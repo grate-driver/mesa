@@ -20,7 +20,7 @@
 
 /*
  * Mesa 3-D graphics library
- * Version:  6.3
+ * Version:  6.4.1
  *
  * Copyright (C) 1999-2005  Brian Paul   All Rights Reserved.
  *
@@ -69,18 +69,16 @@
 #include <float.h>
 #include <stdarg.h>
 
-
 /* Get typedefs for uintptr_t and friends */
-#if defined(_WIN32)
-#include <BaseTsd.h>
-#if _MSC_VER == 1200
-typedef UINT_PTR uintptr_t;
-#endif 
-#if defined(__MINGW32__)
-#include <stdint.h>
-#endif
+#if defined(__MINGW32__) || defined(__NetBSD__)
+#  include <stdint.h>
+#elif defined(_WIN32)
+#  include <BaseTsd.h>
+#  if _MSC_VER == 1200
+     typedef UINT_PTR uintptr_t;
+#  endif 
 #else
-#include <inttypes.h>
+#  include <inttypes.h>
 #endif
 
 #if defined(_WIN32) && !defined(__WIN32__) && !defined(__CYGWIN__) && !defined(BUILD_FOR_SNAP)
@@ -268,14 +266,34 @@ typedef struct tagPIXELFORMATDESCRIPTOR PIXELFORMATDESCRIPTOR, *PPIXELFORMATDESC
 #endif
 
 /* Windows does not have the ffs() function */
-#if defined(_WIN32) && !defined(__MINGW32__)
-int INLINE ffs(int value)
+#if defined(_WIN32)
+static int INLINE
+ffs(register int value)
 {
-    int bit;
-    if (value == 0)
-	return 0;
-    for (bit=1; !(value & 1); bit++)
-	value >>= 1;
+    register int bit = 0;
+    if (value != 0)
+    {
+        if ((value & 0xffff) == 0)
+        {
+            bit += 16;
+            value >>= 16;
+        }
+        if ((value & 0xff) == 0)
+        {
+            bit += 8;
+            value >>= 8;
+        }
+        if ((value & 0xf) == 0)
+        {
+            bit += 4;
+            value >>= 4;
+        }
+        while ((value & 1) == 0)
+        {
+            bit++;
+            value >>= 1;
+        }
+    }
     return bit;
 }
 #endif

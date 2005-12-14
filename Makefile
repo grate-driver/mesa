@@ -134,10 +134,10 @@ ultrix-gcc:
 
 # Rules for making release tarballs
 
-DIRECTORY = Mesa-6.4
-LIB_NAME = MesaLib-6.4
-DEMO_NAME = MesaDemos-6.4
-GLUT_NAME = MesaGLUT-6.4
+DIRECTORY = Mesa-6.4.1
+LIB_NAME = MesaLib-6.4.1
+DEMO_NAME = MesaDemos-6.4.1
+GLUT_NAME = MesaGLUT-6.4.1
 
 MAIN_FILES = \
 	$(DIRECTORY)/Makefile*						\
@@ -269,7 +269,6 @@ DRI_FILES = \
 	$(DIRECTORY)/src/mesa/drivers/dri/Makefile.template		\
 	$(DIRECTORY)/src/mesa/drivers/dri/common/xmlpool/*.[ch]		\
 	$(DIRECTORY)/src/mesa/drivers/dri/common/xmlpool/*.po		\
-	$(DIRECTORY)/src/mesa/drivers/dri/dri_client/imports/*.h	\
 	$(DIRECTORY)/src/mesa/drivers/dri/*/*.[chS]			\
 	$(DIRECTORY)/src/mesa/drivers/dri/*/Makefile			\
 	$(DIRECTORY)/src/mesa/drivers/dri/*/Doxyfile			\
@@ -323,6 +322,8 @@ DEMO_FILES = \
 	$(DIRECTORY)/progs/demos/*.cxx			\
 	$(DIRECTORY)/progs/demos/*.dat			\
 	$(DIRECTORY)/progs/demos/README			\
+	$(DIRECTORY)/progs/osdemos/Makefile		\
+	$(DIRECTORY)/progs/osdemos/*.c			\
 	$(DIRECTORY)/progs/xdemos/Makefile*		\
 	$(DIRECTORY)/progs/xdemos/descrip.mms		\
 	$(DIRECTORY)/progs/xdemos/*.[chf]		\

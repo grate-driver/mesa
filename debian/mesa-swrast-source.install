@@ -345,3 +345,8 @@ src/mesa/glapi/glthread.h usr/share/mesa-source/src/mesa/glapi
 src/mesa/glapi/glapitable.h usr/share/mesa-source/src/mesa/glapi
 include/GL/xmesa.h usr/share/mesa-source/include/GL
 include/GL/xmesa_xf86.h usr/share/mesa-source/include/GL
+src/mesa/main/execmem.c usr/share/mesa-source/src/mesa/main
+src/mesa/main/mm.c usr/share/mesa-source/src/mesa/main
+src/mesa/main/mm.h usr/share/mesa-source/src/mesa/main
+src/mesa/drivers/dri/common/glcontextmodes.c usr/share/mesa-source/src/mesa/drivers/dri/common
+src/mesa/drivers/dri/common/glcontextmodes.h usr/share/mesa-source/src/mesa/drivers/dri/common

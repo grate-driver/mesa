@@ -823,7 +823,15 @@ execute_program( GLcontext *ctx,
                result[0] = 1.0F;
                result[1] = a[0];
                /* XXX we could probably just use pow() here */
-               result[2] = (a[0] > 0.0F) ? (GLfloat) exp(a[3] * log(a[1])) : 0.0F;
+               if (a[0] > 0.0F) {
+                  if (a[1] == 0.0 && a[3] == 0.0)
+                     result[2] = 1.0;
+                  else
+                     result[2] = EXPF(a[3] * LOGF(a[1]));
+               }
+               else {
+                  result[2] = 0.0;
+               }
                result[3] = 1.0F;
                store_vector4( inst, machine, result );
             }
@@ -1025,10 +1033,11 @@ execute_program( GLcontext *ctx,
             {
                GLfloat a[4], result[4];
                fetch_vector1( ctx, &inst->SrcReg[0], machine, program, a );
+               a[0] = FABSF(a[0]);
                result[0] = result[1] = result[2] = result[3] = INV_SQRTF(a[0]);
                store_vector4( inst, machine, result );
 #if DEBUG_FRAG
-               printf("RSQ %g = 1/sqrt(%g)\n", result[0], a[0]);
+               printf("RSQ %g = 1/sqrt(|%g|)\n", result[0], a[0]);
 #endif
             }
             break;

@@ -28,7 +28,12 @@ mesa (6.4.0-1) unstable; urgency=low
   * Drop tight libosmesa6 -> libgl1-mesa-swrast Depends, replace with
     shlibs:Depends.
 
- -- Daniel Stone <daniels@debian.org>  Wed, 26 Oct 2005 12:30:46 +1000
+  [ David Nusinow <dnusinow@debian.org> ]
+  * New upstream version (6.4.1)
+  * Merge changes from Ubuntu version 6.4.1-0ubuntu1
+    + Add new files required by xorg-server GL build to mesa-swrast-source.
+
+ -- David Nusinow <dnusinow@debian.org>  Tue, 13 Dec 2005 19:53:02 -0500
 
 mesa (6.3.2-2) unstable; urgency=low
 

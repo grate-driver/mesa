@@ -1,6 +1,6 @@
 /*
  * Mesa 3-D graphics library
- * Version:  6.3
+ * Version:  6.4.1
  *
  * Copyright (C) 1999-2005  Brian Paul   All Rights Reserved.
  *
@@ -42,6 +42,8 @@
 #include "t_context.h"
 #include "t_pipeline.h"
 #include "t_vb_arbprogram.h"
+#include "tnl.h"
+
 
 #define DISASSEM 0
 
@@ -89,7 +91,10 @@ static GLfloat RoughApproxExp2(GLfloat t)
 
 static GLfloat RoughApproxPower(GLfloat x, GLfloat y)
 {
-   return RoughApproxExp2(y * RoughApproxLog2(x));
+   if (x == 0.0 && y == 0.0)
+      return 1.0;  /* spec requires this */
+   else
+      return RoughApproxExp2(y * RoughApproxLog2(x));
 }
 
 
@@ -127,11 +132,16 @@ static void do_RSW( struct arb_vp_machine *m, union instruction op )
    const GLfloat *arg0 = m->File[op.rsw.file0][op.rsw.idx0];
    GLuint swz = op.rsw.swz;
    GLuint neg = op.rsw.neg;
+   GLfloat tmp[4];
 
-   result[0] = arg0[GET_RSW(swz, 0)];
-   result[1] = arg0[GET_RSW(swz, 1)];
-   result[2] = arg0[GET_RSW(swz, 2)];
-   result[3] = arg0[GET_RSW(swz, 3)];
+   /* Need a temporary to be correct in the case where result == arg0.
+    */
+   COPY_4V(tmp, arg0);
+   
+   result[0] = tmp[GET_RSW(swz, 0)];
+   result[1] = tmp[GET_RSW(swz, 1)];
+   result[2] = tmp[GET_RSW(swz, 2)];
+   result[3] = tmp[GET_RSW(swz, 3)];
    
    if (neg) {
       if (neg & 0x1) result[0] = -result[0];
@@ -250,6 +260,8 @@ static void do_DST( struct arb_vp_machine *m, union instruction op )
    const GLfloat *arg0 = m->File[op.alu.file0][op.alu.idx0];
    const GLfloat *arg1 = m->File[op.alu.file1][op.alu.idx1];
 
+   /* This should be ok even if result == arg0 or result == arg1.
+    */
    result[0] = 1.0F;
    result[1] = arg0[1] * arg1[1];
    result[2] = arg0[2];
@@ -327,17 +339,15 @@ static void do_LIT( struct arb_vp_machine *m, union instruction op )
    GLfloat tmp[4];
 
    tmp[0] = 1.0;
-   tmp[1] = 0.0;
-   tmp[2] = 0.0;
+   tmp[1] = arg0[0];
+   if (arg0[0] > 0.0) {
+      tmp[2] = RoughApproxPower(arg0[1], arg0[3]);
+   }
+   else {
+      tmp[2] = 0.0;
+   }
    tmp[3] = 1.0;
 
-   if (arg0[0] > 0.0) {
-      tmp[1] = arg0[0];
-
-      if (arg0[1] > 0.0) {
-	 tmp[2] = RoughApproxPower(arg0[1], arg0[3]);
-      }
-   }
 
    COPY_4V(result, tmp);
 }
@@ -494,10 +504,18 @@ static void do_XPD( struct arb_vp_machine *m, union instruction op )
    GLfloat *result = m->File[0][op.alu.dst];
    const GLfloat *arg0 = m->File[op.alu.file0][op.alu.idx0];
    const GLfloat *arg1 = m->File[op.alu.file1][op.alu.idx1];
+   GLfloat tmp[3];
 
-   result[0] = arg0[1] * arg1[2] - arg0[2] * arg1[1];
-   result[1] = arg0[2] * arg1[0] - arg0[0] * arg1[2];
-   result[2] = arg0[0] * arg1[1] - arg0[1] * arg1[0];
+   tmp[0] = arg0[1] * arg1[2] - arg0[2] * arg1[1];
+   tmp[1] = arg0[2] * arg1[0] - arg0[0] * arg1[2];
+   tmp[2] = arg0[0] * arg1[1] - arg0[1] * arg1[0];
+
+   /* Need a temporary to be correct in the case where result == arg0
+    * or result == arg1.
+    */
+   result[0] = tmp[0];
+   result[1] = tmp[1];
+   result[2] = tmp[2];
 }
 
 static void do_NOP( struct arb_vp_machine *m, union instruction op ) 
@@ -1031,7 +1049,7 @@ static void compile_vertex_program( struct vertex_program *program,
    /* Initialize cp.  Note that ctx and VB aren't used in compilation
     * so we don't have to worry about statechanges:
     */
-   memset(&cp, 0, sizeof(cp));
+   _mesa_memset(&cp, 0, sizeof(cp));
    cp.csr = p->instructions;
 
    /* Compile instructions:
@@ -1459,3 +1477,20 @@ const struct tnl_pipeline_stage _tnl_arb_vertex_program_stage =
    validate_vertex_program,	/* validate */
    run_arb_vertex_program	/* run */
 };
+
+
+/**
+ * Called via ctx->Driver.ProgramStringNotify() after a new vertex program
+ * string has been parsed.
+ */
+void
+_tnl_program_string(GLcontext *ctx, GLenum target, struct program *program)
+{
+   if (program->Target == GL_VERTEX_PROGRAM_ARB) {
+      /* free any existing tnl data hanging off the program */
+      struct vertex_program *vprog = (struct vertex_program *) program;
+      if (vprog->TnlData) {
+         free_tnl_data(vprog);
+      }
+   }
+}

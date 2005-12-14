@@ -11,9 +11,38 @@
 <H1>News</H1>
 
 
+<h2>November 29, 2005</h2>
+<p>
+Mesa 6.4.1 has been released.  This is a stable, bug-fix release.
+</p>
+<pre>
+    Bug fixes:
+	- redefining a vertex program string didn't take effect in TNL module
+	- fixed occasional segfault upon vertex/fragment parsing error
+	- vertex program LIT instruction didn't handle 0^0=1 correctly
+	- fragment program fog option didn't work with glDrawPixels, glBitmap
+	- USE_MGL_NAMESPACE didn't work for x86-64
+	- OSMesa demos were missing from previous release tarballs
+	- fixed problem with float->ushort conversion in glClear (bug 4992)
+	- popping of GL_EYE_PLANE texgen state was broken (bug 4996)
+	- popping of GL_SPOT_DIRECTION light state was broken (bug 5005)
+	- fixed occasional triangle color interpolation problem on VMS
+	- work around invalid free() call (bug 5131)
+	- fixed BSD X server compilation problem by including stdint.h
+</pre>
+<p>
+The MD5 checksums are:
+</p>
+<pre>
+TBD
+</pre>
+
+
+
+
 <h2>October 24, 2005</h2>
 <p>
-Mesa 6.4 has been released.  This is stable, bug-fix release.
+Mesa 6.4 has been released.  This is a stable, bug-fix release.
 </p>
 <pre>
     New:
@@ -50,7 +79,15 @@ Mesa 6.4 has been released.  This is stable, bug-fix release.
 The MD5 checksums are:
 </p>
 <pre>
-TBD
+1cce0c1eb4fd15e9dfe837a1ce0c9812  MesaLib-6.4.tar.gz
+85a84e47a3f718f752f306b9e0954ef6  MesaLib-6.4.tar.bz2
+b976fea4f3ee06354c53f91b6e3f2ffc  MesaLib-6.4.zip
+d8734f2c69bcf7ef9f5ae454a85743ba  MesaDemos-6.4.tar.gz
+1a8c4d4fc699233f5fdb902b8753099e  MesaDemos-6.4.tar.bz2
+607ab7c7a7de0cc5febbdde2bfa03098  MesaDemos-6.4.zip
+3260156f66174322a092be0767962d34  MesaGLUT-6.4.tar.gz
+0465d053f83775f44a12dec4050dfd78  MesaGLUT-6.4.tar.bz2
+02abfcdcdf72ba938ae00f6e3b70fbe0  MesaGLUT-6.4.zip
 </pre>
 
 
@@ -1094,6 +1131,6 @@ source code</a>.</p>
 
 
 <hr>
-$Id: news.html,v 3.24.2.2 2005/10/24 23:12:29 brianp Exp $
+$Id: news.html,v 3.24.2.4 2005/11/30 01:15:50 brianp Exp $
 </body>
 </html>
