@@ -1,4 +1,4 @@
-mesa (6.4.0-1) unstable; urgency=low
+mesa (6.4.1-1) unstable; urgency=low
 
   [ Marcelo E. Magallon <mmagallo@debian.org> ]
   * debian/control: build-depend on xutils (closes: #326466)
