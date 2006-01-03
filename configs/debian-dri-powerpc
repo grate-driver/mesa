@@ -1,0 +1,5 @@
+include $(TOP)/configs/debian-dri
+
+CONFIG_NAME = debian-dri-powerpc
+
+DRI_DIRS = mach64 r128 r200 r300 radeon tdfx

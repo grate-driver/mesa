@@ -1,0 +1,25 @@
+include $(TOP)/configs/debian
+
+CONFIG_NAME = debian-dri
+
+DEBIAN_COMMON_CPPFLAGS += -DPTHREADS -DUSE_EXTERNAL_DXTN_LIB=1 -DIN_DRI_DRIVER -DGLX_DIRECT_RENDERING -DHAVE_ALIAS -DDEFAULT_DRIVER_DIR=\"/usr/lib/dri\"
+
+LIBDRM_LIB = `pkg-config --libs libdrm`
+DRI_LIB_DEPS  = -lm -lpthread -lexpat -ldl $(LIBDRM_LIB)
+GL_LIB_DEPS = -L/usr/X11R6/lib -lX11 -lXext -lXxf86vm -lm -lpthread -ldl $(LIBDRM_LIB)
+
+USING_EGL=0
+
+# Directories
+ifeq ($(USING_EGL), 1)
+override SRC_DIRS = egl glx/x11 mesa
+PROGRAM_DIRS = egl
+else
+override SRC_DIRS = glx/x11 mesa
+PROGRAM_DIRS =
+endif
+
+DRIVER_DIRS = dri
+WINDOW_SYSTEM=dri
+
+DRI_DIRS = i810 i830 i915 mach64 mga r128 r200 r300 radeon s3v savage sis tdfx trident unichrome ffb
