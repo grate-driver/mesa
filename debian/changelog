@@ -32,8 +32,9 @@ mesa (6.4.1-1) unstable; urgency=low
   * New upstream version (6.4.1)
   * Merge changes from Ubuntu version 6.4.1-0ubuntu1
     + Add new files required by xorg-server GL build to mesa-swrast-source.
+  * NMU to begin getting Xorg 7.0 in to Debian
 
- -- David Nusinow <dnusinow@debian.org>  Tue, 13 Dec 2005 19:53:02 -0500
+ -- David Nusinow <dnusinow@debian.org>  Thu,  5 Jan 2006 22:08:04 -0500
 
 mesa (6.3.2-2) unstable; urgency=low
 
