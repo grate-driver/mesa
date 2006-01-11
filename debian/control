@@ -30,7 +30,7 @@ Description: A free implementation of the OpenGL API -- runtime
 Package: libgl1-mesa-swrast-dev
 Section: libdevel
 Architecture: any
-Depends: libgl1-mesa-swrast (= ${Source-Version}), libc6-dev, libx11-6-dev | xlibs-dev (>> 4.1.0), libxext6 | xlibs (>> 4.1.0), mesa-common-dev (= ${Source-Version}), lesstif2-dev
+Depends: libgl1-mesa-swrast (= ${Source-Version}), libc6-dev, libx11-dev | xlibs-dev (>> 4.1.0), libxext6 | xlibs (>> 4.1.0), mesa-common-dev (= ${Source-Version}), lesstif2-dev
 Provides: libgl-dev, mesag3-widgets, mesag-widgets-dev, libglw-dev, mesag-dev
 Conflicts: mesa-dev, libgl-dev, mesag3 (<< 3.1-1), nvidia-glx-dev, mesag-dev
 Replaces: libgl-dev, mesag-dev

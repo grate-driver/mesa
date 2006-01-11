@@ -29,12 +29,14 @@ mesa (6.4.1-1) unstable; urgency=low
     shlibs:Depends.
 
   [ David Nusinow <dnusinow@debian.org> ]
-  * New upstream version (6.4.1)
+  * New upstream version (6.4.1) (closes: #232665)
   * Merge changes from Ubuntu version 6.4.1-0ubuntu1
     + Add new files required by xorg-server GL build to mesa-swrast-source.
   * NMU to begin getting Xorg 7.0 in to Debian
+  * Change libgl1-mesa-swrast Depends on libx11-6-dev to libx11-dev.
+    (closes: #347205)
 
- -- David Nusinow <dnusinow@debian.org>  Thu,  5 Jan 2006 22:08:04 -0500
+ -- David Nusinow <dnusinow@debian.org>  Tue, 10 Jan 2006 22:45:59 -0500
 
 mesa (6.3.2-2) unstable; urgency=low
 
