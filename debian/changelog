@@ -15,10 +15,10 @@ mesa (6.4.1-1) unstable; urgency=low
     - libgl1-mesa-dri-dev -> libgl1-mesa-dev
     - libgl1-mesa-dri still exists, but now contains the DRI modules only.
   * Drop dependency *from* mesa-common-dev on libgl1-mesa-dev and
-    libglu1-mesa-dev; it should be the other way around.
+    libglu1-mesa-dev; it should be the other way around. (closes: #336565)
   * Add Build-Depends on pkg-config to get flags from libdrm, and libexpat-dev
     for DRI configuration.  Break out xlibs-dev Build-Depends to the
-    individual libraries required.
+    individual libraries required. (closes: #347129)
   * Bump libdrm-dev Build-Depends to >> 1.0.5, in order to get new
     via_drm.h to build the unichrome DRI driver.
   * Configs: pare DRI drivers down to a sensible set for each architecture.
@@ -30,7 +30,8 @@ mesa (6.4.1-1) unstable; urgency=low
 
   [ David Nusinow <dnusinow@debian.org> ]
   * New upstream version (6.4.1) (closes: #232665)
-  * Merge changes from Ubuntu version 6.4.1-0ubuntu1. (closes: #341479)
+  * Merge changes from Ubuntu version 6.4.1-0ubuntu1. 
+    (closes: #341479, #340168, #334742)
     + Add new files required by xorg-server GL build to mesa-swrast-source.
   * NMU to begin getting Xorg 7.0 in to Debian
   * Change libgl1-mesa-swrast Depends on libx11-6-dev to libx11-dev.
