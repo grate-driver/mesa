@@ -185,7 +185,7 @@ binary-arch: build install
 	dh_compress -s
 	dh_fixperms -s
 #	dh_makeshlibs -s -Nlibglu1-mesa -Nmesag3
-	dh_makeshlibs -plibgl1-mesa-swrast-dbg -V 'libgl1-mesa-swrast | libgl1'
+	dh_makeshlibs -plibgl1-mesa-swx11-dbg -V 'libgl1-mesa-swx11 | libgl1'
 ifneq ($(strip $(shell dh_listpackages -s | grep -w libgl1-mesa-glide3)),)
 	dh_makeshlibs -plibgl1-mesa-glide3 -V 'libgl1-mesa-glide3'
 endif
@@ -195,8 +195,8 @@ endif
 ifneq ($(strip $(shell dh_listpackages -s | grep -w libosmesa6)),)
 	dh_makeshlibs -plibosmesa6
 endif
-ifneq ($(strip $(shell dh_listpackages -s | grep -w libgl1-mesa-swrast)),)
-	dh_makeshlibs -plibgl1-mesa-swrast -V 'libgl1-mesa-swrast | libgl1'
+ifneq ($(strip $(shell dh_listpackages -s | grep -w libgl1-mesa-swx11)),)
+	dh_makeshlibs -plibgl1-mesa-swx11 -V 'libgl1-mesa-swx11 | libgl1'
 endif
 ifneq ($(strip $(shell dh_listpackages -s | grep -w libgl1-mesa)),)
 	dh_makeshlibs -plibgl1-mesa -V 'libgl1-mesa | libgl1'

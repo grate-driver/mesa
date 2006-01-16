@@ -30,14 +30,15 @@ mesa (6.4.1-1) unstable; urgency=low
 
   [ David Nusinow <dnusinow@debian.org> ]
   * New upstream version (6.4.1) (closes: #232665)
-  * Merge changes from Ubuntu version 6.4.1-0ubuntu1. 
+  * Merge changes from Ubuntu version 6.4.1-0ubuntu1.
     (closes: #341479, #340168, #334742)
     + Add new files required by xorg-server GL build to mesa-swrast-source.
   * NMU to begin getting Xorg 7.0 in to Debian
   * Change libgl1-mesa-swrast Depends on libx11-6-dev to libx11-dev.
     (closes: #347205)
+  * Change libgl1-mesa-swrast to be named libgl1-mesa-swx11
 
- -- David Nusinow <dnusinow@debian.org>  Tue, 10 Jan 2006 23:00:02 -0500
+ -- David Nusinow <dnusinow@debian.org>  Mon, 16 Jan 2006 17:18:10 -0500
 
 mesa (6.3.2-2) unstable; urgency=low
 

@@ -6,13 +6,13 @@ Uploaders: Marcelo E. Magallon <mmagallo@debian.org>
 Standards-Version: 3.6.1
 Build-Depends: lesstif2-dev, grep-dctrl, debhelper (>> 4), build-essential (>= 11), libdrm-dev (>> 1.0.5), libdirectfb-dev, makedepend | xutils, libexpat-dev, libxxf86vm-dev, libx11-dev, libxext-dev, pkg-config, 
 
-Package: libgl1-mesa-swrast
+Package: libgl1-mesa-swx11
 Section: libs
 Architecture: any
 Depends: ${shlibs:Depends}, libglu1-mesa | libglu1
-Conflicts: mesag3-glide, mesag3-glide2, mesag3+ggi, libgl1, nvidia-glx, mesag3
-Provides: libgl1, mesag3
-Replaces: libgl1, mesag3
+Conflicts: mesag3-glide, mesag3-glide2, mesag3+ggi, libgl1, nvidia-glx, mesag3, libgl1-mesa-swrast
+Provides: libgl1, mesag3, libgl1-mesa-swrast
+Replaces: libgl1, mesag3, libgl1-mesa-swrast
 Description: A free implementation of the OpenGL API -- runtime
  Mesa is a 3-D graphics library with an API which is very similar to
  that of OpenGL.  To the extent that Mesa utilizes the OpenGL command
@@ -27,13 +27,13 @@ Description: A free implementation of the OpenGL API -- runtime
  .
  On Linux, this library is also known as libGL or libGL.so.1.
 
-Package: libgl1-mesa-swrast-dev
+Package: libgl1-mesa-swx11-dev
 Section: libdevel
 Architecture: any
-Depends: libgl1-mesa-swrast (= ${Source-Version}), libc6-dev, libx11-dev | xlibs-dev (>> 4.1.0), libxext6 | xlibs (>> 4.1.0), mesa-common-dev (= ${Source-Version}), lesstif2-dev
-Provides: libgl-dev, mesag3-widgets, mesag-widgets-dev, libglw-dev, mesag-dev
-Conflicts: mesa-dev, libgl-dev, mesag3 (<< 3.1-1), nvidia-glx-dev, mesag-dev
-Replaces: libgl-dev, mesag-dev
+Depends: libgl1-mesa-swx11 (= ${Source-Version}), libc6-dev, libx11-dev | xlibs-dev (>> 4.1.0), libxext6 | xlibs (>> 4.1.0), mesa-common-dev (= ${Source-Version}), lesstif2-dev
+Provides: libgl-dev, mesag3-widgets, mesag-widgets-dev, libglw-dev, mesag-dev, libgl1-mesa-swrast-dev
+Conflicts: mesa-dev, libgl-dev, mesag3 (<< 3.1-1), nvidia-glx-dev, mesag-dev, libgl1-mesa-swrast-dev
+Replaces: libgl-dev, mesag-dev, libgl1-mesa-swrast-dev
 Description: A free implementation of the OpenGL API -- development support files
  This package provides the development environment required for
  compiling programs with Mesa.  For a complete description of Mesa,
@@ -48,14 +48,17 @@ Description: A free implementation of the OpenGL API -- development support file
  a direct rendering-capable library, or one which uses GLX.  For that,
  please see libgl1-mesa-dev.
 
-Package: libgl1-mesa-swrast-dbg
+Package: libgl1-mesa-swx11-dbg
 Section: libs
 Architecture: any
 Depends: ${shlibs:Depends}, libglu1-mesa | libglu1
+Conflicts: libgl1-mesa-swrast-dbg
+Replaces: libgl1-mesa-swrast-dbg
+Provides: libgl1-mesa-swrast-dbg
 Description: A free implementation of the OpenGL API -- debugging package
  This package provides a debug-enabled version of the Mesa libraries.
  .
- For a complete description of Mesa, please look at the libgl1-mesa-swrast
+ For a complete description of Mesa, please look at the libgl1-mesa-swx11
  package.
 
 Package: libgl1-mesa
@@ -74,7 +77,7 @@ Description: A free implementation of the OpenGL API -- GLX runtime
  in the libgl1-mesa-dri package.
  .
  For a complete description of Mesa, please look at the
- libgl1-mesa-swrast package.
+ libgl1-mesa-swx11 package.
 
 Package: libgl1-mesa-dri
 Section: libs
@@ -91,7 +94,7 @@ Description: A free implementation of the OpenGL API -- DRI modules
  modules for accelerating direct rendering.
  .
  For a complete description of Mesa, please look at the
- libgl1-mesa-swrast package.
+ libgl1-mesa-swx11 package.
 
 Package: libgl1-mesa-dev
 Section: libs
@@ -165,7 +168,7 @@ Description: Mesa Off-screen rendering extension
 Package: libosmesa6-dev
 Section: devel
 Architecture: any
-Depends: libosmesa6 (= ${Source-Version}), libgl1-mesa-swrast-dev (= ${Source-Version})
+Depends: libosmesa6 (= ${Source-Version}), libgl1-mesa-swx11-dev (= ${Source-Version})
 Conflicts: xlibosmesa-dev, libosmesa4-dev, libosmesa-dev
 Replaces: xlibosmesa-dev, libosmesa-dev
 Provides: xlibosmesa-dev, libosmesa-dev
@@ -209,7 +212,7 @@ Description: The OpenGL utility library -- development support files
  For a complete description of GLU, please look at the libglu1-mesa
  package.
 
-Package: mesa-swrast-source
+Package: mesa-swx11-source
 Section: libdevel
 Architecture: all
 Description: Mesa software rasteriser source -- development support files
