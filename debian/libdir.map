@@ -4,7 +4,7 @@ gl-debian-debug usr/lib/debug libgl1-mesa-swx11-dbg libgl1-mesa-swx11-dbg
 gl-debian_i386 usr/lib/i686/mmx/cmov libgl1-mesa-swx11 libgl1-mesa-swx11-dev
 gl-debian-static_i386 usr/lib/i686/mmx/cmov libgl1-mesa-swx11 libgl1-mesa-swx11-dev
 gl-debian-debug_i386 usr/lib/debug/i686/mmx/cmov libgl1-mesa-swx11-dbg libgl1-mesa-swx11-dbg
-gl-debian-dri usr/lib libgl1-mesa libgl1-mesa-dev
+gl-debian-dri usr/lib libgl1-mesa-glx libgl1-mesa-dev
 gl-debian-directfb usr/lib libgl1-mesa-directfb libgl1-mesa-directfb-dev
 gl-debian-osmesa16 usr/lib libosmesa6 libosmesa6-dev
 gl-debian-osmesa16-static usr/lib libosmesa6 libosmesa6-dev

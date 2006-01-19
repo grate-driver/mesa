@@ -23,7 +23,7 @@ Description: A free implementation of the OpenGL API -- runtime
  .
  This library provides a pure software rasteriser; it does not provide
  a direct rendering-capable library, or one which uses GLX.  For that,
- please see libgl1-mesa.
+ please see libgl1-mesa-glx.
  .
  On Linux, this library is also known as libGL or libGL.so.1.
 
@@ -37,7 +37,7 @@ Replaces: libgl-dev, mesag-dev, libgl1-mesa-swrast-dev
 Description: A free implementation of the OpenGL API -- development support files
  This package provides the development environment required for
  compiling programs with Mesa.  For a complete description of Mesa,
- please look at the libgl1-mesa package.
+ please look at the libgl1-mesa-swx11 package.
  .
  This package also provides a simple widgets library, libGLw, which
  allows Motif-based applications to embed an OpenGL drawing context.
@@ -61,7 +61,7 @@ Description: A free implementation of the OpenGL API -- debugging package
  For a complete description of Mesa, please look at the libgl1-mesa-swx11
  package.
 
-Package: libgl1-mesa
+Package: libgl1-mesa-glx
 Section: libs
 Architecture: any
 Depends: ${shlibs:Depends}
@@ -82,7 +82,7 @@ Description: A free implementation of the OpenGL API -- GLX runtime
 Package: libgl1-mesa-dri
 Section: libs
 Architecture: any
-Depends: ${shlibs-Depends}, libgl1-mesa (= ${Source-Version})
+Depends: ${shlibs-Depends}, libgl1-mesa-glx (= ${Source-Version})
 Conflicts: xlibmesa-dri
 Replaces: xlibmesa-dri
 Description: A free implementation of the OpenGL API -- DRI modules
@@ -99,7 +99,7 @@ Description: A free implementation of the OpenGL API -- DRI modules
 Package: libgl1-mesa-dev
 Section: libs
 Architecture: any
-Depends: ${shlibs:Depends}, libc6-dev, mesa-common-dev (= ${Source-Version}), libgl1-mesa (=${Source-Version})
+Depends: ${shlibs:Depends}, libc6-dev, mesa-common-dev (= ${Source-Version}), libgl1-mesa-glx (=${Source-Version}), libgl1-mesa-dri (={Source-Version})
 Conflicts: libgl-dev, libgl1-mesa-dri-dev
 Replaces: libgl-dev, libgl1-mesa-dri-dev
 Provides: libgl-dev, libgl1-mesa-dri-dev
@@ -111,7 +111,7 @@ Description: A free implementation of the OpenGL API -- GLX development support 
  This package includes headers and static libraries for compiling
  programs with Mesa.
  .
- For a complete description of Mesa, please look at the libgl1-mesa
+ For a complete description of Mesa, please look at the libgl1-mesa-swx11
  package.
 
 Package: libgl1-mesa-directfb
@@ -125,7 +125,7 @@ Description: A free implementation of the OpenGL API -- DirectFB runtime
  This version of Mesa provides hardware accelerated rendering
  capabilities via the DirectFB infraestructure.
  .
- For a complete description of Mesa, please look at the libgl1-mesa
+ For a complete description of Mesa, please look at the libgl1-mesa-swx11
  package.
 
 Package: libgl1-mesa-directfb-dev
@@ -142,7 +142,7 @@ Description: A free implementation of the OpenGL API -- DirectFB development sup
  This package includes headers and static libraries for compiling
  programs with Mesa.
  .
- For a complete description of Mesa, please look at the libgl1-mesa
+ For a complete description of Mesa, please look at the libgl1-mesa-swx11
  package.
 
 Package: mesa-common-dev
@@ -181,7 +181,7 @@ Description: Mesa Off-screen rendering extension -- development support files
 Package: libglu1-mesa
 Section: libs
 Architecture: any
-Depends: ${shlibs:Depends}, libgl1-mesa | libgl1
+Depends: ${shlibs:Depends}, libgl1-mesa-swx11 | libgl1
 Provides: libglu1
 Conflicts: mesag3 (<< 5.0.0-1), xlibmesa3, libglu1
 Replaces: libglu1

@@ -37,8 +37,9 @@ mesa (6.4.1-1) unstable; urgency=low
   * Change libgl1-mesa-swrast Depends on libx11-6-dev to libx11-dev.
     (closes: #347205)
   * Change libgl1-mesa-swrast to be named libgl1-mesa-swx11
+  * Change libgl1-mesa to be named libgl1-mesa-glx
 
- -- David Nusinow <dnusinow@debian.org>  Mon, 16 Jan 2006 17:18:10 -0500
+ -- David Nusinow <dnusinow@debian.org>  Thu, 19 Jan 2006 18:44:04 -0500
 
 mesa (6.3.2-2) unstable; urgency=low
 

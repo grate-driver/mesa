@@ -198,8 +198,8 @@ endif
 ifneq ($(strip $(shell dh_listpackages -s | grep -w libgl1-mesa-swx11)),)
 	dh_makeshlibs -plibgl1-mesa-swx11 -V 'libgl1-mesa-swx11 | libgl1'
 endif
-ifneq ($(strip $(shell dh_listpackages -s | grep -w libgl1-mesa)),)
-	dh_makeshlibs -plibgl1-mesa -V 'libgl1-mesa | libgl1'
+ifneq ($(strip $(shell dh_listpackages -s | grep -w libgl1-mesa-glx)),)
+	dh_makeshlibs -plibgl1-mesa-glx -V 'libgl1-mesa-glx | libgl1'
 endif
 ifneq ($(strip $(shell dh_listpackages -s | grep -w libgl1-mesa-directfb)),)
 	dh_makeshlibs -plibgl1-mesa-directfb -V 'libgl1-mesa-directfb | libgl1'
