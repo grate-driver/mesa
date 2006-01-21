@@ -1,7 +1,7 @@
 mesa (6.4.1-1) unstable; urgency=low
 
   [ Marcelo E. Magallon <mmagallo@debian.org> ]
-  * debian/control: build-depend on xutils (closes: #326466)
+  * debian/control: build-depend on xutils
   * include/GL/glx{int,proto,md,tokens}.h: missing upstream (closes: bug#326466)
   * debian/libgl1-mesa-dri-dev.install: install GLX include files here, too.
   * debian/rules: GLU and GLW don't have arch-specific targets.
@@ -18,7 +18,7 @@ mesa (6.4.1-1) unstable; urgency=low
     libglu1-mesa-dev; it should be the other way around. (closes: #336565)
   * Add Build-Depends on pkg-config to get flags from libdrm, and libexpat-dev
     for DRI configuration.  Break out xlibs-dev Build-Depends to the
-    individual libraries required. (closes: #347129)
+    individual libraries required.
   * Bump libdrm-dev Build-Depends to >> 1.0.5, in order to get new
     via_drm.h to build the unichrome DRI driver.
   * Configs: pare DRI drivers down to a sensible set for each architecture.
@@ -35,11 +35,20 @@ mesa (6.4.1-1) unstable; urgency=low
     + Add new files required by xorg-server GL build to mesa-swrast-source.
   * NMU to begin getting Xorg 7.0 in to Debian
   * Change libgl1-mesa-swrast Depends on libx11-6-dev to libx11-dev.
-    (closes: #347205)
   * Change libgl1-mesa-swrast to be named libgl1-mesa-swx11
   * Change libgl1-mesa to be named libgl1-mesa-glx
 
  -- David Nusinow <dnusinow@debian.org>  Thu, 19 Jan 2006 18:44:04 -0500
+
+mesa (6.3.2-2.1) unstable; urgency=low
+
+  * Non-maintainer upload.
+  * Adjust Build-Depends:
+    + xlibs transition (Closes: #347129).
+    + xutils, xlibmesa-gl-dev (Closes: #326466).
+  * mesag-dev: Depends: libx11-dev (Closes: #347205).
+
+ -- Christoph Berg <myon@debian.org>  Fri, 20 Jan 2006 20:45:43 +0100
 
 mesa (6.3.2-2) unstable; urgency=low
 
