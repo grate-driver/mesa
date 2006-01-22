@@ -181,7 +181,7 @@ Description: Mesa Off-screen rendering extension -- development support files
 Package: libglu1-mesa
 Section: libs
 Architecture: any
-Depends: ${shlibs:Depends}, libgl1-mesa-swx11 | libgl1
+Depends: ${shlibs:Depends}, libgl1-mesa-glx | libgl1
 Provides: libglu1
 Conflicts: mesag3 (<< 5.0.0-1), xlibmesa3, libglu1
 Replaces: libglu1
