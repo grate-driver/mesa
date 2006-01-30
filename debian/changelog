@@ -1,3 +1,11 @@
+mesa (6.4.1-0.2) unstable; urgency=low
+
+  * NMU
+  * Re-add dh_installdirs call to binary-indep target so that we get
+    arch-specific dirs for the mesa-swx11-source package
+
+ -- David Nusinow <dnusinow@debian.org>  Sat, 28 Jan 2006 17:42:00 -0500
+
 mesa (6.4.1-0.1) unstable; urgency=low
 
   [ Marcelo E. Magallon <mmagallo@debian.org> ]

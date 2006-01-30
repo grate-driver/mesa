@@ -157,6 +157,7 @@ binary-indep: build
 	dh_testroot
 	dh_installchangelogs docs/VERSIONS
 	dh_installdocs
+	dh_installdirs
 #	dh_installexamples
 	dh_install
 #	dh_installman
