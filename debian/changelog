@@ -3,8 +3,10 @@ mesa (6.4.1-0.2) unstable; urgency=low
   * NMU
   * Re-add dh_installdirs call to binary-indep target so that we get
     arch-specific dirs for the mesa-swx11-source package
+  * Remove makedepend from build-depends. Now we'll just build-dep on xutils
+    to get the app, which will translate over to our own xorg 7.0 plans.
 
- -- David Nusinow <dnusinow@debian.org>  Sat, 28 Jan 2006 17:42:00 -0500
+ -- David Nusinow <dnusinow@debian.org>  Tue, 31 Jan 2006 19:21:12 -0500
 
 mesa (6.4.1-0.1) unstable; urgency=low
 
