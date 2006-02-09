@@ -1,3 +1,11 @@
+mesa (6.4.1-0.3) unstable; urgency=low
+
+  * NMU
+  * Add s390 to the USE_IEEE test in src/mesa/main/imports.h.
+    (closes: #349437)
+
+ -- David Nusinow <dnusinow@debian.org>  Wed,  8 Feb 2006 20:24:40 -0500
+
 mesa (6.4.1-0.2) unstable; urgency=low
 
   * NMU

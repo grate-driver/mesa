@@ -199,7 +199,7 @@ typedef union { GLfloat f; GLint i; } fi_type;
  *** USE_IEEE: Determine if we're using IEEE floating point
  ***/
 #if defined(__i386__) || defined(__386__) || defined(__sparc__) || \
-    defined(__s390x__) || defined(__powerpc__) || \
+    defined(__s390x__) || defined(__s390__) || defined(__powerpc__) || \
     defined(__amd64__) || \
     defined(ia64) || defined(__ia64__) || \
     defined(__hppa__) || defined(hpux) || \
