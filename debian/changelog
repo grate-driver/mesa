@@ -1,13 +1,3 @@
-mesa (6.4.1-0.4) experimental; urgency=low
-
-  * NMU
-  * Provide compatibility packages for the Xorg 6.9 mesa packages. This
-    package will be the only source of mesa packages in Debian for the
-    present, and these packages will provide for smooth upgrades and
-    compatibility.
-
- -- David Nusinow <dnusinow@debian.org>  Tue, 21 Feb 2006 22:21:49 -0500
-
 mesa (6.4.1-0.3) unstable; urgency=low
 
   * NMU
