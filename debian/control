@@ -83,8 +83,8 @@ Package: libgl1-mesa-dri
 Section: libs
 Architecture: any
 Depends: ${shlibs-Depends}, libgl1-mesa-glx (= ${Source-Version})
-Conflicts: xlibmesa-dri
-Replaces: xlibmesa-dri
+Conflicts: xlibmesa-dri (<< 1:7.0.0)
+Replaces: xlibmesa-dri (<< 1:7.0.0)
 Description: A free implementation of the OpenGL API -- DRI modules
  This version of Mesa provides GLX and DRI capabilities: it is capable of
  both direct and indirect rendering.  For direct rendering, it can use DRI

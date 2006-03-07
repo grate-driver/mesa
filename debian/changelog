@@ -1,3 +1,11 @@
+mesa (6.4.1-0.4) unstable; urgency=low
+
+  * NMU
+  * Add versioned conflict between libgl1-mesa-dri and xlibmesa-dri so that
+    the xlibmesa-dri transitional upgrade package works
+
+ -- David Nusinow <dnusinow@debian.org>  Mon,  6 Mar 2006 21:46:18 -0500
+
 mesa (6.4.1-0.3) unstable; urgency=low
 
   * NMU
