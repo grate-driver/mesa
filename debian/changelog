@@ -1,5 +1,6 @@
-mesa (6.5.0-0.1) experimental; urgency=low
+mesa (6.5-0.1) experimental; urgency=low
 
+  * NMU
   * New upstream development release
   * Increment libdrm-dev build-dep to 2.0.1
   * Re-Add s390 and m68k to the USE_IEEE test in src/mesa/main/imports.h.
@@ -8,8 +9,9 @@ mesa (6.5.0-0.1) experimental; urgency=low
     Also remove the line that sets SetBuffer to it. Fixes FTBFS.
   * Don't build now non-existant i830 driver in debian dri configs. Fixes
     FTBFS.
+  * Update source package install file
 
- -- David Nusinow <dnusinow@debian.org>  Thu,  6 Apr 2006 23:11:19 -0400
+ -- David Nusinow <dnusinow@debian.org>  Fri,  7 Apr 2006 02:36:23 -0400
 
 mesa (6.4.1-0.4) unstable; urgency=low
 
