@@ -1,0 +1,7 @@
+docs/bugs.html
+docs/debugging.html
+docs/envvars.html
+docs/faq.html
+docs/osmesa.html
+docs/RELNOTES-*
+docs/*.spec

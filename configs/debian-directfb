@@ -1,0 +1,7 @@
+include $(TOP)/configs/debian
+
+CONFIG_NAME = debian-directfb
+
+GL_LIB_DEPS = -lm -lpthread
+
+DRIVER_DIRS = directfb
