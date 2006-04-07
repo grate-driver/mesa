@@ -22,4 +22,4 @@ endif
 DRIVER_DIRS = dri
 WINDOW_SYSTEM=dri
 
-DRI_DIRS = i810 i830 i915 mach64 mga r128 r200 r300 radeon s3v savage sis tdfx trident unichrome ffb
+DRI_DIRS = i810 i915 mach64 mga r128 r200 r300 radeon s3v savage sis tdfx trident unichrome ffb
