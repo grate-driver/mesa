@@ -310,13 +310,6 @@ set_viewport( GLcontext *ctx, GLint x, GLint y, GLsizei w, GLsizei h )
      _mesa_ResizeBuffersMESA();
 }
 
-/* required but not used */
-static void
-set_buffer( GLcontext *ctx, GLframebuffer *buffer, GLuint bufferBit )
-{
-     return;
-}
-
 static void
 delete_renderbuffer( struct gl_renderbuffer *render )
 {
@@ -562,7 +555,6 @@ dfb_mesa_create_context( GLcontext             *context,
      _swsetup_Wakeup( context );
      
      swdd = _swrast_GetDeviceDriverReference( context );
-     swdd->SetBuffer = set_buffer;
 
      _mesa_init_renderbuffer( &data->render, 0 );
      data->render.InternalFormat = GL_RGBA;

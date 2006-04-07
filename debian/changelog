@@ -4,8 +4,10 @@ mesa (6.5.0-0.1) experimental; urgency=low
   * Increment libdrm-dev build-dep to 2.0.1
   * Re-Add s390 and m68k to the USE_IEEE test in src/mesa/main/imports.h.
     I need to submit this upstream.
+  * Remove set_buffer function from idirectfbgl_mesa.c in directfb driver.
+    Also remove the line that sets SetBuffer to it. Fixes FTBFS.
 
- -- David Nusinow <dnusinow@debian.org>  Thu,  6 Apr 2006 21:49:58 -0400
+ -- David Nusinow <dnusinow@debian.org>  Thu,  6 Apr 2006 22:21:37 -0400
 
 mesa (6.4.1-0.4) unstable; urgency=low
 
