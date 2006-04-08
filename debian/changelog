@@ -10,8 +10,10 @@ mesa (6.5-0.1) experimental; urgency=low
   * Don't build now non-existant i830 driver in debian dri configs. Fixes
     FTBFS.
   * Update source package install file
+  * Install the glx sources with the rest in the sources package. This will
+    allow building of Xgl
 
- -- David Nusinow <dnusinow@debian.org>  Fri,  7 Apr 2006 02:36:23 -0400
+ -- David Nusinow <dnusinow@debian.org>  Sat,  8 Apr 2006 14:28:20 -0400
 
 mesa (6.4.1-0.4) unstable; urgency=low
 
