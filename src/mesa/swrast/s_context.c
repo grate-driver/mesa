@@ -1,6 +1,6 @@
 /*
  * Mesa 3-D graphics library
- * Version:  6.5
+ * Version:  6.5.1
  *
  * Copyright (C) 1999-2006  Brian Paul   All Rights Reserved.
  *
@@ -208,11 +208,11 @@ _swrast_update_fog_state( GLcontext *ctx )
    swrast->_FogEnabled = GL_FALSE;
    if (ctx->FragmentProgram._Active) {
       if (ctx->FragmentProgram._Current->Base.Target==GL_FRAGMENT_PROGRAM_ARB) {
-         const struct fragment_program *p
-            = (struct fragment_program *) ctx->FragmentProgram._Current;
-         if (p->FogOption != GL_NONE) {
+         const struct gl_fragment_program *fp
+            = ctx->FragmentProgram._Current;
+         if (fp->FogOption != GL_NONE) {
             swrast->_FogEnabled = GL_TRUE;
-            swrast->_FogMode = p->FogOption;
+            swrast->_FogMode = fp->FogOption;
          }
       }
    }
@@ -231,8 +231,8 @@ static void
 _swrast_update_fragment_program( GLcontext *ctx )
 {
    if (ctx->FragmentProgram._Active) {
-      const struct fragment_program *program = ctx->FragmentProgram._Current;
-      _mesa_load_state_parameters(ctx, program->Base.Parameters);
+      const struct gl_fragment_program *fp = ctx->FragmentProgram._Current;
+      _mesa_load_state_parameters(ctx, fp->Base.Parameters);
    }
 }
 
@@ -513,9 +513,6 @@ _swrast_validate_derived( GLcontext *ctx )
    SWcontext *swrast = SWRAST_CONTEXT(ctx);
 
    if (swrast->NewState) {
-      if (swrast->NewState & _SWRAST_NEW_RASTERMASK)
- 	 _swrast_update_rasterflags( ctx );
-
       if (swrast->NewState & _NEW_POLYGON)
 	 _swrast_update_polygon( ctx );
 
@@ -536,6 +533,9 @@ _swrast_validate_derived( GLcontext *ctx )
 
       if (swrast->NewState & (_NEW_TEXTURE | _NEW_PROGRAM))
          _swrast_validate_texture_images( ctx );
+
+      if (swrast->NewState & _SWRAST_NEW_RASTERMASK)
+ 	 _swrast_update_rasterflags( ctx );
 
       swrast->NewState = 0;
       swrast->StateChanges = 0;

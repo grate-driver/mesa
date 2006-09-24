@@ -12,9 +12,9 @@
 
 /*
  * Mesa 3-D graphics library
- * Version:  6.4
+ * Version:  6.5.1
  *
- * Copyright (C) 1999-2005  Brian Paul   All Rights Reserved.
+ * Copyright (C) 1999-2006  Brian Paul   All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -48,8 +48,6 @@
 
 /**
  * An entry in the hash table.  
- *
- * This struct is private to this file.
  */
 struct HashEntry {
    GLuint Key;             /**< the entry's key */
@@ -57,16 +55,17 @@ struct HashEntry {
    struct HashEntry *Next; /**< pointer to next entry */
 };
 
+
 /**
  * The hash table data structure.  
- *
- * This is an opaque types (it's not defined in hash.h file).
  */
 struct _mesa_HashTable {
    struct HashEntry *Table[TABLE_SIZE];  /**< the lookup table */
    GLuint MaxKey;                        /**< highest key inserted so far */
    _glthread_Mutex Mutex;                /**< mutual exclusion lock */
+   GLboolean InDeleteAll;                /**< Debug check */
 };
+
 
 
 /**
@@ -97,18 +96,22 @@ _mesa_NewHashTable(void)
 void
 _mesa_DeleteHashTable(struct _mesa_HashTable *table)
 {
-   GLuint i;
+   GLuint pos;
    assert(table);
-   for (i = 0; i < TABLE_SIZE; i++) {
-      struct HashEntry *entry = table->Table[i];
+   for (pos = 0; pos < TABLE_SIZE; pos++) {
+      struct HashEntry *entry = table->Table[pos];
       while (entry) {
 	 struct HashEntry *next = entry->Next;
-	 FREE(entry);
+         if (entry->Data) {
+            _mesa_problem(NULL,
+                          "In _mesa_DeleteHashTable, found non-freed data");
+         }
+	 _mesa_free(entry);
 	 entry = next;
       }
    }
    _glthread_DESTROY_MUTEX(table->Mutex);
-   FREE(table);
+   _mesa_free(table);
 }
 
 
@@ -167,15 +170,20 @@ _mesa_HashInsert(struct _mesa_HashTable *table, GLuint key, void *data)
       table->MaxKey = key;
 
    pos = HASH_FUNC(key);
-   entry = table->Table[pos];
-   while (entry) {
+
+   /* check if replacing an existing entry with same key */
+   for (entry = table->Table[pos]; entry; entry = entry->Next) {
       if (entry->Key == key) {
          /* replace entry's data */
+#if 0 /* not sure this check is always valid */
+         if (entry->Data) {
+            _mesa_problem(NULL, "Memory leak detected in _mesa_HashInsert");
+         }
+#endif
 	 entry->Data = data;
          _glthread_UNLOCK_MUTEX(table->Mutex);
 	 return;
       }
-      entry = entry->Next;
    }
 
    /* alloc and insert new table entry */
@@ -208,6 +216,13 @@ _mesa_HashRemove(struct _mesa_HashTable *table, GLuint key)
    assert(table);
    assert(key);
 
+   /* have to check this outside of mutex lock */
+   if (table->InDeleteAll) {
+      _mesa_problem(NULL, "_mesa_HashRemove illegally called from "
+                    "_mesa_HashDeleteAll callback function");
+      return;
+   }
+
    _glthread_LOCK_MUTEX(table->Mutex);
 
    pos = HASH_FUNC(key);
@@ -222,7 +237,7 @@ _mesa_HashRemove(struct _mesa_HashTable *table, GLuint key)
          else {
             table->Table[pos] = entry->Next;
          }
-         FREE(entry);
+         _mesa_free(entry);
          _glthread_UNLOCK_MUTEX(table->Mutex);
 	 return;
       }
@@ -236,17 +251,73 @@ _mesa_HashRemove(struct _mesa_HashTable *table, GLuint key)
 
 
 /**
- * Get the key of the "first" entry in the hash table.
- * 
- * This is used in the course of deleting all display lists when
- * a context is destroyed.
- * 
- * \param table the hash table
- * 
- * \return key for the "first" entry in the hash table.
+ * Delete all entries in a hash table, but don't delete the table itself.
+ * Invoke the given callback function for each table entry.
  *
+ * \param table  the hash table to delete
+ * \param callback  the callback function
+ * \param userData  arbitrary pointer to pass along to the callback
+ *                  (this is typically a GLcontext pointer)
+ */
+void
+_mesa_HashDeleteAll(struct _mesa_HashTable *table,
+                    void (*callback)(GLuint key, void *data, void *userData),
+                    void *userData)
+{
+   GLuint pos;
+   ASSERT(table);
+   ASSERT(callback);
+   _glthread_LOCK_MUTEX(table->Mutex);
+   table->InDeleteAll = GL_TRUE;
+   for (pos = 0; pos < TABLE_SIZE; pos++) {
+      struct HashEntry *entry, *next;
+      for (entry = table->Table[pos]; entry; entry = next) {
+         callback(entry->Key, entry->Data, userData);
+         next = entry->Next;
+         _mesa_free(entry);
+      }
+      table->Table[pos] = NULL;
+   }
+   table->InDeleteAll = GL_FALSE;
+   _glthread_UNLOCK_MUTEX(table->Mutex);
+}
+
+
+/**
+ * Walk over all entries in a hash table, calling callback function for each.
+ * \param table  the hash table to walk
+ * \param callback  the callback function
+ * \param userData  arbitrary pointer to pass along to the callback
+ *                  (this is typically a GLcontext pointer)
+ */
+void
+_mesa_HashWalk(const struct _mesa_HashTable *table,
+               void (*callback)(GLuint key, void *data, void *userData),
+               void *userData)
+{
+   /* cast-away const */
+   struct _mesa_HashTable *table2 = (struct _mesa_HashTable *) table;
+   GLuint pos;
+   ASSERT(table);
+   ASSERT(callback);
+   _glthread_UNLOCK_MUTEX(table2->Mutex);
+   for (pos = 0; pos < TABLE_SIZE; pos++) {
+      struct HashEntry *entry;
+      for (entry = table->Table[pos]; entry; entry = entry->Next) {
+         callback(entry->Key, entry->Data, userData);
+      }
+   }
+   _glthread_UNLOCK_MUTEX(table2->Mutex);
+}
+
+
+/**
+ * Return the key of the "first" entry in the hash table.
  * While holding the lock, walks through all table positions until finding
  * the first entry of the first non-empty one.
+ * 
+ * \param table  the hash table
+ * \return key for the "first" entry in the hash table.
  */
 GLuint
 _mesa_HashFirstEntry(struct _mesa_HashTable *table)
@@ -254,7 +325,7 @@ _mesa_HashFirstEntry(struct _mesa_HashTable *table)
    GLuint pos;
    assert(table);
    _glthread_LOCK_MUTEX(table->Mutex);
-   for (pos=0; pos < TABLE_SIZE; pos++) {
+   for (pos = 0; pos < TABLE_SIZE; pos++) {
       if (table->Table[pos]) {
          _glthread_UNLOCK_MUTEX(table->Mutex);
          return table->Table[pos]->Key;
@@ -282,16 +353,14 @@ _mesa_HashNextEntry(const struct _mesa_HashTable *table, GLuint key)
 
    /* Find the entry with given key */
    pos = HASH_FUNC(key);
-   entry = table->Table[pos];
-   while (entry) {
+   for (entry = table->Table[pos]; entry ; entry = entry->Next) {
       if (entry->Key == key) {
          break;
       }
-      entry = entry->Next;
    }
 
    if (!entry) {
-      /* the key was not found, we can't find next entry */
+      /* the given key was not found, so we can't find the next entry */
       return 0;
    }
 
@@ -321,10 +390,10 @@ _mesa_HashNextEntry(const struct _mesa_HashTable *table, GLuint key)
 void
 _mesa_HashPrint(const struct _mesa_HashTable *table)
 {
-   GLuint i;
+   GLuint pos;
    assert(table);
-   for (i=0;i<TABLE_SIZE;i++) {
-      const struct HashEntry *entry = table->Table[i];
+   for (pos = 0; pos < TABLE_SIZE; pos++) {
+      const struct HashEntry *entry = table->Table[pos];
       while (entry) {
 	 _mesa_debug(NULL, "%u %p\n", entry->Key, entry->Data);
 	 entry = entry->Next;
@@ -350,7 +419,7 @@ _mesa_HashPrint(const struct _mesa_HashTable *table)
 GLuint
 _mesa_HashFindFreeKeyBlock(struct _mesa_HashTable *table, GLuint numKeys)
 {
-   GLuint maxKey = ~((GLuint) 0);
+   const GLuint maxKey = ~((GLuint) 0);
    _glthread_LOCK_MUTEX(table->Mutex);
    if (maxKey - numKeys > table->MaxKey) {
       /* the quick solution */
@@ -362,7 +431,7 @@ _mesa_HashFindFreeKeyBlock(struct _mesa_HashTable *table, GLuint numKeys)
       GLuint freeCount = 0;
       GLuint freeStart = 1;
       GLuint key;
-      for (key=1; key!=maxKey; key++) {
+      for (key = 1; key != maxKey; key++) {
 	 if (_mesa_HashLookup(table, key)) {
 	    /* darn, this key is already in use */
 	    freeCount = 0;

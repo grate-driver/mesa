@@ -162,7 +162,7 @@ compute_component_mapping(GLenum logicalBaseFormat, GLenum textureBaseFormat,
       }
       break;
    default:
-      _mesa_problem(NULL, "Unexpected logicalBaseFormat");
+      _mesa_problem(NULL, "Unexpected textureBaseFormat");
       map[0] = map[1] = 0;
       break;
    }   
@@ -1066,7 +1066,25 @@ _mesa_texstore_rgba8888(TEXSTORE_PARAMS)
        dstFormat == &_mesa_texformat_rgba8888 &&
        baseInternalFormat == GL_RGBA &&
       ((srcFormat == GL_RGBA && srcType == GL_UNSIGNED_INT_8_8_8_8) ||
-       (srcFormat == GL_ABGR_EXT && srcType == GL_UNSIGNED_INT_8_8_8_8_REV))) {
+       (srcFormat == GL_RGBA && srcType == GL_UNSIGNED_BYTE && !littleEndian) ||
+       (srcFormat == GL_ABGR_EXT && srcType == GL_UNSIGNED_INT_8_8_8_8_REV) ||
+       (srcFormat == GL_ABGR_EXT && srcType == GL_UNSIGNED_BYTE && littleEndian))) {
+       /* simple memcpy path */
+      memcpy_texture(ctx, dims,
+                     dstFormat, dstAddr, dstXoffset, dstYoffset, dstZoffset,
+                     dstRowStride,
+                     dstImageOffsets,
+                     srcWidth, srcHeight, srcDepth, srcFormat, srcType,
+                     srcAddr, srcPacking);
+   }
+   else if (!ctx->_ImageTransferState &&
+       !srcPacking->SwapBytes &&
+       dstFormat == &_mesa_texformat_rgba8888_rev &&
+       baseInternalFormat == GL_RGBA &&
+      ((srcFormat == GL_RGBA && srcType == GL_UNSIGNED_INT_8_8_8_8_REV) ||
+       (srcFormat == GL_RGBA && srcType == GL_UNSIGNED_BYTE && littleEndian) ||
+       (srcFormat == GL_ABGR_EXT && srcType == GL_UNSIGNED_INT_8_8_8_8) ||
+       (srcFormat == GL_ABGR_EXT && srcType == GL_UNSIGNED_BYTE && !littleEndian))) {
       /* simple memcpy path */
       memcpy_texture(ctx, dims,
                      dstFormat, dstAddr, dstXoffset, dstYoffset, dstZoffset,
@@ -2164,6 +2182,116 @@ _mesa_texstore_rgba_float16(TEXSTORE_PARAMS)
 }
 
 
+#if FEATURE_EXT_texture_sRGB
+GLboolean
+_mesa_texstore_srgb8(TEXSTORE_PARAMS)
+{
+   const GLuint ui = 1;
+   const GLubyte littleEndian = *((const GLubyte *) &ui);
+   const struct gl_texture_format *newDstFormat;
+   StoreTexImageFunc store;
+   GLboolean k;
+
+   ASSERT(dstFormat == &_mesa_texformat_srgb8);
+
+   /* reuse normal rgb texstore code */
+   if (littleEndian) {
+      newDstFormat = &_mesa_texformat_bgr888;
+      store = _mesa_texstore_bgr888;
+   }
+   else {
+      newDstFormat = &_mesa_texformat_rgb888;
+      store = _mesa_texstore_rgb888;
+   }
+
+   k = store(ctx, dims, baseInternalFormat,
+             newDstFormat, dstAddr,
+             dstXoffset, dstYoffset, dstZoffset,
+             dstRowStride, dstImageOffsets,
+             srcWidth, srcHeight, srcDepth,
+             srcFormat, srcType,
+             srcAddr, srcPacking);
+   return k;
+}
+
+
+GLboolean
+_mesa_texstore_srgba8(TEXSTORE_PARAMS)
+{
+   const GLuint ui = 1;
+   const GLubyte littleEndian = *((const GLubyte *) &ui);
+   const struct gl_texture_format *newDstFormat;
+   GLboolean k;
+
+   ASSERT(dstFormat == &_mesa_texformat_srgba8);
+
+   /* reuse normal rgba texstore code */
+   if (littleEndian)
+      newDstFormat = &_mesa_texformat_rgba8888_rev;
+   else
+      newDstFormat = &_mesa_texformat_rgba8888;
+
+   k = _mesa_texstore_rgba8888(ctx, dims, baseInternalFormat,
+                               newDstFormat, dstAddr,
+                               dstXoffset, dstYoffset, dstZoffset,
+                               dstRowStride, dstImageOffsets,
+                               srcWidth, srcHeight, srcDepth,
+                               srcFormat, srcType,
+                               srcAddr, srcPacking);
+   return k;
+}
+
+
+GLboolean
+_mesa_texstore_sl8(TEXSTORE_PARAMS)
+{
+   const struct gl_texture_format *newDstFormat;
+   GLboolean k;
+
+   ASSERT(dstFormat == &_mesa_texformat_sl8);
+
+   newDstFormat = &_mesa_texformat_l8;
+
+   /* _mesa_textore_a8 handles luminance8 too */
+   k = _mesa_texstore_a8(ctx, dims, baseInternalFormat,
+                         newDstFormat, dstAddr,
+                         dstXoffset, dstYoffset, dstZoffset,
+                         dstRowStride, dstImageOffsets,
+                         srcWidth, srcHeight, srcDepth,
+                         srcFormat, srcType,
+                         srcAddr, srcPacking);
+   return k;
+}
+
+
+GLboolean
+_mesa_texstore_sla8(TEXSTORE_PARAMS)
+{
+   const GLuint ui = 1;
+   const GLubyte littleEndian = *((const GLubyte *) &ui);
+   const struct gl_texture_format *newDstFormat;
+   GLboolean k;
+
+   ASSERT(dstFormat == &_mesa_texformat_sla8);
+
+   /* reuse normal luminance/alpha texstore code */
+   if (littleEndian)
+      newDstFormat = &_mesa_texformat_al88;
+   else
+      newDstFormat = &_mesa_texformat_al88_rev;
+
+   k = _mesa_texstore_al88(ctx, dims, baseInternalFormat,
+                           newDstFormat, dstAddr,
+                           dstXoffset, dstYoffset, dstZoffset,
+                           dstRowStride, dstImageOffsets,
+                           srcWidth, srcHeight, srcDepth,
+                           srcFormat, srcType,
+                           srcAddr, srcPacking);
+   return k;
+}
+
+#endif /* FEATURE_EXT_texture_sRGB */
+
 
 /**
  * Check if an unpack PBO is active prior to fetching a texture image.
@@ -3104,6 +3232,9 @@ do_row(const struct gl_texture_format *format, GLint srcWidth,
    case MESA_FORMAT_RGBA8888_REV:
    case MESA_FORMAT_ARGB8888:
    case MESA_FORMAT_ARGB8888_REV:
+#if FEATURE_EXT_texture_sRGB
+   case MESA_FORMAT_SRGBA8:
+#endif
       {
          GLuint i, j, k;
          const GLubyte (*rowA)[4] = (const GLubyte (*)[4]) srcRowA;
@@ -3124,6 +3255,9 @@ do_row(const struct gl_texture_format *format, GLint srcWidth,
       return;
    case MESA_FORMAT_RGB888:
    case MESA_FORMAT_BGR888:
+#if FEATURE_EXT_texture_sRGB
+   case MESA_FORMAT_SRGB8:
+#endif
       {
          GLuint i, j, k;
          const GLubyte (*rowA)[3] = (const GLubyte (*)[3]) srcRowA;
@@ -3236,6 +3370,9 @@ do_row(const struct gl_texture_format *format, GLint srcWidth,
       return;
    case MESA_FORMAT_AL88:
    case MESA_FORMAT_AL88_REV:
+#if FEATURE_EXT_texture_sRGB
+   case MESA_FORMAT_SLA8:
+#endif
       {
          GLuint i, j, k;
          const GLubyte (*rowA)[2] = (const GLubyte (*)[2]) srcRowA;
@@ -3281,6 +3418,9 @@ do_row(const struct gl_texture_format *format, GLint srcWidth,
    case MESA_FORMAT_L8:
    case MESA_FORMAT_I8:
    case MESA_FORMAT_CI8:
+#if FEATURE_EXT_texture_sRGB
+   case MESA_FORMAT_SL8:
+#endif
       {
          GLuint i, j, k;
          const GLubyte *rowA = (const GLubyte *) srcRowA;
@@ -4089,6 +4229,27 @@ _mesa_upscale_teximage2d (GLsizei inWidth, GLsizei inHeight,
 }
 
 
+#if FEATURE_EXT_texture_sRGB
+
+/**
+ * Test if given texture image is an sRGB format.
+ */
+static GLboolean
+is_srgb_teximage(const struct gl_texture_image *texImage)
+{
+   switch (texImage->TexFormat->MesaFormat) {
+   case MESA_FORMAT_SRGB8:
+   case MESA_FORMAT_SRGBA8:
+   case MESA_FORMAT_SL8:
+   case MESA_FORMAT_SLA8:
+      return GL_TRUE;
+   default:
+      return GL_FALSE;
+   }
+}
+
+#endif /* FEATURE_EXT_texture_sRGB */
+
 
 /**
  * This is the software fallback for Driver.GetTexImage().
@@ -4100,26 +4261,26 @@ _mesa_get_teximage(GLcontext *ctx, GLenum target, GLint level,
                    struct gl_texture_object *texObj,
                    struct gl_texture_image *texImage)
 {
-   GLuint dimensions = (target == GL_TEXTURE_3D) ? 3 : 2;
+   const GLuint dimensions = (target == GL_TEXTURE_3D) ? 3 : 2;
 
    if (ctx->Pack.BufferObj->Name) {
-      /* pack texture image into a PBO */
-      GLubyte *buf;
-      if (!_mesa_validate_pbo_access(dimensions, &ctx->Pack, texImage->Width,
-                                     texImage->Height, texImage->Depth,
-                                     format, type, pixels)) {
-         _mesa_error(ctx, GL_INVALID_OPERATION,
-                     "glGetTexImage(invalid PBO access)");
-         return;
-      }
-      buf = (GLubyte *) ctx->Driver.MapBuffer(ctx, GL_PIXEL_PACK_BUFFER_EXT,
-                                              GL_WRITE_ONLY_ARB,
-                                              ctx->Pack.BufferObj);
+      /* Packing texture image into a PBO.
+       * Map the (potentially) VRAM-based buffer into our process space so
+       * we can write into it with the code below.
+       * A hardware driver might use a sophisticated blit to move the
+       * texture data to the PBO if the PBO is in VRAM along with the texture.
+       */
+      GLubyte *buf = (GLubyte *)
+         ctx->Driver.MapBuffer(ctx, GL_PIXEL_PACK_BUFFER_EXT,
+                               GL_WRITE_ONLY_ARB, ctx->Pack.BufferObj);
       if (!buf) {
          /* buffer is already mapped - that's an error */
          _mesa_error(ctx, GL_INVALID_OPERATION,"glGetTexImage(PBO is mapped)");
          return;
       }
+      /* <pixels> was an offset into the PBO.
+       * Now make it a real, client-side pointer inside the mapped region.
+       */
       pixels = ADD_POINTERS(buf, pixels);
    }
    else if (!pixels) {
@@ -4203,6 +4364,16 @@ _mesa_get_teximage(GLcontext *ctx, GLenum target, GLint level,
                   _mesa_swap2((GLushort *) dest, width);
                }
             }
+#if FEATURE_EXT_texture_sRGB
+            else if (is_srgb_teximage(texImage)) {
+               /* no pixel transfer and no non-linear to linear conversion */
+               const GLint comps = texImage->TexFormat->TexelBytes;
+               const GLint rowstride = comps * texImage->RowStride;
+               MEMCPY(dest,
+                      (const GLubyte *) texImage->Data + row * rowstride,
+                      comps * width * sizeof(GLubyte));
+            }
+#endif /* FEATURE_EXT_texture_sRGB */
             else {
                /* general case:  convert row to RGBA format */
                GLfloat rgba[MAX_WIDTH][4];

@@ -356,6 +356,7 @@ static void FreeScreenConfigs(__GLXdisplayPrivate *priv)
 
 	    psc->configs = NULL;	/* NOTE: just for paranoia */
 	}
+	Xfree((char*) psc->serverGLXexts);
 
 #ifdef GLX_DIRECT_RENDERING
 	/* Free the direct rendering per screen data */
@@ -387,7 +388,7 @@ static int __glXFreeDisplayPrivate(XExtData *extension)
 	priv->serverGLXversion = 0x0; /* to protect against double free's */
     }
 
-#if 0 /* GLX_DIRECT_RENDERING */
+#ifdef GLX_DIRECT_RENDERING
     /* Free the direct rendering per display data */
     if (priv->driDisplay.private)
 	(*priv->driDisplay.destroyDisplay)(priv->dpy,
@@ -718,7 +719,7 @@ static const __DRIinterfaceMethods interface_methods = {
     XF86DRIGetDrawableInfo,
 
     __glXGetUST,
-    glXGetMscRateOML,
+    __glXGetMscRateOML,
 };
 
 

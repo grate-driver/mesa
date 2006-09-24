@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2004-2005 Claudio Ciccani <klan@users.sf.net>
+ * Copyright (C) 2004-2006 Claudio Ciccani <klan@users.sf.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -23,11 +23,20 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-#include <directfb.h>
+#include <pthread.h>
 
 #include <direct/messages.h>
 #include <direct/interface.h>
 #include <direct/mem.h>
+
+#include <directfb.h>
+#include <directfb_version.h>
+
+#define VERSION_CODE( M, m, r )  (((M) * 1000) + ((m) * 100) + ((r)))
+#define DIRECTFB_VERSION_CODE    VERSION_CODE( DIRECTFB_MAJOR_VERSION, \
+                                               DIRECTFB_MINOR_VERSION, \
+                                               DIRECTFB_MICRO_VERSION )
+
 
 #ifdef CLAMP
 # undef CLAMP
@@ -70,7 +79,7 @@ DIRECT_INTERFACE_IMPLEMENTATION( IDirectFBGL, Mesa )
 typedef struct {
      int                     ref;       /* reference counter */
      
-     bool                    locked;
+     DFBBoolean              locked;
      
      IDirectFBSurface       *surface;
      DFBSurfacePixelFormat   format;
@@ -89,32 +98,68 @@ typedef struct {
      struct gl_renderbuffer  render;
 } IDirectFBGL_data;
 
+/******************************************************************************/
 
-static bool  dfb_mesa_setup_visual   ( GLvisual              *visual,
-                                       DFBSurfacePixelFormat  format );
-static bool  dfb_mesa_create_context ( GLcontext             *context,
-                                       GLframebuffer         *framebuffer,
-                                       GLvisual              *visual,
-                                       DFBSurfacePixelFormat  format,
-                                       IDirectFBGL_data      *data );
-static void  dfb_mesa_destroy_context( GLcontext             *context,
-                                       GLframebuffer         *framebuffer );
+static pthread_mutex_t global_lock = PTHREAD_MUTEX_INITIALIZER;
+static unsigned int    global_ref  = 0;
+
+static inline int directfbgl_init( void )
+{
+     pthread_mutexattr_t attr;
+     int                 ret;
+     
+     if (global_ref++)
+          return 0;
+
+     pthread_mutexattr_init( &attr );
+     pthread_mutexattr_settype( &attr, PTHREAD_MUTEX_ERRORCHECK );
+     ret = pthread_mutex_init( &global_lock, &attr );
+     pthread_mutexattr_destroy( &attr );
+
+     return ret;
+}
+
+static inline void directfbgl_finish( void )
+{
+     if (--global_ref == 0)
+          pthread_mutex_destroy( &global_lock );
+}
+
+#define directfbgl_lock()    pthread_mutex_lock( &global_lock )
+#define directfbgl_unlock()  pthread_mutex_unlock( &global_lock )
+
+/******************************************************************************/
+
+static bool  directfbgl_init_visual    ( GLvisual              *visual,
+                                         DFBSurfacePixelFormat  format );
+static bool  directfbgl_create_context ( GLcontext             *context,
+                                         GLframebuffer         *framebuffer,
+                                         GLvisual              *visual,
+                                         DFBSurfacePixelFormat  format,
+                                         IDirectFBGL_data      *data );
+static void  directfbgl_destroy_context( GLcontext             *context,
+                                         GLframebuffer         *framebuffer );
+
+/******************************************************************************/
 
 
 static void
-IDirectFBGL_Destruct( IDirectFBGL *thiz )
+IDirectFBGL_Mesa_Destruct( IDirectFBGL *thiz )
 {
      IDirectFBGL_data *data = (IDirectFBGL_data*) thiz->priv;
 
-     dfb_mesa_destroy_context( &data->context, &data->framebuffer );
+     directfbgl_destroy_context( &data->context, &data->framebuffer );
      
-     data->surface->Release( data->surface );
+     if (data->surface)
+          data->surface->Release( data->surface );
 
      DIRECT_DEALLOCATE_INTERFACE( thiz );
+
+     directfbgl_finish();
 }
 
 static DFBResult
-IDirectFBGL_AddRef( IDirectFBGL *thiz )
+IDirectFBGL_Mesa_AddRef( IDirectFBGL *thiz )
 {
      DIRECT_INTERFACE_GET_DATA( IDirectFBGL );
 
@@ -124,19 +169,18 @@ IDirectFBGL_AddRef( IDirectFBGL *thiz )
 }
 
 static DFBResult
-IDirectFBGL_Release( IDirectFBGL *thiz )
+IDirectFBGL_Mesa_Release( IDirectFBGL *thiz )
 {
      DIRECT_INTERFACE_GET_DATA( IDirectFBGL )
 
-     if (--data->ref == 0) {
-          IDirectFBGL_Destruct( thiz );
-     }
+     if (--data->ref == 0) 
+          IDirectFBGL_Mesa_Destruct( thiz );
 
      return DFB_OK;
 }
 
 static DFBResult
-IDirectFBGL_Lock( IDirectFBGL *thiz )
+IDirectFBGL_Mesa_Lock( IDirectFBGL *thiz )
 {
      IDirectFBSurface *surface;
      int               width   = 0;
@@ -148,11 +192,14 @@ IDirectFBGL_Lock( IDirectFBGL *thiz )
      if (data->locked)
           return DFB_LOCKED;
 
+     if (directfbgl_lock())
+          return DFB_LOCKED;
+
      surface = data->surface;
      surface->GetSize( surface, &width, &height );
      
      err = surface->Lock( surface, DSLF_READ | DSLF_WRITE, 
-                          (void**) &data->video.start, &data->video.pitch );
+                          (void*)&data->video.start, &data->video.pitch );
      if (err != DFB_OK) {
           D_ERROR( "DirectFBGL/Mesa: couldn't lock surface.\n" );
           return err;
@@ -160,45 +207,53 @@ IDirectFBGL_Lock( IDirectFBGL *thiz )
      data->video.end = data->video.start + (height-1) * data->video.pitch;
 
      data->render.Data = data->video.start;
+
+     _mesa_make_current( &data->context, 
+                         &data->framebuffer, &data->framebuffer );
      
      if (data->width != width || data->height != height) {
           data->width  = width;
           data->height = height;
           _mesa_ResizeBuffersMESA();
      }
-     
-     data->locked = true;
+
+     data->locked = DFB_TRUE;
      
      return DFB_OK;
 }
 
 static DFBResult
-IDirectFBGL_Unlock( IDirectFBGL *thiz )
+IDirectFBGL_Mesa_Unlock( IDirectFBGL *thiz )
 {     
      DIRECT_INTERFACE_GET_DATA( IDirectFBGL );
 
      if (!data->locked)
           return DFB_OK;
 
+     _mesa_make_current( NULL, NULL, NULL );
+     
      data->surface->Unlock( data->surface );
-     data->video.start = NULL;
-     data->video.end   = NULL;
-    
-     data->locked = false;
 
+     directfbgl_unlock();
+
+     data->locked = DFB_FALSE;
+     
      return DFB_OK;
 }
 
 static DFBResult
-IDirectFBGL_GetAttributes( IDirectFBGL     *thiz,
-                           DFBGLAttributes *attributes )
+IDirectFBGL_Mesa_GetAttributes( IDirectFBGL     *thiz,
+                                DFBGLAttributes *attributes )
 {
-     GLvisual *visual;
+     DFBSurfaceCapabilities   caps;
+     GLvisual                *visual;
      
      DIRECT_INTERFACE_GET_DATA( IDirectFBGL );
 
      if (!attributes)
           return DFB_INVARG;
+
+     data->surface->GetCapabilities( data->surface, &caps );
 
      visual = &data->visual;
      
@@ -214,7 +269,7 @@ IDirectFBGL_GetAttributes( IDirectFBGL     *thiz,
      attributes->accum_green_size = visual->accumGreenBits;
      attributes->accum_blue_size  = visual->accumBlueBits;
      attributes->accum_alpha_size = visual->accumAlphaBits;
-     attributes->double_buffer    = (visual->doubleBufferMode != 0);
+     attributes->double_buffer    = (caps & DSCAPS_FLIPPING) ? 1 : 0;
      attributes->stereo           = (visual->stereoMode != 0);
 
      return DFB_OK;
@@ -230,12 +285,15 @@ Probe( void *data )
 }
 
 static DFBResult
-Construct( IDirectFBGL      *thiz,
-           IDirectFBSurface *surface )
-{ 
+Construct( IDirectFBGL *thiz, IDirectFBSurface *surface )
+{
+     /* Initialize global resources. */
+     if (directfbgl_init())
+          return DFB_INIT;
+     
      /* Allocate interface data. */
      DIRECT_ALLOCATE_INTERFACE_DATA( thiz, IDirectFBGL );
-
+ 
      /* Initialize interface data. */
      data->ref     = 1;
      data->surface = surface;
@@ -245,48 +303,41 @@ Construct( IDirectFBGL      *thiz,
      surface->GetSize( surface, &data->width, &data->height );
 
      /* Configure visual. */
-     if (!dfb_mesa_setup_visual( &data->visual, data->format )) {
+     if (!directfbgl_init_visual( &data->visual, data->format )) {
           D_ERROR( "DirectFBGL/Mesa: failed to initialize visual.\n" );
-          surface->Release( surface );
+          IDirectFBGL_Mesa_Destruct( thiz );
           return DFB_UNSUPPORTED;
      }
      
      /* Create context. */
-     if (!dfb_mesa_create_context( &data->context, &data->framebuffer,
-                                   &data->visual, data->format, data )) {
+     if (!directfbgl_create_context( &data->context, &data->framebuffer,
+                                     &data->visual, data->format, data )) {
           D_ERROR( "DirectFBGL/Mesa: failed to create context.\n" );
-          surface->Release( surface );
+          IDirectFBGL_Mesa_Destruct( thiz );
           return DFB_UNSUPPORTED;
      }
 
      /* Assign interface pointers. */
-     thiz->AddRef        = IDirectFBGL_AddRef;
-     thiz->Release       = IDirectFBGL_Release;
-     thiz->Lock          = IDirectFBGL_Lock;
-     thiz->Unlock        = IDirectFBGL_Unlock;
-     thiz->GetAttributes = IDirectFBGL_GetAttributes;
+     thiz->AddRef        = IDirectFBGL_Mesa_AddRef;
+     thiz->Release       = IDirectFBGL_Mesa_Release;
+     thiz->Lock          = IDirectFBGL_Mesa_Lock;
+     thiz->Unlock        = IDirectFBGL_Mesa_Unlock;
+     thiz->GetAttributes = IDirectFBGL_Mesa_GetAttributes;
 
      return DFB_OK;
 }
 
 
-/* internal functions */
+/***************************** Driver functions ******************************/
 
 static const GLubyte*
-get_string( GLcontext *ctx, GLenum pname )
+dfbGetString( GLcontext *ctx, GLenum pname )
 {
-     switch (pname) {
-          case GL_VENDOR:
-               return "Claudio Ciccani";
-          case GL_VERSION:
-               return "1.0";
-          default:
-               return NULL;
-     }
+     return NULL;
 }
 
 static void
-update_state( GLcontext *ctx, GLuint new_state )
+dfbUpdateState( GLcontext *ctx, GLuint new_state )
 {
      _swrast_InvalidateState( ctx, new_state );
      _swsetup_InvalidateState( ctx, new_state );
@@ -295,7 +346,7 @@ update_state( GLcontext *ctx, GLuint new_state )
 }
 
 static void
-get_buffer_size( GLframebuffer *buffer, GLuint *width, GLuint *height )
+dfbGetBufferSize( GLframebuffer *buffer, GLuint *width, GLuint *height )
 {
      GLcontext        *ctx  = _mesa_get_current_context();
      IDirectFBGL_data *data = (IDirectFBGL_data*) ctx->DriverCtx;
@@ -305,42 +356,96 @@ get_buffer_size( GLframebuffer *buffer, GLuint *width, GLuint *height )
 }
 
 static void
-set_viewport( GLcontext *ctx, GLint x, GLint y, GLsizei w, GLsizei h )
+dfbSetViewport( GLcontext *ctx, GLint x, GLint y, GLsizei w, GLsizei h )
 {
      _mesa_ResizeBuffersMESA();
 }
 
-/* required but not used */
 static void
-set_buffer( GLcontext *ctx, GLframebuffer *buffer, GLuint bufferBit )
+dfbClear( GLcontext *ctx, GLbitfield mask, GLboolean all,
+          GLint x, GLint y, GLint width, GLint height )
 {
-     return;
-}
+     IDirectFBGL_data *data = (IDirectFBGL_data*) ctx->DriverCtx;
+     
+     if (mask & BUFFER_BIT_FRONT_LEFT &&
+         ctx->Color.ColorMask[0]      &&
+         ctx->Color.ColorMask[1]      &&
+         ctx->Color.ColorMask[2]      &&
+         ctx->Color.ColorMask[3])
+     {
+          DFBRegion clip;
+          __u8 a, r, g, b;
+          
+          UNCLAMPED_FLOAT_TO_UBYTE( a, ctx->Color.ClearColor[ACOMP] );
+          UNCLAMPED_FLOAT_TO_UBYTE( r, ctx->Color.ClearColor[RCOMP] );
+          UNCLAMPED_FLOAT_TO_UBYTE( g, ctx->Color.ClearColor[GCOMP] );
+          UNCLAMPED_FLOAT_TO_UBYTE( b, ctx->Color.ClearColor[BCOMP] );
+
+          data->surface->Unlock( data->surface );
+
+#if DIRECTFB_VERSION_CODE >= VERSION_CODE(0,9,25)
+          data->surface->GetClip( data->surface, &clip );
+#else
+          (void)clip;
+#endif
+          
+          if (all) {
+               data->surface->SetClip( data->surface, NULL );
+          }
+          else {
+               DFBRegion reg = { x1:x, y1:y, x2:x+width-1, y2:y+height-1 };
+               data->surface->SetClip( data->surface, &reg );
+          }
+          
+          data->surface->Clear( data->surface, r, g, b, a );
+
+#if DIRECTFB_VERSION_CODE >= VERSION_CODE(0,9,25)
+          data->surface->SetClip( data->surface, &clip );
+#endif
+          
+          data->surface->Lock( data->surface, DSLF_READ | DSLF_WRITE,
+                               (void*)&data->video.start, &data->video.pitch );
+          
+          mask &= ~BUFFER_BIT_FRONT_LEFT;
+     }
+     
+     if (mask)
+          _swrast_Clear( ctx, mask, all, x, y, width, height );
+}        
+          
+     
+
+/************************ RenderBuffer functions *****************************/
 
 static void
-delete_renderbuffer( struct gl_renderbuffer *render )
+dfbDeleteRenderbuffer( struct gl_renderbuffer *render )
 {
      return;
 }
 
 static GLboolean
-renderbuffer_storage( GLcontext *ctx, struct gl_renderbuffer *render,
-                      GLenum internalFormat, GLuint width, GLuint height )
+dfbRenderbufferStorage( GLcontext *ctx, struct gl_renderbuffer *render,
+                        GLenum internalFormat, GLuint width, GLuint height )
 {
      return GL_TRUE;
 }
 
 
+/***************************** Span functions ********************************/
+
 /* RGB332 */
 #define NAME(PREFIX) PREFIX##_RGB332
 #define FORMAT GL_RGBA8
+#define RB_TYPE GLubyte
 #define SPAN_VARS \
    IDirectFBGL_data *data = (IDirectFBGL_data*) ctx->DriverCtx;
 #define INIT_PIXEL_PTR(P, X, Y) \
    GLubyte *P = data->video.end - (Y) * data->video.pitch + (X);
 #define INC_PIXEL_PTR(P) P += 1
 #define STORE_PIXEL(P, X, Y, S) \
-   *P = ( (((S[RCOMP]) & 0xe0)) | (((S[GCOMP]) & 0xe0) >> 3) | ((S[BCOMP]) >> 6) )
+   *P = ( (((S[RCOMP]) & 0xe0)     ) | \
+          (((S[GCOMP]) & 0xe0) >> 3) | \
+          (((S[BCOMP])       ) >> 6) )
 #define FETCH_PIXEL(D, P) \
    D[RCOMP] = ((*P & 0xe0)     ); \
    D[GCOMP] = ((*P & 0x1c) << 3); \
@@ -349,16 +454,79 @@ renderbuffer_storage( GLcontext *ctx, struct gl_renderbuffer *render,
 
 #include "swrast/s_spantemp.h"
 
-/* ARGB1555 */
-#define NAME(PREFIX) PREFIX##_ARGB1555
+/* ARGB4444 */
+#define NAME(PREFIX) PREFIX##_ARGB4444
 #define FORMAT GL_RGBA8
+#define RB_TYPE GLubyte
 #define SPAN_VARS \
    IDirectFBGL_data *data = (IDirectFBGL_data*) ctx->DriverCtx;
 #define INIT_PIXEL_PTR(P, X, Y) \
    GLushort *P = (GLushort *) (data->video.end - (Y) * data->video.pitch + (X) * 2);
 #define INC_PIXEL_PTR(P) P += 1
+#define STORE_PIXEL_RGB(P, X, Y, S) \
+   *P = ( 0xf000                     | \
+          (((S[RCOMP]) & 0xf0) << 4) | \
+          (((S[GCOMP]) & 0xf0)     ) | \
+          (((S[BCOMP]) & 0xf0) >> 4) )
 #define STORE_PIXEL(P, X, Y, S) \
-   *P = ( (((S[RCOMP]) & 0xf8) << 7) | (((S[GCOMP]) & 0xf8) << 2) | ((S[BCOMP]) >> 3) )
+   *P = ( (((S[ACOMP]) & 0xf0) << 8) | \
+          (((S[RCOMP]) & 0xf0) << 4) | \
+          (((S[GCOMP]) & 0xf0)     ) | \
+          (((S[BCOMP]) & 0xf0) >> 4) )
+#define FETCH_PIXEL(D, P) \
+   D[RCOMP] = ((*P & 0x0f00) >> 4); \
+   D[GCOMP] = ((*P & 0x00f0)     ); \
+   D[BCOMP] = ((*P & 0x000f) << 4); \
+   D[ACOMP] = ((*P & 0xf000) >> 8)
+
+#include "swrast/s_spantemp.h"
+
+/* ARGB2554 */
+#define NAME(PREFIX) PREFIX##_ARGB2554
+#define FORMAT GL_RGBA8
+#define RB_TYPE GLubyte
+#define SPAN_VARS \
+   IDirectFBGL_data *data = (IDirectFBGL_data*) ctx->DriverCtx;
+#define INIT_PIXEL_PTR(P, X, Y) \
+   GLushort *P = (GLushort *) (data->video.end - (Y) * data->video.pitch + (X) * 2);
+#define INC_PIXEL_PTR(P) P += 1
+#define STORE_PIXEL_RGB(P, X, Y, S) \
+   *P = ( 0xc000                     | \
+          (((S[RCOMP]) & 0xf8) << 6) | \
+          (((S[GCOMP]) & 0xf8) << 1) | \
+          (((S[BCOMP]) & 0xf0) >> 4) )
+#define STORE_PIXEL(P, X, Y, S) \
+   *P = ( (((S[ACOMP]) & 0xc0) << 8) | \
+          (((S[RCOMP]) & 0xf8) << 6) | \
+          (((S[GCOMP]) & 0xf8) << 1) | \
+          (((S[BCOMP]) & 0xf0) >> 4) )
+#define FETCH_PIXEL(D, P) \
+   D[RCOMP] = ((*P & 0x3e00) >>  9); \
+   D[GCOMP] = ((*P & 0x01f0) >>  4); \
+   D[BCOMP] = ((*P & 0x000f) <<  4); \
+   D[ACOMP] = ((*P & 0xc000) >> 14)
+
+#include "swrast/s_spantemp.h"
+   
+/* ARGB1555 */
+#define NAME(PREFIX) PREFIX##_ARGB1555
+#define FORMAT GL_RGBA8
+#define RB_TYPE GLubyte
+#define SPAN_VARS \
+   IDirectFBGL_data *data = (IDirectFBGL_data*) ctx->DriverCtx;
+#define INIT_PIXEL_PTR(P, X, Y) \
+   GLushort *P = (GLushort *) (data->video.end - (Y) * data->video.pitch + (X) * 2);
+#define INC_PIXEL_PTR(P) P += 1
+#define STORE_PIXEL_RGB(P, X, Y, S) \
+   *P = ( 0x8000                      | \
+          (((S[RCOMP]) & 0xf8) <<  7) | \
+          (((S[GCOMP]) & 0xf8) <<  2) | \
+          (((S[BCOMP])       ) >>  3) )
+#define STORE_PIXEL(P, X, Y, S) \
+   *P = ( (((S[ACOMP]) & 0x80) << 16) | \
+          (((S[RCOMP]) & 0xf8) <<  7) | \
+          (((S[GCOMP]) & 0xf8) <<  2) | \
+          (((S[BCOMP])       ) >>  3) )
 #define FETCH_PIXEL(D, P) \
    D[RCOMP] = ((*P & 0x7c00) >> 7); \
    D[GCOMP] = ((*P & 0x03e0) >> 2); \
@@ -370,13 +538,16 @@ renderbuffer_storage( GLcontext *ctx, struct gl_renderbuffer *render,
 /* RGB16 */
 #define NAME(PREFIX) PREFIX##_RGB16
 #define FORMAT GL_RGBA8
+#define RB_TYPE GLubyte
 #define SPAN_VARS \
    IDirectFBGL_data *data = (IDirectFBGL_data*) ctx->DriverCtx;
 #define INIT_PIXEL_PTR(P, X, Y) \
    GLushort *P = (GLushort *) (data->video.end - (Y) * data->video.pitch + (X) * 2);
 #define INC_PIXEL_PTR(P) P += 1
 #define STORE_PIXEL(P, X, Y, S) \
-   *P = ( (((S[RCOMP]) & 0xf8) << 8) | (((S[GCOMP]) & 0xfc) << 3) | ((S[BCOMP]) >> 3) )
+   *P = ( (((S[RCOMP]) & 0xf8) << 8) | \
+          (((S[GCOMP]) & 0xfc) << 3) | \
+          (((S[BCOMP])       ) >> 3) )
 #define FETCH_PIXEL(D, P) \
    D[RCOMP] = ((*P & 0xf800) >> 8); \
    D[GCOMP] = ((*P & 0x07e0) >> 3); \
@@ -388,6 +559,7 @@ renderbuffer_storage( GLcontext *ctx, struct gl_renderbuffer *render,
 /* RGB24 */
 #define NAME(PREFIX) PREFIX##_RGB24
 #define FORMAT GL_RGBA8
+#define RB_TYPE GLubyte
 #define SPAN_VARS \
    IDirectFBGL_data *data = ctx->DriverCtx;
 #define INIT_PIXEL_PTR(P, X, Y) \
@@ -403,13 +575,16 @@ renderbuffer_storage( GLcontext *ctx, struct gl_renderbuffer *render,
 /* RGB32 */
 #define NAME(PREFIX) PREFIX##_RGB32
 #define FORMAT GL_RGBA8
+#define RB_TYPE GLubyte
 #define SPAN_VARS \
    IDirectFBGL_data *data = (IDirectFBGL_data*) ctx->DriverCtx;
 #define INIT_PIXEL_PTR(P, X, Y) \
    GLuint *P = (GLuint*) (data->video.end - (Y) * data->video.pitch + (X) * 4);
 #define INC_PIXEL_PTR(P) P += 1
 #define STORE_PIXEL(P, X, Y, S) \
-   *P = ( ((S[RCOMP]) << 16) | ((S[GCOMP]) << 8) | (S[BCOMP]) )
+   *P = ( ((S[RCOMP]) << 16) | \
+          ((S[GCOMP]) <<  8) | \
+          ((S[BCOMP])      ) )
 #define FETCH_PIXEL(D, P) \
    D[RCOMP] = ((*P & 0x00ff0000) >> 16); \
    D[GCOMP] = ((*P & 0x0000ff00) >>  8); \
@@ -421,15 +596,22 @@ renderbuffer_storage( GLcontext *ctx, struct gl_renderbuffer *render,
 /* ARGB */
 #define NAME(PREFIX) PREFIX##_ARGB
 #define FORMAT GL_RGBA8
+#define RB_TYPE GLubyte
 #define SPAN_VARS \
    IDirectFBGL_data *data = (IDirectFBGL_data*) ctx->DriverCtx;
 #define INIT_PIXEL_PTR(P, X, Y) \
    GLuint *P = (GLuint*) (data->video.end - (Y) * data->video.pitch + (X) * 4);
 #define INC_PIXEL_PTR(P) P += 1
 #define STORE_PIXEL_RGB(P, X, Y, S) \
-   *P = ( 0xff000000  | ((S[RCOMP]) << 16) | ((S[GCOMP]) << 8) | (S[BCOMP]) )
+   *P = ( 0xff000000         | \
+          ((S[RCOMP]) << 16) | \
+          ((S[GCOMP]) <<  8) | \
+          ((S[BCOMP])      ) )
 #define STORE_PIXEL(P, X, Y, S) \
-   *P = ( ((S[ACOMP]) << 24) | ((S[RCOMP]) << 16) | ((S[GCOMP]) << 8) | (S[BCOMP]) )
+   *P = ( ((S[ACOMP]) << 24) | \
+          ((S[RCOMP]) << 16) | \
+          ((S[GCOMP]) <<  8) | \
+          ((S[BCOMP])      ) )
 #define FETCH_PIXEL(D, P) \
    D[RCOMP] = ((*P & 0x00ff0000) >> 16); \
    D[GCOMP] = ((*P & 0x0000ff00) >>  8); \
@@ -441,27 +623,35 @@ renderbuffer_storage( GLcontext *ctx, struct gl_renderbuffer *render,
 /* AiRGB */
 #define NAME(PREFIX) PREFIX##_AiRGB
 #define FORMAT GL_RGBA8
+#define RB_TYPE GLubyte
 #define SPAN_VARS \
    IDirectFBGL_data *data = (IDirectFBGL_data*) ctx->DriverCtx;
 #define INIT_PIXEL_PTR(P, X, Y) \
    GLuint *P = (GLuint*) (data->video.end - (Y) * data->video.pitch + (X) * 4);
 #define INC_PIXEL_PTR(P) P += 1
 #define STORE_PIXEL_RGB(P, X, Y, S) \
-   *P = ( ((S[RCOMP]) << 16) | ((S[GCOMP]) << 8) | (S[BCOMP]) )
+   *P = ( ((S[RCOMP]) << 16) | \
+          ((S[GCOMP]) <<  8) | \
+          ((S[BCOMP])      ) )
 #define STORE_PIXEL(P, X, Y, S) \
-   *P = ( ((0xff - (S[ACOMP])) << 24) | ((S[RCOMP]) << 16) | ((S[GCOMP]) << 8) | (S[BCOMP]) )
+   *P = ( (((S[ACOMP]) ^ 0xff) << 24) | \
+          (((S[RCOMP])       ) << 16) | \
+          (((S[GCOMP])       ) <<  8) | \
+          (((S[BCOMP])       )      ) )
 #define FETCH_PIXEL(D, P) \
-   D[RCOMP] =         ((*P & 0x00ff0000) >> 16); \
-   D[GCOMP] =         ((*P & 0x0000ff00) >>  8); \
-   D[BCOMP] =         ((*P & 0x000000ff)      ); \
-   D[ACOMP] = (0xff - ((*P & 0xff000000) >> 24))
+   D[RCOMP] =  ((*P & 0x00ff0000) >> 16); \
+   D[GCOMP] =  ((*P & 0x0000ff00) >>  8); \
+   D[BCOMP] =  ((*P & 0x000000ff)      ); \
+   D[ACOMP] = (((*P & 0xff000000) >> 24) ^ 0xff)
 
 #include "swrast/s_spantemp.h"
 
 
+/*****************************************************************************/
+
 static bool
-dfb_mesa_setup_visual( GLvisual              *visual,
-                       DFBSurfacePixelFormat  format )
+directfbgl_init_visual( GLvisual              *visual,
+                        DFBSurfacePixelFormat  format )
 {
      GLboolean  rgbFlag        = GL_TRUE;
      GLboolean  dbFlag         = GL_FALSE;
@@ -485,6 +675,18 @@ dfb_mesa_setup_visual( GLvisual              *visual,
                redBits   = 3;
                greenBits = 3;
                blueBits  = 2;
+               break;
+          case DSPF_ARGB4444:
+               redBits   = 4;
+               greenBits = 4;
+               blueBits  = 4;
+               alphaBits = 4;
+               break;
+          case DSPF_ARGB2554:
+               redBits   = 5;
+               greenBits = 5;
+               blueBits  = 4;
+               alphaBits = 2;
                break;
           case DSPF_ARGB1555:
                redBits   = 5;
@@ -531,22 +733,22 @@ dfb_mesa_setup_visual( GLvisual              *visual,
 }
 
 static bool
-dfb_mesa_create_context( GLcontext             *context,
-                         GLframebuffer         *framebuffer,
-                         GLvisual              *visual,
-                         DFBSurfacePixelFormat  format,
-                         IDirectFBGL_data      *data )
+directfbgl_create_context( GLcontext             *context,
+                           GLframebuffer         *framebuffer,
+                           GLvisual              *visual,
+                           DFBSurfacePixelFormat  format,
+                           IDirectFBGL_data      *data )
 {
-     struct dd_function_table     functions;
-     struct swrast_device_driver *swdd;
+     struct dd_function_table functions;
      
      _mesa_initialize_framebuffer( framebuffer, visual ); 
      
      _mesa_init_driver_functions( &functions );
-     functions.GetString     = get_string;
-     functions.UpdateState   = update_state;
-     functions.GetBufferSize = get_buffer_size;
-     functions.Viewport      = set_viewport;
+     functions.GetString     = dfbGetString;
+     functions.UpdateState   = dfbUpdateState;
+     functions.GetBufferSize = dfbGetBufferSize;
+     functions.Viewport      = dfbSetViewport;
+     functions.Clear         = dfbClear;
      
      if (!_mesa_initialize_context( context, visual, NULL,
                                     &functions, (void*) data )) {
@@ -560,17 +762,14 @@ dfb_mesa_create_context( GLcontext             *context,
      _tnl_CreateContext( context );
      _swsetup_CreateContext( context );
      _swsetup_Wakeup( context );
-     
-     swdd = _swrast_GetDeviceDriverReference( context );
-     swdd->SetBuffer = set_buffer;
 
      _mesa_init_renderbuffer( &data->render, 0 );
      data->render.InternalFormat = GL_RGBA;
      data->render._BaseFormat    = GL_RGBA;
      data->render.DataType       = GL_UNSIGNED_BYTE;
      data->render.Data           = data->video.start;
-     data->render.Delete         = delete_renderbuffer;
-     data->render.AllocStorage   = renderbuffer_storage;
+     data->render.Delete         = dfbDeleteRenderbuffer;
+     data->render.AllocStorage   = dfbRenderbufferStorage;
      
      switch (format) {
           case DSPF_RGB332:
@@ -580,6 +779,22 @@ dfb_mesa_create_context( GLcontext             *context,
                data->render.PutMonoRow    = put_mono_row_RGB332;
                data->render.PutValues     = put_values_RGB332;
                data->render.PutMonoValues = put_mono_values_RGB332;
+               break;
+          case DSPF_ARGB4444: 
+               data->render.GetRow        = get_row_ARGB4444;
+               data->render.GetValues     = get_values_ARGB4444;
+               data->render.PutRow        = put_row_ARGB4444;
+               data->render.PutMonoRow    = put_mono_row_ARGB4444;
+               data->render.PutValues     = put_values_ARGB4444;
+               data->render.PutMonoValues = put_mono_values_ARGB4444;
+               break;
+          case DSPF_ARGB2554: 
+               data->render.GetRow        = get_row_ARGB2554;
+               data->render.GetValues     = get_values_ARGB2554;
+               data->render.PutRow        = put_row_ARGB2554;
+               data->render.PutMonoRow    = put_mono_row_ARGB2554;
+               data->render.PutValues     = put_values_ARGB2554;
+               data->render.PutMonoValues = put_mono_values_ARGB2554;
                break;
           case DSPF_ARGB1555:
                data->render.GetRow        = get_row_ARGB1555;
@@ -647,17 +862,14 @@ dfb_mesa_create_context( GLcontext             *context,
      TNL_CONTEXT( context )->Driver.RunPipeline = _tnl_run_pipeline;
 
      _mesa_enable_sw_extensions( context );
-
-     _mesa_make_current( context, framebuffer, framebuffer );
      
      return true;
 }
 
 static void
-dfb_mesa_destroy_context( GLcontext     *context,
-                          GLframebuffer *framebuffer )
+directfbgl_destroy_context( GLcontext     *context,
+                            GLframebuffer *framebuffer )
 {
-     _mesa_make_current( NULL, NULL, NULL );
      _mesa_free_framebuffer_data( framebuffer );
      _mesa_notifyDestroy( context );
      _mesa_free_context_data( context );

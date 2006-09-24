@@ -82,7 +82,6 @@ static const struct extension_info known_glx_extensions[] = {
    { GLX(MESA_copy_sub_buffer),        VER(0,0), Y, N, N, N },
    { GLX(MESA_pixmap_colormap),        VER(0,0), N, N, N, N }, /* Deprecated */
    { GLX(MESA_release_buffers),        VER(0,0), N, N, N, N }, /* Deprecated */
-   { GLX(MESA_set_3dfx_mode),          VER(0,0), N, N, N, N }, /* Deprecated */
    { GLX(MESA_swap_control),           VER(0,0), Y, N, N, Y },
    { GLX(MESA_swap_frame_usage),       VER(0,0), Y, N, N, Y },
    { GLX(NV_float_buffer),             VER(0,0), N, N, N, N },
@@ -91,22 +90,17 @@ static const struct extension_info known_glx_extensions[] = {
    { GLX(NV_vertex_array_range),       VER(0,0), N, N, N, Y }, /* Deprecated */
    { GLX(OML_swap_method),             VER(0,0), Y, Y, N, N },
    { GLX(OML_sync_control),            VER(0,0), Y, N, N, Y },
-   { GLX(SGI_cushion),                 VER(0,0), N, N, N, N },
    { GLX(SGI_make_current_read),       VER(1,3), Y, N, N, N },
    { GLX(SGI_swap_control),            VER(0,0), Y, N, N, N },
    { GLX(SGI_video_sync),              VER(0,0), Y, N, N, Y },
    { GLX(SGIS_blended_overlay),        VER(0,0), N, N, N, N },
    { GLX(SGIS_color_range),            VER(0,0), N, N, N, N },
    { GLX(SGIS_multisample),            VER(0,0), Y, Y, N, N },
-   { GLX(SGIX_dm_buffer),              VER(0,0), N, N, N, N },
    { GLX(SGIX_fbconfig),               VER(1,3), Y, Y, N, N },
    { GLX(SGIX_pbuffer),                VER(1,3), Y, N, N, N },
    { GLX(SGIX_swap_barrier),           VER(0,0), N, N, N, N },
    { GLX(SGIX_swap_group),             VER(0,0), N, N, N, N },
-   { GLX(SGIX_video_resize),           VER(0,0), N, N, N, N },
-   { GLX(SGIX_video_source),           VER(0,0), N, N, N, N },
    { GLX(SGIX_visual_select_group),    VER(0,0), Y, Y, N, N },
-   { GLX(SUN_get_transparent_index),   VER(0,0), N, N, N, N },
    { GLX(EXT_texture_from_pixmap),     VER(0,0), Y, N, N, N },
    { NULL }
 };
@@ -141,7 +135,7 @@ static const struct extension_info known_gl_extensions[] = {
    { GL(EXT_abgr),                       VER(0,0), Y, N, N, N },
    { GL(EXT_bgra),                       VER(1,2), Y, N, N, N },
    { GL(EXT_blend_color),                VER(1,4), Y, N, N, N },
-   { GL(EXT_blend_equation_separate),    VER(0,0), N, N, N, N },
+   { GL(EXT_blend_equation_separate),    VER(0,0), Y, N, N, N },
    { GL(EXT_blend_func_separate),        VER(1,4), Y, N, N, N },
    { GL(EXT_blend_logic_op),             VER(1,4), Y, N, N, N },
    { GL(EXT_blend_minmax),               VER(1,4), Y, N, N, N },
@@ -226,6 +220,7 @@ static const struct extension_info known_gl_extensions[] = {
    { GL(OES_read_format),                VER(0,0), Y, N, N, N },
    { GL(OES_compressed_paletted_texture),VER(0,0), Y, N, N, N },
    { GL(SGI_color_matrix),               VER(0,0), Y, N, N, N },
+   { GL(SGI_color_table),                VER(0,0), Y, N, N, N },
    { GL(SGI_texture_color_table),        VER(0,0), Y, N, N, N },
    { GL(SGIS_generate_mipmap),           VER(1,4), Y, N, N, N },
    { GL(SGIS_multisample),               VER(0,0), Y, N, N, N },
@@ -319,6 +314,11 @@ set_glx_extension( const struct extension_info * ext,
  * 
  * \param server_string   GLX extension string from the server.
  * \param server_support  Bit-field of supported extensions.
+ * 
+ * \note
+ * This function is used to process both GLX and GL extension strings.  The
+ * bit-fields used to track each of these have different sizes.  Therefore,
+ * the data pointed by \c server_support must be preinitialized to zero.
  */
 static void
 __glXProcessServerString( const struct extension_info * ext,
@@ -328,8 +328,6 @@ __glXProcessServerString( const struct extension_info * ext,
    unsigned  base;
    unsigned  len;
 
-   (void) memset( server_support, 0, sizeof( server_support ) );
-   
    for ( base = 0 ; server_string[ base ] != NUL ; /* empty */ ) {
       /* Determine the length of the next extension name.
        */
@@ -580,6 +578,8 @@ __glXCalculateUsableExtensions( __GLXscreenConfigs *psc,
 
    __glXExtensionsCtr();
    __glXExtensionsCtrScreen( psc );
+
+   (void) memset( server_support, 0, sizeof( server_support ) );
    __glXProcessServerString( known_glx_extensions,
 			     psc->serverGLXexts, server_support );
 

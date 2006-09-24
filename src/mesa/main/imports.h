@@ -1,6 +1,6 @@
 /*
  * Mesa 3-D graphics library
- * Version:  6.5
+ * Version:  6.5.1
  *
  * Copyright (C) 1999-2006  Brian Paul   All Rights Reserved.
  *
@@ -129,6 +129,9 @@ typedef union { GLfloat f; GLint i; } fi_type;
 #define M_E (2.7182818284590452354)
 #endif
 
+#ifndef FLT_MAX_EXP
+#define FLT_MAX_EXP 128
+#endif
 
 /* XXX this is a bit of a hack needed for compilation within XFree86 */
 #ifndef FLT_MIN
@@ -143,14 +146,13 @@ typedef union { GLfloat f; GLint i; } fi_type;
  *** USE_IEEE: Determine if we're using IEEE floating point
  ***/
 #if defined(__i386__) || defined(__386__) || defined(__sparc__) || \
-    defined(__s390x__) || defined(__s390__) || defined(__powerpc__) || \
+    defined(__s390x__) || defined(__powerpc__) || \
     defined(__amd64__) || \
-    defined(__m68k__) || \
     defined(ia64) || defined(__ia64__) || \
     defined(__hppa__) || defined(hpux) || \
     defined(__mips) || defined(_MIPS_ARCH) || \
     defined(__arm__) || \
-    defined(__sh__) || \
+    defined(__sh__) || defined(__m32r__) || \
     (defined(__alpha__) && (defined(__IEEE_FLOAT) || !defined(VMS)))
 #define USE_IEEE
 #define IEEE_ONE 0x3f800000

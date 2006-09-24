@@ -135,7 +135,8 @@ static void radeonBlendEquationSeparate( GLcontext *ctx,
    if ( !fallback ) {
       RADEON_STATECHANGE( rmesa, ctx );
       rmesa->hw.ctx.cmd[CTX_RB3D_BLENDCNTL] = b;
-      if ( ctx->Color._LogicOpEnabled ) {
+      if ( (ctx->Color.ColorLogicOpEnabled || (ctx->Color.BlendEnabled
+	    && ctx->Color.BlendEquationRGB == GL_LOGIC_OP)) ) {
 	 rmesa->hw.ctx.cmd[CTX_RB3D_CNTL] |=  RADEON_ROP_ENABLE;
       } else {
 	 rmesa->hw.ctx.cmd[CTX_RB3D_CNTL] &= ~RADEON_ROP_ENABLE;
@@ -1739,7 +1740,8 @@ static void radeonEnable( GLcontext *ctx, GLenum cap, GLboolean state )
       } else {
 	 rmesa->hw.ctx.cmd[CTX_RB3D_CNTL] &= ~RADEON_ALPHA_BLEND_ENABLE;
       }
-      if ( ctx->Color._LogicOpEnabled ) {
+      if ( (ctx->Color.ColorLogicOpEnabled || (ctx->Color.BlendEnabled
+	    && ctx->Color.BlendEquationRGB == GL_LOGIC_OP)) ) {
 	 rmesa->hw.ctx.cmd[CTX_RB3D_CNTL] |=  RADEON_ROP_ENABLE;
       } else {
 	 rmesa->hw.ctx.cmd[CTX_RB3D_CNTL] &= ~RADEON_ROP_ENABLE;
@@ -1877,7 +1879,8 @@ static void radeonEnable( GLcontext *ctx, GLenum cap, GLboolean state )
 
    case GL_COLOR_LOGIC_OP:
       RADEON_STATECHANGE( rmesa, ctx );
-      if ( ctx->Color._LogicOpEnabled ) {
+      if ( (ctx->Color.ColorLogicOpEnabled || (ctx->Color.BlendEnabled
+	    && ctx->Color.BlendEquationRGB == GL_LOGIC_OP)) ) {
 	 rmesa->hw.ctx.cmd[CTX_RB3D_CNTL] |=  RADEON_ROP_ENABLE;
       } else {
 	 rmesa->hw.ctx.cmd[CTX_RB3D_CNTL] &= ~RADEON_ROP_ENABLE;
@@ -2017,26 +2020,6 @@ static void radeonLightingSpaceChange( GLcontext *ctx )
  * Deferred state management - matrices, textures, other?
  */
 
-static void texmat_set_texrect( radeonContextPtr rmesa,
-				struct gl_texture_object *tObj, GLuint unit )
-{
-   const struct gl_texture_image *baseImage = tObj->Image[0][tObj->BaseLevel];
-   _math_matrix_set_identity( &rmesa->tmpmat[unit] );
-   rmesa->tmpmat[unit].m[0] = 1.0 / baseImage->Width;
-   rmesa->tmpmat[unit].m[5] = 1.0 / baseImage->Height;
-
-}
-
-static void texmat_fixup_texrect( radeonContextPtr rmesa,
-				  struct gl_texture_object *tObj, GLuint unit )
-{
-   const struct gl_texture_image *baseImage = tObj->Image[0][tObj->BaseLevel];
-   GLuint i;
-   for (i = 0; i < 4; i++) {
-      rmesa->tmpmat[unit].m[i] = rmesa->tmpmat[unit].m[i] / baseImage->Width;
-      rmesa->tmpmat[unit].m[i+4] = rmesa->tmpmat[unit].m[i+4] / baseImage->Height;
-   }}
-
 
 void radeonUploadTexMatrix( radeonContextPtr rmesa,
 			    int unit, GLboolean swapcols )
@@ -2175,15 +2158,6 @@ static void update_texturematrix( GLcontext *ctx )
 	 }
 	 else if (rmesa->TexGenEnabled & (RADEON_TEXMAT_0_ENABLE << unit)) {
 	    _math_matrix_copy( &rmesa->tmpmat[unit], &rmesa->TexGenMatrix[unit] );
-	    needMatrix = GL_TRUE;
-	 }
-	 if (ctx->Texture.Unit[unit]._ReallyEnabled == TEXTURE_RECT_BIT) {
-	    texMatEnabled |= (RADEON_TEXGEN_TEXMAT_0_ENABLE |
-			      RADEON_TEXMAT_0_ENABLE) << unit;
-	    if (needMatrix)
-	       texmat_fixup_texrect( rmesa, ctx->Texture.Unit[unit]._Current, unit );
-	    else
-	       texmat_set_texrect( rmesa, ctx->Texture.Unit[unit]._Current, unit );
 	    needMatrix = GL_TRUE;
 	 }
 	 if (needMatrix) {

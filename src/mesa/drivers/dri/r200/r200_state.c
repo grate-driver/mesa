@@ -54,6 +54,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "r200_tex.h"
 #include "r200_swtcl.h"
 #include "r200_vtxfmt.h"
+#include "r200_vertprog.h"
 
 #include "drirenderbuffer.h"
 
@@ -214,7 +215,7 @@ static void r200_set_blend_state( GLcontext * ctx )
    R200_STATECHANGE( rmesa, ctx );
 
    if (rmesa->r200Screen->drmSupportsBlendColor) {
-      if (ctx->Color._LogicOpEnabled) {
+      if (ctx->Color.ColorLogicOpEnabled) {
          rmesa->hw.ctx.cmd[CTX_RB3D_CNTL] =  cntl | R200_ROP_ENABLE;
          rmesa->hw.ctx.cmd[CTX_RB3D_ABLENDCNTL] = eqn | func;
          rmesa->hw.ctx.cmd[CTX_RB3D_CBLENDCNTL] = eqn | func;
@@ -230,7 +231,7 @@ static void r200_set_blend_state( GLcontext * ctx )
       }
    }
    else {
-      if (ctx->Color._LogicOpEnabled) {
+      if (ctx->Color.ColorLogicOpEnabled) {
          rmesa->hw.ctx.cmd[CTX_RB3D_CNTL] =  cntl | R200_ROP_ENABLE;
          rmesa->hw.ctx.cmd[CTX_RB3D_BLENDCNTL] = eqn | func;
          return;
@@ -1969,6 +1970,8 @@ static void r200Enable( GLcontext *ctx, GLenum cap, GLboolean state )
 
    case GL_LIGHTING:
       r200UpdateSpecular(ctx);
+      /* for reflection map fixup - might set recheck_texgen for all units too */
+      rmesa->NewGLState |= _NEW_TEXTURE;
       break;
 
    case GL_LINE_SMOOTH:
@@ -2100,7 +2103,68 @@ static void r200Enable( GLcontext *ctx, GLenum cap, GLboolean state )
       break;
 
    case GL_VERTEX_PROGRAM_ARB:
-      TCL_FALLBACK(rmesa->glCtx, R200_TCL_FALLBACK_VERTEX_PROGRAM, state);
+      if (!state) {
+	 GLuint i;
+	 rmesa->curr_vp_hw = NULL;
+	 R200_STATECHANGE( rmesa, vap );
+	 rmesa->hw.vap.cmd[VAP_SE_VAP_CNTL] &= ~R200_VAP_PROG_VTX_SHADER_ENABLE;
+	 /* mark all tcl atoms (tcl vector state got overwritten) dirty
+	    not sure about tcl scalar state - we need at least grd
+	    with vert progs too.
+	    ucp looks like it doesn't get overwritten (may even work
+	    with vp for pos-invariant progs if we're lucky) */
+	 R200_STATECHANGE( rmesa, mtl[0] );
+	 R200_STATECHANGE( rmesa, mtl[1] );
+	 R200_STATECHANGE( rmesa, fog );
+	 R200_STATECHANGE( rmesa, glt );
+	 R200_STATECHANGE( rmesa, eye );
+	 for (i = R200_MTX_MV; i <= R200_MTX_TEX5; i++) {
+	    R200_STATECHANGE( rmesa, mat[i] );
+	 }
+	 for (i = 0 ; i < 8; i++) {
+	    R200_STATECHANGE( rmesa, lit[i] );
+	 }
+	 R200_STATECHANGE( rmesa, tcl );
+	 for (i = 0; i <= ctx->Const.MaxClipPlanes; i++) {
+	    if (ctx->Transform.ClipPlanesEnabled & (1 << i)) {
+	       rmesa->hw.tcl.cmd[TCL_UCP_VERT_BLEND_CTL] |= (R200_UCP_ENABLE_0 << i);
+	    }
+/*	    else {
+	       rmesa->hw.tcl.cmd[TCL_UCP_VERT_BLEND_CTL] &= ~(R200_UCP_ENABLE_0 << i);
+	    }*/
+	 }
+	 /* FIXME: ugly as hell. need to call everything which might change tcl_output_vtxfmt0/1 and compsel */
+	 r200UpdateSpecular( ctx );
+	 r200Fogfv( ctx, GL_FOG_COORD_SRC, NULL );
+#if 1
+	/* shouldn't be necessary, as it's picked up anyway in r200ValidateState (_NEW_PROGRAM),
+	   but without it doom3 locks up at always the same places. Why? */
+	/* FIXME: This can (and should) be replaced by a call to the TCL_STATE_FLUSH reg before
+	   accessing VAP_SE_VAP_CNTL. Requires drm changes (done). Remove after some time... */
+	 r200UpdateTextureState( ctx );
+	 /* if we call r200UpdateTextureState we need the code below because we are calling it with
+	    non-current derived enabled values which may revert the state atoms for frag progs even when
+	    they already got disabled... ugh
+	    Should really figure out why we need to call r200UpdateTextureState in the first place */
+	 GLuint unit;
+	 for (unit = 0; unit < R200_MAX_TEXTURE_UNITS; unit++) {
+	    R200_STATECHANGE( rmesa, pix[unit] );
+	    R200_STATECHANGE( rmesa, tex[unit] );
+	    rmesa->hw.tex[unit].cmd[TEX_PP_TXFORMAT] &=
+		~(R200_TXFORMAT_ST_ROUTE_MASK | R200_TXFORMAT_LOOKUP_DISABLE);
+	    rmesa->hw.tex[unit].cmd[TEX_PP_TXFORMAT] |= unit << R200_TXFORMAT_ST_ROUTE_SHIFT;
+	    /* need to guard this with drmSupportsFragmentShader? Should never get here if
+	       we don't announce ATI_fs, right? */
+	    rmesa->hw.tex[unit].cmd[TEX_PP_TXMULTI_CTL] = 0;
+         }
+	 R200_STATECHANGE( rmesa, cst );
+	 R200_STATECHANGE( rmesa, tf );
+	 rmesa->hw.cst.cmd[CST_PP_CNTL_X] = 0;
+#endif
+      }
+      else {
+	 /* picked up later */
+      }
       break;
 
    case GL_FRAGMENT_SHADER_ATI:
@@ -2110,18 +2174,18 @@ static void r200Enable( GLcontext *ctx, GLenum cap, GLboolean state )
 	    if they didn't change) and restore tex coord routing */
 	 GLuint unit;
 	 for (unit = 0; unit < R200_MAX_TEXTURE_UNITS; unit++) {
+	    R200_STATECHANGE( rmesa, pix[unit] );
+	    R200_STATECHANGE( rmesa, tex[unit] );
 	    rmesa->hw.tex[unit].cmd[TEX_PP_TXFORMAT] &=
 		~(R200_TXFORMAT_ST_ROUTE_MASK | R200_TXFORMAT_LOOKUP_DISABLE);
 	    rmesa->hw.tex[unit].cmd[TEX_PP_TXFORMAT] |= unit << R200_TXFORMAT_ST_ROUTE_SHIFT;
 	    /* need to guard this with drmSupportsFragmentShader? Should never get here if
 	       we don't announce ATI_fs, right? */
 	    rmesa->hw.tex[unit].cmd[TEX_PP_TXMULTI_CTL] = 0;
-	    R200_STATECHANGE( rmesa, pix[unit] );
-	    R200_STATECHANGE( rmesa, tex[unit] );
          }
-	 rmesa->hw.cst.cmd[CST_PP_CNTL_X] = 0;
 	 R200_STATECHANGE( rmesa, cst );
 	 R200_STATECHANGE( rmesa, tf );
+	 rmesa->hw.cst.cmd[CST_PP_CNTL_X] = 0;
       }
       else {
 	 /* need to mark this dirty as pix/tf atoms have overwritten the data
@@ -2310,6 +2374,8 @@ void r200ValidateState( GLcontext *ctx )
       r200UpdateLocalViewer( ctx );
    }
 
+/* FIXME: don't really need most of these when vertex progs are enabled */
+
    /* Need an event driven matrix update?
     */
    if (new_state & (_NEW_MODELVIEW|_NEW_PROJECTION)) 
@@ -2340,6 +2406,16 @@ void r200ValidateState( GLcontext *ctx )
 	 r200UpdateClipPlanes( ctx );
    }
 
+   if (new_state & (_NEW_PROGRAM|
+   /* need to test for pretty much anything due to possible parameter bindings */
+	_NEW_MODELVIEW|_NEW_PROJECTION|_NEW_TRANSFORM|
+	_NEW_LIGHT|_NEW_TEXTURE|_NEW_TEXTURE_MATRIX|
+	_NEW_FOG|_NEW_POINT|_NEW_TRACK_MATRIX)) {
+      if (ctx->VertexProgram._Enabled) {
+	 r200SetupVertexProg( ctx );
+      }
+      else TCL_FALLBACK(ctx, R200_TCL_FALLBACK_VERTEX_PROGRAM, 0);
+   }
 
    rmesa->NewGLState = 0;
 }

@@ -1,4 +1,3 @@
-/* $XFree86$ */
 /**************************************************************************
 
 Copyright 2002 Tungsten Graphics Inc., Cedar Park, Texas.
@@ -649,7 +648,7 @@ static void GLAPIENTRY _tnl_EvalCoord1f( GLfloat u )
       if (tnl->vtx.eval.new_state) 
 	 _tnl_update_eval( ctx );
 
-      for (i = 0 ; i <= _TNL_ATTRIB_EDGEFLAG ; i++) {
+      for (i = 0; i < _TNL_NUM_EVAL; i++) {
 	 if (tnl->vtx.eval.map1[i].map) 
 	    if (tnl->vtx.attrsz[i] != tnl->vtx.eval.map1[i].sz)
 	       _tnl_fixup_vertex( ctx, i, tnl->vtx.eval.map1[i].sz );
@@ -677,7 +676,7 @@ static void GLAPIENTRY _tnl_EvalCoord2f( GLfloat u, GLfloat v )
       if (tnl->vtx.eval.new_state) 
 	 _tnl_update_eval( ctx );
 
-      for (i = 0 ; i <= _TNL_ATTRIB_EDGEFLAG ; i++) {
+      for (i = 0; i < _TNL_NUM_EVAL; i++) {
 	 if (tnl->vtx.eval.map2[i].map) 
 	    if (tnl->vtx.attrsz[i] != tnl->vtx.eval.map2[i].sz)
 	       _tnl_fixup_vertex( ctx, i, tnl->vtx.eval.map2[i].sz );
@@ -739,6 +738,11 @@ static void GLAPIENTRY _tnl_EvalPoint2( GLint i, GLint j )
 static void GLAPIENTRY _tnl_Begin( GLenum mode )
 {
    GET_CURRENT_CONTEXT( ctx ); 
+
+   if (mode > GL_POLYGON) {
+      _mesa_error(ctx, GL_INVALID_ENUM, "glBegin(mode)");
+      return;
+   }
 
    if (ctx->Driver.CurrentExecPrimitive == PRIM_OUTSIDE_BEGIN_END) {
       /* we're not inside a glBegin/End pair */

@@ -121,11 +121,10 @@ DRI_CONF_BEGIN
         DRI_CONF_NO_RAST(false)
     DRI_CONF_SECTION_END
     DRI_CONF_SECTION_SOFTWARE
-        DRI_CONF_ARB_VERTEX_PROGRAM(false)
         DRI_CONF_NV_VERTEX_PROGRAM(false)
     DRI_CONF_SECTION_END
 DRI_CONF_END;
-static const GLuint __driNConfigOptions = 17;
+static const GLuint __driNConfigOptions = 16;
 
 extern const struct dri_extension blend_extensions[];
 extern const struct dri_extension ARB_vp_extension[];
@@ -153,6 +152,17 @@ DRI_CONF_OPT_BEGIN_V(command_buffer_size,int,def, # min ":" # max ) \
         DRI_CONF_DESC(de,"Grösse des Befehlspuffers (in KB)") \
 DRI_CONF_OPT_END
 
+#define DRI_CONF_DISABLE_S3TC(def) \
+DRI_CONF_OPT_BEGIN(disable_s3tc,bool,def) \
+        DRI_CONF_DESC(en,"Disable S3TC compression") \
+DRI_CONF_OPT_END
+
+#define DRI_CONF_DISABLE_FALLBACK(def) \
+DRI_CONF_OPT_BEGIN(disable_lowimpact_fallback,bool,def) \
+        DRI_CONF_DESC(en,"Disable Low-impact fallback") \
+DRI_CONF_OPT_END
+
+
 const char __driConfigOptions[] =
 DRI_CONF_BEGIN
 	DRI_CONF_SECTION_PERFORMANCE
@@ -162,12 +172,14 @@ DRI_CONF_BEGIN
 		DRI_CONF_MAX_TEXTURE_IMAGE_UNITS(8, 2, 8)
 		DRI_CONF_MAX_TEXTURE_COORD_UNITS(8, 2, 8)
 		DRI_CONF_COMMAND_BUFFER_SIZE(8, 8, 32)
+		DRI_CONF_DISABLE_FALLBACK(false)
 	DRI_CONF_SECTION_END
 	DRI_CONF_SECTION_QUALITY
 		DRI_CONF_TEXTURE_DEPTH(DRI_CONF_TEXTURE_DEPTH_FB)
 		DRI_CONF_DEF_MAX_ANISOTROPY(1.0, "1.0,2.0,4.0,8.0,16.0")
 		DRI_CONF_NO_NEG_LOD_BIAS(false)
                 DRI_CONF_FORCE_S3TC_ENABLE(false)
+		DRI_CONF_DISABLE_S3TC(false)
 		DRI_CONF_COLOR_REDUCTION(DRI_CONF_COLOR_REDUCTION_DITHER)
 		DRI_CONF_ROUND_MODE(DRI_CONF_ROUND_TRUNC)
 		DRI_CONF_DITHER_MODE(DRI_CONF_DITHER_XERRORDIFF)
@@ -176,7 +188,7 @@ DRI_CONF_BEGIN
 		DRI_CONF_NO_RAST(false)
 	DRI_CONF_SECTION_END
 DRI_CONF_END;
-static const GLuint __driNConfigOptions = 14;
+static const GLuint __driNConfigOptions = 16;
 
 #ifndef RADEON_DEBUG
 int RADEON_DEBUG = 0;
@@ -372,6 +384,7 @@ radeonCreateScreen( __DRIscreenPrivate *sPriv )
       screen->drmSupportsFragShader = (sPriv->drmMinor >= 18);
       screen->drmSupportsPointSprites = (sPriv->drmMinor >= 13);
       screen->drmSupportsCubeMapsR100 = (sPriv->drmMinor >= 15);
+      screen->drmSupportsVertexProgram = (sPriv->drmMinor >= 25);
    }
 
    screen->mmio.handle = dri_priv->registerHandle;
@@ -635,13 +648,10 @@ radeonCreateScreen( __DRIscreenPrivate *sPriv )
 	      dri_priv->deviceID);
       return NULL;
    }
-   if (screen->chip_family == CHIP_FAMILY_R350 || 
-       screen->chip_family == CHIP_FAMILY_R300) {
-	   if (getenv("R300_FORCE_R300") == NULL) {
-		   fprintf(stderr, "Radeon 9500/9700/9800 cards are not currently stable.\n");
-		   fprintf(stderr, "More details can be found at https://bugs.freedesktop.org/show_bug.cgi?id=6318\n");
-		   return NULL;
-	   }
+   if ((screen->chip_family == CHIP_FAMILY_R350 || screen->chip_family == CHIP_FAMILY_R300) &&
+       sPriv->ddxMinor < 2) {
+      fprintf(stderr, "xf86-video-ati-6.6.2 or newer needed for Radeon 9500/9700/9800 cards.\n");
+      return NULL;
    }
 
    if (screen->chip_family <= CHIP_FAMILY_RS200)

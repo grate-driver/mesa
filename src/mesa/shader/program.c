@@ -1,6 +1,6 @@
 /*
  * Mesa 3-D graphics library
- * Version:  6.5
+ * Version:  6.5.1
  *
  * Copyright (C) 1999-2006  Brian Paul   All Rights Reserved.
  *
@@ -57,7 +57,7 @@ make_state_flags(const GLint state[]);
 /* A pointer to this dummy program is put into the hash table when
  * glGenPrograms is called.
  */
-struct program _mesa_DummyProgram;
+struct gl_program _mesa_DummyProgram;
 
 
 /**
@@ -75,7 +75,7 @@ _mesa_init_program(GLcontext *ctx)
    ctx->VertexProgram.Enabled = GL_FALSE;
    ctx->VertexProgram.PointSizeEnabled = GL_FALSE;
    ctx->VertexProgram.TwoSideEnabled = GL_FALSE;
-   ctx->VertexProgram.Current = (struct vertex_program *) ctx->Shared->DefaultVertexProgram;
+   ctx->VertexProgram.Current = (struct gl_vertex_program *) ctx->Shared->DefaultVertexProgram;
    assert(ctx->VertexProgram.Current);
    ctx->VertexProgram.Current->Base.RefCount++;
    for (i = 0; i < MAX_NV_VERTEX_PROGRAM_PARAMS / 4; i++) {
@@ -86,7 +86,7 @@ _mesa_init_program(GLcontext *ctx)
 
 #if FEATURE_NV_fragment_program || FEATURE_ARB_fragment_program
    ctx->FragmentProgram.Enabled = GL_FALSE;
-   ctx->FragmentProgram.Current = (struct fragment_program *) ctx->Shared->DefaultFragmentProgram;
+   ctx->FragmentProgram.Current = (struct gl_fragment_program *) ctx->Shared->DefaultFragmentProgram;
    assert(ctx->FragmentProgram.Current);
    ctx->FragmentProgram.Current->Base.RefCount++;
 #endif
@@ -197,8 +197,8 @@ _mesa_find_line_column(const GLubyte *string, const GLubyte *pos,
 /**
  * Initialize a new vertex/fragment program object.
  */
-static struct program *
-_mesa_init_program_struct( GLcontext *ctx, struct program *prog,
+static struct gl_program *
+_mesa_init_program_struct( GLcontext *ctx, struct gl_program *prog,
                            GLenum target, GLuint id)
 {
    (void) ctx;
@@ -216,8 +216,8 @@ _mesa_init_program_struct( GLcontext *ctx, struct program *prog,
 /**
  * Initialize a new fragment program object.
  */
-struct program *
-_mesa_init_fragment_program( GLcontext *ctx, struct fragment_program *prog,
+struct gl_program *
+_mesa_init_fragment_program( GLcontext *ctx, struct gl_fragment_program *prog,
                              GLenum target, GLuint id)
 {
    if (prog) 
@@ -230,8 +230,8 @@ _mesa_init_fragment_program( GLcontext *ctx, struct fragment_program *prog,
 /**
  * Initialize a new vertex program object.
  */
-struct program *
-_mesa_init_vertex_program( GLcontext *ctx, struct vertex_program *prog,
+struct gl_program *
+_mesa_init_vertex_program( GLcontext *ctx, struct gl_vertex_program *prog,
                            GLenum target, GLuint id)
 {
    if (prog) 
@@ -253,17 +253,18 @@ _mesa_init_vertex_program( GLcontext *ctx, struct vertex_program *prog,
  * \param target  program target/type
  * \return  pointer to new program object
  */
-struct program *
+struct gl_program *
 _mesa_new_program(GLcontext *ctx, GLenum target, GLuint id)
 {
    switch (target) {
    case GL_VERTEX_PROGRAM_ARB: /* == GL_VERTEX_PROGRAM_NV */
-      return _mesa_init_vertex_program( ctx, CALLOC_STRUCT(vertex_program),
-					target, id );
+      return _mesa_init_vertex_program(ctx, CALLOC_STRUCT(gl_vertex_program),
+                                       target, id );
    case GL_FRAGMENT_PROGRAM_NV:
    case GL_FRAGMENT_PROGRAM_ARB:
-      return _mesa_init_fragment_program( ctx, CALLOC_STRUCT(fragment_program),
-					  target, id );
+      return _mesa_init_fragment_program(ctx,
+                                         CALLOC_STRUCT(gl_fragment_program),
+                                         target, id );
    default:
       _mesa_problem(ctx, "bad target in _mesa_new_program");
       return NULL;
@@ -278,7 +279,7 @@ _mesa_new_program(GLcontext *ctx, GLenum target, GLuint id)
  * by a device driver function.
  */
 void
-_mesa_delete_program(GLcontext *ctx, struct program *prog)
+_mesa_delete_program(GLcontext *ctx, struct gl_program *prog)
 {
    (void) ctx;
    ASSERT(prog);
@@ -299,20 +300,41 @@ _mesa_delete_program(GLcontext *ctx, struct program *prog)
       _mesa_free_parameter_list(prog->Parameters);
    }
 
+   /* XXX this is a little ugly */
+   if (prog->Target == GL_VERTEX_PROGRAM_ARB) {
+      struct gl_vertex_program *vprog = (struct gl_vertex_program *) prog;
+      if (vprog->TnlData)
+         _mesa_free(vprog->TnlData);
+   }
+
    _mesa_free(prog);
 }
 
+
+/**
+ * Return the gl_program object for a given ID.
+ * Basically just a wrapper for _mesa_HashLookup() to avoid a lot of
+ * casts elsewhere.
+ */
+struct gl_program *
+_mesa_lookup_program(GLcontext *ctx, GLuint id)
+{
+   if (id)
+      return (struct gl_program *) _mesa_HashLookup(ctx->Shared->Programs, id);
+   else
+      return NULL;
+}
 
 
 /**********************************************************************/
 /* Program parameter functions                                        */
 /**********************************************************************/
 
-struct program_parameter_list *
+struct gl_program_parameter_list *
 _mesa_new_parameter_list(void)
 {
-   return (struct program_parameter_list *)
-      _mesa_calloc(sizeof(struct program_parameter_list));
+   return (struct gl_program_parameter_list *)
+      _mesa_calloc(sizeof(struct gl_program_parameter_list));
 }
 
 
@@ -320,7 +342,7 @@ _mesa_new_parameter_list(void)
  * Free a parameter list and all its parameters
  */
 void
-_mesa_free_parameter_list(struct program_parameter_list *paramList)
+_mesa_free_parameter_list(struct gl_program_parameter_list *paramList)
 {
    GLuint i;
    for (i = 0; i < paramList->NumParameters; i++) {
@@ -343,7 +365,7 @@ _mesa_free_parameter_list(struct program_parameter_list *paramList)
  * \return  index of new parameter in the list, or -1 if error (out of mem)
  */
 static GLint
-add_parameter(struct program_parameter_list *paramList,
+add_parameter(struct gl_program_parameter_list *paramList,
               const char *name, const GLfloat values[4],
               enum register_file type)
 {
@@ -357,10 +379,10 @@ add_parameter(struct program_parameter_list *paramList,
          paramList->Size *= 2;
 
       /* realloc arrays */
-      paramList->Parameters = (struct program_parameter *)
+      paramList->Parameters = (struct gl_program_parameter *)
 	 _mesa_realloc(paramList->Parameters,
-		       n * sizeof(struct program_parameter),
-		       paramList->Size * sizeof(struct program_parameter));
+		       n * sizeof(struct gl_program_parameter),
+		       paramList->Size * sizeof(struct gl_program_parameter));
 
       paramList->ParameterValues = (GLfloat (*)[4])
          _mesa_align_realloc(paramList->ParameterValues,         /* old buf */
@@ -380,7 +402,7 @@ add_parameter(struct program_parameter_list *paramList,
       paramList->NumParameters = n + 1;
 
       _mesa_memset(&paramList->Parameters[n], 0, 
-		   sizeof(struct program_parameter));
+		   sizeof(struct gl_program_parameter));
 
       paramList->Parameters[n].Name = name ? _mesa_strdup(name) : NULL;
       paramList->Parameters[n].Type = type;
@@ -396,7 +418,7 @@ add_parameter(struct program_parameter_list *paramList,
  * \return index of the new entry in the parameter list
  */
 GLint
-_mesa_add_named_parameter(struct program_parameter_list *paramList,
+_mesa_add_named_parameter(struct gl_program_parameter_list *paramList,
                           const char *name, const GLfloat values[4])
 {
    return add_parameter(paramList, name, values, PROGRAM_NAMED_PARAM);
@@ -404,13 +426,16 @@ _mesa_add_named_parameter(struct program_parameter_list *paramList,
 
 
 /**
- * Add a new unnamed constant to the parameter list.
+ * Add a new named constant to the parameter list.
+ * This will be used when the program contains something like this:
+ *    PARAM myVals = { 0, 1, 2, 3 };
+ *
  * \param paramList - the parameter list
  * \param values - four float values
  * \return index of the new parameter.
  */
 GLint
-_mesa_add_named_constant(struct program_parameter_list *paramList,
+_mesa_add_named_constant(struct gl_program_parameter_list *paramList,
                          const char *name, const GLfloat values[4])
 {
    return add_parameter(paramList, name, values, PROGRAM_CONSTANT);
@@ -419,12 +444,15 @@ _mesa_add_named_constant(struct program_parameter_list *paramList,
 
 /**
  * Add a new unnamed constant to the parameter list.
+ * This will be used when the program contains something like this:
+ *    MOV r, { 0, 1, 2, 3 };
+ *
  * \param paramList - the parameter list
  * \param values - four float values
  * \return index of the new parameter.
  */
 GLint
-_mesa_add_unnamed_constant(struct program_parameter_list *paramList,
+_mesa_add_unnamed_constant(struct gl_program_parameter_list *paramList,
                            const GLfloat values[4])
 {
    return add_parameter(paramList, NULL, values, PROGRAM_CONSTANT);
@@ -433,13 +461,15 @@ _mesa_add_unnamed_constant(struct program_parameter_list *paramList,
 
 /**
  * Add a new state reference to the parameter list.
+ * This will be used when the program contains something like this:
+ *    PARAM ambient = state.material.front.ambient;
+ *
  * \param paramList - the parameter list
  * \param state     - an array of 6 state tokens
- *
  * \return index of the new parameter.
  */
 GLint
-_mesa_add_state_reference(struct program_parameter_list *paramList,
+_mesa_add_state_reference(struct gl_program_parameter_list *paramList,
                           const GLint *stateTokens)
 {
    /* XXX we should probably search the current parameter list to see if
@@ -471,7 +501,7 @@ _mesa_add_state_reference(struct program_parameter_list *paramList,
  * \return pointer to the float[4] values.
  */
 GLfloat *
-_mesa_lookup_parameter_value(struct program_parameter_list *paramList,
+_mesa_lookup_parameter_value(struct gl_program_parameter_list *paramList,
                              GLsizei nameLen, const char *name)
 {
    GLuint i;
@@ -505,7 +535,7 @@ _mesa_lookup_parameter_value(struct program_parameter_list *paramList,
  * \return index of parameter in the list.
  */
 GLint
-_mesa_lookup_parameter_index(struct program_parameter_list *paramList,
+_mesa_lookup_parameter_index(struct gl_program_parameter_list *paramList,
                              GLsizei nameLen, const char *name)
 {
    GLint i;
@@ -811,6 +841,7 @@ _mesa_fetch_state(GLcontext *ctx, const enum state_index state[],
              modifier == STATE_MATRIX_INVTRANS) {
             /* Be sure inverse is up to date:
 	     */
+            _math_matrix_alloc_inv( (GLmatrix *) matrix );
 	    _math_matrix_analyse( (GLmatrix*) matrix );
             m = matrix->inv;
          }
@@ -1246,7 +1277,7 @@ make_state_string(const GLint state[6])
  */
 void
 _mesa_load_state_parameters(GLcontext *ctx,
-                            struct program_parameter_list *paramList)
+                            struct gl_program_parameter_list *paramList)
 {
    GLuint i;
 
@@ -1285,6 +1316,43 @@ _mesa_init_instruction(struct prog_instruction *inst)
 
    inst->SaturateMode = SATURATE_OFF;
    inst->Precision = FLOAT32;
+}
+
+
+/**
+ * Allocate an array of program instructions.
+ * \param numInst  number of instructions
+ * \return pointer to instruction memory
+ */
+struct prog_instruction *
+_mesa_alloc_instructions(GLuint numInst)
+{
+   return (struct prog_instruction *)
+      _mesa_calloc(numInst * sizeof(struct prog_instruction));
+}
+
+
+/**
+ * Reallocate memory storing an array of program instructions.
+ * This is used when we need to append additional instructions onto an
+ * program.
+ * \param oldInst  pointer to first of old/src instructions
+ * \param numOldInst  number of instructions at <oldInst>
+ * \param numNewInst  desired size of new instruction array.
+ * \return  pointer to start of new instruction array.
+ */
+struct prog_instruction *
+_mesa_realloc_instructions(struct prog_instruction *oldInst,
+                           GLuint numOldInst, GLuint numNewInst)
+{
+   struct prog_instruction *newInst;
+
+   newInst = (struct prog_instruction *)
+      _mesa_realloc(oldInst,
+                    numOldInst * sizeof(struct prog_instruction),
+                    numNewInst * sizeof(struct prog_instruction));
+
+   return newInst;
 }
 
 
@@ -1631,7 +1699,7 @@ _mesa_print_instruction(const struct prog_instruction *inst)
  * XXX this function could be greatly improved.
  */
 void
-_mesa_print_program(const struct program *prog)
+_mesa_print_program(const struct gl_program *prog)
 {
    GLuint i;
    for (i = 0; i < prog->NumInstructions; i++) {
@@ -1645,7 +1713,7 @@ _mesa_print_program(const struct program *prog)
  * Print all of a program's parameters.
  */
 void
-_mesa_print_program_parameters(GLcontext *ctx, const struct program *prog)
+_mesa_print_program_parameters(GLcontext *ctx, const struct gl_program *prog)
 {
    GLint i;
 
@@ -1666,11 +1734,32 @@ _mesa_print_program_parameters(GLcontext *ctx, const struct program *prog)
 #endif	
 
    for (i = 0; i < prog->Parameters->NumParameters; i++){
-      struct program_parameter *param = prog->Parameters->Parameters + i;
+      struct gl_program_parameter *param = prog->Parameters->Parameters + i;
       const GLfloat *v = prog->Parameters->ParameterValues[i];
       _mesa_printf("param[%d] %s = {%.3f, %.3f, %.3f, %.3f};\n",
                    i, param->Name, v[0], v[1], v[2], v[3]);
    }
+}
+
+
+/**
+ * Mixing ARB and NV vertex/fragment programs can be tricky.
+ * Note: GL_VERTEX_PROGRAM_ARB == GL_VERTEX_PROGRAM_NV
+ *  but, GL_FRAGMENT_PROGRAM_ARB != GL_FRAGMENT_PROGRAM_NV
+ * The two different fragment program targets are supposed to be compatible
+ * to some extent (see GL_ARB_fragment_program spec).
+ * This function does the compatibility check.
+ */
+static GLboolean
+compatible_program_targets(GLenum t1, GLenum t2)
+{
+   if (t1 == t2)
+      return GL_TRUE;
+   if (t1 == GL_FRAGMENT_PROGRAM_ARB && t2 == GL_FRAGMENT_PROGRAM_NV)
+      return GL_TRUE;
+   if (t1 == GL_FRAGMENT_PROGRAM_NV && t2 == GL_FRAGMENT_PROGRAM_ARB)
+      return GL_TRUE;
+   return GL_FALSE;
 }
 
 
@@ -1688,103 +1777,95 @@ _mesa_print_program_parameters(GLcontext *ctx, const struct program *prog)
 void GLAPIENTRY
 _mesa_BindProgram(GLenum target, GLuint id)
 {
-   struct program *prog;
+   struct gl_program *curProg, *newProg;
    GET_CURRENT_CONTEXT(ctx);
    ASSERT_OUTSIDE_BEGIN_END(ctx);
 
    FLUSH_VERTICES(ctx, _NEW_PROGRAM);
 
+   /* Error-check target and get curProg */
    if ((target == GL_VERTEX_PROGRAM_ARB) && /* == GL_VERTEX_PROGRAM_NV */
         (ctx->Extensions.NV_vertex_program ||
          ctx->Extensions.ARB_vertex_program)) {
-      /*** Vertex program binding ***/
-      struct vertex_program *curProg = ctx->VertexProgram.Current;
-      if (curProg->Base.Id == id) {
-         /* binding same program - no change */
-         return;
-      }
-      if (curProg->Base.Id != 0) {
-         /* decrement refcount on previously bound vertex program */
-         curProg->Base.RefCount--;
-         /* and delete if refcount goes below one */
-         if (curProg->Base.RefCount <= 0) {
-            /* the program ID was already removed from the hash table */
-            ctx->Driver.DeleteProgram(ctx, &(curProg->Base));
-         }
-      }
+      curProg = &ctx->VertexProgram.Current->Base;
    }
    else if ((target == GL_FRAGMENT_PROGRAM_NV
              && ctx->Extensions.NV_fragment_program) ||
             (target == GL_FRAGMENT_PROGRAM_ARB
              && ctx->Extensions.ARB_fragment_program)) {
-      /*** Fragment program binding ***/
-      struct fragment_program *curProg = ctx->FragmentProgram.Current;
-      if (curProg->Base.Id == id) {
-         /* binding same program - no change */
-         return;
-      }
-      if (curProg->Base.Id != 0) {
-         /* decrement refcount on previously bound fragment program */
-         curProg->Base.RefCount--;
-         /* and delete if refcount goes below one */
-         if (curProg->Base.RefCount <= 0) {
-            /* the program ID was already removed from the hash table */
-            ctx->Driver.DeleteProgram(ctx, &(curProg->Base));
-         }
-      }
+      curProg = &ctx->FragmentProgram.Current->Base;
    }
    else {
       _mesa_error(ctx, GL_INVALID_ENUM, "glBindProgramNV/ARB(target)");
       return;
    }
 
-   /* NOTE: binding to a non-existant program is not an error.
+   /*
+    * Get pointer to new program to bind.
+    * NOTE: binding to a non-existant program is not an error.
     * That's supposed to be caught in glBegin.
     */
    if (id == 0) {
-      /* Bind default program */
-      prog = NULL;
+      /* Bind a default program */
+      newProg = NULL;
       if (target == GL_VERTEX_PROGRAM_ARB) /* == GL_VERTEX_PROGRAM_NV */
-         prog = ctx->Shared->DefaultVertexProgram;
+         newProg = ctx->Shared->DefaultVertexProgram;
       else
-         prog = ctx->Shared->DefaultFragmentProgram;
+         newProg = ctx->Shared->DefaultFragmentProgram;
    }
    else {
-      /* Bind user program */
-      prog = (struct program *) _mesa_HashLookup(ctx->Shared->Programs, id);
-      if (!prog || prog == &_mesa_DummyProgram) {
+      /* Bind a user program */
+      newProg = _mesa_lookup_program(ctx, id);
+      if (!newProg || newProg == &_mesa_DummyProgram) {
          /* allocate a new program now */
-         prog = ctx->Driver.NewProgram(ctx, target, id);
-         if (!prog) {
+         newProg = ctx->Driver.NewProgram(ctx, target, id);
+         if (!newProg) {
             _mesa_error(ctx, GL_OUT_OF_MEMORY, "glBindProgramNV/ARB");
             return;
          }
-         _mesa_HashInsert(ctx->Shared->Programs, id, prog);
+         _mesa_HashInsert(ctx->Shared->Programs, id, newProg);
       }
-      else if (prog->Target != target) {
+      else if (!compatible_program_targets(newProg->Target, target)) {
          _mesa_error(ctx, GL_INVALID_OPERATION,
                      "glBindProgramNV/ARB(target mismatch)");
          return;
       }
    }
 
-   /* bind now */
+   /** All error checking is complete now **/
+
+   if (curProg->Id == id) {
+      /* binding same program - no change */
+      return;
+   }
+
+   /* unbind/delete oldProg */
+   if (curProg->Id != 0) {
+      /* decrement refcount on previously bound fragment program */
+      curProg->RefCount--;
+      /* and delete if refcount goes below one */
+      if (curProg->RefCount <= 0) {
+         /* the program ID was already removed from the hash table */
+         ctx->Driver.DeleteProgram(ctx, curProg);
+      }
+   }
+
+   /* bind newProg */
    if (target == GL_VERTEX_PROGRAM_ARB) { /* == GL_VERTEX_PROGRAM_NV */
-      ctx->VertexProgram.Current = (struct vertex_program *) prog;
+      ctx->VertexProgram.Current = (struct gl_vertex_program *) newProg;
    }
-   else if (target == GL_FRAGMENT_PROGRAM_NV || target == GL_FRAGMENT_PROGRAM_ARB) {
-      ctx->FragmentProgram.Current = (struct fragment_program *) prog;
+   else if (target == GL_FRAGMENT_PROGRAM_NV ||
+            target == GL_FRAGMENT_PROGRAM_ARB) {
+      ctx->FragmentProgram.Current = (struct gl_fragment_program *) newProg;
    }
+   newProg->RefCount++;
 
    /* Never null pointers */
    ASSERT(ctx->VertexProgram.Current);
    ASSERT(ctx->FragmentProgram.Current);
 
-   if (prog)
-      prog->RefCount++;
-
    if (ctx->Driver.BindProgram)
-      ctx->Driver.BindProgram(ctx, target, prog);
+      ctx->Driver.BindProgram(ctx, target, newProg);
 }
 
 
@@ -1807,8 +1888,7 @@ _mesa_DeletePrograms(GLsizei n, const GLuint *ids)
 
    for (i = 0; i < n; i++) {
       if (ids[i] != 0) {
-         struct program *prog = (struct program *)
-            _mesa_HashLookup(ctx->Shared->Programs, ids[i]);
+         struct gl_program *prog = _mesa_lookup_program(ctx, ids[i]);
          if (prog == &_mesa_DummyProgram) {
             _mesa_HashRemove(ctx->Shared->Programs, ids[i]);
          }
@@ -1897,7 +1977,7 @@ _mesa_IsProgram(GLuint id)
    if (id == 0)
       return GL_FALSE;
 
-   if (_mesa_HashLookup(ctx->Shared->Programs, id))
+   if (_mesa_lookup_program(ctx, id))
       return GL_TRUE;
    else
       return GL_FALSE;

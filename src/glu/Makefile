@@ -13,6 +13,9 @@ default: $(TOP)/configs/current
 		(cd $$dir ; $(MAKE)) ; \
 	done
 
+install:
+	$(INSTALL) -d $(INSTALL_DIR)/$(LIB_DIR)
+	$(COPY_LIBS) $(TOP)/$(LIB_DIR)/libGLU.* $(INSTALL_DIR)/$(LIB_DIR)
 
 clean:
 	@for dir in $(SUBDIRS) ; do \

@@ -7,6 +7,7 @@ MAIN_SOURCES = \
 	main/api_validate.c \
 	main/accum.c \
 	main/attrib.c \
+	main/arrayobj.c \
 	main/blend.c \
 	main/bufferobj.c \
 	main/buffers.c \
@@ -159,6 +160,7 @@ SHADER_SOURCES = \
 	shader/nvvertexec.c \
 	shader/nvvertparse.c \
 	shader/program.c \
+	shader/programopt.c \
 	shader/shaderobjects.c \
 	shader/shaderobjects_3dlabs.c
 
@@ -189,7 +191,7 @@ SLANG_CPP_SOURCES = \
 	shader/slang/MachineIndependent/SymbolTable.cpp	\
 	shader/slang/OGLCompilersDLL/Initialisation.cpp	\
 	shader/slang/OSDependent/Linux/ossource.cpp
-	
+
 SLANG_SOURCES =	\
 	shader/slang/slang_analyse.c	\
 	shader/slang/slang_assemble.c	\
@@ -302,6 +304,15 @@ FBDEV_DRIVER_SOURCES =			\
 
 ### All the core C sources
 
+ALL_SOURCES = \
+	$(GLAPI_SOURCES)	\
+	$(SOLO_SOURCES)		\
+	$(X86_SOURCES)		\
+	$(COMMON_DRIVER_SOURCES)\
+	$(X11_DRIVER_SOURCES)	\
+	$(FBDEV_DRIVER_SOURCES) \
+	$(OSMESA_DRIVER_SOURCES)
+
 SOLO_SOURCES = \
 	$(MAIN_SOURCES)		\
 	$(MATH_SOURCES)		\
@@ -312,7 +323,6 @@ SOLO_SOURCES = \
 	$(SWRAST_SETUP_SOURCES)	\
 	$(ASM_C_SOURCES)	\
 	$(SLANG_SOURCES)
-
 #	$(SLANG_C_SOURCES)
 
 CORE_SOURCES = \
@@ -335,6 +345,8 @@ CORE_OBJECTS = $(SOLO_OBJECTS) $(GLAPI_OBJECTS)
 OSMESA_DRIVER_OBJECTS = $(OSMESA_DRIVER_SOURCES:.c=.o)
 
 COMMON_DRIVER_OBJECTS = $(COMMON_DRIVER_SOURCES:.c=.o)
+
+FBDEV_DRIVER_OBJECTS = $(FBDEV_DRIVER_SOURCES:.c=.o)
 
 
 

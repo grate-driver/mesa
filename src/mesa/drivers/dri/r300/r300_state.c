@@ -64,50 +64,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "drirenderbuffer.h"
 
-static void r300AlphaFunc(GLcontext * ctx, GLenum func, GLfloat ref)
-{
-	r300ContextPtr rmesa = R300_CONTEXT(ctx);
-	int pp_misc = rmesa->hw.at.cmd[R300_AT_ALPHA_TEST];
-	GLubyte refByte;
-
-	CLAMPED_FLOAT_TO_UBYTE(refByte, ref);
-	
-	R300_STATECHANGE(rmesa, at);
-
-	pp_misc &= ~(R300_ALPHA_TEST_OP_MASK | R300_REF_ALPHA_MASK);
-	pp_misc |= (refByte & R300_REF_ALPHA_MASK);
-
-	switch (func) {
-	case GL_NEVER:
-		pp_misc |= R300_ALPHA_TEST_FAIL;
-		break;
-	case GL_LESS:
-		pp_misc |= R300_ALPHA_TEST_LESS;
-		break;
-	case GL_EQUAL:
-		pp_misc |= R300_ALPHA_TEST_EQUAL;
-		break;
-	case GL_LEQUAL:
-		pp_misc |= R300_ALPHA_TEST_LEQUAL;
-		break;
-	case GL_GREATER:
-		pp_misc |= R300_ALPHA_TEST_GREATER;
-		break;
-	case GL_NOTEQUAL:
-		pp_misc |= R300_ALPHA_TEST_NEQUAL;
-		break;
-	case GL_GEQUAL:
-		pp_misc |= R300_ALPHA_TEST_GEQUAL;
-		break;
-	case GL_ALWAYS:
-		pp_misc |= R300_ALPHA_TEST_PASS;
-		//pp_misc &= ~R300_ALPHA_TEST_ENABLE;
-		break;
-	}
-
-	rmesa->hw.at.cmd[R300_AT_ALPHA_TEST] = pp_misc;
-}
-
 static void r300BlendColor(GLcontext * ctx, const GLfloat cf[4])
 {
 	GLubyte color[4];
@@ -144,55 +100,54 @@ static int blend_factor(GLenum factor, GLboolean is_src)
 
 	switch (factor) {
 	case GL_ZERO:
-		func = R200_BLEND_GL_ZERO;
+		func = R300_BLEND_GL_ZERO;
 		break;
 	case GL_ONE:
-		func = R200_BLEND_GL_ONE;
+		func = R300_BLEND_GL_ONE;
 		break;
 	case GL_DST_COLOR:
-		func = R200_BLEND_GL_DST_COLOR;
+		func = R300_BLEND_GL_DST_COLOR;
 		break;
 	case GL_ONE_MINUS_DST_COLOR:
-		func = R200_BLEND_GL_ONE_MINUS_DST_COLOR;
+		func = R300_BLEND_GL_ONE_MINUS_DST_COLOR;
 		break;
 	case GL_SRC_COLOR:
-		func = R200_BLEND_GL_SRC_COLOR;
+		func = R300_BLEND_GL_SRC_COLOR;
 		break;
 	case GL_ONE_MINUS_SRC_COLOR:
-		func = R200_BLEND_GL_ONE_MINUS_SRC_COLOR;
+		func = R300_BLEND_GL_ONE_MINUS_SRC_COLOR;
 		break;
 	case GL_SRC_ALPHA:
-		func = R200_BLEND_GL_SRC_ALPHA;
+		func = R300_BLEND_GL_SRC_ALPHA;
 		break;
 	case GL_ONE_MINUS_SRC_ALPHA:
-		func = R200_BLEND_GL_ONE_MINUS_SRC_ALPHA;
+		func = R300_BLEND_GL_ONE_MINUS_SRC_ALPHA;
 		break;
 	case GL_DST_ALPHA:
-		func = R200_BLEND_GL_DST_ALPHA;
+		func = R300_BLEND_GL_DST_ALPHA;
 		break;
 	case GL_ONE_MINUS_DST_ALPHA:
-		func = R200_BLEND_GL_ONE_MINUS_DST_ALPHA;
+		func = R300_BLEND_GL_ONE_MINUS_DST_ALPHA;
 		break;
 	case GL_SRC_ALPHA_SATURATE:
-		func =
-		    (is_src) ? R200_BLEND_GL_SRC_ALPHA_SATURATE :
-		    R200_BLEND_GL_ZERO;
+		func = (is_src) ? R300_BLEND_GL_SRC_ALPHA_SATURATE :
+		R300_BLEND_GL_ZERO;
 		break;
 	case GL_CONSTANT_COLOR:
-		func = R200_BLEND_GL_CONST_COLOR;
+		func = R300_BLEND_GL_CONST_COLOR;
 		break;
 	case GL_ONE_MINUS_CONSTANT_COLOR:
-		func = R200_BLEND_GL_ONE_MINUS_CONST_COLOR;
+		func = R300_BLEND_GL_ONE_MINUS_CONST_COLOR;
 		break;
 	case GL_CONSTANT_ALPHA:
-		func = R200_BLEND_GL_CONST_ALPHA;
+		func = R300_BLEND_GL_CONST_ALPHA;
 		break;
 	case GL_ONE_MINUS_CONSTANT_ALPHA:
-		func = R200_BLEND_GL_ONE_MINUS_CONST_ALPHA;
+		func = R300_BLEND_GL_ONE_MINUS_CONST_ALPHA;
 		break;
 	default:
 		fprintf(stderr, "unknown blend factor %x\n", factor);
-		func = (is_src) ? R200_BLEND_GL_ONE : R200_BLEND_GL_ZERO;
+		func = (is_src) ? R300_BLEND_GL_ONE : R300_BLEND_GL_ZERO;
 	}
 	return func;
 }
@@ -202,10 +157,10 @@ static int blend_factor(GLenum factor, GLboolean is_src)
  * This is done in a single
  * function because some blend equations (i.e., \c GL_MIN and \c GL_MAX)
  * change the interpretation of the blend function.
- * Also, make sure that blend function and blend equation are set to their default
- * value if color blending is not enabled, since at least blend equations GL_MIN
- * and GL_FUNC_REVERSE_SUBTRACT will cause wrong results otherwise for
- * unknown reasons.
+ * Also, make sure that blend function and blend equation are set to their
+ * default value if color blending is not enabled, since at least blend
+ * equations GL_MIN and GL_FUNC_REVERSE_SUBTRACT will cause wrong results
+ * otherwise for unknown reasons.
  */
 
 /* helper function */
@@ -244,12 +199,12 @@ static void r300_set_blend_cntl(r300ContextPtr r300, int func, int eqn, int cbit
 static void r300_set_blend_state(GLcontext * ctx)
 {
 	r300ContextPtr r300 = R300_CONTEXT(ctx);
-	int func = (R200_BLEND_GL_ONE << R200_SRC_BLEND_SHIFT) |
-	    (R200_BLEND_GL_ZERO << R200_DST_BLEND_SHIFT);
-	int eqn = R200_COMB_FCN_ADD_CLAMP;
-	int funcA = (R200_BLEND_GL_ONE << R200_SRC_BLEND_SHIFT) |
-	    (R200_BLEND_GL_ZERO << R200_DST_BLEND_SHIFT);
-	int eqnA = R200_COMB_FCN_ADD_CLAMP;
+	int func = (R300_BLEND_GL_ONE << R300_SRC_BLEND_SHIFT) |
+	    (R300_BLEND_GL_ZERO << R300_DST_BLEND_SHIFT);
+	int eqn = R300_COMB_FCN_ADD_CLAMP;
+	int funcA = (R300_BLEND_GL_ONE << R300_SRC_BLEND_SHIFT) |
+	    (R300_BLEND_GL_ZERO << R300_DST_BLEND_SHIFT);
+	int eqnA = R300_COMB_FCN_ADD_CLAMP;
 
 	if (ctx->Color._LogicOpEnabled || !ctx->Color.BlendEnabled) {
 		r300_set_blend_cntl(r300,
@@ -258,8 +213,8 @@ static void r300_set_blend_state(GLcontext * ctx)
 		return;
 	}
 
-	func = (blend_factor(ctx->Color.BlendSrcRGB, GL_TRUE) << R200_SRC_BLEND_SHIFT) |
-		(blend_factor(ctx->Color.BlendDstRGB, GL_FALSE) << R200_DST_BLEND_SHIFT);
+	func = (blend_factor(ctx->Color.BlendSrcRGB, GL_TRUE) << R300_SRC_BLEND_SHIFT) |
+		(blend_factor(ctx->Color.BlendDstRGB, GL_FALSE) << R300_DST_BLEND_SHIFT);
 
 	switch (ctx->Color.BlendEquationRGB) {
 	case GL_FUNC_ADD:
@@ -271,19 +226,19 @@ static void r300_set_blend_state(GLcontext * ctx)
 		break;
 
 	case GL_FUNC_REVERSE_SUBTRACT:
-		eqn = R200_COMB_FCN_RSUB_CLAMP;
+		eqn = R300_COMB_FCN_RSUB_CLAMP;
 		break;
 
 	case GL_MIN:
-		eqn = R200_COMB_FCN_MIN;
-		func = (R200_BLEND_GL_ONE << R200_SRC_BLEND_SHIFT) |
-		    (R200_BLEND_GL_ONE << R200_DST_BLEND_SHIFT);
+		eqn = R300_COMB_FCN_MIN;
+		func = (R300_BLEND_GL_ONE << R300_SRC_BLEND_SHIFT) |
+		    (R300_BLEND_GL_ONE << R300_DST_BLEND_SHIFT);
 		break;
 
 	case GL_MAX:
-		eqn = R200_COMB_FCN_MAX;
-		func = (R200_BLEND_GL_ONE << R200_SRC_BLEND_SHIFT) |
-		    (R200_BLEND_GL_ONE << R200_DST_BLEND_SHIFT);
+		eqn = R300_COMB_FCN_MAX;
+		func = (R300_BLEND_GL_ONE << R300_SRC_BLEND_SHIFT) |
+		    (R300_BLEND_GL_ONE << R300_DST_BLEND_SHIFT);
 		break;
 
 	default:
@@ -294,8 +249,8 @@ static void r300_set_blend_state(GLcontext * ctx)
 	}
 
 
-	funcA = (blend_factor(ctx->Color.BlendSrcA, GL_TRUE) << R200_SRC_BLEND_SHIFT) |
-		(blend_factor(ctx->Color.BlendDstA, GL_FALSE) << R200_DST_BLEND_SHIFT);
+	funcA = (blend_factor(ctx->Color.BlendSrcA, GL_TRUE) << R300_SRC_BLEND_SHIFT) |
+		(blend_factor(ctx->Color.BlendDstA, GL_FALSE) << R300_DST_BLEND_SHIFT);
 
 	switch (ctx->Color.BlendEquationA) {
 	case GL_FUNC_ADD:
@@ -307,19 +262,19 @@ static void r300_set_blend_state(GLcontext * ctx)
 		break;
 
 	case GL_FUNC_REVERSE_SUBTRACT:
-		eqnA = R200_COMB_FCN_RSUB_CLAMP;
+		eqnA = R300_COMB_FCN_RSUB_CLAMP;
 		break;
 
 	case GL_MIN:
-		eqnA = R200_COMB_FCN_MIN;
-		funcA = (R200_BLEND_GL_ONE << R200_SRC_BLEND_SHIFT) |
-		    (R200_BLEND_GL_ONE << R200_DST_BLEND_SHIFT);
+		eqnA = R300_COMB_FCN_MIN;
+		funcA = (R300_BLEND_GL_ONE << R300_SRC_BLEND_SHIFT) |
+		    (R300_BLEND_GL_ONE << R300_DST_BLEND_SHIFT);
 		break;
 
 	case GL_MAX:
-		eqnA = R200_COMB_FCN_MAX;
-		funcA = (R200_BLEND_GL_ONE << R200_SRC_BLEND_SHIFT) |
-		    (R200_BLEND_GL_ONE << R200_DST_BLEND_SHIFT);
+		eqnA = R300_COMB_FCN_MAX;
+		funcA = (R300_BLEND_GL_ONE << R300_SRC_BLEND_SHIFT) |
+		    (R300_BLEND_GL_ONE << R300_DST_BLEND_SHIFT);
 		break;
 
 	default:
@@ -371,7 +326,7 @@ static void r300UpdateCulling(GLcontext* ctx)
 	r300->hw.cul.cmd[R300_CUL_CULL] = val;
 }
 
-static void update_early_z(GLcontext* ctx)
+static void update_early_z(GLcontext *ctx)
 {
 	/* updates register 0x4f14 
 	   if depth test is not enabled it should be 0x00000000
@@ -381,17 +336,120 @@ static void update_early_z(GLcontext* ctx)
 	r300ContextPtr r300 = R300_CONTEXT(ctx);
 
 	R300_STATECHANGE(r300, unk4F10);
-	if (ctx->Color.AlphaEnabled)
+	if (ctx->Color.AlphaEnabled && ctx->Color.AlphaFunc != GL_ALWAYS)
 		/* disable early Z */
 		r300->hw.unk4F10.cmd[2] = 0x00000000;
 	else {
-		if (ctx->Depth.Test)
+		if (ctx->Depth.Test && ctx->Depth.Func != GL_NEVER)
 			/* enable early Z */
 			r300->hw.unk4F10.cmd[2] = 0x00000001;
 		else
 			/* disable early Z */
 			r300->hw.unk4F10.cmd[2] = 0x00000000;
 	}
+}
+
+static void update_alpha(GLcontext *ctx)
+{
+	r300ContextPtr r300 = R300_CONTEXT(ctx);
+	GLubyte refByte;
+	uint32_t pp_misc = 0x0;
+	GLboolean really_enabled = ctx->Color.AlphaEnabled;
+
+	CLAMPED_FLOAT_TO_UBYTE(refByte, ctx->Color.AlphaRef);
+	
+	switch (ctx->Color.AlphaFunc) {
+	case GL_NEVER:
+		pp_misc |= R300_ALPHA_TEST_FAIL;
+		break;
+	case GL_LESS:
+		pp_misc |= R300_ALPHA_TEST_LESS;
+		break;
+	case GL_EQUAL:
+		pp_misc |= R300_ALPHA_TEST_EQUAL;
+		break;
+	case GL_LEQUAL:
+		pp_misc |= R300_ALPHA_TEST_LEQUAL;
+		break;
+	case GL_GREATER:
+		pp_misc |= R300_ALPHA_TEST_GREATER;
+		break;
+	case GL_NOTEQUAL:
+		pp_misc |= R300_ALPHA_TEST_NEQUAL;
+		break;
+	case GL_GEQUAL:
+		pp_misc |= R300_ALPHA_TEST_GEQUAL;
+		break;
+	case GL_ALWAYS:
+		/*pp_misc |= R300_ALPHA_TEST_PASS;*/
+		really_enabled = GL_FALSE;
+		break;
+	}
+	
+	if (really_enabled) {
+		pp_misc |= R300_ALPHA_TEST_ENABLE;
+		pp_misc |= (refByte & R300_REF_ALPHA_MASK);
+	} else {
+		pp_misc = 0x0;
+	}
+	
+	
+	R300_STATECHANGE(r300, at);
+	r300->hw.at.cmd[R300_AT_ALPHA_TEST] = pp_misc;
+	update_early_z(ctx);
+}
+
+static void r300AlphaFunc(GLcontext * ctx, GLenum func, GLfloat ref)
+{
+	(void) func;
+	(void) ref;
+	update_alpha(ctx);
+}
+
+static int translate_func(int func)
+{
+	switch (func) {
+	case GL_NEVER:
+		return R300_ZS_NEVER;
+	case GL_LESS:
+		return R300_ZS_LESS;
+	case GL_EQUAL:
+		return R300_ZS_EQUAL;
+	case GL_LEQUAL:
+		return R300_ZS_LEQUAL;
+	case GL_GREATER:
+		return R300_ZS_GREATER;
+	case GL_NOTEQUAL:
+		return R300_ZS_NOTEQUAL;
+	case GL_GEQUAL:
+		return R300_ZS_GEQUAL;
+	case GL_ALWAYS:
+		return R300_ZS_ALWAYS;
+	}
+	return 0;
+}
+
+static void update_depth(GLcontext* ctx)
+{
+	r300ContextPtr r300 = R300_CONTEXT(ctx);
+
+	R300_STATECHANGE(r300, zs);
+	r300->hw.zs.cmd[R300_ZS_CNTL_0] &= R300_RB3D_STENCIL_ENABLE;
+	r300->hw.zs.cmd[R300_ZS_CNTL_1] &= ~(R300_ZS_MASK << R300_RB3D_ZS1_DEPTH_FUNC_SHIFT);
+	
+	if (ctx->Depth.Test && ctx->Depth.Func != GL_NEVER) {
+		if (ctx->Depth.Mask)
+			r300->hw.zs.cmd[R300_ZS_CNTL_0] |= R300_RB3D_Z_TEST_AND_WRITE;
+		else
+			r300->hw.zs.cmd[R300_ZS_CNTL_0] |= R300_RB3D_Z_TEST;
+		
+		r300->hw.zs.cmd[R300_ZS_CNTL_1] |= translate_func(ctx->Depth.Func) << R300_RB3D_ZS1_DEPTH_FUNC_SHIFT;
+	} else {
+		r300->hw.zs.cmd[R300_ZS_CNTL_0] |= R300_RB3D_Z_DISABLED_1;
+		r300->hw.zs.cmd[R300_ZS_CNTL_1] |= translate_func(GL_NEVER) << R300_RB3D_ZS1_DEPTH_FUNC_SHIFT;
+	}
+	
+	update_early_z(ctx);
 }
 
 /**
@@ -436,15 +494,7 @@ static void r300Enable(GLcontext* ctx, GLenum cap, GLboolean state)
 		break;
 
 	case GL_ALPHA_TEST:
-		R300_STATECHANGE(r300, at);
-		if (state) {
-			r300->hw.at.cmd[R300_AT_ALPHA_TEST] |=
-			    R300_ALPHA_TEST_ENABLE;
-		} else {
-			r300->hw.at.cmd[R300_AT_ALPHA_TEST] &=
-			    ~R300_ALPHA_TEST_ENABLE;
-		}
-		update_early_z(ctx);
+		update_alpha(ctx);
 		break;
 
 	case GL_BLEND:
@@ -453,19 +503,7 @@ static void r300Enable(GLcontext* ctx, GLenum cap, GLboolean state)
 		break;
 
 	case GL_DEPTH_TEST:
-		R300_STATECHANGE(r300, zs);
-
-		if (state) {
-			if (ctx->Depth.Mask)
-				newval = R300_RB3D_Z_TEST_AND_WRITE;
-			else
-				newval = R300_RB3D_Z_TEST;
-		} else
-			newval = R300_RB3D_Z_DISABLED_1;
-
-		r300->hw.zs.cmd[R300_ZS_CNTL_0] &= R300_RB3D_STENCIL_ENABLE;
-		r300->hw.zs.cmd[R300_ZS_CNTL_0] |= newval;
-		update_early_z(ctx);
+		update_depth(ctx);
 		break;
 
 	case GL_STENCIL_TEST:
@@ -593,38 +631,8 @@ static void r300FrontFace(GLcontext* ctx, GLenum mode)
  */
 static void r300DepthFunc(GLcontext* ctx, GLenum func)
 {
-	r300ContextPtr r300 = R300_CONTEXT(ctx);
-
-	R300_STATECHANGE(r300, zs);
-
-	r300->hw.zs.cmd[R300_ZS_CNTL_1] &= ~(R300_ZS_MASK << R300_RB3D_ZS1_DEPTH_FUNC_SHIFT);
-
-	switch(func) {
-	case GL_NEVER:
-		r300->hw.zs.cmd[R300_ZS_CNTL_1] |= R300_ZS_NEVER << R300_RB3D_ZS1_DEPTH_FUNC_SHIFT;
-		break;
-	case GL_LESS:
-		r300->hw.zs.cmd[R300_ZS_CNTL_1] |= R300_ZS_LESS << R300_RB3D_ZS1_DEPTH_FUNC_SHIFT;
-		break;
-	case GL_EQUAL:
-		r300->hw.zs.cmd[R300_ZS_CNTL_1] |= R300_ZS_EQUAL << R300_RB3D_ZS1_DEPTH_FUNC_SHIFT;
-		break;
-	case GL_LEQUAL:
-		r300->hw.zs.cmd[R300_ZS_CNTL_1] |= R300_ZS_LEQUAL << R300_RB3D_ZS1_DEPTH_FUNC_SHIFT;
-		break;
-	case GL_GREATER:
-		r300->hw.zs.cmd[R300_ZS_CNTL_1] |= R300_ZS_GREATER << R300_RB3D_ZS1_DEPTH_FUNC_SHIFT;
-		break;
-	case GL_NOTEQUAL:
-		r300->hw.zs.cmd[R300_ZS_CNTL_1] |= R300_ZS_NOTEQUAL << R300_RB3D_ZS1_DEPTH_FUNC_SHIFT;
-		break;
-	case GL_GEQUAL:
-		r300->hw.zs.cmd[R300_ZS_CNTL_1] |= R300_ZS_GEQUAL << R300_RB3D_ZS1_DEPTH_FUNC_SHIFT;
-		break;
-	case GL_ALWAYS:
-		r300->hw.zs.cmd[R300_ZS_CNTL_1] |= R300_ZS_ALWAYS << R300_RB3D_ZS1_DEPTH_FUNC_SHIFT;
-		break;
-	}
+	(void) func;
+	update_depth(ctx);
 }
 
 
@@ -635,7 +643,8 @@ static void r300DepthFunc(GLcontext* ctx, GLenum func)
  */
 static void r300DepthMask(GLcontext* ctx, GLboolean mask)
 {
-	r300Enable(ctx, GL_DEPTH_TEST, ctx->Depth.Test);
+	(void) mask;
+	update_depth(ctx);
 }
 
 
@@ -793,29 +802,6 @@ static void r300PolygonMode(GLcontext *ctx, GLenum face, GLenum mode)
  * Stencil
  */
 
-static int translate_stencil_func(int func)
-{
-	switch (func) {
-	case GL_NEVER:
-		return R300_ZS_NEVER;
-	case GL_LESS:
-		return R300_ZS_LESS;
-	case GL_EQUAL:
-		return R300_ZS_EQUAL;
-	case GL_LEQUAL:
-		return R300_ZS_LEQUAL;
-	case GL_GREATER:
-		return R300_ZS_GREATER;
-	case GL_NOTEQUAL:
-		return R300_ZS_NOTEQUAL;
-	case GL_GEQUAL:
-		return R300_ZS_GEQUAL;
-	case GL_ALWAYS:
-		return R300_ZS_ALWAYS;
-	}
-	return 0;
-}
-
 static int translate_stencil_op(int op)
 {
 	switch (op) {
@@ -877,7 +863,7 @@ static void r300StencilFuncSeparate(GLcontext * ctx, GLenum face,
 	rmesa->hw.zs.cmd[R300_ZS_CNTL_2] &=  ~((R300_RB3D_ZS2_STENCIL_MASK << R300_RB3D_ZS2_STENCIL_REF_SHIFT) |
 						(R300_RB3D_ZS2_STENCIL_MASK << R300_RB3D_ZS2_STENCIL_MASK_SHIFT));
 	
-	flag = translate_stencil_func(ctx->Stencil.Function[0]);
+	flag = translate_func(ctx->Stencil.Function[0]);
 
 	rmesa->hw.zs.cmd[R300_ZS_CNTL_1] |= (flag << R300_RB3D_ZS1_FRONT_FUNC_SHIFT)
 					  | (flag << R300_RB3D_ZS1_BACK_FUNC_SHIFT);
@@ -987,15 +973,15 @@ void r300UpdateViewportOffset( GLcontext *ctx )
 	GLfloat tx = v[MAT_TX] + xoffset + SUBPIXEL_X;
 	GLfloat ty = (- v[MAT_TY]) + yoffset + SUBPIXEL_Y;
 
-	if ( rmesa->hw.vpt.cmd[VPT_SE_VPORT_XOFFSET] != r300PackFloat32(tx) ||
-		rmesa->hw.vpt.cmd[VPT_SE_VPORT_YOFFSET] != r300PackFloat32(ty))
+	if ( rmesa->hw.vpt.cmd[R300_VPT_XOFFSET] != r300PackFloat32(tx) ||
+		rmesa->hw.vpt.cmd[R300_VPT_YOFFSET] != r300PackFloat32(ty))
 	{
 	/* Note: this should also modify whatever data the context reset
 	 * code uses...
 	 */
 	R300_STATECHANGE( rmesa, vpt );
-	rmesa->hw.vpt.cmd[VPT_SE_VPORT_XOFFSET] = r300PackFloat32(tx);
-	rmesa->hw.vpt.cmd[VPT_SE_VPORT_YOFFSET] = r300PackFloat32(ty);
+	rmesa->hw.vpt.cmd[R300_VPT_XOFFSET] = r300PackFloat32(tx);
+	rmesa->hw.vpt.cmd[R300_VPT_YOFFSET] = r300PackFloat32(ty);
       
 	}
 
@@ -1316,19 +1302,20 @@ void r300_setup_rs_unit(GLcontext *ctx)
 	R300_STATECHANGE(r300, rr);
 	
 	fp_reg = in_texcoords = col_interp_nr = high_rr = 0;
-	r300->hw.rr.cmd[R300_RR_ROUTE_0] = 0;
-	r300->hw.rr.cmd[R300_RR_ROUTE_1] = 0;
 
+	r300->hw.rr.cmd[R300_RR_ROUTE_1] = 0;
+	
 	for (i=0;i<ctx->Const.MaxTextureUnits;i++) {
 		r300->hw.ri.cmd[R300_RI_INTERP_0+i] = 0
 				| R300_RS_INTERP_USED
 				| (in_texcoords << R300_RS_INTERP_SRC_SHIFT)
 				| interp_magic[i];
 
+		r300->hw.rr.cmd[R300_RR_ROUTE_0 + fp_reg] = 0;
 		if (InputsRead & (FRAG_BIT_TEX0<<i)) {
 			//assert(r300->state.texture.tc_count != 0);
-			r300->hw.rr.cmd[R300_RR_ROUTE_0 + fp_reg] = 0
-					| R300_RS_ROUTE_ENABLE
+			r300->hw.rr.cmd[R300_RR_ROUTE_0 + fp_reg] |=
+					  R300_RS_ROUTE_ENABLE
 					| i /* source INTERP */
 					| (fp_reg << R300_RS_ROUTE_DEST_SHIFT);
 			high_rr = fp_reg;
@@ -1525,26 +1512,16 @@ static void r300GenerateSimpleVertexShader(r300ContextPtr r300)
 		)
 	o_reg += 2;
 	
-	if (RENDERINPUTS_TEST( r300->state.render_inputs_bitset, _TNL_ATTRIB_COLOR1 )) {
-		WRITE_OP(
-			EASY_VSF_OP(MUL, o_reg++, ALL, RESULT),
-			VSF_REG(r300->state.vap_reg.i_color[1]),
-			VSF_ATTR_UNITY(r300->state.vap_reg.i_color[1]),
-			VSF_UNITY(r300->state.vap_reg.i_color[1])
-		)
-	}
-	
-	/* Pass through texture coordinates, if any */
-	for(i=0;i < r300->radeon.glCtx->Const.MaxTextureUnits;i++)
-		if (RENDERINPUTS_TEST( r300->state.render_inputs_bitset, _TNL_ATTRIB_TEX(i) )){
-			// fprintf(stderr, "i_tex[%d]=%d\n", i, r300->state.vap_reg.i_tex[i]);
+	for (i = VERT_ATTRIB_COLOR1; i < VERT_ATTRIB_MAX; i++)
+		if (r300->state.sw_tcl_inputs[i] != -1) {
 			WRITE_OP(
 				EASY_VSF_OP(MUL, o_reg++ /* 2+i */, ALL, RESULT),
-				VSF_REG(r300->state.vap_reg.i_tex[i]),
-				VSF_ATTR_UNITY(r300->state.vap_reg.i_tex[i]),
-				VSF_UNITY(r300->state.vap_reg.i_tex[i])
+				VSF_REG(r300->state.sw_tcl_inputs[i]),
+				VSF_ATTR_UNITY(r300->state.sw_tcl_inputs[i]),
+				VSF_UNITY(r300->state.sw_tcl_inputs[i])
 				)
-			}
+		
+		}
 	
 	r300->state.vertex_shader.program_end--; /* r300 wants program length to be one more - no idea why */
 	r300->state.vertex_shader.program.length=(r300->state.vertex_shader.program_end+1)*4;
@@ -1675,18 +1652,24 @@ void r300UpdateShaders(r300ContextPtr rmesa)
 {
 	GLcontext *ctx;
 	struct r300_vertex_program *vp;
+	int i;
 	
 	ctx = rmesa->radeon.glCtx;
-	
-	/* Disable tnl programs when doing software vertex programs.
-	   I can only hope this actually disables it at the right time. */
-	ctx->_MaintainTnlProgram = hw_tcl_on;
 	
 	if (rmesa->NewGLState && hw_tcl_on) {
 		rmesa->NewGLState = 0;
 		
+		for (i = _TNL_FIRST_MAT; i <= _TNL_LAST_MAT; i++) {
+			rmesa->temp_attrib[i] = TNL_CONTEXT(ctx)->vb.AttribPtr[i];
+			TNL_CONTEXT(ctx)->vb.AttribPtr[i] = &rmesa->dummy_attrib[i];
+		}
+		
 		_tnl_UpdateFixedFunctionProgram(ctx);
 	
+		for (i = _TNL_FIRST_MAT; i <= _TNL_LAST_MAT; i++) {
+			TNL_CONTEXT(ctx)->vb.AttribPtr[i] = rmesa->temp_attrib[i];
+		}
+		
 		vp = (struct r300_vertex_program *)CURRENT_VERTEX_SHADER(ctx);
 		if (vp->translated == GL_FALSE)
 			r300_translate_vertex_shader(vp);
@@ -2202,12 +2185,12 @@ void r300InitState(r300ContextPtr r300)
 	switch (ctx->Visual.depthBits) {
 	case 16:
 		r300->state.depth.scale = 1.0 / (GLfloat) 0xffff;
-		depth_fmt = R200_DEPTH_FORMAT_16BIT_INT_Z;
+		depth_fmt = R300_DEPTH_FORMAT_16BIT_INT_Z;
 		r300->state.stencil.clear = 0x00000000;
 		break;
 	case 24:
 		r300->state.depth.scale = 1.0 / (GLfloat) 0xffffff;
-		depth_fmt = R200_DEPTH_FORMAT_24BIT_INT_Z;
+		depth_fmt = R300_DEPTH_FORMAT_24BIT_INT_Z;
 		r300->state.stencil.clear = 0x00ff0000;
 		break;
 	default:

@@ -1,20 +1,57 @@
+/*
+ * Mesa 3-D graphics library
+ * Version:  6.5.1
+ *
+ * Copyright (C) 1999-2006  Brian Paul   All Rights Reserved.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
+ * copy of this software and associated documentation files (the "Software"),
+ * to deal in the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense,
+ * and/or sell copies of the Software, and to permit persons to whom the
+ * Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included
+ * in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+ * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
+ * BRIAN PAUL BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+ * AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+ * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
 
 /**
- * \file  Vertex/Fragment program optimizations and transformations.
+ * \file  programopt.c 
+ * Vertex/Fragment program optimizations and transformations for program
+ * options, etc.
+ *
+ * \author Brian Paul
  */
 
 
+#include "glheader.h"
+#include "context.h"
+#include "imports.h"
+#include "mtypes.h"
+#include "program.h"
+#include "programopt.h"
+#include "program_instruction.h"
+
 
 /**
- * This is used for helping with position-invariant vertex programs.
- * It appends extra instructions to the given program to do the
- * vertex position transformation (multiply by the MVP matrix).
+ * This function inserts instructions for coordinate modelview * projection
+ * into a vertex program.
+ * May be used to implement the position_invariant option.
  */
 void
-_mesa_append_modelview_code(GLcontext *ctx, struct vertex_program *program)
+_mesa_insert_mvp_code(GLcontext *ctx, struct gl_vertex_program *vprog)
 {
-   struct vp_instruction newInst[5], *newProgram;
-   GLuint i, origLen;
+   struct prog_instruction *newInst;
+   const GLuint origLen = vprog->Base.NumInstructions;
+   const GLuint newLen = origLen + 4;
+   GLuint i;
 
    /*
     * Setup state references for the modelview/projection matrix.
@@ -26,56 +63,54 @@ _mesa_append_modelview_code(GLcontext *ctx, struct vertex_program *program)
       { STATE_MATRIX, STATE_MVP, 0, 2, 2 },  /* state.matrix.mvp.row[2] */
       { STATE_MATRIX, STATE_MVP, 0, 3, 3 },  /* state.matrix.mvp.row[3] */
    };
-   GLint row[4];
+   GLint mvpRef[4];
 
    for (i = 0; i < 4; i++) {
-      row[i] = _mesa_add_state_reference(program->Parameters, mvpState[i]);
+      mvpRef[i] = _mesa_add_state_reference(vprog->Base.Parameters,
+                                            mvpState[i]);
+   }
+
+   /* Alloc storage for new instructions */
+   newInst = _mesa_alloc_instructions(newLen);
+   if (!newInst) {
+      _mesa_error(ctx, GL_OUT_OF_MEMORY,
+                  "glProgramString(inserting position_invariant code)");
+      return;
    }
 
    /*
-    * Generate instructions:
-    * DP4 result.position.x, mvp.row[0], vertex.position;
-    * DP4 result.position.y, mvp.row[1], vertex.position;
-    * DP4 result.position.z, mvp.row[2], vertex.position;
-    * DP4 result.position.w, mvp.row[3], vertex.position;
+    * Generated instructions:
+    * newInst[0] = DP4 result.position.x, mvp.row[0], vertex.position;
+    * newInst[1] = DP4 result.position.y, mvp.row[1], vertex.position;
+    * newInst[2] = DP4 result.position.z, mvp.row[2], vertex.position;
+    * newInst[3] = DP4 result.position.w, mvp.row[3], vertex.position;
     */
    for (i = 0; i < 4; i++) {
-      _mesa_init_vp_instruction(newInst + i);
-      newInst[i].Opcode = VP_OPCODE_DP4;
+      _mesa_init_instruction(newInst + i);
+      newInst[i].Opcode = OPCODE_DP4;
       newInst[i].DstReg.File = PROGRAM_OUTPUT;
       newInst[i].DstReg.Index = VERT_RESULT_HPOS;
       newInst[i].DstReg.WriteMask = (WRITEMASK_X << i);
       newInst[i].SrcReg[0].File = PROGRAM_STATE_VAR;
-      newInst[i].SrcReg[0].Index = row[i];
+      newInst[i].SrcReg[0].Index = mvpRef[i];
       newInst[i].SrcReg[0].Swizzle = SWIZZLE_NOOP;
       newInst[i].SrcReg[1].File = PROGRAM_INPUT;
       newInst[i].SrcReg[1].Index = VERT_ATTRIB_POS;
       newInst[i].SrcReg[1].Swizzle = SWIZZLE_NOOP;
    }
-   newInst[4].Opcode = VP_OPCODE_END;
 
-   /*
-    * Append new instructions onto program.
-    */
-   origLen = program->Base.NumInstructions;
+   /* Append original instructions after new instructions */
+   _mesa_memcpy(newInst + 4, vprog->Base.Instructions,
+                origLen * sizeof(struct prog_instruction));
 
-   newProgram = (struct vp_instruction *)
-      _mesa_realloc(program->Instructions,
-                    origLen * sizeof(struct vp_instruction),
-                    (origLen + 4) * sizeof(struct vp_instruction));
-   if (!newProgram) {
-      _mesa_error(ctx, GL_OUT_OF_MEMORY,
-                  "glProgramString(generating position transformation code)");
-      return;
-   }
+   /* free old instructions */
+   _mesa_free(vprog->Base.Instructions);
 
-   /* subtract one to overwrite original END instruction */
-   _mesa_memcpy(newProgram + origLen - 1, newInst, sizeof(newInst));
-
-   program->Instructions = newProgram;
-   program->Base.NumInstructions = origLen + 4;
-   program->InputsRead |= VERT_BIT_POS;
-   program->OutputsWritten |= (1 << VERT_RESULT_HPOS);
+   /* install new instructions */
+   vprog->Base.Instructions = newInst;
+   vprog->Base.NumInstructions = newLen;
+   vprog->Base.InputsRead |= VERT_BIT_POS;
+   vprog->Base.OutputsWritten |= (1 << VERT_RESULT_HPOS);
 }
 
 
@@ -83,14 +118,14 @@ _mesa_append_modelview_code(GLcontext *ctx, struct vertex_program *program)
 /**
  * Append extra instructions onto the given fragment program to implement
  * the fog mode specified by program->FogOption.
+ * XXX incomplete.
  */
 void
-_mesa_append_fog_code(GLcontext *ctx, struct fragment_program *program)
+_mesa_append_fog_code(GLcontext *ctx, struct gl_fragment_program *fprog)
 {
-   struct fp_instruction newInst[10];
+   struct prog_instruction newInst[10];
 
-
-   switch (program->FogOption) {
+   switch (fprog->FogOption) {
    case GL_LINEAR:
       /* lerp */
       break;
@@ -107,6 +142,6 @@ _mesa_append_fog_code(GLcontext *ctx, struct fragment_program *program)
    }
 
 
-
+   (void) newInst;
 
 }

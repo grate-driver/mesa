@@ -642,12 +642,12 @@ Parse_SwizzleSrcReg(struct parse_state *parseState, struct prog_src_register *sr
       RETURN_ERROR;
    if (token[0] == '-') {
       (void) Parse_String(parseState, "-");
-      srcReg->NegateBase = GL_TRUE;
+      srcReg->NegateBase = NEGATE_XYZW;
       if (!Peek_Token(parseState, token))
          RETURN_ERROR;
    }
    else {
-      srcReg->NegateBase = GL_FALSE;
+      srcReg->NegateBase = NEGATE_NONE;
    }
 
    /* Src reg can be R<n>, c[n], c[n +/- offset], or a named vertex attrib */
@@ -735,13 +735,13 @@ Parse_ScalarSrcReg(struct parse_state *parseState, struct prog_src_register *src
    if (!Peek_Token(parseState, token))
       RETURN_ERROR;
    if (token[0] == '-') {
-      srcReg->NegateBase = GL_TRUE;
+      srcReg->NegateBase = NEGATE_XYZW;
       (void) Parse_String(parseState, "-"); /* consume '-' */
       if (!Peek_Token(parseState, token))
          RETURN_ERROR;
    }
    else {
-      srcReg->NegateBase = GL_FALSE;
+      srcReg->NegateBase = NEGATE_NONE;
    }
 
    /* Src reg can be R<n>, c[n], c[n +/- offset], or a named vertex attrib */
@@ -1070,7 +1070,7 @@ Parse_PrintInstruction(struct parse_state *parseState, struct prog_instruction *
          RETURN_ERROR;
 
       srcReg->RelAddr = GL_FALSE;
-      srcReg->NegateBase = GL_FALSE;
+      srcReg->NegateBase = NEGATE_NONE;
       srcReg->Swizzle = SWIZZLE_NOOP;
 
       /* Register can be R<n>, c[n], c[n +/- offset], a named vertex attrib,
@@ -1290,7 +1290,7 @@ Parse_Program(struct parse_state *parseState,
 void
 _mesa_parse_nv_vertex_program(GLcontext *ctx, GLenum dstTarget,
                               const GLubyte *str, GLsizei len,
-                              struct vertex_program *program)
+                              struct gl_vertex_program *program)
 {
    struct parse_state parseState;
    struct prog_instruction instBuffer[MAX_NV_VERTEX_PROGRAM_INSTRUCTIONS];
@@ -1364,7 +1364,7 @@ _mesa_parse_nv_vertex_program(GLcontext *ctx, GLenum dstTarget,
       }
       else {
          if (!parseState.isPositionInvariant &&
-             !(parseState.outputsWritten & 1)) {
+             !(parseState.outputsWritten & (1 << VERT_RESULT_HPOS))) {
             /* bit 1 = HPOS register */
             _mesa_error(ctx, GL_INVALID_OPERATION,
                         "glLoadProgramNV(HPOS not written)");
@@ -1374,8 +1374,7 @@ _mesa_parse_nv_vertex_program(GLcontext *ctx, GLenum dstTarget,
 
       /* copy the compiled instructions */
       assert(parseState.numInst <= MAX_NV_VERTEX_PROGRAM_INSTRUCTIONS);
-      newInst = (struct prog_instruction *)
-         _mesa_malloc(parseState.numInst * sizeof(struct prog_instruction));
+      newInst = _mesa_alloc_instructions(parseState.numInst);
       if (!newInst) {
          _mesa_error(ctx, GL_OUT_OF_MEMORY, "glLoadProgramNV");
          _mesa_free(programString);
@@ -1562,7 +1561,7 @@ _mesa_print_nv_vertex_instruction(const struct prog_instruction *inst)
  * Print (unparse) the given vertex program.  Just for debugging.
  */
 void
-_mesa_print_nv_vertex_program(const struct vertex_program *program)
+_mesa_print_nv_vertex_program(const struct gl_vertex_program *program)
 {
    const struct prog_instruction *inst;
 

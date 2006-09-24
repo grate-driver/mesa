@@ -1,4 +1,4 @@
-/* $Id: x86.h,v 1.5 2002-04-09 14:58:03 keithw Exp $ */
+/* $Id: x86.h,v 1.5 2002/04/09 14:58:03 keithw Exp $ */
 
 /*
  * Mesa 3-D graphics library

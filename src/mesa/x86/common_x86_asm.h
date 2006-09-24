@@ -1,4 +1,4 @@
-/* $Id: common_x86_asm.h,v 1.12 2005-07-16 00:56:20 ajax Exp $ */
+/* $Id: common_x86_asm.h,v 1.12 2005/07/16 00:56:20 ajax Exp $ */
 
 /*
  * Mesa 3-D graphics library

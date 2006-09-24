@@ -1,8 +1,8 @@
 /*
  * Mesa 3-D graphics library
- * Version:  6.5
+ * Version:  6.5.1
  *
- * Copyright (C) 1999-2005  Brian Paul   All Rights Reserved.
+ * Copyright (C) 1999-2006  Brian Paul   All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -175,6 +175,7 @@ _mesa_BeginQueryARB(GLenum target, GLuint id)
             return;
          }
          break;
+#if FEATURE_EXT_timer_query
       case GL_TIME_ELAPSED_EXT:
          if (!ctx->Extensions.EXT_timer_query) {
             _mesa_error(ctx, GL_INVALID_ENUM, "glBeginQueryARB(target)");
@@ -185,6 +186,7 @@ _mesa_BeginQueryARB(GLenum target, GLuint id)
             return;
          }
          break;
+#endif
       default:
          _mesa_error(ctx, GL_INVALID_ENUM, "glBeginQueryARB(target)");
          return;
@@ -221,9 +223,11 @@ _mesa_BeginQueryARB(GLenum target, GLuint id)
    if (target == GL_SAMPLES_PASSED_ARB) {
       ctx->Query.CurrentOcclusionObject = q;
    }
+#if FEATURE_EXT_timer_query
    else if (target == GL_TIME_ELAPSED_EXT) {
       ctx->Query.CurrentTimerObject = q;
    }
+#endif
 
    if (ctx->Driver.BeginQuery) {
       ctx->Driver.BeginQuery(ctx, target, q);
@@ -249,6 +253,7 @@ _mesa_EndQueryARB(GLenum target)
          q = ctx->Query.CurrentOcclusionObject;
          ctx->Query.CurrentOcclusionObject = NULL;
          break;
+#if FEATURE_EXT_timer_query
       case GL_TIME_ELAPSED_EXT:
          if (!ctx->Extensions.EXT_timer_query) {
             _mesa_error(ctx, GL_INVALID_ENUM, "glEndQueryARB(target)");
@@ -257,6 +262,7 @@ _mesa_EndQueryARB(GLenum target)
          q = ctx->Query.CurrentTimerObject;
          ctx->Query.CurrentTimerObject = NULL;
          break;
+#endif
       default:
          _mesa_error(ctx, GL_INVALID_ENUM, "glEndQueryARB(target)");
          return;
@@ -294,6 +300,7 @@ _mesa_GetQueryivARB(GLenum target, GLenum pname, GLint *params)
          }
          q = ctx->Query.CurrentOcclusionObject;
          break;
+#if FEATURE_EXT_timer_query
       case GL_TIME_ELAPSED_EXT:
          if (!ctx->Extensions.EXT_timer_query) {
             _mesa_error(ctx, GL_INVALID_ENUM, "glEndQueryARB(target)");
@@ -301,6 +308,7 @@ _mesa_GetQueryivARB(GLenum target, GLenum pname, GLint *params)
          }
          q = ctx->Query.CurrentTimerObject;
          break;
+#endif
       default:
          _mesa_error(ctx, GL_INVALID_ENUM, "glGetQueryivARB(target)");
          return;
@@ -408,6 +416,8 @@ _mesa_GetQueryObjectuivARB(GLuint id, GLenum pname, GLuint *params)
 }
 
 
+#if FEATURE_EXT_timer_query
+
 /**
  * New with GL_EXT_timer_query
  */
@@ -489,6 +499,8 @@ _mesa_GetQueryObjectui64vEXT(GLuint id, GLenum pname, GLuint64EXT *params)
    }
 }
 
+#endif /* FEATURE_EXT_timer_query */
+
 
 /**
  * Allocate/init the context state related to query objects.
@@ -504,22 +516,23 @@ _mesa_init_query(GLcontext *ctx)
 
 
 /**
+ * Callback for deleting a query object.  Called by _mesa_HashDeleteAll().
+ */
+static void
+delete_queryobj_cb(GLuint id, void *data, void *userData)
+{
+   struct gl_query_object *q= (struct gl_query_object *) data;
+   (void) userData;
+   delete_query_object(q);
+}
+
+
+/**
  * Free the context state related to query objects.
  */
 void
 _mesa_free_query_data(GLcontext *ctx)
 {
-   while (1) {
-      GLuint id = _mesa_HashFirstEntry(ctx->Query.QueryObjects);
-      if (id) {
-         struct gl_query_object *q = lookup_query_object(ctx, id);
-         ASSERT(q);
-         delete_query_object(q);
-         _mesa_HashRemove(ctx->Query.QueryObjects, id);
-      }
-      else {
-         break;
-      }
-   }
+   _mesa_HashDeleteAll(ctx->Query.QueryObjects, delete_queryobj_cb, NULL);
    _mesa_DeleteHashTable(ctx->Query.QueryObjects);
 }

@@ -1,6 +1,6 @@
 /*
  * Mesa 3-D graphics library
- * Version:  6.5
+ * Version:  6.5.1
  *
  * Copyright (C) 1999-2006  Brian Paul   All Rights Reserved.
  *
@@ -348,6 +348,36 @@ _mesa_base_tex_format( GLcontext *ctx, GLint internalFormat )
       }
    }
 
+#if FEATURE_EXT_texture_sRGB
+   if (ctx->Extensions.EXT_texture_sRGB) {
+      switch (internalFormat) {
+      case GL_SRGB_EXT:
+      case GL_SRGB8_EXT:
+      case GL_COMPRESSED_SRGB_EXT:
+      case GL_COMPRESSED_SRGB_S3TC_DXT1_EXT:
+         return GL_RGB;
+      case GL_SRGB_ALPHA_EXT:
+      case GL_SRGB8_ALPHA8_EXT:
+      case GL_COMPRESSED_SRGB_ALPHA_EXT:
+      case GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT:
+      case GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT3_EXT:
+      case GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT:
+         return GL_RGBA;
+      case GL_SLUMINANCE_ALPHA_EXT:
+      case GL_SLUMINANCE8_ALPHA8_EXT:
+      case GL_COMPRESSED_SLUMINANCE_EXT:
+      case GL_COMPRESSED_SLUMINANCE_ALPHA_EXT:
+         return GL_LUMINANCE_ALPHA;
+      case GL_SLUMINANCE_EXT:
+      case GL_SLUMINANCE8_EXT:
+         return GL_LUMINANCE;
+      default:
+            ; /* fallthrough */
+      }
+   }
+
+#endif /* FEATURE_EXT_texture_sRGB */
+
    return -1; /* error */
 }
 
@@ -440,6 +470,24 @@ is_color_format(GLenum format)
       case GL_COMPRESSED_RGBA_S3TC_DXT5_EXT:
       case GL_COMPRESSED_RGB_FXT1_3DFX:
       case GL_COMPRESSED_RGBA_FXT1_3DFX:
+#if FEATURE_EXT_texture_sRGB
+      case GL_SRGB_EXT:
+      case GL_SRGB8_EXT:
+      case GL_SRGB_ALPHA_EXT:
+      case GL_SRGB8_ALPHA8_EXT:
+      case GL_SLUMINANCE_ALPHA_EXT:
+      case GL_SLUMINANCE8_ALPHA8_EXT:
+      case GL_SLUMINANCE_EXT:
+      case GL_SLUMINANCE8_EXT:
+      case GL_COMPRESSED_SRGB_EXT:
+      case GL_COMPRESSED_SRGB_S3TC_DXT1_EXT:
+      case GL_COMPRESSED_SRGB_ALPHA_EXT:
+      case GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT:
+      case GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT3_EXT:
+      case GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT:
+      case GL_COMPRESSED_SLUMINANCE_EXT:
+      case GL_COMPRESSED_SLUMINANCE_ALPHA_EXT:
+#endif /* FEATURE_EXT_texture_sRGB */
          return GL_TRUE;
       case GL_YCBCR_MESA:  /* not considered to be RGB */
       default:
@@ -1095,9 +1143,9 @@ _mesa_init_teximage_fields(GLcontext *ctx, GLenum target,
    GLint i;
 
    ASSERT(img);
-   ASSERT(width > 0);
-   ASSERT(height > 0);
-   ASSERT(depth > 0);
+   ASSERT(width >= 0);
+   ASSERT(height >= 0);
+   ASSERT(depth >= 0);
 
    img->_BaseFormat = _mesa_base_tex_format( ctx, internalFormat );
    ASSERT(img->_BaseFormat > 0);
@@ -1461,11 +1509,13 @@ texture_error_check( GLcontext *ctx, GLenum target,
 
    /* additional checks for depth textures */
    if (_mesa_base_tex_format(ctx, internalFormat) == GL_DEPTH_COMPONENT) {
-      /* Only 1D and 2D textures supported */
+      /* Only 1D, 2D and rectangular textures supported, not 3D or cubes */
       if (target != GL_TEXTURE_1D &&
           target != GL_PROXY_TEXTURE_1D &&
           target != GL_TEXTURE_2D &&
-          target != GL_PROXY_TEXTURE_2D) {
+          target != GL_PROXY_TEXTURE_2D &&
+          target != GL_TEXTURE_RECTANGLE_ARB &&
+          target != GL_PROXY_TEXTURE_RECTANGLE_ARB) {
          if (!isProxy)
             _mesa_error(ctx, GL_INVALID_ENUM,
                         "glTexImage(target/internalFormat)");
@@ -1643,6 +1693,20 @@ subtexture_error_check( GLcontext *ctx, GLuint dimensions,
                   "glTexSubImage%dD(format or type)", dimensions);
       return GL_TRUE;
    }
+
+#if FEATURE_EXT_texture_sRGB
+   if (destTex->InternalFormat == GL_COMPRESSED_SRGB_S3TC_DXT1_EXT ||
+       destTex->InternalFormat == GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT ||
+       destTex->InternalFormat == GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT3_EXT ||
+       destTex->InternalFormat == GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT) {
+      if ((width & 0x3) || (height & 0x3) ||
+          (xoffset & 0x3) || (yoffset & 0x3))
+         _mesa_error(ctx, GL_INVALID_OPERATION,
+                     "glTexSubImage%dD(size or offset not multiple of 4)",
+                     dimensions);
+      return GL_TRUE;
+   }
+#endif
 
    if (destTex->IsCompressed) {
       const struct gl_texture_unit *texUnit;
@@ -1994,11 +2058,11 @@ copytexsubimage_error_check( GLcontext *ctx, GLuint dimensions,
    }
 
    if (teximage->IsCompressed) {
-   if (!_mesa_source_buffer_exists(ctx, teximage->_BaseFormat)) {
-      _mesa_error(ctx, GL_INVALID_OPERATION,
-                  "glCopyTexSubImage%dD(missing readbuffer)", dimensions);
-      return GL_TRUE;
-   }
+      if (!_mesa_source_buffer_exists(ctx, teximage->_BaseFormat)) {
+         _mesa_error(ctx, GL_INVALID_OPERATION,
+                     "glCopyTexSubImage%dD(missing readbuffer)", dimensions);
+         return GL_TRUE;
+      }
 
       if (target != GL_TEXTURE_2D) {
          _mesa_error(ctx, GL_INVALID_ENUM,
@@ -2099,20 +2163,24 @@ _mesa_GetTexImage( GLenum target, GLint level, GLenum format,
 
    if (!ctx->Extensions.EXT_paletted_texture && is_index_format(format)) {
       _mesa_error(ctx, GL_INVALID_ENUM, "glGetTexImage(format)");
+      return;
    }
 
    if (!ctx->Extensions.SGIX_depth_texture &&
        !ctx->Extensions.ARB_depth_texture && is_depth_format(format)) {
       _mesa_error(ctx, GL_INVALID_ENUM, "glGetTexImage(format)");
+      return;
    }
 
    if (!ctx->Extensions.MESA_ycbcr_texture && is_ycbcr_format(format)) {
       _mesa_error(ctx, GL_INVALID_ENUM, "glGetTexImage(format)");
+      return;
    }
 
    if (!ctx->Extensions.EXT_packed_depth_stencil
        && is_depthstencil_format(format)) {
       _mesa_error(ctx, GL_INVALID_ENUM, "glGetTexImage(format)");
+      return;
    }
 
    if (!pixels)
@@ -2154,6 +2222,18 @@ _mesa_GetTexImage( GLenum target, GLint level, GLenum format,
        && !is_depthstencil_format(texImage->TexFormat->BaseFormat)) {
       _mesa_error(ctx, GL_INVALID_OPERATION, "glGetTexImage(format mismatch)");
       return;
+   }
+
+   if (ctx->Pack.BufferObj->Name) {
+      /* packing texture image into a PBO */
+      const GLuint dimensions = (target == GL_TEXTURE_3D) ? 3 : 2;
+      if (!_mesa_validate_pbo_access(dimensions, &ctx->Pack, texImage->Width,
+                                     texImage->Height, texImage->Depth,
+                                     format, type, pixels)) {
+         _mesa_error(ctx, GL_INVALID_OPERATION,
+                     "glGetTexImage(invalid PBO access)");
+         return;
+      }
    }
 
    /* typically, this will call _mesa_get_teximage() */
@@ -2932,6 +3012,16 @@ compressed_texture_error_check(GLcontext *ctx, GLint dimensions,
                                                        depth, internalFormat);
    if (expectedSize != imageSize)
       return GL_INVALID_VALUE;
+
+#if FEATURE_EXT_texture_sRGB
+   if ((internalFormat == GL_COMPRESSED_SRGB_S3TC_DXT1_EXT ||
+        internalFormat == GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT ||
+        internalFormat == GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT3_EXT ||
+        internalFormat == GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT)
+       && border != 0) {
+      return GL_INVALID_OPERATION;
+   }
+#endif
 
    return GL_NO_ERROR;
 }

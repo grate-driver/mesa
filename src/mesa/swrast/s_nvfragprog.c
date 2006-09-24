@@ -1,8 +1,8 @@
 /*
  * Mesa 3-D graphics library
- * Version:  6.5
+ * Version:  6.5.1
  *
- * Copyright (C) 1999-2005  Brian Paul   All Rights Reserved.
+ * Copyright (C) 1999-2006  Brian Paul   All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -106,7 +106,7 @@ static INLINE const GLfloat *
 get_register_pointer( GLcontext *ctx,
                       const struct prog_src_register *source,
                       const struct fp_machine *machine,
-                      const struct fragment_program *program )
+                      const struct gl_fragment_program *program )
 {
    const GLfloat *src;
    switch (source->File) {
@@ -153,7 +153,7 @@ static void
 fetch_vector4( GLcontext *ctx,
                const struct prog_src_register *source,
                const struct fp_machine *machine,
-               const struct fragment_program *program,
+               const struct gl_fragment_program *program,
                GLfloat result[4] )
 {
    const GLfloat *src = get_register_pointer(ctx, source, machine, program);
@@ -323,7 +323,7 @@ static void
 fetch_vector1( GLcontext *ctx,
                const struct prog_src_register *source,
                const struct fp_machine *machine,
-               const struct fragment_program *program,
+               const struct gl_fragment_program *program,
                GLfloat result[4] )
 {
    const GLfloat *src = get_register_pointer(ctx, source, machine, program);
@@ -477,7 +477,7 @@ store_vector4( const struct prog_instruction *inst,
 static void
 init_machine_deriv( GLcontext *ctx,
                     const struct fp_machine *machine,
-                    const struct fragment_program *program,
+                    const struct gl_fragment_program *program,
                     const struct sw_span *span, char xOrY,
                     struct fp_machine *dMachine )
 {
@@ -588,7 +588,7 @@ init_machine_deriv( GLcontext *ctx,
  */
 static GLboolean
 execute_program( GLcontext *ctx,
-                 const struct fragment_program *program, GLuint maxInst,
+                 const struct gl_fragment_program *program, GLuint maxInst,
                  struct fp_machine *machine, const struct sw_span *span,
                  GLuint column )
 {
@@ -1381,7 +1381,7 @@ execute_program( GLcontext *ctx,
 
 static void
 init_machine( GLcontext *ctx, struct fp_machine *machine,
-              const struct fragment_program *program,
+              const struct gl_fragment_program *program,
               const struct sw_span *span, GLuint col )
 {
    GLuint inputsRead = program->Base.InputsRead;
@@ -1400,8 +1400,14 @@ init_machine( GLcontext *ctx, struct fp_machine *machine,
    if (inputsRead & (1 << FRAG_ATTRIB_WPOS)) {
       GLfloat *wpos = machine->Inputs[FRAG_ATTRIB_WPOS];
       ASSERT(span->arrayMask & SPAN_Z);
-      wpos[0] = (GLfloat) span->x + col;
-      wpos[1] = (GLfloat) span->y;
+      if (span->arrayMask & SPAN_XY) {
+         wpos[0] = (GLfloat) span->array->x[col];
+         wpos[1] = (GLfloat) span->array->y[col];
+      }
+      else {
+         wpos[0] = (GLfloat) span->x + col;
+         wpos[1] = (GLfloat) span->y;
+      }
       wpos[2] = (GLfloat) span->array->z[col] / ctx->DrawBuffer->_DepthMaxF;
       wpos[3] = span->w + col * span->dwdx;
    }
@@ -1452,7 +1458,7 @@ init_machine( GLcontext *ctx, struct fp_machine *machine,
 void
 _swrast_exec_fragment_program( GLcontext *ctx, struct sw_span *span )
 {
-   const struct fragment_program *program = ctx->FragmentProgram._Current;
+   const struct gl_fragment_program *program = ctx->FragmentProgram._Current;
    GLuint i;
 
    ctx->_CurrentProgram = GL_FRAGMENT_PROGRAM_ARB; /* or NV, doesn't matter */
@@ -1485,7 +1491,12 @@ _swrast_exec_fragment_program( GLcontext *ctx, struct sw_span *span )
          if (program->Base.OutputsWritten & (1 << FRAG_RESULT_DEPR)) {
             const GLfloat depth
                = ctx->FragmentProgram.Machine.Outputs[FRAG_RESULT_DEPR][2];
-            span->array->z[i] = IROUND(depth * ctx->DrawBuffer->_DepthMaxF);
+            if (depth <= 0.0)
+               span->array->z[i] = 0;
+            else if (depth >= 1.0)
+               span->array->z[i] = ctx->DrawBuffer->_DepthMax;
+            else
+               span->array->z[i] = IROUND(depth * ctx->DrawBuffer->_DepthMaxF);
          }
       }
    }

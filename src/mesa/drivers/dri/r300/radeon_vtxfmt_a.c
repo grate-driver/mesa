@@ -44,6 +44,7 @@
 #include "vtxfmt.h"
 #include "api_validate.h"
 #include "state.h"
+#include "image.h"
 
 #define CONV_VB(a, b) rvb->AttribPtr[(a)].size = vb->b->size, \
 			rvb->AttribPtr[(a)].type = GL_FLOAT, \
@@ -73,6 +74,9 @@ void radeon_vb_to_rvb(r300ContextPtr rmesa, struct radeon_vertex_buffer *rvb, st
 	
 	for (i=0; i < ctx->Const.MaxTextureCoordUnits; i++)
 		CONV_VB(VERT_ATTRIB_TEX0 + i, TexCoordPtr[i]);
+
+	for (i=0; i < MAX_VERTEX_PROGRAM_ATTRIBS; i++)
+		CONV_VB(VERT_ATTRIB_GENERIC0 + i, AttribPtr[VERT_ATTRIB_GENERIC0 + i]);
 	
 	rvb->Primitive = vb->Primitive;
 	rvb->PrimitiveCount = vb->PrimitiveCount;
@@ -84,16 +88,18 @@ void radeon_vb_to_rvb(r300ContextPtr rmesa, struct radeon_vertex_buffer *rvb, st
 
 extern void _tnl_array_init( GLcontext *ctx );
 
-#define CONV(a, b) do { \
-			if (ctx->Array.b.Enabled) { \
-				rmesa->state.VB.AttribPtr[(a)].size = ctx->Array.b.Size; \
-				rmesa->state.VB.AttribPtr[(a)].data = ctx->Array.b.BufferObj->Name ? \
-				(void *)ADD_POINTERS(ctx->Array.b.Ptr, ctx->Array.b.BufferObj->Data) : (void *)ctx->Array.b.Ptr; \
-				rmesa->state.VB.AttribPtr[(a)].stride = ctx->Array.b.StrideB; \
-				rmesa->state.VB.AttribPtr[(a)].type = ctx->Array.b.Type; \
-				enabled |= 1 << (a); \
-			} \
-		   } while (0)
+#define CONV(a, b) \
+    do { \
+	if (ctx->Array.ArrayObj->b.Enabled) { \
+	    rmesa->state.VB.AttribPtr[(a)].size = ctx->Array.ArrayObj->b.Size; \
+	    rmesa->state.VB.AttribPtr[(a)].data = ctx->Array.ArrayObj->b.BufferObj->Name \
+	      ? (void *)ADD_POINTERS(ctx->Array.ArrayObj->b.Ptr, ctx->Array.ArrayObj->b.BufferObj->Data) \
+	      : (void *)ctx->Array.ArrayObj->b.Ptr; \
+	    rmesa->state.VB.AttribPtr[(a)].stride = ctx->Array.ArrayObj->b.StrideB; \
+	    rmesa->state.VB.AttribPtr[(a)].type = ctx->Array.ArrayObj->b.Type; \
+	    enabled |= 1 << (a); \
+	} \
+    } while (0)
 
 static int setup_arrays(r300ContextPtr rmesa, GLint start)
 {
@@ -136,13 +142,11 @@ static int setup_arrays(r300ContextPtr rmesa, GLint start)
 	
 	for(i=0; i < VERT_ATTRIB_MAX; i++){
 		if(rmesa->state.VB.AttribPtr[i].type != GL_UNSIGNED_BYTE &&
-			rmesa->state.VB.AttribPtr[i].type != GL_FLOAT){
+#if MESA_LITTLE_ENDIAN
+		   rmesa->state.VB.AttribPtr[i].type != GL_SHORT &&
+#endif
+		   rmesa->state.VB.AttribPtr[i].type != GL_FLOAT){
 			WARN_ONCE("Unsupported format %d at index %d\n", rmesa->state.VB.AttribPtr[i].type, i);
-			return R300_FALLBACK_TCL;
-		}
-		if(rmesa->state.VB.AttribPtr[i].type == GL_UNSIGNED_BYTE &&
-			rmesa->state.VB.AttribPtr[i].size != 4){
-			WARN_ONCE("Unsupported component count for ub colors\n");
 			return R300_FALLBACK_TCL;
 		}
 		
@@ -298,46 +302,14 @@ static void radeonDrawElements( GLenum mode, GLsizei count, GLenum type, const G
 	if (ctx->NewState) 
 		_mesa_update_state( ctx );
 	
-	for (i=_TNL_FIRST_MAT; i <= _TNL_LAST_MAT; i++) {
-		rmesa->temp_attrib[i] = TNL_CONTEXT(ctx)->vb.AttribPtr[i];
-		TNL_CONTEXT(ctx)->vb.AttribPtr[i] = &rmesa->dummy_attrib[i];
-	}
 	r300UpdateShaders(rmesa);
-	for (i=_TNL_FIRST_MAT; i <= _TNL_LAST_MAT; i++) {
-		TNL_CONTEXT(ctx)->vb.AttribPtr[i] = rmesa->temp_attrib[i];
+	
+	if (setup_arrays(rmesa, min) >= R300_FALLBACK_TCL) {
+		r300ReleaseDmaRegion(rmesa, &rvb, __FUNCTION__);
+		goto fallback;
 	}
 	
-	if (rmesa->state.VB.LockCount) {
-		if (rmesa->state.VB.lock_uptodate == GL_FALSE) {
-			if (setup_arrays(rmesa, rmesa->state.VB.LockFirst))
-				return;
-			
-			rmesa->state.VB.Count = rmesa->state.VB.LockCount;
-			
-			r300ReleaseArrays(ctx);
-			r300EmitArrays(ctx, GL_FALSE);
-			
-			rmesa->state.VB.lock_uptodate = GL_TRUE;
-		}
-		
-		if (min < rmesa->state.VB.LockFirst) {
-			WARN_ONCE("Out of range min %d vs %d!\n", min, rmesa->state.VB.LockFirst);
-			return;
-		}
-		
-		if (max >= rmesa->state.VB.LockFirst + rmesa->state.VB.LockCount) {
-			WARN_ONCE("Out of range max %d vs %d!\n", max, rmesa->state.VB.LockFirst +
-					rmesa->state.VB.LockCount);
-			return;
-		}
-	} else {
-		if (setup_arrays(rmesa, min) >= R300_FALLBACK_TCL) {
-			r300ReleaseDmaRegion(rmesa, &rvb, __FUNCTION__);
-			goto fallback;
-		}
-		
-		rmesa->state.VB.Count = max - min + 1;
-	}
+	rmesa->state.VB.Count = max - min + 1;
 	
 	r300UpdateShaderStates(rmesa);
 	
@@ -354,7 +326,10 @@ static void radeonDrawElements( GLenum mode, GLsizei count, GLenum type, const G
 	rmesa->state.VB.Elts = ptr;
 	rmesa->state.VB.elt_size = elt_size;
 	
-	r300_run_vb_render(ctx, NULL);
+	if (r300_run_vb_render(ctx, NULL)) {
+		r300ReleaseDmaRegion(rmesa, &rvb, __FUNCTION__);
+		goto fallback;
+	}
 	
 	if(rvb.buf)
 		radeon_mm_use(rmesa, rvb.buf->id);
@@ -382,6 +357,22 @@ static void radeonDrawRangeElements(GLenum mode, GLuint min, GLuint max, GLsizei
 	const GLvoid *indices = c_indices;
 	
 	if (count > 65535) {
+		/* TODO */
+		if (mode == GL_POINTS ||
+		    mode == GL_LINES ||
+		    mode == GL_QUADS ||
+		    mode == GL_TRIANGLES) {
+			
+			while (count) {
+				i = r300_get_num_verts(rmesa, MIN2(count, 65535), mode);
+				
+				radeonDrawRangeElements(mode, min, max, i, type, indices);
+				
+				indices += i * _mesa_sizeof_type(type);
+				count -= i;
+			}
+			return ;
+		}
 		WARN_ONCE("Too many verts!\n");
 		goto fallback;
 	}
@@ -482,46 +473,14 @@ static void radeonDrawRangeElements(GLenum mode, GLuint min, GLuint max, GLsizei
 	if (ctx->NewState) 
 		_mesa_update_state( ctx );
 	
-	for (i=_TNL_FIRST_MAT; i <= _TNL_LAST_MAT; i++) {
-		rmesa->temp_attrib[i] = TNL_CONTEXT(ctx)->vb.AttribPtr[i];
-		TNL_CONTEXT(ctx)->vb.AttribPtr[i] = &rmesa->dummy_attrib[i];
-	}
 	r300UpdateShaders(rmesa);
-	for (i=_TNL_FIRST_MAT; i <= _TNL_LAST_MAT; i++) {
-		TNL_CONTEXT(ctx)->vb.AttribPtr[i] = rmesa->temp_attrib[i];
+
+	if (setup_arrays(rmesa, min) >= R300_FALLBACK_TCL) {
+		r300ReleaseDmaRegion(rmesa, &rvb, __FUNCTION__);
+		goto fallback;
 	}
 
-	if (rmesa->state.VB.LockCount) {
-		if (rmesa->state.VB.lock_uptodate == GL_FALSE) {
-			if (setup_arrays(rmesa, rmesa->state.VB.LockFirst))
-				goto fallback;
-			
-			rmesa->state.VB.Count = rmesa->state.VB.LockCount;
-			
-			r300ReleaseArrays(ctx);
-			r300EmitArrays(ctx, GL_FALSE);
-			
-			rmesa->state.VB.lock_uptodate = GL_TRUE;
-		}
-		
-		if (min < rmesa->state.VB.LockFirst) {
-			WARN_ONCE("Out of range min %d vs %d!\n", min, rmesa->state.VB.LockFirst);
-			goto fallback;
-		}
-		
-		/*if (max >= rmesa->state.VB.LockFirst + rmesa->state.VB.LockCount) {
-			WARN_ONCE("Out of range max %d vs %d!\n", max, rmesa->state.VB.LockFirst +
-					rmesa->state.VB.LockCount);
-			return;
-		}*/
-	} else {
-		if (setup_arrays(rmesa, min) >= R300_FALLBACK_TCL) {
-			r300ReleaseDmaRegion(rmesa, &rvb, __FUNCTION__);
-			goto fallback;
-		}
-		
-		rmesa->state.VB.Count = max - min + 1;
-	}
+	rmesa->state.VB.Count = max - min + 1;
 	
 	r300UpdateShaderStates(rmesa);
 	
@@ -540,7 +499,10 @@ static void radeonDrawRangeElements(GLenum mode, GLuint min, GLuint max, GLsizei
 	rmesa->state.VB.elt_min = min;
 	rmesa->state.VB.elt_max = max;
 	
-	r300_run_vb_render(ctx, NULL);
+	if (r300_run_vb_render(ctx, NULL)) {
+		r300ReleaseDmaRegion(rmesa, &rvb, __FUNCTION__);
+		goto fallback;
+	}
 	
 	if(rvb.buf)
 		radeon_mm_use(rmesa, rvb.buf->id);
@@ -561,7 +523,6 @@ static void radeonDrawArrays( GLenum mode, GLint start, GLsizei count )
 	GET_CURRENT_CONTEXT(ctx);
 	r300ContextPtr rmesa = R300_CONTEXT(ctx);
 	struct tnl_prim prim;
-	int i;
 	
 	if (count > 65535) {
 		WARN_ONCE("Too many verts!\n");
@@ -578,44 +539,12 @@ static void radeonDrawArrays( GLenum mode, GLint start, GLsizei count )
 	
 	/* XXX: setup_arrays before state update? */
 	
-	for (i=_TNL_FIRST_MAT; i <= _TNL_LAST_MAT; i++) {
-		rmesa->temp_attrib[i] = TNL_CONTEXT(ctx)->vb.AttribPtr[i];
-		TNL_CONTEXT(ctx)->vb.AttribPtr[i] = &rmesa->dummy_attrib[i];
-	}
 	r300UpdateShaders(rmesa);
-	for (i=_TNL_FIRST_MAT; i <= _TNL_LAST_MAT; i++) {
-		TNL_CONTEXT(ctx)->vb.AttribPtr[i] = rmesa->temp_attrib[i];
-	}
 
-	if (rmesa->state.VB.LockCount) {
-		if (rmesa->state.VB.lock_uptodate == GL_FALSE) {
-			if (setup_arrays(rmesa, rmesa->state.VB.LockFirst))
-				return;
-			
-			rmesa->state.VB.Count = rmesa->state.VB.LockCount;
-			
-			r300ReleaseArrays(ctx);
-			r300EmitArrays(ctx, GL_FALSE);
-			
-			rmesa->state.VB.lock_uptodate = GL_TRUE;
-		}
-		
-		if (start < rmesa->state.VB.LockFirst) {
-			WARN_ONCE("Out of range min %d vs %d!\n", start, rmesa->state.VB.LockFirst);
-			goto fallback;
-		}
-		
-		if (start + count - 1 >= rmesa->state.VB.LockFirst + rmesa->state.VB.LockCount) { /* XXX */
-			WARN_ONCE("Out of range max %d vs %d!\n", start + count - 1, rmesa->state.VB.LockFirst +
-					rmesa->state.VB.LockCount);
-			goto fallback;
-		}
-	} else {
-		if (setup_arrays(rmesa, start) >= R300_FALLBACK_TCL)
-			goto fallback;
-		
-		rmesa->state.VB.Count = count;
-	}
+	if (setup_arrays(rmesa, start) >= R300_FALLBACK_TCL)
+		goto fallback;
+
+	rmesa->state.VB.Count = count;
 
 	r300UpdateShaderStates(rmesa);
 	
@@ -634,7 +563,8 @@ static void radeonDrawArrays( GLenum mode, GLint start, GLsizei count )
 	rmesa->state.VB.elt_min = 0;
 	rmesa->state.VB.elt_max = 0;
 	
-	r300_run_vb_render(ctx, NULL);
+	if (r300_run_vb_render(ctx, NULL))
+		goto fallback;
 
 	return ;
 	
@@ -662,41 +592,6 @@ void radeon_init_vtxfmt_a(r300ContextPtr rmesa)
 #endif
 
 #ifdef HW_VBOS
-
-#if 0
-static void radeonLockArraysEXT(GLcontext *ctx, GLint first, GLsizei count)
-{
-	r300ContextPtr rmesa = R300_CONTEXT(ctx);
-	
-	/* Only when CB_DPATH is defined.
-	   r300Clear tampers over the aos setup without it.
-	   (r300ResetHwState cannot call r300EmitArrays)
-	 */
-#ifndef CB_DPATH
-	first = 0; count = 0;
-#endif
-	
-	if (first < 0 || count <= 0) {
-		rmesa->state.VB.LockFirst = 0;
-		rmesa->state.VB.LockCount = 0;
-		rmesa->state.VB.lock_uptodate = GL_FALSE;
-		return ;
-	}
-	
-	rmesa->state.VB.LockFirst = first;
-	rmesa->state.VB.LockCount = count;
-	rmesa->state.VB.lock_uptodate = GL_FALSE;
-}
-
-static void radeonUnlockArraysEXT(GLcontext *ctx)
-{
-	r300ContextPtr rmesa = R300_CONTEXT(ctx);
-	
-	rmesa->state.VB.LockFirst = 0;
-	rmesa->state.VB.LockCount = 0;
-	rmesa->state.VB.lock_uptodate = GL_FALSE;
-}
-#endif
 
 static struct gl_buffer_object *
 r300NewBufferObject(GLcontext *ctx, GLuint name, GLenum target )
@@ -854,15 +749,14 @@ void r300_evict_vbos(GLcontext *ctx, int amount)
 	r300ContextPtr rmesa = R300_CONTEXT(ctx);
 	struct _mesa_HashTable *hash = ctx->Shared->BufferObjects;
 	GLuint k = _mesa_HashFirstEntry(hash);
-	struct gl_buffer_object *obj;
-	struct r300_buffer_object *r300_obj;
-	GLvoid *data;
 	
 	while (amount > 0 && k) {
-		obj = (struct gl_buffer_object *) _mesa_HashLookup(hash, k);
-		r300_obj = (struct r300_buffer_object *) obj;
+		struct gl_buffer_object *obj = _mesa_lookup_bufferobj(ctx, k);
+		struct r300_buffer_object *r300_obj
+			= (struct r300_buffer_object *) obj;
 		
 		if (obj->OnCard && obj->Size) {
+			GLvoid *data;
 			obj->Data = _mesa_malloc(obj->Size);
 			
 			data = radeon_mm_map(rmesa, r300_obj->id, RADEON_MM_R);
@@ -889,9 +783,6 @@ void r300_init_vbo_funcs(struct dd_function_table *functions)
 	functions->MapBuffer = r300MapBuffer;
 	functions->UnmapBuffer = r300UnmapBuffer;
 	functions->DeleteBuffer = r300DeleteBuffer;
-	
-	/*functions->LockArraysEXT = radeonLockArraysEXT;
-	functions->UnlockArraysEXT = radeonUnlockArraysEXT;*/
 }
 
 #endif

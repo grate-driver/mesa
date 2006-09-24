@@ -1,4 +1,4 @@
-/* $Id: sse_normal.S,v 1.6 2006-04-17 18:58:24 krh Exp $ */
+/* $Id: sse_normal.S,v 1.6 2006/04/17 18:58:24 krh Exp $ */
 
 /*
  * Mesa 3-D graphics library

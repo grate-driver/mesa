@@ -93,10 +93,22 @@ typedef enum slang_assembly_type_
 	slang_asm_return,
 	slang_asm_discard,
 	slang_asm_exit,
-	/* mesa-specific extensions */
+   /* GL_MESA_shader_debug */
 	slang_asm_float_print,
 	slang_asm_int_print,
 	slang_asm_bool_print,
+   /* vec4 */
+   slang_asm_float_to_vec4,
+   slang_asm_vec4_add,
+   slang_asm_vec4_subtract,
+   slang_asm_vec4_multiply,
+   slang_asm_vec4_divide,
+   slang_asm_vec4_negate,
+   slang_asm_vec4_dot,
+   slang_asm_vec4_copy,
+   slang_asm_vec4_deref,
+   slang_asm_vec4_equal_int,
+   /* not a real assembly instruction */
 	slang_asm__last
 } slang_assembly_type;
 

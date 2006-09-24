@@ -146,9 +146,9 @@ struct parse_state {
    const GLubyte *start;              /* start of program string */
    const GLubyte *pos;                /* current position */
    const GLubyte *curLine;
-   struct fragment_program *program;  /* current program */
+   struct gl_fragment_program *program;  /* current program */
 
-   struct program_parameter_list *parameters;
+   struct gl_program_parameter_list *parameters;
 
    GLuint numInst;                    /* number of instructions parsed */
    GLuint inputsRead;                 /* bitmask of input registers used */
@@ -983,16 +983,16 @@ Parse_VectorSrc(struct parse_state *parseState,
       srcReg->NegateAbs = (sign < 0.0F) ? GL_TRUE : GL_FALSE;
 
       if (Parse_String(parseState, "-"))
-         srcReg->NegateBase = 0xf;
+         srcReg->NegateBase = NEGATE_XYZW;
       else if (Parse_String(parseState, "+"))
-         srcReg->NegateBase = 0;
+         srcReg->NegateBase = NEGATE_NONE;
       else
-         srcReg->NegateBase = 0;
+         srcReg->NegateBase = NEGATE_NONE;
    }
    else {
       srcReg->Abs = GL_FALSE;
       srcReg->NegateAbs = GL_FALSE;
-      srcReg->NegateBase = (sign < 0.0F) ? 0xf : 0x0;
+      srcReg->NegateBase = (sign < 0.0F) ? NEGATE_XYZW : NEGATE_NONE;
    }
 
    /* This should be the real src vector/register name */
@@ -1009,14 +1009,14 @@ Parse_VectorSrc(struct parse_state *parseState,
       srcReg->Index = idx;
    }
    else if (token[0] == 'f') {
-      /* XXX this might be an identier! */
+      /* XXX this might be an identifier! */
       srcReg->File = PROGRAM_INPUT;
       if (!Parse_FragReg(parseState, &idx))
          RETURN_ERROR;
       srcReg->Index = idx;
    }
    else if (token[0] == 'p') {
-      /* XXX this might be an identier! */
+      /* XXX this might be an identifier! */
       srcReg->File = PROGRAM_LOCAL_PARAM;
       if (!Parse_ProgramParamReg(parseState, &idx))
          RETURN_ERROR;
@@ -1107,16 +1107,16 @@ Parse_ScalarSrcReg(struct parse_state *parseState,
       srcReg->NegateAbs = (sign < 0.0F) ? GL_TRUE : GL_FALSE;
 
       if (Parse_String(parseState, "-"))
-         srcReg->NegateBase = 0xf;
+         srcReg->NegateBase = NEGATE_XYZW;
       else if (Parse_String(parseState, "+"))
-         srcReg->NegateBase = 0x0;
+         srcReg->NegateBase = NEGATE_NONE;
       else
-         srcReg->NegateBase = 0x0;
+         srcReg->NegateBase = NEGATE_NONE;
    }
    else {
       srcReg->Abs = GL_FALSE;
       srcReg->NegateAbs = GL_FALSE;
-      srcReg->NegateBase = (sign < 0.0F) ? 0xf : 0x0;
+      srcReg->NegateBase = (sign < 0.0F) ? NEGATE_XYZW : NEGATE_NONE;
    }
 
    if (!Peek_Token(parseState, token))
@@ -1143,6 +1143,20 @@ Parse_ScalarSrcReg(struct parse_state *parseState,
       if (!Parse_VectorConstant(parseState, values))
          RETURN_ERROR;
       paramIndex = _mesa_add_unnamed_constant(parseState->parameters, values);
+      srcReg->File = PROGRAM_NAMED_PARAM;
+      srcReg->Index = paramIndex;      
+   }
+   else if (IsLetter(token[0])){
+      /* named param/constant */
+      GLubyte ident[100];
+      GLint paramIndex;
+      if (!Parse_Identifier(parseState, ident))
+         RETURN_ERROR;
+      paramIndex = _mesa_lookup_parameter_index(parseState->parameters,
+                                                -1, (const char *) ident);
+      if (paramIndex < 0) {
+         RETURN_ERROR2("Undefined constant or parameter: ", ident);
+      }
       srcReg->File = PROGRAM_NAMED_PARAM;
       srcReg->Index = paramIndex;      
    }
@@ -1241,7 +1255,7 @@ Parse_PrintInstruction(struct parse_state *parseState,
    }
 
    inst->SrcReg[0].Swizzle = SWIZZLE_NOOP;
-   inst->SrcReg[0].NegateBase = 0x0;
+   inst->SrcReg[0].NegateBase = NEGATE_NONE;
    inst->SrcReg[0].Abs = GL_FALSE;
    inst->SrcReg[0].NegateAbs = GL_FALSE;
 
@@ -1452,7 +1466,7 @@ Parse_InstructionSequence(struct parse_state *parseState,
 void
 _mesa_parse_nv_fragment_program(GLcontext *ctx, GLenum dstTarget,
                                 const GLubyte *str, GLsizei len,
-                                struct fragment_program *program)
+                                struct gl_fragment_program *program)
 {
    struct parse_state parseState;
    struct prog_instruction instBuffer[MAX_NV_FRAGMENT_PROGRAM_INSTRUCTIONS];
@@ -1520,14 +1534,13 @@ _mesa_parse_nv_fragment_program(GLcontext *ctx, GLenum dstTarget,
 
       /* copy the compiled instructions */
       assert(parseState.numInst <= MAX_NV_FRAGMENT_PROGRAM_INSTRUCTIONS);
-      newInst = (struct prog_instruction *)
-         MALLOC(parseState.numInst * sizeof(struct prog_instruction));
+      newInst = _mesa_alloc_instructions(parseState.numInst);
       if (!newInst) {
          _mesa_error(ctx, GL_OUT_OF_MEMORY, "glLoadProgramNV");
          return;  /* out of memory */
       }
-      MEMCPY(newInst, instBuffer,
-             parseState.numInst * sizeof(struct prog_instruction));
+      _mesa_memcpy(newInst, instBuffer,
+                   parseState.numInst * sizeof(struct prog_instruction));
 
       /* install the program */
       program->Base.Target = target;
@@ -1569,7 +1582,7 @@ _mesa_parse_nv_fragment_program(GLcontext *ctx, GLenum dstTarget,
 
 
 static void
-PrintSrcReg(const struct fragment_program *program,
+PrintSrcReg(const struct gl_fragment_program *program,
             const struct prog_src_register *src)
 {
    static const char comps[5] = "xyzw";
@@ -1731,7 +1744,7 @@ PrintDstReg(const struct prog_dst_register *dst)
  * Print (unparse) the given vertex program.  Just for debugging.
  */
 void
-_mesa_print_nv_fragment_program(const struct fragment_program *program)
+_mesa_print_nv_fragment_program(const struct gl_fragment_program *program)
 {
    const struct prog_instruction *inst;
 

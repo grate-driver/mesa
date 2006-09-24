@@ -1,3 +1,9 @@
+mesa (6.5.1-0.1) UNRELEASED; urgency=low
+
+  * New upstream version
+
+ -- David Nusinow <dnusinow@debian.org>  Sun, 24 Sep 2006 17:19:55 -0400
+
 mesa (6.5.0.cvs.20060524-1.1) unstable; urgency=medium
 
   * Non-maintainer upload.

@@ -163,6 +163,10 @@ SOURCE=..\..\..\..\src\mesa\main\api_validate.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\..\src\mesa\main\arrayobj.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\..\src\mesa\shader\arbprogparse.c
 # End Source File
 # Begin Source File
@@ -899,6 +903,10 @@ SOURCE=..\..\..\..\src\mesa\main\api_validate.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\..\src\mesa\main\arrayobj.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\..\src\mesa\shader\arbprogparse.h
 # End Source File
 # Begin Source File
@@ -1564,6 +1572,10 @@ SOURCE=..\..\..\..\src\mesa\main\vtxfmt.h
 # Begin Source File
 
 SOURCE=..\..\..\..\src\mesa\main\vtxfmt_tmp.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\src\mesa\x86\rtasm\x86sse.h
 # End Source File
 # End Group
 # End Target

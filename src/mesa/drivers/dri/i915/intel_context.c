@@ -279,16 +279,6 @@ void intelInitDriverFunctions( struct dd_function_table *functions )
 
 static void intel_emit_invarient_state( GLcontext *ctx )
 {
-   intelContextPtr intel = INTEL_CONTEXT(ctx);
-
-   intel->vtbl.emit_invarient_state( intel );
-   intel->prim.flush = 0;
-
-   /* Make sure this gets to the hardware, even if we have no cliprects:
-    */
-   LOCK_HARDWARE( intel );
-   intelFlushBatchLocked( intel, GL_TRUE, GL_FALSE, GL_TRUE );
-   UNLOCK_HARDWARE( intel );
 }
 
 
@@ -398,7 +388,7 @@ GLboolean intelInitContext( intelContextPtr intel,
    intel->do_usleeps = (fthrottle_mode == DRI_CONF_FTHROTTLE_USLEEPS);
 
    intel->vblank_flags = (intel->intelScreen->irq_active != 0)
-       ? driGetDefaultVBlankFlags(&intelScreen->optionCache) : VBLANK_FLAG_NO_IRQ;
+       ? driGetDefaultVBlankFlags(&intel->optionCache) : VBLANK_FLAG_NO_IRQ;
 
    (*dri_interface->getUST)(&intel->swap_ust);
    _math_matrix_ctr (&intel->ViewportMatrix);
@@ -409,7 +399,7 @@ GLboolean intelInitContext( intelContextPtr intel,
      _mesa_enable_extension( ctx, "GL_EXT_texture_compression_s3tc" );
      _mesa_enable_extension( ctx, "GL_S3_s3tc" );
    }
-   else if (driQueryOptionb (&intelScreen->optionCache, "force_s3tc_enable")) {
+   else if (driQueryOptionb (&intel->optionCache, "force_s3tc_enable")) {
      _mesa_enable_extension( ctx, "GL_EXT_texture_compression_s3tc" );
    }
 
@@ -453,6 +443,7 @@ void intelDestroyContext(__DRIcontextPrivate *driContextPriv)
    if (intel) {
       GLboolean   release_texture_heaps;
 
+      INTEL_FIREVERTICES( intel );
 
       intel->vtbl.destroy( intel );
 
@@ -551,6 +542,8 @@ void intelSetBackClipRects( intelContextPtr intel )
 
 void intelWindowMoved( intelContextPtr intel )
 {
+   __DRIdrawablePrivate *dPriv = intel->driDrawable;
+
    if (!intel->ctx.DrawBuffer) {
       intelSetFrontClipRects( intel );
    }
@@ -570,6 +563,10 @@ void intelWindowMoved( intelContextPtr intel )
       }
    }
 
+   _mesa_resize_framebuffer(&intel->ctx,
+			    (GLframebuffer*)dPriv->driverPrivate,
+			    dPriv->w, dPriv->h);
+   
    /* Set state we know depends on drawable parameters:
     */
    {
@@ -745,7 +742,6 @@ void intelCopySubBuffer( __DRIdrawablePrivate *dPriv,
       intel = (intelContextPtr) dPriv->driContextPriv->driverPrivate;
       ctx = &intel->ctx;
       if (ctx->Visual.doubleBufferMode) {
-         intelScreenPrivate *screen = intel->intelScreen;
 	 drm_clip_rect_t rect;
 	 rect.x1 = x + dPriv->x;
 	 rect.y1 = (dPriv->h - y - h) + dPriv->y;

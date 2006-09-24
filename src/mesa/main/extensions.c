@@ -1,6 +1,6 @@
 /*
  * Mesa 3-D graphics library
- * Version:  6.5
+ * Version:  6.5.1
  *
  * Copyright (C) 1999-2006  Brian Paul   All Rights Reserved.
  *
@@ -94,6 +94,7 @@ static const struct {
    { OFF, "GL_EXT_framebuffer_object",         F(EXT_framebuffer_object) },
    { OFF, "GL_EXT_framebuffer_blit",           F(EXT_framebuffer_blit) },
    { OFF, "GL_EXT_fog_coord",                  F(EXT_fog_coord) },
+   { OFF, "GL_EXT_gpu_program_parameters",     F(EXT_gpu_program_parameters) },
    { OFF, "GL_EXT_histogram",                  F(EXT_histogram) },
    { OFF, "GL_EXT_multi_draw_arrays",          F(EXT_multi_draw_arrays) },
    { OFF, "GL_EXT_packed_depth_stencil",       F(EXT_packed_depth_stencil) },
@@ -122,12 +123,14 @@ static const struct {
    { OFF, "GL_EXT_texture_mirror_clamp",       F(EXT_texture_mirror_clamp) },
    { ON,  "GL_EXT_texture_object",             F(EXT_texture_object) },
    { OFF, "GL_EXT_texture_rectangle",          F(NV_texture_rectangle) },
+   { OFF, "GL_EXT_texture_sRGB",               F(EXT_texture_sRGB) },
    { OFF, "GL_EXT_timer_query",                F(EXT_timer_query) },
    { ON,  "GL_EXT_vertex_array",               F(EXT_vertex_array) },
    { OFF, "GL_EXT_vertex_array_set",           F(EXT_vertex_array_set) },
    { OFF, "GL_3DFX_texture_compression_FXT1",  F(TDFX_texture_compression_FXT1) },
    { OFF, "GL_APPLE_client_storage",           F(APPLE_client_storage) },
    { ON,  "GL_APPLE_packed_pixels",            F(APPLE_packed_pixels) },
+   { OFF, "GL_APPLE_vertex_array_object",      F(APPLE_vertex_array_object) },
    { OFF, "GL_ATI_blend_equation_separate",    F(EXT_blend_equation_separate) },
    { OFF, "GL_ATI_texture_env_combine3",       F(ATI_texture_env_combine3)},
    { OFF, "GL_ATI_texture_mirror_once",        F(ATI_texture_mirror_once)},
@@ -213,6 +216,7 @@ _mesa_enable_sw_extensions(GLcontext *ctx)
 #if FEATURE_ARB_vertex_buffer_object
    ctx->Extensions.ARB_vertex_buffer_object = GL_TRUE;
 #endif
+   ctx->Extensions.APPLE_vertex_array_object = GL_TRUE;
 #if FEATURE_ATI_fragment_shader
    ctx->Extensions.ATI_fragment_shader = GL_TRUE;
 #endif
@@ -251,6 +255,9 @@ _mesa_enable_sw_extensions(GLcontext *ctx)
    ctx->Extensions.EXT_texture_env_dot3 = GL_TRUE;
    ctx->Extensions.EXT_texture_mirror_clamp = GL_TRUE;
    ctx->Extensions.EXT_texture_lod_bias = GL_TRUE;
+#if FEATURE_EXT_texture_sRGB
+   ctx->Extensions.EXT_texture_sRGB = GL_TRUE;
+#endif
    ctx->Extensions.IBM_multimode_draw_arrays = GL_TRUE;
    ctx->Extensions.MESA_pack_invert = GL_TRUE;
 #if FEATURE_MESA_program_debug
@@ -278,6 +285,9 @@ _mesa_enable_sw_extensions(GLcontext *ctx)
    ctx->Extensions.SGIX_depth_texture = GL_TRUE;
    ctx->Extensions.SGIX_shadow = GL_TRUE;
    ctx->Extensions.SGIX_shadow_ambient = GL_TRUE;
+#if FEATURE_ARB_vertex_program || FEATURE_ARB_fragment_program
+   ctx->Extensions.EXT_gpu_program_parameters = GL_TRUE;
+#endif
 }
 
 
@@ -382,6 +392,23 @@ _mesa_enable_2_0_extensions(GLcontext *ctx)
 #if FEATURE_ARB_vertex_shader
    ctx->Extensions.ARB_vertex_shader = GL_TRUE;
 #endif
+}
+
+
+/**
+ * Enable all OpenGL 2.1 features and extensions.
+ * A convenience function to be called by drivers.
+ */
+void
+_mesa_enable_2_1_extensions(GLcontext *ctx)
+{
+#if FEATURE_EXT_pixel_buffer_object
+   ctx->Extensions.EXT_pixel_buffer_object = GL_TRUE;
+#endif
+#if FEATURE_EXT_texture_sRGB
+   ctx->Extensions.EXT_texture_sRGB = GL_TRUE;
+#endif
+   /* plus: shading language extensions, non-square uniform matrices */
 }
 
 

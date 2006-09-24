@@ -544,9 +544,9 @@ void r300InitCmdBuf(r300ContextPtr r300)
 		size = 64*256;
 
 	if (RADEON_DEBUG & (DEBUG_IOCTL|DEBUG_DMA)) {
-		fprintf(stderr, "sizeof(drm_r300_cmd_header_t)=%ld\n",
+		fprintf(stderr, "sizeof(drm_r300_cmd_header_t)=%u\n",
 			sizeof(drm_r300_cmd_header_t));
-		fprintf(stderr, "sizeof(drm_radeon_cmd_buffer_t)=%ld\n",
+		fprintf(stderr, "sizeof(drm_radeon_cmd_buffer_t)=%u\n",
 			sizeof(drm_radeon_cmd_buffer_t));
 		fprintf(stderr,
 			"Allocating %d bytes command buffer (max state is %d bytes)\n",
@@ -603,7 +603,7 @@ void r300EmitBlit(r300ContextPtr rmesa,
 
 	cmd[0].header.cmd_type = R300_CMD_PACKET3;
 	cmd[0].header.pad0 = R300_CMD_PACKET3_RAW;
-	cmd[1].u = R200_CP_CMD_BITBLT_MULTI | (5 << 16);
+	cmd[1].u = R300_CP_CMD_BITBLT_MULTI | (5 << 16);
 	cmd[2].u = (RADEON_GMC_SRC_PITCH_OFFSET_CNTL |
 		    RADEON_GMC_DST_PITCH_OFFSET_CNTL |
 		    RADEON_GMC_BRUSH_NONE |
@@ -635,30 +635,35 @@ void r300EmitWait(r300ContextPtr rmesa, GLuint flags)
 
 void r300EmitAOS(r300ContextPtr rmesa, GLuint nr, GLuint offset)
 {
-    int sz = 1 + (nr >> 1) * 3 + (nr & 1) * 2;
-    int i;
-    LOCAL_VARS
+	int sz = 1 + (nr >> 1) * 3 + (nr & 1) * 2;
+	int i;
+	int cmd_reserved = 0;
+	int cmd_written = 0;
+	drm_radeon_cmd_header_t *cmd = NULL;
 
-    if (RADEON_DEBUG & DEBUG_VERTS)
-	fprintf(stderr, "%s: nr=%d, ofs=0x%08x\n", __func__, nr, offset);
+	if (RADEON_DEBUG & DEBUG_VERTS)
+	    fprintf(stderr, "%s: nr=%d, ofs=0x%08x\n", __func__, nr, offset);
 
-    start_packet3(RADEON_CP_PACKET3_3D_LOAD_VBPNTR, sz-1);
-    e32(nr);
-    for(i=0;i+1<nr;i+=2){
-        e32(  (rmesa->state.aos[i].aos_size << 0)
-             |(rmesa->state.aos[i].aos_stride << 8)
-             |(rmesa->state.aos[i+1].aos_size << 16)
-             |(rmesa->state.aos[i+1].aos_stride << 24)
-        );
-        e32(rmesa->state.aos[i].aos_offset+offset*4*rmesa->state.aos[i].aos_stride);
-        e32(rmesa->state.aos[i+1].aos_offset+offset*4*rmesa->state.aos[i+1].aos_stride);
-    }
-    if(nr & 1){
-        e32(  (rmesa->state.aos[nr-1].aos_size << 0)
-             |(rmesa->state.aos[nr-1].aos_stride << 8)
-        );
-        e32(rmesa->state.aos[nr-1].aos_offset+offset*4*rmesa->state.aos[nr-1].aos_stride);
-    }
+	start_packet3(RADEON_CP_PACKET3_3D_LOAD_VBPNTR, sz-1);
+	e32(nr);
+	for(i=0;i+1<nr;i+=2){
+		e32(  (rmesa->state.aos[i].aos_size << 0)
+		      |(rmesa->state.aos[i].aos_stride << 8)
+		      |(rmesa->state.aos[i+1].aos_size << 16)
+		      |(rmesa->state.aos[i+1].aos_stride << 24)
+			);
+		e32(rmesa->state.aos[i].aos_offset +
+		    offset*4*rmesa->state.aos[i].aos_stride);
+		e32(rmesa->state.aos[i+1].aos_offset +
+		    offset*4*rmesa->state.aos[i+1].aos_stride);
+	}
 
+	if(nr & 1){
+		e32(  (rmesa->state.aos[nr-1].aos_size << 0)
+		      |(rmesa->state.aos[nr-1].aos_stride << 8)
+			);
+		e32(rmesa->state.aos[nr-1].aos_offset + 
+		    offset*4*rmesa->state.aos[nr-1].aos_stride);
+	}
 }
 

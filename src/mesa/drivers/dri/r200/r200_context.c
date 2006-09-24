@@ -62,6 +62,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "r200_tcl.h"
 #include "r200_vtxfmt.h"
 #include "r200_maos.h"
+#include "r200_vertprog.h"
 
 #define need_GL_ARB_multisample
 #define need_GL_ARB_texture_compression
@@ -76,7 +77,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #define need_GL_NV_vertex_program
 #include "extension_helper.h"
 
-#define DRIVER_DATE	"20060327"
+#define DRIVER_DATE	"20060602"
 
 #include "vblank.h"
 #include "utils.h"
@@ -310,6 +311,7 @@ GLboolean r200CreateContext( const __GLcontextModes *glVisual,
    r200InitIoctlFuncs(&functions);
    r200InitStateFuncs(&functions);
    r200InitTextureFuncs(&functions);
+   r200InitShaderFuncs(&functions); 
 
    /* Allocate and initialize the Mesa context */
    if (sharedContextPrivate)
@@ -417,6 +419,12 @@ GLboolean r200CreateContext( const __GLcontextModes *glVisual,
    ctx->Const.MaxLineWidthAA = 10.0;
    ctx->Const.LineWidthGranularity = 0.0625;
 
+   ctx->Const.VertexProgram.MaxNativeInstructions = R200_VSF_MAX_INST;
+   ctx->Const.VertexProgram.MaxNativeAttribs = 12;
+   ctx->Const.VertexProgram.MaxNativeTemps = R200_VSF_MAX_TEMPS;
+   ctx->Const.VertexProgram.MaxNativeParameters = R200_VSF_MAX_PARAM;
+   ctx->Const.VertexProgram.MaxNativeAddressRegs = 1;
+
    /* Initialize the software rasterizer and helper modules.
     */
    _swrast_CreateContext( ctx );
@@ -470,7 +478,7 @@ GLboolean r200CreateContext( const __GLcontextModes *glVisual,
    if (rmesa->r200Screen->drmSupportsBlendColor) {
        driInitExtensions( ctx, blend_extensions, GL_FALSE );
    }
-   if(driQueryOptionb(&rmesa->optionCache, "arb_vertex_program"))
+   if(rmesa->r200Screen->drmSupportsVertexProgram)
       driInitSingleExtension( ctx, ARB_vp_extension );
    if(driQueryOptionb(&rmesa->optionCache, "nv_vertex_program"))
       driInitSingleExtension( ctx, NV_vp_extension );
@@ -494,17 +502,15 @@ GLboolean r200CreateContext( const __GLcontextModes *glVisual,
    fthrottle_mode = driQueryOptioni(&rmesa->optionCache, "fthrottle_mode");
    rmesa->iw.irq_seq = -1;
    rmesa->irqsEmitted = 0;
-   rmesa->do_irqs = (rmesa->dri.drmMinor >= 6 && 
-		     fthrottle_mode == DRI_CONF_FTHROTTLE_IRQS &&
+   rmesa->do_irqs = (fthrottle_mode == DRI_CONF_FTHROTTLE_IRQS &&
 		     rmesa->r200Screen->irq);
 
    rmesa->do_usleeps = (fthrottle_mode == DRI_CONF_FTHROTTLE_USLEEPS);
 
    if (!rmesa->do_irqs)
       fprintf(stderr,
-	      "IRQ's not enabled, falling back to %s: %d %d %d\n",
+	      "IRQ's not enabled, falling back to %s: %d %d\n",
 	      rmesa->do_usleeps ? "usleeps" : "busy waits",
-	      rmesa->dri.drmMinor,
 	      fthrottle_mode,
 	      rmesa->r200Screen->irq);
 

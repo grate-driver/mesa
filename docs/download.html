@@ -9,7 +9,7 @@
 <H1>Downloading</H1>
 
 <p>
-Last development release: <b>6.5</b>
+Last development release: <b>6.5.1</b>
 </p>
 
 <p>
@@ -32,10 +32,10 @@ Mesa is distributed in several parts:
 </li>
 <li><b>MesaDemos-x.y.z</b> - OpenGL demonstration and test programs.
     Most of the programs require GLUT (either the
-    <a href="http://www.opengl.org/resources/libraries/glut.html"
+    <a href="http://www.opengl.org/resources/libraries/glut"
     target="_parent">original GLUT by Mark Kilgard</a> or
     <a href="http://freeglut.sourceforge.net" target="_parent">freeglut</a> or
-    <a href="http://freeglut.sourceforge.net" target="_parent">OpenGLUT</a>).
+    <a href="http://openglut.sourceforge.net" target="_parent">OpenGLUT</a>).
 </li>
 <li><b>MesaGLUT-x.y.z</b> - Mark Kilgard's GLUT, easily compiled and used
     with Mesa.  Plus, other implementation of GLUT for DOS, OS/2, BeOS, etc.
@@ -48,8 +48,12 @@ package.
 </p>
 
 <p>
+If you're new to this and not sure what you're doing, grab all three packages.
+</p>
+
+<p>
 The packages are available in .tar.gz, .tar.bz2 and .zip formats.
-Other organizations might offer additional package formats.
+Other sites might offer additional package formats.
 </p>
 
 <H1>Unpacking</H1>
@@ -95,7 +99,7 @@ or
 <h1>Contents</h1>
 
 <p>
-After unpacking you'll have these directories:
+After unpacking you'll have these files and directories (among others):
 </p>
 <pre>
 Makefile	- top-level Makefile for most systems
@@ -106,6 +110,7 @@ docs/		- documentation
 src/		- source code for libraries
 src/mesa	- sources for the main Mesa library and device drivers
 src/glu		- libGLU source code
+src/glx		- sources for building libGL with full GLX and DRI support
 src/glw		- Xt/Motif/OpenGL widget code
 </pre>
 

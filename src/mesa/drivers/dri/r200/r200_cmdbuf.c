@@ -110,6 +110,11 @@ void r200SetUpAtomList( r200ContextPtr rmesa )
    /* FIXME: is this a good place to insert that atom ? */
    insert_at_tail( &rmesa->hw.atomlist, &rmesa->hw.spr );
    insert_at_tail( &rmesa->hw.atomlist, &rmesa->hw.prf );
+   insert_at_tail( &rmesa->hw.atomlist, &rmesa->hw.pvs );
+   insert_at_tail( &rmesa->hw.atomlist, &rmesa->hw.vpp[0] );
+   insert_at_tail( &rmesa->hw.atomlist, &rmesa->hw.vpp[1] );
+   insert_at_tail( &rmesa->hw.atomlist, &rmesa->hw.vpi[0] );
+   insert_at_tail( &rmesa->hw.atomlist, &rmesa->hw.vpi[1] );
 }
 
 static void r200SaveHwState( r200ContextPtr rmesa )
@@ -412,15 +417,13 @@ void r200EmitBlit( r200ContextPtr rmesa,
 
 void r200EmitWait( r200ContextPtr rmesa, GLuint flags )
 {
-   if (rmesa->dri.drmMinor >= 6) {
-      drm_radeon_cmd_header_t *cmd;
+   drm_radeon_cmd_header_t *cmd;
 
-      assert( !(flags & ~(RADEON_WAIT_2D|RADEON_WAIT_3D)) );
-      
-      cmd = (drm_radeon_cmd_header_t *)r200AllocCmdBuf( rmesa, 1 * sizeof(int),
-						   __FUNCTION__ );
-      cmd[0].i = 0;
-      cmd[0].wait.cmd_type = RADEON_CMD_WAIT;
-      cmd[0].wait.flags = flags;
-   }
+   assert( !(flags & ~(RADEON_WAIT_2D|RADEON_WAIT_3D)) );
+
+   cmd = (drm_radeon_cmd_header_t *)r200AllocCmdBuf( rmesa, 1 * sizeof(int),
+					   __FUNCTION__ );
+   cmd[0].i = 0;
+   cmd[0].wait.cmd_type = RADEON_CMD_WAIT;
+   cmd[0].wait.flags = flags;
 }

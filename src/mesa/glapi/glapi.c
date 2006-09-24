@@ -99,6 +99,7 @@ warn(void)
 
 
 #define KEYWORD1 static
+#define KEYWORD1_ALT static
 #define KEYWORD2 GLAPIENTRY
 #define NAME(func)  NoOp##func
 
@@ -184,6 +185,15 @@ PUBLIC const void *_glapi_Context = NULL;
 static GLboolean ThreadSafe = GL_FALSE;  /**< In thread-safe mode? */
 _glthread_TSD _gl_DispatchTSD;           /**< Per-thread dispatch pointer */
 static _glthread_TSD ContextTSD;         /**< Per-thread context pointer */
+
+#if defined(WIN32_THREADS)
+void FreeTSD(_glthread_TSD *p);
+void FreeAllTSD(void)
+{
+   FreeTSD(&_gl_DispatchTSD);
+   FreeTSD(&ContextTSD);
+}
+#endif /* defined(WIN32_THREADS) */
 
 #endif /* defined(THREADS) */
 
@@ -347,8 +357,18 @@ _glapi_get_dispatch(void)
  *** functionality.
  ***/
 
-#if !defined( USE_X86_ASM ) && !defined( XFree86Server ) && !defined ( XGLServer )
-#define NEED_FUNCTION_POINTER
+#if defined(USE_X64_64_ASM) && defined(GLX_USE_TLS)
+# define DISPATCH_FUNCTION_SIZE  16
+#elif defined(USE_X86_ASM)
+# if defined(THREADS) && !defined(GLX_USE_TLS)
+#  define DISPATCH_FUNCTION_SIZE  32
+# else
+#  define DISPATCH_FUNCTION_SIZE  16
+# endif
+#endif
+
+#if !defined(DISPATCH_FUNCTION_SIZE) && !defined(XFree86Server) && !defined(XGLServer)
+# define NEED_FUNCTION_POINTER
 #endif
 
 /* The code in this file is auto-generated with Python */
@@ -398,12 +418,6 @@ extern       GLubyte gl_dispatch_functions_end[];
 extern const GLubyte gl_dispatch_functions_start[];
 #endif
 
-# if defined(THREADS) && !defined(GLX_USE_TLS)
-#  define X86_DISPATCH_FUNCTION_SIZE  32
-# else
-#  define X86_DISPATCH_FUNCTION_SIZE  16
-# endif
-
 #endif /* USE_X86_ASM */
 
 
@@ -416,9 +430,9 @@ get_static_proc_address(const char *funcName)
 {
    const glprocs_table_t * const f = find_entry( funcName );
    if (f) {
-#ifdef USE_X86_ASM
+#ifdef DISPATCH_FUNCTION_SIZE
       return (_glapi_proc) (gl_dispatch_functions_start 
-                            + (X86_DISPATCH_FUNCTION_SIZE * f->Offset));
+                            + (DISPATCH_FUNCTION_SIZE * f->Offset));
 #else
       return f->Address;
 #endif
@@ -535,12 +549,12 @@ generate_entrypoint(GLuint functionOffset)
     * "jmp OFFSET*4(%eax)" can't be encoded in a single byte.
     */
    const GLubyte * const template_func = gl_dispatch_functions_start 
-     + (X86_DISPATCH_FUNCTION_SIZE * 32);
-   GLubyte * const code = (GLubyte *) malloc( X86_DISPATCH_FUNCTION_SIZE );
+     + (DISPATCH_FUNCTION_SIZE * 32);
+   GLubyte * const code = (GLubyte *) malloc(DISPATCH_FUNCTION_SIZE);
 
 
    if ( code != NULL ) {
-      (void) memcpy( code, template_func, X86_DISPATCH_FUNCTION_SIZE );
+      (void) memcpy(code, template_func, DISPATCH_FUNCTION_SIZE);
       fill_in_entrypoint_offset( (_glapi_proc) code, functionOffset );
    }
 
@@ -611,15 +625,15 @@ fill_in_entrypoint_offset(_glapi_proc entrypoint, GLuint offset)
 #if defined(USE_X86_ASM)
    GLubyte * const code = (GLubyte *) entrypoint;
 
-#if X86_DISPATCH_FUNCTION_SIZE == 32
+#if DISPATCH_FUNCTION_SIZE == 32
    *((unsigned int *)(code + 11)) = 4 * offset;
    *((unsigned int *)(code + 22)) = 4 * offset;
-#elif X86_DISPATCH_FUNCTION_SIZE == 16 && defined( GLX_USE_TLS )
+#elif DISPATCH_FUNCTION_SIZE == 16 && defined( GLX_USE_TLS )
    *((unsigned int *)(code +  8)) = 4 * offset;
-#elif X86_DISPATCH_FUNCTION_SIZE == 16
+#elif DISPATCH_FUNCTION_SIZE == 16
    *((unsigned int *)(code +  7)) = 4 * offset;
 #else
-# error Invalid X86_DISPATCH_FUNCTION_SIZE!
+# error Invalid DISPATCH_FUNCTION_SIZE!
 #endif
 
 #elif defined(USE_SPARC_ASM)
@@ -1007,7 +1021,6 @@ _glapi_check_table(const struct _glapi_table *table)
       GLuint offset = (setFenceFunc - (char *) table) / sizeof(void *);
       assert(setFenceOffset == _gloffset_SetFenceNV);
       assert(setFenceOffset == offset);
-      assert(_glapi_get_proc_address("glSetFenceNV") == (_glapi_proc) &glSetFenceNV);
    }
 #else
    (void) table;
@@ -1032,7 +1045,7 @@ init_glapi_relocs( void )
 
     while ( curr_func != (GLubyte *) gl_dispatch_functions_end ) {
 	(void) memcpy( curr_func, get_disp, 6 );
-	curr_func += X86_DISPATCH_FUNCTION_SIZE;
+	curr_func += DISPATCH_FUNCTION_SIZE;
     }
 #endif /* defined( USE_X86_ASM ) && defined( GLX_USE_TLS ) */
 }

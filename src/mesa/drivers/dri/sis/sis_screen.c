@@ -163,6 +163,7 @@ sisCreateScreen( __DRIscreenPrivate *sPriv )
 
    if (sisDRIPriv->agp.size) {
       sisScreen->agp.handle = sisDRIPriv->agp.handle;
+      sisScreen->agpBaseOffset = drmAgpBase(sPriv->fd);
       sisScreen->agp.size   = sisDRIPriv->agp.size;
       if ( drmMap( sPriv->fd, sisScreen->agp.handle, sisScreen->agp.size,
                    &sisScreen->agp.map ) )
@@ -349,10 +350,10 @@ void * __driCreateNewScreen_20050727( __DRInativeDisplay *dpy, int scrn,
    static const __DRIversion ddx_expected = {0, 8, 0};
    static const __DRIversion dri_expected = {4, 0, 0};
    static const __DRIversion drm_expected = {1, 0, 0};
-
+   static const char *driver_name = "SiS";
    dri_interface = interface;
 
-   if (!driCheckDriDdxDrmVersions2("SiS", dri_version, &dri_expected,
+   if (!driCheckDriDdxDrmVersions2(driver_name, dri_version, &dri_expected,
 				   ddx_version, &ddx_expected,
 				   drm_version, &drm_expected)) {
       return NULL;

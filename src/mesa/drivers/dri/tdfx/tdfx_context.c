@@ -50,6 +50,7 @@
 #include "tdfx_texman.h"
 #include "extensions.h"
 #include "hash.h"
+#include "texobj.h"
 
 #include "swrast/swrast.h"
 #include "swrast_setup/swrast_setup.h"
@@ -602,7 +603,7 @@ tdfxDestroyContext( __DRIcontextPrivate *driContextPriv )
               id;
               id = _mesa_HashNextEntry(textures, id)) {
             struct gl_texture_object *tObj
-               = (struct gl_texture_object *) _mesa_HashLookup(textures, id);
+               = _mesa_lookup_texture(fxMesa->glCtx, id);
             tdfxTMFreeTexture(fxMesa, tObj);
          }
       }

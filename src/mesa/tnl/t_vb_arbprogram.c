@@ -1,6 +1,6 @@
 /*
  * Mesa 3-D graphics library
- * Version:  6.5
+ * Version:  6.5.1
  *
  * Copyright (C) 1999-2006  Brian Paul   All Rights Reserved.
  *
@@ -38,7 +38,6 @@
 #include "light.h"
 #include "program.h"
 #include "math/m_matrix.h"
-#include "math/m_translate.h"
 #include "t_context.h"
 #include "t_pipeline.h"
 #include "t_vb_arbprogram.h"
@@ -109,13 +108,6 @@ static GLfloat ApproxPower(GLfloat x, GLfloat y)
    return (GLfloat) _mesa_pow(x, y);
 }
 
-static GLfloat rough_approx_log2_0_1(GLfloat x)
-{
-   return LOG2(x);
-}
-
-
-
 
 /**
  * Perform a reduced swizzle:
@@ -124,19 +116,49 @@ static void do_RSW( struct arb_vp_machine *m, union instruction op )
 {
    GLfloat *result = m->File[0][op.rsw.dst];
    const GLfloat *arg0 = m->File[op.rsw.file0][op.rsw.idx0];
-   GLuint swz = op.rsw.swz;
-   GLuint neg = op.rsw.neg;
+   const GLuint swz = op.rsw.swz;
+   const GLuint neg = op.rsw.neg;
    GLfloat tmp[4];
 
    /* Need a temporary to be correct in the case where result == arg0.
     */
    COPY_4V(tmp, arg0);
-   
-   result[0] = tmp[GET_RSW(swz, 0)];
-   result[1] = tmp[GET_RSW(swz, 1)];
-   result[2] = tmp[GET_RSW(swz, 2)];
-   result[3] = tmp[GET_RSW(swz, 3)];
-   
+
+   result[0] = tmp[GET_SWZ(swz, 0)];
+   result[1] = tmp[GET_SWZ(swz, 1)];
+   result[2] = tmp[GET_SWZ(swz, 2)];
+   result[3] = tmp[GET_SWZ(swz, 3)];
+
+   if (neg) {
+      if (neg & 0x1) result[0] = -result[0];
+      if (neg & 0x2) result[1] = -result[1];
+      if (neg & 0x4) result[2] = -result[2];
+      if (neg & 0x8) result[3] = -result[3];
+   }
+}
+
+/**
+ * Perform a full swizzle
+ */
+static void do_SWZ( struct arb_vp_machine *m, union instruction op ) 
+{
+   GLfloat *result = m->File[0][op.rsw.dst];
+   const GLfloat *arg0 = m->File[op.rsw.file0][op.rsw.idx0];
+   const GLuint swz = op.rsw.swz;
+   const GLuint neg = op.rsw.neg;
+   GLfloat tmp[6];
+   tmp[4] = 0.0;
+   tmp[5] = 1.0;
+
+   /* Need a temporary to be correct in the case where result == arg0.
+    */
+   COPY_4V(tmp, arg0);
+
+   result[0] = tmp[GET_SWZ(swz, 0)];
+   result[1] = tmp[GET_SWZ(swz, 1)];
+   result[2] = tmp[GET_SWZ(swz, 2)];
+   result[3] = tmp[GET_SWZ(swz, 3)];
+
    if (neg) {
       if (neg & 0x1) result[0] = -result[0];
       if (neg & 0x2) result[1] = -result[1];
@@ -160,10 +182,10 @@ static void do_MSK( struct arb_vp_machine *m, union instruction op )
    GLfloat *dst = m->File[0][op.msk.dst];
    const GLfloat *arg = m->File[op.msk.file][op.msk.idx];
  
-   if (op.msk.mask & 0x1) dst[0] = arg[0];
-   if (op.msk.mask & 0x2) dst[1] = arg[1];
-   if (op.msk.mask & 0x4) dst[2] = arg[2];
-   if (op.msk.mask & 0x8) dst[3] = arg[3];
+   if (op.msk.mask & WRITEMASK_X) dst[0] = arg[0];
+   if (op.msk.mask & WRITEMASK_Y) dst[1] = arg[1];
+   if (op.msk.mask & WRITEMASK_Z) dst[2] = arg[2];
+   if (op.msk.mask & WRITEMASK_W) dst[3] = arg[3];
 }
 
 
@@ -281,13 +303,13 @@ static void do_EXP( struct arb_vp_machine *m, union instruction op )
 {
    GLfloat *result = m->File[0][op.alu.dst];
    const GLfloat *arg0 = m->File[op.alu.file0][op.alu.idx0];
-   GLfloat tmp = arg0[0];
-   GLfloat flr_tmp = FLOORF(tmp);
-   GLfloat frac_tmp = tmp - flr_tmp;
+   const GLfloat tmp = arg0[0];
+   const GLfloat flr_tmp = FLOORF(tmp);
+   const GLfloat frac_tmp = tmp - flr_tmp;
 
    result[0] = LDEXPF(1.0, (int)flr_tmp);
    result[1] = frac_tmp;
-   result[2] = LDEXPF(rough_approx_log2_0_1(frac_tmp), (int)flr_tmp);
+   result[2] = RoughApproxExp2(tmp);
    result[3] = 1.0F;
 }
 
@@ -330,7 +352,7 @@ static void do_LIT( struct arb_vp_machine *m, union instruction op )
 {
    GLfloat *result = m->File[0][op.alu.dst];
    const GLfloat *arg0 = m->File[op.alu.file0][op.alu.idx0];
-   GLfloat tmp[4];
+   GLfloat tmp[4]; /* use temp in case arg0 == result register */
 
    tmp[0] = 1.0;
    tmp[1] = arg0[0];
@@ -342,7 +364,6 @@ static void do_LIT( struct arb_vp_machine *m, union instruction op )
    }
    tmp[3] = 1.0;
 
-
    COPY_4V(result, tmp);
 }
 
@@ -353,9 +374,9 @@ static void do_LOG( struct arb_vp_machine *m, union instruction op )
 {
    GLfloat *result = m->File[0][op.alu.dst];
    const GLfloat *arg0 = m->File[op.alu.file0][op.alu.idx0];
-   GLfloat tmp = FABSF(arg0[0]);
+   const GLfloat tmp = FABSF(arg0[0]);
    int exponent;
-   GLfloat mantissa = FREXPF(tmp, &exponent);
+   const GLfloat mantissa = FREXPF(tmp, &exponent);
 
    result[0] = (GLfloat) (exponent - 1);
    result[1] = 2.0 * mantissa; /* map [.5, 1) -> [1, 2) */
@@ -427,7 +448,7 @@ static void do_POW( struct arb_vp_machine *m, union instruction op )
 static void do_REL( struct arb_vp_machine *m, union instruction op )
 {
    GLfloat *result = m->File[0][op.alu.dst];
-   GLuint idx = (op.alu.idx0 + (GLint)m->File[0][REG_ADDR][0]) & (MAX_NV_VERTEX_PROGRAM_PARAMS-1);
+   const GLuint idx = (op.alu.idx0 + (GLint)m->File[0][REG_ADDR][0]) & (MAX_NV_VERTEX_PROGRAM_PARAMS-1);
    const GLfloat *arg0 = m->File[op.alu.file0][idx];
 
    result[0] = arg0[0];
@@ -521,10 +542,10 @@ static void do_NOP( struct arb_vp_machine *m, union instruction op )
 static void print_mask( GLuint mask )
 {
    _mesa_printf(".");
-   if (mask&0x1) _mesa_printf("x");
-   if (mask&0x2) _mesa_printf("y");
-   if (mask&0x4) _mesa_printf("z");
-   if (mask&0x8) _mesa_printf("w");
+   if (mask & WRITEMASK_X) _mesa_printf("x");
+   if (mask & WRITEMASK_Y) _mesa_printf("y");
+   if (mask & WRITEMASK_Z) _mesa_printf("z");
+   if (mask & WRITEMASK_W) _mesa_printf("w");
 }
 
 static void print_reg( GLuint file, GLuint reg )
@@ -570,11 +591,31 @@ static void print_RSW( union instruction op )
    _mesa_printf(", ");
    print_reg(op.rsw.file0, op.rsw.idx0);
    _mesa_printf(".");
-   for (i = 0; i < 4; i++, swz >>= 2) {
-      const char *cswz = "xyzw";
+   for (i = 0; i < 4; i++, swz >>= 3) {
+      const char *cswz = "xyzw01";
       if (neg & (1<<i))   
 	 _mesa_printf("-");
-      _mesa_printf("%c", cswz[swz&0x3]);
+      _mesa_printf("%c", cswz[swz&0x7]);
+   }
+   _mesa_printf("\n");
+}
+
+static void print_SWZ( union instruction op )
+{
+   GLuint swz = op.rsw.swz;
+   GLuint neg = op.rsw.neg;
+   GLuint i;
+
+   _mesa_printf("SWZ ");
+   print_reg(0, op.rsw.dst);
+   _mesa_printf(", ");
+   print_reg(op.rsw.file0, op.rsw.idx0);
+   _mesa_printf(".");
+   for (i = 0; i < 4; i++, swz >>= 3) {
+      const char *cswz = "xyzw01";
+      if (neg & (1<<i))   
+	 _mesa_printf("-");
+      _mesa_printf("%c", cswz[swz&0x7]);
    }
    _mesa_printf("\n");
 }
@@ -651,8 +692,10 @@ _tnl_disassem_vba_insn( union instruction op )
    case OPCODE_RCC:
    case OPCODE_RET:
    case OPCODE_SSG:
-   case OPCODE_SWZ:
       print_NOP(op);
+      break;
+   case OPCODE_SWZ:
+      print_SWZ(op);
       break;
    case RSW:
       print_RSW(op);
@@ -728,7 +771,7 @@ static void (* const opcode_func[MAX_OPCODE+3])(struct arb_vp_machine *, union i
    do_NOP,/*SSG*/
    do_NOP,/*STR*/
    do_SUB,
-   do_RSW,/*SWZ*/
+   do_SWZ,/*SWZ*/
    do_NOP,/*TEX*/
    do_NOP,/*TXB*/
    do_NOP,/*TXD*/
@@ -833,7 +876,7 @@ static struct reg cvp_emit_arg( struct compilation *cp,
 {
    struct reg reg = cvp_load_reg( cp, src->File, src->Index, src->RelAddr, arg );
    union instruction rsw, noop;
-   
+
    /* Emit any necessary swizzling.  
     */
    _mesa_bzero(&rsw, sizeof(rsw));
@@ -841,19 +884,17 @@ static struct reg cvp_emit_arg( struct compilation *cp,
 
    /* we're expecting 2-bit swizzles below... */
 #if 1 /* XXX THESE ASSERTIONS CURRENTLY FAIL DURING GLEAN TESTS! */
+/* hopefully no longer happens? */
    ASSERT(GET_SWZ(src->Swizzle, 0) < 4);
    ASSERT(GET_SWZ(src->Swizzle, 1) < 4);
    ASSERT(GET_SWZ(src->Swizzle, 2) < 4);
    ASSERT(GET_SWZ(src->Swizzle, 3) < 4);
 #endif
-   rsw.rsw.swz = ((GET_SWZ(src->Swizzle, 0) << 0) |
-		  (GET_SWZ(src->Swizzle, 1) << 2) |
-		  (GET_SWZ(src->Swizzle, 2) << 4) |
-		  (GET_SWZ(src->Swizzle, 3) << 6));
+   rsw.rsw.swz = src->Swizzle;
 
    _mesa_bzero(&noop, sizeof(noop));
    noop.rsw.neg = 0;
-   noop.rsw.swz = RSW_NOOP;
+   noop.rsw.swz = SWIZZLE_NOOP;
 
    if (_mesa_memcmp(&rsw, &noop, sizeof(rsw)) !=0) {
       union instruction *op = cvp_next_instruction(cp);
@@ -904,46 +945,6 @@ static GLuint cvp_choose_result( struct compilation *cp,
       _mesa_bzero(fixup, sizeof(*fixup));
       cp->reg_active |= 1 << idx;
       return idx;
-   }
-}
-
-static struct reg cvp_emit_rsw( struct compilation *cp, 
-				GLuint dst,
-				struct reg src,
-				GLuint neg, 
-				GLuint swz,
-				GLboolean force)
-{
-   struct reg retval;
-
-   if (swz != RSW_NOOP || neg != 0) {
-      union instruction *op = cvp_next_instruction(cp);
-      op->rsw.opcode = RSW;
-      op->rsw.dst = dst;
-      op->rsw.file0 = src.file;
-      op->rsw.idx0 = src.idx;
-      op->rsw.neg = neg;
-      op->rsw.swz = swz;
-	    
-      retval.file = FILE_REG;
-      retval.idx = dst;
-      return retval;
-   }
-   else if (force) {
-      /* Oops.  Degenerate case:
-       */
-      union instruction *op = cvp_next_instruction(cp);
-      op->alu.opcode = OPCODE_MOV;
-      op->alu.dst = dst;
-      op->alu.file0 = src.file;
-      op->alu.idx0 = src.idx;
-      
-      retval.file = FILE_REG;
-      retval.idx = dst;
-      return retval;
-   }
-   else {
-      return src;
    }
 }
 
@@ -998,63 +999,25 @@ static void cvp_emit_inst( struct compilation *cp,
       op->alu.idx0 = reg[0].idx;
       break;
 
-   case OPCODE_SWZ: {
-      GLuint swz0 = 0, swz1 = 0;
-      GLuint neg0 = 0, neg1 = 0;
-      GLuint mask = 0;
+   case OPCODE_END:
+      break;
 
-      /* Translate 3-bit-per-element swizzle into two 2-bit swizzles,
-       * one from the source register the other from a constant
-       * {0,0,0,1}.
-       */
-      for (i = 0; i < 4; i++) {
-	 GLuint swzelt = GET_SWZ(inst->SrcReg[0].Swizzle, i);
-	 if (swzelt >= SWIZZLE_ZERO) {
-	    neg0 |= inst->SrcReg[0].NegateBase & (1<<i);
-	    if (swzelt == SWIZZLE_ONE)
-	       swz0 |= SWIZZLE_W << (i*2);
-	    else if (i < SWIZZLE_W)
-	       swz0 |= i << (i*2);
-	 }
-	 else {
-	    mask |= 1<<i;
-	    neg1 |= inst->SrcReg[0].NegateBase & (1<<i);
-	    swz1 |= swzelt << (i*2);
-	 }
-      }
-
+   case OPCODE_SWZ:
       result = cvp_choose_result( cp, &inst->DstReg, &fixup );
-      reg[0].file = FILE_REG;
-      reg[0].idx = REG_ID;
-      reg[1] = cvp_emit_arg( cp, &inst->SrcReg[0], REG_ARG0 );
-
-      if (mask == WRITEMASK_XYZW) {
-	 cvp_emit_rsw(cp, result, reg[0], neg0, swz0, GL_TRUE);
-	 
-      }
-      else if (mask == 0) {
-	 cvp_emit_rsw(cp, result, reg[1], neg1, swz1, GL_TRUE);
-      }
-      else {
-	 cvp_emit_rsw(cp, result, reg[0], neg0, swz0, GL_TRUE);
-	 reg[1] = cvp_emit_rsw(cp, REG_ARG0, reg[1], neg1, swz1, GL_FALSE);
-
-	 op = cvp_next_instruction(cp);
-	 op->msk.opcode = MSK;
-	 op->msk.dst = result;
-	 op->msk.file = reg[1].file;
-	 op->msk.idx = reg[1].idx;
-	 op->msk.mask = mask;
-      }
+      reg[0] = cvp_load_reg( cp, inst->SrcReg[0].File,
+			inst->SrcReg[0].Index, inst->SrcReg[0].RelAddr, REG_ARG0 );
+      op = cvp_next_instruction(cp);
+      op->rsw.opcode = inst->Opcode;
+      op->rsw.file0 = reg[0].file;
+      op->rsw.idx0 = reg[0].idx;
+      op->rsw.dst = result;
+      op->rsw.swz = inst->SrcReg[0].Swizzle;
+      op->rsw.neg = inst->SrcReg[0].NegateBase;
 
       if (result == REG_RES) {
 	 op = cvp_next_instruction(cp);
 	 *op = fixup;
       }
-      break;
-   }
-
-   case OPCODE_END:
       break;
 
    default:
@@ -1074,12 +1037,12 @@ static void cvp_emit_inst( struct compilation *cp,
       if (result == REG_RES) {
 	 op = cvp_next_instruction(cp);
 	 *op = fixup;
-      }      	 
+      }
       break;
    }
 }
 
-static void free_tnl_data( struct vertex_program *program  )
+static void free_tnl_data( struct gl_vertex_program *program  )
 {
    struct tnl_compiled_program *p = (struct tnl_compiled_program *) program->TnlData;
    if (p->compiled_func)
@@ -1088,7 +1051,7 @@ static void free_tnl_data( struct vertex_program *program  )
    program->TnlData = NULL;
 }
 
-static void compile_vertex_program( struct vertex_program *program,
+static void compile_vertex_program( struct gl_vertex_program *program,
 				    GLboolean try_codegen )
 { 
    struct compilation cp;
@@ -1257,7 +1220,7 @@ static INLINE void call_func( struct tnl_compiled_program *p,
 static GLboolean
 run_arb_vertex_program(GLcontext *ctx, struct tnl_pipeline_stage *stage)
 {
-   const struct vertex_program *program;
+   const struct gl_vertex_program *program;
    struct vertex_buffer *VB = &TNL_CONTEXT(ctx)->vb;
    struct arb_vp_machine *m = ARB_VP_MACHINE(stage);
    struct tnl_compiled_program *p;
@@ -1267,7 +1230,10 @@ run_arb_vertex_program(GLcontext *ctx, struct tnl_pipeline_stage *stage)
    if (ctx->ShaderObjects._VertexShaderPresent)
       return GL_TRUE;
 
-   program = (ctx->VertexProgram._Enabled ? ctx->VertexProgram.Current : ctx->_TnlProgram);
+   program = ctx->VertexProgram._Enabled ? ctx->VertexProgram.Current : NULL;
+   if (!program && ctx->_MaintainTnlProgram) {
+      program = ctx->_TnlProgram;
+   }
    if (!program || program->IsNVProgram)
       return GL_TRUE;   
 
@@ -1281,7 +1247,7 @@ run_arb_vertex_program(GLcontext *ctx, struct tnl_pipeline_stage *stage)
 
    m->nr_inputs = m->nr_outputs = 0;
 
-   for (i = 0; i < _TNL_ATTRIB_MAX; i++) {
+   for (i = 0; i < VERT_ATTRIB_MAX; i++) {
       if (program->Base.InputsRead & (1<<i) ||
 	  (i == VERT_ATTRIB_POS && program->IsPositionInvariant)) {
 	 GLuint j = m->nr_inputs++;
@@ -1362,13 +1328,16 @@ run_arb_vertex_program(GLcontext *ctx, struct tnl_pipeline_stage *stage)
    VB->ClipPtr = &m->attribs[VERT_RESULT_HPOS];
    VB->ClipPtr->count = VB->Count;
 
+   /* XXX There seems to be confusion between using the VERT_ATTRIB_*
+    * values vs _TNL_ATTRIB_* tokens here:
+    */
    outputs = program->Base.OutputsWritten;
    if (program->IsPositionInvariant) 
       outputs |= (1<<VERT_RESULT_HPOS);
 
    if (outputs & (1<<VERT_RESULT_COL0)) {
-      VB->ColorPtr[0] = &m->attribs[VERT_RESULT_COL0];
-      VB->AttribPtr[VERT_ATTRIB_COLOR0] = VB->ColorPtr[0];
+      VB->ColorPtr[0] =
+      VB->AttribPtr[VERT_ATTRIB_COLOR0] = &m->attribs[VERT_RESULT_COL0];
    }
 
    if (outputs & (1<<VERT_RESULT_BFC0)) {
@@ -1376,8 +1345,8 @@ run_arb_vertex_program(GLcontext *ctx, struct tnl_pipeline_stage *stage)
    }
 
    if (outputs & (1<<VERT_RESULT_COL1)) {
-      VB->SecondaryColorPtr[0] = &m->attribs[VERT_RESULT_COL1];
-      VB->AttribPtr[VERT_ATTRIB_COLOR1] = VB->SecondaryColorPtr[0];
+      VB->SecondaryColorPtr[0] =
+      VB->AttribPtr[VERT_ATTRIB_COLOR1] = &m->attribs[VERT_RESULT_COL1];
    }
 
    if (outputs & (1<<VERT_RESULT_BFC1)) {
@@ -1385,19 +1354,18 @@ run_arb_vertex_program(GLcontext *ctx, struct tnl_pipeline_stage *stage)
    }
 
    if (outputs & (1<<VERT_RESULT_FOGC)) {
-      VB->FogCoordPtr = &m->attribs[VERT_RESULT_FOGC];
-      VB->AttribPtr[VERT_ATTRIB_FOG] = VB->FogCoordPtr;
+      VB->FogCoordPtr =
+      VB->AttribPtr[VERT_ATTRIB_FOG] = &m->attribs[VERT_RESULT_FOGC];
    }
 
    if (outputs & (1<<VERT_RESULT_PSIZ)) {
-      VB->PointSizePtr = &m->attribs[VERT_RESULT_PSIZ];
       VB->AttribPtr[_TNL_ATTRIB_POINTSIZE] = &m->attribs[VERT_RESULT_PSIZ];
    }
 
    for (i = 0; i < ctx->Const.MaxTextureCoordUnits; i++) {
       if (outputs & (1<<(VERT_RESULT_TEX0+i))) {
-	 VB->TexCoordPtr[i] = &m->attribs[VERT_RESULT_TEX0 + i];
-	 VB->AttribPtr[VERT_ATTRIB_TEX0+i] = VB->TexCoordPtr[i];
+	 VB->TexCoordPtr[i] =
+	 VB->AttribPtr[VERT_ATTRIB_TEX0+i] = &m->attribs[VERT_RESULT_TEX0 + i];
       }
    }
 
@@ -1408,10 +1376,10 @@ run_arb_vertex_program(GLcontext *ctx, struct tnl_pipeline_stage *stage)
 	     VEC_ELT(VB->ClipPtr, GLfloat, i)[1],
 	     VEC_ELT(VB->ClipPtr, GLfloat, i)[2],
 	     VEC_ELT(VB->ClipPtr, GLfloat, i)[3],
-	     VEC_ELT(VB->TexCoordPtr[0], GLfloat, i)[0],
-	     VEC_ELT(VB->TexCoordPtr[0], GLfloat, i)[1],
-	     VEC_ELT(VB->TexCoordPtr[0], GLfloat, i)[2],
-	     VEC_ELT(VB->TexCoordPtr[0], GLfloat, i)[3]);
+	     VEC_ELT(VB->AttribPtr[VERT_ATTRIB_TEX0], GLfloat, i)[0],
+	     VEC_ELT(VB->AttribPtr[VERT_ATTRIB_TEX0], GLfloat, i)[1],
+	     VEC_ELT(VB->AttribPtr[VERT_ATTRIB_TEX0], GLfloat, i)[2],
+	     VEC_ELT(VB->AttribPtr[VERT_ATTRIB_TEX0], GLfloat, i)[3]);
    }
 #endif
 
@@ -1425,7 +1393,7 @@ static void
 validate_vertex_program( GLcontext *ctx, struct tnl_pipeline_stage *stage )
 {
    struct arb_vp_machine *m = ARB_VP_MACHINE(stage);
-   struct vertex_program *program;
+   struct gl_vertex_program *program;
 
    if (ctx->ShaderObjects._VertexShaderPresent)
       return;
@@ -1485,7 +1453,7 @@ static GLboolean init_vertex_program( GLcontext *ctx,
     */
    ASSIGN_4V(m->File[0][REG_ID], 0, 0, 0, 1);
    ASSIGN_4V(m->File[0][REG_ONES], 1, 1, 1, 1);
-   ASSIGN_4V(m->File[0][REG_SWZ], -1, 1, 0, 0);
+   ASSIGN_4V(m->File[0][REG_SWZ], 1, -1, 0, 0);
    ASSIGN_4V(m->File[0][REG_NEG], -1, -1, -1, -1);
    ASSIGN_4V(m->File[0][REG_LIT], 1, 0, 0, 1);
    ASSIGN_4V(m->File[0][REG_LIT2], 1, .5, .2, 1); /* debug value */
@@ -1544,7 +1512,7 @@ static void dtr( struct tnl_pipeline_stage *stage )
  */
 const struct tnl_pipeline_stage _tnl_arb_vertex_program_stage =
 {
-   "vertex-program",
+   "arb-vertex-program",
    NULL,			/* private_data */
    init_vertex_program,		/* create */
    dtr,				/* destroy */
@@ -1558,11 +1526,11 @@ const struct tnl_pipeline_stage _tnl_arb_vertex_program_stage =
  * string has been parsed.
  */
 void
-_tnl_program_string(GLcontext *ctx, GLenum target, struct program *program)
+_tnl_program_string(GLcontext *ctx, GLenum target, struct gl_program *program)
 {
    if (program->Target == GL_VERTEX_PROGRAM_ARB) {
       /* free any existing tnl data hanging off the program */
-      struct vertex_program *vprog = (struct vertex_program *) program;
+      struct gl_vertex_program *vprog = (struct gl_vertex_program *) program;
       if (vprog->TnlData) {
          free_tnl_data(vprog);
       }

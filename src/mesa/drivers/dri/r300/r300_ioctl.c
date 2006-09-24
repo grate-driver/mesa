@@ -65,12 +65,12 @@ static void r300ClearBuffer(r300ContextPtr r300, int flags, int buffer)
 	__DRIdrawablePrivate *dPriv = r300->radeon.dri.drawable;
 	GLuint cboffset, cbpitch;
 	drm_r300_cmd_header_t* cmd2;
-#ifdef CB_DPATH
+	int cmd_reserved = 0;
+	int cmd_written = 0;
+	drm_radeon_cmd_header_t *cmd = NULL;
 	r300ContextPtr rmesa=r300;
-	LOCAL_VARS;
-#else
-	r300ContextPtr rmesa=r300;
-	LOCAL_VARS;
+
+#ifndef CB_DPATH
 	int i;
 #endif
 	
@@ -218,32 +218,18 @@ static void r300ClearBuffer(r300ContextPtr r300, int flags, int buffer)
 	r300->hw.vpi.cmd[8] = 0;
 
 	R300_STATECHANGE(r300, zs);
+	r300->hw.zs.cmd[R300_ZS_CNTL_0] = 0;
+	r300->hw.zs.cmd[R300_ZS_CNTL_1] = 0;
 	if (flags & CLEARBUFFER_DEPTH) {
-		r300->hw.zs.cmd[R300_ZS_CNTL_0] &= R300_RB3D_STENCIL_ENABLE;
-		r300->hw.zs.cmd[R300_ZS_CNTL_0] |= 0x6; // test and write
-		r300->hw.zs.cmd[R300_ZS_CNTL_1] &= ~(R300_ZS_MASK << R300_RB3D_ZS1_DEPTH_FUNC_SHIFT);
+		r300->hw.zs.cmd[R300_ZS_CNTL_0] |= R300_RB3D_Z_WRITE_ONLY;
 		r300->hw.zs.cmd[R300_ZS_CNTL_1] |= (R300_ZS_ALWAYS<<R300_RB3D_ZS1_DEPTH_FUNC_SHIFT);
-/*
-		R300_STATECHANGE(r300, zb);
-		r300->hw.zb.cmd[R300_ZB_OFFSET] =
-			1024*4*300 +
-			r300->radeon.radeonScreen->frontOffset +
-			r300->radeon.radeonScreen->fbLocation;
-		r300->hw.zb.cmd[R300_ZB_PITCH] =
-			r300->radeon.radeonScreen->depthPitch;
-*/
 	} else {
-		r300->hw.zs.cmd[R300_ZS_CNTL_0] &= R300_RB3D_STENCIL_ENABLE;
 		r300->hw.zs.cmd[R300_ZS_CNTL_0] |= R300_RB3D_Z_DISABLED_1; // disable
-		r300->hw.zs.cmd[R300_ZS_CNTL_1] &= ~(R300_ZS_MASK << R300_RB3D_ZS1_DEPTH_FUNC_SHIFT);
 	}
 	
 	R300_STATECHANGE(r300, zs);
 	if (flags & CLEARBUFFER_STENCIL) {
-		r300->hw.zs.cmd[R300_ZS_CNTL_0] &= ~R300_RB3D_STENCIL_ENABLE;
 		r300->hw.zs.cmd[R300_ZS_CNTL_0] |= R300_RB3D_STENCIL_ENABLE;
-		r300->hw.zs.cmd[R300_ZS_CNTL_1] &= 
-		    ~((R300_ZS_MASK << R300_RB3D_ZS1_FRONT_FUNC_SHIFT) | (R300_ZS_MASK << R300_RB3D_ZS1_BACK_FUNC_SHIFT));
 		r300->hw.zs.cmd[R300_ZS_CNTL_1] |= 
 		    (R300_ZS_ALWAYS<<R300_RB3D_ZS1_FRONT_FUNC_SHIFT) | 
 		    (R300_ZS_REPLACE<<R300_RB3D_ZS1_FRONT_FAIL_OP_SHIFT) |
@@ -263,7 +249,7 @@ static void r300ClearBuffer(r300ContextPtr r300, int flags, int buffer)
 #else
 #if 1
 	cp_wait(r300, R300_WAIT_3D | R300_WAIT_3D_CLEAN);
-	end_3d(PASS_PREFIX_VOID);
+	end_3d(rmesa);
 #endif
 	
 	R300_STATECHANGE(r300, cb);
@@ -299,37 +285,18 @@ static void r300ClearBuffer(r300ContextPtr r300, int flags, int buffer)
 	{
 	uint32_t t1, t2;
 	
-	t1 = r300->hw.zs.cmd[R300_ZS_CNTL_0];
-	t2 = r300->hw.zs.cmd[R300_ZS_CNTL_1];
+	t1 = 0x0;
+	t2 = 0x0;
 	
 	if (flags & CLEARBUFFER_DEPTH) {
-		t1 &= R300_RB3D_STENCIL_ENABLE;
-		t1 |= 0x6; // test and write
-		
-		t2 &= ~(R300_ZS_MASK << R300_RB3D_ZS1_DEPTH_FUNC_SHIFT);
-		t2 |= (R300_ZS_ALWAYS<<R300_RB3D_ZS1_DEPTH_FUNC_SHIFT);
-/*
-		R300_STATECHANGE(r300, zb);
-		r300->hw.zb.cmd[R300_ZB_OFFSET] =
-			1024*4*300 +
-			r300->radeon.radeonScreen->frontOffset +
-			r300->radeon.radeonScreen->fbLocation;
-		r300->hw.zb.cmd[R300_ZB_PITCH] =
-			r300->radeon.radeonScreen->depthPitch;
-*/
+		t1 |= R300_RB3D_Z_WRITE_ONLY;
+		t2 |= (R300_ZS_ALWAYS << R300_RB3D_ZS1_DEPTH_FUNC_SHIFT);
 	} else {
-		t1 &= R300_RB3D_STENCIL_ENABLE;
 		t1 |= R300_RB3D_Z_DISABLED_1; // disable
-		
-		t2 &= ~(R300_ZS_MASK << R300_RB3D_ZS1_DEPTH_FUNC_SHIFT);
 	}
 	
 	if (flags & CLEARBUFFER_STENCIL) {
-		t1 &= ~R300_RB3D_STENCIL_ENABLE;
 		t1 |= R300_RB3D_STENCIL_ENABLE;
-		
-		t2 &= 
-		    ~((R300_ZS_MASK << R300_RB3D_ZS1_FRONT_FUNC_SHIFT) | (R300_ZS_MASK << R300_RB3D_ZS1_BACK_FUNC_SHIFT));
 		t2 |= 
 		    (R300_ZS_ALWAYS<<R300_RB3D_ZS1_FRONT_FUNC_SHIFT) | 
 		    (R300_ZS_REPLACE<<R300_RB3D_ZS1_FRONT_FAIL_OP_SHIFT) |
@@ -378,7 +345,9 @@ static void r300EmitClearState(GLcontext * ctx)
 	r300ContextPtr rmesa=r300;
 	__DRIdrawablePrivate *dPriv = r300->radeon.dri.drawable;
 	int i;
-	LOCAL_VARS;
+	int cmd_reserved = 0;
+	int cmd_written = 0;
+	drm_radeon_cmd_header_t *cmd = NULL;
 	
 	
 	R300_STATECHANGE(r300, vir[0]);
@@ -873,9 +842,6 @@ GLuint r300GetMemoryOffsetMESA(__DRInativeDisplay * dpy, int scrn,
 	}
 
 	if (!r300IsGartMemory(rmesa, pointer, 0))
-		return ~0;
-
-	if (rmesa->radeon.dri.drmMinor < 6)
 		return ~0;
 
 	card_offset = r300GartOffsetFromVirtual(rmesa, pointer);

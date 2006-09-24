@@ -35,7 +35,7 @@
 /*
  * monotonizer.h
  *
- * $Header: /cvs/mesa/Mesa/src/glu/sgi/libnurbs/internals/monotonizer.h,v 1.2 2006-04-03 22:23:52 ajax Exp $
+ * $Header: /cvs/mesa/Mesa/src/glu/sgi/libnurbs/internals/monotonizer.h,v 1.2 2006/04/03 22:23:52 ajax Exp $
  */
 
 #ifndef __glumonotonizer_h_

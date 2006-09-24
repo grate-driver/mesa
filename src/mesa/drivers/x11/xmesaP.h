@@ -28,7 +28,6 @@
 
 
 #ifdef XFree86Server
-# include "GL/xf86glx.h"
 # include "xf86glx_util.h"
 #elif defined(USE_XSHM)
 # include <X11/extensions/XShm.h>
@@ -520,6 +519,8 @@ extern void xmesa_update_state( GLcontext *ctx, GLbitfield new_state );
 extern void
 xmesa_set_renderbuffer_funcs(struct xmesa_renderbuffer *xrb,
                              enum pixel_format pixelformat, GLint depth);
+
+extern void xmesa_destroy_buffers_on_display(XMesaDisplay *dpy);
 
 
 /**

@@ -131,7 +131,6 @@ struct r300_dma_region {
     int aos_offset;     /* address in GART memory */
     int aos_stride;     /* distance between elements, in dwords */
     int aos_size;       /* number of components (1-4) */
-    int aos_format;     /* format of components */
     int aos_reg;        /* VAP register assignment */
 };
 
@@ -208,6 +207,10 @@ struct r300_texture_env_state {
 	GLenum envMode;
 };
 
+
+/* The blit width for texture uploads
+ */
+#define R300_BLIT_WIDTH_BYTES 1024
 #define R300_MAX_TEXTURE_UNITS 8
 
 struct r300_texture_state {
@@ -537,17 +540,6 @@ struct r300_stencilbuffer_state {
 
 };
 
-struct r300_vap_reg_state {
-	   /* input register assigments */
-	   int i_coords;
-	   int i_normal;
-	   int i_color[2];
-	   int i_fog;
-	   int i_tex[R300_MAX_TEXTURE_UNITS];
-	   int i_index;
-	   int i_pointsize;
-	};
-
 /* Vertex shader state */
 
 /* Perhaps more if we store programs in vmem? */
@@ -616,7 +608,7 @@ extern int hw_tcl_on;
  * Keeping them them seperate for now should ensure fixed pipeline keeps functioning properly.
  */	
 struct r300_vertex_program {
-	struct vertex_program mesa_program; /* Must be first */
+	struct gl_vertex_program mesa_program; /* Must be first */
 	int translated;
 	
 	struct r300_vertex_shader_fragment program;
@@ -670,7 +662,7 @@ struct r300_pfs_compile_state {
 };
 
 struct r300_fragment_program {
-	struct fragment_program mesa_program;
+	struct gl_fragment_program mesa_program;
 
 	GLcontext *ctx;
 	GLboolean translated;
@@ -723,6 +715,7 @@ struct r300_fragment_program {
 
 #define R300_MAX_AOS_ARRAYS		16
 
+#define AOS_FORMAT_USHORT	0
 #define AOS_FORMAT_FLOAT	1
 #define AOS_FORMAT_UBYTE	2
 #define AOS_FORMAT_FLOAT_COLOR	3
@@ -769,7 +762,7 @@ struct r300_aos_rec {
 struct r300_state {
 	struct r300_depthbuffer_state depth;
 	struct r300_texture_state texture;
-	struct r300_vap_reg_state vap_reg;
+	int sw_tcl_inputs[VERT_ATTRIB_MAX];
 	struct r300_vertex_shader_state vertex_shader;
 	struct r300_pfs_compile_state pfs_compile;
 	struct r300_dma_region aos[R300_MAX_AOS_ARRAYS];
@@ -803,7 +796,7 @@ struct r300_context {
 	struct r300_hw_state hw;
 	struct r300_cmdbuf cmdbuf;
 	struct r300_state state;
-	struct vertex_program *curr_vp;
+	struct gl_vertex_program *curr_vp;
 
 	/* Vertex buffers
 	 */
@@ -831,6 +824,7 @@ struct r300_context {
 
 	GLboolean texmicrotile;
 	GLboolean span_dlocking;
+	GLboolean disable_lowimpact_fallback;
 };
 
 struct r300_buffer_object {
@@ -857,6 +851,8 @@ extern void r300DestroyContext(__DRIcontextPrivate * driContextPriv);
 extern GLboolean r300CreateContext(const __GLcontextModes * glVisual,
 				   __DRIcontextPrivate * driContextPriv,
 				   void *sharedContextPrivate);
+
+extern int r300_get_num_verts(r300ContextPtr rmesa, int num_verts, int prim);
 
 void r300_translate_vertex_shader(struct r300_vertex_program *vp);
 extern void r300InitShaderFuncs(struct dd_function_table *functions);

@@ -113,10 +113,7 @@ static int r300_get_primitive_type(r300ContextPtr rmesa, GLcontext *ctx, int pri
    return type;
 }
 
-static int r300_get_num_verts(r300ContextPtr rmesa,
-	GLcontext *ctx,
-	int num_verts,
-	int prim)
+int r300_get_num_verts(r300ContextPtr rmesa, int num_verts, int prim)
 {
 	int verts_off=0;
 	char *name="UNKNOWN";
@@ -196,9 +193,11 @@ static int r300_get_num_verts(r300ContextPtr rmesa,
 
 /* vertex buffer implementation */
 
-static void inline fire_EB(PREFIX unsigned long addr, int vertex_count, int type, int elt_size)
+static void inline fire_EB(r300ContextPtr rmesa, unsigned long addr, int vertex_count, int type, int elt_size)
 {
-	LOCAL_VARS
+	int cmd_reserved = 0;
+	int cmd_written = 0;
+	drm_radeon_cmd_header_t *cmd = NULL;
 	unsigned long addr_a;
 	unsigned long t_addr;
 	unsigned long magic_1, magic_2;
@@ -241,7 +240,7 @@ static void inline fire_EB(PREFIX unsigned long addr, int vertex_count, int type
 	} else {
 		e32(magic_2); /* Total number of dwords needed? */
 	}
-	//cp_delay(PASS_PREFIX 1);
+	//cp_delay(rmesa, 1);
 #if 0
 	fprintf(stderr, "magic_1 %d\n", magic_1);
 	fprintf(stderr, "t_addr %x\n", t_addr);
@@ -271,7 +270,7 @@ static void inline fire_EB(PREFIX unsigned long addr, int vertex_count, int type
 	} else {
 		e32((vertex_count+1)/2 /*+ addr_a/4*/); /* Total number of dwords needed? */
 	}
-	//cp_delay(PASS_PREFIX 1);
+	//cp_delay(rmesa, 1);
 #endif	
 }
 
@@ -284,14 +283,16 @@ static void r300_render_vb_primitive(r300ContextPtr rmesa,
    int type, num_verts;
 
    type=r300_get_primitive_type(rmesa, ctx, prim);
-   num_verts=r300_get_num_verts(rmesa, ctx, end-start, prim);
+   num_verts=r300_get_num_verts(rmesa, end-start, prim);
 
    if(type<0 || num_verts <= 0)return;
 
    if(rmesa->state.VB.Elts){
 	r300EmitAOS(rmesa, rmesa->state.aos_count, /*0*/start);
 #if 0
-	LOCAL_VARS
+	int cmd_reserved = 0;
+	int cmd_written = 0;
+	drm_radeon_cmd_header_t *cmd = NULL;
 	int i;
 	start_index32_packet(num_verts, type);
 	for(i=0; i < num_verts; i++)
@@ -309,60 +310,13 @@ static void r300_render_vb_primitive(r300ContextPtr rmesa,
 	}
 	
 	r300EmitElts(ctx, rmesa->state.VB.Elts, num_verts, rmesa->state.VB.elt_size);
-	fire_EB(PASS_PREFIX rmesa->state.elt_dma.aos_offset, num_verts, type, rmesa->state.VB.elt_size);
+	fire_EB(rmesa, rmesa->state.elt_dma.aos_offset, num_verts, type, rmesa->state.VB.elt_size);
 #endif
    }else{
 	   r300EmitAOS(rmesa, rmesa->state.aos_count, start);
-	   fire_AOS(PASS_PREFIX num_verts, type);
+	   fire_AOS(rmesa, num_verts, type);
    }
 }
-
-#if 0
-void dump_array(struct r300_dma_region *rvb, int count)
-{
-	int *out = (int *)(rvb->address + rvb->start);
-	int i, ci;
-	
-	fprintf(stderr, "stride %d:", rvb->aos_stride);
-	for (i=0; i < count; i++) {
-		fprintf(stderr, "{");
-		if (rvb->aos_format == AOS_FORMAT_FLOAT)
-			for (ci=0; ci < rvb->aos_size; ci++)
-				fprintf(stderr, "%f ", ((float *)out)[ci]);
-		else
-			for (ci=0; ci < rvb->aos_size; ci++)
-				fprintf(stderr, "%d ", ((unsigned char *)out)[ci]);
-		fprintf(stderr, "}");
-		
-		out += rvb->aos_stride;
-	}
-
-	fprintf(stderr, "\n");
-}
-		
-void dump_dt(struct dt *dt, int count)
-{
-	int *out = dt->data;
-	int i, ci;
-	
-	fprintf(stderr, "stride %d", dt->stride);
-	
-	for (i=0; i < count; i++){
-		fprintf(stderr, "{");
-		if (dt->type == GL_FLOAT)
-			for (ci=0; ci < dt->size; ci++)
-				fprintf(stderr, "%f ", ((float *)out)[ci]);
-		else
-			for (ci=0; ci < dt->size; ci++)
-				fprintf(stderr, "%d ", ((unsigned char *)out)[ci]);
-		fprintf(stderr, "}");
-		
-		out = (int *)((char *)out + dt->stride);
-	}
-	
-	fprintf(stderr, "\n");
-}
-#endif
 
 GLboolean r300_run_vb_render(GLcontext *ctx,
 				 struct tnl_pipeline_stage *stage)
@@ -370,7 +324,10 @@ GLboolean r300_run_vb_render(GLcontext *ctx,
 	r300ContextPtr rmesa = R300_CONTEXT(ctx);
 	struct radeon_vertex_buffer *VB = &rmesa->state.VB;
 	int i;
-	LOCAL_VARS
+	int cmd_reserved = 0;
+	int cmd_written = 0;
+	drm_radeon_cmd_header_t *cmd = NULL;
+
    
 	if (RADEON_DEBUG & DEBUG_PRIMS)
 		fprintf(stderr, "%s\n", __FUNCTION__);
@@ -381,51 +338,17 @@ GLboolean r300_run_vb_render(GLcontext *ctx,
 	}
 	
 	r300UpdateShaders(rmesa);
-	if (rmesa->state.VB.LockCount == 0 || 1) {
-		r300EmitArrays(ctx, GL_FALSE);
+	if (r300EmitArrays(ctx))
+		return GL_TRUE;
 
-		r300UpdateShaderStates(rmesa);
-	} else {
-		/* TODO: Figure out why do we need these. */
-		R300_STATECHANGE(rmesa, vir[0]);
-		R300_STATECHANGE(rmesa, vir[1]);
-		R300_STATECHANGE(rmesa, vic);
-		R300_STATECHANGE(rmesa, vof);
-		
-#if 0		
-		fprintf(stderr, "dt:\n");
-		for(i=0; i < VERT_ATTRIB_MAX; i++){
-			fprintf(stderr, "dt %d:", i);
-			dump_dt(&rmesa->state.VB.AttribPtr[i], VB->Count);
-		}
-		
-		fprintf(stderr, "before:\n");
-		for(i=0; i < rmesa->state.aos_count; i++){
-			fprintf(stderr, "aos %d:", i);
-			dump_array(&rmesa->state.aos[i], VB->Count);
-		}
-#endif
-#if 0
- 	  	r300ReleaseArrays(ctx);
-		r300EmitArrays(ctx, GL_FALSE);
-			
-		fprintf(stderr, "after:\n");
-		for(i=0; i < rmesa->state.aos_count; i++){
-			fprintf(stderr, "aos %d:", i);
-			dump_array(&rmesa->state.aos[i], VB->Count);
-		}
-#endif
-	}
+	r300UpdateShaderStates(rmesa);
 	
 	reg_start(R300_RB3D_DSTCACHE_CTLSTAT,0);
 	e32(0x0000000a);
 
 	reg_start(0x4f18,0);
 	e32(0x00000003);
-#if 0
-	reg_start(R300_VAP_PVS_WAITIDLE,0);
-		e32(0x00000000);
-#endif
+	
 	r300EmitState(rmesa);
 	
 	for(i=0; i < VB->PrimitiveCount; i++){
@@ -449,50 +372,78 @@ GLboolean r300_run_vb_render(GLcontext *ctx,
 	return GL_FALSE;
 }
 
-#define FALLBACK_IF(expr) \
-do {										\
-	if (expr) {								\
-		if (1 || RADEON_DEBUG & DEBUG_FALLBACKS)			\
-			WARN_ONCE("Software fallback:%s\n", #expr);		\
-		return R300_FALLBACK_RAST;					\
-	}									\
-} while(0)
+#define FALLBACK_IF(expr)						\
+	do {								\
+		if (expr) {						\
+			if (1 || RADEON_DEBUG & DEBUG_FALLBACKS)	\
+				WARN_ONCE("Software fallback:%s\n",	\
+					  #expr);			\
+			return R300_FALLBACK_RAST;			\
+		}							\
+	} while(0)
 
 int r300Fallback(GLcontext *ctx)
 {
+	r300ContextPtr r300 = R300_CONTEXT(ctx);
 	int i;
 
-	FALLBACK_IF(ctx->RenderMode != GL_RENDER);  // We do not do SELECT or FEEDBACK (yet ?)
-	
-#if 0 /* These should work now.. */
+	/* We do not do SELECT or FEEDBACK (yet ?)
+	 * Is it worth doing them ?
+	 */
+	FALLBACK_IF(ctx->RenderMode != GL_RENDER);
+
+#if 0
+	/* These should work now.. */
 	FALLBACK_IF(ctx->Color.DitherFlag);
-	FALLBACK_IF(ctx->Color.AlphaEnabled); // GL_ALPHA_TEST
-	FALLBACK_IF(ctx->Color.BlendEnabled); // GL_BLEND
-	FALLBACK_IF(ctx->Polygon.OffsetFill); // GL_POLYGON_OFFSET_FILL
+	/* GL_ALPHA_TEST */
+	FALLBACK_IF(ctx->Color.AlphaEnabled);
+	/* GL_BLEND */
+	FALLBACK_IF(ctx->Color.BlendEnabled);
+	/* GL_POLYGON_OFFSET_FILL */
+	FALLBACK_IF(ctx->Polygon.OffsetFill);
+	/* FOG seems to trigger an unknown output
+	 *  in vertex program.
+	 */
 	FALLBACK_IF(ctx->Fog.Enabled);
 #endif
-	FALLBACK_IF(ctx->Polygon.OffsetPoint); // GL_POLYGON_OFFSET_POINT
-	FALLBACK_IF(ctx->Polygon.OffsetLine); // GL_POLYGON_OFFSET_LINE
-	//FALLBACK_IF(ctx->Stencil.Enabled); // GL_STENCIL_TEST
-	
-	//FALLBACK_IF(ctx->Polygon.SmoothFlag); // GL_POLYGON_SMOOTH disabling to get blender going
-	FALLBACK_IF(ctx->Polygon.StippleFlag); // GL_POLYGON_STIPPLE
-	FALLBACK_IF(ctx->Multisample.Enabled); // GL_MULTISAMPLE_ARB
-	
-	
-	FALLBACK_IF(ctx->Line.StippleFlag);
-	
-	/* HW doesnt appear to directly support these */
-	FALLBACK_IF(ctx->Line.SmoothFlag); // GL_LINE_SMOOTH
-	FALLBACK_IF(ctx->Point.SmoothFlag); // GL_POINT_SMOOTH
-	/* Rest could be done with vertex fragments */
-	if (ctx->Extensions.NV_point_sprite || ctx->Extensions.ARB_point_sprite)
-		FALLBACK_IF(ctx->Point.PointSprite); // GL_POINT_SPRITE_NV
 
+	if(!r300->disable_lowimpact_fallback){
+		/* GL_POLYGON_OFFSET_POINT */
+		FALLBACK_IF(ctx->Polygon.OffsetPoint);
+		/* GL_POLYGON_OFFSET_LINE */
+		FALLBACK_IF(ctx->Polygon.OffsetLine);
+#if 0
+		/* GL_STENCIL_TEST */
+		FALLBACK_IF(ctx->Stencil.Enabled);
+		/* GL_POLYGON_SMOOTH disabling to get blender going */
+		FALLBACK_IF(ctx->Polygon.SmoothFlag);
+#endif
+		/* GL_POLYGON_STIPPLE */
+		FALLBACK_IF(ctx->Polygon.StippleFlag);
+		/* GL_MULTISAMPLE_ARB */
+		FALLBACK_IF(ctx->Multisample.Enabled);
+		/* blender ? */
+		FALLBACK_IF(ctx->Line.StippleFlag);
+		/* GL_LINE_SMOOTH */
+		FALLBACK_IF(ctx->Line.SmoothFlag);
+		/* GL_POINT_SMOOTH */
+		FALLBACK_IF(ctx->Point.SmoothFlag);
+	}
+
+	/* Fallback for LOGICOP */
+	FALLBACK_IF(ctx->Color.ColorLogicOpEnabled);
+
+	/* Rest could be done with vertex fragments */
+	if (ctx->Extensions.NV_point_sprite ||
+	    ctx->Extensions.ARB_point_sprite)
+		/* GL_POINT_SPRITE_NV */
+		FALLBACK_IF(ctx->Point.PointSprite);
+
+	/* Fallback for rectangular texture */
 	for (i = 0; i < ctx->Const.MaxTextureUnits; i++)
 		if (ctx->Texture.Unit[i]._ReallyEnabled & TEXTURE_RECT_BIT)
 			return R300_FALLBACK_TCL;
-		
+
 	return R300_FALLBACK_NONE;
 }
 

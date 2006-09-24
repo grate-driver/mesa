@@ -115,7 +115,7 @@ static struct state_key *make_state_key( GLcontext *ctx )
 {
    TNLcontext *tnl = TNL_CONTEXT(ctx);
    struct vertex_buffer *VB = &tnl->vb;
-   const struct fragment_program *fp = ctx->FragmentProgram._Current;
+   const struct gl_fragment_program *fp = ctx->FragmentProgram._Current;
    struct state_key *key = CALLOC_STRUCT(state_key);
    GLuint i;
 
@@ -257,7 +257,7 @@ struct ureg {
 
 struct tnl_program {
    const struct state_key *state;
-   struct vertex_program *program;
+   struct gl_vertex_program *program;
    
    GLuint temp_in_use;
    GLuint temp_reserved;
@@ -273,7 +273,7 @@ struct tnl_program {
 
 
 static const struct ureg undef = { 
-   ~0,
+   PROGRAM_UNDEFINED,
    ~0,
    0,
    0,
@@ -397,7 +397,7 @@ static struct ureg register_const4f( struct tnl_program *p,
 
 static GLboolean is_undef( struct ureg reg )
 {
-   return reg.file == 0xf;
+   return reg.file == PROGRAM_UNDEFINED;
 }
 
 static struct ureg get_identity_param( struct tnl_program *p )
@@ -460,7 +460,7 @@ static void emit_arg( struct prog_src_register *src,
    src->File = reg.file;
    src->Index = reg.idx;
    src->Swizzle = reg.swz;
-   src->NegateBase = reg.negate;
+   src->NegateBase = reg.negate ? NEGATE_XYZW : 0;
    src->Abs = 0;
    src->NegateAbs = 0;
    src->RelAddr = 0;
@@ -1388,7 +1388,7 @@ static void build_tnl_program( struct tnl_program *p )
 
 static void
 create_new_program( const struct state_key *key,
-                    struct vertex_program *program,
+                    struct gl_vertex_program *program,
                     GLuint max_temps)
 {
    struct tnl_program p;
@@ -1493,7 +1493,7 @@ void _tnl_UpdateFixedFunctionProgram( GLcontext *ctx )
    TNLcontext *tnl = TNL_CONTEXT(ctx);
    struct state_key *key;
    GLuint hash;
-   const struct vertex_program *prev = ctx->VertexProgram._Current;
+   const struct gl_vertex_program *prev = ctx->VertexProgram._Current;
 
    if (ctx->VertexProgram._Enabled == GL_FALSE) { 
       /* Grab all the relevent state and put it in a single structure:
@@ -1503,7 +1503,7 @@ void _tnl_UpdateFixedFunctionProgram( GLcontext *ctx )
 
       /* Look for an already-prepared program for this state:
        */
-      ctx->_TnlProgram = (struct vertex_program *)
+      ctx->_TnlProgram = (struct gl_vertex_program *)
 	 search_cache( tnl->vp_cache, hash, key, sizeof(*key) );
    
       /* OK, we'll have to build a new one:
@@ -1512,7 +1512,7 @@ void _tnl_UpdateFixedFunctionProgram( GLcontext *ctx )
 	 if (0)
 	    _mesa_printf("Build new TNL program\n");
 	 
-	 ctx->_TnlProgram = (struct vertex_program *)
+	 ctx->_TnlProgram = (struct gl_vertex_program *)
 	    ctx->Driver.NewProgram(ctx, GL_VERTEX_PROGRAM_ARB, 0); 
 
 	 create_new_program( key, ctx->_TnlProgram, 
@@ -1540,10 +1540,20 @@ void _tnl_UpdateFixedFunctionProgram( GLcontext *ctx )
     */
    if (ctx->VertexProgram._Current != prev &&
        ctx->Driver.BindProgram) 
-      ctx->Driver.BindProgram(ctx, GL_VERTEX_PROGRAM_ARB, (struct program *)
-			      ctx->VertexProgram._Current);   
+      ctx->Driver.BindProgram(ctx, GL_VERTEX_PROGRAM_ARB,
+                            (struct gl_program *) ctx->VertexProgram._Current);
 }
 
+void _tnl_ProgramCacheInit( GLcontext *ctx )
+{
+   TNLcontext *tnl = TNL_CONTEXT(ctx);
+
+   tnl->vp_cache = (struct tnl_cache *) MALLOC(sizeof(*tnl->vp_cache));
+   tnl->vp_cache->size = 17;
+   tnl->vp_cache->n_items = 0;
+   tnl->vp_cache->items = (struct tnl_cache_item**)
+      _mesa_calloc(tnl->vp_cache->size * sizeof(*tnl->vp_cache->items));
+}
 
 void _tnl_ProgramCacheDestroy( GLcontext *ctx )
 {

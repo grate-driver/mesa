@@ -69,6 +69,15 @@ void radeon_mm_init(r300ContextPtr rmesa)
 	resize_u_list(rmesa);
 }
 
+void radeon_mm_destroy(r300ContextPtr rmesa)
+{
+	_mesa_free(rmesa->rmm->u_list);
+	rmesa->rmm->u_list = NULL;
+
+	_mesa_free(rmesa->rmm);
+	rmesa->rmm = NULL;
+}
+
 void *radeon_mm_ptr(r300ContextPtr rmesa, int id)
 {
 	assert(id <= rmesa->rmm->u_last);
@@ -96,7 +105,7 @@ int radeon_mm_find(r300ContextPtr rmesa, void *ptr)
 int radeon_mm_alloc(r300ContextPtr rmesa, int alignment, int size)
 {
 	drm_radeon_mem_alloc_t alloc;
-	int offset, ret;
+	int offset = 0, ret;
 	int i, free=-1;
 	int done_age;
 	drm_radeon_mem_free_t memfree;
@@ -230,7 +239,9 @@ int radeon_mm_alloc(r300ContextPtr rmesa, int alignment, int size)
 #include "r300_emit.h"
 static void emit_lin_cp(r300ContextPtr rmesa, unsigned long dst, unsigned long src, unsigned long size)
 {
-	LOCAL_VARS
+	int cmd_reserved = 0;
+	int cmd_written = 0;
+	drm_radeon_cmd_header_t *cmd = NULL;
 	int cp_size;
 	
 	

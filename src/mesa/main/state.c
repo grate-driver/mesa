@@ -1,6 +1,6 @@
 /*
  * Mesa 3-D graphics library
- * Version:  6.5
+ * Version:  6.5.1
  *
  * Copyright (C) 1999-2006  Brian Paul   All Rights Reserved.
  *
@@ -45,6 +45,7 @@
 #if FEATURE_ARB_vertex_buffer_object
 #include "bufferobj.h"
 #endif
+#include "arrayobj.h"
 #include "buffers.h"
 #include "clip.h"
 #include "colortab.h"
@@ -69,7 +70,7 @@
 #include "lines.h"
 #include "macros.h"
 #include "matrix.h"
-#if FEATURE_ARB_occlusion_query
+#if FEATURE_ARB_occlusion_query || FEATURE_EXT_timer_query
 #include "occlude.h"
 #endif
 #include "pixel.h"
@@ -355,11 +356,11 @@ _mesa_init_exec_table(struct _glapi_table *exec)
    SET_CopyConvolutionFilter1D(exec, _mesa_CopyConvolutionFilter1D);
    SET_CopyConvolutionFilter2D(exec, _mesa_CopyConvolutionFilter2D);
    SET_GetColorTable(exec, _mesa_GetColorTable);
-   SET_GetColorTableEXT(exec, _mesa_GetColorTable);
+   SET_GetColorTableSGI(exec, _mesa_GetColorTable);
    SET_GetColorTableParameterfv(exec, _mesa_GetColorTableParameterfv);
-   SET_GetColorTableParameterfvEXT(exec, _mesa_GetColorTableParameterfv);
+   SET_GetColorTableParameterfvSGI(exec, _mesa_GetColorTableParameterfv);
    SET_GetColorTableParameteriv(exec, _mesa_GetColorTableParameteriv);
-   SET_GetColorTableParameterivEXT(exec, _mesa_GetColorTableParameteriv);
+   SET_GetColorTableParameterivSGI(exec, _mesa_GetColorTableParameteriv);
    SET_GetConvolutionFilter(exec, _mesa_GetConvolutionFilter);
    SET_GetConvolutionFilterEXT(exec, _mesa_GetConvolutionFilter);
    SET_GetConvolutionParameterfv(exec, _mesa_GetConvolutionParameterfv);
@@ -419,6 +420,17 @@ _mesa_init_exec_table(struct _glapi_table *exec)
    SET_GetMinmaxParameterivEXT(exec, _mesa_GetMinmaxParameteriv);
 #endif
 
+   /* 14. SGI_color_table */
+#if 0
+   SET_ColorTableSGI(exec, _mesa_ColorTable);
+   SET_ColorSubTableSGI(exec, _mesa_ColorSubTable);
+#endif
+#if _HAVE_FULL_GL
+   SET_GetColorTableSGI(exec, _mesa_GetColorTable);
+   SET_GetColorTableParameterfvSGI(exec, _mesa_GetColorTableParameterfv);
+   SET_GetColorTableParameterivSGI(exec, _mesa_GetColorTableParameteriv);
+#endif
+
    /* 30. GL_EXT_vertex_array */
 #if _HAVE_FULL_GL
    SET_ColorPointerEXT(exec, _mesa_ColorPointerEXT);
@@ -438,17 +450,6 @@ _mesa_init_exec_table(struct _glapi_table *exec)
 #if _HAVE_FULL_GL
    SET_PointParameterfEXT(exec, _mesa_PointParameterfEXT);
    SET_PointParameterfvEXT(exec, _mesa_PointParameterfvEXT);
-#endif
-
-   /* 78. GL_EXT_paletted_texture */
-#if 0
-   SET_ColorTableEXT(exec, _mesa_ColorTableEXT);
-   SET_ColorSubTableEXT(exec, _mesa_ColorSubTableEXT);
-#endif
-#if _HAVE_FULL_GL
-   SET_GetColorTableEXT(exec, _mesa_GetColorTable);
-   SET_GetColorTableParameterfvEXT(exec, _mesa_GetColorTableParameterfv);
-   SET_GetColorTableParameterivEXT(exec, _mesa_GetColorTableParameteriv);
 #endif
 
    /* 97. GL_EXT_compiled_vertex_array */
@@ -536,6 +537,12 @@ _mesa_init_exec_table(struct _glapi_table *exec)
    SET_VertexAttribPointerNV(exec, _mesa_VertexAttribPointerNV);
    /* glVertexAttrib*NV functions handled in api_loopback.c */
 #endif
+
+   /* 273. GL_APPLE_vertex_array_object */
+   SET_BindVertexArrayAPPLE(exec, _mesa_BindVertexArrayAPPLE);
+   SET_DeleteVertexArraysAPPLE(exec, _mesa_DeleteVertexArraysAPPLE);
+   SET_GenVertexArraysAPPLE(exec, _mesa_GenVertexArraysAPPLE);
+   SET_IsVertexArrayAPPLE(exec, _mesa_IsVertexArrayAPPLE);
 
    /* 282. GL_NV_fragment_program */
 #if FEATURE_NV_fragment_program
@@ -783,12 +790,19 @@ _mesa_init_exec_table(struct _glapi_table *exec)
    SET_GenerateMipmapEXT(exec, _mesa_GenerateMipmapEXT);
 #endif
 
-   /* GL_EXT_timer_query */
+#if FEATURE_EXT_timer_query
    SET_GetQueryObjecti64vEXT(exec, _mesa_GetQueryObjecti64vEXT);
    SET_GetQueryObjectui64vEXT(exec, _mesa_GetQueryObjectui64vEXT);
+#endif
 
 #if FEATURE_EXT_framebuffer_blit
    SET_BlitFramebufferEXT(exec, _mesa_BlitFramebufferEXT);
+#endif
+
+   /* GL_EXT_gpu_program_parameters */
+#if FEATURE_ARB_vertex_program || FEATURE_ARB_fragment_program
+   SET_ProgramEnvParameters4fvEXT(exec, _mesa_ProgramEnvParameters4fvEXT);
+   SET_ProgramLocalParameters4fvEXT(exec, _mesa_ProgramLocalParameters4fvEXT);
 #endif
 }
 
@@ -821,15 +835,15 @@ update_arrays( GLcontext *ctx )
 
    /* 0 */
    if (ctx->ShaderObjects._VertexShaderPresent
-       && ctx->Array.VertexAttrib[VERT_ATTRIB_GENERIC0].Enabled) {
-      min = ctx->Array.VertexAttrib[VERT_ATTRIB_GENERIC0]._MaxElement;
+       && ctx->Array.ArrayObj->VertexAttrib[VERT_ATTRIB_GENERIC0].Enabled) {
+      min = ctx->Array.ArrayObj->VertexAttrib[VERT_ATTRIB_GENERIC0]._MaxElement;
    }
    else if (ctx->VertexProgram._Enabled
-       && ctx->Array.VertexAttrib[VERT_ATTRIB_POS].Enabled) {
-      min = ctx->Array.VertexAttrib[VERT_ATTRIB_POS]._MaxElement;
+       && ctx->Array.ArrayObj->VertexAttrib[VERT_ATTRIB_POS].Enabled) {
+      min = ctx->Array.ArrayObj->VertexAttrib[VERT_ATTRIB_POS]._MaxElement;
    }
-   else if (ctx->Array.Vertex.Enabled) {
-      min = ctx->Array.Vertex._MaxElement;
+   else if (ctx->Array.ArrayObj->Vertex.Enabled) {
+      min = ctx->Array.ArrayObj->Vertex._MaxElement;
    }
    else {
       /* can't draw anything without vertex positions! */
@@ -838,86 +852,86 @@ update_arrays( GLcontext *ctx )
 
    /* 1 */
    if (ctx->VertexProgram._Enabled
-       && ctx->Array.VertexAttrib[VERT_ATTRIB_WEIGHT].Enabled) {
-      min = MIN2(min, ctx->Array.VertexAttrib[VERT_ATTRIB_WEIGHT]._MaxElement);
+       && ctx->Array.ArrayObj->VertexAttrib[VERT_ATTRIB_WEIGHT].Enabled) {
+      min = MIN2(min, ctx->Array.ArrayObj->VertexAttrib[VERT_ATTRIB_WEIGHT]._MaxElement);
    }
    /* no conventional vertex weight array */
 
    /* 2 */
    if (ctx->VertexProgram._Enabled
-       && ctx->Array.VertexAttrib[VERT_ATTRIB_NORMAL].Enabled) {
-      min = MIN2(min, ctx->Array.VertexAttrib[VERT_ATTRIB_NORMAL]._MaxElement);
+       && ctx->Array.ArrayObj->VertexAttrib[VERT_ATTRIB_NORMAL].Enabled) {
+      min = MIN2(min, ctx->Array.ArrayObj->VertexAttrib[VERT_ATTRIB_NORMAL]._MaxElement);
    }
-   else if (ctx->Array.Normal.Enabled) {
-      min = MIN2(min, ctx->Array.Normal._MaxElement);
+   else if (ctx->Array.ArrayObj->Normal.Enabled) {
+      min = MIN2(min, ctx->Array.ArrayObj->Normal._MaxElement);
    }
 
    /* 3 */
    if (ctx->VertexProgram._Enabled
-       && ctx->Array.VertexAttrib[VERT_ATTRIB_COLOR0].Enabled) {
-      min = MIN2(min, ctx->Array.VertexAttrib[VERT_ATTRIB_COLOR0]._MaxElement);
+       && ctx->Array.ArrayObj->VertexAttrib[VERT_ATTRIB_COLOR0].Enabled) {
+      min = MIN2(min, ctx->Array.ArrayObj->VertexAttrib[VERT_ATTRIB_COLOR0]._MaxElement);
    }
-   else if (ctx->Array.Color.Enabled) {
-      min = MIN2(min, ctx->Array.Color._MaxElement);
+   else if (ctx->Array.ArrayObj->Color.Enabled) {
+      min = MIN2(min, ctx->Array.ArrayObj->Color._MaxElement);
    }
 
    /* 4 */
    if (ctx->VertexProgram._Enabled
-       && ctx->Array.VertexAttrib[VERT_ATTRIB_COLOR1].Enabled) {
-      min = MIN2(min, ctx->Array.VertexAttrib[VERT_ATTRIB_COLOR1]._MaxElement);
+       && ctx->Array.ArrayObj->VertexAttrib[VERT_ATTRIB_COLOR1].Enabled) {
+      min = MIN2(min, ctx->Array.ArrayObj->VertexAttrib[VERT_ATTRIB_COLOR1]._MaxElement);
    }
-   else if (ctx->Array.SecondaryColor.Enabled) {
-      min = MIN2(min, ctx->Array.SecondaryColor._MaxElement);
+   else if (ctx->Array.ArrayObj->SecondaryColor.Enabled) {
+      min = MIN2(min, ctx->Array.ArrayObj->SecondaryColor._MaxElement);
    }
 
    /* 5 */
    if (ctx->VertexProgram._Enabled
-       && ctx->Array.VertexAttrib[VERT_ATTRIB_FOG].Enabled) {
-      min = MIN2(min, ctx->Array.VertexAttrib[VERT_ATTRIB_FOG]._MaxElement);
+       && ctx->Array.ArrayObj->VertexAttrib[VERT_ATTRIB_FOG].Enabled) {
+      min = MIN2(min, ctx->Array.ArrayObj->VertexAttrib[VERT_ATTRIB_FOG]._MaxElement);
    }
-   else if (ctx->Array.FogCoord.Enabled) {
-      min = MIN2(min, ctx->Array.FogCoord._MaxElement);
+   else if (ctx->Array.ArrayObj->FogCoord.Enabled) {
+      min = MIN2(min, ctx->Array.ArrayObj->FogCoord._MaxElement);
    }
 
    /* 6 */
    if (ctx->VertexProgram._Enabled
-       && ctx->Array.VertexAttrib[VERT_ATTRIB_COLOR_INDEX].Enabled) {
-      min = MIN2(min, ctx->Array.VertexAttrib[VERT_ATTRIB_COLOR_INDEX]._MaxElement);
+       && ctx->Array.ArrayObj->VertexAttrib[VERT_ATTRIB_COLOR_INDEX].Enabled) {
+      min = MIN2(min, ctx->Array.ArrayObj->VertexAttrib[VERT_ATTRIB_COLOR_INDEX]._MaxElement);
    }
-   else if (ctx->Array.Index.Enabled) {
-      min = MIN2(min, ctx->Array.Index._MaxElement);
+   else if (ctx->Array.ArrayObj->Index.Enabled) {
+      min = MIN2(min, ctx->Array.ArrayObj->Index._MaxElement);
    }
 
 
    /* 7 */
    if (ctx->VertexProgram._Enabled
-       && ctx->Array.VertexAttrib[VERT_ATTRIB_SEVEN].Enabled) {
-      min = MIN2(min, ctx->Array.VertexAttrib[VERT_ATTRIB_SEVEN]._MaxElement);
+       && ctx->Array.ArrayObj->VertexAttrib[VERT_ATTRIB_SEVEN].Enabled) {
+      min = MIN2(min, ctx->Array.ArrayObj->VertexAttrib[VERT_ATTRIB_SEVEN]._MaxElement);
    }
 
    /* 8..15 */
    for (i = VERT_ATTRIB_TEX0; i <= VERT_ATTRIB_TEX7; i++) {
       if (ctx->VertexProgram._Enabled
-          && ctx->Array.VertexAttrib[i].Enabled) {
-         min = MIN2(min, ctx->Array.VertexAttrib[i]._MaxElement);
+          && ctx->Array.ArrayObj->VertexAttrib[i].Enabled) {
+         min = MIN2(min, ctx->Array.ArrayObj->VertexAttrib[i]._MaxElement);
       }
       else if (i - VERT_ATTRIB_TEX0 < ctx->Const.MaxTextureCoordUnits
-               && ctx->Array.TexCoord[i - VERT_ATTRIB_TEX0].Enabled) {
-         min = MIN2(min, ctx->Array.TexCoord[i - VERT_ATTRIB_TEX0]._MaxElement);
+               && ctx->Array.ArrayObj->TexCoord[i - VERT_ATTRIB_TEX0].Enabled) {
+         min = MIN2(min, ctx->Array.ArrayObj->TexCoord[i - VERT_ATTRIB_TEX0]._MaxElement);
       }
    }
 
    /* 16..31 */
    if (ctx->ShaderObjects._VertexShaderPresent) {
       for (i = VERT_ATTRIB_GENERIC0; i < VERT_ATTRIB_MAX; i++) {
-         if (ctx->Array.VertexAttrib[i].Enabled) {
-            min = MIN2(min, ctx->Array.VertexAttrib[i]._MaxElement);
+         if (ctx->Array.ArrayObj->VertexAttrib[i].Enabled) {
+            min = MIN2(min, ctx->Array.ArrayObj->VertexAttrib[i]._MaxElement);
          }
       }
    }
 
-   if (ctx->Array.EdgeFlag.Enabled) {
-      min = MIN2(min, ctx->Array.EdgeFlag._MaxElement);
+   if (ctx->Array.ArrayObj->EdgeFlag.Enabled) {
+      min = MIN2(min, ctx->Array.ArrayObj->EdgeFlag._MaxElement);
    }
 
    /* _MaxElement is one past the last legal array element */
@@ -948,7 +962,7 @@ update_program(GLcontext *ctx)
    if (ctx->_MaintainTexEnvProgram && !ctx->FragmentProgram._Enabled) {
 #if 0
       if (!ctx->_TexEnvProgram)
-	 ctx->_TexEnvProgram = (struct fragment_program *)
+	 ctx->_TexEnvProgram = (struct gl_fragment_program *)
 	    ctx->Driver.NewProgram(ctx, GL_FRAGMENT_PROGRAM_ARB, 0);
       ctx->FragmentProgram._Current = ctx->_TexEnvProgram;
 #endif
@@ -977,6 +991,20 @@ update_viewport_matrix(GLcontext *ctx)
                          depthMax);
 }
 
+
+/**
+ * Update derived color/blend/logicop state.
+ */
+static void
+update_color(GLcontext *ctx)
+{
+   /* This is needed to support 1.1's RGB logic ops AND
+    * 1.0's blending logicops.
+    */
+   ctx->Color._LogicOpEnabled = (ctx->Color.ColorLogicOpEnabled ||
+                                 (ctx->Color.BlendEnabled &&
+                                  ctx->Color.BlendEquationRGB == GL_LOGIC_OP));
+}
 
 
 /**
@@ -1038,6 +1066,9 @@ _mesa_update_state( GLcontext *ctx )
 
    if (new_state & (_NEW_BUFFERS | _NEW_VIEWPORT))
       update_viewport_matrix(ctx);
+
+   if (new_state & _NEW_COLOR)
+      update_color( ctx );
 
    if (ctx->_MaintainTexEnvProgram) {
       if (new_state & (_NEW_TEXTURE | _DD_NEW_SEPARATE_SPECULAR | _NEW_FOG))

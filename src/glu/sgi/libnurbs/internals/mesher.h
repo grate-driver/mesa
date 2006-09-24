@@ -35,8 +35,8 @@
 /*
  * mesher.h
  *
- * $Date: 2001-08-07 17:34:11 $ $Revision: 1.2 $
- * $Header: /cvs/mesa/Mesa/src/glu/sgi/libnurbs/internals/mesher.h,v 1.2 2001-08-07 17:34:11 brianp Exp $
+ * $Date: 2001/08/07 17:34:11 $ $Revision: 1.2 $
+ * $Header: /cvs/mesa/Mesa/src/glu/sgi/libnurbs/internals/mesher.h,v 1.2 2001/08/07 17:34:11 brianp Exp $
  */
 
 #ifndef __glumesher_h_

@@ -367,6 +367,20 @@ void x86_sub( struct x86_function *p,
    emit_op_modrm(p, 0x2b, 0x29, dst, src );
 }
 
+void x86_or( struct x86_function *p,
+             struct x86_reg dst,
+             struct x86_reg src )
+{
+   emit_op_modrm( p, 0x0b, 0x09, dst, src );
+}
+
+void x86_and( struct x86_function *p,
+              struct x86_reg dst,
+              struct x86_reg src )
+{
+   emit_op_modrm( p, 0x23, 0x21, dst, src );
+}
+
 
 
 /***********************************************************************
@@ -424,6 +438,14 @@ void sse_maxps( struct x86_function *p,
    emit_modrm( p, dst, src );
 }
 
+void sse_maxss( struct x86_function *p,
+		struct x86_reg dst,
+		struct x86_reg src )
+{
+   emit_3ub(p, 0xF3, X86_TWOB, 0x5F);
+   emit_modrm( p, dst, src );
+}
+
 void sse_divss( struct x86_function *p,
 		struct x86_reg dst,
 		struct x86_reg src )
@@ -453,6 +475,14 @@ void sse_mulps( struct x86_function *p,
 		struct x86_reg src )
 {
    emit_2ub(p, X86_TWOB, 0x59);
+   emit_modrm( p, dst, src );
+}
+
+void sse_mulss( struct x86_function *p,
+		struct x86_reg dst,
+		struct x86_reg src )
+{
+   emit_3ub(p, 0xF3, X86_TWOB, 0x59);
    emit_modrm( p, dst, src );
 }
 

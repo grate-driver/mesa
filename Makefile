@@ -33,8 +33,9 @@ realclean:
 
 
 install:
-	@echo "Installing"
-	$(TOP)/bin/installmesa $(DESTDIR)
+	@for dir in $(SUBDIRS) ; do \
+		(cd $$dir ; $(MAKE) install) || exit 1 ; \
+	done
 
 # DirectFBGL module installation
 linux-directfb-install:
@@ -102,6 +103,7 @@ linux-ia64-icc \
 linux-ia64-icc-static \
 linux-icc \
 linux-icc-static \
+linux-osmesa \
 linux-osmesa16 \
 linux-osmesa16-static \
 linux-osmesa32 \
@@ -142,6 +144,10 @@ sunos5-v8-static \
 sunos5-v9 \
 sunos5-v9-static \
 ultrix-gcc:
+	@ if [ -e configs/current ] ; then \
+		echo "Please run 'make realclean' before changing configs" ; \
+		exit 1 ; \
+	fi
 	(cd configs && rm -f current && ln -s $@ current)
 	$(MAKE) default
 
@@ -158,13 +164,11 @@ MAIN_FILES = \
 	$(DIRECTORY)/descrip.mms					\
 	$(DIRECTORY)/mms-config.					\
 	$(DIRECTORY)/bin/mklib						\
-	$(DIRECTORY)/bin/installmesa					\
 	$(DIRECTORY)/configs/[a-z]*					\
 	$(DIRECTORY)/docs/*.html					\
 	$(DIRECTORY)/docs/COPYING					\
 	$(DIRECTORY)/docs/README.*					\
 	$(DIRECTORY)/docs/RELNOTES*					\
-	$(DIRECTORY)/docs/VERSIONS					\
 	$(DIRECTORY)/docs/*.spec					\
 	$(DIRECTORY)/include/GL/internal/glcore.h			\
 	$(DIRECTORY)/include/GL/amesa.h					\
@@ -374,11 +378,15 @@ GLUT_FILES = \
 	$(DIRECTORY)/src/glut/dos/PC_HW/*.[chS]		\
 	$(DIRECTORY)/src/glut/ggi/*.[ch]		\
 	$(DIRECTORY)/src/glut/ggi/Makefile		\
+	$(DIRECTORY)/src/glut/fbdev/Makefile		\
+	$(DIRECTORY)/src/glut/fbdev/*[ch]		\
+	$(DIRECTORY)/src/glut/mini/*[ch]		\
 	$(DIRECTORY)/windows/VC6/progs/glut/glut.dsp	\
 	$(DIRECTORY)/windows/VC7/progs/glut/glut.vcproj
 
 DEPEND_FILES = \
 	$(TOP)/src/mesa/depend		\
+	$(TOP)/src/glx/x11/depend	\
 	$(TOP)/src/glw/depend		\
 	$(TOP)/src/glut/glx/depend	\
 	$(TOP)/src/glu/sgi/depend

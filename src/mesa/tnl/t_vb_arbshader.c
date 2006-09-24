@@ -34,6 +34,8 @@
 #include "slang_utility.h"
 #include "slang_link.h"
 
+#if FEATURE_ARB_vertex_shader
+
 typedef struct
 {
 	GLvector4f outputs[VERT_RESULT_MAX];
@@ -155,7 +157,7 @@ static void fetch_input_vec4 (struct gl2_program_intf **pro, GLuint index, GLuin
 static GLvoid
 fetch_gen_attrib (struct gl2_program_intf **pro, GLuint index, GLuint i, struct vertex_buffer *vb)
 {
-   const GLuint attr = _TNL_ATTRIB_ATTRIBUTE0 + index;
+   const GLuint attr = _TNL_ATTRIB_GENERIC0 + index;
    const GLubyte *ptr = (const GLubyte *) (vb->AttribPtr[attr]->data);
    const GLuint stride = vb->AttribPtr[attr]->stride;
    const GLfloat *data = (const GLfloat *) (ptr + stride * i);
@@ -236,25 +238,30 @@ static GLboolean run_arb_vertex_shader (GLcontext *ctx, struct tnl_pipeline_stag
 
 	vb->ClipPtr = &store->outputs[VERT_RESULT_HPOS];
 	vb->ClipPtr->count = vb->Count;
-	vb->ColorPtr[0] = &store->outputs[VERT_RESULT_COL0];
-	vb->SecondaryColorPtr[0] = &store->outputs[VERT_RESULT_COL1];
-	for (i = 0; i < ctx->Const.MaxTextureCoordUnits; i++)
-		vb->TexCoordPtr[i] = &store->outputs[VERT_RESULT_TEX0 + i];
-	vb->ColorPtr[1] = &store->outputs[VERT_RESULT_BFC0];
-	vb->SecondaryColorPtr[1] = &store->outputs[VERT_RESULT_BFC1];
-	vb->FogCoordPtr = &store->outputs[VERT_RESULT_FOGC];
-	vb->PointSizePtr = &store->outputs[VERT_RESULT_PSIZ];
-	for (i = 0; i < MAX_VARYING_VECTORS; i++)
-		vb->VaryingPtr[i] = &store->varyings[i];
 
+	vb->ColorPtr[0] = &store->outputs[VERT_RESULT_COL0];
 	vb->AttribPtr[VERT_ATTRIB_COLOR0] = vb->ColorPtr[0];
-	vb->AttribPtr[VERT_ATTRIB_COLOR1] = vb->SecondaryColorPtr[0];
-	vb->AttribPtr[VERT_ATTRIB_FOG] = vb->FogCoordPtr;
-	for (i = 0; i < ctx->Const.MaxTextureCoordUnits; i++)
-		vb->AttribPtr[VERT_ATTRIB_TEX0 + i] = vb->TexCoordPtr[i];
+	vb->ColorPtr[1] = &store->outputs[VERT_RESULT_BFC0];
+
+	vb->SecondaryColorPtr[0] =
+	vb->AttribPtr[VERT_ATTRIB_COLOR1] = &store->outputs[VERT_RESULT_COL1];
+
+	vb->SecondaryColorPtr[1] = &store->outputs[VERT_RESULT_BFC1];
+
+	for (i = 0; i < ctx->Const.MaxTextureCoordUnits; i++) {
+		vb->TexCoordPtr[i] =
+		vb->AttribPtr[VERT_ATTRIB_TEX0 + i] = &store->outputs[VERT_RESULT_TEX0 + i];
+        }
+
+	vb->FogCoordPtr =
+	vb->AttribPtr[VERT_ATTRIB_FOG] = &store->outputs[VERT_RESULT_FOGC];
+
 	vb->AttribPtr[_TNL_ATTRIB_POINTSIZE] = &store->outputs[VERT_RESULT_PSIZ];
-	for (i = 0; i < MAX_VARYING_VECTORS; i++)
-		vb->AttribPtr[_TNL_ATTRIB_ATTRIBUTE0 + i] = vb->VaryingPtr[i];
+
+	for (i = 0; i < MAX_VARYING_VECTORS; i++) {
+		vb->VaryingPtr[i] = &store->varyings[i];
+		vb->AttribPtr[_TNL_ATTRIB_GENERIC0 + i] = vb->VaryingPtr[i];
+        }
 
 	store->ormask = 0;
 	store->andmask = CLIP_FRUSTUM_BITS;
@@ -289,4 +296,6 @@ const struct tnl_pipeline_stage _tnl_arb_vertex_shader_stage = {
 	validate_arb_vertex_shader,
 	run_arb_vertex_shader
 };
+
+#endif /* FEATURE_ARB_vertex_shader */
 

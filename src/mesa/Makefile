@@ -32,11 +32,12 @@ default:
 	elif [ "$(DRIVER_DIRS)" = "beos" ]; then \
 		$(MAKE) beos ; \
 	elif [ "$(DRIVER_DIRS)" = "directfb" ]; then \
-		$(MAKE) directfb; \
+		$(MAKE) directfb ; \
+	elif [ "$(DRIVER_DIRS)" = "fbdev" ]; then \
+		$(MAKE) fbdev ; \
 	else \
 		$(MAKE) stand-alone ; \
 	fi
-
 
 
 ######################################################################
@@ -66,21 +67,31 @@ linux-solo: depend subdirs libmesa.a
 libgl-core: $(CORE_OBJECTS)
 	@ $(TOP)/bin/mklib -o $(GL_LIB) -linker '$(CC)' \
 		-major $(MESA_MAJOR) -minor $(MESA_MINOR) -patch $(MESA_TINY) \
-		-install $(LIB_DIR) $(MKLIB_OPTIONS) $(CORE_OBJECTS) $(GL_LIB_DEPS)
+		-install $(TOP)/$(LIB_DIR) $(MKLIB_OPTIONS) $(CORE_OBJECTS) \
+		$(GL_LIB_DEPS)
 
 directfb: depend subdirs libgl-core
-	cd drivers/directfb; $(MAKE)
+	cd drivers/directfb ; $(MAKE)
+
+
+#####################################################################
+# fbdev Mesa driver (libGL.so)
+
+fbdev: $(CORE_OBJECTS) $(FBDEV_DRIVER_OBJECTS) $(COMMON_DRIVER_OBJECTS)
+	@ $(TOP)/bin/mklib -o $(GL_LIB) -linker '$(CC)' \
+		-major $(MESA_MAJOR) -minor $(MESA_MINOR) -patch $(MESA_TINY) \
+		-install $(TOP)/$(LIB_DIR) $(MKLIB_OPTIONS) \
+		$(CORE_OBJECTS) $(FBDEV_DRIVER_OBJECTS) \
+		$(COMMON_DRIVER_OBJECTS) $(GL_LIB_DEPS)
 
 
 ######################################################################
 # Stand-alone Mesa libGL and libOSMesa
-
 STAND_ALONE_DRIVER_SOURCES = \
 	$(COMMON_DRIVER_SOURCES) \
 	$(X11_DRIVER_SOURCES) \
 	$(GLIDE_DRIVER_SOURCES) \
-	$(SVGA_DRIVER_SOURCES) \
-	$(FBDEV_DRIVER_SOURCES)
+	$(SVGA_DRIVER_SOURCES)
 
 STAND_ALONE_DRIVER_OBJECTS = $(STAND_ALONE_DRIVER_SOURCES:.c=.o)
 
@@ -96,45 +107,36 @@ OSMESA16_OBJECTS = \
 	$(OSMESA_DRIVER_OBJECTS)
 
 
-stand-alone: depend subdirs $(LIB_DIR)/$(GL_LIB_NAME) $(LIB_DIR)/$(OSMESA_LIB_NAME)
+stand-alone: depend subdirs $(TOP)/$(LIB_DIR)/$(GL_LIB_NAME) $(TOP)/$(LIB_DIR)/$(OSMESA_LIB_NAME)
 
-osmesa-only: depend subdirs $(LIB_DIR)/$(OSMESA_LIB_NAME)
+osmesa-only: depend subdirs $(TOP)/$(LIB_DIR)/$(OSMESA_LIB_NAME)
 
 # Make the GL library
-$(LIB_DIR)/$(GL_LIB_NAME): $(STAND_ALONE_OBJECTS)
+$(TOP)/$(LIB_DIR)/$(GL_LIB_NAME): $(STAND_ALONE_OBJECTS)
 	@ $(TOP)/bin/mklib -o $(GL_LIB) -linker '$(CC)' \
 		-major $(GL_MAJOR) -minor $(GL_MINOR) -patch $(GL_TINY) \
-		-install $(LIB_DIR) \
+		-install $(TOP)/$(LIB_DIR) \
 		$(MKLIB_OPTIONS) $(GL_LIB_DEPS) $(STAND_ALONE_OBJECTS)
 
 # Make the OSMesa library
-$(LIB_DIR)/$(OSMESA_LIB_NAME): $(OSMESA_DRIVER_OBJECTS) $(OSMESA16_OBJECTS)
+$(TOP)/$(LIB_DIR)/$(OSMESA_LIB_NAME): $(OSMESA_DRIVER_OBJECTS) $(OSMESA16_OBJECTS)
 	@ if [ "${DRIVER_DIRS}" = "osmesa" ] ; then \
 		$(TOP)/bin/mklib -o $(OSMESA_LIB) -linker '$(CC)' \
 			-major $(MESA_MAJOR) \
 			-minor $(MESA_MINOR) -patch $(MESA_TINY) \
-			-install $(LIB_DIR) $(MKLIB_OPTIONS) \
+			-install $(TOP)/$(LIB_DIR) $(MKLIB_OPTIONS) \
 			$(OSMESA_LIB_DEPS) $(OSMESA16_OBJECTS) ; \
 	else \
 		$(TOP)/bin/mklib -o $(OSMESA_LIB) -linker '$(CC)' \
 			-major $(MESA_MAJOR) \
 			-minor $(MESA_MINOR) -patch $(GL_TINY) \
-			-install $(LIB_DIR) $(MKLIB_OPTIONS) \
+			-install $(TOP)/$(LIB_DIR) $(MKLIB_OPTIONS) \
 			$(OSMESA_LIB_DEPS) $(OSMESA_DRIVER_OBJECTS) ; \
 	fi
 
 
 ######################################################################
 # Generic stuff
-
-ALL_SOURCES = \
-	$(GLAPI_SOURCES)	\
-	$(SOLO_SOURCES)		\
-	$(X86_SOURCES)		\
-	$(COMMON_DRIVER_SOURCES)\
-	$(X11_DRIVER_SOURCES)	\
-	$(OSMESA_DRIVER_SOURCES)
-
 
 depend: $(ALL_SOURCES)
 	@ echo "running $(MKDEP)"
@@ -149,9 +151,17 @@ subdirs:
 
 
 install: default
+	$(INSTALL) -d $(INSTALL_DIR)/include/GL
+	$(INSTALL) -d $(INSTALL_DIR)/$(LIB_DIR)
+	$(INSTALL) -m 644 $(TOP)/include/GL/*.h $(INSTALL_DIR)/include/GL
+	$(COPY_LIBS) $(TOP)/$(LIB_DIR)/libGL.* $(INSTALL_DIR)/$(LIB_DIR)
 	@if [ "${DRIVER_DIRS}" = "dri" ] ; then \
 		cd drivers/dri ; $(MAKE) install ; \
 	fi
+
+	## NOT YET:
+	## $(INSTALL) -d $(INSTALL_DIR)/include/GLES
+	## $(INSTALL) -m 644 include/GLES/*.h $(INSTALL_DIR)/include/GLES
 
 
 # Emacs tags
@@ -166,5 +176,6 @@ clean:
 	(cd drivers/dri ; $(MAKE) clean)
 	(cd x86 ; $(MAKE) clean)
 	(cd x86-64 ; $(MAKE) clean)
+
 
 include depend

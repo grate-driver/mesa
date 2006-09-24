@@ -1517,7 +1517,7 @@ struct gl_texture_unit
 struct texenvprog_cache_item {
    GLuint hash;
    void *key;
-   struct fragment_program *data;
+   struct gl_fragment_program *data;
    struct texenvprog_cache_item *next;
 };
 
@@ -1664,10 +1664,14 @@ struct gl_client_array
 
 
 /**
- * Vertex array state
+ * Collection of vertex arrays.  Defined by the GL_APPLE_vertex_array_object
+ * extension, but a nice encapsulation in any case.
  */
-struct gl_array_attrib
+struct gl_array_object
 {
+   /** Name of the array object as received from glGenVertexArrayAPPLE. */
+   GLuint Name;
+
    /** Conventional vertex arrays */
    /*@{*/
    struct gl_client_array Vertex;
@@ -1680,14 +1684,26 @@ struct gl_array_attrib
    struct gl_client_array EdgeFlag;
    /*@}*/
 
-   /** Generic arrays for vertex programs/shaders; */
+   /** Generic arrays for vertex programs/shaders */
    struct gl_client_array VertexAttrib[VERT_ATTRIB_MAX];
+
+   /** Mask of _NEW_ARRAY_* values indicating which arrays are enabled */
+   GLbitfield _Enabled;
+};
+
+
+/**
+ * Vertex array state
+ */
+struct gl_array_attrib
+{
+   struct gl_array_object *ArrayObj;
+   struct gl_array_object *DefaultArrayObj;
 
    GLint ActiveTexture;		/**< Client Active Texture */
    GLuint LockFirst;            /**< GL_EXT_compiled_vertex_array */
    GLuint LockCount;            /**< GL_EXT_compiled_vertex_array */
 
-   GLbitfield _Enabled;		/**< mask of _NEW_ARRAY_* values */
    GLbitfield NewState;		/**< mask of _NEW_ARRAY_* values */
 
 #if FEATURE_ARB_vertex_buffer_object
@@ -1821,19 +1837,20 @@ enum register_file
    PROGRAM_CONSTANT = 7,
    PROGRAM_WRITE_ONLY = 8,
    PROGRAM_ADDRESS = 9,
-   PROGRAM_UNDEFINED = 15  /* invalid value */
+   PROGRAM_UNDEFINED = 10,  /* invalid value */
+   PROGRAM_FILE_MAX
 };
 
 
 /** Vertex and fragment instructions */
 struct prog_instruction;
-struct program_parameter_list;
+struct gl_program_parameter_list;
 
 
 /**
  * Base class for any kind of program object
  */
-struct program
+struct gl_program
 {
    GLuint Id;
    GLubyte *String;          /**< Null-terminated program text */
@@ -1848,7 +1865,7 @@ struct program
    GLbitfield OutputsWritten; /* Bitmask of which output regs are written to */
 
    /** Named parameters, constants, etc. from program text */
-   struct program_parameter_list *Parameters;
+   struct gl_program_parameter_list *Parameters;
    /** Numbered local parameters */
    GLfloat LocalParams[MAX_PROGRAM_LOCAL_PARAMS][4];
 
@@ -1872,19 +1889,19 @@ struct program
 
 
 /** Vertex program object */
-struct vertex_program
+struct gl_vertex_program
 {
-   struct program Base;   /* base class */
-   GLboolean IsNVProgram; /* GL_NV_vertex_program ? */
-   GLboolean IsPositionInvariant;  /* GL_ARB_vertex_program / GL_NV_vertex_program1_1 */
-   void *TnlData;		/* should probably use Base.DriverData */
+   struct gl_program Base;   /**< base class */
+   GLboolean IsNVProgram;    /**< is this a GL_NV_vertex_program program? */
+   GLboolean IsPositionInvariant;
+   void *TnlData;		/**< should probably use Base.DriverData */
 };
 
 
 /** Fragment program object */
-struct fragment_program
+struct gl_fragment_program
 {
-   struct program Base;   /**< base class */
+   struct gl_program Base;   /**< base class */
    GLbitfield TexturesUsed[MAX_TEXTURE_IMAGE_UNITS];  /**< TEXTURE_x_BIT bitmask */
    GLuint NumAluInstructions; /**< GL_ARB_fragment_program */
    GLuint NumTexInstructions;
@@ -1916,8 +1933,8 @@ struct gl_vertex_program_state
    GLboolean _Enabled;                 /**< Enabled and valid program? */
    GLboolean PointSizeEnabled;         /**< GL_VERTEX_PROGRAM_POINT_SIZE_ARB/NV */
    GLboolean TwoSideEnabled;           /**< GL_VERTEX_PROGRAM_TWO_SIDE_ARB/NV */
-   struct vertex_program *Current;     /**< ptr to currently bound program */
-   const struct vertex_program *_Current;    /**< ptr to currently bound
+   struct gl_vertex_program *Current;  /**< ptr to currently bound program */
+   const struct gl_vertex_program *_Current;    /**< ptr to currently bound
 					          program, including internal
 					          (t_vp_build.c) programs */
 
@@ -1949,8 +1966,8 @@ struct gl_fragment_program_state
    GLboolean Enabled;                    /* GL_VERTEX_PROGRAM_NV */
    GLboolean _Enabled;                   /* Enabled and valid program? */
    GLboolean _Active;
-   struct fragment_program *Current;     /* ptr to currently bound program */
-   const struct fragment_program *_Current; /* ptr to currently active program 
+   struct gl_fragment_program *Current;  /* ptr to currently bound program */
+   const struct gl_fragment_program *_Current; /* ptr to currently active program 
 					       (including internal programs) */
    struct fp_machine Machine;            /* machine state */
    GLfloat Parameters[MAX_NV_FRAGMENT_PROGRAM_PARAMS][4]; /* Env params */
@@ -2080,10 +2097,10 @@ struct gl_shared_state
    /*@{*/
    struct _mesa_HashTable *Programs; /**< All vertex/fragment programs */
 #if FEATURE_ARB_vertex_program
-   struct program *DefaultVertexProgram;
+   struct gl_program *DefaultVertexProgram;
 #endif
 #if FEATURE_ARB_fragment_program
-   struct program *DefaultFragmentProgram;
+   struct gl_program *DefaultFragmentProgram;
 #endif
    /*@}*/
 
@@ -2096,12 +2113,17 @@ struct gl_shared_state
    struct _mesa_HashTable *BufferObjects;
 #endif
 
+#if FEATURE_ARB_shader_objects
    struct _mesa_HashTable *GL2Objects;
+#endif
 
 #if FEATURE_EXT_framebuffer_object
    struct _mesa_HashTable *RenderBuffers;
    struct _mesa_HashTable *FrameBuffers;
 #endif
+
+   /** Objects associated with the GL_APPLE_vertex_array_object extension. */
+   struct _mesa_HashTable *ArrayObjects;
 
    void *DriverData;  /**< Device driver shared state */
 };
@@ -2428,6 +2450,7 @@ struct gl_extensions
    GLboolean EXT_framebuffer_object;
    GLboolean EXT_fog_coord;
    GLboolean EXT_framebuffer_blit;
+   GLboolean EXT_gpu_program_parameters;
    GLboolean EXT_histogram;
    GLboolean EXT_multi_draw_arrays;
    GLboolean EXT_paletted_texture;
@@ -2454,12 +2477,14 @@ struct gl_extensions
    GLboolean EXT_texture_filter_anisotropic;
    GLboolean EXT_texture_lod_bias;
    GLboolean EXT_texture_mirror_clamp;
+   GLboolean EXT_texture_sRGB;
    GLboolean EXT_timer_query;
    GLboolean EXT_vertex_array;
    GLboolean EXT_vertex_array_set;
    /* vendor extensions */
    GLboolean APPLE_client_storage;
    GLboolean APPLE_packed_pixels;
+   GLboolean APPLE_vertex_array_object;
    GLboolean ATI_texture_mirror_once;
    GLboolean ATI_texture_env_combine3;
    GLboolean ATI_fragment_shader;
@@ -2900,8 +2925,8 @@ struct __GLcontextRec
    struct gl_fragment_program_state FragmentProgram;  /**< GL_ARB/NV_vertex_program */
    struct gl_ati_fragment_shader_state ATIFragmentShader;  /**< GL_ATI_fragment_shader */
 
-   struct fragment_program *_TexEnvProgram;     /**< Texture state as fragment program */
-   struct vertex_program *_TnlProgram;          /**< Fixed func TNL state as vertex program */
+   struct gl_fragment_program *_TexEnvProgram;     /**< Texture state as fragment program */
+   struct gl_vertex_program *_TnlProgram;          /**< Fixed func TNL state as vertex program */
 
    GLboolean _MaintainTnlProgram;
    GLboolean _MaintainTexEnvProgram;
