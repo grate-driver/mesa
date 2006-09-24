@@ -159,7 +159,7 @@ DRI_CONF_BEGIN
 		DRI_CONF_TCL_MODE(DRI_CONF_TCL_CODEGEN)
 		DRI_CONF_FTHROTTLE_MODE(DRI_CONF_FTHROTTLE_IRQS)
 		DRI_CONF_VBLANK_MODE(DRI_CONF_VBLANK_DEF_INTERVAL_0)
-		DRI_CONF_MAX_TEXTURE_IMAGE_UNITS(16, 2, 16)
+		DRI_CONF_MAX_TEXTURE_IMAGE_UNITS(8, 2, 8)
 		DRI_CONF_MAX_TEXTURE_COORD_UNITS(8, 2, 8)
 		DRI_CONF_COMMAND_BUFFER_SIZE(8, 8, 32)
 	DRI_CONF_SECTION_END
@@ -208,6 +208,19 @@ static const struct dri_debug_control debug_control[] = {
 extern const struct dri_extension card_extensions[];
 
 static int getSwapInfo( __DRIdrawablePrivate *dPriv, __DRIswapInfo * sInfo );
+
+static int
+radeonGetParam(int fd, int param, void *value)
+{
+  int ret;
+  drm_radeon_getparam_t gp;
+  
+  gp.param = param;
+  gp.value = value;
+  
+  ret = drmCommandWriteRead( fd, DRM_RADEON_GETPARAM, &gp, sizeof(gp));
+  return ret;
+}
 
 static __GLcontextModes *
 radeonFillInModes( unsigned pixel_bits, unsigned depth_bits,
@@ -326,52 +339,39 @@ radeonCreateScreen( __DRIscreenPrivate *sPriv )
    /* This is first since which regions we map depends on whether or
     * not we are using a PCI card.
     */
-   screen->IsPCI = dri_priv->IsPCI;
-
+   screen->card_type = (dri_priv->IsPCI ? RADEON_CARD_PCI : RADEON_CARD_AGP);
    {
       int ret;
-      drm_radeon_getparam_t gp;
-
-      gp.param = RADEON_PARAM_GART_BUFFER_OFFSET;
-      gp.value = &screen->gart_buffer_offset;
-
-      ret = drmCommandWriteRead( sPriv->fd, DRM_RADEON_GETPARAM,
-				 &gp, sizeof(gp));
+      ret = radeonGetParam( sPriv->fd, RADEON_PARAM_GART_BUFFER_OFFSET,
+			    &screen->gart_buffer_offset);
+	
       if (ret) {
 	 FREE( screen );
 	 fprintf(stderr, "drm_radeon_getparam_t (RADEON_PARAM_GART_BUFFER_OFFSET): %d\n", ret);
 	 return NULL;
       }
 
-      if (sPriv->drmMinor >= 6) {
-	 gp.param = RADEON_PARAM_GART_BASE;
-	 gp.value = &screen->gart_base;
-
-	 ret = drmCommandWriteRead( sPriv->fd, DRM_RADEON_GETPARAM,
-				    &gp, sizeof(gp));
-	 if (ret) {
-	    FREE( screen );
-	    fprintf(stderr, "drmR200GetParam (RADEON_PARAM_GART_BASE): %d\n", ret);
-	    return NULL;
-	 }
-
-	 gp.param = RADEON_PARAM_IRQ_NR;
-	 gp.value = &screen->irq;
-
-	 ret = drmCommandWriteRead( sPriv->fd, DRM_RADEON_GETPARAM,
-				    &gp, sizeof(gp));
-	 if (ret) {
-	    FREE( screen );
-	    fprintf(stderr, "drm_radeon_getparam_t (RADEON_PARAM_IRQ_NR): %d\n", ret);
-	    return NULL;
-	 }
-	 screen->drmSupportsCubeMapsR200 = (sPriv->drmMinor >= 7);
-	 screen->drmSupportsBlendColor = (sPriv->drmMinor >= 11);
-	 screen->drmSupportsTriPerf = (sPriv->drmMinor >= 16);
-	 screen->drmSupportsFragShader = (sPriv->drmMinor >= 18);
-	 screen->drmSupportsPointSprites = (sPriv->drmMinor >= 13);
-	 screen->drmSupportsCubeMapsR100 = (sPriv->drmMinor >= 15);
+      ret = radeonGetParam( sPriv->fd, RADEON_PARAM_GART_BASE,
+			    &screen->gart_base);
+      if (ret) {
+	 FREE( screen );
+	 fprintf(stderr, "drm_radeon_getparam_t (RADEON_PARAM_GART_BASE): %d\n", ret);
+	 return NULL;
       }
+
+      ret = radeonGetParam( sPriv->fd, RADEON_PARAM_IRQ_NR,
+			    &screen->irq);
+      if (ret) {
+	 FREE( screen );
+	 fprintf(stderr, "drm_radeon_getparam_t (RADEON_PARAM_IRQ_NR): %d\n", ret);
+	 return NULL;
+      }
+      screen->drmSupportsCubeMapsR200 = (sPriv->drmMinor >= 7);
+      screen->drmSupportsBlendColor = (sPriv->drmMinor >= 11);
+      screen->drmSupportsTriPerf = (sPriv->drmMinor >= 16);
+      screen->drmSupportsFragShader = (sPriv->drmMinor >= 18);
+      screen->drmSupportsPointSprites = (sPriv->drmMinor >= 13);
+      screen->drmSupportsCubeMapsR100 = (sPriv->drmMinor >= 15);
    }
 
    screen->mmio.handle = dri_priv->registerHandle;
@@ -425,9 +425,7 @@ radeonCreateScreen( __DRIscreenPrivate *sPriv )
 	 return NULL;
       }
 
-      screen->gart_texture_offset = dri_priv->gartTexOffset + ( screen->IsPCI
-		? INREG( RADEON_AIC_LO_ADDR )
-		: ( ( INREG( RADEON_MC_AGP_LOCATION ) & 0x0ffffU ) << 16 ) );
+      screen->gart_texture_offset = dri_priv->gartTexOffset + screen->gart_base;
    }
 
    screen->chip_flags = 0;
@@ -976,12 +974,12 @@ __driCreateNewScreen_20050727( __DRInativeDisplay *dpy,
    static const char *driver_name = "Radeon";
    static const __DRIutilversion2 ddx_expected = { 4, 5, 0, 0 };
    static const __DRIversion dri_expected = { 4, 0, 0 };
-   static const __DRIversion drm_expected = { 1, 3, 0 };
+   static const __DRIversion drm_expected = { 1, 6, 0 };
 #elif RADEON_COMMON && defined(RADEON_COMMON_FOR_R200)
    static const char *driver_name = "R200";
    static const __DRIutilversion2 ddx_expected = { 4, 5, 0, 0 };
    static const __DRIversion dri_expected = { 4, 0, 0 };
-   static const __DRIversion drm_expected = { 1, 5, 0 };
+   static const __DRIversion drm_expected = { 1, 6, 0 };
 #elif RADEON_COMMON && defined(RADEON_COMMON_FOR_R300)
    static const char *driver_name = "R300";
    static const __DRIutilversion2 ddx_expected = { 4, 5, 0, 0 };

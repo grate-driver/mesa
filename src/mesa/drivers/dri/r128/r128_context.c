@@ -190,7 +190,7 @@ GLboolean r128CreateContext( const __GLcontextModes *glVisual,
    rmesa->RenderIndex = -1;		/* Impossible value */
    rmesa->vert_buf = NULL;
    rmesa->num_verts = 0;
-   rmesa->tnl_state = ~0;
+   RENDERINPUTS_ONES( rmesa->tnl_state_bitset );
 
    /* Set the maximum texture size small enough that we can guarentee that
     * all texture units can bind a maximal texture and have them both in
@@ -296,10 +296,6 @@ void r128DestroyContext( __DRIcontextPrivate *driContextPriv  )
       _ac_DestroyContext( rmesa->glCtx );
       _swrast_DestroyContext( rmesa->glCtx );
 
-      /* free the Mesa context */
-      rmesa->glCtx->DriverCtx = NULL;
-      _mesa_destroy_context(rmesa->glCtx);
-
       if ( release_texture_heaps ) {
          /* This share group is about to go away, free our private
           * texture object data.
@@ -313,6 +309,10 @@ void r128DestroyContext( __DRIcontextPrivate *driContextPriv  )
 
 	 assert( is_empty_list( & rmesa->swapped ) );
       }
+
+      /* free the Mesa context */
+      rmesa->glCtx->DriverCtx = NULL;
+      _mesa_destroy_context(rmesa->glCtx);
 
       /* free the option cache */
       driDestroyOptionCache (&rmesa->optionCache);

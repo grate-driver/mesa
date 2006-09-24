@@ -8,8 +8,8 @@ CONFIG_NAME = aix-static
 CC = cc
 CXX = xlC
 
-CFLAGS = -O -DAIXV3
-CXXFLAGS = -O -DAIXV3
+CFLAGS = -O -DAIXV3 -DPTHREADS
+CXXFLAGS = -O -DAIXV3 -DPTHREADS
 MKLIB_OPTIONS = -static
 
 # Library names (actual file names)
@@ -19,5 +19,7 @@ GLUT_LIB_NAME = libglut.a
 GLW_LIB_NAME = libGLw.a
 OSMESA_LIB_NAME = libOSMesa.a
 
-APP_LIB_DEPS = -L$(LIB_DIR) -lX11 -lXext -lXmu -lXi -lm
+APP_LIB_DEPS = -L$(LIB_DIR) -l$(GLUT_LIB) -l$(GLU_LIB) -l$(GL_LIB) \
+               -lX11 -lXext -lXmu -lXi -lm -lpthread -lC
+
 

@@ -230,7 +230,7 @@ _mesa_GetBooleanv( GLenum pname, GLboolean *params )
       case GL_CURRENT_INDEX:
          {
          FLUSH_CURRENT(ctx, 0);
-         params[0] = FLOAT_TO_BOOLEAN(ctx->Current.Index);
+         params[0] = FLOAT_TO_BOOLEAN(ctx->Current.Attrib[VERT_ATTRIB_COLOR_INDEX][0]);
          }
          break;
       case GL_CURRENT_NORMAL:
@@ -1040,7 +1040,7 @@ _mesa_GetBooleanv( GLenum pname, GLboolean *params )
          break;
       case GL_MAX_TEXTURE_UNITS_ARB:
          CHECK_EXT1(ARB_multitexture, "GetBooleanv");
-         params[0] = INT_TO_BOOLEAN(MIN2(ctx->Const.MaxTextureImageUnits, ctx->Const.MaxTextureCoordUnits));
+         params[0] = INT_TO_BOOLEAN(ctx->Const.MaxTextureUnits);
          break;
       case GL_ACTIVE_TEXTURE_ARB:
          CHECK_EXT1(ARB_multitexture, "GetBooleanv");
@@ -1068,13 +1068,13 @@ _mesa_GetBooleanv( GLenum pname, GLboolean *params )
          break;
       case GL_NUM_COMPRESSED_TEXTURE_FORMATS_ARB:
          CHECK_EXT1(ARB_texture_compression, "GetBooleanv");
-         params[0] = INT_TO_BOOLEAN(_mesa_get_compressed_formats(ctx, NULL));
+         params[0] = INT_TO_BOOLEAN(_mesa_get_compressed_formats(ctx, NULL, GL_FALSE));
          break;
       case GL_COMPRESSED_TEXTURE_FORMATS_ARB:
          CHECK_EXT1(ARB_texture_compression, "GetBooleanv");
          {
          GLint formats[100];
-         GLuint i, n = _mesa_get_compressed_formats(ctx, formats);
+         GLuint i, n = _mesa_get_compressed_formats(ctx, formats, GL_FALSE);
          ASSERT(n <= 100);
          for (i = 0; i < n; i++)
             params[i] = ENUM_TO_INT(formats[i]);
@@ -2048,7 +2048,7 @@ _mesa_GetFloatv( GLenum pname, GLfloat *params )
       case GL_CURRENT_INDEX:
          {
          FLUSH_CURRENT(ctx, 0);
-         params[0] = ctx->Current.Index;
+         params[0] = ctx->Current.Attrib[VERT_ATTRIB_COLOR_INDEX][0];
          }
          break;
       case GL_CURRENT_NORMAL:
@@ -2858,7 +2858,7 @@ _mesa_GetFloatv( GLenum pname, GLfloat *params )
          break;
       case GL_MAX_TEXTURE_UNITS_ARB:
          CHECK_EXT1(ARB_multitexture, "GetFloatv");
-         params[0] = (GLfloat)(MIN2(ctx->Const.MaxTextureImageUnits, ctx->Const.MaxTextureCoordUnits));
+         params[0] = (GLfloat)(ctx->Const.MaxTextureUnits);
          break;
       case GL_ACTIVE_TEXTURE_ARB:
          CHECK_EXT1(ARB_multitexture, "GetFloatv");
@@ -2886,13 +2886,13 @@ _mesa_GetFloatv( GLenum pname, GLfloat *params )
          break;
       case GL_NUM_COMPRESSED_TEXTURE_FORMATS_ARB:
          CHECK_EXT1(ARB_texture_compression, "GetFloatv");
-         params[0] = (GLfloat)(_mesa_get_compressed_formats(ctx, NULL));
+         params[0] = (GLfloat)(_mesa_get_compressed_formats(ctx, NULL, GL_FALSE));
          break;
       case GL_COMPRESSED_TEXTURE_FORMATS_ARB:
          CHECK_EXT1(ARB_texture_compression, "GetFloatv");
          {
          GLint formats[100];
-         GLuint i, n = _mesa_get_compressed_formats(ctx, formats);
+         GLuint i, n = _mesa_get_compressed_formats(ctx, formats, GL_FALSE);
          ASSERT(n <= 100);
          for (i = 0; i < n; i++)
             params[i] = ENUM_TO_INT(formats[i]);
@@ -3866,7 +3866,7 @@ _mesa_GetIntegerv( GLenum pname, GLint *params )
       case GL_CURRENT_INDEX:
          {
          FLUSH_CURRENT(ctx, 0);
-         params[0] = IROUND(ctx->Current.Index);
+         params[0] = IROUND(ctx->Current.Attrib[VERT_ATTRIB_COLOR_INDEX][0]);
          }
          break;
       case GL_CURRENT_NORMAL:
@@ -4676,7 +4676,7 @@ _mesa_GetIntegerv( GLenum pname, GLint *params )
          break;
       case GL_MAX_TEXTURE_UNITS_ARB:
          CHECK_EXT1(ARB_multitexture, "GetIntegerv");
-         params[0] = MIN2(ctx->Const.MaxTextureImageUnits, ctx->Const.MaxTextureCoordUnits);
+         params[0] = ctx->Const.MaxTextureUnits;
          break;
       case GL_ACTIVE_TEXTURE_ARB:
          CHECK_EXT1(ARB_multitexture, "GetIntegerv");
@@ -4704,13 +4704,13 @@ _mesa_GetIntegerv( GLenum pname, GLint *params )
          break;
       case GL_NUM_COMPRESSED_TEXTURE_FORMATS_ARB:
          CHECK_EXT1(ARB_texture_compression, "GetIntegerv");
-         params[0] = _mesa_get_compressed_formats(ctx, NULL);
+         params[0] = _mesa_get_compressed_formats(ctx, NULL, GL_FALSE);
          break;
       case GL_COMPRESSED_TEXTURE_FORMATS_ARB:
          CHECK_EXT1(ARB_texture_compression, "GetIntegerv");
          {
          GLint formats[100];
-         GLuint i, n = _mesa_get_compressed_formats(ctx, formats);
+         GLuint i, n = _mesa_get_compressed_formats(ctx, formats, GL_FALSE);
          ASSERT(n <= 100);
          for (i = 0; i < n; i++)
             params[i] = ENUM_TO_INT(formats[i]);

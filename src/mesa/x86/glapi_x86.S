@@ -138,7 +138,6 @@ EXTERN GLNAME(_glapi_get_dispatch)
 
 		ALIGNTEXT16
 		GLOBL GLNAME(gl_dispatch_functions_start)
-		HIDDEN(GLNAME(gl_dispatch_functions_start))
 GLNAME(gl_dispatch_functions_start):
 
 	GL_STUB(NewList, _gloffset_NewList, NewList@8)
@@ -1156,3 +1155,7 @@ GLNAME(gl_dispatch_functions_end):
 	.long	2,4,20    /* Minimum kernel version w/TLS */
 3:	.p2align 2        /* pad out section */
 #endif /* GLX_USE_TLS */
+	
+#if defined(__ELF__) && defined(__linux__)
+	.section .note.GNU-stack,"",%progbits
+#endif

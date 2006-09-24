@@ -20,7 +20,7 @@ debian/libdir.map, the format is:
 
 The architecture optimized libraries should go under
 /usr/lib/<something>, where <something> matches the optimizations used,
-e.g. "mmx" or "v9".
+e.g. "cmov" or "v9".
 
 Only packages listed in the control file *and* libdir.map are actually
 built.  That means that even if debian/libdir.map lists
@@ -28,6 +28,14 @@ libgl1-random-stuff, if libgl1-random-stuff is *not* listed in
 debian/control it *won't* be built.  The other way around, if
 libgl1-random-stuff is listed in debian/control but there's no entry for
 it in debian/libdir.map it *won't* be built.
+
+Again...
+
+If the libdir.map file doesn't mention your (lib)-(config), e.g.
+gl-debian_i386, THE TARGET WON'T BE BUILT.
+
+If the package listed in libdir.map is not listed in debian/control, THE
+TARGET WON'T BE BUILT.
 
 For architectures where glide3 is available an extra package is built
 (iff this is the mesa-legacy source package).  The list of supported

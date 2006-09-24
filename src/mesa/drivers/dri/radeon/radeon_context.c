@@ -102,7 +102,7 @@ static const GLubyte *radeonGetString( GLcontext *ctx, GLenum name )
    radeonContextPtr rmesa = RADEON_CONTEXT(ctx);
    static char buffer[128];
    unsigned   offset;
-   GLuint agp_mode = rmesa->radeonScreen->IsPCI ? 0 :
+   GLuint agp_mode = (rmesa->radeonScreen->card_type==RADEON_CARD_PCI) ? 0 :
       rmesa->radeonScreen->AGPMode;
 
    switch ( name ) {
@@ -521,10 +521,6 @@ void radeonDestroyContext( __DRIcontextPrivate *driContextPriv )
 	    radeonVtxfmtDestroy( rmesa->glCtx );
       }
 
-      /* free the Mesa context */
-      rmesa->glCtx->DriverCtx = NULL;
-      _mesa_destroy_context( rmesa->glCtx );
-
       _mesa_vector4f_free( &rmesa->tcl.ObjClean );
 
       if (rmesa->state.scissor.pClipRects) {
@@ -545,6 +541,10 @@ void radeonDestroyContext( __DRIcontextPrivate *driContextPriv )
 
 	 assert( is_empty_list( & rmesa->swapped ) );
       }
+
+      /* free the Mesa context */
+      rmesa->glCtx->DriverCtx = NULL;
+      _mesa_destroy_context( rmesa->glCtx );
 
       /* free the option cache */
       driDestroyOptionCache (&rmesa->optionCache);

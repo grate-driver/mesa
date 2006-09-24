@@ -1,4 +1,4 @@
-/* $Id: mmx.h,v 1.9 2002/04/19 20:12:30 jrfonseca Exp $ */
+/* $Id: mmx.h,v 1.9 2002-04-19 20:12:30 jrfonseca Exp $ */
 
 /*
  * Mesa 3-D graphics library

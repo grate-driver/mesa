@@ -47,7 +47,8 @@ USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 static void reset_attrfv( TNLcontext *tnl );
 
-static tnl_attrfv_func choose[_TNL_MAX_ATTR_CODEGEN+1][4]; /* +1 for ERROR_ATTRIB */
+/** Note extra space for error index: */
+static tnl_attrfv_func choose[_TNL_ATTRIB_ERROR+1][4];
 static tnl_attrfv_func generic_attr_func[_TNL_MAX_ATTR_CODEGEN][4];
 
 
@@ -144,22 +145,15 @@ static void _tnl_copy_to_current( GLcontext *ctx )
    TNLcontext *tnl = TNL_CONTEXT(ctx); 
    GLuint i;
 
-   for (i = _TNL_ATTRIB_POS+1 ; i < _TNL_ATTRIB_INDEX ; i++) {
+   for (i = _TNL_ATTRIB_POS+1 ; i < _TNL_ATTRIB_EDGEFLAG ; i++) {
       if (tnl->vtx.attrsz[i]) {
          /* Note: the tnl->vtx.current[i] pointers points to
           * the ctx->Current fields.  The first 16 or so, anyway.
           */
 	 COPY_CLEAN_4V(tnl->vtx.current[i], 
-		    tnl->vtx.attrsz[i], 
-		    tnl->vtx.attrptr[i]);
+                       tnl->vtx.attrsz[i], 
+                       tnl->vtx.attrptr[i]);
       }
-   }
-
-   /* color index is special (it's not a float[4] so COPY_CLEAN_4V above
-    * will trash adjacent memory!)
-    */
-   if (tnl->vtx.attrsz[_TNL_ATTRIB_INDEX]) {
-      ctx->Current.Index = tnl->vtx.attrptr[_TNL_ATTRIB_INDEX][0];
    }
 
    /* Edgeflag requires additional treatment:
@@ -191,10 +185,9 @@ static void _tnl_copy_from_current( GLcontext *ctx )
 
    /* Edgeflag requires additional treatment:
     */
-   tnl->vtx.CurrentFloatEdgeFlag = 
-      (GLfloat)ctx->Current.EdgeFlag;
+   tnl->vtx.CurrentFloatEdgeFlag = (GLfloat) ctx->Current.EdgeFlag;
    
-   for (i = _TNL_ATTRIB_POS+1 ; i <= _TNL_ATTRIB_MAX ; i++) 
+   for (i = _TNL_ATTRIB_POS+1 ; i < _TNL_ATTRIB_MAX ; i++) 
       switch (tnl->vtx.attrsz[i]) {
       case 4: tnl->vtx.attrptr[i][3] = tnl->vtx.current[i][3];
       case 3: tnl->vtx.attrptr[i][2] = tnl->vtx.current[i][2];
@@ -276,7 +269,7 @@ static void _tnl_wrap_upgrade_vertex( GLcontext *ctx,
     */
    if (tnl->vtx.copied.nr)
    {
-      GLfloat *data = tnl->vtx.copied.buffer;
+      const GLfloat *data = tnl->vtx.copied.buffer;
       GLfloat *dest = tnl->vtx.buffer;
       GLuint j;
 
@@ -435,6 +428,7 @@ static tnl_attrfv_func do_choose( GLuint attr, GLuint sz )
    if (!tnl->vtx.tabfv[attr][sz-1])
       tnl->vtx.tabfv[attr][sz-1] = generic_attr_func[attr][sz-1];
 
+   ASSERT(tnl->vtx.tabfv[attr][sz-1]);
    return tnl->vtx.tabfv[attr][sz-1];
 }
 
@@ -443,23 +437,26 @@ static tnl_attrfv_func do_choose( GLuint attr, GLuint sz )
 #define CHOOSE( ATTR, N )				\
 static void choose_##ATTR##_##N( const GLfloat *v )	\
 {							\
-   tnl_attrfv_func f = do_choose(ATTR, N);			\
+   tnl_attrfv_func f = do_choose(ATTR, N);		\
+   ASSERT(f); \
    f( v );						\
 }
 
-#define CHOOSERS( ATTRIB ) \
-   CHOOSE( ATTRIB, 1 )				\
-   CHOOSE( ATTRIB, 2 )				\
-   CHOOSE( ATTRIB, 3 )				\
-   CHOOSE( ATTRIB, 4 )				\
+#define CHOOSERS( ATTRIB )	\
+   CHOOSE( ATTRIB, 1 )		\
+   CHOOSE( ATTRIB, 2 )		\
+   CHOOSE( ATTRIB, 3 )		\
+   CHOOSE( ATTRIB, 4 )		\
 
 
-#define INIT_CHOOSERS(ATTR)				\
-   choose[ATTR][0] = choose_##ATTR##_1;				\
-   choose[ATTR][1] = choose_##ATTR##_2;				\
-   choose[ATTR][2] = choose_##ATTR##_3;				\
+#define INIT_CHOOSERS(ATTR)			\
+   ASSERT(ATTR <= _TNL_ATTRIB_ERROR);\
+   choose[ATTR][0] = choose_##ATTR##_1;		\
+   choose[ATTR][1] = choose_##ATTR##_2;		\
+   choose[ATTR][2] = choose_##ATTR##_3;		\
    choose[ATTR][3] = choose_##ATTR##_4;
 
+/* conventional attributes */
 CHOOSERS( 0 )
 CHOOSERS( 1 )
 CHOOSERS( 2 )
@@ -477,16 +474,45 @@ CHOOSERS( 13 )
 CHOOSERS( 14 )
 CHOOSERS( 15 )
 
-static void error_attrib( const GLfloat *unused )
+/* generic attributes */
+CHOOSERS( 16 )
+CHOOSERS( 17 )
+CHOOSERS( 18 )
+CHOOSERS( 19 )
+CHOOSERS( 20 )
+CHOOSERS( 21 )
+CHOOSERS( 22 )
+CHOOSERS( 23 )
+CHOOSERS( 24 )
+CHOOSERS( 25 )
+CHOOSERS( 26 )
+CHOOSERS( 27 )
+CHOOSERS( 28 )
+CHOOSERS( 29 )
+CHOOSERS( 30 )
+CHOOSERS( 31 )
+
+
+/**
+ * This function will get called when glVertexAttribNV/ARB() is called
+ * with an invalid index parameter.
+ */
+static void
+error_attrib(const GLfloat *unused)
 {
    GET_CURRENT_CONTEXT( ctx );
    (void) unused;
-   _mesa_error( ctx, GL_INVALID_ENUM, "glVertexAttrib" );
+   _mesa_error( ctx, GL_INVALID_VALUE, "glVertexAttrib(index)" );
 }   
 
 
 
-static void reset_attrfv( TNLcontext *tnl )
+/**
+ * Reset all the per-vertex functions pointers to point to the default
+ * "chooser" functions.
+ */
+static void
+reset_attrfv(TNLcontext *tnl)
 {   
    GLuint i;
 
@@ -509,7 +535,8 @@ static void reset_attrfv( TNLcontext *tnl )
       
 
 
-/* Materials:  
+/**
+ * Materials:  
  * 
  * These are treated as per-vertex attributes, at indices above where
  * the NV_vertex_program leaves off.  There are a lot of good things
@@ -522,7 +549,7 @@ static void reset_attrfv( TNLcontext *tnl )
  *
  * There is no aliasing of material attributes with other entrypoints.
  */
-#define OTHER_ATTR( A, N, params )		\
+#define OTHER_ATTR( A, N, params )			\
 do {							\
    if (tnl->vtx.attrsz[A] != N) {			\
       _tnl_fixup_vertex( ctx, A, N );			\
@@ -538,19 +565,21 @@ do {							\
 } while (0)
 
 
-#define MAT( ATTR, N, face, params )				\
-do {								\
-   if (face != GL_BACK)						\
+#define MAT( ATTR, N, face, params )			\
+do {							\
+   if (face != GL_BACK)					\
       OTHER_ATTR( ATTR, N, params ); /* front */	\
-   if (face != GL_FRONT)					\
+   if (face != GL_FRONT)				\
       OTHER_ATTR( ATTR + 1, N, params ); /* back */	\
 } while (0)
 
 
-/* Colormaterial is dealt with later on.
+/**
+ * Called by glMaterialfv().
+ * Colormaterial is dealt with later on.
  */
-static void GLAPIENTRY _tnl_Materialfv( GLenum face, GLenum pname, 
-			       const GLfloat *params )
+static void GLAPIENTRY
+_tnl_Materialfv( GLenum face, GLenum pname, const GLfloat *params )
 {
    GET_CURRENT_CONTEXT( ctx ); 
    TNLcontext *tnl = TNL_CONTEXT(ctx);
@@ -560,7 +589,6 @@ static void GLAPIENTRY _tnl_Materialfv( GLenum face, GLenum pname,
    case GL_BACK:
    case GL_FRONT_AND_BACK:
       break;
-      
    default:
       _mesa_error( ctx, GL_INVALID_ENUM, "glMaterialfv" );
       return;
@@ -607,30 +635,6 @@ static void GLAPIENTRY _tnl_EdgeFlag( GLboolean b )
    OTHER_ATTR( _TNL_ATTRIB_EDGEFLAG, 1, &f );
 }
 
-static void GLAPIENTRY _tnl_EdgeFlagv( const GLboolean *v )
-{
-   GET_CURRENT_CONTEXT( ctx ); 
-   TNLcontext *tnl = TNL_CONTEXT(ctx);
-   GLfloat f = (GLfloat)v[0];
-
-   OTHER_ATTR( _TNL_ATTRIB_EDGEFLAG, 1, &f );
-}
-
-static void GLAPIENTRY _tnl_Indexf( GLfloat f )
-{
-   GET_CURRENT_CONTEXT( ctx ); 
-   TNLcontext *tnl = TNL_CONTEXT(ctx);
-
-   OTHER_ATTR( _TNL_ATTRIB_INDEX, 1, &f );
-}
-
-static void GLAPIENTRY _tnl_Indexfv( const GLfloat *v )
-{
-   GET_CURRENT_CONTEXT( ctx ); 
-   TNLcontext *tnl = TNL_CONTEXT(ctx);
-
-   OTHER_ATTR( _TNL_ATTRIB_INDEX, 1, v );
-}
 
 /* Eval
  */
@@ -645,7 +649,7 @@ static void GLAPIENTRY _tnl_EvalCoord1f( GLfloat u )
       if (tnl->vtx.eval.new_state) 
 	 _tnl_update_eval( ctx );
 
-      for (i = 0 ; i <= _TNL_ATTRIB_INDEX ; i++) {
+      for (i = 0 ; i <= _TNL_ATTRIB_EDGEFLAG ; i++) {
 	 if (tnl->vtx.eval.map1[i].map) 
 	    if (tnl->vtx.attrsz[i] != tnl->vtx.eval.map1[i].sz)
 	       _tnl_fixup_vertex( ctx, i, tnl->vtx.eval.map1[i].sz );
@@ -673,7 +677,7 @@ static void GLAPIENTRY _tnl_EvalCoord2f( GLfloat u, GLfloat v )
       if (tnl->vtx.eval.new_state) 
 	 _tnl_update_eval( ctx );
 
-      for (i = 0 ; i <= _TNL_ATTRIB_INDEX ; i++) {
+      for (i = 0 ; i <= _TNL_ATTRIB_EDGEFLAG ; i++) {
 	 if (tnl->vtx.eval.map2[i].map) 
 	    if (tnl->vtx.attrsz[i] != tnl->vtx.eval.map2[i].sz)
 	       _tnl_fixup_vertex( ctx, i, tnl->vtx.eval.map2[i].sz );
@@ -824,6 +828,9 @@ static void GLAPIENTRY _tnl_End( void )
 }
 
 
+/**
+ * XXX why aren't all members initialized here??
+ */
 static void _tnl_exec_vtxfmt_init( GLcontext *ctx )
 {
    GLvertexformat *vfmt = &(TNL_CONTEXT(ctx)->exec_vtxfmt);
@@ -833,7 +840,6 @@ static void _tnl_exec_vtxfmt_init( GLcontext *ctx )
    vfmt->CallList = _mesa_CallList;
    vfmt->CallLists = _mesa_CallLists;
    vfmt->EdgeFlag = _tnl_EdgeFlag;
-   vfmt->EdgeFlagv = _tnl_EdgeFlagv;
    vfmt->End = _tnl_End;
    vfmt->EvalCoord1f = _tnl_EvalCoord1f;
    vfmt->EvalCoord1fv = _tnl_EvalCoord1fv;
@@ -841,8 +847,6 @@ static void _tnl_exec_vtxfmt_init( GLcontext *ctx )
    vfmt->EvalCoord2fv = _tnl_EvalCoord2fv;
    vfmt->EvalPoint1 = _tnl_EvalPoint1;
    vfmt->EvalPoint2 = _tnl_EvalPoint2;
-   vfmt->Indexf = _tnl_Indexf;
-   vfmt->Indexfv = _tnl_Indexfv;
    vfmt->Materialfv = _tnl_Materialfv;
 
    vfmt->Rectf = _mesa_noop_Rectf;
@@ -882,12 +886,16 @@ void _tnl_FlushVertices( GLcontext *ctx, GLuint flags )
 }
 
 
+/**
+ * Init the tnl->vtx->current[] pointers to point to the corresponding
+ * fields in ctx->Current attribute group.
+ */
 static void _tnl_current_init( GLcontext *ctx ) 
 {
    TNLcontext *tnl = TNL_CONTEXT(ctx);
    GLint i;
 
-   /* setup the pointers for the typical 16 vertex attributes */
+   /* setup the pointers for the typical (32) vertex attributes */
    for (i = 0; i < VERT_ATTRIB_MAX; i++) 
       tnl->vtx.current[i] = ctx->Current.Attrib[i];
 
@@ -896,7 +904,7 @@ static void _tnl_current_init( GLcontext *ctx )
       tnl->vtx.current[_TNL_ATTRIB_MAT_FRONT_AMBIENT + i] = 
 	 ctx->Light.Material.Attrib[i];
 
-   tnl->vtx.current[_TNL_ATTRIB_INDEX] = &ctx->Current.Index;
+   /* special case */
    tnl->vtx.current[_TNL_ATTRIB_EDGEFLAG] = &tnl->vtx.CurrentFloatEdgeFlag;
 }
 
@@ -916,6 +924,7 @@ void _tnl_vtx_init( GLcontext *ctx )
    if (firsttime) {
       firsttime = 0;
 
+      /* conventional attributes */
       INIT_CHOOSERS( 0 );
       INIT_CHOOSERS( 1 );
       INIT_CHOOSERS( 2 );
@@ -933,10 +942,28 @@ void _tnl_vtx_init( GLcontext *ctx )
       INIT_CHOOSERS( 14 );
       INIT_CHOOSERS( 15 );
 
-      choose[ERROR_ATTRIB][0] = error_attrib;
-      choose[ERROR_ATTRIB][1] = error_attrib;
-      choose[ERROR_ATTRIB][2] = error_attrib;
-      choose[ERROR_ATTRIB][3] = error_attrib;
+      /* generic attributes */
+      INIT_CHOOSERS( 16 );
+      INIT_CHOOSERS( 17 );
+      INIT_CHOOSERS( 18 );
+      INIT_CHOOSERS( 19 );
+      INIT_CHOOSERS( 20 );
+      INIT_CHOOSERS( 21 );
+      INIT_CHOOSERS( 22 );
+      INIT_CHOOSERS( 23 );
+      INIT_CHOOSERS( 24 );
+      INIT_CHOOSERS( 25 );
+      INIT_CHOOSERS( 26 );
+      INIT_CHOOSERS( 27 );
+      INIT_CHOOSERS( 28 );
+      INIT_CHOOSERS( 29 );
+      INIT_CHOOSERS( 30 );
+      INIT_CHOOSERS( 31 );
+
+      choose[_TNL_ATTRIB_ERROR][0] = error_attrib;
+      choose[_TNL_ATTRIB_ERROR][1] = error_attrib;
+      choose[_TNL_ATTRIB_ERROR][2] = error_attrib;
+      choose[_TNL_ATTRIB_ERROR][3] = error_attrib;
 
 #ifdef USE_X86_ASM
       if (tnl->AllowCodegen) {
@@ -947,7 +974,7 @@ void _tnl_vtx_init( GLcontext *ctx )
       _tnl_generic_attr_table_init( generic_attr_func );
    }
 
-   for (i = 0; i < _TNL_ATTRIB_INDEX; i++)
+   for (i = 0; i < _TNL_ATTRIB_EDGEFLAG; i++)
       _mesa_vector4f_init( &tmp->Attribs[i], 0, NULL);
 
    for (i = 0; i < 4; i++) {

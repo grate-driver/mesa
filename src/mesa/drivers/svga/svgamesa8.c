@@ -1,4 +1,4 @@
-/* $Id: svgamesa8.c,v 1.9 2005/05/04 20:11:39 brianp Exp $ */
+/* $Id: svgamesa8.c,v 1.9 2005-05-04 20:11:39 brianp Exp $ */
 
 /*
  * Mesa 3-D graphics library

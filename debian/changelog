@@ -1,19 +1,118 @@
-mesa (6.5-0.1) experimental; urgency=low
+mesa (6.5.0.cvs.20060524-1.1) unstable; urgency=medium
 
-  * NMU
-  * New upstream development release
-  * Increment libdrm-dev build-dep to 2.0.1
-  * Re-Add s390 and m68k to the USE_IEEE test in src/mesa/main/imports.h.
-    I need to submit this upstream.
-  * Remove set_buffer function from idirectfbgl_mesa.c in directfb driver.
-    Also remove the line that sets SetBuffer to it. Fixes FTBFS.
-  * Don't build now non-existant i830 driver in debian dri configs. Fixes
-    FTBFS.
-  * Update source package install file
-  * Install the glx sources with the rest in the sources package. This will
-    allow building of Xgl
+  * Non-maintainer upload.
+  * Upload mesa 6.5 cvs to unstable, because we need it for Xorg 7.1.
+  * Upload with medium urgency instead of high, since this is a new
+    upstream that should get some testing in unstable in spite of the
+    multiple RC bugfixes.
+  * Update debian/copyright with the full text of the SGI Free B and SGI
+    MIT-style licenses in use in the package, and take a stab at
+    cleaning up the list of paths and licenses.
+    Closes: #368562.
+  * Make mesa-common-dev Replaces: xlibosmesa-dev from sarge.
+    Closes: #384057.
+  * Fix libgl1-mesa-glx to not Provides: libgl1-mesa-dri, since it
+    definitely doesn't provide DRI support and this Provides: breaks
+    upgrades from sarge.  Closes: #384282.
+  * debian/libgl1-mesa-swx11.shlibs: create a static shlibs file,
+    because libOSMesa.so.6 is not provided by all implementations of
+    libGL and so needs a separate shlibs declaration.  Also make
+    libgl1-mesa-glx the default alternative instead of libgl1-mesa-swx11
+    for consistency even when building against libgl1-mesa-swx11,
+    because to the extent these are interchangeable (i.e., 99%...),
+    there should be no reason to prefer one over the other -- and to the
+    extent that they aren't interchangeable, it's wrong to list libgl1
+    as an alternative dependency at all.  Closes: #386185.
+  * Don't provide shlibs at all for libgl1-mesa-swx11-dbg; this is an
+    unnecessary duplication of the existing libgl1-mesa-swx11 shlibs
+    since packages should not really be linking against /usr/lib/debug/
+    separately.
+  * src/mesa/tnl/t_vb_render.c: Drop a pointless printf() in the
+    RENDER_LINE macro, getting rid of copious debug output on console.
+    Closes: #369895.
+  * libgl1-mesa-swx11 has no reason to depend on libglu, anything that
+    wants libglu will have its own dependency on it; drop this
+    hard-coded dependency from debian/control.
+  * Have libglu1-mesa-dev Provides: xlibmesa-glu-dev, since it's the
+    successor to that package and xlibmesa-glu-dev is still referenced
+    in a number of places and this makes for more reliable builds than
+    depending on alternatives without requiring another dummy -dev
+    package from xorg.
+  * Replace references to Source-Version in debian/control with either 
+    binary:Version or source:Version, depending on whether the
+    relationship references an arch: any or arch: all package, making
+    mesa binNMU-safe; add build-depends on dpkg-dev (>= 1.13.19) to
+    ensure these substvars are available.
 
- -- David Nusinow <dnusinow@debian.org>  Sat,  8 Apr 2006 14:28:20 -0400
+ -- Steve Langasek <vorlon@debian.org>  Fri, 15 Sep 2006 15:51:16 -0700
+
+mesa (6.5.0.cvs.20060524-1) experimental; urgency=low
+
+  * The "-O666 -fwater-c00ling -DBE_F4ST" release
+  * New pull from CVS
+  * Merge back and forth with 6.4.2-1
+  * configs/debian*_i386: disabled, optimized build fuxxored.
+
+ -- Marcelo E. Magallon <mmagallo@debian.org>  Wed, 24 May 2006 14:12:13 -0600
+
+mesa (6.5.0.cvs.20060512-0.0.1) experimental; urgency=low
+
+  * New upstream release (6.5.0)
+  * Pulled CVS as of 2006-05-12
+  * debian/control: remove DirectFB packages
+
+ -- Marcelo E. Magallon <mmagallo@debian.org>  Fri, 12 May 2006 15:23:49 -0600
+
+mesa (6.4.2-1) unstable; urgency=low
+
+  * The "please, please, please don't hate me" release.
+  * New upstream release.
+  * Ack NMUs
+  * debian/control: mesa-common-dev Replaces xlibmesa-gl-dev (<< 1:7)
+    AGAINST MY BETTER JUDGEMENT.  The problem here is gratuitous package
+    renames within a system that does not support them.  (closes:
+    bug#362063)
+  * debian/control: hurd-i386 doesn't have drm.  Doesn't fix #358065,
+    yet.
+  * bin/mklib: fix from Robert Millan to support hurd-i386 and
+    GNU/kFreeBSD.  Thanks Robert.  (closes: bug#358066)
+  * src/glx/x11/indirect_vertex_array.c, src/mesa/main/glheader.h,
+    src/mesa/drivers/dri/common/glcontextmodes.c: fix broken indirect
+    rendering on 64-bit platforms.  Thanks Aaron M. Ucko.  (closes:
+    bug#364228)
+  * debian/control: b-d on x11proto-gl-dev.  Please don't hate me!
+  * debian/control: Standards-Version: 3.7.2
+  * debian/rules: export DEB_HOST_ARCH
+  * configs/debian-dri: use DEB_HOST_ARCH to decide if certain DRI drivers
+    should be built or not.
+        + Built only for i386: i810 i830 sis.
+          Rationale: integrated chipsets available only for i386 processors.
+        + Built only for i386: ffb.
+          Rationale: Michel Dänzer said so, no idea why.
+        + Built only for i386, amd64: i915.
+          Rationale: Apparently this is available in the 64-bit Intel chipset.
+    Please file a bug report stating which drivers should be included/excluded
+    for which architectures.  Positive lists are preferred.  If possible state
+    why.
+  * debian/mesa-swx11-source.install: nuke this abomination.  Dinamically
+    generate the list at build time.
+  * debian/drivers.map: add gl-debian-dri_i386
+  * debian/README.build: updated, add big friendly letters in short sentences.
+    Perhaps I can read it myself this way...
+  * debian/rules, configs/debian, configs/debian-dri, configs/debian_i386,
+    configs/debian-dri_i386, debian/libdir.map, debian/drivers.map: hack in
+    support for variable driver's dir.  If you want this for your pet
+    architecture please provide BOTH configs/debian_arch and
+    configs/debian-dri_arch.  If you just want to include/exclude DRI drivers
+    on your architecture look in configs/debian-dri.
+  * configs/debian*_i386: disabled, optimized build fuxxored.
+  * debian/rules: remove misguided Perl construct, replace by something
+    simpler in shell.  I actually meant to do something else with the Perl
+    thing, but got distracted and forgot about it.  Thanks Aaron M. Ucko!
+  * debian/rules: make it work like debian/README.build says it works wrt to
+    building optimized targets.
+
+ -- Marcelo E. Magallon <mmagallo@debian.org>  Tue, 16 May 2006 18:07:53 -0600
 
 mesa (6.4.1-0.4) unstable; urgency=low
 

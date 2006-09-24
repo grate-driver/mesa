@@ -1470,3 +1470,23 @@ Mesa Version History
 	- fixed a number of GLU tesselator bugs (John Shell, bug 6339)
 	- paletted texturing was broken w/ floating point palettes (K. Schultz)
 	- lots of assorted framebuffer object bug fixes
+
+6.5.1  month, day, 2006
+    New:
+    Changes:
+	- The glVertexAttribARB functions no longer alias the conventional
+	  vertex attributes.
+	- glxinfo program prints more info with -l option
+    Bug fixes:
+	- fixed broken texture border handling for depth textures (bug 6498)
+	- removed the test for duplicated framebuffer attachments, per
+	  version 117 of the GL_EXT_framebuffer_object specification
+	- fixed a few render-to-texture bugs, including render to depth texture
+	- clipping of lines against user-defined clip planes was broken (6512)
+	- assembly language dispatch for SPARC was broken (bug 6484)
+	- assorted compilation fixes on various Unix platforms (Dan Schikore)
+	- glPopAttrib could restore an invalid value for GL_DRAW_BUFFER
+	- assorted minor fixes for 16 and 32 bit/channel modes
+	- fixed assorted bugs in texture compression paths
+	- fixed indirect rendering vertex array crashes (bug 6863)
+	- glDrawPixels GL_INDEX_OFFSET didn't always work

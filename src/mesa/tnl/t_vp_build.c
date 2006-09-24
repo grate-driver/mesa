@@ -2,7 +2,7 @@
  * Mesa 3-D graphics library
  * Version:  6.5
  *
- * Copyright (C) 2005  Tungsten Graphics   All Rights Reserved.
+ * Copyright (C) 2006  Tungsten Graphics   All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -115,7 +115,7 @@ static struct state_key *make_state_key( GLcontext *ctx )
 {
    TNLcontext *tnl = TNL_CONTEXT(ctx);
    struct vertex_buffer *VB = &tnl->vb;
-   struct fragment_program *fp = ctx->FragmentProgram._Current;
+   const struct fragment_program *fp = ctx->FragmentProgram._Current;
    struct state_key *key = CALLOC_STRUCT(state_key);
    GLuint i;
 
@@ -142,7 +142,7 @@ static struct state_key *make_state_key( GLcontext *ctx )
 	 key->light_color_material_mask = ctx->Light.ColorMaterialBitmask;
       }
 
-      for (i = _TNL_ATTRIB_MAT_FRONT_AMBIENT ; i < _TNL_ATTRIB_INDEX ; i++) 
+      for (i = _TNL_FIRST_MAT; i <= _TNL_LAST_MAT; i++) 
 	 if (VB->AttribPtr[i]->stride) 
 	    key->light_material_mask |= 1<<(i-_TNL_ATTRIB_MAT_FRONT_AMBIENT);
 
@@ -272,7 +272,7 @@ struct tnl_program {
 };
 
 
-const static struct ureg undef = { 
+static const struct ureg undef = { 
    ~0,
    ~0,
    0,
@@ -333,7 +333,7 @@ static struct ureg get_temp( struct tnl_program *p )
       _mesa_exit(1);
    }
 
-   if (bit > p->program->Base.NumTemporaries)
+   if ((GLuint) bit > p->program->Base.NumTemporaries)
       p->program->Base.NumTemporaries = bit;
 
    p->temp_in_use |= 1<<(bit-1);
@@ -444,7 +444,7 @@ static void register_matrix_param6( struct tnl_program *p,
 				    GLint s5,
 				    struct ureg *matrix )
 {
-   GLuint i;
+   GLint i;
 
    /* This is a bit sad as the support is there to pull the whole
     * matrix out in one go:
@@ -1154,6 +1154,8 @@ static void build_reflect_texgen( struct tnl_program *p,
    emit_op2(p, OPCODE_ADD, tmp, 0, tmp, tmp); 
    /* (-2n.u)n + u */
    emit_op3(p, OPCODE_MAD, dest, writemask, negate(tmp), normal, eye_hat);
+
+   release_temp(p, tmp);
 }
 
 static void build_sphere_texgen( struct tnl_program *p,
@@ -1491,7 +1493,7 @@ void _tnl_UpdateFixedFunctionProgram( GLcontext *ctx )
    TNLcontext *tnl = TNL_CONTEXT(ctx);
    struct state_key *key;
    GLuint hash;
-   struct vertex_program *prev = ctx->VertexProgram._Current;
+   const struct vertex_program *prev = ctx->VertexProgram._Current;
 
    if (ctx->VertexProgram._Enabled == GL_FALSE) { 
       /* Grab all the relevent state and put it in a single structure:

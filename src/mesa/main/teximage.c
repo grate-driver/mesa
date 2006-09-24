@@ -533,22 +533,17 @@ is_depthstencil_format(GLenum format)
 static GLboolean
 is_compressed_format(GLcontext *ctx, GLenum internalFormat)
 {
-   (void) ctx;
-   switch (internalFormat) {
-      case GL_COMPRESSED_RGB_FXT1_3DFX:
-      case GL_COMPRESSED_RGBA_FXT1_3DFX:
-      case GL_COMPRESSED_RGB_S3TC_DXT1_EXT:
-      case GL_COMPRESSED_RGBA_S3TC_DXT1_EXT:
-      case GL_COMPRESSED_RGBA_S3TC_DXT3_EXT:
-      case GL_COMPRESSED_RGBA_S3TC_DXT5_EXT:
-      case GL_RGB_S3TC:
-      case GL_RGB4_S3TC:
-      case GL_RGBA_S3TC:
-      case GL_RGBA4_S3TC:
+   GLint supported[100]; /* 100 should be plenty */
+   GLuint i, n;
+
+   n = _mesa_get_compressed_formats(ctx, supported, GL_TRUE);
+   ASSERT(n < 100);
+   for (i = 0; i < n; i++) {
+      if ((GLint) internalFormat == supported[i]) {
          return GL_TRUE;
-      default:
-         return GL_FALSE;
+      }
    }
+   return GL_FALSE;
 }
 
 
@@ -642,6 +637,8 @@ void
 _mesa_free_texture_image_data(GLcontext *ctx,
                               struct gl_texture_image *texImage)
 {
+   (void) ctx;
+
    if (texImage->Data && !texImage->IsClientData) {
       /* free the old texture data */
       _mesa_free_texmemory(texImage->Data);
@@ -665,7 +662,9 @@ _mesa_delete_texture_image( GLcontext *ctx, struct gl_texture_image *texImage )
       ctx->Driver.FreeTexImageData( ctx, texImage );
    }
    ASSERT(texImage->Data == NULL);
-   FREE( texImage );
+   if (texImage->ImageOffsets)
+      _mesa_free(texImage->ImageOffsets);
+   _mesa_free(texImage);
 }
 
 
@@ -1053,7 +1052,10 @@ clear_teximage_fields(struct gl_texture_image *img)
    img->Height = 0;
    img->Depth = 0;
    img->RowStride = 0;
-   img->ImageStride = 0;
+   if (img->ImageOffsets) {
+      _mesa_free(img->ImageOffsets);
+      img->ImageOffsets = NULL;
+   }
    img->Width2 = 0;
    img->Height2 = 0;
    img->Depth2 = 0;
@@ -1073,7 +1075,7 @@ clear_teximage_fields(struct gl_texture_image *img)
  * Initialize basic fields of the gl_texture_image struct.
  *
  * \param ctx GL context.
- * \param target texture target.
+ * \param target texture target (GL_TEXTURE_1D, GL_TEXTURE_RECTANGLE, etc).
  * \param img texture image structure to be initialized.
  * \param width image width.
  * \param height image height.
@@ -1090,7 +1092,13 @@ _mesa_init_teximage_fields(GLcontext *ctx, GLenum target,
                            GLsizei width, GLsizei height, GLsizei depth,
                            GLint border, GLenum internalFormat)
 {
+   GLint i;
+
    ASSERT(img);
+   ASSERT(width > 0);
+   ASSERT(height > 0);
+   ASSERT(depth > 0);
+
    img->_BaseFormat = _mesa_base_tex_format( ctx, internalFormat );
    ASSERT(img->_BaseFormat > 0);
    img->InternalFormat = internalFormat;
@@ -1098,8 +1106,6 @@ _mesa_init_teximage_fields(GLcontext *ctx, GLenum target,
    img->Width = width;
    img->Height = height;
    img->Depth = depth;
-   img->RowStride = width;
-   img->ImageStride = width * height;
    img->Width2 = width - 2 * border;   /* == 1 << img->WidthLog2; */
    img->Height2 = height - 2 * border; /* == 1 << img->HeightLog2; */
    img->Depth2 = depth - 2 * border;   /* == 1 << img->DepthLog2; */
@@ -1113,12 +1119,8 @@ _mesa_init_teximage_fields(GLcontext *ctx, GLenum target,
    else
       img->DepthLog2 = logbase2(img->Depth2);
    img->MaxLog2 = MAX2(img->WidthLog2, img->HeightLog2);
-   img->IsCompressed = is_compressed_format(ctx, internalFormat);
-   if (img->IsCompressed)
-      img->CompressedSize = ctx->Driver.CompressedTextureSize(ctx, width,
-                                               height, depth, internalFormat);
-   else
-      img->CompressedSize = 0;
+   img->IsCompressed = GL_FALSE;
+   img->CompressedSize = 0;
 
    if ((width == 1 || _mesa_bitcount(img->Width2) == 1) &&
        (height == 1 || _mesa_bitcount(img->Height2) == 1) &&
@@ -1126,6 +1128,17 @@ _mesa_init_teximage_fields(GLcontext *ctx, GLenum target,
       img->_IsPowerOfTwo = GL_TRUE;
    else
       img->_IsPowerOfTwo = GL_FALSE;
+
+   /* RowStride and ImageOffsets[] describe how to address texels in 'Data' */
+   img->RowStride = width;
+   /* Allocate the ImageOffsets array and initialize to typical values.
+    * We allocate the array for 1D/2D textures too in order to avoid special-
+    * case code in the texstore routines.
+    */
+   img->ImageOffsets = (GLuint *) _mesa_malloc(depth * sizeof(GLuint));
+   for (i = 0; i < depth; i++) {
+      img->ImageOffsets[i] = i * width * height;
+   }
 
    /* Compute Width/Height/DepthScale for mipmap lod computation */
    if (target == GL_TEXTURE_RECTANGLE_NV) {
@@ -2879,9 +2892,11 @@ compressed_texture_error_check(GLcontext *ctx, GLint dimensions,
 
    maxTextureSize = 1 << (maxLevels - 1);
 
+   /* This will detect any invalid internalFormat value */
    if (!is_compressed_format(ctx, internalFormat))
       return GL_INVALID_ENUM;
 
+   /* This should really never fail */
    if (_mesa_base_tex_format(ctx, internalFormat) < 0)
       return GL_INVALID_ENUM;
 
@@ -2913,8 +2928,8 @@ compressed_texture_error_check(GLcontext *ctx, GLint dimensions,
    if (level < 0 || level >= maxLevels)
       return GL_INVALID_VALUE;
 
-   expectedSize = ctx->Driver.CompressedTextureSize(ctx, width, height, depth,
-                                                    internalFormat);
+   expectedSize = _mesa_compressed_texture_size_glenum(ctx, width, height,
+                                                       depth, internalFormat);
    if (expectedSize != imageSize)
       return GL_INVALID_VALUE;
 
@@ -2972,6 +2987,7 @@ compressed_subtexture_error_check(GLcontext *ctx, GLint dimensions,
 
    maxTextureSize = 1 << (maxLevels - 1);
 
+   /* this will catch any invalid compressed format token */
    if (!is_compressed_format(ctx, format))
       return GL_INVALID_ENUM;
 
@@ -2997,8 +3013,8 @@ compressed_subtexture_error_check(GLcontext *ctx, GLint dimensions,
    if ((height & 3) != 0 && height != 2 && height != 1)
       return GL_INVALID_VALUE;
 
-   expectedSize = ctx->Driver.CompressedTextureSize(ctx, width, height, depth,
-                                                    format);
+   expectedSize = _mesa_compressed_texture_size_glenum(ctx, width, height,
+                                                       depth, format);
    if (expectedSize != imageSize)
       return GL_INVALID_VALUE;
 
@@ -3266,7 +3282,9 @@ _mesa_CompressedTexSubImage1DARB(GLenum target, GLint level, GLint xoffset,
    ASSERT_OUTSIDE_BEGIN_END_AND_FLUSH(ctx);
 
    error = compressed_subtexture_error_check(ctx, 1, target, level,
-                                xoffset, 0, 0, width, 1, 1, format, imageSize);
+                                             xoffset, 0, 0, /* pos */
+                                             width, 1, 1,   /* size */
+                                             format, imageSize);
    if (error) {
       _mesa_error(ctx, error, "glCompressedTexSubImage1D");
       return;
@@ -3315,7 +3333,9 @@ _mesa_CompressedTexSubImage2DARB(GLenum target, GLint level, GLint xoffset,
    ASSERT_OUTSIDE_BEGIN_END_AND_FLUSH(ctx);
 
    error = compressed_subtexture_error_check(ctx, 2, target, level,
-                     xoffset, yoffset, 0, width, height, 1, format, imageSize);
+                                             xoffset, yoffset, 0, /* pos */
+                                             width, height, 1,    /* size */
+                                             format, imageSize);
    if (error) {
       /* XXX proxy target? */
       _mesa_error(ctx, error, "glCompressedTexSubImage2D");
@@ -3366,7 +3386,9 @@ _mesa_CompressedTexSubImage3DARB(GLenum target, GLint level, GLint xoffset,
    ASSERT_OUTSIDE_BEGIN_END_AND_FLUSH(ctx);
 
    error = compressed_subtexture_error_check(ctx, 3, target, level,
-           xoffset, yoffset, zoffset, width, height, depth, format, imageSize);
+                                             xoffset, yoffset, zoffset,/*pos*/
+                                             width, height, depth, /*size*/
+                                             format, imageSize);
    if (error) {
       _mesa_error(ctx, error, "glCompressedTexSubImage2D");
       return;

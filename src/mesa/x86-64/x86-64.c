@@ -1,4 +1,4 @@
-/* $Id: x86-64.c,v 1.2 2005/09/19 20:12:33 brianp Exp $ */
+/* $Id: x86-64.c,v 1.2 2005-09-19 20:12:33 brianp Exp $ */
 
 /*
  * Mesa 3-D graphics library

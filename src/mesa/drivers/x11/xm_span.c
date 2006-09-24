@@ -21,7 +21,6 @@
  * AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-/* $XFree86: xc/extras/Mesa/src/X/xm_span.c,v 1.3 2002/02/27 21:07:54 tsi Exp $ */
 
 #include "glxheader.h"
 #include "colormac.h"
@@ -176,7 +175,8 @@ static unsigned long read_pixel( XMesaDisplay *dpy,
 	const void *values, const GLubyte mask[]
 
 
-/* NOTE: if mask==NULL, draw all pixels */
+#define GET_XRB(XRB) \
+   struct xmesa_renderbuffer *XRB = xmesa_renderbuffer(rb)
 
 
 /*
@@ -186,7 +186,7 @@ static void put_row_TRUECOLOR_pixmap( PUT_ROW_ARGS )
 {
    const GLubyte (*rgba)[4] = (const GLubyte (*)[4]) values;
    const XMesaContext xmesa = XMESA_CONTEXT(ctx);
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    XMesaDisplay *dpy = XMESA_BUFFER(ctx->DrawBuffer)->display;
    XMesaDrawable buffer = xrb->drawable;
    XMesaGC gc = XMESA_BUFFER(ctx->DrawBuffer)->gc;
@@ -223,7 +223,7 @@ static void put_row_rgb_TRUECOLOR_pixmap( RGB_SPAN_ARGS )
 {
    const GLubyte (*rgb)[3] = (const GLubyte (*)[3]) values;
    const XMesaContext xmesa = XMESA_CONTEXT(ctx);
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    XMesaDisplay *dpy = xmesa->xm_visual->display;
    XMesaDrawable buffer = xrb->drawable;
    XMesaGC gc = XMESA_BUFFER(ctx->DrawBuffer)->gc;
@@ -258,7 +258,7 @@ static void put_row_TRUEDITHER_pixmap( PUT_ROW_ARGS )
 {
    const GLubyte (*rgba)[4] = (const GLubyte (*)[4]) values;
    const XMesaContext xmesa = XMESA_CONTEXT(ctx);
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    XMesaDisplay *dpy = xmesa->xm_visual->display;
    XMesaDrawable buffer = xrb->drawable;
    XMesaGC gc = XMESA_BUFFER(ctx->DrawBuffer)->gc;
@@ -293,7 +293,7 @@ static void put_row_rgb_TRUEDITHER_pixmap( RGB_SPAN_ARGS )
 {
    const GLubyte (*rgb)[3] = (const GLubyte (*)[3]) values;
    const XMesaContext xmesa = XMESA_CONTEXT(ctx);
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    XMesaDisplay *dpy = xmesa->xm_visual->display;
    XMesaDrawable buffer = xrb->drawable;
    XMesaGC gc = XMESA_BUFFER(ctx->DrawBuffer)->gc;
@@ -328,7 +328,7 @@ static void put_row_8A8B8G8R_pixmap( PUT_ROW_ARGS )
 {
    const GLubyte (*rgba)[4] = (const GLubyte (*)[4]) values;
    const XMesaContext xmesa = XMESA_CONTEXT(ctx);
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    XMesaDisplay *dpy = xmesa->xm_visual->display;
    XMesaDrawable buffer = xrb->drawable;
    XMesaGC gc = XMESA_BUFFER(ctx->DrawBuffer)->gc;
@@ -362,7 +362,7 @@ static void put_row_rgb_8A8B8G8R_pixmap( RGB_SPAN_ARGS )
 {
    const GLubyte (*rgb)[3] = (const GLubyte (*)[3]) values;
    const XMesaContext xmesa = XMESA_CONTEXT(ctx);
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    XMesaDisplay *dpy = xmesa->xm_visual->display;
    XMesaDrawable buffer = xrb->drawable;
    XMesaGC gc = XMESA_BUFFER(ctx->DrawBuffer)->gc;
@@ -395,7 +395,7 @@ static void put_row_8A8R8G8B_pixmap( PUT_ROW_ARGS )
 {
    const GLubyte (*rgba)[4] = (const GLubyte (*)[4]) values;
    const XMesaContext xmesa = XMESA_CONTEXT(ctx);
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    XMesaDisplay *dpy = xmesa->xm_visual->display;
    XMesaDrawable buffer = xrb->drawable;
    XMesaGC gc = XMESA_BUFFER(ctx->DrawBuffer)->gc;
@@ -429,7 +429,7 @@ static void put_row_rgb_8A8R8G8B_pixmap( RGB_SPAN_ARGS )
 {
    const GLubyte (*rgb)[3] = (const GLubyte (*)[3]) values;
    const XMesaContext xmesa = XMESA_CONTEXT(ctx);
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    XMesaDisplay *dpy = xmesa->xm_visual->display;
    XMesaDrawable buffer = xrb->drawable;
    XMesaGC gc = XMESA_BUFFER(ctx->DrawBuffer)->gc;
@@ -462,7 +462,7 @@ static void put_row_8R8G8B_pixmap( PUT_ROW_ARGS )
 {
    const GLubyte (*rgba)[4] = (const GLubyte (*)[4]) values;
    const XMesaContext xmesa = XMESA_CONTEXT(ctx);
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    XMesaDisplay *dpy = xmesa->xm_visual->display;
    XMesaDrawable buffer = xrb->drawable;
    XMesaGC gc = XMESA_BUFFER(ctx->DrawBuffer)->gc;
@@ -495,7 +495,7 @@ static void put_row_8R8G8B24_pixmap( PUT_ROW_ARGS )
 {
    const GLubyte (*rgba)[4] = (const GLubyte (*)[4]) values;
    const XMesaContext xmesa = XMESA_CONTEXT(ctx);
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    XMesaDisplay *dpy = xmesa->xm_visual->display;
    XMesaDrawable buffer = xrb->drawable;
    XMesaGC gc = XMESA_BUFFER(ctx->DrawBuffer)->gc;
@@ -591,7 +591,7 @@ static void put_row_rgb_8R8G8B_pixmap( RGB_SPAN_ARGS )
 {
    const GLubyte (*rgb)[3] = (const GLubyte (*)[3]) values;
    const XMesaContext xmesa = XMESA_CONTEXT(ctx);
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    XMesaDisplay *dpy = xmesa->xm_visual->display;
    XMesaDrawable buffer = xrb->drawable;
    XMesaGC gc = XMESA_BUFFER(ctx->DrawBuffer)->gc;
@@ -623,7 +623,7 @@ static void put_row_rgb_8R8G8B24_pixmap( RGB_SPAN_ARGS )
 {
    const GLubyte (*rgb)[3] = (const GLubyte (*)[3]) values;
    const XMesaContext xmesa = XMESA_CONTEXT(ctx);
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    XMesaDisplay *dpy = xmesa->xm_visual->display;
    XMesaDrawable buffer = xrb->drawable;
    XMesaGC gc = XMESA_BUFFER(ctx->DrawBuffer)->gc;
@@ -724,7 +724,7 @@ static void put_row_5R6G5B_pixmap( PUT_ROW_ARGS )
 {
    const GLubyte (*rgba)[4] = (const GLubyte (*)[4]) values;
    const XMesaContext xmesa = XMESA_CONTEXT(ctx);
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    XMesaDisplay *dpy = xmesa->xm_visual->display;
    XMesaDrawable buffer = xrb->drawable;
    XMesaGC gc = XMESA_BUFFER(ctx->DrawBuffer)->gc;
@@ -757,7 +757,7 @@ static void put_row_DITHER_5R6G5B_pixmap( PUT_ROW_ARGS )
 {
    const GLubyte (*rgba)[4] = (const GLubyte (*)[4]) values;
    const XMesaContext xmesa = XMESA_CONTEXT(ctx);
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    XMesaDisplay *dpy = xmesa->xm_visual->display;
    XMesaDrawable buffer = xrb->drawable;
    XMesaGC gc = XMESA_BUFFER(ctx->DrawBuffer)->gc;
@@ -792,7 +792,7 @@ static void put_row_rgb_5R6G5B_pixmap( RGB_SPAN_ARGS )
 {
    const GLubyte (*rgb)[3] = (const GLubyte (*)[3]) values;
    const XMesaContext xmesa = XMESA_CONTEXT(ctx);
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    XMesaDisplay *dpy = xmesa->xm_visual->display;
    XMesaDrawable buffer = xrb->drawable;
    XMesaGC gc = XMESA_BUFFER(ctx->DrawBuffer)->gc;
@@ -825,7 +825,7 @@ static void put_row_rgb_DITHER_5R6G5B_pixmap( RGB_SPAN_ARGS )
 {
    const GLubyte (*rgb)[3] = (const GLubyte (*)[3]) values;
    const XMesaContext xmesa = XMESA_CONTEXT(ctx);
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    XMesaDisplay *dpy = xmesa->xm_visual->display;
    XMesaDrawable buffer = xrb->drawable;
    XMesaGC gc = XMESA_BUFFER(ctx->DrawBuffer)->gc;
@@ -860,7 +860,7 @@ static void put_row_DITHER_pixmap( PUT_ROW_ARGS )
 {
    const GLubyte (*rgba)[4] = (const GLubyte (*)[4]) values;
    const XMesaContext xmesa = XMESA_CONTEXT(ctx);
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    XMesaDisplay *dpy = xmesa->xm_visual->display;
    XMesaDrawable buffer = xrb->drawable;
    XMesaGC gc = XMESA_BUFFER(ctx->DrawBuffer)->gc;
@@ -893,7 +893,7 @@ static void put_row_rgb_DITHER_pixmap( RGB_SPAN_ARGS )
 {
    const GLubyte (*rgb)[3] = (const GLubyte (*)[3]) values;
    const XMesaContext xmesa = XMESA_CONTEXT(ctx);
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    XMesaDisplay *dpy = xmesa->xm_visual->display;
    XMesaDrawable buffer = xrb->drawable;
    XMesaGC gc = XMESA_BUFFER(ctx->DrawBuffer)->gc;
@@ -926,7 +926,7 @@ static void put_row_1BIT_pixmap( PUT_ROW_ARGS )
 {
    const GLubyte (*rgba)[4] = (const GLubyte (*)[4]) values;
    const XMesaContext xmesa = XMESA_CONTEXT(ctx);
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    XMesaDisplay *dpy = xmesa->xm_visual->display;
    XMesaDrawable buffer = xrb->drawable;
    XMesaGC gc = XMESA_BUFFER(ctx->DrawBuffer)->gc;
@@ -961,7 +961,7 @@ static void put_row_rgb_1BIT_pixmap( RGB_SPAN_ARGS )
 {
    const GLubyte (*rgb)[3] = (const GLubyte (*)[3]) values;
    const XMesaContext xmesa = XMESA_CONTEXT(ctx);
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    XMesaDisplay *dpy = xmesa->xm_visual->display;
    XMesaDrawable buffer = xrb->drawable;
    XMesaGC gc = XMESA_BUFFER(ctx->DrawBuffer)->gc;
@@ -996,7 +996,7 @@ static void put_row_HPCR_pixmap( PUT_ROW_ARGS )
 {
    const GLubyte (*rgba)[4] = (const GLubyte (*)[4]) values;
    const XMesaContext xmesa = XMESA_CONTEXT(ctx);
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    XMesaDisplay *dpy = xmesa->xm_visual->display;
    XMesaDrawable buffer = xrb->drawable;
    XMesaGC gc = XMESA_BUFFER(ctx->DrawBuffer)->gc;
@@ -1029,7 +1029,7 @@ static void put_row_rgb_HPCR_pixmap( RGB_SPAN_ARGS )
 {
    const GLubyte (*rgb)[3] = (const GLubyte (*)[3]) values;
    const XMesaContext xmesa = XMESA_CONTEXT(ctx);
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    XMesaDisplay *dpy = xmesa->xm_visual->display;
    XMesaDrawable buffer = xrb->drawable;
    XMesaGC gc = XMESA_BUFFER(ctx->DrawBuffer)->gc;
@@ -1061,7 +1061,7 @@ static void put_row_LOOKUP_pixmap( PUT_ROW_ARGS )
 {
    const GLubyte (*rgba)[4] = (const GLubyte (*)[4]) values;
    const XMesaContext xmesa = XMESA_CONTEXT(ctx);
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    XMesaDisplay *dpy = xmesa->xm_visual->display;
    XMesaDrawable buffer = xrb->drawable;
    XMesaGC gc = XMESA_BUFFER(ctx->DrawBuffer)->gc;
@@ -1093,7 +1093,7 @@ static void put_row_rgb_LOOKUP_pixmap( RGB_SPAN_ARGS )
 {
    const GLubyte (*rgb)[3] = (const GLubyte (*)[3]) values;
    const XMesaContext xmesa = XMESA_CONTEXT(ctx);
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    XMesaDisplay *dpy = xmesa->xm_visual->display;
    XMesaDrawable buffer = xrb->drawable;
    XMesaGC gc = XMESA_BUFFER(ctx->DrawBuffer)->gc;
@@ -1125,7 +1125,7 @@ static void put_row_GRAYSCALE_pixmap( PUT_ROW_ARGS )
 {
    const GLubyte (*rgba)[4] = (const GLubyte (*)[4]) values;
    const XMesaContext xmesa = XMESA_CONTEXT(ctx);
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    XMesaDisplay *dpy = xmesa->xm_visual->display;
    XMesaDrawable buffer = xrb->drawable;
    XMesaGC gc = XMESA_BUFFER(ctx->DrawBuffer)->gc;
@@ -1156,7 +1156,7 @@ static void put_row_rgb_GRAYSCALE_pixmap( RGB_SPAN_ARGS )
 {
    const GLubyte (*rgb)[3] = (const GLubyte (*)[3]) values;
    const XMesaContext xmesa = XMESA_CONTEXT(ctx);
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    XMesaDisplay *dpy = xmesa->xm_visual->display;
    XMesaDrawable buffer = xrb->drawable;
    XMesaGC gc = XMESA_BUFFER(ctx->DrawBuffer)->gc;
@@ -1186,7 +1186,7 @@ static void put_row_TRUECOLOR_ximage( PUT_ROW_ARGS )
 {
    const GLubyte (*rgba)[4] = (const GLubyte (*)[4]) values;
    const XMesaContext xmesa = XMESA_CONTEXT(ctx);
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    XMesaImage *img = xrb->ximage;
    register GLuint i;
    y = YFLIP(xrb, y);
@@ -1217,7 +1217,7 @@ static void put_row_rgb_TRUECOLOR_ximage( RGB_SPAN_ARGS )
 {
    const GLubyte (*rgb)[3] = (const GLubyte (*)[3]) values;
    const XMesaContext xmesa = XMESA_CONTEXT(ctx);
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    XMesaImage *img = xrb->ximage;
    register GLuint i;
    y = YFLIP(xrb, y);
@@ -1248,7 +1248,7 @@ static void put_row_TRUEDITHER_ximage( PUT_ROW_ARGS )
 {
    const GLubyte (*rgba)[4] = (const GLubyte (*)[4]) values;
    const XMesaContext xmesa = XMESA_CONTEXT(ctx);
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    XMesaImage *img = xrb->ximage;
    register GLuint i;
    y = YFLIP(xrb, y);
@@ -1279,7 +1279,7 @@ static void put_row_rgb_TRUEDITHER_ximage( RGB_SPAN_ARGS )
 {
    const GLubyte (*rgb)[3] = (const GLubyte (*)[3]) values;
    const XMesaContext xmesa = XMESA_CONTEXT(ctx);
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    XMesaImage *img = xrb->ximage;
    register GLuint i;
    y = YFLIP(xrb, y);
@@ -1309,9 +1309,10 @@ static void put_row_rgb_TRUEDITHER_ximage( RGB_SPAN_ARGS )
 static void put_row_8A8B8G8R_ximage( PUT_ROW_ARGS )
 {
    const GLubyte (*rgba)[4] = (const GLubyte (*)[4]) values;
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    register GLuint i;
    register GLuint *ptr = PIXEL_ADDR4(xrb, x, y);
+   (void) ctx;
    if (mask) {
       for (i=0;i<n;i++) {
          if (mask[i]) {
@@ -1334,7 +1335,7 @@ static void put_row_8A8B8G8R_ximage( PUT_ROW_ARGS )
 static void put_row_rgb_8A8B8G8R_ximage( RGB_SPAN_ARGS )
 {
    const GLubyte (*rgb)[3] = (const GLubyte (*)[3]) values;
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    register GLuint i;
    register GLuint *ptr = PIXEL_ADDR4(xrb, x, y);
    if (mask) {
@@ -1358,7 +1359,7 @@ static void put_row_rgb_8A8B8G8R_ximage( RGB_SPAN_ARGS )
 static void put_row_8A8R8G8B_ximage( PUT_ROW_ARGS )
 {
    const GLubyte (*rgba)[4] = (const GLubyte (*)[4]) values;
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    register GLuint i;
    register GLuint *ptr = PIXEL_ADDR4(xrb, x, y);
    if (mask) {
@@ -1383,7 +1384,7 @@ static void put_row_8A8R8G8B_ximage( PUT_ROW_ARGS )
 static void put_row_rgb_8A8R8G8B_ximage( RGB_SPAN_ARGS )
 {
    const GLubyte (*rgb)[3] = (const GLubyte (*)[3]) values;
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    register GLuint i;
    register GLuint *ptr = PIXEL_ADDR4(xrb, x, y);
    if (mask) {
@@ -1408,7 +1409,7 @@ static void put_row_rgb_8A8R8G8B_ximage( RGB_SPAN_ARGS )
 static void put_row_8R8G8B_ximage( PUT_ROW_ARGS )
 {
    const GLubyte (*rgba)[4] = (const GLubyte (*)[4]) values;
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    register GLuint i;
    register GLuint *ptr = PIXEL_ADDR4(xrb, x, y);
    if (mask) {
@@ -1432,7 +1433,7 @@ static void put_row_8R8G8B_ximage( PUT_ROW_ARGS )
 static void put_row_8R8G8B24_ximage( PUT_ROW_ARGS )
 {
    const GLubyte (*rgba)[4] = (const GLubyte (*)[4]) values;
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    register GLuint i;
    register GLubyte *ptr = (GLubyte *) PIXEL_ADDR3(xrb, x, y );
    if (mask) {
@@ -1583,7 +1584,7 @@ static void put_row_8R8G8B24_ximage( PUT_ROW_ARGS )
 static void put_row_rgb_8R8G8B_ximage( RGB_SPAN_ARGS )
 {
    const GLubyte (*rgb)[3] = (const GLubyte (*)[3]) values;
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    register GLuint i;
    register GLuint *ptr = PIXEL_ADDR4(xrb, x, y);
    if (mask) {
@@ -1608,7 +1609,7 @@ static void put_row_rgb_8R8G8B_ximage( RGB_SPAN_ARGS )
 static void put_row_rgb_8R8G8B24_ximage( RGB_SPAN_ARGS )
 {
    const GLubyte (*rgb)[3] = (const GLubyte (*)[3]) values;
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    register GLuint i;
    register GLubyte *ptr = (GLubyte *) PIXEL_ADDR3(xrb, x, y);
    if (mask) {
@@ -1640,7 +1641,7 @@ static void put_row_rgb_8R8G8B24_ximage( RGB_SPAN_ARGS )
 static void put_row_5R6G5B_ximage( PUT_ROW_ARGS )
 {
    const GLubyte (*rgba)[4] = (const GLubyte (*)[4]) values;
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    register GLuint i;
    register GLushort *ptr = PIXEL_ADDR2(xrb, x, y);
    if (mask) {
@@ -1680,7 +1681,7 @@ static void put_row_5R6G5B_ximage( PUT_ROW_ARGS )
 static void put_row_DITHER_5R6G5B_ximage( PUT_ROW_ARGS )
 {
    const GLubyte (*rgba)[4] = (const GLubyte (*)[4]) values;
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    const XMesaContext xmesa = XMESA_CONTEXT(ctx);
    register GLuint i;
    register GLushort *ptr = PIXEL_ADDR2(xrb, x, y);
@@ -1722,7 +1723,7 @@ static void put_row_DITHER_5R6G5B_ximage( PUT_ROW_ARGS )
 static void put_row_rgb_5R6G5B_ximage( RGB_SPAN_ARGS )
 {
    const GLubyte (*rgb)[3] = (const GLubyte (*)[3]) values;
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    register GLuint i;
    register GLushort *ptr = PIXEL_ADDR2(xrb, x, y);
    if (mask) {
@@ -1762,7 +1763,7 @@ static void put_row_rgb_5R6G5B_ximage( RGB_SPAN_ARGS )
 static void put_row_rgb_DITHER_5R6G5B_ximage( RGB_SPAN_ARGS )
 {
    const GLubyte (*rgb)[3] = (const GLubyte (*)[3]) values;
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    const XMesaContext xmesa = XMESA_CONTEXT(ctx);
    register GLuint i;
    register GLushort *ptr = PIXEL_ADDR2(xrb, x, y );
@@ -1803,7 +1804,7 @@ static void put_row_rgb_DITHER_5R6G5B_ximage( RGB_SPAN_ARGS )
 static void put_row_DITHER_ximage( PUT_ROW_ARGS )
 {
    const GLubyte (*rgba)[4] = (const GLubyte (*)[4]) values;
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    XMesaImage *img = xrb->ximage;
    register GLuint i;
    int yy = YFLIP(xrb, y);
@@ -1830,7 +1831,7 @@ static void put_row_DITHER_ximage( PUT_ROW_ARGS )
 static void put_row_rgb_DITHER_ximage( RGB_SPAN_ARGS )
 {
    const GLubyte (*rgb)[3] = (const GLubyte (*)[3]) values;
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    XMesaImage *img = xrb->ximage;
    register GLuint i;
    int yy = YFLIP(xrb, y);
@@ -1858,7 +1859,7 @@ static void put_row_rgb_DITHER_ximage( RGB_SPAN_ARGS )
 static void put_row_DITHER8_ximage( PUT_ROW_ARGS )
 {
    const GLubyte (*rgba)[4] = (const GLubyte (*)[4]) values;
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    register GLuint i;
    register GLubyte *ptr = PIXEL_ADDR1(xrb, x, y);
    XDITHER_SETUP(y);
@@ -1880,7 +1881,7 @@ static void put_row_DITHER8_ximage( PUT_ROW_ARGS )
 static void put_row_rgb_DITHER8_ximage( RGB_SPAN_ARGS )
 {
    const GLubyte (*rgb)[3] = (const GLubyte (*)[3]) values;
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    register GLuint i;
    register GLubyte *ptr = PIXEL_ADDR1(xrb, x, y);
    XDITHER_SETUP(y);
@@ -1909,7 +1910,7 @@ static void put_row_1BIT_ximage( PUT_ROW_ARGS )
 {
    const GLubyte (*rgba)[4] = (const GLubyte (*)[4]) values;
    const XMesaContext xmesa = XMESA_CONTEXT(ctx);
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    XMesaImage *img = xrb->ximage;
    register GLuint i;
    SETUP_1BIT;
@@ -1936,7 +1937,7 @@ static void put_row_rgb_1BIT_ximage( RGB_SPAN_ARGS )
 {
    const GLubyte (*rgb)[3] = (const GLubyte (*)[3]) values;
    const XMesaContext xmesa = XMESA_CONTEXT(ctx);
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    XMesaImage *img = xrb->ximage;
    register GLuint i;
    SETUP_1BIT;
@@ -1962,7 +1963,7 @@ static void put_row_rgb_1BIT_ximage( RGB_SPAN_ARGS )
 static void put_row_HPCR_ximage( PUT_ROW_ARGS )
 {
    const GLubyte (*rgba)[4] = (const GLubyte (*)[4]) values;
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    const XMesaContext xmesa = XMESA_CONTEXT(ctx);
    register GLuint i;
    register GLubyte *ptr = PIXEL_ADDR1(xrb, x, y);
@@ -1988,7 +1989,7 @@ static void put_row_HPCR_ximage( PUT_ROW_ARGS )
 static void put_row_rgb_HPCR_ximage( RGB_SPAN_ARGS )
 {
    const GLubyte (*rgb)[3] = (const GLubyte (*)[3]) values;
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    const XMesaContext xmesa = XMESA_CONTEXT(ctx);
    register GLuint i;
    register GLubyte *ptr = PIXEL_ADDR1(xrb, x, y);
@@ -2014,7 +2015,7 @@ static void put_row_rgb_HPCR_ximage( RGB_SPAN_ARGS )
 static void put_row_LOOKUP_ximage( PUT_ROW_ARGS )
 {
    const GLubyte (*rgba)[4] = (const GLubyte (*)[4]) values;
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    XMesaImage *img = xrb->ximage;
    register GLuint i;
    LOOKUP_SETUP;
@@ -2041,7 +2042,7 @@ static void put_row_LOOKUP_ximage( PUT_ROW_ARGS )
 static void put_row_rgb_LOOKUP_ximage( RGB_SPAN_ARGS )
 {
    const GLubyte (*rgb)[3] = (const GLubyte (*)[3]) values;
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    XMesaImage *img = xrb->ximage;
    register GLuint i;
    LOOKUP_SETUP;
@@ -2068,7 +2069,7 @@ static void put_row_rgb_LOOKUP_ximage( RGB_SPAN_ARGS )
 static void put_row_LOOKUP8_ximage( PUT_ROW_ARGS )
 {
    const GLubyte (*rgba)[4] = (const GLubyte (*)[4]) values;
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    register GLuint i;
    register GLubyte *ptr = PIXEL_ADDR1(xrb, x, y);
    LOOKUP_SETUP;
@@ -2091,7 +2092,7 @@ static void put_row_LOOKUP8_ximage( PUT_ROW_ARGS )
 static void put_row_rgb_LOOKUP8_ximage( RGB_SPAN_ARGS )
 {
    const GLubyte (*rgb)[3] = (const GLubyte (*)[3]) values;
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    register GLuint i;
    register GLubyte *ptr = PIXEL_ADDR1(xrb, x, y);
    LOOKUP_SETUP;
@@ -2119,7 +2120,7 @@ static void put_row_rgb_LOOKUP8_ximage( RGB_SPAN_ARGS )
 static void put_row_GRAYSCALE_ximage( PUT_ROW_ARGS )
 {
    const GLubyte (*rgba)[4] = (const GLubyte (*)[4]) values;
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    XMesaImage *img = xrb->ximage;
    register GLuint i;
    y = YFLIP(xrb, y);
@@ -2145,7 +2146,7 @@ static void put_row_GRAYSCALE_ximage( PUT_ROW_ARGS )
 static void put_row_rgb_GRAYSCALE_ximage( RGB_SPAN_ARGS )
 {
    const GLubyte (*rgb)[3] = (const GLubyte (*)[3]) values;
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    XMesaImage *img = xrb->ximage;
    register GLuint i;
    y = YFLIP(xrb, y);
@@ -2171,7 +2172,7 @@ static void put_row_rgb_GRAYSCALE_ximage( RGB_SPAN_ARGS )
 static void put_row_GRAYSCALE8_ximage( PUT_ROW_ARGS )
 {
    const GLubyte (*rgba)[4] = (const GLubyte (*)[4]) values;
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    register GLuint i;
    register GLubyte *ptr = PIXEL_ADDR1(xrb, x, y);
    if (mask) {
@@ -2196,7 +2197,7 @@ static void put_row_GRAYSCALE8_ximage( PUT_ROW_ARGS )
 static void put_row_rgb_GRAYSCALE8_ximage( RGB_SPAN_ARGS )
 {
    const GLubyte (*rgb)[3] = (const GLubyte (*)[3]) values;
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    register GLuint i;
    register GLubyte *ptr = PIXEL_ADDR1(xrb, x, y);
    if (mask) {
@@ -2235,7 +2236,7 @@ static void put_values_TRUECOLOR_pixmap( PUT_VALUES_ARGS )
 {
    const GLubyte (*rgba)[4] = (const GLubyte (*)[4]) values;
    const XMesaContext xmesa = XMESA_CONTEXT(ctx);
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    XMesaDisplay *dpy = xmesa->xm_visual->display;
    XMesaDrawable buffer = xrb->drawable;
    XMesaGC gc = XMESA_BUFFER(ctx->DrawBuffer)->gc;
@@ -2258,7 +2259,7 @@ static void put_values_TRUEDITHER_pixmap( PUT_VALUES_ARGS )
 {
    const GLubyte (*rgba)[4] = (const GLubyte (*)[4]) values;
    const XMesaContext xmesa = XMESA_CONTEXT(ctx);
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    XMesaDisplay *dpy = xmesa->xm_visual->display;
    XMesaDrawable buffer = xrb->drawable;
    XMesaGC gc = XMESA_BUFFER(ctx->DrawBuffer)->gc;
@@ -2281,7 +2282,7 @@ static void put_values_8A8B8G8R_pixmap( PUT_VALUES_ARGS )
 {
    const GLubyte (*rgba)[4] = (const GLubyte (*)[4]) values;
    const XMesaContext xmesa = XMESA_CONTEXT(ctx);
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    XMesaDisplay *dpy = xmesa->xm_visual->display;
    XMesaDrawable buffer = xrb->drawable;
    XMesaGC gc = XMESA_BUFFER(ctx->DrawBuffer)->gc;
@@ -2302,7 +2303,7 @@ static void put_values_8A8R8G8B_pixmap( PUT_VALUES_ARGS )
 {
    const GLubyte (*rgba)[4] = (const GLubyte (*)[4]) values;
    const XMesaContext xmesa = XMESA_CONTEXT(ctx);
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    XMesaDisplay *dpy = xmesa->xm_visual->display;
    XMesaDrawable buffer = xrb->drawable;
    XMesaGC gc = XMESA_BUFFER(ctx->DrawBuffer)->gc;
@@ -2323,7 +2324,7 @@ static void put_values_8R8G8B_pixmap( PUT_VALUES_ARGS )
 {
    const GLubyte (*rgba)[4] = (const GLubyte (*)[4]) values;
    const XMesaContext xmesa = XMESA_CONTEXT(ctx);
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    XMesaDisplay *dpy = xmesa->xm_visual->display;
    XMesaDrawable buffer = xrb->drawable;
    XMesaGC gc = XMESA_BUFFER(ctx->DrawBuffer)->gc;
@@ -2344,7 +2345,7 @@ static void put_values_8R8G8B24_pixmap( PUT_VALUES_ARGS )
 {
    const GLubyte (*rgba)[4] = (const GLubyte (*)[4]) values;
    const XMesaContext xmesa = XMESA_CONTEXT(ctx);
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    XMesaDisplay *dpy = xmesa->xm_visual->display;
    XMesaDrawable buffer = xrb->drawable;
    XMesaGC gc = XMESA_BUFFER(ctx->DrawBuffer)->gc;
@@ -2365,7 +2366,7 @@ static void put_values_5R6G5B_pixmap( PUT_VALUES_ARGS )
 {
    const GLubyte (*rgba)[4] = (const GLubyte (*)[4]) values;
    const XMesaContext xmesa = XMESA_CONTEXT(ctx);
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    XMesaDisplay *dpy = xmesa->xm_visual->display;
    XMesaDrawable buffer = xrb->drawable;
    XMesaGC gc = XMESA_BUFFER(ctx->DrawBuffer)->gc;
@@ -2386,7 +2387,7 @@ static void put_values_DITHER_5R6G5B_pixmap( PUT_VALUES_ARGS )
 {
    const GLubyte (*rgba)[4] = (const GLubyte (*)[4]) values;
    const XMesaContext xmesa = XMESA_CONTEXT(ctx);
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    XMesaDisplay *dpy = xmesa->xm_visual->display;
    XMesaDrawable buffer = xrb->drawable;
    XMesaGC gc = XMESA_BUFFER(ctx->DrawBuffer)->gc;
@@ -2409,7 +2410,7 @@ static void put_values_DITHER_pixmap( PUT_VALUES_ARGS )
 {
    const GLubyte (*rgba)[4] = (const GLubyte (*)[4]) values;
    const XMesaContext xmesa = XMESA_CONTEXT(ctx);
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    XMesaDisplay *dpy = xmesa->xm_visual->display;
    XMesaDrawable buffer = xrb->drawable;
    XMesaGC gc = XMESA_BUFFER(ctx->DrawBuffer)->gc;
@@ -2432,7 +2433,7 @@ static void put_values_1BIT_pixmap( PUT_VALUES_ARGS )
 {
    const GLubyte (*rgba)[4] = (const GLubyte (*)[4]) values;
    const XMesaContext xmesa = XMESA_CONTEXT(ctx);
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    XMesaDisplay *dpy = xmesa->xm_visual->display;
    XMesaDrawable buffer = xrb->drawable;
    XMesaGC gc = XMESA_BUFFER(ctx->DrawBuffer)->gc;
@@ -2455,7 +2456,7 @@ static void put_values_HPCR_pixmap( PUT_VALUES_ARGS )
 {
    const GLubyte (*rgba)[4] = (const GLubyte (*)[4]) values;
    const XMesaContext xmesa = XMESA_CONTEXT(ctx);
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    XMesaDisplay *dpy = xmesa->xm_visual->display;
    XMesaDrawable buffer = xrb->drawable;
    XMesaGC gc = XMESA_BUFFER(ctx->DrawBuffer)->gc;
@@ -2477,7 +2478,7 @@ static void put_values_LOOKUP_pixmap( PUT_VALUES_ARGS )
 {
    const GLubyte (*rgba)[4] = (const GLubyte (*)[4]) values;
    const XMesaContext xmesa = XMESA_CONTEXT(ctx);
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    XMesaDisplay *dpy = xmesa->xm_visual->display;
    XMesaDrawable buffer = xrb->drawable;
    XMesaGC gc = XMESA_BUFFER(ctx->DrawBuffer)->gc;
@@ -2499,7 +2500,7 @@ static void put_values_GRAYSCALE_pixmap( PUT_VALUES_ARGS )
 {
    const GLubyte (*rgba)[4] = (const GLubyte (*)[4]) values;
    const XMesaContext xmesa = XMESA_CONTEXT(ctx);
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    XMesaDisplay *dpy = xmesa->xm_visual->display;
    XMesaDrawable buffer = xrb->drawable;
    XMesaGC gc = XMESA_BUFFER(ctx->DrawBuffer)->gc;
@@ -2520,7 +2521,7 @@ static void put_values_TRUECOLOR_ximage( PUT_VALUES_ARGS )
 {
    const GLubyte (*rgba)[4] = (const GLubyte (*)[4]) values;
    const XMesaContext xmesa = XMESA_CONTEXT(ctx);
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    XMesaImage *img = xrb->ximage;
    register GLuint i;
    for (i=0;i<n;i++) {
@@ -2540,7 +2541,7 @@ static void put_values_TRUEDITHER_ximage( PUT_VALUES_ARGS )
 {
    const GLubyte (*rgba)[4] = (const GLubyte (*)[4]) values;
    const XMesaContext xmesa = XMESA_CONTEXT(ctx);
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    XMesaImage *img = xrb->ximage;
    register GLuint i;
    for (i=0;i<n;i++) {
@@ -2559,7 +2560,7 @@ static void put_values_TRUEDITHER_ximage( PUT_VALUES_ARGS )
 static void put_values_8A8B8G8R_ximage( PUT_VALUES_ARGS )
 {
    const GLubyte (*rgba)[4] = (const GLubyte (*)[4]) values;
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    register GLuint i;
    for (i=0;i<n;i++) {
       if (mask[i]) {
@@ -2575,7 +2576,7 @@ static void put_values_8A8B8G8R_ximage( PUT_VALUES_ARGS )
 static void put_values_8A8R8G8B_ximage( PUT_VALUES_ARGS )
 {
    const GLubyte (*rgba)[4] = (const GLubyte (*)[4]) values;
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    register GLuint i;
    for (i=0;i<n;i++) {
       if (mask[i]) {
@@ -2592,7 +2593,7 @@ static void put_values_8A8R8G8B_ximage( PUT_VALUES_ARGS )
 static void put_values_8R8G8B_ximage( PUT_VALUES_ARGS )
 {
    const GLubyte (*rgba)[4] = (const GLubyte (*)[4]) values;
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    register GLuint i;
    for (i=0;i<n;i++) {
       if (mask[i]) {
@@ -2609,7 +2610,7 @@ static void put_values_8R8G8B_ximage( PUT_VALUES_ARGS )
 static void put_values_8R8G8B24_ximage( PUT_VALUES_ARGS )
 {
    const GLubyte (*rgba)[4] = (const GLubyte (*)[4]) values;
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    register GLuint i;
    for (i=0;i<n;i++) {
       if (mask[i]) {
@@ -2628,7 +2629,7 @@ static void put_values_8R8G8B24_ximage( PUT_VALUES_ARGS )
 static void put_values_5R6G5B_ximage( PUT_VALUES_ARGS )
 {
    const GLubyte (*rgba)[4] = (const GLubyte (*)[4]) values;
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    register GLuint i;
    for (i=0;i<n;i++) {
       if (mask[i]) {
@@ -2645,7 +2646,7 @@ static void put_values_5R6G5B_ximage( PUT_VALUES_ARGS )
 static void put_values_DITHER_5R6G5B_ximage( PUT_VALUES_ARGS )
 {
    const GLubyte (*rgba)[4] = (const GLubyte (*)[4]) values;
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    const XMesaContext xmesa = XMESA_CONTEXT(ctx);
    register GLuint i;
    for (i=0;i<n;i++) {
@@ -2663,7 +2664,7 @@ static void put_values_DITHER_5R6G5B_ximage( PUT_VALUES_ARGS )
 static void put_values_DITHER_ximage( PUT_VALUES_ARGS )
 {
    const GLubyte (*rgba)[4] = (const GLubyte (*)[4]) values;
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    XMesaImage *img = xrb->ximage;
    register GLuint i;
    DITHER_SETUP;
@@ -2682,7 +2683,7 @@ static void put_values_DITHER_ximage( PUT_VALUES_ARGS )
 static void put_values_DITHER8_ximage( PUT_VALUES_ARGS )
 {
    const GLubyte (*rgba)[4] = (const GLubyte (*)[4]) values;
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    register GLuint i;
    DITHER_SETUP;
    for (i=0;i<n;i++) {
@@ -2701,7 +2702,7 @@ static void put_values_1BIT_ximage( PUT_VALUES_ARGS )
 {
    const GLubyte (*rgba)[4] = (const GLubyte (*)[4]) values;
    const XMesaContext xmesa = XMESA_CONTEXT(ctx);
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    XMesaImage *img = xrb->ximage;
    register GLuint i;
    SETUP_1BIT;
@@ -2720,7 +2721,7 @@ static void put_values_1BIT_ximage( PUT_VALUES_ARGS )
 static void put_values_HPCR_ximage( PUT_VALUES_ARGS )
 {
    const GLubyte (*rgba)[4] = (const GLubyte (*)[4]) values;
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    const XMesaContext xmesa = XMESA_CONTEXT(ctx);
    register GLuint i;
    for (i=0;i<n;i++) {
@@ -2738,7 +2739,7 @@ static void put_values_HPCR_ximage( PUT_VALUES_ARGS )
 static void put_values_LOOKUP_ximage( PUT_VALUES_ARGS )
 {
    const GLubyte (*rgba)[4] = (const GLubyte (*)[4]) values;
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    XMesaImage *img = xrb->ximage;
    register GLuint i;
    LOOKUP_SETUP;
@@ -2756,7 +2757,7 @@ static void put_values_LOOKUP_ximage( PUT_VALUES_ARGS )
 static void put_values_LOOKUP8_ximage( PUT_VALUES_ARGS )
 {
    const GLubyte (*rgba)[4] = (const GLubyte (*)[4]) values;
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    register GLuint i;
    LOOKUP_SETUP;
    for (i=0;i<n;i++) {
@@ -2774,7 +2775,7 @@ static void put_values_LOOKUP8_ximage( PUT_VALUES_ARGS )
 static void put_values_GRAYSCALE_ximage( PUT_VALUES_ARGS )
 {
    const GLubyte (*rgba)[4] = (const GLubyte (*)[4]) values;
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    XMesaImage *img = xrb->ximage;
    register GLuint i;
    for (i=0;i<n;i++) {
@@ -2792,7 +2793,7 @@ static void put_values_GRAYSCALE_ximage( PUT_VALUES_ARGS )
 static void put_values_GRAYSCALE8_ximage( PUT_VALUES_ARGS )
 {
    const GLubyte (*rgba)[4] = (const GLubyte (*)[4]) values;
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    register GLuint i;
    for (i=0;i<n;i++) {
       if (mask[i]) {
@@ -2822,7 +2823,7 @@ static void put_values_GRAYSCALE8_ximage( PUT_VALUES_ARGS )
 static void put_mono_row_pixmap( PUT_MONO_ROW_ARGS )
 {
    const GLubyte *color = (const GLubyte *) value;
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    XMesaContext xmesa = XMESA_CONTEXT(ctx);
    XMesaDisplay *dpy = xmesa->xm_visual->display;
    XMesaDrawable buffer = xrb->drawable;
@@ -2863,7 +2864,7 @@ put_mono_row_ci_pixmap( PUT_MONO_ROW_ARGS )
 {
    GLuint colorIndex = *((GLuint *) value);
    XMesaContext xmesa = XMESA_CONTEXT(ctx);
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    XMesaDisplay *dpy = xmesa->xm_visual->display;
    XMesaDrawable buffer = xrb->drawable;
    XMesaGC gc = XMESA_BUFFER(ctx->DrawBuffer)->gc;
@@ -2899,7 +2900,7 @@ put_mono_row_ci_pixmap( PUT_MONO_ROW_ARGS )
 static void put_mono_row_TRUEDITHER_pixmap( PUT_MONO_ROW_ARGS )
 {
    const GLubyte *color = (const GLubyte *) value;
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    XMesaContext xmesa = XMESA_CONTEXT(ctx);
    XMesaDisplay *dpy = xmesa->xm_visual->display;
    XMesaDrawable buffer = xrb->drawable;
@@ -2924,7 +2925,7 @@ static void put_mono_row_TRUEDITHER_pixmap( PUT_MONO_ROW_ARGS )
 static void put_mono_row_DITHER_pixmap( PUT_MONO_ROW_ARGS )
 {
    const GLubyte *color = (const GLubyte *) value;
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    XMesaContext xmesa = XMESA_CONTEXT(ctx);
    XMesaDisplay *dpy = xmesa->xm_visual->display;
    XMesaDrawable buffer = xrb->drawable;
@@ -2948,7 +2949,7 @@ static void put_mono_row_DITHER_pixmap( PUT_MONO_ROW_ARGS )
 static void put_mono_row_1BIT_pixmap( PUT_MONO_ROW_ARGS )
 {
    const GLubyte *color = (const GLubyte *) value;
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    XMesaContext xmesa = XMESA_CONTEXT(ctx);
    XMesaDisplay *dpy = xmesa->xm_visual->display;
    XMesaDrawable buffer = xrb->drawable;
@@ -2972,7 +2973,7 @@ static void put_mono_row_1BIT_pixmap( PUT_MONO_ROW_ARGS )
 static void put_mono_row_ximage( PUT_MONO_ROW_ARGS )
 {
    const GLubyte *color = (const GLubyte *) value;
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    XMesaContext xmesa = XMESA_CONTEXT(ctx);
    XMesaImage *img = xrb->ximage;
    register GLuint i;
@@ -2991,7 +2992,7 @@ static void
 put_mono_row_ci_ximage( PUT_MONO_ROW_ARGS )
 {
    const GLuint colorIndex = *((GLuint *) value);
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    XMesaImage *img = xrb->ximage;
    register GLuint i;
    y = YFLIP(xrb, y);
@@ -3009,7 +3010,7 @@ put_mono_row_ci_ximage( PUT_MONO_ROW_ARGS )
 static void put_mono_row_TRUEDITHER_ximage( PUT_MONO_ROW_ARGS )
 {
    const GLubyte *color = (const GLubyte *) value;
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    XMesaContext xmesa = XMESA_CONTEXT(ctx);
    XMesaImage *img = xrb->ximage;
    const GLint r = color[RCOMP], g = color[GCOMP], b = color[BCOMP];
@@ -3031,7 +3032,7 @@ static void put_mono_row_TRUEDITHER_ximage( PUT_MONO_ROW_ARGS )
 static void put_mono_row_8A8B8G8R_ximage( PUT_MONO_ROW_ARGS )
 {
    const GLubyte *color = (const GLubyte *) value;
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    XMesaContext xmesa = XMESA_CONTEXT(ctx);
    GLuint i, *ptr;
    const unsigned long pixel = xmesa_color_to_pixel(ctx, color[RCOMP],
@@ -3050,7 +3051,7 @@ static void put_mono_row_8A8B8G8R_ximage( PUT_MONO_ROW_ARGS )
 static void put_mono_row_8A8R8G8B_ximage( PUT_MONO_ROW_ARGS )
 {
    const GLubyte *color = (const GLubyte *) value;
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    GLuint i, *ptr;
    XMesaContext xmesa = XMESA_CONTEXT(ctx);
    const unsigned long pixel = xmesa_color_to_pixel(ctx, color[RCOMP],
@@ -3070,7 +3071,7 @@ static void put_mono_row_8A8R8G8B_ximage( PUT_MONO_ROW_ARGS )
 static void put_mono_row_8R8G8B_ximage( PUT_MONO_ROW_ARGS )
 {
    const GLubyte *color = (const GLubyte *) value;
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    const GLuint pixel = PACK_8R8G8B(color[RCOMP], color[GCOMP], color[BCOMP]);
    GLuint *ptr = PIXEL_ADDR4(xrb, x, y );
    GLuint i;
@@ -3088,7 +3089,7 @@ static void put_mono_row_8R8G8B_ximage( PUT_MONO_ROW_ARGS )
 static void put_mono_row_8R8G8B24_ximage( PUT_MONO_ROW_ARGS )
 {
    const GLubyte *color = (const GLubyte *) value;
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    const GLubyte r = color[RCOMP];
    const GLubyte g = color[GCOMP];
    const GLubyte b = color[BCOMP];
@@ -3110,7 +3111,7 @@ static void put_mono_row_8R8G8B24_ximage( PUT_MONO_ROW_ARGS )
 static void put_mono_row_DITHER_ximage( PUT_MONO_ROW_ARGS )
 {
    const GLubyte *color = (const GLubyte *) value;
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    const GLubyte r = color[RCOMP], g = color[GCOMP], b = color[BCOMP];
    XMesaImage *img = xrb->ximage;
    int yy = YFLIP(xrb, y);
@@ -3130,7 +3131,7 @@ static void put_mono_row_DITHER_ximage( PUT_MONO_ROW_ARGS )
 static void put_mono_row_DITHER8_ximage( PUT_MONO_ROW_ARGS )
 {
    const GLubyte *color = (const GLubyte *) value;
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    const GLubyte r = color[RCOMP], g = color[GCOMP], b = color[BCOMP];
    register GLubyte *ptr = PIXEL_ADDR1(xrb, x, y);
    register GLuint i;
@@ -3149,7 +3150,7 @@ static void put_mono_row_DITHER8_ximage( PUT_MONO_ROW_ARGS )
 static void put_mono_row_LOOKUP8_ximage( PUT_MONO_ROW_ARGS )
 {
    const GLubyte *color = (const GLubyte *) value;
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    register GLuint i;
    register GLubyte *ptr = PIXEL_ADDR1(xrb, x, y);
    GLubyte pixel;
@@ -3170,7 +3171,7 @@ static void put_mono_row_1BIT_ximage( PUT_MONO_ROW_ARGS )
 {
    const GLubyte *color = (const GLubyte *) value;
    const XMesaContext xmesa = XMESA_CONTEXT(ctx);
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    const GLubyte r = color[RCOMP], g = color[GCOMP], b = color[BCOMP];
    XMesaImage *img = xrb->ximage;
    register GLuint i;
@@ -3190,7 +3191,7 @@ static void put_mono_row_1BIT_ximage( PUT_MONO_ROW_ARGS )
 static void put_mono_row_HPCR_ximage( PUT_MONO_ROW_ARGS )
 {
    const GLubyte *color = (const GLubyte *) value;
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    const XMesaContext xmesa = XMESA_CONTEXT(ctx);
    const GLubyte r = color[RCOMP], g = color[GCOMP], b = color[BCOMP];
    register GLubyte *ptr = PIXEL_ADDR1(xrb, x, y);
@@ -3209,7 +3210,7 @@ static void put_mono_row_HPCR_ximage( PUT_MONO_ROW_ARGS )
 static void put_mono_row_GRAYSCALE8_ximage( PUT_MONO_ROW_ARGS )
 {
    const GLubyte *color = (const GLubyte *) value;
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    const GLubyte p = GRAY_RGB(color[RCOMP], color[GCOMP], color[BCOMP]);
    GLubyte *ptr = (GLubyte *) PIXEL_ADDR1(xrb, x, y);
    GLuint i;
@@ -3228,7 +3229,7 @@ static void put_mono_row_GRAYSCALE8_ximage( PUT_MONO_ROW_ARGS )
 static void put_mono_row_DITHER_5R6G5B_ximage( PUT_MONO_ROW_ARGS )
 {
    const GLubyte *color = (const GLubyte *) value;
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    const XMesaContext xmesa = XMESA_CONTEXT(ctx);
    register GLushort *ptr = PIXEL_ADDR2(xrb, x, y );
    const GLint r = color[RCOMP], g = color[GCOMP], b = color[BCOMP];
@@ -3261,7 +3262,7 @@ static void put_mono_values_pixmap( PUT_MONO_VALUES_ARGS )
 {
    const GLubyte *color = (const GLubyte *) value;
    const XMesaContext xmesa = XMESA_CONTEXT(ctx);
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    XMesaDisplay *dpy = xmesa->xm_visual->display;
    XMesaDrawable buffer = xrb->drawable;
    XMesaGC gc = XMESA_BUFFER(ctx->DrawBuffer)->gc;
@@ -3283,7 +3284,7 @@ put_mono_values_ci_pixmap( PUT_MONO_VALUES_ARGS )
 {
    const GLuint colorIndex = *((GLuint *) value);
    const XMesaContext xmesa = XMESA_CONTEXT(ctx);
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    XMesaDisplay *dpy = xmesa->xm_visual->display;
    XMesaDrawable buffer = xrb->drawable;
    XMesaGC gc = XMESA_BUFFER(ctx->DrawBuffer)->gc;
@@ -3305,7 +3306,7 @@ static void put_mono_values_TRUEDITHER_pixmap( PUT_MONO_VALUES_ARGS )
 {
    const GLubyte *color = (const GLubyte *) value;
    const XMesaContext xmesa = XMESA_CONTEXT(ctx);
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    XMesaDisplay *dpy = xmesa->xm_visual->display;
    XMesaDrawable buffer = xrb->drawable;
    XMesaGC gc = XMESA_BUFFER(ctx->DrawBuffer)->gc;
@@ -3330,7 +3331,7 @@ static void put_mono_values_DITHER_pixmap( PUT_MONO_VALUES_ARGS )
 {
    const GLubyte *color = (const GLubyte *) value;
    const XMesaContext xmesa = XMESA_CONTEXT(ctx);
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    XMesaDisplay *dpy = xmesa->xm_visual->display;
    XMesaDrawable buffer = xrb->drawable;
    XMesaGC gc = XMESA_BUFFER(ctx->DrawBuffer)->gc;
@@ -3353,7 +3354,7 @@ static void put_mono_values_1BIT_pixmap( PUT_MONO_VALUES_ARGS )
 {
    const GLubyte *color = (const GLubyte *) value;
    const XMesaContext xmesa = XMESA_CONTEXT(ctx);
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    XMesaDisplay *dpy = xmesa->xm_visual->display;
    XMesaDrawable buffer = xrb->drawable;
    XMesaGC gc = XMESA_BUFFER(ctx->DrawBuffer)->gc;
@@ -3376,7 +3377,7 @@ static void put_mono_values_ximage( PUT_MONO_VALUES_ARGS )
 {
    const GLubyte *color = (const GLubyte *) value;
    const XMesaContext xmesa = XMESA_CONTEXT(ctx);
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    XMesaImage *img = xrb->ximage;
    register GLuint i;
    const unsigned long pixel = xmesa_color_to_pixel(ctx, color[RCOMP],
@@ -3393,7 +3394,7 @@ static void
 put_mono_values_ci_ximage( PUT_MONO_VALUES_ARGS )
 {
    const GLuint colorIndex = *((GLuint *) value);
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    XMesaImage *img = xrb->ximage;
    register GLuint i;
    for (i=0;i<n;i++) {
@@ -3411,7 +3412,7 @@ static void put_mono_values_TRUEDITHER_ximage( PUT_MONO_VALUES_ARGS )
 {
    const GLubyte *color = (const GLubyte *) value;
    const XMesaContext xmesa = XMESA_CONTEXT(ctx);
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    XMesaImage *img = xrb->ximage;
    register GLuint i;
    const int r = color[RCOMP], g = color[GCOMP], b = color[BCOMP];
@@ -3432,7 +3433,7 @@ static void put_mono_values_TRUEDITHER_ximage( PUT_MONO_VALUES_ARGS )
 static void put_mono_values_8A8B8G8R_ximage( PUT_MONO_VALUES_ARGS )
 {
    const GLubyte *color = (const GLubyte *) value;
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    const GLuint p = PACK_8A8B8G8R(color[RCOMP], color[GCOMP],
                                   color[BCOMP], color[ACOMP]);
    register GLuint i;
@@ -3450,7 +3451,7 @@ static void put_mono_values_8A8B8G8R_ximage( PUT_MONO_VALUES_ARGS )
 static void put_mono_values_8A8R8G8B_ximage( PUT_MONO_VALUES_ARGS )
 {
    const GLubyte *color = (const GLubyte *) value;
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    const GLuint p = PACK_8A8R8G8B(color[RCOMP], color[GCOMP],
                                   color[BCOMP], color[ACOMP]);
    register GLuint i;
@@ -3468,7 +3469,7 @@ static void put_mono_values_8A8R8G8B_ximage( PUT_MONO_VALUES_ARGS )
 static void put_mono_values_8R8G8B_ximage( PUT_MONO_VALUES_ARGS )
 {
    const GLubyte *color = (const GLubyte *) value;
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    register GLuint i;
    const GLuint p = PACK_8R8G8B(color[RCOMP], color[GCOMP], color[BCOMP]);
    for (i=0;i<n;i++) {
@@ -3486,7 +3487,7 @@ static void put_mono_values_8R8G8B_ximage( PUT_MONO_VALUES_ARGS )
 static void put_mono_values_8R8G8B24_ximage( PUT_MONO_VALUES_ARGS )
 {
    const GLubyte *color = (const GLubyte *) value;
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    const GLubyte r = color[RCOMP], g = color[GCOMP], b = color[BCOMP];
    register GLuint i;
    for (i=0;i<n;i++) {
@@ -3506,7 +3507,7 @@ static void put_mono_values_8R8G8B24_ximage( PUT_MONO_VALUES_ARGS )
 static void put_mono_values_DITHER_ximage( PUT_MONO_VALUES_ARGS )
 {
    const GLubyte *color = (const GLubyte *) value;
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    const GLubyte r = color[RCOMP], g = color[GCOMP], b = color[BCOMP];
    XMesaImage *img = xrb->ximage;
    register GLuint i;
@@ -3525,7 +3526,7 @@ static void put_mono_values_DITHER_ximage( PUT_MONO_VALUES_ARGS )
 static void put_mono_values_DITHER8_ximage( PUT_MONO_VALUES_ARGS )
 {
    const GLubyte *color = (const GLubyte *) value;
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    const GLubyte r = color[RCOMP], g = color[GCOMP], b = color[BCOMP];
    register GLuint i;
    DITHER_SETUP;
@@ -3544,7 +3545,7 @@ static void put_mono_values_DITHER8_ximage( PUT_MONO_VALUES_ARGS )
 static void put_mono_values_LOOKUP8_ximage( PUT_MONO_VALUES_ARGS )
 {
    const GLubyte *color = (const GLubyte *) value;
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    register GLuint i;
    GLubyte pixel;
    LOOKUP_SETUP;
@@ -3566,7 +3567,7 @@ static void put_mono_values_1BIT_ximage( PUT_MONO_VALUES_ARGS )
 {
    const GLubyte *color = (const GLubyte *) value;
    const XMesaContext xmesa = XMESA_CONTEXT(ctx);
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    const GLubyte r = color[RCOMP], g = color[GCOMP], b = color[BCOMP];
    XMesaImage *img = xrb->ximage;
    register GLuint i;
@@ -3586,7 +3587,7 @@ static void put_mono_values_1BIT_ximage( PUT_MONO_VALUES_ARGS )
 static void put_mono_values_HPCR_ximage( PUT_MONO_VALUES_ARGS )
 {
    const GLubyte *color = (const GLubyte *) value;
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    const XMesaContext xmesa = XMESA_CONTEXT(ctx);
    const GLubyte r = color[RCOMP], g = color[GCOMP], b = color[BCOMP];
    register GLuint i;
@@ -3605,7 +3606,7 @@ static void put_mono_values_HPCR_ximage( PUT_MONO_VALUES_ARGS )
 static void put_mono_values_GRAYSCALE8_ximage( PUT_MONO_VALUES_ARGS )
 {
    const GLubyte *color = (const GLubyte *) value;
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    register GLuint i;
    register GLubyte p = GRAY_RGB(color[RCOMP], color[GCOMP], color[BCOMP]);
    for (i=0;i<n;i++) {
@@ -3623,7 +3624,7 @@ static void put_mono_values_GRAYSCALE8_ximage( PUT_MONO_VALUES_ARGS )
 static void put_mono_values_DITHER_5R6G5B_ximage( PUT_MONO_VALUES_ARGS )
 {
    const GLubyte *color = (const GLubyte *) value;
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    const XMesaContext xmesa = XMESA_CONTEXT(ctx);
    const int r = color[RCOMP], g = color[GCOMP], b = color[BCOMP];
    register GLuint i;
@@ -3648,7 +3649,7 @@ static void put_row_ci_pixmap( PUT_ROW_ARGS )
 {
    const GLuint *index = (GLuint *) values;
    const XMesaContext xmesa = XMESA_CONTEXT(ctx);
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    XMesaDisplay *dpy = xmesa->xm_visual->display;
    XMesaDrawable buffer = xrb->drawable;
    XMesaGC gc = XMESA_BUFFER(ctx->DrawBuffer)->gc;
@@ -3677,7 +3678,7 @@ static void put_row_ci_pixmap( PUT_ROW_ARGS )
 static void put_row_ci_ximage( PUT_ROW_ARGS )
 {
    const GLuint *index = (const GLuint *) values;
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    XMesaImage *img = xrb->ximage;
    register GLuint i;
    y = YFLIP(xrb, y);
@@ -3707,7 +3708,7 @@ static void put_values_ci_pixmap( PUT_VALUES_ARGS )
 {
    const GLuint *index = (const GLuint *) values;
    const XMesaContext xmesa = XMESA_CONTEXT(ctx);
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    XMesaDisplay *dpy = xmesa->xm_visual->display;
    XMesaDrawable buffer = xrb->drawable;
    XMesaGC gc = XMESA_BUFFER(ctx->DrawBuffer)->gc;
@@ -3727,7 +3728,7 @@ static void put_values_ci_pixmap( PUT_VALUES_ARGS )
 static void put_values_ci_ximage( PUT_VALUES_ARGS )
 {
    const GLuint *index = (const GLuint *) values;
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    XMesaImage *img = xrb->ximage;
    register GLuint i;
    for (i=0;i<n;i++) {
@@ -3799,7 +3800,7 @@ get_row_ci(GLcontext *ctx, struct gl_renderbuffer *rb,
 {
    GLuint *index = (GLuint *) values;
    const XMesaContext xmesa = XMESA_CONTEXT(ctx);
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    GLuint i;
 
    y = YFLIP(xrb, y);
@@ -3856,7 +3857,7 @@ get_row_rgba(GLcontext *ctx, struct gl_renderbuffer *rb,
 {
    GLubyte (*rgba)[4] = (GLubyte (*)[4]) values;
    const XMesaContext xmesa = XMESA_CONTEXT(ctx);
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    XMesaBuffer source = XMESA_BUFFER(ctx->DrawBuffer);
 
    if (xrb->pixmap) {
@@ -4258,7 +4259,7 @@ get_values_ci(GLcontext *ctx, struct gl_renderbuffer *rb,
 {
    GLuint *indx = (GLuint *) values;
    const XMesaContext xmesa = XMESA_CONTEXT(ctx);
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    GLuint i;
    if (xrb->pixmap) {
       for (i=0;i<n;i++) {
@@ -4281,7 +4282,7 @@ get_values_rgba(GLcontext *ctx, struct gl_renderbuffer *rb,
                 GLuint n, const GLint x[], const GLint y[], void *values)
 {
    GLubyte (*rgba)[4] = (GLubyte (*)[4]) values;
-   struct xmesa_renderbuffer *xrb = (struct xmesa_renderbuffer *) rb;
+   GET_XRB(xrb);
    const XMesaContext xmesa = XMESA_CONTEXT(ctx);
    XMesaDisplay *dpy = xmesa->xm_visual->display;
    XMesaBuffer source = XMESA_BUFFER(ctx->DrawBuffer);

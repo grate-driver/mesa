@@ -1193,7 +1193,7 @@ do_ndc_cliptest(GLcontext *ctx, struct arb_vp_machine *m)
     * the clipmask.
     */
    m->ormask = 0;
-   m->andmask = CLIP_ALL_BITS;
+   m->andmask = CLIP_FRUSTUM_BITS;
 
    if (tnl->NeedNdcCoords) {
       VB->NdcPtr =
@@ -1257,7 +1257,7 @@ static INLINE void call_func( struct tnl_compiled_program *p,
 static GLboolean
 run_arb_vertex_program(GLcontext *ctx, struct tnl_pipeline_stage *stage)
 {
-   struct vertex_program *program;
+   const struct vertex_program *program;
    struct vertex_buffer *VB = &TNL_CONTEXT(ctx)->vb;
    struct arb_vp_machine *m = ARB_VP_MACHINE(stage);
    struct tnl_compiled_program *p;
@@ -1394,7 +1394,7 @@ run_arb_vertex_program(GLcontext *ctx, struct tnl_pipeline_stage *stage)
       VB->AttribPtr[_TNL_ATTRIB_POINTSIZE] = &m->attribs[VERT_RESULT_PSIZ];
    }
 
-   for (i = 0; i < ctx->Const.MaxTextureUnits; i++) {
+   for (i = 0; i < ctx->Const.MaxTextureCoordUnits; i++) {
       if (outputs & (1<<(VERT_RESULT_TEX0+i))) {
 	 VB->TexCoordPtr[i] = &m->attribs[VERT_RESULT_TEX0 + i];
 	 VB->AttribPtr[VERT_ATTRIB_TEX0+i] = VB->TexCoordPtr[i];

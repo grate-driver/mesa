@@ -37,6 +37,7 @@
 typedef struct
 {
 	GLvector4f outputs[VERT_RESULT_MAX];
+	GLvector4f varyings[MAX_VARYING_VECTORS];
 	GLvector4f ndc_coords;
 	GLubyte *clipmask;
 	GLubyte ormask;
@@ -63,6 +64,11 @@ static GLboolean construct_arb_vertex_shader (GLcontext *ctx, struct tnl_pipelin
 		_mesa_vector4f_alloc (&store->outputs[i], 0, size, 32);
 		store->outputs[i].size = 4;
 	}
+	for (i = 0; i < MAX_VARYING_VECTORS; i++)
+	{
+		_mesa_vector4f_alloc (&store->varyings[i], 0, size, 32);
+		store->varyings[i].size = 4;
+	}
 	_mesa_vector4f_alloc (&store->ndc_coords, 0, size, 32);
 	store->clipmask = (GLubyte *) ALIGN_MALLOC (size, 32);
 
@@ -79,6 +85,8 @@ static void destruct_arb_vertex_shader (struct tnl_pipeline_stage *stage)
 
 		for (i = 0; i < VERT_RESULT_MAX; i++)
 			_mesa_vector4f_free (&store->outputs[i]);
+		for (i = 0; i < MAX_VARYING_VECTORS; i++)
+			_mesa_vector4f_free (&store->varyings[i]);
 		_mesa_vector4f_free (&store->ndc_coords);
 		ALIGN_FREE (store->clipmask);
 
@@ -96,11 +104,9 @@ static GLvoid fetch_input_float (struct gl2_program_intf **pro, GLuint index, GL
 {
 	const GLubyte *ptr = (const GLubyte *) vb->AttribPtr[attr]->data;
 	const GLuint stride = vb->AttribPtr[attr]->stride;
-	const GLfloat *data = (const GLfloat *) (ptr + stride * i);
-	GLfloat vec[1];
+   GLfloat *data = (GLfloat *) (ptr + stride * i);
 
-	vec[0] = data[0];
-	(**pro).UpdateFixedAttribute (pro, index, vec, 0, sizeof (GLfloat), GL_TRUE);
+   (**pro).UpdateFixedAttrib (pro, index, data, 0, sizeof (GLfloat), GL_TRUE);
 }
 
 static GLvoid fetch_input_vec3 (struct gl2_program_intf **pro, GLuint index, GLuint attr, GLuint i,
@@ -108,13 +114,9 @@ static GLvoid fetch_input_vec3 (struct gl2_program_intf **pro, GLuint index, GLu
 {
 	const GLubyte *ptr = (const GLubyte *) vb->AttribPtr[attr]->data;
 	const GLuint stride = vb->AttribPtr[attr]->stride;
-	const GLfloat *data = (const GLfloat *) (ptr + stride * i);
-	GLfloat vec[3];
+   GLfloat *data = (GLfloat *) (ptr + stride * i);
 
-	vec[0] = data[0];
-	vec[1] = data[1];
-	vec[2] = data[2];
-	(**pro).UpdateFixedAttribute (pro, index, vec, 0, 3 * sizeof (GLfloat), GL_TRUE);
+   (**pro).UpdateFixedAttrib (pro, index, data, 0, 3 * sizeof (GLfloat), GL_TRUE);
 }
 
 static void fetch_input_vec4 (struct gl2_program_intf **pro, GLuint index, GLuint attr, GLuint i,
@@ -147,21 +149,32 @@ static void fetch_input_vec4 (struct gl2_program_intf **pro, GLuint index, GLuin
 		vec[3] = data[3];
 		break;
 	}
-	(**pro).UpdateFixedAttribute (pro, index, vec, 0, 4 * sizeof (GLfloat), GL_TRUE);
+   (**pro).UpdateFixedAttrib (pro, index, vec, 0, 4 * sizeof (GLfloat), GL_TRUE);
+}
+
+static GLvoid
+fetch_gen_attrib (struct gl2_program_intf **pro, GLuint index, GLuint i, struct vertex_buffer *vb)
+{
+   const GLuint attr = _TNL_ATTRIB_ATTRIBUTE0 + index;
+   const GLubyte *ptr = (const GLubyte *) (vb->AttribPtr[attr]->data);
+   const GLuint stride = vb->AttribPtr[attr]->stride;
+   const GLfloat *data = (const GLfloat *) (ptr + stride * i);
+
+   (**pro).WriteAttrib (pro, index, data);
 }
 
 static GLvoid fetch_output_float (struct gl2_program_intf **pro, GLuint index, GLuint attr, GLuint i,
 	arbvs_stage_data *store)
 {
-	(**pro).UpdateFixedAttribute (pro, index, &store->outputs[attr].data[i], 0, sizeof (GLfloat),
-		GL_FALSE);
+   (**pro).UpdateFixedAttrib (pro, index, &store->outputs[attr].data[i], 0, sizeof (GLfloat),
+                              GL_FALSE);
 }
 
 static void fetch_output_vec4 (struct gl2_program_intf **pro, GLuint index, GLuint attr, GLuint i,
 	GLuint offset, arbvs_stage_data *store)
 {
-	(**pro).UpdateFixedAttribute (pro, index, &store->outputs[attr].data[i], offset,
-		4 * sizeof (GLfloat), GL_FALSE);
+   (**pro).UpdateFixedAttrib (pro, index, &store->outputs[attr].data[i], offset,
+                              4 * sizeof (GLfloat), GL_FALSE);
 }
 
 static GLboolean run_arb_vertex_shader (GLcontext *ctx, struct tnl_pipeline_stage *stage)
@@ -193,6 +206,8 @@ static GLboolean run_arb_vertex_shader (GLcontext *ctx, struct tnl_pipeline_stag
 		fetch_input_vec4 (pro, SLANG_VERTEX_FIXED_MULTITEXCOORD5, _TNL_ATTRIB_TEX5, i, vb);
 		fetch_input_vec4 (pro, SLANG_VERTEX_FIXED_MULTITEXCOORD6, _TNL_ATTRIB_TEX6, i, vb);
 		fetch_input_vec4 (pro, SLANG_VERTEX_FIXED_MULTITEXCOORD7, _TNL_ATTRIB_TEX7, i, vb);
+      for (j = 0; j < MAX_VERTEX_ATTRIBS; j++)
+         fetch_gen_attrib (pro, j, i, vb);
 
 		_slang_exec_vertex_shader (pro);
 
@@ -206,28 +221,43 @@ static GLboolean run_arb_vertex_shader (GLcontext *ctx, struct tnl_pipeline_stag
 		fetch_output_vec4 (pro, SLANG_VERTEX_FIXED_BACKCOLOR, VERT_RESULT_BFC0, i, 0, store);
 		fetch_output_vec4 (pro, SLANG_VERTEX_FIXED_BACKSECONDARYCOLOR, VERT_RESULT_BFC1, i, 0, store);
 		/* XXX: fetch output SLANG_VERTEX_FIXED_CLIPVERTEX */
+
+		for (j = 0; j < MAX_VARYING_VECTORS; j++)
+		{
+			GLuint k;
+
+			for (k = 0; k < VARYINGS_PER_VECTOR; k++)
+			{
+				(**pro).UpdateVarying (pro, j * VARYINGS_PER_VECTOR + k,
+					&store->varyings[j].data[i][k], GL_TRUE);
+			}
+		}
 	}
 
 	vb->ClipPtr = &store->outputs[VERT_RESULT_HPOS];
 	vb->ClipPtr->count = vb->Count;
 	vb->ColorPtr[0] = &store->outputs[VERT_RESULT_COL0];
 	vb->SecondaryColorPtr[0] = &store->outputs[VERT_RESULT_COL1];
-	for (i = 0; i < ctx->Const.MaxTextureUnits; i++)
+	for (i = 0; i < ctx->Const.MaxTextureCoordUnits; i++)
 		vb->TexCoordPtr[i] = &store->outputs[VERT_RESULT_TEX0 + i];
 	vb->ColorPtr[1] = &store->outputs[VERT_RESULT_BFC0];
 	vb->SecondaryColorPtr[1] = &store->outputs[VERT_RESULT_BFC1];
 	vb->FogCoordPtr = &store->outputs[VERT_RESULT_FOGC];
 	vb->PointSizePtr = &store->outputs[VERT_RESULT_PSIZ];
+	for (i = 0; i < MAX_VARYING_VECTORS; i++)
+		vb->VaryingPtr[i] = &store->varyings[i];
 
 	vb->AttribPtr[VERT_ATTRIB_COLOR0] = vb->ColorPtr[0];
 	vb->AttribPtr[VERT_ATTRIB_COLOR1] = vb->SecondaryColorPtr[0];
 	vb->AttribPtr[VERT_ATTRIB_FOG] = vb->FogCoordPtr;
-	for (i = 0; i < ctx->Const.MaxTextureUnits; i++)
+	for (i = 0; i < ctx->Const.MaxTextureCoordUnits; i++)
 		vb->AttribPtr[VERT_ATTRIB_TEX0 + i] = vb->TexCoordPtr[i];
 	vb->AttribPtr[_TNL_ATTRIB_POINTSIZE] = &store->outputs[VERT_RESULT_PSIZ];
+	for (i = 0; i < MAX_VARYING_VECTORS; i++)
+		vb->AttribPtr[_TNL_ATTRIB_ATTRIBUTE0 + i] = vb->VaryingPtr[i];
 
 	store->ormask = 0;
-	store->andmask = CLIP_ALL_BITS;
+	store->andmask = CLIP_FRUSTUM_BITS;
 
 	if (tnl->NeedNdcCoords)
 	{

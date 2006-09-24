@@ -216,7 +216,7 @@ void intelStartInlinePrimitive( intelContextPtr intel, GLuint prim )
    }
 
 #if 1
-   if (((int)intel->batch.ptr) & 0x4) {
+   if (((unsigned long)intel->batch.ptr) & 0x4) {
       BEGIN_BATCH(1);
       OUT_BATCH(0);
       ADVANCE_BATCH();
@@ -761,11 +761,6 @@ void intelInitBatchBuffer( GLcontext *ctx )
 	 intel->alloc.size = 1 << intel->intelScreen->logTextureGranularity;
 	 break;
       }
-
-      /* KW: temporary - this make crashes & lockups more frequent, so
-       * leave in until they are solved.
-       */
-      intel->alloc.size = 8 * 1024; 
 
       intel->alloc.ptr = intelAllocateAGP( intel, intel->alloc.size );
       if (intel->alloc.ptr)

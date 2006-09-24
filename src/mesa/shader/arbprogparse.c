@@ -2,7 +2,7 @@
  * Mesa 3-D graphics library
  * Version:  6.5
  *
- * Copyright (C) 1999-2005  Brian Paul   All Rights Reserved.
+ * Copyright (C) 1999-2006  Brian Paul   All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -518,7 +518,7 @@ typedef enum
  */
 struct var_cache
 {
-   GLubyte *name;
+   const GLubyte *name;         /* don't free() - no need */
    var_type type;
    GLuint address_binding;      /* The index of the address register we should
                                  * be using                                        */
@@ -641,7 +641,7 @@ parse_string (GLubyte ** inst, struct var_cache **vc_head,
 
    *found = 0;
    var_cache_create (&va);
-   va->name = i;
+   va->name = (const GLubyte *) i;
 
    var_cache_append (vc_head, va);
 
@@ -828,6 +828,7 @@ static GLuint
 parse_relative_offset (GLcontext *ctx, GLubyte **inst, struct arb_program *Program,
                         GLint *offset)
 {
+   (void) ctx;
    *offset = parse_integer(inst, Program);
    return 0;
 }
@@ -856,7 +857,7 @@ parse_generic_attrib_num(GLcontext *ctx, GLubyte ** inst,
 {
    GLint i = parse_integer(inst, Program);
 
-   if ((i < 0) || (i > MAX_VERTEX_PROGRAM_ATTRIBS))
+   if ((i < 0) || (i >= MAX_VERTEX_PROGRAM_ATTRIBS))
    {
       _mesa_set_program_error (ctx, Program->Position,
                                "Invalid generic vertex attribute index");
@@ -1537,7 +1538,12 @@ parse_attrib_binding(GLcontext * ctx, GLubyte ** inst,
                GLuint attrib;
                if (!parse_generic_attrib_num(ctx, inst, Program, &attrib)) {
                   *is_generic = 1;
-                  *inputReg = attrib;
+                  /* Add VERT_ATTRIB_GENERIC0 here because ARB_vertex_program's
+                   * attributes do not alias the conventional vertex
+                   * attributes.
+                   */
+                  if (attrib > 0)
+                     *inputReg = attrib + VERT_ATTRIB_GENERIC0;
                }
             }
             break;
@@ -1931,7 +1937,7 @@ parse_param_use (GLcontext * ctx, GLubyte ** inst, struct var_cache **vc_head,
 
    /* First, insert a dummy entry into the var_cache */
    var_cache_create (&param_var);
-   param_var->name = (GLubyte *) _mesa_strdup (" ");
+   param_var->name = (const GLubyte *) " ";
    param_var->type = vt_param;
 
    param_var->param_binding_length = 0;
@@ -2461,7 +2467,7 @@ parse_src_reg (GLcontext * ctx, GLubyte ** inst, struct var_cache **vc_head,
           */
          var_cache_create(&src);
          src->type = vt_attrib;
-         src->name = (GLubyte *)_mesa_strdup("Dummy Attrib Variable");
+         src->name = (const GLubyte *) "Dummy Attrib Variable";
          src->attrib_binding = binding;
          src->attrib_is_generic = is_generic;
          var_cache_append(vc_head, src);
@@ -3879,6 +3885,10 @@ _mesa_parse_arb_program(GLcontext *ctx, GLenum target,
       err = !grammar_check(grammar_syn_id, (byte *) arb_grammar_text,
                            &parsed, &parsed_len);
 
+      /* 'parsed' is unused here */
+      _mesa_free (parsed);
+      parsed = NULL;
+
       /* NOTE: we can't destroy grammar_syn_id right here because
        * grammar_destroy() can reset the last error
        */
@@ -3951,6 +3961,7 @@ _mesa_parse_arb_program(GLcontext *ctx, GLenum target,
    /* Syntax parse error */
    if (err) {
       _mesa_free(strz);
+      _mesa_free(parsed);
       grammar_get_last_error ((GLubyte *) error_msg, 300, &error_pos);
       _mesa_set_program_error (ctx, error_pos, error_msg);
       _mesa_error (ctx, GL_INVALID_OPERATION,

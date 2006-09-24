@@ -140,7 +140,7 @@ void intelRefillBatchLocked( intelContextPtr intel, GLboolean allow_unlock )
       fprintf(stderr, "%s: now using half %d\n", __FUNCTION__, buf);
 
    intel->batch.start_offset = intel->alloc.offset + buf * half;
-   intel->batch.ptr = (char *)intel->alloc.ptr + buf * half;
+   intel->batch.ptr = (unsigned char *)intel->alloc.ptr + buf * half;
    intel->batch.size = half - 8;
    intel->batch.space = half - 8;
    assert(intel->batch.space >= 0);
@@ -418,7 +418,7 @@ void intelClear(GLcontext *ctx, GLbitfield mask, GLboolean all,
       if (!intel->hw_stencil) {
 	 swrast_mask |= BUFFER_BIT_STENCIL;
       }
-      else if (ctx->Stencil.WriteMask[0] != 0xff) {
+      else if ((ctx->Stencil.WriteMask[0] & 0xff) != 0xff) {
 	 tri_mask |= BUFFER_BIT_STENCIL;
       } 
       else {

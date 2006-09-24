@@ -1,4 +1,4 @@
-/* $Id: glutskel.c,v 1.2 2004/04/22 00:47:28 brianp Exp $ */
+/* $Id: glutskel.c,v 1.2 2004-04-22 00:47:28 brianp Exp $ */
 
 /*
  * A skeleton/template GLUT program
@@ -9,7 +9,7 @@
 
 /*
  * $Log: glutskel.c,v $
- * Revision 1.2  2004/04/22 00:47:28  brianp
+ * Revision 1.2  2004-04-22 00:47:28  brianp
  * minor clean-ups
  *
  * Revision 1.1.1.1  1999/08/19 00:55:42  jtg

@@ -73,7 +73,8 @@
 #define EDGEFLAG_SET(idx, val) VB->EdgeFlag[idx] = val
 
 
-#define CLIPMASK (CLIP_ALL_BITS|CLIP_CULL_BIT)
+/* This does NOT include the CLIP_USER_BIT! */
+#define CLIPMASK (CLIP_FRUSTUM_BITS | CLIP_CULL_BIT)
 
 
 /* Vertices, with the possibility of clipping.

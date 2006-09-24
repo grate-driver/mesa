@@ -41,6 +41,7 @@
 #include "glapitable.h"
 #include "glthread.h"
 #include "math/m_matrix.h"	/* GLmatrix */
+#include "bitset.h"
 
 
 /**
@@ -141,7 +142,7 @@ enum
    VERT_ATTRIB_COLOR0 = 3,
    VERT_ATTRIB_COLOR1 = 4,
    VERT_ATTRIB_FOG = 5,
-   VERT_ATTRIB_SIX = 6,
+   VERT_ATTRIB_COLOR_INDEX = 6,
    VERT_ATTRIB_SEVEN = 7,
    VERT_ATTRIB_TEX0 = 8,
    VERT_ATTRIB_TEX1 = 9,
@@ -155,7 +156,19 @@ enum
    VERT_ATTRIB_GENERIC1 = 17,
    VERT_ATTRIB_GENERIC2 = 18,
    VERT_ATTRIB_GENERIC3 = 19,
-   VERT_ATTRIB_MAX = 16  /* XXX not counting generic attribs yet */
+   VERT_ATTRIB_GENERIC4 = 20,
+   VERT_ATTRIB_GENERIC5 = 21,
+   VERT_ATTRIB_GENERIC6 = 22,
+   VERT_ATTRIB_GENERIC7 = 23,
+   VERT_ATTRIB_GENERIC8 = 24,
+   VERT_ATTRIB_GENERIC9 = 25,
+   VERT_ATTRIB_GENERIC10 = 26,
+   VERT_ATTRIB_GENERIC11 = 27,
+   VERT_ATTRIB_GENERIC12 = 28,
+   VERT_ATTRIB_GENERIC13 = 29,
+   VERT_ATTRIB_GENERIC14 = 30,
+   VERT_ATTRIB_GENERIC15 = 31,
+   VERT_ATTRIB_MAX = 32
 };
 
 /**
@@ -163,30 +176,59 @@ enum
  * These are used in bitfields in many places.
  */
 /*@{*/
-#define VERT_BIT_POS      (1 << VERT_ATTRIB_POS)
-#define VERT_BIT_WEIGHT   (1 << VERT_ATTRIB_WEIGHT)
-#define VERT_BIT_NORMAL   (1 << VERT_ATTRIB_NORMAL)
-#define VERT_BIT_COLOR0   (1 << VERT_ATTRIB_COLOR0)
-#define VERT_BIT_COLOR1   (1 << VERT_ATTRIB_COLOR1)
-#define VERT_BIT_FOG      (1 << VERT_ATTRIB_FOG)
-#define VERT_BIT_SIX      (1 << VERT_ATTRIB_SIX)
-#define VERT_BIT_SEVEN    (1 << VERT_ATTRIB_SEVEN)
-#define VERT_BIT_TEX0     (1 << VERT_ATTRIB_TEX0)
-#define VERT_BIT_TEX1     (1 << VERT_ATTRIB_TEX1)
-#define VERT_BIT_TEX2     (1 << VERT_ATTRIB_TEX2)
-#define VERT_BIT_TEX3     (1 << VERT_ATTRIB_TEX3)
-#define VERT_BIT_TEX4     (1 << VERT_ATTRIB_TEX4)
-#define VERT_BIT_TEX5     (1 << VERT_ATTRIB_TEX5)
-#define VERT_BIT_TEX6     (1 << VERT_ATTRIB_TEX6)
-#define VERT_BIT_TEX7     (1 << VERT_ATTRIB_TEX7)
-#define VERT_BIT_GENERIC0 (1 << VERT_ATTRIB_GENERIC0)
-#define VERT_BIT_GENERIC1 (1 << VERT_ATTRIB_GENERIC1)
-#define VERT_BIT_GENERIC2 (1 << VERT_ATTRIB_GENERIC2)
-#define VERT_BIT_GENERIC3 (1 << VERT_ATTRIB_GENERIC3)
+#define VERT_BIT_POS         (1 << VERT_ATTRIB_POS)
+#define VERT_BIT_WEIGHT      (1 << VERT_ATTRIB_WEIGHT)
+#define VERT_BIT_NORMAL      (1 << VERT_ATTRIB_NORMAL)
+#define VERT_BIT_COLOR0      (1 << VERT_ATTRIB_COLOR0)
+#define VERT_BIT_COLOR1      (1 << VERT_ATTRIB_COLOR1)
+#define VERT_BIT_FOG         (1 << VERT_ATTRIB_FOG)
+#define VERT_BIT_COLOR_INDEX (1 << VERT_ATTRIB_COLOR_INDEX)
+#define VERT_BIT_SEVEN       (1 << VERT_ATTRIB_SEVEN)
+#define VERT_BIT_TEX0        (1 << VERT_ATTRIB_TEX0)
+#define VERT_BIT_TEX1        (1 << VERT_ATTRIB_TEX1)
+#define VERT_BIT_TEX2        (1 << VERT_ATTRIB_TEX2)
+#define VERT_BIT_TEX3        (1 << VERT_ATTRIB_TEX3)
+#define VERT_BIT_TEX4        (1 << VERT_ATTRIB_TEX4)
+#define VERT_BIT_TEX5        (1 << VERT_ATTRIB_TEX5)
+#define VERT_BIT_TEX6        (1 << VERT_ATTRIB_TEX6)
+#define VERT_BIT_TEX7        (1 << VERT_ATTRIB_TEX7)
+#define VERT_BIT_GENERIC0    (1 << VERT_ATTRIB_GENERIC0)
+#define VERT_BIT_GENERIC1    (1 << VERT_ATTRIB_GENERIC1)
+#define VERT_BIT_GENERIC2    (1 << VERT_ATTRIB_GENERIC2)
+#define VERT_BIT_GENERIC3    (1 << VERT_ATTRIB_GENERIC3)
+#define VERT_BIT_GENERIC4    (1 << VERT_ATTRIB_GENERIC4)
+#define VERT_BIT_GENERIC5    (1 << VERT_ATTRIB_GENERIC5)
+#define VERT_BIT_GENERIC6    (1 << VERT_ATTRIB_GENERIC6)
+#define VERT_BIT_GENERIC7    (1 << VERT_ATTRIB_GENERIC7)
+#define VERT_BIT_GENERIC8    (1 << VERT_ATTRIB_GENERIC8)
+#define VERT_BIT_GENERIC9    (1 << VERT_ATTRIB_GENERIC9)
+#define VERT_BIT_GENERIC10   (1 << VERT_ATTRIB_GENERIC10)
+#define VERT_BIT_GENERIC11   (1 << VERT_ATTRIB_GENERIC11)
+#define VERT_BIT_GENERIC12   (1 << VERT_ATTRIB_GENERIC12)
+#define VERT_BIT_GENERIC13   (1 << VERT_ATTRIB_GENERIC13)
+#define VERT_BIT_GENERIC14   (1 << VERT_ATTRIB_GENERIC14)
+#define VERT_BIT_GENERIC15   (1 << VERT_ATTRIB_GENERIC15)
 
 #define VERT_BIT_TEX(u)  (1 << (VERT_ATTRIB_TEX0 + (u)))
 #define VERT_BIT_GENERIC(g)  (1 << (VERT_ATTRIB_GENERIC0 + (g)))
 /*@}*/
+
+/**
+ * GLSL allows shader writers to allocate vertex result attributes (varyings) in
+ * single float component granularity. This is in contrast to vertex / fragment
+ * programs, where result attributes (actually texcoords) were allocated
+ * in 4-component vectors of floats granularity.
+ * For performance reasons, it would be optimal to stick with this scheme on a scalar
+ * processor. Varyings will likely be allocated as 3-component vectors, so statistically
+ * we win 2 floats.
+ * The constant VARYINGS_PER_VECTOR tells us how much of float components we pack into
+ * one result vector. For scalar processor it would be 1, for vector processor - 4.
+ * 
+ * NOTE: Currently we pack varyings into vertex attributes.
+ */
+#define VARYINGS_PER_VECTOR 2
+#define VARYING_EMIT_STYLE  EMIT_2F
+#define MAX_VARYING_VECTORS ((MAX_VARYING_FLOATS + VARYINGS_PER_VECTOR - 1) / VARYINGS_PER_VECTOR)
 
 /**
  * Indexes for vertex program result attributes
@@ -207,7 +249,8 @@ enum
 #define VERT_RESULT_PSIZ 12
 #define VERT_RESULT_BFC0 13
 #define VERT_RESULT_BFC1 14
-#define VERT_RESULT_MAX  15
+#define VERT_RESULT_EDGE 15
+#define VERT_RESULT_MAX  16
 /*@}*/
 
 
@@ -571,29 +614,27 @@ struct gl_colorbuffer_attrib
 struct gl_current_attrib
 {
    /**
-    * \name Values valid only when FLUSH_VERTICES has been called.
+    * \name Current vertex attributes.
+    * \note Values are valid only after FLUSH_VERTICES has been called.
     */
    /*@{*/
-   GLfloat Attrib[VERT_ATTRIB_MAX][4];		/**< Current vertex attributes
-						  *  indexed by VERT_ATTRIB_* */
-   GLfloat Index;				/**< Current color index */
-   GLboolean EdgeFlag;				/**< Current edge flag */
+   GLfloat Attrib[VERT_ATTRIB_MAX][4];	/**< Position, color, texcoords, etc */
+   GLfloat Index;			/**< Current color index */
+   GLboolean EdgeFlag;			/**< Current edge flag */
    /*@}*/
 
    /**
-    * \name Values are always valid.  
-    * 
-    * \note BTW, note how similar this set of attributes is to the SWvertex
-    * data type in the software rasterizer...
+    * \name Current raster position attributes (always valid).
+    * \note This set of attributes is very similar to the SWvertex struct.
     */
    /*@{*/
-   GLfloat RasterPos[4];			/**< Current raster position */
-   GLfloat RasterDistance;			/**< Current raster distance */
-   GLfloat RasterColor[4];			/**< Current raster color */
-   GLfloat RasterSecondaryColor[4];             /**< Current raster secondary color */
-   GLfloat RasterIndex;				/**< Current raster index */
-   GLfloat RasterTexCoords[MAX_TEXTURE_UNITS][4];/**< Current raster texcoords */
-   GLboolean RasterPosValid;			/**< Raster pos valid flag */
+   GLfloat RasterPos[4];
+   GLfloat RasterDistance;
+   GLfloat RasterColor[4];
+   GLfloat RasterSecondaryColor[4];
+   GLfloat RasterIndex;
+   GLfloat RasterTexCoords[MAX_TEXTURE_COORD_UNITS][4];
+   GLboolean RasterPosValid;
    /*@}*/
 };
 
@@ -1006,8 +1047,8 @@ struct gl_point_attrib
    GLfloat MinSize, MaxSize;	/**< GL_EXT_point_parameters */
    GLfloat Threshold;		/**< GL_EXT_point_parameters */
    GLboolean _Attenuated;	/**< True if Params != [1, 0, 0] */
-   GLboolean PointSprite;	/**< GL_NV_point_sprite / GL_NV_point_sprite */
-   GLboolean CoordReplace[MAX_TEXTURE_UNITS]; /**< GL_NV/ARB_point_sprite */
+   GLboolean PointSprite;	/**< GL_NV/ARB_point_sprite */
+   GLboolean CoordReplace[MAX_TEXTURE_COORD_UNITS]; /**< GL_ARB_point_sprite */
    GLenum SpriteRMode;		/**< GL_NV_point_sprite (only!) */
    GLenum SpriteOrigin;		/**< GL_ARB_point_sprite */
 };
@@ -1175,22 +1216,40 @@ typedef void (*StoreTexelFunc)(struct gl_texture_image *texImage,
                                GLint col, GLint row, GLint img,
                                const void *texel);
 
-/**
- * TexImage store function.  This is called by the glTex[Sub]Image
- * functions and is responsible for converting the user-specified texture
- * image into a specific (hardware) image format.
- */
-typedef GLboolean (*StoreTexImageFunc)(GLcontext *ctx, GLuint dims,
-                          GLenum baseInternalFormat,
-                          const struct gl_texture_format *dstFormat,
-                          GLvoid *dstAddr,
-                          GLint dstXoffset, GLint dstYoffset, GLint dstZoffset,
-                          GLint dstRowStride, GLint dstImageStride,
-                          GLint srcWidth, GLint srcHeight, GLint srcDepth,
-                          GLenum srcFormat, GLenum srcType,
-                          const GLvoid *srcAddr,
-                          const struct gl_pixelstore_attrib *srcPacking);
 
+/**
+ * This macro defines the (many) parameters to the texstore functions.
+ * \param dims  either 1 or 2 or 3
+ * \param baseInternalFormat  user-specified base internal format
+ * \param dstFormat  destination Mesa texture format
+ * \param dstAddr  destination image address
+ * \param dstX/Y/Zoffset  destination x/y/z offset (ala TexSubImage), in texels
+ * \param dstRowStride  destination image row stride, in bytes
+ * \param dstImageOffsets  offset of each 2D slice within 3D texture, in texels
+ * \param srcWidth/Height/Depth  source image size, in pixels
+ * \param srcFormat  incoming image format
+ * \param srcType  incoming image data type
+ * \param srcAddr  source image address
+ * \param srcPacking  source image packing parameters
+ */
+#define TEXSTORE_PARAMS \
+	GLcontext *ctx, GLuint dims, \
+	GLenum baseInternalFormat, \
+	const struct gl_texture_format *dstFormat, \
+	GLvoid *dstAddr, \
+	GLint dstXoffset, GLint dstYoffset, GLint dstZoffset, \
+	GLint dstRowStride, const GLuint *dstImageOffsets, \
+	GLint srcWidth, GLint srcHeight, GLint srcDepth, \
+	GLenum srcFormat, GLenum srcType, \
+	const GLvoid *srcAddr, \
+	const struct gl_pixelstore_attrib *srcPacking
+
+
+
+/**
+ * Texture image storage function.
+ */
+typedef GLboolean (*StoreTexImageFunc)(TEXSTORE_PARAMS);
 
 
 /**
@@ -1236,6 +1295,8 @@ struct gl_texture_format
 };
 
 
+#define MAX_3D_TEXTURE_SIZE (1 << (MAX_3D_TEXTURE_LEVELS - 1))
+
 /**
  * Texture image state.  Describes the dimensions of a texture image,
  * the texel format and pointers to Texel Fetch functions.
@@ -1253,8 +1314,6 @@ struct gl_texture_image
    GLuint Width;		/**< = 2^WidthLog2 + 2*Border */
    GLuint Height;		/**< = 2^HeightLog2 + 2*Border */
    GLuint Depth;		/**< = 2^DepthLog2 + 2*Border */
-   GLuint RowStride;		/**< == Width unless IsClientData and padded */
-   GLuint ImageStride;          /**< Stride between images, in texels */
    GLuint Width2;		/**< = Width - 2*Border */
    GLuint Height2;		/**< = Height - 2*Border */
    GLuint Depth2;		/**< = Depth - 2*Border */
@@ -1265,7 +1324,6 @@ struct gl_texture_image
    GLfloat WidthScale;		/**< used for mipmap LOD computation */
    GLfloat HeightScale;		/**< used for mipmap LOD computation */
    GLfloat DepthScale;		/**< used for mipmap LOD computation */
-   GLvoid *Data;		/**< Image data, accessed via FetchTexel() */
    GLboolean IsClientData;	/**< Data owned by client? */
    GLboolean _IsPowerOfTwo;	/**< Are all dimensions powers of two? */
 
@@ -1278,6 +1336,11 @@ struct gl_texture_image
 
    GLboolean IsCompressed;	/**< GL_ARB_texture_compression */
    GLuint CompressedSize;	/**< GL_ARB_texture_compression */
+
+   GLuint RowStride;		/**< == Width unless IsClientData and padded */
+   GLuint *ImageOffsets;        /**< if 3D texture: array [Depth] of offsets to
+                                     each 2D slice in 'Data', in texels */
+   GLvoid *Data;		/**< Image data, accessed via FetchTexel() */
 
    /**
     * \name For device driver:
@@ -1451,11 +1514,17 @@ struct gl_texture_unit
    GLboolean ColorTableEnabled;
 };
 
-struct texenvprog_cache {
+struct texenvprog_cache_item {
    GLuint hash;
    void *key;
-   void *data;
-   struct texenvprog_cache *next;
+   struct fragment_program *data;
+   struct texenvprog_cache_item *next;
+};
+
+struct texenvprog_cache {
+   struct texenvprog_cache_item **items;
+   GLuint size, n_items;
+   GLcontext *ctx;
 };
 
 /**
@@ -1488,7 +1557,7 @@ struct gl_texture_attrib
    struct gl_color_table Palette;
    
    /** Cached texenv fragment programs */
-   struct texenvprog_cache *env_fp_cache;
+   struct texenvprog_cache env_fp_cache;
 };
 
 
@@ -1599,7 +1668,9 @@ struct gl_client_array
  */
 struct gl_array_attrib
 {
-   struct gl_client_array Vertex;	     /**< client data descriptors */
+   /** Conventional vertex arrays */
+   /*@{*/
+   struct gl_client_array Vertex;
    struct gl_client_array Normal;
    struct gl_client_array Color;
    struct gl_client_array SecondaryColor;
@@ -1607,15 +1678,17 @@ struct gl_array_attrib
    struct gl_client_array Index;
    struct gl_client_array TexCoord[MAX_TEXTURE_COORD_UNITS];
    struct gl_client_array EdgeFlag;
+   /*@}*/
 
-   struct gl_client_array VertexAttrib[VERT_ATTRIB_MAX];  /**< GL_NV_vertex_program */
+   /** Generic arrays for vertex programs/shaders; */
+   struct gl_client_array VertexAttrib[VERT_ATTRIB_MAX];
 
    GLint ActiveTexture;		/**< Client Active Texture */
    GLuint LockFirst;            /**< GL_EXT_compiled_vertex_array */
    GLuint LockCount;            /**< GL_EXT_compiled_vertex_array */
 
-   GLbitfield _Enabled;		/**< _NEW_ARRAY_* - bit set if array enabled */
-   GLbitfield NewState;		/**< _NEW_ARRAY_* */
+   GLbitfield _Enabled;		/**< mask of _NEW_ARRAY_* values */
+   GLbitfield NewState;		/**< mask of _NEW_ARRAY_* values */
 
 #if FEATURE_ARB_vertex_buffer_object
    struct gl_buffer_object *NullBufferObj;
@@ -1844,9 +1917,9 @@ struct gl_vertex_program_state
    GLboolean PointSizeEnabled;         /**< GL_VERTEX_PROGRAM_POINT_SIZE_ARB/NV */
    GLboolean TwoSideEnabled;           /**< GL_VERTEX_PROGRAM_TWO_SIDE_ARB/NV */
    struct vertex_program *Current;     /**< ptr to currently bound program */
-   struct vertex_program *_Current;    /**< ptr to currently bound
-					   program, including internal
-					   (t_vp_build.c) programs */
+   const struct vertex_program *_Current;    /**< ptr to currently bound
+					          program, including internal
+					          (t_vp_build.c) programs */
 
    GLenum TrackMatrix[MAX_NV_VERTEX_PROGRAM_PARAMS / 4];
    GLenum TrackMatrixTransform[MAX_NV_VERTEX_PROGRAM_PARAMS / 4];
@@ -1877,8 +1950,8 @@ struct gl_fragment_program_state
    GLboolean _Enabled;                   /* Enabled and valid program? */
    GLboolean _Active;
    struct fragment_program *Current;     /* ptr to currently bound program */
-   struct fragment_program *_Current;    /* ptr to currently active program 
-					    (including internal programs) */
+   const struct fragment_program *_Current; /* ptr to currently active program 
+					       (including internal programs) */
    struct fp_machine Machine;            /* machine state */
    GLfloat Parameters[MAX_NV_FRAGMENT_PROGRAM_PARAMS][4]; /* Env params */
 
@@ -2260,7 +2333,7 @@ struct gl_constants
    GLint MaxTextureRectSize;            /* GL_NV_texture_rectangle */
    GLuint MaxTextureCoordUnits;
    GLuint MaxTextureImageUnits;
-   GLuint MaxTextureUnits;              /* = MAX(CoordUnits, ImageUnits) */
+   GLuint MaxTextureUnits;              /* = MIN(CoordUnits, ImageUnits) */
    GLfloat MaxTextureMaxAnisotropy;	/* GL_EXT_texture_filter_anisotropic */
    GLfloat MaxTextureLodBias;           /* GL_EXT_texture_lod_bias */
    GLuint MaxArrayLockSize;
@@ -2522,7 +2595,7 @@ struct matrix_stack
 #define _NEW_ARRAY_COLOR0           VERT_BIT_COLOR0
 #define _NEW_ARRAY_COLOR1           VERT_BIT_COLOR1
 #define _NEW_ARRAY_FOGCOORD         VERT_BIT_FOG
-#define _NEW_ARRAY_INDEX            VERT_BIT_SIX
+#define _NEW_ARRAY_INDEX            VERT_BIT_COLOR_INDEX
 #define _NEW_ARRAY_EDGEFLAG         VERT_BIT_SEVEN
 #define _NEW_ARRAY_TEXCOORD_0       VERT_BIT_TEX0
 #define _NEW_ARRAY_TEXCOORD_1       VERT_BIT_TEX1

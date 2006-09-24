@@ -1,8 +1,8 @@
 /*
  * Mesa 3-D graphics library
- * Version:  6.1
+ * Version:  6.5.1
  *
- * Copyright (C) 1999-2004  Brian Paul   All Rights Reserved.
+ * Copyright (C) 1999-2006  Brian Paul   All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -29,8 +29,6 @@
 #include "context.h"
 #include "enable.h"
 #include "enums.h"
-#include "dlist.h"
-#include "texstate.h"
 #include "mtypes.h"
 #include "varray.h"
 #include "dispatch.h"
@@ -47,7 +45,7 @@
  */
 static void
 update_array(GLcontext *ctx, struct gl_client_array *array,
-             GLuint dirtyFlag, GLsizei elementSize,
+             GLbitfield dirtyFlag, GLsizei elementSize,
              GLint size, GLenum type,
              GLsizei stride, GLboolean normalized, const GLvoid *ptr)
 {
@@ -167,7 +165,7 @@ _mesa_NormalPointer(GLenum type, GLsizei stride, const GLvoid *ptr )
    }
 
    update_array(ctx, &ctx->Array.Normal, _NEW_ARRAY_NORMAL,
-                elementSize, 3, type, stride, GL_FALSE, ptr);
+                elementSize, 3, type, stride, GL_TRUE, ptr);
 
    if (ctx->Driver.NormalPointer)
       ctx->Driver.NormalPointer( ctx, type, stride, ptr );
@@ -225,7 +223,7 @@ _mesa_ColorPointer(GLint size, GLenum type, GLsizei stride, const GLvoid *ptr)
    }
 
    update_array(ctx, &ctx->Array.Color, _NEW_ARRAY_COLOR0,
-                elementSize, size, type, stride, GL_FALSE, ptr);
+                elementSize, size, type, stride, GL_TRUE, ptr);
 
    if (ctx->Driver.ColorPointer)
       ctx->Driver.ColorPointer( ctx, size, type, stride, ptr );
@@ -357,7 +355,7 @@ _mesa_SecondaryColorPointerEXT(GLint size, GLenum type,
    }
 
    update_array(ctx, &ctx->Array.SecondaryColor, _NEW_ARRAY_COLOR1,
-                elementSize, size, type, stride, GL_FALSE, ptr);
+                elementSize, size, type, stride, GL_TRUE, ptr);
 
    if (ctx->Driver.SecondaryColorPointer)
       ctx->Driver.SecondaryColorPointer( ctx, size, type, stride, ptr );
@@ -437,11 +435,12 @@ void GLAPIENTRY
 _mesa_VertexAttribPointerNV(GLuint index, GLint size, GLenum type,
                             GLsizei stride, const GLvoid *ptr)
 {
+   const GLboolean normalized = GL_FALSE;
    GLsizei elementSize;
    GET_CURRENT_CONTEXT(ctx);
    ASSERT_OUTSIDE_BEGIN_END(ctx);
 
-   if (index >= VERT_ATTRIB_MAX) {
+   if (index >= MAX_VERTEX_PROGRAM_ATTRIBS) {
       _mesa_error(ctx, GL_INVALID_VALUE, "glVertexAttribPointerNV(index)");
       return;
    }
@@ -481,7 +480,7 @@ _mesa_VertexAttribPointerNV(GLuint index, GLint size, GLenum type,
    }
 
    update_array(ctx, &ctx->Array.VertexAttrib[index], _NEW_ARRAY_ATTRIB(index),
-                elementSize, size, type, stride, GL_FALSE, ptr);
+                elementSize, size, type, stride, normalized, ptr);
 
    if (ctx->Driver.VertexAttribPointer)
       ctx->Driver.VertexAttribPointer( ctx, index, size, type, stride, ptr );
@@ -754,6 +753,7 @@ _mesa_InterleavedArrays(GLenum format, GLsizei stride, const GLvoid *pointer)
 
    _mesa_DisableClientState( GL_EDGE_FLAG_ARRAY );
    _mesa_DisableClientState( GL_INDEX_ARRAY );
+   /* XXX also disable secondary color and generic arrays? */
 
    /* Texcoords */
    if (tflag) {
@@ -917,12 +917,11 @@ _mesa_MultiModeDrawElementsIBM( const GLenum * mode, const GLsizei * count,
 }
 
 
-/**********************************************************************/
-/*****                      Initialization                        *****/
-/**********************************************************************/
-
+/**
+ * Initialize vertex array state for given context.
+ */
 void 
-_mesa_init_varray( GLcontext * ctx )
+_mesa_init_varray(GLcontext *ctx)
 {
    GLuint i;
 
@@ -981,7 +980,6 @@ _mesa_init_varray( GLcontext * ctx )
    ctx->Array.EdgeFlag.Ptr = NULL;
    ctx->Array.EdgeFlag.Enabled = GL_FALSE;
    ctx->Array.EdgeFlag.Flags = CA_CLIENT_DATA;
-   ctx->Array.ActiveTexture = 0;   /* GL_ARB_multitexture */
    for (i = 0; i < VERT_ATTRIB_MAX; i++) {
       ctx->Array.VertexAttrib[i].Size = 4;
       ctx->Array.VertexAttrib[i].Type = GL_FLOAT;
@@ -989,6 +987,9 @@ _mesa_init_varray( GLcontext * ctx )
       ctx->Array.VertexAttrib[i].StrideB = 0;
       ctx->Array.VertexAttrib[i].Ptr = NULL;
       ctx->Array.VertexAttrib[i].Enabled = GL_FALSE;
+      ctx->Array.VertexAttrib[i].Normalized = GL_FALSE;
       ctx->Array.VertexAttrib[i].Flags = CA_CLIENT_DATA;
    }
+
+   ctx->Array.ActiveTexture = 0;   /* GL_ARB_multitexture */
 }

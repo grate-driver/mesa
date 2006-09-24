@@ -1,0 +1,2 @@
+libGL 1 libgl1-mesa-glx | libgl1
+libOSMesa 6 libgl1-mesa-swx11 | libgl1-mesa-glide3

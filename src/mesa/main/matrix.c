@@ -160,6 +160,10 @@ _mesa_MatrixMode( GLenum mode )
       ctx->CurrentStack = &ctx->ProjectionMatrixStack;
       break;
    case GL_TEXTURE:
+      if (ctx->Texture.CurrentUnit >= ctx->Const.MaxTextureCoordUnits) {
+         _mesa_error(ctx, GL_INVALID_OPERATION, "glMatrixMode(texcoord unit)");
+         return;
+      }
       ctx->CurrentStack = &ctx->TextureMatrixStack[ctx->Texture.CurrentUnit];
       break;
    case GL_COLOR:
@@ -576,8 +580,8 @@ _mesa_set_viewport( GLcontext *ctx, GLint x, GLint y,
    }
 
    /* clamp width and height to the implementation dependent range */
-   width  = CLAMP(width,  1, ctx->Const.MaxViewportWidth);
-   height = CLAMP(height, 1, ctx->Const.MaxViewportHeight);
+   width  = CLAMP(width,  1, (GLsizei) ctx->Const.MaxViewportWidth);
+   height = CLAMP(height, 1, (GLsizei) ctx->Const.MaxViewportHeight);
 
    ctx->Viewport.X = x;
    ctx->Viewport.Width = width;

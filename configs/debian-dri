@@ -2,11 +2,11 @@ include $(TOP)/configs/debian
 
 CONFIG_NAME = debian-dri
 
-DEBIAN_COMMON_CPPFLAGS += -DPTHREADS -DUSE_EXTERNAL_DXTN_LIB=1 -DIN_DRI_DRIVER -DGLX_DIRECT_RENDERING -DHAVE_ALIAS -DDEFAULT_DRIVER_DIR=\"/usr/lib/dri\"
+DEBIAN_COMMON_CPPFLAGS += -DPTHREADS -DUSE_EXTERNAL_DXTN_LIB=1 -DIN_DRI_DRIVER -DGLX_DIRECT_RENDERING -DHAVE_ALIAS -DDEFAULT_DRIVER_DIR=\"$(DEBIAN_DRIVERS_DIR)\"
 
 LIBDRM_LIB = `pkg-config --libs libdrm`
 DRI_LIB_DEPS  = -lm -lpthread -lexpat -ldl $(LIBDRM_LIB)
-GL_LIB_DEPS = -L/usr/X11R6/lib -lX11 -lXext -lXxf86vm -lm -lpthread -ldl $(LIBDRM_LIB)
+GL_LIB_DEPS = `pkg-config --libs x11 xext xxf86vm` -lm -lpthread -ldl $(LIBDRM_LIB)
 
 USING_EGL=0
 
@@ -22,4 +22,12 @@ endif
 DRIVER_DIRS = dri
 WINDOW_SYSTEM=dri
 
-DRI_DIRS = i810 i915 mach64 mga r128 r200 r300 radeon s3v savage sis tdfx trident unichrome ffb
+DRI_DIRS = mach64 mga r128 r200 r300 radeon s3v savage tdfx trident
+
+ifeq ($(DEB_HOST_ARCH),i386)
+DRI_DIRS += i810 i915 sis ffb unichrome
+endif
+
+ifeq ($(DEB_HOST_ARCH),amd64)
+DRI_DIRS += i915
+endif

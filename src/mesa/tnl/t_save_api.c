@@ -371,7 +371,8 @@ static void _save_copy_to_current( GLcontext *ctx )
    TNLcontext *tnl = TNL_CONTEXT(ctx); 
    GLuint i;
 
-   for (i = _TNL_ATTRIB_POS+1 ; i <= _TNL_ATTRIB_INDEX ; i++) {
+   /* XXX Use _TNL_FIRST_* and _TNL_LAST_* values instead? */
+   for (i = _TNL_ATTRIB_POS+1 ; i <= _TNL_ATTRIB_EDGEFLAG ; i++) {
       if (tnl->save.attrsz[i]) {
 	 tnl->save.currentsz[i][0] = tnl->save.attrsz[i];
 	 COPY_CLEAN_4V(tnl->save.current[i], 
@@ -399,7 +400,7 @@ static void _save_copy_from_current( GLcontext *ctx )
    TNLcontext *tnl = TNL_CONTEXT(ctx); 
    GLint i;
 
-   for (i = _TNL_ATTRIB_POS+1 ; i <= _TNL_ATTRIB_INDEX ; i++) 
+   for (i = _TNL_ATTRIB_POS+1 ; i <= _TNL_ATTRIB_EDGEFLAG ; i++) 
       switch (tnl->save.attrsz[i]) {
       case 4: tnl->save.attrptr[i][3] = tnl->save.current[i][3];
       case 3: tnl->save.attrptr[i][2] = tnl->save.current[i][2];
@@ -936,7 +937,7 @@ static void GLAPIENTRY _save_MultiTexCoord4fv( GLenum target, const GLfloat *v )
 
 static void GLAPIENTRY _save_VertexAttrib1fNV( GLuint index, GLfloat x )
 {
-   if (index < VERT_ATTRIB_MAX)
+   if (index < MAX_VERTEX_PROGRAM_ATTRIBS)
       DISPATCH_ATTR1F( index, x );
    else
       enum_error(); 
@@ -944,7 +945,7 @@ static void GLAPIENTRY _save_VertexAttrib1fNV( GLuint index, GLfloat x )
 
 static void GLAPIENTRY _save_VertexAttrib1fvNV( GLuint index, const GLfloat *v )
 {
-   if (index < VERT_ATTRIB_MAX)
+   if (index < MAX_VERTEX_PROGRAM_ATTRIBS)
       DISPATCH_ATTR1FV( index, v );
    else
       enum_error();
@@ -952,7 +953,7 @@ static void GLAPIENTRY _save_VertexAttrib1fvNV( GLuint index, const GLfloat *v )
 
 static void GLAPIENTRY _save_VertexAttrib2fNV( GLuint index, GLfloat x, GLfloat y )
 {
-   if (index < VERT_ATTRIB_MAX)
+   if (index < MAX_VERTEX_PROGRAM_ATTRIBS)
       DISPATCH_ATTR2F( index, x, y );
    else
       enum_error();
@@ -960,7 +961,7 @@ static void GLAPIENTRY _save_VertexAttrib2fNV( GLuint index, GLfloat x, GLfloat 
 
 static void GLAPIENTRY _save_VertexAttrib2fvNV( GLuint index, const GLfloat *v )
 {
-   if (index < VERT_ATTRIB_MAX)
+   if (index < MAX_VERTEX_PROGRAM_ATTRIBS)
       DISPATCH_ATTR2FV( index, v );
    else
       enum_error();
@@ -969,7 +970,7 @@ static void GLAPIENTRY _save_VertexAttrib2fvNV( GLuint index, const GLfloat *v )
 static void GLAPIENTRY _save_VertexAttrib3fNV( GLuint index, GLfloat x, GLfloat y, 
 				  GLfloat z )
 {
-   if (index < VERT_ATTRIB_MAX)
+   if (index < MAX_VERTEX_PROGRAM_ATTRIBS)
       DISPATCH_ATTR3F( index, x, y, z );
    else
       enum_error();
@@ -977,7 +978,7 @@ static void GLAPIENTRY _save_VertexAttrib3fNV( GLuint index, GLfloat x, GLfloat 
 
 static void GLAPIENTRY _save_VertexAttrib3fvNV( GLuint index, const GLfloat *v )
 {
-   if (index < VERT_ATTRIB_MAX)
+   if (index < MAX_VERTEX_PROGRAM_ATTRIBS)
       DISPATCH_ATTR3FV( index, v );
    else
       enum_error();
@@ -986,7 +987,7 @@ static void GLAPIENTRY _save_VertexAttrib3fvNV( GLuint index, const GLfloat *v )
 static void GLAPIENTRY _save_VertexAttrib4fNV( GLuint index, GLfloat x, GLfloat y,
 				  GLfloat z, GLfloat w )
 {
-   if (index < VERT_ATTRIB_MAX)
+   if (index < MAX_VERTEX_PROGRAM_ATTRIBS)
       DISPATCH_ATTR4F( index, x, y, z, w );
    else
       enum_error();
@@ -994,7 +995,7 @@ static void GLAPIENTRY _save_VertexAttrib4fNV( GLuint index, GLfloat x, GLfloat 
 
 static void GLAPIENTRY _save_VertexAttrib4fvNV( GLuint index, const GLfloat *v )
 {
-   if (index < VERT_ATTRIB_MAX)
+   if (index < MAX_VERTEX_PROGRAM_ATTRIBS)
       DISPATCH_ATTR4FV( index, v );
    else
       enum_error();
@@ -1004,7 +1005,7 @@ static void GLAPIENTRY _save_VertexAttrib4fvNV( GLuint index, const GLfloat *v )
 static void GLAPIENTRY
 _save_VertexAttrib1fARB( GLuint index, GLfloat x )
 {
-   if (index < VERT_ATTRIB_MAX)
+   if (index < MAX_VERTEX_ATTRIBS)
       DISPATCH_ATTR1F( index, x );
    else
       enum_error(); 
@@ -1013,7 +1014,7 @@ _save_VertexAttrib1fARB( GLuint index, GLfloat x )
 static void GLAPIENTRY
 _save_VertexAttrib1fvARB( GLuint index, const GLfloat *v )
 {
-   if (index < VERT_ATTRIB_MAX)
+   if (index < MAX_VERTEX_ATTRIBS)
       DISPATCH_ATTR1FV( index, v );
    else
       enum_error();
@@ -1022,7 +1023,7 @@ _save_VertexAttrib1fvARB( GLuint index, const GLfloat *v )
 static void GLAPIENTRY
 _save_VertexAttrib2fARB( GLuint index, GLfloat x, GLfloat y )
 {
-   if (index < VERT_ATTRIB_MAX)
+   if (index < MAX_VERTEX_ATTRIBS)
       DISPATCH_ATTR2F( index, x, y );
    else
       enum_error();
@@ -1031,7 +1032,7 @@ _save_VertexAttrib2fARB( GLuint index, GLfloat x, GLfloat y )
 static void GLAPIENTRY
 _save_VertexAttrib2fvARB( GLuint index, const GLfloat *v )
 {
-   if (index < VERT_ATTRIB_MAX)
+   if (index < MAX_VERTEX_ATTRIBS)
       DISPATCH_ATTR2FV( index, v );
    else
       enum_error();
@@ -1040,7 +1041,7 @@ _save_VertexAttrib2fvARB( GLuint index, const GLfloat *v )
 static void GLAPIENTRY
 _save_VertexAttrib3fARB( GLuint index, GLfloat x, GLfloat y, GLfloat z )
 {
-   if (index < VERT_ATTRIB_MAX)
+   if (index < MAX_VERTEX_ATTRIBS)
       DISPATCH_ATTR3F( index, x, y, z );
    else
       enum_error();
@@ -1049,7 +1050,7 @@ _save_VertexAttrib3fARB( GLuint index, GLfloat x, GLfloat y, GLfloat z )
 static void GLAPIENTRY
 _save_VertexAttrib3fvARB( GLuint index, const GLfloat *v )
 {
-   if (index < VERT_ATTRIB_MAX)
+   if (index < MAX_VERTEX_ATTRIBS)
       DISPATCH_ATTR3FV( index, v );
    else
       enum_error();
@@ -1058,7 +1059,7 @@ _save_VertexAttrib3fvARB( GLuint index, const GLfloat *v )
 static void GLAPIENTRY
 _save_VertexAttrib4fARB( GLuint index, GLfloat x, GLfloat y, GLfloat z, GLfloat w )
 {
-   if (index < VERT_ATTRIB_MAX)
+   if (index < MAX_VERTEX_ATTRIBS)
       DISPATCH_ATTR4F( index, x, y, z, w );
    else
       enum_error();
@@ -1067,7 +1068,7 @@ _save_VertexAttrib4fARB( GLuint index, GLfloat x, GLfloat y, GLfloat z, GLfloat 
 static void GLAPIENTRY
 _save_VertexAttrib4fvARB( GLuint index, const GLfloat *v )
 {
-   if (index < VERT_ATTRIB_MAX)
+   if (index < MAX_VERTEX_ATTRIBS)
       DISPATCH_ATTR4FV( index, v );
    else
       enum_error();
@@ -1173,19 +1174,15 @@ static void GLAPIENTRY _save_EdgeFlag( GLboolean b )
    IDX_ATTR( _TNL_ATTRIB_EDGEFLAG, (GLfloat)b );
 }
 
-static void GLAPIENTRY _save_EdgeFlagv( const GLboolean *v )
-{
-   IDX_ATTR( _TNL_ATTRIB_EDGEFLAG, (GLfloat)(v[0]) );
-}
 
 static void GLAPIENTRY _save_Indexf( GLfloat f )
 {
-   IDX_ATTR( _TNL_ATTRIB_INDEX, f );
+   IDX_ATTR( _TNL_ATTRIB_COLOR_INDEX, f );
 }
 
 static void GLAPIENTRY _save_Indexfv( const GLfloat *f )
 {
-   IDX_ATTR( _TNL_ATTRIB_INDEX, f[0] );
+   IDX_ATTR( _TNL_ATTRIB_COLOR_INDEX, f[0] );
 }
 
 
@@ -1467,7 +1464,6 @@ static void _save_vtxfmt_init( GLcontext *ctx )
    vfmt->Color4f = _save_Color4f;
    vfmt->Color4fv = _save_Color4fv;
    vfmt->EdgeFlag = _save_EdgeFlag;
-   vfmt->EdgeFlagv = _save_EdgeFlagv;
    vfmt->End = _save_End;
    vfmt->FogCoordfEXT = _save_FogCoordfEXT;
    vfmt->FogCoordfvEXT = _save_FogCoordfvEXT;
@@ -1652,15 +1648,12 @@ static void _save_current_init( GLcontext *ctx )
       tnl->save.current[i] = ctx->ListState.CurrentAttrib[i];
    }
 
-   for (i = _TNL_ATTRIB_MAT_FRONT_AMBIENT; i < _TNL_ATTRIB_INDEX; i++) {
-      const GLuint j = i - _TNL_ATTRIB_MAT_FRONT_AMBIENT;
+   for (i = _TNL_FIRST_MAT; i <= _TNL_LAST_MAT; i++) {
+      const GLuint j = i - _TNL_FIRST_MAT;
       ASSERT(j < MAT_ATTRIB_MAX);
       tnl->save.currentsz[i] = &ctx->ListState.ActiveMaterialSize[j];
       tnl->save.current[i] = ctx->ListState.CurrentMaterial[j];
    }
-
-   tnl->save.currentsz[_TNL_ATTRIB_INDEX] = &ctx->ListState.ActiveIndex;
-   tnl->save.current[_TNL_ATTRIB_INDEX] = &ctx->ListState.CurrentIndex;
 
    tnl->save.currentsz[_TNL_ATTRIB_EDGEFLAG] = &ctx->ListState.ActiveEdgeFlag;
    tnl->save.current[_TNL_ATTRIB_EDGEFLAG] = &tnl->save.CurrentFloatEdgeFlag;

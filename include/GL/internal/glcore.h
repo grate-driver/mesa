@@ -137,6 +137,13 @@ typedef struct __GLcontextModesRec {
     GLint swapMethod;
 
     GLint screen;
+
+    /* EXT_texture_from_pixmap */
+    GLint bindToTextureRgb;
+    GLint bindToTextureRgba;
+    GLint bindToMipmapTexture;
+    GLint bindToTextureTargets;
+    GLint yInverted;
 } __GLcontextModes;
 
 /* Several fields of __GLcontextModes can take these as values.  Since
@@ -165,6 +172,17 @@ typedef struct __GLcontextModesRec {
 #define GLX_WINDOW_BIT                     0x00000001
 #define GLX_PIXMAP_BIT                     0x00000002
 #define GLX_PBUFFER_BIT                    0x00000004
+
+#define GLX_BIND_TO_TEXTURE_RGB_EXT        0x20D0
+#define GLX_BIND_TO_TEXTURE_RGBA_EXT       0x20D1
+#define GLX_BIND_TO_MIPMAP_TEXTURE_EXT     0x20D2
+#define GLX_BIND_TO_TEXTURE_TARGETS_EXT    0x20D3
+#define GLX_Y_INVERTED_EXT                 0x20D4
+
+#define GLX_TEXTURE_1D_BIT_EXT             0x00000001
+#define GLX_TEXTURE_2D_BIT_EXT             0x00000002
+#define GLX_TEXTURE_RECTANGLE_BIT_EXT      0x00000004
+
 
 /************************************************************************/
 

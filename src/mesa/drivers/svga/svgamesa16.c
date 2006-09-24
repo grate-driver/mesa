@@ -1,4 +1,4 @@
-/* $Id: svgamesa16.c,v 1.11 2002/11/11 18:42:40 brianp Exp $ */
+/* $Id: svgamesa16.c,v 1.11 2002-11-11 18:42:40 brianp Exp $ */
 
 /*
  * Mesa 3-D graphics library

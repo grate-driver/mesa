@@ -185,14 +185,14 @@ static GLuint translate_tex_src_bit( GLbitfield bit )
  * Examine current texture environment state and generate a unique
  * key to identify it.
  */
-static struct state_key *
-make_state_key(GLcontext *ctx)
+static void make_state_key( GLcontext *ctx,  struct state_key *key )
 {
-   struct state_key *key = CALLOC_STRUCT(state_key);
    GLuint i, j;
 	
+   memset(key, 0, sizeof(*key));
+
    for (i=0;i<MAX_TEXTURE_UNITS;i++) {
-      struct gl_texture_unit *texUnit = &ctx->Texture.Unit[i];
+      const struct gl_texture_unit *texUnit = &ctx->Texture.Unit[i];
 		
       if (!texUnit->_ReallyEnabled)
          continue;
@@ -212,7 +212,7 @@ make_state_key(GLcontext *ctx)
 	 translate_mode(texUnit->_CurrentCombine->ModeA);
 		
       key->unit[i].ScaleShiftRGB = texUnit->_CurrentCombine->ScaleShiftRGB;
-      key->unit[i].ScaleShiftA = texUnit->_CurrentCombine->ScaleShiftRGB;
+      key->unit[i].ScaleShiftA = texUnit->_CurrentCombine->ScaleShiftA;
 
       for (j=0;j<3;j++) {
          key->unit[i].OptRGB[j].Operand =
@@ -233,8 +233,6 @@ make_state_key(GLcontext *ctx)
       key->fog_enabled = 1;
       key->fog_mode = translate_fog_mode(ctx->Fog.Mode);
    }
-	
-   return key;
 }
 
 /* Use uregs to represent registers internally, translate to Mesa's
@@ -259,7 +257,7 @@ struct ureg {
    GLuint pad:5;
 };
 
-const static struct ureg undef = { 
+static const struct ureg undef = { 
    ~0,
    ~0,
    0,
@@ -342,7 +340,7 @@ static GLboolean is_undef( struct ureg reg )
 
 static struct ureg get_temp( struct texenv_fragment_program *p )
 {
-   int bit;
+   GLint bit;
    
    /* First try and reuse temps which have been used already:
     */
@@ -358,7 +356,7 @@ static struct ureg get_temp( struct texenv_fragment_program *p )
       _mesa_exit(1);
    }
 
-   if (bit > p->program->Base.NumTemporaries)
+   if ((GLuint) bit > p->program->Base.NumTemporaries)
       p->program->Base.NumTemporaries = bit;
 
    p->temp_in_use |= 1<<(bit-1);
@@ -386,7 +384,7 @@ static struct ureg get_tex_temp( struct texenv_fragment_program *p )
       _mesa_exit(1);
    }
 
-   if (bit > p->program->Base.NumTemporaries)
+   if ((GLuint) bit > p->program->Base.NumTemporaries)
       p->program->Base.NumTemporaries = bit;
 
    p->temp_in_use |= 1<<(bit-1);
@@ -729,7 +727,7 @@ static struct ureg emit_combine( struct texenv_fragment_program *p,
 				 GLuint unit,
 				 GLuint nr,
 				 GLuint mode,
-				 struct mode_opt *opt)
+				 const struct mode_opt *opt)
 {
    struct ureg src[3];
    struct ureg tmp, half;
@@ -1023,6 +1021,10 @@ create_new_program(struct state_key *key, GLcontext *ctx,
       p.src_texture[unit] = undef;
 
    p.src_previous = undef;
+   p.half = undef;
+   p.zero = undef;
+   p.one = undef;
+
    p.last_tex_stage = 0;
    release_temps(&p);
 
@@ -1101,60 +1103,119 @@ create_new_program(struct state_key *key, GLcontext *ctx,
 }
 
 
-static void *search_cache( struct texenvprog_cache *cache,
-			   GLuint hash,
-			   const void *key,
-			   GLuint keysize)
+static struct fragment_program *
+search_cache(const struct texenvprog_cache *cache,
+             GLuint hash,
+             const const void *key,
+             GLuint keysize)
 {
-   struct texenvprog_cache *c;
+   struct texenvprog_cache_item *c;
 
-   for (c = cache; c; c = c->next) {
-      if (c->hash == hash && _mesa_memcmp(c->key, key, keysize) == 0)
-	 return c->data;
+   for (c = cache->items[hash % cache->size]; c; c = c->next) {
+      if (c->hash == hash && memcmp(c->key, key, keysize) == 0)
+	 return (struct fragment_program *) c->data;
    }
 
    return NULL;
 }
 
-static void cache_item( struct texenvprog_cache **cache,
-			GLuint hash,
-			void *key,
-			void *data )
+static void rehash( struct texenvprog_cache *cache )
 {
-   struct texenvprog_cache *c = CALLOC_STRUCT(texenvprog_cache);
-   c->hash = hash;
-   c->key = key;
-   c->data = data;
-   c->next = *cache;
-   *cache = c;
+   struct texenvprog_cache_item **items;
+   struct texenvprog_cache_item *c, *next;
+   GLuint size, i;
+
+   size = cache->size * 3;
+   items = (struct texenvprog_cache_item**) _mesa_malloc(size * sizeof(*items));
+   _mesa_memset(items, 0, size * sizeof(*items));
+
+   for (i = 0; i < cache->size; i++)
+      for (c = cache->items[i]; c; c = next) {
+	 next = c->next;
+	 c->next = items[c->hash % size];
+	 items[c->hash % size] = c;
+      }
+
+   _mesa_free(cache->items);
+   cache->items = items;
+   cache->size = size;
 }
 
-static GLuint hash_key( struct state_key *key )
+static void clear_cache( struct texenvprog_cache *cache )
+{
+   struct texenvprog_cache_item *c, *next;
+   GLuint i;
+
+   for (i = 0; i < cache->size; i++) {
+      for (c = cache->items[i]; c; c = next) {
+	 next = c->next;
+	 _mesa_free(c->key);
+	 cache->ctx->Driver.DeleteProgram(cache->ctx, (struct program *)c->data);
+	 _mesa_free(c);
+      }
+      cache->items[i] = NULL;
+   }
+
+
+   cache->n_items = 0;
+}
+
+
+static void cache_item( struct texenvprog_cache *cache,
+			GLuint hash,
+			const struct state_key *key,
+			void *data )
+{
+   struct texenvprog_cache_item *c = MALLOC(sizeof(*c));
+   c->hash = hash;
+
+   c->key = _mesa_malloc(sizeof(*key));
+   memcpy(c->key, key, sizeof(*key));
+
+   c->data = data;
+
+   if (cache->n_items > cache->size * 1.5) {
+      if (cache->size < 1000)
+	 rehash(cache);
+      else 
+	 clear_cache(cache);
+   }
+
+   cache->n_items++;
+   c->next = cache->items[hash % cache->size];
+   cache->items[hash % cache->size] = c;
+}
+
+static GLuint hash_key( const struct state_key *key )
 {
    GLuint *ikey = (GLuint *)key;
    GLuint hash = 0, i;
 
-   /* I'm sure this can be improved on, but speed is important:
+   /* Make a slightly better attempt at a hash function:
     */
-   for (i = 0; i < sizeof(*key)/sizeof(GLuint); i++)
-      hash ^= ikey[i];
+   for (i = 0; i < sizeof(*key)/sizeof(*ikey); i++)
+   {
+      hash += ikey[i];
+      hash += (hash << 10);
+      hash ^= (hash >> 6);
+   }
 
    return hash;
 }
 
 void _mesa_UpdateTexEnvProgram( GLcontext *ctx )
 {
-   struct state_key *key;
+   struct state_key key;
    GLuint hash;
-   struct fragment_program *prev = ctx->FragmentProgram._Current;
+   const struct fragment_program *prev = ctx->FragmentProgram._Current;
 	
    if (!ctx->FragmentProgram._Enabled) {
-      key = make_state_key(ctx);
-      hash = hash_key(key);
+      make_state_key(ctx, &key);
+      hash = hash_key(&key);
       
-      ctx->FragmentProgram._Current = ctx->_TexEnvProgram =
-	 (struct fragment_program *)
-	 search_cache(ctx->Texture.env_fp_cache, hash, key, sizeof(*key));
+      ctx->FragmentProgram._Current =
+      ctx->_TexEnvProgram =
+	 search_cache(&ctx->Texture.env_fp_cache, hash, &key, sizeof(key));
 	
       if (!ctx->_TexEnvProgram) {
 	 if (0) _mesa_printf("Building new texenv proggy for key %x\n", hash);
@@ -1163,11 +1224,10 @@ void _mesa_UpdateTexEnvProgram( GLcontext *ctx )
 	    (struct fragment_program *) 
 	    ctx->Driver.NewProgram(ctx, GL_FRAGMENT_PROGRAM_ARB, 0);
 		
-	 create_new_program(key, ctx, ctx->_TexEnvProgram);
+	 create_new_program(&key, ctx, ctx->_TexEnvProgram);
 
-	 cache_item(&ctx->Texture.env_fp_cache, hash, key, ctx->_TexEnvProgram);
+	 cache_item(&ctx->Texture.env_fp_cache, hash, &key, ctx->_TexEnvProgram);
       } else {
-	 _mesa_free(key);
 	 if (0) _mesa_printf("Found existing texenv program for key %x\n", hash);
       }
    } 
@@ -1184,14 +1244,20 @@ void _mesa_UpdateTexEnvProgram( GLcontext *ctx )
    }
 }
 
+
+void _mesa_TexEnvProgramCacheInit( GLcontext *ctx )
+{
+   ctx->Texture.env_fp_cache.ctx = ctx;
+   ctx->Texture.env_fp_cache.size = 17;
+   ctx->Texture.env_fp_cache.n_items = 0;
+   ctx->Texture.env_fp_cache.items = (struct texenvprog_cache_item **)
+      _mesa_calloc(ctx->Texture.env_fp_cache.size * 
+		   sizeof(struct texenvprog_cache_item));
+}
+
+
 void _mesa_TexEnvProgramCacheDestroy( GLcontext *ctx )
 {
-   struct texenvprog_cache *a, *tmp;
-
-   for (a = ctx->Texture.env_fp_cache; a; a = tmp) {
-      tmp = a->next;
-      _mesa_free(a->key);
-      ctx->Driver.DeleteProgram(ctx, (struct program *) a->data);
-      _mesa_free(a);
-   }
+   clear_cache(&ctx->Texture.env_fp_cache);
+   _mesa_free(ctx->Texture.env_fp_cache.items);
 }

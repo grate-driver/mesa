@@ -1,8 +1,8 @@
 /*
  * Mesa 3-D graphics library
- * Version:  6.5
+ * Version:  6.5.1
  *
- * Copyright (C) 1999-2005  Brian Paul   All Rights Reserved.
+ * Copyright (C) 1999-2006  Brian Paul   All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -848,8 +848,36 @@ _mesa_PopAttrib(void)
                                (GLboolean) (color->ColorMask[1] != 0),
                                (GLboolean) (color->ColorMask[2] != 0),
                                (GLboolean) (color->ColorMask[3] != 0));
-               _mesa_drawbuffers(ctx, ctx->Const.MaxDrawBuffers,
-                                 color->DrawBuffer, NULL);
+               {
+                  /* Need to determine if more than one color output is
+                   * specified.  If so, call glDrawBuffersARB, else call
+                   * glDrawBuffer().  This is a subtle, but essential point
+                   * since GL_FRONT (for example) is illegal for the former
+                   * function, but legal for the later.
+                   */
+                  GLboolean multipleBuffers = GL_FALSE;
+                  if (ctx->Extensions.ARB_draw_buffers) {
+                     GLuint i;
+                     for (i = 1; i < ctx->Const.MaxDrawBuffers; i++) {
+                        if (color->DrawBuffer[i] != GL_NONE) {
+                           multipleBuffers = GL_TRUE;
+                           break;
+                        }
+                     }
+                  }
+                  /* Call the API_level functions, not _mesa_drawbuffers()
+                   * since we need to do error checking on the pop'd
+                   * GL_DRAW_BUFFER.
+                   * Ex: if GL_FRONT were pushed, but we're popping with a
+                   * user FBO bound, GL_FRONT will be illegal and we'll need
+                   * to record that error.  Per OpenGL ARB decision.
+                   */
+                  if (multipleBuffers)
+                     _mesa_DrawBuffersARB(ctx->Const.MaxDrawBuffers,
+                                          color->DrawBuffer);
+                  else
+                     _mesa_DrawBuffer(color->DrawBuffer[0]);
+               }
                _mesa_set_enable(ctx, GL_ALPHA_TEST, color->AlphaEnabled);
                _mesa_AlphaFunc(color->AlphaFunc, color->AlphaRef);
                _mesa_set_enable(ctx, GL_BLEND, color->BlendEnabled);

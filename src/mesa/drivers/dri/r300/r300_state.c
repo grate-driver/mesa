@@ -417,6 +417,24 @@ static void r300Enable(GLcontext* ctx, GLenum cap, GLboolean state)
 	case GL_TEXTURE_3D:
 		break;
 
+	case GL_FOG:
+		R300_STATECHANGE(r300, fogs);
+		if (state) {
+			r300->hw.fogs.cmd[R300_FOGS_STATE] |=
+			    R300_FOG_ENABLE;
+			
+			ctx->Driver.Fogfv( ctx, GL_FOG_MODE, NULL );
+			ctx->Driver.Fogfv( ctx, GL_FOG_DENSITY, &ctx->Fog.Density );
+			ctx->Driver.Fogfv( ctx, GL_FOG_START, &ctx->Fog.Start );
+			ctx->Driver.Fogfv( ctx, GL_FOG_END, &ctx->Fog.End );
+			ctx->Driver.Fogfv( ctx, GL_FOG_COLOR, ctx->Fog.Color );
+		} else {
+			r300->hw.fogs.cmd[R300_FOGS_STATE] &=
+			    ~R300_FOG_ENABLE;
+		}
+		
+		break;
+
 	case GL_ALPHA_TEST:
 		R300_STATECHANGE(r300, at);
 		if (state) {
@@ -640,6 +658,101 @@ static void r300ColorMask(GLcontext* ctx,
 }
 
 /* =============================================================
+ * Fog
+ */
+static void r300Fogfv( GLcontext *ctx, GLenum pname, const GLfloat *param )
+{
+	r300ContextPtr r300 = R300_CONTEXT(ctx);
+	union { int i; float f; } fogScale, fogStart;
+	
+	(void) param;
+	
+	fogScale.i = r300->hw.fogp.cmd[R300_FOGP_SCALE];
+	fogStart.i = r300->hw.fogp.cmd[R300_FOGP_START];
+
+	switch (pname) {
+	case GL_FOG_MODE:
+		if (!ctx->Fog.Enabled)
+			return;
+		switch (ctx->Fog.Mode) {
+		case GL_LINEAR:
+			R300_STATECHANGE(r300, fogs);
+			r300->hw.fogs.cmd[R300_FOGS_STATE] =
+				(r300->hw.fogs.cmd[R300_FOGS_STATE] & ~R300_FOG_MODE_MASK) | R300_FOG_MODE_LINEAR;
+
+			if (ctx->Fog.Start == ctx->Fog.End) {
+				fogScale.f = -1.0;
+				fogStart.f = 1.0;
+			}
+			else {
+				fogScale.f = 1.0 / (ctx->Fog.End-ctx->Fog.Start);
+				fogStart.f = -ctx->Fog.Start / (ctx->Fog.End-ctx->Fog.Start);
+			}
+			break;
+		case GL_EXP:
+			R300_STATECHANGE(r300, fogs);
+			r300->hw.fogs.cmd[R300_FOGS_STATE] =
+				(r300->hw.fogs.cmd[R300_FOGS_STATE] & ~R300_FOG_MODE_MASK) | R300_FOG_MODE_EXP;
+			fogScale.f = 0.0933*ctx->Fog.Density;
+			fogStart.f = 0.0;
+			break;
+		case GL_EXP2:
+			R300_STATECHANGE(r300, fogs);
+			r300->hw.fogs.cmd[R300_FOGS_STATE] =
+				(r300->hw.fogs.cmd[R300_FOGS_STATE] & ~R300_FOG_MODE_MASK) | R300_FOG_MODE_EXP2;
+			fogScale.f = 0.3*ctx->Fog.Density;
+			fogStart.f = 0.0;
+		default:
+			return;
+		}
+		break;
+	case GL_FOG_DENSITY:
+		switch (ctx->Fog.Mode) {
+		case GL_EXP:
+			fogScale.f = 0.0933*ctx->Fog.Density;
+			fogStart.f = 0.0;
+			break;
+		case GL_EXP2:
+			fogScale.f = 0.3*ctx->Fog.Density;
+			fogStart.f = 0.0;
+		default:
+			break;
+		}
+		break;
+	case GL_FOG_START:
+	case GL_FOG_END:
+		if (ctx->Fog.Mode == GL_LINEAR) {
+			if (ctx->Fog.Start == ctx->Fog.End) {
+				fogScale.f = -1.0;
+				fogStart.f = 1.0;
+			}
+			else {
+				fogScale.f = 1.0 / (ctx->Fog.End-ctx->Fog.Start);
+				fogStart.f = -ctx->Fog.Start / (ctx->Fog.End-ctx->Fog.Start);
+			}
+		}
+		break;
+	case GL_FOG_COLOR:
+		R300_STATECHANGE(r300, fogc);
+		r300->hw.fogc.cmd[R300_FOGC_R] = (GLuint) (ctx->Fog.Color[0]*1023.0F) & 0x3FF;
+		r300->hw.fogc.cmd[R300_FOGC_G] = (GLuint) (ctx->Fog.Color[1]*1023.0F) & 0x3FF;
+		r300->hw.fogc.cmd[R300_FOGC_B] = (GLuint) (ctx->Fog.Color[2]*1023.0F) & 0x3FF;
+		break;
+	case GL_FOG_COORD_SRC:
+		break;
+	default:
+		return;
+	}
+
+	if (fogScale.i != r300->hw.fogp.cmd[R300_FOGP_SCALE] ||
+	    fogStart.i != r300->hw.fogp.cmd[R300_FOGP_START]) {
+		R300_STATECHANGE(r300, fogp);
+		r300->hw.fogp.cmd[R300_FOGP_SCALE] = fogScale.i;
+		r300->hw.fogp.cmd[R300_FOGP_START] = fogStart.i;
+	}
+}
+
+/* =============================================================
  * Point state
  */
 static void r300PointSize(GLcontext * ctx, GLfloat size)
@@ -750,8 +863,8 @@ static void r300StencilFuncSeparate(GLcontext * ctx, GLenum face,
                                     GLenum func, GLint ref, GLuint mask)
 {
 	r300ContextPtr rmesa = R300_CONTEXT(ctx);
-	GLuint refmask = ((ctx->Stencil.Ref[0] << R300_RB3D_ZS2_STENCIL_REF_SHIFT) |
-			  (ctx->Stencil.ValueMask[0] << R300_RB3D_ZS2_STENCIL_MASK_SHIFT));
+	GLuint refmask = (((ctx->Stencil.Ref[0] & 0xff) << R300_RB3D_ZS2_STENCIL_REF_SHIFT) |
+			  ((ctx->Stencil.ValueMask[0] & 0xff) << R300_RB3D_ZS2_STENCIL_MASK_SHIFT));
 			  
 	GLuint flag;
 
@@ -777,7 +890,7 @@ static void r300StencilMaskSeparate(GLcontext * ctx, GLenum face, GLuint mask)
 
 	R300_STATECHANGE(rmesa, zs);
 	rmesa->hw.zs.cmd[R300_ZS_CNTL_2]  &= ~(R300_RB3D_ZS2_STENCIL_MASK << R300_RB3D_ZS2_STENCIL_WRITE_MASK_SHIFT);
-	rmesa->hw.zs.cmd[R300_ZS_CNTL_2] |= ctx->Stencil.WriteMask[0] << R300_RB3D_ZS2_STENCIL_WRITE_MASK_SHIFT;
+	rmesa->hw.zs.cmd[R300_ZS_CNTL_2] |= (ctx->Stencil.WriteMask[0] & 0xff) << R300_RB3D_ZS2_STENCIL_WRITE_MASK_SHIFT;
 }
 
 
@@ -807,9 +920,9 @@ static void r300ClearStencil(GLcontext * ctx, GLint s)
 	r300ContextPtr rmesa = R300_CONTEXT(ctx);
 
 	rmesa->state.stencil.clear =
-	    ((GLuint) ctx->Stencil.Clear |
+	    ((GLuint) (ctx->Stencil.Clear & 0xff) |
 	     (R300_RB3D_ZS2_STENCIL_MASK << R300_RB3D_ZS2_STENCIL_MASK_SHIFT) |
-	     (ctx->Stencil.WriteMask[0] << R300_RB3D_ZS2_STENCIL_WRITE_MASK_SHIFT));
+	     ((ctx->Stencil.WriteMask[0] & 0xff) << R300_RB3D_ZS2_STENCIL_WRITE_MASK_SHIFT));
 }
 
 /* =============================================================
@@ -1157,6 +1270,15 @@ void r300_setup_textures(GLcontext *ctx)
 		fprintf(stderr, "TX_ENABLE: %08x  last_hw_tmu=%d\n", r300->hw.txe.cmd[R300_TXE_ENABLE], last_hw_tmu);
 }
 
+union r300_outputs_written {
+	GLuint vp_outputs;                       /* hw_tcl_on */
+	DECLARE_RENDERINPUTS(index_bitset);      /* !hw_tcl_on */
+};
+
+#define R300_OUTPUTS_WRITTEN_TEST(ow, vp_result, tnl_attrib) \
+	((hw_tcl_on) ? (ow).vp_outputs & (1 << (vp_result)) : \
+	RENDERINPUTS_TEST( (ow.index_bitset), (tnl_attrib) ))
+
 void r300_setup_rs_unit(GLcontext *ctx)
 {
 	r300ContextPtr r300 = R300_CONTEXT(ctx);
@@ -1171,16 +1293,16 @@ void r300_setup_rs_unit(GLcontext *ctx)
 		0x00,
 		0x00
 	};
-	GLuint OutputsWritten;
+	union r300_outputs_written OutputsWritten;
 	GLuint InputsRead;
 	int fp_reg, high_rr;
 	int in_texcoords, col_interp_nr;
 	int i;
 
 	if(hw_tcl_on)
-		OutputsWritten = CURRENT_VERTEX_SHADER(ctx)->Base.OutputsWritten;
+		OutputsWritten.vp_outputs = CURRENT_VERTEX_SHADER(ctx)->Base.OutputsWritten;
 	else
-		OutputsWritten = r300->state.render_inputs;
+		RENDERINPUTS_COPY( OutputsWritten.index_bitset, r300->state.render_inputs_bitset );
 
 	if (ctx->FragmentProgram._Current)
 		InputsRead = ctx->FragmentProgram._Current->Base.InputsRead;
@@ -1211,7 +1333,7 @@ void r300_setup_rs_unit(GLcontext *ctx)
 					| (fp_reg << R300_RS_ROUTE_DEST_SHIFT);
 			high_rr = fp_reg;
 
-			if (!(OutputsWritten & (hw_tcl_on ? (1 << (VERT_RESULT_TEX0+i)) : (_TNL_BIT_TEX0<<i)))) {
+			if (!R300_OUTPUTS_WRITTEN_TEST( OutputsWritten, VERT_RESULT_TEX0+i, _TNL_ATTRIB_TEX(i) )) {
 				/* Passing invalid data here can lock the GPU. */
 				WARN_ONCE("fragprog wants coords for tex%d, vp doesn't provide them!\n", i);
 				//_mesa_print_program(&CURRENT_VERTEX_SHADER(ctx)->Base);
@@ -1221,12 +1343,12 @@ void r300_setup_rs_unit(GLcontext *ctx)
 			fp_reg++;
 		} 
 		/* Need to count all coords enabled at vof */
-		if (OutputsWritten & (hw_tcl_on ? (1 << (VERT_RESULT_TEX0+i)) : (_TNL_BIT_TEX0<<i)))
+		if (R300_OUTPUTS_WRITTEN_TEST( OutputsWritten, VERT_RESULT_TEX0+i, _TNL_ATTRIB_TEX(i) ))
 			in_texcoords++;
 	}
 
 	if (InputsRead & FRAG_BIT_COL0) {
-		if (!(OutputsWritten & (hw_tcl_on ? (1<<VERT_RESULT_COL0) : _TNL_BIT_COLOR0))) {
+		if (!R300_OUTPUTS_WRITTEN_TEST( OutputsWritten, VERT_RESULT_COL0, _TNL_ATTRIB_COLOR0 )) {
 			WARN_ONCE("fragprog wants col0, vp doesn't provide it\n");
 			goto out; /* FIXME */
 			//_mesa_print_program(&CURRENT_VERTEX_SHADER(ctx)->Base);
@@ -1242,7 +1364,7 @@ void r300_setup_rs_unit(GLcontext *ctx)
 	out:
 	
 	if (InputsRead & FRAG_BIT_COL1) {
-		if (!(OutputsWritten & (hw_tcl_on ? (1<<VERT_RESULT_COL1) : _TNL_BIT_COLOR1))) {
+		if (!R300_OUTPUTS_WRITTEN_TEST( OutputsWritten, VERT_RESULT_COL1, _TNL_ATTRIB_COLOR1 )) {
 			WARN_ONCE("fragprog wants col1, vp doesn't provide it\n");
 			//exit(-1);
 		}
@@ -1281,6 +1403,7 @@ void r300_setup_rs_unit(GLcontext *ctx)
 #define bump_vpu_count(ptr, new_count)   do{\
 	drm_r300_cmd_header_t* _p=((drm_r300_cmd_header_t*)(ptr));\
 	int _nc=(new_count)/4; \
+	assert(_nc < 256); \
 	if(_nc>_p->vpu.count)_p->vpu.count=_nc;\
 	}while(0)
 
@@ -1402,7 +1525,7 @@ static void r300GenerateSimpleVertexShader(r300ContextPtr r300)
 		)
 	o_reg += 2;
 	
-	if (r300->state.render_inputs & _TNL_BIT_COLOR1) {
+	if (RENDERINPUTS_TEST( r300->state.render_inputs_bitset, _TNL_ATTRIB_COLOR1 )) {
 		WRITE_OP(
 			EASY_VSF_OP(MUL, o_reg++, ALL, RESULT),
 			VSF_REG(r300->state.vap_reg.i_color[1]),
@@ -1413,7 +1536,7 @@ static void r300GenerateSimpleVertexShader(r300ContextPtr r300)
 	
 	/* Pass through texture coordinates, if any */
 	for(i=0;i < r300->radeon.glCtx->Const.MaxTextureUnits;i++)
-		if(r300->state.render_inputs & (_TNL_BIT_TEX0<<i)){
+		if (RENDERINPUTS_TEST( r300->state.render_inputs_bitset, _TNL_ATTRIB_TEX(i) )){
 			// fprintf(stderr, "i_tex[%d]=%d\n", i, r300->state.vap_reg.i_tex[i]);
 			WRITE_OP(
 				EASY_VSF_OP(MUL, o_reg++ /* 2+i */, ALL, RESULT),
@@ -1870,7 +1993,8 @@ void r300ResetHwState(r300ContextPtr r300)
 		r300->hw.gb_misc.cmd[R300_GB_MISC_TILE_CONFIG] = R300_GB_TILE_ENABLE
 							| R300_GB_TILE_PIPE_COUNT_RV300
 							| R300_GB_TILE_SIZE_16;
-	r300->hw.gb_misc.cmd[R300_GB_MISC_SELECT] = 0x00000000;
+	/* set to 0 when fog is disabled? */
+	r300->hw.gb_misc.cmd[R300_GB_MISC_SELECT] = R300_GB_FOG_SELECT_1_1_W;
 	r300->hw.gb_misc.cmd[R300_GB_MISC_AA_CONFIG] = 0x00000000; /* No antialiasing */
 
 	//r300->hw.txe.cmd[R300_TXE_ENABLE] = 0;
@@ -1907,9 +2031,6 @@ void r300ResetHwState(r300ContextPtr r300)
 	r300PolygonMode(ctx, GL_BACK, ctx->Polygon.BackMode);
 	r300->hw.unk4288.cmd[2] = 0x00000001;
 	r300->hw.unk4288.cmd[3] = 0x00000000;
-	r300->hw.unk4288.cmd[4] = 0x00000000;
-	r300->hw.unk4288.cmd[5] = 0x00000000;
-
 	r300->hw.unk42A0.cmd[1] = 0x00000000;
 
 	r300PolygonOffset(ctx, ctx->Polygon.OffsetFactor, ctx->Polygon.OffsetUnits);
@@ -1949,13 +2070,13 @@ void r300ResetHwState(r300ContextPtr r300)
 		r300->hw.fpi[3].cmd[i] = FP_SELA(0,W,NO,FP_TMP(0),0,0);
 	}
 #endif
-
-	r300->hw.unk4BC0.cmd[1] = 0;
-
-	r300->hw.unk4BC8.cmd[1] = 0;
-	r300->hw.unk4BC8.cmd[2] = 0;
-	r300->hw.unk4BC8.cmd[3] = 0;
-
+	r300Enable(ctx, GL_FOG, ctx->Fog.Enabled);
+	ctx->Driver.Fogfv( ctx, GL_FOG_MODE, NULL );
+	ctx->Driver.Fogfv( ctx, GL_FOG_DENSITY, &ctx->Fog.Density );
+	ctx->Driver.Fogfv( ctx, GL_FOG_START, &ctx->Fog.Start );
+	ctx->Driver.Fogfv( ctx, GL_FOG_END, &ctx->Fog.End );
+	ctx->Driver.Fogfv( ctx, GL_FOG_COLOR, ctx->Fog.Color );
+	ctx->Driver.Fogfv( ctx, GL_FOG_COORDINATE_SOURCE_EXT, NULL );
 
 	r300->hw.at.cmd[R300_AT_UNKNOWN] = 0;
 	r300->hw.unk4BD8.cmd[1] = 0;
@@ -2128,6 +2249,7 @@ void r300InitStateFuncs(struct dd_function_table* functions)
 	functions->DepthFunc = r300DepthFunc;
 	functions->DepthMask = r300DepthMask;
 	functions->CullFace = r300CullFace;
+	functions->Fogfv = r300Fogfv;
 	functions->FrontFace = r300FrontFace;
 	functions->ShadeModel = r300ShadeModel;
 

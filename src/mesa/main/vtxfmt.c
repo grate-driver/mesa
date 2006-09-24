@@ -72,7 +72,10 @@
 #include "vtxfmt_tmp.h"
 
 
-
+/**
+ * Use the per-vertex functions found in <vfmt> to initialze the given
+ * API dispatch table.
+ */
 static void
 install_vtxfmt( struct _glapi_table *tab, const GLvertexformat *vfmt )
 {
@@ -82,7 +85,6 @@ install_vtxfmt( struct _glapi_table *tab, const GLvertexformat *vfmt )
    SET_Color4f(tab, vfmt->Color4f);
    SET_Color4fv(tab, vfmt->Color4fv);
    SET_EdgeFlag(tab, vfmt->EdgeFlag);
-   SET_EdgeFlagv(tab, vfmt->EdgeFlagv);
    SET_EvalCoord1f(tab, vfmt->EvalCoord1f);
    SET_EvalCoord1fv(tab, vfmt->EvalCoord1fv);
    SET_EvalCoord2f(tab, vfmt->EvalCoord2f);
@@ -124,6 +126,15 @@ install_vtxfmt( struct _glapi_table *tab, const GLvertexformat *vfmt )
    SET_CallLists(tab, vfmt->CallLists);
    SET_Begin(tab, vfmt->Begin);
    SET_End(tab, vfmt->End);
+   SET_Rectf(tab, vfmt->Rectf);
+   SET_DrawArrays(tab, vfmt->DrawArrays);
+   SET_DrawElements(tab, vfmt->DrawElements);
+   SET_DrawRangeElements(tab, vfmt->DrawRangeElements);
+   SET_EvalMesh1(tab, vfmt->EvalMesh1);
+   SET_EvalMesh2(tab, vfmt->EvalMesh2);
+   ASSERT(tab->EvalMesh2);
+
+   /* GL_NV_vertex_program */
    SET_VertexAttrib1fNV(tab, vfmt->VertexAttrib1fNV);
    SET_VertexAttrib1fvNV(tab, vfmt->VertexAttrib1fvNV);
    SET_VertexAttrib2fNV(tab, vfmt->VertexAttrib2fNV);
@@ -132,6 +143,7 @@ install_vtxfmt( struct _glapi_table *tab, const GLvertexformat *vfmt )
    SET_VertexAttrib3fvNV(tab, vfmt->VertexAttrib3fvNV);
    SET_VertexAttrib4fNV(tab, vfmt->VertexAttrib4fNV);
    SET_VertexAttrib4fvNV(tab, vfmt->VertexAttrib4fvNV);
+#if FEATURE_ARB_vertex_program
    SET_VertexAttrib1fARB(tab, vfmt->VertexAttrib1fARB);
    SET_VertexAttrib1fvARB(tab, vfmt->VertexAttrib1fvARB);
    SET_VertexAttrib2fARB(tab, vfmt->VertexAttrib2fARB);
@@ -140,13 +152,7 @@ install_vtxfmt( struct _glapi_table *tab, const GLvertexformat *vfmt )
    SET_VertexAttrib3fvARB(tab, vfmt->VertexAttrib3fvARB);
    SET_VertexAttrib4fARB(tab, vfmt->VertexAttrib4fARB);
    SET_VertexAttrib4fvARB(tab, vfmt->VertexAttrib4fvARB);
-   SET_Rectf(tab, vfmt->Rectf);
-   SET_DrawArrays(tab, vfmt->DrawArrays);
-   SET_DrawElements(tab, vfmt->DrawElements);
-   SET_DrawRangeElements(tab, vfmt->DrawRangeElements);
-   SET_EvalMesh1(tab, vfmt->EvalMesh1);
-   SET_EvalMesh2(tab, vfmt->EvalMesh2);
-   ASSERT(tab->EvalMesh2);
+#endif
 }
 
 

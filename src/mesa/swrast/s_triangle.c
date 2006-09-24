@@ -38,7 +38,6 @@
 
 #include "s_aatriangle.h"
 #include "s_context.h"
-#include "s_depth.h"
 #include "s_feedback.h"
 #include "s_span.h"
 #include "s_triangle.h"
@@ -883,7 +882,7 @@ fast_persp_span(GLcontext *ctx, struct sw_span *span,
 
 /*
  * This is the big one!
- * Interpolate Z, RGB, Alpha, specular, fog, and N sets of texture coordinates.
+ * Interpolate Z, RGB, Alpha, specular, fog, N sets of texture coordinates, and varying floats.
  * Yup, it's slow.
  */
 #define NAME multitextured_triangle
@@ -894,6 +893,7 @@ fast_persp_span(GLcontext *ctx, struct sw_span *span,
 #define INTERP_ALPHA 1
 #define INTERP_SPEC 1
 #define INTERP_MULTITEX 1
+#define INTERP_VARYING 1
 #define RENDER_SPAN( span )   _swrast_write_rgba_span(ctx, &span);
 #include "s_tritemp.h"
 
@@ -914,7 +914,7 @@ fast_persp_span(GLcontext *ctx, struct sw_span *span,
       return;								\
    }
 #define RENDER_SPAN( span )						\
-   if (ctx->Visual.depthBits <= 16) {					\
+   if (rb->DepthBits <= 16) {						\
       GLuint i;								\
       const GLushort *zRow = (const GLushort *)				\
          rb->GetPointer(ctx, rb, span.x, span.y);			\
@@ -1072,9 +1072,10 @@ _swrast_choose_triangle( GLcontext *ctx )
          }
       }
 
-      if (ctx->Texture._EnabledCoordUnits || ctx->FragmentProgram._Active || ctx->ATIFragmentShader._Enabled) {
+      if (ctx->Texture._EnabledCoordUnits || ctx->FragmentProgram._Active ||
+          ctx->ATIFragmentShader._Enabled || ctx->ShaderObjects._FragmentShaderPresent) {
          /* Ugh, we do a _lot_ of tests to pick the best textured tri func */
-	 const struct gl_texture_object *texObj2D;
+         const struct gl_texture_object *texObj2D;
          const struct gl_texture_image *texImg;
          GLenum minFilter, magFilter, envMode;
          GLint format;
@@ -1088,17 +1089,18 @@ _swrast_choose_triangle( GLcontext *ctx )
          /* First see if we can use an optimized 2-D texture function */
          if (ctx->Texture._EnabledCoordUnits == 0x1
              && !ctx->FragmentProgram._Active
-	     && !ctx->ATIFragmentShader._Enabled
+             && !ctx->ATIFragmentShader._Enabled
+             && !ctx->ShaderObjects._FragmentShaderPresent
              && ctx->Texture.Unit[0]._ReallyEnabled == TEXTURE_2D_BIT
              && texObj2D->WrapS == GL_REPEAT
-	     && texObj2D->WrapT == GL_REPEAT
+             && texObj2D->WrapT == GL_REPEAT
              && texImg->_IsPowerOfTwo
              && texImg->Border == 0
              && texImg->Width == texImg->RowStride
              && (format == MESA_FORMAT_RGB || format == MESA_FORMAT_RGBA)
-	     && minFilter == magFilter
-	     && ctx->Light.Model.ColorControl == GL_SINGLE_COLOR
-	     && ctx->Texture.Unit[0].EnvMode != GL_COMBINE_EXT) {
+             && minFilter == magFilter
+             && ctx->Light.Model.ColorControl == GL_SINGLE_COLOR
+             && ctx->Texture.Unit[0].EnvMode != GL_COMBINE_EXT) {
 	    if (ctx->Hint.PerspectiveCorrection==GL_FASTEST) {
 	       if (minFilter == GL_NEAREST
 		   && format == MESA_FORMAT_RGB
@@ -1108,7 +1110,7 @@ _swrast_choose_triangle( GLcontext *ctx )
 			&& ctx->Depth.Mask == GL_TRUE)
 		       || swrast->_RasterMask == TEXTURE_BIT)
 		   && ctx->Polygon.StippleFlag == GL_FALSE
-                   && ctx->Visual.depthBits <= 16) {
+                   && ctx->DrawBuffer->Visual.depthBits <= 16) {
 		  if (swrast->_RasterMask == (DEPTH_BIT | TEXTURE_BIT)) {
 		     USE(simple_z_textured_triangle);
 		  }

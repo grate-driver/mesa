@@ -35,8 +35,8 @@
 /*
  * basiccurveeval.h
  *
- * $Date: 2006/03/29 18:54:00 $ $Revision: 1.2 $
- * $Header: /cvs/mesa/Mesa/src/glu/sgi/libnurbs/internals/basiccrveval.h,v 1.2 2006/03/29 18:54:00 brianp Exp $
+ * $Date: 2006-03-29 18:54:00 $ $Revision: 1.2 $
+ * $Header: /cvs/mesa/Mesa/src/glu/sgi/libnurbs/internals/basiccrveval.h,v 1.2 2006-03-29 18:54:00 brianp Exp $
  */
 
 #ifndef __glubasiccrveval_h_

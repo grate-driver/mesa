@@ -572,7 +572,7 @@ intelChooseTextureFormat( GLcontext *ctx, GLint internalFormat,
    case GL_DEPTH_COMPONENT16:
    case GL_DEPTH_COMPONENT24:
    case GL_DEPTH_COMPONENT32:
-      return &_mesa_texformat_depth_component16;
+      return &_mesa_texformat_z16;
 
    default:
       fprintf(stderr, "unexpected texture format %s in %s\n", 
@@ -787,7 +787,8 @@ int intelUploadTexImages( intelContextPtr intel,
 	 }
 
 	 /* Set the base offset of the texture image */
-	 t->BufAddr = intel->intelScreen->tex.map + t->base.memBlock->ofs;
+	 t->BufAddr = (GLubyte *) (intel->intelScreen->tex.map + 
+				   t->base.memBlock->ofs);
 	 t->TextureOffset = intel->intelScreen->tex.offset + t->base.memBlock->ofs;
 	 t->dirty = ~0;
       }

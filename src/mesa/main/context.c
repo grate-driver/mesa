@@ -913,18 +913,18 @@ _mesa_init_current( GLcontext *ctx )
 {
    GLuint i;
 
-   /* Current group */
+   /* Init all to (0,0,0,1) */
    for (i = 0; i < VERT_ATTRIB_MAX; i++) {
       ASSIGN_4V( ctx->Current.Attrib[i], 0.0, 0.0, 0.0, 1.0 );
    }
-   /* special cases: */
+
+   /* redo special cases: */
    ASSIGN_4V( ctx->Current.Attrib[VERT_ATTRIB_WEIGHT], 1.0, 0.0, 0.0, 1.0 );
    ASSIGN_4V( ctx->Current.Attrib[VERT_ATTRIB_NORMAL], 0.0, 0.0, 1.0, 1.0 );
    ASSIGN_4V( ctx->Current.Attrib[VERT_ATTRIB_COLOR0], 1.0, 1.0, 1.0, 1.0 );
    ASSIGN_4V( ctx->Current.Attrib[VERT_ATTRIB_COLOR1], 0.0, 0.0, 0.0, 1.0 );
    ASSIGN_4V( ctx->Current.Attrib[VERT_ATTRIB_FOG], 0.0, 0.0, 0.0, 0.0 );
-
-   ctx->Current.Index = 1;
+   ctx->Current.Attrib[VERT_ATTRIB_COLOR_INDEX][0] = 1.0;
    ctx->Current.EdgeFlag = GL_TRUE;
 }
 
@@ -959,14 +959,18 @@ _mesa_init_constants( GLcontext *ctx )
    assert(MAX_TEXTURE_LEVELS >= MAX_3D_TEXTURE_LEVELS);
    assert(MAX_TEXTURE_LEVELS >= MAX_CUBE_TEXTURE_LEVELS);
 
+   assert(MAX_TEXTURE_UNITS >= MAX_TEXTURE_COORD_UNITS);
+   assert(MAX_TEXTURE_UNITS >= MAX_TEXTURE_IMAGE_UNITS);
+
    /* Constants, may be overriden (usually only reduced) by device drivers */
    ctx->Const.MaxTextureLevels = MAX_TEXTURE_LEVELS;
    ctx->Const.Max3DTextureLevels = MAX_3D_TEXTURE_LEVELS;
    ctx->Const.MaxCubeTextureLevels = MAX_CUBE_TEXTURE_LEVELS;
    ctx->Const.MaxTextureRectSize = MAX_TEXTURE_RECT_SIZE;
-   ctx->Const.MaxTextureUnits = MAX_TEXTURE_UNITS;
    ctx->Const.MaxTextureCoordUnits = MAX_TEXTURE_COORD_UNITS;
    ctx->Const.MaxTextureImageUnits = MAX_TEXTURE_IMAGE_UNITS;
+   ctx->Const.MaxTextureUnits = MIN2(ctx->Const.MaxTextureCoordUnits,
+                                     ctx->Const.MaxTextureImageUnits);
    ctx->Const.MaxTextureMaxAnisotropy = MAX_TEXTURE_MAX_ANISOTROPY;
    ctx->Const.MaxTextureLodBias = MAX_TEXTURE_LOD_BIAS;
    ctx->Const.MaxArrayLockSize = MAX_ARRAY_LOCK_SIZE;
@@ -1041,9 +1045,39 @@ _mesa_init_constants( GLcontext *ctx )
 #endif
 
    /* sanity checks */
-   ASSERT(ctx->Const.MaxTextureUnits == MAX2(ctx->Const.MaxTextureImageUnits, ctx->Const.MaxTextureCoordUnits));
+   ASSERT(ctx->Const.MaxTextureUnits == MIN2(ctx->Const.MaxTextureImageUnits,
+                                             ctx->Const.MaxTextureCoordUnits));
    ASSERT(ctx->Const.FragmentProgram.MaxLocalParams <= MAX_PROGRAM_LOCAL_PARAMS);
    ASSERT(ctx->Const.VertexProgram.MaxLocalParams <= MAX_PROGRAM_LOCAL_PARAMS);
+}
+
+
+/**
+ * Do some sanity checks on the limits/constants for the given context.
+ * Only called the first time a context is bound.
+ */
+static void
+check_context_limits(GLcontext *ctx)
+{
+   /* Many context limits/constants are limited by the size of
+    * internal arrays.
+    */
+   assert(ctx->Const.MaxTextureImageUnits <= MAX_TEXTURE_IMAGE_UNITS);
+   assert(ctx->Const.MaxTextureCoordUnits <= MAX_TEXTURE_COORD_UNITS);
+   assert(ctx->Const.MaxTextureUnits <= MAX_TEXTURE_IMAGE_UNITS);
+   assert(ctx->Const.MaxTextureUnits <= MAX_TEXTURE_COORD_UNITS);
+
+   assert(ctx->Const.MaxViewportWidth <= MAX_WIDTH);
+   assert(ctx->Const.MaxViewportHeight <= MAX_WIDTH);
+
+   /* make sure largest texture image is <= MAX_WIDTH in size */
+   assert((1 << (ctx->Const.MaxTextureLevels -1 )) <= MAX_WIDTH);
+   assert((1 << (ctx->Const.MaxCubeTextureLevels -1 )) <= MAX_WIDTH);
+   assert((1 << (ctx->Const.Max3DTextureLevels -1 )) <= MAX_WIDTH);
+
+   assert(ctx->Const.MaxDrawBuffers <= MAX_DRAW_BUFFERS);
+
+   /* XXX probably add more tests */
 }
 
 
@@ -1642,6 +1676,7 @@ _mesa_make_current( GLcontext *newCtx, GLframebuffer *drawBuffer,
                                drawBuffer->Width, drawBuffer->Height);
 	    _mesa_set_scissor(newCtx, 0, 0,
 			      drawBuffer->Width, drawBuffer->Height );
+            check_context_limits(newCtx);
          }
       }
 

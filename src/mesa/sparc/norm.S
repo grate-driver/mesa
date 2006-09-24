@@ -1,4 +1,4 @@
-/* $Id: norm.S,v 1.5 2005/07/28 00:11:11 idr Exp $ */
+/* $Id: norm.S,v 1.5 2005-07-28 00:11:11 idr Exp $ */
 
 #include "sparc_matrix.h"
 

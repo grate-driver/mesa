@@ -47,11 +47,13 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "colormac.h"
 #include "radeon_context.h"
 
-/* PPC doesnt support 16 bit elts ... */
-#ifndef MESA_BIG_ENDIAN
 #define USER_BUFFERS
 #define RADEON_VTXFMT_A
 #define HW_VBOS
+
+/* We don't handle 16 bits elts swapping yet */
+#ifdef MESA_BIG_ENDIAN
+#define FORCE_32BITS_ELTS
 #endif
 
 //#define OPTIMIZE_ELTS
@@ -346,6 +348,21 @@ struct r300_state_atom {
 #define R300_FPP_PARAM_0	1
 #define R300_FPP_CMDSIZE	(32*4+1)
 
+#define R300_FOGS_CMD_0		0
+#define R300_FOGS_STATE		1
+#define R300_FOGS_CMDSIZE	2
+
+#define R300_FOGC_CMD_0		0
+#define R300_FOGC_R		1
+#define R300_FOGC_G		2
+#define R300_FOGC_B		3
+#define R300_FOGC_CMDSIZE	4
+
+#define R300_FOGP_CMD_0		0
+#define R300_FOGP_SCALE		1
+#define R300_FOGP_START		2
+#define R300_FOGP_CMDSIZE	3
+
 #define R300_AT_CMD_0		0
 #define R300_AT_ALPHA_TEST	1
 #define R300_AT_UNKNOWN		2
@@ -432,6 +449,8 @@ struct r300_hw_state {
 	struct r300_state_atom unk4260; /* (4260) */
 	struct r300_state_atom unk4274; /* (4274) */
 	struct r300_state_atom unk4288; /* (4288) */
+	struct r300_state_atom fogp;	/* fog parameters (4294) */
+	struct r300_state_atom unk429C; /* (429C) */
 	struct r300_state_atom unk42A0;	/* (42A0) */
 	struct r300_state_atom zbs;	/* zbias (42A4) */
 	struct r300_state_atom unk42B4; /* (42B4) */
@@ -446,8 +465,8 @@ struct r300_hw_state {
 	struct r300_state_atom fpt;     /* texi - (4620) */
 	struct r300_state_atom unk46A4;	/* (46A4) */
 	struct r300_state_atom fpi[4];	/* fp instructions (46C0/47C0/48C0/49C0) */
-	struct r300_state_atom unk4BC0;	/* (4BC0) */
-	struct r300_state_atom unk4BC8;	/* (4BC8) */
+	struct r300_state_atom fogs;	/* fog state (4BC0) */
+	struct r300_state_atom fogc;	/* fog color (4BC8) */
 	struct r300_state_atom at;	/* alpha test (4BD4) */
 	struct r300_state_atom unk4BD8;	/* (4BD8) */
 	struct r300_state_atom fpp;     /* 0x4C00 and following */
@@ -532,7 +551,8 @@ struct r300_vap_reg_state {
 /* Vertex shader state */
 
 /* Perhaps more if we store programs in vmem? */
-#define VSF_MAX_FRAGMENT_LENGTH (256*4)
+/* drm_r300_cmd_header_t->vpu->count is unsigned char */
+#define VSF_MAX_FRAGMENT_LENGTH (255*4)
 	
 /* Can be tested with colormat currently. */
 #define VSF_MAX_FRAGMENT_TEMPS (14)
@@ -759,7 +779,7 @@ struct r300_state {
 	GLuint *Elts;
 	struct r300_dma_region elt_dma;
 	
-	GLuint render_inputs; /* actual render inputs that R300 was configured for. 
+	DECLARE_RENDERINPUTS(render_inputs_bitset); /* actual render inputs that R300 was configured for. 
 				 They are the same as tnl->render_inputs for fixed pipeline */	
 	
 	struct {
@@ -810,6 +830,7 @@ struct r300_context {
 #endif
 
 	GLboolean texmicrotile;
+	GLboolean span_dlocking;
 };
 
 struct r300_buffer_object {

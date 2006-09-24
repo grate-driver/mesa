@@ -191,20 +191,23 @@ static int
 GetDrawableAttribute( Display *dpy, GLXDrawable drawable,
 		      int attribute, unsigned int *value )
 {
-   __GLXdisplayPrivate *priv = __glXInitialize(dpy);
+   __GLXdisplayPrivate *priv;
    xGLXGetDrawableAttributesReply reply;
    CARD32 * data;
    unsigned int length;
    unsigned int i;
    unsigned int num_attributes;
+
+   if ( (dpy == NULL) || (drawable == 0) ) {
+      return 0;
+   }
+
+   priv = __glXInitialize(dpy);
    GLboolean use_glx_1_3 = ((priv->majorVersion > 1)
 			    || (priv->minorVersion >= 3));
 
    *value = 0;
 
-   if ( (dpy == NULL) || (drawable == 0) ) {
-      return 0;
-   }
 
    
    LockDisplay(dpy);
@@ -284,6 +287,7 @@ CreateDrawable( Display *dpy, const __GLcontextModes * fbconfig,
    xGLXCreateWindowReq * req;
    CARD32 * data;
    unsigned int i;
+   CARD8 opcode;
 
    i = 0;
    if (attrib_list) {
@@ -291,11 +295,16 @@ CreateDrawable( Display *dpy, const __GLcontextModes * fbconfig,
 	   i++;
    }
 
+    opcode = __glXSetupForCommand(dpy);
+    if (!opcode) {
+	return None;
+    }
+
    LockDisplay(dpy);
    GetReqExtra( GLXCreateWindow, 8 * i, req );
    data = (CARD32 *) (req + 1);
 
-   req->reqType = __glXSetupForCommand(dpy);
+   req->reqType = opcode;
    req->glxCode = glxCode;
    req->screen = (CARD32) fbconfig->screen;
    req->fbconfig = fbconfig->fbconfigID;

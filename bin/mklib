@@ -5,7 +5,7 @@
 # Improvements/fixes are welcome.
 
 
-# Copyright (C) 1999-2005  Brian Paul   All Rights Reserved.
+# Copyright (C) 1999-2006  Brian Paul   All Rights Reserved.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -36,6 +36,7 @@ DEPS=""
 LINK=""
 CPLUSPLUS=0
 STATIC=0
+DLOPEN=0
 INSTALLDIR="."
 ARCH="auto"
 ARCHOPT=""
@@ -64,6 +65,7 @@ do
 	    echo '                Not observed on all systems at this time.'
 	    echo '  -cplusplus    link with C++ runtime'
 	    echo '  -static       make a static library (default is dynamic/shared)'
+	    echo '  -dlopen       make a shared library suitable for dynamic loading'
 	    echo '  -install DIR  put resulting library file(s) in DIR'
 	    echo '  -arch ARCH    override using `uname` to determine host system'
 	    echo '  -archopt OPT  specify an extra achitecture-specific option OPT'
@@ -103,6 +105,9 @@ do
 	    ;;
 	'-static')
 	    STATIC=1
+	    ;;
+	'-dlopen')
+	    DLOPEN=1
 	    ;;
 	'-install')
 	    shift 1;
@@ -175,7 +180,7 @@ fi
 #
 case $ARCH in
 
-    'Linux' | 'OpenBSD')
+    'Linux' | 'OpenBSD' | 'GNU' | GNU/*)
 	# we assume gcc
 
 	if [ "x$LINK" = "x" ] ; then
@@ -209,18 +214,22 @@ case $ARCH in
         elif [ $STATIC = 1 ] ; then
 	    LIBNAME="lib${LIBNAME}"     # prefix with "lib"
             echo "mklib: Making" $ARCH "static library: " ${LIBNAME}.a
-            rm -f ${LIBNAME}.a
-            ar -ru ${LIBNAME}.a ${OBJECTS}
+            LINK="ar"
+            OPTS="-ru"
+            # make lib
+            ${LINK} ${OPTS} ${LIBNAME}.a ${OBJECTS}
 	    ranlib ${LIBNAME}.a
             # finish up
             FINAL_LIBS=${LIBNAME}.a
         else
 	    LIBNAME="lib${LIBNAME}"     # prefix with "lib"
-	    if [ $ARCH = 'Linux' ] ; then
+	    case $ARCH in 'Linux' | 'GNU' | GNU/*)
 		OPTS="-Xlinker -Bsymbolic -shared -Wl,-soname,${LIBNAME}.so.${MAJOR}"
-	    else
+	    ;;
+	    *)
 		OPTS="-shared -Wl,-soname,${LIBNAME}.so.${MAJOR}"
-	    fi
+	    ;;
+	    esac
 	    if [ $EXPORTS ] ; then
 		#OPTS="${OPTS} -Xlinker --retain-symbols-file ${EXPORTS}"
 		# Make the 'exptmp' file for --version-script option
@@ -276,9 +285,7 @@ case $ARCH in
 	else
 	    LIBNAME="lib${LIBNAME}.so"
 	    echo "mklib: Making SunOS shared library: " ${LIBNAME}
-	    # XXX OPTS for gcc should be -shared, but that doesn't work.
-	    # Using -G does work though.
-	    OPTS="-G"
+
 	    if [ "x$LINK" = "x" ] ; then
 		# -linker was not specified, choose default linker now
 		if [ $CPLUSPLUS = 1 ] ; then
@@ -298,7 +305,34 @@ case $ARCH in
 		    LINK="ld"
 		fi
 	    fi
-	    echo "mklib: linker is" ${LINK} ${OPTS}
+
+	    # linker options
+	    if [ ${LINK} = "ld" -o ${LINK} = "cc" -o ${LINK} = "CC" ] ; then
+		# SunOS tools, -G to make shared libs
+		OPTS="-G"
+	    else
+		# gcc linker
+		# Check if objects are 32-bit and we're running in 64-bit
+		# environment.  If so, pass -m32 flag to linker.
+		set ${OBJECTS}
+		ABI32=`file $1 | grep 32-bit`
+		if [ "${ABI32}" ] ; then
+		    OPTS="-m32 -shared -Wl,-Bdynamic"
+		else
+		    OPTS="-m64 -shared -Wl,-Bdynamic"
+		fi
+	    fi
+
+	    # Check if objects are SPARC v9
+	    # file says: ELF 64-bit MSB relocatable SPARCV9 Version 1
+	    set ${OBJECTS}
+	    SPARCV9=`file $1 | grep SPARCV9`
+	    if [ "${SPARCV9}" ] ; then
+		OPTS="${OPTS} -xarch=v9"
+	    fi
+
+	    # for debug:
+	    #echo "mklib: linker is" ${LINK} ${OPTS}
 	    rm -f ${LIBNAME}.${MAJOR} ${LIBNAME}
 	    ${LINK} ${OPTS} -o ${LIBNAME}.${MAJOR} ${OBJECTS} ${DEPS}
 	    ln -s ${LIBNAME}.${MAJOR} ${LIBNAME}
@@ -368,26 +402,33 @@ case $ARCH in
 	    FINAL_LIBS=${LIBNAME}
 	else
 	    LIBNAME="lib${LIBNAME}.so"  # prefix with "lib", suffix with ".so"
-	    # XXX we should run 'file' on the first object file to determine
-	    # if it's o32, n32 or 64 format, as we do for Linux above.
-	    if [ $ARCHOPT = "64" ] ; then
-		# 64-bit ABI
-		OPTS="-64 -shared -all"
-		echo "mklib: Making IRIX 64-bit shared library: " ${LIBNAME}
-	    elif [ $ARCHOPT = "o32" ] ; then
-		# old 32-bit ABI
+
+	    # examine first object to determine ABI
+    	    set ${OBJECTS}
+	    ABI_O32=`file $1 | grep 'ELF 32-bit'`
+	    ABI_N32=`file $1 | grep 'ELF N32'`
+	    ABI_N64=`file $1 | grep 'ELF 64-bit'`
+	    if [ "${ABI_O32}" ] ; then
 		OPTS="-32 -shared -all"
-		echo "mklib: Making IRIX o32-bit shared library: " ${LIBNAME}
-	    else
-		# new 32-bit ABI
+		ABI="o32-bit"
+	    elif [ "${ABI_N32}" ] ; then
 		OPTS="-n32 -shared -all"
-		echo "mklib: Making IRIX n32-bit shared library: " ${LIBNAME}
+		ABI="n32-bit"
+	    elif [ "${ABI_N64}" ] ; then
+		OPTS="-64 -shared -all"
+		ABI="64-bit"
+	    else
+		echo "Error: Unexpected IRIX ABI!"
+		exit 1
 	    fi
+
 	    if [ $CPLUSPLUS = 1 ] ; then
 		LINK="CC"
 	    else
 		LINK="ld"
 	    fi
+
+	    echo "mklib: Making IRIX " ${ABI} " shared library: " ${LIBNAME}
 	    ${LINK} ${OPTS} -o ${LIBNAME} ${OBJECTS} ${DEPS}
 	    FINAL_LIBS=${LIBNAME}
 	fi
@@ -409,6 +450,10 @@ case $ARCH in
 	    ar -ruv ${LIBNAME} ${OBJECTS}
 	    FINAL_LIBS=${LIBNAME}
 	else
+            # HP uses a .2 for their current GL/GLU libraries
+	    if [ ${LIBNAME} = "GL" -o ${LIBNAME} = "GLU" ] ; then
+	       MAJOR=2
+	    fi
 	    RUNLIB="lib${LIBNAME}.${MAJOR}"
 	    DEVLIB="lib${LIBNAME}.sl"
 	    echo "mklib: Making HP-UX shared library: " ${RUNLIB} ${DEVLIB}
@@ -418,26 +463,27 @@ case $ARCH in
 	fi
 	;;
 
-    'AIX' | 'AIX64')
-	if [ $ARCH = "AIX64" ] ; then
+    'AIX' )
+	# examine first object to determine ABI
+    	set ${OBJECTS}
+	ABI_64=`file $1 | grep '64-bit'`
+	if [ "${ABI_64}" ] ; then
 	    X64="-X64"
+	    Q64="-q64"
+	    OFILE=shr_64.o
+	else
+	    OFILE=shr.o  #Want to be consistent with the IBM libGL.a
 	fi
 
-        if [ $STATIC = 1 ] ; then
-            LIBNAME="lib${LIBNAME}.a"
-            echo "mklib: Making AIX static library: " ${LIBNAME}
-	    rm -f ${LIBNAME}
-            ar -ruv ${X64} ${LIBNAME} ${OBJECTS}
-            FINAL_LIBS=${LIBNAME}
-        else
+	if [ $STATIC = 1 ] ; then
+	    LIBNAME="lib${LIBNAME}.a"
+	    echo "mklib: Making AIX static library: " ${LIBNAME}
+	    ar -ruv ${X64} ${LIBNAME} ${OBJECTS}
+	    FINAL_LIBS=${LIBNAME}
+	else
 	    EXPFILE="lib${LIBNAME}.exp"
-	    OFILE=shr.o  #Want to be consistent with the IBM libGL.a
 	    LIBNAME="lib${LIBNAME}.a"  # shared objects are still stored in the .a libraries
-	    if [ $ARCH = "AIX64" ] ; then
-		OPTS="-bE:${EXPFILE} -bM:SRE -bnoentry -q64"
-	    else
-		OPTS="-bE:${EXPFILE} -bM:SRE -bnoentry"
-	    fi
+	    OPTS="-bE:${EXPFILE} -bM:SRE -bnoentry ${Q64}"
 	    rm -f ${EXPFILE} ${OFILE}
 	    NM="/bin/nm -eC ${X64}"
 	    echo "#! /usr/lib/${LIBNAME}" > ${EXPFILE}
@@ -455,8 +501,16 @@ case $ARCH in
 			}
 		}
 	    }' | sort -u >> ${EXPFILE}
-	    cc ${OPTS} -o ${OFILE} ${OBJECTS} ${DEPS}
-	    ar ${X64} -r ${LIBNAME} ${OFILE}
+
+            # On AIX a shared library is linked differently when
+            # you want to dlopen the file
+	    if [ $DLOPEN = "1" ] ; then
+		cc -G ${OPTS} -o ${LIBNAME} ${OBJECTS} ${DEPS}
+	    else
+		cc ${OPTS} -o ${OFILE} ${OBJECTS} ${DEPS}
+		ar ${X64} -r ${LIBNAME} ${OFILE}
+	    fi
+
             FINAL_LIBS="${LIBNAME}"
         fi
         ;;
@@ -498,23 +552,46 @@ case $ARCH in
             LIBNAME="lib${LIBNAME}.a"
             echo "mklib: Making Darwin static library: " ${LIBNAME}
             LINK="ar"
-            OPTS="-ruv"
+            OPTS="-ruvs"
             ${LINK} ${OPTS} ${LIBNAME} ${OBJECTS}
             FINAL_LIBS=${LIBNAME}
         else
-	    # may need these:
-	    # CFLAGS += -fno-common
-	    # LDFLAGS += -bundle -flat_namespace -undefined suppress
-            LIBNAME="lib${LIBNAME}.dylib"
-            echo "mklib: Making Darwin shared library: " ${LIBNAME}
-            FLAGS="-dynamiclib -multiply_defined suppress -current_version ${MAJOR}.${MINOR}.0 -compatibility_version ${MAJOR}.${MINOR}.0"
+            # On Darwin a .bundle is used for a library that you want to dlopen
+            if [ $DLOPEN = "1" ] ; then
+                LIBSUFFIX="bundle"
+                OPTS="${ARCHOPT} -bundle -multiply_defined suppress"
+            else
+		LIBSUFFIX="dylib"
+                OPTS="${ARCHOPT} -dynamiclib -multiply_defined suppress -current_version ${MAJOR}.${MINOR}.0 -compatibility_version ${MAJOR}.${MINOR}.0 -install_name lib${LIBNAME}.${MAJOR}.${LIBSUFFIX}"
+            fi
+            LINKNAME="lib${LIBNAME}.${LIBSUFFIX}"
+            LIBNAME="lib${LIBNAME}.${MAJOR}.${LIBSUFFIX}"
+
+	    # examine first object to determine ABI
+    	    set ${OBJECTS}
+	    ABI_PPC=`file $1 | grep 'object ppc'`
+	    ABI_I386=`file $1 | grep 'object i386'`
+	    if [ "${ABI_PPC}" ] ; then
+		OPTS="${OPTS} -arch ppc"
+	    fi
+	    if [ "${ABI_I386}" ] ; then
+		OPTS="${OPTS} -arch i386"
+	    fi
+
+	    # XXX can we always add -isysroot /Developer/SDKs/MacOSX10.4u.sdk
+	    # to OPTS here?
+
+	    # determine linker
 	    if [ $CPLUSPLUS = 1 ] ; then
 		LINK="g++"
 	    else
 		LINK="cc"
 	    fi
-            ${LINK} ${FLAGS} -o ${LIBNAME} ${OBJECTS} ${DEPS}
-            FINAL_LIBS=${LIBNAME}
+
+            echo "mklib: Making Darwin shared library: " ${LIBNAME}
+            ${LINK} ${OPTS} -o ${LIBNAME} ${OBJECTS} ${DEPS}
+            ln -s ${LIBNAME} ${LINKNAME}
+            FINAL_LIBS="${LIBNAME} ${LINKNAME}"
         fi
         ;;
 
@@ -556,7 +633,7 @@ case $ARCH in
 	FINAL_LIBS="${LIBNAME}"
 	;;
 
-    'icc')
+    'icc' | 'icc-istatic')
 	# Intel C compiler
 	# This should get merged into the Linux code, above, since this isn't
 	# really a different architecture.
@@ -571,12 +648,16 @@ case $ARCH in
             # finish up
             FINAL_LIBS="${LIBNAME}.a"
         else
-            OPTS="-shared"
+            if [ $ARCH = icc-istatic ] ; then
+                 OPTS="-shared -i-static -cxxlib-icc"
+            else
+                 OPTS="-shared"
+            fi
             VERSION="${MAJOR}.${MINOR}.${PATCH}"
             echo "mklib: Making Intel ICC shared library: " ${LIBNAME}.so.${VERSION}
 
             if [ $CPLUSPLUS = 1 ] ; then
-                LINK="icc"
+                LINK="icpc"
             else
                 LINK="icc"
             fi

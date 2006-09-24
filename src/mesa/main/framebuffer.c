@@ -1,6 +1,6 @@
 /*
  * Mesa 3-D graphics library
- * Version:  6.5
+ * Version:  6.5.1
  *
  * Copyright (C) 1999-2006  Brian Paul   All Rights Reserved.
  *
@@ -78,10 +78,7 @@ set_depth_renderbuffer(struct gl_framebuffer *fb,
                        struct gl_renderbuffer *rb)
 {
    if (fb->_DepthBuffer) {
-      fb->_DepthBuffer->RefCount--;
-      if (fb->_DepthBuffer->RefCount <= 0) {
-         fb->_DepthBuffer->Delete(fb->_DepthBuffer);
-      }
+      _mesa_dereference_renderbuffer(&fb->_DepthBuffer);
    }
    fb->_DepthBuffer = rb;
    if (rb) {
@@ -99,10 +96,7 @@ set_stencil_renderbuffer(struct gl_framebuffer *fb,
                          struct gl_renderbuffer *rb)
 {
    if (fb->_StencilBuffer) {
-      fb->_StencilBuffer->RefCount--;
-      if (fb->_StencilBuffer->RefCount <= 0) {
-         fb->_StencilBuffer->Delete(fb->_StencilBuffer);
-      }
+      _mesa_dereference_renderbuffer(&fb->_StencilBuffer);
    }
    fb->_StencilBuffer = rb;
    if (rb) {
@@ -141,6 +135,7 @@ struct gl_framebuffer *
 _mesa_new_framebuffer(GLcontext *ctx, GLuint name)
 {
    struct gl_framebuffer *fb;
+   (void) ctx;
    assert(name != 0);
    fb = CALLOC_STRUCT(gl_framebuffer);
    if (fb) {
@@ -225,11 +220,11 @@ _mesa_free_framebuffer_data(struct gl_framebuffer *fb)
       struct gl_renderbuffer_attachment *att = &fb->Attachment[i];
       if (att->Renderbuffer) {
          struct gl_renderbuffer *rb = att->Renderbuffer;
-         _glthread_LOCK_MUTEX(rb->Mutex);
-         rb->RefCount--;
-         _glthread_UNLOCK_MUTEX(rb->Mutex);
-         if (rb->RefCount == 0) {
-            rb->Delete(rb);
+         /* remove framebuffer's reference to renderbuffer */
+         _mesa_dereference_renderbuffer(&rb);
+         if (rb && rb->Name == 0) {
+            /* delete window system renderbuffer */
+            _mesa_dereference_renderbuffer(&rb);
          }
       }
       att->Type = GL_NONE;
@@ -240,6 +235,33 @@ _mesa_free_framebuffer_data(struct gl_framebuffer *fb)
    set_depth_renderbuffer(fb, NULL);
    set_stencil_renderbuffer(fb, NULL);
 }
+
+
+/**
+ * Decrement the reference count on a framebuffer and delete it when
+ * the refcount hits zero.
+ * Note: we pass the address of a pointer and set it to NULL if we delete it.
+ */
+void
+_mesa_dereference_framebuffer(struct gl_framebuffer **fb)
+{
+   GLboolean deleteFlag = GL_FALSE;
+
+   _glthread_LOCK_MUTEX((*fb)->Mutex);
+   {
+      ASSERT((*fb)->RefCount > 0);
+      (*fb)->RefCount--;
+      deleteFlag = ((*fb)->RefCount == 0);
+   }
+   _glthread_UNLOCK_MUTEX((*fb)->Mutex);
+
+   if (deleteFlag) {
+      (*fb)->Delete(*fb);
+      *fb = NULL;
+   }
+}
+
+
 
 
 /**
@@ -413,10 +435,15 @@ _mesa_update_framebuffer_visual(struct gl_framebuffer *fb)
 {
    GLuint i;
 
-   assert(fb->Name != 0);
-
    _mesa_bzero(&fb->Visual, sizeof(fb->Visual));
    fb->Visual.rgbMode = GL_TRUE; /* assume this */
+
+#if 0 /* this _might_ be needed */
+   if (fb->_Status != GL_FRAMEBUFFER_COMPLETE_EXT) {
+      /* leave visual fields zero'd */
+      return;
+   }
+#endif
 
    /* find first RGB or CI renderbuffer */
    for (i = 0; i < BUFFER_COUNT; i++) {
@@ -480,7 +507,9 @@ _mesa_update_depth_buffer(GLcontext *ctx,
 
    if (depthRb && depthRb->_ActualFormat == GL_DEPTH24_STENCIL8_EXT) {
       /* The attached depth buffer is a GL_DEPTH_STENCIL renderbuffer */
-      if (!fb->_DepthBuffer || fb->_DepthBuffer->Wrapped != depthRb) {
+      if (!fb->_DepthBuffer
+          || fb->_DepthBuffer->Wrapped != depthRb
+          || fb->_DepthBuffer->_BaseFormat != GL_DEPTH_COMPONENT) {
          /* need to update wrapper */
          struct gl_renderbuffer *wrapper
             = _mesa_new_z24_renderbuffer_wrapper(ctx, depthRb);
@@ -519,7 +548,9 @@ _mesa_update_stencil_buffer(GLcontext *ctx,
 
    if (stencilRb && stencilRb->_ActualFormat == GL_DEPTH24_STENCIL8_EXT) {
       /* The attached stencil buffer is a GL_DEPTH_STENCIL renderbuffer */
-      if (!fb->_StencilBuffer || fb->_StencilBuffer->Wrapped != stencilRb) {
+      if (!fb->_StencilBuffer
+          || fb->_StencilBuffer->Wrapped != stencilRb
+          || fb->_StencilBuffer->_BaseFormat != GL_STENCIL_INDEX) {
          /* need to update wrapper */
          struct gl_renderbuffer *wrapper
             = _mesa_new_s8_renderbuffer_wrapper(ctx, stencilRb);
@@ -581,6 +612,7 @@ update_color_draw_buffers(GLcontext *ctx, struct gl_framebuffer *fb)
 static void
 update_color_read_buffer(GLcontext *ctx, struct gl_framebuffer *fb)
 {
+   (void) ctx;
    if (fb->_ColorReadBufferIndex == -1) {
       fb->_ColorReadBuffer = NULL; /* legal! */
    }

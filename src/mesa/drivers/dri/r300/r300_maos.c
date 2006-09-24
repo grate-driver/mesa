@@ -252,6 +252,43 @@ void r300EmitElts(GLcontext * ctx, void *elts, unsigned long n_elts, int elt_siz
 	memcpy(out, elts, n_elts * elt_size);
 }
 
+	/* Mesa assumes that all missing components are from (0, 0, 0, 1) */
+#define ALL_COMPONENTS ((R300_INPUT_ROUTE_SELECT_X<<R300_INPUT_ROUTE_X_SHIFT) \
+		| (R300_INPUT_ROUTE_SELECT_Y<<R300_INPUT_ROUTE_Y_SHIFT) \
+		| (R300_INPUT_ROUTE_SELECT_Z<<R300_INPUT_ROUTE_Z_SHIFT) \
+		| (R300_INPUT_ROUTE_SELECT_W<<R300_INPUT_ROUTE_W_SHIFT))
+
+#define ALL_DEFAULT ((R300_INPUT_ROUTE_SELECT_ZERO<<R300_INPUT_ROUTE_X_SHIFT) \
+		| (R300_INPUT_ROUTE_SELECT_ZERO<<R300_INPUT_ROUTE_Y_SHIFT) \
+		| (R300_INPUT_ROUTE_SELECT_ZERO<<R300_INPUT_ROUTE_Z_SHIFT) \
+		| (R300_INPUT_ROUTE_SELECT_ONE<<R300_INPUT_ROUTE_W_SHIFT))
+
+
+static GLuint t_comps(GLuint aos_size)
+{
+	GLuint mask;
+	mask = (1 << (aos_size*3)) - 1;
+	return (ALL_COMPONENTS & mask) | (ALL_DEFAULT & ~mask);
+}
+
+static GLuint fix_comps(GLuint dw, int fmt)
+{	
+#ifdef MESA_BIG_ENDIAN
+	if (fmt == 2) {
+		GLuint dw_temp = 0;
+
+		dw_temp |= ((dw >> R300_INPUT_ROUTE_X_SHIFT) & R300_INPUT_ROUTE_SELECT_MASK) << R300_INPUT_ROUTE_W_SHIFT;
+		dw_temp |= ((dw >> R300_INPUT_ROUTE_Y_SHIFT) & R300_INPUT_ROUTE_SELECT_MASK) << R300_INPUT_ROUTE_Z_SHIFT;
+		dw_temp |= ((dw >> R300_INPUT_ROUTE_Z_SHIFT) & R300_INPUT_ROUTE_SELECT_MASK) << R300_INPUT_ROUTE_Y_SHIFT;
+		dw_temp |= ((dw >> R300_INPUT_ROUTE_W_SHIFT) & R300_INPUT_ROUTE_SELECT_MASK) << R300_INPUT_ROUTE_X_SHIFT;
+		
+		return dw_temp;
+	}
+#endif /* MESA_BIG_ENDIAN */
+	return dw;
+		
+}
+
 /* Emit vertex data to GART memory (unless immediate mode)
  * Route inputs to the vertex processor
  */
@@ -264,12 +301,14 @@ void r300EmitArrays(GLcontext * ctx, GLboolean immd)
 	//struct vertex_buffer *VB = &TNL_CONTEXT(ctx)->vb;
 	GLuint nr = 0;
 	GLuint count = VB->Count;
-	GLuint dw,mask;
+	GLuint dw;
 	GLuint vic_1 = 0;	/* R300_VAP_INPUT_CNTL_1 */
 	GLuint aa_vap_reg = 0; /* VAP register assignment */
 	GLuint i;
-	GLuint inputs = 0;
-	
+	DECLARE_RENDERINPUTS(inputs_bitset);
+
+	RENDERINPUTS_ZERO( inputs_bitset );
+
 #define CONFIGURE_AOS(r, f, v, sz, cn) { \
 		if (RADEON_DEBUG & DEBUG_STATE) \
 			fprintf(stderr, "Enabling "#v "\n"); \
@@ -300,23 +339,23 @@ void r300EmitArrays(GLcontext * ctx, GLboolean immd)
 		GLuint InputsRead = CURRENT_VERTEX_SHADER(ctx)->Base.InputsRead;
 		struct r300_vertex_program *prog=(struct r300_vertex_program *)CURRENT_VERTEX_SHADER(ctx);
 		if (InputsRead & (1<<VERT_ATTRIB_POS)) {
-			inputs |= _TNL_BIT_POS;
+			RENDERINPUTS_SET( inputs_bitset, _TNL_ATTRIB_POS );
 			rmesa->state.aos[nr++].aos_reg = prog->inputs[VERT_ATTRIB_POS];
 		}
 		if (InputsRead & (1<<VERT_ATTRIB_NORMAL)) {
-			inputs |= _TNL_BIT_NORMAL;
+			RENDERINPUTS_SET( inputs_bitset, _TNL_ATTRIB_NORMAL );
 			rmesa->state.aos[nr++].aos_reg = prog->inputs[VERT_ATTRIB_NORMAL];
 		}
 		if (InputsRead & (1<<VERT_ATTRIB_COLOR0)) {
-			inputs |= _TNL_BIT_COLOR0;
+			RENDERINPUTS_SET( inputs_bitset, _TNL_ATTRIB_COLOR0 );
 			rmesa->state.aos[nr++].aos_reg = prog->inputs[VERT_ATTRIB_COLOR0];
 		}
 		if (InputsRead & (1<<VERT_ATTRIB_COLOR1)) {
-			inputs |= _TNL_BIT_COLOR1;
+			RENDERINPUTS_SET( inputs_bitset, _TNL_ATTRIB_COLOR1 );
 			rmesa->state.aos[nr++].aos_reg = prog->inputs[VERT_ATTRIB_COLOR1];
 		}
 		if (InputsRead & (1<<VERT_ATTRIB_FOG)) {
-			inputs |= _TNL_BIT_FOG;
+			RENDERINPUTS_SET( inputs_bitset, _TNL_ATTRIB_FOG );
 			rmesa->state.aos[nr++].aos_reg = prog->inputs[VERT_ATTRIB_FOG];
 		}
 		if(ctx->Const.MaxTextureUnits > 8) { /* Not sure if this can even happen... */
@@ -325,17 +364,17 @@ void r300EmitArrays(GLcontext * ctx, GLboolean immd)
 		}
 		for (i=0;i<ctx->Const.MaxTextureUnits;i++) {
 			if (InputsRead & (1<<(VERT_ATTRIB_TEX0+i))) {
-				inputs |= _TNL_BIT_TEX0<<i;
+				RENDERINPUTS_SET( inputs_bitset, _TNL_ATTRIB_TEX(i) );
 				rmesa->state.aos[nr++].aos_reg = prog->inputs[VERT_ATTRIB_TEX0+i];
 			}
 		}
 		nr = 0;
 	} else {
-		inputs = TNL_CONTEXT(ctx)->render_inputs;
+		RENDERINPUTS_COPY( inputs_bitset, TNL_CONTEXT(ctx)->render_inputs_bitset );
 	}
-	rmesa->state.render_inputs = inputs;
+	RENDERINPUTS_COPY( rmesa->state.render_inputs_bitset, inputs_bitset );
 
-	if (inputs & _TNL_BIT_POS) {
+	if (RENDERINPUTS_TEST( inputs_bitset, _TNL_ATTRIB_POS )) {
 		CONFIGURE_AOS(i_coords,	AOS_FORMAT_FLOAT,
 						VB->AttribPtr[VERT_ATTRIB_POS],
 						immd ? 4 : VB->AttribPtr[VERT_ATTRIB_POS].size,
@@ -344,7 +383,7 @@ void r300EmitArrays(GLcontext * ctx, GLboolean immd)
 		vic_1 |= R300_INPUT_CNTL_POS;
 	}
 
-	if (inputs & _TNL_BIT_NORMAL) {
+	if (RENDERINPUTS_TEST( inputs_bitset, _TNL_ATTRIB_NORMAL )) {
 		CONFIGURE_AOS(i_normal,	AOS_FORMAT_FLOAT,
 						VB->AttribPtr[VERT_ATTRIB_NORMAL],
 						immd ? 4 : VB->AttribPtr[VERT_ATTRIB_NORMAL].size,
@@ -353,7 +392,7 @@ void r300EmitArrays(GLcontext * ctx, GLboolean immd)
 		vic_1 |= R300_INPUT_CNTL_NORMAL;
 	}
 
-	if (inputs & _TNL_BIT_COLOR0) {
+	if (RENDERINPUTS_TEST( inputs_bitset, _TNL_ATTRIB_COLOR0 )) {
 		int emitsize=4;
 
 		if (!immd) {
@@ -376,7 +415,7 @@ void r300EmitArrays(GLcontext * ctx, GLboolean immd)
 		vic_1 |= R300_INPUT_CNTL_COLOR;
 	}
 
-	if (inputs & _TNL_BIT_COLOR1) {
+	if (RENDERINPUTS_TEST( inputs_bitset, _TNL_ATTRIB_COLOR1 )) {
 		int emitsize=4;
 
 		if (!immd) {
@@ -398,7 +437,7 @@ void r300EmitArrays(GLcontext * ctx, GLboolean immd)
 	}
 
 #if 0
-	if (inputs & _TNL_BIT_FOG) {
+	if (RENDERINPUTS_TEST( inputs_bitset, _TNL_ATTRIB_FOG )) {
 		CONFIGURE_AOS(	AOS_FORMAT_FLOAT,
 						VB->FogCoordPtr,
 						immd ? 4 : VB->FogCoordPtr->size,
@@ -408,7 +447,7 @@ void r300EmitArrays(GLcontext * ctx, GLboolean immd)
 
 	r300->state.texture.tc_count = 0;
 	for (i = 0; i < ctx->Const.MaxTextureUnits; i++) {
-		if (inputs & (_TNL_BIT_TEX0 << i)) {
+		if (RENDERINPUTS_TEST( inputs_bitset, _TNL_ATTRIB_TEX(i) )) {
 			CONFIGURE_AOS(i_tex[i], AOS_FORMAT_FLOAT,
 							VB->AttribPtr[VERT_ATTRIB_TEX0+i],
 							immd ? 4 : VB->AttribPtr[VERT_ATTRIB_TEX0+i].size,
@@ -467,17 +506,6 @@ void r300EmitArrays(GLcontext * ctx, GLboolean immd)
 	((drm_r300_cmd_header_t*)r300->hw.vir[0].cmd)->packet0.count = (nr+1)>>1;
 
 
-	/* Mesa assumes that all missing components are from (0, 0, 0, 1) */
-#define ALL_COMPONENTS ((R300_INPUT_ROUTE_SELECT_X<<R300_INPUT_ROUTE_X_SHIFT) \
-		| (R300_INPUT_ROUTE_SELECT_Y<<R300_INPUT_ROUTE_Y_SHIFT) \
-		| (R300_INPUT_ROUTE_SELECT_Z<<R300_INPUT_ROUTE_Z_SHIFT) \
-		| (R300_INPUT_ROUTE_SELECT_W<<R300_INPUT_ROUTE_W_SHIFT))
-
-#define ALL_DEFAULT ((R300_INPUT_ROUTE_SELECT_ZERO<<R300_INPUT_ROUTE_X_SHIFT) \
-		| (R300_INPUT_ROUTE_SELECT_ZERO<<R300_INPUT_ROUTE_Y_SHIFT) \
-		| (R300_INPUT_ROUTE_SELECT_ZERO<<R300_INPUT_ROUTE_Z_SHIFT) \
-		| (R300_INPUT_ROUTE_SELECT_ONE<<R300_INPUT_ROUTE_W_SHIFT))
-
 	R300_STATECHANGE(r300, vir[1]);
 
 	for(i=0; i < nr; i++)
@@ -486,33 +514,22 @@ void r300EmitArrays(GLcontext * ctx, GLboolean immd)
 			r300->state.aos[i].aos_size=/*3*/4; /* XXX */
 		}
 		
-		
-	for(i=0;i+1<nr;i+=2){
+	for (i=0;i+1<nr;i+=2) {
 		/* do i first.. */
-		mask=(1<<(r300->state.aos[i].aos_size*3))-1;
-		dw=(ALL_COMPONENTS & mask)
-		| (ALL_DEFAULT & ~mask)
-		| R300_INPUT_ROUTE_ENABLE;
-
+		dw = fix_comps(t_comps(r300->state.aos[i].aos_size), r300->state.aos[i].aos_format) | R300_INPUT_ROUTE_ENABLE;
 		/* i+1 */
-		mask=(1<<(r300->state.aos[i+1].aos_size*3))-1;
-		dw|=(
-		(ALL_COMPONENTS & mask)
-		| (ALL_DEFAULT & ~mask)
-		| R300_INPUT_ROUTE_ENABLE
-		)<<16;
-
+		dw |= (fix_comps(t_comps(r300->state.aos[i+1].aos_size), r300->state.aos[i+1].aos_format) | R300_INPUT_ROUTE_ENABLE) << 16;
+		
 		//fprintf(stderr, "vir1 dw=%08x\n", dw);
 		r300->hw.vir[1].cmd[R300_VIR_CNTL_0+(i>>1)]=dw;
-		}
-	if(nr & 1){
-		mask=(1<<(r300->state.aos[nr-1].aos_size*3))-1;
-		dw=(ALL_COMPONENTS & mask)
-		| (ALL_DEFAULT & ~mask)
-		| R300_INPUT_ROUTE_ENABLE;
-		r300->hw.vir[1].cmd[R300_VIR_CNTL_0+(nr>>1)]=dw;
+	}
+	if (nr & 1) {
+		dw = fix_comps(t_comps(r300->state.aos[nr-1].aos_size), r300->state.aos[nr-1].aos_format) | R300_INPUT_ROUTE_ENABLE;
+		
 		//fprintf(stderr, "vir1 dw=%08x\n", dw);
-		}
+		r300->hw.vir[1].cmd[R300_VIR_CNTL_0+(nr>>1)]=dw;
+	}
+
 	/* Set the rest of INPUT_ROUTE_1 to 0 */
 	//for(i=((count+1)>>1); i<8; i++)r300->hw.vir[1].cmd[R300_VIR_CNTL_0+i]=0x0;
 	((drm_r300_cmd_header_t*)r300->hw.vir[1].cmd)->packet0.count = (nr+1)>>1;
@@ -531,17 +548,17 @@ void r300EmitArrays(GLcontext * ctx, GLboolean immd)
 #if 0
 	r300->hw.vic.cmd[R300_VIC_CNTL_1]=0;
 
-	if(r300->state.render_inputs & _TNL_BIT_POS)
+	if(RENDERINPUTS_TEST( r300->state.render_inputs_bitset, _TNL_ATTRIB_POS ))
 		r300->hw.vic.cmd[R300_VIC_CNTL_1]|=R300_INPUT_CNTL_POS;
 
-	if(r300->state.render_inputs & _TNL_BIT_NORMAL)
+	if(RENDERINPUTS_TEST( r300->state.render_inputs_bitset, _TNL_ATTRIB_NORMAL ))
 		r300->hw.vic.cmd[R300_VIC_CNTL_1]|=R300_INPUT_CNTL_NORMAL;
 
-	if(r300->state.render_inputs & _TNL_BIT_COLOR0)
+	if(RENDERINPUTS_TEST( r300->state.render_inputs_bitset, _TNL_ATTRIB_COLOR0 ))
 		r300->hw.vic.cmd[R300_VIC_CNTL_1]|=R300_INPUT_CNTL_COLOR;
 
 	for(i=0;i < ctx->Const.MaxTextureUnits;i++)
-		if(r300->state.render_inputs & (_TNL_BIT_TEX0<<i))
+		if(RENDERINPUTS_TEST( r300->state.render_inputs_bitset, _TNL_ATTRIB_TEX(i) ))
 			r300->hw.vic.cmd[R300_VIC_CNTL_1]|=(R300_INPUT_CNTL_TC0<<i);
 #endif
 
@@ -573,15 +590,15 @@ void r300EmitArrays(GLcontext * ctx, GLboolean immd)
 			if(OutputsWritten & (1<<(VERT_RESULT_TEX0+i)))
 				r300->hw.vof.cmd[R300_VOF_CNTL_1] |= (4<<(3*i));
 	} else {
-		if(inputs & _TNL_BIT_POS)
+		if(RENDERINPUTS_TEST( inputs_bitset, _TNL_ATTRIB_POS ))
 			r300->hw.vof.cmd[R300_VOF_CNTL_0] |= R300_VAP_OUTPUT_VTX_FMT_0__POS_PRESENT;
-		if(inputs & _TNL_BIT_COLOR0)
+		if(RENDERINPUTS_TEST( inputs_bitset, _TNL_ATTRIB_COLOR0 ))
 			r300->hw.vof.cmd[R300_VOF_CNTL_0] |= R300_VAP_OUTPUT_VTX_FMT_0__COLOR_PRESENT;
-		if(inputs & _TNL_BIT_COLOR1)
+		if(RENDERINPUTS_TEST( inputs_bitset, _TNL_ATTRIB_COLOR1 ))
 			r300->hw.vof.cmd[R300_VOF_CNTL_0] |= R300_VAP_OUTPUT_VTX_FMT_0__COLOR_1_PRESENT;
 
 		for(i=0;i < ctx->Const.MaxTextureUnits;i++)
-			if(inputs & (_TNL_BIT_TEX0<<i))
+			if(RENDERINPUTS_TEST( inputs_bitset, _TNL_ATTRIB_TEX(i) ))
 				r300->hw.vof.cmd[R300_VOF_CNTL_1]|=(4<<(3*i));
 	}
 

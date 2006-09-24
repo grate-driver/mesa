@@ -5,9 +5,9 @@
 
 /*
  * Mesa 3-D graphics library
- * Version:  6.3
+ * Version:  6.5
  *
- * Copyright (C) 1999-2005  Brian Paul   All Rights Reserved.
+ * Copyright (C) 1999-2006  Brian Paul   All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -108,7 +108,11 @@
 /** Maximum rectangular texture size - GL_NV_texture_rectangle */
 #define MAX_TEXTURE_RECT_SIZE 2048
 
-/** Number of texture units - GL_ARB_multitexture */
+/** Number of texture units - GL_ARB_multitexture
+ * This needs to be the larger of MAX_TEXTURE_COORD_UNITS and
+ * MAX_TEXTURE_IMAGE_UNITS seen below, since MAX_TEXTURE_UNITS is used
+ * to dimension some arrays that store both coord and image data.
+*/
 #define MAX_TEXTURE_UNITS 8
 
 /*@}*/
@@ -203,6 +207,7 @@
 
 /** For GL_ARB_vertex_shader */
 /*@{*/
+#define MAX_VERTEX_ATTRIBS 16
 #define MAX_VERTEX_UNIFORM_COMPONENTS 512
 #define MAX_VARYING_FLOATS 32
 #define MAX_VERTEX_TEXTURE_IMAGE_UNITS 0
