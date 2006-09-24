@@ -1,4 +1,4 @@
-// $Id: demo.cpp,v 1.2 2004-08-14 09:59:16 phoudoin Exp $
+// $Id: demo.cpp,v 1.2 2004/08/14 09:59:16 phoudoin Exp $
 
 // Simple BeOS GLView demo
 // Written by Brian Paul

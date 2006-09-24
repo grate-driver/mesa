@@ -8,7 +8,7 @@
 
 /*
  * $Log: ugldrawpix.c,v $
- * Revision 1.2  2001-09-10 19:21:13  brianp
+ * Revision 1.2  2001/09/10 19:21:13  brianp
  * WindML updates (Stephane Raimbault)
  *
  * Revision 1.1  2001/08/20 16:07:11  brianp
