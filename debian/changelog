@@ -2,11 +2,14 @@ mesa (6.5.1-0.1) UNRELEASED; urgency=low
 
   * New upstream version
   * Build-dep on x11proto-gl-dev >= 1.4.8
-  * Stuff not in the upstream tarballs 
+  * Stuff not in the upstream tarballs
     + os2 glut stuff
     + docs/gears.png
+  * Bump libdrm-dev build-dep to >= 2.0.2
+  * Add libdrm cflags to the debian-dri config. This allows the build system
+    to find drm.h
 
- -- David Nusinow <dnusinow@debian.org>  Sun, 24 Sep 2006 17:51:51 -0400
+ -- David Nusinow <dnusinow@debian.org>  Sun, 24 Sep 2006 18:55:14 -0400
 
 mesa (6.5.0.cvs.20060524-1.1) unstable; urgency=medium
 

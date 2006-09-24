@@ -7,6 +7,7 @@ DEBIAN_COMMON_CPPFLAGS += -DPTHREADS -DUSE_EXTERNAL_DXTN_LIB=1 -DIN_DRI_DRIVER -
 LIBDRM_LIB = `pkg-config --libs libdrm`
 DRI_LIB_DEPS  = -lm -lpthread -lexpat -ldl $(LIBDRM_LIB)
 GL_LIB_DEPS = `pkg-config --libs x11 xext xxf86vm` -lm -lpthread -ldl $(LIBDRM_LIB)
+LIBDRM_CFLAGS = `pkg-config --cflags libdrm`
 
 USING_EGL=0
 
