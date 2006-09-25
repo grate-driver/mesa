@@ -8,8 +8,10 @@ mesa (6.5.1-0.1) UNRELEASED; urgency=low
   * Bump libdrm-dev build-dep to >= 2.0.2
   * Add libdrm cflags to the debian-dri config. This allows the build system
     to find drm.h
+  * Make sure that libGl looks for the dri drivers in the proper location. Do
+    this by setting the appropriate variables in the debian config
 
- -- David Nusinow <dnusinow@debian.org>  Sun, 24 Sep 2006 18:55:14 -0400
+ -- David Nusinow <dnusinow@debian.org>  Sun, 24 Sep 2006 22:24:58 -0400
 
 mesa (6.5.0.cvs.20060524-1.1) unstable; urgency=medium
 

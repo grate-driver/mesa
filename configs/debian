@@ -20,3 +20,6 @@ GLW_SOURCES += GLwMDrawA.c
 
 GL_LIB_DEPS = `pkg-config --libs x11 xext` -lm -lpthread
 GLW_LIB_DEPS = -L$(LIB_DIR) -l$(GL_LIB) `pkg-config --libs x11 xt` -lXm
+
+DRI_DRIVER_INSTALL_DIR = /usr/lib/dri
+DRI_DRIVER_SEARCH_DIR = $(DRI_DRIVER_INSTALL_DIR)
