@@ -10,8 +10,11 @@ mesa (6.5.1-0.1) UNRELEASED; urgency=low
     to find drm.h
   * Make sure that libGl looks for the dri drivers in the proper location. Do
     this by setting the appropriate variables in the debian config
+  * Re-add s390 and m68k to the USE_IEEE test in src/mesa/main/imports.h. This
+    package seriously needs to store patches somewhere that are easy to find
+    and re-apply.
 
- -- David Nusinow <dnusinow@debian.org>  Sun, 24 Sep 2006 22:24:58 -0400
+ -- David Nusinow <dnusinow@debian.org>  Mon, 25 Sep 2006 20:31:23 -0400
 
 mesa (6.5.0.cvs.20060524-1.1) unstable; urgency=medium
 
