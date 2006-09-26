@@ -1,4 +1,4 @@
-mesa (6.5.1-0.1) UNRELEASED; urgency=low
+mesa (6.5.1-0.1) unstable; urgency=low
 
   * New upstream version
   * Build-dep on x11proto-gl-dev >= 1.4.8
@@ -21,7 +21,7 @@ mesa (6.5.1-0.1) UNRELEASED; urgency=low
     for the patch, Michael Banck, Michel Dänzer, and Samuel Thibault for
     input on an appropriate fix. (closes: #358065)
 
- -- David Nusinow <dnusinow@debian.org>  Mon, 25 Sep 2006 20:43:42 -0400
+ -- David Nusinow <dnusinow@debian.org>  Mon, 25 Sep 2006 21:21:47 -0400
 
 mesa (6.5.0.cvs.20060524-1.1) unstable; urgency=medium
 
