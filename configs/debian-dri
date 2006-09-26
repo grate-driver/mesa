@@ -2,6 +2,11 @@ include $(TOP)/configs/debian
 
 CONFIG_NAME = debian-dri
 
+ifeq ($(DEB_HOST_ARCH_OS),hurd)
+# Switch to debian-indirect target
+    include $(TOP)/configs/debian-indirect
+else
+
 DEBIAN_COMMON_CPPFLAGS += -DPTHREADS -DUSE_EXTERNAL_DXTN_LIB=1 -DIN_DRI_DRIVER -DGLX_DIRECT_RENDERING -DHAVE_ALIAS -DDEFAULT_DRIVER_DIR=\"$(DEBIAN_DRIVERS_DIR)\"
 
 LIBDRM_LIB = `pkg-config --libs libdrm`
@@ -32,3 +37,5 @@ endif
 ifeq ($(DEB_HOST_ARCH),amd64)
 DRI_DIRS += i915
 endif
+
+endif # DRI or debian-indirect

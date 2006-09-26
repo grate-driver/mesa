@@ -13,8 +13,15 @@ mesa (6.5.1-0.1) UNRELEASED; urgency=low
   * Re-add s390 and m68k to the USE_IEEE test in src/mesa/main/imports.h. This
     package seriously needs to store patches somewhere that are easy to find
     and re-apply.
+  * Add patch from Cyril Brulebois to allow package to build on HURD, which
+    lacks DRI and directfb. This includes not using lib-directfb in the
+    build-depends for hurd-i386. It also creates a new debian config,
+    debian-indirect, which is used when building for HURD. This config is
+    invoked in the debian-dri config on hurd-i386. Thanks to Cyril Brulebois
+    for the patch, Michael Banck, Michel Dänzer, and Samuel Thibault for
+    input on an appropriate fix. (closes: #358065)
 
- -- David Nusinow <dnusinow@debian.org>  Mon, 25 Sep 2006 20:31:23 -0400
+ -- David Nusinow <dnusinow@debian.org>  Mon, 25 Sep 2006 20:43:42 -0400
 
 mesa (6.5.0.cvs.20060524-1.1) unstable; urgency=medium
 
