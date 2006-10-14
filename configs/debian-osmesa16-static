@@ -1,7 +1,12 @@
+# Configuration for building a static version of OSMesa with support for 16
+# bits per color channel.
+
 include $(TOP)/configs/debian-static
 include $(TOP)/configs/debian-osmesa16
 
 CONFIG_NAME = debian-osmesa16-static
 
 override OSMESA_LIB_NAME = lib$(OSMESA_LIB).a
+
+# vim: ft=make
 

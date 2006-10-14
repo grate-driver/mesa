@@ -1,4 +1,8 @@
+# Configuration for building OSMesa with support for 32 bits per color
+# channel.
+
 include $(TOP)/configs/debian-common
+include $(TOP)/configs/linux-osmesa
 
 CONFIG_NAME = debian-osmesa32
 
@@ -12,4 +16,6 @@ override DRIVER_DIRS = osmesa
 override PROGRAM_DIRS =
 
 override APP_LIB_DEPS = -lOSMesa32
+
+# vim: ft=make
 

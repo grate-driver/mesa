@@ -1,8 +1,10 @@
-#DEB_BUILD_ARCH ?= $(shell dpkg-architecture -qDEB_BUILD_ARCH)
+# Select the correct configuration depending on the build architecture.
 
 ifneq ($(wildcard $(TOP)/configs/debian-$(DEB_BUILD_ARCH)),)
 	include $(TOP)/configs/debian-$(DEB_BUILD_ARCH)
 else
 	include $(TOP)/configs/debian-any
 endif
+
+# vim: ft=make
 

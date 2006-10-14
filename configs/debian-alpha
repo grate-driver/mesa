@@ -1,5 +1,9 @@
-include $(TOP)/configs/debian-common
+# Configuration for building Mesa on alpha.
+
+include $(TOP)/configs/debian-default
 include $(TOP)/configs/linux-alpha
 
 CONFIG_NAME = debian-alpha
+
+# vim: ft=make
 

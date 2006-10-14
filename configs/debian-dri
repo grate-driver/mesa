@@ -1,8 +1,11 @@
-#DEB_BUILD_ARCH ?= $(shell dpkg-architecture -qDEB_BUILD_ARCH)
+# Select the correct configuration for building the DRI drivers depending on
+# the build architecture.
 
 ifneq ($(wildcard $(TOP)/configs/debian-dri-$(DEB_BUILD_ARCH)),)
 	include $(TOP)/configs/debian-dri-$(DEB_BUILD_ARCH)
 else
 	include $(TOP)/configs/debian-dri-any
 endif
+
+# vim: ft=make
 

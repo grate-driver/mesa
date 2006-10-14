@@ -1,4 +1,8 @@
+# Configuration for building Mesa on ppc64.
+
 include $(TOP)/configs/debian-ppc
 
 CONFIG_NAME = debian-ppc64
+
+# vim: ft=make
 

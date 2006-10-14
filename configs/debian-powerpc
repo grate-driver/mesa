@@ -1,5 +1,9 @@
-include $(TOP)/configs/debian-common
+# Configuration for building Mesa on powerpc.
+
+include $(TOP)/configs/debian-default
 include $(TOP)/configs/linux-ppc
 
 CONFIG_NAME = debian-powerpc
+
+# vim: ft=make
 

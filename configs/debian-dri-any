@@ -1,5 +1,10 @@
+# Fallback configuration for building the DRI drivers on architectures for
+# which no architecture-specific configuration is provided.
+
 include $(TOP)/configs/debian-dri-common
 include $(TOP)/configs/linux-dri
 
 CONFIG_NAME = debian-dri
+
+# vim: ft=make
 

@@ -1,5 +1,9 @@
-include $(TOP)/configs/debian-common
+# Configuration for building Mesa on i386.
+
+include $(TOP)/configs/debian-default
 include $(TOP)/configs/linux-x86
 
 CONFIG_NAME = debian-i386
+
+# vim: ft=make
 

@@ -1,6 +1,12 @@
+# Override options needed to build static versions of the libraries.
+#
+# This configuration cannot be used standalone.
+
 include $(TOP)/configs/debian-common
 
 CONFIG_NAME = debian-static
 
 override MKLIB_OPTIONS = -static
+
+# vim: ft=make
 
