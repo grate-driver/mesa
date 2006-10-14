@@ -1,2 +1,3 @@
 usr/include/GL/glu.h
 usr/include/GL/glu_mangle.h
+usr/lib/libGLU.so

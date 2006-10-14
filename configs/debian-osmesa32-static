@@ -1,0 +1,7 @@
+include $(TOP)/configs/debian-static
+include $(TOP)/configs/debian-osmesa32
+
+CONFIG_NAME = debian-osmesa32-static
+
+override OSMESA_LIB_NAME = lib$(OSMESA_LIB).a
+

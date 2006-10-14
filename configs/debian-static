@@ -1,0 +1,6 @@
+include $(TOP)/configs/debian-common
+
+CONFIG_NAME = debian-static
+
+override MKLIB_OPTIONS = -static
+
