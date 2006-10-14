@@ -1,4 +1,0 @@
-include $(TOP)/configs/debian_i386
-include $(TOP)/configs/debian-dri
-
-CONFIG_NAME = debian-dri-i386

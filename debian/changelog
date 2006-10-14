@@ -1,3 +1,19 @@
+mesa (6.5.1-0.2) unstable; urgency=low
+
+  * Non-maintainer upload
+  * Disable generation of SSE instructions (closes: #390560)
+  * Remove duplicate and unused build configurations
+  * Remove extra source files left from CVS snapshots (closes: #389283)
+  * Enable i965 DRI driver on i386 and amd64. Thanks to Ryan Richter
+    for the patch. (closes: #392030)
+  * Enable Unichrome DRI driver on amd64 (closes: #391900)
+  * Enable FFB DRI driver on sparc, not i386 (closes: #388025)
+  * Consistently compile C sources as C99 (closes: #373623)
+  * Fix X display locking error in GLX. Thanks to Josh Triplett for
+    the patch. (closes: #391681)
+
+ -- Ben Hutchings <ben@decadent.org.uk>  Fri, 13 Oct 2006 02:25:52 +0100
+
 mesa (6.5.1-0.1) unstable; urgency=low
 
   * New upstream version

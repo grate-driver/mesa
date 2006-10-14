@@ -155,7 +155,7 @@ binary-indep: debian/mesa-swx11-source.install build
 	@echo Target $@
 	dh_testdir
 	dh_testroot
-	dh_installchangelogs docs/VERSIONS
+	dh_installchangelogs
 	dh_installdocs
 	dh_installdirs
 #	dh_installexamples
@@ -176,7 +176,7 @@ binary-arch: build install
 	@echo Target $@
 	dh_testdir -s
 	dh_testroot -s
-	dh_installchangelogs -s docs/VERSIONS
+	dh_installchangelogs -s
 	dh_installdocs -s
 #	dh_installexamples -s
 	dh_install -s

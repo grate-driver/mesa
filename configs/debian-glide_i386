@@ -1,4 +1,4 @@
-include $(TOP)/configs/debian-i386
+include $(TOP)/configs/debian_i386
 
 CONFIG_NAME = debian-glide-i386
 

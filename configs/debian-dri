@@ -31,11 +31,15 @@ WINDOW_SYSTEM=dri
 DRI_DIRS = mach64 mga r128 r200 r300 radeon s3v savage tdfx trident
 
 ifeq ($(DEB_HOST_ARCH),i386)
-DRI_DIRS += i810 i915 sis ffb unichrome
+DRI_DIRS += i810 i915 i965 sis unichrome
 endif
 
 ifeq ($(DEB_HOST_ARCH),amd64)
-DRI_DIRS += i915
+DRI_DIRS += i915 i965 unichrome
+endif
+
+ifeq ($(DEB_HOST_ARCH),sparc)
+DRI_DIRS += ffb
 endif
 
 endif # DRI or debian-indirect
