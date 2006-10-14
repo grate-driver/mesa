@@ -1,0 +1,8 @@
+include $(TOP)/configs/debian-common
+include $(TOP)/configs/linux
+
+CONFIG_NAME = debian
+
+override SRC_DIRS = mesa glu
+override PROGRAM_DIRS =
+

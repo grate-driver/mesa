@@ -1,5 +1,8 @@
-include $(TOP)/configs/debian-dri-common
-include $(TOP)/configs/linux-dri
+#DEB_BUILD_ARCH ?= $(shell dpkg-architecture -qDEB_BUILD_ARCH)
 
-CONFIG_NAME = debian-dri
+ifneq ($(wildcard $(TOP)/configs/debian-dri-$(DEB_BUILD_ARCH)),)
+	include $(TOP)/configs/debian-dri-$(DEB_BUILD_ARCH)
+else
+	include $(TOP)/configs/debian-dri-any
+endif
 

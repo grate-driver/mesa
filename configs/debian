@@ -1,8 +1,8 @@
-include $(TOP)/configs/debian-common
-include $(TOP)/configs/linux
+#DEB_BUILD_ARCH ?= $(shell dpkg-architecture -qDEB_BUILD_ARCH)
 
-CONFIG_NAME = debian
-
-override SRC_DIRS = mesa glu
-override PROGRAM_DIRS =
+ifneq ($(wildcard $(TOP)/configs/debian-$(DEB_BUILD_ARCH)),)
+	include $(TOP)/configs/debian-$(DEB_BUILD_ARCH)
+else
+	include $(TOP)/configs/debian-any
+endif
 
