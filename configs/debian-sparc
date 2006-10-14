@@ -1,0 +1,5 @@
+include $(TOP)/configs/debian-common
+include $(TOP)/configs/linux-sparc
+
+CONFIG_NAME = debian-sparc
+

@@ -1,0 +1,5 @@
+include $(TOP)/configs/debian-common
+include $(TOP)/configs/linux-ppc
+
+CONFIG_NAME = debian-powerpc
+

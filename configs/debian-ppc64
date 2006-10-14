@@ -1,0 +1,4 @@
+include $(TOP)/configs/debian-ppc
+
+CONFIG_NAME = debian-ppc64
+

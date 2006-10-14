@@ -1,0 +1,8 @@
+include $(TOP)/configs/debian-common
+
+CONFIG_NAME = debian-dri-common
+
+DRI_DRIVER_INSTALL_DIR = $(INSTALL_DIR)/lib/dri
+DRI_DRIVER_SEARCH_DIR = /usr/lib/dri
+
+

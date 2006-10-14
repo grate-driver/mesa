@@ -1,0 +1,5 @@
+include $(TOP)/configs/debian-common
+include $(TOP)/configs/linux-x86-64
+
+CONFIG_NAME = debian-amd64
+

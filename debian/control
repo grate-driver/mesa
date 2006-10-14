@@ -1,0 +1,196 @@
+Source: mesa
+Section: graphics
+Priority: optional
+Maintainer: Debian X Strike Force <debian-x@lists.debian.org>
+Uploaders: Thierry Reding <thierry@gilfi.de>
+Standards-Version: 3.7.2
+Build-Depends: debhelper (>= 5)
+
+Package: libgl1-mesa-swx11
+Section: libs
+Architecture: any
+Depends: ${shlibs:Depends}
+Conflicts: mesag3-glide, mesag3-glide2, mesag3+ggi, libgl1, nvidia-glx, mesag3, libgl1-mesa-swrast
+Provides: libgl1, mesag3, libgl1-mesa-swrast
+Replaces: libgl1, mesag3, libgl1-mesa-swrast
+Description: A free implementation of the OpenGL API -- runtime
+ Mesa is a 3-D graphics library with an API which is very similar to
+ that of OpenGL.  To the extent that Mesa utilizes the OpenGL command
+ syntax or state machine, it is being used with authorization from
+ Silicon Graphics, Inc.  However, the author makes no claim that Mesa
+ is in any way a compatible replacement for OpenGL or associated with
+ Silicon Graphics, Inc.
+ .
+ This library provides a pure software rasteriser; it does not provide
+ a direct rendering-capable library, or one which uses GLX.  For that,
+ please see libgl1-mesa-glx.
+ .
+ On Linux, this library is also known as libGL or libGL.so.1.
+
+Package: libgl1-mesa-swx11-dev
+Section: libdevel
+Architecture: any
+Depends: libgl1-mesa-swx11 (= ${binary:Version}), libc6-dev, libx11-dev | xlibs-dev (>> 4.1.0), libxext6 | xlibs (>> 4.1.0), mesa-common-dev (= ${source:Version}), lesstif2-dev
+Provides: libgl-dev, mesag3-widgets, mesag-widgets-dev, libglw-dev, mesag-dev, libgl1-mesa-swrast-dev
+Conflicts: mesa-dev, libgl-dev, mesag3 (<< 3.1-1), nvidia-glx-dev, mesag-dev, libgl1-mesa-swrast-dev
+Replaces: libgl-dev, mesag-dev, libgl1-mesa-swrast-dev
+Description: A free implementation of the OpenGL API -- development support files
+ This package provides the development environment required for
+ compiling programs with Mesa.  For a complete description of Mesa,
+ please look at the libgl1-mesa-swx11 package.
+ .
+ This package also provides a simple widgets library, libGLw, which
+ allows Motif-based applications to embed an OpenGL drawing context.
+ The headers and static libraries for compiling programs that use this
+ library are included.
+ .
+ This library provides a pure software rasteriser; it does not provide
+ a direct rendering-capable library, or one which uses GLX.  For that,
+ please see libgl1-mesa-dev.
+
+Package: libgl1-mesa-swx11-dbg
+Section: libs
+Architecture: any
+Depends: ${shlibs:Depends}
+Conflicts: libgl1-mesa-swrast-dbg
+Replaces: libgl1-mesa-swrast-dbg
+Provides: libgl1-mesa-swrast-dbg
+Description: A free implementation of the OpenGL API -- debugging package
+ This package provides a debug-enabled version of the Mesa libraries.
+ .
+ For a complete description of Mesa, please look at the libgl1-mesa-swx11
+ package.
+
+Package: libgl1-mesa-glx
+Section: libs
+Architecture: any
+Depends: ${shlibs:Depends}
+Conflicts: libgl1, libgl1-mesa-dri (<< 6.4.0)
+Replaces: libgl1, libgl1-mesa-dri (<< 6.4.0)
+Provides: libgl1
+Description: A free implementation of the OpenGL API -- GLX runtime
+ This version of Mesa provides GLX and DRI capabilities: it is capable of
+ both direct and indirect rendering.  For direct rendering, it can use DRI
+ modules from the libgl1-mesa-dri package to accelerate drawing.
+ .
+ This package does not include the modules themselves: these can be found
+ in the libgl1-mesa-dri package.
+ .
+ For a complete description of Mesa, please look at the
+ libgl1-mesa-swx11 package.
+
+Package: libgl1-mesa-dri
+Section: libs
+Architecture: any
+Depends: ${shlibs:Depends}, libgl1-mesa-glx (= ${binary:Version})
+Conflicts: xlibmesa-dri (<< 1:7.0.0)
+Replaces: xlibmesa-dri (<< 1:7.0.0)
+Description: A free implementation of the OpenGL API -- DRI modules
+ This version of Mesa provides GLX and DRI capabilities: it is capable of
+ both direct and indirect rendering.  For direct rendering, it can use DRI
+ modules from the libgl1-mesa-dri package to accelerate drawing.
+ .
+ This package does not include the OpenGL library itself, only the DRI
+ modules for accelerating direct rendering.
+ .
+ For a complete description of Mesa, please look at the
+ libgl1-mesa-swx11 package.
+
+Package: libgl1-mesa-dev
+Section: libs
+Architecture: any
+Depends: ${shlibs:Depends}, libc6-dev, mesa-common-dev (= ${source:Version}), libgl1-mesa-glx (=${binary:Version}), libgl1-mesa-dri (= ${binary:Version})
+Conflicts: libgl-dev, libgl1-mesa-dri-dev
+Replaces: libgl-dev, libgl1-mesa-dri-dev
+Provides: libgl-dev, libgl1-mesa-dri-dev
+Description: A free implementation of the OpenGL API -- GLX development support files
+ This version of Mesa provides GLX and DRI capabilities: it is capable of
+ both direct and indirect rendering.  For direct rendering, it can use DRI
+ modules from the libgl1-mesa-dri package to accelerate drawing.
+ .
+ This package includes headers and static libraries for compiling
+ programs with Mesa.
+ .
+ For a complete description of Mesa, please look at the libgl1-mesa-swx11
+ package.
+
+Package: mesa-common-dev
+Section: devel
+Architecture: all
+Replaces: xlibmesa-gl-dev (<< 1:7), xlibosmesa-dev
+Description: Developer documentation for Mesa
+ This package includes the specifications for the Mesa-specific OpenGL
+ extensions, the complete set of release release notes and the
+ development header files common to all Mesa packages.
+
+Package: libosmesa6
+Section: libs
+Architecture: any
+Depends: ${shlibs:Depends}
+Description: Mesa Off-screen rendering extension
+ OSmesa is a Mesa extension that allows programs to render to an
+ off-screen buffer using the OpenGL API without having to create a
+ rendering context on an X Server.  It uses a pure software renderer.
+ .
+ This package provides both 16-bit and 32-bit versions of the off-screen
+ renderer which do not require external libraries to work.
+
+Package: libosmesa6-dev
+Section: devel
+Architecture: any
+Depends: libosmesa6 (= ${binary:Version}), libgl1-mesa-swx11-dev (= ${binary:Version})
+Conflicts: xlibosmesa-dev, libosmesa4-dev, libosmesa-dev
+Replaces: xlibosmesa-dev, libosmesa-dev
+Provides: xlibosmesa-dev, libosmesa-dev
+Description: Mesa Off-screen rendering extension -- development support files
+ This package provides the required environment for developing programs
+ that use the off-screen rendering extension of Mesa.
+ .
+ For more information on OSmesa see the libosmesa6 package.
+
+Package: libglu1-mesa
+Section: libs
+Architecture: any
+Depends: ${shlibs:Depends}, libgl1-mesa-glx | libgl1
+Provides: libglu1
+Conflicts: mesag3 (<< 5.0.0-1), xlibmesa3, libglu1
+Replaces: libglu1
+Description: The OpenGL utility library (GLU)
+ GLU offers simple interfaces for building mipmaps; checking for the
+ presence of extensions in the OpenGL (or other libraries which follow
+ the same conventions for advertising extensions); drawing
+ piecewise-linear curves, NURBS, quadrics and other primitives
+ (including, but not limited to, teapots); tesselating surfaces; setting
+ up projection matrices and unprojecting screen coordinates to world
+ coordinates.
+ .
+ On Linux, this library is also known as libGLU or libGLU.so.1.
+ .
+ This package provides the SGI implementation of GLU shipped with the
+ Mesa package (ergo the "-mesa" suffix).
+
+Package: libglu1-mesa-dev
+Section: libdevel
+Architecture: any
+Depends: ${shlibs:Depends}, libglu1-mesa (= ${binary:Version}), libgl1-mesa-dev | libgl-dev
+Provides: libglu-dev, xlibmesa-glu-dev
+Conflicts: mesag-dev (<< 5.0.0-1), mesa-glide2-dev (<< 5.0.0-1), mesag3+ggi-dev (<< 5.0.0-1), xlibmesa-dev
+Replaces: libglu-dev
+Description: The OpenGL utility library -- development support files
+ Includes headers and static libraries for compiling programs with GLU.
+ .
+ For a complete description of GLU, please look at the libglu1-mesa
+ package.
+
+Package: mesa-swx11-source
+Section: libdevel
+Architecture: all
+Description: Mesa software rasteriser source -- development support files
+ This package contains the source to the Mesa software rasteriser, which
+ implements all of Mesa's GL support in software.  It powers the X11 and
+ X server backends (assuming unaccelerated indirect).  This package is
+ provided mainly for modular X servers which support GL, and need the
+ software rasteriser source to build the GLcore module for unaccelerated
+ indirect rendering.
+
+# vim: tw=0

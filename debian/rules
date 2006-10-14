@@ -1,0 +1,93 @@
+#!/usr/bin/make -f
+# -*- makefile -*-
+# Sample debian/rules that uses debhelper.
+# This file was originally written by Joey Hess and Craig Small.
+# As a special exception, when this file is copied by dh-make into a
+# dh-make output file, you may use that output file without restriction.
+# This special exception was added by Craig Small in version 0.37 of dh-make.
+
+# Uncomment this to turn on verbose mode.
+#export DH_VERBOSE=1
+
+CFLAGS = -Wall -g
+ifneq (,$(findstring noopt,$(DEB_BUILD_OPTIONS)))
+	CFLAGS += -O0
+else
+	CFLAGS += -O2
+endif
+ifeq (,$(findstring nostrip,$(DEB_BUILD_OPTIONS)))
+	INSTALL_PROGRAM += -s
+endif
+
+DEB_HOST_ARCH      ?= $(shell dpkg-architecture -qDEB_HOST_ARCH)
+DEB_HOST_GNU_TYPE  ?= $(shell dpkg-architecture -qDEB_HOST_GNU_TYPE)
+DEB_BUILD_GNU_TYPE ?= $(shell dpkg-architecture -qDEB_BUILD_GNU_TYPE)
+DEB_BUILD_DIR      ?= $(CURDIR)/obj-$(DEB_BUILD_GNU_TYPE)
+
+STAMPDIR = debian/stamp
+
+CONFIGS = debian \
+          debian-dri
+
+STAMP = $(STAMPDIR)/$(DEB_BUILD_GNU_TYPE)-
+BUILD_STAMPS = $(addprefix $(STAMP)-build-, $(CONFIGS))
+INSTALL_STAMPS = $(addprefix $(STAMP)-install-, $(CONFIGS))
+
+debian/stamp:
+	dh_testdir
+	mkdir -p debian/stamp
+
+build: debian/stamp $(BUILD_STAMPS)
+$(STAMP)-build-%:
+	dh_testdir
+	mkdir -p $(DEB_BUILD_DIR)/$*
+	find $(CURDIR)/* -maxdepth 0 -not -path '$(DEB_BUILD_DIR)*' | xargs cp -rl -t $(DEB_BUILD_DIR)/$*
+	ln -s $* $(DEB_BUILD_DIR)/$*/configs/current
+	cd $(DEB_BUILD_DIR)/$* && $(MAKE)
+	touch $@
+
+pre-install:
+	dh_testdir
+	dh_testroot
+	dh_clean -k --exclude ./Makefile.orig
+	dh_installdirs
+
+install: build pre-install $(INSTALL_STAMPS)
+
+$(STAMP)-install-%:
+	# Add here commands to install the package into debian/tmp
+	cd $(DEB_BUILD_DIR)/$* && $(MAKE) install INSTALL_DIR=$(CURDIR)/debian/tmp/usr
+
+clean:
+	dh_testdir
+	dh_testroot
+	rm -rf $(DEB_BUILD_DIR) debian/stamp
+	dh_clean --exclude ./Makefile.orig
+
+# Build architecture-independent files here.
+binary-indep: build install
+# We have nothing to do by default.
+
+# Build architecture-dependent files here.
+binary-arch: build install
+	dh_testdir
+	dh_testroot
+	dh_installchangelogs
+	dh_installdocs
+	dh_installexamples
+	dh_install --sourcedir=debian/tmp --list-missing
+	dh_installman
+	dh_link
+	dh_strip
+	dh_compress
+	dh_fixperms
+	dh_makeshlibs
+	dh_installdeb
+	dh_shlibdeps
+	dh_gencontrol
+	dh_md5sums
+	dh_builddeb
+
+binary: binary-indep binary-arch
+.PHONY: build clean binary-indep binary-arch binary install configure
+
