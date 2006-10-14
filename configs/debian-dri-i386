@@ -1,6 +1,6 @@
 # Configuration for building the DRI drivers on i386.
 
-include $(TOP)/configs/debian-dri-common
+include $(TOP)/configs/debian-dri-default
 include $(TOP)/configs/linux-dri-x86
 
 CONFIG_NAME = debian-dri-i386

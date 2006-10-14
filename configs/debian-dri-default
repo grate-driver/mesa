@@ -2,7 +2,7 @@
 
 include $(TOP)/configs/debian-common
 
-CONFIG_NAME = debian-dri-common
+CONFIG_NAME = debian-dri-default
 
 override SRC_DIRS = glx/x11 mesa
 override PROGRAM_DIRS =
