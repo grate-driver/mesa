@@ -1,0 +1,15 @@
+# Debian-specific defaults for the default Mesa configuration.
+#
+# Yes, this is somewhat confusing: this is different from debian-common in
+# that debian-common only sets general compilation flags while this file
+# overrides the directories that are actually built by default.
+
+include $(TOP)/configs/debian-common
+
+CONFIG_NAME = debian-default
+
+override SRC_DIRS = mesa glu
+override PROGRAM_DIRS =
+
+# vim: ft=make
+
