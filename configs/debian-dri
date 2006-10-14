@@ -7,5 +7,7 @@ else
 	include $(TOP)/configs/debian-dri-any
 endif
 
+CONFIG_NAME = debian-dri
+
 # vim: ft=make
 

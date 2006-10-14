@@ -6,5 +6,7 @@ else
 	include $(TOP)/configs/debian-any
 endif
 
+CONFIG_NAME = debian
+
 # vim: ft=make
 
