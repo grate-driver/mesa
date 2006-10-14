@@ -30,6 +30,7 @@ STAMPDIR = debian/stamp
 # build the following configurations
 CONFIGS = debian \
           debian-dri \
+          debian-osmesa \
           debian-osmesa16 \
           debian-osmesa16-static \
           debian-osmesa32 \

@@ -1,0 +1,10 @@
+# Configuration for building OSMesa on Debian.
+
+include $(TOP)/configs/debian-common
+include $(TOP)/configs/linux-osmesa
+
+CONFIG_NAME = debian-osmesa
+
+# vim: ft=make
+
+

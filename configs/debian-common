@@ -1,10 +1,6 @@
 # Override defaults set by the Mesa configuration.
 
-include $(TOP)/configs/default
-
 CONFIG_NAME = debian-common
-
-override OPT_FLAGS = -O2 -g
 
 # vim: ft=make
 

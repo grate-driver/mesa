@@ -2,20 +2,9 @@
 # channel.
 
 include $(TOP)/configs/debian-common
-include $(TOP)/configs/linux-osmesa
+include $(TOP)/configs/linux-osmesa32
 
 CONFIG_NAME = debian-osmesa32
-
-DEFINES += -DCHAN_BITS=32 -DDEFAULT_SOFTWARE_DEPTH_BITS=31
-
-override OSMESA_LIB = OSMesa32
-override OSMESA_LIB_NAME = lib$(OSMESA_LIB).so
-
-override SRC_DIRS = mesa glu
-override DRIVER_DIRS = osmesa
-override PROGRAM_DIRS =
-
-override APP_LIB_DEPS = -lOSMesa32
 
 # vim: ft=make
 
