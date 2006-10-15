@@ -9,7 +9,9 @@
 # Uncomment this to turn on verbose mode.
 #export DH_VERBOSE=1
 
-QUILT_STAMPFN ?= debian/stamp/patch
+STAMP_DIR = debian/stamp
+
+QUILT_STAMPFN = $(STAMP_DIR)/patch
 include /usr/share/quilt/quilt.make
 
 CFLAGS = -Wall -g
@@ -28,8 +30,6 @@ DEB_BUILD_DIR      ?= $(CURDIR)/obj-$(DEB_BUILD_GNU_TYPE)
 
 export DEB_BUILD_ARCH
 
-STAMPDIR = debian/stamp
-
 # build the following configurations
 CONFIGS = debian \
           debian-arch \
@@ -40,19 +40,22 @@ CONFIGS = debian \
           debian-osmesa32-static \
           debian-static
 
-STAMP = $(STAMPDIR)/$(DEB_BUILD_GNU_TYPE)
+STAMP = $(STAMP_DIR)/$(DEB_BUILD_GNU_TYPE)
 BUILD_STAMPS = $(addprefix $(STAMP)-build-, $(CONFIGS))
 INSTALL_STAMPS = $(addprefix $(STAMP)-install-, $(CONFIGS))
 
-debian/stamp:
+$(STAMP_DIR):
 	dh_testdir
-	mkdir -p debian/stamp
+	mkdir -p $@
 
-build: debian/stamp patch $(BUILD_STAMPS)
-$(STAMP)-build-%:
+$(QUILT_STAMPFN): $(STAMP_DIR)
+
+build: $(BUILD_STAMPS)
+$(STAMP)-build-%: patch
 	dh_testdir
 	mkdir -p $(DEB_BUILD_DIR)/$*
-	find $(CURDIR)/* -maxdepth 0 -not -path '$(DEB_BUILD_DIR)*' | xargs cp -rl -t $(DEB_BUILD_DIR)/$*
+	find $(CURDIR)/* -maxdepth 0 -not -path '$(DEB_BUILD_DIR)*' | \
+		xargs cp -rlf -t $(DEB_BUILD_DIR)/$*
 	ln -sf $* $(DEB_BUILD_DIR)/$*/configs/current
 	cd $(DEB_BUILD_DIR)/$* && $(MAKE)
 	touch $@
@@ -74,7 +77,7 @@ $(STAMP)-install-%: $(STAMP)-build-%
 clean: unpatch
 	dh_testdir
 	dh_testroot
-	rm -rf $(DEB_BUILD_DIR) debian/stamp
+	rm -rf $(DEB_BUILD_DIR) $(STAMP_DIR)
 	dh_clean --exclude ./Makefile.orig --exclude configs/CVS/Root.bak
 
 # Build architecture-independent files here.
