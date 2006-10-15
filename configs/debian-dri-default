@@ -4,10 +4,11 @@ include $(TOP)/configs/debian-common
 
 CONFIG_NAME = debian-dri-default
 
+override LIB_DIR = libglx
 override SRC_DIRS = glx/x11 mesa
 override PROGRAM_DIRS =
 
-override DRI_DRIVER_INSTALL_DIR = $(INSTALL_DIR)/lib/dri
+override DRI_DRIVER_INSTALL_DIR = $(INSTALL_DIR)/$(LIB_DIR)/dri
 override DRI_DRIVER_SEARCH_DIR = /usr/lib/dri
 
 # vim: ft=make

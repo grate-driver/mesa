@@ -5,6 +5,9 @@ include $(TOP)/configs/linux-osmesa
 
 CONFIG_NAME = debian-osmesa
 
+override SRC_DIRS = mesa
+override PROGRAM_DIRS =
+
 # vim: ft=make
 
 
