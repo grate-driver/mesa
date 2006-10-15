@@ -4,7 +4,7 @@ Priority: optional
 Maintainer: Debian X Strike Force <debian-x@lists.debian.org>
 Uploaders: Thierry Reding <thierry@gilfi.de>
 Standards-Version: 3.7.2
-Build-Depends: debhelper (>= 5)
+Build-Depends: debhelper (>= 5), quilt
 
 Package: libgl1-mesa-swx11
 Section: libs
@@ -99,7 +99,7 @@ Description: A free implementation of the OpenGL API -- DRI modules
 Package: libgl1-mesa-dev
 Section: libs
 Architecture: any
-Depends: ${shlibs:Depends}, libc6-dev, mesa-common-dev (= ${source:Version}), libgl1-mesa-glx (=${binary:Version}), libgl1-mesa-dri (= ${binary:Version})
+Depends: libc6-dev, mesa-common-dev (= ${source:Version}), libgl1-mesa-glx (=${binary:Version}), libgl1-mesa-dri (= ${binary:Version})
 Conflicts: libgl-dev, libgl1-mesa-dri-dev
 Replaces: libgl-dev, libgl1-mesa-dri-dev
 Provides: libgl-dev, libgl1-mesa-dri-dev
@@ -172,7 +172,7 @@ Description: The OpenGL utility library (GLU)
 Package: libglu1-mesa-dev
 Section: libdevel
 Architecture: any
-Depends: ${shlibs:Depends}, libglu1-mesa (= ${binary:Version}), libgl1-mesa-dev | libgl-dev
+Depends: libglu1-mesa (= ${binary:Version}), libgl1-mesa-dev | libgl-dev
 Provides: libglu-dev, xlibmesa-glu-dev
 Conflicts: mesag-dev (<< 5.0.0-1), mesa-glide2-dev (<< 5.0.0-1), mesag3+ggi-dev (<< 5.0.0-1), xlibmesa-dev
 Replaces: libglu-dev
