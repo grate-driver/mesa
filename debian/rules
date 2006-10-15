@@ -32,13 +32,18 @@ STAMPDIR = debian/stamp
 
 # build the following configurations
 CONFIGS = debian \
+          debian-arch \
           debian-dri \
-          debian-osmesa \
           debian-osmesa16 \
           debian-osmesa16-static \
           debian-osmesa32 \
           debian-osmesa32-static \
           debian-static
+
+# Don't build architecture-dependent DRI drivers (yet) because it's probably
+# not worth the effort. For benchmarking, include the following configuration
+# in the list above.
+#debian-dri-arch
 
 STAMP = $(STAMPDIR)/$(DEB_BUILD_GNU_TYPE)
 BUILD_STAMPS = $(addprefix $(STAMP)-build-, $(CONFIGS))
@@ -68,7 +73,7 @@ install: build pre-install $(INSTALL_STAMPS)
 
 $(STAMP)-install-%: $(STAMP)-build-%
 	# Add here commands to install the package into debian/tmp
-	cd $(DEB_BUILD_DIR)/$* && $(MAKE) install INSTALL_DIR=$(CURDIR)/debian/tmp/usr
+	cd $(DEB_BUILD_DIR)/$* && $(MAKE) install DESTDIR=$(CURDIR)/debian/tmp
 	touch $@
 
 clean: unpatch

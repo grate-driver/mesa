@@ -1,0 +1,13 @@
+# Configuration for building a version of the DRI drivers optimized for the
+# build architecture.
+
+ifneq ($(wildcard $(TOP)/configs/debian-dri-$(DEB_BUILD_ARCH)),)
+	include $(TOP)/configs/debian-dri-$(DEB_BUILD_ARCH)
+else
+	include $(TOP)/configs/debian-dri-any
+endif
+
+CONFIG_NAME = debian-dri-arch
+
+# vim: ft=make
+

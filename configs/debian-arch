@@ -1,0 +1,13 @@
+# Configuration for building a version of Mesa optimized for the build
+# architecture.
+
+ifneq ($(wildcard $(TOP)/configs/debian-$(DEB_BUILD_ARCH)),)
+	include $(TOP)/configs/debian-$(DEB_BUILD_ARCH)
+else
+	include $(TOP)/configs/debian-any
+endif
+
+CONFIG_NAME = debian-arch
+
+# vim: ft=make
+

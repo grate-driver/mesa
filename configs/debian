@@ -1,10 +1,7 @@
-# Select the correct configuration depending on the build architecture.
+# Configuration for building Mesa on the build architecture.
 
-ifneq ($(wildcard $(TOP)/configs/debian-$(DEB_BUILD_ARCH)),)
-	include $(TOP)/configs/debian-$(DEB_BUILD_ARCH)
-else
-	include $(TOP)/configs/debian-any
-endif
+include $(TOP)/configs/debian-default
+include $(TOP)/configs/linux
 
 CONFIG_NAME = debian
 

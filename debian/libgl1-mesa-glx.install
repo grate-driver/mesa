@@ -1,1 +1,1 @@
-usr/libglx/libGL.so.* usr/lib
+usr/lib/glx/libGL.so.* usr/lib

@@ -1,12 +1,9 @@
 # Configuration for building static versions of the libraries.
 
-include $(TOP)/configs/debian-common
+include $(TOP)/configs/debian-default
 include $(TOP)/configs/linux-static
 
 CONFIG_NAME = debian-static
-
-override SRC_DIRS = mesa glu
-override PROGRAM_DIRS =
 
 # vim: ft=make
 

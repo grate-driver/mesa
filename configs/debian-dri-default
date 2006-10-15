@@ -1,14 +1,13 @@
 # Override defaults for the DRI drivers build.
 
-include $(TOP)/configs/debian-common
+include $(TOP)/configs/debian-default
 
 CONFIG_NAME = debian-dri-default
 
-override LIB_DIR = libglx
+override LIB_DIR = lib/glx
 override SRC_DIRS = glx/x11 mesa
-override PROGRAM_DIRS =
 
-override DRI_DRIVER_INSTALL_DIR = $(INSTALL_DIR)/$(LIB_DIR)/dri
+override DRI_DRIVER_INSTALL_DIR = $(INSTALL_DIR)/lib/dri
 override DRI_DRIVER_SEARCH_DIR = /usr/lib/dri
 
 # vim: ft=make

@@ -1,7 +1,7 @@
 # Configuration for building OSMesa with support for 16 bits per color
 # channel.
 
-include $(TOP)/configs/debian-common
+include $(TOP)/configs/debian-default
 include $(TOP)/configs/linux-osmesa16
 
 CONFIG_NAME = debian-osmesa16

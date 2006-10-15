@@ -1,7 +1,7 @@
 # Configuration for building a static version of OSMesa with support for 32
 # bits per color channel.
 
-include $(TOP)/configs/debian-common
+include $(TOP)/configs/debian-default
 include $(TOP)/configs/linux-osmesa32-static
 
 CONFIG_NAME = debian-osmesa32-static

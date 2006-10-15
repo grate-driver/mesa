@@ -1,13 +1,14 @@
 --- a/src/mesa/Makefile
 +++ b/src/mesa/Makefile
-@@ -154,7 +154,11 @@
+@@ -154,7 +154,12 @@
  	$(INSTALL) -d $(INSTALL_DIR)/include/GL
  	$(INSTALL) -d $(INSTALL_DIR)/$(LIB_DIR)
  	$(INSTALL) -m 644 $(TOP)/include/GL/*.h $(INSTALL_DIR)/include/GL
 -	$(COPY_LIBS) $(TOP)/$(LIB_DIR)/libGL.* $(INSTALL_DIR)/$(LIB_DIR)
-+	@if [ "${DRIVER_DIRS}" != "osmesa" ]; then \
++	@if [ -e $(TOP)/$(LIB_DIR)/$(GL_LIB_NAME) ]; then \
 +		$(COPY_LIBS) $(TOP)/$(LIB_DIR)/lib$(GL_LIB).* $(INSTALL_DIR)/$(LIB_DIR); \
-+	else \
++	fi
++	@if [ -e $(TOP)/$(LIB_DIR)/$(OSMESA_LIB_NAME) ]; then \
 +		$(COPY_LIBS) $(TOP)/$(LIB_DIR)/lib$(OSMESA_LIB).* $(INSTALL_DIR)/$(LIB_DIR); \
 +	fi
  	@if [ "${DRIVER_DIRS}" = "dri" ] ; then \

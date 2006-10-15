@@ -11,5 +11,7 @@ CONFIG_NAME = debian-default
 override SRC_DIRS = mesa glu
 override PROGRAM_DIRS =
 
+override INSTALL_DIR = $(DESTDIR)/usr
+
 # vim: ft=make
 
