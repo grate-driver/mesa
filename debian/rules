@@ -33,17 +33,12 @@ STAMPDIR = debian/stamp
 # build the following configurations
 CONFIGS = debian \
           debian-arch \
-          debian-dri \
+          debian-dri-arch \
           debian-osmesa16 \
           debian-osmesa16-static \
           debian-osmesa32 \
           debian-osmesa32-static \
           debian-static
-
-# Don't build architecture-dependent DRI drivers (yet) because it's probably
-# not worth the effort. For benchmarking, include the following configuration
-# in the list above.
-#debian-dri-arch
 
 STAMP = $(STAMPDIR)/$(DEB_BUILD_GNU_TYPE)
 BUILD_STAMPS = $(addprefix $(STAMP)-build-, $(CONFIGS))

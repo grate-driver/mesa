@@ -1,9 +1,0 @@
-# Configuration for building the DRI drivers on the build architecture.
-
-include $(TOP)/configs/debian-dri-default
-include $(TOP)/configs/linux-dri
-
-CONFIG_NAME = debian-dri
-
-# vim: ft=make
-
