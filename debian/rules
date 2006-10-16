@@ -26,44 +26,60 @@ DEB_BUILD_DIR      ?= $(CURDIR)/obj-$(DEB_BUILD_GNU_TYPE)
 
 export DEB_BUILD_ARCH
 
-# build the following configurations
-CONFIGS = debian-swx11+glu-arch \
-          debian-dri-arch \
+# choose an architecture-specific configuration for building swx11 and GLU if
+# one exists
+ifneq ($(wildcard configs/debian-swx11+glu-$(DEB_BUILD_ARCH)),)
+	SWX11_GLU_CONFIGS := debian-swx11+glu-$(DEB_BUILD_ARCH)
+else
+	SWX11_GLU_CONFIGS := debian-swx11+glu-any
+endif
+
+# additional configurations optimized for CPU's supported by the build
+# architecture
+ifeq ($(DEB_BUILD_ARCH), i386)
+	SWX11_GLU_CONFIGS += debian-swx11+glu-i386-i686
+endif
+
+#ifeq ($(DEB_BUILD_ARCH), alpha)
+#	SWX11_GLU_CONFIGS += debian-swx11+glu-alpha-ev5
+#endif
+
+#ifeq ($(DEB_BUILD_ARCH), powerpc)
+#	SWX11_GLU_CONFIGS += debian-swx11+glu-powerpc-603
+#endif
+
+#ifeq ($(DEB_BUILD_ARCH), sparc)
+#	SWX11_GLU_CONFIGS += debian-swx11+glu-sparc-ultrasparc
+#endif
+
+# Use the following to automatically build all optimized configurations
+# available for the build architecture. Use with caution =)
+#SWX11_GLU_CONFIGS += $(subst configs/,,$(wildcard configs/debian-swx11+glu-$(DEB_BUILD_ARCH)-*))
+
+# choose an architecture-specific configuration for building the DRI-enabled
+# libGL if one exists
+ifneq ($(wildcard configs/debian-dri-$(DEB_BUILD_ARCH)),)
+	DRI_CONFIGS := debian-dri-$(DEB_BUILD_ARCH)
+else
+	DRI_CONFIGS := debian-dri-any
+endif
+
+# build the following configurations by default
+CONFIGS = $(SWX11_GLU_CONFIGS) \
+          $(DRI_CONFIGS) \
           debian-osmesa16 \
           debian-osmesa16-static \
           debian-osmesa32 \
           debian-osmesa32-static \
           debian-static
 
-# additional configurations optimized for CPU's supported by the build
-# architecture
-ifeq ($(DEB_BUILD_ARCH), i386)
-	CONFIGS += debian-i386-i686
-endif
-
-#ifeq ($(DEB_BUILD_ARCH), alpha)
-#	CONFIGS += debian-alpha-ev5
-#endif
-
-#ifeq ($(DEB_BUILD_ARCH), powerpc)
-#	CONFIGS += debian-powerpc-603
-#endif
-
-#ifeq ($(DEB_BUILD_ARCH), ppc64)
-#	CONFIGS += debian-ppc64
-#endif
-
-#ifeq ($(DEB_BUILD_ARCH), sparc)
-#	CONFIGS += debian-sparc-ultrasparc
-#endif
-
-# Use the following to automatically build all optimized configurations
-# available for the build architecture. Use with caution =)
-#CONFIGS += $(subst configs/,,$(wildcard configs/debian-$(DEB_BUILD_ARCH)*))
-
 STAMP = $(STAMP_DIR)/$(DEB_BUILD_GNU_TYPE)
 BUILD_STAMPS = $(addprefix $(STAMP)-build-, $(CONFIGS))
 INSTALL_STAMPS = $(addprefix $(STAMP)-install-, $(CONFIGS))
+
+# list the configurations that will built
+configs:
+	@echo Building the following configurations: $(CONFIGS)
 
 $(STAMP_DIR):
 	dh_testdir
@@ -127,5 +143,5 @@ binary-arch: build install
 	dh_builddeb
 
 binary: binary-indep binary-arch
-.PHONY: build clean binary-indep binary-arch binary install configure
+.PHONY: configs build clean binary-indep binary-arch binary install configure
 
