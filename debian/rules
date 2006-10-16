@@ -56,6 +56,9 @@ endif
 # available for the build architecture. Use with caution =)
 #SWX11_GLU_CONFIGS += $(subst configs/,,$(wildcard configs/debian-swx11+glu-$(DEB_BUILD_ARCH)-*))
 
+# build a static version of swx11 and GLU as well
+SWX11_GLU_CONFIGS += debian-swx11+glu-static
+
 # choose an architecture-specific configuration for building the DRI-enabled
 # libGL if one exists
 ifneq ($(wildcard configs/debian-dri-$(DEB_BUILD_ARCH)),)
@@ -70,8 +73,7 @@ CONFIGS = $(SWX11_GLU_CONFIGS) \
           debian-osmesa16 \
           debian-osmesa16-static \
           debian-osmesa32 \
-          debian-osmesa32-static \
-          debian-static
+          debian-osmesa32-static
 
 STAMP = $(STAMP_DIR)/$(DEB_BUILD_GNU_TYPE)
 BUILD_STAMPS = $(addprefix $(STAMP)-build-, $(CONFIGS))
