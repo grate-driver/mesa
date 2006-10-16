@@ -1,6 +1,0 @@
-# Override defaults set by the Mesa configuration.
-
-CONFIG_NAME = debian-common
-
-# vim: ft=make
-

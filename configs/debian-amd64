@@ -5,5 +5,7 @@ include $(TOP)/configs/linux-x86-64
 
 CONFIG_NAME = debian-amd64
 
+override LIB_DIR = lib64
+
 # vim: ft=make
 

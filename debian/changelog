@@ -1,6 +1,7 @@
 mesa (6.5.1-1) unstable; urgency=low
 
-  * 
+  * Provide i686 optimized versions in libgl1-mesa-swx11-i686.
+  * No longer provide the libgl1-mesa-swx11-dbg package.
 
- -- Thierry Reding <thierry@gilfi.de>  Sat, 14 Oct 2006 02:09:50 +0200
+ -- Thierry Reding <thierry@gilfi.de>  Sun, 15 Oct 2006 19:21:13 +0200
 

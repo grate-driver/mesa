@@ -1,10 +1,6 @@
 #!/usr/bin/make -f
-# -*- makefile -*-
-# Sample debian/rules that uses debhelper.
-# This file was originally written by Joey Hess and Craig Small.
-# As a special exception, when this file is copied by dh-make into a
-# dh-make output file, you may use that output file without restriction.
-# This special exception was added by Craig Small in version 0.37 of dh-make.
+# debian/rules for the Debian mesa package
+# Copyright © 2006 Thierry Reding <thierry@gilfi.de>
 
 # Uncomment this to turn on verbose mode.
 #export DH_VERBOSE=1
@@ -31,14 +27,43 @@ DEB_BUILD_DIR      ?= $(CURDIR)/obj-$(DEB_BUILD_GNU_TYPE)
 export DEB_BUILD_ARCH
 
 # build the following configurations
-CONFIGS = debian \
-          debian-arch \
+CONFIGS = debian-swx11+glu \
           debian-dri-arch \
           debian-osmesa16 \
           debian-osmesa16-static \
           debian-osmesa32 \
           debian-osmesa32-static \
           debian-static
+
+# additional configurations optimized for CPU's supported by the build
+# architecture
+ifeq ($(DEB_BUILD_ARCH), i386)
+	CONFIGS += debian-i386-i686
+endif
+
+#ifeq ($(DEB_BUILD_ARCH), alpha)
+#	CONFIGS += debian-alpha-ev5
+#endif
+
+ifeq ($(DEB_BUILD_ARCH), amd64)
+	CONFIGS += debian-amd64
+endif
+
+#ifeq ($(DEB_BUILD_ARCH), powerpc)
+#	CONFIGS += debian-powerpc-603
+#endif
+
+#ifeq ($(DEB_BUILD_ARCH), ppc64)
+#	CONFIGS += debian-ppc64
+#endif
+
+#ifeq ($(DEB_BUILD_ARCH), sparc)
+#	CONFIGS += debian-sparc-ultrasparc
+#endif
+
+# Use the following to automatically build all optimized configurations
+# available for the build architecture. Use with caution =)
+#CONFIGS += $(subst configs/,,$(wildcard configs/debian-$(DEB_BUILD_ARCH)*))
 
 STAMP = $(STAMP_DIR)/$(DEB_BUILD_GNU_TYPE)
 BUILD_STAMPS = $(addprefix $(STAMP)-build-, $(CONFIGS))
@@ -50,7 +75,9 @@ $(STAMP_DIR):
 
 $(QUILT_STAMPFN): $(STAMP_DIR)
 
+
 build: $(BUILD_STAMPS)
+
 $(STAMP)-build-%: patch
 	dh_testdir
 	mkdir -p $(DEB_BUILD_DIR)/$*
@@ -65,9 +92,8 @@ pre-install:
 	dh_testroot
 	dh_clean -k --exclude ./Makefile.orig --exclude configs/CVS/Root.bak
 	rm -rf $(INSTALL_STAMPS)
-	dh_installdirs
 
-install: build pre-install $(INSTALL_STAMPS)
+install: pre-install $(INSTALL_STAMPS)
 
 $(STAMP)-install-%: $(STAMP)-build-%
 	# Add here commands to install the package into debian/tmp
@@ -77,8 +103,8 @@ $(STAMP)-install-%: $(STAMP)-build-%
 clean: unpatch
 	dh_testdir
 	dh_testroot
-	rm -rf $(DEB_BUILD_DIR) $(STAMP_DIR)
 	dh_clean --exclude ./Makefile.orig --exclude configs/CVS/Root.bak
+	rm -rf $(DEB_BUILD_DIR) $(STAMP_DIR)
 
 # Build architecture-independent files here.
 binary-indep: build install
