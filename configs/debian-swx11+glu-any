@@ -1,6 +1,6 @@
 # Configuration for building Mesa (swx11 and GLU) on the build architecture.
 
-include $(TOP)/configs/debian-default
+include $(TOP)/configs/debian-swx11+glu-default
 include $(TOP)/configs/linux
 
 CONFIG_NAME = debian-swx11+glu-any

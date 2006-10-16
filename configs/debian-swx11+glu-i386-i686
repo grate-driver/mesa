@@ -1,12 +1,13 @@
 # Configuration for building Mesa (swx11 and GLU) with runtime-detected
 # assembler optimizations on i386 (i686 optimized).
 
-include $(TOP)/configs/debian-default
+include $(TOP)/configs/debian-swx11+glu-default
 include $(TOP)/configs/linux-x86
 
 CONFIG_NAME = debian-swx11+glu-i386-i686
 
 override ARCH_FLAGS += -mcpu=i686
+override SRC_DIRS = mesa
 override LIB_DIR = lib/i686/cmov
 
 # vim: ft=make

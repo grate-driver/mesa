@@ -1,7 +1,7 @@
 # Configuration for building Mesa (swx11 and GLU) with runtime-detected
 # assembler optimizations on i386.
 
-include $(TOP)/configs/debian-default
+include $(TOP)/configs/debian-swx11+glu-default
 include $(TOP)/configs/linux-x86
 
 CONFIG_NAME = debian-swx11+glu-i386
