@@ -1,0 +1,12 @@
+# Configuration for building Mesa (swx11 and GLU) with runtime-detected
+# assembler optimizations on sparc (ultrasparc-optimized).
+
+include $(TOP)/configs/debian-default
+include $(TOP)/configs/linux-ultrasparc
+
+CONFIG_NAME = debian-swx11+glu-sparc-ultrasparc
+
+override LIB_DIR = lib/ultrasparc/cmov
+
+# vim: ft=make
+

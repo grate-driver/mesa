@@ -3,9 +3,7 @@
 include $(TOP)/configs/debian-default
 include $(TOP)/configs/linux
 
-CONFIG_NAME = debian
-
-override SRC_DIRS = mesa glu
+CONFIG_NAME = debian-swx11+glu-any
 
 # vim: ft=make
 

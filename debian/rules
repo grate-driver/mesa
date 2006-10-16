@@ -27,7 +27,7 @@ DEB_BUILD_DIR      ?= $(CURDIR)/obj-$(DEB_BUILD_GNU_TYPE)
 export DEB_BUILD_ARCH
 
 # build the following configurations
-CONFIGS = debian-swx11+glu \
+CONFIGS = debian-swx11+glu-arch \
           debian-dri-arch \
           debian-osmesa16 \
           debian-osmesa16-static \
@@ -44,10 +44,6 @@ endif
 #ifeq ($(DEB_BUILD_ARCH), alpha)
 #	CONFIGS += debian-alpha-ev5
 #endif
-
-ifeq ($(DEB_BUILD_ARCH), amd64)
-	CONFIGS += debian-amd64
-endif
 
 #ifeq ($(DEB_BUILD_ARCH), powerpc)
 #	CONFIGS += debian-powerpc-603

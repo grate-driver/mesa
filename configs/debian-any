@@ -1,7 +1,0 @@
-# Chicken-out configuration for architectures where optimized builds are not
-# supported.
-
-CONFIG_NAME = debian-any
-
-# vim: ft=make
-

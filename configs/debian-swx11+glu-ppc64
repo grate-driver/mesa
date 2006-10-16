@@ -1,0 +1,11 @@
+# Configuration for building Mesa (swx11 and GLU) with runtime-detected
+# assembler optimizations on ppc64.
+
+include $(TOP)/configs/debian-ppc
+
+CONFIG_NAME = debian-swx11+glu-ppc64
+
+override LIB_DIR = lib64
+
+# vim: ft=make
+

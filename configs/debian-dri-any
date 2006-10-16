@@ -3,7 +3,7 @@
 include $(TOP)/configs/debian-dri-default
 include $(TOP)/configs/linux-dri
 
-CONFIG_NAME = debian-dri
+CONFIG_NAME = debian-dri-any
 
 # vim: ft=make
 

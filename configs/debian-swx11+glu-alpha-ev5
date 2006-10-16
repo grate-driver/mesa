@@ -1,9 +1,9 @@
-# Configuration for building Mesa on alpha.
+# Configuration for building Mesa (swx11 and GLU) on alpha (ev5 optimized).
 
 include $(TOP)/configs/debian-default
 include $(TOP)/configs/linux-alpha
 
-CONFIG_NAME = debian-alpha
+CONFIG_NAME = debian-swx11+glu-alpha-ev5
 
 override LIB_DIR = lib/ev5/cmov
 
