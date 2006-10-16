@@ -5,5 +5,7 @@ include $(TOP)/configs/linux-static
 
 CONFIG_NAME = debian-static
 
+override SRC_DIRS = mesa glu
+
 # vim: ft=make
 
