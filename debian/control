@@ -32,7 +32,7 @@ Section: libs
 Priority: extra
 Architecture: i386
 Pre-Depends: libgl1-mesa-swx11
-Description: A free implementation of the OpenGL API -- i686 optimized runtime
+Description: A free implementation of the OpenGL API -- runtime [i686 optimized]
  Mesa is a 3-D graphics library with an API which is very similar to
  that of OpenGL.  To the extent that Mesa utilizes the OpenGL command
  syntax or state machine, it is being used with authorization from
@@ -90,6 +90,27 @@ Description: A free implementation of the OpenGL API -- GLX runtime
  For a complete description of Mesa, please look at the
  libgl1-mesa-swx11 package.
 
+#Package: libgl1-mesa-glx-i686
+#Section: libs
+#Priority: extra
+#Architecture: i386
+#Pre-Depends: libgl1-mesa-glx
+#Description: A free implementation of the OpenGL API -- GLX runtime [i686 optimized]
+# This version of Mesa provides GLX and DRI capabilities: it is capable of
+# both direct and indirect rendering.  For direct rendering, it can use DRI
+# modules from the libgl1-mesa-dri package to accelerate drawing.
+# .
+# This package does not include the modules themselves: these can be found
+# in the libgl1-mesa-dri package.
+# .
+# For a complete description of Mesa, please look at the
+# libgl1-mesa-swx11 package.
+# .
+# This set of libraries is optimized for i686 machines and will only be used if
+# you are running a 2.6 kernel on an i686 class CPU. This includes Pentium Pro,
+# Pentium II/II/IV, Celeron CPU's and similar class CPU's (including clones
+# such as AMD Athlon/Opteron, VIA C3 Nehemiah, but not VIA C3 Ezla).
+
 Package: libgl1-mesa-dri
 Section: libs
 Architecture: any
@@ -106,6 +127,27 @@ Description: A free implementation of the OpenGL API -- DRI modules
  .
  For a complete description of Mesa, please look at the
  libgl1-mesa-swx11 package.
+
+#Package: libgl1-mesa-dri-i686
+#Section: libs
+#Priority: extra
+#Architecture: i386
+#Pre-Depends: libgl1-mesa-dri
+#Description: A free implementation of the OpenGL API -- DRI modules [i686 optimized]
+# This version of Mesa provides GLX and DRI capabilities: it is capable of
+# both direct and indirect rendering.  For direct rendering, it can use DRI
+# modules from the libgl1-mesa-dri package to accelerate drawing.
+# .
+# This package does not include the OpenGL library itself, only the DRI
+# modules for accelerating direct rendering.
+# .
+# For a complete description of Mesa, please look at the
+# libgl1-mesa-swx11 package.
+# .
+# This set of libraries is optimized for i686 machines and will only be used if
+# you are running a 2.6 kernel on an i686 class CPU. This includes Pentium Pro,
+# Pentium II/II/IV, Celeron CPU's and similar class CPU's (including clones
+# such as AMD Athlon/Opteron, VIA C3 Nehemiah, but not VIA C3 Ezla).
 
 Package: libgl1-mesa-dev
 Section: libs
