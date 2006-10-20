@@ -1,7 +1,7 @@
 # Configuration for building static versions of the libraries (swx11 and GLU).
 
-include $(TOP)/configs/debian-swx11+glu-default
 include $(TOP)/configs/linux-static
+include $(TOP)/configs/debian-swx11+glu-default
 
 CONFIG_NAME = debian-swx11+glu-static
 

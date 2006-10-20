@@ -2,10 +2,10 @@
 
 CONFIG_NAME = debian-default
 
-override SRC_DIRS = mesa
-override PROGRAM_DIRS =
+SRC_DIRS = mesa
+PROGRAM_DIRS =
 
-override INSTALL_DIR = $(DESTDIR)/usr
+INSTALL_DIR = $(DESTDIR)/usr
 
 # vim: ft=make
 

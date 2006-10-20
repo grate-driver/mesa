@@ -1,25 +1,30 @@
-# Override defaults for the DRI drivers build.
+# Configuration defaults for building the DRI drivers and DRI/GLX-enabled
+# libGL.
 
 include $(TOP)/configs/debian-default
 
 CONFIG_NAME = debian-dri-default
 
-override LIB_DIR = lib/glx
-override SRC_DIRS = glx/x11 mesa
+OPT_FLAGS = -O3 -g
 
-override DRI_DRIVER_INSTALL_DIR = $(INSTALL_DIR)/lib/dri
-override DRI_DRIVER_SEARCH_DIR = /usr/lib/dri
+SRC_DIRS = glx/x11 mesa
+DRIVER_DIRS = dri
 
-override DRI_DIRS = mach64 mga r128 r200 r300 radeon s3v savage tdfx trident
+LIB_DIR = lib/glx
+
+DRI_DRIVER_INSTALL_DIR = $(INSTALL_DIR)/lib/dri
+DRI_DRIVER_SEARCH_DIR = /usr/lib/dri
+
+DRI_DIRS = mach64 mga r128 r200 r300 radeon s3v savage tdfx trident
 
 ARCH_X86 = i386 amd64
 
 ifneq ($(findstring $(DEB_BUILD_ARCH), $(ARCH_X86)),)
-	override DRI_DIRS += i810 i915 i965 sis unichrome
+	DRI_DIRS += i810 i915 i965 sis unichrome
 endif
 
 ifeq ($(DEB_BUILD_ARCH), sparc)
-	override DRI_DIRS += ffb
+	DRI_DIRS += ffb
 endif
 
 # vim: ft=make

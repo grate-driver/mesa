@@ -4,7 +4,8 @@ include $(TOP)/configs/debian-default
 
 CONFIG_NAME = debian-swx11+glu-default
 
-override SRC_DIRS = mesa glu
+SRC_DIRS = mesa glu
+DRIVER_DIRS = x11
 
 # vim: ft=make
 

@@ -1,8 +1,8 @@
 # Configuration for building a static version of OSMesa with support for 16
 # bits per color channel.
 
-include $(TOP)/configs/debian-default
 include $(TOP)/configs/linux-osmesa16-static
+include $(TOP)/configs/debian-osmesa-default
 
 CONFIG_NAME = debian-osmesa16-static
 
