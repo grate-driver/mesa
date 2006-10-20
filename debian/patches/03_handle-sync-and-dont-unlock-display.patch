@@ -1,3 +1,8 @@
+Patch that fixes Debian bug #391681.
+
+This patch by Josh Triplett.
+Submitted to Mesa and applied (post 6.5.1).
+
 --- a/src/glx/x11/glxext.c
 +++ b/src/glx/x11/glxext.c
 @@ -1016,11 +1016,11 @@

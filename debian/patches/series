@@ -1,2 +1,4 @@
 00_create-libdir.patch
 01_fix-makefile.patch
+02_use-ieee-fp-on-s390-and-m68k.patch
+03_handle-sync-and-dont-unlock-display.patch

@@ -4,6 +4,9 @@ OSMesa in a separate package.
 Fix Mesa makefile to install the libGL and libOSMesa libraries when they
 exist, not only depending on configuration.
 
+This patch by Thierry Reding.
+Hunk #2 submitted to Mesa and applied (post 6.5.1).
+
 --- a/src/mesa/Makefile
 +++ b/src/mesa/Makefile
 @@ -107,7 +107,7 @@
