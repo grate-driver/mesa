@@ -34,10 +34,22 @@ else
 	SWX11_GLU_CONFIGS := debian-swx11+glu-any
 endif
 
+# build a static version of swx11 and GLU as well
+SWX11_GLU_CONFIGS += debian-swx11+glu-static
+
+# choose an architecture-specific configuration for building the DRI-enabled
+# libGL if one exists
+ifneq ($(wildcard configs/debian-dri-$(DEB_BUILD_ARCH)),)
+	DRI_CONFIGS := debian-dri-$(DEB_BUILD_ARCH)
+else
+	DRI_CONFIGS := debian-dri-any
+endif
+
 # additional configurations optimized for CPU's supported by the build
 # architecture
 ifeq ($(DEB_BUILD_ARCH), i386)
 	SWX11_GLU_CONFIGS += debian-swx11+glu-i386-i686
+#	DRI_CONFIGS += debian-dri-i386-i686
 endif
 
 #ifeq ($(DEB_BUILD_ARCH), alpha)
@@ -56,20 +68,11 @@ endif
 # available for the build architecture. Use with caution =)
 #SWX11_GLU_CONFIGS += $(subst configs/,,$(wildcard configs/debian-swx11+glu-$(DEB_BUILD_ARCH)-*))
 
-# build a static version of swx11 and GLU as well
-SWX11_GLU_CONFIGS += debian-swx11+glu-static
-
-# choose an architecture-specific configuration for building the DRI-enabled
-# libGL if one exists
-ifneq ($(wildcard configs/debian-dri-$(DEB_BUILD_ARCH)),)
-	DRI_CONFIGS := debian-dri-$(DEB_BUILD_ARCH)
-else
-	DRI_CONFIGS := debian-dri-any
-endif
-
 # build the following configurations by default
 CONFIGS = $(SWX11_GLU_CONFIGS) \
           $(DRI_CONFIGS) \
+          debian-osmesa \
+          debian-osmesa-static \
           debian-osmesa16 \
           debian-osmesa16-static \
           debian-osmesa32 \
@@ -77,7 +80,8 @@ CONFIGS = $(SWX11_GLU_CONFIGS) \
 
 STAMP = $(STAMP_DIR)/$(DEB_BUILD_GNU_TYPE)
 BUILD_STAMPS = $(addprefix $(STAMP)-build-, $(CONFIGS))
-INSTALL_STAMPS = $(addprefix $(STAMP)-install-, $(CONFIGS))
+INSTALL_STAMPS = $(addprefix $(STAMP)-install-, $(CONFIGS)) \
+                 $(STAMP_DIR)/install-source
 
 # list the configurations that will built
 configs:
@@ -112,6 +116,11 @@ install: pre-install $(INSTALL_STAMPS)
 $(STAMP)-install-%: $(STAMP)-build-%
 	# Add here commands to install the package into debian/tmp
 	cd $(DEB_BUILD_DIR)/$* && $(MAKE) install DESTDIR=$(CURDIR)/debian/tmp
+	touch $@
+
+$(STAMP_DIR)/install-source:
+	# install Mesa source for mesa-swx11-source package
+	debian/scripts/install-source.sh
 	touch $@
 
 clean: unpatch

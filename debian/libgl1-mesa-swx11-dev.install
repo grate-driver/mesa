@@ -1,5 +1,3 @@
 usr/include/GL/glx*.h
 usr/lib/libGL.a
 usr/lib/libGL.so
-usr/lib/libOSMesa.a
-usr/lib/libOSMesa.so

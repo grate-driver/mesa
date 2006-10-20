@@ -1,5 +1,20 @@
+Do not build OSMesa for a standalone configuration, since Debian only ships
+OSMesa in a separate package.
+
+Fix Mesa makefile to install the libGL and libOSMesa libraries when they
+exist, not only depending on configuration.
+
 --- a/src/mesa/Makefile
 +++ b/src/mesa/Makefile
+@@ -107,7 +107,7 @@
+ 	$(OSMESA_DRIVER_OBJECTS)
+ 
+ 
+-stand-alone: depend subdirs $(TOP)/$(LIB_DIR)/$(GL_LIB_NAME) $(TOP)/$(LIB_DIR)/$(OSMESA_LIB_NAME)
++stand-alone: depend subdirs $(TOP)/$(LIB_DIR)/$(GL_LIB_NAME)
+ 
+ osmesa-only: depend subdirs $(TOP)/$(LIB_DIR)/$(OSMESA_LIB_NAME)
+ 
 @@ -154,7 +154,12 @@
  	$(INSTALL) -d $(INSTALL_DIR)/include/GL
  	$(INSTALL) -d $(INSTALL_DIR)/$(LIB_DIR)
