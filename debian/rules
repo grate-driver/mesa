@@ -119,6 +119,7 @@ $(STAMP)-install-%: $(STAMP)-build-%
 
 $(STAMP_DIR)/install-source:
 	# install Mesa source for mesa-swx11-source package
+	chmod a+x debian/scripts/install-source.sh
 	debian/scripts/install-source.sh
 	touch $@
 
