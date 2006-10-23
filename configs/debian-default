@@ -2,6 +2,8 @@
 
 CONFIG_NAME = debian-default
 
+PIC_FLAGS = -fPIC
+
 SRC_DIRS = mesa
 PROGRAM_DIRS =
 
