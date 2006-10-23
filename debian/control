@@ -191,7 +191,7 @@ Description: Mesa Off-screen rendering extension
 Package: libosmesa6-dev
 Section: devel
 Architecture: any
-Depends: libosmesa6 (= ${binary:Version}), libgl1-mesa-swx11-dev (= ${binary:Version})
+Depends: libosmesa6 (= ${binary:Version}), mesa-common-dev (= ${binary:Version})
 Conflicts: xlibosmesa-dev, libosmesa4-dev, libosmesa-dev
 Replaces: xlibosmesa-dev, libosmesa-dev
 Provides: xlibosmesa-dev, libosmesa-dev
