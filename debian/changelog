@@ -6,8 +6,10 @@ mesa (6.5.1-1) unstable; urgency=low
     so that it works independently of the installed libGL.
   * Make libosmesa6-dev depend on mesa-common-dev because it only needs the
     gl.h header file and no libGL anymore.
+  * Move glx*.h headers from libgl1-mesa(-swx11)-dev into mesa-common-dev
+    because both packages provide identical files.
 
- -- Thierry Reding <thierry@gilfi.de>  Mon, 23 Oct 2006 17:57:01 +0200
+ -- Thierry Reding <thierry@gilfi.de>  Mon, 23 Oct 2006 18:42:47 +0200
 
 mesa (6.5.1-0.2) unstable; urgency=low
 
