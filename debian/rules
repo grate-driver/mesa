@@ -143,6 +143,9 @@ binary-arch: build install
 	dh_install --sourcedir=debian/tmp --list-missing
 	dh_installman
 	dh_link
+	dh_strip -plibgl1-mesa-swx11 --dbg-package=libgl1-mesa-swx11-dbg
+	dh_strip -plibgl1-mesa-glx --dbg-package=libgl1-mesa-glx-dbg
+	dh_strip -plibgl1-mesa-dri --dbg-package=libgl1-mesa-dri-dbg
 	dh_strip
 	dh_compress
 	dh_fixperms

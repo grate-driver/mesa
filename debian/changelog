@@ -9,8 +9,10 @@ mesa (6.5.1-1) unstable; urgency=low
   * Move glx*.h headers from libgl1-mesa(-swx11)-dev into mesa-common-dev
     because both packages provide identical files.
   * Build with -fno-strict-aliasing. (Closes: #394311)
+  * Add debugging symbol packages for libgl1-mesa-swx11, libgl1-mesa-glx and
+    libgl1-mesa-dri.
 
- -- Thierry Reding <thierry@gilfi.de>  Tue, 24 Oct 2006 12:29:27 +0200
+ -- Thierry Reding <thierry@gilfi.de>  Tue, 24 Oct 2006 14:13:01 +0200
 
 mesa (6.5.1-0.2) unstable; urgency=low
 
