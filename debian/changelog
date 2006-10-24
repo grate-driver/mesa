@@ -11,8 +11,10 @@ mesa (6.5.1-1) unstable; urgency=low
   * Build with -fno-strict-aliasing. (Closes: #394311)
   * Add debugging symbol packages for libgl1-mesa-swx11, libgl1-mesa-glx and
     libgl1-mesa-dri.
+  * Repack the contents of the three Mesa tarballs (MesaDemos, MesaGLUT and
+    MesaLib) as the original source tarball. (Closes: #392715)
 
- -- Thierry Reding <thierry@gilfi.de>  Tue, 24 Oct 2006 14:13:01 +0200
+ -- Thierry Reding <thierry@gilfi.de>  Tue, 24 Oct 2006 16:42:33 +0200
 
 mesa (6.5.1-0.2) unstable; urgency=low
 
