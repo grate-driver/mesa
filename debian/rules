@@ -126,7 +126,7 @@ $(STAMP_DIR)/install-source:
 clean: unpatch
 	dh_testdir
 	dh_testroot
-	dh_clean --exclude ./Makefile.orig --exclude configs/CVS/Root.bak
+	dh_clean --exclude ./Makefile.orig
 	rm -rf $(DEB_BUILD_DIR) $(STAMP_DIR)
 
 # Build architecture-independent files here.
