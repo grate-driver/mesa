@@ -2,6 +2,8 @@
 
 CONFIG_NAME = debian-default
 
+CFLAGS += -fno-strict-aliasing
+
 SRC_DIRS = mesa
 PROGRAM_DIRS =
 
