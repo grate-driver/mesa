@@ -8,8 +8,9 @@ mesa (6.5.1-1) unstable; urgency=low
     gl.h header file and no libGL anymore.
   * Move glx*.h headers from libgl1-mesa(-swx11)-dev into mesa-common-dev
     because both packages provide identical files.
+  * Build with -fno-strict-aliasing. (Closes: #394311)
 
- -- Thierry Reding <thierry@gilfi.de>  Mon, 23 Oct 2006 18:42:47 +0200
+ -- Thierry Reding <thierry@gilfi.de>  Tue, 24 Oct 2006 12:29:27 +0200
 
 mesa (6.5.1-0.2) unstable; urgency=low
 
