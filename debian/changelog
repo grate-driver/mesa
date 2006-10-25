@@ -3,7 +3,7 @@ mesa (6.5.1-1) unstable; urgency=low
   * Provide i686 optimized versions in libgl1-mesa-swx11-i686.
   * No longer provide the libgl1-mesa-swx11-dbg package.
   * Statically link libOSMesa with the software rasterization code from libGL
-    so that it works independently of the installed libGL.
+    so that it works independently of the installed libGL. (Closes: #387706)
   * Make libosmesa6-dev depend on mesa-common-dev because it only needs the
     gl.h header file and no libGL anymore.
   * Move glx*.h headers from libgl1-mesa(-swx11)-dev into mesa-common-dev
@@ -14,7 +14,7 @@ mesa (6.5.1-1) unstable; urgency=low
   * Repack the contents of the three Mesa tarballs (MesaDemos, MesaGLUT and
     MesaLib) as the original source tarball. (Closes: #392715)
 
- -- Thierry Reding <thierry@gilfi.de>  Tue, 24 Oct 2006 16:42:33 +0200
+ -- Thierry Reding <thierry@gilfi.de>  Wed, 25 Oct 2006 02:16:26 +0200
 
 mesa (6.5.1-0.2) unstable; urgency=low
 
