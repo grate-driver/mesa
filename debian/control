@@ -230,6 +230,7 @@ Package: mesa-common-dev
 Section: devel
 Architecture: all
 Replaces: xlibmesa-gl-dev (<< 1:7), xlibosmesa-dev
+Depends: libx11-dev
 Description: Developer documentation for Mesa
  This package includes the specifications for the Mesa-specific OpenGL
  extensions, the complete set of release release notes and the

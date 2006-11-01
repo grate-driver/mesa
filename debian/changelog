@@ -13,8 +13,9 @@ mesa (6.5.1-1) unstable; urgency=low
     libgl1-mesa-dri.
   * Repack the contents of the three Mesa tarballs (MesaDemos, MesaGLUT and
     MesaLib) as the original source tarball. (Closes: #392715)
+  * Make mesa-common-dev depend on libx11-dev. (Closes: #396498)
 
- -- Thierry Reding <thierry@gilfi.de>  Wed, 25 Oct 2006 02:16:26 +0200
+ -- Thierry Reding <thierry@gilfi.de>  Wed,  1 Nov 2006 08:52:53 +0100
 
 mesa (6.5.1-0.2) unstable; urgency=low
 
