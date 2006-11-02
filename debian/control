@@ -306,4 +306,14 @@ Description: Mesa software rasteriser source -- development support files
  software rasteriser source to build the GLcore module for unaccelerated
  indirect rendering.
 
+Package: mesa-utils
+Section: x11
+Priority: optional
+Architecture: any
+Depends: ${shlibs:Depends}
+Replaces: xbase-clients (<< 6.8.2-38)
+Description: Miscellaneous Mesa GL utilities
+ This package provides several basic GL utilities built by Mesa, including
+ glxinfo and glxgears.
+
 # vim: tw=0

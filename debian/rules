@@ -75,7 +75,8 @@ CONFIGS = $(SWX11_GLU_CONFIGS) \
           debian-osmesa16 \
           debian-osmesa16-static \
           debian-osmesa32 \
-          debian-osmesa32-static
+          debian-osmesa32-static \
+          debian-utils
 
 STAMP = $(STAMP_DIR)/$(DEB_BUILD_GNU_TYPE)
 BUILD_STAMPS = $(addprefix $(STAMP)-build-, $(CONFIGS))

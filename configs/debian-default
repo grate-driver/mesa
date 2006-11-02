@@ -8,6 +8,7 @@ SRC_DIRS = mesa
 PROGRAM_DIRS =
 
 INSTALL_DIR = $(DESTDIR)/usr
+INSTALL = /usr/bin/install
 
 # vim: ft=make
 
