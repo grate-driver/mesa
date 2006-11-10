@@ -7,8 +7,13 @@ CONFIG_NAME = debian-dri-default
 
 OPT_FLAGS = -O3 -g
 
-SRC_DIRS = glx/x11 mesa
+SRC_DIRS = glx/x11 mesa progs
 DRIVER_DIRS = dri
+PROGRAM_DIRS = xdemos
+PROGS = glxdemo \
+        glxgears \
+        glxheads \
+        glxinfo
 
 LIB_DIR = lib/glx
 
@@ -26,6 +31,8 @@ endif
 ifeq ($(DEB_BUILD_ARCH), sparc)
 	DRI_DIRS += ffb
 endif
+
+APP_LIB_DEPS = -L$(TOP)/$(LIB_DIR) -l$(GL_LIB)
 
 # vim: ft=make
 
