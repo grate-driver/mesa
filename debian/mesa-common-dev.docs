@@ -4,4 +4,5 @@ docs/envvars.html
 docs/faq.html
 docs/osmesa.html
 docs/RELNOTES-*
+docs/relnotes*
 docs/*.spec
