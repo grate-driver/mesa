@@ -1,6 +1,6 @@
 /*
  * Mesa 3-D graphics library
- * Version:  6.5.1
+ * Version:  6.5.2
  *
  * Copyright (C) 1999-2006  Brian Paul   All Rights Reserved.
  *
@@ -45,7 +45,7 @@
 static const char *
 make_state_string(const GLint stateTokens[6]);
 
-static GLuint 
+static GLbitfield
 make_state_flags(const GLint state[]);
 
 
@@ -485,8 +485,7 @@ _mesa_add_state_reference(struct gl_program_parameter_list *paramList,
          paramList->Parameters[index].StateIndexes[i]
             = (enum state_index) stateTokens[i];
       }
-      paramList->StateFlags |= 
-	    make_state_flags(stateTokens);
+      paramList->StateFlags |= make_state_flags(stateTokens);
    }
 
    /* free name string here since we duplicated it in add_parameter() */
@@ -580,37 +579,29 @@ _mesa_fetch_state(GLcontext *ctx, const enum state_index state[],
       {
          /* state[1] is either 0=front or 1=back side */
          const GLuint face = (GLuint) state[1];
+         const struct gl_material *mat = &ctx->Light.Material;
+         ASSERT(face == 0 || face == 1);
+         /* we rely on tokens numbered so that _BACK_ == _FRONT_+ 1 */
+         ASSERT(MAT_ATTRIB_FRONT_AMBIENT + 1 == MAT_ATTRIB_BACK_AMBIENT);
+         /* XXX we could get rid of this switch entirely with a little
+          * work in arbprogparse.c's parse_state_single_item().
+          */
          /* state[2] is the material attribute */
          switch (state[2]) {
          case STATE_AMBIENT:
-            if (face == 0)
-               COPY_4V(value, ctx->Light.Material.Attrib[MAT_ATTRIB_FRONT_AMBIENT]);
-            else
-               COPY_4V(value, ctx->Light.Material.Attrib[MAT_ATTRIB_BACK_AMBIENT]);
+            COPY_4V(value, mat->Attrib[MAT_ATTRIB_FRONT_AMBIENT + face]);
             return;
          case STATE_DIFFUSE:
-            if (face == 0)
-               COPY_4V(value, ctx->Light.Material.Attrib[MAT_ATTRIB_FRONT_DIFFUSE]);
-            else
-               COPY_4V(value, ctx->Light.Material.Attrib[MAT_ATTRIB_BACK_DIFFUSE]);
+            COPY_4V(value, mat->Attrib[MAT_ATTRIB_FRONT_DIFFUSE + face]);
             return;
          case STATE_SPECULAR:
-            if (face == 0)
-               COPY_4V(value, ctx->Light.Material.Attrib[MAT_ATTRIB_FRONT_SPECULAR]);
-            else
-               COPY_4V(value, ctx->Light.Material.Attrib[MAT_ATTRIB_BACK_SPECULAR]);
+            COPY_4V(value, mat->Attrib[MAT_ATTRIB_FRONT_SPECULAR + face]);
             return;
          case STATE_EMISSION:
-            if (face == 0)
-               COPY_4V(value, ctx->Light.Material.Attrib[MAT_ATTRIB_FRONT_EMISSION]);
-            else
-               COPY_4V(value, ctx->Light.Material.Attrib[MAT_ATTRIB_BACK_EMISSION]);
+            COPY_4V(value, mat->Attrib[MAT_ATTRIB_FRONT_EMISSION + face]);
             return;
          case STATE_SHININESS:
-            if (face == 0)
-               value[0] = ctx->Light.Material.Attrib[MAT_ATTRIB_FRONT_SHININESS][0];
-            else
-               value[0] = ctx->Light.Material.Attrib[MAT_ATTRIB_BACK_SHININESS][0];
+            value[0] = mat->Attrib[MAT_ATTRIB_FRONT_SHININESS + face][0];
             value[1] = 0.0F;
             value[2] = 0.0F;
             value[3] = 1.0F;
@@ -917,6 +908,15 @@ _mesa_fetch_state(GLcontext *ctx, const enum state_index state[],
 	    case STATE_NORMAL_SCALE:
                ASSIGN_4V(value, ctx->_ModelViewInvScale, 0, 0, 1);
                break;
+	    case STATE_TEXRECT_SCALE: {
+   	       const int unit = (int) state[2];
+	       const struct gl_texture_object *texObj = ctx->Texture.Unit[unit]._Current;
+	       if (texObj) {
+		  struct gl_texture_image *texImage = texObj->Image[0][0];
+		  ASSIGN_4V(value, 1.0 / texImage->Width, 1.0 / texImage->Height, 0, 1);
+	       }
+               break;
+	    }
 	    default:
                _mesa_problem(ctx, "Bad state switch in _mesa_fetch_state()");
                return;
@@ -932,10 +932,14 @@ _mesa_fetch_state(GLcontext *ctx, const enum state_index state[],
 
 
 /**
- * Return a bit mask of the Mesa state flags under which a parameter's
- * value might change.
+ * Return a bitmask of the Mesa state flags (_NEW_* values) which would
+ * indicate that the given context state may have changed.
+ * The bitmask is used during validation to determine if we need to update
+ * vertex/fragment program parameters (like "state.material.color") when
+ * some GL state has changed.
  */
-static GLuint make_state_flags(const GLint state[])
+static GLbitfield
+make_state_flags(const GLint state[])
 {
    switch (state[0]) {
    case STATE_MATERIAL:
@@ -988,6 +992,8 @@ static GLuint make_state_flags(const GLint state[])
       switch (state[1]) {
       case STATE_NORMAL_SCALE:
 	 return _NEW_MODELVIEW;
+      case STATE_TEXRECT_SCALE:
+	 return _NEW_TEXTURE;
       default:
          _mesa_problem(NULL, "unexpected int. state in make_state_flags()");
 	 return 0;
@@ -1296,26 +1302,32 @@ _mesa_load_state_parameters(GLcontext *ctx,
 
 /**
  * Initialize program instruction fields to defaults.
+ * \param inst  first instruction to initialize
+ * \param count  number of instructions to initialize
  */
 void
-_mesa_init_instruction(struct prog_instruction *inst)
+_mesa_init_instructions(struct prog_instruction *inst, GLuint count)
 {
-   _mesa_bzero(inst, sizeof(struct prog_instruction));
+   GLuint i;
 
-   inst->SrcReg[0].File = PROGRAM_UNDEFINED;
-   inst->SrcReg[0].Swizzle = SWIZZLE_NOOP;
-   inst->SrcReg[1].File = PROGRAM_UNDEFINED;
-   inst->SrcReg[1].Swizzle = SWIZZLE_NOOP;
-   inst->SrcReg[2].File = PROGRAM_UNDEFINED;
-   inst->SrcReg[2].Swizzle = SWIZZLE_NOOP;
+   _mesa_bzero(inst, count * sizeof(struct prog_instruction));
 
-   inst->DstReg.File = PROGRAM_UNDEFINED;
-   inst->DstReg.WriteMask = WRITEMASK_XYZW;
-   inst->DstReg.CondMask = COND_TR;
-   inst->DstReg.CondSwizzle = SWIZZLE_NOOP;
+   for (i = 0; i < count; i++) {
+      inst[i].SrcReg[0].File = PROGRAM_UNDEFINED;
+      inst[i].SrcReg[0].Swizzle = SWIZZLE_NOOP;
+      inst[i].SrcReg[1].File = PROGRAM_UNDEFINED;
+      inst[i].SrcReg[1].Swizzle = SWIZZLE_NOOP;
+      inst[i].SrcReg[2].File = PROGRAM_UNDEFINED;
+      inst[i].SrcReg[2].Swizzle = SWIZZLE_NOOP;
 
-   inst->SaturateMode = SATURATE_OFF;
-   inst->Precision = FLOAT32;
+      inst[i].DstReg.File = PROGRAM_UNDEFINED;
+      inst[i].DstReg.WriteMask = WRITEMASK_XYZW;
+      inst[i].DstReg.CondMask = COND_TR;
+      inst[i].DstReg.CondSwizzle = SWIZZLE_NOOP;
+
+      inst[i].SaturateMode = SATURATE_OFF;
+      inst[i].Precision = FLOAT32;
+   }
 }
 
 
@@ -1450,19 +1462,8 @@ static const struct instruction_info InstInfo[MAX_OPCODE] = {
 GLuint
 _mesa_num_inst_src_regs(enum prog_opcode opcode)
 {
-   GLuint i;
-#ifdef DEBUG
-   for (i = 0; i < MAX_OPCODE; i++) {
-      ASSERT(i == InstInfo[i].Opcode);
-   }
-#endif
-   for (i = 0; i < MAX_OPCODE; i++) {
-      if (InstInfo[i].Opcode == opcode) {
-         return InstInfo[i].NumSrcRegs;
-      }
-   }
-   _mesa_problem(NULL, "invalid opcode in _mesa_num_inst_src_regs");
-   return 0;
+   ASSERT(opcode == InstInfo[opcode].Opcode);
+   return InstInfo[opcode].NumSrcRegs;
 }
 
 
@@ -1601,6 +1602,38 @@ print_src_reg(const struct prog_src_register *srcReg)
                                srcReg->NegateBase, GL_FALSE));
 }
 
+void
+_mesa_print_alu_instruction(const struct prog_instruction *inst,
+			    const char *opcode_string, 
+			    GLuint numRegs)
+{
+   GLuint j;
+
+   _mesa_printf("%s", opcode_string);
+
+   /* frag prog only */
+   if (inst->SaturateMode == SATURATE_ZERO_ONE)
+      _mesa_printf("_SAT");
+
+   if (inst->DstReg.File != PROGRAM_UNDEFINED) {
+      _mesa_printf(" %s[%d]%s",
+		   program_file_string((enum register_file) inst->DstReg.File),
+		   inst->DstReg.Index,
+		   writemask_string(inst->DstReg.WriteMask));
+   }
+
+   if (numRegs > 0)
+      _mesa_printf(", ");
+
+   for (j = 0; j < numRegs; j++) {
+      print_src_reg(inst->SrcReg + j);
+      if (j + 1 < numRegs)
+	 _mesa_printf(", ");
+   }
+
+   _mesa_printf(";\n");
+}
+
 
 /**
  * Print a single vertex/fragment program instruction.
@@ -1659,37 +1692,16 @@ _mesa_print_instruction(const struct prog_instruction *inst)
       print_src_reg(&inst->SrcReg[0]);
       _mesa_printf(";\n");
       break;
+   case OPCODE_END:
+      _mesa_printf("END;\n");
+      break;
    /* XXX may need for other special-case instructions */
    default:
       /* typical alu instruction */
-      {
-         const GLuint numRegs = _mesa_num_inst_src_regs(inst->Opcode);
-         GLuint j;
-
-         _mesa_printf("%s", _mesa_opcode_string(inst->Opcode));
-
-         /* frag prog only */
-         if (inst->SaturateMode == SATURATE_ZERO_ONE)
-            _mesa_printf("_SAT");
-
-         if (inst->DstReg.File != PROGRAM_UNDEFINED) {
-            _mesa_printf(" %s[%d]%s",
-                         program_file_string((enum register_file) inst->DstReg.File),
-                         inst->DstReg.Index,
-                         writemask_string(inst->DstReg.WriteMask));
-         }
-
-         if (numRegs > 0)
-            _mesa_printf(", ");
-
-         for (j = 0; j < numRegs; j++) {
-            print_src_reg(inst->SrcReg + j);
-            if (j + 1 < numRegs)
-               _mesa_printf(", ");
-         }
-
-         _mesa_printf(";\n");
-      }
+      _mesa_print_alu_instruction(inst,
+				  _mesa_opcode_string(inst->Opcode),
+				  _mesa_num_inst_src_regs(inst->Opcode));
+      break;
    }
 }
 
@@ -1961,30 +1973,6 @@ _mesa_GenPrograms(GLsizei n, GLuint *ids)
 }
 
 
-/**
- * Determine if id names a vertex or fragment program.
- * \note Not compiled into display lists.
- * \note Called from both glIsProgramNV and glIsProgramARB.
- * \param id is the program identifier
- * \return GL_TRUE if id is a program, else GL_FALSE.
- */
-GLboolean GLAPIENTRY
-_mesa_IsProgram(GLuint id)
-{
-   GET_CURRENT_CONTEXT(ctx);
-   ASSERT_OUTSIDE_BEGIN_END_WITH_RETVAL(ctx, GL_FALSE);
-
-   if (id == 0)
-      return GL_FALSE;
-
-   if (_mesa_lookup_program(ctx, id))
-      return GL_TRUE;
-   else
-      return GL_FALSE;
-}
-
-
-
 /**********************************************************************/
 /* GL_MESA_program_debug extension                                    */
 /**********************************************************************/
@@ -2091,7 +2079,9 @@ _mesa_GetProgramRegisterfvMESA(GLenum target,
                            "glGetProgramRegisterfvMESA(registerName)");
                return;
             }
-            COPY_4V(v, ctx->VertexProgram.Temporaries[i]);
+#if 0 /* FIX ME */
+            ctx->Driver.GetVertexProgramRegister(ctx, PROGRAM_TEMPORARY, i, v);
+#endif
          }
          else if (reg[0] == 'v' && reg[1] == '[') {
             /* Vertex Input attribute */
@@ -2102,7 +2092,10 @@ _mesa_GetProgramRegisterfvMESA(GLenum target,
                _mesa_sprintf(number, "%d", i);
                if (_mesa_strncmp(reg + 2, name, 4) == 0 ||
                    _mesa_strncmp(reg + 2, number, _mesa_strlen(number)) == 0) {
-                  COPY_4V(v, ctx->VertexProgram.Inputs[i]);
+#if 0 /* FIX ME */
+                  ctx->Driver.GetVertexProgramRegister(ctx, PROGRAM_INPUT,
+                                                       i, v);
+#endif
                   return;
                }
             }
@@ -2155,7 +2148,8 @@ _mesa_GetProgramRegisterfvMESA(GLenum target,
                            "glGetProgramRegisterfvMESA(registerName)");
                return;
             }
-            COPY_4V(v, ctx->FragmentProgram.Machine.Temporaries[i]);
+            ctx->Driver.GetFragmentProgramRegister(ctx, PROGRAM_TEMPORARY,
+                                                   i, v);
          }
          else if (reg[0] == 'f' && reg[1] == '[') {
             /* Fragment input attribute */
@@ -2163,7 +2157,8 @@ _mesa_GetProgramRegisterfvMESA(GLenum target,
             for (i = 0; i < ctx->Const.FragmentProgram.MaxAttribs; i++) {
                const char *name = _mesa_nv_fragment_input_register_name(i);
                if (_mesa_strncmp(reg + 2, name, 4) == 0) {
-                  COPY_4V(v, ctx->FragmentProgram.Machine.Inputs[i]);
+                  ctx->Driver.GetFragmentProgramRegister(ctx,
+                                                         PROGRAM_INPUT, i, v);
                   return;
                }
             }
@@ -2173,15 +2168,18 @@ _mesa_GetProgramRegisterfvMESA(GLenum target,
          }
          else if (_mesa_strcmp(reg, "o[COLR]") == 0) {
             /* Fragment output color */
-            COPY_4V(v, ctx->FragmentProgram.Machine.Outputs[FRAG_RESULT_COLR]);
+            ctx->Driver.GetFragmentProgramRegister(ctx, PROGRAM_OUTPUT,
+                                                   FRAG_RESULT_COLR, v);
          }
          else if (_mesa_strcmp(reg, "o[COLH]") == 0) {
             /* Fragment output color */
-            COPY_4V(v, ctx->FragmentProgram.Machine.Outputs[FRAG_RESULT_COLH]);
+            ctx->Driver.GetFragmentProgramRegister(ctx, PROGRAM_OUTPUT,
+                                                   FRAG_RESULT_COLH, v);
          }
          else if (_mesa_strcmp(reg, "o[DEPR]") == 0) {
             /* Fragment output depth */
-            COPY_4V(v, ctx->FragmentProgram.Machine.Outputs[FRAG_RESULT_DEPR]);
+            ctx->Driver.GetFragmentProgramRegister(ctx, PROGRAM_OUTPUT,
+                                                   FRAG_RESULT_DEPR, v);
          }
          else {
             /* try user-defined identifiers */
@@ -2202,5 +2200,4 @@ _mesa_GetProgramRegisterfvMESA(GLenum target,
                      "glGetProgramRegisterfvMESA(target)");
          return;
    }
-
 }

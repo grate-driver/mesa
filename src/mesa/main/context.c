@@ -735,6 +735,10 @@ alloc_shared_state( GLcontext *ctx )
    ss->DefaultCubeMap->RefCount += MAX_TEXTURE_IMAGE_UNITS;
    ss->DefaultRect->RefCount += MAX_TEXTURE_IMAGE_UNITS;
 
+   _glthread_INIT_MUTEX(ss->TexMutex);
+   ss->TextureStateStamp = 0;
+
+
 #if FEATURE_EXT_framebuffer_object
    ss->FrameBuffers = _mesa_NewHashTable();
    if (!ss->FrameBuffers)
@@ -1048,6 +1052,7 @@ _mesa_init_constants( GLcontext *ctx )
    ctx->Const.VertexProgram.MaxLocalParams = MAX_PROGRAM_LOCAL_PARAMS;
    ctx->Const.VertexProgram.MaxEnvParams = MAX_NV_VERTEX_PROGRAM_PARAMS;
    ctx->Const.VertexProgram.MaxAddressRegs = MAX_VERTEX_PROGRAM_ADDRESS_REGS;
+   ctx->Const.VertexProgram.MaxUniformComponents = MAX_VERTEX_UNIFORM_COMPONENTS;
    init_natives(&ctx->Const.VertexProgram);
 #endif
 #if FEATURE_ARB_fragment_program
@@ -1061,6 +1066,7 @@ _mesa_init_constants( GLcontext *ctx )
    ctx->Const.FragmentProgram.MaxLocalParams = MAX_PROGRAM_LOCAL_PARAMS;
    ctx->Const.FragmentProgram.MaxEnvParams = MAX_NV_FRAGMENT_PROGRAM_PARAMS;
    ctx->Const.FragmentProgram.MaxAddressRegs = MAX_FRAGMENT_PROGRAM_ADDRESS_REGS;
+   ctx->Const.FragmentProgram.MaxUniformComponents = MAX_FRAGMENT_UNIFORM_COMPONENTS;
    init_natives(&ctx->Const.FragmentProgram);
 #endif
    ctx->Const.MaxProgramMatrices = MAX_PROGRAM_MATRICES;
@@ -1085,6 +1091,11 @@ _mesa_init_constants( GLcontext *ctx )
 #if FEATURE_EXT_framebuffer_object
    ctx->Const.MaxColorAttachments = MAX_COLOR_ATTACHMENTS;
    ctx->Const.MaxRenderbufferSize = MAX_WIDTH;
+#endif
+
+#if FEATURE_ARB_vertex_shader
+   ctx->Const.MaxVertexTextureImageUnits = MAX_VERTEX_TEXTURE_IMAGE_UNITS;
+   ctx->Const.MaxVaryingFloats = MAX_VARYING_FLOATS;
 #endif
 
    /* sanity checks */
@@ -1629,11 +1640,12 @@ static void
 initialize_framebuffer_size(GLcontext *ctx, GLframebuffer *fb)
 {
    GLuint width, height;
-   ASSERT(ctx->Driver.GetBufferSize);
-   ctx->Driver.GetBufferSize(fb, &width, &height);
-   if (ctx->Driver.ResizeBuffers)
-      ctx->Driver.ResizeBuffers(ctx, fb, width, height);
-   fb->Initialized = GL_TRUE;
+   if (ctx->Driver.GetBufferSize) {
+      ctx->Driver.GetBufferSize(fb, &width, &height);
+      if (ctx->Driver.ResizeBuffers)
+         ctx->Driver.ResizeBuffers(ctx, fb, width, height);
+      fb->Initialized = GL_TRUE;
+   }
 }
 
 
@@ -1706,6 +1718,9 @@ _mesa_make_current( GLcontext *newCtx, GLframebuffer *drawBuffer,
 
 	 newCtx->NewState |= _NEW_BUFFERS;
 
+#if 1
+         /* We want to get rid of these lines: */
+
 #if _HAVE_FULL_GL
          if (!drawBuffer->Initialized) {
             initialize_framebuffer_size(newCtx, drawBuffer);
@@ -1713,7 +1728,26 @@ _mesa_make_current( GLcontext *newCtx, GLframebuffer *drawBuffer,
          if (readBuffer != drawBuffer && !readBuffer->Initialized) {
             initialize_framebuffer_size(newCtx, readBuffer);
          }
+
+	 _mesa_resizebuffers(newCtx);
 #endif
+
+#else
+         /* We want the drawBuffer and readBuffer to be initialized by
+          * the driver.
+          * This generally means the Width and Height match the actual
+          * window size and the renderbuffers (both hardware and software
+          * based) are allocated to match.  The later can generally be
+          * done with a call to _mesa_resize_framebuffer().
+          *
+          * It's theoretically possible for a buffer to have zero width
+          * or height, but for now, assert check that the driver did what's
+          * expected of it.
+          */
+         ASSERT(drawBuffer->Width > 0);
+         ASSERT(drawBuffer->Height > 0);
+#endif
+
          if (newCtx->FirstTimeCurrent) {
             /* set initial viewport and scissor size now */
             _mesa_set_viewport(newCtx, 0, 0,

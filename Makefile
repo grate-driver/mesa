@@ -154,16 +154,17 @@ ultrix-gcc:
 
 # Rules for making release tarballs
 
-DIRECTORY = Mesa-6.5.1
-LIB_NAME = MesaLib-6.5.1
-DEMO_NAME = MesaDemos-6.5.1
-GLUT_NAME = MesaGLUT-6.5.1
+DIRECTORY = Mesa-6.5.2
+LIB_NAME = MesaLib-6.5.2
+DEMO_NAME = MesaDemos-6.5.2
+GLUT_NAME = MesaGLUT-6.5.2
 
 MAIN_FILES = \
 	$(DIRECTORY)/Makefile*						\
 	$(DIRECTORY)/descrip.mms					\
 	$(DIRECTORY)/mms-config.					\
 	$(DIRECTORY)/bin/mklib						\
+	$(DIRECTORY)/bin/minstall					\
 	$(DIRECTORY)/configs/[a-z]*					\
 	$(DIRECTORY)/docs/*.html					\
 	$(DIRECTORY)/docs/COPYING					\

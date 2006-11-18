@@ -214,7 +214,8 @@ IDirectFBGL_Mesa_Lock( IDirectFBGL *thiz )
      if (data->width != width || data->height != height) {
           data->width  = width;
           data->height = height;
-          _mesa_ResizeBuffersMESA();
+          _mesa_resize_framebuffer(&data->context, 
+                                   &data->framebuffer, width, height);
      }
 
      data->locked = DFB_TRUE;
@@ -355,17 +356,30 @@ dfbGetBufferSize( GLframebuffer *buffer, GLuint *width, GLuint *height )
      *height = (GLuint) data->height;
 }
 
+/**
+ * We only implement this function as a mechanism to check if the
+ * framebuffer size has changed (and update corresponding state).
+ */
 static void
 dfbSetViewport( GLcontext *ctx, GLint x, GLint y, GLsizei w, GLsizei h )
 {
-     _mesa_ResizeBuffersMESA();
+   GLuint newWidth, newHeight;
+   GLframebuffer *buffer = ctx->WinSysDrawBuffer;
+   dfbGetBufferSize( buffer, &newWidth, &newHeight );
+   if (buffer->Width != newWidth || buffer->Height != newHeight) {
+      _mesa_resize_framebuffer(ctx, buffer, newWidth, newHeight );
+   }
 }
 
 static void
-dfbClear( GLcontext *ctx, GLbitfield mask, GLboolean all,
-          GLint x, GLint y, GLint width, GLint height )
+dfbClear( GLcontext *ctx, GLbitfield mask )
 {
      IDirectFBGL_data *data = (IDirectFBGL_data*) ctx->DriverCtx;
+     int x = ctx->DrawBuffer->_Xmin;
+     int y = ctx->DrawBuffer->_Ymin;
+     int width = ctx->DrawBuffer->_Xmax - x;
+     int height = ctx->DrawBuffer->_Ymax - y;
+     GLboolean all = (width == ctx->DrawBuffer->Width && height == ctx->DrawBuffer->height)
      
      if (mask & BUFFER_BIT_FRONT_LEFT &&
          ctx->Color.ColorMask[0]      &&
@@ -410,7 +424,7 @@ dfbClear( GLcontext *ctx, GLbitfield mask, GLboolean all,
      }
      
      if (mask)
-          _swrast_Clear( ctx, mask, all, x, y, width, height );
+          _swrast_Clear( ctx, mask );
 }        
           
      

@@ -206,7 +206,7 @@ static void r300_set_blend_state(GLcontext * ctx)
 	    (R300_BLEND_GL_ZERO << R300_DST_BLEND_SHIFT);
 	int eqnA = R300_COMB_FCN_ADD_CLAMP;
 
-	if (ctx->Color._LogicOpEnabled || !ctx->Color.BlendEnabled) {
+	if (RGBA_LOGICOP_ENABLED(ctx) || !ctx->Color.BlendEnabled) {
 		r300_set_blend_cntl(r300,
 			func, eqn, 0,
 			func, eqn);
@@ -460,7 +460,6 @@ static void update_depth(GLcontext* ctx)
 static void r300Enable(GLcontext* ctx, GLenum cap, GLboolean state)
 {
 	r300ContextPtr r300 = R300_CONTEXT(ctx);
-	uint32_t newval;
 
 	if (RADEON_DEBUG & DEBUG_STATE)
 		fprintf(stderr, "%s( %s = %s )\n", __FUNCTION__,
@@ -1910,11 +1909,10 @@ void r300ResetHwState(r300ContextPtr r300)
 
 	r300->hw.unk2134.cmd[1] = 0x00FFFFFF;
 	r300->hw.unk2134.cmd[2] = 0x00000000;
-#ifdef MESA_BIG_ENDIAN
-	r300->hw.unk2140.cmd[1] = 0x00000002;
-#else
-	r300->hw.unk2140.cmd[1] = 0x00000000;
-#endif
+	if (_mesa_little_endian())
+		r300->hw.unk2140.cmd[1] = 0x00000000;
+	else
+		r300->hw.unk2140.cmd[1] = 0x00000002;
 
 #if 0 /* Done in setup routing */
 	((drm_r300_cmd_header_t*)r300->hw.vir[0].cmd)->packet0.count = 1;
