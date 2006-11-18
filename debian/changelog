@@ -1,4 +1,4 @@
-mesa (6.5.1-1) unstable; urgency=low
+mesa (6.5.1-1) experimental; urgency=low
 
   * Provide i686 optimized versions in libgl1-mesa-swx11-i686.
   * No longer provide the libgl1-mesa-swx11-dbg package.
@@ -17,7 +17,7 @@ mesa (6.5.1-1) unstable; urgency=low
   * Provide a new package: mesa-utils. These utilities are shipped in the
     MesaDemos package so mesa is the right package to provide them.
 
- -- Thierry Reding <thierry@gilfi.de>  Thu,  2 Nov 2006 22:14:58 +0100
+ -- Thierry Reding <thierry@gilfi.de>  Sat, 18 Nov 2006 18:50:07 +0100
 
 mesa (6.5.1-0.2) unstable; urgency=low
 
