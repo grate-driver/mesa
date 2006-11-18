@@ -4,9 +4,9 @@ mesa (6.5.2~rc1-1) experimental; urgency=low
   * Update patches:
     + Drop hunk #2 of 01_fix-makefile.patch, applied upstream.
     + Drop 03_handle-sync-and-dont-unlock-display.patch, applied upstream.
-  * Bump build-dependency on libdrm2-dev (>= 2.2.0).
+  * Bump build-dependency on libdrm-dev (>= 2.2.0).
 
- -- Thierry Reding <thierry@gilfi.de>  Sat, 18 Nov 2006 20:05:42 +0100
+ -- Thierry Reding <thierry@gilfi.de>  Sat, 18 Nov 2006 22:22:07 +0100
 
 mesa (6.5.1-1) experimental; urgency=low
 
