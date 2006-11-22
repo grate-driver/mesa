@@ -430,14 +430,24 @@ _mesa_add_named_parameter(struct gl_program_parameter_list *paramList,
  * This will be used when the program contains something like this:
  *    PARAM myVals = { 0, 1, 2, 3 };
  *
- * \param paramList - the parameter list
- * \param values - four float values
- * \return index of the new parameter.
+ * \param paramList  the parameter list
+ * \param name  the name for the constant
+ * \param values  four float values
+ * \return index/position of the new parameter in the parameter list
  */
 GLint
 _mesa_add_named_constant(struct gl_program_parameter_list *paramList,
-                         const char *name, const GLfloat values[4])
+                         const char *name, const GLfloat values[4],
+                         GLuint size)
 {
+#if 0 /* disable this for now -- we need to save the name! */
+   GLuint pos, swizzle;
+   ASSERT(size == 4); /* XXX future feature */
+   /* check if we already have this constant */
+   if (_mesa_lookup_parameter_constant(paramList, values, 4, &pos, &swizzle)) {
+      return pos;
+   }
+#endif
    return add_parameter(paramList, name, values, PROGRAM_CONSTANT);
 }
 
@@ -447,14 +457,20 @@ _mesa_add_named_constant(struct gl_program_parameter_list *paramList,
  * This will be used when the program contains something like this:
  *    MOV r, { 0, 1, 2, 3 };
  *
- * \param paramList - the parameter list
- * \param values - four float values
- * \return index of the new parameter.
+ * \param paramList  the parameter list
+ * \param values  four float values
+ * \return index/position of the new parameter in the parameter list.
  */
 GLint
 _mesa_add_unnamed_constant(struct gl_program_parameter_list *paramList,
-                           const GLfloat values[4])
+                           const GLfloat values[4], GLuint size)
 {
+   GLuint pos, swizzle;
+   ASSERT(size == 4); /* XXX future feature */
+   /* check if we already have this constant */
+   if (_mesa_lookup_parameter_constant(paramList, values, 4, &pos, &swizzle)) {
+      return pos;
+   }
    return add_parameter(paramList, NULL, values, PROGRAM_CONSTANT);
 }
 
@@ -464,8 +480,8 @@ _mesa_add_unnamed_constant(struct gl_program_parameter_list *paramList,
  * This will be used when the program contains something like this:
  *    PARAM ambient = state.material.front.ambient;
  *
- * \param paramList - the parameter list
- * \param state     - an array of 6 state tokens
+ * \param paramList  the parameter list
+ * \param state  an array of 6 state tokens
  * \return index of the new parameter.
  */
 GLint
@@ -500,7 +516,7 @@ _mesa_add_state_reference(struct gl_program_parameter_list *paramList,
  * \return pointer to the float[4] values.
  */
 GLfloat *
-_mesa_lookup_parameter_value(struct gl_program_parameter_list *paramList,
+_mesa_lookup_parameter_value(const struct gl_program_parameter_list *paramList,
                              GLsizei nameLen, const char *name)
 {
    GLuint i;
@@ -530,11 +546,15 @@ _mesa_lookup_parameter_value(struct gl_program_parameter_list *paramList,
 
 
 /**
- * Lookup a parameter index by name in the given parameter list.
+ * Given a program parameter name, find its position in the list of parameters.
+ * \param paramList  the parameter list to search
+ * \param nameLen  length of name (in chars).
+ *                 If length is negative, assume that name is null-terminated.
+ * \param name  the name to search for
  * \return index of parameter in the list.
  */
 GLint
-_mesa_lookup_parameter_index(struct gl_program_parameter_list *paramList,
+_mesa_lookup_parameter_index(const struct gl_program_parameter_list *paramList,
                              GLsizei nameLen, const char *name)
 {
    GLint i;
@@ -560,6 +580,61 @@ _mesa_lookup_parameter_index(struct gl_program_parameter_list *paramList,
       }
    }
    return -1;
+}
+
+
+/**
+ * Look for a float vector in the given parameter list.  The float vector
+ * may be of length 1, 2, 3 or 4.
+ * \param paramList  the parameter list to search
+ * \param v  the float vector to search for
+ * \param size  number of element in v
+ * \param posOut  returns the position of the constant, if found
+ * \param swizzleOut  returns a swizzle mask describing location of the
+ *                    vector elements if found
+ * \return GL_TRUE if found, GL_FALSE if not found
+ */
+GLboolean
+_mesa_lookup_parameter_constant(const struct gl_program_parameter_list *paramList,
+                                const GLfloat v[], GLsizei vSize,
+                                GLuint *posOut, GLuint *swizzleOut)
+{
+   GLuint i;
+
+   assert(vSize >= 1);
+   assert(vSize <= 4);
+
+   if (!paramList)
+      return -1;
+
+   for (i = 0; i < paramList->NumParameters; i++) {
+      if (paramList->Parameters[i].Type == PROGRAM_CONSTANT) {
+         const GLint maxShift = 4 - vSize;
+         GLint shift, j;
+         for (shift = 0; shift <= maxShift; shift++) {
+            GLint matched = 0;
+            GLuint swizzle[4];
+            swizzle[0] = swizzle[1] = swizzle[2] = swizzle[3] = 0;
+            /* XXX we could do out-of-order swizzle matches too, someday */
+            for (j = 0; j < vSize; j++) {
+               assert(shift + j < 4);
+               if (paramList->ParameterValues[i][shift + j] == v[j]) {
+                  matched++;
+                  swizzle[j] = shift + j;
+               }
+            }
+            if (matched == vSize) {
+               /* found! */
+               *posOut = i;
+               *swizzleOut = MAKE_SWIZZLE4(swizzle[0], swizzle[1],
+                                           swizzle[2], swizzle[3]);
+               return GL_TRUE;
+            }
+         }
+      }
+   }
+
+   return GL_FALSE;
 }
 
 
@@ -918,7 +993,9 @@ _mesa_fetch_state(GLcontext *ctx, const enum state_index state[],
                break;
 	    }
 	    default:
-               _mesa_problem(ctx, "Bad state switch in _mesa_fetch_state()");
+	       /* unknown state indexes are silently ignored
+	       *  should be handled by the driver.
+	       */
                return;
          }
       }
@@ -995,7 +1072,9 @@ make_state_flags(const GLint state[])
       case STATE_TEXRECT_SCALE:
 	 return _NEW_TEXTURE;
       default:
-         _mesa_problem(NULL, "unexpected int. state in make_state_flags()");
+         /* unknown state indexes are silently ignored and
+         *  no flag set, since it is handled by the driver.
+         */
 	 return 0;
       }
 
@@ -1267,7 +1346,7 @@ make_state_string(const GLint state[6])
    case STATE_INTERNAL:
       break;
    default:
-      _mesa_problem(NULL, "Invalid state in maka_state_string");
+      _mesa_problem(NULL, "Invalid state in make_state_string");
       break;
    }
 

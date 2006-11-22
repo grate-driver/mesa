@@ -307,14 +307,14 @@ _mesa_UseProgramObjectARB(GLhandleARB programObj)
    FLUSH_VERTICES(ctx, _NEW_PROGRAM);
 
    if (programObj != 0) {
-      GET_PROGRAM(pro, programObj, "glUseProgramObjectARB");
+      GET_PROGRAM(pro, programObj, "glUseProgramObjectARB(program)");
 
       if (pro == NULL)
          return;
 
       if ((**pro).GetLinkStatus(pro) == GL_FALSE) {
          RELEASE_PROGRAM(pro);
-         _mesa_error(ctx, GL_INVALID_OPERATION, "glUseProgramObjectARB");
+         _mesa_error(ctx, GL_INVALID_OPERATION, "glUseProgramObjectARB(not linked)");
          return;
       }
 
@@ -1013,7 +1013,7 @@ _mesa_GetProgramiv(GLuint program, GLenum pname, GLint *params)
 
    switch (pname) {
    case GL_DELETE_STATUS:
-      *params = (**pro)._container._generic.GetDeleteStatus((struct gl2_generic_inf **) pro);
+      *params = (**pro)._container._generic.GetDeleteStatus((struct gl2_generic_intf **) pro);
       break; 
    case GL_LINK_STATUS:
       *params = (**pro).GetLinkStatus(pro);
@@ -1022,10 +1022,10 @@ _mesa_GetProgramiv(GLuint program, GLenum pname, GLint *params)
       *params = (**pro).GetValidateStatus(pro);
       break;
    case GL_INFO_LOG_LENGTH:
-      *params = (**pro)._container._generic.GetInfoLogLength( (struct gl2_unknown_inf **) pro );
+      *params = (**pro)._container._generic.GetInfoLogLength( (struct gl2_generic_intf **) pro );
       break;
    case GL_ATTACHED_SHADERS:
-      *params = (**pro)._container.GetAttachedCount( (struct gl2_unknown_inf **) pro );
+      *params = (**pro)._container.GetAttachedCount( (struct gl2_container_intf **) pro );
       break;
    case GL_ACTIVE_ATTRIBUTES:
       *params = (**pro).GetActiveAttribCount(pro);
@@ -1066,13 +1066,13 @@ _mesa_GetShaderiv(GLuint shader, GLenum pname, GLint *params)
       *params = (**sh).GetSubType(sh);
       break;
    case GL_DELETE_STATUS:
-      *params = (**sh)._generic.GetDeleteStatus((struct gl2_generic_inf **) sh);
+      *params = (**sh)._generic.GetDeleteStatus((struct gl2_generic_intf **) sh);
       break;
    case GL_COMPILE_STATUS:
       *params = (**sh).GetCompileStatus(sh);
       break;
    case GL_INFO_LOG_LENGTH:
-      *params = (**sh)._generic.GetInfoLogLength((struct gl2_generic_inf **)sh);
+      *params = (**sh)._generic.GetInfoLogLength((struct gl2_generic_intf **)sh);
       break;
    case GL_SHADER_SOURCE_LENGTH:
       {

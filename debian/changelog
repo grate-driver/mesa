@@ -1,3 +1,10 @@
+mesa (6.5.2~rc2-1) experimental; urgency=low
+
+  * New upstream release candidate:
+    + Refresh 02_use-ieee-fp-on-s390-and-m68k.patch.
+
+ -- Thierry Reding <thierry@gilfi.de>  Wed, 22 Nov 2006 20:49:06 +0100
+
 mesa (6.5.2~rc1-1) experimental; urgency=low
 
   * New upstream release candidate.
