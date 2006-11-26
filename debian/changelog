@@ -1,12 +1,14 @@
-mesa (6.5.2~rc2-1) experimental; urgency=low
+mesa (6.5.2~rc2-0.1) experimental; urgency=low
 
+  * Non-maintainer upload.
   * New upstream release candidate:
     + Refresh 02_use-ieee-fp-on-s390-and-m68k.patch.
 
  -- Thierry Reding <thierry@gilfi.de>  Wed, 22 Nov 2006 20:49:06 +0100
 
-mesa (6.5.2~rc1-1) experimental; urgency=low
+mesa (6.5.2~rc1-0.1) experimental; urgency=low
 
+  * Non-maintainer upload.
   * New upstream release candidate.
   * Update patches:
     + Drop hunk #2 of 01_fix-makefile.patch, applied upstream.
@@ -18,8 +20,9 @@ mesa (6.5.2~rc1-1) experimental; urgency=low
 
  -- Thierry Reding <thierry@gilfi.de>  Sat, 18 Nov 2006 22:23:04 +0100
 
-mesa (6.5.1-1) experimental; urgency=low
+mesa (6.5.1-0.5) experimental; urgency=low
 
+  * Non-maintainer upload.
   * Rewrote the debian/rules file to make it easier to understand.
   * Provide i686 optimized versions in libgl1-mesa-swx11-i686 instead of in
     libgl1-mesa-swx11.
