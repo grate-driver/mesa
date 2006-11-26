@@ -20,8 +20,9 @@ mesa (6.5.2~rc1-1) experimental; urgency=low
 
 mesa (6.5.1-1) experimental; urgency=low
 
-  * Provide i686 optimized versions in libgl1-mesa-swx11-i686.
-  * No longer provide the libgl1-mesa-swx11-dbg package.
+  * Rewrote the debian/rules file to make it easier to understand.
+  * Provide i686 optimized versions in libgl1-mesa-swx11-i686 instead of in
+    libgl1-mesa-swx11.
   * Statically link libOSMesa with the software rasterization code from libGL
     so that it works independently of the installed libGL. (Closes: #387706)
   * Make libosmesa6-dev depend on mesa-common-dev because it only needs the
@@ -33,11 +34,26 @@ mesa (6.5.1-1) experimental; urgency=low
     libgl1-mesa-dri.
   * Repack the contents of the three Mesa tarballs (MesaDemos, MesaGLUT and
     MesaLib) as the original source tarball. (Closes: #392715)
-  * Make mesa-common-dev depend on libx11-dev. (Closes: #396498)
+  * Make mesa-common-dev depend on libx11-dev.
   * Provide a new package: mesa-utils. These utilities are shipped in the
     MesaDemos package so mesa is the right package to provide them.
 
  -- Thierry Reding <thierry@gilfi.de>  Sat, 18 Nov 2006 18:50:07 +0100
+
+mesa (6.5.1-0.4) unstable; urgency=medium
+
+  * Non-maintainer upload (and brown paper bag release).
+  * _Depend_ on libx11-dev from libgl1-mesa-dev; revert previous change.
+    Fixes FTBFS in other packages. (Really Closes: #396498)
+
+ -- Steinar H. Gunderson <sesse@debian.org>  Sat, 11 Nov 2006 13:55:20 +0100
+
+mesa (6.5.1-0.3) unstable; urgency=medium
+
+  * Non-maintainer upload.
+  * Build-depend on libx11-dev; fixes FTBFS. (Closes: #396498)
+
+ -- Steinar H. Gunderson <sesse@debian.org>  Wed,  8 Nov 2006 20:58:40 +0100
 
 mesa (6.5.1-0.2) unstable; urgency=low
 
