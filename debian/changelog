@@ -1,3 +1,10 @@
+mesa (6.5.2~rc3-0.1) experimental; urgency=low
+
+  * Non-maintainer upload.
+  * Update to latest upstream release candidate.
+
+ -- Thierry Reding <thierry@gilfi.de>  Fri,  1 Dec 2006 01:06:28 +0100
+
 mesa (6.5.2~rc2-0.1) experimental; urgency=low
 
   * Non-maintainer upload.

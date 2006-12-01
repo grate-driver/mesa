@@ -49,7 +49,10 @@ copy texturing).
     <li>radeon</li>
     <li>savage</li>
     <li>mga</li>
+    <li>tdfx</li>
     </ul>
+<li>Added support for ARB_occlusion_query to the tdfx driver (Ian
+Romanick).</li>
 </ul>
 
 <h2>Bug fixes</h2>
@@ -69,6 +72,7 @@ copy texturing).
 <li>Fixed glDrawPixels(GL_COLOR_INDEX, GL_BITMAP) segfault (bug 9044)
 <li>Fixed some gluBuild2DMipmaps() bugs (Greg McGarragh)
 <li>Fixed broken "mgl" name mangling
+<li>Indirect rending was broken for glMap* functions (bug 8899)
 </ul>
 
 

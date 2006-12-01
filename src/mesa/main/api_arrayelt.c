@@ -1051,7 +1051,7 @@ GLboolean _ae_create_context( GLcontext *ctx )
    FogCoordFuncs[6] = _gloffset_FogCoordfvEXT;
    FogCoordFuncs[7] = _gloffset_FogCoorddvEXT;
 
-   ctx->aelt_context = MALLOC( sizeof(AEcontext) );
+   ctx->aelt_context = CALLOC( sizeof(AEcontext) );
    if (!ctx->aelt_context)
       return GL_FALSE;
 
@@ -1076,6 +1076,7 @@ static void check_vbo( AEcontext *actx,
       for (i = 0; i < actx->nr_vbos; i++)
 	 if (actx->vbo[i] == vbo)
 	    return;
+      assert(actx->nr_vbos < VERT_ATTRIB_MAX);
       actx->vbo[actx->nr_vbos++] = vbo;
    }
 }
@@ -1093,6 +1094,8 @@ static void _ae_update_state( GLcontext *ctx )
    AEarray *aa = actx->arrays;
    AEattrib *at = actx->attribs;
    GLuint i;
+
+   actx->nr_vbos = 0;
 
    /* conventional vertex arrays */
   if (ctx->Array.ArrayObj->Index.Enabled) {
@@ -1143,7 +1146,7 @@ static void _ae_update_state( GLcontext *ctx )
                                  [at->array->Size-1]
                                  [TYPE_IDX(at->array->Type)];
          at->index = VERT_ATTRIB_TEX0 + i;
-	 check_vbo(actx, aa->array->BufferObj);
+	 check_vbo(actx, at->array->BufferObj);
          at++;
       }
    }
@@ -1170,7 +1173,7 @@ static void _ae_update_state( GLcontext *ctx )
                                      [TYPE_IDX(at->array->Type)];
          }
          at->index = i;
-	 check_vbo(actx, aa->array->BufferObj);
+	 check_vbo(actx, at->array->BufferObj);
          at++;
       }
    }
@@ -1220,7 +1223,8 @@ void _ae_map_vbos( GLcontext *ctx )
 			    GL_DYNAMIC_DRAW_ARB,
 			    actx->vbo[i]);
 
-   actx->mapped_vbos = GL_TRUE;
+   if (actx->nr_vbos)
+      actx->mapped_vbos = GL_TRUE;
 }
 
 void _ae_unmap_vbos( GLcontext *ctx )
@@ -1295,6 +1299,19 @@ void _ae_invalidate_state( GLcontext *ctx, GLuint new_state )
 {
    AEcontext *actx = AE_CONTEXT(ctx);
 
-   assert(!actx->mapped_vbos);
-   actx->NewState |= new_state;
+   
+   /* Only interested in this subset of mesa state.  Need to prune
+    * this down as both tnl/ and the drivers can raise statechanges
+    * for arcane reasons in the middle of seemingly atomic operations
+    * like DrawElements, over which we'd like to keep a known set of
+    * arrays and vbo's mapped.  
+    *
+    * Luckily, neither the drivers nor tnl muck with the state that
+    * concerns us here:
+    */
+   new_state &= _NEW_ARRAY | _NEW_PROGRAM;
+   if (new_state) {
+      assert(!actx->mapped_vbos);
+      actx->NewState |= new_state;
+   }
 }
