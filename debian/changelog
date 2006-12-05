@@ -2,8 +2,9 @@ mesa (6.5.2-0.1) experimental; urgency=low
 
   * Non-maintainer upload.
   * New upstream release.
+  * Build the i915tex DRI module on the i386 and amd64 architectures.
 
- -- Thierry Reding <thierry@gilfi.de>  Sun,  3 Dec 2006 00:45:09 +0100
+ -- Thierry Reding <thierry@gilfi.de>  Tue,  5 Dec 2006 01:44:53 +0100
 
 mesa (6.5.2~rc3-0.1) experimental; urgency=low
 
