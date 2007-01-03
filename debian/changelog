@@ -1,3 +1,11 @@
+mesa (6.5.1-0.4) unstable; urgency=medium
+
+  * Non-maintainer upload (and brown paper bag release).
+  * _Depend_ on libx11-dev from libgl1-mesa-dev; revert previous change.
+    Fixes FTBFS in other packages. (Really Closes: #396498)
+
+ -- Steinar H. Gunderson <sesse@debian.org>  Sat, 11 Nov 2006 13:55:20 +0100
+
 mesa (6.5.1-0.3) unstable; urgency=medium
 
   * Non-maintainer upload.
