@@ -1,3 +1,12 @@
+mesa (6.5.1-0.5) unstable; urgency=low
+
+  * Non-maintainer upload.
+  * Build with -fno-strict-aliasing to fix misbuild of i965_dri.so
+    (closes: #394311).  Thanks to Michel Dänzer for the fix, and to Ryan
+    Richter for the report and testing.
+
+ -- Julien Cristau <julien.cristau@ens-lyon.org>  Wed,  3 Jan 2007 13:48:20 +0100
+
 mesa (6.5.1-0.4) unstable; urgency=medium
 
   * Non-maintainer upload (and brown paper bag release).
