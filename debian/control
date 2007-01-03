@@ -4,7 +4,7 @@ Priority: optional
 Maintainer: Mesa package maintainers <pkg-mesa-devel@lists.alioth.debian.org>
 Uploaders: Marcelo E. Magallon <mmagallo@debian.org>
 Standards-Version: 3.7.2
-Build-Depends: lesstif2-dev, grep-dctrl, debhelper (>> 4), build-essential (>= 11), libdrm-dev (>= 2.0.2) [!hurd-i386], libdirectfb-dev [!hurd-i386], xutils, libexpat-dev, libxxf86vm-dev, libx11-dev, libxext-dev, pkg-config, x11proto-gl-dev (>= 1.4.8) , dpkg-dev (>= 1.13.19)
+Build-Depends: lesstif2-dev, grep-dctrl, debhelper (>> 4), build-essential (>= 11), libdrm-dev (>= 2.0.2) [!hurd-i386], libdirectfb-dev [!hurd-i386], xutils, libexpat-dev, libxxf86vm-dev, libx11-dev, libxext-dev, pkg-config, x11proto-gl-dev (>= 1.4.8) , dpkg-dev (>= 1.13.19), libx11-dev
 
 Package: libgl1-mesa-swx11
 Section: libs

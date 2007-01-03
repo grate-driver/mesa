@@ -1,3 +1,10 @@
+mesa (6.5.1-0.3) unstable; urgency=medium
+
+  * Non-maintainer upload.
+  * Build-depend on libx11-dev; fixes FTBFS. (Closes: #396498)
+
+ -- Steinar H. Gunderson <sesse@debian.org>  Wed,  8 Nov 2006 20:58:40 +0100
+
 mesa (6.5.1-0.2) unstable; urgency=low
 
   * Non-maintainer upload
