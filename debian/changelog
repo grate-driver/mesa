@@ -38,7 +38,7 @@ mesa (6.5.2~rc1-0.1) experimental; urgency=low
 
  -- Thierry Reding <thierry@gilfi.de>  Sat, 18 Nov 2006 22:23:04 +0100
 
-mesa (6.5.1-0.5) experimental; urgency=low
+mesa (6.5.1-0.6) experimental; urgency=low
 
   * Non-maintainer upload.
   * Rewrote the debian/rules file to make it easier to understand.
@@ -50,7 +50,6 @@ mesa (6.5.1-0.5) experimental; urgency=low
     gl.h header file and no libGL anymore.
   * Move glx*.h headers from libgl1-mesa(-swx11)-dev into mesa-common-dev
     because both packages provide identical files.
-  * Build with -fno-strict-aliasing. (Closes: #394311)
   * Add debugging symbol packages for libgl1-mesa-swx11, libgl1-mesa-glx and
     libgl1-mesa-dri.
   * Repack the contents of the three Mesa tarballs (MesaDemos, MesaGLUT and
@@ -60,6 +59,15 @@ mesa (6.5.1-0.5) experimental; urgency=low
     MesaDemos package so mesa is the right package to provide them.
 
  -- Thierry Reding <thierry@gilfi.de>  Sat, 18 Nov 2006 18:50:07 +0100
+
+mesa (6.5.1-0.5) unstable; urgency=low
+
+  * Non-maintainer upload.
+  * Build with -fno-strict-aliasing to fix misbuild of i965_dri.so
+    (closes: #394311).  Thanks to Michel Dänzer for the fix, and to Ryan
+    Richter for the report and testing.
+
+ -- Julien Cristau <julien.cristau@ens-lyon.org>  Wed,  3 Jan 2007 13:48:20 +0100
 
 mesa (6.5.1-0.4) unstable; urgency=medium
 
