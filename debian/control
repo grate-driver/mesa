@@ -78,7 +78,7 @@ Description: A free implementation of the OpenGL API -- runtime [i686 optimized]
 Package: libgl1-mesa-swx11-dev
 Section: libdevel
 Architecture: any
-Depends: libgl1-mesa-swx11 (= ${binary:Version}), libc6-dev, libx11-dev | xlibs-dev (>> 4.1.0), libxext6 | xlibs (>> 4.1.0), mesa-common-dev (= ${source:Version})
+Depends: libgl1-mesa-swx11 (= ${binary:Version}), libc6-dev, libx11-dev, libxext6, mesa-common-dev (= ${source:Version})
 Provides: libgl-dev, mesag3-widgets, mesag-widgets-dev, libglw-dev, mesag-dev, libgl1-mesa-swrast-dev
 Conflicts: mesa-dev, libgl-dev, mesag3 (<< 3.1-1), nvidia-glx-dev, mesag-dev, libgl1-mesa-swrast-dev
 Replaces: libgl-dev, mesag-dev, libgl1-mesa-swrast-dev
