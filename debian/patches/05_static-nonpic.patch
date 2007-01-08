@@ -1,0 +1,12 @@
+diff --git a/configs/linux-static b/configs/linux-static
+index 85141ea..1592668 100644
+--- a/configs/linux-static
++++ b/configs/linux-static
+@@ -5,6 +5,7 @@ include $(TOP)/configs/linux
+ CONFIG_NAME = linux-static
+ 
+ MKLIB_OPTIONS = -static
++PIC_FLAGS =
+ 
+ # Library names (actual file names)
+ GL_LIB_NAME = libGL.a

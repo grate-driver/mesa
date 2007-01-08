@@ -5,11 +5,14 @@ mesa (6.5.2-1) experimental; urgency=low
   * Set the Debian X Strike Force as maintainer.
   * Add myself to uploaders.
   * Build the i915tex DRI module on the i386 and amd64 architectures.
+  * Add patch 04_cleanup-osmesa-configs that makes the OSMesa configurations
+    behave as expected.
+  * Add patch 05_static-nonpic to build static libraries without -fPIC.
 
   [ Julien Cristau ]
   * Drop obsolete depends on xlibs.
 
- -- Julien Cristau <julien.cristau@ens-lyon.org>  Fri,  5 Jan 2007 15:44:16 +0100
+ -- Thierry Reding <thierry@gilfi.de>  Mon,  8 Jan 2007 07:12:08 +0100
 
 mesa (6.5.2~rc3-0.1) experimental; urgency=low
 
