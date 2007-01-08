@@ -41,3 +41,6 @@ TARGET=${TOP}/debian/tmp/usr/share/mesa-source
 		cp -lf "$x" "$TARGET/$DIRNAME"
 	done
 
+# fix permissions
+find "$TARGET" -type f | xargs chmod 0644
+
