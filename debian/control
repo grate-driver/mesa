@@ -28,9 +28,10 @@ Description: A free implementation of the OpenGL API -- runtime
  On Linux, this library is also known as libGL or libGL.so.1.
 
 Package: libgl1-mesa-swx11-dbg
-Section: libs
+Section: libdevel
 Priority: extra
 Architecture: any
+Depends: libgl1-mesa-swx11 (= ${binary:Version})
 Conflicts: libgl1-mesa-swrast-dbg
 Provides: libgl1-mesa-swrast-dbg
 Replaces: libgl1-mesa-swrast-dbg
@@ -115,9 +116,10 @@ Description: A free implementation of the OpenGL API -- GLX runtime
  libgl1-mesa-swx11 package.
 
 Package: libgl1-mesa-glx-dbg
-Section: libs
+Section: libdevel
 Priority: extra
 Architecture: any
+Depends: libgl1-mesa-glx (= ${binary:Version})
 Description: A free implementation of the OpenGL API -- GLX runtime -- debugging symbols
  This version of Mesa provides GLX and DRI capabilities: it is capable of
  both direct and indirect rendering.  For direct rendering, it can use DRI
@@ -171,9 +173,10 @@ Description: A free implementation of the OpenGL API -- DRI modules
  libgl1-mesa-swx11 package.
 
 Package: libgl1-mesa-dri-dbg
-Section: libs
+Section: libdevel
 Priority: extra
 Architecture: any
+Depends: libgl1-mesa-dri (= ${binary:Version})
 Description: A free implementation of the OpenGL API -- DRI modules -- debugging symbols
  This version of Mesa provides GLX and DRI capabilities: it is capable of
  both direct and indirect rendering.  For direct rendering, it can use DRI
