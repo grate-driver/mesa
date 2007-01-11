@@ -11,11 +11,12 @@ mesa (6.5.2-1) experimental; urgency=low
   * Make debugging symbol packages depend on the corresponding binary package
     and put them into the libdevel section.
   * Bump shlibs file for the libosmesa6 package to account for added symbols.
+  * Build the DRI modules with the default optimization flags.
 
   [ Julien Cristau ]
   * Drop obsolete depends on xlibs.
 
- -- Thierry Reding <thierry@gilfi.de>  Wed, 10 Jan 2007 15:22:18 +0100
+ -- Thierry Reding <thierry@gilfi.de>  Thu, 11 Jan 2007 14:39:24 +0100
 
 mesa (6.5.2~rc3-0.1) experimental; urgency=low
 

@@ -5,8 +5,6 @@ include $(TOP)/configs/debian-default
 
 CONFIG_NAME = debian-dri-default
 
-OPT_FLAGS = -O3 -g
-
 SRC_DIRS = glx/x11 mesa progs
 DRIVER_DIRS = dri
 PROGRAM_DIRS = xdemos
