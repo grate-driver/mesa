@@ -243,6 +243,7 @@ Package: libosmesa6
 Section: libs
 Architecture: any
 Depends: ${shlibs:Depends}
+Replaces: libgl1-mesa-swx11 (<< 6.5.2)
 Description: Mesa Off-screen rendering extension
  OSmesa is a Mesa extension that allows programs to render to an
  off-screen buffer using the OpenGL API without having to create a
@@ -256,7 +257,7 @@ Section: devel
 Architecture: any
 Depends: libosmesa6 (= ${binary:Version}), mesa-common-dev (= ${source:Version}) | libgl-dev
 Conflicts: xlibosmesa-dev, libosmesa4-dev, libosmesa-dev
-Replaces: xlibosmesa-dev, libosmesa-dev
+Replaces: xlibosmesa-dev, libosmesa-dev, libgl1-mesa-swx11-dev (<< 6.5.2), mesa-common-dev (<< 6.5.2)
 Provides: xlibosmesa-dev, libosmesa-dev
 Description: Mesa Off-screen rendering extension -- development support files
  This package provides the required environment for developing programs
