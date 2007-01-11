@@ -232,7 +232,7 @@ Description: A free implementation of the OpenGL API -- GLX development support 
 Package: mesa-common-dev
 Section: devel
 Architecture: all
-Replaces: xlibmesa-gl-dev (<< 1:7), xlibosmesa-dev
+Replaces: xlibmesa-gl-dev (<< 1:7), xlibosmesa-dev, libgl1-mesa-swx11-dev (<< 6.5.2), libgl1-mesa-dev (<< 6.5.2)
 Depends: libx11-dev
 Description: Developer documentation for Mesa
  This package includes the specifications for the Mesa-specific OpenGL

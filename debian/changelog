@@ -12,11 +12,13 @@ mesa (6.5.2-1) experimental; urgency=low
     and put them into the libdevel section.
   * Bump shlibs file for the libosmesa6 package to account for added symbols.
   * Build the DRI modules with the default optimization flags.
+  * mesa-common-dev now ships the GLX header files so it needs to replace
+    libgl1-mesa-swx11-dev and libgl1-mesa-dev.
 
   [ Julien Cristau ]
   * Drop obsolete depends on xlibs.
 
- -- Thierry Reding <thierry@gilfi.de>  Thu, 11 Jan 2007 14:39:24 +0100
+ -- Thierry Reding <thierry@gilfi.de>  Thu, 11 Jan 2007 14:54:17 +0100
 
 mesa (6.5.2~rc3-0.1) experimental; urgency=low
 
