@@ -28,7 +28,7 @@ Description: A free implementation of the OpenGL API -- runtime
  On Linux, this library is also known as libGL or libGL.so.1.
 
 Package: libgl1-mesa-swx11-dbg
-Section: libdevel
+Section: libs
 Priority: extra
 Architecture: any
 Depends: libgl1-mesa-swx11 (= ${binary:Version})
@@ -157,6 +157,7 @@ Description: A free implementation of the OpenGL API -- GLX runtime -- debugging
 
 Package: libgl1-mesa-dri
 Section: libs
+Priority: optional
 Architecture: any
 Depends: ${shlibs:Depends}, libgl1-mesa-glx (= ${binary:Version})
 Conflicts: xlibmesa-dri (<< 1:7.0.0)
@@ -212,7 +213,7 @@ Description: A free implementation of the OpenGL API -- DRI modules -- debugging
 # such as AMD Athlon/Opteron, VIA C3 Nehemiah, but not VIA C3 Ezla).
 
 Package: libgl1-mesa-dev
-Section: libs
+Section: libdevel
 Architecture: all
 Depends: libc6-dev, mesa-common-dev (= ${source:Version}), libgl1-mesa-glx (>= ${Source-Version}), libgl1-mesa-dri (>= ${Source-Version})
 Conflicts: libgl-dev, libgl1-mesa-dri-dev
