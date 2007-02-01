@@ -36,7 +36,7 @@
  * backend.c++
  *
  * $Date: 2004/05/12 15:29:36 $ $Revision: 1.2 $
- * $Header: /cvs/mesa/Mesa/src/glu/sgi/libnurbs/internals/backend.cc,v 1.2 2004/05/12 15:29:36 brianp Exp $
+ * $Header: /home/krh/git/sync/mesa-cvs-repo/Mesa/src/glu/sgi/libnurbs/internals/backend.cc,v 1.2 2004/05/12 15:29:36 brianp Exp $
  */
 
 /* Bezier surface backend

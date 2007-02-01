@@ -32,7 +32,7 @@
 ** compliant with the OpenGL(R) version 1.2.1 Specification.
 **
 ** $Date: 2001/09/24 09:40:40 $ $Revision: 1.3 $
-** $Header: /cvs/mesa/Mesa/src/glu/sgi/libutil/glue.c,v 1.3 2001/09/24 09:40:40 joukj Exp $
+** $Header: /home/krh/git/sync/mesa-cvs-repo/Mesa/src/glu/sgi/libutil/glue.c,v 1.3 2001/09/24 09:40:40 joukj Exp $
 */
 
 #include <stdlib.h>

@@ -34,7 +34,7 @@
 ** $Date: 2001/03/17 00:25:41 $ $Revision: 1.1 $
 */
 /*
-** $Header: /cvs/mesa/Mesa/src/glu/sgi/libnurbs/nurbtess/gridWrap.h,v 1.1 2001/03/17 00:25:41 brianp Exp $
+** $Header: /home/krh/git/sync/mesa-cvs-repo/Mesa/src/glu/sgi/libnurbs/nurbtess/gridWrap.h,v 1.1 2001/03/17 00:25:41 brianp Exp $
 */
 
 #ifndef _GRIDWRAP_H

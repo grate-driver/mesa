@@ -1,0 +1,82 @@
+# Build a subset DRI-based libGL.so library.
+# Indirect rendering not supported, etc.
+
+TOP = ../../..
+include $(TOP)/configs/current
+
+
+DEFINES += -DGLX_DIRECT_RENDERING -DIN_MINI_GLX -UIN_DRI_DRIVER
+
+C_SOURCES = \
+	  $(TOP)/src/mesa/main/dispatch.c \
+	  $(TOP)/src/mesa/glapi/glapi.c \
+	  $(TOP)/src/mesa/glapi/glthread.c \
+	  $(TOP)/src/mesa/drivers/dri/common/glcontextmodes.c \
+	  miniglx.c \
+	  miniglx_events.c
+
+X86_SOURCES = $(TOP)/src/mesa/x86/glapi_x86.S
+
+OBJECTS = $(C_SOURCES:.c=.o) \
+	  $(ASM_SOURCES:.S=.o)
+
+INCLUDES = -I. $(INCLUDE_DIRS)
+
+INCLUDE_DIRS = \
+	-I$(TOP)/include \
+	-I$(TOP)/src/mesa \
+	-I$(TOP)/src/mesa/main \
+	-I$(TOP)/src/mesa/glapi \
+	-I$(TOP)/src/mesa/math \
+	-I$(TOP)/src/mesa/transform \
+	-I$(TOP)/src/mesa/swrast \
+	-I$(TOP)/src/mesa/swrast_setup \
+	-I$(TOP)/src/mesa/drivers/dri/common \
+	`pkg-config --cflags libdrm`
+
+
+##### RULES #####
+
+.c.o:
+	$(CC) -c $(INCLUDES) $(CFLAGS) $(DEFINES) $< -o $@
+
+.S.o:
+	$(CC) -c $(INCLUDES) $(CFLAGS) $(DEFINES)  $< -o $@
+
+
+##### TARGETS #####
+
+default: depend $(TOP)/$(LIB_DIR)/$(GL_LIB_NAME)
+
+
+# Make libGL
+$(TOP)/$(LIB_DIR)/$(GL_LIB_NAME):  $(OBJECTS) Makefile
+	$(TOP)/bin/mklib -o $(GL_LIB) -linker '$(CC)' \
+		-major 1 -minor 2 $(MKLIB_OPTIONS) \
+		-install $(TOP)/$(LIB_DIR) $(GL_LIB_DEPS) $(OBJECTS) `/usr/bin/pkg-config --libs libdrm` `/usr/bin/pkg-config --libs pciaccess`
+	rm -f $(TOP)/$(LIB_DIR)/miniglx.conf
+	install example.miniglx.conf $(TOP)/$(LIB_DIR)/miniglx.conf
+
+
+drmtest: xf86drm.o drmtest.o
+	rm -f drmtest && $(CC) -o drmtest xf86drm.o drmtest.o
+
+
+depend: $(C_SOURCES) $(ASM_SOURCES)
+	touch depend
+	$(MKDEP) $(MKDEP_OPTIONS) $(INCLUDES) $(C_SOURCES) $(ASM_SOURCES) \
+		> /dev/null 
+
+
+# Emacs tags
+tags:
+	etags `find . -name \*.[ch]` `find ../include`
+
+
+# Remove .o and backup files
+clean:
+	-rm -f drmtest $(TOP)/$(LIB_DIR)/libGL.so*
+	-rm -f *.o *~
+	-rm -f depend
+
+include depend

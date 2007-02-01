@@ -34,7 +34,7 @@
 ** $Date: 2005/10/28 13:09:23 $ $Revision: 1.5 $
 */
 /*
-** $Header: /cvs/mesa/Mesa/src/glu/sgi/libnurbs/nurbtess/sampleMonoPoly.cc,v 1.5 2005/10/28 13:09:23 brianp Exp $
+** $Header: /home/krh/git/sync/mesa-cvs-repo/Mesa/src/glu/sgi/libnurbs/nurbtess/sampleMonoPoly.cc,v 1.5 2005/10/28 13:09:23 brianp Exp $
 */
 
 #include "gluos.h"
