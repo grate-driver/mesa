@@ -1,8 +1,10 @@
 mesa (6.5.2-2) UNRELEASED; urgency=low
 
   * Sync Section/Priority for all packages with the override.
+  * Build the arch:all debs in binary-indep, and use the debhelper -s option
+    for commands in binary-arch, to fix FTBFS on non-i386 archs.
 
- -- Julien Cristau <julien.cristau@ens-lyon.org>  Sun, 28 Jan 2007 18:17:23 +0100
+ -- Julien Cristau <julien.cristau@ens-lyon.org>  Sun,  4 Feb 2007 14:01:55 +0100
 
 mesa (6.5.2-1) experimental; urgency=low
 

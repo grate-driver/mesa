@@ -96,30 +96,43 @@ clean: unpatch
 
 # Build architecture-independent files here.
 binary-indep: build install
-# We have nothing to do by default.
+	dh_testdir
+	dh_testroot
+	dh_installchangelogs -i
+	dh_installdocs -i
+	dh_installexamples -i
+	dh_install --sourcedir=debian/tmp --list-missing -i
+	dh_installman -i
+	dh_link -i
+	dh_compress -i
+	dh_fixperms -i
+	dh_installdeb -i
+	dh_gencontrol -i
+	dh_md5sums -i
+	dh_builddeb -i
 
 # Build architecture-dependent files here.
 binary-arch: build install
 	dh_testdir
 	dh_testroot
-	dh_installchangelogs
-	dh_installdocs
-	dh_installexamples
-	dh_install --sourcedir=debian/tmp --list-missing
-	dh_installman
-	dh_link
+	dh_installchangelogs -s
+	dh_installdocs -s
+	dh_installexamples -s
+	dh_install --sourcedir=debian/tmp --list-missing -s
+	dh_installman -s
+	dh_link -s
 	dh_strip -plibgl1-mesa-swx11 --dbg-package=libgl1-mesa-swx11-dbg
 	dh_strip -plibgl1-mesa-glx --dbg-package=libgl1-mesa-glx-dbg
 	dh_strip -plibgl1-mesa-dri --dbg-package=libgl1-mesa-dri-dbg
-	dh_strip
-	dh_compress
-	dh_fixperms
-	dh_makeshlibs
-	dh_installdeb
-	dh_shlibdeps
-	dh_gencontrol
-	dh_md5sums
-	dh_builddeb
+	dh_strip -s
+	dh_compress -s
+	dh_fixperms -s
+	dh_makeshlibs -s
+	dh_installdeb -s
+	dh_shlibdeps -s
+	dh_gencontrol -s
+	dh_md5sums -s
+	dh_builddeb -s
 
 binary: binary-indep binary-arch
 .PHONY: configs build clean binary-indep binary-arch binary install configure
