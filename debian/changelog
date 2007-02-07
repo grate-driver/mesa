@@ -1,3 +1,11 @@
+mesa (6.5.2-3) experimental; urgency=low
+
+  * Set LIB_DIR and EXTRA_LIB_PATH in configs/debian-default to override
+    settings in configs/linux-x86-64. This fixes a FTBFS on amd64, thanks to
+    Marc 'HE' Brockschmidt for the report (closes: #410118).
+
+ -- Julien Cristau <jcristau@debian.org>  Wed,  7 Feb 2007 23:04:28 +0100
+
 mesa (6.5.2-2) experimental; urgency=low
 
   * Sync Section/Priority for all packages with the override.
