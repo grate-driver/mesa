@@ -1,3 +1,13 @@
+mesa (6.5.1-0.6) unstable; urgency=medium
+
+  * Non-maintainer upload.
+  * Backport a fix from mesa 6.5.2 to mesa 6.5.1 which:
+     - fixes braces around the ASSERT macro;
+     - fixes a clipping problem, which leads to systematic segfaults of the
+       X server (Closes: #405803).
+
+ -- Cyril Brulebois <cyril.brulebois@enst-bretagne.fr>  Thu, 22 Feb 2007 21:08:56 +0100
+
 mesa (6.5.1-0.5) unstable; urgency=low
 
   * Non-maintainer upload.
