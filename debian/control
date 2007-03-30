@@ -160,6 +160,7 @@ Section: libs
 Priority: optional
 Architecture: any
 Depends: ${shlibs:Depends}, libgl1-mesa-glx (= ${binary:Version})
+Suggests: libglide3
 Conflicts: xlibmesa-dri (<< 1:7.0.0)
 Replaces: xlibmesa-dri (<< 1:7.0.0)
 Description: A free implementation of the OpenGL API -- DRI modules
@@ -172,6 +173,9 @@ Description: A free implementation of the OpenGL API -- DRI modules
  .
  For a complete description of Mesa, please look at the
  libgl1-mesa-swx11 package.
+ .
+ The tdfx DRI module uses libglide3 if available to provide better performance,
+ so installing that package is useful for users of tdfx hardware.
 
 Package: libgl1-mesa-dri-dbg
 Section: libdevel

@@ -1,3 +1,10 @@
+mesa (6.5.2-4) UNRELEASED; urgency=low
+
+  * debian/control: libgl1-mesa-dri now suggests libglide3, with an
+    explanation in the description (closes: #387339).
+
+ -- Julien Cristau <jcristau@debian.org>  Fri, 30 Mar 2007 14:06:44 +0200
+
 mesa (6.5.2-3) experimental; urgency=low
 
   * Set LIB_DIR and EXTRA_LIB_PATH in configs/debian-default to override
