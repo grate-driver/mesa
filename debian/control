@@ -80,18 +80,13 @@ Package: libgl1-mesa-swx11-dev
 Section: libdevel
 Architecture: any
 Depends: libgl1-mesa-swx11 (= ${binary:Version}), libc6-dev, libx11-dev, libxext6, mesa-common-dev (= ${source:Version})
-Provides: libgl-dev, mesag3-widgets, mesag-widgets-dev, libglw-dev, mesag-dev, libgl1-mesa-swrast-dev
+Provides: libgl-dev, mesag-dev, libgl1-mesa-swrast-dev
 Conflicts: mesa-dev, libgl-dev, mesag3 (<< 3.1-1), nvidia-glx-dev, mesag-dev, libgl1-mesa-swrast-dev
 Replaces: libgl-dev, mesag-dev, libgl1-mesa-swrast-dev
 Description: A free implementation of the OpenGL API -- development support files
  This package provides the development environment required for
  compiling programs with Mesa.  For a complete description of Mesa,
  please look at the libgl1-mesa-swx11 package.
- .
- This package also provides a simple widgets library, libGLw, which
- allows Motif-based applications to embed an OpenGL drawing context.
- The headers and static libraries for compiling programs that use this
- library are included.
  .
  This library provides a pure software rasteriser; it does not provide
  a direct rendering-capable library, or one which uses GLX.  For that,
@@ -302,6 +297,39 @@ Description: The OpenGL utility library -- development support files
  .
  For a complete description of GLU, please look at the libglu1-mesa
  package.
+
+Package: libglw1-mesa
+Section: libs
+Architecture: any
+Depends: ${shlibs:Depends}
+Conflicts: libgl1-mesa-swx11 (<< 6.5.2-4)
+Provides: libglw1
+Description: A free implementation of the OpenGL API -- runtime
+ Mesa is a 3-D graphics library with an API which is very similar to
+ that of OpenGL.  To the extent that Mesa utilizes the OpenGL command
+ syntax or state machine, it is being used with authorization from
+ Silicon Graphics, Inc.  However, the author makes no claim that Mesa
+ is in any way a compatible replacement for OpenGL or associated with
+ Silicon Graphics, Inc.
+ .
+ This package provides a simple widgets library, libGLw, which
+ allows Motif-based applications to embed an OpenGL drawing context.
+ .
+ On Linux, this library is also known as libGLw or libGLw.so.1.
+
+Package: libglw1-mesa-dev
+Section: libdevel
+Architecture: any
+Depends: libglw1-mesa (= ${binary:Version}), libc6-dev, libx11-dev, libxext6, mesa-common-dev (= ${source:Version})
+Provides: mesag3-widgets, mesag-widgets-dev, libglw-dev
+Conflicts: libgl1-mesa-swx11-dev (<< 6.5.2-4)
+Replaces: libglw-dev
+Description: A free implementation of the OpenGL API -- development support files
+ This package provides the development environment required for
+ compiling programs with the Mesa widgets library, libGLw, which
+ allows Motif-based applications to embed an OpenGL drawing context.
+ The headers and static libraries for compiling programs that use this
+ library are included.
 
 Package: mesa-swx11-source
 Section: libdevel
