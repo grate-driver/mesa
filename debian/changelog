@@ -8,6 +8,7 @@ mesa (6.5.2-4) UNRELEASED; urgency=low
   * Split out libGLw libs and headers from libgl1-mesa-swx11 and ship both
     static and shared libraries, creating libglw1-mesa and libglw1-mesa-dev
     (closes: #374904).
+  * Add 06_fix_texture_data_corruption.patch (closes: #412346).
 
  -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Fri, 30 Mar 2007 19:44:53 +0200
 

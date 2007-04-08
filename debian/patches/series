@@ -4,3 +4,4 @@
 03_optional-progs-and-install.patch
 04_cleanup-osmesa-configs.patch
 05_static-nonpic.patch
+06_fix_texture_data_corruption.patch
