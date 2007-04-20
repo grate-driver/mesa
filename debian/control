@@ -302,7 +302,6 @@ Package: libglw1-mesa
 Section: libs
 Architecture: any
 Depends: ${shlibs:Depends}
-Conflicts: libgl1-mesa-swx11 (<< 6.5.2-4)
 Provides: libglw1
 Description: A free implementation of the OpenGL API -- runtime
  Mesa is a 3-D graphics library with an API which is very similar to
@@ -322,7 +321,7 @@ Section: libdevel
 Architecture: any
 Depends: libglw1-mesa (= ${binary:Version}), libc6-dev, libx11-dev, libxext6, mesa-common-dev (= ${source:Version})
 Provides: mesag3-widgets, mesag-widgets-dev, libglw-dev
-Conflicts: libgl1-mesa-swx11-dev (<< 6.5.2-4)
+Conflicts: libglw-dev, libgl1-mesa-swx11-dev (<< 6.5.2-4)
 Replaces: libglw-dev
 Description: A free implementation of the OpenGL API -- development support files
  This package provides the development environment required for
