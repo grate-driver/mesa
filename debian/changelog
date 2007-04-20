@@ -1,3 +1,10 @@
+mesa (6.5.2-5) UNRELEASED; urgency=low
+
+  * Add 07_call_radeonSetCliprects_from_radeonMakeCurrent.patch
+    (closes: #420164). Thanks to Christian Ohm.
+
+ -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Fri, 20 Apr 2007 18:36:51 +0200
+
 mesa (6.5.2-4) unstable; urgency=low
 
   [ Julien Cristau ]

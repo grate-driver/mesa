@@ -1,0 +1,56 @@
+From: Michel DÃ¤nzer <michel@tungstengraphics.com>
+Date: Tue, 6 Mar 2007 12:22:35 +0000 (+0100)
+Subject: r300: Call radeonSetCliprects from radeonMakeCurrent.
+X-Git-Url: http://gitweb.freedesktop.org/?p=mesa/mesa.git;a=commitdiff;h=6f9b1afc862851532e4820705c412388b497ad58
+
+r300: Call radeonSetCliprects from radeonMakeCurrent.
+
+Based on a patch by Panagiotis Papadakos.
+
+Among other things, this makes sure the framebuffer object associated with the
+drawable has the correct size when _mesa_make_current is called, so the default
+viewport is set up correctly.
+
+Also update radeon->lastStamp in radeonSetCliprects.
+---
+
+--- a/src/mesa/drivers/dri/r300/radeon_context.c
++++ b/src/mesa/drivers/dri/r300/radeon_context.c
+@@ -51,6 +51,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DE
+ #include "radeon_macros.h"
+ #include "radeon_reg.h"
+ 
++#include "radeon_state.h"
+ #include "r300_state.h"
+ 
+ #include "utils.h"
+@@ -279,6 +280,8 @@ GLboolean radeonMakeCurrent(__DRIcontext
+ 
+ 			r300UpdateWindow(radeon->glCtx);
+ 			r300UpdateViewportOffset(radeon->glCtx);
++
++			radeonSetCliprects(radeon);
+ 		}
+ 
+ 		_mesa_make_current(radeon->glCtx,
+--- a/src/mesa/drivers/dri/r300/radeon_lock.c
++++ b/src/mesa/drivers/dri/r300/radeon_lock.c
+@@ -90,7 +90,6 @@ static void r300RegainedLock(radeonConte
+ #else
+ 		radeonUpdateScissor(radeon->glCtx);
+ #endif
+-		radeon->lastStamp = drawable->lastStamp;
+ 	}
+ 
+ 	if (sarea->ctx_owner != radeon->dri.hwContext) {
+--- a/src/mesa/drivers/dri/r300/radeon_state.c
++++ b/src/mesa/drivers/dri/r300/radeon_state.c
+@@ -185,6 +185,8 @@ void radeonSetCliprects(radeonContextPtr
+ 
+ 	if (radeon->state.scissor.enabled)
+ 		radeonRecalcScissorRects(radeon);
++
++	radeon->lastStamp = drawable->lastStamp;
+ }
+ 
+ 
