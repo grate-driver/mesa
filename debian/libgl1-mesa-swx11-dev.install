@@ -1,2 +1,4 @@
+usr/include/GL/GLw*A.h
 usr/lib/libGL.a
 usr/lib/libGL.so
+usr/lib/libGLw.a
