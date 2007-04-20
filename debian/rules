@@ -1,10 +1,16 @@
 #!/usr/bin/make -f
+# debian/rules for the Debian mesa package
+# Copyright © 2006 Thierry Reding <thierry@gilfi.de>
 
-export DH_OPTIONS
-export DEB_HOST_ARCH
+# Uncomment this to turn on verbose mode.
+#export DH_VERBOSE=1
+
+STAMP_DIR = debian/stamp
+
+QUILT_STAMPFN = $(STAMP_DIR)/patch
+include /usr/share/quilt/quilt.make
 
 CFLAGS = -Wall -g
-
 ifneq (,$(findstring noopt,$(DEB_BUILD_OPTIONS)))
 	CFLAGS += -O0
 else
@@ -14,219 +20,120 @@ ifeq (,$(findstring nostrip,$(DEB_BUILD_OPTIONS)))
 	INSTALL_PROGRAM += -s
 endif
 
-DEB_HOST_ARCH := $(shell dpkg-architecture -qDEB_HOST_ARCH)
+DEB_BUILD_ARCH     ?= $(shell dpkg-architecture -qDEB_BUILD_ARCH)
+DEB_BUILD_GNU_TYPE ?= $(shell dpkg-architecture -qDEB_BUILD_GNU_TYPE)
+DEB_BUILD_DIR      ?= $(CURDIR)/obj-$(DEB_BUILD_GNU_TYPE)
 
-STAMPDIR := debian/stamp
+export DEB_BUILD_ARCH
 
-select_target_any = $(shell dh_listpackages -s | grep -v '^$$' | while read p ; do cut -d ' ' -f 1,3 debian/libdir.map | grep -w $$p ; done | grep -v _ | cut -d ' ' -f 1 | sort -u | grep ^$(1)- | cut -d - -f 2-)
-select_target_arch = $(filter $(shell dh_listpackages -s | grep -v '^$$' | while read p ; do cut -d ' ' -f 1,3 debian/libdir.map | grep -w $$p ; done | grep _ | cut -d ' ' -f 1 | sort -u | grep ^$(1)- | cut -d - -f 2-), $(patsubst configs/%, %, $(wildcard configs/*_$(DEB_HOST_ARCH))))
-select_target = $(sort $(BUILD_$(1)_TARGETS_any) $(BUILD_$(1)_TARGETS_arch))
+# choose which configurations to build
+SWX11_GLU_CONFIGS =
+DRI_CONFIGS =
 
-BUILD_GL_TARGETS_any := $(call select_target_any,gl)
-BUILD_GL_TARGETS_arch := $(call select_target_arch,gl)
-BUILD_GL_TARGETS := $(call select_target,GL)
+include debian/scripts/choose-configs
 
-BUILD_GLU_TARGETS_any := $(call select_target_any,glu)
-#BUILD_GLU_TARGETS_arch := $(call select_target_arch,glu)
-BUILD_GLU_TARGETS := $(call select_target,GLU)
+# build the following configurations by default
+CONFIGS = $(SWX11_GLU_CONFIGS) \
+          $(DRI_CONFIGS) \
+          debian-osmesa \
+          debian-osmesa-static \
+          debian-osmesa16 \
+          debian-osmesa16-static \
+          debian-osmesa32 \
+          debian-osmesa32-static
 
-BUILD_GLW_TARGETS_any := $(call select_target_any,glw)
-#BUILD_GLW_TARGETS_arch := $(call select_target_arch,glw)
-BUILD_GLW_TARGETS := $(call select_target,GLW)
+STAMP = $(STAMP_DIR)/$(DEB_BUILD_GNU_TYPE)
+BUILD_STAMPS = $(addprefix $(STAMP)-build-, $(CONFIGS))
+INSTALL_STAMPS = $(addprefix $(STAMP)-install-, $(CONFIGS)) \
+                 $(STAMP_DIR)/install-source
 
-BUILD_TARGETS := \
-	$(foreach t, $(BUILD_GL_TARGETS), $(STAMPDIR)/target-gl-$(t)) \
-	$(foreach t, $(BUILD_GLU_TARGETS), $(STAMPDIR)/target-glu-$(t)) \
-	$(foreach t, $(BUILD_GLW_TARGETS), $(STAMPDIR)/target-glw-$(t))
+# list the configurations that will built
+configs:
+	@echo Building the following configurations: $(CONFIGS)
 
-ifneq ($(strip $(shell grep-dctrl -n -s Package -PX libgl1-mesa-directfb debian/control)),)
-DFB_MODULE_DIR := $(shell pkg-config --variable=moduledir directfb-internal)
-endif
-
-build: $(STAMPDIR)/build
-$(STAMPDIR)/build: $(BUILD_TARGETS)
+$(STAMP_DIR):
 	dh_testdir
-	mkdir -p $(dir $@) && touch $@
+	mkdir -p $@
 
-# Parameters:
-#     1: library (gl, glu, glw)
-#     2: target (debian, debian-i386, ...)
-#     3: subdir to build (mesa, glw, glu/sgi)
+$(QUILT_STAMPFN): $(STAMP_DIR)
 
-driver_map = $(word $(2),$(shell grep '^$(1) ' debian/drivers.map))
-libdir_map = $(word $(2),$(shell grep '^$(1) ' debian/libdir.map))
 
-define build_target_actions
+build: $(BUILD_STAMPS)
+
+$(STAMP)-build-%: patch
 	dh_testdir
-	chmod +x debian/shadowtree
-	$(RM) -rf build/$(1)-$(2)
-	debian/shadowtree build/$(1)-$(2)
-	ln -sf $(2) build/$(1)-$(2)/configs/current
-	if test $(1) != gl ; then \
-		mkdir -p build/$(1)-$(2)/lib/ ; \
-		ln -sf ../../gl-$(2)/lib/libGL.so build/$(1)-$(2)/lib/ ; \
-	fi
-	make -C build/$(1)-$(2)/src SRC_DIRS=$(3) DEBIAN_DRIVERS_DIR=$(if $(call driver_map,$(1)-$(2),1),/$(call driver_map,$(1)-$(2),3))
-	if test $(1) != gl ; then \
-		rm build/$(1)-$(2)/lib/libGL.so ; \
-	fi
-	mkdir -p $(dir $@) && touch $@
-endef
+	mkdir -p $(DEB_BUILD_DIR)/$*
+	find $(CURDIR)/* -maxdepth 0 -not -path '$(DEB_BUILD_DIR)*' | \
+		xargs cp -rlf -t $(DEB_BUILD_DIR)/$*
+	ln -sf $* $(DEB_BUILD_DIR)/$*/configs/current
+	cd $(DEB_BUILD_DIR)/$* && $(MAKE)
+	touch $@
 
-$(STAMPDIR)/target-gl-%:
-	$(call build_target_actions,gl,$*,mesa)
-
-$(STAMPDIR)/target-glu-%: $(STAMPDIR)/target-gl-%
-	$(call build_target_actions,glu,$*,glu/sgi)
-
-$(STAMPDIR)/target-glw-%: $(STAMPDIR)/target-gl-%
-	$(call build_target_actions,glw,$*,glw)
-
-# Parameters:
-#     1: target (gl-debian, gl-debian-i386, ...)
-#     2: installation directory (usr/lib, usr/lib/dbg, ...)
-#     3: library package name
-#     4: development package name
-
-define install_target_lib_actions
-	dh_installdirs -p$(3) $(2)
-	dh_installdirs -p$(4) $(2)
-	dh_install -p$(3) build/$(1)/lib/lib*.so.* $(2)
-	dh_install -p$(4) build/$(1)/lib/lib*.so $(2)
-	dh_install -p$(4) build/$(1)/lib/lib*.a $(2)
-endef
-
-install_target_libs = $(call install_target_lib_actions,$(1),$(call libdir_map,$(1),2),$(call libdir_map,$(1),3),$(call libdir_map,$(1),4))
-
-# Parameters:
-#     1: target (gl-debian, gl-debian-i386, ...)
-#     2: source directory (usr/lib, usr/lib/dbg, ...)
-#     3: installation directory (usr/lib, usr/lib/dbg, ...)
-#     4: package name
-
-define install_target_driver_actions
-	dh_installdirs -p$(4) $(3)
-	dh_install -p$(4) build/$(1)/$(2) $(3)
-endef
-
-install_target_drivers = $(if $(call driver_map,$(1),1),$(call install_target_driver_actions,$(1),$(call driver_map,$(1),2),$(call driver_map,$(1),3),$(call driver_map,$(1),4)))
-
-# Parameters:
-#     1: target (gl-debian, gl-debian-i386, ...)
-
-define install_target
-	$(call install_target_libs,$(1))
-	$(call install_target_drivers,$(1))
-endef
-
-install-target-%: $(STAMPDIR)/target-%
-	@echo Target $@.
-	$(call install_target,$*)
-	@echo Target $@: done.
-
-install-pre:
-	@echo Target $@.
+pre-install:
 	dh_testdir
 	dh_testroot
-	dh_clean -k
-	dh_installdirs
-	@echo Target $@: done.
+	dh_clean -k --exclude ./Makefile.orig --exclude configs/CVS/Root.bak
+	rm -rf $(INSTALL_STAMPS)
 
-install-all: install-pre \
-	$(addprefix install-target-gl-,$(BUILD_GL_TARGETS)) \
-	$(addprefix install-target-glu-,$(BUILD_GLU_TARGETS)) \
-	$(addprefix install-target-glw-,$(BUILD_GLW_TARGETS))
-	@echo Target $@.
-	@echo Target $@: done.
+install: pre-install $(INSTALL_STAMPS)
 
-clean:
+$(STAMP)-install-%: $(STAMP)-build-%
+	# Add here commands to install the package into debian/tmp
+	cd $(DEB_BUILD_DIR)/$* && $(MAKE) install DESTDIR=$(CURDIR)/debian/tmp
+	touch $@
+
+$(STAMP_DIR)/install-source:
+	# install Mesa source for mesa-swx11-source package
+	chmod a+x debian/scripts/install-source.sh
+	debian/scripts/install-source.sh
+	touch $@
+
+clean: unpatch
 	dh_testdir
 	dh_testroot
-	$(RM) -rf debian/stamp
-	$(RM) -rf build
-	dh_clean debian/mesa-swx11-source.install
+	dh_clean --exclude ./Makefile.orig
+	rm -rf $(DEB_BUILD_DIR) $(STAMP_DIR)
 
-install: build install-all
-	@echo Target $@.
-	@echo Target $@: done.
-
-binary-indep: DH_OPTIONS := -i
-binary-indep: debian/mesa-swx11-source.install build
-	@echo Target $@
+# Build architecture-independent files here.
+binary-indep: build install
 	dh_testdir
 	dh_testroot
-	dh_installchangelogs
-	dh_installdocs
-	dh_installdirs
-#	dh_installexamples
-	dh_install
-#	dh_installman
-#	dh_link
-	dh_strip
-	dh_compress
-	dh_fixperms
-	dh_installdeb
-	dh_gencontrol
-	dh_md5sums
-	dh_builddeb
-	@echo Target $@: done.
+	dh_installchangelogs -i
+	dh_installdocs -i
+	dh_installexamples -i
+	dh_install --sourcedir=debian/tmp --list-missing -i
+	dh_installman -i
+	dh_link -i
+	dh_compress -i
+	dh_fixperms -i
+	dh_installdeb -i
+	dh_gencontrol -i
+	dh_md5sums -i
+	dh_builddeb -i
 
-# binary-arch: DH_OPTIONS := -s
+# Build architecture-dependent files here.
 binary-arch: build install
-	@echo Target $@
-	dh_testdir -s
-	dh_testroot -s
+	dh_testdir
+	dh_testroot
 	dh_installchangelogs -s
 	dh_installdocs -s
-#	dh_installexamples -s
-	dh_install -s
-#	dh_installman -s
-#	dh_link -s
+	dh_installexamples -s
+	dh_install --sourcedir=debian/tmp --list-missing -s
+	dh_installman -s
+	dh_link -s
+	dh_strip -plibgl1-mesa-swx11 --dbg-package=libgl1-mesa-swx11-dbg
+	dh_strip -plibgl1-mesa-glx --dbg-package=libgl1-mesa-glx-dbg
+	dh_strip -plibgl1-mesa-dri --dbg-package=libgl1-mesa-dri-dbg
 	dh_strip -s
 	dh_compress -s
 	dh_fixperms -s
-#	dh_makeshlibs -s -Nlibglu1-mesa -Nmesag3
-ifneq ($(strip $(shell dh_listpackages -s | grep -w libgl1-mesa-glide3)),)
-	dh_makeshlibs -plibgl1-mesa-glide3 -V 'libgl1-mesa-glide3'
-endif
-ifneq ($(strip $(shell dh_listpackages -s | grep -w libglu1-mesa)),)
-	dh_makeshlibs -plibglu1-mesa -V 'libglu1-mesa | libglu1'
-endif
-ifneq ($(strip $(shell dh_listpackages -s | grep -w libosmesa6)),)
-	dh_makeshlibs -plibosmesa6
-endif
-ifneq ($(strip $(shell dh_listpackages -s | grep -w libgl1-mesa-swx11)),)
-	dh_makeshlibs -plibgl1-mesa-swx11
-endif
-ifneq ($(strip $(shell dh_listpackages -s | grep -w libgl1-mesa-glx)),)
-	dh_makeshlibs -plibgl1-mesa-glx -V 'libgl1-mesa-glx | libgl1'
-endif
-ifneq ($(strip $(shell dh_listpackages -s | grep -w libgl1-mesa-directfb)),)
-	dh_makeshlibs -plibgl1-mesa-directfb -V 'libgl1-mesa-directfb | libgl1'
-endif
-# Make sure nothing has been left behind.
-	find debian -mindepth 2 -name shlibs | cut -d / -f 2 | sort -u > \
-		debian/shlibs.actual
-	find debian -mindepth 2 -name lib\*.so.\* | grep -v dbg | cut -d / -f 2 | sort -u > \
-		debian/shlibs.should
-	cmp debian/shlibs.actual debian/shlibs.should
-	rm debian/shlibs.actual debian/shlibs.should
+	dh_makeshlibs -s
 	dh_installdeb -s
 	dh_shlibdeps -s
 	dh_gencontrol -s
 	dh_md5sums -s
 	dh_builddeb -s
-	@echo Target $@: done.
-
-list-targets:
-	@for t in $(BUILD_GL_TARGETS_arch) ; do echo $$t ; done
-
-debian/mesa-swx11-source.install:
-	( find src/mesa src/glx/x11 include/GL/internal -name '*.[ch]' ; \
-	  find include/GL -name 'xmesa*' ) | \
-	egrep -v 'drivers/(dri/(fb|ffb|gamma|i[a-z0-9]+|mach64|mga|r[0-9]+|radeon|s3v|savage|sis|tdfx|trident|unichrome)|directfb|dos|fbdev|ggi|glide|osmesa|svga|windows)/' | \
-	while read x; do echo $$x usr/share/mesa-source/`dirname $$x`; done \
-	> $@
 
 binary: binary-indep binary-arch
-.PHONY: build clean binary-indep binary-arch binary install configure debian/mesa-swx11-source.install
+.PHONY: configs build clean binary-indep binary-arch binary install configure
+

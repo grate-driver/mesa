@@ -1,6 +1,0 @@
-DEBIAN_COMMON_CPPFLAGS += -DPTHREADS -DHAVE_ALIAS
-
-DRI_LIB_DEPS = -lm -lpthread -lexpat -ldl
-GL_LIB_DEPS  = `pkg-config --libs x11 xext xxf86vm` -lm -lpthread -ldl
-
-SRC_DIRS = glx/x11 glu glut/glx glw

@@ -1,7 +1,0 @@
-include $(TOP)/configs/debian-static
-
-CONFIG_NAME = debian-static-i386
-
-DEBIAN_OPT_CFLAGS = -O3 -march=i686 -DUSE_X86_ASM -DUSE_MMX_ASM -DUSE_3DNOW_ASM -DUSE_SSE_ASM
-
-ASM_SOURCES = $(X86_SOURCES) $(X86_API)

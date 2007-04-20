@@ -1,0 +1,45 @@
+Allow the programs that are to be built to be defined in the build
+configuration.
+
+Provide an install target for installing the programs in $(INSTALL_DIR)/bin.
+
+This patch by Thierry Reding.
+Not submitted to Mesa.
+
+--- a/progs/xdemos/Makefile
++++ b/progs/xdemos/Makefile
+@@ -8,7 +8,7 @@
+ 
+ LIB_DEP = $(TOP)/$(LIB_DIR)/$(GL_LIB_NAME) $(TOP)/$(LIB_DIR)/$(GLU_LIB_NAME)
+ 
+-PROGS = glthreads \
++PROGS ?= glthreads \
+ 	glxdemo \
+ 	glxgears \
+ 	glxgears_fbconfig \
+@@ -44,6 +44,9 @@
+ 
+ default: $(PROGS)
+ 
++install: $(PROGS)
++	$(INSTALL) -d $(INSTALL_DIR)/bin
++	$(INSTALL) -m 755 $(PROGS) $(INSTALL_DIR)/bin
+ 
+ clean:
+ 	-rm -f $(PROGS)
+--- a/progs/Makefile
++++ b/progs/Makefile
+@@ -21,8 +21,12 @@
+ 		fi \
+ 	done
+ 
+-# Dummy install target
+ install:
++	@for dir in $(SUBDIRS) ; do \
++		if [ -d $$dir ] ; then \
++			(cd $$dir ; $(MAKE) install) ; \
++		fi \
++	done
+ 
+ clean:
+ 	@for dir in $(SUBDIRS) tests ; do \

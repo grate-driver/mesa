@@ -385,7 +385,7 @@ StateVars = [
 	  ["ctx->ProjectionMatrixStack.Depth + 1"], "", None ),
 	( "GL_READ_BUFFER", GLenum, ["ctx->ReadBuffer->ColorReadBuffer"], "", None ),
 	( "GL_RED_BIAS", GLfloat, ["ctx->Pixel.RedBias"], "", None ),
-	( "GL_RED_BITS", GLint, [" ctx->DrawBuffer->Visual.redBits "], "", None ),
+	( "GL_RED_BITS", GLint, ["ctx->DrawBuffer->Visual.redBits"], "", None ),
 	( "GL_RED_SCALE", GLfloat, ["ctx->Pixel.RedScale"], "", None ),
 	( "GL_RENDER_MODE", GLenum, ["ctx->RenderMode"], "", None ),
 	( "GL_RESCALE_NORMAL", GLboolean,
@@ -958,6 +958,7 @@ StateVars = [
 	# OpenGL 2.0
 	( "GL_STENCIL_BACK_FUNC", GLenum, ["ctx->Stencil.Function[1]"], "", None ),
 	( "GL_STENCIL_BACK_VALUE_MASK", GLint, ["ctx->Stencil.ValueMask[1]"], "", None ),
+	( "GL_STENCIL_BACK_WRITEMASK", GLint, ["ctx->Stencil.WriteMask[1]"], "", None ),
 	( "GL_STENCIL_BACK_REF", GLint, ["ctx->Stencil.Ref[1]"], "", None ),
 	( "GL_STENCIL_BACK_FAIL", GLenum, ["ctx->Stencil.FailFunc[1]"], "", None ),
 	( "GL_STENCIL_BACK_PASS_DEPTH_FAIL", GLenum, ["ctx->Stencil.ZFailFunc[1]"], "", None ),
@@ -978,17 +979,19 @@ StateVars = [
 
 	# GL_ARB_fragment_shader
 	( "GL_MAX_FRAGMENT_UNIFORM_COMPONENTS_ARB", GLint,
-	  ["MAX_FRAGMENT_UNIFORM_COMPONENTS"], "", ["ARB_fragment_shader"] ),
+	  ["ctx->Const.FragmentProgram.MaxUniformComponents"], "",
+	  ["ARB_fragment_shader"] ),
 	( "GL_FRAGMENT_SHADER_DERIVATIVE_HINT_ARB", GLenum,
 	  ["ctx->Hint.FragmentShaderDerivative"], "", ["ARB_fragment_shader"] ),
 
 	# GL_ARB_vertex_shader
 	( "GL_MAX_VERTEX_UNIFORM_COMPONENTS_ARB", GLint,
-	  ["MAX_VERTEX_UNIFORM_COMPONENTS"], "", ["ARB_vertex_shader"] ),
+	  ["ctx->Const.VertexProgram.MaxUniformComponents"], "",
+	  ["ARB_vertex_shader"] ),
 	( "GL_MAX_VARYING_FLOATS_ARB", GLint,
-	  ["MAX_VARYING_FLOATS"], "", ["ARB_vertex_shader"] ),
+	  ["ctx->Const.MaxVaryingFloats"], "", ["ARB_vertex_shader"] ),
 	( "GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS_ARB", GLint,
-	  ["MAX_VERTEX_TEXTURE_IMAGE_UNITS"], "", ["ARB_vertex_shader"] ),
+	  ["ctx->Const.MaxVertexTextureImageUnits"], "", ["ARB_vertex_shader"] ),
 	( "GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS_ARB", GLint,
 	  ["MAX_COMBINED_TEXTURE_IMAGE_UNITS"], "", ["ARB_vertex_shader"] )
 ]

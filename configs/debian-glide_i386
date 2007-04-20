@@ -1,7 +1,0 @@
-include $(TOP)/configs/debian_i386
-
-CONFIG_NAME = debian-glide-i386
-
-DEBIAN_COMMON_CPPFLAGS += -DFX -I/usr/include/glide3
-
-GL_LIB_DEPS = -L/usr/X11R6/lib -lX11 -lXext -lglide3x -lm -lpthread

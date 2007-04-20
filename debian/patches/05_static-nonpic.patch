@@ -1,0 +1,60 @@
+diff --git a/configs/linux-alpha-static b/configs/linux-alpha-static
+index 2a30af9..eb6a08a 100644
+--- a/configs/linux-alpha-static
++++ b/configs/linux-alpha-static
+@@ -11,6 +11,7 @@ CFLAGS = -O3 -mcpu=ev5 -ansi -mieee -pedantic -D_XOPEN_SOURCE -DUSE_XSHM
+ CXXFLAGS = -O3 -mcpu=ev5 -ansi -mieee -pedantic -D_XOPEN_SOURCE
+ GLUT_CFLAGS = -fexceptions
+ MKLIB_OPTIONS = -static
++PIC_FLAGS =
+ 
+ 
+ # Library names (actual file names)
+diff --git a/configs/linux-ppc-static b/configs/linux-ppc-static
+index d0e1688..3f3dc55 100644
+--- a/configs/linux-ppc-static
++++ b/configs/linux-ppc-static
+@@ -5,6 +5,7 @@ include $(TOP)/configs/linux-ppc
+ CONFIG_NAME = linux-ppc-static
+ 
+ MKLIB_OPTIONS = -static
++PIC_FLAGS =
+ 
+ # Library names (actual file names)
+ GL_LIB_NAME = libGL.a
+diff --git a/configs/linux-static b/configs/linux-static
+index 85141ea..1592668 100644
+--- a/configs/linux-static
++++ b/configs/linux-static
+@@ -5,6 +5,7 @@ include $(TOP)/configs/linux
+ CONFIG_NAME = linux-static
+ 
+ MKLIB_OPTIONS = -static
++PIC_FLAGS =
+ 
+ # Library names (actual file names)
+ GL_LIB_NAME = libGL.a
+diff --git a/configs/linux-x86-64-static b/configs/linux-x86-64-static
+index 0257430..2d0b664 100644
+--- a/configs/linux-x86-64-static
++++ b/configs/linux-x86-64-static
+@@ -5,6 +5,7 @@ include $(TOP)/configs/linux-x86-64
+ CONFIG_NAME = linux-x86-64-static
+ 
+ MKLIB_OPTIONS = -static
++PIC_FLAGS =
+ 
+ # Library names (actual file names)
+ GL_LIB_NAME = libGL.a
+diff --git a/configs/linux-x86-static b/configs/linux-x86-static
+index 9915987..e6a3696 100644
+--- a/configs/linux-x86-static
++++ b/configs/linux-x86-static
+@@ -5,6 +5,7 @@ include $(TOP)/configs/linux-x86
+ CONFIG_NAME = linux-x86-static
+ 
+ MKLIB_OPTIONS = -static
++PIC_FLAGS =
+ 
+ # Library names (actual file names)
+ GL_LIB_NAME = libGL.a

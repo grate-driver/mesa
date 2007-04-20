@@ -1,6 +1,8 @@
 This package was debianized by James A. Treacy treacy@debian.org on Thu,
 6 Jan 2000 01:11:34 -0500.  It was newly debianized by Marcelo E.
-Magallon <mmagallo@debian.org> on Sat, 25 Dec 2004 14:50:02 -0600.
+Magallon <mmagallo@debian.org> on Sat, 25 Dec 2004 14:50:02 -0600. It was
+again debianized by Thierry Reding <thierry@gilfi.de> on Sat, 14 Oct 2006
+02:01:12 +0200.
 
 It was downloaded from http://www.mesa3d.org/download.html
 
@@ -432,5 +434,11 @@ Inc. under a more liberal, MIT-style license, as follows:
  RedBook demos   progs/redbook/*       SGI                 SGI MIT-style
 
 
-    On Debian systems the full text of the GNU LGPL license is found in
-    /usr/share/common-licenses/LGPL.
+On Debian systems the full text of the GNU LGPL license is found in
+/usr/share/common-licenses/LGPL.
+
+------------------------------------------------------------------------------
+
+The Debian packaging is (C) 2006, Thierry Reding <thierry@gilfi.de> and
+is licensed under the GPL, see `/usr/share/common-licenses/GPL'.
+

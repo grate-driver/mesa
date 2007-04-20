@@ -1,12 +1,113 @@
-mesa (6.5.1-0.6) unstable; urgency=medium
+mesa (6.5.2-4) UNRELEASED; urgency=low
+
+  [ Julien Cristau ]
+  * debian/control: libgl1-mesa-dri now suggests libglide3, with an
+    explanation in the description (closes: #387339).
+
+  [ Brice Goglin ]
+  * Split out libGLw libs and headers from libgl1-mesa-swx11 and ship both
+    static and shared libraries, creating libglw1-mesa and libglw1-mesa-dev
+    (closes: #374904).
+
+ -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Fri, 30 Mar 2007 19:44:53 +0200
+
+mesa (6.5.2-3) experimental; urgency=low
+
+  * Set LIB_DIR and EXTRA_LIB_PATH in configs/debian-default to override
+    settings in configs/linux-x86-64. This fixes a FTBFS on amd64, thanks to
+    Marc 'HE' Brockschmidt for the report (closes: #410118).
+
+ -- Julien Cristau <jcristau@debian.org>  Wed,  7 Feb 2007 23:04:28 +0100
+
+mesa (6.5.2-2) experimental; urgency=low
+
+  * Sync Section/Priority for all packages with the override.
+  * Build the arch:all debs in binary-indep, and use the debhelper -s option
+    for commands in binary-arch, to fix FTBFS on non-i386 archs, thanks to
+    Marc 'HE' Brockschmidt (closes: #409638).
+  * Add myself to Uploaders.
+
+ -- Julien Cristau <jcristau@debian.org>  Sun,  4 Feb 2007 21:14:02 +0100
+
+mesa (6.5.2-1) experimental; urgency=low
+
+  [ Thierry Reding ]
+  * New upstream release.
+  * Set the Debian X Strike Force as maintainer.
+  * Add myself to uploaders.
+  * Build the i915tex DRI module on the i386 and amd64 architectures.
+  * Add patch 04_cleanup-osmesa-configs that makes the OSMesa configurations
+    behave as expected.
+  * Add patch 05_static-nonpic to build static libraries without -fPIC.
+  * Make debugging symbol packages depend on the corresponding binary package
+    and put them into the libdevel section.
+  * Bump shlibs file for the libosmesa6 package to account for added symbols.
+    Thanks Julien Cristau.
+  * Build the DRI modules with the default optimization flags. Thanks Julien
+    Cristau.
+  * mesa-common-dev now ships the GLX header files so it needs to replace
+    libgl1-mesa-swx11-dev and libgl1-mesa-dev. Thanks Julien Cristau.
+  * All OSMesa libraries were moved to the libosmesa6 and libosmesa6-dev
+    package, so have them replace libgl1-mesa-swx11, libgl1-mesa-swx11-dev and
+    mesa-common-dev respectively. Thanks Julien Cristau.
+
+  [ Julien Cristau ]
+  * Drop obsolete depends on xlibs.
+
+ -- Thierry Reding <thierry@gilfi.de>  Thu, 11 Jan 2007 15:06:52 +0100
+
+mesa (6.5.2~rc3-0.1) experimental; urgency=low
 
   * Non-maintainer upload.
-  * Backport a fix from mesa 6.5.2 to mesa 6.5.1 which:
-     - fixes braces around the ASSERT macro;
-     - fixes a clipping problem, which leads to systematic segfaults of the
-       X server (Closes: #405803).
+  * Update to latest upstream release candidate.
 
- -- Cyril Brulebois <cyril.brulebois@enst-bretagne.fr>  Thu, 22 Feb 2007 21:08:56 +0100
+ -- Thierry Reding <thierry@gilfi.de>  Fri,  1 Dec 2006 01:06:28 +0100
+
+mesa (6.5.2~rc2-0.1) experimental; urgency=low
+
+  * Non-maintainer upload.
+  * New upstream release candidate:
+    + Refresh 02_use-ieee-fp-on-s390-and-m68k.patch.
+  * Add manual pages for the glxdemo, glxgears, glxheads and glxinfo
+    utilities (Closes: #385463).
+
+ -- Thierry Reding <thierry@gilfi.de>  Wed, 22 Nov 2006 20:49:06 +0100
+
+mesa (6.5.2~rc1-0.1) experimental; urgency=low
+
+  * Non-maintainer upload.
+  * New upstream release candidate.
+  * Update patches:
+    + Drop hunk #2 of 01_fix-makefile.patch, applied upstream.
+    + Drop 03_handle-sync-and-dont-unlock-display.patch, applied upstream.
+  * Bump build-dependency on libdrm-dev (>= 2.2.0).
+  * Use the new upstream minstall utility to install files and directories.
+    Using /usr/bin/install would result in a symlink's target being copied
+    instead of the symlink.
+
+ -- Thierry Reding <thierry@gilfi.de>  Sat, 18 Nov 2006 22:23:04 +0100
+
+mesa (6.5.1-0.6) experimental; urgency=low
+
+  * Non-maintainer upload.
+  * Rewrote the debian/rules file to make it easier to understand.
+  * Provide i686 optimized versions in libgl1-mesa-swx11-i686 instead of in
+    libgl1-mesa-swx11.
+  * Statically link libOSMesa with the software rasterization code from libGL
+    so that it works independently of the installed libGL. (Closes: #387706)
+  * Make libosmesa6-dev depend on mesa-common-dev because it only needs the
+    gl.h header file and no libGL anymore.
+  * Move glx*.h headers from libgl1-mesa(-swx11)-dev into mesa-common-dev
+    because both packages provide identical files.
+  * Add debugging symbol packages for libgl1-mesa-swx11, libgl1-mesa-glx and
+    libgl1-mesa-dri.
+  * Repack the contents of the three Mesa tarballs (MesaDemos, MesaGLUT and
+    MesaLib) as the original source tarball. (Closes: #392715)
+  * Make mesa-common-dev depend on libx11-dev.
+  * Provide a new package: mesa-utils. These utilities are shipped in the
+    MesaDemos package so mesa is the right package to provide them.
+
+ -- Thierry Reding <thierry@gilfi.de>  Sat, 18 Nov 2006 18:50:07 +0100
 
 mesa (6.5.1-0.5) unstable; urgency=low
 

@@ -1,14 +1,10 @@
-include $(TOP)/configs/debian-static
+# Configuration for building a static version of OSMesa with support for 32
+# bits per color channel.
+
+include $(TOP)/configs/linux-osmesa32-static
+include $(TOP)/configs/debian-osmesa-default
 
 CONFIG_NAME = debian-osmesa32-static
 
-DEBIAN_COMMON_CPPFLAGS += -DCHAN_BITS=32 -DDEFAULT_SOFTWARE_DEPTH_BITS=31
+# vim: ft=make
 
-OSMESA_LIB = OSMesa32
-OSMESA_LIB_NAME = libOSMesa32.a
-
-SRC_DIRS = mesa glu
-DRIVER_DIRS = osmesa
-PROGRAM_DIRS = 
-
-APP_LIB_DEPS = -lOSMesa32

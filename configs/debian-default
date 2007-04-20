@@ -1,0 +1,18 @@
+# Define Debian-specific defaults.
+
+CONFIG_NAME = debian-default
+
+OPT_FLAGS = -O2 -g
+CFLAGS += -fno-strict-aliasing
+
+# override settings in configs/linux-x86-64
+LIB_DIR = lib
+EXTRA_LIB_PATH =
+
+SRC_DIRS = mesa
+PROGRAM_DIRS =
+
+INSTALL_DIR = $(DESTDIR)/usr
+
+# vim: ft=make
+

@@ -24,6 +24,7 @@
  * Written by Sean D'Epagnier (c) 2006
  */
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -262,7 +263,6 @@ void glutLeaveGameMode(void)
 
    KeyboardFunc = KeyFuncs[0];
    KeyboardUpFunc = KeyFuncs[1];
-
 
    DisplayFunc = NormFuncs[0];
    ReshapeFunc = NormFuncs[1];

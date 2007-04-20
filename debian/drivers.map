@@ -1,3 +1,0 @@
-gl-debian-dri lib/*_dri.so usr/lib/dri libgl1-mesa-dri
-gl-debian-dri_i386 lib/*_dri.so usr/lib/i686/cmov/dri libgl1-mesa-dri
-gl-debian-directfb src/mesa/drivers/directfb/libidirectfbgl_mesa.so usr/lib/directfb-0.9.22/interfaces/IDirectFBGL libgl1-mesa-directfb

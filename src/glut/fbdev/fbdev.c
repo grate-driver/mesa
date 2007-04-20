@@ -74,6 +74,7 @@ int Redisplay;
 int Visible;
 int VisibleSwitch;
 int Active;
+static int Resized;
 /* we have to poll to see if we are visible
    on a framebuffer that is not active */
 int VisiblePoll;
@@ -103,6 +104,9 @@ void TestVisible(void) {
 
 static void Cleanup(void)
 {
+   /* do not handle this signal when cleaning up */
+   signal(SIGWINCH, SIG_IGN);
+
    if(GameMode)
       glutLeaveGameMode();
 
@@ -124,8 +128,10 @@ static void Cleanup(void)
 	 fprintf(stderr, "ioctl(FBIOPUT_VSCREENINFO failed): %s\n",
 		 strerror(errno));
 
-      munmap(FrameBuffer, FixedInfo.smem_len);
+      if(FrameBuffer)
+         munmap(FrameBuffer, FixedInfo.smem_len);
       close(FrameBufferFD);
+
    }
 
    /* free allocated back buffer */
@@ -236,6 +242,7 @@ void glutInit (int *argcp, char **argv)
    signal(SIGSEGV, CrashHandler);
    signal(SIGINT, CrashHandler);
    signal(SIGTERM, CrashHandler);
+   signal(SIGABRT, CrashHandler);
 
    if(nomouse == 0)
       InitializeMouse();
@@ -271,7 +278,7 @@ void glutInit (int *argcp, char **argv)
       exit(0);
    }
 
-   /* Get the fixed screen info */
+   /* get the fixed screen info */
    if (ioctl(FrameBufferFD, FBIOGET_FSCREENINFO, &FixedInfo)) {
       sprintf(exiterror, "error: ioctl(FBIOGET_FSCREENINFO) failed: %s\n",
 	      strerror(errno));
@@ -410,16 +417,18 @@ void glutInitWindowSize (int width, int height)
 
 static void ProcessTimers(void)
 {
-   if(GlutTimers && GlutTimers->time < glutGet(GLUT_ELAPSED_TIME)) {
+   while(GlutTimers && GlutTimers->time <= glutGet(GLUT_ELAPSED_TIME)) {
       struct GlutTimer *timer = GlutTimers;
-      timer->func(timer->value);
       GlutTimers = timer->next;
+      timer->func(timer->value);
       free(timer);
    }
 }
 
 void glutMainLoop(void)
 {
+   int idleiters;
+
    if(ReshapeFunc)
       ReshapeFunc(VarInfo.xres, VarInfo.yres);
 
@@ -436,8 +445,6 @@ void glutMainLoop(void)
       else
 	 if(VisiblePoll)
 	    TestVisible();
-	 else
-	    usleep(1);
 
       if(IdleFunc)
 	 IdleFunc();
@@ -448,17 +455,48 @@ void glutMainLoop(void)
 	    VisibilityFunc(Visible ? GLUT_VISIBLE : GLUT_NOT_VISIBLE);
       }
 
+      if(Resized) {
+         SetVideoMode();
+         CreateBuffer();
+
+         if(!glFBDevMakeCurrent( Context, Buffer, Buffer )) {
+            sprintf(exiterror, "Failure to Make Current\n");
+            exit(0);
+         }
+
+         InitializeMenus();
+
+         if(ReshapeFunc)
+            ReshapeFunc(VarInfo.xres, VarInfo.yres);
+
+         Redisplay = 1;
+         Resized = 0;
+      }
+
       if(Visible && Redisplay) {
 	 Redisplay = 0;
-	 if(MouseEnabled)
-	    EraseCursor();
+         EraseCursor();
 	 DisplayFunc();
 	 if(!(DisplayMode & GLUT_DOUBLE)) {
 	    if(ActiveMenu)
 	       DrawMenus();
-	    if(MouseEnabled)
-	       DrawCursor();
+            DrawCursor();
 	 }
+         idleiters = 0;
+      } else {
+         /* we sleep if not receiving redisplays, and
+            the main loop is running faster than 2khz */
+
+         static int lasttime;
+         int time = glutGet(GLUT_ELAPSED_TIME);
+         if(time > lasttime) {
+            if(idleiters >= 2)
+               usleep(100);
+
+            idleiters = 0;
+            lasttime = time;
+         }
+         idleiters++;         
       }
    }
 }
@@ -532,17 +570,16 @@ int ParseFBModes(int minw, int maxw, int minh, int maxh, int minf, int maxf)
    return 0;
 }
 
-/* ---------- Window Management ----------*/
 void SetVideoMode(void)
 {
    /* set new variable screen info */
    if (ioctl(FrameBufferFD, FBIOPUT_VSCREENINFO, &VarInfo)) {
-      sprintf(exiterror, "ioctl(FBIOPUT_VSCREENINFO failed): %s\n",
-	      strerror(errno));
+      sprintf(exiterror, "FBIOPUT_VSCREENINFO failed: %s\n", strerror(errno));
+      strcat(exiterror, "Perhaps the device does not support the selected mode\n");
       exit(0);
    }
 
-   /* reload the screen info to update offsets */
+   /* reload the screen info to update rgb bits */
    if (ioctl(FrameBufferFD, FBIOGET_VSCREENINFO, &VarInfo)) {
       sprintf(exiterror, "error: ioctl(FBIOGET_VSCREENINFO) failed: %s\n",
 	      strerror(errno));
@@ -570,7 +607,7 @@ void SetVideoMode(void)
    LoadColorMap();
 }
 
-void CreateBuffer()
+void CreateBuffer(void)
 {
    int size = VarInfo.xres_virtual * VarInfo.yres_virtual
                               * VarInfo.bits_per_pixel / 8;
@@ -669,6 +706,30 @@ void CreateVisual(void)
    }
 }
 
+static void SignalWinch(int arg)
+{
+   /* we can't change bitdepth without destroying the visual */
+   int bits_per_pixel = VarInfo.bits_per_pixel;
+   struct fb_bitfield red = VarInfo.red, green = VarInfo.green,
+                      blue = VarInfo.blue, transp = VarInfo.transp;
+
+   /* get the variable screen info */
+   if (ioctl(FrameBufferFD, FBIOGET_VSCREENINFO, &VarInfo)) {
+      sprintf(exiterror, "error: ioctl(FBIOGET_VSCREENINFO) failed: %s\n",
+	      strerror(errno));
+      exit(0);
+   }
+
+   /* restore bitdepth and color masks only */
+   VarInfo.bits_per_pixel = bits_per_pixel;
+   VarInfo.red = red;
+   VarInfo.green = green;
+   VarInfo.blue = blue;
+   VarInfo.transp = transp;
+
+   Resized = 1;
+}
+
 int glutCreateWindow (const char *title)
 {
    if(Initialized == 0) {
@@ -713,6 +774,8 @@ int glutCreateWindow (const char *title)
 
    glutSetWindowTitle(title);
 
+   signal(SIGWINCH, SignalWinch);
+
    Visible = 1;
    VisibleSwitch = 1;
    Redisplay = 1;
@@ -739,6 +802,7 @@ void glutDestroyWindow(int win)
    glFBDevDestroyContext(Context);
    glFBDevDestroyBuffer(Buffer);
    glFBDevDestroyVisual(Visual);
+  
    Visual = NULL;
 }
 
@@ -756,12 +820,14 @@ void glutSwapBuffers(void)
 {
    glFlush();
 
+   if(!(DisplayMode & GLUT_DOUBLE))
+      return;
+
    if(ActiveMenu)
       DrawMenus();
-   if(MouseEnabled)
-      DrawCursor();
+   DrawCursor();
 
-   if(DisplayMode & GLUT_DOUBLE && Visible) {
+   if(Visible) {
       Swapping = 1;
       glFBDevSwapBuffers(Buffer);
       Swapping = 0;
@@ -787,19 +853,11 @@ void glutReshapeWindow(int width, int height)
    if(!ParseFBModes(width, width, height, height, 0, MAX_VSYNC))
       return;
 
+   signal(SIGWINCH, SIG_IGN);
+
    SetVideoMode();
-   CreateBuffer();
- 
-   if(!glFBDevMakeCurrent( Context, Buffer, Buffer )) {
-      sprintf(exiterror, "Failure to Make Current\n");
-      exit(0);
-   }
-
-   InitializeMenus();
-
-   if(ReshapeFunc)
-      ReshapeFunc(VarInfo.xres, VarInfo.yres);
-   Redisplay = 1;
+   signal(SIGWINCH, SignalWinch);
+   Resized = 1;
 }
 
 void glutFullScreen(void)
@@ -836,6 +894,9 @@ static void UnIconifyWindow(int sig)
 	      strerror(errno));
       exit(0);
    }
+
+   RestoreColorMap();
+
    Redisplay = 1;
    VisibleSwitch = 1;
    Visible = 1;
@@ -848,6 +909,7 @@ void glutIconifyWindow(void)
    if (ioctl(FrameBufferFD, FBIOPUT_VSCREENINFO, &OrigVarInfo))
       fprintf(stderr, "ioctl(FBIOPUT_VSCREENINFO failed): %s\n",
 	      strerror(errno));
+
    raise(SIGSTOP);
 }
 

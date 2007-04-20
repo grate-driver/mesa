@@ -1,5 +1,2 @@
-include/GL/glx.h                        usr/include/GL
-include/GL/glxext.h                     usr/include/GL
-include/GL/glx_mangle.h                 usr/include/GL
-src/glw/GLwDrawA.h                      usr/include/GL
-src/glw/GLwMDrawA.h                     usr/include/GL
+usr/lib/libGL.a
+usr/lib/libGL.so

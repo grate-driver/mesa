@@ -1,0 +1,16 @@
+Do not build OSMesa for a standalone configuration, since Debian only ships
+OSMesa in a separate package.
+
+This patch by Thierry Reding.
+
+--- a/src/mesa/Makefile
++++ b/src/mesa/Makefile
+@@ -107,7 +107,7 @@
+ 	$(OSMESA_DRIVER_OBJECTS)
+ 
+ 
+-stand-alone: depend subdirs $(TOP)/$(LIB_DIR)/$(GL_LIB_NAME) $(TOP)/$(LIB_DIR)/$(OSMESA_LIB_NAME)
++stand-alone: depend subdirs $(TOP)/$(LIB_DIR)/$(GL_LIB_NAME)
+ 
+ osmesa-only: depend subdirs $(TOP)/$(LIB_DIR)/$(OSMESA_LIB_NAME)
+ 

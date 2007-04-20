@@ -24,9 +24,25 @@
 #
 # Authors:
 #    Ian Romanick <idr@us.ibm.com>
+#    Jeremy Kolb <jkolb@brandeis.edu>
 
 import gl_XML, glX_XML, glX_proto_common, license
 import sys, getopt, copy, string
+
+def convertStringForXCB(str):
+    tmp = ""
+    special = [ "ARB" ]
+    i = 0
+    while i < len(str):
+        if str[i:i+3] in special:
+            tmp = '%s_%s' % (tmp, string.lower(str[i:i+3]))
+            i = i + 2;
+        elif str[i].isupper():
+            tmp = '%s_%s' % (tmp, string.lower(str[i]))
+        else:
+            tmp = '%s%s' % (tmp, str[i])
+        i += 1
+    return tmp
 
 def hash_pixel_function(func):
 	"""Generate a 'unique' key for a pixel function.  The key is based on
@@ -150,11 +166,14 @@ class PrintGlxProtoStubs(glX_proto_common.glx_print_proto):
 		print '#include "indirect.h"'
 		print '#include "glxclient.h"'
 		print '#include "indirect_size.h"'
+		print '#include "dispatch.h"'
+		print '#include "glapi.h"'
+		print '#include "glthread.h"'
 		print '#include <GL/glxproto.h>'
 		print '#ifdef USE_XCB'
-		print '#include <X11/xcl.h>'
-		print '#include <X11/XCB/xcb.h>'
-		print '#include <X11/XCB/glx.h>'
+		print '#include <X11/Xlib-xcb.h>'
+		print '#include <xcb/xcb.h>'
+		print '#include <xcb/glx.h>'
 		print '#endif /* USE_XCB */'
 
 		print ''
@@ -325,26 +344,44 @@ const GLuint __glXDefaultPixelStore[9] = { 0, 0, 0, 0, 0, 0, 0, 0, 1 };
 						generated_stubs.append(h)
 
 						fake_func = glx_pixel_function_stub( func, n )
-						self.printFunction( fake_func )
+						self.printFunction(fake_func, fake_func.name)
 
 
-			self.printFunction( func )
+			self.printFunction(func, func.name)
+			if func.glx_sop and func.glx_vendorpriv:
+				self.printFunction(func, func.glx_vendorpriv_names[0])
 
 		return
 
 
-	def printFunction(self, func):
+	def printFunction(self, func, name):
+		footer = '}\n'
 		if func.glx_rop == ~0:
 			print 'static %s' % (func.return_type)
 			print '%s( unsigned opcode, unsigned dim, %s )' % (func.name, func.get_parameter_string())
+			print '{'
 		else:
-			print '#define %s %d' % (func.opcode_name(), func.opcode_value())
+			if func.has_different_protocol(name):
+				if func.return_type == "void":
+					ret_string = ''
+				else:
+					ret_string = "return "
 
-			print '%s' % (func.return_type)
-			print '__indirect_gl%s(%s)' % (func.name, func.get_parameter_string())
+				func_name = func.static_glx_name(name)
+				print '#define %s %d' % (func.opcode_vendor_name(name), func.glx_vendorpriv)
+				print '%s gl%s(%s)' % (func.return_type, func_name, func.get_parameter_string())
+				print '{'
+				print '    __GLXcontext * const gc = __glXGetCurrentContext();'
+				print ''
+				print '    if (gc->isDirect) {'
+				print '    %sCALL_%s(GET_DISPATCH(), (%s));' % (ret_string, func.name, func.get_called_parameter_string())
+				print '    } else {'
+				footer = '}\n}\n'
+			else:
+				print '#define %s %d' % (func.opcode_name(), func.opcode_value())
 
-
-		print '{'
+				print '%s __indirect_gl%s(%s)' % (func.return_type, name, func.get_parameter_string())
+				print '{'
 
 
 		if func.glx_rop != 0 or func.vectorequiv != None:
@@ -353,14 +390,12 @@ const GLuint __glXDefaultPixelStore[9] = { 0, 0, 0, 0, 0, 0, 0, 0, 1 };
 			else:
 				self.printRenderFunction(func)
 		elif func.glx_sop != 0 or func.glx_vendorpriv != 0:
-			self.printSingleFunction(func)
+			self.printSingleFunction(func, name)
 			pass
 		else:
-			print "/* Missing GLX protocol for %s. */" % (func.name)
+			print "/* Missing GLX protocol for %s. */" % (name)
 
-		print '}'
-		print ''
-
+		print footer
 		return
 
 
@@ -381,25 +416,25 @@ generic_%u_byte( GLint rop, const void * ptr )
 		return
 
 
-	def common_emit_one_arg(self, p, pc, indent, adjust, extra_offset):
+	def common_emit_one_arg(self, p, pc, adjust, extra_offset):
 		if p.is_array():
 			src_ptr = p.name
 		else:
 			src_ptr = "&" + p.name
 
 		if not extra_offset:
-			print '%s    (void) memcpy((void *)(%s + %u), (void *)(%s), %s);' \
-			    % (indent, pc, p.offset + adjust, src_ptr, p.size_string() )
+			print '(void) memcpy((void *)(%s + %u), (void *)(%s), %s);' \
+			    % (pc, p.offset + adjust, src_ptr, p.size_string() )
 		else:
-			print '%s    (void) memcpy((void *)(%s + %u + %s), (void *)(%s), %s);' \
-			    % (indent, pc, p.offset + adjust, extra_offset, src_ptr, p.size_string() )
+			print '(void) memcpy((void *)(%s + %u + %s), (void *)(%s), %s);' \
+			    % (pc, p.offset + adjust, extra_offset, src_ptr, p.size_string() )
 
-	def common_emit_args(self, f, pc, indent, adjust, skip_vla):
+	def common_emit_args(self, f, pc, adjust, skip_vla):
 		extra_offset = None
 
 		for p in f.parameterIterateGlxSend( not skip_vla ):
 			if p.name != f.img_reset:
-				self.common_emit_one_arg(p, pc, indent, adjust, extra_offset)
+				self.common_emit_one_arg(p, pc, adjust, extra_offset)
 				
 				if p.is_variable_length():
 					temp = p.size_string()
@@ -411,7 +446,7 @@ generic_%u_byte( GLint rop, const void * ptr )
 		return
 
 
-	def pixel_emit_args(self, f, pc, indent, large):
+	def pixel_emit_args(self, f, pc, large):
 		"""Emit the arguments for a pixel function.  This differs from
 		common_emit_args in that pixel functions may require padding
 		be inserted (i.e., for the missing width field for
@@ -425,10 +460,10 @@ generic_%u_byte( GLint rop, const void * ptr )
 
 		for param in f.parameterIterateGlxSend():
 			if not param.is_image():
-				self.common_emit_one_arg(param, pc, indent, adjust, None)
+				self.common_emit_one_arg(param, pc, adjust, None)
 
 				if f.pad_after(param):
-					print '%s    (void) memcpy((void *)(%s + %u), zero, 4);' % (indent, pc, (param.offset + param.size()) + adjust)
+					print '(void) memcpy((void *)(%s + %u), zero, 4);' % (pc, (param.offset + param.size()) + adjust)
 
 			else:
 				[dim, width, height, depth, extent] = param.get_dimensions()
@@ -439,9 +474,9 @@ generic_%u_byte( GLint rop, const void * ptr )
 
 				if param.img_null_flag:
 					if large:
-						print '%s    (void) memcpy((void *)(%s + %u), zero, 4);' % (indent, pc, (param.offset - 4) + adjust)
+						print '(void) memcpy((void *)(%s + %u), zero, 4);' % (pc, (param.offset - 4) + adjust)
 					else:
-						print '%s    (void) memcpy((void *)(%s + %u), (void *)((%s == NULL) ? one : zero), 4);' % (indent, pc, (param.offset - 4) + adjust, param.name)
+						print '(void) memcpy((void *)(%s + %u), (void *)((%s == NULL) ? one : zero), 4);' % (pc, (param.offset - 4) + adjust, param.name)
 
 
 				pixHeaderPtr = "%s + %u" % (pc, adjust)
@@ -453,27 +488,26 @@ generic_%u_byte( GLint rop, const void * ptr )
 					else:
 						condition = 'compsize > 0'
 
-					print '%s    if (%s) {' % (indent, condition)
-					print '%s        (*gc->fillImage)(gc, %s, %s, %s, %s, %s, %s, %s, %s, %s);' % (indent, dim_str, width, height, depth, param.img_format, param.img_type, param.name, pcPtr, pixHeaderPtr)
-					print '%s    }' % (indent)
-					print '%s    else {' % (indent)
-					print '%s        (void) memcpy( %s, default_pixel_store_%uD, default_pixel_store_%uD_size );' % (indent, pixHeaderPtr, dim, dim)
-					print '%s    }' % (indent)
+					print 'if (%s) {' % (condition)
+					print '    (*gc->fillImage)(gc, %s, %s, %s, %s, %s, %s, %s, %s, %s);' % (dim_str, width, height, depth, param.img_format, param.img_type, param.name, pcPtr, pixHeaderPtr)
+					print '} else {'
+					print '    (void) memcpy( %s, default_pixel_store_%uD, default_pixel_store_%uD_size );' % (pixHeaderPtr, dim, dim)
+					print '}'
 				else:
-					print '%s    __glXSendLargeImage(gc, compsize, %s, %s, %s, %s, %s, %s, %s, %s, %s);' % (indent, dim_str, width, height, depth, param.img_format, param.img_type, param.name, pcPtr, pixHeaderPtr)
+					print '__glXSendLargeImage(gc, compsize, %s, %s, %s, %s, %s, %s, %s, %s, %s);' % (dim_str, width, height, depth, param.img_format, param.img_type, param.name, pcPtr, pixHeaderPtr)
 
 		return
 
 
-	def large_emit_begin(self, indent, f, op_name = None):
+	def large_emit_begin(self, f, op_name = None):
 		if not op_name:
 			op_name = f.opcode_real_name()
 
-		print '%s    const GLint op = %s;' % (indent, op_name)
-		print '%s    const GLuint cmdlenLarge = cmdlen + 4;' % (indent)
-		print '%s    GLubyte * const pc = __glXFlushRenderBuffer(gc, gc->pc);' % (indent)
-		print '%s    (void) memcpy((void *)(pc + 0), (void *)(&cmdlenLarge), 4);' % (indent)
-		print '%s    (void) memcpy((void *)(pc + 4), (void *)(&op), 4);' % (indent)
+		print 'const GLint op = %s;' % (op_name)
+		print 'const GLuint cmdlenLarge = cmdlen + 4;'
+		print 'GLubyte * const pc = __glXFlushRenderBuffer(gc, gc->pc);'
+		print '(void) memcpy((void *)(pc + 0), (void *)(&cmdlenLarge), 4);'
+		print '(void) memcpy((void *)(pc + 4), (void *)(&op), 4);'
 		return
 
 
@@ -532,21 +566,21 @@ generic_%u_byte( GLint rop, const void * ptr )
 			return 0
 
 
-	def printSingleFunction(self, f):
+	def printSingleFunction(self, f, name):
 		self.common_func_print_just_start(f)
 
 		if self.debug:
 			print '        printf( "Enter %%s...\\n", "gl%s" );' % (f.name)
 
-		if f.glx_vendorpriv == 0:
+		if name not in f.glx_vendorpriv_names:
 
 			# XCB specific:
 			print '#ifdef USE_XCB'
 			if self.debug:
 				print '        printf("\\tUsing XCB.\\n");'
-			print '        XCBConnection *c = XCBConnectionOfDisplay(dpy);'
+			print '        xcb_connection_t *c = XGetXCBConnection(dpy);'
 			print '        (void) __glXFlushRenderBuffer(gc, gc->pc);'
-			xcb_name = 'XCBGlx%s' % f.name
+			xcb_name = 'xcb_glx%s' % convertStringForXCB(name)
 
 			iparams=[]
 			extra_iparams = []
@@ -563,7 +597,7 @@ generic_%u_byte( GLint rop, const void * ptr )
 					
 						# Hardcode this in.  lsb_first param (apparently always GL_FALSE)
 						# also present in GetPolygonStipple, but taken care of above.
-						if xcb_name == "XCBGlxReadPixels": 
+						if xcb_name == "xcb_glx_read_pixels": 
 							extra_iparams.append("0")
 				else:
 					iparams.append(p.name)
@@ -572,16 +606,16 @@ generic_%u_byte( GLint rop, const void * ptr )
 			xcb_request = '%s(%s)' % (xcb_name, ", ".join(["c", "gc->currentContextTag"] + iparams + extra_iparams))
 
 			if f.needs_reply():
-				print '        %sRep *reply = %sReply(c, %s, NULL);' % (xcb_name, xcb_name, xcb_request)
+				print '        %s_reply_t *reply = %s_reply(c, %s, NULL);' % (xcb_name, xcb_name, xcb_request)
 				if output and f.reply_always_array:
-					print '        (void)memcpy(%s, %sData(reply), %sDataLength(reply) * sizeof(%s));' % (output.name, xcb_name, xcb_name, output.get_base_type_string())
+					print '        (void)memcpy(%s, %s_data(reply), %s_data_length(reply) * sizeof(%s));' % (output.name, xcb_name, xcb_name, output.get_base_type_string())
 
 				elif output and not f.reply_always_array:
 					if not output.is_image():
-						print '        if (%sDataLength(reply) == 0)' % (xcb_name)
+						print '        if (%s_data_length(reply) == 0)' % (xcb_name)
 						print '            (void)memcpy(%s, &reply->datum, sizeof(reply->datum));' % (output.name)
 						print '        else'
-					print '        (void)memcpy(%s, %sData(reply), %sDataLength(reply) * sizeof(%s));' % (output.name, xcb_name, xcb_name, output.get_base_type_string())
+					print '        (void)memcpy(%s, %s_data(reply), %s_data_length(reply) * sizeof(%s));' % (output.name, xcb_name, xcb_name, output.get_base_type_string())
 
 
 				if f.return_type != 'void':
@@ -598,12 +632,12 @@ generic_%u_byte( GLint rop, const void * ptr )
 		else:
 			pc_decl = "(void)"
 
-		if f.glx_vendorpriv != 0:
-			print '        %s __glXSetupVendorRequest(gc, %s, %s, cmdlen);' % (pc_decl, f.opcode_real_name(), f.opcode_name())
+		if name in f.glx_vendorpriv_names:
+			print '        %s __glXSetupVendorRequest(gc, %s, %s, cmdlen);' % (pc_decl, f.opcode_real_name(), f.opcode_vendor_name(name))
 		else:
 			print '        %s __glXSetupSingleRequest(gc, %s, cmdlen);' % (pc_decl, f.opcode_name())
 
-		self.common_emit_args(f, "pc", "    ", 0, 0)
+		self.common_emit_args(f, "pc", 0, 0)
 
 		images = f.get_images()
 
@@ -671,12 +705,12 @@ generic_%u_byte( GLint rop, const void * ptr )
 			print '        __indirect_glFinish();'
 
 		if self.debug:
-			print '        printf( "Exit %%s.\\n", "gl%s" );' % (f.name)
+			print '        printf( "Exit %%s.\\n", "gl%s" );' % (name)
 
 
 		print '        UnlockDisplay(dpy); SyncHandle();'
 
-		if f.glx_vendorpriv == 0:
+		if name not in f.glx_vendorpriv_names:
 			print '#endif /* USE_XCB */'
 
 		print '    }'
@@ -706,39 +740,36 @@ generic_%u_byte( GLint rop, const void * ptr )
 
 
 		if self.common_func_print_just_start(f):
-			indent = "    "
 			trailer = "    }"
 		else:
-			indent = ""
 			trailer = None
 
 
 		if f.can_be_large:
-			print '%s    if (cmdlen <= gc->maxSmallRenderCommandSize) {' % (indent)
-			print '%s        if ( (gc->pc + cmdlen) > gc->bufEnd ) {' % (indent)
-			print '%s            (void) __glXFlushRenderBuffer(gc, gc->pc);' % (indent)
-			print '%s        }' % (indent)
-			indent += "    "
+			print 'if (cmdlen <= gc->maxSmallRenderCommandSize) {'
+			print '    if ( (gc->pc + cmdlen) > gc->bufEnd ) {'
+			print '        (void) __glXFlushRenderBuffer(gc, gc->pc);'
+			print '    }'
 
 		if f.glx_rop == ~0:
 			opcode = "opcode"
 		else:
 			opcode = f.opcode_real_name()
 
-		print '%s    emit_header(gc->pc, %s, cmdlen);' % (indent, opcode)
+		print 'emit_header(gc->pc, %s, cmdlen);' % (opcode)
 
-		self.pixel_emit_args( f, "gc->pc", indent, 0 )
-		print '%s    gc->pc += cmdlen;' % (indent)
-		print '%s    if (gc->pc > gc->limit) { (void) __glXFlushRenderBuffer(gc, gc->pc); }' % (indent)
+		self.pixel_emit_args( f, "gc->pc", 0 )
+		print 'gc->pc += cmdlen;'
+		print 'if (gc->pc > gc->limit) { (void) __glXFlushRenderBuffer(gc, gc->pc); }'
 
 		if f.can_be_large:
-			print '%s}' % (indent)
-			print '%selse {' % (indent)
+			print '}'
+			print 'else {'
 
-			self.large_emit_begin(indent, f, opcode)
-			self.pixel_emit_args( f, "pc", indent, 1 )
+			self.large_emit_begin(f, opcode)
+			self.pixel_emit_args(f, "pc", 1)
 
-			print '%s}' % (indent)
+			print '}'
 
 		if trailer: print trailer
 		return
@@ -761,42 +792,39 @@ generic_%u_byte( GLint rop, const void * ptr )
 					return
 
 		if self.common_func_print_just_start(f):
-			indent = "    "
 			trailer = "    }"
 		else:
-			indent = ""
 			trailer = None
 
 		if self.debug:
-			print '%s    printf( "Enter %%s...\\n", "gl%s" );' % (indent, f.name)
+			print 'printf( "Enter %%s...\\n", "gl%s" );' % (f.name)
 
 		if f.can_be_large:
-			print '%s    if (cmdlen <= gc->maxSmallRenderCommandSize) {' % (indent)
-			print '%s        if ( (gc->pc + cmdlen) > gc->bufEnd ) {' % (indent)
-			print '%s            (void) __glXFlushRenderBuffer(gc, gc->pc);' % (indent)
-			print '%s        }' % (indent)
-			indent += "    "
+			print 'if (cmdlen <= gc->maxSmallRenderCommandSize) {'
+			print '    if ( (gc->pc + cmdlen) > gc->bufEnd ) {'
+			print '        (void) __glXFlushRenderBuffer(gc, gc->pc);'
+			print '    }'
 
-		print '%s    emit_header(gc->pc, %s, cmdlen);' % (indent, f.opcode_real_name())
+		print 'emit_header(gc->pc, %s, cmdlen);' % (f.opcode_real_name())
 
-		self.common_emit_args(f, "gc->pc", indent, 4, 0)
-		print '%s    gc->pc += cmdlen;' % (indent)
-		print '%s    if (__builtin_expect(gc->pc > gc->limit, 0)) { (void) __glXFlushRenderBuffer(gc, gc->pc); }' % (indent)
+		self.common_emit_args(f, "gc->pc", 4, 0)
+		print 'gc->pc += cmdlen;'
+		print 'if (__builtin_expect(gc->pc > gc->limit, 0)) { (void) __glXFlushRenderBuffer(gc, gc->pc); }'
 
 		if f.can_be_large:
-			print '%s}' % (indent)
-			print '%selse {' % (indent)
+			print '}'
+			print 'else {'
 
-			self.large_emit_begin(indent, f)
-			self.common_emit_args(f, "pc", indent, 8, 1)
+			self.large_emit_begin(f)
+			self.common_emit_args(f, "pc", 8, 1)
 
 			p = f.variable_length_parameter()
-			print '%s    __glXSendLargeCommand(gc, pc, %u, %s, %s);' % (indent, p.offset + 8, p.name, p.size_string())
-			print '%s}' % (indent)
+			print '    __glXSendLargeCommand(gc, pc, %u, %s, %s);' % (p.offset + 8, p.name, p.size_string())
+			print '}'
 
 		if self.debug:
-			print '%s    __indirect_glFinish();' % (indent)
-			print '%s    printf( "Exit %%s.\\n", "gl%s" );' % (indent, f.name)
+			print '__indirect_glFinish();'
+			print 'printf( "Exit %%s.\\n", "gl%s" );' % (f.name)
 
 		if trailer: print trailer
 		return
@@ -868,87 +896,18 @@ __GLapi * __glXNewIndirectAPI( void )
 		return
 
 
-	def printCategory(self, category_group, show_num):
-		cat_keys = category_group.keys()
-		cat_keys.sort()
-		for cat_num in cat_keys:
-			first = 1
-			for offset in category_group[ cat_num ]:
-				[cat_name, func_name] = category_group[ cat_num ][ offset ]
-
-				if first:
-					print ''
-					if show_num:
-						print '    /* %3u. %s */' % (cat_num, cat_name)
-					else:
-						print '    /* %s */' % (cat_name)
-					print ''
-					first = 0
-
-				print '    glAPI->%s = __indirect_gl%s;' % (func_name, func_name)
-		
-
 	def printBody(self, api):
-		core_categories = {}
-		arb_categories = {}
-		other_categories = {}
-		next_unnum = 1000
+		for [name, number] in api.categoryIterate():
+			if number != None:
+				preamble = '\n    /* %3u. %s */\n\n' % (int(number), name)
+			else:
+				preamble = '\n    /* %s */\n\n' % (name)
 
-		for func in api.functionIterateGlx():
-			[cat, num] = api.get_category_for_name( func.name )
+			for func in api.functionIterateByCategory(name):
+				if func.client_supported_for_indirect():
+					print '%s    glAPI->%s = __indirect_gl%s;' % (preamble, func.name, func.name)
+					preamble = ''
 
-			# There are three groups of "categories" that we
-			# care about here.  We want to separate the core GL
-			# version categories from extensions.  We also want to
-			# separate the ARB extensions from the non-ARB
-			# extensions.
-			#
-			# This is done by first trying to convert the category
-			# name to a floating point number.  All core GL
-			# versions are of the form "N.M" where both N and M
-			# are integers.  If the cast to float fails, an
-			# exception will be thrown.  Once down that path, 
-			# we can look at the start of the extension string.
-			# If it begins with "GL_ARB_", it's an ARB extension.
-			#
-			# Once the categories are separated, the are ordered
-			# by number.  The un-numbered non-ARB extensions
-			# (e.g., GL_INGR_blend_func_separate) are assigned
-			# arbitrary numbers starting at 1000.
-			#
-			# FIXME In order to maintain repeatability, the
-			# FIXME unnumbered extensions should be put in their
-			# FIXME own dictionary and ordered by name (since they
-			# FIXME have no number).
-
-			try:
-				num = float(cat)
-				if not core_categories.has_key( num ):
-					core_categories[ num ] = {}
-
-				core_categories[ num ][ func.offset ] = [cat, func.name]
-
-			except Exception, e:
-				if not num:
-					num = next_unnum
-					next_unnum += 1
-				else:
-					num = int(num)
-
-				if cat.startswith( "GL_ARB_" ):
-					if not arb_categories.has_key( num ):
-						arb_categories[ num ] = {}
-
-					arb_categories[ num ][ func.offset ] = [cat, func.name]
-				else:
-					if not other_categories.has_key( num ):
-						other_categories[ num ] = {}
-
-					other_categories[ num ][ func.offset ] = [cat, func.name]
-
-		self.printCategory( core_categories,  0 )
-		self.printCategory( arb_categories,   1 )
-		self.printCategory( other_categories, 1 )
 		return
 
 
@@ -1000,7 +959,20 @@ extern HIDDEN NOINLINE FASTCALL GLubyte * __glXSetupVendorRequest(
 
 	def printBody(self, api):
 		for func in api.functionIterateGlx():
-			print 'extern HIDDEN %s __indirect_gl%s(%s);' % (func.return_type, func.name, func.get_parameter_string())
+			params = func.get_parameter_string()
+
+			print 'extern HIDDEN %s __indirect_gl%s(%s);' % (func.return_type, func.name, params)
+
+			for n in func.entry_points:
+				if func.has_different_protocol(n):
+					asdf = func.static_glx_name(n)
+					if asdf not in func.static_entry_points:
+						print 'extern HIDDEN %s gl%s(%s);' % (func.return_type, asdf, params)
+					else:
+						print 'GLAPI %s GLAPIENTRY gl%s(%s);' % (func.return_type, asdf, params)
+						
+					break
+
 
 
 def show_usage():

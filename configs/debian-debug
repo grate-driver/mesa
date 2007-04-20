@@ -1,7 +1,0 @@
-include $(TOP)/configs/debian
-
-CONFIG_NAME = debian-debug
-
-DEBIAN_COMMON_CPPFLAGS += -DDEBUG -DMESA_DEBUG
-
-DEBIAN_OPT_CFLAGS =
