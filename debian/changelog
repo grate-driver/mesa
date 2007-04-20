@@ -1,12 +1,14 @@
-mesa (6.5.2-4) UNRELEASED; urgency=low
+mesa (6.5.2-4) unstable; urgency=low
 
+  [ Julien Cristau ]
   * debian/control: libgl1-mesa-dri now suggests libglide3, with an
     explanation in the description (closes: #387339).
+  * Upload to unstable.
 
   [ Brice Goglin ]
   * Add 06_fix_texture_data_corruption.patch (closes: #412346).
 
- -- Julien Cristau <jcristau@debian.org>  Fri, 30 Mar 2007 14:06:44 +0200
+ -- Julien Cristau <jcristau@debian.org>  Fri, 20 Apr 2007 05:57:35 +0200
 
 mesa (6.5.2-3) experimental; urgency=low
 
