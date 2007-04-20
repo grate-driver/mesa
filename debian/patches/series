@@ -6,3 +6,4 @@
 05_static-nonpic.patch
 06_fix_texture_data_corruption.patch
 07_call_radeonSetCliprects_from_radeonMakeCurrent.patch
+08_r300_update_window_state_when_bound_but_stamp_changed.patch

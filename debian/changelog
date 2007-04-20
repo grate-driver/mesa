@@ -2,6 +2,7 @@ mesa (6.5.2-5) UNRELEASED; urgency=low
 
   * Add 07_call_radeonSetCliprects_from_radeonMakeCurrent.patch
     (closes: #420164). Thanks to Christian Ohm.
+  * Add 08_r300_update_window_state_when_bound_but_stamp_changed.patch
 
  -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Fri, 20 Apr 2007 18:36:51 +0200
 
