@@ -36,7 +36,7 @@
  * glcurveval.c++
  *
  * $Date: 2006/03/29 18:46:46 $ $Revision: 1.7 $
- * $Header: /cvs/mesa/Mesa/src/glu/sgi/libnurbs/interface/glcurveval.cc,v 1.7 2006/03/29 18:46:46 brianp Exp $
+ * $Header: /home/krh/git/sync/mesa-cvs-repo/Mesa/src/glu/sgi/libnurbs/interface/glcurveval.cc,v 1.7 2006/03/29 18:46:46 brianp Exp $
  */
 
 /* Polynomial Evaluator Interface */

@@ -1,0 +1,1469 @@
+/*
+ * Mesa 3-D graphics library
+ * Version:  6.5
+ *
+ * Copyright (C) 2006  Brian Paul   All Rights Reserved.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
+ * copy of this software and associated documentation files (the "Software"),
+ * to deal in the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense,
+ * and/or sell copies of the Software, and to permit persons to whom the
+ * Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included
+ * in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+ * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
+ * BRIAN PAUL BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+ * AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+ * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+
+//
+// From Shader Spec, ver. 1.10, rev. 59
+//
+
+const int gl_MaxLights = 8;
+const int gl_MaxClipPlanes = 6;
+const int gl_MaxTextureUnits = 8;
+const int gl_MaxTextureCoords = 8;
+const int gl_MaxVertexAttribs = 16;
+const int gl_MaxVertexUniformComponents = 512;
+const int gl_MaxVaryingFloats = 32;
+const int gl_MaxVertexTextureImageUnits = 0;
+const int gl_MaxCombinedTextureImageUnits = 2;
+const int gl_MaxTextureImageUnits = 2;
+const int gl_MaxFragmentUniformComponents = 64;
+const int gl_MaxDrawBuffers = 1;
+
+uniform mat4 gl_ModelViewMatrix;
+uniform mat4 gl_ProjectionMatrix;
+uniform mat4 gl_ModelViewProjectionMatrix;
+uniform mat4 gl_TextureMatrix[gl_MaxTextureCoords];
+
+uniform mat3 gl_NormalMatrix;
+
+uniform mat4 gl_ModelViewMatrixInverse;
+uniform mat4 gl_ProjectionMatrixInverse;
+uniform mat4 gl_ModelViewProjectionMatrixInverse;
+uniform mat4 gl_TextureMatrixInverse[gl_MaxTextureCoords];
+
+uniform mat4 gl_ModelViewMatrixTranspose;
+uniform mat4 gl_ProjectionMatrixTranspose;
+uniform mat4 gl_ModelViewProjectionMatrixTranspose;
+uniform mat4 gl_TextureMatrixTranspose[gl_MaxTextureCoords];
+
+uniform mat4 gl_ModelViewMatrixInverseTranspose;
+uniform mat4 gl_ProjectionMatrixInverseTranspose;
+uniform mat4 gl_ModelViewProjectionMatrixInverseTranspose;
+uniform mat4 gl_TextureMatrixInverseTranspose[gl_MaxTextureCoords];
+
+uniform float gl_NormalScale;
+
+struct gl_DepthRangeParameters {
+    float near;
+    float far;
+    float diff;
+};
+
+uniform gl_DepthRangeParameters gl_DepthRange;
+
+uniform vec4 gl_ClipPlane[gl_MaxClipPlanes];
+
+struct gl_PointParameters {
+    float size;
+    float sizeMin;
+    float sizeMax;
+    float fadeThresholdSize;
+    float distanceConstantAttenuation;
+    float distanceLinearAttenuation;
+    float distanceQuadraticAttenuation;
+};
+
+uniform gl_PointParameters gl_Point;
+
+struct gl_MaterialParameters {
+    vec4 emission;
+    vec4 ambient;
+    vec4 diffuse;
+    vec4 specular;
+    float shininess;
+};
+
+uniform gl_MaterialParameters gl_FrontMaterial;
+uniform gl_MaterialParameters gl_BackMaterial;
+
+struct gl_LightSourceParameters {
+    vec4 ambient;
+    vec4 diffuse;
+    vec4 specular;
+    vec4 position;
+    vec4 halfVector;
+    vec3 spotDirection;
+    float spotExponent;
+    float spotCutoff;
+    float spotCosCutoff;
+    float constantAttenuation;
+    float linearAttenuation;
+    float quadraticAttenuation;
+};
+
+uniform gl_LightSourceParameters gl_LightSource[gl_MaxLights];
+
+struct gl_LightModelParameters {
+    vec4 ambient;
+};
+
+uniform gl_LightModelParameters gl_LightModel;
+
+struct gl_LightModelProducts {
+    vec4 sceneColor;
+};
+
+uniform gl_LightModelProducts gl_FrontLightModelProduct;
+uniform gl_LightModelProducts gl_BackLightModelProduct;
+
+struct gl_LightProducts {
+    vec4 ambient;
+    vec4 diffuse;
+    vec4 specular;
+};
+
+uniform gl_LightProducts gl_FrontLightProduct[gl_MaxLights];
+uniform gl_LightProducts gl_BackLightProduct[gl_MaxLights];
+
+uniform vec4 gl_TextureEnvColor[gl_MaxTextureImageUnits];
+uniform vec4 gl_EyePlaneS[gl_MaxTextureCoords];
+uniform vec4 gl_EyePlaneT[gl_MaxTextureCoords];
+uniform vec4 gl_EyePlaneR[gl_MaxTextureCoords];
+uniform vec4 gl_EyePlaneQ[gl_MaxTextureCoords];
+uniform vec4 gl_ObjectPlaneS[gl_MaxTextureCoords];
+uniform vec4 gl_ObjectPlaneT[gl_MaxTextureCoords];
+uniform vec4 gl_ObjectPlaneR[gl_MaxTextureCoords];
+uniform vec4 gl_ObjectPlaneQ[gl_MaxTextureCoords];
+
+struct gl_FogParameters {
+    vec4 color;
+    float density;
+    float start;
+    float end;
+    float scale;
+};
+
+uniform gl_FogParameters gl_Fog;
+
+//
+// 8.1 Angle and Trigonometry Functions
+//
+
+float radians (float deg) {
+    return 3.141593 * deg / 180.0;
+}
+
+vec2 radians (vec2 deg) {
+    return vec2 (3.141593) * deg / vec2 (180.0);
+}
+
+vec3 radians (vec3 deg) {
+    return vec3 (3.141593) * deg / vec3 (180.0);
+}
+
+vec4 radians (vec4 deg) {
+    return vec4 (3.141593) * deg / vec4 (180.0);
+}
+
+float degrees (float rad) {
+    return 180.0 * rad / 3.141593;
+}
+
+vec2 degrees (vec2 rad) {
+    return vec2 (180.0) * rad / vec2 (3.141593);
+}
+
+vec3 degrees (vec3 rad) {
+    return vec3 (180.0) * rad / vec3 (3.141593);
+}
+
+vec4 degrees (vec4 rad) {
+    return vec4 (180.0) * rad / vec4 (3.141593);
+}
+
+float sin (float angle) {
+    float x;
+    __asm float_sine x, angle;
+    return x;
+}
+
+vec2 sin (vec2 angle) {
+    return vec2 (
+        sin (angle.x),
+        sin (angle.y)
+    );
+}
+
+vec3 sin (vec3 angle) {
+    return vec3 (
+        sin (angle.x),
+        sin (angle.y),
+        sin (angle.z)
+    );
+}
+
+vec4 sin (vec4 angle) {
+    return vec4 (
+        sin (angle.x),
+        sin (angle.y),
+        sin (angle.z),
+        sin (angle.w)
+    );
+}
+
+float cos (float angle) {
+    return sin (angle + 1.5708);
+}
+
+vec2 cos (vec2 angle) {
+    return vec2 (
+        cos (angle.x),
+        cos (angle.y)
+    );
+}
+
+vec3 cos (vec3 angle) {
+    return vec3 (
+        cos (angle.x),
+        cos (angle.y),
+        cos (angle.z)
+    );
+}
+
+vec4 cos (vec4 angle) {
+    return vec4 (
+        cos (angle.x),
+        cos (angle.y),
+        cos (angle.z),
+        cos (angle.w)
+    );
+}
+
+float tan (float angle) {
+    return sin (angle) / cos (angle);
+}
+
+vec2 tan (vec2 angle) {
+    return vec2 (
+        tan (angle.x),
+        tan (angle.y)
+    );
+}
+
+vec3 tan (vec3 angle) {
+    return vec3 (
+        tan (angle.x),
+        tan (angle.y),
+        tan (angle.z)
+    );
+}
+
+vec4 tan (vec4 angle) {
+    return vec4 (
+        tan (angle.x),
+        tan (angle.y),
+        tan (angle.z),
+        tan (angle.w)
+    );
+}
+
+float asin (float x) {
+    float y;
+    __asm float_arcsine y, x;
+    return y;
+}
+
+vec2 asin (vec2 v) {
+    return vec2 (
+        asin (v.x),
+        asin (v.y)
+    );
+}
+
+vec3 asin (vec3 v) {
+    return vec3 (
+        asin (v.x),
+        asin (v.y),
+        asin (v.z)
+    );
+}
+
+vec4 asin (vec4 v) {
+    return vec4 (
+        asin (v.x),
+        asin (v.y),
+        asin (v.z),
+        asin (v.w)
+    );
+}
+
+float acos (float x) {
+    return 1.5708 - asin (x);
+}
+
+vec2 acos (vec2 v) {
+    return vec2 (
+        acos (v.x),
+        acos (v.y)
+    );
+}
+
+vec3 acos (vec3 v) {
+    return vec3 (
+        acos (v.x),
+        acos (v.y),
+        acos (v.z)
+    );
+}
+
+vec4 acos (vec4 v) {
+    return vec4 (
+        acos (v.x),
+        acos (v.y),
+        acos (v.z),
+        acos (v.w)
+    );
+}
+
+float atan (float y_over_x) {
+    float z;
+    __asm float_arctan z, y_over_x;
+    return z;
+}
+
+vec2 atan (vec2 y_over_x) {
+    return vec2 (
+        atan (y_over_x.x),
+        atan (y_over_x.y)
+    );
+}
+
+vec3 atan (vec3 y_over_x) {
+    return vec3 (
+        atan (y_over_x.x),
+        atan (y_over_x.y),
+        atan (y_over_x.z)
+    );
+}
+
+vec4 atan (vec4 y_over_x) {
+    return vec4 (
+        atan (y_over_x.x),
+        atan (y_over_x.y),
+        atan (y_over_x.z),
+        atan (y_over_x.w)
+    );
+}
+
+float atan (float y, float x) {
+    float z = atan (y / x);
+    if (x < 0.0)
+    {
+        if (y < 0.0)
+            return z - 3.141593;
+        return z + 3.141593;
+    }
+    return z;
+}
+
+vec2 atan (vec2 u, vec2 v) {
+    return vec2 (
+        atan (u.x, v.x),
+        atan (u.y, v.y)
+    );
+}
+
+vec3 atan (vec3 u, vec3 v) {
+    return vec3 (
+        atan (u.x, v.x),
+        atan (u.y, v.y),
+        atan (u.z, v.z)
+    );
+}
+
+vec4 atan (vec4 u, vec4 v) {
+    return vec4 (
+        atan (u.x, v.x),
+        atan (u.y, v.y),
+        atan (u.z, v.z),
+        atan (u.w, v.w)
+    );
+}
+
+//
+// 8.2 Exponential Functions
+//
+
+float pow (float x, float y) {
+    float p;
+    __asm float_power p, x, y;
+    return p;
+}
+
+vec2 pow (vec2 v, vec2 u) {
+    return vec2 (
+        pow (v.x, u.x),
+        pow (v.y, u.y)
+    );
+}
+
+vec3 pow (vec3 v, vec3 u) {
+    return vec3 (
+        pow (v.x, u.x),
+        pow (v.y, u.y),
+        pow (v.z, u.z)
+    );
+}
+
+vec4 pow (vec4 v, vec4 u) {
+    return vec4 (
+        pow (v.x, u.x),
+        pow (v.y, u.y),
+        pow (v.z, u.z),
+        pow (v.w, u.w)
+    );
+}
+
+float exp (float x) {
+    return pow (2.71828183, x);
+}
+
+vec2 exp (vec2 v) {
+    return pow (vec2 (2.71828183), v);
+}
+
+vec3 exp (vec3 v) {
+    return pow (vec3 (2.71828183), v);
+}
+
+vec4 exp (vec4 v) {
+    return pow (vec4 (2.71828183), v);
+}
+
+float log2 (float x) {
+    float y;
+    __asm float_log2 y, x;
+    return y;
+}
+
+vec2 log2 (vec2 v) {
+    return vec2 (
+        log2 (v.x),
+        log2 (v.y)
+    );
+}
+
+vec3 log2 (vec3 v) {
+    return vec3 (
+        log2 (v.x),
+        log2 (v.y),
+        log2 (v.z)
+    );
+}
+
+vec4 log2 (vec4 v) {
+    return vec4 (
+        log2 (v.x),
+        log2 (v.y),
+        log2 (v.z),
+        log2 (v.w)
+    );
+}
+
+float log (float x) {
+    return log2 (x) / log2 (2.71828183);
+}
+
+vec2 log (vec2 v) {
+    return log2 (v) / log2 (vec2 (2.71828183));
+}
+
+vec3 log (vec3 v) {
+    return log2 (v) / log2 (vec3 (2.71828183));
+}
+
+vec4 log (vec4 v) {
+    return log2 (v) / log2 (vec4 (2.71828183));
+}
+
+float exp2 (float x) {
+    return pow (2.0, x);
+}
+
+vec2 exp2 (vec2 v) {
+    return pow (vec2 (2.0), v);
+}
+
+vec3 exp2 (vec3 v) {
+    return pow (vec3 (2.0), v);
+}
+
+vec4 exp2 (vec4 v) {
+    return pow (vec4 (2.0), v);
+}
+
+float sqrt (float x) {
+    return pow (x, 0.5);
+}
+
+vec2 sqrt (vec2 v) {
+    return pow (v, vec2 (0.5));
+}
+
+vec3 sqrt (vec3 v) {
+    return pow (v, vec3 (0.5));
+}
+
+vec4 sqrt (vec4 v) {
+    return pow (v, vec4 (0.5));
+}
+
+float inversesqrt (float x) {
+    return 1.0 / sqrt (x);
+}
+
+vec2 inversesqrt (vec2 v) {
+    return vec2 (1.0) / sqrt (v);
+}
+
+vec3 inversesqrt (vec3 v) {
+    return vec3 (1.0) / sqrt (v);
+}
+
+vec4 inversesqrt (vec4 v) {
+    return vec4 (1.0) / sqrt (v);
+}
+
+//
+// 8.3 Common Functions
+//
+
+float abs (float x) {
+    return x >= 0.0 ? x : -x;
+}
+
+vec2 abs (vec2 v) {
+    return vec2 (
+        abs (v.x),
+        abs (v.y)
+    );
+}
+
+vec3 abs (vec3 v) {
+    return vec3 (
+        abs (v.x),
+        abs (v.y),
+        abs (v.z)
+    );
+}
+
+vec4 abs (vec4 v) {
+    return vec4 (
+        abs (v.x),
+        abs (v.y),
+        abs (v.z),
+        abs (v.w)
+    );
+}
+
+float sign (float x) {
+    return x > 0.0 ? 1.0 : x < 0.0 ? -1.0 : 0.0;
+}
+
+vec2 sign (vec2 v) {
+    return vec2 (
+        sign (v.x),
+        sign (v.y)
+    );
+}
+
+vec3 sign (vec3 v) {
+    return vec3 (
+        sign (v.x),
+        sign (v.y),
+        sign (v.z)
+    );
+}
+
+vec4 sign (vec4 v) {
+    return vec4 (
+        sign (v.x),
+        sign (v.y),
+        sign (v.z),
+        sign (v.w)
+    );
+}
+
+float floor (float x) {
+    float y;
+    __asm float_floor y, x;
+    return y;
+}
+
+vec2 floor (vec2 v) {
+    return vec2 (
+        floor (v.x),
+        floor (v.y)
+    );
+}
+
+vec3 floor (vec3 v) {
+    return vec3 (
+        floor (v.x),
+        floor (v.y),
+        floor (v.z)
+    );
+}
+
+vec4 floor (vec4 v) {
+    return vec4 (
+        floor (v.x),
+        floor (v.y),
+        floor (v.z),
+        floor (v.w)
+    );
+}
+
+float ceil (float x) {
+    float y;
+    __asm float_ceil y, x;
+    return y;
+}
+
+vec2 ceil (vec2 v) {
+    return vec2 (
+        ceil (v.x),
+        ceil (v.y)
+    );
+}
+
+vec3 ceil (vec3 v) {
+    return vec3 (
+        ceil (v.x),
+        ceil (v.y),
+        ceil (v.z)
+    );
+}
+
+vec4 ceil (vec4 v) {
+    return vec4 (
+        ceil (v.x),
+        ceil (v.y),
+        ceil (v.z),
+        ceil (v.w)
+    );
+}
+
+float fract (float x) {
+    return x - floor (x);
+}
+
+vec2 fract (vec2 v) {
+    return v - floor (v);
+}
+
+vec3 fract (vec3 v) {
+    return v - floor (v);
+}
+
+vec4 fract (vec4 v) {
+    return v - floor (v);
+}
+
+float mod (float x, float y) {
+    return x - y * floor (x / y);
+}
+
+vec2 mod (vec2 v, float u) {
+    return v - u * floor (v / u);
+}
+
+vec3 mod (vec3 v, float u) {
+    return v - u * floor (v / u);
+}
+
+vec4 mod (vec4 v, float u) {
+    return v - u * floor (v / u);
+}
+
+vec2 mod (vec2 v, vec2 u) {
+    return v - u * floor (v / u);
+}
+
+vec3 mod (vec3 v, vec3 u) {
+    return v - u * floor (v / u);
+}
+
+vec4 mod (vec4 v, vec4 u) {
+    return v - u * floor (v / u);
+}
+
+float min (float x, float y) {
+    return x < y ? x : y;
+}
+
+vec2 min (vec2 v, vec2 u) {
+    return vec2 (
+        min (v.x, u.x),
+        min (v.y, u.y)
+    );
+}
+
+vec3 min (vec3 v, vec3 u) {
+    return vec3 (
+        min (v.x, u.x),
+        min (v.y, u.y),
+        min (v.z, u.z)
+    );
+}
+
+vec4 min (vec4 v, vec4 u) {
+    return vec4 (
+        min (v.x, u.x),
+        min (v.y, u.y),
+        min (v.z, u.z),
+        min (v.w, u.w)
+    );
+}
+
+vec2 min (vec2 v, float y) {
+    return min (v, vec2 (y));
+}
+
+vec3 min (vec3 v, float y) {
+    return min (v, vec3 (y));
+}
+
+vec4 min (vec4 v, float y) {
+    return min (v, vec4 (y));
+}
+
+float max (float x, float y) {
+    return x < y ? y : x;
+}
+
+vec2 max (vec2 v, vec2 u) {
+    return vec2 (
+        max (v.x, u.x),
+        max (v.y, u.y)
+    );
+}
+
+vec3 max (vec3 v, vec3 u) {
+    return vec3 (
+        max (v.x, u.x),
+        max (v.y, u.y),
+        max (v.z, u.z)
+    );
+}
+
+vec4 max (vec4 v, vec4 u) {
+    return vec4 (
+        max (v.x, u.x),
+        max (v.y, u.y),
+        max (v.z, u.z),
+        max (v.w, u.w)
+    );
+}
+
+vec2 max (vec2 v, float y) {
+    return max (v, vec2 (y));
+}
+
+vec3 max (vec3 v, float y) {
+    return max (v, vec3 (y));
+}
+
+vec4 max (vec4 v, float y) {
+    return max (v, vec4 (y));
+}
+
+float clamp (float x, float minVal, float maxVal) {
+    return min (max (x, minVal), maxVal);
+}
+
+vec2 clamp (vec2 x, float minVal, float maxVal) {
+    return min (max (x, minVal), maxVal);
+}
+
+vec3 clamp (vec3 x, float minVal, float maxVal) {
+    return min (max (x, minVal), maxVal);
+}
+
+vec4 clamp (vec4 x, float minVal, float maxVal) {
+    return min (max (x, minVal), maxVal);
+}
+
+vec2 clamp (vec2 x, vec2 minVal, vec2 maxVal) {
+    return min (max (x, minVal), maxVal);
+}
+
+vec3 clamp (vec3 x, vec3 minVal, vec3 maxVal) {
+    return min (max (x, minVal), maxVal);
+}
+
+vec4 clamp (vec4 x, vec4 minVal, vec4 maxVal) {
+    return min (max (x, minVal), maxVal);
+}
+
+float mix (float x, float y, float a) {
+    return x * (1.0 - a) + y * a;
+}
+
+vec2 mix (vec2 x, vec2 y, float a) {
+    return x * (1.0 - a) + y * a;
+}
+
+vec3 mix (vec3 x, vec3 y, float a) {
+    return x * (1.0 - a) + y * a;
+}
+
+vec4 mix (vec4 x, vec4 y, float a) {
+    return x * (1.0 - a) + y * a;
+}
+
+vec2 mix (vec2 x, vec2 y, vec2 a) {
+    return x * (1.0 - a) + y * a;
+}
+
+vec3 mix (vec3 x, vec3 y, vec3 a) {
+    return x * (1.0 - a) + y * a;
+}
+
+vec4 mix (vec4 x, vec4 y, vec4 a) {
+    return x * (1.0 - a) + y * a;
+}
+
+float step (float edge, float x) {
+    return x < edge ? 0.0 : 1.0;
+}
+
+vec2 step (vec2 edge, vec2 v) {
+    return vec2 (
+        step (edge.x, v.x),
+        step (edge.y, v.y)
+    );
+}
+
+vec3 step (vec3 edge, vec3 v) {
+    return vec3 (
+        step (edge.x, v.x),
+        step (edge.y, v.y),
+        step (edge.z, v.z)
+    );
+}
+
+vec4 step (vec4 edge, vec4 v) {
+    return vec4 (
+        step (edge.x, v.x),
+        step (edge.y, v.y),
+        step (edge.z, v.z),
+        step (edge.w, v.w)
+    );
+}
+
+vec2 step (float edge, vec2 v) {
+    return step (vec2 (edge), v);
+}
+
+vec3 step (float edge, vec3 v) {
+    return step (vec3 (edge), v);
+}
+
+vec4 step (float edge, vec4 v) {
+    return step (vec4 (edge), v);
+}
+
+float smoothstep (float edge0, float edge1, float x) {
+    float t = clamp ((x - edge0) / (edge1 - edge0), 0.0, 1.0);
+    return t * t * (3.0 - 2.0 * t);
+}
+
+vec2 smoothstep (vec2 edge0, vec2 edge1, vec2 v) {
+    return vec2 (
+        smoothstep (edge0.x, edge1.x, v.x),
+        smoothstep (edge0.y, edge1.y, v.y)
+    );
+}
+
+vec3 smoothstep (vec3 edge0, vec3 edge1, vec3 v) {
+    return vec3 (
+        smoothstep (edge0.x, edge1.x, v.x),
+        smoothstep (edge0.y, edge1.y, v.y),
+        smoothstep (edge0.z, edge1.z, v.z)
+    );
+}
+
+vec4 smoothstep (vec4 edge0, vec4 edge1, vec4 v) {
+    return vec4 (
+        smoothstep (edge0.x, edge1.x, v.x),
+        smoothstep (edge0.y, edge1.y, v.y),
+        smoothstep (edge0.z, edge1.z, v.z),
+        smoothstep (edge0.w, edge1.w, v.w)
+    );
+}
+
+vec2 smoothstep (float edge0, float edge1, vec2 v) {
+    return vec2 (
+        smoothstep (edge0, edge1, v.x),
+        smoothstep (edge0, edge1, v.y)
+    );
+}
+
+vec3 smoothstep (float edge0, float edge1, vec3 v) {
+    return vec3 (
+        smoothstep (edge0, edge1, v.x),
+        smoothstep (edge0, edge1, v.y),
+        smoothstep (edge0, edge1, v.z)
+    );
+}
+
+vec4 smoothstep (float edge0, float edge1, vec4 v) {
+    return vec4 (
+        smoothstep (edge0, edge1, v.x),
+        smoothstep (edge0, edge1, v.y),
+        smoothstep (edge0, edge1, v.z),
+        smoothstep (edge0, edge1, v.w)
+    );
+}
+
+//
+// 8.4 Geometric Functions
+//
+
+float dot (float x, float y) {
+    return x * y;
+}
+
+float dot (vec2 v, vec2 u) {
+    return v.x * u.x + v.y * u.y;
+}
+
+float dot (vec3 v, vec3 u) {
+    return v.x * u.x + v.y * u.y + v.z * u.z;
+}
+
+float dot (vec4 v, vec4 u) {
+    return v.x * u.x + v.y * u.y + v.z * u.z + v.w * u.w;
+}
+
+float length (float x) {
+    return sqrt (dot (x, x));
+}
+
+float length (vec2 v) {
+    return sqrt (dot (v, v));
+}
+
+float length (vec3 v) {
+    return sqrt (dot (v, v));
+}
+
+float length (vec4 v) {
+    return sqrt (dot (v, v));
+}
+
+float distance (float x, float y) {
+    return length (x - y);
+}
+
+float distance (vec2 v, vec2 u) {
+    return length (v - u);
+}
+
+float distance (vec3 v, vec3 u) {
+    return length (v - u);
+}
+
+float distance (vec4 v, vec4 u) {
+    return length (v - u);
+}
+
+vec3 cross (vec3 v, vec3 u) {
+    return vec3 (
+        v.y * u.z - u.y * v.z,
+        v.z * u.x - u.z * v.x,
+        v.x * u.y - u.x * v.y
+    );
+}
+
+float normalize (float x) {
+    return 1.0;
+}
+
+vec2 normalize (vec2 v) {
+    return v / length (v);
+}
+
+vec3 normalize (vec3 v) {
+    return v / length (v);
+}
+
+vec4 normalize (vec4 v) {
+    return v / length (v);
+}
+
+float faceforward (float N, float I, float Nref) {
+    return dot (Nref, I) < 0.0 ? N : -N;
+}
+
+vec2 faceforward (vec2 N, vec2 I, vec2 Nref) {
+    return dot (Nref, I) < 0.0 ? N : -N;
+}
+
+vec3 faceforward (vec3 N, vec3 I, vec3 Nref) {
+    return dot (Nref, I) < 0.0 ? N : -N;
+}
+
+vec4 faceforward (vec4 N, vec4 I, vec4 Nref) {
+    return dot (Nref, I) < 0.0 ? N : -N;
+}
+
+float reflect (float I, float N) {
+    return I - 2.0 * dot (N, I) * N;
+}
+
+vec2 reflect (vec2 I, vec2 N) {
+    return I - 2.0 * dot (N, I) * N;
+}
+
+vec3 reflect (vec3 I, vec3 N) {
+    return I - 2.0 * dot (N, I) * N;
+}
+
+vec4 reflect (vec4 I, vec4 N) {
+    return I - 2.0 * dot (N, I) * N;
+}
+
+float refract (float I, float N, float eta) {
+    float k = 1.0 - eta * eta * (1.0 - dot (N, I) * dot (N, I));
+    if (k < 0.0)
+        return 0.0;
+    return eta * I - (eta * dot (N, I) + sqrt (k)) * N;
+}
+
+vec2 refract (vec2 I, vec2 N, float eta) {
+    float k = 1.0 - eta * eta * (1.0 - dot (N, I) * dot (N, I));
+    if (k < 0.0)
+        return 0.0;
+    return eta * I - (eta * dot (N, I) + sqrt (k)) * N;
+}
+
+vec3 refract (vec3 I, vec3 N, float eta) {
+    float k = 1.0 - eta * eta * (1.0 - dot (N, I) * dot (N, I));
+    if (k < 0.0)
+        return 0.0;
+    return eta * I - (eta * dot (N, I) + sqrt (k)) * N;
+}
+
+vec4 refract (vec4 I, vec4 N, float eta) {
+    float k = 1.0 - eta * eta * (1.0 - dot (N, I) * dot (N, I));
+    if (k < 0.0)
+        return 0.0;
+    return eta * I - (eta * dot (N, I) + sqrt (k)) * N;
+}
+
+//
+// 8.5 Matrix Functions
+//
+
+mat2 matrixCompMult (mat2 m, mat2 n) {
+    return mat2 (m[0] * n[0], m[1] * n[1]);
+}
+
+mat3 matrixCompMult (mat3 m, mat3 n) {
+    return mat3 (m[0] * n[0], m[1] * n[1], m[2] * n[2]);
+}
+
+mat4 matrixCompMult (mat4 m, mat4 n) {
+    return mat4 (m[0] * n[0], m[1] * n[1], m[2] * n[2], m[3] * n[3]);
+}
+
+//
+// 8.6 Vector Relational Functions
+//
+
+bvec2 lessThan (vec2 v, vec2 u) {
+    return bvec2 (v.x < u.x, v.y < u.y);
+}
+
+bvec3 lessThan (vec3 v, vec3 u) {
+    return bvec3 (v.x < u.x, v.y < u.y, v.z < u.z);
+}
+
+bvec4 lessThan (vec4 v, vec4 u) {
+    return bvec4 (v.x < u.x, v.y < u.y, v.z < u.z, v.w < u.w);
+}
+
+bvec2 lessThan (ivec2 v, ivec2 u) {
+    return bvec2 (v.x < u.x, v.y < u.y);
+}
+
+bvec3 lessThan (ivec3 v, ivec3 u) {
+    return bvec3 (v.x < u.x, v.y < u.y, v.z < u.z);
+}
+
+bvec4 lessThan (ivec4 v, ivec4 u) {
+    return bvec4 (v.x < u.x, v.y < u.y, v.z < u.z, v.w < u.w);
+}
+
+bvec2 lessThanEqual (vec2 v, vec2 u) {
+    return bvec2 (v.x <= u.x, v.y <= u.y);
+}
+
+bvec3 lessThanEqual (vec3 v, vec3 u) {
+    return bvec3 (v.x <= u.x, v.y <= u.y, v.z <= u.z);
+}
+
+bvec4 lessThanEqual (vec4 v, vec4 u) {
+    return bvec4 (v.x <= u.x, v.y <= u.y, v.z <= u.z, v.w <= u.w);
+}
+
+bvec2 lessThanEqual (ivec2 v, ivec2 u) {
+    return bvec2 (v.x <= u.x, v.y <= u.y);
+}
+
+bvec3 lessThanEqual (ivec3 v, ivec3 u) {
+    return bvec3 (v.x <= u.x, v.y <= u.y, v.z <= u.z);
+}
+
+bvec4 lessThanEqual (ivec4 v, ivec4 u) {
+    return bvec4 (v.x <= u.x, v.y <= u.y, v.z <= u.z, v.w <= u.w);
+}
+
+bvec2 greaterThan (vec2 v, vec2 u) {
+    return bvec2 (v.x > u.x, v.y > u.y);
+}
+
+bvec3 greaterThan (vec3 v, vec3 u) {
+    return bvec3 (v.x > u.x, v.y > u.y, v.z > u.z);
+}
+
+bvec4 greaterThan (vec4 v, vec4 u) {
+    return bvec4 (v.x > u.x, v.y > u.y, v.z > u.z, v.w > u.w);
+}
+
+bvec2 greaterThan (ivec2 v, ivec2 u) {
+    return bvec2 (v.x > u.x, v.y > u.y);
+}
+
+bvec3 greaterThan (ivec3 v, ivec3 u) {
+    return bvec3 (v.x > u.x, v.y > u.y, v.z > u.z);
+}
+
+bvec4 greaterThan (ivec4 v, ivec4 u) {
+   return bvec4 (v.x > u.x, v.y > u.y, v.z > u.z, v.w > u.w);
+}
+
+bvec2 greaterThanEqual (vec2 v, vec2 u) {
+    return bvec2 (v.x >= u.x, v.y >= u.y);
+}
+
+bvec3 greaterThanEqual (vec3 v, vec3 u) {
+    return bvec3 (v.x >= u.x, v.y >= u.y, v.z >= u.z);
+}
+
+bvec4 greaterThanEqual (vec4 v, vec4 u) {
+    return bvec4 (v.x >= u.x, v.y >= u.y, v.z >= u.z, v.w >= u.w);
+}
+
+bvec2 greaterThanEqual (ivec2 v, ivec2 u) {
+    return bvec2 (v.x >= u.x, v.y >= u.y);
+}
+
+bvec3 greaterThanEqual (ivec3 v, ivec3 u) {
+    return bvec3 (v.x >= u.x, v.y >= u.y, v.z >= u.z);
+}
+
+bvec4 greaterThanEqual (ivec4 v, ivec4 u) {
+    return bvec4 (v.x >= u.x, v.y >= u.y, v.z >= u.z, v.w >= u.w);
+}
+
+bvec2 equal (vec2 v, vec2 u) {
+    return bvec2 (v.x == u.x, v.y == u.y);
+}
+
+bvec3 equal (vec3 v, vec3 u) {
+    return bvec3 (v.x == u.x, v.y == u.y, v.z == u.z);
+}
+
+bvec4 equal (vec4 v, vec4 u) {
+    return bvec4 (v.x == u.x, v.y == u.y, v.z == u.z, v.w == u.w);
+}
+
+bvec2 equal (ivec2 v, ivec2 u) {
+    return bvec2 (v.x == u.x, v.y == u.y);
+}
+
+bvec3 equal (ivec3 v, ivec3 u) {
+    return bvec3 (v.x == u.x, v.y == u.y, v.z == u.z);
+}
+
+bvec4 equal (ivec4 v, ivec4 u) {
+    return bvec4 (v.x == u.x, v.y == u.y, v.z == u.z, v.w == u.w);
+}
+
+bvec2 notEqual (vec2 v, vec2 u) {
+    return bvec2 (v.x != u.x, v.y != u.y);
+}
+
+bvec3 notEqual (vec3 v, vec3 u) {
+    return bvec3 (v.x != u.x, v.y != u.y, v.z != u.z);
+}
+
+bvec4 notEqual (vec4 v, vec4 u) {
+    return bvec4 (v.x != u.x, v.y != u.y, v.z != u.z, v.w != u.w);
+}
+
+bvec2 notEqual (ivec2 v, ivec2 u) {
+    return bvec2 (v.x != u.x, v.y != u.y);
+}
+
+bvec3 notEqual (ivec3 v, ivec3 u) {
+    return bvec3 (v.x != u.x, v.y != u.y, v.z != u.z);
+}
+
+bvec4 notEqual (ivec4 v, ivec4 u) {
+    return bvec4 (v.x != u.x, v.y != u.y, v.z != u.z, v.w != u.w);
+}
+
+bool any (bvec2 v) {
+    return v.x || v.y;
+}
+
+bool any (bvec3 v) {
+    return v.x || v.y || v.z;
+}
+
+bool any (bvec4 v) {
+    return v.x || v.y || v.z || v.w;
+}
+
+bool all (bvec2 v) {
+    return v.x && v.y;
+}
+
+bool all (bvec3 v) {
+    return v.x && v.y && v.z;
+}
+
+bool all (bvec4 v) {
+    return v.x && v.y && v.z && v.w;
+}
+
+bvec2 not (bvec2 v) {
+    return bvec2 (!v.x, !v.y);
+}
+
+bvec3 not (bvec3 v) {
+    return bvec3 (!v.x, !v.y, !v.z);
+}
+
+bvec4 not (bvec4 v) {
+    return bvec4 (!v.x, !v.y, !v.z, !v.w);
+}
+
+//
+// 8.7 Texture Lookup Functions
+//
+
+vec4 texture1D (sampler1D sampler, float coord) {
+    vec4 texel;
+    __asm vec4_tex1d texel, sampler, coord, 0.0;
+    return texel;
+}
+
+vec4 texture1DProj (sampler1D sampler, vec2 coord) {
+    return texture1D (sampler, coord.s / coord.t);
+}
+
+vec4 texture1DProj (sampler1D sampler, vec4 coord) {
+    return texture1D (sampler, coord.s / coord.q);
+}
+
+vec4 texture2D (sampler2D sampler, vec2 coord) {
+    vec4 texel;
+    __asm vec4_tex2d texel, sampler, coord, 0.0;
+    return texel;
+}
+
+vec4 texture2DProj (sampler2D sampler, vec3 coord) {
+    return texture2D (sampler, vec2 (coord.s / coord.p, coord.t / coord.p));
+}
+
+vec4 texture2DProj (sampler2D sampler, vec4 coord) {
+    return texture2D (sampler, vec2 (coord.s / coord.q, coord.t / coord.q));
+}
+
+vec4 texture3D (sampler3D sampler, vec3 coord) {
+    vec4 texel;
+    __asm vec4_tex3d texel, sampler, coord, 0.0;
+    return texel;
+}
+
+vec4 texture3DProj (sampler3D sampler, vec4 coord) {
+    return texture3D (sampler, vec3 (coord.s / coord.q, coord.t / coord.q, coord.p / coord.q));
+}
+
+vec4 textureCube (samplerCube sampler, vec3 coord) {
+    vec4 texel;
+    __asm vec4_texcube texel, sampler, coord, 0.0;
+    return texel;
+}
+
+vec4 shadow1D (sampler1DShadow sampler, vec3 coord) {
+    vec4 texel;
+    __asm vec4_shad1d texel, sampler, coord, 0.0;
+    return texel;
+}
+
+vec4 shadow1DProj (sampler1DShadow sampler, vec4 coord) {
+    return shadow1D (sampler, vec3 (coord.s / coord.q, 0.0, coord.p / coord.q));
+}
+
+vec4 shadow2D (sampler2DShadow sampler, vec3 coord) {
+    vec4 texel;
+    __asm vec4_shad2d texel, sampler, coord, 0.0;
+    return texel;
+}
+
+vec4 shadow2DProj (sampler2DShadow sampler, vec4 coord) {
+    return shadow2D (sampler, vec3 (coord.s / coord.q, coord.t / coord.q, coord.p / coord.q));
+}
+
+//
+// 8.9 Noise Functions
+//
+// AUTHOR: Stefan Gustavson (stegu@itn.liu.se), Nov 26, 2005
+//
+
+float noise1 (float x) {
+    float a;
+    __asm float_noise1 a, x;
+    return a;
+}
+
+float noise1 (vec2 x) {
+    float a;
+    __asm float_noise2 a, x;
+    return a;
+}
+
+float noise1 (vec3 x) {
+    float a;
+    __asm float_noise3 a, x;
+    return a;
+}
+
+float noise1 (vec4 x) {
+    float a;
+    __asm float_noise4 a, x;
+    return a;
+}
+
+vec2 noise2 (float x) {
+    return vec2 (
+        noise1 (x),
+        noise1 (x + 19.34)
+    );
+}
+
+vec2 noise2 (vec2 x) {
+    return vec2 (
+        noise1 (x),
+        noise1 (x + vec2 (19.34, 7.66))
+    );
+}
+
+vec2 noise2 (vec3 x) {
+    return vec2 (
+        noise1 (x),
+        noise1 (x + vec3 (19.34, 7.66, 3.23))
+    );
+}
+
+vec2 noise2 (vec4 x) {
+    return vec2 (
+        noise1 (x),
+        noise1 (x + vec4 (19.34, 7.66, 3.23, 2.77))
+    );
+}
+
+vec3 noise3 (float x) {
+    return vec3 (
+        noise1 (x),
+        noise1 (x + 19.34),
+        noise1 (x + 5.47)
+    );
+}
+
+vec3 noise3 (vec2 x) {
+    return vec3 (
+        noise1 (x),
+        noise1 (x + vec2 (19.34, 7.66)),
+        noise1 (x + vec2 (5.47, 17.85))
+    );
+}
+
+vec3 noise3 (vec3 x) {
+    return vec3 (
+        noise1 (x),
+        noise1 (x + vec3 (19.34, 7.66, 3.23)),
+        noise1 (x + vec3 (5.47, 17.85, 11.04))
+    );
+}
+
+vec3 noise3 (vec4 x) {
+    return vec3 (
+        noise1 (x),
+        noise1 (x + vec4 (19.34, 7.66, 3.23, 2.77)),
+        noise1 (x + vec4 (5.47, 17.85, 11.04, 13.19))
+    );
+}
+
+vec4 noise4 (float x) {
+    return vec4 (
+        noise1 (x),
+        noise1 (x + 19.34),
+        noise1 (x + 5.47),
+        noise1 (x + 23.54)
+    );
+}
+
+vec4 noise4 (vec2 x) {
+    return vec4 (
+        noise1 (x),
+        noise1 (x + vec2 (19.34, 7.66)),
+        noise1 (x + vec2 (5.47, 17.85)),
+        noise1 (x + vec2 (23.54, 29.11))
+    );
+}
+
+vec4 noise4 (vec3 x) {
+    return vec4 (
+        noise1 (x),
+        noise1 (x + vec3 (19.34, 7.66, 3.23)),
+        noise1 (x + vec3 (5.47, 17.85, 11.04)),
+        noise1 (x + vec3 (23.54, 29.11, 31.91))
+    );
+}
+
+vec4 noise4 (vec4 x) {
+    return vec4 (
+        noise1 (x),
+        noise1 (x + vec4 (19.34, 7.66, 3.23, 2.77)),
+        noise1 (x + vec4 (5.47, 17.85, 11.04, 13.19)),
+        noise1 (x + vec4 (23.54, 29.11, 31.91, 37.48))
+    );
+}
+

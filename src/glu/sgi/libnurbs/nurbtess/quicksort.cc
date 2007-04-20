@@ -34,7 +34,7 @@
 ** $Date: 2002/04/17 19:30:41 $ $Revision: 1.2 $
 */
 /*
-** $Header: /cvs/mesa/Mesa/src/glu/sgi/libnurbs/nurbtess/quicksort.cc,v 1.2 2002/04/17 19:30:41 brianp Exp $
+** $Header: /home/krh/git/sync/mesa-cvs-repo/Mesa/src/glu/sgi/libnurbs/nurbtess/quicksort.cc,v 1.2 2002/04/17 19:30:41 brianp Exp $
 */
 
 #include <stdlib.h>

@@ -36,7 +36,7 @@
  * trimvertexpool.c++
  *
  * $Date: 2003/05/08 15:47:00 $ $Revision: 1.2 $
- * $Header: /cvs/mesa/Mesa/src/glu/sgi/libnurbs/internals/trimvertpool.cc,v 1.2 2003/05/08 15:47:00 brianp Exp $
+ * $Header: /home/krh/git/sync/mesa-cvs-repo/Mesa/src/glu/sgi/libnurbs/internals/trimvertpool.cc,v 1.2 2003/05/08 15:47:00 brianp Exp $
  */
 
 #include "glimports.h"

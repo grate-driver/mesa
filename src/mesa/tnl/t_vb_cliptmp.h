@@ -125,7 +125,6 @@ TAG(clip_line)( GLcontext *ctx, GLuint v0, GLuint v1, GLubyte mask )
    GLfloat t0 = 0;
    GLfloat t1 = 0;
    GLuint p;
-   const GLuint v0_orig = v0;
 
    if (mask & 0x3f) {
       LINE_CLIP( CLIP_RIGHT_BIT,  -1,  0,  0, 1 );
@@ -154,18 +153,12 @@ TAG(clip_line)( GLcontext *ctx, GLuint v0, GLuint v1, GLubyte mask )
       v0 = newvert;
       newvert++;
    }
-   else {
+   else
       ASSERT(t0 == 0.0);
-   }
 
    if (VB->ClipMask[v1]) {
-     /* Note: we need to use vertex v0_orig when computing the new
-      * interpolated/clipped vertex position, not the current v0 which
-      * may have got set when we clipped the other end of the line!
-      */
-
-      INTERP_4F( t1, coord[newvert], coord[v1], coord[v0_orig] );
-      interp( ctx, t1, newvert, v1, v0_orig, GL_FALSE );
+      INTERP_4F( t1, coord[newvert], coord[v1], coord[v0] );
+      interp( ctx, t1, newvert, v1, v0, GL_FALSE );
 
       if (ctx->Light.ShadeModel == GL_FLAT)
 	 tnl->Driver.Render.CopyPV( ctx, newvert, v1 );
@@ -174,9 +167,8 @@ TAG(clip_line)( GLcontext *ctx, GLuint v0, GLuint v1, GLubyte mask )
 
       newvert++;
    }
-   else {
+   else
       ASSERT(t1 == 0.0);
-   }
 
    tnl->Driver.Render.ClippedLine( ctx, v0, v1 );
 }

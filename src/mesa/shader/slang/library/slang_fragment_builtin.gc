@@ -1,0 +1,172 @@
+/*
+ * Mesa 3-D graphics library
+ * Version:  6.5
+ *
+ * Copyright (C) 2006  Brian Paul   All Rights Reserved.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
+ * copy of this software and associated documentation files (the "Software"),
+ * to deal in the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense,
+ * and/or sell copies of the Software, and to permit persons to whom the
+ * Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included
+ * in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+ * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
+ * BRIAN PAUL BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+ * AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+ * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+
+//
+// TODO:
+// - implement dFdx, dFdy,
+//
+
+//
+// From Shader Spec, ver. 1.10, rev. 59
+//
+
+__fixed_input vec4 gl_FragCoord;
+__fixed_input bool gl_FrontFacing;
+__fixed_output vec4 gl_FragColor;
+__fixed_output vec4 gl_FragData[gl_MaxDrawBuffers];
+__fixed_output float gl_FragDepth;
+
+varying vec4 gl_Color;
+varying vec4 gl_SecondaryColor;
+varying vec4 gl_TexCoord[gl_MaxTextureCoords];
+varying float gl_FogFragCoord;
+
+//
+// 8.7 Texture Lookup Functions
+//
+
+vec4 texture1D (sampler1D sampler, float coord, float bias) {
+    vec4 texel;
+    __asm vec4_tex1d texel, sampler, coord, bias;
+    return texel;
+}
+
+vec4 texture1DProj (sampler1D sampler, vec2 coord, float bias) {
+    return texture1D (sampler, coord.s / coord.t, bias);
+}
+
+vec4 texture1DProj (sampler1D sampler, vec4 coord, float bias) {
+    return texture1D (sampler, coord.s / coord.q, bias);
+}
+
+vec4 texture2D (sampler2D sampler, vec2 coord, float bias) {
+    vec4 texel;
+    __asm vec4_tex2d texel, sampler, coord, bias;
+    return texel;
+}
+
+vec4 texture2DProj (sampler2D sampler, vec3 coord, float bias) {
+    return texture2D (sampler, vec2 (coord.s / coord.p, coord.t / coord.p), bias);
+}
+
+vec4 texture2DProj (sampler2D sampler, vec4 coord, float bias) {
+    return texture2D (sampler, vec2 (coord.s / coord.q, coord.t / coord.q), bias);
+}
+
+vec4 texture3D (sampler3D sampler, vec3 coord, float bias) {
+    vec4 texel;
+    __asm vec4_tex3d texel, sampler, coord, bias;
+    return texel;
+}
+
+vec4 texture3DProj (sampler3D sampler, vec4 coord, float bias) {
+    return texture3D (sampler, vec3 (coord.s / coord.q, coord.t / coord.q, coord.p / coord.q), bias);
+}
+
+vec4 textureCube (samplerCube sampler, vec3 coord, float bias) {
+    vec4 texel;
+    __asm vec4_texcube texel, sampler, coord, bias;
+    return texel;
+}
+
+vec4 shadow1D (sampler1DShadow sampler, vec3 coord, float bias) {
+    vec4 texel;
+    __asm vec4_shad1d texel, sampler, coord, bias;
+    return texel;
+}
+
+vec4 shadow1DProj (sampler1DShadow sampler, vec4 coord, float bias) {
+    return shadow1D (sampler, vec3 (coord.s / coord.q, 0.0, coord.p / coord.q), bias);
+}
+
+vec4 shadow2D (sampler2DShadow sampler, vec3 coord, float bias) {
+    vec4 texel;
+    __asm vec4_shad2d texel, sampler, coord, bias;
+    return texel;
+}
+
+vec4 shadow2DProj (sampler2DShadow sampler, vec4 coord, float bias) {
+    return shadow2D (sampler, vec3 (coord.s / coord.q, coord.t / coord.q, coord.p / coord.q), bias);
+}
+
+//
+// 8.8 Fragment Processing Functions
+//
+
+float dFdx (float p) {
+    // XXX:
+    return 0.001;
+}
+
+vec2 dFdx (vec2 p) {
+    // XXX:
+    return vec2 (0.001);
+}
+
+vec3 dFdx (vec3 p) {
+    // XXX:
+    return vec3 (0.001);
+}
+
+vec4 dFdx (vec4 p) {
+    // XXX:
+    return vec4 (0.001);
+}
+
+float dFdy (float p) {
+    // XXX:
+    return 0.001;
+}
+
+vec2 dFdy (vec2 p) {
+    // XXX:
+    return vec2 (0.001);
+}
+
+vec3 dFdy (vec3 p) {
+    // XXX:
+    return vec3 (0.001);
+}
+
+vec4 dFdy (vec4 p) {
+    // XXX:
+    return vec4 (0.001);
+}
+
+float fwidth (float p) {
+    return abs (dFdx (p)) + abs (dFdy (p));
+}
+
+vec2 fwidth (vec2 p) {
+    return abs (dFdx (p)) + abs (dFdy (p));
+}
+
+vec3 fwidth (vec3 p) {
+    return abs (dFdx (p)) + abs (dFdy (p));
+}
+
+vec4 fwidth (vec4 p) {
+    return abs (dFdx (p)) + abs (dFdy (p));
+}
+

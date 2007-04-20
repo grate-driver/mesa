@@ -1,4 +1,4 @@
-/* $Id: glstate.h,v 1.1.1.1 1999/08/19 00:55:42 jtg Exp $ */
+/* $Id: glstate.h,v 1.1 1999/08/19 00:55:42 jtg Exp $ */
 
 /*
  * Print GL state information (for debugging)
@@ -22,8 +22,8 @@
 
 /*
  * $Log: glstate.h,v $
- * Revision 1.1.1.1  1999/08/19 00:55:42  jtg
- * Imported sources
+ * Revision 1.1  1999/08/19 00:55:42  jtg
+ * Initial revision
  *
  * Revision 1.2  1999/06/19 01:36:43  brianp
  * more features added

@@ -36,7 +36,7 @@
  * sorter.c++
  *
  * $Date: 2006/03/14 15:08:52 $ $Revision: 1.3 $
- * $Header: /cvs/mesa/Mesa/src/glu/sgi/libnurbs/internals/sorter.cc,v 1.3 2006/03/14 15:08:52 brianp Exp $
+ * $Header: /home/krh/git/sync/mesa-cvs-repo/Mesa/src/glu/sgi/libnurbs/internals/sorter.cc,v 1.3 2006/03/14 15:08:52 brianp Exp $
  */
 
 #include "glimports.h"

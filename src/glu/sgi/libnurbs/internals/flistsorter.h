@@ -36,7 +36,7 @@
  * flistsorter.h
  *
  * $Date: 2006/03/29 18:54:00 $ $Revision: 1.2 $
- * $Header: /cvs/mesa/Mesa/src/glu/sgi/libnurbs/internals/flistsorter.h,v 1.2 2006/03/29 18:54:00 brianp Exp $
+ * $Header: /home/krh/git/sync/mesa-cvs-repo/Mesa/src/glu/sgi/libnurbs/internals/flistsorter.h,v 1.2 2006/03/29 18:54:00 brianp Exp $
  */
 
 #ifndef __gluflistsorter_h_
