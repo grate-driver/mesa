@@ -1289,7 +1289,7 @@ _swrast_read_depth_span_uint( GLcontext *ctx, struct gl_renderbuffer *rb,
       GLint dx = -x;
       GLint i;
       for (i = 0; i < dx; i++)
-         depth[i] = 0.0;
+         depth[i] = 0;
       x = 0;
       n -= dx;
       depth += dx;
@@ -1298,7 +1298,7 @@ _swrast_read_depth_span_uint( GLcontext *ctx, struct gl_renderbuffer *rb,
       GLint dx = x + n - (GLint) rb->Width;
       GLint i;
       for (i = 0; i < dx; i++)
-         depth[n - i - 1] = 0.0;
+         depth[n - i - 1] = 0;
       n -= dx;
    }
    if (n <= 0) {
@@ -1350,7 +1350,7 @@ _swrast_clear_depth_buffer( GLcontext *ctx, struct gl_renderbuffer *rb )
    GLuint clearValue;
    GLint x, y, width, height;
 
-   if (!rb || !ctx->Depth.Mask) {
+   if (!rb || !ctx->Depth.Mask || !rb->Data) {
       /* no depth buffer, or writing to it is disabled */
       return;
    }

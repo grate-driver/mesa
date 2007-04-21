@@ -317,7 +317,9 @@
     <enum name="ATTRIB_STACK_DEPTH"            count="1"  value="0x0BB0">
         <size name="Get" mode="get"/>
     </enum>
-    <enum name="CLIENT_ATTRIB_STACK_DEPTH"                value="0x0BB1"/>
+    <enum name="CLIENT_ATTRIB_STACK_DEPTH"     count="1"  value="0x0BB1">
+        <size name="Get" mode="get"/>
+    </enum>
     <enum name="ALPHA_TEST"                    count="1"  value="0x0BC0">
         <size name="Get" mode="get"/>
     </enum>
@@ -577,7 +579,9 @@
     <enum name="MAX_VIEWPORT_DIMS"             count="2"  value="0x0D3A">
         <size name="Get" mode="get"/>
     </enum>
-    <enum name="MAX_CLIENT_ATTRIB_STACK_DEPTH"            value="0x0D3B"/>
+    <enum name="MAX_CLIENT_ATTRIB_STACK_DEPTH" count="1"  value="0x0D3B">
+        <size name="Get" mode="get"/>
+    </enum>
     <enum name="SUBPIXEL_BITS"                 count="1"  value="0x0D50">
         <size name="Get" mode="get"/>
     </enum>
@@ -5318,7 +5322,7 @@
         <glx ignore="true"/>
     </function>
 
-    <function name="GetVertexAttribPointerv" alias="GetVertexAttribPointervARB">
+    <function name="GetVertexAttribPointerv" alias="GetVertexAttribPointervNV">
         <param name="index" type="GLuint"/>
         <param name="pname" type="GLenum"/>
         <param name="pointer" type="GLvoid **" output="true"/>
@@ -6091,7 +6095,7 @@
         <size name="GetTexLevelParameterfv" mode="get"/>
         <size name="GetTexLevelParameteriv" mode="get"/>
     </enum>
-    <enum name="NUM_TEXTURE_COMPRESSED_FORMATS_ARB" count="1" value="0x86A2">
+    <enum name="NUM_COMPRESSED_TEXTURE_FORMATS_ARB" count="1" value="0x86A2">
         <size name="Get" mode="get"/>
     </enum>
     <enum name="TEXTURE_COMPRESSED_FORMATS_ARB"           value="0x86A3"/>
@@ -7209,7 +7213,7 @@
     <function name="GetVertexAttribPointervARB" alias="GetVertexAttribPointervNV">
         <param name="index" type="GLuint"/>
         <param name="pname" type="GLenum"/>
-        <param name="params" type="GLvoid **" output="true"/>
+        <param name="pointer" type="GLvoid **" output="true"/>
     </function>
 </category>
 
@@ -7254,10 +7258,10 @@
         <size name="GetProgramivARB" mode="get"/>
     </enum>
     <enum name="MAX_TEXTURE_COORDS_ARB"        count="1"  value="0x8871">
-        <size name="GetProgramivARB" mode="get"/>
+        <size name="Get" mode="get"/>
     </enum>
     <enum name="MAX_TEXTURE_IMAGE_UNITS_ARB"   count="1"  value="0x8872">
-        <size name="GetProgramivARB" mode="get"/>
+        <size name="Get" mode="get"/>
     </enum>
 </category>
 
@@ -11234,7 +11238,7 @@
     <function name="GetVertexAttribPointervNV" offset="assign">
         <param name="index" type="GLuint"/>
         <param name="pname" type="GLenum"/>
-        <param name="params" type="GLvoid **" output="true"/>
+        <param name="pointer" type="GLvoid **" output="true"/>
         <glx handcode="true"/>
     </function>
 

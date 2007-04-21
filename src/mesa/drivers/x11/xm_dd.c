@@ -47,16 +47,11 @@
 #include "texstore.h"
 #include "texformat.h"
 #include "xmesaP.h"
-#include "array_cache/acache.h"
 #include "swrast/swrast.h"
 #include "swrast/s_context.h"
 #include "swrast_setup/swrast_setup.h"
 #include "tnl/tnl.h"
 #include "tnl/t_context.h"
-
-#ifdef XFree86Server
-#include <GL/glxtokens.h>
-#endif
 
 
 
@@ -829,8 +824,8 @@ xmesa_update_state( GLcontext *ctx, GLbitfield new_state )
     * modules.  The X11 driver has no internal GL-dependent state.
     */
    _swrast_InvalidateState( ctx, new_state );
-   _ac_InvalidateState( ctx, new_state );
    _tnl_InvalidateState( ctx, new_state );
+   _vbo_InvalidateState( ctx, new_state );
    _swsetup_InvalidateState( ctx, new_state );
 
    if (ctx->DrawBuffer->Name != 0)

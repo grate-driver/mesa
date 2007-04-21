@@ -190,7 +190,7 @@ StateVars = [
 	( "GL_DOUBLEBUFFER", GLboolean,
 	  ["ctx->DrawBuffer->Visual.doubleBufferMode"], "", None ),
 	( "GL_DRAW_BUFFER", GLenum, ["ctx->DrawBuffer->ColorDrawBuffer[0]"], "", None ),
-	( "GL_EDGE_FLAG", GLboolean, ["ctx->Current.EdgeFlag"],
+	( "GL_EDGE_FLAG", GLboolean, ["(ctx->Current.Attrib[VERT_ATTRIB_EDGEFLAG][0] == 1.0)"],
 	  "FLUSH_CURRENT(ctx, 0);", None ),
 	( "GL_FEEDBACK_BUFFER_SIZE", GLint, ["ctx->Feedback.BufferSize"], "", None ),
 	( "GL_FEEDBACK_BUFFER_TYPE", GLenum, ["ctx->Feedback.Type"], "", None ),
@@ -337,16 +337,16 @@ StateVars = [
 	( "GL_PACK_INVERT_MESA", GLboolean, ["ctx->Pack.Invert"], "", None ),
 	( "GL_PERSPECTIVE_CORRECTION_HINT", GLenum,
 	  ["ctx->Hint.PerspectiveCorrection"], "", None ),
-	( "GL_PIXEL_MAP_A_TO_A_SIZE", GLint, ["ctx->Pixel.MapAtoAsize"], "", None ),
-	( "GL_PIXEL_MAP_B_TO_B_SIZE", GLint, ["ctx->Pixel.MapBtoBsize"], "", None ),
-	( "GL_PIXEL_MAP_G_TO_G_SIZE", GLint, ["ctx->Pixel.MapGtoGsize"], "", None ),
-	( "GL_PIXEL_MAP_I_TO_A_SIZE", GLint, ["ctx->Pixel.MapItoAsize"], "", None ),
-	( "GL_PIXEL_MAP_I_TO_B_SIZE", GLint, ["ctx->Pixel.MapItoBsize"], "", None ),
-	( "GL_PIXEL_MAP_I_TO_G_SIZE", GLint, ["ctx->Pixel.MapItoGsize"], "", None ),
-	( "GL_PIXEL_MAP_I_TO_I_SIZE", GLint, ["ctx->Pixel.MapItoIsize"], "", None ),
-	( "GL_PIXEL_MAP_I_TO_R_SIZE", GLint, ["ctx->Pixel.MapItoRsize"], "", None ),
-	( "GL_PIXEL_MAP_R_TO_R_SIZE", GLint, ["ctx->Pixel.MapRtoRsize"], "", None ),
-	( "GL_PIXEL_MAP_S_TO_S_SIZE", GLint, ["ctx->Pixel.MapStoSsize"], "", None ),
+	( "GL_PIXEL_MAP_A_TO_A_SIZE", GLint, ["ctx->PixelMaps.AtoA.Size"], "", None ),
+	( "GL_PIXEL_MAP_B_TO_B_SIZE", GLint, ["ctx->PixelMaps.BtoB.Size"], "", None ),
+	( "GL_PIXEL_MAP_G_TO_G_SIZE", GLint, ["ctx->PixelMaps.GtoG.Size"], "", None ),
+	( "GL_PIXEL_MAP_I_TO_A_SIZE", GLint, ["ctx->PixelMaps.ItoA.Size"], "", None ),
+	( "GL_PIXEL_MAP_I_TO_B_SIZE", GLint, ["ctx->PixelMaps.ItoB.Size"], "", None ),
+	( "GL_PIXEL_MAP_I_TO_G_SIZE", GLint, ["ctx->PixelMaps.ItoG.Size"], "", None ),
+	( "GL_PIXEL_MAP_I_TO_I_SIZE", GLint, ["ctx->PixelMaps.ItoI.Size"], "", None ),
+	( "GL_PIXEL_MAP_I_TO_R_SIZE", GLint, ["ctx->PixelMaps.ItoR.Size"], "", None ),
+	( "GL_PIXEL_MAP_R_TO_R_SIZE", GLint, ["ctx->PixelMaps.RtoR.Size"], "", None ),
+	( "GL_PIXEL_MAP_S_TO_S_SIZE", GLint, ["ctx->PixelMaps.StoS.Size"], "", None ),
 	( "GL_POINT_SIZE", GLfloat, ["ctx->Point.Size"], "", None ),
 	( "GL_POINT_SIZE_GRANULARITY", GLfloat,
 	  ["ctx->Const.PointSizeGranularity"], "", None ),
@@ -624,11 +624,11 @@ StateVars = [
 
 	# GL_SGI_color_table / GL_ARB_imaging
 	( "GL_COLOR_TABLE_SGI", GLboolean,
-	  ["ctx->Pixel.ColorTableEnabled"], "", ["SGI_color_table"] ),
+	  ["ctx->Pixel.ColorTableEnabled[COLORTABLE_PRECONVOLUTION]"], "", ["SGI_color_table"] ),
 	( "GL_POST_CONVOLUTION_COLOR_TABLE_SGI", GLboolean,
-	  ["ctx->Pixel.PostConvolutionColorTableEnabled"], "", ["SGI_color_table"] ),
+	  ["ctx->Pixel.ColorTableEnabled[COLORTABLE_POSTCONVOLUTION]"], "", ["SGI_color_table"] ),
 	( "GL_POST_COLOR_MATRIX_COLOR_TABLE_SGI", GLboolean,
-	  ["ctx->Pixel.PostColorMatrixColorTableEnabled"], "", ["SGI_color_table"] ),
+	  ["ctx->Pixel.ColorTableEnabled[COLORTABLE_POSTCOLORMATRIX]"], "", ["SGI_color_table"] ),
 
 	# GL_SGI_texture_color_table
 	( "GL_TEXTURE_COLOR_TABLE_SGI", GLboolean,
@@ -989,11 +989,18 @@ StateVars = [
 	  ["ctx->Const.VertexProgram.MaxUniformComponents"], "",
 	  ["ARB_vertex_shader"] ),
 	( "GL_MAX_VARYING_FLOATS_ARB", GLint,
-	  ["ctx->Const.MaxVaryingFloats"], "", ["ARB_vertex_shader"] ),
+	  ["ctx->Const.MaxVarying * 4"], "", ["ARB_vertex_shader"] ),
 	( "GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS_ARB", GLint,
 	  ["ctx->Const.MaxVertexTextureImageUnits"], "", ["ARB_vertex_shader"] ),
 	( "GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS_ARB", GLint,
-	  ["MAX_COMBINED_TEXTURE_IMAGE_UNITS"], "", ["ARB_vertex_shader"] )
+	  ["MAX_COMBINED_TEXTURE_IMAGE_UNITS"], "", ["ARB_vertex_shader"] ),
+
+	# GL_ARB_shader_objects
+	# Actually, this token isn't part of GL_ARB_shader_objects, but is
+	# close enough for now.
+	( "GL_CURRENT_PROGRAM", GLint,
+	  ["ctx->Shader.CurrentProgram ? ctx->Shader.CurrentProgram->Name : 0"],
+	  "", ["ARB_shader_objects"] )
 ]
 
 

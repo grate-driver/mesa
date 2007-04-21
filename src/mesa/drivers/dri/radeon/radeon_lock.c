@@ -56,8 +56,10 @@ static void
 radeonUpdatePageFlipping( radeonContextPtr rmesa )
 {
    rmesa->doPageFlip = rmesa->sarea->pfState;
-   driFlipRenderbuffers(rmesa->glCtx->WinSysDrawBuffer,
-                        rmesa->sarea->pfCurrentPage);
+   if (rmesa->glCtx->WinSysDrawBuffer) {
+      driFlipRenderbuffers(rmesa->glCtx->WinSysDrawBuffer,
+                           rmesa->sarea->pfCurrentPage);
+   }
 }
 
 
@@ -96,7 +98,6 @@ void radeonGetLock( radeonContextPtr rmesa, GLuint flags )
       radeonSetCliprects( rmesa );
       radeonUpdateViewportOffset( rmesa->glCtx );
       driUpdateFramebufferSize(rmesa->glCtx, drawable);
-      rmesa->lastStamp = drawable->lastStamp;
    }
 
    RADEON_STATECHANGE( rmesa, ctx );

@@ -92,6 +92,7 @@ linux-alpha-static \
 linux-debug \
 linux-directfb \
 linux-dri \
+linux-dri-debug \
 linux-dri-x86 \
 linux-dri-x86-64 \
 linux-dri-ppc \
@@ -154,10 +155,10 @@ ultrix-gcc:
 
 # Rules for making release tarballs
 
-DIRECTORY = Mesa-6.5.2
-LIB_NAME = MesaLib-6.5.2
-DEMO_NAME = MesaDemos-6.5.2
-GLUT_NAME = MesaGLUT-6.5.2
+DIRECTORY = Mesa-6.5.3rc1
+LIB_NAME = MesaLib-6.5.3rc1
+DEMO_NAME = MesaDemos-6.5.3rc1
+GLUT_NAME = MesaGLUT-6.5.3rc1
 
 MAIN_FILES = \
 	$(DIRECTORY)/Makefile*						\
@@ -208,9 +209,6 @@ MAIN_FILES = \
 	$(DIRECTORY)/src/mesa/glapi/*.[chS]				\
 	$(DIRECTORY)/src/mesa/glapi/descrip.mms				\
 	$(DIRECTORY)/src/mesa/glapi/sources				\
-	$(DIRECTORY)/src/mesa/array_cache/*.[ch]			\
-	$(DIRECTORY)/src/mesa/array_cache/descrip.mms			\
-	$(DIRECTORY)/src/mesa/array_cache/sources			\
 	$(DIRECTORY)/src/mesa/math/*.[ch]				\
 	$(DIRECTORY)/src/mesa/math/descrip.mms				\
 	$(DIRECTORY)/src/mesa/math/sources				\
@@ -230,6 +228,8 @@ MAIN_FILES = \
 	$(DIRECTORY)/src/mesa/swrast_setup/*.[ch]			\
 	$(DIRECTORY)/src/mesa/swrast_setup/descrip.mms			\
 	$(DIRECTORY)/src/mesa/swrast_setup/sources			\
+	$(DIRECTORY)/src/mesa/vbo/*.[chS]				\
+	$(DIRECTORY)/src/mesa/vbo/descrip.mms				\
 	$(DIRECTORY)/src/mesa/tnl/*.[chS]				\
 	$(DIRECTORY)/src/mesa/tnl/descrip.mms				\
 	$(DIRECTORY)/src/mesa/tnl/sources				\
@@ -364,6 +364,9 @@ DEMO_FILES = \
 	$(DIRECTORY)/progs/samples/Makefile*		\
 	$(DIRECTORY)/progs/samples/README		\
 	$(DIRECTORY)/progs/samples/*.c			\
+	$(DIRECTORY)/progs/glsl/Makefile*		\
+	$(DIRECTORY)/progs/glsl/*.c			\
+	$(DIRECTORY)/progs/glsl/*.txt			\
 	$(DIRECTORY)/progs/windml/Makefile.ugl		\
 	$(DIRECTORY)/progs/windml/*.c			\
 	$(DIRECTORY)/progs/windml/*.bmp			\

@@ -41,7 +41,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "light.h"
 
 #include "swrast/swrast.h"
-#include "array_cache/acache.h"
+#include "vbo/vbo.h"
 #include "tnl/tnl.h"
 #include "tnl/t_pipeline.h"
 #include "swrast_setup/swrast_setup.h"
@@ -185,6 +185,8 @@ void radeonSetCliprects(radeonContextPtr radeon)
 
 	if (radeon->state.scissor.enabled)
 		radeonRecalcScissorRects(radeon);
+
+	radeon->lastStamp = drawable->lastStamp;
 }
 
 

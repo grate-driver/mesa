@@ -89,9 +89,7 @@ fbdev: $(CORE_OBJECTS) $(FBDEV_DRIVER_OBJECTS) $(COMMON_DRIVER_OBJECTS)
 # Stand-alone Mesa libGL and libOSMesa
 STAND_ALONE_DRIVER_SOURCES = \
 	$(COMMON_DRIVER_SOURCES) \
-	$(X11_DRIVER_SOURCES) \
-	$(GLIDE_DRIVER_SOURCES) \
-	$(SVGA_DRIVER_SOURCES)
+	$(X11_DRIVER_SOURCES)
 
 STAND_ALONE_DRIVER_OBJECTS = $(STAND_ALONE_DRIVER_SOURCES:.c=.o)
 
@@ -142,7 +140,7 @@ depend: $(ALL_SOURCES)
 	@ echo "running $(MKDEP)"
 	@ touch depend
 	@$(MKDEP) $(MKDEP_OPTIONS) $(DEFINES) $(INCLUDE_DIRS) $(ALL_SOURCES) \
-		> /dev/null 
+		> /dev/null 2>/dev/null
 
 
 subdirs:

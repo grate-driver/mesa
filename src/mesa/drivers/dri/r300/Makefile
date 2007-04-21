@@ -39,7 +39,7 @@ DRIVER_SOURCES = \
 		 r300_texmem.c \
 		 r300_tex.c \
 		 r300_texstate.c \
-		 r300_vertexprog.c \
+		 r300_vertprog.c \
 		 r300_fragprog.c \
 		 r300_shader.c \
 		 r300_maos.c \
@@ -90,9 +90,11 @@ COMMON_SYMLINKS = \
 
 include ../Makefile.template
 
-$(SYMLINKS):
+server:
 	mkdir -p server
-	for i in $(SYMLINKS) ; do rm -f $$i && test -f ../radeon/$$i && ln -s ../../radeon/$$i $$i ; done
+
+$(SYMLINKS): server
+	@[ -e $@ ] || ln -sf ../../radeon/$@ server/
 
 $(COMMON_SYMLINKS):
 	@[ -e $@ ] || ln -sf ../radeon/$@ ./

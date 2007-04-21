@@ -139,8 +139,19 @@
 .emtcode TYPE_SPECIFIER_SAMPLERCUBE                 19
 .emtcode TYPE_SPECIFIER_SAMPLER1DSHADOW             20
 .emtcode TYPE_SPECIFIER_SAMPLER2DSHADOW             21
-.emtcode TYPE_SPECIFIER_STRUCT                      22
-.emtcode TYPE_SPECIFIER_TYPENAME                    23
+.emtcode TYPE_SPECIFIER_SAMPLER2DRECT               22
+.emtcode TYPE_SPECIFIER_SAMPLER2DRECTSHADOW         23
+.emtcode TYPE_SPECIFIER_STRUCT                      24
+.emtcode TYPE_SPECIFIER_TYPENAME                    25
+
+/* OpenGL 2.1 */
+.emtcode TYPE_SPECIFIER_MAT23                       26
+.emtcode TYPE_SPECIFIER_MAT32                       27
+.emtcode TYPE_SPECIFIER_MAT24                       28
+.emtcode TYPE_SPECIFIER_MAT42                       29
+.emtcode TYPE_SPECIFIER_MAT34                       30
+.emtcode TYPE_SPECIFIER_MAT43                       31
+
 
 /* structure field */
 .emtcode FIELD_NONE                                 0
@@ -878,12 +889,20 @@ type_qualifier
                                           | "mat2"
                                           | "mat3"
                                           | "mat4"
+                                          | "mat2x3"
+                                          | "mat3x2"
+                                          | "mat2x4"
+                                          | "mat4x2"
+                                          | "mat3x4"
+                                          | "mat4x3"
                                           | "sampler1D"
                                           | "sampler2D"
                                           | "sampler3D"
                                           | "samplerCube"
                                           | "sampler1DShadow"
                                           | "sampler2DShadow"
+					  | "sampler2DRect"
+					  | "sampler2DRectShadow"
                                           | <struct_specifier>
                                           | <type_name>
 */
@@ -904,12 +923,20 @@ type_specifier_space
     "mat2" .emit TYPE_SPECIFIER_MAT2 .or
     "mat3" .emit TYPE_SPECIFIER_MAT3 .or
     "mat4" .emit TYPE_SPECIFIER_MAT4 .or
+    "mat2x3" .emit TYPE_SPECIFIER_MAT23 .or
+    "mat3x2" .emit TYPE_SPECIFIER_MAT32 .or
+    "mat2x4" .emit TYPE_SPECIFIER_MAT24 .or
+    "mat4x2" .emit TYPE_SPECIFIER_MAT42 .or
+    "mat3x4" .emit TYPE_SPECIFIER_MAT34 .or
+    "mat4x3" .emit TYPE_SPECIFIER_MAT43 .or
     "sampler1D" .emit TYPE_SPECIFIER_SAMPLER1D .or
     "sampler2D" .emit TYPE_SPECIFIER_SAMPLER2D .or
     "sampler3D" .emit TYPE_SPECIFIER_SAMPLER3D .or
     "samplerCube" .emit TYPE_SPECIFIER_SAMPLERCUBE .or
     "sampler1DShadow" .emit TYPE_SPECIFIER_SAMPLER1DSHADOW .or
     "sampler2DShadow" .emit TYPE_SPECIFIER_SAMPLER2DSHADOW .or
+    "sampler2DRect" .emit TYPE_SPECIFIER_SAMPLER2DRECT .or
+    "sampler2DRectShadow" .emit TYPE_SPECIFIER_SAMPLER2DRECTSHADOW .or
     type_name .emit TYPE_SPECIFIER_TYPENAME;
 type_specifier_nospace
     struct_specifier .emit TYPE_SPECIFIER_STRUCT;
@@ -1096,7 +1123,7 @@ condition_3
     expression .and .true .emit OP_END;
 
 /*
-    <iteration_statement>               ::= "while" "(" <condition> ")" <statement_no_new_scope>
+    <iteration_statement>               ::= "while" "(" <condition> ")" <statement>
                                           | "do" <statement> "while" "(" <expression> ")" ";"
                                           | "for" "(" <for_init_statement> <for_rest_statement> ")"
                                             <statement_no_new_scope>
@@ -1105,7 +1132,7 @@ iteration_statement
     iteration_statement_1 .or iteration_statement_2 .or iteration_statement_3;
 iteration_statement_1
     "while" .emit OP_WHILE .and lparen .error LPAREN_EXPECTED .and condition .and
-    rparen .error RPAREN_EXPECTED .and statement_no_new_scope;
+    rparen .error RPAREN_EXPECTED .and statement;
 iteration_statement_2
     "do" .emit OP_DO .and statement_space .and "while" .and lparen .error LPAREN_EXPECTED .and
     expression .and rparen .error RPAREN_EXPECTED .emit OP_END .and semicolon;
@@ -1192,7 +1219,12 @@ note: this is an extension to the standard language specification - normally sla
       __asm statements
 */
 asm_argument
-    variable_identifier .or floatconstant;
+    var_with_field .or
+    variable_identifier .or
+    floatconstant;
+
+var_with_field
+    variable_identifier .and dot .and field_selection .emit OP_FIELD;
 
 /*
     <translation_unit>                  ::= <external_declaration>
