@@ -1036,10 +1036,16 @@ setup_monochrome( XMesaVisual v, XMesaBuffer b )
  * \return GL_TRUE=success, GL_FALSE=failure
  */
 static GLboolean
-initialize_visual_and_buffer(int client, XMesaVisual v, XMesaBuffer b,
+initialize_visual_and_buffer(XMesaVisual v, XMesaBuffer b,
                              GLboolean rgb_flag, XMesaDrawable window,
                              XMesaColormap cmap)
 {
+   int client = 0;
+
+#ifdef XFree86Server
+   client = (window) ? CLIENT_ID(window->id) : 0;
+#endif
+
    ASSERT(!b || b->xm_visual == v);
 
    /* Save true bits/pixel */
@@ -1103,6 +1109,8 @@ initialize_visual_and_buffer(int client, XMesaVisual v, XMesaBuffer b,
    }
 
    if (b && window) {
+      char *data;
+
       /* Do window-specific initializations */
 
       /* these should have been set in create_xmesa_buffer */
@@ -1170,15 +1178,15 @@ initialize_visual_and_buffer(int client, XMesaVisual v, XMesaBuffer b,
       }
 
       /* Initialize the row buffer XImage for use in write_color_span() */
+      data = (char*) MALLOC(MAX_WIDTH*4);
 #ifdef XFree86Server
-      b->rowimage = XMesaCreateImage(GET_VISUAL_DEPTH(v), MAX_WIDTH, 1,
-				     (char *)MALLOC(MAX_WIDTH*4));
+      b->rowimage = XMesaCreateImage(GET_VISUAL_DEPTH(v), MAX_WIDTH, 1, data);
 #else
       b->rowimage = XCreateImage( v->display,
                                   v->visinfo->visual,
                                   v->visinfo->depth,
                                   ZPixmap, 0,           /*format, offset*/
-                                  (char*) MALLOC(MAX_WIDTH*4),  /*data*/
+                                  data,                 /*data*/
                                   MAX_WIDTH, 1,         /*width, height*/
                                   32,                   /*bitmap_pad*/
                                   0                     /*bytes_per_line*/ );
@@ -1410,7 +1418,7 @@ XMesaVisual XMesaCreateVisual( XMesaDisplay *display,
    if (alpha_flag)
       v->mesa_visual.alphaBits = 8;
 
-   (void) initialize_visual_and_buffer( 0, v, NULL, rgb_flag, 0, 0 );
+   (void) initialize_visual_and_buffer( v, NULL, rgb_flag, 0, 0 );
 
    {
       const int xclass = v->mesa_visual.visualType;
@@ -1557,6 +1565,11 @@ PUBLIC
 void XMesaDestroyContext( XMesaContext c )
 {
    GLcontext *mesaCtx = &c->mesa;
+
+#ifdef FX
+   FXdestroyContext( XMESA_BUFFER(mesaCtx->DrawBuffer) );
+#endif
+
    _swsetup_DestroyContext( mesaCtx );
    _swrast_DestroyContext( mesaCtx );
    _tnl_DestroyContext( mesaCtx );
@@ -1580,31 +1593,25 @@ XMesaCreateWindowBuffer(XMesaVisual v, XMesaWindow w)
 #ifndef XFree86Server
    XWindowAttributes attr;
 #endif
-   int client = 0;
    XMesaBuffer b;
    XMesaColormap cmap;
+   int depth;
 
    assert(v);
    assert(w);
 
    /* Check that window depth matches visual depth */
 #ifdef XFree86Server
-   client = CLIENT_ID(((XMesaDrawable)w)->id);
-
-   if (GET_VISUAL_DEPTH(v) != ((XMesaDrawable)w)->depth) {
-      _mesa_warning(NULL, "XMesaCreateWindowBuffer: depth mismatch between visual (%d) and window (%d)!\n",
-                    GET_VISUAL_DEPTH(v), ((XMesaDrawable) w)->depth);
-      return NULL;
-   }
+   depth = ((XMesaDrawable)w)->depth;
 #else
    XGetWindowAttributes( v->display, w, &attr );
-
-   if (GET_VISUAL_DEPTH(v) != attr.depth) {
+   depth = attr.depth;
+#endif
+   if (GET_VISUAL_DEPTH(v) != depth) {
       _mesa_warning(NULL, "XMesaCreateWindowBuffer: depth mismatch between visual (%d) and window (%d)!\n",
-                    GET_VISUAL_DEPTH(v), attr.depth);
+                    GET_VISUAL_DEPTH(v), depth);
       return NULL;
    }
-#endif
 
    /* Find colormap */
 #ifdef XFree86Server
@@ -1625,7 +1632,7 @@ XMesaCreateWindowBuffer(XMesaVisual v, XMesaWindow w)
    if (!b)
       return NULL;
 
-   if (!initialize_visual_and_buffer( client, v, b, v->mesa_visual.rgbMode,
+   if (!initialize_visual_and_buffer( v, b, v->mesa_visual.rgbMode,
                                       (XMesaDrawable) w, cmap )) {
       xmesa_free_buffer(b);
       return NULL;
@@ -1633,6 +1640,7 @@ XMesaCreateWindowBuffer(XMesaVisual v, XMesaWindow w)
 
    return b;
 }
+
 
 
 /**
@@ -1647,7 +1655,6 @@ XMesaCreateWindowBuffer(XMesaVisual v, XMesaWindow w)
 PUBLIC XMesaBuffer
 XMesaCreatePixmapBuffer(XMesaVisual v, XMesaPixmap p, XMesaColormap cmap)
 {
-   int client = 0;
    XMesaBuffer b;
 
    assert(v);
@@ -1656,11 +1663,7 @@ XMesaCreatePixmapBuffer(XMesaVisual v, XMesaPixmap p, XMesaColormap cmap)
    if (!b)
       return NULL;
 
-#ifdef XFree86Server
-   client = CLIENT_ID(((XMesaDrawable)p)->id);
-#endif
-
-   if (!initialize_visual_and_buffer(client, v, b, v->mesa_visual.rgbMode,
+   if (!initialize_visual_and_buffer(v, b, v->mesa_visual.rgbMode,
 				     (XMesaDrawable) p, cmap)) {
       xmesa_free_buffer(b);
       return NULL;
@@ -1675,10 +1678,7 @@ XMesaBuffer
 XMesaCreatePBuffer(XMesaVisual v, XMesaColormap cmap,
                    unsigned int width, unsigned int height)
 {
-#ifdef XFree86Server
-   return 0;
-#else
-   int client = 0;
+#ifndef XFree86Server
    XMesaWindow root;
    XMesaDrawable drawable;  /* X Pixmap Drawable */
    XMesaBuffer b;
@@ -1694,13 +1694,15 @@ XMesaCreatePBuffer(XMesaVisual v, XMesaColormap cmap,
    if (!b)
       return NULL;
 
-   if (!initialize_visual_and_buffer(client, v, b, v->mesa_visual.rgbMode,
+   if (!initialize_visual_and_buffer(v, b, v->mesa_visual.rgbMode,
 				     drawable, cmap)) {
       xmesa_free_buffer(b);
       return NULL;
    }
 
    return b;
+#else
+   return 0;
 #endif
 }
 
@@ -1769,6 +1771,11 @@ GLboolean XMesaMakeCurrent2( XMesaContext c, XMesaBuffer drawBuffer,
       }
 
       c->xm_buffer = drawBuffer;
+
+#ifdef FX
+      if (FXmakeCurrent( drawBuffer ))
+         return GL_TRUE;
+#endif
 
       /* Call this periodically to detect when the user has begun using
        * GL rendering from multiple threads.
@@ -1862,9 +1869,7 @@ PUBLIC
 GLboolean XMesaForceCurrent(XMesaContext c)
 {
    if (c) {
-#ifdef XGLServer
       _glapi_set_dispatch(c->mesa.CurrentDispatch);
-#endif
 
       if (&(c->mesa) != _mesa_get_current_context()) {
 	 _mesa_make_current(&c->mesa, c->mesa.DrawBuffer, c->mesa.ReadBuffer);
@@ -1895,14 +1900,13 @@ GLboolean XMesaCopyContext( XMesaContext xm_src, XMesaContext xm_dst, GLuint mas
 #endif /* XFree86Server */
 
 
-/*
- * Switch 3Dfx support hack between window and full-screen mode.
- */
+#ifndef FX
 GLboolean XMesaSetFXmode( GLint mode )
 {
    (void) mode;
    return GL_FALSE;
 }
+#endif
 
 
 
@@ -1927,7 +1931,11 @@ void XMesaSwapBuffers( XMesaBuffer b )
       _mesa_notifySwapBuffers(ctx);
 
    if (b->db_mode) {
-     if (b->backxrb->ximage) {
+#ifdef FX
+      if (FXswapBuffers(b))
+         return;
+#endif
+      if (b->backxrb->ximage) {
 	 /* Copy Ximage (back buf) from client memory to server window */
 #if defined(USE_XSHM) && !defined(XFree86Server)
 	 if (b->shm) {
@@ -1993,6 +2001,10 @@ void XMesaCopySubBuffer( XMesaBuffer b, int x, int y, int width, int height )
 
    if (b->db_mode) {
       int yTop = b->mesa_buffer.Height - y - height;
+#ifdef FX
+      if (FXswapBuffers(b))
+         return;
+#endif
       if (b->backxrb->ximage) {
          /* Copy Ximage from host's memory to server's window */
 #if defined(USE_XSHM) && !defined(XFree86Server)

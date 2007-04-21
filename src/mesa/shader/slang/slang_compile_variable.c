@@ -30,8 +30,8 @@
 
 #include "imports.h"
 #include "slang_compile.h"
+#include "slang_mem.h"
 
-/* slang_type_specifier_type */
 
 typedef struct
 {
@@ -135,10 +135,10 @@ slang_fully_specified_type_copy(slang_fully_specified_type * x,
 static slang_variable *
 slang_variable_new(void)
 {
-   slang_variable *v = (slang_variable *) malloc(sizeof(slang_variable));
+   slang_variable *v = (slang_variable *) _slang_alloc(sizeof(slang_variable));
    if (v) {
       if (!slang_variable_construct(v)) {
-         free(v);
+         _slang_free(v);
          v = NULL;
       }
    }
@@ -150,7 +150,7 @@ static void
 slang_variable_delete(slang_variable * var)
 {
    slang_variable_destruct(var);
-   free(var);
+   _slang_free(var);
 }
 
 
@@ -162,8 +162,9 @@ slang_variable_scope *
 _slang_variable_scope_new(slang_variable_scope *parent)
 {
    slang_variable_scope *s;
-   s = (slang_variable_scope *) _mesa_calloc(sizeof(slang_variable_scope));
-   s->outer_scope = parent;
+   s = (slang_variable_scope *) _slang_alloc(sizeof(slang_variable_scope));
+   if (s)
+      s->outer_scope = parent;
    return s;
 }
 
@@ -187,7 +188,7 @@ slang_variable_scope_destruct(slang_variable_scope * scope)
       if (scope->variables[i])
          slang_variable_delete(scope->variables[i]);
    }
-   slang_alloc_free(scope->variables);
+   _slang_free(scope->variables);
    /* do not free scope->outer_scope */
 }
 
@@ -200,7 +201,7 @@ slang_variable_scope_copy(slang_variable_scope * x,
 
    _slang_variable_scope_ctr(&z);
    z.variables = (slang_variable **)
-      _mesa_calloc(y->num_variables * sizeof(slang_variable *));
+      _slang_alloc(y->num_variables * sizeof(slang_variable *));
    if (z.variables == NULL) {
       slang_variable_scope_destruct(&z);
       return 0;
@@ -235,9 +236,9 @@ slang_variable_scope_grow(slang_variable_scope *scope)
 {
    const int n = scope->num_variables;
    scope->variables = (slang_variable **)
-         slang_alloc_realloc(scope->variables,
-                             n * sizeof(slang_variable *),
-                             (n + 1) * sizeof(slang_variable *));
+         _slang_realloc(scope->variables,
+                        n * sizeof(slang_variable *),
+                        (n + 1) * sizeof(slang_variable *));
    if (!scope->variables)
       return NULL;
 
@@ -276,7 +277,7 @@ slang_variable_destruct(slang_variable * var)
    slang_fully_specified_type_destruct(&var->type);
    if (var->initializer != NULL) {
       slang_operation_destruct(var->initializer);
-      slang_alloc_free(var->initializer);
+      _slang_free(var->initializer);
    }
 #if 0
    if (var->aux) {
@@ -301,13 +302,13 @@ slang_variable_copy(slang_variable * x, const slang_variable * y)
    z.array_len = y->array_len;
    if (y->initializer != NULL) {
       z.initializer
-         = (slang_operation *) slang_alloc_malloc(sizeof(slang_operation));
+         = (slang_operation *) _slang_alloc(sizeof(slang_operation));
       if (z.initializer == NULL) {
          slang_variable_destruct(&z);
          return 0;
       }
       if (!slang_operation_construct(z.initializer)) {
-         slang_alloc_free(z.initializer);
+         _slang_free(z.initializer);
          slang_variable_destruct(&z);
          return 0;
       }

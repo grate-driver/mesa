@@ -41,10 +41,10 @@ MAIN_SOURCES = \
 	main/matrix.c \
 	main/mipmap.c \
 	main/mm.c \
-	main/occlude.c \
 	main/pixel.c \
 	main/points.c \
 	main/polygon.c \
+	main/queryobj.c \
 	main/rastpos.c \
 	main/rbadaptors.c \
 	main/renderbuffer.c \
@@ -182,6 +182,7 @@ SLANG_SOURCES =	\
 	shader/slang/slang_library_noise.c	\
 	shader/slang/slang_link.c	\
 	shader/slang/slang_log.c	\
+	shader/slang/slang_mem.c	\
 	shader/slang/slang_preprocess.c	\
 	shader/slang/slang_print.c	\
 	shader/slang/slang_simplify.c	\
@@ -246,6 +247,7 @@ X11_DRIVER_SOURCES =		\
 	drivers/x11/xm_api.c	\
 	drivers/x11/xm_buffer.c	\
 	drivers/x11/xm_dd.c	\
+	drivers/x11/xm_glide.c	\
 	drivers/x11/xm_line.c	\
 	drivers/x11/xm_span.c	\
 	drivers/x11/xm_tri.c

@@ -48,6 +48,7 @@
 #include "slang_codegen.h"
 #include "slang_compile.h"
 #include "slang_label.h"
+#include "slang_mem.h"
 #include "slang_simplify.h"
 #include "slang_emit.h"
 #include "slang_vartable.h"
@@ -459,7 +460,7 @@ static slang_ir_node *
 new_node3(slang_ir_opcode op,
           slang_ir_node *c0, slang_ir_node *c1, slang_ir_node *c2)
 {
-   slang_ir_node *n = (slang_ir_node *) calloc(1, sizeof(slang_ir_node));
+   slang_ir_node *n = (slang_ir_node *) _slang_alloc(sizeof(slang_ir_node));
    if (n) {
       n->Opcode = op;
       n->Children[0] = c0;
@@ -923,11 +924,11 @@ slang_inline_function_call(slang_assemble_ctx * A, slang_function *fun,
 
    /* allocate temporary arrays */
    paramMode = (ParamMode *)
-      _mesa_calloc(totalArgs * sizeof(ParamMode));
+      _slang_alloc(totalArgs * sizeof(ParamMode));
    substOld = (slang_variable **)
-      _mesa_calloc(totalArgs * sizeof(slang_variable *));
+      _slang_alloc(totalArgs * sizeof(slang_variable *));
    substNew = (slang_operation **)
-      _mesa_calloc(totalArgs * sizeof(slang_operation *));
+      _slang_alloc(totalArgs * sizeof(slang_operation *));
 
 #if 0
    printf("Inline call to %s  (total vars=%d  nparams=%d)\n",
@@ -1128,9 +1129,9 @@ slang_inline_function_call(slang_assemble_ctx * A, slang_function *fun,
       }
    }
 
-   _mesa_free(paramMode);
-   _mesa_free(substOld);
-   _mesa_free(substNew);
+   _slang_free(paramMode);
+   _slang_free(substOld);
+   _slang_free(substNew);
 
 #if 0
    printf("Done Inline call to %s  (total vars=%d  nparams=%d)\n",
@@ -1188,7 +1189,7 @@ _slang_gen_function_call(slang_assemble_ctx *A, slang_function *fun,
    /* Replace the function call with the inlined block */
    slang_operation_destruct(oper);
    *oper = *inlined;
-   /* XXX slang_operation_destruct(inlined) ??? */
+   _slang_free(inlined);
 
 #if 0
    assert(inlined->locals);
@@ -1202,7 +1203,6 @@ _slang_gen_function_call(slang_assemble_ctx *A, slang_function *fun,
 
    /*_slang_label_delete(A->curFuncEndLabel);*/
    A->curFuncEndLabel = prevFuncEndLabel;
-   assert(A->curFuncEndLabel);
 
    return n;
 }
@@ -1319,7 +1319,7 @@ _slang_gen_asm(slang_assemble_ctx *A, slang_operation *oper,
       n->Store = n0->Store;
       n->Writemask = writemask;
 
-      free(n0);
+      _slang_free(n0);
    }
 
    return n;
@@ -1761,7 +1761,7 @@ _slang_gen_temporary(GLint size)
          n->Store = store;
       }
       else {
-         free(store);
+         _slang_free(store);
       }
    }
    return n;
@@ -1871,11 +1871,6 @@ _slang_gen_logical_and(slang_assemble_ctx *A, slang_operation *oper)
    select->children[2].literal_size = 1;
 
    n = _slang_gen_select(A, select);
-
-   /* xxx wrong */
-   free(select->children);
-   free(select);
-
    return n;
 }
 
@@ -1902,11 +1897,6 @@ _slang_gen_logical_or(slang_assemble_ctx *A, slang_operation *oper)
    slang_operation_copy(&select->children[2], &oper->children[1]);
 
    n = _slang_gen_select(A, select);
-
-   /* xxx wrong */
-   free(select->children);
-   free(select);
-
    return n;
 }
 
@@ -2320,15 +2310,16 @@ _slang_gen_field(slang_assemble_ctx * A, slang_operation *oper)
       /* oper->a_id is the field name */
       slang_ir_node *base, *n;
       slang_typeinfo field_ti;
-      GLint fieldSize, fieldOffset;
+      GLint fieldSize, fieldOffset = -1;
       /* type of field */
       slang_typeinfo_construct(&field_ti);
       _slang_typeof_operation(A, oper, &field_ti);
 
       fieldSize = _slang_sizeof_type_specifier(&field_ti.spec);
-      fieldOffset = _slang_field_offset(&ti.spec, oper->a_id);
+      if (fieldSize > 0)
+         fieldOffset = _slang_field_offset(&ti.spec, oper->a_id);
 
-      if (fieldOffset < 0) {
+      if (fieldSize == 0 || fieldOffset < 0) {
          slang_info_log_error(A->log,
                               "\"%s\" is not a member of struct \"%s\"",
                               (char *) oper->a_id,
