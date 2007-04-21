@@ -1,4 +1,4 @@
-mesa (6.5.3~rc1-1) UNRELEASED; urgency=low
+mesa (6.5.3~rc2-1) UNRELEASED; urgency=low
 
   [ Brice Goglin ]
   * Split out libGLw libs and headers from libgl1-mesa-swx11 and ship both
