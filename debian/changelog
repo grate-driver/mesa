@@ -5,7 +5,14 @@ mesa (6.5.3~rc1-1) UNRELEASED; urgency=low
     static and shared libraries, creating libglw1-mesa and libglw1-mesa-dev
     (closes: #374904).
 
- -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Fri, 30 Mar 2007 19:44:53 +0200
+  [ Julien Cristau ]
+  * New upstream release candidate.
+    + 06_fix_texture_data_corruption.patch,
+      07_call_radeonSetCliprects_from_radeonMakeCurrent.patch,
+      08_r300_update_window_state_when_bound_but_stamp_changed.patch,
+      09_i915_always_enable_pixel_fog.patch: remove, included upstream.
+
+ -- Julien Cristau <jcristau@debian.org>  Sat, 21 Apr 2007 20:43:43 +0200
 
 mesa (6.5.2-5) UNRELEASED; urgency=low
 
