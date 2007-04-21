@@ -9,7 +9,6 @@ fi
 SOURCE_DIRS='
 	include/GL/internal
 	src/glx/x11
-	src/mesa/array_cache
 	src/mesa/drivers/common
 	src/mesa/drivers/dri/common
 	src/mesa/drivers/dri/glcore
@@ -24,6 +23,7 @@ SOURCE_DIRS='
 	src/mesa/swrast
 	src/mesa/tnl_dd
 	src/mesa/tnl
+	src/mesa/vbo
 	src/mesa/x86-64
 	src/mesa/x86
 '
