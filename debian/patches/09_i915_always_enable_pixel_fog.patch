@@ -1,0 +1,31 @@
+From: Zou Nan hai <nanhai.zou@intel.com>
+Date: Fri, 2 Feb 2007 01:35:17 +0000 (+0800)
+Subject:   Fix fd.o #9686, when fall into vertex fog,
+X-Git-Url: http://gitweb.freedesktop.org/?p=mesa/mesa.git;a=commitdiff;h=2dfb3a217f730d6783fb2ac8b73248dc682f923c
+
+  Fix fd.o #9686, when fall into vertex fog,
+  fog factors are precomputed in t_vb_fog.c compute_fog_blend_factors,
+  which is incompatible with appended fragment fog code.
+  That will make GoogleEarth display abnormally.
+  always use pixel fog.
+---
+
+--- a/src/mesa/drivers/dri/i915/i915_state.c
++++ b/src/mesa/drivers/dri/i915/i915_state.c
+@@ -611,10 +611,12 @@ void i915_update_fog( GLcontext *ctx )
+ 	 i915->state.Ctx[I915_CTXREG_LIS5] &= ~S5_FOG_ENABLE;
+    }
+ 
+-   if (enabled) {
+-      _tnl_allow_vertex_fog( ctx, (i915->vertex_fog == I915_FOG_VERTEX) ); 
+-      _tnl_allow_pixel_fog( ctx, (i915->vertex_fog != I915_FOG_VERTEX) ); 
+-   }
++   /* always enbale pixel fog
++    * vertex fog use precaculted fog coord will conflict with appended
++    * fog program
++    */
++    _tnl_allow_vertex_fog( ctx, 0 );
++    _tnl_allow_pixel_fog( ctx, 1 );
+ }
+ 
+ static void i915Fogfv(GLcontext *ctx, GLenum pname, const GLfloat *param)
