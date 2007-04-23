@@ -44,8 +44,8 @@ CONFIGS = $(SWX11_GLU_CONFIGS) \
 
 STAMP = $(STAMP_DIR)/$(DEB_BUILD_GNU_TYPE)
 BUILD_STAMPS = $(addprefix $(STAMP)-build-, $(CONFIGS))
-INSTALL_STAMPS = $(addprefix $(STAMP)-install-, $(CONFIGS)) \
-                 $(STAMP_DIR)/install-source
+ARCH_INSTALL_STAMPS = $(addprefix $(STAMP)-install-, $(CONFIGS))
+INDEP_INSTALL_STAMPS = $(STAMP_DIR)/install-source
 
 # list the configurations that will built
 configs:
@@ -72,17 +72,17 @@ $(STAMP)-build-%: patch
 pre-install:
 	dh_testdir
 	dh_testroot
-	dh_clean -k --exclude ./Makefile.orig --exclude configs/CVS/Root.bak
+	dh_clean -k
 	rm -rf $(INSTALL_STAMPS)
 
-install: pre-install $(INSTALL_STAMPS)
+install: pre-install $(ARCH_INSTALL_STAMPS)
 
 $(STAMP)-install-%: $(STAMP)-build-%
 	# Add here commands to install the package into debian/tmp
 	cd $(DEB_BUILD_DIR)/$* && $(MAKE) install DESTDIR=$(CURDIR)/debian/tmp
 	touch $@
 
-$(STAMP_DIR)/install-source:
+$(STAMP_DIR)/install-source: pre-install
 	# install Mesa source for mesa-swx11-source package
 	chmod a+x debian/scripts/install-source.sh
 	debian/scripts/install-source.sh
@@ -95,7 +95,7 @@ clean: unpatch
 	rm -rf $(DEB_BUILD_DIR) $(STAMP_DIR)
 
 # Build architecture-independent files here.
-binary-indep: build install
+binary-indep: build install $(INDEP_INSTALL_STAMPS)
 	dh_testdir
 	dh_testroot
 	dh_installchangelogs -i
