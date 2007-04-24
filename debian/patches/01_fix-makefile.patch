@@ -3,9 +3,11 @@ OSMesa in a separate package.
 
 This patch by Thierry Reding.
 
---- a/src/mesa/Makefile
-+++ b/src/mesa/Makefile
-@@ -107,7 +107,7 @@
+Index: mesa/src/mesa/Makefile
+===================================================================
+--- mesa.orig/src/mesa/Makefile	2007-04-25 01:44:31.000000000 +0200
++++ mesa/src/mesa/Makefile	2007-04-25 01:44:58.000000000 +0200
+@@ -105,7 +105,7 @@
  	$(OSMESA_DRIVER_OBJECTS)
  
  

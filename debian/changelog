@@ -1,4 +1,4 @@
-mesa (6.5.3~rc2-1) UNRELEASED; urgency=low
+mesa (6.5.3~rc3-1) UNRELEASED; urgency=low
 
   [ Brice Goglin ]
   * Split out libGLw libs and headers from libgl1-mesa-swx11 and ship both
@@ -11,11 +11,12 @@ mesa (6.5.3~rc2-1) UNRELEASED; urgency=low
       07_call_radeonSetCliprects_from_radeonMakeCurrent.patch,
       08_r300_update_window_state_when_bound_but_stamp_changed.patch,
       09_i915_always_enable_pixel_fog.patch: remove, included upstream.
+    + 01_fix-makefile.patch, 02_use-ieee-fp-on-s390-and-m68k.patch: refresh.
   * Add build-dependencies on libxdamage-dev and libxfixes-dev.
   * Resync debian/scripts/install-source.sh.
   * Build mesa-swx11-source only in binary-indep.
 
- -- Julien Cristau <jcristau@debian.org>  Sun, 22 Apr 2007 01:06:39 +0200
+ -- Julien Cristau <jcristau@debian.org>  Wed, 25 Apr 2007 01:46:10 +0200
 
 mesa (6.5.2-5) UNRELEASED; urgency=low
 
