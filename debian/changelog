@@ -1,4 +1,4 @@
-mesa (6.5.3~rc3-1) UNRELEASED; urgency=low
+mesa (6.5.3~rc3-1) experimental; urgency=low
 
   [ Brice Goglin ]
   * Split out libGLw libs and headers from libgl1-mesa-swx11 and ship both
@@ -18,7 +18,7 @@ mesa (6.5.3~rc3-1) UNRELEASED; urgency=low
   * Update from upstream git (commit
     dee1b0d5bbe91f83854813cbbcd3090327bcb5c2).
 
- -- Julien Cristau <jcristau@debian.org>  Wed, 25 Apr 2007 08:40:49 +0200
+ -- Julien Cristau <jcristau@debian.org>  Wed, 25 Apr 2007 10:36:50 +0200
 
 mesa (6.5.2-5) UNRELEASED; urgency=low
 
