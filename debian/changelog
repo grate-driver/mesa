@@ -15,8 +15,10 @@ mesa (6.5.3~rc3-1) UNRELEASED; urgency=low
   * Add build-dependencies on libxdamage-dev and libxfixes-dev.
   * Resync debian/scripts/install-source.sh.
   * Build mesa-swx11-source only in binary-indep.
+  * Update from upstream git (commit
+    dee1b0d5bbe91f83854813cbbcd3090327bcb5c2).
 
- -- Julien Cristau <jcristau@debian.org>  Wed, 25 Apr 2007 01:46:10 +0200
+ -- Julien Cristau <jcristau@debian.org>  Wed, 25 Apr 2007 08:40:49 +0200
 
 mesa (6.5.2-5) UNRELEASED; urgency=low
 
