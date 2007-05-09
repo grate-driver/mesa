@@ -1,8 +1,13 @@
 mesa (6.5.3-1) experimental; urgency=low
 
+  [ David Nusinow ]
   * New upstream release
 
- -- David Nusinow <dnusinow@debian.org>  Sun, 29 Apr 2007 23:23:06 -0400
+  [ Julien Cristau ]
+  * Cherry-pick commit 65faf023679988f93da82b4c7ebdc689f2094459 by Michel
+    Dänzer to fix r300 crash.
+
+ -- Julien Cristau <jcristau@debian.org>  Wed, 09 May 2007 15:02:12 +0200
 
 mesa (6.5.3~rc3-1) experimental; urgency=low
 
