@@ -1,11 +1,12 @@
-mesa (6.5.2-5) UNRELEASED; urgency=low
+mesa (6.5.2-5) unstable; urgency=low
 
+  [ Brice Goglin ]
   * Add 07_call_radeonSetCliprects_from_radeonMakeCurrent.patch
     (closes: #420164). Thanks to Christian Ohm.
   * Add 08_r300_update_window_state_when_bound_but_stamp_changed.patch
   * Add 09_i915_always_enable_pixel_fog.patch
 
- -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Fri, 20 Apr 2007 18:36:51 +0200
+ -- Julien Cristau <jcristau@debian.org>  Fri, 18 May 2007 13:36:25 +0200
 
 mesa (6.5.2-4) unstable; urgency=low
 
