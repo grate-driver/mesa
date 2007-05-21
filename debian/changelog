@@ -7,7 +7,7 @@ mesa (6.5.3-1) experimental; urgency=low
   * Cherry-pick commit 65faf023679988f93da82b4c7ebdc689f2094459 by Michel
     Dänzer to fix r300 crash.
 
- -- Julien Cristau <jcristau@debian.org>  Wed, 09 May 2007 15:02:12 +0200
+ -- Julien Cristau <jcristau@debian.org>  Mon, 21 May 2007 11:34:51 +0200
 
 mesa (6.5.3~rc3-1) experimental; urgency=low
 
