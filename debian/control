@@ -57,7 +57,7 @@ Section: libs
 Priority: extra
 Architecture: i386
 Pre-Depends: libgl1-mesa-swx11
-Description: A free implementation of the OpenGL API -- runtime [i686 optimized]
+Description: Mesa OpenGL runtime [i686 optimized]
  Mesa is a 3-D graphics library with an API which is very similar to
  that of OpenGL.  To the extent that Mesa utilizes the OpenGL command
  syntax or state machine, it is being used with authorization from
@@ -83,7 +83,7 @@ Depends: libgl1-mesa-swx11 (= ${binary:Version}), libc6-dev, libx11-dev, libxext
 Provides: libgl-dev, mesag-dev, libgl1-mesa-swrast-dev
 Conflicts: mesa-dev, libgl-dev, mesag3 (<< 3.1-1), nvidia-glx-dev, mesag-dev, libgl1-mesa-swrast-dev
 Replaces: libgl-dev, mesag-dev, libgl1-mesa-swrast-dev
-Description: A free implementation of the OpenGL API -- development support files
+Description: A free implementation of the OpenGL API -- development files
  This package provides the development environment required for
  compiling programs with Mesa.  For a complete description of Mesa,
  please look at the libgl1-mesa-swx11 package.
@@ -115,7 +115,7 @@ Section: libdevel
 Priority: extra
 Architecture: any
 Depends: libgl1-mesa-glx (= ${binary:Version})
-Description: A free implementation of the OpenGL API -- GLX runtime -- debugging symbols
+Description: Debugging symbols for the Mesa GLX runtime
  This version of Mesa provides GLX and DRI capabilities: it is capable of
  both direct and indirect rendering.  For direct rendering, it can use DRI
  modules from the libgl1-mesa-dri package to accelerate drawing.
@@ -176,7 +176,7 @@ Section: libdevel
 Priority: extra
 Architecture: any
 Depends: libgl1-mesa-dri (= ${binary:Version})
-Description: A free implementation of the OpenGL API -- DRI modules -- debugging symbols
+Description: Debugging symbols for the Mesa DRI modules
  This version of Mesa provides GLX and DRI capabilities: it is capable of
  both direct and indirect rendering.  For direct rendering, it can use DRI
  modules from the libgl1-mesa-dri package to accelerate drawing.
@@ -217,7 +217,7 @@ Depends: libc6-dev, mesa-common-dev (= ${source:Version}), libgl1-mesa-glx (>= $
 Conflicts: libgl-dev, libgl1-mesa-dri-dev
 Replaces: libgl-dev, libgl1-mesa-dri-dev
 Provides: libgl-dev, libgl1-mesa-dri-dev
-Description: A free implementation of the OpenGL API -- GLX development support files
+Description: A free implementation of the OpenGL API -- GLX development files
  This version of Mesa provides GLX and DRI capabilities: it is capable of
  both direct and indirect rendering.  For direct rendering, it can use DRI
  modules from the libgl1-mesa-dri package to accelerate drawing.
@@ -258,7 +258,7 @@ Depends: libosmesa6 (= ${binary:Version}), mesa-common-dev (= ${source:Version})
 Conflicts: xlibosmesa-dev, libosmesa4-dev, libosmesa-dev
 Replaces: xlibosmesa-dev, libosmesa-dev, libgl1-mesa-swx11-dev (<< 6.5.2), mesa-common-dev (<< 6.5.2)
 Provides: xlibosmesa-dev, libosmesa-dev
-Description: Mesa Off-screen rendering extension -- development support files
+Description: Mesa Off-screen rendering extension -- development files
  This package provides the required environment for developing programs
  that use the off-screen rendering extension of Mesa.
  .
@@ -292,7 +292,7 @@ Depends: libglu1-mesa (= ${binary:Version}), libgl1-mesa-dev | libgl-dev
 Provides: libglu-dev, xlibmesa-glu-dev
 Conflicts: mesag-dev (<< 5.0.0-1), mesa-glide2-dev (<< 5.0.0-1), mesag3+ggi-dev (<< 5.0.0-1), xlibmesa-dev
 Replaces: libglu-dev
-Description: The OpenGL utility library -- development support files
+Description: The OpenGL utility library -- development files
  Includes headers and static libraries for compiling programs with GLU.
  .
  For a complete description of GLU, please look at the libglu1-mesa
@@ -323,7 +323,7 @@ Depends: libglw1-mesa (= ${binary:Version}), libc6-dev, libx11-dev, libxext6, me
 Provides: mesag3-widgets, mesag-widgets-dev, libglw-dev
 Conflicts: libglw-dev, libgl1-mesa-swx11-dev (<< 6.5.2-4)
 Replaces: libglw-dev
-Description: A free implementation of the OpenGL API -- development support files
+Description: A free implementation of the OpenGL API -- development files
  This package provides the development environment required for
  compiling programs with the Mesa widgets library, libGLw, which
  allows Motif-based applications to embed an OpenGL drawing context.
@@ -333,7 +333,7 @@ Description: A free implementation of the OpenGL API -- development support file
 Package: mesa-swx11-source
 Section: libdevel
 Architecture: all
-Description: Mesa software rasteriser source -- development support files
+Description: Mesa software rasteriser source -- development files
  This package contains the source to the Mesa software rasteriser, which
  implements all of Mesa's GL support in software.  It powers the X11 and
  X server backends (assuming unaccelerated indirect).  This package is
