@@ -9,8 +9,9 @@ mesa (6.5.3-2) UNRELEASED; urgency=low
 
   * Modify the short descriptions of various packages so they fit in .changes
     files without being cut off.  Thanks, Marc 'HE' Brockschmidt!
+  * Add a shlibs file for libgl1-mesa-swx11-i686.
 
- -- Julien Cristau <jcristau@debian.org>  Wed, 13 Jun 2007 19:30:06 +0200
+ -- Julien Cristau <jcristau@debian.org>  Wed, 27 Jun 2007 17:43:35 +0100
 
 mesa (6.5.3-1) experimental; urgency=low
 
