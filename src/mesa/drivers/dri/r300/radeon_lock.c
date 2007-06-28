@@ -135,3 +135,5 @@ void radeonGetLock(radeonContextPtr rmesa, GLuint flags)
 
 	rmesa->lost_context = GL_TRUE;
 }
+}
+}

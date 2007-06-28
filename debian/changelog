@@ -4,11 +4,23 @@ mesa (7.0.0-1) experimental; urgency=low
 
  -- David Nusinow <dnusinow@debian.org>  Wed, 27 Jun 2007 21:32:32 -0400
 
+mesa (6.5.3-2) UNRELEASED; urgency=low
+
+  * Modify the short descriptions of various packages so they fit in .changes
+    files without being cut off.  Thanks, Marc 'HE' Brockschmidt!
+
+ -- Julien Cristau <jcristau@debian.org>  Wed, 13 Jun 2007 19:30:06 +0200
+
 mesa (6.5.3-1) experimental; urgency=low
 
+  [ David Nusinow ]
   * New upstream release
 
- -- David Nusinow <dnusinow@debian.org>  Sun, 29 Apr 2007 23:23:06 -0400
+  [ Julien Cristau ]
+  * Cherry-pick commit 65faf023679988f93da82b4c7ebdc689f2094459 by Michel
+    Dänzer to fix r300 crash.
+
+ -- Julien Cristau <jcristau@debian.org>  Mon, 21 May 2007 11:34:51 +0200
 
 mesa (6.5.3~rc3-1) experimental; urgency=low
 
@@ -32,14 +44,15 @@ mesa (6.5.3~rc3-1) experimental; urgency=low
 
  -- Julien Cristau <jcristau@debian.org>  Wed, 25 Apr 2007 10:36:50 +0200
 
-mesa (6.5.2-5) UNRELEASED; urgency=low
+mesa (6.5.2-5) unstable; urgency=low
 
+  [ Brice Goglin ]
   * Add 07_call_radeonSetCliprects_from_radeonMakeCurrent.patch
     (closes: #420164). Thanks to Christian Ohm.
   * Add 08_r300_update_window_state_when_bound_but_stamp_changed.patch
   * Add 09_i915_always_enable_pixel_fog.patch
 
- -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Fri, 20 Apr 2007 18:36:51 +0200
+ -- Julien Cristau <jcristau@debian.org>  Fri, 18 May 2007 13:36:25 +0200
 
 mesa (6.5.2-4) unstable; urgency=low
 
