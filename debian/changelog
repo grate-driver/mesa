@@ -1,8 +1,9 @@
-mesa (7.0.0-1) experimental; urgency=low
+mesa (7.0.0-1) UNRELEASED; urgency=low
 
   * New upstream release
+  * Bite the bullet and add myself to uploaders
 
- -- David Nusinow <dnusinow@debian.org>  Wed, 27 Jun 2007 21:32:32 -0400
+ -- David Nusinow <dnusinow@debian.org>  Wed, 27 Jun 2007 22:54:22 -0400
 
 mesa (6.5.3-2) UNRELEASED; urgency=low
 
