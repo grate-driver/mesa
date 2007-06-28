@@ -22,10 +22,14 @@ else
 endif
 
 # and for the GLX/DRI-enabled libGL
-ifneq ($(wildcard configs/debian-dri-$(DEB_BUILD_ARCH)),)
-	DRI_CONFIGS := debian-dri-$(DEB_BUILD_ARCH)
+ifneq ($(wildcard configs/debian-indirect-$(DEB_BUILD_ARCH)),)
+	DRI_CONFIGS := debian-indirect-$(DEB_BUILD_ARCH)
 else
+  ifneq ($(wildcard configs/debian-dri-$(DEB_BUILD_ARCH)),)
+	DRI_CONFIGS := debian-dri-$(DEB_BUILD_ARCH)
+  else
 	DRI_CONFIGS := debian-dri-any
+  endif
 endif
 
 ##############################################################################
