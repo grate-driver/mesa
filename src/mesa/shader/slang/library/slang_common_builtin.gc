@@ -313,9 +313,16 @@ vec4 tan(const vec4 angle)
 
 float asin(const float x)
 {
-   // XXX FIX ME!
-   // __asm float_arcsine y, x;
-   __retVal = 0.5;
+   const float a0 = 1.5707288;  // PI/2?
+   const float a1 = -0.2121144;
+   const float a2 = 0.0742610;
+   //const float a3 = -0.0187293;
+   const float halfPi = 3.1415926 * 0.5;
+   const float y = abs(x);
+   // three terms seem to be enough:
+   __retVal = (halfPi - sqrt(1.0 - y) * (a0 + y * (a1 + a2 * y))) * sign(x);
+   // otherwise, try four:
+   //__retVal = (halfPi - sqrt(1.0 - y) * (a0 + y * (a1 + y * (a2 + y * a3)))) * sign(x);
 }
 
 vec2 asin(const vec2 v)
@@ -340,8 +347,8 @@ vec4 asin(const vec4 v)
 
 float acos(const float x)
 {
-   // XXX FIX ME!
-   __retVal = 0.5;
+   const float halfPi = 3.1415926 * 0.5;
+   __retVal = halfPi - asin(x);
 }
 
 vec2 acos(const vec2 v)
@@ -365,11 +372,9 @@ vec4 acos(const vec4 v)
    __retVal.w = acos(v.w);
 }
 
-float atan(const float y_over_x)
+float atan(const float x)
 {
-   // XXX FIX ME
-   //__asm float_arctan z, y_over_x;
-   __retVal = 0.5;
+   __retVal = asin(x * inversesqrt(x * x + 1.0));
 }
 
 vec2 atan(const vec2 y_over_x)
@@ -466,28 +471,32 @@ vec4 pow(const vec4 a, const vec4 b)
 
 float exp(const float a)
 {
-   __asm float_exp __retVal.x, a;
+   const float e = 2.71828;
+   __asm float_power __retVal, e, a;
 }
 
 vec2 exp(const vec2 a)
 {
-   __asm float_exp __retVal.x, a.x;
-   __asm float_exp __retVal.y, a.y;
+   const float e = 2.71828;
+   __asm float_power __retVal.x, e, a.x;
+   __asm float_power __retVal.y, e, a.y;
 }
 
 vec3 exp(const vec3 a)
 {
-   __asm float_exp __retVal.x, a.x;
-   __asm float_exp __retVal.y, a.y;
-   __asm float_exp __retVal.z, a.z;
+   const float e = 2.71828;
+   __asm float_power __retVal.x, e, a.x;
+   __asm float_power __retVal.y, e, a.y;
+   __asm float_power __retVal.z, e, a.z;
 }
 
 vec4 exp(const vec4 a)
 {
-   __asm float_exp __retVal.x, a.x;
-   __asm float_exp __retVal.y, a.y;
-   __asm float_exp __retVal.z, a.z;
-   __asm float_exp __retVal.w, a.w;
+   const float e = 2.71828;
+   __asm float_power __retVal.x, e, a.x;
+   __asm float_power __retVal.y, e, a.y;
+   __asm float_power __retVal.z, e, a.z;
+   __asm float_power __retVal.w, e, a.w;
 }
 
 
@@ -889,7 +898,7 @@ vec4 mod(const vec4 a, const vec4 b)
     __retVal.x = a.x - b.x * floor(a.x * oneOverBx);
     __retVal.y = a.y - b.y * floor(a.y * oneOverBy);
     __retVal.z = a.z - b.z * floor(a.z * oneOverBz);
-    __retVal.w = a.w - b.w * floor(a.w * oneOverBz);
+    __retVal.w = a.w - b.w * floor(a.w * oneOverBw);
 }
 
 
