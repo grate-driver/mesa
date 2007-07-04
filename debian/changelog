@@ -1,4 +1,4 @@
-mesa (6.5.2-6) UNRELEASED; urgency=low
+mesa (6.5.2-6) unstable; urgency=low
 
   * libgl1-mesa-swx11 needs to depend on libosmesa6 (>= 6.5.2-1) because
     it used to contain libOSMesa.so.6.  This means that programs linked
@@ -7,7 +7,7 @@ mesa (6.5.2-6) UNRELEASED; urgency=low
   * Fix build on hurd-i386 (build libgl1-mesa-glx without dri support and
     don't build the dri drivers); closes: #420403.  Thanks, Samuel Thibault!
 
- -- Julien Cristau <jcristau@debian.org>  Thu, 05 Jul 2007 00:47:14 +0200
+ -- Julien Cristau <jcristau@debian.org>  Thu, 05 Jul 2007 00:56:35 +0200
 
 mesa (6.5.2-5) unstable; urgency=low
 
