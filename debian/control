@@ -218,7 +218,7 @@ Description: A free implementation of the OpenGL API -- DRI modules -- debugging
 Package: libgl1-mesa-dev
 Section: libdevel
 Architecture: all
-Depends: libc6-dev, mesa-common-dev (= ${source:Version}), libgl1-mesa-glx (>= ${Source-Version}), libgl1-mesa-dri (>= ${Source-Version})
+Depends: libc6-dev, mesa-common-dev (= ${source:Version}), libgl1-mesa-glx (>= ${Source-Version})
 Conflicts: libgl-dev, libgl1-mesa-dri-dev
 Replaces: libgl-dev, libgl1-mesa-dri-dev
 Provides: libgl-dev, libgl1-mesa-dri-dev
