@@ -7,8 +7,12 @@ mesa (6.5.2-7) UNRELEASED; urgency=low
 
   [ Julien Cristau ]
   * Use ${source:Version} instead of ${Source-Version} in one remaining spot.
+  * libgl1-mesa-dev Depends on libgl1-mesa-glx (>= ${source:Upstream-Version})
+    instead of >= ${source:Version}.  This way it's still installable on
+    architectures where mesa isn't built yet when a minor revision is
+    uploaded.
 
- -- Julien Cristau <jcristau@debian.org>  Wed, 11 Jul 2007 05:29:58 +0200
+ -- Julien Cristau <jcristau@debian.org>  Wed, 11 Jul 2007 05:40:32 +0200
 
 mesa (6.5.2-6) unstable; urgency=low
 
