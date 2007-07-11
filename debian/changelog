@@ -1,10 +1,14 @@
 mesa (6.5.2-7) UNRELEASED; urgency=low
 
+  [ Brice Goglin ]
   * libgl1-mesa-dev does not need to depend on libgl1-mesa-dri,
     libgl1-mesa-glx is enough (since their split in 6.4.1-0.1);
     closes: #432081.  Thanks, Samuel Thibault!
 
- -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Sat, 07 Jul 2007 20:15:36 +0200
+  [ Julien Cristau ]
+  * Use ${source:Version} instead of ${Source-Version} in one remaining spot.
+
+ -- Julien Cristau <jcristau@debian.org>  Wed, 11 Jul 2007 05:29:58 +0200
 
 mesa (6.5.2-6) unstable; urgency=low
 
