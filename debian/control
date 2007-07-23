@@ -9,7 +9,7 @@ Build-Depends: debhelper (>= 5), quilt (>= 0.40), pkg-config, libdrm-dev (>= 2.2
 Package: libgl1-mesa-swx11
 Section: libs
 Architecture: any
-Depends: ${shlibs:Depends}
+Depends: ${shlibs:Depends}, libosmesa6 (>= 6.5.2-1)
 Conflicts: mesag3-glide, mesag3-glide2, mesag3+ggi, libgl1, nvidia-glx, mesag3, libgl1-mesa-swrast
 Provides: libgl1, mesag3, libgl1-mesa-swrast
 Replaces: libgl1, mesag3, libgl1-mesa-swrast
@@ -213,7 +213,7 @@ Description: Debugging symbols for the Mesa DRI modules
 Package: libgl1-mesa-dev
 Section: libdevel
 Architecture: all
-Depends: libc6-dev, mesa-common-dev (= ${source:Version}), libgl1-mesa-glx (>= ${Source-Version}), libgl1-mesa-dri (>= ${Source-Version})
+Depends: libc6-dev, mesa-common-dev (= ${source:Version}), libgl1-mesa-glx (>= ${source:Upstream-Version})
 Conflicts: libgl-dev, libgl1-mesa-dri-dev
 Replaces: libgl-dev, libgl1-mesa-dri-dev
 Provides: libgl-dev, libgl1-mesa-dri-dev
