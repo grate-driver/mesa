@@ -1,17 +1,15 @@
-mesa (7.0-1) UNRELEASED; urgency=low
+mesa (7.0.1~rc1-1) UNRELEASED; urgency=low
 
   [ David Nusinow ]
-  * New upstream release
+  * New upstream release candidate
   * Bite the bullet and add myself to uploaders
 
   [ Julien Cristau ]
   * Modify the short descriptions of various packages so they fit in .changes
     files without being cut off.  Thanks, Marc 'HE' Brockschmidt!
   * Add a shlibs file for libgl1-mesa-swx11-i686.
-  * Fix build on hurd-i386 (build libgl1-mesa-glx without dri support and
-    don't build the dri drivers); closes: #420403.  Thanks, Samuel Thibault!
 
- -- Julien Cristau <jcristau@debian.org>  Thu, 28 Jun 2007 22:26:10 +0100
+ -- Julien Cristau <jcristau@debian.org>  Mon, 23 Jul 2007 16:29:27 +0200
 
 mesa (6.5.3-1) experimental; urgency=low
 
