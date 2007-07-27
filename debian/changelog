@@ -1,4 +1,4 @@
-mesa (7.0.1~rc2-1) UNRELEASED; urgency=low
+mesa (7.0.1~rc2-1) experimental; urgency=low
 
   [ David Nusinow ]
   * New upstream release candidate
@@ -9,7 +9,7 @@ mesa (7.0.1~rc2-1) UNRELEASED; urgency=low
     files without being cut off.  Thanks, Marc 'HE' Brockschmidt!
   * Add a shlibs file for libgl1-mesa-swx11-i686.
 
- -- Julien Cristau <jcristau@debian.org>  Fri, 27 Jul 2007 19:59:18 +0200
+ -- Julien Cristau <jcristau@debian.org>  Fri, 27 Jul 2007 20:17:48 +0200
 
 mesa (6.5.3-1) experimental; urgency=low
 
