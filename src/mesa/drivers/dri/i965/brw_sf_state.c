@@ -184,6 +184,7 @@ static void upload_sf_unit( struct brw_context *brw )
    /* _NEW_POINT */
    sf.sf6.point_rast_rule = 1;	/* opengl conventions */
    sf.sf7.point_size = brw->attribs.Point->_Size * (1<<3);
+   sf.sf7.sprite_point = brw->attribs.Point->PointSprite;
    sf.sf7.use_point_size_state = !brw->attribs.Point->_Attenuated;
    sf.sf7.aa_line_distance_mode = 0;
 
