@@ -1,3 +1,9 @@
+mesa (7.0.1-1) UNRELEASED; urgency=low
+
+  * New upstream release.
+
+ -- Julien Cristau <jcristau@debian.org>  Thu, 09 Aug 2007 11:29:27 +0200
+
 mesa (7.0.1~rc2-1) experimental; urgency=low
 
   [ David Nusinow ]
