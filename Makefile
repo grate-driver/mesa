@@ -1,5 +1,7 @@
 # Top-level Mesa makefile
 
+SHELL = /bin/bash
+
 TOP = .
 
 SUBDIRS = src progs
@@ -67,6 +69,7 @@ aix-64-static \
 aix-gcc \
 aix-static \
 beos \
+bluegene-osmesa \
 darwin \
 darwin-static \
 darwin-static-x86ppc \
@@ -151,6 +154,7 @@ sunos5-v8 \
 sunos5-v8-static \
 sunos5-v9 \
 sunos5-v9-static \
+sunos5-v9-cc-g++ \
 ultrix-gcc:
 	@ if [ -e configs/current ] ; then \
 		echo "Please run 'make realclean' before changing configs" ; \
@@ -162,10 +166,10 @@ ultrix-gcc:
 
 # Rules for making release tarballs
 
-DIRECTORY = Mesa-7.0.1-rc2
-LIB_NAME = MesaLib-7.0.1-rc2
-DEMO_NAME = MesaDemos-7.0.1-rc2
-GLUT_NAME = MesaGLUT-7.0.1-rc2
+DIRECTORY = Mesa-7.0.1
+LIB_NAME = MesaLib-7.0.1
+DEMO_NAME = MesaDemos-7.0.1
+GLUT_NAME = MesaGLUT-7.0.1
 
 MAIN_FILES = \
 	$(DIRECTORY)/Makefile*						\
