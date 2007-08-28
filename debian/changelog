@@ -1,11 +1,11 @@
-mesa (7.0.1-2) UNRELEASED; urgency=low
+mesa (7.0.1-2) unstable; urgency=low
 
   * Update to latest git (from mesa_7_0_branch)
     + adds support for some new intel chipsets (i915 and i915_tex dri drivers)
       (closes: #437333)
     + broken inline asm in dri drivers fixed (closes: #423739)
 
- -- Julien Cristau <jcristau@debian.org>  Tue, 28 Aug 2007 12:06:45 +0200
+ -- Julien Cristau <jcristau@debian.org>  Tue, 28 Aug 2007 12:11:30 +0200
 
 mesa (7.0.1-1) unstable; urgency=low
 
