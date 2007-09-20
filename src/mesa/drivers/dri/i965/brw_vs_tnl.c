@@ -1622,7 +1622,8 @@ const struct brw_tracked_state brw_tnl_vertprog = {
 	       _NEW_FOG | 
 	       _NEW_HINT | 
 	       _NEW_POINT | 
-	       _NEW_TEXTURE),
+	       _NEW_TEXTURE |
+          _NEW_TEXTURE_MATRIX),
       .brw = (BRW_NEW_FRAGMENT_PROGRAM | 
 	      BRW_NEW_INPUT_VARYING),
       .cache = 0
