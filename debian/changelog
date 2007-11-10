@@ -1,3 +1,14 @@
+mesa (7.0.2-1) UNRELEASED; urgency=low
+
+  * New upstream release.
+    + Fix Blender crash in triangle_twoside(), closes: #439668, #446315.
+    + Fix crash in _generic_read_RGBA_span_RGB565_MMX(), closes: #445313.
+    + Fix the new __gluInvertMatrix() function, closes: #440137 ,#441071.
+    + Refresh 04_cleanup-osmesa-configs.patch.
+    + Drop 05_static-nonpic.patch,, applied upstream.
+
+ -- Brice Goglin <bgoglin@debian.org>  Sun, 11 Nov 2007 00:25:31 +0100
+
 mesa (7.0.1-2) unstable; urgency=low
 
   * Update to latest git (from mesa_7_0_branch)

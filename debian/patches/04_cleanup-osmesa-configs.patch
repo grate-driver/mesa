@@ -1,8 +1,8 @@
-diff --git a/configs/linux-osmesa b/configs/linux-osmesa
-index cc1fbbd..aabab59 100644
---- a/configs/linux-osmesa
-+++ b/configs/linux-osmesa
-@@ -9,8 +9,17 @@ CONFIG_NAME = linux-osmesa
+Index: mesa/configs/linux-osmesa
+===================================================================
+--- mesa.orig/configs/linux-osmesa	2007-11-11 00:24:07.000000000 +0100
++++ mesa/configs/linux-osmesa	2007-11-11 00:33:20.000000000 +0100
+@@ -9,8 +9,17 @@
  # Compiler and flags
  CC = gcc
  CXX = g++
@@ -20,18 +20,18 @@ index cc1fbbd..aabab59 100644
 +
 +CXXFLAGS = -ansi -pedantic $(OPT_FLAGS) $(PIC_FLAGS) $(ARCH_FLAGS) $(DEFINES)
  
- 
- # Directories
-@@ -23,3 +33,4 @@ PROGRAM_DIRS = osdemos
+ # Work around aliasing bugs - developers should comment this out
+ CFLAGS += -fno-strict-aliasing
+@@ -26,3 +35,4 @@
  OSMESA_LIB_DEPS = -lm -lpthread
  GLU_LIB_DEPS = -L$(TOP)/$(LIB_DIR) -l$(OSMESA_LIB)
  APP_LIB_DEPS = -lOSMesa -lGLU
 +
-diff --git a/configs/linux-osmesa-static b/configs/linux-osmesa-static
-index 465f83c..eb3575f 100644
---- a/configs/linux-osmesa-static
-+++ b/configs/linux-osmesa-static
-@@ -8,7 +8,8 @@ CONFIG_NAME = linux-osmesa-static
+Index: mesa/configs/linux-osmesa-static
+===================================================================
+--- mesa.orig/configs/linux-osmesa-static	2007-11-11 00:24:01.000000000 +0100
++++ mesa/configs/linux-osmesa-static	2007-11-11 00:33:20.000000000 +0100
+@@ -8,7 +8,8 @@
  
  # Compiler and flags
  MKLIB_OPTIONS = -static
@@ -41,11 +41,11 @@ index 465f83c..eb3575f 100644
 -OSMESA_LIB_NAME = libOSMesa.a
 +OSMESA_LIB_NAME = lib$(OSMESA_LIB).a
  
-diff --git a/configs/linux-osmesa16 b/configs/linux-osmesa16
-index 1fb0186..2a06254 100644
---- a/configs/linux-osmesa16
-+++ b/configs/linux-osmesa16
-@@ -1,28 +1,17 @@
+Index: mesa/configs/linux-osmesa16
+===================================================================
+--- mesa.orig/configs/linux-osmesa16	2007-11-11 00:24:07.000000000 +0100
++++ mesa/configs/linux-osmesa16	2007-11-11 00:33:41.000000000 +0100
+@@ -1,31 +1,19 @@
  # Configuration for 16 bits/channel OSMesa library on Linux
  
 -include $(TOP)/configs/default
@@ -59,8 +59,11 @@ index 1fb0186..2a06254 100644
 -CFLAGS = -O3 -ansi -pedantic -fPIC -ffast-math -D_POSIX_SOURCE -D_POSIX_C_SOURCE=199309L -D_SVID_SOURCE -D_BSD_SOURCE -DUSE_XSHM -DPTHREADS -I/usr/X11R6/include -DCHAN_BITS=16 -DDEFAULT_SOFTWARE_DEPTH_BITS=31
 -CXXFLAGS = -O3 -ansi -pedantic -fPIC -ffast-math -D_POSIX_SOURCE -D_POSIX_C_SOURCE=199309L -D_SVID_SOURCE -D_BSD_SOURCE
 -
+ # Work around aliasing bugs - developers should comment this out
+ CFLAGS += -fno-strict-aliasing
+ CXXFLAGS += -fno-strict-aliasing
+-
 +DEFINES += -DCHAN_BITS=16 -DDEFAULT_SOFTWARE_DEPTH_BITS=32
- 
  # Library names
  OSMESA_LIB = OSMesa16
 -OSMESA_LIB_NAME = libOSMesa16.so
@@ -78,11 +81,11 @@ index 1fb0186..2a06254 100644
 -APP_LIB_DEPS = -lOSMesa16
 +APP_LIB_DEPS = -l$(OSMESA_LIB)
 +
-diff --git a/configs/linux-osmesa16-static b/configs/linux-osmesa16-static
-index 6645504..894cf82 100644
---- a/configs/linux-osmesa16-static
-+++ b/configs/linux-osmesa16-static
-@@ -1,28 +1,13 @@
+Index: mesa/configs/linux-osmesa16-static
+===================================================================
+--- mesa.orig/configs/linux-osmesa16-static	2007-11-11 00:24:07.000000000 +0100
++++ mesa/configs/linux-osmesa16-static	2007-11-11 00:33:20.000000000 +0100
+@@ -1,14 +1,10 @@
  # Configuration for 16 bits/channel OSMesa library on Linux
  
 -include $(TOP)/configs/default
@@ -96,29 +99,31 @@ index 6645504..894cf82 100644
 -CFLAGS = -O3 -ansi -pedantic -ffast-math -D_POSIX_SOURCE -D_POSIX_C_SOURCE=199309L -D_SVID_SOURCE -D_BSD_SOURCE -DUSE_XSHM -DPTHREADS -I/usr/X11R6/include -DCHAN_BITS=16 -DDEFAULT_SOFTWARE_DEPTH_BITS=31
 -CXXFLAGS = -O3 -ansi -pedantic -ffast-math -D_POSIX_SOURCE -D_POSIX_C_SOURCE=199309L -D_SVID_SOURCE -D_BSD_SOURCE
  MKLIB_OPTIONS = -static
--
-+PIC_FLAGS =
+ PIC_FLAGS =
+ 
+@@ -17,16 +13,5 @@
+ CXXFLAGS += -fno-strict-aliasing
  
  # Library names
 -OSMESA_LIB = OSMesa16
 -OSMESA_LIB_NAME = libOSMesa16.a
--
++OSMESA_LIB_NAME = lib$(OSMESA_LIB).a
+ 
 -
 -# Directories
 -SRC_DIRS = mesa glu
 -DRIVER_DIRS = osmesa
 -PROGRAM_DIRS = 
 -
-+OSMESA_LIB_NAME = lib$(OSMESA_LIB).a
- 
+-
 -# Dependencies
 -OSMESA_LIB_DEPS = -lm -lpthread
 -APP_LIB_DEPS = -lOSMesa16
-diff --git a/configs/linux-osmesa32 b/configs/linux-osmesa32
-index a1e5a35..5a703f6 100644
---- a/configs/linux-osmesa32
-+++ b/configs/linux-osmesa32
-@@ -1,28 +1,18 @@
+Index: mesa/configs/linux-osmesa32
+===================================================================
+--- mesa.orig/configs/linux-osmesa32	2007-11-11 00:24:07.000000000 +0100
++++ mesa/configs/linux-osmesa32	2007-11-11 00:33:51.000000000 +0100
+@@ -1,31 +1,22 @@
  # Configuration for 32 bits/channel OSMesa library on Linux
  
 -include $(TOP)/configs/default
@@ -131,7 +136,10 @@ index a1e5a35..5a703f6 100644
 -CXX = g++
 -CFLAGS = -O3 -ansi -pedantic -fPIC -ffast-math -D_POSIX_SOURCE -D_POSIX_C_SOURCE=199309L -D_SVID_SOURCE -D_BSD_SOURCE -DUSE_XSHM -DPTHREADS -I/usr/X11R6/include -DCHAN_BITS=32 -DDEFAULT_SOFTWARE_DEPTH_BITS=31
 -CXXFLAGS = -O3 -ansi -pedantic -fPIC -ffast-math -D_POSIX_SOURCE -D_POSIX_C_SOURCE=199309L -D_SVID_SOURCE -D_BSD_SOURCE
--
+ 
+ # Work around aliasing bugs - developers should comment this out
+ CFLAGS += -fno-strict-aliasing
+ CXXFLAGS += -fno-strict-aliasing
 +DEFINES += -DCHAN_BITS=32 -DDEFAULT_SOFTWARE_DEPTH_BITS=31
  
  # Library names
@@ -151,10 +159,10 @@ index a1e5a35..5a703f6 100644
 -APP_LIB_DEPS = -lOSMesa32
 +APP_LIB_DEPS = -l$(OSMESA_LIB)
 +
-diff --git a/configs/linux-osmesa32-static b/configs/linux-osmesa32-static
-index 6db8bc0..ecbb72e 100644
---- a/configs/linux-osmesa32-static
-+++ b/configs/linux-osmesa32-static
+Index: mesa/configs/linux-osmesa32-static
+===================================================================
+--- mesa.orig/configs/linux-osmesa32-static	2007-11-11 00:24:01.000000000 +0100
++++ mesa/configs/linux-osmesa32-static	2007-11-11 00:33:20.000000000 +0100
 @@ -1,28 +1,13 @@
  # Configuration for 32 bits/channel OSMesa library on Linux
  

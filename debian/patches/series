@@ -3,4 +3,3 @@
 02_use-ieee-fp-on-s390-and-m68k.patch
 03_optional-progs-and-install.patch
 04_cleanup-osmesa-configs.patch
-05_static-nonpic.patch
