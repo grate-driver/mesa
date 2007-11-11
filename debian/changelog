@@ -1,4 +1,4 @@
-mesa (7.0.2-1) UNRELEASED; urgency=low
+mesa (7.0.2-1) unstable; urgency=low
 
   * New upstream release.
     + Fix Blender crash in triangle_twoside(), closes: #439668, #446315.
@@ -10,8 +10,9 @@ mesa (7.0.2-1) UNRELEASED; urgency=low
     + Drop 05_static-nonpic.patch,, applied upstream.
     + Remove DESTDIR from INSTALL_DIR in configs/debian-default since
       the upstream Makefiles now support DESTDIR.
+  * Add myself to Uploaders.
 
- -- Brice Goglin <bgoglin@debian.org>  Sun, 11 Nov 2007 00:25:31 +0100
+ -- Brice Goglin <bgoglin@debian.org>  Sun, 11 Nov 2007 11:53:26 +0100
 
 mesa (7.0.1-2) unstable; urgency=low
 
