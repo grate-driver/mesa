@@ -34,8 +34,8 @@ Index: mesa/progs/xdemos/Makefile
  default: $(PROGS)
  
 +install: $(PROGS)
-+	$(INSTALL) -d $(INSTALL_DIR)/bin
-+	$(INSTALL) -m 755 $(PROGS) $(INSTALL_DIR)/bin
++	$(INSTALL) -d $(DESTDIR)$(INSTALL_DIR)/bin
++	$(INSTALL) -m 755 $(PROGS) $(DESTDIR)$(INSTALL_DIR)/bin
  
  clean:
  	-rm -f $(PROGS)

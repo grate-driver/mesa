@@ -8,6 +8,8 @@ mesa (7.0.2-1) UNRELEASED; urgency=low
       built when building progs/xdemos.
     + Refresh 04_cleanup-osmesa-configs.patch.
     + Drop 05_static-nonpic.patch,, applied upstream.
+    + Remove DESTDIR from INSTALL_DIR in configs/debian-default since
+      the upstream Makefiles now support DESTDIR.
 
  -- Brice Goglin <bgoglin@debian.org>  Sun, 11 Nov 2007 00:25:31 +0100
 

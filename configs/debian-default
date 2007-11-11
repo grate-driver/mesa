@@ -12,7 +12,7 @@ EXTRA_LIB_PATH =
 SRC_DIRS = mesa
 PROGRAM_DIRS =
 
-INSTALL_DIR = $(DESTDIR)/usr
+INSTALL_DIR = /usr
 
 # vim: ft=make
 
