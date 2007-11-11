@@ -5,19 +5,31 @@ Provide an install target for installing the programs in $(INSTALL_DIR)/bin.
 
 This patch by Thierry Reding.
 Not submitted to Mesa.
+--
+Also remove references to GLU library since it is not required
+and we don't actually build it at this point.
 
---- a/progs/xdemos/Makefile
-+++ b/progs/xdemos/Makefile
-@@ -8,7 +8,7 @@
+
+Index: mesa/progs/xdemos/Makefile
+===================================================================
+--- mesa.orig/progs/xdemos/Makefile	2007-11-11 00:34:12.000000000 +0100
++++ mesa/progs/xdemos/Makefile	2007-11-11 02:07:52.000000000 +0100
+@@ -6,11 +6,11 @@
  
- LIB_DEP = $(TOP)/$(LIB_DIR)/$(GL_LIB_NAME) $(TOP)/$(LIB_DIR)/$(GLU_LIB_NAME)
+ INCDIR = $(TOP)/include
+ 
+-LIB_DEP = $(TOP)/$(LIB_DIR)/$(GL_LIB_NAME) $(TOP)/$(LIB_DIR)/$(GLU_LIB_NAME)
++LIB_DEP = $(TOP)/$(LIB_DIR)/$(GL_LIB_NAME)
+ 
+-LIBS = -L$(TOP)/$(LIB_DIR) -l$(GLU_LIB) -l$(GL_LIB) $(APP_LIB_DEPS)
++LIBS = -L$(TOP)/$(LIB_DIR) -l$(GL_LIB) $(APP_LIB_DEPS)
  
 -PROGS = glthreads \
 +PROGS ?= glthreads \
  	glxdemo \
  	glxgears \
  	glxgears_fbconfig \
-@@ -44,6 +44,9 @@
+@@ -46,6 +46,9 @@
  
  default: $(PROGS)
  
@@ -27,8 +39,10 @@ Not submitted to Mesa.
  
  clean:
  	-rm -f $(PROGS)
---- a/progs/Makefile
-+++ b/progs/Makefile
+Index: mesa/progs/Makefile
+===================================================================
+--- mesa.orig/progs/Makefile	2007-11-11 00:34:12.000000000 +0100
++++ mesa/progs/Makefile	2007-11-11 02:06:48.000000000 +0100
 @@ -21,8 +21,12 @@
  		fi \
  	done

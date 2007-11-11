@@ -4,6 +4,8 @@ mesa (7.0.2-1) UNRELEASED; urgency=low
     + Fix Blender crash in triangle_twoside(), closes: #439668, #446315.
     + Fix crash in _generic_read_RGBA_span_RGB565_MMX(), closes: #445313.
     + Fix the new __gluInvertMatrix() function, closes: #440137 ,#441071.
+    + Refresh 03_optional-progs-and-install.patch since libGLU is not
+      built when building progs/xdemos.
     + Refresh 04_cleanup-osmesa-configs.patch.
     + Drop 05_static-nonpic.patch,, applied upstream.
 
