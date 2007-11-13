@@ -3,8 +3,9 @@ mesa (7.0.2-2) UNRELEASED; urgency=low
   * Don't set -fno-strict-aliasing in configs/debian-default.  It is set
     upstream now.
   * Workaround gcc ICE on hppa: build libOSMesa with -O0 (see bug#451047).
+  * Add build-dep on libxext-dev.  Thanks, Timo Aaltonen!
 
- -- Julien Cristau <jcristau@debian.org>  Tue, 13 Nov 2007 20:58:22 +0100
+ -- Julien Cristau <jcristau@debian.org>  Tue, 13 Nov 2007 21:40:14 +0100
 
 mesa (7.0.2-1) unstable; urgency=low
 
