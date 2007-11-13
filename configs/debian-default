@@ -3,7 +3,6 @@
 CONFIG_NAME = debian-default
 
 OPT_FLAGS = -O2 -g
-CFLAGS += -fno-strict-aliasing
 
 # override settings in configs/linux-x86-64
 LIB_DIR = lib
