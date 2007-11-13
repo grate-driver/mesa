@@ -6,5 +6,9 @@ CONFIG_NAME = debian-osmesa-default
 
 DRIVER_DIRS = osmesa
 
+ifeq ($(DEB_BUILD_ARCH), hppa)
+	OPT_FLAGS = -g -O0
+endif
+
 # vim: ft=make
 
