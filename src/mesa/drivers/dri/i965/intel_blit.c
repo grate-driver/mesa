@@ -373,7 +373,7 @@ void intelClearWithBlit(GLcontext *ctx, GLbitfield flags)
    clear_depth = 0;
 
    if (flags & BUFFER_BIT_DEPTH) {
-      clear_depth = (GLuint)(ctx->Depth.Clear * intel->ClearDepth);
+      clear_depth = (GLuint)(ctx->Depth.Clear * ctx->DrawBuffer->_DepthMax);
    }
 
    if (flags & BUFFER_BIT_STENCIL) {
