@@ -1,8 +1,14 @@
 mesa (7.0.2-3) UNRELEASED; urgency=low
 
   * Update to mesa_7_0_branch head (commit 0107acde).
+  * Bump Standards-Version to 3.7.3.
+  * Move libgl1-mesa-swx11-dbg, mesa-common-dev and libosmesa6-dev to section
+    libdevel.
+  * libgl1-mesa-swx11 conflicts with libgl1-mesa-glx.  Move it and
+    libgl1-mesa-swx11-dev to priority extra.
+  * Fix typo in mesa-common-dev's long description.
 
- -- Julien Cristau <jcristau@debian.org>  Tue, 18 Dec 2007 12:34:58 +0100
+ -- Julien Cristau <jcristau@debian.org>  Tue, 18 Dec 2007 13:32:25 +0100
 
 mesa (7.0.2-2) unstable; urgency=low
 

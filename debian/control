@@ -3,11 +3,12 @@ Section: graphics
 Priority: optional
 Maintainer: Debian X Strike Force <debian-x@lists.debian.org>
 Uploaders: Thierry Reding <thierry@gilfi.de>, Julien Cristau <jcristau@debian.org>, David Nusinow <dnusinow@debian.org>, Brice Goglin <bgoglin@debian.org>
-Standards-Version: 3.7.2
+Standards-Version: 3.7.3
 Build-Depends: debhelper (>= 5), quilt (>= 0.40), pkg-config, libdrm-dev (>= 2.2.0) [!hurd-i386], libx11-dev, xutils-dev, x11proto-gl-dev (>= 1.4.8), libxxf86vm-dev, libexpat1-dev, lesstif2-dev, dpkg-dev (>= 1.13.19), libxfixes-dev, libxdamage-dev, libxext-dev
 
 Package: libgl1-mesa-swx11
 Section: libs
+Priority: extra
 Architecture: any
 Depends: ${shlibs:Depends}, libosmesa6 (>= 6.5.2-1)
 Conflicts: mesag3-glide, mesag3-glide2, mesag3+ggi, libgl1, nvidia-glx, mesag3, libgl1-mesa-swrast
@@ -28,7 +29,7 @@ Description: A free implementation of the OpenGL API -- runtime
  On Linux, this library is also known as libGL or libGL.so.1.
 
 Package: libgl1-mesa-swx11-dbg
-Section: libs
+Section: libdevel
 Priority: extra
 Architecture: any
 Depends: libgl1-mesa-swx11 (= ${binary:Version})
@@ -78,6 +79,7 @@ Description: Mesa OpenGL runtime [i686 optimized]
 
 Package: libgl1-mesa-swx11-dev
 Section: libdevel
+Priority: extra
 Architecture: any
 Depends: libgl1-mesa-swx11 (= ${binary:Version}), libc6-dev, libx11-dev, libxext6, mesa-common-dev (= ${source:Version})
 Provides: libgl-dev, mesag-dev, libgl1-mesa-swrast-dev
@@ -229,14 +231,14 @@ Description: A free implementation of the OpenGL API -- GLX development files
  package.
 
 Package: mesa-common-dev
-Section: devel
+Section: libdevel
 Architecture: all
 Replaces: xlibmesa-gl-dev (<< 1:7), xlibosmesa-dev, libgl1-mesa-swx11-dev (<< 6.5.2), libgl1-mesa-dev (<< 6.5.2)
 Depends: libx11-dev
 Description: Developer documentation for Mesa
  This package includes the specifications for the Mesa-specific OpenGL
- extensions, the complete set of release release notes and the
- development header files common to all Mesa packages.
+ extensions, the complete set of release notes and the development header
+ files common to all Mesa packages.
 
 Package: libosmesa6
 Section: libs
@@ -252,7 +254,7 @@ Description: Mesa Off-screen rendering extension
  renderer which do not require external libraries to work.
 
 Package: libosmesa6-dev
-Section: devel
+Section: libdevel
 Architecture: any
 Depends: libosmesa6 (= ${binary:Version}), mesa-common-dev (= ${source:Version}) | libgl-dev
 Conflicts: xlibosmesa-dev, libosmesa4-dev, libosmesa-dev
