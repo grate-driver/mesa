@@ -1,3 +1,9 @@
+mesa (7.0.2-3) UNRELEASED; urgency=low
+
+  * Update to mesa_7_0_branch head (commit 0107acde).
+
+ -- Julien Cristau <jcristau@debian.org>  Tue, 18 Dec 2007 12:34:58 +0100
+
 mesa (7.0.2-2) unstable; urgency=low
 
   [ Julien Cristau ]
