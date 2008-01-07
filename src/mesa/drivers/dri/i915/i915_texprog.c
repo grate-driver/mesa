@@ -69,7 +69,7 @@ static GLuint get_source( struct i915_fragment_program *p,
 	 if (p->VB->TexCoordPtr[unit]->size == 4)
 	    op = T0_TEXLDP;
 
-	 p->src_texture = i915_emit_texld( p, tmp, A0_DEST_CHANNEL_ALL, 
+	 p->src_texture = i915_emit_texld( p, 0, tmp, A0_DEST_CHANNEL_ALL, 
 					  sampler, texcoord, op );
       }
 
