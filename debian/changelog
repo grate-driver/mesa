@@ -1,3 +1,10 @@
+mesa (7.0.2-4) unstable; urgency=low
+
+  * Update to mesa_7_0_branch head (commit 48ae5cf0).
+  * Add Vcs-Git, Vcs-Browser and Homepage fields in debian/control.
+
+ -- Julien Cristau <jcristau@debian.org>  Thu, 17 Jan 2008 22:23:06 +0100
+
 mesa (7.0.2-3) unstable; urgency=low
 
   * Update to mesa_7_0_branch head (commit 0107acde).
