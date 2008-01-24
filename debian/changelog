@@ -1,3 +1,10 @@
+mesa (7.0.2-5) UNRELEASED; urgency=low
+
+  * Stop building with -O0 on hppa. Bug #451047 should be fixed in recent gcc
+    versions.
+
+ -- Julien Cristau <jcristau@debian.org>  Thu, 24 Jan 2008 22:51:04 +0100
+
 mesa (7.0.2-4) unstable; urgency=low
 
   * Update to mesa_7_0_branch head (commit 48ae5cf0).
