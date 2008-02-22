@@ -1,5 +1,6 @@
-mesa (7.0.2-5) UNRELEASED; urgency=low
+mesa (7.0.3~rc2-1) UNRELEASED; urgency=low
 
+  * New upstream release candidate.
   * Stop building with -O0 on hppa. Bug #451047 should be fixed in recent gcc
     versions.
 
