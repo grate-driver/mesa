@@ -166,10 +166,10 @@ ultrix-gcc:
 
 # Rules for making release tarballs
 
-DIRECTORY = Mesa-7.0.3
-LIB_NAME = MesaLib-7.0.3
-DEMO_NAME = MesaDemos-7.0.3
-GLUT_NAME = MesaGLUT-7.0.3
+DIRECTORY = Mesa-7.0.3-rc2
+LIB_NAME = MesaLib-7.0.3-rc2
+DEMO_NAME = MesaDemos-7.0.3-rc2
+GLUT_NAME = MesaGLUT-7.0.3-rc2
 
 MAIN_FILES = \
 	$(DIRECTORY)/Makefile*						\
@@ -415,6 +415,7 @@ GLUT_FILES = \
 	$(DIRECTORY)/src/glut/fbdev/Makefile		\
 	$(DIRECTORY)/src/glut/fbdev/*[ch]		\
 	$(DIRECTORY)/src/glut/mini/*[ch]		\
+	$(DIRECTORY)/src/glut/mini/glut.pc.in		\
 	$(DIRECTORY)/src/glut/directfb/Makefile		\
 	$(DIRECTORY)/src/glut/directfb/NOTES		\
 	$(DIRECTORY)/src/glut/directfb/*[ch]		\
