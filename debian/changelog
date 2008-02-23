@@ -1,11 +1,11 @@
-mesa (7.0.3~rc2-1) UNRELEASED; urgency=low
+mesa (7.0.3~rc2-1) unstable; urgency=low
 
   * New upstream release candidate.
     + 03_optional-progs-and-install.patch: partly applied upstream, fixed up
   * Stop building with -O0 on hppa. Bug #451047 should be fixed in recent gcc
     versions.
 
- -- Julien Cristau <jcristau@debian.org>  Thu, 24 Jan 2008 22:51:04 +0100
+ -- Julien Cristau <jcristau@debian.org>  Sat, 23 Feb 2008 18:18:29 +0100
 
 mesa (7.0.2-4) unstable; urgency=low
 
