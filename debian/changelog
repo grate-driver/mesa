@@ -1,6 +1,7 @@
 mesa (7.0.3~rc2-1) UNRELEASED; urgency=low
 
   * New upstream release candidate.
+    + 03_optional-progs-and-install.patch: partly applied upstream, fixed up
   * Stop building with -O0 on hppa. Bug #451047 should be fixed in recent gcc
     versions.
 
