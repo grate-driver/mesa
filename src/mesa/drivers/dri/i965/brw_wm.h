@@ -73,6 +73,8 @@ struct brw_wm_prog_key {
    GLuint pad1:16;
 
    GLuint program_string_id:32;
+   GLuint origin_x, origin_y;
+   GLuint drawable_height;
 };
 
 
