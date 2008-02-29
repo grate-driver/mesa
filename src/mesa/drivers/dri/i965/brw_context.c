@@ -64,23 +64,7 @@ static const struct dri_extension brw_extensions[] =
 
 static void brwUseProgram(GLcontext *ctx, GLuint program)
 {
-        struct brw_context *brw = brw_context(ctx);
-        struct gl_shader_program *sh_prog;
-        _mesa_use_program(ctx, program);
-        sh_prog = ctx->Shader.CurrentProgram;
-        if (sh_prog) {
-	    if (sh_prog->VertexProgram) {
-		brw->attribs.VertexProgram->Current = sh_prog->VertexProgram;
-		ctx->VertexProgram.Enabled = GL_TRUE;
-	    }else
-		ctx->VertexProgram.Enabled = GL_FALSE;
-		
-	    if (sh_prog->FragmentProgram) {
-		brw->attribs.FragmentProgram->Current = sh_prog->FragmentProgram;
-		ctx->FragmentProgram.Enabled = GL_TRUE;
-	    } else
-		ctx->FragmentProgram.Enabled = GL_FALSE;
-	}
+   _mesa_use_program(ctx, program);
 }
 
 static void brwInitProgFuncs( struct dd_function_table *functions )
