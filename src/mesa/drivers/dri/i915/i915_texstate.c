@@ -454,7 +454,12 @@ static void i915SetTexImages( i915ContextPtr i915,
 
    case MESA_FORMAT_Z16:
       t->intel.texelBytes = 2;
-      textureFormat = (MAPSURF_16BIT | MT_16BIT_L16);
+      if (tObj->DepthMode == GL_ALPHA)
+	  textureFormat = (MAPSURF_16BIT | MT_16BIT_A16);
+      else if (tObj->DepthMode == GL_INTENSITY)
+	  textureFormat = (MAPSURF_16BIT | MT_16BIT_I16);
+      else
+	  textureFormat = (MAPSURF_16BIT | MT_16BIT_L16);
       break;
 
    case MESA_FORMAT_RGBA_DXT1:
