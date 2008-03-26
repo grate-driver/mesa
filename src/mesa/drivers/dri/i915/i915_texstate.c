@@ -604,8 +604,13 @@ static void i915ImportTexObjState( struct gl_texture_object *texObj )
       shadow = SS2_SHADOW_ENABLE;
       shadow |= intel_translate_compare_func( texObj->CompareFunc );
       
-      minFilt = FILTER_4X4_FLAT;
-      magFilt = FILTER_4X4_FLAT;
+      if (texObj->Target == GL_TEXTURE_1D) {
+	  minFilt = FILTER_NEAREST;
+	  magFilt = FILTER_NEAREST;
+      } else {
+	  minFilt = FILTER_4X4_FLAT;
+	  magFilt = FILTER_4X4_FLAT;
+      }
    }
 
 
