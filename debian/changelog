@@ -3,6 +3,8 @@ mesa (7.0.3~rc2-2) UNRELEASED; urgency=low
   * Pull from mesa_7_0_branch (1e83d70b).
   * Fixes regression in the i965 dri driver (closes: #470984, #470084)
   * Update 02_use-ieee-fp-on-s390-and-m68k.patch.
+  * Change libgl1-mesa-swx11-i686's pre-dependency on libgl1-mesa-swx11 to a
+    regular versioned dependency, and add ${shlibs:Depends}.
 
  -- Julien Cristau <jcristau@debian.org>  Mon, 31 Mar 2008 13:02:39 +0200
 
