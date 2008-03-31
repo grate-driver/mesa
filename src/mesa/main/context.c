@@ -687,10 +687,10 @@ free_shared_state( GLcontext *ctx, struct gl_shared_state *ss )
    _mesa_DeleteHashTable(ss->Programs);
 #endif
 #if FEATURE_ARB_vertex_program
-   _mesa_delete_program(ctx, ss->DefaultVertexProgram);
+   ctx->Driver.DeleteProgram(ctx, ss->DefaultVertexProgram);
 #endif
 #if FEATURE_ARB_fragment_program
-   _mesa_delete_program(ctx, ss->DefaultFragmentProgram);
+   ctx->Driver.DeleteProgram(ctx, ss->DefaultFragmentProgram);
 #endif
 
 #if FEATURE_ATI_fragment_shader
@@ -754,7 +754,7 @@ _mesa_init_current(GLcontext *ctx)
    }
 
    /* redo special cases: */
-   ASSIGN_4V( ctx->Current.Attrib[VERT_ATTRIB_WEIGHT], 1.0, 0.0, 0.0, 1.0 );
+   ASSIGN_4V( ctx->Current.Attrib[VERT_ATTRIB_WEIGHT], 1.0, 0.0, 0.0, 0.0 );
    ASSIGN_4V( ctx->Current.Attrib[VERT_ATTRIB_NORMAL], 0.0, 0.0, 1.0, 1.0 );
    ASSIGN_4V( ctx->Current.Attrib[VERT_ATTRIB_COLOR0], 1.0, 1.0, 1.0, 1.0 );
    ASSIGN_4V( ctx->Current.Attrib[VERT_ATTRIB_COLOR1], 0.0, 0.0, 0.0, 1.0 );
