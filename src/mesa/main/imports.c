@@ -258,7 +258,7 @@ _mesa_memset16( unsigned short *dst, unsigned short val, size_t n )
 void
 _mesa_bzero( void *dst, size_t n )
 {
-#if defined(__FreeBSD__)
+#if defined(__FreeBSD__) || defined(__DragonFly__)
    bzero( dst, n );
 #else
    memset( dst, 0, n );
