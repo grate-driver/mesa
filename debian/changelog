@@ -1,3 +1,11 @@
+mesa (7.0.3-1) UNRELEASED; urgency=low
+
+  * New upstream release.
+  * Only call ProgramStringNotify if program parsing succeeded,
+    closes: #473551.
+
+ -- Brice Goglin <bgoglin@debian.org>  Fri, 11 Apr 2008 08:40:42 +0200
+
 mesa (7.0.3~rc2-2) unstable; urgency=low
 
   * Pull from mesa_7_0_branch (1e83d70b).
