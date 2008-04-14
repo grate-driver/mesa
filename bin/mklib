@@ -115,6 +115,9 @@ do
 	    # Another special case for DragonFly
 	    DEPS="$DEPS $1"
 	    ;;
+	-Wl*)
+	    DEPS="$DEPS $1"
+	    ;;
 	'-pthread')
 	    DEPS="$DEPS -pthread"
 	    ;;
