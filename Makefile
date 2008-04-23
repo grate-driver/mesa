@@ -83,6 +83,7 @@ freebsd \
 freebsd-dri \
 freebsd-dri-amd64 \
 freebsd-dri-x86 \
+freebsd-static \
 hpux10 \
 hpux10-gcc \
 hpux10-static \
