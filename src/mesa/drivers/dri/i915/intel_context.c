@@ -117,6 +117,8 @@ const GLubyte *intelGetString( GLcontext *ctx, GLenum name )
 	 chipset = "Intel(R) 865G"; break;
       case PCI_CHIP_I915_G:
 	 chipset = "Intel(R) 915G"; break;
+      case PCI_CHIP_E7221_G:
+	 chipset = "Intel (R) E7221G (i915)"; break;
       case PCI_CHIP_I915_GM:
 	 chipset = "Intel(R) 915GM"; break;
       case PCI_CHIP_I945_G:
