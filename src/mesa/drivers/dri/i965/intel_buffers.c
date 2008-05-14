@@ -545,15 +545,14 @@ static void intelDrawBuffer(GLcontext *ctx, GLenum mode )
    if ( intel->sarea->pf_current_page == 1 ) 
       front ^= 1;
    
-   intelSetFrontClipRects( intel );
-
-
    if (front) {
+      intelSetFrontClipRects(intel);
       if (intel->draw_region != intel->front_region) {
 	 intel_region_release(intel, &intel->draw_region);
 	 intel_region_reference(&intel->draw_region, intel->front_region);
       }
    } else {
+      intelSetBackClipRects(intel);
       if (intel->draw_region != intel->back_region) {
 	 intel_region_release(intel, &intel->draw_region);
 	 intel_region_reference(&intel->draw_region, intel->back_region);
