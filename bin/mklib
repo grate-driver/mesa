@@ -111,6 +111,13 @@ do
 	    # this is a special case (see bugzilla 10876)
 	    DEPS="$DEPS $1"
 	    ;;
+	-Wl*)
+	    # Another special case for DragonFly
+	    DEPS="$DEPS $1"
+	    ;;
+	-Wl*)
+	    DEPS="$DEPS $1"
+	    ;;
 	'-pthread')
 	    DEPS="$DEPS -pthread"
 	    ;;
@@ -198,7 +205,7 @@ fi
 #
 case $ARCH in
 
-    'Linux' | 'OpenBSD' | 'GNU' | GNU/*)
+    'Linux' | 'OpenBSD' | 'DragonFly' | 'GNU' | GNU/*)
 	# we assume gcc
 
 	if [ "x$LINK" = "x" ] ; then

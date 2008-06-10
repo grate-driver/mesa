@@ -42,7 +42,20 @@
 #include "program.h"
 #include "programopt.h"
 
-
+static const GLfloat sin_quad_constants[2][4] = {
+   {
+      2.0,
+      -1.0,
+      .5,
+      .75
+   },
+   {
+      4.0,
+      -4.0,
+      1.0 / (2.0 * M_PI),
+      .2225
+   }
+};
 
 /* 1, -1/3!, 1/5!, -1/7! */
 static const GLfloat sin_constants[4] = {  1.0, 
@@ -91,7 +104,7 @@ static GLuint src_vector( struct i915_fragment_program *p,
 	    break;
 	 case FRAG_ATTRIB_FOGC:
 	    src = i915_emit_decl( p,  REG_TYPE_T, T_FOG_W, D0_CHANNEL_W ); 
-	    src = swizzle( src, W, W, W, W );
+	    src = swizzle(src, W, ZERO, ZERO, ONE);
 	    break;
 	 case FRAG_ATTRIB_TEX0:
 	 case FRAG_ATTRIB_TEX1:
@@ -269,7 +282,7 @@ static void upload_program( struct i915_fragment_program *p )
 
    while (1) {
       GLuint src0, src1, src2, flags;
-      GLuint tmp = 0;
+      GLuint tmp = 0, consts0 = 0, consts1 = 0;
 
       switch (inst->Opcode) {
       case OPCODE_ABS: 
@@ -297,67 +310,87 @@ static void upload_program( struct i915_fragment_program *p )
 	 break;
 
       case OPCODE_COS:
-	 src0 = src_vector( p, &inst->SrcReg[0], program);
-	 tmp = i915_get_utemp( p );
+         src0 = src_vector(p, &inst->SrcReg[0], program);
+         tmp = i915_get_utemp(p);
+	 consts0 = i915_emit_const4fv(p, sin_quad_constants[0]);
+	 consts1 = i915_emit_const4fv(p, sin_quad_constants[1]);
 
-	 i915_emit_arith( p, 
-			 A0_MUL,
+	 /* Reduce range from repeating about [-pi,pi] to [-1,1] */
+         i915_emit_arith(p,
+                         A0_MAD,
+                         tmp, A0_DEST_CHANNEL_X, 0,
+                         src0,
+			 swizzle(consts1, Z, ZERO, ZERO, ZERO), /* 1/(2pi) */
+			 swizzle(consts0, W, ZERO, ZERO, ZERO)); /* .75 */
+
+         i915_emit_arith(p, A0_FRC, tmp, A0_DEST_CHANNEL_X, 0, tmp, 0, 0);
+
+	 i915_emit_arith(p,
+			 A0_MAD,
 			 tmp, A0_DEST_CHANNEL_X, 0,
-			 src0, 
-			 i915_emit_const1f(p, 1.0/(M_PI * 2)),
+			 tmp,
+			 swizzle(consts0, X, ZERO, ZERO, ZERO), /* 2 */
+			 swizzle(consts0, Y, ZERO, ZERO, ZERO)); /* -1 */
+
+	 /* Compute COS with the same calculation used for SIN, but a
+	  * different source range has been mapped to [-1,1] this time.
+	  */
+
+	 /* tmp.y = abs(tmp.x); {x, abs(x), 0, 0} */
+	 i915_emit_arith(p,
+                         A0_MAX,
+			 tmp, A0_DEST_CHANNEL_Y, 0,
+			 swizzle(tmp, ZERO, X, ZERO, ZERO),
+			 negate(swizzle(tmp, ZERO, X, ZERO, ZERO), 0, 1, 0, 0),
 			 0);
 
-	 i915_emit_arith( p, 
-			 A0_MOD,
-			 tmp, A0_DEST_CHANNEL_X, 0,
-			 tmp, 
-			 0, 0 );
-
-	 /* By choosing different taylor constants, could get rid of this mul:
-	  */
-	 i915_emit_arith( p, 
+	 /* tmp.y = tmp.y * tmp.x; {x, x * abs(x), 0, 0} */
+	 i915_emit_arith(p,
 			 A0_MUL,
-			 tmp, A0_DEST_CHANNEL_X, 0,
-			 tmp, 
-			 i915_emit_const1f(p, (M_PI * 2)),
+			 tmp, A0_DEST_CHANNEL_Y, 0,
+			 swizzle(tmp, ZERO, X, ZERO, ZERO),
+			 tmp,
 			 0);
 
-	 /* 
-	  * t0.xy = MUL x.xx11, x.x1111  ; x^2, x, 1, 1
-	  * t0 = MUL t0.xyxy t0.xx11 ; x^4, x^3, x^2, 1
-	  * t0 = MUL t0.xxz1 t0.z111    ; x^6 x^4 x^2 1
-	  * result = DP4 t0, cos_constants
+	 /* tmp.x = tmp.xy DP sin_quad_constants[2].xy */
+         i915_emit_arith(p,
+                         A0_DP3,
+                         tmp, A0_DEST_CHANNEL_X, 0,
+			 tmp,
+                         swizzle(consts1, X, Y, ZERO, ZERO),
+			 0);
+
+	 /* tmp.x now contains a first approximation (y).  Now, weight it
+	  * against tmp.y**2 to get closer.
 	  */
-	 i915_emit_arith( p, 
-			 A0_MUL,
-			 tmp, A0_DEST_CHANNEL_XY, 0,
-			 swizzle(tmp, X,X,ONE,ONE), 
-			 swizzle(tmp, X,ONE,ONE,ONE), 0);
+	 i915_emit_arith(p,
+                         A0_MAX,
+			 tmp, A0_DEST_CHANNEL_Y, 0,
+			 swizzle(tmp, ZERO, X, ZERO, ZERO),
+			 negate(swizzle(tmp, ZERO, X, ZERO, ZERO), 0, 1, 0, 0),
+			 0);
 
-	 i915_emit_arith( p, 
-			 A0_MUL,
-			 tmp, A0_DEST_CHANNEL_XYZ, 0,
-			 swizzle(tmp, X,Y,X,ONE), 
-			 swizzle(tmp, X,X,ONE,ONE), 0);
+	 /* tmp.y = tmp.x * tmp.y - tmp.x; {y, y * abs(y) - y, 0, 0} */
+	 i915_emit_arith(p,
+			 A0_MAD,
+			 tmp, A0_DEST_CHANNEL_Y, 0,
+			 swizzle(tmp, ZERO, X, ZERO, ZERO),
+			 swizzle(tmp, ZERO, Y, ZERO, ZERO),
+			 negate(swizzle(tmp, ZERO, X, ZERO, ZERO), 0, 1, 0, 0));
 
-	 i915_emit_arith( p, 
-			 A0_MUL,
-			 tmp, A0_DEST_CHANNEL_XYZ, 0,
-			 swizzle(tmp, X,X,Z,ONE), 
-			 swizzle(tmp, Z,ONE,ONE,ONE), 0);
-	    
-	 i915_emit_arith( p, 
-			 A0_DP4,
-			 get_result_vector( p, inst ), 
-			 get_result_flags( inst ), 0,
-			 swizzle(tmp, ONE,Z,Y,X),
-			 i915_emit_const4fv( p, cos_constants ), 0);
+	 /* result = .2225 * tmp.y + tmp.x =.2225(y * abs(y) - y) + y= */
+	 i915_emit_arith(p,
+			 A0_MAD,
+                         get_result_vector(p, inst),
+                         get_result_flags(inst), 0,
+			 swizzle(consts1, W, W, W, W),
+			 swizzle(tmp, Y, Y, Y, Y),
+			 swizzle(tmp, X, X, X, X));
+         break;
 
-	 break;
-
-      case OPCODE_DP3: 
-	 EMIT_2ARG_ARITH( A0_DP3 );
-	 break;
+      case OPCODE_DP3:
+         EMIT_2ARG_ARITH(A0_DP3);
+         break;
 
       case OPCODE_DP4: 
 	 EMIT_2ARG_ARITH( A0_DP4 );
@@ -638,62 +671,86 @@ static void upload_program( struct i915_fragment_program *p )
 	 break;
 
       case OPCODE_SIN:
-	 src0 = src_vector( p, &inst->SrcReg[0], program);
-	 tmp = i915_get_utemp( p );
+         src0 = src_vector(p, &inst->SrcReg[0], program);
+         tmp = i915_get_utemp(p);
+	 consts0 = i915_emit_const4fv(p, sin_quad_constants[0]);
+	 consts1 = i915_emit_const4fv(p, sin_quad_constants[1]);
 
-	 i915_emit_arith( p, 
-			 A0_MUL,
+	 /* Reduce range from repeating about [-pi,pi] to [-1,1] */
+         i915_emit_arith(p,
+                         A0_MAD,
+                         tmp, A0_DEST_CHANNEL_X, 0,
+                         src0,
+			 swizzle(consts1, Z, ZERO, ZERO, ZERO), /* 1/(2pi) */
+			 swizzle(consts0, Z, ZERO, ZERO, ZERO)); /* .5 */
+
+         i915_emit_arith(p, A0_FRC, tmp, A0_DEST_CHANNEL_X, 0, tmp, 0, 0);
+	 i915_emit_arith(p,
+			 A0_MAD,
 			 tmp, A0_DEST_CHANNEL_X, 0,
-			 src0, 
-			 i915_emit_const1f(p, 1.0/(M_PI * 2)),
+			 tmp,
+			 swizzle(consts0, X, ZERO, ZERO, ZERO), /* 2 */
+			 swizzle(consts0, Y, ZERO, ZERO, ZERO)); /* -1 */
+
+	 /* Compute sin using a quadratic and quartic.  It gives continuity
+	  * that repeating the Taylor series lacks every 2*pi, and has
+	  * reduced error.
+	  *
+	  * The idea was described at:
+	  * http://www.devmaster.net/forums/showthread.php?t=5784
+	  */
+	 /* tmp.y = abs(tmp.x); {x, abs(x), 0, 0} */
+	 i915_emit_arith(p,
+                         A0_MAX,
+			 tmp, A0_DEST_CHANNEL_Y, 0,
+			 swizzle(tmp, ZERO, X, ZERO, ZERO),
+			 negate(swizzle(tmp, ZERO, X, ZERO, ZERO), 0, 1, 0, 0),
 			 0);
 
-	 i915_emit_arith( p, 
-			 A0_MOD,
-			 tmp, A0_DEST_CHANNEL_X, 0,
-			 tmp, 
-			 0, 0 );
-
-	 /* By choosing different taylor constants, could get rid of this mul:
-	  */
-	 i915_emit_arith( p, 
+	 /* tmp.y = tmp.y * tmp.x; {x, x * abs(x), 0, 0} */
+	 i915_emit_arith(p,
 			 A0_MUL,
-			 tmp, A0_DEST_CHANNEL_X, 0,
-			 tmp, 
-			 i915_emit_const1f(p, (M_PI * 2)),
+			 tmp, A0_DEST_CHANNEL_Y, 0,
+			 swizzle(tmp, ZERO, X, ZERO, ZERO),
+			 tmp,
 			 0);
 
-	 /* 
-	  * t0.xy = MUL x.xx11, x.x1111  ; x^2, x, 1, 1
-	  * t0 = MUL t0.xyxy t0.xx11 ; x^4, x^3, x^2, x
-	  * t1 = MUL t0.xyyw t0.yz11    ; x^7 x^5 x^3 x
-	  * result = DP4 t1.wzyx, sin_constants
+	 /* tmp.x = tmp.xy DP sin_quad_constants[2].xy */
+         i915_emit_arith(p,
+                         A0_DP3,
+                         tmp, A0_DEST_CHANNEL_X, 0,
+			 tmp,
+                         swizzle(consts1, X, Y, ZERO, ZERO),
+			 0);
+
+	 /* tmp.x now contains a first approximation (y).  Now, weight it
+	  * against tmp.y**2 to get closer.
 	  */
-	 i915_emit_arith( p, 
-			 A0_MUL,
-			 tmp, A0_DEST_CHANNEL_XY, 0,
-			 swizzle(tmp, X,X,ONE,ONE), 
-			 swizzle(tmp, X,ONE,ONE,ONE), 0);
+	 i915_emit_arith(p,
+                         A0_MAX,
+			 tmp, A0_DEST_CHANNEL_Y, 0,
+			 swizzle(tmp, ZERO, X, ZERO, ZERO),
+			 negate(swizzle(tmp, ZERO, X, ZERO, ZERO), 0, 1, 0, 0),
+			 0);
 
-	 i915_emit_arith( p, 
-			 A0_MUL,
-			 tmp, A0_DEST_CHANNEL_ALL, 0,
-			 swizzle(tmp, X,Y,X,Y), 
-			 swizzle(tmp, X,X,ONE,ONE), 0);
+	 /* tmp.y = tmp.x * tmp.y - tmp.x; {y, y * abs(y) - y, 0, 0} */
+	 i915_emit_arith(p,
+			 A0_MAD,
+			 tmp, A0_DEST_CHANNEL_Y, 0,
+			 swizzle(tmp, ZERO, X, ZERO, ZERO),
+			 swizzle(tmp, ZERO, Y, ZERO, ZERO),
+			 negate(swizzle(tmp, ZERO, X, ZERO, ZERO), 0, 1, 0, 0));
 
-	 i915_emit_arith( p, 
-			 A0_MUL,
-			 tmp, A0_DEST_CHANNEL_ALL, 0,
-			 swizzle(tmp, X,Y,Y,W), 
-			 swizzle(tmp, X,Z,ONE,ONE), 0);
-	    
-	 i915_emit_arith( p, 
-			 A0_DP4,
-			 get_result_vector( p, inst ), 
-			 get_result_flags( inst ), 0,
-			 swizzle(tmp, W, Z, Y, X ),
-			 i915_emit_const4fv( p, sin_constants ), 0);
-	 break;
+	 /* result = .2225 * tmp.y + tmp.x =.2225(y * abs(y) - y) + y= */
+	 i915_emit_arith(p,
+			 A0_MAD,
+                         get_result_vector(p, inst),
+                         get_result_flags(inst), 0,
+			 swizzle(consts1, W, W, W, W),
+			 swizzle(tmp, Y, Y, Y, Y),
+			 swizzle(tmp, X, X, X, X));
+
+         break;
 
       case OPCODE_SLT: 
 	 EMIT_2ARG_ARITH( A0_SLT );

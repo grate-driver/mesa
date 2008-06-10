@@ -291,7 +291,7 @@ static void get_space( struct brw_context *brw,
 		       struct gl_buffer_object **vbo_return,
 		       GLuint *offset_return )
 {
-   size = (size + 63) & ~63;
+   size = ALIGN(size, 64);
    
    if (brw->vb.upload.offset + size > BRW_UPLOAD_INIT_SIZE)
       wrap_buffers(brw, size);
@@ -593,6 +593,31 @@ void brw_upload_indices( struct brw_context *brw,
 				 ib_size,
 				 index_buffer->ptr,
 				 bufferobj);
+   } else {
+      /* If the index buffer isn't aligned to its element size, we have to
+       * rebase it into a temporary.
+       */
+       if ((get_size(index_buffer->type) - 1) & offset) {
+           struct gl_buffer_object *vbo;
+           GLuint voffset;
+           GLubyte *map = ctx->Driver.MapBuffer(ctx,
+                                                GL_ELEMENT_ARRAY_BUFFER_ARB,
+                                                GL_DYNAMIC_DRAW_ARB,
+                                                bufferobj);
+           map += offset;
+           get_space(brw, ib_size, &vbo, &voffset);
+           
+           ctx->Driver.BufferSubData(ctx,
+                                     GL_ELEMENT_ARRAY_BUFFER_ARB,
+                                     voffset,
+                                     ib_size,
+                                     map,
+                                     vbo);
+           ctx->Driver.UnmapBuffer(ctx, GL_ELEMENT_ARRAY_BUFFER_ARB, bufferobj);
+
+           bufferobj = vbo;
+           offset = voffset;
+       }
    }
 
    /* Emit the indexbuffer packet:

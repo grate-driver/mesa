@@ -69,7 +69,7 @@ static GLuint translate_tex_target( GLenum target )
 }
 
 
-static GLuint translate_tex_format( GLuint mesa_format )
+static GLuint translate_tex_format( GLuint mesa_format, GLenum depth_mode )
 {
    switch( mesa_format ) {
    case MESA_FORMAT_L8:
@@ -114,11 +114,29 @@ static GLuint translate_tex_format( GLuint mesa_format )
       return BRW_SURFACEFORMAT_FXT1;
 
    case MESA_FORMAT_Z16:
-      return BRW_SURFACEFORMAT_L16_UNORM;
+       if (depth_mode == GL_INTENSITY)
+	   return BRW_SURFACEFORMAT_I16_UNORM;
+       else if (depth_mode == GL_ALPHA)
+	   return BRW_SURFACEFORMAT_A16_UNORM;
+       else
+	   return BRW_SURFACEFORMAT_L16_UNORM;
+
+   case MESA_FORMAT_RGB_DXT1:
+       return BRW_SURFACEFORMAT_DXT1_RGB;
 
    case MESA_FORMAT_RGBA_DXT1:
-   case MESA_FORMAT_RGB_DXT1:
-      return BRW_SURFACEFORMAT_DXT1_RGB;
+       return BRW_SURFACEFORMAT_BC1_UNORM;
+       
+   case MESA_FORMAT_RGBA_DXT3:
+       return BRW_SURFACEFORMAT_BC2_UNORM;
+       
+   case MESA_FORMAT_RGBA_DXT5:
+       return BRW_SURFACEFORMAT_BC3_UNORM;
+
+   case MESA_FORMAT_SRGBA8:
+      return BRW_SURFACEFORMAT_R8G8B8A8_UNORM_SRGB;
+   case MESA_FORMAT_SRGB_DXT1:
+      return BRW_SURFACEFORMAT_BC1_UNORM_SRGB;
 
    default:
       assert(0);
@@ -141,7 +159,7 @@ void brw_update_texture_surface( GLcontext *ctx,
 
    surf->ss0.mipmap_layout_mode = BRW_SURFACE_MIPMAPLAYOUT_BELOW;   
    surf->ss0.surface_type = translate_tex_target(tObj->Target);
-   surf->ss0.surface_format = translate_tex_format(firstImage->TexFormat->MesaFormat);
+   surf->ss0.surface_format = translate_tex_format(firstImage->TexFormat->MesaFormat, tObj->DepthMode);
 
    /* This is ok for all textures with channel width 8bit or less:
     */
@@ -181,11 +199,8 @@ static void upload_wm_surfaces(struct brw_context *brw )
 {
    GLcontext *ctx = &brw->intel.ctx;
    struct intel_context *intel = &brw->intel;
-   struct brw_surface_binding_table bind;
    GLuint i;
 
-   memcpy(&bind, &brw->wm.bind, sizeof(bind));
-      
    {
       struct brw_surface_state surf;
       struct intel_region *region = brw->state.draw_region;

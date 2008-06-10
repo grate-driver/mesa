@@ -189,12 +189,12 @@ static void intelDrawBuffer(GLcontext *ctx, GLenum mode )
    if ( intel->sarea->pf_current_page == 1 ) 
       front ^= 1;
    
-   intelSetFrontClipRects( intel );
-
    if (front) {
+      intelSetFrontClipRects( intel );
       intel->drawRegion = &intel->intelScreen->front;
       intel->readRegion = &intel->intelScreen->front;
    } else {
+      intelSetBackClipRects( intel );
       intel->drawRegion = &intel->intelScreen->back;
       intel->readRegion = &intel->intelScreen->back;
    }

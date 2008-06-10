@@ -66,6 +66,7 @@
 int INTEL_DEBUG = (0);
 #endif
 
+#define need_GL_NV_point_sprite
 #define need_GL_ARB_multisample
 #define need_GL_ARB_point_parameters
 #define need_GL_ARB_texture_compression
@@ -81,6 +82,13 @@ int INTEL_DEBUG = (0);
 #define need_GL_EXT_fog_coord
 #define need_GL_EXT_multi_draw_arrays
 #define need_GL_EXT_secondary_color
+#define need_GL_ATI_separate_stencil
+#define need_GL_EXT_point_parameters
+#define need_GL_VERSION_2_0
+#define need_GL_VERSION_2_1
+#define need_GL_ARB_shader_objects
+#define need_GL_ARB_vertex_shader
+
 #include "extension_helper.h"
 
 #ifndef VERBOSE
@@ -146,6 +154,7 @@ const struct dri_extension card_extensions[] =
     { "GL_ARB_multisample",                GL_ARB_multisample_functions },
     { "GL_ARB_multitexture",               NULL },
     { "GL_ARB_point_parameters",           GL_ARB_point_parameters_functions },
+    { "GL_NV_point_sprite",                GL_NV_point_sprite_functions },
     { "GL_ARB_texture_border_clamp",       NULL },
     { "GL_ARB_texture_compression",        GL_ARB_texture_compression_functions },
     { "GL_ARB_texture_cube_map",           NULL },
@@ -158,6 +167,8 @@ const struct dri_extension card_extensions[] =
     { "GL_NV_texture_rectangle",           NULL },
     { "GL_EXT_texture_rectangle",          NULL },
     { "GL_ARB_texture_rectangle",          NULL },
+    { "GL_ARB_point_sprite",               NULL},
+    { "GL_ARB_point_parameters",	   NULL }, 
     { "GL_ARB_vertex_buffer_object",       GL_ARB_vertex_buffer_object_functions },
     { "GL_ARB_vertex_program",             GL_ARB_vertex_program_functions },
     { "GL_ARB_window_pos",                 GL_ARB_window_pos_functions },
@@ -171,18 +182,33 @@ const struct dri_extension card_extensions[] =
     { "GL_EXT_fog_coord",                  GL_EXT_fog_coord_functions },
     { "GL_EXT_multi_draw_arrays",          GL_EXT_multi_draw_arrays_functions },
     { "GL_EXT_secondary_color",            GL_EXT_secondary_color_functions },
+    { "GL_ATI_separate_stencil",           GL_ATI_separate_stencil_functions },
     { "GL_EXT_stencil_wrap",               NULL },
+    /* Do not enable this extension.  It conflicts with GL_ATI_separate_stencil
+     * and 2.0's separate stencil, because mesa's computed _TestTwoSide will
+     * only reflect whether it's enabled through this extension, even if the
+     * application is using the other interfaces.
+     */
+/*{ "GL_EXT_stencil_two_side",           GL_EXT_stencil_two_side_functions },*/
     { "GL_EXT_texture_edge_clamp",         NULL },
     { "GL_EXT_texture_env_combine",        NULL },
     { "GL_EXT_texture_env_dot3",           NULL },
     { "GL_EXT_texture_filter_anisotropic", NULL },
     { "GL_EXT_texture_lod_bias",           NULL },
+    { "GL_EXT_texture_sRGB",               NULL },
     { "GL_3DFX_texture_compression_FXT1",  NULL },
     { "GL_APPLE_client_storage",           NULL },
     { "GL_MESA_pack_invert",               NULL },
     { "GL_MESA_ycbcr_texture",             NULL },
     { "GL_NV_blend_square",                NULL },
     { "GL_SGIS_generate_mipmap",           NULL },
+    { "GL_ARB_shading_language_100",       GL_VERSION_2_0_functions},
+    { "GL_ARB_shading_language_120",       GL_VERSION_2_1_functions},
+    { "GL_ARB_shader_objects",             GL_ARB_shader_objects_functions},
+    { "GL_ARB_vertex_shader",              GL_ARB_vertex_shader_functions},
+    { "GL_ARB_fragment_shader",            NULL },
+    /* XXX not implement yet, to compile builtin glsl lib */
+    { "GL_ARB_draw_buffers",               NULL },
     { NULL,                                NULL }
 };
 
@@ -399,17 +425,10 @@ GLboolean intelInitContext( struct intel_context *intel,
    switch(mesaVis->depthBits) {
    case 0:			/* what to do in this case? */
    case 16:
-      intel->depth_scale = 1.0/0xffff;
       intel->polygon_offset_scale = 1.0/0xffff;
-      intel->depth_clear_mask = ~0;
-      intel->ClearDepth = 0xffff;
       break;
    case 24:
-      intel->depth_scale = 1.0/0xffffff;
       intel->polygon_offset_scale = 2.0/0xffffff; /* req'd to pass glean */
-      intel->depth_clear_mask = 0x00ffffff;
-      intel->stencil_clear_mask = 0xff000000;
-      intel->ClearDepth = 0x00ffffff;
       break;
    default:
       assert(0); 
@@ -551,6 +570,8 @@ void intelDestroyContext(__DRIcontextPrivate *driContextPriv)
 #endif
 
       /* free the Mesa context */
+      intel->ctx.VertexProgram.Current = NULL;
+      intel->ctx.FragmentProgram.Current = NULL;
       _mesa_destroy_context(&intel->ctx);
    }
 

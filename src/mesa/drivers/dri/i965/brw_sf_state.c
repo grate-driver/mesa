@@ -38,6 +38,8 @@
 
 static void upload_sf_vp(struct brw_context *brw)
 {
+   GLcontext *ctx = &brw->intel.ctx;
+   const GLfloat depth_scale = 1.0F / ctx->DrawBuffer->_DepthMaxF;
    struct brw_sf_viewport sfv;
 
    memset(&sfv, 0, sizeof(sfv));
@@ -47,14 +49,14 @@ static void upload_sf_vp(struct brw_context *brw)
       /* _NEW_VIEWPORT, BRW_NEW_METAOPS */
 
       if (!brw->metaops.active) {
-	 const GLfloat *v = brw->intel.ctx.Viewport._WindowMap.m;
+	 const GLfloat *v = ctx->Viewport._WindowMap.m;
 	 
 	 sfv.viewport.m00 =   v[MAT_SX];
 	 sfv.viewport.m11 = - v[MAT_SY];
-	 sfv.viewport.m22 =   v[MAT_SZ] * brw->intel.depth_scale;
+	 sfv.viewport.m22 =   v[MAT_SZ] * depth_scale;
 	 sfv.viewport.m30 =   v[MAT_TX];
 	 sfv.viewport.m31 = - v[MAT_TY] + brw->intel.driDrawable->h;
-	 sfv.viewport.m32 =   v[MAT_TZ] * brw->intel.depth_scale;
+	 sfv.viewport.m32 =   v[MAT_TZ] * depth_scale;
       }
       else {
 	 sfv.viewport.m00 =   1;
@@ -118,7 +120,7 @@ static void upload_sf_unit( struct brw_context *brw )
    memset(&sf, 0, sizeof(sf));
 
    /* CACHE_NEW_SF_PROG */
-   sf.thread0.grf_reg_count = ((brw->sf.prog_data->total_grf-1) & ~15) / 16;
+   sf.thread0.grf_reg_count = ALIGN(brw->sf.prog_data->total_grf, 16) / 16 - 1;
    sf.thread0.kernel_start_pointer = brw->sf.prog_gs_offset >> 6;
    sf.thread3.urb_entry_read_length = brw->sf.prog_data->urb_read_length;
 
@@ -184,6 +186,7 @@ static void upload_sf_unit( struct brw_context *brw )
    /* _NEW_POINT */
    sf.sf6.point_rast_rule = 1;	/* opengl conventions */
    sf.sf7.point_size = brw->attribs.Point->_Size * (1<<3);
+   sf.sf7.sprite_point = brw->attribs.Point->PointSprite;
    sf.sf7.use_point_size_state = !brw->attribs.Point->_Attenuated;
    sf.sf7.aa_line_distance_mode = 0;
 

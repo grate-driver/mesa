@@ -524,10 +524,13 @@ static void emit_op3fn(struct tnl_program *p,
    GLuint nr = p->program->Base.NumInstructions++;
       
    if (nr >= p->nr_instructions) {
+      int new_nr_instructions = p->nr_instructions * 2;
+
       p->program->Base.Instructions = 
 	 _mesa_realloc(p->program->Base.Instructions,
 		       sizeof(struct prog_instruction) * p->nr_instructions,
-		       sizeof(struct prog_instruction) * (p->nr_instructions *= 2));
+		       sizeof(struct prog_instruction) * new_nr_instructions);
+      p->nr_instructions = new_nr_instructions;
    }
 
    {      
@@ -1167,6 +1170,11 @@ static void build_fog( struct tnl_program *p )
    }
    else {
       input = swizzle1(register_input(p, VERT_ATTRIB_FOG), X);
+      if (p->state->fog_option &&
+	  p->state->tnl_do_vertex_fog)
+	  input = swizzle1(register_input(p, VERT_ATTRIB_FOG), X);
+      else
+	  input = register_input(p, VERT_ATTRIB_FOG);
    }
 
    if (p->state->fog_option &&
@@ -1575,7 +1583,7 @@ static void update_tnl_program( struct brw_context *brw )
    struct gl_vertex_program *old = brw->tnl_program;
 
    /* _NEW_PROGRAM */
-   if (brw->attribs.VertexProgram->_Enabled) 
+   if (brw->attribs.VertexProgram->_Current) 
       return;
       
    /* Grab all the relevent state and put it in a single structure:
@@ -1622,7 +1630,8 @@ const struct brw_tracked_state brw_tnl_vertprog = {
 	       _NEW_FOG | 
 	       _NEW_HINT | 
 	       _NEW_POINT | 
-	       _NEW_TEXTURE),
+	       _NEW_TEXTURE |
+          _NEW_TEXTURE_MATRIX),
       .brw = (BRW_NEW_FRAGMENT_PROGRAM | 
 	      BRW_NEW_INPUT_VARYING),
       .cache = 0
@@ -1638,8 +1647,8 @@ static void update_active_vertprog( struct brw_context *brw )
    const struct gl_vertex_program *prev = brw->vertex_program;
 
    /* NEW_PROGRAM */
-   if (brw->attribs.VertexProgram->_Enabled) {
-      brw->vertex_program = brw->attribs.VertexProgram->Current;
+   if (brw->attribs.VertexProgram->_Current) {
+      brw->vertex_program = brw->attribs.VertexProgram->_Current;
    }
    else {
       /* BRW_NEW_TNL_PROGRAM */

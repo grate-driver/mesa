@@ -38,7 +38,7 @@
 #if defined(USE_SSE_ASM) && defined(__linux__)
 #include <linux/version.h>
 #endif
-#if defined(USE_SSE_ASM) && defined(__FreeBSD__)
+#if defined(USE_SSE_ASM) && (defined(__FreeBSD__) || defined(__DragonFly__))
 #include <sys/types.h>
 #include <sys/sysctl.h>
 #endif
@@ -104,7 +104,7 @@ static LONG WINAPI ExceptionFilter(LPEXCEPTION_POINTERS exp)
 
 static void check_os_sse_support( void )
 {
-#if defined(__FreeBSD__)
+#if defined(__FreeBSD__) || defined(__DragonFly__)
    {
       int ret, enabled;
       unsigned int len;

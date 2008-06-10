@@ -44,6 +44,8 @@
 #include "api_noop.h"
 #include "vtxfmt.h"
 
+#include "shader/shader_api.h"
+
 /***************************************
  * Mesa's Driver Functions
  ***************************************/
@@ -60,12 +62,21 @@ static const struct dri_extension brw_extensions[] =
     { NULL,                                NULL }
 };
 
+static void brwUseProgram(GLcontext *ctx, GLuint program)
+{
+   _mesa_use_program(ctx, program);
+}
 
+static void brwInitProgFuncs( struct dd_function_table *functions )
+{
+   functions->UseProgram = brwUseProgram;
+}
 static void brwInitDriverFunctions( struct dd_function_table *functions )
 {
    intelInitDriverFunctions( functions );
    brwInitTextureFuncs( functions );
    brwInitFragProgFuncs( functions );
+   brwInitProgFuncs( functions );
 }
 
 

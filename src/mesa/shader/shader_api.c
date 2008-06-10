@@ -128,9 +128,16 @@ _mesa_free_shader_program_data(GLcontext *ctx,
    for (i = 0; i < shProg->NumShaders; i++) {
       _mesa_reference_shader(ctx, &shProg->Shaders[i], NULL);
    }
+   shProg->NumShaders = 0;
+
    if (shProg->Shaders) {
       _mesa_free(shProg->Shaders);
       shProg->Shaders = NULL;
+   }
+
+   if (shProg->InfoLog) {
+      _mesa_free(shProg->InfoLog);
+      shProg->InfoLog = NULL;
    }
 }
 
@@ -142,10 +149,7 @@ void
 _mesa_free_shader_program(GLcontext *ctx, struct gl_shader_program *shProg)
 {
    _mesa_free_shader_program_data(ctx, shProg);
-   if (shProg->Shaders) {
-      _mesa_free(shProg->Shaders);
-      shProg->Shaders = NULL;
-   }
+
    _mesa_free(shProg);
 }
 
@@ -380,6 +384,17 @@ sizeof_glsl_type(GLenum type)
    case GL_BOOL:
    case GL_FLOAT:
    case GL_INT:
+   case GL_SAMPLER_1D:
+   case GL_SAMPLER_2D:
+   case GL_SAMPLER_3D:
+   case GL_SAMPLER_CUBE:
+   case GL_SAMPLER_1D_SHADOW:
+   case GL_SAMPLER_2D_SHADOW:
+   case GL_SAMPLER_2D_RECT_ARB:
+   case GL_SAMPLER_2D_RECT_SHADOW_ARB:
+   case GL_SAMPLER_1D_ARRAY_SHADOW_EXT:
+   case GL_SAMPLER_2D_ARRAY_SHADOW_EXT:
+   case GL_SAMPLER_CUBE_SHADOW_EXT:
       return 1;
    case GL_BOOL_VEC2:
    case GL_FLOAT_VEC2:

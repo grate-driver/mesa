@@ -75,10 +75,15 @@ darwin-fat-32bit \
 darwin-fat-all \
 darwin-static \
 darwin-static-x86ppc \
+dragonfly \
+dragonfly-dri \
+dragonfly-dri-amd64 \
+dragonfly-dri-x86 \
 freebsd \
 freebsd-dri \
 freebsd-dri-amd64 \
 freebsd-dri-x86 \
+freebsd-static \
 hpux10 \
 hpux10-gcc \
 hpux10-static \
