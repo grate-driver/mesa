@@ -759,7 +759,7 @@ int intelUploadTexImages( intelContextPtr intel,
 			  GLuint face)
 {
    const int numLevels = t->base.lastLevel - t->base.firstLevel + 1;
-   const struct gl_texture_image *firstImage = t->image[face][t->base.firstLevel].image;
+   const struct gl_texture_image *firstImage = t->image[face][0].image;
    int pitch = firstImage->RowStride * firstImage->TexFormat->TexelBytes;
 
    /* Can we texture out of the existing client data? */
