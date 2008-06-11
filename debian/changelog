@@ -1,11 +1,14 @@
 mesa (7.0.3-2) UNRELEASED; urgency=low
 
-  * Pull from mesa_7_0_branch (6f4c8b5b).
+  * Pull from mesa_7_0_branch (03447de3).
   * Set right cliprects for the current draw region on Intel, closes: #467319.
   * Use BRW_TEXCOORDMODE_CLAMP instead of BRW_TEXCOORDMODE_CLAMP_BORDER
     to implement GL_CLAMP on i965, closes: #478880.
+  * Fix segment fault with BASE_LEVEL set to 5 for MipMap on i915,
+    closes: #451339.
+  * Disable low impact fallback on r300 by default, closes: #440868.
 
- -- Brice Goglin <bgoglin@debian.org>  Tue, 10 Jun 2008 23:15:21 +0200
+ -- Brice Goglin <bgoglin@debian.org>  Wed, 11 Jun 2008 10:56:08 +0200
 
 mesa (7.0.3-1) unstable; urgency=low
 
