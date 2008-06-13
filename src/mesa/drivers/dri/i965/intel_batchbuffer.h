@@ -84,7 +84,7 @@ void intel_batchbuffer_release_space(struct intel_batchbuffer *batch,
 static inline GLuint 
 intel_batchbuffer_space( struct intel_batchbuffer *batch )
 {
-   return (BATCH_SZ - BATCH_RESERVED) - (batch->ptr - (batch->map + batch->offset));
+   return (BATCH_SZ - BATCH_RESERVED) - (batch->ptr - batch->map);
 }
 
 
