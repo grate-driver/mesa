@@ -79,7 +79,7 @@ new_subroutine(slang_emit_info *emitInfo, GLuint *id)
       _mesa_realloc(emitInfo->Subroutines,
                     n * sizeof(struct gl_program),
                     (n + 1) * sizeof(struct gl_program));
-   emitInfo->Subroutines[n] = _mesa_new_program(ctx, emitInfo->prog->Target, 0);
+   emitInfo->Subroutines[n] = ctx->Driver.NewProgram(ctx, emitInfo->prog->Target, 0);
    emitInfo->Subroutines[n]->Parameters = emitInfo->prog->Parameters;
    emitInfo->NumSubroutines++;
    *id = n;
