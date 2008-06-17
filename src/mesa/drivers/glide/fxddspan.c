@@ -549,6 +549,7 @@ void
 fxSetupDDSpanPointers(GLcontext * ctx)
 {
    struct swrast_device_driver *swdd = _swrast_GetDeviceDriverReference( ctx );
+#if 0
    fxMesaContext fxMesa = FX_CONTEXT(ctx);
 
    switch (fxMesa->colDepth) {
@@ -602,6 +603,8 @@ fxSetupDDSpanPointers(GLcontext * ctx)
       swdd->WriteStencilPixels = fxWriteStencilPixels;
       swdd->ReadStencilPixels = fxReadStencilPixels;
    }
+#endif
+
 #if 0
    swdd->WriteCI8Span		= NULL;
    swdd->WriteCI32Span		= NULL;
