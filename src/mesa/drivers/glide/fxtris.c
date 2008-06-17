@@ -177,22 +177,23 @@ fx_translate_vertex( GLcontext *ctx, const GrVertex *src, SWvertex *dst)
    dst->specular[2] = src->g1;
 #endif /* !FX_PACKEDCOLOR */
 
-   dst->texcoord[ts0][0] = fxMesa->inv_s0scale * src->tmuvtx[0].sow * w;
-   dst->texcoord[ts0][1] = fxMesa->inv_t0scale * src->tmuvtx[0].tow * w;
+   /* TODO: changed "texcoord" to "attrib" */
+   dst->attrib[ts0][0] = fxMesa->inv_s0scale * src->tmuvtx[0].sow * w;
+   dst->attrib[ts0][1] = fxMesa->inv_t0scale * src->tmuvtx[0].tow * w;
 
    if (fxMesa->stw_hint_state & GR_STWHINT_W_DIFF_TMU0)
-      dst->texcoord[ts0][3] = src->tmuvtx[0].oow * w;
+      dst->attrib[ts0][3] = src->tmuvtx[0].oow * w;
    else
-      dst->texcoord[ts0][3] = 1.0F;
+      dst->attrib[ts0][3] = 1.0F;
 
    if (fxMesa->SetupIndex & SETUP_TMU1) {
-      dst->texcoord[ts1][0] = fxMesa->inv_s1scale * src->tmuvtx[1].sow * w;
-      dst->texcoord[ts1][1] = fxMesa->inv_t1scale * src->tmuvtx[1].tow * w;
+      dst->attrib[ts1][0] = fxMesa->inv_s1scale * src->tmuvtx[1].sow * w;
+      dst->attrib[ts1][1] = fxMesa->inv_t1scale * src->tmuvtx[1].tow * w;
 
       if (fxMesa->stw_hint_state & GR_STWHINT_W_DIFF_TMU1)
-	 dst->texcoord[ts1][3] = src->tmuvtx[1].oow * w;
+	 dst->attrib[ts1][3] = src->tmuvtx[1].oow * w;
       else
-	 dst->texcoord[ts1][3] = 1.0F;
+	 dst->attrib[ts1][3] = 1.0F;
    }
 
    dst->pointSize = src->psize;

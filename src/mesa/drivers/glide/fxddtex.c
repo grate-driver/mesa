@@ -504,7 +504,7 @@ fxDDIsTextureResident(GLcontext *ctx, struct gl_texture_object *tObj)
 static GrTexTable_t
 convertPalette(const fxMesaContext fxMesa, FxU32 data[256], const struct gl_color_table *table)
 {
-   const GLubyte *tableUB = (const GLubyte *) table->Table;
+   const GLubyte *tableUB = (const GLubyte *) table->TableUB;
    GLint width = table->Size;
    FxU32 r, g, b, a;
    GLint i;
@@ -580,7 +580,7 @@ fxDDTexPalette(GLcontext * ctx, struct gl_texture_object *tObj)
 		 tObj->Name, (GLuint) tObj->DriverData);
       }
       /* This might be a proxy texture. */
-      if (!tObj->Palette.Table)
+      if (!tObj->Palette.TableUB) /* TODO: is that ok or should it be TableF? */
          return;
       if (!tObj->DriverData)
          tObj->DriverData = fxAllocTexObjData(fxMesa);

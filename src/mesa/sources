@@ -258,7 +258,6 @@ OSMESA_DRIVER_SOURCES = \
 GLIDE_DRIVER_SOURCES =			\
 	drivers/glide/fxapi.c		\
 	drivers/glide/fxdd.c		\
-	drivers/glide/fxddspan.c	\
 	drivers/glide/fxddtex.c		\
 	drivers/glide/fxsetup.c		\
 	drivers/glide/fxtexman.c	\
@@ -266,6 +265,8 @@ GLIDE_DRIVER_SOURCES =			\
 	drivers/glide/fxvb.c		\
 	drivers/glide/fxglidew.c	\
 	drivers/glide/fxg.c
+
+#	drivers/fxddspan.c
 
 SVGA_DRIVER_SOURCES =			\
 	drivers/svga/svgamesa.c		\
