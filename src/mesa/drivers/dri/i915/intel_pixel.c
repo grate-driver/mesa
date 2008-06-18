@@ -364,7 +364,7 @@ intelTryDrawPixels( GLcontext *ctx,
    GLint pitch = unpack->RowLength ? unpack->RowLength : width;
    GLuint dest;
    GLuint cpp = intel->intelScreen->cpp;
-   GLint size = width * pitch * cpp;
+   GLint size = height * pitch * cpp;
 
    if (INTEL_DEBUG & DEBUG_PIXEL)
       fprintf(stderr, "%s\n", __FUNCTION__);
