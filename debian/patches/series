@@ -2,4 +2,4 @@
 01_fix-makefile.patch
 02_use-ieee-fp-on-s390-and-m68k.patch
 03_optional-progs-and-install.patch
-04_debian-configs.patch
+04_cleanup-osmesa-configs.patch

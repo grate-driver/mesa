@@ -1,0 +1,197 @@
+Index: mesa/configs/linux-osmesa
+===================================================================
+--- mesa.orig/configs/linux-osmesa	2007-11-11 00:24:07.000000000 +0100
++++ mesa/configs/linux-osmesa	2007-11-11 00:33:20.000000000 +0100
+@@ -9,8 +9,17 @@
+ # Compiler and flags
+ CC = gcc
+ CXX = g++
+-CFLAGS = -O3 -ansi -pedantic -fPIC -ffast-math -D_POSIX_SOURCE -D_POSIX_C_SOURCE=199309L -D_SVID_SOURCE -D_BSD_SOURCE -DPTHREADS
+-CXXFLAGS = -O3 -ansi -pedantic -fPIC -ffast-math -D_POSIX_SOURCE -D_POSIX_C_SOURCE=199309L -D_SVID_SOURCE -D_BSD_SOURCE
++
++PIC_FLAGS  = -fPIC
++
++DEFINES = -D_POSIX_SOURCE -D_POSIX_C_SOURCE=199309L -D_SVID_SOURCE \
++	-D_BSD_SOURCE -D_GNU_SOURCE \
++	-DPTHREADS -DUSE_XSHM -DHAVE_POSIX_MEMALIGN
++
++CFLAGS = -ansi -pedantic $(OPT_FLAGS) $(PIC_FLAGS) $(ARCH_FLAGS) $(DEFINES) \
++	$(ASM_FLAGS) -ffast-math
++
++CXXFLAGS = -ansi -pedantic $(OPT_FLAGS) $(PIC_FLAGS) $(ARCH_FLAGS) $(DEFINES)
+ 
+ # Work around aliasing bugs - developers should comment this out
+ CFLAGS += -fno-strict-aliasing
+@@ -26,3 +35,4 @@
+ OSMESA_LIB_DEPS = -lm -lpthread
+ GLU_LIB_DEPS = -L$(TOP)/$(LIB_DIR) -l$(OSMESA_LIB)
+ APP_LIB_DEPS = -lOSMesa -lGLU
++
+Index: mesa/configs/linux-osmesa-static
+===================================================================
+--- mesa.orig/configs/linux-osmesa-static	2007-11-11 00:24:01.000000000 +0100
++++ mesa/configs/linux-osmesa-static	2007-11-11 00:33:20.000000000 +0100
+@@ -8,7 +8,8 @@
+ 
+ # Compiler and flags
+ MKLIB_OPTIONS = -static
++PIC_FLAGS =
+ 
+ # Library names
+-OSMESA_LIB_NAME = libOSMesa.a
++OSMESA_LIB_NAME = lib$(OSMESA_LIB).a
+ 
+Index: mesa/configs/linux-osmesa16
+===================================================================
+--- mesa.orig/configs/linux-osmesa16	2007-11-11 00:24:07.000000000 +0100
++++ mesa/configs/linux-osmesa16	2007-11-11 00:33:41.000000000 +0100
+@@ -1,31 +1,19 @@
+ # Configuration for 16 bits/channel OSMesa library on Linux
+ 
+-include $(TOP)/configs/default
++include $(TOP)/configs/linux-osmesa
+ 
+ CONFIG_NAME = linux-osmesa16
+ 
+-# Compiler and flags
+-CC = gcc
+-CXX = g++
+-CFLAGS = -O3 -ansi -pedantic -fPIC -ffast-math -D_POSIX_SOURCE -D_POSIX_C_SOURCE=199309L -D_SVID_SOURCE -D_BSD_SOURCE -DUSE_XSHM -DPTHREADS -I/usr/X11R6/include -DCHAN_BITS=16 -DDEFAULT_SOFTWARE_DEPTH_BITS=31
+-CXXFLAGS = -O3 -ansi -pedantic -fPIC -ffast-math -D_POSIX_SOURCE -D_POSIX_C_SOURCE=199309L -D_SVID_SOURCE -D_BSD_SOURCE
+-
+ # Work around aliasing bugs - developers should comment this out
+ CFLAGS += -fno-strict-aliasing
+ CXXFLAGS += -fno-strict-aliasing
+-
++DEFINES += -DCHAN_BITS=16 -DDEFAULT_SOFTWARE_DEPTH_BITS=32
+ # Library names
+ OSMESA_LIB = OSMesa16
+-OSMESA_LIB_NAME = libOSMesa16.so
+-
+ 
+ # Directories
+-SRC_DIRS = mesa glu
+-DRIVER_DIRS = osmesa
+ PROGRAM_DIRS = 
+ 
+-
+ # Dependencies
+-OSMESA_LIB_DEPS = -lm -lpthread
+-GLU_LIB_DEPS = -L$(TOP)/$(LIB_DIR) -l$(OSMESA_LIB)
+-APP_LIB_DEPS = -lOSMesa16
++APP_LIB_DEPS = -l$(OSMESA_LIB)
++
+Index: mesa/configs/linux-osmesa16-static
+===================================================================
+--- mesa.orig/configs/linux-osmesa16-static	2007-11-11 00:24:07.000000000 +0100
++++ mesa/configs/linux-osmesa16-static	2007-11-11 00:33:20.000000000 +0100
+@@ -1,14 +1,10 @@
+ # Configuration for 16 bits/channel OSMesa library on Linux
+ 
+-include $(TOP)/configs/default
++include $(TOP)/configs/linux-osmesa16
+ 
+ CONFIG_NAME = linux-osmesa16-static
+ 
+ # Compiler and flags
+-CC = gcc
+-CXX = g++
+-CFLAGS = -O3 -ansi -pedantic -ffast-math -D_POSIX_SOURCE -D_POSIX_C_SOURCE=199309L -D_SVID_SOURCE -D_BSD_SOURCE -DUSE_XSHM -DPTHREADS -I/usr/X11R6/include -DCHAN_BITS=16 -DDEFAULT_SOFTWARE_DEPTH_BITS=31
+-CXXFLAGS = -O3 -ansi -pedantic -ffast-math -D_POSIX_SOURCE -D_POSIX_C_SOURCE=199309L -D_SVID_SOURCE -D_BSD_SOURCE
+ MKLIB_OPTIONS = -static
+ PIC_FLAGS =
+ 
+@@ -17,16 +13,5 @@
+ CXXFLAGS += -fno-strict-aliasing
+ 
+ # Library names
+-OSMESA_LIB = OSMesa16
+-OSMESA_LIB_NAME = libOSMesa16.a
++OSMESA_LIB_NAME = lib$(OSMESA_LIB).a
+ 
+-
+-# Directories
+-SRC_DIRS = mesa glu
+-DRIVER_DIRS = osmesa
+-PROGRAM_DIRS = 
+-
+-
+-# Dependencies
+-OSMESA_LIB_DEPS = -lm -lpthread
+-APP_LIB_DEPS = -lOSMesa16
+Index: mesa/configs/linux-osmesa32
+===================================================================
+--- mesa.orig/configs/linux-osmesa32	2007-11-11 00:24:07.000000000 +0100
++++ mesa/configs/linux-osmesa32	2007-11-11 00:33:51.000000000 +0100
+@@ -1,31 +1,22 @@
+ # Configuration for 32 bits/channel OSMesa library on Linux
+ 
+-include $(TOP)/configs/default
++include $(TOP)/configs/linux-osmesa
+ 
+ CONFIG_NAME = linux-osmesa32
+ 
+ # Compiler and flags
+-CC = gcc
+-CXX = g++
+-CFLAGS = -O3 -ansi -pedantic -fPIC -ffast-math -D_POSIX_SOURCE -D_POSIX_C_SOURCE=199309L -D_SVID_SOURCE -D_BSD_SOURCE -DUSE_XSHM -DPTHREADS -I/usr/X11R6/include -DCHAN_BITS=32 -DDEFAULT_SOFTWARE_DEPTH_BITS=31
+-CXXFLAGS = -O3 -ansi -pedantic -fPIC -ffast-math -D_POSIX_SOURCE -D_POSIX_C_SOURCE=199309L -D_SVID_SOURCE -D_BSD_SOURCE
+ 
+ # Work around aliasing bugs - developers should comment this out
+ CFLAGS += -fno-strict-aliasing
+ CXXFLAGS += -fno-strict-aliasing
++DEFINES += -DCHAN_BITS=32 -DDEFAULT_SOFTWARE_DEPTH_BITS=31
+ 
+ # Library names
+ OSMESA_LIB = OSMesa32
+-OSMESA_LIB_NAME = libOSMesa32.so
+-
+ 
+ # Directories
+-SRC_DIRS = mesa glu
+-DRIVER_DIRS = osmesa
+ PROGRAM_DIRS = 
+ 
+-
+ # Dependencies
+-OSMESA_LIB_DEPS = -lm -lpthread
+-GLU_LIB_DEPS = -L$(TOP)/$(LIB_DIR) -l$(OSMESA_LIB)
+-APP_LIB_DEPS = -lOSMesa32
++APP_LIB_DEPS = -l$(OSMESA_LIB)
++
+Index: mesa/configs/linux-osmesa32-static
+===================================================================
+--- mesa.orig/configs/linux-osmesa32-static	2007-11-11 00:24:01.000000000 +0100
++++ mesa/configs/linux-osmesa32-static	2007-11-11 00:33:20.000000000 +0100
+@@ -1,28 +1,13 @@
+ # Configuration for 32 bits/channel OSMesa library on Linux
+ 
+-include $(TOP)/configs/default
++include $(TOP)/configs/linux-osmesa32
+ 
+ CONFIG_NAME = linux-osmesa32-static
+ 
+ # Compiler and flags
+-CC = gcc
+-CXX = g++
+-CFLAGS = -O3 -ansi -pedantic -ffast-math -D_POSIX_SOURCE -D_POSIX_C_SOURCE=199309L -D_SVID_SOURCE -D_BSD_SOURCE -DUSE_XSHM -DPTHREADS -I/usr/X11R6/include -DCHAN_BITS=32 -DDEFAULT_SOFTWARE_DEPTH_BITS=31
+-CXXFLAGS = -O3 -ansi -pedantic -ffast-math -D_POSIX_SOURCE -D_POSIX_C_SOURCE=199309L -D_SVID_SOURCE -D_BSD_SOURCE
+ MKLIB_OPTIONS = -static
+-
++PIC_FLAGS =
+ 
+ # Library names
+-OSMESA_LIB = OSMesa32
+-OSMESA_LIB_NAME = libOSMesa32.a
+-
+-
+-# Directories
+-SRC_DIRS = mesa glu
+-DRIVER_DIRS = osmesa
+-PROGRAM_DIRS = 
+-
++OSMESA_LIB_NAME = lib$(OSMESA_LIB).a
+ 
+-# Dependencies
+-OSMESA_LIB_DEPS = -lm -lpthread
+-APP_LIB_DEPS = -lOSMesa32
