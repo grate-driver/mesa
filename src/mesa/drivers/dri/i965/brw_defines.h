@@ -850,7 +850,11 @@
 #define R02_PRIM_END    0x1
 #define R02_PRIM_START  0x2
 
-#define BRW_IS_IGD(brw)     ((brw)->intel.intelScreen->deviceID == PCI_CHIP_IGD_GM)
+#define BRW_IS_IGD_GM(brw)              ((brw)->intel.intelScreen->deviceID == PCI_CHIP_IGD_GM)
+#define BRW_IS_G4X(brw)                 (((brw)->intel.intelScreen->deviceID == PCI_CHIP_IGD_E_G) || \
+                                         ((brw)->intel.intelScreen->deviceID == PCI_CHIP_G45_G) || \
+                                         ((brw)->intel.intelScreen->deviceID == PCI_CHIP_Q45_G))
+#define BRW_IS_IGD(brw)			(BRW_IS_IGD_GM(brw) || BRW_IS_G4X(brw))
 #define CMD_PIPELINE_SELECT(brw)       ((BRW_IS_IGD(brw)) ? CMD_PIPELINE_SELECT_IGD : CMD_PIPELINE_SELECT_965)
 #define CMD_VF_STATISTICS(brw)         ((BRW_IS_IGD(brw)) ? CMD_VF_STATISTICS_IGD : CMD_VF_STATISTICS_965)
 #define URB_SIZES(brw)                 ((BRW_IS_IGD(brw)) ? 384 : 256)  /* 512 bit unit */

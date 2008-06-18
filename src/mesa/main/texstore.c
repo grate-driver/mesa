@@ -2320,6 +2320,8 @@ _mesa_texstore_ycbcr(TEXSTORE_PARAMS)
 GLboolean
 _mesa_texstore_z24_s8(TEXSTORE_PARAMS)
 {
+   const GLfloat depthScale = (GLfloat) 0xffffff;
+
    ASSERT(dstFormat == &_mesa_texformat_z24_s8);
    ASSERT(srcFormat == GL_DEPTH_STENCIL_EXT);
    ASSERT(srcType == GL_UNSIGNED_INT_24_8_EXT);
@@ -2356,9 +2358,9 @@ _mesa_texstore_z24_s8(TEXSTORE_PARAMS)
             GLint i;
             /* the 24 depth bits will be in the high position: */
             _mesa_unpack_depth_span(ctx, srcWidth,
-                                    GL_UNSIGNED_INT, /* dst type */
+                                    GL_UNSIGNED_INT_24_8_EXT, /* dst type */
                                     dstRow, /* dst addr */
-                                    (GLfloat) 0xffffff, /* depthScale */
+                                    depthScale,
                                     srcType, src, srcPacking);
             /* get the 8-bit stencil values */
             _mesa_unpack_stencil_span(ctx, srcWidth,

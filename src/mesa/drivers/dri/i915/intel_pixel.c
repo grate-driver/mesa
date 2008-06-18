@@ -228,7 +228,7 @@ intelTryReadPixels( GLcontext *ctx,
       __DRIdrawablePrivate *dPriv = intel->driDrawable;
       int nbox = dPriv->numClipRects;
       int src_offset = intel->readRegion->offset;
-      int src_pitch = intel->intelScreen->front.pitch;
+      int src_pitch = intel->intelScreen->front.pitch / intel->intelScreen->cpp; /* in pixels */
       int dst_offset = intelAgpOffsetFromVirtual( intel, pixels);
       drm_clip_rect_t *box = dPriv->pClipRects;
       int i;
@@ -308,7 +308,7 @@ static void do_draw_pix( GLcontext *ctx,
    int nbox = dPriv->numClipRects;
    int i;
    int src_offset = intelAgpOffsetFromVirtual( intel, pixels);
-   int src_pitch = pitch;
+   int src_pitch = pitch;  /* in pixels */
 
    assert(src_offset != ~0);  /* should be caught earlier */
 
@@ -339,7 +339,7 @@ static void do_draw_pix( GLcontext *ctx,
             intelEmitCopyBlitLocked( intel,
                                      intel->intelScreen->cpp,
                                      src_pitch, src_offset,
-                                     intel->intelScreen->front.pitch,
+                                     intel->intelScreen->front.pitch / intel->intelScreen->cpp, /* in pixels */
                                      intel->drawRegion->offset,
                                      bx - x, by - y,
                                      bx, by,
@@ -364,7 +364,7 @@ intelTryDrawPixels( GLcontext *ctx,
    GLint pitch = unpack->RowLength ? unpack->RowLength : width;
    GLuint dest;
    GLuint cpp = intel->intelScreen->cpp;
-   GLint size = width * pitch * cpp;
+   GLint size = height * pitch * cpp;
 
    if (INTEL_DEBUG & DEBUG_PIXEL)
       fprintf(stderr, "%s\n", __FUNCTION__);
