@@ -127,8 +127,14 @@ static const GLubyte *intelGetString( GLcontext *ctx, GLenum name )
 	 chipset = "Intel(R) 965GM"; break;
          break;
       case PCI_CHIP_IGD_GM:
+      case PCI_CHIP_IGD_E_G:
 	 chipset = "Intel(R) Integrated Graphics Device";
          break;
+      case PCI_CHIP_Q45_G:
+	  chipset = "Intel(R) Q45/Q43"; break;
+      case PCI_CHIP_G45_G:
+	  chipset = "Intel(R) G45/G43"; break;
+
       default:
 	 chipset = "Unknown Intel Chipset"; break;
       }
