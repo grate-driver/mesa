@@ -1,3 +1,9 @@
+mesa (7.0.3-4) UNRELEASED; urgency=low
+
+  * Pull from mesa_7_0_branch (2ac4919d).
+
+ -- Brice Goglin <bgoglin@debian.org>  Wed, 18 Jun 2008 20:52:39 +0200
+
 mesa (7.0.3-3) unstable; urgency=low
 
   * Pull from mesa_7_0_branch (718724de).
