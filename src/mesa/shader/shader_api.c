@@ -1006,11 +1006,11 @@ _mesa_get_uniformfv(GLcontext *ctx, GLuint program, GLint location,
             }
       }
       else {
-         _mesa_error(ctx, GL_INVALID_VALUE, "glGetUniformfv(location)");
+         _mesa_error(ctx, GL_INVALID_OPERATION, "glGetUniformfv(location)");
       }
    }
    else {
-      _mesa_error(ctx, GL_INVALID_VALUE, "glGetUniformfv(program)");
+      _mesa_error(ctx, GL_INVALID_OPERATION, "glGetUniformfv(program)");
    }
 }
 
