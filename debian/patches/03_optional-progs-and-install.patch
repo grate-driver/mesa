@@ -10,18 +10,20 @@ Also remove references to GLU library since it is not required
 and we don't actually build it at this point.
 
 
---- mesa.orig/progs/xdemos/Makefile
-+++ mesa/progs/xdemos/Makefile
+Index: mesa/progs/xdemos/Makefile
+===================================================================
+--- mesa.orig/progs/xdemos/Makefile	2008-07-01 15:26:56.000000000 +0300
++++ mesa/progs/xdemos/Makefile	2008-07-01 15:48:47.000000000 +0300
 @@ -10,7 +10,7 @@
  
  LIBS = -L$(TOP)/$(LIB_DIR) -l$(GL_LIB) $(APP_LIB_DEPS)
  
 -PROGS = \
 +PROGS ?= \
+ 	corender \
  	glthreads \
  	glxdemo \
- 	glxgears \
-@@ -55,6 +55,11 @@
+@@ -60,6 +60,11 @@
  extra: $(EXTRA_PROGS)
  
  
@@ -33,8 +35,10 @@ and we don't actually build it at this point.
  clean:
  	-rm -f $(PROGS) $(EXTRA_PROGS)
  	-rm -f *.o *~
---- mesa.orig/progs/Makefile
-+++ mesa/progs/Makefile
+Index: mesa/progs/Makefile
+===================================================================
+--- mesa.orig/progs/Makefile	2008-07-01 15:26:56.000000000 +0300
++++ mesa/progs/Makefile	2008-07-01 15:48:07.000000000 +0300
 @@ -21,8 +21,12 @@
  		fi \
  	done
@@ -48,4 +52,4 @@ and we don't actually build it at this point.
 +	done
  
  clean:
- 	@for dir in $(SUBDIRS) tests ; do \
+ 	-@for dir in $(SUBDIRS) tests ; do \
