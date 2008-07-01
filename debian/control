@@ -335,17 +335,6 @@ Description: A free implementation of the OpenGL API -- development files
  The headers and static libraries for compiling programs that use this
  library are included.
 
-Package: mesa-swx11-source
-Section: libdevel
-Architecture: all
-Description: Mesa software rasteriser source -- development files
- This package contains the source to the Mesa software rasteriser, which
- implements all of Mesa's GL support in software.  It powers the X11 and
- X server backends (assuming unaccelerated indirect).  This package is
- provided mainly for modular X servers which support GL, and need the
- software rasteriser source to build the GLcore module for unaccelerated
- indirect rendering.
-
 Package: mesa-utils
 Section: x11
 Priority: optional

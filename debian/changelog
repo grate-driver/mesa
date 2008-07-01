@@ -8,8 +8,9 @@ mesa (7.1~rc1-1) UNRELEASED; urgency=low
   * Refresh patches, and drop obsolete 00_create-libdir.patch and
     01_fix-makefile.patch.
   * Build-depend on x11proto-dri2-dev.
+  * Drop mesa-swx11-source.
 
- -- Timo Aaltonen <tepsipakki@ubuntu.com>  Tue, 01 Jul 2008 16:08:26 +0300
+ -- Timo Aaltonen <tepsipakki@ubuntu.com>  Tue, 01 Jul 2008 18:55:51 +0300
 
 mesa (7.0.3-4) unstable; urgency=low
 
