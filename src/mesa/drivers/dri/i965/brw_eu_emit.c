@@ -319,7 +319,7 @@ static void brw_set_dp_read_message( struct brw_instruction *insn,
 }
 
 static void brw_set_sampler_message(struct brw_context *brw,
-				     struct brw_instruction *insn,
+                 struct brw_instruction *insn,
 				     GLuint binding_table_index,
 				     GLuint sampler,
 				     GLuint msg_type,

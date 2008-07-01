@@ -34,7 +34,6 @@
 #include "brw_util.h"
 #include "brw_wm.h"
 #include "brw_state.h"
-#include "brw_hal.h"
 
 
 GLuint brw_wm_nr_args( GLuint opcode )
@@ -120,20 +119,6 @@ GLuint brw_wm_is_scalar_result( GLuint opcode )
 }
 
 
-static void brw_wm_pass_hal (struct brw_wm_compile *c)
-{
-   static void (*hal_wm_pass) (struct brw_wm_compile *c);
-   static GLboolean hal_tried;
-   
-   if (!hal_tried)
-   {
-      hal_wm_pass = brw_hal_find_symbol ("intel_hal_wm_pass");
-      hal_tried = 1;
-   }
-   if (hal_wm_pass)
-      (*hal_wm_pass) (c);
-}
-
 static void do_wm_prog( struct brw_context *brw,
 			struct brw_fragment_program *fp, 
 			struct brw_wm_prog_key *key)
@@ -154,6 +139,7 @@ static void do_wm_prog( struct brw_context *brw,
    c->fp = fp;
    c->env_param = brw->intel.ctx.FragmentProgram.Parameters;
 
+    brw_init_compile(brw, &c->func);
    if (brw_wm_is_glsl(&c->fp->program)) {
        brw_wm_glsl_emit(brw, c);
    } else {
@@ -161,7 +147,7 @@ static void do_wm_prog( struct brw_context *brw,
 	* post-fragment-program tasks such as interpolation and fogging.
 	*/
        brw_wm_pass_fp(c);
-   
+
        /* Translate to intermediate representation.  Build register usage
 	* chains.
 	*/
@@ -171,17 +157,9 @@ static void do_wm_prog( struct brw_context *brw,
 	*/
        brw_wm_pass1(c);
 
-       /* Hal optimization
-	*/
-       brw_wm_pass_hal (c);
-   
        /* Register allocation.
 	*/
        c->grf_limit = BRW_WM_MAX_GRF/2;
-
-       /* This is where we start emitting gen4 code:
-	*/
-       brw_init_compile(brw, &c->func);    
 
        brw_wm_pass2(c);
 
@@ -197,20 +175,17 @@ static void do_wm_prog( struct brw_context *brw,
 	*/
        brw_wm_emit(c);
    }
-
    /* get the program
     */
    program = brw_get_program(&c->func, &program_size);
 
-   /*
-    */
-   brw->wm.prog_gs_offset = brw_upload_cache( &brw->cache[BRW_WM_PROG],
-					      &c->key,
-					      sizeof(c->key),
-					      program,
-					      program_size,
-					      &c->prog_data,
-					      &brw->wm.prog_data );
+   dri_bo_unreference(brw->wm.prog_bo);
+   brw->wm.prog_bo = brw_upload_cache( &brw->cache, BRW_WM_PROG,
+				       &c->key, sizeof(c->key),
+				       NULL, 0,
+				       program, program_size,
+				       &c->prog_data,
+				       &brw->wm.prog_data );
 }
 
 
@@ -350,7 +325,7 @@ static void brw_wm_populate_key( struct brw_context *brw,
 }
 
 
-static void brw_upload_wm_prog( struct brw_context *brw )
+static int brw_prepare_wm_prog( struct brw_context *brw )
 {
    struct brw_wm_prog_key key;
    struct brw_fragment_program *fp = (struct brw_fragment_program *)
@@ -360,13 +335,15 @@ static void brw_upload_wm_prog( struct brw_context *brw )
 
    /* Make an early check for the key.
     */
-   if (brw_search_cache(&brw->cache[BRW_WM_PROG], 
-			&key, sizeof(key),
-			&brw->wm.prog_data,
-			&brw->wm.prog_gs_offset))
-      return;
+   dri_bo_unreference(brw->wm.prog_bo);
+   brw->wm.prog_bo = brw_search_cache(&brw->cache, BRW_WM_PROG,
+				      &key, sizeof(key),
+				      NULL, 0,
+				      &brw->wm.prog_data);
+   if (brw->wm.prog_bo == NULL)
+      do_wm_prog(brw, fp, &key);
 
-   do_wm_prog(brw, fp, &key);
+   return dri_bufmgr_check_aperture_space(brw->wm.prog_bo);
 }
 
 
@@ -387,6 +364,6 @@ const struct brw_tracked_state brw_wm_prog = {
 		BRW_NEW_REDUCED_PRIMITIVE),
       .cache = 0
    },
-   .update = brw_upload_wm_prog
+   .prepare = brw_prepare_wm_prog
 };
 

@@ -2,11 +2,11 @@
 #include "enums.h"
 
 #include "nouveau_bufferobj.h"
-#include "nouveau_buffers.h"
 #include "nouveau_context.h"
 #include "nouveau_drm.h"
-#include "nouveau_object.h"
+#include "nouveau_mem.h"
 #include "nouveau_msg.h"
+#include "nouveau_object.h"
 
 #define NOUVEAU_MEM_FREE(mem) do {      \
 	nouveau_mem_free(ctx, (mem));   \
@@ -41,7 +41,7 @@ nouveau_bo_download_from_screen(GLcontext *ctx,	GLuint offset, GLuint size,
 		DEBUG("..sys_mem\n");
 		in_mem = nouveau_mem_alloc(ctx, NOUVEAU_MEM_AGP, size, 0);
 		if (in_mem) {
-			DEBUG("....via AGP\n");
+			DEBUG("....via GART\n");
 			/* otherwise, try blitting to faster memory and
 			 * copying from there
 			 */
@@ -86,7 +86,7 @@ nouveau_bo_upload_to_screen(GLcontext *ctx, GLuint offset, GLuint size,
 						 NOUVEAU_MEM_MAPPED,
 						 size, 0);
 		if (out_mem) {
-			DEBUG("....via AGP\n");
+			DEBUG("....via GART\n");
 			_mesa_memcpy(out_mem->map,
 					nbo->cpu_mem_sys + offset, size);
 			nouveau_memformat_flat_emit(ctx, nbo->gpu_mem, out_mem,
@@ -224,7 +224,7 @@ nouveau_bo_init_storage(GLcontext *ctx,	GLuint valid_gpu_access,
 					GLsizeiptrARB size,
 					const GLvoid *data,
 					GLenum usage,
-					struct gl_buffer_object *bo)
+ 			struct gl_buffer_object *bo, int flags)
 {
 	nouveau_buffer_object *nbo = (nouveau_buffer_object *)bo;
 
@@ -257,7 +257,18 @@ nouveau_bo_init_storage(GLcontext *ctx,	GLuint valid_gpu_access,
 
 	if (data) {
 		GLvoid *map = nouveau_bo_map(ctx, GL_WRITE_ONLY_ARB, bo);
-		_mesa_memcpy(map, data, size);
+#ifdef MESA_BIG_ENDIAN
+		int i;
+		if (flags) {
+		  for (i = 0; i < size; i+=4) {
+		    uint32_t _data = *(unsigned int *)(data+i);
+		    _data = ((_data >> 16) | ((_data & 0xffff) << 16));
+		    *(unsigned int *)(map+i) = _data;
+		  }
+		} else
+#endif
+		  _mesa_memcpy(map, data, size);
+		(void)flags; /* get rid of warning */
 		nouveau_bo_dirty_all(ctx, GL_FALSE, bo);
 		nouveau_bo_unmap(ctx, bo);
 	}
@@ -511,10 +522,10 @@ nouveauBufferData(GLcontext *ctx, GLenum target, GLsizeiptrARB size,
 		gpu_flags = 0;
 		break;
 	default:
-		gpu_flags = NOUVEAU_BO_VRAM_OK | NOUVEAU_BO_AGP_OK;
+		gpu_flags = NOUVEAU_BO_VRAM_OK | NOUVEAU_BO_GART_OK;
 		break;
 	}
-	nouveau_bo_init_storage(ctx, gpu_flags, size, data, usage, obj);
+	nouveau_bo_init_storage(ctx, gpu_flags, size, data, usage, obj, 0);
 }
 
 static void

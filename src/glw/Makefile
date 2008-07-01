@@ -42,7 +42,7 @@ install: glw.pc
 	$(INSTALL) -m 644 glw.pc $(DESTDIR)$(INSTALL_DIR)/$(LIB_DIR)/pkgconfig
 
 clean:
-	-rm depend depend.bak
+	-rm -f depend depend.bak
 	-rm -f *.o *~
 
 
@@ -61,7 +61,7 @@ $(TOP)/$(LIB_DIR)/$(GLW_LIB_NAME): $(OBJECTS)
 depend: $(GLW_SOURCES)
 	touch depend
 	$(MKDEP) $(MKDEP_OPTIONS) -I$(TOP)/include $(GLW_SOURCES) \
-		$(X11_INCLUDES) > /dev/null 
+		$(X11_INCLUDES) > /dev/null
 
 
 include depend

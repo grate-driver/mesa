@@ -45,8 +45,6 @@
 #include "tnl/t_context.h"
 #include "tnl/t_pipeline.h"
 
-#include "swrast/s_context.h"
-#include "swrast/s_texfilter.h"
 
 
 /*!

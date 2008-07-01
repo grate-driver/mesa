@@ -667,9 +667,6 @@ struct radeon_context {
 
 	/* VBI
 	 */
-	GLuint vbl_seq;
-	GLuint vblank_flags;
-
 	int64_t swap_ust;
 	int64_t swap_missed_ust;
 
@@ -708,9 +705,9 @@ struct radeon_context {
 
 #define RADEON_CONTEXT(ctx)		((radeonContextPtr)(ctx->DriverCtx))
 
-static __inline GLuint radeonPackColor(GLuint cpp,
-				       GLubyte r, GLubyte g,
-				       GLubyte b, GLubyte a)
+static INLINE GLuint radeonPackColor(GLuint cpp,
+                                     GLubyte r, GLubyte g,
+                                     GLubyte b, GLubyte a)
 {
 	switch (cpp) {
 	case 2:

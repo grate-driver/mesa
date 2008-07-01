@@ -673,15 +673,35 @@ SOURCE=..\..\..\..\src\mesa\main\stencil.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\..\src\mesa\tnl\t_array_api.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\src\mesa\tnl\t_array_import.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\..\src\mesa\tnl\t_context.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\..\src\mesa\tnl\t_draw.c
+SOURCE=..\..\..\..\src\mesa\tnl\t_pipeline.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\..\src\mesa\tnl\t_pipeline.c
+SOURCE=..\..\..\..\src\mesa\tnl\t_save_loopback.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\src\mesa\tnl\t_save_playback.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\src\mesa\tnl\t_vb_arbprogram.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\src\mesa\tnl\t_vb_arbshader.c
 # End Source File
 # Begin Source File
 
@@ -734,6 +754,22 @@ SOURCE=..\..\..\..\src\mesa\tnl\t_vertex_generic.c
 # Begin Source File
 
 SOURCE=..\..\..\..\src\mesa\tnl\t_vp_build.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\src\mesa\tnl\t_vtx_api.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\src\mesa\tnl\t_vtx_eval.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\src\mesa\tnl\t_vtx_exec.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\src\mesa\tnl\t_vtx_generic.c
 # End Source File
 # Begin Source File
 

@@ -223,6 +223,7 @@ storage_to_src_reg(struct prog_src_register *src, const slang_ir_storage *st)
    assert(st->Size <= 4);
    src->File = st->File;
    src->Index = st->Index;
+   src->RelAddr = st->RelAddr;
    if (st->Swizzle != SWIZZLE_NOOP)
       src->Swizzle = st->Swizzle;
    else
@@ -922,11 +923,15 @@ emit_tex(slang_emit_info *emitInfo, slang_ir_node *n)
    assert(n->Children[0]->Store->Size >= TEXTURE_1D_INDEX);
    assert(n->Children[0]->Store->Size <= TEXTURE_RECT_INDEX);
 
-   inst->Sampler = n->Children[0]->Store->Index; /* i.e. uniform's index */
    inst->TexSrcTarget = n->Children[0]->Store->Size;
+#if 0
    inst->TexSrcUnit = 27; /* Dummy value; the TexSrcUnit will be computed at
                            * link time, using the sampler uniform's value.
                            */
+   inst->Sampler = n->Children[0]->Store->Index; /* i.e. uniform's index */
+#else
+   inst->TexSrcUnit = n->Children[0]->Store->Index; /* i.e. uniform's index */
+#endif
    return inst;
 }
 
@@ -1484,11 +1489,16 @@ emit_array_element(slang_emit_info *emitInfo, slang_ir_node *n)
       n->Store->Index = arrayAddr + index;
    }
    else {
-      /* Variable index - PROBLEM */
-      const GLint arrayAddr = n->Children[0]->Store->Index;
-      const GLint index = 0;
-      _mesa_problem(NULL, "variable array indexes not supported yet!");
-      n->Store->Index = arrayAddr + index;
+      /* Variable index*/
+      struct prog_instruction *inst;
+      inst = new_instruction(emitInfo, OPCODE_ARL);
+      storage_to_dst_reg(&inst->DstReg, n->Store, n->Writemask);
+      storage_to_src_reg(&inst->SrcReg[0], n->Children[1]->Store);
+      inst->DstReg.File = PROGRAM_ADDRESS;
+      inst->Comment = _mesa_strdup("ARL ADDR");
+      n->Store->RelAddr = GL_TRUE;
+      n->Store->Index = inst->DstReg.Index;/*index of the array*/
+      inst->DstReg.Index = 0; /*addr index is always 0*/
    }
    return NULL; /* no instruction */
 }
@@ -1793,7 +1803,7 @@ _slang_resolve_subroutines(slang_emit_info *emitInfo)
                               sub->NumInstructions);
       /* delete subroutine code */
       sub->Parameters = NULL; /* prevent double-free */
-      _mesa_delete_program(ctx, sub);
+      _mesa_reference_program(ctx, &emitInfo->Subroutines[i], NULL);
    }
 
    /* free subroutine list */

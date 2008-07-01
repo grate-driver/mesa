@@ -39,7 +39,7 @@
 /* Not quite sure how correct this is - need to understand horiz
  * vs. vertical strides a little better.
  */
-static __inline struct brw_reg sechalf( struct brw_reg reg )
+static INLINE struct brw_reg sechalf( struct brw_reg reg )
 {
    if (reg.vstride)
       reg.nr++;
@@ -715,7 +715,7 @@ static void emit_tex( struct brw_wm_compile *c,
 	      retype(vec16(dst[0]), BRW_REGISTER_TYPE_UW),
 	      1,
 	      retype(c->payload.depth[0].hw_reg, BRW_REGISTER_TYPE_UW),
-	      inst->tex_unit + 1, /* surface */
+	      inst->tex_unit + MAX_DRAW_BUFFERS, /* surface */
 	      inst->tex_unit,	  /* sampler */
 	      inst->writemask,
 	      (shadow ? 
@@ -765,7 +765,7 @@ static void emit_txb( struct brw_wm_compile *c,
 	      retype(vec16(dst[0]), BRW_REGISTER_TYPE_UW),
 	      1,
 	      retype(c->payload.depth[0].hw_reg, BRW_REGISTER_TYPE_UW),
-	      inst->tex_unit + 1, /* surface */
+	      inst->tex_unit + MAX_DRAW_BUFFERS, /* surface */
 	      inst->tex_unit,	  /* sampler */
 	      inst->writemask,
 	      BRW_SAMPLER_MESSAGE_SIMD16_SAMPLE_BIAS,
@@ -838,7 +838,9 @@ static void emit_kil( struct brw_wm_compile *c,
 
 static void fire_fb_write( struct brw_wm_compile *c,
 			   GLuint base_reg,
-			   GLuint nr )
+			   GLuint nr,
+			   GLuint target,
+			   GLuint eot )
 {
    struct brw_compile *p = &c->func;
    
@@ -861,10 +863,10 @@ static void fire_fb_write( struct brw_wm_compile *c,
 		retype(vec16(brw_null_reg()), BRW_REGISTER_TYPE_UW),
 		base_reg,
 		retype(brw_vec8_grf(0, 0), BRW_REGISTER_TYPE_UW),
-		0,		/* render surface always 0 */
+		target,		
 		nr,
 		0, 
-		1);
+		eot);
 }
 
 static void emit_aa( struct brw_wm_compile *c,
@@ -889,7 +891,9 @@ static void emit_aa( struct brw_wm_compile *c,
 static void emit_fb_write( struct brw_wm_compile *c,
 			   struct brw_reg *arg0,
 			   struct brw_reg *arg1,
-			   struct brw_reg *arg2)
+			   struct brw_reg *arg2,
+			   GLuint target,
+			   GLuint eot)
 {
    struct brw_compile *p = &c->func;
    GLuint nr = 2;
@@ -962,7 +966,7 @@ static void emit_fb_write( struct brw_wm_compile *c,
       if (c->key.aa_dest_stencil_reg)
 	 emit_aa(c, arg1, 2);
 
-      fire_fb_write(c, 0, nr);
+      fire_fb_write(c, 0, nr, target, eot);
    }
    else {
       struct brw_reg v1_null_ud = vec1(retype(brw_null_reg(), BRW_REGISTER_TYPE_UD));
@@ -979,14 +983,14 @@ static void emit_fb_write( struct brw_wm_compile *c,
       jmp = brw_JMPI(p, ip, ip, brw_imm_w(0));
       {
 	 emit_aa(c, arg1, 2);
-	 fire_fb_write(c, 0, nr);
+	 fire_fb_write(c, 0, nr, target, eot);
 	 /* note - thread killed in subroutine */
       }
       brw_land_fwd_jump(p, jmp);
 
       /* ELSE: Shuffle up one register to fill in the hole left for AA:
        */
-      fire_fb_write(c, 1, nr-1);
+      fire_fb_write(c, 1, nr-1, target, eot);
    }
 }
 
@@ -1154,7 +1158,7 @@ void brw_wm_emit( struct brw_wm_compile *c )
 	 break;
 
       case WM_FB_WRITE:
-	 emit_fb_write(c, args[0], args[1], args[2]);
+	 emit_fb_write(c, args[0], args[1], args[2], inst->target, inst->eot);
 	 break;
 
 	 /* Straightforward arithmetic:

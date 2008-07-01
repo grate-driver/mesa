@@ -11,21 +11,26 @@ LIB_DEP = $(TOP)/$(LIB_DIR)/$(GL_LIB_NAME)
 LIBS = -L$(TOP)/$(LIB_DIR) -l$(GL_LIB) $(APP_LIB_DEPS)
 
 PROGS = \
+	corender \
 	glthreads \
 	glxdemo \
 	glxgears \
 	glxgears_fbconfig \
+	glxgears_pixmap \
 	glxcontexts \
 	glxheads \
 	glxinfo \
 	glxpixmap \
 	glxpbdemo \
+	glxsnoop \
 	glxswapcontrol \
 	manywin \
 	offset \
 	overlay \
 	pbinfo \
 	pbdemo \
+	sharedtex \
+	texture_from_pixmap \
 	wincopy \
 	xfont \
 	xrotfontdemo
@@ -90,6 +95,15 @@ xuserotfont.o: xuserotfont.c xuserotfont.h
 
 xrotfontdemo.o: xrotfontdemo.c xuserotfont.h
 	$(CC) -c -I. -I$(INCDIR) $(X11_INCLUDES) $(CFLAGS) xrotfontdemo.c
+
+corender: corender.o ipc.o
+	$(CC) $(CFLAGS) corender.o ipc.o $(LIBS) -o $@
+
+corender.o: corender.c ipc.h
+	$(CC) -c -I. -I$(INCDIR) $(X11_INCLUDES) $(CFLAGS) corender.c
+
+ipc.o: ipc.c ipc.h
+	$(CC) -c -I. -I$(INCDIR) $(X11_INCLUDES) $(CFLAGS) ipc.c
 
 yuvrect_client: yuvrect_client.c
 	$(CC) -I$(INCDIR) $(X11_INCLUDES) $(CFLAGS) $< $(LDFLAGS) $(LIBS) -l$(GLU_LIB) -o $@

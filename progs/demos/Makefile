@@ -11,9 +11,11 @@ OSMESA16_LIBS = -L$(TOP)/$(LIB_DIR) -lglut -lOSMesa16 -lGLU -lGL $(APP_LIB_DEPS)
 
 OSMESA32_LIBS = -L$(TOP)/$(LIB_DIR) -lglut -lOSMesa32 -lGLU -lGL $(APP_LIB_DEPS)
 
-LIB_DEP = $(TOP)/$(LIB_DIR)/$(GL_LIB_NAME) $(TOP)/$(LIB_DIR)/$(GLU_LIB_NAME) $(TOP)/$(LIB_DIR)/$(GLUT_LIB_NAME)
+LIB_DEP = $(TOP)/$(LIB_DIR)/$(GL_LIB_NAME) $(TOP)/$(LIB_DIR)/$(GLU_LIB_NAME) \
+	$(TOP)/$(LIB_DIR)/$(GLUT_LIB_NAME)
 
-LIBS = -L$(TOP)/$(LIB_DIR) -l$(GLUT_LIB) -l$(GLU_LIB) -l$(GL_LIB) $(APP_LIB_DEPS)
+LIBS = -L$(TOP)/$(LIB_DIR) -l$(GLUT_LIB) -l$(GLU_LIB) -l$(GL_LIB) \
+	$(APP_LIB_DEPS)
 
 PROGS = \
 	arbfplight \
@@ -21,6 +23,7 @@ PROGS = \
 	arbocclude \
 	bounce \
 	clearspd \
+	copypix \
 	cubemap \
 	drawpix \
 	engine \
@@ -44,6 +47,7 @@ PROGS = \
 	multiarb \
 	paltex \
 	pointblast \
+	rain \
 	ray \
 	readpix \
 	reflect \
@@ -72,7 +76,7 @@ PROGS = \
 
 .SUFFIXES:
 .SUFFIXES: .c
-
+.SUFFIXES: .cxx
 
 # make executable from .c file:
 .c: $(LIB_DEP) readtex.o
@@ -153,6 +157,18 @@ fslight: fslight.o
 fslight.o: fslight.c extfuncs.h
 	$(CC) -c -I$(INCDIR) $(CFLAGS) fslight.c
 
+rain: particles.o rain.o readtex.o
+	$(CXX) $(LDFLAGS) $^ $(LIBS) -o $@
+
+rain.o: rain.cxx readtex.h
+	$(CXX) -c -I$(INCDIR) $(CXXFLAGS) $<
+
+particles.o: particles.cxx
+	$(CXX) -c -I$(INCDIR) $(CXXFLAGS) $<
+
+
+viewdds: viewdds.c
+	$(CC) -I$(INCDIR) $(CFLAGS) $< readtex.o $(LIBS) -L. -lgltc -o $@
 
 
 clean:

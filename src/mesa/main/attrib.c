@@ -1,6 +1,6 @@
 /*
  * Mesa 3-D graphics library
- * Version:  7.0.2
+ * Version:  7.1
  *
  * Copyright (C) 1999-2007  Brian Paul   All Rights Reserved.
  *
@@ -47,9 +47,9 @@
 #include "stencil.h"
 #include "texobj.h"
 #include "texstate.h"
+#include "varray.h"
 #include "mtypes.h"
 #include "math/m_xform.h"
-
 
 /**
  * Special struct for saving/restoring texture state (GL_TEXTURE_BIT)
@@ -59,21 +59,13 @@ struct texture_state
    struct gl_texture_attrib Texture;  /**< The usual context state */
 
    /** to save per texture object state (wrap modes, filters, etc): */
-   struct gl_texture_object Saved1D[MAX_TEXTURE_UNITS];
-   struct gl_texture_object Saved2D[MAX_TEXTURE_UNITS];
-   struct gl_texture_object Saved3D[MAX_TEXTURE_UNITS];
-   struct gl_texture_object SavedCube[MAX_TEXTURE_UNITS];
-   struct gl_texture_object SavedRect[MAX_TEXTURE_UNITS];
+   struct gl_texture_object SavedObj[MAX_TEXTURE_UNITS][NUM_TEXTURE_TARGETS];
 
    /**
     * To save references to texture objects (so they don't get accidentally
     * deleted while saved in the attribute stack).
     */
-   struct gl_texture_object *SavedRef1D[MAX_TEXTURE_UNITS];
-   struct gl_texture_object *SavedRef2D[MAX_TEXTURE_UNITS];
-   struct gl_texture_object *SavedRef3D[MAX_TEXTURE_UNITS];
-   struct gl_texture_object *SavedRefCube[MAX_TEXTURE_UNITS];
-   struct gl_texture_object *SavedRefRect[MAX_TEXTURE_UNITS];
+   struct gl_texture_object *SavedTexRef[MAX_TEXTURE_UNITS][NUM_TEXTURE_TARGETS];
 };
 
 
@@ -124,9 +116,13 @@ _mesa_PushAttrib(GLbitfield mask)
    }
 
    if (mask & GL_COLOR_BUFFER_BIT) {
+      GLuint i;
       struct gl_colorbuffer_attrib *attr;
       attr = MALLOC_STRUCT( gl_colorbuffer_attrib );
       MEMCPY( attr, &ctx->Color, sizeof(struct gl_colorbuffer_attrib) );
+      /* push the Draw FBO's DrawBuffer[] state, not ctx->Color.DrawBuffer[] */
+      for (i = 0; i < ctx->Const.MaxDrawBuffers; i ++)
+         attr->DrawBuffer[i] = ctx->DrawBuffer->ColorDrawBuffer[i];
       newnode = new_attrib_node( GL_COLOR_BUFFER_BIT );
       newnode->data = attr;
       newnode->next = head;
@@ -361,7 +357,7 @@ _mesa_PushAttrib(GLbitfield mask)
    }
 
    if (mask & GL_TEXTURE_BIT) {
-      struct texture_state *texstate = CALLOC_STRUCT( texture_state );
+      struct texture_state *texstate = CALLOC_STRUCT(texture_state);
       GLuint u;
 
       if (!texstate) {
@@ -378,25 +374,38 @@ _mesa_PushAttrib(GLbitfield mask)
        * accidentally get deleted while referenced in the attribute stack.
        */
       for (u = 0; u < ctx->Const.MaxTextureUnits; u++) {
-         _mesa_reference_texobj(&texstate->SavedRef1D[u], ctx->Texture.Unit[u].Current1D);
-         _mesa_reference_texobj(&texstate->SavedRef2D[u], ctx->Texture.Unit[u].Current2D);
-         _mesa_reference_texobj(&texstate->SavedRef3D[u], ctx->Texture.Unit[u].Current3D);
-         _mesa_reference_texobj(&texstate->SavedRefCube[u], ctx->Texture.Unit[u].CurrentCubeMap);
-         _mesa_reference_texobj(&texstate->SavedRefRect[u], ctx->Texture.Unit[u].CurrentRect);
+         _mesa_reference_texobj(&texstate->SavedTexRef[u][TEXTURE_1D_INDEX],
+                                ctx->Texture.Unit[u].Current1D);
+         _mesa_reference_texobj(&texstate->SavedTexRef[u][TEXTURE_2D_INDEX],
+                                ctx->Texture.Unit[u].Current2D);
+         _mesa_reference_texobj(&texstate->SavedTexRef[u][TEXTURE_3D_INDEX],
+                                ctx->Texture.Unit[u].Current3D);
+         _mesa_reference_texobj(&texstate->SavedTexRef[u][TEXTURE_CUBE_INDEX],
+                                ctx->Texture.Unit[u].CurrentCubeMap);
+         _mesa_reference_texobj(&texstate->SavedTexRef[u][TEXTURE_RECT_INDEX],
+                                ctx->Texture.Unit[u].CurrentRect);
+         _mesa_reference_texobj(&texstate->SavedTexRef[u][TEXTURE_1D_ARRAY_INDEX],
+                                ctx->Texture.Unit[u].Current1DArray);
+         _mesa_reference_texobj(&texstate->SavedTexRef[u][TEXTURE_2D_ARRAY_INDEX],
+                                ctx->Texture.Unit[u].Current2DArray);
       }
 
       /* copy state/contents of the currently bound texture objects */
       for (u = 0; u < ctx->Const.MaxTextureUnits; u++) {
-         _mesa_copy_texture_object(&texstate->Saved1D[u],
+         _mesa_copy_texture_object(&texstate->SavedObj[u][TEXTURE_1D_INDEX],
                                    ctx->Texture.Unit[u].Current1D);
-         _mesa_copy_texture_object(&texstate->Saved2D[u],
+         _mesa_copy_texture_object(&texstate->SavedObj[u][TEXTURE_2D_INDEX],
                                    ctx->Texture.Unit[u].Current2D);
-         _mesa_copy_texture_object(&texstate->Saved3D[u],
+         _mesa_copy_texture_object(&texstate->SavedObj[u][TEXTURE_3D_INDEX],
                                    ctx->Texture.Unit[u].Current3D);
-         _mesa_copy_texture_object(&texstate->SavedCube[u],
+         _mesa_copy_texture_object(&texstate->SavedObj[u][TEXTURE_CUBE_INDEX],
                                    ctx->Texture.Unit[u].CurrentCubeMap);
-         _mesa_copy_texture_object(&texstate->SavedRect[u],
+         _mesa_copy_texture_object(&texstate->SavedObj[u][TEXTURE_RECT_INDEX],
                                    ctx->Texture.Unit[u].CurrentRect);
+         _mesa_copy_texture_object(&texstate->SavedObj[u][TEXTURE_1D_ARRAY_INDEX],
+                                   ctx->Texture.Unit[u].Current1DArray);
+         _mesa_copy_texture_object(&texstate->SavedObj[u][TEXTURE_2D_ARRAY_INDEX],
+                                   ctx->Texture.Unit[u].Current2DArray);
       }
 
       _mesa_unlock_context_textures(ctx);
@@ -759,33 +768,22 @@ pop_texture_group(GLcontext *ctx, struct texture_state *texstate)
          GLfloat bordColor[4];
          GLenum target;
 
-         switch (tgt) {
-         case TEXTURE_1D_INDEX:
-            obj = &texstate->Saved1D[u];
-            ASSERT(obj->Target == GL_TEXTURE_1D);
-            break;
-         case TEXTURE_2D_INDEX:
-            obj = &texstate->Saved2D[u];
-            ASSERT(obj->Target == GL_TEXTURE_2D);
-            break;
-         case TEXTURE_3D_INDEX:
-            obj = &texstate->Saved3D[u];
-            ASSERT(obj->Target == GL_TEXTURE_3D);
-            break;
-         case TEXTURE_CUBE_INDEX:
-            if (!ctx->Extensions.ARB_texture_cube_map)
-               continue;
-            obj = &texstate->SavedCube[u];
-            ASSERT(obj->Target == GL_TEXTURE_CUBE_MAP_ARB);
-            break;
-         case TEXTURE_RECT_INDEX:
-            if (!ctx->Extensions.NV_texture_rectangle)
-               continue;
-            obj = &texstate->SavedRect[u];
-            ASSERT(obj->Target == GL_TEXTURE_RECTANGLE_NV);
-            break;
-         default:
-            _mesa_problem(ctx, "bad texture index in pop_texture_group");
+         obj = &texstate->SavedObj[u][tgt];
+
+         /* don't restore state for unsupported targets to prevent
+          * raising GL errors.
+          */
+         if (obj->Target == GL_TEXTURE_CUBE_MAP_ARB &&
+             !ctx->Extensions.ARB_texture_cube_map) {
+            continue;
+         }
+         else if (obj->Target == GL_TEXTURE_RECTANGLE_NV &&
+                  !ctx->Extensions.NV_texture_rectangle) {
+            continue;
+         }
+         else if ((obj->Target == GL_TEXTURE_1D_ARRAY_EXT ||
+                   obj->Target == GL_TEXTURE_2D_ARRAY_EXT) &&
+                  !ctx->Extensions.MESA_texture_array) {
             continue;
          }
 
@@ -798,8 +796,8 @@ pop_texture_group(GLcontext *ctx, struct texture_state *texstate)
          bordColor[2] = CHAN_TO_FLOAT(obj->BorderColor[2]);
          bordColor[3] = CHAN_TO_FLOAT(obj->BorderColor[3]);
 
-         _mesa_TexParameterf(target, GL_TEXTURE_PRIORITY, obj->Priority);
          _mesa_TexParameterfv(target, GL_TEXTURE_BORDER_COLOR, bordColor);
+         _mesa_TexParameterf(target, GL_TEXTURE_PRIORITY, obj->Priority);
          _mesa_TexParameteri(target, GL_TEXTURE_WRAP_S, obj->WrapS);
          _mesa_TexParameteri(target, GL_TEXTURE_WRAP_T, obj->WrapT);
          _mesa_TexParameteri(target, GL_TEXTURE_WRAP_R, obj->WrapR);
@@ -828,11 +826,9 @@ pop_texture_group(GLcontext *ctx, struct texture_state *texstate)
       }
 
       /* remove saved references to the texture objects */
-      _mesa_reference_texobj(&texstate->SavedRef1D[u], NULL);
-      _mesa_reference_texobj(&texstate->SavedRef2D[u], NULL);
-      _mesa_reference_texobj(&texstate->SavedRef3D[u], NULL);
-      _mesa_reference_texobj(&texstate->SavedRefCube[u], NULL);
-      _mesa_reference_texobj(&texstate->SavedRefRect[u], NULL);
+      for (tgt = 0; tgt < NUM_TEXTURE_TARGETS; tgt++) {
+         _mesa_reference_texobj(&texstate->SavedTexRef[u][tgt], NULL);
+      }
    }
 
    _mesa_ActiveTextureARB(GL_TEXTURE0_ARB + texstate->Texture.CurrentUnit);
@@ -1403,8 +1399,10 @@ _mesa_PopClientAttrib(void)
             adjust_buffer_object_ref_counts(&ctx->Array, -1);
 	 
             ctx->Array.ActiveTexture = data->ActiveTexture;
-	    ctx->Array.LockFirst = data->LockFirst;
-	    ctx->Array.LockCount = data->LockCount;
+	    if (data->LockCount != 0)
+	       _mesa_LockArraysEXT(data->LockFirst, data->LockCount);
+	    else if (ctx->Array.LockCount)
+	       _mesa_UnlockArraysEXT();
 
 	    _mesa_BindVertexArrayAPPLE( data->ArrayObj->Name );
 	    
@@ -1441,6 +1439,9 @@ _mesa_PopClientAttrib(void)
 }
 
 
+/**
+ * Free any attribute state data that might be attached to the context.
+ */
 void
 _mesa_free_attrib_data(GLcontext *ctx)
 {
@@ -1453,14 +1454,12 @@ _mesa_free_attrib_data(GLcontext *ctx)
       while (attr) {
          if (attr->kind == GL_TEXTURE_BIT) {
             struct texture_state *texstate = (struct texture_state*)attr->data;
-            GLuint u;
+            GLuint u, tgt;
             /* clear references to the saved texture objects */
             for (u = 0; u < ctx->Const.MaxTextureUnits; u++) {
-               _mesa_reference_texobj(&texstate->SavedRef1D[u], NULL);
-               _mesa_reference_texobj(&texstate->SavedRef2D[u], NULL);
-               _mesa_reference_texobj(&texstate->SavedRef3D[u], NULL);
-               _mesa_reference_texobj(&texstate->SavedRefCube[u], NULL);
-               _mesa_reference_texobj(&texstate->SavedRefRect[u], NULL);
+               for (tgt = 0; tgt < NUM_TEXTURE_TARGETS; tgt++) {
+                  _mesa_reference_texobj(&texstate->SavedTexRef[u][tgt], NULL);
+               }
             }
          }
          else {
