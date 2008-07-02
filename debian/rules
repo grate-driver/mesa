@@ -75,6 +75,9 @@ confflags-osmesa32-static = --with-osmesa-bits=32 \
 	     --enable-static \
 	     --with-demos=
 
+autoreconf:
+	autoreconf -vfi
+
 # list the configurations that will built
 configs:
 	@echo Building the following configurations: $(CONFIGS)
@@ -85,7 +88,7 @@ $(STAMP_DIR):
 
 $(QUILT_STAMPFN): $(STAMP_DIR)
 
-build: patch $(BUILD_STAMPS)
+build: patch autoreconf $(BUILD_STAMPS)
 
 $(STAMP)-build-%:
 	dh_testdir

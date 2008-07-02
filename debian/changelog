@@ -13,8 +13,9 @@ mesa (7.1~rc1-1) UNRELEASED; urgency=low
   * Add gl.pc to libgl1-mesa-dev
   * rules: Replace the old build system with the new autotools-based 
     system.
+  * Run autoreconf before building the various flavours..
 
- -- Timo Aaltonen <tepsipakki@ubuntu.com>  Wed, 02 Jul 2008 17:55:03 +0300
+ -- Timo Aaltonen <tepsipakki@ubuntu.com>  Thu, 03 Jul 2008 00:20:15 +0300
 
 mesa (7.0.3-4) unstable; urgency=low
 
