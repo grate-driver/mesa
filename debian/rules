@@ -5,11 +5,6 @@
 # Uncomment this to turn on verbose mode.
 #export DH_VERBOSE=1
 
-STAMP_DIR = debian/stamp
-
-QUILT_STAMPFN = $(STAMP_DIR)/patch
-include /usr/share/quilt/quilt.make
-
 CFLAGS = -Wall -g
 ifneq (,$(findstring noopt,$(DEB_BUILD_OPTIONS)))
 	CFLAGS += -O0
@@ -21,8 +16,14 @@ ifeq (,$(findstring nostrip,$(DEB_BUILD_OPTIONS)))
 endif
 
 DEB_BUILD_ARCH     ?= $(shell dpkg-architecture -qDEB_BUILD_ARCH)
+DEB_HOST_GNU_TYPE  ?= $(shell dpkg-architecture -qDEB_HOST_GNU_TYPE)
 DEB_BUILD_GNU_TYPE ?= $(shell dpkg-architecture -qDEB_BUILD_GNU_TYPE)
 DEB_BUILD_DIR      ?= $(CURDIR)/obj-$(DEB_BUILD_GNU_TYPE)
+ifeq ($(DEB_BUILD_GNU_TYPE), $(DEB_HOST_GNU_TYPE))
+        confflags += --build=$(DEB_HOST_GNU_TYPE)
+else
+        confflags += --build=$(DEB_BUILD_GNU_TYPE) --host=$(DEB_HOST_GNU_TYPE)
+endif
 
 export DEB_BUILD_ARCH
 
@@ -33,18 +34,46 @@ DRI_CONFIGS =
 include debian/scripts/choose-configs
 
 # build the following configurations by default
-CONFIGS = $(SWX11_GLU_CONFIGS) \
-          $(DRI_CONFIGS) \
-          debian-osmesa \
-          debian-osmesa-static \
-          debian-osmesa16 \
-          debian-osmesa16-static \
-          debian-osmesa32 \
-          debian-osmesa32-static
+CONFIGS = osmesa \
+	  osmesa-static \
+	  osmesa16 \
+	  osmesa16-static \
+	  osmesa32 \
+	  osmesa32-static
 
+
+STAMP_DIR = debian/stamp
 STAMP = $(STAMP_DIR)/$(DEB_BUILD_GNU_TYPE)
 BUILD_STAMPS = $(addprefix $(STAMP)-build-, $(CONFIGS))
 ARCH_INSTALL_STAMPS = $(addprefix $(STAMP)-install-, $(CONFIGS))
+
+QUILT_STAMPFN = $(STAMP_DIR)/patch
+include /usr/share/quilt/quilt.make
+
+confflags-osmesa = --enable-gl-osmesa \
+	     --with-demos=xdemos
+
+confflags-osmesa-static = --enable-static \
+	     --with-driver=osmesa \
+	     --with-demos=
+
+confflags-osmesa16 = --with-osmesa-bits=16 \
+	     --with-driver=osmesa \
+	     --with-demos=
+
+confflags-osmesa16-static = --with-osmesa-bits=16 \
+	     --with-driver=osmesa \
+	     --enable-static \
+	     --with-demos=
+
+confflags-osmesa32 = --with-osmesa-bits=32 \
+	     --with-driver=osmesa \
+	     --with-demos= 
+
+confflags-osmesa32-static = --with-osmesa-bits=32 \
+	     --with-driver=osmesa \
+	     --enable-static \
+	     --with-demos=
 
 # list the configurations that will built
 configs:
@@ -56,16 +85,21 @@ $(STAMP_DIR):
 
 $(QUILT_STAMPFN): $(STAMP_DIR)
 
+build: patch $(BUILD_STAMPS)
 
-build: $(BUILD_STAMPS)
-
-$(STAMP)-build-%: patch
+$(STAMP)-build-%:
 	dh_testdir
+
 	mkdir -p $(DEB_BUILD_DIR)/$*
 	find $(CURDIR)/* -maxdepth 0 -not -path '$(DEB_BUILD_DIR)*' | \
 		xargs cp -rlf -t $(DEB_BUILD_DIR)/$*
-	ln -sf $* $(DEB_BUILD_DIR)/$*/configs/current
+	cd $(DEB_BUILD_DIR)/$* && \
+	../../configure --prefix=/usr --mandir=\$${prefix}/share/man \
+	             --infodir=\$${prefix}/share/info --sysconfdir=/etc \
+	             --localstatedir=/var $(confflags) $(confflags-$*) \
+	             CFLAGS="$(CFLAGS)"
 	cd $(DEB_BUILD_DIR)/$* && $(MAKE)
+
 	touch $@
 
 pre-install:
@@ -78,14 +112,26 @@ install: pre-install $(ARCH_INSTALL_STAMPS)
 
 $(STAMP)-install-%: $(STAMP)-build-%
 	# Add here commands to install the package into debian/tmp
-	cd $(DEB_BUILD_DIR)/$* && $(MAKE) install DESTDIR=$(CURDIR)/debian/tmp
+	dh_installdirs
+	
+	cd $(DEB_BUILD_DIR)/$* && $(MAKE) DESTDIR=$(CURDIR)/debian/tmp install
 	touch $@
 
 clean: unpatch
 	dh_testdir
 	dh_testroot
-	dh_clean --exclude ./Makefile.orig
-	rm -rf $(DEB_BUILD_DIR) $(STAMP_DIR)
+	rm -rf .pc
+	
+	rm -f config.cache config.log config.status
+	rm -f */config.cache */config.log */config.status
+	rm -f conftest* */conftest*
+	rm -rf autom4te.cache */autom4te.cache
+	rm -rf obj-*
+	rm -rf $(STAMP_DIR)
+	# needed for git snapshots
+	chmod +x configure
+	
+	dh_clean
 
 # Build architecture-independent files here.
 binary-indep: build install
@@ -111,7 +157,7 @@ binary-arch: build install
 	dh_installchangelogs -s
 	dh_installdocs -s
 	dh_installexamples -s
-	dh_install --sourcedir=debian/tmp --list-missing -s
+	dh_install -s --sourcedir=debian/tmp --list-missing
 	dh_installman -s
 	dh_link -s
 	dh_strip -plibgl1-mesa-swx11 --dbg-package=libgl1-mesa-swx11-dbg
@@ -128,5 +174,4 @@ binary-arch: build install
 	dh_builddeb -s
 
 binary: binary-indep binary-arch
-.PHONY: configs build clean binary-indep binary-arch binary install configure
-
+.PHONY: configs build clean binary-indep binary-arch binary install
