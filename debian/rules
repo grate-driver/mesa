@@ -156,6 +156,9 @@ clean: unpatch
 	rm -f conftest* */conftest*
 	rm -rf autom4te.cache */autom4te.cache
 	rm -rf obj-*
+	rm -rf configure config.guess config.sub config.h.in
+	rm -rf $$(find -name Makefile.in)
+	rm -rf aclocal.m4 missing depcomp install-sh ltmain.sh
 	rm -rf $(STAMP_DIR)
 	# needed for git snapshots
 	chmod +x configure
