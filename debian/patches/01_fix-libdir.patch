@@ -7,7 +7,7 @@ index f15d9ff..7de1017 100644
  
  dnl LIB_DIR - library basename
 -LIB_DIR=`echo $libdir | $SED 's%.*/%%'`
-+LIB_DIR=`echo $libdir | $SED 's%[^/]*/[^/]*/%%'`
++LIB_DIR=`echo $libdir | $SED 's%[[^/]*/[^/]]*/%%'`
  AC_SUBST([LIB_DIR])
  
  dnl Cache LDFLAGS so we can add EXTRA_LIB_PATH and restore it later
