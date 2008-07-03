@@ -1,3 +1,31 @@
+mesa (7.1~rc1-0ubuntu1) UNRELEASED; urgency=low
+
+  [ Bryce Harrington ]
+  * Merge from git.debian.org, remaining changes:
+    - Change maintainer address to Ubuntu.
+    - Drop lesstif-dev from Build-Depends since it's a universe component
+      that Ubuntu doesn't want in main due to security concerns about it
+      (it's a large codebase without active development - last release >2
+      yrs ago).
+    - Comment out GLw libs from control since it depends on lesstif-dev.
+    - Add lpia to -dri and -dri-dbg package in debian/control.
+    - Add Xsession hook to disable ASM optimizations when running on
+      64-but processors that don't support them
+      (LP: 87661, Deb: 484180, fdo: 8724)
+
+  [ Timo Aaltonen ]
+  * Dropped patches
+    101_ubuntu_hidden_glname.patch:
+    - the changelog doesn't say why it was there, besides the patch had
+      no effect since the code is ifdef'd away (we don't use GLX_TLS)
+    102_ubuntu_no_glw.patch:
+    - the new build system handles this better
+    103_dlopen_in_driveropen.diff and 104_fix_driveropen.diff:
+    - upstream
+  * debian/rules: use --disable-glw for swx11 targets too. 
+
+ -- Timo Aaltonen <tepsipakki@ubuntu.com>  Thu, 03 Jul 2008 17:45:45 +0300
+
 mesa (7.1~rc1-1) UNRELEASED; urgency=low
 
   [ Julien Cristau ]
@@ -29,6 +57,29 @@ mesa (7.0.3-4) unstable; urgency=low
 
  -- Brice Goglin <bgoglin@debian.org>  Wed, 18 Jun 2008 20:59:14 +0200
 
+mesa (7.0.3-3ubuntu1) intrepid; urgency=low
+
+  * Merge from debian unstable, remaining changes:
+     - Change maintainer address to Ubuntu.
+       - Drop lesstif-dev from Build-Depends since it's a universe component
+         that Ubuntu doesn't want in main due to security concerns about it
+         (it's a large codebase without active development - last release >2
+         yrs ago).
+       - Comment out GLw libs from control since it depends on lesstif-dev.
+       - Add lpia to -dri and -dri-dbg package in debian/control.
+       - Add lpia to ARCH_X86 in configs/debian-dri-default.
+       - Add 101_ubuntu_hidden_glname.patch
+       - Add 102_ubuntu_no_glw.patch to remove lesstif build depends since
+         its a universe component.
+       - Add 103_dlopen_in_driveropen.diff and 104_fix_driveropen.diff from
+         upstream; "Always call dlopen in DriverOpen".
+         (LP: 189580, fdo: 13541)
+       - Add Xsession hook to disable ASM optimizations when running on
+         64-but processors that don't support them
+         (LP: 87661, Deb: 484180, fdo: 8724)
+
+ -- Bryce Harrington <bryce@ubuntu.com>  Tue, 17 Jun 2008 16:47:35 -0700
+
 mesa (7.0.3-3) unstable; urgency=low
 
   * Pull from mesa_7_0_branch (718724de).
@@ -52,6 +103,28 @@ mesa (7.0.3-2) unstable; urgency=low
 
  -- Brice Goglin <bgoglin@debian.org>  Fri, 13 Jun 2008 06:53:29 +0200
 
+mesa (7.0.3-1ubuntu2) intrepid; urgency=low
+
+  * Add Xsession hook to disable ASM optimizations when running on 
+    64-but processors that don't support them (LP: #87661)
+
+ -- Tormod Volden <debian.tormod@gmail.com>  Thu, 05 Jun 2008 12:41:25 +0200
+
+mesa (7.0.3-1ubuntu1) intrepid; urgency=low
+
+  * Merge from debian unstable, remaining changes:
+    - Change maintainer address.
+    - Drop lesstif-dev from Build-Depends.
+    - Comment out GLw libs from control.
+    - Add lpia to -dri and -dri-dbg package in debian/control.
+    - Add lpia to ARCH_X86 in configs/debian-dri-default.
+    - Add 101_ubuntu_hidden_glname.patch
+    - Add 102_ubuntu_no_glw.patch
+    - Add 103_dlopen_in_driveropen.diff and 104_fix_driveropen.diff from
+      upstream; "Always call dlopen in DriverOpen". (LP: #189580)
+
+ -- Timo Aaltonen <tepsipakki@ubuntu.com>  Wed, 04 Jun 2008 18:38:43 +0300
+
 mesa (7.0.3-1) unstable; urgency=low
 
   * New upstream release.
@@ -70,6 +143,44 @@ mesa (7.0.3~rc2-2) unstable; urgency=low
 
  -- Julien Cristau <jcristau@debian.org>  Mon, 31 Mar 2008 16:47:31 +0200
 
+mesa (7.0.3~rc2-1ubuntu3) hardy; urgency=low
+
+  * debian/patches/107_fix_-ve_rhw_regression.patch: Fixes regression
+    introduced upstream where a -ve rhw workaround is being applied only
+    for IGD systems, when it should be applied only for *non*-IGD systems.
+    This resulted in rendering issues in 3D games and drawing programs.
+    (LP: #199823, #206287)
+
+ -- Bryce Harrington <bryce@ubuntu.com>  Fri, 04 Apr 2008 19:46:40 -0700
+
+mesa (7.0.3~rc2-1ubuntu2) hardy; urgency=low
+
+  [ Laurent Bigonville ]
+  * debian/patches/105_vblank_fix.patch: Fix "drmWaitVBlank returned -1" error
+    (LP: #186764)
+
+  [ Timo Aaltonen ]
+  * Add 106_i965_wine_fix.diff from upstream, "Only call
+    ProgramStringNotify if program parsing succeeded". (LP: #178292)
+
+ -- Timo Aaltonen <tepsipakki@ubuntu.com>  Wed, 12 Mar 2008 12:33:41 +0200
+
+mesa (7.0.3~rc2-1ubuntu1) hardy; urgency=low
+
+  * Merge from debian unstable (LP: #189167), remaining changes:
+    - Change maintainer address.
+    - Drop lesstif-dev from Build-Depends.
+    - Comment out GLw libs from control.
+    - Add lpia to -dri and -dri-dbg package in debian/control.
+    - Add lpia to ARCH_X86 in configs/debian-dri-default.
+    - Add 101_ubuntu_hidden_glname.patch
+    - Add 102_ubuntu_no_glw.patch
+  * Drop patch 103_fix_rv410se.diff, applied upstream.
+  * Add 103_dlopen_in_driveropen.diff and 104_fix_driveropen.diff from
+    upstream; "Always call dlopen in DriverOpen". (LP: #189580)
+ 
+ -- Timo Aaltonen <tepsipakki@ubuntu.com>  Tue, 26 Feb 2008 13:07:45 +0200
+
 mesa (7.0.3~rc2-1) unstable; urgency=low
 
   * New upstream release candidate.
@@ -80,12 +191,48 @@ mesa (7.0.3~rc2-1) unstable; urgency=low
 
  -- Julien Cristau <jcristau@debian.org>  Sun, 24 Feb 2008 10:22:54 +0100
 
+mesa (7.0.2-4ubuntu2) hardy; urgency=low
+
+  * 103_fix_rv410se.diff:
+    - patch from upstream; "Fix rendering on x700 SE chips."
+      (LP: #151974)
+
+ -- Timo Aaltonen <tepsipakki@ubuntu.com>  Wed, 30 Jan 2008 13:18:23 +0200
+
+mesa (7.0.2-4ubuntu1) hardy; urgency=low
+
+  * Merge from debian unstable (LP: #151974), remaining changes:
+    - Change maintainer address.
+    - Drop lesstif-dev from Build-Depends.
+    - Comment out GLw libs from control.
+    - Add lpia to -dri and -dri-dbg package in debian/control.
+    - Add lpia to ARCH_X86 in configs/debian-dri-default.
+    - Add 101_ubuntu_hidden_glname.patch
+    - Add 102_ubuntu_no_glw.patch
+
+ -- Timo Aaltonen <tepsipakki@ubuntu.com>  Tue, 29 Jan 2008 12:09:30 +0200
+
 mesa (7.0.2-4) unstable; urgency=low
 
   * Update to mesa_7_0_branch head (commit 48ae5cf0).
   * Add Vcs-Git, Vcs-Browser and Homepage fields in debian/control.
 
  -- Julien Cristau <jcristau@debian.org>  Thu, 17 Jan 2008 22:23:06 +0100
+
+mesa (7.0.2-3ubuntu1) hardy; urgency=low
+
+  * Merge from debian unstable, remaining changes:
+    - Change maintainer address.
+    - Drop lesstif-dev from Build-Depends.
+    - Comment out GLw libs from control.
+    - Add lpia to -dri and -dri-dbg package in debian/control.
+    - Add lpia to ARCH_X86 in configs/debian-dri-default.
+    - Add 101_ubuntu_hidden_glname.patch
+    - Add 102_ubuntu_no_glw.patch
+  * debian/control: Do not build-depend on gcc-3.4 anymore.
+  * Drop 110_ubuntu_use_gcc-3.4_for_i965.patch
+
+ -- Timo Aaltonen <tepsipakki@ubuntu.com>  Sat, 05 Jan 2008 00:45:31 +0200
 
 mesa (7.0.2-3) unstable; urgency=low
 
@@ -99,6 +246,21 @@ mesa (7.0.2-3) unstable; urgency=low
 
  -- Julien Cristau <jcristau@debian.org>  Tue, 18 Dec 2007 19:13:18 +0100
 
+mesa (7.0.2-2ubuntu1) hardy; urgency=low
+
+  * Merge from debian unstable, remaining changes:
+    - Change maintainer address.
+    - Add gcc-3.4 as a build dependency for amd64, i386 and lpia.
+    - Drop lesstif-dev from Build-Depends.
+    - Comment out GLw libs from control.
+    - Add lpia to -dri and -dri-dbg package in debian/control.
+    - Add lpia to ARCH_X86 in configs/debian-dri-default.
+    - Add 101_ubuntu_hidden_glname.patch
+    - Add 102_ubuntu_no_glw.patch
+    - Add 110_ubuntu_use_gcc-3.4_for_i965.patch
+  
+ -- Timo Aaltonen <tepsipakki@ubuntu.com>  Fri, 16 Nov 2007 09:00:24 +0200
+
 mesa (7.0.2-2) unstable; urgency=low
 
   [ Julien Cristau ]
@@ -108,6 +270,27 @@ mesa (7.0.2-2) unstable; urgency=low
   * Add build-dep on libxext-dev.  Thanks, Timo Aaltonen!
 
  -- Brice Goglin <bgoglin@debian.org>  Tue, 13 Nov 2007 21:43:40 +0100
+
+mesa (7.0.2-1ubuntu2) hardy; urgency=low
+
+  * Add libxext-dev to Build-Depends.
+
+ -- Timo Aaltonen <tepsipakki@ubuntu.com>  Mon, 12 Nov 2007 14:50:38 +0200
+
+mesa (7.0.2-1ubuntu1) hardy; urgency=low
+
+  * Merge from debian unstable, remaining changes:
+    - Change maintainer address.
+    - Add gcc-3.4 as a build dependency for amd64, i386 and lpia.
+    - Drop lesstif-dev from Build-Depends.
+    - Comment out GLw libs from control.
+    - Add lpia to -dri and -dri-dbg package in debian/control.
+    - Add lpia to ARCH_X86 in configs/debian-dri-default.
+    - Add 101_ubuntu_hidden_glname.patch
+    - Add 102_ubuntu_no_glw.patch
+    - Add 110_ubuntu_use_gcc-3.4_for_i965.patch
+  
+ -- Timo Aaltonen <tepsipakki@ubuntu.com>  Mon, 12 Nov 2007 12:55:33 +0200
 
 mesa (7.0.2-1) unstable; urgency=low
 
@@ -134,6 +317,37 @@ mesa (7.0.1-2) unstable; urgency=low
 
  -- Julien Cristau <jcristau@debian.org>  Tue, 28 Aug 2007 12:11:30 +0200
 
+mesa (7.0.1-1ubuntu3) gutsy; urgency=low
+
+  * Add lpia to -dri and -dri-dbg package in debian/control.
+  * Add lpa top ARCH_X86 in configs/debian-dri-default.
+
+ -- Tollef Fog Heen <tfheen@ubuntu.com>  Fri, 12 Oct 2007 14:12:21 +0200
+
+mesa (7.0.1-1ubuntu2) gutsy; urgency=low
+
+  * Add fix-965-vblank.patch, pulled from upstream
+    b3fc9a1585f390274fa26b3e3f80bc6d16f4388a which fixes missed vbl
+    interrupts on Intel i965 hardware.
+
+ -- Kyle McMartin <kyle@ubuntu.com>  Wed,  3 Oct 2007 11:11:22 -0400
+
+mesa (7.0.1-1ubuntu1) gutsy; urgency=low
+
+  * Merge from debian unstable, remaining changes:
+    - Change maintainer to Ubuntu
+    - Add gcc-3.4 as a build dependency for lpia.
+    - Add support for Intel 945GME, G33, Q33, Q35
+      + 200_945gme.patch, upstream a74eec5af5397b612d60dd4b0d81666027f19bb0,
+        ad6351a994fd14af9d07da4f06837a7f9b9d0de4
+      + 201_g33.patch, upstream 8331d9d7aa7cde7126d38d4e1eb5fe8a168077f3
+    - Comment out GLw libs from control file
+    - Dropped Ubuntu addition of conflicts of libgl1-mesa-glx against
+      libgl1-mesa-swx11, since Debian has hadded a shlibs file for
+      libgl1-mesa-swx11-i686
+
+ -- Bryce Harrington <bryce@ubuntu.com>  Wed, 15 Aug 2007 15:08:32 -0700
+
 mesa (7.0.1-1) unstable; urgency=low
 
   * New upstream release.
@@ -153,6 +367,81 @@ mesa (7.0.1~rc2-1) experimental; urgency=low
   * Add a shlibs file for libgl1-mesa-swx11-i686.
 
  -- Julien Cristau <jcristau@debian.org>  Fri, 27 Jul 2007 20:17:48 +0200
+
+mesa (7.0.0-0ubuntu3) gutsy; urgency=low
+
+  * Add gcc-3.4 as a build dependency for lpia.
+
+ -- Matthias Klose <doko@ubuntu.com>  Tue, 07 Aug 2007 17:15:37 +0000
+
+mesa (7.0.0-0ubuntu2) gutsy; urgency=low
+
+  [ Kyle McMartin ]
+  * Add support for Intel 945GME, G33, Q33, Q35
+    - 200_945gme.patch, upstream a74eec5af5397b612d60dd4b0d81666027f19bb0,
+      ad6351a994fd14af9d07da4f06837a7f9b9d0de4
+    - 201_g33.patch, upstream 8331d9d7aa7cde7126d38d4e1eb5fe8a168077f3
+
+ --  Kyle McMartin <kyle@ubuntu.com>  Tue, 03 Jul 2007 19:32:39 +0000
+
+mesa (7.0.0-0ubuntu1) gutsy; urgency=low
+
+  [ Bryce Harrington ]
+  * New upstream release
+    - Adds OpenGL 2.0 and 2.1 API support.
+    - Fixed a few fog-related bugs.
+    - Fixed broken GLSL mix() function.
+    - Fixed broken GLSL exp() functions.
+    - Fixed GLSL mod4(vec4, vec4) bug.
+    - Implemented GLSL asin(), acos(), atan() functions.
+    - Fixed an R300 driver bug that caused Xorg composite manager to
+      crash
+    - Fixed R300 vertex program/matrix bug (fdo# 10848)
+    - GLSL dFdx() and dFdy() work for fragment program inputs now
+      (texcoords)
+    - Fixed potential crash when specifying an invalid texture unit as a
+      sampler
+    - Fixed incorrect GLX protocol request for glXDestroyPBuffer()
+      (fdo# 10983)
+    - ARB vp state.light[n].half value was incorrect (fdo# 10987)
+    - Fixed a positional light source bug (fdo# 11009)
+    - Fixed point size attenuation problem (fdo# 11042)
+    - Fixed problem where glPopAttrib didn't restore texture object's
+      LOD bias (fdo# 11049)
+    - Fixed a TLS / TEXTREL problem (fdo# 7459)
+    - Some texture code consolidation and simplifiction
+    - R300 driver clean-ups.
+
+  [ Sarah Hobbs ]
+  * Added a conflicts of libgl1-mesa-glx against libgl1-mesa-swx11, and vice
+    versa
+
+ -- Sarah Hobbs <hobbsee@ubuntu.com>  Tue, 26 Jun 2007 15:32:00 +1000
+
+mesa (6.5.3-1ubuntu1) gutsy; urgency=low
+
+  * Update Maintainer for Ubuntu
+
+  [ Kyle McMartin ]
+  * Merge with Debian experimental:
+    - Remove lesstif-dev from Build-Depends (Timo Aaltonen)
+    - Comment out GLw libs from control file
+    - Add 102_ubuntu_no_glw.patch to remove lesstif build depends
+    - Add libxext-dev to Build-Depends (Paul Sladen)
+    - Add gcc-3.4 [i386 amd64] to Build-Depends (Ben Collins)
+    - Add 110_ubuntu_use_gcc-3.4_for_i965.patch (Timo Aaltonen)
+    - Add 101_ubuntu_hidden_glname.patch
+    - Add 112_fedora-hush-synthetic-visual-warning.patch (Adam Jackson)
+
+  * Dropped patches:
+    - 103_ubuntu_fd.org-9686-fog.patch merged upstream
+    - 104_r300_call_radeonsetcliprects.patch merged upstream
+    - 105_radeon_call_radeonsetcliprects.patch merged upstream
+    - 106_r200_call_radeonsetcliprects.patch merged upstream
+    - 107_r200_simplify_r200setcliprects.patch merged upstream
+    - 111_unichrome_remove_xdrawoffset.patch merged upstream
+
+ -- Kyle McMartin <kyle@ubuntu.com>  Fri, 25 May 2007 16:43:31 +0000
 
 mesa (6.5.3-1) experimental; urgency=low
 

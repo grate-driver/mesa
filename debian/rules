@@ -90,15 +90,18 @@ confflags-osmesa32-static = --with-driver=osmesa --with-osmesa-bits=32 \
 
 confflags-swx11+glu = --with-driver=xlib \
 	     --with-demos= \
+	     --disable-glw \
 	     --libdir=/usr/lib
 
 confflags-swx11+glu-static = --with-driver=xlib \
 	     --enable-static \
 	     --with-demos= \
+	     --disable-glw \
 	     --libdir=/usr/lib
 
 confflags-swx11+glu-i386-i686 = --with-driver=xlib \
 	     --with-demos= \
+	     --disable-glw \
 	     --libdir=/usr/lib/i686/cmov \
 	     CFLAGS="$(CFLAGS) -march=i686"
 
@@ -144,6 +147,9 @@ $(STAMP)-install-%: $(STAMP)-build-%
 	dh_installdirs
 	
 	cd $(DEB_BUILD_DIR)/$* && $(MAKE) DESTDIR=$(CURDIR)/debian/tmp install
+	mkdir -p debian/tmp/etc/X11/Xsession.d
+	cp debian/Xsession.d_65mesa-check-x86-64 \
+	   debian/tmp/etc/X11/Xsession.d/65mesa-check-x86-64
 	touch $@
 
 clean: unpatch
