@@ -34,13 +34,14 @@ DRI_CONFIGS =
 include debian/scripts/choose-configs
 
 # build the following configurations by default
-CONFIGS = osmesa \
+CONFIGS = $(SWX11_GLU_CONFIGS) \
+	  dri \
+	  osmesa \
 	  osmesa-static \
 	  osmesa16 \
 	  osmesa16-static \
 	  osmesa32 \
 	  osmesa32-static
-
 
 STAMP_DIR = debian/stamp
 STAMP = $(STAMP_DIR)/$(DEB_BUILD_GNU_TYPE)
@@ -50,30 +51,52 @@ ARCH_INSTALL_STAMPS = $(addprefix $(STAMP)-install-, $(CONFIGS))
 QUILT_STAMPFN = $(STAMP_DIR)/patch
 include /usr/share/quilt/quilt.make
 
-confflags-osmesa = --enable-gl-osmesa \
-	     --with-demos=xdemos
+confflags-common = --disable-glu --disable-glut --disable-glw \
+	     CFLAGS="$(CFLAGS)"
 
-confflags-osmesa-static = --enable-static \
-	     --with-driver=osmesa \
+confflags-dri = --with-demos=xdemos \
+	     --libdir=/usr/lib/glx \
+	     --with-dri-driverdir=/usr/lib/dri \
+	     $(confflags-common)
+
+confflags-osmesa = --with-driver=osmesa \
+	     --with-demos= \
+	     $(confflags-common)
+
+confflags-osmesa-static = --with-driver=osmesa \
+	     --enable-static \
+	     --with-demos= \
+	     $(confflags-common)
+
+confflags-osmesa16 = --with-driver=osmesa --with-osmesa-bits=16 \
+	     --with-demos= \
+	     $(confflags-common)
+
+confflags-osmesa16-static = --with-driver=osmesa --with-osmesa-bits=16 \
+	     --enable-static \
+	     --with-demos= \
+	     $(confflags-common)
+
+confflags-osmesa32 = --with-driver=osmesa --with-osmesa-bits=32 \
+	     --with-demos= \
+	     $(confflags-common)
+
+confflags-osmesa32-static = --with-driver=osmesa --with-osmesa-bits=32 \
+	     --enable-static \
+	     --with-demos= \
+	     $(confflags-common)
+
+confflags-swx11+glu = --with-driver=xlib \
 	     --with-demos=
 
-confflags-osmesa16 = --with-osmesa-bits=16 \
-	     --with-driver=osmesa \
-	     --with-demos=
-
-confflags-osmesa16-static = --with-osmesa-bits=16 \
-	     --with-driver=osmesa \
+confflags-swx11+glu-static = --with-driver=xlib \
 	     --enable-static \
 	     --with-demos=
 
-confflags-osmesa32 = --with-osmesa-bits=32 \
-	     --with-driver=osmesa \
-	     --with-demos= 
-
-confflags-osmesa32-static = --with-osmesa-bits=32 \
-	     --with-driver=osmesa \
-	     --enable-static \
-	     --with-demos=
+confflags-swx11+glu-i386-i686 = --with-driver=xlib \
+	     --with-demos= \
+	     --libdir=/usr/lib/i686/cmov \
+	     CFLAGS="$(CFLAGS) -march=i686"
 
 autoreconf:
 	autoreconf -vfi
@@ -99,8 +122,7 @@ $(STAMP)-build-%:
 	cd $(DEB_BUILD_DIR)/$* && \
 	../../configure --prefix=/usr --mandir=\$${prefix}/share/man \
 	             --infodir=\$${prefix}/share/info --sysconfdir=/etc \
-	             --localstatedir=/var $(confflags) $(confflags-$*) \
-	             CFLAGS="$(CFLAGS)"
+	             --localstatedir=/var $(confflags) $(confflags-$*)
 	cd $(DEB_BUILD_DIR)/$* && $(MAKE)
 
 	touch $@
