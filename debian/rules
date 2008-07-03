@@ -160,6 +160,7 @@ clean: unpatch
 	rm -rf $$(find -name Makefile.in)
 	rm -rf aclocal.m4 missing depcomp install-sh ltmain.sh
 	rm -rf $(STAMP_DIR)
+	rm -f configs/current
 	
 	dh_clean
 

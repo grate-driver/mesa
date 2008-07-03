@@ -17,8 +17,9 @@ mesa (7.1~rc1-1) UNRELEASED; urgency=low
   * 01_fix-libdir.patch: libdir handling is broken in configure.ac, fix 
     it.
   * Add automake & autoconf to build-deps.
+  * Remove configs/current on clean.
 
- -- Timo Aaltonen <tepsipakki@ubuntu.com>  Thu, 03 Jul 2008 15:51:00 +0300
+ -- Timo Aaltonen <tepsipakki@ubuntu.com>  Thu, 03 Jul 2008 18:36:45 +0300
 
 mesa (7.0.3-4) unstable; urgency=low
 
