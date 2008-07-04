@@ -29,6 +29,8 @@ mesa (7.1~rc1-1) UNRELEASED; urgency=low
   [ Julien Cristau ]
   * New upstream release candidate.
   * Build against libdrm >= 2.3.1.
+  * 04_osmesa_version.diff: fix libOSMesa versioning, to revert accidental
+    SONAME bump.
 
   [ Timo Aaltonen ]
   * Refresh patches, and drop obsolete 00_create-libdir.patch and
