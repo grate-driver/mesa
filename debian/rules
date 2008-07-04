@@ -52,14 +52,13 @@ QUILT_STAMPFN = $(STAMP_DIR)/patch
 include /usr/share/quilt/quilt.make
 
 confflags-common = --disable-glu --disable-glut --disable-glw \
-	     --libdir=/usr/lib \
 	     CFLAGS="$(CFLAGS)"
 
 confflags-dri = --with-demos=xdemos \
 	     --libdir=/usr/lib/glx \
 	     --with-dri-driverdir=/usr/lib/dri \
-	     --disable-glu --disable-glut --disable-glw \
-	     CFLAGS="$(CFLAGS)"
+	     --enable-glx-tls \
+	     $(confflags-common)
 
 confflags-osmesa = --with-driver=osmesa \
 	     --with-demos= \
@@ -90,17 +89,20 @@ confflags-osmesa32-static = --with-driver=osmesa --with-osmesa-bits=32 \
 
 confflags-swx11+glu = --with-driver=xlib \
 	     --with-demos= \
+	     --disable-glut \
 	     --disable-glw \
-	     --libdir=/usr/lib
+	     CFLAGS="$(CFLAGS)"
 
 confflags-swx11+glu-static = --with-driver=xlib \
 	     --enable-static \
 	     --with-demos= \
+	     --disable-glut \
 	     --disable-glw \
-	     --libdir=/usr/lib
+	     CFLAGS="$(CFLAGS)"
 
 confflags-swx11+glu-i386-i686 = --with-driver=xlib \
 	     --with-demos= \
+	     --disable-glut \
 	     --disable-glw \
 	     --libdir=/usr/lib/i686/cmov \
 	     CFLAGS="$(CFLAGS) -march=i686"
@@ -166,7 +168,6 @@ clean: unpatch
 	rm -rf $$(find -name Makefile.in)
 	rm -rf aclocal.m4 missing depcomp install-sh ltmain.sh
 	rm -rf $(STAMP_DIR)
-	rm -f configs/current
 	
 	dh_clean
 
