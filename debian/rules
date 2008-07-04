@@ -90,15 +90,18 @@ confflags-osmesa32-static = --with-driver=osmesa --with-osmesa-bits=32 \
 
 confflags-swx11+glu = --with-driver=xlib \
 	     --with-demos= \
+	     --disable-glut \
 	     --libdir=/usr/lib
 
 confflags-swx11+glu-static = --with-driver=xlib \
 	     --enable-static \
 	     --with-demos= \
+	     --disable-glut \
 	     --libdir=/usr/lib
 
 confflags-swx11+glu-i386-i686 = --with-driver=xlib \
 	     --with-demos= \
+	     --disable-glut \
 	     --libdir=/usr/lib/i686/cmov \
 	     CFLAGS="$(CFLAGS) -march=i686"
 
