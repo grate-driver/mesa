@@ -1,0 +1,12 @@
+Index: mesa-6.5.2/src/mesa/x86/glapi_x86.S
+===================================================================
+--- mesa-6.5.2.orig/src/mesa/x86/glapi_x86.S	2006-11-04 01:44:40.000000000 +0200
++++ mesa-6.5.2/src/mesa/x86/glapi_x86.S	2007-02-09 20:25:45.000000000 +0200
+@@ -139,7 +139,6 @@
+ 
+ 		ALIGNTEXT16
+ 		GLOBL GLNAME(gl_dispatch_functions_start)
+-		HIDDEN(GLNAME(gl_dispatch_functions_start))
+ GLNAME(gl_dispatch_functions_start):
+ 
+ 	GL_STUB(NewList, _gloffset_NewList, NewList@8)

@@ -12,19 +12,17 @@ mesa (7.1~rc1-0ubuntu1) UNRELEASED; urgency=low
     - Add Xsession hook to disable ASM optimizations when running on
       64-but processors that don't support them
       (LP: 87661, Deb: 484180, fdo: 8724)
+    - Add 101_ubuntu_hidden_glname.patch.
 
   [ Timo Aaltonen ]
   * Dropped patches
-    101_ubuntu_hidden_glname.patch:
-    - the changelog doesn't say why it was there, besides the patch had
-      no effect since the code is ifdef'd away (we don't use GLX_TLS)
     102_ubuntu_no_glw.patch:
     - the new build system handles this better
     103_dlopen_in_driveropen.diff and 104_fix_driveropen.diff:
     - upstream
   * debian/rules: use --disable-glw for swx11 targets too. 
 
- -- Timo Aaltonen <tepsipakki@ubuntu.com>  Thu, 03 Jul 2008 17:45:45 +0300
+ -- Timo Aaltonen <tepsipakki@ubuntu.com>  Fri, 04 Jul 2008 11:25:05 +0300
 
 mesa (7.1~rc1-1) UNRELEASED; urgency=low
 
