@@ -59,6 +59,7 @@ confflags-dri = --with-demos=xdemos \
 	     --libdir=/usr/lib/glx \
 	     --with-dri-driverdir=/usr/lib/dri \
 	     --disable-glu --disable-glut --disable-glw \
+	     --enable-glx-tls \
 	     CFLAGS="$(CFLAGS)"
 
 confflags-osmesa = --with-driver=osmesa \
