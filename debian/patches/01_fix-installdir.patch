@@ -1,0 +1,380 @@
+From 410195da3cddb0e4f0a4d31a25732f00c264af51 Mon Sep 17 00:00:00 2001
+From: Dan Nicholson <dbn.lists@gmail.com>
+Date: Thu, 3 Jul 2008 09:17:44 -0700
+Subject: [PATCH] Set library and header installation directories from configuration
+
+Currently the installation directories for libraries and headers are
+resolved within the install commands. For instance, the libraries will
+be installed to $(INSTALL_DIR)/$(LIB_DIR). This limits the flexibility
+of the installation, such as when the libraries should be installed to a
+subdirectory like /usr/lib/tls.
+
+This adds the make variables $(INSTALL_LIB_DIR) and $(INSTALL_INC_DIR)
+to define the locations that the libraries and headers are installed.
+For the static configs, this resolves exactly as before to
+$(INSTALL_DIR)/include and $(INSTALL_DIR)/$(LIB_DIR). For autoconf, they
+are derived directly from the --libdir and --includedir settings.
+---
+ configs/autoconf.in            |    3 +++
+ configs/default                |    4 +++-
+ configure.ac                   |    1 +
+ src/glu/Makefile               |   11 ++++++-----
+ src/glu/glu.pc.in              |    4 ++--
+ src/glut/fbdev/Makefile        |    8 ++++----
+ src/glut/glx/Makefile          |   15 ++++++++-------
+ src/glut/glx/glut.pc.in        |    4 ++--
+ src/glut/mini/Makefile         |   15 ++++++++-------
+ src/glut/mini/glut.pc.in       |    4 ++--
+ src/glw/Makefile               |   15 ++++++++-------
+ src/glw/glw.pc.in              |    4 ++--
+ src/mesa/Makefile              |   19 ++++++++++---------
+ src/mesa/drivers/dri/Makefile  |   15 +++++++++------
+ src/mesa/drivers/dri/dri.pc.in |    4 ++--
+ src/mesa/gl.pc.in              |    4 ++--
+ 16 files changed, 72 insertions(+), 58 deletions(-)
+
+diff --git a/configs/autoconf.in b/configs/autoconf.in
+index ed44a0f..21d224f 100644
+--- a/configs/autoconf.in
++++ b/configs/autoconf.in
+@@ -89,9 +89,12 @@ EXPAT_INCLUDES = @EXPAT_INCLUDES@
+ prefix = @prefix@
+ exec_prefix = @exec_prefix@
+ libdir = @libdir@
++includedir = @includedir@
+ 
+ # Installation directories (for make install)
+ INSTALL_DIR = $(prefix)
++INSTALL_LIB_DIR = $(libdir)
++INSTALL_INC_DIR = $(includedir)
+ 
+ # DRI installation directories
+ DRI_DRIVER_INSTALL_DIR = @DRI_DRIVER_INSTALL_DIR@
+diff --git a/configs/default b/configs/default
+index 37b6939..d5b40c5 100644
+--- a/configs/default
++++ b/configs/default
+@@ -84,7 +84,9 @@ APP_LIB_DEPS = -lm
+ 
+ # Installation directories (for make install)
+ INSTALL_DIR = /usr/local
+-DRI_DRIVER_INSTALL_DIR = $(INSTALL_DIR)/$(LIB_DIR)/dri
++INSTALL_LIB_DIR = $(INSTALL_DIR)/$(LIB_DIR)
++INSTALL_INC_DIR = $(INSTALL_DIR)/include
++DRI_DRIVER_INSTALL_DIR = $(INSTALL_LIB_DIR)/dri
+ 
+ # Where libGL will look for DRI hardware drivers
+ DRI_DRIVER_SEARCH_DIR = $(DRI_DRIVER_INSTALL_DIR)
+diff --git a/configure.ac b/configure.ac
+index f15d9ff..961a60c 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -994,6 +994,7 @@ echo ""
+ echo "        prefix:          $prefix"
+ echo "        exec_prefix:     $exec_prefix"
+ echo "        libdir:          $libdir"
++echo "        includedir:      $includedir"
+ 
+ dnl Driver info
+ echo ""
+diff --git a/src/glu/Makefile b/src/glu/Makefile
+index 23161b5..fe19fd1 100644
+--- a/src/glu/Makefile
++++ b/src/glu/Makefile
+@@ -16,16 +16,17 @@ default: $(TOP)/configs/current
+ # GLU pkg-config file
+ pcedit = sed \
+ 	-e 's,@INSTALL_DIR@,$(INSTALL_DIR),' \
+-	-e 's,@LIB_DIR@,$(LIB_DIR),' \
++	-e 's,@INSTALL_LIB_DIR@,$(INSTALL_LIB_DIR),' \
++	-e 's,@INSTALL_INC_DIR@,$(INSTALL_INC_DIR),' \
+ 	-e 's,@VERSION@,$(MESA_MAJOR).$(MESA_MINOR).$(MESA_TINY),'
+ glu.pc: glu.pc.in
+ 	$(pcedit) $< > $@
+ 
+ install: glu.pc
+-	$(INSTALL) -d $(DESTDIR)$(INSTALL_DIR)/$(LIB_DIR)
+-	$(INSTALL) -d $(DESTDIR)$(INSTALL_DIR)/$(LIB_DIR)/pkgconfig
+-	$(INSTALL) $(TOP)/$(LIB_DIR)/libGLU.* $(DESTDIR)$(INSTALL_DIR)/$(LIB_DIR)
+-	$(INSTALL) -m 644 glu.pc $(DESTDIR)$(INSTALL_DIR)/$(LIB_DIR)/pkgconfig
++	$(INSTALL) -d $(DESTDIR)$(INSTALL_LIB_DIR)
++	$(INSTALL) -d $(DESTDIR)$(INSTALL_LIB_DIR)/pkgconfig
++	$(INSTALL) $(TOP)/$(LIB_DIR)/libGLU.* $(DESTDIR)$(INSTALL_LIB_DIR)
++	$(INSTALL) -m 644 glu.pc $(DESTDIR)$(INSTALL_LIB_DIR)/pkgconfig
+ 
+ clean:
+ 	-@for dir in $(SUBDIRS) ; do \
+diff --git a/src/glu/glu.pc.in b/src/glu/glu.pc.in
+index 5d6e52a..8606b9b 100644
+--- a/src/glu/glu.pc.in
++++ b/src/glu/glu.pc.in
+@@ -1,7 +1,7 @@
+ prefix=@INSTALL_DIR@
+ exec_prefix=${prefix}
+-libdir=${exec_prefix}/@LIB_DIR@
+-includedir=${prefix}/include
++libdir=@INSTALL_LIB_DIR@
++includedir=@INSTALL_INC_DIR@
+ 
+ Name: glu
+ Description: Mesa OpenGL Utility library
+diff --git a/src/glut/fbdev/Makefile b/src/glut/fbdev/Makefile
+index 95893b7..ff74a28 100644
+--- a/src/glut/fbdev/Makefile
++++ b/src/glut/fbdev/Makefile
+@@ -69,10 +69,10 @@ $(TOP)/$(LIB_DIR)/$(GLUT_LIB_NAME): depend $(OBJECTS)
+ 		$(MKLIB_OPTIONS) $(OBJECTS)
+ 
+ install:
+-	$(INSTALL) -d $(DESTDIR)$(INSTALL_DIR)/include/GL
+-	$(INSTALL) -d $(DESTDIR)$(INSTALL_DIR)/$(LIB_DIR)
+-	$(INSTALL) -m 644 $(TOP)/include/GL/glut.h $(DESTDIR)$(INSTALL_DIR)/include/GL
+-	$(INSTALL) $(TOP)/$(LIB_DIR)/libglut* $(DESTDIR)$(INSTALL_DIR)/$(LIB_DIR)
++	$(INSTALL) -d $(DESTDIR)$(INSTALL_INC_DIR)/GL
++	$(INSTALL) -d $(DESTDIR)$(INSTALL_LIB_DIR)
++	$(INSTALL) -m 644 $(TOP)/include/GL/glut.h $(DESTDIR)$(INSTALL_INC_DIR)/GL
++	$(INSTALL) $(TOP)/$(LIB_DIR)/libglut* $(DESTDIR)$(INSTALL_LIB_DIR)
+ 
+ # Run 'make -f Makefile.solo dep' to update the dependencies if you change
+ # what's included by any source file.
+diff --git a/src/glut/glx/Makefile b/src/glut/glx/Makefile
+index 674d5a5..819dfd2 100644
+--- a/src/glut/glx/Makefile
++++ b/src/glut/glx/Makefile
+@@ -100,18 +100,19 @@ $(TOP)/$(LIB_DIR)/$(GLUT_LIB_NAME): depend $(OBJECTS)
+ # glut pkgconfig file
+ pcedit = sed \
+ 	-e 's,@INSTALL_DIR@,$(INSTALL_DIR),' \
+-	-e 's,@LIB_DIR@,$(LIB_DIR),' \
++	-e 's,@INSTALL_LIB_DIR@,$(INSTALL_LIB_DIR),' \
++	-e 's,@INSTALL_INC_DIR@,$(INSTALL_INC_DIR),' \
+ 	-e 's,@VERSION@,$(GLUT_MAJOR).$(GLUT_MINOR).$(GLUT_TINY),'
+ glut.pc: glut.pc.in
+ 	$(pcedit) $< > $@
+ 
+ install: glut.pc
+-	$(INSTALL) -d $(DESTDIR)$(INSTALL_DIR)/include/GL
+-	$(INSTALL) -d $(DESTDIR)$(INSTALL_DIR)/$(LIB_DIR)
+-	$(INSTALL) -d $(DESTDIR)$(INSTALL_DIR)/$(LIB_DIR)/pkgconfig
+-	$(INSTALL) -m 644 $(TOP)/include/GL/glut.h $(DESTDIR)$(INSTALL_DIR)/include/GL
+-	$(INSTALL) $(TOP)/$(LIB_DIR)/libglut* $(DESTDIR)$(INSTALL_DIR)/$(LIB_DIR)
+-	$(INSTALL) -m 644 glut.pc $(DESTDIR)$(INSTALL_DIR)/$(LIB_DIR)/pkgconfig
++	$(INSTALL) -d $(DESTDIR)$(INSTALL_INC_DIR)/GL
++	$(INSTALL) -d $(DESTDIR)$(INSTALL_LIB_DIR)
++	$(INSTALL) -d $(DESTDIR)$(INSTALL_LIB_DIR)/pkgconfig
++	$(INSTALL) -m 644 $(TOP)/include/GL/glut.h $(DESTDIR)$(INSTALL_INC_DIR)/GL
++	$(INSTALL) $(TOP)/$(LIB_DIR)/libglut* $(DESTDIR)$(INSTALL_LIB_DIR)
++	$(INSTALL) -m 644 glut.pc $(DESTDIR)$(INSTALL_LIB_DIR)/pkgconfig
+ 
+ 
+ clean:
+diff --git a/src/glut/glx/glut.pc.in b/src/glut/glx/glut.pc.in
+index f732f29..e8638fe 100644
+--- a/src/glut/glx/glut.pc.in
++++ b/src/glut/glx/glut.pc.in
+@@ -1,7 +1,7 @@
+ prefix=@INSTALL_DIR@
+ exec_prefix=${prefix}
+-libdir=${exec_prefix}/@LIB_DIR@
+-includedir=${prefix}/include
++libdir=@INSTALL_LIB_DIR@
++includedir=@INSTALL_INC_DIR@
+ 
+ Name: glut
+ Description: Mesa OpenGL Utility Toolkit library
+diff --git a/src/glut/mini/Makefile b/src/glut/mini/Makefile
+index d386050..6aba2af 100644
+--- a/src/glut/mini/Makefile
++++ b/src/glut/mini/Makefile
+@@ -75,18 +75,19 @@ tags:
+ # glut pkgconfig file
+ pcedit = sed \
+ 	-e 's,@INSTALL_DIR@,$(INSTALL_DIR),' \
+-	-e 's,@LIB_DIR@,$(LIB_DIR),' \
++	-e 's,@INSTALL_LIB_DIR@,$(INSTALL_LIB_DIR),' \
++	-e 's,@INSTALL_INC_DIR@,$(INSTALL_INC_DIR),' \
+ 	-e 's,@VERSION@,$(GLUT_MAJOR).$(GLUT_MINOR).$(GLUT_TINY),'
+ glut.pc: glut.pc.in
+ 	$(pcedit) $< > $@
+ 
+ install: glut.pc
+-	$(INSTALL) -d $(DESTDIR)$(INSTALL_DIR)/include/GL
+-	$(INSTALL) -d $(DESTDIR)$(INSTALL_DIR)/$(LIB_DIR)
+-	$(INSTALL) -d $(DESTDIR)$(INSTALL_DIR)/$(LIB_DIR)/pkgconfig
+-	$(INSTALL) -m 644 $(TOP)/include/GL/glut.h $(DESTDIR)$(INSTALL_DIR)/include/GL
+-	$(INSTALL) $(TOP)/$(LIB_DIR)/libglut* $(DESTDIR)$(INSTALL_DIR)/$(LIB_DIR)
+-	$(INSTALL) -m 644 glut.pc $(DESTDIR)$(INSTALL_DIR)/$(LIB_DIR)/pkgconfig
++	$(INSTALL) -d $(DESTDIR)$(INSTALL_INC_DIR)/GL
++	$(INSTALL) -d $(DESTDIR)$(INSTALL_LIB_DIR)
++	$(INSTALL) -d $(DESTDIR)$(INSTALL_LIB_DIR)/pkgconfig
++	$(INSTALL) -m 644 $(TOP)/include/GL/glut.h $(DESTDIR)$(INSTALL_INC_DIR)/GL
++	$(INSTALL) $(TOP)/$(LIB_DIR)/libglut* $(DESTDIR)$(INSTALL_LIB_DIR)
++	$(INSTALL) -m 644 glut.pc $(DESTDIR)$(INSTALL_LIB_DIR)/pkgconfig
+ 
+ 
+ # Remove .o and backup files
+diff --git a/src/glut/mini/glut.pc.in b/src/glut/mini/glut.pc.in
+index f732f29..e8638fe 100644
+--- a/src/glut/mini/glut.pc.in
++++ b/src/glut/mini/glut.pc.in
+@@ -1,7 +1,7 @@
+ prefix=@INSTALL_DIR@
+ exec_prefix=${prefix}
+-libdir=${exec_prefix}/@LIB_DIR@
+-includedir=${prefix}/include
++libdir=@INSTALL_LIB_DIR@
++includedir=@INSTALL_INC_DIR@
+ 
+ Name: glut
+ Description: Mesa OpenGL Utility Toolkit library
+diff --git a/src/glw/Makefile b/src/glw/Makefile
+index 88bf99d..f0dd1ac 100644
+--- a/src/glw/Makefile
++++ b/src/glw/Makefile
+@@ -28,18 +28,19 @@ default: $(TOP)/$(LIB_DIR)/$(GLW_LIB_NAME)
+ # GLU pkg-config file
+ pcedit = sed \
+ 	-e 's,@INSTALL_DIR@,$(INSTALL_DIR),' \
+-	-e 's,@LIB_DIR@,$(LIB_DIR),' \
++	-e 's,@INSTALL_LIB_DIR@,$(INSTALL_LIB_DIR),' \
++	-e 's,@INSTALL_INC_DIR@,$(INSTALL_INC_DIR),' \
+ 	-e 's,@VERSION@,$(MAJOR).$(MINOR).$(TINY),'
+ glw.pc: glw.pc.in
+ 	$(pcedit) $< > $@
+ 
+ install: glw.pc
+-	$(INSTALL) -d $(DESTDIR)$(INSTALL_DIR)/include/GL
+-	$(INSTALL) -d $(DESTDIR)$(INSTALL_DIR)/$(LIB_DIR)
+-	$(INSTALL) -d $(DESTDIR)$(INSTALL_DIR)/$(LIB_DIR)/pkgconfig
+-	$(INSTALL) -m 644 *.h $(DESTDIR)$(INSTALL_DIR)/include/GL
+-	$(INSTALL) $(TOP)/$(LIB_DIR)/libGLw.* $(DESTDIR)$(INSTALL_DIR)/$(LIB_DIR)
+-	$(INSTALL) -m 644 glw.pc $(DESTDIR)$(INSTALL_DIR)/$(LIB_DIR)/pkgconfig
++	$(INSTALL) -d $(DESTDIR)$(INSTALL_INC_DIR)/GL
++	$(INSTALL) -d $(DESTDIR)$(INSTALL_LIB_DIR)
++	$(INSTALL) -d $(DESTDIR)$(INSTALL_LIB_DIR)/pkgconfig
++	$(INSTALL) -m 644 *.h $(DESTDIR)$(INSTALL_INC_DIR)/GL
++	$(INSTALL) $(TOP)/$(LIB_DIR)/libGLw.* $(DESTDIR)$(INSTALL_LIB_DIR)
++	$(INSTALL) -m 644 glw.pc $(DESTDIR)$(INSTALL_LIB_DIR)/pkgconfig
+ 
+ clean:
+ 	-rm -f depend depend.bak
+diff --git a/src/glw/glw.pc.in b/src/glw/glw.pc.in
+index 9c2682f..25f3f73 100644
+--- a/src/glw/glw.pc.in
++++ b/src/glw/glw.pc.in
+@@ -1,7 +1,7 @@
+ prefix=@INSTALL_DIR@
+ exec_prefix=${prefix}
+-libdir=${exec_prefix}/@LIB_DIR@
+-includedir=${prefix}/include
++libdir=@INSTALL_LIB_DIR@
++includedir=@INSTALL_INC_DIR@
+ 
+ Name: glw
+ Description: Mesa OpenGL widget library
+diff --git a/src/mesa/Makefile b/src/mesa/Makefile
+index e0b641b..3827ffb 100644
+--- a/src/mesa/Makefile
++++ b/src/mesa/Makefile
+@@ -90,28 +90,29 @@ install: default
+ 
+ pcedit = sed \
+ 	-e 's,@INSTALL_DIR@,$(INSTALL_DIR),' \
+-	-e 's,@LIB_DIR@,$(LIB_DIR),' \
++	-e 's,@INSTALL_LIB_DIR@,$(INSTALL_LIB_DIR),' \
++	-e 's,@INSTALL_INC_DIR@,$(INSTALL_INC_DIR),' \
+ 	-e 's,@VERSION@,$(MESA_MAJOR).$(MESA_MINOR).$(MESA_TINY),'
+ 
+ gl.pc: gl.pc.in
+ 	$(pcedit) $< > $@
+ 
+ install-headers:
+-	$(INSTALL) -d $(DESTDIR)$(INSTALL_DIR)/include/GL
++	$(INSTALL) -d $(DESTDIR)$(INSTALL_INC_DIR)/GL
+ 	$(INSTALL) -m 644 $(TOP)/include/GL/*.h \
+-		$(DESTDIR)$(INSTALL_DIR)/include/GL
++		$(DESTDIR)$(INSTALL_INC_DIR)/GL
+ 
+ install-libgl: default gl.pc install-headers
+-	$(INSTALL) -d $(DESTDIR)$(INSTALL_DIR)/$(LIB_DIR)
+-	$(INSTALL) -d $(DESTDIR)$(INSTALL_DIR)/$(LIB_DIR)/pkgconfig
++	$(INSTALL) -d $(DESTDIR)$(INSTALL_LIB_DIR)
++	$(INSTALL) -d $(DESTDIR)$(INSTALL_LIB_DIR)/pkgconfig
+ 	$(INSTALL) $(TOP)/$(LIB_DIR)/$(GL_LIB_NAME)* \
+-		$(DESTDIR)$(INSTALL_DIR)/$(LIB_DIR)
+-	$(INSTALL) -m 644 gl.pc $(DESTDIR)$(INSTALL_DIR)/$(LIB_DIR)/pkgconfig
++		$(DESTDIR)$(INSTALL_LIB_DIR)
++	$(INSTALL) -m 644 gl.pc $(DESTDIR)$(INSTALL_LIB_DIR)/pkgconfig
+ 
+ install-osmesa: default
+-	$(INSTALL) -d $(DESTDIR)$(INSTALL_DIR)/$(LIB_DIR)
++	$(INSTALL) -d $(DESTDIR)$(INSTALL_LIB_DIR)
+ 	$(INSTALL) $(TOP)/$(LIB_DIR)/$(OSMESA_LIB_NAME)* \
+-		$(DESTDIR)$(INSTALL_DIR)/$(LIB_DIR)
++		$(DESTDIR)$(INSTALL_LIB_DIR)
+ 
+ install-dri: default
+ 	cd drivers/dri && $(MAKE) install
+diff --git a/src/mesa/drivers/dri/Makefile b/src/mesa/drivers/dri/Makefile
+index 3f87782..96118e0 100644
+--- a/src/mesa/drivers/dri/Makefile
++++ b/src/mesa/drivers/dri/Makefile
+@@ -22,7 +22,8 @@ subdirs:
+ 
+ pcedit = sed \
+ 	-e 's,@INSTALL_DIR@,$(INSTALL_DIR),' \
+-	-e 's,@LIB_DIR@,$(LIB_DIR),' \
++	-e 's,@INSTALL_LIB_DIR@,$(INSTALL_LIB_DIR),' \
++	-e 's,@INSTALL_INC_DIR@,$(INSTALL_INC_DIR),' \
+ 	-e 's,@VERSION@,$(MESA_MAJOR).$(MESA_MINOR).$(MESA_TINY),' \
+ 	-e 's,@DRI_DRIVER_DIR@,$(DRI_DRIVER_SEARCH_DIR),'
+ 
+@@ -36,11 +37,13 @@ install: dri.pc
+ 			(cd $$dir && $(MAKE) install) || exit 1 ; \
+ 		fi \
+ 	done
+-	$(INSTALL) -d $(DESTDIR)$(INSTALL_DIR)/include/GL/internal
+-	$(INSTALL) -m 0644 $(TOP)/include/GL/internal/dri_interface.h $(DESTDIR)$(INSTALL_DIR)/include/GL/internal
+-	$(INSTALL) -m 0644 $(TOP)/include/GL/internal/dri_sarea.h $(DESTDIR)$(INSTALL_DIR)/include/GL/internal
+-	$(INSTALL) -d $(DESTDIR)$(INSTALL_DIR)/$(LIB_DIR)/pkgconfig
+-	$(INSTALL) -m 0644 dri.pc $(DESTDIR)$(INSTALL_DIR)/$(LIB_DIR)/pkgconfig
++	$(INSTALL) -d $(DESTDIR)$(INSTALL_INC_DIR)/GL/internal
++	$(INSTALL) -m 0644 $(TOP)/include/GL/internal/dri_interface.h \
++	  $(DESTDIR)$(INSTALL_INC_DIR)/GL/internal
++	$(INSTALL) -m 0644 $(TOP)/include/GL/internal/dri_sarea.h \
++	  $(DESTDIR)$(INSTALL_INC_DIR)/GL/internal
++	$(INSTALL) -d $(DESTDIR)$(INSTALL_LIB_DIR)/pkgconfig
++	$(INSTALL) -m 0644 dri.pc $(DESTDIR)$(INSTALL_LIB_DIR)/pkgconfig
+ 
+ 
+ clean:
+diff --git a/src/mesa/drivers/dri/dri.pc.in b/src/mesa/drivers/dri/dri.pc.in
+index 58d890d..c47ee9c 100644
+--- a/src/mesa/drivers/dri/dri.pc.in
++++ b/src/mesa/drivers/dri/dri.pc.in
+@@ -1,7 +1,7 @@
+ prefix=@INSTALL_DIR@
+ exec_prefix=${prefix}
+-libdir=${exec_prefix}/@LIB_DIR@
+-includedir=${prefix}/include
++libdir=@INSTALL_LIB_DIR@
++includedir=@INSTALL_INC_DIR@
+ dridriverdir=@DRI_DRIVER_DIR@
+ 
+ Name: dri
+diff --git a/src/mesa/gl.pc.in b/src/mesa/gl.pc.in
+index 4b144ff..1927880 100644
+--- a/src/mesa/gl.pc.in
++++ b/src/mesa/gl.pc.in
+@@ -1,7 +1,7 @@
+ prefix=@INSTALL_DIR@
+ exec_prefix=${prefix}
+-libdir=${exec_prefix}/@LIB_DIR@
+-includedir=${prefix}/include
++libdir=@INSTALL_LIB_DIR@
++includedir=@INSTALL_INC_DIR@
+ 
+ Name: gl
+ Description: Mesa OpenGL library
+-- 
+1.5.3.2

@@ -52,7 +52,6 @@ QUILT_STAMPFN = $(STAMP_DIR)/patch
 include /usr/share/quilt/quilt.make
 
 confflags-common = --disable-glu --disable-glut --disable-glw \
-	     --libdir=/usr/lib \
 	     CFLAGS="$(CFLAGS)"
 
 confflags-dri = --with-demos=xdemos \
@@ -91,14 +90,12 @@ confflags-osmesa32-static = --with-driver=osmesa --with-osmesa-bits=32 \
 
 confflags-swx11+glu = --with-driver=xlib \
 	     --with-demos= \
-	     --disable-glut \
-	     --libdir=/usr/lib
+	     --disable-glut
 
 confflags-swx11+glu-static = --with-driver=xlib \
 	     --enable-static \
 	     --with-demos= \
-	     --disable-glut \
-	     --libdir=/usr/lib
+	     --disable-glut
 
 confflags-swx11+glu-i386-i686 = --with-driver=xlib \
 	     --with-demos= \
