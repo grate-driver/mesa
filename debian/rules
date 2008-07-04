@@ -4,6 +4,7 @@
 
 # Uncomment this to turn on verbose mode.
 #export DH_VERBOSE=1
+unexport LDFLAGS
 
 CFLAGS = -Wall -g
 ifneq (,$(findstring noopt,$(DEB_BUILD_OPTIONS)))

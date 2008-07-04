@@ -20,7 +20,8 @@ mesa (7.1~rc1-0ubuntu1) UNRELEASED; urgency=low
     - the new build system handles this better
     103_dlopen_in_driveropen.diff and 104_fix_driveropen.diff:
     - upstream
-  * debian/rules: use --disable-glw for swx11 targets too. 
+  * debian/rules: use --disable-glw for swx11 targets too.
+  * Unexport LDFLAGS (amd64 FTBFS).
 
  -- Timo Aaltonen <tepsipakki@ubuntu.com>  Fri, 04 Jul 2008 11:25:05 +0300
 
