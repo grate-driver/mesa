@@ -19,7 +19,6 @@ mesa (7.1~rc1-1) UNRELEASED; urgency=low
   * 01_fix-libdir.patch: libdir handling is broken in configure.ac, fix 
     it.
   * Add automake & autoconf to build-deps.
-  * Remove configs/current on clean.
   * Use --enable-glx-tls for dri.
 
  -- Timo Aaltonen <tepsipakki@ubuntu.com>  Fri, 04 Jul 2008 10:02:34 +0300
