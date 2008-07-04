@@ -57,9 +57,8 @@ confflags-common = --disable-glu --disable-glut --disable-glw \
 confflags-dri = --with-demos=xdemos \
 	     --libdir=/usr/lib/glx \
 	     --with-dri-driverdir=/usr/lib/dri \
-	     --disable-glu --disable-glut --disable-glw \
 	     --enable-glx-tls \
-	     CFLAGS="$(CFLAGS)"
+	     $(confflags-common)
 
 confflags-osmesa = --with-driver=osmesa \
 	     --with-demos= \
@@ -90,12 +89,14 @@ confflags-osmesa32-static = --with-driver=osmesa --with-osmesa-bits=32 \
 
 confflags-swx11+glu = --with-driver=xlib \
 	     --with-demos= \
-	     --disable-glut
+	     --disable-glut \
+	     CFLAGS="$(CFLAGS)"
 
 confflags-swx11+glu-static = --with-driver=xlib \
 	     --enable-static \
 	     --with-demos= \
-	     --disable-glut
+	     --disable-glut \
+	     CFLAGS="$(CFLAGS)"
 
 confflags-swx11+glu-i386-i686 = --with-driver=xlib \
 	     --with-demos= \
