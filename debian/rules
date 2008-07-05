@@ -54,11 +54,13 @@ include /usr/share/quilt/quilt.make
 confflags-common = --disable-glu --disable-glut --disable-glw \
 	     CFLAGS="$(CFLAGS)"
 
-confflags-dri = --with-demos=xdemos \
-	     --libdir=/usr/lib/glx \
-	     --with-dri-driverdir=/usr/lib/dri \
-	     --enable-glx-tls \
-	     $(confflags-common)
+confflags-dri = \
+	--with-driver=dri \
+	--with-demos=xdemos \
+	--libdir=/usr/lib/glx \
+	--with-dri-driverdir=/usr/lib/dri \
+	--enable-glx-tls \
+	$(confflags-common)
 
 confflags-osmesa = --with-driver=osmesa \
 	     --with-demos= \
