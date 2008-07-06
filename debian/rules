@@ -51,8 +51,11 @@ ARCH_INSTALL_STAMPS = $(addprefix $(STAMP)-install-, $(CONFIGS))
 QUILT_STAMPFN = $(STAMP_DIR)/patch
 include /usr/share/quilt/quilt.make
 
-confflags-common = --disable-glu --disable-glut --disable-glw \
-	     CFLAGS="$(CFLAGS)"
+confflags-common = \
+	--disable-glu \
+	--disable-glut \
+	--disable-glw \
+	CFLAGS="$(CFLAGS)"
 
 DRI_DRIVERS = swrast
 
@@ -82,49 +85,65 @@ confflags-dri = \
 	$(DIRECT_RENDERING) \
 	$(confflags-common)
 
-confflags-osmesa = --with-driver=osmesa \
-	     --with-demos= \
-	     $(confflags-common)
+confflags-osmesa = \
+	--with-driver=osmesa \
+	--with-demos= \
+	$(confflags-common)
 
-confflags-osmesa-static = --with-driver=osmesa \
-	     --enable-static \
-	     --with-demos= \
-	     $(confflags-common)
+confflags-osmesa-static = \
+	--with-driver=osmesa \
+	--enable-static \
+	--with-demos= \
+	$(confflags-common)
 
-confflags-osmesa16 = --with-driver=osmesa --with-osmesa-bits=16 \
-	     --with-demos= \
-	     $(confflags-common)
+confflags-osmesa16 = \
+	--with-driver=osmesa \
+	--with-osmesa-bits=16 \
+	--with-demos= \
+	$(confflags-common)
 
-confflags-osmesa16-static = --with-driver=osmesa --with-osmesa-bits=16 \
-	     --enable-static \
-	     --with-demos= \
-	     $(confflags-common)
+confflags-osmesa16-static = \
+	--with-driver=osmesa \
+	--with-osmesa-bits=16 \
+	--enable-static \
+	--with-demos= \
+	$(confflags-common)
 
-confflags-osmesa32 = --with-driver=osmesa --with-osmesa-bits=32 \
-	     --with-demos= \
-	     $(confflags-common)
+confflags-osmesa32 = \
+	--with-driver=osmesa \
+	--with-osmesa-bits=32 \
+	--with-demos= \
+	$(confflags-common)
 
-confflags-osmesa32-static = --with-driver=osmesa --with-osmesa-bits=32 \
-	     --enable-static \
-	     --with-demos= \
-	     $(confflags-common)
+confflags-osmesa32-static = \
+	--with-driver=osmesa \
+	--with-osmesa-bits=32 \
+	--enable-static \
+	--with-demos= \
+	$(confflags-common)
 
-confflags-swx11+glu = --with-driver=xlib \
-	     --with-demos= \
-	     --disable-glut \
-	     CFLAGS="$(CFLAGS)"
+confflags-swx11+glu = \
+	--with-driver=xlib \
+	--disable-gl-osmesa \
+	--with-demos= \
+	--disable-glut \
+	CFLAGS="$(CFLAGS)"
 
-confflags-swx11+glu-static = --with-driver=xlib \
-	     --enable-static \
-	     --with-demos= \
-	     --disable-glut \
-	     CFLAGS="$(CFLAGS)"
+confflags-swx11+glu-static = \
+	--with-driver=xlib \
+	--disable-gl-osmesa \
+	--enable-static \
+	--with-demos= \
+	--disable-glut \
+	CFLAGS="$(CFLAGS)"
 
-confflags-swx11+glu-i386-i686 = --with-driver=xlib \
-	     --with-demos= \
-	     --disable-glut \
-	     --libdir=/usr/lib/i686/cmov \
-	     CFLAGS="$(CFLAGS) -march=i686"
+confflags-swx11+glu-i386-i686 = \
+	--with-driver=xlib \
+	--disable-gl-osmesa \
+	--with-demos= \
+	--disable-glut \
+	--libdir=/usr/lib/i686/cmov \
+	CFLAGS="$(CFLAGS) -march=i686"
 
 configure: $(QUILT_STAMPFN) configure.ac
 	autoreconf -vfi
@@ -139,7 +158,7 @@ $(STAMP_DIR):
 
 $(QUILT_STAMPFN): $(STAMP_DIR)
 
-build: configs $(BUILD_STAMPS)
+build: $(BUILD_STAMPS)
 
 $(STAMP)-build-%: configure
 	dh_testdir
@@ -159,7 +178,7 @@ pre-install:
 	dh_testdir
 	dh_testroot
 	dh_clean -k
-	rm -rf $(INSTALL_STAMPS)
+	rm -rf $(ARCH_INSTALL_STAMPS)
 
 install: pre-install $(ARCH_INSTALL_STAMPS)
 
@@ -188,7 +207,7 @@ clean: unpatch
 	dh_clean
 
 # Build architecture-independent files here.
-binary-indep: build install
+binary-indep: install
 	dh_testdir
 	dh_testroot
 	dh_installchangelogs -i
