@@ -818,7 +818,7 @@
 #define CMD_STATE_BASE_ADDRESS        0x6101
 #define CMD_STATE_INSN_POINTER        0x6102
 #define CMD_PIPELINE_SELECT_965       0x6104
-#define CMD_PIPELINE_SELECT_IGD       0x6904
+#define CMD_PIPELINE_SELECT_GM45      0x6904
 
 #define CMD_PIPELINED_STATE_POINTERS  0x7800
 #define CMD_BINDING_TABLE_PTRS        0x7801
@@ -826,7 +826,7 @@
 #define CMD_VERTEX_ELEMENT            0x7809
 #define CMD_INDEX_BUFFER              0x780a
 #define CMD_VF_STATISTICS_965         0x780b
-#define CMD_VF_STATISTICS_IGD         0x680b
+#define CMD_VF_STATISTICS_GM45        0x680b
 
 #define CMD_DRAW_RECT                 0x7900
 #define CMD_BLEND_CONSTANT_COLOR      0x7901
@@ -850,13 +850,12 @@
 #define R02_PRIM_END    0x1
 #define R02_PRIM_START  0x2
 
-#define BRW_IS_IGD_GM(brw)              ((brw)->intel.intelScreen->deviceID == PCI_CHIP_IGD_GM)
+#define BRW_IS_GM45(brw)                ((brw)->intel.intelScreen->deviceID == PCI_CHIP_GM45_GM)
 #define BRW_IS_G4X(brw)                 (((brw)->intel.intelScreen->deviceID == PCI_CHIP_IGD_E_G) || \
                                          ((brw)->intel.intelScreen->deviceID == PCI_CHIP_G45_G) || \
                                          ((brw)->intel.intelScreen->deviceID == PCI_CHIP_Q45_G))
-#define BRW_IS_IGD(brw)			(BRW_IS_IGD_GM(brw) || BRW_IS_G4X(brw))
-#define CMD_PIPELINE_SELECT(brw)       ((BRW_IS_IGD(brw)) ? CMD_PIPELINE_SELECT_IGD : CMD_PIPELINE_SELECT_965)
-#define CMD_VF_STATISTICS(brw)         ((BRW_IS_IGD(brw)) ? CMD_VF_STATISTICS_IGD : CMD_VF_STATISTICS_965)
-#define URB_SIZES(brw)                 ((BRW_IS_IGD(brw)) ? 384 : 256)  /* 512 bit unit */
+#define CMD_PIPELINE_SELECT(brw)       ((BRW_IS_GM45(brw) || BRW_IS_G4X(brw)) ? CMD_PIPELINE_SELECT_GM45 : CMD_PIPELINE_SELECT_965)
+#define CMD_VF_STATISTICS(brw)         ((BRW_IS_GM45(brw) || BRW_IS_G4X(brw)) ? CMD_VF_STATISTICS_GM45 : CMD_VF_STATISTICS_965)
+#define URB_SIZES(brw)                 ((BRW_IS_GM45(brw) || BRW_IS_G4X(brw)) ? 384 : 256)  /* 512 bit unit */
 
 #endif

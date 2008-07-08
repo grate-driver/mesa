@@ -126,7 +126,9 @@ static const GLubyte *intelGetString( GLcontext *ctx, GLenum name )
       case PCI_CHIP_I965_GM:
 	 chipset = "Intel(R) 965GM"; break;
          break;
-      case PCI_CHIP_IGD_GM:
+      case PCI_CHIP_GM45_GM:
+	 chipset = "Mobile Intel® GM45 Express Chipset";
+	 break;
       case PCI_CHIP_IGD_E_G:
 	 chipset = "Intel(R) Integrated Graphics Device";
          break;

@@ -1362,7 +1362,7 @@ struct brw_instruction
          GLuint msg_target:4;
          GLuint pad1:3;
          GLuint end_of_thread:1;
-      } sampler_igd; 
+      } sampler_gm45_g4x; 
 
       struct brw_urb_immediate urb;
 

@@ -249,7 +249,7 @@ static void upload_depthbuffer(struct brw_context *brw)
    memset(&bd, 0, sizeof(bd));
 
    bd.header.bits.opcode = CMD_DEPTH_BUFFER;
-   bd.header.bits.length = BRW_IS_IGD(brw) ? (sizeof(bd)/4-2) : (sizeof(bd)/4-3);
+   bd.header.bits.length = (BRW_IS_GM45(brw) || BRW_IS_G4X(brw)) ? (sizeof(bd)/4-2) : (sizeof(bd)/4-3);
    bd.dword1.bits.pitch = (region->pitch * region->cpp) - 1;
    
    switch (region->cpp) {
@@ -366,7 +366,7 @@ static void upload_aa_line_parameters(struct brw_context *brw)
 {
    struct brw_aa_line_parameters balp;
    
-   if (!BRW_IS_IGD(brw))
+   if (!(BRW_IS_GM45(brw) || BRW_IS_G4X(brw)))
       return;
 
    /* use legacy aa line coverage computation */
