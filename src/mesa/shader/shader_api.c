@@ -963,12 +963,15 @@ _mesa_get_shader_source(GLcontext *ctx, GLuint shader, GLsizei maxLength,
 }
 
 
+#define MAX_UNIFORM_ELEMENTS 16
+
 /**
- * Called via ctx->Driver.GetUniformfv().
+ * Helper for GetUniformfv(), GetUniformiv()
+ * Returns number of elements written to 'params' output.
  */
-void
-_mesa_get_uniformfv(GLcontext *ctx, GLuint program, GLint location,
-                    GLfloat *params)
+static GLuint
+get_uniformfv(GLcontext *ctx, GLuint program, GLint location,
+              GLfloat *params)
 {
    struct gl_shader_program *shProg
       = _mesa_lookup_shader_program(ctx, program);
@@ -1004,11 +1007,14 @@ _mesa_get_uniformfv(GLcontext *ctx, GLuint program, GLint location,
             for (c = 0, i = 0; c * 4 < uSize; c++)
                for (r = 0; r < rows; r++, i++)
                   params[i] = shProg->Uniforms->ParameterValues[location + c][r];
+            return i;
          }
-         else
+         else {
             for (i = 0; i < uSize; i++) {
                params[i] = shProg->Uniforms->ParameterValues[location][i];
             }
+            return i;
+         }
       }
       else {
          _mesa_error(ctx, GL_INVALID_OPERATION, "glGetUniformfv(location)");
@@ -1016,6 +1022,35 @@ _mesa_get_uniformfv(GLcontext *ctx, GLuint program, GLint location,
    }
    else {
       _mesa_error(ctx, GL_INVALID_OPERATION, "glGetUniformfv(program)");
+   }
+   return 0;
+}
+
+
+/**
+ * Called via ctx->Driver.GetUniformfv().
+ */
+void
+_mesa_get_uniformfv(GLcontext *ctx, GLuint program, GLint location,
+                    GLfloat *params)
+{
+   (void) get_uniformfv(ctx, program, location, params);
+}
+
+
+/**
+ * Called via ctx->Driver.GetUniformiv().
+ */
+void
+_mesa_get_uniformiv(GLcontext *ctx, GLuint program, GLint location,
+                    GLint *params)
+{
+   GLfloat fparams[MAX_UNIFORM_ELEMENTS];
+   GLuint n = get_uniformfv(ctx, program, location, fparams);
+   GLuint i;
+   assert(n <= MAX_UNIFORM_ELEMENTS);
+   for (i = 0; i < n; i++) {
+      params[i] = (GLint) fparams[i];
    }
 }
 
