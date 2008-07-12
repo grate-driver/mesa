@@ -1,6 +1,7 @@
 mesa (7.0.3-5) UNRELEASED; urgency=low
 
   * Disable the i915tex driver, it doesn't build against libdrm 2.3.1.
+  * Pull from mesa_7_0_branch (27425708).
 
  -- Julien Cristau <jcristau@debian.org>  Tue, 08 Jul 2008 18:16:24 +0200
 
