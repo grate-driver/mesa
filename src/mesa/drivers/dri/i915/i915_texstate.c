@@ -609,13 +609,8 @@ static void i915ImportTexObjState( struct gl_texture_object *texObj )
       shadow = SS2_SHADOW_ENABLE;
       shadow |= intel_translate_compare_func( texObj->CompareFunc );
       
-      if (texObj->Target == GL_TEXTURE_1D) {
-	  minFilt = FILTER_NEAREST;
-	  magFilt = FILTER_NEAREST;
-      } else {
-	  minFilt = FILTER_4X4_FLAT;
-	  magFilt = FILTER_4X4_FLAT;
-      }
+      minFilt = FILTER_4X4_FLAT;
+      magFilt = FILTER_4X4_FLAT;
    }
 
 
@@ -747,6 +742,9 @@ static GLboolean enable_tex_common( GLcontext *ctx, GLuint unit )
       return GL_FALSE;
    }
 
+   if (tObj->Target == GL_TEXTURE_1D &&
+       tObj->CompareMode == GL_COMPARE_R_TO_TEXTURE_ARB)
+      return GL_FALSE;
 
    /* Update state if this is a different texture object to last
     * time.
