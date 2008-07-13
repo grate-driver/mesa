@@ -12,6 +12,10 @@ m4_ifval(mesa_version,[],[
     m4_exit([1])
 ])
 
+dnl Tell the user about autoconf.html in the --help output
+m4_divert_once([HELP_END], [
+See docs/autoconf.html for more details on the options for Mesa.])
+
 AC_INIT([Mesa],[mesa_version],
     [https://bugs.freedesktop.org/enter_bug.cgi?product=Mesa])
 AC_CONFIG_AUX_DIR([bin])
@@ -29,17 +33,15 @@ AC_CHECK_PROGS([MAKE], [gmake make])
 AC_PATH_PROG([MKDEP], [makedepend])
 AC_PATH_PROG([SED], [sed])
 
-dnl Platform-specific program settings
-EXTRA_CONFIG_LINES=""
-AC_SUBST([EXTRA_CONFIG_LINES])
+dnl We need a POSIX shell for parts of the build. Assume we have one
+dnl in most cases.
 case "$host_os" in
 solaris*)
     # Solaris /bin/sh is too old/non-POSIX compliant
     AC_PATH_PROGS(POSIX_SHELL, [ksh93 ksh sh])
-    EXTRA_CONFIG_LINES="SHELL=$POSIX_SHELL"
+    SHELL="$POSIX_SHELL"
     ;;
 esac
-
 
 MKDEP_OPTIONS=-fdepend
 dnl Ask gcc where it's keeping its secret headers
@@ -452,7 +454,7 @@ esac
 
 dnl
 dnl Find out if X is available. The variable have_x is set if libX11 is
-dnl to mimic AC_PATH_XTRA.
+dnl found to mimic AC_PATH_XTRA.
 dnl
 if test -n "$PKG_CONFIG"; then
     AC_MSG_CHECKING([pkg-config files for X11 are available])
@@ -470,6 +472,12 @@ dnl Use the autoconf macro if no pkg-config files
 if test "$x11_pkgconfig" = no; then
     AC_PATH_XTRA
 fi
+
+dnl Try to tell the user that the --x-* options are only used when
+dnl pkg-config is not available. This must be right after AC_PATH_XTRA.
+m4_divert_once([HELP_BEGIN],
+[These options are only used when the X libraries cannot be found by the
+pkg-config utility.])
 
 dnl We need X for xlib and dri, so bomb now if it's not found
 case "$mesa_driver" in
@@ -619,7 +627,7 @@ case "$with_dri_drivers" in
 no|yes) ;;
 *)
     # verify the requested driver directories exist
-    dri_drivers=`IFS=,; echo $with_dri_drivers`
+    dri_drivers=`IFS=', '; echo $with_dri_drivers`
     for driver in $dri_drivers; do
         test -d "$srcdir/src/mesa/drivers/dri/$driver" || \
             AC_MSG_ERROR([DRI driver directory '$driver' doesn't exist])
@@ -994,6 +1002,7 @@ echo ""
 echo "        prefix:          $prefix"
 echo "        exec_prefix:     $exec_prefix"
 echo "        libdir:          $libdir"
+echo "        includedir:      $includedir"
 
 dnl Driver info
 echo ""

@@ -70,20 +70,28 @@ extern void _tnl_UpdateFixedFunctionProgram(GLcontext * ctx);
 
 static void r300BlendColor(GLcontext * ctx, const GLfloat cf[4])
 {
-	GLubyte color[4];
 	r300ContextPtr rmesa = R300_CONTEXT(ctx);
 
 	R300_STATECHANGE(rmesa, blend_color);
 
-	CLAMPED_FLOAT_TO_UBYTE(color[0], cf[0]);
-	CLAMPED_FLOAT_TO_UBYTE(color[1], cf[1]);
-	CLAMPED_FLOAT_TO_UBYTE(color[2], cf[2]);
-	CLAMPED_FLOAT_TO_UBYTE(color[3], cf[3]);
+	if (rmesa->radeon.radeonScreen->chip_family >= CHIP_FAMILY_RV515) {
+		GLuint r = IROUND(cf[0]*1023.0f);
+		GLuint g = IROUND(cf[1]*1023.0f);
+		GLuint b = IROUND(cf[2]*1023.0f);
+		GLuint a = IROUND(cf[3]*1023.0f);
 
-	rmesa->hw.blend_color.cmd[1] = PACK_COLOR_8888(color[3], color[0],
-						       color[1], color[2]);
-	rmesa->hw.blend_color.cmd[2] = 0;
-	rmesa->hw.blend_color.cmd[3] = 0;
+		rmesa->hw.blend_color.cmd[1] = r | (a << 16);
+		rmesa->hw.blend_color.cmd[2] = b | (g << 16);
+	} else {
+		GLubyte color[4];
+		CLAMPED_FLOAT_TO_UBYTE(color[0], cf[0]);
+		CLAMPED_FLOAT_TO_UBYTE(color[1], cf[1]);
+		CLAMPED_FLOAT_TO_UBYTE(color[2], cf[2]);
+		CLAMPED_FLOAT_TO_UBYTE(color[3], cf[3]);
+
+		rmesa->hw.blend_color.cmd[1] = PACK_COLOR_8888(color[3], color[0],
+							color[1], color[2]);
+	}
 }
 
 /**
@@ -1963,13 +1971,14 @@ static void r300VapCntl(r300ContextPtr rmesa, GLuint input_count,
     if (rmesa->radeon.radeonScreen->chip_family == CHIP_FAMILY_RV515)
 	rmesa->hw.vap_cntl.cmd[R300_VAP_CNTL_INSTR] |= (2 << R300_PVS_NUM_FPUS_SHIFT);
     else if ((rmesa->radeon.radeonScreen->chip_family == CHIP_FAMILY_RV530) ||
-	     (rmesa->radeon.radeonScreen->chip_family == CHIP_FAMILY_RV560))
+	     (rmesa->radeon.radeonScreen->chip_family == CHIP_FAMILY_RV560) ||
+	     (rmesa->radeon.radeonScreen->chip_family == CHIP_FAMILY_RV570))
 	rmesa->hw.vap_cntl.cmd[R300_VAP_CNTL_INSTR] |= (5 << R300_PVS_NUM_FPUS_SHIFT);
-    else if (rmesa->radeon.radeonScreen->chip_family == CHIP_FAMILY_R420)
+    else if ((rmesa->radeon.radeonScreen->chip_family == CHIP_FAMILY_RV410) ||
+	     (rmesa->radeon.radeonScreen->chip_family == CHIP_FAMILY_R420))
 	rmesa->hw.vap_cntl.cmd[R300_VAP_CNTL_INSTR] |= (6 << R300_PVS_NUM_FPUS_SHIFT);
     else if ((rmesa->radeon.radeonScreen->chip_family == CHIP_FAMILY_R520) ||
-	     (rmesa->radeon.radeonScreen->chip_family == CHIP_FAMILY_R580) ||
-	     (rmesa->radeon.radeonScreen->chip_family == CHIP_FAMILY_RV570))
+	     (rmesa->radeon.radeonScreen->chip_family == CHIP_FAMILY_R580))
 	rmesa->hw.vap_cntl.cmd[R300_VAP_CNTL_INSTR] |= (8 << R300_PVS_NUM_FPUS_SHIFT);
     else
 	rmesa->hw.vap_cntl.cmd[R300_VAP_CNTL_INSTR] |= (4 << R300_PVS_NUM_FPUS_SHIFT);
@@ -2445,6 +2454,27 @@ void r300UpdateShaders(r300ContextPtr rmesa)
 	r300UpdateStateParameters(ctx, _NEW_PROGRAM);
 }
 
+static const GLfloat *get_fragmentprogram_constant(GLcontext *ctx,
+	struct gl_program *program, struct prog_src_register srcreg)
+{
+	static const GLfloat dummy[4] = { 0, 0, 0, 0 };
+
+	switch(srcreg.File) {
+	case PROGRAM_LOCAL_PARAM:
+		return program->LocalParams[srcreg.Index];
+	case PROGRAM_ENV_PARAM:
+		return ctx->FragmentProgram.Parameters[srcreg.Index];
+	case PROGRAM_STATE_VAR:
+	case PROGRAM_NAMED_PARAM:
+	case PROGRAM_CONSTANT:
+		return program->Parameters->ParameterValues[srcreg.Index];
+	default:
+		_mesa_problem(ctx, "get_fragmentprogram_constant: Unknown\n");
+		return dummy;
+	}
+}
+
+
 static void r300SetupPixelShader(r300ContextPtr rmesa)
 {
 	GLcontext *ctx = rmesa->radeon.glCtx;
@@ -2467,26 +2497,17 @@ static void r300SetupPixelShader(r300ContextPtr rmesa)
 	r300SetupTextures(ctx);
 
 	R300_STATECHANGE(rmesa, fpi[0]);
-	rmesa->hw.fpi[0].cmd[R300_FPI_CMD_0] = cmdpacket0(R300_US_ALU_RGB_INST_0, code->alu_end + 1);
-	for (i = 0; i <= code->alu_end; i++) {
-		rmesa->hw.fpi[0].cmd[R300_FPI_INSTR_0 + i] = code->alu.inst[i].inst0;
-	}
-
 	R300_STATECHANGE(rmesa, fpi[1]);
-	rmesa->hw.fpi[1].cmd[R300_FPI_CMD_0] = cmdpacket0(R300_US_ALU_RGB_ADDR_0, code->alu_end + 1);
-	for (i = 0; i <= code->alu_end; i++) {
-		rmesa->hw.fpi[1].cmd[R300_FPI_INSTR_0 + i] = code->alu.inst[i].inst1;
-	}
-
 	R300_STATECHANGE(rmesa, fpi[2]);
-	rmesa->hw.fpi[2].cmd[R300_FPI_CMD_0] = cmdpacket0(R300_US_ALU_ALPHA_INST_0, code->alu_end + 1);
-	for (i = 0; i <= code->alu_end; i++) {
-		rmesa->hw.fpi[2].cmd[R300_FPI_INSTR_0 + i] = code->alu.inst[i].inst2;
-	}
-
 	R300_STATECHANGE(rmesa, fpi[3]);
-	rmesa->hw.fpi[3].cmd[R300_FPI_CMD_0] = cmdpacket0(R300_US_ALU_ALPHA_ADDR_0, code->alu_end + 1);
-	for (i = 0; i <= code->alu_end; i++) {
+	rmesa->hw.fpi[0].cmd[R300_FPI_CMD_0] = cmdpacket0(R300_US_ALU_RGB_INST_0, code->alu.length);
+	rmesa->hw.fpi[1].cmd[R300_FPI_CMD_0] = cmdpacket0(R300_US_ALU_RGB_ADDR_0, code->alu.length);
+	rmesa->hw.fpi[2].cmd[R300_FPI_CMD_0] = cmdpacket0(R300_US_ALU_ALPHA_INST_0, code->alu.length);
+	rmesa->hw.fpi[3].cmd[R300_FPI_CMD_0] = cmdpacket0(R300_US_ALU_ALPHA_ADDR_0, code->alu.length);
+	for (i = 0; i < code->alu.length; i++) {
+		rmesa->hw.fpi[0].cmd[R300_FPI_INSTR_0 + i] = code->alu.inst[i].inst0;
+		rmesa->hw.fpi[1].cmd[R300_FPI_INSTR_0 + i] = code->alu.inst[i].inst1;
+		rmesa->hw.fpi[2].cmd[R300_FPI_INSTR_0 + i] = code->alu.inst[i].inst2;
 		rmesa->hw.fpi[3].cmd[R300_FPI_INSTR_0 + i] = code->alu.inst[i].inst3;
 	}
 
@@ -2494,10 +2515,10 @@ static void r300SetupPixelShader(r300ContextPtr rmesa)
 	rmesa->hw.fp.cmd[R300_FP_CNTL0] = code->cur_node | (code->first_node_has_tex << 3);
 	rmesa->hw.fp.cmd[R300_FP_CNTL1] = code->max_temp_idx;
 	rmesa->hw.fp.cmd[R300_FP_CNTL2] =
-	  (code->alu_offset << R300_PFS_CNTL_ALU_OFFSET_SHIFT) |
-	  (code->alu_end << R300_PFS_CNTL_ALU_END_SHIFT) |
-	  (code->tex_offset << R300_PFS_CNTL_TEX_OFFSET_SHIFT) |
-	  (code->tex_end << R300_PFS_CNTL_TEX_END_SHIFT);
+	  (0 << R300_PFS_CNTL_ALU_OFFSET_SHIFT) |
+	  ((code->alu.length-1) << R300_PFS_CNTL_ALU_END_SHIFT) |
+	  (0 << R300_PFS_CNTL_TEX_OFFSET_SHIFT) |
+	  ((code->tex.length ? code->tex.length-1 : 0) << R300_PFS_CNTL_TEX_END_SHIFT);
 	/* I just want to say, the way these nodes are stored.. weird.. */
 	for (i = 0, k = (4 - (code->cur_node + 1)); i < 4; i++, k++) {
 		if (i < (code->cur_node + 1)) {
@@ -2515,10 +2536,12 @@ static void r300SetupPixelShader(r300ContextPtr rmesa)
 	R300_STATECHANGE(rmesa, fpp);
 	rmesa->hw.fpp.cmd[R300_FPP_CMD_0] = cmdpacket0(R300_PFS_PARAM_0_X, code->const_nr * 4);
 	for (i = 0; i < code->const_nr; i++) {
-		rmesa->hw.fpp.cmd[R300_FPP_PARAM_0 + 4 * i + 0] = r300PackFloat24(code->constant[i][0]);
-		rmesa->hw.fpp.cmd[R300_FPP_PARAM_0 + 4 * i + 1] = r300PackFloat24(code->constant[i][1]);
-		rmesa->hw.fpp.cmd[R300_FPP_PARAM_0 + 4 * i + 2] = r300PackFloat24(code->constant[i][2]);
-		rmesa->hw.fpp.cmd[R300_FPP_PARAM_0 + 4 * i + 3] = r300PackFloat24(code->constant[i][3]);
+		const GLfloat *constant = get_fragmentprogram_constant(ctx,
+			&fp->mesa_program.Base, code->constant[i]);
+		rmesa->hw.fpp.cmd[R300_FPP_PARAM_0 + 4 * i + 0] = r300PackFloat24(constant[0]);
+		rmesa->hw.fpp.cmd[R300_FPP_PARAM_0 + 4 * i + 1] = r300PackFloat24(constant[1]);
+		rmesa->hw.fpp.cmd[R300_FPP_PARAM_0 + 4 * i + 2] = r300PackFloat24(constant[2]);
+		rmesa->hw.fpp.cmd[R300_FPP_PARAM_0 + 4 * i + 3] = r300PackFloat24(constant[3]);
 	}
 }
 
@@ -2587,10 +2610,12 @@ static void r500SetupPixelShader(r300ContextPtr rmesa)
 
 	R300_STATECHANGE(rmesa, r500fp_const);
 	for (i = 0; i < code->const_nr; i++) {
-		rmesa->hw.r500fp_const.cmd[R300_FPP_PARAM_0 + 4 * i + 0] = r300PackFloat32(code->constant[i][0]);
-		rmesa->hw.r500fp_const.cmd[R300_FPP_PARAM_0 + 4 * i + 1] = r300PackFloat32(code->constant[i][1]);
-		rmesa->hw.r500fp_const.cmd[R300_FPP_PARAM_0 + 4 * i + 2] = r300PackFloat32(code->constant[i][2]);
-		rmesa->hw.r500fp_const.cmd[R300_FPP_PARAM_0 + 4 * i + 3] = r300PackFloat32(code->constant[i][3]);
+		const GLfloat *constant = get_fragmentprogram_constant(ctx,
+			&fp->mesa_program.Base, code->constant[i]);
+		rmesa->hw.r500fp_const.cmd[R300_FPP_PARAM_0 + 4 * i + 0] = r300PackFloat32(constant[0]);
+		rmesa->hw.r500fp_const.cmd[R300_FPP_PARAM_0 + 4 * i + 1] = r300PackFloat32(constant[1]);
+		rmesa->hw.r500fp_const.cmd[R300_FPP_PARAM_0 + 4 * i + 2] = r300PackFloat32(constant[2]);
+		rmesa->hw.r500fp_const.cmd[R300_FPP_PARAM_0 + 4 * i + 3] = r300PackFloat32(constant[3]);
 	}
 	bump_r500fp_const_count(rmesa->hw.r500fp_const.cmd, code->const_nr * 4);
 
