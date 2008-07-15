@@ -17,8 +17,11 @@ ifeq (,$(findstring nostrip,$(DEB_BUILD_OPTIONS)))
 endif
 
 DEB_BUILD_ARCH     ?= $(shell dpkg-architecture -qDEB_BUILD_ARCH)
+DEB_HOST_ARCH     ?= $(shell dpkg-architecture -qDEB_HOST_ARCH)
+DEB_HOST_ARCH_OS     ?= $(shell dpkg-architecture -qDEB_HOST_ARCH_OS)
 DEB_HOST_GNU_TYPE  ?= $(shell dpkg-architecture -qDEB_HOST_GNU_TYPE)
 DEB_BUILD_GNU_TYPE ?= $(shell dpkg-architecture -qDEB_BUILD_GNU_TYPE)
+DEB_HOST_GNU_CPU ?= $(shell dpkg-architecture -qDEB_HOST_GNU_CPU)
 DEB_BUILD_DIR      ?= $(CURDIR)/obj-$(DEB_BUILD_GNU_TYPE)
 ifeq ($(DEB_BUILD_GNU_TYPE), $(DEB_HOST_GNU_TYPE))
         confflags += --build=$(DEB_HOST_GNU_TYPE)
@@ -29,9 +32,6 @@ endif
 export DEB_BUILD_ARCH
 
 # choose which configurations to build
-SWX11_GLU_CONFIGS =
-DRI_CONFIGS =
-
 include debian/scripts/choose-configs
 
 # build the following configurations by default
@@ -52,63 +52,104 @@ ARCH_INSTALL_STAMPS = $(addprefix $(STAMP)-install-, $(CONFIGS))
 QUILT_STAMPFN = $(STAMP_DIR)/patch
 include /usr/share/quilt/quilt.make
 
-confflags-common = --disable-glu --disable-glut --disable-glw \
-	     CFLAGS="$(CFLAGS)"
+confflags-common = \
+	--disable-glu \
+	--disable-glut \
+	--disable-glw \
+	CFLAGS="$(CFLAGS)"
 
-confflags-dri = --with-demos=xdemos \
-	     --libdir=/usr/lib/glx \
-	     --with-dri-driverdir=/usr/lib/dri \
-	     --enable-glx-tls \
-	     $(confflags-common)
+DRI_DRIVERS = swrast
 
-confflags-osmesa = --with-driver=osmesa \
-	     --with-demos= \
-	     $(confflags-common)
+# hurd doesn't do direct rendering
+ifeq ($(DEB_HOST_ARCH_OS), hurd)
+	DIRECT_RENDERING = --disable-driglx-direct
+else
+	DIRECT_RENDERING = --enable-driglx-direct
+	DRI_DRIVERS += mach64 mga r128 r200 r300 radeon s3v savage tdfx trident
+endif
 
-confflags-osmesa-static = --with-driver=osmesa \
-	     --enable-static \
-	     --with-demos= \
-	     $(confflags-common)
+ifeq ($(DEB_HOST_GNU_CPU), i486)
+	DRI_DRIVERS += i810 i915 i965 sis unichrome
+else ifeq ($(DEB_HOST_GNU_CPU), x86_64)
+	DRI_DRIVERS += i915 i965 sis unichrome
+else ifeq ($(DEB_HOST_ARCH), sparc)
+	DRI_DRIVERS += ffb
+endif
 
-confflags-osmesa16 = --with-driver=osmesa --with-osmesa-bits=16 \
-	     --with-demos= \
-	     $(confflags-common)
+confflags-dri = \
+	--with-driver=dri \
+	--with-dri-drivers="$(DRI_DRIVERS)" \
+	--with-demos=xdemos \
+	--libdir=/usr/lib/glx \
+	--with-dri-driverdir=/usr/lib/dri \
+	--enable-glx-tls \
+	$(DIRECT_RENDERING) \
+	$(confflags-common)
 
-confflags-osmesa16-static = --with-driver=osmesa --with-osmesa-bits=16 \
-	     --enable-static \
-	     --with-demos= \
-	     $(confflags-common)
+confflags-osmesa = \
+	--with-driver=osmesa \
+	--with-demos= \
+	$(confflags-common)
 
-confflags-osmesa32 = --with-driver=osmesa --with-osmesa-bits=32 \
-	     --with-demos= \
-	     $(confflags-common)
+confflags-osmesa-static = \
+	--with-driver=osmesa \
+	--enable-static \
+	--with-demos= \
+	$(confflags-common)
 
-confflags-osmesa32-static = --with-driver=osmesa --with-osmesa-bits=32 \
-	     --enable-static \
-	     --with-demos= \
-	     $(confflags-common)
+confflags-osmesa16 = \
+	--with-driver=osmesa \
+	--with-osmesa-bits=16 \
+	--with-demos= \
+	$(confflags-common)
 
-confflags-swx11+glu = --with-driver=xlib \
-	     --with-demos= \
-	     --disable-glut \
-	     --disable-glw \
-	     CFLAGS="$(CFLAGS)"
+confflags-osmesa16-static = \
+	--with-driver=osmesa \
+	--with-osmesa-bits=16 \
+	--enable-static \
+	--with-demos= \
+	$(confflags-common)
 
-confflags-swx11+glu-static = --with-driver=xlib \
-	     --enable-static \
-	     --with-demos= \
-	     --disable-glut \
-	     --disable-glw \
-	     CFLAGS="$(CFLAGS)"
+confflags-osmesa32 = \
+	--with-driver=osmesa \
+	--with-osmesa-bits=32 \
+	--with-demos= \
+	$(confflags-common)
 
-confflags-swx11+glu-i386-i686 = --with-driver=xlib \
-	     --with-demos= \
-	     --disable-glut \
-	     --disable-glw \
-	     --libdir=/usr/lib/i686/cmov \
-	     CFLAGS="$(CFLAGS) -march=i686"
+confflags-osmesa32-static = \
+	--with-driver=osmesa \
+	--with-osmesa-bits=32 \
+	--enable-static \
+	--with-demos= \
+	$(confflags-common)
 
-autoreconf:
+confflags-swx11+glu = \
+	--with-driver=xlib \
+	--disable-gl-osmesa \
+	--with-demos= \
+	--disable-glut \
+	--disable-glw \
+	CFLAGS="$(CFLAGS)"
+
+confflags-swx11+glu-static = \
+	--with-driver=xlib \
+	--disable-gl-osmesa \
+	--enable-static \
+	--with-demos= \
+	--disable-glut \
+	--disable-glw \
+	CFLAGS="$(CFLAGS)"
+
+confflags-swx11+glu-i386-i686 = \
+	--with-driver=xlib \
+	--disable-gl-osmesa \
+	--with-demos= \
+	--disable-glut \
+	--disable-glw \
+	--libdir=/usr/lib/i686/cmov \
+	CFLAGS="$(CFLAGS) -march=i686"
+
+configure: $(QUILT_STAMPFN) configure.ac
 	autoreconf -vfi
 
 # list the configurations that will built
@@ -121,9 +162,9 @@ $(STAMP_DIR):
 
 $(QUILT_STAMPFN): $(STAMP_DIR)
 
-build: patch autoreconf $(BUILD_STAMPS)
+build: $(BUILD_STAMPS)
 
-$(STAMP)-build-%:
+$(STAMP)-build-%: configure
 	dh_testdir
 
 	mkdir -p $(DEB_BUILD_DIR)/$*
@@ -141,7 +182,7 @@ pre-install:
 	dh_testdir
 	dh_testroot
 	dh_clean -k
-	rm -rf $(INSTALL_STAMPS)
+	rm -rf $(ARCH_INSTALL_STAMPS)
 
 install: pre-install $(ARCH_INSTALL_STAMPS)
 
@@ -173,7 +214,7 @@ clean: unpatch
 	dh_clean
 
 # Build architecture-independent files here.
-binary-indep: build install
+binary-indep: install
 	dh_testdir
 	dh_testroot
 	dh_installchangelogs -i
