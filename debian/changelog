@@ -1,3 +1,32 @@
+mesa (7.1~rc3-1ubuntu1) intrepid; urgency=low
+
+  * merged with debian-experimental
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Tue, 15 Jul 2008 15:07:41 +0100
+
+mesa (7.1~rc3-1) experimental; urgency=low
+
+  [ Julien Cristau ]
+  * New upstream release candidate (updated to git commit 4fab47b1).
+  * Build against libdrm >= 2.3.1.
+  * 04_osmesa_version.diff: fix libOSMesa versioning, to revert accidental
+    SONAME bump.
+
+  [ Timo Aaltonen ]
+  * Refresh patches, and drop obsolete 00_create-libdir.patch and
+    01_fix-makefile.patch.
+  * Build-depend on x11proto-dri2-dev.
+  * Drop mesa-swx11-source.
+  * Add dri_interface.h to mesa-common-dev.
+  * Add gl.pc to libgl1-mesa-dev
+  * rules: Replace the old build system with the new autotools-based 
+    system.
+  * Run autoreconf before building the various flavours..
+  * Add automake & autoconf to build-deps.
+  * Use --enable-glx-tls for dri.
+
+ -- Julien Cristau <jcristau@debian.org>  Sun, 13 Jul 2008 19:41:42 +0200
+
 mesa (7.1~rc1-0ubuntu2) intrepid; urgency=low
 
   * Merge with debian git, fixes FTBFS on sparc/hppa/ia64.
@@ -30,31 +59,6 @@ mesa (7.1~rc1-0ubuntu1) intrepid; urgency=low
   * Unexport LDFLAGS (amd64 FTBFS).
 
  -- Timo Aaltonen <tepsipakki@ubuntu.com>  Fri, 04 Jul 2008 13:19:57 +0300
-
-mesa (7.1~rc1-1) UNRELEASED; urgency=low
-
-  [ Julien Cristau ]
-  * New upstream release candidate.
-  * Build against libdrm >= 2.3.1.
-  * 04_osmesa_version.diff: fix libOSMesa versioning, to revert accidental
-    SONAME bump.
-
-  [ Timo Aaltonen ]
-  * Refresh patches, and drop obsolete 00_create-libdir.patch and
-    01_fix-makefile.patch.
-  * Build-depend on x11proto-dri2-dev.
-  * Drop mesa-swx11-source.
-  * Add dri_interface.h to mesa-common-dev.
-  * Add gl.pc to libgl1-mesa-dev
-  * rules: Replace the old build system with the new autotools-based 
-    system.
-  * Run autoreconf before building the various flavours..
-  * 01_fix-installdir.patch: installdir handling was broken, this patch
-    from upstream fixes it.
-  * Add automake & autoconf to build-deps.
-  * Use --enable-glx-tls for dri.
-
- -- Timo Aaltonen <tepsipakki@ubuntu.com>  Fri, 04 Jul 2008 10:59:12 +0300
 
 mesa (7.0.3-4) unstable; urgency=low
 
