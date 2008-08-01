@@ -1,3 +1,9 @@
+mesa (7.1~rc3-1ubuntu2) intrepid; urgency=low
+
+  * 102_fix-fdo-14441.diff: fix tfp on i965. (LP: #245888)
+
+ -- Timo Aaltonen <tepsipakki@ubuntu.com>  Fri, 01 Aug 2008 16:08:01 +0300
+
 mesa (7.1~rc3-1ubuntu1) intrepid; urgency=low
 
   * merged with debian-experimental
