@@ -1,3 +1,9 @@
+mesa (7.1~rc3-2) UNRELEASED; urgency=low
+
+  * Add parallel build support.
+
+ -- Julien Cristau <jcristau@debian.org>  Mon, 04 Aug 2008 09:36:31 +0200
+
 mesa (7.1~rc3-1) experimental; urgency=low
 
   [ Julien Cristau ]

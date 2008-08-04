@@ -6,13 +6,14 @@
 #export DH_VERBOSE=1
 
 CFLAGS = -Wall -g
-ifneq (,$(findstring noopt,$(DEB_BUILD_OPTIONS)))
+ifneq (,$(filter noopt,$(DEB_BUILD_OPTIONS)))
 	CFLAGS += -O0
 else
 	CFLAGS += -O2
 endif
-ifeq (,$(findstring nostrip,$(DEB_BUILD_OPTIONS)))
-	INSTALL_PROGRAM += -s
+ifneq (,$(filter parallel=%,$(DEB_BUILD_OPTIONS)))
+	NUMJOBS = $(patsubst parallel=%,%,$(filter parallel=%,$(DEB_BUILD_OPTIONS)))
+	MAKEFLAGS += -j$(NUMJOBS)
 endif
 
 DEB_BUILD_ARCH     ?= $(shell dpkg-architecture -qDEB_BUILD_ARCH)
@@ -180,9 +181,9 @@ pre-install:
 	dh_clean -k
 	rm -rf $(ARCH_INSTALL_STAMPS)
 
-install: pre-install $(ARCH_INSTALL_STAMPS)
+install: $(ARCH_INSTALL_STAMPS)
 
-$(STAMP)-install-%: $(STAMP)-build-%
+$(STAMP)-install-%: $(STAMP)-build-% pre-install
 	# Add here commands to install the package into debian/tmp
 	dh_installdirs
 	
