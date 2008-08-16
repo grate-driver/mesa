@@ -624,7 +624,10 @@ dnl If $with_dri_drivers is yes, directories will be added through
 dnl platform checks
 DRI_DIRS=""
 case "$with_dri_drivers" in
-no|yes) ;;
+no) ;;
+yes)
+    DRI_DIRS="yes"
+    ;;
 *)
     # verify the requested driver directories exist
     dri_drivers=`IFS=', '; echo $with_dri_drivers`
@@ -670,7 +673,7 @@ if test "$mesa_driver" = dri; then
             # converted to use the new interface.  i810 are missing
             # because there is no x86-64 system where they could *ever*
             # be used.
-            if test "x$DRI_DIRS" = x; then
+            if test "x$DRI_DIRS" = "xyes"; then
                 DRI_DIRS="i915 i965 mach64 mga r128 r200 r300 radeon \
                     savage tdfx unichrome swrast"
             fi
@@ -678,13 +681,13 @@ if test "$mesa_driver" = dri; then
         powerpc*)
             # Build only the drivers for cards that exist on PowerPC.
             # At some point MGA will be added, but not yet.
-            if test "x$DRI_DIRS" = x; then
+            if test "x$DRI_DIRS" = "xyes"; then
                 DRI_DIRS="mach64 r128 r200 r300 radeon tdfx swrast"
             fi
             ;;
         sparc*)
             # Build only the drivers for cards that exist on sparc`
-            if test "x$DRI_DIRS" = x; then
+            if test "x$DRI_DIRS" = "xyes"; then
                 DRI_DIRS="mach64 r128 r200 r300 radeon ffb swrast"
             fi
             ;;
@@ -703,7 +706,7 @@ if test "$mesa_driver" = dri; then
 
         # ffb and gamma are missing because they have not been converted
         # to use the new interface.
-        if test "x$DRI_DIRS" = x; then
+        if test "x$DRI_DIRS" = "xyes"; then
             DRI_DIRS="i810 i915 i965 mach64 mga r128 r200 r300 radeon tdfx \
                 unichrome savage sis swrast"
         fi
@@ -718,7 +721,7 @@ if test "$mesa_driver" = dri; then
     esac
 
     # default drivers
-    if test "x$DRI_DIRS" = x; then
+    if test "x$DRI_DIRS" = "xyes"; then
         DRI_DIRS="i810 i915 i965 mach64 mga r128 r200 r300 radeon s3v \
             savage sis tdfx trident unichrome ffb swrast"
     fi
@@ -878,6 +881,12 @@ if test "x$enable_glw" = xyes && test "$mesa_driver" = osmesa; then
     AC_MSG_WARN([Disabling GLw since the driver is OSMesa])
     enable_glw=no
 fi
+AC_ARG_ENABLE([motif],
+    [AS_HELP_STRING([--enable-motif],
+        [use Motif widgets in GLw @<:@default=disabled@:>@])],
+    [enable_motif="$enableval"],
+    [enable_motif=no])
+
 if test "x$enable_glw" = xyes; then
     SRC_DIRS="$SRC_DIRS glw"
     if test "$x11_pkgconfig" = yes; then
@@ -885,7 +894,25 @@ if test "x$enable_glw" = xyes; then
         GLW_LIB_DEPS="$GLW_LIBS"
     else
         # should check these...
-        GLW_LIB_DEPS="$X_LIBS -lX11 -lXt"
+        GLW_LIB_DEPS="$X_LIBS -lXt -lX11"
+    fi
+
+    GLW_SOURCES="GLwDrawA.c"
+    MOTIF_CFLAGS=
+    if test "x$enable_motif" = xyes; then
+        GLW_SOURCES="$GLW_SOURCES GLwMDrawA.c"
+        AC_PATH_PROG([MOTIF_CONFIG], [motif-config], [no])
+        if test "x$MOTIF_CONFIG" != xno; then
+            MOTIF_CFLAGS=`$MOTIF_CONFIG --cflags`
+            MOTIF_LIBS=`$MOTIF_CONFIG --libs`
+        else
+            AC_CHECK_HEADER([Xm/PrimitiveP.h], [],
+                [AC_MSG_ERROR([Can't locate Motif headers])])
+            AC_CHECK_LIB([Xm], [XmGetPixmap], [MOTIF_LIBS="-lXm"],
+                [AC_MSG_ERROR([Can't locate Motif Xm library])])
+        fi
+        # MOTIF_LIBS is prepended to GLW_LIB_DEPS since Xm needs Xt/X11
+        GLW_LIB_DEPS="$MOTIF_LIBS $GLW_LIB_DEPS"
     fi
 
     # If static, empty GLW_LIB_DEPS and add libs for programs to link
@@ -900,6 +927,8 @@ if test "x$enable_glw" = xyes; then
 fi
 AC_SUBST([GLW_LIB_DEPS])
 AC_SUBST([GLW_MESA_DEPS])
+AC_SUBST([GLW_SOURCES])
+AC_SUBST([MOTIF_CFLAGS])
 
 dnl
 dnl GLUT configuration
@@ -1015,7 +1044,11 @@ fi
 if test "$mesa_driver" = dri; then
     # cleanup the drivers var
     dri_dirs=`echo $DRI_DIRS | $SED 's/^ *//;s/  */ /;s/ *$//'`
+if test "x$DRI_DIRS" = x; then
+    echo "        DRI drivers:     no"
+else
     echo "        DRI drivers:     $dri_dirs"
+fi
     echo "        DRI driver dir:  $DRI_DRIVER_INSTALL_DIR"
     echo "        TTM API support: $ttmapi"
 fi
@@ -1025,7 +1058,7 @@ echo ""
 echo "        Shared libs:     $enable_shared"
 echo "        Static libs:     $enable_static"
 echo "        GLU:             $enable_glu"
-echo "        GLw:             $enable_glw"
+echo "        GLw:             $enable_glw (Motif: $enable_motif)"
 echo "        glut:            $enable_glut"
 
 dnl Programs

@@ -54,7 +54,6 @@ static const struct dri_extension i915_extensions[] = {
    {"GL_ARB_depth_texture", NULL},
    {"GL_ARB_fragment_program", NULL},
    {"GL_ARB_shadow", NULL},
-   {"GL_ARB_texture_env_crossbar", NULL},
    {"GL_ARB_texture_non_power_of_two", NULL},
    {"GL_EXT_shadow_funcs", NULL},
    /* ARB extn won't work if not enabled */
@@ -138,6 +137,9 @@ i915CreateContext(const __GLcontextModes * mesaVis,
    /* Install the customized pipeline: */
    _tnl_destroy_pipeline(ctx);
    _tnl_install_pipeline(ctx, intel_pipeline);
+
+   if (intel->no_rast)
+      FALLBACK(intel, INTEL_FALLBACK_USER, 1);
 
    ctx->Const.MaxTextureUnits = I915_TEX_UNITS;
    ctx->Const.MaxTextureImageUnits = I915_TEX_UNITS;
