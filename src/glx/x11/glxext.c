@@ -156,21 +156,27 @@ static void FreeScreenConfigs(__GLXdisplayPrivate *priv)
     for (i = 0; i < screens; i++, psc++) {
 	if (psc->configs) {
 	    _gl_context_modes_destroy( psc->configs );
-	    if(psc->effectiveGLXexts)
+	    if (psc->effectiveGLXexts)
 		Xfree(psc->effectiveGLXexts);
-
 	    psc->configs = NULL;	/* NOTE: just for paranoia */
 	}
-	Xfree((char*) psc->serverGLXexts);
+        if (psc->visuals) {
+            _gl_context_modes_destroy( psc->visuals );
+            psc->visuals = NULL;  /* NOTE: just for paranoia */
+        }
+ 	Xfree((char*) psc->serverGLXexts);
 
 #ifdef GLX_DIRECT_RENDERING
 	if (psc->driScreen) {
 	    psc->driScreen->destroyScreen(psc);
 	    __glxHashDestroy(psc->drawHash);
+            XFree(psc->driScreen);
+            psc->driScreen = NULL;
 	}
 #endif
     }
     XFree((char*) priv->screenConfigs);
+    priv->screenConfigs = NULL;
 }
 
 /*

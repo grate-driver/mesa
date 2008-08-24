@@ -125,9 +125,12 @@ intel_finalize_mipmap_tree(struct intel_context *intel, GLuint unit)
    struct intel_texture_object *intelObj = intel_texture_object(tObj);
    int comp_byte = 0;
    int cpp;
+
    GLuint face, i;
    GLuint nr_faces = 0;
    struct intel_texture_image *firstImage;
+
+   GLboolean need_flush = GL_FALSE;
 
    /* We know/require this is true by now: 
     */
@@ -224,63 +227,88 @@ intel_finalize_mipmap_tree(struct intel_context *intel, GLuint unit)
           */
          if (intelObj->mt != intelImage->mt) {
             copy_image_data_to_tree(intel, intelObj, intelImage);
+	    need_flush = GL_TRUE;
          }
       }
    }
 
+#ifdef I915
+   /* XXX: what is this flush about?
+    * On 965, it causes a batch flush in the middle of the state relocation
+    * emits, which means that the eventual rendering doesn't have all of the
+    * required relocations in place.
+    */
+   if (need_flush)
+      intel_batchbuffer_flush(intel->batch);
+#endif
+
    return GL_TRUE;
 }
 
+void
+intel_tex_map_level_images(struct intel_context *intel,
+			   struct intel_texture_object *intelObj,
+			   int level)
+{
+   GLuint nr_faces = (intelObj->base.Target == GL_TEXTURE_CUBE_MAP) ? 6 : 1;
+   GLuint face;
 
+   for (face = 0; face < nr_faces; face++) {
+      struct intel_texture_image *intelImage =
+	 intel_texture_image(intelObj->base.Image[face][level]);
+
+      if (intelImage->mt) {
+	 intelImage->base.Data =
+	    intel_miptree_image_map(intel,
+				    intelImage->mt,
+				    intelImage->face,
+				    intelImage->level,
+				    &intelImage->base.RowStride,
+				    intelImage->base.ImageOffsets);
+	 /* convert stride to texels, not bytes */
+	 intelImage->base.RowStride /= intelImage->mt->cpp;
+	 /* intelImage->base.ImageStride /= intelImage->mt->cpp; */
+      }
+   }
+}
+
+void
+intel_tex_unmap_level_images(struct intel_context *intel,
+			     struct intel_texture_object *intelObj,
+			     int level)
+{
+   GLuint nr_faces = (intelObj->base.Target == GL_TEXTURE_CUBE_MAP) ? 6 : 1;
+   GLuint face;
+
+   for (face = 0; face < nr_faces; face++) {
+      struct intel_texture_image *intelImage =
+	 intel_texture_image(intelObj->base.Image[face][level]);
+
+      if (intelImage->mt) {
+	 intel_miptree_image_unmap(intel, intelImage->mt);
+	 intelImage->base.Data = NULL;
+      }
+   }
+}
 
 void
 intel_tex_map_images(struct intel_context *intel,
                      struct intel_texture_object *intelObj)
 {
-   GLuint nr_faces = (intelObj->base.Target == GL_TEXTURE_CUBE_MAP) ? 6 : 1;
-   GLuint face, i;
+   int i;
 
    DBG("%s\n", __FUNCTION__);
 
-   for (face = 0; face < nr_faces; face++) {
-      for (i = intelObj->firstLevel; i <= intelObj->lastLevel; i++) {
-         struct intel_texture_image *intelImage =
-            intel_texture_image(intelObj->base.Image[face][i]);
-
-         if (intelImage->mt) {
-            intelImage->base.Data =
-               intel_miptree_image_map(intel,
-                                       intelImage->mt,
-                                       intelImage->face,
-                                       intelImage->level,
-                                       &intelImage->base.RowStride,
-                                       intelImage->base.ImageOffsets);
-            /* convert stride to texels, not bytes */
-            intelImage->base.RowStride /= intelImage->mt->cpp;
-/*             intelImage->base.ImageStride /= intelImage->mt->cpp; */
-         }
-      }
-   }
+   for (i = intelObj->firstLevel; i <= intelObj->lastLevel; i++)
+      intel_tex_map_level_images(intel, intelObj, i);
 }
-
-
 
 void
 intel_tex_unmap_images(struct intel_context *intel,
                        struct intel_texture_object *intelObj)
 {
-   GLuint nr_faces = (intelObj->base.Target == GL_TEXTURE_CUBE_MAP) ? 6 : 1;
-   GLuint face, i;
+   int i;
 
-   for (face = 0; face < nr_faces; face++) {
-      for (i = intelObj->firstLevel; i <= intelObj->lastLevel; i++) {
-         struct intel_texture_image *intelImage =
-            intel_texture_image(intelObj->base.Image[face][i]);
-
-         if (intelImage->mt) {
-            intel_miptree_image_unmap(intel, intelImage->mt);
-            intelImage->base.Data = NULL;
-         }
-      }
-   }
+   for (i = intelObj->firstLevel; i <= intelObj->lastLevel; i++)
+      intel_tex_unmap_level_images(intel, intelObj, i);
 }
