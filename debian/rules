@@ -47,7 +47,7 @@ CONFIGS = $(SWX11_GLU_CONFIGS) \
 STAMP_DIR = debian/stamp
 STAMP = $(STAMP_DIR)/$(DEB_BUILD_GNU_TYPE)
 BUILD_STAMPS = $(addprefix $(STAMP)-build-, $(CONFIGS))
-ARCH_INSTALL_STAMPS = $(addprefix $(STAMP)-install-, $(CONFIGS))
+INSTALL_TARGETS = $(addprefix install-, $(CONFIGS))
 
 QUILT_STAMPFN = $(STAMP_DIR)/patch
 include /usr/share/quilt/quilt.make
@@ -153,11 +153,12 @@ configure: $(QUILT_STAMPFN) configure.ac
 configs:
 	@echo Building the following configurations: $(CONFIGS)
 
-$(STAMP_DIR):
+$(STAMP_DIR)/stamp:
 	dh_testdir
-	mkdir -p $@
+	mkdir -p $(STAMP_DIR)
+	>$@
 
-$(QUILT_STAMPFN): $(STAMP_DIR)
+$(QUILT_STAMPFN): $(STAMP_DIR)/stamp
 
 build: $(BUILD_STAMPS)
 
@@ -175,20 +176,16 @@ $(STAMP)-build-%: configure
 
 	touch $@
 
-pre-install:
+install:
+	# Add here commands to install the package into debian/tmp
 	dh_testdir
 	dh_testroot
 	dh_clean -k
-	rm -rf $(ARCH_INSTALL_STAMPS)
-
-install: $(ARCH_INSTALL_STAMPS)
-
-$(STAMP)-install-%: $(STAMP)-build-% pre-install
-	# Add here commands to install the package into debian/tmp
 	dh_installdirs
-	
+	$(MAKE) -f debian/rules $(INSTALL_TARGETS)
+
+install-%: $(STAMP)-build-%
 	cd $(DEB_BUILD_DIR)/$* && $(MAKE) DESTDIR=$(CURDIR)/debian/tmp install
-	touch $@
 
 clean: unpatch
 	dh_testdir
@@ -225,7 +222,7 @@ binary-indep: install
 	dh_builddeb -i
 
 # Build architecture-dependent files here.
-binary-arch: build install
+binary-arch: install
 	dh_testdir
 	dh_testroot
 	dh_installchangelogs -s
