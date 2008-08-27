@@ -1,4 +1,4 @@
-mesa (7.1-1ubuntu1) UNRELEASED; urgency=low
+mesa (7.1-1ubuntu1) intrepid; urgency=low
 
   * Merge from git.debian.org, remaining changes:
     - debian/control
@@ -21,7 +21,7 @@ mesa (7.1-1ubuntu1) UNRELEASED; urgency=low
     - debian/patches
       + Add 101_ubuntu_hidden_glname.patch.
 
- -- Timo Aaltonen <tepsipakki@ubuntu.com>  Thu, 28 Aug 2008 00:44:22 +0300
+ -- Timo Aaltonen <tepsipakki@ubuntu.com>  Thu, 28 Aug 2008 01:18:35 +0300
 
 mesa (7.1-1) experimental; urgency=low
 
