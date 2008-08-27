@@ -1,3 +1,10 @@
+mesa (7.1~rc3-1ubuntu4) intrepid; urgency=low
+
+  * debian/control: Add Pre-Depends: dpkg (>= 1.14.12ubuntu3) to ensure dpkg
+    support for lzma.
+
+ -- Martin Pitt <martin.pitt@ubuntu.com>  Sun, 11 May 2008 10:42:54 +0200
+
 mesa (7.1~rc3-1ubuntu3) intrepid; urgency=low
 
   * Build .debs with lzma compression to reduce libgl1-mesa-dri from 13.2 to
