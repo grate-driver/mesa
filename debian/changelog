@@ -1,11 +1,11 @@
-mesa (7.1-1) UNRELEASED; urgency=low
+mesa (7.1-1) experimental; urgency=low
 
   * Add parallel build support.
   * New upstream development release
     + libGLU now only exports its public interface (closes: #319388)
   * Some more parallel build updates.
 
- -- Julien Cristau <jcristau@debian.org>  Mon, 04 Aug 2008 09:36:31 +0200
+ -- Julien Cristau <jcristau@debian.org>  Wed, 27 Aug 2008 19:52:24 +0200
 
 mesa (7.1~rc3-1) experimental; urgency=low
 
