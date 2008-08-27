@@ -1,3 +1,10 @@
+mesa (7.1~rc3-1ubuntu3) intrepid; urgency=low
+
+  * Build .debs with lzma compression to reduce libgl1-mesa-dri from 13.2 to
+    2.8 MB.
+
+ -- Martin Pitt <martin.pitt@ubuntu.com>  Tue, 12 Aug 2008 09:31:01 +0200
+
 mesa (7.1~rc3-1ubuntu2) intrepid; urgency=low
 
   * 102_fix-fdo-14441.diff: fix tfp on i965. (LP: #245888)
