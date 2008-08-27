@@ -31,6 +31,20 @@
 #include "radeon_program_alu.h"
 
 
+static struct prog_src_register shadow_ambient(struct gl_program *program, int tmu)
+{
+	gl_state_index fail_value_tokens[STATE_LENGTH] = {
+		STATE_INTERNAL, STATE_SHADOW_AMBIENT, 0, 0, 0
+	};
+	struct prog_src_register reg = { 0, };
+
+	fail_value_tokens[2] = tmu;
+	reg.File = PROGRAM_STATE_VAR;
+	reg.Index = _mesa_add_state_reference(program->Parameters, fail_value_tokens);
+	reg.Swizzle = SWIZZLE_WWWW;
+	return reg;
+}
+
 /**
  * Transform TEX, TXP, TXB, and KIL instructions in the following way:
  *  - premultiply texture coordinates for RECT
@@ -63,17 +77,26 @@ static GLboolean transform_TEX(
 			tgt = radeonAppendInstructions(t->Program, 1);
 
 			tgt->Opcode = OPCODE_MOV;
-			tgt->DstReg.File = inst.DstReg.File;
-			tgt->DstReg.Index = inst.DstReg.Index;
-			tgt->DstReg.WriteMask = inst.DstReg.WriteMask;
-			tgt->SrcReg[0].File = PROGRAM_BUILTIN;
-			tgt->SrcReg[0].Swizzle = comparefunc == GL_ALWAYS ? SWIZZLE_1111 : SWIZZLE_0000;
+			tgt->DstReg = inst.DstReg;
+			if (comparefunc == GL_ALWAYS) {
+				tgt->SrcReg[0].File = PROGRAM_BUILTIN;
+				tgt->SrcReg[0].Swizzle = SWIZZLE_1111;
+			} else {
+				tgt->SrcReg[0] = shadow_ambient(t->Program, inst.TexSrcUnit);
+			}
 			return GL_TRUE;
 		}
 
 		inst.DstReg.File = PROGRAM_TEMPORARY;
 		inst.DstReg.Index = radeonFindFreeTemporary(t);
 		inst.DstReg.WriteMask = WRITEMASK_XYZW;
+	} else if (inst.Opcode != OPCODE_KIL && inst.DstReg.File != PROGRAM_TEMPORARY) {
+		int tempreg = radeonFindFreeTemporary(t);
+
+		inst.DstReg.File = PROGRAM_TEMPORARY;
+		inst.DstReg.Index = tempreg;
+		inst.DstReg.WriteMask = WRITEMASK_XYZW;
+		destredirect = GL_TRUE;
 	}
 
 	tgt = radeonAppendInstructions(t->Program, 1);
@@ -84,6 +107,7 @@ static GLboolean transform_TEX(
 		GLuint comparefunc = GL_NEVER + compiler->fp->state.unit[inst.TexSrcUnit].texture_compare_func;
 		GLuint depthmode = compiler->fp->state.unit[inst.TexSrcUnit].depth_texture_mode;
 		int rcptemp = radeonFindFreeTemporary(t);
+		int pass, fail;
 
 		tgt = radeonAppendInstructions(t->Program, 3);
 
@@ -121,16 +145,18 @@ static GLboolean transform_TEX(
 		tgt[2].DstReg = orig_inst->DstReg;
 		tgt[2].SrcReg[0].File = PROGRAM_TEMPORARY;
 		tgt[2].SrcReg[0].Index = tgt[1].DstReg.Index;
-		tgt[2].SrcReg[1].File = PROGRAM_BUILTIN;
-		tgt[2].SrcReg[2].File = PROGRAM_BUILTIN;
 
 		if (comparefunc == GL_LESS || comparefunc == GL_GREATER) {
-			tgt[2].SrcReg[1].Swizzle = SWIZZLE_1111;
-			tgt[2].SrcReg[2].Swizzle = SWIZZLE_0000;
+			pass = 1;
+			fail = 2;
 		} else {
-			tgt[2].SrcReg[1].Swizzle = SWIZZLE_0000;
-			tgt[2].SrcReg[2].Swizzle = SWIZZLE_1111;
+			pass = 2;
+			fail = 1;
 		}
+
+		tgt[2].SrcReg[pass].File = PROGRAM_BUILTIN;
+		tgt[2].SrcReg[pass].Swizzle = SWIZZLE_1111;
+		tgt[2].SrcReg[fail] = shadow_ambient(t->Program, inst.TexSrcUnit);
 	} else if (destredirect) {
 		tgt = radeonAppendInstructions(t->Program, 1);
 
@@ -262,44 +288,95 @@ static GLboolean is_native_swizzle(GLuint opcode, struct prog_src_register reg)
 	GLuint relevant;
 	int i;
 
-	if (reg.Abs)
+	if (opcode == OPCODE_TEX ||
+	    opcode == OPCODE_TXB ||
+	    opcode == OPCODE_TXP ||
+	    opcode == OPCODE_KIL) {
+		if (reg.Abs)
+			return GL_FALSE;
+
+		if (reg.NegateAbs)
+			reg.NegateBase ^= 15;
+
+		if (opcode == OPCODE_KIL) {
+			if (reg.Swizzle != SWIZZLE_NOOP)
+				return GL_FALSE;
+		} else {
+			for(i = 0; i < 4; ++i) {
+				GLuint swz = GET_SWZ(reg.Swizzle, i);
+				if (swz == SWIZZLE_NIL) {
+					reg.NegateBase &= ~(1 << i);
+					continue;
+				}
+				if (swz >= 4)
+					return GL_FALSE;
+			}
+		}
+
+		if (reg.NegateBase)
+			return GL_FALSE;
+
 		return GL_TRUE;
+	} else if (opcode == OPCODE_DDX || opcode == OPCODE_DDY) {
+		/* DDX/MDH and DDY/MDV explicitly ignore incoming swizzles;
+		 * if it doesn't fit perfectly into a .xyzw case... */
+		if (reg.Swizzle == SWIZZLE_NOOP && !reg.Abs
+				&& !reg.NegateBase && !reg.NegateAbs)
+			return GL_TRUE;
 
-	relevant = 0;
-	for(i = 0; i < 3; ++i) {
-		GLuint swz = GET_SWZ(reg.Swizzle, i);
-		if (swz != SWIZZLE_NIL && swz != SWIZZLE_ZERO)
-			relevant |= 1 << i;
-	}
-	if ((reg.NegateBase & relevant) && ((reg.NegateBase & relevant) != relevant))
 		return GL_FALSE;
+	} else {
+		/* ALU instructions support almost everything */
+		if (reg.Abs)
+			return GL_TRUE;
 
-	return GL_TRUE;
+		relevant = 0;
+		for(i = 0; i < 3; ++i) {
+			GLuint swz = GET_SWZ(reg.Swizzle, i);
+			if (swz != SWIZZLE_NIL && swz != SWIZZLE_ZERO)
+				relevant |= 1 << i;
+		}
+		if ((reg.NegateBase & relevant) && ((reg.NegateBase & relevant) != relevant))
+			return GL_FALSE;
+
+		return GL_TRUE;
+	}
 }
 
 /**
- * Implement a non-native swizzle. This function assumes that
- * is_native_swizzle returned true.
+ * Implement a MOV with a potentially non-native swizzle.
+ *
+ * The only thing we *cannot* do in an ALU instruction is per-component
+ * negation. Therefore, we split the MOV into two instructions when necessary.
  */
 static void nqssadce_build_swizzle(struct nqssadce_state *s,
 	struct prog_dst_register dst, struct prog_src_register src)
 {
 	struct prog_instruction *inst;
+	GLuint negatebase[2] = { 0, 0 };
+	int i;
 
-	_mesa_insert_instructions(s->Program, s->IP, 2);
+	for(i = 0; i < 4; ++i) {
+		GLuint swz = GET_SWZ(src.Swizzle, i);
+		if (swz == SWIZZLE_NIL)
+			continue;
+		negatebase[GET_BIT(src.NegateBase, i)] |= 1 << i;
+	}
+
+	_mesa_insert_instructions(s->Program, s->IP, (negatebase[0] ? 1 : 0) + (negatebase[1] ? 1 : 0));
 	inst = s->Program->Instructions + s->IP;
 
-	inst[0].Opcode = OPCODE_MOV;
-	inst[0].DstReg = dst;
-	inst[0].DstReg.WriteMask &= src.NegateBase;
-	inst[0].SrcReg[0] = src;
+	for(i = 0; i <= 1; ++i) {
+		if (!negatebase[i])
+			continue;
 
-	inst[1].Opcode = OPCODE_MOV;
-	inst[1].DstReg = dst;
-	inst[1].DstReg.WriteMask &= ~src.NegateBase;
-	inst[1].SrcReg[0] = src;
-
-	s->IP += 2;
+		inst->Opcode = OPCODE_MOV;
+		inst->DstReg = dst;
+		inst->DstReg.WriteMask = negatebase[i];
+		inst->SrcReg[0] = src;
+		inst++;
+		s->IP++;
+	}
 }
 
 static GLuint build_dtm(GLuint depthmode)
@@ -370,13 +447,14 @@ void r500TranslateFragmentShader(r300ContextPtr r300,
 
 		insert_WPOS_trailer(&compiler);
 
-		struct radeon_program_transformation transformations[3] = {
+		struct radeon_program_transformation transformations[] = {
 			{ &transform_TEX, &compiler },
 			{ &radeonTransformALU, 0 },
+			{ &radeonTransformDeriv, 0 },
 			{ &radeonTransformTrigScale, 0 }
 		};
 		radeonLocalTransform(r300->radeon.glCtx, compiler.program,
-			3, transformations);
+			4, transformations);
 
 		if (RADEON_DEBUG & DEBUG_PIXEL) {
 			_mesa_printf("Compiler: after native rewrite:\n");

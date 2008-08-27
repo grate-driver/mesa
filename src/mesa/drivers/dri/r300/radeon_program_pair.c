@@ -265,11 +265,21 @@ static void final_rewrite(struct pair_state *s, struct prog_instruction *inst)
 		inst->SrcReg[0] = tmp;
 		break;
 	case OPCODE_MOV:
-		inst->SrcReg[1] = inst->SrcReg[0];
+		/* AMD say we should use CMP.
+		 * However, when we transform
+		 *  KIL -r0;
+		 * into
+		 *  CMP tmp, -r0, -r0, 0;
+		 *  KIL tmp;
+		 * we get incorrect behaviour on R500 when r0 == 0.0.
+		 * It appears that the R500 KIL hardware treats -0.0 as less
+		 * than zero.
+		 */
+		inst->SrcReg[1].File = PROGRAM_BUILTIN;
+		inst->SrcReg[1].Swizzle = SWIZZLE_1111;
 		inst->SrcReg[2].File = PROGRAM_BUILTIN;
 		inst->SrcReg[2].Swizzle = SWIZZLE_0000;
-		inst->Opcode = OPCODE_CMP;
-		// TODO: disable output modifiers on R500
+		inst->Opcode = OPCODE_MAD;
 		break;
 	case OPCODE_MUL:
 		inst->SrcReg[2].File = PROGRAM_BUILTIN;
@@ -295,6 +305,8 @@ static void classify_instruction(struct pair_state *s,
 	switch(inst->Opcode) {
 	case OPCODE_ADD:
 	case OPCODE_CMP:
+	case OPCODE_DDX:
+	case OPCODE_DDY:
 	case OPCODE_FRC:
 	case OPCODE_MAD:
 	case OPCODE_MAX:
@@ -663,8 +675,6 @@ static int alloc_pair_source(struct pair_state *s, struct radeon_pair_instructio
 	return candidate;
 }
 
-
-
 /**
  * Fill the given ALU instruction's opcodes and source operands into the given pair,
  * if possible.
@@ -693,6 +703,14 @@ static GLboolean fill_instruction_into_pair(struct pair_state *s, struct radeon_
 
 	int nargs = _mesa_num_inst_src_regs(inst->Opcode);
 	int i;
+
+	/* Special case for DDX/DDY (MDH/MDV). */
+	if (inst->Opcode == OPCODE_DDX || inst->Opcode == OPCODE_DDY) {
+		if (pair->RGB.Src[0].Used || pair->Alpha.Src[0].Used)
+			return GL_FALSE;
+		else
+			nargs++;
+	}
 
 	for(i = 0; i < nargs; ++i) {
 		int source;

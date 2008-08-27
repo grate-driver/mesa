@@ -29,9 +29,9 @@
  */
 
 
-#include "glheader.h"
-#include "imports.h"
-#include "macros.h"
+#include "main/glheader.h"
+#include "main/imports.h"
+#include "main/macros.h"
 #include "prog_instruction.h"
 #include "prog_parameter.h"
 #include "prog_statevars.h"
@@ -61,29 +61,6 @@ _mesa_free_parameter_list(struct gl_program_parameter_list *paramList)
    _mesa_free(paramList);
 }
 
-
-static GLint
-_mesa_fit_type_in_vec4(GLenum type)
-{
-   switch (type) {
-   case GL_FLOAT:
-   case GL_INT:
-      return 4;
-      break;
-   case GL_FLOAT_VEC2:
-   case GL_INT_VEC2:
-      return 2;
-      break;
-   case GL_FLOAT_VEC3:
-   case GL_INT_VEC3:
-      return 1;
-      break;
-   case GL_FLOAT_VEC4:
-   case GL_INT_VEC4:
-   default:
-      return 1;
-   }
-}
 
 /**
  * Add a new parameter to a parameter list.
@@ -294,8 +271,28 @@ _mesa_add_uniform(struct gl_program_parameter_list *paramList,
    }
    else {
       i = _mesa_add_parameter(paramList, PROGRAM_UNIFORM, name,
-                              size * _mesa_fit_type_in_vec4(datatype), datatype, NULL, NULL);
+                              size, datatype, NULL, NULL);
       return i;
+   }
+}
+
+
+/**
+ * Mark the named uniform as 'used'.
+ */
+void
+_mesa_use_uniform(struct gl_program_parameter_list *paramList,
+                  const char *name)
+{
+   GLuint i;
+   for (i = 0; i < paramList->NumParameters; i++) {
+      struct gl_program_parameter *p = paramList->Parameters + i;
+      if (p->Type == PROGRAM_UNIFORM && _mesa_strcmp(p->Name, name) == 0) {
+         p->Used = GL_TRUE;
+         /* Note that large uniforms may occupy several slots so we're
+          * not done searching yet.
+          */
+      }
    }
 }
 
@@ -319,6 +316,7 @@ _mesa_add_sampler(struct gl_program_parameter_list *paramList,
       return (GLint) paramList->ParameterValues[i][0];
    }
    else {
+      GLuint i;
       const GLint size = 1; /* a sampler is basically a texture unit number */
       GLfloat value;
       GLint numSamplers = 0;
@@ -347,7 +345,7 @@ _mesa_add_varying(struct gl_program_parameter_list *paramList,
       return i;
    }
    else {
-      assert(size == 4);
+      /*assert(size == 4);*/
       i = _mesa_add_parameter(paramList, PROGRAM_VARYING, name,
                               size, GL_NONE, NULL, NULL);
       return i;
@@ -362,7 +360,7 @@ _mesa_add_varying(struct gl_program_parameter_list *paramList,
  */
 GLint
 _mesa_add_attribute(struct gl_program_parameter_list *paramList,
-                    const char *name, GLint size, GLint attrib)
+                    const char *name, GLint size, GLenum datatype, GLint attrib)
 {
    GLint i = _mesa_lookup_parameter_index(paramList, -1, name);
    if (i >= 0) {
@@ -378,7 +376,7 @@ _mesa_add_attribute(struct gl_program_parameter_list *paramList,
       if (size < 0)
          size = 4;
       i = _mesa_add_parameter(paramList, PROGRAM_INPUT, name,
-                              size, GL_NONE, NULL, state);
+                              size, datatype, NULL, state);
    }
    return i;
 }
@@ -613,21 +611,24 @@ _mesa_clone_parameter_list(const struct gl_program_parameter_list *list)
    /** Not too efficient, but correct */
    for (i = 0; i < list->NumParameters; i++) {
       struct gl_program_parameter *p = list->Parameters + i;
+      struct gl_program_parameter *pCopy;
       GLuint size = MIN2(p->Size, 4);
       GLint j = _mesa_add_parameter(clone, p->Type, p->Name, size, p->DataType,
                                     list->ParameterValues[i], NULL);
       ASSERT(j >= 0);
+      pCopy = clone->Parameters + j;
+      pCopy->Used = p->Used;
       /* copy state indexes */
       if (p->Type == PROGRAM_STATE_VAR) {
          GLint k;
-         struct gl_program_parameter *q = clone->Parameters + j;
          for (k = 0; k < STATE_LENGTH; k++) {
-            q->StateIndexes[k] = p->StateIndexes[k];
+            pCopy->StateIndexes[k] = p->StateIndexes[k];
          }
       }
       else {
          clone->Parameters[j].Size = p->Size;
       }
+      
    }
 
    clone->StateFlags = list->StateFlags;

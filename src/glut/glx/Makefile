@@ -94,6 +94,7 @@ $(TOP)/$(LIB_DIR)/$(GLUT_LIB_NAME): depend $(OBJECTS)
 	$(MKLIB) -o $(GLUT_LIB) -linker '$(CC)' -ldflags '$(LDFLAGS)' \
 		-major $(GLUT_MAJOR) -minor $(GLUT_MINOR) -patch $(GLUT_TINY) \
 		$(MKLIB_OPTIONS) -install $(TOP)/$(LIB_DIR) \
+		-id $(INSTALL_LIB_DIR)/lib$(GLUT_LIB).$(GLUT_MAJOR).dylib \
 		$(GLUT_LIB_DEPS) $(OBJECTS)
 
 
@@ -111,7 +112,7 @@ install: glut.pc
 	$(INSTALL) -d $(DESTDIR)$(INSTALL_LIB_DIR)
 	$(INSTALL) -d $(DESTDIR)$(INSTALL_LIB_DIR)/pkgconfig
 	$(INSTALL) -m 644 $(TOP)/include/GL/glut.h $(DESTDIR)$(INSTALL_INC_DIR)/GL
-	$(INSTALL) $(TOP)/$(LIB_DIR)/libglut* $(DESTDIR)$(INSTALL_LIB_DIR)
+	$(INSTALL) $(TOP)/$(LIB_DIR)/$(GLUT_LIB_GLOB) $(DESTDIR)$(INSTALL_LIB_DIR)
 	$(INSTALL) -m 644 glut.pc $(DESTDIR)$(INSTALL_LIB_DIR)/pkgconfig
 
 

@@ -23,8 +23,8 @@
  */
 
 
-#include "imports.h"
-#include "context.h"
+#include "main/imports.h"
+#include "main/context.h"
 #include "slang_ir.h"
 #include "slang_mem.h"
 #include "shader/prog_print.h"
@@ -51,8 +51,11 @@ static const slang_ir_info IrInfo[] = {
    { IR_SLT, "IR_SLT", OPCODE_SLT, 4, 2 },
    { IR_POW, "IR_POW", OPCODE_POW, 1, 2 },
    { IR_EQUAL, "IR_EQUAL", OPCODE_NOP, 1, 2 },
+   { IR_NOTEQUAL, "IR_NOTEQUAL", OPCODE_NOP, 1, 2 },
+
    /* unary ops */
-   { IR_I_TO_F, "IR_I_TO_F", OPCODE_NOP, 1, 1 },
+   { IR_MOVE, "IR_MOVE", OPCODE_MOV, 4, 1 },
+   { IR_I_TO_F, "IR_I_TO_F", OPCODE_MOV, 4, 1 },  /* int[4] to float[4] */
    { IR_F_TO_I, "IR_F_TO_I", OPCODE_INT, 4, 1 }, /* 4 floats to 4 ints */
    { IR_EXP, "IR_EXP", OPCODE_EXP, 1, 1 },
    { IR_EXP2, "IR_EXP2", OPCODE_EX2, 1, 1 },
@@ -80,7 +83,7 @@ static const slang_ir_info IrInfo[] = {
    { IR_KILL, "IR_KILL", OPCODE_NOP, 0, 0 },
    { IR_COND, "IR_COND", OPCODE_NOP, 0, 0 },
    { IR_CALL, "IR_CALL", OPCODE_NOP, 0, 0 },
-   { IR_MOVE, "IR_MOVE", OPCODE_NOP, 0, 1 },
+   { IR_COPY, "IR_COPY", OPCODE_NOP, 0, 1 },
    { IR_NOT, "IR_NOT", OPCODE_NOP, 1, 1 },
    { IR_VAR, "IR_VAR", OPCODE_NOP, 0, 0 },
    { IR_VAR_DECL, "IR_VAR_DECL", OPCODE_NOP, 0, 0 },
@@ -109,11 +112,72 @@ _slang_ir_info(slang_ir_opcode opcode)
 }
 
 
+/**
+ * Return a new slang_ir_storage object.
+ */
+slang_ir_storage *
+_slang_new_ir_storage(enum register_file file, GLint index, GLint size)
+{
+   slang_ir_storage *st;
+   st = (slang_ir_storage *) _slang_alloc(sizeof(slang_ir_storage));
+   if (st) {
+      st->File = file;
+      st->Index = index;
+      st->Size = size;
+      st->Swizzle = SWIZZLE_NOOP;
+      st->Parent = NULL;
+   }
+   return st;
+}
+
+
+/**
+ * Return a new slang_ir_storage object.
+ */
+slang_ir_storage *
+_slang_new_ir_storage_swz(enum register_file file, GLint index, GLint size,
+                          GLuint swizzle)
+{
+   slang_ir_storage *st;
+   st = (slang_ir_storage *) _slang_alloc(sizeof(slang_ir_storage));
+   if (st) {
+      st->File = file;
+      st->Index = index;
+      st->Size = size;
+      st->Swizzle = swizzle;
+      st->Parent = NULL;
+   }
+   return st;
+}
+
+
+/**
+ * Return a new slang_ir_storage object.
+ */
+slang_ir_storage *
+_slang_new_ir_storage_relative(GLint index, GLint size,
+                               slang_ir_storage *parent)
+{
+   slang_ir_storage *st;
+   st = (slang_ir_storage *) _slang_alloc(sizeof(slang_ir_storage));
+   if (st) {
+      st->File = PROGRAM_UNDEFINED;
+      st->Index = index;
+      st->Size = size;
+      st->Swizzle = SWIZZLE_NOOP;
+      st->Parent = parent;
+   }
+   return st;
+}
+
+
+
 static const char *
 _slang_ir_name(slang_ir_opcode opcode)
 {
    return _slang_ir_info(opcode)->IrName;
 }
+
 
 
 #if 0 /* no longer needed with mempool */
@@ -174,20 +238,6 @@ _slang_free_ir_tree(slang_ir_node *n)
    _slang_free_ir(n);
 }
 
-
-
-static const char *
-swizzle_string(GLuint swizzle)
-{
-   static char s[6];
-   GLuint i;
-   s[0] = '.';
-   for (i = 1; i < 5; i++) {
-      s[i] = "xyzw"[GET_SWZ(swizzle, i-1)];
-   }
-   s[i] = 0;
-   return s;
-}
 
 
 static const char *
@@ -277,8 +327,8 @@ _slang_print_ir_tree(const slang_ir_node *n, int indent)
       assert(!n->Children[1]);
       _slang_print_ir_tree(n->Children[0], indent + 3);
       break;
-   case IR_MOVE:
-      printf("MOVE (writemask = %s)\n", writemask_string(n->Writemask));
+   case IR_COPY:
+      printf("COPY (writemask = %s)\n", writemask_string(n->Writemask));
       _slang_print_ir_tree(n->Children[0], indent+3);
       _slang_print_ir_tree(n->Children[1], indent+3);
       break;
@@ -347,7 +397,7 @@ _slang_print_ir_tree(const slang_ir_node *n, int indent)
    case IR_VAR:
       printf("VAR %s%s at %s  store %p\n",
              (n->Var ? (char *) n->Var->a_name : "TEMP"),
-             swizzle_string(n->Store->Swizzle),
+             _mesa_swizzle_string(n->Store->Swizzle, 0, 0),
              storage_string(n->Store), (void*) n->Store);
       break;
    case IR_VAR_DECL:
@@ -374,7 +424,7 @@ _slang_print_ir_tree(const slang_ir_node *n, int indent)
       break;
    case IR_SWIZZLE:
       printf("SWIZZLE %s of  (store %p) \n",
-             swizzle_string(n->Store->Swizzle), (void*) n->Store);
+             _mesa_swizzle_string(n->Store->Swizzle, 0, 0), (void*) n->Store);
       _slang_print_ir_tree(n->Children[0], indent + 3);
       break;
    default:

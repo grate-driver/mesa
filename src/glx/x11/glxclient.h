@@ -66,6 +66,8 @@
 # include <pthread.h>
 #endif
 
+#include "glxextensions.h"
+
 #define GLX_MAJOR_VERSION	1	/* current version numbers */
 #define GLX_MINOR_VERSION	4
 
@@ -693,9 +695,10 @@ extern void __glEmptyImage(__GLXcontext*, GLint, GLint, GLint, GLint, GLenum,
 
 
 /*
-** Allocate and Initialize Vertex Array client state 
+** Allocate and Initialize Vertex Array client state, and free.
 */
-extern void __glXInitVertexArrayState(__GLXcontext*);
+extern void __glXInitVertexArrayState(__GLXcontext *);
+extern void __glXFreeVertexArrayState(__GLXcontext *);
 
 /*
 ** Inform the Server of the major and minor numbers and of the client

@@ -321,6 +321,44 @@ static void r300BlendFuncSeparate(GLcontext * ctx,
 	r300SetBlendState(ctx);
 }
 
+/**
+ * Translate LogicOp enums into hardware representation.
+ * Both use a very logical bit-wise layout, but unfortunately the order
+ * of bits is reversed.
+ */
+static GLuint translate_logicop(GLenum logicop)
+{
+	GLuint bits = logicop - GL_CLEAR;
+	bits = ((bits & 1) << 3) | ((bits & 2) << 1) | ((bits & 4) >> 1) | ((bits & 8) >> 3);
+	return bits << R300_RB3D_ROPCNTL_ROP_SHIFT;
+}
+
+/**
+ * Used internally to update the r300->hw hardware state to match the
+ * current OpenGL state.
+ */
+static void r300SetLogicOpState(GLcontext *ctx)
+{
+	r300ContextPtr r300 = R300_CONTEXT(ctx);
+	R300_STATECHANGE(r300, rop);
+	if (RGBA_LOGICOP_ENABLED(ctx)) {
+		r300->hw.rop.cmd[1] = R300_RB3D_ROPCNTL_ROP_ENABLE |
+			translate_logicop(ctx->Color.LogicOp);
+	} else {
+		r300->hw.rop.cmd[1] = 0;
+	}
+}
+
+/**
+ * Called by Mesa when an application program changes the LogicOp state
+ * via glLogicOp.
+ */
+static void r300LogicOpcode(GLcontext *ctx, GLenum logicop)
+{
+	if (RGBA_LOGICOP_ENABLED(ctx))
+		r300SetLogicOpState(ctx);
+}
+
 static void r300ClipPlane( GLcontext *ctx, GLenum plane, const GLfloat *eq )
 {
 	r300ContextPtr rmesa = R300_CONTEXT(ctx);
@@ -709,8 +747,6 @@ static void r300Fogfv(GLcontext * ctx, GLenum pname, const GLfloat * param)
 
 	switch (pname) {
 	case GL_FOG_MODE:
-		if (!ctx->Fog.Enabled)
-			return;
 		switch (ctx->Fog.Mode) {
 		case GL_LINEAR:
 			R300_STATECHANGE(r300, fogs);
@@ -843,12 +879,12 @@ static void r300PointParameter(GLcontext * ctx, GLenum pname, const GLfloat * pa
 	case GL_POINT_SIZE_MIN:
 		R300_STATECHANGE(r300, ga_point_minmax);
 		r300->hw.ga_point_minmax.cmd[1] &= ~R300_GA_POINT_MINMAX_MIN_MASK;
-		r300->hw.ga_point_minmax.cmd[1] |= (GLuint)(ctx->Point.MinSize * 16.0);
+		r300->hw.ga_point_minmax.cmd[1] |= (GLuint)(ctx->Point.MinSize * 6.0);
 		break;
 	case GL_POINT_SIZE_MAX:
 		R300_STATECHANGE(r300, ga_point_minmax);
 		r300->hw.ga_point_minmax.cmd[1] &= ~R300_GA_POINT_MINMAX_MAX_MASK;
-		r300->hw.ga_point_minmax.cmd[1] |= (GLuint)(ctx->Point.MaxSize * 16.0)
+		r300->hw.ga_point_minmax.cmd[1] |= (GLuint)(ctx->Point.MaxSize * 6.0)
 			<< R300_GA_POINT_MINMAX_MAX_SHIFT;
 		break;
 	case GL_POINT_DISTANCE_ATTENUATION:
@@ -2117,8 +2153,10 @@ static void r300Enable(GLcontext * ctx, GLenum cap, GLboolean state)
 	case GL_ALPHA_TEST:
 		r300SetAlphaState(ctx);
 		break;
-	case GL_BLEND:
 	case GL_COLOR_LOGIC_OP:
+		r300SetLogicOpState(ctx);
+		/* fall-through, because logic op overrides blending */
+	case GL_BLEND:
 		r300SetBlendState(ctx);
 		break;
 	case GL_CLIP_PLANE0:
@@ -2188,6 +2226,7 @@ static void r300ResetHwState(r300ContextPtr r300)
 	r300UpdateTextureState(ctx);
 
 	r300SetBlendState(ctx);
+	r300SetLogicOpState(ctx);
 
 	r300AlphaFunc(ctx, ctx->Color.AlphaFunc, ctx->Color.AlphaRef);
 	r300Enable(ctx, GL_ALPHA_TEST, ctx->Color.AlphaEnabled);
@@ -2581,6 +2620,16 @@ static void r500SetupPixelShader(r300ContextPtr rmesa)
 	}
 	code = &fp->code;
 
+	if (fp->mesa_program.FogOption != GL_NONE) {
+		/* Enable HW fog. Try not to squish GL context.
+		 * (Anybody sane remembered to set glFog() opts first!) */
+		r300SetFogState(ctx, GL_TRUE);
+		ctx->Fog.Mode = fp->mesa_program.FogOption;
+		r300Fogfv(ctx, GL_FOG_MODE, NULL);
+	} else
+		/* Make sure HW is matching GL context. */
+		r300SetFogState(ctx, ctx->Fog.Enabled);
+
 	r300SetupTextures(ctx);
 
 	R300_STATECHANGE(rmesa, fp);
@@ -2755,6 +2804,7 @@ void r300InitStateFuncs(struct dd_function_table *functions)
 	functions->Fogfv = r300Fogfv;
 	functions->FrontFace = r300FrontFace;
 	functions->ShadeModel = r300ShadeModel;
+	functions->LogicOpcode = r300LogicOpcode;
 
 	/* ARB_point_parameters */
 	functions->PointParameterfv = r300PointParameter;

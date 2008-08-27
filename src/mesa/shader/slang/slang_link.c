@@ -42,6 +42,20 @@
 #include "slang_link.h"
 
 
+/**
+ * Record a linking error.
+ */
+static void
+link_error(struct gl_shader_program *shProg, const char *msg)
+{
+   if (shProg->InfoLog) {
+      _mesa_free(shProg->InfoLog);
+   }
+   shProg->InfoLog = _mesa_strdup(msg);
+   shProg->LinkStatus = GL_FALSE;
+}
+
+
 
 /**
  * Linking varying vars involves rearranging varying vars so that the
@@ -52,7 +66,6 @@ static GLboolean
 link_varying_vars(struct gl_shader_program *shProg, struct gl_program *prog)
 {
    GLuint *map, i, firstVarying, newFile;
-   GLbitfield varsWritten, varsRead;
 
    map = (GLuint *) malloc(prog->Varying->NumParameters * sizeof(GLuint));
    if (!map)
@@ -60,14 +73,13 @@ link_varying_vars(struct gl_shader_program *shProg, struct gl_program *prog)
 
    for (i = 0; i < prog->Varying->NumParameters; i++) {
       /* see if this varying is in the linked varying list */
-      const struct gl_program_parameter *var
-         = prog->Varying->Parameters + i;
-
+      const struct gl_program_parameter *var = prog->Varying->Parameters + i;
       GLint j = _mesa_lookup_parameter_index(shProg->Varying, -1, var->Name);
       if (j >= 0) {
          /* already in list, check size */
          if (var->Size != shProg->Varying->Parameters[j].Size) {
             /* error */
+            link_error(shProg, "mismatched varying variable types");
             return GL_FALSE;
          }
       }
@@ -75,9 +87,19 @@ link_varying_vars(struct gl_shader_program *shProg, struct gl_program *prog)
          /* not already in linked list */
          j = _mesa_add_varying(shProg->Varying, var->Name, var->Size);
       }
-      ASSERT(j >= 0);
 
-      map[i] = j;
+      /* map varying[i] to varying[j].
+       * Note: the loop here takes care of arrays or large (sz>4) vars.
+       */
+      {
+         GLint sz = var->Size;
+         while (sz > 0) {
+            /*printf("Link varying from %d to %d\n", i, j);*/
+            map[i++] = j++;
+            sz -= 4;
+         }
+         i--; /* go back one */
+      }
    }
 
 
@@ -96,9 +118,6 @@ link_varying_vars(struct gl_shader_program *shProg, struct gl_program *prog)
       newFile = PROGRAM_INPUT;
    }
 
-   /* keep track of which varying vars we read and write */
-   varsWritten = varsRead = 0x0;
-
    /* OK, now scan the program/shader instructions looking for varying vars,
     * replacing the old index with the new index.
     */
@@ -109,29 +128,21 @@ link_varying_vars(struct gl_shader_program *shProg, struct gl_program *prog)
       if (inst->DstReg.File == PROGRAM_VARYING) {
          inst->DstReg.File = newFile;
          inst->DstReg.Index = map[ inst->DstReg.Index ] + firstVarying;
-         varsWritten |= (1 << inst->DstReg.Index);
       }
 
       for (j = 0; j < 3; j++) {
          if (inst->SrcReg[j].File == PROGRAM_VARYING) {
             inst->SrcReg[j].File = newFile;
             inst->SrcReg[j].Index = map[ inst->SrcReg[j].Index ] + firstVarying;
-            varsRead |= (1 << inst->SrcReg[j].Index);
          }
       }
    }
 
-   if (prog->Target == GL_VERTEX_PROGRAM_ARB) {
-      prog->OutputsWritten |= varsWritten;
-      /*printf("VERT OUTPUTS: 0x%x \n", varsWritten);*/
-   }
-   else {
-      assert(prog->Target == GL_FRAGMENT_PROGRAM_ARB);
-      prog->InputsRead |= varsRead;
-      /*printf("FRAG INPUTS: 0x%x\n", varsRead);*/
-   }
-
    free(map);
+
+   /* these will get recomputed before linking is completed */
+   prog->InputsRead = 0x0;
+   prog->OutputsWritten = 0x0;
 
    return GL_TRUE;
 }
@@ -162,7 +173,7 @@ link_uniform_vars(struct gl_shader_program *shProg,
        * Furthermore, we'll need to fix the state-var's size/datatype info.
        */
 
-      if (p->Type == PROGRAM_UNIFORM ||
+      if ((p->Type == PROGRAM_UNIFORM && p->Used) ||
           p->Type == PROGRAM_SAMPLER) {
          _mesa_append_uniform(shProg->Uniforms, p->Name, prog->Target, i);
       }
@@ -211,7 +222,6 @@ _slang_resolve_attributes(struct gl_shader_program *shProg,
 {
    GLuint i, j;
    GLbitfield usedAttributes;
-   GLint size = 4; /* XXX fix */
 
    assert(prog->Target == GL_VERTEX_PROGRAM_ARB);
 
@@ -253,6 +263,8 @@ _slang_resolve_attributes(struct gl_shader_program *shProg,
                 * Start at 1 since generic attribute 0 always aliases
                 * glVertex/position.
                 */
+               GLint size = prog->Attributes->Parameters[k].Size;
+               GLenum datatype = prog->Attributes->Parameters[k].DataType;
                for (attr = 1; attr < MAX_VERTEX_ATTRIBS; attr++) {
                   if (((1 << attr) & usedAttributes) == 0)
                      break;
@@ -261,7 +273,7 @@ _slang_resolve_attributes(struct gl_shader_program *shProg,
                   /* too many!  XXX record error log */
                   return GL_FALSE;
                }
-               _mesa_add_attribute(shProg->Attributes, name, size, attr);
+               _mesa_add_attribute(shProg->Attributes, name, size, datatype,attr);
 
 	       /* set the attribute as used */
 	       usedAttributes |= 1<<attr;
@@ -272,6 +284,36 @@ _slang_resolve_attributes(struct gl_shader_program *shProg,
       }
    }
    return GL_TRUE;
+}
+
+
+/**
+ * Scan program instructions to update the program's NumTemporaries field.
+ * Note: this implemenation relies on the code generator allocating
+ * temps in increasing order (0, 1, 2, ... ).
+ */
+static void
+_slang_count_temporaries(struct gl_program *prog)
+{
+   GLuint i, j;
+   GLint maxIndex = -1;
+
+   for (i = 0; i < prog->NumInstructions; i++) {
+      const struct prog_instruction *inst = prog->Instructions + i;
+      const GLuint numSrc = _mesa_num_inst_src_regs(inst->Opcode);
+      for (j = 0; j < numSrc; j++) {
+         if (inst->SrcReg[j].File == PROGRAM_TEMPORARY) {
+            if (maxIndex < inst->SrcReg[j].Index)
+               maxIndex = inst->SrcReg[j].Index;
+         }
+         if (inst->DstReg.File == PROGRAM_TEMPORARY) {
+            if (maxIndex < (GLint) inst->DstReg.Index)
+               maxIndex = inst->DstReg.Index;
+         }
+      }
+   }
+
+   prog->NumTemporaries = (GLuint) (maxIndex + 1);
 }
 
 
@@ -351,21 +393,6 @@ fragment_program(struct gl_program *prog)
 
 
 /**
- * Record a linking error.
- */
-static void
-link_error(struct gl_shader_program *shProg, const char *msg)
-{
-   if (shProg->InfoLog) {
-      _mesa_free(shProg->InfoLog);
-   }
-   shProg->InfoLog = _mesa_strdup(msg);
-   shProg->LinkStatus = GL_FALSE;
-}
-
-
-
-/**
  * Shader linker.  Currently:
  *
  * 1. The last attached vertex shader and fragment shader are linked.
@@ -400,18 +427,31 @@ _slang_link(GLcontext *ctx,
    shProg->Varying = _mesa_new_parameter_list();
 
    /**
-    * Find attached vertex shader, fragment shader
+    * Find attached vertex, fragment shaders defining main()
     */
    vertProg = NULL;
    fragProg = NULL;
    for (i = 0; i < shProg->NumShaders; i++) {
-      if (shProg->Shaders[i]->Type == GL_VERTEX_SHADER)
-         vertProg = vertex_program(shProg->Shaders[i]->Programs[0]);
-      else if (shProg->Shaders[i]->Type == GL_FRAGMENT_SHADER)
-         fragProg = fragment_program(shProg->Shaders[i]->Programs[0]);
+      struct gl_shader *shader = shProg->Shaders[i];
+      if (shader->Type == GL_VERTEX_SHADER && shader->Main)
+         vertProg = vertex_program(shader->Program);
+      else if (shader->Type == GL_FRAGMENT_SHADER && shader->Main)
+         fragProg = fragment_program(shader->Program);
       else
          _mesa_problem(ctx, "unexpected shader target in slang_link()");
    }
+
+#if FEATURE_es2_glsl
+   /* must have both a vertex and fragment program for ES2 */
+   if (!vertProg) {
+      link_error(shProg, "missing vertex shader\n");
+      return;
+   }
+   if (!fragProg) {
+      link_error(shProg, "missing fragment shader\n");
+      return;
+   }
+#endif
 
    /*
     * Make copies of the vertex/fragment programs now since we'll be
@@ -434,10 +474,14 @@ _slang_link(GLcontext *ctx,
    }
 
    /* link varying vars */
-   if (shProg->VertexProgram)
-      link_varying_vars(shProg, &shProg->VertexProgram->Base);
-   if (shProg->FragmentProgram)
-      link_varying_vars(shProg, &shProg->FragmentProgram->Base);
+   if (shProg->VertexProgram) {
+      if (!link_varying_vars(shProg, &shProg->VertexProgram->Base))
+         return;
+   }
+   if (shProg->FragmentProgram) {
+      if (!link_varying_vars(shProg, &shProg->FragmentProgram->Base))
+         return;
+   }
 
    /* link uniform vars */
    if (shProg->VertexProgram)
@@ -457,6 +501,7 @@ _slang_link(GLcontext *ctx,
 
    if (shProg->VertexProgram) {
       _slang_update_inputs_outputs(&shProg->VertexProgram->Base);
+      _slang_count_temporaries(&shProg->VertexProgram->Base);
       if (!(shProg->VertexProgram->Base.OutputsWritten & (1 << VERT_RESULT_HPOS))) {
          /* the vertex program did not compute a vertex position */
          link_error(shProg,
@@ -464,8 +509,10 @@ _slang_link(GLcontext *ctx,
          return;
       }
    }
-   if (shProg->FragmentProgram)
+   if (shProg->FragmentProgram) {
+      _slang_count_temporaries(&shProg->FragmentProgram->Base);
       _slang_update_inputs_outputs(&shProg->FragmentProgram->Base);
+   }
 
    /* Check that all the varying vars needed by the fragment shader are
     * actually produced by the vertex shader.
@@ -482,12 +529,6 @@ _slang_link(GLcontext *ctx,
       }         
    }
 
-   /* Check that the vertex program doesn't use too many sampler units */
-   if (shProg->VertexProgram &&
-       _mesa_bitcount(shProg->VertexProgram->Base.SamplersUsed) > ctx->Const.MaxVertexTextureImageUnits) {
-      link_error(shProg, "Vertex program uses too many samplers.\n");
-      return;
-   }
 
    if (fragProg && shProg->FragmentProgram) {
       /* notify driver that a new fragment program has been compiled/linked */

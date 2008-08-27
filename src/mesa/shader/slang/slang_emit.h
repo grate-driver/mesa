@@ -26,10 +26,10 @@
 #define SLANG_EMIT_H
 
 
-#include "imports.h"
+#include "main/imports.h"
 #include "slang_compile.h"
 #include "slang_ir.h"
-#include "mtypes.h"
+#include "main/mtypes.h"
 
 
 extern void
@@ -38,10 +38,6 @@ slang_print_ir(const slang_ir_node *n, int indent);
 
 extern GLuint
 _slang_swizzle_swizzle(GLuint swz1, GLuint swz2);
-
-
-extern slang_ir_storage *
-_slang_new_ir_storage(enum register_file file, GLint index, GLint size);
 
 
 extern GLboolean

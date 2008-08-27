@@ -13,11 +13,13 @@ PROGS = \
 	bitmap \
 	brick \
 	bump \
+	convolutions \
 	deriv \
 	mandelbrot \
 	multitex \
 	noise \
 	points \
+	pointcoord \
 	texdemo1 \
 	toyball \
 	twoside \
@@ -89,6 +91,13 @@ bump: bump.o shaderutil.o
 	$(CC) -I$(INCDIR) $(CFLAGS) $(LDFLAGS) bump.o shaderutil.o $(LIBS) -o $@
 
 
+convolutions.o: convolutions.c readtex.h
+	$(CC) -c -I$(INCDIR) $(CFLAGS) convolutions.c
+
+convolutions: convolutions.o readtex.o
+	$(CC) -I$(INCDIR) $(CFLAGS) $(LDFLAGS) convolutions.o readtex.o $(LIBS) -o $@
+
+
 deriv.o: deriv.c extfuncs.h shaderutil.h
 	$(CC) -c -I$(INCDIR) $(CFLAGS) deriv.c
 
@@ -122,6 +131,13 @@ points.o: points.c extfuncs.h shaderutil.h
 
 points: points.o shaderutil.o
 	$(CC) -I$(INCDIR) $(CFLAGS) $(LDFLAGS) points.o shaderutil.o $(LIBS) -o $@
+
+
+pointcoord.o: pointcoord.c readtex.h extfuncs.h shaderutil.h
+	$(CC) -c -I$(INCDIR) $(CFLAGS) pointcoord.c
+
+pointcoord: pointcoord.o readtex.o shaderutil.o
+	$(CC) -I$(INCDIR) $(CFLAGS) $(LDFLAGS) pointcoord.o readtex.o shaderutil.o $(LIBS) -o $@
 
 
 texdemo1.o: texdemo1.c readtex.h extfuncs.h shaderutil.h

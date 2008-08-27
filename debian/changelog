@@ -1,3 +1,37 @@
+mesa (7.1-1ubuntu1) UNRELEASED; urgency=low
+
+  * Merge from git.debian.org, remaining changes:
+    - debian/control
+      + Change maintainer address to Ubuntu.
+      + Drop lesstif-dev from Build-Depends since it's a universe component
+        that Ubuntu doesn't want in main due to security concerns about it
+        (it's a large codebase without active development - last release >2
+        yrs ago).
+      + Comment out GLw libs since it depends on lesstif-dev.
+      + Add lpia to -dri and -dri-dbg package in.
+      + Add Pre-Depends: dpkg (>= 1.14.12ubuntu3) to ensure dpkg
+        support for lzma.
+    - debian/rules
+      + Unexport LDFLAGS (amd64 FTBFS).
+      + Add Xsession hook to disable ASM optimizations when running on
+        64-but processors that don't support them
+        (LP: 87661, Deb: 484180, fdo: 8724)
+      + use --disable-glw for swx11 targets too.
+      + Build .debs with lzma compression.
+    - debian/patches
+      + Add 101_ubuntu_hidden_glname.patch.
+
+ -- Timo Aaltonen <tepsipakki@ubuntu.com>  Thu, 28 Aug 2008 00:44:22 +0300
+
+mesa (7.1-1) experimental; urgency=low
+
+  * Add parallel build support.
+  * New upstream development release
+    + libGLU now only exports its public interface (closes: #319388)
+  * Some more parallel build updates.
+
+ -- Julien Cristau <jcristau@debian.org>  Wed, 27 Aug 2008 19:52:24 +0200
+
 mesa (7.1~rc3-1ubuntu4) intrepid; urgency=low
 
   * debian/control: Add Pre-Depends: dpkg (>= 1.14.12ubuntu3) to ensure dpkg

@@ -7,7 +7,7 @@ MAJOR = 1
 MINOR = 0
 TINY = 0
 
-INCDIRS = -I$(TOP)/include -I/usr/include/Motif1.2 $(X11_INCLUDES)
+INCDIRS = -I$(TOP)/include $(MOTIF_CFLAGS) $(X11_INCLUDES)
 
 
 OBJECTS = $(GLW_SOURCES:.c=.o)
@@ -39,7 +39,7 @@ install: glw.pc
 	$(INSTALL) -d $(DESTDIR)$(INSTALL_LIB_DIR)
 	$(INSTALL) -d $(DESTDIR)$(INSTALL_LIB_DIR)/pkgconfig
 	$(INSTALL) -m 644 *.h $(DESTDIR)$(INSTALL_INC_DIR)/GL
-	$(INSTALL) $(TOP)/$(LIB_DIR)/libGLw.* $(DESTDIR)$(INSTALL_LIB_DIR)
+	$(INSTALL) $(TOP)/$(LIB_DIR)/$(GLW_LIB_GLOB) $(DESTDIR)$(INSTALL_LIB_DIR)
 	$(INSTALL) -m 644 glw.pc $(DESTDIR)$(INSTALL_LIB_DIR)/pkgconfig
 
 clean:
@@ -52,6 +52,7 @@ $(TOP)/$(LIB_DIR)/$(GLW_LIB_NAME): $(OBJECTS)
 	$(MKLIB) -o $(GLW_LIB) -linker '$(CC)' -ldflags '$(LDFLAGS)' \
 		-major $(MAJOR) -minor $(MINOR) -patch $(TINY) \
 		$(MKLIB_OPTIONS) -install $(TOP)/$(LIB_DIR) \
+		-id $(INSTALL_LIB_DIR)/lib$(GLW_LIB).$(MAJOR).dylib \
 		$(GLW_LIB_DEPS) $(OBJECTS)
 
 
