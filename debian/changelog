@@ -1,6 +1,6 @@
 mesa (7.1-1ubuntu1) intrepid; urgency=low
 
-  * Merge from git.debian.org, remaining changes:
+  * Merge from debian experimental, remaining changes:
     - debian/control
       + Change maintainer address to Ubuntu.
       + Drop lesstif-dev from Build-Depends since it's a universe component
