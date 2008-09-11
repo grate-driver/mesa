@@ -207,10 +207,6 @@ static int __glXFreeDisplayPrivate(XExtData *extension)
     if (priv->driDisplay)
 	(*priv->driDisplay->destroyDisplay)(priv->driDisplay);
     priv->driDisplay = NULL;
-
-    if (priv->dri2Display)
-	(*priv->dri2Display->destroyDisplay)(priv->dri2Display);
-    priv->dri2Display = NULL;
 #endif
 
     Xfree((char*) priv);
@@ -608,9 +604,6 @@ static Bool AllocAndFetchScreenConfigs(Display *dpy, __GLXdisplayPrivate *priv)
 	if (psc->drawHash == NULL)
 	    continue;
 
-	if (priv->dri2Display)
-	    psc->driScreen = (*priv->dri2Display->createScreen)(psc, i, priv);
-
 	if (psc->driScreen == NULL && priv->driDisplay)
 	    psc->driScreen = (*priv->driDisplay->createScreen)(psc, i, priv);
 
@@ -716,7 +709,6 @@ _X_HIDDEN __GLXdisplayPrivate *__glXInitialize(Display* dpy)
     ** (e.g., those called in AllocAndFetchScreenConfigs).
     */
     if (glx_direct && glx_accel) {
-	dpyPriv->dri2Display = dri2CreateDisplay(dpy);
 	dpyPriv->driDisplay = driCreateDisplay(dpy);
     }
     if (glx_direct)

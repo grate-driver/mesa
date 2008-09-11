@@ -151,7 +151,6 @@ struct __GLXDRIdrawableRec {
 */
 extern __GLXDRIdisplay *driswCreateDisplay(Display *dpy);
 extern __GLXDRIdisplay *driCreateDisplay(Display *dpy);
-extern __GLXDRIdisplay *dri2CreateDisplay(Display *dpy);
 
 extern void DRI_glXUseXFont( Font font, int first, int count, int listbase );
 
@@ -570,7 +569,6 @@ struct __GLXdisplayPrivateRec {
      */
     __GLXDRIdisplay *driswDisplay;
     __GLXDRIdisplay *driDisplay;
-    __GLXDRIdisplay *dri2Display;
 #endif
 };
 
