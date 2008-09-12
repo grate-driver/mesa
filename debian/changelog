@@ -1,3 +1,11 @@
+mesa (7.1-1ubuntu2) intrepid; urgency=low
+
+  * 102_dont_vblank.patch
+    - Revert the commit which defaults to vblank on intel. It breaks
+      DPMS with compiz, resulting in a hang. (LP: 262605)
+
+ -- Timo Aaltonen <tepsipakki@ubuntu.com>  Fri, 12 Sep 2008 11:25:01 +0300
+
 mesa (7.1-1ubuntu1) intrepid; urgency=low
 
   * Merge from debian experimental, remaining changes:
