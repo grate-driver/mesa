@@ -11,11 +11,13 @@
 <H1>Mesa 7.2 Release Notes / (date tbd)</H1>
 
 <p>
-Mesa 7.2 is a stable release fixing bugs found in 7.1.
+Mesa 7.2 is a stable release fixing bugs found in 7.1, which was a
+new development release.
 </p>
 </>
 Note that this version of Mesa does not use the GEM memory manager.
 The master branch of git uses GEM.
+The prototype DRI2 code that was in 7.1 has also been removed.
 </p>
 <p>
 DRM version 2.3.1 should be used with Mesa 7.2
@@ -30,11 +32,17 @@ tbd
 
 <h2>New features</h2>
 <ul>
+<li>i965 driver: added support for G41 chipset (Intel)
 </ul>
 
 
 <h2>Bug fixes</h2>
 <ul>
+<li>Assorted bug fixes for Ming build
+<li>Fixed some vertex/pixel buffer object reference counting bugs
+<li>Fixed depth/stencil bug in i915/945 driver
+<li>Fixed some shader flow control bugs in i965 driver
+<li>Fixed a few tdfx driver bugs which prevented driver from working
 </ul>
 
 
