@@ -1,3 +1,9 @@
+mesa (7.1-1ubuntu3) UNRELEASED; urgency=low
+
+  * debian/rules: Build i915_dri.so and only that on lpia.
+
+ -- Timo Aaltonen <tepsipakki@ubuntu.com>  Mon, 15 Sep 2008 13:32:34 +0300
+
 mesa (7.1-1ubuntu2) intrepid; urgency=low
 
   * 102_dont_vblank.patch
