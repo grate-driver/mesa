@@ -76,7 +76,7 @@ else ifeq ($(DEB_HOST_GNU_CPU), x86_64)
 else ifeq ($(DEB_HOST_ARCH), sparc)
 	DRI_DRIVERS += ffb
 else ifeq ($(DEB_HOST_ARCH), lpia)
-        DRI_DRIVERS = i915
+        DRI_DRIVERS = i915 i965
 endif
 
 confflags-dri = \
