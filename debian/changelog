@@ -1,3 +1,11 @@
+mesa (7.0.3-6) UNRELEASED; urgency=low
+
+  * Update debian/copyright to the SGI Free Software License B, version 2.0.
+    It now mirrors the free X11 license used by X.Org (closes: #368560).
+    http://www.sgi.com/company_info/newsroom/press_releases/2008/september/opengl.html
+
+ -- Julien Cristau <jcristau@debian.org>  Fri, 19 Sep 2008 18:02:55 +0200
+
 mesa (7.0.3-5) unstable; urgency=low
 
   * Disable the i915tex driver, it doesn't build against libdrm 2.3.1.
