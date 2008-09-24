@@ -1,3 +1,19 @@
+mesa (7.2-1) experimental; urgency=low
+
+  [ Brice Goglin ]
+  * Fix grammar and punctuation in glxinfo(1), thanks Sam Hocevar,
+    closes: #498595.
+
+  [ Timo Aaltonen ]
+  * New upstream release.
+  * Refresh patch 04_osmesa_version.diff
+
+  [ Julien Cristau ]
+  * Remove the build-dep on dri2proto, DRI2 support has been removed.
+  * intel: don't warn about TTM init failure.
+
+ -- Julien Cristau <jcristau@debian.org>  Wed, 24 Sep 2008 14:28:21 +0200
+
 mesa (7.1-1ubuntu3) intrepid; urgency=low
 
   * debian/rules: Build i915 and i965 DRI drivers on lpia. (LP: #270106)
