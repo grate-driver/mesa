@@ -1,3 +1,9 @@
+mesa (7.2-1ubuntu1) intrepid; urgency=low
+
+  * Merge from Debian experimental.
+
+ -- Timo Aaltonen <tepsipakki@ubuntu.com>  Wed, 24 Sep 2008 21:00:38 +0300
+
 mesa (7.2-1) experimental; urgency=low
 
   [ Brice Goglin ]
