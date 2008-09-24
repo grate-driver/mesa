@@ -10,6 +10,7 @@ mesa (7.2-1) UNRELEASED; urgency=low
 
   [ Julien Cristau ]
   * Remove the build-dep on dri2proto, DRI2 support has been removed.
+  * intel: don't warn about TTM init failure.
 
  -- Timo Aaltonen <tepsipakki@ubuntu.com>  Tue, 23 Sep 2008 16:08:48 +0300
 
