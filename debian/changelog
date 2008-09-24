@@ -1,4 +1,4 @@
-mesa (7.2-1) UNRELEASED; urgency=low
+mesa (7.2-1) experimental; urgency=low
 
   [ Brice Goglin ]
   * Fix grammar and punctuation in glxinfo(1), thanks Sam Hocevar,
@@ -12,7 +12,7 @@ mesa (7.2-1) UNRELEASED; urgency=low
   * Remove the build-dep on dri2proto, DRI2 support has been removed.
   * intel: don't warn about TTM init failure.
 
- -- Timo Aaltonen <tepsipakki@ubuntu.com>  Tue, 23 Sep 2008 16:08:48 +0300
+ -- Julien Cristau <jcristau@debian.org>  Wed, 24 Sep 2008 14:28:21 +0200
 
 mesa (7.1-1) experimental; urgency=low
 
