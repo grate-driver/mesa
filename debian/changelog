@@ -3,6 +3,7 @@ mesa (7.0.3-7) UNRELEASED; urgency=low
   * Cherry-pick patch from upstream:
     Use 3Dnow! x86-64 routines only on processors that support 3Dnow!
     (closes: #484180).
+  * Also build the x86-specific dri drivers on kfreebsd (closes: #492894).
 
  -- Julien Cristau <jcristau@debian.org>  Sun, 26 Oct 2008 15:27:10 +0100
 
