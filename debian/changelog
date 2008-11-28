@@ -1,3 +1,11 @@
+mesa (7.2-1ubuntu2) intrepid; urgency=low
+
+  * debian/patches/103_fix-crash-in-i830_emit_state.dpatch:
+    - Apply upstream commit to fix a crash in i830_emit_state
+      (LP: #277709)
+
+ -- Chris Coulson <chrisccoulson@googlemail.com>  Tue, 21 Oct 2008 17:55:10 +0100
+
 mesa (7.2-1ubuntu1) intrepid; urgency=low
 
   * Merge from Debian experimental.
