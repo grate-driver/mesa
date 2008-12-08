@@ -1,0 +1,14 @@
+Index: mesa/src/mesa/drivers/dri/intel/intel_context.c
+===================================================================
+--- mesa.orig/src/mesa/drivers/dri/intel/intel_context.c
++++ mesa/src/mesa/drivers/dri/intel/intel_context.c
+@@ -490,9 +490,6 @@
+    if (intel->bufmgr == NULL) {
+       if (ttm_disable) {
+ 	 fprintf(stderr, "TTM buffer manager disabled.  Using classic.\n");
+-      } else {
+-	 fprintf(stderr, "Failed to initialize TTM buffer manager.  "
+-		 "Falling back to classic.\n");
+       }
+ 
+       if (intelScreen->tex.size == 0) {

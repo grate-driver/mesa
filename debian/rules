@@ -1,0 +1,248 @@
+#!/usr/bin/make -f
+# debian/rules for the Debian mesa package
+# Copyright © 2006 Thierry Reding <thierry@gilfi.de>
+
+# Uncomment this to turn on verbose mode.
+#export DH_VERBOSE=1
+
+CFLAGS = -Wall -g
+ifneq (,$(filter noopt,$(DEB_BUILD_OPTIONS)))
+	CFLAGS += -O0
+else
+	CFLAGS += -O2
+endif
+ifneq (,$(filter parallel=%,$(DEB_BUILD_OPTIONS)))
+	NUMJOBS = $(patsubst parallel=%,%,$(filter parallel=%,$(DEB_BUILD_OPTIONS)))
+	MAKEFLAGS += -j$(NUMJOBS)
+endif
+
+DEB_BUILD_ARCH     ?= $(shell dpkg-architecture -qDEB_BUILD_ARCH)
+DEB_HOST_ARCH     ?= $(shell dpkg-architecture -qDEB_HOST_ARCH)
+DEB_HOST_ARCH_OS     ?= $(shell dpkg-architecture -qDEB_HOST_ARCH_OS)
+DEB_HOST_GNU_TYPE  ?= $(shell dpkg-architecture -qDEB_HOST_GNU_TYPE)
+DEB_BUILD_GNU_TYPE ?= $(shell dpkg-architecture -qDEB_BUILD_GNU_TYPE)
+DEB_HOST_GNU_CPU ?= $(shell dpkg-architecture -qDEB_HOST_GNU_CPU)
+DEB_BUILD_DIR      ?= $(CURDIR)/obj-$(DEB_BUILD_GNU_TYPE)
+ifeq ($(DEB_BUILD_GNU_TYPE), $(DEB_HOST_GNU_TYPE))
+        confflags += --build=$(DEB_HOST_GNU_TYPE)
+else
+        confflags += --build=$(DEB_BUILD_GNU_TYPE) --host=$(DEB_HOST_GNU_TYPE)
+endif
+
+export DEB_BUILD_ARCH
+
+# choose which configurations to build
+include debian/scripts/choose-configs
+
+# build the following configurations by default
+CONFIGS = $(SWX11_GLU_CONFIGS) \
+	  dri \
+	  osmesa \
+	  osmesa-static \
+	  osmesa16 \
+	  osmesa16-static \
+	  osmesa32 \
+	  osmesa32-static
+
+STAMP_DIR = debian/stamp
+STAMP = $(STAMP_DIR)/$(DEB_BUILD_GNU_TYPE)
+BUILD_STAMPS = $(addprefix $(STAMP)-build-, $(CONFIGS))
+INSTALL_TARGETS = $(addprefix install-, $(CONFIGS))
+
+QUILT_STAMPFN = $(STAMP_DIR)/patch
+include /usr/share/quilt/quilt.make
+
+confflags-common = \
+	--disable-glu \
+	--disable-glut \
+	--disable-glw \
+	CFLAGS="$(CFLAGS)"
+
+DRI_DRIVERS = swrast
+
+# hurd doesn't do direct rendering
+ifeq ($(DEB_HOST_ARCH_OS), hurd)
+	DIRECT_RENDERING = --disable-driglx-direct
+else
+	DIRECT_RENDERING = --enable-driglx-direct
+	DRI_DRIVERS += mach64 mga r128 r200 r300 radeon s3v savage tdfx trident
+endif
+
+ifeq ($(DEB_HOST_GNU_CPU), i486)
+	DRI_DRIVERS += i810 i915 i965 sis unichrome
+else ifeq ($(DEB_HOST_GNU_CPU), x86_64)
+	DRI_DRIVERS += i915 i965 sis unichrome
+else ifeq ($(DEB_HOST_ARCH), sparc)
+	DRI_DRIVERS += ffb
+endif
+
+confflags-dri = \
+	--with-driver=dri \
+	--with-dri-drivers="$(DRI_DRIVERS)" \
+	--with-demos=xdemos \
+	--libdir=/usr/lib/glx \
+	--with-dri-driverdir=/usr/lib/dri \
+	--enable-glx-tls \
+	$(DIRECT_RENDERING) \
+	$(confflags-common)
+
+confflags-osmesa = \
+	--with-driver=osmesa \
+	--with-demos= \
+	$(confflags-common)
+
+confflags-osmesa-static = \
+	--with-driver=osmesa \
+	--enable-static \
+	--with-demos= \
+	$(confflags-common)
+
+confflags-osmesa16 = \
+	--with-driver=osmesa \
+	--with-osmesa-bits=16 \
+	--with-demos= \
+	$(confflags-common)
+
+confflags-osmesa16-static = \
+	--with-driver=osmesa \
+	--with-osmesa-bits=16 \
+	--enable-static \
+	--with-demos= \
+	$(confflags-common)
+
+confflags-osmesa32 = \
+	--with-driver=osmesa \
+	--with-osmesa-bits=32 \
+	--with-demos= \
+	$(confflags-common)
+
+confflags-osmesa32-static = \
+	--with-driver=osmesa \
+	--with-osmesa-bits=32 \
+	--enable-static \
+	--with-demos= \
+	$(confflags-common)
+
+confflags-swx11+glu = \
+	--with-driver=xlib \
+	--disable-gl-osmesa \
+	--with-demos= \
+	--disable-glut \
+	CFLAGS="$(CFLAGS)"
+
+confflags-swx11+glu-static = \
+	--with-driver=xlib \
+	--disable-gl-osmesa \
+	--enable-static \
+	--with-demos= \
+	--disable-glut \
+	CFLAGS="$(CFLAGS)"
+
+confflags-swx11+glu-i386-i686 = \
+	--with-driver=xlib \
+	--disable-gl-osmesa \
+	--with-demos= \
+	--disable-glut \
+	--libdir=/usr/lib/i686/cmov \
+	CFLAGS="$(CFLAGS) -march=i686"
+
+configure: $(QUILT_STAMPFN) configure.ac
+	autoreconf -vfi
+
+# list the configurations that will built
+configs:
+	@echo Building the following configurations: $(CONFIGS)
+
+$(STAMP_DIR)/stamp:
+	dh_testdir
+	mkdir -p $(STAMP_DIR)
+	>$@
+
+$(QUILT_STAMPFN): $(STAMP_DIR)/stamp
+
+build: $(BUILD_STAMPS)
+
+$(STAMP)-build-%: configure
+	dh_testdir
+
+	mkdir -p $(DEB_BUILD_DIR)/$*
+	find $(CURDIR)/* -maxdepth 0 -not -path '$(DEB_BUILD_DIR)*' | \
+		xargs cp -rlf -t $(DEB_BUILD_DIR)/$*
+	cd $(DEB_BUILD_DIR)/$* && \
+	../../configure --prefix=/usr --mandir=\$${prefix}/share/man \
+	             --infodir=\$${prefix}/share/info --sysconfdir=/etc \
+	             --localstatedir=/var $(confflags) $(confflags-$*)
+	cd $(DEB_BUILD_DIR)/$* && $(MAKE)
+
+	touch $@
+
+install:
+	# Add here commands to install the package into debian/tmp
+	dh_testdir
+	dh_testroot
+	dh_clean -k
+	dh_installdirs
+	$(MAKE) -f debian/rules $(INSTALL_TARGETS)
+
+install-%: $(STAMP)-build-%
+	cd $(DEB_BUILD_DIR)/$* && $(MAKE) DESTDIR=$(CURDIR)/debian/tmp install
+
+clean: unpatch
+	dh_testdir
+	dh_testroot
+	rm -rf .pc
+	
+	rm -f config.cache config.log config.status
+	rm -f */config.cache */config.log */config.status
+	rm -f conftest* */conftest*
+	rm -rf autom4te.cache */autom4te.cache
+	rm -rf obj-*
+	rm -rf configure config.guess config.sub config.h.in
+	rm -rf $$(find -name Makefile.in)
+	rm -rf aclocal.m4 missing depcomp install-sh ltmain.sh
+	rm -rf $(STAMP_DIR)
+	
+	dh_clean
+
+# Build architecture-independent files here.
+binary-indep: install
+	dh_testdir
+	dh_testroot
+	dh_installchangelogs -i
+	dh_installdocs -i
+	dh_installexamples -i
+	dh_install --sourcedir=debian/tmp --list-missing -i
+	dh_installman -i
+	dh_link -i
+	dh_compress -i
+	dh_fixperms -i
+	dh_installdeb -i
+	dh_gencontrol -i
+	dh_md5sums -i
+	dh_builddeb -i
+
+# Build architecture-dependent files here.
+binary-arch: install
+	dh_testdir
+	dh_testroot
+	dh_installchangelogs -s
+	dh_installdocs -s
+	dh_installexamples -s
+	dh_install -s --sourcedir=debian/tmp --list-missing
+	dh_installman -s
+	dh_link -s
+	dh_strip -plibgl1-mesa-swx11 --dbg-package=libgl1-mesa-swx11-dbg
+	dh_strip -plibgl1-mesa-glx --dbg-package=libgl1-mesa-glx-dbg
+	dh_strip -plibgl1-mesa-dri --dbg-package=libgl1-mesa-dri-dbg
+	dh_strip -s
+	dh_compress -s
+	dh_fixperms -s
+	dh_makeshlibs -s
+	dh_installdeb -s
+	dh_shlibdeps -s
+	dh_gencontrol -s
+	dh_md5sums -s
+	dh_builddeb -s
+
+binary: binary-indep binary-arch
+.PHONY: configs build clean binary-indep binary-arch binary install
