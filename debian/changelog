@@ -1,8 +1,6 @@
 mesa (7.2+git20081209.a0d5c3cf-0ubuntu1) UNRELEASED; urgency=low
 
   * Merge from debian-experimental git branch.
-  * 102_dont_vblank.patch: deleted, this workaround is not needed
-    anymore.
   * 103_fix-crash-in-i830_emit_state.dpatch: deleted, included
     upstream.
 
