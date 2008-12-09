@@ -38,8 +38,7 @@
 #include "glheader.h"
 #include <GL/internal/glcore.h>	/* __GLcontextModes (GLvisual) */
 #include "config.h"		/* Hardwired parameters */
-#include "glapi/glapitable.h"
-#include "glapi/glthread.h"
+#include "glapi/glapi.h"
 #include "math/m_matrix.h"	/* GLmatrix */
 #include "bitset.h"
 
@@ -123,6 +122,7 @@ typedef int GLfixed;
 /*@{*/
 struct _mesa_HashTable;
 struct gl_pixelstore_attrib;
+struct gl_program_cache;
 struct gl_texture_format;
 struct gl_texture_image;
 struct gl_texture_object;
@@ -149,6 +149,7 @@ enum
    VERT_ATTRIB_COLOR1 = 4,
    VERT_ATTRIB_FOG = 5,
    VERT_ATTRIB_COLOR_INDEX = 6,
+   VERT_ATTRIB_POINT_SIZE = 6,  /*alias*/
    VERT_ATTRIB_EDGEFLAG = 7,
    VERT_ATTRIB_TEX0 = 8,
    VERT_ATTRIB_TEX1 = 9,
@@ -1431,6 +1432,7 @@ struct gl_texture_object
    GLenum DepthMode;		/**< GL_ARB_depth_texture */
    GLint _MaxLevel;		/**< actual max mipmap level (q in the spec) */
    GLfloat _MaxLambda;		/**< = _MaxLevel - BaseLevel (q - b in spec) */
+   GLint CropRect[4];           /**< GL_OES_draw_texture */
    GLboolean GenerateMipmap;    /**< GL_SGIS_generate_mipmap */
    GLboolean _Complete;		/**< Is texture object complete? */
 
@@ -1439,7 +1441,6 @@ struct gl_texture_object
 
    /** GL_EXT_paletted_texture */
    struct gl_color_table Palette;
-
 
    /**
     * \name For device driver.
@@ -1546,15 +1547,6 @@ struct gl_texture_unit
 };
 
 
-struct texenvprog_cache_item;
-
-struct texenvprog_cache
-{
-   struct texenvprog_cache_item **items;
-   GLuint size, n_items;
-   GLcontext *ctx;
-};
-
 
 /**
  * Texture attribute group (GL_TEXTURE_BIT).
@@ -1581,9 +1573,6 @@ struct gl_texture_attrib
    /** GL_EXT_shared_texture_palette */
    GLboolean SharedPalette;
    struct gl_color_table Palette;
-   
-   /** Cached texenv fragment programs */
-   struct texenvprog_cache env_fp_cache;
 };
 
 
@@ -1704,6 +1693,7 @@ struct gl_array_object
    struct gl_client_array Index;
    struct gl_client_array EdgeFlag;
    struct gl_client_array TexCoord[MAX_TEXTURE_COORD_UNITS];
+   struct gl_client_array PointSize;
    /*@}*/
 
    /** Generic arrays for vertex programs/shaders */
@@ -1883,9 +1873,12 @@ struct gl_program
 
    GLbitfield InputsRead;     /**< Bitmask of which input regs are read */
    GLbitfield OutputsWritten; /**< Bitmask of which output regs are written to */
+   GLbitfield InputFlags[MAX_PROGRAM_INPUTS];   /**< PROG_PARAM_BIT_x flags */
+   GLbitfield OutputFlags[MAX_PROGRAM_OUTPUTS]; /**< PROG_PARAM_BIT_x flags */
    GLbitfield TexturesUsed[MAX_TEXTURE_IMAGE_UNITS];  /**< TEXTURE_x_BIT bitmask */
    GLbitfield SamplersUsed;   /**< Bitfield of which samplers are used */
    GLbitfield ShadowSamplers; /**< Texture units used for shadow sampling. */
+
 
    /** Named parameters, constants, etc. from program text */
    struct gl_program_parameter_list *Parameters;
@@ -1942,7 +1935,10 @@ struct gl_fragment_program
 {
    struct gl_program Base;   /**< base class */
    GLenum FogOption;
-   GLboolean UsesKill;
+   GLboolean UsesKill;          /**< shader uses KIL instruction */
+   GLboolean UsesPointCoord;    /**< shader uses gl_PointCoord */
+   GLboolean UsesFrontFacing;   /**< shader used gl_FrontFacing */
+   GLboolean UsesFogFragCoord;  /**< shader used gl_FogFragCoord */
 };
 
 
@@ -1984,6 +1980,9 @@ struct gl_vertex_program_state
    /** Program to emulate fixed-function T&L (see above) */
    struct gl_vertex_program *_TnlProgram;
 
+   /** Cache of fixed-function programs */
+   struct gl_program_cache *Cache;
+
 #if FEATURE_MESA_program_debug
    GLprogramcallbackMESA Callback;
    GLvoid *CallbackData;
@@ -2016,6 +2015,9 @@ struct gl_fragment_program_state
 
    /** Program to emulate fixed-function texture env/combine (see above) */
    struct gl_fragment_program *_TexEnvProgram;
+
+   /** Cache of fixed-function programs */
+   struct gl_program_cache *Cache;
 
 #if FEATURE_MESA_program_debug
    GLprogramcallbackMESA Callback;
@@ -2074,10 +2076,11 @@ struct gl_ati_fragment_shader_state
  */
 struct gl_query_object
 {
-   GLuint Id;
-   GLuint64EXT Result; /* the counter */
-   GLboolean Active;   /* inside Begin/EndQuery */
-   GLboolean Ready;    /* result is ready */
+   GLenum Target;      /**< The query target, when active */
+   GLuint Id;          /**< hash table ID/name */
+   GLuint64EXT Result; /**< the counter */
+   GLboolean Active;   /**< inside Begin/EndQuery */
+   GLboolean Ready;    /**< result is ready? */
 };
 
 
@@ -2500,7 +2503,7 @@ struct gl_constants
    GLuint MaxRenderbufferSize;
    /* GL_ARB_vertex_shader */
    GLuint MaxVertexTextureImageUnits;
-   GLuint MaxVarying;
+   GLuint MaxVarying;  /**< Number of float[4] vectors */
 };
 
 
@@ -2626,7 +2629,6 @@ struct gl_extensions
    GLboolean SGIS_generate_mipmap;
    GLboolean SGIS_texture_edge_clamp;
    GLboolean SGIS_texture_lod;
-   GLboolean SGIX_depth_texture;
    GLboolean SGIX_shadow;
    GLboolean SGIX_shadow_ambient; /* or GL_ARB_shadow_ambient */
    GLboolean TDFX_texture_compression_FXT1;
@@ -2738,6 +2740,7 @@ struct gl_matrix_stack
 #define _NEW_ARRAY_FOGCOORD         VERT_BIT_FOG
 #define _NEW_ARRAY_INDEX            VERT_BIT_COLOR_INDEX
 #define _NEW_ARRAY_EDGEFLAG         VERT_BIT_EDGEFLAG
+#define _NEW_ARRAY_POINT_SIZE       VERT_BIT_COLOR_INDEX  /* aliased */
 #define _NEW_ARRAY_TEXCOORD_0       VERT_BIT_TEX0
 #define _NEW_ARRAY_TEXCOORD_1       VERT_BIT_TEX1
 #define _NEW_ARRAY_TEXCOORD_2       VERT_BIT_TEX2
@@ -2753,6 +2756,7 @@ struct gl_matrix_stack
 #define _NEW_ARRAY_TEXCOORD(i) (_NEW_ARRAY_TEXCOORD_0 << (i))
 #define _NEW_ARRAY_ATTRIB(i) (_NEW_ARRAY_ATTRIB_0 << (i))
 /*@}*/
+
 
 
 /**
@@ -3127,7 +3131,9 @@ enum _verbose
    VERBOSE_LIGHTING		= 0x0200,
    VERBOSE_PRIMS		= 0x0400,
    VERBOSE_VERTS		= 0x0800,
-   VERBOSE_DISASSEM		= 0x1000
+   VERBOSE_DISASSEM		= 0x1000,
+   VERBOSE_GLSL			= 0x2000,
+   VERBOSE_GLSL_DUMP		= 0x4000
 };
 
 

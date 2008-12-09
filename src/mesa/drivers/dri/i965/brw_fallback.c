@@ -25,19 +25,20 @@
  * 
  **************************************************************************/
 
+#include "main/glheader.h"
+#include "main/context.h"
+#include "main/enums.h"
+#include "main/imports.h"
+#include "main/macros.h"
+#include "main/mtypes.h"
+
 #include "swrast_setup/swrast_setup.h"
 #include "swrast/swrast.h"
 #include "tnl/tnl.h"
-#include "context.h"
 #include "brw_context.h"
 #include "brw_fallback.h"
 
-#include "glheader.h"
-#include "enums.h"
-#include "glapi.h"
-#include "imports.h"
-#include "macros.h"
-#include "mtypes.h"
+#include "glapi/glapi.h"
 
 #define FILE_DEBUG_FLAG DEBUG_FALLBACKS
 
@@ -73,10 +74,7 @@ static GLboolean do_check_fallback(struct brw_context *brw)
       if (texUnit->_ReallyEnabled) {
 	 struct intel_texture_object *intelObj = intel_texture_object(texUnit->_Current);
 	 struct gl_texture_image *texImage = intelObj->base.Image[0][intelObj->firstLevel];
-	 if (texImage->Border ||
-         ((texImage->_BaseFormat == GL_DEPTH_COMPONENT) &&
-          ((texImage->TexObject->WrapS == GL_CLAMP_TO_BORDER) || 
-           (texImage->TexObject->WrapT == GL_CLAMP_TO_BORDER)))) {
+	 if (texImage->Border) {
 	    DBG("FALLBACK: texture border\n");
 	    return GL_TRUE;
 	 }
@@ -95,10 +93,9 @@ static GLboolean do_check_fallback(struct brw_context *brw)
    return GL_FALSE;
 }
 
-static int check_fallback(struct brw_context *brw)
+static void check_fallback(struct brw_context *brw)
 {
    brw->intel.Fallback = do_check_fallback(brw);
-   return 0;
 }
 
 const struct brw_tracked_state brw_check_fallback = {

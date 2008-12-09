@@ -34,7 +34,7 @@
 #include "brw_state.h"
 #include "brw_defines.h"
 
-#include "macros.h"
+#include "main/macros.h"
 
 
 
@@ -229,6 +229,9 @@ brw_wm_sampler_populate_key(struct brw_context *brw,
 	 struct wm_sampler_entry *entry = &key->sampler[unit];
 	 struct gl_texture_unit *texUnit = &brw->attribs.Texture->Unit[unit];
 	 struct gl_texture_object *texObj = texUnit->_Current;
+	 struct intel_texture_object *intelObj = intel_texture_object(texObj);
+	 struct gl_texture_image *firstImage =
+	    texObj->Image[0][intelObj->firstLevel];
 
 	 entry->wrap_r = texObj->WrapR;
 	 entry->wrap_s = texObj->WrapS;
@@ -244,8 +247,22 @@ brw_wm_sampler_populate_key(struct brw_context *brw,
     entry->comparefunc = texObj->CompareFunc;
 
 	 dri_bo_unreference(brw->wm.sdc_bo[unit]);
-	 brw->wm.sdc_bo[unit] = upload_default_color(brw, texObj->BorderColor);
-
+	 if (firstImage->_BaseFormat == GL_DEPTH_COMPONENT) {
+	    float bordercolor[4] = {
+	       texObj->BorderColor[0],
+	       texObj->BorderColor[0],
+	       texObj->BorderColor[0],
+	       texObj->BorderColor[0]
+	    };
+	    /* GL specs that border color for depth textures is taken from the
+	     * R channel, while the hardware uses A.  Spam R into all the
+	     * channels for safety.
+	     */
+	    brw->wm.sdc_bo[unit] = upload_default_color(brw, bordercolor);
+	 } else {
+	    brw->wm.sdc_bo[unit] = upload_default_color(brw,
+							texObj->BorderColor);
+	 }
 	 key->sampler_count = unit + 1;
       }
    }
@@ -255,11 +272,10 @@ brw_wm_sampler_populate_key(struct brw_context *brw,
  * complicates various things.  However, this is still too confusing -
  * FIXME: simplify all the different new texture state flags.
  */
-static int upload_wm_samplers( struct brw_context *brw )
+static void upload_wm_samplers( struct brw_context *brw )
 {
    struct wm_sampler_key key;
    int i;
-   int ret = 0;
 
    brw_wm_sampler_populate_key(brw, &key);
 
@@ -271,7 +287,7 @@ static int upload_wm_samplers( struct brw_context *brw )
    dri_bo_unreference(brw->wm.sampler_bo);
    brw->wm.sampler_bo = NULL;
    if (brw->wm.sampler_count == 0)
-      return 0;
+      return;
 
    brw->wm.sampler_bo = brw_search_cache(&brw->cache, BRW_SAMPLER,
 					 &key, sizeof(key),
@@ -304,19 +320,14 @@ static int upload_wm_samplers( struct brw_context *brw )
 	 if (!brw->attribs.Texture->Unit[i]._ReallyEnabled)
 	    continue;
 
-	 ret |= dri_bufmgr_check_aperture_space(brw->wm.sdc_bo[i]);
-	 dri_emit_reloc(brw->wm.sampler_bo,
-			DRM_BO_FLAG_MEM_TT | DRM_BO_FLAG_READ,
-			0,
-			i * sizeof(struct brw_sampler_state) +
-			offsetof(struct brw_sampler_state, ss2),
-			brw->wm.sdc_bo[i]);
+	 dri_bo_emit_reloc(brw->wm.sampler_bo,
+			   I915_GEM_DOMAIN_SAMPLER, 0,
+			   0,
+			   i * sizeof(struct brw_sampler_state) +
+			   offsetof(struct brw_sampler_state, ss2),
+			   brw->wm.sdc_bo[i]);
       }
    }
-
-   ret |= dri_bufmgr_check_aperture_space(brw->wm.sampler_bo);
-   return ret;
-
 }
 
 const struct brw_tracked_state brw_wm_samplers = {

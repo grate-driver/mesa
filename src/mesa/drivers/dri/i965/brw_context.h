@@ -35,7 +35,7 @@
 
 #include "intel_context.h"
 #include "brw_structs.h"
-#include "imports.h"
+#include "main/imports.h"
 
 
 /* Glossary:
@@ -130,18 +130,19 @@ struct brw_context;
 #define BRW_NEW_CONTEXT                 0x80
 #define BRW_NEW_WM_INPUT_DIMENSIONS     0x100
 #define BRW_NEW_INPUT_VARYING           0x200
-#define BRW_NEW_TNL_PROGRAM             0x400
 #define BRW_NEW_PSP                     0x800
 #define BRW_NEW_METAOPS                 0x1000
 #define BRW_NEW_FENCE                   0x2000
-#define BRW_NEW_LOCK                    0x4000
+#define BRW_NEW_INDICES			0x4000
+#define BRW_NEW_VERTICES		0x8000
 /**
  * Used for any batch entry with a relocated pointer that will be used
  * by any 3D rendering.
  */
-#define BRW_NEW_BATCH			0x8000
+#define BRW_NEW_BATCH			0x10000
 /** brw->depth_region updated */
-#define BRW_NEW_DEPTH_BUFFER		0x10000
+#define BRW_NEW_DEPTH_BUFFER		0x20000
+#define BRW_NEW_NR_SURFACES		0x40000
 
 struct brw_state_flags {
    /** State update flags signalled by mesa internals */
@@ -157,7 +158,6 @@ struct brw_state_flags {
 struct brw_vertex_program {
    struct gl_vertex_program program;
    GLuint id;
-   GLuint param_state;		/* flags indicating state tracked by params */
 };
 
 
@@ -165,7 +165,6 @@ struct brw_vertex_program {
 struct brw_fragment_program {
    struct gl_fragment_program program;
    GLuint id;
-   GLuint param_state;		/* flags indicating state tracked by params */
 };
 
 
@@ -332,7 +331,7 @@ struct brw_state_pointers {
  */
 struct brw_tracked_state {
    struct brw_state_flags dirty;
-   int (*prepare)( struct brw_context *brw );
+   void (*prepare)( struct brw_context *brw );
    void (*emit)( struct brw_context *brw );
 };
 
@@ -409,7 +408,22 @@ struct brw_tnl_cache {
    GLuint size, n_items;
 };
 
+struct brw_query_object {
+   struct gl_query_object Base;
 
+   /** Doubly linked list of active query objects in the context. */
+   struct brw_query_object *prev, *next;
+
+   /** Last query BO associated with this query. */
+   dri_bo *bo;
+   /** First index in bo with query data for this object. */
+   int first_index;
+   /** Last index in bo with query data for this object. */
+   int last_index;
+
+   /* Total count of pixels from previous BOs */
+   unsigned int count;
+};
 
 struct brw_context 
 {
@@ -417,7 +431,6 @@ struct brw_context
    GLuint primitive;
 
    GLboolean emit_state_always;
-   GLboolean wrap;
    GLboolean tmp_fallback;
    GLboolean no_batch_wrap;
 
@@ -429,6 +442,19 @@ struct brw_context
       GLuint nr_draw_regions;
       struct intel_region *draw_regions[MAX_DRAW_BUFFERS];
       struct intel_region *depth_region;
+
+      /**
+       * List of buffers accumulated in brw_validate_state to receive
+       * dri_bo_check_aperture treatment before exec, so we can know if we
+       * should flush the batch and try again before emitting primitives.
+       *
+       * This can be a fixed number as we only have a limited number of
+       * objects referenced from the batchbuffer in a primitive emit,
+       * consisting of the vertex buffers, pipelined state pointers,
+       * the CURBE, the depth buffer, and a query BO.
+       */
+      dri_bo *validated_bos[VERT_ATTRIB_MAX + 16];
+      int validated_bo_count;
    } state;
 
    struct brw_state_pointers attribs;
@@ -450,7 +476,20 @@ struct brw_context
        * for changes to this state:
        */
       struct brw_vertex_info info;
+      unsigned int min_index, max_index;
    } vb;
+
+   struct {
+      /**
+       * Index buffer for this draw_prims call.
+       *
+       * Updates are signaled by BRW_NEW_INDICES.
+       */
+      const struct _mesa_index_buffer *ib;
+
+      dri_bo *bo;
+      unsigned int offset;
+   } ib;
 
    struct {
       /* Will be allocated on demand if needed.   
@@ -473,10 +512,6 @@ struct brw_context
       GLboolean active;
    } metaops;
 
-   /* Track fixed function t&l in a vertex program:
-    */
-   struct gl_vertex_program *tnl_program;
-   struct brw_tnl_cache tnl_program_cache;
 
    /* Active vertex program: 
     */
@@ -542,6 +577,11 @@ struct brw_context
 
       GLfloat *last_buf;
       GLuint last_bufsz;
+      /**
+       *  Whether we should create a new bo instead of reusing the old one
+       * (if we just dispatch the batch pointing at the old one.
+       */
+      GLboolean need_new_bo;
    } curbe;
 
    struct {
@@ -611,7 +651,12 @@ struct brw_context
       dri_bo *vp_bo;
    } cc;
 
-   
+   struct {
+      struct brw_query_object active_head;
+      dri_bo *bo;
+      int index;
+      GLboolean active;
+   } query;
    /* Used to give every program string a unique id
     */
    GLuint program_id;
@@ -636,15 +681,13 @@ GLboolean brwCreateContext( const __GLcontextModes *mesaVis,
 			    __DRIcontextPrivate *driContextPriv,
 			    void *sharedContextPrivate);
 
-
-
 /*======================================================================
- * brw_state.c
+ * brw_queryobj.c
  */
-int brw_validate_state( struct brw_context *brw );
-void brw_init_state( struct brw_context *brw );
-void brw_destroy_state( struct brw_context *brw );
-
+void brw_init_queryobj_functions(struct dd_function_table *functions);
+void brw_prepare_query_begin(struct brw_context *brw);
+void brw_emit_query_begin(struct brw_context *brw);
+void brw_emit_query_end(struct brw_context *brw);
 
 /*======================================================================
  * brw_state_dump.c

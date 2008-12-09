@@ -174,10 +174,10 @@ ultrix-gcc:
 
 # Rules for making release tarballs
 
-DIRECTORY = Mesa-7.2
-LIB_NAME = MesaLib-7.2
-DEMO_NAME = MesaDemos-7.2
-GLUT_NAME = MesaGLUT-7.2
+DIRECTORY = Mesa-7.1-rc4
+LIB_NAME = MesaLib-7.1-rc4
+DEMO_NAME = MesaDemos-7.1-rc4
+GLUT_NAME = MesaGLUT-7.1-rc4
 
 MAIN_FILES = \
 	$(DIRECTORY)/Makefile*						\
@@ -287,6 +287,8 @@ MAIN_FILES = \
 	$(DIRECTORY)/src/mesa/drivers/x11/Makefile			\
 	$(DIRECTORY)/src/mesa/drivers/x11/descrip.mms			\
 	$(DIRECTORY)/src/mesa/drivers/x11/*.[ch]			\
+	$(DIRECTORY)/src/mesa/drivers/glslcompiler/Makefile		\
+	$(DIRECTORY)/src/mesa/drivers/glslcompiler/glslcompiler.c	\
 	$(DIRECTORY)/src/mesa/ppc/*.[ch]				\
 	$(DIRECTORY)/src/mesa/sparc/*.[chS]				\
 	$(DIRECTORY)/src/mesa/x86/Makefile				\

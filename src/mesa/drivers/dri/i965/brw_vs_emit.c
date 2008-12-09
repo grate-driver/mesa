@@ -818,8 +818,7 @@ static void emit_vertex_write( struct brw_vs_compile *c)
    }
 
 
-   /* Build ndc coords?   TODO: Shortcircuit when w is known to be one.
-    */
+   /* Build ndc coords */
    if (!c->key.know_w_is_one) {
       ndc = get_tmp(c);
       emit_math1(c, BRW_MATH_FUNCTION_INV, ndc, brw_swizzle1(pos, 3), BRW_MATH_PRECISION_FULL);
@@ -829,12 +828,12 @@ static void emit_vertex_write( struct brw_vs_compile *c)
       ndc = pos;
    }
 
-   /* This includes the workaround for -ve rhw, so is no longer an
-    * optional step:
+   /* Update the header for point size, user clipping flags, and -ve rhw
+    * workaround.
     */
    if ((c->prog_data.outputs_written & (1<<VERT_RESULT_PSIZ)) ||
        c->key.nr_userclip ||
-       !c->key.know_w_is_one)
+       (!BRW_IS_G4X(p->brw) && !c->key.know_w_is_one))
    {
       struct brw_reg header1 = retype(get_tmp(c), BRW_REGISTER_TYPE_UD);
       GLuint i;
@@ -867,7 +866,7 @@ static void emit_vertex_write( struct brw_vs_compile *c)
        * Later, clipping will detect ucp[6] and ensure the primitive is
        * clipped against all fixed planes.
        */
-      if (!(BRW_IS_GM45(p->brw) || BRW_IS_G4X(p->brw)) && !c->key.know_w_is_one) {
+      if (!BRW_IS_G4X(p->brw) && !c->key.know_w_is_one) {
 	 brw_CMP(p,
 		 vec8(brw_null_reg()),
 		 BRW_CONDITIONAL_L,
@@ -1024,6 +1023,9 @@ void brw_vs_emit(struct brw_vs_compile *c )
       case OPCODE_ADD:
 	 brw_ADD(p, dst, args[0], args[1]);
 	 break;
+      case OPCODE_COS:
+	 emit_math1(c, BRW_MATH_FUNCTION_COS, dst, args[0], BRW_MATH_PRECISION_FULL);
+	 break;
       case OPCODE_DP3:
 	 brw_DP3(p, dst, args[0], args[1]);
 	 break;
@@ -1089,6 +1091,9 @@ void brw_vs_emit(struct brw_vs_compile *c )
       case OPCODE_SEQ:
          emit_seq(p, dst, args[0], args[1]);
          break;
+      case OPCODE_SIN:
+	 emit_math1(c, BRW_MATH_FUNCTION_SIN, dst, args[0], BRW_MATH_PRECISION_FULL);
+	 break;
       case OPCODE_SNE:
          emit_sne(p, dst, args[0], args[1]);
          break;
@@ -1155,7 +1160,10 @@ void brw_vs_emit(struct brw_vs_compile *c )
       case OPCODE_ENDSUB:
 	 break;
       default:
-	 _mesa_printf("Unsupport opcode %d in vertex shader\n", inst->Opcode);
+	 _mesa_printf("Unsupported opcode %i (%s) in vertex shader\n",
+		      inst->Opcode, inst->Opcode < MAX_OPCODE ?
+				    _mesa_opcode_string(inst->Opcode) :
+				    "unknown");
 	 break;
       }
 

@@ -23,6 +23,7 @@ AC_CANONICAL_HOST
 
 dnl Versions for external dependencies
 LIBDRM_REQUIRED=2.3.1
+DRI2PROTO_REQUIRED=1.99.3
 
 dnl Check for progs
 AC_PROG_CPP
@@ -82,7 +83,7 @@ dnl Compiler macros
 DEFINES=""
 AC_SUBST([DEFINES])
 case "$host_os" in
-linux*)
+*-gnu)
 if test "x$GCC" = xyes; then
     DEFINES="$DEFINES -D_POSIX_SOURCE -D_POSIX_C_SOURCE=199309L -D_BSD_SOURCE"
 fi
@@ -270,14 +271,14 @@ if test "x$enable_asm" = xyes; then
     case "$host_cpu" in
     i?86)
         case "$host_os" in
-        linux* | freebsd* | dragonfly*)
+        linux* | *freebsd* | dragonfly*)
             test "x$enable_64bit" = xyes && asm_arch=x86_64 || asm_arch=x86
             ;;
         esac
         ;;
     x86_64)
         case "$host_os" in
-        linux* | freebsd* | dragonfly*)
+        linux* | *freebsd* | dragonfly*)
             test "x$enable_32bit" = xyes && asm_arch=x86 || asm_arch=x86_64
             ;;
         esac
@@ -367,7 +368,7 @@ linux*)
     i*86|x86_64|powerpc*) default_driver="dri";;
     esac
     ;;
-freebsd* | dragonfly*)
+*freebsd* | dragonfly*)
     case "$host_cpu" in
     i*86|x86_64) default_driver="dri";;
     esac
@@ -530,6 +531,7 @@ dri)
 
     # Check for libdrm
     PKG_CHECK_MODULES([LIBDRM], [libdrm >= $LIBDRM_REQUIRED])
+    PKG_CHECK_MODULES([DRI2PROTO], [dri2proto >= $DRI2PROTO_REQUIRED])
 
     # find the DRI deps for libGL
     if test "$x11_pkgconfig" = yes; then
@@ -593,20 +595,6 @@ AC_ARG_ENABLE([driglx-direct],
         [enable direct rendering in GLX for DRI @<:@default=enabled@:>@])],
     [driglx_direct="$enableval"],
     [driglx_direct="yes"])
-dnl ttm support
-AC_ARG_ENABLE([ttm-api],
-    [AS_HELP_STRING([--enable-ttm-api],
-        [enable TTM API users @<:@default=disabled@:>@])],
-    [ttmapi="$enableval"],
-    [ttmapi="no"])
-
-if test "x$ttmapi" = "xyes"; then
-    save_CFLAGS=$CFLAGS
-    CFLAGS=$LIBDRM_CFLAGS
-    AC_CHECK_HEADERS([xf86mm.h],[],[AC_MSG_ERROR([xf86mm.h required for TTM.])],[#include "stdint.h"\n#include "drm.h"])
-    CFLAGS=$save_CFLAGS
-fi
-
 dnl Which drivers to build - default is chosen by platform
 AC_ARG_WITH([dri-drivers],
     [AS_HELP_STRING([--with-dri-drivers@<:@=DIRS...@:>@],
@@ -646,10 +634,6 @@ if test "$mesa_driver" = dri; then
     # Use TLS in GLX?
     if test "x$GLX_USE_TLS" = xyes; then
         DEFINES="$DEFINES -DGLX_USE_TLS -DPTHREADS"
-    fi
-
-    if test "x$ttmapi" = xyes; then
-        DEFINES="$DEFINES -DTTM_API"
     fi
 
     if test "x$USING_EGL" = x1; then
@@ -1048,8 +1032,8 @@ else
     echo "        DRI drivers:     $dri_dirs"
 fi
     echo "        DRI driver dir:  $DRI_DRIVER_INSTALL_DIR"
-    echo "        TTM API support: $ttmapi"
 fi
+echo "        Use XCB:         $enable_xcb"
 
 dnl Libraries
 echo ""

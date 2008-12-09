@@ -26,12 +26,12 @@
  **************************************************************************/
 
 
-#include "glheader.h"
-#include "context.h"
-#include "macros.h"
-#include "enums.h"
-#include "colormac.h"
-#include "dd.h"
+#include "main/glheader.h"
+#include "main/context.h"
+#include "main/macros.h"
+#include "main/enums.h"
+#include "main/colormac.h"
+#include "main/dd.h"
 
 #include "intel_screen.h"
 #include "intel_context.h"
@@ -267,6 +267,8 @@ intelViewport(GLcontext * ctx,
               GLint x, GLint y, GLsizei width, GLsizei height)
 {
    intelCalcViewport(ctx);
+
+   intel_viewport(ctx, x, y, width, height);
 }
 
 static void

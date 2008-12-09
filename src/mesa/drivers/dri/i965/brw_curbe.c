@@ -31,10 +31,10 @@
 
 
 
-#include "glheader.h"
-#include "context.h"
-#include "macros.h"
-#include "enums.h"
+#include "main/glheader.h"
+#include "main/context.h"
+#include "main/macros.h"
+#include "main/enums.h"
 #include "shader/prog_parameter.h"
 #include "shader/prog_statevars.h"
 #include "intel_batchbuffer.h"
@@ -46,7 +46,7 @@
 
 /* Partition the CURBE between the various users of constant values:
  */
-static int calculate_curbe_offsets( struct brw_context *brw )
+static void calculate_curbe_offsets( struct brw_context *brw )
 {
    /* CACHE_NEW_WM_PROG */
    GLuint nr_fp_regs = (brw->wm.prog_data->nr_params + 15) / 16;
@@ -117,7 +117,6 @@ static int calculate_curbe_offsets( struct brw_context *brw )
 
       brw->state.dirty.brw |= BRW_NEW_CURBE_OFFSETS;
    }
-   return 0;
 }
 
 
@@ -156,19 +155,7 @@ void brw_upload_constant_buffer_state(struct brw_context *brw)
 
    assert(brw->urb.nr_cs_entries);
    BRW_CACHED_BATCH_STRUCT(brw, &cbs);
-}      
-
-#if 0
-const struct brw_tracked_state brw_constant_buffer_state = {
-   .dirty = {
-      .mesa = 0,
-      .brw = BRW_NEW_URB_FENCE,
-      .cache = 0
-   },
-   .update = brw_upload_constant_buffer_state
-};
-#endif
-
+}
 
 static GLfloat fixed_plane[6][4] = {
    { 0,    0,   -1, 1 },
@@ -183,7 +170,7 @@ static GLfloat fixed_plane[6][4] = {
  * cache mechanism, but maybe would benefit from a comparison against
  * the current uploaded set of constants.
  */
-static int prepare_constant_buffer(struct brw_context *brw)
+static void prepare_constant_buffer(struct brw_context *brw)
 {
    GLcontext *ctx = &brw->intel.ctx;
    struct brw_vertex_program *vp = (struct brw_vertex_program *)brw->vertex_program;
@@ -197,8 +184,8 @@ static int prepare_constant_buffer(struct brw_context *brw)
     * function will also be called whenever fp or vp changes.
     */
    brw->curbe.tracked_state.dirty.mesa = (_NEW_TRANSFORM|_NEW_PROJECTION);
-   brw->curbe.tracked_state.dirty.mesa |= vp->param_state;
-   brw->curbe.tracked_state.dirty.mesa |= fp->param_state;
+   brw->curbe.tracked_state.dirty.mesa |= vp->program.Base.Parameters->StateFlags;
+   brw->curbe.tracked_state.dirty.mesa |= fp->program.Base.Parameters->StateFlags;
 
    if (sz == 0) {
 
@@ -207,8 +194,8 @@ static int prepare_constant_buffer(struct brw_context *brw)
 	 brw->curbe.last_buf = NULL;
 	 brw->curbe.last_bufsz  = 0;
       }
-       
-      return 0;
+
+      return;
    }
 
    buf = (GLfloat *)malloc(bufsz);
@@ -295,7 +282,8 @@ static int prepare_constant_buffer(struct brw_context *brw)
       brw->curbe.last_bufsz = bufsz;
 
       if (brw->curbe.curbe_bo != NULL &&
-	  brw->curbe.curbe_next_offset + bufsz > brw->curbe.curbe_bo->size)
+	  (brw->curbe.need_new_bo ||
+	   brw->curbe.curbe_next_offset + bufsz > brw->curbe.curbe_bo->size))
       {
 	 dri_bo_unreference(brw->curbe.curbe_bo);
 	 brw->curbe.curbe_bo = NULL;
@@ -306,10 +294,7 @@ static int prepare_constant_buffer(struct brw_context *brw)
 	  * They're generally around 64b.
 	  */
 	 brw->curbe.curbe_bo = dri_bo_alloc(brw->intel.bufmgr, "CURBE",
-					    4096, 1 << 6,
-					    DRM_BO_FLAG_MEM_LOCAL |
-					    DRM_BO_FLAG_CACHED |
-					    DRM_BO_FLAG_CACHED_MAPPED);
+					    4096, 1 << 6);
 	 brw->curbe.curbe_next_offset = 0;
       }
 
@@ -322,6 +307,7 @@ static int prepare_constant_buffer(struct brw_context *brw)
       dri_bo_subdata(brw->curbe.curbe_bo, brw->curbe.curbe_offset, bufsz, buf);
    }
 
+   brw_add_validated_bo(brw, brw->curbe.curbe_bo);
 
    /* Because this provokes an action (ie copy the constants into the
     * URB), it shouldn't be shortcircuited if identical to the
@@ -336,9 +322,6 @@ static int prepare_constant_buffer(struct brw_context *brw)
     * flushes as necessary when doublebuffering of CURBEs isn't
     * possible.
     */
-
-   /* check aperture space for this bo */
-   return dri_bufmgr_check_aperture_space(brw->curbe.curbe_bo);
 }
 
 
@@ -353,7 +336,8 @@ static void emit_constant_buffer(struct brw_context *brw)
       OUT_BATCH(0);
    } else {
       OUT_BATCH((CMD_CONST_BUFFER << 16) | (1 << 8) | (2 - 2));
-      OUT_RELOC(brw->curbe.curbe_bo, DRM_BO_FLAG_MEM_TT | DRM_BO_FLAG_READ,
+      OUT_RELOC(brw->curbe.curbe_bo,
+		I915_GEM_DOMAIN_INSTRUCTION, 0,
 		(sz - 1) + brw->curbe.curbe_offset);
    }
    ADVANCE_BATCH();

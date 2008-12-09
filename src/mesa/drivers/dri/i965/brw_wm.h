@@ -49,8 +49,7 @@
 #define IZ_DEPTH_TEST_ENABLE_BIT    0x8
 #define IZ_STENCIL_WRITE_ENABLE_BIT 0x10
 #define IZ_STENCIL_TEST_ENABLE_BIT  0x20
-#define IZ_EARLY_DEPTH_TEST_BIT     0x40
-#define IZ_BIT_MAX                  0x80
+#define IZ_BIT_MAX                  0x40
 
 #define AA_NEVER     0
 #define AA_SOMETIMES 1
@@ -157,6 +156,7 @@ struct brw_wm_instruction {
 #define BRW_WM_MAX_PARAM 256
 #define BRW_WM_MAX_CONST 256
 #define BRW_WM_MAX_KILLS MAX_NV_FRAGMENT_PROGRAM_INSTRUCTIONS
+#define BRW_WM_MAX_SUBROUTINE 16
 
 
 
@@ -246,7 +246,10 @@ struct brw_wm_compile {
    struct brw_reg stack;
    struct brw_reg emit_mask_reg;
    GLuint reg_index;
+   GLuint tmp_regs[BRW_WM_MAX_GRF];
    GLuint tmp_index;
+   GLuint tmp_max;
+   GLuint subroutines[BRW_WM_MAX_SUBROUTINE];
 };
 
 

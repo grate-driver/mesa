@@ -1,6 +1,6 @@
 /**************************************************************************
  * 
- * Copyright 2003 Tungsten Graphics, Inc., Cedar Park, Texas.
+ * Copyright 2007 Tungsten Graphics, Inc., Cedar Park, Texas.
  * All Rights Reserved.
  * 
  * Permission is hereby granted, free of charge, to any person obtaining a
@@ -25,22 +25,16 @@
  * 
  **************************************************************************/
 
-#ifndef INTEL_IOCTL_H
-#define INTEL_IOCTL_H
 
-#include "intel_context.h"
+#ifndef FFVERTEX_PROG_H
+#define FFVERTEX_PROG_H
 
-void intelWaitIrq( struct intel_context *intel, int seq );
-int intelEmitIrqLocked( struct intel_context *intel );
 
-void intel_batch_ioctl( struct intel_context *intel, 
-			GLuint start_offset,
-			GLuint used,
-			GLboolean ignore_cliprects,
-			GLboolean allow_unlock );
-void intel_exec_ioctl(struct intel_context *intel,
-		      GLuint used,
-		      GLboolean ignore_cliprects, GLboolean allow_unlock,
-		      void *start, GLuint count, dri_fence **fence);
+#include "main/mtypes.h"
 
-#endif
+struct gl_vertex_program *
+_mesa_get_fixed_func_vertex_program(GLcontext *ctx);
+
+
+
+#endif /* FFVERTEX_PROG_H */

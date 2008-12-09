@@ -25,11 +25,11 @@
  * 
  **************************************************************************/
 
-#include "mtypes.h"
-#include "enums.h"
-#include "image.h"
-#include "teximage.h"
-#include "mipmap.h"
+#include "main/mtypes.h"
+#include "main/enums.h"
+#include "main/image.h"
+#include "main/teximage.h"
+#include "main/mipmap.h"
 #include "swrast/swrast.h"
 
 #include "intel_screen.h"
@@ -60,7 +60,7 @@ get_teximage_source(struct intel_context *intel, GLenum internalFormat)
 
    switch (internalFormat) {
    case GL_DEPTH_COMPONENT:
-   case GL_DEPTH_COMPONENT16_ARB:
+   case GL_DEPTH_COMPONENT16:
       irb = intel_get_renderbuffer(intel->ctx.ReadBuffer, BUFFER_DEPTH);
       if (irb && irb->region && irb->region->cpp == 2)
          return irb->region;
@@ -98,7 +98,9 @@ do_copy_texsubimage(struct intel_context *intel,
       get_teximage_source(intel, internalFormat);
 
    if (!intelImage->mt || !src) {
-      DBG("%s fail %p %p\n", __FUNCTION__, intelImage->mt, src);
+      if (INTEL_DEBUG & DEBUG_FALLBACKS)
+	 fprintf(stderr, "%s fail %p %p\n",
+		 __FUNCTION__, intelImage->mt, src);
       return GL_FALSE;
    }
 
@@ -114,45 +116,49 @@ do_copy_texsubimage(struct intel_context *intel,
 
       if (_mesa_clip_to_region(fb->_Xmin, fb->_Ymin, fb->_Xmax, fb->_Ymax,
                                &x, &y, &width, &height)) {
+	 GLshort src_pitch;
+
          /* Update dst for clipped src.  Need to also clip the source rect.
           */
          dstx += x - orig_x;
          dsty += y - orig_y;
 
+	 /* image_offset may be non-page-aligned, but that's illegal for tiling.
+	  */
+	 assert(intelImage->mt->region->tiling == I915_TILING_NONE);
+
          if (ctx->ReadBuffer->Name == 0) {
             /* reading from a window, adjust x, y */
             __DRIdrawablePrivate *dPriv = intel->driDrawable;
-            GLuint window_y;
-            /* window_y = position of window on screen if y=0=bottom */
-            window_y = intel->intelScreen->height - (dPriv->y + dPriv->h);
-            y = window_y + y;
+	    y = dPriv->y + (dPriv->h - (y + height));
             x += dPriv->x;
+
+	    /* Invert the data coming from the source rectangle due to GL
+	     * and hardware disagreeing on where y=0 is.
+	     *
+	     * It appears that our offsets and pitches get mangled
+	     * appropriately by the hardware, and we don't need to adjust them
+	     * on our own.
+	     */
+	    src_pitch = -src->pitch;
          }
          else {
-            /* reading from a FBO */
-            /* invert Y */
-            y = ctx->ReadBuffer->Height - y - 1;
+            /* reading from a FBO, y is already oriented the way we like */
+	    src_pitch = src->pitch;
          }
 
-
-         /* A bit of fiddling to get the blitter to work with -ve
-          * pitches.  But we get a nice inverted blit this way, so it's
-          * worth it:
-          */
          intelEmitCopyBlit(intel,
                            intelImage->mt->cpp,
-                           -src->pitch,
+                           src_pitch,
                            src->buffer,
-                           src->height * src->pitch * src->cpp,
-			   GL_FALSE,
+                           0,
+			   src->tiling,
                            intelImage->mt->pitch,
                            intelImage->mt->region->buffer,
                            image_offset,
-			   intelImage->mt->region->tiled,
-                           x, y + height, dstx, dsty, width, height,
-			   GL_COPY); /* ? */
-
-         intel_batchbuffer_flush(intel->batch);
+			   intelImage->mt->region->tiling,
+                           x, y, dstx, dsty, width, height,
+			   GL_COPY);
       }
    }
 
@@ -161,7 +167,7 @@ do_copy_texsubimage(struct intel_context *intel,
 
    /* GL_SGIS_generate_mipmap */
    if (intelImage->level == texObj->BaseLevel && texObj->GenerateMipmap) {
-      intel_generate_mipmap(ctx, target, texObj);
+      ctx->Driver.GenerateMipmap(ctx, target, texObj);
    }
 
    return GL_TRUE;

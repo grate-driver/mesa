@@ -183,9 +183,10 @@ decode_2d(uint32_t *data, int count, uint32_t hw_offset, int *failures)
     switch ((data[0] & 0x1fc00000) >> 22) {
     case 0x50:
 	instr_out(data, hw_offset, 0,
-		  "XY_COLOR_BLT (rgb %sabled, alpha %sabled)\n",
+		  "XY_COLOR_BLT (rgb %sabled, alpha %sabled, dst tile %d)\n",
 		  (data[0] & (1 << 20)) ? "en" : "dis",
-		  (data[0] & (1 << 21)) ? "en" : "dis");
+		  (data[0] & (1 << 21)) ? "en" : "dis",
+		  (data[0] >> 11) & 1);
 
 	len = (data[0] & 0x000000ff) + 2;
 	if (len != 6)
@@ -210,7 +211,8 @@ decode_2d(uint32_t *data, int count, uint32_t hw_offset, int *failures)
 
 	instr_out(data, hw_offset, 1, "format %s, pitch %d, "
 		  "clipping %sabled\n", format,
-		  data[1] & 0xffff, data[1] & (1 << 30) ? "en" : "dis");
+		  (short)(data[1] & 0xffff),
+		  data[1] & (1 << 30) ? "en" : "dis");
 	instr_out(data, hw_offset, 2, "(%d,%d)\n",
 		  data[2] & 0xffff, data[2] >> 16);
 	instr_out(data, hw_offset, 3, "(%d,%d)\n",
@@ -220,9 +222,12 @@ decode_2d(uint32_t *data, int count, uint32_t hw_offset, int *failures)
 	return len;
     case 0x53:
 	instr_out(data, hw_offset, 0,
-		  "XY_SRC_COPY_BLT (rgb %sabled, alpha %sabled)\n",
+		  "XY_SRC_COPY_BLT (rgb %sabled, alpha %sabled, "
+		  "src tile %d, dst tile %d)\n",
 		  (data[0] & (1 << 20)) ? "en" : "dis",
-		  (data[0] & (1 << 21)) ? "en" : "dis");
+		  (data[0] & (1 << 21)) ? "en" : "dis",
+		  (data[0] >> 15) & 1,
+		  (data[0] >> 11) & 1);
 
 	len = (data[0] & 0x000000ff) + 2;
 	if (len != 8)
@@ -247,16 +252,17 @@ decode_2d(uint32_t *data, int count, uint32_t hw_offset, int *failures)
 
 	instr_out(data, hw_offset, 1, "format %s, dst pitch %d, "
 		  "clipping %sabled\n", format,
-		  data[1] & 0xffff, data[1] & (1 << 30) ? "en" : "dis");
+		  (short)(data[1] & 0xffff),
+		  data[1] & (1 << 30) ? "en" : "dis");
 	instr_out(data, hw_offset, 2, "dst (%d,%d)\n",
 		  data[2] & 0xffff, data[2] >> 16);
 	instr_out(data, hw_offset, 3, "dst (%d,%d)\n",
-		  data[2] & 0xffff, data[2] >> 16);
+		  data[3] & 0xffff, data[3] >> 16);
 	instr_out(data, hw_offset, 4, "dst offset 0x%08x\n", data[4]);
 	instr_out(data, hw_offset, 5, "src (%d,%d)\n",
 		  data[5] & 0xffff, data[5] >> 16);
 	instr_out(data, hw_offset, 6, "src pitch %d\n",
-		  data[6] & 0xffff);
+		  (short)(data[6] & 0xffff));
 	instr_out(data, hw_offset, 7, "src offset 0x%08x\n", data[7]);
 	return len;
     }
@@ -302,6 +308,15 @@ decode_3d_1c(uint32_t *data, int count, uint32_t hw_offset, int *failures)
     case 0x10:
 	instr_out(data, hw_offset, 0, "3DSTATE_SCISSOR_ENABLE\n");
 	return 1;
+    case 0x01:
+	instr_out(data, hw_offset, 0, "3DSTATE_MAP_COORD_SET_I830\n");
+	return 1;
+    case 0x0a:
+	instr_out(data, hw_offset, 0, "3DSTATE_MAP_CUBE_I830\n");
+	return 1;
+    case 0x05:
+	instr_out(data, hw_offset, 0, "3DSTATE_MAP_TEX_STREAM_I830\n");
+	return 1;
     }
 
     instr_out(data, hw_offset, 0, "3D UNKNOWN\n");
@@ -310,33 +325,39 @@ decode_3d_1c(uint32_t *data, int count, uint32_t hw_offset, int *failures)
 }
 
 static int
-decode_3d_1d(uint32_t *data, int count, uint32_t hw_offset, int *failures)
+decode_3d_1d(uint32_t *data, int count, uint32_t hw_offset, int *failures, int i830)
 {
     unsigned int len, i, c, opcode, word, map, sampler, instr;
 
     struct {
 	uint32_t opcode;
+	int i830_only;
 	int min_len;
 	int max_len;
 	char *name;
     } opcodes_3d_1d[] = {
-	{ 0x8e, 3, 3, "3DSTATE_BUFFER_INFO" },
-	{ 0x86, 4, 4, "3DSTATE_CHROMA_KEY" },
-	{ 0x9c, 1, 1, "3DSTATE_CLEAR_PARAMETERS" },
-	{ 0x88, 2, 2, "3DSTATE_CONSTANT_BLEND_COLOR" },
-	{ 0x99, 2, 2, "3DSTATE_DEFAULT_DIFFUSE" },
-	{ 0x9a, 2, 2, "3DSTATE_DEFAULT_SPECULAR" },
-	{ 0x98, 2, 2, "3DSTATE_DEFAULT_Z" },
-	{ 0x97, 2, 2, "3DSTATE_DEPTH_OFFSET_SCALE" },
-	{ 0x85, 2, 2, "3DSTATE_DEST_BUFFER_VARIABLES" },
-	{ 0x80, 5, 5, "3DSTATE_DRAWING_RECTANGLE" },
-	{ 0x8e, 3, 3, "3DSTATE_BUFFER_INFO" },
-	{ 0x9d, 65, 65, "3DSTATE_FILTER_COEFFICIENTS_4X4" },
-	{ 0x9e, 4, 4, "3DSTATE_MONO_FILTER" },
-	{ 0x89, 4, 4, "3DSTATE_FOG_MODE" },
-	{ 0x8f, 2, 16, "3DSTATE_MAP_PALLETE_LOAD_32" },
-	{ 0x81, 3, 3, "3DSTATE_SCISSOR_RECTANGLE" },
-	{ 0x83, 2, 2, "3DSTATE_SPAN_STIPPLE" },
+	{ 0x8e, 0, 3, 3, "3DSTATE_BUFFER_INFO" },
+	{ 0x86, 0, 4, 4, "3DSTATE_CHROMA_KEY" },
+	{ 0x9c, 0, 1, 1, "3DSTATE_CLEAR_PARAMETERS" },
+	{ 0x88, 0, 2, 2, "3DSTATE_CONSTANT_BLEND_COLOR" },
+	{ 0x99, 0, 2, 2, "3DSTATE_DEFAULT_DIFFUSE" },
+	{ 0x9a, 0, 2, 2, "3DSTATE_DEFAULT_SPECULAR" },
+	{ 0x98, 0, 2, 2, "3DSTATE_DEFAULT_Z" },
+	{ 0x97, 0, 2, 2, "3DSTATE_DEPTH_OFFSET_SCALE" },
+	{ 0x85, 0, 2, 2, "3DSTATE_DEST_BUFFER_VARIABLES" },
+	{ 0x80, 0, 5, 5, "3DSTATE_DRAWING_RECTANGLE" },
+	{ 0x8e, 0, 3, 3, "3DSTATE_BUFFER_INFO" },
+	{ 0x9d, 0, 65, 65, "3DSTATE_FILTER_COEFFICIENTS_4X4" },
+	{ 0x9e, 0, 4, 4, "3DSTATE_MONO_FILTER" },
+	{ 0x89, 0, 4, 4, "3DSTATE_FOG_MODE" },
+	{ 0x8f, 0, 2, 16, "3DSTATE_MAP_PALLETE_LOAD_32" },
+	{ 0x81, 0, 3, 3, "3DSTATE_SCISSOR_RECTANGLE" },
+	{ 0x83, 0, 2, 2, "3DSTATE_SPAN_STIPPLE" },
+	{ 0x8c, 1, 2, 2, "3DSTATE_MAP_COORD_TRANSFORM_I830" },
+	{ 0x8b, 1, 2, 2, "3DSTATE_MAP_VERTEX_TRANSFORM_I830" },
+	{ 0x8d, 1, 3, 3, "3DSTATE_W_STATE_I830" },
+	{ 0x01, 1, 2, 2, "3DSTATE_COLOR_FACTOR_I830" },
+	{ 0x02, 1, 2, 2, "3DSTATE_MAP_COORD_SETBIND_I830" },
     };
 
     switch ((data[0] & 0x00ff0000) >> 16) {
@@ -482,6 +503,8 @@ decode_3d_1d(uint32_t *data, int count, uint32_t hw_offset, int *failures)
 	}
 	return len;
     case 0x01:
+	if (i830)
+	    break;
 	instr_out(data, hw_offset, 0, "3DSTATE_SAMPLER_STATE\n");
 	len = (data[0] & 0x0000003f) + 2;
 	i = 1;
@@ -507,6 +530,9 @@ decode_3d_1d(uint32_t *data, int count, uint32_t hw_offset, int *failures)
     for (opcode = 0; opcode < sizeof(opcodes_3d_1d) / sizeof(opcodes_3d_1d[0]);
 	 opcode++)
     {
+	if (opcodes_3d_1d[opcode].i830_only && !i830)
+	    continue;
+
 	if (((data[0] & 0x00ff0000) >> 16) == opcodes_3d_1d[opcode].opcode) {
 	    len = 1;
 
@@ -750,7 +776,7 @@ decode_3d(uint32_t *data, int count, uint32_t hw_offset, int *failures)
     case 0x1f:
 	return decode_3d_primitive(data, count, hw_offset, failures);
     case 0x1d:
-	return decode_3d_1d(data, count, hw_offset, failures);
+	return decode_3d_1d(data, count, hw_offset, failures, 0);
     case 0x1c:
 	return decode_3d_1c(data, count, hw_offset, failures);
     }
@@ -993,6 +1019,73 @@ decode_3d_965(uint32_t *data, int count, uint32_t hw_offset, int *failures)
     return 1;
 }
 
+static int
+decode_3d_i830(uint32_t *data, int count, uint32_t hw_offset, int *failures)
+{
+    unsigned int opcode;
+
+    struct {
+	uint32_t opcode;
+	int min_len;
+	int max_len;
+	char *name;
+    } opcodes_3d[] = {
+	{ 0x02, 1, 1, "3DSTATE_MODES_3" },
+	{ 0x03, 1, 1, "3DSTATE_ENABLES_1"},
+	{ 0x04, 1, 1, "3DSTATE_ENABLES_2"},
+	{ 0x05, 1, 1, "3DSTATE_VFT0"},
+	{ 0x06, 1, 1, "3DSTATE_AA"},
+	{ 0x07, 1, 1, "3DSTATE_RASTERIZATION_RULES" },
+	{ 0x08, 1, 1, "3DSTATE_MODES_1" },
+	{ 0x09, 1, 1, "3DSTATE_STENCIL_TEST" },
+	{ 0x0a, 1, 1, "3DSTATE_VFT1"},
+	{ 0x0b, 1, 1, "3DSTATE_INDPT_ALPHA_BLEND" },
+	{ 0x0c, 1, 1, "3DSTATE_MODES_5" },
+	{ 0x0d, 1, 1, "3DSTATE_MAP_BLEND_OP" },
+	{ 0x0e, 1, 1, "3DSTATE_MAP_BLEND_ARG" },
+	{ 0x0f, 1, 1, "3DSTATE_MODES_2" },
+	{ 0x15, 1, 1, "3DSTATE_FOG_COLOR" },
+	{ 0x16, 1, 1, "3DSTATE_MODES_4" },
+    };
+
+    switch ((data[0] & 0x1f000000) >> 24) {
+    case 0x1f:
+	return decode_3d_primitive(data, count, hw_offset, failures);
+    case 0x1d:
+	return decode_3d_1d(data, count, hw_offset, failures, 1);
+    case 0x1c:
+	return decode_3d_1c(data, count, hw_offset, failures);
+    }
+
+    for (opcode = 0; opcode < sizeof(opcodes_3d) / sizeof(opcodes_3d[0]);
+	 opcode++) {
+	if ((data[0] & 0x1f000000) >> 24 == opcodes_3d[opcode].opcode) {
+	    unsigned int len = 1, i;
+
+	    instr_out(data, hw_offset, 0, "%s\n", opcodes_3d[opcode].name);
+	    if (opcodes_3d[opcode].max_len > 1) {
+		len = (data[0] & 0xff) + 2;
+		if (len < opcodes_3d[opcode].min_len ||
+		    len > opcodes_3d[opcode].max_len)
+		{
+		    fprintf(out, "Bad count in %s\n", opcodes_3d[opcode].name);
+		}
+	    }
+
+	    for (i = 1; i < len; i++) {
+		if (i >= count)
+		    BUFFER_FAIL(count, len, opcodes_3d[opcode].name);
+		instr_out(data, hw_offset, i, "dword %d\n", i);
+	    }
+	    return len;
+	}
+    }
+
+    instr_out(data, hw_offset, 0, "3D UNKNOWN\n");
+    (*failures)++;
+    return 1;
+}
+
 /**
  * Decodes an i830-i915 batch buffer, writing the output to stdout.
  *
@@ -1022,9 +1115,12 @@ intel_decode(uint32_t *data, int count, uint32_t hw_offset, uint32_t devid)
 	    if (IS_965(devid)) {
 		index += decode_3d_965(data + index, count - index,
 				       hw_offset + index * 4, &failures);
-	    } else {
+	    } else if (IS_9XX(devid)) {
 		index += decode_3d(data + index, count - index,
 				   hw_offset + index * 4, &failures);
+	    } else {
+		index += decode_3d_i830(data + index, count - index,
+					hw_offset + index * 4, &failures);
 	    }
 	    break;
 	default:

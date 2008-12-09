@@ -30,11 +30,11 @@
 
 
 
-#include "mtypes.h"
-#include "drm.h"
-#include "mm.h"
+#include "main/mtypes.h"
+#include "main/mm.h"
 #include "texmem.h"
-#include "dri_bufmgr.h"
+#include "drm.h"
+#include "intel_bufmgr.h"
 
 #include "intel_screen.h"
 #include "intel_tex_obj.h"
@@ -85,6 +85,7 @@ struct intel_context
    {
       void (*destroy) (struct intel_context * intel);
       void (*emit_state) (struct intel_context * intel);
+      void (*finish_batch) (struct intel_context * intel);
       void (*new_batch) (struct intel_context * intel);
       void (*emit_invarient_state) (struct intel_context * intel);
       void (*note_fence) (struct intel_context *intel, GLuint fence);
@@ -174,9 +175,6 @@ struct intel_context
     */
    GLboolean ttm;
 
-   dri_fence *last_swap_fence;
-   dri_fence *first_swap_fence;
-
    struct intel_batchbuffer *batch;
    GLboolean no_batch_wrap;
    unsigned batch_id;
@@ -184,9 +182,14 @@ struct intel_context
    struct
    {
       GLuint id;
-      GLuint primitive;
-      GLubyte *start_ptr;
+      uint32_t primitive;	/**< Current hardware primitive type */
       void (*flush) (struct intel_context *);
+      GLubyte *start_ptr; /**< for i8xx */
+      dri_bo *vb_bo;
+      uint8_t *vb;
+      unsigned int start_offset; /**< Byte offset of primitive sequence */
+      unsigned int current_offset; /**< Byte offset of next vertex */
+      unsigned int count;	/**< Number of vertices in current primitive */
    } prim;
 
    GLuint stats_wm;
@@ -224,7 +227,6 @@ struct intel_context
    GLenum reduced_primitive;
    GLuint vertex_size;
    GLubyte *verts;              /* points to tnl->clipspace.vertex_buf */
-   struct intel_region *draw_region;
 
    /* Fallback rasterization functions 
     */
@@ -234,10 +236,18 @@ struct intel_context
 
    /* These refer to the current drawing buffer:
     */
-   int drawX, drawY;            /**< origin of drawing area within region */
-   GLuint numClipRects;         /**< cliprects for drawing */
-   drm_clip_rect_t *pClipRects;
    struct gl_texture_object *frame_buffer_texobj;
+   /**
+    * Set to true if a single constant cliprect should be used in the
+    * batchbuffer.  Otherwise, cliprects must be calculated at batchbuffer
+    * flush time while the lock is held.
+    */
+   GLboolean constant_cliprect;
+   /**
+    * In !constant_cliprect mode, set to true if the front cliprects should be
+    * used instead of back.
+    */
+   GLboolean front_cliprects;
    drm_clip_rect_t fboRect;     /**< cliprect for FBO rendering */
 
    int perf_boxes;
@@ -254,6 +264,7 @@ struct intel_context
    drmLock *driHwLock;
    int driFd;
 
+   __DRIcontextPrivate *driContext;
    __DRIdrawablePrivate *driDrawable;
    __DRIdrawablePrivate *driReadDrawable;
    __DRIscreenPrivate *driScreen;
@@ -268,10 +279,6 @@ struct intel_context
     * Configuration cache
     */
    driOptionCache optionCache;
-
-   /* Last seen width/height of the screen */
-   int width;
-   int height;
 
    int64_t swap_ust;
    int64_t swap_missed_ust;
@@ -291,6 +298,7 @@ extern char *__progname;
 #define SUBPIXEL_X 0.125
 #define SUBPIXEL_Y 0.125
 
+#define ARRAY_SIZE(x) (sizeof(x) / sizeof(x[0]))
 #define ALIGN(value, alignment)  ((value + alignment - 1) & ~(alignment - 1))
 
 #define INTEL_FIREVERTICES(intel)		\
@@ -488,6 +496,11 @@ extern int intel_translate_stencil_op(GLenum op);
 extern int intel_translate_blend_factor(GLenum factor);
 extern int intel_translate_logic_op(GLenum opcode);
 
+void intel_viewport(GLcontext * ctx, GLint x, GLint y,
+		    GLsizei width, GLsizei height);
+
+void intel_update_renderbuffers(__DRIcontext *context,
+				__DRIdrawable *drawable);
 
 /*======================================================================
  * Inline conversion functions.  

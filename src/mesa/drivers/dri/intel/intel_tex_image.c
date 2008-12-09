@@ -2,26 +2,25 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "glheader.h"
-#include "macros.h"
-#include "mtypes.h"
-#include "enums.h"
-#include "colortab.h"
-#include "convolve.h"
-#include "context.h"
-#include "simple_list.h"
-#include "texcompress.h"
-#include "texformat.h"
-#include "texobj.h"
-#include "texstore.h"
-#include "teximage.h"
+#include "main/glheader.h"
+#include "main/macros.h"
+#include "main/mtypes.h"
+#include "main/enums.h"
+#include "main/colortab.h"
+#include "main/convolve.h"
+#include "main/context.h"
+#include "main/simple_list.h"
+#include "main/texcompress.h"
+#include "main/texformat.h"
+#include "main/texobj.h"
+#include "main/texstore.h"
+#include "main/teximage.h"
 
 #include "intel_context.h"
 #include "intel_mipmap_tree.h"
 #include "intel_buffer_objects.h"
 #include "intel_batchbuffer.h"
 #include "intel_tex.h"
-#include "intel_ioctl.h"
 #include "intel_blit.h"
 #include "intel_fbo.h"
 
@@ -238,8 +237,6 @@ try_pbo_upload(struct intel_context *intel,
                         dst_stride, dst_buffer, dst_offset, GL_FALSE,
                         0, 0, 0, 0, width, height,
 			GL_COPY);
-
-      intel_batchbuffer_flush(intel->batch);
    }
    UNLOCK_HARDWARE(intel);
 
@@ -400,10 +397,25 @@ intelTexImage(GLcontext * ctx,
 
       intel_miptree_reference(&intelImage->mt, intelObj->mt);
       assert(intelImage->mt);
-   }
+   } else if (intelImage->base.Border == 0) {
+      int comp_byte = 0;
 
-   if (!intelImage->mt)
-      DBG("XXX: Image did not fit into tree - storing in local memory!\n");
+      if (intelImage->base.IsCompressed) {
+	 comp_byte =
+	    intel_compressed_num_bytes(intelImage->base.TexFormat->MesaFormat);
+      }
+
+      /* Didn't fit in the object miptree, but it's suitable for inclusion in
+       * a miptree, so create one just for our level and store it in the image.
+       * It'll get moved into the object miptree at validate time.
+       */
+      intelImage->mt = intel_miptree_create(intel, target, internalFormat,
+					    level, level,
+					    width, height, depth,
+					    intelImage->base.TexFormat->TexelBytes,
+					    comp_byte);
+
+   }
 
    /* PBO fastpaths:
     */
@@ -718,9 +730,15 @@ intelSetTexBuffer(__DRIcontext *pDRICtx, GLint target, __DRIdrawable *dPriv)
    if (!intelObj)
       return;
 
-   __driParseEvents(pDRICtx, dPriv);
+   intel_update_renderbuffers(pDRICtx, dPriv);
 
    rb = intel_fb->color_rb[0];
+   /* If the region isn't set, then intel_update_renderbuffers was unable
+    * to get the buffers for the drawable.
+    */
+   if (rb->region == NULL)
+      return;
+
    type = GL_BGRA;
    format = GL_UNSIGNED_BYTE;
    internalFormat = (rb->region->cpp == 3 ? 3 : 4);
@@ -739,7 +757,7 @@ intelSetTexBuffer(__DRIcontext *pDRICtx, GLint target, __DRIdrawable *dPriv)
    intelObj->mt = mt;
    texImage = _mesa_get_tex_image(&intel->ctx, texObj, target, level);
    _mesa_init_teximage_fields(&intel->ctx, target, texImage,
-			      rb->region->pitch, rb->region->height, 1,
+			      rb->region->width, rb->region->height, 1,
 			      0, internalFormat);
 
    intelImage = intel_texture_image(texImage);

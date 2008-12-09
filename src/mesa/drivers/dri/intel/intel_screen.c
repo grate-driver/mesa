@@ -25,12 +25,12 @@
  * 
  **************************************************************************/
 
-#include "glheader.h"
-#include "context.h"
-#include "framebuffer.h"
-#include "matrix.h"
-#include "renderbuffer.h"
-#include "simple_list.h"
+#include "main/glheader.h"
+#include "main/context.h"
+#include "main/framebuffer.h"
+#include "main/matrix.h"
+#include "main/renderbuffer.h"
+#include "main/simple_list.h"
 #include "utils.h"
 #include "vblank.h"
 #include "xmlpool.h"
@@ -41,7 +41,6 @@
 #include "intel_buffers.h"
 #include "intel_tex.h"
 #include "intel_span.h"
-#include "intel_ioctl.h"
 #include "intel_fbo.h"
 #include "intel_chipset.h"
 
@@ -49,7 +48,7 @@
 #include "i830_dri.h"
 #include "intel_regions.h"
 #include "intel_batchbuffer.h"
-#include "intel_bufmgr_ttm.h"
+#include "intel_bufmgr.h"
 
 PUBLIC const char __driConfigOptions[] =
    DRI_CONF_BEGIN
@@ -59,7 +58,7 @@ PUBLIC const char __driConfigOptions[] =
       /* Options correspond to DRI_CONF_BO_REUSE_DISABLED,
        * DRI_CONF_BO_REUSE_ALL
        */
-      DRI_CONF_OPT_BEGIN_V(bo_reuse, enum, 0, "0:1")
+      DRI_CONF_OPT_BEGIN_V(bo_reuse, enum, 1, "0:1")
 	 DRI_CONF_DESC_BEGIN(en, "Buffer object reuse")
 	    DRI_CONF_ENUM(0, "Disable buffer object reuse")
 	    DRI_CONF_ENUM(1, "Enable reuse of all sizes of buffer objects")
@@ -90,51 +89,6 @@ intelMapScreenRegions(__DRIscreenPrivate * sPriv)
 {
    intelScreenPrivate *intelScreen = (intelScreenPrivate *) sPriv->private;
 
-   if (intelScreen->front.handle) {
-      if (drmMap(sPriv->fd,
-                 intelScreen->front.handle,
-                 intelScreen->front.size,
-                 (drmAddress *) & intelScreen->front.map) != 0) {
-         _mesa_problem(NULL, "drmMap(frontbuffer) failed!");
-         return GL_FALSE;
-      }
-   }
-   else {
-      _mesa_warning(NULL, "no front buffer handle in intelMapScreenRegions!");
-   }
-
-   if (0)
-      _mesa_printf("Back 0x%08x ", intelScreen->back.handle);
-   if (drmMap(sPriv->fd,
-              intelScreen->back.handle,
-              intelScreen->back.size,
-              (drmAddress *) & intelScreen->back.map) != 0) {
-      intelUnmapScreenRegions(intelScreen);
-      return GL_FALSE;
-   }
-
-   if (intelScreen->third.handle) {
-      if (0)
-	 _mesa_printf("Third 0x%08x ", intelScreen->third.handle);
-      if (drmMap(sPriv->fd,
-		 intelScreen->third.handle,
-		 intelScreen->third.size,
-		 (drmAddress *) & intelScreen->third.map) != 0) {
-	 intelUnmapScreenRegions(intelScreen);
-	 return GL_FALSE;
-      }
-   }
-
-   if (0)
-      _mesa_printf("Depth 0x%08x ", intelScreen->depth.handle);
-   if (drmMap(sPriv->fd,
-              intelScreen->depth.handle,
-              intelScreen->depth.size,
-              (drmAddress *) & intelScreen->depth.map) != 0) {
-      intelUnmapScreenRegions(intelScreen);
-      return GL_FALSE;
-   }
-
    if (0)
       _mesa_printf("TEX 0x%08x ", intelScreen->tex.handle);
    if (intelScreen->tex.size != 0) {
@@ -147,50 +101,15 @@ intelMapScreenRegions(__DRIscreenPrivate * sPriv)
       }
    }
 
-   if (0)
-      printf("Mappings:  front: %p  back: %p  third: %p  depth: %p  tex: %p\n",
-             intelScreen->front.map,
-             intelScreen->back.map, intelScreen->third.map,
-             intelScreen->depth.map, intelScreen->tex.map);
    return GL_TRUE;
 }
 
 void
 intelUnmapScreenRegions(intelScreenPrivate * intelScreen)
 {
-#define REALLY_UNMAP 1
-   if (intelScreen->front.map) {
-#if REALLY_UNMAP
-      if (drmUnmap(intelScreen->front.map, intelScreen->front.size) != 0)
-         printf("drmUnmap front failed!\n");
-#endif
-      intelScreen->front.map = NULL;
-   }
-   if (intelScreen->back.map) {
-#if REALLY_UNMAP
-      if (drmUnmap(intelScreen->back.map, intelScreen->back.size) != 0)
-         printf("drmUnmap back failed!\n");
-#endif
-      intelScreen->back.map = NULL;
-   }
-   if (intelScreen->third.map) {
-#if REALLY_UNMAP
-      if (drmUnmap(intelScreen->third.map, intelScreen->third.size) != 0)
-         printf("drmUnmap third failed!\n");
-#endif
-      intelScreen->third.map = NULL;
-   }
-   if (intelScreen->depth.map) {
-#if REALLY_UNMAP
-      drmUnmap(intelScreen->depth.map, intelScreen->depth.size);
-      intelScreen->depth.map = NULL;
-#endif
-   }
    if (intelScreen->tex.map) {
-#if REALLY_UNMAP
       drmUnmap(intelScreen->tex.map, intelScreen->tex.size);
       intelScreen->tex.map = NULL;
-#endif
    }
 }
 
@@ -221,16 +140,16 @@ intelPrintSAREA(const struct drm_i915_sarea * sarea)
            sarea->height);
    fprintf(stderr, "SAREA: pitch: %d\n", sarea->pitch);
    fprintf(stderr,
-           "SAREA: front offset: 0x%08x  size: 0x%x  handle: 0x%x\n",
+           "SAREA: front offset: 0x%08x  size: 0x%x  handle: 0x%x tiled: %d\n",
            sarea->front_offset, sarea->front_size,
-           (unsigned) sarea->front_handle);
+           (unsigned) sarea->front_handle, sarea->front_tiled);
    fprintf(stderr,
-           "SAREA: back  offset: 0x%08x  size: 0x%x  handle: 0x%x\n",
+           "SAREA: back  offset: 0x%08x  size: 0x%x  handle: 0x%x tiled: %d\n",
            sarea->back_offset, sarea->back_size,
-           (unsigned) sarea->back_handle);
-   fprintf(stderr, "SAREA: depth offset: 0x%08x  size: 0x%x  handle: 0x%x\n",
+           (unsigned) sarea->back_handle, sarea->back_tiled);
+   fprintf(stderr, "SAREA: depth offset: 0x%08x  size: 0x%x  handle: 0x%x tiled: %d\n",
            sarea->depth_offset, sarea->depth_size,
-           (unsigned) sarea->depth_handle);
+           (unsigned) sarea->depth_handle, sarea->depth_tiled);
    fprintf(stderr, "SAREA: tex   offset: 0x%08x  size: 0x%x  handle: 0x%x\n",
            sarea->tex_offset, sarea->tex_size, (unsigned) sarea->tex_handle);
 }
@@ -289,106 +208,6 @@ intelUpdateScreenFromSAREA(intelScreenPrivate * intelScreen,
 
    if (0)
       intelPrintSAREA(sarea);
-}
-
-
-/**
- * DRI2 entrypoint
- */
-static void
-intelHandleDrawableConfig(__DRIdrawablePrivate *dPriv,
-			  __DRIcontextPrivate *pcp,
-			  __DRIDrawableConfigEvent *event)
-{
-   struct intel_framebuffer *intel_fb = dPriv->driverPrivate;
-   struct intel_region *region = NULL;
-   struct intel_renderbuffer *rb, *depth_rb, *stencil_rb;
-   struct intel_context *intel = pcp->driverPrivate;
-   int cpp, pitch;
-
-   cpp = intel->ctx.Visual.rgbBits / 8;
-   pitch = ((cpp * dPriv->w + 63) & ~63) / cpp;
-
-   rb = intel_fb->color_rb[1];
-   if (rb) {
-      region = intel_region_alloc(intel, cpp, pitch, dPriv->h);
-      intel_renderbuffer_set_region(rb, region);
-   }
-
-   rb = intel_fb->color_rb[2];
-   if (rb) {
-      region = intel_region_alloc(intel, cpp, pitch, dPriv->h);
-      intel_renderbuffer_set_region(rb, region);
-   }
-
-   depth_rb = intel_get_renderbuffer(&intel_fb->Base, BUFFER_DEPTH);
-   stencil_rb = intel_get_renderbuffer(&intel_fb->Base, BUFFER_STENCIL);
-   if (depth_rb || stencil_rb)
-      region = intel_region_alloc(intel, cpp, pitch, dPriv->h);
-   if (depth_rb)
-      intel_renderbuffer_set_region(depth_rb, region);
-   if (stencil_rb)
-      intel_renderbuffer_set_region(stencil_rb, region);
-
-   /* FIXME: Tell the X server about the regions we just allocated and
-    * attached. */
-}
-
-#define BUFFER_FLAG_TILED 0x0100
-
-/**
- * DRI2 entrypoint
- */
-static void
-intelHandleBufferAttach(__DRIdrawablePrivate *dPriv,
-			__DRIcontextPrivate *pcp,
-			__DRIBufferAttachEvent *ba)
-{
-   struct intel_framebuffer *intel_fb = dPriv->driverPrivate;
-   struct intel_renderbuffer *rb;
-   struct intel_region *region;
-   struct intel_context *intel = pcp->driverPrivate;
-   GLuint tiled;
-
-   switch (ba->buffer.attachment) {
-   case DRI_DRAWABLE_BUFFER_FRONT_LEFT:
-      rb = intel_fb->color_rb[0];
-      break;
-
-   case DRI_DRAWABLE_BUFFER_BACK_LEFT:
-      rb = intel_fb->color_rb[0];
-      break;
-
-   case DRI_DRAWABLE_BUFFER_DEPTH:
-     rb = intel_get_renderbuffer(&intel_fb->Base, BUFFER_DEPTH);
-     break;
-
-   case DRI_DRAWABLE_BUFFER_STENCIL:
-     rb = intel_get_renderbuffer(&intel_fb->Base, BUFFER_STENCIL);
-     break;
-
-   case DRI_DRAWABLE_BUFFER_ACCUM:
-   default:
-      fprintf(stderr, "unhandled buffer attach event, attacment type %d\n",
-	      ba->buffer.attachment);
-      return;
-   }
-
-#if 0
-   /* FIXME: Add this so we can filter out when the X server sends us
-    * attachment events for the buffers we just allocated.  Need to
-    * get the BO handle for a render buffer. */
-   if (intel_renderbuffer_get_region_handle(rb) == ba->buffer.handle)
-      return;
-#endif
-
-   tiled = (ba->buffer.flags & BUFFER_FLAG_TILED) > 0;
-   region = intel_region_alloc_for_handle(intel, ba->buffer.cpp,
-					  ba->buffer.pitch / ba->buffer.cpp,
-					  dPriv->h, tiled,
-					  ba->buffer.handle);
-
-   intel_renderbuffer_set_region(rb, region);
 }
 
 static const __DRItexOffsetExtension intelTexOffsetExtension = {
@@ -454,9 +273,9 @@ static GLboolean intelInitDriver(__DRIscreenPrivate *sPriv)
 
    intelScreen->driScrnPriv = sPriv;
    sPriv->private = (void *) intelScreen;
-   intelScreen->sarea_priv_offset = gDRIPriv->sarea_priv_offset;
    sarea = (struct drm_i915_sarea *)
-      (((GLubyte *) sPriv->pSAREA) + intelScreen->sarea_priv_offset);
+      (((GLubyte *) sPriv->pSAREA) + gDRIPriv->sarea_priv_offset);
+   intelScreen->sarea = sarea;
 
    intelScreen->deviceID = gDRIPriv->deviceID;
 
@@ -469,8 +288,6 @@ static GLboolean intelInitDriver(__DRIscreenPrivate *sPriv)
       return GL_FALSE;
    }
 
-   intelScreen->sarea_priv_offset = gDRIPriv->sarea_priv_offset;
-
    if (0)
       intelPrintDRIInfo(intelScreen, sPriv, gDRIPriv);
 
@@ -479,11 +296,6 @@ static GLboolean intelInitDriver(__DRIscreenPrivate *sPriv)
    /* Determine if IRQs are active? */
    if (!intel_get_param(sPriv, I915_PARAM_IRQ_ACTIVE,
 			&intelScreen->irq_active))
-      return GL_FALSE;
-
-   /* Determine if batchbuffers are allowed */
-   if (!intel_get_param(sPriv, I915_PARAM_ALLOW_BATCHBUFFER,
-			&intelScreen->allow_batchbuffer))
       return GL_FALSE;
 
    sPriv->extensions = intelScreenExtensions;
@@ -497,6 +309,7 @@ intelDestroyScreen(__DRIscreenPrivate * sPriv)
 {
    intelScreenPrivate *intelScreen = (intelScreenPrivate *) sPriv->private;
 
+   dri_bufmgr_destroy(intelScreen->bufmgr);
    intelUnmapScreenRegions(intelScreen);
 
    FREE(intelScreen);
@@ -530,14 +343,13 @@ intelCreateBuffer(__DRIscreenPrivate * driScrnPriv,
       _mesa_initialize_framebuffer(&intel_fb->Base, mesaVis);
 
       /* setup the hardware-based renderbuffers */
-      {
-         intel_fb->color_rb[0] = intel_create_renderbuffer(rgbFormat);
-         _mesa_add_renderbuffer(&intel_fb->Base, BUFFER_FRONT_LEFT,
-				&intel_fb->color_rb[0]->Base);
-      }
+      intel_fb->color_rb[0] = intel_create_renderbuffer(rgbFormat);
+      _mesa_add_renderbuffer(&intel_fb->Base, BUFFER_FRONT_LEFT,
+			     &intel_fb->color_rb[0]->Base);
 
       if (mesaVis->doubleBufferMode) {
-         intel_fb->color_rb[1] = intel_create_renderbuffer(rgbFormat);
+	 intel_fb->color_rb[1] = intel_create_renderbuffer(rgbFormat);
+
          _mesa_add_renderbuffer(&intel_fb->Base, BUFFER_BACK_LEFT,
 				&intel_fb->color_rb[1]->Base);
 
@@ -569,7 +381,7 @@ intelCreateBuffer(__DRIscreenPrivate * driScrnPriv,
       else if (mesaVis->depthBits == 16) {
          /* just 16-bit depth buffer, no hw stencil */
          struct intel_renderbuffer *depthRb
-            = intel_create_renderbuffer(GL_DEPTH_COMPONENT16);
+	    = intel_create_renderbuffer(GL_DEPTH_COMPONENT16);
          _mesa_add_renderbuffer(&intel_fb->Base, BUFFER_DEPTH, &depthRb->Base);
       }
 
@@ -649,6 +461,7 @@ intelCreateContext(const __GLcontextModes * mesaVis,
 				  sharedContextPrivate);
       }
    } else {
+      intelScreen->no_vbo = GL_TRUE;
       return i830CreateContext(mesaVis, driContextPriv, sharedContextPrivate);
    }
 #else
@@ -680,8 +493,8 @@ intelFillInModes(__DRIscreenPrivate *psp,
       GLX_NONE, GLX_SWAP_UNDEFINED_OML, GLX_SWAP_COPY_OML
    };
 
-   u_int8_t depth_bits_array[3];
-   u_int8_t stencil_bits_array[3];
+   uint8_t depth_bits_array[3];
+   uint8_t stencil_bits_array[3];
 
    depth_bits_array[0] = 0;
    depth_bits_array[1] = depth_bits;
@@ -732,6 +545,69 @@ intelFillInModes(__DRIscreenPrivate *psp,
    return configs;
 }
 
+static GLboolean
+intel_init_bufmgr(intelScreenPrivate *intelScreen)
+{
+   GLboolean gem_disable = getenv("INTEL_NO_GEM") != NULL;
+   int gem_kernel = 0;
+   GLboolean gem_supported;
+   struct drm_i915_getparam gp;
+   __DRIscreenPrivate *spriv = intelScreen->driScrnPriv;
+
+   intelScreen->no_hw = getenv("INTEL_NO_HW") != NULL;
+
+   gp.param = I915_PARAM_HAS_GEM;
+   gp.value = &gem_kernel;
+
+   (void) drmCommandWriteRead(spriv->fd, DRM_I915_GETPARAM, &gp, sizeof(gp));
+
+   /* If we've got a new enough DDX that's initializing GEM and giving us
+    * object handles for the shared buffers, use that.
+    */
+   intelScreen->ttm = GL_FALSE;
+   if (intelScreen->driScrnPriv->dri2.enabled)
+       gem_supported = GL_TRUE;
+   else if (intelScreen->driScrnPriv->ddx_version.minor >= 9 &&
+	    gem_kernel &&
+	    intelScreen->front.bo_handle != -1)
+       gem_supported = GL_TRUE;
+   else
+       gem_supported = GL_FALSE;
+
+   if (!gem_disable && gem_supported) {
+      intelScreen->bufmgr = intel_bufmgr_gem_init(spriv->fd, BATCH_SZ);
+      if (intelScreen->bufmgr != NULL)
+	 intelScreen->ttm = GL_TRUE;
+   }
+   /* Otherwise, use the classic buffer manager. */
+   if (intelScreen->bufmgr == NULL) {
+      if (gem_disable) {
+	 fprintf(stderr, "GEM disabled.  Using classic.\n");
+      } else {
+	 fprintf(stderr, "Failed to initialize GEM.  "
+		 "Falling back to classic.\n");
+      }
+
+      if (intelScreen->tex.size == 0) {
+	 fprintf(stderr, "[%s:%u] Error initializing buffer manager.\n",
+		 __func__, __LINE__);
+	 return GL_FALSE;
+      }
+
+      intelScreen->bufmgr =
+	 intel_bufmgr_fake_init(spriv->fd,
+				intelScreen->tex.offset,
+				intelScreen->tex.map,
+				intelScreen->tex.size,
+				(unsigned int * volatile)
+				&intelScreen->sarea->last_dispatch);
+   }
+
+   /* XXX bufmgr should be per-screen, not per-context */
+   intelScreen->ttm = intelScreen->ttm;
+
+   return GL_TRUE;
+}
 
 /**
  * This is the driver specific part of the createNewScreen entry point.
@@ -743,6 +619,7 @@ intelFillInModes(__DRIscreenPrivate *psp,
  */
 static const __DRIconfig **intelInitScreen(__DRIscreenPrivate *psp)
 {
+   intelScreenPrivate *intelScreen;
 #ifdef I915
    static const __DRIversion ddx_expected = { 1, 5, 0 };
 #else
@@ -775,6 +652,10 @@ static const __DRIconfig **intelInitScreen(__DRIscreenPrivate *psp)
        return NULL;
 
    psp->extensions = intelScreenExtensions;
+
+   intelScreen = psp->private;
+   if (!intel_init_bufmgr(intelScreen))
+       return GL_FALSE;
 
    return (const __DRIconfig **)
        intelFillInModes(psp, dri_priv->cpp * 8,
@@ -835,26 +716,15 @@ __DRIconfig **intelInitScreen2(__DRIscreenPrivate *psp)
 
    intelScreen->drmMinor = psp->drm_version.minor;
 
-   /* Determine chipset ID? */
+   /* Determine chipset ID */
    if (!intel_get_param(psp, I915_PARAM_CHIPSET_ID,
 			&intelScreen->deviceID))
       return GL_FALSE;
 
-   /* Determine if IRQs are active? */
-   if (!intel_get_param(psp, I915_PARAM_IRQ_ACTIVE,
-			&intelScreen->irq_active))
-      return GL_FALSE;
+   if (!intel_init_bufmgr(intelScreen))
+       return GL_FALSE;
 
-   /* Determine if batchbuffers are allowed */
-   if (!intel_get_param(psp, I915_PARAM_ALLOW_BATCHBUFFER,
-			&intelScreen->allow_batchbuffer))
-      return GL_FALSE;
-
-   if (!intelScreen->allow_batchbuffer) {
-      fprintf(stderr, "batch buffer not allowed\n");
-      return GL_FALSE;
-   }
-
+   intelScreen->irq_active = 1;
    psp->extensions = intelScreenExtensions;
 
    return driConcatConfigs(intelFillInModes(psp, 16, 16, 0, 1),
@@ -877,6 +747,4 @@ const struct __DriverAPIRec driDriverAPI = {
    .CopySubBuffer	 = intelCopySubBuffer,
 
    .InitScreen2		 = intelInitScreen2,
-   .HandleDrawableConfig = intelHandleDrawableConfig,
-   .HandleBufferAttach	 = intelHandleBufferAttach,
 };

@@ -230,12 +230,6 @@ static void brw_wm_populate_key( struct brw_context *brw,
 	 lookup |= IZ_STENCIL_WRITE_ENABLE_BIT;
    }
 
-   /* XXX: when should this be disabled?
-    */
-   if (1)
-      lookup |= IZ_EARLY_DEPTH_TEST_BIT;
-
-   
    line_aa = AA_NEVER;
 
    /* _NEW_LINE, _NEW_POLYGON, BRW_NEW_REDUCED_PRIMITIVE */
@@ -322,7 +316,7 @@ static void brw_wm_populate_key( struct brw_context *brw,
 }
 
 
-static int brw_prepare_wm_prog( struct brw_context *brw )
+static void brw_prepare_wm_prog(struct brw_context *brw)
 {
    struct brw_wm_prog_key key;
    struct brw_fragment_program *fp = (struct brw_fragment_program *)
@@ -339,8 +333,6 @@ static int brw_prepare_wm_prog( struct brw_context *brw )
 				      &brw->wm.prog_data);
    if (brw->wm.prog_bo == NULL)
       do_wm_prog(brw, fp, &key);
-
-   return dri_bufmgr_check_aperture_space(brw->wm.prog_bo);
 }
 
 

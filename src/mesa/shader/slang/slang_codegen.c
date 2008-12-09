@@ -238,9 +238,9 @@ _slang_attach_storage(slang_ir_node *n, slang_variable *var)
 
    if (!n->Store) {
       /* need to setup storage */
-      if (n->Var && n->Var->aux) {
+      if (n->Var && n->Var->store) {
          /* node storage info = var storage info */
-         n->Store = (slang_ir_storage *) n->Var->aux;
+         n->Store = n->Var->store;
       }
       else {
          /* alloc new storage info */
@@ -251,8 +251,8 @@ _slang_attach_storage(slang_ir_node *n, slang_variable *var)
                 (void*) n->Store, n->Store->Size);
 #endif
          if (n->Var)
-            n->Var->aux = n->Store;
-         assert(n->Var->aux);
+            n->Var->store = n->Store;
+         assert(n->Var->store);
       }
    }
 }
@@ -413,6 +413,9 @@ static slang_asm_info AsmInfo[] = {
    { "vec4_multiply", IR_MUL, 1, 2 },
    { "vec4_dot", IR_DOT4, 1, 2 },
    { "vec3_dot", IR_DOT3, 1, 2 },
+   { "vec2_dot", IR_DOT2, 1, 2 },
+   { "vec3_nrm", IR_NRM3, 1, 1 },
+   { "vec4_nrm", IR_NRM4, 1, 1 },
    { "vec3_cross", IR_CROSS, 1, 2 },
    { "vec4_lrp", IR_LRP, 1, 3 },
    { "vec4_min", IR_MIN, 1, 2 },
@@ -477,7 +480,6 @@ new_node3(slang_ir_opcode op,
       n->Children[0] = c0;
       n->Children[1] = c1;
       n->Children[2] = c2;
-      n->Writemask = WRITEMASK_XYZW;
       n->InstLocation = -1;
    }
    return n;
@@ -1475,6 +1477,8 @@ _slang_simple_writemask(GLuint writemask, GLuint swizzle)
  * Convert the given swizzle into a writemask.  In some cases this
  * is trivial, in other cases, we'll need to also swizzle the right
  * hand side to put components in the right places.
+ * See comment above for more info.
+ * XXX this function could be simplified and should probably be renamed.
  * \param swizzle  the incoming swizzle
  * \param writemaskOut  returns the writemask
  * \param swizzleOut  swizzle to apply to the right-hand-side
@@ -1599,19 +1603,6 @@ resolve_swizzle(const slang_operation *oper)
 
 
 /**
- * As above, but produce a writemask.
- */
-static GLuint
-resolve_writemask(slang_assemble_ctx *A, const slang_operation *oper)
-{
-   GLuint swizzle = resolve_swizzle(oper);
-   GLuint writemask, swizzleOut;
-   swizzle_to_writemask(A, swizzle, &writemask, &swizzleOut);
-   return writemask;
-}
-
-
-/**
  * Recursively descend through swizzle nodes to find the node's storage info.
  */
 static slang_ir_storage *
@@ -1674,13 +1665,10 @@ _slang_gen_asm(slang_assemble_ctx *A, slang_operation *oper,
       /* Setup n->Store to be a particular location.  Otherwise, storage
        * for the result (a temporary) will be allocated later.
        */
-      GLuint writemask = WRITEMASK_XYZW;
       slang_operation *dest_oper;
       slang_ir_node *n0;
 
       dest_oper = &oper->children[0];
-
-      writemask = resolve_writemask(A, dest_oper);
 
       n0 = _slang_gen_operation(A, dest_oper);
       if (!n0)
@@ -2032,6 +2020,28 @@ _slang_gen_function_call_name(slang_assemble_ctx *A, const char *name,
                            name);
       return NULL;
    }
+   if (!fun->body) {
+      slang_info_log_error(A->log,
+                           "Function '%s' prototyped but not defined.  "
+                           "Separate compilation units not supported.",
+                           name);
+      return NULL;
+   }
+
+   /* type checking to be sure function's return type matches 'dest' type */
+   if (dest) {
+      slang_typeinfo t0;
+
+      slang_typeinfo_construct(&t0);
+      _slang_typeof_operation(A, dest, &t0);
+
+      if (!slang_type_specifier_equal(&t0.spec, &fun->header.type.specifier)) {
+         slang_info_log_error(A->log,
+                              "Incompatible type returned by call to '%s'",
+                              name);
+         return NULL;
+      }
+   }
 
    n = _slang_gen_function_call(A, fun, oper, dest);
 
@@ -2043,6 +2053,46 @@ _slang_gen_function_call_name(slang_assemble_ctx *A, const char *name,
       /*printf("Alloc storage for function result, size %d \n", size);*/
    }
 
+   return n;
+}
+
+
+static slang_ir_node *
+_slang_gen_method_call(slang_assemble_ctx *A, slang_operation *oper)
+{
+   slang_atom *a_length = slang_atom_pool_atom(A->atoms, "length");
+   slang_ir_node *n;
+   slang_variable *var;
+
+   /* NOTE: In GLSL 1.20, there's only one kind of method
+    * call: array.length().  Anything else is an error.
+    */
+   if (oper->a_id != a_length) {
+      slang_info_log_error(A->log,
+                           "Undefined method call '%s'", (char *) oper->a_id);
+      return NULL;
+   }
+
+   /* length() takes no arguments */
+   if (oper->num_children > 0) {
+      slang_info_log_error(A->log, "Invalid arguments to length() method");
+      return NULL;
+   }
+
+   /* lookup the object/variable */
+   var = _slang_locate_variable(oper->locals, oper->a_obj, GL_TRUE);
+   if (!var || var->type.specifier.type != SLANG_SPEC_ARRAY) {
+      slang_info_log_error(A->log,
+                           "Undefined object '%s'", (char *) oper->a_obj);
+      return NULL;
+   }
+
+   /* Create a float/literal IR node encoding the array length */
+   n = new_node0(IR_FLOAT);
+   if (n) {
+      n->Value[0] = (float) var->array_len;
+      n->Store = _slang_new_ir_storage(PROGRAM_CONSTANT, -1, 1);
+   }
    return n;
 }
 
@@ -2309,7 +2359,7 @@ _slang_gen_if(slang_assemble_ctx * A, const slang_operation *oper)
 
    /* type-check expression */
    if (!_slang_is_boolean(A, &oper->children[0])) {
-      slang_info_log_error(A->log, "boolean expression expected for 'while'");
+      slang_info_log_error(A->log, "boolean expression expected for 'if'");
       return NULL;
    }
 
@@ -2439,17 +2489,21 @@ _slang_gen_var_decl(slang_assemble_ctx *A, slang_variable *var)
    /*assert(!var->declared);*/
    var->declared = GL_TRUE;
 
-   assert(!is_sampler_type(&var->type));
-
    n = new_node0(IR_VAR_DECL);
    if (n) {
       _slang_attach_storage(n, var);
-      assert(var->aux);
-      assert(n->Store == var->aux);
+      assert(var->store);
+      assert(n->Store == var->store);
       assert(n->Store);
       assert(n->Store->Index < 0);
 
-      n->Store->File = PROGRAM_TEMPORARY;
+      if (is_sampler_type(&var->type)) {
+         n->Store->File = PROGRAM_SAMPLER;
+      }
+      else {
+         n->Store->File = PROGRAM_TEMPORARY;
+      }
+
       n->Store->Size = _slang_sizeof_type_specifier(&n->Var->type.specifier);
 
       if (n->Store->Size <= 0) {
@@ -3057,7 +3111,6 @@ _slang_gen_assignment(slang_assemble_ctx * A, slang_operation *oper)
             rhs = _slang_gen_swizzle(rhs, newSwizzle);
          }
          n = new_node2(IR_COPY, lhs, rhs);
-         n->Writemask = writemask;
          return n;
       }
       else {
@@ -3125,7 +3178,7 @@ _slang_gen_struct_field(slang_assemble_ctx * A, slang_operation *oper)
       /* oper->a_id is the field name */
       slang_ir_node *base, *n;
       slang_typeinfo field_ti;
-      GLint fieldSize, fieldOffset = -1, swz;
+      GLint fieldSize, fieldOffset = -1;
 
       /* type of field */
       slang_typeinfo_construct(&field_ti);
@@ -3158,22 +3211,12 @@ _slang_gen_struct_field(slang_assemble_ctx * A, slang_operation *oper)
       if (!n)
          return NULL;
 
-
-      /* setup the storage info for this node */
-      swz = fieldOffset % 4;
-
       n->Field = (char *) oper->a_id;
-      n->Store = _slang_new_ir_storage_relative(fieldOffset / 4,
-                                                fieldSize,
-                                                base->Store);
-      if (fieldSize == 1)
-         n->Store->Swizzle = MAKE_SWIZZLE4(swz, swz, swz, swz);
-      else if (fieldSize == 2)
-         n->Store->Swizzle = MAKE_SWIZZLE4(SWIZZLE_X, SWIZZLE_Y,
-                                           SWIZZLE_NIL, SWIZZLE_NIL);
-      else if (fieldSize == 3)
-         n->Store->Swizzle = MAKE_SWIZZLE4(SWIZZLE_X, SWIZZLE_Y,
-                                           SWIZZLE_Z, SWIZZLE_NIL);
+
+      /* Store the field's offset in storage->Index */
+      n->Store = _slang_new_ir_storage(base->Store->File,
+                                       fieldOffset,
+                                       fieldSize);
 
       return n;
    }
@@ -3214,8 +3257,6 @@ _slang_gen_array_element(slang_assemble_ctx * A, slang_operation *oper)
                                         SWIZZLE_NIL,
                                         SWIZZLE_NIL);
          n = _slang_gen_swizzle(n, swizzle);
-         /*n->Store = _slang_clone_ir_storage_swz(n->Store, */
-         n->Writemask = WRITEMASK_X << index;
       }
       assert(n->Store);
       return n;
@@ -3249,7 +3290,7 @@ _slang_gen_array_element(slang_assemble_ctx * A, slang_operation *oper)
       index = _slang_gen_operation(A, &oper->children[1]);
       if (array && index) {
          /* bounds check */
-         GLint constIndex = 0;
+         GLint constIndex = -1;
          if (index->Opcode == IR_FLOAT) {
             constIndex = (int) index->Value[0];
             if (constIndex < 0 || constIndex >= arrayLen) {
@@ -3268,12 +3309,12 @@ _slang_gen_array_element(slang_assemble_ctx * A, slang_operation *oper)
          }
 
          elem = new_node2(IR_ELEMENT, array, index);
-         elem->Store = _slang_new_ir_storage_relative(constIndex,
-                                                      elemSize,
-                                                      array->Store);
 
-         assert(elem->Store->Parent);
-         /* XXX try to do some array bounds checking here */
+         /* The storage info here will be updated during code emit */
+         elem->Store = _slang_new_ir_storage(array->Store->File,
+                                             array->Store->Index,
+                                             elemSize);
+
          return elem;
       }
       else {
@@ -3548,6 +3589,8 @@ _slang_gen_operation(slang_assemble_ctx * A, slang_operation *oper)
    case SLANG_OPER_CALL:
       return _slang_gen_function_call_name(A, (const char *) oper->a_id,
                                            oper, NULL);
+   case SLANG_OPER_METHOD:
+      return _slang_gen_method_call(A, oper);
    case SLANG_OPER_RETURN:
       return _slang_gen_return(A, oper);
    case SLANG_OPER_LABEL:
@@ -3701,11 +3744,6 @@ _slang_codegen_global_variable(slang_assemble_ctx *A, slang_variable *var,
       const GLint totalSize = array_size(size, var->array_len);
       const GLuint swizzle = _slang_var_swizzle(totalSize, 0);
 
-      if (var->initializer) {
-         slang_info_log_error(A->log, "illegal initializer for uniform '%s'", varName);
-         return GL_FALSE;
-      }
-
       if (prog) {
          /* user-defined uniform */
          if (datatype == GL_NONE) {
@@ -3713,7 +3751,7 @@ _slang_codegen_global_variable(slang_assemble_ctx *A, slang_variable *var,
                /* temporary work-around */
                GLenum datatype = GL_FLOAT;
                GLint uniformLoc = _mesa_add_uniform(prog->Parameters, varName,
-                                                    totalSize, datatype);
+                                                    totalSize, datatype, NULL);
                store = _slang_new_ir_storage_swz(PROGRAM_UNIFORM, uniformLoc,
                                                  totalSize, swizzle);
 
@@ -3730,6 +3768,12 @@ _slang_codegen_global_variable(slang_assemble_ctx *A, slang_variable *var,
                 * "f.a"  (GL_FLOAT_VEC3)
                 * "f.b"  (GL_FLOAT_VEC4)
                 */
+
+               if (var->initializer) {
+                  slang_info_log_error(A->log,
+                     "unsupported initializer for uniform '%s'", varName);
+                  return GL_FALSE;
+               }
             }
             else {
                slang_info_log_error(A->log,
@@ -3739,8 +3783,25 @@ _slang_codegen_global_variable(slang_assemble_ctx *A, slang_variable *var,
             }
          }
          else {
-            GLint uniformLoc = _mesa_add_uniform(prog->Parameters, varName,
-                                                 totalSize, datatype);
+            GLint uniformLoc;
+            const GLfloat *initialValues = NULL;
+            if (var->initializer) {
+               _slang_simplify(var->initializer, &A->space, A->atoms);
+               if (var->initializer->type == SLANG_OPER_LITERAL_FLOAT ||
+                   var->initializer->type == SLANG_OPER_LITERAL_INT) {
+                  /* simple float/vector initializer */
+                  initialValues = var->initializer->literal;
+               }
+               else {
+                  /* complex initializer */
+                  slang_info_log_error(A->log,
+                     "unsupported initializer for uniform '%s'", varName);
+                  return GL_FALSE;
+               }
+            }
+
+            uniformLoc = _mesa_add_uniform(prog->Parameters, varName,
+                                           totalSize, datatype, initialValues);
             store = _slang_new_ir_storage_swz(PROGRAM_UNIFORM, uniformLoc,
                                               totalSize, swizzle);
          }
@@ -3775,8 +3836,19 @@ _slang_codegen_global_variable(slang_assemble_ctx *A, slang_variable *var,
 
       if (prog) {
          /* user-defined varying */
-         GLint varyingLoc = _mesa_add_varying(prog->Varying, varName, totalSize);
-         GLuint swizzle = _slang_var_swizzle(size, 0);
+         GLbitfield flags;
+         GLint varyingLoc;
+         GLuint swizzle;
+
+         flags = 0x0;
+         if (var->type.centroid == SLANG_CENTROID)
+            flags |= PROG_PARAM_BIT_CENTROID;
+         if (var->type.variant == SLANG_INVARIANT)
+            flags |= PROG_PARAM_BIT_INVARIANT;
+
+         varyingLoc = _mesa_add_varying(prog->Varying, varName,
+                                        totalSize, flags);
+         swizzle = _slang_var_swizzle(size, 0);
          store = _slang_new_ir_storage_swz(PROGRAM_VARYING, varyingLoc,
                                            totalSize, swizzle);
       }
@@ -3807,6 +3879,8 @@ _slang_codegen_global_variable(slang_assemble_ctx *A, slang_variable *var,
       if (dbg) printf("VARYING ");
    }
    else if (var->type.qualifier == SLANG_QUAL_ATTRIBUTE) {
+      GLuint swizzle;
+      GLint index;
       /* attributes must be float, vec or mat */
       if (!_slang_type_is_float_vec_mat(var->type.specifier.type)) {
          slang_info_log_error(A->log,
@@ -3818,20 +3892,18 @@ _slang_codegen_global_variable(slang_assemble_ctx *A, slang_variable *var,
       if (prog) {
          /* user-defined vertex attribute */
          const GLint attr = -1; /* unknown */
-         GLint index = _mesa_add_attribute(prog->Attributes, varName,
-                                           size, datatype, attr);
+         swizzle = _slang_var_swizzle(size, 0);
+         index = _mesa_add_attribute(prog->Attributes, varName,
+                                     size, datatype, attr);
          assert(index >= 0);
-         store = _slang_new_ir_storage(PROGRAM_INPUT,
-                                       VERT_ATTRIB_GENERIC0 + index, size);
+         index = VERT_ATTRIB_GENERIC0 + index;
       }
       else {
          /* pre-defined vertex attrib */
-         GLuint swizzle;
-         GLint index = _slang_input_index(varName, GL_VERTEX_PROGRAM_ARB,
-                                          &swizzle);
+         index = _slang_input_index(varName, GL_VERTEX_PROGRAM_ARB, &swizzle);
          assert(index >= 0);
-         store = _slang_new_ir_storage_swz(PROGRAM_INPUT, index, size, swizzle);
       }
+      store = _slang_new_ir_storage_swz(PROGRAM_INPUT, index, size, swizzle);
       if (dbg) printf("ATTRIB ");
    }
    else if (var->type.qualifier == SLANG_QUAL_FIXEDINPUT) {
@@ -3893,7 +3965,7 @@ _slang_codegen_global_variable(slang_assemble_ctx *A, slang_variable *var,
                    store ? store->Index : -2);
 
    if (store)
-      var->aux = store;  /* save var's storage info */
+      var->store = store;  /* save var's storage info */
 
    var->declared = GL_TRUE;
 

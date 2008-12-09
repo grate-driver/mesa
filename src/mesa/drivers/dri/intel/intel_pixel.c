@@ -25,8 +25,8 @@
  * 
  **************************************************************************/
 
-#include "enums.h"
-#include "state.h"
+#include "main/enums.h"
+#include "main/state.h"
 #include "swrast/swrast.h"
 
 #include "intel_context.h"
@@ -112,12 +112,6 @@ intel_check_blit_fragment_ops(GLcontext * ctx, GLboolean src_alpha_is_one)
       return GL_FALSE;
    }
 
-   if (ctx->Scissor.Enabled) {
-      /* XXX Note: Scissor could be done with the blitter */
-      DBG("fallback due to image scissor\n");
-      return GL_FALSE;
-   }
-
    if (ctx->RenderMode != GL_RENDER) {
       DBG("fallback due to render mode\n");
       return GL_FALSE;
@@ -181,9 +175,9 @@ intelInitPixelFuncs(struct dd_function_table *functions)
    if (!getenv("INTEL_NO_BLIT")) {
       functions->Bitmap = intelBitmap;
       functions->CopyPixels = intelCopyPixels;
+      functions->DrawPixels = intelDrawPixels;
 #ifdef I915
       functions->ReadPixels = intelReadPixels;
-      functions->DrawPixels = intelDrawPixels;
 #endif
    }
 }
