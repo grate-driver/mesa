@@ -1,10 +1,10 @@
-mesa (7.2+git20081209.a0d5c3cf-0ubuntu1) UNRELEASED; urgency=low
+mesa (7.2+git20081209.a0d5c3cf-0ubuntu1) jaunty; urgency=low
 
   * Merge from debian-experimental git branch.
   * 103_fix-crash-in-i830_emit_state.dpatch: deleted, included
     upstream.
 
- -- Timo Aaltonen <tjaalton@ubuntu.com>  Tue, 09 Dec 2008 02:22:15 +0200
+ -- Timo Aaltonen <tjaalton@ubuntu.com>  Tue, 09 Dec 2008 21:54:28 +0200
 
 mesa (7.2+git20081209.a0d5c3cf-1) UNRELEASED; urgency=low
 
