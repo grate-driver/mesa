@@ -3,6 +3,8 @@ mesa (7.2+git20081209.a0d5c3cf-1) UNRELEASED; urgency=low
   * New upstream snapshot.
   * Remove debian/patches/01_disable-intel-classic-warn.diff, the
     warning is gone now.
+  * debian/control:
+    - Build-depend on x11proto-dri2-dev (>= 1.99.3)
 
  -- Timo Aaltonen <tjaalton@ubuntu.com>  Tue, 09 Dec 2008 01:38:42 +0200
 
