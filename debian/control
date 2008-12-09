@@ -1,7 +1,7 @@
 Source: mesa
 Section: graphics
 Priority: optional
-Maintainer: Ubuntu Core Developers <ubuntu-devel@lists.ubuntu.com>
+Maintainer: Ubuntu X-SWAT <ubuntu-x@lists.ubuntu.com>
 XSBC-Original-Maintainer: Debian X Strike Force <debian-x@lists.debian.org>
 Uploaders: Thierry Reding <thierry@gilfi.de>, Julien Cristau <jcristau@debian.org>, David Nusinow <dnusinow@debian.org>, Brice Goglin <bgoglin@debian.org>
 Standards-Version: 3.7.3
