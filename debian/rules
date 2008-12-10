@@ -192,9 +192,6 @@ install:
 
 install-%: $(STAMP)-build-%
 	cd $(DEB_BUILD_DIR)/$* && $(MAKE) DESTDIR=$(CURDIR)/debian/tmp install
-	mkdir -p debian/tmp/etc/X11/Xsession.d
-	cp debian/Xsession.d_65mesa-check-x86-64 \
-	   debian/tmp/etc/X11/Xsession.d/65mesa-check-x86-64
 	touch $@
 
 clean: unpatch

@@ -1,2 +1,1 @@
 usr/lib/dri/*.so
-etc/X11/Xsession.d/65mesa-check-x86-64
