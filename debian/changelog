@@ -1,3 +1,9 @@
+mesa (7.2+git20081209.a0d5c3cf-0ubuntu3) jaunty; urgency=low
+
+  * Fix the CFLAGS for lpia/armel (FTBFS).
+
+ -- Timo Aaltonen <tjaalton@ubuntu.com>  Fri, 12 Dec 2008 00:05:15 +0200
+
 mesa (7.2+git20081209.a0d5c3cf-0ubuntu2) jaunty; urgency=low
 
   * debian/rules: Add -D_BSD_SOURCE to CFLAGS for lpia & armel (FTBFS).
