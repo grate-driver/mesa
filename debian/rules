@@ -77,6 +77,9 @@ else ifeq ($(DEB_HOST_ARCH), sparc)
 	DRI_DRIVERS += ffb
 else ifeq ($(DEB_HOST_ARCH), lpia)
         DRI_DRIVERS = i915 i965
+	CFLAGS="$(CFLAGS) -D_BSD_SOURCE"
+else ifeq ($(DEB_HOST_ARCH), armel)
+	CFLAGS="$(CFLAGS) -D_BSD_SOURCE"
 endif
 
 confflags-dri = \

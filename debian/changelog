@@ -1,3 +1,9 @@
+mesa (7.2+git20081209.a0d5c3cf-0ubuntu3) jaunty; urgency=low
+
+  * debian/rules: Add -D_BSD_SOURCE to CFLAGS for lpia & armel (FTBFS).
+
+ -- Timo Aaltonen <tjaalton@ubuntu.com>  Thu, 11 Dec 2008 23:20:47 +0200
+
 mesa (7.2+git20081209.a0d5c3cf-0ubuntu2) UNRELEASED; urgency=low
 
   * Drop the Xsession.d hook, not needed anymore.
