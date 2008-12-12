@@ -1,8 +1,14 @@
+mesa (7.2+git20081209.a0d5c3cf-0ubuntu4) jaunty; urgency=low
+
+  * debian/rules: Add -D_GNU_SOURCE for lpia & armel (FTBFS).
+
+ -- Timo Aaltonen <tjaalton@ubuntu.com>  Fri, 12 Dec 2008 02:15:40 +0200
+
 mesa (7.2+git20081209.a0d5c3cf-0ubuntu3) jaunty; urgency=low
 
   * debian/rules (CFLAGS): Avoid recursive reference.
 
- -- Matthias Klose < doko@ubuntu.com>   Thu, 11 Dec 2008 22:34:43 +0100
+ -- Matthias Klose <doko@ubuntu.com>  Thu, 11 Dec 2008 22:34:43 +0100
 
 mesa (7.2+git20081209.a0d5c3cf-0ubuntu2) jaunty; urgency=low
 
