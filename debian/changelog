@@ -16,6 +16,7 @@ mesa (7.3~rc1-1) UNRELEASED; urgency=low
   * Merge packaging changes from unstable, from 7.0.3-5 to 7.0.3-7.
   * Delete unused configs/debian-*, and install-source.sh script.  We've
     switched to using autoconf, and mesa-swx11-source is gone.
+  * Delete some now unused code from debian/rules.
 
  -- Timo Aaltonen <tjaalton@ubuntu.com>  Tue, 09 Dec 2008 01:38:42 +0200
 
