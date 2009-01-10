@@ -1,6 +1,8 @@
-mesa (7.2+git20081209.a0d5c3cf-1) UNRELEASED; urgency=low
+mesa (7.3~rc1-1) UNRELEASED; urgency=low
 
-  * New upstream snapshot.
+  * New upstream release candidate.
+
+  [ Timo Aaltonen ]
   * Remove debian/patches/01_disable-intel-classic-warn.diff, the
     warning is gone now.
   * debian/control:
