@@ -1,6 +1,9 @@
 mesa (7.3~rc1-1) UNRELEASED; urgency=low
 
   * New upstream release candidate.
+    + provides DRI2 (closes: #411141).
+    + i915: fallback for cube map texture.  Fixes GPU hang with scorched3d
+      (closes: #484049).
 
   [ Timo Aaltonen ]
   * Remove debian/patches/01_disable-intel-classic-warn.diff, the
