@@ -174,10 +174,10 @@ ultrix-gcc:
 
 # Rules for making release tarballs
 
-DIRECTORY = Mesa-7.1-rc4
-LIB_NAME = MesaLib-7.1-rc4
-DEMO_NAME = MesaDemos-7.1-rc4
-GLUT_NAME = MesaGLUT-7.1-rc4
+DIRECTORY = Mesa-7.3-rc1
+LIB_NAME = MesaLib-7.3-rc1
+DEMO_NAME = MesaDemos-7.3-rc1
+GLUT_NAME = MesaGLUT-7.3-rc1
 
 MAIN_FILES = \
 	$(DIRECTORY)/Makefile*						\
@@ -200,9 +200,7 @@ MAIN_FILES = \
 	$(DIRECTORY)/docs/RELNOTES*					\
 	$(DIRECTORY)/docs/*.spec					\
 	$(DIRECTORY)/include/GL/internal/glcore.h			\
-	$(DIRECTORY)/include/GL/amesa.h					\
 	$(DIRECTORY)/include/GL/dmesa.h					\
-	$(DIRECTORY)/include/GL/fxmesa.h				\
 	$(DIRECTORY)/include/GL/ggimesa.h				\
 	$(DIRECTORY)/include/GL/gl.h					\
 	$(DIRECTORY)/include/GL/glext.h					\
@@ -217,13 +215,8 @@ MAIN_FILES = \
 	$(DIRECTORY)/include/GL/mglmesa.h				\
 	$(DIRECTORY)/include/GL/osmesa.h				\
 	$(DIRECTORY)/include/GL/svgamesa.h				\
-	$(DIRECTORY)/include/GL/ugl*.h					\
 	$(DIRECTORY)/include/GL/vms_x_fix.h				\
 	$(DIRECTORY)/include/GL/wmesa.h					\
-	$(DIRECTORY)/include/GL/xmesa.h					\
-	$(DIRECTORY)/include/GL/xmesa_x.h				\
-	$(DIRECTORY)/include/GL/xmesa_xf86.h				\
-	$(DIRECTORY)/include/GLView.h					\
 	$(DIRECTORY)/src/Makefile					\
 	$(DIRECTORY)/src/descrip.mms					\
 	$(DIRECTORY)/src/mesa/Makefile*					\
@@ -316,7 +309,7 @@ MAIN_FILES = \
 
 DRI_FILES = \
 	$(DIRECTORY)/include/GL/internal/dri_interface.h		\
-	$(DIRECTORY)/include/GL/internal/dri_sarea.h			\
+	$(DIRECTORY)/include/GL/internal/glcore.h			\
 	$(DIRECTORY)/include/GL/internal/sarea.h			\
 	$(DIRECTORY)/src/glx/Makefile					\
 	$(DIRECTORY)/src/glx/x11/Makefile				\
