@@ -1,4 +1,4 @@
-mesa (7.3~rc1-1) UNRELEASED; urgency=low
+mesa (7.3~rc1-1) experimental; urgency=low
 
   * New upstream release candidate.
     + provides DRI2 (closes: #411141).
@@ -18,7 +18,7 @@ mesa (7.3~rc1-1) UNRELEASED; urgency=low
     switched to using autoconf, and mesa-swx11-source is gone.
   * Delete some now unused code from debian/rules.
 
- -- Timo Aaltonen <tjaalton@ubuntu.com>  Tue, 09 Dec 2008 01:38:42 +0200
+ -- Julien Cristau <jcristau@debian.org>  Sat, 10 Jan 2009 22:14:55 +0100
 
 mesa (7.2-1) experimental; urgency=low
 
