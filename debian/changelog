@@ -8,6 +8,9 @@ mesa (7.3~rc1-1) UNRELEASED; urgency=low
   * debian/control:
     - Build-depend on x11proto-dri2-dev (>= 1.99.3)
 
+  [ Julien Cristau ]
+  * Require libdrm-dev 2.4.3.
+
  -- Timo Aaltonen <tjaalton@ubuntu.com>  Tue, 09 Dec 2008 01:38:42 +0200
 
 mesa (7.2-1) experimental; urgency=low
