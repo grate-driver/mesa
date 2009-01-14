@@ -30,8 +30,6 @@ else
         confflags += --build=$(DEB_BUILD_GNU_TYPE) --host=$(DEB_HOST_GNU_TYPE)
 endif
 
-export DEB_BUILD_ARCH
-
 # choose which configurations to build
 include debian/scripts/choose-configs
 

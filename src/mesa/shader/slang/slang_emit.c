@@ -1,8 +1,8 @@
 /*
  * Mesa 3-D graphics library
- * Version:  7.1
  *
  * Copyright (C) 2005-2008  Brian Paul   All Rights Reserved.
+ * Copyright (C) 2008 VMware, Inc.   All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -155,6 +155,28 @@ _slang_swizzle_swizzle(GLuint swz1, GLuint swz2)
 
 
 /**
+ * Return the default swizzle mask for accessing a variable of the
+ * given size (in floats).  If size = 1, comp is used to identify
+ * which component [0..3] of the register holds the variable.
+ */
+GLuint
+_slang_var_swizzle(GLint size, GLint comp)
+{
+   switch (size) {
+   case 1:
+      return MAKE_SWIZZLE4(comp, comp, comp, comp);
+   case 2:
+      return MAKE_SWIZZLE4(SWIZZLE_X, SWIZZLE_Y, SWIZZLE_NIL, SWIZZLE_NIL);
+   case 3:
+      return MAKE_SWIZZLE4(SWIZZLE_X, SWIZZLE_Y, SWIZZLE_Z, SWIZZLE_NIL);
+   default:
+      return SWIZZLE_XYZW;
+   }
+}
+
+
+
+/**
  * Allocate storage for the given node (if it hasn't already been allocated).
  *
  * Typically this is temporary storage for an intermediate result (such as
@@ -288,24 +310,22 @@ storage_to_dst_reg(struct prog_dst_register *dst, const slang_ir_storage *st)
       dst->WriteMask = swizzle_to_writemask(swizzle);
    }
    else {
-      GLuint writemask;
       switch (size) {
       case 1:
-         writemask = WRITEMASK_X << GET_SWZ(st->Swizzle, 0);
+         dst->WriteMask = WRITEMASK_X << GET_SWZ(st->Swizzle, 0);
          break;
       case 2:
-         writemask = WRITEMASK_XY;
+         dst->WriteMask = WRITEMASK_XY;
          break;
       case 3:
-         writemask = WRITEMASK_XYZ;
+         dst->WriteMask = WRITEMASK_XYZ;
          break;
       case 4:
-         writemask = WRITEMASK_XYZW;
+         dst->WriteMask = WRITEMASK_XYZW;
          break;
       default:
          ; /* error would have been caught above */
       }
-      dst->WriteMask = writemask;
    }
 
    dst->RelAddr = relAddr;
@@ -326,6 +346,10 @@ storage_to_src_reg(struct prog_src_register *src, const slang_ir_storage *st)
    assert(index >= 0);
    while (st->Parent) {
       st = st->Parent;
+      if (st->Index < 0) {
+         /* an error should have been reported already */
+         return;
+      }
       assert(st->Index >= 0);
       index += st->Index;
       swizzle = _slang_swizzle_swizzle(fix_swizzle(st->Swizzle), swizzle);
@@ -1264,6 +1288,7 @@ emit_tex(slang_emit_info *emitInfo, slang_ir_node *n)
 
    /* Child[0] is the sampler (a uniform which'll indicate the texture unit) */
    assert(n->Children[0]->Store);
+   assert(n->Children[0]->Store->File == PROGRAM_SAMPLER);
    /* Store->Index is the sampler index */
    assert(n->Children[0]->Store->Index >= 0);
    /* Store->Size is the texture target */
@@ -1272,6 +1297,10 @@ emit_tex(slang_emit_info *emitInfo, slang_ir_node *n)
 
    inst->TexSrcTarget = n->Children[0]->Store->Size;
    inst->TexSrcUnit = n->Children[0]->Store->Index; /* i.e. uniform's index */
+
+   /* mark the sampler as being used */
+   _mesa_use_uniform(emitInfo->prog->Parameters,
+                     (char *) n->Children[0]->Var->a_name);
 
    return inst;
 }
@@ -1819,9 +1848,17 @@ emit_array_element(slang_emit_info *emitInfo, slang_ir_node *n)
          root = root->Parent;
 
       if (root->File == PROGRAM_STATE_VAR) {
-         GLint index = _slang_alloc_statevar(n, emitInfo->prog->Parameters);
-         assert(n->Store->Index == index);
-         return NULL;
+         GLboolean direct;
+         GLint index =
+            _slang_alloc_statevar(n, emitInfo->prog->Parameters, &direct);
+         if (index < 0) {
+            /* error */
+            return NULL;
+         }
+         if (direct) {
+            n->Store->Index = index;
+            return NULL; /* all done */
+         }
       }
    }
 
@@ -1917,6 +1954,7 @@ emit_array_element(slang_emit_info *emitInfo, slang_ir_node *n)
    }
 
    n->Store->Size = elemSize;
+   n->Store->Swizzle = _slang_var_swizzle(elemSize, 0);
 
    return NULL; /* no instruction */
 }
@@ -1944,18 +1982,22 @@ emit_struct_field(slang_emit_info *emitInfo, slang_ir_node *n)
     * space for the ones that we actually use!
     */
    if (root->File == PROGRAM_STATE_VAR) {
-      root->Index = _slang_alloc_statevar(n, emitInfo->prog->Parameters);
-      if (root->Index < 0) {
+      GLboolean direct;
+      GLint index = _slang_alloc_statevar(n, emitInfo->prog->Parameters, &direct);
+      if (index < 0) {
          slang_info_log_error(emitInfo->log, "Error parsing state variable");
          return NULL;
       }
-      return NULL;
+      if (direct) {
+         root->Index = index;
+         return NULL; /* all done */
+      }
    }
-   else {
-      /* do codegen for struct */
-      emit(emitInfo, n->Children[0]);
-      assert(n->Children[0]->Store->Index >= 0);
-   }
+
+   /* do codegen for struct */
+   emit(emitInfo, n->Children[0]);
+   assert(n->Children[0]->Store->Index >= 0);
+
 
    fieldOffset = n->Store->Index;
    fieldSize = n->Store->Size;
@@ -1963,9 +2005,7 @@ emit_struct_field(slang_emit_info *emitInfo, slang_ir_node *n)
    _slang_copy_ir_storage(n->Store, n->Children[0]->Store);
 
    n->Store->Index = n->Children[0]->Store->Index + fieldOffset / 4;
-   /* XXX test this:
-   n->Store->Index += fieldOffset / 4;
-   */
+   n->Store->Size = fieldSize;
 
    switch (fieldSize) {
    case 1:
@@ -2054,9 +2094,21 @@ emit_var_ref(slang_emit_info *emitInfo, slang_ir_node *n)
    assert(n->Store->File != PROGRAM_UNDEFINED);
 
    if (n->Store->File == PROGRAM_STATE_VAR && n->Store->Index < 0) {
-      n->Store->Index = _slang_alloc_statevar(n, emitInfo->prog->Parameters);
+      GLboolean direct;
+      GLint index = _slang_alloc_statevar(n, emitInfo->prog->Parameters, &direct);
+      if (index < 0) {
+         /* error */
+         char s[100];
+         _mesa_snprintf(s, sizeof(s), "Undefined variable '%s'",
+                        (char *) n->Var->a_name);
+         slang_info_log_error(emitInfo->log, s);
+         return NULL;
+      }
+
+      n->Store->Index = index;
    }
-   else if (n->Store->File == PROGRAM_UNIFORM) {
+   else if (n->Store->File == PROGRAM_UNIFORM ||
+            n->Store->File == PROGRAM_SAMPLER) {
       /* mark var as used */
       _mesa_use_uniform(emitInfo->prog->Parameters, (char *) n->Var->a_name);
    }

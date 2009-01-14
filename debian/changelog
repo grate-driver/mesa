@@ -1,3 +1,25 @@
+mesa (7.3~rc1-1) experimental; urgency=low
+
+  * New upstream release candidate.
+    + provides DRI2 (closes: #411141).
+    + i915: fallback for cube map texture.  Fixes GPU hang with scorched3d
+      (closes: #484049).
+
+  [ Timo Aaltonen ]
+  * Remove debian/patches/01_disable-intel-classic-warn.diff, the
+    warning is gone now.
+  * debian/control:
+    - Build-depend on x11proto-dri2-dev (>= 1.99.3)
+
+  [ Julien Cristau ]
+  * Require libdrm-dev 2.4.3.
+  * Merge packaging changes from unstable, from 7.0.3-5 to 7.0.3-7.
+  * Delete unused configs/debian-*, and install-source.sh script.  We've
+    switched to using autoconf, and mesa-swx11-source is gone.
+  * Delete some now unused code from debian/rules.
+
+ -- Julien Cristau <jcristau@debian.org>  Sat, 10 Jan 2009 22:14:55 +0100
+
 mesa (7.2+git20081209.a0d5c3cf-0ubuntu4) jaunty; urgency=low
 
   * debian/rules: Add -D_GNU_SOURCE for lpia & armel (FTBFS).
@@ -24,16 +46,6 @@ mesa (7.2+git20081209.a0d5c3cf-0ubuntu1) jaunty; urgency=low
     upstream.
 
  -- Timo Aaltonen <tjaalton@ubuntu.com>  Tue, 09 Dec 2008 21:54:28 +0200
-
-mesa (7.2+git20081209.a0d5c3cf-1) UNRELEASED; urgency=low
-
-  * New upstream snapshot.
-  * Remove debian/patches/01_disable-intel-classic-warn.diff, the
-    warning is gone now.
-  * debian/control:
-    - Build-depend on x11proto-dri2-dev (>= 1.99.3)
-
- -- Timo Aaltonen <tjaalton@ubuntu.com>  Tue, 09 Dec 2008 01:38:42 +0200
 
 mesa (7.2-1ubuntu2) intrepid; urgency=low
 
@@ -162,6 +174,7 @@ mesa (7.1~rc3-1) experimental; urgency=low
 
  -- Julien Cristau <jcristau@debian.org>  Sun, 13 Jul 2008 19:41:42 +0200
 
+<<<<<<< HEAD:debian/changelog
 mesa (7.1~rc1-0ubuntu2) intrepid; urgency=low
 
   * Merge with debian git, fixes FTBFS on sparc/hppa/ia64.
@@ -194,6 +207,31 @@ mesa (7.1~rc1-0ubuntu1) intrepid; urgency=low
   * Unexport LDFLAGS (amd64 FTBFS).
 
  -- Timo Aaltonen <tepsipakki@ubuntu.com>  Fri, 04 Jul 2008 13:19:57 +0300
+=======
+mesa (7.0.3-7) unstable; urgency=low
+
+  * Cherry-pick patch from upstream:
+    Use 3Dnow! x86-64 routines only on processors that support 3Dnow!
+    (closes: #484180).
+  * Also build the x86-specific dri drivers on kfreebsd (closes: #492894).
+
+ -- Julien Cristau <jcristau@debian.org>  Sun, 14 Dec 2008 07:34:58 +0530
+
+mesa (7.0.3-6) unstable; urgency=high
+
+  * Update debian/copyright to the SGI Free Software License B, version 2.0.
+    It now mirrors the free X11 license used by X.Org (closes: #368560).
+    http://www.sgi.com/company_info/newsroom/press_releases/2008/september/opengl.html
+
+ -- Julien Cristau <jcristau@debian.org>  Sat, 20 Sep 2008 16:30:44 +0200
+
+mesa (7.0.3-5) unstable; urgency=low
+
+  * Disable the i915tex driver, it doesn't build against libdrm 2.3.1.
+  * Pull from mesa_7_0_branch (27425708).
+
+ -- Julien Cristau <jcristau@debian.org>  Sat, 12 Jul 2008 18:56:19 +0200
+>>>>>>> origin/debian-experimental:debian/changelog
 
 mesa (7.0.3-4) unstable; urgency=low
 

@@ -1,15 +1,9 @@
-/**
- * \file mtypes.h
- * Main Mesa data structures.
- *
- * Please try to mark derived values with a leading underscore ('_').
- */
-
 /*
  * Mesa 3-D graphics library
- * Version:  6.5.3
+ * Version:  7.3
  *
  * Copyright (C) 1999-2007  Brian Paul   All Rights Reserved.
+ * Copyright (C) 1999-2008  VMware, Inc.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -29,7 +23,12 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-
+/**
+ * \file mtypes.h
+ * Main Mesa data structures.
+ *
+ * Please try to mark derived values with a leading underscore ('_').
+ */
 
 #ifndef TYPES_H
 #define TYPES_H
@@ -639,7 +638,7 @@ struct gl_current_attrib
    GLfloat RasterColor[4];
    GLfloat RasterSecondaryColor[4];
    GLfloat RasterIndex;
-   GLfloat RasterTexCoords[MAX_TEXTURE_COORD_UNITS][4];
+   GLfloat RasterTexCoords[MAX_TEXTURE_UNITS][4];
    GLboolean RasterPosValid;
    /*@}*/
 };
@@ -723,10 +722,10 @@ struct gl_enable_attrib
    GLboolean SampleCoverage;          /* GL_ARB_multisample */
    GLboolean SampleCoverageInvert;    /* GL_ARB_multisample */
    GLboolean RasterPositionUnclipped; /* GL_IBM_rasterpos_clip */
-   GLuint Texture[MAX_TEXTURE_IMAGE_UNITS];
-   GLuint TexGen[MAX_TEXTURE_COORD_UNITS];
+   GLuint Texture[MAX_TEXTURE_UNITS];
+   GLuint TexGen[MAX_TEXTURE_UNITS];
    /* SGI_texture_color_table */
-   GLboolean TextureColorTable[MAX_TEXTURE_IMAGE_UNITS];
+   GLboolean TextureColorTable[MAX_TEXTURE_UNITS];
    /* GL_ARB_vertex_program / GL_NV_vertex_program */
    GLboolean VertexProgram;
    GLboolean VertexProgramPointSize;
@@ -1069,7 +1068,7 @@ struct gl_point_attrib
    GLfloat Threshold;		/**< GL_EXT_point_parameters */
    GLboolean _Attenuated;	/**< True if Params != [1, 0, 0] */
    GLboolean PointSprite;	/**< GL_NV/ARB_point_sprite */
-   GLboolean CoordReplace[MAX_TEXTURE_COORD_UNITS]; /**< GL_ARB_point_sprite */
+   GLboolean CoordReplace[MAX_TEXTURE_UNITS]; /**< GL_ARB_point_sprite */
    GLenum SpriteRMode;		/**< GL_NV_point_sprite (only!) */
    GLenum SpriteOrigin;		/**< GL_ARB_point_sprite */
 };
@@ -1557,7 +1556,7 @@ struct gl_texture_attrib
     * name multitexture 
     */
    /**@{*/
-   GLuint CurrentUnit;	       /**< Active texture unit */
+   GLuint CurrentUnit;   /**< Active texture unit [0, MaxTextureImageUnits-1] */
    GLbitfield _EnabledUnits;  /**< one bit set for each really-enabled unit */
    GLbitfield _EnabledCoordUnits;   /**< one bit per enabled coordinate unit */
    GLbitfield _GenFlags;            /**< for texgen */
@@ -1875,7 +1874,7 @@ struct gl_program
    GLbitfield OutputsWritten; /**< Bitmask of which output regs are written to */
    GLbitfield InputFlags[MAX_PROGRAM_INPUTS];   /**< PROG_PARAM_BIT_x flags */
    GLbitfield OutputFlags[MAX_PROGRAM_OUTPUTS]; /**< PROG_PARAM_BIT_x flags */
-   GLbitfield TexturesUsed[MAX_TEXTURE_IMAGE_UNITS];  /**< TEXTURE_x_BIT bitmask */
+   GLbitfield TexturesUsed[MAX_TEXTURE_UNITS];  /**< TEXTURE_x_BIT bitmask */
    GLbitfield SamplersUsed;   /**< Bitfield of which samplers are used */
    GLbitfield ShadowSamplers; /**< Texture units used for shadow sampling. */
 
@@ -1957,14 +1956,15 @@ struct gl_program_state
  */
 struct gl_vertex_program_state
 {
-   GLboolean Enabled;               /**< GL_VERTEX_PROGRAM_ARB/NV */
-   GLboolean _Enabled;              /**< Enabled and valid program? */
+   GLboolean Enabled;               /**< User-set GL_VERTEX_PROGRAM_ARB/NV flag */
+   GLboolean _Enabled;              /**< Enabled and _valid_ user program? */
    GLboolean PointSizeEnabled;      /**< GL_VERTEX_PROGRAM_POINT_SIZE_ARB/NV */
    GLboolean TwoSideEnabled;        /**< GL_VERTEX_PROGRAM_TWO_SIDE_ARB/NV */
-   struct gl_vertex_program *Current;  /**< user-bound vertex program */
+   struct gl_vertex_program *Current;  /**< User-bound vertex program */
 
-   /** Currently enabled and valid program (including internal programs
-    * and compiled shader programs).
+   /** Currently enabled and valid vertex program (including internal programs,
+    * user-defined vertex programs and GLSL vertex shaders).
+    * This is the program we must use when rendering.
     */
    struct gl_vertex_program *_Current;
 
@@ -1998,12 +1998,12 @@ struct gl_vertex_program_state
 struct gl_fragment_program_state
 {
    GLboolean Enabled;     /**< User-set fragment program enable flag */
-   GLboolean _Enabled;    /**< Fragment program enabled and valid? */
-   GLboolean _Active;
+   GLboolean _Enabled;    /**< Enabled and _valid_ user program? */
    struct gl_fragment_program *Current;  /**< User-bound fragment program */
 
-   /** Currently enabled and valid program (including internal programs
-    * and compiled shader programs).
+   /** Currently enabled and valid fragment program (including internal programs,
+    * user-defined fragment programs and GLSL fragment shaders).
+    * This is the program we must use when rendering.
     */
    struct gl_fragment_program *_Current;
 
@@ -2011,7 +2011,6 @@ struct gl_fragment_program_state
 
    /** Should fixed-function texturing be implemented with a fragment prog? */
    GLboolean _MaintainTexEnvProgram;
-   GLboolean _UseTexEnvProgram;
 
    /** Program to emulate fixed-function texture env/combine (see above) */
    struct gl_fragment_program *_TexEnvProgram;
@@ -2467,9 +2466,9 @@ struct gl_constants
    GLint MaxTextureRectSize;            /* GL_NV_texture_rectangle */
    GLuint MaxTextureCoordUnits;
    GLuint MaxTextureImageUnits;
-   GLuint MaxTextureUnits;              /* = MIN(CoordUnits, ImageUnits) */
-   GLfloat MaxTextureMaxAnisotropy;	/* GL_EXT_texture_filter_anisotropic */
-   GLfloat MaxTextureLodBias;           /* GL_EXT_texture_lod_bias */
+   GLuint MaxTextureUnits;              /**< = MIN(CoordUnits, ImageUnits) */
+   GLfloat MaxTextureMaxAnisotropy;     /**< GL_EXT_texture_filter_anisotropic */
+   GLfloat MaxTextureLodBias;           /**< GL_EXT_texture_lod_bias */
    GLuint MaxArrayLockSize;
    GLint SubPixelBits;
    GLfloat MinPointSize, MaxPointSize;		/* aliased */
@@ -2944,7 +2943,7 @@ struct __GLcontextRec
    struct gl_matrix_stack ModelviewMatrixStack;
    struct gl_matrix_stack ProjectionMatrixStack;
    struct gl_matrix_stack ColorMatrixStack;
-   struct gl_matrix_stack TextureMatrixStack[MAX_TEXTURE_COORD_UNITS];
+   struct gl_matrix_stack TextureMatrixStack[MAX_TEXTURE_UNITS];
    struct gl_matrix_stack ProgramMatrixStack[MAX_PROGRAM_MATRICES];
    struct gl_matrix_stack *CurrentStack; /**< Points to one of the above stacks */
    /*@}*/
