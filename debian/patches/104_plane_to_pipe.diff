@@ -1,0 +1,35 @@
+Index: mesa/src/mesa/drivers/dri/intel/intel_buffers.c
+===================================================================
+--- mesa.orig/src/mesa/drivers/dri/intel/intel_buffers.c	2009-01-18 16:29:04.000000000 +0200
++++ mesa/src/mesa/drivers/dri/intel/intel_buffers.c	2009-01-18 16:29:04.000000000 +0200
+@@ -114,7 +114,6 @@
+ 		    int *x_off, int *y_off)
+ {
+    __DRIdrawablePrivate *dPriv = intel->driDrawable;
+-   struct intel_framebuffer *intel_fb = dPriv->driverPrivate;
+ 
+    if (intel->constant_cliprect) {
+       /* FBO or DRI2 rendering, which can just use the fb's size. */
+@@ -159,14 +158,14 @@
+       volatile struct drm_i915_sarea *sarea = intel->sarea;
+       drm_clip_rect_t drw_rect = { .x1 = dPriv->x, .x2 = dPriv->x + dPriv->w,
+ 				   .y1 = dPriv->y, .y2 = dPriv->y + dPriv->h };
+-      drm_clip_rect_t planeA_rect = { .x1 = sarea->planeA_x, .y1 = sarea->planeA_y,
+-				     .x2 = sarea->planeA_x + sarea->planeA_w,
+-				     .y2 = sarea->planeA_y + sarea->planeA_h };
+-      drm_clip_rect_t planeB_rect = { .x1 = sarea->planeB_x, .y1 = sarea->planeB_y,
+-				     .x2 = sarea->planeB_x + sarea->planeB_w,
+-				     .y2 = sarea->planeB_y + sarea->planeB_h };
+-      GLint areaA = driIntersectArea( drw_rect, planeA_rect );
+-      GLint areaB = driIntersectArea( drw_rect, planeB_rect );
++      drm_clip_rect_t pipeA_rect = { .x1 = sarea->pipeA_x, .y1 = sarea->pipeA_y,
++				     .x2 = sarea->pipeA_x + sarea->pipeA_w,
++				     .y2 = sarea->pipeA_y + sarea->pipeA_h };
++      drm_clip_rect_t pipeB_rect = { .x1 = sarea->pipeB_x, .y1 = sarea->pipeB_y,
++				     .x2 = sarea->pipeB_x + sarea->pipeB_w,
++				     .y2 = sarea->pipeB_y + sarea->pipeB_h };
++      GLint areaA = driIntersectArea( drw_rect, pipeA_rect );
++      GLint areaB = driIntersectArea( drw_rect, pipeB_rect );
+       GLuint flags = dPriv->vblFlags;
+ 
+       /* Update vblank info
