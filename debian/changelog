@@ -1,3 +1,11 @@
+mesa (7.3~rc2-0ubuntu1) UNRELEASED; urgency=low
+
+  * Merge with Debian experimental
+  * Add 103_remove_intel_pageflipping.diff to remove obsolete code which
+    makes the build to fail.
+
+ -- Timo Aaltonen <tjaalton@ubuntu.com>  Sun, 18 Jan 2009 15:49:24 +0200
+
 mesa (7.3~rc2-1) UNRELEASED; urgency=low
 
   * New upstream release candidate.
