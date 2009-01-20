@@ -2,7 +2,7 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="8,00"
-	Name="gears"
+	Name="gears_staticCRT"
 	ProjectGUID="{3A7B0671-10F8-45D1-B012-F6D650F817CE}"
 	RootNamespace="gears"
 	>
@@ -46,7 +46,7 @@
 				AdditionalIncludeDirectories="../../../../include"
 				PreprocessorDefinitions="WIN32,_DEBUG,_CONSOLE"
 				BasicRuntimeChecks="3"
-				RuntimeLibrary="3"
+				RuntimeLibrary="1"
 				PrecompiledHeaderFile=".\Debug/gears.pch"
 				AssemblerListingLocation=".\Debug/"
 				ObjectFile=".\Debug/"
@@ -136,7 +136,7 @@
 				AdditionalIncludeDirectories="../../../../include"
 				PreprocessorDefinitions="WIN32,NDEBUG,_CONSOLE"
 				StringPooling="true"
-				RuntimeLibrary="2"
+				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
 				PrecompiledHeaderFile=".\Release/gears.pch"
 				AssemblerListingLocation=".\Release/"
