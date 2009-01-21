@@ -1,4 +1,4 @@
-mesa (7.3~rc3-1) UNRELEASED; urgency=low
+mesa (7.3~rc3-1) experimental; urgency=low
 
   [ Timo Aaltonen ]
   * New upstream release candidate.
@@ -6,7 +6,7 @@ mesa (7.3~rc3-1) UNRELEASED; urgency=low
   [ Julien Cristau ]
   * Refresh patches 03 and 04.
 
- -- Timo Aaltonen <tjaalton@ubuntu.com>  Fri, 16 Jan 2009 23:06:40 +0200
+ -- Julien Cristau <jcristau@debian.org>  Wed, 21 Jan 2009 19:01:21 +0100
 
 mesa (7.3~rc1-1) experimental; urgency=low
 
