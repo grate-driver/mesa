@@ -1,6 +1,10 @@
 mesa (7.3~rc3-1) UNRELEASED; urgency=low
 
+  [ Timo Aaltonen ]
   * New upstream release candidate.
+
+  [ Julien Cristau ]
+  * Refresh patches 03 and 04.
 
  -- Timo Aaltonen <tjaalton@ubuntu.com>  Fri, 16 Jan 2009 23:06:40 +0200
 

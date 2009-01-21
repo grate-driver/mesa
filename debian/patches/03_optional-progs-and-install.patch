@@ -12,8 +12,8 @@ and we don't actually build it at this point.
 
 Index: mesa/progs/xdemos/Makefile
 ===================================================================
---- mesa.orig/progs/xdemos/Makefile	2008-07-01 15:26:56.000000000 +0300
-+++ mesa/progs/xdemos/Makefile	2008-07-01 15:48:47.000000000 +0300
+--- mesa.orig/progs/xdemos/Makefile
++++ mesa/progs/xdemos/Makefile
 @@ -10,7 +10,7 @@
  
  LIBS = -L$(TOP)/$(LIB_DIR) -l$(GL_LIB) $(APP_LIB_DEPS)
@@ -21,9 +21,9 @@ Index: mesa/progs/xdemos/Makefile
 -PROGS = \
 +PROGS ?= \
  	corender \
+ 	glsync \
  	glthreads \
- 	glxdemo \
-@@ -60,6 +60,11 @@
+@@ -61,6 +61,11 @@
  extra: $(EXTRA_PROGS)
  
  
@@ -37,8 +37,8 @@ Index: mesa/progs/xdemos/Makefile
  	-rm -f *.o *~
 Index: mesa/progs/Makefile
 ===================================================================
---- mesa.orig/progs/Makefile	2008-07-01 15:26:56.000000000 +0300
-+++ mesa/progs/Makefile	2008-07-01 15:48:07.000000000 +0300
+--- mesa.orig/progs/Makefile
++++ mesa/progs/Makefile
 @@ -21,8 +21,12 @@
  		fi \
  	done
