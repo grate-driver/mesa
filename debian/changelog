@@ -1,4 +1,4 @@
-mesa (7.3~rc3-1ubuntu1) UNRELEASED; urgency=low
+mesa (7.3~rc3-1ubuntu1) jaunty; urgency=low
 
   * Merge with Debian experimental.
   * Drop 102_dont_vblank.patch, since the new drm code in the kernel
@@ -6,7 +6,7 @@ mesa (7.3~rc3-1ubuntu1) UNRELEASED; urgency=low
   * Bump the build-dependency of libdrm to 2.4.4. It's the first version
     with necessary changes to build this.
 
- -- Timo Aaltonen <tjaalton@ubuntu.com>  Sun, 18 Jan 2009 15:49:24 +0200
+ -- Timo Aaltonen <tjaalton@ubuntu.com>  Fri, 23 Jan 2009 10:20:24 +0200
 
 mesa (7.3~rc3-1) experimental; urgency=low
 
