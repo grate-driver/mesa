@@ -1,10 +1,6 @@
 mesa (7.3~rc3-1ubuntu1) UNRELEASED; urgency=low
 
   * Merge with Debian experimental.
-  * Add 103_remove_intel_pageflipping.diff to remove obsolete code which
-    makes the build to fail.
-  * Add 104_plane_to_pipe.diff which renames plane* back to pipe* in
-    intel_buffers.c.
 
  -- Timo Aaltonen <tjaalton@ubuntu.com>  Sun, 18 Jan 2009 15:49:24 +0200
 
