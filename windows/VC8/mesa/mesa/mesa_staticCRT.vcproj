@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="8.00"
-	Name="mesa"
+	Version="8,00"
+	Name="mesa_staticCRT"
 	ProjectGUID="{2120C974-2717-4709-B44F-D6E6D0A56448}"
 	RootNamespace="mesa"
 	>
@@ -44,7 +44,7 @@
 				AdditionalOptions="/Zm1000 "
 				InlineFunctionExpansion="1"
 				AdditionalIncludeDirectories="../../../../include,../../../../src/mesa,../../../../src/mesa/glapi,../../../../src/mesa/main,../../../../src/mesa/shader,../../../../src/mesa/shader/slang,../../../../src/mesa/shader/grammar"
-				PreprocessorDefinitions="_CRT_SECURE_NO_DEPRECATE;NDEBUG;WIN32;_LIB;_DLL;BUILD_GL32;MESA_MINWARN"
+				PreprocessorDefinitions="NDEBUG,WIN32,_LIB,MESA_MINWARN;_CRT_SECURE_NO_DEPRECATE"
 				StringPooling="true"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
@@ -119,7 +119,7 @@
 				AdditionalOptions="/Zm1000 "
 				Optimization="0"
 				AdditionalIncludeDirectories="../../../../include,../../../../src/mesa,../../../../src/mesa/glapi,../../../../src/mesa/main,../../../../src/mesa/shader,../../../../src/mesa/shader/slang,../../../../src/mesa/shader/grammar"
-				PreprocessorDefinitions="_CRT_SECURE_NO_DEPRECATE;_DEBUG;WIN32;_LIB;_DLL;BUILD_GL32;MESA_MINWARN"
+				PreprocessorDefinitions="_DEBUG,WIN32,_LIB,MESA_MINWARN;_CRT_SECURE_NO_DEPRECATE"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
 				PrecompiledHeaderFile=".\Debug/mesa.pch"
