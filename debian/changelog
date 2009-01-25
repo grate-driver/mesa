@@ -1,3 +1,9 @@
+mesa (7.3-1) UNRELEASED; urgency=low
+
+  * New upstream release.
+
+ -- Timo Aaltonen <tjaalton@ubuntu.com>  Sun, 25 Jan 2009 17:31:25 +0200
+
 mesa (7.3~rc3-1) experimental; urgency=low
 
   [ Timo Aaltonen ]
