@@ -553,12 +553,19 @@ static void precalc_lit( struct brw_wm_compile *c,
    }
 }
 
+
+/**
+ * Some TEX instructions require extra code, cube map coordinate
+ * normalization, or coordinate scaling for RECT textures, etc.
+ * This function emits those extra instructions and the TEX
+ * instruction itself.
+ */
 static void precalc_tex( struct brw_wm_compile *c,
 			 const struct prog_instruction *inst )
 {
    struct prog_src_register coord;
    struct prog_dst_register tmpcoord;
-   GLuint unit = c->fp->program.Base.SamplerUnits[inst->TexSrcUnit];
+   const GLuint unit = c->fp->program.Base.SamplerUnits[inst->TexSrcUnit];
 
    if (inst->TexSrcTarget == TEXTURE_CUBE_INDEX) {
        struct prog_instruction *out;
@@ -568,9 +575,11 @@ static void precalc_tex( struct brw_wm_compile *c,
        struct prog_src_register tmp1src = src_reg_from_dst(tmp1);
        struct prog_src_register src0 = inst->SrcReg[0];
 
+       /* find longest component of coord vector and normalize it */
        tmpcoord = get_temp(c);
        coord = src_reg_from_dst(tmpcoord);
 
+       /* tmpcoord = src0 (i.e.: coord = src0) */
        out = emit_op(c, OPCODE_MOV,
                      tmpcoord,
                      0, 0, 0,
@@ -580,6 +589,7 @@ static void precalc_tex( struct brw_wm_compile *c,
        out->SrcReg[0].NegateBase = 0;
        out->SrcReg[0].Abs = 1;
 
+       /* tmp0 = MAX(coord.X, coord.Y) */
        emit_op(c, OPCODE_MAX,
                tmp0,
                0, 0, 0,
@@ -587,6 +597,7 @@ static void precalc_tex( struct brw_wm_compile *c,
                src_swizzle1(coord, Y),
                src_undef());
 
+       /* tmp1 = MAX(tmp0, coord.Z) */
        emit_op(c, OPCODE_MAX,
                tmp1,
                0, 0, 0,
@@ -594,6 +605,7 @@ static void precalc_tex( struct brw_wm_compile *c,
                src_swizzle1(coord, Z),
                src_undef());
 
+       /* tmp0 = 1 / tmp1 */
        emit_op(c, OPCODE_RCP,
                tmp0,
                0, 0, 0,
@@ -601,6 +613,7 @@ static void precalc_tex( struct brw_wm_compile *c,
                src_undef(),
                src_undef());
 
+       /* tmpCoord = src0 * tmp0 */
        emit_op(c, OPCODE_MUL,
                tmpcoord,
                0, 0, 0,
@@ -610,7 +623,8 @@ static void precalc_tex( struct brw_wm_compile *c,
 
        release_temp(c, tmp0);
        release_temp(c, tmp1);
-   } else if (inst->TexSrcTarget == TEXTURE_RECT_INDEX) {
+   }
+   else if (inst->TexSrcTarget == TEXTURE_RECT_INDEX) {
       struct prog_src_register scale = 
 	 search_or_add_param5( c, 
 			       STATE_INTERNAL, 
@@ -641,19 +655,9 @@ static void precalc_tex( struct brw_wm_compile *c,
     * conversion requires allocating a temporary variable which we
     * don't have the facility to do that late in the compilation.
     */
-   if (!(c->key.yuvtex_mask & (1<<unit))) {
-      emit_op(c, 
-	      OPCODE_TEX,
-	      inst->DstReg,
-	      inst->SaturateMode,
-	      unit,
-	      inst->TexSrcTarget,
-	      coord,
-	      src_undef(),
-	      src_undef());
-   }
-   else {
-       GLboolean  swap_uv = c->key.yuvtex_swap_mask & (1<<unit);
+   if (c->key.yuvtex_mask & (1 << unit)) {
+      /* convert ycbcr to RGBA */
+      GLboolean  swap_uv = c->key.yuvtex_swap_mask & (1<<unit);
 
       /* 
 	 CONST C0 = { -.5, -.0625,  -.5, 1.164 }
@@ -732,6 +736,18 @@ static void precalc_tex( struct brw_wm_compile *c,
 	      src_swizzle1(src_reg_from_dst(dst), Y));
 
       release_temp(c, tmp);
+   }
+   else {
+      /* ordinary RGBA tex instruction */
+      emit_op(c, 
+	      OPCODE_TEX,
+	      inst->DstReg,
+	      inst->SaturateMode,
+	      unit,
+	      inst->TexSrcTarget,
+	      coord,
+	      src_undef(),
+	      src_undef());
    }
 
    if ((inst->TexSrcTarget == TEXTURE_RECT_INDEX) ||
