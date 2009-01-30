@@ -2,4 +2,3 @@
 03_optional-progs-and-install.patch
 04_osmesa_version.diff
 101_ubuntu_hidden_glname.patch
-102_remove_flip.diff

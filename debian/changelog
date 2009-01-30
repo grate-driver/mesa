@@ -1,3 +1,21 @@
+mesa (7.3-1ubuntu1) UNRELEASED; urgency=low
+
+  * Merge with Debian experimental.
+  * Drop 102_remove_flip.diff, included in 7.3..
+
+ -- Timo Aaltonen <tjaalton@ubuntu.com>  Fri, 30 Jan 2009 21:52:03 +0200
+
+mesa (7.3-1) experimental; urgency=low
+
+  [ Timo Aaltonen ]
+  * New upstream release.
+
+  [ Julien Cristau ]
+  * Try to make the diff a bit smaller by removing directories that are in
+    upstream git but not in tarballs.
+
+ -- Julien Cristau <jcristau@debian.org>  Fri, 30 Jan 2009 20:00:34 +0100
+
 mesa (7.3~rc3-1ubuntu2) jaunty; urgency=low
 
   * 102_remove_flip.diff: Add a patch from upstream which removes the
