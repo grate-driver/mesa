@@ -1,6 +1,11 @@
 mesa (7.3-1) UNRELEASED; urgency=low
 
+  [ Timo Aaltonen ]
   * New upstream release.
+
+  [ Julien Cristau ]
+  * Try to make the diff a bit smaller by removing directories that are in
+    upstream git but not in tarballs.
 
  -- Timo Aaltonen <tjaalton@ubuntu.com>  Sun, 25 Jan 2009 17:31:25 +0200
 
