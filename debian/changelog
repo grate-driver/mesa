@@ -1,3 +1,10 @@
+mesa (7.3-1ubuntu2) UNRELEASED; urgency=low
+
+  * Drop CFLAGS mangling for lpia and armel from debian/rules, the issue has
+    been fixed upstream.
+
+ -- Julien Cristau <jcristau@debian.org>  Sat, 31 Jan 2009 22:12:35 +0100
+
 mesa (7.3-1ubuntu1) jaunty; urgency=low
 
   * Merge with Debian experimental.
