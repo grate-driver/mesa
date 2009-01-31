@@ -4,6 +4,8 @@ mesa (7.3-2) UNRELEASED; urgency=low
     actual releases.
   * debian/control: add lpia to the Architecture field for
     libgl1-mesa-dri{,-dbg} to match Ubuntu.
+  * debian/rules: on lpia, only build the i915 and i965 dri drivers (based on
+    Ubuntu changes).
 
  -- Julien Cristau <jcristau@debian.org>  Sat, 31 Jan 2009 22:06:36 +0100
 
