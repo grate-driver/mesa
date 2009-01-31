@@ -2,6 +2,8 @@ mesa (7.3-2) UNRELEASED; urgency=low
 
   * Fix watch file to make uscan not consider release candidates as newer than
     actual releases.
+  * debian/control: add lpia to the Architecture field for
+    libgl1-mesa-dri{,-dbg} to match Ubuntu.
 
  -- Julien Cristau <jcristau@debian.org>  Sat, 31 Jan 2009 22:06:36 +0100
 
