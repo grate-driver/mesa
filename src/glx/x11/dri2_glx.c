@@ -173,6 +173,7 @@ static __GLXDRIdrawable *dri2CreateDrawable(__GLXscreenConfigs *psc,
     pdraw->base.xDrawable = xDrawable;
     pdraw->base.drawable = drawable;
     pdraw->base.psc = psc;
+    pdraw->bufferCount = 0;
     pdraw->configureSeqno = ~0;
 
     DRI2CreateDrawable(psc->dpy, xDrawable);
@@ -493,6 +494,7 @@ _X_HIDDEN __GLXDRIdisplay *dri2CreateDisplay(Display *dpy)
 					  dri2ConfigureNotifyProc);
 
     pdp->driPatch = 0;
+    pdp->configureSeqno = 0;
 
     pdp->base.destroyDisplay = dri2DestroyDisplay;
     pdp->base.createScreen = dri2CreateScreen;
