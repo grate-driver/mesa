@@ -146,6 +146,9 @@ GLboolean brwCreateContext( const __GLcontextModes *mesaVis,
    /* if conformance mode is set, swrast can handle any size AA point */
    ctx->Const.MaxPointSizeAA = 255.0;
 
+   /* We want the GLSL compiler to emit code that uses condition codes */
+   ctx->Shader.EmitCondCodes = GL_TRUE;
+
 /*    ctx->Const.MaxNativeVertexProgramTemps = 32; */
 
    brw_init_attribs( brw );
