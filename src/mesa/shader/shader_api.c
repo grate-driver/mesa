@@ -1433,7 +1433,8 @@ _mesa_use_program(GLcontext *ctx, GLuint program)
          return;
       }
       if (!shProg->LinkStatus) {
-         _mesa_error(ctx, GL_INVALID_OPERATION, "glUseProgram");
+         _mesa_error(ctx, GL_INVALID_OPERATION,
+                     "glUseProgram(program %u not linked)", program);
          return;
       }
    }
