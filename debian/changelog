@@ -1,9 +1,14 @@
 mesa (7.3-1ubuntu2) UNRELEASED; urgency=low
 
+  [ Julien Cristau ]
   * Drop CFLAGS mangling for lpia and armel from debian/rules, the issue has
     been fixed upstream.
 
- -- Julien Cristau <jcristau@debian.org>  Sat, 31 Jan 2009 22:12:35 +0100
+  [ Timo Aaltonen ]
+  * 102_dont_vblank.patch: Disable vblank again for intel, and revisit it
+    again during the next cycle.
+
+ -- Timo Aaltonen <tjaalton@ubuntu.com>  Mon, 23 Feb 2009 16:37:59 +0200
 
 mesa (7.3-1ubuntu1) jaunty; urgency=low
 
