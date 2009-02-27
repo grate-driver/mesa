@@ -797,6 +797,8 @@ _mesa_DeleteBuffersARB(GLsizei n, const GLuint *ids)
          if (bufObj->Pointer) {
             /* if mapped, unmap it now */
             ctx->Driver.UnmapBuffer(ctx, 0, bufObj);
+            bufObj->Access = GL_READ_WRITE_ARB;
+            bufObj->Pointer = NULL;
          }
 
          unbind(ctx, &ctx->Array.ArrayObj->Vertex.BufferObj, bufObj);
@@ -1068,11 +1070,8 @@ _mesa_UnmapBufferARB(GLenum target)
       return GL_FALSE;
    }
 
-   if (ctx->Driver.UnmapBuffer) {
-      status = ctx->Driver.UnmapBuffer( ctx, target, bufObj );
-   }
-
-   bufObj->Access = GL_READ_WRITE_ARB; /* initial value, OK? */
+   status = ctx->Driver.UnmapBuffer( ctx, target, bufObj );
+   bufObj->Access = GL_READ_WRITE_ARB;
    bufObj->Pointer = NULL;
 
    return status;
