@@ -944,8 +944,10 @@ _mesa_BufferDataARB(GLenum target, GLsizeiptrARB size,
    }
    
    if (bufObj->Pointer) {
-      _mesa_error(ctx, GL_INVALID_OPERATION, "glBufferDataARB(buffer is mapped)" );
-      return;
+      /* Unmap the existing buffer.  We'll replace it now.  Not an error. */
+      ctx->Driver.UnmapBuffer(ctx, target, bufObj);
+      bufObj->Access = GL_READ_WRITE_ARB;
+      bufObj->Pointer = NULL;
    }  
 
    ASSERT(ctx->Driver.BufferData);
