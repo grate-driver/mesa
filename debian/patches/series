@@ -3,3 +3,4 @@
 04_osmesa_version.diff
 101_ubuntu_hidden_glname.patch
 102_dont_vblank.diff
+103_rs600_support.patch

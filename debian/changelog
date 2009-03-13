@@ -1,3 +1,10 @@
+mesa (7.3-1ubuntu3) jaunty; urgency=low
+
+  * Add 103_rs600_support.patch: Adds support for the RS600 chip and sets
+    the number of gb pipes properly for r3xx/r5xx cards.
+
+ -- Bryce Harrington <bryce@ubuntu.com>  Tue, 03 Mar 2009 00:26:59 -0800
+
 mesa (7.3-1ubuntu2) jaunty; urgency=low
 
   [ Julien Cristau ]
