@@ -1,5 +1,6 @@
-mesa (7.3-2) UNRELEASED; urgency=low
+mesa (7.4~rc1-1) UNRELEASED; urgency=low
 
+  * New upstream release candidate.
   * Fix watch file to make uscan not consider release candidates as newer than
     actual releases.
   * debian/control: add lpia to the Architecture field for
