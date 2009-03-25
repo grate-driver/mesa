@@ -1,4 +1,4 @@
-mesa (7.4~rc1-1) UNRELEASED; urgency=low
+mesa (7.4~rc1-1) experimental; urgency=low
 
   * New upstream release candidate.
   * Fix watch file to make uscan not consider release candidates as newer than
@@ -9,7 +9,7 @@ mesa (7.4~rc1-1) UNRELEASED; urgency=low
     Ubuntu changes).
   * Build-depend on linux-libc-dev >= 2.6.29 on linux archs.
 
- -- Julien Cristau <jcristau@debian.org>  Sat, 31 Jan 2009 22:06:36 +0100
+ -- Julien Cristau <jcristau@debian.org>  Wed, 25 Mar 2009 11:34:42 +0100
 
 mesa (7.3-1) experimental; urgency=low
 
