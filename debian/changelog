@@ -1,11 +1,9 @@
 mesa (7.4~rc1-1ubuntu1) UNRELEASED; urgency=low
 
-  * debian/patches/110_fix_intel_965_atunnel_rendering_glitch.diff: fix rendering defects
-    in atunnel screensaver (from rss-glx package). Patch originally comes from
-    upstream mesa master at cgit.freedesktop.org (26th Feb by Haihao Xiang
-    as commit 68915fd6fac44dd000080298e3afb0669e8754aa). (LP: #330476)
+  * Merge from debian-experimental (LP: #330476)
+  * Drop 103_rs600_support.patch, included in this version.
 
- -- Martin Olsson <martin@minimum.se>  Mon, 02 Mar 2009 13:30:47 +0100
+ -- Timo Aaltonen <tjaalton@ubuntu.com>  Fri, 27 Mar 2009 16:11:30 +0200
 
 mesa (7.4~rc1-1) experimental; urgency=low
 
