@@ -533,7 +533,7 @@ intelFlush(GLcontext * ctx)
    intel_flush(ctx, GL_FALSE);
 }
 
-static void
+void
 intel_glFlush(GLcontext *ctx)
 {
    intel_flush(ctx, GL_TRUE);
