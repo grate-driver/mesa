@@ -1,4 +1,4 @@
-mesa (7.3-1ubuntu5) UNRELEASED; urgency=low
+mesa (7.4~rc1-1ubuntu1) UNRELEASED; urgency=low
 
   * debian/patches/110_fix_intel_965_atunnel_rendering_glitch.diff: fix rendering defects
     in atunnel screensaver (from rss-glx package). Patch originally comes from
@@ -6,6 +6,19 @@ mesa (7.3-1ubuntu5) UNRELEASED; urgency=low
     as commit 68915fd6fac44dd000080298e3afb0669e8754aa). (LP: #330476)
 
  -- Martin Olsson <martin@minimum.se>  Mon, 02 Mar 2009 13:30:47 +0100
+
+mesa (7.4~rc1-1) experimental; urgency=low
+
+  * New upstream release candidate.
+  * Fix watch file to make uscan not consider release candidates as newer than
+    actual releases.
+  * debian/control: add lpia to the Architecture field for
+    libgl1-mesa-dri{,-dbg} to match Ubuntu.
+  * debian/rules: on lpia, only build the i915 and i965 dri drivers (based on
+    Ubuntu changes).
+  * Build-depend on linux-libc-dev >= 2.6.29 on linux archs.
+
+ -- Julien Cristau <jcristau@debian.org>  Wed, 25 Mar 2009 11:34:42 +0100
 
 mesa (7.3-1ubuntu4) jaunty; urgency=low
 
