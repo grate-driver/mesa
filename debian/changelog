@@ -1,4 +1,4 @@
-mesa (7.3-1ubuntu4) jaunty; urgency=low
+mesa (7.3-1ubuntu5) UNRELEASED; urgency=low
 
   * debian/patches/110_fix_intel_965_atunnel_rendering_glitch.diff: fix rendering defects
     in atunnel screensaver (from rss-glx package). Patch originally comes from
@@ -6,6 +6,15 @@ mesa (7.3-1ubuntu4) jaunty; urgency=low
     as commit 68915fd6fac44dd000080298e3afb0669e8754aa). (LP: #330476)
 
  -- Martin Olsson <martin@minimum.se>  Mon, 02 Mar 2009 13:30:47 +0100
+
+mesa (7.3-1ubuntu4) jaunty; urgency=low
+
+  * Backport 104_swrast_fbconfigs.patch from mesa git.
+    - Properly assigns an fbconfig for the root visual.  This fixes
+      issues with MythTV not being able to show fonts when using a software
+      rasterizer. (LP: #341898)
+
+ -- Mario Limonciello <superm1@ubuntu.com>  Fri, 27 Mar 2009 02:50:13 -0500
 
 mesa (7.3-1ubuntu3) jaunty; urgency=low
 
