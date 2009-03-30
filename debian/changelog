@@ -1,3 +1,9 @@
+mesa (7.4-1) UNRELEASED; urgency=low
+
+  * New upstream release.
+
+ -- Timo Aaltonen <tjaalton@ubuntu.com>  Mon, 30 Mar 2009 10:41:04 +0300
+
 mesa (7.4~rc1-1) experimental; urgency=low
 
   * New upstream release candidate.
