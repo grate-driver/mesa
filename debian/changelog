@@ -1,9 +1,10 @@
-mesa (7.4~rc1-1ubuntu1) UNRELEASED; urgency=low
+mesa (7.4-0ubuntu1) UNRELEASED; urgency=low
 
-  * Merge from debian-experimental (LP: #330476)
+  * New upstream release, merge from debian-experimental (LP: #330476)
   * Drop 103_rs600_support.patch, included in this version.
+  * Drop 104_swrast_fbconfigs.patch, included in this version.
 
- -- Timo Aaltonen <tjaalton@ubuntu.com>  Fri, 27 Mar 2009 16:11:30 +0200
+ -- Timo Aaltonen <tjaalton@ubuntu.com>  Mon, 30 Mar 2009 10:47:38 +0300
 
 mesa (7.4~rc1-1) experimental; urgency=low
 
