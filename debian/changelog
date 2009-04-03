@@ -4,6 +4,7 @@ mesa (7.4-0ubuntu1) UNRELEASED; urgency=low
   * Drop 103_rs600_support.patch, included in this version.
   * Drop 104_swrast_fbconfigs.patch, included in this version.
   * Add 103_bump_965_texture_limit.diff. (LP: #146298)
+  * Add 104_fix_dri2_ext_tfp.diff. (LP: #324854)
 
  -- Timo Aaltonen <tjaalton@ubuntu.com>  Mon, 30 Mar 2009 10:47:38 +0300
 
