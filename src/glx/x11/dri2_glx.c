@@ -74,7 +74,6 @@ struct __GLXDRIdrawablePrivateRec {
     int bufferCount;
     int width, height;
     int have_back;
-    int have_front;
     int have_fake_front;
 };
 
@@ -195,7 +194,7 @@ static void dri2CopySubBuffer(__GLXDRIdrawable *pdraw,
     XserverRegion region;
 
     /* Check we have the right attachments */
-    if (!(priv->have_front && priv->have_back))
+    if (!priv->have_back)
     	return;
 
     xrect.x = x;
@@ -223,7 +222,7 @@ static void dri2WaitX(__GLXDRIdrawable *pdraw)
     XserverRegion region;
 
     /* Check we have the right attachments */
-    if (!(priv->have_fake_front && priv->have_front))
+    if (!priv->have_fake_front)
     	return;
 
     xrect.x = 0;
@@ -243,7 +242,7 @@ static void dri2WaitGL(__GLXDRIdrawable *pdraw)
     XRectangle xrect;
     XserverRegion region;
 
-    if (!(priv->have_fake_front && priv->have_front))
+    if (!priv->have_fake_front)
     	return;
 
     xrect.x = 0;
@@ -292,7 +291,6 @@ dri2GetBuffers(__DRIdrawable *driDrawable,
     pdraw->width = *width;
     pdraw->height = *height;
     pdraw->bufferCount = *out_count;
-    pdraw->have_front = 0;
     pdraw->have_fake_front = 0;
     pdraw->have_back = 0;
 
@@ -304,8 +302,6 @@ dri2GetBuffers(__DRIdrawable *driDrawable,
 	pdraw->buffers[i].pitch = buffers[i].pitch;
 	pdraw->buffers[i].cpp = buffers[i].cpp;
 	pdraw->buffers[i].flags = buffers[i].flags;
-	if (pdraw->buffers[i].attachment == __DRI_BUFFER_FRONT_LEFT)
-	    pdraw->have_front = 1;
 	if (pdraw->buffers[i].attachment == __DRI_BUFFER_FAKE_FRONT_LEFT)
 	    pdraw->have_fake_front = 1;
 	if (pdraw->buffers[i].attachment == __DRI_BUFFER_BACK_LEFT)
