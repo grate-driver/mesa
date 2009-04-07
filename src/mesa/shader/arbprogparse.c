@@ -1823,7 +1823,6 @@ parse_param_elements (GLcontext * ctx, const GLubyte ** inst,
                if (param_var->param_binding_begin == ~0U)
                   param_var->param_binding_begin = idx;
                param_var->param_binding_length++;
-               Program->Base.NumParameters++;
             }
          }
          else {
@@ -1832,7 +1831,6 @@ parse_param_elements (GLcontext * ctx, const GLubyte ** inst,
             if (param_var->param_binding_begin == ~0U)
                param_var->param_binding_begin = idx;
             param_var->param_binding_length++;
-            Program->Base.NumParameters++;
          }
          break;
 
@@ -1843,7 +1841,6 @@ parse_param_elements (GLcontext * ctx, const GLubyte ** inst,
          if (param_var->param_binding_begin == ~0U)
             param_var->param_binding_begin = idx;
          param_var->param_binding_length++;
-         Program->Base.NumParameters++;
 
          /* Check if there is more: 0 -> we're done, else its an integer */
          if (**inst) {
@@ -1879,7 +1876,6 @@ parse_param_elements (GLcontext * ctx, const GLubyte ** inst,
                idx = _mesa_add_state_reference(Program->Base.Parameters,
                                                state_tokens);
                param_var->param_binding_length++;
-               Program->Base.NumParameters++;
             }
          }
          else {
@@ -1897,7 +1893,6 @@ parse_param_elements (GLcontext * ctx, const GLubyte ** inst,
             param_var->param_binding_begin = idx;
          param_var->param_binding_type = PROGRAM_CONSTANT;
          param_var->param_binding_length++;
-         Program->Base.NumParameters++;
          break;
 
       default:
@@ -1905,6 +1900,8 @@ parse_param_elements (GLcontext * ctx, const GLubyte ** inst,
                        "Unexpected token (in parse_param_elements())");
          return 1;
    }
+
+   Program->Base.NumParameters = Program->Base.Parameters->NumParameters;
 
    /* Make sure we haven't blown past our parameter limits */
    if (((Program->Base.Target == GL_VERTEX_PROGRAM_ARB) &&
