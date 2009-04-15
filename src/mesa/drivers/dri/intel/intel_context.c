@@ -97,7 +97,7 @@ int INTEL_DEBUG = (0);
 
 #include "extension_helper.h"
 
-#define DRIVER_DATE                     "20090326 2009Q1 RC2"
+#define DRIVER_DATE                     "20090415 2009Q1 RC3"
 #define DRIVER_DATE_GEM                 "GEM " DRIVER_DATE
 
 static const GLubyte *
