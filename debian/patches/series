@@ -5,3 +5,4 @@
 102_dont_vblank.diff
 103_bump_965_texture_limit.diff
 104_fix_dri2_ext_tfp.diff
+105_glXWaitX_segfaults.patch

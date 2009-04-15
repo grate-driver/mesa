@@ -1,3 +1,10 @@
+mesa (7.4-0ubuntu2) jaunty; urgency=low
+
+  * Add 105_glXWaitX_segfaults.patch. Resolves segfaults from unitialized
+    variables when using swrast based drivers. (LP: #355242)
+
+ -- Mario Limonciello <superm1@ubuntu.com>  Wed, 15 Apr 2009 01:03:30 -0500
+
 mesa (7.4-0ubuntu1) jaunty; urgency=low
 
   * New upstream release, merge from debian-experimental
