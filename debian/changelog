@@ -1,3 +1,11 @@
+mesa (7.4-3) UNRELEASED; urgency=low
+
+  * Make libgl1-mesa-dev and mesa-common-dev 'Architecture: any'.  This gets
+    rid of uninstallability when a new upstream version isn't built on all
+    architectures, and allows us to ship potentially arch-specific .pc files.
+
+ -- Julien Cristau <jcristau@debian.org>  Wed, 15 Apr 2009 19:25:50 +0200
+
 mesa (7.4-2) unstable; urgency=low
 
   * Upload to unstable.
