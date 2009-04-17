@@ -1,3 +1,11 @@
+mesa (7.4-0ubuntu4) jaunty; urgency=low
+
+  * Disable 103_bump_965_texture_limit.diff.  This is suspected to cause X
+    freeze issues.
+    (LP: #359392, Reopen: 146298)
+
+ -- Bryce Harrington <bryce@ubuntu.com>  Fri, 17 Apr 2009 10:33:21 -0700
+
 mesa (7.4-0ubuntu3) jaunty; urgency=low
 
   * Add 107_enable_all_radeon_fbconfigs.patch.  Resolves X errors causing fonts
