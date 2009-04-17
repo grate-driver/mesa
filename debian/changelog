@@ -1,3 +1,13 @@
+mesa (7.4-0ubuntu3) jaunty; urgency=low
+
+  * Add 107_enable_all_radeon_fbconfigs.patch.  Resolves X errors causing fonts
+    and most QT3 widgets from being shown.  These regressions were caused by
+    changes in behavior for Xorg server 1.5.  This patch is based on a similar
+    patch that was applied to swrast previously, 104_swrast_fbconfigs.patch.
+    (LP: #341898)
+
+ -- Mario Limonciello <superm1@ubuntu.com>  Thu, 16 Apr 2009 23:24:34 -0500
+
 mesa (7.4-0ubuntu2) jaunty; urgency=low
 
   * Add 105_glXWaitX_segfaults.patch. Resolves segfaults from unitialized
