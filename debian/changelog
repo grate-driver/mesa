@@ -12,6 +12,7 @@ mesa (7.4-3) UNRELEASED; urgency=low
     for direct rendering (either software or hardware).  Mark libgl1-mesa-dri
     as breaking old xserver-xorg-core and libgl1-mesa-glx, to avoid
     incompatibilities.
+  * Add patch by Samuel Thibault to fix FTBFS on hurd-i386.
 
  -- Julien Cristau <jcristau@debian.org>  Wed, 15 Apr 2009 19:25:50 +0200
 
