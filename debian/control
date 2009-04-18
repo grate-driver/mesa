@@ -106,6 +106,7 @@ Package: libgl1-mesa-glx
 Section: libs
 Architecture: any
 Depends: ${shlibs:Depends}
+Recommends: libgl1-mesa-dri (>= 7.2)
 Conflicts: libgl1, libgl1-mesa-dri (<< 6.4.0)
 Replaces: libgl1, libgl1-mesa-dri (<< 6.4.0)
 Provides: libgl1
@@ -164,10 +165,11 @@ Package: libgl1-mesa-dri
 Section: libs
 Priority: optional
 Architecture: any
-Depends: ${shlibs:Depends}, libgl1-mesa-glx (= ${binary:Version})
+Depends: ${shlibs:Depends}
 Suggests: libglide3
 Conflicts: xlibmesa-dri (<< 1:7.0.0)
 Replaces: xlibmesa-dri (<< 1:7.0.0)
+Breaks: xserver-xorg-core (<< 2:1.5), libgl1-mesa-glx (<< 7.2)
 Description: A free implementation of the OpenGL API -- DRI modules
  This version of Mesa provides GLX and DRI capabilities: it is capable of
  both direct and indirect rendering.  For direct rendering, it can use DRI

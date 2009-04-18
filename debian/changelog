@@ -6,6 +6,12 @@ mesa (7.4-3) UNRELEASED; urgency=low
   * Install pkgconfig files for libGLU, libOSMesa and libGLw.
   * Make libgl1-mesa-dri 'Architecture: any', as swrast_dri.so should get
     built everywhere.
+  * Drop the dependency on libgl1-mesa-glx from -dri, and make -glx recommend
+    -dri instead.  The dri drivers are also loaded by the X server, which
+    doesn't need libGL.  On the other hand, libGL needs one of the dri drivers
+    for direct rendering (either software or hardware).  Mark libgl1-mesa-dri
+    as breaking old xserver-xorg-core and libgl1-mesa-glx, to avoid
+    incompatibilities.
 
  -- Julien Cristau <jcristau@debian.org>  Wed, 15 Apr 2009 19:25:50 +0200
 
