@@ -1,5 +1,6 @@
 mesa (7.4-3) UNRELEASED; urgency=low
 
+  [ Julien Cristau ]
   * Make libgl1-mesa-dev and mesa-common-dev 'Architecture: any'.  This gets
     rid of uninstallability when a new upstream version isn't built on all
     architectures, and allows us to ship potentially arch-specific .pc files.
@@ -14,7 +15,10 @@ mesa (7.4-3) UNRELEASED; urgency=low
     incompatibilities.
   * Add patch by Samuel Thibault to fix FTBFS on hurd-i386.
 
- -- Julien Cristau <jcristau@debian.org>  Wed, 15 Apr 2009 19:25:50 +0200
+  [ Brice Goglin ]
+  * Add patch by Aurelien Jarno to fix FTBFS on kfreebsd-i386, closes: #524690.
+
+ -- Brice Goglin <bgoglin@debian.org>  Mon, 20 Apr 2009 12:33:45 +0200
 
 mesa (7.4-2) unstable; urgency=low
 
