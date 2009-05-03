@@ -186,7 +186,7 @@ Description: A free implementation of the OpenGL API -- DRI modules
 Package: libgl1-mesa-dri-dbg
 Section: debug
 Priority: extra
-Architecture: alpha amd64 arm armeb armel hppa i386 ia64 kfreebsd-i386 kfreebsd-amd64 lpia m68k mips mipsel powerpc s390 sparc
+Architecture: any
 Depends: libgl1-mesa-dri (= ${binary:Version})
 Description: Debugging symbols for the Mesa DRI modules
  This version of Mesa provides GLX and DRI capabilities: it is capable of
