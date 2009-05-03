@@ -1,4 +1,4 @@
-mesa (7.4.1-1) UNRELEASED; urgency=low
+mesa (7.4.1-1) unstable; urgency=low
 
   [ Julien Cristau ]
   * Make libgl1-mesa-dev and mesa-common-dev 'Architecture: any'.  This gets
@@ -20,7 +20,7 @@ mesa (7.4.1-1) UNRELEASED; urgency=low
   [ Brice Goglin ]
   * Add patch by Aurelien Jarno to fix FTBFS on kfreebsd-i386, closes: #524690.
 
- -- Brice Goglin <bgoglin@debian.org>  Mon, 20 Apr 2009 12:33:45 +0200
+ -- Julien Cristau <jcristau@debian.org>  Sun, 03 May 2009 16:05:09 +0200
 
 mesa (7.4-2) unstable; urgency=low
 
