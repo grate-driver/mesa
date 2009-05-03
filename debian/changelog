@@ -1,4 +1,4 @@
-mesa (7.4-3) UNRELEASED; urgency=low
+mesa (7.4.1-1) UNRELEASED; urgency=low
 
   [ Julien Cristau ]
   * Make libgl1-mesa-dev and mesa-common-dev 'Architecture: any'.  This gets
@@ -14,6 +14,7 @@ mesa (7.4-3) UNRELEASED; urgency=low
     as breaking old xserver-xorg-core and libgl1-mesa-glx, to avoid
     incompatibilities.
   * Add patch by Samuel Thibault to fix FTBFS on hurd-i386.
+  * Pull from mesa_7_4_branch as of May 3rd (commit 63375254).
 
   [ Brice Goglin ]
   * Add patch by Aurelien Jarno to fix FTBFS on kfreebsd-i386, closes: #524690.
