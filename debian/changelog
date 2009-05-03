@@ -15,6 +15,7 @@ mesa (7.4.1-1) UNRELEASED; urgency=low
     incompatibilities.
   * Add patch by Samuel Thibault to fix FTBFS on hurd-i386.
   * Pull from mesa_7_4_branch as of May 3rd (commit 63375254).
+  * Move -dbg packages to new 'debug' section.
 
   [ Brice Goglin ]
   * Add patch by Aurelien Jarno to fix FTBFS on kfreebsd-i386, closes: #524690.

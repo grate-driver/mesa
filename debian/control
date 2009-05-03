@@ -37,7 +37,7 @@ Description: A free implementation of the OpenGL API -- runtime
  On Linux, this library is also known as libGL or libGL.so.1.
 
 Package: libgl1-mesa-swx11-dbg
-Section: libdevel
+Section: debug
 Priority: extra
 Architecture: any
 Depends: libgl1-mesa-swx11 (= ${binary:Version})
@@ -122,7 +122,7 @@ Description: A free implementation of the OpenGL API -- GLX runtime
  libgl1-mesa-swx11 package.
 
 Package: libgl1-mesa-glx-dbg
-Section: libdevel
+Section: debug
 Priority: extra
 Architecture: any
 Depends: libgl1-mesa-glx (= ${binary:Version})
@@ -184,7 +184,7 @@ Description: A free implementation of the OpenGL API -- DRI modules
  The tdfx DRI module needs libglide3 to enable direct rendering.
 
 Package: libgl1-mesa-dri-dbg
-Section: libdevel
+Section: debug
 Priority: extra
 Architecture: alpha amd64 arm armeb armel hppa i386 ia64 kfreebsd-i386 kfreebsd-amd64 lpia m68k mips mipsel powerpc s390 sparc
 Depends: libgl1-mesa-dri (= ${binary:Version})
