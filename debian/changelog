@@ -1,3 +1,15 @@
+mesa (7.4-0ubuntu3.1) jaunty-proposed; urgency=low
+
+  * debian/patches/106_compiz_ring_switcher_xorg_segv_on_radeon.diff:
+    fix xserver segv triggered by compiz ring switcher plugin for users
+    with r300/r400 radeon chipsets and -ati driver. Patch previously
+    commited to mesa master as c28707b50701b1cf8727be29d61e2d939c6ee58f
+    and also to mesa_7_4_branch as a1ce4efefbb7f796a0a24544a1e893a56848f0c1.
+    Note: it was commited to the 7.4 branch after mesa 7.4.0 release.
+    (LP: #368049)
+
+ -- Martin Olsson <martin@minimum.se>  Mon, 04 May 2009 12:25:29 +0200
+
 mesa (7.4-0ubuntu3) jaunty; urgency=low
 
   * Disable 103_bump_965_texture_limit.diff.  This is suspected to cause X
