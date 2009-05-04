@@ -1,3 +1,12 @@
+mesa (7.4-0ubuntu5) karmic; urgency=low
+
+  * Add 107_glxgears_is_not_a_benchmark.patch:  glxgears makes
+    troubleshooting performance issues difficult because bug reporters
+    see it provides fps output, and end up not looking for a better
+    benchmark.
+
+ -- Bryce Harrington <bryce@ubuntu.com>  Mon, 04 May 2009 12:49:12 -0700
+
 mesa (7.4-0ubuntu4) karmic; urgency=low
 
   * debian/patches/106_compiz_ring_switcher_xorg_segv_on_radeon.diff:

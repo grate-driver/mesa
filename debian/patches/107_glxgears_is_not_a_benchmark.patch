@@ -1,0 +1,13 @@
+diff --git a/progs/xdemos/glxgears.c b/progs/xdemos/glxgears.c
+index 2dc157a..d7c8191 100644
+--- a/progs/xdemos/glxgears.c
++++ b/progs/xdemos/glxgears.c
+@@ -347,7 +347,7 @@ draw_frame(Display *dpy, Window win)
+    if (t - tRate0 >= 5.0) {
+       GLfloat seconds = t - tRate0;
+       GLfloat fps = frames / seconds;
+-      printf("%d frames in %3.1f seconds = %6.3f FPS\n", frames, seconds,
++      printf("%d frames in %3.1f seconds\n", frames, seconds,
+              fps);
+       tRate0 = t;
+       frames = 0;

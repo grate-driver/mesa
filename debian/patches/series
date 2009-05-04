@@ -7,3 +7,4 @@
 104_fix_dri2_ext_tfp.diff
 105_glXWaitX_segfaults.patch
 106_compiz_ring_switcher_xorg_segv_on_radeon.diff
+107_glxgears_is_not_a_benchmark.patch
