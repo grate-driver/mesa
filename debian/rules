@@ -129,6 +129,7 @@ confflags-swx11+glu = \
 	--disable-gl-osmesa \
 	--with-demos= \
 	--disable-glut \
+	--enable-motif \
 	CFLAGS="$(CFLAGS)"
 
 confflags-swx11+glu-static = \
@@ -137,6 +138,7 @@ confflags-swx11+glu-static = \
 	--enable-static \
 	--with-demos= \
 	--disable-glut \
+	--enable-motif \
 	CFLAGS="$(CFLAGS)"
 
 confflags-swx11+glu-i386-i686 = \
@@ -144,6 +146,7 @@ confflags-swx11+glu-i386-i686 = \
 	--disable-gl-osmesa \
 	--with-demos= \
 	--disable-glut \
+	--enable-motif \
 	--libdir=/usr/lib/i686/cmov \
 	CFLAGS="$(CFLAGS) -march=i686"
 

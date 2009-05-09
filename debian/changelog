@@ -1,8 +1,12 @@
 mesa (7.4.1-2) UNRELEASED; urgency=low
 
+  [ Julien Cristau ]
   * Don't build hardware dri drivers on s390.
 
- -- Julien Cristau <jcristau@debian.org>  Sun, 03 May 2009 19:22:59 +0200
+  [ Brice Goglin ]
+  * Enable motif in GLw, closes: #527483.
+
+ -- Brice Goglin <bgoglin@debian.org>  Sat, 09 May 2009 20:48:55 +0200
 
 mesa (7.4.1-1) unstable; urgency=low
 
