@@ -35,6 +35,10 @@ tbd
 <li>Fixed segfault when rendering to front buffer with DRI 1.
 <li>Fixed swrast texture rectangle bug when wrap mode = GL_CLAMP_TO_BORDER and
     filter mode = GL_LINEAR.  (bug 21461)
+<li>Fixed texture object mem leak during context destruction.
+<li>Fixed a state validation bug in glCopyTex[Sub]Image()
+<li>Fixed some i965 GLSL bugs.
+<li>Fixed an R300 driver texture object bad memory reference.
 </ul>
 
 
