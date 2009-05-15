@@ -191,7 +191,6 @@ install:
 
 install-%: $(STAMP)-build-%
 	cd $(DEB_BUILD_DIR)/$* && $(MAKE) DESTDIR=$(CURDIR)/debian/tmp install
-	touch $@
 
 clean: unpatch
 	dh_testdir
