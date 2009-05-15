@@ -1,3 +1,22 @@
+mesa (7.4.1-1ubuntu1) karmic; urgency=low
+
+  * Merge from debian unstable, remaining changes:
+    - debian/control
+      + Change maintainer address to Ubuntu.
+      + Drop lesstif-dev from Build-Depends.
+      + Comment out GLw libs since it depends on lesstif-dev.
+    - debian/rules
+      + Unexport LDFLAGS (amd64 FTBFS).
+      + use --disable-glw for swx11 targets too.
+      + Build .debs with lzma compression.
+    - debian/patches
+      + 101_ubuntu_hidden_glname.patch.
+      + 102_dont_vblank.patch:
+      + 104_fix_dri2_ext_tfp.diff
+      + 105_glXWaitX_segfaults.patch
+
+ -- Timo Aaltonen <tjaalton@ubuntu.com>  Fri, 15 May 2009 14:50:57 +0300
+
 mesa (7.4.1-1) unstable; urgency=low
 
   [ Julien Cristau ]

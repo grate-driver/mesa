@@ -5,7 +5,5 @@
 06_kfreebsd-ftbfs.diff
 101_ubuntu_hidden_glname.patch
 102_dont_vblank.diff
-#103_bump_965_texture_limit.diff
 104_fix_dri2_ext_tfp.diff
 105_glXWaitX_segfaults.patch
-106_compiz_ring_switcher_xorg_segv_on_radeon.diff
