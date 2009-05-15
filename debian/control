@@ -6,7 +6,7 @@ XSBC-Original-Maintainer: Debian X Strike Force <debian-x@lists.debian.org>
 Uploaders: Thierry Reding <thierry@gilfi.de>, Julien Cristau <jcristau@debian.org>, David Nusinow <dnusinow@debian.org>, Brice Goglin <bgoglin@debian.org>
 Standards-Version: 3.7.3
 Build-Depends: debhelper (>= 5), quilt (>= 0.40), pkg-config,
- libdrm-dev (>= 2.4.4) [!hurd-i386], libx11-dev, xutils-dev,
+ libdrm-dev (>= 2.4.3) [!hurd-i386], libx11-dev, xutils-dev,
  x11proto-gl-dev (>= 1.4.8), libxxf86vm-dev,
  libexpat1-dev, dpkg-dev (>= 1.13.19), libxfixes-dev,
  libxdamage-dev, libxext-dev, autoconf, automake, x11proto-dri2-dev (>= 1.99.3),
@@ -19,7 +19,6 @@ Package: libgl1-mesa-swx11
 Section: libs
 Priority: extra
 Architecture: any
-Pre-Depends: dpkg (>= 1.14.12ubuntu3)
 Depends: ${shlibs:Depends}, libosmesa6 (>= 6.5.2-1)
 Conflicts: mesag3-glide, mesag3-glide2, mesag3+ggi, libgl1, nvidia-glx, mesag3, libgl1-mesa-swrast
 Provides: libgl1, mesag3, libgl1-mesa-swrast
@@ -42,7 +41,6 @@ Package: libgl1-mesa-swx11-dbg
 Section: debug
 Priority: extra
 Architecture: any
-Pre-Depends: dpkg (>= 1.14.12ubuntu3)
 Depends: libgl1-mesa-swx11 (= ${binary:Version})
 Conflicts: libgl1-mesa-swrast-dbg
 Provides: libgl1-mesa-swrast-dbg
@@ -68,7 +66,6 @@ Package: libgl1-mesa-swx11-i686
 Section: libs
 Priority: extra
 Architecture: i386
-Pre-Depends: dpkg (>= 1.14.12ubuntu3)
 Depends: libgl1-mesa-swx11 (= ${binary:Version}), ${shlibs:Depends}
 Description: Mesa OpenGL runtime [i686 optimized]
  Mesa is a 3-D graphics library with an API which is very similar to
@@ -93,7 +90,6 @@ Package: libgl1-mesa-swx11-dev
 Section: libdevel
 Priority: extra
 Architecture: any
-Pre-Depends: dpkg (>= 1.14.12ubuntu3)
 Depends: libgl1-mesa-swx11 (= ${binary:Version}), libc6-dev, libx11-dev, libxext6, mesa-common-dev (= ${binary:Version})
 Provides: libgl-dev, mesag-dev, libgl1-mesa-swrast-dev
 Conflicts: mesa-dev, libgl-dev, mesag3 (<< 3.1-1), nvidia-glx-dev, mesag-dev, libgl1-mesa-swrast-dev
@@ -110,7 +106,6 @@ Description: A free implementation of the OpenGL API -- development files
 Package: libgl1-mesa-glx
 Section: libs
 Architecture: any
-Pre-Depends: dpkg (>= 1.14.12ubuntu3)
 Depends: ${shlibs:Depends}
 Recommends: libgl1-mesa-dri (>= 7.2)
 Conflicts: libgl1, libgl1-mesa-dri (<< 6.4.0)
@@ -131,7 +126,6 @@ Package: libgl1-mesa-glx-dbg
 Section: debug
 Priority: extra
 Architecture: any
-Pre-Depends: dpkg (>= 1.14.12ubuntu3)
 Depends: libgl1-mesa-glx (= ${binary:Version})
 Description: Debugging symbols for the Mesa GLX runtime
  This version of Mesa provides GLX and DRI capabilities: it is capable of
@@ -151,7 +145,7 @@ Description: Debugging symbols for the Mesa GLX runtime
 #Section: libs
 #Priority: extra
 #Architecture: i386
-#Pre-Depends: libgl1-mesa-glx, dpkg (>= 1.14.12ubuntu3)
+#Pre-Depends: libgl1-mesa-glx
 #Description: A free implementation of the OpenGL API -- GLX runtime [i686 optimized]
 # This version of Mesa provides GLX and DRI capabilities: it is capable of
 # both direct and indirect rendering.  For direct rendering, it can use DRI
@@ -194,7 +188,6 @@ Package: libgl1-mesa-dri-dbg
 Section: debug
 Priority: extra
 Architecture: any
-Pre-Depends: dpkg (>= 1.14.12ubuntu3)
 Depends: libgl1-mesa-dri (= ${binary:Version})
 Description: Debugging symbols for the Mesa DRI modules
  This version of Mesa provides GLX and DRI capabilities: it is capable of
@@ -213,7 +206,7 @@ Description: Debugging symbols for the Mesa DRI modules
 #Section: libs
 #Priority: extra
 #Architecture: i386
-#Pre-Depends: libgl1-mesa-dri, dpkg (>= 1.14.12ubuntu3)
+#Pre-Depends: libgl1-mesa-dri
 #Description: A free implementation of the OpenGL API -- DRI modules [i686 optimized]
 # This version of Mesa provides GLX and DRI capabilities: it is capable of
 # both direct and indirect rendering.  For direct rendering, it can use DRI
@@ -233,7 +226,6 @@ Description: Debugging symbols for the Mesa DRI modules
 Package: libgl1-mesa-dev
 Section: libdevel
 Architecture: any
-Pre-Depends: dpkg (>= 1.14.12ubuntu3)
 Depends: libc6-dev, mesa-common-dev (= ${binary:Version}), libgl1-mesa-glx (= ${binary:Version})
 Conflicts: libgl-dev, libgl1-mesa-dri-dev
 Replaces: libgl-dev, libgl1-mesa-dri-dev
@@ -253,7 +245,6 @@ Package: mesa-common-dev
 Section: libdevel
 Architecture: any
 Replaces: xlibmesa-gl-dev (<< 1:7), xlibosmesa-dev, libgl1-mesa-swx11-dev (<< 6.5.2), libgl1-mesa-dev (<< 6.5.2)
-Pre-Depends: dpkg (>= 1.14.12ubuntu3)
 Depends: libx11-dev
 Description: Developer documentation for Mesa
  This package includes the specifications for the Mesa-specific OpenGL
@@ -263,7 +254,6 @@ Description: Developer documentation for Mesa
 Package: libosmesa6
 Section: libs
 Architecture: any
-Pre-Depends: dpkg (>= 1.14.12ubuntu3)
 Depends: ${shlibs:Depends}
 Replaces: libgl1-mesa-swx11 (<< 6.5.2)
 Description: Mesa Off-screen rendering extension
@@ -277,7 +267,6 @@ Description: Mesa Off-screen rendering extension
 Package: libosmesa6-dev
 Section: libdevel
 Architecture: any
-Pre-Depends: dpkg (>= 1.14.12ubuntu3)
 Depends: libosmesa6 (= ${binary:Version}), mesa-common-dev (= ${binary:Version}) | libgl-dev
 Conflicts: xlibosmesa-dev, libosmesa4-dev, libosmesa-dev
 Replaces: xlibosmesa-dev, libosmesa-dev, libgl1-mesa-swx11-dev (<< 6.5.2), mesa-common-dev (<< 6.5.2)
@@ -291,7 +280,6 @@ Description: Mesa Off-screen rendering extension -- development files
 Package: libglu1-mesa
 Section: libs
 Architecture: any
-Pre-Depends: dpkg (>= 1.14.12ubuntu3)
 Depends: ${shlibs:Depends}, libgl1-mesa-glx | libgl1
 Provides: libglu1
 Conflicts: mesag3 (<< 5.0.0-1), xlibmesa3, libglu1
@@ -313,7 +301,6 @@ Description: The OpenGL utility library (GLU)
 Package: libglu1-mesa-dev
 Section: libdevel
 Architecture: any
-Pre-Depends: dpkg (>= 1.14.12ubuntu3)
 Depends: libglu1-mesa (= ${binary:Version}), libgl1-mesa-dev | libgl-dev
 Provides: libglu-dev, xlibmesa-glu-dev
 Conflicts: mesag-dev (<< 5.0.0-1), mesa-glide2-dev (<< 5.0.0-1), mesag3+ggi-dev (<< 5.0.0-1), xlibmesa-dev
@@ -327,7 +314,6 @@ Description: The OpenGL utility library -- development files
 #Package: libglw1-mesa
 #Section: libs
 #Architecture: any
-#Pre-Depends: dpkg (>= 1.14.12ubuntu3)
 #Depends: ${shlibs:Depends}
 #Provides: libglw1
 #Description: A free implementation of the OpenGL API -- runtime
@@ -361,7 +347,6 @@ Package: mesa-utils
 Section: x11
 Priority: optional
 Architecture: any
-Pre-Depends: dpkg (>= 1.14.12ubuntu3)
 Depends: ${shlibs:Depends}
 Replaces: xbase-clients (<< 6.8.2-38)
 Description: Miscellaneous Mesa GL utilities
