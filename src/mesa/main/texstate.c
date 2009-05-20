@@ -485,7 +485,6 @@ update_texture_state( GLcontext *ctx )
       GLbitfield enableBits;
       GLuint tex;
 
-      texUnit->_Current = NULL;
       texUnit->_ReallyEnabled = 0;
       texUnit->_GenFlags = 0;
 
