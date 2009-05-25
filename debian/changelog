@@ -1,4 +1,4 @@
-mesa (7.4.1-2) UNRELEASED; urgency=low
+mesa (7.5~rc2-1) UNRELEASED; urgency=low
 
   [ Julien Cristau ]
   * Don't build hardware dri drivers on s390.
@@ -6,7 +6,11 @@ mesa (7.4.1-2) UNRELEASED; urgency=low
   [ Brice Goglin ]
   * Enable motif in GLw, closes: #527483.
 
- -- Brice Goglin <bgoglin@debian.org>  Sat, 09 May 2009 20:48:55 +0200
+  [ Timo Aaltonen ]
+  * New upstream release.
+  * rules: Disable EGL.
+
+ -- Timo Aaltonen <tjaalton@ubuntu.com>  Mon, 18 May 2009 15:12:17 +0300
 
 mesa (7.4.1-1) unstable; urgency=low
 

@@ -51,6 +51,7 @@ QUILT_STAMPFN = $(STAMP_DIR)/patch
 include /usr/share/quilt/quilt.make
 
 confflags-common = \
+	--disable-egl \
 	--disable-glu \
 	--disable-glut \
 	--disable-glw \
@@ -128,6 +129,7 @@ confflags-swx11+glu = \
 	--with-driver=xlib \
 	--disable-gl-osmesa \
 	--with-demos= \
+	--disable-egl \
 	--disable-glut \
 	--enable-motif \
 	CFLAGS="$(CFLAGS)"
@@ -137,6 +139,7 @@ confflags-swx11+glu-static = \
 	--disable-gl-osmesa \
 	--enable-static \
 	--with-demos= \
+	--disable-egl \
 	--disable-glut \
 	--enable-motif \
 	CFLAGS="$(CFLAGS)"
@@ -146,6 +149,7 @@ confflags-swx11+glu-i386-i686 = \
 	--disable-gl-osmesa \
 	--with-demos= \
 	--disable-glut \
+	--disable-egl \
 	--enable-motif \
 	--libdir=/usr/lib/i686/cmov \
 	CFLAGS="$(CFLAGS) -march=i686"
