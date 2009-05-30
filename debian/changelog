@@ -7,7 +7,7 @@ mesa (7.5~rc2-1) UNRELEASED; urgency=low
   * Enable motif in GLw, closes: #527483.
 
   [ Timo Aaltonen ]
-  * New upstream release.
+  * New upstream release candidate.
   * rules: Disable EGL.
 
  -- Timo Aaltonen <tjaalton@ubuntu.com>  Mon, 18 May 2009 15:12:17 +0300
