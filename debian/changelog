@@ -2,6 +2,7 @@ mesa (7.5~rc2-1) UNRELEASED; urgency=low
 
   [ Julien Cristau ]
   * Don't build hardware dri drivers on s390.
+  * Install dri.pc, which will be needed to build xorg-server 1.7.
 
   [ Brice Goglin ]
   * Enable motif in GLw, closes: #527483.
