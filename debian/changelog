@@ -11,6 +11,13 @@ mesa (7.5~rc2-1) UNRELEASED; urgency=low
   * New upstream release candidate.
   * rules: Disable EGL.
 
+  [ Julien Cristau ]
+  * Update patches:
+    + 02_use-ieee-fp-on-s390-and-m68k.patch moved from imports.h to compiler.h
+    + 03_optional-progs-and-install.patch refreshed
+    + 05_hurd-ftbfs.diff partly applied upstream
+    + 06_kfreebsd-ftbfs.diff refreshed
+
  -- Timo Aaltonen <tjaalton@ubuntu.com>  Mon, 18 May 2009 15:12:17 +0300
 
 mesa (7.4.1-1) unstable; urgency=low
