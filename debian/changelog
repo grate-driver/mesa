@@ -10,6 +10,7 @@ mesa (7.5~rc2-1) UNRELEASED; urgency=low
   [ Timo Aaltonen ]
   * New upstream release candidate.
   * rules: Disable EGL.
+  * mesa-common-dev.install: Don't install glxew.h, conflicts with libglew.
 
   [ Julien Cristau ]
   * Update patches:
