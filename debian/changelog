@@ -62,7 +62,6 @@ mesa (7.4-1) experimental; urgency=low
   * New upstream release.
 
  -- Julien Cristau <jcristau@debian.org>  Wed, 01 Apr 2009 20:25:00 +0200
->>>>>>> 18cf88a563302751ed8cae4506913bddbd9fe298:debian/changelog
 
 mesa (7.4-0ubuntu4) karmic; urgency=low
 
