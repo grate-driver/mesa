@@ -1,0 +1,112 @@
+commit d027e8feff7d38cccadc6aaccc0454b21ce4dca0
+Author: Shuang He <shuang.he@intel.com>
+Date:   Mon Jun 15 16:19:30 2009 -0600
+
+    intel: Release fb backing regions in intelDestroyBuffer()
+    
+    Fixes memory leak when destroying framebuffers.
+
+# 2009-06-23:  Updated for mesa 7.4 ~ bryce@canonical.com
+
+diff -Nurp mesa-ubuntu-git/src/mesa/drivers/dri/i915/intel_screen.c working/src/mesa/drivers/dri/i915/intel_screen.c
+--- mesa-ubuntu-git/src/mesa/drivers/dri/i915/intel_screen.c	2009-04-11 01:08:05.000000000 -0700
++++ working/src/mesa/drivers/dri/i915/intel_screen.c	2009-06-23 13:26:07.000000000 -0700
+@@ -385,6 +385,30 @@ intelCreateBuffer(__DRIscreenPrivate * d
+ static void
+ intelDestroyBuffer(__DRIdrawablePrivate * driDrawPriv)
+ {
++   struct intel_framebuffer *intel_fb = driDrawPriv->driverPrivate;
++   struct intel_renderbuffer *depth_rb;
++   struct intel_renderbuffer *stencil_rb;
++
++   if (intel_fb) {
++      if (intel_fb->color_rb[0]) {
++         intel_renderbuffer_set_region(intel_fb->color_rb[0], NULL);
++      }
++
++      if (intel_fb->color_rb[1]) {
++         intel_renderbuffer_set_region(intel_fb->color_rb[1], NULL);
++      }
++
++      depth_rb = intel_get_renderbuffer(&intel_fb->Base, BUFFER_DEPTH);
++      if (depth_rb) {
++         intel_renderbuffer_set_region(depth_rb, NULL);
++      }
++
++      stencil_rb = intel_get_renderbuffer(&intel_fb->Base, BUFFER_STENCIL);
++      if (stencil_rb) {
++         intel_renderbuffer_set_region(stencil_rb, NULL);
++      }
++   }
++
+    _mesa_unreference_framebuffer((GLframebuffer **)(&(driDrawPriv->driverPrivate)));
+ }
+ 
+diff -Nurp mesa-ubuntu-git/src/mesa/drivers/dri/i965/intel_screen.c working/src/mesa/drivers/dri/i965/intel_screen.c
+--- mesa-ubuntu-git/src/mesa/drivers/dri/i965/intel_screen.c	2009-04-11 01:08:05.000000000 -0700
++++ working/src/mesa/drivers/dri/i965/intel_screen.c	2009-06-23 13:26:07.000000000 -0700
+@@ -385,6 +385,30 @@ intelCreateBuffer(__DRIscreenPrivate * d
+ static void
+ intelDestroyBuffer(__DRIdrawablePrivate * driDrawPriv)
+ {
++   struct intel_framebuffer *intel_fb = driDrawPriv->driverPrivate;
++   struct intel_renderbuffer *depth_rb;
++   struct intel_renderbuffer *stencil_rb;
++
++   if (intel_fb) {
++      if (intel_fb->color_rb[0]) {
++         intel_renderbuffer_set_region(intel_fb->color_rb[0], NULL);
++      }
++
++      if (intel_fb->color_rb[1]) {
++         intel_renderbuffer_set_region(intel_fb->color_rb[1], NULL);
++      }
++
++      depth_rb = intel_get_renderbuffer(&intel_fb->Base, BUFFER_DEPTH);
++      if (depth_rb) {
++         intel_renderbuffer_set_region(depth_rb, NULL);
++      }
++
++      stencil_rb = intel_get_renderbuffer(&intel_fb->Base, BUFFER_STENCIL);
++      if (stencil_rb) {
++         intel_renderbuffer_set_region(stencil_rb, NULL);
++      }
++   }
++
+    _mesa_unreference_framebuffer((GLframebuffer **)(&(driDrawPriv->driverPrivate)));
+ }
+ 
+diff -Nurp mesa-ubuntu-git/src/mesa/drivers/dri/intel/intel_screen.c working/src/mesa/drivers/dri/intel/intel_screen.c
+--- mesa-ubuntu-git/src/mesa/drivers/dri/intel/intel_screen.c	2009-04-11 01:08:05.000000000 -0700
++++ working/src/mesa/drivers/dri/intel/intel_screen.c	2009-06-23 13:26:07.000000000 -0700
+@@ -385,6 +385,30 @@ intelCreateBuffer(__DRIscreenPrivate * d
+ static void
+ intelDestroyBuffer(__DRIdrawablePrivate * driDrawPriv)
+ {
++   struct intel_framebuffer *intel_fb = driDrawPriv->driverPrivate;
++   struct intel_renderbuffer *depth_rb;
++   struct intel_renderbuffer *stencil_rb;
++
++   if (intel_fb) {
++      if (intel_fb->color_rb[0]) {
++         intel_renderbuffer_set_region(intel_fb->color_rb[0], NULL);
++      }
++
++      if (intel_fb->color_rb[1]) {
++         intel_renderbuffer_set_region(intel_fb->color_rb[1], NULL);
++      }
++
++      depth_rb = intel_get_renderbuffer(&intel_fb->Base, BUFFER_DEPTH);
++      if (depth_rb) {
++         intel_renderbuffer_set_region(depth_rb, NULL);
++      }
++
++      stencil_rb = intel_get_renderbuffer(&intel_fb->Base, BUFFER_STENCIL);
++      if (stencil_rb) {
++         intel_renderbuffer_set_region(stencil_rb, NULL);
++      }
++   }
++
+    _mesa_unreference_framebuffer((GLframebuffer **)(&(driDrawPriv->driverPrivate)));
+ }
+ 
