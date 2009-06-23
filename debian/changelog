@@ -1,3 +1,11 @@
+mesa (7.4.1-1ubuntu3) karmic; urgency=low
+
+  * Add 108_destroy_intel_fb.patch: Release fb backing regions in
+    intelDestroyBuffer() Fixes memory leak when destroying framebuffers.
+    (LP: #360319)
+
+ -- Bryce Harrington <bryce@ubuntu.com>  Tue, 23 Jun 2009 13:32:08 -0700
+
 mesa (7.4.1-1ubuntu2) karmic; urgency=low
 
   * Add 107_glxgears_is_not_a_benchmark.patch:  glxgears makes

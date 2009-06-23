@@ -8,3 +8,4 @@
 104_fix_dri2_ext_tfp.diff
 105_glXWaitX_segfaults.patch
 107_glxgears_is_not_a_benchmark.patch
+108_destroy_intel_fb.patch
