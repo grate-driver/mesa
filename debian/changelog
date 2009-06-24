@@ -1,6 +1,8 @@
-mesa (7.4.1-2) UNRELEASED; urgency=low
+mesa (7.4.4-1) UNRELEASED; urgency=low
 
   [ Julien Cristau ]
+  * New upstream release.
+    + fixes a crash in swrast glXWaitX (closes: #528708)
   * Don't build hardware dri drivers on s390.
 
   [ Brice Goglin ]
