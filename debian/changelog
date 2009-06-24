@@ -2,6 +2,7 @@ mesa (7.5~rc3-1) UNRELEASED; urgency=low
 
   [ Timo Aaltonen ]
   * New upstream release candidate.
+    + xdriinfo now works with DRI2 (closes: #527132)
   * rules: Disable EGL.
   * mesa-common-dev.install: Don't install glxew.h, conflicts with libglew.
 
