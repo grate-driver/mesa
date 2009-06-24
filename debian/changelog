@@ -1,11 +1,11 @@
-mesa (7.4.1-1ubuntu4~bug391808~1) karmic; urgency=low
+mesa (7.4.1-1ubuntu4) karmic; urgency=low
 
   * Add 110_null_ptr_during_screen_tear_down.patch and
     111_fix_mesa_ref_fb_call_syntax.patch to fix crashes caused by errors
     in the previous memory leak fixes in -1u3.
     (LP: #391808)
 
- -- Bryce Harrington <bryce@ubuntu.com>  Wed, 24 Jun 2009 15:06:02 -0700
+ -- Bryce Harrington <bryce@ubuntu.com>  Wed, 24 Jun 2009 15:32:54 -0700
 
 mesa (7.4.1-1ubuntu3) karmic; urgency=low
 
