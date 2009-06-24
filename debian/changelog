@@ -4,6 +4,7 @@ mesa (7.4.4-1) UNRELEASED; urgency=low
   * New upstream release.
     + fixes a crash in swrast glXWaitX (closes: #528708)
   * Don't build hardware dri drivers on s390.
+  * Update 04_osmesa_version.diff, refresh 06_kfreebsd-ftbfs.diff.
 
   [ Brice Goglin ]
   * Enable motif in GLw, closes: #527483.
