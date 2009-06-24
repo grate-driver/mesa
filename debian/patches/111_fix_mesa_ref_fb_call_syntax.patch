@@ -1,0 +1,25 @@
+From 4b8cd0b0ad48c3b0129451924f7461ffcbbc8597 Mon Sep 17 00:00:00 2001
+From: Brian Paul <brianp@vmware.com>
+Date: Mon, 22 Jun 2009 17:23:13 +0000
+Subject: intel: call _mesa_unreference_framebuffer() in intelDestroyBuffer()
+
+This was a call to _mesa_reference_framebuffer(ptr, NULL) but the NULL
+pointer is incorrect in Mesa 7.4.x.
+
+Fixes a failed assertion during screen tear-down.
+---
+diff --git a/src/mesa/drivers/dri/intel/intel_screen.c b/src/mesa/drivers/dri/intel/intel_screen.c
+index 59fa54f..8d2a3a7 100644
+--- a/src/mesa/drivers/dri/intel/intel_screen.c
++++ b/src/mesa/drivers/dri/intel/intel_screen.c
+@@ -409,7 +409,7 @@ intelDestroyBuffer(__DRIdrawablePrivate * driDrawPriv)
+       }
+    }
+ 
+-   _mesa_reference_framebuffer((GLframebuffer **)(&(driDrawPriv->driverPrivate)), NULL);
++   _mesa_unreference_framebuffer((GLframebuffer **)(&(driDrawPriv->driverPrivate)));
+ }
+ 
+ 
+--
+cgit v0.8.2

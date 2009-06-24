@@ -1,0 +1,23 @@
+From 1dbbc39f48ce5f9aa63ab42930b14e48938b326f Mon Sep 17 00:00:00 2001
+From: Brian Paul <brianp@vmware.com>
+Date: Mon, 22 Jun 2009 17:23:30 +0000
+Subject: intel: added a null ptr check
+
+This was hit during screen tear-down.
+---
+diff --git a/src/mesa/drivers/dri/intel/intel_fbo.c b/src/mesa/drivers/dri/intel/intel_fbo.c
+index 54f6038..5a1314e 100644
+--- a/src/mesa/drivers/dri/intel/intel_fbo.c
++++ b/src/mesa/drivers/dri/intel/intel_fbo.c
+@@ -345,7 +345,8 @@ intel_renderbuffer_set_region(struct intel_renderbuffer *rb,
+    intel_region_reference(&rb->region, region);
+    intel_region_release(&old);
+ 
+-   rb->pfPitch = region->pitch;
++   if (region)
++      rb->pfPitch = region->pitch;
+ }
+ 
+ /**
+--
+cgit v0.8.2

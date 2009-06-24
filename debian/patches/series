@@ -10,3 +10,5 @@
 107_glxgears_is_not_a_benchmark.patch
 108_destroy_intel_fb.patch
 109_release_direct_rendering_resources.patch
+110_null_ptr_during_screen_tear_down.patch
+111_fix_mesa_ref_fb_call_syntax.patch
