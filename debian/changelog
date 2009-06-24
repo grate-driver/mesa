@@ -1,4 +1,4 @@
-mesa (7.5~rc2-1) UNRELEASED; urgency=low
+mesa (7.5~rc3-1) UNRELEASED; urgency=low
 
   [ Julien Cristau ]
   * Don't build hardware dri drivers on s390.
