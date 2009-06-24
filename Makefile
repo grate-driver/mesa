@@ -127,6 +127,7 @@ linux-icc \
 linux-icc-static \
 linux-llvm \
 linux-osmesa \
+linux-osmesa-static \
 linux-osmesa16 \
 linux-osmesa16-static \
 linux-osmesa32 \
@@ -181,7 +182,7 @@ ultrix-gcc:
 
 # Rules for making release tarballs
 
-VERSION=7.5-rc2
+VERSION=7.5-rc3
 DIRECTORY = Mesa-$(VERSION)
 LIB_NAME = MesaLib-$(VERSION)
 DEMO_NAME = MesaDemos-$(VERSION)
