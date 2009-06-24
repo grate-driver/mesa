@@ -50,6 +50,9 @@ INSTALL_TARGETS = $(addprefix install-, $(CONFIGS))
 QUILT_STAMPFN = $(STAMP_DIR)/patch
 include /usr/share/quilt/quilt.make
 
+# temporary until we figure out what to build
+confflags += --disable-gallium
+
 confflags-common = \
 	--disable-egl \
 	--disable-glu \

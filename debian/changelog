@@ -12,6 +12,7 @@ mesa (7.5~rc3-1) UNRELEASED; urgency=low
     + 05_hurd-ftbfs.diff partly applied upstream
     + 06_kfreebsd-ftbfs.diff refreshed
   * Install dri.pc, which will be needed to build xorg-server 1.7.
+  * Don't build gallium for now.
 
  -- Timo Aaltonen <tjaalton@ubuntu.com>  Mon, 18 May 2009 15:12:17 +0300
 
