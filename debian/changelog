@@ -1,3 +1,10 @@
+mesa (7.4.1-1ubuntu6) karmic; urgency=low
+  
+  * Install dri.pc in libgl1-mesa-dev as well
+    (LP: #379797)
+
+ -- Robert Hooker <sarvatt@gmail.com>  Wed, 24 Jun 2009 17:47:08 -0400
+
 mesa (7.4.1-1ubuntu5) karmic; urgency=low
 
   * Drop 111_fix_mesa_ref_fb_call_syntax.patch: Testing showed that 110

@@ -188,6 +188,7 @@ install:
 	dh_clean -k
 	dh_installdirs
 	$(MAKE) -f debian/rules $(INSTALL_TARGETS)
+	cp debian/tmp/usr/lib/glx/pkgconfig/dri.pc debian/tmp/usr/lib/pkgconfig/dri.pc
 
 install-%: $(STAMP)-build-%
 	cd $(DEB_BUILD_DIR)/$* && $(MAKE) DESTDIR=$(CURDIR)/debian/tmp install

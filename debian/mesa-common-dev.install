@@ -3,3 +3,4 @@ usr/include/GL/glext.h
 usr/include/GL/gl_mangle.h
 usr/include/GL/glx*.h
 usr/include/GL/internal/dri_interface.h
+usr/lib/pkgconfig/dri.pc
