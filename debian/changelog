@@ -1,3 +1,10 @@
+mesa (7.4.1-1ubuntu5) karmic; urgency=low
+
+  * Drop 111_fix_mesa_ref_fb_call_syntax.patch: Testing showed that 110
+    alone is sufficient to fix the issue.
+
+ -- Bryce Harrington <bryce@ubuntu.com>  Wed, 24 Jun 2009 17:07:33 -0700
+
 mesa (7.4.1-1ubuntu4) karmic; urgency=low
 
   * Add 110_null_ptr_during_screen_tear_down.patch and
