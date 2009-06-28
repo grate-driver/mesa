@@ -1,4 +1,4 @@
-mesa (7.4.4-1) UNRELEASED; urgency=low
+mesa (7.4.4-1) unstable; urgency=low
 
   [ Julien Cristau ]
   * New upstream release.
@@ -9,7 +9,7 @@ mesa (7.4.4-1) UNRELEASED; urgency=low
   [ Brice Goglin ]
   * Enable motif in GLw, closes: #527483.
 
- -- Brice Goglin <bgoglin@debian.org>  Sat, 09 May 2009 20:48:55 +0200
+ -- Julien Cristau <jcristau@debian.org>  Sun, 28 Jun 2009 18:58:27 +0200
 
 mesa (7.4.1-1) unstable; urgency=low
 
