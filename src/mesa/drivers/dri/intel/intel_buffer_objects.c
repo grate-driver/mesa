@@ -102,6 +102,7 @@ intel_bufferobj_free(GLcontext * ctx, struct gl_buffer_object *obj)
    assert(intel_obj);
    assert(!obj->Pointer); /* Mesa should have unmapped it */
 
+   _mesa_free(intel_obj->sys_buffer);
    if (intel_obj->region) {
       intel_bufferobj_release_region(intel, intel_obj);
    }
@@ -142,7 +143,23 @@ intel_bufferobj_data(GLcontext * ctx,
       dri_bo_unreference(intel_obj->buffer);
       intel_obj->buffer = NULL;
    }
+   _mesa_free(intel_obj->sys_buffer);
+   intel_obj->sys_buffer = NULL;
+
    if (size != 0) {
+#ifdef I915
+      /* On pre-965, stick VBOs in system memory, as we're always doing swtnl
+       * with their contents anyway.
+       */
+      if (target == GL_ARRAY_BUFFER || target == GL_ELEMENT_ARRAY_BUFFER) {
+	 intel_obj->sys_buffer = _mesa_malloc(size);
+	 if (intel_obj->sys_buffer != NULL) {
+	    if (data != NULL)
+	       memcpy(intel_obj->sys_buffer, data, size);
+	    return;
+	 }
+      }
+#endif
       intel_bufferobj_alloc_buffer(intel, intel_obj);
 
       if (data != NULL)
@@ -172,7 +189,10 @@ intel_bufferobj_subdata(GLcontext * ctx,
    if (intel_obj->region)
       intel_bufferobj_cow(intel, intel_obj);
 
-   dri_bo_subdata(intel_obj->buffer, offset, size, data);
+   if (intel_obj->sys_buffer)
+      memcpy((char *)intel_obj->sys_buffer + offset, data, size);
+   else
+      dri_bo_subdata(intel_obj->buffer, offset, size, data);
 }
 
 
@@ -205,8 +225,14 @@ intel_bufferobj_map(GLcontext * ctx,
    struct intel_context *intel = intel_context(ctx);
    struct intel_buffer_object *intel_obj = intel_buffer_object(obj);
    GLboolean read_only = (access == GL_READ_ONLY_ARB);
+   GLboolean write_only = (access == GL_WRITE_ONLY_ARB);
 
    assert(intel_obj);
+
+   if (intel_obj->sys_buffer) {
+      obj->Pointer = intel_obj->sys_buffer;
+      return obj->Pointer;
+   }
 
    if (intel_obj->region)
       intel_bufferobj_cow(intel, intel_obj);
@@ -216,7 +242,14 @@ intel_bufferobj_map(GLcontext * ctx,
       return NULL;
    }
 
-   dri_bo_map(intel_obj->buffer, !read_only);
+   if (write_only && intel->intelScreen->kernel_exec_fencing) {
+      drm_intel_gem_bo_map_gtt(intel_obj->buffer);
+      intel_obj->mapped_gtt = GL_TRUE;
+   } else {
+      drm_intel_bo_map(intel_obj->buffer, !read_only);
+      intel_obj->mapped_gtt = GL_FALSE;
+   }
+
    obj->Pointer = intel_obj->buffer->virtual;
    return obj->Pointer;
 }
@@ -234,7 +267,11 @@ intel_bufferobj_unmap(GLcontext * ctx,
    assert(intel_obj);
    if (intel_obj->buffer != NULL) {
       assert(obj->Pointer);
-      dri_bo_unmap(intel_obj->buffer);
+      if (intel_obj->mapped_gtt) {
+	 drm_intel_gem_bo_unmap_gtt(intel_obj->buffer);
+      } else {
+	 drm_intel_bo_unmap(intel_obj->buffer);
+      }
       obj->Pointer = NULL;
    }
    return GL_TRUE;
@@ -251,6 +288,18 @@ intel_bufferobj_buffer(struct intel_context *intel,
          intel_bufferobj_release_region(intel, intel_obj);
 	 intel_bufferobj_alloc_buffer(intel, intel_obj);
       }
+   }
+
+   if (intel_obj->buffer == NULL) {
+      intel_bufferobj_alloc_buffer(intel, intel_obj);
+      intel_bufferobj_subdata(&intel->ctx,
+			      GL_ARRAY_BUFFER_ARB,
+			      0,
+			      intel_obj->Base.Size,
+			      intel_obj->sys_buffer,
+			      &intel_obj->Base);
+      _mesa_free(intel_obj->sys_buffer);
+      intel_obj->sys_buffer = NULL;
    }
 
    return intel_obj->buffer;

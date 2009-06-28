@@ -208,7 +208,7 @@ try_pbo_upload(struct intel_context *intel,
    if (!pbo ||
        intel->ctx._ImageTransferState ||
        unpack->SkipPixels || unpack->SkipRows) {
-      _mesa_printf("%s: failure 1\n", __FUNCTION__);
+      DBG("%s: failure 1\n", __FUNCTION__);
       return GL_FALSE;
    }
 
@@ -264,7 +264,7 @@ try_pbo_zcopy(struct intel_context *intel,
    if (!pbo ||
        intel->ctx._ImageTransferState ||
        unpack->SkipPixels || unpack->SkipRows) {
-      _mesa_printf("%s: failure 1\n", __FUNCTION__);
+      DBG("%s: failure 1\n", __FUNCTION__);
       return GL_FALSE;
    }
 
@@ -283,7 +283,7 @@ try_pbo_zcopy(struct intel_context *intel,
    dst_stride = intelImage->mt->pitch;
 
    if (src_stride != dst_stride || dst_offset != 0 || src_offset != 0) {
-      _mesa_printf("%s: failure 2\n", __FUNCTION__);
+      DBG("%s: failure 2\n", __FUNCTION__);
       return GL_FALSE;
    }
 
@@ -636,6 +636,12 @@ intel_get_tex_image(GLcontext * ctx, GLenum target, GLint level,
 {
    struct intel_context *intel = intel_context(ctx);
    struct intel_texture_image *intelImage = intel_texture_image(texImage);
+
+   /* If we're reading from a texture that has been rendered to, need to
+    * make sure rendering is complete.
+    * We could probably predicate this on texObj->_RenderToTexture
+    */
+   intelFlush(ctx);
 
    /* Map */
    if (intelImage->mt) {

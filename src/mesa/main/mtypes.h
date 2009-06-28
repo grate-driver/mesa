@@ -2032,6 +2032,7 @@ struct gl_shader_state
    struct gl_shader_program *CurrentProgram; /**< The user-bound program */
    /** Driver-selectable options: */
    GLboolean EmitHighLevelInstructions; /**< IF/ELSE/ENDIF vs. BRA, etc. */
+   GLboolean EmitContReturn;            /**< Emit CONT/RET opcodes? */
    GLboolean EmitCondCodes;             /**< Use condition codes? */
    GLboolean EmitComments;              /**< Annotated instructions */
    void *MemPool;
@@ -2052,6 +2053,9 @@ struct gl_shared_state
 
    /** Default texture objects (shared by all texture units) */
    struct gl_texture_object *DefaultTex[NUM_TEXTURE_TARGETS];
+
+   /** Fallback texture used when a bound texture is incomplete */
+   struct gl_texture_object *FallbackTex;
 
    /**
     * \name Thread safety and statechange notification for texture
@@ -2946,6 +2950,8 @@ struct __GLcontextRec
    GLenum ErrorValue;        /**< Last error code */
    GLenum RenderMode;        /**< either GL_RENDER, GL_SELECT, GL_FEEDBACK */
    GLbitfield NewState;      /**< bitwise-or of _NEW_* flags */
+
+   GLboolean ViewportInitialized;  /**< has viewport size been initialized? */
 
    GLbitfield varying_vp_inputs;  /**< mask of VERT_BIT_* flags */
 

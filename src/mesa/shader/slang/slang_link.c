@@ -97,7 +97,8 @@ bits_agree(GLbitfield flags1, GLbitfield flags2, GLbitfield bit)
  * which inputs are centroid-sampled, invariant, etc.
  */
 static GLboolean
-link_varying_vars(struct gl_shader_program *shProg, struct gl_program *prog)
+link_varying_vars(GLcontext *ctx,
+                  struct gl_shader_program *shProg, struct gl_program *prog)
 {
    GLuint *map, i, firstVarying, newFile;
    GLbitfield *inOutFlags;
@@ -156,8 +157,12 @@ link_varying_vars(struct gl_shader_program *shProg, struct gl_program *prog)
                                var->Flags);
       }
 
+      if (shProg->Varying->NumParameters > ctx->Const.MaxVarying) {
+         link_error(shProg, "Too many varying variables");
+         return GL_FALSE;
+      }
+
       /* Map varying[i] to varying[j].
-       * Plus, set prog->Input/OutputFlags[] as described above.
        * Note: the loop here takes care of arrays or large (sz>4) vars.
        */
       {
@@ -319,7 +324,7 @@ _slang_resolve_attributes(struct gl_shader_program *shProg,
                           const struct gl_program *origProg,
                           struct gl_program *linkedProg)
 {
-   GLint attribMap[MAX_VERTEX_ATTRIBS];
+   GLint attribMap[MAX_VERTEX_GENERIC_ATTRIBS];
    GLuint i, j;
    GLbitfield usedAttributes; /* generics only, not legacy attributes */
 
@@ -355,7 +360,7 @@ _slang_resolve_attributes(struct gl_shader_program *shProg,
    }
 
    /* initialize the generic attribute map entries to -1 */
-   for (i = 0; i < MAX_VERTEX_ATTRIBS; i++) {
+   for (i = 0; i < MAX_VERTEX_GENERIC_ATTRIBS; i++) {
       attribMap[i] = -1;
    }
 
@@ -396,11 +401,11 @@ _slang_resolve_attributes(struct gl_shader_program *shProg,
                    * Start at 1 since generic attribute 0 always aliases
                    * glVertex/position.
                    */
-                  for (attr = 0; attr < MAX_VERTEX_ATTRIBS; attr++) {
+                  for (attr = 0; attr < MAX_VERTEX_GENERIC_ATTRIBS; attr++) {
                      if (((1 << attr) & usedAttributes) == 0)
                         break;
                   }
-                  if (attr == MAX_VERTEX_ATTRIBS) {
+                  if (attr == MAX_VERTEX_GENERIC_ATTRIBS) {
                      link_error(shProg, "Too many vertex attributes");
                      return GL_FALSE;
                   }
@@ -725,11 +730,11 @@ _slang_link(GLcontext *ctx,
 
    /* link varying vars */
    if (shProg->VertexProgram) {
-      if (!link_varying_vars(shProg, &shProg->VertexProgram->Base))
+      if (!link_varying_vars(ctx, shProg, &shProg->VertexProgram->Base))
          return;
    }
    if (shProg->FragmentProgram) {
-      if (!link_varying_vars(shProg, &shProg->FragmentProgram->Base))
+      if (!link_varying_vars(ctx, shProg, &shProg->FragmentProgram->Base))
          return;
    }
 
