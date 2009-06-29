@@ -5,9 +5,4 @@
 06_kfreebsd-ftbfs.diff
 101_ubuntu_hidden_glname.patch
 102_dont_vblank.diff
-104_fix_dri2_ext_tfp.diff
-105_glXWaitX_segfaults.patch
 107_glxgears_is_not_a_benchmark.patch
-108_destroy_intel_fb.patch
-109_release_direct_rendering_resources.patch
-110_null_ptr_during_screen_tear_down.patch

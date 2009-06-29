@@ -1,3 +1,29 @@
+ mesa (7.5~rc4-1ubuntu1) UNRELEASED; urgency=low
+
+  * Merge from Debian experimental, remaining changes:
+    - debian/control
+      + Change maintainer address to Ubuntu.
+      + Drop lesstif-dev from Build-Depends.
+      + Comment out GLw libs since it depends on lesstif-dev.
+    - debian/rules
+      + Unexport LDFLAGS (amd64 FTBFS).
+      + Use --disable-glw for swx11 targets too.
+      + Don't enable motif for swx11 targets.
+      + Build .debs with lzma compression.  
+    - debian/patches
+      + 101_ubuntu_hidden_glname.patch refreshed.
+      + 102_dont_vblank.patch refreshed.
+    - debian/mesa-common-dev.install
+      + Install dri.pc
+  * Dropped patches, applied upstream:
+    104_fix_dri2_ext_tfp.diff
+    105_glXWaitX_segfaults.patch
+    108_destroy_intel_fb.patch
+    109_release_direct_rendering_resources.patch
+    110_null_ptr_during_screen_tear_down.patch
+
+ -- Timo Aaltonen <tjaalton@ubuntu.com>  Mon, 29 Jun 2009 14:48:12 +0300
+
 mesa (7.5~rc4-1) experimental; urgency=low
 
   [ Timo Aaltonen ]
