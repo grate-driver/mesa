@@ -1,4 +1,3 @@
-.cvsignore
 arbfplight
 arbfslight
 arbocclude
@@ -6,9 +5,12 @@ bounce
 clearspd
 copypix
 cubemap
+dinoshade
 drawpix
 engine
 extfuncs.h
+fbo_firecube
+fbotexture
 fire
 fogcoord
 fplight
@@ -27,11 +29,9 @@ isosurf
 lodbias
 morph3d
 multiarb
-occlude
-osdemo
 paltex
-pixeltex
 pointblast
+projtex
 rain
 ray
 readpix
@@ -54,10 +54,12 @@ texcyl
 texdown
 texenv
 texobj
+textures
 trackball.c
 trackball.h
 trispd
 tunnel
 tunnel2
 vao_demo
+Windows
 winpos

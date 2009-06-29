@@ -51,7 +51,11 @@ INSTALL_TARGETS = $(addprefix install-, $(CONFIGS))
 QUILT_STAMPFN = $(STAMP_DIR)/patch
 include /usr/share/quilt/quilt.make
 
+# temporary until we figure out what to build
+confflags += --disable-gallium
+
 confflags-common = \
+	--disable-egl \
 	--disable-glu \
 	--disable-glut \
 	--disable-glw \
@@ -66,7 +70,7 @@ else
 	DIRECT_RENDERING = --enable-driglx-direct
   ifeq ($(DEB_HOST_ARCH), lpia)
 	DRI_DRIVERS += i915 i965
-  else
+  else ifneq ($(DEB_HOST_ARCH), s390)
 	DRI_DRIVERS += mach64 mga r128 r200 r300 radeon s3v savage tdfx trident
     ifeq ($(DEB_HOST_GNU_CPU), i486)
 	DRI_DRIVERS += i810 i915 i965 sis unichrome
@@ -129,6 +133,7 @@ confflags-swx11+glu = \
 	--with-driver=xlib \
 	--disable-gl-osmesa \
 	--with-demos= \
+	--disable-egl \
 	--disable-glut \
 	--disable-glw \
 	CFLAGS="$(CFLAGS)"
@@ -138,6 +143,7 @@ confflags-swx11+glu-static = \
 	--disable-gl-osmesa \
 	--enable-static \
 	--with-demos= \
+	--disable-egl \
 	--disable-glut \
 	--disable-glw \
 	CFLAGS="$(CFLAGS)"
@@ -147,6 +153,7 @@ confflags-swx11+glu-i386-i686 = \
 	--disable-gl-osmesa \
 	--with-demos= \
 	--disable-glut \
+	--disable-egl \
 	--disable-glw \
 	--libdir=/usr/lib/i686/cmov \
 	CFLAGS="$(CFLAGS) -march=i686"
@@ -188,7 +195,6 @@ install:
 	dh_clean -k
 	dh_installdirs
 	$(MAKE) -f debian/rules $(INSTALL_TARGETS)
-	cp debian/tmp/usr/lib/glx/pkgconfig/dri.pc debian/tmp/usr/lib/pkgconfig/dri.pc
 
 install-%: $(STAMP)-build-%
 	cd $(DEB_BUILD_DIR)/$* && $(MAKE) DESTDIR=$(CURDIR)/debian/tmp install

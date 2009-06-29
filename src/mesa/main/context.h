@@ -49,9 +49,11 @@
 #define CONTEXT_H
 
 
-#include "glapi/glapi.h"
 #include "imports.h"
 #include "mtypes.h"
+
+
+struct _glapi_table;
 
 
 /** \name Visual-related functions */
@@ -129,6 +131,9 @@ _mesa_copy_context(const GLcontext *src, GLcontext *dst, GLuint mask);
 
 
 extern void
+_mesa_check_init_viewport(GLcontext *ctx, GLuint width, GLuint height);
+
+extern GLboolean
 _mesa_make_current( GLcontext *ctx, GLframebuffer *drawBuffer,
                     GLframebuffer *readBuffer );
 
@@ -148,6 +153,10 @@ _mesa_notifySwapBuffers(__GLcontext *gc);
 extern struct _glapi_table *
 _mesa_get_dispatch(GLcontext *ctx);
 
+
+void
+_mesa_set_mvp_with_dp4( GLcontext *ctx,
+                        GLboolean flag );
 
 
 /** \name Miscellaneous */
