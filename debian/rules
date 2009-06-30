@@ -195,7 +195,7 @@ install:
 	dh_clean -k
 	dh_installdirs
 	for config in $(CONFIGS); do \
-		$(MAKE) -f debian/rules install-$$config \
+		$(MAKE) -f debian/rules install-$$config; \
 	done
 
 install-%: $(STAMP)-build-%

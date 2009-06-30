@@ -1,3 +1,9 @@
+mesa (7.5~rc4-1ubuntu2) karmic; urgency=low
+
+  * rules: Add a missing semicolon (FTBFS).
+
+ -- Timo Aaltonen <tjaalton@ubuntu.com>  Tue, 30 Jun 2009 19:49:17 +0300
+
 mesa (7.5~rc4-1ubuntu1) karmic; urgency=low
 
   * Merge from Debian experimental, remaining changes:
