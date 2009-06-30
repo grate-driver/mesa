@@ -1,4 +1,4 @@
-mesa (7.5~rc4-1ubuntu1) UNRELEASED; urgency=low
+mesa (7.5~rc4-1ubuntu1) karmic; urgency=low
 
   * Merge from Debian experimental, remaining changes:
     - debian/control
@@ -24,7 +24,7 @@ mesa (7.5~rc4-1ubuntu1) UNRELEASED; urgency=low
   * rules: Serialize install phase as suggested by Julien Cristau,
     fixes amd64 FTBFS.
 
- -- Timo Aaltonen <tjaalton@ubuntu.com>  Mon, 29 Jun 2009 14:48:12 +0300
+ -- Timo Aaltonen <tjaalton@ubuntu.com>  Tue, 30 Jun 2009 17:52:14 +0300
 
 mesa (7.5~rc4-1) experimental; urgency=low
 
