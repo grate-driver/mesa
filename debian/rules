@@ -194,7 +194,9 @@ install:
 	dh_testroot
 	dh_clean -k
 	dh_installdirs
-	$(MAKE) -f debian/rules $(INSTALL_TARGETS)
+	for config in $(CONFIGS); do \
+		$(MAKE) -f debian/rules install-$$config \
+	done
 
 install-%: $(STAMP)-build-%
 	cd $(DEB_BUILD_DIR)/$* && $(MAKE) DESTDIR=$(CURDIR)/debian/tmp install

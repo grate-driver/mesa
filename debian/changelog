@@ -21,6 +21,8 @@ mesa (7.5~rc4-1ubuntu1) UNRELEASED; urgency=low
     108_destroy_intel_fb.patch
     109_release_direct_rendering_resources.patch
     110_null_ptr_during_screen_tear_down.patch
+  * rules: Serialize install phase as suggested by Julien Cristau,
+    fixes amd64 FTBFS.
 
  -- Timo Aaltonen <tjaalton@ubuntu.com>  Mon, 29 Jun 2009 14:48:12 +0300
 
