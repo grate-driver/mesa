@@ -1,3 +1,10 @@
+mesa (7.5~rc4-1ubuntu3) karmic; urgency=low
+
+  * Add 108_bo_assertion.patch: Fix assertion failure on remapping a 
+    non-BO-backed VBO with intel video. (LP: #396667)
+
+ -- Robert Hooker (Sarvatt) <sarvatt@gmail.com>  Tue, 07 Jul 2009 14:35:54 -0400
+
 mesa (7.5~rc4-1ubuntu2) karmic; urgency=low
 
   * rules: Add a missing semicolon (FTBFS).
