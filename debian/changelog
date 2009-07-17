@@ -1,8 +1,12 @@
 mesa (7.5~rc4-2) UNRELEASED; urgency=low
 
+  [ Timo Aaltonen ]
   * Move dri.pc to mesa-common-dev (closes: #521667)
 
- -- Timo Aaltonen <tjaalton@ubuntu.com>  Mon, 29 Jun 2009 15:16:43 +0300
+  [ Brice Goglin ]
+  * Enable i686 optimized libraries on kfreebsd-i386, closes: #537345.
+
+ -- Brice Goglin <bgoglin@debian.org>  Fri, 17 Jul 2009 18:19:14 +0200
 
 mesa (7.5~rc4-1) experimental; urgency=low
 
