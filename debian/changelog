@@ -1,3 +1,10 @@
+mesa (7.5-3) UNRELEASED; urgency=low
+
+  * Pull from upstream mesa_7_5_branch up to commit b4ba6a66
+    (early 7.5.1 release snapshot).
+
+ -- Brice Goglin <bgoglin@debian.org>  Thu, 23 Jul 2009 21:10:12 +0200
+
 mesa (7.5-2) unstable; urgency=low
 
   * Pull from upstream mesa_7_5_branch up to commit a6b31415
