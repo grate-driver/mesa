@@ -1,3 +1,10 @@
+mesa (7.5-4) UNRELEASED; urgency=low
+
+  * Override 'package-name-doesnt-match-sonames' lintian warnings for libGLU,
+    libGLw and both libGLs.
+
+ -- Julien Cristau <jcristau@debian.org>  Thu, 23 Jul 2009 15:53:11 +0200
+
 mesa (7.5-3) unstable; urgency=low
 
   * Pull from upstream mesa_7_5_branch up to commit b4ba6a66
