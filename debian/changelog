@@ -2,6 +2,7 @@ mesa (7.5-4) UNRELEASED; urgency=low
 
   * Override 'package-name-doesnt-match-sonames' lintian warnings for libGLU,
     libGLw and both libGLs.
+  * Use dh_lintian.
 
  -- Julien Cristau <jcristau@debian.org>  Thu, 23 Jul 2009 15:53:11 +0200
 
