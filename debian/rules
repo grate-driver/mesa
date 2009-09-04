@@ -45,7 +45,6 @@ CONFIGS = $(SWX11_GLU_CONFIGS) \
 STAMP_DIR = debian/stamp
 STAMP = $(STAMP_DIR)/$(DEB_BUILD_GNU_TYPE)
 BUILD_STAMPS = $(addprefix $(STAMP)-build-, $(CONFIGS))
-INSTALL_TARGETS = $(addprefix install-, $(CONFIGS))
 
 QUILT_STAMPFN = $(STAMP_DIR)/patch
 include /usr/share/quilt/quilt.make
