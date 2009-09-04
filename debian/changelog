@@ -1,10 +1,14 @@
-mesa (7.5-4) UNRELEASED; urgency=low
+mesa (7.5.1-1) UNRELEASED; urgency=low
 
+  [ Brice Goglin ]
+  * New upstream release.
+
+  [ Julien Cristau ]
   * Override 'package-name-doesnt-match-sonames' lintian warnings for libGLU,
     libGLw and both libGLs.
   * Use dh_lintian and bump debhelper build-dep accordingly.
 
- -- Julien Cristau <jcristau@debian.org>  Thu, 23 Jul 2009 15:53:11 +0200
+ -- Brice Goglin <bgoglin@debian.org>  Fri, 04 Sep 2009 10:54:26 +0200
 
 mesa (7.5-3) unstable; urgency=low
 
