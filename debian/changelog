@@ -1,10 +1,14 @@
-mesa (7.5.1-2) UNRELEASED; urgency=low
+mesa (7.6-1) UNRELEASED; urgency=low
 
+  [ Brice Goglin ]
+  * New upstream release.
+
+  [ Julien Cristau ]
   * Don't run install from the various configs in parallel, hopefully fixing a
     bug in the previous debian/rules.  Thanks to Bernhard R. Link for the
     suggestions.
 
- -- Julien Cristau <jcristau@debian.org>  Fri, 04 Sep 2009 17:19:57 +0200
+ -- Brice Goglin <bgoglin@debian.org>  Tue, 29 Sep 2009 11:42:50 +0200
 
 mesa (7.5.1-1) unstable; urgency=low
 
