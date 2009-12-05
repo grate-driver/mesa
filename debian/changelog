@@ -1,4 +1,4 @@
-mesa (7.6.1~rc2-1) UNRELEASED; urgency=low
+mesa (7.6.1~rc2-1) unstable; urgency=low
 
   * New upstream release candidate.
     + Pull upstream mesa_7_6_branch up to commit b2953ee.
@@ -9,7 +9,7 @@ mesa (7.6.1~rc2-1) UNRELEASED; urgency=low
       is enabled, closes: #549588.
     + Refresh patches.
 
- -- Brice Goglin <bgoglin@debian.org>  Sun, 06 Dec 2009 00:14:12 +0100
+ -- Brice Goglin <bgoglin@debian.org>  Sun, 06 Dec 2009 00:14:34 +0100
 
 mesa (7.6-1) unstable; urgency=low
 
