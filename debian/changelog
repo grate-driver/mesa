@@ -1,3 +1,15 @@
+mesa (7.6.1~rc2-1) UNRELEASED; urgency=low
+
+  * New upstream release candidate.
+    + Pull upstream mesa_7_6_branch up to commit b2953ee.
+    + i965: Fix the bounds emitted in the vertex buffer packets,
+      closes: #556541.
+    + Fix window drawing regression in Kwin on older Radeon hardware,
+      fix assertion failure leading to crash on kwin when compositing
+      is enabled, closes: #549588.
+
+ -- Brice Goglin <bgoglin@debian.org>  Sat, 05 Dec 2009 23:37:04 +0100
+
 mesa (7.6-1) unstable; urgency=low
 
   [ Brice Goglin ]
