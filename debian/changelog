@@ -7,8 +7,9 @@ mesa (7.6.1~rc2-1) UNRELEASED; urgency=low
     + Fix window drawing regression in Kwin on older Radeon hardware,
       fix assertion failure leading to crash on kwin when compositing
       is enabled, closes: #549588.
+    + Refresh patches.
 
- -- Brice Goglin <bgoglin@debian.org>  Sat, 05 Dec 2009 23:37:04 +0100
+ -- Brice Goglin <bgoglin@debian.org>  Sun, 06 Dec 2009 00:14:12 +0100
 
 mesa (7.6-1) unstable; urgency=low
 
