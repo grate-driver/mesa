@@ -55,14 +55,14 @@ struct cso_context {
    void *samplers[PIPE_MAX_SAMPLERS];
    unsigned nr_samplers;
 
-   void *samplers_saved[PIPE_MAX_SAMPLERS];
    unsigned nr_samplers_saved;
+   void *samplers_saved[PIPE_MAX_SAMPLERS];
 
    struct pipe_texture *textures[PIPE_MAX_SAMPLERS];
    uint nr_textures;
 
-   struct pipe_texture *textures_saved[PIPE_MAX_SAMPLERS];
    uint nr_textures_saved;
+   struct pipe_texture *textures_saved[PIPE_MAX_SAMPLERS];
 
    /** Current and saved state.
     * The saved state is used as a 1-deep stack.
@@ -268,7 +268,7 @@ void cso_release_all( struct cso_context *ctx )
 void cso_destroy_context( struct cso_context *ctx )
 {
    if (ctx) {
-      //cso_release_all( ctx );
+      /*cso_release_all( ctx );*/
       FREE( ctx );
    }
 }

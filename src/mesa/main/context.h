@@ -159,11 +159,24 @@ _mesa_set_mvp_with_dp4( GLcontext *ctx,
                         GLboolean flag );
 
 
+extern GLboolean
+_mesa_valid_to_render(GLcontext *ctx, const char *where);
+
+
+
 /** \name Miscellaneous */
 /*@{*/
 
 extern void
 _mesa_record_error( GLcontext *ctx, GLenum error );
+
+
+extern void
+_mesa_finish(GLcontext *ctx);
+
+extern void
+_mesa_flush(GLcontext *ctx);
+
 
 extern void GLAPIENTRY
 _mesa_Finish( void );
@@ -172,7 +185,6 @@ extern void GLAPIENTRY
 _mesa_Flush( void );
 
 /*@}*/
-
 
 
 /**

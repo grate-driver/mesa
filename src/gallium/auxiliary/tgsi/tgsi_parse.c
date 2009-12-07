@@ -42,9 +42,6 @@ void
 tgsi_full_token_free(
    union tgsi_full_token *full_token )
 {
-   if( full_token->Token.Type == TGSI_TOKEN_TYPE_IMMEDIATE ) {
-      FREE( (void *) full_token->FullImmediate.u.Pointer );
-   }
 }
 
 unsigned
@@ -156,14 +153,8 @@ tgsi_parse_token(
       case TGSI_IMM_FLOAT32:
          {
             uint imm_count = imm->Immediate.NrTokens - 1;
-            struct tgsi_immediate_float32 *data;
-
-            data = (struct tgsi_immediate_float32 *) MALLOC(sizeof(struct tgsi_immediate_float32) * imm_count);
-            if (data) {
-               for (i = 0; i < imm_count; i++) {
-                  next_token(ctx, &data[i]);
-               }
-               imm->u.ImmediateFloat32 = data;
+            for (i = 0; i < imm_count; i++) {
+               next_token(ctx, &imm->u[i]);
             }
          }
          break;
@@ -219,7 +210,6 @@ tgsi_parse_token(
          /*
           * No support for indirect or multi-dimensional addressing.
           */
-         assert( !inst->FullDstRegisters[i].DstRegister.Indirect );
          assert( !inst->FullDstRegisters[i].DstRegister.Dimension );
 
          extended = inst->FullDstRegisters[i].DstRegister.Extended;
@@ -245,6 +235,17 @@ tgsi_parse_token(
             }
 
             extended = token.Extended;
+         }
+
+         if( inst->FullDstRegisters[i].DstRegister.Indirect ) {
+            next_token( ctx, &inst->FullDstRegisters[i].DstRegisterInd );
+
+            /*
+             * No support for indirect or multi-dimensional addressing.
+             */
+            assert( !inst->FullDstRegisters[i].DstRegisterInd.Indirect );
+            assert( !inst->FullDstRegisters[i].DstRegisterInd.Dimension );
+            assert( !inst->FullDstRegisters[i].DstRegisterInd.Extended );
          }
       }
 

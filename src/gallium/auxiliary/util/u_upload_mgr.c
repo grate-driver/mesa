@@ -83,7 +83,9 @@ my_buffer_write(struct pipe_screen *screen,
    assert(dirty_size >= size);
    assert(size);
 
-   map = pipe_buffer_map_range(screen, buf, offset, size, PIPE_BUFFER_USAGE_CPU_WRITE);
+   map = pipe_buffer_map_range(screen, buf, offset, size, 
+                               PIPE_BUFFER_USAGE_CPU_WRITE |
+                               PIPE_BUFFER_USAGE_FLUSH_EXPLICIT);
    if (map == NULL) 
       return PIPE_ERROR_OUT_OF_MEMORY;
 
@@ -121,21 +123,25 @@ static enum pipe_error
 u_upload_alloc_buffer( struct u_upload_mgr *upload,
                        unsigned min_size )
 {
+   unsigned size;
+
    /* Release old buffer, if present:
     */
    u_upload_flush( upload );
 
    /* Allocate a new one: 
     */
-   upload->size = align(MAX2(upload->default_size, min_size), 4096);
+   size = align(MAX2(upload->default_size, min_size), 4096);
 
    upload->buffer = pipe_buffer_create( upload->screen,
                                         upload->alignment,
                                         upload->usage | PIPE_BUFFER_USAGE_CPU_WRITE,
-                                        upload->size );
+                                        size );
    if (upload->buffer == NULL) 
       goto fail;
    
+   upload->size = size;
+
    upload->offset = 0;
    return 0;
 

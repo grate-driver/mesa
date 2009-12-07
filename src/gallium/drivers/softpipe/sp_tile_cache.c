@@ -44,8 +44,8 @@
 
 
 /** XXX move these */
-#define MAX_WIDTH 2048
-#define MAX_HEIGHT 2048
+#define MAX_WIDTH 4096
+#define MAX_HEIGHT 4096
 
 
 struct softpipe_tile_cache
@@ -116,6 +116,12 @@ sp_create_tile_cache( struct pipe_screen *screen )
 {
    struct softpipe_tile_cache *tc;
    uint pos;
+   int maxLevels, maxTexSize;
+
+   /* sanity checking: max sure MAX_WIDTH/HEIGHT >= largest texture image */
+   maxLevels = screen->get_param(screen, PIPE_CAP_MAX_TEXTURE_2D_LEVELS);
+   maxTexSize = 1 << (maxLevels - 1);
+   assert(MAX_WIDTH >= maxTexSize);
 
    tc = CALLOC_STRUCT( softpipe_tile_cache );
    if (tc) {
@@ -124,6 +130,16 @@ sp_create_tile_cache( struct pipe_screen *screen )
          tc->entries[pos].x =
          tc->entries[pos].y = -1;
       }
+
+      /* XXX this code prevents valgrind warnings about use of uninitialized
+       * memory in programs that don't clear the surface before rendering.
+       * However, it breaks clearing in other situations (such as in
+       * progs/tests/drawbuffers, see bug 24402).
+       */
+#if 0 && TILE_CLEAR_OPTIMIZATION
+      /* set flags to indicate all the tiles are cleared */
+      memset(tc->clear_flags, 255, sizeof(tc->clear_flags));
+#endif
    }
    return tc;
 }

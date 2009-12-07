@@ -163,6 +163,9 @@ static uint32_t x_tile_swizzle(struct intel_renderbuffer *irb,
 	int	x_tile_number, y_tile_number;
 	int	tile_off, tile_base;
 	
+        x += irb->region->draw_x;
+        y += irb->region->draw_y;
+
 	tile_stride = (irb->region->pitch * irb->region->cpp) << 3;
 
 	xbyte = x * irb->region->cpp;
@@ -218,6 +221,9 @@ static uint32_t y_tile_swizzle(struct intel_renderbuffer *irb,
 	int	x_tile_number, y_tile_number;
 	int	tile_off, tile_base;
 	
+        x += irb->region->draw_x;
+        y += irb->region->draw_y;
+
 	tile_stride = (irb->region->pitch * irb->region->cpp) << 5;
 
 	xbyte = x * irb->region->cpp;
@@ -501,7 +507,7 @@ intel_map_unmap_buffers(struct intel_context *intel, GLboolean map)
 
 
 /**
- * Prepare for softare rendering.  Map current read/draw framebuffers'
+ * Prepare for software rendering.  Map current read/draw framebuffers'
  * renderbuffes and all currently bound texture objects.
  *
  * Old note: Moved locking out to get reasonable span performance.
@@ -526,7 +532,7 @@ intelSpanRenderStart(GLcontext * ctx)
 }
 
 /**
- * Called when done softare rendering.  Unmap the buffers we mapped in
+ * Called when done software rendering.  Unmap the buffers we mapped in
  * the above function.
  */
 void

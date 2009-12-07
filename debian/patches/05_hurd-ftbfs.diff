@@ -1,10 +1,15 @@
 From: Samuel Thibault <samuel.thibault@ens-lyon.org>
 Subject: Fix build on GNU/Hurd
 
-Index: mesa/src/glx/x11/dri2.c
+---
+ configure.ac       |   25 ++++++++++++++-----------
+ src/glx/x11/dri2.c |    2 ++
+ 2 files changed, 16 insertions(+), 11 deletions(-)
+
+Index: mesa-7.6.1~rc2/src/glx/x11/dri2.c
 ===================================================================
---- mesa.orig/src/glx/x11/dri2.c
-+++ mesa/src/glx/x11/dri2.c
+--- mesa-7.6.1~rc2.orig/src/glx/x11/dri2.c	2009-12-05 23:51:01.000000000 +0100
++++ mesa-7.6.1~rc2/src/glx/x11/dri2.c	2009-12-06 00:10:10.000000000 +0100
 @@ -30,6 +30,7 @@
   *   Kristian Høgsberg (krh@redhat.com)
   */
@@ -13,16 +18,16 @@ Index: mesa/src/glx/x11/dri2.c
  
  #define NEED_REPLIES
  #include <X11/Xlibint.h>
-@@ -369,3 +370,4 @@
-     UnlockDisplay(dpy);
-     SyncHandle();
+@@ -377,3 +378,4 @@
+    UnlockDisplay(dpy);
+    SyncHandle();
  }
 +#endif
-Index: mesa/configure.ac
+Index: mesa-7.6.1~rc2/configure.ac
 ===================================================================
---- mesa.orig/configure.ac
-+++ mesa/configure.ac
-@@ -528,6 +528,13 @@
+--- mesa-7.6.1~rc2.orig/configure.ac	2009-12-05 23:50:57.000000000 +0100
++++ mesa-7.6.1~rc2/configure.ac	2009-12-06 00:10:27.000000000 +0100
+@@ -538,6 +538,13 @@
      enable_xcb=no
  fi
  
@@ -36,7 +41,7 @@ Index: mesa/configure.ac
  dnl
  dnl libGL configuration per driver
  dnl
-@@ -561,11 +568,13 @@
+@@ -571,11 +578,13 @@
          AC_MSG_ERROR([Can't use static libraries for DRI drivers])
      fi
  
@@ -53,12 +58,12 @@ Index: mesa/configure.ac
 +        DRI_PC_REQ_PRIV="libdrm >= $LIBDRM_REQUIRED"
 +    fi
  
-     # find the DRI deps for libGL
-     if test "$x11_pkgconfig" = yes; then
-@@ -632,12 +641,6 @@
-     [DRI_DRIVER_INSTALL_DIR="$withval"],
-     [DRI_DRIVER_INSTALL_DIR='${libdir}/dri'])
- AC_SUBST([DRI_DRIVER_INSTALL_DIR])
+     PKG_CHECK_MODULES([LIBDRM_RADEON], [libdrm_radeon], HAVE_LIBDRM_RADEON=yes, HAVE_LIBDRM_RADEON=no)
+ 
+@@ -656,12 +665,6 @@
+     [DRI_DRIVER_SEARCH_DIR="$withval"],
+     [DRI_DRIVER_SEARCH_DIR='${DRI_DRIVER_INSTALL_DIR}'])
+ AC_SUBST([DRI_DRIVER_SEARCH_DIR])
 -dnl Direct rendering or just indirect rendering
 -AC_ARG_ENABLE([driglx-direct],
 -    [AS_HELP_STRING([--disable-driglx-direct],

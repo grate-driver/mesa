@@ -11,11 +11,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include <GL/gl.h>
+#include <GL/glew.h>
 #include <GL/glut.h>
-#include <GL/glext.h>
-#include "extfuncs.h"
 
+#ifndef M_PI
+#define M_PI 3.1415926535
+#endif
 
 static GLint WinWidth = 300, WinHeight = 300;
 static GLint win = 0;
@@ -105,6 +106,8 @@ static float Sin(float a)
 static void
 Redisplay(void)
 {
+   float cx = 0.5 * WinWidth, cy = 0.5 * WinHeight;
+   float len = 0.5 * WinWidth - 20.0;
    int i;
 
    glClear(GL_COLOR_BUFFER_BIT);
@@ -116,20 +119,20 @@ Redisplay(void)
 
    for (i = 0; i < 360; i+=5) {
       float v0[2], v1[2];
-      v0[0] = 150 + 40 * Cos(i);
-      v0[1] = 150 + 40 * Sin(i);
-      v1[0] = 150 + 130 * Cos(i);
-      v1[1] = 150 + 130 * Sin(i);
+      v0[0] = cx + 40 * Cos(i);
+      v0[1] = cy + 40 * Sin(i);
+      v1[0] = cx + len * Cos(i);
+      v1[1] = cy + len * Sin(i);
       QuadLine(v0, v1, Width);
    }
 
    {
       float v0[2], v1[2], x;
       for (x = 0; x < 1.0; x += 0.2) {
-         v0[0] = 150 + x;
-         v0[1] = 150 + x * 40 - 20;
-         v1[0] = 150 + x + 5.0;
-         v1[1] = 150 + x * 40 - 20;
+         v0[0] = cx + x;
+         v0[1] = cy + x * 40 - 20;
+         v1[0] = cx + x + 5.0;
+         v1[1] = cy + x * 40 - 20;
          QuadLine(v0, v1, Width);
       }
    }
@@ -144,6 +147,8 @@ Redisplay(void)
 static void
 Reshape(int width, int height)
 {
+   WinWidth = width;
+   WinHeight = height;
    glViewport(0, 0, width, height);
    glMatrixMode(GL_PROJECTION);
    glLoadIdentity();
@@ -328,8 +333,6 @@ Init(void)
       exit(1);
    }
 
-   GetExtensionFuncs();
-
    glClearColor(0.3f, 0.3f, 0.3f, 0.0f);
 
    printf("GL_RENDERER = %s\n",(const char *) glGetString(GL_RENDERER));
@@ -355,10 +358,10 @@ int
 main(int argc, char *argv[])
 {
    glutInit(&argc, argv);
-   glutInitWindowPosition( 0, 0);
    glutInitWindowSize(WinWidth, WinHeight);
    glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE);
    win = glutCreateWindow(argv[0]);
+   glewInit();
    glutReshapeFunc(Reshape);
    glutKeyboardFunc(Key);
    glutDisplayFunc(Redisplay);

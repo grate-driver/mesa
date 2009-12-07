@@ -589,8 +589,12 @@ _mesa_make_temp_chan_image(GLcontext *ctx, GLuint dims,
    /* unpack and transfer the source image */
    tempImage = (GLchan *) _mesa_malloc(srcWidth * srcHeight * srcDepth
                                        * components * sizeof(GLchan));
-   if (!tempImage)
+   if (!tempImage) {
+      if (freeSrcImage) {
+         _mesa_free((void *) srcAddr);
+      }
       return NULL;
+   }
 
    dst = tempImage;
    for (img = 0; img < srcDepth; img++) {
@@ -3138,7 +3142,7 @@ _mesa_validate_pbo_teximage(GLcontext *ctx, GLuint dimensions,
 {
    GLubyte *buf;
 
-   if (unpack->BufferObj->Name == 0) {
+   if (!_mesa_is_bufferobj(unpack->BufferObj)) {
       /* no PBO */
       return pixels;
    }
@@ -3174,7 +3178,7 @@ _mesa_validate_pbo_compressed_teximage(GLcontext *ctx,
 {
    GLubyte *buf;
 
-   if (packing->BufferObj->Name == 0) {
+   if (!_mesa_is_bufferobj(packing->BufferObj)) {
       /* not using a PBO - return pointer unchanged */
       return pixels;
    }
@@ -3204,7 +3208,7 @@ void
 _mesa_unmap_teximage_pbo(GLcontext *ctx,
                          const struct gl_pixelstore_attrib *unpack)
 {
-   if (unpack->BufferObj->Name) {
+   if (_mesa_is_bufferobj(unpack->BufferObj)) {
       ctx->Driver.UnmapBuffer(ctx, GL_PIXEL_UNPACK_BUFFER_EXT,
                               unpack->BufferObj);
    }

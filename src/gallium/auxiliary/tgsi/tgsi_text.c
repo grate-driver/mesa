@@ -26,6 +26,7 @@
  **************************************************************************/
 
 #include "util/u_debug.h"
+#include "util/u_memory.h"
 #include "tgsi_text.h"
 #include "tgsi_build.h"
 #include "tgsi_info.h"
@@ -230,7 +231,8 @@ static const char *file_names[TGSI_FILE_COUNT] =
    "TEMP",
    "SAMP",
    "ADDR",
-   "IMM"
+   "IMM",
+   "LOOP"
 };
 
 static boolean
@@ -788,16 +790,6 @@ match_inst_mnemonic(const char **pcur,
    if (str_match_no_case(pcur, info->mnemonic)) {
       return TRUE;
    }
-   if (info->alt_mnemonic1) {
-      if (str_match_no_case(pcur, info->alt_mnemonic1)) {
-         return TRUE;
-      }
-      if (info->alt_mnemonic2) {
-         if (str_match_no_case(pcur, info->alt_mnemonic2)) {
-            return TRUE;
-         }
-      }
-   }
    return FALSE;
 }
 
@@ -927,7 +919,8 @@ static const char *semantic_names[TGSI_SEMANTIC_COUNT] =
    "FOG",
    "PSIZE",
    "GENERIC",
-   "NORMAL"
+   "NORMAL",
+   "FACE"
 };
 
 static const char *interpolate_names[TGSI_INTERPOLATE_COUNT] =
@@ -946,6 +939,9 @@ static boolean parse_declaration( struct translate_ctx *ctx )
    uint writemask;
    const char *cur;
    uint advance;
+
+   assert(Elements(semantic_names) == TGSI_SEMANTIC_COUNT);
+   assert(Elements(interpolate_names) == TGSI_INTERPOLATE_COUNT);
 
    if (!eat_white( &ctx->cur )) {
       report_error( ctx, "Syntax error" );
@@ -1086,7 +1082,10 @@ static boolean parse_immediate( struct translate_ctx *ctx )
    imm = tgsi_default_full_immediate();
    imm.Immediate.NrTokens += 4;
    imm.Immediate.DataType = TGSI_IMM_FLOAT32;
-   imm.u.Pointer = values;
+   imm.u[0].Float = values[0];
+   imm.u[1].Float = values[1];
+   imm.u[2].Float = values[2];
+   imm.u[3].Float = values[3];
 
    advance = tgsi_build_full_immediate(
       &imm,

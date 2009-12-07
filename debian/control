@@ -4,8 +4,8 @@ Priority: optional
 Maintainer: Ubuntu X-SWAT <ubuntu-x@lists.ubuntu.com>
 XSBC-Original-Maintainer: Debian X Strike Force <debian-x@lists.debian.org>
 Uploaders: Thierry Reding <thierry@gilfi.de>, Julien Cristau <jcristau@debian.org>, David Nusinow <dnusinow@debian.org>, Brice Goglin <bgoglin@debian.org>
-Standards-Version: 3.7.3
-Build-Depends: debhelper (>= 5), quilt (>= 0.40), pkg-config,
+Standards-Version: 3.8.3
+Build-Depends: debhelper (>= 6.0.7), quilt (>= 0.40), pkg-config,
  libdrm-dev (>= 2.4.3) [!hurd-i386], libx11-dev, xutils-dev,
  x11proto-gl-dev (>= 1.4.8), libxxf86vm-dev,
  libexpat1-dev, dpkg-dev (>= 1.13.19), libxfixes-dev,
@@ -65,7 +65,7 @@ Description: A free implementation of the OpenGL API -- debugging symbols
 Package: libgl1-mesa-swx11-i686
 Section: libs
 Priority: extra
-Architecture: i386
+Architecture: i386 kfreebsd-i386 hurd-i386
 Depends: libgl1-mesa-swx11 (= ${binary:Version}), ${shlibs:Depends}
 Description: Mesa OpenGL runtime [i686 optimized]
  Mesa is a 3-D graphics library with an API which is very similar to
@@ -144,7 +144,7 @@ Description: Debugging symbols for the Mesa GLX runtime
 #Package: libgl1-mesa-glx-i686
 #Section: libs
 #Priority: extra
-#Architecture: i386
+#Architecture: i386 kfreebsd-i386 hurd-i386
 #Pre-Depends: libgl1-mesa-glx
 #Description: A free implementation of the OpenGL API -- GLX runtime [i686 optimized]
 # This version of Mesa provides GLX and DRI capabilities: it is capable of
@@ -205,7 +205,7 @@ Description: Debugging symbols for the Mesa DRI modules
 #Package: libgl1-mesa-dri-i686
 #Section: libs
 #Priority: extra
-#Architecture: i386
+#Architecture: i386 kfreebsd-i386 hurd-i386
 #Pre-Depends: libgl1-mesa-dri
 #Description: A free implementation of the OpenGL API -- DRI modules [i686 optimized]
 # This version of Mesa provides GLX and DRI capabilities: it is capable of
@@ -244,7 +244,7 @@ Description: A free implementation of the OpenGL API -- GLX development files
 Package: mesa-common-dev
 Section: libdevel
 Architecture: any
-Replaces: xlibmesa-gl-dev (<< 1:7), xlibosmesa-dev, libgl1-mesa-swx11-dev (<< 6.5.2), libgl1-mesa-dev (<< 6.5.2)
+Replaces: xlibmesa-gl-dev (<< 1:7), xlibosmesa-dev, libgl1-mesa-swx11-dev (<< 6.5.2), libgl1-mesa-dev (<< 7.5~rc4-2)
 Depends: libx11-dev
 Description: Developer documentation for Mesa
  This package includes the specifications for the Mesa-specific OpenGL

@@ -63,6 +63,13 @@ pipe_buffer_map(struct pipe_screen *screen,
    if(screen->buffer_map_range) {
       unsigned offset = 0;
       unsigned length = buf->size;
+
+      /* XXX: Actually we should be using/detecting DISCARD
+       * instead of assuming that WRITE implies discard */
+      if((usage & PIPE_BUFFER_USAGE_CPU_WRITE) &&
+         !(usage & PIPE_BUFFER_USAGE_DISCARD))
+         usage |= PIPE_BUFFER_USAGE_CPU_READ;
+
       return screen->buffer_map_range(screen, buf, offset, length, usage);
    }
    else
@@ -117,7 +124,9 @@ pipe_buffer_write(struct pipe_screen *screen,
    assert(offset + size <= buf->size);
    assert(size);
 
-   map = pipe_buffer_map_range(screen, buf, offset, size, PIPE_BUFFER_USAGE_CPU_WRITE);
+   map = pipe_buffer_map_range(screen, buf, offset, size, 
+                               PIPE_BUFFER_USAGE_CPU_WRITE | 
+                               PIPE_BUFFER_USAGE_FLUSH_EXPLICIT);
    assert(map);
    if(map) {
       memcpy(map + offset, data, size);

@@ -1194,12 +1194,16 @@ getFallbackString(GLuint bit)
 
 
 
+/**
+ * Enable/disable a fallback flag.
+ * \param bit  one of INTEL_FALLBACK_x flags.
+ */
 void
-intelFallback(struct intel_context *intel, GLuint bit, GLboolean mode)
+intelFallback(struct intel_context *intel, GLbitfield bit, GLboolean mode)
 {
    GLcontext *ctx = &intel->ctx;
    TNLcontext *tnl = TNL_CONTEXT(ctx);
-   GLuint oldfallback = intel->Fallback;
+   const GLbitfield oldfallback = intel->Fallback;
 
    if (mode) {
       intel->Fallback |= bit;
@@ -1255,11 +1259,9 @@ intel_meta_draw_poly(struct intel_context *intel,
 {
    union fi *vb;
    GLint i;
-   GLboolean was_locked = intel->locked;
    unsigned int saved_vertex_size = intel->vertex_size;
 
-   if (!was_locked)
-       LOCK_HARDWARE(intel);
+   LOCK_HARDWARE(intel);
 
    intel->vertex_size = 6;
 
@@ -1283,8 +1285,7 @@ intel_meta_draw_poly(struct intel_context *intel,
 
    intel->vertex_size = saved_vertex_size;
 
-   if (!was_locked)
-       UNLOCK_HARDWARE(intel);
+   UNLOCK_HARDWARE(intel);
 }
 
 static void

@@ -1,3 +1,78 @@
+mesa (7.6.1~rc2-1) unstable; urgency=low
+
+  * New upstream release candidate.
+    + Pull upstream mesa_7_6_branch up to commit b2953ee.
+    + i965: Fix the bounds emitted in the vertex buffer packets,
+      closes: #556541.
+    + Fix window drawing regression in Kwin on older Radeon hardware,
+      fix assertion failure leading to crash on kwin when compositing
+      is enabled, closes: #549588.
+    + Refresh patches.
+
+ -- Brice Goglin <bgoglin@debian.org>  Sun, 06 Dec 2009 00:14:34 +0100
+
+mesa (7.6-1) unstable; urgency=low
+
+  [ Brice Goglin ]
+  * New upstream release.
+    + Fix software fallback assertion on RS480, closes: #539162.
+    + Fix segfault in _swrast_ReadPixels on i915, closes: #545085.
+
+  [ Julien Cristau ]
+  * Don't run install from the various configs in parallel, hopefully fixing a
+    bug in the previous debian/rules.  Thanks to Bernhard R. Link for the
+    suggestions.
+
+ -- Brice Goglin <bgoglin@debian.org>  Tue, 29 Sep 2009 11:51:58 +0200
+
+mesa (7.5.1-1) unstable; urgency=low
+
+  [ Brice Goglin ]
+  * New upstream release.
+  * Add README.source.
+  * Bump Standards-Version to 3.8.3.
+
+  [ Julien Cristau ]
+  * Override 'package-name-doesnt-match-sonames' lintian warnings for libGLU,
+    libGLw and both libGLs.
+  * Use dh_lintian and bump debhelper build-dep accordingly.
+
+ -- Brice Goglin <bgoglin@debian.org>  Fri, 04 Sep 2009 11:38:46 +0200
+
+mesa (7.5-3) unstable; urgency=low
+
+  * Pull from upstream mesa_7_5_branch up to commit b4ba6a66
+    (early 7.5.1 release snapshot).
+  * Only install the huge upstream changelog in mesa-common-dev,
+    closes: #538094.
+  * Enable i686 optimized libraries on hurd-i386.
+
+ -- Brice Goglin <bgoglin@debian.org>  Fri, 24 Jul 2009 00:29:28 +0200
+
+mesa (7.5-2) unstable; urgency=low
+
+  * Pull from upstream mesa_7_5_branch up to commit a6b31415
+    + radeon/DRI1: if we have HW stencil, only expose fbconfigs with stencil,
+      closes: #537732.
+  * Install the upstream changelog.
+
+ -- Brice Goglin <bgoglin@debian.org>  Tue, 21 Jul 2009 22:21:50 +0200
+
+mesa (7.5-1) unstable; urgency=low
+
+  [ Timo Aaltonen ]
+  * Move dri.pc to mesa-common-dev (closes: #521667)
+
+  [ Brice Goglin ]
+  * Enable i686 optimized libraries on kfreebsd-i386, closes: #537345.
+  * New upstream release:
+    + i915: Fix assertion failure on remapping a non-BO-backed VBO,
+      closes: #537147.
+    + GLX/DRI1: Mark GLX visuals with depth != screen depth non-conformant,
+      closes: #532980.
+
+ -- Brice Goglin <bgoglin@debian.org>  Sun, 19 Jul 2009 12:53:41 +0200
+
 mesa (7.5~rc4-1ubuntu3) karmic; urgency=low
 
   * Add 108_bo_assertion.patch: Fix assertion failure on remapping a 
