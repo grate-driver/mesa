@@ -1,8 +1,8 @@
 Index: mesa/src/mesa/drivers/dri/intel/intel_screen.c
 ===================================================================
---- mesa.orig/src/mesa/drivers/dri/intel/intel_screen.c	2009-06-29 14:43:07.000000000 +0300
-+++ mesa/src/mesa/drivers/dri/intel/intel_screen.c	2009-06-29 14:45:38.000000000 +0300
-@@ -54,7 +54,7 @@
+--- mesa.orig/src/mesa/drivers/dri/intel/intel_screen.c	2009-12-07 11:44:54.000000000 +0200
++++ mesa/src/mesa/drivers/dri/intel/intel_screen.c	2009-12-07 11:49:55.000000000 +0200
+@@ -58,7 +58,7 @@
     DRI_CONF_BEGIN
     DRI_CONF_SECTION_PERFORMANCE
        DRI_CONF_FTHROTTLE_MODE(DRI_CONF_FTHROTTLE_IRQS)

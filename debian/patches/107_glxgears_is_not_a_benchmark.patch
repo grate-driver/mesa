@@ -1,8 +1,8 @@
-diff --git a/progs/xdemos/glxgears.c b/progs/xdemos/glxgears.c
-index 2dc157a..d7c8191 100644
---- a/progs/xdemos/glxgears.c
-+++ b/progs/xdemos/glxgears.c
-@@ -347,7 +347,7 @@ draw_frame(Display *dpy, Window win)
+Index: mesa/progs/xdemos/glxgears.c
+===================================================================
+--- mesa.orig/progs/xdemos/glxgears.c	2009-12-07 11:44:54.000000000 +0200
++++ mesa/progs/xdemos/glxgears.c	2009-12-07 11:49:55.000000000 +0200
+@@ -346,7 +346,7 @@
     if (t - tRate0 >= 5.0) {
        GLfloat seconds = t - tRate0;
        GLfloat fps = frames / seconds;
