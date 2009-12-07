@@ -6,4 +6,3 @@
 101_ubuntu_hidden_glname.patch
 102_dont_vblank.diff
 107_glxgears_is_not_a_benchmark.patch
-108_bo_assertion.patch

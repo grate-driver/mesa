@@ -1,3 +1,25 @@
+mesa (7.6.1~rc2-1ubuntu1) UNRELEASED; urgency=low
+
+  * Merge from Debian unstable, remaining changes:
+    - debian/control
+      + Drop lesstif-dev from Build-Depends.
+      + Comment out GLw libs since it depends on lesstif-dev.
+    - debian/rules
+      + Unexport LDFLAGS (amd64 FTBFS).
+      + Use --disable-glw for swx11 targets too.
+      + Don't enable motif for swx11 targets.
+      + Build .debs with lzma compression.
+    - debian/patches
+      + 101_ubuntu_hidden_glname.patch
+      + 102_dont_vblank.patch
+      + 107_glxgears_is_not_a_benchmark.patch
+  * Drop patches now included upstream:
+    - 108_fix_scissors_regression.patch
+    - 109_revert-dma-reuse.patch
+    - 110_dont_free.patch
+
+ -- Timo Aaltonen <tjaalton@ubuntu.com>  Mon, 07 Dec 2009 11:04:04 +0200
+
 mesa (7.6.1~rc2-1) unstable; urgency=low
 
   * New upstream release candidate.
@@ -10,6 +32,63 @@ mesa (7.6.1~rc2-1) unstable; urgency=low
     + Refresh patches.
 
  -- Brice Goglin <bgoglin@debian.org>  Sun, 06 Dec 2009 00:14:34 +0100
+
+mesa (7.6.0-1ubuntu4) karmic; urgency=low
+  
+  * Add 110_dont_free.patch: It is not necessary to worry about freeing
+    the textures, VBOs, etc. in _mesa_meta_free() since these are already
+    handled by the normal context deallocation code.  Fixes a crash in
+    Blender in brw_prepare_vertices().
+    (LP: #438657)
+
+ -- Bryce Harrington <bryce@ubuntu.com>  Tue, 13 Oct 2009 13:48:03 -0700
+
+mesa (7.6.0-1ubuntu3) karmic; urgency=low
+
+  * Add 109_revert-dma-reuse.patch: Fix assertion failure leading to crash
+    on kwin when compositing is enabled.  This reverts commit 284a7af27.
+    (LP: #446578)
+
+ -- Bryce Harrington <bryce@ubuntu.com>  Tue, 13 Oct 2009 00:52:32 -0700
+
+mesa (7.6.0-1ubuntu2) karmic; urgency=low
+
+  * Add 108_fix_scissors_regression.patch: Fix window drawing regression
+    in Kwin on older Radeon hardware.
+    (LP: #446425)
+
+ -- Bryce Harrington <bryce@ubuntu.com>  Fri, 09 Oct 2009 14:12:44 -0700
+
+mesa (7.6.0-1ubuntu1) karmic; urgency=low
+
+  * Merge from Debian.  (LP: #420803)
+    Remaining Ubuntu changes:
+    - debian/control
+      + Change maintainer address to Ubuntu.
+      + Drop lesstif-dev from Build-Depends.
+      + Comment out GLw libs since it depends on lesstif-dev.
+      + Require at least libdrm_2.4.12+git20090801.45078630
+    - debian/rules
+      + Unexport LDFLAGS (amd64 FTBFS).
+      + Use --disable-glw for swx11 targets too.
+      + Don't enable motif for swx11 targets.
+      + Build .debs with lzma compression.
+      + Serialize install phase as suggested by Julien Cristau,
+        fixes amd64 FTBFS.
+    - debian/patches
+      + 101_ubuntu_hidden_glname.patch
+      + 102_dont_vblank.patch
+      + 107_glxgears_is_not_a_benchmark.patch
+  * Drop patches now included upstream:
+    + 108_big_endian.patch
+    + 109_fix_relocation_delta_for_wm_surfaces.patch
+    + 110_deassociate_drawables.patch
+    + 111_dridrawable_nullptr.patch
+    + 112_dont_corrupt_random_number_state.patch
+  * Mesa 7.6 fixes the following Ubuntu bugs:
+    + Suppress excessive warnings on unsupported GLX 1.3 calls.
+      (LP: #433488)
+  * See http://www.mesa3d.org/relnotes-7.6.html for more details.
 
 mesa (7.6-1) unstable; urgency=low
 
@@ -24,6 +103,88 @@ mesa (7.6-1) unstable; urgency=low
     suggestions.
 
  -- Brice Goglin <bgoglin@debian.org>  Tue, 29 Sep 2009 11:51:58 +0200
+
+mesa (7.6.0~git20090817.7c422387-0ubuntu8) karmic; urgency=low
+
+  * Add 112_dont_corrupt_random_number_state.patch: Fix predictable
+    numbers being seeded into the RNG in OpenGL when glutCreateWindow() is
+    called.
+    (LP: #421651)
+
+ -- Bryce Harrington <bryce@ubuntu.com>  Wed, 07 Oct 2009 00:38:40 -0700
+
+mesa (7.6.0~git20090817.7c422387-0ubuntu7) karmic; urgency=low
+
+  * Add 110_deassociate_drawables.patch, 111_dridrawable_nullptr.patch:
+    Fix X crash when 3D wine applications are closed.
+    (LP: #401067)
+
+ -- Bryce Harrington <bryce@ubuntu.com>  Fri, 02 Oct 2009 18:00:02 -0700
+
+mesa (7.6.0~git20090817.7c422387-0ubuntu6) karmic; urgency=low
+
+  * Fix build failures for big endian architectures, update
+    108_big_endian.patch.
+
+ -- Matthias Klose <doko@ubuntu.com>  Sun, 27 Sep 2009 15:34:47 +0200
+
+mesa (7.6.0~git20090817.7c422387-0ubuntu5) karmic; urgency=low
+
+  * debian/rules: Disable r600: Disable r600 as 3D support is still
+    experimental and causes problems with the gnome session when
+    compiz is enabled (LP: #419126).
+
+ -- Alberto Milone <alberto.milone@canonical.com>  Wed, 16 Sep 2009 17:43:59 +0200
+
+mesa (7.6.0~git20090817.7c422387-0ubuntu4) karmic; urgency=low
+
+  * Add 109_fix_relocation_delta_for_wm_surfaces.patch: Fix relocation
+    delta for WM surfaces. This was a regression introduced in
+    0f328c90dbc893e15005f2ab441d309c1c176245 (LP: #429241).
+
+ -- Alberto Milone <alberto.milone@canonical.com>  Tue, 15 Sep 2009 18:14:48 +0200
+
+mesa (7.6.0~git20090817.7c422387-0ubuntu3) karmic; urgency=low
+
+  * Add 108_big_endian.patch:  Fix a couple build issues on big-endian hw.
+  * changelog:  Restore missing changelog entries lost during merge.
+
+ -- Bryce Harrington <bryce@ubuntu.com>  Wed, 26 Aug 2009 13:25:56 -0700
+
+mesa (7.6.0~git20090817.7c422387-0ubuntu2) karmic; urgency=low
+
+  * control:  Require at least libdrm_2.4.12+git20090801.45078630
+
+ -- Bryce Harrington <bryce@ubuntu.com>  Fri, 21 Aug 2009 21:09:03 -0700
+
+mesa (7.6.0~git20090817.7c422387-0ubuntu1) karmic; urgency=low
+
+  [Bryce Harrington]
+  * Checkout from git 20090817 (master branch) up to commit
+    7c4223876b4f8a78335687c7fcd7448b5a83ad10
+    + Add DRI2 support to -ati
+      (LP: #329654, #404428, #327698, #321108)
+    + Fix portion of MythTV Frontend does not work with RADEON DRI
+      (LP: #341898)
+    + Fix selection mode on RS482
+      (LP: #273329)
+    + Fix issue running 3D acceleration games on ATI chipsets
+      (LP: #374590)
+    + Provide DRI2 swap buffers
+      (LP: #377090)
+    + Fix blender unusable with UXA when DRI2 enabled
+      (LP: #353763)
+    + Fix glxgears blanking screens on -ati
+      (LP: #411251)
+  * Drop 108_bo_assertion.patch (applied upstream)
+
+  [Robert Hooker]
+  * Only added debian/ tree from origin/ubuntu
+  * Enable r600 driver. Note that it requires seperate drm modules
+    not provided in this PPA or in ubuntu, and also does not work with
+    KMS.
+
+ -- Bryce Harrington <bryce@ubuntu.com>  Fri, 21 Aug 2009 19:14:36 -0700
 
 mesa (7.5.1-1) unstable; urgency=low
 
@@ -57,6 +218,32 @@ mesa (7.5-2) unstable; urgency=low
   * Install the upstream changelog.
 
  -- Brice Goglin <bgoglin@debian.org>  Tue, 21 Jul 2009 22:21:50 +0200
+
+mesa (7.5-1ubuntu1) karmic; urgency=low
+  
+  * Merge from Debian.  Remaining Ubuntu changes:
+    - debian/control
+      + Change maintainer address to Ubuntu.
+      + Drop lesstif-dev from Build-Depends.
+      + Comment out GLw libs since it depends on lesstif-dev.
+    - debian/rules
+      + Unexport LDFLAGS (amd64 FTBFS).
+      + Use --disable-glw for swx11 targets too.
+      + Don't enable motif for swx11 targets.
+      + Build .debs with lzma compression.
+      + Serialize install phase as suggested by Julien Cristau,
+        fixes amd64 FTBFS.
+    - debian/patches
+      + 101_ubuntu_hidden_glname.patch
+      + 102_dont_vblank.patch
+      + 107_glxgears_is_not_a_benchmark.patch
+  * Dropped patches, applied upstream:
+    - 108_bo_assertion.patch
+  * Mesa 7.5 fixes the following Ubuntu bugs:
+    - Fixes intelTexImage Assertion failed (LP: #358403)
+    - Fixes segv during glean/makeCurrent (LP: #333748)
+
+ -- Bryce Harrington <bryce@ubuntu.com>  Tue, 21 Jul 2009 00:41:19 -0700
 
 mesa (7.5-1) unstable; urgency=low
 
