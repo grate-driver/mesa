@@ -2,8 +2,9 @@ mesa (7.6.1~rc3-1) UNRELEASED; urgency=low
 
   * New upstream release candidate.
     + Pull upstream mesa_7_6_branch up to commit 7d41b424.
-  * Update debian/rules and add 07_sparc64_xform_asm.patch to
-    fix sparc64 FTBFS, thanks Aurelien Jarno, closes: #560403.
+    + Includes sparc64 xform asm patch from #560403.
+  * Update debian/rules to fix sparc64 FTBFS, thanks Aurelien Jarno,
+    closes: #560403.
   * Build r600 DRI driver.
 
  -- Brice Goglin <bgoglin@debian.org>  Fri, 11 Dec 2009 07:51:52 +0100
