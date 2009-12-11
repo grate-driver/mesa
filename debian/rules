@@ -76,6 +76,8 @@ else
 	DRI_DRIVERS += i915 i965 sis unichrome
     else ifeq ($(DEB_HOST_ARCH), sparc)
 	DRI_DRIVERS += ffb
+    else ifeq ($(DEB_HOST_ARCH), sparc64)
+	DRI_DRIVERS += ffb
     endif
   endif
 endif
