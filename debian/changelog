@@ -1,6 +1,7 @@
 mesa (7.7~rc2-1) UNRELEASED; urgency=low
 
   * New upstream release candidate.
+    + s3v and trident DRI drivers removed since they never worked.
 
  -- Brice Goglin <bgoglin@debian.org>  Sat, 12 Dec 2009 12:34:26 +0100
 
