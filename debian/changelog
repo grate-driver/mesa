@@ -1,3 +1,9 @@
+mesa (7.6.1~rc3-1ubuntu1) lucid; urgency=low
+
+  * Merge from Debian unstable.
+
+ -- Timo Aaltonen <tjaalton@ubuntu.com>  Mon, 14 Dec 2009 16:49:11 +0200
+
 mesa (7.6.1~rc3-1) unstable; urgency=low
 
   * New upstream release candidate.
