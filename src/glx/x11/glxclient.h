@@ -53,7 +53,9 @@
 #include "GL/glxint.h"
 #include "GL/glxproto.h"
 #include "GL/internal/glcore.h"
+#ifndef GLX_USE_APPLEGL
 #include "glapi/glapitable.h"
+#endif
 #include "glxhash.h"
 #if defined( PTHREADS )
 # include <pthread.h>
@@ -183,6 +185,10 @@ extern const char *glXGetScreenDriver(Display * dpy, int scrNum);
 
 extern const char *glXGetDriverConfig(const char *driverName);
 
+#endif
+
+#ifdef GLX_USE_APPLEGL
+extern void DRI_glXUseXFont( Font font, int first, int count, int listbase );
 #endif
 
 /************************************************************************/
@@ -437,6 +443,11 @@ struct __GLXcontextRec
    unsigned long thread_id;
 
    char gl_extension_bits[__GL_EXT_BYTES];
+
+#ifdef GLX_USE_APPLEGL
+   void *apple;
+   Bool do_destroy;
+#endif
 };
 
 #define __glXSetError(gc,code)  \
@@ -615,12 +626,14 @@ struct __GLXdisplayPrivateRec
 
 extern GLubyte *__glXFlushRenderBuffer(__GLXcontext *, GLubyte *);
 
+#ifndef GLX_USE_APPLEGL
 extern void __glXSendLargeChunk(__GLXcontext * gc, GLint requestNumber,
                                 GLint totalRequests,
                                 const GLvoid * data, GLint dataLen);
 
 extern void __glXSendLargeCommand(__GLXcontext *, const GLvoid *, GLint,
                                   const GLvoid *, GLint);
+#endif
 
 /* Initialize the GLX extension for dpy */
 extern __GLXdisplayPrivate *__glXInitialize(Display *);
