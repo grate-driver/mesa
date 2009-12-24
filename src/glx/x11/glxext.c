@@ -165,7 +165,7 @@ FreeScreenConfigs(__GLXdisplayPrivate * priv)
       }
       Xfree((char *) psc->serverGLXexts);
 
-#ifdef GLX_DIRECT_RENDERING
+#if defined(GLX_DIRECT_RENDERING) && !defined(GLX_USE_APPLEGL)
       if (psc->driver_configs) {
          unsigned int j;
          for (j = 0; psc->driver_configs[j]; j++)
@@ -205,7 +205,7 @@ __glXFreeDisplayPrivate(XExtData * extension)
       priv->serverGLXversion = 0x0;     /* to protect against double free's */
    }
 
-#ifdef GLX_DIRECT_RENDERING
+#if defined(GLX_DIRECT_RENDERING) && !defined(GLX_USE_APPLEGL)
    /* Free the direct rendering per display data */
    if (priv->driswDisplay)
       (*priv->driswDisplay->destroyDisplay) (priv->driswDisplay);
@@ -679,7 +679,7 @@ AllocAndFetchScreenConfigs(Display * dpy, __GLXdisplayPrivate * priv)
       getVisualConfigs(dpy, priv, i);
       getFBConfigs(dpy, priv, i);
 
-#ifdef GLX_DIRECT_RENDERING
+#if defined(GLX_DIRECT_RENDERING) && !defined(GLX_USE_APPLEGL)
       psc->scr = i;
       psc->dpy = dpy;
       psc->drawHash = __glxHashCreate();
@@ -716,7 +716,7 @@ __glXInitialize(Display * dpy)
    __GLXdisplayPrivate *dpyPriv;
    XEDataObject dataObj;
    int major, minor;
-#ifdef GLX_DIRECT_RENDERING
+#if defined(GLX_DIRECT_RENDERING) && !defined(GLX_USE_APPLEGL)
    Bool glx_direct, glx_accel;
 #endif
 
@@ -773,7 +773,7 @@ __glXInitialize(Display * dpy)
    dpyPriv->serverGLXvendor = 0x0;
    dpyPriv->serverGLXversion = 0x0;
 
-#ifdef GLX_DIRECT_RENDERING
+#if defined(GLX_DIRECT_RENDERING) && !defined(GLX_USE_APPLEGL)
    glx_direct = (getenv("LIBGL_ALWAYS_INDIRECT") == NULL);
    glx_accel = (getenv("LIBGL_ALWAYS_SOFTWARE") == NULL);
 

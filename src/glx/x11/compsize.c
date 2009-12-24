@@ -29,9 +29,7 @@
  */
 
 #include <GL/gl.h>
-#ifndef GLX_USE_APPLEGL
 #include "indirect_size.h"
-#endif
 #include "glxclient.h"
 
 /*
