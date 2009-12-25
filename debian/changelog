@@ -1,6 +1,11 @@
 mesa (7.7~rc2-2) UNRELEASED; urgency=low
 
+  [ Brice Goglin ]
   * Bump libdrm build dependency to 2.4.15, closes: #561058.
+
+  [ Julien Cristau ]
+  * Add freedesktop.org ftp to watch file since that's where newer upstream
+    tarballs are.
 
  -- Brice Goglin <bgoglin@debian.org>  Mon, 14 Dec 2009 09:17:50 +0100
 
