@@ -6,6 +6,7 @@ mesa (7.7~rc2-2) UNRELEASED; urgency=low
   [ Julien Cristau ]
   * Add freedesktop.org ftp to watch file since that's where newer upstream
     tarballs are.
+  * Don't include GLUT sources since we don't use them.
 
  -- Brice Goglin <bgoglin@debian.org>  Mon, 14 Dec 2009 09:17:50 +0100
 
