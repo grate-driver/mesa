@@ -658,7 +658,12 @@ llvmpipe_bind_fs_state(struct pipe_context *pipe, void *fs)
 {
    struct llvmpipe_context *llvmpipe = llvmpipe_context(pipe);
 
-   llvmpipe->fs = (struct lp_fragment_shader *) fs;
+   if (llvmpipe->fs == fs)
+      return;
+
+   draw_flush(llvmpipe->draw);
+
+   llvmpipe->fs = fs;
 
    llvmpipe->dirty |= LP_NEW_FS;
 }
@@ -709,8 +714,7 @@ llvmpipe_set_constant_buffer(struct pipe_context *pipe,
    assert(shader < PIPE_SHADER_TYPES);
    assert(index == 0);
 
-   if(shader == PIPE_SHADER_VERTEX)
-      draw_flush(llvmpipe->draw);
+   draw_flush(llvmpipe->draw);
 
    /* note: reference counting */
    pipe_buffer_reference(&llvmpipe->constants[shader].buffer, buffer);
