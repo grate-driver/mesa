@@ -2,6 +2,8 @@ mesa (7.6.1-1) UNRELEASED; urgency=low
 
   * New upstream release
     + Pull upstream mesa_7_6_branch up to commit da876fa3
+  * Bump linux-libc-dev build-dep to 2.6.31 for the r600 dri driver (fixes
+    ftbfs on mips).
 
  -- Julien Cristau <jcristau@debian.org>  Tue, 29 Dec 2009 10:16:43 +0000
 
