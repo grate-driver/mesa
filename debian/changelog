@@ -4,6 +4,8 @@ mesa (7.6.1-1) UNRELEASED; urgency=low
     + Pull upstream mesa_7_6_branch up to commit da876fa3
   * Bump linux-libc-dev build-dep to 2.6.31 for the r600 dri driver (fixes
     ftbfs on mips).
+  * Drop hunk from 05_hurd-ftbfs.diff that was applied upstream.  Refresh
+    other patches.
 
  -- Julien Cristau <jcristau@debian.org>  Tue, 29 Dec 2009 10:16:43 +0000
 
