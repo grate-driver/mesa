@@ -1,4 +1,4 @@
-mesa (7.7-0ubuntu1) UNRELEASED; urgency=low
+mesa (7.7-0ubuntu0.1) lucid; urgency=low
 
   * Merge from Debian experimental.
 
