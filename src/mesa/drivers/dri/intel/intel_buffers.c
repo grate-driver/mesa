@@ -133,6 +133,25 @@ intel_get_cliprects(struct intel_context *intel,
 
 
 /**
+ * Check if we're about to draw into the front color buffer.
+ * If so, set the intel->front_buffer_dirty field to true.
+ */
+void
+intel_check_front_buffer_rendering(struct intel_context *intel)
+{
+   const struct gl_framebuffer *fb = intel->ctx.DrawBuffer;
+   if (fb->Name == 0) {
+      /* drawing to window system buffer */
+      if (fb->_NumColorDrawBuffers > 0) {
+         if (fb->_ColorDrawBufferIndexes[0] == BUFFER_FRONT_LEFT) {
+	    intel->front_buffer_dirty = GL_TRUE;
+	 }
+      }
+   }
+}
+
+
+/**
  * Update the hardware state for drawing into a window or framebuffer object.
  *
  * Called by glDrawBuffer, glBindFramebufferEXT, MakeCurrent, and other
@@ -172,10 +191,15 @@ intel_draw_buffer(GLcontext * ctx, struct gl_framebuffer *fb)
       return;
    }
 
-   /*
-    * How many color buffers are we drawing into?
+   /* How many color buffers are we drawing into?
+    *
+    * If there are zero buffers or the buffer is too big, don't configure any
+    * regions for hardware drawing.  We'll fallback to software below.  Not
+    * having regions set makes some of the software fallback paths faster.
     */
-   if (fb->_NumColorDrawBuffers == 0) {
+   if ((fb->Width > ctx->Const.MaxRenderbufferSize)
+       || (fb->Height > ctx->Const.MaxRenderbufferSize)
+       || (fb->_NumColorDrawBuffers == 0)) {
       /* writing to 0  */
       colorRegions[0] = NULL;
       intel->constant_cliprect = GL_TRUE;
@@ -192,7 +216,7 @@ intel_draw_buffer(GLcontext * ctx, struct gl_framebuffer *fb)
    }
    else {
       /* Get the intel_renderbuffer for the single colorbuffer we're drawing
-       * into, and set up cliprects if it's .
+       * into, and set up cliprects if it's a DRI1 window front buffer.
        */
       if (fb->Name == 0) {
 	 intel->constant_cliprect = intel->driScreen->dri2.enabled;
@@ -202,14 +226,12 @@ intel_draw_buffer(GLcontext * ctx, struct gl_framebuffer *fb)
 	       intel_batchbuffer_flush(intel->batch);
 	    intel->front_cliprects = GL_TRUE;
 	    colorRegions[0] = intel_get_rb_region(fb, BUFFER_FRONT_LEFT);
-
-	    intel->front_buffer_dirty = GL_TRUE;
 	 }
 	 else {
 	    if (!intel->constant_cliprect && intel->front_cliprects)
 	       intel_batchbuffer_flush(intel->batch);
 	    intel->front_cliprects = GL_FALSE;
-	    colorRegions[0]= intel_get_rb_region(fb, BUFFER_BACK_LEFT);
+	    colorRegions[0] = intel_get_rb_region(fb, BUFFER_BACK_LEFT);
 	 }
       }
       else {
@@ -257,7 +279,7 @@ intel_draw_buffer(GLcontext * ctx, struct gl_framebuffer *fb)
    if (fb->_StencilBuffer && fb->_StencilBuffer->Wrapped) {
       irbStencil = intel_renderbuffer(fb->_StencilBuffer->Wrapped);
       if (irbStencil && irbStencil->region) {
-         ASSERT(irbStencil->Base._ActualFormat == GL_DEPTH24_STENCIL8_EXT);
+         ASSERT(irbStencil->Base.Format == MESA_FORMAT_S8_Z24);
          FALLBACK(intel, INTEL_FALLBACK_STENCIL_BUFFER, GL_FALSE);
       }
       else {
