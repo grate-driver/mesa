@@ -1,10 +1,10 @@
-mesa (7.6.1~rc3-1ubuntu3) lucid; urgency=low
+mesa (7.6.1~rc3-1ubuntu2) lucid; urgency=low
 
   * debian/libgl1-mesa-glx.install:
     - Install libGL.so* in /usr/lib/mesa so as to allow things to
       work with alternatives.
 
- -- Alberto Milone <alberto.milone@canonical.com>  Fri, 08 Jan 2010 18:53:35 +0100
+ -- Alberto Milone <alberto.milone@canonical.com>  Fri, 08 Jan 2010 19:38:14 +0100
 
 mesa (7.6.1~rc3-1ubuntu1) lucid; urgency=low
 
