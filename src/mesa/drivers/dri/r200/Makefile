@@ -14,7 +14,7 @@ EGL_SOURCES = server/radeon_egl.c
 endif
 
 ifeq ($(RADEON_LDFLAGS),)
-CS_SOURCES = radeon_cs_space_drm.c
+CS_SOURCES = radeon_cs_space_drm.c radeon_bo.c radeon_cs.c
 endif
 
 RADEON_COMMON_SOURCES = \
@@ -55,8 +55,7 @@ C_SOURCES = $(COMMON_SOURCES) $(DRIVER_SOURCES)
 
 X86_SOURCES = 
 
-DRIVER_DEFINES = -DRADEON_COMMON=1 -DRADEON_COMMON_FOR_R200 \
-				 -Wall
+DRIVER_DEFINES = -DRADEON_R200 -Wall
 
 DRI_LIB_DEPS += $(RADEON_LDFLAGS)
 
@@ -67,4 +66,3 @@ include ../Makefile.template
 
 #INCLUDES += -I../radeon/server
 
-symlinks:

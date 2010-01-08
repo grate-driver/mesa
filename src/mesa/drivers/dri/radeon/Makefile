@@ -11,7 +11,7 @@ LIBNAME = radeon_dri.so
 MINIGLX_SOURCES = server/radeon_dri.c 
 
 ifeq ($(RADEON_LDFLAGS),)
-CS_SOURCES = radeon_cs_space_drm.c
+CS_SOURCES = radeon_cs_space_drm.c radeon_bo.c radeon_cs.c
 endif
 
 RADEON_COMMON_SOURCES = \
@@ -47,8 +47,7 @@ C_SOURCES = \
 	$(DRIVER_SOURCES) \
 	$(CS_SOURCES)
 
-DRIVER_DEFINES = -DRADEON_COMMON=0 \
-				 -Wall
+DRIVER_DEFINES = -DRADEON_R100 -Wall
 
 DRI_LIB_DEPS += $(RADEON_LDFLAGS)
 
@@ -56,4 +55,3 @@ X86_SOURCES =
 
 include ../Makefile.template
 
-symlinks:
