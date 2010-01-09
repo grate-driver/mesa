@@ -9,7 +9,11 @@ mesa (7.7-1) UNRELEASED; urgency=low
   * Don't include GLUT sources since we don't use them.
   * Pull from upstream mesa_7_7_branch, commit f42c861.
 
- -- Brice Goglin <bgoglin@debian.org>  Mon, 14 Dec 2009 09:17:50 +0100
+  [ Timo Aaltonen ]
+  * Bump the libdrm build-dep to 2.4.17 because of the changed radeon
+    API.
+
+ -- Timo Aaltonen <tjaalton@ubuntu.com>  Sat, 09 Jan 2010 02:21:21 +0200
 
 mesa (7.7~rc2-1) experimental; urgency=low
 
