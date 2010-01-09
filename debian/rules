@@ -137,6 +137,7 @@ confflags-swx11+glu = \
 	--disable-egl \
 	--disable-glut \
 	--disable-glw \
+	--libdir=/usr/lib/mesa \
 	CFLAGS="$(CFLAGS)"
 
 confflags-swx11+glu-static = \
@@ -147,6 +148,7 @@ confflags-swx11+glu-static = \
 	--disable-egl \
 	--disable-glut \
 	--disable-glw \
+	--libdir=/usr/lib/mesa \
 	CFLAGS="$(CFLAGS)"
 
 confflags-swx11+glu-i386-i686 = \

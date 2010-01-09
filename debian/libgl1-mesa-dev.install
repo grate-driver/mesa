@@ -1,2 +1,2 @@
-usr/lib/libGL.so
-usr/lib/pkgconfig/gl.pc
+usr/lib/mesa/libGL.so
+usr/lib/mesa/pkgconfig/gl.pc usr/lib/pkgconfig

@@ -1,3 +1,10 @@
+mesa (7.7-0ubuntu2) lucid; urgency=low
+
+  * Moving just libGL.so.* to /usr/lib/mesa broke all builds depending on
+    libGL.so or gl.pc. Fix the swx11 target --libdir to use /usr/lib/mesa.
+
+ -- Timo Aaltonen <tjaalton@ubuntu.com>  Sat, 09 Jan 2010 11:21:13 +0200
+
 mesa (7.7-0ubuntu1) lucid; urgency=low
 
   * Merge from Debian experimental.
