@@ -2,12 +2,13 @@ mesa (7.7-1) UNRELEASED; urgency=low
 
   [ Brice Goglin ]
   * Bump libdrm build dependency to 2.4.15, closes: #561058.
+  * New upstream release.
+  * Pull from upstream mesa_7_7_branch up to commit 6d6c9c66.
 
   [ Julien Cristau ]
   * Add freedesktop.org ftp to watch file since that's where newer upstream
     tarballs are.
   * Don't include GLUT sources since we don't use them.
-  * Pull from upstream mesa_7_7_branch, commit f42c861.
 
  -- Brice Goglin <bgoglin@debian.org>  Mon, 14 Dec 2009 09:17:50 +0100
 
