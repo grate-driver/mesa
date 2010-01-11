@@ -9,7 +9,7 @@ case "$1" in
   configure)
   # Use alternatives to make it easier to switch between Mesa and 3rd party modules
   update-alternatives \
-    --install /etc/ld.so.conf.d/GL.conf gl_conf /usr/lib/GL/ld.so.conf 500 \
+    --install /etc/ld.so.conf.d/GL.conf gl_conf /usr/lib/mesa/ld.so.conf 500 \
     --slave /usr/lib/GL gl_libraries /usr/lib/mesa \
     --slave /usr/lib/xorg/extra-modules xorg_extra_modules /usr/lib/xorg/x11-extra-modules
 
