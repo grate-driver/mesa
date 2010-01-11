@@ -19,6 +19,17 @@ mesa (7.7~rc2-1) experimental; urgency=low
 
  -- Brice Goglin <bgoglin@debian.org>  Sat, 12 Dec 2009 13:02:55 +0100
 
+mesa (7.6.1-1) unstable; urgency=low
+
+  * New upstream release
+    + Pull upstream mesa_7_6_branch up to commit da876fa3
+  * Bump linux-libc-dev build-dep to 2.6.31 for the r600 dri driver (fixes
+    ftbfs on mips).
+  * Drop hunk from 05_hurd-ftbfs.diff that was applied upstream.  Refresh
+    other patches.
+
+ -- Julien Cristau <jcristau@debian.org>  Tue, 29 Dec 2009 10:42:24 +0000
+
 mesa (7.6.1~rc3-1) unstable; urgency=low
 
   * New upstream release candidate.
