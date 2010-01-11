@@ -256,7 +256,7 @@ endif
 	dh_fixperms -s
 	dh_makeshlibs -s
 	dh_installdeb -s
-	dh_shlibdeps -s
+	dh_shlibdeps -s -l/usr/lib/mesa
 	dh_gencontrol -s
 	dh_md5sums -s
 	dh_builddeb -s -- -Zlzma

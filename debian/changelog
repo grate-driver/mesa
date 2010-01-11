@@ -1,4 +1,4 @@
-mesa (7.7-0ubuntu3) lucid; urgency=low
+mesa (7.7-0ubuntu4) lucid; urgency=low
 
   * debian/libgl1-mesa-dev.links:
     - Add link to /usr/lib/mesa/libGL.so in /usr/lib so as not to break
@@ -13,7 +13,14 @@ mesa (7.7-0ubuntu3) lucid; urgency=low
     - Create an empty directory (for alternatives) just to be sure:
       /usr/lib/xorg/x11-extra-modules.
 
- -- Alberto Milone <alberto.milone@canonical.com>  Mon, 11 Jan 2010 15:54:58 +0100
+ -- Alberto Milone <alberto.milone@canonical.com>  Mon, 11 Jan 2010 16:49:14 +0100
+
+mesa (7.7-0ubuntu3) lucid; urgency=low
+
+  * Add -l/usr/lib/mesa to dh_shlibdeps to fix FTBFS, thanks to 
+    Albert Damen for the patch!
+
+ -- Stefan Potyra <sistpoty@ubuntu.com>  Sun, 10 Jan 2010 00:41:48 +0100
 
 mesa (7.7-0ubuntu2) lucid; urgency=low
 
