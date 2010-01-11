@@ -1,3 +1,18 @@
+mesa (7.7-0ubuntu3) lucid; urgency=low
+
+  * debian/libgl1-mesa-dev.links:
+    - Add link to /usr/lib/mesa/libGL.so in /usr/lib so as not to break
+      software that build against mesa (LP: #505359).
+  * debian/libgl1-mesa-glx.{postinst|prerm}:
+    - Use alternatives so that /usr/lib/GL is a slave which points to
+      /usr/lib/mesa.
+  * debian/rules:
+    - Install /usr/lib/mesa/ld.so.conf
+    - Create an empty directory (for alternatives) just to be sure:
+      /usr/lib/xorg/x11-extra-modules.
+
+ -- Alberto Milone <alberto.milone@canonical.com>  Mon, 11 Jan 2010 12:04:53 +0100
+
 mesa (7.7-0ubuntu2) lucid; urgency=low
 
   * Moving just libGL.so.* to /usr/lib/mesa broke all builds depending on
