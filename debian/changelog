@@ -1,4 +1,4 @@
-mesa (7.7-1) UNRELEASED; urgency=low
+mesa (7.7-1) experimental; urgency=low
 
   [ Brice Goglin ]
   * Bump libdrm build dependency to 2.4.15, closes: #561058.
@@ -10,7 +10,7 @@ mesa (7.7-1) UNRELEASED; urgency=low
     tarballs are.
   * Don't include GLUT sources since we don't use them.
 
- -- Brice Goglin <bgoglin@debian.org>  Mon, 14 Dec 2009 09:17:50 +0100
+ -- Brice Goglin <bgoglin@debian.org>  Mon, 11 Jan 2010 17:52:31 +0100
 
 mesa (7.7~rc2-1) experimental; urgency=low
 
