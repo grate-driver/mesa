@@ -6,12 +6,14 @@ mesa (7.7-0ubuntu3) lucid; urgency=low
   * debian/libgl1-mesa-glx.{postinst|prerm}:
     - Use alternatives so that /usr/lib/GL is a slave which points to
       /usr/lib/mesa.
+  * debian/libglu-mesa-dev.links:
+    - Add link to /usr/lib/mesa/libGLU.so in /usr/lib/libGLU.so.
   * debian/rules:
     - Install /usr/lib/mesa/ld.so.conf
     - Create an empty directory (for alternatives) just to be sure:
       /usr/lib/xorg/x11-extra-modules.
 
- -- Alberto Milone <alberto.milone@canonical.com>  Mon, 11 Jan 2010 12:04:53 +0100
+ -- Alberto Milone <alberto.milone@canonical.com>  Mon, 11 Jan 2010 15:54:58 +0100
 
 mesa (7.7-0ubuntu2) lucid; urgency=low
 
