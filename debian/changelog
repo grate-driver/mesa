@@ -1,4 +1,4 @@
-mesa (7.7-0ubuntu5) UNRELEASED; urgency=low
+mesa (7.7-0ubuntu5) lucid; urgency=low
 
   * debian/rules:
     - Remove invalid "install -d" command.
@@ -12,7 +12,7 @@ mesa (7.7-0ubuntu5) UNRELEASED; urgency=low
   * debian/libglu1-mesa-dev.links:
     - Remove file as we install libGLU in the right place now.
 
- -- Alberto Milone <alberto.milone@canonical.com>  Wed, 13 Jan 2010 15:23:17 +0100
+ -- Alberto Milone <alberto.milone@canonical.com>  Wed, 13 Jan 2010 20:18:17 +0100
 
 mesa (7.7-0ubuntu4) lucid; urgency=low
 
