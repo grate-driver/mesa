@@ -1,3 +1,19 @@
+mesa (7.7-0ubuntu5) UNRELEASED; urgency=low
+
+  * debian/rules:
+    - Remove invalid "install -d" command.
+    - Do not pass --libdir=/usr/lib/mesa flag any more. 
+  * debian/libgl1-mesa-dev.install, libgl1-mesa-swx11-dev.install,
+    libgl1-mesa-swx11.install, libglu1-mesa-dev.install,
+    libglu1-mesa.install:
+    - Install *.pc files in /usr/lib/pkgconfig instead of
+      /usr/lib/mesa/pkgconfig.
+    - Do not Install libGLU* in /usr/lib/mesa (LP: #506547).
+  * debian/libglu1-mesa-dev.links:
+    - Remove file as we install libGLU in the right place now.
+
+ -- Alberto Milone <alberto.milone@canonical.com>  Wed, 13 Jan 2010 15:23:17 +0100
+
 mesa (7.7-0ubuntu4) lucid; urgency=low
 
   * debian/libgl1-mesa-dev.links:

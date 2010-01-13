@@ -137,7 +137,6 @@ confflags-swx11+glu = \
 	--disable-egl \
 	--disable-glut \
 	--disable-glw \
-	--libdir=/usr/lib/mesa \
 	CFLAGS="$(CFLAGS)"
 
 confflags-swx11+glu-static = \
@@ -148,7 +147,6 @@ confflags-swx11+glu-static = \
 	--disable-egl \
 	--disable-glut \
 	--disable-glw \
-	--libdir=/usr/lib/mesa \
 	CFLAGS="$(CFLAGS)"
 
 confflags-swx11+glu-i386-i686 = \
@@ -232,7 +230,6 @@ binary-arch: install
 	dh_install -s --sourcedir=debian/tmp --list-missing
 
 	# Create an ld.so.conf which says where to find libGL from Mesa
-	$(INSTALL) -d $(CURDIR)/debian/libgl1-mesa-glx/usr/lib/mesa
 	echo "/usr/lib/mesa" \
 	> $(CURDIR)/debian/libgl1-mesa-glx/usr/lib/mesa/ld.so.conf
 
