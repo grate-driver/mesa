@@ -1,4 +1,4 @@
-mesa (7.7-0ubuntu6) UNRELEASED; urgency=low
+mesa (7.7-0ubuntu6) lucid; urgency=low
 
   * debian/libgl1-mesa-glx.postinst
     - Remove gl_libraries slave link as the file in ld.so.conf.d is
