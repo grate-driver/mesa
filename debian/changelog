@@ -1,11 +1,11 @@
-mesa (7.7-0ubuntu7) UNRELEASED; urgency=low
+mesa (7.7-0ubuntu7) lucid; urgency=low
 
   * debian/libgl1-mesa-glx.postinst
     - Install alternative with --force so that files that
       already exist are overwritten thus avoiding to install a
       broken alternative.
 
- -- Alberto Milone <alberto.milone@canonical.com>  Tue, 19 Jan 2010 16:49:41 +0100
+ -- Alberto Milone <alberto.milone@canonical.com>  Tue, 19 Jan 2010 17:29:19 +0100
 
 mesa (7.7-0ubuntu6) lucid; urgency=low
 
