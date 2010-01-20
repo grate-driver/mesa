@@ -1,3 +1,12 @@
+mesa (7.7-0ubuntu8) UNRELEASED; urgency=low
+
+  * debian/libgl1-mesa-glx.postinst:
+    - Pass LDCONFIG_NOTRIGGER=y to ldconfig as it needs to be run
+      immediately as we're changing /etc/ld.so.conf.d/ with
+      alternatives.
+
+ -- Alberto Milone <alberto.milone@canonical.com>  Wed, 20 Jan 2010 13:12:56 +0100
+
 mesa (7.7-0ubuntu7) lucid; urgency=low
 
   * debian/libgl1-mesa-glx.postinst

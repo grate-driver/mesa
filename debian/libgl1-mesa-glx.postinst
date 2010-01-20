@@ -12,8 +12,9 @@ case "$1" in
     --install /etc/ld.so.conf.d/GL.conf gl_conf /usr/lib/mesa/ld.so.conf 500 \
     --slave /usr/lib/xorg/extra-modules xorg_extra_modules /usr/lib/xorg/x11-extra-modules
 
-  # explicit ldconfig due to alternatives
-  ldconfig
+  # ldconfig needs to be run immediately as we're changing /etc/ld.so.conf.d/ with
+  # alternatives.
+  LDCONFIG_NOTRIGGER=y ldconfig
 
 esac
 
