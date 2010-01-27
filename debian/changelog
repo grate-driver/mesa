@@ -1,3 +1,11 @@
+mesa (7.7-2) UNRELEASED; urgency=low
+
+  * Rename the build directory to not include DEB_BUILD_GNU_TYPE for no
+    good reason.  Thanks, Colin Watson!
+  * Remove myself from Uploaders
+
+ -- Julien Cristau <jcristau@debian.org>  Sat, 16 Jan 2010 16:47:40 +0000
+
 mesa (7.7-1) experimental; urgency=low
 
   [ Brice Goglin ]
