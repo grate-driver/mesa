@@ -1855,6 +1855,7 @@ exec_instruction(
 {
    uint chan_index;
    union tgsi_exec_channel r[10];
+   union tgsi_exec_channel d[8];
 
    (*pc)++;
 
@@ -2255,11 +2256,7 @@ exec_instruction(
       FETCH(&r[4], 1, CHAN_Y);
 
       micro_mul( &r[5], &r[3], &r[4] );
-      micro_sub( &r[2], &r[2], &r[5] );
-
-      if (IS_CHANNEL_ENABLED( *inst, CHAN_X )) {
-         STORE( &r[2], 0, CHAN_X );
-      }
+      micro_sub(&d[CHAN_X], &r[2], &r[5]);
 
       FETCH(&r[2], 1, CHAN_X);
 
@@ -2268,26 +2265,27 @@ exec_instruction(
       FETCH(&r[5], 0, CHAN_X);
 
       micro_mul( &r[1], &r[1], &r[5] );
-      micro_sub( &r[3], &r[3], &r[1] );
-
-      if (IS_CHANNEL_ENABLED( *inst, CHAN_Y )) {
-         STORE( &r[3], 0, CHAN_Y );
-      }
+      micro_sub(&d[CHAN_Y], &r[3], &r[1]);
 
       micro_mul( &r[5], &r[5], &r[4] );
       micro_mul( &r[0], &r[0], &r[2] );
-      micro_sub( &r[5], &r[5], &r[0] );
+      micro_sub(&d[CHAN_Z], &r[5], &r[0]);
 
-      if (IS_CHANNEL_ENABLED( *inst, CHAN_Z )) {
-         STORE( &r[5], 0, CHAN_Z );
+      if (IS_CHANNEL_ENABLED(*inst, CHAN_X)) {
+         STORE(&d[CHAN_X], 0, CHAN_X);
       }
-
+      if (IS_CHANNEL_ENABLED(*inst, CHAN_Y)) {
+         STORE(&d[CHAN_Y], 0, CHAN_Y);
+      }
+      if (IS_CHANNEL_ENABLED(*inst, CHAN_Z)) {
+         STORE(&d[CHAN_Z], 0, CHAN_Z);
+      }
       if (IS_CHANNEL_ENABLED( *inst, CHAN_W )) {
          STORE( &mach->Temps[TEMP_1_I].xyzw[TEMP_1_C], 0, CHAN_W );
       }
       break;
 
-    case TGSI_OPCODE_ABS:
+   case TGSI_OPCODE_ABS:
        FOR_EACH_ENABLED_CHANNEL( *inst, chan_index ) {
           FETCH(&r[0], 0, chan_index);
 
