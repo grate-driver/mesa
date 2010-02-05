@@ -133,8 +133,7 @@ static const union tgsi_exec_channel ZeroVec =
    { { 0.0, 0.0, 0.0, 0.0 } };
 
 
-#ifdef DEBUG
-static void
+static INLINE void
 check_inf_or_nan(const union tgsi_exec_channel *chan)
 {
    assert(!util_is_inf_or_nan(chan->f[0]));
@@ -142,7 +141,6 @@ check_inf_or_nan(const union tgsi_exec_channel *chan)
    assert(!util_is_inf_or_nan(chan->f[2]));
    assert(!util_is_inf_or_nan(chan->f[3]));
 }
-#endif
 
 
 #ifdef DEBUG
@@ -1424,9 +1422,9 @@ store_dest(
    int offset = 0;  /* indirection offset */
    int index;
 
-#ifdef DEBUG
-   check_inf_or_nan(chan);
-#endif
+   if (0) {
+      check_inf_or_nan(chan);
+   }
 
    /* There is an extra source register that indirectly subscripts
     * a register file. The direct index now becomes an offset
