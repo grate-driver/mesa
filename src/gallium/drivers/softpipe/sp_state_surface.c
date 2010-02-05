@@ -30,7 +30,6 @@
 
 #include "sp_context.h"
 #include "sp_state.h"
-#include "sp_surface.h"
 #include "sp_tile_cache.h"
 
 #include "draw/draw_context.h"
@@ -48,6 +47,8 @@ softpipe_set_framebuffer_state(struct pipe_context *pipe,
 {
    struct softpipe_context *sp = softpipe_context(pipe);
    uint i;
+
+   draw_flush(sp->draw);
 
    for (i = 0; i < PIPE_MAX_COLOR_BUFS; i++) {
       /* check if changing cbuf */

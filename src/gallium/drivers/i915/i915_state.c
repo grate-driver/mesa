@@ -30,7 +30,6 @@
 
 
 #include "draw/draw_context.h"
-#include "pipe/internal/p_winsys_screen.h"
 #include "pipe/p_inlines.h"
 #include "util/u_math.h"
 #include "util/u_memory.h"
@@ -38,7 +37,6 @@
 
 #include "i915_context.h"
 #include "i915_reg.h"
-#include "i915_state.h"
 #include "i915_state_inlines.h"
 #include "i915_fpc.h"
 
@@ -58,10 +56,10 @@ translate_wrap_mode(unsigned wrap)
       return TEXCOORDMODE_CLAMP_EDGE;
    case PIPE_TEX_WRAP_CLAMP_TO_BORDER:
       return TEXCOORDMODE_CLAMP_BORDER;
-/*
+   /*         
    case PIPE_TEX_WRAP_MIRRORED_REPEAT:
       return TEXCOORDMODE_MIRROR;
-*/
+    */
    default:
       return TEXCOORDMODE_WRAP;
    }

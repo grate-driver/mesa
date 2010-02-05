@@ -1,3 +1,23 @@
+mesa (7.7-3) experimental; urgency=low
+
+  * Pull from upstream mesa_7_7_branch up to commit f5145a6e.
+  * Build against libdrm-radeon1 2.4.17 to get DRI2 support.
+
+ -- Brice Goglin <bgoglin@debian.org>  Mon, 01 Feb 2010 22:55:36 +0100
+
+mesa (7.7-2) experimental; urgency=low
+
+  [ Julien Cristau ]
+  * Rename the build directory to not include DEB_BUILD_GNU_TYPE for no
+    good reason.  Thanks, Colin Watson!
+  * Remove myself from Uploaders
+
+  [ Brice Goglin ]
+  * Pull from upstream mesa_7_7_branch up to commit 2f28ca0a.
+    + Fix funky colors on radeon/r200/r300.
+
+ -- Brice Goglin <bgoglin@debian.org>  Wed, 27 Jan 2010 09:14:38 +0100
+
 mesa (7.7-0ubuntu8) lucid; urgency=low
 
   * debian/libgl1-mesa-glx.postinst:
@@ -77,18 +97,19 @@ mesa (7.7-0ubuntu1) lucid; urgency=low
 
  -- Timo Aaltonen <tjaalton@ubuntu.com>  Sat, 09 Jan 2010 00:12:29 +0200
 
-mesa (7.7-1) UNRELEASED; urgency=low
+mesa (7.7-1) experimental; urgency=low
 
   [ Brice Goglin ]
   * Bump libdrm build dependency to 2.4.15, closes: #561058.
+  * New upstream release.
+  * Pull from upstream mesa_7_7_branch up to commit 6d6c9c66.
 
   [ Julien Cristau ]
   * Add freedesktop.org ftp to watch file since that's where newer upstream
     tarballs are.
   * Don't include GLUT sources since we don't use them.
-  * Pull from upstream mesa_7_7_branch, commit f42c861.
 
- -- Brice Goglin <bgoglin@debian.org>  Mon, 14 Dec 2009 09:17:50 +0100
+ -- Brice Goglin <bgoglin@debian.org>  Mon, 11 Jan 2010 17:52:31 +0100
 
 mesa (7.7~rc2-1) experimental; urgency=low
 
@@ -97,6 +118,7 @@ mesa (7.7~rc2-1) experimental; urgency=low
 
  -- Brice Goglin <bgoglin@debian.org>  Sat, 12 Dec 2009 13:02:55 +0100
 
+<<<<<<< HEAD
 mesa (7.6.1~rc3-1ubuntu2) lucid; urgency=low
 
   * debian/libgl1-mesa-glx.install:
@@ -110,6 +132,18 @@ mesa (7.6.1~rc3-1ubuntu1) lucid; urgency=low
   * Merge from Debian unstable.
 
  -- Timo Aaltonen <tjaalton@ubuntu.com>  Mon, 14 Dec 2009 16:49:11 +0200
+=======
+mesa (7.6.1-1) unstable; urgency=low
+
+  * New upstream release
+    + Pull upstream mesa_7_6_branch up to commit da876fa3
+  * Bump linux-libc-dev build-dep to 2.6.31 for the r600 dri driver (fixes
+    ftbfs on mips).
+  * Drop hunk from 05_hurd-ftbfs.diff that was applied upstream.  Refresh
+    other patches.
+
+ -- Julien Cristau <jcristau@debian.org>  Tue, 29 Dec 2009 10:42:24 +0000
+>>>>>>> mesa-7.7-3
 
 mesa (7.6.1~rc3-1) unstable; urgency=low
 

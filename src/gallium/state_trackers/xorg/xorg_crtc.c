@@ -70,6 +70,8 @@ struct crtc_private
 static void
 crtc_dpms(xf86CrtcPtr crtc, int mode)
 {
+    /* ScrnInfoPtr pScrn = crtc->scrn; */
+
     switch (mode) {
     case DPMSModeOn:
     case DPMSModeStandby:
@@ -120,7 +122,8 @@ crtc_set_mode_major(xf86CrtcPtr crtc, DisplayModePtr mode,
     drm_mode.vrefresh = mode->VRefresh;
     if (!mode->name)
 	xf86SetModeDefaultName(mode);
-    strncpy(drm_mode.name, mode->name, DRM_DISPLAY_MODE_LEN);
+    strncpy(drm_mode.name, mode->name, DRM_DISPLAY_MODE_LEN - 1);
+    drm_mode.name[DRM_DISPLAY_MODE_LEN - 1] = '\0';
 
     ret = drmModeSetCrtc(ms->fd, drm_crtc->crtc_id, ms->fb_id, x, y,
 			 &drm_connector->connector_id, 1, &drm_mode);
@@ -146,18 +149,23 @@ crtc_gamma_set(xf86CrtcPtr crtc, CARD16 * red, CARD16 * green, CARD16 * blue,
 static void *
 crtc_shadow_allocate(xf86CrtcPtr crtc, int width, int height)
 {
+    /* ScrnInfoPtr pScrn = crtc->scrn; */
+
     return NULL;
 }
 
 static PixmapPtr
 crtc_shadow_create(xf86CrtcPtr crtc, void *data, int width, int height)
 {
+    /* ScrnInfoPtr pScrn = crtc->scrn; */
+
     return NULL;
 }
 
 static void
 crtc_shadow_destroy(xf86CrtcPtr crtc, PixmapPtr rotate_pixmap, void *data)
 {
+    /* ScrnInfoPtr pScrn = crtc->scrn; */
 }
 
 /*
@@ -235,7 +243,11 @@ crtc_load_cursor_argb_kms(xf86CrtcPtr crtc, CARD32 * image)
 	unsigned attr[8];
 
 	attr[0] = KMS_BO_TYPE;
+#ifdef KMS_BO_TYPE_CURSOR_64X64_A8R8G8B8
+	attr[1] = KMS_BO_TYPE_CURSOR_64X64_A8R8G8B8;
+#else
 	attr[1] = KMS_BO_TYPE_CURSOR;
+#endif
 	attr[2] = KMS_WIDTH;
 	attr[3] = 64;
 	attr[4] = KMS_HEIGHT;

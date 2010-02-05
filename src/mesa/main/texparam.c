@@ -33,7 +33,6 @@
 #include "main/glheader.h"
 #include "main/colormac.h"
 #include "main/context.h"
-#include "main/enums.h"
 #include "main/formats.h"
 #include "main/macros.h"
 #include "main/texcompress.h"
@@ -1165,6 +1164,7 @@ _mesa_GetTexParameteriv( GLenum target, GLenum pname, GLint *params )
       return;
    }
 
+   _mesa_lock_texture(ctx, obj);
    switch (pname) {
       case GL_TEXTURE_MAG_FILTER:
          *params = (GLint) obj->MagFilter;

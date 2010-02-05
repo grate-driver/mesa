@@ -162,6 +162,7 @@ __glXSetCurrentContextNull(void)
    __glXSetCurrentContext(&dummyContext);
 #ifdef GLX_DIRECT_RENDERING
    _glapi_set_dispatch(NULL);   /* no-op functions */
+   _glapi_set_context(NULL);
 #endif
 }
 
@@ -474,13 +475,6 @@ MakeContextCurrent(Display * dpy, GLXDrawable draw,
             if (!IndirectAPI)
                IndirectAPI = __glXNewIndirectAPI();
             _glapi_set_dispatch(IndirectAPI);
-
-#ifdef GLX_USE_APPLEGL
-            do {
-               extern void XAppleDRIUseIndirectDispatch(void);
-               XAppleDRIUseIndirectDispatch();
-            } while (0);
-#endif
 
             state = (__GLXattribute *) (gc->client_state_private);
 

@@ -30,7 +30,6 @@
 
 #include "lp_context.h"
 #include "lp_state.h"
-#include "lp_surface.h"
 #include "lp_tile_cache.h"
 
 #include "draw/draw_context.h"
@@ -48,6 +47,8 @@ llvmpipe_set_framebuffer_state(struct pipe_context *pipe,
 {
    struct llvmpipe_context *lp = llvmpipe_context(pipe);
    uint i;
+
+   draw_flush(lp->draw);
 
    for (i = 0; i < PIPE_MAX_COLOR_BUFS; i++) {
       /* check if changing cbuf */

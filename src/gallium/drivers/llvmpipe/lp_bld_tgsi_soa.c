@@ -47,13 +47,11 @@
 #include "tgsi/tgsi_exec.h"
 #include "lp_bld_type.h"
 #include "lp_bld_const.h"
-#include "lp_bld_intr.h"
 #include "lp_bld_arit.h"
 #include "lp_bld_logic.h"
 #include "lp_bld_swizzle.h"
 #include "lp_bld_flow.h"
 #include "lp_bld_tgsi.h"
-#include "lp_bld_debug.h"
 
 
 #define LP_MAX_TEMPS 256
@@ -321,7 +319,7 @@ emit_tex( struct lp_build_tgsi_soa_context *bld,
 {
    const uint unit = inst->FullSrcRegisters[1].SrcRegister.Index;
    LLVMValueRef lodbias;
-   LLVMValueRef oow;
+   LLVMValueRef oow = NULL;
    LLVMValueRef coords[3];
    unsigned num_coords;
    unsigned i;
@@ -446,7 +444,12 @@ emit_instruction(
 {
    unsigned chan_index;
    LLVMValueRef src0, src1, src2;
-   LLVMValueRef tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7;
+   LLVMValueRef tmp0, tmp1, tmp2;
+   LLVMValueRef tmp3 = NULL;
+   LLVMValueRef tmp4 = NULL;
+   LLVMValueRef tmp5 = NULL;
+   LLVMValueRef tmp6 = NULL;
+   LLVMValueRef tmp7 = NULL;
    LLVMValueRef res;
    LLVMValueRef dst0[NUM_CHANNELS];
 
@@ -763,7 +766,7 @@ emit_instruction(
       FOR_EACH_DST0_ENABLED_CHANNEL( inst, chan_index ) {
          src0 = emit_fetch( bld, inst, 0, chan_index );
          tmp0 = lp_build_floor(&bld->base, src0);
-         tmp0 = lp_build_sub(&bld->base, tmp0, src0);
+         tmp0 = lp_build_sub(&bld->base, src0, tmp0);
          dst0[chan_index] = tmp0;
       }
       break;

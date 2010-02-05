@@ -41,7 +41,6 @@
 #include "pipe/p_format.h"
 #include "pipe/p_context.h"
 #include "pipe/p_state.h"
-#include "pipe/p_inlines.h"
 
 #include "util/u_rect.h"
 #include "util/u_math.h"
@@ -515,6 +514,7 @@ ExaCopy(PixmapPtr pDstPixmap, int srcX, int srcY, int dstX, int dstY,
 #endif
 
    debug_assert(priv == exa->copy.dst);
+   (void) priv;
 
    if (exa->copy.use_surface_copy) {
       /* XXX: consider exposing >1 box in surface_copy interface.
@@ -1020,6 +1020,9 @@ xorg_exa_close(ScrnInfoPtr pScrn)
 
    if (exa->pipe)
       exa->pipe->destroy(exa->pipe);
+   exa->pipe = NULL;
+   /* Since this was shared be proper with the pointer */
+   ms->ctx = NULL;
 
    exaDriverFini(pScrn->pScreen);
    xfree(exa);

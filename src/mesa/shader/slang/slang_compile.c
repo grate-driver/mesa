@@ -40,13 +40,10 @@
 #include "slang_compile.h"
 #include "slang_preprocess.h"
 #include "slang_storage.h"
-#include "slang_emit.h"
 #include "slang_log.h"
 #include "slang_mem.h"
 #include "slang_vartable.h"
 #include "slang_simplify.h"
-
-#include "slang_print.h"
 
 /*
  * This is a straightforward implementation of the slang front-end
@@ -2058,6 +2055,7 @@ parse_init_declarator(slang_parse_ctx * C, slang_output_ctx * O,
    if (C->global_scope) {
       slang_assemble_ctx A;
       memset(&A, 0, sizeof(slang_assemble_ctx));
+      A.allow_uniform_initializers = C->version > 110;
       A.atoms = C->atoms;
       A.space.funcs = O->funs;
       A.space.structs = O->structs;
@@ -2077,6 +2075,7 @@ parse_init_declarator(slang_parse_ctx * C, slang_output_ctx * O,
       if (var->initializer != NULL) {
          slang_assemble_ctx A;
          memset(&A, 0, sizeof(slang_assemble_ctx));
+         A.allow_uniform_initializers = C->version > 110;
          A.atoms = C->atoms;
          A.space.funcs = O->funs;
          A.space.structs = O->structs;
@@ -2434,6 +2433,7 @@ parse_code_unit(slang_parse_ctx * C, slang_code_unit * unit,
       A.vartable = o.vartable;
       A.EmitContReturn = ctx->Shader.EmitContReturn;
       A.log = C->L;
+      A.allow_uniform_initializers = C->version > 110;
 
       /* main() takes no parameters */
       if (mainFunc->param_count > 0) {

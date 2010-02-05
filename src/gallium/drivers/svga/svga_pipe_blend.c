@@ -29,7 +29,6 @@
 #include "util/u_memory.h"
 
 #include "svga_context.h"
-#include "svga_state.h"
 
 #include "svga_hw_reg.h"
 
@@ -93,6 +92,7 @@ svga_create_blend_state(struct pipe_context *pipe,
       if (templ->logicop_enable) {
          switch (templ->logicop_func) {
          case PIPE_LOGICOP_XOR:
+         case PIPE_LOGICOP_INVERT:
             blend->need_white_fragments = TRUE;
             blend->rt[i].blend_enable = TRUE;
             blend->rt[i].srcblend       = SVGA3D_BLENDOP_ONE;
@@ -125,12 +125,6 @@ svga_create_blend_state(struct pipe_context *pipe,
             blend->rt[i].srcblend       = SVGA3D_BLENDOP_ONE;
             blend->rt[i].dstblend       = SVGA3D_BLENDOP_ONE;
             blend->rt[i].blendeq        = SVGA3D_BLENDEQ_MAXIMUM;
-            break;
-         case PIPE_LOGICOP_INVERT:
-            blend->rt[i].blend_enable = TRUE;
-            blend->rt[i].srcblend       = SVGA3D_BLENDOP_INVSRCCOLOR;
-            blend->rt[i].dstblend       = SVGA3D_BLENDOP_ZERO;
-            blend->rt[i].blendeq        = SVGA3D_BLENDEQ_ADD;
             break;
          case PIPE_LOGICOP_AND:
             /* Approximate with minimum - works for the 0 & anything case: */

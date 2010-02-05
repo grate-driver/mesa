@@ -33,7 +33,6 @@
 #include "svga_hw_reg.h"
 #include "svga_context.h"
 #include "svga_screen.h"
-#include "svga_winsys.h"
 #include "svga_draw.h"
 #include "svga_state.h"
 #include "svga_swtnl.h"
@@ -219,9 +218,6 @@ svga_draw_range_elements( struct pipe_context *pipe,
    if (SVGA_DEBUG & DEBUG_FLUSH) {
       static unsigned id;
       debug_printf("%s %d\n", __FUNCTION__, id++);
-      if (id > 1300)
-         util_time_sleep( 2000 );
-
       svga_hwtnl_flush_retry( svga );
       svga_context_flush(svga, NULL);
    }

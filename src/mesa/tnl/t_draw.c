@@ -28,15 +28,11 @@
 #include "main/glheader.h"
 #include "main/context.h"
 #include "main/imports.h"
-#include "main/state.h"
 #include "main/mtypes.h"
 #include "main/macros.h"
 #include "main/enums.h"
 
 #include "t_context.h"
-#include "t_pipeline.h"
-#include "t_vp_build.h"
-#include "t_vertex.h"
 #include "tnl.h"
 
 
@@ -397,6 +393,9 @@ void _tnl_draw_prims( GLcontext *ctx,
    const GLint max = TEST_SPLIT ? 8 : tnl->vb.Size - MAX_CLIPPED_VERTICES;
    GLuint max_basevertex = prim->basevertex;
    GLuint i;
+
+   /* Mesa core state should have been validated already */
+   assert(ctx->NewState == 0x0);
 
    for (i = 1; i < nr_prims; i++)
       max_basevertex = MAX2(max_basevertex, prim[i].basevertex);
