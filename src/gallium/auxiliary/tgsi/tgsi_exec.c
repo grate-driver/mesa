@@ -336,7 +336,9 @@ tgsi_exec_machine_bind_shader(
             /* XXX we only handle SOA dependencies properly for MOV/SWZ
              * at this time!
              */
-            if (opcode != TGSI_OPCODE_MOV) {
+            if (opcode != TGSI_OPCODE_MOV &&
+                opcode != TGSI_OPCODE_MUL &&
+                opcode != TGSI_OPCODE_CMP) {
                debug_printf("Warning: SOA dependency in instruction"
                             " is not handled:\n");
                tgsi_dump_instruction(&parse.FullToken.FullInstruction,
@@ -1852,7 +1854,7 @@ exec_instruction(
    int *pc )
 {
    uint chan_index;
-   union tgsi_exec_channel r[10];
+   union tgsi_exec_channel r[3 * NUM_CHANNELS];
    union tgsi_exec_channel d[8];
 
    (*pc)++;
@@ -1980,14 +1982,27 @@ exec_instruction(
       break;
 
    case TGSI_OPCODE_MUL:
-      FOR_EACH_ENABLED_CHANNEL( *inst, chan_index )
-      {
-         FETCH(&r[0], 0, chan_index);
-         FETCH(&r[1], 1, chan_index);
+      if (inst->Flags & SOA_DEPENDENCY_FLAG) {
+         FOR_EACH_ENABLED_CHANNEL( *inst, chan_index )
+         {
+            FETCH(&r[chan_index], 0, chan_index);
+            FETCH(&r[chan_index + NUM_CHANNELS], 1, chan_index);
+         }
+         FOR_EACH_ENABLED_CHANNEL( *inst, chan_index )
+         {
+            micro_mul( &r[chan_index], &r[chan_index], &r[chan_index + NUM_CHANNELS] );
+            STORE(&r[chan_index], 0, chan_index);
+         }
+      } else {
+         FOR_EACH_ENABLED_CHANNEL( *inst, chan_index )
+         {
+            FETCH(&r[0], 0, chan_index);
+            FETCH(&r[1], 1, chan_index);
 
-         micro_mul( &r[0], &r[0], &r[1] );
+            micro_mul( &r[0], &r[0], &r[1] );
 
-         STORE(&r[0], 0, chan_index);
+            STORE(&r[0], 0, chan_index);
+         }
       }
       break;
 
@@ -2663,14 +2678,28 @@ exec_instruction(
       break;
 
    case TGSI_OPCODE_CMP:
-      FOR_EACH_ENABLED_CHANNEL( *inst, chan_index ) {
-         FETCH(&r[0], 0, chan_index);
-         FETCH(&r[1], 1, chan_index);
-         FETCH(&r[2], 2, chan_index);
+      if (inst->Flags & SOA_DEPENDENCY_FLAG) {
+         FOR_EACH_ENABLED_CHANNEL( *inst, chan_index ) {
+            FETCH(&r[chan_index], 0, chan_index);
+            FETCH(&r[chan_index + NUM_CHANNELS], 1, chan_index);
+            FETCH(&r[chan_index + 2 * NUM_CHANNELS], 2, chan_index);
+         }
+         FOR_EACH_ENABLED_CHANNEL( *inst, chan_index ) {
+            micro_lt( &r[chan_index], &r[chan_index],
+                      &mach->Temps[TEMP_0_I].xyzw[TEMP_0_C], &r[chan_index + NUM_CHANNELS],
+                      &r[chan_index + 2*NUM_CHANNELS] );
+            STORE(&r[chan_index], 0, chan_index);
+         }
+      } else {
+         FOR_EACH_ENABLED_CHANNEL( *inst, chan_index ) {
+            FETCH(&r[0], 0, chan_index);
+            FETCH(&r[1], 1, chan_index);
+            FETCH(&r[2], 2, chan_index);
 
-         micro_lt( &r[0], &r[0], &mach->Temps[TEMP_0_I].xyzw[TEMP_0_C], &r[1], &r[2] );
+            micro_lt( &r[0], &r[0], &mach->Temps[TEMP_0_I].xyzw[TEMP_0_C], &r[1], &r[2] );
 
-         STORE(&r[0], 0, chan_index);
+            STORE(&r[0], 0, chan_index);
+         }
       }
       break;
 
