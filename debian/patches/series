@@ -3,6 +3,7 @@
 04_osmesa_version.diff
 05_hurd-ftbfs.diff
 06_kfreebsd-ftbfs.diff
+100_no_abi_tag.patch
 101_ubuntu_hidden_glname.patch
 102_dont_vblank.diff
 107_glxgears_is_not_a_benchmark.patch
