@@ -1,0 +1,26 @@
+#!/bin/sh
+
+set -e
+
+THIS_PACKAGE=libgl1-mesa-swx11
+THIS_SCRIPT=postinst
+
+case "$1" in
+  configure)
+  # Use alternatives to make it easier to switch between Mesa and 3rd party modules
+  update-alternatives --force \
+    --install /etc/ld.so.conf.d/GL.conf gl_conf /usr/lib/mesa/ld.so.conf 500 \
+    --slave /usr/lib/xorg/extra-modules xorg_extra_modules /usr/lib/xorg/x11-extra-modules
+
+  # ldconfig needs to be run immediately as we're changing /etc/ld.so.conf.d/ with
+  # alternatives.
+  LDCONFIG_NOTRIGGER=y ldconfig
+
+esac
+
+#DEBHELPER#
+
+exit 0
+
+# vim:set ai et sw=2 ts=2 tw=80:
+
