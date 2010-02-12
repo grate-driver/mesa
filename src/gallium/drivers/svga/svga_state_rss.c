@@ -26,6 +26,7 @@
 #include "pipe/p_inlines.h"
 #include "pipe/p_defines.h"
 #include "util/u_math.h"
+#include "util/u_pack_color.h"
 
 #include "svga_context.h"
 #include "svga_state.h"
@@ -98,6 +99,20 @@ static int emit_rss( struct svga_context *svga,
             EMIT_RS( svga, curr->rt[0].blendeq_alpha, BLENDEQUATIONALPHA, fail );
          }
       }
+   }
+
+
+   if (dirty & SVGA_NEW_BLEND_COLOR) {
+      unsigned color = 0;
+      ubyte r = float_to_ubyte(svga->curr.blend_color.color[0]);
+      ubyte g = float_to_ubyte(svga->curr.blend_color.color[1]);
+      ubyte b = float_to_ubyte(svga->curr.blend_color.color[2]);
+      ubyte a = float_to_ubyte(svga->curr.blend_color.color[3]);
+
+      util_pack_color_ub( r, g, b, a,
+                          PIPE_FORMAT_B8G8R8A8_UNORM, &color);
+
+      EMIT_RS( svga, color, BLENDCOLOR, fail );
    }
 
 
@@ -230,12 +245,9 @@ static int emit_rss( struct svga_context *svga,
       memcpy( rs,
               queue.rs,
               queue.rs_count * sizeof queue.rs[0]);
-      
+
       SVGA_FIFOCommitAll( svga->swc );
    }
-
-   /* Also blend color:
-    */
 
    return 0;
 
@@ -256,6 +268,7 @@ struct svga_tracked_state svga_hw_rss =
    "hw rss state",
 
    (SVGA_NEW_BLEND |
+    SVGA_NEW_BLEND_COLOR |
     SVGA_NEW_DEPTH_STENCIL |
     SVGA_NEW_RAST |
     SVGA_NEW_FRAME_BUFFER |
