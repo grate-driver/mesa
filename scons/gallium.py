@@ -235,7 +235,9 @@ def generate(env):
     # different scons versions building the same source file
     env['build'] = build_dir
     env.SConsignFile(os.path.join(build_dir, '.sconsign'))
-    env.CacheDir('build/cache')
+    if 'SCONS_CACHE_DIR' in os.environ:
+        print 'scons: Using build cache in %s.' % (os.environ['SCONS_CACHE_DIR'],)
+        env.CacheDir(os.environ['SCONS_CACHE_DIR'])
 
     # Parallel build
     if env.GetOption('num_jobs') <= 1:
