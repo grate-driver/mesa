@@ -7,8 +7,9 @@ mesa (7.7-3ubuntu1) UNRELEASED; urgency=low
   * Add 100_no_abi_tag.patch: Removes the ABI tag in /usr/lib/libGL.so.1
     which prevented ldconfig from using a libGL from another directory
     at a higher priority than the one in /usr/lib.
+  * Install libGL alternatives with libgl1-mesa-swx11 as well. (LP: #522048)
 
- -- Robert Hooker <sarvatt@ubuntu.com>  Fri, 12 Feb 2010 16:57:30 -0500
+ -- Robert Hooker <sarvatt@ubuntu.com>  Mon, 15 Feb 2010 11:45:20 -0500
 
 mesa (7.7-3) experimental; urgency=low
 
