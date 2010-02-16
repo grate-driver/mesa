@@ -404,6 +404,7 @@ setup_interleaved_attribs(GLcontext *ctx,
             vbuffer->buffer_offset = 0;
          }
          else {
+            assert(!bufobj->Pointer);
             vbuffer->buffer = NULL;
             pipe_buffer_reference(&vbuffer->buffer, stobj->buffer);
             vbuffer->buffer_offset = pointer_to_offset(low);
@@ -460,6 +461,7 @@ setup_non_interleaved_attribs(GLcontext *ctx,
          assert(stobj->buffer);
          /*printf("stobj %u = %p\n", attr, (void*) stobj);*/
 
+         assert(!bufobj->Pointer);
          vbuffer[attr].buffer = NULL;
          pipe_buffer_reference(&vbuffer[attr].buffer, stobj->buffer);
          vbuffer[attr].buffer_offset = pointer_to_offset(arrays[mesaAttr]->Ptr);
