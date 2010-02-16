@@ -204,6 +204,7 @@ static int emit_rss( struct svga_context *svga,
       EMIT_RS( svga, curr->scissortestenable, SCISSORTESTENABLE, fail );
       EMIT_RS( svga, curr->multisampleantialias, MULTISAMPLEANTIALIAS, fail );
       EMIT_RS( svga, curr->lastpixel, LASTPIXEL, fail );
+      EMIT_RS( svga, curr->pointspriteenable, POINTSPRITEENABLE, fail );
       EMIT_RS( svga, curr->linepattern, LINEPATTERN, fail );
       EMIT_RS_FLOAT( svga, curr->pointsize, POINTSIZE, fail );
       EMIT_RS_FLOAT( svga, curr->pointsize_min, POINTSIZEMIN, fail );
