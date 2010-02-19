@@ -1,4 +1,4 @@
-mesa (7.7-3ubuntu1) UNRELEASED; urgency=low
+mesa (7.7-3ubuntu1) lucid; urgency=low
 
   [ Timo Aaltonen ]
   * Merge from Debian experimental.
@@ -9,7 +9,7 @@ mesa (7.7-3ubuntu1) UNRELEASED; urgency=low
     at a higher priority than the one in /usr/lib.
   * Install libGL alternatives with libgl1-mesa-swx11 as well. (LP: #522048)
 
- -- Robert Hooker <sarvatt@ubuntu.com>  Mon, 15 Feb 2010 11:45:20 -0500
+ -- Timo Aaltonen <tjaalton@ubuntu.com>  Fri, 19 Feb 2010 15:52:12 +0200
 
 mesa (7.7-3) experimental; urgency=low
 
