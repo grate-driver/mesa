@@ -1,0 +1,19 @@
+#!/bin/sh
+
+set -e
+
+THIS_PACKAGE=libgl1-mesa-dri
+THIS_SCRIPT=postinst
+
+case "$1" in
+configure)
+  if dpkg --compare-versions "$2" lt-nl "7.7-3ubuntu2"; then
+    rm -f /etc/X11/Xsession.d/65mesa-check-x86-64
+esac
+
+#DEBHELPER#
+
+exit 0
+
+# vim:set ai et sw=2 ts=2 tw=80:
+
