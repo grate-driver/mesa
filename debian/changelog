@@ -1,6 +1,11 @@
 mesa (7.7-3ubuntu2) UNRELEASED; urgency=low
 
+  [Timo Aaltonen]
   * libgl1-mesa-dri: Get rid of the old hook (65mesa-check-x86-64).
+
+  [Rolf Leggewie]
+  * debian/control: depend on dpkg package where u-a supports --force
+    (LP: #525592)
 
  -- Timo Aaltonen <tjaalton@ubuntu.com>  Sun, 21 Feb 2010 01:10:45 +0200
 
