@@ -1,4 +1,4 @@
-mesa (7.7-3ubuntu2) UNRELEASED; urgency=low
+mesa (7.7-4ubuntu1) UNRELEASED; urgency=low
 
   [Timo Aaltonen]
   * libgl1-mesa-dri: Get rid of the old hook (65mesa-check-x86-64).
@@ -8,6 +8,13 @@ mesa (7.7-3ubuntu2) UNRELEASED; urgency=low
     (LP: #525592)
 
  -- Timo Aaltonen <tjaalton@ubuntu.com>  Sun, 21 Feb 2010 01:10:45 +0200
+
+mesa (7.7-4) unstable; urgency=low
+
+  * Pull from upstream mesa_7_7_branch up to commit 293f4d51.
+    + r6xx/r7xx: emit relocation for FRAG & TILE buffer, closes: #569663.
+
+ -- Brice Goglin <bgoglin@debian.org>  Wed, 24 Feb 2010 22:44:11 +0100
 
 mesa (7.7-3ubuntu1) lucid; urgency=low
 
