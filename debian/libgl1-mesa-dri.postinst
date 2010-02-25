@@ -7,7 +7,7 @@ THIS_SCRIPT=postinst
 
 case "$1" in
 configure)
-  if dpkg --compare-versions "$2" lt-nl "7.7-3ubuntu2"; then
+  if dpkg --compare-versions "$2" lt-nl "7.7-4ubuntu1"; then
     rm -f /etc/X11/Xsession.d/65mesa-check-x86-64
   fi
 esac
