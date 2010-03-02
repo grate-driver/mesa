@@ -1,4 +1,4 @@
-mesa (7.7-4ubuntu1) UNRELEASED; urgency=low
+mesa (7.7-4ubuntu1) lucid; urgency=low
 
   [Timo Aaltonen]
   * libgl1-mesa-dri: Get rid of the old hook (65mesa-check-x86-64).
@@ -8,7 +8,7 @@ mesa (7.7-4ubuntu1) UNRELEASED; urgency=low
   * debian/control: depend on dpkg package where u-a supports --force
     (LP: #525592)
 
- -- Timo Aaltonen <tjaalton@ubuntu.com>  Sun, 21 Feb 2010 01:10:45 +0200
+ -- Timo Aaltonen <tjaalton@ubuntu.com>  Tue, 02 Mar 2010 17:11:31 +0200
 
 mesa (7.7-4) unstable; urgency=low
 
