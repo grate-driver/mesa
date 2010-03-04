@@ -1,3 +1,9 @@
+mesa (7.7-5) UNRELEASED; urgency=low
+
+  * Remove Thierry Reding from Uploaders, closes: #572539.
+
+ -- Brice Goglin <bgoglin@debian.org>  Thu, 04 Mar 2010 20:51:29 +0100
+
 mesa (7.7-4) unstable; urgency=low
 
   * Pull from upstream mesa_7_7_branch up to commit 293f4d51.
