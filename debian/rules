@@ -93,6 +93,12 @@ confflags-dri = \
 	$(DIRECT_RENDERING) \
 	$(confflags-common)
 
+# Add /usr/lib32/dri/ on 32 bit systems so that this path is used
+# for 32 bit compatibility on 64 bit systems
+ifeq ($(DEB_BUILD_ARCH),i386)
+	confflags-dri += --with-dri-searchpath=/usr/lib/dri:/usr/lib32/dri
+endif
+
 confflags-osmesa = \
 	--with-driver=osmesa \
 	--with-demos= \

@@ -1,3 +1,12 @@
+mesa (7.7-4ubuntu2) UNRELEASED; urgency=low
+
+  [Alberto Milone]
+  * debian/rules: pass --with-dri-searchpath=/usr/lib/dri:/usr/lib32/dri
+    to confflags-dri on i386 so that /usr/lib32/dri is used for 32 bit
+    compatibility on 64 bit systems (LP: #248392).
+
+ -- Alberto Milone <alberto.milone@canonical.com>  Wed, 10 Mar 2010 13:26:38 +0100
+
 mesa (7.7-4ubuntu1) lucid; urgency=low
 
   [Timo Aaltonen]
