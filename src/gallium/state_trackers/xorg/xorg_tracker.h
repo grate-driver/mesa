@@ -98,6 +98,7 @@ typedef struct _modesettingRec
 
     Bool noAccel;
     Bool SWCursor;
+    CursorPtr cursor;
     Bool swapThrottling;
     Bool dirtyThrottling;
     CloseScreenProcPtr CloseScreen;
