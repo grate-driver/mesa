@@ -173,8 +173,7 @@ st_set_framebuffer_surface(struct st_framebuffer *stfb,
    assert(ST_SURFACE_BACK_LEFT == BUFFER_BACK_LEFT);
    assert(ST_SURFACE_FRONT_RIGHT == BUFFER_FRONT_RIGHT);
    assert(ST_SURFACE_BACK_RIGHT == BUFFER_BACK_RIGHT);
-   /* XXX The current values are wrong but fixing this causes new bugs*/
-   /* assert(ST_SURFACE_DEPTH == BUFFER_DEPTH); */
+   assert(ST_SURFACE_DEPTH == BUFFER_DEPTH);
 
    assert(surfIndex < BUFFER_COUNT);
 
