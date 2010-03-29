@@ -1,11 +1,10 @@
-mesa (7.7.1~rc1-1) UNRELEASED; urgency=low
+mesa (7.7.1-1) UNRELEASED; urgency=low
 
   [ Brice Goglin ]
   * Remove Thierry Reding from Uploaders, closes: #572539.
 
   [ Timo Aaltonen ]
-  * New upstream release candidate.
-  * Pull from upstream mesa_7_7_branch up to commit 00e41e00.
+  * New upstream release.
 
  -- Brice Goglin <bgoglin@debian.org>  Thu, 04 Mar 2010 20:51:29 +0100
 
