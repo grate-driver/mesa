@@ -2,6 +2,7 @@ mesa (7.7.1-1) UNRELEASED; urgency=low
 
   [ Brice Goglin ]
   * Remove Thierry Reding from Uploaders, closes: #572539.
+  * Bump Standards-Version to 3.8.4, no changes needed.
 
   [ Timo Aaltonen ]
   * New upstream release.
