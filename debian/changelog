@@ -1,6 +1,7 @@
 mesa (7.8-1) UNRELEASED; urgency=low
 
   * New upstream release.
+  * Refresh patches.
 
  -- Brice Goglin <bgoglin@debian.org>  Tue, 30 Mar 2010 21:42:31 +0200
 
