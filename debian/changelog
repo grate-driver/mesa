@@ -1,3 +1,9 @@
+mesa (7.8-1) UNRELEASED; urgency=low
+
+  * New upstream release.
+
+ -- Brice Goglin <bgoglin@debian.org>  Tue, 30 Mar 2010 21:42:31 +0200
+
 mesa (7.7.1-1) unstable; urgency=low
 
   [ Brice Goglin ]
