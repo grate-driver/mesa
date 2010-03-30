@@ -65,7 +65,7 @@ static void
 intelClear(GLcontext *ctx, GLbitfield mask)
 {
    struct intel_context *intel = intel_context(ctx);
-   const GLuint colorMask = *((GLuint *) & ctx->Color.ColorMask);
+   const GLuint colorMask = *((GLuint *) & ctx->Color.ColorMask[0]);
    GLbitfield tri_mask = 0;
    GLbitfield blit_mask = 0;
    GLbitfield swrast_mask = 0;
@@ -131,6 +131,12 @@ intelClear(GLcontext *ctx, GLbitfield mask)
 	 tri_mask |= blit_mask & (1 << (color_bit - 1));
 	 blit_mask &= ~(1 << (color_bit - 1));
       }
+   }
+
+   if (intel->gen >= 6) {
+      /* Blits are in a different ringbuffer so we don't use them. */
+      tri_mask |= blit_mask;
+      blit_mask = 0;
    }
 
    /* SW fallback clearing */
