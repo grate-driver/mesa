@@ -2,6 +2,8 @@ mesa (7.8-1) UNRELEASED; urgency=low
 
   * New upstream release.
   * Refresh patches.
+  * Bump build dependency to libdrm-dev 2.4.19, x11proto-gl-dev 1.4.11,
+    and x11proto-dri2-dev 2.1.
 
  -- Brice Goglin <bgoglin@debian.org>  Tue, 30 Mar 2010 21:42:31 +0200
 
