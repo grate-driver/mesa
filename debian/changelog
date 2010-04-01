@@ -1,4 +1,4 @@
-mesa (7.7-4ubuntu2) UNRELEASED; urgency=low
+mesa (7.7.1-1ubuntu1) UNRELEASED; urgency=low
 
   [Alberto Milone]
   * debian/rules: pass --with-dri-searchpath=/usr/lib/dri:/usr/lib32/dri
@@ -6,6 +6,17 @@ mesa (7.7-4ubuntu2) UNRELEASED; urgency=low
     compatibility on 64 bit systems (LP: #248392).
 
  -- Alberto Milone <alberto.milone@canonical.com>  Wed, 10 Mar 2010 13:26:38 +0100
+
+mesa (7.7.1-1) unstable; urgency=low
+
+  [ Brice Goglin ]
+  * Remove Thierry Reding from Uploaders, closes: #572539.
+  * Bump Standards-Version to 3.8.4, no changes needed.
+
+  [ Timo Aaltonen ]
+  * New upstream release.
+
+ -- Brice Goglin <bgoglin@debian.org>  Tue, 30 Mar 2010 17:15:09 +0200
 
 mesa (7.7-4ubuntu1) lucid; urgency=low
 
