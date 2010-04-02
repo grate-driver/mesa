@@ -33,23 +33,12 @@
  * Client-side GLX interface for current context management.
  */
 
-#ifdef PTHREADS
-#include <pthread.h>
-#endif
-
 #include "glxclient.h"
-#ifdef GLX_USE_APPLEGL
-#include <stdlib.h>
-
-#include "apple_glx.h"
-#include "apple_glx_context.h"
-#else
 #include "glapi.h"
 #include "indirect_init.h"
 
-#if defined(GLX_DIRECT_RENDERING) && !defined(GLX_USE_APPLEGL)
+#ifdef GLX_DIRECT_RENDERING
 #include "xf86dri.h"
-#endif
 #endif
 
 /*
@@ -74,12 +63,11 @@ static __GLXcontext dummyContext = {
 };
 
 
-#ifndef GLX_USE_APPLEGL
 /*
 ** All indirect rendering contexts will share the same indirect dispatch table.
 */
 static __GLapi *IndirectAPI = NULL;
-#endif
+
 
 /*
  * Current context management and locking
@@ -172,11 +160,9 @@ _X_HIDDEN void
 __glXSetCurrentContextNull(void)
 {
    __glXSetCurrentContext(&dummyContext);
-#ifndef GLX_USE_APPLEGL
-#if defined(GLX_DIRECT_RENDERING) && !defined(GLX_USE_APPLEGL)
+#ifdef GLX_DIRECT_RENDERING
    _glapi_set_dispatch(NULL);   /* no-op functions */
    _glapi_set_context(NULL);
-#endif
 #endif
 }
 
@@ -204,7 +190,6 @@ glXGetCurrentDrawable(void)
 }
 
 
-#ifndef GLX_USE_APPLEGL
 /************************************************************************/
 
 /**
@@ -288,7 +273,7 @@ SendMakeCurrentRequest(Display * dpy, CARD8 opcode,
 }
 
 
-#if defined(GLX_DIRECT_RENDERING) && !defined(GLX_USE_APPLEGL)
+#ifdef GLX_DIRECT_RENDERING
 static __GLXDRIdrawable *
 FetchDRIDrawable(Display * dpy, GLXDrawable glxDrawable, GLXContext gc)
 {
@@ -332,8 +317,6 @@ __glXGenerateError(Display * dpy, GLXContext gc, XID resource,
    _XError(dpy, &error);
 }
 
-#endif /* GLX_USE_APPLEGL */
-
 /**
  * Make a particular context current.
  *
@@ -343,17 +326,8 @@ static Bool
 MakeContextCurrent(Display * dpy, GLXDrawable draw,
                    GLXDrawable read, GLXContext gc)
 {
-   const GLXContext oldGC = __glXGetCurrentContext();
-#ifdef GLX_USE_APPLEGL
-   bool error = apple_glx_make_current_context(dpy, 
-                   (oldGC && oldGC != &dummyContext) ? oldGC->driContext : NULL, 
-                   gc ? gc->driContext : NULL, draw);
-   
-   apple_glx_diagnostic("%s: error %s\n", __func__, error ? "YES" : "NO");
-   if(error)
-      return GL_FALSE;
-#else
    xGLXMakeCurrentReply reply;
+   const GLXContext oldGC = __glXGetCurrentContext();
    const CARD8 opcode = __glXSetupForCommand(dpy);
    const CARD8 oldOpcode = ((gc == oldGC) || (oldGC == &dummyContext))
       ? opcode : __glXSetupForCommand(oldGC->currentDpy);
@@ -390,7 +364,7 @@ MakeContextCurrent(Display * dpy, GLXDrawable draw,
       return False;
    }
 
-#if defined(GLX_DIRECT_RENDERING) && !defined(GLX_USE_APPLEGL)
+#ifdef GLX_DIRECT_RENDERING
    /* Bind the direct rendering context to the drawable */
    if (gc && gc->driContext) {
       __GLXDRIdrawable *pdraw = FetchDRIDrawable(dpy, draw, gc);
@@ -425,7 +399,7 @@ MakeContextCurrent(Display * dpy, GLXDrawable draw,
       return False;
    }
 
-#if defined(GLX_DIRECT_RENDERING) && !defined(GLX_USE_APPLEGL)
+#ifdef GLX_DIRECT_RENDERING
    if ((dpy != oldGC->currentDpy || (gc && gc->driContext)) &&
        !oldGC->isDirect && oldGC != &dummyContext) {
 #else
@@ -443,13 +417,12 @@ MakeContextCurrent(Display * dpy, GLXDrawable draw,
                                     oldGC->currentContextTag, None, None,
                                     &dummy_reply);
    }
-#if defined(GLX_DIRECT_RENDERING) && !defined(GLX_USE_APPLEGL)
+#ifdef GLX_DIRECT_RENDERING
    else if (oldGC->driContext && oldGC != gc) {
       oldGC->driContext->unbindContext(oldGC->driContext);
    }
 #endif
 
-#endif /* GLX_USE_APPLEGL */
 
    /* Update our notion of what is current */
    __glXLock();
@@ -459,10 +432,8 @@ MakeContextCurrent(Display * dpy, GLXDrawable draw,
        * cannot be NULL, therefore if they are the same, gc is not
        * NULL and not the dummy.
        */
-      if(gc) {
-        gc->currentDrawable = draw;
-        gc->currentReadable = read;
-      }
+      gc->currentDrawable = draw;
+      gc->currentReadable = read;
    }
    else {
       if (oldGC != &dummyContext) {
@@ -472,24 +443,13 @@ MakeContextCurrent(Display * dpy, GLXDrawable draw,
          oldGC->currentReadable = None;
          oldGC->currentContextTag = 0;
          oldGC->thread_id = 0;
-#ifdef GLX_USE_APPLEGL
-         
-         /*
-          * At this point we should check if the context has been
-          * through glXDestroyContext, and redestroy it if so.
-          */
-         if(oldGC->do_destroy) {
-            __glXUnlock();
-            /* glXDestroyContext uses the same global lock. */
-            glXDestroyContext(dpy, oldGC);
-            __glXLock();
-#else
+
          if (oldGC->xid == None) {
             /* We are switching away from a context that was
              * previously destroyed, so we need to free the memory
              * for the old handle.
              */
-#if defined(GLX_DIRECT_RENDERING) && !defined(GLX_USE_APPLEGL)
+#ifdef GLX_DIRECT_RENDERING
             /* Destroy the old direct rendering context */
             if (oldGC->driContext) {
                oldGC->driContext->destroyContext(oldGC->driContext,
@@ -499,7 +459,6 @@ MakeContextCurrent(Display * dpy, GLXDrawable draw,
             }
 #endif
             __glXFreeContext(oldGC);
-#endif /* GLX_USE_APPLEGL */
          }
       }
       if (gc) {
@@ -508,10 +467,9 @@ MakeContextCurrent(Display * dpy, GLXDrawable draw,
          gc->currentDpy = dpy;
          gc->currentDrawable = draw;
          gc->currentReadable = read;
-#ifndef GLX_USE_APPLEGL
          gc->thread_id = _glthread_GetID();
 
-#if defined(GLX_DIRECT_RENDERING) && !defined(GLX_USE_APPLEGL)
+#ifdef GLX_DIRECT_RENDERING
          if (!gc->driContext) {
 #endif
             if (!IndirectAPI)
@@ -526,13 +484,12 @@ MakeContextCurrent(Display * dpy, GLXDrawable draw,
                (void) glGetString(GL_VERSION);
                __glXInitVertexArrayState(gc);
             }
-#if defined(GLX_DIRECT_RENDERING) && !defined(GLX_USE_APPLEGL)
+#ifdef GLX_DIRECT_RENDERING
          }
          else {
             gc->currentContextTag = -1;
          }
 #endif
-#endif /* GLX_USE_APPLEGL */
       }
       else {
          __glXSetCurrentContextNull();
