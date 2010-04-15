@@ -1,3 +1,15 @@
+mesa (7.7.1-1ubuntu2) lucid; urgency=low
+
+  * Add 103_savage-expose_fbmodes_with_nonzero_alpha.patch: Expose
+    fbmodes with non-zero alpha depth.  Fixes issue where clutter apps
+    crash when using the savage driver.  Thanks to knarf for developing
+    the fix.
+    (LP: #467474)
+  * mesa-common-dev should depend on libdrm-dev
+    (LP: #490811)
+
+ -- Bryce Harrington <bryce@ubuntu.com>  Wed, 14 Apr 2010 12:06:00 -0700
+
 mesa (7.7.1-1ubuntu1) lucid; urgency=low
 
   [ Alberto Milone ]
