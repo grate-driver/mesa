@@ -1,0 +1,94 @@
+--- mesa-7.7.orig/src/mesa/drivers/dri/savage/savage_xmesa.c
++++ mesa-7.7/src/mesa/drivers/dri/savage/savage_xmesa.c
+@@ -63,6 +63,8 @@
+ 
+ #include "xmlpool.h"
+ 
++#define ARRAY_SIZE(x) (sizeof(x) / sizeof(x[0]))
++
+ /* Driver-specific options
+  */
+ #define SAVAGE_ENABLE_VDMA(def) \
+@@ -888,29 +890,30 @@ savageFillInModes( __DRIscreenPrivate *p
+ 		   unsigned stencil_bits, GLboolean have_back_buffer )
+ {
+     __DRIconfig **configs;
++    __DRIconfig **configs_a8r8g8b8;
++    __DRIconfig **configs_x8r8g8b8;
+     __GLcontextModes * m;
+     unsigned depth_buffer_factor;
+     unsigned back_buffer_factor;
+-    GLenum fb_format;
+-    GLenum fb_type;
++    uint8_t depth_bits_array[2];
++    uint8_t stencil_bits_array[2];
++    uint8_t msaa_samples_array[1];
+     int i;
+ 
+     /* Right now GLX_SWAP_COPY_OML isn't supported, but it would be easy
+      * enough to add support.  Basically, if a context is created with an
+      * fbconfig where the swap method is GLX_SWAP_COPY_OML, pageflipping
+      * will never be used.
+-     *
+-     * FK: What about drivers that don't use page flipping? Could they
+-     * just expose GLX_SWAP_COPY_OML?
+      */
+     static const GLenum back_buffer_modes[] = {
+ 	GLX_NONE, GLX_SWAP_UNDEFINED_OML /*, GLX_SWAP_COPY_OML */
+     };
+ 
+-    uint8_t depth_bits_array[2];
+-    uint8_t stencil_bits_array[2];
+-    uint8_t msaa_samples_array[1];
+-
++    /* This being a DRI1 driver the depth buffer is always allocated,
++     * so it does not make sense to expose visuals without it. If this
++     * driver ever gets ported to DRI2 the first array value should be
++     * changed to 0 to expose modes without a depth buffer.
++     */
+     depth_bits_array[0] = depth_bits;
+     depth_bits_array[1] = depth_bits;
+     
+@@ -925,21 +928,32 @@ savageFillInModes( __DRIscreenPrivate *p
+ 
+     depth_buffer_factor = ((depth_bits != 0) || (stencil_bits != 0)) ? 2 : 1;
+     back_buffer_factor  = (have_back_buffer) ? 2 : 1;
+-
++    
+     if ( pixel_bits == 16 ) {
+-        fb_format = GL_RGB;
+-        fb_type = GL_UNSIGNED_SHORT_5_6_5;
++        configs = driCreateConfigs(GL_RGB, GL_UNSIGNED_SHORT_5_6_5,
++				depth_bits_array, stencil_bits_array,
++				depth_buffer_factor,
++				back_buffer_modes, back_buffer_factor,
++               			msaa_samples_array, 1);
+     }
+     else {
+-        fb_format = GL_BGR;
+-        fb_type = GL_UNSIGNED_INT_8_8_8_8_REV;
++        configs_a8r8g8b8 = driCreateConfigs(GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV,
++					  depth_bits_array,
++					  stencil_bits_array,
++					  depth_buffer_factor,
++					  back_buffer_modes,
++					  back_buffer_factor,
++					  msaa_samples_array, 1);
++        configs_x8r8g8b8 = driCreateConfigs(GL_BGR, GL_UNSIGNED_INT_8_8_8_8_REV,
++					  depth_bits_array,
++					  stencil_bits_array,
++					  depth_buffer_factor,
++					  back_buffer_modes,
++					  back_buffer_factor,
++					  msaa_samples_array, 1);
++        configs = driConcatConfigs(configs_a8r8g8b8, configs_x8r8g8b8);
+     }
+ 
+-    configs = driCreateConfigs(fb_format, fb_type,
+-			       depth_bits_array, stencil_bits_array,
+-			       depth_buffer_factor,
+-			       back_buffer_modes, back_buffer_factor,
+-                               msaa_samples_array, 1);
+     if (configs == NULL) {
+ 	fprintf( stderr, "[%s:%u] Error creating FBConfig!\n",
+ 		 __func__, __LINE__ );
