@@ -1110,6 +1110,13 @@ init_fbconfig_for_chooser(__GLcontextModes * config,
     }                                           \
   } while ( 0 )
 
+/* Test that all bits from a are contained in b */
+#define MATCH_MASK(param)			\
+  do {						\
+    if ((a->param & ~b->param) != 0)		\
+      return False;				\
+  } while (0);
+
 /**
  * Determine if two GLXFBConfigs are compatible.
  *
@@ -1148,11 +1155,8 @@ fbconfigs_compatible(const __GLcontextModes * const a,
    MATCH_DONT_CARE(stereoMode);
    MATCH_EXACT(level);
 
-   if (((a->drawableType & b->drawableType) == 0)
-       || ((a->renderType & b->renderType) == 0)) {
-      return False;
-   }
-
+   MATCH_MASK(drawableType);
+   MATCH_MASK(renderType);
 
    /* There is a bug in a few of the XFree86 DDX drivers.  They contain
     * visuals with a "transparent type" of 0 when they really mean GLX_NONE.
@@ -1917,6 +1921,7 @@ __glXSwapIntervalSGI(int interval)
 #endif
    psc = GetGLXScreenConfigs( gc->currentDpy, gc->screen);
 
+#ifdef GLX_DIRECT_RENDERING
    if (gc->driContext && psc->driScreen && psc->driScreen->setSwapInterval) {
       __GLXDRIdrawable *pdraw = GetGLXDRIDrawable(gc->currentDpy,
 						  gc->currentDrawable,
@@ -1924,6 +1929,7 @@ __glXSwapIntervalSGI(int interval)
       psc->driScreen->setSwapInterval(pdraw, interval);
       return 0;
    }
+#endif
 
    dpy = gc->currentDpy;
    opcode = __glXSetupForCommand(dpy);
@@ -1974,6 +1980,7 @@ __glXSwapIntervalMESA(unsigned int interval)
    }
 #endif
 
+#ifdef GLX_DIRECT_RENDERING
    if (gc != NULL && gc->driContext) {
       __GLXscreenConfigs *psc;
 
@@ -1985,6 +1992,7 @@ __glXSwapIntervalMESA(unsigned int interval)
 	 return 0;
       }
    }
+#endif
 
    return GLX_BAD_CONTEXT;
 }
@@ -2009,6 +2017,8 @@ __glXGetSwapIntervalMESA(void)
       }
    }
 #endif
+
+#ifdef GLX_DIRECT_RENDERING
    if (gc != NULL && gc->driContext) {
       __GLXscreenConfigs *psc;
 
@@ -2019,6 +2029,7 @@ __glXGetSwapIntervalMESA(void)
 	 return psc->driScreen->getSwapInterval(pdraw);
       }
    }
+#endif
 
    return 0;
 }
@@ -2135,13 +2146,22 @@ __glXGetVideoSyncSGI(unsigned int *count)
    int ret;
    GLXContext gc = __glXGetCurrentContext();
    __GLXscreenConfigs *psc;
+#ifdef GLX_DIRECT_RENDERING
    __GLXDRIdrawable *pdraw;
+#endif
 
-   if (!gc || !gc->driContext)
+   if (!gc)
       return GLX_BAD_CONTEXT;
 
+#ifdef GLX_DIRECT_RENDERING
+   if (!gc->driContext)
+      return GLX_BAD_CONTEXT;
+#endif
+
    psc = GetGLXScreenConfigs(gc->currentDpy, gc->screen);
+#ifdef GLX_DIRECT_RENDERING
    pdraw = GetGLXDRIDrawable(gc->currentDpy, gc->currentDrawable, NULL);
+#endif
 
    /* FIXME: Looking at the GLX_SGI_video_sync spec in the extension registry,
     * FIXME: there should be a GLX encoding for this call.  I can find no
@@ -2156,11 +2176,14 @@ __glXGetVideoSyncSGI(unsigned int *count)
       return (ret == 0) ? 0 : GLX_BAD_CONTEXT;
    }
 #endif
+
+#ifdef GLX_DIRECT_RENDERING
    if (psc->driScreen && psc->driScreen->getDrawableMSC) {
       ret = psc->driScreen->getDrawableMSC(psc, pdraw, &ust, &msc, &sbc);
       *count = (unsigned) msc;
       return (ret == True) ? 0 : GLX_BAD_CONTEXT;
    }
+#endif
 
    return GLX_BAD_CONTEXT;
 }
@@ -2170,18 +2193,27 @@ __glXWaitVideoSyncSGI(int divisor, int remainder, unsigned int *count)
 {
    GLXContext gc = __glXGetCurrentContext();
    __GLXscreenConfigs *psc;
+#ifdef GLX_DIRECT_RENDERING
    __GLXDRIdrawable *pdraw;
+#endif
    int64_t ust, msc, sbc;
    int ret;
 
    if (divisor <= 0 || remainder < 0)
       return GLX_BAD_VALUE;
 
-   if (!gc || !gc->driContext)
+   if (!gc)
       return GLX_BAD_CONTEXT;
 
+#ifdef GLX_DIRECT_RENDERING
+   if (!gc->driContext)
+      return GLX_BAD_CONTEXT;
+#endif
+
    psc = GetGLXScreenConfigs( gc->currentDpy, gc->screen);
+#ifdef GLX_DIRECT_RENDERING
    pdraw = GetGLXDRIDrawable(gc->currentDpy, gc->currentDrawable, NULL);
+#endif
 
 #ifdef __DRI_MEDIA_STREAM_COUNTER
    if (psc->msc != NULL && psc->driScreen ) {
@@ -2191,12 +2223,15 @@ __glXWaitVideoSyncSGI(int divisor, int remainder, unsigned int *count)
       return (ret == 0) ? 0 : GLX_BAD_CONTEXT;
    }
 #endif
+
+#ifdef GLX_DIRECT_RENDERING
    if (psc->driScreen && psc->driScreen->waitForMSC) {
       ret = psc->driScreen->waitForMSC(pdraw, 0, divisor, remainder, &ust, &msc,
 				       &sbc);
       *count = (unsigned) msc;
       return (ret == True) ? 0 : GLX_BAD_CONTEXT;
    }
+#endif
 
    return GLX_BAD_CONTEXT;
 }
@@ -2354,13 +2389,17 @@ __glXGetSyncValuesOML(Display * dpy, GLXDrawable drawable,
 {
    __GLXdisplayPrivate * const priv = __glXInitialize(dpy);
    int i, ret;
+#ifdef GLX_DIRECT_RENDERING
    __GLXDRIdrawable *pdraw;
+#endif
    __GLXscreenConfigs *psc;
 
    if (!priv)
       return False;
 
+#ifdef GLX_DIRECT_RENDERING
    pdraw = GetGLXDRIDrawable(dpy, drawable, &i);
+#endif
    psc = &priv->screenConfigs[i];
 
 #if defined(__DRI_SWAP_BUFFER_COUNTER) && defined(__DRI_MEDIA_STREAM_COUNTER)
@@ -2370,10 +2409,13 @@ __glXGetSyncValuesOML(Display * dpy, GLXDrawable drawable,
 	       && ((*psc->sbc->getSBC)(pdraw->driDrawable, sbc) == 0)
 	       && (__glXGetUST(ust) == 0) );
 #endif
+
+#ifdef GLX_DIRECT_RENDERING
    if (pdraw && psc && psc->driScreen && psc->driScreen->getDrawableMSC) {
       ret = psc->driScreen->getDrawableMSC(psc, pdraw, ust, msc, sbc);
       return ret;
    }
+#endif
 
    return False;
 }
@@ -2491,11 +2533,18 @@ __glXSwapBuffersMscOML(Display * dpy, GLXDrawable drawable,
 {
    GLXContext gc = __glXGetCurrentContext();
    int screen;
+#ifdef GLX_DIRECT_RENDERING
    __GLXDRIdrawable *pdraw = GetGLXDRIDrawable(dpy, drawable, &screen);
+#endif
    __GLXscreenConfigs *const psc = GetGLXScreenConfigs(dpy, screen);
 
-   if (!pdraw || !gc || !gc->driContext) /* no GLX for this */
+   if (!gc) /* no GLX for this */
       return -1;
+
+#ifdef GLX_DIRECT_RENDERING
+   if (!pdraw || !gc->driContext)
+      return -1;
+#endif
 
    /* The OML_sync_control spec says these should "generate a GLX_BAD_VALUE
     * error", but it also says "It [glXSwapBuffersMscOML] will return a value
@@ -2530,7 +2579,9 @@ __glXWaitForMscOML(Display * dpy, GLXDrawable drawable,
                    int64_t * msc, int64_t * sbc)
 {
    int screen;
+#ifdef GLX_DIRECT_RENDERING
    __GLXDRIdrawable *pdraw = GetGLXDRIDrawable(dpy, drawable, &screen);
+#endif
    __GLXscreenConfigs * const psc = GetGLXScreenConfigs( dpy, screen );
    int ret;
 
@@ -2554,11 +2605,14 @@ __glXWaitForMscOML(Display * dpy, GLXDrawable drawable,
       return ((ret == 0) && (__glXGetUST(ust) == 0));
    }
 #endif
+
+#ifdef GLX_DIRECT_RENDERING
    if (pdraw && psc->driScreen && psc->driScreen->waitForMSC) {
       ret = psc->driScreen->waitForMSC(pdraw, target_msc, divisor, remainder,
 				       ust, msc, sbc);
       return ret;
    }
+#endif
 
    return False;
 }
@@ -2570,7 +2624,9 @@ __glXWaitForSbcOML(Display * dpy, GLXDrawable drawable,
                    int64_t * msc, int64_t * sbc)
 {
    int screen;
+#ifdef GLX_DIRECT_RENDERING
    __GLXDRIdrawable *pdraw = GetGLXDRIDrawable(dpy, drawable, &screen);
+#endif
    __GLXscreenConfigs *const psc = GetGLXScreenConfigs(dpy, screen);
    int ret;
 
@@ -2590,10 +2646,14 @@ __glXWaitForSbcOML(Display * dpy, GLXDrawable drawable,
       return ((ret == 0) && (__glXGetUST(ust) == 0));
    }
 #endif
+
+#ifdef GLX_DIRECT_RENDERING
    if (pdraw && psc->driScreen && psc->driScreen->waitForSBC) {
       ret = psc->driScreen->waitForSBC(pdraw, target_sbc, ust, msc, sbc);
       return ret;
    }
+#endif
+
    return False;
 }
 
