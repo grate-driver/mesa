@@ -1,0 +1,43 @@
+From 885048232fb715b0646d52ff35305941a25f1382 Mon Sep 17 00:00:00 2001
+From: Tormod Volden <lists.tormod@gmail.com>
+Date: Thu, 15 Apr 2010 17:13:53 +0000
+Subject: savage: call _mesa_meta_init/free()
+
+Fixes crash when using _mesa_CopyTexImage2D.
+Bug #27652.
+
+Signed-off-by: Tormod Volden <debian.tormod@gmail.com>
+Signed-off-by: Brian Paul <brianp@vmware.com>
+---
+diff --git a/src/mesa/drivers/dri/savage/savage_xmesa.c b/src/mesa/drivers/dri/savage/savage_xmesa.c
+index 6f07ac2..c3a53ea 100644
+--- a/src/mesa/drivers/dri/savage/savage_xmesa.c
++++ b/src/mesa/drivers/dri/savage/savage_xmesa.c
+@@ -44,6 +44,7 @@
+ #include "tnl/t_pipeline.h"
+ 
+ #include "drivers/common/driverfuncs.h"
++#include "drivers/common/meta.h"
+ 
+ #include "savagedd.h"
+ #include "savagestate.h"
+@@ -473,6 +474,8 @@ savageCreateContext( const __GLcontextModes *mesaVis,
+    imesa->CurrentTexObj[0] = 0;
+    imesa->CurrentTexObj[1] = 0;
+ 
++   _mesa_meta_init( ctx );
++
+    /* Initialize the software rasterizer and helper modules.
+     */
+    _swrast_CreateContext( ctx );
+@@ -564,6 +567,8 @@ savageDestroyContext(__DRIcontext *driContextPriv)
+       free(imesa->cmdBuf.base);
+       free(imesa->clientVtxBuf.buf);
+ 
++      _mesa_meta_free( imesa->glCtx );
++
+       _swsetup_DestroyContext(imesa->glCtx );
+       _tnl_DestroyContext( imesa->glCtx );
+       _vbo_DestroyContext( imesa->glCtx );
+--
+cgit v0.8.3-6-g21f6
