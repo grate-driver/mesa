@@ -1,3 +1,12 @@
+mesa (7.7.1-1ubuntu3) lucid-proposed; urgency=low
+
+  * Add 104_savage_init_mesa.patch: Savage driver needs to initialize
+    &ctx->Meta->Save.  Fixes crash when using _mesa_CopyTexImage2D
+    on Savage hardware.  Cherrypick from upstream.  Thanks Tormod.
+    (LP: #562718)
+  
+ -- Bryce Harrington <bryce@ubuntu.com>  Wed, 21 Apr 2010 09:48:09 -0700
+
 mesa (7.7.1-1ubuntu2) lucid; urgency=low
 
   * Add 103_savage-expose_fbmodes_with_nonzero_alpha.patch: Expose
