@@ -1,3 +1,9 @@
+mesa (7.8.1-2) UNRELEASED; urgency=low
+
+  * debian/rules: Do not strip the same packages twice
+
+ -- Tormod Volden <debian.tormod@gmail.com>  Sun, 09 May 2010 12:37:53 +0200
+
 mesa (7.8.1-1) experimental; urgency=low
 
   * New upstream release.
