@@ -1138,6 +1138,7 @@ radeonCreateScreen( __DRIscreenPrivate *sPriv )
        /* pipe overrides */
        switch (dri_priv->deviceID) {
        case PCI_CHIP_R300_AD: /* 9500 with 1 quadpipe verified by: Reid Linnemann <lreid@cs.okstate.edu> */
+       case PCI_CHIP_R350_AH: /* 9800 SE only have 1 quadpipe */
        case PCI_CHIP_RV410_5E4C: /* RV410 SE only have 1 quadpipe */
        case PCI_CHIP_RV410_5E4F: /* RV410 SE only have 1 quadpipe */
 	   screen->num_gb_pipes = 1;
@@ -1345,6 +1346,7 @@ radeonCreateScreen2(__DRIscreenPrivate *sPriv)
        /* pipe overrides */
        switch (device_id) {
        case PCI_CHIP_R300_AD: /* 9500 with 1 quadpipe verified by: Reid Linnemann <lreid@cs.okstate.edu> */
+       case PCI_CHIP_R350_AH: /* 9800 SE only have 1 quadpipe */
        case PCI_CHIP_RV410_5E4C: /* RV410 SE only have 1 quadpipe */
        case PCI_CHIP_RV410_5E4F: /* RV410 SE only have 1 quadpipe */
 	   screen->num_gb_pipes = 1;
