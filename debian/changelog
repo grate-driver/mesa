@@ -1,6 +1,10 @@
 mesa (7.8.1-2) UNRELEASED; urgency=low
 
+  [ Tormod Volden ]
   * debian/rules: Do not strip the same packages twice
+
+  [ Julien Cristau ]
+  * Stop building the ffb dri driver on sparc, it no longer exists.
 
  -- Tormod Volden <debian.tormod@gmail.com>  Sun, 09 May 2010 12:37:53 +0200
 
