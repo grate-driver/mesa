@@ -1,3 +1,41 @@
+mesa (7.8.1-1ubuntu1) UNRELEASED; urgency=low
+
+  * Merged from Debian experimental, remaining changes:
+   - debian/control
+      + Drop lesstif-dev from Build-Depends.
+      + Comment out GLw libs since it depends on lesstif-dev.
+    - debian/rules
+      + Unexport LDFLAGS (amd64 FTBFS).
+      + Use --disable-glw for swx11 targets too.
+      + Don't enable motif for swx11 targets.
+    - debian/patches
+      + 100_no_abi_tag.patch
+      + 101_ubuntu_hidden_glname.patch
+      + 103_savage-expose_fbmodes_with_nonzero_alpha.patch
+      + 107_glxgears_is_not_a_benchmark.patch
+    - rules, libgl1-mesa-{glx,dev,swx11,swx11-dev}.install,
+      libgl1-mesa-{glx,swx11}.{postinst,prerm}, libgl1-mesa-dev.links:
+      Install libGL.so* in /usr/lib/mesa to allow things to work with
+      alternatives.
+  * Dropped patches:
+    - 102_dont_vblank.patch: should be obsolete by now
+    - 104_savage_init_mesa.patch: merged upstream
+  * control: Drop dependencies on dpkg, since lucid has it and it's the
+    only version where upgrades are supported from.
+  * libgl1-mesa-dri.postinst: Drop, same as above.
+
+ -- Timo Aaltonen <tjaalton@ubuntu.com>  Sun, 16 May 2010 19:00:50 +0300
+
+mesa (7.8.1-1) experimental; urgency=low
+
+  * New upstream release.
+    + Pull from upstream 7.8 branch up to commit db3b3421.
+  * Refresh patches.
+  * Bump build dependency to libdrm-dev 2.4.19, x11proto-gl-dev 1.4.11,
+    and x11proto-dri2-dev 2.1.
+
+ -- Brice Goglin <bgoglin@debian.org>  Sun, 18 Apr 2010 09:25:39 +0200
+
 mesa (7.7.1-1ubuntu3) lucid-proposed; urgency=low
 
   * Add 104_savage_init_mesa.patch: Savage driver needs to initialize
