@@ -1,5 +1,6 @@
 mesa (7.8.1-1ubuntu1) UNRELEASED; urgency=low
 
+  [ Timo Aaltonen ]
   * Merged from Debian experimental, remaining changes:
    - debian/control
       + Drop lesstif-dev from Build-Depends.
@@ -24,7 +25,10 @@ mesa (7.8.1-1ubuntu1) UNRELEASED; urgency=low
     only version where upgrades are supported from.
   * libgl1-mesa-dri.postinst: Drop, same as above.
 
- -- Timo Aaltonen <tjaalton@ubuntu.com>  Sun, 16 May 2010 19:00:50 +0300
+  [ Robert Hooker ]
+  * debian/rules: Stop building/shipping abandoned the mach64 DRI driver.
+
+ -- Robert Hooker <sarvatt@ubuntu.com>  Sun, 16 May 2010 20:03:14 -0400
 
 mesa (7.8.1-1) experimental; urgency=low
 
