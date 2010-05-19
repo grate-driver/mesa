@@ -28,7 +28,11 @@ mesa (7.8.1-1ubuntu1) UNRELEASED; urgency=low
   [ Robert Hooker ]
   * debian/rules: Stop building/shipping abandoned the mach64 DRI driver.
 
- -- Robert Hooker <sarvatt@ubuntu.com>  Sun, 16 May 2010 20:03:14 -0400
+  [ Christopher James Halse Rogers ]
+  * debian/patches/103_savage-expose_fbmodes_with_nonzero_alpha.patch
+    - Refresh for driCreateConfigs API change
+
+ -- Christopher James Halse Rogers <raof@ubuntu.com>  Wed, 19 May 2010 11:03:37 +1000
 
 mesa (7.8.1-1) experimental; urgency=low
 

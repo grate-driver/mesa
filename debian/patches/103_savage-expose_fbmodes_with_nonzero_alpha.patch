@@ -1,5 +1,7 @@
---- a/src/mesa/drivers/dri/savage/savage_xmesa.c
-+++ b/src/mesa/drivers/dri/savage/savage_xmesa.c
+Index: mesa/src/mesa/drivers/dri/savage/savage_xmesa.c
+===================================================================
+--- mesa.orig/src/mesa/drivers/dri/savage/savage_xmesa.c	2010-05-19 08:53:43.544920275 +1000
++++ mesa/src/mesa/drivers/dri/savage/savage_xmesa.c	2010-05-19 10:59:49.573978367 +1000
 @@ -64,6 +64,8 @@
  
  #include "xmlpool.h"
@@ -9,7 +11,7 @@
  /* Driver-specific options
   */
  #define SAVAGE_ENABLE_VDMA(def) \
-@@ -893,32 +895,33 @@ savageFillInModes( __DRIscreen *psp,
+@@ -893,32 +895,33 @@
  		   unsigned stencil_bits, GLboolean have_back_buffer )
  {
      __DRIconfig **configs;
@@ -53,7 +55,7 @@
      /* Just like with the accumulation buffer, always provide some modes
       * with a stencil buffer.  It will be a sw fallback, but some apps won't
       * care about that.
-@@ -932,19 +935,30 @@ savageFillInModes( __DRIscreen *psp,
+@@ -932,19 +935,32 @@
      back_buffer_factor  = (have_back_buffer) ? 2 : 1;
  
      if ( pixel_bits == 16 ) {
@@ -63,7 +65,7 @@
 +                               depth_bits_array, stencil_bits_array,
 +                               depth_buffer_factor,
 +                               back_buffer_modes, back_buffer_factor,
-+                                       msaa_samples_array, 1);
++                               msaa_samples_array, 1, GL_TRUE);
      }
      else {
 -        fb_format = GL_BGR;
@@ -74,14 +76,16 @@
 +                                         depth_buffer_factor,
 +                                         back_buffer_modes,
 +                                         back_buffer_factor,
-+                                         msaa_samples_array, 1);
++                                         msaa_samples_array, 1,
++                                         GL_TRUE);
 +        configs_x8r8g8b8 = driCreateConfigs(GL_BGR, GL_UNSIGNED_INT_8_8_8_8_REV,
 +                                         depth_bits_array,
 +                                         stencil_bits_array,
 +                                         depth_buffer_factor,
 +                                         back_buffer_modes,
 +                                         back_buffer_factor,
-+                                         msaa_samples_array, 1);
++                                         msaa_samples_array, 1,
++                                         GL_TRUE);
 +        configs = driConcatConfigs(configs_a8r8g8b8, configs_x8r8g8b8);
      }
  
