@@ -278,15 +278,17 @@ TARBALL = $(shell echo mesa_$(UPVERSION).orig.tar.gz | tr -d ' ')
 DEMOS_SOURCE = $(shell echo MesaDemos-$(UPVERSION).tar.gz | tr -d ' ')
 LIBS_SOURCE = $(shell echo MesaLib-$(UPVERSION).tar.gz | tr -d ' ')
 
-get-orig-source:
-	echo \"$(VERSION)\"
-	echo \"$(UPVERSION)\"
+$(DEMOS_SOURCE) $(LIBS_SOURCE):
 	uscan --download --destdir $(CURDIR) \
 	      --no-symlink --force-download --download-version $(UPVERSION)
+
+$(TARBALL): $(DEMOS_SOURCE) $(LIBS_SOURCE)
 	tar xzf $(DEMOS_SOURCE)
 	tar xzf $(LIBS_SOURCE)
 	mv Mesa-$(UPVERSION) mesa-$(UPVERSION)
-	tar czf $(TARBALL) mesa-$(UPVERSION)
+	tar czf $(TARBALL) mesa-$(UPVERSION)	
+
+get-orig-source: $(TARBALL)
 	rm -r mesa-$(UPVERSION)
 	rm $(DEMOS_SOURCE)
 	rm $(LIBS_SOURCE)
