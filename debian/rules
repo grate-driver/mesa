@@ -270,4 +270,26 @@ endif
 	dh_builddeb -s -- -Zlzma
 
 binary: binary-indep binary-arch
-.PHONY: configs build clean binary-indep binary-arch binary install
+
+
+VERSION = $(shell dpkg-parsechangelog | grep ^Vers | cut -d" " -f2)
+UPVERSION = $(shell echo $(VERSION) | sed 's,-.*,,') 
+TARBALL = $(shell echo mesa_$(UPVERSION).orig.tar.gz | tr -d ' ')
+DEMOS_SOURCE = $(shell echo MesaDemos-$(UPVERSION).tar.gz | tr -d ' ')
+LIBS_SOURCE = $(shell echo MesaLib-$(UPVERSION).tar.gz | tr -d ' ')
+
+get-orig-source:
+	echo \"$(VERSION)\"
+	echo \"$(UPVERSION)\"
+	uscan --download --destdir $(CURDIR) \
+	      --no-symlink --force-download --download-version $(UPVERSION)
+	tar xzf $(DEMOS_SOURCE)
+	tar xzf $(LIBS_SOURCE)
+	mv Mesa-$(UPVERSION) mesa-$(UPVERSION)
+	tar czf $(TARBALL) mesa-$(UPVERSION)
+	rm -r mesa-$(UPVERSION)
+	rm $(DEMOS_SOURCE)
+	rm $(LIBS_SOURCE)
+
+
+.PHONY: configs build clean binary-indep binary-arch binary install get-orig-source
