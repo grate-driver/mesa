@@ -71,7 +71,7 @@ else
 	DRI_DRIVERS += i915 i965
   else ifneq ($(DEB_HOST_ARCH), s390)
 	DRI_DRIVERS += mga r128 r200 r300 r600 radeon savage tdfx
-    ifeq ($(DEB_HOST_GNU_CPU), i486)
+    ifeq ($(DEB_HOST_GNU_CPU), i686)
 	DRI_DRIVERS += i810 i915 i965 sis unichrome
     else ifeq ($(DEB_HOST_GNU_CPU), x86_64)
 	DRI_DRIVERS += i915 i965 sis unichrome
