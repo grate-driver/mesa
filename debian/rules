@@ -21,7 +21,7 @@ DEB_HOST_ARCH     ?= $(shell dpkg-architecture -qDEB_HOST_ARCH)
 DEB_HOST_ARCH_OS     ?= $(shell dpkg-architecture -qDEB_HOST_ARCH_OS)
 DEB_HOST_GNU_TYPE  ?= $(shell dpkg-architecture -qDEB_HOST_GNU_TYPE)
 DEB_BUILD_GNU_TYPE ?= $(shell dpkg-architecture -qDEB_BUILD_GNU_TYPE)
-DEB_HOST_GNU_CPU ?= $(shell dpkg-architecture -qDEB_HOST_GNU_CPU)
+DEB_HOST_ARCH_CPU ?= $(shell dpkg-architecture -qDEB_HOST_ARCH_CPU)
 DEB_BUILD_DIR      ?= $(CURDIR)/build
 ifeq ($(DEB_BUILD_GNU_TYPE), $(DEB_HOST_GNU_TYPE))
         confflags += --build=$(DEB_HOST_GNU_TYPE)
@@ -70,9 +70,9 @@ else
 	DRI_DRIVERS += i915 i965
   else ifneq ($(DEB_HOST_ARCH), s390)
 	DRI_DRIVERS += mach64 mga r128 r200 r300 r600 radeon savage tdfx
-    ifeq ($(DEB_HOST_GNU_CPU), i486)
+    ifeq ($(DEB_HOST_ARCH_CPU), i386)
 	DRI_DRIVERS += i810 i915 i965 sis unichrome
-    else ifeq ($(DEB_HOST_GNU_CPU), x86_64)
+    else ifeq ($(DEB_HOST_ARCH_CPU), amd64)
 	DRI_DRIVERS += i915 i965 sis unichrome
     else ifeq ($(DEB_HOST_ARCH), sparc)
 	DRI_DRIVERS += ffb
