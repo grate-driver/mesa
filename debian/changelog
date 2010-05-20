@@ -1,4 +1,4 @@
-mesa (7.8.1-1ubuntu1) UNRELEASED; urgency=low
+mesa (7.8.1-1ubuntu1) maverick; urgency=low
 
   [ Timo Aaltonen ]
   * Merged from Debian experimental, remaining changes:
