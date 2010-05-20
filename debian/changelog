@@ -38,6 +38,8 @@ mesa (7.8.1-1ubuntu1) UNRELEASED; urgency=low
       generated.
     - The i386 architecture for Maverick is now i686, not i486.  Adapt rules
       so that the Intel DRI drivers are actually built.
+    - Drop LDFLAGS unexport.  Mesa builds fine on amd64 with Ubuntu's
+      default LDFLAGS.
 
  -- Christopher James Halse Rogers <raof@ubuntu.com>  Wed, 19 May 2010 14:47:25 +1000
 
