@@ -46,6 +46,13 @@ mesa (7.8.1-1ubuntu1) maverick; urgency=low
   * debian/scripts/choose-configs:
     - Drop libgl1-mesa-swx11-i686 from CPU-optimised swrast configs.
 
+  * Changes from unreleased debian-expemental 7.8.1-2 packaging:
+  [ Tormod Volden ]
+  * debian/rules: Do not strip the same packages twice
+
+  [ Julien Cristau ]
+  * Stop building the ffb dri driver on sparc, it no longer exists.
+  
  -- Christopher James Halse Rogers <raof@ubuntu.com>  Wed, 19 May 2010 14:47:25 +1000
 
 mesa (7.8.1-1) experimental; urgency=low

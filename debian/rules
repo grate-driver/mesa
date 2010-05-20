@@ -74,10 +74,6 @@ else
 	DRI_DRIVERS += i810 i915 i965 sis unichrome
     else ifeq ($(DEB_HOST_GNU_CPU), x86_64)
 	DRI_DRIVERS += i915 i965 sis unichrome
-    else ifeq ($(DEB_HOST_ARCH), sparc)
-	DRI_DRIVERS += ffb
-    else ifeq ($(DEB_HOST_ARCH), sparc64)
-	DRI_DRIVERS += ffb
     endif
   endif
 endif
@@ -258,7 +254,7 @@ endif
 	dh_strip -plibgl1-mesa-swx11 --dbg-package=libgl1-mesa-swx11-dbg
 	dh_strip -plibgl1-mesa-glx --dbg-package=libgl1-mesa-glx-dbg
 	dh_strip -plibgl1-mesa-dri --dbg-package=libgl1-mesa-dri-dbg
-	dh_strip -s
+	dh_strip -s --remaining-packages
 	dh_compress -s
 	dh_fixperms -s
 	dh_makeshlibs -s
