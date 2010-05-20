@@ -3,6 +3,7 @@ mesa (7.7.1-2) UNRELEASED; urgency=low
   * debian/rules: use DEB_HOST_ARCH_CPU instead of DEB_HOST_GNU_CPU.  Prompted
     by Ubuntu which changed the latter to i686, breaking their packages on
     i386.
+  * Pull from mesa_7_7_branch (commit 8ba378d).
 
  -- Julien Cristau <jcristau@debian.org>  Thu, 20 May 2010 10:59:05 +0200
 
