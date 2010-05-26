@@ -12,11 +12,30 @@ mesa (7.8.1-2) UNRELEASED; urgency=low
     - Bump to v7 for dh_install search path behaviour
   * debian/rules:
     - Enable gallium for dri build.
+    - Enable egl for dri build.
     - Build nouveau, radeon & swrast gallium drivers
     - Build OpenVG, OpenGL|ES, dri, glx & egl state trackers
     - Add /usr/lib/dri-gallium to driver search path to allow classic and
       gallium drivers to co-exist peacefully.  Install gallium drivers to
       /usr/lib/dri-gallium.
+  * debian/libegl1-mesa-dev.install:
+  * debian/libegl1-mesa.install:
+  * debian/libegl1-mesa.symbols:
+    - New libEGL package.
+  * debian/libgles1-mesa-dev.install:
+  * debian/libgles1-mesa.install:
+  * debian/libgles1-mesa.symbols:
+    - New OpenGL|ES v1.x package.
+  * debian/libgles2-mesa-dev.install:
+  * debian/libgles2-mesa.install:
+  * debian/libgles2-mesa.symbols:
+    - New OpenGL|ES v2.x package.
+  * debian/libopenvg1-mesa-dev.install:
+  * debian/libopenvg1-mesa.install:
+  * debian/libopenvg1-mesa.symbols:
+    - New OpenVG package.
+  * debian/libegl1-mesa-drivers-x11.install:
+    - New gallium EGL drivers package.
   * debian/libgl1-mesa-dri-gallium.install:
   * debian/libgl1-mesa-dri.install:
     - “make install” puts classic and gallium drivers in the same path, but
