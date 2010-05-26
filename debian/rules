@@ -49,11 +49,7 @@ BUILD_STAMPS = $(addprefix $(STAMP)-build-, $(CONFIGS))
 QUILT_STAMPFN = $(STAMP_DIR)/patch
 include /usr/share/quilt/quilt.make
 
-# temporary until we figure out what to build
-confflags += --disable-gallium
-
 confflags-common = \
-	--disable-egl \
 	--disable-glu \
 	--disable-glut \
 	--disable-glw \
@@ -79,33 +75,46 @@ else
 endif
 
 confflags-dri = \
+	--disable-egl
 	--with-driver=dri \
 	--with-dri-drivers="$(DRI_DRIVERS)" \
 	--with-demos=xdemos \
 	--libdir=/usr/lib/glx \
 	--with-dri-driverdir=/usr/lib/dri \
 	--enable-glx-tls \
+	--enable-gallium-nouveau \
+	--enable-gallium-radeon \
+	--enable-gallium-swrast \
+	--with-state-trackers=egl,es,glx,dri,vega \
 	$(DIRECT_RENDERING) \
 	$(confflags-common)
 
 confflags-osmesa = \
+	--disable-egl \
+	--disable-gallium \
 	--with-driver=osmesa \
 	--with-demos= \
 	$(confflags-common)
 
 confflags-osmesa-static = \
+	--disable-egl \
+	--disable-gallium \
 	--with-driver=osmesa \
 	--enable-static \
 	--with-demos= \
 	$(confflags-common)
 
 confflags-osmesa16 = \
+	--disable-egl \
+	--disable-gallium \
 	--with-driver=osmesa \
 	--with-osmesa-bits=16 \
 	--with-demos= \
 	$(confflags-common)
 
 confflags-osmesa16-static = \
+	--disable-egl \
+	--disable-gallium \
 	--with-driver=osmesa \
 	--with-osmesa-bits=16 \
 	--enable-static \
@@ -113,12 +122,16 @@ confflags-osmesa16-static = \
 	$(confflags-common)
 
 confflags-osmesa32 = \
+	--disable-egl \
+	--disable-gallium \
 	--with-driver=osmesa \
 	--with-osmesa-bits=32 \
 	--with-demos= \
 	$(confflags-common)
 
 confflags-osmesa32-static = \
+	--disable-egl \
+	--disable-gallium \
 	--with-driver=osmesa \
 	--with-osmesa-bits=32 \
 	--enable-static \
@@ -126,6 +139,8 @@ confflags-osmesa32-static = \
 	$(confflags-common)
 
 confflags-swx11+glu = \
+	--disable-egl \
+	--disable-gallium \
 	--with-driver=xlib \
 	--disable-gl-osmesa \
 	--with-demos= \
@@ -135,6 +150,8 @@ confflags-swx11+glu = \
 	CFLAGS="$(CFLAGS)"
 
 confflags-swx11+glu-static = \
+	--disable-egl \
+	--disable-gallium \
 	--with-driver=xlib \
 	--disable-gl-osmesa \
 	--enable-static \
@@ -145,6 +162,8 @@ confflags-swx11+glu-static = \
 	CFLAGS="$(CFLAGS)"
 
 confflags-swx11+glu-i386-i686 = \
+	--disable-egl \
+	--disable-gallium \
 	--with-driver=xlib \
 	--disable-gl-osmesa \
 	--with-demos= \
@@ -153,6 +172,11 @@ confflags-swx11+glu-i386-i686 = \
 	--enable-motif \
 	--libdir=/usr/lib/i686/cmov \
 	CFLAGS="$(CFLAGS) -march=i686"
+
+# Add /usr/lib/dri-gallium to the front of the search paths so that users can
+# opt-in to installing gallium drivers there and have them override the classic
+# drivers.
+confflags-dri += --with-dri-searchpath=/usr/lib/dri-gallium:/usr/lib/dri 
 
 configure: $(QUILT_STAMPFN) configure.ac
 	autoreconf -vfi
@@ -188,7 +212,7 @@ install: build
 	# Add here commands to install the package into debian/tmp
 	dh_testdir
 	dh_testroot
-	dh_clean -k
+	dh_prep
 	dh_installdirs
 	set -e; for config in $(CONFIGS); do \
 		$(MAKE) -C $(DEB_BUILD_DIR)/$$config DESTDIR=$(CURDIR)/debian/tmp install; \
@@ -222,13 +246,18 @@ binary-arch: install
 	dh_installchangelogs -pmesa-common-dev ChangeLog
 	dh_installdocs -s
 	dh_installexamples -s
-	dh_install -s --sourcedir=debian/tmp --list-missing
+	# Classic DRI and Gallium DRI are mixed up together here
+	# Remove the whole tree to avoid false-positives in --list-missing, and
+	# install the right files manually.
+	rm -r debian/tmp/usr/lib/dri
+	dh_install -s --list-missing
 	dh_installman -s
 	dh_lintian -s
 	dh_link -s
 	dh_strip -plibgl1-mesa-swx11 --dbg-package=libgl1-mesa-swx11-dbg
 	dh_strip -plibgl1-mesa-glx --dbg-package=libgl1-mesa-glx-dbg
 	dh_strip -plibgl1-mesa-dri --dbg-package=libgl1-mesa-dri-dbg
+	dh_strip -plibgl1-mesa-dri-gallium --dbg-package=libgl1-mesa-dri-gallium-dbg
 	dh_strip -s --remaining-packages
 	dh_compress -s
 	dh_fixperms -s

@@ -7,7 +7,28 @@ mesa (7.8.1-2) UNRELEASED; urgency=low
   * Stop building the ffb dri driver on sparc, it no longer exists.
   * Merge changes from 7.7.1-2.
 
- -- Tormod Volden <debian.tormod@gmail.com>  Sun, 09 May 2010 12:37:53 +0200
+  [ Christopher James Halse Rogers ]
+  * debian/compat:
+    - Bump to v7 for dh_install search path behaviour
+  * debian/rules:
+    - Enable gallium for dri build.
+    - Build nouveau, radeon & swrast gallium drivers
+    - Build OpenVG, OpenGL|ES, dri, glx & egl state trackers
+    - Add /usr/lib/dri-gallium to driver search path to allow classic and
+      gallium drivers to co-exist peacefully.  Install gallium drivers to
+      /usr/lib/dri-gallium.
+  * debian/libgl1-mesa-dri-gallium.install:
+  * debian/libgl1-mesa-dri.install:
+    - “make install” puts classic and gallium drivers in the same path, but
+      builds gallium drivers in the gallium/ subdirectory.  Copy the drivers 
+      directly from the build path, rather than trying to separate them out 
+      post-hock.
+  * debian/control:
+    - Add new packages.
+    - Add new build-depends on libx11-xcb-dev, libxcb-dri2-0-dev, 
+      libxcb-xfixes0-dev and python-libxml2 for gallium.
+  
+ -- Christopher James Halse Rogers <raof@ubuntu.com>  Wed, 26 May 2010 17:55:34 +1000
 
 mesa (7.8.1-1) experimental; urgency=low
 
