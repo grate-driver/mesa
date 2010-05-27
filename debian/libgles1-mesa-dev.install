@@ -1,2 +1,2 @@
-usr/glx/libGLESv1_CM.so
+usr/lib/libGLESv1_CM.so usr/lib
 usr/include/GLES
