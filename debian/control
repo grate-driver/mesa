@@ -168,7 +168,7 @@ Description: A free implementation of the EGL API -- X11 driver debugging symbol
 
 Package: libegl1-mesa-drivers-kms
 Section: libs
-Architecture: any
+Architecture: linux-any
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: A free implementation of the EGL API -- KMS drivers
  This package contains the EGL native platform graphics interface library.
@@ -181,7 +181,7 @@ Description: A free implementation of the EGL API -- KMS drivers
 
 Package: libegl1-mesa-drivers-kms-dbg
 Section: libs
-Architecture: any
+Architecture: linux-any
 Depends: libegl1-mesa-drivers-kms (= ${binary:Version}), ${misc:Depends}
 Description: A free implementation of the EGL API -- KMS driver debugging symbols
  This package contains the EGL native platform graphics interface library.
@@ -408,7 +408,7 @@ Description: Debugging symbols for the Mesa DRI modules
 Package: libgl1-mesa-dri-gallium
 Section: libs
 Priority: optional
-Architecture: any
+Architecture: linux-any
 Depends: ${shlibs:Depends}
 Description: A free implementation of the OpenGL API -- Gallium DRI modules
  This version of Mesa provides GLX and DRI capabilities: it is capable of
@@ -428,7 +428,7 @@ Description: A free implementation of the OpenGL API -- Gallium DRI modules
 Package: libgl1-mesa-dri-gallium-dbg
 Section: debug
 Priority: extra
-Architecture: any
+Architecture: linux-any
 Depends: libgl1-mesa-dri-gallium (= ${binary:Version})
 Description: Debugging symbols for the Mesa DRI modules
  This version of Mesa provides GLX and DRI capabilities: it is capable of
