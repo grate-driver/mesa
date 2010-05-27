@@ -281,7 +281,7 @@ ifeq ($(HAVE_GALLIUM_DRI_DRIVERS), yes)
 endif
 	dh_strip -plibopenvg1-mesa --dbg-package=libopenvg1-mesa-dbg
 	dh_strip -plibegl1-mesa --dbg-package=libegl1-mesa-dbg
-	dh_strip -plibgles1-mesa --dbg-package=libgles2-mesa-dbg
+	dh_strip -plibgles1-mesa --dbg-package=libgles1-mesa-dbg
 	dh_strip -plibgles2-mesa --dbg-package=libgles2-mesa-dbg	
 	dh_strip -plibegl1-mesa-drivers-x11 --dbg-package=libegl1-mesa-drivers-x11-dbg
 ifeq ($(HAVE_KMS), yes)
