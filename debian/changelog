@@ -36,6 +36,8 @@ mesa (7.8.1-2) UNRELEASED; urgency=low
     - New OpenVG package.
   * debian/libegl1-mesa-drivers-x11.install:
     - New gallium EGL drivers package.
+  * debian/libegl1-mesa-drivers-kms.install:
+    - New gallium EGL kms driver package.
   * debian/libgl1-mesa-dri-gallium.install:
   * debian/libgl1-mesa-dri.install:
     - “make install” puts classic and gallium drivers in the same path, but

@@ -75,12 +75,12 @@ else
 endif
 
 confflags-dri = \
-	--disable-egl
 	--with-driver=dri \
 	--with-dri-drivers="$(DRI_DRIVERS)" \
 	--with-demos=xdemos \
 	--libdir=/usr/lib/glx \
 	--with-dri-driverdir=/usr/lib/dri \
+	--with-egl-displays=x11,kms \
 	--enable-glx-tls \
 	--enable-gallium-nouveau \
 	--enable-gallium-radeon \
@@ -263,6 +263,7 @@ binary-arch: install
 	dh_strip -plibgles1-mesa --dbg-package=libgles2-mesa-dbg
 	dh_strip -plibgles2-mesa --dbg-package=libgles2-mesa-dbg	
 	dh_strip -plibegl1-mesa-drivers-x11 --dbg-package=libegl1-mesa-drivers-x11-dbg
+	dh_strip -plibegl1-mesa-drivers-kms --dbg-package=libegl1-mesa-drivers-kms-dbg
 	dh_strip -s --remaining-packages
 	dh_compress -s
 	dh_fixperms -s

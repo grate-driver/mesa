@@ -166,18 +166,31 @@ Description: A free implementation of the EGL API -- X11 driver debugging symbol
  hardware accelerated rendering of EGL-based graphics libraries, such as
  OpenGL|ES and OpenVG, in an X11 environment.
 
-# Package: libegl1-mesa-drivers-kms
-# Section: libs
-# Architecture: any
-# Depends: ${shlibs:Depends}, ${misc:Depends}
-# Description: A free implementation of the EGL API -- KMS drivers
-#  This package contains the EGL native platform graphics interface library.
-#  EGL provides a platform-agnostic mechanism for creating rendering surfaces
-#  for use with other graphics libraries, such as OpenGL|ES and OpenVG.
-#  .
-#  This package contains the drivers required for hardware accelerated rendering
-#  of EGL-based graphics libraries, such as OpenGL|ES and OpenVG in a raw
-#  KMS-framebuffer environment.
+Package: libegl1-mesa-drivers-kms
+Section: libs
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: A free implementation of the EGL API -- KMS drivers
+ This package contains the EGL native platform graphics interface library.
+ EGL provides a platform-agnostic mechanism for creating rendering surfaces
+ for use with other graphics libraries, such as OpenGL|ES and OpenVG.
+ .
+ This package contains the drivers required for hardware accelerated rendering
+ of EGL-based graphics libraries, such as OpenGL|ES and OpenVG in a raw
+ KMS-framebuffer environment.
+
+Package: libegl1-mesa-drivers-kms-dbg
+Section: libs
+Architecture: any
+Depends: libegl1-mesa-drivers-kms (= ${binary:Version}), ${misc:Depends}
+Description: A free implementation of the EGL API -- KMS driver debugging symbols
+ This package contains the EGL native platform graphics interface library.
+ EGL provides a platform-agnostic mechanism for creating rendering surfaces
+ for use with other graphics libraries, such as OpenGL|ES and OpenVG.
+ .
+ This package contains the debugging symbols for the drivers required for 
+ hardware accelerated rendering of EGL-based graphics libraries, such as 
+ OpenGL|ES and OpenVG in a raw KMS-framebuffer environment.
 
 Package: libopenvg1-mesa
 Section: libs
