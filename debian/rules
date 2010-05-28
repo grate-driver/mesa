@@ -261,7 +261,7 @@ binary-indep: install
 binary-arch: install
 	dh_testdir
 	dh_testroot
-	dh_installchangelogs -s
+	dh_installchangelogs -s -XChangeLog
 	dh_installchangelogs -pmesa-common-dev ChangeLog
 	dh_installdocs -s
 	dh_installexamples -s
