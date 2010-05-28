@@ -21,7 +21,7 @@ DEB_HOST_ARCH     ?= $(shell dpkg-architecture -qDEB_HOST_ARCH)
 DEB_HOST_ARCH_OS     ?= $(shell dpkg-architecture -qDEB_HOST_ARCH_OS)
 DEB_HOST_GNU_TYPE  ?= $(shell dpkg-architecture -qDEB_HOST_GNU_TYPE)
 DEB_BUILD_GNU_TYPE ?= $(shell dpkg-architecture -qDEB_BUILD_GNU_TYPE)
-DEB_HOST_GNU_CPU ?= $(shell dpkg-architecture -qDEB_HOST_GNU_CPU)
+DEB_HOST_ARCH_CPU ?= $(shell dpkg-architecture -qDEB_HOST_ARCH_CPU)
 DEB_BUILD_DIR      ?= $(CURDIR)/build
 ifeq ($(DEB_BUILD_GNU_TYPE), $(DEB_HOST_GNU_TYPE))
         confflags += --build=$(DEB_HOST_GNU_TYPE)
@@ -49,33 +49,50 @@ BUILD_STAMPS = $(addprefix $(STAMP)-build-, $(CONFIGS))
 QUILT_STAMPFN = $(STAMP_DIR)/patch
 include /usr/share/quilt/quilt.make
 
-# temporary until we figure out what to build
-confflags += --disable-gallium
-
 confflags-common = \
-	--disable-egl \
 	--disable-glu \
 	--disable-glut \
 	--disable-glw \
 	CFLAGS="$(CFLAGS)"
 
 DRI_DRIVERS = swrast
+GALLIUM_DRIVERS = --enable-gallium-swrast
+# Mesa 7.8 doesn't build a gallium swrast DRI driver
+# This is built in git, and will be built in 7.9
+HAVE_GALLIUM_DRI_DRIVERS = no
+HAVE_KMS = no
+EGL_DISPLAYS = x11
 
 # hurd doesn't do direct rendering
 ifeq ($(DEB_HOST_ARCH_OS), hurd)
 	DIRECT_RENDERING = --disable-driglx-direct
 else
 	DIRECT_RENDERING = --enable-driglx-direct
+
+  ifeq ($(DEB_HOST_ARCH_OS), linux)
+# Nouveau and Radeon require libdrm-nouveau and libdrm-radeon
+# which are only available on linux.
+	GALLIUM_DRIVERS += --enable-gallium-nouveau --enable-gallium-radeon
+	HAVE_GALLIUM_DRI_DRIVERS = yes
+# Although the KMS egl drivers will probably build on kfreebsd & hurd
+# only linux actually has KMS drivers implemented at this point.
+	HAVE_KMS = yes
+  endif
+
   ifeq ($(DEB_HOST_ARCH), lpia)
 	DRI_DRIVERS += i915 i965
   else ifneq ($(DEB_HOST_ARCH), s390)
 	DRI_DRIVERS += mga r128 r200 r300 r600 radeon savage tdfx
-    ifeq ($(DEB_HOST_GNU_CPU), i686)
+    ifeq ($(DEB_HOST_ARCH_CPU), i386)
 	DRI_DRIVERS += i810 i915 i965 sis unichrome
-    else ifeq ($(DEB_HOST_GNU_CPU), x86_64)
+    else ifeq ($(DEB_HOST_ARCH_CPU), amd64)
 	DRI_DRIVERS += i915 i965 sis unichrome
     endif
   endif
+endif
+
+ifeq ($(HAVE_KMS), yes)
+	EGL_DISPLAYS += kms
 endif
 
 confflags-dri = \
@@ -84,34 +101,39 @@ confflags-dri = \
 	--with-demos=xdemos \
 	--libdir=/usr/lib/glx \
 	--with-dri-driverdir=/usr/lib/dri \
+	--with-egl-displays="$(EGL_DISPLAYS)" \
 	--enable-glx-tls \
+	$(GALLIUM_DRIVERS) \
+	--with-state-trackers=egl,es,glx,dri,vega \
 	$(DIRECT_RENDERING) \
 	$(confflags-common)
 
-# Add /usr/lib32/dri/ on 32 bit systems so that this path is used
-# for 32 bit compatibility on 64 bit systems
-ifeq ($(DEB_BUILD_ARCH),i386)
-	confflags-dri += --with-dri-searchpath=/usr/lib/dri:/usr/lib32/dri
-endif
-
 confflags-osmesa = \
+	--disable-egl \
+	--disable-gallium \
 	--with-driver=osmesa \
 	--with-demos= \
 	$(confflags-common)
 
 confflags-osmesa-static = \
+	--disable-egl \
+	--disable-gallium \
 	--with-driver=osmesa \
 	--enable-static \
 	--with-demos= \
 	$(confflags-common)
 
 confflags-osmesa16 = \
+	--disable-egl \
+	--disable-gallium \
 	--with-driver=osmesa \
 	--with-osmesa-bits=16 \
 	--with-demos= \
 	$(confflags-common)
 
 confflags-osmesa16-static = \
+	--disable-egl \
+	--disable-gallium \
 	--with-driver=osmesa \
 	--with-osmesa-bits=16 \
 	--enable-static \
@@ -119,12 +141,16 @@ confflags-osmesa16-static = \
 	$(confflags-common)
 
 confflags-osmesa32 = \
+	--disable-egl \
+	--disable-gallium \
 	--with-driver=osmesa \
 	--with-osmesa-bits=32 \
 	--with-demos= \
 	$(confflags-common)
 
 confflags-osmesa32-static = \
+	--disable-egl \
+	--disable-gallium \
 	--with-driver=osmesa \
 	--with-osmesa-bits=32 \
 	--enable-static \
@@ -132,6 +158,8 @@ confflags-osmesa32-static = \
 	$(confflags-common)
 
 confflags-swx11+glu = \
+	--disable-egl \
+	--disable-gallium \
 	--with-driver=xlib \
 	--disable-gl-osmesa \
 	--with-demos= \
@@ -141,6 +169,8 @@ confflags-swx11+glu = \
 	CFLAGS="$(CFLAGS)"
 
 confflags-swx11+glu-static = \
+	--disable-egl \
+	--disable-gallium \
 	--with-driver=xlib \
 	--disable-gl-osmesa \
 	--enable-static \
@@ -151,6 +181,8 @@ confflags-swx11+glu-static = \
 	CFLAGS="$(CFLAGS)"
 
 confflags-swx11+glu-i386-i686 = \
+	--disable-egl \
+	--disable-gallium \
 	--with-driver=xlib \
 	--disable-gl-osmesa \
 	--with-demos= \
@@ -159,6 +191,18 @@ confflags-swx11+glu-i386-i686 = \
 	--disable-glw \
 	--libdir=/usr/lib/i686/cmov \
 	CFLAGS="$(CFLAGS) -march=i686"
+
+# Add /usr/lib/dri-gallium to the front of the search paths so that users can
+# opt-in to installing gallium drivers there and have them override the classic
+# drivers.
+# Add /usr/lib32/dri/ on 32 bit systems so that this path is used
+# for 32 bit compatibility on 64 bit systems
+ifeq ($(DEB_BUILD_ARCH),i386)
+	confflags-dri += --with-dri-searchpath=/usr/lib/dri-gallium:/usr/lib/dri:/usr/lib32/dri-gallium:/usr/lib32/dri
+else
+	confflags-dri += --with-dri-searchpath=/usr/lib/dri-gallium:/usr/lib/dri 
+endif
+
 
 configure: $(QUILT_STAMPFN) configure.ac
 	autoreconf -vfi
@@ -194,7 +238,7 @@ install: build
 	# Add here commands to install the package into debian/tmp
 	dh_testdir
 	dh_testroot
-	dh_clean -k
+	dh_prep
 	dh_installdirs
 	set -e; for config in $(CONFIGS); do \
 		$(MAKE) -C $(DEB_BUILD_DIR)/$$config DESTDIR=$(CURDIR)/debian/tmp install; \
@@ -224,11 +268,16 @@ binary-indep: install
 binary-arch: install
 	dh_testdir
 	dh_testroot
-	dh_installchangelogs -s
+	dh_installchangelogs -s -XChangeLog
 	dh_installchangelogs -pmesa-common-dev ChangeLog
 	dh_installdocs -s
 	dh_installexamples -s
-	dh_install -s --sourcedir=debian/tmp --list-missing
+
+	# Classic DRI and Gallium DRI are mixed up together here
+	# Remove the whole tree to avoid false-positives in --list-missing, and
+	# install the right files manually.
+	rm -r debian/tmp/usr/lib/dri
+	dh_install -s --list-missing
 
 	# Create an ld.so.conf which says where to find libGL from Mesa
 	echo "/usr/lib/mesa" \
@@ -254,6 +303,17 @@ endif
 	dh_strip -plibgl1-mesa-swx11 --dbg-package=libgl1-mesa-swx11-dbg
 	dh_strip -plibgl1-mesa-glx --dbg-package=libgl1-mesa-glx-dbg
 	dh_strip -plibgl1-mesa-dri --dbg-package=libgl1-mesa-dri-dbg
+ifeq ($(HAVE_GALLIUM_DRI_DRIVERS), yes)
+	dh_strip -plibgl1-mesa-dri-gallium --dbg-package=libgl1-mesa-dri-gallium-dbg
+endif
+	dh_strip -plibopenvg1-mesa --dbg-package=libopenvg1-mesa-dbg
+	dh_strip -plibegl1-mesa --dbg-package=libegl1-mesa-dbg
+	dh_strip -plibgles1-mesa --dbg-package=libgles1-mesa-dbg
+	dh_strip -plibgles2-mesa --dbg-package=libgles2-mesa-dbg	
+	dh_strip -plibegl1-mesa-drivers-x11 --dbg-package=libegl1-mesa-drivers-x11-dbg
+ifeq ($(HAVE_KMS), yes)
+	dh_strip -plibegl1-mesa-drivers-kms --dbg-package=libegl1-mesa-drivers-kms-dbg
+endif
 	dh_strip -s --remaining-packages
 	dh_compress -s
 	dh_fixperms -s
