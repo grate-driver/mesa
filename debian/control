@@ -130,7 +130,7 @@ Description: A free implementation of the EGL API -- debugging symbols
  This package contains the debugging symbols for the EGL library.
 
 Package: libegl1-mesa-dev
-Section: libs
+Section: libdevel
 Architecture: any
 Depends: libegl1-mesa (= ${binary:Version}), ${misc:Depends}
 Description: A free implementation of the EGL API -- development files
@@ -138,6 +138,9 @@ Description: A free implementation of the EGL API -- development files
  programs against EGL native platform graphics interface library.
  EGL provides a platform-agnostic mechanism for creating rendering surfaces
  for use with other graphics libraries, such as OpenGL|ES and OpenVG.
+ .
+ This package provides the development environment for compiling programs
+ against the EGL library.
 
 Package: libegl1-mesa-drivers-x11
 Section: libs
@@ -196,7 +199,7 @@ Package: libopenvg1-mesa
 Section: libs
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
-Description: 
+Description: A free implementation of the OpenVG API -- runtime
  This package contains the mesa implementation of the OpenVG 2D acceleration
  library.  OpenVG provides a device independent and vendor-neutral interface 
  for sophisticated 2D graphical applications, while allowing device 
@@ -222,6 +225,12 @@ Section: libdevel
 Architecture: any
 Depends: libopenvg1-mesa (= ${binary:Version}), libegl1-mesa-dev, ${misc:Depends}
 Description: A free implementation of the OpenVG API -- development files
+ This package contains the mesa implementation of the OpenVG 2D acceleration
+ library.  OpenVG provides a device independent and vendor-neutral interface 
+ for sophisticated 2D graphical applications, while allowing device 
+ manufacturers to provide hardware acceleration on devices ranging from wrist 
+ watches to full microprocessor-based desktop and server machines. 
+ .
  This package contains the development environment required for compiling 
  programs against the OpenVG 2D acceleration library.
 
@@ -253,7 +262,7 @@ Description: A free implementation of the OpenGL|ES 1.x API -- debugging symbols
  This package contains the debugging symbols for the libGLESv1_CM library.
 
 Package: libgles1-mesa-dev
-Section: libs
+Section: libdevel
 Architecture: any
 Depends: libgles1-mesa (= ${binary:Version}), libegl1-mesa-dev, ${misc:Depends}
 Description: A free implementation of the OpenGL|ES 1.x API -- development files
@@ -263,6 +272,9 @@ Description: A free implementation of the OpenGL|ES 1.x API -- development files
  special needs of embedded systems.
  .
  OpenGL|ES 1.x provides an API for fixed-function hardware.
+ .
+ This package provides a development environment for building programs using
+ the OpenGL|ES 1.x APIs.
 
 Package: libgles2-mesa
 Section: libs
@@ -305,6 +317,9 @@ Description: A free implementation of the OpenGL|ES 2.x API -- development files
  .
  OpenGL|ES 2.x provides an API for programmable hardware including vertex
  and fragment shaders.
+ .
+ This package provides a development environment for building applications 
+ using the OpenGL|ES 2.x APIs.
 
 Package: libgl1-mesa-glx
 Section: libs
@@ -407,9 +422,8 @@ Description: Debugging symbols for the Mesa DRI modules
 
 Package: libgl1-mesa-dri-gallium
 Section: libs
-Priority: optional
 Architecture: linux-any
-Depends: ${shlibs:Depends}
+Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: A free implementation of the OpenGL API -- Gallium DRI modules
  This version of Mesa provides GLX and DRI capabilities: it is capable of
  both direct and indirect rendering.  For direct rendering, it can use DRI
@@ -429,8 +443,8 @@ Package: libgl1-mesa-dri-gallium-dbg
 Section: debug
 Priority: extra
 Architecture: linux-any
-Depends: libgl1-mesa-dri-gallium (= ${binary:Version})
-Description: Debugging symbols for the Mesa DRI modules
+Depends: libgl1-mesa-dri-gallium (= ${binary:Version}), ${misc:Depends}
+Description: Debugging symbols for the Mesa Gallium DRI modules
  This version of Mesa provides GLX and DRI capabilities: it is capable of
  both direct and indirect rendering.  For direct rendering, it can use DRI
  modules from the libgl1-mesa-dri package to accelerate drawing.
