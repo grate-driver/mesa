@@ -15,9 +15,6 @@ mesa (7.8.1-2) UNRELEASED; urgency=low
     - Enable egl for dri build.
     - Build nouveau, radeon & swrast gallium drivers
     - Build OpenVG, OpenGL|ES, dri, glx & egl state trackers
-    - Add /usr/lib/dri-gallium to driver search path to allow classic and
-      gallium drivers to co-exist peacefully.  Install gallium drivers to
-      /usr/lib/dri-gallium.
   * debian/libegl1-mesa-dev.install:
   * debian/libegl1-mesa.install:
   * debian/libegl1-mesa.symbols:
