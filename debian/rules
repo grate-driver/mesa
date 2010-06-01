@@ -269,6 +269,12 @@ binary-arch: install
 	# Remove the whole tree to avoid false-positives in --list-missing, and
 	# install the right files manually.
 	rm -r debian/tmp/usr/lib/dri
+	# Radeon searches for r{200,300,600}_dri only, but the gallium driver
+	# is (at the moment) radeong_dri.  Rename it to r300_dri, as it
+	# fails to support r600.
+	mv build/dri/glx/gallium/radeong_dri.so \
+		build/dri/glx/gallium/r300_dri.so
+
 	dh_install -s --list-missing
 	dh_installman -s
 	dh_lintian -s
