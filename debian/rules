@@ -192,11 +192,6 @@ confflags-swx11+glu-i386-i686 = \
 	--libdir=/usr/lib/i686/cmov \
 	CFLAGS="$(CFLAGS) -march=i686"
 
-# Add /usr/lib/dri-gallium to the front of the search paths so that users can
-# opt-in to installing gallium drivers there and have them override the classic
-# drivers.
-confflags-dri += --with-dri-searchpath=/usr/lib/dri-gallium:/usr/lib/dri 
-
 configure: $(QUILT_STAMPFN) configure.ac
 	autoreconf -vfi
 
