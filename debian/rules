@@ -70,9 +70,9 @@ else
 	DIRECT_RENDERING = --enable-driglx-direct
 
   ifeq ($(DEB_HOST_ARCH_OS), linux)
-# Nouveau and Radeon require libdrm-nouveau and libdrm-radeon
-# which are only available on linux.
-	GALLIUM_DRIVERS += --enable-gallium-nouveau --enable-gallium-radeon
+# Gallium drivers require libdrm-{intel,nouveau,radeon}, only available on Linux
+	GALLIUM_DRIVERS += --enable-gallium-nouveau --enable-gallium-radeon \
+				--enable-gallium-intel
 	HAVE_GALLIUM_DRI_DRIVERS = yes
 # Although the KMS egl drivers will probably build on kfreebsd & hurd
 # only linux actually has KMS drivers implemented at this point.
@@ -269,6 +269,10 @@ binary-arch: install
 	# fails to support r600.
 	mv build/dri/glx/gallium/radeong_dri.so \
 		build/dri/glx/gallium/r300_dri.so
+	# Intel i965 Gallium appears to do nothing more than generate GPU 
+	# lockups.  Kill it with fire.  i915 is apparently useful.
+	rm build/dri/glx/gallium/i965_dri.so
+	rm debian/tmp/usr/lib/glx/egl/egl_*_i965.so
 
 	dh_install -s --list-missing
 	dh_installman -s
