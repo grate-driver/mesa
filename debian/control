@@ -434,18 +434,15 @@ Description: A free implementation of the OpenGL API -- Extra DRI modules
  in this package may provide more features than the drivers in the
  libgl1-mesa-dri at the cost of less stability.
  .
- This package currently cotains drivers for Nvidia, ATi,
- and some Intel cards.
- .
  For a complete description of Mesa, please look at the
  libgl1-mesa-swx11 package.
 
-Package: libgl1-mesa-dri-gallium-dbg
+Package: libgl1-mesa-dri-experimental-dbg
 Section: debug
 Priority: extra
 Architecture: linux-any
-Depends: libgl1-mesa-dri-gallium (= ${binary:Version}), ${misc:Depends}
-Description: Debugging symbols for the Mesa Gallium DRI modules
+Depends: libgl1-mesa-dri-experimental (= ${binary:Version}), ${misc:Depends}
+Description: Debugging symbols for the experimental Mesa DRI modules
  This version of Mesa provides GLX and DRI capabilities: it is capable of
  both direct and indirect rendering.  For direct rendering, it can use DRI
  modules from the libgl1-mesa-dri package to accelerate drawing.

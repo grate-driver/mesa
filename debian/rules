@@ -284,7 +284,7 @@ binary-arch: install
 	dh_strip -plibgl1-mesa-glx --dbg-package=libgl1-mesa-glx-dbg
 	dh_strip -plibgl1-mesa-dri --dbg-package=libgl1-mesa-dri-dbg
 ifeq ($(HAVE_GALLIUM_DRI_DRIVERS), yes)
-	dh_strip -plibgl1-mesa-dri-gallium --dbg-package=libgl1-mesa-dri-gallium-dbg
+	dh_strip -plibgl1-mesa-dri-experimental --dbg-package=libgl1-mesa-dri-experimental-dbg
 endif
 	dh_strip -plibopenvg1-mesa --dbg-package=libopenvg1-mesa-dbg
 	dh_strip -plibegl1-mesa --dbg-package=libegl1-mesa-dbg
