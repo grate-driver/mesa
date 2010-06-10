@@ -70,9 +70,8 @@ else
 	DIRECT_RENDERING = --enable-driglx-direct
 
   ifeq ($(DEB_HOST_ARCH_OS), linux)
-# Gallium drivers require libdrm-{intel,nouveau,radeon}, only available on Linux
-	GALLIUM_DRIVERS += --enable-gallium-nouveau --enable-gallium-radeon \
-				--enable-gallium-intel
+# Gallium drivers require libdrm-{nouveau,radeon}, only available on Linux
+	GALLIUM_DRIVERS += --enable-gallium-nouveau --enable-gallium-radeon
 	HAVE_GALLIUM_DRI_DRIVERS = yes
 # Although the KMS egl drivers will probably build on kfreebsd & hurd
 # only linux actually has KMS drivers implemented at this point.
@@ -81,12 +80,15 @@ else
 
   ifeq ($(DEB_HOST_ARCH), lpia)
 	DRI_DRIVERS += i915 i965
+	GALLIUM_DRIVERS += --enable-gallium-intel
   else ifneq ($(DEB_HOST_ARCH), s390)
 	DRI_DRIVERS += mach64 mga r128 r200 r300 r600 radeon savage tdfx
     ifeq ($(DEB_HOST_ARCH_CPU), i386)
 	DRI_DRIVERS += i810 i915 i965 sis unichrome
+	GALLIUM_DRIVERS += --enable-gallium-intel
     else ifeq ($(DEB_HOST_ARCH_CPU), amd64)
 	DRI_DRIVERS += i915 i965 sis unichrome
+	GALLIUM_DRIVERS += --enable-gallium-intel
     endif
   endif
 endif
@@ -271,8 +273,8 @@ binary-arch: install
 		build/dri/glx/gallium/r300_dri.so
 	# Intel i965 Gallium appears to do nothing more than generate GPU 
 	# lockups.  Kill it with fire.  i915 is apparently useful.
-	rm build/dri/glx/gallium/i965_dri.so
-	rm debian/tmp/usr/lib/glx/egl/egl_*_i965.so
+	-rm build/dri/glx/gallium/i965_dri.so
+	-rm debian/tmp/usr/lib/glx/egl/egl_*_i965.so
 
 	dh_install -s --list-missing
 	dh_installman -s
