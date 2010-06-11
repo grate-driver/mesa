@@ -1,4 +1,4 @@
-mesa (7.8.1-2) UNRELEASED; urgency=low
+mesa (7.8.1-2) experimental; urgency=low
 
   [ Tormod Volden ]
   * debian/rules: Do not strip the same packages twice
@@ -15,9 +15,6 @@ mesa (7.8.1-2) UNRELEASED; urgency=low
     - Enable egl for dri build.
     - Build nouveau, radeon & swrast gallium drivers
     - Build OpenVG, OpenGL|ES, dri, glx & egl state trackers
-    - Add /usr/lib/dri-gallium to driver search path to allow classic and
-      gallium drivers to co-exist peacefully.  Install gallium drivers to
-      /usr/lib/dri-gallium.
   * debian/libegl1-mesa-dev.install:
   * debian/libegl1-mesa.install:
   * debian/libegl1-mesa.symbols:
@@ -38,7 +35,13 @@ mesa (7.8.1-2) UNRELEASED; urgency=low
     - New gallium EGL drivers package.
   * debian/libegl1-mesa-drivers-kms.install:
     - New gallium EGL kms driver package.
-  * debian/libgl1-mesa-dri-gallium.install:
+  * debian/egl.pc:
+  * debian/vg.pc:
+  * debian/glesv1_cm.pc:
+  * debian/glesv2.pc:
+    - Pull pkg-config files from master and install them in the respective
+      -dev packages.
+  * debian/libgl1-mesa-dri-experimental.install:
   * debian/libgl1-mesa-dri.install:
     - “make install” puts classic and gallium drivers in the same path, but
       builds gallium drivers in the gallium/ subdirectory.  Copy the drivers 
@@ -48,8 +51,9 @@ mesa (7.8.1-2) UNRELEASED; urgency=low
     - Add new packages.
     - Add new build-depends on libx11-xcb-dev, libxcb-dri2-0-dev, 
       libxcb-xfixes0-dev and python-libxml2 for gallium.
-  
- -- Christopher James Halse Rogers <raof@ubuntu.com>  Wed, 26 May 2010 17:55:34 +1000
+    - Bump build-depends on dpkg-dev for regex in symbols files.
+
+ -- Julien Cristau <jcristau@debian.org>  Fri, 11 Jun 2010 03:19:09 +0200
 
 mesa (7.8.1-1ubuntu1) maverick; urgency=low
 
