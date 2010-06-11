@@ -6,6 +6,10 @@
 #export DH_VERBOSE=1
 
 CFLAGS = -Wall -g
+ifeq (,$(filter ccache,$(DEB_BUILD_OPTIONS)))
+	CC := ccache $(CC)
+	CXX := ccache $(CXX)
+endif
 ifneq (,$(filter noopt,$(DEB_BUILD_OPTIONS)))
 	CFLAGS += -O0
 else
@@ -101,7 +105,6 @@ confflags-dri = \
 	--with-driver=dri \
 	--with-dri-drivers="$(DRI_DRIVERS)" \
 	--with-demos=xdemos \
-	--libdir=/usr/lib/glx \
 	--with-dri-driverdir=/usr/lib/dri \
 	--with-egl-displays="$(EGL_DISPLAYS)" \
 	--enable-glx-tls \
@@ -217,7 +220,7 @@ $(STAMP)-build-%: configure
 	find $(CURDIR)/* -maxdepth 0 -not -path '$(DEB_BUILD_DIR)*' | \
 		xargs cp -rlf -t $(DEB_BUILD_DIR)/$*
 	cd $(DEB_BUILD_DIR)/$* && \
-	../../configure --prefix=/usr --mandir=\$${prefix}/share/man \
+	../../configure CC="$(CC)" CXX="$(CXX)" --prefix=/usr --mandir=\$${prefix}/share/man \
 	             --infodir=\$${prefix}/share/info --sysconfdir=/etc \
 	             --localstatedir=/var $(confflags) $(confflags-$*)
 	cd $(DEB_BUILD_DIR)/$* && $(MAKE)
@@ -230,9 +233,10 @@ install: build
 	dh_testroot
 	dh_prep
 	dh_installdirs
-	set -e; for config in $(CONFIGS); do \
+	set -e; for config in $(filter-out dri, $(CONFIGS)); do \
 		$(MAKE) -C $(DEB_BUILD_DIR)/$$config DESTDIR=$(CURDIR)/debian/tmp install; \
 	done
+	$(MAKE) -C $(DEB_BUILD_DIR)/dri DESTDIR=$(CURDIR)/debian/tmp/dri install
 
 clean: unpatch
 	dh_testdir
@@ -265,16 +269,16 @@ binary-arch: install
 	# Classic DRI and Gallium DRI are mixed up together here
 	# Remove the whole tree to avoid false-positives in --list-missing, and
 	# install the right files manually.
-	rm -r debian/tmp/usr/lib/dri
+	rm -r debian/tmp/dri/usr/lib/dri
 	# Radeon searches for r{200,300,600}_dri only, but the gallium driver
 	# is (at the moment) radeong_dri.  Rename it to r300_dri, as it
 	# fails to support r600.
-	mv build/dri/glx/gallium/radeong_dri.so \
-		build/dri/glx/gallium/r300_dri.so
+	mv build/dri/lib/gallium/radeong_dri.so \
+		build/dri/lib/gallium/r300_dri.so
 	# Intel i965 Gallium appears to do nothing more than generate GPU 
 	# lockups.  Kill it with fire.  i915 is apparently useful.
-	-rm build/dri/glx/gallium/i965_dri.so
-	-rm debian/tmp/usr/lib/glx/egl/egl_*_i965.so
+	-rm build/dri/lib/gallium/i965_dri.so
+	-rm debian/tmp/dri/usr/lib/egl/egl_*_i965.so
 
 	dh_install -s --list-missing
 	dh_installman -s
