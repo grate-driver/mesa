@@ -6,10 +6,6 @@
 #export DH_VERBOSE=1
 
 CFLAGS = -Wall -g
-ifeq (,$(filter ccache,$(DEB_BUILD_OPTIONS)))
-	CC := ccache $(CC)
-	CXX := ccache $(CXX)
-endif
 ifneq (,$(filter noopt,$(DEB_BUILD_OPTIONS)))
 	CFLAGS += -O0
 else
@@ -220,7 +216,7 @@ $(STAMP)-build-%: configure
 	find $(CURDIR)/* -maxdepth 0 -not -path '$(DEB_BUILD_DIR)*' | \
 		xargs cp -rlf -t $(DEB_BUILD_DIR)/$*
 	cd $(DEB_BUILD_DIR)/$* && \
-	../../configure CC="$(CC)" CXX="$(CXX)" --prefix=/usr --mandir=\$${prefix}/share/man \
+	../../configure --prefix=/usr --mandir=\$${prefix}/share/man \
 	             --infodir=\$${prefix}/share/info --sysconfdir=/etc \
 	             --localstatedir=/var $(confflags) $(confflags-$*)
 	cd $(DEB_BUILD_DIR)/$* && $(MAKE)
