@@ -9,6 +9,8 @@ mesa (7.8.1-3) UNRELEASED; urgency=low
   [ Julien Cristau ]
   * Add ${misc:Depends} to all packages.
   * libc6-dev is build-essential, no need to depend on it.
+  * Replace nonsensical dependency of libglw1-mesa-dev on libxext6 with a
+    dependency on libxt-dev and lesstif2-dev.
 
  -- Robert Hooker <sarvatt@ubuntu.com>  Fri, 11 Jun 2010 09:46:20 -0400
 

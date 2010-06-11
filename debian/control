@@ -666,7 +666,8 @@ Architecture: any
 Depends:
  libglw1-mesa (= ${binary:Version}),
  libx11-dev,
- libxext6,
+ libxt-dev,
+ lesstif2-dev,
  mesa-common-dev (= ${binary:Version}),
  ${shlibs:Depends},
  ${misc:Depends},
