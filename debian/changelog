@@ -1,4 +1,4 @@
-mesa (7.8.1-2) UNRELEASED; urgency=low
+mesa (7.8.1-2) experimental; urgency=low
 
   [ Tormod Volden ]
   * debian/rules: Do not strip the same packages twice
@@ -52,8 +52,8 @@ mesa (7.8.1-2) UNRELEASED; urgency=low
     - Add new build-depends on libx11-xcb-dev, libxcb-dri2-0-dev, 
       libxcb-xfixes0-dev and python-libxml2 for gallium.
     - Bump build-depends on dpkg-dev for regex in symbols files.
-  
- -- Christopher James Halse Rogers <raof@ubuntu.com>  Thu, 10 Jun 2010 21:10:22 +1000
+
+ -- Julien Cristau <jcristau@debian.org>  Fri, 11 Jun 2010 03:19:09 +0200
 
 mesa (7.8.1-1) experimental; urgency=low
 
