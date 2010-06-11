@@ -1,9 +1,13 @@
 mesa (7.8.1-3) UNRELEASED; urgency=low
 
+  [ Robert Hooker ]
   * Adjust the build system to install the dri target in a seperate
     DESTDIR, no longer passing --libdir=/usr/lib/glx at configure time
     messing with the .pc's since it is used for a majority of the 
     packages now.
+
+  [ Julien Cristau ]
+  * Add ${misc:Depends} to all packages.
 
  -- Robert Hooker <sarvatt@ubuntu.com>  Fri, 11 Jun 2010 09:46:20 -0400
 
