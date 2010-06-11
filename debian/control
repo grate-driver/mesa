@@ -100,7 +100,6 @@ Priority: extra
 Architecture: any
 Depends:
  libgl1-mesa-swx11 (= ${binary:Version}),
- libc6-dev,
  libx11-dev,
  libxext6,
  mesa-common-dev (= ${binary:Version}),
@@ -542,7 +541,6 @@ Package: libgl1-mesa-dev
 Section: libdevel
 Architecture: any
 Depends:
- libc6-dev,
  mesa-common-dev (= ${binary:Version}),
  libgl1-mesa-glx (= ${binary:Version}),
  ${misc:Depends},
@@ -667,7 +665,6 @@ Section: libdevel
 Architecture: any
 Depends:
  libglw1-mesa (= ${binary:Version}),
- libc6-dev,
  libx11-dev,
  libxext6,
  mesa-common-dev (= ${binary:Version}),
