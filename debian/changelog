@@ -503,6 +503,8 @@ mesa (7.6.0-1ubuntu1) karmic; urgency=low
       (LP: #433488)
   * See http://www.mesa3d.org/relnotes-7.6.html for more details.
 
+ -- Bryce Harrington <bryce@ubuntu.com>  Wed, 07 Oct 2009 14:51:41 -0700
+  
 mesa (7.6-1) unstable; urgency=low
 
   [ Brice Goglin ]
