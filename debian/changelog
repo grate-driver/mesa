@@ -1,3 +1,28 @@
+mesa (7.8.1-3ubuntu1) maverick; urgency=low
+
+  * Merge from Debian experimental git.  Remaining Ubuntu changes:
+   - debian/control
+      + Drop lesstif-dev from Build-Depends.
+      + Comment out GLw libs since it depends on lesstif-dev.
+      + Drop i686 swx11 libgl package.
+      + Add libdrm-dev to mesa-common-dev Depends.
+    - debian/rules
+      + Unexport LDFLAGS (amd64 FTBFS).
+      + Use --disable-glw for swx11 targets too.
+      + Don't enable motif for swx11 targets.
+      + Use lzma compression for binary debs to save CD space.
+    - debian/patches
+      + 100_no_abi_tag.patch
+      + 101_ubuntu_hidden_glname.patch
+      + 103_savage-expose_fbmodes_with_nonzero_alpha.patch
+      + 107_glxgears_is_not_a_benchmark.patch
+    - rules, libgl1-mesa-{glx,dev,swx11,swx11-dev}.install,
+      libgl1-mesa-{glx,swx11}.{postinst,prerm}, libgl1-mesa-dev.links:
+      Install libGL.so* in /usr/lib/mesa to allow things to work with
+      alternatives.
+
+ -- Christopher James Halse Rogers <raof@ubuntu.com>  Tue, 15 Jun 2010 08:49:05 +1000
+
 mesa (7.8.1-3) UNRELEASED; urgency=low
 
   [ Robert Hooker ]
