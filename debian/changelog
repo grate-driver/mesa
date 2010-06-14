@@ -1,3 +1,29 @@
+mesa (7.8.1-3) UNRELEASED; urgency=low
+
+  [ Robert Hooker ]
+  * Adjust the build system to install the dri target in a seperate
+    DESTDIR, no longer passing --libdir=/usr/lib/glx at configure time
+    messing with the .pc's since it is used for a majority of the 
+    packages now.
+
+  [ Julien Cristau ]
+  * Add ${misc:Depends} to all packages.
+  * libc6-dev is build-essential, no need to depend on it.
+  * Replace nonsensical dependency of libglw1-mesa-dev on libxext6 with a
+    dependency on libxt-dev and lesstif2-dev.
+  * Add new lintian overrides for the package-name-doesnt-match-sonames stuff.
+
+  [ Christopher James Halse Rogers ]
+  * debian/patches/07-nouveau-update.diff:
+    - Pull in nouveau_class.h header no longer shipped by libdrm 2.4.21 and 
+      update nouveau build to use it.  Fixes FTBFS against libdrm 2.4.21.
+  * debian/rules:
+    - Simplify selecting which gallium drivers are built.  Use this to only
+      act on gallium packages on archs where we're actually building them.
+      Part of the fix for FTBFS on Hurd and kFreeBSD.
+
+ -- Christopher James Halse Rogers <raof@ubuntu.com>  Mon, 14 Jun 2010 13:28:59 +1000
+
 mesa (7.8.1-2) experimental; urgency=low
 
   [ Tormod Volden ]
