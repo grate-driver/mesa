@@ -13,7 +13,12 @@ mesa (7.8.1-3) UNRELEASED; urgency=low
     dependency on libxt-dev and lesstif2-dev.
   * Add new lintian overrides for the package-name-doesnt-match-sonames stuff.
 
- -- Robert Hooker <sarvatt@ubuntu.com>  Fri, 11 Jun 2010 09:46:20 -0400
+  [ Christopher James Halse Rogers ]
+  * debian/patches/07-nouveau-update.diff:
+    - Pull in nouveau_class.h header no longer shipped by libdrm 2.4.21 and 
+      update nouveau build to use it.  Fixes FTBFS against libdrm 2.4.21.
+
+ --
 
 mesa (7.8.1-2) experimental; urgency=low
 
