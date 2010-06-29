@@ -1,4 +1,4 @@
-mesa (7.8.1-3) UNRELEASED; urgency=low
+mesa (7.8.2-1) UNRELEASED; urgency=low
 
   [ Robert Hooker ]
   * Adjust the build system to install the dri target in a seperate
@@ -14,6 +14,7 @@ mesa (7.8.1-3) UNRELEASED; urgency=low
     dependency on libxt-dev and lesstif2-dev.
   * Add new lintian overrides for the package-name-doesnt-match-sonames stuff.
   * Don't ship progs/objviewer in the tarball, it's insanely big and unused.
+  * New upstream release.
 
   [ Christopher James Halse Rogers ]
   * debian/patches/07-nouveau-update.diff:
@@ -24,7 +25,7 @@ mesa (7.8.1-3) UNRELEASED; urgency=low
       act on gallium packages on archs where we're actually building them.
       Part of the fix for FTBFS on Hurd and kFreeBSD.
 
- -- Robert Hooker <sarvatt@ubuntu.com>  Tue, 15 Jun 2010 18:26:48 -0400
+ -- Julien Cristau <jcristau@debian.org>  Tue, 29 Jun 2010 11:56:18 +0100
 
 mesa (7.8.1-2) experimental; urgency=low
 
