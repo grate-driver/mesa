@@ -15,6 +15,7 @@ mesa (7.8.2-1) UNRELEASED; urgency=low
   * Add new lintian overrides for the package-name-doesnt-match-sonames stuff.
   * Don't ship progs/objviewer in the tarball, it's insanely big and unused.
   * New upstream release.
+  * Refresh patches.
 
   [ Christopher James Halse Rogers ]
   * debian/patches/07-nouveau-update.diff:
