@@ -18,6 +18,8 @@ mesa (7.8.2-1) UNRELEASED; urgency=low
   * Refresh patches.
   * Stop shipping an upstream git log, it's unlikely to be useful to anyone,
     and it's big.
+  * debian/scripts/choose-configs: use DEB_HOST_ARCH, not DEB_BUILD_ARCH
+    (closes: #451648).
 
   [ Christopher James Halse Rogers ]
   * debian/patches/07-nouveau-update.diff:
