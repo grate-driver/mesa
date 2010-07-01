@@ -220,6 +220,7 @@ ifeq ($(findstring intel, $(GALLIUM_DRIVERS)), intel)
 	rm build/dri/lib/gallium/i965_dri.so
 	rm build/dri/lib/egl_*_i965.so
 endif
+	>$@
 
 $(STAMP)-build-%: configure
 	dh_testdir
