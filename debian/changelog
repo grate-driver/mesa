@@ -20,6 +20,7 @@ mesa (7.8.2-1) UNRELEASED; urgency=low
     and it's big.
   * debian/scripts/choose-configs: use DEB_HOST_ARCH, not DEB_BUILD_ARCH
     (closes: #451648).
+  * Rename radeong_dri.so to r300_dri.so in build, not binary.
 
   [ Christopher James Halse Rogers ]
   * debian/patches/07-nouveau-update.diff:
