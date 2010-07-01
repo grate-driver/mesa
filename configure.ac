@@ -1102,10 +1102,6 @@ fi
 
 if test "x$enable_glut" = xyes; then
     SRC_DIRS="$SRC_DIRS glut/glx"
-    GLUT_CFLAGS=""
-    if test "x$GCC" = xyes; then
-        GLUT_CFLAGS="-fexceptions"
-    fi
     if test "$x11_pkgconfig" = yes; then
         PKG_CHECK_MODULES([GLUT],[x11 xmu xi])
         GLUT_PC_REQ_PRIV="x11 xmu xi"
@@ -1115,6 +1111,9 @@ if test "x$enable_glut" = xyes; then
         GLUT_LIB_DEPS="$X_LIBS -lX11 -lXmu -lXi"
         GLUT_PC_LIB_PRIV="$GLUT_LIB_DEPS"
         GLUT_PC_CFLAGS="$X11_INCLUDES"
+    fi
+    if test "x$GCC" = xyes; then
+        GLUT_CFLAGS="$GLUT_CFLAGS -fexceptions"
     fi
     GLUT_LIB_DEPS="$GLUT_LIB_DEPS -lm"
     GLUT_PC_LIB_PRIV="$GLUT_PC_LIB_PRIV -lm"
