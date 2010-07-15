@@ -1,3 +1,13 @@
+mesa (7.8.1-3ubuntu3) maverick; urgency=low
+
+  [ Alexandros Frantzis ]
+  * Make libegl1-mesa-dev depend on the following libraries which
+    contain the required .pc files, as specified in egl.pc:
+    libdrm-dev, x11proto-dri2-dev, x11proto-gl-dev, libx11-dev,
+    libxext-dev, libxxf86vm-dev, libxdamage-dev, libxfixes-dev.
+
+ -- Alberto Milone <alberto.milone@canonical.com>  Thu, 15 Jul 2010 19:01:10 +0200
+
 mesa (7.8.1-3ubuntu2) maverick; urgency=low
 
   * Fix up the mesa-common-dev header installation location
