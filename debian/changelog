@@ -1,3 +1,10 @@
+mesa (7.8.2-2) UNRELEASED; urgency=low
+
+  * Add missing dependencies to libegl1-mesa-dev, thanks to Alexandros
+    Frantzis (LP: #600243).
+
+ -- Julien Cristau <jcristau@debian.org>  Thu, 15 Jul 2010 17:05:56 +0100
+
 mesa (7.8.2-1) experimental; urgency=low
 
   [ Robert Hooker ]
