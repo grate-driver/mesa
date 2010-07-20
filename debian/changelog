@@ -1,4 +1,4 @@
-mesa (7.8.2-2) UNRELEASED; urgency=low
+mesa (7.8.2-2) experimental; urgency=low
 
   * Add missing dependencies to libegl1-mesa-dev, thanks to Alexandros
     Frantzis (LP: #600243).
@@ -8,7 +8,7 @@ mesa (7.8.2-2) UNRELEASED; urgency=low
   * Pull from 7.8-branch up to commit d06e011.
   * Fixup hurd and kfreebsd patches to apply.
 
- -- Julien Cristau <jcristau@debian.org>  Thu, 15 Jul 2010 17:05:56 +0100
+ -- Julien Cristau <jcristau@debian.org>  Tue, 20 Jul 2010 15:57:31 +0200
 
 mesa (7.8.2-1) experimental; urgency=low
 
