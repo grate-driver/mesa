@@ -4,3 +4,4 @@
 05_hurd-ftbfs.diff
 06_kfreebsd-ftbfs.diff
 07-nouveau-update.diff
+08-kfreebsd-gallium.diff
