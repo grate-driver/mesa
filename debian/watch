@@ -1,13 +1,6 @@
-# NOTE: This provides version information only.
-# uscan on its own will not download the correct tarball.
-# See debian/rules get-orig-source
-#
 version=3
 opts="uversionmangle=s/-rc/~rc/" \
 http://sf.net/mesa3d/MesaLib-(.*)\.tar\.gz
 
 opts="uversionmangle=s/-rc/~rc/" \
 ftp://freedesktop.org/pub/mesa/([\d\.]*)/ MesaLib-(.*)\.tar\.gz
-
-opts="uversionmangle=s/-rc/~rc/" \
-ftp://freedesktop.org/pub/mesa/([\d\.]*)/ MesaDemos-(.*)\.tar\.gz

@@ -398,6 +398,7 @@ dnl Check to see if dlopen is in default libraries (like Solaris, which
 dnl has it in libc), or if libdl is needed to get it.
 AC_CHECK_FUNC([dlopen], [],
     [AC_CHECK_LIB([dl], [dlopen], [DLOPEN_LIBS="-ldl"])])
+AC_SUBST([DLOPEN_LIBS])
 
 dnl See if posix_memalign is available
 AC_CHECK_FUNC([posix_memalign], [DEFINES="$DEFINES -DHAVE_POSIX_MEMALIGN"])
@@ -547,8 +548,14 @@ else
     x11_pkgconfig=no
 fi
 dnl Use the autoconf macro if no pkg-config files
-if test "$x11_pkgconfig" = no; then
+if test "$x11_pkgconfig" = yes; then
+    PKG_CHECK_MODULES([X11], [x11])
+else
     AC_PATH_XTRA
+    test -z "$X11_CFLAGS" && X11_CFLAGS="$X_CFLAGS"
+    test -z "$X11_LIBS" && X11_LIBS="$X_LIBS -lX11"
+    AC_SUBST([X11_CFLAGS])
+    AC_SUBST([X11_LIBS])
 fi
 
 dnl Try to tell the user that the --x-* options are only used when
@@ -693,7 +700,7 @@ AC_SUBST([DRI_DRIVER_SEARCH_DIR])
 dnl Direct rendering or just indirect rendering
 AC_ARG_ENABLE([driglx-direct],
     [AS_HELP_STRING([--disable-driglx-direct],
-        [enable direct rendering in GLX for DRI @<:@default=enabled@:>@])],
+        [enable direct rendering in GLX and EGL for DRI @<:@default=enabled@:>@])],
     [driglx_direct="$enableval"],
     [driglx_direct="yes"])
 dnl Which drivers to build - default is chosen by platform
@@ -859,7 +866,7 @@ else
 fi
 AC_ARG_ENABLE([gl-osmesa],
     [AS_HELP_STRING([--enable-gl-osmesa],
-        [enable OSMesa on libGL @<:@default=enabled for xlib driver@:>@])],
+        [enable OSMesa with libGL @<:@default=enabled for xlib driver@:>@])],
     [gl_osmesa="$enableval"],
     [gl_osmesa="$default_gl_osmesa"])
 if test "x$gl_osmesa" = xyes; then
@@ -894,8 +901,8 @@ x16|x32)
 esac
 AC_SUBST([OSMESA_LIB])
 
-case "$mesa_driver" in
-osmesa)
+case "$DRIVER_DIRS" in
+*osmesa*)
     # only link libraries with osmesa if shared
     if test "$enable_static" = no; then
         OSMESA_LIB_DEPS="-lm -lpthread $SELINUX_LIBS $DLOPEN_LIBS"
@@ -905,19 +912,7 @@ osmesa)
     OSMESA_MESA_DEPS=""
     OSMESA_PC_LIB_PRIV="-lm -lpthread $SELINUX_LIBS $DLOPEN_LIBS"
     ;;
-*)
-    # Link OSMesa to libGL otherwise
-    OSMESA_LIB_DEPS=""
-    # only link libraries with osmesa if shared
-    if test "$enable_static" = no; then
-        OSMESA_MESA_DEPS='-l$(GL_LIB)'
-    else
-        OSMESA_MESA_DEPS=""
-    fi
-    OSMESA_PC_REQ="gl"
-    ;;
 esac
-OSMESA_PC_LIB_PRIV="$OSMESA_PC_LIB_PRIV"
 AC_SUBST([OSMESA_LIB_DEPS])
 AC_SUBST([OSMESA_MESA_DEPS])
 AC_SUBST([OSMESA_PC_REQ])
@@ -1108,10 +1103,6 @@ fi
 
 if test "x$enable_glut" = xyes; then
     SRC_DIRS="$SRC_DIRS glut/glx"
-    GLUT_CFLAGS=""
-    if test "x$GCC" = xyes; then
-        GLUT_CFLAGS="-fexceptions"
-    fi
     if test "$x11_pkgconfig" = yes; then
         PKG_CHECK_MODULES([GLUT],[x11 xmu xi])
         GLUT_PC_REQ_PRIV="x11 xmu xi"
@@ -1121,6 +1112,9 @@ if test "x$enable_glut" = xyes; then
         GLUT_LIB_DEPS="$X_LIBS -lX11 -lXmu -lXi"
         GLUT_PC_LIB_PRIV="$GLUT_LIB_DEPS"
         GLUT_PC_CFLAGS="$X11_INCLUDES"
+    fi
+    if test "x$GCC" = xyes; then
+        GLUT_CFLAGS="$GLUT_CFLAGS -fexceptions"
     fi
     GLUT_LIB_DEPS="$GLUT_LIB_DEPS -lm"
     GLUT_PC_LIB_PRIV="$GLUT_PC_LIB_PRIV -lm"
@@ -1222,6 +1216,10 @@ yes)
         egl)
             if test "x$enable_egl" != xyes; then
                 AC_MSG_ERROR([cannot build egl state tracker without EGL library])
+            fi
+            # define GLX_DIRECT_RENDERING even when the driver is not dri
+            if test "x$mesa_driver" != xdri -a "x$driglx_direct" = xyes; then
+                DEFINES="$DEFINES -DGLX_DIRECT_RENDERING"
             fi
             ;;
         xorg)

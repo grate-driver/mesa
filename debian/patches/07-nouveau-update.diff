@@ -6,11 +6,10 @@ And fix nv50_screen.c to compile against the updated header.
 Cherry-pick from upstream commit 54526154c5b02be0fbae6b0dad766c6be1bee21
 with modifications to apply to mesa 7.8 branch.
 ---
-diff --git a/src/gallium/drivers/nouveau/nouveau_class.h b/src/gallium/drivers/nouveau/nouveau_class.h
-new file mode 100644
-index 0000000..a701b9d
---- a/dev/null
-+++ b/src/gallium/drivers/nouveau/nouveau_class.h
+Index: mesa/src/gallium/drivers/nouveau/nouveau_class.h
+===================================================================
+--- /dev/null
++++ mesa/src/gallium/drivers/nouveau/nouveau_class.h
 @@ -0,0 +1,9024 @@
 +/*************************************************************************
 +
@@ -9036,12 +9035,12 @@ index 0000000..a701b9d
 +
 +
 +#endif /* NOUVEAU_REG_H */
-diff --git a/src/gallium/drivers/nv50/nv50_screen.c b/src/gallium/drivers/nv50/nv50_screen.c
-index 801548d..551e893 100644
---- a/src/gallium/drivers/nv50/nv50_screen.c
-+++ b/src/gallium/drivers/nv50/nv50_screen.c
-@@ -379,8 +379,8 @@ nv50_screen_create(struct pipe_winsys *ws, struct nouveau_device *dev)
-	so_data  (so, 1);
+Index: mesa/src/gallium/drivers/nv50/nv50_screen.c
+===================================================================
+--- mesa.orig/src/gallium/drivers/nv50/nv50_screen.c
++++ mesa/src/gallium/drivers/nv50/nv50_screen.c
+@@ -360,8 +360,8 @@
+ 	so_data  (so, 1);
  
  	/* activate all 32 lanes (threads) in a warp */
 -	so_method(so, screen->tesla, NV50TCL_WARP_HALVES, 1);
@@ -9051,13 +9050,10 @@ index 801548d..551e893 100644
  	so_method(so, screen->tesla, 0x1400, 1);
  	so_data  (so, 0xf);
  
-diff --git a/src/mesa/drivers/dri/nouveau/nouveau_class.h b/src/mesa/drivers/dri/nouveau/nouveau_class.h
-new file mode 120000
-index 0000000..5eff4af
---- a/dev/null
-+++ b/src/mesa/drivers/dri/nouveau/nouveau_class.h
+Index: mesa/src/mesa/drivers/dri/nouveau/nouveau_class.h
+===================================================================
+--- /dev/null
++++ mesa/src/mesa/drivers/dri/nouveau/nouveau_class.h
 @@ -0,0 +1 @@
 +../../../../gallium/drivers/nouveau/nouveau_class.h
 \ No newline at end of file
---
-cgit v0.8.3-6-g21f6

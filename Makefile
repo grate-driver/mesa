@@ -180,7 +180,7 @@ ultrix-gcc:
 
 # Rules for making release tarballs
 
-VERSION=7.8.1
+VERSION=7.8.2
 DIRECTORY = Mesa-$(VERSION)
 LIB_NAME = MesaLib-$(VERSION)
 DEMO_NAME = MesaDemos-$(VERSION)
@@ -285,9 +285,6 @@ MAIN_FILES = \
 	$(DIRECTORY)/src/mesa/x86-64/*.[chS]				\
 	$(DIRECTORY)/src/mesa/x86-64/Makefile				\
 	$(DIRECTORY)/progs/Makefile					\
-	$(DIRECTORY)/progs/util/README					\
-	$(DIRECTORY)/progs/util/*.[ch]					\
-	$(DIRECTORY)/progs/util/sampleMakefile				\
 	$(DIRECTORY)/windows/VC8/
 
 ES_FILES = \
@@ -438,7 +435,10 @@ DEMO_FILES = \
 	$(DIRECTORY)/progs/glsl/*.c			\
 	$(DIRECTORY)/progs/glsl/*.frag			\
 	$(DIRECTORY)/progs/glsl/*.vert			\
-	$(DIRECTORY)/progs/glsl/*.shtest
+	$(DIRECTORY)/progs/glsl/*.shtest		\
+	$(DIRECTORY)/progs/util/README			\
+	$(DIRECTORY)/progs/util/*.[ch]			\
+	$(DIRECTORY)/progs/util/sampleMakefile
 
 GLUT_FILES = \
 	$(DIRECTORY)/include/GL/glut.h			\

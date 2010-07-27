@@ -208,7 +208,25 @@ $(STAMP_DIR)/stamp:
 
 $(QUILT_STAMPFN): $(STAMP_DIR)/stamp
 
-build: $(BUILD_STAMPS)
+build: build-stamp
+
+build-stamp: $(BUILD_STAMPS)
+ifeq ($(findstring radeon, $(GALLIUM_DRIVERS)), radeon)
+	# Radeon searches for r{200,300,600}_dri only, but the gallium driver
+	# is (at the moment) radeong_dri.  Rename it to r300_dri, as it
+	# fails to support r600.
+	# We don't actually install radeong yet, although it will probably
+	# replace r300 classic soon.
+	mv build/dri/lib/gallium/radeong_dri.so \
+		build/dri/lib/gallium/r300_dri.so
+endif
+ifeq ($(findstring intel, $(GALLIUM_DRIVERS)), intel)
+	# Intel i965 Gallium appears to do nothing more than generate GPU 
+	# lockups.  Kill it with fire.  i915 is apparently useful.
+	rm build/dri/lib/gallium/i965_dri.so
+	rm build/dri/lib/egl_*_i965.so
+endif
+	>$@
 
 $(STAMP)-build-%: configure
 	dh_testdir
@@ -221,8 +239,7 @@ $(STAMP)-build-%: configure
 	             --infodir=\$${prefix}/share/info --sysconfdir=/etc \
 	             --localstatedir=/var $(confflags) $(confflags-$*)
 	cd $(DEB_BUILD_DIR)/$* && $(MAKE)
-
-	touch $@
+	>$@
 
 install: build
 	# Add here commands to install the package into debian/tmp
@@ -260,8 +277,8 @@ binary-indep: install
 binary-arch: install
 	dh_testdir
 	dh_testroot
-	dh_installchangelogs -s -XChangeLog
-	dh_installchangelogs -pmesa-common-dev ChangeLog
+	dh_installchangelogs -s
+	dh_installchangelogs -pmesa-common-dev
 	dh_installdocs -s
 	dh_installexamples -s
 
@@ -269,22 +286,6 @@ binary-arch: install
 	# Remove the whole tree to avoid false-positives in --list-missing, and
 	# install the right files manually.
 	rm -r debian/tmp/dri/usr/lib/dri
-
-ifeq ($(findstring radeon, $(GALLIUM_DRIVERS)), radeon)
-	# Radeon searches for r{200,300,600}_dri only, but the gallium driver
-	# is (at the moment) radeong_dri.  Rename it to r300_dri, as it
-	# fails to support r600.
-	# We don't actually install radeong yet, although it will probably
-	# replace r300 classic soon.
-	mv build/dri/lib/gallium/radeong_dri.so \
-		build/dri/lib/gallium/r300_dri.so
-endif
-ifeq ($(findstring intel, $(GALLIUM_DRIVERS)), intel)
-	# Intel i965 Gallium appears to do nothing more than generate GPU 
-	# lockups.  Kill it with fire.  i915 is apparently useful.
-	rm build/dri/lib/gallium/i965_dri.so
-	rm debian/tmp/dri/usr/lib/egl/egl_*_i965.so
-endif
 
 	dh_install -s --list-missing
 
@@ -336,28 +337,4 @@ endif
 	dh_builddeb -s -- -Zlzma
 
 binary: binary-indep binary-arch
-
-
-VERSION = $(shell dpkg-parsechangelog | grep ^Vers | cut -d" " -f2)
-UPVERSION = $(shell echo $(VERSION) | sed 's,-.*,,') 
-TARBALL = $(shell echo mesa_$(UPVERSION).orig.tar.gz | tr -d ' ')
-DEMOS_SOURCE = $(shell echo MesaDemos-$(UPVERSION).tar.gz | tr -d ' ')
-LIBS_SOURCE = $(shell echo MesaLib-$(UPVERSION).tar.gz | tr -d ' ')
-
-$(DEMOS_SOURCE) $(LIBS_SOURCE):
-	uscan --download --destdir $(CURDIR) \
-	      --no-symlink --force-download --download-version $(UPVERSION)
-
-$(TARBALL): $(DEMOS_SOURCE) $(LIBS_SOURCE)
-	tar xzf $(DEMOS_SOURCE)
-	tar xzf $(LIBS_SOURCE)
-	mv Mesa-$(UPVERSION) mesa-$(UPVERSION)
-	tar czf $(TARBALL) mesa-$(UPVERSION)	
-
-get-orig-source: $(TARBALL)
-	rm -r mesa-$(UPVERSION)
-	rm $(DEMOS_SOURCE)
-	rm $(LIBS_SOURCE)
-
-
-.PHONY: configs build clean binary-indep binary-arch binary install get-orig-source
+.PHONY: configs build clean binary-indep binary-arch binary install
