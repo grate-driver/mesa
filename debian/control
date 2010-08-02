@@ -123,6 +123,9 @@ Depends:
  ${shlibs:Depends},
  ${misc:Depends},
 Recommends: libegl1-mesa-drivers-x11
+Provides: libegl1-x11
+Conflicts: libegl1-x11
+Replaces: libegl1-x11
 Description: A free implementation of the EGL API -- runtime
  This package contains the EGL native platform graphics interface library.
  EGL provides a platform-agnostic mechanism for creating rendering surfaces
@@ -237,6 +240,9 @@ Architecture: any
 Depends:
  ${shlibs:Depends},
  ${misc:Depends},
+Provides: libopenvg1
+Conflicts: libopenvg1
+Replaces: libopenvg1
 Description: A free implementation of the OpenVG API -- runtime
  This package contains the mesa implementation of the OpenVG 2D acceleration
  library.  OpenVG provides a device independent and vendor-neutral interface 
@@ -283,6 +289,9 @@ Architecture: any
 Depends:
  ${shlibs:Depends},
  ${misc:Depends},
+Provides: libgles1
+Conflicts: libgles1
+Replaces: libgles1
 Description: A free implementation of the OpenGL|ES 1.x API -- runtime
  OpenGL|ES is a cross-platform API for full-function 2D and 3D graphics on 
  embedded systems - including consoles, phones, appliances and vehicles.
@@ -332,6 +341,9 @@ Architecture: any
 Depends:
  ${shlibs:Depends},
  ${misc:Depends},
+Provides: libgles2
+Conflicts: libgles2
+Replaces: libgles2
 Description: A free implementation of the OpenGL|ES 2.x API -- runtime
  OpenGL|ES is a cross-platform API for full-function 2D and 3D graphics on 
  embedded systems - including consoles, phones, appliances and vehicles.

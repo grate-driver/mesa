@@ -1,4 +1,4 @@
-libOpenVG.so.1 libopenvg1-mesa #MINVER#
+libOpenVG.so.1 libopenvg1-mesa #MINVER# | libopenvg1
  st_api_OpenVG@Base 7.8.1
  st_bind_texture_surface@Base 7.8.1
  st_copy_context_state@Base 7.8.1

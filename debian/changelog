@@ -1,3 +1,14 @@
+mesa (7.8.2-3) UNRELEASED; urgency=low
+
+  * debian/control:
+    - Add EGL, GLESv1, GLESv2, and OpenVG virtual packages.  The Khronos group
+      specifies a de-facto linux ABI for these libraries.  We have a similar
+      package for libgl1.
+  * debian/README.Debian:
+    - Document the virtual packages above.
+
+ -- Christopher James Halse Rogers <raof@ubuntu.com>  Fri, 30 Jul 2010 19:08:57 +1000
+
 mesa (7.8.2-2) experimental; urgency=low
 
   * Add missing dependencies to libegl1-mesa-dev, thanks to Alexandros
