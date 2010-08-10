@@ -1,5 +1,6 @@
-mesa (7.8.2-3) UNRELEASED; urgency=low
+mesa (7.8.2-2ubuntu2) maverick; urgency=low
 
+  * Cherry-pick EGL/GL|ES/OpenVG virtual packages from Debian experimental git
   * debian/control:
     - Add EGL, GLESv1, GLESv2, and OpenVG virtual packages.  The Khronos group
       specifies a de-facto linux ABI for these libraries.  We have a similar
