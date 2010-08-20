@@ -278,7 +278,7 @@ struct brw_aa_line_parameters
    struct header header;
 
    struct {
-      GLuint aa_coverage_scope:8;
+      GLuint aa_coverage_slope:8;
       GLuint pad0:8;
       GLuint aa_coverage_bias:8;
       GLuint pad1:8;
@@ -1657,8 +1657,36 @@ struct brw_instruction
 	 GLuint end_of_thread:1;
       } dp_write_gen5;
 
+      /* Sandybridge DP for sample cache, constant cache, render cache */
       struct {
-	 GLuint pad:16;
+	 GLuint binding_table_index:8;
+	 GLuint msg_control:5;
+	 GLuint msg_type:3;
+	 GLuint pad0:3;
+	 GLuint header_present:1;
+	 GLuint response_length:5;
+	 GLuint msg_length:4;
+	 GLuint pad1:2;
+	 GLuint end_of_thread:1;
+      } dp_sampler_const_cache;
+
+      struct {
+	 GLuint binding_table_index:8;
+	 GLuint msg_control:3;
+	 GLuint slot_group_select:1;
+	 GLuint pixel_scoreboard_clear:1;
+	 GLuint msg_type:4;
+	 GLuint send_commit_msg:1;
+	 GLuint pad0:1;
+	 GLuint header_present:1;
+	 GLuint response_length:5;
+	 GLuint msg_length:4;
+	 GLuint pad1:2;
+	 GLuint end_of_thread:1;
+      } dp_render_cache;
+
+      struct {
+	 GLuint function_control:16;
 	 GLuint response_length:4;
 	 GLuint msg_length:4;
 	 GLuint msg_target:4;
@@ -1666,8 +1694,9 @@ struct brw_instruction
 	 GLuint end_of_thread:1;
       } generic;
 
+      /* Of this struct, only end_of_thread is not present for gen6. */
       struct {
-	 GLuint pad:19;
+	 GLuint function_control:19;
 	 GLuint header_present:1;
 	 GLuint response_length:5;
 	 GLuint msg_length:4;

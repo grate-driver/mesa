@@ -31,11 +31,12 @@
   
 #include "main/imports.h"
 #include "main/enums.h"
-#include "shader/prog_parameter.h"
-#include "shader/program.h"
-#include "shader/programopt.h"
-#include "shader/shader_api.h"
+#include "main/shaderobj.h"
+#include "program/prog_parameter.h"
+#include "program/program.h"
+#include "program/programopt.h"
 #include "tnl/tnl.h"
+#include "talloc.h"
 
 #include "brw_context.h"
 #include "brw_wm.h"
@@ -95,20 +96,6 @@ static struct gl_program *brwNewProgram( GLcontext *ctx,
 static void brwDeleteProgram( GLcontext *ctx,
 			      struct gl_program *prog )
 {
-   if (prog->Target == GL_FRAGMENT_PROGRAM_ARB) {
-      struct gl_fragment_program *fp = (struct gl_fragment_program *) prog;
-      struct brw_fragment_program *brw_fp = brw_fragment_program(fp);
-
-      dri_bo_unreference(brw_fp->const_buffer);
-   }
-
-   if (prog->Target == GL_VERTEX_PROGRAM_ARB) {
-      struct gl_vertex_program *vp = (struct gl_vertex_program *) prog;
-      struct brw_vertex_program *brw_vp = brw_vertex_program(vp);
-
-      dri_bo_unreference(brw_vp->const_buffer);
-   }
-
    _mesa_delete_program( ctx, prog );
 }
 
@@ -128,10 +115,7 @@ shader_error(GLcontext *ctx, struct gl_program *prog, const char *msg)
    shader = _mesa_lookup_shader_program(ctx, prog->Id);
 
    if (shader) {
-      if (shader->InfoLog) {
-	 free(shader->InfoLog);
-      }
-      shader->InfoLog = _mesa_strdup(msg);
+      shader->InfoLog = talloc_strdup_append(shader->InfoLog, msg);
       shader->LinkStatus = GL_FALSE;
    }
 }
@@ -188,8 +172,43 @@ static GLboolean brwProgramStringNotify( GLcontext *ctx,
 	 shader_error(ctx, prog,
 		      "i965 driver doesn't yet support uninlined function "
 		      "calls.  Move to using a single return statement at "
-		      "the end of the function to work around it.");
+		      "the end of the function to work around it.\n");
 	 return GL_FALSE;
+      }
+
+      if (prog->Instructions[i].Opcode == OPCODE_RET) {
+	 shader_error(ctx, prog,
+		      "i965 driver doesn't yet support \"return\" "
+		      "from main().\n");
+	 return GL_FALSE;
+      }
+
+      if (prog->Instructions[i].DstReg.RelAddr &&
+	  prog->Instructions[i].DstReg.File == PROGRAM_INPUT) {
+	 shader_error(ctx, prog,
+		      "Variable indexing of shader inputs unsupported\n");
+	 return GL_FALSE;
+      }
+      if (prog->Instructions[i].DstReg.RelAddr &&
+	  prog->Instructions[i].DstReg.File == PROGRAM_OUTPUT) {
+	 shader_error(ctx, prog,
+		      "Variable indexing of shader outputs unsupported\n");
+	 return GL_FALSE;
+      }
+      if (target == GL_FRAGMENT_PROGRAM_ARB) {
+	 if ((prog->Instructions[i].DstReg.RelAddr &&
+	      prog->Instructions[i].DstReg.File == PROGRAM_TEMPORARY) ||
+	     (prog->Instructions[i].SrcReg[0].RelAddr &&
+	      prog->Instructions[i].SrcReg[0].File == PROGRAM_TEMPORARY) ||
+	     (prog->Instructions[i].SrcReg[1].RelAddr &&
+	      prog->Instructions[i].SrcReg[1].File == PROGRAM_TEMPORARY) ||
+	     (prog->Instructions[i].SrcReg[2].RelAddr &&
+	      prog->Instructions[i].SrcReg[2].File == PROGRAM_TEMPORARY)) {
+	    shader_error(ctx, prog,
+			 "Variable indexing of variable arrays in the FS "
+			 "unsupported\n");
+	    return GL_FALSE;
+	 }
       }
    }
 

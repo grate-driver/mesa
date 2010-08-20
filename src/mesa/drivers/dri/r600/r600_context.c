@@ -59,7 +59,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "radeon_buffer_objects.h"
 #include "radeon_span.h"
 #include "r600_cmdbuf.h"
-#include "r600_emit.h"
 #include "radeon_bocs_wrapper.h"
 #include "radeon_queryobj.h"
 #include "r600_blit.h"
@@ -73,6 +72,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #define R600_ENABLE_GLSL_TEST 1
 
 #define need_GL_VERSION_2_0
+#define need_GL_VERSION_2_1
+#define need_GL_ARB_draw_elements_base_vertex
 #define need_GL_ARB_occlusion_query
 #define need_GL_ARB_point_parameters
 #define need_GL_ARB_vertex_program
@@ -141,6 +142,7 @@ static const struct dri_extension card_extensions[] = {
   {"GL_NV_vertex_program",		GL_NV_vertex_program_functions},
   {"GL_SGIS_generate_mipmap",		NULL},
   {"GL_ARB_pixel_buffer_object",        NULL},
+  {"GL_ARB_draw_elements_base_vertex",	GL_ARB_draw_elements_base_vertex_functions },
   {NULL,				NULL}
   /* *INDENT-ON* */
 };
@@ -158,6 +160,7 @@ static const struct dri_extension mm_extensions[] = {
 static const struct dri_extension gl_20_extension[] = {
 #ifdef R600_ENABLE_GLSL_TEST
     {"GL_ARB_shading_language_100",			GL_VERSION_2_0_functions },
+    {"GL_ARB_shading_language_120",			GL_VERSION_2_1_functions },
 #else
   {"GL_VERSION_2_0",			GL_VERSION_2_0_functions },
 #endif /* R600_ENABLE_GLSL_TEST */
@@ -239,6 +242,7 @@ static void r600_init_vtbl(radeonContextPtr radeon)
 	radeon->vtbl.emit_query_finish = r600_emit_query_finish;
 	radeon->vtbl.check_blit = r600_check_blit;
 	radeon->vtbl.blit = r600_blit;
+	radeon->vtbl.is_format_renderable = r600IsFormatRenderable;
 }
 
 static void r600InitConstValues(GLcontext *ctx, radeonScreenPtr screen)
@@ -352,7 +356,8 @@ static void r600InitGLExtensions(GLcontext *ctx)
 
 /* Create the device specific rendering context.
  */
-GLboolean r600CreateContext(const __GLcontextModes * glVisual,
+GLboolean r600CreateContext(gl_api api,
+			    const __GLcontextModes * glVisual,
 			    __DRIcontext * driContextPriv,
 			    void *sharedContextPrivate)
 {
@@ -383,7 +388,7 @@ GLboolean r600CreateContext(const __GLcontextModes * glVisual,
 	 */
 	_mesa_init_driver_functions(&functions);
 
-	r700InitStateFuncs(&functions);
+	r700InitStateFuncs(&r600->radeon, &functions);
 	r600InitTextureFuncs(&r600->radeon, &functions);
 	r700InitShaderFuncs(&functions);
 	radeonInitQueryObjFunctions(&functions);

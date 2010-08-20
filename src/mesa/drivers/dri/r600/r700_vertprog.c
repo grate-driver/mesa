@@ -35,14 +35,15 @@
 #include "main/mtypes.h"
 
 #include "tnl/t_context.h"
-#include "shader/program.h"
-#include "shader/prog_parameter.h"
-#include "shader/prog_statevars.h"
+#include "program/program.h"
+#include "program/prog_parameter.h"
+#include "program/prog_statevars.h"
 
 #include "radeon_debug.h"
 #include "r600_context.h"
 #include "r600_cmdbuf.h"
-#include "shader/programopt.h"
+#include "r600_emit.h"
+#include "program/programopt.h"
 
 #include "r700_debug.h"
 #include "r700_vertprog.h"
@@ -460,11 +461,11 @@ static void r700TranslateAttrib(GLcontext *ctx, GLuint unLoc, int count, const s
 	stride = (input->StrideB == 0) ? getTypeSize(input->Type) * input->Size 
                                    : input->StrideB;
 
-    if (input->Type == GL_DOUBLE || input->Type == GL_UNSIGNED_INT || input->Type == GL_INT ||
+    if (input->Type == GL_DOUBLE || input->Type == GL_UNSIGNED_INT || input->Type == GL_INT
 #if MESA_BIG_ENDIAN
-        getTypeSize(input->Type) != 4 ||
+        || getTypeSize(input->Type) != 4
 #endif
-        stride < 4) 
+       ) 
     {
         pStreamDesc->type = GL_FLOAT;
 
@@ -627,6 +628,16 @@ GLboolean r700SetupVertexProgram(GLcontext * ctx)
     }
 
     R600_STATECHANGE(context, spi);
+
+    if(vp->mesa_program->Base.OutputsWritten & (1 << VERT_RESULT_PSIZ)) {
+        R600_STATECHANGE(context, cl);
+        SETbit(r700->PA_CL_VS_OUT_CNTL.u32All, USE_VTX_POINT_SIZE_bit);
+        SETbit(r700->PA_CL_VS_OUT_CNTL.u32All, VS_OUT_MISC_VEC_ENA_bit);
+    } else if (r700->PA_CL_VS_OUT_CNTL.u32All != 0) {
+        R600_STATECHANGE(context, cl);
+        CLEARbit(r700->PA_CL_VS_OUT_CNTL.u32All, USE_VTX_POINT_SIZE_bit);
+        CLEARbit(r700->PA_CL_VS_OUT_CNTL.u32All, VS_OUT_MISC_VEC_ENA_bit);
+    }
 
     SETfield(r700->SPI_VS_OUT_CONFIG.u32All,
 	     vp->r700Shader.nParamExports ? (vp->r700Shader.nParamExports - 1) : 0,

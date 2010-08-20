@@ -595,6 +595,27 @@ struct dd_function_table {
    
    /*@}*/
 
+   /**
+    * \name GLSL shader/program functions.
+    */
+   /*@{*/
+   /**
+    * Called when a shader is compiled.
+    *
+    * Note that not all shader objects get ShaderCompile called on
+    * them.  Notably, the shaders containing builtin functions do not
+    * have CompileShader() called, so if lowering passes are done they
+    * need to also be performed in LinkShader().
+    */
+   GLboolean (*CompileShader)(GLcontext *ctx, struct gl_shader *shader);
+   /**
+    * Called when a shader program is linked.
+    *
+    * This gives drivers an opportunity to clone the IR and make their
+    * own transformations on it for the purposes of code generation.
+    */
+   GLboolean (*LinkShader)(GLcontext *ctx, struct gl_shader_program *shader);
+   /*@}*/
 
    /**
     * \name State-changing functions.
@@ -705,27 +726,6 @@ struct dd_function_table {
    void (*Viewport)(GLcontext *ctx, GLint x, GLint y, GLsizei w, GLsizei h);
    /*@}*/
 
-
-   /** 
-    * \name State-query functions
-    *
-    * Return GL_TRUE if query was completed, GL_FALSE otherwise.
-    */
-   /*@{*/
-   /** Return the value or values of a selected parameter */
-   GLboolean (*GetBooleanv)(GLcontext *ctx, GLenum pname, GLboolean *result);
-   /** Return the value or values of a selected parameter */
-   GLboolean (*GetDoublev)(GLcontext *ctx, GLenum pname, GLdouble *result);
-   /** Return the value or values of a selected parameter */
-   GLboolean (*GetFloatv)(GLcontext *ctx, GLenum pname, GLfloat *result);
-   /** Return the value or values of a selected parameter */
-   GLboolean (*GetIntegerv)(GLcontext *ctx, GLenum pname, GLint *result);
-   /** Return the value or values of a selected parameter */
-   GLboolean (*GetInteger64v)(GLcontext *ctx, GLenum pname, GLint64 *result);
-   /** Return the value or values of a selected parameter */
-   GLboolean (*GetPointerv)(GLcontext *ctx, GLenum pname, GLvoid **result);
-   /*@}*/
-   
 
    /**
     * \name Vertex/pixel buffer object functions
@@ -849,54 +849,12 @@ struct dd_function_table {
     * \name GLSL-related functions (ARB extensions and OpenGL 2.x)
     */
    /*@{*/
-   void (*AttachShader)(GLcontext *ctx, GLuint program, GLuint shader);
-   void (*BindAttribLocation)(GLcontext *ctx, GLuint program, GLuint index,
-                              const GLcharARB *name);
-   void (*CompileShader)(GLcontext *ctx, GLuint shader);
-   GLuint (*CreateShader)(GLcontext *ctx, GLenum type);
-   GLuint (*CreateProgram)(GLcontext *ctx);
-   void (*DeleteProgram2)(GLcontext *ctx, GLuint program);
-   void (*DeleteShader)(GLcontext *ctx, GLuint shader);
-   void (*DetachShader)(GLcontext *ctx, GLuint program, GLuint shader);
-   void (*GetActiveAttrib)(GLcontext *ctx, GLuint program, GLuint index,
-                           GLsizei maxLength, GLsizei * length, GLint * size,
-                           GLenum * type, GLcharARB * name);
-   void (*GetActiveUniform)(GLcontext *ctx, GLuint program, GLuint index,
-                            GLsizei maxLength, GLsizei *length, GLint *size,
-                            GLenum *type, GLcharARB *name);
-   void (*GetAttachedShaders)(GLcontext *ctx, GLuint program, GLsizei maxCount,
-                              GLsizei *count, GLuint *obj);
-   GLint (*GetAttribLocation)(GLcontext *ctx, GLuint program,
-                              const GLcharARB *name);
-   GLuint (*GetHandle)(GLcontext *ctx, GLenum pname);
-   void (*GetProgramiv)(GLcontext *ctx, GLuint program,
-                        GLenum pname, GLint *params);
-   void (*GetProgramInfoLog)(GLcontext *ctx, GLuint program, GLsizei bufSize,
-                             GLsizei *length, GLchar *infoLog);
-   void (*GetShaderiv)(GLcontext *ctx, GLuint shader,
-                       GLenum pname, GLint *params);
-   void (*GetShaderInfoLog)(GLcontext *ctx, GLuint shader, GLsizei bufSize,
-                            GLsizei *length, GLchar *infoLog);
-   void (*GetShaderSource)(GLcontext *ctx, GLuint shader, GLsizei maxLength,
-                           GLsizei *length, GLcharARB *sourceOut);
-   void (*GetUniformfv)(GLcontext *ctx, GLuint program, GLint location,
-                        GLfloat *params);
-   void (*GetUniformiv)(GLcontext *ctx, GLuint program, GLint location,
-                        GLint *params);
-   GLint (*GetUniformLocation)(GLcontext *ctx, GLuint program,
-                               const GLcharARB *name);
-   GLboolean (*IsProgram)(GLcontext *ctx, GLuint name);
-   GLboolean (*IsShader)(GLcontext *ctx, GLuint name);
-   void (*LinkProgram)(GLcontext *ctx, GLuint program);
-   void (*ShaderSource)(GLcontext *ctx, GLuint shader, const GLchar *source);
-   void (*Uniform)(GLcontext *ctx, GLint location, GLsizei count,
-                   const GLvoid *values, GLenum type);
-   void (*UniformMatrix)(GLcontext *ctx, GLint cols, GLint rows,
-                         GLint location, GLsizei count,
-                         GLboolean transpose, const GLfloat *values);
-   void (*UseProgram)(GLcontext *ctx, GLuint program);
-   void (*ValidateProgram)(GLcontext *ctx, GLuint program);
-   /* XXX many more to come */
+   struct gl_shader *(*NewShader)(GLcontext *ctx, GLuint name, GLenum type);
+   void (*DeleteShader)(GLcontext *ctx, struct gl_shader *shader);
+   struct gl_shader_program *(*NewShaderProgram)(GLcontext *ctx, GLuint name);
+   void (*DeleteShaderProgram)(GLcontext *ctx,
+                               struct gl_shader_program *shProg);
+   void (*UseProgram)(GLcontext *ctx, struct gl_shader_program *shProg);
    /*@}*/
 
 
@@ -1059,6 +1017,22 @@ struct dd_function_table {
 					     void *image_handle);
 #endif
 
+#if FEATURE_EXT_transform_feedback
+   struct gl_transform_feedback_object *
+        (*NewTransformFeedback)(GLcontext *ctx, GLuint name);
+   void (*DeleteTransformFeedback)(GLcontext *ctx,
+                                   struct gl_transform_feedback_object *obj);
+   void (*BeginTransformFeedback)(GLcontext *ctx, GLenum mode,
+                                  struct gl_transform_feedback_object *obj);
+   void (*EndTransformFeedback)(GLcontext *ctx,
+                                struct gl_transform_feedback_object *obj);
+   void (*PauseTransformFeedback)(GLcontext *ctx,
+                                  struct gl_transform_feedback_object *obj);
+   void (*ResumeTransformFeedback)(GLcontext *ctx,
+                                   struct gl_transform_feedback_object *obj);
+   void (*DrawTransformFeedback)(GLcontext *ctx, GLenum mode,
+                                 struct gl_transform_feedback_object *obj);
+#endif
 };
 
 
@@ -1085,23 +1059,23 @@ typedef struct {
     * \name Vertex
     */
    /*@{*/
-   void (GLAPIENTRYP ArrayElement)( GLint ); /* NOTE */
+   void (GLAPIENTRYP ArrayElement)( GLint );
    void (GLAPIENTRYP Color3f)( GLfloat, GLfloat, GLfloat );
    void (GLAPIENTRYP Color3fv)( const GLfloat * );
    void (GLAPIENTRYP Color4f)( GLfloat, GLfloat, GLfloat, GLfloat );
    void (GLAPIENTRYP Color4fv)( const GLfloat * );
    void (GLAPIENTRYP EdgeFlag)( GLboolean );
-   void (GLAPIENTRYP EvalCoord1f)( GLfloat );          /* NOTE */
-   void (GLAPIENTRYP EvalCoord1fv)( const GLfloat * ); /* NOTE */
-   void (GLAPIENTRYP EvalCoord2f)( GLfloat, GLfloat ); /* NOTE */
-   void (GLAPIENTRYP EvalCoord2fv)( const GLfloat * ); /* NOTE */
-   void (GLAPIENTRYP EvalPoint1)( GLint );             /* NOTE */
-   void (GLAPIENTRYP EvalPoint2)( GLint, GLint );      /* NOTE */
+   void (GLAPIENTRYP EvalCoord1f)( GLfloat );
+   void (GLAPIENTRYP EvalCoord1fv)( const GLfloat * );
+   void (GLAPIENTRYP EvalCoord2f)( GLfloat, GLfloat );
+   void (GLAPIENTRYP EvalCoord2fv)( const GLfloat * );
+   void (GLAPIENTRYP EvalPoint1)( GLint );
+   void (GLAPIENTRYP EvalPoint2)( GLint, GLint );
    void (GLAPIENTRYP FogCoordfEXT)( GLfloat );
    void (GLAPIENTRYP FogCoordfvEXT)( const GLfloat * );
    void (GLAPIENTRYP Indexf)( GLfloat );
    void (GLAPIENTRYP Indexfv)( const GLfloat * );
-   void (GLAPIENTRYP Materialfv)( GLenum face, GLenum pname, const GLfloat * ); /* NOTE */
+   void (GLAPIENTRYP Materialfv)( GLenum face, GLenum pname, const GLfloat * );
    void (GLAPIENTRYP MultiTexCoord1fARB)( GLenum, GLfloat );
    void (GLAPIENTRYP MultiTexCoord1fvARB)( GLenum, const GLfloat * );
    void (GLAPIENTRYP MultiTexCoord2fARB)( GLenum, GLfloat, GLfloat );
@@ -1128,8 +1102,8 @@ typedef struct {
    void (GLAPIENTRYP Vertex3fv)( const GLfloat * );
    void (GLAPIENTRYP Vertex4f)( GLfloat, GLfloat, GLfloat, GLfloat );
    void (GLAPIENTRYP Vertex4fv)( const GLfloat * );
-   void (GLAPIENTRYP CallList)( GLuint );	/* NOTE */
-   void (GLAPIENTRYP CallLists)( GLsizei, GLenum, const GLvoid * );	/* NOTE */
+   void (GLAPIENTRYP CallList)( GLuint );
+   void (GLAPIENTRYP CallLists)( GLsizei, GLenum, const GLvoid * );
    void (GLAPIENTRYP Begin)( GLenum );
    void (GLAPIENTRYP End)( void );
    /* GL_NV_vertex_program */
@@ -1153,8 +1127,6 @@ typedef struct {
 #endif
    /*@}*/
 
-   /*
-    */
    void (GLAPIENTRYP Rectf)( GLfloat, GLfloat, GLfloat, GLfloat );
 
    /**
@@ -1186,6 +1158,11 @@ typedef struct {
 						   const GLvoid **indices,
 						   GLsizei primcount,
 						   const GLint *basevertex);
+   void (GLAPIENTRYP DrawArraysInstanced)(GLenum mode, GLint first,
+                                          GLsizei count, GLsizei primcount);
+   void (GLAPIENTRYP DrawElementsInstanced)(GLenum mode, GLsizei count,
+                                            GLenum type, const GLvoid *indices,
+                                            GLsizei primcount);
    /*@}*/
 
    /**

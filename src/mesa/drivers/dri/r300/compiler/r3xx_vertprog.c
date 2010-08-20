@@ -29,7 +29,13 @@
 #include "radeon_dataflow.h"
 #include "radeon_program_alu.h"
 #include "radeon_swizzle.h"
+#include "radeon_emulate_branches.h"
+#include "radeon_emulate_loops.h"
 
+struct loop {
+	int BgnLoop;
+
+};
 
 /*
  * Take an already-setup and valid source then swizzle it appropriately to
@@ -145,7 +151,8 @@ static unsigned long t_src(struct r300_vertex_program_code *vp,
 			       t_swizzle(GET_SWZ(src->Swizzle, 2)),
 			       t_swizzle(GET_SWZ(src->Swizzle, 3)),
 			       t_src_class(src->File),
-			       src->Negate) | (src->RelAddr << 4);
+			       src->Negate) |
+	       (src->RelAddr << 4) | (src->Abs << 3);
 }
 
 static unsigned long t_src_scalar(struct r300_vertex_program_code *vp,
@@ -161,7 +168,7 @@ static unsigned long t_src_scalar(struct r300_vertex_program_code *vp,
 			       t_swizzle(GET_SWZ(src->Swizzle, 0)),
 			       t_src_class(src->File),
 			       src->Negate ? RC_MASK_XYZW : RC_MASK_NONE) |
-	    (src->RelAddr << 4);
+	       (src->RelAddr << 4) | (src->Abs << 3);
 }
 
 static int valid_dst(struct r300_vertex_program_code *vp,
@@ -330,10 +337,139 @@ static void ei_pow(struct r300_vertex_program_code *vp,
 	inst[3] = t_src_scalar(vp, &vpi->SrcReg[1]);
 }
 
+static void mark_write(void * userdata,	struct rc_instruction * inst,
+		rc_register_file file,	unsigned int index, unsigned int mask)
+{
+	unsigned int * writemasks = userdata;
+
+	if (file != RC_FILE_TEMPORARY)
+		return;
+
+	if (index >= R300_VS_MAX_TEMPS)
+		return;
+
+	writemasks[index] |= mask;
+}
+
+static unsigned long t_pred_src(struct r300_vertex_program_compiler * compiler)
+{
+	return PVS_SRC_OPERAND(compiler->PredicateIndex,
+		t_swizzle(RC_SWIZZLE_ZERO),
+		t_swizzle(RC_SWIZZLE_ZERO),
+		t_swizzle(RC_SWIZZLE_ZERO),
+		t_swizzle(RC_SWIZZLE_W),
+		t_src_class(RC_FILE_TEMPORARY),
+		0);
+}
+
+static unsigned long t_pred_dst(struct r300_vertex_program_compiler * compiler,
+					unsigned int hw_opcode, int is_math)
+{
+	return PVS_OP_DST_OPERAND(hw_opcode,
+	     is_math,
+	     0,
+	     compiler->PredicateIndex,
+	     RC_MASK_W,
+	     t_dst_class(RC_FILE_TEMPORARY));
+
+}
+
+static void ei_if(struct r300_vertex_program_compiler * compiler,
+					struct rc_instruction *rci,
+					unsigned int * inst,
+					unsigned int branch_depth)
+{
+	unsigned int predicate_opcode;
+	int is_math = 0;
+
+	if (!compiler->Base.is_r500) {
+		rc_error(&compiler->Base,"Opcode IF not supported\n");
+		return;
+	}
+
+	/* Reserve a temporary to use as our predicate stack counter, if we
+	 * don't already have one. */
+	if (!compiler->PredicateMask) {
+		unsigned int writemasks[R300_VS_MAX_TEMPS];
+		memset(writemasks, 0, sizeof(writemasks));
+		struct rc_instruction * inst;
+		unsigned int i;
+		for(inst = compiler->Base.Program.Instructions.Next;
+				inst != &compiler->Base.Program.Instructions;
+							inst = inst->Next) {
+			rc_for_all_writes_mask(inst, mark_write, writemasks);
+		}
+		for(i = 0; i < R300_VS_MAX_TEMPS; i++) {
+			unsigned int mask = ~writemasks[i] & RC_MASK_XYZW;
+			/* Only the W component can be used fo the predicate
+			 * stack counter. */
+			if (mask & RC_MASK_W) {
+				compiler->PredicateMask = RC_MASK_W;
+				compiler->PredicateIndex = i;
+				break;
+			}
+		}
+		if (i == R300_VS_MAX_TEMPS) {
+			rc_error(&compiler->Base, "No free temporary to use for"
+					" predicate stack counter.\n");
+			return;
+		}
+	}
+	predicate_opcode =
+			branch_depth ? VE_PRED_SET_NEQ_PUSH : ME_PRED_SET_NEQ;
+
+	rci->U.I.SrcReg[0].Swizzle = RC_MAKE_SWIZZLE_SMEAR(GET_SWZ(rci->U.I.SrcReg[0].Swizzle,0));
+	if (branch_depth == 0) {
+		is_math = 1;
+		predicate_opcode = ME_PRED_SET_NEQ;
+		inst[1] = t_src(compiler->code, &rci->U.I.SrcReg[0]);
+		inst[2] = 0;
+	} else {
+		predicate_opcode = VE_PRED_SET_NEQ_PUSH;
+		inst[1] = t_pred_src(compiler);
+		inst[2] = t_src(compiler->code, &rci->U.I.SrcReg[0]);
+	}
+
+	inst[0] = t_pred_dst(compiler, predicate_opcode, is_math);
+	inst[3] = 0;
+
+}
+
+static void ei_else(struct r300_vertex_program_compiler * compiler,
+							unsigned int * inst)
+{
+	if (!compiler->Base.is_r500) {
+		rc_error(&compiler->Base,"Opcode ELSE not supported\n");
+		return;
+	}
+	inst[0] = t_pred_dst(compiler, ME_PRED_SET_INV, 1);
+	inst[1] = t_pred_src(compiler);
+	inst[2] = 0;
+	inst[3] = 0;
+}
+
+static void ei_endif(struct r300_vertex_program_compiler *compiler,
+							unsigned int * inst)
+{
+	if (!compiler->Base.is_r500) {
+		rc_error(&compiler->Base,"Opcode ENDIF not supported\n");
+		return;
+	}
+	inst[0] = t_pred_dst(compiler, ME_PRED_SET_POP, 1);
+	inst[1] = t_pred_src(compiler);
+	inst[2] = 0;
+	inst[3] = 0;
+}
 
 static void translate_vertex_program(struct r300_vertex_program_compiler * compiler)
 {
 	struct rc_instruction *rci;
+
+	struct loop * loops;
+	int current_loop_depth = 0;
+	int loops_reserved = 0;
+
+	unsigned int branch_depth = 0;
 
 	compiler->code->pos_end = 0;	/* Not supported yet */
 	compiler->code->length = 0;
@@ -348,19 +484,28 @@ static void translate_vertex_program(struct r300_vertex_program_compiler * compi
 		if (!valid_dst(compiler->code, &vpi->DstReg))
 			continue;
 
-		if (compiler->code->length >= VSF_MAX_FRAGMENT_LENGTH) {
+		if (compiler->code->length >= R500_VS_MAX_ALU_DWORDS ||
+		    (compiler->code->length >= R300_VS_MAX_ALU_DWORDS && !compiler->Base.is_r500)) {
 			rc_error(&compiler->Base, "Vertex program has too many instructions\n");
 			return;
 		}
 
+		assert(compiler->Base.is_r500 ||
+		       (vpi->Opcode != RC_OPCODE_SEQ &&
+			vpi->Opcode != RC_OPCODE_SNE));
+
 		switch (vpi->Opcode) {
 		case RC_OPCODE_ADD: ei_vector2(compiler->code, VE_ADD, vpi, inst); break;
 		case RC_OPCODE_ARL: ei_vector1(compiler->code, VE_FLT2FIX_DX, vpi, inst); break;
+		case RC_OPCODE_COS: ei_math1(compiler->code, ME_COS, vpi, inst); break;
 		case RC_OPCODE_DP4: ei_vector2(compiler->code, VE_DOT_PRODUCT, vpi, inst); break;
 		case RC_OPCODE_DST: ei_vector2(compiler->code, VE_DISTANCE_VECTOR, vpi, inst); break;
+		case RC_OPCODE_ELSE: ei_else(compiler, inst); break;
+		case RC_OPCODE_ENDIF: ei_endif(compiler, inst); branch_depth--; break;
 		case RC_OPCODE_EX2: ei_math1(compiler->code, ME_EXP_BASE2_FULL_DX, vpi, inst); break;
 		case RC_OPCODE_EXP: ei_math1(compiler->code, ME_EXP_BASE2_DX, vpi, inst); break;
 		case RC_OPCODE_FRC: ei_vector1(compiler->code, VE_FRACTION, vpi, inst); break;
+		case RC_OPCODE_IF: ei_if(compiler, rci, inst, branch_depth); branch_depth++; break;
 		case RC_OPCODE_LG2: ei_math1(compiler->code, ME_LOG_BASE2_FULL_DX, vpi, inst); break;
 		case RC_OPCODE_LIT: ei_lit(compiler->code, vpi, inst); break;
 		case RC_OPCODE_LOG: ei_math1(compiler->code, ME_LOG_BASE2_DX, vpi, inst); break;
@@ -372,11 +517,89 @@ static void translate_vertex_program(struct r300_vertex_program_compiler * compi
 		case RC_OPCODE_POW: ei_pow(compiler->code, vpi, inst); break;
 		case RC_OPCODE_RCP: ei_math1(compiler->code, ME_RECIP_DX, vpi, inst); break;
 		case RC_OPCODE_RSQ: ei_math1(compiler->code, ME_RECIP_SQRT_DX, vpi, inst); break;
+		case RC_OPCODE_SEQ: ei_vector2(compiler->code, VE_SET_EQUAL, vpi, inst); break;
 		case RC_OPCODE_SGE: ei_vector2(compiler->code, VE_SET_GREATER_THAN_EQUAL, vpi, inst); break;
+		case RC_OPCODE_SIN: ei_math1(compiler->code, ME_SIN, vpi, inst); break;
 		case RC_OPCODE_SLT: ei_vector2(compiler->code, VE_SET_LESS_THAN, vpi, inst); break;
+		case RC_OPCODE_SNE: ei_vector2(compiler->code, VE_SET_NOT_EQUAL, vpi, inst); break;
+		case RC_OPCODE_BGNLOOP:
+		{
+			struct loop * l;
+
+			if ((!compiler->Base.is_r500
+				&& loops_reserved >= R300_VS_MAX_LOOP_DEPTH)
+				|| loops_reserved >= R500_VS_MAX_FC_DEPTH) {
+				rc_error(&compiler->Base,
+						"Loops are nested too deep.");
+				return;
+			}
+			memory_pool_array_reserve(&compiler->Base.Pool,
+					struct loop, loops, current_loop_depth,
+					loops_reserved, 1);
+			l = &loops[current_loop_depth++];
+			memset(l , 0, sizeof(struct loop));
+			l->BgnLoop = (compiler->code->length / 4);
+			continue;
+		}
+		case RC_OPCODE_ENDLOOP:
+		{
+			struct loop * l = &loops[current_loop_depth - 1];
+			unsigned int act_addr = l->BgnLoop - 1;
+			unsigned int last_addr = (compiler->code->length / 4) - 1;
+			unsigned int ret_addr = l->BgnLoop;
+
+			if (loops_reserved >= R300_VS_MAX_FC_OPS) {
+				rc_error(&compiler->Base,
+					"Too many flow control instructions.");
+				return;
+			}
+			if (compiler->Base.is_r500) {
+				compiler->code->fc_op_addrs.r500
+					[compiler->code->num_fc_ops].lw =
+					R500_PVS_FC_ACT_ADRS(act_addr)
+					| R500_PVS_FC_LOOP_CNT_JMP_INST(0xffff)
+					;
+				compiler->code->fc_op_addrs.r500
+					[compiler->code->num_fc_ops].uw =
+					R500_PVS_FC_LAST_INST(last_addr)
+					| R500_PVS_FC_RTN_INST(ret_addr)
+					;
+			} else {
+				compiler->code->fc_op_addrs.r300
+					[compiler->code->num_fc_ops] =
+					R300_PVS_FC_ACT_ADRS(act_addr)
+					| R300_PVS_FC_LOOP_CNT_JMP_INST(0xff)
+					| R300_PVS_FC_LAST_INST(last_addr)
+					| R300_PVS_FC_RTN_INST(ret_addr)
+					;
+			}
+			compiler->code->fc_loop_index[compiler->code->num_fc_ops] =
+				R300_PVS_FC_LOOP_INIT_VAL(0x0)
+				| R300_PVS_FC_LOOP_STEP_VAL(0x1)
+				;
+			compiler->code->fc_ops |= R300_VAP_PVS_FC_OPC_LOOP(
+						compiler->code->num_fc_ops);
+			compiler->code->num_fc_ops++;
+			current_loop_depth--;
+			continue;
+		}
+
 		default:
-			rc_error(&compiler->Base, "Unknown opcode %i\n", vpi->Opcode);
+			rc_error(&compiler->Base, "Unknown opcode %s\n", rc_get_opcode_info(vpi->Opcode)->Name);
 			return;
+		}
+
+		/* Non-flow control instructions that are inside an if statement
+		 * need to pay attention to the predicate bit. */
+		if (branch_depth
+			&& vpi->Opcode != RC_OPCODE_IF
+			&& vpi->Opcode != RC_OPCODE_ELSE
+			&& vpi->Opcode != RC_OPCODE_ENDIF) {
+
+			inst[0] |= (PVS_DST_PRED_ENABLE_MASK
+						<< PVS_DST_PRED_ENABLE_SHIFT);
+			inst[0] |= (PVS_DST_PRED_SENSE_MASK
+						<< PVS_DST_PRED_SENSE_SHIFT);
 		}
 
 		compiler->code->length += 4;
@@ -395,8 +618,9 @@ struct temporary_allocation {
 static void allocate_temporary_registers(struct r300_vertex_program_compiler * compiler)
 {
 	struct rc_instruction *inst;
+	struct rc_instruction *end_loop = NULL;
 	unsigned int num_orig_temps = 0;
-	char hwtemps[VSF_MAX_FRAGMENT_TEMPS];
+	char hwtemps[R300_VS_MAX_TEMPS];
 	struct temporary_allocation * ta;
 	unsigned int i, j;
 
@@ -429,10 +653,35 @@ static void allocate_temporary_registers(struct r300_vertex_program_compiler * c
 	/* Pass 2: Determine original temporary lifetimes */
 	for(inst = compiler->Base.Program.Instructions.Next; inst != &compiler->Base.Program.Instructions; inst = inst->Next) {
 		const struct rc_opcode_info * opcode = rc_get_opcode_info(inst->U.I.Opcode);
+		/* Instructions inside of loops need to use the ENDLOOP
+		 * instruction as their LastRead. */
+		if (!end_loop && inst->U.I.Opcode == RC_OPCODE_BGNLOOP) {
+			int endloops = 1;
+			struct rc_instruction * ptr;
+			for(ptr = inst->Next;
+				ptr != &compiler->Base.Program.Instructions;
+							ptr = ptr->Next){
+				if (ptr->U.I.Opcode == RC_OPCODE_BGNLOOP) {
+					endloops++;
+				} else if (ptr->U.I.Opcode == RC_OPCODE_ENDLOOP) {
+					endloops--;
+					if (endloops <= 0) {
+						end_loop = ptr;
+						break;
+					}
+				}
+			}
+		}
+
+		if (inst == end_loop) {
+			end_loop = NULL;
+			continue;
+		}
 
 		for (i = 0; i < opcode->NumSrcRegs; ++i) {
 			if (inst->U.I.SrcReg[i].File == RC_FILE_TEMPORARY)
-				ta[inst->U.I.SrcReg[i].Index].LastRead = inst;
+				ta[inst->U.I.SrcReg[i].Index].LastRead =
+						end_loop ? end_loop : inst;
 		}
 	}
 
@@ -455,11 +704,11 @@ static void allocate_temporary_registers(struct r300_vertex_program_compiler * c
 				unsigned int orig = inst->U.I.DstReg.Index;
 
 				if (!ta[orig].Allocated) {
-					for(j = 0; j < VSF_MAX_FRAGMENT_TEMPS; ++j) {
+					for(j = 0; j < R300_VS_MAX_TEMPS; ++j) {
 						if (!hwtemps[j])
 							break;
 					}
-					if (j >= VSF_MAX_FRAGMENT_TEMPS) {
+					if (j >= R300_VS_MAX_TEMPS) {
 						fprintf(stderr, "Out of hw temporaries\n");
 					} else {
 						ta[orig].Allocated = 1;
@@ -477,6 +726,44 @@ static void allocate_temporary_registers(struct r300_vertex_program_compiler * c
 	}
 }
 
+/**
+ * R3xx-R4xx vertex engine does not support the Absolute source operand modifier
+ * and the Saturate opcode modifier. Only Absolute is currently transformed.
+ */
+static int transform_nonnative_modifiers(
+	struct radeon_compiler *c,
+	struct rc_instruction *inst,
+	void* unused)
+{
+	const struct rc_opcode_info *opcode = rc_get_opcode_info(inst->U.I.Opcode);
+	unsigned i;
+
+	/* Transform ABS(a) to MAX(a, -a). */
+	for (i = 0; i < opcode->NumSrcRegs; i++) {
+		if (inst->U.I.SrcReg[i].Abs) {
+			struct rc_instruction *new_inst;
+			unsigned temp;
+
+			inst->U.I.SrcReg[i].Abs = 0;
+
+			temp = rc_find_free_temporary(c);
+
+			new_inst = rc_insert_new_instruction(c, inst->Prev);
+			new_inst->U.I.Opcode = RC_OPCODE_MAX;
+			new_inst->U.I.DstReg.File = RC_FILE_TEMPORARY;
+			new_inst->U.I.DstReg.Index = temp;
+			new_inst->U.I.SrcReg[0] = inst->U.I.SrcReg[i];
+			new_inst->U.I.SrcReg[1] = inst->U.I.SrcReg[i];
+			new_inst->U.I.SrcReg[1].Negate ^= RC_MASK_XYZW;
+
+			memset(&inst->U.I.SrcReg[i], 0, sizeof(inst->U.I.SrcReg[i]));
+			inst->U.I.SrcReg[i].File = RC_FILE_TEMPORARY;
+			inst->U.I.SrcReg[i].Index = temp;
+			inst->U.I.SrcReg[i].Swizzle = RC_SWIZZLE_XYZW;
+		}
+	}
+	return 1;
+}
 
 /**
  * Vertex engine cannot read two inputs or two constants at the same time.
@@ -566,6 +853,14 @@ static int swizzle_is_native(rc_opcode opcode, struct rc_src_register reg)
 	return 1;
 }
 
+static void debug_program_log(struct r300_vertex_program_compiler* c, const char * where)
+{
+	if (c->Base.Debug) {
+		fprintf(stderr, "Vertex Program: %s\n", where);
+		rc_print_program(&c->Base.Program);
+	}
+}
+
 
 static struct rc_swizzle_caps r300_vertprog_swizzle_caps = {
 	.IsNative = &swizzle_is_native,
@@ -575,21 +870,52 @@ static struct rc_swizzle_caps r300_vertprog_swizzle_caps = {
 
 void r3xx_compile_vertex_program(struct r300_vertex_program_compiler* compiler)
 {
+	struct emulate_loop_state loop_state;
+
 	compiler->Base.SwizzleCaps = &r300_vertprog_swizzle_caps;
 
 	addArtificialOutputs(compiler);
 
-	{
-		struct radeon_program_transformation transformations[] = {
-			{ &r300_transform_vertex_alu, 0 },
-		};
-		radeonLocalTransform(&compiler->Base, 1, transformations);
+	debug_program_log(compiler, "before compilation");
+
+	if (compiler->Base.is_r500)
+		rc_transform_loops(&compiler->Base, &loop_state, R500_VS_MAX_ALU);
+	else
+		rc_transform_loops(&compiler->Base, &loop_state, R300_VS_MAX_ALU);
+
+	debug_program_log(compiler, "after emulate loops");
+
+	if (!compiler->Base.is_r500) {
+		rc_emulate_branches(&compiler->Base);
+		debug_program_log(compiler, "after emulate branches");
 	}
 
-	if (compiler->Base.Debug) {
-		fprintf(stderr, "Vertex program after native rewrite:\n");
-		rc_print_program(&compiler->Base.Program);
-		fflush(stderr);
+	if (compiler->Base.is_r500) {
+		struct radeon_program_transformation transformations[] = {
+			{ &r300_transform_vertex_alu, 0 },
+			{ &r300_transform_trig_scale_vertex, 0 }
+		};
+		radeonLocalTransform(&compiler->Base, 2, transformations);
+
+		debug_program_log(compiler, "after native rewrite");
+	} else {
+		struct radeon_program_transformation transformations[] = {
+			{ &r300_transform_vertex_alu, 0 },
+			{ &radeonTransformTrigSimple, 0 }
+		};
+		radeonLocalTransform(&compiler->Base, 2, transformations);
+
+		debug_program_log(compiler, "after native rewrite");
+
+		/* Note: This pass has to be done seperately from ALU rewrite,
+		 * because it needs to check every instruction.
+		 */
+		struct radeon_program_transformation transformations2[] = {
+			{ &transform_nonnative_modifiers, 0 },
+		};
+		radeonLocalTransform(&compiler->Base, 1, transformations2);
+
+		debug_program_log(compiler, "after emulate modifiers");
 	}
 
 	{
@@ -603,29 +929,17 @@ void r3xx_compile_vertex_program(struct r300_vertex_program_compiler* compiler)
 		radeonLocalTransform(&compiler->Base, 1, transformations);
 	}
 
-	if (compiler->Base.Debug) {
-		fprintf(stderr, "Vertex program after source conflict resolve:\n");
-		rc_print_program(&compiler->Base.Program);
-		fflush(stderr);
-	}
+	debug_program_log(compiler, "after source conflict resolve");
 
 	rc_dataflow_deadcode(&compiler->Base, &dataflow_outputs_mark_used, compiler);
 
-	if (compiler->Base.Debug) {
-		fprintf(stderr, "Vertex program after deadcode:\n");
-		rc_print_program(&compiler->Base.Program);
-		fflush(stderr);
-	}
+	debug_program_log(compiler, "after deadcode");
 
 	rc_dataflow_swizzles(&compiler->Base);
 
 	allocate_temporary_registers(compiler);
 
-	if (compiler->Base.Debug) {
-		fprintf(stderr, "Vertex program after dataflow:\n");
-		rc_print_program(&compiler->Base.Program);
-		fflush(stderr);
-	}
+	debug_program_log(compiler, "after dataflow");
 
 	translate_vertex_program(compiler);
 
@@ -636,6 +950,6 @@ void r3xx_compile_vertex_program(struct r300_vertex_program_compiler* compiler)
 
 	if (compiler->Base.Debug) {
 		fprintf(stderr, "Final vertex program code:\n");
-		r300_vertex_program_dump(compiler->code);
+		r300_vertex_program_dump(compiler);
 	}
 }

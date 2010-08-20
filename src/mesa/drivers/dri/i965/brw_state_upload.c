@@ -61,12 +61,15 @@ static const struct brw_tracked_state *gen4_atoms[] =
    &brw_curbe_offsets,
    &brw_recalculate_urb_fence,
 
-   &brw_cc_vp,
    &brw_cc_unit,
+
+   &brw_vs_constants, /* Before vs_surfaces and constant_buffer */
+   &brw_wm_constants, /* Before wm_surfaces and constant_buffer */
 
    &brw_vs_surfaces,		/* must do before unit */
    &brw_wm_constant_surface,	/* must do before wm surfaces/bind bo */
    &brw_wm_surfaces,		/* must do before samplers and unit */
+   &brw_wm_binding_table,
    &brw_wm_samplers,
 
    &brw_wm_unit,
@@ -113,7 +116,6 @@ const struct brw_tracked_state *gen6_atoms[] =
 
    &gen6_clip_vp,
    &gen6_sf_vp,
-   &gen6_cc_vp,
 
    /* Command packets: */
    &brw_invarient_state,
@@ -126,9 +128,13 @@ const struct brw_tracked_state *gen6_atoms[] =
    &gen6_depth_stencil_state,	/* must do before cc unit */
    &gen6_cc_state_pointers,
 
+   &brw_vs_constants, /* Before vs_surfaces and constant_buffer */
+   &brw_wm_constants, /* Before wm_surfaces and constant_buffer */
+
    &brw_vs_surfaces,		/* must do before unit */
    &brw_wm_constant_surface,	/* must do before wm surfaces/bind bo */
    &brw_wm_surfaces,		/* must do before samplers and unit */
+   &brw_wm_binding_table,
 
    &brw_wm_samplers,
    &gen6_sampler_state,
@@ -208,7 +214,7 @@ brw_clear_validated_bos(struct brw_context *brw)
 
    /* Clear the last round of validated bos */
    for (i = 0; i < brw->state.validated_bo_count; i++) {
-      dri_bo_unreference(brw->state.validated_bos[i]);
+      drm_intel_bo_unreference(brw->state.validated_bos[i]);
       brw->state.validated_bos[i] = NULL;
    }
    brw->state.validated_bo_count = 0;
@@ -266,6 +272,8 @@ static struct dirty_bit_map brw_bits[] = {
    DEFINE_BIT(BRW_NEW_CONTEXT),
    DEFINE_BIT(BRW_NEW_WM_INPUT_DIMENSIONS),
    DEFINE_BIT(BRW_NEW_PSP),
+   DEFINE_BIT(BRW_NEW_WM_SURFACES),
+   DEFINE_BIT(BRW_NEW_BINDING_TABLE),
    DEFINE_BIT(BRW_NEW_INDICES),
    DEFINE_BIT(BRW_NEW_INDEX_BUFFER),
    DEFINE_BIT(BRW_NEW_VERTICES),
@@ -292,8 +300,6 @@ static struct dirty_bit_map cache_bits[] = {
    DEFINE_BIT(CACHE_NEW_CLIP_VP),
    DEFINE_BIT(CACHE_NEW_CLIP_UNIT),
    DEFINE_BIT(CACHE_NEW_CLIP_PROG),
-   DEFINE_BIT(CACHE_NEW_SURFACE),
-   DEFINE_BIT(CACHE_NEW_SURF_BIND),
    {0, 0, 0}
 };
 

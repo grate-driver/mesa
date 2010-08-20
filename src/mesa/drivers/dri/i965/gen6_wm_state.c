@@ -29,8 +29,8 @@
 #include "brw_state.h"
 #include "brw_defines.h"
 #include "brw_util.h"
-#include "shader/prog_parameter.h"
-#include "shader/prog_statevars.h"
+#include "program/prog_parameter.h"
+#include "program/prog_statevars.h"
 #include "intel_batchbuffer.h"
 
 static void
@@ -98,7 +98,8 @@ upload_wm_state(struct brw_context *brw)
 
    /* CACHE_NEW_SAMPLER */
    dw2 |= (ALIGN(brw->wm.sampler_count, 4) / 4) << GEN6_WM_SAMPLER_COUNT_SHIFT;
-   dw4 |= (1 << GEN6_WM_DISPATCH_START_GRF_SHIFT_0);
+   dw4 |= (brw->wm.prog_data->first_curbe_grf <<
+	   GEN6_WM_DISPATCH_START_GRF_SHIFT_0);
 
    dw5 |= (40 - 1) << GEN6_WM_MAX_THREADS_SHIFT;
    dw5 |= GEN6_WM_DISPATCH_ENABLE;

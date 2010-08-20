@@ -42,8 +42,9 @@
 
 static enum pipe_error
 retry_draw_range_elements( struct svga_context *svga,
-                           struct pipe_buffer *index_buffer,
+                           struct pipe_resource *index_buffer,
                            unsigned index_size,
+                           int index_bias,
                            unsigned min_index,
                            unsigned max_index,
                            unsigned prim, 
@@ -66,9 +67,9 @@ retry_draw_range_elements( struct svga_context *svga,
       goto retry;
 
    ret = svga_hwtnl_draw_range_elements( svga->hwtnl,
-                                         index_buffer, index_size,
+                                         index_buffer, index_size, index_bias,
                                          min_index, max_index,
-                                         prim, start, count, 0 );
+                                         prim, start, count );
    if (ret)
       goto retry;
 
@@ -86,7 +87,7 @@ retry:
    if (do_retry)
    {
       return retry_draw_range_elements( svga,
-                                        index_buffer, index_size,
+                                        index_buffer, index_size, index_bias,
                                         min_index, max_index,
                                         prim, start, count,
                                         FALSE );
@@ -150,8 +151,9 @@ retry:
 
 static void
 svga_draw_range_elements( struct pipe_context *pipe,
-                          struct pipe_buffer *index_buffer,
+                          struct pipe_resource *index_buffer,
                           unsigned index_size,
+                          int index_bias,
                           unsigned min_index,
                           unsigned max_index,
                           unsigned prim, unsigned start, unsigned count)
@@ -190,6 +192,7 @@ svga_draw_range_elements( struct pipe_context *pipe,
       ret = svga_swtnl_draw_range_elements( svga, 
                                             index_buffer, 
                                             index_size,
+                                            index_bias,
                                             min_index, max_index,
                                             prim,
                                             start, count );
@@ -199,6 +202,7 @@ svga_draw_range_elements( struct pipe_context *pipe,
          ret = retry_draw_range_elements( svga,
                                           index_buffer,
                                           index_size,
+                                          index_bias,
                                           min_index,
                                           max_index,
                                           prim,
@@ -223,31 +227,30 @@ svga_draw_range_elements( struct pipe_context *pipe,
 
 
 static void
-svga_draw_elements( struct pipe_context *pipe,
-                    struct pipe_buffer *index_buffer,
-                    unsigned index_size,
-                    unsigned prim, unsigned start, unsigned count)
+svga_draw_vbo(struct pipe_context *pipe, const struct pipe_draw_info *info)
 {
-   svga_draw_range_elements( pipe, index_buffer,
-                             index_size,
-                             0, 0xffffffff,
-                             prim, start, count );
-}
+   struct svga_context *svga = svga_context(pipe);
 
-static void
-svga_draw_arrays( struct pipe_context *pipe,
-                  unsigned prim, unsigned start, unsigned count)
-{
-   svga_draw_range_elements(pipe, NULL, 0, 
-                            start, start + count - 1, 
-                            prim, 
-                            start, count);
+   if (info->indexed && svga->curr.ib.buffer) {
+      unsigned offset;
+
+      assert(svga->curr.ib.offset % svga->curr.ib.index_size == 0);
+      offset = svga->curr.ib.offset / svga->curr.ib.index_size;
+
+      svga_draw_range_elements(pipe, svga->curr.ib.buffer,
+                               svga->curr.ib.index_size, info->index_bias,
+                               info->min_index, info->max_index,
+                               info->mode, info->start + offset, info->count);
+   }
+   else {
+      svga_draw_range_elements(pipe, NULL, 0, 0,
+                               info->min_index, info->max_index,
+                               info->mode, info->start, info->count);
+   }
 }
 
 
 void svga_init_draw_functions( struct svga_context *svga )
 {
-   svga->pipe.draw_arrays = svga_draw_arrays;
-   svga->pipe.draw_elements = svga_draw_elements;
-   svga->pipe.draw_range_elements = svga_draw_range_elements;
+   svga->pipe.draw_vbo = svga_draw_vbo;
 }

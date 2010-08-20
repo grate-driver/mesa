@@ -28,7 +28,7 @@
 #define _R700_ASSEMBLER_H_
 
 #include "main/mtypes.h"
-#include "shader/prog_instruction.h"
+#include "program/prog_instruction.h"
 
 #include "r700_chip.h"
 #include "r700_shaderinst.h"
@@ -108,7 +108,7 @@ typedef enum AddressMode
 typedef enum SrcRegisterType 
 {
     SRC_REG_TEMPORARY      = 0,
-    SRC_REG_INPUT          = 1,
+    SRC_REG_GPR            = 1,
     SRC_REG_CONSTANT       = 2,
     SRC_REG_ALT_TEMPORARY  = 3,
     SRC_REC_LITERAL        = 4, 
@@ -582,7 +582,6 @@ GLboolean check_scalar(r700_AssemblerBase* pAsm,
 GLboolean check_vector(r700_AssemblerBase* pAsm,
                        R700ALUInstruction* alu_instruction_ptr);
 GLboolean assemble_alu_instruction(r700_AssemblerBase *pAsm);
-GLboolean next_ins(r700_AssemblerBase *pAsm);
 
 GLboolean pops(r700_AssemblerBase *pAsm, GLuint pops);
 GLboolean jumpToOffest(r700_AssemblerBase *pAsm, GLuint pops, GLint offset);
@@ -626,6 +625,7 @@ GLboolean assemble_LOGIC_PRED(r700_AssemblerBase *pAsm, BITS opcode);
 GLboolean assemble_TRIG(r700_AssemblerBase *pAsm, BITS opcode);
 
 GLboolean assemble_SLT(r700_AssemblerBase *pAsm);
+GLboolean assemble_SSG(r700_AssemblerBase *pAsm);
 GLboolean assemble_STP(r700_AssemblerBase *pAsm);
 GLboolean assemble_TEX(r700_AssemblerBase *pAsm);
 GLboolean assemble_XPD(r700_AssemblerBase *pAsm);

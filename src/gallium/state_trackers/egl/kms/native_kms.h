@@ -14,12 +14,13 @@
  * The above copyright notice and this permission notice shall be included
  * in all copies or substantial portions of the Software.
  *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
- * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
- * BRIAN PAUL BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
- * AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
- * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ * THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+ * DEALINGS IN THE SOFTWARE.
  */
 
 #ifndef _NATIVE_KMS_H_
@@ -31,14 +32,10 @@
 #include "pipe/p_compiler.h"
 #include "util/u_format.h"
 #include "pipe/p_state.h"
-#include "state_tracker/drm_api.h"
+#include "state_tracker/drm_driver.h"
 
 #include "common/native.h"
-
-enum kms_surface_type {
-   KMS_SURFACE_TYPE_PBUFFER,
-   KMS_SURFACE_TYPE_SCANOUT
-};
+#include "common/native_helper.h"
 
 struct kms_config;
 struct kms_connector;
@@ -56,7 +53,6 @@ struct kms_display {
    struct native_event_handler *event_handler;
 
    int fd;
-   struct drm_api *api;
    drmModeResPtr resources;
    struct kms_config *config;
 
@@ -69,7 +65,7 @@ struct kms_display {
 };
 
 struct kms_framebuffer {
-   struct pipe_texture *texture;
+   struct pipe_resource *texture;
    boolean is_passive;
 
    uint32_t buffer_id;
@@ -77,12 +73,12 @@ struct kms_framebuffer {
 
 struct kms_surface {
    struct native_surface base;
-   enum kms_surface_type type;
-   enum pipe_format color_format;
    struct kms_display *kdpy;
+
+   struct resource_surface *rsurf;
+   enum pipe_format color_format;
    int width, height;
 
-   struct pipe_texture *textures[NUM_NATIVE_ATTACHMENTS];
    unsigned int sequence_number;
    struct kms_framebuffer front_fb, back_fb;
 

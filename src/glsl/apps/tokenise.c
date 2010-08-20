@@ -30,6 +30,8 @@
 #include <string.h>
 #include <assert.h>
 #include "../pp/sl_pp_public.h"
+#include "../pp/sl_pp_purify.h"
+#include "../pp/sl_pp_token.h"
 
 
 int
@@ -58,6 +60,9 @@ main(int argc,
    fseek(in, 0, SEEK_END);
    size = ftell(in);
    assert(size != -1);
+   if (size == -1) {
+      return 1;
+   }
    fseek(in, 0, SEEK_SET);
 
    out = fopen(argv[2], "wb");

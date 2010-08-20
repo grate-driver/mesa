@@ -44,6 +44,8 @@ struct tgsi_full_dst_register
 {
    struct tgsi_dst_register               Register;
    struct tgsi_src_register               Indirect;
+   struct tgsi_dimension                  Dimension;
+   struct tgsi_src_register               DimIndirect;
 };
 
 struct tgsi_full_src_register
@@ -54,12 +56,18 @@ struct tgsi_full_src_register
    struct tgsi_src_register         DimIndirect;
 };
 
+struct tgsi_immediate_array_data
+{
+   union tgsi_immediate_data *u;
+};
+
 struct tgsi_full_declaration
 {
    struct tgsi_declaration Declaration;
    struct tgsi_declaration_range Range;
    struct tgsi_declaration_dimension Dim;
    struct tgsi_declaration_semantic Semantic;
+   struct tgsi_immediate_array_data ImmediateData;
 };
 
 struct tgsi_full_immediate

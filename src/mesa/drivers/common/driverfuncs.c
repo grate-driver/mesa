@@ -31,6 +31,7 @@
 #include "main/mipmap.h"
 #include "main/queryobj.h"
 #include "main/renderbuffer.h"
+#include "main/shaderobj.h"
 #include "main/texcompress.h"
 #include "main/texformat.h"
 #include "main/texgetimage.h"
@@ -47,9 +48,11 @@
 #if FEATURE_ARB_sync
 #include "main/syncobj.h"
 #endif
+#if FEATURE_EXT_transform_feedback
+#include "main/transformfeedback.h"
+#endif
 
-#include "shader/program.h"
-#include "shader/shader_api.h"
+#include "program/program.h"
 #include "tnl/tnl.h"
 #include "swrast/swrast.h"
 
@@ -178,14 +181,6 @@ _mesa_init_driver_functions(struct dd_function_table *driver)
    driver->TexParameter = NULL;
    driver->Viewport = NULL;
 
-   /* state queries */
-   driver->GetBooleanv = NULL;
-   driver->GetDoublev = NULL;
-   driver->GetFloatv = NULL;
-   driver->GetIntegerv = NULL;
-   driver->GetInteger64v = NULL;
-   driver->GetPointerv = NULL;
-   
    /* buffer objects */
    _mesa_init_buffer_object_functions(driver);
 
@@ -213,6 +208,12 @@ _mesa_init_driver_functions(struct dd_function_table *driver)
    driver->DeleteArrayObject = _mesa_delete_array_object;
    driver->BindArrayObject = NULL;
 
+   _mesa_init_shader_object_functions(driver);
+
+#if FEATURE_EXT_transform_feedback
+   _mesa_init_transform_feedback_functions(driver);
+#endif
+
    /* T&L stuff */
    driver->NeedValidate = GL_FALSE;
    driver->ValidateTnlModule = NULL;
@@ -232,10 +233,6 @@ _mesa_init_driver_functions(struct dd_function_table *driver)
    driver->EndList = NULL;
    driver->BeginCallList = NULL;
    driver->EndCallList = NULL;
-
-
-   /* XXX temporary here */
-   _mesa_init_glsl_driver_functions(driver);
 }
 
 

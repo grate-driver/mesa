@@ -69,7 +69,7 @@ upload_sf_state(struct brw_context *brw)
    dw1 =
       num_outputs << GEN6_SF_NUM_OUTPUTS_SHIFT |
       (num_inputs + 1) / 2 << GEN6_SF_URB_ENTRY_READ_LENGTH_SHIFT |
-      3 << GEN6_SF_URB_ENTRY_READ_OFFSET_SHIFT;
+      1 << GEN6_SF_URB_ENTRY_READ_OFFSET_SHIFT;
    dw2 = GEN6_SF_VIEWPORT_TRANSFORM_ENABLE |
       GEN6_SF_STATISTICS_ENABLE;
    dw3 = 0;
@@ -87,7 +87,7 @@ upload_sf_state(struct brw_context *brw)
    if (ctx->Polygon.CullFlag) {
       switch (ctx->Polygon.CullFaceMode) {
       case GL_FRONT:
-	 dw3 |= GEN6_SF_CULL_BOTH;
+	 dw3 |= GEN6_SF_CULL_FRONT;
 	 break;
       case GL_BACK:
 	 dw3 |= GEN6_SF_CULL_BACK;

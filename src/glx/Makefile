@@ -5,14 +5,15 @@ EXTRA_DEFINES = -DXF86VIDMODE -D_REENTRANT \
                 -DDEFAULT_DRIVER_DIR=\"$(DRI_DRIVER_SEARCH_DIR)\"
 
 SOURCES = \
-	  glcontextmodes.c \
 	  clientattrib.c \
 	  compsize.c \
 	  eval.c \
+	  glxconfig.c \
 	  glxcmds.c \
 	  glxcurrent.c \
 	  glxext.c \
 	  glxextensions.c \
+	  indirect_glx.c \
 	  indirect.c \
 	  indirect_init.c \
 	  indirect_size.c \
@@ -37,9 +38,11 @@ SOURCES = \
 	  XF86dri.c \
 	  glxhash.c \
 	  dri2_glx.c \
-	  dri2.c
+	  dri2.c \
+	  applegl_glx.c
 
-GLAPI_LIB = $(TOP)/src/mesa/libglapi.a
+
+GLAPI_LIB = $(TOP)/src/mapi/glapi/libglapi.a
 
 OBJECTS = $(SOURCES:.c=.o)
 
@@ -47,7 +50,8 @@ INCLUDES = -I. \
 	-I$(TOP)/include \
 	-I$(TOP)/include/GL/internal \
 	-I$(TOP)/src/mesa \
-	-I$(TOP)/src/mesa/glapi \
+	-I$(TOP)/src/mapi \
+	-I$(TOP)/src/mapi/glapi \
 	$(LIBDRM_CFLAGS) \
 	$(DRI2PROTO_CFLAGS) \
 	$(X11_INCLUDES)
@@ -73,7 +77,7 @@ $(TOP)/$(LIB_DIR)/$(GL_LIB_NAME): $(OBJECTS) $(GLAPI_LIB) Makefile
 		$(GL_LIB_DEPS) $(OBJECTS) $(GLAPI_LIB)
 
 $(GLAPI_LIB):
-	@$(MAKE) -C $(TOP)/src/mesa libglapi.a
+	@$(MAKE) -C $(TOP)/src/mapi/glapi
 
 depend: $(SOURCES) Makefile
 	rm -f depend

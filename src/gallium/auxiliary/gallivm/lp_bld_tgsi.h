@@ -35,10 +35,11 @@
 #ifndef LP_BLD_TGSI_H
 #define LP_BLD_TGSI_H
 
-#include <llvm-c/Core.h>
+#include "gallivm/lp_bld.h"
 
 
 struct tgsi_token;
+struct tgsi_shader_info;
 struct lp_type;
 struct lp_build_context;
 struct lp_build_mask_context;
@@ -58,13 +59,16 @@ struct lp_build_sampler_soa
    (*destroy)( struct lp_build_sampler_soa *sampler );
 
    void
-   (*emit_fetch_texel)( struct lp_build_sampler_soa *sampler,
+   (*emit_fetch_texel)( const struct lp_build_sampler_soa *sampler,
                         LLVMBuilderRef builder,
                         struct lp_type type,
                         unsigned unit,
                         unsigned num_coords,
                         const LLVMValueRef *coords,
-                        LLVMValueRef lodbias,
+                        const LLVMValueRef *ddx,
+                        const LLVMValueRef *ddy,
+                        LLVMValueRef lod_bias, /* optional */
+                        LLVMValueRef explicit_lod, /* optional */
                         LLVMValueRef *texel);
 };
 
@@ -78,7 +82,8 @@ lp_build_tgsi_soa(LLVMBuilderRef builder,
                   const LLVMValueRef *pos,
                   const LLVMValueRef (*inputs)[4],
                   LLVMValueRef (*outputs)[4],
-                  struct lp_build_sampler_soa *sampler);
+                  struct lp_build_sampler_soa *sampler,
+                  const struct tgsi_shader_info *info);
 
 
 #endif /* LP_BLD_TGSI_H */

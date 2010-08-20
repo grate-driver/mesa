@@ -277,13 +277,13 @@ void rc_transform_fragment_wpos(struct radeon_compiler * c, unsigned wpos, unsig
 
 	inst_mad->U.I.SrcReg[0].File = RC_FILE_TEMPORARY;
 	inst_mad->U.I.SrcReg[0].Index = tempregi;
-	inst_mad->U.I.SrcReg[0].Swizzle = RC_MAKE_SWIZZLE(RC_SWIZZLE_X, RC_SWIZZLE_Y, RC_SWIZZLE_Z, RC_SWIZZLE_ZERO);
+	inst_mad->U.I.SrcReg[0].Swizzle = RC_SWIZZLE_XYZ0;
 
 	inst_mad->U.I.SrcReg[1].File = RC_FILE_CONSTANT;
-	inst_mad->U.I.SrcReg[1].Swizzle = RC_MAKE_SWIZZLE(RC_SWIZZLE_X, RC_SWIZZLE_Y, RC_SWIZZLE_Z, RC_SWIZZLE_ZERO);
+	inst_mad->U.I.SrcReg[1].Swizzle = RC_SWIZZLE_XYZ0;
 
 	inst_mad->U.I.SrcReg[2].File = RC_FILE_CONSTANT;
-	inst_mad->U.I.SrcReg[2].Swizzle = RC_MAKE_SWIZZLE(RC_SWIZZLE_X, RC_SWIZZLE_Y, RC_SWIZZLE_Z, RC_SWIZZLE_ZERO);
+	inst_mad->U.I.SrcReg[2].Swizzle = RC_SWIZZLE_XYZ0;
 
 	if (full_vtransform) {
 		inst_mad->U.I.SrcReg[1].Index = rc_constants_add_state(&c->Program.Constants, RC_STATE_R300_VIEWPORT_SCALE, 0);
@@ -307,3 +307,46 @@ void rc_transform_fragment_wpos(struct radeon_compiler * c, unsigned wpos, unsig
 	}
 }
 
+
+/**
+ * The FACE input in hardware contains 1 if it's a back face, 0 otherwise.
+ * Gallium and OpenGL define it the other way around.
+ *
+ * So let's just negate FACE at the beginning of the shader and rewrite the rest
+ * of the shader to read from the newly allocated temporary.
+ */
+void rc_transform_fragment_face(struct radeon_compiler *c, unsigned face)
+{
+	unsigned tempregi = rc_find_free_temporary(c);
+	struct rc_instruction *inst_add;
+	struct rc_instruction *inst;
+
+	/* perspective divide */
+	inst_add = rc_insert_new_instruction(c, &c->Program.Instructions);
+	inst_add->U.I.Opcode = RC_OPCODE_ADD;
+
+	inst_add->U.I.DstReg.File = RC_FILE_TEMPORARY;
+	inst_add->U.I.DstReg.Index = tempregi;
+	inst_add->U.I.DstReg.WriteMask = RC_MASK_X;
+
+	inst_add->U.I.SrcReg[0].File = RC_FILE_NONE;
+	inst_add->U.I.SrcReg[0].Swizzle = RC_SWIZZLE_1111;
+
+	inst_add->U.I.SrcReg[1].File = RC_FILE_INPUT;
+	inst_add->U.I.SrcReg[1].Index = face;
+	inst_add->U.I.SrcReg[1].Swizzle = RC_SWIZZLE_XXXX;
+	inst_add->U.I.SrcReg[1].Negate = RC_MASK_XYZW;
+
+	for (inst = inst_add->Next; inst != &c->Program.Instructions; inst = inst->Next) {
+		const struct rc_opcode_info * opcode = rc_get_opcode_info(inst->U.I.Opcode);
+		unsigned i;
+
+		for(i = 0; i < opcode->NumSrcRegs; i++) {
+			if (inst->U.I.SrcReg[i].File == RC_FILE_INPUT &&
+			    inst->U.I.SrcReg[i].Index == face) {
+				inst->U.I.SrcReg[i].File = RC_FILE_TEMPORARY;
+				inst->U.I.SrcReg[i].Index = tempregi;
+			}
+		}
+	}
+}

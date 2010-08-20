@@ -14,39 +14,39 @@
  * The above copyright notice and this permission notice shall be included
  * in all copies or substantial portions of the Software.
  *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
- * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
- * BRIAN PAUL BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
- * AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
- * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ * THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+ * DEALINGS IN THE SOFTWARE.
  *
  * Authors:
  *    Chia-I Wu <olv@lunarg.com>
  */
 
-#include <assert.h>
 #include "pipe/p_screen.h"
 #include "util/u_memory.h"
 #include "util/u_rect.h"
 #include "util/u_inlines.h"
 #include "eglcurrent.h"
-#include "egllog.h"
 
 #include "native.h"
 #include "egl_g3d.h"
+#include "egl_g3d_api.h"
 #include "egl_g3d_image.h"
 
 /**
  * Reference and return the front left buffer of the native pixmap.
  */
-static struct pipe_texture *
+static struct pipe_resource *
 egl_g3d_reference_native_pixmap(_EGLDisplay *dpy, EGLNativePixmapType pix)
 {
    struct egl_g3d_display *gdpy = egl_g3d_display(dpy);
    struct egl_g3d_config *gconf;
    struct native_surface *nsurf;
-   struct pipe_texture *textures[NUM_NATIVE_ATTACHMENTS];
+   struct pipe_resource *textures[NUM_NATIVE_ATTACHMENTS];
    enum native_attachment natt;
 
    gconf = egl_g3d_config(egl_g3d_find_pixmap_config(dpy, pix));
@@ -72,18 +72,18 @@ egl_g3d_create_image(_EGLDriver *drv, _EGLDisplay *dpy, _EGLContext *ctx,
                      EGLenum target, EGLClientBuffer buffer,
                      const EGLint *attribs)
 {
-   struct pipe_texture *ptex;
+   struct pipe_resource *ptex;
    struct egl_g3d_image *gimg;
    unsigned face = 0, level = 0, zslice = 0;
 
    gimg = CALLOC_STRUCT(egl_g3d_image);
    if (!gimg) {
-      _eglError(EGL_BAD_ALLOC, "eglCreatePbufferSurface");
+      _eglError(EGL_BAD_ALLOC, "eglCreateEGLImageKHR");
       return NULL;
    }
 
    if (!_eglInitImage(&gimg->base, dpy, attribs)) {
-      free(gimg);
+      FREE(gimg);
       return NULL;
    }
 
@@ -98,20 +98,20 @@ egl_g3d_create_image(_EGLDriver *drv, _EGLDisplay *dpy, _EGLContext *ctx,
    }
 
    if (!ptex) {
-      free(gimg);
+      FREE(gimg);
       return NULL;
    }
 
    if (level > ptex->last_level) {
       _eglError(EGL_BAD_MATCH, "eglCreateEGLImageKHR");
-      pipe_texture_reference(&gimg->texture, NULL);
-      free(gimg);
+      pipe_resource_reference(&gimg->texture, NULL);
+      FREE(gimg);
       return NULL;
    }
    if (zslice > ptex->depth0) {
       _eglError(EGL_BAD_PARAMETER, "eglCreateEGLImageKHR");
-      pipe_texture_reference(&gimg->texture, NULL);
-      free(gimg);
+      pipe_resource_reference(&gimg->texture, NULL);
+      FREE(gimg);
       return NULL;
    }
 
@@ -129,8 +129,8 @@ egl_g3d_destroy_image(_EGLDriver *drv, _EGLDisplay *dpy, _EGLImage *img)
 {
    struct egl_g3d_image *gimg = egl_g3d_image(img);
 
-   pipe_texture_reference(&gimg->texture, NULL);
-   free(gimg);
+   pipe_resource_reference(&gimg->texture, NULL);
+   FREE(gimg);
 
    return EGL_TRUE;
 }

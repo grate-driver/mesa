@@ -34,16 +34,70 @@
 #include "pipe/p_context.h"
 #include "util/u_memory.h"
 #include "util/u_math.h"
+#include "util/u_cpu_detect.h"
 #include "draw_context.h"
 #include "draw_vs.h"
 #include "draw_gs.h"
 
+#if HAVE_LLVM
+#include "gallivm/lp_bld_init.h"
+#include "draw_llvm.h"
+
+static boolean
+draw_get_option_use_llvm(void)
+{
+   static boolean first = TRUE;
+   static boolean value;
+   if (first) {
+      first = FALSE;
+      value = debug_get_bool_option("DRAW_USE_LLVM", TRUE);
+
+#ifdef PIPE_ARCH_X86
+      util_cpu_detect();
+      /* require SSE2 due to LLVM PR6960. */
+      if (!util_cpu_caps.has_sse2)
+         value = FALSE;
+#endif
+   }
+   return value;
+}
+#endif
 
 struct draw_context *draw_create( struct pipe_context *pipe )
 {
    struct draw_context *draw = CALLOC_STRUCT( draw_context );
    if (draw == NULL)
       goto fail;
+
+#if HAVE_LLVM
+   if(draw_get_option_use_llvm())
+   {
+      lp_build_init();
+      assert(lp_build_engine);
+      draw->engine = lp_build_engine;
+      draw->llvm = draw_llvm_create(draw);
+   }
+#endif
+
+   if (!draw_init(draw))
+      goto fail;
+
+   draw->pipe = pipe;
+
+   return draw;
+
+fail:
+   draw_destroy( draw );
+   return NULL;
+}
+
+boolean draw_init(struct draw_context *draw)
+{
+   /*
+    * Note that several functions compute the clipmask of the predefined
+    * formats with hardcoded formulas instead of using these. So modifications
+    * here must be reflected there too.
+    */
 
    ASSIGN_4V( draw->plane[0], -1,  0,  0, 1 );
    ASSIGN_4V( draw->plane[1],  1,  0,  0, 1 );
@@ -58,34 +112,30 @@ struct draw_context *draw_create( struct pipe_context *pipe )
 
 
    if (!draw_pipeline_init( draw ))
-      goto fail;
+      return FALSE;
 
    if (!draw_pt_init( draw ))
-      goto fail;
+      return FALSE;
 
    if (!draw_vs_init( draw ))
-      goto fail;
+      return FALSE;
 
    if (!draw_gs_init( draw ))
-      goto fail;
+      return FALSE;
 
-   draw->pipe = pipe;
-
-   return draw;
-
-fail:
-   draw_destroy( draw );   
-   return NULL;
+   return TRUE;
 }
 
 
 void draw_destroy( struct draw_context *draw )
 {
-   struct pipe_context *pipe = draw->pipe;
+   struct pipe_context *pipe;
    int i, j;
 
    if (!draw)
       return;
+
+   pipe = draw->pipe;
 
    /* free any rasterizer CSOs that we may have created.
     */
@@ -107,6 +157,10 @@ void draw_destroy( struct draw_context *draw )
    draw_pt_destroy( draw );
    draw_vs_destroy( draw );
    draw_gs_destroy( draw );
+#ifdef HAVE_LLVM
+   if(draw->llvm)
+      draw_llvm_destroy( draw->llvm );
+#endif
 
    FREE( draw );
 }
@@ -186,6 +240,7 @@ void draw_set_clip_state( struct draw_context *draw,
    assert(clip->nr <= PIPE_MAX_CLIP_PLANES);
    memcpy(&draw->plane[6], clip->ucp, clip->nr * sizeof(clip->ucp[0]));
    draw->nr_planes = 6 + clip->nr;
+   draw->depth_clamp = clip->depth_clamp;
 }
 
 
@@ -257,12 +312,19 @@ draw_set_mapped_constant_buffer(struct draw_context *draw,
                 shader_type == PIPE_SHADER_GEOMETRY);
    debug_assert(slot < PIPE_MAX_CONSTANT_BUFFERS);
 
-   if (shader_type == PIPE_SHADER_VERTEX) {
+   switch (shader_type) {
+   case PIPE_SHADER_VERTEX:
       draw->pt.user.vs_constants[slot] = buffer;
+      draw->pt.user.vs_constants_size[slot] = size;
       draw_vs_set_constants(draw, slot, buffer, size);
-   } else if (shader_type == PIPE_SHADER_GEOMETRY) {
+      break;
+   case PIPE_SHADER_GEOMETRY:
       draw->pt.user.gs_constants[slot] = buffer;
+      draw->pt.user.gs_constants_size[slot] = size;
       draw_gs_set_constants(draw, slot, buffer, size);
+      break;
+   default:
+      assert(0 && "invalid shader type in draw_set_mapped_constant_buffer");
    }
 }
 
@@ -276,6 +338,17 @@ draw_wide_point_threshold(struct draw_context *draw, float threshold)
 {
    draw_do_flush( draw, DRAW_FLUSH_STATE_CHANGE );
    draw->pipeline.wide_point_threshold = threshold;
+}
+
+
+/**
+ * Should the draw module handle point->quad conversion for drawing sprites?
+ */
+void
+draw_wide_point_sprites(struct draw_context *draw, boolean draw_sprite)
+{
+   draw_do_flush( draw, DRAW_FLUSH_STATE_CHANGE );
+   draw->pipeline.wide_point_sprites = draw_sprite;
 }
 
 
@@ -399,13 +472,18 @@ draw_num_shader_outputs(const struct draw_context *draw)
  */
 void
 draw_texture_samplers(struct draw_context *draw,
+                      uint shader,
                       uint num_samplers,
                       struct tgsi_sampler **samplers)
 {
-   draw->vs.num_samplers = num_samplers;
-   draw->vs.samplers = samplers;
-   draw->gs.num_samplers = num_samplers;
-   draw->gs.samplers = samplers;
+   if (shader == PIPE_SHADER_VERTEX) {
+      draw->vs.num_samplers = num_samplers;
+      draw->vs.samplers = samplers;
+   } else {
+      debug_assert(shader == PIPE_SHADER_GEOMETRY);
+      draw->gs.num_samplers = num_samplers;
+      draw->gs.samplers = samplers;
+   }
 }
 
 
@@ -432,12 +510,14 @@ void draw_set_render( struct draw_context *draw,
 void
 draw_set_mapped_element_buffer_range( struct draw_context *draw,
                                       unsigned eltSize,
+                                      int eltBias,
                                       unsigned min_index,
                                       unsigned max_index,
                                       const void *elements )
 {
    draw->pt.user.elts = elements;
    draw->pt.user.eltSize = eltSize;
+   draw->pt.user.eltBias = eltBias;
    draw->pt.user.min_index = min_index;
    draw->pt.user.max_index = max_index;
 }
@@ -446,10 +526,12 @@ draw_set_mapped_element_buffer_range( struct draw_context *draw,
 void
 draw_set_mapped_element_buffer( struct draw_context *draw,
                                 unsigned eltSize,
+                                int eltBias,
                                 const void *elements )
 {
    draw->pt.user.elts = elements;
    draw->pt.user.eltSize = eltSize;
+   draw->pt.user.eltBias = eltBias;
    draw->pt.user.min_index = 0;
    draw->pt.user.max_index = 0xffffffff;
 }
@@ -526,11 +608,85 @@ draw_get_rasterizer_no_cull( struct draw_context *draw,
       memset(&rast, 0, sizeof(rast));
       rast.scissor = scissor;
       rast.flatshade = flatshade;
-      rast.front_winding = PIPE_WINDING_CCW;
+      rast.front_ccw = 1;
       rast.gl_rasterization_rules = draw->rasterizer->gl_rasterization_rules;
 
       draw->rasterizer_no_cull[scissor][flatshade] =
          pipe->create_rasterizer_state(pipe, &rast);
    }
    return draw->rasterizer_no_cull[scissor][flatshade];
+}
+
+void
+draw_set_mapped_so_buffers(struct draw_context *draw,
+                           void *buffers[PIPE_MAX_SO_BUFFERS],
+                           unsigned num_buffers)
+{
+   int i;
+
+   for (i = 0; i < num_buffers; ++i) {
+      draw->so.buffers[i] = buffers[i];
+   }
+   draw->so.num_buffers = num_buffers;
+}
+
+void
+draw_set_so_state(struct draw_context *draw,
+                  struct pipe_stream_output_state *state)
+{
+   memcpy(&draw->so.state,
+          state,
+          sizeof(struct pipe_stream_output_state));
+}
+
+void
+draw_set_sampler_views(struct draw_context *draw,
+                       struct pipe_sampler_view **views,
+                       unsigned num)
+{
+   unsigned i;
+
+   debug_assert(num <= PIPE_MAX_VERTEX_SAMPLERS);
+
+   for (i = 0; i < num; ++i)
+      draw->sampler_views[i] = views[i];
+   for (i = num; i < PIPE_MAX_VERTEX_SAMPLERS; ++i)
+      draw->sampler_views[i] = NULL;
+
+   draw->num_sampler_views = num;
+}
+
+void
+draw_set_samplers(struct draw_context *draw,
+                  struct pipe_sampler_state **samplers,
+                  unsigned num)
+{
+   unsigned i;
+
+   debug_assert(num <= PIPE_MAX_VERTEX_SAMPLERS);
+
+   for (i = 0; i < num; ++i)
+      draw->samplers[i] = samplers[i];
+   for (i = num; i < PIPE_MAX_VERTEX_SAMPLERS; ++i)
+      draw->samplers[i] = NULL;
+
+   draw->num_samplers = num;
+}
+
+void
+draw_set_mapped_texture(struct draw_context *draw,
+                        unsigned sampler_idx,
+                        uint32_t width, uint32_t height, uint32_t depth,
+                        uint32_t last_level,
+                        uint32_t row_stride[DRAW_MAX_TEXTURE_LEVELS],
+                        uint32_t img_stride[DRAW_MAX_TEXTURE_LEVELS],
+                        const void *data[DRAW_MAX_TEXTURE_LEVELS])
+{
+#ifdef HAVE_LLVM
+   if(draw->llvm)
+      draw_llvm_set_mapped_texture(draw,
+                                sampler_idx,
+                                width, height, depth, last_level,
+                                row_stride, img_stride, data);
+#endif
 }

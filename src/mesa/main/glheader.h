@@ -85,6 +85,42 @@ typedef void *GLeglImageOES;
 #define GL_PROGRAM_BINARY_LENGTH_OES 0x8741
 #endif
 
+/* GLES 2.0 tokens */
+#ifndef GL_RGB565
+#define GL_RGB565 0x8D62
+#endif
+
+#ifndef GL_TEXTURE_GEN_STR_OES
+#define GL_TEXTURE_GEN_STR_OES                                  0x8D60
+#endif
+
+#ifndef GL_OES_compressed_paletted_texture
+#define GL_PALETTE4_RGB8_OES                                    0x8B90
+#define GL_PALETTE4_RGBA8_OES                                   0x8B91
+#define GL_PALETTE4_R5_G6_B5_OES                                0x8B92
+#define GL_PALETTE4_RGBA4_OES                                   0x8B93
+#define GL_PALETTE4_RGB5_A1_OES                                 0x8B94
+#define GL_PALETTE8_RGB8_OES                                    0x8B95
+#define GL_PALETTE8_RGBA8_OES                                   0x8B96
+#define GL_PALETTE8_R5_G6_B5_OES                                0x8B97
+#define GL_PALETTE8_RGBA4_OES                                   0x8B98
+#define GL_PALETTE8_RGB5_A1_OES                                 0x8B99
+#endif
+
+#ifndef GL_OES_matrix_get
+#define GL_MODELVIEW_MATRIX_FLOAT_AS_INT_BITS_OES               0x898D
+#define GL_PROJECTION_MATRIX_FLOAT_AS_INT_BITS_OES              0x898E
+#define GL_TEXTURE_MATRIX_FLOAT_AS_INT_BITS_OES                 0x898F
+#endif
+
+#ifndef GL_ES_VERSION_2_0
+#define GL_SHADER_BINARY_FORMATS            0x8DF8
+#define GL_NUM_SHADER_BINARY_FORMATS        0x8DF9
+#define GL_SHADER_COMPILER                  0x8DFA
+#define GL_MAX_VERTEX_UNIFORM_VECTORS       0x8DFB
+#define GL_MAX_VARYING_VECTORS              0x8DFC
+#define GL_MAX_FRAGMENT_UNIFORM_VECTORS     0x8DFD
+#endif
 
 /**
  * Special, internal token

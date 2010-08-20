@@ -70,7 +70,7 @@ PUBLIC const char __driConfigOptions[] =
 	 DRI_CONF_DESC(en, "Enable early Z in classic mode (unstable, 945-only).")
       DRI_CONF_OPT_END
 
-      DRI_CONF_OPT_BEGIN(fragment_shader, bool, false)
+      DRI_CONF_OPT_BEGIN(fragment_shader, bool, true)
 	 DRI_CONF_DESC(en, "Enable limited ARB_fragment_shader support on 915/945.")
       DRI_CONF_OPT_END
 
@@ -110,23 +110,16 @@ intelDRI2Flush(__DRIdrawable *drawable)
    if (intel->gen < 4)
       INTEL_FIREVERTICES(intel);
 
+   intel->need_throttle = GL_TRUE;
+
    if (intel->batch->map != intel->batch->ptr)
       intel_batchbuffer_flush(intel->batch);
-}
-
-static void
-intelDRI2Invalidate(__DRIdrawable *drawable)
-{
-   struct intel_context *intel = drawable->driContextPriv->driverPrivate;
-
-   intel->using_dri2_swapbuffers = GL_TRUE;
-   dri2InvalidateDrawable(drawable);
 }
 
 static const struct __DRI2flushExtensionRec intelFlushExtension = {
     { __DRI2_FLUSH, __DRI2_FLUSH_VERSION },
     intelDRI2Flush,
-    intelDRI2Invalidate,
+    dri2InvalidateDrawable,
 };
 
 static __DRIimage *
@@ -225,6 +218,7 @@ static const __DRIextension *intelScreenExtensions[] = {
     &intelTexBufferExtension.base,
     &intelFlushExtension.base,
     &intelImageExtension.base,
+    &dri2ConfigQueryExtension.base,
     NULL
 };
 
@@ -312,18 +306,13 @@ intelCreateBuffer(__DRIscreen * driScrnPriv,
       }
 
       if (mesaVis->depthBits == 24) {
-	 if (mesaVis->stencilBits == 8) {
-	    /* combined depth/stencil buffer */
-	    struct intel_renderbuffer *depthStencilRb
-	       = intel_create_renderbuffer(MESA_FORMAT_S8_Z24);
-	    /* note: bind RB to two attachment points */
-	    _mesa_add_renderbuffer(fb, BUFFER_DEPTH, &depthStencilRb->Base);
-	    _mesa_add_renderbuffer(fb, BUFFER_STENCIL, &depthStencilRb->Base);
-	 } else {
-	    struct intel_renderbuffer *depthRb
-	       = intel_create_renderbuffer(MESA_FORMAT_X8_Z24);
-	    _mesa_add_renderbuffer(fb, BUFFER_DEPTH, &depthRb->Base);
-	 }
+	 assert(mesaVis->stencilBits == 8);
+	 /* combined depth/stencil buffer */
+	 struct intel_renderbuffer *depthStencilRb
+	    = intel_create_renderbuffer(MESA_FORMAT_S8_Z24);
+	 /* note: bind RB to two attachment points */
+	 _mesa_add_renderbuffer(fb, BUFFER_DEPTH, &depthStencilRb->Base);
+	 _mesa_add_renderbuffer(fb, BUFFER_STENCIL, &depthStencilRb->Base);
       }
       else if (mesaVis->depthBits == 16) {
          /* just 16-bit depth buffer, no hw stencil */
@@ -361,15 +350,18 @@ extern GLboolean i830CreateContext(const __GLcontextModes * mesaVis,
                                    __DRIcontext * driContextPriv,
                                    void *sharedContextPrivate);
 
-extern GLboolean i915CreateContext(const __GLcontextModes * mesaVis,
+extern GLboolean i915CreateContext(int api,
+				   const __GLcontextModes * mesaVis,
                                    __DRIcontext * driContextPriv,
                                    void *sharedContextPrivate);
-extern GLboolean brwCreateContext(const __GLcontextModes * mesaVis,
+extern GLboolean brwCreateContext(int api,
+				  const __GLcontextModes * mesaVis,
 				  __DRIcontext * driContextPriv,
 				  void *sharedContextPrivate);
 
 static GLboolean
-intelCreateContext(const __GLcontextModes * mesaVis,
+intelCreateContext(gl_api api,
+		   const __GLcontextModes * mesaVis,
                    __DRIcontext * driContextPriv,
                    void *sharedContextPrivate)
 {
@@ -379,7 +371,7 @@ intelCreateContext(const __GLcontextModes * mesaVis,
 #ifdef I915
    if (IS_9XX(intelScreen->deviceID)) {
       if (!IS_965(intelScreen->deviceID)) {
-	 return i915CreateContext(mesaVis, driContextPriv,
+	 return i915CreateContext(api, mesaVis, driContextPriv,
 				  sharedContextPrivate);
       }
    } else {
@@ -388,7 +380,8 @@ intelCreateContext(const __GLcontextModes * mesaVis,
    }
 #else
    if (IS_965(intelScreen->deviceID))
-      return brwCreateContext(mesaVis, driContextPriv, sharedContextPrivate);
+      return brwCreateContext(api, mesaVis,
+			      driContextPriv, sharedContextPrivate);
 #endif
    fprintf(stderr, "Unrecognized deviceID %x\n", intelScreen->deviceID);
    return GL_FALSE;
@@ -435,6 +428,7 @@ __DRIconfig **intelInitScreen2(__DRIscreen *psp)
    struct intel_screen *intelScreen;
    GLenum fb_format[3];
    GLenum fb_type[3];
+   unsigned int api_mask;
 
    static const GLenum back_buffer_modes[] = {
        GLX_NONE, GLX_SWAP_UNDEFINED_OML, GLX_SWAP_COPY_OML
@@ -460,6 +454,17 @@ __DRIconfig **intelInitScreen2(__DRIscreen *psp)
    if (!intel_get_param(psp, I915_PARAM_CHIPSET_ID,
 			&intelScreen->deviceID))
       return GL_FALSE;
+
+   api_mask = (1 << __DRI_API_OPENGL);
+#if FEATURE_ES1
+   api_mask |= (1 << __DRI_API_GLES);
+#endif
+#if FEATURE_ES2
+   api_mask |= (1 << __DRI_API_GLES2);
+#endif
+
+   if (IS_9XX(intelScreen->deviceID) || IS_965(intelScreen->deviceID))
+      psp->api_mask = api_mask;
 
    if (!intel_init_bufmgr(intelScreen))
        return GL_FALSE;

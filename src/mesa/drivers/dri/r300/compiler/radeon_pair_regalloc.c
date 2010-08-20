@@ -65,6 +65,11 @@ struct regalloc_state {
 
 	struct hardware_register * HwTemporary;
 	unsigned int NumHwTemporaries;
+	/**
+	 * If an instruction is inside of a loop, end_loop will be the
+	 * IP of the ENDLOOP instruction, otherwise end_loop will be 0
+	 */
+	int end_loop;
 };
 
 static void print_live_intervals(struct live_intervals * src)
@@ -159,7 +164,7 @@ static int try_add_live_intervals(struct regalloc_state * s,
 }
 
 static void scan_callback(void * data, struct rc_instruction * inst,
-		rc_register_file file, unsigned int index, unsigned int chan)
+		rc_register_file file, unsigned int index, unsigned int mask)
 {
 	struct regalloc_state * s = data;
 	struct register_info * reg;
@@ -178,10 +183,10 @@ static void scan_callback(void * data, struct rc_instruction * inst,
 		else
 			reg->Live.Start = inst->IP;
 		reg->Live.End = inst->IP;
-	} else {
-		if (inst->IP > reg->Live.End)
-			reg->Live.End = inst->IP;
-	}
+	} else if (s->end_loop)
+		reg->Live.End = s->end_loop;
+	else if (inst->IP > reg->Live.End)
+		reg->Live.End = inst->IP;
 }
 
 static void compute_live_intervals(struct regalloc_state * s)
@@ -191,14 +196,40 @@ static void compute_live_intervals(struct regalloc_state * s)
 	for(struct rc_instruction * inst = s->C->Program.Instructions.Next;
 	    inst != &s->C->Program.Instructions;
 	    inst = inst->Next) {
-		rc_for_all_reads(inst, scan_callback, s);
-		rc_for_all_writes(inst, scan_callback, s);
+
+		/* For all instructions inside of a loop, the ENDLOOP
+		 * instruction is used as the end of the live interval. */
+		if (inst->U.I.Opcode == RC_OPCODE_BGNLOOP && !s->end_loop) {
+			int loops = 1;
+			struct rc_instruction * tmp;
+			for(tmp = inst->Next;
+					tmp != &s->C->Program.Instructions;
+					tmp = tmp->Next) {
+				if (tmp->U.I.Opcode == RC_OPCODE_BGNLOOP) {
+					loops++;
+					break;
+				} else if (tmp->U.I.Opcode
+							== RC_OPCODE_ENDLOOP) {
+					if(!--loops) {
+						s->end_loop = tmp->IP;
+						break;
+					}
+				}
+			}
+		}
+
+		if (inst->IP == s->end_loop)
+			s->end_loop = 0;
+
+		rc_for_all_reads_mask(inst, scan_callback, s);
+		rc_for_all_writes_mask(inst, scan_callback, s);
 	}
 }
 
-static void rewrite_register(struct regalloc_state * s,
+static void remap_register(void * data, struct rc_instruction * inst,
 		rc_register_file * file, unsigned int * index)
 {
+	struct regalloc_state * s = data;
 	const struct register_info * reg;
 
 	if (*file == RC_FILE_TEMPORARY)
@@ -211,74 +242,6 @@ static void rewrite_register(struct regalloc_state * s,
 	if (reg->Allocated) {
 		*file = reg->File;
 		*index = reg->Index;
-	}
-}
-
-static void rewrite_normal_instruction(struct regalloc_state * s, struct rc_sub_instruction * inst)
-{
-	const struct rc_opcode_info * opcode = rc_get_opcode_info(inst->Opcode);
-
-	if (opcode->HasDstReg) {
-		rc_register_file file = inst->DstReg.File;
-		unsigned int index = inst->DstReg.Index;
-
-		rewrite_register(s, &file, &index);
-
-		inst->DstReg.File = file;
-		inst->DstReg.Index = index;
-	}
-
-	for(unsigned int src = 0; src < opcode->NumSrcRegs; ++src) {
-		rc_register_file file = inst->SrcReg[src].File;
-		unsigned int index = inst->SrcReg[src].Index;
-
-		rewrite_register(s, &file, &index);
-
-		inst->SrcReg[src].File = file;
-		inst->SrcReg[src].Index = index;
-	}
-}
-
-static void rewrite_pair_instruction(struct regalloc_state * s, struct rc_pair_instruction * inst)
-{
-	if (inst->RGB.WriteMask) {
-		rc_register_file file = RC_FILE_TEMPORARY;
-		unsigned int index = inst->RGB.DestIndex;
-
-		rewrite_register(s, &file, &index);
-
-		inst->RGB.DestIndex = index;
-	}
-
-	if (inst->Alpha.WriteMask) {
-		rc_register_file file = RC_FILE_TEMPORARY;
-		unsigned int index = inst->Alpha.DestIndex;
-
-		rewrite_register(s, &file, &index);
-
-		inst->Alpha.DestIndex = index;
-	}
-
-	for(unsigned int src = 0; src < 3; ++src) {
-		if (inst->RGB.Src[src].Used) {
-			rc_register_file file = inst->RGB.Src[src].File;
-			unsigned int index = inst->RGB.Src[src].Index;
-
-			rewrite_register(s, &file, &index);
-
-			inst->RGB.Src[src].File = file;
-			inst->RGB.Src[src].Index = index;
-		}
-
-		if (inst->Alpha.Src[src].Used) {
-			rc_register_file file = inst->Alpha.Src[src].File;
-			unsigned int index = inst->Alpha.Src[src].Index;
-
-			rewrite_register(s, &file, &index);
-
-			inst->Alpha.Src[src].File = file;
-			inst->Alpha.Src[src].Index = index;
-		}
 	}
 }
 
@@ -310,10 +273,7 @@ static void do_regalloc(struct regalloc_state * s)
 	for(struct rc_instruction * inst = s->C->Program.Instructions.Next;
 	    inst != &s->C->Program.Instructions;
 	    inst = inst->Next) {
-		if (inst->Type == RC_INSTRUCTION_NORMAL)
-			rewrite_normal_instruction(s, &inst->U.I);
-		else
-			rewrite_pair_instruction(s, &inst->U.P);
+		rc_remap_registers(inst, &remap_register, s);
 	}
 }
 

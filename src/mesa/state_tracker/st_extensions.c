@@ -139,95 +139,28 @@ void st_init_limits(struct st_context *st)
    st->ctx->Shader.EmitContReturn =
       screen->get_param(screen, PIPE_CAP_TGSI_CONT_SUPPORTED);
 
-   if (screen->get_param(screen, PIPE_CAP_GLSL)) {
-      /*
-       * In the lack of more fine grained capabilities, if the pipe driver supports
-       * GLSL then assume native limits match Mesa software limits.
-       */
+   /* Quads always follow GL provoking rules. */
+   c->QuadsFollowProvokingVertexConvention = GL_FALSE;
 
-      pc = &c->FragmentProgram;
-      pc->MaxNativeInstructions      = pc->MaxInstructions;
-      pc->MaxNativeAluInstructions   = pc->MaxAluInstructions;
-      pc->MaxNativeTexInstructions   = pc->MaxTexInstructions;
-      pc->MaxNativeTexIndirections   = pc->MaxTexIndirections;
-      pc->MaxNativeAttribs           = pc->MaxAttribs;
-      pc->MaxNativeTemps             = pc->MaxTemps;
-      pc->MaxNativeAddressRegs       = pc->MaxAddressRegs;
-      pc->MaxNativeParameters        = pc->MaxParameters;
+   pc = &c->FragmentProgram;
+   pc->MaxNativeInstructions    = screen->get_param(screen, PIPE_CAP_MAX_FS_INSTRUCTIONS);
+   pc->MaxNativeAluInstructions = screen->get_param(screen, PIPE_CAP_MAX_FS_ALU_INSTRUCTIONS);
+   pc->MaxNativeTexInstructions = screen->get_param(screen, PIPE_CAP_MAX_FS_TEX_INSTRUCTIONS);
+   pc->MaxNativeTexIndirections = screen->get_param(screen, PIPE_CAP_MAX_FS_TEX_INDIRECTIONS);
+   pc->MaxNativeAttribs         = screen->get_param(screen, PIPE_CAP_MAX_FS_INPUTS);
+   pc->MaxNativeTemps           = screen->get_param(screen, PIPE_CAP_MAX_FS_TEMPS);
+   pc->MaxNativeAddressRegs     = screen->get_param(screen, PIPE_CAP_MAX_FS_ADDRS);
+   pc->MaxNativeParameters      = screen->get_param(screen, PIPE_CAP_MAX_FS_CONSTS);
 
-      pc = &c->VertexProgram;
-      pc->MaxNativeInstructions      = pc->MaxInstructions;
-      pc->MaxNativeAluInstructions   = pc->MaxAluInstructions;
-      pc->MaxNativeTexInstructions   = pc->MaxTexInstructions;
-      pc->MaxNativeTexIndirections   = pc->MaxTexIndirections;
-      pc->MaxNativeAttribs           = pc->MaxAttribs;
-      pc->MaxNativeTemps             = pc->MaxTemps;
-      pc->MaxNativeAddressRegs       = pc->MaxAddressRegs;
-      pc->MaxNativeParameters        = pc->MaxParameters;
-   } else if (screen->get_param(screen, PIPE_CAP_SM3)) {
-      /*
-       * Assume the hardware meets the minimum requirements
-       * for Shader Model 3.
-       *
-       * See also:
-       * - http://msdn.microsoft.com/en-us/library/bb172920(VS.85).aspx
-       * - http://msdn.microsoft.com/en-us/library/bb172963(VS.85).aspx
-       */
-
-      pc = &c->FragmentProgram;
-      pc->MaxNativeInstructions      = 512; /* D3DMIN30SHADERINSTRUCTIONS */
-      pc->MaxNativeAluInstructions   = pc->MaxNativeInstructions;
-      pc->MaxNativeTexInstructions   = pc->MaxNativeInstructions;
-      pc->MaxNativeTexIndirections   = pc->MaxNativeTexInstructions;
-      pc->MaxNativeAttribs           = 10;
-      pc->MaxNativeTemps             = 32;
-      pc->MaxNativeAddressRegs       = 1; /* aL */
-      pc->MaxNativeParameters        = 224;
-
-      pc = &c->VertexProgram;
-      pc->MaxNativeInstructions      = 512; /* D3DMIN30SHADERINSTRUCTIONS */
-      pc->MaxNativeAluInstructions   = pc->MaxNativeInstructions;
-      pc->MaxNativeTexInstructions   = pc->MaxNativeInstructions;
-      pc->MaxNativeTexIndirections   = pc->MaxNativeTexInstructions;
-      pc->MaxNativeAttribs           = 16;
-      pc->MaxNativeTemps             = 32;
-      pc->MaxNativeAddressRegs       = 2; /* a0 and aL */
-      pc->MaxNativeParameters        = 256;
-   } else {
-      /*
-       * Assume the hardware meets the minimum requirements
-       * for Shader Model 2.
-       *
-       * See also:
-       * - http://msdn.microsoft.com/en-us/library/bb172918(VS.85).aspx
-       * - http://msdn.microsoft.com/en-us/library/bb172961(VS.85).aspx
-       */
-
-      pc = &c->FragmentProgram;
-      pc->MaxNativeInstructions      = 96; /* D3DPS20_MIN_NUMINSTRUCTIONSLOTS */
-      pc->MaxNativeAluInstructions   = 64;
-      pc->MaxNativeTexInstructions   = 32;
-      pc->MaxNativeTexIndirections   = pc->MaxNativeTexInstructions;
-      pc->MaxNativeAttribs           = 10; /* 2 color + 8 texture coord */
-      pc->MaxNativeTemps             = 12; /* D3DPS20_MIN_NUMTEMPS */
-      pc->MaxNativeAddressRegs       = 0;
-      pc->MaxNativeParameters        = 16;
-
-      pc = &c->VertexProgram;
-      pc->MaxNativeInstructions      = 256;
-      pc->MaxNativeAluInstructions   = 256;
-      pc->MaxNativeTexInstructions   = 0;
-      pc->MaxNativeTexIndirections   = 0;
-      pc->MaxNativeAttribs           = 16;
-      pc->MaxNativeTemps             = 12; /* D3DVS20_MIN_NUMTEMPS */
-      pc->MaxNativeAddressRegs       = 2; /* a0 and aL */
-      pc->MaxNativeParameters        = 256;
-   }
-
-   if (!screen->get_param(screen, PIPE_CAP_MAX_VERTEX_TEXTURE_UNITS)) {
-      c->VertexProgram.MaxNativeTexInstructions = 0;
-      c->VertexProgram.MaxNativeTexIndirections = 0;
-   }
+   pc = &c->VertexProgram;
+   pc->MaxNativeInstructions    = screen->get_param(screen, PIPE_CAP_MAX_VS_INSTRUCTIONS);
+   pc->MaxNativeAluInstructions = screen->get_param(screen, PIPE_CAP_MAX_VS_ALU_INSTRUCTIONS);
+   pc->MaxNativeTexInstructions = screen->get_param(screen, PIPE_CAP_MAX_VS_TEX_INSTRUCTIONS);
+   pc->MaxNativeTexIndirections = screen->get_param(screen, PIPE_CAP_MAX_VS_TEX_INDIRECTIONS);
+   pc->MaxNativeAttribs         = screen->get_param(screen, PIPE_CAP_MAX_VS_INPUTS);
+   pc->MaxNativeTemps           = screen->get_param(screen, PIPE_CAP_MAX_VS_TEMPS);
+   pc->MaxNativeAddressRegs     = screen->get_param(screen, PIPE_CAP_MAX_VS_ADDRS);
+   pc->MaxNativeParameters      = screen->get_param(screen, PIPE_CAP_MAX_VS_CONSTS);
 }
 
 
@@ -247,6 +180,7 @@ void st_init_extensions(struct st_context *st)
     * Extensions that are supported by all Gallium drivers:
     */
    ctx->Extensions.ARB_copy_buffer = GL_TRUE;
+   ctx->Extensions.ARB_draw_elements_base_vertex = GL_TRUE;
    ctx->Extensions.ARB_fragment_coord_conventions = GL_TRUE;
    ctx->Extensions.ARB_fragment_program = GL_TRUE;
    ctx->Extensions.ARB_map_buffer_range = GL_TRUE;
@@ -260,6 +194,7 @@ void st_init_extensions(struct st_context *st)
    ctx->Extensions.ARB_vertex_array_object = GL_TRUE;
    ctx->Extensions.ARB_vertex_buffer_object = GL_TRUE;
    ctx->Extensions.ARB_vertex_program = GL_TRUE;
+   ctx->Extensions.ARB_window_pos = GL_TRUE;
 
    ctx->Extensions.EXT_blend_color = GL_TRUE;
    ctx->Extensions.EXT_blend_func_separate = GL_TRUE;
@@ -270,6 +205,7 @@ void st_init_extensions(struct st_context *st)
    ctx->Extensions.EXT_framebuffer_object = GL_TRUE;
    ctx->Extensions.EXT_framebuffer_multisample = GL_TRUE;
    ctx->Extensions.EXT_fog_coord = GL_TRUE;
+   ctx->Extensions.EXT_gpu_program_parameters = GL_TRUE;
    ctx->Extensions.EXT_multi_draw_arrays = GL_TRUE;
    ctx->Extensions.EXT_pixel_buffer_object = GL_TRUE;
    ctx->Extensions.EXT_point_parameters = GL_TRUE;
@@ -284,10 +220,23 @@ void st_init_extensions(struct st_context *st)
 
    ctx->Extensions.APPLE_vertex_array_object = GL_TRUE;
 
+   ctx->Extensions.ATI_texture_env_combine3 = GL_TRUE;
+
+   ctx->Extensions.MESA_pack_invert = GL_TRUE;
+
    ctx->Extensions.NV_blend_square = GL_TRUE;
    ctx->Extensions.NV_texgen_reflection = GL_TRUE;
    ctx->Extensions.NV_texture_env_combine4 = GL_TRUE;
+   ctx->Extensions.NV_texture_rectangle = GL_TRUE;
+#if 0
+   /* possibly could support the following two */
+   ctx->Extensions.NV_vertex_program = GL_TRUE;
+   ctx->Extensions.NV_vertex_program1_1 = GL_TRUE;
+#endif
 
+#if FEATURE_OES_EGL_image
+   ctx->Extensions.OES_EGL_image = GL_TRUE;
+#endif
 #if FEATURE_OES_draw_texture
    ctx->Extensions.OES_draw_texture = GL_TRUE;
 #endif
@@ -300,6 +249,10 @@ void st_init_extensions(struct st_context *st)
     */
    if (screen->get_param(screen, PIPE_CAP_MAX_RENDER_TARGETS) > 0) {
       ctx->Extensions.ARB_draw_buffers = GL_TRUE;
+   }
+
+   if (screen->get_param(screen, PIPE_CAP_TEXTURE_SWIZZLE) > 0) {
+      ctx->Extensions.EXT_texture_swizzle = GL_TRUE;
    }
 
    if (screen->get_param(screen, PIPE_CAP_GLSL)) {
@@ -320,11 +273,11 @@ void st_init_extensions(struct st_context *st)
 
    if (screen->get_param(screen, PIPE_CAP_TEXTURE_MIRROR_CLAMP) > 0) {
       ctx->Extensions.EXT_texture_mirror_clamp = GL_TRUE;
+      ctx->Extensions.ATI_texture_mirror_once = GL_TRUE;
    }
 
    if (screen->get_param(screen, PIPE_CAP_NPOT_TEXTURES)) {
       ctx->Extensions.ARB_texture_non_power_of_two = GL_TRUE;
-      ctx->Extensions.NV_texture_rectangle = GL_TRUE;
    }
 
    if (screen->get_param(screen, PIPE_CAP_MAX_TEXTURE_IMAGE_UNITS) > 1) {
@@ -350,9 +303,13 @@ void st_init_extensions(struct st_context *st)
    if (screen->get_param(screen, PIPE_CAP_OCCLUSION_QUERY)) {
       ctx->Extensions.ARB_occlusion_query = GL_TRUE;
    }
+   if (screen->get_param(screen, PIPE_CAP_TIMER_QUERY)) {
+     ctx->Extensions.EXT_timer_query = GL_TRUE;
+   }
 
    if (screen->get_param(screen, PIPE_CAP_TEXTURE_SHADOW_MAP)) {
       ctx->Extensions.ARB_depth_texture = GL_TRUE;
+      ctx->Extensions.ARB_fragment_program_shadow = GL_TRUE;
       ctx->Extensions.ARB_shadow = GL_TRUE;
       ctx->Extensions.EXT_shadow_funcs = GL_TRUE;
       /*ctx->Extensions.ARB_shadow_ambient = GL_TRUE;*/
@@ -361,52 +318,52 @@ void st_init_extensions(struct st_context *st)
    /* GL_EXT_packed_depth_stencil requires both the ability to render to
     * a depth/stencil buffer and texture from depth/stencil source.
     */
-   if (screen->is_format_supported(screen, PIPE_FORMAT_S8Z24_UNORM,
-                                   PIPE_TEXTURE_2D, 
-                                   PIPE_TEXTURE_USAGE_DEPTH_STENCIL, 0) &&
-       screen->is_format_supported(screen, PIPE_FORMAT_S8Z24_UNORM,
-                                   PIPE_TEXTURE_2D, 
-                                   PIPE_TEXTURE_USAGE_SAMPLER, 0)) {
+   if (screen->is_format_supported(screen, PIPE_FORMAT_S8_USCALED_Z24_UNORM,
+                                   PIPE_TEXTURE_2D, 0,
+                                   PIPE_BIND_DEPTH_STENCIL, 0) &&
+       screen->is_format_supported(screen, PIPE_FORMAT_S8_USCALED_Z24_UNORM,
+                                   PIPE_TEXTURE_2D, 0,
+                                   PIPE_BIND_SAMPLER_VIEW, 0)) {
       ctx->Extensions.EXT_packed_depth_stencil = GL_TRUE;
    }
-   else if (screen->is_format_supported(screen, PIPE_FORMAT_Z24S8_UNORM,
-                                        PIPE_TEXTURE_2D, 
-                                        PIPE_TEXTURE_USAGE_DEPTH_STENCIL, 0) &&
-            screen->is_format_supported(screen, PIPE_FORMAT_Z24S8_UNORM,
-                                        PIPE_TEXTURE_2D, 
-                                        PIPE_TEXTURE_USAGE_SAMPLER, 0)) {
+   else if (screen->is_format_supported(screen, PIPE_FORMAT_Z24_UNORM_S8_USCALED,
+                                        PIPE_TEXTURE_2D, 0,
+                                        PIPE_BIND_DEPTH_STENCIL, 0) &&
+            screen->is_format_supported(screen, PIPE_FORMAT_Z24_UNORM_S8_USCALED,
+                                        PIPE_TEXTURE_2D, 0,
+                                        PIPE_BIND_SAMPLER_VIEW, 0)) {
       ctx->Extensions.EXT_packed_depth_stencil = GL_TRUE;
    }
 
    /* sRGB support */
    if (screen->is_format_supported(screen, PIPE_FORMAT_A8B8G8R8_SRGB,
-                                   PIPE_TEXTURE_2D, 
-                                   PIPE_TEXTURE_USAGE_SAMPLER, 0) ||
+                                   PIPE_TEXTURE_2D, 0,
+                                   PIPE_BIND_SAMPLER_VIEW, 0) ||
       screen->is_format_supported(screen, PIPE_FORMAT_B8G8R8A8_SRGB,
-                                   PIPE_TEXTURE_2D, 
-                                   PIPE_TEXTURE_USAGE_SAMPLER, 0)) {
+                                   PIPE_TEXTURE_2D, 0,
+                                   PIPE_BIND_SAMPLER_VIEW, 0)) {
       ctx->Extensions.EXT_texture_sRGB = GL_TRUE;
    }
 
    /* s3tc support */
    if (screen->is_format_supported(screen, PIPE_FORMAT_DXT5_RGBA,
-                                   PIPE_TEXTURE_2D,
-                                   PIPE_TEXTURE_USAGE_SAMPLER, 0) &&
+                                   PIPE_TEXTURE_2D, 0,
+                                   PIPE_BIND_SAMPLER_VIEW, 0) &&
        (ctx->Mesa_DXTn ||
         screen->is_format_supported(screen, PIPE_FORMAT_DXT5_RGBA,
-                                    PIPE_TEXTURE_2D,
-                                    PIPE_TEXTURE_USAGE_RENDER_TARGET, 0))) {
+                                    PIPE_TEXTURE_2D, 0,
+                                    PIPE_BIND_RENDER_TARGET, 0))) {
       ctx->Extensions.EXT_texture_compression_s3tc = GL_TRUE;
       ctx->Extensions.S3_s3tc = GL_TRUE;
    }
 
    /* ycbcr support */
    if (screen->is_format_supported(screen, PIPE_FORMAT_UYVY, 
-                                   PIPE_TEXTURE_2D, 
-                                   PIPE_TEXTURE_USAGE_SAMPLER, 0) ||
+                                   PIPE_TEXTURE_2D, 0,
+                                   PIPE_BIND_SAMPLER_VIEW, 0) ||
        screen->is_format_supported(screen, PIPE_FORMAT_YUYV, 
-                                   PIPE_TEXTURE_2D, 
-                                   PIPE_TEXTURE_USAGE_SAMPLER, 0)) {
+                                   PIPE_TEXTURE_2D, 0,
+                                   PIPE_BIND_SAMPLER_VIEW, 0)) {
       ctx->Extensions.MESA_ycbcr_texture = GL_TRUE;
    }
 
@@ -424,9 +381,24 @@ void st_init_extensions(struct st_context *st)
       ctx->Extensions.EXT_draw_buffers2 = GL_TRUE;
    }
 
+   /* GL_ARB_half_float_vertex */
+   if (screen->is_format_supported(screen, PIPE_FORMAT_R16G16B16A16_FLOAT,
+                                   PIPE_BUFFER, 0,
+                                   PIPE_BIND_VERTEX_BUFFER, 0)) {
+      ctx->Extensions.ARB_half_float_vertex = GL_TRUE;
+   }
+
 #if 0 /* not yet */
    if (screen->get_param(screen, PIPE_CAP_INDEP_BLEND_FUNC)) {
       ctx->Extensions.ARB_draw_buffers_blend = GL_TRUE;
    }
 #endif
+
+   if (screen->get_param(screen, PIPE_CAP_GEOMETRY_SHADER4)) {
+      ctx->Extensions.ARB_geometry_shader4 = GL_TRUE;
+   }
+
+   if (screen->get_param(screen, PIPE_CAP_DEPTH_CLAMP)) {
+      ctx->Extensions.ARB_depth_clamp = GL_TRUE;
+   }
 }

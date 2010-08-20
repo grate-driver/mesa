@@ -32,7 +32,7 @@
 
 #include "main/mtypes.h"
 #include "main/imports.h"
-#include "shader/prog_parameter.h"
+#include "program/prog_parameter.h"
 
 #include "radeon_debug.h"
 #include "r600_context.h"
@@ -275,7 +275,10 @@ GLuint GetSurfaceFormat(GLenum eType, GLuint nChannels, GLuint * pClient_size)
                 case 2:
                     format = FMT_8_8; break;
                 case 3:
-                    format = FMT_8_8_8; break;
+                    /* for some (small/unaligned) strides using 4 comps works
+                     * better, probably same as GL_SHORT below
+                     * test piglit/draw-vertices */
+                    format = FMT_8_8_8_8; break;
                 case 4:
                     format = FMT_8_8_8_8; break;
                 default:
@@ -293,7 +296,9 @@ GLuint GetSurfaceFormat(GLenum eType, GLuint nChannels, GLuint * pClient_size)
                 case 2:
                     format = FMT_16_16; break;
                 case 3:
-                    format = FMT_16_16_16; break;
+                    /* 3 comp GL_SHORT vertex format doesnt work on r700
+                       4 somehow works, test - sauerbraten  */
+                    format = FMT_16_16_16_16; break;
                 case 4:
                     format = FMT_16_16_16_16; break;
                 default:
@@ -1051,6 +1056,67 @@ void checkop_init(r700_AssemblerBase* pAsm)
     pAsm->aArgSubst[3] = -1;
 }
 
+static GLboolean next_ins(r700_AssemblerBase *pAsm)
+{
+    struct prog_instruction *pILInst = &(pAsm->pILInst[pAsm->uiCurInst]);
+
+    if (GL_TRUE == pAsm->is_tex)
+    {
+        if (pILInst->TexSrcTarget == TEXTURE_RECT_INDEX)
+        {
+            if (GL_FALSE == assemble_tex_instruction(pAsm, GL_FALSE))
+            {
+                radeon_error("Error assembling TEX instruction\n");
+                return GL_FALSE;
+            }
+        }
+        else
+        {
+            if (GL_FALSE == assemble_tex_instruction(pAsm, GL_TRUE))
+            {
+                radeon_error("Error assembling TEX instruction\n");
+                return GL_FALSE;
+            }
+        }
+    }
+    else
+    {   //ALU
+        if (GL_FALSE == assemble_alu_instruction(pAsm))
+        {
+            radeon_error("Error assembling ALU instruction\n");
+            return GL_FALSE;
+        }
+    }
+
+    if (pAsm->D.dst.rtype == DST_REG_OUT)
+    {
+        assert(pAsm->D.dst.reg >= pAsm->starting_export_register_number);
+
+        if (pAsm->D.dst.op3)
+        {
+            // There is no mask for OP3 instructions, so all channels are written
+            pAsm->pucOutMask[pAsm->D.dst.reg - pAsm->starting_export_register_number] = 0xF;
+        }
+        else
+        {
+            pAsm->pucOutMask[pAsm->D.dst.reg - pAsm->starting_export_register_number]
+               |= (unsigned char)pAsm->pILInst[pAsm->uiCurInst].DstReg.WriteMask;
+        }
+    }
+
+    //reset for next inst.
+    pAsm->D.bits    = 0;
+    pAsm->D2.bits   = 0;
+    pAsm->S[0].bits = 0;
+    pAsm->S[1].bits = 0;
+    pAsm->S[2].bits = 0;
+    pAsm->is_tex = GL_FALSE;
+    pAsm->need_tex_barrier = GL_FALSE;
+    pAsm->D2.bits = 0;
+    pAsm->C[0].bits = pAsm->C[1].bits = pAsm->C[2].bits = pAsm->C[3].bits = 0;
+    return GL_TRUE;
+}
+
 GLboolean mov_temp(r700_AssemblerBase* pAsm, int src)
 {
     GLuint tmp = gethelpr(pAsm);
@@ -1201,7 +1267,7 @@ GLboolean checkop3(r700_AssemblerBase* pAsm)
 	    {
             if( GL_FALSE == mov_temp(pAsm, 1) )
             {
-                return 1;
+                return GL_FALSE;
             }
         }
 
@@ -1291,7 +1357,7 @@ GLboolean assemble_src(r700_AssemblerBase *pAsm,
             break;      
         case PROGRAM_INPUT:
             setaddrmode_PVSSRC(&(pAsm->S[fld].src), ADDR_ABSOLUTE); 
-            pAsm->S[fld].src.rtype = SRC_REG_INPUT;
+            pAsm->S[fld].src.rtype = SRC_REG_GPR;
             switch (pAsm->currentShaderType)
             {
             case SPT_FP:
@@ -1302,6 +1368,19 @@ GLboolean assemble_src(r700_AssemblerBase *pAsm,
                 break;
             }
             break;      
+        case PROGRAM_OUTPUT:
+            setaddrmode_PVSSRC(&(pAsm->S[fld].src), ADDR_ABSOLUTE);
+            pAsm->S[fld].src.rtype = SRC_REG_GPR;
+            switch (pAsm->currentShaderType)
+            {
+            case SPT_FP:
+                pAsm->S[fld].src.reg = pAsm->uiFP_OutputMap[pILInst->SrcReg[src].Index];
+                break;
+            case SPT_VP:
+                pAsm->S[fld].src.reg = pAsm->ucVP_OutputMap[pILInst->SrcReg[src].Index];
+                break;
+            }
+            break;
         default:
             radeon_error("Invalid source argument type : %d \n", pILInst->SrcReg[src].File);
             return GL_FALSE;
@@ -1455,7 +1534,7 @@ GLboolean tex_src(r700_AssemblerBase *pAsm)
                         bValidTexCoord = GL_TRUE;
                         pAsm->S[0].src.reg   =
                             pAsm->ucVP_AttributeMap[pILInst->SrcReg[0].Index];
-                        pAsm->S[0].src.rtype = SRC_REG_INPUT;
+                        pAsm->S[0].src.rtype = SRC_REG_GPR;
                         break;
                 }
             }
@@ -1478,7 +1557,7 @@ GLboolean tex_src(r700_AssemblerBase *pAsm)
                         bValidTexCoord = GL_TRUE;
                         pAsm->S[0].src.reg   =
                             pAsm->uiFP_AttributeMap[pILInst->SrcReg[0].Index];
-                        pAsm->S[0].src.rtype = SRC_REG_INPUT;
+                        pAsm->S[0].src.rtype = SRC_REG_GPR;
                         break;
                     case FRAG_ATTRIB_FACE:
                         fprintf(stderr, "FRAG_ATTRIB_FACE unsupported\n");
@@ -1494,7 +1573,7 @@ GLboolean tex_src(r700_AssemblerBase *pAsm)
 				    bValidTexCoord = GL_TRUE;
                     pAsm->S[0].src.reg   =
                         pAsm->uiFP_AttributeMap[pILInst->SrcReg[0].Index];
-                    pAsm->S[0].src.rtype = SRC_REG_INPUT;
+                    pAsm->S[0].src.rtype = SRC_REG_GPR;
                 }
             }
 
@@ -1679,7 +1758,7 @@ GLboolean assemble_alu_src(R700ALUInstruction*  alu_instruction_ptr,
     else 
     {
         if ( (pSource->rtype == SRC_REG_TEMPORARY) || 
-             (pSource->rtype == SRC_REG_INPUT)
+             (pSource->rtype == SRC_REG_GPR)
         ) 
         {
             src_sel = pSource->reg;
@@ -2318,7 +2397,7 @@ GLboolean assemble_alu_instruction(r700_AssemblerBase *pAsm)
                     default: channel_swizzle = SQ_SEL_MASK; break;
                 }
                 if ( ((pSource[j]->rtype == SRC_REG_TEMPORARY) || 
-                     (pSource[j]->rtype == SRC_REG_INPUT))
+                     (pSource[j]->rtype == SRC_REG_GPR))
                      && (channel_swizzle <= SQ_SEL_W) )
                 {                    
                     chan_counter[channel_swizzle]++;                        
@@ -2578,62 +2657,6 @@ GLboolean assemble_alu_instruction(r700_AssemblerBase *pAsm)
     return GL_TRUE;
 }
 
-GLboolean next_ins(r700_AssemblerBase *pAsm)
-{
-    struct prog_instruction *pILInst = &(pAsm->pILInst[pAsm->uiCurInst]);
-
-    if( GL_TRUE == pAsm->is_tex )
-    {
-	    if (pILInst->TexSrcTarget == TEXTURE_RECT_INDEX) {
-		    if( GL_FALSE == assemble_tex_instruction(pAsm, GL_FALSE) ) 
-		    {
-			    radeon_error("Error assembling TEX instruction\n");
-			    return GL_FALSE;
-		    }
-	    } else {
-		    if( GL_FALSE == assemble_tex_instruction(pAsm, GL_TRUE) ) 
-		    {
-			    radeon_error("Error assembling TEX instruction\n");
-			    return GL_FALSE;
-		    }
-	    }
-    }
-    else 
-    {   //ALU      
-        if( GL_FALSE == assemble_alu_instruction(pAsm) ) 
-        {
-            radeon_error("Error assembling ALU instruction\n");
-            return GL_FALSE;
-        }
-    } 
-      
-    if(pAsm->D.dst.rtype == DST_REG_OUT) 
-    {
-        if(pAsm->D.dst.op3) 
-        {        
-            // There is no mask for OP3 instructions, so all channels are written        
-            pAsm->pucOutMask[pAsm->D.dst.reg - pAsm->starting_export_register_number] = 0xF;
-        }
-        else 
-        {
-            pAsm->pucOutMask[pAsm->D.dst.reg - pAsm->starting_export_register_number] 
-               |= (unsigned char)pAsm->pILInst[pAsm->uiCurInst].DstReg.WriteMask;
-        }
-    }
-    
-    //reset for next inst.
-    pAsm->D.bits    = 0;
-    pAsm->D2.bits   = 0;
-    pAsm->S[0].bits = 0;
-    pAsm->S[1].bits = 0;
-    pAsm->S[2].bits = 0;
-    pAsm->is_tex = GL_FALSE;
-    pAsm->need_tex_barrier = GL_FALSE;
-    pAsm->D2.bits = 0;
-    pAsm->C[0].bits = pAsm->C[1].bits = pAsm->C[2].bits = pAsm->C[3].bits = 0;
-    return GL_TRUE;
-}
-
 GLboolean assemble_math_function(r700_AssemblerBase* pAsm, BITS opcode)
 {
     BITS tmp;
@@ -2865,25 +2888,92 @@ GLboolean assemble_CMP(r700_AssemblerBase *pAsm)
 
 GLboolean assemble_TRIG(r700_AssemblerBase *pAsm, BITS opcode)
 {
+    /* 
+     * r600 - trunc to -PI..PI range
+     * r700 - normalize by dividing by 2PI
+     * see fdo bug 27901
+     */
+  
     int tmp;
     checkop1(pAsm);
 
     tmp = gethelpr(pAsm);
 
-    pAsm->D.dst.opcode = SQ_OP2_INST_MUL;
+    pAsm->D.dst.opcode = SQ_OP3_INST_MULADD;
+    pAsm->D.dst.op3    = 1;
+
     setaddrmode_PVSDST(&(pAsm->D.dst), ADDR_ABSOLUTE);
     pAsm->D.dst.rtype  = DST_REG_TEMPORARY;
     pAsm->D.dst.reg    = tmp;
-    pAsm->D.dst.writex = 1;
 
     assemble_src(pAsm, 0, -1);
 
     pAsm->S[1].src.rtype = SRC_REC_LITERAL;
     setswizzle_PVSSRC(&(pAsm->S[1].src), SQ_SEL_X);
+    
+    pAsm->S[2].src.rtype = SRC_REC_LITERAL;
+    setswizzle_PVSSRC(&(pAsm->S[2].src), SQ_SEL_Y);
+
     pAsm->D2.dst2.literal_slots = 1;
     pAsm->C[0].f = 1/(3.1415926535 * 2);
-    pAsm->C[1].f = 0.0F;
-    next_ins(pAsm);
+    pAsm->C[1].f = 0.5f;
+    
+    if ( GL_FALSE == next_ins(pAsm) )
+    {
+        return GL_FALSE;
+    }
+
+    pAsm->D.dst.opcode = SQ_OP2_INST_FRACT;
+
+    setaddrmode_PVSDST(&(pAsm->D.dst), ADDR_ABSOLUTE);
+    pAsm->D.dst.rtype  = DST_REG_TEMPORARY;
+    pAsm->D.dst.reg    = tmp;
+    pAsm->D.dst.writex = 1;
+
+    setaddrmode_PVSSRC(&(pAsm->S[0].src), ADDR_ABSOLUTE);
+    pAsm->S[0].src.rtype = SRC_REG_TEMPORARY;
+    pAsm->S[0].src.reg   = tmp;
+    setswizzle_PVSSRC(&(pAsm->S[0].src), SQ_SEL_X);
+
+    if(( GL_FALSE == next_ins(pAsm) ))
+    {
+        return GL_FALSE;
+    }
+    pAsm->D.dst.opcode = SQ_OP3_INST_MULADD;
+    pAsm->D.dst.op3    = 1;
+
+    setaddrmode_PVSDST(&(pAsm->D.dst), ADDR_ABSOLUTE);
+    pAsm->D.dst.rtype  = DST_REG_TEMPORARY;
+    pAsm->D.dst.reg    = tmp;
+
+    setaddrmode_PVSSRC(&(pAsm->S[0].src), ADDR_ABSOLUTE);
+    pAsm->S[0].src.rtype = SRC_REG_TEMPORARY;
+    pAsm->S[0].src.reg   = tmp;
+    setswizzle_PVSSRC(&(pAsm->S[0].src), SQ_SEL_X);
+
+    pAsm->S[1].src.rtype = SRC_REC_LITERAL;
+    setswizzle_PVSSRC(&(pAsm->S[1].src), SQ_SEL_X);
+
+    pAsm->S[2].src.rtype = SRC_REC_LITERAL;
+    setswizzle_PVSSRC(&(pAsm->S[2].src), SQ_SEL_Y);
+
+    pAsm->D2.dst2.literal_slots = 1;
+
+    if (pAsm->bR6xx)
+    {
+       pAsm->C[0].f = 3.1415926535897f * 2.0f;
+       pAsm->C[1].f = -3.1415926535897f;
+    }
+    else 
+    {
+       pAsm->C[0].f = 1.0f;
+       pAsm->C[1].f = -0.5f;
+    }
+
+    if(( GL_FALSE == next_ins(pAsm) ))
+    {
+        return GL_FALSE;
+    }
 
     pAsm->D.dst.opcode = opcode;
     pAsm->D.dst.math = 1;
@@ -2927,7 +3017,14 @@ GLboolean assemble_DOT(r700_AssemblerBase *pAsm)
         return GL_FALSE;
     }
 
-    if(OPCODE_DP3 == pAsm->pILInst[pAsm->uiCurInst].Opcode)
+    if(OPCODE_DP2 == pAsm->pILInst[pAsm->uiCurInst].Opcode)
+    {
+       zerocomp_PVSSRC(&(pAsm->S[0].src),2);
+       zerocomp_PVSSRC(&(pAsm->S[0].src),3);
+       zerocomp_PVSSRC(&(pAsm->S[1].src),2);
+       zerocomp_PVSSRC(&(pAsm->S[1].src),3);
+    }
+    else if(OPCODE_DP3 == pAsm->pILInst[pAsm->uiCurInst].Opcode)
     {
         zerocomp_PVSSRC(&(pAsm->S[0].src), 3);
         zerocomp_PVSSRC(&(pAsm->S[1].src), 3);
@@ -4023,22 +4120,79 @@ GLboolean assemble_SCS(r700_AssemblerBase *pAsm)
     checkop1(pAsm);
 
     tmp = gethelpr(pAsm);
-    /* tmp.x = src /2*PI */
-    pAsm->D.dst.opcode = SQ_OP2_INST_MUL;
+
+    pAsm->D.dst.opcode = SQ_OP3_INST_MULADD;
+    pAsm->D.dst.op3    = 1;
+
     setaddrmode_PVSDST(&(pAsm->D.dst), ADDR_ABSOLUTE);
     pAsm->D.dst.rtype  = DST_REG_TEMPORARY;
     pAsm->D.dst.reg    = tmp;
-    pAsm->D.dst.writex = 1;
 
     assemble_src(pAsm, 0, -1);
 
     pAsm->S[1].src.rtype = SRC_REC_LITERAL;
     setswizzle_PVSSRC(&(pAsm->S[1].src), SQ_SEL_X);
+
+    pAsm->S[2].src.rtype = SRC_REC_LITERAL;
+    setswizzle_PVSSRC(&(pAsm->S[2].src), SQ_SEL_Y);
+
     pAsm->D2.dst2.literal_slots = 1;
     pAsm->C[0].f = 1/(3.1415926535 * 2);
-    pAsm->C[1].f = 0.0F;
+    pAsm->C[1].f = 0.5F;
 
-    next_ins(pAsm);
+    if ( GL_FALSE == next_ins(pAsm) )
+    {
+        return GL_FALSE;
+    }
+
+    pAsm->D.dst.opcode = SQ_OP2_INST_FRACT;
+
+    setaddrmode_PVSDST(&(pAsm->D.dst), ADDR_ABSOLUTE);
+    pAsm->D.dst.rtype  = DST_REG_TEMPORARY;
+    pAsm->D.dst.reg    = tmp;
+    pAsm->D.dst.writex = 1;
+
+    setaddrmode_PVSSRC(&(pAsm->S[0].src), ADDR_ABSOLUTE);
+    pAsm->S[0].src.rtype = SRC_REG_TEMPORARY;
+    pAsm->S[0].src.reg   = tmp;
+    setswizzle_PVSSRC(&(pAsm->S[0].src), SQ_SEL_X);
+
+    if(( GL_FALSE == next_ins(pAsm) ))
+    {
+        return GL_FALSE;
+    }
+    pAsm->D.dst.opcode = SQ_OP3_INST_MULADD;
+    pAsm->D.dst.op3    = 1;
+
+    setaddrmode_PVSDST(&(pAsm->D.dst), ADDR_ABSOLUTE);
+    pAsm->D.dst.rtype  = DST_REG_TEMPORARY;
+    pAsm->D.dst.reg    = tmp;
+
+    setaddrmode_PVSSRC(&(pAsm->S[0].src), ADDR_ABSOLUTE);
+    pAsm->S[0].src.rtype = SRC_REG_TEMPORARY;
+    pAsm->S[0].src.reg   = tmp;
+    setswizzle_PVSSRC(&(pAsm->S[0].src), SQ_SEL_X);
+
+    pAsm->S[1].src.rtype = SRC_REC_LITERAL;
+    setswizzle_PVSSRC(&(pAsm->S[1].src), SQ_SEL_X);
+
+    pAsm->S[2].src.rtype = SRC_REC_LITERAL;
+    setswizzle_PVSSRC(&(pAsm->S[2].src), SQ_SEL_Y);
+
+    pAsm->D2.dst2.literal_slots = 1;
+
+    if(pAsm->bR6xx) {
+       pAsm->C[0].f = 3.1415926535897f * 2.0f;
+       pAsm->C[1].f = -3.1415926535897f;
+    } else {
+       pAsm->C[0].f = 1.0f;
+       pAsm->C[1].f = -0.5f;
+    }
+
+    if(( GL_FALSE == next_ins(pAsm) ))
+    {
+        return GL_FALSE;
+    }
 
     // COS dst.x,    a.x
     pAsm->D.dst.opcode = SQ_OP2_INST_COS;
@@ -4215,6 +4369,65 @@ GLboolean assemble_SLT(r700_AssemblerBase *pAsm)
     return GL_TRUE;
 }
  
+GLboolean assemble_SSG(r700_AssemblerBase *pAsm)
+{
+    checkop1(pAsm);
+    
+    GLuint tmp = gethelpr(pAsm);
+    /* tmp = (src > 0 ? 1 : src) */
+    pAsm->D.dst.opcode = SQ_OP3_INST_CNDGT;
+    pAsm->D.dst.op3    = 1;
+    pAsm->D.dst.rtype = DST_REG_TEMPORARY;
+    pAsm->D.dst.reg   = tmp;
+
+    if( GL_FALSE == assemble_src(pAsm, 0, -1) )
+    {
+        return GL_FALSE;
+    }
+
+    setswizzle_PVSSRC(&(pAsm->S[1].src), SQ_SEL_1);
+
+    if( GL_FALSE == assemble_src(pAsm, 0, 2) )
+    {
+        return GL_FALSE;
+    }
+
+    if( GL_FALSE == next_ins(pAsm) )
+    {
+        return GL_FALSE;
+    }
+
+    /* dst = (-tmp > 0 ? -1 : tmp) */
+    pAsm->D.dst.opcode = SQ_OP3_INST_CNDGT;
+    pAsm->D.dst.op3    = 1;
+
+    if( GL_FALSE == assemble_dst(pAsm) )
+    {
+        return GL_FALSE;
+    }
+
+    setaddrmode_PVSSRC(&(pAsm->S[0].src), ADDR_ABSOLUTE);
+    pAsm->S[0].src.rtype = SRC_REG_TEMPORARY;
+    pAsm->S[0].src.reg   = tmp;
+    noswizzle_PVSSRC(&(pAsm->S[0].src));
+    neg_PVSSRC(&(pAsm->S[0].src));
+
+    setswizzle_PVSSRC(&(pAsm->S[1].src), SQ_SEL_1);
+    neg_PVSSRC(&(pAsm->S[1].src));
+
+    setaddrmode_PVSSRC(&(pAsm->S[2].src), ADDR_ABSOLUTE);
+    pAsm->S[2].src.rtype = SRC_REG_TEMPORARY;
+    pAsm->S[2].src.reg   = tmp;
+    noswizzle_PVSSRC(&(pAsm->S[2].src));
+
+    if( GL_FALSE == next_ins(pAsm) )
+    {
+        return GL_FALSE;
+    }
+
+    return GL_TRUE;
+}
+
 GLboolean assemble_STP(r700_AssemblerBase *pAsm) 
 {
     return GL_TRUE;
@@ -5547,6 +5760,7 @@ GLboolean AssembleInstr(GLuint uiFirstInst,
                 return GL_FALSE;
             break;  
 
+        case OPCODE_DP2:
         case OPCODE_DP3: 
         case OPCODE_DP4: 
         case OPCODE_DPH: 
@@ -5738,6 +5952,13 @@ GLboolean AssembleInstr(GLuint uiFirstInst,
         //        return GL_FALSE;
         //    break;
 
+        case OPCODE_SSG:
+            if ( GL_FALSE == assemble_SSG(pR700AsmCode) )
+            {
+                return GL_FALSE;
+            }
+            break;
+
         case OPCODE_SWZ: 
             if ( GL_FALSE == assemble_MOV(pR700AsmCode) ) 
             {
@@ -5872,7 +6093,7 @@ GLboolean AssembleInstr(GLuint uiFirstInst,
             return GL_TRUE;
 
         default:
-            radeon_error("internal: unknown instruction\n");
+            radeon_error("r600: unknown instruction %d\n", pILInst[i].Opcode);
             return GL_FALSE;
         }
     }
@@ -6154,7 +6375,7 @@ GLboolean callPreSub(r700_AssemblerBase* pAsm,
     }
     if(uNumValidSrc > 0)
     {
-        prelude_cf_ptr     = pAsm->cf_current_alu_clause_ptr;
+        prelude_cf_ptr     = (R700ControlFlowGenericClause*) pAsm->cf_current_alu_clause_ptr;
         pAsm->alu_x_opcode = SQ_CF_INST_ALU;
     }
 
@@ -6274,7 +6495,7 @@ GLboolean callPreSub(r700_AssemblerBase* pAsm,
 
         next_ins(pAsm);        
 
-        pAsm->callers[pAsm->unCallerArrayPointer - 1].finale_cf_ptr  = pAsm->cf_current_alu_clause_ptr;
+        pAsm->callers[pAsm->unCallerArrayPointer - 1].finale_cf_ptr  = (R700ControlFlowGenericClause*) pAsm->cf_current_alu_clause_ptr;
         pAsm->callers[pAsm->unCallerArrayPointer - 1].prelude_cf_ptr = prelude_cf_ptr;
         pAsm->alu_x_opcode = SQ_CF_INST_ALU;
     }
@@ -6347,6 +6568,8 @@ GLboolean Process_Export(r700_AssemblerBase* pAsm,
 
     if (export_count == 1) 
     {
+        assert(starting_register_number >= pAsm->starting_export_register_number);
+
         ucWriteMask = pAsm->pucOutMask[starting_register_number - pAsm->starting_export_register_number];
 	/* exports Z as a float into Red channel */
 	if (GL_TRUE == is_depth_export)
@@ -6437,6 +6660,7 @@ GLboolean Process_Fragment_Exports(r700_AssemblerBase *pR700AsmCode,
 { 
     unsigned int unBit;
     GLuint export_count = 0;
+    unsigned int i;
 
     if(pR700AsmCode->depth_export_register_number >= 0) 
     {
@@ -6446,39 +6670,24 @@ GLboolean Process_Fragment_Exports(r700_AssemblerBase *pR700AsmCode,
 		}
     }
 
-    unBit = 1 << FRAG_RESULT_COLOR;
-	if(OutputsWritten & unBit)
-	{
-		if( GL_FALSE == Process_Export(pR700AsmCode,
-                                       SQ_EXPORT_PIXEL, 
-                                       0, 
-                                       1, 
-                                       pR700AsmCode->uiFP_OutputMap[FRAG_RESULT_COLOR], 
-                                       GL_FALSE) ) 
+    for (i = 0; i < FRAG_RESULT_MAX; ++i)
+    {
+        unBit = 1 << i;
+
+        if (OutputsWritten & unBit)
         {
-            return GL_FALSE;
+            GLboolean is_depth = i == FRAG_RESULT_DEPTH ? GL_TRUE : GL_FALSE;
+            if (!Process_Export(pR700AsmCode, SQ_EXPORT_PIXEL, 0, 1, pR700AsmCode->uiFP_OutputMap[i], is_depth))
+                return GL_FALSE;
+            ++export_count;
         }
-        export_count++;
-	}
-	unBit = 1 << FRAG_RESULT_DEPTH;
-	if(OutputsWritten & unBit)
-	{
-        if( GL_FALSE == Process_Export(pR700AsmCode,
-                                       SQ_EXPORT_PIXEL, 
-                                       0, 
-                                       1, 
-                                       pR700AsmCode->uiFP_OutputMap[FRAG_RESULT_DEPTH], 
-                                       GL_TRUE)) 
-        {
-            return GL_FALSE;
-        }
-        export_count++;
-	}
+    }
+
     /* Need to export something, otherwise we'll hang
      * results are undefined anyway */
     if(export_count == 0)
     {
-        Process_Export(pR700AsmCode, SQ_EXPORT_PIXEL, 0, 1, 0, GL_FALSE);
+        Process_Export(pR700AsmCode, SQ_EXPORT_PIXEL, 0, 1, pR700AsmCode->starting_export_register_number, GL_FALSE);
     }
     
     if(pR700AsmCode->cf_last_export_ptr != NULL) 
@@ -6511,13 +6720,30 @@ GLboolean Process_Vertex_Exports(r700_AssemblerBase *pR700AsmCode,
         {
             return GL_FALSE;
         }
-
+        export_starting_index++;
         export_count--;
+        }
 
-        pR700AsmCode->cf_last_export_ptr->m_Word1.f.cf_inst = SQ_CF_INST_EXPORT_DONE;
-	}
+    unBit = 1 << VERT_RESULT_PSIZ;
+    if(OutputsWritten & unBit)
+    {
+        if( GL_FALSE == Process_Export(pR700AsmCode,
+                                       SQ_EXPORT_POS,
+                                       export_starting_index,
+                                       1,
+                                       pR700AsmCode->ucVP_OutputMap[VERT_RESULT_PSIZ],
+                                       GL_FALSE) )
+        {
+            return GL_FALSE;
+        }
+        export_count--;
+    }
+
+    pR700AsmCode->cf_last_export_ptr->m_Word1.f.cf_inst = SQ_CF_INST_EXPORT_DONE;
+
 
     pR700AsmCode->number_of_exports = export_count;
+    export_starting_index = 0;
 
 	unBit = 1 << VERT_RESULT_COL0;
 	if(OutputsWritten & unBit)
