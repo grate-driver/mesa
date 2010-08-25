@@ -1,3 +1,13 @@
+mesa (7.9~git20100825-0ubuntu1) maverick; urgency=low
+
+  * New upstream git snapshot up to commit f81cec52a.
+    - Remove pre-generated .pc's, use the ones generated at build time
+      instead.
+    - Remove all references to mesa-utils now that its shipped as a
+      seperate package.
+
+ -- Robert Hooker <sarvatt@ubuntu.com>  Wed, 25 Aug 2010 17:15:21 -0400
+
 mesa (7.8.2-2ubuntu2) maverick; urgency=low
 
   * Cherry-pick EGL/GL|ES/OpenVG virtual packages from Debian experimental git
