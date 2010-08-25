@@ -40,7 +40,6 @@
 #include "lp_bld_const.h"
 #include "lp_bld_arit.h"
 #include "lp_bld_type.h"
-#include "lp_bld_format.h"
 #include "lp_bld_sample.h"
 
 
@@ -51,9 +50,11 @@
  */
 void
 lp_sampler_static_state(struct lp_sampler_static_state *state,
-                        const struct pipe_texture *texture,
+                        const struct pipe_sampler_view *view,
                         const struct pipe_sampler_state *sampler)
 {
+   const struct pipe_resource *texture = view->texture;
+
    memset(state, 0, sizeof *state);
 
    if(!texture)
@@ -62,7 +63,24 @@ lp_sampler_static_state(struct lp_sampler_static_state *state,
    if(!sampler)
       return;
 
-   state->format            = texture->format;
+   /*
+    * We don't copy sampler state over unless it is actually enabled, to avoid
+    * spurious recompiles, as the sampler static state is part of the shader
+    * key.
+    *
+    * Ideally the state tracker or cso_cache module would make all state
+    * canonical, but until that happens it's better to be safe than sorry here.
+    *
+    * XXX: Actually there's much more than can be done here, especially
+    * regarding 1D/2D/3D/CUBE textures, wrap modes, etc.
+    */
+
+   state->format            = view->format;
+   state->swizzle_r         = view->swizzle_r;
+   state->swizzle_g         = view->swizzle_g;
+   state->swizzle_b         = view->swizzle_b;
+   state->swizzle_a         = view->swizzle_a;
+
    state->target            = texture->target;
    state->pot_width         = util_is_pot(texture->width0);
    state->pot_height        = util_is_pot(texture->height0);
@@ -72,128 +90,102 @@ lp_sampler_static_state(struct lp_sampler_static_state *state,
    state->wrap_t            = sampler->wrap_t;
    state->wrap_r            = sampler->wrap_r;
    state->min_img_filter    = sampler->min_img_filter;
-   state->min_mip_filter    = sampler->min_mip_filter;
    state->mag_img_filter    = sampler->mag_img_filter;
+   if (view->last_level) {
+      state->min_mip_filter = sampler->min_mip_filter;
+   } else {
+      state->min_mip_filter = PIPE_TEX_MIPFILTER_NONE;
+   }
+
    state->compare_mode      = sampler->compare_mode;
-   state->compare_func      = sampler->compare_func;
+   if (sampler->compare_mode != PIPE_TEX_COMPARE_NONE) {
+      state->compare_func   = sampler->compare_func;
+   }
+
    state->normalized_coords = sampler->normalized_coords;
    state->lod_bias          = sampler->lod_bias;
-   state->min_lod           = sampler->min_lod;
-   state->max_lod           = sampler->max_lod;
+   if (!view->last_level &&
+       sampler->min_img_filter == sampler->mag_img_filter) {
+      state->min_lod        = 0.0f;
+      state->max_lod        = 0.0f;
+   } else {
+      state->min_lod        = MAX2(sampler->min_lod, 0.0f);
+      state->max_lod        = sampler->max_lod;
+   }
    state->border_color[0]   = sampler->border_color[0];
    state->border_color[1]   = sampler->border_color[1];
    state->border_color[2]   = sampler->border_color[2];
    state->border_color[3]   = sampler->border_color[3];
+
+   /*
+    * FIXME: Handle the remainder of pipe_sampler_view.
+    */
 }
 
 
 /**
- * Gather elements from scatter positions in memory into a single vector.
+ * Compute the offset of a pixel block.
  *
- * @param src_width src element width
- * @param dst_width result element width (source will be expanded to fit)
- * @param length length of the offsets,
- * @param base_ptr base pointer, should be a i8 pointer type.
- * @param offsets vector with offsets
- */
-LLVMValueRef
-lp_build_gather(LLVMBuilderRef builder,
-                unsigned length,
-                unsigned src_width,
-                unsigned dst_width,
-                LLVMValueRef base_ptr,
-                LLVMValueRef offsets)
-{
-   LLVMTypeRef src_type = LLVMIntType(src_width);
-   LLVMTypeRef src_ptr_type = LLVMPointerType(src_type, 0);
-   LLVMTypeRef dst_elem_type = LLVMIntType(dst_width);
-   LLVMTypeRef dst_vec_type = LLVMVectorType(dst_elem_type, length);
-   LLVMValueRef res;
-   unsigned i;
-
-   res = LLVMGetUndef(dst_vec_type);
-   for(i = 0; i < length; ++i) {
-      LLVMValueRef index = LLVMConstInt(LLVMInt32Type(), i, 0);
-      LLVMValueRef elem_offset;
-      LLVMValueRef elem_ptr;
-      LLVMValueRef elem;
-
-      elem_offset = LLVMBuildExtractElement(builder, offsets, index, "");
-      elem_ptr = LLVMBuildGEP(builder, base_ptr, &elem_offset, 1, "");
-      elem_ptr = LLVMBuildBitCast(builder, elem_ptr, src_ptr_type, "");
-      elem = LLVMBuildLoad(builder, elem_ptr, "");
-
-      assert(src_width <= dst_width);
-      if(src_width > dst_width)
-         elem = LLVMBuildTrunc(builder, elem, dst_elem_type, "");
-      if(src_width < dst_width)
-         elem = LLVMBuildZExt(builder, elem, dst_elem_type, "");
-
-      res = LLVMBuildInsertElement(builder, res, elem, index, "");
-   }
-
-   return res;
-}
-
-
-/**
- * Compute the offset of a pixel.
+ * x, y, z, y_stride, z_stride are vectors, and they refer to pixels.
  *
- * x, y, y_stride are vectors
+ * Returns the relative offset and i,j sub-block coordinates
  */
-LLVMValueRef
+void
 lp_build_sample_offset(struct lp_build_context *bld,
                        const struct util_format_description *format_desc,
                        LLVMValueRef x,
                        LLVMValueRef y,
+                       LLVMValueRef z,
                        LLVMValueRef y_stride,
-                       LLVMValueRef data_ptr)
+                       LLVMValueRef z_stride,
+                       LLVMValueRef *out_offset,
+                       LLVMValueRef *out_i,
+                       LLVMValueRef *out_j)
 {
    LLVMValueRef x_stride;
    LLVMValueRef offset;
+   LLVMValueRef i;
+   LLVMValueRef j;
 
-   x_stride = lp_build_const_scalar(bld->type, format_desc->block.bits/8);
+   /*
+    * Describe the coordinates in terms of pixel blocks.
+    *
+    * TODO: pixel blocks are power of two. LLVM should convert rem/div to
+    * bit arithmetic. Verify this.
+    */
 
-   if(format_desc->colorspace == UTIL_FORMAT_COLORSPACE_ZS) {
-      LLVMValueRef x_lo, x_hi;
-      LLVMValueRef y_lo, y_hi;
-      LLVMValueRef x_stride_lo, x_stride_hi;
-      LLVMValueRef y_stride_lo, y_stride_hi;
-      LLVMValueRef x_offset_lo, x_offset_hi;
-      LLVMValueRef y_offset_lo, y_offset_hi;
-      LLVMValueRef offset_lo, offset_hi;
-
-      x_lo = LLVMBuildAnd(bld->builder, x, bld->one, "");
-      y_lo = LLVMBuildAnd(bld->builder, y, bld->one, "");
-
-      x_hi = LLVMBuildLShr(bld->builder, x, bld->one, "");
-      y_hi = LLVMBuildLShr(bld->builder, y, bld->one, "");
-
-      x_stride_lo = x_stride;
-      y_stride_lo = lp_build_const_scalar(bld->type, 2*format_desc->block.bits/8);
-
-      x_stride_hi = lp_build_const_scalar(bld->type, 4*format_desc->block.bits/8);
-      y_stride_hi = LLVMBuildShl(bld->builder, y_stride, bld->one, "");
-
-      x_offset_lo = lp_build_mul(bld, x_lo, x_stride_lo);
-      y_offset_lo = lp_build_mul(bld, y_lo, y_stride_lo);
-      offset_lo = lp_build_add(bld, x_offset_lo, y_offset_lo);
-
-      x_offset_hi = lp_build_mul(bld, x_hi, x_stride_hi);
-      y_offset_hi = lp_build_mul(bld, y_hi, y_stride_hi);
-      offset_hi = lp_build_add(bld, x_offset_hi, y_offset_hi);
-
-      offset = lp_build_add(bld, offset_hi, offset_lo);
+   if (format_desc->block.width == 1) {
+      i = bld->zero;
    }
    else {
-      LLVMValueRef x_offset;
-      LLVMValueRef y_offset;
-
-      x_offset = lp_build_mul(bld, x, x_stride);
-      y_offset = lp_build_mul(bld, y, y_stride);
-
-      offset = lp_build_add(bld, x_offset, y_offset);
+      LLVMValueRef block_width = lp_build_const_int_vec(bld->type, format_desc->block.width);
+      i = LLVMBuildURem(bld->builder, x, block_width, "");
+      x = LLVMBuildUDiv(bld->builder, x, block_width, "");
    }
 
-   return offset;
+   if (format_desc->block.height == 1) {
+      j = bld->zero;
+   }
+   else {
+      LLVMValueRef block_height = lp_build_const_int_vec(bld->type, format_desc->block.height);
+      j = LLVMBuildURem(bld->builder, y, block_height, "");
+      y = LLVMBuildUDiv(bld->builder, y, block_height, "");
+   }
+
+   x_stride = lp_build_const_vec(bld->type, format_desc->block.bits/8);
+   offset = lp_build_mul(bld, x, x_stride);
+
+   if (y && y_stride) {
+      LLVMValueRef y_offset = lp_build_mul(bld, y, y_stride);
+      offset = lp_build_add(bld, offset, y_offset);
+   }
+
+   if (z && z_stride) {
+      LLVMValueRef z_offset = lp_build_mul(bld, z, z_stride);
+      offset = lp_build_add(bld, offset, z_offset);
+   }
+
+   *out_offset = offset;
+   *out_i = i;
+   *out_j = j;
 }

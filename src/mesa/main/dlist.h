@@ -72,7 +72,7 @@ extern void _mesa_delete_list(GLcontext *ctx, struct gl_display_list *dlist);
 
 extern void _mesa_save_vtxfmt_init( GLvertexformat *vfmt );
 
-extern void _mesa_init_save_table( struct _glapi_table *table );
+extern struct _glapi_table *_mesa_create_save_table(void);
 
 extern void _mesa_install_dlist_vtxfmt(struct _glapi_table *disp,
                                        const GLvertexformat *vfmt);
@@ -80,6 +80,8 @@ extern void _mesa_install_dlist_vtxfmt(struct _glapi_table *disp,
 extern void _mesa_init_dlist_dispatch(struct _glapi_table *disp);
 
 #else /* FEATURE_dlist */
+
+#include "main/compiler.h"
 
 #define _MESA_INIT_DLIST_FUNCTIONS(driver, impl) do { } while (0)
 #define _MESA_INIT_DLIST_VTXFMT(vfmt, impl) do { } while (0)

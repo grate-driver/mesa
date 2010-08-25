@@ -265,17 +265,6 @@ static void r700SendVTXState(GLcontext *ctx, struct radeon_state_atom *atom)
     if (context->radeon.tcl.aos_count == 0)
 	    return;
 
-    BEGIN_BATCH_NO_AUTOSTATE(6);
-    R600_OUT_BATCH(CP_PACKET3(R600_IT_SET_CTL_CONST, 1));
-    R600_OUT_BATCH(mmSQ_VTX_BASE_VTX_LOC - ASIC_CTL_CONST_BASE_INDEX);
-    R600_OUT_BATCH(0);
-
-    R600_OUT_BATCH(CP_PACKET3(R600_IT_SET_CTL_CONST, 1));
-    R600_OUT_BATCH(mmSQ_VTX_START_INST_LOC - ASIC_CTL_CONST_BASE_INDEX);
-    R600_OUT_BATCH(0);
-    END_BATCH();
-    COMMIT_BATCH();
-
     for(i=0; i<VERT_ATTRIB_MAX; i++) {
 	    if(vp->mesa_program->Base.InputsRead & (1 << i))
 	    {
@@ -290,7 +279,7 @@ static void r700SendVTXState(GLcontext *ctx, struct radeon_state_atom *atom)
 static void r700SetRenderTarget(context_t *context, int id)
 {
     R700_CHIP_CONTEXT *r700 = (R700_CHIP_CONTEXT*)(&context->hw);
-
+    uint32_t format = COLOR_8_8_8_8, comp_swap = SWAP_ALT, number_type = NUMBER_UNORM;
     struct radeon_renderbuffer *rrb;
     unsigned int nPitchInPixel;
 
@@ -312,22 +301,251 @@ static void r700SetRenderTarget(context_t *context, int id)
     SETfield(r700->render_target[id].CB_COLOR0_INFO.u32All, ENDIAN_NONE, ENDIAN_shift, ENDIAN_mask);
     SETfield(r700->render_target[id].CB_COLOR0_INFO.u32All, ARRAY_LINEAR_GENERAL,
              CB_COLOR0_INFO__ARRAY_MODE_shift, CB_COLOR0_INFO__ARRAY_MODE_mask);
-    if(4 == rrb->cpp)
-    {
-        SETfield(r700->render_target[id].CB_COLOR0_INFO.u32All, COLOR_8_8_8_8,
-                 CB_COLOR0_INFO__FORMAT_shift, CB_COLOR0_INFO__FORMAT_mask);
-        SETfield(r700->render_target[id].CB_COLOR0_INFO.u32All, SWAP_ALT, COMP_SWAP_shift, COMP_SWAP_mask);
+
+    switch (rrb->base.Format) {
+    case MESA_FORMAT_RGBA8888:
+            format = COLOR_8_8_8_8;
+            comp_swap = SWAP_STD_REV;
+	    number_type = NUMBER_UNORM;
+	    SETbit(r700->render_target[id].CB_COLOR0_INFO.u32All, SOURCE_FORMAT_bit);
+            break;
+    case MESA_FORMAT_SIGNED_RGBA8888:
+            format = COLOR_8_8_8_8;
+            comp_swap = SWAP_STD_REV;
+	    number_type = NUMBER_SNORM;
+	    SETbit(r700->render_target[id].CB_COLOR0_INFO.u32All, SOURCE_FORMAT_bit);
+            break;
+    case MESA_FORMAT_RGBA8888_REV:
+            format = COLOR_8_8_8_8;
+            comp_swap = SWAP_STD;
+	    number_type = NUMBER_UNORM;
+	    SETbit(r700->render_target[id].CB_COLOR0_INFO.u32All, SOURCE_FORMAT_bit);
+            break;
+    case MESA_FORMAT_SIGNED_RGBA8888_REV:
+            format = COLOR_8_8_8_8;
+            comp_swap = SWAP_STD;
+	    number_type = NUMBER_SNORM;
+	    SETbit(r700->render_target[id].CB_COLOR0_INFO.u32All, SOURCE_FORMAT_bit);
+            break;
+    case MESA_FORMAT_ARGB8888:
+    case MESA_FORMAT_XRGB8888:
+            format = COLOR_8_8_8_8;
+            comp_swap = SWAP_ALT;
+	    number_type = NUMBER_UNORM;
+	    SETbit(r700->render_target[id].CB_COLOR0_INFO.u32All, SOURCE_FORMAT_bit);
+            break;
+    case MESA_FORMAT_ARGB8888_REV:
+    case MESA_FORMAT_XRGB8888_REV:
+            format = COLOR_8_8_8_8;
+            comp_swap = SWAP_ALT_REV;
+	    number_type = NUMBER_UNORM;
+	    SETbit(r700->render_target[id].CB_COLOR0_INFO.u32All, SOURCE_FORMAT_bit);
+            break;
+    case MESA_FORMAT_RGB565:
+            format = COLOR_5_6_5;
+            comp_swap = SWAP_STD_REV;
+	    number_type = NUMBER_UNORM;
+	    SETbit(r700->render_target[id].CB_COLOR0_INFO.u32All, SOURCE_FORMAT_bit);
+            break;
+    case MESA_FORMAT_RGB565_REV:
+            format = COLOR_5_6_5;
+            comp_swap = SWAP_STD;
+	    number_type = NUMBER_UNORM;
+	    SETbit(r700->render_target[id].CB_COLOR0_INFO.u32All, SOURCE_FORMAT_bit);
+            break;
+    case MESA_FORMAT_ARGB4444:
+            format = COLOR_4_4_4_4;
+            comp_swap = SWAP_ALT;
+	    number_type = NUMBER_UNORM;
+	    SETbit(r700->render_target[id].CB_COLOR0_INFO.u32All, SOURCE_FORMAT_bit);
+            break;
+    case MESA_FORMAT_ARGB4444_REV:
+            format = COLOR_4_4_4_4;
+            comp_swap = SWAP_ALT_REV;
+	    number_type = NUMBER_UNORM;
+	    SETbit(r700->render_target[id].CB_COLOR0_INFO.u32All, SOURCE_FORMAT_bit);
+            break;
+    case MESA_FORMAT_ARGB1555:
+            format = COLOR_1_5_5_5;
+            comp_swap = SWAP_ALT;
+	    number_type = NUMBER_UNORM;
+	    SETbit(r700->render_target[id].CB_COLOR0_INFO.u32All, SOURCE_FORMAT_bit);
+            break;
+    case MESA_FORMAT_ARGB1555_REV:
+            format = COLOR_1_5_5_5;
+            comp_swap = SWAP_ALT_REV;
+	    number_type = NUMBER_UNORM;
+	    SETbit(r700->render_target[id].CB_COLOR0_INFO.u32All, SOURCE_FORMAT_bit);
+            break;
+    case MESA_FORMAT_AL88:
+            format = COLOR_8_8;
+            comp_swap = SWAP_STD;
+	    number_type = NUMBER_UNORM;
+	    SETbit(r700->render_target[id].CB_COLOR0_INFO.u32All, SOURCE_FORMAT_bit);
+            break;
+    case MESA_FORMAT_AL88_REV:
+            format = COLOR_8_8;
+            comp_swap = SWAP_STD_REV;
+	    number_type = NUMBER_UNORM;
+	    SETbit(r700->render_target[id].CB_COLOR0_INFO.u32All, SOURCE_FORMAT_bit);
+            break;
+    case MESA_FORMAT_RGB332:
+            format = COLOR_3_3_2;
+            comp_swap = SWAP_STD_REV;
+	    number_type = NUMBER_UNORM;
+	    SETbit(r700->render_target[id].CB_COLOR0_INFO.u32All, SOURCE_FORMAT_bit);
+            break;
+    case MESA_FORMAT_A8:
+            format = COLOR_8;
+            comp_swap = SWAP_ALT_REV;
+	    number_type = NUMBER_UNORM;
+	    SETbit(r700->render_target[id].CB_COLOR0_INFO.u32All, SOURCE_FORMAT_bit);
+            break;
+    case MESA_FORMAT_I8:
+    case MESA_FORMAT_CI8:
+            format = COLOR_8;
+            comp_swap = SWAP_STD;
+	    number_type = NUMBER_UNORM;
+	    SETbit(r700->render_target[id].CB_COLOR0_INFO.u32All, SOURCE_FORMAT_bit);
+            break;
+    case MESA_FORMAT_L8:
+            format = COLOR_8;
+            comp_swap = SWAP_ALT;
+	    number_type = NUMBER_UNORM;
+	    SETbit(r700->render_target[id].CB_COLOR0_INFO.u32All, SOURCE_FORMAT_bit);
+            break;
+    case MESA_FORMAT_RGBA_FLOAT32:
+            format = COLOR_32_32_32_32_FLOAT;
+            comp_swap = SWAP_STD_REV;
+	    number_type = NUMBER_FLOAT;
+	    SETbit(r700->render_target[id].CB_COLOR0_INFO.u32All, BLEND_FLOAT32_bit);
+	    CLEARbit(r700->render_target[id].CB_COLOR0_INFO.u32All, SOURCE_FORMAT_bit);
+            break;
+    case MESA_FORMAT_RGBA_FLOAT16:
+            format = COLOR_16_16_16_16_FLOAT;
+            comp_swap = SWAP_STD_REV;
+	    number_type = NUMBER_FLOAT;
+	    CLEARbit(r700->render_target[id].CB_COLOR0_INFO.u32All, SOURCE_FORMAT_bit);
+            break;
+    case MESA_FORMAT_ALPHA_FLOAT32:
+            format = COLOR_32_FLOAT;
+            comp_swap = SWAP_ALT_REV;
+	    number_type = NUMBER_FLOAT;
+	    SETbit(r700->render_target[id].CB_COLOR0_INFO.u32All, BLEND_FLOAT32_bit);
+	    CLEARbit(r700->render_target[id].CB_COLOR0_INFO.u32All, SOURCE_FORMAT_bit);
+            break;
+    case MESA_FORMAT_ALPHA_FLOAT16:
+            format = COLOR_16_FLOAT;
+            comp_swap = SWAP_ALT_REV;
+	    number_type = NUMBER_FLOAT;
+	    CLEARbit(r700->render_target[id].CB_COLOR0_INFO.u32All, SOURCE_FORMAT_bit);
+            break;
+    case MESA_FORMAT_LUMINANCE_FLOAT32:
+            format = COLOR_32_FLOAT;
+            comp_swap = SWAP_ALT;
+	    number_type = NUMBER_FLOAT;
+	    SETbit(r700->render_target[id].CB_COLOR0_INFO.u32All, BLEND_FLOAT32_bit);
+	    CLEARbit(r700->render_target[id].CB_COLOR0_INFO.u32All, SOURCE_FORMAT_bit);
+            break;
+    case MESA_FORMAT_LUMINANCE_FLOAT16:
+            format = COLOR_16_FLOAT;
+            comp_swap = SWAP_ALT;
+	    number_type = NUMBER_FLOAT;
+	    CLEARbit(r700->render_target[id].CB_COLOR0_INFO.u32All, SOURCE_FORMAT_bit);
+            break;
+    case MESA_FORMAT_LUMINANCE_ALPHA_FLOAT32:
+            format = COLOR_32_32_FLOAT;
+            comp_swap = SWAP_ALT_REV;
+	    number_type = NUMBER_FLOAT;
+	    SETbit(r700->render_target[id].CB_COLOR0_INFO.u32All, BLEND_FLOAT32_bit);
+	    CLEARbit(r700->render_target[id].CB_COLOR0_INFO.u32All, SOURCE_FORMAT_bit);
+            break;
+    case MESA_FORMAT_LUMINANCE_ALPHA_FLOAT16:
+            format = COLOR_16_16_FLOAT;
+            comp_swap = SWAP_ALT_REV;
+	    number_type = NUMBER_FLOAT;
+	    CLEARbit(r700->render_target[id].CB_COLOR0_INFO.u32All, SOURCE_FORMAT_bit);
+            break;
+    case MESA_FORMAT_INTENSITY_FLOAT32: /* X, X, X, X */
+            format = COLOR_32_FLOAT;
+            comp_swap = SWAP_STD;
+	    number_type = NUMBER_FLOAT;
+	    SETbit(r700->render_target[id].CB_COLOR0_INFO.u32All, BLEND_FLOAT32_bit);
+	    CLEARbit(r700->render_target[id].CB_COLOR0_INFO.u32All, SOURCE_FORMAT_bit);
+            break;
+    case MESA_FORMAT_INTENSITY_FLOAT16: /* X, X, X, X */
+            format = COLOR_16_FLOAT;
+            comp_swap = SWAP_STD;
+	    number_type = NUMBER_UNORM;
+	    CLEARbit(r700->render_target[id].CB_COLOR0_INFO.u32All, SOURCE_FORMAT_bit);
+            break;
+    case MESA_FORMAT_X8_Z24:
+    case MESA_FORMAT_S8_Z24:
+            format = COLOR_8_24;
+            comp_swap = SWAP_STD;
+	    number_type = NUMBER_UNORM;
+	    SETfield(r700->render_target[id].CB_COLOR0_INFO.u32All, ARRAY_1D_TILED_THIN1,
+		     CB_COLOR0_INFO__ARRAY_MODE_shift, CB_COLOR0_INFO__ARRAY_MODE_mask);
+	    CLEARbit(r700->render_target[id].CB_COLOR0_INFO.u32All, SOURCE_FORMAT_bit);
+            break;
+    case MESA_FORMAT_Z24_S8:
+            format = COLOR_24_8;
+            comp_swap = SWAP_STD;
+	    number_type = NUMBER_UNORM;
+	    SETfield(r700->render_target[id].CB_COLOR0_INFO.u32All, ARRAY_1D_TILED_THIN1,
+		     CB_COLOR0_INFO__ARRAY_MODE_shift, CB_COLOR0_INFO__ARRAY_MODE_mask);
+	    CLEARbit(r700->render_target[id].CB_COLOR0_INFO.u32All, SOURCE_FORMAT_bit);
+            break;
+    case MESA_FORMAT_Z16:
+            format = COLOR_16;
+            comp_swap = SWAP_STD;
+	    number_type = NUMBER_UNORM;
+	    SETfield(r700->render_target[id].CB_COLOR0_INFO.u32All, ARRAY_1D_TILED_THIN1,
+		     CB_COLOR0_INFO__ARRAY_MODE_shift, CB_COLOR0_INFO__ARRAY_MODE_mask);
+	    CLEARbit(r700->render_target[id].CB_COLOR0_INFO.u32All, SOURCE_FORMAT_bit);
+            break;
+    case MESA_FORMAT_Z32:
+            format = COLOR_32;
+            comp_swap = SWAP_STD;
+	    number_type = NUMBER_UNORM;
+	    SETfield(r700->render_target[id].CB_COLOR0_INFO.u32All, ARRAY_1D_TILED_THIN1,
+		     CB_COLOR0_INFO__ARRAY_MODE_shift, CB_COLOR0_INFO__ARRAY_MODE_mask);
+	    CLEARbit(r700->render_target[id].CB_COLOR0_INFO.u32All, SOURCE_FORMAT_bit);
+            break;
+    case MESA_FORMAT_SARGB8:
+            format = COLOR_8_8_8_8;
+            comp_swap = SWAP_ALT;
+	    number_type = NUMBER_SRGB;
+	    SETbit(r700->render_target[id].CB_COLOR0_INFO.u32All, SOURCE_FORMAT_bit);
+            break;
+    case MESA_FORMAT_SLA8:
+            format = COLOR_8_8;
+            comp_swap = SWAP_ALT_REV;
+	    number_type = NUMBER_SRGB;
+	    SETbit(r700->render_target[id].CB_COLOR0_INFO.u32All, SOURCE_FORMAT_bit);
+            break;
+    case MESA_FORMAT_SL8:
+            format = COLOR_8;
+            comp_swap = SWAP_ALT_REV;
+	    number_type = NUMBER_SRGB;
+	    SETbit(r700->render_target[id].CB_COLOR0_INFO.u32All, SOURCE_FORMAT_bit);
+            break;
+    default:
+	    _mesa_problem(context->radeon.glCtx, "unexpected format in r700SetRenderTarget()");
+	    break;
     }
-    else
-    {
-        SETfield(r700->render_target[id].CB_COLOR0_INFO.u32All, COLOR_5_6_5,
-                 CB_COLOR0_INFO__FORMAT_shift, CB_COLOR0_INFO__FORMAT_mask);
-        SETfield(r700->render_target[id].CB_COLOR0_INFO.u32All, SWAP_ALT_REV,
-                 COMP_SWAP_shift, COMP_SWAP_mask);
-    }
-    SETbit(r700->render_target[id].CB_COLOR0_INFO.u32All, SOURCE_FORMAT_bit);
+
+    /* must be 0 on r7xx */
+    if (context->radeon.radeonScreen->chip_family >= CHIP_FAMILY_RV770)
+	    CLEARbit(r700->render_target[id].CB_COLOR0_INFO.u32All, BLEND_FLOAT32_bit);
+
+    SETfield(r700->render_target[id].CB_COLOR0_INFO.u32All, format,
+	     CB_COLOR0_INFO__FORMAT_shift, CB_COLOR0_INFO__FORMAT_mask);
+    SETfield(r700->render_target[id].CB_COLOR0_INFO.u32All, comp_swap,
+	     COMP_SWAP_shift, COMP_SWAP_mask);
+    SETfield(r700->render_target[id].CB_COLOR0_INFO.u32All, number_type,
+	     NUMBER_TYPE_shift, NUMBER_TYPE_mask);
     SETbit(r700->render_target[id].CB_COLOR0_INFO.u32All, BLEND_CLAMP_bit);
-    SETfield(r700->render_target[id].CB_COLOR0_INFO.u32All, NUMBER_UNORM, NUMBER_TYPE_shift, NUMBER_TYPE_mask);
 
     r700->render_target[id].enabled = GL_TRUE;
 }
@@ -388,16 +606,23 @@ static void r700SendDepthTargetState(GLcontext *ctx, struct radeon_state_atom *a
 
 	r700SetDepthTarget(context);
 
-        BEGIN_BATCH_NO_AUTOSTATE(8 + 2);
+        BEGIN_BATCH_NO_AUTOSTATE(7 + 2);
 	R600_OUT_BATCH_REGSEQ(DB_DEPTH_SIZE, 2);
 	R600_OUT_BATCH(r700->DB_DEPTH_SIZE.u32All);
 	R600_OUT_BATCH(r700->DB_DEPTH_VIEW.u32All);
-	R600_OUT_BATCH_REGSEQ(DB_DEPTH_BASE, 2);
+	R600_OUT_BATCH_REGSEQ(DB_DEPTH_BASE, 1);
 	R600_OUT_BATCH(r700->DB_DEPTH_BASE.u32All);
-	R600_OUT_BATCH(r700->DB_DEPTH_INFO.u32All);
 	R600_OUT_BATCH_RELOC(r700->DB_DEPTH_BASE.u32All,
 			     rrb->bo,
 			     r700->DB_DEPTH_BASE.u32All,
+			     0, RADEON_GEM_DOMAIN_VRAM, 0);
+        END_BATCH();
+        BEGIN_BATCH_NO_AUTOSTATE(3 + 2);
+	R600_OUT_BATCH_REGSEQ(DB_DEPTH_INFO, 1);
+	R600_OUT_BATCH(r700->DB_DEPTH_INFO.u32All);
+	R600_OUT_BATCH_RELOC(r700->DB_DEPTH_INFO.u32All,
+			     rrb->bo,
+			     r700->DB_DEPTH_INFO.u32All,
 			     0, RADEON_GEM_DOMAIN_VRAM, 0);
         END_BATCH();
 
@@ -458,25 +683,33 @@ static void r700SendRenderTargetState(GLcontext *ctx, struct radeon_state_atom *
 	BEGIN_BATCH_NO_AUTOSTATE(3 + 2);
 	R600_OUT_BATCH_REGSEQ(CB_COLOR0_TILE + (4 * id), 1);
 	R600_OUT_BATCH(r700->render_target[id].CB_COLOR0_TILE.u32All);
-	R600_OUT_BATCH_RELOC(r700->render_target[id].CB_COLOR0_BASE.u32All,
+	R600_OUT_BATCH_RELOC(r700->render_target[id].CB_COLOR0_TILE.u32All,
 			     rrb->bo,
-			     r700->render_target[id].CB_COLOR0_BASE.u32All,
+			     r700->render_target[id].CB_COLOR0_TILE.u32All,
 			     0, RADEON_GEM_DOMAIN_VRAM, 0);
 	END_BATCH();
 	BEGIN_BATCH_NO_AUTOSTATE(3 + 2);
 	R600_OUT_BATCH_REGSEQ(CB_COLOR0_FRAG + (4 * id), 1);
 	R600_OUT_BATCH(r700->render_target[id].CB_COLOR0_FRAG.u32All);
-	R600_OUT_BATCH_RELOC(r700->render_target[id].CB_COLOR0_BASE.u32All,
+	R600_OUT_BATCH_RELOC(r700->render_target[id].CB_COLOR0_FRAG.u32All,
 			     rrb->bo,
-			     r700->render_target[id].CB_COLOR0_BASE.u32All,
+			     r700->render_target[id].CB_COLOR0_FRAG.u32All,
 			     0, RADEON_GEM_DOMAIN_VRAM, 0);
         END_BATCH();
 
-        BEGIN_BATCH_NO_AUTOSTATE(12);
+        BEGIN_BATCH_NO_AUTOSTATE(9);
 	R600_OUT_BATCH_REGVAL(CB_COLOR0_SIZE + (4 * id), r700->render_target[id].CB_COLOR0_SIZE.u32All);
 	R600_OUT_BATCH_REGVAL(CB_COLOR0_VIEW + (4 * id), r700->render_target[id].CB_COLOR0_VIEW.u32All);
-	R600_OUT_BATCH_REGVAL(CB_COLOR0_INFO + (4 * id), r700->render_target[id].CB_COLOR0_INFO.u32All);
 	R600_OUT_BATCH_REGVAL(CB_COLOR0_MASK + (4 * id), r700->render_target[id].CB_COLOR0_MASK.u32All);
+        END_BATCH();
+
+	BEGIN_BATCH_NO_AUTOSTATE(3 + 2);
+	R600_OUT_BATCH_REGVAL(CB_COLOR0_INFO + (4 * id), r700->render_target[id].CB_COLOR0_INFO.u32All);
+	R600_OUT_BATCH_RELOC(r700->render_target[id].CB_COLOR0_INFO.u32All,
+			     rrb->bo,
+			     r700->render_target[id].CB_COLOR0_INFO.u32All,
+			     0, RADEON_GEM_DOMAIN_VRAM, 0);
+
         END_BATCH();
 
 	COMMIT_BATCH();
@@ -488,6 +721,7 @@ static void r700SendPSState(GLcontext *ctx, struct radeon_state_atom *atom)
     context_t *context = R700_CONTEXT(ctx);
     R700_CHIP_CONTEXT *r700 = R700_CONTEXT_STATES(context);
     struct radeon_bo * pbo;
+    struct radeon_bo * pbo_const;
     BATCH_LOCALS(&context->radeon);
     radeon_print(RADEON_STATE, RADEON_VERBOSE, "%s\n", __func__);
 
@@ -517,6 +751,9 @@ static void r700SendPSState(GLcontext *ctx, struct radeon_state_atom *atom)
     R600_OUT_BATCH_REGVAL(SQ_LOOP_CONST_0, 0x01000FFF);
     END_BATCH();
 
+    pbo_const = (struct radeon_bo *)r700GetActiveFpShaderConstBo(GL_CONTEXT(context));
+    //TODO : set up shader const
+
     COMMIT_BATCH();
 
 }
@@ -526,13 +763,14 @@ static void r700SendVSState(GLcontext *ctx, struct radeon_state_atom *atom)
     context_t *context = R700_CONTEXT(ctx);
     R700_CHIP_CONTEXT *r700 = R700_CONTEXT_STATES(context);
     struct radeon_bo * pbo;
+    struct radeon_bo * pbo_const;
     BATCH_LOCALS(&context->radeon);
     radeon_print(RADEON_STATE, RADEON_VERBOSE, "%s\n", __func__);
 
     pbo = (struct radeon_bo *)r700GetActiveVpShaderBo(GL_CONTEXT(context));
 
     if (!pbo)
-	    return;
+        return;
 
     r700SyncSurf(context, pbo, RADEON_GEM_DOMAIN_GTT, 0, SH_ACTION_ENA_bit);
 
@@ -555,6 +793,29 @@ static void r700SendVSState(GLcontext *ctx, struct radeon_state_atom *atom)
     //R600_OUT_BATCH_REGVAL((SQ_LOOP_CONST_0 + (SQ_LOOP_CONST_vs<2)), 0x0100000F);
     END_BATCH();
 
+    /* TODO : handle 4 bufs */
+    if(GL_TRUE == r700->bShaderUseMemConstant)
+    {
+	    pbo_const = (struct radeon_bo *)r700GetActiveVpShaderConstBo(GL_CONTEXT(context));
+        if(NULL != pbo_const)
+        {
+            r700SyncSurf(context, pbo_const, RADEON_GEM_DOMAIN_GTT, 0, SH_ACTION_ENA_bit); /* TODO : Check kc bit. */
+
+            BEGIN_BATCH_NO_AUTOSTATE(3);            
+            R600_OUT_BATCH_REGVAL(SQ_ALU_CONST_BUFFER_SIZE_VS_0, (r700->vs.num_consts * 4)/16 );    
+            END_BATCH();
+
+            BEGIN_BATCH_NO_AUTOSTATE(3 + 2);            
+            R600_OUT_BATCH_REGSEQ(SQ_ALU_CONST_CACHE_VS_0, 1);
+            R600_OUT_BATCH(r700->vs.SQ_ALU_CONST_CACHE_VS_0.u32All);
+            R600_OUT_BATCH_RELOC(r700->vs.SQ_ALU_CONST_CACHE_VS_0.u32All,
+                         pbo_const,
+                         r700->vs.SQ_ALU_CONST_CACHE_VS_0.u32All,
+                         RADEON_GEM_DOMAIN_GTT, 0, 0);
+            END_BATCH();
+        }
+    }
+    
     COMMIT_BATCH();
 }
 
@@ -1236,9 +1497,6 @@ static int check_vtx(GLcontext *ctx, struct radeon_state_atom *atom)
 	context_t *context = R700_CONTEXT(ctx);
 	int count = context->radeon.tcl.aos_count * 18;
 
-	if (count)
-		count += 6;
-
 	radeon_print(RADEON_STATE, RADEON_TRACE, "%s %d\n", __func__, count);
 	return count;
 }
@@ -1328,45 +1586,55 @@ static void r600_init_query_stateobj(radeonContextPtr radeon, int SZ)
 
 void r600InitAtoms(context_t *context)
 {
-	radeon_print(RADEON_STATE, RADEON_NORMAL, "%s %p\n", __func__, context);
-	context->radeon.hw.max_state_size = 10 + 5 + 14; /* start 3d, idle, cb/db flush */
+    R700_CHIP_CONTEXT *r700    = (R700_CHIP_CONTEXT*)(&context->hw);
+    radeon_print(RADEON_STATE, RADEON_NORMAL, "%s %p\n", __func__, context);
+    context->radeon.hw.max_state_size = 10 + 5 + 14; /* start 3d, idle, cb/db flush */
 
-	/* Setup the atom linked list */
-	make_empty_list(&context->radeon.hw.atomlist);
-	context->radeon.hw.atomlist.name = "atom-list";
+    /* Setup the atom linked list */
+    make_empty_list(&context->radeon.hw.atomlist);
+    context->radeon.hw.atomlist.name = "atom-list";
 
-	ALLOC_STATE(sq, always, 34, r700SendSQConfig);
-	ALLOC_STATE(db, always, 17, r700SendDBState);
-	ALLOC_STATE(stencil, always, 4, r700SendStencilState);
-	ALLOC_STATE(db_target, always, 12, r700SendDepthTargetState);
-	ALLOC_STATE(sc, always, 15, r700SendSCState);
-	ALLOC_STATE(scissor, always, 22, r700SendScissorState);
-	ALLOC_STATE(aa, always, 12, r700SendAAState);
-	ALLOC_STATE(cl, always, 12, r700SendCLState);
-	ALLOC_STATE(gb, always, 6, r700SendGBState);
-	ALLOC_STATE(ucp, ucp, (R700_MAX_UCP * 6), r700SendUCPState);
-	ALLOC_STATE(su, always, 9, r700SendSUState);
-	ALLOC_STATE(poly, always, 10, r700SendPolyState);
-	ALLOC_STATE(cb, cb, 18, r700SendCBState);
-	ALLOC_STATE(clrcmp, always, 6, r700SendCBCLRCMPState);
-	ALLOC_STATE(cb_target, always, 29, r700SendRenderTargetState);
-	ALLOC_STATE(blnd, blnd, (6 + (R700_MAX_RENDER_TARGETS * 3)), r700SendCBBlendState);
-	ALLOC_STATE(blnd_clr, always, 6, r700SendCBBlendColorState);
-	ALLOC_STATE(sx, always, 9, r700SendSXState);
-	ALLOC_STATE(vgt, always, 41, r700SendVGTState);
-	ALLOC_STATE(spi, always, (59 + R700_MAX_SHADER_EXPORTS), r700SendSPIState);
-	ALLOC_STATE(vpt, always, 16, r700SendViewportState);
-	ALLOC_STATE(fs, always, 18, r700SendFSState);
-	ALLOC_STATE(vs, always, 21, r700SendVSState);
-	ALLOC_STATE(ps, always, 24, r700SendPSState);
-	ALLOC_STATE(vs_consts, vs_consts, (2 + (R700_MAX_DX9_CONSTS * 4)), r700SendVSConsts);
-	ALLOC_STATE(ps_consts, ps_consts, (2 + (R700_MAX_DX9_CONSTS * 4)), r700SendPSConsts);
-	ALLOC_STATE(vtx, vtx, (6 + (VERT_ATTRIB_MAX * 18)), r700SendVTXState);
-	ALLOC_STATE(tx, tx, (R700_TEXTURE_NUMBERUNITS * 20), r700SendTexState);
-	ALLOC_STATE(tx_smplr, tx, (R700_TEXTURE_NUMBERUNITS * 5), r700SendTexSamplerState);
-	ALLOC_STATE(tx_brdr_clr, tx, (R700_TEXTURE_NUMBERUNITS * 6), r700SendTexBorderColorState);
-	r600_init_query_stateobj(&context->radeon, 6 * 2);
+    ALLOC_STATE(sq, always, 34, r700SendSQConfig);
+    ALLOC_STATE(db, always, 17, r700SendDBState);
+    ALLOC_STATE(stencil, always, 4, r700SendStencilState);
+    ALLOC_STATE(db_target, always, 16, r700SendDepthTargetState);
+    ALLOC_STATE(sc, always, 15, r700SendSCState);
+    ALLOC_STATE(scissor, always, 22, r700SendScissorState);
+    ALLOC_STATE(aa, always, 12, r700SendAAState);
+    ALLOC_STATE(cl, always, 12, r700SendCLState);
+    ALLOC_STATE(gb, always, 6, r700SendGBState);
+    ALLOC_STATE(ucp, ucp, (R700_MAX_UCP * 6), r700SendUCPState);
+    ALLOC_STATE(su, always, 9, r700SendSUState);
+    ALLOC_STATE(poly, always, 10, r700SendPolyState);
+    ALLOC_STATE(cb, cb, 18, r700SendCBState);
+    ALLOC_STATE(clrcmp, always, 6, r700SendCBCLRCMPState);
+    ALLOC_STATE(cb_target, always, 31, r700SendRenderTargetState);
+    ALLOC_STATE(blnd, blnd, (6 + (R700_MAX_RENDER_TARGETS * 3)), r700SendCBBlendState);
+    ALLOC_STATE(blnd_clr, always, 6, r700SendCBBlendColorState);
+    ALLOC_STATE(sx, always, 9, r700SendSXState);
+    ALLOC_STATE(vgt, always, 41, r700SendVGTState);
+    ALLOC_STATE(spi, always, (59 + R700_MAX_SHADER_EXPORTS), r700SendSPIState);
+    ALLOC_STATE(vpt, always, 16, r700SendViewportState);
+    ALLOC_STATE(fs, always, 18, r700SendFSState);
+    if(GL_TRUE == r700->bShaderUseMemConstant)
+    {
+        ALLOC_STATE(vs, always, 36, r700SendVSState);
+	    ALLOC_STATE(ps, always, 24, r700SendPSState); /* TODO : not imp yet, fix later. */
+    }
+    else
+    {
+        ALLOC_STATE(vs, always, 21, r700SendVSState);
+        ALLOC_STATE(ps, always, 24, r700SendPSState);
+        ALLOC_STATE(vs_consts, vs_consts, (2 + (R700_MAX_DX9_CONSTS * 4)), r700SendVSConsts);
+        ALLOC_STATE(ps_consts, ps_consts, (2 + (R700_MAX_DX9_CONSTS * 4)), r700SendPSConsts);
+    }
 
-	context->radeon.hw.is_dirty = GL_TRUE;
-	context->radeon.hw.all_dirty = GL_TRUE;
+    ALLOC_STATE(vtx, vtx, (VERT_ATTRIB_MAX * 18), r700SendVTXState);
+    ALLOC_STATE(tx, tx, (R700_TEXTURE_NUMBERUNITS * 20), r700SendTexState);
+    ALLOC_STATE(tx_smplr, tx, (R700_TEXTURE_NUMBERUNITS * 5), r700SendTexSamplerState);
+    ALLOC_STATE(tx_brdr_clr, tx, (R700_TEXTURE_NUMBERUNITS * 6), r700SendTexBorderColorState);
+    r600_init_query_stateobj(&context->radeon, 6 * 2);
+
+    context->radeon.hw.is_dirty = GL_TRUE;
+    context->radeon.hw.all_dirty = GL_TRUE;
 }

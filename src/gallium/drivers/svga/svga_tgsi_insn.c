@@ -49,9 +49,7 @@ translate_opcode(
    case TGSI_OPCODE_DP2A:       return SVGA3DOP_DP2ADD;
    case TGSI_OPCODE_DP3:        return SVGA3DOP_DP3;
    case TGSI_OPCODE_DP4:        return SVGA3DOP_DP4;
-   case TGSI_OPCODE_ENDFOR:     return SVGA3DOP_ENDLOOP;
    case TGSI_OPCODE_FRC:        return SVGA3DOP_FRC;
-   case TGSI_OPCODE_BGNFOR:     return SVGA3DOP_LOOP;
    case TGSI_OPCODE_MAD:        return SVGA3DOP_MAD;
    case TGSI_OPCODE_MAX:        return SVGA3DOP_MAX;
    case TGSI_OPCODE_MIN:        return SVGA3DOP_MIN;
@@ -2590,10 +2588,10 @@ static boolean emit_light_twoside( struct svga_shader_emitter *emit )
    
    if_token = inst_token( SVGA3DOP_IFC );
 
-   if (emit->key.fkey.front_cw)
-      if_token.control = SVGA3DOPCOMP_GT;
-   else
+   if (emit->key.fkey.front_ccw)
       if_token.control = SVGA3DOPCOMP_LT;
+   else
+      if_token.control = SVGA3DOPCOMP_GT;
 
    zero = scalar(zero, TGSI_SWIZZLE_X);
 
@@ -2641,12 +2639,12 @@ static boolean emit_frontface( struct svga_shader_emitter *emit )
    temp = dst_register( SVGA3DREG_TEMP,
                         emit->nr_hw_temp++ );
 
-   if (emit->key.fkey.front_cw) {
-      pass = scalar( zero, TGSI_SWIZZLE_W );
-      fail = scalar( zero, TGSI_SWIZZLE_X );
-   } else {
+   if (emit->key.fkey.front_ccw) {
       pass = scalar( zero, TGSI_SWIZZLE_X );
       fail = scalar( zero, TGSI_SWIZZLE_W );
+   } else {
+      pass = scalar( zero, TGSI_SWIZZLE_W );
+      fail = scalar( zero, TGSI_SWIZZLE_X );
    }
 
    if (!emit_conditional(emit, PIPE_FUNC_GREATER,
@@ -2686,7 +2684,6 @@ needs_to_create_zero( struct svga_shader_emitter *emit )
 
    if (emit->info.opcode_count[TGSI_OPCODE_IF] >= 1 ||
        emit->info.opcode_count[TGSI_OPCODE_BGNLOOP] >= 1 ||
-       emit->info.opcode_count[TGSI_OPCODE_BGNFOR] >= 1 ||
        emit->info.opcode_count[TGSI_OPCODE_DDX] >= 1 ||
        emit->info.opcode_count[TGSI_OPCODE_DDY] >= 1 ||
        emit->info.opcode_count[TGSI_OPCODE_SGE] >= 1 ||

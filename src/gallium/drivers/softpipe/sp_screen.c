@@ -27,15 +27,19 @@
 
 
 #include "util/u_memory.h"
-#include "util/u_simple_screen.h"
-#include "util/u_simple_screen.h"
+#include "util/u_format.h"
+#include "util/u_format_s3tc.h"
 #include "pipe/p_defines.h"
 #include "pipe/p_screen.h"
 
+#include "state_tracker/sw_winsys.h"
+#include "tgsi/tgsi_exec.h"
+
 #include "sp_texture.h"
-#include "sp_winsys.h"
 #include "sp_screen.h"
 #include "sp_context.h"
+#include "sp_fence.h"
+#include "sp_public.h"
 
 
 static const char *
@@ -53,7 +57,7 @@ softpipe_get_name(struct pipe_screen *screen)
 
 
 static int
-softpipe_get_param(struct pipe_screen *screen, int param)
+softpipe_get_param(struct pipe_screen *screen, enum pipe_cap param)
 {
    switch (param) {
    case PIPE_CAP_MAX_TEXTURE_IMAGE_UNITS:
@@ -68,6 +72,8 @@ softpipe_get_param(struct pipe_screen *screen, int param)
       return 1;
    case PIPE_CAP_GLSL:
       return 1;
+   case PIPE_CAP_SM3:
+      return 1;
    case PIPE_CAP_ANISOTROPIC_FILTER:
       return 0;
    case PIPE_CAP_POINT_SPRITE:
@@ -76,18 +82,22 @@ softpipe_get_param(struct pipe_screen *screen, int param)
       return PIPE_MAX_COLOR_BUFS;
    case PIPE_CAP_OCCLUSION_QUERY:
       return 1;
+   case PIPE_CAP_TIMER_QUERY:
+      return 1;
    case PIPE_CAP_TEXTURE_MIRROR_CLAMP:
       return 1;
    case PIPE_CAP_TEXTURE_MIRROR_REPEAT:
       return 1;
    case PIPE_CAP_TEXTURE_SHADOW_MAP:
       return 1;
+   case PIPE_CAP_TEXTURE_SWIZZLE:
+      return 1;
    case PIPE_CAP_MAX_TEXTURE_2D_LEVELS:
-      return 13; /* max 4Kx4K */
+      return SP_MAX_TEXTURE_2D_LEVELS;
    case PIPE_CAP_MAX_TEXTURE_3D_LEVELS:
-      return 9;  /* max 256x256x256 */
+      return SP_MAX_TEXTURE_3D_LEVELS;
    case PIPE_CAP_MAX_TEXTURE_CUBE_LEVELS:
-      return 13; /* max 4Kx4K */
+      return SP_MAX_TEXTURE_2D_LEVELS;
    case PIPE_CAP_TGSI_CONT_SUPPORTED:
       return 1;
    case PIPE_CAP_BLEND_EQUATION_SEPARATE:
@@ -105,6 +115,43 @@ softpipe_get_param(struct pipe_screen *screen, int param)
    case PIPE_CAP_TGSI_FS_COORD_PIXEL_CENTER_HALF_INTEGER:
    case PIPE_CAP_TGSI_FS_COORD_PIXEL_CENTER_INTEGER:
       return 1;
+   case PIPE_CAP_STREAM_OUTPUT:
+      return 1;
+
+   case PIPE_CAP_MAX_VS_INSTRUCTIONS:
+   case PIPE_CAP_MAX_FS_INSTRUCTIONS:
+   case PIPE_CAP_MAX_VS_ALU_INSTRUCTIONS:
+   case PIPE_CAP_MAX_FS_ALU_INSTRUCTIONS:
+   case PIPE_CAP_MAX_VS_TEX_INSTRUCTIONS:
+   case PIPE_CAP_MAX_FS_TEX_INSTRUCTIONS:
+   case PIPE_CAP_MAX_VS_TEX_INDIRECTIONS:
+   case PIPE_CAP_MAX_FS_TEX_INDIRECTIONS:
+      /* There is no limit in number of instructions beyond available memory */
+      return 32768;
+   case PIPE_CAP_MAX_VS_CONTROL_FLOW_DEPTH:
+   case PIPE_CAP_MAX_FS_CONTROL_FLOW_DEPTH:
+      return TGSI_EXEC_MAX_NESTING;
+   case PIPE_CAP_MAX_VS_INPUTS:
+   case PIPE_CAP_MAX_FS_INPUTS:
+      return TGSI_EXEC_MAX_INPUT_ATTRIBS;
+   case PIPE_CAP_MAX_FS_CONSTS:
+   case PIPE_CAP_MAX_VS_CONSTS:
+      return TGSI_EXEC_MAX_CONST_BUFFER;
+   case PIPE_CAP_MAX_VS_TEMPS:
+   case PIPE_CAP_MAX_FS_TEMPS:
+      return TGSI_EXEC_NUM_TEMPS;
+   case PIPE_CAP_MAX_VS_ADDRS:
+   case PIPE_CAP_MAX_FS_ADDRS:
+      return TGSI_EXEC_NUM_ADDRS;
+   case PIPE_CAP_MAX_VS_PREDS:
+   case PIPE_CAP_MAX_FS_PREDS:
+      return TGSI_EXEC_NUM_PREDS;
+
+   case PIPE_CAP_DEPTHSTENCIL_CLEAR_SEPARATE:
+      return 0;
+
+   case PIPE_CAP_GEOMETRY_SHADER4:
+      return 1;
    default:
       return 0;
    }
@@ -112,7 +159,7 @@ softpipe_get_param(struct pipe_screen *screen, int param)
 
 
 static float
-softpipe_get_paramf(struct pipe_screen *screen, int param)
+softpipe_get_paramf(struct pipe_screen *screen, enum pipe_cap param)
 {
    switch (param) {
    case PIPE_CAP_MAX_LINE_WIDTH:
@@ -140,41 +187,95 @@ softpipe_get_paramf(struct pipe_screen *screen, int param)
  */
 static boolean
 softpipe_is_format_supported( struct pipe_screen *screen,
-                              enum pipe_format format, 
+                              enum pipe_format format,
                               enum pipe_texture_target target,
-                              unsigned tex_usage, 
+                              unsigned sample_count,
+                              unsigned bind,
                               unsigned geom_flags )
 {
-   assert(target == PIPE_TEXTURE_1D ||
+   struct sw_winsys *winsys = softpipe_screen(screen)->winsys;
+   const struct util_format_description *format_desc;
+
+   assert(target == PIPE_BUFFER ||
+          target == PIPE_TEXTURE_1D ||
           target == PIPE_TEXTURE_2D ||
+          target == PIPE_TEXTURE_RECT ||
           target == PIPE_TEXTURE_3D ||
           target == PIPE_TEXTURE_CUBE);
 
-   switch(format) {
-   case PIPE_FORMAT_L16_UNORM:
-   case PIPE_FORMAT_YUYV:
-   case PIPE_FORMAT_UYVY:
-   case PIPE_FORMAT_DXT1_RGB:
-   case PIPE_FORMAT_DXT1_RGBA:
-   case PIPE_FORMAT_DXT3_RGBA:
-   case PIPE_FORMAT_DXT5_RGBA:
-   case PIPE_FORMAT_Z32_FLOAT:
-   case PIPE_FORMAT_R8G8_SNORM:
-   case PIPE_FORMAT_R5SG5SB6U_NORM:
-   case PIPE_FORMAT_R8SG8SB8UX8U_NORM:
-   case PIPE_FORMAT_R8G8B8A8_SNORM:
-   case PIPE_FORMAT_NONE:
+   format_desc = util_format_description(format);
+   if (!format_desc)
       return FALSE;
-   default:
-      return TRUE;
+
+   if (sample_count > 1)
+      return FALSE;
+
+   if (bind & (PIPE_BIND_DISPLAY_TARGET |
+               PIPE_BIND_SCANOUT |
+               PIPE_BIND_SHARED)) {
+      if(!winsys->is_displaytarget_format_supported(winsys, bind, format))
+         return FALSE;
    }
+
+   if (bind & PIPE_BIND_RENDER_TARGET) {
+      if (format_desc->colorspace == UTIL_FORMAT_COLORSPACE_ZS)
+         return FALSE;
+
+      /*
+       * Although possible, it is unnatural to render into compressed or YUV
+       * surfaces. So disable these here to avoid going into weird paths
+       * inside the state trackers.
+       */
+      if (format_desc->block.width != 1 ||
+          format_desc->block.height != 1)
+         return FALSE;
+
+      /*
+       * TODO: Unfortunately we cannot render into anything more than 32 bits
+       * because we encode color clear values into a 32bit word.
+       */
+      if (format_desc->block.bits > 32)
+         return FALSE;
+   }
+
+   if (bind & PIPE_BIND_DEPTH_STENCIL) {
+      if (format_desc->colorspace != UTIL_FORMAT_COLORSPACE_ZS)
+         return FALSE;
+
+      /*
+       * TODO: Unfortunately we cannot render into anything more than 32 bits
+       * because we encode depth and stencil clear values into a 32bit word.
+       */
+      if (format_desc->block.bits > 32)
+         return FALSE;
+
+      /*
+       * TODO: eliminate this restriction
+       */
+      if (format == PIPE_FORMAT_Z32_FLOAT)
+         return FALSE;
+   }
+
+   /*
+    * All other operations (sampling, transfer, etc).
+    */
+
+   if (format_desc->layout == UTIL_FORMAT_LAYOUT_S3TC) {
+      return util_format_s3tc_enabled;
+   }
+
+   /*
+    * Everything else should be supported by u_format.
+    */
+   return TRUE;
 }
 
 
 static void
 softpipe_destroy_screen( struct pipe_screen *screen )
 {
-   struct pipe_winsys *winsys = screen->winsys;
+   struct softpipe_screen *sp_screen = softpipe_screen(screen);
+   struct sw_winsys *winsys = sp_screen->winsys;
 
    if(winsys->destroy)
       winsys->destroy(winsys);
@@ -183,21 +284,37 @@ softpipe_destroy_screen( struct pipe_screen *screen )
 }
 
 
+/* This is often overriden by the co-state tracker.
+ */
+static void
+softpipe_flush_frontbuffer(struct pipe_screen *_screen,
+                           struct pipe_surface *surface,
+                           void *context_private)
+{
+   struct softpipe_screen *screen = softpipe_screen(_screen);
+   struct sw_winsys *winsys = screen->winsys;
+   struct softpipe_resource *texture = softpipe_resource(surface->texture);
+
+   assert(texture->dt);
+   if (texture->dt)
+      winsys->displaytarget_display(winsys, texture->dt, context_private);
+}
 
 /**
  * Create a new pipe_screen object
  * Note: we're not presently subclassing pipe_screen (no softpipe_screen).
  */
 struct pipe_screen *
-softpipe_create_screen(struct pipe_winsys *winsys)
+softpipe_create_screen(struct sw_winsys *winsys)
 {
    struct softpipe_screen *screen = CALLOC_STRUCT(softpipe_screen);
 
    if (!screen)
       return NULL;
 
-   screen->base.winsys = winsys;
+   screen->winsys = winsys;
 
+   screen->base.winsys = NULL;
    screen->base.destroy = softpipe_destroy_screen;
 
    screen->base.get_name = softpipe_get_name;
@@ -206,9 +323,12 @@ softpipe_create_screen(struct pipe_winsys *winsys)
    screen->base.get_paramf = softpipe_get_paramf;
    screen->base.is_format_supported = softpipe_is_format_supported;
    screen->base.context_create = softpipe_create_context;
+   screen->base.flush_frontbuffer = softpipe_flush_frontbuffer;
+
+   util_format_s3tc_init();
 
    softpipe_init_screen_texture_funcs(&screen->base);
-   u_simple_screen_init(&screen->base);
+   softpipe_init_screen_fence_funcs(&screen->base);
 
    return &screen->base;
 }

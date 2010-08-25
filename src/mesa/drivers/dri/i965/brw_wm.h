@@ -34,7 +34,7 @@
 #define BRW_WM_H
 
 
-#include "shader/prog_instruction.h"
+#include "program/prog_instruction.h"
 #include "brw_context.h"
 #include "brw_eu.h"
 
@@ -61,7 +61,7 @@ struct brw_wm_prog_key {
    GLuint source_depth_reg:3;
    GLuint aa_dest_stencil_reg:3;
    GLuint dest_depth_reg:3;
-   GLuint nr_depth_regs:3;
+   GLuint nr_payload_regs:4;
    GLuint computes_depth:1;	/* could be derived from program string */
    GLuint source_depth_to_render_target:1;
    GLuint flat_shade:1;
@@ -286,7 +286,7 @@ void brw_wm_pass0( struct brw_wm_compile *c );
 void brw_wm_pass1( struct brw_wm_compile *c );
 void brw_wm_pass2( struct brw_wm_compile *c );
 void brw_wm_emit( struct brw_wm_compile *c );
-
+GLboolean brw_wm_arg_can_be_immediate(enum prog_opcode, int arg);
 void brw_wm_print_value( struct brw_wm_compile *c,
 			 struct brw_wm_value *value );
 
@@ -343,6 +343,11 @@ void emit_delta_xy(struct brw_compile *p,
 		   const struct brw_reg *dst,
 		   GLuint mask,
 		   const struct brw_reg *arg0);
+void emit_dp2(struct brw_compile *p,
+	      const struct brw_reg *dst,
+	      GLuint mask,
+	      const struct brw_reg *arg0,
+	      const struct brw_reg *arg1);
 void emit_dp3(struct brw_compile *p,
 	      const struct brw_reg *dst,
 	      GLuint mask,
@@ -425,6 +430,10 @@ void emit_sop(struct brw_compile *p,
 	      GLuint cond,
 	      const struct brw_reg *arg0,
 	      const struct brw_reg *arg1);
+void emit_sign(struct brw_compile *p,
+	       const struct brw_reg *dst,
+	       GLuint mask,
+	       const struct brw_reg *arg0);
 void emit_tex(struct brw_wm_compile *c,
 	      struct brw_reg *dst,
 	      GLuint dst_flags,

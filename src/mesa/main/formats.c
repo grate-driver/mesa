@@ -26,7 +26,6 @@
 
 #include "imports.h"
 #include "formats.h"
-#include "config.h"
 
 
 /**
@@ -48,7 +47,7 @@ struct gl_format_info
 
    /**
     * Logical data type: one of  GL_UNSIGNED_NORMALIZED, GL_SIGNED_NORMALED,
-    * GL_UNSIGNED_INT, GL_SIGNED_INT, GL_FLOAT.
+    * GL_UNSIGNED_INT, GL_INT, GL_FLOAT.
     */
    GLenum DataType;
 
@@ -628,6 +627,66 @@ static struct gl_format_info format_info[MESA_FORMAT_COUNT] =
       0, 16, 0, 0, 0,
       1, 1, 2
    },
+
+   /* unnormalized signed int formats */
+   {
+      MESA_FORMAT_RGBA_INT8,
+      "MESA_FORMAT_RGBA_INT8",
+      GL_RGBA,
+      GL_INT,
+      8, 8, 8, 8,
+      0, 0, 0, 0, 0,
+      1, 1, 4
+   },
+   {
+      MESA_FORMAT_RGBA_INT16,
+      "MESA_FORMAT_RGBA_INT16",
+      GL_RGBA,
+      GL_INT,
+      16, 16, 16, 16,
+      0, 0, 0, 0, 0,
+      1, 1, 8
+   },
+   {
+      MESA_FORMAT_RGBA_INT32,
+      "MESA_FORMAT_RGBA_INT32",
+      GL_RGBA,
+      GL_INT,
+      32, 32, 32, 32,
+      0, 0, 0, 0, 0,
+      1, 1, 16
+   },
+
+   /* unnormalized unsigned int formats */
+   {
+      MESA_FORMAT_RGBA_UINT8,
+      "MESA_FORMAT_RGBA_UINT8",
+      GL_RGBA,
+      GL_UNSIGNED_INT,
+      8, 8, 8, 8,
+      0, 0, 0, 0, 0,
+      1, 1, 4
+   },
+   {
+      MESA_FORMAT_RGBA_UINT16,
+      "MESA_FORMAT_RGBA_UINT16",
+      GL_RGBA,
+      GL_UNSIGNED_INT,
+      16, 16, 16, 16,
+      0, 0, 0, 0, 0,
+      1, 1, 8
+   },
+   {
+      MESA_FORMAT_RGBA_UINT32,
+      "MESA_FORMAT_RGBA_UINT32",
+      GL_RGBA,
+      GL_UNSIGNED_INT,
+      32, 32, 32, 32,
+      0, 0, 0, 0, 0,
+      1, 1, 16
+   },
+
+
    {
       MESA_FORMAT_DUDV8,
       "MESA_FORMAT_DUDV8",
@@ -636,6 +695,35 @@ static struct gl_format_info format_info[MESA_FORMAT_COUNT] =
       0, 0, 0, 0,
       0, 0, 0, 0, 0,
       1, 1, 2
+   },
+
+   /* Signed 8 bits / channel */
+   {
+      MESA_FORMAT_SIGNED_R8,        /* Name */
+      "MESA_FORMAT_SIGNED_R8",      /* StrName */
+      GL_RGBA,                      /* BaseFormat */
+      GL_SIGNED_NORMALIZED,         /* DataType */
+      8, 0, 0, 0,                   /* Red/Green/Blue/AlphaBits */
+      0, 0, 0, 0, 0,                /* Lum/Int/Index/Depth/StencilBits */
+      1, 1, 1                       /* BlockWidth/Height,Bytes */
+   },
+   {
+      MESA_FORMAT_SIGNED_RG88,
+      "MESA_FORMAT_SIGNED_RG88",
+      GL_RGBA,
+      GL_SIGNED_NORMALIZED,
+      8, 8, 0, 0,
+      0, 0, 0, 0, 0,
+      1, 1, 2
+   },
+   {
+      MESA_FORMAT_SIGNED_RGBX8888,
+      "MESA_FORMAT_SIGNED_RGBX8888",
+      GL_RGBA,
+      GL_SIGNED_NORMALIZED,
+      8, 8, 8, 0,
+      0, 0, 0, 0, 0,
+      1, 1, 4                       /* 4 bpp, but no alpha */
    },
    {
       MESA_FORMAT_SIGNED_RGBA8888,
@@ -655,11 +743,49 @@ static struct gl_format_info format_info[MESA_FORMAT_COUNT] =
       0, 0, 0, 0, 0,
       1, 1, 4
    },
+
+   /* Signed 16 bits / channel */
+   {
+      MESA_FORMAT_SIGNED_R_16,
+      "MESA_FORMAT_SIGNED_R_16",
+      GL_RGBA,
+      GL_SIGNED_NORMALIZED,
+      16, 0, 0, 0,
+      0, 0, 0, 0, 0,
+      1, 1, 2
+   },
+   {
+      MESA_FORMAT_SIGNED_RG_16,
+      "MESA_FORMAT_SIGNED_RG_16",
+      GL_RGBA,
+      GL_SIGNED_NORMALIZED,
+      16, 16, 0, 0,
+      0, 0, 0, 0, 0,
+      1, 1, 4
+   },
+   {
+      MESA_FORMAT_SIGNED_RGB_16,
+      "MESA_FORMAT_SIGNED_RGB_16",
+      GL_RGBA,
+      GL_SIGNED_NORMALIZED,
+      16, 16, 16, 0,
+      0, 0, 0, 0, 0,
+      1, 1, 6
+   },
    {
       MESA_FORMAT_SIGNED_RGBA_16,
       "MESA_FORMAT_SIGNED_RGBA_16",
       GL_RGBA,
       GL_SIGNED_NORMALIZED,
+      16, 16, 16, 16,
+      0, 0, 0, 0, 0,
+      1, 1, 8
+   },
+   {
+      MESA_FORMAT_RGBA_16,
+      "MESA_FORMAT_RGBA_16",
+      GL_RGBA,
+      GL_UNSIGNED_NORMALIZED,
       16, 16, 16, 16,
       0, 0, 0, 0, 0,
       1, 1, 8
@@ -1067,6 +1193,19 @@ _mesa_format_to_type_and_comps(gl_format format,
       *datatype = GL_BYTE;
       *comps = 4;
       return;
+
+   case MESA_FORMAT_SIGNED_R_16:
+      *datatype = GL_SHORT;
+      *comps = 1;
+      return;
+   case MESA_FORMAT_SIGNED_RG_16:
+      *datatype = GL_SHORT;
+      *comps = 2;
+      return;
+   case MESA_FORMAT_SIGNED_RGB_16:
+      *datatype = GL_SHORT;
+      *comps = 3;
+      return;
    case MESA_FORMAT_SIGNED_RGBA_16:
       *datatype = GL_SHORT;
       *comps = 4;
@@ -1149,6 +1288,36 @@ _mesa_format_to_type_and_comps(gl_format format,
       *datatype = GL_HALF_FLOAT_ARB;
       *comps = 1;
       return;
+
+   case MESA_FORMAT_RGBA_INT8:
+      *datatype = GL_BYTE;
+      *comps = 4;
+      return;
+   case MESA_FORMAT_RGBA_INT16:
+      *datatype = GL_SHORT;
+      *comps = 4;
+      return;
+   case MESA_FORMAT_RGBA_INT32:
+      *datatype = GL_INT;
+      *comps = 4;
+      return;
+
+   /**
+    * \name Non-normalized unsigned integer formats.
+    */
+   case MESA_FORMAT_RGBA_UINT8:
+      *datatype = GL_UNSIGNED_BYTE;
+      *comps = 4;
+      return;
+   case MESA_FORMAT_RGBA_UINT16:
+      *datatype = GL_UNSIGNED_SHORT;
+      *comps = 4;
+      return;
+   case MESA_FORMAT_RGBA_UINT32:
+      *datatype = GL_UNSIGNED_INT;
+      *comps = 4;
+      return;
+
 
    default:
       _mesa_problem(NULL, "bad format in _mesa_format_to_type_and_comps");

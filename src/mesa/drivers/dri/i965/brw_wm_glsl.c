@@ -1,7 +1,7 @@
 #include "main/macros.h"
-#include "shader/prog_parameter.h"
-#include "shader/prog_print.h"
-#include "shader/prog_optimize.h"
+#include "program/prog_parameter.h"
+#include "program/prog_print.h"
+#include "program/prog_optimize.h"
 #include "brw_context.h"
 #include "brw_eu.h"
 #include "brw_wm.h"
@@ -22,6 +22,9 @@ static struct brw_reg get_dst_reg(struct brw_wm_compile *c,
 GLboolean brw_wm_is_glsl(const struct gl_fragment_program *fp)
 {
     int i;
+
+    if (INTEL_DEBUG & DEBUG_GLSL_FORCE)
+       return GL_TRUE;
 
     for (i = 0; i < fp->Base.NumInstructions; i++) {
 	const struct prog_instruction *inst = &fp->Base.Instructions[i];
@@ -289,6 +292,7 @@ reclaim_temps(struct brw_wm_compile *c)
  */
 static void prealloc_reg(struct brw_wm_compile *c)
 {
+    struct intel_context *intel = &c->func.brw->intel;
     int i, j;
     struct brw_reg reg;
     int urb_read_length = 0;
@@ -299,13 +303,13 @@ static void prealloc_reg(struct brw_wm_compile *c)
     c->first_free_grf = 0;
 
     for (i = 0; i < 4; i++) {
-        if (i < c->key.nr_depth_regs) 
+	if (i < (c->key.nr_payload_regs + 1) / 2)
             reg = brw_vec8_grf(i * 2, 0);
         else
             reg = brw_vec8_grf(0, 0);
 	set_reg(c, PROGRAM_PAYLOAD, PAYLOAD_DEPTH, i, reg);
     }
-    reg_index += 2 * c->key.nr_depth_regs;
+    reg_index += c->key.nr_payload_regs;
 
     /* constants */
     {
@@ -376,7 +380,7 @@ static void prealloc_reg(struct brw_wm_compile *c)
        }
     }
 
-    c->prog_data.first_curbe_grf = c->key.nr_depth_regs * 2;
+    c->prog_data.first_curbe_grf = c->key.nr_payload_regs;
     c->prog_data.urb_read_length = urb_read_length;
     c->prog_data.curb_read_length = c->nr_creg;
     c->emit_mask_reg = brw_uw1_reg(BRW_GENERAL_REGISTER_FILE, reg_index, 0);
@@ -408,6 +412,43 @@ static void prealloc_reg(struct brw_wm_compile *c)
 		    assert(dst[j].nr == dst[j - 1].nr + 1);
 	    }
 	    break;
+	default:
+	    break;
+	}
+    }
+
+    for (i = 0; i < c->nr_fp_insns; i++) {
+	const struct prog_instruction *inst = &c->prog_instructions[i];
+
+	switch (inst->Opcode) {
+	case WM_DELTAXY:
+	    /* Allocate WM_DELTAXY destination on G45/GM45 to an
+	     * even-numbered GRF if possible so that we can use the PLN
+	     * instruction.
+	     */
+	    if (inst->DstReg.WriteMask == WRITEMASK_XY &&
+		!c->wm_regs[inst->DstReg.File][inst->DstReg.Index][0].inited &&
+		!c->wm_regs[inst->DstReg.File][inst->DstReg.Index][1].inited &&
+		(IS_G4X(intel->intelScreen->deviceID) || intel->gen == 5)) {
+		int grf;
+
+		for (grf = c->first_free_grf & ~1;
+		     grf < BRW_WM_MAX_GRF;
+		     grf += 2)
+		{
+		    if (!c->used_grf[grf] && !c->used_grf[grf + 1]) {
+			c->used_grf[grf] = GL_TRUE;
+			c->used_grf[grf + 1] = GL_TRUE;
+			c->first_free_grf = grf + 2;  /* a guess */
+
+			set_reg(c, inst->DstReg.File, inst->DstReg.Index, 0,
+				brw_vec8_grf(grf, 0));
+			set_reg(c, inst->DstReg.File, inst->DstReg.Index, 1,
+				brw_vec8_grf(grf + 1, 0));
+			break;
+		    }
+		}
+	    }
 	default:
 	    break;
 	}
@@ -529,12 +570,35 @@ static struct brw_reg get_src_reg(struct brw_wm_compile *c,
     const GLuint nr = 1;
     const GLuint component = GET_SWZ(src->Swizzle, channel);
 
-    /* Extended swizzle terms */
-    if (component == SWIZZLE_ZERO) {
-       return brw_imm_f(0.0F);
-    }
-    else if (component == SWIZZLE_ONE) {
-       return brw_imm_f(1.0F);
+    /* Only one immediate value can be used per native opcode, and it
+     * has be in the src1 slot, so not all Mesa instructions will get
+     * to take advantage of immediate constants.
+     */
+    if (brw_wm_arg_can_be_immediate(inst->Opcode, srcRegIndex)) {
+       const struct gl_program_parameter_list *params;
+
+       params = c->fp->program.Base.Parameters;
+
+       /* Extended swizzle terms */
+       if (component == SWIZZLE_ZERO) {
+	  return brw_imm_f(0.0F);
+       } else if (component == SWIZZLE_ONE) {
+	  if (src->Negate)
+	     return brw_imm_f(-1.0F);
+	  else
+	     return brw_imm_f(1.0F);
+       }
+
+       if (src->File == PROGRAM_CONSTANT) {
+	  float f = params->ParameterValues[src->Index][component];
+
+	  if (src->Abs)
+	     f = fabs(f);
+	  if (src->Negate)
+	     f = -f;
+
+	  return brw_imm_f(f);
+       }
     }
 
     if (c->fp->use_const_buffer &&
@@ -1839,6 +1903,9 @@ static void brw_wm_emit_glsl(struct brw_context *brw, struct brw_wm_compile *c)
 	    case OPCODE_SWZ:
 		emit_alu1(p, brw_MOV, dst, dst_flags, args[0]);
 		break;
+	    case OPCODE_DP2:
+		emit_dp2(p, dst, dst_flags, args[0], args[1]);
+		break;
 	    case OPCODE_DP3:
 		emit_dp3(p, dst, dst_flags, args[0], args[1]);
 		break;
@@ -1906,6 +1973,9 @@ static void brw_wm_emit_glsl(struct brw_context *brw, struct brw_wm_compile *c)
 	    case OPCODE_SNE:
 		emit_sop(p, dst, dst_flags,
 			 BRW_CONDITIONAL_NEQ, args[0], args[1]);
+		break;
+	    case OPCODE_SSG:
+		emit_sign(p, dst, dst_flags, args[0]);
 		break;
 	    case OPCODE_MUL:
 		emit_alu2(p, brw_MUL, dst, dst_flags, args[0], args[1]);
@@ -2029,8 +2099,9 @@ static void brw_wm_emit_glsl(struct brw_context *brw, struct brw_wm_compile *c)
                }
                break;
 	    default:
-		printf("unsupported IR in fragment shader %d\n",
-			inst->Opcode);
+		printf("unsupported opcode %d (%s) in fragment shader\n",
+		       inst->Opcode, inst->Opcode < MAX_OPCODE ?
+		       _mesa_opcode_string(inst->Opcode) : "unknown");
 	}
 
 	/* Release temporaries containing any unaliased source regs. */
@@ -2046,7 +2117,7 @@ static void brw_wm_emit_glsl(struct brw_context *brw, struct brw_wm_compile *c)
     if (INTEL_DEBUG & DEBUG_WM) {
       printf("wm-native:\n");
       for (i = 0; i < p->nr_insn; i++)
-	 brw_disasm(stderr, &p->store[i]);
+	 brw_disasm(stdout, &p->store[i], intel->gen);
       printf("\n");
     }
 }

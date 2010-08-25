@@ -1,6 +1,7 @@
 /**************************************************************************
  * 
  * Copyright 2007 Tungsten Graphics, Inc., Cedar Park, Texas.
+ * Copyright 2010 VMware, Inc.
  * All Rights Reserved.
  * 
  * Permission is hereby granted, free of charge, to any person obtaining a
@@ -18,28 +19,25 @@
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
  * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT.
- * IN NO EVENT SHALL TUNGSTEN GRAPHICS AND/OR ITS SUPPLIERS BE LIABLE FOR
+ * IN NO EVENT SHALL THE AUTHORS AND/OR ITS SUPPLIERS BE LIABLE FOR
  * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * 
  **************************************************************************/
 
-/* Author:
- *    Keith Whitwell <keith@tungstengraphics.com>
+/* Authors:
+ *    Keith Whitwell, Qicheng Christopher Li, Brian Paul
  */
 
 #include "draw/draw_context.h"
 #include "pipe/p_defines.h"
 #include "util/u_memory.h"
 #include "lp_context.h"
+#include "lp_flush.h"
+#include "lp_fence.h"
 #include "lp_query.h"
 #include "lp_state.h"
-
-struct llvmpipe_query {
-   uint64_t start;
-   uint64_t end;
-};
 
 
 static struct llvmpipe_query *llvmpipe_query( struct pipe_query *p )
@@ -49,17 +47,59 @@ static struct llvmpipe_query *llvmpipe_query( struct pipe_query *p )
 
 static struct pipe_query *
 llvmpipe_create_query(struct pipe_context *pipe, 
-		      unsigned type)
+                      unsigned type)
 {
+   struct llvmpipe_query *pq;
+
    assert(type == PIPE_QUERY_OCCLUSION_COUNTER);
-   return (struct pipe_query *)CALLOC_STRUCT( llvmpipe_query );
+
+   pq = CALLOC_STRUCT( llvmpipe_query );
+   if (pq) {
+      pipe_mutex_init(pq->mutex);
+   }
+
+   return (struct pipe_query *) pq;
 }
 
 
 static void
 llvmpipe_destroy_query(struct pipe_context *pipe, struct pipe_query *q)
 {
-   FREE(q);
+   struct llvmpipe_query *pq = llvmpipe_query(q);
+   /* query might still be in process if we never waited for the result */
+   if (!pq->done) {
+      llvmpipe_finish(pipe, __FUNCTION__);
+   }
+
+   pipe_mutex_destroy(pq->mutex);
+   FREE(pq);
+}
+
+
+static boolean
+llvmpipe_get_query_result(struct pipe_context *pipe, 
+                          struct pipe_query *q,
+                          boolean wait,
+                          void *vresult)
+{
+   struct llvmpipe_query *pq = llvmpipe_query(q);
+   uint64_t *result = (uint64_t *)vresult;
+
+   if (!pq->done) {
+      if (wait) {
+         llvmpipe_finish(pipe, __FUNCTION__);
+      }
+      /* this is a bit inconsequent but should be ok */
+      else {
+         llvmpipe_flush(pipe, 0, NULL, __FUNCTION__);
+      }
+   }
+
+   if (pq->done) {
+      *result = pq->result;
+   }
+
+   return pq->done;
 }
 
 
@@ -67,9 +107,18 @@ static void
 llvmpipe_begin_query(struct pipe_context *pipe, struct pipe_query *q)
 {
    struct llvmpipe_context *llvmpipe = llvmpipe_context( pipe );
-   struct llvmpipe_query *sq = llvmpipe_query(q);
-   
-   sq->start = llvmpipe->occlusion_count;
+   struct llvmpipe_query *pq = llvmpipe_query(q);
+
+   /* Check if the query is already in the scene.  If so, we need to
+    * flush the scene now.  Real apps shouldn't re-use a query in a
+    * frame of rendering.
+    */
+   if (pq->binned) {
+      llvmpipe_finish(pipe, __FUNCTION__);
+   }
+
+   lp_setup_begin_query(llvmpipe->setup, pq);
+
    llvmpipe->active_query_count++;
    llvmpipe->dirty |= LP_NEW_QUERY;
 }
@@ -79,23 +128,13 @@ static void
 llvmpipe_end_query(struct pipe_context *pipe, struct pipe_query *q)
 {
    struct llvmpipe_context *llvmpipe = llvmpipe_context( pipe );
-   struct llvmpipe_query *sq = llvmpipe_query(q);
+   struct llvmpipe_query *pq = llvmpipe_query(q);
 
+   lp_setup_end_query(llvmpipe->setup, pq);
+
+   assert(llvmpipe->active_query_count);
    llvmpipe->active_query_count--;
-   sq->end = llvmpipe->occlusion_count;
    llvmpipe->dirty |= LP_NEW_QUERY;
-}
-
-
-static boolean
-llvmpipe_get_query_result(struct pipe_context *pipe, 
-			  struct pipe_query *q,
-			  boolean wait,
-			  uint64_t *result )
-{
-   struct llvmpipe_query *sq = llvmpipe_query(q);
-   *result = sq->end - sq->start;
-   return TRUE;
 }
 
 

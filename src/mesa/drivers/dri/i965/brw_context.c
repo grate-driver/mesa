@@ -34,8 +34,6 @@
 #include "main/api_noop.h"
 #include "main/macros.h"
 #include "main/simple_list.h"
-#include "shader/shader_api.h"
-
 #include "brw_context.h"
 #include "brw_defines.h"
 #include "brw_draw.h"
@@ -48,27 +46,19 @@
  * Mesa's Driver Functions
  ***************************************/
 
-static void brwUseProgram(GLcontext *ctx, GLuint program)
-{
-   _mesa_use_program(ctx, program);
-}
-
-static void brwInitProgFuncs( struct dd_function_table *functions )
-{
-   functions->UseProgram = brwUseProgram;
-}
 static void brwInitDriverFunctions( struct dd_function_table *functions )
 {
    intelInitDriverFunctions( functions );
 
    brwInitFragProgFuncs( functions );
-   brwInitProgFuncs( functions );
    brw_init_queryobj_functions(functions);
 
-   functions->Viewport = intel_viewport;
+   functions->Enable = brw_enable;
+   functions->DepthRange = brw_depth_range;
 }
 
-GLboolean brwCreateContext( const __GLcontextModes *mesaVis,
+GLboolean brwCreateContext( int api,
+			    const __GLcontextModes *mesaVis,
 			    __DRIcontext *driContextPriv,
 			    void *sharedContextPrivate)
 {
@@ -85,7 +75,7 @@ GLboolean brwCreateContext( const __GLcontextModes *mesaVis,
    brwInitVtbl( brw );
    brwInitDriverFunctions( &functions );
 
-   if (!intelInitContext( intel, mesaVis, driContextPriv,
+   if (!intelInitContext( intel, api, mesaVis, driContextPriv,
 			  sharedContextPrivate, &functions )) {
       printf("%s: failed to init intel context\n", __FUNCTION__);
       FREE(brw);
@@ -154,15 +144,21 @@ GLboolean brwCreateContext( const __GLcontextModes *mesaVis,
       brw->CMD_VF_STATISTICS = CMD_VF_STATISTICS_GM45;
       brw->CMD_PIPELINE_SELECT = CMD_PIPELINE_SELECT_GM45;
       brw->has_surface_tile_offset = GL_TRUE;
-      brw->has_compr4 = GL_TRUE;
+      if (intel->gen < 6)
+	  brw->has_compr4 = GL_TRUE;
       brw->has_aa_line_parameters = GL_TRUE;
+      brw->has_pln = GL_TRUE;
   } else {
       brw->CMD_VF_STATISTICS = CMD_VF_STATISTICS_965;
       brw->CMD_PIPELINE_SELECT = CMD_PIPELINE_SELECT_965;
    }
 
    /* WM maximum threads is number of EUs times number of threads per EU. */
-   if (intel->gen == 5) {
+   if (intel->gen >= 6) {
+      brw->urb.size = 1024;
+      brw->vs_max_threads = 60;
+      brw->wm_max_threads = 80;
+   } else if (intel->gen == 5) {
       brw->urb.size = 1024;
       brw->vs_max_threads = 72;
       brw->wm_max_threads = 12 * 6;
@@ -184,6 +180,9 @@ GLboolean brwCreateContext( const __GLcontextModes *mesaVis,
 
    brw_init_state( brw );
 
+   brw->curbe.last_buf = calloc(1, 4096);
+   brw->curbe.next_buf = calloc(1, 4096);
+
    brw->state.dirty.mesa = ~0;
    brw->state.dirty.brw = ~0;
 
@@ -192,9 +191,12 @@ GLboolean brwCreateContext( const __GLcontextModes *mesaVis,
    ctx->VertexProgram._MaintainTnlProgram = GL_TRUE;
    ctx->FragmentProgram._MaintainTexEnvProgram = GL_TRUE;
 
-   make_empty_list(&brw->query.active_head);
-
    brw_draw_init( brw );
+
+   /* Now that most driver functions are hooked up, initialize some of the
+    * immediate state.
+    */
+   brw_update_cc_vp(brw);
 
    return GL_TRUE;
 }

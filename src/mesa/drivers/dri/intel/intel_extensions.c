@@ -50,19 +50,22 @@
 #define need_GL_EXT_cull_vertex
 #define need_GL_EXT_draw_buffers2
 #define need_GL_EXT_fog_coord
-#define need_GL_EXT_framebuffer_object
 #define need_GL_EXT_framebuffer_blit
+#define need_GL_EXT_framebuffer_multisample
+#define need_GL_EXT_framebuffer_object
 #define need_GL_EXT_gpu_program_parameters
 #define need_GL_EXT_point_parameters
 #define need_GL_EXT_provoking_vertex
 #define need_GL_EXT_secondary_color
 #define need_GL_EXT_stencil_two_side
+#define need_GL_EXT_timer_query
 #define need_GL_APPLE_vertex_array_object
 #define need_GL_APPLE_object_purgeable
 #define need_GL_ATI_separate_stencil
 #define need_GL_ATI_envmap_bumpmap
 #define need_GL_NV_point_sprite
 #define need_GL_NV_vertex_program
+#define need_GL_OES_EGL_image
 #define need_GL_VERSION_2_0
 #define need_GL_VERSION_2_1
 
@@ -109,6 +112,7 @@ static const struct dri_extension card_extensions[] = {
    { "GL_EXT_cull_vertex",                GL_EXT_cull_vertex_functions },
    { "GL_EXT_framebuffer_blit",         GL_EXT_framebuffer_blit_functions },
    { "GL_EXT_framebuffer_object",       GL_EXT_framebuffer_object_functions },
+   { "GL_EXT_framebuffer_multisample",    GL_EXT_framebuffer_multisample_functions },
    { "GL_EXT_fog_coord",                  GL_EXT_fog_coord_functions },
    { "GL_EXT_gpu_program_parameters",     GL_EXT_gpu_program_parameters_functions },
    { "GL_EXT_packed_depth_stencil",       NULL },
@@ -130,6 +134,9 @@ static const struct dri_extension card_extensions[] = {
    { "GL_NV_vertex_program",              GL_NV_vertex_program_functions },
    { "GL_NV_vertex_program1_1",           NULL },
    { "GL_SGIS_generate_mipmap",           NULL },
+#if FEATURE_OES_EGL_image
+   { "GL_OES_EGL_image",                  GL_OES_EGL_image_functions },
+#endif
    { NULL, NULL }
 };
 
@@ -178,6 +185,9 @@ static const struct dri_extension brw_extensions[] = {
    { NULL,                                NULL }
 };
 
+static const struct dri_extension ironlake_extensions[] = {
+   { "GL_EXT_timer_query",                GL_EXT_timer_query_functions },
+};
 
 static const struct dri_extension arb_oq_extensions[] = {
    { "GL_ARB_occlusion_query",            GL_ARB_occlusion_query_functions },
@@ -202,6 +212,9 @@ intelInitExtensions(GLcontext *ctx)
    /* Disable imaging extension until convolution is working in teximage paths.
     */
    driInitExtensions(ctx, card_extensions, GL_FALSE);
+
+   if (intel->gen >= 5)
+      driInitExtensions(ctx, ironlake_extensions, GL_FALSE);
 
    if (intel->gen >= 4)
       driInitExtensions(ctx, brw_extensions, GL_FALSE);

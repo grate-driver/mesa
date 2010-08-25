@@ -42,9 +42,6 @@
 #include "intel_fbo.h"
 #include "intel_mipmap_tree.h"
 #include "intel_regions.h"
-#ifndef I915
-#include "brw_state.h"
-#endif
 
 #define FILE_DEBUG_FLAG DEBUG_FBO
 
@@ -135,6 +132,11 @@ intel_alloc_renderbuffer_storage(GLcontext * ctx, struct gl_renderbuffer *rb,
       rb->Format = MESA_FORMAT_ARGB8888;
       rb->DataType = GL_UNSIGNED_BYTE;
       break;
+   case GL_ALPHA:
+   case GL_ALPHA8:
+      rb->Format = MESA_FORMAT_A8;
+      rb->DataType = GL_UNSIGNED_BYTE;
+      break;
    case GL_STENCIL_INDEX:
    case GL_STENCIL_INDEX1_EXT:
    case GL_STENCIL_INDEX4_EXT:
@@ -168,7 +170,7 @@ intel_alloc_renderbuffer_storage(GLcontext * ctx, struct gl_renderbuffer *rb,
    rb->_BaseFormat = _mesa_base_fbo_format(ctx, internalFormat);
    cpp = _mesa_get_format_bytes(rb->Format);
 
-   intelFlush(ctx);
+   intel_flush(ctx);
 
    /* free old region */
    if (irb->region) {
@@ -180,7 +182,7 @@ intel_alloc_renderbuffer_storage(GLcontext * ctx, struct gl_renderbuffer *rb,
    /* alloc hardware renderbuffer */
    DBG("Allocating %d x %d Intel RBO\n", width, height);
 
-   irb->region = intel_region_alloc(intel, I915_TILING_NONE, cpp,
+   irb->region = intel_region_alloc(intel->intelScreen, I915_TILING_NONE, cpp,
 				    width, height, GL_TRUE);
    if (!irb->region)
       return GL_FALSE;       /* out of memory? */
@@ -291,12 +293,6 @@ intel_renderbuffer_set_region(struct intel_context *intel,
    old = rb->region;
    rb->region = NULL;
    intel_region_reference(&rb->region, region);
-#ifndef I915
-   if (old) {
-      brw_state_cache_bo_delete(&brw_context(&intel->ctx)->surface_cache,
-				old->buffer);
-   }
-#endif
    intel_region_release(&old);
 }
 
@@ -345,6 +341,10 @@ intel_create_renderbuffer(gl_format format)
    case MESA_FORMAT_S8_Z24:
       irb->Base._BaseFormat = GL_DEPTH_STENCIL;
       irb->Base.DataType = GL_UNSIGNED_INT_24_8_EXT;
+      break;
+   case MESA_FORMAT_A8:
+      irb->Base._BaseFormat = GL_ALPHA;
+      irb->Base.DataType = GL_UNSIGNED_BYTE;
       break;
    default:
       _mesa_problem(NULL,
@@ -420,7 +420,7 @@ intel_framebuffer_renderbuffer(GLcontext * ctx,
 {
    DBG("Intel FramebufferRenderbuffer %u %u\n", fb->Name, rb ? rb->Name : 0);
 
-   intelFlush(ctx);
+   intel_flush(ctx);
 
    _mesa_framebuffer_renderbuffer(ctx, fb, attachment, rb);
    intel_draw_buffer(ctx, fb);
@@ -450,6 +450,10 @@ intel_update_wrapper(GLcontext *ctx, struct intel_renderbuffer *irb,
    else if (texImage->TexFormat == MESA_FORMAT_ARGB4444) {
       irb->Base.DataType = GL_UNSIGNED_BYTE;
       DBG("Render to ARGB4444 texture OK\n");
+   }
+   else if (texImage->TexFormat == MESA_FORMAT_A8) {
+      irb->Base.DataType = GL_UNSIGNED_BYTE;
+      DBG("Render to A8 texture OK\n");
    }
    else if (texImage->TexFormat == MESA_FORMAT_Z16) {
       irb->Base.DataType = GL_UNSIGNED_SHORT;
@@ -577,7 +581,7 @@ intel_render_texture(GLcontext * ctx,
 				  att->Zoffset,
 				  &dst_x, &dst_y);
 
-   intel_image->mt->region->draw_offset = (dst_y * intel_image->mt->pitch +
+   intel_image->mt->region->draw_offset = (dst_y * intel_image->mt->region->pitch +
 					   dst_x) * intel_image->mt->cpp;
    intel_image->mt->region->draw_x = dst_x;
    intel_image->mt->region->draw_y = dst_y;
@@ -660,6 +664,7 @@ intel_validate_framebuffer(GLcontext *ctx, struct gl_framebuffer *fb)
       case MESA_FORMAT_RGB565:
       case MESA_FORMAT_ARGB1555:
       case MESA_FORMAT_ARGB4444:
+      case MESA_FORMAT_A8:
 	 break;
       default:
 	 fb->_Status = GL_FRAMEBUFFER_UNSUPPORTED_EXT;

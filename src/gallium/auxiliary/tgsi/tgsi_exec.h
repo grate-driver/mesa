@@ -37,8 +37,6 @@ extern "C" {
 #endif
 
 
-#define MAX_LABELS (4 * 1024)  /**< basically, max instructions */
-
 #define NUM_CHANNELS 4  /* R,G,B,A */
 #define QUAD_SIZE    4  /* 4 pixel/quad */
 
@@ -93,18 +91,9 @@ struct tgsi_sampler
                        float rgba[NUM_CHANNELS][QUAD_SIZE]);
 };
 
-/**
- * For branching/calling subroutines.
- */
-struct tgsi_exec_labels
-{
-   unsigned labels[MAX_LABELS][2];
-   unsigned count;
-};
-
-
 #define TGSI_EXEC_NUM_TEMPS       128
 #define TGSI_EXEC_NUM_IMMEDIATES  256
+#define TGSI_EXEC_NUM_TEMP_ARRAYS 8
 
 /*
  * Locations of various utility registers (_I = Index, _C = Channel)
@@ -186,10 +175,11 @@ struct tgsi_exec_labels
 
 
 
-#define TGSI_EXEC_MAX_COND_NESTING  32
-#define TGSI_EXEC_MAX_LOOP_NESTING  32
-#define TGSI_EXEC_MAX_SWITCH_NESTING 32
-#define TGSI_EXEC_MAX_CALL_NESTING  32
+#define TGSI_EXEC_MAX_NESTING  32
+#define TGSI_EXEC_MAX_COND_NESTING  TGSI_EXEC_MAX_NESTING
+#define TGSI_EXEC_MAX_LOOP_NESTING  TGSI_EXEC_MAX_NESTING
+#define TGSI_EXEC_MAX_SWITCH_NESTING TGSI_EXEC_MAX_NESTING
+#define TGSI_EXEC_MAX_CALL_NESTING  TGSI_EXEC_MAX_NESTING
 
 /* The maximum number of input attributes per vertex. For 2D
  * input register files, this is the stride between two 1D
@@ -248,8 +238,11 @@ struct tgsi_exec_machine
     */
    struct tgsi_exec_vector       Temps[TGSI_EXEC_NUM_TEMPS +
                                        TGSI_EXEC_NUM_TEMP_EXTRAS];
+   struct tgsi_exec_vector       TempArray[TGSI_EXEC_NUM_TEMP_ARRAYS][TGSI_EXEC_NUM_TEMPS];
 
    float                         Imms[TGSI_EXEC_NUM_IMMEDIATES][4];
+
+   float                         ImmArray[TGSI_EXEC_NUM_IMMEDIATES][4];
 
    struct tgsi_exec_vector       Inputs[TGSI_MAX_PRIM_VERTICES * PIPE_MAX_ATTRIBS];
    struct tgsi_exec_vector       Outputs[TGSI_MAX_TOTAL_VERTICES];
@@ -260,7 +253,10 @@ struct tgsi_exec_machine
    struct tgsi_sampler           **Samplers;
 
    unsigned                      ImmLimit;
+
    const void *Consts[PIPE_MAX_CONSTANT_BUFFERS];
+   unsigned ConstsSize[PIPE_MAX_CONSTANT_BUFFERS];
+
    const struct tgsi_token       *Tokens;   /**< Declarations, instructions */
    unsigned                      Processor; /**< TGSI_PROCESSOR_x */
 
@@ -299,10 +295,6 @@ struct tgsi_exec_machine
    uint LoopLabelStack[TGSI_EXEC_MAX_LOOP_NESTING];
    int LoopLabelStackTop;
 
-   /** Loop counter stack (x = index, y = counter, z = step) */
-   struct tgsi_exec_vector LoopCounterStack[TGSI_EXEC_MAX_LOOP_NESTING];
-   int LoopCounterStackTop;
-   
    /** Loop continue mask stack (see comments in tgsi_exec.c) */
    uint ContStack[TGSI_EXEC_MAX_LOOP_NESTING];
    int ContStackTop;
@@ -328,7 +320,6 @@ struct tgsi_exec_machine
    struct tgsi_full_declaration *Declarations;
    uint NumDeclarations;
 
-   struct tgsi_exec_labels Labels;
 };
 
 struct tgsi_exec_machine *
@@ -377,6 +368,13 @@ tgsi_set_exec_mask(struct tgsi_exec_machine *mach,
    mask[2] = ch2 ? ~0 : 0;
    mask[3] = ch3 ? ~0 : 0;
 }
+
+
+extern void
+tgsi_exec_set_constant_buffers(struct tgsi_exec_machine *mach,
+                               unsigned num_bufs,
+                               const void **bufs,
+                               const unsigned *buf_sizes);
 
 
 #if defined __cplusplus

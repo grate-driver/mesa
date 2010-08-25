@@ -168,6 +168,9 @@ static INLINE float logf( float f )
 #undef logf
 #define logf(x) ((float)log((double)(x)))
 #endif /* logf */
+
+#define isfinite(x) _finite((double)(x))
+#define isnan(x) _isnan((double)(x))
 #endif
 
 static INLINE double log2( double x )
@@ -334,6 +337,15 @@ util_iround(float f)
 #endif
 }
 
+
+/**
+ * Approximate floating point comparison
+ */
+static INLINE boolean
+util_is_approx(float a, float b, float tol)
+{
+   return fabs(b - a) <= tol;
+}
 
 
 /**
@@ -555,10 +567,24 @@ util_bswap16(uint16_t n)
 #define MAX3( A, B, C ) MAX2( MAX2( A, B ), C )
 
 
+/**
+ * Align a value, only works pot alignemnts.
+ */
 static INLINE int
 align(int value, int alignment)
 {
    return (value + alignment - 1) & ~(alignment - 1);
+}
+
+/**
+ * Works like align but on npot alignments.
+ */
+static INLINE size_t
+util_align_npot(size_t value, size_t alignment)
+{
+   if (value % alignment)
+      return value + (alignment - (value % alignment));
+   return value;
 }
 
 static INLINE unsigned
