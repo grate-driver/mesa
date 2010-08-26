@@ -306,10 +306,7 @@ endif
 	dh_strip -plibegl1-mesa --dbg-package=libegl1-mesa-dbg
 	dh_strip -plibgles1-mesa --dbg-package=libgles1-mesa-dbg
 	dh_strip -plibgles2-mesa --dbg-package=libgles2-mesa-dbg	
-	dh_strip -plibegl1-mesa-drivers-x11 --dbg-package=libegl1-mesa-drivers-x11-dbg
-ifeq ($(findstring kms, $(EGL_DISPLAYS)), kms)
-	dh_strip -plibegl1-mesa-drivers-kms --dbg-package=libegl1-mesa-drivers-kms-dbg
-endif
+	dh_strip -plibegl1-mesa-dri --dbg-package=libegl1-mesa-dri-dbg
 	dh_strip -s --remaining-packages
 	dh_compress -s
 	dh_fixperms -s
