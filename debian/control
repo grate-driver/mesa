@@ -179,6 +179,7 @@ Architecture: any
 Depends:
  ${shlibs:Depends},
  ${misc:Depends},
+ libegl1-mesa (= ${binary:Version}),
 Description: A free implementation of the EGL API -- hardware drivers.
  This package contains the EGL native platform graphics interface library.
  EGL provides a platform-agnostic mechanism for creating rendering surfaces
@@ -192,7 +193,7 @@ Section: debug
 Priority: extra
 Architecture: any
 Depends:
- libegl1-mesa-drivers-x11 (= ${binary:Version}),
+ libegl1-mesa-drivers (= ${binary:Version}),
  ${misc:Depends},
 Description: A free implementation of the EGL API -- driver debugging symbols
  This package contains the EGL native platform graphics interface library.
