@@ -1,11 +1,16 @@
 mesa (7.8.2-3) UNRELEASED; urgency=low
 
+  [ Christopher James Halse Rogers ]
   * debian/control:
     - Add EGL, GLESv1, GLESv2, and OpenVG virtual packages.  The Khronos group
       specifies a de-facto linux ABI for these libraries.  We have a similar
       package for libgl1.
   * debian/README.Debian:
     - Document the virtual packages above.
+  
+  [ Sven Joachim ]
+  * Bump libdrm-dev build dependency to 2.4.21-2~, the Nouveau Gallium
+    driver does not build with squeeze's libdrm-nouveau1.
 
  -- Christopher James Halse Rogers <raof@ubuntu.com>  Fri, 30 Jul 2010 19:08:57 +1000
 
