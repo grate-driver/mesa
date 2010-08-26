@@ -204,20 +204,11 @@ $(QUILT_STAMPFN): $(STAMP_DIR)/stamp
 build: build-stamp
 
 build-stamp: $(BUILD_STAMPS)
-ifeq ($(findstring radeon, $(GALLIUM_DRIVERS)), radeon)
-	# Radeon searches for r{200,300,600}_dri only, but the gallium driver
-	# is (at the moment) radeong_dri.  Rename it to r300_dri, as it
-	# fails to support r600.
-	# We don't actually install radeong yet, although it will probably
-	# replace r300 classic soon.
-	mv build/dri/lib/gallium/radeong_dri.so \
-		build/dri/lib/gallium/r300_dri.so
-endif
 ifeq ($(findstring intel, $(GALLIUM_DRIVERS)), intel)
 	# Intel i965 Gallium appears to do nothing more than generate GPU 
 	# lockups.  Kill it with fire.  i915 is apparently useful.
 	rm build/dri/lib/gallium/i965_dri.so
-	rm build/dri/lib/egl_*_i965.so
+	rm build/dri/lib/egl/pipe_i965.so
 endif
 	>$@
 
