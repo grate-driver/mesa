@@ -204,12 +204,12 @@ $(QUILT_STAMPFN): $(STAMP_DIR)/stamp
 build: build-stamp
 
 build-stamp: $(BUILD_STAMPS)
-ifeq ($(findstring intel, $(GALLIUM_DRIVERS)), intel)
-	# Intel i965 Gallium appears to do nothing more than generate GPU 
-	# lockups.  Kill it with fire.  i915 is apparently useful.
-	rm build/dri/lib/gallium/i965_dri.so
-	rm build/dri/lib/egl/pipe_i965.so
-endif
+# ifeq ($(findstring intel, $(GALLIUM_DRIVERS)), intel)
+# 	# Intel i965 Gallium appears to do nothing more than generate GPU 
+# 	# lockups.  Kill it with fire.  i915 is apparently useful.
+# 	rm build/dri/lib/gallium/i965_dri.so
+# 	rm build/dri/lib/egl/pipe_i965.so
+# endif
 	>$@
 
 $(STAMP)-build-%: configure
