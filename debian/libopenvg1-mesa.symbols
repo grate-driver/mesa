@@ -1,4 +1,10 @@
 libOpenVG.so.1 libopenvg1-mesa #MINVER# | libopenvg1
+ mapi_get_proc_address@Base 7.9~
+ mapi_init@Base 7.9~
+ mapi_table_create@Base 7.9~
+ mapi_table_destroy@Base 7.9~
+ mapi_table_fill@Base 7.9~
+ mapi_table_make_current@Base 7.9~
  vgAppendPath@Base 7.8.1
  vgAppendPathData@Base 7.8.1
  vgChildImage@Base 7.8.1
@@ -74,12 +80,3 @@ libOpenVG.so.1 libopenvg1-mesa #MINVER# | libopenvg1
  vgTransformPath@Base 7.8.1
  vgTranslate@Base 7.8.1
  vgWritePixels@Base 7.8.1
- vguArc@Base 7.8.1
- vguComputeWarpQuadToQuad@Base 7.8.1
- vguComputeWarpQuadToSquare@Base 7.8.1
- vguComputeWarpSquareToQuad@Base 7.8.1
- vguEllipse@Base 7.8.1
- vguLine@Base 7.8.1
- vguPolygon@Base 7.8.1
- vguRect@Base 7.8.1
- vguRoundRect@Base 7.8.1
