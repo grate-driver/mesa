@@ -210,6 +210,10 @@ build-stamp: $(BUILD_STAMPS)
 # 	rm build/dri/lib/gallium/i965_dri.so
 # 	rm build/dri/lib/egl/pipe_i965.so
 # endif
+
+# Install nouveau_vieux in the libgl1-mesa-dri-experimental package,
+# not with the rest of the stock DRI modules.
+	mv build/dri/lib/nouveau_vieux_dri.so build/dri/lib/gallium/
 	>$@
 
 $(STAMP)-build-%: configure
