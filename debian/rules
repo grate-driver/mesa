@@ -75,15 +75,15 @@ else
 
   ifeq ($(DEB_HOST_ARCH), lpia)
 	DRI_DRIVERS += i915 i965
-	GALLIUM_DRIVERS += i915 i965
+	GALLIUM_DRIVERS += i915
   else ifneq ($(DEB_HOST_ARCH), s390)
 	DRI_DRIVERS += mga nouveau r128 r200 r300 r600 radeon savage tdfx
     ifeq ($(DEB_HOST_ARCH_CPU), i386)
 	DRI_DRIVERS += i810 i915 i965 sis unichrome
-	GALLIUM_DRIVERS += i915 i965
+	GALLIUM_DRIVERS += i915
     else ifeq ($(DEB_HOST_ARCH_CPU), amd64)
 	DRI_DRIVERS += i915 i965 sis unichrome
-	GALLIUM_DRIVERS += i915 i965
+	GALLIUM_DRIVERS += i915
     endif
   endif
 endif
@@ -204,13 +204,6 @@ $(QUILT_STAMPFN): $(STAMP_DIR)/stamp
 build: build-stamp
 
 build-stamp: $(BUILD_STAMPS)
-# ifeq ($(findstring intel, $(GALLIUM_DRIVERS)), intel)
-# 	# Intel i965 Gallium appears to do nothing more than generate GPU 
-# 	# lockups.  Kill it with fire.  i915 is apparently useful.
-# 	rm build/dri/lib/gallium/i965_dri.so
-# 	rm build/dri/lib/egl/pipe_i965.so
-# endif
-
 # Install nouveau_vieux in the libgl1-mesa-dri-experimental package,
 # not with the rest of the stock DRI modules.
 	mv build/dri/lib/nouveau_vieux_dri.so build/dri/lib/gallium/
