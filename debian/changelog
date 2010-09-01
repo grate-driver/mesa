@@ -1,12 +1,19 @@
-mesa (7.9~git20100825-0ubuntu1) maverick; urgency=low
+mesa (7.9~git20100901-0ubuntu1) maverick; urgency=low
 
-  * New upstream git snapshot up to commit f81cec52a.
+  [ Robert Hooker ]
+  * New upstream git snapshot up to commit 9b075cb9.
     - Remove pre-generated .pc's, use the ones generated at build time
       instead.
     - Remove all references to mesa-utils now that its shipped as a
       seperate package.
 
- -- Robert Hooker <sarvatt@ubuntu.com>  Wed, 25 Aug 2010 17:15:21 -0400
+  [ Christopher James Halse Rogers ]
+  * Build nouveau-vieux driver for nv04-nv30 cards and install in 
+    libgl1-mesa-dri-experimental
+  * debian/patches/04_osmesa_version.diff:
+    - Refresh for new upstream
+
+ -- Christopher James Halse Rogers <raof@ubuntu.com>  Wed, 01 Sep 2010 10:23:15 +1000
 
 mesa (7.8.2-2ubuntu2) maverick; urgency=low
 
