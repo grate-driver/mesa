@@ -204,9 +204,6 @@ $(QUILT_STAMPFN): $(STAMP_DIR)/stamp
 build: build-stamp
 
 build-stamp: $(BUILD_STAMPS)
-# Install nouveau_vieux in the libgl1-mesa-dri-experimental package,
-# not with the rest of the stock DRI modules.
-	mv build/dri/lib/nouveau_vieux_dri.so build/dri/lib/gallium/
 	>$@
 
 $(STAMP)-build-%: configure
@@ -232,6 +229,27 @@ install: build
 		$(MAKE) -C $(DEB_BUILD_DIR)/$$config DESTDIR=$(CURDIR)/debian/tmp install; \
 	done
 	$(MAKE) -C $(DEB_BUILD_DIR)/dri DESTDIR=$(CURDIR)/debian/tmp/dri install
+# Install nouveau_vieux in the libgl1-mesa-dri-experimental package,
+# not with the rest of the stock DRI modules.
+	mv build/dri/lib/nouveau_vieux_dri.so build/dri/lib/gallium/
+# Remove gallium drivers which replace existing classic drivers.
+# Intel gallium is significantly behind the classic mesa drivers...
+ifeq (i915,$(findstring i915, $(GALLIUM_DRIVERS)))
+	rm build/dri/lib/gallium/i915_dri.so
+endif
+ifeq (i965,$(findstring i965, $(GALLIUM_DRIVERS)))
+	rm build/dri/lib/gallium/i965_dri.so
+endif
+# We should switch to r300g soon, but it won't support UMS.  Stick
+# with r300c for now
+ifeq (radeon,$(findstring radeon, $(GALLIUM_DRIVERS)))
+	rm build/dri/lib/gallium/r300_dri.so
+endif
+# r600g is not yet in a fit state to ship, and the same caveats apply
+# as for r300g
+ifeq (r600,$(findstring r600, $(GALLIUM_DRIVERS)))
+	rm build/dri/lib/gallium/r600_dri.so
+endif
 
 clean: unpatch
 	dh_testdir
