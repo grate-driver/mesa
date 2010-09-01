@@ -294,11 +294,7 @@ endif
 	dh_strip -plibgl1-mesa-swx11 --dbg-package=libgl1-mesa-swx11-dbg
 	dh_strip -plibgl1-mesa-glx --dbg-package=libgl1-mesa-glx-dbg
 	dh_strip -plibgl1-mesa-dri --dbg-package=libgl1-mesa-dri-dbg
-# Mesa 7.8 doesn't build a gallium swrast DRI driver
-# This is built in git, and will be built in 7.9
-ifneq ($(filter-out swrast, $(GALLIUM_DRIVERS)), )
 	dh_strip -plibgl1-mesa-dri-experimental --dbg-package=libgl1-mesa-dri-experimental-dbg
-endif
 	dh_strip -plibopenvg1-mesa --dbg-package=libopenvg1-mesa-dbg
 	dh_strip -plibegl1-mesa --dbg-package=libegl1-mesa-dbg
 	dh_strip -plibgles1-mesa --dbg-package=libgles1-mesa-dbg

@@ -469,7 +469,7 @@ Description: Debugging symbols for the Mesa DRI modules
 
 Package: libgl1-mesa-dri-experimental
 Section: libs
-Architecture: linux-any
+Architecture: any
 Depends:
  ${shlibs:Depends},
  ${misc:Depends},
@@ -489,7 +489,7 @@ Description: A free implementation of the OpenGL API -- Extra DRI modules
 Package: libgl1-mesa-dri-experimental-dbg
 Section: debug
 Priority: extra
-Architecture: linux-any
+Architecture: any
 Depends:
  libgl1-mesa-dri-experimental (= ${binary:Version}),
  ${misc:Depends},
