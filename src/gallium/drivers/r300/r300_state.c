@@ -23,7 +23,7 @@
 
 #include "draw/draw_context.h"
 
-#include "util/u_blitter.h"
+#include "util/u_framebuffer.h"
 #include "util/u_math.h"
 #include "util/u_mm.h"
 #include "util/u_memory.h"
@@ -748,7 +748,7 @@ static void
     /* The tiling flags are dependent on the surface miplevel, unfortunately. */
     r300_fb_set_tiling_flags(r300, state);
 
-    util_assign_framebuffer_state(r300->fb_state.state, state);
+    util_copy_framebuffer_state(r300->fb_state.state, state);
 
     r300_mark_fb_state_dirty(r300, R300_CHANGED_FB_STATE);
 
@@ -1213,8 +1213,8 @@ static void*
 
     /* Unfortunately, r300-r500 don't support floating-point mipmap lods. */
     /* We must pass these to the merge function to clamp them properly. */
-    sampler->min_lod = MAX2((unsigned)state->min_lod, 0);
-    sampler->max_lod = MAX2((unsigned)ceilf(state->max_lod), 0);
+    sampler->min_lod = (unsigned)MAX2(state->min_lod, 0);
+    sampler->max_lod = (unsigned)MAX2(ceilf(state->max_lod), 0);
 
     lod_bias = CLAMP((int)(state->lod_bias * 32 + 1), -(1 << 9), (1 << 9) - 1);
 

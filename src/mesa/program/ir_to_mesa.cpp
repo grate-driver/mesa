@@ -105,6 +105,18 @@ extern ir_to_mesa_src_reg ir_to_mesa_undef;
 
 class ir_to_mesa_instruction : public exec_node {
 public:
+   /* Callers of this talloc-based new need not call delete. It's
+    * easier to just talloc_free 'ctx' (or any of its ancestors). */
+   static void* operator new(size_t size, void *ctx)
+   {
+      void *node;
+
+      node = talloc_zero_size(ctx, size);
+      assert(node != NULL);
+
+      return node;
+   }
+
    enum prog_opcode op;
    ir_to_mesa_dst_reg dst_reg;
    ir_to_mesa_src_reg src_reg[3];
@@ -880,8 +892,9 @@ ir_to_mesa_visitor::visit(ir_expression *ir)
       break;
 
    case ir_unop_sqrt:
+      /* sqrt(x) = x * rsq(x). */
       ir_to_mesa_emit_scalar_op1(ir, OPCODE_RSQ, result_dst, op[0]);
-      ir_to_mesa_emit_scalar_op1(ir, OPCODE_RCP, result_dst, result_src);
+      ir_to_mesa_emit_op2(ir, OPCODE_MUL, result_dst, result_src, op[0]);
       /* For incoming channels < 0, set the result to 0. */
       ir_to_mesa_emit_op3(ir, OPCODE_CMP, result_dst,
 			  op[0], src_reg_for_float(0.0), result_src);
@@ -1356,7 +1369,7 @@ ir_to_mesa_visitor::visit(ir_dereference_array *ir)
    if (deref_var && strncmp(deref_var->var->name,
 			    "gl_TextureMatrix",
 			    strlen("gl_TextureMatrix")) == 0) {
-      struct variable_storage *entry;
+      variable_storage *entry;
 
       entry = get_builtin_matrix_ref(this->mem_ctx, this->prog, deref_var->var,
 				     ir->array_index);
@@ -1382,7 +1395,8 @@ ir_to_mesa_visitor::visit(ir_dereference_array *ir)
       return;
    }
 
-   if (strncmp(var->name, "gl_", 3) == 0 && var->mode == ir_var_uniform &&
+   if (var &&
+       strncmp(var->name, "gl_", 3) == 0 && var->mode == ir_var_uniform &&
        !var->type->is_matrix()) {
       ir_dereference_record *record = NULL;
       if (ir->array->ir_type == ir_type_dereference_record)
@@ -1552,7 +1566,7 @@ void
 ir_to_mesa_visitor::visit(ir_constant *ir)
 {
    ir_to_mesa_src_reg src_reg;
-   GLfloat stack_vals[4];
+   GLfloat stack_vals[4] = { 0 };
    GLfloat *values = stack_vals;
    unsigned int i;
 
@@ -2027,9 +2041,12 @@ ir_to_mesa_visitor::visit(ir_return *ir)
 void
 ir_to_mesa_visitor::visit(ir_discard *ir)
 {
+   struct gl_fragment_program *fp = (struct gl_fragment_program *)this->prog;
+
    assert(ir->condition == NULL); /* FINISHME */
 
    ir_to_mesa_emit_op0(ir, OPCODE_KIL_NV);
+   fp->UsesKill = GL_TRUE;
 }
 
 void
@@ -2250,6 +2267,25 @@ count_resources(struct gl_program *prog)
    _mesa_update_shader_textures_used(prog);
 }
 
+struct uniform_sort {
+   struct gl_uniform *u;
+   int pos;
+};
+
+/* The shader_program->Uniforms list is almost sorted in increasing
+ * uniform->{Frag,Vert}Pos locations, but not quite when there are
+ * uniforms shared between targets.  We need to add parameters in
+ * increasing order for the targets.
+ */
+static int
+sort_uniforms(const void *a, const void *b)
+{
+   struct uniform_sort *u1 = (struct uniform_sort *)a;
+   struct uniform_sort *u2 = (struct uniform_sort *)b;
+
+   return u1->pos - u2->pos;
+}
+
 /* Add the uniforms to the parameters.  The linker chose locations
  * in our parameters lists (which weren't created yet), which the
  * uniforms code will use to poke values into our parameters list
@@ -2261,12 +2297,14 @@ add_uniforms_to_parameters_list(struct gl_shader_program *shader_program,
 				struct gl_program *prog)
 {
    unsigned int i;
-   unsigned int next_sampler = 0;
+   unsigned int next_sampler = 0, num_uniforms = 0;
+   struct uniform_sort *sorted_uniforms;
+
+   sorted_uniforms = talloc_array(NULL, struct uniform_sort,
+				  shader_program->Uniforms->NumUniforms);
 
    for (i = 0; i < shader_program->Uniforms->NumUniforms; i++) {
       struct gl_uniform *uniform = shader_program->Uniforms->Uniforms + i;
-      const glsl_type *type = uniform->Type;
-      unsigned int size;
       int parameter_index = -1;
 
       switch (shader->Type) {
@@ -2282,8 +2320,21 @@ add_uniforms_to_parameters_list(struct gl_shader_program *shader_program,
       }
 
       /* Only add uniforms used in our target. */
-      if (parameter_index == -1)
-	 continue;
+      if (parameter_index != -1) {
+	 sorted_uniforms[num_uniforms].pos = parameter_index;
+	 sorted_uniforms[num_uniforms].u = uniform;
+	 num_uniforms++;
+      }
+   }
+
+   qsort(sorted_uniforms, num_uniforms, sizeof(struct uniform_sort),
+	 sort_uniforms);
+
+   for (i = 0; i < num_uniforms; i++) {
+      struct gl_uniform *uniform = sorted_uniforms[i].u;
+      int parameter_index = sorted_uniforms[i].pos;
+      const glsl_type *type = uniform->Type;
+      unsigned int size;
 
       if (type->is_vector() ||
 	  type->is_scalar()) {
@@ -2330,6 +2381,8 @@ add_uniforms_to_parameters_list(struct gl_shader_program *shader_program,
 	 }
       }
    }
+
+   talloc_free(sorted_uniforms);
 }
 
 static void
@@ -2455,7 +2508,7 @@ get_mesa_program(GLcontext *ctx, struct gl_shader_program *shader_program,
       break;
    default:
       assert(!"should not be reached");
-      break;
+      return NULL;
    }
 
    validate_ir_tree(shader->ir);

@@ -74,6 +74,7 @@ struct lp_setup_context
    uint prim;
    uint vertex_size;
    uint nr_vertices;
+   uint sprite;
    uint vertex_buffer_size;
    void *vertex_buffer;
 
@@ -89,8 +90,12 @@ struct lp_setup_context
    boolean flatshade_first;
    boolean ccw_is_frontface;
    boolean scissor_test;
+   boolean point_size_per_vertex;
    unsigned cullmode;
    float pixel_offset;
+   float line_width;
+   float point_size;
+   float psize;
 
    struct pipe_framebuffer_state fb;
    struct u_rect framebuffer;
@@ -169,6 +174,19 @@ void
 lp_setup_print_vertex(struct lp_setup_context *setup,
                       const char *name,
                       const float (*v)[4]);
+
+
+struct lp_rast_triangle *
+lp_setup_alloc_triangle(struct lp_scene *scene,
+                        unsigned nr_inputs,
+                        unsigned nr_planes,
+                        unsigned *tri_size);
+
+void
+lp_setup_bin_triangle( struct lp_setup_context *setup,
+                       struct lp_rast_triangle *tri,
+                       const struct u_rect *bbox,
+                       int nr_planes );
 
 #endif
 

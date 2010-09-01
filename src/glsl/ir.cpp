@@ -326,6 +326,9 @@ ir_constant::ir_constant(float f)
    this->ir_type = ir_type_constant;
    this->type = glsl_type::float_type;
    this->value.f[0] = f;
+   for (int i = 1; i < 16; i++)  {
+      this->value.f[i] = 0;
+   }
 }
 
 ir_constant::ir_constant(unsigned int u)
@@ -333,6 +336,9 @@ ir_constant::ir_constant(unsigned int u)
    this->ir_type = ir_type_constant;
    this->type = glsl_type::uint_type;
    this->value.u[0] = u;
+   for (int i = 1; i < 16; i++) {
+      this->value.u[i] = 0;
+   }
 }
 
 ir_constant::ir_constant(int i)
@@ -340,6 +346,9 @@ ir_constant::ir_constant(int i)
    this->ir_type = ir_type_constant;
    this->type = glsl_type::int_type;
    this->value.i[0] = i;
+   for (int i = 1; i < 16; i++) {
+      this->value.i[i] = 0;
+   }
 }
 
 ir_constant::ir_constant(bool b)
@@ -347,6 +356,9 @@ ir_constant::ir_constant(bool b)
    this->ir_type = ir_type_constant;
    this->type = glsl_type::bool_type;
    this->value.b[0] = b;
+   for (int i = 1; i < 16; i++) {
+      this->value.b[i] = false;
+   }
 }
 
 ir_constant::ir_constant(const ir_constant *c, unsigned i)
@@ -397,6 +409,9 @@ ir_constant::ir_constant(const struct glsl_type *type, exec_list *value_list)
       return;
    }
 
+   for (unsigned i = 0; i < 16; i++) {
+      this->value.u[i] = 0;
+   }
 
    ir_constant *value = (ir_constant *) (value_list->head);
 
@@ -697,6 +712,20 @@ ir_dereference_record::ir_dereference_record(ir_variable *var,
       ? this->record->type->field_type(field) : glsl_type::error_type;
 }
 
+bool type_contains_sampler(const glsl_type *type)
+{
+   if (type->is_array()) {
+      return type_contains_sampler(type->fields.array);
+   } else if (type->is_record()) {
+      for (unsigned int i = 0; i < type->length; i++) {
+	 if (type_contains_sampler(type->fields.structure[i].type))
+	    return true;
+      }
+      return false;
+   } else {
+      return type->is_sampler();
+   }
+}
 
 bool
 ir_dereference::is_lvalue()
@@ -709,6 +738,15 @@ ir_dereference::is_lvalue()
       return false;
 
    if (this->type->is_array() && !var->array_lvalue)
+      return false;
+
+   /* From page 17 (page 23 of the PDF) of the GLSL 1.20 spec:
+    *
+    *    "Samplers cannot be treated as l-values; hence cannot be used
+    *     as out or inout function parameters, nor can they be
+    *     assigned into."
+    */
+   if (type_contains_sampler(this->type))
       return false;
 
    return true;
@@ -959,7 +997,6 @@ ir_function_signature::ir_function_signature(const glsl_type *return_type)
    : return_type(return_type), is_defined(false), _function(NULL)
 {
    this->ir_type = ir_type_function_signature;
-   this->is_built_in = false;
 }
 
 
@@ -1011,6 +1048,7 @@ ir_function::ir_function(const char *name)
 {
    this->ir_type = ir_type_function;
    this->name = talloc_strdup(this, name);
+   this->is_builtin = false;
 }
 
 

@@ -653,7 +653,7 @@ ir_swizzle::constant_expression_value()
    ir_constant *v = this->val->constant_expression_value();
 
    if (v != NULL) {
-      ir_constant_data data;
+      ir_constant_data data = { { 0 } };
 
       const unsigned swiz_idx[4] = {
 	 this->mask.x, this->mask.y, this->mask.z, this->mask.w
@@ -785,7 +785,7 @@ ir_call::constant_expression_value()
     * "Function calls to user-defined functions (non-built-in functions)
     *  cannot be used to form constant expressions."
     */
-   if (!this->callee->is_built_in)
+   if (!this->callee->function()->is_builtin)
       return NULL;
 
    unsigned num_parameters = 0;

@@ -64,6 +64,21 @@ _mesa_ast_to_hir(exec_list *instructions, struct _mesa_glsl_parse_state *state)
 
    state->current_function = NULL;
 
+   /* Section 4.2 of the GLSL 1.20 specification states:
+    * "The built-in functions are scoped in a scope outside the global scope
+    *  users declare global variables in.  That is, a shader's global scope,
+    *  available for user-defined functions and global variables, is nested
+    *  inside the scope containing the built-in functions."
+    *
+    * Since built-in functions like ftransform() access built-in variables,
+    * it follows that those must be in the outer scope as well.
+    *
+    * We push scope here to create this nesting effect...but don't pop.
+    * This way, a shader's globals are still in the symbol table for use
+    * by the linker.
+    */
+   state->symbols->push_scope();
+
    foreach_list_typed (ast_node, ast, link, & state->translation_unit)
       ast->hir(instructions, state);
 }
@@ -495,7 +510,6 @@ do_assignment(exec_list *instructions, struct _mesa_glsl_parse_state *state,
    bool error_emitted = (lhs->type->is_error() || rhs->type->is_error());
 
    if (!error_emitted) {
-      /* FINISHME: This does not handle 'foo.bar.a.b.c[5].d = 5' */
       if (!lhs->is_lvalue()) {
 	 _mesa_glsl_error(& lhs_loc, state, "non-lvalue in assignment");
 	 error_emitted = true;
@@ -566,7 +580,6 @@ get_lvalue_copy(exec_list *instructions, ir_rvalue *lvalue)
    void *ctx = talloc_parent(lvalue);
    ir_variable *var;
 
-   /* FINISHME: Give unique names to the temporaries. */
    var = new(ctx) ir_variable(lvalue->type, "_post_incdec_tmp",
 			      ir_var_temporary);
    instructions->push_tail(var);
@@ -789,9 +802,60 @@ ast_expression::hir(exec_list *instructions,
    case ast_bit_and:
    case ast_bit_xor:
    case ast_bit_or:
+      op[0] = this->subexpressions[0]->hir(instructions, state);
+      op[1] = this->subexpressions[1]->hir(instructions, state);
+
+      if (state->language_version < 130) {
+	 _mesa_glsl_error(&loc, state, "bit-wise operations require GLSL 1.30");
+	 error_emitted = true;
+      }
+
+      if (!op[0]->type->is_integer()) {
+	 _mesa_glsl_error(&loc, state, "LHS of `%s' must be an integer",
+			  operator_string(this->oper));
+	 error_emitted = true;
+      }
+
+      if (!op[1]->type->is_integer()) {
+	 _mesa_glsl_error(&loc, state, "RHS of `%s' must be an integer",
+			  operator_string(this->oper));
+	 error_emitted = true;
+      }
+
+      if (op[0]->type->base_type != op[1]->type->base_type) {
+	 _mesa_glsl_error(&loc, state, "operands of `%s' must have the same "
+			  "base type", operator_string(this->oper));
+	 error_emitted = true;
+      }
+
+      if (op[0]->type->is_vector() && op[1]->type->is_vector()
+	  && op[0]->type->vector_elements != op[1]->type->vector_elements) {
+	 _mesa_glsl_error(&loc, state, "operands of `%s' cannot be vectors of "
+			  "different sizes", operator_string(this->oper));
+	 error_emitted = true;
+      }
+
+      type = op[0]->type->is_scalar() ? op[1]->type : op[0]->type;
+      result = new(ctx) ir_expression(operations[this->oper], type,
+				      op[0], op[1]);
+      error_emitted = op[0]->type->is_error() || op[1]->type->is_error();
+      break;
+
    case ast_bit_not:
-      _mesa_glsl_error(& loc, state, "FINISHME: implement bit-wise operators");
-      error_emitted = true;
+      op[0] = this->subexpressions[0]->hir(instructions, state);
+
+      if (state->language_version < 130) {
+	 _mesa_glsl_error(&loc, state, "bit-wise operations require GLSL 1.30");
+	 error_emitted = true;
+      }
+
+      if (!op[0]->type->is_integer()) {
+	 _mesa_glsl_error(&loc, state, "operand of `~' must be an integer");
+	 error_emitted = true;
+      }
+
+      type = op[0]->type;
+      result = new(ctx) ir_expression(ir_unop_bit_not, type, op[0], NULL);
       break;
 
    case ast_logic_and: {
@@ -1259,8 +1323,14 @@ ast_expression::hir(exec_list *instructions,
 	 _mesa_glsl_error(&loc, state, "unsized array index must be constant");
       } else {
 	 if (array->type->is_array()) {
+	    /* whole_variable_referenced can return NULL if the array is a
+	     * member of a structure.  In this case it is safe to not update
+	     * the max_array_access field because it is never used for fields
+	     * of structures.
+	     */
 	    ir_variable *v = array->whole_variable_referenced();
-	    v->max_array_access = array->type->array_size();
+	    if (v != NULL)
+	       v->max_array_access = array->type->array_size();
 	 }
       }
 
@@ -1881,22 +1951,23 @@ ast_declarator_list::hir(exec_list *instructions,
 			  "const declaration of `%s' must be initialized");
       }
 
-      /* Attempt to add the variable to the symbol table.  If this fails, it
-       * means the variable has already been declared at this scope.  Arrays
-       * fudge this rule a little bit.
+      /* Check if this declaration is actually a re-declaration, either to
+       * resize an array or add qualifiers to an existing variable.
        *
-       * From page 24 (page 30 of the PDF) of the GLSL 1.50 spec,
-       *
-       *    "It is legal to declare an array without a size and then
-       *    later re-declare the same name as an array of the same
-       *    type and specify a size."
+       * This is allowed for variables in the current scope, or when at
+       * global scope (for built-ins in the implicit outer scope).
        */
-      if (state->symbols->name_declared_this_scope(decl->identifier)) {
-	 ir_variable *const earlier =
-	    state->symbols->get_variable(decl->identifier);
+      ir_variable *earlier = state->symbols->get_variable(decl->identifier);
+      if (earlier != NULL && (state->current_function == NULL ||
+	  state->symbols->name_declared_this_scope(decl->identifier))) {
 
-	 if ((earlier != NULL)
-	     && (earlier->type->array_size() == 0)
+	 /* From page 24 (page 30 of the PDF) of the GLSL 1.50 spec,
+	  *
+	  * "It is legal to declare an array without a size and then
+	  *  later re-declare the same name as an array of the same
+	  *  type and specify a size."
+	  */
+	 if ((earlier->type->array_size() == 0)
 	     && var->type->is_array()
 	     && (var->type->element_type() == earlier->type->element_type())) {
 	    /* FINISHME: This doesn't match the qualifiers on the two
@@ -1928,11 +1999,10 @@ ast_declarator_list::hir(exec_list *instructions,
 	    earlier->type = var->type;
 	    delete var;
 	    var = NULL;
-	 } else if (state->extensions->ARB_fragment_coord_conventions &&
-		    (earlier != NULL) &&
-		    (strcmp(var->name, "gl_FragCoord") == 0) &&
-		    earlier->type == var->type &&
-		    earlier->mode == var->mode) {
+	 } else if (state->extensions->ARB_fragment_coord_conventions
+		    && strcmp(var->name, "gl_FragCoord") == 0
+		    && earlier->type == var->type
+		    && earlier->mode == var->mode) {
 	    /* Allow redeclaration of gl_FragCoord for ARB_fcc layout
 	     * qualifiers.
 	     */
@@ -1940,27 +2010,43 @@ ast_declarator_list::hir(exec_list *instructions,
 	    earlier->pixel_center_integer = var->pixel_center_integer;
 	 } else {
 	    YYLTYPE loc = this->get_location();
-
-	    _mesa_glsl_error(& loc, state, "`%s' redeclared",
-			     decl->identifier);
+	    _mesa_glsl_error(&loc, state, "`%s' redeclared", decl->identifier);
 	 }
 
 	 continue;
       }
 
-      /* From page 15 (page 21 of the PDF) of the GLSL 1.10 spec,
+      /* By now, we know it's a new variable declaration (we didn't hit the
+       * above "continue").
+       *
+       * From page 15 (page 21 of the PDF) of the GLSL 1.10 spec,
        *
        *   "Identifiers starting with "gl_" are reserved for use by
        *   OpenGL, and may not be declared in a shader as either a
        *   variable or a function."
        */
-      if (strncmp(decl->identifier, "gl_", 3) == 0) {
-	 /* FINISHME: This should only trigger if we're not redefining
-	  * FINISHME: a builtin (to add a qualifier, for example).
-	  */
+      if (strncmp(decl->identifier, "gl_", 3) == 0)
 	 _mesa_glsl_error(& loc, state,
 			  "identifier `%s' uses reserved `gl_' prefix",
 			  decl->identifier);
+
+      /* Add the variable to the symbol table.  Note that the initializer's
+       * IR was already processed earlier (though it hasn't been emitted yet),
+       * without the variable in scope.
+       *
+       * This differs from most C-like languages, but it follows the GLSL
+       * specification.  From page 28 (page 34 of the PDF) of the GLSL 1.50
+       * spec:
+       *
+       *     "Within a declaration, the scope of a name starts immediately
+       *     after the initializer if present or immediately after the name
+       *     being declared if not."
+       */
+      if (!state->symbols->add_variable(var->name, var)) {
+	 YYLTYPE loc = this->get_location();
+	 _mesa_glsl_error(&loc, state, "name `%s' already taken in the "
+			  "current scope", decl->identifier);
+	 continue;
       }
 
       /* Push the variable declaration to the top.  It means that all
@@ -1972,20 +2058,6 @@ ast_declarator_list::hir(exec_list *instructions,
        */
       instructions->push_head(var);
       instructions->append_list(&initializer_instructions);
-
-      /* Add the variable to the symbol table after processing the initializer.
-       * This differs from most C-like languages, but it follows the GLSL
-       * specification.  From page 28 (page 34 of the PDF) of the GLSL 1.50
-       * spec:
-       *
-       *     "Within a declaration, the scope of a name starts immediately
-       *     after the initializer if present or immediately after the name
-       *     being declared if not."
-       */
-      const bool added_variable =
-	 state->symbols->add_variable(var->name, var);
-      assert(added_variable);
-      (void) added_variable;
    }
 
 
@@ -2166,8 +2238,8 @@ ast_function::hir(exec_list *instructions,
     * seen signature for a function with the same name, or, if a match is found,
     * that the previously seen signature does not have an associated definition.
     */
-   f = state->symbols->get_function(name);
-   if (f != NULL) {
+   f = state->symbols->get_function(name, false);
+   if (f != NULL && !f->is_builtin) {
       sig = f->exact_matching_signature(&hir_parameters);
       if (sig != NULL) {
 	 const char *badvar = sig->qualifiers_match(&hir_parameters);
@@ -2191,17 +2263,16 @@ ast_function::hir(exec_list *instructions,
 	    _mesa_glsl_error(& loc, state, "function `%s' redefined", name);
 	 }
       }
-   } else if (state->symbols->name_declared_this_scope(name)) {
-      /* This function name shadows a non-function use of the same name.
-       */
-      YYLTYPE loc = this->get_location();
-
-      _mesa_glsl_error(& loc, state, "function name `%s' conflicts with "
-		       "non-function", name);
-      return NULL;
    } else {
       f = new(ctx) ir_function(name);
-      state->symbols->add_function(f->name, f);
+      if (!state->symbols->add_function(f->name, f)) {
+	 /* This function name shadows a non-function use of the same name. */
+	 YYLTYPE loc = this->get_location();
+
+	 _mesa_glsl_error(&loc, state, "function name `%s' conflicts with "
+			  "non-function", name);
+	 return NULL;
+      }
 
       /* Emit the new function header */
       instructions->push_tail(f);
@@ -2624,18 +2695,10 @@ ast_struct_specifier::hir(exec_list *instructions,
       glsl_type::get_record_instance(fields, decl_count, name);
 
    YYLTYPE loc = this->get_location();
-   if (!state->symbols->add_type(name, t)) {
+   ir_function *ctor = t->generate_constructor();
+   if (!state->symbols->add_type(name, t, ctor)) {
       _mesa_glsl_error(& loc, state, "struct `%s' previously defined", name);
    } else {
-      /* This logic is a bit tricky.  It is an error to declare a structure at
-       * global scope if there is also a function with the same name.
-       */
-      if ((state->current_function == NULL)
-	  && (state->symbols->get_function(name) != NULL)) {
-	 _mesa_glsl_error(& loc, state, "name `%s' previously defined", name);
-      } else {
-	 t->generate_constructor(state->symbols);
-      }
 
       const glsl_type **s = (const glsl_type **)
 	 realloc(state->user_structures,

@@ -209,6 +209,7 @@ read_function(_mesa_glsl_parse_state *st, s_list *list, bool skip_body)
    ir_function *f = st->symbols->get_function(name->value());
    if (f == NULL) {
       f = new(ctx) ir_function(name->value());
+      f->is_builtin = true;
       added = st->symbols->add_function(f->name, f);
       assert(added);
    }
@@ -281,7 +282,6 @@ read_function_sig(_mesa_glsl_parse_state *st, ir_function *f, s_list *list,
    if (sig == NULL && skip_body) {
       /* If scanning for prototypes, generate a new signature. */
       sig = new(ctx) ir_function_signature(return_type);
-      sig->is_built_in = true;
       f->add_signature(sig);
    } else if (sig != NULL) {
       const char *badvar = sig->qualifiers_match(&hir_parameters);
@@ -803,7 +803,7 @@ read_constant(_mesa_glsl_parse_state *st, s_list *list)
 
    const glsl_type *const base_type = type->get_base_type();
 
-   ir_constant_data data;
+   ir_constant_data data = { { 0 } };
 
    // Read in list of values (at most 16).
    int k = 0;
