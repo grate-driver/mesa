@@ -1,4 +1,4 @@
-mesa (7.9~git20100901-0ubuntu1) maverick; urgency=low
+mesa (7.9~git20100902-0ubuntu1) maverick; urgency=low
 
   [ Robert Hooker ]
   * New upstream git snapshot up to commit 9b075cb9.
