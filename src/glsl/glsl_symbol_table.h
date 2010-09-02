@@ -98,8 +98,7 @@ public:
     */
    /*@{*/
    bool add_variable(const char *name, ir_variable *v);
-   bool add_type(const char *name, const glsl_type *t,
-	         ir_function *constructor = NULL);
+   bool add_type(const char *name, const glsl_type *t);
    bool add_function(const char *name, ir_function *f);
    /*@}*/
 
@@ -109,7 +108,7 @@ public:
    /*@{*/
    ir_variable *get_variable(const char *name);
    const glsl_type *get_type(const char *name);
-   ir_function *get_function(const char *name, bool return_constructors = true);
+   ir_function *get_function(const char *name);
    /*@}*/
 
 private:

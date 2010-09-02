@@ -415,6 +415,66 @@ ir_constant::ir_constant(const struct glsl_type *type, exec_list *value_list)
 
    ir_constant *value = (ir_constant *) (value_list->head);
 
+   /* Constructors with exactly one scalar argument are special for vectors
+    * and matrices.  For vectors, the scalar value is replicated to fill all
+    * the components.  For matrices, the scalar fills the components of the
+    * diagonal while the rest is filled with 0.
+    */
+   if (value->type->is_scalar() && value->next->is_tail_sentinel()) {
+      if (type->is_matrix()) {
+	 /* Matrix - fill diagonal (rest is already set to 0) */
+	 assert(type->base_type == GLSL_TYPE_FLOAT);
+	 for (unsigned i = 0; i < type->matrix_columns; i++)
+	    this->value.f[i * type->vector_elements + i] = value->value.f[0];
+      } else {
+	 /* Vector or scalar - fill all components */
+	 switch (type->base_type) {
+	 case GLSL_TYPE_UINT:
+	 case GLSL_TYPE_INT:
+	    for (unsigned i = 0; i < type->components(); i++)
+	       this->value.u[i] = value->value.u[0];
+	    break;
+	 case GLSL_TYPE_FLOAT:
+	    for (unsigned i = 0; i < type->components(); i++)
+	       this->value.f[i] = value->value.f[0];
+	    break;
+	 case GLSL_TYPE_BOOL:
+	    for (unsigned i = 0; i < type->components(); i++)
+	       this->value.b[i] = value->value.b[0];
+	    break;
+	 default:
+	    assert(!"Should not get here.");
+	    break;
+	 }
+      }
+      return;
+   }
+
+   if (type->is_matrix() && value->type->is_matrix()) {
+      assert(value->next->is_tail_sentinel());
+
+      /* From section 5.4.2 of the GLSL 1.20 spec:
+       * "If a matrix is constructed from a matrix, then each component
+       *  (column i, row j) in the result that has a corresponding component
+       *  (column i, row j) in the argument will be initialized from there."
+       */
+      unsigned cols = MIN2(type->matrix_columns, value->type->matrix_columns);
+      unsigned rows = MIN2(type->vector_elements, value->type->vector_elements);
+      for (unsigned i = 0; i < cols; i++) {
+	 for (unsigned j = 0; j < rows; j++) {
+	    const unsigned src = i * value->type->vector_elements + j;
+	    const unsigned dst = i * type->vector_elements + j;
+	    this->value.f[dst] = value->value.f[src];
+	 }
+      }
+
+      /* "All other components will be initialized to the identity matrix." */
+      for (unsigned i = cols; i < type->matrix_columns; i++)
+	 this->value.f[i * type->vector_elements + i] = 1.0;
+
+      return;
+   }
+
    /* Use each component from each entry in the value_list to initialize one
     * component of the constant being constructed.
     */
@@ -454,7 +514,7 @@ ir_constant::ir_constant(const struct glsl_type *type, exec_list *value_list)
 ir_constant *
 ir_constant::zero(void *mem_ctx, const glsl_type *type)
 {
-   assert(type->is_numeric());
+   assert(type->is_numeric() || type->is_boolean());
 
    ir_constant *c = new(mem_ctx) ir_constant;
    c->type = type;

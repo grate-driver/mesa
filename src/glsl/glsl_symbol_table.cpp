@@ -46,7 +46,7 @@ public:
 
    symbol_table_entry(ir_variable *v)                     : v(v), f(0), t(0) {}
    symbol_table_entry(ir_function *f)                     : v(0), f(f), t(0) {}
-   symbol_table_entry(const glsl_type *t, ir_function *f) : v(0), f(f), t(t) {}
+   symbol_table_entry(const glsl_type *t)                 : v(0), f(0), t(t) {}
 
    ir_variable *v;
    ir_function *f;
@@ -115,10 +115,9 @@ bool glsl_symbol_table::add_variable(const char *name, ir_variable *v)
    return _mesa_symbol_table_add_symbol(table, -1, name, entry) == 0;
 }
 
-bool glsl_symbol_table::add_type(const char *name, const glsl_type *t,
-				 ir_function *constructor)
+bool glsl_symbol_table::add_type(const char *name, const glsl_type *t)
 {
-   symbol_table_entry *entry = new(mem_ctx) symbol_table_entry(t, constructor);
+   symbol_table_entry *entry = new(mem_ctx) symbol_table_entry(t);
    return _mesa_symbol_table_add_symbol(table, -1, name, entry) == 0;
 }
 
@@ -127,7 +126,7 @@ bool glsl_symbol_table::add_function(const char *name, ir_function *f)
    if (this->language_version == 110 && name_declared_this_scope(name)) {
       /* In 1.10, functions and variables have separate namespaces. */
       symbol_table_entry *existing = get_entry(name);
-      if (existing->f == NULL) {
+      if ((existing->f == NULL) && (existing->t == NULL)) {
 	 existing->f = f;
 	 return true;
       }
@@ -148,15 +147,10 @@ const glsl_type *glsl_symbol_table::get_type(const char *name)
    return entry != NULL ? entry->t : NULL;
 }
 
-ir_function *glsl_symbol_table::get_function(const char *name,
-					     bool return_constructors)
+ir_function *glsl_symbol_table::get_function(const char *name)
 {
    symbol_table_entry *entry = get_entry(name);
-   // If there's a type, the function is a constructor; caller may not want it.
-   if (entry != NULL && (return_constructors || entry->t == NULL))
-      return entry->f;
-
-   return NULL;
+   return entry != NULL ? entry->f : NULL;
 }
 
 symbol_table_entry *glsl_symbol_table::get_entry(const char *name)
