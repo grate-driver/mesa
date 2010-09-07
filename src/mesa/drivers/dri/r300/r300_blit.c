@@ -56,6 +56,7 @@ static void create_vertex_program(struct r300_context *r300)
     struct r300_vertex_program_compiler compiler;
     struct rc_instruction *inst;
 
+    memset(&compiler, 0, sizeof(compiler));
     rc_init(&compiler.Base);
 
     inst = rc_insert_new_instruction(&compiler.Base, compiler.Base.Program.Instructions.Prev);
@@ -88,6 +89,12 @@ static void create_vertex_program(struct r300_context *r300)
     compiler.RequiredOutputs = compiler.Base.Program.OutputsWritten = (1 << VERT_RESULT_HPOS) | (1 << VERT_RESULT_TEX0);
     compiler.SetHwInputOutput = vp_ins_outs;
     compiler.code = &r300->blit.vp_code;
+    compiler.Base.is_r500 = r300->radeon.radeonScreen->chip_family >= CHIP_FAMILY_RV515;
+    compiler.Base.disable_optimizations = 0;
+    compiler.Base.has_half_swizzles = 0;
+    compiler.Base.max_temp_regs = 32;
+    compiler.Base.max_constants = 256;
+    compiler.Base.max_alu_insts = compiler.Base.is_r500 ? 1024 : 256;
 
     r3xx_compile_vertex_program(&compiler);
 }
@@ -119,7 +126,11 @@ static void create_fragment_program(struct r300_context *r300)
     compiler.OutputDepth = FRAG_RESULT_DEPTH;
     compiler.enable_shadow_ambient = GL_TRUE;
     compiler.Base.is_r500 = (r300->radeon.radeonScreen->chip_family >= CHIP_FAMILY_RV515);
+    compiler.Base.disable_optimizations = 0;
+    compiler.Base.has_half_swizzles = 1;
     compiler.Base.max_temp_regs = (compiler.Base.is_r500) ? 128 : 32;
+    compiler.Base.max_constants = compiler.Base.is_r500 ? 256 : 32;
+    compiler.Base.max_alu_insts = compiler.Base.is_r500 ? 512 : 64;
     compiler.code = &r300->blit.fp_code;
     compiler.AllocateHwInputs = fp_allocate_hw_inputs;
 

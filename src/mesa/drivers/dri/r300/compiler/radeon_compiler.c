@@ -350,3 +350,36 @@ void rc_transform_fragment_face(struct radeon_compiler *c, unsigned face)
 		}
 	}
 }
+
+/* Executes a list of compiler passes given in the parameter 'list'. */
+void rc_run_compiler(struct radeon_compiler *c, struct radeon_compiler_pass *list,
+		     const char *shader_name)
+{
+	if (c->Debug) {
+		fprintf(stderr, "%s: before compilation\n", shader_name);
+		rc_print_program(&c->Program);
+	}
+
+	for (unsigned i = 0; list[i].name; i++) {
+		if (list[i].predicate) {
+			list[i].run(c, list[i].user);
+
+			if (c->Error)
+				return;
+
+			if (c->Debug && list[i].dump) {
+				fprintf(stderr, "%s: after '%s'\n", shader_name, list[i].name);
+				rc_print_program(&c->Program);
+			}
+		}
+	}
+}
+
+void rc_validate_final_shader(struct radeon_compiler *c, void *user)
+{
+	/* Check the number of constants. */
+	if (c->Program.Constants.Count > c->max_constants) {
+		rc_error(c, "Too many constants. Max: 256, Got: %i\n",
+			 c->Program.Constants.Count);
+	}
+}

@@ -47,6 +47,9 @@ static INLINE void
 nvfx_region_set_format(struct nv04_region* rgn, enum pipe_format format)
 {
 	unsigned bits = util_format_get_blocksizebits(format);
+	unsigned shift = 0;
+	rgn->one_bits = 0;
+
 	switch(bits)
 	{
 	case 8:
@@ -54,43 +57,28 @@ nvfx_region_set_format(struct nv04_region* rgn, enum pipe_format format)
 		break;
 	case 16:
 		rgn->bpps = 1;
+		if(format == PIPE_FORMAT_B5G5R5X1_UNORM)
+			rgn->one_bits = 1;
 		break;
 	case 32:
 		rgn->bpps = 2;
+		if(format == PIPE_FORMAT_R8G8B8X8_UNORM || format == PIPE_FORMAT_B8G8R8X8_UNORM)
+			rgn->one_bits = 8;
 		break;
-	default:
-		{
-			int shift;
-			assert(util_is_power_of_two(bits));
-			shift = util_logbase2(bits) - 3;
-			assert(shift >= 2);
-			rgn->bpps = 2;
-			shift -= 2;
-
-			rgn->x = util_format_get_nblocksx(format, rgn->x) << shift;
-			rgn->y = util_format_get_nblocksy(format, rgn->y);
-		}
+	case 64:
+		rgn->bpps = 2;
+		shift = 1;
+		break;
+	case 128:
+		rgn->bpps = 2;
+		shift = 2;
+		break;
 	}
-}
 
-static INLINE void
-nvfx_region_fixup_swizzled(struct nv04_region* rgn, unsigned zslice, unsigned width, unsigned height, unsigned depth)
-{
-	// TODO: move this code to surface creation?
-	if((depth <= 1) && (height <= 1 || width <= 2))
-		rgn->pitch = width << rgn->bpps;
-	else if(depth > 1 && height <= 2 && width <= 2)
-	{
-		rgn->pitch = width << rgn->bpps;
-		rgn->offset += (zslice * width * height) << rgn->bpps;
-	}
-	else
-	{
-		rgn->pitch = 0;
-		rgn->z = zslice;
-		rgn->w = width;
-		rgn->h = height;
-		rgn->d = depth;
+	if(shift) {
+		rgn->x = util_format_get_nblocksx(format, rgn->x) << shift;
+		rgn->y = util_format_get_nblocksy(format, rgn->y);
+		rgn->w <<= shift;
 	}
 }
 
@@ -100,7 +88,6 @@ nvfx_region_init_for_surface(struct nv04_region* rgn, struct nvfx_surface* surf,
 	rgn->x = x;
 	rgn->y = y;
 	rgn->z = 0;
-	nvfx_region_set_format(rgn, surf->base.base.format);
 
 	if(surf->temp)
 	{
@@ -113,11 +100,22 @@ nvfx_region_init_for_surface(struct nv04_region* rgn, struct nvfx_surface* surf,
 	} else {
 		rgn->bo = ((struct nvfx_resource*)surf->base.base.texture)->bo;
 		rgn->offset = surf->base.base.offset;
-		rgn->pitch = surf->pitch;
 
-	        if(!(surf->base.base.texture->flags & NVFX_RESOURCE_FLAG_LINEAR))
-		        nvfx_region_fixup_swizzled(rgn, surf->base.base.zslice, surf->base.base.width, surf->base.base.height, u_minify(surf->base.base.texture->depth0, surf->base.base.level));
+		if(surf->base.base.texture->flags & NVFX_RESOURCE_FLAG_LINEAR)
+			rgn->pitch = surf->pitch;
+	        else
+	        {
+		        rgn->pitch = 0;
+		        rgn->z = surf->base.base.zslice;
+		        rgn->w = surf->base.base.width;
+		        rgn->h = surf->base.base.height;
+		        rgn->d = u_minify(surf->base.base.texture->depth0, surf->base.base.level);
+	        }
 	}
+
+	nvfx_region_set_format(rgn, surf->base.base.format);
+	if(!rgn->pitch)
+		nv04_region_try_to_linearize(rgn);
 }
 
 static INLINE void
@@ -135,67 +133,48 @@ nvfx_region_init_for_subresource(struct nv04_region* rgn, struct pipe_resource* 
 
 	rgn->bo = ((struct nvfx_resource*)pt)->bo;
 	rgn->offset = nvfx_subresource_offset(pt, sub.face, sub.level, z);
-	rgn->pitch = nvfx_subresource_pitch(pt, sub.level);
 	rgn->x = x;
 	rgn->y = y;
-	rgn->z = 0;
+
+	if(pt->flags & NVFX_RESOURCE_FLAG_LINEAR)
+	{
+		rgn->pitch = nvfx_subresource_pitch(pt, sub.level);
+		rgn->z = 0;
+	}
+	else
+	{
+		rgn->pitch = 0;
+		rgn->z = z;
+		rgn->w = u_minify(pt->width0, sub.level);
+		rgn->h = u_minify(pt->height0, sub.level);
+		rgn->d = u_minify(pt->depth0, sub.level);
+	}
 
 	nvfx_region_set_format(rgn, pt->format);
-	if(!(pt->flags & NVFX_RESOURCE_FLAG_LINEAR))
-		nvfx_region_fixup_swizzled(rgn, z, u_minify(pt->width0, sub.level), u_minify(pt->height0, sub.level), u_minify(pt->depth0, sub.level));
+	if(!rgn->pitch)
+		nv04_region_try_to_linearize(rgn);
 }
 
-// TODO: actually test this for all formats, it's probably wrong for some...
-
-static INLINE int
-nvfx_surface_format(enum pipe_format format)
-{
-	switch(util_format_get_blocksize(format)) {
-	case 1:
-		return NV04_CONTEXT_SURFACES_2D_FORMAT_Y8;
-	case 2:
-		//return NV04_CONTEXT_SURFACES_2D_FORMAT_Y16;
-		return NV04_CONTEXT_SURFACES_2D_FORMAT_R5G6B5;
-	case 4:
-		//if(format == PIPE_FORMAT_B8G8R8X8_UNORM || format == PIPE_FORMAT_B8G8R8A8_UNORM)
-			return NV04_CONTEXT_SURFACES_2D_FORMAT_A8R8G8B8;
-		//else
-		//	return NV04_CONTEXT_SURFACES_2D_FORMAT_Y32;
-	default:
-		return -1;
-	}
-}
-
-static INLINE int
-nv04_scaled_image_format(enum pipe_format format)
-{
-	switch(util_format_get_blocksize(format)) {
-	case 1:
-		return NV03_SCALED_IMAGE_FROM_MEMORY_COLOR_FORMAT_Y8;
-	case 2:
-		//if(format == PIPE_FORMAT_B5G5R5A1_UNORM)
-		//	return NV03_SCALED_IMAGE_FROM_MEMORY_COLOR_FORMAT_A1R5G5B5;
-		//else
-			return NV03_SCALED_IMAGE_FROM_MEMORY_COLOR_FORMAT_R5G6B5;
-	case 4:
-		if(format == PIPE_FORMAT_B8G8R8X8_UNORM)
-			return NV03_SCALED_IMAGE_FROM_MEMORY_COLOR_FORMAT_X8R8G8B8;
-		else
-			return NV03_SCALED_IMAGE_FROM_MEMORY_COLOR_FORMAT_A8R8G8B8;
-	default:
-		return -1;
-	}
-}
-
-// XXX: must save index buffer too!
+// don't save index buffer because blitter doesn't setit
 static struct blitter_context*
 nvfx_get_blitter(struct pipe_context* pipe, int copy)
 {
 	struct nvfx_context* nvfx = nvfx_context(pipe);
 
-	struct blitter_context* blitter = nvfx->blitter;
-	if(!blitter)
-		nvfx->blitter = blitter = util_blitter_create(pipe);
+	assert(nvfx->blitters_in_use < Elements(nvfx->blitter));
+
+	if(nvfx->query && !nvfx->blitters_in_use)
+	{
+		struct nouveau_channel* chan = nvfx->screen->base.channel;
+		WAIT_RING(chan, 2);
+		OUT_RING(chan, RING_3D(NV30_3D_QUERY_ENABLE, 1));
+		OUT_RING(chan, 0);
+	}
+
+	struct blitter_context** pblitter = &nvfx->blitter[nvfx->blitters_in_use++];
+	if(!*pblitter)
+		*pblitter = util_blitter_create(pipe);
+	struct blitter_context* blitter = *pblitter;
 
 	util_blitter_save_blend(blitter, nvfx->blend);
 	util_blitter_save_depth_stencil_alpha(blitter, nvfx->zsa);
@@ -216,6 +195,22 @@ nvfx_get_blitter(struct pipe_context* pipe, int copy)
 	}
 
 	return blitter;
+}
+
+static inline void
+nvfx_put_blitter(struct pipe_context* pipe, struct blitter_context* blitter)
+{
+	struct nvfx_context* nvfx = nvfx_context(pipe);
+	--nvfx->blitters_in_use;
+	assert(nvfx->blitters_in_use >= 0);
+
+	if(nvfx->query && !nvfx->blitters_in_use)
+	{
+		struct nouveau_channel* chan = nvfx->screen->base.channel;
+		WAIT_RING(chan, 2);
+		OUT_RING(chan, RING_3D(NV30_3D_QUERY_ENABLE, 1));
+		OUT_RING(chan, 1);
+	}
 }
 
 static unsigned
@@ -269,16 +264,21 @@ nvfx_resource_copy_region(struct pipe_context *pipe,
 	if((!dst_to_gpu || !src_on_gpu) && small)
 		ret = -1; /* use the CPU */
 	else
-		ret = nv04_region_copy_2d(ctx, &dst, &src, w, h,
-			dstr->target == PIPE_BUFFER ? -1 : nvfx_surface_format(dstr->format),
-			dstr->target == PIPE_BUFFER ? -1 : nv04_scaled_image_format(dstr->format),
-			dst_to_gpu, src_on_gpu);
+		ret = nv04_region_copy_2d(ctx, &dst, &src, w, h, dst_to_gpu, src_on_gpu);
 	if(!ret)
 	{}
-	else if(ret > 0 && dstr->bind & PIPE_BIND_RENDER_TARGET && srcr->bind & PIPE_BIND_SAMPLER_VIEW)
+	else if(ret > 0
+			&& dstr->bind & (PIPE_BIND_RENDER_TARGET | PIPE_BIND_DEPTH_STENCIL)
+			&& srcr->bind & PIPE_BIND_SAMPLER_VIEW)
 	{
+		/* this currently works because we hack the bind flags on resource creation to be
+		 * the maximum set that the resource type actually supports
+		 *
+		 * TODO: perhaps support reinterpreting the formats
+		 */
 		struct blitter_context* blitter = nvfx_get_blitter(pipe, 1);
 		util_blitter_copy_region(blitter, dstr, subdst, dstx, dsty, dstz, srcr, subsrc, srcx, srcy, srcz, w, h, TRUE);
+		nvfx_put_blitter(pipe, blitter);
 	}
 	else
 	{
@@ -372,6 +372,10 @@ nvfx_surface_copy_temp(struct pipe_context* pipe, struct pipe_surface* surf, int
 	struct pipe_subresource tempsr, surfsr;
 	struct nvfx_context* nvfx = nvfx_context(pipe);
 
+	/* temporarily detach the temp, so it isn't used in place of the actual resource */
+	struct nvfx_miptree* temp = ns->temp;
+	ns->temp = 0;
+
 	// TODO: we really should do this validation before setting these variable in draw calls
 	unsigned use_vertex_buffers = nvfx->use_vertex_buffers;
 	boolean use_index_buffer = nvfx->use_index_buffer;
@@ -383,9 +387,16 @@ nvfx_surface_copy_temp(struct pipe_context* pipe, struct pipe_surface* surf, int
 	surfsr.level = surf->level;
 
 	if(to_temp)
-		nvfx_resource_copy_region(pipe, &ns->temp->base.base, tempsr, 0, 0, 0, surf->texture, surfsr, 0, 0, surf->zslice, surf->width, surf->height);
+		nvfx_resource_copy_region(pipe, &temp->base.base, tempsr, 0, 0, 0, surf->texture, surfsr, 0, 0, surf->zslice, surf->width, surf->height);
 	else
-		nvfx_resource_copy_region(pipe, surf->texture, surfsr, 0, 0, surf->zslice, &ns->temp->base.base, tempsr, 0, 0, 0, surf->width, surf->height);
+		nvfx_resource_copy_region(pipe, surf->texture, surfsr, 0, 0, surf->zslice, &temp->base.base, tempsr, 0, 0, 0, surf->width, surf->height);
+
+	/* If this triggers, it probably means we attempted to use the blitter
+	 * but failed due to non-renderability of the target.
+	 * Obviously, this would lead to infinite recursion if supported. */
+	assert(!ns->temp);
+
+	ns->temp = temp;
 
 	nvfx->use_vertex_buffers = use_vertex_buffers;
 	nvfx->use_index_buffer = use_index_buffer;
@@ -409,6 +420,8 @@ nvfx_surface_create_temp(struct pipe_context* pipe, struct pipe_surface* surf)
 	template.nr_samples = surf->texture->nr_samples;
 	template.flags = NVFX_RESOURCE_FLAG_LINEAR;
 
+	assert(!ns->temp && !util_dirty_surface_is_dirty(&ns->base));
+
 	ns->temp = (struct nvfx_miptree*)nvfx_miptree_create(pipe->screen, &template);
 	nvfx_surface_copy_temp(pipe, surf, 1);
 }
@@ -420,10 +433,9 @@ nvfx_surface_flush(struct pipe_context* pipe, struct pipe_surface* surf)
 	struct nvfx_surface* ns = (struct nvfx_surface*)surf;
 	boolean bound = FALSE;
 
-	/* must be done before the copy, otherwise the copy will use the temp as destination */
-	util_dirty_surface_set_clean(nvfx_surface_get_dirty_surfaces(surf), &ns->base);
-
 	nvfx_surface_copy_temp(pipe, surf, 0);
+
+	util_dirty_surface_set_clean(nvfx_surface_get_dirty_surfaces(surf), &ns->base);
 
 	if(nvfx->framebuffer.zsbuf == surf)
 		bound = TRUE;
@@ -459,6 +471,7 @@ nvfx_clear_render_target(struct pipe_context *pipe,
 		// TODO: probably should use hardware clear here instead if possible
 		struct blitter_context* blitter = nvfx_get_blitter(pipe, 0);
 		util_blitter_clear_render_target(blitter, dst, rgba, dstx, dsty, width, height);
+		nvfx_put_blitter(pipe, blitter);
 	}
 }
 
@@ -477,6 +490,7 @@ nvfx_clear_depth_stencil(struct pipe_context *pipe,
 		// TODO: probably should use hardware clear here instead if possible
 		struct blitter_context* blitter = nvfx_get_blitter(pipe, 0);
 		util_blitter_clear_depth_stencil(blitter, dst, clear_flags, depth, stencil, dstx, dsty, width, height);
+		nvfx_put_blitter(pipe, blitter);
 	}
 }
 

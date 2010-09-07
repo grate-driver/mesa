@@ -385,7 +385,11 @@ static void r300_translate_fragment_shader(
     compiler.code = &shader->code;
     compiler.state = shader->compare_state;
     compiler.Base.is_r500 = r300->screen->caps.is_r500;
+    compiler.Base.disable_optimizations = DBG_ON(r300, DBG_NO_OPT);
+    compiler.Base.has_half_swizzles = TRUE;
     compiler.Base.max_temp_regs = compiler.Base.is_r500 ? 128 : 32;
+    compiler.Base.max_constants = compiler.Base.is_r500 ? 256 : 32;
+    compiler.Base.max_alu_insts = compiler.Base.is_r500 ? 512 : 64;
     compiler.Base.remove_unused_constants = TRUE;
     compiler.AllocateHwInputs = &allocate_hardware_inputs;
     compiler.UserData = &shader->inputs;
@@ -423,14 +427,6 @@ static void r300_translate_fragment_shader(
     /* Invoke the compiler */
     r3xx_compile_fragment_program(&compiler);
 
-    /* Shaders with zero instructions are invalid,
-     * use the dummy shader instead. */
-    if (shader->code.code.r500.inst_end == -1) {
-        rc_destroy(&compiler.Base);
-        r300_dummy_fragment_shader(r300, shader);
-        return;
-    }
-
     if (compiler.Base.Error) {
         fprintf(stderr, "r300 FP: Compiler Error:\n%sUsing a dummy shader"
                 " instead.\n", compiler.Base.ErrorMsg);
@@ -441,6 +437,14 @@ static void r300_translate_fragment_shader(
             abort();
         }
 
+        rc_destroy(&compiler.Base);
+        r300_dummy_fragment_shader(r300, shader);
+        return;
+    }
+
+    /* Shaders with zero instructions are invalid,
+     * use the dummy shader instead. */
+    if (shader->code.code.r500.inst_end == -1) {
         rc_destroy(&compiler.Base);
         r300_dummy_fragment_shader(r300, shader);
         return;

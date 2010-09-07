@@ -18,7 +18,7 @@
 
 #include "nouveau/nouveau_winsys.h"
 #include "nouveau/nouveau_gldefs.h"
-
+#include "nv30-40_3d.xml.h"
 #include "nvfx_state.h"
 
 #define NOUVEAU_ERR(fmt, args...) \
@@ -141,22 +141,17 @@ struct nvfx_context {
 	struct nvfx_screen *screen;
 
 	unsigned is_nv4x; /* either 0 or ~0 */
+	unsigned use_nv4x; /* either 0 or ~0 */
 	boolean use_vp_clipping;
 
 	struct draw_context *draw;
-	struct blitter_context* blitter;
+	/* one is for user-requested operations, the other is for temporary copying inside them */
+	struct blitter_context* blitter[2];
+	unsigned blitters_in_use;
 	struct list_head render_cache;
 
 	/* HW state derived from pipe states */
 	struct nvfx_state state;
-	struct {
-		struct nvfx_vertex_program *vertprog;
-
-		unsigned nr_attribs;
-		unsigned hw[PIPE_MAX_SHADER_INPUTS];
-		unsigned draw[PIPE_MAX_SHADER_INPUTS];
-		unsigned emit[PIPE_MAX_SHADER_INPUTS];
-	} swtnl;
 
 	enum {
 		HW, SWTNL, SWRAST
@@ -168,7 +163,7 @@ struct nvfx_context {
 	struct pipe_scissor_state scissor;
 	unsigned stipple[32];
 	struct pipe_clip_state clip;
-	struct nvfx_vertex_program *vertprog;
+	struct nvfx_pipe_vertex_program *vertprog;
 	struct nvfx_pipe_fragment_program *fragprog;
 	struct pipe_resource *constbuf[PIPE_SHADER_TYPES];
 	unsigned constbuf_nr[PIPE_SHADER_TYPES];
@@ -183,6 +178,7 @@ struct nvfx_context {
 	struct nvfx_sampler_state *tex_sampler[PIPE_MAX_SAMPLERS];
 	struct pipe_sampler_view *fragment_sampler_views[PIPE_MAX_SAMPLERS];
 	struct nvfx_pipe_fragment_program* dummy_fs;
+	struct pipe_query* query;
 
 	unsigned nr_samplers;
 	unsigned nr_textures;
@@ -199,13 +195,14 @@ struct nvfx_context {
 	int use_vertex_buffers;
 
 	unsigned hw_vtxelt_nr;
-	uint8_t hw_samplers;
-	uint32_t hw_txf[8];
+	unsigned hw_samplers;
+	uint32_t hw_txf[16];
 	struct nvfx_render_target hw_rt[4];
 	struct nvfx_render_target hw_zeta;
 	int hw_pointsprite_control;
 	int hw_vp_output;
 	struct nvfx_fragment_program* hw_fragprog;
+	struct nvfx_vertex_program* hw_vertprog;
 
 	unsigned relocs_needed;
 };
@@ -324,6 +321,7 @@ extern void nvfx_init_transfer_functions(struct pipe_context *pipe);
 
 /* nvfx_vbo.c */
 extern boolean nvfx_vbo_validate(struct nvfx_context *nvfx);
+extern void nvfx_vbo_swtnl_validate(struct nvfx_context *nvfx);
 extern void nvfx_vbo_relocate(struct nvfx_context *nvfx);
 extern void nvfx_idxbuf_validate(struct nvfx_context* nvfx);
 extern void nvfx_idxbuf_relocate(struct nvfx_context* nvfx);
@@ -346,25 +344,25 @@ static inline void nvfx_emit_vtx_attr(struct nouveau_channel* chan, unsigned att
 {
 	switch (ncomp) {
 	case 4:
-		OUT_RING(chan, RING_3D(NV34TCL_VTX_ATTR_4F_X(attrib), 4));
+		OUT_RING(chan, RING_3D(NV30_3D_VTX_ATTR_4F_X(attrib), 4));
 		OUT_RING(chan, fui(v[0]));
 		OUT_RING(chan, fui(v[1]));
 		OUT_RING(chan,  fui(v[2]));
 		OUT_RING(chan,  fui(v[3]));
 		break;
 	case 3:
-		OUT_RING(chan, RING_3D(NV34TCL_VTX_ATTR_3F_X(attrib), 3));
+		OUT_RING(chan, RING_3D(NV30_3D_VTX_ATTR_3F_X(attrib), 3));
 		OUT_RING(chan,  fui(v[0]));
 		OUT_RING(chan,  fui(v[1]));
 		OUT_RING(chan,  fui(v[2]));
 		break;
 	case 2:
-		OUT_RING(chan, RING_3D(NV34TCL_VTX_ATTR_2F_X(attrib), 2));
+		OUT_RING(chan, RING_3D(NV30_3D_VTX_ATTR_2F_X(attrib), 2));
 		OUT_RING(chan,  fui(v[0]));
 		OUT_RING(chan,  fui(v[1]));
 		break;
 	case 1:
-		OUT_RING(chan, RING_3D(NV34TCL_VTX_ATTR_1F(attrib), 1));
+		OUT_RING(chan, RING_3D(NV30_3D_VTX_ATTR_1F(attrib), 1));
 		OUT_RING(chan,  fui(v[0]));
 		break;
 	}

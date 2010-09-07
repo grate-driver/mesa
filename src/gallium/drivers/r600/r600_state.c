@@ -28,6 +28,7 @@
 #include "util/u_inlines.h"
 #include "util/u_format.h"
 #include "util/u_memory.h"
+#include "util/u_pack_color.h"
 #include "r600_screen.h"
 #include "r600_context.h"
 #include "r600_resource.h"
@@ -38,50 +39,92 @@ static void r600_blend(struct r600_context *rctx, struct radeon_state *rstate, c
 static void r600_viewport(struct r600_context *rctx, struct radeon_state *rstate, const struct pipe_viewport_state *state);
 static void r600_ucp(struct r600_context *rctx, struct radeon_state *rstate, const struct pipe_clip_state *state);
 static void r600_sampler(struct r600_context *rctx, struct radeon_state *rstate, const struct pipe_sampler_state *state, unsigned id);
+static void r600_sampler_border(struct r600_context *rctx, struct radeon_state *rstate,
+				const struct pipe_sampler_state *state, unsigned id);
 static void r600_resource(struct pipe_context *ctx, struct radeon_state *rstate, const struct pipe_sampler_view *view, unsigned id);
 static void r600_cb(struct r600_context *rctx, struct radeon_state *rstate,
 			const struct pipe_framebuffer_state *state, int cb);
 static void r600_db(struct r600_context *rctx, struct radeon_state *rstate,
 			const struct pipe_framebuffer_state *state);
 
+static struct r600_context_state *r600_new_context_state(unsigned type)
+{
+	struct r600_context_state *rstate = CALLOC_STRUCT(r600_context_state);
+	if (rstate == NULL)
+		return NULL;
+	rstate->type = type;
+	rstate->refcount = 1;
+	return rstate;
+}
 
 static void *r600_create_blend_state(struct pipe_context *ctx,
 					const struct pipe_blend_state *state)
 {
 	struct r600_context *rctx = r600_context(ctx);
+	struct r600_context_state *rstate;
 
-	return r600_context_state(rctx, pipe_blend_type, state);
+	rstate = r600_new_context_state(pipe_blend_type);
+	rstate->state.blend = *state;
+	r600_blend(rctx, &rstate->rstate[0], &rstate->state.blend);
+	
+	return rstate;
 }
 
 static void *r600_create_dsa_state(struct pipe_context *ctx,
-					const struct pipe_depth_stencil_alpha_state *state)
+				   const struct pipe_depth_stencil_alpha_state *state)
 {
-	struct r600_context *rctx = r600_context(ctx);
+	struct r600_context_state *rstate;
 
-	return r600_context_state(rctx, pipe_dsa_type, state);
+	rstate = r600_new_context_state(pipe_dsa_type);
+	rstate->state.dsa = *state;
+	return rstate;
 }
 
 static void *r600_create_rs_state(struct pipe_context *ctx,
 					const struct pipe_rasterizer_state *state)
 {
-	struct r600_context *rctx = r600_context(ctx);
+	struct r600_context_state *rstate;
 
-	return r600_context_state(rctx, pipe_rasterizer_type, state);
+	rstate = r600_new_context_state(pipe_rasterizer_type);
+	rstate->state.rasterizer = *state;
+	return rstate;
 }
 
 static void *r600_create_sampler_state(struct pipe_context *ctx,
 					const struct pipe_sampler_state *state)
 {
 	struct r600_context *rctx = r600_context(ctx);
+	struct r600_context_state *rstate;
 
-	return r600_context_state(rctx, pipe_sampler_type, state);
+	rstate = r600_new_context_state(pipe_sampler_type);
+	rstate->state.sampler = *state;
+	r600_sampler(rctx, &rstate->rstate[0], &rstate->state.sampler, 0);
+	r600_sampler_border(rctx, &rstate->rstate[1], &rstate->state.sampler, 0);
+	return rstate;
 }
 
+static void r600_remove_sampler_view(struct r600_shader_sampler_states *sampler,
+				     struct r600_context_state *rstate)
+{
+	int i, j;
+	
+	for (i = 0; i < sampler->nview; i++) {
+		for (j = 0; j < rstate->nrstate; j++) {
+			if (sampler->view[i] == &rstate->rstate[j])
+				sampler->view[i] = NULL;
+		}
+	}
+}
 static void r600_sampler_view_destroy(struct pipe_context *ctx,
 				      struct pipe_sampler_view *state)
 {
 	struct r600_context_state *rstate = (struct r600_context_state *)state;
+	struct r600_context *rctx = r600_context(ctx);
+	int i;
 
+	/* need to search list of vs/ps sampler views and remove it from any - uggh */
+	r600_remove_sampler_view(&rctx->ps_sampler, rstate);
+	r600_remove_sampler_view(&rctx->vs_sampler, rstate);
 	r600_context_state_decref(rstate);
 }
 
@@ -89,10 +132,11 @@ static struct pipe_sampler_view *r600_create_sampler_view(struct pipe_context *c
 							struct pipe_resource *texture,
 							const struct pipe_sampler_view *state)
 {
-	struct r600_context *rctx = r600_context(ctx);
 	struct r600_context_state *rstate;
 
-	rstate = r600_context_state(rctx, pipe_sampler_view_type, state);
+	rstate = r600_new_context_state(pipe_sampler_view_type);
+	rstate->state.sampler_view = *state;
+	rstate->state.sampler_view.texture = NULL;
 	pipe_reference(NULL, &texture->reference);
 	rstate->state.sampler_view.texture = texture;
 	rstate->state.sampler_view.reference.count = 1;
@@ -101,12 +145,73 @@ static struct pipe_sampler_view *r600_create_sampler_view(struct pipe_context *c
 	return &rstate->state.sampler_view;
 }
 
+static void r600_set_sampler_view(struct pipe_context *ctx,
+				  unsigned count,
+				  struct pipe_sampler_view **views,
+				  struct r600_shader_sampler_states *sampler,
+				  unsigned shader_id)
+{
+	struct r600_context *rctx = r600_context(ctx);
+	struct r600_context_state *rstate;
+	unsigned i;
+
+	for (i = 0; i < sampler->nview; i++) {
+		radeon_draw_unbind(&rctx->draw, sampler->view[i]);
+	}
+
+	for (i = 0; i < count; i++) {
+		rstate = (struct r600_context_state *)views[i];
+		if (rstate) {
+			rstate->nrstate = 0;
+		}
+	}
+	for (i = 0; i < count; i++) {
+		rstate = (struct r600_context_state *)views[i];
+		if (rstate) {
+			if (rstate->nrstate >= R600_MAX_RSTATE)
+				continue;
+			if (rstate->nrstate) {
+				memcpy(&rstate->rstate[rstate->nrstate], &rstate->rstate[0], sizeof(struct radeon_state));
+			}
+			radeon_state_convert(&rstate->rstate[rstate->nrstate], R600_STATE_RESOURCE, i, shader_id);
+			sampler->view[i] = &rstate->rstate[rstate->nrstate];
+			rstate->nrstate++;
+		}
+	}
+	sampler->nview = count;
+}
+
+static void r600_set_ps_sampler_view(struct pipe_context *ctx,
+					unsigned count,
+					struct pipe_sampler_view **views)
+{
+	struct r600_context *rctx = r600_context(ctx);
+	r600_set_sampler_view(ctx, count, views, &rctx->ps_sampler, R600_SHADER_PS);
+}
+
+static void r600_set_vs_sampler_view(struct pipe_context *ctx,
+					unsigned count,
+					struct pipe_sampler_view **views)
+{
+	struct r600_context *rctx = r600_context(ctx);
+	r600_set_sampler_view(ctx, count, views, &rctx->vs_sampler, R600_SHADER_VS);
+}
+
 static void *r600_create_shader_state(struct pipe_context *ctx,
 					const struct pipe_shader_state *state)
 {
 	struct r600_context *rctx = r600_context(ctx);
+	struct r600_context_state *rstate;
+	int r;
 
-	return r600_context_state(rctx, pipe_shader_type, state);
+	rstate = r600_new_context_state(pipe_shader_type);
+	rstate->state.shader = *state;
+	r =  r600_pipe_shader_create(&rctx->context, rstate, rstate->state.shader.tokens);
+	if (r) {
+		r600_context_state_decref(rstate);
+		return NULL;
+	}
+	return rstate;
 }
 
 static void *r600_create_vertex_elements(struct pipe_context *ctx,
@@ -120,89 +225,6 @@ static void *r600_create_vertex_elements(struct pipe_context *ctx,
 	memcpy(v->elements, elements, count * sizeof(struct pipe_vertex_element));
 	v->refcount = 1;
 	return v;
-}
-
-static void r600_bind_state(struct pipe_context *ctx, void *state)
-{
-	struct r600_context *rctx = r600_context(ctx);
-	struct r600_context_state *rstate = (struct r600_context_state *)state;
-
-	if (state == NULL)
-		return;
-	switch (rstate->type) {
-	case pipe_rasterizer_type:
-		rctx->rasterizer = r600_context_state_decref(rctx->rasterizer);
-		rctx->rasterizer = r600_context_state_incref(rstate);
-		break;
-	case pipe_poly_stipple_type:
-		rctx->poly_stipple = r600_context_state_decref(rctx->poly_stipple);
-		rctx->poly_stipple = r600_context_state_incref(rstate);
-		break;
-	case pipe_scissor_type:
-		rctx->scissor = r600_context_state_decref(rctx->scissor);
-		rctx->scissor = r600_context_state_incref(rstate);
-		break;
-	case pipe_clip_type:
-		rctx->clip = r600_context_state_decref(rctx->clip);
-		rctx->clip = r600_context_state_incref(rstate);
-		break;
-	case pipe_depth_type:
-		rctx->depth = r600_context_state_decref(rctx->depth);
-		rctx->depth = r600_context_state_incref(rstate);
-		break;
-	case pipe_stencil_type:
-		rctx->stencil = r600_context_state_decref(rctx->stencil);
-		rctx->stencil = r600_context_state_incref(rstate);
-		break;
-	case pipe_alpha_type:
-		rctx->alpha = r600_context_state_decref(rctx->alpha);
-		rctx->alpha = r600_context_state_incref(rstate);
-		break;
-	case pipe_dsa_type:
-		rctx->dsa = r600_context_state_decref(rctx->dsa);
-		rctx->dsa = r600_context_state_incref(rstate);
-		break;
-	case pipe_blend_type:
-		rctx->blend = r600_context_state_decref(rctx->blend);
-		rctx->blend = r600_context_state_incref(rstate);
-		break;
-	case pipe_framebuffer_type:
-		rctx->framebuffer = r600_context_state_decref(rctx->framebuffer);
-		rctx->framebuffer = r600_context_state_incref(rstate);
-		break;
-	case pipe_stencil_ref_type:
-		rctx->stencil_ref = r600_context_state_decref(rctx->stencil_ref);
-		rctx->stencil_ref = r600_context_state_incref(rstate);
-		break;
-	case pipe_viewport_type:
-		rctx->viewport = r600_context_state_decref(rctx->viewport);
-		rctx->viewport = r600_context_state_incref(rstate);
-		break;
-	case pipe_shader_type:
-	case pipe_sampler_type:
-	case pipe_sampler_view_type:
-	default:
-		R600_ERR("invalid type %d\n", rstate->type);
-		return;
-	}
-}
-
-static void r600_bind_ps_shader(struct pipe_context *ctx, void *state)
-{
-	struct r600_context *rctx = r600_context(ctx);
-	struct r600_context_state *rstate = (struct r600_context_state *)state;
-
-	rctx->ps_shader = r600_context_state_decref(rctx->ps_shader);
-	rctx->ps_shader = r600_context_state_incref(rstate);
-}
-
-static void r600_bind_vs_shader(struct pipe_context *ctx, void *state)
-{
-	struct r600_context *rctx = r600_context(ctx);
-	struct r600_context_state *rstate = (struct r600_context_state *)state;
-
-	rctx->vs_shader = r600_context_state_decref(rctx->vs_shader);
-	rctx->vs_shader = r600_context_state_incref(rstate);
 }
 
 static void r600_delete_vertex_element(struct pipe_context *ctx, void *state)
@@ -228,13 +250,72 @@ static void r600_bind_vertex_elements(struct pipe_context *ctx, void *state)
 	}
 }
 
-static void r600_bind_ps_sampler(struct pipe_context *ctx,
-					unsigned count, void **states)
+static void r600_bind_rasterizer_state(struct pipe_context *ctx, void *state)
+{
+	struct r600_context *rctx = r600_context(ctx);
+	struct r600_context_state *rstate = (struct r600_context_state *)state;
+
+	if (state == NULL)
+		return;
+	rctx->rasterizer = r600_context_state_decref(rctx->rasterizer);
+	rctx->rasterizer = r600_context_state_incref(rstate);
+}
+
+static void r600_bind_blend_state(struct pipe_context *ctx, void *state)
+{
+	struct r600_context *rctx = r600_context(ctx);
+	struct r600_context_state *rstate = (struct r600_context_state *)state;
+
+	if (state == NULL)
+		return;
+	rctx->blend = r600_context_state_decref(rctx->blend);
+	rctx->blend = r600_context_state_incref(rstate);
+
+}
+
+static void r600_bind_dsa_state(struct pipe_context *ctx, void *state)
+{
+	struct r600_context *rctx = r600_context(ctx);
+	struct r600_context_state *rstate = (struct r600_context_state *)state;
+
+	if (state == NULL)
+		return;
+	rctx->dsa = r600_context_state_decref(rctx->dsa);
+	rctx->dsa = r600_context_state_incref(rstate);
+}
+
+static void r600_bind_ps_shader(struct pipe_context *ctx, void *state)
+{
+	struct r600_context *rctx = r600_context(ctx);
+	struct r600_context_state *rstate = (struct r600_context_state *)state;
+
+	rctx->ps_shader = r600_context_state_decref(rctx->ps_shader);
+	rctx->ps_shader = r600_context_state_incref(rstate);
+}
+
+static void r600_bind_vs_shader(struct pipe_context *ctx, void *state)
+{
+	struct r600_context *rctx = r600_context(ctx);
+	struct r600_context_state *rstate = (struct r600_context_state *)state;
+
+	rctx->vs_shader = r600_context_state_decref(rctx->vs_shader);
+	rctx->vs_shader = r600_context_state_incref(rstate);
+}
+
+static void r600_bind_sampler_shader(struct pipe_context *ctx,
+				     unsigned count, void **states,
+				     struct r600_shader_sampler_states *sampler, unsigned shader_id)
 {
 	struct r600_context *rctx = r600_context(ctx);
 	struct r600_context_state *rstate;
 	unsigned i;
 
+	for (i = 0; i < sampler->nsampler; i++) {
+		radeon_draw_unbind(&rctx->draw, sampler->sampler[i]);
+	}
+	for (i = 0; i < sampler->nborder; i++) {
+		radeon_draw_unbind(&rctx->draw, sampler->border[i]);
+	}
 	for (i = 0; i < count; i++) {
 		rstate = (struct r600_context_state *)states[i];
 		if (rstate) {
@@ -248,42 +329,31 @@ static void r600_bind_ps_sampler(struct pipe_context *ctx,
 				continue;
 			if (rstate->nrstate) {
 				memcpy(&rstate->rstate[rstate->nrstate], &rstate->rstate[0], sizeof(struct radeon_state));
+				memcpy(&rstate->rstate[rstate->nrstate+1], &rstate->rstate[1], sizeof(struct radeon_state));
 			}
-			radeon_state_convert(&rstate->rstate[rstate->nrstate], R600_STATE_SAMPLER, i, R600_SHADER_PS);
-			rctx->ps_sampler[i] = &rstate->rstate[rstate->nrstate];
-			rstate->nrstate++;
+			radeon_state_convert(&rstate->rstate[rstate->nrstate], R600_STATE_SAMPLER, i, shader_id);
+			radeon_state_convert(&rstate->rstate[rstate->nrstate + 1], R600_STATE_SAMPLER_BORDER, i, shader_id);
+			sampler->sampler[i] = &rstate->rstate[rstate->nrstate];
+			sampler->border[i] = &rstate->rstate[rstate->nrstate + 1];
+			rstate->nrstate += 2;
 		}
 	}
-	rctx->ps_nsampler = count;
+	sampler->nsampler = count;
+	sampler->nborder = count;
+}
+
+static void r600_bind_ps_sampler(struct pipe_context *ctx,
+					unsigned count, void **states)
+{
+	struct r600_context *rctx = r600_context(ctx);
+	r600_bind_sampler_shader(ctx, count, states, &rctx->ps_sampler, R600_SHADER_PS);	
 }
 
 static void r600_bind_vs_sampler(struct pipe_context *ctx,
 					unsigned count, void **states)
 {
 	struct r600_context *rctx = r600_context(ctx);
-	struct r600_context_state *rstate;
-	unsigned i;
-
-	for (i = 0; i < count; i++) {
-		rstate = (struct r600_context_state *)states[i];
-		if (rstate) {
-			rstate->nrstate = 0;
-		}
-	}
-	for (i = 0; i < count; i++) {
-		rstate = (struct r600_context_state *)states[i];
-		if (rstate) {
-			if (rstate->nrstate >= R600_MAX_RSTATE)
-				continue;
-			if (rstate->nrstate) {
-				memcpy(&rstate->rstate[rstate->nrstate], &rstate->rstate[0], sizeof(struct radeon_state));
-			}
-			radeon_state_convert(&rstate->rstate[rstate->nrstate], R600_STATE_SAMPLER, i, R600_SHADER_VS);
-			rctx->vs_sampler[i] = &rstate->rstate[rstate->nrstate];
-			rstate->nrstate++;
-		}
-	}
-	rctx->vs_nsampler = count;
+	r600_bind_sampler_shader(ctx, count, states, &rctx->vs_sampler, R600_SHADER_VS);	
 }
 
 static void r600_delete_state(struct pipe_context *ctx, void *state)
@@ -307,10 +377,12 @@ static void r600_set_clip_state(struct pipe_context *ctx,
 	struct r600_context *rctx = r600_context(ctx);
 	struct r600_context_state *rstate;
 
-	rstate = r600_context_state(rctx, pipe_clip_type, state);
-	r600_bind_state(ctx, rstate);
-	/* refcount is taken care of this */
-	r600_delete_state(ctx, rstate);
+	r600_context_state_decref(rctx->clip);
+
+	rstate = r600_new_context_state(pipe_clip_type);
+	rstate->state.clip = *state;
+	r600_ucp(rctx, &rstate->rstate[0], &rstate->state.clip);
+	rctx->clip = rstate;
 }
 
 static void r600_set_constant_buffer(struct pipe_context *ctx,
@@ -359,80 +431,29 @@ static void r600_set_constant_buffer(struct pipe_context *ctx,
 	}
 }
 
-static void r600_set_ps_sampler_view(struct pipe_context *ctx,
-					unsigned count,
-					struct pipe_sampler_view **views)
-{
-	struct r600_context *rctx = r600_context(ctx);
-	struct r600_context_state *rstate;
-	unsigned i;
-
-	for (i = 0; i < count; i++) {
-		rstate = (struct r600_context_state *)views[i];
-		if (rstate) {
-			rstate->nrstate = 0;
-		}
-	}
-	for (i = 0; i < count; i++) {
-		rstate = (struct r600_context_state *)views[i];
-		if (rstate) {
-			if (rstate->nrstate >= R600_MAX_RSTATE)
-				continue;
-			if (rstate->nrstate) {
-				memcpy(&rstate->rstate[rstate->nrstate], &rstate->rstate[0], sizeof(struct radeon_state));
-			}
-			radeon_state_convert(&rstate->rstate[rstate->nrstate], R600_STATE_RESOURCE, i, R600_SHADER_PS);
-			rctx->ps_sampler_view[i] = &rstate->rstate[rstate->nrstate];
-			rstate->nrstate++;
-		}
-	}
-	rctx->ps_nsampler_view = count;
-}
-
-static void r600_set_vs_sampler_view(struct pipe_context *ctx,
-					unsigned count,
-					struct pipe_sampler_view **views)
-{
-	struct r600_context *rctx = r600_context(ctx);
-	struct r600_context_state *rstate;
-	unsigned i;
-
-	for (i = 0; i < count; i++) {
-		rstate = (struct r600_context_state *)views[i];
-		if (rstate) {
-			rstate->nrstate = 0;
-		}
-	}
-	for (i = 0; i < count; i++) {
-		rstate = (struct r600_context_state *)views[i];
-		if (rstate) {
-			if (rstate->nrstate >= R600_MAX_RSTATE)
-				continue;
-			if (rstate->nrstate) {
-				memcpy(&rstate->rstate[rstate->nrstate], &rstate->rstate[0], sizeof(struct radeon_state));
-			}
-			radeon_state_convert(&rstate->rstate[rstate->nrstate], R600_STATE_RESOURCE, i, R600_SHADER_VS);
-			rctx->vs_sampler_view[i] = &rstate->rstate[rstate->nrstate];
-			rstate->nrstate++;
-		}
-	}
-	rctx->vs_nsampler_view = count;
-}
-
 static void r600_set_framebuffer_state(struct pipe_context *ctx,
 					const struct pipe_framebuffer_state *state)
 {
 	struct r600_context *rctx = r600_context(ctx);
 	struct r600_context_state *rstate;
+	int i;
 
-	rstate = r600_context_state(rctx, pipe_framebuffer_type, state);
-	r600_bind_state(ctx, rstate);
-	for (int i = 0; i < state->nr_cbufs; i++) {
+	r600_context_state_decref(rctx->framebuffer);
+
+	rstate = r600_new_context_state(pipe_framebuffer_type);
+	rstate->state.framebuffer = *state;
+	for (i = 0; i < rstate->state.framebuffer.nr_cbufs; i++) {
+		pipe_reference(NULL, &state->cbufs[i]->reference);
+	}
+	pipe_reference(NULL, &state->zsbuf->reference);
+	rctx->framebuffer = rstate;
+	for (i = 0; i < state->nr_cbufs; i++) {
 		r600_cb(rctx, &rstate->rstate[i+1], state, i);
 	}
 	if (state->zsbuf) {
 		r600_db(rctx, &rstate->rstate[0], state);
 	}
+	return;
 }
 
 static void r600_set_polygon_stipple(struct pipe_context *ctx,
@@ -450,10 +471,11 @@ static void r600_set_scissor_state(struct pipe_context *ctx,
 	struct r600_context *rctx = r600_context(ctx);
 	struct r600_context_state *rstate;
 
-	rstate = r600_context_state(rctx, pipe_scissor_type, state);
-	r600_bind_state(ctx, rstate);
-	/* refcount is taken care of this */
-	r600_delete_state(ctx, rstate);
+	r600_context_state_decref(rctx->scissor);
+
+	rstate = r600_new_context_state(pipe_scissor_type);
+	rstate->state.scissor = *state;
+	rctx->scissor = rstate;
 }
 
 static void r600_set_stencil_ref(struct pipe_context *ctx,
@@ -462,10 +484,11 @@ static void r600_set_stencil_ref(struct pipe_context *ctx,
 	struct r600_context *rctx = r600_context(ctx);
 	struct r600_context_state *rstate;
 
-	rstate = r600_context_state(rctx, pipe_stencil_ref_type, state);
-	r600_bind_state(ctx, rstate);
-	/* refcount is taken care of this */
-	r600_delete_state(ctx, rstate);
+	r600_context_state_decref(rctx->stencil_ref);
+
+	rstate = r600_new_context_state(pipe_stencil_ref_type);
+	rstate->state.stencil_ref = *state;
+	rctx->stencil_ref = rstate;
 }
 
 static void r600_set_vertex_buffers(struct pipe_context *ctx,
@@ -508,9 +531,12 @@ static void r600_set_viewport_state(struct pipe_context *ctx,
 	struct r600_context *rctx = r600_context(ctx);
 	struct r600_context_state *rstate;
 
-	rstate = r600_context_state(rctx, pipe_viewport_type, state);
-	r600_bind_state(ctx, rstate);
-	r600_delete_state(ctx, rstate);
+	r600_context_state_decref(rctx->viewport);
+
+	rstate = r600_new_context_state(pipe_viewport_type);
+	rstate->state.viewport = *state;
+	r600_viewport(rctx, &rstate->rstate[0], &rstate->state.viewport);
+	rctx->viewport = rstate;
 }
 
 void r600_init_state_functions(struct r600_context *rctx)
@@ -523,11 +549,11 @@ void r600_init_state_functions(struct r600_context *rctx)
 	rctx->context.create_sampler_view = r600_create_sampler_view;
 	rctx->context.create_vertex_elements_state = r600_create_vertex_elements;
 	rctx->context.create_vs_state = r600_create_shader_state;
-	rctx->context.bind_blend_state = r600_bind_state;
-	rctx->context.bind_depth_stencil_alpha_state = r600_bind_state;
+	rctx->context.bind_blend_state = r600_bind_blend_state;
+	rctx->context.bind_depth_stencil_alpha_state = r600_bind_dsa_state;
 	rctx->context.bind_fragment_sampler_states = r600_bind_ps_sampler;
 	rctx->context.bind_fs_state = r600_bind_ps_shader;
-	rctx->context.bind_rasterizer_state = r600_bind_state;
+	rctx->context.bind_rasterizer_state = r600_bind_rasterizer_state;
 	rctx->context.bind_vertex_elements_state = r600_bind_vertex_elements;
 	rctx->context.bind_vertex_sampler_states = r600_bind_vs_sampler;
 	rctx->context.bind_vs_state = r600_bind_vs_shader;
@@ -601,88 +627,6 @@ struct r600_context_state *r600_context_state_decref(struct r600_context_state *
 	radeon_state_fini(&rstate->rstate[0]);
 	FREE(rstate);
 	return NULL;
-}
-
-struct r600_context_state *r600_context_state(struct r600_context *rctx, unsigned type, const void *state)
-{
-	struct r600_context_state *rstate = CALLOC_STRUCT(r600_context_state);
-	const union pipe_states *states = state;
-	unsigned i;
-	int r;
-
-	if (rstate == NULL)
-		return NULL;
-	rstate->type = type;
-	rstate->refcount = 1;
-
-	switch (rstate->type) {
-	case pipe_sampler_view_type:
-		rstate->state.sampler_view = (*states).sampler_view;
-		rstate->state.sampler_view.texture = NULL;
-		break;
-	case pipe_framebuffer_type:
-		rstate->state.framebuffer = (*states).framebuffer;
-		for (i = 0; i < rstate->state.framebuffer.nr_cbufs; i++) {
-			pipe_surface_reference(&rstate->state.framebuffer.cbufs[i],
-						(*states).framebuffer.cbufs[i]);
-		}
-		pipe_surface_reference(&rstate->state.framebuffer.zsbuf,
-					(*states).framebuffer.zsbuf);
-		break;
-	case pipe_viewport_type:
-		rstate->state.viewport = (*states).viewport;
-		r600_viewport(rctx, &rstate->rstate[0], &rstate->state.viewport);
-		break;
-	case pipe_depth_type:
-		rstate->state.depth = (*states).depth;
-		break;
-	case pipe_rasterizer_type:
-		rstate->state.rasterizer = (*states).rasterizer;
-		break;
-	case pipe_poly_stipple_type:
-		rstate->state.poly_stipple = (*states).poly_stipple;
-		break;
-	case pipe_scissor_type:
-		rstate->state.scissor = (*states).scissor;
-		break;
-	case pipe_clip_type:
-		rstate->state.clip = (*states).clip;
-		r600_ucp(rctx, &rstate->rstate[0], &rstate->state.clip);
-		break;
-	case pipe_stencil_type:
-		rstate->state.stencil = (*states).stencil;
-		break;
-	case pipe_alpha_type:
-		rstate->state.alpha = (*states).alpha;
-		break;
-	case pipe_dsa_type:
-		rstate->state.dsa = (*states).dsa;
-		break;
-	case pipe_blend_type:
-		rstate->state.blend = (*states).blend;
-		r600_blend(rctx, &rstate->rstate[0], &rstate->state.blend);
-		break;
-	case pipe_stencil_ref_type:
-		rstate->state.stencil_ref = (*states).stencil_ref;
-		break;
-	case pipe_shader_type:
-		rstate->state.shader = (*states).shader;
-		r =  r600_pipe_shader_create(&rctx->context, rstate, rstate->state.shader.tokens);
-		if (r) {
-			r600_context_state_decref(rstate);
-			return NULL;
-		}
-		break;
-	case pipe_sampler_type:
-		rstate->state.sampler = (*states).sampler;
-		r600_sampler(rctx, &rstate->rstate[0], &rstate->state.sampler, 0);
-		break;
-	default:
-		R600_ERR("invalid type %d\n", rstate->type);
-		FREE(rstate);
-		return NULL;
-	}
-	return rstate;
 }
 
 static void r600_blend(struct r600_context *rctx, struct radeon_state *rstate, const struct pipe_blend_state *state)
@@ -1003,8 +947,10 @@ static void r600_dsa(struct r600_context *rctx, struct radeon_state *rstate)
 	const struct pipe_stencil_ref *stencil_ref = &rctx->stencil_ref->state.stencil_ref;
 	struct r600_screen *rscreen = rctx->screen;
 	unsigned db_depth_control, alpha_test_control, alpha_ref, db_shader_control;
-	unsigned stencil_ref_mask, stencil_ref_mask_bf;
+	unsigned stencil_ref_mask, stencil_ref_mask_bf, db_render_override, db_render_control;
 	struct r600_shader *rshader;
+	struct r600_query *rquery;
+	boolean query_running;
 	int i;
 
 	if (rctx->ps_shader == NULL) {
@@ -1057,6 +1003,26 @@ static void r600_dsa(struct r600_context *rctx, struct radeon_state *rstate)
 		alpha_ref = fui(state->alpha.ref_value);
 	}
 
+	db_render_control = S_028D0C_STENCIL_COMPRESS_DISABLE(1) |
+		S_028D0C_DEPTH_COMPRESS_DISABLE(1);
+	db_render_override = S_028D10_FORCE_HIZ_ENABLE(V_028D10_FORCE_DISABLE) |
+		S_028D10_FORCE_HIS_ENABLE0(V_028D10_FORCE_DISABLE) |
+		S_028D10_FORCE_HIS_ENABLE1(V_028D10_FORCE_DISABLE);
+
+	query_running = false;
+
+	LIST_FOR_EACH_ENTRY(rquery, &rctx->query_list, list) {
+		if (rquery->state & R600_QUERY_STATE_STARTED) {
+			query_running = true;
+		}
+	}
+
+	if (query_running) {
+		db_render_override |= S_028D10_NOOP_CULL_DISABLE(1);
+		if (rscreen->chip_class == R700)
+			db_render_control |= S_028D0C_R700_PERFECT_ZPASS_COUNTS(1);
+	}
+
 	rstate->states[R600_DSA__DB_STENCIL_CLEAR] = 0x00000000;
 	rstate->states[R600_DSA__DB_DEPTH_CLEAR] = 0x3F800000;
 	rstate->states[R600_DSA__SX_ALPHA_TEST_CONTROL] = alpha_test_control;
@@ -1068,93 +1034,46 @@ static void r600_dsa(struct r600_context *rctx, struct radeon_state *rstate)
 	rstate->states[R600_DSA__SPI_FOG_CNTL] = 0x00000000;
 	rstate->states[R600_DSA__DB_DEPTH_CONTROL] = db_depth_control;
 	rstate->states[R600_DSA__DB_SHADER_CONTROL] = db_shader_control;
-	rstate->states[R600_DSA__DB_RENDER_CONTROL] = 0x00000060;
-	rstate->states[R600_DSA__DB_RENDER_OVERRIDE] = 0x0000002A;
+	rstate->states[R600_DSA__DB_RENDER_CONTROL] = db_render_control;
+	rstate->states[R600_DSA__DB_RENDER_OVERRIDE] = db_render_override;
+	  
 	rstate->states[R600_DSA__DB_SRESULTS_COMPARE_STATE1] = 0x00000000;
 	rstate->states[R600_DSA__DB_PRELOAD_CONTROL] = 0x00000000;
 	rstate->states[R600_DSA__DB_ALPHA_TO_MASK] = 0x0000AA00;
 	radeon_state_pm4(rstate);
 }
 
-static inline unsigned r600_tex_wrap(unsigned wrap)
-{
-	switch (wrap) {
-	default:
-	case PIPE_TEX_WRAP_REPEAT:
-		return V_03C000_SQ_TEX_WRAP;
-	case PIPE_TEX_WRAP_CLAMP:
-		return V_03C000_SQ_TEX_CLAMP_LAST_TEXEL;
-	case PIPE_TEX_WRAP_CLAMP_TO_EDGE:
-		return V_03C000_SQ_TEX_CLAMP_HALF_BORDER;
-	case PIPE_TEX_WRAP_CLAMP_TO_BORDER:
-		return V_03C000_SQ_TEX_CLAMP_BORDER;
-	case PIPE_TEX_WRAP_MIRROR_REPEAT:
-		return V_03C000_SQ_TEX_MIRROR;
-	case PIPE_TEX_WRAP_MIRROR_CLAMP:
-		return V_03C000_SQ_TEX_MIRROR_ONCE_LAST_TEXEL;
-	case PIPE_TEX_WRAP_MIRROR_CLAMP_TO_EDGE:
-		return V_03C000_SQ_TEX_MIRROR_ONCE_HALF_BORDER;
-	case PIPE_TEX_WRAP_MIRROR_CLAMP_TO_BORDER:
-		return V_03C000_SQ_TEX_MIRROR_ONCE_BORDER;
-	}
-}
-
-static inline unsigned r600_tex_filter(unsigned filter)
-{
-	switch (filter) {
-	default:
-	case PIPE_TEX_FILTER_NEAREST:
-		return V_03C000_SQ_TEX_XY_FILTER_POINT;
-	case PIPE_TEX_FILTER_LINEAR:
-		return V_03C000_SQ_TEX_XY_FILTER_BILINEAR;
-	}
-}
-
-static inline unsigned r600_tex_mipfilter(unsigned filter)
-{
-	switch (filter) {
-	case PIPE_TEX_MIPFILTER_NEAREST:
-		return V_03C000_SQ_TEX_Z_FILTER_POINT;
-	case PIPE_TEX_MIPFILTER_LINEAR:
-		return V_03C000_SQ_TEX_Z_FILTER_LINEAR;
-	default:
-	case PIPE_TEX_MIPFILTER_NONE:
-		return V_03C000_SQ_TEX_Z_FILTER_NONE;
-	}
-}
-
-static inline unsigned r600_tex_compare(unsigned compare)
-{
-	switch (compare) {
-	default:
-	case PIPE_FUNC_NEVER:
-		return V_03C000_SQ_TEX_DEPTH_COMPARE_NEVER;
-	case PIPE_FUNC_LESS:
-		return V_03C000_SQ_TEX_DEPTH_COMPARE_LESS;
-	case PIPE_FUNC_EQUAL:
-		return V_03C000_SQ_TEX_DEPTH_COMPARE_EQUAL;
-	case PIPE_FUNC_LEQUAL:
-		return V_03C000_SQ_TEX_DEPTH_COMPARE_LESSEQUAL;
-	case PIPE_FUNC_GREATER:
-		return V_03C000_SQ_TEX_DEPTH_COMPARE_GREATER;
-	case PIPE_FUNC_NOTEQUAL:
-		return V_03C000_SQ_TEX_DEPTH_COMPARE_NOTEQUAL;
-	case PIPE_FUNC_GEQUAL:
-		return V_03C000_SQ_TEX_DEPTH_COMPARE_GREATEREQUAL;
-	case PIPE_FUNC_ALWAYS:
-		return V_03C000_SQ_TEX_DEPTH_COMPARE_ALWAYS;
-	}
-}
 
 static INLINE u32 S_FIXED(float value, u32 frac_bits)
 {
 	return value * (1 << frac_bits);
 }
 
+static void r600_sampler_border(struct r600_context *rctx, struct radeon_state *rstate,
+				const struct pipe_sampler_state *state, unsigned id)
+{
+	struct r600_screen *rscreen = rctx->screen;
+	union util_color uc;
+
+	util_pack_color(state->border_color, PIPE_FORMAT_B8G8R8A8_UNORM, &uc);
+
+	radeon_state_init(rstate, rscreen->rw, R600_STATE_SAMPLER_BORDER, id, R600_SHADER_PS);
+	if (uc.ui) {
+		rstate->states[R600_PS_SAMPLER_BORDER__TD_PS_SAMPLER0_BORDER_RED] = fui(state->border_color[0]);
+		rstate->states[R600_PS_SAMPLER_BORDER__TD_PS_SAMPLER0_BORDER_GREEN] = fui(state->border_color[1]);
+		rstate->states[R600_PS_SAMPLER_BORDER__TD_PS_SAMPLER0_BORDER_BLUE] = fui(state->border_color[2]);
+		rstate->states[R600_PS_SAMPLER_BORDER__TD_PS_SAMPLER0_BORDER_ALPHA] = fui(state->border_color[3]);
+	}
+	radeon_state_pm4(rstate);
+}
+
 static void r600_sampler(struct r600_context *rctx, struct radeon_state *rstate,
 			const struct pipe_sampler_state *state, unsigned id)
 {
 	struct r600_screen *rscreen = rctx->screen;
+	union util_color uc;
+
+	util_pack_color(state->border_color, PIPE_FORMAT_B8G8R8A8_UNORM, &uc);
 
 	radeon_state_init(rstate, rscreen->rw, R600_STATE_SAMPLER, id, R600_SHADER_PS);
 	rstate->states[R600_PS_SAMPLER__SQ_TEX_SAMPLER_WORD0_0] =
@@ -1164,7 +1083,8 @@ static void r600_sampler(struct r600_context *rctx, struct radeon_state *rstate,
 			S_03C000_XY_MAG_FILTER(r600_tex_filter(state->mag_img_filter)) |
 			S_03C000_XY_MIN_FILTER(r600_tex_filter(state->min_img_filter)) |
 			S_03C000_MIP_FILTER(r600_tex_mipfilter(state->min_mip_filter)) |
-			S_03C000_DEPTH_COMPARE_FUNCTION(r600_tex_compare(state->compare_func));
+	                S_03C000_DEPTH_COMPARE_FUNCTION(r600_tex_compare(state->compare_func)) |
+	                S_03C000_BORDER_COLOR_TYPE(uc.ui ? V_03C000_SQ_TEX_BORDER_COLOR_REGISTER : 0);
 	/* FIXME LOD it depends on texture base level ... */
 	rstate->states[R600_PS_SAMPLER__SQ_TEX_SAMPLER_WORD1_0] =
 			S_03C004_MIN_LOD(S_FIXED(CLAMP(state->min_lod, 0, 15), 6)) |
@@ -1172,55 +1092,9 @@ static void r600_sampler(struct r600_context *rctx, struct radeon_state *rstate,
 			S_03C004_LOD_BIAS(S_FIXED(CLAMP(state->lod_bias, -16, 16), 6));
 	rstate->states[R600_PS_SAMPLER__SQ_TEX_SAMPLER_WORD2_0] = S_03C008_TYPE(1);
 	radeon_state_pm4(rstate);
+
 }
 
-static inline unsigned r600_tex_swizzle(unsigned swizzle)
-{
-	switch (swizzle) {
-	case PIPE_SWIZZLE_RED:
-		return V_038010_SQ_SEL_X;
-	case PIPE_SWIZZLE_GREEN:
-		return V_038010_SQ_SEL_Y;
-	case PIPE_SWIZZLE_BLUE:
-		return V_038010_SQ_SEL_Z;
-	case PIPE_SWIZZLE_ALPHA:
-		return V_038010_SQ_SEL_W;
-	case PIPE_SWIZZLE_ZERO:
-		return V_038010_SQ_SEL_0;
-	default:
-	case PIPE_SWIZZLE_ONE:
-		return V_038010_SQ_SEL_1;
-	}
-}
-
-static inline unsigned r600_format_type(unsigned format_type)
-{
-	switch (format_type) {
-	default:
-	case UTIL_FORMAT_TYPE_UNSIGNED:
-		return V_038010_SQ_FORMAT_COMP_UNSIGNED;
-	case UTIL_FORMAT_TYPE_SIGNED:
-		return V_038010_SQ_FORMAT_COMP_SIGNED;
-	case UTIL_FORMAT_TYPE_FIXED:
-		return V_038010_SQ_FORMAT_COMP_UNSIGNED_BIASED;
-	}
-}
-
-static inline unsigned r600_tex_dim(unsigned dim)
-{
-	switch (dim) {
-	default:
-	case PIPE_TEXTURE_1D:
-		return V_038000_SQ_TEX_DIM_1D;
-	case PIPE_TEXTURE_2D:
-	case PIPE_TEXTURE_RECT:
-		return V_038000_SQ_TEX_DIM_2D;
-	case PIPE_TEXTURE_3D:
-		return V_038000_SQ_TEX_DIM_3D;
-	case PIPE_TEXTURE_CUBE:
-		return V_038000_SQ_TEX_DIM_CUBEMAP;
-	}
-}
 
 static void r600_resource(struct pipe_context *ctx, struct radeon_state *rstate,
 			const struct pipe_sampler_view *view, unsigned id)
@@ -1319,7 +1193,7 @@ static void r600_cb_cntl(struct r600_context *rctx, struct radeon_state *rstate)
 	}
 
 	if (pbs->logicop_enable) {
-		color_control |= (pbs->logicop_func) << 16;
+		color_control |= (pbs->logicop_func << 16) | (pbs->logicop_func << 20);
 	} else {
 		color_control |= (0xcc << 16);
 	}
@@ -1352,6 +1226,26 @@ static void r600_cb_cntl(struct r600_context *rctx, struct radeon_state *rstate)
 	rstate->states[R600_CB_CNTL__CB_CLRCMP_MSK] = 0xFFFFFFFF;
 	rstate->states[R600_CB_CNTL__PA_SC_AA_MASK] = 0xFFFFFFFF;
 	radeon_state_pm4(rstate);
+}
+
+static void r600_bind_shader_sampler(struct r600_context *rctx, struct r600_shader_sampler_states *sampler)
+{
+	int i;
+
+	for (i = 0; i < sampler->nsampler; i++) {
+		if (sampler->sampler[i])
+			radeon_draw_bind(&rctx->draw, sampler->sampler[i]);
+	}
+
+	for (i = 0; i < sampler->nborder; i++) {
+		if (sampler->border[i])
+			radeon_draw_bind(&rctx->draw, sampler->border[i]);
+	}
+
+	for (i = 0; i < sampler->nview; i++) {
+		if (sampler->view[i])
+			radeon_draw_bind(&rctx->draw, sampler->view[i]);
+	}
 }
 
 int r600_context_hw_states(struct pipe_context *ctx)
@@ -1388,15 +1282,9 @@ int r600_context_hw_states(struct pipe_context *ctx)
 	if (rctx->framebuffer->state.framebuffer.zsbuf) {
 		radeon_draw_bind(&rctx->draw, &rctx->framebuffer->rstate[0]);
 	}
-	for (i = 0; i < rctx->ps_nsampler; i++) {
-		if (rctx->ps_sampler[i]) {
-			radeon_draw_bind(&rctx->draw, rctx->ps_sampler[i]);
-		}
-	}
-	for (i = 0; i < rctx->ps_nsampler_view; i++) {
-		if (rctx->ps_sampler_view[i]) {
-			radeon_draw_bind(&rctx->draw, rctx->ps_sampler_view[i]);
-		}
-	}
+
+	r600_bind_shader_sampler(rctx, &rctx->vs_sampler);
+	r600_bind_shader_sampler(rctx, &rctx->ps_sampler);
+
 	return 0;
 }

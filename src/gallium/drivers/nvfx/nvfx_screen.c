@@ -4,15 +4,15 @@
 #include "util/u_simple_screen.h"
 
 #include "nouveau/nouveau_screen.h"
-
+#include "nouveau/nv_object.xml.h"
 #include "nvfx_context.h"
 #include "nvfx_screen.h"
 #include "nvfx_resource.h"
 #include "nvfx_tex.h"
 
-#define NV30TCL_CHIPSET_3X_MASK 0x00000003
-#define NV34TCL_CHIPSET_3X_MASK 0x00000010
-#define NV35TCL_CHIPSET_3X_MASK 0x000001e0
+#define NV30_3D_CHIPSET_3X_MASK 0x00000003
+#define NV34_3D_CHIPSET_3X_MASK 0x00000010
+#define NV35_3D_CHIPSET_3X_MASK 0x000001e0
 
 #define NV4X_GRCLASS4097_CHIPSETS 0x00000baf
 #define NV4X_GRCLASS4497_CHIPSETS 0x00005450
@@ -25,10 +25,9 @@ nvfx_screen_get_param(struct pipe_screen *pscreen, enum pipe_cap param)
 
 	switch (param) {
 	case PIPE_CAP_MAX_TEXTURE_IMAGE_UNITS:
-		/* TODO: check this */
-		return screen->is_nv4x ? 16 : 8;
+		return 16;
 	case PIPE_CAP_NPOT_TEXTURES:
-		return !!screen->is_nv4x;
+		return screen->advertise_npot;
 	case PIPE_CAP_TWO_SIDED_STENCIL:
 		return 1;
 	case PIPE_CAP_GLSL:
@@ -38,7 +37,7 @@ nvfx_screen_get_param(struct pipe_screen *pscreen, enum pipe_cap param)
 	case PIPE_CAP_POINT_SPRITE:
 		return 1;
 	case PIPE_CAP_MAX_RENDER_TARGETS:
-		return screen->is_nv4x ? 4 : 2;
+		return screen->use_nv4x ? 4 : 2;
 	case PIPE_CAP_OCCLUSION_QUERY:
 		return 1;
         case PIPE_CAP_TIMER_QUERY:
@@ -54,7 +53,7 @@ nvfx_screen_get_param(struct pipe_screen *pscreen, enum pipe_cap param)
 	case PIPE_CAP_MAX_TEXTURE_CUBE_LEVELS:
 		return 13;
 	case PIPE_CAP_TEXTURE_MIRROR_CLAMP:
-		return !!screen->is_nv4x;
+		return !!screen->use_nv4x;
 	case PIPE_CAP_TEXTURE_MIRROR_REPEAT:
 		return 1;
 	case PIPE_CAP_MAX_VERTEX_TEXTURE_UNITS:
@@ -62,7 +61,7 @@ nvfx_screen_get_param(struct pipe_screen *pscreen, enum pipe_cap param)
 	case PIPE_CAP_TGSI_CONT_SUPPORTED:
 		return 0;
 	case PIPE_CAP_BLEND_EQUATION_SEPARATE:
-		return !!screen->is_nv4x;
+		return screen->advertise_blend_equation_separate;
 	case PIPE_CAP_MAX_COMBINED_SAMPLERS:
 		return 16;
 	case PIPE_CAP_INDEP_BLEND_ENABLE:
@@ -75,10 +74,9 @@ nvfx_screen_get_param(struct pipe_screen *pscreen, enum pipe_cap param)
 		return 0;
 	case PIPE_CAP_TGSI_FS_COORD_ORIGIN_LOWER_LEFT:
 	case PIPE_CAP_TGSI_FS_COORD_PIXEL_CENTER_HALF_INTEGER:
-		return 1;
 	case PIPE_CAP_TGSI_FS_COORD_ORIGIN_UPPER_LEFT:
 	case PIPE_CAP_TGSI_FS_COORD_PIXEL_CENTER_INTEGER:
-		return 0;
+		return 1;
 	case PIPE_CAP_MAX_FS_INSTRUCTIONS:
 	case PIPE_CAP_MAX_FS_ALU_INSTRUCTIONS:
 	case PIPE_CAP_MAX_FS_TEX_INSTRUCTIONS:
@@ -87,43 +85,45 @@ nvfx_screen_get_param(struct pipe_screen *pscreen, enum pipe_cap param)
 	case PIPE_CAP_MAX_FS_CONTROL_FLOW_DEPTH:
 		/* FIXME: is it the dynamic (nv30:0/nv40:24) or the static
 		   value (nv30:0/nv40:4) ? */
-		return screen->is_nv4x ? 4 : 0;
+		return screen->use_nv4x ? 4 : 0;
 	case PIPE_CAP_MAX_FS_INPUTS:
-		return 10;
+		return screen->use_nv4x ? 12 : 10;
 	case PIPE_CAP_MAX_FS_CONSTS:
-		return screen->is_nv4x ? 224 : 32;
+		return screen->use_nv4x ? 224 : 32;
 	case PIPE_CAP_MAX_FS_TEMPS:
 		return 32;
 	case PIPE_CAP_MAX_FS_ADDRS:
-		return screen->is_nv4x ? 1 : 0;
+		return screen->use_nv4x ? 1 : 0;
 	case PIPE_CAP_MAX_FS_PREDS:
-		return screen->is_nv4x ? 1 : 0;
+		return 0; /* we could expose these, but nothing uses them */
 	case PIPE_CAP_MAX_VS_INSTRUCTIONS:
 	case PIPE_CAP_MAX_VS_ALU_INSTRUCTIONS:
-		return screen->is_nv4x ? 512 : 256;
+		return screen->use_nv4x ? 512 : 256;
 	case PIPE_CAP_MAX_VS_TEX_INSTRUCTIONS:
 	case PIPE_CAP_MAX_VS_TEX_INDIRECTIONS:
-		return screen->is_nv4x ? 512 : 0;
+		return screen->use_nv4x ? 512 : 0;
 	case PIPE_CAP_MAX_VS_CONTROL_FLOW_DEPTH:
 		/* FIXME: is it the dynamic (nv30:24/nv40:24) or the static
 		   value (nv30:1/nv40:4) ? */
-		return screen->is_nv4x ? 4 : 1;
+		return screen->use_nv4x ? 4 : 1;
 	case PIPE_CAP_MAX_VS_INPUTS:
 		return 16;
 	case PIPE_CAP_MAX_VS_CONSTS:
-		return 256;
+		/* - 6 is for clip planes; Gallium should be fixed to put
+		 * them in the vertex shader itself, so we don't need to reserve these */
+		return (screen->use_nv4x ? 468 : 256) - 6;
 	case PIPE_CAP_MAX_VS_TEMPS:
-		return screen->is_nv4x ? 32 : 13;
+		return screen->use_nv4x ? 32 : 13;
 	case PIPE_CAP_MAX_VS_ADDRS:
 		return 2;
 	case PIPE_CAP_MAX_VS_PREDS:
-		return screen->is_nv4x ? 1 : 0;
+		return 0; /* we could expose these, but nothing uses them */
 	case PIPE_CAP_GEOMETRY_SHADER4:
 		return 0;
 	case PIPE_CAP_DEPTH_CLAMP:
 		return 0; // TODO: implement depth clamp
 	default:
-		NOUVEAU_ERR("Unknown PIPE_CAP %d\n", param);
+		NOUVEAU_ERR("Warning: unknown PIPE_CAP %d\n", param);
 		return 0;
 	}
 }
@@ -141,9 +141,9 @@ nvfx_screen_get_paramf(struct pipe_screen *pscreen, enum pipe_cap param)
 	case PIPE_CAP_MAX_POINT_WIDTH_AA:
 		return 64.0;
 	case PIPE_CAP_MAX_TEXTURE_ANISOTROPY:
-		return screen->is_nv4x ? 16.0 : 8.0;
+		return screen->use_nv4x ? 16.0 : 8.0;
 	case PIPE_CAP_MAX_TEXTURE_LOD_BIAS:
-		return screen->is_nv4x ? 16.0 : 4.0;
+		return 15.0;
 	default:
 		NOUVEAU_ERR("Unknown PIPE_CAP %d\n", param);
 		return 0.0;
@@ -168,6 +168,14 @@ nvfx_screen_is_format_supported(struct pipe_screen *pscreen,
 		case PIPE_FORMAT_B8G8R8X8_UNORM:
 		case PIPE_FORMAT_B5G6R5_UNORM:
 			break;
+		case PIPE_FORMAT_R16G16B16A16_FLOAT:
+			if(!screen->advertise_fp16)
+				return FALSE;
+			break;
+		case PIPE_FORMAT_R32G32B32A32_FLOAT:
+			if(!screen->advertise_fp32)
+				return FALSE;
+			break;
 		default:
 			return FALSE;
 		}
@@ -188,8 +196,11 @@ nvfx_screen_is_format_supported(struct pipe_screen *pscreen,
 		struct nvfx_texture_format* tf = &nvfx_texture_formats[format];
 		if(util_format_is_s3tc(format) && !util_format_s3tc_enabled)
 			return FALSE;
-
-		if(screen->is_nv4x)
+		if(format == PIPE_FORMAT_R16G16B16A16_FLOAT && !screen->advertise_fp16)
+			return FALSE;
+		if(format == PIPE_FORMAT_R32G32B32A32_FLOAT && !screen->advertise_fp32)
+			return FALSE;
+		if(screen->use_nv4x)
 		{
 			if(tf->fmt[4] < 0)
 				return FALSE;
@@ -245,9 +256,9 @@ static void nv30_screen_init(struct nvfx_screen *screen)
 
 	/* TODO: perhaps we should do some of this on nv40 too? */
 	for (i=1; i<8; i++) {
-		OUT_RING(chan, RING_3D(NV34TCL_VIEWPORT_CLIP_HORIZ(i), 1));
+		OUT_RING(chan, RING_3D(NV30_3D_VIEWPORT_CLIP_HORIZ(i), 1));
 		OUT_RING(chan, 0);
-		OUT_RING(chan, RING_3D(NV34TCL_VIEWPORT_CLIP_VERT(i), 1));
+		OUT_RING(chan, RING_3D(NV30_3D_VIEWPORT_CLIP_VERT(i), 1));
 		OUT_RING(chan, 0);
 	}
 
@@ -283,14 +294,14 @@ static void nv30_screen_init(struct nvfx_screen *screen)
 	OUT_RING(chan, RING_3D(0x1d88, 1));
 	OUT_RING(chan, 0x00001200);
 
-	OUT_RING(chan, RING_3D(NV34TCL_RC_ENABLE, 1));
+	OUT_RING(chan, RING_3D(NV30_3D_RC_ENABLE, 1));
 	OUT_RING(chan, 0);
 
-	OUT_RING(chan, RING_3D(NV34TCL_DEPTH_RANGE_NEAR, 2));
+	OUT_RING(chan, RING_3D(NV30_3D_DEPTH_RANGE_NEAR, 2));
 	OUT_RING(chan, fui(0.0));
 	OUT_RING(chan, fui(1.0));
 
-	OUT_RING(chan, RING_3D(NV34TCL_MULTISAMPLE_CONTROL, 1));
+	OUT_RING(chan, RING_3D(NV30_3D_MULTISAMPLE_CONTROL, 1));
 	OUT_RING(chan, 0xffff0000);
 
 	/* enables use of vp rather than fixed-function somehow */
@@ -302,9 +313,12 @@ static void nv40_screen_init(struct nvfx_screen *screen)
 {
 	struct nouveau_channel *chan = screen->base.channel;
 
-	OUT_RING(chan, RING_3D(NV40TCL_DMA_COLOR2, 2));
+	OUT_RING(chan, RING_3D(NV40_3D_DMA_COLOR2, 2));
 	OUT_RING(chan, screen->base.channel->vram->handle);
 	OUT_RING(chan, screen->base.channel->vram->handle);
+
+	OUT_RING(chan, RING_3D(0x1450, 1));
+	OUT_RING(chan, 0x00000004);
 
 	OUT_RING(chan, RING_3D(0x1ea4, 3));
 	OUT_RING(chan, 0x00000010);
@@ -316,7 +330,7 @@ static void nv40_screen_init(struct nvfx_screen *screen)
 	OUT_RING(chan, 0x06144321);
 	OUT_RING(chan, RING_3D(0x1fc8, 2));
 	OUT_RING(chan, 0xedcba987);
-	OUT_RING(chan, 0x00000021);
+	OUT_RING(chan, 0x0000006f);
 	OUT_RING(chan, RING_3D(0x1fd0, 1));
 	OUT_RING(chan, 0x00171615);
 	OUT_RING(chan, RING_3D(0x1fd4, 1));
@@ -325,9 +339,12 @@ static void nv40_screen_init(struct nvfx_screen *screen)
 	OUT_RING(chan, RING_3D(0x1ef8, 1));
 	OUT_RING(chan, 0x0020ffff);
 	OUT_RING(chan, RING_3D(0x1d64, 1));
-	OUT_RING(chan, 0x00d30000);
+	OUT_RING(chan, 0x01d300d4);
 	OUT_RING(chan, RING_3D(0x1e94, 1));
 	OUT_RING(chan, 0x00000001);
+
+	OUT_RING(chan, RING_3D(NV40_3D_MIPMAP_ROUNDING, 1));
+	OUT_RING(chan, NV40_3D_MIPMAP_ROUNDING_MODE_DOWN);
 }
 
 static unsigned
@@ -343,19 +360,6 @@ nvfx_screen_get_vertex_buffer_flags(struct nvfx_screen* screen)
 		)
 		vram_hack_default = 1;
 	vram_hack = debug_get_bool_option("NOUVEAU_VTXIDX_IN_VRAM", vram_hack_default);
-
-#ifdef DEBUG
-	if(!vram_hack)
-	{
-		fprintf(stderr, "Some systems may experience graphics corruption due to randomly misplaced vertices.\n"
-			"If this is happening, export NOUVEAU_VTXIDX_IN_VRAM=1 may reduce or eliminate the problem\n");
-	}
-	else
-	{
-		fprintf(stderr, "A performance reducing hack is being used to help avoid graphics corruption.\n"
-			"You can try export NOUVEAU_VTXIDX_IN_VRAM=0 to disable it.\n");
-	}
-#endif
 
 	return vram_hack ? NOUVEAU_BO_VRAM : NOUVEAU_BO_GART;
 }
@@ -402,23 +406,23 @@ nvfx_screen_create(struct pipe_winsys *ws, struct nouveau_device *dev)
 
 	switch (dev->chipset & 0xf0) {
 	case 0x30:
-		if (NV30TCL_CHIPSET_3X_MASK & (1 << (dev->chipset & 0x0f)))
-			eng3d_class = 0x0397;
-		else if (NV34TCL_CHIPSET_3X_MASK & (1 << (dev->chipset & 0x0f)))
-			eng3d_class = 0x0697;
-		else if (NV35TCL_CHIPSET_3X_MASK & (1 << (dev->chipset & 0x0f)))
-			eng3d_class = 0x0497;
+		if (NV30_3D_CHIPSET_3X_MASK & (1 << (dev->chipset & 0x0f)))
+			eng3d_class = NV30_3D;
+		else if (NV34_3D_CHIPSET_3X_MASK & (1 << (dev->chipset & 0x0f)))
+			eng3d_class = NV34_3D;
+		else if (NV35_3D_CHIPSET_3X_MASK & (1 << (dev->chipset & 0x0f)))
+			eng3d_class = NV35_3D;
 		break;
 	case 0x40:
 		if (NV4X_GRCLASS4097_CHIPSETS & (1 << (dev->chipset & 0x0f)))
-			eng3d_class = NV40TCL;
+			eng3d_class = NV40_3D;
 		else if (NV4X_GRCLASS4497_CHIPSETS & (1 << (dev->chipset & 0x0f)))
-			eng3d_class = NV44TCL;
+			eng3d_class = NV44_3D;
 		screen->is_nv4x = ~0;
 		break;
 	case 0x60:
 		if (NV6X_GRCLASS4497_CHIPSETS & (1 << (dev->chipset & 0x0f)))
-			eng3d_class = NV44TCL;
+			eng3d_class = NV44_3D;
 		screen->is_nv4x = ~0;
 		break;
 	}
@@ -428,17 +432,37 @@ nvfx_screen_create(struct pipe_winsys *ws, struct nouveau_device *dev)
 		return NULL;
 	}
 
-	screen->force_swtnl = debug_get_bool_option("NOUVEAU_SWTNL", FALSE);
+	screen->advertise_npot = !!screen->is_nv4x;
+	screen->advertise_blend_equation_separate = !!screen->is_nv4x;
+	screen->use_nv4x = screen->is_nv4x;
+
+	if(screen->is_nv4x) {
+		if(debug_get_bool_option("NVFX_SIMULATE_NV30", FALSE))
+			screen->use_nv4x = 0;
+		if(!debug_get_bool_option("NVFX_NPOT", TRUE))
+			screen->advertise_npot = 0;
+		if(!debug_get_bool_option("NVFX_BLEND_EQ_SEP", TRUE))
+			screen->advertise_blend_equation_separate = 0;
+	}
+
+	screen->force_swtnl = debug_get_bool_option("NVFX_SWTNL", FALSE);
 	screen->trace_draw = debug_get_bool_option("NVFX_TRACE_DRAW", FALSE);
 
 	screen->buffer_allocation_cost = debug_get_num_option("NVFX_BUFFER_ALLOCATION_COST", 16384);
 	screen->inline_cost_per_hardware_cost = atof(debug_get_option("NVFX_INLINE_COST_PER_HARDWARE_COST", "1.0"));
 	screen->static_reuse_threshold = atof(debug_get_option("NVFX_STATIC_REUSE_THRESHOLD", "2.0"));
 
+	/* We don't advertise these by default because filtering and blending doesn't work as
+	 * it should, due to several restrictions.
+	 * The only exception is fp16 on nv40.
+	 */
+	screen->advertise_fp16 = debug_get_bool_option("NVFX_FP16", !!screen->use_nv4x);
+	screen->advertise_fp32 = debug_get_bool_option("NVFX_FP32", 0);
+
 	screen->vertex_buffer_reloc_flags = nvfx_screen_get_vertex_buffer_flags(screen);
 
 	/* surely both nv3x and nv44 support index buffers too: find out how and test that */
-	if(eng3d_class == NV40TCL)
+	if(eng3d_class == NV40_3D)
 		screen->index_buffer_reloc_flags = screen->vertex_buffer_reloc_flags;
 
 	if(!screen->force_swtnl && screen->vertex_buffer_reloc_flags == screen->index_buffer_reloc_flags)
@@ -487,8 +511,8 @@ nvfx_screen_create(struct pipe_winsys *ws, struct nouveau_device *dev)
 	LIST_INITHEAD(&screen->query_list);
 
 	/* Vtxprog resources */
-	if (nouveau_resource_init(&screen->vp_exec_heap, 0, screen->is_nv4x ? 512 : 256) ||
-	    nouveau_resource_init(&screen->vp_data_heap, 0, 256)) {
+	if (nouveau_resource_init(&screen->vp_exec_heap, 0, screen->use_nv4x ? 512 : 256) ||
+	    nouveau_resource_init(&screen->vp_data_heap, 0, screen->use_nv4x ? 468 : 256)) {
 		nvfx_screen_destroy(pscreen);
 		return NULL;
 	}
@@ -497,25 +521,25 @@ nvfx_screen_create(struct pipe_winsys *ws, struct nouveau_device *dev)
 
 	/* Static eng3d initialisation */
 	/* note that we just started using the channel, so we must have space in the pushbuffer */
-	OUT_RING(chan, RING_3D(NV34TCL_DMA_NOTIFY, 1));
+	OUT_RING(chan, RING_3D(NV30_3D_DMA_NOTIFY, 1));
 	OUT_RING(chan, screen->sync->handle);
-	OUT_RING(chan, RING_3D(NV34TCL_DMA_TEXTURE0, 2));
+	OUT_RING(chan, RING_3D(NV30_3D_DMA_TEXTURE0, 2));
 	OUT_RING(chan, chan->vram->handle);
 	OUT_RING(chan, chan->gart->handle);
-	OUT_RING(chan, RING_3D(NV34TCL_DMA_COLOR1, 1));
+	OUT_RING(chan, RING_3D(NV30_3D_DMA_COLOR1, 1));
 	OUT_RING(chan, chan->vram->handle);
-	OUT_RING(chan, RING_3D(NV34TCL_DMA_COLOR0, 2));
+	OUT_RING(chan, RING_3D(NV30_3D_DMA_COLOR0, 2));
 	OUT_RING(chan, chan->vram->handle);
 	OUT_RING(chan, chan->vram->handle);
-	OUT_RING(chan, RING_3D(NV34TCL_DMA_VTXBUF0, 2));
+	OUT_RING(chan, RING_3D(NV30_3D_DMA_VTXBUF0, 2));
 	OUT_RING(chan, chan->vram->handle);
 	OUT_RING(chan, chan->gart->handle);
 
-	OUT_RING(chan, RING_3D(NV34TCL_DMA_FENCE, 2));
+	OUT_RING(chan, RING_3D(NV30_3D_DMA_FENCE, 2));
 	OUT_RING(chan, 0);
 	OUT_RING(chan, screen->query->handle);
 
-	OUT_RING(chan, RING_3D(NV34TCL_DMA_IN_MEMORY7, 2));
+	OUT_RING(chan, RING_3D(NV30_3D_DMA_UNK1AC, 2));
 	OUT_RING(chan, chan->vram->handle);
 	OUT_RING(chan, chan->vram->handle);
 

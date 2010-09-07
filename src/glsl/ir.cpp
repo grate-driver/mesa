@@ -287,11 +287,15 @@ static const char *const operator_strs[] = {
    "pow",
 };
 
+const char *ir_expression::operator_string(ir_expression_operation op)
+{
+   assert((unsigned int) op < Elements(operator_strs));
+   return operator_strs[op];
+}
+
 const char *ir_expression::operator_string()
 {
-   assert((unsigned int) operation <=
-	  sizeof(operator_strs) / sizeof(operator_strs[0]));
-   return operator_strs[operation];
+   return operator_string(this->operation);
 }
 
 ir_expression_operation
@@ -700,6 +704,18 @@ ir_constant::has_value(const ir_constant *c) const
 
    return true;
 }
+
+
+ir_loop::ir_loop()
+{
+   this->ir_type = ir_type_loop;
+   this->cmp = ir_unop_neg;
+   this->from = NULL;
+   this->to = NULL;
+   this->increment = NULL;
+   this->counter = NULL;
+}
+
 
 ir_dereference_variable::ir_dereference_variable(ir_variable *var)
 {

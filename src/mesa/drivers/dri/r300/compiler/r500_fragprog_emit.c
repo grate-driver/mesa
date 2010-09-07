@@ -63,7 +63,7 @@ struct branch_info {
 	int Endif;
 };
 
-struct loop_info {
+struct r500_loop_info {
 	int BgnLoop;
 
 	int BranchDepth;
@@ -84,7 +84,7 @@ struct emit_state {
 	unsigned int CurrentBranchDepth;
 	unsigned int BranchesReserved;
 
-	struct loop_info * Loops;
+	struct r500_loop_info * Loops;
 	unsigned int CurrentLoopDepth;
 	unsigned int LoopsReserved;
 
@@ -229,7 +229,7 @@ static void emit_paired(struct r300_fragment_program_compiler *c, struct rc_pair
 {
 	PROG_CODE;
 
-	if (code->inst_end >= 511) {
+	if (code->inst_end >= c->Base.max_alu_insts-1) {
 		error("emit_alu: Too many instructions");
 		return;
 	}
@@ -322,7 +322,7 @@ static int emit_tex(struct r300_fragment_program_compiler *c, struct rc_sub_inst
 {
 	PROG_CODE;
 
-	if (code->inst_end >= 511) {
+	if (code->inst_end >= c->Base.max_alu_insts-1) {
 		error("emit_tex: Too many instructions");
 		return 0;
 	}
@@ -370,7 +370,7 @@ static int emit_tex(struct r300_fragment_program_compiler *c, struct rc_sub_inst
 
 static void emit_flowcontrol(struct emit_state * s, struct rc_instruction * inst)
 {
-	if (s->Code->inst_end >= 511) {
+	if (s->Code->inst_end >= s->C->max_alu_insts-1) {
 		rc_error(s->C, "emit_tex: Too many instructions");
 		return;
 	}
@@ -387,13 +387,13 @@ static void emit_flowcontrol(struct emit_state * s, struct rc_instruction * inst
 
 	switch(inst->U.I.Opcode){
 	struct branch_info * branch;
-	struct loop_info * loop;
+	struct r500_loop_info * loop;
 	case RC_OPCODE_BGNLOOP:
-		memory_pool_array_reserve(&s->C->Pool, struct loop_info,
+		memory_pool_array_reserve(&s->C->Pool, struct r500_loop_info,
 			s->Loops, s->CurrentLoopDepth, s->LoopsReserved, 1);
 
 		loop = &s->Loops[s->CurrentLoopDepth++];
-		memset(loop, 0, sizeof(struct loop_info));
+		memset(loop, 0, sizeof(struct r500_loop_info));
 		loop->BranchDepth = s->CurrentBranchDepth;
 		loop->BgnLoop = newip;
 
@@ -546,8 +546,9 @@ static void emit_flowcontrol(struct emit_state * s, struct rc_instruction * inst
 	}
 }
 
-void r500BuildFragmentProgramHwCode(struct r300_fragment_program_compiler *compiler)
+void r500BuildFragmentProgramHwCode(struct radeon_compiler *c, void *user)
 {
+	struct r300_fragment_program_compiler *compiler = (struct r300_fragment_program_compiler*)c;
 	struct emit_state s;
 	struct r500_fragment_program_code *code = &compiler->code->code.r500;
 
@@ -577,7 +578,7 @@ void r500BuildFragmentProgramHwCode(struct r300_fragment_program_compiler *compi
 		}
 	}
 
-	if (code->max_temp_idx >= 128)
+	if (code->max_temp_idx >= compiler->Base.max_temp_regs)
 		rc_error(&compiler->Base, "Too many hardware temporaries used");
 
 	if (compiler->Base.Error)
@@ -587,7 +588,7 @@ void r500BuildFragmentProgramHwCode(struct r300_fragment_program_compiler *compi
 	    (code->inst[code->inst_end].inst0 & R500_INST_TYPE_MASK) != R500_INST_TYPE_OUT) {
 		/* This may happen when dead-code elimination is disabled or
 		 * when most of the fragment program logic is leading to a KIL */
-		if (code->inst_end >= 511) {
+		if (code->inst_end >= compiler->Base.max_alu_insts-1) {
 			rc_error(&compiler->Base, "Introducing fake OUT: Too many instructions");
 			return;
 		}

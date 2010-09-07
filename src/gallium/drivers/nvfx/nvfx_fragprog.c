@@ -1,3 +1,4 @@
+#include <float.h>
 #include "pipe/p_context.h"
 #include "pipe/p_defines.h"
 #include "pipe/p_state.h"
@@ -13,9 +14,6 @@
 #include "nvfx_context.h"
 #include "nvfx_shader.h"
 #include "nvfx_resource.h"
-
-#define MAX_CONSTS 128
-#define MAX_IMM 32
 
 struct nvfx_fpc {
 	struct nvfx_pipe_fragment_program* pfp;
@@ -33,13 +31,9 @@ struct nvfx_fpc {
 	unsigned inst_offset;
 	unsigned have_const;
 
-	struct {
-		int pipe;
-		float vals[4];
-	} consts[MAX_CONSTS];
-	int nr_consts;
+	struct util_dynarray imm_data;
 
-	struct nvfx_reg imm[MAX_IMM];
+	struct nvfx_reg* r_imm;
 	unsigned nr_imm;
 
 	unsigned char generic_to_slot[256]; /* semantic idx for each input semantic */
@@ -72,19 +66,14 @@ release_temps(struct nvfx_fpc *fpc)
 	fpc->r_temps_discard = 0ULL;
 }
 
-static INLINE struct nvfx_reg
-constant(struct nvfx_fpc *fpc, int pipe, float vals[4])
+static inline struct nvfx_reg
+nvfx_fp_imm(struct nvfx_fpc *fpc, float a, float b, float c, float d)
 {
-	int idx;
+	float v[4] = {a, b, c, d};
+	int idx = fpc->imm_data.size >> 4;
 
-	if (fpc->nr_consts == MAX_CONSTS)
-		assert(0);
-	idx = fpc->nr_consts++;
-
-	fpc->consts[idx].pipe = pipe;
-	if (pipe == -1)
-		memcpy(fpc->consts[idx].vals, vals, 4 * sizeof(float));
-	return nvfx_reg(NVFXSR_CONST, idx);
+	memcpy(util_dynarray_grow(&fpc->imm_data, sizeof(float) * 4), v, 4 * sizeof(float));
+	return nvfx_reg(NVFXSR_IMM, idx);
 }
 
 static void
@@ -121,26 +110,35 @@ emit_src(struct nvfx_fpc *fpc, int pos, struct nvfx_src src)
 		//printf("adding relocation at %x for %x\n", fpc->inst_offset, src.index);
 		util_dynarray_append(&fpc->fp->slot_relocations[src.reg.index], unsigned, fpc->inst_offset + pos + 1);
 		break;
-	case NVFXSR_CONST:
+	case NVFXSR_IMM:
 		if (!fpc->have_const) {
 			grow_insns(fpc, 4);
+			hw = &fp->insn[fpc->inst_offset];
 			fpc->have_const = 1;
 		}
 
-		hw = &fp->insn[fpc->inst_offset];
-		if (fpc->consts[src.reg.index].pipe >= 0) {
+		memcpy(&fp->insn[fpc->inst_offset + 4],
+				(float*)fpc->imm_data.data + src.reg.index * 4,
+				sizeof(uint32_t) * 4);
+
+		sr |= (NVFX_FP_REG_TYPE_CONST << NVFX_FP_REG_TYPE_SHIFT);
+		break;
+	case NVFXSR_CONST:
+		if (!fpc->have_const) {
+			grow_insns(fpc, 4);
+			hw = &fp->insn[fpc->inst_offset];
+			fpc->have_const = 1;
+		}
+
+		{
 			struct nvfx_fragment_program_data *fpd;
 
 			fp->consts = realloc(fp->consts, ++fp->nr_consts *
 					     sizeof(*fpd));
 			fpd = &fp->consts[fp->nr_consts - 1];
 			fpd->offset = fpc->inst_offset + 4;
-			fpd->index = fpc->consts[src.reg.index].pipe;
+			fpd->index = src.reg.index;
 			memset(&fp->insn[fpd->offset], 0, sizeof(uint32_t) * 4);
-		} else {
-			memcpy(&fp->insn[fpc->inst_offset + 4],
-				fpc->consts[src.reg.index].vals,
-				sizeof(uint32_t) * 4);
 		}
 
 		sr |= (NVFX_FP_REG_TYPE_CONST << NVFX_FP_REG_TYPE_SHIFT);
@@ -207,7 +205,7 @@ nvfx_fp_emit(struct nvfx_fpc *fpc, struct nvfx_insn insn)
 	memset(hw, 0, sizeof(uint32_t) * 4);
 
 	if (insn.op == NVFX_FP_OP_OPCODE_KIL)
-		fp->fp_control |= NV34TCL_FP_CONTROL_USES_KIL;
+		fp->fp_control |= NV30_3D_FP_CONTROL_USES_KIL;
 	hw[0] |= (insn.op << NVFX_FP_OP_OPCODE_SHIFT);
 	hw[0] |= (insn.mask << NVFX_FP_OP_OUTMASK_SHIFT);
 	hw[2] |= (insn.scale << NVFX_FP_OP_DST_SCALE_SHIFT);
@@ -408,11 +406,11 @@ tgsi_src(struct nvfx_fpc *fpc, const struct tgsi_full_src_register *fsrc)
 		}
 		break;
 	case TGSI_FILE_CONSTANT:
-		src.reg = constant(fpc, fsrc->Register.Index, NULL);
+		src.reg = nvfx_reg(NVFXSR_CONST, fsrc->Register.Index);
 		break;
 	case TGSI_FILE_IMMEDIATE:
 		assert(fsrc->Register.Index < fpc->nr_imm);
-		src.reg = fpc->imm[fsrc->Register.Index];
+		src.reg = fpc->r_imm[fsrc->Register.Index];
 		break;
 	case TGSI_FILE_TEMPORARY:
 		src.reg = fpc->r_temp[fsrc->Register.Index];
@@ -495,7 +493,21 @@ nvfx_fragprog_parse_instruction(struct nvfx_context* nvfx, struct nvfx_fpc *fpc,
 
 		switch (fsrc->Register.File) {
 		case TGSI_FILE_INPUT:
-			if (ai == -1 || ai == fsrc->Register.Index) {
+			if(fpc->pfp->info.input_semantic_name[fsrc->Register.Index] == TGSI_SEMANTIC_FOG && (0
+					|| fsrc->Register.SwizzleX == PIPE_SWIZZLE_ALPHA
+					|| fsrc->Register.SwizzleY == PIPE_SWIZZLE_ALPHA
+					|| fsrc->Register.SwizzleZ == PIPE_SWIZZLE_ALPHA
+					|| fsrc->Register.SwizzleW == PIPE_SWIZZLE_ALPHA
+					)) {
+				/* hardware puts 0 in fogcoord.w, but GL/Gallium want 1 there */
+				struct nvfx_src addend = nvfx_src(nvfx_fp_imm(fpc, 0, 0, 0, 1));
+				addend.swz[0] = fsrc->Register.SwizzleX;
+				addend.swz[1] = fsrc->Register.SwizzleY;
+				addend.swz[2] = fsrc->Register.SwizzleZ;
+				addend.swz[3] = fsrc->Register.SwizzleW;
+				src[i] = nvfx_src(temp(fpc));
+				nvfx_fp_emit(fpc, arith(0, ADD, src[i].reg, NVFX_FP_MASK_ALL, tgsi_src(fpc, fsrc), addend, none));
+			} else if (ai == -1 || ai == fsrc->Register.Index) {
 				ai = fsrc->Register.Index;
 				src[i] = tgsi_src(fpc, fsrc);
 			} else {
@@ -629,7 +641,27 @@ nvfx_fragprog_parse_instruction(struct nvfx_context* nvfx, struct nvfx_fpc *fpc,
 	case TGSI_OPCODE_LG2:
 		nvfx_fp_emit(fpc, arith(sat, LG2, dst, mask, src[0], none, none));
 		break;
-//	case TGSI_OPCODE_LIT:
+	case TGSI_OPCODE_LIT:
+		if(!nvfx->is_nv4x)
+			nvfx_fp_emit(fpc, arith(sat, LIT_NV30, dst, mask, src[0], src[1], src[2]));
+		else {
+			/* we use FLT_MIN, so that log2 never gives -infinity, and thus multiplication by
+			 * specular 0 always gives 0, so that ex2 gives 1, to satisfy the 0^0 = 1 requirement
+			 *
+			 * NOTE: if we start using half precision, we might need an fp16 FLT_MIN here instead
+			 */
+			struct nvfx_src maxs = nvfx_src(nvfx_fp_imm(fpc, 0, FLT_MIN, 0, 0));
+			tmp = nvfx_src(temp(fpc));
+			if (ci>= 0 || ii >= 0) {
+				nvfx_fp_emit(fpc, arith(0, MOV, tmp.reg, NVFX_FP_MASK_X | NVFX_FP_MASK_Y, maxs, none, none));
+				maxs = tmp;
+			}
+			nvfx_fp_emit(fpc, arith(0, MAX, tmp.reg, NVFX_FP_MASK_Y | NVFX_FP_MASK_W, swz(src[0], X, X, X, Y), swz(maxs, X, X, Y, Y), none));
+			nvfx_fp_emit(fpc, arith(0, LG2, tmp.reg, NVFX_FP_MASK_W, swz(tmp, W, W, W, W), none, none));
+			nvfx_fp_emit(fpc, arith(0, MUL, tmp.reg, NVFX_FP_MASK_W, swz(tmp, W, W, W, W), swz(src[0], W, W, W, W), none));
+			nvfx_fp_emit(fpc, arith(sat, LITEX2_NV40, dst, mask, swz(tmp, Y, Y, W, W), none, none));
+		}
+		break;
 	case TGSI_OPCODE_LRP:
 		if(!nvfx->is_nv4x)
 			nvfx_fp_emit(fpc, arith(sat, LRP_NV30, dst, mask, src[0], src[1], src[2]));
@@ -735,12 +767,24 @@ nvfx_fragprog_parse_instruction(struct nvfx_context* nvfx, struct nvfx_fpc *fpc,
 		nvfx_fp_emit(fpc, arith(sat, SNE, dst, mask, src[0], src[1], none));
 		break;
 	case TGSI_OPCODE_SSG:
-		tmp = nvfx_src(temp(fpc));
-		tmp2 = nvfx_src(temp(fpc));
-		nvfx_fp_emit(fpc, arith(0, SGT, tmp.reg, mask, src[0], nvfx_src(nvfx_reg(NVFXSR_CONST, 0)), none));
-		nvfx_fp_emit(fpc, arith(0, SLT, tmp.reg, mask, src[0], nvfx_src(nvfx_reg(NVFXSR_CONST, 0)), none));
-		nvfx_fp_emit(fpc, arith(sat, ADD, dst, mask, tmp, neg(tmp2), none));
+	{
+		struct nvfx_src minones = swz(nvfx_src(nvfx_fp_imm(fpc, -1, -1, -1, -1)), X, X, X, X);
+
+		insn = arith(sat, MOV, dst, mask, src[0], none, none);
+		insn.cc_update = 1;
+		nvfx_fp_emit(fpc, insn);
+
+		insn = arith(0, STR, dst, mask, none, none, none);
+		insn.cc_test = NVFX_COND_GT;
+		nvfx_fp_emit(fpc, insn);
+
+		if(!sat) {
+			insn = arith(0, MOV, dst, mask, minones, none, none);
+			insn.cc_test = NVFX_COND_LT;
+			nvfx_fp_emit(fpc, insn);
+		}
 		break;
+	}
 	case TGSI_OPCODE_STR:
 		nvfx_fp_emit(fpc, arith(sat, STR, dst, mask, src[0], src[1], none));
 		break;
@@ -784,7 +828,7 @@ nvfx_fragprog_parse_instruction(struct nvfx_context* nvfx, struct nvfx_fpc *fpc,
 	case TGSI_OPCODE_IF:
 		// MOVRC0 R31 (TR0.xyzw), R<src>:
 		// IF (NE.xxxx) ELSE <else> END <end>
-		if(!nvfx->is_nv4x)
+		if(!nvfx->use_nv4x)
 			goto nv3x_cflow;
 		nv40_fp_if(fpc, src[0]);
 		break;
@@ -792,7 +836,7 @@ nvfx_fragprog_parse_instruction(struct nvfx_context* nvfx, struct nvfx_fpc *fpc,
 	case TGSI_OPCODE_ELSE:
 	{
 		uint32_t *hw;
-		if(!nvfx->is_nv4x)
+		if(!nvfx->use_nv4x)
 			goto nv3x_cflow;
 		assert(util_dynarray_contains(&fpc->if_stack, unsigned));
 		hw = &fpc->fp->insn[util_dynarray_top(&fpc->if_stack, unsigned)];
@@ -803,7 +847,7 @@ nvfx_fragprog_parse_instruction(struct nvfx_context* nvfx, struct nvfx_fpc *fpc,
 	case TGSI_OPCODE_ENDIF:
 	{
 		uint32_t *hw;
-		if(!nvfx->is_nv4x)
+		if(!nvfx->use_nv4x)
 			goto nv3x_cflow;
 		assert(util_dynarray_contains(&fpc->if_stack, unsigned));
 		hw = &fpc->fp->insn[util_dynarray_pop(&fpc->if_stack, unsigned)];
@@ -826,19 +870,19 @@ nvfx_fragprog_parse_instruction(struct nvfx_context* nvfx, struct nvfx_fpc *fpc,
 		break;
 
 	case TGSI_OPCODE_CAL:
-		if(!nvfx->is_nv4x)
+		if(!nvfx->use_nv4x)
 			goto nv3x_cflow;
 		nv40_fp_cal(fpc, finst->Label.Label);
 		break;
 
 	case TGSI_OPCODE_RET:
-		if(!nvfx->is_nv4x)
+		if(!nvfx->use_nv4x)
 			goto nv3x_cflow;
 		nv40_fp_ret(fpc);
 		break;
 
 	case TGSI_OPCODE_BGNLOOP:
-		if(!nvfx->is_nv4x)
+		if(!nvfx->use_nv4x)
 			goto nv3x_cflow;
 		/* TODO: we should support using two nested REPs to allow a > 255 iteration count */
 		nv40_fp_rep(fpc, 255, finst->Label.Label);
@@ -848,7 +892,7 @@ nvfx_fragprog_parse_instruction(struct nvfx_context* nvfx, struct nvfx_fpc *fpc,
 		break;
 
 	case TGSI_OPCODE_BRK:
-		if(!nvfx->is_nv4x)
+		if(!nvfx->use_nv4x)
 			goto nv3x_cflow;
 		nv40_fp_brk(fpc);
 		break;
@@ -903,7 +947,7 @@ nvfx_fragprog_parse_decl_output(struct nvfx_context* nvfx, struct nvfx_fpc *fpc,
 		case 2: hw = 3; break;
 		case 3: hw = 4; break;
 		}
-		if(hw > ((nvfx->is_nv4x) ? 4 : 2)) {
+		if(hw > ((nvfx->use_nv4x) ? 4 : 2)) {
 			NOUVEAU_ERR("bad rcol index\n");
 			return FALSE;
 		}
@@ -924,19 +968,17 @@ nvfx_fragprog_prepare(struct nvfx_context* nvfx, struct nvfx_fpc *fpc)
 	struct tgsi_parse_context p;
 	int high_temp = -1, i;
 	struct util_semantic_set set;
-	float const0v[4] = {0, 0, 0, 0};
-	struct nvfx_reg const0;
+	unsigned num_texcoords = nvfx->use_nv4x ? 10 : 8;
 
 	fpc->fp->num_slots = util_semantic_set_from_program_file(&set, fpc->pfp->pipe.tokens, TGSI_FILE_INPUT);
-	if(fpc->fp->num_slots > 8)
+	if(fpc->fp->num_slots > num_texcoords)
 		return FALSE;
-	util_semantic_layout_from_set(fpc->fp->slot_to_generic, &set, 0, 8);
-	util_semantic_table_from_layout(fpc->generic_to_slot, fpc->fp->slot_to_generic, 0, 8);
+	util_semantic_layout_from_set(fpc->fp->slot_to_generic, &set, 0, num_texcoords);
+	util_semantic_table_from_layout(fpc->generic_to_slot, fpc->fp->slot_to_generic, 0, num_texcoords);
 
 	memset(fpc->fp->slot_to_fp_input, 0xff, sizeof(fpc->fp->slot_to_fp_input));
 
-	const0 = constant(fpc, -1, const0v);
-	assert(const0.index == 0);
+	fpc->r_imm = CALLOC(fpc->pfp->info.immediate_count, sizeof(struct nvfx_reg));
 
 	tgsi_parse_init(&p, fpc->pfp->pipe.tokens);
 	while (!tgsi_parse_end_of_tokens(&p)) {
@@ -967,19 +1009,14 @@ nvfx_fragprog_prepare(struct nvfx_context* nvfx, struct nvfx_fpc *fpc)
 		case TGSI_TOKEN_TYPE_IMMEDIATE:
 		{
 			struct tgsi_full_immediate *imm;
-			float vals[4];
 
 			imm = &p.FullToken.FullImmediate;
 			assert(imm->Immediate.DataType == TGSI_IMM_FLOAT32);
-			assert(fpc->nr_imm < MAX_IMM);
+			assert(fpc->nr_imm < fpc->pfp->info.immediate_count);
 
-			vals[0] = imm->u[0].Float;
-			vals[1] = imm->u[1].Float;
-			vals[2] = imm->u[2].Float;
-			vals[3] = imm->u[3].Float;
-			fpc->imm[fpc->nr_imm++] = constant(fpc, -1, vals);
-		}
+			fpc->r_imm[fpc->nr_imm++] = nvfx_fp_imm(fpc, imm->u[0].Float, imm->u[1].Float, imm->u[2].Float, imm->u[3].Float);
 			break;
+		}
 		default:
 			break;
 		}
@@ -1025,10 +1062,20 @@ nvfx_fragprog_translate(struct nvfx_context *nvfx,
 	if (!fpc)
 		goto out_err;
 
-	fpc->max_temps = nvfx->is_nv4x ? 48 : 32;
+	fpc->max_temps = nvfx->use_nv4x ? 48 : 32;
 	fpc->pfp = pfp;
 	fpc->fp = fp;
 	fpc->num_regs = 2;
+
+	for (unsigned i = 0; i < pfp->info.num_properties; ++i) {
+		if (pfp->info.properties[i].name == TGSI_PROPERTY_FS_COORD_ORIGIN) {
+			if(pfp->info.properties[i].data[0])
+				fp->coord_conventions |= NV30_3D_COORD_CONVENTIONS_ORIGIN_INVERTED;
+		} else if (pfp->info.properties[i].name == TGSI_PROPERTY_FS_COORD_PIXEL_CENTER) {
+			if(pfp->info.properties[i].data[0])
+				fp->coord_conventions |= NV30_3D_COORD_CONVENTIONS_CENTER_INTEGER;
+		}
+	}
 
 	if (!nvfx_fragprog_prepare(nvfx, fpc))
 		goto out_err;
@@ -1040,8 +1087,7 @@ nvfx_fragprog_translate(struct nvfx_context *nvfx,
 	{
 		struct nvfx_reg reg = temp(fpc);
 		struct nvfx_src sprite_input = nvfx_src(nvfx_reg(NVFXSR_RELOCATED, fp->num_slots));
-		float v[4] = {1, -1, 0, 0};
-		struct nvfx_src imm = nvfx_src(constant(fpc, -1, v));
+		struct nvfx_src imm = nvfx_src(nvfx_fp_imm(fpc, 1, -1, 0, 0));
 
 		fpc->sprite_coord_temp = reg.index;
 		fpc->r_temps_discard = 0ULL;
@@ -1078,7 +1124,7 @@ nvfx_fragprog_translate(struct nvfx_context *nvfx,
 	if(!nvfx->is_nv4x)
 		fp->fp_control |= (fpc->num_regs-1)/2;
 	else
-		fp->fp_control |= fpc->num_regs << NV40TCL_FP_CONTROL_TEMP_COUNT_SHIFT;
+		fp->fp_control |= fpc->num_regs << NV40_3D_FP_CONTROL_TEMP_COUNT__SHIFT;
 
 	/* Terminate final instruction */
 	if(fp->insn)
@@ -1119,6 +1165,7 @@ out:
 			FREE(fpc->r_temp);
 		util_dynarray_fini(&fpc->if_stack);
 		util_dynarray_fini(&fpc->label_relocs);
+		util_dynarray_fini(&fpc->imm_data);
 		//util_dynarray_fini(&fpc->loop_stack);
 		FREE(fpc);
 	}
@@ -1230,7 +1277,7 @@ nvfx_fragprog_validate(struct nvfx_context *nvfx)
 		pfp->fps[key] = fp;
 	}
 
-	vp = nvfx->render_mode == HW ? nvfx->vertprog : nvfx->swtnl.vertprog;
+	vp = nvfx->hw_vertprog;
 
 	if (fp->last_vp_id != vp->id || fp->last_sprite_coord_enable != sprite_coord_enable) {
 		int sprite_real_input = -1;
@@ -1450,17 +1497,17 @@ update:
 		nvfx->hw_fragprog = fp;
 
 		MARK_RING(chan, 8, 1);
-		OUT_RING(chan, RING_3D(NV34TCL_FP_ACTIVE_PROGRAM, 1));
+		OUT_RING(chan, RING_3D(NV30_3D_FP_ACTIVE_PROGRAM, 1));
 		OUT_RELOC(chan, fp->fpbo->bo, offset, NOUVEAU_BO_VRAM |
 			      NOUVEAU_BO_GART | NOUVEAU_BO_RD | NOUVEAU_BO_LOW |
-			      NOUVEAU_BO_OR, NV34TCL_FP_ACTIVE_PROGRAM_DMA0,
-			      NV34TCL_FP_ACTIVE_PROGRAM_DMA1);
-		OUT_RING(chan, RING_3D(NV34TCL_FP_CONTROL, 1));
+			      NOUVEAU_BO_OR, NV30_3D_FP_ACTIVE_PROGRAM_DMA0,
+			      NV30_3D_FP_ACTIVE_PROGRAM_DMA1);
+		OUT_RING(chan, RING_3D(NV30_3D_FP_CONTROL, 1));
 		OUT_RING(chan, fp->fp_control);
 		if(!nvfx->is_nv4x) {
-			OUT_RING(chan, RING_3D(NV34TCL_FP_REG_CONTROL, 1));
+			OUT_RING(chan, RING_3D(NV30_3D_FP_REG_CONTROL, 1));
 			OUT_RING(chan, (1<<16)|0x4);
-			OUT_RING(chan, RING_3D(NV34TCL_TX_UNITS_ENABLE, 1));
+			OUT_RING(chan, RING_3D(NV30_3D_TEX_UNITS_ENABLE, 1));
 			OUT_RING(chan, fp->samplers);
 		}
 	}
@@ -1470,7 +1517,7 @@ update:
 		if(pointsprite_control != nvfx->hw_pointsprite_control)
 		{
 			WAIT_RING(chan, 2);
-			OUT_RING(chan, RING_3D(NV34TCL_POINT_SPRITE, 1));
+			OUT_RING(chan, RING_3D(NV30_3D_POINT_SPRITE, 1));
 			OUT_RING(chan, pointsprite_control);
 			nvfx->hw_pointsprite_control = pointsprite_control;
 		}
@@ -1489,10 +1536,10 @@ nvfx_fragprog_relocate(struct nvfx_context *nvfx)
 	unsigned fp_flags = NOUVEAU_BO_VRAM | NOUVEAU_BO_RD; // TODO: GART?
 	fp_flags |= NOUVEAU_BO_DUMMY;
 	MARK_RING(chan, 2, 2);
-	OUT_RELOC(chan, bo, RING_3D(NV34TCL_FP_ACTIVE_PROGRAM, 1), fp_flags, 0, 0);
+	OUT_RELOC(chan, bo, RING_3D(NV30_3D_FP_ACTIVE_PROGRAM, 1), fp_flags, 0, 0);
 	OUT_RELOC(chan, bo, offset, fp_flags | NOUVEAU_BO_LOW |
-		      NOUVEAU_BO_OR, NV34TCL_FP_ACTIVE_PROGRAM_DMA0,
-		      NV34TCL_FP_ACTIVE_PROGRAM_DMA1);
+		      NOUVEAU_BO_OR, NV30_3D_FP_ACTIVE_PROGRAM_DMA0,
+		      NV30_3D_FP_ACTIVE_PROGRAM_DMA1);
 	nvfx->relocs_needed &=~ NVFX_RELOCATE_FRAGPROG;
 }
 

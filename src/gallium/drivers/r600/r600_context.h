@@ -121,6 +121,18 @@ struct r600_context_hw_states {
 	struct radeon_state	cb_cntl;
 };
 
+#define R600_MAX_CONSTANT 256 /* magic */
+#define R600_MAX_RESOURCE 160 /* magic */
+
+struct r600_shader_sampler_states {
+	unsigned			nsampler;
+	unsigned			nview;
+	unsigned			nborder;
+	struct radeon_state		*sampler[PIPE_MAX_ATTRIBS];
+	struct radeon_state		*view[PIPE_MAX_ATTRIBS];
+	struct radeon_state		*border[PIPE_MAX_ATTRIBS];
+};
+
 struct r600_context {
 	struct pipe_context		context;
 	struct r600_screen		*screen;
@@ -130,17 +142,15 @@ struct r600_context {
 	struct radeon_draw		draw;
 	struct radeon_state		config;
 	/* FIXME get rid of those vs_resource,vs/ps_constant */
-	struct radeon_state		vs_resource[160];
-	struct radeon_state		vs_constant[256];
-	struct radeon_state		ps_constant[256];
+	struct radeon_state		*vs_resource;
+	unsigned			vs_nresource;
+	struct radeon_state		*vs_constant;
+	struct radeon_state		*ps_constant;
 	/* hw states */
 	struct r600_context_hw_states	hw_states;
 	/* pipe states */
 	unsigned			flat_shade;
-	unsigned			ps_nsampler;
-	unsigned			vs_nsampler;
-	unsigned			ps_nsampler_view;
-	unsigned			vs_nsampler_view;
+
 	unsigned			nvertex_buffer;
 	struct r600_context_state	*rasterizer;
 	struct r600_context_state	*poly_stipple;
@@ -156,10 +166,9 @@ struct r600_context {
 	struct r600_context_state	*stencil_ref;
 	struct r600_context_state	*viewport;
 	struct r600_context_state	*framebuffer;
-	struct radeon_state		*ps_sampler[PIPE_MAX_ATTRIBS];
-	struct radeon_state		*vs_sampler[PIPE_MAX_ATTRIBS];
-	struct radeon_state		*ps_sampler_view[PIPE_MAX_ATTRIBS];
-	struct radeon_state		*vs_sampler_view[PIPE_MAX_ATTRIBS];
+	struct r600_shader_sampler_states vs_sampler;
+	struct r600_shader_sampler_states ps_sampler;
+	/* can add gs later */
 	struct r600_vertex_element	*vertex_elements;
 	struct pipe_vertex_buffer	vertex_buffer[PIPE_MAX_ATTRIBS];
 	struct pipe_index_buffer	index_buffer;
@@ -178,7 +187,6 @@ static INLINE struct r600_query* r600_query(struct pipe_query* q)
     return (struct r600_query*)q;
 }
 
-struct r600_context_state *r600_context_state(struct r600_context *rctx, unsigned type, const void *state);
 struct r600_context_state *r600_context_state_incref(struct r600_context_state *rstate);
 struct r600_context_state *r600_context_state_decref(struct r600_context_state *rstate);
 void r600_flush(struct pipe_context *ctx, unsigned flags,
