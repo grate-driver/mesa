@@ -1,7 +1,7 @@
-mesa (7.9~git20100902-0ubuntu1) maverick; urgency=low
+mesa (7.9~git20100907-0ubuntu1) maverick; urgency=low
 
   [ Robert Hooker ]
-  * New upstream git snapshot up to commit 9b075cb9.
+  * New upstream git snapshot up to commit 09782c72.
     - Remove pre-generated .pc's, use the ones generated at build time
       instead.
     - Remove all references to mesa-utils now that its shipped as a
