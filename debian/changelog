@@ -5,7 +5,7 @@ mesa (7.9~git20100902-0ubuntu1) maverick; urgency=low
     - Remove pre-generated .pc's, use the ones generated at build time
       instead.
     - Remove all references to mesa-utils now that its shipped as a
-      seperate package.
+      separate package.
 
   [ Christopher James Halse Rogers ]
   * Build nouveau-vieux driver for nv04-nv30 cards and install in 
