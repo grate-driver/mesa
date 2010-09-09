@@ -12,8 +12,19 @@ mesa (7.9~git20100907-0ubuntu1) maverick; urgency=low
     libgl1-mesa-dri-experimental
   * debian/patches/04_osmesa_version.diff:
     - Refresh for new upstream
-
- -- Christopher James Halse Rogers <raof@ubuntu.com>  Wed, 01 Sep 2010 10:23:15 +1000
+  * New upstream version...
+    - Fixes severe rendering corruption in Unity on radeon (LP: #628727,
+      LP: #596292, LP: #599741, LP: #630315, LP: #613694).
+    - Also fixes rendering in gnome-shell (LP: #578619).
+    - Flickering in OpenGL apps on radeon (LP: #626943, LP: #610541).
+    - Corruption in KWin desktop effects on intel (LP: #628930).
+    - Provides preliminary support for new intel chips (LP: #601052)
+  * debian/rules:
+    - Update configure flags to match upstream reshuffling.
+    - Explicitly remove gallium DRI drivers that we don't want to ship.
+    - Add classic nouveau driver to libgl1-mesa-dri-experimental
+  
+ -- Christopher James Halse Rogers <raof@ubuntu.com>  Fri, 10 Sep 2010 08:32:47 +1000
 
 mesa (7.8.2-2ubuntu2) maverick; urgency=low
 
