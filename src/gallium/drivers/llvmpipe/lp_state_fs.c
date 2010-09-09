@@ -794,6 +794,16 @@ dump_fs_variant_key(const struct lp_fragment_shader_variant_key *key)
 }
 
 
+void
+lp_debug_fs_variant(const struct lp_fragment_shader_variant *variant)
+{
+   debug_printf("llvmpipe: Fragment shader #%u variant #%u:\n", 
+                variant->shader->no, variant->no);
+   tgsi_dump(variant->shader->base.tokens, 0);
+   dump_fs_variant_key(&variant->key);
+   debug_printf("variant->opaque = %u\n", variant->opaque);
+   debug_printf("\n");
+}
 
 static struct lp_fragment_shader_variant *
 generate_variant(struct llvmpipe_context *lp,
@@ -813,16 +823,6 @@ generate_variant(struct llvmpipe_context *lp,
    variant->no = shader->variants_created++;
 
    memcpy(&variant->key, key, shader->variant_key_size);
-
-   if (gallivm_debug & GALLIVM_DEBUG_IR) {
-      debug_printf("llvmpipe: Creating fragment shader #%u variant #%u:\n", 
-		   shader->no, variant->no);
-      tgsi_dump(shader->base.tokens, 0);
-      dump_fs_variant_key(key);
-   }
-
-   generate_fragment(lp, shader, variant, RAST_WHOLE);
-   generate_fragment(lp, shader, variant, RAST_EDGE_TEST);
 
    /*
     * Determine whether we are touching all channels in the color buffer.
@@ -846,6 +846,14 @@ generate_variant(struct llvmpipe_context *lp,
          !key->depth.enabled &&
          !shader->info.uses_kill
          ? TRUE : FALSE;
+
+
+   if (gallivm_debug & GALLIVM_DEBUG_IR) {
+      lp_debug_fs_variant(variant);
+   }
+
+   generate_fragment(lp, shader, variant, RAST_WHOLE);
+   generate_fragment(lp, shader, variant, RAST_EDGE_TEST);
 
    return variant;
 }

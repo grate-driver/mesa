@@ -160,44 +160,79 @@ lp_setup_print_triangle(struct lp_setup_context *setup,
 }
 
 
-lp_rast_cmd lp_rast_tri_tab[9] = {
-   NULL,               /* should be impossible */
-   lp_rast_triangle_1,
-   lp_rast_triangle_2,
-   lp_rast_triangle_3,
-   lp_rast_triangle_4,
-   lp_rast_triangle_5,
-   lp_rast_triangle_6,
-   lp_rast_triangle_7,
-   lp_rast_triangle_8
+static unsigned
+lp_rast_tri_tab[9] = {
+   0,               /* should be impossible */
+   LP_RAST_OP_TRIANGLE_1,
+   LP_RAST_OP_TRIANGLE_2,
+   LP_RAST_OP_TRIANGLE_3,
+   LP_RAST_OP_TRIANGLE_4,
+   LP_RAST_OP_TRIANGLE_5,
+   LP_RAST_OP_TRIANGLE_6,
+   LP_RAST_OP_TRIANGLE_7,
+   LP_RAST_OP_TRIANGLE_8
 };
+
+
+
+/**
+ * The primitive covers the whole tile- shade whole tile.
+ *
+ * \param tx, ty  the tile position in tiles, not pixels
+ */
+static boolean
+lp_setup_whole_tile(struct lp_setup_context *setup,
+                    const struct lp_rast_shader_inputs *inputs,
+                    int tx, int ty)
+{
+   struct lp_scene *scene = setup->scene;
+
+   LP_COUNT(nr_fully_covered_64);
+
+   /* if variant is opaque and scissor doesn't effect the tile */
+   if (inputs->opaque) {
+      if (!scene->fb.zsbuf) {
+         /*
+          * All previous rendering will be overwritten so reset the bin.
+          */
+         lp_scene_bin_reset( scene, tx, ty );
+      }
+
+      LP_COUNT(nr_shade_opaque_64);
+      return lp_scene_bin_command( scene, tx, ty,
+                                   LP_RAST_OP_SHADE_TILE_OPAQUE,
+                                   lp_rast_arg_inputs(inputs) );
+   } else {
+      LP_COUNT(nr_shade_64);
+      return lp_scene_bin_command( scene, tx, ty,
+                                   LP_RAST_OP_SHADE_TILE,
+                                   lp_rast_arg_inputs(inputs) );
+   }
+}
+
 
 /**
  * Do basic setup for triangle rasterization and determine which
  * framebuffer tiles are touched.  Put the triangle in the scene's
  * bins for the tiles which we overlap.
  */
-static void
+static boolean
 do_triangle_ccw(struct lp_setup_context *setup,
 		const float (*v0)[4],
 		const float (*v1)[4],
 		const float (*v2)[4],
 		boolean frontfacing )
 {
-   struct lp_scene *scene = lp_setup_get_current_scene(setup);
+   struct lp_scene *scene = setup->scene;
    struct lp_rast_triangle *tri;
    int x[3];
    int y[3];
-   float dy01, dy20;
-   float dx01, dx20;
-   float oneoverarea;
-   struct lp_tri_info info;
    int area;
    struct u_rect bbox;
    unsigned tri_bytes;
    int i;
    int nr_planes = 3;
-      
+
    if (0)
       lp_setup_print_triangle(setup, v0, v1, v2);
 
@@ -241,13 +276,13 @@ do_triangle_ccw(struct lp_setup_context *setup,
        bbox.y1 < bbox.y0) {
       if (0) debug_printf("empty bounding box\n");
       LP_COUNT(nr_culled_tris);
-      return;
+      return TRUE;
    }
 
    if (!u_rect_test_intersection(&setup->draw_region, &bbox)) {
       if (0) debug_printf("offscreen\n");
       LP_COUNT(nr_culled_tris);
-      return;
+      return TRUE;
    }
 
    u_rect_find_intersection(&setup->draw_region, &bbox);
@@ -257,7 +292,7 @@ do_triangle_ccw(struct lp_setup_context *setup,
                                  nr_planes,
                                  &tri_bytes);
    if (!tri)
-      return;
+      return FALSE;
 
 #ifdef DEBUG
    tri->v[0][0] = v0[0][0];
@@ -288,36 +323,17 @@ do_triangle_ccw(struct lp_setup_context *setup,
    if (area <= 0) {
       lp_scene_putback_data( scene, tri_bytes );
       LP_COUNT(nr_culled_tris);
-      return;
+      return TRUE;
    }
-
-
-   /* 
-    */
-   dx01 = v0[0][0] - v1[0][0];
-   dy01 = v0[0][1] - v1[0][1];
-   dx20 = v2[0][0] - v0[0][0];
-   dy20 = v2[0][1] - v0[0][1];
-   oneoverarea = 1.0f / (dx01 * dy20 - dx20 * dy01);
-
-   info.v0 = v0;
-   info.v1 = v1;
-   info.v2 = v2;
-   info.frontfacing = frontfacing;
-   info.x0_center = v0[0][0] - setup->pixel_offset;
-   info.y0_center = v0[0][1] - setup->pixel_offset;
-   info.dx01_ooa  = dx01 * oneoverarea;
-   info.dx20_ooa  = dx20 * oneoverarea;
-   info.dy01_ooa  = dy01 * oneoverarea;
-   info.dy20_ooa  = dy20 * oneoverarea;
 
    /* Setup parameter interpolants:
     */
-   lp_setup_tri_coef( setup, &tri->inputs, &info );
+   lp_setup_tri_coef( setup, &tri->inputs, v0, v1, v2, frontfacing );
 
    tri->inputs.facing = frontfacing ? 1.0F : -1.0F;
+   tri->inputs.disable = FALSE;
+   tri->inputs.opaque = setup->fs.current.variant->opaque;
    tri->inputs.state = setup->fs.stored;
-
 
   
    for (i = 0; i < 3; i++) {
@@ -420,18 +436,17 @@ do_triangle_ccw(struct lp_setup_context *setup,
       tri->plane[6].eo = 0;
    }
 
-   lp_setup_bin_triangle( setup, tri, &bbox, nr_planes );
+   return lp_setup_bin_triangle( setup, tri, &bbox, nr_planes );
 }
 
 
-void
+boolean
 lp_setup_bin_triangle( struct lp_setup_context *setup,
                        struct lp_rast_triangle *tri,
                        const struct u_rect *bbox,
                        int nr_planes )
 {
    struct lp_scene *scene = setup->scene;
-   struct lp_fragment_shader_variant *variant = setup->fs.current.variant;
    int ix0, ix1, iy0, iy1;
    int i;
 
@@ -455,10 +470,9 @@ lp_setup_bin_triangle( struct lp_setup_context *setup,
 	  */
 	 int mask = (ix0 & 3) | ((iy0 & 3) << 4);
 
-	 lp_scene_bin_command( scene, ix0/4, iy0/4,
-			       lp_rast_triangle_3_16,
-			       lp_rast_arg_triangle(tri, mask) );
-	 return;
+	 return lp_scene_bin_command( scene, ix0/4, iy0/4,
+                                      LP_RAST_OP_TRIANGLE_3_16,
+                                      lp_rast_arg_triangle(tri, mask) );
       }
    }
 
@@ -481,9 +495,9 @@ lp_setup_bin_triangle( struct lp_setup_context *setup,
    {
       /* Triangle is contained in a single tile:
        */
-      lp_scene_bin_command( scene, ix0, iy0,
-                            lp_rast_tri_tab[nr_planes], 
-			    lp_rast_arg_triangle(tri, (1<<nr_planes)-1) );
+      return lp_scene_bin_command( scene, ix0, iy0,
+                                   lp_rast_tri_tab[nr_planes], 
+                                   lp_rast_arg_triangle(tri, (1<<nr_planes)-1) );
    }
    else
    {
@@ -544,9 +558,10 @@ lp_setup_bin_triangle( struct lp_setup_context *setup,
                 */
                int count = util_bitcount(partial);
                in = TRUE;
-               lp_scene_bin_command( scene, x, y,
-                                     lp_rast_tri_tab[count], 
-                                     lp_rast_arg_triangle(tri, partial) );
+               if (!lp_scene_bin_command( scene, x, y,
+                                          lp_rast_tri_tab[count], 
+                                          lp_rast_arg_triangle(tri, partial) ))
+                  goto fail;
 
                LP_COUNT(nr_partially_covered_64);
             }
@@ -554,13 +569,8 @@ lp_setup_bin_triangle( struct lp_setup_context *setup,
                /* triangle covers the whole tile- shade whole tile */
                LP_COUNT(nr_fully_covered_64);
                in = TRUE;
-	       if (variant->opaque &&
-	           !setup->fb.zsbuf) {
-	          lp_scene_bin_reset( scene, x, y );
-	       }
-               lp_scene_bin_command( scene, x, y,
-				     lp_rast_shade_tile,
-				     lp_rast_arg_inputs(&tri->inputs) );
+               if (!lp_setup_whole_tile(setup, &tri->inputs, x, y))
+                  goto fail;
             }
 
 	    /* Iterate cx values across the region:
@@ -575,6 +585,16 @@ lp_setup_bin_triangle( struct lp_setup_context *setup,
             c[i] += ystep[i];
       }
    }
+
+   return TRUE;
+
+fail:
+   /* Need to disable any partially binned triangle.  This is easier
+    * than trying to locate all the triangle, shade-tile, etc,
+    * commands which may have been binned.
+    */
+   tri->inputs.disable = TRUE;
+   return FALSE;
 }
 
 
@@ -586,7 +606,13 @@ static void triangle_cw( struct lp_setup_context *setup,
 			 const float (*v1)[4],
 			 const float (*v2)[4] )
 {
-   do_triangle_ccw( setup, v1, v0, v2, !setup->ccw_is_frontface );
+   if (!do_triangle_ccw( setup, v1, v0, v2, !setup->ccw_is_frontface ))
+   {
+      lp_setup_flush_and_restart(setup);
+
+      if (!do_triangle_ccw( setup, v1, v0, v2, !setup->ccw_is_frontface ))
+         assert(0);
+   }
 }
 
 
@@ -598,7 +624,12 @@ static void triangle_ccw( struct lp_setup_context *setup,
 			 const float (*v1)[4],
 			 const float (*v2)[4] )
 {
-   do_triangle_ccw( setup, v0, v1, v2, setup->ccw_is_frontface );
+   if (!do_triangle_ccw( setup, v0, v1, v2, setup->ccw_is_frontface ))
+   {
+      lp_setup_flush_and_restart(setup);
+      if (!do_triangle_ccw( setup, v0, v1, v2, setup->ccw_is_frontface ))
+         assert(0);
+   }
 }
 
 

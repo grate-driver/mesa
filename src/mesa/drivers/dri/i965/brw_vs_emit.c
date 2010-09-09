@@ -954,7 +954,7 @@ get_reladdr_constant(struct brw_vs_compile *c,
    struct brw_compile *p = &c->func;
    struct brw_reg const_reg = c->current_const[argIndex].reg;
    struct brw_reg addrReg = c->regs[PROGRAM_ADDRESS][0];
-   struct brw_reg byte_addr_reg = get_tmp(c);
+   struct brw_reg byte_addr_reg = retype(get_tmp(c), BRW_REGISTER_TYPE_D);
 
    assert(argIndex < 3);
 
@@ -1068,6 +1068,12 @@ move_to_reladdr_dst(struct brw_vs_compile *c,
    GLuint byte_offset = base.nr * 32 + base.subnr;
    struct brw_reg indirect = brw_vec4_indirect(0,0);
    struct brw_reg acc = retype(vec1(get_tmp(c)), BRW_REGISTER_TYPE_UW);
+
+   /* Because destination register indirect addressing can only use
+    * one index, we'll write each vertex's vec4 value separately.
+    */
+   val.width = BRW_WIDTH_4;
+   val.vstride = BRW_VERTICAL_STRIDE_4;
 
    brw_push_insn_state(p);
    brw_set_access_mode(p, BRW_ALIGN_1);

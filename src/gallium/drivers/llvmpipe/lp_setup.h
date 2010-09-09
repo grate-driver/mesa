@@ -65,6 +65,7 @@ struct pipe_framebuffer_state;
 struct lp_fragment_shader_variant;
 struct lp_jit_context;
 struct llvmpipe_query;
+struct pipe_fence_handle;
 
 
 struct lp_setup_context *
@@ -78,8 +79,6 @@ lp_setup_clear(struct lp_setup_context *setup,
                unsigned clear_stencil,
                unsigned flags);
 
-struct pipe_fence_handle *
-lp_setup_fence( struct lp_setup_context *setup );
 
 
 void

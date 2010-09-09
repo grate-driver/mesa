@@ -54,10 +54,27 @@ dri_create_context(gl_api api, const __GLcontextModes * visual,
 {
    __DRIscreen *sPriv = cPriv->driScreenPriv;
    struct dri_screen *screen = dri_screen(sPriv);
-   struct st_api *stapi = screen->st_api;
+   struct st_api *stapi;
    struct dri_context *ctx = NULL;
    struct st_context_iface *st_share = NULL;
    struct st_visual stvis;
+
+   switch (api) {
+   case API_OPENGL:
+      stapi = screen->st_api[ST_API_OPENGL];
+      break;
+   case API_OPENGLES:
+      stapi = screen->st_api[ST_API_OPENGL_ES1];
+      break;
+   case API_OPENGLES2:
+      stapi = screen->st_api[ST_API_OPENGL_ES2];
+      break;
+   default:
+      stapi = NULL;
+      break;
+   }
+   if (!stapi)
+      return GL_FALSE;
 
    if (sharedContextPrivate) {
       st_share = ((struct dri_context *)sharedContextPrivate)->st;
@@ -80,8 +97,17 @@ dri_create_context(gl_api api, const __GLcontextModes * visual,
    if (ctx->st == NULL)
       goto fail;
    ctx->st->st_manager_private = (void *) ctx;
+   ctx->stapi = stapi;
 
-   dri_init_extensions(ctx);
+   /*
+    * libmesagallium.a that this state tracker will be linked to expects
+    * OpenGL's _glapi_table.  That is, it expects libGL.so instead of
+    * libGLESv1_CM.so or libGLESv2.so.  As there is no clean way to know the
+    * shared library the app links to, use the api as a simple check.
+    * It might be as well to simply remove this function call though.
+    */
+   if (api == API_OPENGL)
+      dri_init_extensions(ctx);
 
    return GL_TRUE;
 
@@ -90,7 +116,7 @@ dri_create_context(gl_api api, const __GLcontextModes * visual,
       ctx->st->destroy(ctx->st);
 
    FREE(ctx);
-   return FALSE;
+   return GL_FALSE;
 }
 
 void
@@ -119,14 +145,12 @@ GLboolean
 dri_unbind_context(__DRIcontext * cPriv)
 {
    /* dri_util.c ensures cPriv is not null */
-   struct dri_screen *screen = dri_screen(cPriv->driScreenPriv);
    struct dri_context *ctx = dri_context(cPriv);
-   struct st_api *stapi = screen->st_api;
 
    if (--ctx->bind_count == 0) {
-      if (ctx->st == stapi->get_current(stapi)) {
+      if (ctx->st == ctx->stapi->get_current(ctx->stapi)) {
          ctx->st->flush(ctx->st, PIPE_FLUSH_RENDER_CACHE, NULL);
-         stapi->make_current(stapi, NULL, NULL, NULL);
+         ctx->stapi->make_current(ctx->stapi, NULL, NULL, NULL);
       }
    }
 
@@ -139,12 +163,10 @@ dri_make_current(__DRIcontext * cPriv,
 		 __DRIdrawable * driReadPriv)
 {
    /* dri_util.c ensures cPriv is not null */
-   struct dri_screen *screen = dri_screen(cPriv->driScreenPriv);
    struct dri_context *ctx = dri_context(cPriv);
-   struct st_api *stapi = screen->st_api;
    struct dri_drawable *draw = dri_drawable(driDrawPriv);
    struct dri_drawable *read = dri_drawable(driReadPriv);
-   struct st_context_iface *old_st = stapi->get_current(stapi);
+   struct st_context_iface *old_st = ctx->stapi->get_current(ctx->stapi);
 
    if (old_st && old_st != ctx->st)
       old_st->flush(old_st, PIPE_FLUSH_RENDER_CACHE, NULL);
@@ -160,7 +182,7 @@ dri_make_current(__DRIcontext * cPriv,
       read->texture_stamp = driReadPriv->lastStamp - 1;
    }
 
-   stapi->make_current(stapi, ctx->st, &draw->base, &read->base);
+   ctx->stapi->make_current(ctx->stapi, ctx->st, &draw->base, &read->base);
 
    return GL_TRUE;
 }
@@ -169,10 +191,24 @@ struct dri_context *
 dri_get_current(__DRIscreen *sPriv)
 {
    struct dri_screen *screen = dri_screen(sPriv);
-   struct st_api *stapi = screen->st_api;
-   struct st_context_iface *st;
+   struct st_api *stapi;
+   struct st_context_iface *st = NULL;
+   gl_api api;
 
-   st = stapi->get_current(stapi);
+   /* XXX: How do we do this when the screen supports
+      multiple rendering API's? Pick the first one,
+      like this? (NB: all three API's use the same
+      implementation of get_current (see st_manager.c),
+      so maybe it doesn't matter right now since
+      they'll all return the same result.) */
+   for (api = API_OPENGL; api <= API_OPENGLES2; ++api) {
+      stapi = screen->st_api[api];
+      if (!stapi)
+         continue;
+      st = stapi->get_current(stapi);
+      if (st)
+         break;
+   }
 
    return (struct dri_context *) (st) ? st->st_manager_private : NULL;
 }

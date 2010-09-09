@@ -62,6 +62,8 @@ _mesa_ast_to_hir(exec_list *instructions, struct _mesa_glsl_parse_state *state)
    _mesa_glsl_initialize_variables(instructions, state);
    _mesa_glsl_initialize_functions(instructions, state);
 
+   state->symbols->language_version = state->language_version;
+
    state->current_function = NULL;
 
    /* Section 4.2 of the GLSL 1.20 specification states:
@@ -512,6 +514,12 @@ do_assignment(exec_list *instructions, struct _mesa_glsl_parse_state *state,
    if (!error_emitted) {
       if (!lhs->is_lvalue()) {
 	 _mesa_glsl_error(& lhs_loc, state, "non-lvalue in assignment");
+	 error_emitted = true;
+      }
+
+      if (state->es_shader && lhs->type->is_array()) {
+	 _mesa_glsl_error(&lhs_loc, state, "whole array assignment is not "
+			  "allowed in GLSL ES 1.00.");
 	 error_emitted = true;
       }
    }
@@ -1125,6 +1133,17 @@ ast_expression::hir(exec_list *instructions,
 	 type = op[1]->type;
       }
 
+      /* From page 33 (page 39 of the PDF) of the GLSL 1.10 spec:
+       *
+       *    "The second and third expressions must be the same type, but can
+       *    be of any type other than an array."
+       */
+      if ((state->language_version <= 110) && type->is_array()) {
+	 _mesa_glsl_error(& loc, state, "Second and third operands of ?: "
+			  "operator must not be arrays.");
+	 error_emitted = true;
+      }
+
       ir_constant *cond_val = op[0]->constant_expression_value();
       ir_constant *then_val = op[1]->constant_expression_value();
       ir_constant *else_val = op[2]->constant_expression_value();
@@ -1461,7 +1480,7 @@ ast_compound_statement::hir(exec_list *instructions,
 
 
 static const glsl_type *
-process_array_type(const glsl_type *base, ast_node *array_size,
+process_array_type(YYLTYPE *loc, const glsl_type *base, ast_node *array_size,
 		   struct _mesa_glsl_parse_state *state)
 {
    unsigned length = 0;
@@ -1497,6 +1516,12 @@ process_array_type(const glsl_type *base, ast_node *array_size,
 	    }
 	 }
       }
+   } else if (state->es_shader) {
+      /* Section 10.17 of the GLSL ES 1.00 specification states that unsized
+       * array declarations have been removed from the language.
+       */
+      _mesa_glsl_error(loc, state, "unsized array declarations are not "
+		       "allowed in GLSL ES 1.00.");
    }
 
    return glsl_type::get_array_instance(base, length);
@@ -1517,7 +1542,8 @@ ast_type_specifier::glsl_type(const char **name,
       *name = this->type_name;
 
       if (this->is_array) {
-	 type = process_array_type(type, this->array_size, state);
+	 YYLTYPE loc = this->get_location();
+	 type = process_array_type(&loc, type, this->array_size, state);
       }
    }
 
@@ -1604,7 +1630,7 @@ apply_type_qualifier_to_variable(const struct ast_type_qualifier *qual,
 		       qual_string);
    }
 
-   if (var->type->is_array() && (state->language_version >= 120)) {
+   if (var->type->is_array() && state->language_version != 110) {
       var->array_lvalue = true;
    }
 }
@@ -1714,7 +1740,8 @@ ast_declarator_list::hir(exec_list *instructions,
       }
 
       if (decl->is_array) {
-	 var_type = process_array_type(decl_type, decl->array_size, state);
+	 var_type = process_array_type(&loc, decl_type, decl->array_size,
+				       state);
       } else {
 	 var_type = decl_type;
       }
@@ -2129,7 +2156,7 @@ ast_parameter_declarator::hir(exec_list *instructions,
     * call already handled the "vec4[..] foo" case.
     */
    if (this->is_array) {
-      type = process_array_type(type, this->array_size, state);
+      type = process_array_type(&loc, type, this->array_size, state);
    }
 
    if (type->array_size() == 0) {
@@ -2258,7 +2285,7 @@ ast_function::hir(exec_list *instructions,
     * that the previously seen signature does not have an associated definition.
     */
    f = state->symbols->get_function(name);
-   if (f != NULL && !f->is_builtin) {
+   if (f != NULL && (state->es_shader || !f->has_builtin_signature())) {
       sig = f->exact_matching_signature(&hir_parameters);
       if (sig != NULL) {
 	 const char *badvar = sig->qualifiers_match(&hir_parameters);
@@ -2694,16 +2721,26 @@ ast_struct_specifier::hir(exec_list *instructions,
 
       decl_list->type->specifier->hir(instructions, state);
 
+      /* Section 10.9 of the GLSL ES 1.00 specification states that
+       * embedded structure definitions have been removed from the language.
+       */
+      if (state->es_shader && decl_list->type->specifier->structure != NULL) {
+	 YYLTYPE loc = this->get_location();
+	 _mesa_glsl_error(&loc, state, "Embedded structure definitions are "
+			  "not allowed in GLSL ES 1.00.");
+      }
+
       const glsl_type *decl_type =
 	 decl_list->type->specifier->glsl_type(& type_name, state);
 
       foreach_list_typed (ast_declaration, decl, link,
 			  &decl_list->declarations) {
-	 const struct glsl_type *const field_type =
-	    (decl->is_array)
-	    ? process_array_type(decl_type, decl->array_size, state)
-	    : decl_type;
-
+	 const struct glsl_type *field_type = decl_type;
+	 if (decl->is_array) {
+	    YYLTYPE loc = decl->get_location();
+	    field_type = process_array_type(&loc, decl_type, decl->array_size,
+					    state);
+	 }
 	 fields[i].type = (field_type != NULL)
 	    ? field_type : glsl_type::error_type;
 	 fields[i].name = decl->identifier;

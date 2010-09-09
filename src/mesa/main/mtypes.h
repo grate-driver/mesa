@@ -41,6 +41,15 @@
 #include "math/m_matrix.h"	/* GLmatrix */
 #include "main/simple_list.h"	/* struct simple_node */
 
+/* Shader stages. Note that these will become 5 with tessellation.
+ * These MUST have the same values as PIPE_SHADER_*
+ */
+#define MESA_SHADER_VERTEX   0
+#define MESA_SHADER_FRAGMENT 1
+#define MESA_SHADER_GEOMETRY 2
+#define MESA_SHADER_TYPES    3
+
+
 /**
  * Internal token
  *  Must be simply different than GL_VERTEX_PROGRAM
@@ -2166,9 +2175,18 @@ struct gl_shader_program
 struct gl_shader_state
 {
    struct gl_shader_program *CurrentProgram; /**< The user-bound program */
+   void *MemPool;
+
+   GLbitfield Flags;                    /**< Mask of GLSL_x flags */
+};
+
+/**
+ * Compiler options for a single GLSL shaders type
+ */
+struct gl_shader_compiler_options
+{
    /** Driver-selectable options: */
    GLboolean EmitHighLevelInstructions; /**< IF/ELSE/ENDIF vs. BRA, etc. */
-   GLboolean EmitContReturn;            /**< Emit CONT/RET opcodes? */
    GLboolean EmitCondCodes;             /**< Use condition codes? */
    GLboolean EmitComments;              /**< Annotated instructions */
    GLboolean EmitNVTempInitialization;  /**< 0-fill NV temp registers */
@@ -2177,11 +2195,15 @@ struct gl_shader_state
     * support control flow.
     */
    GLboolean EmitNoIfs;
-   void *MemPool;
-   GLbitfield Flags;                    /**< Mask of GLSL_x flags */
+   GLboolean EmitNoLoops;
+   GLboolean EmitNoFunctions;
+   GLboolean EmitNoCont;                  /**< Emit CONT opcode? */
+   GLboolean EmitNoMainReturn;            /**< Emit CONT/RET opcodes? */
+
+   GLuint MaxUnrollIterations;
+
    struct gl_sl_pragmas DefaultPragmas; /**< Default #pragma settings */
 };
-
 
 /**
  * Transform feedback object state
@@ -3203,6 +3225,7 @@ struct __GLcontextRec
    struct gl_ati_fragment_shader_state ATIFragmentShader;
 
    struct gl_shader_state Shader; /**< GLSL shader object state */
+   struct gl_shader_compiler_options ShaderCompilerOptions[MESA_SHADER_TYPES];
 
    struct gl_query_state Query;  /**< occlusion, timer queries */
 

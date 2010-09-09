@@ -49,8 +49,6 @@
 #define LP_SETUP_NEW_SCISSOR     0x08
 
 
-struct lp_scene_queue;
-
 
 /** Max number of scenes */
 #define MAX_SCENES 2
@@ -70,6 +68,7 @@ struct lp_setup_context
 {
    struct vbuf_render base;
 
+   struct pipe_context *pipe;
    struct vertex_info *vertex_info;
    uint prim;
    uint vertex_size;
@@ -83,9 +82,12 @@ struct lp_setup_context
     */
    struct draw_stage *vbuf;
    unsigned num_threads;
+   unsigned scene_idx;
    struct lp_scene *scenes[MAX_SCENES];  /**< all the scenes */
    struct lp_scene *scene;               /**< current scene being built */
-   struct lp_scene_queue *empty_scenes;  /**< queue of empty scenes */
+
+   struct lp_fence *last_fence;
+   struct llvmpipe_query *active_query;
 
    boolean flatshade_first;
    boolean ccw_is_frontface;
@@ -105,12 +107,12 @@ struct lp_setup_context
    struct {
       unsigned flags;
       union lp_rast_cmd_arg color;    /**< lp_rast_clear_color() cmd */
-      struct lp_rast_clearzs clearzs; /**< lp_rast_clear_zstencil() cmd */
+      unsigned zsmask;
+      unsigned zsvalue;               /**< lp_rast_clear_zstencil() cmd */
    } clear;
 
    enum setup_state {
       SETUP_FLUSHED,    /**< scene is null */
-      SETUP_EMPTY,      /**< scene exists but has only state changes */
       SETUP_CLEARED,    /**< scene exists but has only clears */
       SETUP_ACTIVE      /**< scene exists and has at least one draw/query */
    } state;
@@ -156,13 +158,14 @@ void lp_setup_choose_triangle( struct lp_setup_context *setup );
 void lp_setup_choose_line( struct lp_setup_context *setup );
 void lp_setup_choose_point( struct lp_setup_context *setup );
 
-struct lp_scene *lp_setup_get_current_scene(struct lp_setup_context *setup);
-
 void lp_setup_init_vbuf(struct lp_setup_context *setup);
 
-void lp_setup_update_state( struct lp_setup_context *setup );
+void lp_setup_update_state( struct lp_setup_context *setup,
+                            boolean update_scene);
 
 void lp_setup_destroy( struct lp_setup_context *setup );
+
+void lp_setup_flush_and_restart(struct lp_setup_context *setup);
 
 void
 lp_setup_print_triangle(struct lp_setup_context *setup,
@@ -182,11 +185,12 @@ lp_setup_alloc_triangle(struct lp_scene *scene,
                         unsigned nr_planes,
                         unsigned *tri_size);
 
-void
+boolean
 lp_setup_bin_triangle( struct lp_setup_context *setup,
                        struct lp_rast_triangle *tri,
                        const struct u_rect *bbox,
                        int nr_planes );
 
-#endif
+void lp_setup_flush_and_restart(struct lp_setup_context *setup);
 
+#endif

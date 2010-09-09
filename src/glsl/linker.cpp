@@ -740,14 +740,14 @@ link_intrastage_shaders(GLcontext *ctx,
 	       ir_function_signature *sig =
 		  (ir_function_signature *) iter.get();
 
-	       if (!sig->is_defined || f->is_builtin)
+	       if (!sig->is_defined || sig->is_builtin)
 		  continue;
 
 	       ir_function_signature *other_sig =
 		  other->exact_matching_signature(& sig->parameters);
 
 	       if ((other_sig != NULL) && other_sig->is_defined
-		   && !other_sig->function()->is_builtin) {
+		   && !other_sig->is_builtin) {
 		  linker_error_printf(prog,
 				      "function `%s' is multiply defined",
 				      f->name);
@@ -1402,9 +1402,10 @@ link_shaders(GLcontext *ctx, struct gl_shader_program *prog)
     * match shading language versions.  With GLSL 1.30 and later, the versions
     * of all shaders must match.
     */
-   assert(min_version >= 110);
+   assert(min_version >= 100);
    assert(max_version <= 130);
-   if ((max_version >= 130) && (min_version != max_version)) {
+   if ((max_version >= 130 || min_version == 100)
+       && min_version != max_version) {
       linker_error_printf(prog, "all shaders must use same shading "
 			  "language version\n");
       goto done;
@@ -1470,13 +1471,13 @@ link_shaders(GLcontext *ctx, struct gl_shader_program *prog)
     * some of that unused.
     */
    for (unsigned i = 0; i < prog->_NumLinkedShaders; i++) {
-      while (do_common_optimization(prog->_LinkedShaders[i]->ir, true))
+      while (do_common_optimization(prog->_LinkedShaders[i]->ir, true, 32))
 	 ;
    }
 
    assign_uniform_locations(prog);
 
-   if (prog->_LinkedShaders[0]->Type == GL_VERTEX_SHADER) {
+   if (prog->_NumLinkedShaders && prog->_LinkedShaders[0]->Type == GL_VERTEX_SHADER) {
       /* FINISHME: The value of the max_attribute_index parameter is
        * FINISHME: implementation dependent based on the value of
        * FINISHME: GL_MAX_VERTEX_ATTRIBS.  GL_MAX_VERTEX_ATTRIBS must be

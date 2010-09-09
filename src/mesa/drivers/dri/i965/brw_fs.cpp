@@ -141,7 +141,7 @@ brw_link_shader(GLcontext *ctx, struct gl_shader_program *prog)
 	 do {
 	    progress = false;
 
-	    progress = do_common_optimization(shader->ir, true) || progress;
+	    progress = do_common_optimization(shader->ir, true, 32) || progress;
 	 } while (progress);
 
 	 validate_ir_tree(shader->ir);
@@ -202,63 +202,56 @@ public:
       return node;
    }
 
+   void init()
+   {
+      this->reg = 0;
+      this->reg_offset = 0;
+      this->negate = 0;
+      this->abs = 0;
+      this->hw_reg = -1;
+   }
+
    /** Generic unset register constructor. */
    fs_reg()
    {
+      init();
       this->file = BAD_FILE;
-      this->reg = 0;
-      this->reg_offset = 0;
-      this->hw_reg = -1;
-      this->negate = 0;
-      this->abs = 0;
    }
 
    /** Immediate value constructor. */
    fs_reg(float f)
    {
+      init();
       this->file = IMM;
-      this->reg = 0;
-      this->hw_reg = 0;
       this->type = BRW_REGISTER_TYPE_F;
       this->imm.f = f;
-      this->negate = 0;
-      this->abs = 0;
    }
 
    /** Immediate value constructor. */
    fs_reg(int32_t i)
    {
+      init();
       this->file = IMM;
-      this->reg = 0;
-      this->hw_reg = 0;
       this->type = BRW_REGISTER_TYPE_D;
       this->imm.i = i;
-      this->negate = 0;
-      this->abs = 0;
    }
 
    /** Immediate value constructor. */
    fs_reg(uint32_t u)
    {
+      init();
       this->file = IMM;
-      this->reg = 0;
-      this->hw_reg = 0;
       this->type = BRW_REGISTER_TYPE_UD;
       this->imm.u = u;
-      this->negate = 0;
-      this->abs = 0;
    }
 
    /** Fixed brw_reg Immediate value constructor. */
    fs_reg(struct brw_reg fixed_hw_reg)
    {
+      init();
       this->file = FIXED_HW_REG;
       this->fixed_hw_reg = fixed_hw_reg;
-      this->reg = 0;
-      this->hw_reg = 0;
       this->type = fixed_hw_reg.type;
-      this->negate = 0;
-      this->abs = 0;
    }
 
    fs_reg(enum register_file file, int hw_reg);
@@ -482,25 +475,21 @@ public:
 /** Fixed HW reg constructor. */
 fs_reg::fs_reg(enum register_file file, int hw_reg)
 {
+   init();
    this->file = file;
-   this->reg = 0;
-   this->reg_offset = 0;
    this->hw_reg = hw_reg;
    this->type = BRW_REGISTER_TYPE_F;
-   this->negate = 0;
-   this->abs = 0;
 }
 
 /** Automatic reg constructor. */
 fs_reg::fs_reg(class fs_visitor *v, const struct glsl_type *type)
 {
+   init();
+
    this->file = GRF;
    this->reg = v->next_abstract_grf;
    this->reg_offset = 0;
    v->next_abstract_grf += type_size(type);
-   this->hw_reg = -1;
-   this->negate = 0;
-   this->abs = 0;
 
    switch (type->base_type) {
    case GLSL_TYPE_FLOAT:
@@ -778,7 +767,7 @@ fs_visitor::visit(ir_expression *ir)
       emit(fs_inst(BRW_OPCODE_MOV, this->result, op[0]));
       break;
    case ir_unop_f2i:
-      emit(fs_inst(BRW_OPCODE_RNDZ, this->result, op[0]));
+      emit(fs_inst(BRW_OPCODE_MOV, this->result, op[0]));
       break;
    case ir_unop_f2b:
    case ir_unop_i2b:
@@ -1222,6 +1211,8 @@ fs_visitor::emit_interpolation()
    this->current_annotation = "compute pixel centers";
    this->pixel_x = fs_reg(this, glsl_type::uint_type);
    this->pixel_y = fs_reg(this, glsl_type::uint_type);
+   this->pixel_x.type = BRW_REGISTER_TYPE_UW;
+   this->pixel_y.type = BRW_REGISTER_TYPE_UW;
    emit(fs_inst(BRW_OPCODE_ADD,
 		this->pixel_x,
 		fs_reg(stride(suboffset(g1_uw, 4), 2, 4, 0)),
@@ -1524,6 +1515,14 @@ fs_visitor::assign_curb_setup()
 {
    c->prog_data.first_curbe_grf = c->key.nr_payload_regs;
    c->prog_data.curb_read_length = ALIGN(c->prog_data.nr_params, 8) / 8;
+
+   if (intel->gen == 5 && (c->prog_data.first_curbe_grf +
+			   c->prog_data.curb_read_length) & 1) {
+      /* Align the start of the interpolation coefficients so that we can use
+       * the PLN instruction.
+       */
+      c->prog_data.first_curbe_grf++;
+   }
 
    /* Map the offsets in the UNIFORM file to fixed HW regs. */
    foreach_iter(exec_list_iterator, iter, this->instructions) {
@@ -1882,9 +1881,6 @@ brw_wm_fs_emit(struct brw_context *brw, struct brw_wm_compile *c)
 	 ir->accept(&v);
       }
 
-      if (v.fail)
-	 return GL_FALSE;
-
       v.emit_fb_writes();
       v.assign_curb_setup();
       v.assign_urb_setup();
@@ -1892,6 +1888,11 @@ brw_wm_fs_emit(struct brw_context *brw, struct brw_wm_compile *c)
    }
 
    v.generate_code();
+
+   assert(!v.fail); /* FINISHME: Cleanly fail, tested at link time, etc. */
+
+   if (v.fail)
+      return GL_FALSE;
 
    if (INTEL_DEBUG & DEBUG_WM) {
       const char *last_annotation_string = NULL;
