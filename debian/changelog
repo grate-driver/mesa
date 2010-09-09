@@ -1,12 +1,19 @@
-mesa (7.9~git20100825-0ubuntu1) maverick; urgency=low
+mesa (7.9~git20100909-0ubuntu1) maverick; urgency=low
 
-  * New upstream git snapshot up to commit f81cec52a.
-    - Remove pre-generated .pc's, use the ones generated at build time
-      instead.
-    - Remove all references to mesa-utils now that its shipped as a
-      seperate package.
+  * New upstream git snapshot up to commit 94118fe2d4b1e5 (LP: #631413)
+    - Many bug fixes including:
+      628930
+     - LP: #626943, #610541 - Flickering on Radeon
+     - LP: #628930 - KDE desktop effects not enabled automatically, graphical
+       corruption when enabled
+     - LP: #601052 - Cougar Point Graphics support
+     - LP: #596292, #599741 - Unity failing to start or misrendering on ATI
+  * Remove pre-generated .pc's, use the ones generated at build time
+    instead.
+  * Remove all references to mesa-utils now that its no longer shipped
+    with the mesa source.
 
- -- Robert Hooker <sarvatt@ubuntu.com>  Wed, 25 Aug 2010 17:15:21 -0400
+ -- Robert Hooker <robert.hooker@canonical.com>  Thu, 09 Sep 2010 15:37:52 -0400
 
 mesa (7.8.2-2ubuntu2) maverick; urgency=low
 
