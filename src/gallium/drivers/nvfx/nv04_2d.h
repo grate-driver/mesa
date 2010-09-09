@@ -43,9 +43,30 @@ struct nv04_region {
 	int offset;
 	unsigned pitch; // 0 -> swizzled
 	unsigned bpps; // bpp shift (0, 1, 2; 3, 4 for fp/compressed)
+	unsigned one_bits; // number of high bits read and written as ones (for "no-alpha" optimization)
 	unsigned x, y, z;
 	unsigned w, h, d;
 };
+
+static inline void
+nv04_region_try_to_linearize(struct nv04_region* rgn)
+{
+	assert(!rgn->pitch);
+
+	if(rgn->d <= 1)
+	{
+		if(rgn->h <= 1 || rgn->w <= 2)
+			rgn->pitch = rgn->w << rgn->bpps;
+	}
+	else
+	{
+		if(rgn->h <= 2 && rgn->w <= 2)
+		{
+			rgn->pitch = rgn->w << rgn->bpps;
+			rgn->offset += rgn->z * rgn->h * rgn->pitch;
+		}
+	}
+}
 
 void
 nv04_memcpy(struct nv04_2d_context *ctx,
@@ -75,7 +96,6 @@ int
 nv04_region_copy_2d(struct nv04_2d_context *ctx,
 		struct nv04_region* dst, struct nv04_region* src,
 		int w, int h,
-		int cs2d_format, int sifm_format,
 		int dst_to_gpu, int src_on_gpu);
 
 int

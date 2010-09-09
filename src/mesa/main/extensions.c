@@ -58,7 +58,8 @@ static const struct {
    { OFF, "GL_ARB_fragment_shader",            F(ARB_fragment_shader) },
    { OFF, "GL_ARB_framebuffer_object",         F(ARB_framebuffer_object) },
    { OFF, "GL_ARB_explicit_attrib_location",   F(ARB_explicit_attrib_location) },
-   { OFF, "GL_ARB_geometry_shader4",           F(ARB_geometry_shader4) },
+   /* TODO: reenable this when the new GLSL compiler actually supports them */
+   /* { OFF, "GL_ARB_geometry_shader4",           F(ARB_geometry_shader4) }, */
    { OFF, "GL_ARB_half_float_pixel",           F(ARB_half_float_pixel) },
    { OFF, "GL_ARB_half_float_vertex",          F(ARB_half_float_vertex) },
    { OFF, "GL_ARB_imaging",                    F(ARB_imaging) },
@@ -969,7 +970,7 @@ _mesa_get_extension_count(GLcontext *ctx)
 
    if (0)
       _mesa_debug(ctx, "%u of %d extensions enabled\n", ctx->Extensions.Count,
-                  Elements(default_extensions));
+                  (int) Elements(default_extensions));
 
    return ctx->Extensions.Count;
 }

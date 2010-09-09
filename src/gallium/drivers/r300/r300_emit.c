@@ -182,7 +182,7 @@ void r300_emit_fs_constants(struct r300_context* r300, unsigned size, void *stat
     OUT_CS_REG_SEQ(R300_PFS_PARAM_0_X, count * 4);
     if (buf->remap_table){
         for (i = 0; i < count; i++) {
-            uint32_t *data = &buf->ptr[buf->remap_table[i]*4];
+            float *data = (float*)&buf->ptr[buf->remap_table[i]*4];
             for (j = 0; j < 4; j++)
                 OUT_CS(pack_float24(data[j]));
         }
@@ -909,7 +909,7 @@ void r300_emit_vs_state(struct r300_context* r300, unsigned size, void* state)
 
     unsigned pvs_num_slots = MIN3(vtx_mem_size / input_count,
                                   vtx_mem_size / output_count, 10);
-    unsigned pvs_num_controllers = MIN2(vtx_mem_size / temp_count, 6);
+    unsigned pvs_num_controllers = MIN2(vtx_mem_size / temp_count, 5);
 
     unsigned imm_first = vs->externals_count;
     unsigned imm_end = vs->code.constants.Count;

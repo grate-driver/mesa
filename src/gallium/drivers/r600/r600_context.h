@@ -53,7 +53,7 @@ struct r600_query {
 	unsigned				buffer_size;
 	/* linked list of queries */
 	struct list_head			list;
-	struct radeon_state			*rstate;
+	struct radeon_state			rstate;
 };
 
 /* XXX move this to a more appropriate place */
@@ -95,13 +95,16 @@ enum pipe_state_type {
 	pipe_type_count
 };
 
+#define R600_MAX_RSTATE		16
+
 struct r600_context_state {
 	union pipe_states		state;
 	unsigned			refcount;
 	unsigned			type;
-	struct radeon_state		*rstate;
+	struct radeon_state		rstate[R600_MAX_RSTATE];
 	struct r600_shader		shader;
 	struct radeon_bo		*bo;
+	unsigned			nrstate;
 };
 
 struct r600_vertex_element
@@ -112,37 +115,83 @@ struct r600_vertex_element
 };
 
 struct r600_context_hw_states {
-	struct radeon_state	*rasterizer;
-	struct radeon_state	*scissor;
-	struct radeon_state	*dsa;
-	struct radeon_state	*blend;
-	struct radeon_state	*viewport;
-	struct radeon_state	*cb[8];
-	struct radeon_state	*config;
-	struct radeon_state	*cb_cntl;
-	struct radeon_state	*db;
-	struct radeon_state	*ucp[6];
-	unsigned		ps_nresource;
-	unsigned		ps_nsampler;
-	struct radeon_state	*ps_resource[160];
-	struct radeon_state	*ps_sampler[16];
+	struct radeon_state	rasterizer;
+	struct radeon_state	scissor;
+	struct radeon_state	dsa;
+	struct radeon_state	cb_cntl;
 };
+
+#define R600_MAX_CONSTANT 256 /* magic */
+#define R600_MAX_RESOURCE 160 /* magic */
+
+struct r600_shader_sampler_states {
+	unsigned			nsampler;
+	unsigned			nview;
+	unsigned			nborder;
+	struct radeon_state		*sampler[PIPE_MAX_ATTRIBS];
+	struct radeon_state		*view[PIPE_MAX_ATTRIBS];
+	struct radeon_state		*border[PIPE_MAX_ATTRIBS];
+};
+
+struct r600_context;
+struct r600_resource;
+
+struct r600_context_hw_state_vtbl {
+	void (*blend)(struct r600_context *rctx,
+		      struct radeon_state *rstate,
+		      const struct pipe_blend_state *state);
+	void (*ucp)(struct r600_context *rctx, struct radeon_state *rstate,
+		    const struct pipe_clip_state *state);
+	void (*cb)(struct r600_context *rctx, struct radeon_state *rstate,
+		   const struct pipe_framebuffer_state *state, int cb);
+	void (*db)(struct r600_context *rctx, struct radeon_state *rstate,
+		   const struct pipe_framebuffer_state *state);
+	void (*rasterizer)(struct r600_context *rctx, struct radeon_state *rstate);
+	void (*scissor)(struct r600_context *rctx, struct radeon_state *rstate);
+	void (*viewport)(struct r600_context *rctx, struct radeon_state *rstate, const struct pipe_viewport_state *state);
+	void (*dsa)(struct r600_context *rctx, struct radeon_state *rstate);
+	void (*sampler_border)(struct r600_context *rctx, struct radeon_state *rstate,
+			       const struct pipe_sampler_state *state, unsigned id);
+	void (*sampler)(struct r600_context *rctx, struct radeon_state *rstate,
+			const struct pipe_sampler_state *state, unsigned id);
+	void (*resource)(struct pipe_context *ctx, struct radeon_state *rstate,
+			 const struct pipe_sampler_view *view, unsigned id);
+	void (*cb_cntl)(struct r600_context *rctx, struct radeon_state *rstate);
+	int (*vs_resource)(struct r600_context *rctx, int id, struct r600_resource *rbuffer, uint32_t offset,
+			   uint32_t stride, uint32_t format);
+	int (*vgt_init)(struct r600_context *rctx, struct radeon_state *draw,
+			struct r600_resource *rbuffer,
+			uint32_t count, int vgt_draw_initiator);
+	int (*vgt_prim)(struct r600_context *rctx, struct radeon_state *vgt,
+			uint32_t prim, uint32_t start, uint32_t vgt_dma_index_type);
+
+	int (*ps_shader)(struct r600_context *rctx, struct r600_context_state *rshader,
+			 struct radeon_state *state);
+	int (*vs_shader)(struct r600_context *rctx, struct r600_context_state *rpshader,
+			 struct radeon_state *state);
+	void (*init_config)(struct r600_context *rctx);
+};
+extern struct r600_context_hw_state_vtbl r600_hw_state_vtbl;
 
 struct r600_context {
 	struct pipe_context		context;
 	struct r600_screen		*screen;
 	struct radeon			*rw;
-	struct radeon_ctx		*ctx;
+	struct radeon_ctx		ctx;
 	struct blitter_context		*blitter;
-	struct radeon_draw		*draw;
+	struct radeon_draw		draw;
+	struct r600_context_hw_state_vtbl *vtbl;
+	struct radeon_state		config;
+	/* FIXME get rid of those vs_resource,vs/ps_constant */
+	struct radeon_state		*vs_resource;
+	unsigned			vs_nresource;
+	struct radeon_state		*vs_constant;
+	struct radeon_state		*ps_constant;
 	/* hw states */
 	struct r600_context_hw_states	hw_states;
 	/* pipe states */
 	unsigned			flat_shade;
-	unsigned			ps_nsampler;
-	unsigned			vs_nsampler;
-	unsigned			ps_nsampler_view;
-	unsigned			vs_nsampler_view;
+
 	unsigned			nvertex_buffer;
 	struct r600_context_state	*rasterizer;
 	struct r600_context_state	*poly_stipple;
@@ -158,10 +207,9 @@ struct r600_context {
 	struct r600_context_state	*stencil_ref;
 	struct r600_context_state	*viewport;
 	struct r600_context_state	*framebuffer;
-	struct r600_context_state	*ps_sampler[PIPE_MAX_ATTRIBS];
-	struct r600_context_state	*vs_sampler[PIPE_MAX_ATTRIBS];
-	struct r600_context_state	*ps_sampler_view[PIPE_MAX_ATTRIBS];
-	struct r600_context_state	*vs_sampler_view[PIPE_MAX_ATTRIBS];
+	struct r600_shader_sampler_states vs_sampler;
+	struct r600_shader_sampler_states ps_sampler;
+	/* can add gs later */
 	struct r600_vertex_element	*vertex_elements;
 	struct pipe_vertex_buffer	vertex_buffer[PIPE_MAX_ATTRIBS];
 	struct pipe_index_buffer	index_buffer;
@@ -180,7 +228,6 @@ static INLINE struct r600_query* r600_query(struct pipe_query* q)
     return (struct r600_query*)q;
 }
 
-struct r600_context_state *r600_context_state(struct r600_context *rctx, unsigned type, const void *state);
 struct r600_context_state *r600_context_state_incref(struct r600_context_state *rstate);
 struct r600_context_state *r600_context_state_decref(struct r600_context_state *rstate);
 void r600_flush(struct pipe_context *ctx, unsigned flags,
@@ -213,5 +260,11 @@ uint32_t r600_translate_texformat(enum pipe_format format,
 extern void r600_queries_resume(struct pipe_context *ctx);
 extern void r600_queries_suspend(struct pipe_context *ctx);
 
+void r600_set_constant_buffer_file(struct pipe_context *ctx,
+				   uint shader, uint index,
+				   struct pipe_resource *buffer);
+void r600_set_constant_buffer_mem(struct pipe_context *ctx,
+				  uint shader, uint index,
+				  struct pipe_resource *buffer);
 
 #endif

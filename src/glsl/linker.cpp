@@ -343,12 +343,26 @@ cross_validate_globals(struct gl_shader_program *prog,
 	 ir_variable *const existing = variables.get_variable(var->name);
 	 if (existing != NULL) {
 	    if (var->type != existing->type) {
-	       linker_error_printf(prog, "%s `%s' declared as type "
-				   "`%s' and type `%s'\n",
-				   mode_string(var),
-				   var->name, var->type->name,
-				   existing->type->name);
-	       return false;
+	       /* Consider the types to be "the same" if both types are arrays
+		* of the same type and one of the arrays is implicitly sized.
+		* In addition, set the type of the linked variable to the
+		* explicitly sized array.
+		*/
+	       if (var->type->is_array()
+		   && existing->type->is_array()
+		   && (var->type->fields.array == existing->type->fields.array)
+		   && ((var->type->length == 0)
+		       || (existing->type->length == 0))) {
+		  if (existing->type->length == 0)
+		     existing->type = var->type;
+	       } else {
+		  linker_error_printf(prog, "%s `%s' declared as type "
+				      "`%s' and type `%s'\n",
+				      mode_string(var),
+				      var->name, var->type->name,
+				      existing->type->name);
+		  return false;
+	       }
 	    }
 
 	    /* FINISHME: Handle non-constant initializers.
@@ -726,14 +740,14 @@ link_intrastage_shaders(GLcontext *ctx,
 	       ir_function_signature *sig =
 		  (ir_function_signature *) iter.get();
 
-	       if (!sig->is_defined || sig->is_built_in)
+	       if (!sig->is_defined || sig->is_builtin)
 		  continue;
 
 	       ir_function_signature *other_sig =
 		  other->exact_matching_signature(& sig->parameters);
 
 	       if ((other_sig != NULL) && other_sig->is_defined
-		   && !other_sig->is_built_in) {
+		   && !other_sig->is_builtin) {
 		  linker_error_printf(prog,
 				      "function `%s' is multiply defined",
 				      f->name);
@@ -1282,15 +1296,24 @@ assign_varying_locations(struct gl_shader_program *prog,
 
       assert(input_var->location == -1);
 
-      /* FINISHME: Location assignment will need some changes when arrays,
-       * FINISHME: matrices, and structures are allowed as shader inputs /
-       * FINISHME: outputs.
-       */
       output_var->location = output_index;
       input_var->location = input_index;
 
-      output_index++;
-      input_index++;
+      /* FINISHME: Support for "varying" records in GLSL 1.50. */
+      assert(!output_var->type->is_record());
+
+      if (output_var->type->is_array()) {
+	 const unsigned slots = output_var->type->length
+	    * output_var->type->fields.array->matrix_columns;
+
+	 output_index += slots;
+	 input_index += slots;
+      } else {
+	 const unsigned slots = output_var->type->matrix_columns;
+
+	 output_index += slots;
+	 input_index += slots;
+      }
    }
 
    demote_unread_shader_outputs(producer);
@@ -1379,9 +1402,10 @@ link_shaders(GLcontext *ctx, struct gl_shader_program *prog)
     * match shading language versions.  With GLSL 1.30 and later, the versions
     * of all shaders must match.
     */
-   assert(min_version >= 110);
+   assert(min_version >= 100);
    assert(max_version <= 130);
-   if ((max_version >= 130) && (min_version != max_version)) {
+   if ((max_version >= 130 || min_version == 100)
+       && min_version != max_version) {
       linker_error_printf(prog, "all shaders must use same shading "
 			  "language version\n");
       goto done;
@@ -1447,13 +1471,13 @@ link_shaders(GLcontext *ctx, struct gl_shader_program *prog)
     * some of that unused.
     */
    for (unsigned i = 0; i < prog->_NumLinkedShaders; i++) {
-      while (do_common_optimization(prog->_LinkedShaders[i]->ir, true))
+      while (do_common_optimization(prog->_LinkedShaders[i]->ir, true, 32))
 	 ;
    }
 
    assign_uniform_locations(prog);
 
-   if (prog->_LinkedShaders[0]->Type == GL_VERTEX_SHADER) {
+   if (prog->_NumLinkedShaders && prog->_LinkedShaders[0]->Type == GL_VERTEX_SHADER) {
       /* FINISHME: The value of the max_attribute_index parameter is
        * FINISHME: implementation dependent based on the value of
        * FINISHME: GL_MAX_VERTEX_ATTRIBS.  GL_MAX_VERTEX_ATTRIBS must be

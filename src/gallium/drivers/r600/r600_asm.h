@@ -26,11 +26,15 @@
 #include "radeon.h"
 #include "util/u_double_list.h"
 
+#define NUM_OF_CYCLES 3
+#define NUM_OF_COMPONENTS 4
+
 struct r600_bc_alu_src {
 	unsigned			sel;
 	unsigned			chan;
 	unsigned			neg;
 	unsigned			abs;
+	unsigned			rel;
 };
 
 struct r600_bc_alu_dst {
@@ -38,18 +42,23 @@ struct r600_bc_alu_dst {
 	unsigned			chan;
 	unsigned			clamp;
 	unsigned			write;
+	unsigned			rel;
 };
 
 struct r600_bc_alu {
 	struct list_head		list;
+	struct list_head		bs_list; /* bank swizzle list */
 	struct r600_bc_alu_src		src[3];
 	struct r600_bc_alu_dst		dst;
 	unsigned			inst;
 	unsigned			last;
 	unsigned			is_op3;
+	unsigned                        predicate;
 	unsigned			nliteral;
 	unsigned			literal_added;
+	unsigned                        bank_swizzle;
 	u32				value[4];
+	int hw_gpr[NUM_OF_CYCLES][NUM_OF_COMPONENTS];
 };
 
 struct r600_bc_tex {
@@ -114,23 +123,58 @@ struct r600_bc_cf {
 	unsigned			addr;
 	unsigned			ndw;
 	unsigned			id;
+	unsigned                        cond;
+	unsigned                        pop_count;
+	unsigned                        cf_addr; /* control flow addr */
+	unsigned                        kcache0_mode;
 	struct list_head		alu;
 	struct list_head		tex;
 	struct list_head		vtx;
 	struct r600_bc_output		output;
+	struct r600_bc_alu *curr_bs_head;
 };
 
+#define FC_NONE 0
+#define FC_IF 1
+#define FC_LOOP 2
+#define FC_REP 3
+#define FC_PUSH_VPM 4
+#define FC_PUSH_WQM 5
+
+struct r600_cf_stack_entry {
+	int type;
+	struct r600_bc_cf *start;
+	struct r600_bc_cf **mid; /* used to store the else point */
+	int num_mid;
+};
+
+#define SQ_MAX_CALL_DEPTH 0x00000020
+struct r600_cf_callstack {
+	unsigned fc_sp_before_entry;
+	int sub_desc_index;
+	int current;
+	int max;
+};
+	
 struct r600_bc {
 	enum radeon_family		family;
 	int chiprev; /* 0 - r600, 1 - r700, 2 - evergreen */
+	unsigned                        use_mem_constant; 
 	struct list_head		cf;
 	struct r600_bc_cf		*cf_last;
 	unsigned			ndw;
 	unsigned			ncf;
 	unsigned			ngpr;
+	unsigned                        nstack;
 	unsigned			nresource;
 	unsigned			force_add_cf;
 	u32				*bytecode;
+
+	u32 fc_sp;
+	struct r600_cf_stack_entry fc_stack[32];
+
+	unsigned call_sp;
+	struct r600_cf_callstack callstack[SQ_MAX_CALL_DEPTH];
 };
 
 int r600_bc_init(struct r600_bc *bc, enum radeon_family family);
@@ -140,5 +184,6 @@ int r600_bc_add_vtx(struct r600_bc *bc, const struct r600_bc_vtx *vtx);
 int r600_bc_add_tex(struct r600_bc *bc, const struct r600_bc_tex *tex);
 int r600_bc_add_output(struct r600_bc *bc, const struct r600_bc_output *output);
 int r600_bc_build(struct r600_bc *bc);
-
+int r600_bc_add_cfinst(struct r600_bc *bc, int inst);
+int r600_bc_add_alu_type(struct r600_bc *bc, const struct r600_bc_alu *alu, int type);
 #endif

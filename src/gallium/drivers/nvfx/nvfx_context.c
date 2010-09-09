@@ -17,10 +17,11 @@ nvfx_flush(struct pipe_context *pipe, unsigned flags,
 
 	/* XXX: we need to actually be intelligent here */
 	if (flags & PIPE_FLUSH_TEXTURE_CACHE) {
-		BEGIN_RING(chan, eng3d, 0x1fd8, 1);
-		OUT_RING  (chan, 2);
-		BEGIN_RING(chan, eng3d, 0x1fd8, 1);
-		OUT_RING  (chan, 1);
+		WAIT_RING(chan, 4);
+		OUT_RING(chan, RING_3D(0x1fd8, 1));
+		OUT_RING(chan, 2);
+		OUT_RING(chan, RING_3D(0x1fd8, 1));
+		OUT_RING(chan, 1);
 	}
 
 	FIRE_RING(chan);
@@ -76,6 +77,7 @@ nvfx_create(struct pipe_screen *pscreen, void *priv)
 	nvfx->pipe.flush = nvfx_flush;
 
 	nvfx->is_nv4x = screen->is_nv4x;
+	nvfx->use_nv4x = screen->use_nv4x;
 	/* TODO: it seems that nv30 might have fixed function clipping usable with vertex programs
 	 * However, my code for that doesn't work, so use vp clipping for all cards, which works.
 	 */

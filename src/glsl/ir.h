@@ -343,7 +343,7 @@ public:
    unsigned is_defined:1;
 
    /** Whether or not this function signature is a built-in. */
-   unsigned is_built_in:1;
+   unsigned is_builtin:1;
 
    /** Body of instructions in the function. */
    struct exec_list body;
@@ -410,6 +410,9 @@ public:
     */
    const char *name;
 
+   /** Whether or not this function has a signature that is a built-in. */
+   bool has_builtin_signature();
+
    /**
     * List of ir_function_signature for each overloaded function with this name.
     */
@@ -461,10 +464,7 @@ public:
  */
 class ir_loop : public ir_instruction {
 public:
-   ir_loop() : from(NULL), to(NULL), increment(NULL), counter(NULL)
-   {
-      ir_type = ir_type_loop;
-   }
+   ir_loop();
 
    virtual ir_loop *clone(void *mem_ctx, struct hash_table *ht) const;
 
@@ -493,12 +493,30 @@ public:
 
    /**
     * \name Loop counter and controls
+    *
+    * Represents a loop like a FORTRAN \c do-loop.
+    *
+    * \note
+    * If \c from and \c to are the same value, the loop will execute once.
     */
    /*@{*/
-   ir_rvalue *from;
-   ir_rvalue *to;
+   ir_rvalue *from;             /** Value of the loop counter on the first
+				 * iteration of the loop.
+				 */
+   ir_rvalue *to;               /** Value of the loop counter on the last
+				 * iteration of the loop.
+				 */
    ir_rvalue *increment;
    ir_variable *counter;
+
+   /**
+    * Comparison operation in the loop terminator.
+    *
+    * If any of the loop control fields are non-\c NULL, this field must be
+    * one of \c ir_binop_less, \c ir_binop_greater, \c ir_binop_lequal,
+    * \c ir_binop_gequal, \c ir_binop_equal, or \c ir_binop_nequal.
+    */
+   int cmp;
    /*@}*/
 };
 
@@ -714,6 +732,12 @@ public:
     * Return a string representing this expression's operator.
     */
    const char *operator_string();
+
+   /**
+    * Return a string representing this expression's operator.
+    */
+   static const char *operator_string(ir_expression_operation);
+
 
    /**
     * Do a reverse-lookup to translate the given string into an operator.

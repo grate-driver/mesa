@@ -45,7 +45,6 @@
 #include "r600_emit.h"
 #include "program/programopt.h"
 
-#include "r700_debug.h"
 #include "evergreen_vertprog.h"
 
 unsigned int evergreen_Map_Vertex_Output(r700_AssemblerBase       *pAsm, 
@@ -201,7 +200,6 @@ void evergreen_Map_Vertex_Program(GLcontext *ctx,
                         struct evergreen_vertex_program *vp,
 						struct gl_vertex_program   *mesa_vp)
 {
-    GLuint ui;
     r700_AssemblerBase *pAsm = &(vp->r700AsmCode);
 	unsigned int num_inputs;
 
@@ -226,13 +224,6 @@ void evergreen_Map_Vertex_Program(GLcontext *ctx,
 	pAsm->starting_export_register_number = pAsm->number_used_registers;
 
 	pAsm->number_used_registers += pAsm->number_of_exports;
-
-    pAsm->pucOutMask = (unsigned char*) MALLOC(pAsm->number_of_exports);
-
-    for(ui=0; ui<pAsm->number_of_exports; ui++)
-    {
-        pAsm->pucOutMask[ui] = 0x0;
-    }
 
     /* Map temporary registers (GPRs) */
     pAsm->starting_temp_register_number = pAsm->number_used_registers;
@@ -600,10 +591,6 @@ GLboolean evergreenSetupVertexProgram(GLcontext * ctx)
     EVERGREEN_CHIP_CONTEXT *evergreen = GET_EVERGREEN_CHIP(context);
     struct evergreen_vertex_program *vp = context->selected_vp;
 
-    struct gl_program_parameter_list *paramList;
-    unsigned int unNumParamData;
-    unsigned int ui;
-
     if(GL_FALSE == vp->loaded)
     {
 	    if(vp->r700Shader.bNeedsAssembly == GL_TRUE)
@@ -655,6 +642,19 @@ GLboolean evergreenSetupVertexProgram(GLcontext * ctx)
     SETbit(evergreen->SPI_PS_IN_CONTROL_0.u32All, PERSP_GRADIENT_ENA_bit);
     CLEARbit(evergreen->SPI_PS_IN_CONTROL_0.u32All, LINEAR_GRADIENT_ENA_bit);
     */
+
+    return GL_TRUE;
+}
+
+GLboolean evergreenSetupVPconstants(GLcontext * ctx)
+{
+    context_t *context = EVERGREEN_CONTEXT(ctx);
+    EVERGREEN_CHIP_CONTEXT *evergreen = GET_EVERGREEN_CHIP(context);
+    struct evergreen_vertex_program *vp = context->selected_vp;
+
+    struct gl_program_parameter_list *paramList;
+    unsigned int unNumParamData;
+    unsigned int ui;
 
     /* sent out shader constants. */
     paramList = vp->mesa_program->Base.Parameters;
@@ -728,3 +728,4 @@ GLboolean evergreenSetupVertexProgram(GLcontext * ctx)
 
     return GL_TRUE;
 }
+

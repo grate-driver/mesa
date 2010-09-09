@@ -58,8 +58,10 @@ static const struct dri_extension nouveau_extensions[] = {
 	{ "GL_EXT_framebuffer_object",	GL_EXT_framebuffer_object_functions },
 	{ "GL_EXT_secondary_color",	GL_EXT_secondary_color_functions },
 	{ "GL_EXT_stencil_wrap",	NULL },
+	{ "GL_EXT_texture_env_combine",	NULL },
 	{ "GL_EXT_texture_lod_bias",	NULL },
 	{ "GL_NV_blend_square",         NULL },
+	{ "GL_NV_texture_env_combine4",	NULL },
 	{ "GL_SGIS_generate_mipmap",	NULL },
 	{ NULL,				NULL }
 };
@@ -306,6 +308,9 @@ nouveau_context_make_current(__DRIcontext *dri_ctx, __DRIdrawable *dri_draw,
 GLboolean
 nouveau_context_unbind(__DRIcontext *dri_ctx)
 {
+	/* Unset current context and dispath table */
+	_mesa_make_current(NULL, NULL, NULL);
+
 	return GL_TRUE;
 }
 

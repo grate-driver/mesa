@@ -32,7 +32,7 @@
 
 
 /**
- * Prototype for a 7 plane rasterizer function.  Will codegenerate
+ * Prototype for a 8 plane rasterizer function.  Will codegenerate
  * several of these.
  *
  * XXX: Varients for more/fewer planes.
@@ -81,11 +81,14 @@ TAG(do_block_16)(struct lp_rasterizer_task *task,
    for (j = 0; j < NR_PLANES; j++) {
       const int dcdx = -plane[j].dcdx * 4;
       const int dcdy = plane[j].dcdy * 4;
-      const int cox = c[j] + plane[j].eo * 4;
-      const int cio = c[j] + plane[j].ei * 4 - 1;
+      const int cox = plane[j].eo * 4;
+      const int cio = plane[j].ei * 4 - 1;
 
-      outmask |= build_mask_linear(cox, dcdx, dcdy);
-      partmask |= build_mask_linear(cio, dcdx, dcdy);
+      build_masks(c[j] + cox,
+		  cio - cox,
+		  dcdx, dcdy, 
+		  &outmask,   /* sign bits from c[i][0..15] + cox */
+		  &partmask); /* sign bits from c[i][0..15] + cio */
    }
 
    if (outmask == 0xffff)
@@ -159,8 +162,18 @@ TAG(lp_rast_triangle)(struct lp_rasterizer_task *task,
    unsigned outmask, inmask, partmask, partial_mask;
    unsigned j = 0;
 
+   if (tri->inputs.disable) {
+      /* This triangle was partially binned and has been disabled */
+      return;
+   }
+
    outmask = 0;                 /* outside one or more trivial reject planes */
    partmask = 0;                /* outside one or more trivial accept planes */
+
+   if (tri->inputs.disable) {
+      /* This triangle was partially binned and has been disabled */
+      return;
+   }
 
    while (plane_mask) {
       int i = ffs(plane_mask) - 1;
@@ -171,11 +184,14 @@ TAG(lp_rast_triangle)(struct lp_rasterizer_task *task,
       {
 	 const int dcdx = -plane[j].dcdx * 16;
 	 const int dcdy = plane[j].dcdy * 16;
-	 const int cox = c[j] + plane[j].eo * 16;
-	 const int cio = c[j] + plane[j].ei * 16 - 1;
+	 const int cox = plane[j].eo * 16;
+	 const int cio = plane[j].ei * 16 - 1;
 
-	 outmask |= build_mask_linear(cox, dcdx, dcdy);
-	 partmask |= build_mask_linear(cio, dcdx, dcdy);
+	 build_masks(c[j] + cox,
+		     cio - cox,
+		     dcdx, dcdy, 
+		     &outmask,   /* sign bits from c[i][0..15] + cox */
+		     &partmask); /* sign bits from c[i][0..15] + cio */
       }
 
       j++;

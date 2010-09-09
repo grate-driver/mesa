@@ -263,6 +263,7 @@
 
 /* NV40 only fragment program opcodes */
 #define NVFX_FP_OP_OPCODE_TXL_NV40 0x2F
+#define NVFX_FP_OP_OPCODE_LITEX2_NV40 0x3C
 
 /* The use of these instructions appears to be indicated by bit 31 of DWORD 2.*/
 #define NV40_FP_OP_BRA_OPCODE_BRK                                    0x0
@@ -378,8 +379,9 @@
 #define NVFXSR_OUTPUT	1
 #define NVFXSR_INPUT	2
 #define NVFXSR_TEMP	3
-#define NVFXSR_CONST	4
-#define NVFXSR_RELOCATED	5
+#define NVFXSR_CONST	5
+#define NVFXSR_IMM	6
+#define NVFXSR_RELOCATED	7
 
 #define NVFX_COND_FL  0
 #define NVFX_COND_LT  1
@@ -414,14 +416,16 @@
 #define abs(s) nvfx_src_abs((s))
 
 struct nvfx_reg {
-	uint8_t type;
+	int8_t type;
 	uint32_t index;
 };
 
 struct nvfx_src {
 	struct nvfx_reg reg;
 
-	/* src only */
+	uint8_t indirect : 1;
+	uint8_t indirect_reg : 1;
+	uint8_t indirect_swz : 2;
 	uint8_t negate : 1;
 	uint8_t abs : 1;
 	uint8_t swz[4];
@@ -483,6 +487,7 @@ nvfx_src(struct nvfx_reg reg)
 		.abs = 0,
 		.negate = 0,
 		.swz = { 0, 1, 2, 3 },
+		.indirect = 0,
 	};
 	return temp;
 }

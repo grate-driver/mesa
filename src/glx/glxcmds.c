@@ -44,7 +44,9 @@
 #include "glx_error.h"
 #else
 #include <sys/time.h>
+#ifdef XF86VIDMODE
 #include <X11/extensions/xf86vmode.h>
+#endif
 #include "xf86dri.h"
 #endif
 #else
@@ -60,56 +62,6 @@ static const char __glXGLXClientVendorName[] = "Mesa Project and SGI";
 static const char __glXGLXClientVersion[] = "1.4";
 
 #if defined(GLX_DIRECT_RENDERING) && !defined(GLX_USE_APPLEGL)
-
-static Bool windowExistsFlag;
-static int
-windowExistsErrorHandler(Display * dpy, XErrorEvent * xerr)
-{
-   (void) dpy;
-
-   if (xerr->error_code == BadWindow) {
-      windowExistsFlag = GL_FALSE;
-   }
-   return 0;
-}
-
-/**
- * Find drawables in the local hash that have been destroyed on the
- * server.
- *
- * \param dpy    Display to destroy drawables for
- * \param screen Screen number to destroy drawables for
- */
-_X_HIDDEN void
-GarbageCollectDRIDrawables(struct glx_screen * sc)
-{
-   XID draw;
-   __GLXDRIdrawable *pdraw;
-   struct glx_display *priv = sc->display;
-   XWindowAttributes xwa;
-   int (*oldXErrorHandler) (Display *, XErrorEvent *);
-
-   /* Set no-op error handler so Xlib doesn't bail out if the windows
-    * has alreay been destroyed on the server. */
-   XSync(priv->dpy, GL_FALSE);
-   oldXErrorHandler = XSetErrorHandler(windowExistsErrorHandler);
-
-   if (__glxHashFirst(priv->drawHash, &draw, (void *) &pdraw) == 1) {
-      do {
-         windowExistsFlag = GL_TRUE;
-         XGetWindowAttributes(priv->dpy, draw, &xwa); /* dummy request */
-         if (!windowExistsFlag) {
-            /* Destroy the local drawable data, if the drawable no
-               longer exists in the Xserver */
-            (*pdraw->destroyDrawable) (pdraw);
-            __glxHashDelete(priv->drawHash, draw);
-         }
-      } while (__glxHashNext(priv->drawHash, &draw, (void *) &pdraw) == 1);
-   }
-
-   XSync(priv->dpy, GL_FALSE);
-   XSetErrorHandler(oldXErrorHandler);
-}
 
 /**
  * Get the __DRIdrawable for the drawable associated with a GLXContext
@@ -2063,15 +2015,9 @@ __glxGetMscRate(__GLXDRIdrawable *glxDraw,
       return True;
    }
    else
-      return False;
-#else
-   (void) draw;
-   (void) numerator;
-   (void) denominator;
-   (void) private;
+#endif
 
    return False;
-#endif
 }
 #endif
 
@@ -2161,9 +2107,9 @@ __glXWaitForMscOML(Display * dpy, GLXDrawable drawable,
 {
 #ifdef GLX_DIRECT_RENDERING
    __GLXDRIdrawable *pdraw = GetGLXDRIDrawable(dpy, drawable);
-#endif
    struct glx_screen *psc = pdraw ? pdraw->psc : NULL;
    int ret;
+#endif
 
 
    /* The OML_sync_control spec says these should "generate a GLX_BAD_VALUE
@@ -2193,9 +2139,9 @@ __glXWaitForSbcOML(Display * dpy, GLXDrawable drawable,
 {
 #ifdef GLX_DIRECT_RENDERING
    __GLXDRIdrawable *pdraw = GetGLXDRIDrawable(dpy, drawable);
-#endif
    struct glx_screen *psc = pdraw ? pdraw->psc : NULL;
    int ret;
+#endif
 
    /* The OML_sync_control spec says this should "generate a GLX_BAD_VALUE
     * error", but the return type in the spec is Bool.

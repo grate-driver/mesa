@@ -103,7 +103,7 @@ DRI2WireToEvent(Display *dpy, XEvent *event, xEvent *wire)
 
       /* Ignore swap events if we're not looking for them */
       pdraw = dri2GetGlxDrawableFromXDrawableId(dpy, awire->drawable);
-      if (!(pdraw->eventMask & GLX_BUFFER_SWAP_COMPLETE_INTEL_MASK))
+      if (!pdraw || !(pdraw->eventMask & GLX_BUFFER_SWAP_COMPLETE_INTEL_MASK))
 	 return False;
 
       aevent->serial = _XSetLastRequestRead(dpy, (xGenericReply *) wire);
@@ -173,6 +173,14 @@ DRI2Error(Display *display, xError *err, XExtCodes *codes, int *ret_code)
     if (err->majorCode == codes->major_opcode &&
 	err->errorCode == BadDrawable &&
 	err->minorCode == X_DRI2CopyRegion)
+	return True;
+
+    /* If the X drawable was destroyed before the GLX drawable, the
+     * DRI2 drawble will be gone by the time we call
+     * DRI2DestroyDrawable.  So just ignore BadDrawable here. */
+    if (err->majorCode == codes->major_opcode &&
+	err->errorCode == BadDrawable &&
+	err->minorCode == X_DRI2DestroyDrawable)
 	return True;
 
     return False;

@@ -287,11 +287,15 @@ static const char *const operator_strs[] = {
    "pow",
 };
 
+const char *ir_expression::operator_string(ir_expression_operation op)
+{
+   assert((unsigned int) op < Elements(operator_strs));
+   return operator_strs[op];
+}
+
 const char *ir_expression::operator_string()
 {
-   assert((unsigned int) operation <=
-	  sizeof(operator_strs) / sizeof(operator_strs[0]));
-   return operator_strs[operation];
+   return operator_string(this->operation);
 }
 
 ir_expression_operation
@@ -326,6 +330,9 @@ ir_constant::ir_constant(float f)
    this->ir_type = ir_type_constant;
    this->type = glsl_type::float_type;
    this->value.f[0] = f;
+   for (int i = 1; i < 16; i++)  {
+      this->value.f[i] = 0;
+   }
 }
 
 ir_constant::ir_constant(unsigned int u)
@@ -333,6 +340,9 @@ ir_constant::ir_constant(unsigned int u)
    this->ir_type = ir_type_constant;
    this->type = glsl_type::uint_type;
    this->value.u[0] = u;
+   for (int i = 1; i < 16; i++) {
+      this->value.u[i] = 0;
+   }
 }
 
 ir_constant::ir_constant(int i)
@@ -340,6 +350,9 @@ ir_constant::ir_constant(int i)
    this->ir_type = ir_type_constant;
    this->type = glsl_type::int_type;
    this->value.i[0] = i;
+   for (int i = 1; i < 16; i++) {
+      this->value.i[i] = 0;
+   }
 }
 
 ir_constant::ir_constant(bool b)
@@ -347,6 +360,9 @@ ir_constant::ir_constant(bool b)
    this->ir_type = ir_type_constant;
    this->type = glsl_type::bool_type;
    this->value.b[0] = b;
+   for (int i = 1; i < 16; i++) {
+      this->value.b[i] = false;
+   }
 }
 
 ir_constant::ir_constant(const ir_constant *c, unsigned i)
@@ -397,8 +413,71 @@ ir_constant::ir_constant(const struct glsl_type *type, exec_list *value_list)
       return;
    }
 
+   for (unsigned i = 0; i < 16; i++) {
+      this->value.u[i] = 0;
+   }
 
    ir_constant *value = (ir_constant *) (value_list->head);
+
+   /* Constructors with exactly one scalar argument are special for vectors
+    * and matrices.  For vectors, the scalar value is replicated to fill all
+    * the components.  For matrices, the scalar fills the components of the
+    * diagonal while the rest is filled with 0.
+    */
+   if (value->type->is_scalar() && value->next->is_tail_sentinel()) {
+      if (type->is_matrix()) {
+	 /* Matrix - fill diagonal (rest is already set to 0) */
+	 assert(type->base_type == GLSL_TYPE_FLOAT);
+	 for (unsigned i = 0; i < type->matrix_columns; i++)
+	    this->value.f[i * type->vector_elements + i] = value->value.f[0];
+      } else {
+	 /* Vector or scalar - fill all components */
+	 switch (type->base_type) {
+	 case GLSL_TYPE_UINT:
+	 case GLSL_TYPE_INT:
+	    for (unsigned i = 0; i < type->components(); i++)
+	       this->value.u[i] = value->value.u[0];
+	    break;
+	 case GLSL_TYPE_FLOAT:
+	    for (unsigned i = 0; i < type->components(); i++)
+	       this->value.f[i] = value->value.f[0];
+	    break;
+	 case GLSL_TYPE_BOOL:
+	    for (unsigned i = 0; i < type->components(); i++)
+	       this->value.b[i] = value->value.b[0];
+	    break;
+	 default:
+	    assert(!"Should not get here.");
+	    break;
+	 }
+      }
+      return;
+   }
+
+   if (type->is_matrix() && value->type->is_matrix()) {
+      assert(value->next->is_tail_sentinel());
+
+      /* From section 5.4.2 of the GLSL 1.20 spec:
+       * "If a matrix is constructed from a matrix, then each component
+       *  (column i, row j) in the result that has a corresponding component
+       *  (column i, row j) in the argument will be initialized from there."
+       */
+      unsigned cols = MIN2(type->matrix_columns, value->type->matrix_columns);
+      unsigned rows = MIN2(type->vector_elements, value->type->vector_elements);
+      for (unsigned i = 0; i < cols; i++) {
+	 for (unsigned j = 0; j < rows; j++) {
+	    const unsigned src = i * value->type->vector_elements + j;
+	    const unsigned dst = i * type->vector_elements + j;
+	    this->value.f[dst] = value->value.f[src];
+	 }
+      }
+
+      /* "All other components will be initialized to the identity matrix." */
+      for (unsigned i = cols; i < type->matrix_columns; i++)
+	 this->value.f[i * type->vector_elements + i] = 1.0;
+
+      return;
+   }
 
    /* Use each component from each entry in the value_list to initialize one
     * component of the constant being constructed.
@@ -439,7 +518,7 @@ ir_constant::ir_constant(const struct glsl_type *type, exec_list *value_list)
 ir_constant *
 ir_constant::zero(void *mem_ctx, const glsl_type *type)
 {
-   assert(type->is_numeric());
+   assert(type->is_numeric() || type->is_boolean());
 
    ir_constant *c = new(mem_ctx) ir_constant;
    c->type = type;
@@ -626,6 +705,18 @@ ir_constant::has_value(const ir_constant *c) const
    return true;
 }
 
+
+ir_loop::ir_loop()
+{
+   this->ir_type = ir_type_loop;
+   this->cmp = ir_unop_neg;
+   this->from = NULL;
+   this->to = NULL;
+   this->increment = NULL;
+   this->counter = NULL;
+}
+
+
 ir_dereference_variable::ir_dereference_variable(ir_variable *var)
 {
    this->ir_type = ir_type_dereference_variable;
@@ -697,6 +788,20 @@ ir_dereference_record::ir_dereference_record(ir_variable *var,
       ? this->record->type->field_type(field) : glsl_type::error_type;
 }
 
+bool type_contains_sampler(const glsl_type *type)
+{
+   if (type->is_array()) {
+      return type_contains_sampler(type->fields.array);
+   } else if (type->is_record()) {
+      for (unsigned int i = 0; i < type->length; i++) {
+	 if (type_contains_sampler(type->fields.structure[i].type))
+	    return true;
+      }
+      return false;
+   } else {
+      return type->is_sampler();
+   }
+}
 
 bool
 ir_dereference::is_lvalue()
@@ -709,6 +814,15 @@ ir_dereference::is_lvalue()
       return false;
 
    if (this->type->is_array() && !var->array_lvalue)
+      return false;
+
+   /* From page 17 (page 23 of the PDF) of the GLSL 1.20 spec:
+    *
+    *    "Samplers cannot be treated as l-values; hence cannot be used
+    *     as out or inout function parameters, nor can they be
+    *     assigned into."
+    */
+   if (type_contains_sampler(this->type))
       return false;
 
    return true;
@@ -959,7 +1073,7 @@ ir_function_signature::ir_function_signature(const glsl_type *return_type)
    : return_type(return_type), is_defined(false), _function(NULL)
 {
    this->ir_type = ir_type_function_signature;
-   this->is_built_in = false;
+   this->is_builtin = false;
 }
 
 
@@ -1011,6 +1125,18 @@ ir_function::ir_function(const char *name)
 {
    this->ir_type = ir_type_function;
    this->name = talloc_strdup(this, name);
+}
+
+
+bool
+ir_function::has_builtin_signature()
+{
+   foreach_list(n, &this->signatures) {
+      ir_function_signature *const sig = (ir_function_signature *) n;
+      if (sig->is_builtin)
+	 return true;
+   }
+   return false;
 }
 
 

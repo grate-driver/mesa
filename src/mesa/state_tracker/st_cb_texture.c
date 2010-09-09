@@ -548,6 +548,14 @@ st_TexImage(GLcontext * ctx,
    /* switch to "normal" */
    if (stObj->surface_based) {
       _mesa_clear_texture_object(ctx, texObj);
+      pipe_resource_reference(&stObj->pt, NULL);
+
+      /* oops, need to init this image again */
+      _mesa_init_teximage_fields(ctx, target, texImage,
+            width, height, depth, border, internalFormat);
+      _mesa_choose_texture_format(ctx, texObj, texImage, target, level,
+            internalFormat, format, type);
+
       stObj->surface_based = GL_FALSE;
    }
 
@@ -987,6 +995,8 @@ st_get_tex_image(GLcontext * ctx, GLenum target, GLint level,
    texImage->Depth = 1;
 
    dest = (GLubyte *) pixels;
+
+   _mesa_set_fetch_functions(texImage, get_texture_dims(target));
 
    for (i = 0; i < depth; i++) {
       if (compressed_dst) {

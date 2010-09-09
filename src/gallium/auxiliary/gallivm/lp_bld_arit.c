@@ -259,7 +259,7 @@ lp_build_add(struct lp_build_context *bld,
 }
 
 
-/** Return the sum of the elements of a */
+/** Return the scalar sum of the elements of a */
 LLVMValueRef
 lp_build_sum_vector(struct lp_build_context *bld,
                     LLVMValueRef a)
@@ -270,11 +270,9 @@ lp_build_sum_vector(struct lp_build_context *bld,
 
    assert(lp_check_value(type, a));
 
-   if (a == bld->zero)
-      return bld->zero;
-   if (a == bld->undef)
-      return bld->undef;
-   assert(type.length > 1);
+   if (type.length == 1) {
+      return a;
+   }
 
    assert(!bld->type.norm);
 
@@ -538,7 +536,7 @@ lp_build_mul_imm(struct lp_build_context *bld,
    if(b == 2 && bld->type.floating)
       return lp_build_add(bld, a, a);
 
-   if(util_is_pot(b)) {
+   if(util_is_power_of_two(b)) {
       unsigned shift = ffs(b) - 1;
 
       if(bld->type.floating) {

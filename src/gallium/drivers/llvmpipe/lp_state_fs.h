@@ -51,11 +51,14 @@ struct lp_fragment_shader_variant_key
    struct pipe_stencil_state stencil[2];
    struct pipe_alpha_state alpha;
    struct pipe_blend_state blend;
-   enum pipe_format zsbuf_format;
+
    unsigned nr_cbufs:8;
    unsigned nr_samplers:8;	/* actually derivable from just the shader */
    unsigned flatshade:1;
    unsigned occlusion_count:1;
+
+   enum pipe_format zsbuf_format;
+   enum pipe_format cbuf_format[PIPE_MAX_COLOR_BUFS];
 
    struct lp_sampler_static_state sampler[PIPE_MAX_SAMPLERS];
 };
@@ -99,6 +102,10 @@ struct lp_fragment_shader
    unsigned variants_created;
    unsigned variants_cached;
 };
+
+
+void
+lp_debug_fs_variant(const struct lp_fragment_shader_variant *variant);
 
 
 #endif /* LP_STATE_FS_H_ */

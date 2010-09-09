@@ -93,6 +93,8 @@ delete_dummy_framebuffer(struct gl_framebuffer *fb)
 void
 _mesa_init_fbobjects(GLcontext *ctx)
 {
+   _glthread_INIT_MUTEX(DummyFramebuffer.Mutex);
+   _glthread_INIT_MUTEX(DummyRenderbuffer.Mutex);
    DummyFramebuffer.Delete = delete_dummy_framebuffer;
    DummyRenderbuffer.Delete = delete_dummy_renderbuffer;
 }
@@ -923,6 +925,12 @@ GLenum
 _mesa_base_fbo_format(GLcontext *ctx, GLenum internalFormat)
 {
    switch (internalFormat) {
+   case GL_ALPHA:
+   case GL_ALPHA4:
+   case GL_ALPHA8:
+   case GL_ALPHA12:
+   case GL_ALPHA16:
+      return GL_ALPHA;
    case GL_RGB:
    case GL_R3_G3_B2:
    case GL_RGB4:
@@ -1020,7 +1028,7 @@ renderbuffer_storage(GLenum target, GLenum internalFormat,
 
    rb = ctx->CurrentRenderbuffer;
    if (!rb) {
-      _mesa_error(ctx, GL_INVALID_OPERATION, func);
+      _mesa_error(ctx, GL_INVALID_OPERATION, "%s", func);
       return;
    }
 

@@ -38,7 +38,6 @@
 
 #include "r300_fragprog_common.h"
 
-#include "program/prog_parameter.h"
 #include "program/prog_print.h"
 
 #include "compiler/radeon_compiler.h"
@@ -214,6 +213,7 @@ static void translate_fragment_program(GLcontext *ctx, struct r300_fragment_prog
 	r300ContextPtr r300 = R300_CONTEXT(ctx);
 	struct r300_fragment_program_compiler compiler;
 
+        memset(&compiler, 0, sizeof(compiler));
 	rc_init(&compiler.Base);
 	compiler.Base.Debug = (RADEON_DEBUG & RADEON_PIXEL) ? GL_TRUE : GL_FALSE;
 
@@ -221,7 +221,11 @@ static void translate_fragment_program(GLcontext *ctx, struct r300_fragment_prog
 	compiler.state = fp->state;
 	compiler.enable_shadow_ambient = GL_TRUE;
 	compiler.Base.is_r500 = (r300->radeon.radeonScreen->chip_family >= CHIP_FAMILY_RV515) ? GL_TRUE : GL_FALSE;
+	compiler.Base.disable_optimizations = 0;
+	compiler.Base.has_half_swizzles = 1;
 	compiler.Base.max_temp_regs = (compiler.Base.is_r500) ? 128 : 32;
+	compiler.Base.max_constants = compiler.Base.is_r500 ? 256 : 32;
+	compiler.Base.max_alu_insts = compiler.Base.is_r500 ? 512 : 64;
 	compiler.OutputDepth = FRAG_RESULT_DEPTH;
 	memset(compiler.OutputColor, 0, 4 * sizeof(unsigned));
 	compiler.OutputColor[0] = FRAG_RESULT_COLOR;

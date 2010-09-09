@@ -5,6 +5,7 @@
 static inline boolean
 nvfx_surface_linear_renderable(struct pipe_surface* surf)
 {
+	/* TODO: precompute this in nvfx_surface creation */
 	return (surf->texture->flags & NVFX_RESOURCE_FLAG_LINEAR)
 		&& !(surf->offset & 63)
 		&& !(((struct nvfx_surface*)surf)->pitch & 63);
@@ -13,13 +14,14 @@ nvfx_surface_linear_renderable(struct pipe_surface* surf)
 static inline boolean
 nvfx_surface_swizzled_renderable(struct pipe_framebuffer_state* fb, struct pipe_surface* surf)
 {
-	/* TODO: return FALSE if we have a format not supporting swizzled rendering (e.g. r8); currently those are not supported at all */
+	/* TODO: precompute this in nvfx_surface creation */
 	return !((struct nvfx_miptree*)surf->texture)->linear_pitch
 		&& (surf->texture->target != PIPE_TEXTURE_3D || u_minify(surf->texture->depth0, surf->level) <= 1)
 		&& !(surf->offset & 127)
 		&& (surf->width == fb->width)
 		&& (surf->height == fb->height)
-		&& !((struct nvfx_surface*)surf)->temp;
+		&& !((struct nvfx_surface*)surf)->temp
+		&& (surf->format == PIPE_FORMAT_B8G8R8A8_UNORM || surf->format == PIPE_FORMAT_B8G8R8X8_UNORM || surf->format == PIPE_FORMAT_B5G6R5_UNORM);
 }
 
 static boolean
@@ -100,10 +102,10 @@ nvfx_framebuffer_validate(struct nvfx_context *nvfx, unsigned prepare_result)
 	unsigned w = fb->width;
 	unsigned h = fb->height;
 
-	rt_enable = (NV34TCL_RT_ENABLE_COLOR0 << fb->nr_cbufs) - 1;
-	if (rt_enable & (NV34TCL_RT_ENABLE_COLOR1 |
-			 NV40TCL_RT_ENABLE_COLOR2 | NV40TCL_RT_ENABLE_COLOR3))
-		rt_enable |= NV34TCL_RT_ENABLE_MRT;
+	rt_enable = (NV30_3D_RT_ENABLE_COLOR0 << fb->nr_cbufs) - 1;
+	if (rt_enable & (NV30_3D_RT_ENABLE_COLOR1 |
+			 NV40_3D_RT_ENABLE_COLOR2 | NV40_3D_RT_ENABLE_COLOR3))
+		rt_enable |= NV30_3D_RT_ENABLE_MRT;
 
 	nvfx->state.render_temps = 0;
 
@@ -123,55 +125,63 @@ nvfx_framebuffer_validate(struct nvfx_context *nvfx, unsigned prepare_result)
 	if (prepare_result) {
 		assert(!(fb->width & (fb->width - 1)) && !(fb->height & (fb->height - 1)));
 
-		rt_format = NV34TCL_RT_FORMAT_TYPE_SWIZZLED |
-			(util_logbase2(fb->width) << NV34TCL_RT_FORMAT_LOG2_WIDTH_SHIFT) |
-			(util_logbase2(fb->height) << NV34TCL_RT_FORMAT_LOG2_HEIGHT_SHIFT);
+		rt_format = NV30_3D_RT_FORMAT_TYPE_SWIZZLED |
+			(util_logbase2(fb->width) << NV30_3D_RT_FORMAT_LOG2_WIDTH__SHIFT) |
+			(util_logbase2(fb->height) << NV30_3D_RT_FORMAT_LOG2_HEIGHT__SHIFT);
 	} else
-		rt_format = NV34TCL_RT_FORMAT_TYPE_LINEAR;
+		rt_format = NV30_3D_RT_FORMAT_TYPE_LINEAR;
 
 	if(fb->nr_cbufs > 0) {
 		switch (fb->cbufs[0]->format) {
 		case PIPE_FORMAT_B8G8R8X8_UNORM:
-			rt_format |= NV34TCL_RT_FORMAT_COLOR_X8R8G8B8;
+			rt_format |= NV30_3D_RT_FORMAT_COLOR_X8R8G8B8;
 			break;
 		case PIPE_FORMAT_B8G8R8A8_UNORM:
 		case 0:
-			rt_format |= NV34TCL_RT_FORMAT_COLOR_A8R8G8B8;
+			rt_format |= NV30_3D_RT_FORMAT_COLOR_A8R8G8B8;
 			break;
 		case PIPE_FORMAT_B5G6R5_UNORM:
-			rt_format |= NV34TCL_RT_FORMAT_COLOR_R5G6B5;
+			rt_format |= NV30_3D_RT_FORMAT_COLOR_R5G6B5;
+			break;
+		case PIPE_FORMAT_R32G32B32A32_FLOAT:
+			rt_format |= NV30_3D_RT_FORMAT_COLOR_A32B32G32R32_FLOAT;
+			break;
+		case PIPE_FORMAT_R16G16B16A16_FLOAT:
+			rt_format |= NV30_3D_RT_FORMAT_COLOR_A16B16G16R16_FLOAT;
 			break;
 		default:
 			assert(0);
 		}
 	} else if(fb->zsbuf && util_format_get_blocksize(fb->zsbuf->format) == 2)
-		rt_format |= NV34TCL_RT_FORMAT_COLOR_R5G6B5;
+		rt_format |= NV30_3D_RT_FORMAT_COLOR_R5G6B5;
 	else
-		rt_format |= NV34TCL_RT_FORMAT_COLOR_A8R8G8B8;
+		rt_format |= NV30_3D_RT_FORMAT_COLOR_A8R8G8B8;
 
 	if(fb->zsbuf) {
 		switch (fb->zsbuf->format) {
 		case PIPE_FORMAT_Z16_UNORM:
-			rt_format |= NV34TCL_RT_FORMAT_ZETA_Z16;
+			rt_format |= NV30_3D_RT_FORMAT_ZETA_Z16;
 			break;
 		case PIPE_FORMAT_S8_USCALED_Z24_UNORM:
 		case PIPE_FORMAT_X8Z24_UNORM:
 		case 0:
-			rt_format |= NV34TCL_RT_FORMAT_ZETA_Z24S8;
+			rt_format |= NV30_3D_RT_FORMAT_ZETA_Z24S8;
 			break;
 		default:
 			assert(0);
 		}
 	} else if(fb->nr_cbufs && util_format_get_blocksize(fb->cbufs[0]->format) == 2)
-		rt_format |= NV34TCL_RT_FORMAT_ZETA_Z16;
+		rt_format |= NV30_3D_RT_FORMAT_ZETA_Z16;
 	else
-		rt_format |= NV34TCL_RT_FORMAT_ZETA_Z24S8;
+		rt_format |= NV30_3D_RT_FORMAT_ZETA_Z24S8;
 
-	if ((rt_enable & NV34TCL_RT_ENABLE_COLOR0) || fb->zsbuf) {
+	MARK_RING(chan, 42, 10);
+
+	if ((rt_enable & NV30_3D_RT_ENABLE_COLOR0) || fb->zsbuf) {
 		struct nvfx_render_target *rt0 = &nvfx->hw_rt[0];
 		uint32_t pitch;
 
-		if(!(rt_enable & NV34TCL_RT_ENABLE_COLOR0))
+		if(!(rt_enable & NV30_3D_RT_ENABLE_COLOR0))
 			rt0 = &nvfx->hw_zeta;
 
 		pitch = rt0->pitch;
@@ -186,23 +196,23 @@ nvfx_framebuffer_validate(struct nvfx_context *nvfx, unsigned prepare_result)
 
 		//printf("rendering to bo %p [%i] at offset %i with pitch %i\n", rt0->bo, rt0->bo->handle, rt0->offset, pitch);
 
-		OUT_RING(chan, RING_3D(NV34TCL_DMA_COLOR0, 1));
+		OUT_RING(chan, RING_3D(NV30_3D_DMA_COLOR0, 1));
 		OUT_RELOC(chan, rt0->bo, 0,
 			      rt_flags | NOUVEAU_BO_OR,
 			      chan->vram->handle, chan->gart->handle);
-		OUT_RING(chan, RING_3D(NV34TCL_COLOR0_PITCH, 2));
+		OUT_RING(chan, RING_3D(NV30_3D_COLOR0_PITCH, 2));
 		OUT_RING(chan, pitch);
 		OUT_RELOC(chan, rt0->bo,
 			      rt0->offset, rt_flags | NOUVEAU_BO_LOW,
 			      0, 0);
 	}
 
-	if (rt_enable & NV34TCL_RT_ENABLE_COLOR1) {
-		OUT_RING(chan, RING_3D(NV34TCL_DMA_COLOR1, 1));
+	if (rt_enable & NV30_3D_RT_ENABLE_COLOR1) {
+		OUT_RING(chan, RING_3D(NV30_3D_DMA_COLOR1, 1));
 		OUT_RELOC(chan, nvfx->hw_rt[1].bo, 0,
 			      rt_flags | NOUVEAU_BO_OR,
 			      chan->vram->handle, chan->gart->handle);
-		OUT_RING(chan, RING_3D(NV34TCL_COLOR1_OFFSET, 2));
+		OUT_RING(chan, RING_3D(NV30_3D_COLOR1_OFFSET, 2));
 		OUT_RELOC(chan, nvfx->hw_rt[1].bo,
 				nvfx->hw_rt[1].offset, rt_flags | NOUVEAU_BO_LOW,
 			      0, 0);
@@ -211,71 +221,69 @@ nvfx_framebuffer_validate(struct nvfx_context *nvfx, unsigned prepare_result)
 
 	if(nvfx->is_nv4x)
 	{
-		if (rt_enable & NV40TCL_RT_ENABLE_COLOR2) {
-			OUT_RING(chan, RING_3D(NV40TCL_DMA_COLOR2, 1));
+		if (rt_enable & NV40_3D_RT_ENABLE_COLOR2) {
+			OUT_RING(chan, RING_3D(NV40_3D_DMA_COLOR2, 1));
 			OUT_RELOC(chan, nvfx->hw_rt[2].bo, 0,
 				      rt_flags | NOUVEAU_BO_OR,
 				      chan->vram->handle, chan->gart->handle);
-			OUT_RING(chan, RING_3D(NV40TCL_COLOR2_OFFSET, 1));
+			OUT_RING(chan, RING_3D(NV40_3D_COLOR2_OFFSET, 1));
 			OUT_RELOC(chan, nvfx->hw_rt[2].bo,
 				      nvfx->hw_rt[2].offset, rt_flags | NOUVEAU_BO_LOW,
 				      0, 0);
-			OUT_RING(chan, RING_3D(NV40TCL_COLOR2_PITCH, 1));
+			OUT_RING(chan, RING_3D(NV40_3D_COLOR2_PITCH, 1));
 			OUT_RING(chan, nvfx->hw_rt[2].pitch);
 		}
 
-		if (rt_enable & NV40TCL_RT_ENABLE_COLOR3) {
-			OUT_RING(chan, RING_3D(NV40TCL_DMA_COLOR3, 1));
+		if (rt_enable & NV40_3D_RT_ENABLE_COLOR3) {
+			OUT_RING(chan, RING_3D(NV40_3D_DMA_COLOR3, 1));
 			OUT_RELOC(chan, nvfx->hw_rt[3].bo, 0,
 				      rt_flags | NOUVEAU_BO_OR,
 				      chan->vram->handle, chan->gart->handle);
-			OUT_RING(chan, RING_3D(NV40TCL_COLOR3_OFFSET, 1));
+			OUT_RING(chan, RING_3D(NV40_3D_COLOR3_OFFSET, 1));
 			OUT_RELOC(chan, nvfx->hw_rt[3].bo,
 					nvfx->hw_rt[3].offset, rt_flags | NOUVEAU_BO_LOW,
 				      0, 0);
-			OUT_RING(chan, RING_3D(NV40TCL_COLOR3_PITCH, 1));
+			OUT_RING(chan, RING_3D(NV40_3D_COLOR3_PITCH, 1));
 			OUT_RING(chan, nvfx->hw_rt[3].pitch);
 		}
 	}
 
 	if (fb->zsbuf) {
-		OUT_RING(chan, RING_3D(NV34TCL_DMA_ZETA, 1));
+		OUT_RING(chan, RING_3D(NV30_3D_DMA_ZETA, 1));
 		OUT_RELOC(chan, nvfx->hw_zeta.bo, 0,
 			      rt_flags | NOUVEAU_BO_OR,
 			      chan->vram->handle, chan->gart->handle);
-		OUT_RING(chan, RING_3D(NV34TCL_ZETA_OFFSET, 1));
+		OUT_RING(chan, RING_3D(NV30_3D_ZETA_OFFSET, 1));
 		/* TODO: reverse engineer LMA */
 		OUT_RELOC(chan, nvfx->hw_zeta.bo,
 			     nvfx->hw_zeta.offset, rt_flags | NOUVEAU_BO_LOW, 0, 0);
 	        if(nvfx->is_nv4x) {
-			OUT_RING(chan, RING_3D(NV40TCL_ZETA_PITCH, 1));
+			OUT_RING(chan, RING_3D(NV40_3D_ZETA_PITCH, 1));
 			OUT_RING(chan, nvfx->hw_zeta.pitch);
 		}
 	}
 	else if(nvfx->is_nv4x) {
-		OUT_RING(chan, RING_3D(NV40TCL_ZETA_PITCH, 1));
+		OUT_RING(chan, RING_3D(NV40_3D_ZETA_PITCH, 1));
 		OUT_RING(chan, 64);
 	}
 
-	OUT_RING(chan, RING_3D(NV34TCL_RT_ENABLE, 1));
+	OUT_RING(chan, RING_3D(NV30_3D_RT_ENABLE, 1));
 	OUT_RING(chan, rt_enable);
-	OUT_RING(chan, RING_3D(NV34TCL_RT_HORIZ, 3));
+	OUT_RING(chan, RING_3D(NV30_3D_RT_HORIZ, 3));
 	OUT_RING(chan, (w << 16) | 0);
 	OUT_RING(chan, (h << 16) | 0);
 	OUT_RING(chan, rt_format);
-	OUT_RING(chan, RING_3D(NV34TCL_VIEWPORT_HORIZ, 2));
+	OUT_RING(chan, RING_3D(NV30_3D_VIEWPORT_HORIZ, 2));
 	OUT_RING(chan, (w << 16) | 0);
 	OUT_RING(chan, (h << 16) | 0);
-	OUT_RING(chan, RING_3D(NV34TCL_VIEWPORT_CLIP_HORIZ(0), 2));
+	OUT_RING(chan, RING_3D(NV30_3D_VIEWPORT_CLIP_HORIZ(0), 2));
 	OUT_RING(chan, ((w - 1) << 16) | 0);
 	OUT_RING(chan, ((h - 1) << 16) | 0);
-	OUT_RING(chan, RING_3D(0x1d88, 1));
-	OUT_RING(chan, (1 << 12) | h);
 
 	if(!nvfx->is_nv4x) {
 		/* Wonder why this is needed, context should all be set to zero on init */
 		/* TODO: we can most likely remove this, after putting it in context init */
-		OUT_RING(chan, RING_3D(NV34TCL_VIEWPORT_TX_ORIGIN, 1));
+		OUT_RING(chan, RING_3D(NV30_3D_VIEWPORT_TX_ORIGIN, 1));
 		OUT_RING(chan, 0);
 	}
 	nvfx->relocs_needed &=~ NVFX_RELOCATE_FRAMEBUFFER;
@@ -291,22 +299,22 @@ nvfx_framebuffer_relocate(struct nvfx_context *nvfx)
 
 #define DO_(var, pfx, name) \
 	if(var.bo) { \
-		OUT_RELOC(chan, var.bo, RING_3D(pfx##TCL_DMA_##name, 1), rt_flags, 0, 0); \
+		OUT_RELOC(chan, var.bo, RING_3D(pfx##_3D_DMA_##name, 1), rt_flags, 0, 0); \
 		OUT_RELOC(chan, var.bo, 0, \
 			rt_flags | NOUVEAU_BO_OR, \
 			chan->vram->handle, chan->gart->handle); \
-		OUT_RELOC(chan, var.bo, RING_3D(pfx##TCL_##name##_OFFSET, 1), rt_flags, 0, 0); \
+		OUT_RELOC(chan, var.bo, RING_3D(pfx##_3D_##name##_OFFSET, 1), rt_flags, 0, 0); \
 		OUT_RELOC(chan, var.bo, \
 			var.offset, rt_flags | NOUVEAU_BO_LOW, \
 			0, 0); \
 	}
 
 #define DO(pfx, num) DO_(nvfx->hw_rt[num], pfx, COLOR##num)
-	DO(NV34, 0);
-	DO(NV34, 1);
+	DO(NV30, 0);
+	DO(NV30, 1);
 	DO(NV40, 2);
 	DO(NV40, 3);
 
-	DO_(nvfx->hw_zeta, NV34, ZETA);
+	DO_(nvfx->hw_zeta, NV30, ZETA);
 	nvfx->relocs_needed &=~ NVFX_RELOCATE_FRAMEBUFFER;
 }

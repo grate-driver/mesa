@@ -44,8 +44,6 @@
 #include "evergreen_vertprog.h"
 #include "evergreen_fragprog.h"
 
-#include "r700_debug.h"
-
 void evergreen_insert_wpos_code(GLcontext *ctx, struct gl_fragment_program *fprog)
 {
     static const gl_state_index winstate[STATE_LENGTH]
@@ -101,7 +99,6 @@ void evergreen_Map_Fragment_Program(r700_AssemblerBase         *pAsm,
 {
 	unsigned int unBit;
     unsigned int i;
-    GLuint       ui;
 
     /* match fp inputs with vp exports. */
     struct evergreen_vertex_program_cont *vpc =
@@ -247,12 +244,6 @@ void evergreen_Map_Fragment_Program(r700_AssemblerBase         *pAsm,
 		pAsm->number_of_colorandz_exports++;
 		pAsm->pR700Shader->depthIsExported = 1;
 	}
-
-    pAsm->pucOutMask = (unsigned char*) MALLOC(pAsm->number_of_exports);
-    for(ui=0; ui<pAsm->number_of_exports; ui++)
-    {
-        pAsm->pucOutMask[ui] = 0x0;
-    }
 
     pAsm->flag_reg_index = pAsm->number_used_registers++;
 
@@ -503,9 +494,7 @@ GLboolean evergreenSetupFragmentProgram(GLcontext * ctx)
     struct evergreen_fragment_program *fp = (struct evergreen_fragment_program *)
 	                                   (ctx->FragmentProgram._Current);
     r700_AssemblerBase         *pAsm = &(fp->r700AsmCode);
-    struct gl_fragment_program *mesa_fp = &(fp->mesa_program);
-    struct gl_program_parameter_list *paramList;
-    unsigned int unNumParamData;
+    struct gl_fragment_program *mesa_fp = &(fp->mesa_program);    
     unsigned int ui, i;
     unsigned int unNumOfReg;
     unsigned int unBit;
@@ -744,7 +733,22 @@ GLboolean evergreenSetupFragmentProgram(GLcontext * ctx)
     }
 
     exportCount = (evergreen->SQ_PGM_EXPORTS_PS.u32All & EXPORT_MODE_mask) / (1 << EXPORT_MODE_shift);
-    
+
+    return GL_TRUE;
+}
+
+GLboolean evergreenSetupFPconstants(GLcontext * ctx)
+{
+    context_t *context = EVERGREEN_CONTEXT(ctx);
+    EVERGREEN_CHIP_CONTEXT *evergreen = GET_EVERGREEN_CHIP(context);
+    struct evergreen_fragment_program *fp = (struct evergreen_fragment_program *)
+	                                   (ctx->FragmentProgram._Current);
+    r700_AssemblerBase *pAsm = &(fp->r700AsmCode);
+
+    struct gl_program_parameter_list *paramList;
+    unsigned int unNumParamData;
+    unsigned int ui;
+
     /* sent out shader constants. */
     paramList = fp->mesa_program.Base.Parameters;
 

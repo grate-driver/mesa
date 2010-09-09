@@ -52,6 +52,7 @@ struct r600_screen {
 	struct pipe_screen		screen;
 	struct radeon			*rw;
 	enum chip_class			chip_class;
+	boolean use_mem_constant;
 };
 
 static INLINE struct r600_screen *r600_screen(struct pipe_screen *screen)
@@ -84,7 +85,7 @@ void* r600_texture_transfer_map(struct pipe_context *ctx,
 void r600_texture_transfer_unmap(struct pipe_context *ctx,
 				 struct pipe_transfer* transfer);
 int r600_texture_scissor(struct pipe_context *ctx, struct r600_resource_texture *rtexture, unsigned level);
-int r600_texture_cb0(struct pipe_context *ctx, struct r600_resource_texture *rtexture, unsigned level);
+int r600_texture_cb(struct pipe_context *ctx, struct r600_resource_texture *rtexture, unsigned cb, unsigned level);
 int r600_texture_db(struct pipe_context *ctx, struct r600_resource_texture *rtexture, unsigned level);
 int r600_texture_from_depth(struct pipe_context *ctx, struct r600_resource_texture *rtexture, unsigned level);
 int r600_texture_viewport(struct pipe_context *ctx, struct r600_resource_texture *rtexture, unsigned level);
