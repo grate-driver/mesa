@@ -1,17 +1,21 @@
 mesa (7.9~git20100909-0ubuntu1) maverick; urgency=low
 
   * New upstream git snapshot up to commit 94118fe2d4b1e5 (LP: #631413)
-    - Many bug fixes including:
-      628930
-     - LP: #626943, #610541 - Flickering on Radeon
-     - LP: #628930 - KDE desktop effects not enabled automatically, graphical
-       corruption when enabled
-     - LP: #601052 - Cougar Point Graphics support
-     - LP: #596292, #599741 - Unity failing to start or misrendering on ATI
+  * New features include ATI HD5xxx series support in r600, and a vastly
+    improved glsl compiler.
+  * Many bug fixes including:
+   - LP: #626943, #610541 - Flickering on Radeon
+   - LP: #633261 - KDE desktop effects not enabled automatically,
+     graphical corruption when enabled
+   - LP: #601052 - Cougar Point Graphics support
+   - LP: #596292, #599741 - Unity failing to start or misrendering on ATI
   * Remove pre-generated .pc's, use the ones generated at build time
     instead.
   * Remove all references to mesa-utils now that its no longer shipped
     with the mesa source.
+  * Disable the experimental ARB_fragment_shader option by default on
+    i915, it exposes incomplete functionality that breaks KDE compositing
+    among other things. It can be enabled via driconf still. (LP: #628930)
 
  -- Robert Hooker <robert.hooker@canonical.com>  Thu, 09 Sep 2010 15:37:52 -0400
 
