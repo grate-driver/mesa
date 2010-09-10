@@ -31,8 +31,9 @@ mesa (7.9~git20100909-0ubuntu1) maverick; urgency=low
   * debian/rules:
     - Update configure flags to match upstream reshuffling.
     - Explicitly remove gallium DRI drivers that we don't want to ship.
-  
- -- Christopher James Halse Rogers <raof@ubuntu.com>  Fri, 10 Sep 2010 08:32:47 +1000
+  * Update debian/gbp.conf for this Maverick-specific packaging
+
+ -- Christopher James Halse Rogers <raof@ubuntu.com>  Fri, 10 Sep 2010 12:02:05 +1000
 
 mesa (7.8.2-2ubuntu2) maverick; urgency=low
 
