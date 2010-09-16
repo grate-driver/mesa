@@ -1,3 +1,10 @@
+mesa (7.9~git20100909-0ubuntu3) maverick; urgency=low
+
+  * Drop the changes from previous upload.  The Unity white screen problem
+    is clutter bug #632352, fixed in clutter-1.0 1.2.12-0ubuntu12.
+
+ -- Christopher James Halse Rogers <raof@ubuntu.com>  Thu, 16 Sep 2010 16:04:28 +0200
+
 mesa (7.9~git20100909-0ubuntu2) maverick; urgency=low
 
   * 105_old_gc_ignore_destroyed_drawable_events.patch (revert),

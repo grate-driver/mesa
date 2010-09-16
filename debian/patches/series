@@ -7,6 +7,3 @@
 101_ubuntu_hidden_glname.patch
 103_savage-expose_fbmodes_with_nonzero_alpha.patch
 104_i915_fragment_shader_disable.patch
-105_old_gc_ignore_destroyed_drawable_events.patch -R
-106_old_gc_fix_use_after_free.patch -R
-107_old_gc_drop_broken_drawable_garbage_collector.patch -R
