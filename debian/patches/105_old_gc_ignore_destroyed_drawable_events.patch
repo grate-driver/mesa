@@ -1,0 +1,23 @@
+commit f24ec6367b1cf6c6822fa998df8a877288711427
+Author: Kristian Høgsberg <krh@bitplanet.net>
+Date:   Wed Sep 8 18:54:30 2010 -0400
+
+    glx: Ignore DRI2 event for drawables we've destroyed
+    
+    Since we now actually destroy GLX drawables, we get into situations where
+    we get events for drawables that no longer exist.  Just ignore the
+    event in that case.
+
+diff --git a/src/glx/dri2.c b/src/glx/dri2.c
+index d410898..30999c8 100644
+--- a/src/glx/dri2.c
++++ b/src/glx/dri2.c
+@@ -103,7 +103,7 @@ DRI2WireToEvent(Display *dpy, XEvent *event, xEvent *wire)
+ 
+       /* Ignore swap events if we're not looking for them */
+       pdraw = dri2GetGlxDrawableFromXDrawableId(dpy, awire->drawable);
+-      if (!(pdraw->eventMask & GLX_BUFFER_SWAP_COMPLETE_INTEL_MASK))
++      if (!pdraw || !(pdraw->eventMask & GLX_BUFFER_SWAP_COMPLETE_INTEL_MASK))
+ 	 return False;
+ 
+       aevent->serial = _XSetLastRequestRead(dpy, (xGenericReply *) wire);

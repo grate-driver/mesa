@@ -1,3 +1,16 @@
+mesa (7.9~git20100909-0ubuntu2) maverick; urgency=low
+
+  * 105_old_gc_ignore_destroyed_drawable_events.patch (revert),
+    106_old_gc_fix_use_after_free.patch (revert),
+    107_old_gc_drop_broken_drawable_garbage_collector.patch (revert):
+    These three related patches introduced a new garbage collector, however
+    this introduces a regression causing clutter/mutter/unity to load with
+    a blank white screen.  Revert these three patches to restore mesa to
+    a working condition for unity.
+    (LP: #638808, #638725)
+
+ -- Bryce Harrington <bryce@ubuntu.com>  Wed, 15 Sep 2010 19:32:52 -0700
+
 mesa (7.9~git20100909-0ubuntu1) maverick; urgency=low
 
   [ Robert Hooker ]
@@ -14,7 +27,8 @@ mesa (7.9~git20100909-0ubuntu1) maverick; urgency=low
     instead.
   * Remove all references to mesa-utils now that its no longer shipped
     with the mesa source.
-  * Disable the experimental ARB_fragment_shader option by default on
+  * Add 104_i915_fragment_shader_disable.patch:
+    - Disable the experimental ARB_fragment_shader option by default on
     i915, it exposes incomplete functionality that breaks KDE compositing
     among other things. It can be enabled via driconf still. (LP: #628930)
 
