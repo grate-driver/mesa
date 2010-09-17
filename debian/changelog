@@ -24,12 +24,6 @@ mesa (7.9~git20100909-0ubuntu1) maverick; urgency=low
   * New upstream git snapshot up to commit 94118fe2d4b1e5 (LP: #631413)
   * New features include ATI HD5xxx series support in r600, and a vastly
     improved glsl compiler.
-  * Many bug fixes including:
-   - LP: #626943, #610541 - Flickering on Radeon
-   - LP: #633261 - KDE desktop effects not enabled automatically,
-     graphical corruption when enabled
-   - LP: #601052 - Cougar Point Graphics support
-   - LP: #596292, #599741 - Unity failing to start or misrendering on ATI
   * Remove pre-generated .pc's, use the ones generated at build time
     instead.
   * Remove all references to mesa-utils now that its no longer shipped
@@ -37,24 +31,26 @@ mesa (7.9~git20100909-0ubuntu1) maverick; urgency=low
   * Add 104_i915_fragment_shader_disable.patch:
     - Disable the experimental ARB_fragment_shader option by default on
     i915, it exposes incomplete functionality that breaks KDE compositing
-    among other things. It can be enabled via driconf still. (LP: #628930)
+    among other things. It can be enabled via driconf still. (LP: #628930).
 
   [ Christopher James Halse Rogers ]
   * debian/patches/04_osmesa_version.diff:
     - Refresh for new upstream
-  * New upstream version...
+  * Bugs fixed in this release:
     - Fixes severe rendering corruption in Unity on radeon (LP: #628727,
-      LP: #596292, LP: #599741, LP: #630315, LP: #613694).
+      LP: #596292, LP: #599741, LP: #630315, LP: #613694, LP: #599741).
     - Also fixes rendering in gnome-shell (LP: #578619).
     - Flickering in OpenGL apps on radeon (LP: #626943, LP: #610541).
-    - Corruption in KWin desktop effects on intel (LP: #628930).
-    - Provides preliminary support for new intel chips (LP: #601052)
+    - Provides preliminary support for new intel chips (LP: #601052).
   * debian/rules:
     - Update configure flags to match upstream reshuffling.
     - Explicitly remove gallium DRI drivers that we don't want to ship.
   * Update debian/gbp.conf for this Maverick-specific packaging
+  * libegl1-mesa-dri-x11,kms: There are no longer separate kms or x11 drivers
+    for EGL, libegl1-mesa-drivers now contains a single driver that provides
+    both backends.
 
- -- Christopher James Halse Rogers <raof@ubuntu.com>  Fri, 10 Sep 2010 12:02:05 +1000
+ -- Robert Hooker <robert.hooker@canonical.com>  Tue, 14 Sep 2010 08:55:40 -0400
 
 mesa (7.8.2-2ubuntu2) maverick; urgency=low
 
