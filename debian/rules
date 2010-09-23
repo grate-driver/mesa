@@ -88,10 +88,6 @@ else
   endif
 endif
 
-ifeq ($(HAVE_KMS), yes)
-	EGL_DISPLAYS += kms
-endif
-
 confflags-dri = \
 	--with-driver=dri \
 	--with-dri-drivers="$(DRI_DRIVERS)" \

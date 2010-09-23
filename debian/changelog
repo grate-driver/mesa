@@ -4,6 +4,7 @@ mesa (7.9~git20100923-0ubuntu1) UNRELEASED; urgency=low
     - Fixes GPU hang in occlusion-query on i965 (LP: #634683)
   * debian/rules:
     - Update configure options for kms → drm EGL backend name change
+    - Remove unused HAVE_KMS variable.
 
  -- Christopher James Halse Rogers <raof@ubuntu.com>  Thu, 23 Sep 2010 11:25:10 +1000
 
