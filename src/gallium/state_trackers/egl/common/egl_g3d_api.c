@@ -43,19 +43,25 @@
  * Return the state tracker for the given context.
  */
 static struct st_api *
-egl_g3d_choose_st(_EGLDriver *drv, _EGLContext *ctx)
+egl_g3d_choose_st(_EGLDriver *drv, _EGLContext *ctx,
+                  enum st_profile_type *profile)
 {
    struct egl_g3d_driver *gdrv = egl_g3d_driver(drv);
-   EGLint idx = -1;
+   struct st_api *stapi;
+   EGLint api = -1;
+
+   *profile = ST_PROFILE_DEFAULT;
 
    switch (ctx->ClientAPI) {
    case EGL_OPENGL_ES_API:
       switch (ctx->ClientVersion) {
       case 1:
-         idx = ST_API_OPENGL_ES1;
+         api = ST_API_OPENGL;
+         *profile = ST_PROFILE_OPENGL_ES1;
          break;
       case 2:
-         idx = ST_API_OPENGL_ES2;
+         api = ST_API_OPENGL;
+         *profile = ST_PROFILE_OPENGL_ES2;
          break;
       default:
          _eglLog(_EGL_WARNING, "unknown client version %d",
@@ -64,17 +70,31 @@ egl_g3d_choose_st(_EGLDriver *drv, _EGLContext *ctx)
       }
       break;
    case EGL_OPENVG_API:
-      idx = ST_API_OPENVG;
+      api = ST_API_OPENVG;
       break;
    case EGL_OPENGL_API:
-      idx = ST_API_OPENGL;
+      api = ST_API_OPENGL;
       break;
    default:
       _eglLog(_EGL_WARNING, "unknown client API 0x%04x", ctx->ClientAPI);
       break;
    }
 
-   return (idx >= 0) ? gdrv->loader->get_st_api(idx) : NULL;
+   switch (api) {
+   case ST_API_OPENGL:
+      stapi = gdrv->loader->guess_gl_api(*profile);
+      break;
+   case ST_API_OPENVG:
+      stapi = gdrv->loader->get_st_api(api);
+      break;
+   default:
+      stapi = NULL;
+      break;
+   }
+   if (stapi && !(stapi->profile_mask & (1 << *profile)))
+      stapi = NULL;
+
+   return stapi;
 }
 
 static _EGLContext *
@@ -85,6 +105,7 @@ egl_g3d_create_context(_EGLDriver *drv, _EGLDisplay *dpy, _EGLConfig *conf,
    struct egl_g3d_context *gshare = egl_g3d_context(share);
    struct egl_g3d_config *gconf = egl_g3d_config(conf);
    struct egl_g3d_context *gctx;
+   struct st_context_attribs stattribs;
 
    gctx = CALLOC_STRUCT(egl_g3d_context);
    if (!gctx) {
@@ -97,14 +118,18 @@ egl_g3d_create_context(_EGLDriver *drv, _EGLDisplay *dpy, _EGLConfig *conf,
       return NULL;
    }
 
-   gctx->stapi = egl_g3d_choose_st(drv, &gctx->base);
+   memset(&stattribs, 0, sizeof(stattribs));
+   if (gconf)
+      stattribs.visual = gconf->stvis;
+
+   gctx->stapi = egl_g3d_choose_st(drv, &gctx->base, &stattribs.profile);
    if (!gctx->stapi) {
       FREE(gctx);
       return NULL;
    }
 
    gctx->stctxi = gctx->stapi->create_context(gctx->stapi, gdpy->smapi,
-         (gconf) ? &gconf->stvis : NULL, (gshare) ? gshare->stctxi : NULL);
+         &stattribs, (gshare) ? gshare->stctxi : NULL);
    if (!gctx->stctxi) {
       FREE(gctx);
       return NULL;

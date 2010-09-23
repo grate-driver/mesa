@@ -650,6 +650,8 @@ enum ir_expression_operation {
    ir_unop_dFdy,
    /*@}*/
 
+   ir_unop_noise,
+
    ir_binop_add,
    ir_binop_sub,
    ir_binop_mul,
@@ -673,16 +675,18 @@ enum ir_expression_operation {
    ir_binop_greater,
    ir_binop_lequal,
    ir_binop_gequal,
+   ir_binop_equal,
+   ir_binop_nequal,
    /**
     * Returns single boolean for whether all components of operands[0]
     * equal the components of operands[1].
     */
-   ir_binop_equal,
+   ir_binop_all_equal,
    /**
     * Returns single boolean for whether any component of operands[0]
     * is not equal to the corresponding component of operands[1].
     */
-   ir_binop_nequal,
+   ir_binop_any_nequal,
    /*@}*/
 
    /**

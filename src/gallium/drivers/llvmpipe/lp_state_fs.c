@@ -186,6 +186,7 @@ generate_quad_mask(LLVMBuilderRef builder,
    LLVMTypeRef i32t = LLVMInt32Type();
    LLVMValueRef bits[4];
    LLVMValueRef mask;
+   int shift;
 
    /*
     * XXX: We'll need a different path for 16 x u8
@@ -197,10 +198,28 @@ generate_quad_mask(LLVMBuilderRef builder,
    /*
     * mask_input >>= (quad * 4)
     */
+   
+   switch (quad) {
+   case 0:
+      shift = 0;
+      break;
+   case 1:
+      shift = 2;
+      break;
+   case 2:
+      shift = 8;
+      break;
+   case 3:
+      shift = 10;
+      break;
+   default:
+      assert(0);
+      shift = 0;
+   }
 
    mask_input = LLVMBuildLShr(builder,
                               mask_input,
-                              LLVMConstInt(i32t, quad * 4, 0),
+                              LLVMConstInt(i32t, shift, 0),
                               "");
 
    /*
@@ -211,9 +230,9 @@ generate_quad_mask(LLVMBuilderRef builder,
 
    bits[0] = LLVMConstInt(i32t, 1 << 0, 0);
    bits[1] = LLVMConstInt(i32t, 1 << 1, 0);
-   bits[2] = LLVMConstInt(i32t, 1 << 2, 0);
-   bits[3] = LLVMConstInt(i32t, 1 << 3, 0);
-
+   bits[2] = LLVMConstInt(i32t, 1 << 4, 0);
+   bits[3] = LLVMConstInt(i32t, 1 << 5, 0);
+   
    mask = LLVMBuildAnd(builder, mask, LLVMConstVector(bits, 4), "");
 
    /*
@@ -332,14 +351,13 @@ generate_fs(struct llvmpipe_context *lp,
                   lp_build_name(out, "color%u.%u.%c", i, attrib, "rgba"[chan]);
 
                   /* Alpha test */
-                  /* XXX: should the alpha reference value be passed separately? */
 		  /* XXX: should only test the final assignment to alpha */
-                  if(cbuf == 0 && chan == 3) {
+                  if (cbuf == 0 && chan == 3 && key->alpha.enabled) {
                      LLVMValueRef alpha = out;
                      LLVMValueRef alpha_ref_value;
                      alpha_ref_value = lp_jit_context_alpha_ref_value(builder, context_ptr);
                      alpha_ref_value = lp_build_broadcast(builder, vec_type, alpha_ref_value);
-                     lp_build_alpha_test(builder, &key->alpha, type,
+                     lp_build_alpha_test(builder, key->alpha.func, type,
                                          &mask, alpha, alpha_ref_value);
                   }
 
@@ -750,7 +768,6 @@ dump_fs_variant_key(const struct lp_fragment_shader_variant_key *key)
 
    if (key->alpha.enabled) {
       debug_printf("alpha.func = %s\n", util_dump_func(key->alpha.func, TRUE));
-      debug_printf("alpha.ref_value = %f\n", key->alpha.ref_value);
    }
 
    if (key->blend.logicop_enable) {
@@ -852,8 +869,14 @@ generate_variant(struct llvmpipe_context *lp,
       lp_debug_fs_variant(variant);
    }
 
-   generate_fragment(lp, shader, variant, RAST_WHOLE);
    generate_fragment(lp, shader, variant, RAST_EDGE_TEST);
+
+   if (variant->opaque) {
+      /* Specialized shader, which doesn't need to read the color buffer. */
+      generate_fragment(lp, shader, variant, RAST_WHOLE);
+   } else {
+      variant->jit_function[RAST_WHOLE] = variant->jit_function[RAST_EDGE_TEST];
+   }
 
    return variant;
 }

@@ -146,6 +146,13 @@ int r600_bc_init(struct r600_bc *bc, enum radeon_family family)
 	case CHIP_RV740:
 		bc->chiprev = 1;
 		break;
+	case CHIP_CEDAR:
+	case CHIP_REDWOOD:
+	case CHIP_JUNIPER:
+	case CHIP_CYPRESS:
+	case CHIP_HEMLOCK:
+		bc->chiprev = 2;
+		break;
 	default:
 		R600_ERR("unknown family %d\n", bc->family);
 		return -EINVAL;
@@ -213,6 +220,7 @@ static int init_gpr(struct r600_bc_alu *alu)
 	return 0;
 }
 
+#if 0
 static int reserve_gpr(struct r600_bc_alu *alu, unsigned sel, unsigned chan, unsigned cycle)
 {
 	if (alu->hw_gpr[cycle][chan] < 0)
@@ -292,14 +300,7 @@ static int cycle_for_vector_bank_swizzle(const int swiz, const int sel, unsigned
 	return ret;
 }
 
-static int is_const(int sel)
-{
-	if (sel > 255 && sel < 512)
-		return 1;
-	if (sel >= V_SQ_ALU_SRC_0 && sel <= V_SQ_ALU_SRC_LITERAL)
-		return 1;
-	return 0;
-}
+
 
 static void update_chan_counter(struct r600_bc_alu *alu, int *chan_counter)
 {
@@ -316,7 +317,6 @@ static void update_chan_counter(struct r600_bc_alu *alu, int *chan_counter)
 	}
 }
 
-#if 0
 /* we need something like this I think - but this is bogus */
 int check_read_slots(struct r600_bc *bc, struct r600_bc_alu *alu_first)
 {
@@ -341,10 +341,23 @@ int check_read_slots(struct r600_bc *bc, struct r600_bc_alu *alu_first)
 }
 #endif
 
+static int is_const(int sel)
+{
+	if (sel > 255 && sel < 512)
+		return 1;
+	if (sel >= V_SQ_ALU_SRC_0 && sel <= V_SQ_ALU_SRC_LITERAL)
+		return 1;
+	return 0;
+}
+
 static int check_scalar(struct r600_bc *bc, struct r600_bc_alu *alu)
 {
 	unsigned swizzle_key;
 
+	if (alu->bank_swizzle_force) {
+		alu->bank_swizzle = alu->bank_swizzle_force;
+		return 0;
+	}
 	swizzle_key = (is_const(alu->src[0].sel) ? 4 : 0 ) + 
 		(is_const(alu->src[1].sel) ? 2 : 0 ) + 
 		(is_const(alu->src[2].sel) ? 1 : 0 );
@@ -357,6 +370,10 @@ static int check_vector(struct r600_bc *bc, struct r600_bc_alu *alu)
 {
 	unsigned swizzle_key;
 
+	if (alu->bank_swizzle_force) {
+		alu->bank_swizzle = alu->bank_swizzle_force;
+		return 0;
+	}
 	swizzle_key = (is_const(alu->src[0].sel) ? 4 : 0 ) + 
 		(is_const(alu->src[1].sel) ? 2 : 0 ) + 
 		(is_const(alu->src[2].sel) ? 1 : 0 );
@@ -393,7 +410,6 @@ int r600_bc_add_alu_type(struct r600_bc *bc, const struct r600_bc_alu *alu, int 
 {
 	struct r600_bc_alu *nalu = r600_bc_alu();
 	struct r600_bc_alu *lalu;
-	struct r600_bc_alu *curr_bs_head;
 	int i, r;
 
 	if (nalu == NULL)
@@ -462,7 +478,7 @@ int r600_bc_add_alu_type(struct r600_bc *bc, const struct r600_bc_alu *alu, int 
 
 int r600_bc_add_alu(struct r600_bc *bc, const struct r600_bc_alu *alu)
 {
-	return r600_bc_add_alu_type(bc, alu, V_SQ_CF_ALU_WORD1_SQ_CF_INST_ALU);
+	return r600_bc_add_alu_type(bc, alu, BC_INST(bc, V_SQ_CF_ALU_WORD1_SQ_CF_INST_ALU));
 }
 
 int r600_bc_add_literal(struct r600_bc *bc, const u32 *value)
@@ -475,6 +491,7 @@ int r600_bc_add_literal(struct r600_bc *bc, const u32 *value)
 	if (bc->cf_last->inst == V_SQ_CF_WORD1_SQ_CF_INST_TEX) {
 		return 0;
 	}
+	/* all same on EG */
 	if (bc->cf_last->inst == V_SQ_CF_WORD1_SQ_CF_INST_JUMP ||
 	    bc->cf_last->inst == V_SQ_CF_WORD1_SQ_CF_INST_ELSE ||
 	    bc->cf_last->inst == V_SQ_CF_WORD1_SQ_CF_INST_LOOP_START_NO_AL ||
@@ -484,6 +501,7 @@ int r600_bc_add_literal(struct r600_bc *bc, const u32 *value)
 	    bc->cf_last->inst == V_SQ_CF_WORD1_SQ_CF_INST_POP) {
 		return 0;
 	}
+	/* same on EG */
 	if (((bc->cf_last->inst != (V_SQ_CF_ALU_WORD1_SQ_CF_INST_ALU << 3)) &&
 	     (bc->cf_last->inst != (V_SQ_CF_ALU_WORD1_SQ_CF_INST_ALU_PUSH_BEFORE << 3))) ||
 		LIST_IS_EMPTY(&bc->cf_last->alu)) {
@@ -566,6 +584,7 @@ int r600_bc_add_cfinst(struct r600_bc *bc, int inst)
 	return 0;
 }
 
+/* common to all 3 families */
 static int r600_bc_vtx_build(struct r600_bc *bc, struct r600_bc_vtx *vtx, unsigned id)
 {
 	bc->bytecode[id++] = S_SQ_VTX_WORD0_BUFFER_ID(vtx->buffer_id) |
@@ -583,6 +602,7 @@ static int r600_bc_vtx_build(struct r600_bc *bc, struct r600_bc_vtx *vtx, unsign
 	return 0;
 }
 
+/* common to all 3 families */
 static int r600_bc_tex_build(struct r600_bc *bc, struct r600_bc_tex *tex, unsigned id)
 {
 	bc->bytecode[id++] = S_SQ_TEX_WORD0_TEX_INST(tex->inst) |
@@ -612,6 +632,7 @@ static int r600_bc_tex_build(struct r600_bc *bc, struct r600_bc_tex *tex, unsign
 	return 0;
 }
 
+/* r600 only, r700/eg bits in r700_asm.c */
 static int r600_bc_alu_build(struct r600_bc *bc, struct r600_bc_alu *alu, unsigned id)
 {
 	unsigned i;
@@ -662,6 +683,7 @@ static int r600_bc_alu_build(struct r600_bc *bc, struct r600_bc_alu *alu, unsign
 	return 0;
 }
 
+/* common for r600/r700 - eg in eg_asm.c */
 static int r600_bc_cf_build(struct r600_bc *bc, struct r600_bc_cf *cf)
 {
 	unsigned id = cf->id;
@@ -748,6 +770,8 @@ int r600_bc_build(struct r600_bc *bc)
 			break;
 		case V_SQ_CF_ALLOC_EXPORT_WORD1_SQ_CF_INST_EXPORT:
 		case V_SQ_CF_ALLOC_EXPORT_WORD1_SQ_CF_INST_EXPORT_DONE:
+		case EG_V_SQ_CF_ALLOC_EXPORT_WORD1_SQ_CF_INST_EXPORT:
+		case EG_V_SQ_CF_ALLOC_EXPORT_WORD1_SQ_CF_INST_EXPORT_DONE:
 			break;
 		case V_SQ_CF_WORD1_SQ_CF_INST_JUMP:
 		case V_SQ_CF_WORD1_SQ_CF_INST_ELSE:
@@ -771,7 +795,10 @@ int r600_bc_build(struct r600_bc *bc)
 		return -ENOMEM;
 	LIST_FOR_EACH_ENTRY(cf, &bc->cf, list) {
 		addr = cf->addr;
-		r = r600_bc_cf_build(bc, cf);
+		if (bc->chiprev == 2)
+			r = eg_bc_cf_build(bc, cf);
+		else
+			r = r600_bc_cf_build(bc, cf);
 		if (r)
 			return r;
 		switch (cf->inst) {
@@ -783,6 +810,7 @@ int r600_bc_build(struct r600_bc *bc)
 					r = r600_bc_alu_build(bc, alu, addr);
 					break;
 				case 1:
+				case 2: /* eg alu is same encoding as r700 */
 					r = r700_bc_alu_build(bc, alu, addr);
 					break;
 				default:
@@ -816,6 +844,8 @@ int r600_bc_build(struct r600_bc *bc)
 			break;
 		case V_SQ_CF_ALLOC_EXPORT_WORD1_SQ_CF_INST_EXPORT:
 		case V_SQ_CF_ALLOC_EXPORT_WORD1_SQ_CF_INST_EXPORT_DONE:
+		case EG_V_SQ_CF_ALLOC_EXPORT_WORD1_SQ_CF_INST_EXPORT:
+		case EG_V_SQ_CF_ALLOC_EXPORT_WORD1_SQ_CF_INST_EXPORT_DONE:
 		case V_SQ_CF_WORD1_SQ_CF_INST_LOOP_START_NO_AL:
 		case V_SQ_CF_WORD1_SQ_CF_INST_LOOP_END:
 		case V_SQ_CF_WORD1_SQ_CF_INST_LOOP_CONTINUE:

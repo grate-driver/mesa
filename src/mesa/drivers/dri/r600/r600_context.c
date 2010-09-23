@@ -43,6 +43,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "main/extensions.h"
 #include "main/bufferobj.h"
 #include "main/texobj.h"
+#include "main/points.h"
 
 #include "swrast/swrast.h"
 #include "swrast_setup/swrast_setup.h"
@@ -227,7 +228,7 @@ static void r600_emit_query_finish(radeonContextPtr radeon)
 
 	BEGIN_BATCH_NO_AUTOSTATE(4 + 2);
 	R600_OUT_BATCH(CP_PACKET3(R600_IT_EVENT_WRITE, 2));
-	R600_OUT_BATCH(ZPASS_DONE);
+	R600_OUT_BATCH(R600_EVENT_TYPE(ZPASS_DONE) | R600_EVENT_INDEX(1));
 	R600_OUT_BATCH(query->curr_offset + 8); /* hw writes qwords */
 	R600_OUT_BATCH(0x00000000);
 	R600_OUT_BATCH_RELOC(VGT_EVENT_INITIATOR, query->bo, 0, 0, RADEON_GEM_DOMAIN_GTT, 0);
@@ -458,6 +459,9 @@ GLboolean r600CreateContext(gl_api api,
 	ctx->FragmentProgram._MaintainTexEnvProgram = GL_TRUE;
 
 	r600InitConstValues(ctx, screen);
+
+	/* reinit, it depends on consts above */
+	_mesa_init_point(ctx);
 
 	_mesa_set_mvp_with_dp4( ctx, GL_TRUE );
 

@@ -45,7 +45,7 @@ static int radeon_get_device(struct radeon *radeon)
 struct radeon *radeon_new(int fd, unsigned device)
 {
 	struct radeon *radeon;
-	int r, i, id;
+	int r, i, id, j, k;
 
 	radeon = calloc(1, sizeof(*radeon));
 	if (radeon == NULL) {
@@ -79,6 +79,11 @@ struct radeon *radeon_new(int fd, unsigned device)
 	case CHIP_RV730:
 	case CHIP_RV710:
 	case CHIP_RV740:
+	case CHIP_CEDAR:
+	case CHIP_REDWOOD:
+	case CHIP_JUNIPER:
+	case CHIP_CYPRESS:
+	case CHIP_HEMLOCK:
 		if (r600_init(radeon)) {
 			return radeon_decref(radeon);
 		}
@@ -110,29 +115,11 @@ struct radeon *radeon_new(int fd, unsigned device)
 	case CHIP_RV560:
 	case CHIP_RV570:
 	case CHIP_R580:
-	case CHIP_CEDAR:
-	case CHIP_REDWOOD:
-	case CHIP_JUNIPER:
-	case CHIP_CYPRESS:
-	case CHIP_HEMLOCK:
 	default:
 		fprintf(stderr, "%s unknown or unsupported chipset 0x%04X\n",
 			__func__, radeon->device);
 		break;
 	}
-	radeon->state_type_id = calloc(radeon->nstype, sizeof(unsigned));
-	if (radeon->state_type_id == NULL) {
-		return radeon_decref(radeon);
-	}
-	for (i = 0, id = 0; i < radeon->nstype; i++) {
-		radeon->state_type_id[i] = id;
-		for (int j = 0; j < radeon->nstype; j++) {
-			if (radeon->stype[j].stype != i)
-				continue;
-			id += radeon->stype[j].num;
-		}
-	}
-	radeon->nstate_per_shader = id;
 	return radeon;
 }
 

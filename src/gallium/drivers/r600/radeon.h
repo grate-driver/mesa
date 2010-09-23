@@ -212,9 +212,13 @@ enum r600_stype {
 	R600_STATE_UCP,
 	R600_STATE_VGT,
 	R600_STATE_DRAW,
+	R600_STATE_CB_FLUSH,
+	R600_STATE_DB_FLUSH,
+	R600_STATE_MAX,
 };
 
 #include "r600_states_inc.h"
+#include "eg_states_inc.h"
 
 /* R600 QUERY BEGIN/END */
 #define R600_QUERY__OFFSET			0

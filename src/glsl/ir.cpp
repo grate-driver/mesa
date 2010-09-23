@@ -196,6 +196,8 @@ ir_expression::get_num_operands(ir_expression_operation op)
       1, /* ir_unop_dFdx */
       1, /* ir_unop_dFdy */
 
+      1, /* ir_unop_noise */
+
       2, /* ir_binop_add */
       2, /* ir_binop_sub */
       2, /* ir_binop_mul */
@@ -208,6 +210,8 @@ ir_expression::get_num_operands(ir_expression_operation op)
       2, /* ir_binop_gequal */
       2, /* ir_binop_equal */
       2, /* ir_binop_nequal */
+      2, /* ir_binop_all_equal */
+      2, /* ir_binop_any_nequal */
 
       2, /* ir_binop_lshift */
       2, /* ir_binop_rshift */
@@ -261,6 +265,7 @@ static const char *const operator_strs[] = {
    "cos",
    "dFdx",
    "dFdy",
+   "noise",
    "+",
    "-",
    "*",
@@ -272,6 +277,8 @@ static const char *const operator_strs[] = {
    ">=",
    "==",
    "!=",
+   "all_equal",
+   "any_nequal",
    "<<",
    ">>",
    "&",
@@ -290,6 +297,7 @@ static const char *const operator_strs[] = {
 const char *ir_expression::operator_string(ir_expression_operation op)
 {
    assert((unsigned int) op < Elements(operator_strs));
+   assert(Elements(operator_strs) == (ir_binop_pow + 1));
    return operator_strs[op];
 }
 

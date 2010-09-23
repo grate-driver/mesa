@@ -47,12 +47,27 @@
  */
 enum st_api_type {
    ST_API_OPENGL,
-   ST_API_OPENGL_ES1,
-   ST_API_OPENGL_ES2,
    ST_API_OPENVG,
 
    ST_API_COUNT
 };
+
+/**
+ * The profile of a context.
+ */
+enum st_profile_type
+{
+   ST_PROFILE_DEFAULT,
+   ST_PROFILE_OPENGL_CORE,
+   ST_PROFILE_OPENGL_ES1,
+   ST_PROFILE_OPENGL_ES2
+};
+
+/* for profile_mask in st_api */
+#define ST_PROFILE_DEFAULT_MASK      (1 << ST_PROFILE_DEFAULT)
+#define ST_PROFILE_OPENGL_CORE_MASK  (1 << ST_PROFILE_OPENGL_CORE)
+#define ST_PROFILE_OPENGL_ES1_MASK   (1 << ST_PROFILE_OPENGL_ES1)
+#define ST_PROFILE_OPENGL_ES2_MASK   (1 << ST_PROFILE_OPENGL_ES2)
 
 /**
  * Used in st_context_iface->teximage.
@@ -177,6 +192,37 @@ struct st_visual
     * Desired render buffer.
     */
    enum st_attachment_type render_buffer;
+};
+
+/**
+ * Represent the attributes of a context.
+ */
+struct st_context_attribs
+{
+   /**
+    * The profile and minimal version to support.
+    *
+    * The valid profiles and versions are rendering API dependent.  The latest
+    * version satisfying the request should be returned, unless
+    * forward_compatiible is true.
+    */
+   enum st_profile_type profile;
+   int major, minor;
+
+   /**
+    * Enable debugging.
+    */
+   boolean debug;
+
+   /**
+    * Return the exact version and disallow the use of deprecated features.
+    */
+   boolean forward_compatible;
+
+   /**
+    * The visual of the framebuffers the context will be bound to.
+    */
+   struct st_visual visual;
 };
 
 /**
@@ -357,6 +403,16 @@ struct st_manager
 struct st_api
 {
    /**
+    * The supported rendering API.
+    */
+   enum st_api_type api;
+
+   /**
+    * The supported profiles.  Tested with ST_PROFILE_*_MASK.
+    */
+   unsigned profile_mask;
+
+   /**
     * Destroy the API.
     */
    void (*destroy)(struct st_api *stapi);
@@ -373,13 +429,14 @@ struct st_api
     */
    struct st_context_iface *(*create_context)(struct st_api *stapi,
                                               struct st_manager *smapi,
-                                              const struct st_visual *visual,
+                                              const struct st_context_attribs *attribs,
                                               struct st_context_iface *stsharei);
 
    /**
     * Bind the context to the calling thread with draw and read as drawables.
     *
-    * The framebuffers might have different visuals than the context does.
+    * The framebuffers might be NULL, or might have different visuals than the
+    * context does.
     */
    boolean (*make_current)(struct st_api *stapi,
                            struct st_context_iface *stctxi,
@@ -400,19 +457,5 @@ st_visual_have_buffers(const struct st_visual *visual, unsigned mask)
 {
    return ((visual->buffer_mask & mask) == mask);
 }
-
-/* these symbols may need to be dynamically lookup up */
-extern PUBLIC struct st_api * st_api_create_OpenGL(void);
-extern PUBLIC struct st_api * st_api_create_OpenGL_ES1(void);
-extern PUBLIC struct st_api * st_api_create_OpenGL_ES2(void);
-extern PUBLIC struct st_api * st_api_create_OpenVG(void);
-
-/**
- * The entry points of the state trackers.
- */
-#define ST_CREATE_OPENGL_SYMBOL      "st_api_create_OpenGL"
-#define ST_CREATE_OPENGL_ES1_SYMBOL  "st_api_create_OpenGL_ES1"
-#define ST_CREATE_OPENGL_ES2_SYMBOL  "st_api_create_OpenGL_ES2"
-#define ST_CREATE_OPENVG_SYMBOL      "st_api_create_OpenVG"
 
 #endif /* _ST_API_H_ */

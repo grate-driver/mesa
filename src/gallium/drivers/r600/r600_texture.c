@@ -199,11 +199,6 @@ struct pipe_resource *r600_texture_from_handle(struct pipe_screen *screen,
 	struct r600_resource *resource;
 	struct radeon_bo *bo = NULL;
 
-	bo = radeon_bo(rw, whandle->handle, 0, 0, NULL);
-	if (bo == NULL) {
-		return NULL;
-	}
-
 	/* Support only 2D textures without mipmaps */
 	if ((templ->target != PIPE_TEXTURE_2D && templ->target != PIPE_TEXTURE_RECT) ||
 	      templ->depth0 != 1 || templ->last_level != 0)
@@ -212,6 +207,12 @@ struct pipe_resource *r600_texture_from_handle(struct pipe_screen *screen,
 	rtex = CALLOC_STRUCT(r600_resource_texture);
 	if (rtex == NULL)
 		return NULL;
+
+	bo = radeon_bo(rw, whandle->handle, 0, 0, NULL);
+	if (bo == NULL) {
+		FREE(rtex);
+		return NULL;
+	}
 
 	resource = &rtex->resource;
 	resource->base.b = *templ;
@@ -523,7 +524,7 @@ uint32_t r600_translate_texformat(enum pipe_format format,
 			if (desc->channel[0].size == 5 &&
 			    desc->channel[1].size == 6 &&
 			    desc->channel[2].size == 5) {
-				result |= V_0280A0_COLOR_5_6_5;
+				result = V_0280A0_COLOR_5_6_5;
 				goto out_word4;
 			}
 			goto out_unknown;
@@ -532,14 +533,14 @@ uint32_t r600_translate_texformat(enum pipe_format format,
 			    desc->channel[1].size == 5 &&
 			    desc->channel[2].size == 5 &&
 			    desc->channel[3].size == 1) {
-				result |= V_0280A0_COLOR_1_5_5_5;
+				result = V_0280A0_COLOR_1_5_5_5;
 				goto out_word4;
 			}
 			if (desc->channel[0].size == 10 &&
 			    desc->channel[1].size == 10 &&
 			    desc->channel[2].size == 10 &&
 			    desc->channel[3].size == 2) {
-				result |= V_0280A0_COLOR_10_10_10_2;
+				result = V_0280A0_COLOR_10_10_10_2;
 				goto out_word4;
 			}
 			goto out_unknown;
@@ -560,36 +561,36 @@ uint32_t r600_translate_texformat(enum pipe_format format,
 		case 4:
 			switch (desc->nr_channels) {
 			case 2:
-				result |= V_0280A0_COLOR_4_4;
+				result = V_0280A0_COLOR_4_4;
 				goto out_word4;
 			case 4:
-				result |= V_0280A0_COLOR_4_4_4_4;
+				result = V_0280A0_COLOR_4_4_4_4;
 				goto out_word4;
 			}
 			goto out_unknown;
 		case 8:
 			switch (desc->nr_channels) {
 			case 1:
-				result |= V_0280A0_COLOR_8;
+				result = V_0280A0_COLOR_8;
 				goto out_word4;
 			case 2:
-				result |= V_0280A0_COLOR_8_8;
+				result = V_0280A0_COLOR_8_8;
 				goto out_word4;
 			case 4:
-				result |= V_0280A0_COLOR_8_8_8_8;
+				result = V_0280A0_COLOR_8_8_8_8;
 				goto out_word4;
 			}
 			goto out_unknown;
 		case 16:
 			switch (desc->nr_channels) {
 			case 1:
-				result |= V_0280A0_COLOR_16;
+				result = V_0280A0_COLOR_16;
 				goto out_word4;
 			case 2:
-				result |= V_0280A0_COLOR_16_16;
+				result = V_0280A0_COLOR_16_16;
 				goto out_word4;
 			case 4:
-				result |= V_0280A0_COLOR_16_16_16_16;
+				result = V_0280A0_COLOR_16_16_16_16;
 				goto out_word4;
 			}
 		}
@@ -600,26 +601,26 @@ uint32_t r600_translate_texformat(enum pipe_format format,
 		case 16:
 			switch (desc->nr_channels) {
 			case 1:
-				result |= V_0280A0_COLOR_16_FLOAT;
+				result = V_0280A0_COLOR_16_FLOAT;
 				goto out_word4;
 			case 2:
-				result |= V_0280A0_COLOR_16_16_FLOAT;
+				result = V_0280A0_COLOR_16_16_FLOAT;
 				goto out_word4;
 			case 4:
-				result |= V_0280A0_COLOR_16_16_16_16_FLOAT;
+				result = V_0280A0_COLOR_16_16_16_16_FLOAT;
 				goto out_word4;
 			}
 			goto out_unknown;
 		case 32:
 			switch (desc->nr_channels) {
 			case 1:
-				result |= V_0280A0_COLOR_32_FLOAT;
+				result = V_0280A0_COLOR_32_FLOAT;
 				goto out_word4;
 			case 2:
-				result |= V_0280A0_COLOR_32_32_FLOAT;
+				result = V_0280A0_COLOR_32_32_FLOAT;
 				goto out_word4;
 			case 4:
-				result |= V_0280A0_COLOR_32_32_32_32_FLOAT;
+				result = V_0280A0_COLOR_32_32_32_32_FLOAT;
 				goto out_word4;
 			}
 		}

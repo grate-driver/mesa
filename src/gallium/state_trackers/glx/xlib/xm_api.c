@@ -849,6 +849,7 @@ PUBLIC
 XMesaContext XMesaCreateContext( XMesaVisual v, XMesaContext share_list )
 {
    XMesaDisplay xmdpy = xmesa_init_display(v->display);
+   struct st_context_attribs attribs;
    XMesaContext c;
 
    if (!xmdpy)
@@ -863,8 +864,12 @@ XMesaContext XMesaCreateContext( XMesaVisual v, XMesaContext share_list )
    c->xm_buffer = NULL;   /* set later by XMesaMakeCurrent */
    c->xm_read_buffer = NULL;
 
+   memset(&attribs, 0, sizeof(attribs));
+   attribs.profile = ST_PROFILE_DEFAULT;
+   attribs.visual = v->stvis;
+
    c->st = stapi->create_context(stapi, xmdpy->smapi,
-         &v->stvis, (share_list) ? share_list->st : NULL);
+         &attribs, (share_list) ? share_list->st : NULL);
    if (c->st == NULL)
       goto fail;
 
@@ -1082,19 +1087,29 @@ XMesaDestroyBuffer(XMesaBuffer b)
 
 
 /**
+ * Notify the binding context to validate the buffer.
+ */
+void
+xmesa_notify_invalid_buffer(XMesaBuffer b)
+{
+   XMesaContext xmctx = XMesaGetCurrentContext();
+
+   if (xmctx && xmctx->xm_buffer == b)
+      xmctx->st->notify_invalid_framebuffer(xmctx->st, b->stfb);
+}
+
+
+/**
  * Query the current drawable size and notify the binding context.
  */
 void
 xmesa_check_buffer_size(XMesaBuffer b)
 {
-   XMesaContext xmctx = XMesaGetCurrentContext();
-
    if (b->type == PBUFFER)
       return;
 
    xmesa_get_window_size(b->xm_visual->display, b, &b->width, &b->height);
-   if (xmctx && xmctx->xm_buffer == b)
-      xmctx->st->notify_invalid_framebuffer(xmctx->st, b->stfb);
+   xmesa_notify_invalid_buffer(b);
 }
 
 

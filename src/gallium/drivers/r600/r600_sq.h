@@ -135,15 +135,7 @@
 #define   S_SQ_CF_ALLOC_EXPORT_WORD1_CF_INST(x)                      (((x) & 0x7F) << 23)
 #define   G_SQ_CF_ALLOC_EXPORT_WORD1_CF_INST(x)                      (((x) >> 23) & 0x7F)
 #define   C_SQ_CF_ALLOC_EXPORT_WORD1_CF_INST                         0xC07FFFFF
-#define     V_SQ_CF_ALLOC_EXPORT_WORD1_SQ_CF_INST_MEM_STREAM0        0x00000020
-#define     V_SQ_CF_ALLOC_EXPORT_WORD1_SQ_CF_INST_MEM_STREAM1        0x00000021
-#define     V_SQ_CF_ALLOC_EXPORT_WORD1_SQ_CF_INST_MEM_STREAM2        0x00000022
-#define     V_SQ_CF_ALLOC_EXPORT_WORD1_SQ_CF_INST_MEM_STREAM3        0x00000023
-#define     V_SQ_CF_ALLOC_EXPORT_WORD1_SQ_CF_INST_MEM_SCRATCH        0x00000024
-#define     V_SQ_CF_ALLOC_EXPORT_WORD1_SQ_CF_INST_MEM_REDUCTION      0x00000025
-#define     V_SQ_CF_ALLOC_EXPORT_WORD1_SQ_CF_INST_MEM_RING           0x00000026
-#define     V_SQ_CF_ALLOC_EXPORT_WORD1_SQ_CF_INST_EXPORT             0x00000027
-#define     V_SQ_CF_ALLOC_EXPORT_WORD1_SQ_CF_INST_EXPORT_DONE        0x00000028
+
 #define   S_SQ_CF_ALLOC_EXPORT_WORD1_WHOLE_QUAD_MODE(x)              (((x) & 0x1) << 30)
 #define   G_SQ_CF_ALLOC_EXPORT_WORD1_WHOLE_QUAD_MODE(x)              (((x) >> 30) & 0x1)
 #define   C_SQ_CF_ALLOC_EXPORT_WORD1_WHOLE_QUAD_MODE                 0xBFFFFFFF
@@ -187,6 +179,7 @@
  * 253  SQ_ALU_SRC_LITERAL: literal constant.
  * 254  SQ_ALU_SRC_PV: previous vector result.
  * 255  SQ_ALU_SRC_PS: previous scalar result.
+ * 448  EG - INTERP SRC BASE
  */
 #define     V_SQ_ALU_SRC_0                                           0x000000F8
 #define     V_SQ_ALU_SRC_1                                           0x000000F9
@@ -194,6 +187,7 @@
 #define     V_SQ_ALU_SRC_M_1_INT                                     0x000000FB
 #define     V_SQ_ALU_SRC_0_5                                         0x000000FC
 #define     V_SQ_ALU_SRC_LITERAL                                     0x000000FD
+#define     V_SQ_ALU_SRC_PARAM_BASE                                  0x000001C0
 #define   S_SQ_ALU_WORD0_SRC0_REL(x)                                 (((x) & 0x1) << 9)
 #define   G_SQ_ALU_WORD0_SRC0_REL(x)                                 (((x) >> 9) & 0x1)
 #define   C_SQ_ALU_WORD0_SRC0_REL                                    0xFFFFFDFF

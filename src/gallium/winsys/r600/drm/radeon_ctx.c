@@ -34,7 +34,7 @@ static int radeon_ctx_set_bo_new(struct radeon_ctx *ctx, struct radeon_bo *bo)
 {
 	if (ctx->nbo >= RADEON_CTX_MAX_PM4)
 		return -EBUSY;
-	ctx->bo[ctx->nbo] = bo;
+	ctx->bo[ctx->nbo] = radeon_bo_incref(ctx->radeon, bo);
 	ctx->nbo++;
 	return 0;
 }
@@ -137,7 +137,6 @@ static int radeon_ctx_state_bo(struct radeon_ctx *ctx, struct radeon_state *stat
 				break;
 		}
 		if (j == ctx->nbo) {
-			radeon_bo_incref(ctx->radeon, state->bo[i]);
 			r = radeon_ctx_set_bo_new(ctx, state->bo[i]);
 			if (r)
 				return r;
@@ -259,25 +258,24 @@ int radeon_ctx_set_draw(struct radeon_ctx *ctx, struct radeon_draw *draw)
 {
 	unsigned previous_cdwords;
 	int r = 0;
+	int i;
 
-	for (int i = 0; i < (ctx->radeon->nstate_per_shader * R600_SHADER_MAX); i++) {
+	for (i = 0; i < ctx->radeon->max_states; i++) {
 		r = radeon_ctx_state_bo(ctx, draw->state[i]);
 		if (r)
 			return r;
 	}
 	previous_cdwords = ctx->cdwords;
-	for (int i = 0, id = 0; i < ctx->radeon->nstate_per_shader; i++) {
-		for (int j = 0; j < R600_SHADER_MAX; j++) {
-			id = j * ctx->radeon->nstate_per_shader + i;
-			if (draw->state[id]) {
-				r = radeon_ctx_state_schedule(ctx, draw->state[id]);
-				if (r) {
-					ctx->cdwords = previous_cdwords;
-					return r;
-				}
+	for (i = 0; i < ctx->radeon->max_states; i++) {
+		if (draw->state[i]) {
+			r = radeon_ctx_state_schedule(ctx, draw->state[i]);
+			if (r) {
+				ctx->cdwords = previous_cdwords;
+				return r;
 			}
 		}
 	}
+
 	return 0;
 }
 

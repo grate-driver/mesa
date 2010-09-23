@@ -35,7 +35,9 @@
 #include "radeon_common_context.h"
 #include "evergreen_context.h"
 #include "evergreen_state.h"
-#include "r600_blit.h"
+#include "evergreen_blit.h"
+#include "r600_cmdbuf.h"
+#include "radeon_queryobj.h"
 
 static void evergreen_get_lock(radeonContextPtr rmesa)
 {
@@ -56,8 +58,7 @@ static void evergreen_vtbl_emit_cs_header(struct radeon_cs *cs, radeonContextPtr
 
 static void evergreen_vtbl_pre_emit_atoms(radeonContextPtr radeon)
 {
-    //TODO apr.01
-	//r700Start3D((context_t *)radeon);
+	r700Start3D((context_t *)radeon);
 }
 
 static void evergreen_fallback(GLcontext *ctx, GLuint bit, GLboolean mode)
@@ -71,20 +72,19 @@ static void evergreen_fallback(GLcontext *ctx, GLuint bit, GLboolean mode)
 
 static void evergreen_emit_query_finish(radeonContextPtr radeon)
 {
-    //TODO apr.01
-	//context_t *context = (context_t*) radeon;
-	//BATCH_LOCALS(&context->radeon);
+	context_t *context = (context_t*) radeon;
+	BATCH_LOCALS(&context->radeon);
 
 	struct radeon_query_object *query = radeon->query.current;
 
-	//BEGIN_BATCH_NO_AUTOSTATE(4 + 2);
-	//R600_OUT_BATCH(CP_PACKET3(R600_IT_EVENT_WRITE, 2));
-	//R600_OUT_BATCH(ZPASS_DONE);
-	//R600_OUT_BATCH(query->curr_offset + 8); /* hw writes qwords */
-	//R600_OUT_BATCH(0x00000000);
-	//R600_OUT_BATCH_RELOC(VGT_EVENT_INITIATOR, query->bo, 0, 0, RADEON_GEM_DOMAIN_GTT, 0);
-	//END_BATCH();
-	//assert(query->curr_offset < RADEON_QUERY_PAGE_SIZE);
+	BEGIN_BATCH_NO_AUTOSTATE(4 + 2);
+	R600_OUT_BATCH(CP_PACKET3(R600_IT_EVENT_WRITE, 2));
+	R600_OUT_BATCH(R600_EVENT_TYPE(ZPASS_DONE) | R600_EVENT_INDEX(1));
+	R600_OUT_BATCH(query->curr_offset + 8); /* hw writes qwords */
+	R600_OUT_BATCH(0x00000000);
+	R600_OUT_BATCH_RELOC(VGT_EVENT_INITIATOR, query->bo, 0, 0, RADEON_GEM_DOMAIN_GTT, 0);
+	END_BATCH();
+	assert(query->curr_offset < RADEON_QUERY_PAGE_SIZE);
 	query->emitted_begin = GL_FALSE;
 }
 
@@ -97,9 +97,9 @@ void evergreen_init_vtbl(radeonContextPtr radeon)
 	radeon->vtbl.pre_emit_atoms = evergreen_vtbl_pre_emit_atoms;
 	radeon->vtbl.fallback = evergreen_fallback;
 	radeon->vtbl.emit_query_finish = evergreen_emit_query_finish;
-	radeon->vtbl.check_blit = r600_check_blit;
-	radeon->vtbl.blit = r600_blit;
-	radeon->vtbl.is_format_renderable = radeonIsFormatRenderable;
+	radeon->vtbl.check_blit = evergreen_check_blit;
+	radeon->vtbl.blit = evergreen_blit;
+	radeon->vtbl.is_format_renderable = r600IsFormatRenderable;
 }
 
 

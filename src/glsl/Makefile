@@ -50,10 +50,10 @@ CXX_SOURCES = \
 	ir_function_inlining.cpp \
 	ir_hierarchical_visitor.cpp \
 	ir_hv_accept.cpp \
-	ir_if_return.cpp \
 	ir_if_simplification.cpp \
 	ir_if_to_cond_assign.cpp \
 	ir_import_prototypes.cpp \
+	ir_lower_jumps.cpp \
 	ir_mat_op_to_vec.cpp \
 	ir_mod_to_fract.cpp \
 	ir_noop_swizzle.cpp \
@@ -75,6 +75,8 @@ CXX_SOURCES = \
 	loop_analysis.cpp \
 	loop_controls.cpp \
 	loop_unroll.cpp \
+	lower_noise.cpp \
+	opt_redundant_jumps.cpp \
 	s_expression.cpp
 
 LIBS = \

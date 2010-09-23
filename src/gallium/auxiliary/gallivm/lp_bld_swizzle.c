@@ -76,11 +76,15 @@ lp_build_broadcast_scalar(struct lp_build_context *bld,
    }
    else {
       LLVMValueRef res;
+      /* The shuffle vector is always made of int32 elements */
+      struct lp_type i32_vec_type = lp_type_int_vec(32);
+      i32_vec_type.length = type.length;
+
 #if HAVE_LLVM >= 0x207
       res = LLVMBuildInsertElement(bld->builder, bld->undef, scalar,
                                    LLVMConstInt(LLVMInt32Type(), 0, 0), "");
       res = LLVMBuildShuffleVector(bld->builder, res, bld->undef,
-                                   lp_build_const_int_vec(type, 0), "");
+                                   lp_build_const_int_vec(i32_vec_type, 0), "");
 #else
       /* XXX: The above path provokes a bug in LLVM 2.6 */
       unsigned i;
@@ -95,10 +99,13 @@ lp_build_broadcast_scalar(struct lp_build_context *bld,
 }
 
 
+/**
+ * Swizzle one channel into all other three channels.
+ */
 LLVMValueRef
-lp_build_broadcast_aos(struct lp_build_context *bld,
-                       LLVMValueRef a,
-                       unsigned channel)
+lp_build_swizzle_scalar_aos(struct lp_build_context *bld,
+                            LLVMValueRef a,
+                            unsigned channel)
 {
    const struct lp_type type = bld->type;
    const unsigned n = type.length;
@@ -203,7 +210,7 @@ lp_build_swizzle_aos(struct lp_build_context *bld,
       case PIPE_SWIZZLE_GREEN:
       case PIPE_SWIZZLE_BLUE:
       case PIPE_SWIZZLE_ALPHA:
-         return lp_build_broadcast_aos(bld, a, swizzles[0]);
+         return lp_build_swizzle_scalar_aos(bld, a, swizzles[0]);
       case PIPE_SWIZZLE_ZERO:
          return bld->zero;
       case PIPE_SWIZZLE_ONE:

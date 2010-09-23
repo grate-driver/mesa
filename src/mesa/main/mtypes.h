@@ -51,14 +51,6 @@
 
 
 /**
- * Internal token
- *  Must be simply different than GL_VERTEX_PROGRAM
- *    and GL_FRAGMENT_PROGRAM_ARB
- *  FIXME: this will have to be a real GL extension
- */
-#define MESA_GEOMETRY_PROGRAM 0x9999
-
-/**
  * Color channel data type.
  */
 #if CHAN_BITS == 8
@@ -2186,9 +2178,7 @@ struct gl_shader_state
 struct gl_shader_compiler_options
 {
    /** Driver-selectable options: */
-   GLboolean EmitHighLevelInstructions; /**< IF/ELSE/ENDIF vs. BRA, etc. */
    GLboolean EmitCondCodes;             /**< Use condition codes? */
-   GLboolean EmitComments;              /**< Annotated instructions */
    GLboolean EmitNVTempInitialization;  /**< 0-fill NV temp registers */
    /**
     * Attempts to flatten all ir_if (OPCODE_IF) for GPUs that can't
@@ -2199,6 +2189,7 @@ struct gl_shader_compiler_options
    GLboolean EmitNoFunctions;
    GLboolean EmitNoCont;                  /**< Emit CONT opcode? */
    GLboolean EmitNoMainReturn;            /**< Emit CONT/RET opcodes? */
+   GLboolean EmitNoNoise;                 /**< Emit NOISE opcodes? */
 
    GLuint MaxUnrollIterations;
 

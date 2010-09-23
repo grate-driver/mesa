@@ -60,7 +60,46 @@ do {									\
 	insert_at_tail(&context->radeon.hw.atomlist, &context->evergreen_atoms.ATOM); \
 } while (0)
 
-/*
+static int check_queryobj(GLcontext *ctx, struct radeon_state_atom *atom)
+{
+	radeonContextPtr radeon = RADEON_CONTEXT(ctx);
+	struct radeon_query_object *query = radeon->query.current;
+	int count;
+
+	if (!query || query->emitted_begin)
+		count = 0;
+	else
+		count = atom->cmd_size;
+	radeon_print(RADEON_STATE, RADEON_TRACE, "%s %d\n", __func__, count);
+	return count;
+}
+
+static void evergreenSendQueryBegin(GLcontext *ctx, struct radeon_state_atom *atom)
+{
+	radeonContextPtr radeon = RADEON_CONTEXT(ctx);
+	struct radeon_query_object *query = radeon->query.current;
+	BATCH_LOCALS(radeon);
+	radeon_print(RADEON_STATE, RADEON_VERBOSE, "%s\n", __func__);
+
+	/* clear the buffer */
+	radeon_bo_map(query->bo, GL_FALSE);
+	memset(query->bo->ptr, 0, 8 * 2 * sizeof(uint64_t)); /* 8 DBs, 2 qwords each */
+	radeon_bo_unmap(query->bo);
+
+	radeon_cs_space_check_with_bo(radeon->cmdbuf.cs,
+				      query->bo,
+				      0, RADEON_GEM_DOMAIN_GTT);
+
+	BEGIN_BATCH_NO_AUTOSTATE(4 + 2);
+	R600_OUT_BATCH(CP_PACKET3(R600_IT_EVENT_WRITE, 2));
+	R600_OUT_BATCH(R600_EVENT_TYPE(ZPASS_DONE) | R600_EVENT_INDEX(1));
+	R600_OUT_BATCH(query->curr_offset); /* hw writes qwords */
+	R600_OUT_BATCH(0x00000000);
+	R600_OUT_BATCH_RELOC(VGT_EVENT_INITIATOR, query->bo, 0, 0, RADEON_GEM_DOMAIN_GTT, 0);
+	END_BATCH();
+	query->emitted_begin = GL_TRUE;
+}
+
 static void evergreen_init_query_stateobj(radeonContextPtr radeon, int SZ)
 {
 	radeon->query.queryobj.cmd_size = (SZ);
@@ -69,11 +108,11 @@ static void evergreen_init_query_stateobj(radeonContextPtr radeon, int SZ)
 	radeon->query.queryobj.idx = 0;
 	radeon->query.queryobj.check = check_queryobj;
 	radeon->query.queryobj.dirty = GL_FALSE;
-	radeon->query.queryobj.emit = r700SendQueryBegin;
+	radeon->query.queryobj.emit = evergreenSendQueryBegin;
 	radeon->hw.max_state_size += (SZ);
 	insert_at_tail(&radeon->hw.atomlist, &radeon->query.queryobj);
 }
-*/
+
 
 static int check_always(GLcontext *ctx, struct radeon_state_atom *atom)
 {
@@ -107,7 +146,6 @@ static void evergreenSendTexState(GLcontext *ctx, struct radeon_state_atom *atom
 				}
 				if (bo) 
                 {                    
-                    radeon_bo_unmap(bo);                    
 
 					r700SyncSurf(context, bo,
 						     RADEON_GEM_DOMAIN_GTT|RADEON_GEM_DOMAIN_VRAM,
@@ -118,7 +156,7 @@ static void evergreenSendTexState(GLcontext *ctx, struct radeon_state_atom *atom
 
                     if( (1<<i) & vp->r700AsmCode.unVetTexBits )                    
                     {   /* vs texture */                                     
-                        R600_OUT_BATCH((i + VERT_ATTRIB_MAX + EG_SQ_FETCH_RESOURCE_VS_OFFSET) * FETCH_RESOURCE_STRIDE);
+                        R600_OUT_BATCH((i + VERT_ATTRIB_MAX + EG_SQ_FETCH_RESOURCE_VS_OFFSET) * EG_FETCH_RESOURCE_STRIDE);
                     }
                     else
                     {
@@ -512,8 +550,9 @@ static void evergreenSendPSresource(GLcontext *ctx)
     context_t *context = EVERGREEN_CONTEXT(ctx);
     EVERGREEN_CHIP_CONTEXT *evergreen = GET_EVERGREEN_CHIP(context);
     struct radeon_bo * pbo;
-	
-	struct radeon_bo * pbo_const;
+    struct radeon_bo * pbo_const;
+    /* const size reg is in units of 16 consts */
+    int const_size = ((evergreen->ps.num_consts * 4) + 15) & ~15;
 
     BATCH_LOCALS(&context->radeon);
     radeon_print(RADEON_STATE, RADEON_VERBOSE, "%s\n", __func__);
@@ -544,17 +583,8 @@ static void evergreenSendPSresource(GLcontext *ctx)
     {                  
         r700SyncSurf(context, pbo_const, RADEON_GEM_DOMAIN_GTT, 0, SH_ACTION_ENA_bit); 
 
-	    BEGIN_BATCH_NO_AUTOSTATE(3);  
-        
-        if(evergreen->ps.num_consts < 4)
-        {
-            EVERGREEN_OUT_BATCH_REGVAL(EG_SQ_ALU_CONST_BUFFER_SIZE_PS_0, 1);
-        }
-        else
-        {
-            EVERGREEN_OUT_BATCH_REGVAL(EG_SQ_ALU_CONST_BUFFER_SIZE_PS_0, (evergreen->ps.num_consts * 4)/16 );
-        }
-        
+	BEGIN_BATCH_NO_AUTOSTATE(3);
+	EVERGREEN_OUT_BATCH_REGVAL(EG_SQ_ALU_CONST_BUFFER_SIZE_PS_0, const_size / 16);
         END_BATCH();
 
         BEGIN_BATCH_NO_AUTOSTATE(3 + 2);            
@@ -575,8 +605,9 @@ static void evergreenSendVSresource(GLcontext *ctx, struct radeon_state_atom *at
     context_t *context = EVERGREEN_CONTEXT(ctx);
     EVERGREEN_CHIP_CONTEXT *evergreen = GET_EVERGREEN_CHIP(context);
     struct radeon_bo * pbo;
-	
-	struct radeon_bo * pbo_const;
+    struct radeon_bo * pbo_const;
+    /* const size reg is in units of 16 consts */
+    int const_size = ((evergreen->vs.num_consts * 4) + 15) & ~15;
 
     BATCH_LOCALS(&context->radeon);
     radeon_print(RADEON_STATE, RADEON_VERBOSE, "%s\n", __func__);
@@ -608,17 +639,8 @@ static void evergreenSendVSresource(GLcontext *ctx, struct radeon_state_atom *at
     {                  
         r700SyncSurf(context, pbo_const, RADEON_GEM_DOMAIN_GTT, 0, SH_ACTION_ENA_bit);
 
-	    BEGIN_BATCH_NO_AUTOSTATE(3);   
-        
-        if(evergreen->vs.num_consts < 4)
-        {
-            EVERGREEN_OUT_BATCH_REGVAL(EG_SQ_ALU_CONST_BUFFER_SIZE_VS_0, 1);
-        }
-        else
-        {
-            EVERGREEN_OUT_BATCH_REGVAL(EG_SQ_ALU_CONST_BUFFER_SIZE_VS_0, (evergreen->vs.num_consts * 4)/16 );
-        }
-       
+	BEGIN_BATCH_NO_AUTOSTATE(3);
+	EVERGREEN_OUT_BATCH_REGVAL(EG_SQ_ALU_CONST_BUFFER_SIZE_VS_0, const_size / 16);
         END_BATCH();
 
         BEGIN_BATCH_NO_AUTOSTATE(3 + 2);            
@@ -843,7 +865,7 @@ static void evergreenSetDepthTarget(context_t *context)
 {
     EVERGREEN_CHIP_CONTEXT *evergreen = GET_EVERGREEN_CHIP(context);
     struct radeon_renderbuffer *rrb;
-    unsigned int nPitchInPixel;
+    unsigned int nPitchInPixel, height;
 
     rrb = radeon_get_depthbuffer(&context->radeon);
     if (!rrb)
@@ -855,13 +877,24 @@ static void evergreenSetDepthTarget(context_t *context)
 
     evergreen->DB_DEPTH_SIZE.u32All  = 0;        
     
+    nPitchInPixel = rrb->pitch/rrb->cpp;
+
+    if (context->radeon.radeonScreen->driScreen->dri2.enabled)
+    {
+        height = rrb->base.Height;
+    }
+    else
+    {
+        height =  context->radeon.radeonScreen->driScreen->fbHeight;
+    }
+
     SETfield(evergreen->DB_DEPTH_SIZE.u32All, (nPitchInPixel/8)-1,
              EG_DB_DEPTH_SIZE__PITCH_TILE_MAX_shift, 
              EG_DB_DEPTH_SIZE__PITCH_TILE_MAX_mask);
-    SETfield(evergreen->DB_DEPTH_SIZE.u32All, (context->radeon.radeonScreen->driScreen->fbHeight/8)-1,
+    SETfield(evergreen->DB_DEPTH_SIZE.u32All, (height/8)-1,
              EG_DB_DEPTH_SIZE__HEIGHT_TILE_MAX_shift, 
              EG_DB_DEPTH_SIZE__HEIGHT_TILE_MAX_mask);
-    evergreen->DB_DEPTH_SLICE.u32All = ( (nPitchInPixel * context->radeon.radeonScreen->driScreen->fbHeight)/64 )-1;
+    evergreen->DB_DEPTH_SLICE.u32All = ( (nPitchInPixel * height)/64 )-1;
 
     if(4 == rrb->cpp)
     {
@@ -1026,9 +1059,9 @@ static void evergreenSendDB(GLcontext *ctx, struct radeon_state_atom *atom)
 static void evergreenSetRenderTarget(context_t *context, int id)
 {
     EVERGREEN_CHIP_CONTEXT *evergreen = GET_EVERGREEN_CHIP(context);
-
+    uint32_t format = COLOR_8_8_8_8, comp_swap = SWAP_ALT, number_type = NUMBER_UNORM, source_format = 1;
     struct radeon_renderbuffer *rrb;
-    unsigned int nPitchInPixel;
+    unsigned int nPitchInPixel, height;
 
     rrb = radeon_get_colorbuffer(&context->radeon);
     if (!rrb || !rrb->bo) {
@@ -1043,14 +1076,22 @@ static void evergreenSetRenderTarget(context_t *context, int id)
     /* pitch */
     nPitchInPixel = rrb->pitch/rrb->cpp;    
 
+    if (context->radeon.radeonScreen->driScreen->dri2.enabled)
+    {
+        height = rrb->base.Height;
+    }
+    else
+    {
+        height =  context->radeon.radeonScreen->driScreen->fbHeight;
+    }
+
     SETfield(evergreen->render_target[id].CB_COLOR0_PITCH.u32All, (nPitchInPixel/8)-1,
              EG_CB_COLOR0_PITCH__TILE_MAX_shift, 
              EG_CB_COLOR0_PITCH__TILE_MAX_mask);
 
-    /* skice */
+    /* slice */
     SETfield(evergreen->render_target[id].CB_COLOR0_SLICE.u32All, 
-             //( (nPitchInPixel * context->radeon.radeonScreen->driScreen->fbHeight)/64 )-1,
-             ( (nPitchInPixel * 240)/64 )-1,
+             ( (nPitchInPixel * height)/64 )-1,
              EG_CB_COLOR0_SLICE__TILE_MAX_shift, 
              EG_CB_COLOR0_SLICE__TILE_MAX_mask);
 
@@ -1067,43 +1108,266 @@ static void evergreenSetRenderTarget(context_t *context, int id)
              ARRAY_LINEAR_GENERAL, 
              EG_CB_COLOR0_INFO__ARRAY_MODE_shift, 
              EG_CB_COLOR0_INFO__ARRAY_MODE_mask);   
-    if(4 == rrb->cpp)
-    {
-        SETfield(evergreen->render_target[id].CB_COLOR0_INFO.u32All, 
-                 COLOR_8_8_8_8,
-                 EG_CB_COLOR0_INFO__FORMAT_shift, 
-                 EG_CB_COLOR0_INFO__FORMAT_mask);
-        SETfield(evergreen->render_target[id].CB_COLOR0_INFO.u32All, 
-                 SWAP_ALT, //SWAP_STD
-                 EG_CB_COLOR0_INFO__COMP_SWAP_shift, 
-                 EG_CB_COLOR0_INFO__COMP_SWAP_mask);
+
+    switch (rrb->base.Format) {
+    case MESA_FORMAT_RGBA8888:
+            format = COLOR_8_8_8_8;
+            comp_swap = SWAP_STD_REV;
+	    number_type = NUMBER_UNORM;
+	    source_format = 1;
+            break;
+    case MESA_FORMAT_SIGNED_RGBA8888:
+            format = COLOR_8_8_8_8;
+            comp_swap = SWAP_STD_REV;
+	    number_type = NUMBER_SNORM;
+	    source_format = 1;
+            break;
+    case MESA_FORMAT_RGBA8888_REV:
+            format = COLOR_8_8_8_8;
+            comp_swap = SWAP_STD;
+	    number_type = NUMBER_UNORM;
+	    source_format = 1;
+            break;
+    case MESA_FORMAT_SIGNED_RGBA8888_REV:
+            format = COLOR_8_8_8_8;
+            comp_swap = SWAP_STD;
+	    number_type = NUMBER_SNORM;
+	    source_format = 1;
+            break;
+    case MESA_FORMAT_ARGB8888:
+    case MESA_FORMAT_XRGB8888:
+            format = COLOR_8_8_8_8;
+            comp_swap = SWAP_ALT;
+	    number_type = NUMBER_UNORM;
+	    source_format = 1;
+            break;
+    case MESA_FORMAT_ARGB8888_REV:
+    case MESA_FORMAT_XRGB8888_REV:
+            format = COLOR_8_8_8_8;
+            comp_swap = SWAP_ALT_REV;
+	    number_type = NUMBER_UNORM;
+	    source_format = 1;
+            break;
+    case MESA_FORMAT_RGB565:
+            format = COLOR_5_6_5;
+            comp_swap = SWAP_STD_REV;
+	    number_type = NUMBER_UNORM;
+	    source_format = 1;
+            break;
+    case MESA_FORMAT_RGB565_REV:
+            format = COLOR_5_6_5;
+            comp_swap = SWAP_STD;
+	    number_type = NUMBER_UNORM;
+	    source_format = 1;
+            break;
+    case MESA_FORMAT_ARGB4444:
+            format = COLOR_4_4_4_4;
+            comp_swap = SWAP_ALT;
+	    number_type = NUMBER_UNORM;
+	    source_format = 1;
+            break;
+    case MESA_FORMAT_ARGB4444_REV:
+            format = COLOR_4_4_4_4;
+            comp_swap = SWAP_ALT_REV;
+	    number_type = NUMBER_UNORM;
+	    source_format = 1;
+            break;
+    case MESA_FORMAT_ARGB1555:
+            format = COLOR_1_5_5_5;
+            comp_swap = SWAP_ALT;
+	    number_type = NUMBER_UNORM;
+	    source_format = 1;
+            break;
+    case MESA_FORMAT_ARGB1555_REV:
+            format = COLOR_1_5_5_5;
+            comp_swap = SWAP_ALT_REV;
+	    number_type = NUMBER_UNORM;
+	    source_format = 1;
+            break;
+    case MESA_FORMAT_AL88:
+            format = COLOR_8_8;
+            comp_swap = SWAP_STD;
+	    number_type = NUMBER_UNORM;
+	    source_format = 1;
+            break;
+    case MESA_FORMAT_AL88_REV:
+            format = COLOR_8_8;
+            comp_swap = SWAP_STD_REV;
+	    number_type = NUMBER_UNORM;
+	    source_format = 1;
+            break;
+    case MESA_FORMAT_RGB332:
+            format = COLOR_3_3_2;
+            comp_swap = SWAP_STD_REV;
+	    number_type = NUMBER_UNORM;
+	    source_format = 1;
+            break;
+    case MESA_FORMAT_A8:
+            format = COLOR_8;
+            comp_swap = SWAP_ALT_REV;
+	    number_type = NUMBER_UNORM;
+	    source_format = 1;
+            break;
+    case MESA_FORMAT_I8:
+    case MESA_FORMAT_CI8:
+            format = COLOR_8;
+            comp_swap = SWAP_STD;
+	    number_type = NUMBER_UNORM;
+	    source_format = 1;
+            break;
+    case MESA_FORMAT_L8:
+            format = COLOR_8;
+            comp_swap = SWAP_ALT;
+	    number_type = NUMBER_UNORM;
+	    source_format = 1;
+            break;
+    case MESA_FORMAT_RGBA_FLOAT32:
+            format = COLOR_32_32_32_32_FLOAT;
+            comp_swap = SWAP_STD_REV;
+	    number_type = NUMBER_FLOAT;
+	    source_format = 0;
+            break;
+    case MESA_FORMAT_RGBA_FLOAT16:
+            format = COLOR_16_16_16_16_FLOAT;
+            comp_swap = SWAP_STD_REV;
+	    number_type = NUMBER_FLOAT;
+	    source_format = 0;
+            break;
+    case MESA_FORMAT_ALPHA_FLOAT32:
+            format = COLOR_32_FLOAT;
+            comp_swap = SWAP_ALT_REV;
+	    number_type = NUMBER_FLOAT;
+	    source_format = 0;
+            break;
+    case MESA_FORMAT_ALPHA_FLOAT16:
+            format = COLOR_16_FLOAT;
+            comp_swap = SWAP_ALT_REV;
+	    number_type = NUMBER_FLOAT;
+	    source_format = 0;
+            break;
+    case MESA_FORMAT_LUMINANCE_FLOAT32:
+            format = COLOR_32_FLOAT;
+            comp_swap = SWAP_ALT;
+	    number_type = NUMBER_FLOAT;
+	    source_format = 0;
+            break;
+    case MESA_FORMAT_LUMINANCE_FLOAT16:
+            format = COLOR_16_FLOAT;
+            comp_swap = SWAP_ALT;
+	    number_type = NUMBER_FLOAT;
+	    source_format = 0;
+            break;
+    case MESA_FORMAT_LUMINANCE_ALPHA_FLOAT32:
+            format = COLOR_32_32_FLOAT;
+            comp_swap = SWAP_ALT_REV;
+	    number_type = NUMBER_FLOAT;
+	    source_format = 0;
+            break;
+    case MESA_FORMAT_LUMINANCE_ALPHA_FLOAT16:
+            format = COLOR_16_16_FLOAT;
+            comp_swap = SWAP_ALT_REV;
+	    number_type = NUMBER_FLOAT;
+	    source_format = 0;
+            break;
+    case MESA_FORMAT_INTENSITY_FLOAT32: /* X, X, X, X */
+            format = COLOR_32_FLOAT;
+            comp_swap = SWAP_STD;
+	    number_type = NUMBER_FLOAT;
+	    source_format = 0;
+            break;
+    case MESA_FORMAT_INTENSITY_FLOAT16: /* X, X, X, X */
+            format = COLOR_16_FLOAT;
+            comp_swap = SWAP_STD;
+	    number_type = NUMBER_UNORM;
+	    source_format = 0;
+            break;
+    case MESA_FORMAT_X8_Z24:
+    case MESA_FORMAT_S8_Z24:
+            format = COLOR_8_24;
+            comp_swap = SWAP_STD;
+	    number_type = NUMBER_UNORM;
+	    SETfield(evergreen->render_target[id].CB_COLOR0_INFO.u32All,
+		     ARRAY_1D_TILED_THIN1,
+		     EG_CB_COLOR0_INFO__ARRAY_MODE_shift,
+		     EG_CB_COLOR0_INFO__ARRAY_MODE_mask);
+	    source_format = 0;
+            break;
+    case MESA_FORMAT_Z24_S8:
+            format = COLOR_24_8;
+            comp_swap = SWAP_STD;
+	    number_type = NUMBER_UNORM;
+	    SETfield(evergreen->render_target[id].CB_COLOR0_INFO.u32All,
+		     ARRAY_1D_TILED_THIN1,
+		     EG_CB_COLOR0_INFO__ARRAY_MODE_shift,
+		     EG_CB_COLOR0_INFO__ARRAY_MODE_mask);
+	    source_format = 0;
+            break;
+    case MESA_FORMAT_Z16:
+            format = COLOR_16;
+            comp_swap = SWAP_STD;
+	    number_type = NUMBER_UNORM;
+	    SETfield(evergreen->render_target[id].CB_COLOR0_INFO.u32All,
+		     ARRAY_1D_TILED_THIN1,
+		     EG_CB_COLOR0_INFO__ARRAY_MODE_shift,
+		     EG_CB_COLOR0_INFO__ARRAY_MODE_mask);
+	    source_format = 0;
+            break;
+    case MESA_FORMAT_Z32:
+            format = COLOR_32;
+            comp_swap = SWAP_STD;
+	    number_type = NUMBER_UNORM;
+	    SETfield(evergreen->render_target[id].CB_COLOR0_INFO.u32All,
+		     ARRAY_1D_TILED_THIN1,
+		     EG_CB_COLOR0_INFO__ARRAY_MODE_shift,
+		     EG_CB_COLOR0_INFO__ARRAY_MODE_mask);
+	    source_format = 0;
+            break;
+    case MESA_FORMAT_SARGB8:
+            format = COLOR_8_8_8_8;
+            comp_swap = SWAP_ALT;
+	    number_type = NUMBER_SRGB;
+	    source_format = 1;
+            break;
+    case MESA_FORMAT_SLA8:
+            format = COLOR_8_8;
+            comp_swap = SWAP_ALT_REV;
+	    number_type = NUMBER_SRGB;
+	    source_format = 1;
+            break;
+    case MESA_FORMAT_SL8:
+            format = COLOR_8;
+            comp_swap = SWAP_ALT_REV;
+	    number_type = NUMBER_SRGB;
+	    source_format = 1;
+            break;
+    default:
+	    _mesa_problem(context->radeon.glCtx, "unexpected format in evergreenSetRenderTarget()");
+	    break;
     }
-    else
-    {
-        SETfield(evergreen->render_target[id].CB_COLOR0_INFO.u32All, 
-                 COLOR_5_6_5,
-                 EG_CB_COLOR0_INFO__FORMAT_shift, 
-                 EG_CB_COLOR0_INFO__FORMAT_mask);
-        SETfield(evergreen->render_target[id].CB_COLOR0_INFO.u32All, 
-                 SWAP_ALT_REV,
-                 EG_CB_COLOR0_INFO__COMP_SWAP_shift, 
-                 EG_CB_COLOR0_INFO__COMP_SWAP_mask);
-    }
-    SETfield(evergreen->render_target[id].CB_COLOR0_INFO.u32All, 
-             1,
-             EG_CB_COLOR0_INFO__SOURCE_FORMAT_shift, 
-             EG_CB_COLOR0_INFO__SOURCE_FORMAT_mask);
-    SETbit(evergreen->render_target[id].CB_COLOR0_INFO.u32All, 
-           EG_CB_COLOR0_INFO__BLEND_CLAMP_bit);
-    SETfield(evergreen->render_target[id].CB_COLOR0_INFO.u32All, 
-             NUMBER_UNORM,
-             EG_CB_COLOR0_INFO__NUMBER_TYPE_shift, 
+
+    SETfield(evergreen->render_target[id].CB_COLOR0_INFO.u32All,
+	     format,
+	     EG_CB_COLOR0_INFO__FORMAT_shift,
+	     EG_CB_COLOR0_INFO__FORMAT_mask);
+    SETfield(evergreen->render_target[id].CB_COLOR0_INFO.u32All,
+	     comp_swap,
+	     EG_CB_COLOR0_INFO__COMP_SWAP_shift,
+	     EG_CB_COLOR0_INFO__COMP_SWAP_mask);
+    SETfield(evergreen->render_target[id].CB_COLOR0_INFO.u32All,
+             number_type,
+             EG_CB_COLOR0_INFO__NUMBER_TYPE_shift,
              EG_CB_COLOR0_INFO__NUMBER_TYPE_mask);
+    SETfield(evergreen->render_target[id].CB_COLOR0_INFO.u32All,
+             source_format,
+             EG_CB_COLOR0_INFO__SOURCE_FORMAT_shift,
+             EG_CB_COLOR0_INFO__SOURCE_FORMAT_mask);
+    SETbit(evergreen->render_target[id].CB_COLOR0_INFO.u32All,
+           EG_CB_COLOR0_INFO__BLEND_CLAMP_bit);
 
     evergreen->render_target[id].CB_COLOR0_VIEW.u32All        = 0;
     evergreen->render_target[id].CB_COLOR0_CMASK.u32All       = 0;
     evergreen->render_target[id].CB_COLOR0_FMASK.u32All       = 0;
-    evergreen->render_target[id].CB_COLOR0_FMASK_SLICE.u32All = 0; 
+    evergreen->render_target[id].CB_COLOR0_FMASK_SLICE.u32All = 0;
 
     evergreen->render_target[id].enabled = GL_TRUE;
 }
@@ -1169,37 +1433,22 @@ static void evergreenSendCB(GLcontext *ctx, struct radeon_state_atom *atom)
     R600_OUT_BATCH(evergreen->CB_SHADER_MASK.u32All);   
     END_BATCH();
 
-    BEGIN_BATCH_NO_AUTOSTATE(5);
-    EVERGREEN_OUT_BATCH_REGSEQ(EG_CB_BLEND_RED, 3);
+    BEGIN_BATCH_NO_AUTOSTATE(6);
+    EVERGREEN_OUT_BATCH_REGSEQ(EG_CB_BLEND_RED, 4);
     R600_OUT_BATCH(evergreen->CB_BLEND_RED.u32All);    
     R600_OUT_BATCH(evergreen->CB_BLEND_GREEN.u32All);  
     R600_OUT_BATCH(evergreen->CB_BLEND_BLUE.u32All);   
+    R600_OUT_BATCH(evergreen->CB_BLEND_ALPHA.u32All);  
     END_BATCH();
 
-    BEGIN_BATCH_NO_AUTOSTATE(9);
-    EVERGREEN_OUT_BATCH_REGVAL(EG_CB_BLEND_ALPHA, evergreen->CB_BLEND_ALPHA.u32All);  
+    BEGIN_BATCH_NO_AUTOSTATE(6);
     EVERGREEN_OUT_BATCH_REGVAL(EG_CB_BLEND0_CONTROL, evergreen->CB_BLEND0_CONTROL.u32All);  
     EVERGREEN_OUT_BATCH_REGVAL(EG_CB_COLOR_CONTROL, evergreen->CB_COLOR_CONTROL.u32All);  
     END_BATCH();
     
     COMMIT_BATCH();
 }
-static void evergreenSendCP(GLcontext *ctx, struct radeon_state_atom *atom)
-{
-    context_t *context = EVERGREEN_CONTEXT(ctx);	
-	BATCH_LOCALS(&context->radeon);
-	radeon_print(RADEON_STATE, RADEON_VERBOSE, "%s\n", __func__);
 
-    //first to send
-    //r700Start3D
-    BEGIN_BATCH_NO_AUTOSTATE(3);
-    R600_OUT_BATCH(CP_PACKET3(R600_IT_CONTEXT_CONTROL, 1)); //IT_CONTEXT_CONTROL 0x28
-    R600_OUT_BATCH(0x80000000);
-    R600_OUT_BATCH(0x80000000);
-    END_BATCH();
-
-    COMMIT_BATCH();
-}
 static void evergreenSendVGT(GLcontext *ctx, struct radeon_state_atom *atom)
 {
     context_t *context = EVERGREEN_CONTEXT(ctx);
@@ -1255,13 +1504,6 @@ static void evergreenSendVGT(GLcontext *ctx, struct radeon_state_atom *atom)
     COMMIT_BATCH();
 }
 
-static void evergreenSendTIMESTAMP(GLcontext *ctx, struct radeon_state_atom *atom)
-{
-    context_t *context = EVERGREEN_CONTEXT(ctx);	
-	BATCH_LOCALS(&context->radeon);
-	radeon_print(RADEON_STATE, RADEON_VERBOSE, "%s\n", __func__);
-}
-
 void evergreenInitAtoms(context_t *context)
 {        
     radeon_print(RADEON_STATE, RADEON_NORMAL, "%s %p\n", __func__, context);
@@ -1272,10 +1514,6 @@ void evergreenInitAtoms(context_t *context)
     context->radeon.hw.atomlist.name = "atom-list";
 
     EVERGREEN_ALLOC_STATE(init, always, 19, evergreenSendSQConfig);
-
-    //make sure send first
-    EVERGREEN_ALLOC_STATE(cp, always, 3,    evergreenSendCP);
-
     EVERGREEN_ALLOC_STATE(vtx,       evergreen_vtx, (6 + (VERT_ATTRIB_MAX * 12)), evergreenSendVTX);
     EVERGREEN_ALLOC_STATE(pa,        always,        124, evergreenSendPA);
     EVERGREEN_ALLOC_STATE(tp,        always,        0,   evergreenSendTP);
@@ -1285,11 +1523,10 @@ void evergreenInitAtoms(context_t *context)
     EVERGREEN_ALLOC_STATE(sx,        always,        9,   evergreenSendSX);
     EVERGREEN_ALLOC_STATE(tx,        evergreen_tx,  (R700_TEXTURE_NUMBERUNITS * (21+5) + 6), evergreenSendTexState); /* 21 for resource, 5 for sampler */
     EVERGREEN_ALLOC_STATE(db,        always,        65,  evergreenSendDB); 
-    EVERGREEN_ALLOC_STATE(cb,        always,        35,  evergreenSendCB);	
+    EVERGREEN_ALLOC_STATE(cb,        always,        33,  evergreenSendCB);	
     EVERGREEN_ALLOC_STATE(vgt,       always,        29,  evergreenSendVGT);
-    EVERGREEN_ALLOC_STATE(timestamp, always,        3,   evergreenSendTIMESTAMP);
 
-    //evergreen_init_query_stateobj(&context->radeon, 6 * 2);
+    evergreen_init_query_stateobj(&context->radeon, 6 * 2);
 
     context->radeon.hw.is_dirty = GL_TRUE;
     context->radeon.hw.all_dirty = GL_TRUE;

@@ -38,6 +38,7 @@
 #include "os/os_thread.h"
 #include "lp_tile_soa.h"
 #include "lp_rast.h"
+#include "lp_debug.h"
 
 struct lp_scene_queue;
 
@@ -48,12 +49,12 @@ struct lp_scene_queue;
 #define TILES_Y (LP_MAX_HEIGHT / TILE_SIZE)
 
 
-#define CMD_BLOCK_MAX 16
-#define DATA_BLOCK_SIZE (64 * 1024 - 2 * sizeof(void *))
+#define CMD_BLOCK_MAX 128
+#define DATA_BLOCK_SIZE (64 * 1024)
 
 /* Scene temporary storage is clamped to this size:
  */
-#define LP_SCENE_MAX_SIZE (1024*1024)
+#define LP_SCENE_MAX_SIZE (4*1024*1024)
 
 /* The maximum amount of texture storage referenced by a scene is
  * clamped ot this size:
@@ -205,6 +206,11 @@ lp_scene_alloc( struct lp_scene *scene, unsigned size)
    assert(size <= DATA_BLOCK_SIZE);
    assert(block != NULL);
 
+   if (LP_DEBUG & DEBUG_MEM)
+      debug_printf("alloc %u block %u/%u tot %u/%u\n",
+		   size, block->used, DATA_BLOCK_SIZE,
+		   scene->scene_size, LP_SCENE_MAX_SIZE);
+
    if (block->used + size > DATA_BLOCK_SIZE) {
       block = lp_scene_new_data_block( scene );
       if (!block) {
@@ -232,6 +238,12 @@ lp_scene_alloc_aligned( struct lp_scene *scene, unsigned size,
    struct data_block *block = list->head;
 
    assert(block != NULL);
+
+   if (LP_DEBUG & DEBUG_MEM)
+      debug_printf("alloc %u block %u/%u tot %u/%u\n",
+		   size + alignment - 1,
+		   block->used, DATA_BLOCK_SIZE,
+		   scene->scene_size, LP_SCENE_MAX_SIZE);
        
    if (block->used + size + alignment - 1 > DATA_BLOCK_SIZE) {
       block = lp_scene_new_data_block( scene );

@@ -119,6 +119,9 @@ struct r600_context_hw_states {
 	struct radeon_state	scissor;
 	struct radeon_state	dsa;
 	struct radeon_state	cb_cntl;
+
+	struct radeon_state	db_flush;
+	struct radeon_state	cb_flush;
 };
 
 #define R600_MAX_CONSTANT 256 /* magic */
@@ -172,6 +175,7 @@ struct r600_context_hw_state_vtbl {
 	void (*init_config)(struct r600_context *rctx);
 };
 extern struct r600_context_hw_state_vtbl r600_hw_state_vtbl;
+extern struct r600_context_hw_state_vtbl eg_hw_state_vtbl;
 
 struct r600_context {
 	struct pipe_context		context;
@@ -182,6 +186,7 @@ struct r600_context {
 	struct radeon_draw		draw;
 	struct r600_context_hw_state_vtbl *vtbl;
 	struct radeon_state		config;
+	boolean use_mem_constant;
 	/* FIXME get rid of those vs_resource,vs/ps_constant */
 	struct radeon_state		*vs_resource;
 	unsigned			vs_nresource;
@@ -260,11 +265,16 @@ uint32_t r600_translate_texformat(enum pipe_format format,
 extern void r600_queries_resume(struct pipe_context *ctx);
 extern void r600_queries_suspend(struct pipe_context *ctx);
 
+int eg_bc_cf_build(struct r600_bc *bc, struct r600_bc_cf *cf);
+
 void r600_set_constant_buffer_file(struct pipe_context *ctx,
 				   uint shader, uint index,
 				   struct pipe_resource *buffer);
 void r600_set_constant_buffer_mem(struct pipe_context *ctx,
 				  uint shader, uint index,
 				  struct pipe_resource *buffer);
+void eg_set_constant_buffer(struct pipe_context *ctx,
+			    uint shader, uint index,
+			    struct pipe_resource *buffer);
 
 #endif

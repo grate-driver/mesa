@@ -1097,6 +1097,12 @@ ir_to_mesa_visitor::visit(ir_expression *ir)
       assert(!ir->operands[operand]->type->is_matrix());
    }
 
+   int vector_elements = ir->operands[0]->type->vector_elements;
+   if (ir->operands[1]) {
+      vector_elements = MAX2(vector_elements,
+			     ir->operands[1]->type->vector_elements);
+   }
+
    this->result.file = PROGRAM_UNDEFINED;
 
    /* Storage for our result.  Ideally for an assignment we'd be using
@@ -1154,6 +1160,16 @@ ir_to_mesa_visitor::visit(ir_expression *ir)
       ir_to_mesa_emit_op1(ir, OPCODE_DDY, result_dst, op[0]);
       break;
 
+   case ir_unop_noise: {
+      const enum prog_opcode opcode =
+	 prog_opcode(OPCODE_NOISE1
+		     + (ir->operands[0]->type->vector_elements) - 1);
+      assert((opcode >= OPCODE_NOISE1) && (opcode <= OPCODE_NOISE4));
+
+      ir_to_mesa_emit_op1(ir, opcode, result_dst, op[0]);
+      break;
+   }
+
    case ir_binop_add:
       ir_to_mesa_emit_op2(ir, OPCODE_ADD, result_dst, op[0], op[1]);
       break;
@@ -1183,27 +1199,43 @@ ir_to_mesa_visitor::visit(ir_expression *ir)
       ir_to_mesa_emit_op2(ir, OPCODE_SGE, result_dst, op[0], op[1]);
       break;
    case ir_binop_equal:
+      ir_to_mesa_emit_op2(ir, OPCODE_SEQ, result_dst, op[0], op[1]);
+      break;
+   case ir_binop_nequal:
+      ir_to_mesa_emit_op2(ir, OPCODE_SNE, result_dst, op[0], op[1]);
+      break;
+   case ir_binop_all_equal:
       /* "==" operator producing a scalar boolean. */
       if (ir->operands[0]->type->is_vector() ||
 	  ir->operands[1]->type->is_vector()) {
 	 ir_to_mesa_src_reg temp = get_temp(glsl_type::vec4_type);
 	 ir_to_mesa_emit_op2(ir, OPCODE_SNE,
 			     ir_to_mesa_dst_reg_from_src(temp), op[0], op[1]);
-	 ir_to_mesa_emit_op2(ir, OPCODE_DP4, result_dst, temp, temp);
+	 if (vector_elements == 4)
+	    ir_to_mesa_emit_op2(ir, OPCODE_DP4, result_dst, temp, temp);
+	 else if (vector_elements == 3)
+	    ir_to_mesa_emit_op2(ir, OPCODE_DP3, result_dst, temp, temp);
+	 else
+	    ir_to_mesa_emit_op2(ir, OPCODE_DP2, result_dst, temp, temp);
 	 ir_to_mesa_emit_op2(ir, OPCODE_SEQ,
 			     result_dst, result_src, src_reg_for_float(0.0));
       } else {
 	 ir_to_mesa_emit_op2(ir, OPCODE_SEQ, result_dst, op[0], op[1]);
       }
       break;
-   case ir_binop_nequal:
+   case ir_binop_any_nequal:
       /* "!=" operator producing a scalar boolean. */
       if (ir->operands[0]->type->is_vector() ||
 	  ir->operands[1]->type->is_vector()) {
 	 ir_to_mesa_src_reg temp = get_temp(glsl_type::vec4_type);
 	 ir_to_mesa_emit_op2(ir, OPCODE_SNE,
 			     ir_to_mesa_dst_reg_from_src(temp), op[0], op[1]);
-	 ir_to_mesa_emit_op2(ir, OPCODE_DP4, result_dst, temp, temp);
+	 if (vector_elements == 4)
+	    ir_to_mesa_emit_op2(ir, OPCODE_DP4, result_dst, temp, temp);
+	 else if (vector_elements == 3)
+	    ir_to_mesa_emit_op2(ir, OPCODE_DP3, result_dst, temp, temp);
+	 else
+	    ir_to_mesa_emit_op2(ir, OPCODE_DP2, result_dst, temp, temp);
 	 ir_to_mesa_emit_op2(ir, OPCODE_SNE,
 			     result_dst, result_src, src_reg_for_float(0.0));
       } else {
@@ -2719,10 +2751,15 @@ _mesa_ir_link_shader(GLcontext *ctx, struct gl_shader_program *prog)
 	 do_div_to_mul_rcp(ir);
 	 do_explog_to_explog2(ir);
 
+	 progress = do_lower_jumps(ir, true, true, options->EmitNoMainReturn, options->EmitNoCont, options->EmitNoLoops) || progress;
+
 	 progress = do_common_optimization(ir, true, options->MaxUnrollIterations) || progress;
 
 	 if (options->EmitNoIfs)
 	    progress = do_if_to_cond_assign(ir) || progress;
+
+	 if (options->EmitNoNoise)
+	    progress = lower_noise(ir) || progress;
 
 	 progress = do_vec_index_to_cond_assign(ir) || progress;
       } while (progress);

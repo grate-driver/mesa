@@ -5,6 +5,7 @@
 #include "radeon_cs_gem.h"
 #include "radeon_buffer.h"
 
+#include "util/u_hash_table.h"
 #include "util/u_inlines.h"
 #include "util/u_memory.h"
 #include "util/u_simple_list.h"
@@ -19,9 +20,6 @@ struct radeon_drm_buffer {
     struct radeon_drm_bufmgr *mgr;
 
     struct radeon_bo *bo;
-
-    /* The CS associated with the last buffer_map. */
-    struct radeon_libdrm_cs *cs;
 
     boolean flinked;
     uint32_t flink;
@@ -44,6 +42,7 @@ struct radeon_drm_bufmgr {
     struct pb_manager base;
     struct radeon_libdrm_winsys *rws;
     struct radeon_drm_buffer buffer_map_list;
+    struct util_hash_table *buffer_handles;
 };
 
 static INLINE struct radeon_drm_bufmgr *
@@ -57,11 +56,17 @@ static void
 radeon_drm_buffer_destroy(struct pb_buffer *_buf)
 {
     struct radeon_drm_buffer *buf = radeon_drm_buffer(_buf);
+    int name;
 
     if (buf->bo->ptr != NULL) {
 	remove_from_list(buf);
 	radeon_bo_unmap(buf->bo);
 	buf->bo->ptr = NULL;
+    }
+    name = radeon_gem_name_bo(buf->bo);
+    if (name) {
+	util_hash_table_remove(buf->mgr->buffer_handles,
+			       (void*)(uintptr_t)name);
     }
     radeon_bo_unref(buf->bo);
 
@@ -89,15 +94,27 @@ static unsigned get_pb_usage_from_transfer_flags(enum pipe_transfer_usage usage)
 
 static void *
 radeon_drm_buffer_map_internal(struct pb_buffer *_buf,
-		      unsigned flags)
+			       unsigned flags, void *flush_ctx)
 {
     struct radeon_drm_buffer *buf = radeon_drm_buffer(_buf);
-    struct radeon_libdrm_cs *cs = buf->cs;
+    struct radeon_libdrm_cs *cs = flush_ctx;
     int write = 0;
 
+    /* Note how we use radeon_bo_is_referenced_by_cs here. There are
+     * basically two places this map function can be called from:
+     * - pb_map
+     * - create_buffer (in the buffer reuse case)
+     *
+     * Since pb managers are per-winsys managers, not per-context managers,
+     * and we shouldn't reuse buffers if they are in-use in any context,
+     * we simply ask: is this buffer referenced by *any* CS?
+     *
+     * The problem with buffer_create is that it comes from pipe_screen,
+     * so we have no CS to look at, though luckily the following code
+     * is sufficient to tell whether the buffer is in use. */
     if (flags & PB_USAGE_DONTBLOCK) {
         if (_buf->base.usage & RADEON_PB_USAGE_VERTEX)
-            if (cs && radeon_bo_is_referenced_by_cs(buf->bo, cs->cs))
+            if (radeon_bo_is_referenced_by_cs(buf->bo, NULL))
 		return NULL;
     }
 
@@ -109,6 +126,10 @@ radeon_drm_buffer_map_internal(struct pb_buffer *_buf,
         if (radeon_bo_is_busy(buf->bo, &domain))
             return NULL;
     }
+
+    /* If we don't have any CS and the buffer is referenced,
+     * we cannot flush. */
+    assert(cs || !radeon_bo_is_referenced_by_cs(buf->bo, NULL));
 
     if (cs && radeon_bo_is_referenced_by_cs(buf->bo, cs->cs)) {
         cs->flush_cs(cs->flush_data);
@@ -173,6 +194,13 @@ struct pb_buffer *radeon_drm_bufmgr_create_buffer_from_handle(struct pb_manager 
     struct radeon_drm_buffer *buf;
     struct radeon_bo *bo;
 
+    buf = util_hash_table_get(mgr->buffer_handles, (void*)(uintptr_t)handle);
+    if (buf) {
+        struct pb_buffer *b = NULL;
+        pb_reference(&b, &buf->base);
+        return b;
+    }
+
     bo = radeon_bo_open(rws->bom, handle, 0,
 			0, 0, 0);
     if (bo == NULL)
@@ -194,6 +222,8 @@ struct pb_buffer *radeon_drm_bufmgr_create_buffer_from_handle(struct pb_manager 
     buf->mgr = mgr;
 
     buf->bo = bo;
+
+    util_hash_table_set(mgr->buffer_handles, (void*)(uintptr_t)handle, buf);
 
     return &buf->base;
 }
@@ -248,7 +278,18 @@ static void
 radeon_drm_bufmgr_destroy(struct pb_manager *_mgr)
 {
     struct radeon_drm_bufmgr *mgr = radeon_drm_bufmgr(_mgr);
+    util_hash_table_destroy(mgr->buffer_handles);
     FREE(mgr);
+}
+
+static unsigned handle_hash(void *key)
+{
+    return (unsigned)key;
+}
+
+static int handle_compare(void *key1, void *key2)
+{
+    return !((int)key1 == (int)key2);
 }
 
 struct pb_manager *
@@ -266,6 +307,7 @@ radeon_drm_bufmgr_create(struct radeon_libdrm_winsys *rws)
 
     mgr->rws = rws;
     make_empty_list(&mgr->buffer_map_list);
+    mgr->buffer_handles = util_hash_table_create(handle_hash, handle_compare);
     return &mgr->base;
 }
 
@@ -293,12 +335,8 @@ void *radeon_drm_buffer_map(struct r300_winsys_screen *ws,
                             enum pipe_transfer_usage usage)
 {
     struct pb_buffer *_buf = radeon_pb_buffer(buf);
-    struct radeon_drm_buffer *rbuf = get_drm_buffer(_buf);
 
-    if (rbuf)
-        rbuf->cs = radeon_libdrm_cs(cs);
-
-    return pb_map(_buf, get_pb_usage_from_transfer_flags(usage));
+    return pb_map(_buf, get_pb_usage_from_transfer_flags(usage), radeon_libdrm_cs(cs));
 }
 
 void radeon_drm_buffer_unmap(struct r300_winsys_screen *ws,
