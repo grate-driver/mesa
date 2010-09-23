@@ -70,7 +70,7 @@ else
 	GALLIUM_DRIVERS += nouveau radeon r600
 # Although the KMS egl drivers will probably build on kfreebsd & hurd
 # only linux actually has KMS drivers implemented at this point.
-	EGL_DISPLAYS += kms
+	EGL_DISPLAYS += drm
   endif
 
   ifeq ($(DEB_HOST_ARCH), lpia)
