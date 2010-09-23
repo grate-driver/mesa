@@ -1,3 +1,10 @@
+mesa (7.9~git20100923-0ubuntu1) UNRELEASED; urgency=low
+
+  * New upstream snapshot from the 7.9 release branch up to commit 8f4c99a9.
+    - Fixes GPU hang in occlusion-query on i965 (LP: #634683)
+
+ -- Christopher James Halse Rogers <raof@ubuntu.com>  Thu, 23 Sep 2010 11:25:10 +1000
+
 mesa (7.9~git20100909-0ubuntu3) maverick; urgency=low
 
   * Drop the changes from previous upload.  The Unity white screen problem
