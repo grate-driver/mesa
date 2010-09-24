@@ -582,7 +582,6 @@ struct statevar_element {
    const char *field;
    int tokens[STATE_LENGTH];
    int swizzle;
-   bool array_indexed;
 };
 
 static struct statevar_element gl_DepthRange_elements[] = {
@@ -898,8 +897,8 @@ ir_to_mesa_visitor::visit(ir_variable *ir)
 	       if (storage->index == -1) {
 		  storage->index = index;
 	       } else {
-		  assert(index == ((int)storage->index +
-				   a * statevar->num_elements + i));
+		  assert(index ==
+                         (int)(storage->index + a * statevar->num_elements + i));
 	       }
 	    } else {
 	       ir_to_mesa_src_reg src(PROGRAM_STATE_VAR, index, NULL);
@@ -2760,6 +2759,19 @@ _mesa_ir_link_shader(GLcontext *ctx, struct gl_shader_program *prog)
 
 	 if (options->EmitNoNoise)
 	    progress = lower_noise(ir) || progress;
+
+	 /* If there are forms of indirect addressing that the driver
+	  * cannot handle, perform the lowering pass.
+	  */
+	 if (options->EmitNoIndirectInput || options->EmitNoIndirectOutput
+	     || options->EmitNoIndirectTemp || options->EmitNoIndirectUniform)
+	   progress =
+	     lower_variable_index_to_cond_assign(ir,
+						 options->EmitNoIndirectInput,
+						 options->EmitNoIndirectOutput,
+						 options->EmitNoIndirectTemp,
+						 options->EmitNoIndirectUniform)
+	     || progress;
 
 	 progress = do_vec_index_to_cond_assign(ir) || progress;
       } while (progress);
