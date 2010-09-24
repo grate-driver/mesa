@@ -1,7 +1,9 @@
-mesa (7.9~git20100923-0ubuntu1) UNRELEASED; urgency=low
+mesa (7.9~git20100924-0ubuntu1) UNRELEASED; urgency=low
 
-  * New upstream snapshot from the 7.9 release branch up to commit 8f4c99a9.
+  * New upstream snapshot from the 7.9 release branch up to commit 3ad02793.
     - Fixes GPU hang in occlusion-query on i965 (LP: #634683)
+    - Fixes hang/crash when changing desktop-effects settings in
+      KDE. (LP: #633406)
   * debian/rules:
     - Update configure options for kms → drm EGL backend name change
     - Remove unused HAVE_KMS variable.
