@@ -1,4 +1,4 @@
-mesa (7.9~git20100924-0ubuntu1) UNRELEASED; urgency=low
+mesa (7.9~git20100924-0ubuntu1) maverick; urgency=low
 
   * New upstream snapshot from the 7.9 release branch up to commit 3ad02793.
     - Fixes GPU hang in occlusion-query on i965 (LP: #634683)
