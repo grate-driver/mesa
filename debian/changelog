@@ -1,3 +1,11 @@
+mesa (7.9~git20100924-0ubuntu2) maverick; urgency=low
+
+  * Cherry-pick b24238c4 from 7.9 release branch.  Fixes the lookup of
+    drawables after switching the GLX context, which was causing BadDrawable
+    errors in clutter applications which use multiple stages (LP: #561734)
+
+ -- Christopher James Halse Rogers <raof@ubuntu.com>  Thu, 30 Sep 2010 14:48:12 +1000
+
 mesa (7.9~git20100924-0ubuntu1) maverick; urgency=low
 
   * New upstream snapshot from the 7.9 release branch up to commit 3ad02793.
