@@ -780,7 +780,7 @@ link_intrastage_shaders(GLcontext *ctx,
       return NULL;
    }
 
-   gl_shader *const linked = ctx->Driver.NewShader(NULL, 0, main->Type);
+   gl_shader *linked = ctx->Driver.NewShader(NULL, 0, main->Type);
    linked->ir = new(linked) exec_list;
    clone_ir_list(linked, linked->ir, main->ir);
 
@@ -827,7 +827,11 @@ link_intrastage_shaders(GLcontext *ctx,
 
    assert(idx == num_linking_shaders);
 
-   link_function_calls(prog, linked, linking_shaders, num_linking_shaders);
+   if (!link_function_calls(prog, linked, linking_shaders,
+			    num_linking_shaders)) {
+      ctx->Driver.DeleteShader(ctx, linked);
+      linked = NULL;
+   }
 
    free(linking_shaders);
 
