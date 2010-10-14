@@ -80,6 +80,10 @@ extern "C" {
 #include "linker.h"
 #include "ir_optimization.h"
 
+extern "C" {
+#include "main/shaderobj.h"
+}
+
 /**
  * Visitor that determines whether or not a variable is ever written.
  */
@@ -321,6 +325,9 @@ cross_validate_globals(struct gl_shader_program *prog,
     */
    glsl_symbol_table variables;
    for (unsigned i = 0; i < num_shaders; i++) {
+      if (shader_list[i] == NULL)
+	 continue;
+
       foreach_list(node, shader_list[i]->ir) {
 	 ir_variable *const var = ((ir_instruction *) node)->as_variable();
 
@@ -407,7 +414,7 @@ bool
 cross_validate_uniforms(struct gl_shader_program *prog)
 {
    return cross_validate_globals(prog, prog->_LinkedShaders,
-				 prog->_NumLinkedShaders, true);
+				 MESA_SHADER_TYPES, true);
 }
 
 
@@ -863,7 +870,10 @@ struct uniform_node {
 static void
 update_array_sizes(struct gl_shader_program *prog)
 {
-   for (unsigned i = 0; i < prog->_NumLinkedShaders; i++) {
+   for (unsigned i = 0; i < MESA_SHADER_TYPES; i++) {
+	 if (prog->_LinkedShaders[i] == NULL)
+	    continue;
+
       foreach_list(node, prog->_LinkedShaders[i]->ir) {
 	 ir_variable *const var = ((ir_instruction *) node)->as_variable();
 
@@ -874,7 +884,10 @@ update_array_sizes(struct gl_shader_program *prog)
 	    continue;
 
 	 unsigned int size = var->max_array_access;
-	 for (unsigned j = 0; j < prog->_NumLinkedShaders; j++) {
+	 for (unsigned j = 0; j < MESA_SHADER_TYPES; j++) {
+	       if (prog->_LinkedShaders[j] == NULL)
+		  continue;
+
 	    foreach_list(node2, prog->_LinkedShaders[j]->ir) {
 	       ir_variable *other_var = ((ir_instruction *) node2)->as_variable();
 	       if (!other_var)
@@ -986,7 +999,10 @@ assign_uniform_locations(struct gl_shader_program *prog)
 				    hash_table_string_compare);
    void *mem_ctx = talloc_new(NULL);
 
-   for (unsigned i = 0; i < prog->_NumLinkedShaders; i++) {
+   for (unsigned i = 0; i < MESA_SHADER_TYPES; i++) {
+      if (prog->_LinkedShaders[i] == NULL)
+	 continue;
+
       unsigned next_position = 0;
 
       foreach_list(node, prog->_LinkedShaders[i]->ir) {
@@ -1418,13 +1434,15 @@ link_shaders(GLcontext *ctx, struct gl_shader_program *prog)
 
    prog->Version = max_version;
 
-   for (unsigned int i = 0; i < prog->_NumLinkedShaders; i++) {
-      ctx->Driver.DeleteShader(ctx, prog->_LinkedShaders[i]);
+   for (unsigned int i = 0; i < MESA_SHADER_TYPES; i++) {
+      if (prog->_LinkedShaders[i] != NULL)
+	 ctx->Driver.DeleteShader(ctx, prog->_LinkedShaders[i]);
+
+      prog->_LinkedShaders[i] = NULL;
    }
 
    /* Link all shaders for a particular stage and validate the result.
     */
-   prog->_NumLinkedShaders = 0;
    if (num_vert_shaders > 0) {
       gl_shader *const sh =
 	 link_intrastage_shaders(ctx, prog, vert_shader_list, num_vert_shaders);
@@ -1435,8 +1453,8 @@ link_shaders(GLcontext *ctx, struct gl_shader_program *prog)
       if (!validate_vertex_shader_executable(prog, sh))
 	  goto done;
 
-      prog->_LinkedShaders[prog->_NumLinkedShaders] = sh;
-      prog->_NumLinkedShaders++;
+      _mesa_reference_shader(ctx, &prog->_LinkedShaders[MESA_SHADER_VERTEX],
+			     sh);
    }
 
    if (num_frag_shaders > 0) {
@@ -1449,8 +1467,8 @@ link_shaders(GLcontext *ctx, struct gl_shader_program *prog)
       if (!validate_fragment_shader_executable(prog, sh))
 	  goto done;
 
-      prog->_LinkedShaders[prog->_NumLinkedShaders] = sh;
-      prog->_NumLinkedShaders++;
+      _mesa_reference_shader(ctx, &prog->_LinkedShaders[MESA_SHADER_FRAGMENT],
+			     sh);
    }
 
    /* Here begins the inter-stage linking phase.  Some initial validation is
@@ -1458,14 +1476,26 @@ link_shaders(GLcontext *ctx, struct gl_shader_program *prog)
     * varyings.
     */
    if (cross_validate_uniforms(prog)) {
+      unsigned prev;
+
+      for (prev = 0; prev < MESA_SHADER_TYPES; prev++) {
+	 if (prog->_LinkedShaders[prev] != NULL)
+	    break;
+      }
+
       /* Validate the inputs of each stage with the output of the preceeding
        * stage.
        */
-      for (unsigned i = 1; i < prog->_NumLinkedShaders; i++) {
+      for (unsigned i = prev + 1; i < MESA_SHADER_TYPES; i++) {
+	 if (prog->_LinkedShaders[i] == NULL)
+	    continue;
+
 	 if (!cross_validate_outputs_to_inputs(prog,
-					       prog->_LinkedShaders[i - 1],
+					       prog->_LinkedShaders[prev],
 					       prog->_LinkedShaders[i]))
 	    goto done;
+
+	 prev = i;
       }
 
       prog->LinkStatus = true;
@@ -1475,7 +1505,10 @@ link_shaders(GLcontext *ctx, struct gl_shader_program *prog)
     * uniforms, and varyings.  Later optimization could possibly make
     * some of that unused.
     */
-   for (unsigned i = 0; i < prog->_NumLinkedShaders; i++) {
+   for (unsigned i = 0; i < MESA_SHADER_TYPES; i++) {
+      if (prog->_LinkedShaders[i] == NULL)
+	 continue;
+
       while (do_common_optimization(prog->_LinkedShaders[i]->ir, true, 32))
 	 ;
    }
@@ -1484,7 +1517,7 @@ link_shaders(GLcontext *ctx, struct gl_shader_program *prog)
 
    assign_uniform_locations(prog);
 
-   if (prog->_NumLinkedShaders && prog->_LinkedShaders[0]->Type == GL_VERTEX_SHADER) {
+   if (prog->_LinkedShaders[MESA_SHADER_VERTEX] != NULL) {
       /* FINISHME: The value of the max_attribute_index parameter is
        * FINISHME: implementation dependent based on the value of
        * FINISHME: GL_MAX_VERTEX_ATTRIBS.  GL_MAX_VERTEX_ATTRIBS must be
@@ -1493,14 +1526,26 @@ link_shaders(GLcontext *ctx, struct gl_shader_program *prog)
       if (!assign_attribute_locations(prog, 16))
 	 goto done;
 
-      if (prog->_NumLinkedShaders == 1)
-	 demote_unread_shader_outputs(prog->_LinkedShaders[0]);
+      if ((prog->_LinkedShaders[MESA_SHADER_GEOMETRY] == NULL)
+	  && (prog->_LinkedShaders[MESA_SHADER_FRAGMENT] == NULL))
+	 demote_unread_shader_outputs(prog->_LinkedShaders[MESA_SHADER_VERTEX]);
    }
 
-   for (unsigned i = 1; i < prog->_NumLinkedShaders; i++)
+   unsigned prev;
+   for (prev = 0; prev < MESA_SHADER_TYPES; prev++) {
+      if (prog->_LinkedShaders[prev] != NULL)
+	 break;
+   }
+
+   for (unsigned i = prev + 1; i < MESA_SHADER_TYPES; i++) {
+      if (prog->_LinkedShaders[i] == NULL)
+	 continue;
+
       assign_varying_locations(prog,
-			       prog->_LinkedShaders[i - 1],
+			       prog->_LinkedShaders[prev],
 			       prog->_LinkedShaders[i]);
+      prev = i;
+   }
 
    /* FINISHME: Assign fragment shader output locations. */
 

@@ -209,7 +209,7 @@ _mesa_copy_string(GLchar *dst, GLsizei maxLength,
  *
  */
 static bool
-validate_shader_target(const struct gl_context *ctx, GLenum type)
+validate_shader_target(const GLcontext *ctx, GLenum type)
 {
    switch (type) {
 #if FEATURE_ARB_fragment_shader
