@@ -1992,6 +1992,7 @@ _mesa_meta_Bitmap(GLcontext *ctx,
    struct temp_texture *tex = get_bitmap_temp_texture(ctx);
    const GLenum texIntFormat = GL_ALPHA;
    const struct gl_pixelstore_attrib unpackSave = *unpack;
+   GLubyte fg, bg;
    struct vertex {
       GLfloat x, y, z, s, t, r, g, b, a;
    };
@@ -2093,21 +2094,26 @@ _mesa_meta_Bitmap(GLcontext *ctx,
       _mesa_BufferSubDataARB(GL_ARRAY_BUFFER_ARB, 0, sizeof(verts), verts);
    }
 
+   /* choose different foreground/background alpha values */
+   CLAMPED_FLOAT_TO_UBYTE(fg, ctx->Current.RasterColor[ACOMP]);
+   bg = (fg > 127 ? 0 : 255);
+
    bitmap1 = _mesa_map_pbo_source(ctx, &unpackSave, bitmap1);
    if (!bitmap1) {
       _mesa_meta_end(ctx);
       return;
    }
 
-   bitmap8 = (GLubyte *) calloc(1, width * height);
+   bitmap8 = (GLubyte *) malloc(width * height);
    if (bitmap8) {
+      memset(bitmap8, bg, width * height);
       _mesa_expand_bitmap(width, height, &unpackSave, bitmap1,
-                          bitmap8, width, 0xff);
+                          bitmap8, width, fg);
 
       _mesa_set_enable(ctx, tex->Target, GL_TRUE);
 
       _mesa_set_enable(ctx, GL_ALPHA_TEST, GL_TRUE);
-      _mesa_AlphaFunc(GL_GREATER, 0.0);
+      _mesa_AlphaFunc(GL_NOTEQUAL, UBYTE_TO_FLOAT(bg));
 
       setup_drawpix_texture(ctx, tex, newTex, texIntFormat, width, height,
                             GL_ALPHA, GL_UNSIGNED_BYTE, bitmap8);
