@@ -1,4 +1,4 @@
-mesa (7.8.2-3) UNRELEASED; urgency=low
+mesa (7.9-1) UNRELEASED; urgency=low
 
   [ Christopher James Halse Rogers ]
   * debian/control:
@@ -11,6 +11,9 @@ mesa (7.8.2-3) UNRELEASED; urgency=low
   [ Sven Joachim ]
   * Bump libdrm-dev build dependency to 2.4.21-2~, the Nouveau Gallium
     driver does not build with squeeze's libdrm-nouveau1.
+
+  [ Julien Cristau ]
+  * New upstream release.
 
  -- Christopher James Halse Rogers <raof@ubuntu.com>  Fri, 30 Jul 2010 19:08:57 +1000
 
