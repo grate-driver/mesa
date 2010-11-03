@@ -14,6 +14,13 @@ mesa (7.9-1) UNRELEASED; urgency=low
 
   [ Julien Cristau ]
   * New upstream release.
+  * Update patches:
+    - 03_optional-progs-and-install.patch dropped, demos moved to a separate
+      package
+    - 07-nouveau-update.diff and
+      09-intel-fix-invalidate-before-initialisation.diff dropped, they were
+      backports from upstream
+    - 04_osmesa_version.diff updated
 
  -- Christopher James Halse Rogers <raof@ubuntu.com>  Fri, 30 Jul 2010 19:08:57 +1000
 
