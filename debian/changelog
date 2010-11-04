@@ -35,6 +35,7 @@ mesa (7.9-1) UNRELEASED; urgency=low
     - Update symbols files
   * README.source: we don't need to repack MesaLib.tar.gz anymore.
   * Kill old sourceforge url from debian/watch.
+  * Ship the gallium r300 driver instead of the classic one.
 
  -- Christopher James Halse Rogers <raof@ubuntu.com>  Fri, 30 Jul 2010 19:08:57 +1000
 
