@@ -25,6 +25,14 @@ mesa (7.9-1) UNRELEASED; urgency=low
   * Drop the mesa-utils package, demos were moved out of the mesa tree.
   * Use --with-egl-platforms instead of --with-egl-displays, and replace kms
     with drm.
+  * Merge some packaging changes from ubuntu:
+    - libegl1-mesa-drivers-x11,kms: There are no longer separate kms or x11
+      drivers for EGL, libegl1-mesa-drivers now contains a single driver that
+      provides both backends (Christopher James Halse Rogers)
+    - Remove pre-generated .pc's, use the ones generated at build time instead
+      (Robert Hooker)
+    - Build the r600 gallium driver
+    - Update symbols files
 
  -- Christopher James Halse Rogers <raof@ubuntu.com>  Fri, 30 Jul 2010 19:08:57 +1000
 
