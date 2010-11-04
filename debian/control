@@ -702,16 +702,4 @@ Description: A free implementation of the OpenGL API -- development files
  The headers and static libraries for compiling programs that use this
  library are included.
 
-Package: mesa-utils
-Section: x11
-Priority: optional
-Architecture: any
-Depends:
- ${shlibs:Depends},
- ${misc:Depends},
-Replaces: xbase-clients (<< 6.8.2-38)
-Description: Miscellaneous Mesa GL utilities
- This package provides several basic GL utilities built by Mesa, including
- glxinfo and glxgears.
-
 # vim: tw=0
