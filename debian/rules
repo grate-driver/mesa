@@ -70,7 +70,7 @@ else
 	GALLIUM_DRIVERS += nouveau radeon
 # Although the KMS egl drivers will probably build on kfreebsd & hurd
 # only linux actually has KMS drivers implemented at this point.
-	EGL_DISPLAYS += kms
+	EGL_DISPLAYS += drm
   endif
 
   ifeq ($(DEB_HOST_ARCH), lpia)
@@ -88,15 +88,11 @@ else
   endif
 endif
 
-ifeq ($(HAVE_KMS), yes)
-	EGL_DISPLAYS += kms
-endif
-
 confflags-dri = \
 	--with-driver=dri \
 	--with-dri-drivers="$(DRI_DRIVERS)" \
 	--with-dri-driverdir=/usr/lib/dri \
-	--with-egl-displays="$(EGL_DISPLAYS)" \
+	--with-egl-platforms="$(EGL_DISPLAYS)" \
 	--enable-glx-tls \
 	$(addprefix --enable-gallium-,$(GALLIUM_DRIVERS)) \
 	--with-state-trackers=egl,es,glx,dri,vega \
@@ -288,7 +284,7 @@ endif
 	dh_strip -plibgles1-mesa --dbg-package=libgles1-mesa-dbg
 	dh_strip -plibgles2-mesa --dbg-package=libgles2-mesa-dbg	
 	dh_strip -plibegl1-mesa-drivers-x11 --dbg-package=libegl1-mesa-drivers-x11-dbg
-ifeq ($(findstring kms, $(EGL_DISPLAYS)), kms)
+ifeq ($(findstring drm, $(EGL_DISPLAYS)), drm)
 	dh_strip -plibegl1-mesa-drivers-kms --dbg-package=libegl1-mesa-drivers-kms-dbg
 endif
 	dh_strip -s --remaining-packages

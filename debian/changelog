@@ -23,6 +23,8 @@ mesa (7.9-1) UNRELEASED; urgency=low
     - 04_osmesa_version.diff updated
   * Add build-dep on talloc.
   * Drop the mesa-utils package, demos were moved out of the mesa tree.
+  * Use --with-egl-platforms instead of --with-egl-displays, and replace kms
+    with drm.
 
  -- Christopher James Halse Rogers <raof@ubuntu.com>  Fri, 30 Jul 2010 19:08:57 +1000
 
