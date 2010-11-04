@@ -179,6 +179,7 @@ Architecture: any
 Depends:
  ${shlibs:Depends},
  ${misc:Depends},
+ libegl1-mesa (= ${binary:Version}),
 Description: A free implementation of the EGL API -- hardware drivers
  This package contains the EGL native platform graphics interface library.
  EGL provides a platform-agnostic mechanism for creating rendering surfaces
@@ -502,7 +503,7 @@ Description: Debugging symbols for the experimental Mesa DRI modules
  For a complete description of Mesa, please look at the
  libgl1-mesa-swx11 package.
  .
- This package contains debugging symbols for the Gallium DRI modules.
+ This package contains debugging symbols for the extra DRI modules.
 
 #Package: libgl1-mesa-dri-i686
 #Section: libs
