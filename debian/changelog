@@ -33,6 +33,7 @@ mesa (7.9-1) UNRELEASED; urgency=low
       (Robert Hooker)
     - Build the r600 gallium driver
     - Update symbols files
+  * README.source: we don't need to repack MesaLib.tar.gz anymore.
 
  -- Christopher James Halse Rogers <raof@ubuntu.com>  Fri, 30 Jul 2010 19:08:57 +1000
 
