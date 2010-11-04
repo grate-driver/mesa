@@ -21,6 +21,7 @@ mesa (7.9-1) UNRELEASED; urgency=low
       09-intel-fix-invalidate-before-initialisation.diff dropped, they were
       backports from upstream
     - 04_osmesa_version.diff updated
+  * Add build-dep on talloc.
 
  -- Christopher James Halse Rogers <raof@ubuntu.com>  Fri, 30 Jul 2010 19:08:57 +1000
 
