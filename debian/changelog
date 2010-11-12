@@ -1,4 +1,4 @@
-mesa (7.9-1) UNRELEASED; urgency=low
+mesa (7.9-1) experimental; urgency=low
 
   [ Christopher James Halse Rogers ]
   * debian/control:
@@ -7,7 +7,7 @@ mesa (7.9-1) UNRELEASED; urgency=low
       package for libgl1.
   * debian/README.Debian:
     - Document the virtual packages above.
-  
+
   [ Sven Joachim ]
   * Bump libdrm-dev build dependency to 2.4.21-2~, the Nouveau Gallium
     driver does not build with squeeze's libdrm-nouveau1.
@@ -37,7 +37,7 @@ mesa (7.9-1) UNRELEASED; urgency=low
   * Kill old sourceforge url from debian/watch.
   * Ship the gallium r300 driver instead of the classic one.
 
- -- Christopher James Halse Rogers <raof@ubuntu.com>  Fri, 30 Jul 2010 19:08:57 +1000
+ -- Julien Cristau <jcristau@debian.org>  Sat, 13 Nov 2010 00:36:11 +0100
 
 mesa (7.8.2-2) experimental; urgency=low
 
