@@ -532,6 +532,7 @@ Architecture: any
 Depends:
  mesa-common-dev (= ${binary:Version}),
  libgl1-mesa-glx (= ${binary:Version}),
+ libxext-dev, 
  ${misc:Depends},
 Conflicts: libgl-dev, libgl1-mesa-dri-dev
 Replaces: libgl-dev, libgl1-mesa-dri-dev
