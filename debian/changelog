@@ -1,3 +1,10 @@
+mesa (7.9+repack-1) experimental; urgency=low
+
+  * Repack the upstream tarball to get rid of duplicate files which make dpkg
+    choke.  Thanks to Luca Falavigna for his help diagnosing this.
+
+ -- Julien Cristau <jcristau@debian.org>  Mon, 15 Nov 2010 23:04:45 +0100
+
 mesa (7.9-1) experimental; urgency=low
 
   [ Christopher James Halse Rogers ]
