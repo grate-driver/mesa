@@ -566,6 +566,7 @@ static int presub_helper(
 		for(i = 0; i < info->NumSrcRegs; i++) {
 			unsigned int mask = src_reads_dst_mask(
 				inst->U.I.SrcReg[i], s->Inst->U.I.DstReg);
+			struct rc_src_register src = inst->U.I.SrcReg[i];
 			/* XXX We could be more aggressive here using
 			 * presubtract.  It is okay if SrcReg[i] only reads
 			 * from some of the mask components. */
@@ -576,6 +577,11 @@ static int presub_helper(
 				} else {
 					continue;
 				}
+			}
+			src.File = RC_FILE_PRESUB;
+			if (!c->SwizzleCaps->IsNative(inst->U.I.Opcode, src)){
+				can_remove = 0;
+				break;
 			}
 			if (cant_sub || !can_use_presub) {
 				can_remove = 0;
