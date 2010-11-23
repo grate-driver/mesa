@@ -16,6 +16,9 @@ mesa (7.9+repack-1ubuntu1) UNRELEASED; urgency=low
       + 100_no_abi_tag.patch
       + 101_ubuntu_hidden_glname.patch
       + 103_savage-expose_fbmodes_with_nonzero_alpha.patch
+      + 104_i915_fragment_shader_disable.patch:
+        - Disable the (experimental) ARB_fragment_shader option by default
+  	  on i915, which breaks KDE compositing (LP 628930).
       + 107_glxgears_is_not_a_benchmark.patch
     - rules, libgl1-mesa-{glx,dev,swx11,swx11-dev}.install,
       libgl1-mesa-{glx,swx11}.{postinst,prerm}, libgl1-mesa-dev.links:
@@ -75,6 +78,80 @@ mesa (7.9-1) experimental; urgency=low
   * Ship the gallium r300 driver instead of the classic one.
 
  -- Julien Cristau <jcristau@debian.org>  Sat, 13 Nov 2010 00:36:11 +0100
+
+mesa (7.9~git20100924-0ubuntu2) maverick; urgency=low
+
+  * Cherry-pick b24238c4 from 7.9 release branch.  Fixes the lookup of
+    drawables after switching the GLX context, which was causing BadDrawable
+    errors in clutter applications which use multiple stages (LP: #561734)
+
+ -- Christopher James Halse Rogers <raof@ubuntu.com>  Thu, 30 Sep 2010 14:48:12 +1000
+
+mesa (7.9~git20100924-0ubuntu1) maverick; urgency=low
+
+  * New upstream snapshot from the 7.9 release branch up to commit 3ad02793.
+    - Fixes GPU hang in occlusion-query on i965 (LP: #634683)
+    - Fixes hang/crash when changing desktop-effects settings in
+      KDE. (LP: #633406)
+  * debian/rules:
+    - Update configure options for kms → drm EGL backend name change
+    - Remove unused HAVE_KMS variable.
+
+ -- Christopher James Halse Rogers <raof@ubuntu.com>  Thu, 23 Sep 2010 11:25:10 +1000
+
+mesa (7.9~git20100909-0ubuntu3) maverick; urgency=low
+
+  * Drop the changes from previous upload.  The Unity white screen problem
+    is clutter bug #632352, fixed in clutter-1.0 1.2.12-0ubuntu12.
+
+ -- Christopher James Halse Rogers <raof@ubuntu.com>  Thu, 16 Sep 2010 16:04:28 +0200
+
+mesa (7.9~git20100909-0ubuntu2) maverick; urgency=low
+
+  * 105_old_gc_ignore_destroyed_drawable_events.patch (revert),
+    106_old_gc_fix_use_after_free.patch (revert),
+    107_old_gc_drop_broken_drawable_garbage_collector.patch (revert):
+    These three related patches introduced a new garbage collector, however
+    this introduces a regression causing clutter/mutter/unity to load with
+    a blank white screen.  Revert these three patches to restore mesa to
+    a working condition for unity.
+    (LP: #638808, #638725)
+
+ -- Bryce Harrington <bryce@ubuntu.com>  Wed, 15 Sep 2010 19:32:52 -0700
+
+mesa (7.9~git20100909-0ubuntu1) maverick; urgency=low
+
+  [ Robert Hooker ]
+  * New upstream git snapshot up to commit 94118fe2d4b1e5 (LP: #631413)
+  * New features include ATI HD5xxx series support in r600, and a vastly
+    improved glsl compiler.
+  * Remove pre-generated .pc's, use the ones generated at build time
+    instead.
+  * Remove all references to mesa-utils now that its no longer shipped
+    with the mesa source.
+  * Add 104_i915_fragment_shader_disable.patch:
+    - Disable the experimental ARB_fragment_shader option by default on
+    i915, it exposes incomplete functionality that breaks KDE compositing
+    among other things. It can be enabled via driconf still. (LP: #628930).
+
+  [ Christopher James Halse Rogers ]
+  * debian/patches/04_osmesa_version.diff:
+    - Refresh for new upstream
+  * Bugs fixed in this release:
+    - Fixes severe rendering corruption in Unity on radeon (LP: #628727,
+      LP: #596292, LP: #599741, LP: #630315, LP: #613694, LP: #599741).
+    - Also fixes rendering in gnome-shell (LP: #578619).
+    - Flickering in OpenGL apps on radeon (LP: #626943, LP: #610541).
+    - Provides preliminary support for new intel chips (LP: #601052).
+  * debian/rules:
+    - Update configure flags to match upstream reshuffling.
+    - Explicitly remove gallium DRI drivers that we don't want to ship.
+  * Update debian/gbp.conf for this Maverick-specific packaging
+  * libegl1-mesa-dri-x11,kms: There are no longer separate kms or x11 drivers
+    for EGL, libegl1-mesa-drivers now contains a single driver that provides
+    both backends.
+
+ -- Robert Hooker <robert.hooker@canonical.com>  Tue, 14 Sep 2010 08:55:40 -0400
 
 mesa (7.8.2-2ubuntu2) maverick; urgency=low
 
