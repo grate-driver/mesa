@@ -28,8 +28,13 @@ mesa (7.9+repack-1ubuntu1) UNRELEASED; urgency=low
       + Point at Ubuntu branch to make git-buildpackage less narky.
   * Drop 107_glxgears_is_not_a_benchmark.patch.  Demos have been moved out to
     the mesa-demos package.
+  * debian/rules:
+  * debian/libgl1-mesa-dri.install:
+    - Install both r300c/r300g and r600c/r600g, renaming the non-default
+      r300c to r300c_dri.so and r600g to r600g_dri.so to avoid conflicts.
+      The radeon DDX will get a patch to select between these appropriately.
 
- -- Christopher James Halse Rogers <raof@ubuntu.com>  Tue, 23 Nov 2010 15:13:10 +1100
+ -- Christopher James Halse Rogers <raof@ubuntu.com>  Tue, 23 Nov 2010 16:09:25 +1100
 
 mesa (7.9+repack-1) experimental; urgency=low
 

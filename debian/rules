@@ -203,8 +203,20 @@ build-stamp: $(BUILD_STAMPS)
 # Remove gallium drivers which replace existing classic drivers.
 # Intel gallium is significantly behind the classic mesa drivers...
 	rm -f build/dri/lib/gallium/i915_dri.so
-# r600g is not yet in a fit state to ship
-	rm -f build/dri/lib/gallium/r600_dri.so
+# We want to be able to ship both r300g & r300c for UMS support.
+# If we're building both, rename classic r300_dri to r300c_dri
+ifneq (,$(findstring r300,$(DRI_DRIVERS)))
+    ifneq (,$(findstring radeon,$(GALLIUM_DRIVERS)))
+	mv build/dri/lib/r300_dri.so build/dri/lib/r300c_dri.so
+    endif
+endif
+# Similarly, we want to ship both r600g & r600c, but this
+# time r600c is the default, so rename r600g.
+ifneq (,$(findstring r600,$(DRI_DRIVERS)))
+    ifneq (,$(findstring r600,$(GALLIUM_DRIVERS)))
+	mv build/dri/lib/gallium/r600_dri.so build/dri/lib/gallium/r600g_dri.so
+    endif
+endif
 	>$@
 
 $(STAMP)-build-%: configure
