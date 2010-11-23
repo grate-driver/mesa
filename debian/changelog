@@ -23,6 +23,8 @@ mesa (7.9+repack-1ubuntu1) UNRELEASED; urgency=low
       alternatives.
     - debian/gbp.conf
       + Point at Ubuntu branch to make git-buildpackage less narky.
+  * Drop 107_glxgears_is_not_a_benchmark.patch.  Demos have been moved out to
+    the mesa-demos package.
 
  -- Christopher James Halse Rogers <raof@ubuntu.com>  Tue, 23 Nov 2010 15:13:10 +1100
 
