@@ -63,7 +63,9 @@ objects. They all follow simple, one-method binding calls, e.g.
 * ``set_scissor_state`` sets the bounds for the scissor test, which culls
   pixels before blending to render targets. If the :ref:`Rasterizer` does
   not have the scissor test enabled, then the scissor bounds never need to
-  be set since they will not be used.
+  be set since they will not be used.  Note that scissor xmin and ymin are
+  inclusive, but  xmax and ymax are exclusive.  The inclusive ranges in x
+  and y would be [xmin..xmax-1] and [ymin..ymax-1].
 * ``set_viewport_state``
 
 
@@ -261,9 +263,11 @@ apart from any 3D state in the context.  Blitting functionality may be
 moved to a separate abstraction at some point in the future.
 
 ``resource_copy_region`` blits a region of a subresource of a resource to a
-region of another subresource of a resource, provided that both resources have the
-same format. The source and destination may be the same resource, but overlapping
-blits are not permitted.
+region of another subresource of a resource, provided that both resources have
+the same format, or compatible formats, i.e., formats for which copying the
+bytes from the source resource unmodified to the destination resource will
+achieve the same effect of a textured quad blitter. The source and destination
+may be the same resource, but overlapping blits are not permitted.
 
 ``resource_resolve`` resolves a multisampled resource into a non-multisampled
 one. Formats and dimensions must match. This function must be present if a driver

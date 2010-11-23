@@ -24,7 +24,9 @@ common_CPPFLAGS := \
 	-I$(TOP)/src/gallium/auxiliary \
 	-I$(TOP)/src/gallium/drivers \
 	-I$(TOP)/src/gallium/include \
-	-I$(TOP)/src/gallium/winsys
+	-I$(TOP)/src/gallium/winsys \
+	$(LIBDRM_CFLAGS)
+
 common_SYS :=
 common_LIBS := \
 	$(TOP)/src/gallium/drivers/identity/libidentity.a \
@@ -41,11 +43,11 @@ egl_SYS := -lm $(DLOPEN_LIBS) -L$(TOP)/$(LIB_DIR) -lEGL
 egl_LIBS := $(TOP)/src/gallium/state_trackers/egl/libegl.a
 
 ifneq ($(findstring x11, $(EGL_PLATFORMS)),)
-egl_SYS += -lX11 -lXext -lXfixes
+egl_SYS += -lX11 -lXext -lXfixes $(LIBDRM_LIB)
 egl_LIBS += $(TOP)/src/gallium/winsys/sw/xlib/libws_xlib.a
 endif
-ifneq ($(findstring kms, $(EGL_PLATFORMS)),)
-egl_SYS += -ldrm
+ifneq ($(findstring drm, $(EGL_PLATFORMS)),)
+egl_SYS += $(LIBDRM_LIB)
 endif
 ifneq ($(findstring fbdev, $(EGL_PLATFORMS)),)
 egl_LIBS += $(TOP)/src/gallium/winsys/sw/fbdev/libfbdev.a
@@ -90,12 +92,19 @@ nouveau_LIBS := \
 	$(TOP)/src/gallium/drivers/nv50/libnv50.a \
 	$(TOP)/src/gallium/drivers/nouveau/libnouveau.a
 
-# radeon pipe driver
-radeon_CPPFLAGS :=
-radeon_SYS := -ldrm -ldrm_radeon
-radeon_LIBS := \
+# r300 pipe driver
+r300_CPPFLAGS :=
+r300_SYS := -ldrm -ldrm_radeon
+r300_LIBS := \
 	$(TOP)/src/gallium/winsys/radeon/drm/libradeonwinsys.a \
 	$(TOP)/src/gallium/drivers/r300/libr300.a
+
+# r600 pipe driver
+r600_CPPFLAGS :=
+r600_SYS := -ldrm -ldrm_radeon
+r600_LIBS := \
+	$(TOP)/src/gallium/winsys/r600/drm/libr600winsys.a \
+	$(TOP)/src/gallium/drivers/r600/libr600.a
 
 # vmwgfx pipe driver
 vmwgfx_CPPFLAGS :=
@@ -119,7 +128,8 @@ endif
 
 # OpenGL state tracker
 GL_CPPFLAGS := -I$(TOP)/src/mesa $(API_DEFINES)
-GL_SYS := $(DRI_LIB_DEPS) -L$(TOP)/$(LIB_DIR) -l$(GL_LIB)
+# do not link to $(GL_LIB) as the it supports GLES too
+GL_SYS := $(DRI_LIB_DEPS)
 GL_LIBS := $(TOP)/src/mesa/libmesagallium.a
 
 # OpenGL ES 1.x state tracker
@@ -151,7 +161,10 @@ ifneq ($(findstring nouveau/drm,$(GALLIUM_WINSYS_DIRS)),)
 OUTPUTS += nouveau
 endif
 ifneq ($(findstring radeon/drm,$(GALLIUM_WINSYS_DIRS)),)
-OUTPUTS += radeon
+OUTPUTS += r300
+endif
+ifneq ($(findstring r600/drm,$(GALLIUM_WINSYS_DIRS)),)
+OUTPUTS += r600
 endif
 ifneq ($(findstring svga/drm,$(GALLIUM_WINSYS_DIRS)),)
 OUTPUTS += vmwgfx
@@ -174,6 +187,13 @@ $(MKLIB) -o $(notdir $@) -noprefix -linker '$(CC)' -ldflags '$(LDFLAGS)' \
 	$(common_SYS) $($(1)_SYS)
 endef
 
+define mklib-cxx
+$(MKLIB) -o $(notdir $@) -noprefix -linker '$(CXX)' -ldflags '$(LDFLAGS)' \
+	-cplusplus -install $(OUTPUT_PATH) $(MKLIB_OPTIONS) $< \
+	-Wl,--start-group $(common_LIBS) $($(1)_LIBS) -Wl,--end-group \
+	$(common_SYS) $($(1)_SYS)
+endef
+
 # EGL driver
 $(OUTPUT_PATH)/egl_gallium.so: egl.o $(egl_LIBS)
 	$(call mklib,egl)
@@ -188,8 +208,11 @@ $(OUTPUT_PATH)/$(PIPE_PREFIX)i965.so: pipe_i965.o $(i965_LIBS)
 $(OUTPUT_PATH)/$(PIPE_PREFIX)nouveau.so: pipe_nouveau.o $(nouveau_LIBS)
 	$(call mklib,nouveau)
 
-$(OUTPUT_PATH)/$(PIPE_PREFIX)radeon.so: pipe_radeon.o $(radeon_LIBS)
-	$(call mklib,radeon)
+$(OUTPUT_PATH)/$(PIPE_PREFIX)r300.so: pipe_r300.o $(r300_LIBS)
+	$(call mklib,r300)
+
+$(OUTPUT_PATH)/$(PIPE_PREFIX)r600.so: pipe_r600.o $(r600_LIBS)
+	$(call mklib,r600)
 
 $(OUTPUT_PATH)/$(PIPE_PREFIX)vmwgfx.so: pipe_vmwgfx.o $(vmwgfx_LIBS)
 	$(call mklib,vmwgfx)
@@ -199,13 +222,13 @@ $(OUTPUT_PATH)/$(PIPE_PREFIX)swrast.so: pipe_swrast.o $(swrast_LIBS)
 
 # state trackers
 $(OUTPUT_PATH)/$(ST_PREFIX)$(GL_LIB).so: st_GL.o $(GL_LIBS)
-	$(call mklib,GL)
+	$(call mklib-cxx,GL)
 
 $(OUTPUT_PATH)/$(ST_PREFIX)$(GLESv1_CM_LIB).so: st_GLESv1_CM.o $(GLESv1_CM_LIBS)
-	$(call mklib,GLESv1_CM)
+	$(call mklib-cxx,GLESv1_CM)
 
 $(OUTPUT_PATH)/$(ST_PREFIX)$(GLESv2_LIB).so: st_GLESv2.o $(GLESv2_LIBS)
-	$(call mklib,GLESv2)
+	$(call mklib-cxx,GLESv2)
 
 $(OUTPUT_PATH)/$(ST_PREFIX)$(VG_LIB).so: st_OpenVG.o $(OpenVG_LIBS)
 	$(call mklib,OpenVG)

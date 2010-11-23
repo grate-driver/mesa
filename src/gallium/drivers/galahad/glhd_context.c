@@ -54,6 +54,10 @@ galahad_draw_vbo(struct pipe_context *_pipe,
    struct galahad_context *glhd_pipe = galahad_context(_pipe);
    struct pipe_context *pipe = glhd_pipe->pipe;
 
+   /* XXX we should check that all bound resources are unmapped
+    * before drawing.
+    */
+
    pipe->draw_vbo(pipe, info);
 }
 
@@ -185,6 +189,12 @@ galahad_bind_fragment_sampler_states(struct pipe_context *_pipe,
    struct galahad_context *glhd_pipe = galahad_context(_pipe);
    struct pipe_context *pipe = glhd_pipe->pipe;
 
+   if (num_samplers > PIPE_MAX_SAMPLERS) {
+      glhd_error("%u fragment samplers requested, "
+         "but only %u are permitted by API",
+         num_samplers, PIPE_MAX_SAMPLERS);
+   }
+
    pipe->bind_fragment_sampler_states(pipe,
                                       num_samplers,
                                       samplers);
@@ -197,6 +207,12 @@ galahad_bind_vertex_sampler_states(struct pipe_context *_pipe,
 {
    struct galahad_context *glhd_pipe = galahad_context(_pipe);
    struct pipe_context *pipe = glhd_pipe->pipe;
+
+   if (num_samplers > PIPE_MAX_VERTEX_SAMPLERS) {
+      glhd_error("%u vertex samplers requested, "
+         "but only %u are permitted by API",
+         num_samplers, PIPE_MAX_VERTEX_SAMPLERS);
+   }
 
    pipe->bind_vertex_sampler_states(pipe,
                                     num_samplers,
@@ -446,6 +462,19 @@ galahad_set_constant_buffer(struct pipe_context *_pipe,
    struct pipe_context *pipe = glhd_pipe->pipe;
    struct pipe_resource *unwrapped_resource;
    struct pipe_resource *resource = NULL;
+
+   if (shader >= PIPE_SHADER_TYPES) {
+      glhd_error("Unknown shader type %u", shader);
+   }
+
+   if (index &&
+      index >=
+         pipe->screen->get_shader_param(pipe->screen, shader, PIPE_SHADER_CAP_MAX_CONST_BUFFERS)) {
+      glhd_error("Access to constant buffer %u requested, "
+         "but only %d are supported",
+         index,
+         pipe->screen->get_shader_param(pipe->screen, shader, PIPE_SHADER_CAP_MAX_CONST_BUFFERS));
+   }
 
    /* XXX hmm? unwrap the input state */
    if (_resource) {
@@ -835,6 +864,10 @@ galahad_context_transfer_map(struct pipe_context *_context,
    struct pipe_context *context = glhd_context->pipe;
    struct pipe_transfer *transfer = glhd_transfer->transfer;
 
+   struct galahad_resource *glhd_resource = galahad_resource(_transfer->resource);
+
+   glhd_resource->map_count++;
+
    return context->transfer_map(context,
                                 transfer);
 }
@@ -865,6 +898,14 @@ galahad_context_transfer_unmap(struct pipe_context *_context,
    struct galahad_transfer *glhd_transfer = galahad_transfer(_transfer);
    struct pipe_context *context = glhd_context->pipe;
    struct pipe_transfer *transfer = glhd_transfer->transfer;
+   struct galahad_resource *glhd_resource = galahad_resource(_transfer->resource);
+
+   if (glhd_resource->map_count < 1) {
+      glhd_warn("context::transfer_unmap() called too many times"
+                " (count = %d)\n", glhd_resource->map_count);      
+   }
+
+   glhd_resource->map_count--;
 
    context->transfer_unmap(context,
                            transfer);
@@ -971,6 +1012,8 @@ galahad_context_create(struct pipe_screen *_screen, struct pipe_context *pipe)
    glhd_pipe->base.transfer_inline_write = galahad_context_transfer_inline_write;
 
    glhd_pipe->pipe = pipe;
+
+   glhd_warn("Created context %p", glhd_pipe);
 
    return &glhd_pipe->base;
 }

@@ -76,11 +76,15 @@ lp_build_broadcast_scalar(struct lp_build_context *bld,
    }
    else {
       LLVMValueRef res;
+      /* The shuffle vector is always made of int32 elements */
+      struct lp_type i32_vec_type = lp_type_int_vec(32);
+      i32_vec_type.length = type.length;
+
 #if HAVE_LLVM >= 0x207
       res = LLVMBuildInsertElement(bld->builder, bld->undef, scalar,
                                    LLVMConstInt(LLVMInt32Type(), 0, 0), "");
       res = LLVMBuildShuffleVector(bld->builder, res, bld->undef,
-                                   lp_build_const_int_vec(type, 0), "");
+                                   lp_build_const_int_vec(i32_vec_type, 0), "");
 #else
       /* XXX: The above path provokes a bug in LLVM 2.6 */
       unsigned i;
@@ -95,10 +99,13 @@ lp_build_broadcast_scalar(struct lp_build_context *bld,
 }
 
 
+/**
+ * Swizzle one channel into all other three channels.
+ */
 LLVMValueRef
-lp_build_broadcast_aos(struct lp_build_context *bld,
-                       LLVMValueRef a,
-                       unsigned channel)
+lp_build_swizzle_scalar_aos(struct lp_build_context *bld,
+                            LLVMValueRef a,
+                            unsigned channel)
 {
    const struct lp_type type = bld->type;
    const unsigned n = type.length;
@@ -139,13 +146,10 @@ lp_build_broadcast_aos(struct lp_build_context *bld,
          { 1, -2},
          {-1, -2}
       };
-      boolean cond[4];
       unsigned i;
 
-      memset(cond, 0, sizeof cond);
-      cond[channel] = 1;
-
-      a = LLVMBuildAnd(bld->builder, a, lp_build_const_mask_aos(type, cond), "");
+      a = LLVMBuildAnd(bld->builder, a,
+                       lp_build_const_mask_aos(type, 1 << channel), "");
 
       /*
        * Build a type where each element is an integer that cover the four
@@ -206,7 +210,7 @@ lp_build_swizzle_aos(struct lp_build_context *bld,
       case PIPE_SWIZZLE_GREEN:
       case PIPE_SWIZZLE_BLUE:
       case PIPE_SWIZZLE_ALPHA:
-         return lp_build_broadcast_aos(bld, a, swizzles[0]);
+         return lp_build_swizzle_scalar_aos(bld, a, swizzles[0]);
       case PIPE_SWIZZLE_ZERO:
          return bld->zero;
       case PIPE_SWIZZLE_ONE:
@@ -282,7 +286,7 @@ lp_build_swizzle_aos(struct lp_build_context *bld,
        */
       LLVMValueRef res;
       struct lp_type type4;
-      boolean cond[4];
+      unsigned cond = 0;
       unsigned chan;
       int shift;
 
@@ -290,9 +294,11 @@ lp_build_swizzle_aos(struct lp_build_context *bld,
        * Start with a mixture of 1 and 0.
        */
       for (chan = 0; chan < 4; ++chan) {
-         cond[chan] = swizzles[chan] == PIPE_SWIZZLE_ONE ? TRUE : FALSE;
+         if (swizzles[chan] == PIPE_SWIZZLE_ONE) {
+            cond |= 1 << chan;
+         }
       }
-      res = lp_build_select_aos(bld, bld->one, bld->zero, cond);
+      res = lp_build_select_aos(bld, cond, bld->one, bld->zero);
 
       /*
        * Build a type where each element is an integer that cover the four

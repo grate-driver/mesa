@@ -68,6 +68,7 @@ void st_init_limits(struct st_context *st)
    struct pipe_screen *screen = st->pipe->screen;
    struct gl_constants *c = &st->ctx->Const;
    struct gl_program_constants *pc;
+   unsigned i;
 
    c->MaxTextureLevels
       = _min(screen->get_param(screen, PIPE_CAP_MAX_TEXTURE_2D_LEVELS),
@@ -134,33 +135,59 @@ void st_init_limits(struct st_context *st)
       = CLAMP(screen->get_param(screen, PIPE_CAP_MAX_RENDER_TARGETS),
               1, MAX_DRAW_BUFFERS);
 
-   /* Is TGSI_OPCODE_CONT supported? */
-   /* XXX separate query for early function return? */
-   st->ctx->Shader.EmitContReturn =
-      screen->get_param(screen, PIPE_CAP_TGSI_CONT_SUPPORTED);
-
    /* Quads always follow GL provoking rules. */
    c->QuadsFollowProvokingVertexConvention = GL_FALSE;
 
-   pc = &c->FragmentProgram;
-   pc->MaxNativeInstructions    = screen->get_param(screen, PIPE_CAP_MAX_FS_INSTRUCTIONS);
-   pc->MaxNativeAluInstructions = screen->get_param(screen, PIPE_CAP_MAX_FS_ALU_INSTRUCTIONS);
-   pc->MaxNativeTexInstructions = screen->get_param(screen, PIPE_CAP_MAX_FS_TEX_INSTRUCTIONS);
-   pc->MaxNativeTexIndirections = screen->get_param(screen, PIPE_CAP_MAX_FS_TEX_INDIRECTIONS);
-   pc->MaxNativeAttribs         = screen->get_param(screen, PIPE_CAP_MAX_FS_INPUTS);
-   pc->MaxNativeTemps           = screen->get_param(screen, PIPE_CAP_MAX_FS_TEMPS);
-   pc->MaxNativeAddressRegs     = screen->get_param(screen, PIPE_CAP_MAX_FS_ADDRS);
-   pc->MaxNativeParameters      = screen->get_param(screen, PIPE_CAP_MAX_FS_CONSTS);
+   for(i = 0; i < MESA_SHADER_TYPES; ++i) {
+      struct gl_shader_compiler_options *options = &st->ctx->ShaderCompilerOptions[i];
+      switch(i)
+      {
+      case PIPE_SHADER_FRAGMENT:
+         pc = &c->FragmentProgram;
+         break;
+      case PIPE_SHADER_VERTEX:
+         pc = &c->VertexProgram;
+         break;
+      case PIPE_SHADER_GEOMETRY:
+         pc = &c->GeometryProgram;
+         break;
+      }
 
-   pc = &c->VertexProgram;
-   pc->MaxNativeInstructions    = screen->get_param(screen, PIPE_CAP_MAX_VS_INSTRUCTIONS);
-   pc->MaxNativeAluInstructions = screen->get_param(screen, PIPE_CAP_MAX_VS_ALU_INSTRUCTIONS);
-   pc->MaxNativeTexInstructions = screen->get_param(screen, PIPE_CAP_MAX_VS_TEX_INSTRUCTIONS);
-   pc->MaxNativeTexIndirections = screen->get_param(screen, PIPE_CAP_MAX_VS_TEX_INDIRECTIONS);
-   pc->MaxNativeAttribs         = screen->get_param(screen, PIPE_CAP_MAX_VS_INPUTS);
-   pc->MaxNativeTemps           = screen->get_param(screen, PIPE_CAP_MAX_VS_TEMPS);
-   pc->MaxNativeAddressRegs     = screen->get_param(screen, PIPE_CAP_MAX_VS_ADDRS);
-   pc->MaxNativeParameters      = screen->get_param(screen, PIPE_CAP_MAX_VS_CONSTS);
+      pc->MaxNativeInstructions    = screen->get_shader_param(screen, i, PIPE_SHADER_CAP_MAX_INSTRUCTIONS);
+      pc->MaxNativeAluInstructions = screen->get_shader_param(screen, i, PIPE_SHADER_CAP_MAX_ALU_INSTRUCTIONS);
+      pc->MaxNativeTexInstructions = screen->get_shader_param(screen, i, PIPE_SHADER_CAP_MAX_TEX_INSTRUCTIONS);
+      pc->MaxNativeTexIndirections = screen->get_shader_param(screen, i, PIPE_SHADER_CAP_MAX_TEX_INDIRECTIONS);
+      pc->MaxNativeAttribs         = screen->get_shader_param(screen, i, PIPE_SHADER_CAP_MAX_INPUTS);
+      pc->MaxNativeTemps           = screen->get_shader_param(screen, i, PIPE_SHADER_CAP_MAX_TEMPS);
+      pc->MaxNativeAddressRegs     = screen->get_shader_param(screen, i, PIPE_SHADER_CAP_MAX_ADDRS);
+      pc->MaxNativeParameters      = screen->get_shader_param(screen, i, PIPE_SHADER_CAP_MAX_CONSTS);
+
+      options->EmitNoNoise = TRUE;
+
+      /* TODO: make these more fine-grained if anyone needs it */
+      options->EmitNoIfs = !screen->get_shader_param(screen, i, PIPE_SHADER_CAP_MAX_CONTROL_FLOW_DEPTH);
+      options->EmitNoFunctions = !screen->get_shader_param(screen, i, PIPE_SHADER_CAP_MAX_CONTROL_FLOW_DEPTH);
+      options->EmitNoLoops = !screen->get_shader_param(screen, i, PIPE_SHADER_CAP_MAX_CONTROL_FLOW_DEPTH);
+      options->EmitNoMainReturn = !screen->get_shader_param(screen, i, PIPE_SHADER_CAP_MAX_CONTROL_FLOW_DEPTH);
+
+      options->EmitNoCont = !screen->get_shader_param(screen, i, PIPE_SHADER_CAP_TGSI_CONT_SUPPORTED);
+
+      if(options->EmitNoLoops)
+         options->MaxUnrollIterations = MIN2(screen->get_shader_param(screen, i, PIPE_SHADER_CAP_MAX_INSTRUCTIONS), 65536);
+   }
+
+   /* PIPE_CAP_MAX_FS_INPUTS specifies the number of COLORn + GENERICn inputs
+    * and is set in MaxNativeAttribs. It's always 2 colors + N generic
+    * attributes. The GLSL compiler never uses COLORn for varyings, so we
+    * subtract the 2 colors to get the maximum number of varyings (generic
+    * attributes) supported by a driver. */
+   c->MaxVarying = screen->get_shader_param(screen, PIPE_SHADER_FRAGMENT, PIPE_SHADER_CAP_MAX_INPUTS) - 2;
+   c->MaxVarying = MIN2(c->MaxVarying, MAX_VARYING);
+
+   /* XXX we'll need a better query here someday */
+   if (screen->get_param(screen, PIPE_CAP_GLSL)) {
+      c->GLSLVersion = 120;
+   }
 }
 
 
@@ -260,7 +287,6 @@ void st_init_extensions(struct st_context *st)
       ctx->Extensions.ARB_vertex_shader = GL_TRUE;
       ctx->Extensions.ARB_shader_objects = GL_TRUE;
       ctx->Extensions.ARB_shading_language_100 = GL_TRUE;
-      ctx->Extensions.ARB_shading_language_120 = GL_TRUE;
    }
 
    if (screen->get_param(screen, PIPE_CAP_TEXTURE_MIRROR_REPEAT) > 0) {
@@ -394,7 +420,7 @@ void st_init_extensions(struct st_context *st)
    }
 #endif
 
-   if (screen->get_param(screen, PIPE_CAP_GEOMETRY_SHADER4)) {
+   if (screen->get_shader_param(screen, PIPE_SHADER_GEOMETRY, PIPE_SHADER_CAP_MAX_INSTRUCTIONS) > 0) {
       ctx->Extensions.ARB_geometry_shader4 = GL_TRUE;
    }
 

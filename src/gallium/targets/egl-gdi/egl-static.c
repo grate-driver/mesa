@@ -33,64 +33,41 @@
 #include "target-helpers/inline_debug_helper.h"
 #include "egldriver.h"
 
-static uint
-get_api_mask(void)
-{
-   uint api_mask = 0x0;
-
-#if FEATURE_GL
-   api_mask |= 1 << ST_API_OPENGL;
-#endif
-#if FEATURE_ES1
-   api_mask |= 1 << ST_API_OPENGL_ES1;
-#endif
-#if FEATURE_ES2
-   api_mask |= 1 << ST_API_OPENGL_ES2;
-#endif
-#if FEATURE_VG
-   api_mask |= 1 << ST_API_OPENVG;
-#endif
-
-   return api_mask;
-}
+static struct st_api *stapis[ST_API_COUNT];
 
 static struct st_api *
 get_st_api(enum st_api_type api)
 {
-   struct st_api *stapi = NULL;
+   struct st_api *stapi;
+
+   stapi = stapis[api];
+   if (stapi)
+      return stapi;
 
    switch (api) {
-#if FEATURE_GL
-      case ST_API_OPENGL:
-         stapi = st_gl_api_create();
-         break;
-#endif
-#if FEATURE_ES1
-      case ST_API_OPENGL_ES1:
-         stapi = st_gl_api_create_es1();
-         break;
-#endif
-#if FEATURE_ES2
-      case ST_API_OPENGL_ES2:
-         stapi = st_gl_api_create_es2();
-         break;
+#if FEATURE_GL || FEATURE_ES1 || FEATURE_ES2
+   case ST_API_OPENGL:
+      stapi = st_gl_api_create();
+      break;
 #endif
 #if FEATURE_VG
-      case ST_API_OPENVG:
-         stapi = (struct st_api *) vg_api_get();
-         break;
+   case ST_API_OPENVG:
+      stapi = (struct st_api *) vg_api_get();
+      break;
 #endif
-      default:
-         break;
+   default:
+      break;
    }
+
+   stapis[api] = stapi;
 
    return stapi;
 }
 
 static struct st_api *
-guess_gl_api(void)
+guess_gl_api(enum st_profile_type profile)
 {
-   return NULL;
+   return get_st_api(ST_API_OPENGL);
 }
 
 static struct pipe_screen *
@@ -114,10 +91,19 @@ create_sw_screen(struct sw_winsys *ws)
 static void
 init_loader(struct egl_g3d_loader *loader)
 {
-   if (loader->api_mask)
-      return;
+#if FEATURE_GL
+   loader->profile_masks[ST_API_OPENGL] |= ST_PROFILE_DEFAULT_MASK;
+#endif
+#if FEATURE_ES1
+   loader->profile_masks[ST_API_OPENGL] |= ST_PROFILE_OPENGL_ES1_MASK;
+#endif
+#if FEATURE_ES2
+   loader->profile_masks[ST_API_OPENGL] |= ST_PROFILE_OPENGL_ES2_MASK;
+#endif
+#if FEATURE_VG
+   loader->profile_masks[ST_API_OPENVG] |= ST_PROFILE_DEFAULT_MASK;
+#endif
 
-   loader->api_mask = get_api_mask();
    loader->get_st_api = get_st_api;
    loader->guess_gl_api = guess_gl_api;
    loader->create_drm_screen = create_drm_screen;
@@ -127,7 +113,16 @@ init_loader(struct egl_g3d_loader *loader)
 static void
 egl_g3d_unload(_EGLDriver *drv)
 {
+   int i;
+
    egl_g3d_destroy_driver(drv);
+
+   for (i = 0; i < ST_API_COUNT; i++) {
+      if (stapis[i]) {
+         stapis[i]->destroy(stapis[i]);
+         stapis[i] = NULL;
+      }
+   }
 }
 
 static struct egl_g3d_loader loader;

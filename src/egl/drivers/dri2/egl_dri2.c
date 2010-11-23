@@ -370,10 +370,9 @@ dri2_flush_front_buffer(__DRIdrawable * driDrawable, void *loaderPrivate)
 }
 
 static __DRIimage *
-dri2_lookup_egl_image(__DRIcontext *context, void *image, void *data)
+dri2_lookup_egl_image(__DRIscreen *screen, void *image, void *data)
 {
-   struct dri2_egl_context *dri2_ctx = data;
-   _EGLDisplay *disp = dri2_ctx->base.Resource.Display;
+   _EGLDisplay *disp = data;
    struct dri2_egl_image *dri2_img;
    _EGLImage *img;
 
@@ -728,7 +727,7 @@ dri2_create_screen(_EGLDisplay *disp)
    dri2_dpy = disp->DriverData;
    dri2_dpy->dri_screen =
       dri2_dpy->dri2->createNewScreen(0, dri2_dpy->fd, dri2_dpy->extensions,
-				      &dri2_dpy->driver_configs, dri2_dpy);
+				      &dri2_dpy->driver_configs, disp);
 
    if (dri2_dpy->dri_screen == NULL) {
       _eglLog(_EGL_WARNING, "DRI2: failed to create dri screen");
@@ -836,6 +835,7 @@ dri2_initialize_x11(_EGLDriver *drv, _EGLDisplay *disp,
 	 goto cleanup_configs;
    }
 
+   disp->Extensions.MESA_drm_image = EGL_TRUE;
    disp->Extensions.KHR_image_base = EGL_TRUE;
    disp->Extensions.KHR_image_pixmap = EGL_TRUE;
    disp->Extensions.KHR_gl_renderbuffer_image = EGL_TRUE;
@@ -888,6 +888,7 @@ const int i915_chip_ids[] = {
    0x29b2, /* PCI_CHIP_Q35_G */
    0x29c2, /* PCI_CHIP_G33_G */
    0x29d2, /* PCI_CHIP_Q33_G */
+   0xa011, /* Pineview */
 };
 
 const int i965_chip_ids[] = {
@@ -994,6 +995,7 @@ dri2_initialize_drm(_EGLDriver *drv, _EGLDisplay *disp,
    for (i = 0; dri2_dpy->driver_configs[i]; i++)
       dri2_add_config(disp, dri2_dpy->driver_configs[i], i + 1, 0, 0);
 
+   disp->Extensions.MESA_drm_image = EGL_TRUE;
    disp->Extensions.KHR_image_base = EGL_TRUE;
    disp->Extensions.KHR_gl_renderbuffer_image = EGL_TRUE;
    disp->Extensions.KHR_gl_texture_2D_image = EGL_TRUE;
@@ -1506,7 +1508,6 @@ dri2_create_image_khr_pixmap(_EGLDisplay *disp, _EGLContext *ctx,
 			     EGLClientBuffer buffer, const EGLint *attr_list)
 {
    struct dri2_egl_display *dri2_dpy = dri2_egl_display(disp);
-   struct dri2_egl_context *dri2_ctx = dri2_egl_context(ctx);
    struct dri2_egl_image *dri2_img;
    unsigned int attachments[1];
    xcb_drawable_t drawable;
@@ -1574,7 +1575,7 @@ dri2_create_image_khr_pixmap(_EGLDisplay *disp, _EGLContext *ctx,
 
    stride = buffers[0].pitch / buffers[0].cpp;
    dri2_img->dri_image =
-      dri2_dpy->image->createImageFromName(dri2_ctx->dri_context,
+      dri2_dpy->image->createImageFromName(dri2_dpy->dri_screen,
 					   buffers_reply->width,
 					   buffers_reply->height,
 					   format,
@@ -1621,6 +1622,95 @@ dri2_create_image_khr_renderbuffer(_EGLDisplay *disp, _EGLContext *ctx,
 }
 
 static _EGLImage *
+dri2_create_image_mesa_drm_buffer(_EGLDisplay *disp, _EGLContext *ctx,
+				  EGLClientBuffer buffer, const EGLint *attr_list)
+{
+   struct dri2_egl_display *dri2_dpy = dri2_egl_display(disp);
+   struct dri2_egl_image *dri2_img;
+   EGLint width, height, format, name, stride, pitch, i, err;
+
+   name = (EGLint) buffer;
+
+   err = EGL_SUCCESS;
+   width = 0;
+   height = 0;
+   format = 0;
+   stride = 0;
+
+   for (i = 0; attr_list[i] != EGL_NONE; i++) {
+      EGLint attr = attr_list[i++];
+      EGLint val = attr_list[i];
+
+      switch (attr) {
+      case EGL_WIDTH:
+	 width = val;
+         break;
+      case EGL_HEIGHT:
+	 height = val;
+         break;
+      case EGL_DRM_BUFFER_FORMAT_MESA:
+	 format = val;
+         break;
+      case EGL_DRM_BUFFER_STRIDE_MESA:
+	 stride = val;
+         break;
+      default:
+         err = EGL_BAD_ATTRIBUTE;
+         break;
+      }
+
+      if (err != EGL_SUCCESS) {
+         _eglLog(_EGL_WARNING, "bad image attribute 0x%04x", attr);
+	 return NULL;
+      }
+   }
+
+   if (width <= 0 || height <= 0 || stride <= 0) {
+      _eglError(EGL_BAD_PARAMETER,
+		"bad width, height or stride");
+      return NULL;
+   }
+
+   switch (format) {
+   case EGL_DRM_BUFFER_FORMAT_ARGB32_MESA:
+      format = __DRI_IMAGE_FORMAT_ARGB8888;
+      pitch = stride;
+      break;
+   default:
+      _eglError(EGL_BAD_PARAMETER,
+		"dri2_create_image_khr: unsupported pixmap depth");
+      return NULL;
+   }
+
+   dri2_img = malloc(sizeof *dri2_img);
+   if (!dri2_img) {
+      _eglError(EGL_BAD_ALLOC, "dri2_create_image_mesa_drm");
+      return NULL;
+   }
+
+   if (!_eglInitImage(&dri2_img->base, disp, attr_list)) {
+      free(dri2_img);
+      return NULL;
+   }
+
+   dri2_img->dri_image =
+      dri2_dpy->image->createImageFromName(dri2_dpy->dri_screen,
+					   width,
+					   height,
+					   format,
+					   name,
+					   pitch,
+					   dri2_img);
+   if (dri2_img->dri_image == NULL) {
+      free(dri2_img);
+      _eglError(EGL_BAD_ALLOC, "dri2_create_image_mesa_drm");
+      return NULL;
+   }
+
+   return &dri2_img->base;
+}
+
+static _EGLImage *
 dri2_create_image_khr(_EGLDriver *drv, _EGLDisplay *disp,
 		      _EGLContext *ctx, EGLenum target,
 		      EGLClientBuffer buffer, const EGLint *attr_list)
@@ -1630,6 +1720,8 @@ dri2_create_image_khr(_EGLDriver *drv, _EGLDisplay *disp,
       return dri2_create_image_khr_pixmap(disp, ctx, buffer, attr_list);
    case EGL_GL_RENDERBUFFER_KHR:
       return dri2_create_image_khr_renderbuffer(disp, ctx, buffer, attr_list);
+   case EGL_DRM_BUFFER_MESA:
+      return dri2_create_image_mesa_drm_buffer(disp, ctx, buffer, attr_list);
    default:
       _eglError(EGL_BAD_PARAMETER, "dri2_create_image_khr");
       return EGL_NO_IMAGE_KHR;
@@ -1644,6 +1736,133 @@ dri2_destroy_image_khr(_EGLDriver *drv, _EGLDisplay *disp, _EGLImage *image)
 
    dri2_dpy->image->destroyImage(dri2_img->dri_image);
    free(dri2_img);
+
+   return EGL_TRUE;
+}
+
+static _EGLImage *
+dri2_create_drm_image_mesa(_EGLDriver *drv, _EGLDisplay *disp,
+			   const EGLint *attr_list)
+{
+   struct dri2_egl_display *dri2_dpy = dri2_egl_display(disp);
+   struct dri2_egl_image *dri2_img;
+   int width, height, format, i;
+   unsigned int use, dri_use, valid_mask;
+   EGLint err = EGL_SUCCESS;
+
+   dri2_img = malloc(sizeof *dri2_img);
+   if (!dri2_img) {
+      _eglError(EGL_BAD_ALLOC, "dri2_create_image_khr");
+      return EGL_NO_IMAGE_KHR;
+   }
+
+   if (!attr_list) {
+      err = EGL_BAD_PARAMETER;
+      goto cleanup_img;
+   }
+
+   if (!_eglInitImage(&dri2_img->base, disp, attr_list)) {
+      err = EGL_BAD_PARAMETER;
+      goto cleanup_img;
+   }
+
+   width = 0;
+   height = 0;
+   format = 0;
+   use = 0;
+   for (i = 0; attr_list[i] != EGL_NONE; i++) {
+      EGLint attr = attr_list[i++];
+      EGLint val = attr_list[i];
+
+      switch (attr) {
+      case EGL_WIDTH:
+	 width = val;
+         break;
+      case EGL_HEIGHT:
+	 height = val;
+         break;
+      case EGL_DRM_BUFFER_FORMAT_MESA:
+	 format = val;
+         break;
+      case EGL_DRM_BUFFER_USE_MESA:
+	 use = val;
+         break;
+      default:
+         err = EGL_BAD_ATTRIBUTE;
+         break;
+      }
+
+      if (err != EGL_SUCCESS) {
+         _eglLog(_EGL_WARNING, "bad image attribute 0x%04x", attr);
+	 goto cleanup_img;
+      }
+   }
+
+   if (width <= 0 || height <= 0) {
+      _eglLog(_EGL_WARNING, "bad width or height (%dx%d)", width, height);
+      goto cleanup_img;
+   }
+
+   switch (format) {
+   case EGL_DRM_BUFFER_FORMAT_ARGB32_MESA:
+      format = __DRI_IMAGE_FORMAT_ARGB8888;
+      break;
+   default:
+      _eglLog(_EGL_WARNING, "bad image format value 0x%04x", format);
+      goto cleanup_img;
+   }
+
+   valid_mask =
+      EGL_DRM_BUFFER_USE_SCANOUT_MESA |
+      EGL_DRM_BUFFER_USE_SHARE_MESA; 
+   if (use & ~valid_mask) {
+      _eglLog(_EGL_WARNING, "bad image use bit 0x%04x", use & ~valid_mask);
+      goto cleanup_img;
+   }
+
+   dri_use = 0;
+   if (use & EGL_DRM_BUFFER_USE_SHARE_MESA)
+      dri_use |= __DRI_IMAGE_USE_SHARE;
+   if (use & EGL_DRM_BUFFER_USE_SCANOUT_MESA)
+      dri_use |= __DRI_IMAGE_USE_SCANOUT;
+
+   dri2_img->dri_image = 
+      dri2_dpy->image->createImage(dri2_dpy->dri_screen,
+				   width, height, format, dri_use, dri2_img);
+   if (dri2_img->dri_image == NULL) {
+      err = EGL_BAD_ALLOC;
+      goto cleanup_img;
+   }
+
+   return &dri2_img->base;
+
+ cleanup_img:
+   free(dri2_img);
+   _eglError(err, "dri2_create_drm_image_mesa");
+
+   return EGL_NO_IMAGE_KHR;
+}
+
+static EGLBoolean
+dri2_export_drm_image_mesa(_EGLDriver *drv, _EGLDisplay *disp, _EGLImage *img,
+			  EGLint *name, EGLint *handle, EGLint *stride)
+{
+   struct dri2_egl_display *dri2_dpy = dri2_egl_display(disp);
+   struct dri2_egl_image *dri2_img = dri2_egl_image(img);
+
+   if (name && !dri2_dpy->image->queryImage(dri2_img->dri_image,
+					    __DRI_IMAGE_ATTRIB_NAME, name)) {
+      _eglError(EGL_BAD_ALLOC, "dri2_export_drm_image_mesa");
+      return EGL_FALSE;
+   }
+
+   if (handle)
+      dri2_dpy->image->queryImage(dri2_img->dri_image,
+				  __DRI_IMAGE_ATTRIB_HANDLE, handle);
+
+   if (stride)
+      dri2_dpy->image->queryImage(dri2_img->dri_image,
+				  __DRI_IMAGE_ATTRIB_STRIDE, stride);
 
    return EGL_TRUE;
 }
@@ -1681,6 +1900,8 @@ _eglMain(const char *args)
    dri2_drv->base.API.CreateImageKHR = dri2_create_image_khr;
    dri2_drv->base.API.DestroyImageKHR = dri2_destroy_image_khr;
    dri2_drv->base.API.SwapBuffersRegionNOK = dri2_swap_buffers_region;
+   dri2_drv->base.API.CreateDRMImageMESA = dri2_create_drm_image_mesa;
+   dri2_drv->base.API.ExportDRMImageMESA = dri2_export_drm_image_mesa;
 
    dri2_drv->base.Name = "DRI2";
    dri2_drv->base.Unload = dri2_unload;

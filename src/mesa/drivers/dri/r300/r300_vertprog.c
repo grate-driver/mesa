@@ -238,12 +238,19 @@ static struct r300_vertex_program *build_program(GLcontext *ctx,
 	vp->Base = _mesa_clone_vertex_program(ctx, mesa_vp);
 	memcpy(&vp->key, wanted_key, sizeof(vp->key));
 
+        memset(&compiler, 0, sizeof(compiler));
 	rc_init(&compiler.Base);
 	compiler.Base.Debug = (RADEON_DEBUG & RADEON_VERTS) ? GL_TRUE : GL_FALSE;
 
 	compiler.code = &vp->code;
 	compiler.RequiredOutputs = compute_required_outputs(vp->Base, vp->key.FpReads);
 	compiler.SetHwInputOutput = &t_inputs_outputs;
+	compiler.Base.is_r500 = R300_CONTEXT(ctx)->radeon.radeonScreen->chip_family >= CHIP_FAMILY_RV515;
+	compiler.Base.disable_optimizations = 0;
+	compiler.Base.has_half_swizzles = 0;
+	compiler.Base.max_temp_regs = 32;
+	compiler.Base.max_constants = 256;
+	compiler.Base.max_alu_insts = compiler.Base.is_r500 ? 1024 : 256;
 
 	if (compiler.Base.Debug) {
 		fprintf(stderr, "Initial vertex program:\n");

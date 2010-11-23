@@ -43,6 +43,15 @@
 #define R600_BOOL_CONST_OFFSET                 0X0003E380
 #define R600_BOOL_CONST_END                    0X00040000
 
+/* evergreen values */
+#define EG_RESOURCE_OFFSET                 0x00030000
+#define EG_RESOURCE_END                    0x00030400
+#define EG_LOOP_CONST_OFFSET               0x0003A200
+#define EG_LOOP_CONST_END                  0x0003A26C
+#define EG_BOOL_CONST_OFFSET               0x0003A500
+#define EG_BOOL_CONST_END                  0x0003A506
+
+
 #define PKT3_NOP                               0x10
 #define PKT3_INDIRECT_BUFFER_END               0x17
 #define PKT3_SET_PREDICATION                   0x20
@@ -82,6 +91,7 @@
 #define PKT3_SET_CTL_CONST                     0x6F
 #define PKT3_SURFACE_BASE_UPDATE               0x73
 
+#define EVENT_TYPE_ZPASS_DONE                  0x15
 #define EVENT_TYPE_CACHE_FLUSH_AND_INV_EVENT   0x16
 
 #define PKT_TYPE_S(x)                   (((x) & 0x3) << 30)

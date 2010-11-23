@@ -96,8 +96,8 @@ int radeon_bo_map(struct radeon *radeon, struct radeon_bo *bo)
 	void *ptr;
 	int r;
 
-	if (bo->map_count++ != 0) {
-		return 0;
+	if (bo->map_count != 0) {
+		goto success;
 	}
 	/* Zero out args to make valgrind happy */
 	memset(&args, 0, sizeof(args));
@@ -117,6 +117,10 @@ int radeon_bo_map(struct radeon *radeon, struct radeon_bo *bo)
 		return -errno;
 	}
 	bo->data = ptr;
+
+success:
+	bo->map_count++;
+
 	return 0;
 }
 
@@ -145,7 +149,9 @@ struct radeon_bo *radeon_bo_decref(struct radeon *radeon, struct radeon_bo *bo)
 		return NULL;
 	}
 
-	munmap(bo->data, bo->size);
+	if (bo->map_count) {
+		munmap(bo->data, bo->size);
+	}
 	memset(&args, 0, sizeof(args));
 	args.handle = bo->handle;
 	drmIoctl(radeon->fd, DRM_IOCTL_GEM_CLOSE, &args);

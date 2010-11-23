@@ -31,34 +31,14 @@
 
 #include "util/u_math.h"
 #include "util/u_memory.h"
+#include "util/u_rect.h"
 #include "lp_perf.h"
 #include "lp_setup_context.h"
+#include "lp_setup_coef.h"
 #include "lp_rast.h"
 #include "lp_state_fs.h"
 
 #define NUM_CHANNELS 4
-
-struct tri_info {
-
-   float pixel_offset;
-
-   /* fixed point vertex coordinates */
-   int x[3];
-   int y[3];
-
-   /* float x,y deltas - all from the original coordinates
-    */
-   float dy01, dy20;
-   float dx01, dx20;
-   float oneoverarea;
-
-   const float (*v0)[4];
-   const float (*v1)[4];
-   const float (*v2)[4];
-
-   boolean frontfacing;
-};
-
 
 
    
@@ -76,247 +56,6 @@ fixed_to_float(int a)
 
 
 
-/**
- * Compute a0 for a constant-valued coefficient (GL_FLAT shading).
- */
-static void constant_coef( struct lp_rast_triangle *tri,
-                           unsigned slot,
-			   const float value,
-                           unsigned i )
-{
-   tri->inputs.a0[slot][i] = value;
-   tri->inputs.dadx[slot][i] = 0.0f;
-   tri->inputs.dady[slot][i] = 0.0f;
-}
-
-
-
-static void linear_coef( struct lp_rast_triangle *tri,
-                         const struct tri_info *info,
-                         unsigned slot,
-                         unsigned vert_attr,
-                         unsigned i)
-{
-   float a0 = info->v0[vert_attr][i];
-   float a1 = info->v1[vert_attr][i];
-   float a2 = info->v2[vert_attr][i];
-
-   float da01 = a0 - a1;
-   float da20 = a2 - a0;
-   float dadx = (da01 * info->dy20 - info->dy01 * da20) * info->oneoverarea;
-   float dady = (da20 * info->dx01 - info->dx20 * da01) * info->oneoverarea;
-
-   tri->inputs.dadx[slot][i] = dadx;
-   tri->inputs.dady[slot][i] = dady;
-
-   /* calculate a0 as the value which would be sampled for the
-    * fragment at (0,0), taking into account that we want to sample at
-    * pixel centers, in other words (0.5, 0.5).
-    *
-    * this is neat but unfortunately not a good way to do things for
-    * triangles with very large values of dadx or dady as it will
-    * result in the subtraction and re-addition from a0 of a very
-    * large number, which means we'll end up loosing a lot of the
-    * fractional bits and precision from a0.  the way to fix this is
-    * to define a0 as the sample at a pixel center somewhere near vmin
-    * instead - i'll switch to this later.
-    */
-   tri->inputs.a0[slot][i] = (a0 -
-                              (dadx * (info->v0[0][0] - info->pixel_offset) +
-                               dady * (info->v0[0][1] - info->pixel_offset)));
-}
-
-
-/**
- * Compute a0, dadx and dady for a perspective-corrected interpolant,
- * for a triangle.
- * We basically multiply the vertex value by 1/w before computing
- * the plane coefficients (a0, dadx, dady).
- * Later, when we compute the value at a particular fragment position we'll
- * divide the interpolated value by the interpolated W at that fragment.
- */
-static void perspective_coef( struct lp_rast_triangle *tri,
-                              const struct tri_info *info,
-                              unsigned slot,
-			      unsigned vert_attr,
-                              unsigned i)
-{
-   /* premultiply by 1/w  (v[0][3] is always 1/w):
-    */
-   float a0 = info->v0[vert_attr][i] * info->v0[0][3];
-   float a1 = info->v1[vert_attr][i] * info->v1[0][3];
-   float a2 = info->v2[vert_attr][i] * info->v2[0][3];
-   float da01 = a0 - a1;
-   float da20 = a2 - a0;
-   float dadx = (da01 * info->dy20 - info->dy01 * da20) * info->oneoverarea;
-   float dady = (da20 * info->dx01 - info->dx20 * da01) * info->oneoverarea;
-
-   tri->inputs.dadx[slot][i] = dadx;
-   tri->inputs.dady[slot][i] = dady;
-   tri->inputs.a0[slot][i] = (a0 -
-                              (dadx * (info->v0[0][0] - info->pixel_offset) +
-                               dady * (info->v0[0][1] - info->pixel_offset)));
-}
-
-
-/**
- * Special coefficient setup for gl_FragCoord.
- * X and Y are trivial
- * Z and W are copied from position_coef which should have already been computed.
- * We could do a bit less work if we'd examine gl_FragCoord's swizzle mask.
- */
-static void
-setup_fragcoord_coef(struct lp_rast_triangle *tri,
-                     const struct tri_info *info,
-                     unsigned slot,
-                     unsigned usage_mask)
-{
-   /*X*/
-   if (usage_mask & TGSI_WRITEMASK_X) {
-      tri->inputs.a0[slot][0] = 0.0;
-      tri->inputs.dadx[slot][0] = 1.0;
-      tri->inputs.dady[slot][0] = 0.0;
-   }
-
-   /*Y*/
-   if (usage_mask & TGSI_WRITEMASK_Y) {
-      tri->inputs.a0[slot][1] = 0.0;
-      tri->inputs.dadx[slot][1] = 0.0;
-      tri->inputs.dady[slot][1] = 1.0;
-   }
-
-   /*Z*/
-   if (usage_mask & TGSI_WRITEMASK_Z) {
-      linear_coef(tri, info, slot, 0, 2);
-   }
-
-   /*W*/
-   if (usage_mask & TGSI_WRITEMASK_W) {
-      linear_coef(tri, info, slot, 0, 3);
-   }
-}
-
-
-/**
- * Setup the fragment input attribute with the front-facing value.
- * \param frontface  is the triangle front facing?
- */
-static void setup_facing_coef( struct lp_rast_triangle *tri,
-                               unsigned slot,
-                               boolean frontface,
-                               unsigned usage_mask)
-{
-   /* convert TRUE to 1.0 and FALSE to -1.0 */
-   if (usage_mask & TGSI_WRITEMASK_X)
-      constant_coef( tri, slot, 2.0f * frontface - 1.0f, 0 );
-
-   if (usage_mask & TGSI_WRITEMASK_Y)
-      constant_coef( tri, slot, 0.0f, 1 ); /* wasted */
-
-   if (usage_mask & TGSI_WRITEMASK_Z)
-      constant_coef( tri, slot, 0.0f, 2 ); /* wasted */
-
-   if (usage_mask & TGSI_WRITEMASK_W)
-      constant_coef( tri, slot, 0.0f, 3 ); /* wasted */
-}
-
-
-/**
- * Compute the tri->coef[] array dadx, dady, a0 values.
- */
-static void setup_tri_coefficients( struct lp_setup_context *setup,
-				    struct lp_rast_triangle *tri,
-                                    const struct tri_info *info)
-{
-   unsigned fragcoord_usage_mask = TGSI_WRITEMASK_XYZ;
-   unsigned slot;
-   unsigned i;
-
-   /* setup interpolation for all the remaining attributes:
-    */
-   for (slot = 0; slot < setup->fs.nr_inputs; slot++) {
-      unsigned vert_attr = setup->fs.input[slot].src_index;
-      unsigned usage_mask = setup->fs.input[slot].usage_mask;
-
-      switch (setup->fs.input[slot].interp) {
-      case LP_INTERP_CONSTANT:
-         if (setup->flatshade_first) {
-            for (i = 0; i < NUM_CHANNELS; i++)
-               if (usage_mask & (1 << i))
-                  constant_coef(tri, slot+1, info->v0[vert_attr][i], i);
-         }
-         else {
-            for (i = 0; i < NUM_CHANNELS; i++)
-               if (usage_mask & (1 << i))
-                  constant_coef(tri, slot+1, info->v2[vert_attr][i], i);
-         }
-         break;
-
-      case LP_INTERP_LINEAR:
-         for (i = 0; i < NUM_CHANNELS; i++)
-            if (usage_mask & (1 << i))
-               linear_coef(tri, info, slot+1, vert_attr, i);
-         break;
-
-      case LP_INTERP_PERSPECTIVE:
-         for (i = 0; i < NUM_CHANNELS; i++)
-            if (usage_mask & (1 << i))
-               perspective_coef(tri, info, slot+1, vert_attr, i);
-         fragcoord_usage_mask |= TGSI_WRITEMASK_W;
-         break;
-
-      case LP_INTERP_POSITION:
-         /*
-          * The generated pixel interpolators will pick up the coeffs from
-          * slot 0, so all need to ensure that the usage mask is covers all
-          * usages.
-          */
-         fragcoord_usage_mask |= usage_mask;
-         break;
-
-      case LP_INTERP_FACING:
-         setup_facing_coef(tri, slot+1, info->frontfacing, usage_mask);
-         break;
-
-      default:
-         assert(0);
-      }
-   }
-
-   /* The internal position input is in slot zero:
-    */
-   setup_fragcoord_coef(tri, info, 0, fragcoord_usage_mask);
-
-   if (0) {
-      for (i = 0; i < NUM_CHANNELS; i++) {
-         float a0   = tri->inputs.a0  [0][i];
-         float dadx = tri->inputs.dadx[0][i];
-         float dady = tri->inputs.dady[0][i];
-
-         debug_printf("POS.%c: a0 = %f, dadx = %f, dady = %f\n",
-                      "xyzw"[i],
-                      a0, dadx, dady);
-      }
-
-      for (slot = 0; slot < setup->fs.nr_inputs; slot++) {
-         unsigned usage_mask = setup->fs.input[slot].usage_mask;
-         for (i = 0; i < NUM_CHANNELS; i++) {
-            if (usage_mask & (1 << i)) {
-               float a0   = tri->inputs.a0  [1 + slot][i];
-               float dadx = tri->inputs.dadx[1 + slot][i];
-               float dady = tri->inputs.dady[1 + slot][i];
-
-               debug_printf("IN[%u].%c: a0 = %f, dadx = %f, dady = %f\n",
-                            slot,
-                            "xyzw"[i],
-                            a0, dadx, dady);
-            }
-         }
-      }
-   }
-}
-
-
 
 
 
@@ -329,11 +68,11 @@ static void setup_tri_coefficients( struct lp_setup_context *setup,
  * \param nr_inputs  number of fragment shader inputs
  * \return pointer to triangle space
  */
-static INLINE struct lp_rast_triangle *
-alloc_triangle(struct lp_scene *scene,
-               unsigned nr_inputs,
-               unsigned nr_planes,
-               unsigned *tri_size)
+struct lp_rast_triangle *
+lp_setup_alloc_triangle(struct lp_scene *scene,
+                        unsigned nr_inputs,
+                        unsigned nr_planes,
+                        unsigned *tri_size)
 {
    unsigned input_array_sz = NUM_CHANNELS * (nr_inputs + 1) * sizeof(float);
    struct lp_rast_triangle *tri;
@@ -357,71 +96,145 @@ alloc_triangle(struct lp_scene *scene,
    return tri;
 }
 
-
-/**
- * Print triangle vertex attribs (for debug).
- */
-static void
-print_triangle(struct lp_setup_context *setup,
-               const float (*v1)[4],
-               const float (*v2)[4],
-               const float (*v3)[4])
+void
+lp_setup_print_vertex(struct lp_setup_context *setup,
+                      const char *name,
+                      const float (*v)[4])
 {
-   uint i;
+   int i, j;
 
-   debug_printf("llvmpipe triangle\n");
-   for (i = 0; i < 1 + setup->fs.nr_inputs; i++) {
-      debug_printf("  v1[%d]:  %f %f %f %f\n", i,
-                   v1[i][0], v1[i][1], v1[i][2], v1[i][3]);
-   }
-   for (i = 0; i < 1 + setup->fs.nr_inputs; i++) {
-      debug_printf("  v2[%d]:  %f %f %f %f\n", i,
-                   v2[i][0], v2[i][1], v2[i][2], v2[i][3]);
-   }
-   for (i = 0; i < 1 + setup->fs.nr_inputs; i++) {
-      debug_printf("  v3[%d]:  %f %f %f %f\n", i,
-                   v3[i][0], v3[i][1], v3[i][2], v3[i][3]);
+   debug_printf("   wpos (%s[0]) xyzw %f %f %f %f\n",
+                name,
+                v[0][0], v[0][1], v[0][2], v[0][3]);
+
+   for (i = 0; i < setup->fs.nr_inputs; i++) {
+      const float *in = v[setup->fs.input[i].src_index];
+
+      debug_printf("  in[%d] (%s[%d]) %s%s%s%s ",
+                   i, 
+                   name, setup->fs.input[i].src_index,
+                   (setup->fs.input[i].usage_mask & 0x1) ? "x" : " ",
+                   (setup->fs.input[i].usage_mask & 0x2) ? "y" : " ",
+                   (setup->fs.input[i].usage_mask & 0x4) ? "z" : " ",
+                   (setup->fs.input[i].usage_mask & 0x8) ? "w" : " ");
+
+      for (j = 0; j < 4; j++)
+         if (setup->fs.input[i].usage_mask & (1<<j))
+            debug_printf("%.5f ", in[j]);
+
+      debug_printf("\n");
    }
 }
 
 
-lp_rast_cmd lp_rast_tri_tab[8] = {
-   NULL,               /* should be impossible */
-   lp_rast_triangle_1,
-   lp_rast_triangle_2,
-   lp_rast_triangle_3,
-   lp_rast_triangle_4,
-   lp_rast_triangle_5,
-   lp_rast_triangle_6,
-   lp_rast_triangle_7
+/**
+ * Print triangle vertex attribs (for debug).
+ */
+void
+lp_setup_print_triangle(struct lp_setup_context *setup,
+                        const float (*v0)[4],
+                        const float (*v1)[4],
+                        const float (*v2)[4])
+{
+   debug_printf("triangle\n");
+
+   {
+      const float ex = v0[0][0] - v2[0][0];
+      const float ey = v0[0][1] - v2[0][1];
+      const float fx = v1[0][0] - v2[0][0];
+      const float fy = v1[0][1] - v2[0][1];
+
+      /* det = cross(e,f).z */
+      const float det = ex * fy - ey * fx;
+      if (det < 0.0f) 
+         debug_printf("   - ccw\n");
+      else if (det > 0.0f)
+         debug_printf("   - cw\n");
+      else
+         debug_printf("   - zero area\n");
+   }
+
+   lp_setup_print_vertex(setup, "v0", v0);
+   lp_setup_print_vertex(setup, "v1", v1);
+   lp_setup_print_vertex(setup, "v2", v2);
+}
+
+
+static unsigned
+lp_rast_tri_tab[9] = {
+   0,               /* should be impossible */
+   LP_RAST_OP_TRIANGLE_1,
+   LP_RAST_OP_TRIANGLE_2,
+   LP_RAST_OP_TRIANGLE_3,
+   LP_RAST_OP_TRIANGLE_4,
+   LP_RAST_OP_TRIANGLE_5,
+   LP_RAST_OP_TRIANGLE_6,
+   LP_RAST_OP_TRIANGLE_7,
+   LP_RAST_OP_TRIANGLE_8
 };
+
+
+
+/**
+ * The primitive covers the whole tile- shade whole tile.
+ *
+ * \param tx, ty  the tile position in tiles, not pixels
+ */
+static boolean
+lp_setup_whole_tile(struct lp_setup_context *setup,
+                    const struct lp_rast_shader_inputs *inputs,
+                    int tx, int ty)
+{
+   struct lp_scene *scene = setup->scene;
+
+   LP_COUNT(nr_fully_covered_64);
+
+   /* if variant is opaque and scissor doesn't effect the tile */
+   if (inputs->opaque) {
+      if (!scene->fb.zsbuf) {
+         /*
+          * All previous rendering will be overwritten so reset the bin.
+          */
+         lp_scene_bin_reset( scene, tx, ty );
+      }
+
+      LP_COUNT(nr_shade_opaque_64);
+      return lp_scene_bin_command( scene, tx, ty,
+                                   LP_RAST_OP_SHADE_TILE_OPAQUE,
+                                   lp_rast_arg_inputs(inputs) );
+   } else {
+      LP_COUNT(nr_shade_64);
+      return lp_scene_bin_command( scene, tx, ty,
+                                   LP_RAST_OP_SHADE_TILE,
+                                   lp_rast_arg_inputs(inputs) );
+   }
+}
+
 
 /**
  * Do basic setup for triangle rasterization and determine which
  * framebuffer tiles are touched.  Put the triangle in the scene's
  * bins for the tiles which we overlap.
  */
-static void
+static boolean
 do_triangle_ccw(struct lp_setup_context *setup,
+		const float (*v0)[4],
 		const float (*v1)[4],
 		const float (*v2)[4],
-		const float (*v3)[4],
 		boolean frontfacing )
 {
-
-   struct lp_scene *scene = lp_setup_get_current_scene(setup);
-   struct lp_fragment_shader_variant *variant = setup->fs.current.variant;
+   struct lp_scene *scene = setup->scene;
    struct lp_rast_triangle *tri;
-   struct tri_info info;
+   int x[3];
+   int y[3];
    int area;
-   int minx, maxx, miny, maxy;
-   int ix0, ix1, iy0, iy1;
+   struct u_rect bbox;
    unsigned tri_bytes;
    int i;
    int nr_planes = 3;
-      
+
    if (0)
-      print_triangle(setup, v1, v2, v3);
+      lp_setup_print_triangle(setup, v0, v1, v2);
 
    if (setup->scissor_test) {
       nr_planes = 7;
@@ -430,38 +243,73 @@ do_triangle_ccw(struct lp_setup_context *setup,
       nr_planes = 3;
    }
 
+   /* x/y positions in fixed point */
+   x[0] = subpixel_snap(v0[0][0] - setup->pixel_offset);
+   x[1] = subpixel_snap(v1[0][0] - setup->pixel_offset);
+   x[2] = subpixel_snap(v2[0][0] - setup->pixel_offset);
+   y[0] = subpixel_snap(v0[0][1] - setup->pixel_offset);
+   y[1] = subpixel_snap(v1[0][1] - setup->pixel_offset);
+   y[2] = subpixel_snap(v2[0][1] - setup->pixel_offset);
 
-   tri = alloc_triangle(scene,
-                        setup->fs.nr_inputs,
-                        nr_planes,
-                        &tri_bytes);
+
+   /* Bounding rectangle (in pixels) */
+   {
+      /* Yes this is necessary to accurately calculate bounding boxes
+       * with the two fill-conventions we support.  GL (normally) ends
+       * up needing a bottom-left fill convention, which requires
+       * slightly different rounding.
+       */
+      int adj = (setup->pixel_offset != 0) ? 1 : 0;
+
+      bbox.x0 = (MIN3(x[0], x[1], x[2]) + (FIXED_ONE-1)) >> FIXED_ORDER;
+      bbox.x1 = (MAX3(x[0], x[1], x[2]) + (FIXED_ONE-1)) >> FIXED_ORDER;
+      bbox.y0 = (MIN3(y[0], y[1], y[2]) + (FIXED_ONE-1) + adj) >> FIXED_ORDER;
+      bbox.y1 = (MAX3(y[0], y[1], y[2]) + (FIXED_ONE-1) + adj) >> FIXED_ORDER;
+
+      /* Inclusive coordinates:
+       */
+      bbox.x1--;
+      bbox.y1--;
+   }
+
+   if (bbox.x1 < bbox.x0 ||
+       bbox.y1 < bbox.y0) {
+      if (0) debug_printf("empty bounding box\n");
+      LP_COUNT(nr_culled_tris);
+      return TRUE;
+   }
+
+   if (!u_rect_test_intersection(&setup->draw_region, &bbox)) {
+      if (0) debug_printf("offscreen\n");
+      LP_COUNT(nr_culled_tris);
+      return TRUE;
+   }
+
+   u_rect_find_intersection(&setup->draw_region, &bbox);
+
+   tri = lp_setup_alloc_triangle(scene,
+                                 setup->fs.nr_inputs,
+                                 nr_planes,
+                                 &tri_bytes);
    if (!tri)
-      return;
+      return FALSE;
 
 #ifdef DEBUG
-   tri->v[0][0] = v1[0][0];
-   tri->v[1][0] = v2[0][0];
-   tri->v[2][0] = v3[0][0];
-   tri->v[0][1] = v1[0][1];
-   tri->v[1][1] = v2[0][1];
-   tri->v[2][1] = v3[0][1];
+   tri->v[0][0] = v0[0][0];
+   tri->v[1][0] = v1[0][0];
+   tri->v[2][0] = v2[0][0];
+   tri->v[0][1] = v0[0][1];
+   tri->v[1][1] = v1[0][1];
+   tri->v[2][1] = v2[0][1];
 #endif
 
-   /* x/y positions in fixed point */
-   info.x[0] = subpixel_snap(v1[0][0] - setup->pixel_offset);
-   info.x[1] = subpixel_snap(v2[0][0] - setup->pixel_offset);
-   info.x[2] = subpixel_snap(v3[0][0] - setup->pixel_offset);
-   info.y[0] = subpixel_snap(v1[0][1] - setup->pixel_offset);
-   info.y[1] = subpixel_snap(v2[0][1] - setup->pixel_offset);
-   info.y[2] = subpixel_snap(v3[0][1] - setup->pixel_offset);
+   tri->plane[0].dcdy = x[0] - x[1];
+   tri->plane[1].dcdy = x[1] - x[2];
+   tri->plane[2].dcdy = x[2] - x[0];
 
-   tri->plane[0].dcdy = info.x[0] - info.x[1];
-   tri->plane[1].dcdy = info.x[1] - info.x[2];
-   tri->plane[2].dcdy = info.x[2] - info.x[0];
-
-   tri->plane[0].dcdx = info.y[0] - info.y[1];
-   tri->plane[1].dcdx = info.y[1] - info.y[2];
-   tri->plane[2].dcdx = info.y[2] - info.y[0];
+   tri->plane[0].dcdx = y[0] - y[1];
+   tri->plane[1].dcdx = y[1] - y[2];
+   tri->plane[2].dcdx = y[2] - y[0];
 
    area = (tri->plane[0].dcdy * tri->plane[2].dcdx -
            tri->plane[2].dcdy * tri->plane[0].dcdx);
@@ -475,64 +323,17 @@ do_triangle_ccw(struct lp_setup_context *setup,
    if (area <= 0) {
       lp_scene_putback_data( scene, tri_bytes );
       LP_COUNT(nr_culled_tris);
-      return;
+      return TRUE;
    }
-
-   /* Bounding rectangle (in pixels) */
-   {
-      /* Yes this is necessary to accurately calculate bounding boxes
-       * with the two fill-conventions we support.  GL (normally) ends
-       * up needing a bottom-left fill convention, which requires
-       * slightly different rounding.
-       */
-      int adj = (setup->pixel_offset != 0) ? 1 : 0;
-
-      minx = (MIN3(info.x[0], info.x[1], info.x[2]) + (FIXED_ONE-1)) >> FIXED_ORDER;
-      maxx = (MAX3(info.x[0], info.x[1], info.x[2]) + (FIXED_ONE-1)) >> FIXED_ORDER;
-      miny = (MIN3(info.y[0], info.y[1], info.y[2]) + (FIXED_ONE-1) + adj) >> FIXED_ORDER;
-      maxy = (MAX3(info.y[0], info.y[1], info.y[2]) + (FIXED_ONE-1) + adj) >> FIXED_ORDER;
-   }
-
-   if (setup->scissor_test) {
-      minx = MAX2(minx, setup->scissor.current.minx);
-      maxx = MIN2(maxx, setup->scissor.current.maxx);
-      miny = MAX2(miny, setup->scissor.current.miny);
-      maxy = MIN2(maxy, setup->scissor.current.maxy);
-   }
-   else {
-      minx = MAX2(minx, 0);
-      miny = MAX2(miny, 0);
-      maxx = MIN2(maxx, scene->fb.width);
-      maxy = MIN2(maxy, scene->fb.height);
-   }
-
-
-   if (miny >= maxy || minx >= maxx) {
-      lp_scene_putback_data( scene, tri_bytes );
-      LP_COUNT(nr_culled_tris);
-      return;
-   }
-
-   /* 
-    */
-   info.pixel_offset = setup->pixel_offset;
-   info.v0 = v1;
-   info.v1 = v2;
-   info.v2 = v3;
-   info.dx01 = info.v0[0][0] - info.v1[0][0];
-   info.dx20 = info.v2[0][0] - info.v0[0][0];
-   info.dy01 = info.v0[0][1] - info.v1[0][1];
-   info.dy20 = info.v2[0][1] - info.v0[0][1];
-   info.oneoverarea = 1.0f / (info.dx01 * info.dy20 - info.dx20 * info.dy01);
-   info.frontfacing = frontfacing;
 
    /* Setup parameter interpolants:
     */
-   setup_tri_coefficients( setup, tri, &info );
+   lp_setup_tri_coef( setup, &tri->inputs, v0, v1, v2, frontfacing );
 
    tri->inputs.facing = frontfacing ? 1.0F : -1.0F;
+   tri->inputs.disable = FALSE;
+   tri->inputs.opaque = setup->fs.current.variant->opaque;
    tri->inputs.state = setup->fs.stored;
-
 
   
    for (i = 0; i < 3; i++) {
@@ -541,7 +342,7 @@ do_triangle_ccw(struct lp_setup_context *setup,
       /* half-edge constants, will be interated over the whole render
        * target.
        */
-      plane->c = plane->dcdx * info.x[i] - plane->dcdy * info.y[i];
+      plane->c = plane->dcdx * x[i] - plane->dcdy * y[i];
 
       /* correct for top-left vs. bottom-left fill convention.  
        *
@@ -612,79 +413,121 @@ do_triangle_ccw(struct lp_setup_context *setup,
    if (nr_planes == 7) {
       tri->plane[3].dcdx = -1;
       tri->plane[3].dcdy = 0;
-      tri->plane[3].c = 1-minx;
+      tri->plane[3].c = 1-bbox.x0;
       tri->plane[3].ei = 0;
       tri->plane[3].eo = 1;
 
       tri->plane[4].dcdx = 1;
       tri->plane[4].dcdy = 0;
-      tri->plane[4].c = maxx;
+      tri->plane[4].c = bbox.x1+1;
       tri->plane[4].ei = -1;
       tri->plane[4].eo = 0;
 
       tri->plane[5].dcdx = 0;
       tri->plane[5].dcdy = 1;
-      tri->plane[5].c = 1-miny;
+      tri->plane[5].c = 1-bbox.y0;
       tri->plane[5].ei = 0;
       tri->plane[5].eo = 1;
 
       tri->plane[6].dcdx = 0;
       tri->plane[6].dcdy = -1;
-      tri->plane[6].c = maxy;
+      tri->plane[6].c = bbox.y1+1;
       tri->plane[6].ei = -1;
       tri->plane[6].eo = 0;
    }
 
+   return lp_setup_bin_triangle( setup, tri, &bbox, nr_planes );
+}
 
-   /*
-    * All fields of 'tri' are now set.  The remaining code here is
-    * concerned with binning.
-    */
+/*
+ * Round to nearest less or equal power of two of the input.
+ *
+ * Undefined if no bit set exists, so code should check against 0 first.
+ */
+static INLINE uint32_t 
+floor_pot(uint32_t n)
+{
+#if defined(PIPE_CC_GCC) && defined(PIPE_ARCH_X86)
+   if (n == 0)
+      return 0;
 
-   /* Convert to tile coordinates, and inclusive ranges:
+   __asm__("bsr %1,%0"
+          : "=r" (n)
+          : "rm" (n));
+   return 1 << n;
+#else
+   n |= (n >>  1);
+   n |= (n >>  2);
+   n |= (n >>  4);
+   n |= (n >>  8);
+   n |= (n >> 16);
+   return n - (n >> 1);
+#endif
+}
+
+
+boolean
+lp_setup_bin_triangle( struct lp_setup_context *setup,
+                       struct lp_rast_triangle *tri,
+                       const struct u_rect *bbox,
+                       int nr_planes )
+{
+   struct lp_scene *scene = setup->scene;
+   int i;
+
+   /* What is the largest power-of-two boundary this triangle crosses:
     */
+   int dx = floor_pot((bbox->x0 ^ bbox->x1) |
+		      (bbox->y0 ^ bbox->y1));
+
+   /* The largest dimension of the rasterized area of the triangle
+    * (aligned to a 4x4 grid), rounded down to the nearest power of two:
+    */
+   int sz = floor_pot((bbox->x1 - (bbox->x0 & ~3)) |
+		      (bbox->y1 - (bbox->y0 & ~3)));
+
    if (nr_planes == 3) {
-      int ix0 = minx / 16;
-      int iy0 = miny / 16;
-      int ix1 = (maxx-1) / 16;
-      int iy1 = (maxy-1) / 16;
-      
-      if (iy0 == iy1 && ix0 == ix1)
+      if (sz < 4 && dx < 64)
       {
+	 /* Triangle is contained in a single 4x4 stamp:
+	  */
+	 int mask = (bbox->x0 & 63 & ~3) | ((bbox->y0 & 63 & ~3) << 8);
+
+	 return lp_scene_bin_command( scene,
+				      bbox->x0/64, bbox->y0/64,
+				      LP_RAST_OP_TRIANGLE_3_4,
+				      lp_rast_arg_triangle(tri, mask) );
+      }
+
+      if (sz < 16 && dx < 64)
+      {
+	 int mask = (bbox->x0 & 63 & ~3) | ((bbox->y0 & 63 & ~3) << 8);
 
 	 /* Triangle is contained in a single 16x16 block:
 	  */
-	 int mask = (ix0 & 3) | ((iy0 & 3) << 4);
-
-	 lp_scene_bin_command( scene, ix0/4, iy0/4,
-			       lp_rast_triangle_3_16,
-			       lp_rast_arg_triangle(tri, mask) );
-	 return;
+	 return lp_scene_bin_command( scene,
+				      bbox->x0/64, bbox->y0/64,
+                                      LP_RAST_OP_TRIANGLE_3_16,
+                                      lp_rast_arg_triangle(tri, mask) );
       }
    }
 
-   ix0 = minx / TILE_SIZE;
-   iy0 = miny / TILE_SIZE;
-   ix1 = (maxx-1) / TILE_SIZE;
-   iy1 = (maxy-1) / TILE_SIZE;
-
-   /*
-    * Clamp to framebuffer size
-    */
-   assert(ix0 == MAX2(ix0, 0));
-   assert(iy0 == MAX2(iy0, 0));
-   assert(ix1 == MIN2(ix1, scene->tiles_x - 1));
-   assert(iy1 == MIN2(iy1, scene->tiles_y - 1));
 
    /* Determine which tile(s) intersect the triangle's bounding box
     */
-   if (iy0 == iy1 && ix0 == ix1)
+   if (dx < TILE_SIZE)
    {
+      int ix0 = bbox->x0 / TILE_SIZE;
+      int iy0 = bbox->y0 / TILE_SIZE;
+
+      assert(iy0 == bbox->y1 / TILE_SIZE &&
+	     ix0 == bbox->x1 / TILE_SIZE);
+
       /* Triangle is contained in a single tile:
        */
-      lp_scene_bin_command( scene, ix0, iy0,
-                            lp_rast_tri_tab[nr_planes], 
-			    lp_rast_arg_triangle(tri, (1<<nr_planes)-1) );
+      return lp_scene_bin_command( scene, ix0, iy0,
+                                   lp_rast_tri_tab[nr_planes], 
+                                   lp_rast_arg_triangle(tri, (1<<nr_planes)-1) );
    }
    else
    {
@@ -694,6 +537,11 @@ do_triangle_ccw(struct lp_setup_context *setup,
       int xstep[7];
       int ystep[7];
       int x, y;
+
+      int ix0 = bbox->x0 / TILE_SIZE;
+      int iy0 = bbox->y0 / TILE_SIZE;
+      int ix1 = bbox->x1 / TILE_SIZE;
+      int iy1 = bbox->y1 / TILE_SIZE;
       
       for (i = 0; i < nr_planes; i++) {
          c[i] = (tri->plane[i].c + 
@@ -745,9 +593,10 @@ do_triangle_ccw(struct lp_setup_context *setup,
                 */
                int count = util_bitcount(partial);
                in = TRUE;
-               lp_scene_bin_command( scene, x, y,
-                                     lp_rast_tri_tab[count], 
-                                     lp_rast_arg_triangle(tri, partial) );
+               if (!lp_scene_bin_command( scene, x, y,
+                                          lp_rast_tri_tab[count], 
+                                          lp_rast_arg_triangle(tri, partial) ))
+                  goto fail;
 
                LP_COUNT(nr_partially_covered_64);
             }
@@ -755,13 +604,8 @@ do_triangle_ccw(struct lp_setup_context *setup,
                /* triangle covers the whole tile- shade whole tile */
                LP_COUNT(nr_fully_covered_64);
                in = TRUE;
-	       if (variant->opaque &&
-	           !setup->fb.zsbuf) {
-	          lp_scene_bin_reset( scene, x, y );
-	       }
-               lp_scene_bin_command( scene, x, y,
-				     lp_rast_shade_tile,
-				     lp_rast_arg_inputs(&tri->inputs) );
+               if (!lp_setup_whole_tile(setup, &tri->inputs, x, y))
+                  goto fail;
             }
 
 	    /* Iterate cx values across the region:
@@ -776,6 +620,16 @@ do_triangle_ccw(struct lp_setup_context *setup,
             c[i] += ystep[i];
       }
    }
+
+   return TRUE;
+
+fail:
+   /* Need to disable any partially binned triangle.  This is easier
+    * than trying to locate all the triangle, shade-tile, etc,
+    * commands which may have been binned.
+    */
+   tri->inputs.disable = TRUE;
+   return FALSE;
 }
 
 
@@ -787,7 +641,13 @@ static void triangle_cw( struct lp_setup_context *setup,
 			 const float (*v1)[4],
 			 const float (*v2)[4] )
 {
-   do_triangle_ccw( setup, v1, v0, v2, !setup->ccw_is_frontface );
+   if (!do_triangle_ccw( setup, v1, v0, v2, !setup->ccw_is_frontface ))
+   {
+      lp_setup_flush_and_restart(setup);
+
+      if (!do_triangle_ccw( setup, v1, v0, v2, !setup->ccw_is_frontface ))
+         assert(0);
+   }
 }
 
 
@@ -799,7 +659,12 @@ static void triangle_ccw( struct lp_setup_context *setup,
 			 const float (*v1)[4],
 			 const float (*v2)[4] )
 {
-   do_triangle_ccw( setup, v0, v1, v2, setup->ccw_is_frontface );
+   if (!do_triangle_ccw( setup, v0, v1, v2, setup->ccw_is_frontface ))
+   {
+      lp_setup_flush_and_restart(setup);
+      if (!do_triangle_ccw( setup, v0, v1, v2, setup->ccw_is_frontface ))
+         assert(0);
+   }
 }
 
 
@@ -819,9 +684,10 @@ static void triangle_both( struct lp_setup_context *setup,
    const float fy = v1[0][1] - v2[0][1];
 
    /* det = cross(e,f).z */
-   if (ex * fy - ey * fx < 0.0f) 
+   const float det = ex * fy - ey * fx;
+   if (det < 0.0f) 
       triangle_ccw( setup, v0, v1, v2 );
-   else
+   else if (det > 0.0f)
       triangle_cw( setup, v0, v1, v2 );
 }
 

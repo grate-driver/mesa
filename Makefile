@@ -180,15 +180,13 @@ ultrix-gcc:
 
 # Rules for making release tarballs
 
-VERSION=7.9-devel
+VERSION=7.9
 DIRECTORY = Mesa-$(VERSION)
 LIB_NAME = MesaLib-$(VERSION)
 GLUT_NAME = MesaGLUT-$(VERSION)
 
 # This is part of MAIN_FILES
 MAIN_ES_FILES = \
-	$(DIRECTORY)/src/mesa/es/Makefile				\
-	$(DIRECTORY)/src/mesa/es/sources.mak				\
 	$(DIRECTORY)/src/mesa/main/*.xml				\
 	$(DIRECTORY)/src/mesa/main/*.py					\
 	$(DIRECTORY)/src/mesa/main/*.dtd
@@ -229,8 +227,11 @@ MAIN_FILES = \
 	$(DIRECTORY)/src/glsl/Makefile					\
 	$(DIRECTORY)/src/glsl/Makefile.template				\
 	$(DIRECTORY)/src/glsl/SConscript				\
-	$(DIRECTORY)/src/glsl/*/Makefile				\
-	$(DIRECTORY)/src/glsl/*/*.[ch]					\
+	$(DIRECTORY)/src/glsl/*.[ch]					\
+	$(DIRECTORY)/src/glsl/*.[cly]pp					\
+	$(DIRECTORY)/src/glsl/README					\
+	$(DIRECTORY)/src/glsl/glcpp/*.[chly]				\
+	$(DIRECTORY)/src/glsl/glcpp/README				\
 	$(DIRECTORY)/src/Makefile					\
 	$(DIRECTORY)/src/mesa/Makefile*					\
 	$(DIRECTORY)/src/mesa/sources.mak				\
@@ -244,12 +245,9 @@ MAIN_FILES = \
 	$(DIRECTORY)/src/mesa/math/*.[ch]				\
 	$(DIRECTORY)/src/mesa/math/descrip.mms				\
 	$(DIRECTORY)/src/mesa/program/*.[chly]				\
+	$(DIRECTORY)/src/mesa/program/*.cpp				\
 	$(DIRECTORY)/src/mesa/program/Makefile				\
 	$(DIRECTORY)/src/mesa/program/descrip.mms			\
-	$(DIRECTORY)/src/mesa/slang/*.[ch]				\
-	$(DIRECTORY)/src/mesa/slang/descrip.mms				\
-	$(DIRECTORY)/src/mesa/slang/library/*.gc			\
-	$(DIRECTORY)/src/mesa/slang/library/Makefile			\
 	$(DIRECTORY)/src/mesa/swrast/*.[ch]				\
 	$(DIRECTORY)/src/mesa/swrast/descrip.mms			\
 	$(DIRECTORY)/src/mesa/swrast_setup/*.[ch]			\
@@ -278,8 +276,6 @@ MAIN_FILES = \
 	$(DIRECTORY)/src/mesa/drivers/x11/Makefile			\
 	$(DIRECTORY)/src/mesa/drivers/x11/descrip.mms			\
 	$(DIRECTORY)/src/mesa/drivers/x11/*.[ch]			\
-	$(DIRECTORY)/src/mesa/drivers/glslcompiler/Makefile		\
-	$(DIRECTORY)/src/mesa/drivers/glslcompiler/glslcompiler.c	\
 	$(DIRECTORY)/src/mesa/ppc/*.[ch]				\
 	$(DIRECTORY)/src/mesa/sparc/*.[chS]				\
 	$(DIRECTORY)/src/mesa/x86/Makefile				\
@@ -323,7 +319,9 @@ EGL_FILES = \
 	$(DIRECTORY)/src/egl/*/Makefile.template			\
 	$(DIRECTORY)/src/egl/*/*.[ch]					\
 	$(DIRECTORY)/src/egl/*/*/Makefile				\
-	$(DIRECTORY)/src/egl/*/*/*.[ch]
+	$(DIRECTORY)/src/egl/*/*/*.[ch]					\
+	$(DIRECTORY)/src/egl/main/*.pc.in				\
+	$(DIRECTORY)/src/egl/main/*.def
 
 GALLIUM_FILES = \
 	$(DIRECTORY)/src/mesa/state_tracker/*[ch]			\
@@ -331,12 +329,14 @@ GALLIUM_FILES = \
 	$(DIRECTORY)/src/gallium/Makefile.template			\
 	$(DIRECTORY)/src/gallium/SConscript				\
 	$(DIRECTORY)/src/gallium/targets/Makefile.dri			\
-	$(DIRECTORY)/src/gallium/targets/Makefile.egl			\
+	$(DIRECTORY)/src/gallium/targets/Makefile.xorg			\
+	$(DIRECTORY)/src/gallium/targets/SConscript.dri			\
 	$(DIRECTORY)/src/gallium/*/Makefile				\
 	$(DIRECTORY)/src/gallium/*/SConscript				\
 	$(DIRECTORY)/src/gallium/*/*/Makefile				\
 	$(DIRECTORY)/src/gallium/*/*/SConscript				\
 	$(DIRECTORY)/src/gallium/*/*/*.[ch]				\
+	$(DIRECTORY)/src/gallium/auxiliary/gallivm/*.cpp		\
 	$(DIRECTORY)/src/gallium/*/*/*.py				\
 	$(DIRECTORY)/src/gallium/*/*/*.csv				\
 	$(DIRECTORY)/src/gallium/*/*/*/Makefile				\
@@ -358,6 +358,7 @@ DRI_FILES = \
 	$(DIRECTORY)/src/mesa/drivers/dri/common/xmlpool/*.[ch]		\
 	$(DIRECTORY)/src/mesa/drivers/dri/common/xmlpool/*.po		\
 	$(DIRECTORY)/src/mesa/drivers/dri/*/*.[chS]			\
+	$(DIRECTORY)/src/mesa/drivers/dri/*/*.cpp			\
 	$(DIRECTORY)/src/mesa/drivers/dri/*/*/*.[chS]			\
 	$(DIRECTORY)/src/mesa/drivers/dri/*/Makefile			\
 	$(DIRECTORY)/src/mesa/drivers/dri/*/*/Makefile			\

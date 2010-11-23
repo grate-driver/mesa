@@ -118,13 +118,13 @@ dri2_destroy_context(struct glx_context *context)
    struct dri2_context *pcp = (struct dri2_context *) context;
    struct dri2_screen *psc = (struct dri2_screen *) context->psc;
 
+   driReleaseDrawables(&pcp->base);
+
    if (context->xid)
       glx_send_destroy_context(psc->base.dpy, context->xid);
 
    if (context->extensions)
       XFree((char *) context->extensions);
-
-   GarbageCollectDRIDrawables(context->psc);
 
    (*psc->core->destroyContext) (pcp->driContext);
 
@@ -138,6 +138,7 @@ dri2_bind_context(struct glx_context *context, struct glx_context *old,
    struct dri2_context *pcp = (struct dri2_context *) context;
    struct dri2_screen *psc = (struct dri2_screen *) pcp->base.psc;
    struct dri2_drawable *pdraw, *pread;
+   struct dri2_display *pdp;
 
    pdraw = (struct dri2_drawable *) driFetchDrawable(context, draw);
    pread = (struct dri2_drawable *) driFetchDrawable(context, read);
@@ -145,11 +146,21 @@ dri2_bind_context(struct glx_context *context, struct glx_context *old,
    if (pdraw == NULL || pread == NULL)
       return GLXBadDrawable;
 
-   if ((*psc->core->bindContext) (pcp->driContext,
-				  pdraw->driDrawable, pread->driDrawable))
-      return Success;
+   if (!(*psc->core->bindContext) (pcp->driContext,
+				   pdraw->driDrawable, pread->driDrawable))
+      return GLXBadContext;
 
-   return GLXBadContext;
+   /* If the server doesn't send invalidate events, we may miss a
+    * resize before the rendering starts.  Invalidate the buffers now
+    * so the driver will recheck before rendering starts. */
+   pdp = (struct dri2_display *) psc->base.display;
+   if (!pdp->invalidateAvailable) {
+      dri2InvalidateBuffers(psc->base.dpy, pdraw->base.xDrawable);
+      if (pread != pdraw)
+	 dri2InvalidateBuffers(psc->base.dpy, pread->base.xDrawable);
+   }
+
+   return Success;
 }
 
 static void
@@ -159,6 +170,9 @@ dri2_unbind_context(struct glx_context *context, struct glx_context *new)
    struct dri2_screen *psc = (struct dri2_screen *) pcp->base.psc;
 
    (*psc->core->unbindContext) (pcp->driContext);
+
+   if (context == new)
+      driReleaseDrawables(&pcp->base);
 }
 
 static struct glx_context *
@@ -210,7 +224,17 @@ dri2DestroyDrawable(__GLXDRIdrawable *base)
 
    __glxHashDelete(pdp->dri2Hash, pdraw->base.xDrawable);
    (*psc->core->destroyDrawable) (pdraw->driDrawable);
-   DRI2DestroyDrawable(psc->base.dpy, pdraw->base.xDrawable);
+
+   /* If it's a GLX 1.3 drawables, we can destroy the DRI2 drawable
+    * now, as the application explicitly asked to destroy the GLX
+    * drawable.  Otherwise, for legacy drawables, we let the DRI2
+    * drawable linger on the server, since there's no good way of
+    * knowing when the application is done with it.  The server will
+    * destroy the DRI2 drawable when it destroys the X drawable or the
+    * client exits anyway. */
+   if (pdraw->base.xDrawable != pdraw->base.drawable)
+      DRI2DestroyDrawable(psc->base.dpy, pdraw->base.xDrawable);
+
    Xfree(pdraw);
 }
 

@@ -162,7 +162,6 @@ struct r300_sampler_state {
 
     uint32_t filter0;      /* R300_TX_FILTER0: 0x4400 */
     uint32_t filter1;      /* R300_TX_FILTER1: 0x4440 */
-    uint32_t border_color; /* R300_TX_BORDER_COLOR: 0x45c0 */
 
     /* Min/max LOD must be clamped to [0, last_level], thus
      * it's dependent on a currently bound texture */
@@ -254,8 +253,8 @@ struct r300_ztop_state {
 struct r300_constant_buffer {
     /* Buffer of constants */
     uint32_t *ptr;
-    /* Total number of vec4s */
-    unsigned count;
+    /* Remapping table. */
+    unsigned *remap_table;
 };
 
 /* Query object.
@@ -447,8 +446,18 @@ struct r300_context {
     struct r300_winsys_cs *cs;
     /* Screen. */
     struct r300_screen *screen;
+
     /* Draw module. Used mostly for SW TCL. */
     struct draw_context* draw;
+    /* Vertex buffer for SW TCL. */
+    struct pipe_resource* vbo;
+    /* Offset and size into the SW TCL VBO. */
+    size_t draw_vbo_offset;
+    size_t draw_vbo_size;
+    /* Whether the VBO must not be flushed. */
+    boolean draw_vbo_locked;
+    boolean draw_first_emitted;
+
     /* Accelerated blit support. */
     struct blitter_context* blitter;
     /* Stencil two-sided reference value fallback. */
@@ -456,14 +465,10 @@ struct r300_context {
     /* For translating vertex buffers having incompatible vertex layout. */
     struct r300_translate_context tran;
 
-    /* Vertex buffer for rendering. */
-    struct pipe_resource* vbo;
     /* The KIL opcode needs the first texture unit to be enabled
      * on r3xx-r4xx. In order to calm down the CS checker, we bind this
      * dummy texture there. */
     struct r300_sampler_view *texkill_sampler;
-    /* Offset into the VBO. */
-    size_t vbo_offset;
 
     /* The currently active query. */
     struct r300_query *query_current;
@@ -648,6 +653,11 @@ void r300_translate_index_buffer(struct r300_context *r300,
 
 /* r300_render_stencilref.c */
 void r300_plug_in_stencil_ref_fallback(struct r300_context *r300);
+
+/* r300_render.c */
+void r300_draw_flush_vbuf(struct r300_context *r300);
+boolean r500_index_bias_supported(struct r300_context *r300);
+void r500_emit_index_bias(struct r300_context *r300, int index_bias);
 
 /* r300_state.c */
 enum r300_fb_state_change {

@@ -120,7 +120,7 @@ typedef union { GLfloat f; GLint i; } fi_type;
  * \name Work-arounds for platforms that lack C99 math functions
  */
 /*@{*/
-#if (defined(_XOPEN_SOURCE) && (_XOPEN_SOURCE < 600)) && !defined(_ISOC99_SOURCE) \
+#if (!defined(_XOPEN_SOURCE) || (_XOPEN_SOURCE < 600)) && !defined(_ISOC99_SOURCE) \
    && (!defined(__STDC_VERSION__) || (__STDC_VERSION__ < 199901L)) \
    && (!defined(_MSC_VER) || (_MSC_VER < 1400))
 #define acosf(f) ((float) acos(f))
@@ -141,7 +141,14 @@ typedef union { GLfloat f; GLint i; } fi_type;
 #define sqrtf(f) ((float) sqrt(f))
 #define tanf(f) ((float) tan(f))
 #define tanhf(f) ((float) tanh(f))
-#define truncf(f) ((float) trunc(f))
+#endif
+
+#if defined(_MSC_VER)
+static INLINE float truncf(float x) { return x < 0.0f ? ceilf(x) : floorf(x); }
+static INLINE float exp2f(float x) { return powf(2.0f, x); }
+static INLINE float log2f(float x) { return logf(x) * 1.442695041f; }
+static INLINE int isblank(int ch) { return ch == ' ' || ch == '\t'; }
+#define strtoll(p, e, b) _strtoi64(p, e, b)
 #endif
 /*@}*/
 
@@ -559,19 +566,25 @@ extern unsigned int
 _mesa_str_checksum(const char *str);
 
 extern int
-_mesa_snprintf( char *str, size_t size, const char *fmt, ... );
+_mesa_snprintf( char *str, size_t size, const char *fmt, ... ) PRINTFLIKE(3, 4);
 
 extern void
-_mesa_warning( __GLcontext *gc, const char *fmtString, ... );
+_mesa_warning( __GLcontext *gc, const char *fmtString, ... ) PRINTFLIKE(2, 3);
 
 extern void
-_mesa_problem( const __GLcontext *ctx, const char *fmtString, ... );
+_mesa_problem( const __GLcontext *ctx, const char *fmtString, ... ) PRINTFLIKE(2, 3);
 
 extern void
-_mesa_error( __GLcontext *ctx, GLenum error, const char *fmtString, ... );
+_mesa_error( __GLcontext *ctx, GLenum error, const char *fmtString, ... ) PRINTFLIKE(3, 4);
 
 extern void
-_mesa_debug( const __GLcontext *ctx, const char *fmtString, ... );
+_mesa_debug( const __GLcontext *ctx, const char *fmtString, ... ) PRINTFLIKE(2, 3);
+
+
+#if defined(_MSC_VER) && !defined(snprintf)
+#define snprintf _snprintf
+#endif
+
 
 #ifdef __cplusplus
 }

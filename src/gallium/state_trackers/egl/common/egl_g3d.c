@@ -65,8 +65,8 @@ egl_g3d_get_platform(_EGLDriver *drv, _EGLPlatformType plat)
          break;
       case _EGL_PLATFORM_DRM:
          plat_name = "DRM";
-#ifdef HAVE_KMS_BACKEND
-         nplat = native_get_kms_platform();
+#ifdef HAVE_DRM_BACKEND
+         nplat = native_get_drm_platform();
 #endif
          break;
       case _EGL_PLATFORM_FBDEV:
@@ -502,13 +502,13 @@ egl_g3d_initialize(_EGLDriver *drv, _EGLDisplay *dpy,
       goto fail;
    }
 
-   if (gdpy->loader->api_mask & (1 << ST_API_OPENGL))
+   if (gdpy->loader->profile_masks[ST_API_OPENGL] & ST_PROFILE_DEFAULT_MASK)
       dpy->ClientAPIsMask |= EGL_OPENGL_BIT;
-   if (gdpy->loader->api_mask & (1 << ST_API_OPENGL_ES1))
+   if (gdpy->loader->profile_masks[ST_API_OPENGL] & ST_PROFILE_OPENGL_ES1_MASK)
       dpy->ClientAPIsMask |= EGL_OPENGL_ES_BIT;
-   if (gdpy->loader->api_mask & (1 << ST_API_OPENGL_ES2))
+   if (gdpy->loader->profile_masks[ST_API_OPENGL] & ST_PROFILE_OPENGL_ES2_MASK)
       dpy->ClientAPIsMask |= EGL_OPENGL_ES2_BIT;
-   if (gdpy->loader->api_mask & (1 << ST_API_OPENVG))
+   if (gdpy->loader->profile_masks[ST_API_OPENVG] & ST_PROFILE_DEFAULT_MASK)
       dpy->ClientAPIsMask |= EGL_OPENVG_BIT;
 
    gdpy->smapi = egl_g3d_create_st_manager(dpy);
@@ -532,6 +532,15 @@ egl_g3d_initialize(_EGLDriver *drv, _EGLDisplay *dpy,
 
    dpy->Extensions.KHR_reusable_sync = EGL_TRUE;
    dpy->Extensions.KHR_fence_sync = EGL_TRUE;
+
+   dpy->Extensions.KHR_surfaceless_gles1 = EGL_TRUE;
+   dpy->Extensions.KHR_surfaceless_gles2 = EGL_TRUE;
+   dpy->Extensions.KHR_surfaceless_opengl = EGL_TRUE;
+
+   if (dpy->Platform == _EGL_PLATFORM_DRM) {
+      dpy->Extensions.MESA_drm_display = EGL_TRUE;
+      dpy->Extensions.MESA_drm_image = EGL_TRUE;
+   }
 
    if (egl_g3d_add_configs(drv, dpy, 1) == 1) {
       _eglError(EGL_NOT_INITIALIZED, "eglInitialize(unable to add configs)");
@@ -558,7 +567,7 @@ egl_g3d_get_proc_address(_EGLDriver *drv, const char *procname)
    if (procname && procname[0] == 'v' && procname[1] == 'g')
       stapi = gdrv->loader->get_st_api(ST_API_OPENVG);
    else if (procname && procname[0] == 'g' && procname[1] == 'l')
-      stapi = gdrv->loader->guess_gl_api();
+      stapi = gdrv->loader->get_st_api(ST_API_OPENGL);
 
    return (_EGLProc) ((stapi) ?
          stapi->get_proc_address(stapi, procname) : NULL);

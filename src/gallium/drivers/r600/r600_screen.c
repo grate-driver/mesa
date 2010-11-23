@@ -46,8 +46,10 @@ static const char* r600_get_name(struct pipe_screen* pscreen)
 
 	if (family >= CHIP_R600 && family < CHIP_RV770)
 		return "R600 (HD2XXX,HD3XXX)";
-	else
+	else if (family < CHIP_CEDAR)
 		return "R700 (HD4XXX)";
+	else
+		return "EVERGREEN";
 }
 
 static int r600_get_param(struct pipe_screen* pscreen, enum pipe_cap param)
@@ -69,15 +71,13 @@ static int r600_get_param(struct pipe_screen* pscreen, enum pipe_cap param)
 	case PIPE_CAP_TEXTURE_SWIZZLE:
 	case PIPE_CAP_INDEP_BLEND_ENABLE:
 	case PIPE_CAP_DEPTHSTENCIL_CLEAR_SEPARATE:
+	case PIPE_CAP_DEPTH_CLAMP:
 		return 1;
 
 	/* Unsupported features (boolean caps). */
 	case PIPE_CAP_TIMER_QUERY:
-	case PIPE_CAP_TGSI_CONT_SUPPORTED:
 	case PIPE_CAP_STREAM_OUTPUT:
 	case PIPE_CAP_INDEP_BLEND_FUNC: /* FIXME allow this */
-	case PIPE_CAP_GEOMETRY_SHADER4:
-	case PIPE_CAP_DEPTH_CLAMP: /* FIXME allow this */
 		return 0;
 
 	/* Texturing. */
@@ -104,53 +104,57 @@ static int r600_get_param(struct pipe_screen* pscreen, enum pipe_cap param)
 	case PIPE_CAP_TGSI_FS_COORD_ORIGIN_LOWER_LEFT:
 	case PIPE_CAP_TGSI_FS_COORD_PIXEL_CENTER_INTEGER:
 		return 0;
-
-	/* Shader limits. */
-	case PIPE_CAP_MAX_VS_INSTRUCTIONS:
-		return 16384;  //max native instructions, not greater than max instructions
-	case PIPE_CAP_MAX_VS_ALU_INSTRUCTIONS:
-	case PIPE_CAP_MAX_VS_TEX_INSTRUCTIONS:
-	case PIPE_CAP_MAX_VS_TEX_INDIRECTIONS:
-		return 16384;
-	case PIPE_CAP_MAX_FS_INSTRUCTIONS:
-		return 16384; //max program native instructions
-	case PIPE_CAP_MAX_FS_ALU_INSTRUCTIONS:
-		return 16384; //max program native ALU instructions
-	case PIPE_CAP_MAX_FS_TEX_INSTRUCTIONS:
-		return 16384; //max program native texture instructions
-	case PIPE_CAP_MAX_FS_TEX_INDIRECTIONS:
-		return 2048; //max program native texture indirections
-	case PIPE_CAP_MAX_VS_CONTROL_FLOW_DEPTH:
-	case PIPE_CAP_MAX_FS_CONTROL_FLOW_DEPTH:
-		return 8; /* FIXME */
-	case PIPE_CAP_MAX_VS_INPUTS:
-		return 16; //max native attributes
-	case PIPE_CAP_MAX_FS_INPUTS:
-		return 10; //max native attributes
-	case PIPE_CAP_MAX_VS_TEMPS:
-		return 256; //max native temporaries
-	case PIPE_CAP_MAX_FS_TEMPS:
-		return 256; //max native temporaries
-	case PIPE_CAP_MAX_VS_ADDRS:
-	case PIPE_CAP_MAX_FS_ADDRS:
-		return 1; //max native address registers/* FIXME Isn't this equal to TEMPS? */
-	case PIPE_CAP_MAX_VS_CONSTS:
-		return 256; //max native parameters
-	case PIPE_CAP_MAX_FS_CONSTS:
-		return 256; //max program native parameters
-	case PIPE_CAP_MAX_CONST_BUFFERS:
-		return 1;
-	case PIPE_CAP_MAX_CONST_BUFFER_SIZE: /* in bytes */
-		return 4096;
-	case PIPE_CAP_MAX_PREDICATE_REGISTERS:
-	case PIPE_CAP_MAX_VS_PREDS:
-	case PIPE_CAP_MAX_FS_PREDS:
-		return 0; /* FIXME */
-
 	default:
 		R600_ERR("r600: unknown param %d\n", param);
 		return 0;
 	}
+}
+
+static int r600_get_shader_param(struct pipe_screen* pscreen, unsigned shader, enum pipe_shader_cap param)
+{
+	switch(shader)
+	{
+	case PIPE_SHADER_FRAGMENT:
+	case PIPE_SHADER_VERTEX:
+		break;
+	case PIPE_SHADER_GEOMETRY:
+		/* TODO: support and enable geometry programs */
+		return 0;
+	default:
+		/* TODO: support tessellation on Evergreen */
+		return 0;
+	}
+
+	/* TODO: all these should be fixed, since r600 surely supports much more! */
+        switch (param) {
+        case PIPE_SHADER_CAP_MAX_INSTRUCTIONS:
+        case PIPE_SHADER_CAP_MAX_ALU_INSTRUCTIONS:
+        case PIPE_SHADER_CAP_MAX_TEX_INSTRUCTIONS:
+        case PIPE_SHADER_CAP_MAX_TEX_INDIRECTIONS:
+                return 16384;
+        case PIPE_SHADER_CAP_MAX_CONTROL_FLOW_DEPTH:
+                return 8; /* FIXME */
+        case PIPE_SHADER_CAP_MAX_INPUTS:
+		if(shader == PIPE_SHADER_FRAGMENT)
+			return 10;
+		else
+			return 16;
+        case PIPE_SHADER_CAP_MAX_TEMPS:
+                return 256; //max native temporaries
+        case PIPE_SHADER_CAP_MAX_ADDRS:
+                return 1; //max native address registers/* FIXME Isn't this equal to TEMPS? */
+        case PIPE_SHADER_CAP_MAX_CONSTS:
+                return 256; //max native parameters
+        case PIPE_SHADER_CAP_MAX_CONST_BUFFERS:
+                return 1;
+        case PIPE_SHADER_CAP_MAX_PREDS:
+                return 0; /* FIXME */
+        case PIPE_SHADER_CAP_TGSI_CONT_SUPPORTED:
+                /* TODO: support this! */
+                return 0;
+        default:
+                return 0;
+        }
 }
 
 static float r600_get_paramf(struct pipe_screen* pscreen, enum pipe_cap param)
@@ -234,9 +238,43 @@ static void r600_destroy_screen(struct pipe_screen* pscreen)
 struct pipe_screen *r600_screen_create(struct radeon *rw)
 {
 	struct r600_screen* rscreen;
+	enum radeon_family family = radeon_get_family(rw);
 
 	rscreen = CALLOC_STRUCT(r600_screen);
 	if (rscreen == NULL) {
+		return NULL;
+	}
+	
+	/* don't enable mem constant for r600 yet */
+	rscreen->use_mem_constant = FALSE;
+
+	switch (family) {
+	case CHIP_R600:
+	case CHIP_RV610:
+	case CHIP_RV630:
+	case CHIP_RV670:
+	case CHIP_RV620:
+	case CHIP_RV635:
+	case CHIP_RS780:
+	case CHIP_RS880:
+		rscreen->chip_class = R600;
+		break;
+	case CHIP_RV770:
+	case CHIP_RV730:
+	case CHIP_RV710:
+	case CHIP_RV740:
+		rscreen->chip_class = R700;
+		break;
+	case CHIP_CEDAR:
+	case CHIP_REDWOOD:
+	case CHIP_JUNIPER:
+	case CHIP_CYPRESS:
+	case CHIP_HEMLOCK:
+		rscreen->chip_class = EVERGREEN;
+		rscreen->use_mem_constant = TRUE;
+		break;
+	default:
+		FREE(rscreen);
 		return NULL;
 	}
 	rscreen->rw = rw;
@@ -245,6 +283,7 @@ struct pipe_screen *r600_screen_create(struct radeon *rw)
 	rscreen->screen.get_name = r600_get_name;
 	rscreen->screen.get_vendor = r600_get_vendor;
 	rscreen->screen.get_param = r600_get_param;
+	rscreen->screen.get_shader_param = r600_get_shader_param;
 	rscreen->screen.get_paramf = r600_get_paramf;
 	rscreen->screen.is_format_supported = r600_is_format_supported;
 	rscreen->screen.context_create = r600_create_context;

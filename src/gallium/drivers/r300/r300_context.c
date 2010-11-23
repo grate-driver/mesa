@@ -65,7 +65,7 @@ static void r300_release_referenced_objects(struct r300_context *r300)
     unsigned i;
 
     /* Framebuffer state. */
-    util_assign_framebuffer_state(fb, NULL);
+    util_unreference_framebuffer_state(fb);
 
     /* Textures. */
     for (i = 0; i < textures->sampler_view_count; i++)
@@ -431,8 +431,6 @@ struct pipe_context* r300_create_context(struct pipe_screen* screen,
         r300->draw = draw_create(&r300->context);
         /* Enable our renderer. */
         draw_set_rasterize_stage(r300->draw, r300_draw_stage(r300));
-        /* Enable Draw's clipping. */
-        draw_set_driver_clipping(r300->draw, FALSE);
         /* Disable converting points/lines to triangles. */
         draw_wide_line_threshold(r300->draw, 10000000.f);
         draw_wide_point_threshold(r300->draw, 10000000.f);

@@ -108,7 +108,7 @@ st_renderbuffer_alloc_storage(GLcontext * ctx, struct gl_renderbuffer *rb,
       /* Setup new texture template.
        */
       memset(&template, 0, sizeof(template));
-      template.target = PIPE_TEXTURE_2D;
+      template.target = st->internal_target;
       template.format = format;
       template.width0 = width;
       template.height0 = height;
@@ -446,6 +446,30 @@ st_validate_attachment(struct pipe_screen *screen,
                                       stObj->pt->nr_samples, bindings, 0);
 }
 
+
+/**
+ * Check if two renderbuffer attachments name a combined depth/stencil
+ * renderbuffer.
+ */
+GLboolean
+st_is_depth_stencil_combined(const struct gl_renderbuffer_attachment *depth,
+                             const struct gl_renderbuffer_attachment *stencil)
+{
+   assert(depth && stencil);
+
+   if (depth->Type == stencil->Type) {
+      if (depth->Type == GL_RENDERBUFFER_EXT &&
+          depth->Renderbuffer == stencil->Renderbuffer)
+         return GL_TRUE;
+
+      if (depth->Type == GL_TEXTURE &&
+          depth->Texture == stencil->Texture)
+         return GL_TRUE;
+   }
+
+   return GL_FALSE;
+}
+ 
 
 /**
  * Check that the framebuffer configuration is valid in terms of what

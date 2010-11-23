@@ -260,6 +260,8 @@ struct glx_context
    GLint bufSize;
    /*@} */
 
+   const struct glx_context_vtable *vtable;
+
     /**
      * The XID of this rendering context.  When the context is created a
      * new XID is allocated.  This is set to None when the context is
@@ -423,8 +425,6 @@ struct glx_context
    unsigned long thread_id;
 
    char gl_extension_bits[__GL_EXT_BYTES];
-
-   const struct glx_context_vtable *vtable;
 };
 
 extern Bool
@@ -494,13 +494,13 @@ struct glx_screen
 
    struct glx_display *display;
 
+   Display *dpy;
+   int scr;
+
 #if defined(GLX_DIRECT_RENDERING) && !defined(GLX_USE_APPLEGL)
     /**
      * Per screen direct rendering interface functions and data.
      */
-   Display *dpy;
-   int scr;
-
    __GLXDRIscreen *driScreen;
 #endif
 

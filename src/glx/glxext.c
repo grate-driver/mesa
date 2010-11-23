@@ -41,7 +41,6 @@
 #include "glxclient.h"
 #include <X11/extensions/Xext.h>
 #include <X11/extensions/extutil.h>
-#include <X11/extensions/dri2proto.h>
 #ifdef GLX_USE_APPLEGL
 #include "apple_glx.h"
 #include "apple_visual.h"
@@ -131,16 +130,6 @@ __glXWireToEvent(Display *dpy, XEvent *event, xEvent *wire)
       aevent->count = awire->count;
       return True;
    }
-   /* No easy symbol to test for this, as GLX_BufferSwapComplete is
-    * defined in the local glx.h header, but the
-    * xGLXBufferSwapComplete typedef is only available in new versions
-    * of the external glxproto.h header, which doesn't have any
-    * testable versioning define.
-    *
-    * I'll use the related DRI2 define, in the hope that we won't
-    * receive these events unless we know how to ask for them:
-    */
-#ifdef X_DRI2SwapBuffers
    case GLX_BufferSwapComplete:
    {
       GLXBufferSwapComplete *aevent = (GLXBufferSwapComplete *)event;
@@ -152,7 +141,6 @@ __glXWireToEvent(Display *dpy, XEvent *event, xEvent *wire)
       aevent->sbc = ((CARD64)awire->sbc_hi << 32) | awire->sbc_lo;
       return True;
    }
-#endif
    default:
       /* client doesn't support server event */
       break;
@@ -249,9 +237,9 @@ glx_display_free(struct glx_display *priv)
    if (priv->serverGLXversion)
       Xfree((char *) priv->serverGLXversion);
 
+#if defined(GLX_DIRECT_RENDERING) && !defined(GLX_USE_APPLEGL)
    __glxHashDestroy(priv->drawHash);
 
-#if defined(GLX_DIRECT_RENDERING) && !defined(GLX_USE_APPLEGL)
    /* Free the direct rendering per display data */
    if (priv->driswDisplay)
       (*priv->driswDisplay->destroyDisplay) (priv->driswDisplay);

@@ -33,6 +33,7 @@
 #include "util/u_format_s3tc.h"
 #include "pipe/p_defines.h"
 #include "pipe/p_screen.h"
+#include "draw/draw_context.h"
 
 #include "gallivm/lp_bld_limits.h"
 #include "lp_texture.h"
@@ -61,6 +62,9 @@ static const struct debug_named_value lp_debug_flags[] = {
    { "show_tiles",    DEBUG_SHOW_TILES, NULL },
    { "show_subtiles", DEBUG_SHOW_SUBTILES, NULL },
    { "counters", DEBUG_COUNTERS, NULL },
+   { "scene", DEBUG_SCENE, NULL },
+   { "fence", DEBUG_FENCE, NULL },
+   { "mem", DEBUG_MEM, NULL },
    DEBUG_NAMED_VALUE_END
 };
 #endif
@@ -87,7 +91,14 @@ llvmpipe_get_param(struct pipe_screen *screen, enum pipe_cap param)
    case PIPE_CAP_MAX_TEXTURE_IMAGE_UNITS:
       return PIPE_MAX_SAMPLERS;
    case PIPE_CAP_MAX_VERTEX_TEXTURE_UNITS:
-      return PIPE_MAX_VERTEX_SAMPLERS;
+      /* At this time, the draw module and llvmpipe driver only
+       * support vertex shader texture lookups when LLVM is enabled in
+       * the draw module.
+       */
+      if (debug_get_bool_option("DRAW_USE_LLVM", TRUE))
+         return PIPE_MAX_VERTEX_SAMPLERS;
+      else
+         return 0;
    case PIPE_CAP_MAX_COMBINED_SAMPLERS:
       return PIPE_MAX_SAMPLERS + PIPE_MAX_VERTEX_SAMPLERS;
    case PIPE_CAP_NPOT_TEXTURES:
@@ -122,8 +133,6 @@ llvmpipe_get_param(struct pipe_screen *screen, enum pipe_cap param)
       return LP_MAX_TEXTURE_3D_LEVELS;
    case PIPE_CAP_MAX_TEXTURE_CUBE_LEVELS:
       return LP_MAX_TEXTURE_2D_LEVELS;
-   case PIPE_CAP_TGSI_CONT_SUPPORTED:
-      return 1;
    case PIPE_CAP_BLEND_EQUATION_SEPARATE:
       return 1;
    case PIPE_CAP_INDEP_BLEND_ENABLE:
@@ -136,47 +145,29 @@ llvmpipe_get_param(struct pipe_screen *screen, enum pipe_cap param)
    case PIPE_CAP_TGSI_FS_COORD_ORIGIN_LOWER_LEFT:
    case PIPE_CAP_TGSI_FS_COORD_PIXEL_CENTER_HALF_INTEGER:
       return 0;
-   case PIPE_CAP_MAX_VS_INSTRUCTIONS:
-   case PIPE_CAP_MAX_FS_INSTRUCTIONS:
-   case PIPE_CAP_MAX_VS_ALU_INSTRUCTIONS:
-   case PIPE_CAP_MAX_FS_ALU_INSTRUCTIONS:
-   case PIPE_CAP_MAX_VS_TEX_INSTRUCTIONS:
-   case PIPE_CAP_MAX_FS_TEX_INSTRUCTIONS:
-   case PIPE_CAP_MAX_VS_TEX_INDIRECTIONS:
-   case PIPE_CAP_MAX_FS_TEX_INDIRECTIONS:
-      /* There is no limit in number of instructions beyond available memory */
-      return 32768;
-   case PIPE_CAP_MAX_VS_CONTROL_FLOW_DEPTH:
-   case PIPE_CAP_MAX_FS_CONTROL_FLOW_DEPTH:
-      return LP_MAX_TGSI_NESTING;
-   case PIPE_CAP_MAX_VS_INPUTS:
-   case PIPE_CAP_MAX_FS_INPUTS:
-      return PIPE_MAX_ATTRIBS;
-   case PIPE_CAP_MAX_FS_CONSTS:
-   case PIPE_CAP_MAX_VS_CONSTS:
-      /* There is no limit in number of constants beyond available memory */
-      return 32768;
-   case PIPE_CAP_MAX_VS_TEMPS:
-   case PIPE_CAP_MAX_FS_TEMPS:
-      return LP_MAX_TGSI_TEMPS;
-   case PIPE_CAP_MAX_VS_ADDRS:
-   case PIPE_CAP_MAX_FS_ADDRS:
-      return LP_MAX_TGSI_ADDRS;
-   case PIPE_CAP_MAX_VS_PREDS:
-   case PIPE_CAP_MAX_FS_PREDS:
-      return LP_MAX_TGSI_PREDS;
    case PIPE_CAP_DEPTHSTENCIL_CLEAR_SEPARATE:
-      return 1;
-   case PIPE_CAP_GEOMETRY_SHADER4:
       return 1;
    case PIPE_CAP_DEPTH_CLAMP:
       return 0;
    default:
-      assert(0);
       return 0;
    }
 }
 
+static int
+llvmpipe_get_shader_param(struct pipe_screen *screen, unsigned shader, enum pipe_shader_cap param)
+{
+   switch(shader)
+   {
+   case PIPE_SHADER_FRAGMENT:
+      return tgsi_exec_get_shader_param(param);
+   case PIPE_SHADER_VERTEX:
+   case PIPE_SHADER_GEOMETRY:
+      return draw_get_shader_param(shader, param);
+   default:
+      return 0;
+   }
+}
 
 static float
 llvmpipe_get_paramf(struct pipe_screen *screen, enum pipe_cap param)
@@ -230,6 +221,7 @@ llvmpipe_is_format_supported( struct pipe_screen *_screen,
    assert(target == PIPE_BUFFER ||
           target == PIPE_TEXTURE_1D ||
           target == PIPE_TEXTURE_2D ||
+          target == PIPE_TEXTURE_RECT ||
           target == PIPE_TEXTURE_3D ||
           target == PIPE_TEXTURE_CUBE);
 
@@ -314,6 +306,51 @@ llvmpipe_destroy_screen( struct pipe_screen *_screen )
 
 
 
+
+/**
+ * Fence reference counting.
+ */
+static void
+llvmpipe_fence_reference(struct pipe_screen *screen,
+                         struct pipe_fence_handle **ptr,
+                         struct pipe_fence_handle *fence)
+{
+   struct lp_fence **old = (struct lp_fence **) ptr;
+   struct lp_fence *f = (struct lp_fence *) fence;
+
+   lp_fence_reference(old, f);
+}
+
+
+/**
+ * Has the fence been executed/finished?
+ */
+static int
+llvmpipe_fence_signalled(struct pipe_screen *screen,
+                         struct pipe_fence_handle *fence,
+                         unsigned flag)
+{
+   struct lp_fence *f = (struct lp_fence *) fence;
+   return lp_fence_signalled(f);
+}
+
+
+/**
+ * Wait for the fence to finish.
+ */
+static int
+llvmpipe_fence_finish(struct pipe_screen *screen,
+                      struct pipe_fence_handle *fence_handle,
+                      unsigned flag)
+{
+   struct lp_fence *f = (struct lp_fence *) fence_handle;
+
+   lp_fence_wait(f);
+   return 0;
+}
+
+
+
 /**
  * Create a new pipe_screen object
  * Note: we're not presently subclassing pipe_screen (no llvmpipe_screen).
@@ -346,14 +383,17 @@ llvmpipe_create_screen(struct sw_winsys *winsys)
    screen->base.get_name = llvmpipe_get_name;
    screen->base.get_vendor = llvmpipe_get_vendor;
    screen->base.get_param = llvmpipe_get_param;
+   screen->base.get_shader_param = llvmpipe_get_shader_param;
    screen->base.get_paramf = llvmpipe_get_paramf;
    screen->base.is_format_supported = llvmpipe_is_format_supported;
 
    screen->base.context_create = llvmpipe_create_context;
    screen->base.flush_frontbuffer = llvmpipe_flush_frontbuffer;
+   screen->base.fence_reference = llvmpipe_fence_reference;
+   screen->base.fence_signalled = llvmpipe_fence_signalled;
+   screen->base.fence_finish = llvmpipe_fence_finish;
 
    llvmpipe_init_screen_resource_funcs(&screen->base);
-   llvmpipe_init_screen_fence_funcs(&screen->base);
 
    lp_jit_screen_init(screen);
 

@@ -84,7 +84,7 @@ compute_version(GLcontext *ctx)
 			      (ctx->Extensions.EXT_stencil_two_side
 			       || ctx->Extensions.ATI_separate_stencil));
    const GLboolean ver_2_1 = (ver_2_0 &&
-                              ctx->Extensions.ARB_shading_language_120 &&
+                              ctx->Const.GLSLVersion >= 120 &&
                               ctx->Extensions.EXT_pixel_buffer_object &&
                               ctx->Extensions.EXT_texture_sRGB);
    const GLboolean ver_3_0 = (ver_2_1 &&
@@ -260,11 +260,15 @@ compute_version_es2(GLcontext *ctx)
 
 /**
  * Set the context's VersionMajor, VersionMinor, VersionString fields.
- * This should only be called once as part of context initialization.
+ * This should only be called once as part of context initialization
+ * or to perform version check for GLX_ARB_create_context_profile.
  */
 void
 _mesa_compute_version(GLcontext *ctx)
 {
+   if (ctx->VersionMajor)
+      return;
+
    switch (ctx->API) {
    case API_OPENGL:
       compute_version(ctx);

@@ -149,6 +149,8 @@ struct draw_context
       struct pipe_vertex_element vertex_element[PIPE_MAX_ATTRIBS];
       unsigned nr_vertex_elements;
 
+      struct pipe_index_buffer index_buffer;
+
       /* user-space vertex data, buffers */
       struct {
          /** vertex element/index buffer (ex: glDrawElements) */
@@ -174,13 +176,19 @@ struct draw_context
    } pt;
 
    struct {
-      boolean bypass_clipping;
-      boolean bypass_vs;
+      boolean bypass_clip_xy;
+      boolean bypass_clip_z;
    } driver;
 
    boolean flushing;         /**< debugging/sanity */
    boolean suspend_flushing; /**< internally set */
-   boolean bypass_clipping;  /**< set if either api or driver bypass_clipping true */
+
+   /* Flags set if API requires clipping in these planes and the
+    * driver doesn't indicate that it can do it for us.
+    */
+   boolean clip_xy;
+   boolean clip_z;
+   boolean clip_user;
 
    boolean force_passthrough; /**< never clip or shade */
 

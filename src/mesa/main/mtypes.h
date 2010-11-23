@@ -41,13 +41,14 @@
 #include "math/m_matrix.h"	/* GLmatrix */
 #include "main/simple_list.h"	/* struct simple_node */
 
-/**
- * Internal token
- *  Must be simply different than GL_VERTEX_PROGRAM
- *    and GL_FRAGMENT_PROGRAM_ARB
- *  FIXME: this will have to be a real GL extension
+/* Shader stages. Note that these will become 5 with tessellation.
+ * These MUST have the same values as PIPE_SHADER_*
  */
-#define MESA_GEOMETRY_PROGRAM 0x9999
+#define MESA_SHADER_VERTEX   0
+#define MESA_SHADER_FRAGMENT 1
+#define MESA_SHADER_GEOMETRY 2
+#define MESA_SHADER_TYPES    3
+
 
 /**
  * Color channel data type.
@@ -1632,10 +1633,9 @@ struct gl_array_attrib
 
    GLbitfield NewState;		/**< mask of _NEW_ARRAY_* values */
 
-#if FEATURE_ARB_vertex_buffer_object
+   /* GL_ARB_vertex_buffer_object */
    struct gl_buffer_object *ArrayBufferObj;
    struct gl_buffer_object *ElementArrayBufferObj;
-#endif
 };
 
 
@@ -2167,22 +2167,44 @@ struct gl_shader_program
 struct gl_shader_state
 {
    struct gl_shader_program *CurrentProgram; /**< The user-bound program */
+   void *MemPool;
+
+   GLbitfield Flags;                    /**< Mask of GLSL_x flags */
+};
+
+/**
+ * Compiler options for a single GLSL shaders type
+ */
+struct gl_shader_compiler_options
+{
    /** Driver-selectable options: */
-   GLboolean EmitHighLevelInstructions; /**< IF/ELSE/ENDIF vs. BRA, etc. */
-   GLboolean EmitContReturn;            /**< Emit CONT/RET opcodes? */
    GLboolean EmitCondCodes;             /**< Use condition codes? */
-   GLboolean EmitComments;              /**< Annotated instructions */
    GLboolean EmitNVTempInitialization;  /**< 0-fill NV temp registers */
    /**
     * Attempts to flatten all ir_if (OPCODE_IF) for GPUs that can't
     * support control flow.
     */
    GLboolean EmitNoIfs;
-   void *MemPool;
-   GLbitfield Flags;                    /**< Mask of GLSL_x flags */
+   GLboolean EmitNoLoops;
+   GLboolean EmitNoFunctions;
+   GLboolean EmitNoCont;                  /**< Emit CONT opcode? */
+   GLboolean EmitNoMainReturn;            /**< Emit CONT/RET opcodes? */
+   GLboolean EmitNoNoise;                 /**< Emit NOISE opcodes? */
+
+   /**
+    * \name Forms of indirect addressing the driver cannot do.
+    */
+   /*@{*/
+   GLboolean EmitNoIndirectInput;   /**< No indirect addressing of inputs */
+   GLboolean EmitNoIndirectOutput;  /**< No indirect addressing of outputs */
+   GLboolean EmitNoIndirectTemp;    /**< No indirect addressing of temps */
+   GLboolean EmitNoIndirectUniform; /**< No indirect addressing of constants */
+   /*@}*/
+
+   GLuint MaxUnrollIterations;
+
    struct gl_sl_pragmas DefaultPragmas; /**< Default #pragma settings */
 };
-
 
 /**
  * Transform feedback object state
@@ -2264,39 +2286,26 @@ struct gl_shared_state
     */
    /*@{*/
    struct _mesa_HashTable *Programs; /**< All vertex/fragment programs */
-#if FEATURE_ARB_vertex_program
    struct gl_vertex_program *DefaultVertexProgram;
-#endif
-#if FEATURE_ARB_fragment_program
    struct gl_fragment_program *DefaultFragmentProgram;
-#endif
-#if FEATURE_ARB_geometry_shader4
    struct gl_geometry_program *DefaultGeometryProgram;
-#endif
    /*@}*/
 
-#if FEATURE_ATI_fragment_shader
+   /* GL_ATI_fragment_shader */
    struct _mesa_HashTable *ATIShaders;
    struct ati_fragment_shader *DefaultFragmentShader;
-#endif
 
-#if FEATURE_ARB_vertex_buffer_object || FEATURE_ARB_pixel_buffer_object
    struct _mesa_HashTable *BufferObjects;
-#endif
 
-#if FEATURE_ARB_shader_objects
    /** Table of both gl_shader and gl_shader_program objects */
    struct _mesa_HashTable *ShaderObjects;
-#endif
 
-#if FEATURE_EXT_framebuffer_object
+   /* GL_EXT_framebuffer_object */
    struct _mesa_HashTable *RenderBuffers;
    struct _mesa_HashTable *FrameBuffers;
-#endif
 
-#if FEATURE_ARB_sync
+   /* GL_ARB_sync */
    struct simple_node SyncObjects;
-#endif
 
    void *DriverData;  /**< Device driver shared state */
 };
@@ -2531,14 +2540,13 @@ struct gl_program_constants
    GLuint MaxNativeParameters;
    /* For shaders */
    GLuint MaxUniformComponents;
-#if FEATURE_ARB_geometry_shader4
+   /* GL_ARB_geometry_shader4 */
    GLuint MaxGeometryTextureImageUnits;
    GLuint MaxGeometryVaryingComponents;
    GLuint MaxVertexVaryingComponents;
    GLuint MaxGeometryUniformComponents;
    GLuint MaxGeometryOutputVertices;
    GLuint MaxGeometryTotalOutputComponents;
-#endif
 };
 
 
@@ -2600,7 +2608,10 @@ struct gl_constants
 
    GLuint MaxVarying;  /**< Number of float[4] varying parameters */
 
-   GLbitfield SupportedBumpUnits; /**> units supporting GL_ATI_envmap_bumpmap as targets */
+   GLuint GLSLVersion;  /**< GLSL version supported (ex: 120 = 1.20) */
+
+   /** Which texture units support GL_ATI_envmap_bumpmap as targets */
+   GLbitfield SupportedBumpUnits;
 
    /**
     * Maximum amount of time, measured in nanseconds, that the server can wait.
@@ -2659,7 +2670,6 @@ struct gl_extensions
    GLboolean ARB_seamless_cube_map;
    GLboolean ARB_shader_objects;
    GLboolean ARB_shading_language_100;
-   GLboolean ARB_shading_language_120;
    GLboolean ARB_shadow;
    GLboolean ARB_shadow_ambient;
    GLboolean ARB_sync;
@@ -2786,12 +2796,8 @@ struct gl_extensions
    GLboolean SGIS_texture_lod;
    GLboolean TDFX_texture_compression_FXT1;
    GLboolean S3_s3tc;
-#if FEATURE_OES_EGL_image
    GLboolean OES_EGL_image;
-#endif
-#if FEATURE_OES_draw_texture
    GLboolean OES_draw_texture;
-#endif /* FEATURE_OES_draw_texture */
    /** The extension string */
    const GLubyte *String;
    /** Number of supported extensions */
@@ -3221,6 +3227,7 @@ struct __GLcontextRec
    struct gl_ati_fragment_shader_state ATIFragmentShader;
 
    struct gl_shader_state Shader; /**< GLSL shader object state */
+   struct gl_shader_compiler_options ShaderCompilerOptions[MESA_SHADER_TYPES];
 
    struct gl_query_state Query;  /**< occlusion, timer queries */
 
@@ -3232,9 +3239,8 @@ struct __GLcontextRec
 
    struct gl_meta_state *Meta;  /**< for "meta" operations */
 
-#if FEATURE_EXT_framebuffer_object
+   /* GL_EXT_framebuffer_object */
    struct gl_renderbuffer *CurrentRenderbuffer;
-#endif
 
    GLenum ErrorValue;        /**< Last error code */
 

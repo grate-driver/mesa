@@ -477,6 +477,15 @@ static void r300_update_rs_block(struct r300_context *r300)
         }
     }
 
+    if (DBG_ON(r300, DBG_RS)) {
+        for (; i < ATTR_GENERIC_COUNT; i++) {
+            if (fs_inputs->generic[i] != ATTR_UNUSED) {
+                DBG(r300, DBG_RS,
+                    "r300: FS input generic %i unassigned.\n", i);
+            }
+        }
+    }
+
     /* Rasterize fog coordinates. */
     if (vs_outputs->fog != ATTR_UNUSED && tex_count < 8) {
         /* Set up the fog coordinates in VAP. */
@@ -558,6 +567,58 @@ static void r300_update_rs_block(struct r300_context *r300)
     }
 }
 
+static uint32_t r300_get_border_color(enum pipe_format format,
+                                      const float border[4])
+{
+    const struct util_format_description *desc;
+    float border_swizzled[4] = {
+        border[2],
+        border[1],
+        border[0],
+        border[3]
+    };
+    uint32_t r;
+
+    desc = util_format_description(format);
+
+    /* We don't use util_pack_format because it does not handle the formats
+     * we want, e.g. R4G4B4A4 is non-existent in Gallium. */
+    switch (desc->channel[0].size) {
+        case 4:
+            r = ((float_to_ubyte(border_swizzled[0]) & 0xf0) >> 4) |
+                ((float_to_ubyte(border_swizzled[1]) & 0xf0) << 0) |
+                ((float_to_ubyte(border_swizzled[2]) & 0xf0) << 4) |
+                ((float_to_ubyte(border_swizzled[3]) & 0xf0) << 8);
+            break;
+
+        case 5:
+            if (desc->channel[1].size == 5) {
+                r = ((float_to_ubyte(border_swizzled[0]) & 0xf8) >> 3) |
+                    ((float_to_ubyte(border_swizzled[1]) & 0xf8) << 2) |
+                    ((float_to_ubyte(border_swizzled[2]) & 0xf8) << 7) |
+                    ((float_to_ubyte(border_swizzled[3]) & 0x80) << 8);
+            } else if (desc->channel[1].size == 6) {
+                r = ((float_to_ubyte(border_swizzled[0]) & 0xf8) >> 3) |
+                    ((float_to_ubyte(border_swizzled[1]) & 0xfc) << 3) |
+                    ((float_to_ubyte(border_swizzled[2]) & 0xf8) << 8);
+            } else {
+                assert(0);
+            }
+            break;
+
+        default:
+            /* I think the fat formats (16, 32) are specified
+             * as the 8-bit ones. I am not sure how compressed formats
+             * work here. */
+            r = ((float_to_ubyte(border_swizzled[0]) & 0xff) << 0) |
+                ((float_to_ubyte(border_swizzled[1]) & 0xff) << 8) |
+                ((float_to_ubyte(border_swizzled[2]) & 0xff) << 16) |
+                ((float_to_ubyte(border_swizzled[3]) & 0xff) << 24);
+    }
+
+    return r;
+}
+
 static void r300_merge_textures_and_samplers(struct r300_context* r300)
 {
     struct r300_textures_state *state =
@@ -590,7 +651,30 @@ static void r300_merge_textures_and_samplers(struct r300_context* r300)
             texstate->format = view->format;
             texstate->filter0 = sampler->filter0;
             texstate->filter1 = sampler->filter1;
-            texstate->border_color = sampler->border_color;
+
+            /* Set the border color. */
+            texstate->border_color =
+                r300_get_border_color(view->base.format,
+                                      sampler->state.border_color);
+
+            /* determine min/max levels */
+            max_level = MIN3(sampler->max_lod + view->base.first_level,
+                             tex->desc.b.b.last_level, view->base.last_level);
+            min_level = MIN2(sampler->min_lod + view->base.first_level,
+                             max_level);
+
+            if (tex->desc.is_npot && min_level > 0) {
+                /* Even though we do not implement mipmapping for NPOT
+                 * textures, we should at least honor the minimum level
+                 * which is allowed to be displayed. We do this by setting up
+                 * an i-th mipmap level as the zero level. */
+                r300_texture_setup_format_state(r300->screen, &tex->desc,
+                                                min_level,
+                                                &texstate->format);
+                texstate->format.tile_config |=
+                        tex->desc.offset_in_bytes[min_level] & 0xffffffe0;
+                assert((tex->desc.offset_in_bytes[min_level] & 0x1f) == 0);
+            }
 
             /* Assign a texture cache region. */
             texstate->format.format1 |= view->texcache_region;
@@ -654,12 +738,7 @@ static void r300_merge_textures_and_samplers(struct r300_context* r300)
                     texstate->filter0 |= R300_TX_WRAP_T(R300_TX_CLAMP_TO_EDGE);
                 }
             } else {
-                /* determine min/max levels */
                 /* the MAX_MIP level is the largest (finest) one */
-                max_level = MIN3(sampler->max_lod + view->base.first_level,
-                                 tex->desc.b.b.last_level, view->base.last_level);
-                min_level = MIN2(sampler->min_lod + view->base.first_level,
-                                 max_level);
                 texstate->format.format0 |= R300_TX_NUM_LEVELS(max_level);
                 texstate->filter0 |= R300_TX_MAX_MIP_LEVEL(min_level);
             }

@@ -74,8 +74,10 @@ gl_target_to_pipe(GLenum target)
       return PIPE_TEXTURE_1D;
 
    case GL_TEXTURE_2D:
-   case GL_TEXTURE_RECTANGLE_NV:
       return PIPE_TEXTURE_2D;
+
+   case GL_TEXTURE_RECTANGLE_NV:
+      return PIPE_TEXTURE_RECT;
 
    case GL_TEXTURE_3D:
       return PIPE_TEXTURE_3D;
@@ -238,6 +240,12 @@ get_texture_dims(GLenum target)
       return 1;
    case GL_TEXTURE_2D:
    case GL_TEXTURE_CUBE_MAP_ARB:
+   case GL_TEXTURE_CUBE_MAP_POSITIVE_X_ARB:
+   case GL_TEXTURE_CUBE_MAP_NEGATIVE_X_ARB:
+   case GL_TEXTURE_CUBE_MAP_POSITIVE_Y_ARB:
+   case GL_TEXTURE_CUBE_MAP_NEGATIVE_Y_ARB:
+   case GL_TEXTURE_CUBE_MAP_POSITIVE_Z_ARB:
+   case GL_TEXTURE_CUBE_MAP_NEGATIVE_Z_ARB:
    case GL_TEXTURE_RECTANGLE_NV:
    case GL_TEXTURE_2D_ARRAY_EXT:
       return 2;
@@ -449,7 +457,7 @@ compress_with_blit(GLcontext * ctx,
    /* Create the temporary source texture
     */
    memset(&templ, 0, sizeof(templ));
-   templ.target = PIPE_TEXTURE_2D;
+   templ.target = st->internal_target;
    templ.format = st_mesa_format_to_pipe_format(mesa_format);
    templ.width0 = width;
    templ.height0 = height;
@@ -546,6 +554,14 @@ st_TexImage(GLcontext * ctx,
    /* switch to "normal" */
    if (stObj->surface_based) {
       _mesa_clear_texture_object(ctx, texObj);
+      pipe_resource_reference(&stObj->pt, NULL);
+
+      /* oops, need to init this image again */
+      _mesa_init_teximage_fields(ctx, target, texImage,
+            width, height, depth, border, internalFormat);
+      _mesa_choose_texture_format(ctx, texObj, texImage, target, level,
+            internalFormat, format, type);
+
       stObj->surface_based = GL_FALSE;
    }
 
@@ -985,6 +1001,8 @@ st_get_tex_image(GLcontext * ctx, GLenum target, GLint level,
    texImage->Depth = 1;
 
    dest = (GLubyte *) pixels;
+
+   _mesa_set_fetch_functions(texImage, get_texture_dims(target));
 
    for (i = 0; i < depth; i++) {
       if (compressed_dst) {

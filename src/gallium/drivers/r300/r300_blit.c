@@ -263,10 +263,6 @@ static void r300_clear(struct pipe_context* pipe,
          zstex->hiz_in_use[fb->zsbuf->level])) {
         r300->hyperz_state.dirty = TRUE;
     }
-
-    /* XXX this flush "fixes" a hardlock in the cubestorm xscreensaver */
-    if (r300->flush_counter == 0)
-        pipe->flush(pipe, 0, NULL);
 }
 
 /* Clear a region of a color surface to a constant value. */
@@ -391,9 +387,6 @@ static void r300_resource_copy_region(struct pipe_context *pipe,
         r300_flush_depth_stencil(pipe, src, subsrc, srcz);
     }
     if (old_format != new_format) {
-        dst->format = new_format;
-        src->format = new_format;
-
         r300_texture_reinterpret_format(pipe->screen,
                                         dst, new_format);
         r300_texture_reinterpret_format(pipe->screen,
@@ -404,9 +397,6 @@ static void r300_resource_copy_region(struct pipe_context *pipe,
                         src, subsrc, srcx, srcy, srcz, width, height);
 
     if (old_format != new_format) {
-        dst->format = old_format;
-        src->format = old_format;
-
         r300_texture_reinterpret_format(pipe->screen,
                                         dst, old_format);
         r300_texture_reinterpret_format(pipe->screen,

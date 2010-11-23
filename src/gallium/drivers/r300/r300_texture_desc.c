@@ -184,7 +184,8 @@ static unsigned r300_texture_get_nblocksy(struct r300_texture_desc *desc,
 
         /* This is needed for the kernel checker, unfortunately. */
         if ((desc->b.b.target != PIPE_TEXTURE_1D &&
-             desc->b.b.target != PIPE_TEXTURE_2D) ||
+             desc->b.b.target != PIPE_TEXTURE_2D &&
+             desc->b.b.target != PIPE_TEXTURE_RECT) ||
             desc->b.b.last_level != 0) {
             height = util_next_power_of_two(height);
         }
@@ -202,7 +203,8 @@ static unsigned r300_texture_get_nblocksy(struct r300_texture_desc *desc,
                  * Do so for 3 or more macrotiles in the Y direction. */
                 if (level == 0 && desc->b.b.last_level == 0 &&
                     (desc->b.b.target == PIPE_TEXTURE_1D ||
-                     desc->b.b.target == PIPE_TEXTURE_2D) &&
+                     desc->b.b.target == PIPE_TEXTURE_2D ||
+                     desc->b.b.target == PIPE_TEXTURE_RECT) &&
                     height >= tile_height * 3) {
                     height = align(height, tile_height * 2);
                 }
@@ -254,7 +256,7 @@ static void r300_setup_miptree(struct r300_screen *screen,
 {
     struct pipe_resource *base = &desc->b.b;
     unsigned stride, size, layer_size, nblocksy, i;
-    boolean rv350_mode = screen->caps.is_rv350;
+    boolean rv350_mode = screen->caps.family >= CHIP_FAMILY_R350;
     boolean aligned_for_cbzb;
 
     desc->size_in_bytes = 0;
@@ -337,6 +339,9 @@ static void r300_setup_cbzb_flags(struct r300_screen *rscreen,
                        (bpp == 16 || bpp == 32) &&
                        desc->macrotile[0];
 
+    if (SCREEN_DBG_ON(rscreen, DBG_NO_CBZB))
+        first_level_valid = FALSE;
+
     for (i = 0; i <= desc->b.b.last_level; i++)
         desc->cbzb_allowed[i] = first_level_valid && desc->macrotile[i];
 }
@@ -346,7 +351,7 @@ static void r300_setup_tiling(struct r300_screen *screen,
 {
     struct r300_winsys_screen *rws = screen->rws;
     enum pipe_format format = desc->b.b.format;
-    boolean rv350_mode = screen->caps.is_rv350;
+    boolean rv350_mode = screen->caps.family >= CHIP_FAMILY_R350;
     boolean is_zb = util_format_is_depth_or_stencil(format);
     boolean dbg_no_tiling = SCREEN_DBG_ON(screen, DBG_NO_TILING);
 

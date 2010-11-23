@@ -58,7 +58,8 @@ static const struct {
    { OFF, "GL_ARB_fragment_shader",            F(ARB_fragment_shader) },
    { OFF, "GL_ARB_framebuffer_object",         F(ARB_framebuffer_object) },
    { OFF, "GL_ARB_explicit_attrib_location",   F(ARB_explicit_attrib_location) },
-   { OFF, "GL_ARB_geometry_shader4",           F(ARB_geometry_shader4) },
+   /* TODO: reenable this when the new GLSL compiler actually supports them */
+   /* { OFF, "GL_ARB_geometry_shader4",           F(ARB_geometry_shader4) }, */
    { OFF, "GL_ARB_half_float_pixel",           F(ARB_half_float_pixel) },
    { OFF, "GL_ARB_half_float_vertex",          F(ARB_half_float_vertex) },
    { OFF, "GL_ARB_imaging",                    F(ARB_imaging) },
@@ -76,7 +77,6 @@ static const struct {
    { OFF, "GL_ARB_seamless_cube_map",          F(ARB_seamless_cube_map) },
    { OFF, "GL_ARB_shader_objects",             F(ARB_shader_objects) },
    { OFF, "GL_ARB_shading_language_100",       F(ARB_shading_language_100) },
-   { OFF, "GL_ARB_shading_language_120",       F(ARB_shading_language_120) },
    { OFF, "GL_ARB_shadow",                     F(ARB_shadow) },
    { OFF, "GL_ARB_shadow_ambient",             F(ARB_shadow_ambient) },
    { OFF, "GL_ARB_sync",                       F(ARB_sync) },
@@ -267,9 +267,6 @@ _mesa_enable_sw_extensions(GLcontext *ctx)
 #endif
 #if FEATURE_ARB_shading_language_100
    ctx->Extensions.ARB_shading_language_100 = GL_TRUE;
-#endif
-#if FEATURE_ARB_shading_language_120
-   ctx->Extensions.ARB_shading_language_120 = GL_TRUE;
 #endif
    ctx->Extensions.ARB_shadow = GL_TRUE;
    ctx->Extensions.ARB_shadow_ambient = GL_TRUE;
@@ -511,9 +508,6 @@ _mesa_enable_2_1_extensions(GLcontext *ctx)
 #endif
 #if FEATURE_EXT_texture_sRGB
    ctx->Extensions.EXT_texture_sRGB = GL_TRUE;
-#endif
-#if FEATURE_ARB_shading_language_120
-   ctx->Extensions.ARB_shading_language_120 = GL_TRUE;
 #endif
 }
 
@@ -969,7 +963,7 @@ _mesa_get_extension_count(GLcontext *ctx)
 
    if (0)
       _mesa_debug(ctx, "%u of %d extensions enabled\n", ctx->Extensions.Count,
-                  Elements(default_extensions));
+                  (int) Elements(default_extensions));
 
    return ctx->Extensions.Count;
 }

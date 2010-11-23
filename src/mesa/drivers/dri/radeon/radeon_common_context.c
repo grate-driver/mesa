@@ -93,6 +93,11 @@ static const char* get_chip_family_name(int chip_family)
 	case CHIP_FAMILY_RV730: return "RV730";
 	case CHIP_FAMILY_RV710: return "RV710";
 	case CHIP_FAMILY_RV740: return "RV740";
+	case CHIP_FAMILY_CEDAR: return "CEDAR";
+	case CHIP_FAMILY_REDWOOD: return "REDWOOD";
+	case CHIP_FAMILY_JUNIPER: return "JUNIPER";
+	case CHIP_FAMILY_CYPRESS: return "CYPRESS";
+	case CHIP_FAMILY_HEMLOCK: return "HEMLOCK";
 	default: return "unknown";
 	}
 }
@@ -240,9 +245,16 @@ GLboolean radeonInitContext(radeonContextPtr radeon,
 	        DRI_CONF_TEXTURE_DEPTH_32 : DRI_CONF_TEXTURE_DEPTH_16;
 
 	if (IS_R600_CLASS(radeon->radeonScreen)) {
-		radeon->texture_row_align = 256;
-		radeon->texture_rect_row_align = 256;
-		radeon->texture_compressed_row_align = 256;
+		int chip_family = radeon->radeonScreen->chip_family;
+		if (chip_family >= CHIP_FAMILY_CEDAR) {
+			radeon->texture_row_align = 512;
+			radeon->texture_rect_row_align = 512;
+			radeon->texture_compressed_row_align = 512;
+		} else {
+			radeon->texture_row_align = 256;
+			radeon->texture_rect_row_align = 256;
+			radeon->texture_compressed_row_align = 256;
+		}
 	} else if (IS_R200_CLASS(radeon->radeonScreen) ||
 		   IS_R100_CLASS(radeon->radeonScreen)) {
 		radeon->texture_row_align = 32;
@@ -357,6 +369,9 @@ GLboolean radeonUnbindContext(__DRIcontext * driContextPriv)
 	if (RADEON_DEBUG & RADEON_DRI)
 		fprintf(stderr, "%s ctx %p\n", __FUNCTION__,
 			radeon->glCtx);
+
+	/* Unset current context and dispath table */
+	_mesa_make_current(NULL, NULL, NULL);
 
 	return GL_TRUE;
 }
@@ -506,6 +521,7 @@ void radeon_prepare_render(radeonContextPtr radeon)
     __DRIcontext *driContext = radeon->dri.context;
     __DRIdrawable *drawable;
     __DRIscreen *screen;
+    struct radeon_framebuffer *draw;
 
     screen = driContext->driScreenPriv;
     if (!screen->dri2.loader)
@@ -516,9 +532,10 @@ void radeon_prepare_render(radeonContextPtr radeon)
 	if (drawable->lastStamp != drawable->dri2.stamp)
 	    radeon_update_renderbuffers(driContext, drawable, GL_FALSE);
 
-	/* Intel driver does the equivalent of this, no clue if it is needed:
-	 * radeon_draw_buffer(radeon->glCtx, &(drawable->driverPrivate)->base);
-	 */
+	/* Intel driver does the equivalent of this, no clue if it is needed:*/
+	draw = drawable->driverPrivate;
+	radeon_draw_buffer(radeon->glCtx, &draw->base);
+
 	driContext->dri2.draw_stamp = drawable->dri2.stamp;
     }
 

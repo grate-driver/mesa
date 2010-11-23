@@ -1,3 +1,79 @@
+mesa (7.9+repack-1ubuntu1) UNRELEASED; urgency=low
+
+  * Merge from Debian experimental.  Remaining Ubuntu changes:
+   - debian/control
+      + Drop lesstif-dev from Build-Depends; it's in Universe.
+      + Comment out GLw libs since it depends on lesstif-dev.
+      + Drop i686 swx11 libgl package.
+      + Add libdrm-dev to mesa-common-dev Depends.
+    - debian/rules
+      + Unexport LDFLAGS (amd64 FTBFS).
+      + Use --disable-glw for swx11 targets too.
+      + Don't enable motif for swx11 targets.
+      + Use lzma compression for binary debs to save CD space.
+      + Drop unloved mach64 driver.
+    - debian/patches
+      + 100_no_abi_tag.patch
+      + 101_ubuntu_hidden_glname.patch
+      + 103_savage-expose_fbmodes_with_nonzero_alpha.patch
+      + 107_glxgears_is_not_a_benchmark.patch
+    - rules, libgl1-mesa-{glx,dev,swx11,swx11-dev}.install,
+      libgl1-mesa-{glx,swx11}.{postinst,prerm}, libgl1-mesa-dev.links:
+      Install libGL.so* in /usr/lib/mesa to allow things to work with
+      alternatives.
+    - debian/gbp.conf
+      + Point at Ubuntu branch to make git-buildpackage less narky.
+
+ -- Christopher James Halse Rogers <raof@ubuntu.com>  Tue, 23 Nov 2010 15:13:10 +1100
+
+mesa (7.9+repack-1) experimental; urgency=low
+
+  * Repack the upstream tarball to get rid of duplicate files which make dpkg
+    choke.  Thanks to Luca Falavigna for his help diagnosing this.
+
+ -- Julien Cristau <jcristau@debian.org>  Mon, 15 Nov 2010 23:04:45 +0100
+
+mesa (7.9-1) experimental; urgency=low
+
+  [ Christopher James Halse Rogers ]
+  * debian/control:
+    - Add EGL, GLESv1, GLESv2, and OpenVG virtual packages.  The Khronos group
+      specifies a de-facto linux ABI for these libraries.  We have a similar
+      package for libgl1.
+  * debian/README.Debian:
+    - Document the virtual packages above.
+
+  [ Sven Joachim ]
+  * Bump libdrm-dev build dependency to 2.4.21-2~, the Nouveau Gallium
+    driver does not build with squeeze's libdrm-nouveau1.
+
+  [ Julien Cristau ]
+  * New upstream release.
+  * Update patches:
+    - 03_optional-progs-and-install.patch dropped, demos moved to a separate
+      package
+    - 07-nouveau-update.diff and
+      09-intel-fix-invalidate-before-initialisation.diff dropped, they were
+      backports from upstream
+    - 04_osmesa_version.diff updated
+  * Add build-dep on talloc.
+  * Drop the mesa-utils package, demos were moved out of the mesa tree.
+  * Use --with-egl-platforms instead of --with-egl-displays, and replace kms
+    with drm.
+  * Merge some packaging changes from ubuntu:
+    - libegl1-mesa-drivers-x11,kms: There are no longer separate kms or x11
+      drivers for EGL, libegl1-mesa-drivers now contains a single driver that
+      provides both backends (Christopher James Halse Rogers)
+    - Remove pre-generated .pc's, use the ones generated at build time instead
+      (Robert Hooker)
+    - Build the r600 gallium driver
+    - Update symbols files
+  * README.source: we don't need to repack MesaLib.tar.gz anymore.
+  * Kill old sourceforge url from debian/watch.
+  * Ship the gallium r300 driver instead of the classic one.
+
+ -- Julien Cristau <jcristau@debian.org>  Sat, 13 Nov 2010 00:36:11 +0100
+
 mesa (7.8.2-2ubuntu2) maverick; urgency=low
 
   * Cherry-pick EGL/GL|ES/OpenVG virtual packages from Debian experimental git

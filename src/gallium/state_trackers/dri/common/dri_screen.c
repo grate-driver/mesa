@@ -287,16 +287,14 @@ dri_fill_st_visual(struct st_visual *stvis, struct dri_screen *screen,
 
 static boolean
 dri_get_egl_image(struct st_manager *smapi,
-                  struct st_context_iface *stctxi,
                   void *egl_image,
                   struct st_egl_image *stimg)
 {
-   struct dri_context *ctx =
-      (struct dri_context *)stctxi->st_manager_private;
+   struct dri_screen *screen = (struct dri_screen *)smapi;
    __DRIimage *img = NULL;
 
-   if (ctx->lookup_egl_image) {
-      img = ctx->lookup_egl_image(ctx, egl_image);
+   if (screen->lookup_egl_image) {
+      img = screen->lookup_egl_image(screen, egl_image);
    }
 
    if (!img)
@@ -378,10 +376,15 @@ dri_init_screen_helper(struct dri_screen *screen,
 
    screen->base.get_egl_image = dri_get_egl_image;
    screen->base.get_param = dri_get_param;
-   screen->st_api = st_gl_api_create();
 
+   screen->st_api = st_gl_api_create();
    if (!screen->st_api)
       return NULL;
+
+   if(pscreen->get_param(pscreen, PIPE_CAP_NPOT_TEXTURES))
+      screen->target = PIPE_TEXTURE_2D;
+   else
+      screen->target = PIPE_TEXTURE_RECT;
 
    driParseOptionInfo(&screen->optionCache,
                       __driConfigOptions, __driNConfigOptions);

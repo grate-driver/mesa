@@ -43,19 +43,25 @@
  * Return the state tracker for the given context.
  */
 static struct st_api *
-egl_g3d_choose_st(_EGLDriver *drv, _EGLContext *ctx)
+egl_g3d_choose_st(_EGLDriver *drv, _EGLContext *ctx,
+                  enum st_profile_type *profile)
 {
    struct egl_g3d_driver *gdrv = egl_g3d_driver(drv);
-   EGLint idx = -1;
+   struct st_api *stapi;
+   EGLint api = -1;
+
+   *profile = ST_PROFILE_DEFAULT;
 
    switch (ctx->ClientAPI) {
    case EGL_OPENGL_ES_API:
       switch (ctx->ClientVersion) {
       case 1:
-         idx = ST_API_OPENGL_ES1;
+         api = ST_API_OPENGL;
+         *profile = ST_PROFILE_OPENGL_ES1;
          break;
       case 2:
-         idx = ST_API_OPENGL_ES2;
+         api = ST_API_OPENGL;
+         *profile = ST_PROFILE_OPENGL_ES2;
          break;
       default:
          _eglLog(_EGL_WARNING, "unknown client version %d",
@@ -64,17 +70,31 @@ egl_g3d_choose_st(_EGLDriver *drv, _EGLContext *ctx)
       }
       break;
    case EGL_OPENVG_API:
-      idx = ST_API_OPENVG;
+      api = ST_API_OPENVG;
       break;
    case EGL_OPENGL_API:
-      idx = ST_API_OPENGL;
+      api = ST_API_OPENGL;
       break;
    default:
       _eglLog(_EGL_WARNING, "unknown client API 0x%04x", ctx->ClientAPI);
       break;
    }
 
-   return (idx >= 0) ? gdrv->loader->get_st_api(idx) : NULL;
+   switch (api) {
+   case ST_API_OPENGL:
+      stapi = gdrv->loader->guess_gl_api(*profile);
+      break;
+   case ST_API_OPENVG:
+      stapi = gdrv->loader->get_st_api(api);
+      break;
+   default:
+      stapi = NULL;
+      break;
+   }
+   if (stapi && !(stapi->profile_mask & (1 << *profile)))
+      stapi = NULL;
+
+   return stapi;
 }
 
 static _EGLContext *
@@ -85,6 +105,7 @@ egl_g3d_create_context(_EGLDriver *drv, _EGLDisplay *dpy, _EGLConfig *conf,
    struct egl_g3d_context *gshare = egl_g3d_context(share);
    struct egl_g3d_config *gconf = egl_g3d_config(conf);
    struct egl_g3d_context *gctx;
+   struct st_context_attribs stattribs;
 
    gctx = CALLOC_STRUCT(egl_g3d_context);
    if (!gctx) {
@@ -97,14 +118,18 @@ egl_g3d_create_context(_EGLDriver *drv, _EGLDisplay *dpy, _EGLConfig *conf,
       return NULL;
    }
 
-   gctx->stapi = egl_g3d_choose_st(drv, &gctx->base);
+   memset(&stattribs, 0, sizeof(stattribs));
+   if (gconf)
+      stattribs.visual = gconf->stvis;
+
+   gctx->stapi = egl_g3d_choose_st(drv, &gctx->base, &stattribs.profile);
    if (!gctx->stapi) {
       FREE(gctx);
       return NULL;
    }
 
    gctx->stctxi = gctx->stapi->create_context(gctx->stapi, gdpy->smapi,
-         &gconf->stvis, (gshare) ? gshare->stctxi : NULL);
+         &stattribs, (gshare) ? gshare->stctxi : NULL);
    if (!gctx->stctxi) {
       FREE(gctx);
       return NULL;
@@ -438,16 +463,19 @@ egl_g3d_make_current(_EGLDriver *drv, _EGLDisplay *dpy,
       ok = gctx->stapi->make_current(gctx->stapi, gctx->stctxi,
             (gdraw) ? gdraw->stfbi : NULL, (gread) ? gread->stfbi : NULL);
       if (ok) {
-         gctx->stctxi->notify_invalid_framebuffer(gctx->stctxi, gdraw->stfbi);
-         if (gread != gdraw) {
+         if (gdraw) {
+            gctx->stctxi->notify_invalid_framebuffer(gctx->stctxi,
+                  gdraw->stfbi);
+
+            if (gdraw->base.Type == EGL_WINDOW_BIT) {
+               gctx->base.WindowRenderBuffer =
+                  (gdraw->stvis.render_buffer == ST_ATTACHMENT_FRONT_LEFT) ?
+                  EGL_SINGLE_BUFFER : EGL_BACK_BUFFER;
+            }
+         }
+         if (gread && gread != gdraw) {
             gctx->stctxi->notify_invalid_framebuffer(gctx->stctxi,
                   gread->stfbi);
-         }
-
-         if (gdraw->base.Type == EGL_WINDOW_BIT) {
-            gctx->base.WindowRenderBuffer =
-               (gdraw->stvis.render_buffer == ST_ATTACHMENT_FRONT_LEFT) ?
-               EGL_SINGLE_BUFFER : EGL_BACK_BUFFER;
          }
       }
    }
@@ -581,8 +609,10 @@ egl_g3d_wait_client(_EGLDriver *drv, _EGLDisplay *dpy, _EGLContext *ctx)
 
    gctx->stctxi->flush(gctx->stctxi,
          PIPE_FLUSH_RENDER_CACHE | PIPE_FLUSH_FRAME, &fence);
-   screen->fence_finish(screen, fence, 0);
-   screen->fence_reference(screen, &fence, NULL);
+   if (fence) {
+      screen->fence_finish(screen, fence, 0);
+      screen->fence_reference(screen, &fence, NULL);
+   }
 
    return EGL_TRUE;
 }
@@ -806,6 +836,10 @@ egl_g3d_init_driver_api(_EGLDriver *drv)
 
    drv->API.CreateImageKHR = egl_g3d_create_image;
    drv->API.DestroyImageKHR = egl_g3d_destroy_image;
+#ifdef EGL_MESA_drm_image
+   drv->API.CreateDRMImageMESA = egl_g3d_create_drm_image;
+   drv->API.ExportDRMImageMESA = egl_g3d_export_drm_image;
+#endif
 
 #ifdef EGL_KHR_reusable_sync
    drv->API.CreateSyncKHR = egl_g3d_create_sync;

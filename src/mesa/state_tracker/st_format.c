@@ -35,7 +35,6 @@
 #include "main/imports.h"
 #include "main/context.h"
 #include "main/texstore.h"
-#include "main/enums.h"
 #include "main/image.h"
 #include "main/macros.h"
 
@@ -78,7 +77,9 @@ st_format_datatype(enum pipe_format format)
          return GL_UNSIGNED_SHORT;
       }
       else if (format == PIPE_FORMAT_Z24_UNORM_S8_USCALED ||
-               format == PIPE_FORMAT_S8_USCALED_Z24_UNORM) {
+               format == PIPE_FORMAT_S8_USCALED_Z24_UNORM ||
+               format == PIPE_FORMAT_Z24X8_UNORM ||
+               format == PIPE_FORMAT_X8Z24_UNORM) {
          return GL_UNSIGNED_INT_24_8;
       }
       else {
@@ -165,6 +166,8 @@ st_mesa_format_to_pipe_format(gl_format mesaFormat)
       return PIPE_FORMAT_X8Z24_UNORM;
    case MESA_FORMAT_X8_Z24:
       return PIPE_FORMAT_Z24X8_UNORM;
+   case MESA_FORMAT_S8:
+      return PIPE_FORMAT_S8_USCALED;
    case MESA_FORMAT_YCBCR:
       return PIPE_FORMAT_UYVY;
 #if FEATURE_texture_s3tc

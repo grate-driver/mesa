@@ -48,9 +48,23 @@ solaris*)
     ;;
 esac
 
+dnl clang is mostly GCC-compatible, but its version is much lower,
+dnl so we have to check for it.
+AC_MSG_CHECKING([if compiling with clang])
+
+AC_COMPILE_IFELSE(
+[AC_LANG_PROGRAM([], [[
+#ifndef __clang__
+       not clang
+#endif
+]])],
+[CLANG=yes], [CLANG=no])
+
+AC_MSG_RESULT([$CLANG])
+
 dnl If we're using GCC, make sure that it is at least version 3.3.0.  Older
 dnl versions are explictly not supported.
-if test "x$GCC" = xyes; then
+if test "x$GCC" = xyes -a "x$CLANG" = xno; then
     AC_MSG_CHECKING([whether gcc version is sufficient])
     major=0
     minor=0
@@ -123,7 +137,10 @@ esac
 
 dnl Add flags for gcc and g++
 if test "x$GCC" = xyes; then
-    CFLAGS="$CFLAGS -Wall -Wmissing-prototypes -std=c99 -ffast-math"
+    CFLAGS="$CFLAGS -Wall -Wmissing-prototypes -std=c99"
+    if test "x$CLANG" = "xno"; then
+       CFLAGS="$CFLAGS -ffast-math"
+    fi
 
     # Enable -fvisibility=hidden if using a gcc that supports it
     save_CFLAGS="$CFLAGS"
@@ -137,6 +154,13 @@ if test "x$GCC" = xyes; then
 fi
 if test "x$GXX" = xyes; then
     CXXFLAGS="$CXXFLAGS -Wall"
+
+    # Enable -fvisibility=hidden if using a gcc that supports it
+    save_CXXFLAGS="$CXXFLAGS"
+    AC_MSG_CHECKING([whether $CXX supports -fvisibility=hidden])
+    CXXFLAGS="$CXXFLAGS -fvisibility=hidden"
+    AC_LINK_IFELSE([AC_LANG_PROGRAM()], AC_MSG_RESULT([yes]),
+		   [CXXFLAGS="$save_CXXFLAGS" ; AC_MSG_RESULT([no])]);
 
     # Work around aliasing bugs - developers should comment this out
     CXXFLAGS="$CXXFLAGS -fno-strict-aliasing"
@@ -258,6 +282,8 @@ fi
 dnl
 dnl library names
 dnl
+LIB_PREFIX_GLOB='lib'
+LIB_VERSION_SEPARATOR='.'
 if test "$enable_static" = yes; then
     LIB_EXTENSION='a'
 else
@@ -265,7 +291,10 @@ else
     darwin* )
         LIB_EXTENSION='dylib' ;;
     cygwin* )
-        LIB_EXTENSION='dll.a' ;;
+        dnl prefix can be 'cyg' or 'lib'
+        LIB_PREFIX_GLOB='???'
+        LIB_VERSION_SEPARATOR='-'
+        LIB_EXTENSION='dll' ;;
     aix* )
         LIB_EXTENSION='a' ;;
     * )
@@ -283,15 +312,16 @@ GLESv1_CM_LIB_NAME='lib$(GLESv1_CM_LIB).'${LIB_EXTENSION}
 GLESv2_LIB_NAME='lib$(GLESv2_LIB).'${LIB_EXTENSION}
 VG_LIB_NAME='lib$(VG_LIB).'${LIB_EXTENSION}
 
-GL_LIB_GLOB='lib$(GL_LIB).*'${LIB_EXTENSION}'*'
-GLU_LIB_GLOB='lib$(GLU_LIB).*'${LIB_EXTENSION}'*'
-GLUT_LIB_GLOB='lib$(GLUT_LIB).*'${LIB_EXTENSION}'*'
-GLW_LIB_GLOB='lib$(GLW_LIB).*'${LIB_EXTENSION}'*'
-OSMESA_LIB_GLOB='lib$(OSMESA_LIB).*'${LIB_EXTENSION}'*'
-EGL_LIB_GLOB='lib$(EGL_LIB).*'${LIB_EXTENSION}'*'
-GLESv1_CM_LIB_GLOB='lib$(GLESv1_CM_LIB).*'${LIB_EXTENSION}'*'
-GLESv2_LIB_GLOB='lib$(GLESv2_LIB).*'${LIB_EXTENSION}'*'
-VG_LIB_GLOB='lib$(VG_LIB).*'${LIB_EXTENSION}'*'
+GL_LIB_GLOB=${LIB_PREFIX_GLOB}'$(GL_LIB)'${LIB_VERSION_SEPARATOR}'*'${LIB_EXTENSION}'*'
+GLU_LIB_GLOB=${LIB_PREFIX_GLOB}'$(GLU_LIB)'${LIB_VERSION_SEPARATOR}'*'${LIB_EXTENSION}'*'
+GLUT_LIB_GLOB=${LIB_PREFIX_GLOB}'$(GLUT_LIB)'${LIB_VERSION_SEPARATOR}'*'${LIB_EXTENSION}'*'
+GLW_LIB_GLOB=${LIB_PREFIX_GLOB}'$(GLW_LIB)'${LIB_VERSION_SEPARATOR}'*'${LIB_EXTENSION}'*'
+OSMESA_LIB_GLOB=${LIB_PREFIX_GLOB}'$(OSMESA_LIB)'${LIB_VERSION_SEPARATOR}'*'${LIB_EXTENSION}'*'
+EGL_LIB_GLOB=${LIB_PREFIX_GLOB}'$(EGL_LIB)'${LIB_VERSION_SEPARATOR}'*'${LIB_EXTENSION}'*'
+EGL_LIB_GLOB=${LIB_PREFIX_GLOB}'$(EGL_LIB)'${LIB_VERSION_SEPARATOR}'*'${LIB_EXTENSION}'*'
+GLESv1_CM_LIB_GLOB=${LIB_PREFIX_GLOB}'$(GLESv1_CM_LIB)'${LIB_VERSION_SEPARATOR}'*'${LIB_EXTENSION}'*'
+GLESv2_LIB_GLOB=${LIB_PREFIX_GLOB}'$(GLESv2_LIB)'${LIB_VERSION_SEPARATOR}'*'${LIB_EXTENSION}'*'
+VG_LIB_GLOB=${LIB_PREFIX_GLOB}'$(VG_LIB)'${LIB_VERSION_SEPARATOR}'*'${LIB_EXTENSION}'*'
 
 AC_SUBST([GL_LIB_NAME])
 AC_SUBST([GLU_LIB_NAME])
@@ -464,6 +494,8 @@ xxlib|xdri|xosmesa)
 esac
 
 PKG_CHECK_MODULES([TALLOC], [talloc])
+AC_SUBST([TALLOC_LIBS])
+AC_SUBST([TALLOC_CFLAGS])
 
 dnl
 dnl Driver specific build directories
@@ -576,8 +608,8 @@ xlib)
         GL_PC_LIB_PRIV="$GL_LIB_DEPS"
         GL_PC_CFLAGS="$X11_INCLUDES"
     fi
-    GL_LIB_DEPS="$GL_LIB_DEPS $SELINUX_LIBS -lm -lpthread"
-    GL_PC_LIB_PRIV="$GL_PC_LIB_PRIV $SELINUX_LIBS -lm -lpthread"
+    GL_LIB_DEPS="$GL_LIB_DEPS $SELINUX_LIBS -lm -lpthread $TALLOC_LIBS"
+    GL_PC_LIB_PRIV="$GL_PC_LIB_PRIV $SELINUX_LIBS -lm -lpthread $TALLOC_LIBS"
 
     # if static, move the external libraries to the programs
     # and empty the libraries for libGL
@@ -601,8 +633,15 @@ dri)
 
     # find the DRI deps for libGL
     if test "$x11_pkgconfig" = yes; then
+        dri_modules="x11 xext xdamage xfixes"
+
+        # add xf86vidmode if available
+        PKG_CHECK_MODULES([XF86VIDMODE], [xxf86vm], HAVE_XF86VIDMODE=yes, HAVE_XF86VIDMODE=no)
+        if test "$HAVE_XF86VIDMODE" = yes ; then
+            dri_modules="$dri_modules xxf86vm"
+        fi
+
         # add xcb modules if necessary
-        dri_modules="x11 xext xxf86vm xdamage xfixes"
         if test "$enable_xcb" = yes; then
             dri_modules="$dri_modules x11-xcb xcb-glx"
         fi
@@ -650,6 +689,13 @@ AC_SUBST([GLESv1_CM_PC_LIB_PRIV])
 AC_SUBST([GLESv2_LIB_DEPS])
 AC_SUBST([GLESv2_PC_LIB_PRIV])
 
+
+AC_SUBST([HAVE_XF86VIDMODE])
+
+PKG_CHECK_MODULES([LIBDRM_RADEON],
+		  [libdrm_radeon libdrm >= $LIBDRM_RADEON_REQUIRED],
+		  HAVE_LIBDRM_RADEON=yes,
+		  HAVE_LIBDRM_RADEON=no)
 
 dnl
 dnl More X11 setup
@@ -869,12 +915,7 @@ esac
 
 case $DRI_DIRS in
 *radeon*|*r200*|*r300*|*r600*)
-    PKG_CHECK_MODULES([LIBDRM_RADEON],
-		      [libdrm_radeon libdrm >= $LIBDRM_RADEON_REQUIRED],
-		      HAVE_LIBDRM_RADEON=yes,
-		      HAVE_LIBDRM_RADEON=no)
-
-    if test "$HAVE_LIBDRM_RADEON" = yes; then
+    if test "x$HAVE_LIBDRM_RADEON" = xyes; then
 	RADEON_CFLAGS="-DHAVE_LIBDRM_RADEON=1 $LIBDRM_RADEON_CFLAGS"
 	RADEON_LDFLAGS=$LIBDRM_RADEON_LIBS
     fi
@@ -933,12 +974,12 @@ case "$DRIVER_DIRS" in
 *osmesa*)
     # only link libraries with osmesa if shared
     if test "$enable_static" = no; then
-        OSMESA_LIB_DEPS="-lm -lpthread $SELINUX_LIBS $DLOPEN_LIBS"
+        OSMESA_LIB_DEPS="-lm -lpthread $SELINUX_LIBS $DLOPEN_LIBS $TALLOC_LIBS"
     else
         OSMESA_LIB_DEPS=""
     fi
     OSMESA_MESA_DEPS=""
-    OSMESA_PC_LIB_PRIV="-lm -lpthread $SELINUX_LIBS $DLOPEN_LIBS"
+    OSMESA_PC_LIB_PRIV="-lm -lpthread $SELINUX_LIBS $DLOPEN_LIBS $TALLOC_LIBS"
     ;;
 esac
 AC_SUBST([OSMESA_LIB_DEPS])
@@ -1322,7 +1363,7 @@ fi
 AC_ARG_WITH([egl-platforms],
     [AS_HELP_STRING([--with-egl-platforms@<:@=DIRS...@:>@],
         [comma delimited native platforms libEGL supports, e.g.
-        "x11,kms" @<:@default=auto@:>@])],
+        "x11,drm" @<:@default=auto@:>@])],
     [with_egl_platforms="$withval"],
     [with_egl_platforms=yes])
 AC_ARG_WITH([egl-displays],
@@ -1335,6 +1376,9 @@ case "$with_egl_platforms" in
 yes)
     if test "x$enable_egl" = xyes && test "x$mesa_driver" != xosmesa; then
         EGL_PLATFORMS="x11"
+        if test "$mesa_driver" = dri; then
+            EGL_PLATFORMS="$EGL_PLATFORMS drm"
+        fi
     fi
     ;;
 *)
@@ -1477,18 +1521,28 @@ elif test "x$enable_gallium_i965" = xauto; then
 fi
 
 dnl
-dnl Gallium Radeon configuration
+dnl Gallium Radeon r300g configuration
 dnl
 AC_ARG_ENABLE([gallium-radeon],
     [AS_HELP_STRING([--enable-gallium-radeon],
         [build gallium radeon @<:@default=disabled@:>@])],
     [enable_gallium_radeon="$enableval"],
     [enable_gallium_radeon=auto])
+if test "x$enable_gallium_radeon" = xauto; then
+    if test "x$HAVE_LIBDRM_RADEON" = xyes; then
+	GALLIUM_DRIVERS_DIRS="$GALLIUM_DRIVERS_DIRS r300"
+	gallium_check_st "radeon/drm" "dri-r300"
+    else
+	AC_MSG_WARN([libdrm_radeon is missing, not building gallium-radeon (r300)])
+    fi
+fi
 if test "x$enable_gallium_radeon" = xyes; then
-    GALLIUM_DRIVERS_DIRS="$GALLIUM_DRIVERS_DIRS r300"
-    gallium_check_st "radeon/drm" "dri-radeong" "xorg-radeon"
-elif test "x$enable_gallium_radeon" = xauto; then
-    GALLIUM_DRIVERS_DIRS="$GALLIUM_DRIVERS_DIRS r300"
+    if test "x$HAVE_LIBDRM_RADEON" = xyes; then
+	GALLIUM_DRIVERS_DIRS="$GALLIUM_DRIVERS_DIRS r300"
+	gallium_check_st "radeon/drm" "dri-r300" "xorg-radeon"
+    else
+	AC_MSG_ERROR([libdrm_radeon is missing, cannot build gallium-radeon (r300)])
+    fi
 fi
 
 dnl
@@ -1500,8 +1554,12 @@ AC_ARG_ENABLE([gallium-r600],
     [enable_gallium_r600="$enableval"],
     [enable_gallium_r600=auto])
 if test "x$enable_gallium_r600" = xyes; then
-    GALLIUM_DRIVERS_DIRS="$GALLIUM_DRIVERS_DIRS r600"
-    gallium_check_st "r600/drm" "dri-r600"
+    if test "x$HAVE_LIBDRM_RADEON" = xyes; then
+	GALLIUM_DRIVERS_DIRS="$GALLIUM_DRIVERS_DIRS r600"
+	gallium_check_st "r600/drm" "dri-r600"
+    else
+	AC_MSG_ERROR([libdrm_radeon is missing, cannot build gallium-r600])
+    fi
 fi
 
 dnl

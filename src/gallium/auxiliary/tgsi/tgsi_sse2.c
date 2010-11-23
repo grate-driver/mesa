@@ -2703,8 +2703,7 @@ static void aos_to_soa( struct x86_function *func,
    struct x86_reg aos_input = x86_make_reg( file_REG32, reg_BX );
    struct x86_reg num_inputs = x86_make_reg( file_REG32, reg_CX );
    struct x86_reg stride = x86_make_reg( file_REG32, reg_DX );
-   int inner_loop;
-
+   int loop_top, loop_exit_fixup;
 
    /* Save EBX */
    x86_push( func, x86_make_reg( file_REG32, reg_BX ) );
@@ -2717,8 +2716,11 @@ static void aos_to_soa( struct x86_function *func,
    x86_mov( func, num_inputs, x86_fn_arg( func, arg_num ) );
    x86_mov( func, stride,     x86_fn_arg( func, arg_stride ) );
 
-   /* do */
-   inner_loop = x86_get_label( func );
+   /* while (num_inputs != 0) */
+   loop_top = x86_get_label( func );
+   x86_cmp_imm( func, num_inputs, 0 );
+   loop_exit_fixup = x86_jcc_forward( func, cc_E );
+
    {
       x86_push( func, aos_input );
       sse_movlps( func, make_xmm( 0 ), x86_make_disp( aos_input, 0 ) );
@@ -2750,9 +2752,10 @@ static void aos_to_soa( struct x86_function *func,
       x86_lea( func, aos_input, x86_make_disp(aos_input, 16) );
       x86_lea( func, soa_input, x86_make_disp(soa_input, 64) );
    }
-   /* while --num_inputs */
+   /* --num_inputs */
    x86_dec( func, num_inputs );
-   x86_jcc( func, cc_NE, inner_loop );
+   x86_jmp( func, loop_top );
+   x86_fixup_fwd_jump( func, loop_exit_fixup );
 
    /* Restore EBX */
    x86_pop( func, x86_make_reg( file_REG32, reg_BX ) );
@@ -2827,31 +2830,52 @@ static void soa_to_aos( struct x86_function *func,
  * Check if the instructions dst register is the same as any src
  * register and warn if there's a posible SOA dependency.
  */
-static void
+static boolean
 check_soa_dependencies(const struct tgsi_full_instruction *inst)
 {
-   switch (inst->Instruction.Opcode) {
+   uint opcode = inst->Instruction.Opcode;
+
+   /* XXX: we only handle src/dst aliasing in a few opcodes currently.
+    * Need to use an additional temporay to hold the result in the
+    * cases where the code is too opaque to fix.
+    */
+
+   switch (opcode) {
    case TGSI_OPCODE_ADD:
    case TGSI_OPCODE_MOV:
    case TGSI_OPCODE_MUL:
+   case TGSI_OPCODE_RCP:
+   case TGSI_OPCODE_RSQ:
+   case TGSI_OPCODE_EXP:
+   case TGSI_OPCODE_LOG:
+   case TGSI_OPCODE_DP3:
+   case TGSI_OPCODE_DP4:
+   case TGSI_OPCODE_DP2A:
+   case TGSI_OPCODE_EX2:
+   case TGSI_OPCODE_LG2:
+   case TGSI_OPCODE_POW:
    case TGSI_OPCODE_XPD:
+   case TGSI_OPCODE_DPH:
+   case TGSI_OPCODE_COS:
+   case TGSI_OPCODE_SIN:
+   case TGSI_OPCODE_TEX:
+   case TGSI_OPCODE_TXB:
+   case TGSI_OPCODE_TXP:
+   case TGSI_OPCODE_NRM:
+   case TGSI_OPCODE_NRM4:
+   case TGSI_OPCODE_DP2:
       /* OK - these opcodes correctly handle SOA dependencies */
-      break;
+      return TRUE;
    default:
-      if (tgsi_check_soa_dependencies(inst)) {
-         uint opcode = inst->Instruction.Opcode;
+      if (!tgsi_check_soa_dependencies(inst))
+         return TRUE;
 
-         /* XXX: we only handle src/dst aliasing in a few opcodes
-          * currently.  Need to use an additional temporay to hold
-          * the result in the cases where the code is too opaque to
-          * fix.
-          */
-         if (opcode != TGSI_OPCODE_MOV) {
-            debug_printf("Warning: src/dst aliasing in instruction"
-                         " is not handled:\n");
-            tgsi_dump_instruction(inst, 1);
-         }
-      }
+      debug_printf("Warning: src/dst aliasing in instruction"
+                   " is not handled:\n");
+      debug_printf("Warning: ");
+      tgsi_dump_instruction(inst, 1);
+
+      return FALSE;
    }
 }
 
@@ -2951,7 +2975,8 @@ tgsi_emit_sse2(
                          tgsi_get_processor_name(proc));
 	 }
 
-         check_soa_dependencies(&parse.FullToken.FullInstruction);
+         if (ok)
+            ok = check_soa_dependencies(&parse.FullToken.FullInstruction);
          break;
 
       case TGSI_TOKEN_TYPE_IMMEDIATE:

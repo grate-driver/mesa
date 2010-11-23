@@ -41,7 +41,6 @@
 #include "intel_span.h"
 #include "tnl/t_pipeline.h"
 
-
 /***************************************
  * Mesa's Driver Functions
  ***************************************/
@@ -66,6 +65,7 @@ GLboolean brwCreateContext( int api,
    struct brw_context *brw = (struct brw_context *) CALLOC_STRUCT(brw_context);
    struct intel_context *intel = &brw->intel;
    GLcontext *ctx = &intel->ctx;
+   unsigned i;
 
    if (!brw) {
       printf("%s: failed to alloc context\n", __FUNCTION__);
@@ -110,8 +110,19 @@ GLboolean brwCreateContext( int api,
    ctx->Const.MaxPointSizeAA = 255.0;
 
    /* We want the GLSL compiler to emit code that uses condition codes */
-   ctx->Shader.EmitCondCodes = GL_TRUE;
-   ctx->Shader.EmitNVTempInitialization = GL_TRUE;
+   for (i = 0; i <= MESA_SHADER_FRAGMENT; i++) {
+      ctx->ShaderCompilerOptions[i].EmitCondCodes = GL_TRUE;
+      ctx->ShaderCompilerOptions[i].EmitNVTempInitialization = GL_TRUE;
+      ctx->ShaderCompilerOptions[i].EmitNoNoise = GL_TRUE;
+      ctx->ShaderCompilerOptions[i].EmitNoMainReturn = GL_TRUE;
+      ctx->ShaderCompilerOptions[i].EmitNoIndirectInput = GL_TRUE;
+      ctx->ShaderCompilerOptions[i].EmitNoIndirectOutput = GL_TRUE;
+
+      ctx->ShaderCompilerOptions[i].EmitNoIndirectUniform =
+	 (i == MESA_SHADER_FRAGMENT);
+      ctx->ShaderCompilerOptions[i].EmitNoIndirectTemp =
+	 (i == MESA_SHADER_FRAGMENT);
+   }
 
    ctx->Const.VertexProgram.MaxNativeInstructions = (16 * 1024);
    ctx->Const.VertexProgram.MaxAluInstructions = 0;
@@ -144,7 +155,8 @@ GLboolean brwCreateContext( int api,
       brw->CMD_VF_STATISTICS = CMD_VF_STATISTICS_GM45;
       brw->CMD_PIPELINE_SELECT = CMD_PIPELINE_SELECT_GM45;
       brw->has_surface_tile_offset = GL_TRUE;
-      brw->has_compr4 = GL_TRUE;
+      if (intel->gen < 6)
+	  brw->has_compr4 = GL_TRUE;
       brw->has_aa_line_parameters = GL_TRUE;
       brw->has_pln = GL_TRUE;
   } else {
@@ -153,7 +165,11 @@ GLboolean brwCreateContext( int api,
    }
 
    /* WM maximum threads is number of EUs times number of threads per EU. */
-   if (intel->gen == 5) {
+   if (intel->gen >= 6) {
+      brw->urb.size = 1024;
+      brw->vs_max_threads = 60;
+      brw->wm_max_threads = 80;
+   } else if (intel->gen == 5) {
       brw->urb.size = 1024;
       brw->vs_max_threads = 72;
       brw->wm_max_threads = 12 * 6;

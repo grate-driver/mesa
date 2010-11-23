@@ -605,8 +605,10 @@ tgsi_check_soa_dependencies(const struct tgsi_full_instruction *inst)
    for (i = 0; i < inst->Instruction.NumSrcRegs; i++) {
       if ((inst->Src[i].Register.File ==
            inst->Dst[0].Register.File) &&
-          (inst->Src[i].Register.Index ==
-           inst->Dst[0].Register.Index)) {
+          ((inst->Src[i].Register.Index ==
+            inst->Dst[0].Register.Index) ||
+	   inst->Src[i].Register.Indirect ||
+	   inst->Dst[0].Register.Indirect)) {
          /* loop over dest channels */
          uint channelsWritten = 0x0;
          FOR_EACH_ENABLED_CHANNEL(*inst, chan) {
@@ -3239,6 +3241,8 @@ exec_instruction(
 
          if (mach->CallStackTop == 0) {
             /* returning from main() */
+            mach->CondStackTop = 0;
+            mach->LoopStackTop = 0;
             *pc = -1;
             return;
          }
@@ -3767,6 +3771,9 @@ tgsi_exec_machine_run( struct tgsi_exec_machine *mach )
    }
 #endif
 
+   /* Strictly speaking, these assertions aren't really needed but they
+    * can potentially catch some bugs in the control flow code.
+    */
    assert(mach->CondStackTop == 0);
    assert(mach->LoopStackTop == 0);
    assert(mach->ContStackTop == 0);

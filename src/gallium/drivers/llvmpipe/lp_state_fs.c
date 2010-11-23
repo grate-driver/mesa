@@ -186,6 +186,7 @@ generate_quad_mask(LLVMBuilderRef builder,
    LLVMTypeRef i32t = LLVMInt32Type();
    LLVMValueRef bits[4];
    LLVMValueRef mask;
+   int shift;
 
    /*
     * XXX: We'll need a different path for 16 x u8
@@ -197,10 +198,28 @@ generate_quad_mask(LLVMBuilderRef builder,
    /*
     * mask_input >>= (quad * 4)
     */
+   
+   switch (quad) {
+   case 0:
+      shift = 0;
+      break;
+   case 1:
+      shift = 2;
+      break;
+   case 2:
+      shift = 8;
+      break;
+   case 3:
+      shift = 10;
+      break;
+   default:
+      assert(0);
+      shift = 0;
+   }
 
    mask_input = LLVMBuildLShr(builder,
                               mask_input,
-                              LLVMConstInt(i32t, quad * 4, 0),
+                              LLVMConstInt(i32t, shift, 0),
                               "");
 
    /*
@@ -211,9 +230,9 @@ generate_quad_mask(LLVMBuilderRef builder,
 
    bits[0] = LLVMConstInt(i32t, 1 << 0, 0);
    bits[1] = LLVMConstInt(i32t, 1 << 1, 0);
-   bits[2] = LLVMConstInt(i32t, 1 << 2, 0);
-   bits[3] = LLVMConstInt(i32t, 1 << 3, 0);
-
+   bits[2] = LLVMConstInt(i32t, 1 << 4, 0);
+   bits[3] = LLVMConstInt(i32t, 1 << 5, 0);
+   
    mask = LLVMBuildAnd(builder, mask, LLVMConstVector(bits, 4), "");
 
    /*
@@ -332,14 +351,13 @@ generate_fs(struct llvmpipe_context *lp,
                   lp_build_name(out, "color%u.%u.%c", i, attrib, "rgba"[chan]);
 
                   /* Alpha test */
-                  /* XXX: should the alpha reference value be passed separately? */
 		  /* XXX: should only test the final assignment to alpha */
-                  if(cbuf == 0 && chan == 3) {
+                  if (cbuf == 0 && chan == 3 && key->alpha.enabled) {
                      LLVMValueRef alpha = out;
                      LLVMValueRef alpha_ref_value;
                      alpha_ref_value = lp_jit_context_alpha_ref_value(builder, context_ptr);
                      alpha_ref_value = lp_build_broadcast(builder, vec_type, alpha_ref_value);
-                     lp_build_alpha_test(builder, &key->alpha, type,
+                     lp_build_alpha_test(builder, key->alpha.func, type,
                                          &mask, alpha, alpha_ref_value);
                   }
 
@@ -728,6 +746,9 @@ dump_fs_variant_key(const struct lp_fragment_shader_variant_key *key)
 
    debug_printf("fs variant %p:\n", (void *) key);
 
+   for (i = 0; i < key->nr_cbufs; ++i) {
+      debug_printf("cbuf_format[%u] = %s\n", i, util_format_name(key->cbuf_format[i]));
+   }
    if (key->depth.enabled) {
       debug_printf("depth.format = %s\n", util_format_name(key->zsbuf_format));
       debug_printf("depth.func = %s\n", util_dump_func(key->depth.func, TRUE));
@@ -747,7 +768,6 @@ dump_fs_variant_key(const struct lp_fragment_shader_variant_key *key)
 
    if (key->alpha.enabled) {
       debug_printf("alpha.func = %s\n", util_dump_func(key->alpha.func, TRUE));
-      debug_printf("alpha.ref_value = %f\n", key->alpha.ref_value);
    }
 
    if (key->blend.logicop_enable) {
@@ -791,6 +811,16 @@ dump_fs_variant_key(const struct lp_fragment_shader_variant_key *key)
 }
 
 
+void
+lp_debug_fs_variant(const struct lp_fragment_shader_variant *variant)
+{
+   debug_printf("llvmpipe: Fragment shader #%u variant #%u:\n", 
+                variant->shader->no, variant->no);
+   tgsi_dump(variant->shader->base.tokens, 0);
+   dump_fs_variant_key(&variant->key);
+   debug_printf("variant->opaque = %u\n", variant->opaque);
+   debug_printf("\n");
+}
 
 static struct lp_fragment_shader_variant *
 generate_variant(struct llvmpipe_context *lp,
@@ -798,6 +828,7 @@ generate_variant(struct llvmpipe_context *lp,
                  const struct lp_fragment_shader_variant_key *key)
 {
    struct lp_fragment_shader_variant *variant;
+   boolean fullcolormask;
 
    variant = CALLOC_STRUCT(lp_fragment_shader_variant);
    if(!variant)
@@ -808,28 +839,44 @@ generate_variant(struct llvmpipe_context *lp,
    variant->list_item_local.base = variant;
    variant->no = shader->variants_created++;
 
-   memcpy(&variant->key, key, sizeof *key);
+   memcpy(&variant->key, key, shader->variant_key_size);
 
-   if (gallivm_debug & GALLIVM_DEBUG_IR) {
-      debug_printf("llvmpipe: Creating fragment shader #%u variant #%u:\n", 
-		   shader->no, variant->no);
-      tgsi_dump(shader->base.tokens, 0);
-      dump_fs_variant_key(key);
+   /*
+    * Determine whether we are touching all channels in the color buffer.
+    */
+   fullcolormask = FALSE;
+   if (key->nr_cbufs == 1) {
+      const struct util_format_description *format_desc;
+      format_desc = util_format_description(key->cbuf_format[0]);
+      if ((~key->blend.rt[0].colormask &
+           util_format_colormask(format_desc)) == 0) {
+         fullcolormask = TRUE;
+      }
    }
 
-   generate_fragment(lp, shader, variant, RAST_WHOLE);
-   generate_fragment(lp, shader, variant, RAST_EDGE_TEST);
-
-   /* TODO: most of these can be relaxed, in particular the colormask */
    variant->opaque =
          !key->blend.logicop_enable &&
          !key->blend.rt[0].blend_enable &&
-         key->blend.rt[0].colormask == 0xf &&
+         fullcolormask &&
          !key->stencil[0].enabled &&
          !key->alpha.enabled &&
          !key->depth.enabled &&
          !shader->info.uses_kill
          ? TRUE : FALSE;
+
+
+   if (gallivm_debug & GALLIVM_DEBUG_IR) {
+      lp_debug_fs_variant(variant);
+   }
+
+   generate_fragment(lp, shader, variant, RAST_EDGE_TEST);
+
+   if (variant->opaque) {
+      /* Specialized shader, which doesn't need to read the color buffer. */
+      generate_fragment(lp, shader, variant, RAST_WHOLE);
+   } else {
+      variant->jit_function[RAST_WHOLE] = variant->jit_function[RAST_EDGE_TEST];
+   }
 
    return variant;
 }
@@ -840,6 +887,7 @@ llvmpipe_create_fs_state(struct pipe_context *pipe,
                          const struct pipe_shader_state *templ)
 {
    struct lp_fragment_shader *shader;
+   int nr_samplers;
 
    shader = CALLOC_STRUCT(lp_fragment_shader);
    if (!shader)
@@ -853,6 +901,11 @@ llvmpipe_create_fs_state(struct pipe_context *pipe,
 
    /* we need to keep a local copy of the tokens */
    shader->base.tokens = tgsi_dup_tokens(templ->tokens);
+
+   nr_samplers = shader->info.file_max[TGSI_FILE_SAMPLER] + 1;
+
+   shader->variant_key_size = Offset(struct lp_fragment_shader_variant_key,
+				     sampler[nr_samplers]);
 
    if (LP_DEBUG & DEBUG_TGSI) {
       unsigned attrib;
@@ -921,7 +974,6 @@ static void
 llvmpipe_delete_fs_state(struct pipe_context *pipe, void *fs)
 {
    struct llvmpipe_context *llvmpipe = llvmpipe_context(pipe);
-   struct pipe_fence_handle *fence = NULL;
    struct lp_fragment_shader *shader = fs;
    struct lp_fs_variant_list_item *li;
 
@@ -934,12 +986,7 @@ llvmpipe_delete_fs_state(struct pipe_context *pipe, void *fs)
     * Flushing alone might not sufficient we need to wait on it too.
     */
 
-   llvmpipe_flush(pipe, 0, &fence);
-
-   if (fence) {
-      pipe->screen->fence_finish(pipe->screen, fence, 0);
-      pipe->screen->fence_reference(pipe->screen, &fence, NULL);
-   }
+   llvmpipe_finish(pipe, __FUNCTION__);
 
    li = first_elem(&shader->variants);
    while(!at_end(&shader->variants, li)) {
@@ -1027,7 +1074,7 @@ make_variant_key(struct llvmpipe_context *lp,
 {
    unsigned i;
 
-   memset(key, 0, sizeof *key);
+   memset(key, 0, shader->variant_key_size);
 
    if (lp->framebuffer.zsbuf) {
       if (lp->depth_stencil->depth.enabled) {
@@ -1056,25 +1103,22 @@ make_variant_key(struct llvmpipe_context *lp,
 
    key->nr_cbufs = lp->framebuffer.nr_cbufs;
    for (i = 0; i < lp->framebuffer.nr_cbufs; i++) {
+      enum pipe_format format = lp->framebuffer.cbufs[i]->format;
       struct pipe_rt_blend_state *blend_rt = &key->blend.rt[i];
       const struct util_format_description *format_desc;
-      unsigned chan;
 
-      format_desc = util_format_description(lp->framebuffer.cbufs[i]->format);
+      key->cbuf_format[i] = format;
+
+      format_desc = util_format_description(format);
       assert(format_desc->colorspace == UTIL_FORMAT_COLORSPACE_RGB ||
              format_desc->colorspace == UTIL_FORMAT_COLORSPACE_SRGB);
 
       blend_rt->colormask = lp->blend->rt[i].colormask;
 
-      /* mask out color channels not present in the color buffer.
-       * Should be simple to incorporate per-cbuf writemasks:
+      /*
+       * Mask out color channels not present in the color buffer.
        */
-      for(chan = 0; chan < 4; ++chan) {
-         enum util_format_swizzle swizzle = format_desc->swizzle[chan];
-
-         if(swizzle > UTIL_FORMAT_SWIZZLE_W)
-            blend_rt->colormask &= ~(1 << chan);
-      }
+      blend_rt->colormask &= util_format_colormask(format_desc);
 
       /*
        * Our swizzled render tiles always have an alpha channel, but the linear
@@ -1097,9 +1141,17 @@ make_variant_key(struct llvmpipe_context *lp,
       }
    }
 
-   for(i = 0; i < PIPE_MAX_SAMPLERS; ++i)
-      if(shader->info.file_mask[TGSI_FILE_SAMPLER] & (1 << i))
-         lp_sampler_static_state(&key->sampler[i], lp->fragment_sampler_views[i], lp->sampler[i]);
+   /* This value will be the same for all the variants of a given shader:
+    */
+   key->nr_samplers = shader->info.file_max[TGSI_FILE_SAMPLER] + 1;
+
+   for(i = 0; i < key->nr_samplers; ++i) {
+      if(shader->info.file_mask[TGSI_FILE_SAMPLER] & (1 << i)) {
+         lp_sampler_static_state(&key->sampler[i],
+				 lp->fragment_sampler_views[i],
+				 lp->sampler[i]);
+      }
+   }
 }
 
 /**
@@ -1118,7 +1170,7 @@ llvmpipe_update_fs(struct llvmpipe_context *lp)
 
    li = first_elem(&shader->variants);
    while(!at_end(&shader->variants, li)) {
-      if(memcmp(&li->base->key, &key, sizeof key) == 0) {
+      if(memcmp(&li->base->key, &key, shader->variant_key_size) == 0) {
          variant = li->base;
          break;
       }
@@ -1134,19 +1186,14 @@ llvmpipe_update_fs(struct llvmpipe_context *lp)
       unsigned i;
       if (lp->nr_fs_variants >= LP_MAX_SHADER_VARIANTS) {
          struct pipe_context *pipe = &lp->pipe;
-         struct pipe_fence_handle *fence = NULL;
 
          /*
           * XXX: we need to flush the context until we have some sort of reference
           * counting in fragment shaders as they may still be binned
           * Flushing alone might not be sufficient we need to wait on it too.
           */
-         llvmpipe_flush(pipe, 0, &fence);
+         llvmpipe_finish(pipe, __FUNCTION__);
 
-         if (fence) {
-            pipe->screen->fence_finish(pipe->screen, fence, 0);
-            pipe->screen->fence_reference(pipe->screen, &fence, NULL);
-         }
          for (i = 0; i < LP_MAX_SHADER_VARIANTS / 4; i++) {
             struct lp_fs_variant_list_item *item = last_elem(&lp->fs_variants_list);
             remove_shader_variant(lp, item->base);

@@ -46,6 +46,7 @@
 #include "lp_bld_conv.h"
 #include "lp_bld_swizzle.h"
 #include "lp_bld_gather.h"
+#include "lp_bld_debug.h"
 #include "lp_bld_format.h"
 
 
@@ -388,7 +389,7 @@ lp_build_fetch_rgba_aos(LLVMBuilderRef builder,
 
    if (format_matches_type(format_desc, type) &&
        format_desc->block.bits <= type.width * 4 &&
-       util_is_pot(format_desc->block.bits)) {
+       util_is_power_of_two(format_desc->block.bits)) {
       LLVMValueRef packed;
 
       /*
@@ -416,7 +417,7 @@ lp_build_fetch_rgba_aos(LLVMBuilderRef builder,
         format_desc->colorspace == UTIL_FORMAT_COLORSPACE_ZS) &&
        format_desc->block.width == 1 &&
        format_desc->block.height == 1 &&
-       util_is_pot(format_desc->block.bits) &&
+       util_is_power_of_two(format_desc->block.bits) &&
        format_desc->block.bits <= 32 &&
        format_desc->is_bitmask &&
        !format_desc->is_mixed &&
@@ -448,6 +449,11 @@ lp_build_fetch_rgba_aos(LLVMBuilderRef builder,
        * TODO: We could avoid floating conversion for integer to
        * integer conversions.
        */
+
+      if (gallivm_debug & GALLIVM_DEBUG_PERF && !type.floating) {
+         debug_printf("%s: unpacking %s with floating point\n",
+                      __FUNCTION__, format_desc->short_name);
+      }
 
       lp_build_conv(builder,
                     lp_float32_vec4_type(),
@@ -512,6 +518,10 @@ lp_build_fetch_rgba_aos(LLVMBuilderRef builder,
 
       util_snprintf(name, sizeof name, "util_format_%s_fetch_rgba_8unorm",
                     format_desc->short_name);
+
+      if (gallivm_debug & GALLIVM_DEBUG_PERF) {
+         debug_printf("%s: falling back to %s\n", __FUNCTION__, name);
+      }
 
       /*
        * Declare and bind format_desc->fetch_rgba_8unorm().
@@ -611,6 +621,10 @@ lp_build_fetch_rgba_aos(LLVMBuilderRef builder,
 
       util_snprintf(name, sizeof name, "util_format_%s_fetch_rgba_float",
                     format_desc->short_name);
+
+      if (gallivm_debug & GALLIVM_DEBUG_PERF) {
+         debug_printf("%s: falling back to %s\n", __FUNCTION__, name);
+      }
 
       /*
        * Declare and bind format_desc->fetch_rgba_float().

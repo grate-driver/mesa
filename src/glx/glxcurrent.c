@@ -53,7 +53,7 @@
 */
 
 static GLubyte dummyBuffer[__GLX_BUFFER_LIMIT_SIZE];
-
+static struct glx_context_vtable dummyVtable;
 /*
 ** Dummy context used by small commands when there is no current context.
 ** All the
@@ -66,6 +66,7 @@ struct glx_context dummyContext = {
    &dummyBuffer[0],
    &dummyBuffer[__GLX_BUFFER_LIMIT_SIZE],
    sizeof(dummyBuffer),
+   &dummyVtable
 };
 
 /*
@@ -241,29 +242,34 @@ MakeContextCurrent(Display * dpy, GLXDrawable draw,
       return False;
    }
 
-   if (oldGC != &dummyContext && oldGC != gc) {
+   if (oldGC == gc &&
+       gc->currentDrawable == draw && gc->currentReadable == read)
+      return True;
+
+   if (oldGC != &dummyContext) {
       oldGC->vtable->unbind(oldGC, gc);
       oldGC->currentDpy = 0;
       oldGC->currentDrawable = None;
       oldGC->currentReadable = None;
       oldGC->thread_id = 0;
-      if (oldGC->xid == None)
-	 /* We are switching away from a context that was
-	  * previously destroyed, so we need to free the memory
-	  * for the old handle.
-	  */
-	 oldGC->vtable->destroy(oldGC);
    }
 
    if (gc) {
-      ret = gc->vtable->bind(gc, oldGC, draw, read);
       gc->currentDpy = dpy;
       gc->currentDrawable = draw;
       gc->currentReadable = read;
       gc->thread_id = _glthread_GetID();
       __glXSetCurrentContext(gc);
+      ret = gc->vtable->bind(gc, oldGC, draw, read);
    } else {
       __glXSetCurrentContextNull();
+   }
+
+   if (oldGC != &dummyContext && oldGC->xid == None && oldGC != gc) {
+      /* We are switching away from a context that was
+       * previously destroyed, so we need to free the memory
+       * for the old handle. */
+      oldGC->vtable->destroy(oldGC);
    }
 
    if (ret) {

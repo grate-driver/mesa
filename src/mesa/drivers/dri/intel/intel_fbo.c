@@ -102,7 +102,7 @@ intel_alloc_renderbuffer_storage(GLcontext * ctx, struct gl_renderbuffer *rb,
 {
    struct intel_context *intel = intel_context(ctx);
    struct intel_renderbuffer *irb = intel_renderbuffer(rb);
-   int cpp;
+   int cpp, tiling;
 
    ASSERT(rb->Name != 0);
 
@@ -137,27 +137,21 @@ intel_alloc_renderbuffer_storage(GLcontext * ctx, struct gl_renderbuffer *rb,
       rb->Format = MESA_FORMAT_A8;
       rb->DataType = GL_UNSIGNED_BYTE;
       break;
+   case GL_DEPTH_COMPONENT16:
+      rb->Format = MESA_FORMAT_Z16;
+      rb->DataType = GL_UNSIGNED_SHORT;
+      break;
    case GL_STENCIL_INDEX:
    case GL_STENCIL_INDEX1_EXT:
    case GL_STENCIL_INDEX4_EXT:
    case GL_STENCIL_INDEX8_EXT:
    case GL_STENCIL_INDEX16_EXT:
-      /* alloc a depth+stencil buffer */
-      rb->Format = MESA_FORMAT_S8_Z24;
-      rb->DataType = GL_UNSIGNED_INT_24_8_EXT;
-      break;
-   case GL_DEPTH_COMPONENT16:
-      rb->Format = MESA_FORMAT_Z16;
-      rb->DataType = GL_UNSIGNED_SHORT;
-      break;
    case GL_DEPTH_COMPONENT:
    case GL_DEPTH_COMPONENT24:
    case GL_DEPTH_COMPONENT32:
-      rb->Format = MESA_FORMAT_S8_Z24;
-      rb->DataType = GL_UNSIGNED_INT_24_8_EXT;
-      break;
    case GL_DEPTH_STENCIL_EXT:
    case GL_DEPTH24_STENCIL8_EXT:
+      /* alloc a depth+stencil buffer */
       rb->Format = MESA_FORMAT_S8_Z24;
       rb->DataType = GL_UNSIGNED_INT_24_8_EXT;
       break;
@@ -182,7 +176,13 @@ intel_alloc_renderbuffer_storage(GLcontext * ctx, struct gl_renderbuffer *rb,
    /* alloc hardware renderbuffer */
    DBG("Allocating %d x %d Intel RBO\n", width, height);
 
-   irb->region = intel_region_alloc(intel, I915_TILING_NONE, cpp,
+   tiling = I915_TILING_NONE;
+
+   /* Gen6 requires depth must be tiling */
+   if (intel->gen >= 6 && rb->Format == MESA_FORMAT_S8_Z24)
+       tiling = I915_TILING_Y;
+
+   irb->region = intel_region_alloc(intel->intelScreen, tiling, cpp,
 				    width, height, GL_TRUE);
    if (!irb->region)
       return GL_FALSE;       /* out of memory? */
@@ -208,8 +208,8 @@ intel_image_target_renderbuffer_storage(GLcontext *ctx,
    __DRIimage *image;
 
    screen = intel->intelScreen->driScrnPriv;
-   image = screen->dri2.image->lookupEGLImage(intel->driContext, image_handle,
-					      intel->driContext->loaderPrivate);
+   image = screen->dri2.image->lookupEGLImage(screen, image_handle,
+					      screen->loaderPrivate);
    if (image == NULL)
       return;
 

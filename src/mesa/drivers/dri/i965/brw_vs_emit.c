@@ -98,6 +98,39 @@ static void release_tmps( struct brw_vs_compile *c )
    c->last_tmp = c->first_tmp;
 }
 
+static int
+get_first_reladdr_output(struct gl_vertex_program *vp)
+{
+   int i;
+   int first_reladdr_output = VERT_RESULT_MAX;
+
+   for (i = 0; i < vp->Base.NumInstructions; i++) {
+      struct prog_instruction *inst = vp->Base.Instructions + i;
+
+      if (inst->DstReg.File == PROGRAM_OUTPUT &&
+	  inst->DstReg.RelAddr &&
+	  inst->DstReg.Index < first_reladdr_output)
+	 first_reladdr_output = inst->DstReg.Index;
+   }
+
+   return first_reladdr_output;
+}
+
+/* Clears the record of which vp_const_buffer elements have been
+ * loaded into our constant buffer registers, for the starts of new
+ * blocks after control flow.
+ */
+static void
+clear_current_const(struct brw_vs_compile *c)
+{
+   unsigned int i;
+
+   if (c->vp->use_const_buffer) {
+      for (i = 0; i < 3; i++) {
+         c->current_const[i].index = -1;
+      }
+   }
+}
 
 /**
  * Preallocate GRF register before code emit.
@@ -109,6 +142,7 @@ static void brw_vs_alloc_regs( struct brw_vs_compile *c )
    struct intel_context *intel = &c->func.brw->intel;
    GLuint i, reg = 0, mrf;
    int attributes_in_vue;
+   int first_reladdr_output;
 
    /* Determine whether to use a real constant buffer or use a block
     * of GRF registers for constants.  The later is faster but only
@@ -220,12 +254,13 @@ static void brw_vs_alloc_regs( struct brw_vs_compile *c )
    c->first_overflow_output = 0;
 
    if (intel->gen >= 6)
-      mrf = 4;
+      mrf = 3; /* no more pos store in attribute */
    else if (intel->gen == 5)
       mrf = 8;
    else
       mrf = 4;
 
+   first_reladdr_output = get_first_reladdr_output(&c->vp->program);
    for (i = 0; i < VERT_RESULT_MAX; i++) {
       if (c->prog_data.outputs_written & BITFIELD64_BIT(i)) {
 	 c->nr_outputs++;
@@ -254,15 +289,16 @@ static void brw_vs_alloc_regs( struct brw_vs_compile *c )
 	     * For attributes beyond the compute-to-MRF, we compute to
 	     * GRFs and they will be written in the second URB_WRITE.
 	     */
-            if (mrf < 15) {
+            if (first_reladdr_output > i && mrf < 15) {
                c->regs[PROGRAM_OUTPUT][i] = brw_message_reg(mrf);
                mrf++;
             }
             else {
-               if (!c->first_overflow_output)
+               if (mrf >= 15 && !c->first_overflow_output)
                   c->first_overflow_output = i;
                c->regs[PROGRAM_OUTPUT][i] = brw_vec8_grf(reg, 0);
                reg++;
+	       mrf++;
             }
 	 }
       }
@@ -293,10 +329,10 @@ static void brw_vs_alloc_regs( struct brw_vs_compile *c )
 
    if (c->vp->use_const_buffer) {
       for (i = 0; i < 3; i++) {
-         c->current_const[i].index = -1;
          c->current_const[i].reg = brw_vec8_grf(reg, 0);
          reg++;
       }
+      clear_current_const(c);
    }
 
    for (i = 0; i < 128; i++) {
@@ -918,7 +954,7 @@ get_reladdr_constant(struct brw_vs_compile *c,
    struct brw_compile *p = &c->func;
    struct brw_reg const_reg = c->current_const[argIndex].reg;
    struct brw_reg addrReg = c->regs[PROGRAM_ADDRESS][0];
-   struct brw_reg byte_addr_reg = get_tmp(c);
+   struct brw_reg byte_addr_reg = retype(get_tmp(c), BRW_REGISTER_TYPE_D);
 
    assert(argIndex < 3);
 
@@ -1028,12 +1064,16 @@ move_to_reladdr_dst(struct brw_vs_compile *c,
    int reg_size = 32;
    struct brw_reg addr_reg = c->regs[PROGRAM_ADDRESS][0];
    struct brw_reg vp_address = retype(vec1(addr_reg), BRW_REGISTER_TYPE_D);
-   struct brw_reg temp_base = c->regs[inst->DstReg.File][0];
-   GLuint byte_offset = temp_base.nr * 32 + temp_base.subnr;
+   struct brw_reg base = c->regs[inst->DstReg.File][inst->DstReg.Index];
+   GLuint byte_offset = base.nr * 32 + base.subnr;
    struct brw_reg indirect = brw_vec4_indirect(0,0);
    struct brw_reg acc = retype(vec1(get_tmp(c)), BRW_REGISTER_TYPE_UW);
 
-   byte_offset += inst->DstReg.Index * reg_size;
+   /* Because destination register indirect addressing can only use
+    * one index, we'll write each vertex's vec4 value separately.
+    */
+   val.width = BRW_WIDTH_4;
+   val.vstride = BRW_VERTICAL_STRIDE_4;
 
    brw_push_insn_state(p);
    brw_set_access_mode(p, BRW_ALIGN_1);
@@ -1320,6 +1360,7 @@ static void emit_vertex_write( struct brw_vs_compile *c)
    struct brw_reg ndc;
    int eot;
    GLuint len_vertex_header = 2;
+   int next_mrf, i;
 
    if (c->key.copy_edgeflag) {
       brw_MOV(p, 
@@ -1351,8 +1392,11 @@ static void emit_vertex_write( struct brw_vs_compile *c)
 
       if (c->prog_data.outputs_written & BITFIELD64_BIT(VERT_RESULT_PSIZ)) {
 	 struct brw_reg psiz = c->regs[PROGRAM_OUTPUT][VERT_RESULT_PSIZ];
-	 brw_MUL(p, brw_writemask(header1, WRITEMASK_W), brw_swizzle1(psiz, 0), brw_imm_f(1<<11));
-	 brw_AND(p, brw_writemask(header1, WRITEMASK_W), header1, brw_imm_ud(0x7ff<<8));
+	 if (intel->gen < 6) {
+	     brw_MUL(p, brw_writemask(header1, WRITEMASK_W), brw_swizzle1(psiz, 0), brw_imm_f(1<<11));
+	     brw_AND(p, brw_writemask(header1, WRITEMASK_W), header1, brw_imm_ud(0x7ff<<8));
+	 } else
+	     brw_MOV(p, brw_writemask(header1, WRITEMASK_W), brw_swizzle1(psiz, 0));
       }
 
       for (i = 0; i < c->key.nr_userclip; i++) {
@@ -1397,6 +1441,7 @@ static void emit_vertex_write( struct brw_vs_compile *c)
     * of zeros followed by two sets of NDC coordinates:
     */
    brw_set_access_mode(p, BRW_ALIGN_1);
+   brw_set_acc_write_control(p, 0);
 
    /* The VUE layout is documented in Volume 2a. */
    if (intel->gen >= 6) {
@@ -1409,8 +1454,7 @@ static void emit_vertex_write( struct brw_vs_compile *c)
        * position.
        */
       brw_MOV(p, brw_message_reg(2), pos);
-      brw_MOV(p, brw_message_reg(3), pos);
-      len_vertex_header = 2;
+      len_vertex_header = 1;
    } else if (intel->gen == 5) {
       /* There are 20 DWs (D0-D19) in VUE header on Ironlake:
        * dword 0-3 (m1) of the header is indices, point width, clip flags.
@@ -1435,6 +1479,23 @@ static void emit_vertex_write( struct brw_vs_compile *c)
       brw_MOV(p, brw_message_reg(2), ndc);
       brw_MOV(p, brw_message_reg(3), pos);
       len_vertex_header = 2;
+   }
+
+   /* Move variable-addressed, non-overflow outputs to their MRFs. */
+   next_mrf = 2 + len_vertex_header;
+   for (i = 0; i < VERT_RESULT_MAX; i++) {
+      if (c->first_overflow_output > 0 && i >= c->first_overflow_output)
+	 break;
+      if (!(c->prog_data.outputs_written & BITFIELD64_BIT(i)))
+	 continue;
+
+      if (i >= VERT_RESULT_TEX0 &&
+	  c->regs[PROGRAM_OUTPUT][i].file == BRW_GENERAL_REGISTER_FILE) {
+	 brw_MOV(p, brw_message_reg(next_mrf), c->regs[PROGRAM_OUTPUT][i]);
+	 next_mrf++;
+      } else if (c->regs[PROGRAM_OUTPUT][i].file == BRW_MESSAGE_REGISTER_FILE) {
+	 next_mrf = c->regs[PROGRAM_OUTPUT][i].nr + 1;
+      }
    }
 
    eot = (c->first_overflow_output == 0);
@@ -1574,9 +1635,15 @@ void brw_vs_emit(struct brw_vs_compile *c )
       printf("\n");
    }
 
+   /* FIXME Need to fix conditional instruction to remove this */
+   if (intel->gen >= 6)
+       p->single_program_flow = GL_TRUE;
+
    brw_set_compression_control(p, BRW_COMPRESSION_NONE);
    brw_set_access_mode(p, BRW_ALIGN_16);
    if_depth_in_loop[loop_depth] = 0;
+
+   brw_set_acc_write_control(p, 1);
 
    for (insn = 0; insn < nr_insns; insn++) {
        GLuint i;
@@ -1615,7 +1682,6 @@ void brw_vs_emit(struct brw_vs_compile *c )
       const struct prog_instruction *inst = &c->vp->program.Base.Instructions[insn];
       struct brw_reg args[3], dst;
       GLuint i;
-      struct brw_instruction *temp;
 
 #if 0
       printf("%d: ", insn);
@@ -1788,32 +1854,34 @@ void brw_vs_emit(struct brw_vs_compile *c )
 	 if_depth++;
 	 break;
       case OPCODE_ELSE:
+	 clear_current_const(c);
 	 assert(if_depth > 0);
 	 if_inst[if_depth-1] = brw_ELSE(p, if_inst[if_depth-1]);
 	 break;
       case OPCODE_ENDIF:
+	 clear_current_const(c);
          assert(if_depth > 0);
 	 brw_ENDIF(p, if_inst[--if_depth]);
 	 if_depth_in_loop[loop_depth]--;
 	 break;			
       case OPCODE_BGNLOOP:
+	 clear_current_const(c);
          loop_inst[loop_depth++] = brw_DO(p, BRW_EXECUTE_8);
 	 if_depth_in_loop[loop_depth] = 0;
          break;
       case OPCODE_BRK:
 	 brw_set_predicate_control(p, get_predicate(inst));
-	 temp = brw_BREAK(p);
-	 temp->bits3.if_else.pop_count = if_depth_in_loop[loop_depth];
+	 brw_BREAK(p, if_depth_in_loop[loop_depth]);
 	 brw_set_predicate_control(p, BRW_PREDICATE_NONE);
          break;
       case OPCODE_CONT:
 	 brw_set_predicate_control(p, get_predicate(inst));
-	 temp = brw_CONT(p);
-	 temp->bits3.if_else.pop_count = if_depth_in_loop[loop_depth];
+	 brw_CONT(p, if_depth_in_loop[loop_depth]);
          brw_set_predicate_control(p, BRW_PREDICATE_NONE);
          break;
       case OPCODE_ENDLOOP: 
          {
+	    clear_current_const(c);
             struct brw_instruction *inst0, *inst1;
 	    GLuint br = 1;
 
@@ -1917,11 +1985,9 @@ void brw_vs_emit(struct brw_vs_compile *c )
          }
       }
 
-      if (inst->DstReg.RelAddr && inst->DstReg.File == PROGRAM_TEMPORARY) {
-	 /* We don't do RelAddr of PROGRAM_OUTPUT yet, because of the
-	  * compute-to-mrf and the fact that we are allocating
-	  * registers for only the used PROGRAM_OUTPUTs.
-	  */
+      if (inst->DstReg.RelAddr) {
+	 assert(inst->DstReg.File == PROGRAM_TEMPORARY||
+		inst->DstReg.File == PROGRAM_OUTPUT);
 	 move_to_reladdr_dst(c, inst, dst);
       }
 

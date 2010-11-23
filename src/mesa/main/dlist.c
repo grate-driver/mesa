@@ -6070,8 +6070,15 @@ exec_GetAttribLocationARB(GLuint program, const GLchar *name)
    FLUSH_VERTICES(ctx, 0);
    return CALL_GetAttribLocationARB(ctx->Exec, (program, name));
 }
-/* XXX more shader functions needed here */
 
+static GLint GLAPIENTRY
+exec_GetUniformLocationARB(GLuint program, const GLchar *name)
+{
+   GET_CURRENT_CONTEXT(ctx);
+   FLUSH_VERTICES(ctx, 0);
+   return CALL_GetUniformLocationARB(ctx->Exec, (program, name));
+}
+/* XXX more shader functions needed here */
 
 
 #if FEATURE_EXT_framebuffer_blit
@@ -6811,7 +6818,7 @@ _mesa_compile_error(GLcontext *ctx, GLenum error, const char *s)
    if (ctx->CompileFlag)
       save_error(ctx, error, s);
    if (ctx->ExecuteFlag)
-      _mesa_error(ctx, error, s);
+      _mesa_error(ctx, error, "%s", s);
 }
 
 
@@ -6878,7 +6885,7 @@ execute_list(GLcontext *ctx, GLuint list)
       else {
          switch (opcode) {
          case OPCODE_ERROR:
-            _mesa_error(ctx, n[1].e, (const char *) n[2].data);
+            _mesa_error(ctx, n[1].e, "%s", (const char *) n[2].data);
             break;
          case OPCODE_ACCUM:
             CALL_Accum(ctx->Exec, (n[1].e, n[2].f));
@@ -7910,7 +7917,7 @@ execute_list(GLcontext *ctx, GLuint list)
                char msg[1000];
                _mesa_snprintf(msg, sizeof(msg), "Error in execute_list: opcode=%d",
                              (int) opcode);
-               _mesa_problem(ctx, msg);
+               _mesa_problem(ctx, "%s", msg);
             }
             done = GL_TRUE;
          }
@@ -8885,8 +8892,8 @@ exec_FogCoordPointerEXT(GLenum type, GLsizei stride, const GLvoid *ptr)
 
 /* GL_EXT_multi_draw_arrays */
 static void GLAPIENTRY
-exec_MultiDrawArraysEXT(GLenum mode, GLint * first,
-                        GLsizei * count, GLsizei primcount)
+exec_MultiDrawArraysEXT(GLenum mode, const GLint *first,
+                        const GLsizei *count, GLsizei primcount)
 {
    GET_CURRENT_CONTEXT(ctx);
    FLUSH_VERTICES(ctx, 0);
@@ -9491,6 +9498,7 @@ _mesa_create_save_table(void)
    /* ARB 30/31/32. GL_ARB_shader_objects, GL_ARB_vertex/fragment_shader */
    SET_BindAttribLocationARB(table, exec_BindAttribLocationARB);
    SET_GetAttribLocationARB(table, exec_GetAttribLocationARB);
+   SET_GetUniformLocationARB(table, exec_GetUniformLocationARB);
    /* XXX additional functions need to be implemented here! */
 
    /* 299. GL_EXT_blend_equation_separate */

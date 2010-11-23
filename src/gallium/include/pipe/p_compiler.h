@@ -35,6 +35,7 @@
 #include <string.h>
 #include <stddef.h>
 #include <stdarg.h>
+#include <limits.h>
 
 
 #if defined(_WIN32) && !defined(__WIN32__)
@@ -77,6 +78,14 @@ typedef unsigned char boolean;
 #endif
 #ifndef FALSE
 #define FALSE false
+#endif
+
+#ifndef va_copy
+#ifdef __va_copy
+#define va_copy(dest, src) __va_copy((dest), (src))
+#else
+#define va_copy(dest, src) (dest) = (src)
+#endif
 #endif
 
 /* Function inlining */

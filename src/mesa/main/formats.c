@@ -26,6 +26,7 @@
 
 #include "imports.h"
 #include "formats.h"
+#include "mfeatures.h"
 
 
 /**
@@ -936,6 +937,18 @@ _mesa_is_format_compressed(gl_format format)
 {
    const struct gl_format_info *info = _mesa_get_format_info(format);
    return info->BlockWidth > 1 || info->BlockHeight > 1;
+}
+
+
+/**
+ * Determine if the given format represents a packed depth/stencil buffer.
+ */
+GLboolean
+_mesa_is_format_packed_depth_stencil(gl_format format)
+{
+   const struct gl_format_info *info = _mesa_get_format_info(format);
+
+   return info->BaseFormat == GL_DEPTH_STENCIL;
 }
 
 

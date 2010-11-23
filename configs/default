@@ -82,6 +82,9 @@ GLESv1_CM_LIB_GLOB = $(GLESv1_CM_LIB_NAME)*
 GLESv2_LIB_GLOB = $(GLESv2_LIB_NAME)*
 VG_LIB_GLOB = $(VG_LIB_NAME)*
 
+TALLOC_LIBS = `pkg-config --libs talloc`
+TALLOC_CFLAGS = `pkg-config --cflags talloc`
+
 # Optional assembly language optimization files for libGL
 MESA_ASM_SOURCES = 
 
@@ -104,7 +107,7 @@ EGL_DRIVERS_DIRS = glx
 # Gallium directories and 
 GALLIUM_DIRS = auxiliary drivers state_trackers
 GALLIUM_AUXILIARIES = $(TOP)/src/gallium/auxiliary/libgallium.a
-GALLIUM_DRIVERS_DIRS = softpipe trace rbug identity i915 i965 svga r300 nvfx nv50 failover
+GALLIUM_DRIVERS_DIRS = softpipe trace rbug identity galahad i915 i965 svga r300 nvfx nv50 failover
 GALLIUM_DRIVERS = $(foreach DIR,$(GALLIUM_DRIVERS_DIRS),$(TOP)/src/gallium/drivers/$(DIR)/lib$(DIR).a)
 GALLIUM_WINSYS_DIRS = sw sw/xlib
 GALLIUM_TARGET_DIRS = libgl-xlib
@@ -116,7 +119,7 @@ EGL_CLIENT_APIS = $(GL_LIB)
 
 # Library dependencies
 #EXTRA_LIB_PATH ?=
-GL_LIB_DEPS     = $(EXTRA_LIB_PATH) -lX11 -lXext -lm -lpthread -ltalloc
+GL_LIB_DEPS     = $(EXTRA_LIB_PATH) -lX11 -lXext -lm -lpthread $(TALLOC_LIBS)
 EGL_LIB_DEPS    = $(EXTRA_LIB_PATH) -ldl -lpthread
 OSMESA_LIB_DEPS = $(EXTRA_LIB_PATH) -L$(TOP)/$(LIB_DIR) -l$(GL_LIB)
 GLU_LIB_DEPS    = $(EXTRA_LIB_PATH) -L$(TOP)/$(LIB_DIR) -l$(GL_LIB) -lm

@@ -56,16 +56,9 @@
 #include "lp_bld_intr.h"
 #include "lp_bld_logic.h"
 #include "lp_bld_pack.h"
+#include "lp_bld_debug.h"
 #include "lp_bld_arit.h"
 
-
-/*
- * XXX: Increasing eliminates some artifacts, but adds others, most
- * noticeably corruption in the Earth halo in Google Earth.
- */
-#define RCP_NEWTON_STEPS 0
-
-#define RSQRT_NEWTON_STEPS 0
 
 #define EXP_POLY_DEGREE 3
 
@@ -267,7 +260,7 @@ lp_build_add(struct lp_build_context *bld,
 }
 
 
-/** Return the sum of the elements of a */
+/** Return the scalar sum of the elements of a */
 LLVMValueRef
 lp_build_sum_vector(struct lp_build_context *bld,
                     LLVMValueRef a)
@@ -278,11 +271,9 @@ lp_build_sum_vector(struct lp_build_context *bld,
 
    assert(lp_check_value(type, a));
 
-   if (a == bld->zero)
-      return bld->zero;
-   if (a == bld->undef)
-      return bld->undef;
-   assert(type.length > 1);
+   if (type.length == 1) {
+      return a;
+   }
 
    assert(!bld->type.norm);
 
@@ -546,7 +537,7 @@ lp_build_mul_imm(struct lp_build_context *bld,
    if(b == 2 && bld->type.floating)
       return lp_build_add(bld, a, a);
 
-   if(util_is_pot(b)) {
+   if(util_is_power_of_two(b)) {
       unsigned shift = ffs(b) - 1;
 
       if(bld->type.floating) {
@@ -1266,6 +1257,11 @@ lp_build_sqrt(struct lp_build_context *bld,
  *
  *   x_{i+1} = x_i * (2 - a * x_i)
  *
+ * XXX: Unfortunately this won't give IEEE-754 conformant results for 0 or
+ * +/-Inf, giving NaN instead.  Certain applications rely on this behavior,
+ * such as Google Earth, which does RCP(RSQRT(0.0) when drawing the Earth's
+ * halo. It would be necessary to clamp the argument to prevent this.
+ *
  * See also:
  * - http://en.wikipedia.org/wiki/Division_(digital)#Newton.E2.80.93Raphson_division
  * - http://softwarecommunity.intel.com/articles/eng/1818.htm
@@ -1306,13 +1302,27 @@ lp_build_rcp(struct lp_build_context *bld,
    if(LLVMIsConstant(a))
       return LLVMConstFDiv(bld->one, a);
 
-   if(util_cpu_caps.has_sse && type.width == 32 && type.length == 4) {
+   /*
+    * We don't use RCPPS because:
+    * - it only has 10bits of precision
+    * - it doesn't even get the reciprocate of 1.0 exactly
+    * - doing Newton-Rapshon steps yields wrong (NaN) values for 0.0 or Inf
+    * - for recent processors the benefit over DIVPS is marginal, a case
+    *   depedent
+    *
+    * We could still use it on certain processors if benchmarks show that the
+    * RCPPS plus necessary workarounds are still preferrable to DIVPS; or for
+    * particular uses that require less workarounds.
+    */
+
+   if (FALSE && util_cpu_caps.has_sse && type.width == 32 && type.length == 4) {
+      const unsigned num_iterations = 0;
       LLVMValueRef res;
       unsigned i;
 
       res = lp_build_intrinsic_unary(bld->builder, "llvm.x86.sse.rcp.ps", bld->vec_type, a);
 
-      for (i = 0; i < RCP_NEWTON_STEPS; ++i) {
+      for (i = 0; i < num_iterations; ++i) {
          res = lp_build_rcp_refine(bld, a, res);
       }
 
@@ -1363,13 +1373,14 @@ lp_build_rsqrt(struct lp_build_context *bld,
 
    assert(type.floating);
 
-   if(util_cpu_caps.has_sse && type.width == 32 && type.length == 4) {
+   if (util_cpu_caps.has_sse && type.width == 32 && type.length == 4) {
+      const unsigned num_iterations = 0;
       LLVMValueRef res;
       unsigned i;
 
       res = lp_build_intrinsic_unary(bld->builder, "llvm.x86.sse.rsqrt.ps", bld->vec_type, a);
 
-      for (i = 0; i < RSQRT_NEWTON_STEPS; ++i) {
+      for (i = 0; i < num_iterations; ++i) {
          res = lp_build_rsqrt_refine(bld, a, res);
       }
 
@@ -1840,9 +1851,11 @@ lp_build_pow(struct lp_build_context *bld,
              LLVMValueRef y)
 {
    /* TODO: optimize the constant case */
-   if(LLVMIsConstant(x) && LLVMIsConstant(y))
+   if (gallivm_debug & GALLIVM_DEBUG_PERF &&
+       LLVMIsConstant(x) && LLVMIsConstant(y)) {
       debug_printf("%s: inefficient/imprecise constant arithmetic\n",
                    __FUNCTION__);
+   }
 
    return lp_build_exp2(bld, lp_build_mul(bld, lp_build_log2(bld, x), y));
 }
@@ -1897,9 +1910,11 @@ lp_build_polynomial(struct lp_build_context *bld,
    assert(lp_check_value(bld->type, x));
 
    /* TODO: optimize the constant case */
-   if(LLVMIsConstant(x))
+   if (gallivm_debug & GALLIVM_DEBUG_PERF &&
+       LLVMIsConstant(x)) {
       debug_printf("%s: inefficient/imprecise constant arithmetic\n",
                    __FUNCTION__);
+   }
 
    for (i = num_coeffs; i--; ) {
       LLVMValueRef coeff;
@@ -1971,9 +1986,11 @@ lp_build_exp2_approx(struct lp_build_context *bld,
 
    if(p_exp2_int_part || p_frac_part || p_exp2) {
       /* TODO: optimize the constant case */
-      if(LLVMIsConstant(x))
+      if (gallivm_debug & GALLIVM_DEBUG_PERF &&
+          LLVMIsConstant(x)) {
          debug_printf("%s: inefficient/imprecise constant arithmetic\n",
                       __FUNCTION__);
+      }
 
       assert(type.floating && type.width == 32);
 
@@ -2086,9 +2103,11 @@ lp_build_log2_approx(struct lp_build_context *bld,
 
    if(p_exp || p_floor_log2 || p_log2) {
       /* TODO: optimize the constant case */
-      if(LLVMIsConstant(x))
+      if (gallivm_debug & GALLIVM_DEBUG_PERF &&
+          LLVMIsConstant(x)) {
          debug_printf("%s: inefficient/imprecise constant arithmetic\n",
                       __FUNCTION__);
+      }
 
       assert(type.floating && type.width == 32);
 

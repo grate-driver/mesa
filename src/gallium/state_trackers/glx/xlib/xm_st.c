@@ -26,11 +26,10 @@
  *    Chia-I Wu <olv@lunarg.com>
  */
 
-#include "util/u_memory.h"
-#include "util/u_inlines.h"
-
 #include "xm_api.h"
 #include "xm_st.h"
+
+#include "util/u_inlines.h"
 
 struct xmesa_st_framebuffer {
    XMesaDisplay display;
@@ -38,6 +37,7 @@ struct xmesa_st_framebuffer {
    struct pipe_screen *screen;
 
    struct st_visual stvis;
+   enum pipe_texture_target target;
 
    unsigned texture_width, texture_height, texture_mask;
    struct pipe_resource *textures[ST_ATTACHMENT_COUNT];
@@ -122,6 +122,7 @@ xmesa_st_framebuffer_copy_textures(struct st_framebuffer_iface *stfbi,
 
 /**
  * Remove outdated textures and create the requested ones.
+ * This is a helper used during framebuffer validation.
  */
 static boolean
 xmesa_st_framebuffer_validate_textures(struct st_framebuffer_iface *stfbi,
@@ -139,7 +140,7 @@ xmesa_st_framebuffer_validate_textures(struct st_framebuffer_iface *stfbi,
    }
 
    memset(&templ, 0, sizeof(templ));
-   templ.target = PIPE_TEXTURE_2D;
+   templ.target = xstfb->target;
    templ.width0 = width;
    templ.height0 = height;
    templ.depth0 = 1;
@@ -193,6 +194,10 @@ xmesa_st_framebuffer_validate_textures(struct st_framebuffer_iface *stfbi,
    return TRUE;
 }
 
+
+/**
+ * Called via st_framebuffer_iface::validate()
+ */
 static boolean 
 xmesa_st_framebuffer_validate(struct st_framebuffer_iface *stfbi,
                               const enum st_attachment_type *statts,
@@ -209,6 +214,12 @@ xmesa_st_framebuffer_validate(struct st_framebuffer_iface *stfbi,
       statt_mask |= 1 << statts[i];
    /* record newly allocated textures */
    new_mask = statt_mask & ~xstfb->texture_mask;
+
+   /* If xmesa_strict_invalidate is not set, we will not yet have
+    * called XGetGeometry().  Do so here:
+    */
+   if (!xmesa_strict_invalidate)
+      xmesa_check_buffer_size(xstfb->buffer);
 
    resized = (xstfb->buffer->width != xstfb->texture_width ||
               xstfb->buffer->height != xstfb->texture_height);
@@ -243,6 +254,9 @@ xmesa_st_framebuffer_validate(struct st_framebuffer_iface *stfbi,
    return TRUE;
 }
 
+/**
+ * Called via st_framebuffer_iface::flush_front()
+ */
 static boolean
 xmesa_st_framebuffer_flush_front(struct st_framebuffer_iface *stfbi,
                                  enum st_attachment_type statt)
@@ -251,7 +265,8 @@ xmesa_st_framebuffer_flush_front(struct st_framebuffer_iface *stfbi,
    boolean ret;
 
    ret = xmesa_st_framebuffer_display(stfbi, statt);
-   if (ret)
+
+   if (ret && xmesa_strict_invalidate)
       xmesa_check_buffer_size(xstfb->buffer);
 
    return ret;
@@ -279,6 +294,10 @@ xmesa_create_st_framebuffer(XMesaDisplay xmdpy, XMesaBuffer b)
    xstfb->buffer = b;
    xstfb->screen = xmdpy->screen;
    xstfb->stvis = b->xm_visual->stvis;
+   if(xstfb->screen->get_param(xstfb->screen, PIPE_CAP_NPOT_TEXTURES))
+      xstfb->target = PIPE_TEXTURE_2D;
+   else
+      xstfb->target = PIPE_TEXTURE_RECT;
 
    stfbi->visual = &xstfb->stvis;
    stfbi->flush_front = xmesa_st_framebuffer_flush_front;
@@ -320,9 +339,14 @@ xmesa_swap_st_framebuffer(struct st_framebuffer_iface *stfbi)
          tmp = *front;
          *front = *back;
          *back = tmp;
+
+         /* the current context should validate the buffer after swapping */
+         if (!xmesa_strict_invalidate)
+            xmesa_notify_invalid_buffer(xstfb->buffer);
       }
 
-      xmesa_check_buffer_size(xstfb->buffer);
+      if (xmesa_strict_invalidate)
+	 xmesa_check_buffer_size(xstfb->buffer);
    }
 }
 

@@ -405,7 +405,7 @@ eglCreateContext(EGLDisplay dpy, EGLConfig config, EGLContext share_list,
    if (config)
       _EGL_CHECK_CONFIG(disp, conf, EGL_NO_CONTEXT, drv);
    else
-      drv = _eglCheckDisplay(disp, __FUNCTION__);
+      _EGL_CHECK_DISPLAY(disp, EGL_NO_CONTEXT, drv);
 
    if (!share && share_list != EGL_NO_CONTEXT)
       RETURN_EGL_ERROR(disp, EGL_BAD_CONTEXT, EGL_NO_CONTEXT);
@@ -832,7 +832,44 @@ eglGetProcAddress(const char *procname)
       const char *name;
       _EGLProc function;
    } egl_functions[] = {
-      /* extensions only */
+      /* core functions should not be queryable, but, well... */
+#ifdef _EGL_GET_CORE_ADDRESSES
+      /* alphabetical order */
+      { "eglBindAPI", (_EGLProc) eglBindAPI },
+      { "eglBindTexImage", (_EGLProc) eglBindTexImage },
+      { "eglChooseConfig", (_EGLProc) eglChooseConfig },
+      { "eglCopyBuffers", (_EGLProc) eglCopyBuffers },
+      { "eglCreateContext", (_EGLProc) eglCreateContext },
+      { "eglCreatePbufferFromClientBuffer", (_EGLProc) eglCreatePbufferFromClientBuffer },
+      { "eglCreatePbufferSurface", (_EGLProc) eglCreatePbufferSurface },
+      { "eglCreatePixmapSurface", (_EGLProc) eglCreatePixmapSurface },
+      { "eglCreateWindowSurface", (_EGLProc) eglCreateWindowSurface },
+      { "eglDestroyContext", (_EGLProc) eglDestroyContext },
+      { "eglDestroySurface", (_EGLProc) eglDestroySurface },
+      { "eglGetConfigAttrib", (_EGLProc) eglGetConfigAttrib },
+      { "eglGetConfigs", (_EGLProc) eglGetConfigs },
+      { "eglGetCurrentContext", (_EGLProc) eglGetCurrentContext },
+      { "eglGetCurrentDisplay", (_EGLProc) eglGetCurrentDisplay },
+      { "eglGetCurrentSurface", (_EGLProc) eglGetCurrentSurface },
+      { "eglGetDisplay", (_EGLProc) eglGetDisplay },
+      { "eglGetError", (_EGLProc) eglGetError },
+      { "eglGetProcAddress", (_EGLProc) eglGetProcAddress },
+      { "eglInitialize", (_EGLProc) eglInitialize },
+      { "eglMakeCurrent", (_EGLProc) eglMakeCurrent },
+      { "eglQueryAPI", (_EGLProc) eglQueryAPI },
+      { "eglQueryContext", (_EGLProc) eglQueryContext },
+      { "eglQueryString", (_EGLProc) eglQueryString },
+      { "eglQuerySurface", (_EGLProc) eglQuerySurface },
+      { "eglReleaseTexImage", (_EGLProc) eglReleaseTexImage },
+      { "eglReleaseThread", (_EGLProc) eglReleaseThread },
+      { "eglSurfaceAttrib", (_EGLProc) eglSurfaceAttrib },
+      { "eglSwapBuffers", (_EGLProc) eglSwapBuffers },
+      { "eglSwapInterval", (_EGLProc) eglSwapInterval },
+      { "eglTerminate", (_EGLProc) eglTerminate },
+      { "eglWaitClient", (_EGLProc) eglWaitClient },
+      { "eglWaitGL", (_EGLProc) eglWaitGL },
+      { "eglWaitNative", (_EGLProc) eglWaitNative },
+#endif /* _EGL_GET_CORE_ADDRESSES */
 #ifdef EGL_MESA_screen_surface
       { "eglChooseModeMESA", (_EGLProc) eglChooseModeMESA },
       { "eglGetModesMESA", (_EGLProc) eglGetModesMESA },
@@ -856,6 +893,10 @@ eglGetProcAddress(const char *procname)
 #endif /* EGL_KHR_image_base */
 #ifdef EGL_NOK_swap_region
       { "eglSwapBuffersRegionNOK", (_EGLProc) eglSwapBuffersRegionNOK },
+#endif
+#ifdef EGL_MESA_drm_image
+      { "eglCreateDRMImageMESA", (_EGLProc) eglCreateDRMImageMESA },
+      { "eglExportDRMImageMESA", (_EGLProc) eglExportDRMImageMESA },
 #endif
       { NULL, NULL }
    };
@@ -1379,3 +1420,42 @@ eglSwapBuffersRegionNOK(EGLDisplay dpy, EGLSurface surface,
 }
 
 #endif /* EGL_NOK_swap_region */
+
+
+#ifdef EGL_MESA_drm_image
+
+EGLImageKHR EGLAPIENTRY
+eglCreateDRMImageMESA(EGLDisplay dpy, const EGLint *attr_list)
+{
+   _EGLDisplay *disp = _eglLockDisplay(dpy);
+   _EGLDriver *drv;
+   _EGLImage *img;
+   EGLImageKHR ret;
+
+   _EGL_CHECK_DISPLAY(disp, EGL_NO_IMAGE_KHR, drv);
+
+   img = drv->API.CreateDRMImageMESA(drv, disp, attr_list);
+   ret = (img) ? _eglLinkImage(img, disp) : EGL_NO_IMAGE_KHR;
+
+   RETURN_EGL_EVAL(disp, ret);
+}
+
+EGLBoolean EGLAPIENTRY
+eglExportDRMImageMESA(EGLDisplay dpy, EGLImageKHR image,
+		      EGLint *name, EGLint *handle, EGLint *stride)
+{
+   _EGLDisplay *disp = _eglLockDisplay(dpy);
+   _EGLImage *img = _eglLookupImage(image, disp);
+   _EGLDriver *drv;
+   EGLBoolean ret;
+
+   _EGL_CHECK_DISPLAY(disp, EGL_FALSE, drv);
+   if (!img)
+      RETURN_EGL_ERROR(disp, EGL_BAD_PARAMETER, EGL_FALSE);
+
+   ret = drv->API.ExportDRMImageMESA(drv, disp, img, name, handle, stride);
+
+   RETURN_EGL_EVAL(disp, ret);
+}
+
+#endif

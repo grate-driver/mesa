@@ -37,7 +37,7 @@ __asm__("x86_current_tls:\n\t"
         "1:\n\t"
         "popl %eax\n\t"
 	"addl $_GLOBAL_OFFSET_TABLE_+[.-1b], %eax\n\t"
-	"movl _glapi_tls_Dispatch@GOTNTPOFF(%eax), %eax\n\t"
+	"movl u_current_table_tls@GOTNTPOFF(%eax), %eax\n\t"
 	"ret");
 
 #ifndef GLX_X86_READONLY_TEXT
@@ -91,7 +91,7 @@ entry_patch_public(void)
 void
 entry_patch(mapi_func entry, int slot)
 {
-   void *code = (void *) entry;
+   char *code = (char *) entry;
    *((unsigned long *) (code + 8)) = slot * sizeof(mapi_func);
 }
 

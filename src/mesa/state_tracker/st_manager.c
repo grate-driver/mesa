@@ -42,7 +42,9 @@
 #include "main/texstate.h"
 #include "main/texfetch.h"
 #include "main/framebuffer.h"
+#include "main/fbobject.h"
 #include "main/renderbuffer.h"
+#include "main/version.h"
 #include "st_texture.h"
 
 #include "st_context.h"
@@ -247,6 +249,9 @@ st_framebuffer_add_renderbuffer(struct st_framebuffer *stfb,
    int samples;
    boolean sw;
 
+   if (!stfb->iface)
+      return FALSE;
+
    /* do not distinguish depth/stencil buffers */
    if (idx == BUFFER_STENCIL)
       idx = BUFFER_DEPTH;
@@ -422,6 +427,15 @@ st_framebuffer_create(struct st_framebuffer_iface *stfbi)
    if (!stfb)
       return NULL;
 
+   /* for FBO-only context */
+   if (!stfbi) {
+      GLframebuffer *base = _mesa_get_incomplete_framebuffer();
+
+      stfb->Base = *base;
+
+      return stfb;
+   }
+
    st_visual_to_context_mode(stfbi->visual, &mode);
    _mesa_initialize_window_framebuffer(&stfb->Base, &mode);
 
@@ -472,9 +486,18 @@ st_context_notify_invalid_framebuffer(struct st_context_iface *stctxi,
    stfb = st_ws_framebuffer(st->ctx->WinSysDrawBuffer);
    if (!stfb || stfb->iface != stfbi)
       stfb = st_ws_framebuffer(st->ctx->WinSysReadBuffer);
-   assert(stfb && stfb->iface == stfbi);
 
-   p_atomic_set(&stfb->revalidate, TRUE);
+   if (stfb && stfb->iface == stfbi) {
+      p_atomic_set(&stfb->revalidate, TRUE);
+   }
+   else {
+      /* This function is probably getting called when we've detected a
+       * change in a window's size but the currently bound context is
+       * not bound to that window.
+       * If the st_framebuffer_iface structure had a pointer to the
+       * corresponding st_framebuffer we'd be able to handle this.
+       */
+   }
 }
 
 static void
@@ -595,24 +618,55 @@ st_context_destroy(struct st_context_iface *stctxi)
 }
 
 static struct st_context_iface *
-create_context(gl_api api, struct st_manager *smapi,
-               const struct st_visual *visual,
-               struct st_context_iface *shared_stctxi)
+st_api_create_context(struct st_api *stapi, struct st_manager *smapi,
+                      const struct st_context_attribs *attribs,
+                      struct st_context_iface *shared_stctxi)
 {
    struct st_context *shared_ctx = (struct st_context *) shared_stctxi;
    struct st_context *st;
    struct pipe_context *pipe;
    __GLcontextModes mode;
+   gl_api api;
+
+   if (!(stapi->profile_mask & (1 << attribs->profile)))
+      return NULL;
+
+   switch (attribs->profile) {
+   case ST_PROFILE_DEFAULT:
+      api = API_OPENGL;
+      break;
+   case ST_PROFILE_OPENGL_ES1:
+      api = API_OPENGLES;
+      break;
+   case ST_PROFILE_OPENGL_ES2:
+      api = API_OPENGLES2;
+      break;
+   case ST_PROFILE_OPENGL_CORE:
+   default:
+      return NULL;
+      break;
+   }
 
    pipe = smapi->screen->context_create(smapi->screen, NULL);
    if (!pipe)
       return NULL;
 
-   st_visual_to_context_mode(visual, &mode);
+   st_visual_to_context_mode(&attribs->visual, &mode);
    st = st_create_context(api, pipe, &mode, shared_ctx);
    if (!st) {
       pipe->destroy(pipe);
       return NULL;
+   }
+
+   /* need to perform version check */
+   if (attribs->major > 1 || attribs->minor > 0) {
+      _mesa_compute_version(st->ctx);
+
+      if (st->ctx->VersionMajor < attribs->major ||
+          st->ctx->VersionMajor < attribs->minor) {
+         st_destroy_context(st);
+         return NULL;
+      }
    }
 
    st->invalidate_on_gl_viewport =
@@ -627,30 +681,6 @@ create_context(gl_api api, struct st_manager *smapi,
    st->iface.st_context_private = (void *) smapi;
 
    return &st->iface;
-}
-
-static struct st_context_iface *
-st_api_create_context(struct st_api *stapi, struct st_manager *smapi,
-                      const struct st_visual *visual,
-                      struct st_context_iface *shared_stctxi)
-{
-   return create_context(API_OPENGL, smapi, visual, shared_stctxi);
-}
-
-static struct st_context_iface *
-st_api_create_context_es1(struct st_api *stapi, struct st_manager *smapi,
-                          const struct st_visual *visual,
-                          struct st_context_iface *shared_stctxi)
-{
-   return create_context(API_OPENGLES, smapi, visual, shared_stctxi);
-}
-
-static struct st_context_iface *
-st_api_create_context_es2(struct st_api *stapi, struct st_manager *smapi,
-                          const struct st_visual *visual,
-                          struct st_context_iface *shared_stctxi)
-{
-   return create_context(API_OPENGLES2, smapi, visual, shared_stctxi);
 }
 
 static boolean
@@ -693,10 +723,14 @@ st_api_make_current(struct st_api *stapi, struct st_context_iface *stctxi,
             st_framebuffer_validate(stread, st);
 
          /* modify the draw/read buffers of the context */
-         st_visual_to_default_buffer(stdraw->iface->visual,
-               &st->ctx->Color.DrawBuffer[0], NULL);
-         st_visual_to_default_buffer(stread->iface->visual,
-               &st->ctx->Pixel.ReadBuffer, NULL);
+         if (stdraw->iface) {
+            st_visual_to_default_buffer(stdraw->iface->visual,
+                  &st->ctx->Color.DrawBuffer[0], NULL);
+         }
+         if (stread->iface) {
+            st_visual_to_default_buffer(stread->iface->visual,
+                  &st->ctx->Pixel.ReadBuffer, NULL);
+         }
 
          ret = _mesa_make_current(st->ctx, &stdraw->Base, &stread->Base);
       }
@@ -748,6 +782,8 @@ st_manager_flush_frontbuffer(struct st_context *st)
    if (!strb)
       return;
 
+   /* never a dummy fb */
+   assert(stfb->iface);
    stfb->iface->flush_front(stfb->iface, ST_ATTACHMENT_FRONT_LEFT);
 }
 
@@ -767,7 +803,7 @@ st_manager_get_egl_image_surface(struct st_context *st,
       return NULL;
 
    memset(&stimg, 0, sizeof(stimg));
-   if (!smapi->get_egl_image(smapi, &st->iface, eglimg, &stimg))
+   if (!smapi->get_egl_image(smapi, eglimg, &stimg))
       return NULL;
 
    ps = smapi->screen->get_tex_surface(smapi->screen,
@@ -829,6 +865,17 @@ st_manager_add_color_renderbuffer(struct st_context *st, GLframebuffer *fb,
 }
 
 static const struct st_api st_gl_api = {
+   ST_API_OPENGL,
+#if FEATURE_GL
+   ST_PROFILE_DEFAULT_MASK |
+#endif
+#if FEATURE_ES1
+   ST_PROFILE_OPENGL_ES1_MASK |
+#endif
+#if FEATURE_ES2
+   ST_PROFILE_OPENGL_ES2_MASK |
+#endif
+   0,
    st_api_destroy,
    st_api_get_proc_address,
    st_api_create_context,
@@ -836,52 +883,8 @@ static const struct st_api st_gl_api = {
    st_api_get_current,
 };
 
-static const struct st_api st_gl_api_es1 = {
-   st_api_destroy,
-   st_api_get_proc_address,
-   st_api_create_context_es1,
-   st_api_make_current,
-   st_api_get_current,
-};
-
-static const struct st_api st_gl_api_es2 = {
-   st_api_destroy,
-   st_api_get_proc_address,
-   st_api_create_context_es2,
-   st_api_make_current,
-   st_api_get_current,
-};
-
 struct st_api *
 st_gl_api_create(void)
 {
-   (void) st_gl_api;
-   (void) st_gl_api_es1;
-   (void) st_gl_api_es2;
-
-#if FEATURE_GL
    return (struct st_api *) &st_gl_api;
-#else
-   return NULL;
-#endif
-}
-
-struct st_api *
-st_gl_api_create_es1(void)
-{
-#if FEATURE_ES1
-   return (struct st_api *) &st_gl_api_es1;
-#else
-   return NULL;
-#endif
-}
-
-struct st_api *
-st_gl_api_create_es2(void)
-{
-#if FEATURE_ES2
-   return (struct st_api *) &st_gl_api_es2;
-#else
-   return NULL;
-#endif
 }

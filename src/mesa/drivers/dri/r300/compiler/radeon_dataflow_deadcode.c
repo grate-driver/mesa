@@ -157,8 +157,12 @@ static void update_instruction(struct deadcode_state * s, struct rc_instruction 
 		unsigned char * pused = get_used_ptr(s, inst->U.I.DstReg.File, inst->U.I.DstReg.Index);
 		if (pused) {
 			usedmask = *pused & inst->U.I.DstReg.WriteMask;
-			*pused &= ~usedmask;
+			if (!inst->U.I.DstReg.RelAddr)
+				*pused &= ~usedmask;
 		}
+
+		if (inst->U.I.DstReg.RelAddr)
+			mark_used(s, RC_FILE_ADDRESS, 0, RC_MASK_X);
 	}
 
 	insts->WriteMask |= usedmask;
@@ -209,10 +213,24 @@ static void mark_output_use(void * data, unsigned int index, unsigned int mask)
 	mark_used(s, RC_FILE_OUTPUT, index, mask);
 }
 
-void rc_dataflow_deadcode(struct radeon_compiler * c, rc_dataflow_mark_outputs_fn dce, void * userdata)
+void rc_dataflow_deadcode(struct radeon_compiler * c, void *user)
 {
 	struct deadcode_state s;
 	unsigned int nr_instructions;
+	unsigned has_temp_reladdr_src = 0;
+	rc_dataflow_mark_outputs_fn dce = (rc_dataflow_mark_outputs_fn)user;
+
+	/* Give up if there is relative addressing of destination operands. */
+	for(struct rc_instruction * inst = c->Program.Instructions.Next;
+	    inst != &c->Program.Instructions;
+	    inst = inst->Next) {
+		const struct rc_opcode_info *opcode = rc_get_opcode_info(inst->U.I.Opcode);
+		if (opcode->HasDstReg &&
+		    inst->U.I.DstReg.WriteMask &&
+		    inst->U.I.DstReg.RelAddr) {
+			return;
+		}
+	}
 
 	memset(&s, 0, sizeof(s));
 	s.C = c;
@@ -221,7 +239,7 @@ void rc_dataflow_deadcode(struct radeon_compiler * c, rc_dataflow_mark_outputs_f
 	s.Instructions = memory_pool_malloc(&c->Pool, sizeof(struct instruction_state)*nr_instructions);
 	memset(s.Instructions, 0, sizeof(struct instruction_state)*nr_instructions);
 
-	dce(userdata, &s, &mark_output_use);
+	dce(c, &s, &mark_output_use);
 
 	for(struct rc_instruction * inst = c->Program.Instructions.Prev;
 	    inst != &c->Program.Instructions;
@@ -298,6 +316,32 @@ void rc_dataflow_deadcode(struct radeon_compiler * c, rc_dataflow_mark_outputs_f
 					}
 				} else {
 					rc_error(c, "%s: Unhandled control flow instruction %s\n", __FUNCTION__, opcode->Name);
+				}
+			}
+
+			if (!has_temp_reladdr_src) {
+				for (unsigned i = 0; i < opcode->NumSrcRegs; i++) {
+					if (inst->U.I.SrcReg[i].File == RC_FILE_TEMPORARY &&
+					    inst->U.I.SrcReg[i].RelAddr) {
+						/* If there is a register read from a temporary file with relative addressing,
+						 * mark all preceding written registers as used. */
+						for (struct rc_instruction *ptr = inst->Prev;
+						     ptr != &c->Program.Instructions;
+						     ptr = ptr->Prev) {
+							opcode = rc_get_opcode_info(ptr->U.I.Opcode);
+							if (opcode->HasDstReg &&
+							    ptr->U.I.DstReg.File == RC_FILE_TEMPORARY &&
+							    ptr->U.I.DstReg.WriteMask) {
+								mark_used(&s,
+									  ptr->U.I.DstReg.File,
+									  ptr->U.I.DstReg.Index,
+									  ptr->U.I.DstReg.WriteMask);
+							}
+						}
+
+						has_temp_reladdr_src = 1;
+						break;
+					}
 				}
 			}
 		}

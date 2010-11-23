@@ -50,8 +50,9 @@
 #define need_GL_EXT_cull_vertex
 #define need_GL_EXT_draw_buffers2
 #define need_GL_EXT_fog_coord
-#define need_GL_EXT_framebuffer_object
 #define need_GL_EXT_framebuffer_blit
+#define need_GL_EXT_framebuffer_multisample
+#define need_GL_EXT_framebuffer_object
 #define need_GL_EXT_gpu_program_parameters
 #define need_GL_EXT_point_parameters
 #define need_GL_EXT_provoking_vertex
@@ -88,7 +89,6 @@ static const struct dri_extension card_extensions[] = {
    { "GL_ARB_point_sprite",               NULL },
    { "GL_ARB_shader_objects",             GL_ARB_shader_objects_functions },
    { "GL_ARB_shading_language_100",       GL_VERSION_2_0_functions },
-   { "GL_ARB_shading_language_120",       GL_VERSION_2_1_functions },
    { "GL_ARB_sync",                       GL_ARB_sync_functions },
    { "GL_ARB_texture_border_clamp",       NULL },
    { "GL_ARB_texture_cube_map",           NULL },
@@ -111,6 +111,7 @@ static const struct dri_extension card_extensions[] = {
    { "GL_EXT_cull_vertex",                GL_EXT_cull_vertex_functions },
    { "GL_EXT_framebuffer_blit",         GL_EXT_framebuffer_blit_functions },
    { "GL_EXT_framebuffer_object",       GL_EXT_framebuffer_object_functions },
+   { "GL_EXT_framebuffer_multisample",    GL_EXT_framebuffer_multisample_functions },
    { "GL_EXT_fog_coord",                  GL_EXT_fog_coord_functions },
    { "GL_EXT_gpu_program_parameters",     GL_EXT_gpu_program_parameters_functions },
    { "GL_EXT_packed_depth_stencil",       NULL },
@@ -210,6 +211,9 @@ intelInitExtensions(GLcontext *ctx)
    /* Disable imaging extension until convolution is working in teximage paths.
     */
    driInitExtensions(ctx, card_extensions, GL_FALSE);
+
+   _mesa_map_function_array(GL_VERSION_2_1_functions);
+   ctx->Const.GLSLVersion = 120;
 
    if (intel->gen >= 5)
       driInitExtensions(ctx, ironlake_extensions, GL_FALSE);

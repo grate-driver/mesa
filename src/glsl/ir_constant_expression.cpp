@@ -34,7 +34,7 @@
  */
 
 #include <math.h>
-#include "main/macros.h"
+#include "main/core.h" /* for MAX2, MIN2, CLAMP */
 #include "ir.h"
 #include "ir_visitor.h"
 #include "glsl_types.h"
@@ -89,9 +89,9 @@ ir_expression::constant_expression_value()
    if (op[0]->type->is_array()) {
       assert(op[1] != NULL && op[1]->type->is_array());
       switch (this->operation) {
-      case ir_binop_equal:
+      case ir_binop_all_equal:
 	 return new(ctx) ir_constant(op[0]->has_value(op[1]));
-      case ir_binop_nequal:
+      case ir_binop_any_nequal:
 	 return new(ctx) ir_constant(!op[0]->has_value(op[1]));
       default:
 	 break;
@@ -146,6 +146,15 @@ ir_expression::constant_expression_value()
       assert(op[0]->type->is_integer());
       for (unsigned c = 0; c < op[0]->type->components(); c++) {
 	 data.b[c] = bool(op[0]->value.u[c]);
+      }
+      break;
+
+   case ir_unop_any:
+      assert(op[0]->type->is_boolean());
+      data.b[0] = false;
+      for (unsigned c = 0; c < op[0]->type->components(); c++) {
+	 if (op[0]->value.b[c])
+	    data.b[0] = true;
       }
       break;
 
@@ -613,11 +622,46 @@ ir_expression::constant_expression_value()
 	 assert(0);
       }
       break;
-
    case ir_binop_equal:
-      data.b[0] = op[0]->has_value(op[1]);
+      assert(op[0]->type == op[1]->type);
+      for (unsigned c = 0; c < components; c++) {
+	 switch (op[0]->type->base_type) {
+	 case GLSL_TYPE_UINT:
+	    data.b[c] = op[0]->value.u[c] == op[1]->value.u[c];
+	    break;
+	 case GLSL_TYPE_INT:
+	    data.b[c] = op[0]->value.i[c] == op[1]->value.i[c];
+	    break;
+	 case GLSL_TYPE_FLOAT:
+	    data.b[c] = op[0]->value.f[c] == op[1]->value.f[c];
+	    break;
+	 default:
+	    assert(0);
+	 }
+      }
       break;
    case ir_binop_nequal:
+      assert(op[0]->type != op[1]->type);
+      for (unsigned c = 0; c < components; c++) {
+	 switch (op[0]->type->base_type) {
+	 case GLSL_TYPE_UINT:
+	    data.b[c] = op[0]->value.u[c] != op[1]->value.u[c];
+	    break;
+	 case GLSL_TYPE_INT:
+	    data.b[c] = op[0]->value.i[c] != op[1]->value.i[c];
+	    break;
+	 case GLSL_TYPE_FLOAT:
+	    data.b[c] = op[0]->value.f[c] != op[1]->value.f[c];
+	    break;
+	 default:
+	    assert(0);
+	 }
+      }
+      break;
+   case ir_binop_all_equal:
+      data.b[0] = op[0]->has_value(op[1]);
+      break;
+   case ir_binop_any_nequal:
       data.b[0] = !op[0]->has_value(op[1]);
       break;
 
@@ -644,7 +688,7 @@ ir_swizzle::constant_expression_value()
    ir_constant *v = this->val->constant_expression_value();
 
    if (v != NULL) {
-      ir_constant_data data;
+      ir_constant_data data = { { 0 } };
 
       const unsigned swiz_idx[4] = {
 	 this->mask.x, this->mask.y, this->mask.z, this->mask.w
@@ -776,7 +820,7 @@ ir_call::constant_expression_value()
     * "Function calls to user-defined functions (non-built-in functions)
     *  cannot be used to form constant expressions."
     */
-   if (!this->callee->is_built_in)
+   if (!this->callee->is_builtin)
       return NULL;
 
    unsigned num_parameters = 0;

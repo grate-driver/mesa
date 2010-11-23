@@ -163,6 +163,19 @@ intelGetString(GLcontext * ctx, GLenum name)
       case PCI_CHIP_ILM_G:
          chipset = "Intel(R) Ironlake Mobile";
          break;
+      case PCI_CHIP_SANDYBRIDGE_GT1:
+      case PCI_CHIP_SANDYBRIDGE_GT2:
+      case PCI_CHIP_SANDYBRIDGE_GT2_PLUS:
+	 chipset = "Intel(R) Sandybridge Desktop";
+	 break;
+      case PCI_CHIP_SANDYBRIDGE_M_GT1:
+      case PCI_CHIP_SANDYBRIDGE_M_GT2:
+      case PCI_CHIP_SANDYBRIDGE_M_GT2_PLUS:
+	 chipset = "Intel(R) Sandybridge Mobile";
+	 break;
+      case PCI_CHIP_SANDYBRIDGE_S:
+	 chipset = "Intel(R) Sandybridge Server";
+	 break;
       default:
          chipset = "Unknown Intel Chipset";
          break;
@@ -377,7 +390,8 @@ intel_update_renderbuffers(__DRIcontext *context, __DRIdrawable *drawable)
 	  intel_region_reference(&region, depth_region);
        }
        else
-          region = intel_region_alloc_for_handle(intel, buffers[i].cpp,
+          region = intel_region_alloc_for_handle(intel->intelScreen,
+						 buffers[i].cpp,
 						 drawable->w,
 						 drawable->h,
 						 buffers[i].pitch / buffers[i].cpp,
@@ -720,6 +734,8 @@ intelInitContext(struct intel_context *intel,
    ctx->Const.MaxPointSizeAA = 3.0;
    ctx->Const.PointSizeGranularity = 1.0;
 
+   ctx->Const.MaxSamples = 1.0;
+
    /* reinitialize the context point state.
     * It depend on constants in __GLcontextRec::Const
     */
@@ -782,6 +798,11 @@ intelInitContext(struct intel_context *intel,
    INTEL_DEBUG = driParseDebugString(getenv("INTEL_DEBUG"), debug_control);
    if (INTEL_DEBUG & DEBUG_BUFMGR)
       dri_bufmgr_set_debug(intel->bufmgr, GL_TRUE);
+
+   /* XXX force SIMD8 kernel for Sandybridge before we fixed
+      SIMD16 interpolation. */
+   if (intel->gen == 6)
+       INTEL_DEBUG |= DEBUG_GLSL_FORCE;
 
    intel->batch = intel_batchbuffer_alloc(intel);
 
@@ -870,6 +891,9 @@ intelDestroyContext(__DRIcontext * driContextPriv)
 GLboolean
 intelUnbindContext(__DRIcontext * driContextPriv)
 {
+   /* Unset current context and dispath table */
+   _mesa_make_current(NULL, NULL, NULL);
+
    return GL_TRUE;
 }
 

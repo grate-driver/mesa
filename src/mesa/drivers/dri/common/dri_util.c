@@ -32,6 +32,7 @@
 #include "drm_sarea.h"
 #include "utils.h"
 #include "xmlpool.h"
+#include "../glsl/glsl_parser_extras.h"
 
 PUBLIC const char __dri2ConfigOptions[] =
    DRI_CONF_BEGIN
@@ -634,6 +635,7 @@ dri2CreateNewContextForAPI(__DRIscreen *screen, int api,
 			   __DRIcontext *shared, void *data)
 {
     __DRIcontext *context;
+    const __GLcontextModes *modes = (config != NULL) ? &config->modes : NULL;
     void *shareCtx = (shared != NULL) ? shared->driverPrivate : NULL;
     gl_api mesa_api;
 
@@ -650,6 +652,8 @@ dri2CreateNewContextForAPI(__DRIscreen *screen, int api,
     case __DRI_API_GLES2:
 	    mesa_api = API_OPENGLES2;
 	    break;
+    default:
+	    return NULL;
     }
 
     context = malloc(sizeof *context);
@@ -660,7 +664,7 @@ dri2CreateNewContextForAPI(__DRIscreen *screen, int api,
     context->driDrawablePriv = NULL;
     context->loaderPrivate = data;
     
-    if (!(*screen->DriverAPI.CreateContext)(api, &config->modes,
+    if (!(*screen->DriverAPI.CreateContext)(mesa_api, modes,
 					    context, shareCtx) ) {
         free(context);
         return NULL;
@@ -876,6 +880,7 @@ dri2CreateNewScreen(int scrn, int fd,
     }
 
     psp->DriverAPI = driDriverAPI;
+    psp->loaderPrivate = data;
 
     driParseOptionInfo(&psp->optionInfo, __dri2ConfigOptions,
 		       __dri2NConfigOptions);
