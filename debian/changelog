@@ -33,8 +33,12 @@ mesa (7.9+repack-1ubuntu1) UNRELEASED; urgency=low
     - Install both r300c/r300g and r600c/r600g, renaming the non-default
       r300c to r300c_dri.so and r600g to r600g_dri.so to avoid conflicts.
       The radeon DDX will get a patch to select between these appropriately.
+  * debian/patches/105_use_shared_libdricore.patch:
+  * debian/rules:
+    - Build a shared library of common mesa routines and link DRI drivers
+      against it.  Shaves about 30MiB of disc space off the DRI drivers.
 
- -- Christopher James Halse Rogers <raof@ubuntu.com>  Tue, 23 Nov 2010 16:09:25 +1100
+ -- Christopher James Halse Rogers <raof@ubuntu.com>  Wed, 24 Nov 2010 11:46:17 +1100
 
 mesa (7.9+repack-1) experimental; urgency=low
 

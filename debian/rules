@@ -99,6 +99,7 @@ confflags-dri = \
 	--enable-gles-overlay \
 	--enable-gles1 \
 	--enable-gles2 \
+	--enable-shared-dricore \
 	$(DIRECT_RENDERING) \
 	$(confflags-common)
 
