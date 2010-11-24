@@ -1,5 +1,5 @@
---- a/src/mesa/x86-64/glapi_x86-64.S
-+++ b/src/mesa/x86-64/glapi_x86-64.S
+--- a/src/mapi/glapi/glapi_x86-64.S
++++ b/src/mapi/glapi/glapi_x86-64.S
 @@ -30885,18 +30885,6 @@ GL_PREFIX(EGLImageTargetTexture2DOES):
  	.globl GL_PREFIX(FramebufferTextureLayer) ; .set GL_PREFIX(FramebufferTextureLayer), GL_PREFIX(FramebufferTextureLayerEXT)
  	.globl GL_PREFIX(ProvokingVertex) ; .set GL_PREFIX(ProvokingVertex), GL_PREFIX(ProvokingVertexEXT)
@@ -19,8 +19,8 @@
  
  #if defined (__ELF__) && defined (__linux__)
  	.section .note.GNU-stack,"",%progbits
---- a/src/mesa/x86/glapi_x86.S
-+++ b/src/mesa/x86/glapi_x86.S
+--- a/src/mapi/glapi/glapi_x86.S
++++ b/src/mapi/glapi/glapi_x86.S
 @@ -1279,18 +1279,6 @@ GLNAME(gl_dispatch_functions_start):
  		ALIGNTEXT16
  GLNAME(gl_dispatch_functions_end):
