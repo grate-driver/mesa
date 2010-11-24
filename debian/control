@@ -12,7 +12,7 @@ Build-Depends: debhelper (>= 7.2.7), quilt (>= 0.40), pkg-config,
  libxdamage-dev, libxext-dev, autoconf, automake, x11proto-dri2-dev (>= 2.1),
  linux-libc-dev (>= 2.6.31) [!hurd-i386 !kfreebsd-amd64 !kfreebsd-i386],
  libx11-xcb-dev, libxcb-dri2-0-dev, libxcb-xfixes0-dev, python-libxml2,
- libtalloc-dev,
+ libtalloc-dev, libudev-dev,
 Vcs-Git: git://git.debian.org/git/pkg-xorg/lib/mesa
 Vcs-Browser: http://git.debian.org/?p=pkg-xorg/lib/mesa.git
 Homepage: http://mesa3d.sourceforge.net/
