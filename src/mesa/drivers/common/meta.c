@@ -1385,6 +1385,7 @@ _mesa_meta_Clear(GLcontext *ctx, GLbitfield buffers)
    struct vertex verts[4];
    /* save all state but scissor, pixel pack/unpack */
    GLbitfield metaSave = META_ALL - META_SCISSOR - META_PIXEL_STORE;
+   const GLuint stencilMax = (1 << ctx->DrawBuffer->Visual.stencilBits) - 1;
 
    if (buffers & BUFFER_BITS_COLOR) {
       /* if clearing color buffers, don't save/restore colormask */
@@ -1440,7 +1441,7 @@ _mesa_meta_Clear(GLcontext *ctx, GLbitfield buffers)
       _mesa_StencilOpSeparate(GL_FRONT_AND_BACK,
                               GL_REPLACE, GL_REPLACE, GL_REPLACE);
       _mesa_StencilFuncSeparate(GL_FRONT_AND_BACK, GL_ALWAYS,
-                                ctx->Stencil.Clear & 0x7fffffff,
+                                ctx->Stencil.Clear & stencilMax,
                                 ctx->Stencil.WriteMask[0]);
    }
    else {
