@@ -35,6 +35,7 @@ mesa (7.9+repack-1ubuntu1) UNRELEASED; urgency=low
       The radeon DDX will get a patch to select between these appropriately.
   * debian/patches/105_use_shared_libdricore.patch:
   * debian/rules:
+  * debian/libgl1-mesa-dri.install
     - Build a shared library of common mesa routines and link DRI drivers
       against it.  Shaves about 30MiB of disc space off the DRI drivers.
   * debian/control:

@@ -1,3 +1,5 @@
 build/dri/lib/*_dri.so  usr/lib/dri
 build/dri/lib/gallium/r300_dri.so usr/lib/dri
 build/dri/lib/gallium/r600g_dri.so usr/lib/dri
+build/dri/lib/libglsl.so usr/lib/dri
+build/dri/lib/libdricore.so usr/lib/dri
