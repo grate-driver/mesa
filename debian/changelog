@@ -95,6 +95,13 @@ mesa (7.9-1) experimental; urgency=low
 
  -- Julien Cristau <jcristau@debian.org>  Sat, 13 Nov 2010 00:36:11 +0100
 
+mesa (7.9~git20100924-0ubuntu3) natty; urgency=low
+
+  * debian/control:
+    - libgl1-mesa-dev should depends on libxext-dev other pkg-config gl fails.
+
+ -- Didier Roche <didrocks@ubuntu.com>  Fri, 12 Nov 2010 15:37:48 +0100
+  
 mesa (7.9~git20100924-0ubuntu2) maverick; urgency=low
 
   * Cherry-pick b24238c4 from 7.9 release branch.  Fixes the lookup of
