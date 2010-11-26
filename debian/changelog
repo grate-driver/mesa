@@ -1,3 +1,11 @@
+mesa (7.9+repack-1ubuntu2) natty; urgency=low
+
+  * debian/patches/105_use_shared_libdricore.patch:
+    - Fix makefile dependencies to ensure libdricore gets built before
+      the DRI drivers.  Fixes FTBFS on buildds, which ues parallel builds.
+
+ -- Christopher James Halse Rogers <raof@ubuntu.com>  Fri, 26 Nov 2010 13:24:55 +1100
+
 mesa (7.9+repack-1ubuntu1) natty; urgency=low
 
   * Merge from Debian experimental.  Remaining Ubuntu changes:
