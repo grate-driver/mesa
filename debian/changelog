@@ -5,7 +5,7 @@ mesa (7.9+repack-2) UNRELEASED; urgency=low
 
   [ Christopher James Halse Rogers ]
   * debian/control:
-    - Add libudev-dev to build-depends.  This is requried for the DRI2 EGL
+    - Add libudev-dev to build-depends.  This is required for the DRI2 EGL
       driver to work with a drm display.
 
  -- Christopher James Halse Rogers <raof@ubuntu.com>  Mon, 29 Nov 2010 08:58:35 +1100
