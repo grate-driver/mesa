@@ -569,7 +569,8 @@ static void r300_update_rs_block(struct r300_context *r300)
 }
 
 static uint32_t r300_get_border_color(enum pipe_format format,
-                                      const float border[4])
+                                      const float border[4],
+                                      boolean is_r500)
 {
     const struct util_format_description *desc;
     float border_swizzled[4] = {0};
@@ -577,6 +578,24 @@ static uint32_t r300_get_border_color(enum pipe_format format,
     union util_color uc = {0};
 
     desc = util_format_description(format);
+
+    /* Do depth formats first. */
+    if (util_format_is_depth_or_stencil(format)) {
+        switch (format) {
+        case PIPE_FORMAT_Z16_UNORM:
+            return util_pack_z(PIPE_FORMAT_Z16_UNORM, border[0]);
+        case PIPE_FORMAT_X8Z24_UNORM:
+        case PIPE_FORMAT_S8_USCALED_Z24_UNORM:
+            if (is_r500) {
+                return util_pack_z(PIPE_FORMAT_X8Z24_UNORM, border[0]);
+            } else {
+                return util_pack_z(PIPE_FORMAT_Z16_UNORM, border[0]) << 16;
+            }
+        default:
+            assert(0);
+            return 0;
+        }
+    }
 
     /* Apply inverse swizzle of the format. */
     for (i = 0; i < 4; i++) {
@@ -594,6 +613,12 @@ static uint32_t r300_get_border_color(enum pipe_format format,
             border_swizzled[3] = border[i];
             break;
         }
+    }
+
+    /* Compressed formats. */
+    if (util_format_is_compressed(format)) {
+        util_pack_color(border_swizzled, PIPE_FORMAT_R8G8B8A8_UNORM, &uc);
+        return uc.ui;
     }
 
     switch (desc->channel[0].size) {
@@ -618,6 +643,15 @@ static uint32_t r300_get_border_color(enum pipe_format format,
 
         case 10:
             util_pack_color(border_swizzled, PIPE_FORMAT_B10G10R10A2_UNORM, &uc);
+            break;
+
+        case 16:
+            if (desc->nr_channels <= 2) {
+                border_swizzled[0] = border_swizzled[2];
+                util_pack_color(border_swizzled, PIPE_FORMAT_R16G16_UNORM, &uc);
+            } else {
+                util_pack_color(border_swizzled, PIPE_FORMAT_B8G8R8A8_UNORM, &uc);
+            }
             break;
     }
 
@@ -660,7 +694,8 @@ static void r300_merge_textures_and_samplers(struct r300_context* r300)
             /* Set the border color. */
             texstate->border_color =
                 r300_get_border_color(view->base.format,
-                                      sampler->state.border_color);
+                                      sampler->state.border_color,
+                                      r300->screen->caps.is_r500);
 
             /* determine min/max levels */
             max_level = MIN3(sampler->max_lod + view->base.first_level,
