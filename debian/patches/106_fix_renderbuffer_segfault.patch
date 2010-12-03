@@ -1,0 +1,16 @@
+diff --git a/src/mesa/drivers/dri/radeon/radeon_common_context.c b/src/mesa/drivers/dri/radeon/radeon_common_context.c
+index b0340ce..9b44801 100644
+--- a/src/mesa/drivers/dri/radeon/radeon_common_context.c
++++ b/src/mesa/drivers/dri/radeon/radeon_common_context.c
+@@ -731,10 +731,10 @@ radeon_update_renderbuffers(__DRIcontext *context, __DRIdrawable *drawable,
+ 						buffers[i].flags);
+ 
+ 			if (bo == NULL) {
+-
+ 				fprintf(stderr, "failed to attach %s %d\n",
+ 					regname, buffers[i].name);
+ 
++				continue;
+ 			}
+ 
+ 			ret = radeon_bo_get_tiling(bo, &tiling_flags, &pitch);

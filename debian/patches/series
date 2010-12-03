@@ -8,3 +8,4 @@
 103_savage-expose_fbmodes_with_nonzero_alpha.patch
 104_i915_fragment_shader_disable.patch
 105_use_shared_libdricore.patch
+106_fix_renderbuffer_segfault.patch
