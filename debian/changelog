@@ -4,8 +4,9 @@ mesa (7.9+repack-1ubuntu3) natty; urgency=low
     - Cherrypick of 9b1ac4d1 from 7.9 branch to fix segfault in
       renderbuffer update that occurs in Compiz while resizing windows,
       giving the error message "failed to attach dri2 front buffer XX"
+      (LP: #683361)
 
- -- Bryce Harrington <bryce@ubuntu.com>  Thu, 02 Dec 2010 16:57:03 -0800
+ -- Bryce Harrington <bryce@ubuntu.com>  Thu, 02 Dec 2010 17:15:02 -0800
 
 mesa (7.9+repack-1ubuntu2) natty; urgency=low
 
