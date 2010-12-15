@@ -77,6 +77,7 @@ CXX_SOURCES = \
 	loop_unroll.cpp \
 	lower_noise.cpp \
 	lower_variable_index_to_cond_assign.cpp \
+	opt_discard_simplification.cpp \
 	opt_redundant_jumps.cpp \
 	s_expression.cpp
 
