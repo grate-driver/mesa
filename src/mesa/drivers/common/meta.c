@@ -53,6 +53,7 @@
 #include "main/readpix.h"
 #include "main/scissor.h"
 #include "main/shaderapi.h"
+#include "main/shaderobj.h"
 #include "main/state.h"
 #include "main/stencil.h"
 #include "main/texobj.h"
@@ -147,7 +148,7 @@ struct save_state
    struct gl_vertex_program *VertexProgram;
    GLboolean FragmentProgramEnabled;
    struct gl_fragment_program *FragmentProgram;
-   GLuint Shader;
+   struct gl_shader_program *Shader;
 
    /** META_STENCIL_TEST */
    struct gl_stencil_attrib Stencil;
@@ -443,8 +444,8 @@ _mesa_meta_begin(GLcontext *ctx, GLbitfield state)
       }
 
       if (ctx->Extensions.ARB_shader_objects) {
-         save->Shader = ctx->Shader.CurrentProgram ?
-            ctx->Shader.CurrentProgram->Name : 0;
+	 _mesa_reference_shader_program(ctx, &save->Shader,
+					ctx->Shader.CurrentProgram);
          _mesa_UseProgramObjectARB(0);
       }
    }
@@ -678,7 +679,7 @@ _mesa_meta_end(GLcontext *ctx)
       }
 
       if (ctx->Extensions.ARB_shader_objects) {
-         _mesa_UseProgramObjectARB(save->Shader);
+         _mesa_use_program(ctx, save->Shader);
       }
    }
 
