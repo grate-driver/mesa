@@ -2576,7 +2576,7 @@ set_uniform_initializers(GLcontext *ctx,
    talloc_free(mem_ctx);
 }
 
-struct gl_program *
+static struct gl_program *
 get_mesa_program(GLcontext *ctx, struct gl_shader_program *shader_program,
 		 struct gl_shader *shader)
 {
@@ -2718,6 +2718,15 @@ get_mesa_program(GLcontext *ctx, struct gl_shader_program *shader_program,
 
       mesa_inst++;
       i++;
+
+      if (!shader_program->LinkStatus)
+         break;
+   }
+
+   if (!shader_program->LinkStatus) {
+      free(mesa_instructions);
+      _mesa_reference_program(ctx, &shader->Program, NULL);
+      return NULL;
    }
 
    set_branchtargets(&v, mesa_instructions, num_instructions);
@@ -2814,30 +2823,34 @@ _mesa_ir_link_shader(GLcontext *ctx, struct gl_shader_program *prog)
 
    for (unsigned i = 0; i < MESA_SHADER_TYPES; i++) {
       struct gl_program *linked_prog;
-      bool ok = true;
 
       if (prog->_LinkedShaders[i] == NULL)
 	 continue;
 
       linked_prog = get_mesa_program(ctx, prog, prog->_LinkedShaders[i]);
 
-      switch (prog->_LinkedShaders[i]->Type) {
-      case GL_VERTEX_SHADER:
-	 _mesa_reference_vertprog(ctx, &prog->VertexProgram,
-				  (struct gl_vertex_program *)linked_prog);
-	 ok = ctx->Driver.ProgramStringNotify(ctx, GL_VERTEX_PROGRAM_ARB,
-					      linked_prog);
-	 break;
-      case GL_FRAGMENT_SHADER:
-	 _mesa_reference_fragprog(ctx, &prog->FragmentProgram,
-				  (struct gl_fragment_program *)linked_prog);
-	 ok = ctx->Driver.ProgramStringNotify(ctx, GL_FRAGMENT_PROGRAM_ARB,
-					      linked_prog);
-	 break;
+      if (linked_prog) {
+         bool ok = true;
+
+         switch (prog->_LinkedShaders[i]->Type) {
+         case GL_VERTEX_SHADER:
+            _mesa_reference_vertprog(ctx, &prog->VertexProgram,
+                                     (struct gl_vertex_program *)linked_prog);
+            ok = ctx->Driver.ProgramStringNotify(ctx, GL_VERTEX_PROGRAM_ARB,
+                                                 linked_prog);
+            break;
+         case GL_FRAGMENT_SHADER:
+            _mesa_reference_fragprog(ctx, &prog->FragmentProgram,
+                                     (struct gl_fragment_program *)linked_prog);
+            ok = ctx->Driver.ProgramStringNotify(ctx, GL_FRAGMENT_PROGRAM_ARB,
+                                                 linked_prog);
+            break;
+         }
+         if (!ok) {
+            return GL_FALSE;
+         }
       }
-      if (!ok) {
-	 return GL_FALSE;
-      }
+
       _mesa_reference_program(ctx, &linked_prog, NULL);
    }
 
