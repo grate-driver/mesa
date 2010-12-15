@@ -72,6 +72,7 @@ sources = [
     'loop_analysis.cpp',
     'loop_controls.cpp',
     'loop_unroll.cpp',
+    'lower_discard.cpp',
     'lower_noise.cpp',
     'lower_variable_index_to_cond_assign.cpp',
     'opt_discard_simplification.cpp',
