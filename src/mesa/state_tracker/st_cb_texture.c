@@ -1523,6 +1523,9 @@ st_copy_texsubimage(GLcontext *ctx,
    if (texBaseFormat == GL_DEPTH_COMPONENT ||
        texBaseFormat == GL_DEPTH_STENCIL) {
       strb = st_renderbuffer(fb->_DepthBuffer);
+      if (strb->Base.Wrapped) {
+         strb = st_renderbuffer(strb->Base.Wrapped);
+      }
    }
    else {
       /* texBaseFormat == GL_RGB, GL_RGBA, GL_ALPHA, etc */
