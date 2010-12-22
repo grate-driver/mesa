@@ -402,7 +402,6 @@ egl_g3d_create_pbuffer_surface(_EGLDriver *drv, _EGLDisplay *dpy,
                                _EGLConfig *conf, const EGLint *attribs)
 {
    struct egl_g3d_surface *gsurf;
-   struct pipe_resource *ptex = NULL;
 
    gsurf = create_pbuffer_surface(dpy, conf, attribs,
          "eglCreatePbufferSurface");
@@ -410,13 +409,6 @@ egl_g3d_create_pbuffer_surface(_EGLDriver *drv, _EGLDisplay *dpy,
       return NULL;
 
    gsurf->client_buffer_type = EGL_NONE;
-
-   if (!gsurf->stfbi->validate(gsurf->stfbi,
-            &gsurf->stvis.render_buffer, 1, &ptex)) {
-      egl_g3d_destroy_st_framebuffer(gsurf->stfbi);
-      FREE(gsurf);
-      return NULL;
-   }
 
    return &gsurf->base;
 }
@@ -477,12 +469,14 @@ egl_g3d_create_pbuffer_from_client_buffer(_EGLDriver *drv, _EGLDisplay *dpy,
    gsurf->client_buffer_type = buftype;
    gsurf->client_buffer = buffer;
 
+   /* validate now so that it fails if the client buffer is invalid */
    if (!gsurf->stfbi->validate(gsurf->stfbi,
             &gsurf->stvis.render_buffer, 1, &ptex)) {
       egl_g3d_destroy_st_framebuffer(gsurf->stfbi);
       FREE(gsurf);
       return NULL;
    }
+   pipe_resource_reference(&ptex, NULL);
 
    return &gsurf->base;
 }
