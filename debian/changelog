@@ -12,6 +12,7 @@ mesa (7.9+repack-2) UNRELEASED; urgency=low
   * Update for the latest libdrm-nouveau API:
     - Cherry-pick commit c25fcf5a from Mesa master.
     - Build-depend on libdrm-dev 2.4.23 or newer.
+  * Use linux-any for linux-libc-dev and libudev-dev build-depends.
   
  -- Christopher James Halse Rogers <raof@ubuntu.com>  Mon, 29 Nov 2010 08:58:35 +1100
 
