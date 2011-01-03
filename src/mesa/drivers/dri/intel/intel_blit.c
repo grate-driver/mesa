@@ -207,7 +207,7 @@ intelEmitCopyBlit(struct intel_context *intel,
  * which we're clearing with triangles.
  * \param mask  bitmask of BUFFER_BIT_* values indicating buffers to clear
  */
-void
+GLbitfield
 intelClearWithBlit(struct gl_context *ctx, GLbitfield mask)
 {
    struct intel_context *intel = intel_context(ctx);
@@ -215,6 +215,7 @@ intelClearWithBlit(struct gl_context *ctx, GLbitfield mask)
    GLuint clear_depth;
    GLboolean all;
    GLint cx, cy, cw, ch;
+   GLbitfield fail_mask = 0;
    BATCH_LOCALS;
 
    /*
@@ -237,7 +238,7 @@ intelClearWithBlit(struct gl_context *ctx, GLbitfield mask)
    ch = fb->_Ymax - fb->_Ymin;
 
    if (cw == 0 || ch == 0)
-      return;
+      return 0;
 
    GLuint buf;
    all = (cw == fb->Width && ch == fb->Height);
@@ -333,9 +334,9 @@ intelClearWithBlit(struct gl_context *ctx, GLbitfield mask)
 					clear[3], clear[3]);
 	    break;
 	 default:
-	    _mesa_problem(ctx, "Unexpected renderbuffer format: %d\n",
-			  irb->Base.Format);
-	    clear_val = 0;
+	    fail_mask |= bufBit;
+	    mask &= ~bufBit;
+	    continue;
 	 }
       }
 
@@ -370,6 +371,8 @@ intelClearWithBlit(struct gl_context *ctx, GLbitfield mask)
       else
 	 mask &= ~bufBit;    /* turn off bit, for faster loop exit */
    }
+
+   return fail_mask;
 }
 
 GLboolean
