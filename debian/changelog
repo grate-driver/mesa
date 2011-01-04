@@ -16,6 +16,7 @@ mesa (7.9+repack-2) UNRELEASED; urgency=low
 
   [ Julien Cristau ]
   * Update from upstream 7.9 branch, commit 0ff45dd.
+  * Refresh patches.
 
  -- Christopher James Halse Rogers <raof@ubuntu.com>  Mon, 29 Nov 2010 08:58:35 +1100
 
