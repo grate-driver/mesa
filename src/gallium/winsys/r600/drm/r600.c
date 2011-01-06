@@ -103,6 +103,9 @@ struct radeon *r600_new(int fd, unsigned device)
 	case CHIP_CYPRESS:
 	case CHIP_HEMLOCK:
 	case CHIP_PALM:
+	case CHIP_BARTS:
+	case CHIP_TURKS:
+	case CHIP_CAICOS:
 		r600->chip_class = EVERGREEN;
 		break;
 	default:
