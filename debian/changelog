@@ -1,4 +1,4 @@
-mesa (7.9+repack-1ubuntu4~bug691653~bwh2) natty; urgency=low
+mesa (7.9+repack-1ubuntu4) natty; urgency=low
 
   * debian/patches/winsys_buffer_nullptr.patch: Null pointer check for
     winsys buffer.
