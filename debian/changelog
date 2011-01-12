@@ -1,3 +1,11 @@
+mesa (7.9+repack-1ubuntu4~bug691653~bwh2) natty; urgency=low
+
+  * debian/patches/winsys_buffer_nullptr.patch: Null pointer check for
+    winsys buffer.
+    (LP: #691653)
+
+ -- Bryce Harrington <bryce@ubuntu.com>  Thu, 06 Jan 2011 14:44:43 -0800
+
 mesa (7.9+repack-1ubuntu3) natty; urgency=low
 
   * debian/patches/106_fix_renderbuffer_segfault.patch:

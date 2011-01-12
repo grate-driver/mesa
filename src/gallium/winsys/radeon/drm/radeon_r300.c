@@ -119,7 +119,7 @@ static struct r300_winsys_buffer *radeon_r300_winsys_buffer_from_handle(struct r
 
     if (stride)
         *stride = whandle->stride;
-    if (size)
+    if (size && _buf)
         *size = _buf->base.size;
 
     return radeon_libdrm_winsys_buffer(_buf);
