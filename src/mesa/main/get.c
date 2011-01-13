@@ -2310,8 +2310,10 @@ void GLAPIENTRY
 _mesa_GetBooleanIndexedv( GLenum pname, GLuint index, GLboolean *params )
 {
    union value v;
+   enum value_type type =
+      find_value_indexed("glGetBooleanIndexedv", pname, index, &v);
 
-   switch (find_value_indexed("glGetBooleanIndexedv", pname, index, &v)) {
+   switch (type) {
    case TYPE_INT:
       params[0] = INT_TO_BOOLEAN(v.value_int);
       break;
@@ -2325,7 +2327,7 @@ _mesa_GetBooleanIndexedv( GLenum pname, GLuint index, GLboolean *params )
       params[0] = INT64_TO_BOOLEAN(v.value_int);
       break;
    default:
-      assert(0);
+      ; /* nothing - GL error was recorded */
    }
 }
 
@@ -2333,8 +2335,10 @@ void GLAPIENTRY
 _mesa_GetIntegerIndexedv( GLenum pname, GLuint index, GLint *params )
 {
    union value v;
+   enum value_type type =
+      find_value_indexed("glGetIntegerIndexedv", pname, index, &v);
 
-   switch (find_value_indexed("glGetIntegerIndexedv", pname, index, &v)) {
+   switch (type) {
    case TYPE_INT:
       params[0] = v.value_int;
       break;
@@ -2348,7 +2352,7 @@ _mesa_GetIntegerIndexedv( GLenum pname, GLuint index, GLint *params )
       params[0] = INT64_TO_INT(v.value_int);
       break;
    default:
-      assert(0);
+      ; /* nothing - GL error was recorded */
    }
 }
 
@@ -2357,8 +2361,10 @@ void GLAPIENTRY
 _mesa_GetInteger64Indexedv( GLenum pname, GLuint index, GLint64 *params )
 {
    union value v;
+   enum value_type type =
+      find_value_indexed("glGetIntegerIndexedv", pname, index, &v);      
 
-   switch (find_value_indexed("glGetIntegerIndexedv", pname, index, &v)) {
+   switch (type) {
    case TYPE_INT:
       params[0] = v.value_int;
       break;
@@ -2372,7 +2378,7 @@ _mesa_GetInteger64Indexedv( GLenum pname, GLuint index, GLint64 *params )
       params[0] = v.value_int;
       break;
    default:
-      assert(0);
+      ; /* nothing - GL error was recorded */
    }
 }
 #endif /* FEATURE_ARB_sync */
