@@ -1,3 +1,14 @@
+mesa (7.9+repack-1ubuntu5) natty; urgency=low
+
+  * debian/patches/108-r300g-fixup-rs690-tiling-stride-align.patch
+    - Cherry pick 32218e4cc88f7dedebadffe4a80247decf4498f1 from upstream
+      r300g: fixup rs690 tiling stride alignment calculations
+      itself cherrypicked from d19b5cbd317620f3977e68fffb7a74793436b7e2
+      addressing unity (and other) text and icon rendering problems.
+      (LP: #681915)
+
+ -- John S Gruber <JohnSGruber@gmail.com>  Sun, 09 Jan 2011 14:25:53 -0500
+
 mesa (7.9+repack-1ubuntu4) natty; urgency=low
 
   * debian/patches/winsys_buffer_nullptr.patch: Null pointer check for

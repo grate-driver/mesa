@@ -9,4 +9,5 @@
 104_i915_fragment_shader_disable.patch
 105_use_shared_libdricore.patch
 106_fix_renderbuffer_segfault.patch
-winsys_buffer_nullptr.patch
+107_winsys_buffer_nullptr.patch
+108-r300g-fixup-rs690-tiling-stride-align.patch
