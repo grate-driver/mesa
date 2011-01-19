@@ -2525,6 +2525,17 @@ struct gl_framebuffer
 
 
 /**
+ * Precision info for shader datatypes.  See glGetShaderPrecisionFormat().
+ */
+struct gl_precision
+{
+   GLushort RangeMin;   /**< min value exponent */
+   GLushort RangeMax;   /**< max value exponent */
+   GLushort Precision;  /**< number of mantissa bits */
+};
+
+
+/**
  * Limits for vertex and fragment programs/shaders.
  */
 struct gl_program_constants
@@ -2558,6 +2569,9 @@ struct gl_program_constants
    GLuint MaxGeometryUniformComponents;
    GLuint MaxGeometryOutputVertices;
    GLuint MaxGeometryTotalOutputComponents;
+   /* ES 2.0 and GL_ARB_ES2_compatibility */
+   struct gl_precision LowFloat, MediumFloat, HighFloat;
+   struct gl_precision LowInt, MediumInt, HighInt;
 };
 
 
