@@ -305,6 +305,18 @@ public:
 	      offset == inst->offset);
    }
 
+   bool is_math()
+   {
+      return (opcode == FS_OPCODE_RCP ||
+	      opcode == FS_OPCODE_RSQ ||
+	      opcode == FS_OPCODE_SQRT ||
+	      opcode == FS_OPCODE_EXP2 ||
+	      opcode == FS_OPCODE_LOG2 ||
+	      opcode == FS_OPCODE_SIN ||
+	      opcode == FS_OPCODE_COS ||
+	      opcode == FS_OPCODE_POW);
+   }
+
    int opcode; /* BRW_OPCODE_* or FS_OPCODE_* */
    fs_reg dst;
    fs_reg src[3];
