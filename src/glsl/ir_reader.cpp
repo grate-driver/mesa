@@ -23,10 +23,6 @@
 
 #include <cstdarg>
 
-extern "C" {
-#include <talloc.h>
-}
-
 #include "ir_reader.h"
 #include "glsl_parser_extras.h"
 #include "glsl_types.h"
