@@ -1,0 +1,17 @@
+---
+ src/mesa/drivers/osmesa/Makefile |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+Index: mesa/src/mesa/drivers/osmesa/Makefile
+===================================================================
+--- mesa.orig/src/mesa/drivers/osmesa/Makefile
++++ mesa/src/mesa/drivers/osmesa/Makefile
+@@ -37,7 +37,7 @@
+ # -DCHAN_BITS=16/32.
+ $(TOP)/$(LIB_DIR)/$(OSMESA_LIB_NAME): $(OBJECTS) $(CORE_MESA)
+ 	$(MKLIB) -o $(OSMESA_LIB) -linker '$(CXX)' -ldflags '$(LDFLAGS)' \
+-		-major $(MESA_MAJOR) -minor $(MESA_MINOR) -patch $(MESA_TINY) \
++		-major 6 -minor 5 -patch 3 \
+ 		-install $(TOP)/$(LIB_DIR) -cplusplus $(MKLIB_OPTIONS) \
+ 		-id $(INSTALL_LIB_DIR)/lib$(OSMESA_LIB).$(MESA_MAJOR).dylib \
+ 		$(OSMESA_LIB_DEPS) $(OBJECTS) $(CORE_MESA)
