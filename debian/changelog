@@ -17,6 +17,10 @@ mesa (7.10-1) UNRELEASED; urgency=low
     any related issue will break the build:
     - libgles1-mesa.symbols
     - libgles2-mesa.symbols
+  * Stop using dh_strip -s --remaining-packages. When a build is resumed
+    (-nc), this dh_strip call is a no-op if it was previously written to
+    the debhelper log files. Specify all remaining packages instead.
+    That's boring, but avoid getting non-stripped packages.
 
  -- Cyril Brulebois <kibi@debian.org>  Sat, 22 Jan 2011 03:14:03 +0000
 
