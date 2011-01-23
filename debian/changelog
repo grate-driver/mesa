@@ -2,6 +2,9 @@ mesa (7.10-1) UNRELEASED; urgency=low
 
   * New upstream release.
   * Add patch: 10-fix-talloc-linking.diff
+  * Use debian/not-installed to keep track of files which aren't getting
+    installed for now. Delete them before running dh_install. Use the list
+    of files appearing in the build logs for 7.9+repack-2.
 
  -- Cyril Brulebois <kibi@debian.org>  Sat, 22 Jan 2011 03:14:03 +0000
 

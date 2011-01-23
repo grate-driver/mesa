@@ -32,6 +32,10 @@ endif
 # choose which configurations to build
 include debian/scripts/choose-configs
 
+# keep a list of files we don't install (yet), but since it's a bit
+# large, use an external file:
+include debian/not-installed
+
 # build the following configurations by default
 CONFIGS = $(SWX11_GLU_CONFIGS) \
 	  dri \
@@ -259,6 +263,10 @@ binary-arch: install
 	# Remove the whole tree to avoid false-positives in --list-missing, and
 	# install the right files manually.
 	rm -r debian/tmp/dri/usr/lib/dri
+
+	# Also get rid of other files which aren't installed. Do not
+	# use -f to ensure we notice disappearing files:
+	set -e; for file in $(NOT_INSTALLED); do rm debian/tmp/$$file; done
 
 	dh_install -s --list-missing
 	dh_installman -s
