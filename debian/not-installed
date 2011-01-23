@@ -3,6 +3,8 @@ NOT_INSTALLED = \
 	dri/usr/include/GL/glfbdev.h \
 	dri/usr/include/GL/glu.h \
 	dri/usr/include/GL/glu_mangle.h \
+	dri/usr/include/GL/glutf90.h \
+	dri/usr/include/GL/glut.h \
 	dri/usr/include/GL/mesa_wgl.h \
 	dri/usr/include/GL/osmesa.h \
 	dri/usr/include/GL/vms_x_fix.h \
@@ -14,6 +16,8 @@ NOT_INSTALLED = \
 	usr/include/GL/glfbdev.h \
 	usr/include/GL/gl.h \
 	usr/include/GL/gl_mangle.h \
+	usr/include/GL/glutf90.h \
+	usr/include/GL/glut.h \
 	usr/include/GL/GLwDrawAP.h \
 	usr/include/GL/GLwMDrawAP.h \
 	usr/include/GL/glxext.h \
