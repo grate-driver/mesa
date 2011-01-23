@@ -1,6 +1,7 @@
 mesa (7.10-1) UNRELEASED; urgency=low
 
   * New upstream release.
+  * Add patch: 10-fix-talloc-linking.diff
 
  -- Cyril Brulebois <kibi@debian.org>  Sat, 22 Jan 2011 03:14:03 +0000
 
