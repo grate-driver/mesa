@@ -12,6 +12,11 @@ mesa (7.10-1) UNRELEASED; urgency=low
     symbol-related changes are noticed and dealt with.
   * Update symbols files with new symbols:
     - libopenvg1-mesa.symbols
+  * Remove “mesa internal ASM optimized functions” lines from symbols
+    files, those seem to be gone, and with -c4 passed to dpkg-gensymbols,
+    any related issue will break the build:
+    - libgles1-mesa.symbols
+    - libgles2-mesa.symbols
 
  -- Cyril Brulebois <kibi@debian.org>  Sat, 22 Jan 2011 03:14:03 +0000
 
