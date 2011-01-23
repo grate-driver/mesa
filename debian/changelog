@@ -7,6 +7,7 @@ mesa (7.10-1) UNRELEASED; urgency=low
     of files appearing in the build logs for 7.9+repack-2.
   * Update this list with new files, until we decide what to do with
     those: {,dri/}usr/include/GL/glut{,f90}.h
+  * Switch from --list-missing to --fail-missing accordingly.
 
  -- Cyril Brulebois <kibi@debian.org>  Sat, 22 Jan 2011 03:14:03 +0000
 

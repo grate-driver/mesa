@@ -268,7 +268,7 @@ binary-arch: install
 	# use -f to ensure we notice disappearing files:
 	set -e; for file in $(NOT_INSTALLED); do rm debian/tmp/$$file; done
 
-	dh_install -s --list-missing
+	dh_install -s --fail-missing
 	dh_installman -s
 	dh_lintian -s
 	dh_link -s
