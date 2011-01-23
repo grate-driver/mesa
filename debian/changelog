@@ -10,6 +10,8 @@ mesa (7.10-1) UNRELEASED; urgency=low
   * Switch from --list-missing to --fail-missing accordingly.
   * Pass -c4 to dpkg-gensymbols through dh_makeshlibs to make sure
     symbol-related changes are noticed and dealt with.
+  * Update symbols files with new symbols:
+    - libopenvg1-mesa.symbols
 
  -- Cyril Brulebois <kibi@debian.org>  Sat, 22 Jan 2011 03:14:03 +0000
 
