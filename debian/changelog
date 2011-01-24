@@ -1,4 +1,4 @@
-mesa (7.10-1) UNRELEASED; urgency=low
+mesa (7.10-1) experimental; urgency=low
 
   * New upstream release.
   * Add patch: 10-fix-talloc-linking.diff
@@ -23,7 +23,7 @@ mesa (7.10-1) UNRELEASED; urgency=low
     aren't in the release tarballs, and make dpkg-source error out.
   * Keep my eyes wide shut and add myself to Uploaders.
 
- -- Cyril Brulebois <kibi@debian.org>  Sat, 22 Jan 2011 03:14:03 +0000
+ -- Cyril Brulebois <kibi@debian.org>  Tue, 25 Jan 2011 00:20:57 +0100
 
 mesa (7.9+repack-2) experimental; urgency=low
 
