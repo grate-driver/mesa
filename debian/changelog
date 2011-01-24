@@ -21,6 +21,8 @@ mesa (7.10-1) UNRELEASED; urgency=low
     (-nc), this dh_strip call is a no-op if it was previously written to
     the debhelper log files. Specify all remaining packages instead.
     That's boring, but avoid getting non-stripped packages.
+  * Add debian/git-cleanup.sh script to ease removing files in git which
+    aren't in the release tarballs, and make dpkg-source error out.
 
  -- Cyril Brulebois <kibi@debian.org>  Sat, 22 Jan 2011 03:14:03 +0000
 
