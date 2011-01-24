@@ -5,8 +5,6 @@ mesa (7.10-1) UNRELEASED; urgency=low
   * Use debian/not-installed to keep track of files which aren't getting
     installed for now. Delete them before running dh_install. Use the list
     of files appearing in the build logs for 7.9+repack-2.
-  * Update this list with new files, until we decide what to do with
-    those: {,dri/}usr/include/GL/glut{,f90}.h
   * Switch from --list-missing to --fail-missing accordingly.
   * Pass -c4 to dpkg-gensymbols through dh_makeshlibs to make sure
     symbol-related changes are noticed and dealt with.
