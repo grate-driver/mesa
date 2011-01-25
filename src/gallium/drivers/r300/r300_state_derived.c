@@ -25,6 +25,7 @@
 
 #include "util/u_math.h"
 #include "util/u_memory.h"
+#include "util/u_pack_color.h"
 
 #include "r300_context.h"
 #include "r300_fs.h"
@@ -192,7 +193,7 @@ static void r300_swtcl_vertex_psc(struct r300_context *r300)
         (R300_LAST_VEC << (i & 1 ? 16 : 0));
 
     vstream->count = (i >> 1) + 1;
-    r300->vertex_stream_state.dirty = TRUE;
+    r300_mark_atom_dirty(r300, &r300->vertex_stream_state);
     r300->vertex_stream_state.size = (1 + vstream->count) * 2;
 }
 
@@ -324,6 +325,7 @@ static void r300_update_rs_block(struct r300_context *r300)
     boolean any_bcolor_used = vs_outputs->bcolor[0] != ATTR_UNUSED ||
                               vs_outputs->bcolor[1] != ATTR_UNUSED;
     int *stream_loc_notcl = r300->stream_loc_notcl;
+    uint32_t stuffing_enable = 0;
 
     if (r300->screen->caps.is_r500) {
         rX00_rs_col       = r500_rs_col;
@@ -432,11 +434,17 @@ static void r300_update_rs_block(struct r300_context *r300)
         fp_offset++;
         col_count++;
         DBG(r300, DBG_RS, "r300: Rasterized FACE written to FS.\n");
+    } else if (fs_inputs->face != ATTR_UNUSED) {
+        fprintf(stderr, "r300: ERROR: FS input FACE unassigned.\n");
     }
 
     /* Rasterize texture coordinates. */
     for (i = 0; i < ATTR_GENERIC_COUNT && tex_count < 8; i++) {
-	bool sprite_coord = !!(r300->sprite_coord_enable & (1 << i));
+	bool sprite_coord = false;
+
+	if (fs_inputs->generic[i] != ATTR_UNUSED) {
+	    sprite_coord = !!(r300->sprite_coord_enable & (1 << i));
+	}
 
         if (vs_outputs->generic[i] != ATTR_UNUSED || sprite_coord) {
             if (!sprite_coord) {
@@ -444,7 +452,9 @@ static void r300_update_rs_block(struct r300_context *r300)
                 rs.vap_vsm_vtx_assm |= (R300_INPUT_CNTL_TC0 << tex_count);
                 rs.vap_out_vtx_fmt[1] |= (4 << (3 * tex_count));
                 stream_loc_notcl[loc++] = 6 + tex_count;
-            }
+            } else
+                stuffing_enable |=
+                    R300_GB_TEX_ST << (R300_GB_TEX0_SOURCE_SHIFT + (tex_count*2));
 
             /* Rasterize it. */
             rX00_rs_tex(&rs, tex_count, tex_ptr,
@@ -456,8 +466,8 @@ static void r300_update_rs_block(struct r300_context *r300)
                 fp_offset++;
 
                 DBG(r300, DBG_RS,
-                    "r300: Rasterized generic %i written to FS%s.\n",
-                    i, sprite_coord ? " (sprite coord)" : "");
+                    "r300: Rasterized generic %i written to FS%s in texcoord %d.\n",
+                    i, sprite_coord ? " (sprite coord)" : "", tex_count);
             } else {
                 DBG(r300, DBG_RS,
                     "r300: Rasterized generic %i unused%s.\n",
@@ -477,12 +487,10 @@ static void r300_update_rs_block(struct r300_context *r300)
         }
     }
 
-    if (DBG_ON(r300, DBG_RS)) {
-        for (; i < ATTR_GENERIC_COUNT; i++) {
-            if (fs_inputs->generic[i] != ATTR_UNUSED) {
-                DBG(r300, DBG_RS,
-                    "r300: FS input generic %i unassigned.\n", i);
-            }
+    for (; i < ATTR_GENERIC_COUNT; i++) {
+        if (fs_inputs->generic[i] != ATTR_UNUSED) {
+            fprintf(stderr, "r300: ERROR: FS input generic %i unassigned, "
+                    "not enough hardware slots.\n", i);
         }
     }
 
@@ -513,7 +521,12 @@ static void r300_update_rs_block(struct r300_context *r300)
         if (fs_inputs->fog != ATTR_UNUSED) {
             fp_offset++;
 
-            DBG(r300, DBG_RS, "r300: FS input fog unassigned.\n");
+            if (tex_count < 8) {
+                DBG(r300, DBG_RS, "r300: FS input fog unassigned.\n");
+            } else {
+                fprintf(stderr, "r300: ERROR: FS input fog unassigned, "
+                        "not enough hardware slots.\n");
+            }
         }
     }
 
@@ -536,6 +549,11 @@ static void r300_update_rs_block(struct r300_context *r300)
         fp_offset++;
         tex_count++;
         tex_ptr += 4;
+    } else {
+        if (fs_inputs->wpos != ATTR_UNUSED && tex_count >= 8) {
+            fprintf(stderr, "r300: ERROR: FS input WPOS unassigned, "
+                    "not enough hardware slots.\n");
+        }
     }
 
     /* Invalidate the rest of the no-TCL (GA) stream locations. */
@@ -560,63 +578,107 @@ static void r300_update_rs_block(struct r300_context *r300)
     count = MAX3(col_count, tex_count, 1);
     rs.inst_count = count - 1;
 
+    /* set the GB enable flags */
+    if (r300->sprite_coord_enable)
+	stuffing_enable |= R300_GB_POINT_STUFF_ENABLE;
+
+    rs.gb_enable = stuffing_enable;
+
     /* Now, after all that, see if we actually need to update the state. */
     if (memcmp(r300->rs_block_state.state, &rs, sizeof(struct r300_rs_block))) {
         memcpy(r300->rs_block_state.state, &rs, sizeof(struct r300_rs_block));
-        r300->rs_block_state.size = 11 + count*2;
+        r300->rs_block_state.size = 13 + count*2;
     }
 }
 
 static uint32_t r300_get_border_color(enum pipe_format format,
-                                      const float border[4])
+                                      const float border[4],
+                                      boolean is_r500)
 {
     const struct util_format_description *desc;
-    float border_swizzled[4] = {
-        border[2],
-        border[1],
-        border[0],
-        border[3]
-    };
-    uint32_t r;
+    float border_swizzled[4] = {0};
+    unsigned i;
+    union util_color uc = {0};
 
     desc = util_format_description(format);
 
-    /* We don't use util_pack_format because it does not handle the formats
-     * we want, e.g. R4G4B4A4 is non-existent in Gallium. */
+    /* Do depth formats first. */
+    if (util_format_is_depth_or_stencil(format)) {
+        switch (format) {
+        case PIPE_FORMAT_Z16_UNORM:
+            return util_pack_z(PIPE_FORMAT_Z16_UNORM, border[0]);
+        case PIPE_FORMAT_X8Z24_UNORM:
+        case PIPE_FORMAT_S8_USCALED_Z24_UNORM:
+            if (is_r500) {
+                return util_pack_z(PIPE_FORMAT_X8Z24_UNORM, border[0]);
+            } else {
+                return util_pack_z(PIPE_FORMAT_Z16_UNORM, border[0]) << 16;
+            }
+        default:
+            assert(0);
+            return 0;
+        }
+    }
+
+    /* Apply inverse swizzle of the format. */
+    for (i = 0; i < 4; i++) {
+        switch (desc->swizzle[i]) {
+        case UTIL_FORMAT_SWIZZLE_X:
+            border_swizzled[2] = border[i];
+            break;
+        case UTIL_FORMAT_SWIZZLE_Y:
+            border_swizzled[1] = border[i];
+            break;
+        case UTIL_FORMAT_SWIZZLE_Z:
+            border_swizzled[0] = border[i];
+            break;
+        case UTIL_FORMAT_SWIZZLE_W:
+            border_swizzled[3] = border[i];
+            break;
+        }
+    }
+
+    /* Compressed formats. */
+    if (util_format_is_compressed(format)) {
+        util_pack_color(border_swizzled, PIPE_FORMAT_R8G8B8A8_UNORM, &uc);
+        return uc.ui;
+    }
+
     switch (desc->channel[0].size) {
         case 4:
-            r = ((float_to_ubyte(border_swizzled[0]) & 0xf0) >> 4) |
-                ((float_to_ubyte(border_swizzled[1]) & 0xf0) << 0) |
-                ((float_to_ubyte(border_swizzled[2]) & 0xf0) << 4) |
-                ((float_to_ubyte(border_swizzled[3]) & 0xf0) << 8);
+            util_pack_color(border_swizzled, PIPE_FORMAT_B4G4R4A4_UNORM, &uc);
             break;
 
         case 5:
             if (desc->channel[1].size == 5) {
-                r = ((float_to_ubyte(border_swizzled[0]) & 0xf8) >> 3) |
-                    ((float_to_ubyte(border_swizzled[1]) & 0xf8) << 2) |
-                    ((float_to_ubyte(border_swizzled[2]) & 0xf8) << 7) |
-                    ((float_to_ubyte(border_swizzled[3]) & 0x80) << 8);
+                util_pack_color(border_swizzled, PIPE_FORMAT_B5G5R5A1_UNORM, &uc);
             } else if (desc->channel[1].size == 6) {
-                r = ((float_to_ubyte(border_swizzled[0]) & 0xf8) >> 3) |
-                    ((float_to_ubyte(border_swizzled[1]) & 0xfc) << 3) |
-                    ((float_to_ubyte(border_swizzled[2]) & 0xf8) << 8);
+                util_pack_color(border_swizzled, PIPE_FORMAT_B5G6R5_UNORM, &uc);
             } else {
                 assert(0);
             }
             break;
 
         default:
-            /* I think the fat formats (16, 32) are specified
-             * as the 8-bit ones. I am not sure how compressed formats
-             * work here. */
-            r = ((float_to_ubyte(border_swizzled[0]) & 0xff) << 0) |
-                ((float_to_ubyte(border_swizzled[1]) & 0xff) << 8) |
-                ((float_to_ubyte(border_swizzled[2]) & 0xff) << 16) |
-                ((float_to_ubyte(border_swizzled[3]) & 0xff) << 24);
+        case 8:
+            util_pack_color(border_swizzled, PIPE_FORMAT_B8G8R8A8_UNORM, &uc);
+            break;
+
+        case 10:
+            util_pack_color(border_swizzled, PIPE_FORMAT_B10G10R10A2_UNORM, &uc);
+            break;
+
+        case 16:
+            if (desc->nr_channels <= 2) {
+                border_swizzled[0] = border_swizzled[2];
+                util_pack_color(border_swizzled, PIPE_FORMAT_R16G16_UNORM, &uc);
+            } else {
+                util_pack_color(border_swizzled, PIPE_FORMAT_B8G8R8A8_UNORM, &uc);
+            }
+            break;
     }
 
-    return r;
+    return uc.ui;
 }
 
 static void r300_merge_textures_and_samplers(struct r300_context* r300)
@@ -655,12 +717,13 @@ static void r300_merge_textures_and_samplers(struct r300_context* r300)
             /* Set the border color. */
             texstate->border_color =
                 r300_get_border_color(view->base.format,
-                                      sampler->state.border_color);
+                                      sampler->state.border_color,
+                                      r300->screen->caps.is_r500);
 
             /* determine min/max levels */
-            max_level = MIN3(sampler->max_lod + view->base.first_level,
-                             tex->desc.b.b.last_level, view->base.last_level);
-            min_level = MIN2(sampler->min_lod + view->base.first_level,
+            max_level = MIN3(sampler->max_lod + view->base.u.tex.first_level,
+                             tex->desc.b.b.last_level, view->base.u.tex.last_level);
+            min_level = MIN2(sampler->min_lod + view->base.u.tex.first_level,
                              max_level);
 
             if (tex->desc.is_npot && min_level > 0) {
@@ -701,11 +764,16 @@ static void r300_merge_textures_and_samplers(struct r300_context* r300)
                 if (sampler->state.compare_mode == PIPE_TEX_COMPARE_NONE) {
                     texstate->format.format1 |=
                         r300_get_swizzle_combined(depth_swizzle,
-                                                  view->swizzle);
+                                                  view->swizzle, FALSE);
                 } else {
                     texstate->format.format1 |=
-                        r300_get_swizzle_combined(depth_swizzle, 0);
+                        r300_get_swizzle_combined(depth_swizzle, 0, FALSE);
                 }
+            }
+
+            if (r300->screen->caps.dxtc_swizzle &&
+                util_format_is_compressed(tex->desc.b.b.format)) {
+                texstate->filter1 |= R400_DXTC_SWIZZLE_ENABLE;
             }
 
             /* to emulate 1D textures through 2D ones correctly */
@@ -819,9 +887,8 @@ static void r300_flush_depth_textures(struct r300_context *r300)
             for (level = 0; level <= tex->last_level; level++)
                 if (r300_texture(tex)->zmask_in_use[level]) {
                     /* We don't handle 3D textures and cubemaps yet. */
-                    r300_flush_depth_stencil(&r300->context, tex,
-                                             u_subresource(0, level), 0);
-                }
+                    r300_flush_depth_stencil(&r300->context, tex, level, 0);
+                 }
         }
 }
 

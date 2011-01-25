@@ -1,8 +1,8 @@
 Index: mesa/src/mesa/drivers/dri/savage/savage_xmesa.c
 ===================================================================
---- mesa.orig/src/mesa/drivers/dri/savage/savage_xmesa.c	2010-05-19 08:53:43.544920275 +1000
-+++ mesa/src/mesa/drivers/dri/savage/savage_xmesa.c	2010-05-19 10:59:49.573978367 +1000
-@@ -64,6 +64,8 @@
+--- mesa.orig/src/mesa/drivers/dri/savage/savage_xmesa.c	2011-01-24 18:31:53.000000000 +1100
++++ mesa/src/mesa/drivers/dri/savage/savage_xmesa.c	2011-01-24 18:42:07.157623000 +1100
+@@ -61,6 +61,8 @@
  
  #include "xmlpool.h"
  
@@ -11,38 +11,24 @@ Index: mesa/src/mesa/drivers/dri/savage/savage_xmesa.c
  /* Driver-specific options
   */
  #define SAVAGE_ENABLE_VDMA(def) \
-@@ -893,32 +895,33 @@
+@@ -891,11 +893,11 @@
  		   unsigned stencil_bits, GLboolean have_back_buffer )
  {
      __DRIconfig **configs;
 +    __DRIconfig **configs_a8r8g8b8;
 +    __DRIconfig **configs_x8r8g8b8;
-     __GLcontextModes * m;
+     struct gl_config * m;
      unsigned depth_buffer_factor;
      unsigned back_buffer_factor;
 -    GLenum fb_format;
 -    GLenum fb_type;
-+    uint8_t depth_bits_array[2];
-+    uint8_t stencil_bits_array[2];
-+    uint8_t msaa_samples_array[1];
      int i;
  
      /* Right now GLX_SWAP_COPY_OML isn't supported, but it would be easy
-      * enough to add support.  Basically, if a context is created with an
-      * fbconfig where the swap method is GLX_SWAP_COPY_OML, pageflipping
-      * will never be used.
--     *
--     * FK: What about drivers that don't use page flipping? Could they
--     * just expose GLX_SWAP_COPY_OML?
-      */
-     static const GLenum back_buffer_modes[] = {
- 	GLX_NONE, GLX_SWAP_UNDEFINED_OML /*, GLX_SWAP_COPY_OML */
-     };
+@@ -914,6 +916,11 @@
+     uint8_t stencil_bits_array[2];
+     uint8_t msaa_samples_array[1];
  
--    uint8_t depth_bits_array[2];
--    uint8_t stencil_bits_array[2];
--    uint8_t msaa_samples_array[1];
--
 +    /* This being a DRI1 driver the depth buffer is always allocated,
 +     * so it does not make sense to expose visuals without it. If this
 +     * driver ever gets ported to DRI2 the first array value should be
@@ -50,12 +36,8 @@ Index: mesa/src/mesa/drivers/dri/savage/savage_xmesa.c
 +     */
      depth_bits_array[0] = depth_bits;
      depth_bits_array[1] = depth_bits;
--    
-+
-     /* Just like with the accumulation buffer, always provide some modes
-      * with a stencil buffer.  It will be a sw fallback, but some apps won't
-      * care about that.
-@@ -932,19 +935,32 @@
+     
+@@ -930,19 +937,32 @@
      back_buffer_factor  = (have_back_buffer) ? 2 : 1;
  
      if ( pixel_bits == 16 ) {

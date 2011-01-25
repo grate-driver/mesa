@@ -1,3 +1,92 @@
+mesa (7.10-1ubuntu1) UNRELEASED; urgency=low
+
+  * Merge from Debian experimental.  Remaining Ubuntu changes:
+   - debian/control
+      + Drop lesstif-dev from Build-Depends; it's in Universe.
+      + Comment out GLw libs since it depends on lesstif-dev.
+      + Drop i686 swx11 libgl package.
+      + Add libdrm-dev to mesa-common-dev Depends.
+    - debian/rules
+      + Use --disable-glw for swx11 targets too.
+      + Don't enable motif for swx11 targets.
+      + Use lzma compression for binary debs to save CD space.
+      + Drop unloved mach64 driver.
+      + Install both r300/r300g and r600/r600g
+    - debian/patches
+      + 100_no_abi_tag.patch
+      + 101_ubuntu_hidden_glname.patch
+      + 103_savage-expose_fbmodes_with_nonzero_alpha.patch
+    - rules, libgl1-mesa-{glx,dev,swx11,swx11-dev}.install,
+      libgl1-mesa-{glx,swx11}.{postinst,prerm}, libgl1-mesa-dev.links:
+      Install libGL.so* in /usr/lib/mesa to allow things to work with
+      alternatives.
+    - debian/gbp.conf
+      + Point at Ubuntu branch to make git-buildpackage less narky.
+    - debian/patches/105_use_shared_libdricore.patch, debian/rules:
+      + Link DRI drivers against shared dricore routines to save CD space.
+  * debian/patches/104_i915_fragment_shader_disable.patch:
+    - Drop to re-expose ARB_fragment_shader support by default as new upstream
+      version contains many fixes.  May re-open LP 628930.
+  * debian/patches/108-r300g-fixup-rs690-tiling-stride-align.patch:
+  * debian/patches/106_fix_renderbuffer_segfault.patch:
+    - Drop; these cherry-picks are in 7.10
+  * debian/not-installed:
+    - Remove GLw headers from not-installed list.  We don't build GLw, so
+      these files aren't put into the install directory in the first place.
+  * debian/rules:
+    - Don't try to dh_strip GLw packages.  We don't build them.
+
+ -- Christopher James Halse Rogers <raof@ubuntu.com>  Tue, 25 Jan 2011 12:58:00 +1100
+
+mesa (7.10-1) experimental; urgency=low
+
+  * New upstream release.
+  * Add patch: 10-fix-talloc-linking.diff
+  * Use debian/not-installed to keep track of files which aren't getting
+    installed for now. Delete them before running dh_install. Use the list
+    of files appearing in the build logs for 7.9+repack-2.
+  * Switch from --list-missing to --fail-missing accordingly.
+  * Pass -c4 to dpkg-gensymbols through dh_makeshlibs to make sure
+    symbol-related changes are noticed and dealt with.
+  * Update symbols files with new symbols:
+    - libopenvg1-mesa.symbols
+  * Remove “mesa internal ASM optimized functions” lines from symbols
+    files, those seem to be gone, and with -c4 passed to dpkg-gensymbols,
+    any related issue will break the build:
+    - libgles1-mesa.symbols
+    - libgles2-mesa.symbols
+  * Stop using dh_strip -s --remaining-packages. When a build is resumed
+    (-nc), this dh_strip call is a no-op if it was previously written to
+    the debhelper log files. Specify all remaining packages instead.
+    That's boring, but avoid getting non-stripped packages.
+  * Add debian/git-cleanup.sh script to ease removing files in git which
+    aren't in the release tarballs, and make dpkg-source error out.
+  * Keep my eyes wide shut and add myself to Uploaders.
+
+ -- Cyril Brulebois <kibi@debian.org>  Tue, 25 Jan 2011 00:20:57 +0100
+
+mesa (7.9+repack-2) experimental; urgency=low
+
+  [ Cyril Brulebois ]
+  * Specify PASV in watch file, and mangle +repack.
+
+  [ Christopher James Halse Rogers ]
+  * debian/control:
+    - Add libudev-dev to build-depends.  This is required for the DRI2 EGL
+      driver to work with a drm display.
+
+  [ Sven Joachim ]
+  * Update for the latest libdrm-nouveau API:
+    - Cherry-pick commit c25fcf5a from Mesa master.
+    - Build-depend on libdrm-dev 2.4.23 or newer.
+  * Use linux-any for linux-libc-dev and libudev-dev build-depends.
+
+  [ Julien Cristau ]
+  * Update from upstream 7.9 branch, commit 0ff45dd.
+  * Refresh patches.
+
+ -- Julien Cristau <jcristau@debian.org>  Tue, 04 Jan 2011 12:46:59 +0100
+
 mesa (7.9+repack-1ubuntu5) natty; urgency=low
 
   * debian/patches/108-r300g-fixup-rs690-tiling-stride-align.patch

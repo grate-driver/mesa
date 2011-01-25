@@ -26,10 +26,9 @@ SWX11_GLU_CONFIGS := swx11+glu swx11+glu-static
 ##############################################################################
 ## CPU-optimized configurations ##############################################
 
-#ifneq (,$(filter $(DEB_BUILD_ARCH), i386 kfreebsd-i386 hurd-i386)) 
-#	SWX11_GLU_CONFIGS += swx11+glu-i386-i686
-#	DRI_CONFIGS += debian-dri-i386-i686
-#endif
+# ifneq (,$(filter $(DEB_HOST_ARCH), i386 kfreebsd-i386 hurd-i386))
+# 	SWX11_GLU_CONFIGS += swx11+glu-i386-i686
+# endif
 
 #ifeq ($(DEB_BUILD_ARCH), alpha)
 #	SWX11_GLU_CONFIGS += debian-swx11+glu-alpha-ev5

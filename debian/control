@@ -3,16 +3,16 @@ Section: graphics
 Priority: optional
 Maintainer: Ubuntu X-SWAT <ubuntu-x@lists.ubuntu.com>
 XSBC-Original-Maintainer: Debian X Strike Force <debian-x@lists.debian.org>
-Uploaders: David Nusinow <dnusinow@debian.org>, Brice Goglin <bgoglin@debian.org>
+Uploaders: David Nusinow <dnusinow@debian.org>, Brice Goglin <bgoglin@debian.org>, Cyril Brulebois <kibi@debian.org>
 Standards-Version: 3.8.4
 Build-Depends: debhelper (>= 7.2.7), quilt (>= 0.40), pkg-config,
- libdrm-dev (>= 2.4.21-2~) [!hurd-i386], libx11-dev, xutils-dev,
+ libdrm-dev (>= 2.4.23) [!hurd-i386], libx11-dev, xutils-dev,
  x11proto-gl-dev (>= 1.4.11), libxxf86vm-dev,
  libexpat1-dev, dpkg-dev (>= 1.15.6), libxfixes-dev,
  libxdamage-dev, libxext-dev, autoconf, automake, x11proto-dri2-dev (>= 2.1),
- linux-libc-dev (>= 2.6.31) [!hurd-i386 !kfreebsd-amd64 !kfreebsd-i386],
+ linux-libc-dev (>= 2.6.31) [linux-any],
  libx11-xcb-dev, libxcb-dri2-0-dev, libxcb-xfixes0-dev, python-libxml2,
- libtalloc-dev, libudev-dev,
+ libtalloc-dev, libudev-dev [linux-any],
 Vcs-Git: git://git.debian.org/git/pkg-xorg/lib/mesa
 Vcs-Browser: http://git.debian.org/?p=pkg-xorg/lib/mesa.git
 Homepage: http://mesa3d.sourceforge.net/
@@ -133,7 +133,7 @@ Description: A free implementation of the EGL API -- runtime
  EGL provides a platform-agnostic mechanism for creating rendering surfaces
  for use with other graphics libraries, such as OpenGL|ES and OpenVG.
  .
- This package contains modules to interface with the existing system GLX or 
+ This package contains modules to interface with the existing system GLX or
  DRI2 drivers to provide OpenGL via EGL.  The libegl1-mesa-drivers package
  provides drivers to provide hardware-accelerated OpenGL|ES and OpenVG support.
 
@@ -166,7 +166,7 @@ Depends:
  libxfixes-dev,
  ${misc:Depends},
 Description: A free implementation of the EGL API -- development files
- This package contains the development environment required for compiling 
+ This package contains the development environment required for compiling
  programs against EGL native platform graphics interface library.
  EGL provides a platform-agnostic mechanism for creating rendering surfaces
  for use with other graphics libraries, such as OpenGL|ES and OpenVG.
@@ -201,7 +201,7 @@ Description: A free implementation of the EGL API -- driver debugging symbols
  EGL provides a platform-agnostic mechanism for creating rendering surfaces
  for use with other graphics libraries, such as OpenGL|ES and OpenVG.
  .
- This package contains the debugging symbols for the drivers required for 
+ This package contains the debugging symbols for the drivers required for
  hardware accelerated rendering of EGL-based graphics libraries.
 
 Package: libopenvg1-mesa
@@ -215,10 +215,10 @@ Conflicts: libopenvg1
 Replaces: libopenvg1
 Description: A free implementation of the OpenVG API -- runtime
  This package contains the mesa implementation of the OpenVG 2D acceleration
- library.  OpenVG provides a device independent and vendor-neutral interface 
- for sophisticated 2D graphical applications, while allowing device 
- manufacturers to provide hardware acceleration on devices ranging from wrist 
- watches to full microprocessor-based desktop and server machines. 
+ library.  OpenVG provides a device independent and vendor-neutral interface
+ for sophisticated 2D graphical applications, while allowing device
+ manufacturers to provide hardware acceleration on devices ranging from wrist
+ watches to full microprocessor-based desktop and server machines.
 
 Package: libopenvg1-mesa-dbg
 Section: debug
@@ -229,10 +229,10 @@ Depends:
  ${misc:Depends},
 Description: A free implementation of the OpenVG API -- debugging symbols
  This package contains the mesa implementation of the OpenVG 2D acceleration
- library.  OpenVG provides a device independent and vendor-neutral interface 
- for sophisticated 2D graphical applications, while allowing device 
- manufacturers to provide hardware acceleration on devices ranging from wrist 
- watches to full microprocessor-based desktop and server machines. 
+ library.  OpenVG provides a device independent and vendor-neutral interface
+ for sophisticated 2D graphical applications, while allowing device
+ manufacturers to provide hardware acceleration on devices ranging from wrist
+ watches to full microprocessor-based desktop and server machines.
  .
  This package contains the debugging symbols for the OpenVG library.
 
@@ -245,12 +245,12 @@ Depends:
  ${misc:Depends},
 Description: A free implementation of the OpenVG API -- development files
  This package contains the mesa implementation of the OpenVG 2D acceleration
- library.  OpenVG provides a device independent and vendor-neutral interface 
- for sophisticated 2D graphical applications, while allowing device 
- manufacturers to provide hardware acceleration on devices ranging from wrist 
- watches to full microprocessor-based desktop and server machines. 
+ library.  OpenVG provides a device independent and vendor-neutral interface
+ for sophisticated 2D graphical applications, while allowing device
+ manufacturers to provide hardware acceleration on devices ranging from wrist
+ watches to full microprocessor-based desktop and server machines.
  .
- This package contains the development environment required for compiling 
+ This package contains the development environment required for compiling
  programs against the OpenVG 2D acceleration library.
 
 Package: libgles1-mesa
@@ -263,9 +263,9 @@ Provides: libgles1
 Conflicts: libgles1
 Replaces: libgles1
 Description: A free implementation of the OpenGL|ES 1.x API -- runtime
- OpenGL|ES is a cross-platform API for full-function 2D and 3D graphics on 
+ OpenGL|ES is a cross-platform API for full-function 2D and 3D graphics on
  embedded systems - including consoles, phones, appliances and vehicles.
- It contains a subset of OpenGL plus a number of extensions for the 
+ It contains a subset of OpenGL plus a number of extensions for the
  special needs of embedded systems.
  .
  OpenGL|ES 1.x provides an API for fixed-function hardware.
@@ -278,9 +278,9 @@ Depends:
  libgles1-mesa (= ${binary:Version}),
  ${misc:Depends},
 Description: A free implementation of the OpenGL|ES 1.x API -- debugging symbols
- OpenGL|ES is a cross-platform API for full-function 2D and 3D graphics on 
+ OpenGL|ES is a cross-platform API for full-function 2D and 3D graphics on
  embedded systems - including consoles, phones, appliances and vehicles.
- It contains a subset of OpenGL plus a number of extensions for the 
+ It contains a subset of OpenGL plus a number of extensions for the
  special needs of embedded systems.
  .
  OpenGL|ES 1.x provides an API for fixed-function hardware.
@@ -295,9 +295,9 @@ Depends:
  libegl1-mesa-dev,
  ${misc:Depends},
 Description: A free implementation of the OpenGL|ES 1.x API -- development files
- OpenGL|ES is a cross-platform API for full-function 2D and 3D graphics on 
+ OpenGL|ES is a cross-platform API for full-function 2D and 3D graphics on
  embedded systems - including consoles, phones, appliances and vehicles.
- It contains a subset of OpenGL plus a number of extensions for the 
+ It contains a subset of OpenGL plus a number of extensions for the
  special needs of embedded systems.
  .
  OpenGL|ES 1.x provides an API for fixed-function hardware.
@@ -315,9 +315,9 @@ Provides: libgles2
 Conflicts: libgles2
 Replaces: libgles2
 Description: A free implementation of the OpenGL|ES 2.x API -- runtime
- OpenGL|ES is a cross-platform API for full-function 2D and 3D graphics on 
+ OpenGL|ES is a cross-platform API for full-function 2D and 3D graphics on
  embedded systems - including consoles, phones, appliances and vehicles.
- It contains a subset of OpenGL plus a number of extensions for the 
+ It contains a subset of OpenGL plus a number of extensions for the
  special needs of embedded systems.
  .
  OpenGL|ES 2.x provides an API for programmable hardware including vertex
@@ -331,9 +331,9 @@ Depends:
  libgles2-mesa (= ${binary:Version}),
  ${misc:Depends},
 Description: A free implementation of the OpenGL|ES 2.x API -- debugging symbols
- OpenGL|ES is a cross-platform API for full-function 2D and 3D graphics on 
+ OpenGL|ES is a cross-platform API for full-function 2D and 3D graphics on
  embedded systems - including consoles, phones, appliances and vehicles.
- It contains a subset of OpenGL plus a number of extensions for the 
+ It contains a subset of OpenGL plus a number of extensions for the
  special needs of embedded systems.
  .
  OpenGL|ES 2.x provides an API for programmable hardware including vertex
@@ -349,15 +349,15 @@ Depends:
  libegl1-mesa-dev,
  ${misc:Depends},
 Description: A free implementation of the OpenGL|ES 2.x API -- development files
- OpenGL|ES is a cross-platform API for full-function 2D and 3D graphics on 
+ OpenGL|ES is a cross-platform API for full-function 2D and 3D graphics on
  embedded systems - including consoles, phones, appliances and vehicles.
- It contains a subset of OpenGL plus a number of extensions for the 
+ It contains a subset of OpenGL plus a number of extensions for the
  special needs of embedded systems.
  .
  OpenGL|ES 2.x provides an API for programmable hardware including vertex
  and fragment shaders.
  .
- This package provides a development environment for building applications 
+ This package provides a development environment for building applications
  using the OpenGL|ES 2.x APIs.
 
 Package: libgl1-mesa-glx
@@ -533,7 +533,7 @@ Architecture: any
 Depends:
  mesa-common-dev (= ${binary:Version}),
  libgl1-mesa-glx (= ${binary:Version}),
- libxext-dev, 
+ libxext-dev,
  ${misc:Depends},
 Conflicts: libgl-dev, libgl1-mesa-dri-dev
 Replaces: libgl-dev, libgl1-mesa-dri-dev
