@@ -1,4 +1,4 @@
-mesa (7.10-1ubuntu1) UNRELEASED; urgency=low
+mesa (7.10-1ubuntu1) natty; urgency=lowe
 
   * Merge from Debian experimental.  Remaining Ubuntu changes:
    - debian/control
