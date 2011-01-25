@@ -1,3 +1,10 @@
+mesa (7.10-2) UNRELEASED; urgency=low
+
+  * Fix FTBFS on i386: Add some files to debian/not-installed, on a
+    per-architecture fashion (those are under /usr/lib/i686/cmov/).
+
+ -- Cyril Brulebois <kibi@debian.org>  Tue, 25 Jan 2011 22:53:45 +0000
+
 mesa (7.10-1) experimental; urgency=low
 
   * New upstream release.
