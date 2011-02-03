@@ -1125,7 +1125,7 @@ case 8:
 YY_RULE_SETUP
 #line 94 "glcpp/glcpp-lex.l"
 {
-	yylval->str = talloc_strdup (yyextra, yytext);
+	yylval->str = ralloc_strdup (yyextra, yytext);
 	yyextra->space_tokens = 0;
 	return HASH_VERSION;
 }
@@ -1136,7 +1136,7 @@ case 9:
 YY_RULE_SETUP
 #line 102 "glcpp/glcpp-lex.l"
 {
-	yylval->str = talloc_strdup (yyextra, yytext);
+	yylval->str = ralloc_strdup (yyextra, yytext);
 	yylineno++;
 	yycolumn = 0;
 	return OTHER;
@@ -1316,7 +1316,7 @@ case 24:
 YY_RULE_SETUP
 #line 221 "glcpp/glcpp-lex.l"
 {
-	yylval->str = talloc_strdup (yyextra, yytext);
+	yylval->str = ralloc_strdup (yyextra, yytext);
 	return INTEGER_STRING;
 }
 	YY_BREAK
@@ -1324,7 +1324,7 @@ case 25:
 YY_RULE_SETUP
 #line 226 "glcpp/glcpp-lex.l"
 {
-	yylval->str = talloc_strdup (yyextra, yytext);
+	yylval->str = ralloc_strdup (yyextra, yytext);
 	return INTEGER_STRING;
 }
 	YY_BREAK
@@ -1332,7 +1332,7 @@ case 26:
 YY_RULE_SETUP
 #line 231 "glcpp/glcpp-lex.l"
 {
-	yylval->str = talloc_strdup (yyextra, yytext);
+	yylval->str = ralloc_strdup (yyextra, yytext);
 	return INTEGER_STRING;
 }
 	YY_BREAK
@@ -1410,7 +1410,7 @@ case 37:
 YY_RULE_SETUP
 #line 276 "glcpp/glcpp-lex.l"
 {
-	yylval->str = talloc_strdup (yyextra, yytext);
+	yylval->str = ralloc_strdup (yyextra, yytext);
 	return IDENTIFIER;
 }
 	YY_BREAK
@@ -1425,7 +1425,7 @@ case 39:
 YY_RULE_SETUP
 #line 285 "glcpp/glcpp-lex.l"
 {
-	yylval->str = talloc_strdup (yyextra, yytext);
+	yylval->str = ralloc_strdup (yyextra, yytext);
 	return OTHER;
 }
 	YY_BREAK
