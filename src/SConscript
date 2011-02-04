@@ -4,7 +4,6 @@ SConscript('mapi/vgapi/SConscript')
 
 if env['platform'] == 'windows':
     SConscript('egl/main/SConscript')
-    SConscript('talloc/SConscript')
 
 SConscript('glsl/SConscript')
 SConscript('mapi/glapi/SConscript')

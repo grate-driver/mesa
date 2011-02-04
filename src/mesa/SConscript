@@ -17,7 +17,6 @@ if env['platform'] == 'windows':
         '_GDI32_', # prevent gl* being declared __declspec(dllimport) in MS headers
         'BUILD_GL32', # declare gl* as __declspec(dllexport) in Mesa headers
     ])
-    env.Prepend(CPPPATH = ['#src/talloc'])
 else:
     env.Append(CPPDEFINES = [
         'IN_DRI_DRIVER', # enable the remap table (for DRI drivers)

@@ -7,10 +7,8 @@ env = env.Clone()
 env.Prepend(CPPPATH = [
     '#src/mapi',
     '#src/mesa',
+    '#src/glsl',
 ])
-
-if env['platform'] == 'windows':
-    env.Prepend(CPPPATH = ['#src/talloc'])
 
 sources = [
     'glcpp/glcpp-lex.c',
@@ -97,7 +95,7 @@ if env['platform'] == 'windows':
         'user32',
     ])
 
-env.Prepend(LIBS = [glsl, talloc])
+env.Prepend(LIBS = [glsl])
 
 env.Program(
     target = 'glsl2',
