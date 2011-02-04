@@ -387,6 +387,8 @@ printf_length(const char *fmt, va_list untouched_args)
    size = vsnprintf(&junk, 1, fmt, args);
    assert(size >= 0);
 
+   va_end(args);
+
    return size;
 }
 
