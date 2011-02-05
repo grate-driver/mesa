@@ -42,6 +42,10 @@ TBD
 <li>Fix incorrect handling of <tt>layout</tt> qualifier
 with <tt>in</tt>, <tt>out</tt>, <tt>attribute</tt>, and <tt>varying</tt>.</li>
 
+<li>Fix an i965 shader bug where the negative absolute value was generated instead of the absolute value of a negation.</li>
+
+<li>Fix numerous issues handling precision qualifiers in GLSL ES.</li>
+
 <li><a href="https://bugs.freedesktop.org/show_bug.cgi?id=29164">Bug 29164</a> - [GLSL 1.20] invariant variable shouldn't be used before declaration</li>
 
 <li><a href="https://bugs.freedesktop.org/show_bug.cgi?id=30156">Bug 30156</a> - [i965] After updating to Mesa 7.9, Civilization IV starts to show garbage</li>
@@ -55,6 +59,10 @@ with <tt>in</tt>, <tt>out</tt>, <tt>attribute</tt>, and <tt>varying</tt>.</li>
 <li><a href="https://bugs.freedesktop.org/show_bug.cgi?id=32831">Bug 32831</a> - [glsl] division by zero crashes GLSL compiler</li>
 
 <li><a href="https://bugs.freedesktop.org/show_bug.cgi?id=32910">Bug 32910</a> - Keywords 'in' and 'out' not handled properly for GLSL 1.20 shaders</li>
+
+<li><a href="https://bugs.freedesktop.org/show_bug.cgi?id=33219">Bug 33219</a> -[GLSL bisected] implicit sized array triggers segfault in ir_to_mesa_visitor::copy_propagate</li>
+
+<li><a href="https://bugs.freedesktop.org/show_bug.cgi?id=33308">Bug 33308</a> -[glsl] ast_to_hir.cpp:3016: virtual ir_rvalue* ast_jump_statement::hir(exec_list*, _mesa_glsl_parse_state*): Assertion `ret != __null' failed.</li>
 
 <li><a href="https://bugs.freedesktop.org/show_bug.cgi?id=33316">Bug 33316</a> - uniform array will be allocate one line more and initialize it when it was freed will abort</li>
 
