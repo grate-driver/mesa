@@ -9,6 +9,8 @@ mesa (7.10-3) UNRELEASED; urgency=low
     This fixes the FTBFS on GNU/kFreeBSD.
   * Ship r300g (r300 gallium) on Linux only: Introduce Linux-specific
     libgl1-mesa-dri.install.linux to that effect.
+  * According to Michel Dänzer, r600g (r600 gallium) is working well
+    enough to be shipped now. Let's ship it, then!
 
  -- Cyril Brulebois <kibi@debian.org>  Tue, 08 Feb 2011 13:18:38 +0100
 
