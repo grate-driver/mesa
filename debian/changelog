@@ -1,4 +1,4 @@
-mesa (7.10-3) UNRELEASED; urgency=low
+mesa (7.10-3) unstable; urgency=low
 
   [ Julien Cristau ]
   * debian/rules: RIP lpia.
@@ -15,7 +15,7 @@ mesa (7.10-3) UNRELEASED; urgency=low
     r300g (Closes: #612380):
     - dri_util: fail driCreateNewScreen if InitScreen is NULL
 
- -- Cyril Brulebois <kibi@debian.org>  Tue, 08 Feb 2011 13:18:38 +0100
+ -- Cyril Brulebois <kibi@debian.org>  Tue, 08 Feb 2011 16:06:38 +0100
 
 mesa (7.10-2) unstable; urgency=low
 
