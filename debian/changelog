@@ -11,6 +11,9 @@ mesa (7.10-3) UNRELEASED; urgency=low
     libgl1-mesa-dri.install.linux to that effect.
   * According to Michel Dänzer, r600g (r600 gallium) is working well
     enough to be shipped now. Let's ship it, then!
+  * Cherry-pick from upstream, fixing X's failure to start with UMS on
+    r300g (Closes: #612380):
+    - dri_util: fail driCreateNewScreen if InitScreen is NULL
 
  -- Cyril Brulebois <kibi@debian.org>  Tue, 08 Feb 2011 13:18:38 +0100
 
