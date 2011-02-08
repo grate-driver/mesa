@@ -7,6 +7,8 @@ mesa (7.10-3) UNRELEASED; urgency=low
   * Cherry-pick from upstream (thanks to Dave Airlie for the hint):
     - radeon: fix build on non-KMS systems.
     This fixes the FTBFS on GNU/kFreeBSD.
+  * Ship r300g (r300 gallium) on Linux only: Introduce Linux-specific
+    libgl1-mesa-dri.install.linux to that effect.
 
  -- Cyril Brulebois <kibi@debian.org>  Tue, 08 Feb 2011 13:18:38 +0100
 
