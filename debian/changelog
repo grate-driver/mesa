@@ -1,3 +1,10 @@
+mesa (7.10-3) UNRELEASED; urgency=low
+
+  * Cherry-pick from upstream (thanks to Dave Airlie for the hint):
+    - radeon: fix build on non-KMS systems.
+
+ -- Cyril Brulebois <kibi@debian.org>  Tue, 08 Feb 2011 13:18:38 +0100
+
 mesa (7.10-2) unstable; urgency=low
 
   * Fix FTBFS on i386: Add some files to debian/not-installed, on a
