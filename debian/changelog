@@ -1,5 +1,9 @@
 mesa (7.10-3) UNRELEASED; urgency=low
 
+  [ Julien Cristau ]
+  * debian/rules: RIP lpia.
+
+  [ Cyril Brulebois ]
   * Cherry-pick from upstream (thanks to Dave Airlie for the hint):
     - radeon: fix build on non-KMS systems.
 
