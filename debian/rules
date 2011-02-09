@@ -61,7 +61,11 @@ confflags-common = \
 
 DRI_DRIVERS = swrast
 GALLIUM_DRIVERS = swrast
-EGL_DISPLAYS = x11
+
+# hurd doesn't do EGL/DRI2:
+ifneq ($(DEB_HOST_ARCH_OS), hurd)
+	EGL_DISPLAYS = x11
+endif
 
 # hurd doesn't do direct rendering
 ifeq ($(DEB_HOST_ARCH_OS), hurd)
