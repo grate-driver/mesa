@@ -2,6 +2,7 @@ mesa (7.10-4) UNRELEASED; urgency=low
 
   * debian/not-installed: Ignore the same files on kfreebsd-i386 as i386.
   * debian/rules: Don't try to build the x11 EGL display on hurd-i386.
+  * debian/local/control: Report-with: xserver-xorg{,-core}.
   * debian/local/script: New bug script, calling glxinfo if available,
     then the server's bug script.
 
