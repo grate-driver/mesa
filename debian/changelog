@@ -1,3 +1,13 @@
+mesa (7.10-1ubuntu2) natty; urgency=low
+
+  * Add 108_fix_leaks_dri2_screen_creation.patch: Cherrypick from upstream
+    to fix leaks in DRI2 screen creation error paths, which causes Clutter
+    applications to fail with error, "BadLength (poly request too large or
+    internal Xlib length".
+    (LP: #714280)
+
+ -- Bryce Harrington <bryce@ubuntu.com>  Mon, 14 Feb 2011 11:32:25 -0800
+
 mesa (7.10-1ubuntu1) natty; urgency=lowe
 
   * Merge from Debian experimental.  Remaining Ubuntu changes:
