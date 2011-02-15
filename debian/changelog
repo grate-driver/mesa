@@ -5,6 +5,8 @@ mesa (7.10.1~git20110215.cc1636b6-0ubuntu1) natty; urgency=low
     - Drop.  Upstream has replaced talloc with an in-tree replacement
   * debian/patches/105_use_shared_libdricore.patch:
     - Refresh for talloc-dropping buildsystem changes.
+  * debian/patches/107_winsys_buffer_nullptr.patch:
+    - Drop.  Included upstream.
 
  -- Christopher James Halse Rogers <raof@ubuntu.com>  Tue, 15 Feb 2011 16:31:44 +1100
 
