@@ -7,8 +7,11 @@ mesa (7.10.1~git20110215.cc1636b6-0ubuntu1) natty; urgency=low
     - Refresh for talloc-dropping buildsystem changes.
   * debian/patches/107_winsys_buffer_nullptr.patch:
     - Drop.  Included upstream.
+  * debian/patches/109_nv50_fix_tgsi_sign_mode.diff:
+    - Cherry-pick from master.  Fixes assert hit by Unity on nv5x hardware
+      (LP: #710588)
 
- -- Christopher James Halse Rogers <raof@ubuntu.com>  Tue, 15 Feb 2011 16:31:44 +1100
+ -- Christopher James Halse Rogers <raof@ubuntu.com>  Wed, 16 Feb 2011 10:37:07 +1100
 
 mesa (7.10-1ubuntu2) natty; urgency=low
 
