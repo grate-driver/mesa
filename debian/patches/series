@@ -10,4 +10,5 @@
 103_savage-expose_fbmodes_with_nonzero_alpha.patch
 105_use_shared_libdricore.patch
 108_fix_leaks_dri2_screen_creation.patch
-109_nv50_fix_tgsi_sign_mode.diff
+109_fix_length_of_glxgetfbconfigssgix.patch
+110_nv50_fix_tgsi_sign_mode.diff
