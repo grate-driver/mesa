@@ -10,7 +10,7 @@ mesa (7.10-1ubuntu2) natty; urgency=low
 
  -- Bryce Harrington <bryce@ubuntu.com>  Mon, 14 Feb 2011 11:44:22 -0800
 
-mesa (7.10-1ubuntu1) natty; urgency=lowe
+mesa (7.10-1ubuntu1) natty; urgency=low
 
   * Merge from Debian experimental.  Remaining Ubuntu changes:
    - debian/control
