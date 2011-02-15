@@ -1,3 +1,12 @@
+mesa (7.10-1ubuntu3) natty; urgency=low
+
+  * Add 109_fix_length_of_glxgetfbconfigssgix.patch: Second try at fix for
+    "BadLength (poly request too large or internal Xlib length" when using
+    non-C, non-en locales.  This time with the real fix.
+    (LP: #714280)
+
+ -- Bryce Harrington <bryce@ubuntu.com>  Tue, 15 Feb 2011 15:28:33 -0800
+
 mesa (7.10-1ubuntu2) natty; urgency=low
 
   * Add 108_fix_leaks_dri2_screen_creation.patch: Cherrypick from upstream

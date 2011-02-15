@@ -12,3 +12,4 @@
 105_use_shared_libdricore.patch
 107_winsys_buffer_nullptr.patch
 108_fix_leaks_dri2_screen_creation.patch
+109_fix_length_of_glxgetfbconfigssgix.patch
