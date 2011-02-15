@@ -1,3 +1,9 @@
+mesa (7.10.1~git20110215.cc1636b6-0ubuntu1) natty; urgency=low
+
+  * New upstream snapshot from 7.10 release branch.
+
+ -- Christopher James Halse Rogers <raof@ubuntu.com>  Tue, 15 Feb 2011 16:31:44 +1100
+
 mesa (7.10-1ubuntu2) natty; urgency=low
 
   * Add 108_fix_leaks_dri2_screen_creation.patch: Cherrypick from upstream
