@@ -5,8 +5,10 @@ mesa (7.10-1ubuntu2) natty; urgency=low
     applications to fail with error, "BadLength (poly request too large or
     internal Xlib length".
     (LP: #714280)
+  * Change dep on libudev-dev to not limit to linux-any (fixes FTBS when
+    using pbuilder, see deb bug 600823)
 
- -- Bryce Harrington <bryce@ubuntu.com>  Mon, 14 Feb 2011 11:32:25 -0800
+ -- Bryce Harrington <bryce@ubuntu.com>  Mon, 14 Feb 2011 11:44:22 -0800
 
 mesa (7.10-1ubuntu1) natty; urgency=lowe
 
