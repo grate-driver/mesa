@@ -41,7 +41,6 @@ extern "C" {
 #include "brw_context.h"
 #include "brw_eu.h"
 #include "brw_wm.h"
-#include "talloc.h"
 }
 #include "brw_fs.h"
 #include "../glsl/glsl_types.h"
@@ -55,7 +54,7 @@ brw_new_shader(struct gl_context *ctx, GLuint name, GLuint type)
 {
    struct brw_shader *shader;
 
-   shader = talloc_zero(NULL, struct brw_shader);
+   shader = rzalloc(NULL, struct brw_shader);
    if (shader) {
       shader->base.Type = type;
       shader->base.Name = name;
@@ -69,7 +68,7 @@ struct gl_shader_program *
 brw_new_shader_program(struct gl_context *ctx, GLuint name)
 {
    struct brw_shader_program *prog;
-   prog = talloc_zero(NULL, struct brw_shader_program);
+   prog = rzalloc(NULL, struct brw_shader_program);
    if (prog) {
       prog->base.Name = name;
       _mesa_init_shader_program(ctx, &prog->base);
@@ -95,11 +94,11 @@ brw_link_shader(struct gl_context *ctx, struct gl_shader_program *prog)
    struct brw_shader *shader =
       (struct brw_shader *)prog->_LinkedShaders[MESA_SHADER_FRAGMENT];
    if (shader != NULL) {
-      void *mem_ctx = talloc_new(NULL);
+      void *mem_ctx = ralloc_context(NULL);
       bool progress;
 
       if (shader->ir)
-	 talloc_free(shader->ir);
+	 ralloc_free(shader->ir);
       shader->ir = new(shader) exec_list;
       clone_ir_list(mem_ctx, shader->ir, shader->base.ir);
 
@@ -149,7 +148,7 @@ brw_link_shader(struct gl_context *ctx, struct gl_shader_program *prog)
       validate_ir_tree(shader->ir);
 
       reparent_ir(shader->ir, shader->ir);
-      talloc_free(mem_ctx);
+      ralloc_free(mem_ctx);
    }
 
    if (!_mesa_ir_link_shader(ctx, prog))
@@ -236,8 +235,8 @@ fs_visitor::virtual_grf_alloc(int size)
 	 virtual_grf_array_size = 16;
       else
 	 virtual_grf_array_size *= 2;
-      virtual_grf_sizes = talloc_realloc(mem_ctx, virtual_grf_sizes,
-					 int, virtual_grf_array_size);
+      virtual_grf_sizes = reralloc(mem_ctx, virtual_grf_sizes, int,
+				   virtual_grf_array_size);
 
       /* This slot is always unused. */
       virtual_grf_sizes[0] = 0;
@@ -315,7 +314,6 @@ int
 fs_visitor::setup_uniform_values(int loc, const glsl_type *type)
 {
    unsigned int offset = 0;
-   float *vec_values;
 
    if (type->is_matrix()) {
       const glsl_type *column = glsl_type::get_instance(GLSL_TYPE_FLOAT,
@@ -334,7 +332,6 @@ fs_visitor::setup_uniform_values(int loc, const glsl_type *type)
    case GLSL_TYPE_UINT:
    case GLSL_TYPE_INT:
    case GLSL_TYPE_BOOL:
-      vec_values = fp->Base.Parameters->ParameterValues[loc];
       for (unsigned int i = 0; i < type->vector_elements; i++) {
 	 unsigned int param = c->prog_data.nr_params++;
 
@@ -358,8 +355,8 @@ fs_visitor::setup_uniform_values(int loc, const glsl_type *type)
 	    c->prog_data.param_convert[param] = PARAM_NO_CONVERT;
 	    break;
 	 }
-
-	 c->prog_data.param[param] = &vec_values[i];
+	 this->param_index[param] = loc;
+	 this->param_offset[param] = i;
       }
       return 1;
 
@@ -430,7 +427,6 @@ fs_visitor::setup_builtin_uniform_values(ir_variable *ir)
 	  */
 	 int index = _mesa_add_state_reference(this->fp->Base.Parameters,
 					       (gl_state_index *)tokens);
-	 float *vec_values = this->fp->Base.Parameters->ParameterValues[index];
 
 	 /* Add each of the unique swizzles of the element as a
 	  * parameter.  This'll end up matching the expected layout of
@@ -445,7 +441,9 @@ fs_visitor::setup_builtin_uniform_values(ir_variable *ir)
 
 	    c->prog_data.param_convert[c->prog_data.nr_params] =
 	       PARAM_NO_CONVERT;
-	    c->prog_data.param[c->prog_data.nr_params++] = &vec_values[swiz];
+	    this->param_index[c->prog_data.nr_params] = index;
+	    this->param_offset[c->prog_data.nr_params] = swiz;
+	    c->prog_data.nr_params++;
 	 }
       }
    }
@@ -534,24 +532,39 @@ fs_visitor::emit_general_interpolation(ir_variable *ir)
 	    continue;
 	 }
 
-	 for (unsigned int c = 0; c < type->vector_elements; c++) {
-	    struct brw_reg interp = interp_reg(location, c);
-	    emit(fs_inst(FS_OPCODE_LINTERP,
-			 attr,
-			 this->delta_x,
-			 this->delta_y,
-			 fs_reg(interp)));
-	    attr.reg_offset++;
-	 }
-
-	 if (intel->gen < 6) {
-	    attr.reg_offset -= type->vector_elements;
+	 if (c->key.flat_shade && (location == FRAG_ATTRIB_COL0 ||
+				   location == FRAG_ATTRIB_COL1)) {
+	    /* Constant interpolation (flat shading) case. The SF has
+	     * handed us defined values in only the constant offset
+	     * field of the setup reg.
+	     */
 	    for (unsigned int c = 0; c < type->vector_elements; c++) {
-	       emit(fs_inst(BRW_OPCODE_MUL,
-			    attr,
-			    attr,
-			    this->pixel_w));
+	       struct brw_reg interp = interp_reg(location, c);
+	       interp = suboffset(interp, 3);
+	       emit(fs_inst(FS_OPCODE_CINTERP, attr, fs_reg(interp)));
 	       attr.reg_offset++;
+	    }
+	 } else {
+	    /* Perspective interpolation case. */
+	    for (unsigned int c = 0; c < type->vector_elements; c++) {
+	       struct brw_reg interp = interp_reg(location, c);
+	       emit(fs_inst(FS_OPCODE_LINTERP,
+			    attr,
+			    this->delta_x,
+			    this->delta_y,
+			    fs_reg(interp)));
+	       attr.reg_offset++;
+	    }
+
+	    if (intel->gen < 6) {
+	       attr.reg_offset -= type->vector_elements;
+	       for (unsigned int c = 0; c < type->vector_elements; c++) {
+		  emit(fs_inst(BRW_OPCODE_MUL,
+			       attr,
+			       attr,
+			       this->pixel_w));
+		  attr.reg_offset++;
+	       }
 	    }
 	 }
 	 location++;
@@ -859,6 +872,7 @@ fs_visitor::visit(ir_expression *ir)
       break;
    case ir_unop_abs:
       op[0].abs = true;
+      op[0].negate = false;
       this->result = op[0];
       break;
    case ir_unop_sign:
@@ -1353,10 +1367,13 @@ fs_visitor::visit(ir_texture *ir)
       fs_reg scale_y = fs_reg(UNIFORM, c->prog_data.nr_params + 1);
       GLuint index = _mesa_add_state_reference(params,
 					       (gl_state_index *)tokens);
-      float *vec_values = this->fp->Base.Parameters->ParameterValues[index];
 
-      c->prog_data.param[c->prog_data.nr_params++] = &vec_values[0];
-      c->prog_data.param[c->prog_data.nr_params++] = &vec_values[1];
+      this->param_index[c->prog_data.nr_params] = index;
+      this->param_offset[c->prog_data.nr_params] = 0;
+      c->prog_data.nr_params++;
+      this->param_index[c->prog_data.nr_params] = index;
+      this->param_offset[c->prog_data.nr_params] = 1;
+      c->prog_data.nr_params++;
 
       fs_reg dst = fs_reg(this, ir->coordinate->type);
       fs_reg src = coordinate;
@@ -2047,7 +2064,7 @@ fs_visitor::emit_fb_writes()
    }
 
    for (int target = 0; target < c->key.nr_color_regions; target++) {
-      this->current_annotation = talloc_asprintf(this->mem_ctx,
+      this->current_annotation = ralloc_asprintf(this->mem_ctx,
 						 "FB write target %d",
 						 target);
       if (this->frag_color || this->frag_data) {
@@ -2483,6 +2500,22 @@ fs_visitor::generate_pull_constant_load(fs_inst *inst, struct brw_reg dst)
    }
 }
 
+/**
+ * To be called after the last _mesa_add_state_reference() call, to
+ * set up prog_data.param[] for assign_curb_setup() and
+ * setup_pull_constants().
+ */
+void
+fs_visitor::setup_paramvalues_refs()
+{
+   /* Set up the pointers to ParamValues now that that array is finalized. */
+   for (unsigned int i = 0; i < c->prog_data.nr_params; i++) {
+      c->prog_data.param[i] =
+	 fp->Base.Parameters->ParameterValues[this->param_index[i]] +
+	 this->param_offset[i];
+   }
+}
+
 void
 fs_visitor::assign_curb_setup()
 {
@@ -2556,12 +2589,15 @@ fs_visitor::assign_urb_setup()
    foreach_iter(exec_list_iterator, iter, this->instructions) {
       fs_inst *inst = (fs_inst *)iter.get();
 
-      if (inst->opcode != FS_OPCODE_LINTERP)
-	 continue;
+      if (inst->opcode == FS_OPCODE_LINTERP) {
+	 assert(inst->src[2].file == FIXED_HW_REG);
+	 inst->src[2].fixed_hw_reg.nr += urb_start;
+      }
 
-      assert(inst->src[2].file == FIXED_HW_REG);
-
-      inst->src[2].fixed_hw_reg.nr += urb_start;
+      if (inst->opcode == FS_OPCODE_CINTERP) {
+	 assert(inst->src[0].file == FIXED_HW_REG);
+	 inst->src[0].fixed_hw_reg.nr += urb_start;
+      }
    }
 
    this->first_non_payload_grf = urb_start + c->prog_data.urb_read_length;
@@ -2720,8 +2756,8 @@ void
 fs_visitor::calculate_live_intervals()
 {
    int num_vars = this->virtual_grf_next;
-   int *def = talloc_array(mem_ctx, int, num_vars);
-   int *use = talloc_array(mem_ctx, int, num_vars);
+   int *def = ralloc_array(mem_ctx, int, num_vars);
+   int *use = ralloc_array(mem_ctx, int, num_vars);
    int loop_depth = 0;
    int loop_start = 0;
    int bb_header_ip = 0;
@@ -2801,8 +2837,8 @@ fs_visitor::calculate_live_intervals()
       }
    }
 
-   talloc_free(this->virtual_grf_def);
-   talloc_free(this->virtual_grf_use);
+   ralloc_free(this->virtual_grf_def);
+   ralloc_free(this->virtual_grf_use);
    this->virtual_grf_def = def;
    this->virtual_grf_use = use;
 }
@@ -3466,6 +3502,9 @@ fs_visitor::generate_code()
       case FS_OPCODE_COS:
 	 generate_math(inst, dst, src);
 	 break;
+      case FS_OPCODE_CINTERP:
+	 brw_MOV(p, dst, src[0]);
+	 break;
       case FS_OPCODE_LINTERP:
 	 generate_linterp(inst, dst, src);
 	 break;
@@ -3603,8 +3642,9 @@ brw_wm_fs_emit(struct brw_context *brw, struct brw_wm_compile *c)
       v.emit_fb_writes();
 
       v.split_virtual_grfs();
-      v.setup_pull_constants();
 
+      v.setup_paramvalues_refs();
+      v.setup_pull_constants();
       v.assign_curb_setup();
       v.assign_urb_setup();
 

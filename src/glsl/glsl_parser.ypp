@@ -108,6 +108,7 @@
 %token VERSION EXTENSION LINE COLON EOL INTERFACE OUTPUT
 %token PRAGMA_DEBUG_ON PRAGMA_DEBUG_OFF
 %token PRAGMA_OPTIMIZE_ON PRAGMA_OPTIMIZE_OFF
+%token PRAGMA_INVARIANT_ALL
 %token LAYOUT_TOK
 
    /* Reserved words that are not actually used in the grammar.
@@ -227,6 +228,11 @@ version_statement:
 	   case 130:
 	      /* FINISHME: Check against implementation support versions. */
 	      state->language_version = $2;
+	      state->version_string =
+		 ralloc_asprintf(state, "GLSL%s %d.%02d",
+				 state->es_shader ? " ES" : "",
+				 state->language_version / 100,
+				 state->language_version % 100);
 	      break;
 	   default:
 	      _mesa_glsl_error(& @2, state, "Shading language version"
@@ -241,6 +247,16 @@ pragma_statement:
 	| PRAGMA_DEBUG_OFF EOL
 	| PRAGMA_OPTIMIZE_ON EOL
 	| PRAGMA_OPTIMIZE_OFF EOL
+	| PRAGMA_INVARIANT_ALL EOL
+	{
+	   if (state->language_version < 120) {
+	      _mesa_glsl_warning(& @1, state,
+				 "pragma `invariant(all)' not supported in %s",
+				 state->version_string);
+	   } else {
+	      state->all_invariant = true;
+	   }
+	}
 	;
 
 extension_statement_list:
@@ -260,16 +276,16 @@ extension_statement:
 external_declaration_list:
 	external_declaration
 	{
-	   /* FINISHME: The NULL test is only required because 'precision'
-	    * FINISHME: statements are not yet supported.
+	   /* FINISHME: The NULL test is required because pragmas are set to
+	    * FINISHME: NULL. (See production rule for external_declaration.)
 	    */
 	   if ($1 != NULL)
 	      state->translation_unit.push_tail(& $1->link);
 	}
 	| external_declaration_list external_declaration
 	{
-	   /* FINISHME: The NULL test is only required because 'precision'
-	    * FINISHME: statements are not yet supported.
+	   /* FINISHME: The NULL test is required because pragmas are set to
+	    * FINISHME: NULL. (See production rule for external_declaration.)
 	    */
 	   if ($2 != NULL)
 	      state->translation_unit.push_tail(& $2->link);
@@ -686,14 +702,9 @@ declaration:
 	}
 	| PRECISION precision_qualifier type_specifier_no_prec ';'
 	{
-	   if (($3->type_specifier != ast_float)
-	       && ($3->type_specifier != ast_int)) {
-	      _mesa_glsl_error(& @3, state, "global precision qualifier can "
-			       "only be applied to `int' or `float'\n");
-	      YYERROR;
-	   }
-
-	   $$ = NULL; /* FINISHME */
+	   $3->precision = $2;
+	   $3->is_precision_statement = true;
+	   $$ = $3;
 	}
 	;
 
@@ -1179,6 +1190,9 @@ storage_qualifier:
 
 type_specifier:
 	type_specifier_no_prec
+	{
+	   $$ = $1;
+	}
 	| precision_qualifier type_specifier_no_prec
 	{
 	   $$ = $2;
@@ -1282,10 +1296,9 @@ precision_qualifier:
 		     if (!state->es_shader && state->language_version < 130)
 			_mesa_glsl_error(& @1, state,
 				         "precision qualifier forbidden "
-					 "in GLSL %d.%d (1.30 or later "
+					 "in %s (1.30 or later "
 					 "required)\n",
-					 state->language_version / 100,
-					 state->language_version % 100);
+					 state->version_string);
 
 		     $$ = ast_precision_high;
 		  }
@@ -1293,10 +1306,9 @@ precision_qualifier:
 		     if (!state->es_shader && state->language_version < 130)
 			_mesa_glsl_error(& @1, state,
 					 "precision qualifier forbidden "
-					 "in GLSL %d.%d (1.30 or later "
+					 "in %s (1.30 or later "
 					 "required)\n",
-					 state->language_version / 100,
-					 state->language_version % 100);
+					 state->version_string);
 
 		     $$ = ast_precision_medium;
 		  }
@@ -1304,10 +1316,9 @@ precision_qualifier:
 		     if (!state->es_shader && state->language_version < 130)
 			_mesa_glsl_error(& @1, state,
 					 "precision qualifier forbidden "
-					 "in GLSL %d.%d (1.30 or later "
+					 "in %s (1.30 or later "
 					 "required)\n",
-					 state->language_version / 100,
-					 state->language_version % 100);
+					 state->version_string);
 
 		     $$ = ast_precision_low;
 		  }
