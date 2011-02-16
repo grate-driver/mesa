@@ -23,6 +23,8 @@ mesa (7.10-4) UNRELEASED; urgency=low
     - libgles2-mesa-dbg
     - libgles2-mesa-dev
   * Disable EGL/Gallium/GLES/state trackers on GNU/Hurd.
+  * Fix FTBFS on sparc64, treat it the same way as sparc. Thanks, Aurélien
+    Jarno! (Closes: #613106).
 
  -- Cyril Brulebois <kibi@debian.org>  Tue, 08 Feb 2011 19:19:57 +0100
 

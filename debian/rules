@@ -306,7 +306,7 @@ binary-arch: install
 		-pmesa-common-dev
 	dh_compress -s
 	dh_fixperms -s
-ifneq ($(DEB_HOST_ARCH), sparc)
+ifeq (,$(filter sparc sparc64,$(DEB_HOST_ARCH)))
 	dh_makeshlibs -s -- -c4
 else
 	# Temporarily work around FTBFS on sparc, ignore new symbols:
