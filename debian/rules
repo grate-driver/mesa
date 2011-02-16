@@ -63,12 +63,10 @@ DRI_DRIVERS = swrast
 
 # hurd doesn't do direct rendering
 ifeq ($(DEB_HOST_ARCH_OS), hurd)
-	DIRECT_RENDERING = --disable-driglx-direct
-
+	confflags_DIRECT_RENDERING = --disable-driglx-direct
 	confflags_EGL = --disable-egl
 	confflags_GALLIUM = --disable-gallium
 else
-	DIRECT_RENDERING = --enable-driglx-direct
 	EGL_DISPLAYS = x11
 	GALLIUM_DRIVERS = swrast
 	GALLIUM_STATE_TRACKERS = egl,glx,dri,vega
@@ -92,6 +90,7 @@ else
 	GALLIUM_DRIVERS += i915
   endif
 
+	confflags_DIRECT_RENDERING = --enable-driglx-direct
 	confflags_EGL = --with-egl-platforms="$(EGL_DISPLAYS)"
 	confflags_GALLIUM = $(addprefix --enable-gallium-,$(GALLIUM_DRIVERS))
 	confflags_GLES = --enable-gles-overlay --enable-gles1 --enable-gles2
@@ -103,11 +102,11 @@ confflags-dri = \
 	--with-dri-drivers="$(DRI_DRIVERS)" \
 	--with-dri-driverdir=/usr/lib/dri \
 	--enable-glx-tls \
+	$(confflags_DIRECT_RENDERING) \
 	$(confflags_EGL) \
 	$(confflags_GALLIUM) \
 	$(confflags_GLES) \
 	$(confflags_STATE_TRACKERS) \
-	$(DIRECT_RENDERING) \
 	$(confflags-common)
 
 confflags-osmesa = \
