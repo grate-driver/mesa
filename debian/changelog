@@ -1,4 +1,4 @@
-mesa (7.10-4) UNRELEASED; urgency=low
+mesa (7.10-4) unstable; urgency=low
 
   * debian/not-installed: Ignore the same files on *i386.
   * debian/local/control: Report-with: xserver-xorg{,-core}.
@@ -28,7 +28,7 @@ mesa (7.10-4) UNRELEASED; urgency=low
     Wasserbäch (Closes: #612640):
     - 12-fix-fdo-31940.diff
 
- -- Cyril Brulebois <kibi@debian.org>  Tue, 08 Feb 2011 19:19:57 +0100
+ -- Cyril Brulebois <kibi@debian.org>  Wed, 16 Feb 2011 11:53:26 +0100
 
 mesa (7.10-3) unstable; urgency=low
 
