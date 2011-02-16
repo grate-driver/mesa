@@ -7,6 +7,21 @@ mesa (7.10-4) UNRELEASED; urgency=low
     then the server's bug script.
   * New patch, thanks to Pino Toscano, fixing FTBFS on GNU/Hurd:
     - 11-hurd-ftbfs-again.diff
+  * Make a lot of binary packages linux-any kfreebsd-any:
+    - libegl1-mesa
+    - libegl1-mesa-dbg
+    - libegl1-mesa-dev
+    - libegl1-mesa-drivers
+    - libegl1-mesa-drivers-dbg
+    - libopenvg1-mesa
+    - libopenvg1-mesa-dbg
+    - libopenvg1-mesa-dev
+    - libgles1-mesa
+    - libgles1-mesa-dbg
+    - libgles1-mesa-dev
+    - libgles2-mesa
+    - libgles2-mesa-dbg
+    - libgles2-mesa-dev
 
  -- Cyril Brulebois <kibi@debian.org>  Tue, 08 Feb 2011 19:19:57 +0100
 
