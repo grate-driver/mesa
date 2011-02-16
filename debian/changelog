@@ -5,6 +5,8 @@ mesa (7.10-4) UNRELEASED; urgency=low
   * debian/local/control: Report-with: xserver-xorg{,-core}.
   * debian/local/script: New bug script, calling glxinfo if available,
     then the server's bug script.
+  * New patch, thanks to Pino Toscano, fixing FTBFS on GNU/Hurd:
+    - 11-hurd-ftbfs-again.diff
 
  -- Cyril Brulebois <kibi@debian.org>  Tue, 08 Feb 2011 19:19:57 +0100
 
