@@ -1,5 +1,29 @@
 mesa (7.10.1~git20110215.cc1636b6-0ubuntu1) natty; urgency=low
 
+  * Merge from Debian.  Remaining Ubuntu changes:
+   - debian/control
+      + Drop lesstif-dev from Build-Depends; it's in Universe.
+      + Comment out GLw libs since it depends on lesstif-dev.
+      + Drop i686 swx11 libgl package.
+      + Add libdrm-dev to mesa-common-dev Depends.
+    - debian/rules
+      + Use --disable-glw for swx11 targets too.
+      + Don't enable motif for swx11 targets.
+      + Use lzma compression for binary debs to save CD space.
+      + Drop unloved mach64 driver.
+      + Install both r300/r300g and r600/r600g
+    - debian/patches
+      + 100_no_abi_tag.patch
+      + 101_ubuntu_hidden_glname.patch
+      + 103_savage-expose_fbmodes_with_nonzero_alpha.patch
+    - rules, libgl1-mesa-{glx,dev,swx11,swx11-dev}.install,
+      libgl1-mesa-{glx,swx11}.{postinst,prerm}, libgl1-mesa-dev.links:
+      Install libGL.so* in /usr/lib/mesa to allow things to work with
+      alternatives.
+    - debian/gbp.conf
+      + Point at Ubuntu branch to make git-buildpackage less narky.
+    - debian/patches/105_use_shared_libdricore.patch, debian/rules:
+      + Link DRI drivers against shared dricore routines to save CD space.
   * New upstream snapshot from 7.10 release branch.
   * debian/patches/10_fix_talloc_linking.diff:
     - Drop.  Upstream has replaced talloc with an in-tree replacement
@@ -10,8 +34,43 @@ mesa (7.10.1~git20110215.cc1636b6-0ubuntu1) natty; urgency=low
   * debian/patches/110_nv50_fix_tgsi_sign_mode.diff:
     - Cherry-pick from master.  Fixes assert hit by Unity on nv5x hardware
       (LP: #710588)
+  * debian/rules:
+  * debian/libgl1-mesa-dri.install.linux:
+    - Add /usr/lib/dri-alternates to DRI search path and install r300c/r600c
+      there.  The gallium drivers will fail to load without KMS, and libGL
+      will then load the classic drivers from dri-alternates.
 
  -- Christopher James Halse Rogers <raof@ubuntu.com>  Wed, 16 Feb 2011 10:37:07 +1100
+
+mesa (7.10-3) unstable; urgency=low
+
+  [ Julien Cristau ]
+  * debian/rules: RIP lpia.
+
+  [ Cyril Brulebois ]
+  * Cherry-pick from upstream (thanks to Dave Airlie for the hint):
+    - radeon: fix build on non-KMS systems.
+    This fixes the FTBFS on GNU/kFreeBSD.
+  * Ship r300g (r300 gallium) on Linux only: Introduce Linux-specific
+    libgl1-mesa-dri.install.linux to that effect.
+  * According to Michel Dänzer, r600g (r600 gallium) is working well
+    enough to be shipped now. Let's ship it, then!
+  * Cherry-pick from upstream, fixing X's failure to start with UMS on
+    r300g (Closes: #612380):
+    - dri_util: fail driCreateNewScreen if InitScreen is NULL
+
+ -- Cyril Brulebois <kibi@debian.org>  Tue, 08 Feb 2011 16:06:38 +0100
+
+mesa (7.10-2) unstable; urgency=low
+
+  * Fix FTBFS on i386: Add some files to debian/not-installed, on a
+    per-architecture fashion (those are under /usr/lib/i686/cmov/).
+  * Work around FTBFS on sparc due to new symbols: pass -c1 to
+    dpkg-gensymbols instead of -c4 (on sparc only). Those symbols probably
+    shouldn't be exported, but let's make it possible to build xorg-server
+    1.9 in sid.
+
+ -- Cyril Brulebois <kibi@debian.org>  Sat, 05 Feb 2011 11:16:26 +0100
 
 mesa (7.10-1ubuntu3) natty; urgency=low
 
