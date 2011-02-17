@@ -6,6 +6,8 @@ mesa (7.10.1~git20110215.cc1636b6-0ubuntu1) natty; urgency=low
       + Comment out GLw libs since it depends on lesstif-dev.
       + Drop i686 swx11 libgl package.
       + Add libdrm-dev to mesa-common-dev Depends.
+      + Drop [linux-any] qualifier from libudev-dev to fix pbuilder FTBFS
+        (see deb bug 600823)
     - debian/rules
       + Use --disable-glw for swx11 targets too.
       + Don't enable motif for swx11 targets.
@@ -24,6 +26,11 @@ mesa (7.10.1~git20110215.cc1636b6-0ubuntu1) natty; urgency=low
       + Point at Ubuntu branch to make git-buildpackage less narky.
     - debian/patches/105_use_shared_libdricore.patch, debian/rules:
       + Link DRI drivers against shared dricore routines to save CD space.
+    - debian/patches/109_fix_length_of_glxgetfbconfigssgix.patch:
+      Fix "BadLength (poly request too large or internal Xlib length" 
+      when using non-C, non-en locales.  (LP 714280)
+    - debian/patches/108_fix_leaks_dri2_screen_creation.patch: Cherrypick
+      to fix some leaks in DRI2 screen creation failure paths.
   * New upstream snapshot from 7.10 release branch.
   * debian/patches/10_fix_talloc_linking.diff:
     - Drop.  Upstream has replaced talloc with an in-tree replacement
