@@ -34,11 +34,6 @@ mesa (7.10.1~git20110215.cc1636b6-0ubuntu1) natty; urgency=low
   * debian/patches/110_nv50_fix_tgsi_sign_mode.diff:
     - Cherry-pick from master.  Fixes assert hit by Unity on nv5x hardware
       (LP: #710588)
-  * debian/rules:
-  * debian/libgl1-mesa-dri.install.linux:
-    - Add /usr/lib/dri-alternates to DRI search path and install r300c/r600c
-      there.  The gallium drivers will fail to load without KMS, and libGL
-      will then load the classic drivers from dri-alternates.
 
  -- Christopher James Halse Rogers <raof@ubuntu.com>  Wed, 16 Feb 2011 10:37:07 +1100
 
