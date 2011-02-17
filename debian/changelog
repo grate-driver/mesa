@@ -43,6 +43,9 @@ mesa (7.10.1~git20110215.cc1636b6-0ubuntu1) natty; urgency=low
       (LP: #710588)
   * debian/control:
     - Drop no-longer-used libtalloc-dev build-dependency.
+  * debian/not-installed:
+    - Remove i686 files from not-installed list; we don't build the i686 swx11
+      packages.
 
  -- Christopher James Halse Rogers <raof@ubuntu.com>  Wed, 16 Feb 2011 10:37:07 +1100
 

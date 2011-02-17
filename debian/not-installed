@@ -24,19 +24,6 @@ NOT_INSTALLED := \
 	usr/include/GL/wglext.h \
 	usr/include/GL/wmesa.h
 
-# Architecture-specific additional files:
-NOT_INSTALLED_i386 = \
-	usr/lib/i686/cmov/libGL.so \
-	usr/lib/i686/cmov/libGLU.so \
-	usr/lib/i686/cmov/libGLU.so.1 \
-	usr/lib/i686/cmov/libGLU.so.1.* \
-	usr/lib/i686/cmov/libGLw.so \
-	usr/lib/i686/cmov/libGLw.so.1 \
-	usr/lib/i686/cmov/libGLw.so.1.* \
-	usr/lib/i686/cmov/pkgconfig/glw.pc \
-	usr/lib/i686/cmov/pkgconfig/glu.pc \
-	usr/lib/i686/cmov/pkgconfig/gl.pc \
-
 # Detect the current architecture and add the files if any:
 DEB_HOST_ARCH ?= $(shell dpkg-architecture -qDEB_HOST_ARCH)
 NOT_INSTALLED += $(NOT_INSTALLED_$(DEB_HOST_ARCH))
