@@ -1,3 +1,10 @@
+mesa (7.10-5) UNRELEASED; urgency=low
+
+  * Revert to r600 classic, r600 gallium doesn't seem ready yet, after all
+    (Closes: #612609).
+
+ -- Cyril Brulebois <kibi@debian.org>  Thu, 17 Feb 2011 15:43:30 +0100
+
 mesa (7.10-4) unstable; urgency=low
 
   * debian/not-installed: Ignore the same files on *i386.
