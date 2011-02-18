@@ -12,3 +12,4 @@
 108_fix_leaks_dri2_screen_creation.patch
 109_fix_length_of_glxgetfbconfigssgix.patch
 110_nv50_fix_tgsi_sign_mode.diff
+111_export_searchdirs_in_dripc.diff
