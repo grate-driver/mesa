@@ -1,3 +1,13 @@
+mesa (7.10.1~git20110215.cc1636b6-0ubuntu2) natty; urgency=low
+
+  * debian/rules:
+  * debian/libgl1-mesa-dri.install.linux:
+    - Add /usr/lib/dri-alternates to the driver search path, and install the
+      classic r300 and r600 drivers there so mesa will fallback when the
+      gallium drivers are unavailable (such as when using UMS).
+
+ -- Christopher James Halse Rogers <raof@ubuntu.com>  Fri, 18 Feb 2011 21:31:37 +1100
+
 mesa (7.10.1~git20110215.cc1636b6-0ubuntu1) natty; urgency=low
 
   * Merge from Debian.  Remaining Ubuntu changes:
