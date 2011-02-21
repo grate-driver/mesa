@@ -63,10 +63,10 @@
  *
  * \author Ian Romanick <ian.d.romanick@intel.com>
  */
-#include <cstdlib>
-#include <cstdio>
-#include <cstdarg>
-#include <climits>
+#include <stdlib.h>
+#include <stdio.h>
+#include <stdarg.h>
+#include <limits.h>
 
 #include "main/core.h"
 #include "glsl_symbol_table.h"
