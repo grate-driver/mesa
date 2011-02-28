@@ -1,7 +1,13 @@
 mesa (7.10-5) UNRELEASED; urgency=low
 
+  [ Cyril Brulebois ]
   * Revert to r600 classic, r600 gallium doesn't seem ready yet, after all
     (Closes: #612609).
+
+  [ Julien Cristau ]
+  * Set the DRI driver search path to "${ORIGIN}/dri", allowing libGL to find
+    the drivers after being relocated to /usr/lib32 by ia32-libs
+    (closes: #466790).  Thanks to Javier Serrano Polo for the suggestion.
 
  -- Cyril Brulebois <kibi@debian.org>  Thu, 17 Feb 2011 15:43:30 +0100
 
