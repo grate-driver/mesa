@@ -46,6 +46,14 @@ with <tt>in</tt>, <tt>out</tt>, <tt>attribute</tt>, and <tt>varying</tt>.</li>
 
 <li>Fix numerous issues handling precision qualifiers in GLSL ES.</li>
 
+<li>Fixed a few GLX protocol encoder bugs (Julien Cristau)</li>
+
+<li>Assorted Gallium llvmpipe driver bug fixes</li>
+
+<li>Assorted Mesa/Gallium state tracker bug fixes</li>
+
+<li><a href="https://bugs.freedesktop.org/show_bug.cgi?id=26795">Bug 26795</a> - gl_FragCoord off by one in Gallium drivers.</li>
+
 <li><a href="https://bugs.freedesktop.org/show_bug.cgi?id=29164">Bug 29164</a> - [GLSL 1.20] invariant variable shouldn't be used before declaration</li>
 
 <li><a href="https://bugs.freedesktop.org/show_bug.cgi?id=29823">Bug 29823</a> - GetUniform[if]v busted</li>
@@ -62,6 +70,8 @@ with <tt>in</tt>, <tt>out</tt>, <tt>attribute</tt>, and <tt>varying</tt>.</li>
 
 <li><a href="https://bugs.freedesktop.org/show_bug.cgi?id=32375">Bug 32375</a> - [gl gles2] Not able to get the attribute by function glGetVertexAttribfv</li>
 
+<li><a href="https://bugs.freedesktop.org/show_bug.cgi?id=32541">Bug 32541</a> - Segmentation Fault while running an HDR (high dynamic range) rendering demo</li>
+
 <li><a href="https://bugs.freedesktop.org/show_bug.cgi?id=32569">Bug 32569</a> - [gles2] glGetShaderPrecisionFormat not implemented yet</li>
 
 <li><a href="https://bugs.freedesktop.org/show_bug.cgi?id=32695">Bug 32695</a> - [glsl] SIGSEGV glcpp/glcpp-parse.y:833</li>
@@ -77,6 +87,12 @@ with <tt>in</tt>, <tt>out</tt>, <tt>attribute</tt>, and <tt>varying</tt>.</li>
 <li><a href="https://bugs.freedesktop.org/show_bug.cgi?id=33308">Bug 33308</a> -[glsl] ast_to_hir.cpp:3016: virtual ir_rvalue* ast_jump_statement::hir(exec_list*, _mesa_glsl_parse_state*): Assertion `ret != __null' failed.</li>
 
 <li><a href="https://bugs.freedesktop.org/show_bug.cgi?id=33316">Bug 33316</a> - uniform array will be allocate one line more and initialize it when it was freed will abort</li>
+
+<li><a href="https://bugs.freedesktop.org/show_bug.cgi?id=33386">Bug 33386</a> - Dubious assembler in read_rgba_span_x86.S</li>
+
+<li><a href="https://bugs.freedesktop.org/show_bug.cgi?id=33388">Bug 33388</a> - Dubious assembler in xform4.S</li>
+
+<li><a href="https://bugs.freedesktop.org/show_bug.cgi?id=33433">Bug 33433</a> - Error in x86-64 API dispatch code.</li>
 
 <li><a href="https://bugs.freedesktop.org/show_bug.cgi?id=33507">Bug 33507</a> - [glsl] GLSL preprocessor modulus by zero crash</li>
 
@@ -99,19 +115,6 @@ with <tt>in</tt>, <tt>out</tt>, <tt>attribute</tt>, and <tt>varying</tt>.</li>
 <li><a href="https://bugs.meego.com/show_bug.cgi?id=13005">Meego bug 13005</a> - Graphics GLSL issue lead to camera preview fail on Pinetrail</li>
 
 <!-- <li><a href="https://bugs.freedesktop.org/show_bug.cgi?id=">Bug </a> - </li> -->
-
-<li>Fixed a few GLX protocol encoder bugs (Julien Cristau)</li>
-
-<li><a href="https://bugs.freedesktop.org/show_bug.cgi?id=26795">Bug 26795</a> - gl_FragCoord off by one in Gallium drivers.</li>
-
-<li><a href="http://bugs.freedesktop.org/show_bug.cgi?id=33433">Bug 33433</a> - Error in x86-64 API dispatch code.</li>
-
-<li><a href="http://bugs.freedesktop.org/show_bug.cgi?id=33386">Bug 33386</a> and <a href="http://bugs.freedesktop.org/show_bug.cgi?id=33388">Bug 33388</a> - bad assembly code in vertex transfomration code.</li>
-
-<li>Assorted Gallium llvmpipe driver bug fixes</li>
-
-<li>Assorted Mesa/Gallium state tracker bug fixes</li>
-
 
 </ul>
 
