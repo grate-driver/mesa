@@ -435,6 +435,13 @@ modulus_result_type(const struct glsl_type *type_a,
 		    const struct glsl_type *type_b,
 		    struct _mesa_glsl_parse_state *state, YYLTYPE *loc)
 {
+   if (state->language_version < 130) {
+      _mesa_glsl_error(loc, state,
+                       "operator '%%' is reserved in %s",
+                       state->version_string);
+      return glsl_type::error_type;
+   }
+
    /* From GLSL 1.50 spec, page 56:
     *    "The operator modulus (%) operates on signed or unsigned integers or
     *    integer vectors. The operand types must both be signed or both be
@@ -3256,11 +3263,9 @@ ast_struct_specifier::hir(exec_list *instructions,
    if (!state->symbols->add_type(name, t)) {
       _mesa_glsl_error(& loc, state, "struct `%s' previously defined", name);
    } else {
-
-      const glsl_type **s = (const glsl_type **)
-	 realloc(state->user_structures,
-		 sizeof(state->user_structures[0]) *
-		 (state->num_user_structures + 1));
+      const glsl_type **s = reralloc(state, state->user_structures,
+				     const glsl_type *,
+				     state->num_user_structures + 1);
       if (s != NULL) {
 	 s[state->num_user_structures] = t;
 	 state->user_structures = s;

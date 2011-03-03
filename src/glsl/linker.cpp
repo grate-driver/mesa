@@ -63,10 +63,10 @@
  *
  * \author Ian Romanick <ian.d.romanick@intel.com>
  */
-#include <cstdlib>
-#include <cstdio>
-#include <cstdarg>
-#include <climits>
+#include <stdlib.h>
+#include <stdio.h>
+#include <stdarg.h>
+#include <limits.h>
 
 #include "main/core.h"
 #include "glsl_symbol_table.h"
@@ -899,7 +899,7 @@ link_intrastage_shaders(void *mem_ctx,
 	    if (var->type->is_array() && (var->type->length == 0)) {
 	       const glsl_type *type =
 		  glsl_type::get_array_instance(var->type->fields.array,
-						var->max_array_access);
+						var->max_array_access + 1);
 
 	       assert(type != NULL);
 	       var->type = type;
@@ -1653,6 +1653,20 @@ link_shaders(struct gl_context *ctx, struct gl_shader_program *prog)
       gl_shader *const sh = prog->_LinkedShaders[MESA_SHADER_FRAGMENT];
 
       demote_shader_inputs_and_outputs(sh, ir_var_in);
+   }
+
+   /* OpenGL ES requires that a vertex shader and a fragment shader both be
+    * present in a linked program.  By checking for use of shading language
+    * version 1.00, we also catch the GL_ARB_ES2_compatibility case.
+    */
+   if (ctx->API == API_OPENGLES2 || prog->Version == 100) {
+      if (prog->_LinkedShaders[MESA_SHADER_VERTEX] == NULL) {
+	 linker_error_printf(prog, "program lacks a vertex shader\n");
+	 prog->LinkStatus = false;
+      } else if (prog->_LinkedShaders[MESA_SHADER_FRAGMENT] == NULL) {
+	 linker_error_printf(prog, "program lacks a fragment shader\n");
+	 prog->LinkStatus = false;
+      }
    }
 
    /* FINISHME: Assign fragment shader output locations. */

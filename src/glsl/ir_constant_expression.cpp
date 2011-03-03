@@ -514,10 +514,18 @@ ir_expression::constant_expression_value()
 
 	 switch (op[0]->type->base_type) {
 	 case GLSL_TYPE_UINT:
-	    data.u[c] = op[0]->value.u[c0] / op[1]->value.u[c1];
+	    if (op[1]->value.u[c1] == 0) {
+	       data.u[c] = 0;
+	    } else {
+	       data.u[c] = op[0]->value.u[c0] / op[1]->value.u[c1];
+	    }
 	    break;
 	 case GLSL_TYPE_INT:
-	    data.i[c] = op[0]->value.i[c0] / op[1]->value.i[c1];
+	    if (op[1]->value.i[c1] == 0) {
+	       data.i[c] = 0;
+	    } else {
+	       data.i[c] = op[0]->value.i[c0] / op[1]->value.i[c1];
+	    }
 	    break;
 	 case GLSL_TYPE_FLOAT:
 	    data.f[c] = op[0]->value.f[c0] / op[1]->value.f[c1];
@@ -536,10 +544,18 @@ ir_expression::constant_expression_value()
 
 	 switch (op[0]->type->base_type) {
 	 case GLSL_TYPE_UINT:
-	    data.u[c] = op[0]->value.u[c0] % op[1]->value.u[c1];
+	    if (op[1]->value.u[c1] == 0) {
+	       data.u[c] = 0;
+	    } else {
+	       data.u[c] = op[0]->value.u[c0] % op[1]->value.u[c1];
+	    }
 	    break;
 	 case GLSL_TYPE_INT:
-	    data.i[c] = op[0]->value.i[c0] % op[1]->value.i[c1];
+	    if (op[1]->value.i[c1] == 0) {
+	       data.i[c] = 0;
+	    } else {
+	       data.i[c] = op[0]->value.i[c0] % op[1]->value.i[c1];
+	    }
 	    break;
 	 case GLSL_TYPE_FLOAT:
 	    /* We don't use fmod because it rounds toward zero; GLSL specifies

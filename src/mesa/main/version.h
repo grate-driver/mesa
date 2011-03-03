@@ -35,7 +35,7 @@ struct gl_context;
 #define MESA_MAJOR 7
 #define MESA_MINOR 10
 #define MESA_PATCH 1
-#define MESA_VERSION_STRING "7.10.1-devel"
+#define MESA_VERSION_STRING "7.10.1"
 
 /* To make version comparison easy */
 #define MESA_VERSION(a,b,c) (((a) << 16) + ((b) << 8) + (c))

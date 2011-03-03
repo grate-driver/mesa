@@ -21,7 +21,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-#include <cstdarg>
+#include <stdarg.h>
 
 #include "ir_reader.h"
 #include "glsl_parser_extras.h"

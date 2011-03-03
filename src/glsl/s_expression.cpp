@@ -22,9 +22,9 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <assert.h>
 #include "s_expression.h"
 
