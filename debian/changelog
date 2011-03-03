@@ -1,3 +1,12 @@
+mesa (7.10.1-0ubuntu1) natty; urgency=low
+
+  * New upstream bugfix release.
+    - Drop cherry-picks now upstream:
+      + 110_nv50_fix_tgsi_sign_mode.diff
+      + 109_fix_length_of_glxgetfbconfigssgix.patch
+
+ -- Christopher James Halse Rogers <raof@ubuntu.com>  Thu, 03 Mar 2011 12:50:41 +1100
+
 mesa (7.10.1~git20110215.cc1636b6-0ubuntu2) natty; urgency=low
 
   * debian/rules:
