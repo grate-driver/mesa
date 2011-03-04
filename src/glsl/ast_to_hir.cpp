@@ -2017,6 +2017,86 @@ apply_type_qualifier_to_variable(const struct ast_type_qualifier *qual,
    }
 }
 
+/**
+ * Get the variable that is being redeclared by this declaration
+ *
+ * Semantic checks to verify the validity of the redeclaration are also
+ * performed.  If semantic checks fail, compilation error will be emitted via
+ * \c _mesa_glsl_error, but a non-\c NULL pointer will still be returned.
+ *
+ * \returns
+ * A pointer to an existing variable in the current scope if the declaration
+ * is a redeclaration, \c NULL otherwise.
+ */
+ir_variable *
+get_variable_being_redeclared(ir_variable *var, ast_declaration *decl,
+			      struct _mesa_glsl_parse_state *state)
+{
+   /* Check if this declaration is actually a re-declaration, either to
+    * resize an array or add qualifiers to an existing variable.
+    *
+    * This is allowed for variables in the current scope, or when at
+    * global scope (for built-ins in the implicit outer scope).
+    */
+   ir_variable *earlier = state->symbols->get_variable(decl->identifier);
+   if (earlier == NULL ||
+       (state->current_function != NULL &&
+	!state->symbols->name_declared_this_scope(decl->identifier))) {
+      return NULL;
+   }
+
+
+   YYLTYPE loc = decl->get_location();
+
+   /* From page 24 (page 30 of the PDF) of the GLSL 1.50 spec,
+    *
+    * "It is legal to declare an array without a size and then
+    *  later re-declare the same name as an array of the same
+    *  type and specify a size."
+    */
+   if ((earlier->type->array_size() == 0)
+       && var->type->is_array()
+       && (var->type->element_type() == earlier->type->element_type())) {
+      /* FINISHME: This doesn't match the qualifiers on the two
+       * FINISHME: declarations.  It's not 100% clear whether this is
+       * FINISHME: required or not.
+       */
+
+      /* From page 54 (page 60 of the PDF) of the GLSL 1.20 spec:
+       *
+       *     "The size [of gl_TexCoord] can be at most
+       *     gl_MaxTextureCoords."
+       */
+      const unsigned size = unsigned(var->type->array_size());
+      if ((strcmp("gl_TexCoord", var->name) == 0)
+	  && (size > state->Const.MaxTextureCoords)) {
+	 _mesa_glsl_error(& loc, state, "`gl_TexCoord' array size cannot "
+			  "be larger than gl_MaxTextureCoords (%u)\n",
+			  state->Const.MaxTextureCoords);
+      } else if ((size > 0) && (size <= earlier->max_array_access)) {
+	 _mesa_glsl_error(& loc, state, "array size must be > %u due to "
+			  "previous access",
+			  earlier->max_array_access);
+      }
+
+      earlier->type = var->type;
+      delete var;
+      var = NULL;
+   } else if (state->ARB_fragment_coord_conventions_enable
+	      && strcmp(var->name, "gl_FragCoord") == 0
+	      && earlier->type == var->type
+	      && earlier->mode == var->mode) {
+      /* Allow redeclaration of gl_FragCoord for ARB_fcc layout
+       * qualifiers.
+       */
+      earlier->origin_upper_left = var->origin_upper_left;
+      earlier->pixel_center_integer = var->pixel_center_integer;
+   } else {
+      _mesa_glsl_error(&loc, state, "`%s' redeclared", decl->identifier);
+   }
+
+   return earlier;
+}
 
 /**
  * Generate the IR for an initializer in a variable declaration
@@ -2448,68 +2528,8 @@ ast_declarator_list::hir(exec_list *instructions,
 			  decl->identifier);
       }
 
-      /* Check if this declaration is actually a re-declaration, either to
-       * resize an array or add qualifiers to an existing variable.
-       *
-       * This is allowed for variables in the current scope, or when at
-       * global scope (for built-ins in the implicit outer scope).
-       */
-      ir_variable *earlier = state->symbols->get_variable(decl->identifier);
-      if (earlier != NULL && (state->current_function == NULL ||
-	  state->symbols->name_declared_this_scope(decl->identifier))) {
-
-	 /* From page 24 (page 30 of the PDF) of the GLSL 1.50 spec,
-	  *
-	  * "It is legal to declare an array without a size and then
-	  *  later re-declare the same name as an array of the same
-	  *  type and specify a size."
-	  */
-	 if ((earlier->type->array_size() == 0)
-	     && var->type->is_array()
-	     && (var->type->element_type() == earlier->type->element_type())) {
-	    /* FINISHME: This doesn't match the qualifiers on the two
-	     * FINISHME: declarations.  It's not 100% clear whether this is
-	     * FINISHME: required or not.
-	     */
-
-	    /* From page 54 (page 60 of the PDF) of the GLSL 1.20 spec:
-	     *
-	     *     "The size [of gl_TexCoord] can be at most
-	     *     gl_MaxTextureCoords."
-	     */
-	    const unsigned size = unsigned(var->type->array_size());
-	    if ((strcmp("gl_TexCoord", var->name) == 0)
-		&& (size > state->Const.MaxTextureCoords)) {
-	       YYLTYPE loc = this->get_location();
-
-	       _mesa_glsl_error(& loc, state, "`gl_TexCoord' array size cannot "
-				"be larger than gl_MaxTextureCoords (%u)\n",
-				state->Const.MaxTextureCoords);
-	    } else if ((size > 0) && (size <= earlier->max_array_access)) {
-	       YYLTYPE loc = this->get_location();
-
-	       _mesa_glsl_error(& loc, state, "array size must be > %u due to "
-				"previous access",
-				earlier->max_array_access);
-	    }
-
-	    earlier->type = var->type;
-	    delete var;
-	    var = NULL;
-	 } else if (state->ARB_fragment_coord_conventions_enable
-		    && strcmp(var->name, "gl_FragCoord") == 0
-		    && earlier->type == var->type
-		    && earlier->mode == var->mode) {
-	    /* Allow redeclaration of gl_FragCoord for ARB_fcc layout
-	     * qualifiers.
-	     */
-	    earlier->origin_upper_left = var->origin_upper_left;
-	    earlier->pixel_center_integer = var->pixel_center_integer;
-	 } else {
-	    YYLTYPE loc = this->get_location();
-	    _mesa_glsl_error(&loc, state, "`%s' redeclared", decl->identifier);
-	 }
-
+      ir_variable *earlier = get_variable_being_redeclared(var, decl, state);
+      if (earlier != NULL) {
 	 continue;
       }
 
