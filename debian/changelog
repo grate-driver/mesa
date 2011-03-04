@@ -1,4 +1,4 @@
-mesa (7.10-5) UNRELEASED; urgency=low
+mesa (7.10.1-1) UNRELEASED; urgency=low
 
   [ Cyril Brulebois ]
   * Revert to r600 classic, r600 gallium doesn't seem ready yet, after all
@@ -9,7 +9,12 @@ mesa (7.10-5) UNRELEASED; urgency=low
     the drivers after being relocated to /usr/lib32 by ia32-libs
     (closes: #466790).  Thanks to Javier Serrano Polo for the suggestion.
 
- -- Cyril Brulebois <kibi@debian.org>  Thu, 17 Feb 2011 15:43:30 +0100
+  [ Christopher James Halse Rogers ]
+  * New upstream release
+    - Lots of intel bugfixes, mainly for Sandybridge.
+    - Lots of GLSL spec conformance fixes
+
+ -- Christopher James Halse Rogers <raof@ubuntu.com>  Fri, 04 Mar 2011 11:42:11 +1100
 
 mesa (7.10-4) unstable; urgency=low
 
