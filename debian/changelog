@@ -13,6 +13,7 @@ mesa (7.10.1-1) UNRELEASED; urgency=low
   * New upstream release
     - Lots of intel bugfixes, mainly for Sandybridge.
     - Lots of GLSL spec conformance fixes
+    - Drop 12-fix-fdo-31940.diff; included included in new release.
   * Remove talloc from build-depends.  This has been re-implemented in-tree.
   * Also drop patch fixing talloc linking.
 
