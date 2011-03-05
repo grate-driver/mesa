@@ -17,6 +17,7 @@ mesa (7.10.1-1) UNRELEASED; urgency=low
   * Remove talloc from build-depends.  This has been re-implemented in-tree.
   * Also drop patch fixing talloc linking.
   * Cherry-pick fix from master for changed nouveau headers in libdrm 2.4.24.
+    - Also bump build-depend on libdrm to 2.4.24
 
  -- Christopher James Halse Rogers <raof@ubuntu.com>  Fri, 04 Mar 2011 11:42:11 +1100
 
