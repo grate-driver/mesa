@@ -4,8 +4,11 @@ mesa (7.10.1-0ubuntu1) UNRELEASED; urgency=low
     - Drop cherry-picks now upstream:
       + 110_nv50_fix_tgsi_sign_mode.diff
       + 109_fix_length_of_glxgetfbconfigssgix.patch
+  * 112_fix_segfault_on_nvAF.diff:
+    - Fix from nouveau ML for segfault on X startup with nvAF cards.
+      Fixed differently in upstream/master, so drop after 7.10 (LP: #723012)
 
- -- Christopher James Halse Rogers <raof@ubuntu.com>  Thu, 03 Mar 2011 12:50:41 +1100
+ -- Christopher James Halse Rogers <raof@ubuntu.com>  Tue, 08 Mar 2011 16:04:56 +1100
 
 mesa (7.10.1~git20110215.cc1636b6-0ubuntu2) natty; urgency=low
 

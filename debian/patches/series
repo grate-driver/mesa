@@ -11,3 +11,4 @@
 105_use_shared_libdricore.patch
 108_fix_leaks_dri2_screen_creation.patch
 111_export_searchdirs_in_dripc.diff
+112_fix_segfault_on_nvAF.diff
