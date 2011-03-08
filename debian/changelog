@@ -1,4 +1,4 @@
-mesa (7.10.1-0ubuntu1) UNRELEASED; urgency=low
+mesa (7.10.1-0ubuntu1) natty; urgency=low
 
   * New upstream bugfix release.
     - Drop cherry-picks now upstream:
