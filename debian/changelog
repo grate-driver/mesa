@@ -1,3 +1,16 @@
+mesa (7.10.1-0ubuntu2) natty; urgency=low
+
+  * The “stop SIGSEGVing unrelated code” upload.
+  * debian/patches/113_partially_fix_tls.diff:
+    - Fix TLS usage: initial-exec is not appropriate for a library that
+      can be dynamically loaded with dlopen. (LP: #259219)
+    - Partial patch: missing IA32 assembler dispatch code.
+  * debian/rules:
+    - Build without optimised assembler on i386, as we haven't fixed that
+      yet.  Opens LP #735188.
+
+ -- Christopher James Halse Rogers <raof@ubuntu.com>  Tue, 15 Mar 2011 10:24:52 +1100
+
 mesa (7.10.1-0ubuntu1) natty; urgency=low
 
   * New upstream bugfix release.

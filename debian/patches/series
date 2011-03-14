@@ -12,3 +12,4 @@
 108_fix_leaks_dri2_screen_creation.patch
 111_export_searchdirs_in_dripc.diff
 112_fix_segfault_on_nvAF.diff
+113_partially_fix_tls.diff
