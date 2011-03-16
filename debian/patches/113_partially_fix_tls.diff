@@ -6,8 +6,8 @@ Date:   Tue Mar 15 09:56:23 2011 +1100
 
 Index: mesa/src/egl/main/eglcurrent.c
 ===================================================================
---- mesa.orig/src/egl/main/eglcurrent.c	2011-03-15 09:56:31.000000000 +1100
-+++ mesa/src/egl/main/eglcurrent.c	2011-03-15 10:29:33.819054325 +1100
+--- mesa.orig/src/egl/main/eglcurrent.c	2011-03-16 19:23:13.308777938 +1100
++++ mesa/src/egl/main/eglcurrent.c	2011-03-16 19:24:08.830795461 +1100
 @@ -24,7 +24,7 @@
  
  #ifdef GLX_USE_TLS
@@ -19,8 +19,8 @@ Index: mesa/src/egl/main/eglcurrent.c
  static INLINE void _eglSetTSD(const _EGLThreadInfo *t)
 Index: mesa/src/glx/glxclient.h
 ===================================================================
---- mesa.orig/src/glx/glxclient.h	2011-03-15 10:29:26.000000000 +1100
-+++ mesa/src/glx/glxclient.h	2011-03-15 10:29:33.819054325 +1100
+--- mesa.orig/src/glx/glxclient.h	2011-03-16 19:24:08.780793647 +1100
++++ mesa/src/glx/glxclient.h	2011-03-16 19:24:08.830795461 +1100
 @@ -619,7 +619,7 @@
  # if defined( GLX_USE_TLS )
  
@@ -32,8 +32,8 @@ Index: mesa/src/glx/glxclient.h
  
 Index: mesa/src/glx/glxcurrent.c
 ===================================================================
---- mesa.orig/src/glx/glxcurrent.c	2011-03-15 09:56:31.000000000 +1100
-+++ mesa/src/glx/glxcurrent.c	2011-03-15 10:29:33.819054325 +1100
+--- mesa.orig/src/glx/glxcurrent.c	2011-03-16 19:23:13.868798280 +1100
++++ mesa/src/glx/glxcurrent.c	2011-03-16 19:24:08.830795461 +1100
 @@ -86,7 +86,7 @@
   * \b never be \c NULL.  This is important!  Because of this
   * \c __glXGetCurrentContext can be implemented as trivial macro.
@@ -45,8 +45,8 @@ Index: mesa/src/glx/glxcurrent.c
  _X_HIDDEN void
 Index: mesa/src/mapi/glapi/gen/gl_x86-64_asm.py
 ===================================================================
---- mesa.orig/src/mapi/glapi/gen/gl_x86-64_asm.py	2011-03-15 09:56:31.000000000 +1100
-+++ mesa/src/mapi/glapi/gen/gl_x86-64_asm.py	2011-03-15 10:29:33.819054325 +1100
+--- mesa.orig/src/mapi/glapi/gen/gl_x86-64_asm.py	2011-03-16 19:23:13.888799008 +1100
++++ mesa/src/mapi/glapi/gen/gl_x86-64_asm.py	2011-03-16 19:24:08.830795461 +1100
 @@ -153,8 +153,16 @@
  		print ''
  		print '\t.p2align\t4,,15'
@@ -78,8 +78,8 @@ Index: mesa/src/mapi/glapi/gen/gl_x86-64_asm.py
  		print '#elif defined(PTHREADS)'
 Index: mesa/src/mapi/glapi/glapi.h
 ===================================================================
---- mesa.orig/src/mapi/glapi/glapi.h	2011-03-15 09:56:31.000000000 +1100
-+++ mesa/src/mapi/glapi/glapi.h	2011-03-15 10:29:33.819054325 +1100
+--- mesa.orig/src/mapi/glapi/glapi.h	2011-03-16 19:23:13.888799008 +1100
++++ mesa/src/mapi/glapi/glapi.h	2011-03-16 19:24:08.830795461 +1100
 @@ -86,10 +86,10 @@
  #if defined (GLX_USE_TLS)
  
@@ -95,8 +95,8 @@ Index: mesa/src/mapi/glapi/glapi.h
  _GLAPI_EXPORT extern const void *_glapi_Context;
 Index: mesa/src/mapi/mapi/u_current.c
 ===================================================================
---- mesa.orig/src/mapi/mapi/u_current.c	2011-03-15 09:56:31.000000000 +1100
-+++ mesa/src/mapi/mapi/u_current.c	2011-03-15 10:30:39.391465724 +1100
+--- mesa.orig/src/mapi/mapi/u_current.c	2011-03-16 19:23:13.918800098 +1100
++++ mesa/src/mapi/mapi/u_current.c	2011-03-16 19:24:08.830795461 +1100
 @@ -100,11 +100,11 @@
  #if defined(GLX_USE_TLS)
  
@@ -113,8 +113,8 @@ Index: mesa/src/mapi/mapi/u_current.c
  const void *u_current_user;
 Index: mesa/src/mapi/mapi/u_current.h
 ===================================================================
---- mesa.orig/src/mapi/mapi/u_current.h	2011-03-15 09:56:31.000000000 +1100
-+++ mesa/src/mapi/mapi/u_current.h	2011-03-15 10:31:25.813168981 +1100
+--- mesa.orig/src/mapi/mapi/u_current.h	2011-03-16 19:23:13.918800098 +1100
++++ mesa/src/mapi/mapi/u_current.h	2011-03-16 19:24:08.830795461 +1100
 @@ -31,10 +31,10 @@
  #ifdef GLX_USE_TLS
  
@@ -130,8 +130,8 @@ Index: mesa/src/mapi/mapi/u_current.h
  extern const void *u_current_user;
 Index: mesa/src/mesa/drivers/x11/glxapi.c
 ===================================================================
---- mesa.orig/src/mesa/drivers/x11/glxapi.c	2011-03-15 09:56:32.000000000 +1100
-+++ mesa/src/mesa/drivers/x11/glxapi.c	2011-03-15 10:29:33.819054325 +1100
+--- mesa.orig/src/mesa/drivers/x11/glxapi.c	2011-03-16 19:23:14.108807000 +1100
++++ mesa/src/mesa/drivers/x11/glxapi.c	2011-03-16 19:24:08.830795461 +1100
 @@ -160,7 +160,7 @@
   */
  #if defined(GLX_USE_TLS)
@@ -143,8 +143,8 @@ Index: mesa/src/mesa/drivers/x11/glxapi.c
  #else
 Index: mesa/src/mapi/glapi/glapi_x86-64.S
 ===================================================================
---- mesa.orig/src/mapi/glapi/glapi_x86-64.S	2011-03-15 10:29:48.579597730 +1100
-+++ mesa/src/mapi/glapi/glapi_x86-64.S	2011-03-15 10:31:47.573966382 +1100
+--- mesa.orig/src/mapi/glapi/glapi_x86-64.S	2011-03-16 19:24:08.710791106 +1100
++++ mesa/src/mapi/glapi/glapi_x86-64.S	2011-03-16 19:24:08.850796197 +1100
 @@ -60,8 +60,12 @@
  
  	.p2align	4,,15
@@ -12943,6 +12943,142 @@ Index: mesa/src/mapi/glapi/glapi_x86-64.S
 @@ -33923,6 +39587,18 @@
  	.globl GL_PREFIX(TransformFeedbackVaryings) ; .set GL_PREFIX(TransformFeedbackVaryings), GL_PREFIX(TransformFeedbackVaryingsEXT)
  	.globl GL_PREFIX(ProvokingVertex) ; .set GL_PREFIX(ProvokingVertex), GL_PREFIX(ProvokingVertexEXT)
+ 
++#if defined(GLX_USE_TLS) && defined(__linux__)
++	.section ".note.ABI-tag", "a"
++	.p2align 2
++	.long	1f - 0f   /* name length */
++	.long	3f - 2f   /* data length */
++	.long	1         /* note length */
++0:	.asciz "GNU"      /* vendor name */
++1:	.p2align 2
++2:	.long	0         /* note data: the ABI tag */
++	.long	2,4,20    /* Minimum kernel version w/TLS */
++3:	.p2align 2        /* pad out section */
++#endif /* GLX_USE_TLS */
+ 
+ #if defined (__ELF__) && defined (__linux__)
+ 	.section .note.GNU-stack,"",%progbits
+Index: mesa/src/mapi/glapi/gen/gl_x86_asm.py
+===================================================================
+--- mesa.orig/src/mapi/glapi/gen/gl_x86_asm.py	2011-03-16 19:27:01.157061012 +1100
++++ mesa/src/mapi/glapi/gen/gl_x86_asm.py	2011-03-16 19:28:02.029275520 +1100
+@@ -84,18 +84,11 @@
+ 		print ''
+ 		print '#ifdef GLX_USE_TLS'
+ 		print ''
+-		print '#ifdef GLX_X86_READONLY_TEXT'
+-		print '# define CTX_INSNS MOV_L(GS:(EAX), EAX)'
+-		print '#else'
+-		print '# define CTX_INSNS NOP /* Pad for init_glapi_relocs() */'
+-		print '#endif'
+-		print ''
+ 		print '#  define GL_STUB(fn,off,fn_alt)\t\t\t\\'
+ 		print 'ALIGNTEXT16;\t\t\t\t\t\t\\'
+ 		print 'GLOBL_FN(GL_PREFIX(fn, fn_alt));\t\t\t\\'
+ 		print 'GL_PREFIX(fn, fn_alt):\t\t\t\t\t\\'
+ 		print '\tCALL(_x86_get_dispatch) ;\t\t\t\\'
+-		print '\tCTX_INSNS ;					\\'
+ 		print '\tJMP(GL_OFFSET(off))'
+ 		print ''
+ 		print '#elif defined(PTHREADS)'
+@@ -146,10 +139,14 @@
+ 		print '\tHIDDEN(GLNAME(_x86_get_dispatch))'
+ 		print 'ALIGNTEXT16'
+ 		print 'GLNAME(_x86_get_dispatch):'
+-		print '\tcall	1f'
+-		print '1:\tpopl	%eax'
+-		print '\taddl	$_GLOBAL_OFFSET_TABLE_+[.-1b], %eax'
+-		print '\tmovl	_glapi_tls_Dispatch@GOTNTPOFF(%eax), %eax'
++		print '\tpushl\t%ebx'
++		print '\tcall\t1f'
++		print '1:\tpopl\t%ebx'
++		print '\taddl\t$_GLOBAL_OFFSET_TABLE_+[.-1b], %ebx'
++		print '\tleal\t_glapi_tls_Dispatch@tlsgd(,%ebx,1), %eax'
++		print '\tcall\t___tls_get_addr@plt'
++		print '\tmovl\t(%eax),%eax'
++		print '\tpopl\t%ebx'
+ 		print '\tret'
+ 		print ''
+ 		print '#elif defined(PTHREADS)'
+Index: mesa/src/mapi/glapi/glapi_entrypoint.c
+===================================================================
+--- mesa.orig/src/mapi/glapi/glapi_entrypoint.c	2011-03-16 19:24:45.632133054 +1100
++++ mesa/src/mapi/glapi/glapi_entrypoint.c	2011-03-16 19:25:54.684643514 +1100
+@@ -65,21 +65,6 @@
+ static void
+ init_glapi_relocs( void )
+ {
+-#if defined(GLX_USE_TLS) && !defined(GLX_X86_READONLY_TEXT)
+-    extern unsigned long _x86_get_dispatch(void);
+-    char run_time_patch[] = {
+-       0x65, 0xa1, 0, 0, 0, 0 /* movl %gs:0,%eax */
+-    };
+-    GLuint *offset = (GLuint *) &run_time_patch[2]; /* 32-bits for x86/32 */
+-    const GLubyte * const get_disp = (const GLubyte *) run_time_patch;
+-    GLubyte * curr_func = (GLubyte *) gl_dispatch_functions_start;
+-
+-    *offset = _x86_get_dispatch();
+-    while ( curr_func != (GLubyte *) gl_dispatch_functions_end ) {
+-	(void) memcpy( curr_func, get_disp, sizeof(run_time_patch));
+-	curr_func += DISPATCH_FUNCTION_SIZE;
+-    }
+-#endif
+ }
+ 
+ 
+Index: mesa/src/mapi/glapi/glapi_x86.S
+===================================================================
+--- mesa.orig/src/mapi/glapi/glapi_x86.S	2011-03-16 19:28:39.130625572 +1100
++++ mesa/src/mapi/glapi/glapi_x86.S	2011-03-16 19:29:04.271540544 +1100
+@@ -57,18 +57,11 @@
+ 
+ #ifdef GLX_USE_TLS
+ 
+-#ifdef GLX_X86_READONLY_TEXT
+-# define CTX_INSNS MOV_L(GS:(EAX), EAX)
+-#else
+-# define CTX_INSNS NOP /* Pad for init_glapi_relocs() */
+-#endif
+-
+ #  define GL_STUB(fn,off,fn_alt)			\
+ ALIGNTEXT16;						\
+ GLOBL_FN(GL_PREFIX(fn, fn_alt));			\
+ GL_PREFIX(fn, fn_alt):					\
+ 	CALL(_x86_get_dispatch) ;			\
+-	CTX_INSNS ;					\
+ 	JMP(GL_OFFSET(off))
+ 
+ #elif defined(PTHREADS)
+@@ -119,10 +112,14 @@
+ 	HIDDEN(GLNAME(_x86_get_dispatch))
+ ALIGNTEXT16
+ GLNAME(_x86_get_dispatch):
++	pushl	%ebx
+ 	call	1f
+-1:	popl	%eax
+-	addl	$_GLOBAL_OFFSET_TABLE_+[.-1b], %eax
+-	movl	_glapi_tls_Dispatch@GOTNTPOFF(%eax), %eax
++1:	popl	%ebx
++	addl	$_GLOBAL_OFFSET_TABLE_+[.-1b], %ebx
++	leal	_glapi_tls_Dispatch@tlsgd(,%ebx,1), %eax
++	call	___tls_get_addr@plt
++	movl	(%eax),%eax
++	popl	%ebx
+ 	ret
+ 
+ #elif defined(PTHREADS)
+@@ -147,6 +144,7 @@
+ 
+ 		ALIGNTEXT16
+ 		GLOBL GLNAME(gl_dispatch_functions_start)
++		HIDDEN(GLNAME(gl_dispatch_functions_start))
+ GLNAME(gl_dispatch_functions_start):
+ 
+ 	GL_STUB(NewList, 0, NewList@8)
+@@ -1410,6 +1408,18 @@
+ 		ALIGNTEXT16
+ GLNAME(gl_dispatch_functions_end):
  
 +#if defined(GLX_USE_TLS) && defined(__linux__)
 +	.section ".note.ABI-tag", "a"
