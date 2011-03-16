@@ -191,11 +191,6 @@ else
 	confflags-dri += --with-dri-searchpath=/usr/lib/dri:/usr/lib/dri-alternates
 endif
 
-# TEMPORARY HACK FOR TLS MADNESS.  Introduces LP: #735188
-ifeq ($(DEB_HOST_ARCH_CPU),i386)
-	confflags += --disable-asm
-endif
-
 configure: $(QUILT_STAMPFN) configure.ac
 	autoreconf -vfi
 
