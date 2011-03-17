@@ -1,4 +1,4 @@
-mesa (7.10.1-0ubuntu3) UNRELASED; urgency=low
+mesa (7.10.1-0ubuntu3) natty; urgency=low
 
   * debian/patches/113_partially_fix_tls.diff:
     - Also fix the IA32 dispatch code, rename to 113_fix_tls.diff.
@@ -6,7 +6,7 @@ mesa (7.10.1-0ubuntu3) UNRELASED; urgency=low
     - Re-enable assembler on i386, now that the dispatch code has been fixed.
       (LP: #735188)
 
- -- Christopher James Halse Rogers <raof@ubuntu.com>  Wed, 16 Mar 2011 19:35:10 +1100
+ -- Christopher James Halse Rogers <raof@ubuntu.com>  Thu, 17 Mar 2011 15:14:43 +1100
 
 mesa (7.10.1-0ubuntu2) natty; urgency=low
 
