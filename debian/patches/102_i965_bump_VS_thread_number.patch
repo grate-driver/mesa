@@ -1,0 +1,62 @@
+From 71bb87af9d720abb728136b4b61782ee26f6e0da Mon Sep 17 00:00:00 2001
+From: Zou Nan hai <nanhai.zou@intel.com>
+Date: Tue, 1 Mar 2011 10:39:35 +0800
+Subject: [PATCH 1/2] i965: bump VS thread number to 60 on SNB
+
+Signed-off-by: Zou Nan hai <nanhai.zou@intel.com>
+---
+ src/mesa/drivers/dri/i965/brw_vs_emit.c   |   10 +++++++++-
+ src/mesa/drivers/dri/i965/gen6_vs_state.c |    3 ++-
+ 2 files changed, 11 insertions(+), 2 deletions(-)
+
+diff --git a/src/mesa/drivers/dri/i965/brw_vs_emit.c b/src/mesa/drivers/dri/i965/brw_vs_emit.c
+index 0411ce0..6ec6255 100644
+--- a/src/mesa/drivers/dri/i965/brw_vs_emit.c
++++ b/src/mesa/drivers/dri/i965/brw_vs_emit.c
+@@ -1561,6 +1561,7 @@ static void emit_vertex_write( struct brw_vs_compile *c)
+    int eot;
+    GLuint len_vertex_header = 2;
+    int next_mrf, i;
++   int msg_len;
+ 
+    if (c->key.copy_edgeflag) {
+       brw_MOV(p, 
+@@ -1727,13 +1728,20 @@ static void emit_vertex_write( struct brw_vs_compile *c)
+ 
+    eot = (c->first_overflow_output == 0);
+ 
++   msg_len = c->nr_outputs + 2 + len_vertex_header; 
++   if (intel->gen >= 6) {
++	   /* interleaved urb write message length for gen6 should be multiple of 2 */
++	   if ((msg_len % 2) != 0)
++		msg_len++;
++   }
++
+    brw_urb_WRITE(p, 
+ 		 brw_null_reg(), /* dest */
+ 		 0,		/* starting mrf reg nr */
+ 		 c->r0,		/* src */
+ 		 0,		/* allocate */
+ 		 1,		/* used */
+-		 MIN2(c->nr_outputs + 1 + len_vertex_header, (BRW_MAX_MRF-1)), /* msg len */
++		 MIN2(msg_len - 1, (BRW_MAX_MRF - 1)), /* msg len */
+ 		 0,		/* response len */
+ 		 eot, 		/* eot */
+ 		 eot, 		/* writes complete */
+diff --git a/src/mesa/drivers/dri/i965/gen6_vs_state.c b/src/mesa/drivers/dri/i965/gen6_vs_state.c
+index ed132bd..20dfb13 100644
+--- a/src/mesa/drivers/dri/i965/gen6_vs_state.c
++++ b/src/mesa/drivers/dri/i965/gen6_vs_state.c
+@@ -136,7 +136,8 @@ upload_vs_state(struct brw_context *brw)
+    OUT_BATCH((1 << GEN6_VS_DISPATCH_START_GRF_SHIFT) |
+ 	     (brw->vs.prog_data->urb_read_length << GEN6_VS_URB_READ_LENGTH_SHIFT) |
+ 	     (0 << GEN6_VS_URB_ENTRY_READ_OFFSET_SHIFT));
+-   OUT_BATCH((0 << GEN6_VS_MAX_THREADS_SHIFT) |
++
++   OUT_BATCH(((60 - 1) << GEN6_VS_MAX_THREADS_SHIFT) | /* max 60 threads for gen6 */
+ 	     GEN6_VS_STATISTICS_ENABLE |
+ 	     GEN6_VS_ENABLE);
+    ADVANCE_BATCH();
+-- 
+1.7.4.1
+

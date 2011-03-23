@@ -7,6 +7,7 @@
 # Ubuntu patches.
 100_no_abi_tag.patch
 101_ubuntu_hidden_glname.patch
+102_i965_bump_VS_thread_number.patch
 103_savage-expose_fbmodes_with_nonzero_alpha.patch
 105_use_shared_libdricore.patch
 108_fix_leaks_dri2_screen_creation.patch
