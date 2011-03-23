@@ -1,3 +1,11 @@
+mesa (7.10.1-0ubuntu4) UNRELEASED; urgency=low
+
+  * Cherry-pick upstream commit 6c324777a685d28d0a81d23157e4863240552999
+    to fix a major performance problem with unity on Intel
+    Sandybridge GPUs.
+
+ -- Robert Hooker <sarvatt@ubuntu.com>  Wed, 23 Mar 2011 15:51:12 -0400
+
 mesa (7.10.1-0ubuntu3) natty; urgency=low
 
   * debian/patches/113_partially_fix_tls.diff:
