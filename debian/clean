@@ -16,3 +16,7 @@ debian/libgl1-mesa-dev.install
 debian/libegl1-mesa.install
 debian/libegl1-mesa-drivers.install
 debian/libegl1-mesa-dev.install
+debian/libgl1-mesa-glx.postinst
+debian/libgl1-mesa-glx.prerm
+debian/libgl1-mesa-swx11.postinst
+debian/libgl1-mesa-swx11.prerm

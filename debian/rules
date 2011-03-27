@@ -245,9 +245,11 @@ install: build
 	            libgl1-mesa-glx-i686.install libgl1-mesa-dri.install \
 	            libgl1-mesa-dri.install.linux libegl1-mesa.install \
 	            libgl1-mesa-dri-experimental.install \
-	            libegl1-mesa-drivers.install libegl1-mesa-dev.install; \
+	            libegl1-mesa-drivers.install libegl1-mesa-dev.install \
 	            libgl1-mesa-dev.install libgl1-mesa-swx11-dev.install \
-	            libgl1-mesa-swx11.install \
+	            libgl1-mesa-swx11.install libgl1-mesa-glx.postinst \
+	            libgl1-mesa-glx.prerm libgl1-mesa-swx11.postinst \
+	            libgl1-mesa-swx11.prerm; \
 	do \
 		sed -e"s,\$${DEB_HOST_MULTIARCH},$(DEB_HOST_MULTIARCH),g" \
 			debian/$${file}.in > debian/$$file; \
@@ -295,22 +297,14 @@ binary-arch: install
 	dh_install -s --fail-missing
 
 	# Create an ld.so.conf which says where to find libGL from Mesa
-	echo "/usr/lib/mesa" \
-	> $(CURDIR)/debian/libgl1-mesa-glx/usr/lib/mesa/ld.so.conf
-	echo "/usr/lib/mesa" \
-	> $(CURDIR)/debian/libgl1-mesa-swx11/usr/lib/mesa/ld.so.conf
-
-ifeq ($(DEB_BUILD_ARCH),amd64)
-	# Add the path to 32bit libGL from Mesa (on 64 bit)
-	echo "/usr/lib32/mesa" \
-	>> $(CURDIR)/debian/libgl1-mesa-glx/usr/lib/mesa/ld.so.conf
-	echo "/usr/lib32/mesa" \
-	>> $(CURDIR)/debian/libgl1-mesa-swx11/usr/lib/mesa/ld.so.conf
-endif
+	echo "/usr/lib/$(DEB_HOST_MULTIARCH)/mesa" \
+	> $(CURDIR)/debian/libgl1-mesa-glx/usr/lib/$(DEB_HOST_MULTIARCH)/mesa/ld.so.conf
+	echo "/usr/lib/$(DEB_HOST_MULTIARCH)/mesa" \
+	> $(CURDIR)/debian/libgl1-mesa-swx11/usr/lib/$(DEB_HOST_MULTIARCH)/mesa/ld.so.conf
 
 	# Empty directory for the alternative
-	mkdir -p $(CURDIR)/debian/libgl1-mesa-glx/usr/lib/xorg/x11-extra-modules
-	mkdir -p $(CURDIR)/debian/libgl1-mesa-swx11/usr/lib/xorg/x11-extra-modules
+	mkdir -p $(CURDIR)/debian/libgl1-mesa-glx/usr/lib/$(DEB_HOST_MULTIARCH)/xorg/x11-extra-modules
+	mkdir -p $(CURDIR)/debian/libgl1-mesa-swx11/usr/lib/$(DEB_HOST_MULTIARCH)/xorg/x11-extra-modules
 
 	dh_installman -s
 	dh_lintian -s
