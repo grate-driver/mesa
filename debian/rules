@@ -182,14 +182,11 @@ confflags-swx11+glu-i386-i686 = \
 	--libdir=/usr/lib/$(DEB_HOST_MULTIARCH)/i686/cmov \
 	CFLAGS="$(CFLAGS) -march=i686"
 
-# Add /usr/lib32/dri/ on 32 bit systems so that this path is used
-# for 32 bit compatibility on 64 bit systems
-#
 # Add /usr/lib/dri-alternates for classic fallback for gallium drivers
 ifeq ($(DEB_BUILD_ARCH),i386)
-	confflags-dri += --with-dri-searchpath=/usr/lib/dri:/usr/lib/dri-alternates:/usr/lib32/dri:/usr/lib32/dri-alternates
+	confflags-dri += --with-dri-searchpath=/usr/lib/$(DEB_HOST_MULTIARCH)/dri:/usr/lib/dri:/usr/lib/$(DEB_HOST_MULTIARCH)/dri-alternates:/usr/lib/dri-alternates:/usr/lib32/dri:/usr/lib32/dri-alternates
 else
-	confflags-dri += --with-dri-searchpath=/usr/lib/dri:/usr/lib/dri-alternates
+	confflags-dri += --with-dri-searchpath=/usr/lib/$(DEB_HOST_MULTIARCH)/dri:/usr/lib/dri:/usr/lib/$(DEB_HOST_MULTIARCH)/dri-alternates:/usr/lib/dri-alternates
 endif
 
 configure: $(QUILT_STAMPFN) configure.ac
