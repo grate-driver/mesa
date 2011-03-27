@@ -26,7 +26,8 @@ Depends:
  libosmesa6 (>= 6.5.2-1),
  ${shlibs:Depends},
  ${misc:Depends},
-Conflicts: mesag3-glide, mesag3-glide2, mesag3+ggi, libgl1, nvidia-glx, mesag3, libgl1-mesa-swrast
+Conflicts: mesag3-glide, mesag3-glide2, mesag3+ggi, libgl1, nvidia-glx, mesag3, libgl1-mesa-swrast,
+ nvidia-current, fglrx
 Provides: libgl1, mesag3, libgl1-mesa-swrast
 Replaces: libgl1, mesag3, libgl1-mesa-swrast
 Pre-Depends: ${misc:Pre-Depends}
@@ -387,7 +388,7 @@ Depends:
  ${shlibs:Depends},
  ${misc:Depends}
 Recommends: libgl1-mesa-dri (>= 7.2)
-Conflicts: libgl1, libgl1-mesa-dri (<< 6.4.0)
+Conflicts: libgl1, libgl1-mesa-dri (<< 6.4.0), nvidia-current, fglrx
 Replaces: libgl1, libgl1-mesa-dri (<< 6.4.0)
 Provides: libgl1
 Pre-Depends: ${misc:Pre-Depends}

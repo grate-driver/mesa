@@ -13,6 +13,9 @@ mesa (7.10.1-0ubuntu4+multiarch.1) UNRELEASED; urgency=low
     libgl1-mesa-glx that will look for DRI modules only in /usr/lib/dri.
   * Fix up the maintainer scripts to transition to per-architecture
     alternatives for ld.so configs.
+  * Conflict with nvidia-current, fglrx due to the migration of alternatives
+    for the ld.so.conf snippets.  This should eventually be a << conflicts,
+    but only once there are packages available that use the new alternative.
 
  -- Robert Hooker <sarvatt@ubuntu.com>  Wed, 23 Mar 2011 15:51:12 -0400
 
