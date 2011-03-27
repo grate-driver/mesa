@@ -10,8 +10,8 @@ NOT_INSTALLED := \
 	dri/usr/include/GL/vms_x_fix.h \
 	dri/usr/include/GL/wglext.h \
 	dri/usr/include/GL/wmesa.h \
-	dri/usr/lib/libGL.so \
-	dri/usr/lib/pkgconfig/gl.pc \
+	dri/usr/lib/*/libGL.so \
+	dri/usr/lib/*/pkgconfig/gl.pc \
 	usr/include/GL/glext.h \
 	usr/include/GL/glfbdev.h \
 	usr/include/GL/gl.h \

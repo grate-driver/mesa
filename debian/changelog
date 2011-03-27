@@ -1,4 +1,4 @@
-mesa (7.10.1-0ubuntu4) UNRELEASED; urgency=low
+mesa (7.10.1-0ubuntu4+multiarch.1) UNRELEASED; urgency=low
 
   [ Robert Hooker ]
   * Cherry-pick upstream commit 6c324777a685d28d0a81d23157e4863240552999
@@ -8,6 +8,7 @@ mesa (7.10.1-0ubuntu4) UNRELEASED; urgency=low
   [ Steve Langasek ]
   * Fix alternatives removal on removal of libgl1-mesa-{swx11,glx}: the
     files are in /usr/lib/mesa, not /usr/lib/GL.
+  * Build for multiarch.
 
  -- Robert Hooker <sarvatt@ubuntu.com>  Wed, 23 Mar 2011 15:51:12 -0400
 

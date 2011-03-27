@@ -1,4 +1,0 @@
-# If this part gets modified, make sure to update .install.$os as well:
-build/dri/lib/*_dri.so  usr/lib/dri
-build/dri/lib/libglsl.so usr/lib/dri
-build/dri/lib/libdricore.so usr/lib/dri
