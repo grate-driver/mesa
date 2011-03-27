@@ -456,7 +456,7 @@ Depends:
 Suggests: libglide3
 Conflicts: xlibmesa-dri (<< 1:7.0.0)
 Replaces: xlibmesa-dri (<< 1:7.0.0)
-Breaks: xserver-xorg-core (<< 2:1.5), libgl1-mesa-glx (<< 7.2)
+Breaks: xserver-xorg-core (<< 2:1.10.0-0ubuntu2+multiarch.1), libgl1-mesa-glx (<< 7.10.1-0ubuntu3+multiarch.1)
 Multi-Arch: same
 Description: A free implementation of the OpenGL API -- DRI modules
  This version of Mesa provides GLX and DRI capabilities: it is capable of
@@ -498,6 +498,7 @@ Architecture: linux-any
 Depends:
  ${shlibs:Depends},
  ${misc:Depends},
+Breaks: xserver-xorg-core (<< 2:1.10.0-0ubuntu2+multiarch.1), libgl1-mesa-glx (<< 7.10.1-0ubuntu3+multiarch.1)
 Multi-Arch: same
 Description: A free implementation of the OpenGL API -- Extra DRI modules
  This version of Mesa provides GLX and DRI capabilities: it is capable of

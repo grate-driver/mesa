@@ -9,6 +9,8 @@ mesa (7.10.1-0ubuntu4+multiarch.1) UNRELEASED; urgency=low
   * Fix alternatives removal on removal of libgl1-mesa-{swx11,glx}: the
     files are in /usr/lib/mesa, not /usr/lib/GL.
   * Build for multiarch.
+  * Declare Breaks: against old versions of xserver-xorg-core and
+    libgl1-mesa-glx that will look for DRI modules only in /usr/lib/dri.
 
  -- Robert Hooker <sarvatt@ubuntu.com>  Wed, 23 Mar 2011 15:51:12 -0400
 
