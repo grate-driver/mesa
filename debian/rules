@@ -102,7 +102,7 @@ confflags-dri = \
 	--with-driver=dri \
 	--with-dri-drivers="$(DRI_DRIVERS)" \
 	--with-dri-driverdir=/usr/lib/$(DEB_HOST_MULTIARCH)/dri \
-	--with-dri-searchpath='\$$$${ORIGIN}/dri' \
+	--with-dri-searchpath=/usr/lib/$(DEB_HOST_MULTIARCH)/dri:/usr/lib/dri \
 	--enable-glx-tls \
 	$(confflags_DIRECT_RENDERING) \
 	$(confflags_EGL) \
