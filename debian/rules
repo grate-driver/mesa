@@ -338,7 +338,7 @@ else
 	dh_makeshlibs -s -- -c1
 endif
 	dh_installdeb -s
-	dh_shlibdeps -s -l/usr/lib/mesa
+	dh_shlibdeps -s -l/usr/lib/$(DEB_HOST_MULTIARCH)/mesa
 	dh_gencontrol -s
 	dh_md5sums -s
 	dh_builddeb -s -- -Zlzma

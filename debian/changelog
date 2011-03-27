@@ -18,6 +18,7 @@ mesa (7.10.1-0ubuntu4+multiarch.1) UNRELEASED; urgency=low
     but only once there are packages available that use the new alternative.
   * Use multiarch dirs for our dri module search path, with a fallback to
     /usr/lib/dri.
+  * Use the right path for dh_shlibdeps.
 
  -- Robert Hooker <sarvatt@ubuntu.com>  Wed, 23 Mar 2011 15:51:12 -0400
 
