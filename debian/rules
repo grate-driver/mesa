@@ -185,7 +185,7 @@ confflags-swx11+glu-i386-i686 = \
 # for 32 bit compatibility on 64 bit systems
 #
 # Add /usr/lib/dri-alternates for classic fallback for gallium drivers
-ifeq ($(DEB_BUILD_ARCH),i386)
+ifeq ($(DEB_HOST_ARCH),i386)
 	confflags-dri += --with-dri-searchpath=/usr/lib/dri:/usr/lib/dri-alternates:/usr/lib32/dri:/usr/lib32/dri-alternates
 else
 	confflags-dri += --with-dri-searchpath=/usr/lib/dri:/usr/lib/dri-alternates
@@ -284,7 +284,7 @@ binary-arch: install
 	echo "/usr/lib/mesa" \
 	> $(CURDIR)/debian/libgl1-mesa-swx11/usr/lib/mesa/ld.so.conf
 
-ifeq ($(DEB_BUILD_ARCH),amd64)
+ifeq ($(DEB_HOST_ARCH),amd64)
 	# Add the path to 32bit libGL from Mesa (on 64 bit)
 	echo "/usr/lib32/mesa" \
 	>> $(CURDIR)/debian/libgl1-mesa-glx/usr/lib/mesa/ld.so.conf

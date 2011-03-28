@@ -8,6 +8,8 @@ mesa (7.10.1-0ubuntu4) UNRELEASED; urgency=low
   [ Steve Langasek ]
   * Fix alternatives removal on removal of libgl1-mesa-{swx11,glx}: the
     files are in /usr/lib/mesa, not /usr/lib/GL.
+  * The architecture we're building for is DEB_HOST_ARCH, not
+    DEB_BUILD_ARCH.
 
  -- Robert Hooker <sarvatt@ubuntu.com>  Wed, 23 Mar 2011 15:51:12 -0400
 
