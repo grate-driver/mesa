@@ -1,4 +1,4 @@
-mesa (7.10.1-0ubuntu4+multiarch.1) UNRELEASED; urgency=low
+mesa (7.10.1-0ubuntu3+multiarch.1) natty; urgency=low
 
   [ Robert Hooker ]
   * Cherry-pick upstream commit 6c324777a685d28d0a81d23157e4863240552999
@@ -20,7 +20,7 @@ mesa (7.10.1-0ubuntu4+multiarch.1) UNRELEASED; urgency=low
     /usr/lib/dri.
   * Use the right path for dh_shlibdeps.
 
- -- Robert Hooker <sarvatt@ubuntu.com>  Wed, 23 Mar 2011 15:51:12 -0400
+ -- Steve Langasek <steve.langasek@ubuntu.com>  Sun, 27 Mar 2011 22:52:36 -0700
 
 mesa (7.10.1-0ubuntu3) natty; urgency=low
 
