@@ -1,4 +1,4 @@
-mesa (7.10.1-1) UNRELEASED; urgency=low
+mesa (7.10.1-1) experimental; urgency=low
 
   [ Cyril Brulebois ]
   * Revert to r600 classic, r600 gallium doesn't seem ready yet, after all
@@ -21,7 +21,7 @@ mesa (7.10.1-1) UNRELEASED; urgency=low
   * Build and install nouveau_vieux driver in libgl1-mesa-dri-experimental.
     (Closes: #586062)
 
- -- Christopher James Halse Rogers <raof@ubuntu.com>  Sat, 05 Mar 2011 19:30:58 +1100
+ -- Cyril Brulebois <kibi@debian.org>  Sun, 03 Apr 2011 21:26:05 +0200
 
 mesa (7.10-4) unstable; urgency=low
 
