@@ -11,7 +11,11 @@ mesa (7.10.1-0ubuntu4) UNRELEASED; urgency=low
   * The architecture we're building for is DEB_HOST_ARCH, not
     DEB_BUILD_ARCH.
 
- -- Robert Hooker <sarvatt@ubuntu.com>  Wed, 23 Mar 2011 15:51:12 -0400
+  [ Christopher James Halse Rogers ]
+  * debian/patches/114_update_for_2.4.24_nouveau_headers.diff:
+    - Cherry-pick from upstream to follow headers renamed in libdrm 2.4.24
+
+ -- Christopher James Halse Rogers <raof@ubuntu.com>  Mon, 04 Apr 2011 12:52:13 +1000
 
 mesa (7.10.1-0ubuntu3) natty; urgency=low
 
