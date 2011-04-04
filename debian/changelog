@@ -14,8 +14,10 @@ mesa (7.10.1-0ubuntu4) UNRELEASED; urgency=low
   [ Christopher James Halse Rogers ]
   * debian/patches/114_update_for_2.4.24_nouveau_headers.diff:
     - Cherry-pick from upstream to follow headers renamed in libdrm 2.4.24
+  * debian/control:
+    - Build-depend on libdrm 2.4.24
 
- -- Christopher James Halse Rogers <raof@ubuntu.com>  Mon, 04 Apr 2011 12:52:13 +1000
+ -- Christopher James Halse Rogers <raof@ubuntu.com>  Mon, 04 Apr 2011 19:10:45 +1000
 
 mesa (7.10.1-0ubuntu3) natty; urgency=low
 
