@@ -1,0 +1,81 @@
+<HTML>
+
+<head>
+<TITLE>Mesa Release Notes</TITLE>
+<link rel="stylesheet" type="text/css" href="mesa.css">
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+</head>
+
+<BODY>
+
+<body bgcolor="#eeeeee">
+
+<H1>Mesa 7.10.2 Release Notes / TBD</H1>
+
+<p>
+Mesa 7.10.2 is a bug fix release which fixes bugs found since the 7.10 release.
+</p>
+<p>
+Mesa 7.10.2 implements the OpenGL 2.1 API, but the version reported by
+glGetString(GL_VERSION) depends on the particular driver being used.
+Some drivers don't support all the features required in OpenGL 2.1.
+</p>
+<p>
+See the <a href="install.html">Compiling/Installing page</a> for prerequisites
+for DRI hardware acceleration.
+</p>
+
+
+<h2>MD5 checksums</h2>
+<pre>
+TBD
+</pre>
+
+
+<h2>New features</h2>
+<p>None.</p>
+
+<h2>Bug fixes</h2>
+<p>This list is likely incomplete.</p>
+<ul>
+
+<li><a href="https://bugs.freedesktop.org/show_bug.cgi?id=29172">Bug 29172</a> - Arrandale - Pill Popper Pops Pills</li>
+
+<li><a href="https://bugs.freedesktop.org/show_bug.cgi?id=31159">Bug 31159</a> - shadow problem in 0ad game</li>
+
+<li><a href="https://bugs.freedesktop.org/show_bug.cgi?id=32688">Bug 32688</a> - [RADEON:KMS:R300G] some games have a wireframe or outline visible</li>
+
+<li><a href="https://bugs.freedesktop.org/show_bug.cgi?id=32949">Bug 32949</a> - [glsl wine] Need for Speed renders incorrectly with GLSL enabled</li>
+
+<li><a href="https://bugs.freedesktop.org/show_bug.cgi?id=34203">Bug 34203</a> - [GLSL] fail to call long chains across shaders</li>
+
+<li><a href="https://bugs.freedesktop.org/show_bug.cgi?id=34376">Bug 34376</a> - [GLSL] allowing assignment to unsized array
+  <ul>
+    <li>The commit message incorrectly
+    lists <a href="https://bugs.freedesktop.org/show_bug.cgi?id=34367">bug
+    34367</a>.</li>
+  </ul>
+</li>
+
+<li><a href="https://bugs.freedesktop.org/show_bug.cgi?id=34370">Bug 34370</a> - [GLSL] "i&lt;5 &amp;&amp; i&lt;4" in for loop fails</li>
+
+<li><a href="https://bugs.freedesktop.org/show_bug.cgi?id=34374">Bug 34374</a> - [GLSL] fail to redeclare an array using initializer</li>
+
+<li><a href="https://bugs.freedesktop.org/show_bug.cgi?id=35073">Bug 35073</a> - [GM45] Alpha test is broken when rendering to FBO with no color attachment</li>
+
+<li><a href="https://bugs.freedesktop.org/show_bug.cgi?id=35483">Bug 35483</a> - util_blit_pixels_writemask: crash in line 322 of src/gallium/auxiliary/util/u_blit.c</li>
+
+<!-- <li><a href="https://bugs.freedesktop.org/show_bug.cgi?id=">Bug </a> - </li> -->
+
+</ul>
+
+
+<h2>Changes</h2>
+<p>The full set of changes can be viewed by using the following GIT command:</p>
+
+<pre>
+  git log mesa-7.10.1..origin/7.10
+</pre>
+
+</body>
+</html>
