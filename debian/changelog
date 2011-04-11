@@ -12,11 +12,6 @@ mesa (7.10.2-0ubuntu1) natty; urgency=low
   * The architecture we're building for is DEB_HOST_ARCH, not
     DEB_BUILD_ARCH.
 
-  [ Robert Hooker ]
-  * Cherry-pick upstream commit 6c324777a685d28d0a81d23157e4863240552999
-    to fix a major performance problem with unity on Intel
-    Sandybridge GPUs.
-
   [ Christopher James Halse Rogers ]
   * New upstream bugfix release.
     - Contains fix for KWin crash when enabling effects on r600 (LP: #738687)
