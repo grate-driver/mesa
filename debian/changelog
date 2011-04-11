@@ -1,8 +1,8 @@
-mesa (7.10.2-0ubuntu2) UNRELEASED; urgency=low
+mesa (7.10.2-0ubuntu2) natty; urgency=low
 
   * Merge from natty.
 
- -- Steve Langasek <steve.langasek@ubuntu.com>  Mon, 11 Apr 2011 10:03:09 -0700
+ -- Steve Langasek <steve.langasek@ubuntu.com>  Mon, 11 Apr 2011 10:03:38 -0700
 
 mesa (7.10.2-0ubuntu1) natty; urgency=low
 
