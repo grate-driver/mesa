@@ -1,3 +1,30 @@
+mesa (7.10.2-0ubuntu2) UNRELEASED; urgency=low
+
+  * Merge from natty.
+
+ -- Steve Langasek <steve.langasek@ubuntu.com>  Mon, 11 Apr 2011 10:03:09 -0700
+
+mesa (7.10.2-0ubuntu1) natty; urgency=low
+
+  [ Steve Langasek ]
+  * Fix alternatives removal on removal of libgl1-mesa-{swx11,glx}: the
+    files are in /usr/lib/mesa, not /usr/lib/GL.
+  * The architecture we're building for is DEB_HOST_ARCH, not
+    DEB_BUILD_ARCH.
+
+  [ Robert Hooker ]
+  * Cherry-pick upstream commit 6c324777a685d28d0a81d23157e4863240552999
+    to fix a major performance problem with unity on Intel
+    Sandybridge GPUs.
+
+  [ Christopher James Halse Rogers ]
+  * New upstream bugfix release.
+    - Contains fix for KWin crash when enabling effects on r600 (LP: #738687)
+  * debian/patches/105_use_shared_libdricore.patch: Fix rpath for i386
+    libraries installed on amd64 via ia32-libs. (LP: #755720)
+
+ -- Christopher James Halse Rogers <raof@ubuntu.com>  Mon, 11 Apr 2011 10:10:35 +1000
+
 mesa (7.10.1-0ubuntu3+multiarch.1) natty; urgency=low
 
   [ Robert Hooker ]

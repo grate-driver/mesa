@@ -13,8 +13,8 @@ Date:   Wed Nov 17 14:28:34 2010 +1100
 
 Index: mesa/configs/autoconf.in
 ===================================================================
---- mesa.orig/configs/autoconf.in	2011-02-15 16:11:30.000000000 +1100
-+++ mesa/configs/autoconf.in	2011-02-16 10:20:03.222410207 +1100
+--- mesa.orig/configs/autoconf.in	2011-04-11 11:17:43.692242067 +1000
++++ mesa/configs/autoconf.in	2011-04-11 11:18:11.463257267 +1000
 @@ -33,6 +33,8 @@
  LLVM_LIBS = @LLVM_LIBS@
  GLW_CFLAGS = @GLW_CFLAGS@
@@ -46,8 +46,8 @@ Index: mesa/configs/autoconf.in
  LIBDRM_LIB = @LIBDRM_LIBS@
 Index: mesa/configs/default
 ===================================================================
---- mesa.orig/configs/default	2011-02-15 16:11:30.000000000 +1100
-+++ mesa/configs/default	2011-02-16 10:20:03.222410207 +1100
+--- mesa.orig/configs/default	2011-04-11 11:17:43.722243160 +1000
++++ mesa/configs/default	2011-04-11 11:18:11.463257267 +1000
 @@ -82,6 +82,9 @@
  GLESv2_LIB_GLOB = $(GLESv2_LIB_NAME)*
  VG_LIB_GLOB = $(VG_LIB_NAME)*
@@ -60,8 +60,8 @@ Index: mesa/configs/default
  
 Index: mesa/configs/freebsd-dri
 ===================================================================
---- mesa.orig/configs/freebsd-dri	2011-02-15 15:14:26.000000000 +1100
-+++ mesa/configs/freebsd-dri	2011-02-16 10:20:03.222410207 +1100
+--- mesa.orig/configs/freebsd-dri	2011-04-11 11:17:43.702242435 +1000
++++ mesa/configs/freebsd-dri	2011-04-11 11:18:11.463257267 +1000
 @@ -30,9 +30,11 @@
  MESA_ASM_SOURCES = 
  
@@ -77,8 +77,8 @@ Index: mesa/configs/freebsd-dri
  
 Index: mesa/configs/linux-dri
 ===================================================================
---- mesa.orig/configs/linux-dri	2011-02-15 16:11:30.000000000 +1100
-+++ mesa/configs/linux-dri	2011-02-16 10:21:12.872512371 +1100
+--- mesa.orig/configs/linux-dri	2011-04-11 11:17:43.662240971 +1000
++++ mesa/configs/linux-dri	2011-04-11 11:18:11.473257629 +1000
 @@ -43,9 +43,11 @@
  # Library/program dependencies
  EXTRA_LIB_PATH=-L/usr/X11R6/lib
@@ -94,8 +94,8 @@ Index: mesa/configs/linux-dri
  
 Index: mesa/configs/linux-dri-xcb
 ===================================================================
---- mesa.orig/configs/linux-dri-xcb	2011-02-15 15:14:26.000000000 +1100
-+++ mesa/configs/linux-dri-xcb	2011-02-16 10:20:03.232410237 +1100
+--- mesa.orig/configs/linux-dri-xcb	2011-04-11 11:17:43.682241704 +1000
++++ mesa/configs/linux-dri-xcb	2011-04-11 11:18:11.473257629 +1000
 @@ -41,9 +41,11 @@
  # Library/program dependencies
  EXTRA_LIB_PATH=$(shell pkg-config --libs-only-L x11)
@@ -111,8 +111,8 @@ Index: mesa/configs/linux-dri-xcb
  
 Index: mesa/configs/linux-egl
 ===================================================================
---- mesa.orig/configs/linux-egl	2011-02-15 15:14:26.000000000 +1100
-+++ mesa/configs/linux-egl	2011-02-16 10:20:03.232410237 +1100
+--- mesa.orig/configs/linux-egl	2011-04-11 11:17:43.732243530 +1000
++++ mesa/configs/linux-egl	2011-04-11 11:18:11.473257629 +1000
 @@ -38,9 +38,11 @@
  # Library/program dependencies
  EXTRA_LIB_PATH=-L/usr/X11R6/lib
@@ -128,8 +128,8 @@ Index: mesa/configs/linux-egl
                  $(LIBDRM_LIB)
 Index: mesa/configs/linux-indirect
 ===================================================================
---- mesa.orig/configs/linux-indirect	2011-02-15 15:14:26.000000000 +1100
-+++ mesa/configs/linux-indirect	2011-02-16 10:20:03.232410237 +1100
+--- mesa.orig/configs/linux-indirect	2011-04-11 11:17:43.742243890 +1000
++++ mesa/configs/linux-indirect	2011-04-11 11:18:11.473257629 +1000
 @@ -42,7 +42,8 @@
  # Library/program dependencies
  EXTRA_LIB_PATH=-L/usr/X11R6/lib
@@ -142,8 +142,8 @@ Index: mesa/configs/linux-indirect
  
 Index: mesa/configure.ac
 ===================================================================
---- mesa.orig/configure.ac	2011-02-16 10:18:03.000000000 +1100
-+++ mesa/configure.ac	2011-02-16 10:23:12.322687577 +1100
+--- mesa.orig/configure.ac	2011-04-11 11:18:08.543150386 +1000
++++ mesa/configure.ac	2011-04-11 11:20:12.507714770 +1000
 @@ -801,6 +801,34 @@
  AC_SUBST([GLESv2_PC_LIB_PRIV])
  
@@ -158,7 +158,7 @@ Index: mesa/configure.ac
 +      DRICORE_GLSL_LIBS='$(TOP)/$(LIB_DIR)/libglsl.so'
 +      DRICORE_LIBS='$(TOP)/$(LIB_DIR)/libdricore.so'
 +      DRICORE_LIB_DEPS='-L$(TOP)/$(LIB_DIR) -Wl,-R$(DRI_DRIVER_INSTALL_DIR) -lglsl'
-+      DRI_LIB_DEPS='-L$(TOP)/$(LIB_DIR) -Wl,-R$(DRI_DRIVER_INSTALL_DIR) -ldricore -lglsl'
++      DRI_LIB_DEPS='-L$(TOP)/$(LIB_DIR) -Wl,--rpath=$(DRI_DRIVER_SEARCH_DIR) -ldricore -lglsl'
 +      DRI_CFLAGS='$(filter-out -fvisibility=hidden,$(CFLAGS)) -DUSE_DRICORE'
 +      DRI_CXXFLAGS='$(filter-out -fvisibility=hidden,$(CXXFLAGS)) -DUSE_DRICORE'
 +      MESA_MODULES='$(DRICORE_LIBS) $(DRICORE_GLSL_LIBS)'
@@ -192,8 +192,8 @@ Index: mesa/configure.ac
  AC_SUBST([EXPAT_INCLUDES])
 Index: mesa/src/glsl/Makefile
 ===================================================================
---- mesa.orig/src/glsl/Makefile	2011-02-15 16:11:30.000000000 +1100
-+++ mesa/src/glsl/Makefile	2011-02-16 10:20:03.232410237 +1100
+--- mesa.orig/src/glsl/Makefile	2011-04-11 11:17:43.652240611 +1000
++++ mesa/src/glsl/Makefile	2011-04-11 11:18:11.473257629 +1000
 @@ -112,6 +112,9 @@
  	$(C_SOURCES:.c=.o) \
  	$(CXX_SOURCES:.cpp=.o)
@@ -237,8 +237,8 @@ Index: mesa/src/glsl/Makefile
  
 Index: mesa/src/mesa/Makefile
 ===================================================================
---- mesa.orig/src/mesa/Makefile	2011-02-15 16:11:30.000000000 +1100
-+++ mesa/src/mesa/Makefile	2011-02-16 10:20:03.232410237 +1100
+--- mesa.orig/src/mesa/Makefile	2011-04-11 11:17:43.592238416 +1000
++++ mesa/src/mesa/Makefile	2011-04-11 11:18:11.473257629 +1000
 @@ -15,6 +15,7 @@
  MESA_OBJ_DIR := .
  ES1_OBJ_DIR := objs-es1
@@ -383,8 +383,8 @@ Index: mesa/src/mesa/Makefile
  	-rm -f depend depend.bak libmesa.a libmesagallium.a
 Index: mesa/src/mesa/drivers/dri/Makefile.template
 ===================================================================
---- mesa.orig/src/mesa/drivers/dri/Makefile.template	2011-02-15 15:14:27.254277714 +1100
-+++ mesa/src/mesa/drivers/dri/Makefile.template	2011-02-16 10:20:03.232410237 +1100
+--- mesa.orig/src/mesa/drivers/dri/Makefile.template	2011-04-11 11:17:43.622239515 +1000
++++ mesa/src/mesa/drivers/dri/Makefile.template	2011-04-11 11:18:11.473257629 +1000
 @@ -1,7 +1,5 @@
  # -*-makefile-*-
  
@@ -425,8 +425,8 @@ Index: mesa/src/mesa/drivers/dri/Makefile.template
  	mv -f $@.tmp $@
 Index: mesa/src/mesa/x86/read_rgba_span_x86.S
 ===================================================================
---- mesa.orig/src/mesa/x86/read_rgba_span_x86.S	2011-02-03 11:33:56.000000000 +1100
-+++ mesa/src/mesa/x86/read_rgba_span_x86.S	2011-02-16 10:20:03.232410237 +1100
+--- mesa.orig/src/mesa/x86/read_rgba_span_x86.S	2011-04-11 11:17:43.602238784 +1000
++++ mesa/src/mesa/x86/read_rgba_span_x86.S	2011-04-11 11:18:11.473257629 +1000
 @@ -77,7 +77,9 @@
   */
  
