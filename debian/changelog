@@ -1,4 +1,10 @@
-mesa (7.10.2-0ubuntu2) natty; urgency=low
+mesa (7.10.2-0ubuntu1+multiarch.2) natty; urgency=low
+
+  * No-change rebuild to pick up a build for armel
+
+ -- Steve Langasek <steve.langasek@ubuntu.com>  Mon, 11 Apr 2011 10:25:34 -0700
+
+mesa (7.10.2-0ubuntu1+multiarch.1) natty; urgency=low
 
   * Merge from natty.
 
