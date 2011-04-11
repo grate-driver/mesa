@@ -13,4 +13,3 @@
 111_export_searchdirs_in_dripc.diff
 112_fix_segfault_on_nvAF.diff
 113_fix_tls.diff
-114_update_for_2.4.24_nouveau_headers.diff
