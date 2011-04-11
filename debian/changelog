@@ -8,6 +8,7 @@ mesa (7.10.2-0ubuntu1) UNRELEASED; urgency=low
 
   [ Christopher James Halse Rogers ]
   * New upstream bugfix release.
+    - Contains fix for KWin crash when enabling effects on r600 (LP: #738687)
   * debian/patches/105_use_shared_libdricore.patch: Fix rpath for i386
     libraries installed on amd64 via ia32-libs. (LP: #755720)
 
