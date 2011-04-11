@@ -1,4 +1,4 @@
-mesa (7.10.2-0ubuntu1) UNRELEASED; urgency=low
+mesa (7.10.2-0ubuntu1) natty; urgency=low
 
   [ Steve Langasek ]
   * Fix alternatives removal on removal of libgl1-mesa-{swx11,glx}: the
