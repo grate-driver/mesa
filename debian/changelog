@@ -1,3 +1,12 @@
+mesa (7.10.2-0ubuntu2) natty; urgency=low
+
+  [ Felix Geyer ]
+  * Add 114_intel_dri_renderer_string.diff: Re-add "GEM" to the dri renderer
+    string of the intel driver. Removing it breaks KDE's detection for the blur
+    effect. (LP: #753370)
+
+ -- Timo Aaltonen <tjaalton@ubuntu.com>  Tue, 19 Apr 2011 12:38:25 +0300
+
 mesa (7.10.2-0ubuntu1+multiarch.2) natty; urgency=low
 
   * No-change rebuild to pick up a build for armel
