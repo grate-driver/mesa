@@ -1,6 +1,11 @@
 mesa (7.10.2-2) UNRELEASED; urgency=low
 
+  [ Cyril Brulebois ]
   * Merge upstream 7.10 branch up to b8c6362389.
+
+  [ Sven Joachim ]
+  * Avoid installing the nouveau_vieux driver into libgl1-mesa-dri
+    (Closes: #622222).
 
  -- Cyril Brulebois <kibi@debian.org>  Mon, 02 May 2011 00:28:01 +0200
 
