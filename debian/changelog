@@ -2,6 +2,9 @@ mesa (7.10.2-2) UNRELEASED; urgency=low
 
   [ Cyril Brulebois ]
   * Merge upstream 7.10 branch up to b8c6362389.
+  * Get rid of leading article in short descriptions, taking care of this
+    lintian tag for almost all binary packages:
+    - description-synopsis-starts-with-article
 
   [ Sven Joachim ]
   * Avoid installing the nouveau_vieux driver into libgl1-mesa-dri
