@@ -5,6 +5,7 @@ mesa (7.10.2-2) UNRELEASED; urgency=low
   * Get rid of leading article in short descriptions, taking care of this
     lintian tag for almost all binary packages:
     - description-synopsis-starts-with-article
+  * Get rid of libgl1-mesa-dri-i686, already commented out in control file.
 
   [ Sven Joachim ]
   * Avoid installing the nouveau_vieux driver into libgl1-mesa-dri
