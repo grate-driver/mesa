@@ -215,9 +215,6 @@ $(QUILT_STAMPFN): $(STAMP_DIR)/stamp
 build: build-stamp
 
 build-stamp: $(BUILD_STAMPS)
-# Remove gallium drivers which replace existing classic drivers.
-# Intel gallium is significantly behind the classic mesa drivers...
-	rm -f build/dri/lib/gallium/i915_dri.so
 	>$@
 
 $(STAMP)-build-%: configure

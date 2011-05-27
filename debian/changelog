@@ -35,9 +35,14 @@ mesa (7.10.2-2ubuntu1) UNRELEASED; urgency=low
       to fix some leaks in DRI2 screen creation failure paths.
     - 114_intel_dri_renderer_string.diff: Re-add "GEM" to the dri renderer
       string of the intel driver. (LP 753370)
-    - 113_fix_tls.diff: Fix crashes in unrelated code due to TLS usage.  
+    - 113_fix_tls.diff: Fix crashes in unrelated code due to TLS usage.
+  * debian/rules:
+  * debian/libgl1-dri-experimental.install:
+    - Ship i915g in the experimental package.  We're already building it,
+      and it's apparently now comparable to i915c.
+    - 
 
- -- Christopher James Halse Rogers <raof@ubuntu.com>  Thu, 26 May 2011 14:32:21 +1000
+ --
 
 mesa (7.10.2-2) unstable; urgency=low
 
