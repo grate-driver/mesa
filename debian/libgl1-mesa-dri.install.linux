@@ -6,5 +6,6 @@ build/dri/lib/libdricore.so usr/lib/dri
 # This part is Linux-specific:
 build/dri/lib/gallium/r300_dri.so usr/lib/dri
 build/dri/lib/gallium/r600_dri.so usr/lib/dri
+build/dri/lib/gallium/nouveau_dri.so usr/lib/dri
 build/dri/lib/r300_dri.so usr/lib/dri-alternates
 build/dri/lib/r600_dri.so usr/lib/dri-alternates

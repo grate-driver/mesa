@@ -432,8 +432,13 @@ Depends:
  ${misc:Depends}
 Suggests: libglide3
 Conflicts: xlibmesa-dri (<< 1:7.0.0)
-Replaces: xlibmesa-dri (<< 1:7.0.0)
-Breaks: xserver-xorg-core (<< 2:1.5), libgl1-mesa-glx (<< 7.2)
+Replaces: 
+ xlibmesa-dri (<< 1:7.0.0),
+ libgl1-mesa-dri-experimental (<< 7.10.2-2ubuntu1)
+Breaks: 
+ xserver-xorg-core (<< 2:1.5),
+ libgl1-mesa-glx (<< 7.2),
+ libgl1-mesa-dri-experimental (<< 7.10.2-2ubuntu1)
 Description: free implementation of the OpenGL API -- DRI modules
  This version of Mesa provides GLX and DRI capabilities: it is capable of
  both direct and indirect rendering.  For direct rendering, it can use DRI
