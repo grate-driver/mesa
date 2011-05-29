@@ -882,6 +882,11 @@ decompress_with_blit(struct gl_context * ctx, GLenum target, GLint level,
       return;
    }
 
+   /* Disable conditional rendering. */
+   if (st->render_condition) {
+      pipe->render_condition(pipe, NULL, 0);
+   }
+
    /* blit/render/decompress */
    util_blit_pixels_tex(st->blit,
                         src_view,      /* pipe_resource (src) */
@@ -892,6 +897,12 @@ decompress_with_blit(struct gl_context * ctx, GLenum target, GLint level,
                         width, height,    /* dst x1, y1 */
                         0.0,              /* z */
                         PIPE_TEX_MIPFILTER_NEAREST);
+
+   /* Restore conditional rendering state. */
+   if (st->render_condition) {
+      pipe->render_condition(pipe, st->render_condition,
+                             st->condition_mode);
+   }
 
    /* map the dst_surface so we can read from it */
    tex_xfer = pipe_get_transfer(st_context(ctx)->pipe,
