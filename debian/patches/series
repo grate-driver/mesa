@@ -15,3 +15,4 @@
 112_fix_segfault_on_nvAF.diff
 113_fix_tls.diff
 114_intel_dri_renderer_string.diff
+115_llvm_dynamic_linking.diff

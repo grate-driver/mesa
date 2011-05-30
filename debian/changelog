@@ -47,7 +47,7 @@ mesa (7.10.2-2ubuntu1) UNRELEASED; urgency=low
       is no longer adamant that bugs should be ignored.  Try installing it by
       default to get a better Unity experience OOTB. (LP: #759562)
 
- --
+ -- Christopher James Halse Rogers <raof@ubuntu.com>  Fri, 27 May 2011 18:00:29 +1000
 
 mesa (7.10.2-2) unstable; urgency=low
 

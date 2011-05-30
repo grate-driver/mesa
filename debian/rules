@@ -68,7 +68,7 @@ ifeq ($(DEB_HOST_ARCH_OS), hurd)
 	confflags_GALLIUM = --disable-gallium
 else
 	EGL_DISPLAYS = x11
-	GALLIUM_DRIVERS = swrast
+	GALLIUM_DRIVERS = swrast llvm
 	GALLIUM_STATE_TRACKERS = egl,glx,dri,vega
 
   ifeq ($(DEB_HOST_ARCH_OS), linux)
@@ -224,7 +224,7 @@ $(STAMP)-build-%: configure
 	find $(CURDIR)/* -maxdepth 0 -not -path '$(DEB_BUILD_DIR)*' | \
 		xargs cp -rlf -t $(DEB_BUILD_DIR)/$*
 	cd $(DEB_BUILD_DIR)/$* && \
-	../../configure --prefix=/usr --mandir=\$${prefix}/share/man \
+	LLVM_CONFIG=/usr/bin/llvm-config-2.9 ../../configure --prefix=/usr --mandir=\$${prefix}/share/man \
 	             --infodir=\$${prefix}/share/info --sysconfdir=/etc \
 	             --localstatedir=/var $(confflags) $(confflags-$*)
 	cd $(DEB_BUILD_DIR)/$* && $(MAKE)
