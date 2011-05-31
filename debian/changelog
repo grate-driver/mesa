@@ -54,6 +54,17 @@ mesa (7.10.2-2ubuntu1) UNRELEASED; urgency=low
   * debian/rules:
   * debian/libgl1-mesa-dri-experimental.install:
     - Install llvmpipe software renderer in libgl1-mesa-dri-experimental
+  * Merge multiarch support branch:
+    - Declare Breaks: against old versions of xserver-xorg-core and
+      libgl1-mesa-glx that will look for DRI modules only in /usr/lib/dri.
+    - Fix up the maintainer scripts to transition to per-architecture
+      alternatives for ld.so configs.
+    - Conflict with nvidia-current, fglrx due to the migration of alternatives
+      for the ld.so.conf snippets.  This should eventually be a << conflicts,
+      but only once there are packages available that use the new alternative.
+    - Use multiarch dirs for our dri module search path, with a fallback to
+      /usr/lib/dri.
+    - Use the right path for dh_shlibdeps.  
 
  -- Christopher James Halse Rogers <raof@ubuntu.com>  Tue, 31 May 2011 17:11:53 +1000
 

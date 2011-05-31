@@ -16,6 +16,7 @@ ifneq (,$(filter parallel=%,$(DEB_BUILD_OPTIONS)))
 	MAKEFLAGS += -j$(NUMJOBS)
 endif
 
+DEB_HOST_MULTIARCH ?= $(shell dpkg-architecture -qDEB_HOST_MULTIARCH)
 DEB_BUILD_ARCH     ?= $(shell dpkg-architecture -qDEB_BUILD_ARCH)
 DEB_HOST_ARCH      ?= $(shell dpkg-architecture -qDEB_HOST_ARCH)
 DEB_HOST_ARCH_OS   ?= $(shell dpkg-architecture -qDEB_HOST_ARCH_OS)
@@ -102,8 +103,7 @@ endif
 confflags-dri = \
 	--with-driver=dri \
 	--with-dri-drivers="$(DRI_DRIVERS)" \
-	--with-dri-driverdir=/usr/lib/dri \
-	--with-dri-searchpath='\$$$${ORIGIN}/dri' \
+	--with-dri-driverdir=/usr/lib/$(DEB_HOST_MULTIARCH)/dri \
 	--enable-glx-tls \
 	--enable-shared-dricore \
 	$(confflags_DIRECT_RENDERING) \
@@ -185,17 +185,14 @@ confflags-swx11+glu-i386-i686 = \
 	--disable-glut \
 	--disable-egl \
 	--disable-glw \
-	--libdir=/usr/lib/i686/cmov \
+	--libdir=/usr/lib/$(DEB_HOST_MULTIARCH)/i686/cmov \
 	CFLAGS="$(CFLAGS) -march=i686"
 
-# Add /usr/lib32/dri/ on 32 bit systems so that this path is used
-# for 32 bit compatibility on 64 bit systems
-#
 # Add /usr/lib/dri-alternates for classic fallback for gallium drivers
-ifeq ($(DEB_HOST_ARCH),i386)
-	confflags-dri += --with-dri-searchpath=/usr/lib/dri:/usr/lib/dri-alternates:/usr/lib32/dri:/usr/lib32/dri-alternates
+ifeq ($(DEB_BUILD_ARCH),i386)
+	confflags-dri += --with-dri-searchpath=/usr/lib/$(DEB_HOST_MULTIARCH)/dri:/usr/lib/dri:/usr/lib/$(DEB_HOST_MULTIARCH)/dri-alternates:/usr/lib/dri-alternates:/usr/lib32/dri:/usr/lib32/dri-alternates
 else
-	confflags-dri += --with-dri-searchpath=/usr/lib/dri:/usr/lib/dri-alternates
+	confflags-dri += --with-dri-searchpath=/usr/lib/$(DEB_HOST_MULTIARCH)/dri:/usr/lib/dri:/usr/lib/$(DEB_HOST_MULTIARCH)/dri-alternates:/usr/lib/dri-alternates
 endif
 
 configure: $(QUILT_STAMPFN) configure.ac
@@ -226,6 +223,7 @@ $(STAMP)-build-%: configure
 	cd $(DEB_BUILD_DIR)/$* && \
 	LLVM_CONFIG=/usr/bin/llvm-config-2.9 ../../configure --prefix=/usr --mandir=\$${prefix}/share/man \
 	             --infodir=\$${prefix}/share/info --sysconfdir=/etc \
+	             --libdir=\$${prefix}/lib/$(DEB_HOST_MULTIARCH) \
 	             --localstatedir=/var $(confflags) $(confflags-$*)
 	cd $(DEB_BUILD_DIR)/$* && $(MAKE)
 	>$@
@@ -241,8 +239,24 @@ install: build
 	done
 	$(MAKE) -C $(DEB_BUILD_DIR)/dri DESTDIR=$(CURDIR)/debian/tmp/dri install
 	# Rename swrastg_dri to swrast_dri so it can be used.
-	mv $(DEB_BUILD_DIR)/dri/lib/gallium/swrastg_dri.so \
-		$(DEB_BUILD_DIR)/dri/lib/gallium/swrast_dri.so
+	mv $(DEB_BUILD_DIR)/dri/$(DEB_HOST_MULTIARCH)/gallium/swrastg_dri.so \
+		$(DEB_BUILD_DIR)/dri/$(DEB_HOST_MULTIARCH)/gallium/swrast_dri.so
+	for file in mesa-common-dev.install libopenvg1-mesa.install \
+	            libopenvg1-mesa-dev.install libgles2-mesa.install \
+	            libgles2-mesa-dev.install libgles1-mesa.install \
+	            libgles1-mesa-dev.install libgl1-mesa-glx.install \
+	            libgl1-mesa-glx-i686.install libgl1-mesa-dri.install \
+	            libgl1-mesa-dri.install.linux libegl1-mesa.install \
+	            libgl1-mesa-dri-experimental.install \
+	            libegl1-mesa-drivers.install libegl1-mesa-dev.install \
+	            libgl1-mesa-dev.install libgl1-mesa-swx11-dev.install \
+	            libgl1-mesa-swx11.install libgl1-mesa-glx.postinst \
+	            libgl1-mesa-glx.prerm libgl1-mesa-swx11.postinst \
+	            libgl1-mesa-swx11.prerm; \
+	do \
+		sed -e"s,\$${DEB_HOST_MULTIARCH},$(DEB_HOST_MULTIARCH),g" \
+			debian/$${file}.in > debian/$$file; \
+	done
 
 clean: unpatch
 	dh_testdir
@@ -277,7 +291,7 @@ binary-arch: install
 	# Classic DRI and Gallium DRI are mixed up together here
 	# Remove the whole tree to avoid false-positives in --list-missing, and
 	# install the right files manually.
-	rm -r debian/tmp/dri/usr/lib/dri
+	rm -r debian/tmp/dri/usr/lib/$(DEB_HOST_MULTIARCH)/dri
 
 	# Also get rid of other files which aren't installed. Do not
 	# use -f to ensure we notice disappearing files:
@@ -286,22 +300,14 @@ binary-arch: install
 	dh_install -s --fail-missing
 
 	# Create an ld.so.conf which says where to find libGL from Mesa
-	echo "/usr/lib/mesa" \
-	> $(CURDIR)/debian/libgl1-mesa-glx/usr/lib/mesa/ld.so.conf
-	echo "/usr/lib/mesa" \
-	> $(CURDIR)/debian/libgl1-mesa-swx11/usr/lib/mesa/ld.so.conf
-
-ifeq ($(DEB_HOST_ARCH),amd64)
-	# Add the path to 32bit libGL from Mesa (on 64 bit)
-	echo "/usr/lib32/mesa" \
-	>> $(CURDIR)/debian/libgl1-mesa-glx/usr/lib/mesa/ld.so.conf
-	echo "/usr/lib32/mesa" \
-	>> $(CURDIR)/debian/libgl1-mesa-swx11/usr/lib/mesa/ld.so.conf
-endif
+	echo "/usr/lib/$(DEB_HOST_MULTIARCH)/mesa" \
+	> $(CURDIR)/debian/libgl1-mesa-glx/usr/lib/$(DEB_HOST_MULTIARCH)/mesa/ld.so.conf
+	echo "/usr/lib/$(DEB_HOST_MULTIARCH)/mesa" \
+	> $(CURDIR)/debian/libgl1-mesa-swx11/usr/lib/$(DEB_HOST_MULTIARCH)/mesa/ld.so.conf
 
 	# Empty directory for the alternative
-	mkdir -p $(CURDIR)/debian/libgl1-mesa-glx/usr/lib/xorg/x11-extra-modules
-	mkdir -p $(CURDIR)/debian/libgl1-mesa-swx11/usr/lib/xorg/x11-extra-modules
+	mkdir -p $(CURDIR)/debian/libgl1-mesa-glx/usr/lib/$(DEB_HOST_MULTIARCH)/xorg/x11-extra-modules
+	mkdir -p $(CURDIR)/debian/libgl1-mesa-swx11/usr/lib/$(DEB_HOST_MULTIARCH)/xorg/x11-extra-modules
 
 	dh_installman -s
 	dh_lintian -s
@@ -344,7 +350,7 @@ else
 	dh_makeshlibs -s -- -c1
 endif
 	dh_installdeb -s
-	dh_shlibdeps -s -l/usr/lib/mesa
+	dh_shlibdeps -s -l/usr/lib/$(DEB_HOST_MULTIARCH)/mesa
 	dh_gencontrol -s
 	dh_md5sums -s
 	dh_builddeb -s -- -Zlzma
