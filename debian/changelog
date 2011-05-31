@@ -46,8 +46,13 @@ mesa (7.10.2-2ubuntu1) UNRELEASED; urgency=low
     - Move nouveau gallium driver from -dri-experimental to -dri.  Upstream
       is no longer adamant that bugs should be ignored.  Try installing it by
       default to get a better Unity experience OOTB. (LP: #759562)
+  * debian/control:
+  * debian/rules:
+    - Enable LLVM support.
+  * debian/patches/115_llvm_dynamic_linking.diff
+    - Dynamically link DRI drivers to libllvm.  Saves ~6MiB per DRI driver.
 
- -- Christopher James Halse Rogers <raof@ubuntu.com>  Fri, 27 May 2011 18:00:29 +1000
+ -- Christopher James Halse Rogers <raof@ubuntu.com>  Tue, 31 May 2011 17:11:53 +1000
 
 mesa (7.10.2-2) unstable; urgency=low
 
