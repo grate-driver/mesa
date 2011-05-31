@@ -1,3 +1,9 @@
+mesa (7.10.2-3) UNRELEASED; urgency=low
+
+  * Merge upstream 7.10 branch up to eaadbacb5c.
+
+ -- Cyril Brulebois <kibi@debian.org>  Tue, 31 May 2011 16:25:11 +0200
+
 mesa (7.10.2-2) unstable; urgency=low
 
   [ Cyril Brulebois ]
