@@ -240,6 +240,9 @@ install: build
 		$(MAKE) -C $(DEB_BUILD_DIR)/$$config DESTDIR=$(CURDIR)/debian/tmp install; \
 	done
 	$(MAKE) -C $(DEB_BUILD_DIR)/dri DESTDIR=$(CURDIR)/debian/tmp/dri install
+	# Rename swrastg_dri to swrast_dri so it can be used.
+	mv $(DEB_BUILD_DIR)/dri/lib/gallium/swrastg_dri.so \
+		$(DEB_BUILD_DIR)/dri/lib/gallium/swrast_dri.so
 
 clean: unpatch
 	dh_testdir

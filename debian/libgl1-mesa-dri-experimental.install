@@ -1,1 +1,2 @@
 build/dri/lib/gallium/i915_dri.so usr/lib/dri-alternates
+build/dri/lib/gallium/swrast_dri.so usr/lib/dri-alternates
