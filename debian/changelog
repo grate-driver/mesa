@@ -47,6 +47,10 @@ mesa (7.10.2-2ubuntu1) UNRELEASED; urgency=low
     - Move nouveau gallium driver from -dri-experimental to -dri.  Upstream
       is no longer adamant that bugs should be ignored.  Try installing it by
       default to get a better Unity experience OOTB. (LP: #759562)
+  * debian/libgl1-mesa-dri-experimental.install.in:
+  * debian/libgl1-mesa-dri.install.linux.in:
+    - Move r300/r600 classic drivers to -experimental.  They're not supported.
+      Shave another ~1MB off the CD!
   * debian/control:
   * debian/rules:
     - Enable LLVM support.
