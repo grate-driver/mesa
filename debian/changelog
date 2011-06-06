@@ -1,5 +1,6 @@
 mesa (7.10.2-2ubuntu1) UNRELEASED; urgency=low
 
+  * Merge upstream 7.10 branch up to a10cba3a.
   * Merge with Debian unstable.  Remaining Ubuntu changes:
    - debian/control
       + Drop lesstif-dev from Build-Depends; it's in Universe.
@@ -66,7 +67,7 @@ mesa (7.10.2-2ubuntu1) UNRELEASED; urgency=low
       /usr/lib/dri.
     - Use the right path for dh_shlibdeps.  
 
- -- Christopher James Halse Rogers <raof@ubuntu.com>  Tue, 31 May 2011 17:11:53 +1000
+ -- Christopher James Halse Rogers <raof@ubuntu.com>  Mon, 06 Jun 2011 16:51:56 +1000
 
 mesa (7.10.2-2) unstable; urgency=low
 
