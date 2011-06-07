@@ -249,10 +249,10 @@ install: build
 	            libgl1-mesa-dri.install.linux libegl1-mesa.install \
 	            libgl1-mesa-dri-experimental.install \
 	            libegl1-mesa-drivers.install libegl1-mesa-dev.install \
-	            libgl1-mesa-dev.install libgl1-mesa-swx11-dev.install \
-	            libgl1-mesa-swx11.install libgl1-mesa-glx.postinst \
-	            libgl1-mesa-glx.prerm libgl1-mesa-swx11.postinst \
-	            libgl1-mesa-swx11.prerm; \
+	            libgl1-mesa-dev.install libgl1-mesa-dev.links \
+		    libgl1-mesa-swx11-dev.install libgl1-mesa-swx11.install \
+	   	    libgl1-mesa-glx.postinst libgl1-mesa-glx.prerm \
+		    libgl1-mesa-swx11.postinst libgl1-mesa-swx11.prerm; \
 	do \
 		sed -e"s,\$${DEB_HOST_MULTIARCH},$(DEB_HOST_MULTIARCH),g" \
 			debian/$${file}.in > debian/$$file; \
