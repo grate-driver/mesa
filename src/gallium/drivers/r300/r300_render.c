@@ -566,7 +566,12 @@ static void r300_draw_range_elements(struct pipe_context* pipe,
 				minIndex, maxIndex, mode, start, count);
     } else {
         do {
-            short_count = MIN2(count, 65534);
+            /* The maximum must be divisible by 4 and 3,
+             * so that quad and triangle lists are split correctly.
+             *
+             * Strips, loops, and fans won't work. */
+            short_count = MIN2(count, 65532);
+
             r300_emit_draw_elements(r300, indexBuffer, indexSize,
                                      minIndex, maxIndex,
                                      mode, start, short_count);
@@ -614,7 +619,11 @@ static void r300_draw_arrays(struct pipe_context* pipe, unsigned mode,
             r300_emit_draw_arrays(r300, mode, count);
         } else {
             do {
-                short_count = MIN2(count, 65535);
+                /* The maximum must be divisible by 4 and 3,
+                 * so that quad and triangle lists are split correctly.
+                 *
+                 * Strips, loops, and fans won't work. */
+                short_count = MIN2(count, 65532);
                 r300_emit_draw_arrays(r300, mode, short_count);
 
                 start += short_count;
