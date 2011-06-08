@@ -226,6 +226,7 @@ MAIN_FILES = \
 	$(DIRECTORY)/include/GL/vms_x_fix.h				\
 	$(DIRECTORY)/include/GL/wglext.h				\
 	$(DIRECTORY)/include/GL/wmesa.h					\
+	$(DIRECTORY)/include/c99/*.h					\
 	$(DIRECTORY)/src/glsl/Makefile					\
 	$(DIRECTORY)/src/glsl/Makefile.template				\
 	$(DIRECTORY)/src/glsl/SConscript				\
