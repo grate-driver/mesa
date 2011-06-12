@@ -1,3 +1,10 @@
+mesa (7.10.2-4) UNRELEASED; urgency=low
+
+  [ Steve Langasek ]
+  * Build for multiarch.
+
+ -- Julien Cristau <jcristau@debian.org>  Sun, 12 Jun 2011 17:49:06 +0200
+
 mesa (7.10.2-3) unstable; urgency=low
 
   * Merge upstream 7.10 branch up to eaadbacb5c.
