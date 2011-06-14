@@ -1,6 +1,6 @@
-mesa (7.10.2-2ubuntu1) UNRELEASED; urgency=low
+mesa (7.10.3-0ubuntu1) UNRELEASED; urgency=low
 
-  * Merge upstream 7.10 branch up to a10cba3a.
+  * New upstream 7.10.3 bugfix release.
   * Merge with Debian unstable.  Remaining Ubuntu changes:
    - debian/control
       + Drop lesstif-dev from Build-Depends; it's in Universe.
