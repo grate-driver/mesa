@@ -1,4 +1,4 @@
-mesa (7.10.2-4) UNRELEASED; urgency=low
+mesa (7.10.2-4) unstable; urgency=low
 
   [ Steve Langasek ]
   * Build for multiarch.
@@ -12,7 +12,7 @@ mesa (7.10.2-4) UNRELEASED; urgency=low
   * Update Uploaders list. Thanks, David and Brice!
   * Wrap Build-Depends.
 
- -- Julien Cristau <jcristau@debian.org>  Sun, 12 Jun 2011 17:49:06 +0200
+ -- Cyril Brulebois <kibi@debian.org>  Tue, 14 Jun 2011 12:19:33 +0200
 
 mesa (7.10.2-3) unstable; urgency=low
 
