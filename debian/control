@@ -14,6 +14,8 @@ Build-Depends: debhelper (>= 8.1.2ubuntu2), quilt (>= 0.40), pkg-config,
  libx11-xcb-dev, libxcb-dri2-0-dev, libxcb-xfixes0-dev, python-libxml2,
  libudev-dev [linux-any],
  llvm-2.9-dev,
+ flex,
+ bison,
 Vcs-Git: git://git.debian.org/git/pkg-xorg/lib/mesa
 Vcs-Browser: http://git.debian.org/?p=pkg-xorg/lib/mesa.git
 Homepage: http://mesa3d.sourceforge.net/

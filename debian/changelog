@@ -54,6 +54,8 @@ mesa (7.10.3-0ubuntu1) UNRELEASED; urgency=low
   * debian/control:
   * debian/rules:
     - Enable LLVM support.
+  * debian/control:
+    - Add new bison and flex build-depends.
   * debian/patches/115_llvm_dynamic_linking.diff
     - Dynamically link DRI drivers to libllvm.  Saves ~6MiB per DRI driver.
   * debian/rules:
