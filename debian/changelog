@@ -8,6 +8,7 @@ mesa (7.10.2-4) UNRELEASED; urgency=low
     server queries the DRI driver path at build time, which is getting
     changed for multiarch, so the server needs be rebuilt; a binNMU will
     take care of getting the server ready.
+  * Many thanks for multiarch, Steve!
 
  -- Julien Cristau <jcristau@debian.org>  Sun, 12 Jun 2011 17:49:06 +0200
 
