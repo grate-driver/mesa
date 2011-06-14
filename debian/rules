@@ -1,0 +1,344 @@
+#!/usr/bin/make -f
+# debian/rules for the Debian mesa package
+# Copyright © 2006 Thierry Reding <thierry@gilfi.de>
+
+# Uncomment this to turn on verbose mode.
+#export DH_VERBOSE=1
+
+CFLAGS = -Wall -g
+ifneq (,$(filter noopt,$(DEB_BUILD_OPTIONS)))
+	CFLAGS += -O0
+else
+	CFLAGS += -O2
+endif
+ifneq (,$(filter parallel=%,$(DEB_BUILD_OPTIONS)))
+	NUMJOBS = $(patsubst parallel=%,%,$(filter parallel=%,$(DEB_BUILD_OPTIONS)))
+	MAKEFLAGS += -j$(NUMJOBS)
+endif
+
+DEB_HOST_MULTIARCH ?= $(shell dpkg-architecture -qDEB_HOST_MULTIARCH)
+DEB_BUILD_ARCH     ?= $(shell dpkg-architecture -qDEB_BUILD_ARCH)
+DEB_HOST_ARCH      ?= $(shell dpkg-architecture -qDEB_HOST_ARCH)
+DEB_HOST_ARCH_OS   ?= $(shell dpkg-architecture -qDEB_HOST_ARCH_OS)
+DEB_HOST_GNU_TYPE  ?= $(shell dpkg-architecture -qDEB_HOST_GNU_TYPE)
+DEB_BUILD_GNU_TYPE ?= $(shell dpkg-architecture -qDEB_BUILD_GNU_TYPE)
+DEB_HOST_ARCH_CPU  ?= $(shell dpkg-architecture -qDEB_HOST_ARCH_CPU)
+DEB_BUILD_DIR      ?= $(CURDIR)/build
+ifeq ($(DEB_BUILD_GNU_TYPE), $(DEB_HOST_GNU_TYPE))
+	confflags += --build=$(DEB_HOST_GNU_TYPE)
+else
+	confflags += --build=$(DEB_BUILD_GNU_TYPE) --host=$(DEB_HOST_GNU_TYPE)
+endif
+
+# choose which configurations to build
+include debian/scripts/choose-configs
+
+# keep a list of files we don't install (yet), but since it's a bit
+# large, use an external file:
+include debian/not-installed
+
+# build the following configurations by default
+CONFIGS = $(SWX11_GLU_CONFIGS) \
+	  dri \
+	  osmesa \
+	  osmesa-static \
+	  osmesa16 \
+	  osmesa16-static \
+	  osmesa32 \
+	  osmesa32-static
+
+STAMP_DIR = debian/stamp
+STAMP = $(STAMP_DIR)/$(DEB_BUILD_GNU_TYPE)
+BUILD_STAMPS = $(addprefix $(STAMP)-build-, $(CONFIGS))
+
+QUILT_STAMPFN = $(STAMP_DIR)/patch
+include /usr/share/quilt/quilt.make
+
+confflags-common = \
+	--disable-glu \
+	--disable-glut \
+	--disable-glw \
+	CFLAGS="$(CFLAGS)"
+
+DRI_DRIVERS = swrast
+
+# hurd doesn't do direct rendering
+ifeq ($(DEB_HOST_ARCH_OS), hurd)
+	confflags_DIRECT_RENDERING = --disable-driglx-direct
+	confflags_EGL = --disable-egl
+	confflags_GALLIUM = --disable-gallium
+else
+	EGL_DISPLAYS = x11
+	GALLIUM_DRIVERS = swrast
+	GALLIUM_STATE_TRACKERS = egl,glx,dri,vega
+
+  ifeq ($(DEB_HOST_ARCH_OS), linux)
+# Gallium drivers require libdrm-{nouveau,radeon}, only available on Linux
+	GALLIUM_DRIVERS += nouveau radeon r600
+# Although the KMS egl drivers will probably build on kfreebsd & hurd
+# only linux actually has KMS drivers implemented at this point.
+	EGL_DISPLAYS += drm
+# Nouveau requires KMS, so even the classic DRI driver only works on linux
+	DRI_DRIVERS += nouveau
+  endif
+
+  ifneq ($(DEB_HOST_ARCH), s390)
+	DRI_DRIVERS += mach64 mga r128 r200 r600 radeon savage tdfx
+  endif
+  ifeq ($(DEB_HOST_ARCH_CPU), i386)
+	DRI_DRIVERS += i810 i915 i965 sis unichrome
+	GALLIUM_DRIVERS += i915
+  else ifeq ($(DEB_HOST_ARCH_CPU), amd64)
+	DRI_DRIVERS += i915 i965 sis unichrome
+	GALLIUM_DRIVERS += i915
+  endif
+
+	confflags_DIRECT_RENDERING = --enable-driglx-direct
+	confflags_EGL = --with-egl-platforms="$(EGL_DISPLAYS)"
+	confflags_GALLIUM = $(addprefix --enable-gallium-,$(GALLIUM_DRIVERS))
+	confflags_GLES = --enable-gles-overlay --enable-gles1 --enable-gles2
+	confflags_STATE_TRACKERS = --with-state-trackers="$(GALLIUM_STATE_TRACKERS)"
+endif
+
+confflags-dri = \
+	--with-driver=dri \
+	--with-dri-drivers="$(DRI_DRIVERS)" \
+	--with-dri-driverdir=/usr/lib/$(DEB_HOST_MULTIARCH)/dri \
+	--with-dri-searchpath='\$$$${ORIGIN}/dri:/usr/lib/dri' \
+	--enable-glx-tls \
+	$(confflags_DIRECT_RENDERING) \
+	$(confflags_EGL) \
+	$(confflags_GALLIUM) \
+	$(confflags_GLES) \
+	$(confflags_STATE_TRACKERS) \
+	$(confflags-common)
+
+confflags-osmesa = \
+	--disable-egl \
+	--disable-gallium \
+	--with-driver=osmesa \
+	$(confflags-common)
+
+confflags-osmesa-static = \
+	--disable-egl \
+	--disable-gallium \
+	--with-driver=osmesa \
+	--enable-static \
+	$(confflags-common)
+
+confflags-osmesa16 = \
+	--disable-egl \
+	--disable-gallium \
+	--with-driver=osmesa \
+	--with-osmesa-bits=16 \
+	$(confflags-common)
+
+confflags-osmesa16-static = \
+	--disable-egl \
+	--disable-gallium \
+	--with-driver=osmesa \
+	--with-osmesa-bits=16 \
+	--enable-static \
+	$(confflags-common)
+
+confflags-osmesa32 = \
+	--disable-egl \
+	--disable-gallium \
+	--with-driver=osmesa \
+	--with-osmesa-bits=32 \
+	$(confflags-common)
+
+confflags-osmesa32-static = \
+	--disable-egl \
+	--disable-gallium \
+	--with-driver=osmesa \
+	--with-osmesa-bits=32 \
+	--enable-static \
+	$(confflags-common)
+
+confflags-swx11+glu = \
+	--disable-egl \
+	--disable-gallium \
+	--with-driver=xlib \
+	--disable-gl-osmesa \
+	--disable-egl \
+	--disable-glut \
+	--enable-motif \
+	CFLAGS="$(CFLAGS)"
+
+confflags-swx11+glu-static = \
+	--disable-egl \
+	--disable-gallium \
+	--with-driver=xlib \
+	--disable-gl-osmesa \
+	--enable-static \
+	--disable-egl \
+	--disable-glut \
+	--enable-motif \
+	CFLAGS="$(CFLAGS)"
+
+confflags-swx11+glu-i386-i686 = \
+	--disable-egl \
+	--disable-gallium \
+	--with-driver=xlib \
+	--disable-gl-osmesa \
+	--disable-glut \
+	--disable-egl \
+	--enable-motif \
+	--libdir=/usr/lib/$(DEB_HOST_MULTIARCH)/i686/cmov \
+	CFLAGS="$(CFLAGS) -march=i686"
+
+configure: $(QUILT_STAMPFN) configure.ac
+	autoreconf -vfi
+
+# list the configurations that will built
+configs:
+	@echo Building the following configurations: $(CONFIGS)
+
+$(STAMP_DIR)/stamp:
+	dh_testdir
+	mkdir -p $(STAMP_DIR)
+	>$@
+
+$(QUILT_STAMPFN): $(STAMP_DIR)/stamp
+
+build: build-stamp
+
+build-stamp: $(BUILD_STAMPS)
+# Remove gallium drivers which replace existing classic drivers.
+# Intel gallium is significantly behind the classic mesa drivers...
+	rm -f build/dri/lib/$(DEB_HOST_MULTIARCH)/gallium/i915_dri.so
+	>$@
+
+$(STAMP)-build-%: configure
+	dh_testdir
+
+	mkdir -p $(DEB_BUILD_DIR)/$*
+	find $(CURDIR)/* -maxdepth 0 -not -path '$(DEB_BUILD_DIR)*' | \
+		xargs cp -rlf -t $(DEB_BUILD_DIR)/$*
+	cd $(DEB_BUILD_DIR)/$* && \
+	../../configure --prefix=/usr --mandir=\$${prefix}/share/man \
+	             --infodir=\$${prefix}/share/info --sysconfdir=/etc \
+	             --libdir=\$${prefix}/lib/$(DEB_HOST_MULTIARCH) \
+	             --localstatedir=/var $(confflags) $(confflags-$*)
+	cd $(DEB_BUILD_DIR)/$* && $(MAKE)
+	>$@
+
+install: build
+	# Add here commands to install the package into debian/tmp
+	dh_testdir
+	dh_testroot
+	dh_prep
+	dh_installdirs
+	set -e; for config in $(filter-out dri, $(CONFIGS)); do \
+		$(MAKE) -C $(DEB_BUILD_DIR)/$$config DESTDIR=$(CURDIR)/debian/tmp install; \
+	done
+	$(MAKE) -C $(DEB_BUILD_DIR)/dri DESTDIR=$(CURDIR)/debian/tmp/dri install
+	for file in mesa-common-dev.install libopenvg1-mesa.install \
+	            libopenvg1-mesa-dev.install libgles2-mesa.install \
+	            libgles2-mesa-dev.install libgles1-mesa.install \
+	            libgles1-mesa-dev.install libgl1-mesa-glx.install \
+	            libgl1-mesa-glx-i686.install libgl1-mesa-dri.install \
+	            libgl1-mesa-dri.install.linux libegl1-mesa.install \
+	            libgl1-mesa-dri-experimental.install \
+	            libegl1-mesa-drivers.install libegl1-mesa-dev.install; \
+	do \
+		sed -e"s,\$${DEB_HOST_MULTIARCH},$(DEB_HOST_MULTIARCH),g" \
+			debian/$${file}.in > debian/$$file; \
+	done
+
+clean: unpatch
+	dh_testdir
+	dh_testroot
+	rm -rf .pc
+
+	rm -f config.cache config.log config.status
+	rm -f */config.cache */config.log */config.status
+	rm -f conftest* */conftest*
+	rm -rf autom4te.cache */autom4te.cache
+	rm -rf build
+	rm -rf configure config.guess config.sub config.h.in
+	rm -rf $$(find -name Makefile.in)
+	rm -rf aclocal.m4 missing depcomp install-sh ltmain.sh
+	rm -rf $(STAMP_DIR)
+
+	dh_clean
+
+# Build architecture-independent files here.
+binary-indep: install
+
+
+# Build architecture-dependent files here.
+binary-arch: install
+	dh_testdir
+	dh_testroot
+	dh_installchangelogs -s
+	dh_installchangelogs -pmesa-common-dev
+	dh_installdocs -s
+	dh_installexamples -s
+
+	# Classic DRI and Gallium DRI are mixed up together here
+	# Remove the whole tree to avoid false-positives in --list-missing, and
+	# install the right files manually.
+	rm -r debian/tmp/dri/usr/lib/$(DEB_HOST_MULTIARCH)/dri
+
+	# Move nouveau_vieux alongside nouveau to install in dri-experimental package
+ifneq (,$(filter nouveau,$(DRI_DRIVERS)))
+	mv build/dri/$(DEB_HOST_MULTIARCH)/nouveau_vieux_dri.so build/dri/$(DEB_HOST_MULTIARCH)/gallium/
+endif
+
+	# Also get rid of other files which aren't installed. Do not
+	# use -f to ensure we notice disappearing files:
+	set -e; for file in $(NOT_INSTALLED); do rm debian/tmp/$$file; done
+
+	dh_install -s --fail-missing
+	dh_installman -s
+	dh_lintian -s
+	dh_link -s
+	# Install bug control and script:
+	set -e; for p in `dh_listpackages -s`; do \
+		install -d debian/$$p/usr/share/bug/$$p && \
+		install -m 644 debian/local/control debian/$$p/usr/share/bug/$$p && \
+		install -m 755 debian/local/script  debian/$$p/usr/share/bug/$$p; \
+	done
+	dh_strip -plibgl1-mesa-swx11 --dbg-package=libgl1-mesa-swx11-dbg
+	dh_strip -plibgl1-mesa-glx --dbg-package=libgl1-mesa-glx-dbg
+	dh_strip -plibgl1-mesa-dri --dbg-package=libgl1-mesa-dri-dbg
+	dh_strip -plibgl1-mesa-dri-experimental --dbg-package=libgl1-mesa-dri-experimental-dbg
+	dh_strip -plibopenvg1-mesa --dbg-package=libopenvg1-mesa-dbg
+	dh_strip -plibegl1-mesa --dbg-package=libegl1-mesa-dbg
+	dh_strip -plibgles1-mesa --dbg-package=libgles1-mesa-dbg
+	dh_strip -plibgles2-mesa --dbg-package=libgles2-mesa-dbg
+	dh_strip -plibegl1-mesa-drivers --dbg-package=libegl1-mesa-drivers-dbg
+	# dh_strip -s --remaining-packages doesn't work with resumed
+	# builds (see changelog for mesa 7.10-1):
+	dh_strip \
+		-plibegl1-mesa-dev \
+		-plibgl1-mesa-dev \
+		-plibgl1-mesa-swx11-dev \
+		-plibgles1-mesa-dev \
+		-plibgles2-mesa-dev \
+		-plibglu1-mesa \
+		-plibglu1-mesa-dev \
+		-plibglw1-mesa \
+		-plibglw1-mesa-dev \
+		-plibopenvg1-mesa-dev \
+		-plibosmesa6 \
+		-plibosmesa6-dev \
+		-pmesa-common-dev
+	dh_compress -s
+	dh_fixperms -s
+ifeq (,$(filter sparc sparc64,$(DEB_HOST_ARCH)))
+	dh_makeshlibs -s -- -c4
+else
+	# Temporarily work around FTBFS on sparc, ignore new symbols:
+	dh_makeshlibs -s -- -c1
+endif
+	dh_installdeb -s
+	dh_shlibdeps -s
+	dh_gencontrol -s
+	dh_md5sums -s
+	dh_builddeb -s
+
+binary: binary-indep binary-arch
+.PHONY: configs build clean binary-indep binary-arch binary install
