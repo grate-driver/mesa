@@ -1,7 +1,7 @@
 Index: mesa/bin/mklib
 ===================================================================
---- mesa.orig/bin/mklib	2011-06-14 17:09:31.449526451 +1000
-+++ mesa/bin/mklib	2011-06-14 17:13:28.608853763 +1000
+--- mesa.orig/bin/mklib	2011-06-14 18:58:41.579402261 +1000
++++ mesa/bin/mklib	2011-06-14 18:59:14.110623277 +1000
 @@ -147,6 +147,7 @@
  NOPREFIX=0
  EXPORTS=""
@@ -58,8 +58,8 @@ Index: mesa/bin/mklib
              # finish up
 Index: mesa/configure.ac
 ===================================================================
---- mesa.orig/configure.ac	2011-06-14 17:13:28.598853367 +1000
-+++ mesa/configure.ac	2011-06-14 17:13:28.618854166 +1000
+--- mesa.orig/configure.ac	2011-06-14 18:59:14.080622091 +1000
++++ mesa/configure.ac	2011-06-14 18:59:14.110623277 +1000
 @@ -806,6 +806,41 @@
  AC_SUBST([GLESv2_LIB_DEPS])
  AC_SUBST([GLESv2_PC_LIB_PRIV])
@@ -104,8 +104,17 @@ Index: mesa/configure.ac
      [AS_HELP_STRING([--enable-shared-dricore],
 Index: mesa/src/gallium/Makefile.template
 ===================================================================
---- mesa.orig/src/gallium/Makefile.template	2011-06-14 17:09:31.519528945 +1000
-+++ mesa/src/gallium/Makefile.template	2011-06-14 17:13:28.618854166 +1000
+--- mesa.orig/src/gallium/Makefile.template	2011-06-14 18:58:41.649404860 +1000
++++ mesa/src/gallium/Makefile.template	2011-06-14 19:34:52.843035156 +1000
+@@ -30,7 +30,7 @@
+ 
+ ##### TARGETS #####
+ 
+-default: depend lib$(LIBNAME).a $(PROGS)
++default:: depend lib$(LIBNAME).a $(PROGS)
+ 
+ lib$(LIBNAME).a: $(OBJECTS) $(EXTRA_OBJECTS) Makefile $(TOP)/src/gallium/Makefile.template
+ 	$(MKLIB) -o $(LIBNAME) -static $(OBJECTS) $(EXTRA_OBJECTS)
 @@ -58,16 +58,16 @@
  ##### RULES #####
  
@@ -129,8 +138,8 @@ Index: mesa/src/gallium/Makefile.template
  sinclude depend
 Index: mesa/src/gallium/auxiliary/Makefile
 ===================================================================
---- mesa.orig/src/gallium/auxiliary/Makefile	2011-06-14 17:09:31.509528592 +1000
-+++ mesa/src/gallium/auxiliary/Makefile	2011-06-14 17:13:28.618854166 +1000
+--- mesa.orig/src/gallium/auxiliary/Makefile	2011-06-14 18:58:41.619403748 +1000
++++ mesa/src/gallium/auxiliary/Makefile	2011-06-14 18:59:14.110623277 +1000
 @@ -205,6 +205,14 @@
  
  include ../Makefile.template
@@ -146,19 +155,16 @@ Index: mesa/src/gallium/auxiliary/Makefile
  
  indices/u_indices_gen.c: indices/u_indices_gen.py
  	$(PYTHON2) $< > $@
-@@ -220,3 +228,7 @@
+@@ -220,3 +228,5 @@
  
  util/u_half.c: util/u_half.py
  	$(PYTHON2) util/u_half.py > $@
 +
-+all: default $(TOP)/$(LIB_DIR)/libgallium.so
-+
-+.DEFAULT_GOAL := all
-\ No newline at end of file
++default:: $(TOP)/$(LIB_DIR)/libgallium.so
 Index: mesa/src/gallium/targets/Makefile.dri
 ===================================================================
---- mesa.orig/src/gallium/targets/Makefile.dri	2011-06-14 17:09:31.559530372 +1000
-+++ mesa/src/gallium/targets/Makefile.dri	2011-06-14 17:13:28.618854166 +1000
+--- mesa.orig/src/gallium/targets/Makefile.dri	2011-06-14 18:58:41.679405971 +1000
++++ mesa/src/gallium/targets/Makefile.dri	2011-06-14 18:59:14.110623277 +1000
 @@ -10,7 +10,6 @@
  endif
  
@@ -180,8 +186,8 @@ Index: mesa/src/gallium/targets/Makefile.dri
  
 Index: mesa/src/mesa/Makefile
 ===================================================================
---- mesa.orig/src/mesa/Makefile	2011-06-14 17:09:31.499528243 +1000
-+++ mesa/src/mesa/Makefile	2011-06-14 17:13:28.618854166 +1000
+--- mesa.orig/src/mesa/Makefile	2011-06-14 18:59:13.850613003 +1000
++++ mesa/src/mesa/Makefile	2011-06-14 18:59:14.110623277 +1000
 @@ -30,6 +30,9 @@
  ES2_GALLIUM_OBJECTS := $(addprefix $(ES2_OBJ_DIR)/, $(MESA_GALLIUM_OBJECTS))
  MESA_GALLIUM_OBJECTS := $(addprefix $(MESA_OBJ_DIR)/, $(MESA_GALLIUM_OBJECTS))
@@ -214,8 +220,8 @@ Index: mesa/src/mesa/Makefile
  driver_subdirs: $(MESA_LIBS) $(DRICORE_LIBS)
 Index: mesa/configs/autoconf.in
 ===================================================================
---- mesa.orig/configs/autoconf.in	2011-06-14 17:14:41.241740406 +1000
-+++ mesa/configs/autoconf.in	2011-06-14 17:14:44.961887427 +1000
+--- mesa.orig/configs/autoconf.in	2011-06-14 18:59:13.850613003 +1000
++++ mesa/configs/autoconf.in	2011-06-14 18:59:14.110623277 +1000
 @@ -110,6 +110,7 @@
  DRICORE_GLSL_LIBS = @DRICORE_GLSL_LIBS@
  DRICORE_LIBS = @DRICORE_LIBS@
