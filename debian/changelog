@@ -10,6 +10,7 @@ mesa (7.10.2-4) UNRELEASED; urgency=low
     take care of getting the server ready.
   * Many thanks for multiarch, Steve!
   * Update Uploaders list. Thanks, David and Brice!
+  * Wrap Build-Depends.
 
  -- Julien Cristau <jcristau@debian.org>  Sun, 12 Jun 2011 17:49:06 +0200
 
