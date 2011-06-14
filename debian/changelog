@@ -10,6 +10,10 @@ mesa (7.11~0-1) UNRELEASED; urgency=low
     PIPE_OS_HURD).
   * debian/libegl1-mesa.install.in: Stop trying to install egl_dri2.so and
     egl_glx.so, since they are now built-in (since c98ea26e16).
+  * debian/libgles{1,2}-mesa.install.in: Stop trying to install
+    st_GLESv{1,2}_CM.so (respectively), which got removed. Quoting the
+    commit message: “Remove GLES overlay. With core mesa doing runtime API
+    checks, GLES overlay is no longer needed.” (12583174c5).
 
  -- Cyril Brulebois <kibi@debian.org>  Wed, 15 Jun 2011 14:10:03 +0200
 
