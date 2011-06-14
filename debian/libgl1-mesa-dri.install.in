@@ -2,3 +2,4 @@
 build/dri/${DEB_HOST_MULTIARCH}/*_dri.so  usr/lib/${DEB_HOST_MULTIARCH}/dri
 build/dri/${DEB_HOST_MULTIARCH}/libglsl.so usr/lib/${DEB_HOST_MULTIARCH}/dri
 build/dri/${DEB_HOST_MULTIARCH}/libdricore.so usr/lib/${DEB_HOST_MULTIARCH}/dri
+build/dri/${DEB_HOST_MULTIARCH}/libgallium.so usr/lib/${DEB_HOST_MULTIARCH}/dri

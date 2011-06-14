@@ -59,6 +59,10 @@ mesa (7.10.2-2ubuntu1) UNRELEASED; urgency=low
   * debian/rules:
   * debian/libgl1-mesa-dri-experimental.install.in:
     - Install llvmpipe software renderer in libgl1-mesa-dri-experimental
+  * debian/patches/116_use_shared_galliumcore.diff:
+  * debian/libgl1-mesa-dri.install.in:
+    - Link gallium DRI drivers against shared gallium routines to save CD
+      space.
   * Merge multiarch support branch:
     - Declare Breaks: against old versions of xserver-xorg-core and
       libgl1-mesa-glx that will look for DRI modules only in /usr/lib/dri.

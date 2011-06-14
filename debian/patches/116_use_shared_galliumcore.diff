@@ -1,0 +1,226 @@
+Index: mesa/bin/mklib
+===================================================================
+--- mesa.orig/bin/mklib	2011-06-14 17:09:31.449526451 +1000
++++ mesa/bin/mklib	2011-06-14 17:13:28.608853763 +1000
+@@ -147,6 +147,7 @@
+ NOPREFIX=0
+ EXPORTS=""
+ ID=""
++WHOLE_ARCHIVE=""
+ 
+ #
+ # Parse arguments
+@@ -191,6 +192,18 @@
+ 	-R*)
+ 	    DEPS="$DEPS $1"
+ 	    ;;
++	'-Wl,-whole-archive')
++	    shift
++	    while [ "x$1" != "x-Wl,-no-whole-archive" ] ; do
++		if [ "x$1" = "x" ] ; then
++		    echo "mklib: End of arguments reached when scanning for -Wl,-no-whole-archive"
++		    echo "mklib: Arguments to -no-whole-archive must be terminated by -Wl,-no-whole-archive"
++		    exit 1
++		fi
++		WHOLE_ARCHIVE="$WHOLE_ARCHIVE $1"
++		shift
++	    done
++	    ;;
+ 	-Wl*)
+             DEPS="$DEPS $1"
+             ;;
+@@ -271,6 +284,10 @@
+     OBJECTS=$NEWOBJECTS
+ fi
+ 
++if [ "x$WHOLE_ARCHIVE" != "x" ] ; then
++    OBJECTS="${OBJECTS} -Wl,-whole-archive ${WHOLE_ARCHIVE} -Wl,-no-whole-archive"
++fi
++
+ 
+ #
+ # Error checking
+@@ -284,7 +301,6 @@
+     exit 1
+ fi
+ 
+-
+ #
+ # Debugging info
+ #
+@@ -343,6 +359,7 @@
+             fi
+ 
+             rm -f ${LIBNAME}
++	    
+             # make lib
+             ${LINK} ${OPTS} ${LDFLAGS} -o ${LIBNAME} ${OBJECTS} ${DEPS}
+             # finish up
+Index: mesa/configure.ac
+===================================================================
+--- mesa.orig/configure.ac	2011-06-14 17:13:28.598853367 +1000
++++ mesa/configure.ac	2011-06-14 17:13:28.618854166 +1000
+@@ -806,6 +806,41 @@
+ AC_SUBST([GLESv2_LIB_DEPS])
+ AC_SUBST([GLESv2_PC_LIB_PRIV])
+ 
++dnl Setup default DRI CFLAGS
++DRI_CFLAGS='$(CFLAGS)'
++DRI_CXXFLAGS='$(CXXFLAGS)'
++DRI_LIB_DEPS='$(TOP)/src/mesa/libmesa.a'
++MESA_MODULES='$(TOP)/src/mesa/libmesa.a'
++
++AC_ARG_ENABLE([shared-dricore],
++    [AS_HELP_STRING([--enable-shared-dricore],
++        [link DRI modules with shared core DRI routines @<:@default=disabled@:>@])],
++    [enable_dricore="$enableval"],
++    [enable_dricore=no])
++if test "$mesa_driver" = dri ; then
++   if test "$enable_dricore" = yes ; then
++      if test "$GCC$GXX" != yesyes ; then
++      	 AC_MSG_WARN([Shared dricore requires GCC-compatible rpath handling.  Disabling shared dricore])
++	 enable_dricore=no
++      else
++	 DRICORE_GLSL_LIBS='$(TOP)/$(LIB_DIR)/libglsl.so'
++	 DRICORE_LIBS='$(TOP)/$(LIB_DIR)/libdricore.so'
++	 DRICORE_LIB_DEPS='-L$(TOP)/$(LIB_DIR) -Wl,-R$(DRI_DRIVER_INSTALL_DIR) -lglsl'
++      	 DRI_LIB_DEPS='-L$(TOP)/$(LIB_DIR) -Wl,-R$(DRI_DRIVER_INSTALL_DIR) -lgallium -ldricore -lglsl'
++	 GALLIUM_LIB_DEPS='-lgallium'
++      	 DRI_CFLAGS='$(CFLAGS_NOVISIBILITY) -DUSE_DRICORE'
++      	 DRI_CXXFLAGS='$(CXXFLAGS_NOVISIBILITY) -DUSE_DRICORE'
++      	 MESA_MODULES='$(DRICORE_LIBS) $(DRICORE_GLSL_LIBS)'
++      fi
++   fi
++fi
++AC_SUBST([DRICORE_LIBS])
++AC_SUBST([DRICORE_GLSL_LIBS])
++AC_SUBST([DRICORE_LIB_DEPS])
++AC_SUBST([GALLIUM_LIB_DEPS])
++AC_SUBST([DRI_CXXFLAGS])
++AC_SUBST([DRI_CFLAGS])
++AC_SUBST([MESA_MODULES])
+ 
+ AC_ARG_ENABLE([shared-dricore],
+     [AS_HELP_STRING([--enable-shared-dricore],
+Index: mesa/src/gallium/Makefile.template
+===================================================================
+--- mesa.orig/src/gallium/Makefile.template	2011-06-14 17:09:31.519528945 +1000
++++ mesa/src/gallium/Makefile.template	2011-06-14 17:13:28.618854166 +1000
+@@ -58,16 +58,16 @@
+ ##### RULES #####
+ 
+ %.s: %.c
+-	$(CC) -S $(INCLUDES) $(CFLAGS) $(LIBRARY_DEFINES) $< -o $@
++	$(CC) -S $(INCLUDES) $(DRI_CFLAGS) $(LIBRARY_DEFINES) $< -o $@
+ 
+ %.o: %.c
+-	$(CC) -c $(INCLUDES) $(CFLAGS) $(LIBRARY_DEFINES) $< -o $@
++	$(CC) -c $(INCLUDES) $(DRI_CFLAGS) $(LIBRARY_DEFINES) $< -o $@
+ 
+ %.o: %.cpp
+-	$(CXX) -c $(INCLUDES) $(CXXFLAGS) $(LIBRARY_DEFINES) $< -o $@
++	$(CXX) -c $(INCLUDES) $(DRI_CXXFLAGS) $(LIBRARY_DEFINES) $< -o $@
+ 
+ %.o: %.S
+-	$(CC) -c $(INCLUDES) $(CFLAGS) $(LIBRARY_DEFINES)  $< -o $@
++	$(CC) -c $(INCLUDES) $(DRI_CFLAGS) $(LIBRARY_DEFINES)  $< -o $@
+ 
+ 
+ sinclude depend
+Index: mesa/src/gallium/auxiliary/Makefile
+===================================================================
+--- mesa.orig/src/gallium/auxiliary/Makefile	2011-06-14 17:09:31.509528592 +1000
++++ mesa/src/gallium/auxiliary/Makefile	2011-06-14 17:13:28.618854166 +1000
+@@ -205,6 +205,14 @@
+ 
+ include ../Makefile.template
+ 
++# Shared dricore library for classic DRI drivers
++$(TOP)/$(LIB_DIR)/libgallium.so: $(OBJECTS) $(EXTRA_OBJECTS)
++	@$(MKLIB) -o $@ -linker '$(CXX)' -ldflags '$(LDFLAGS)' \
++		-cplusplus -noprefix \
++		-install $(TOP)/$(LIB_DIR) -id $(DRI_DRIVER_INSTALL_DIR)/$@.dylib \
++		-Wl,-whole-archive $(TOP)/src/mesa/libgalliumcore.a -Wl,-no-whole-archive \
++		$(OBJECTS) $(EXTRA_OBJECTS)
++
+ 
+ indices/u_indices_gen.c: indices/u_indices_gen.py
+ 	$(PYTHON2) $< > $@
+@@ -220,3 +228,7 @@
+ 
+ util/u_half.c: util/u_half.py
+ 	$(PYTHON2) util/u_half.py > $@
++
++all: default $(TOP)/$(LIB_DIR)/libgallium.so
++
++.DEFAULT_GOAL := all
+\ No newline at end of file
+Index: mesa/src/gallium/targets/Makefile.dri
+===================================================================
+--- mesa.orig/src/gallium/targets/Makefile.dri	2011-06-14 17:09:31.559530372 +1000
++++ mesa/src/gallium/targets/Makefile.dri	2011-06-14 17:13:28.618854166 +1000
+@@ -10,7 +10,6 @@
+ endif
+ 
+ MESA_MODULES = \
+-	$(TOP)/src/mesa/libmesagallium.a \
+ 	$(GALLIUM_AUXILIARIES)
+ 
+ COMMON_GALLIUM_SOURCES = \
+@@ -79,8 +78,8 @@
+ 	$(MKLIB) -o $@.tmp -noprefix -linker '$(CXX)' -ldflags '$(LDFLAGS)' \
+ 		$(OBJECTS) $(PIPE_DRIVERS) \
+                 -Wl,--start-group $(MESA_MODULES) -Wl,--end-group \
+-                 $(DRI_LIB_DEPS) $(DRIVER_EXTRAS)
+-	$(CXX) $(CFLAGS) -o $@.test $(TOP)/src/mesa/drivers/dri/common/dri_test.o $@.tmp $(DRI_LIB_DEPS) $(LDFLAGS);
++                $(DRI_LIB_DEPS) $(GALLIUM_LIB_DEPS) $(DRIVER_EXTRAS)
++	$(CXX) $(CFLAGS) -o $@.test $(TOP)/src/mesa/drivers/dri/common/dri_test.o $@.tmp -lgallium $(DRI_LIB_DEPS) $(GALLIUM_LIB_DEPS) $(LDFLAGS);
+ 	@rm -f $@.test
+ 	mv -f $@.tmp $@
+ 
+Index: mesa/src/mesa/Makefile
+===================================================================
+--- mesa.orig/src/mesa/Makefile	2011-06-14 17:09:31.499528243 +1000
++++ mesa/src/mesa/Makefile	2011-06-14 17:13:28.618854166 +1000
+@@ -30,6 +30,9 @@
+ ES2_GALLIUM_OBJECTS := $(addprefix $(ES2_OBJ_DIR)/, $(MESA_GALLIUM_OBJECTS))
+ MESA_GALLIUM_OBJECTS := $(addprefix $(MESA_OBJ_DIR)/, $(MESA_GALLIUM_OBJECTS))
+ 
++DRICORE_OBJECTS := $(addprefix $(DRICORE_OBJ_DIR)/, $(MESA_OBJECTS))
++GALLIUMCORE_OBJECTS := $(addprefix $(DRICORE_OBJ_DIR)/, $(filter-out $(MESA_OBJECTS), $(MESA_GALLIUM_OBJECTS)))
++
+ # define preprocessor flags
+ MESA_CPPFLAGS := $(API_DEFINES) $(DEFINES)
+ ES1_CPPFLAGS := -DFEATURE_ES1=1 $(DEFINES)
+@@ -106,7 +109,7 @@
+ # Default: build dependencies, then asm_subdirs, GLSL built-in lib,
+ # then convenience libs (.a) and finally the device drivers:
+ default: $(DEPENDS) asm_subdirs \
+-	$(MESA_LIBS) $(ES1_LIBS) $(ES2_LIBS) $(DRICORE_LIBS) driver_subdirs
++	$(MESA_LIBS) $(ES1_LIBS) $(ES2_LIBS) $(DRICORE_LIBS) driver_subdirs libgalliumcore.a
+ 
+ main/api_exec_es1.c: main/APIspec.xml main/es_generator.py main/APIspecutil.py main/APIspec.py
+ 	$(PYTHON2) $(PYTHON_FLAGS) main/es_generator.py -S main/APIspec.xml -V GLES1.1 > $@
+@@ -146,6 +149,10 @@
+ libes2gallium.a: $(ES2_GALLIUM_OBJECTS) $(GLSL_LIBS)
+ 	@$(MKLIB) -o es2gallium -static $(ES2_GALLIUM_OBJECTS) $(GLSL_LIBS)
+ 
++# Make archive of subset of core mesa object files for gallium
++libgalliumcore.a: $(GALLIUMCORE_OBJECTS)
++	@ $(MKLIB) -o galliumcore -static $(GALLIUMCORE_OBJECTS)
++
+ ######################################################################
+ # Device drivers
+ driver_subdirs: $(MESA_LIBS) $(DRICORE_LIBS)
+Index: mesa/configs/autoconf.in
+===================================================================
+--- mesa.orig/configs/autoconf.in	2011-06-14 17:14:41.241740406 +1000
++++ mesa/configs/autoconf.in	2011-06-14 17:14:44.961887427 +1000
+@@ -110,6 +110,7 @@
+ DRICORE_GLSL_LIBS = @DRICORE_GLSL_LIBS@
+ DRICORE_LIBS = @DRICORE_LIBS@
+ DRICORE_LIB_DEPS = @DRICORE_LIB_DEPS@
++GALLIUM_LIB_DEPS = @GALLIUM_LIB_DEPS@
+ EGL_PLATFORMS = @EGL_PLATFORMS@
+ EGL_CLIENT_APIS = @EGL_CLIENT_APIS@
+ 
