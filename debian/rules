@@ -241,7 +241,8 @@ install: build
 	            libgl1-mesa-glx-i686.install libgl1-mesa-dri.install \
 	            libgl1-mesa-dri.install.linux libegl1-mesa.install \
 	            libgl1-mesa-dri-experimental.install \
-	            libegl1-mesa-drivers.install libegl1-mesa-dev.install; \
+	            libegl1-mesa-drivers.install libegl1-mesa-dev.install \
+	            libglapi-mesa.install; \
 	do \
 		sed -e"s,\$${DEB_HOST_MULTIARCH},$(DEB_HOST_MULTIARCH),g" \
 			debian/$${file}.in > debian/$$file; \
@@ -292,6 +293,8 @@ endif
 	set -e; for file in $(NOT_INSTALLED); do rm debian/tmp/$$file; done
 	# Files only in git, not in tarballs, OK to use rm -f here:
 	set -e; for file in $(NOT_INSTALLED_EITHER); do rm -f debian/tmp/$$file; done
+	# No need for this .so, libglapi is just a convenience library:
+	rm debian/tmp/dri/usr/lib/${DEB_HOST_MULTIARCH}/libglapi.so
 
 	dh_install -s --fail-missing
 	dh_installman -s
@@ -309,6 +312,7 @@ endif
 	dh_strip -plibgl1-mesa-dri-experimental --dbg-package=libgl1-mesa-dri-experimental-dbg
 	dh_strip -plibopenvg1-mesa --dbg-package=libopenvg1-mesa-dbg
 	dh_strip -plibegl1-mesa --dbg-package=libegl1-mesa-dbg
+	dh_strip -plibglapi-mesa --dbg-package=libglapi-mesa-dbg
 	dh_strip -plibgles1-mesa --dbg-package=libgles1-mesa-dbg
 	dh_strip -plibgles2-mesa --dbg-package=libgles2-mesa-dbg
 	dh_strip -plibegl1-mesa-drivers --dbg-package=libegl1-mesa-drivers-dbg

@@ -287,6 +287,7 @@ Package: libgles1-mesa
 Section: libs
 Architecture: linux-any kfreebsd-any
 Depends:
+ libglapi-mesa (= ${binary:Version}),
  ${shlibs:Depends},
  ${misc:Depends},
 Provides: libgles1
@@ -342,6 +343,7 @@ Package: libgles2-mesa
 Section: libs
 Architecture: linux-any kfreebsd-any
 Depends:
+ libglapi-mesa (= ${binary:Version}),
  ${shlibs:Depends},
  ${misc:Depends},
 Provides: libgles2
@@ -395,6 +397,33 @@ Description: free implementation of the OpenGL|ES 2.x API -- development files
  .
  This package provides a development environment for building applications
  using the OpenGL|ES 2.x APIs.
+
+Package: libglapi-mesa
+Section: libs
+Architecture: linux-any kfreebsd-any
+Depends:
+ ${shlibs:Depends},
+ ${misc:Depends},
+Pre-Depends: ${misc:Pre-Depends}
+Multi-Arch: same
+Description: free implementation of the GL API -- shared library
+ The Mesa GL API module is responsible for dispatching all the gl*
+ functions. It is intended to be mainly used by both the libgles1-mesa
+ and libgles2-mesa packages.
+
+Package: libglapi-mesa-dbg
+Section: debug
+Architecture: linux-any kfreebsd-any
+Depends:
+ libglapi-mesa (= ${binary:Version}),
+ ${misc:Depends},
+Multi-Arch: same
+Description: free implementation of the GL API -- debugging symbols
+ The Mesa GL API module is responsible for dispatching all the gl*
+ functions. It is intended to be mainly used by both the libgles1-mesa
+ and libgles2-mesa packages.
+ .
+ This package contains debugging symbols for the GL API library.
 
 Package: libgl1-mesa-glx
 Section: libs
