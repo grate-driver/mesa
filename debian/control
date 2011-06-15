@@ -389,9 +389,13 @@ Depends:
  ${shlibs:Depends},
  ${misc:Depends}
 Recommends: libgl1-mesa-dri (>= 7.2)
-Conflicts: libgl1, libgl1-mesa-dri (<< 6.4.0), nvidia-current, fglrx
+Conflicts: libgl1, libgl1-mesa-dri (<< 6.4.0)
 Replaces: libgl1, libgl1-mesa-dri (<< 6.4.0)
 Provides: libgl1
+Breaks: 
+ nvidia-current (<= 270.41.19-0ubuntu1),
+ nvidia-173 (<= 173.14.30-0ubuntu2),
+ fglrx (<= 2:8.850-0ubuntu1),
 Pre-Depends: ${misc:Pre-Depends}
 Multi-Arch: same
 Description: free implementation of the OpenGL API -- GLX runtime
@@ -461,9 +465,9 @@ Replaces:
  xlibmesa-dri (<< 1:7.0.0),
  libgl1-mesa-dri-experimental (<< 7.10.2-2ubuntu1)
 Breaks: 
- xserver-xorg-core (<< 2:1.10.1-1ubuntu4),
- libgl1-mesa-glx (<< 7.10.2-2ubuntu1),
- libgl1-mesa-dri-experimental (<< 7.10.2-2ubuntu1)
+ xserver-xorg-core (<< 2:1.10.2-1ubuntu1),
+ libgl1-mesa-glx (<< 7.10.3-0ubuntu1),
+ libgl1-mesa-dri-experimental (<< 7.10.3-0ubuntu1)
 Multi-Arch: same
 Description: free implementation of the OpenGL API -- DRI modules
  This version of Mesa provides GLX and DRI capabilities: it is capable of
@@ -506,8 +510,8 @@ Depends:
  ${shlibs:Depends},
  ${misc:Depends},
 Breaks: 
- xserver-xorg-core (<< 2:1.10.1-1ubuntu4),
- libgl1-mesa-glx (<< 7.10.2-2ubuntu1),
+ xserver-xorg-core (<< 2:1.10.2-1ubuntu1),
+ libgl1-mesa-glx (<< 7.10.3-0ubuntu1),
 Multi-Arch: same
 Description: free implementation of the OpenGL API -- Extra DRI modules
  This version of Mesa provides GLX and DRI capabilities: it is capable of
