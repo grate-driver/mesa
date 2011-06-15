@@ -13,6 +13,7 @@ debian/libgl1-mesa-dri.install
 debian/libgl1-mesa-dri.install.linux
 debian/libgl1-mesa-dri-experimental.install
 debian/libgl1-mesa-dev.install
+debian/libgl1-mesa-dev.links
 debian/libegl1-mesa.install
 debian/libegl1-mesa-drivers.install
 debian/libegl1-mesa-dev.install
