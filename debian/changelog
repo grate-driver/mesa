@@ -1,6 +1,7 @@
 mesa (7.10.3-0ubuntu1) oneiric; urgency=low
 
   * New upstream 7.10.3 bugfix release.
+   - Fixes infinite loop in GLSL compiler (LP: #788730)
   * Merge with Debian unstable.  Remaining Ubuntu changes:
    - debian/control
       + Drop lesstif-dev from Build-Depends; it's in Universe.
