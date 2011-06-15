@@ -1,3 +1,9 @@
+mesa (7.11~0-1) UNRELEASED; urgency=low
+
+  * New upstream snapshot, from the master branch (up to a128355ecb).
+
+ -- Cyril Brulebois <kibi@debian.org>  Wed, 15 Jun 2011 14:10:03 +0200
+
 mesa (7.10.3-1) unstable; urgency=low
 
   * New upstream release.
