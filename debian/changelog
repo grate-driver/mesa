@@ -24,6 +24,7 @@ mesa (7.11~0-1) UNRELEASED; urgency=low
     (those files aren't in the released tarballs). Let's consider it's OK
     to run “rm -f” on them: {,dri/}usr/include/GL/glut{,f90}.h
   * Add libglapi-mesa{,-dbg} packages.
+  * Update libegl1-mesa.symbols with new symbols.
 
  -- Cyril Brulebois <kibi@debian.org>  Wed, 15 Jun 2011 14:10:03 +0200
 
