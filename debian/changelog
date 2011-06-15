@@ -25,6 +25,8 @@ mesa (7.11~0-1) UNRELEASED; urgency=low
     to run “rm -f” on them: {,dri/}usr/include/GL/glut{,f90}.h
   * Add libglapi-mesa{,-dbg} packages.
   * Update libegl1-mesa.symbols with new symbols.
+  * Update libgles{1,2}-mesa.symbols now that internal symbols (_glapi_*
+    and _glthread_GetID) moved to libglapi-mesa.
 
  -- Cyril Brulebois <kibi@debian.org>  Wed, 15 Jun 2011 14:10:03 +0200
 
