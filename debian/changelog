@@ -15,6 +15,8 @@ mesa (7.11~0-1) UNRELEASED; urgency=low
     commit message: “Remove GLES overlay. With core mesa doing runtime API
     checks, GLES overlay is no longer needed.” (12583174c5).
   * Drop --enable-gles-overlay from debian/rules accordingly.
+  * Add 12-llvm-config-check.diff to handle --disable-gallium more
+    properly.
 
  -- Cyril Brulebois <kibi@debian.org>  Wed, 15 Jun 2011 14:10:03 +0200
 
