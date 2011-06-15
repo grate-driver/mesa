@@ -1,4 +1,4 @@
-mesa (7.10.3-0ubuntu1) UNRELEASED; urgency=low
+mesa (7.10.3-0ubuntu1) oneiric; urgency=low
 
   * New upstream 7.10.3 bugfix release.
   * Merge with Debian unstable.  Remaining Ubuntu changes:
@@ -52,15 +52,10 @@ mesa (7.10.3-0ubuntu1) UNRELEASED; urgency=low
     - Move r300/r600 classic drivers to -experimental.  They're not supported.
       Shave another ~1MB off the CD!
   * debian/control:
-  * debian/rules:
-    - Enable LLVM support.
-  * debian/control:
     - Add new bison and flex build-depends.
   * debian/patches/115_llvm_dynamic_linking.diff
     - Dynamically link DRI drivers to libllvm.  Saves ~6MiB per DRI driver.
   * debian/rules:
-  * debian/libgl1-mesa-dri-experimental.install.in:
-    - Install llvmpipe software renderer in libgl1-mesa-dri-experimental
   * debian/patches/116_use_shared_galliumcore.diff:
   * debian/libgl1-mesa-dri.install.in:
     - Link gallium DRI drivers against shared gallium routines to save CD
