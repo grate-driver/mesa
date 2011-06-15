@@ -29,6 +29,8 @@ mesa (7.11~0-1) UNRELEASED; urgency=low
     and _glthread_GetID) moved to libglapi-mesa.
   * Add libwayland-dev build-dep.
   * Add wayland to EGL_DISPLAYS on Linux.
+  * Ship wayland-egl.pc and libwayland-egl.so in libegl1-mesa-dev; and ship
+    libwayland-egl.so.1* in libegl1-mesa-drivers.
 
  -- Cyril Brulebois <kibi@debian.org>  Wed, 15 Jun 2011 14:10:03 +0200
 
