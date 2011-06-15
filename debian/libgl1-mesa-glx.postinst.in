@@ -9,7 +9,7 @@ case "$1" in
   configure)
   # on upgrade from previous versions, clean up our non-arch-qualified
   # alternative
-  if dpkg --compare-versions "$2" lt-nl 7.10.1-0ubuntu4+multiarch.1; then
+  if dpkg --compare-versions "$2" lt-nl 7.10.3-0ubuntu1; then
     update-alternatives --remove gl_conf /usr/lib/mesa/ld.so.conf
   fi
   # Use alternatives to make it easier to switch between Mesa and 3rd party modules
