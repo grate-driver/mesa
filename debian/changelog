@@ -70,6 +70,10 @@ mesa (7.10.3-0ubuntu1) oneiric; urgency=low
     - Use multiarch dirs for our dri module search path, with a fallback to
       /usr/lib/dri.
     - Use the right path for dh_shlibdeps.  
+  * debian/patches/117_handle_dri2connect_errors_when_indirect.diff:
+    - Handle BadRequest X protocol errors which DRI2 throws when remote
+      clients attempt to connect so that mesa can fall back to a codepath
+      that works. (LP: #785368)
 
  -- Christopher James Halse Rogers <raof@ubuntu.com>  Mon, 06 Jun 2011 16:51:56 +1000
 

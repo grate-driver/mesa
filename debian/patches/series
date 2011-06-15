@@ -17,3 +17,4 @@
 114_intel_dri_renderer_string.diff
 115_llvm_dynamic_linking.diff
 116_use_shared_galliumcore.diff
+117_handle_dri2connect_errors_when_indirect.diff
