@@ -1,3 +1,13 @@
+mesa (7.10.3-0ubuntu2) oneiric; urgency=low
+
+  * debian/control:
+    - Make the Breaks against the proprietary drivers unversioned.  A sneaky
+      nvidia-current upload broke my sly attempt at avoiding this work.
+      The Breaks: should therefore stay unversioned until we know the version
+      of the fixed packages.  (LP: #798007)
+
+ -- Christopher James Halse Rogers <raof@ubuntu.com>  Thu, 16 Jun 2011 18:02:02 +1000
+
 mesa (7.10.3-0ubuntu1) oneiric; urgency=low
 
   * New upstream 7.10.3 bugfix release.

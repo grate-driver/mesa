@@ -393,9 +393,9 @@ Conflicts: libgl1, libgl1-mesa-dri (<< 6.4.0)
 Replaces: libgl1, libgl1-mesa-dri (<< 6.4.0)
 Provides: libgl1
 Breaks: 
- nvidia-current (<= 270.41.19-0ubuntu1),
- nvidia-173 (<= 173.14.30-0ubuntu2),
- fglrx (<= 2:8.850-0ubuntu1),
+ nvidia-current,
+ nvidia-173,
+ fglrx,
 Pre-Depends: ${misc:Pre-Depends}
 Multi-Arch: same
 Description: free implementation of the OpenGL API -- GLX runtime
