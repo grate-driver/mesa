@@ -5,8 +5,13 @@ mesa (7.10.3-0ubuntu2) oneiric; urgency=low
       nvidia-current upload broke my sly attempt at avoiding this work.
       The Breaks: should therefore stay unversioned until we know the version
       of the fixed packages.  (LP: #798007)
+  * debian/rules:
+  * debian/clean:
+  * debian/libgl1-mesa-dri-experimental.armel.install.in
+    - We don't build i915g on armel as there's no concievable hardware to
+      support.  Don't try to install it.  Fixes the build on armel.
 
- -- Christopher James Halse Rogers <raof@ubuntu.com>  Thu, 16 Jun 2011 18:02:02 +1000
+ -- Christopher James Halse Rogers <raof@ubuntu.com>  Thu, 16 Jun 2011 20:45:20 +1000
 
 mesa (7.10.3-0ubuntu1) oneiric; urgency=low
 

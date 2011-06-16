@@ -12,6 +12,7 @@ debian/libgl1-mesa-glx-i686.install
 debian/libgl1-mesa-dri.install
 debian/libgl1-mesa-dri.install.linux
 debian/libgl1-mesa-dri-experimental.install
+debian/libgl1-mesa-dri-experimental.armel.install
 debian/libgl1-mesa-dev.install
 debian/libgl1-mesa-dev.links
 debian/libegl1-mesa.install
