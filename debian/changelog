@@ -1,3 +1,13 @@
+mesa (7.10.3-3) UNRELEASED; urgency=low
+
+  * Update the “Breaks: xserver-xorg-core” from “(<= 2:1.10.2-1)” to
+    “(<< 2:1.10.2-2)”. The first binNMU migrated to testing too soon,
+    so it was needed to rebuild it again, in testing. Updating the
+    Breaks makes sure that a multiarch mesa doesn't get installed with
+    a server built against a pre-multiarch mesa.
+
+ -- Cyril Brulebois <kibi@debian.org>  Sat, 18 Jun 2011 00:29:34 +0200
+
 mesa (7.10.3-2) unstable; urgency=low
 
   [ Cyril Brulebois ]
