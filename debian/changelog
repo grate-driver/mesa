@@ -1,4 +1,4 @@
-mesa (7.10.3-0ubuntu3) UNRELEASED; urgency=low
+mesa (7.10.3-0ubuntu3) oneiric; urgency=low
 
   * debian/rules:
     - Fix typo in previous armel change.  Really fix the build this time.
