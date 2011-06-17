@@ -1,3 +1,10 @@
+mesa (7.10.3-0ubuntu3) UNRELEASED; urgency=low
+
+  * debian/rules:
+    - Fix typo in previous armel change.  Really fix the build this time.
+
+ -- Christopher James Halse Rogers <raof@ubuntu.com>  Fri, 17 Jun 2011 11:11:36 +1000
+
 mesa (7.10.3-0ubuntu2) oneiric; urgency=low
 
   * debian/control:
