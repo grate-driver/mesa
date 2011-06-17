@@ -1,5 +1,5 @@
 build/dri/${DEB_HOST_MULTIARCH}/gallium/i915_dri.so usr/lib/${DEB_HOST_MULTIARCH}/dri-alternates
-#build/dri/${DEB_HOST_MULTIARCH}/gallium/swrastg_dri.so usr/lib/${DEB_HOST_MULTIARCH}/dri-alternates
+build/dri/${DEB_HOST_MULTIARCH}/gallium/swrastg_dri.so usr/lib/${DEB_HOST_MULTIARCH}/dri-alternates
 
 # Install the classic radeon drivers for UMS fallback
 # Most users will not need these, and we don't want to support them
