@@ -3,7 +3,8 @@ mesa (7.10.3-2) UNRELEASED; urgency=low
   * Add Breaks against nvidia and fglrx packages, since they are also
     affected by the multiarch changes, and need fixing. Until fixed
     packages reach the archive, nvidia and fglrx users should stick to
-    mesa 7.10.2-3 packages, currently available in testing.
+    mesa 7.10.2-3 packages, currently available in testing. Thanks to
+    Andreas and Patrick for the version strings (Closes: #630710).
   * Set CXXFLAGS along with CFLAGS (Closes: #630602). Thanks for the
     report and the patch, Fabio Pedretti!
 
