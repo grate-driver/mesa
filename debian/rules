@@ -245,7 +245,8 @@ install: build
 	            libgl1-mesa-glx-i686.install libgl1-mesa-dri.install \
 	            libgl1-mesa-dri.install.linux libegl1-mesa.install \
 	            libgl1-mesa-dri-experimental.install \
-		    libgl1-mesa-dri-experimental.install.armel \
+		    libgl1-mesa-dri-experimental.install.i386 \
+		    libgl1-mesa-dri-experimental.install.amd64 \
 	            libegl1-mesa-drivers.install libegl1-mesa-dev.install \
 	            libgl1-mesa-dev.install libgl1-mesa-dev.links \
 		    libgl1-mesa-swx11-dev.install libgl1-mesa-swx11.install \

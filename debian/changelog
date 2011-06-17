@@ -5,8 +5,15 @@ mesa (7.10.3-0ubuntu3) oneiric; urgency=low
   * debian/rules:
     - Enable llvm support
   * debian/libgl1-mesa-dri-experimental.install.in:
-  * debian/libgl1-mesa-dri-experimental.install.armel.in:
+  * debian/libgl1-mesa-dri-experimental.install.i386.in:
+  * debian/libgl1-mesa-dri-experimental.install.amd64.in:
     - Ship llvmpipe software rasteriser in libgl1-mesa-dri-experimental
+  * debian/libgl1-mesa-dri-experimental.install.in:
+  * debian/libgl1-mesa-dri-experimental.i386.install.in:
+  * debian/libgl1-mesa-dir-experimental.amd64.install.in:
+    - Only i386 and amd64 build i915g.  Explicitly install it only on those
+      architectures, rather than trying to exclude it on architectures which
+      don't build it.  Fixes build (again) on armel and now powerpc as well.
 
  -- Christopher James Halse Rogers <raof@ubuntu.com>  Fri, 17 Jun 2011 11:24:37 +1000
 
