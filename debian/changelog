@@ -1,4 +1,4 @@
-mesa (7.10.3-2) UNRELEASED; urgency=low
+mesa (7.10.3-2) unstable; urgency=low
 
   [ Cyril Brulebois ]
   * Add Breaks against nvidia and fglrx packages, since they are also
@@ -14,7 +14,7 @@ mesa (7.10.3-2) UNRELEASED; urgency=low
     works for libGL, but not for egl_dri2.so (which lives in /usr/lib/*/egl/).
     Thanks to Michel Dänzer for the heads-up!
 
- -- Cyril Brulebois <kibi@debian.org>  Fri, 17 Jun 2011 11:09:10 +0200
+ -- Cyril Brulebois <kibi@debian.org>  Fri, 17 Jun 2011 11:46:20 +0200
 
 mesa (7.10.3-1) unstable; urgency=low
 
