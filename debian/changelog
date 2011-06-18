@@ -1,6 +1,6 @@
 mesa (7.11~0-1) UNRELEASED; urgency=low
 
-  * New upstream snapshot, from the master branch (up to a128355ecb).
+  * New upstream snapshot, from the master branch (up to 2fe39b46e7).
   * Drop 05_hurd-ftbfs.diff, merged upstream (as 758561786c).
   * Refresh 06_kfreebsd-ftbfs.diff (due to 8fd8de3995).
   * Refresh 08-kfreebsd-gallium.diff (adjust offsets).
