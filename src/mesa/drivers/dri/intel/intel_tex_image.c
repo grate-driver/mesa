@@ -54,8 +54,7 @@ intel_miptree_create_for_teximage(struct intel_context *intel,
    GLuint width = intelImage->base.Width;
    GLuint height = intelImage->base.Height;
    GLuint depth = intelImage->base.Depth;
-   GLuint i, comp_byte = 0;
-   GLuint texelBytes;
+   GLuint i;
 
    DBG("%s\n", __FUNCTION__);
 
@@ -108,22 +107,14 @@ intel_miptree_create_for_teximage(struct intel_context *intel,
       }
    }
 
-   if (_mesa_is_format_compressed(intelImage->base.TexFormat))
-      comp_byte = intel_compressed_num_bytes(intelImage->base.TexFormat);
-
-   texelBytes = _mesa_get_format_bytes(intelImage->base.TexFormat);
-
    return intel_miptree_create(intel,
 			       intelObj->base.Target,
-			       intelImage->base._BaseFormat,
-			       intelImage->base.InternalFormat,
+			       intelImage->base.TexFormat,
 			       firstLevel,
 			       lastLevel,
 			       width,
 			       height,
 			       depth,
-			       texelBytes,
-			       comp_byte,
 			       expect_accelerated_upload);
 }
 
@@ -692,8 +683,8 @@ intelSetTexBuffer2(__DRIcontext *pDRICtx, GLint target,
       texFormat = MESA_FORMAT_ARGB8888;
    }
 
-   mt = intel_miptree_create_for_region(intel, target,
-					internalFormat, rb->region, 1, 0);
+   mt = intel_miptree_create_for_region(intel, target, texFormat,
+					rb->region, 1);
    if (mt == NULL)
        return;
 
@@ -756,9 +747,8 @@ intel_image_target_texture_2d(struct gl_context *ctx, GLenum target,
    if (image == NULL)
       return;
 
-   mt = intel_miptree_create_for_region(intel, target,
-					image->internal_format,
-					image->region, 1, 0);
+   mt = intel_miptree_create_for_region(intel, target, image->format,
+					image->region, 1);
    if (mt == NULL)
        return;
 

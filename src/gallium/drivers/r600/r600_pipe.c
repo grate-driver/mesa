@@ -367,7 +367,6 @@ static int r600_get_param(struct pipe_screen* pscreen, enum pipe_cap param)
 	case PIPE_CAP_TEXTURE_MIRROR_CLAMP:
 	case PIPE_CAP_TEXTURE_MIRROR_REPEAT:
 	case PIPE_CAP_BLEND_EQUATION_SEPARATE:
-	case PIPE_CAP_SM3:
 	case PIPE_CAP_TEXTURE_SWIZZLE:
 	case PIPE_CAP_DEPTHSTENCIL_CLEAR_SEPARATE:
 	case PIPE_CAP_DEPTH_CLAMP:
@@ -376,6 +375,7 @@ static int r600_get_param(struct pipe_screen* pscreen, enum pipe_cap param)
 	case PIPE_CAP_MIXED_COLORBUFFER_FORMATS:
 	case PIPE_CAP_TGSI_FS_COORD_ORIGIN_UPPER_LEFT:
 	case PIPE_CAP_TGSI_FS_COORD_PIXEL_CENTER_HALF_INTEGER:
+	case PIPE_CAP_SM3:
 		return 1;
 
 	/* Supported except the original R600. */
