@@ -19,6 +19,10 @@ mesa (7.11~0-1) UNRELEASED; urgency=low
     properly.
   * Add 13-llvm-config-pick-a-version.diff, so that llvm-config-2.9 is
     searched by configure, instead of unversioned llvm-config.
+  * Add a NOT_INSTALLED_EITHER variable to debian/not-installed. A few
+    files might have to be removed, but only if that's a git snapshot
+    (those files aren't in the released tarballs). Let's consider it's OK
+    to run “rm -f” on them: {,dri/}usr/include/GL/glut{,f90}.h
 
  -- Cyril Brulebois <kibi@debian.org>  Wed, 15 Jun 2011 14:10:03 +0200
 

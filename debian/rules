@@ -290,6 +290,8 @@ endif
 	# Also get rid of other files which aren't installed. Do not
 	# use -f to ensure we notice disappearing files:
 	set -e; for file in $(NOT_INSTALLED); do rm debian/tmp/$$file; done
+	# Files only in git, not in tarballs, OK to use rm -f here:
+	set -e; for file in $(NOT_INSTALLED_EITHER); do rm -f debian/tmp/$$file; done
 
 	dh_install -s --fail-missing
 	dh_installman -s
