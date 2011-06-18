@@ -11,6 +11,8 @@ mesa (7.10.3-4) UNRELEASED; urgency=low
     multiarch) to wheezy (with multiarch).
   * Add lintian overrides for breaks-without-version accordingly, those
     packages are only provided in squeeze-backports.
+  * Replace “The OpenGL utility library…” with “Mesa OpenGL utility
+    library…” in the description of the libglu1-mesa* packages.
 
   [ Sven Joachim ]
   * Fix comments in libegl1-mesa.symbols to avoid impending FTBFS with

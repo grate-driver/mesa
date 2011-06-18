@@ -639,7 +639,7 @@ Conflicts: mesag3 (<< 5.0.0-1), xlibmesa3, libglu1
 Replaces: libglu1
 Pre-Depends: ${misc:Pre-Depends}
 Multi-Arch: same
-Description: The OpenGL utility library (GLU)
+Description: Mesa OpenGL utility library (GLU)
  GLU offers simple interfaces for building mipmaps; checking for the
  presence of extensions in the OpenGL (or other libraries which follow
  the same conventions for advertising extensions); drawing
@@ -663,7 +663,7 @@ Depends:
 Provides: libglu-dev, xlibmesa-glu-dev
 Conflicts: mesag-dev (<< 5.0.0-1), mesa-glide2-dev (<< 5.0.0-1), mesag3+ggi-dev (<< 5.0.0-1), xlibmesa-dev
 Replaces: libglu-dev
-Description: The OpenGL utility library -- development files
+Description: Mesa OpenGL utility library -- development files
  Includes headers and static libraries for compiling programs with GLU.
  .
  For a complete description of GLU, please look at the libglu1-mesa
