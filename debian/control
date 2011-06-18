@@ -413,6 +413,7 @@ Description: free implementation of the GL API -- shared library
 
 Package: libglapi-mesa-dbg
 Section: debug
+Priority: extra
 Architecture: linux-any kfreebsd-any
 Depends:
  libglapi-mesa (= ${binary:Version}),
