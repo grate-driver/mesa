@@ -7,7 +7,7 @@ mesa (7.11~0-1) UNRELEASED; urgency=low
   * Refresh 11-hurd-ftbfs-again.diff (adjust offsets and drop the
     src/gallium/auxiliary/os/os_time.c hunk, which should be OK since
     PIPE_OS_UNIX is used there, and should happily replace the use of
-    PIPE_OS_HURD).
+    PIPE_OS_HURD; and adapt for the removal of the PIPE_OS_EMBEDDED check).
   * debian/libegl1-mesa.install.in: Stop trying to install egl_dri2.so and
     egl_glx.so, since they are now built-in (since c98ea26e16).
   * debian/libgles{1,2}-mesa.install.in: Stop trying to install
