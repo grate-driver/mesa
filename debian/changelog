@@ -4,6 +4,8 @@ mesa (7.11~0-1) UNRELEASED; urgency=low
   * Drop 05_hurd-ftbfs.diff, merged upstream (as 758561786c).
   * Refresh 06_kfreebsd-ftbfs.diff (due to 8fd8de3995).
   * Refresh 08-kfreebsd-gallium.diff (adjust offsets).
+  * Add 10-hurd-configure-tweaks.diff to enable x86 assembler on Hurd,
+    thanks to Pino Toscano.
   * Refresh 11-hurd-ftbfs-again.diff (adjust offsets and drop the
     src/gallium/auxiliary/os/os_time.c hunk, which should be OK since
     PIPE_OS_UNIX is used there, and should happily replace the use of
