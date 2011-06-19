@@ -87,10 +87,8 @@ else
   endif
   ifeq ($(DEB_HOST_ARCH_CPU), i386)
 	DRI_DRIVERS += i810 i915 i965 sis unichrome
-	GALLIUM_DRIVERS += i915
   else ifeq ($(DEB_HOST_ARCH_CPU), amd64)
 	DRI_DRIVERS += i915 i965 sis unichrome
-	GALLIUM_DRIVERS += i915
   endif
 
 	confflags_DIRECT_RENDERING = --enable-driglx-direct
@@ -205,9 +203,6 @@ $(QUILT_STAMPFN): $(STAMP_DIR)/stamp
 build: build-stamp
 
 build-stamp: $(BUILD_STAMPS)
-# Remove gallium drivers which replace existing classic drivers.
-# Intel gallium is significantly behind the classic mesa drivers...
-	rm -f build/dri/lib/$(DEB_HOST_MULTIARCH)/gallium/i915_dri.so
 	>$@
 
 $(STAMP)-build-%: configure

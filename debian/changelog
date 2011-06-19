@@ -35,6 +35,8 @@ mesa (7.11~0-1) UNRELEASED; urgency=low
     (5722286be2).
   * Build r300 classic (through DRI_DRIVERS) everywhere, since r300g comes
     with a few additional requirements.
+  * Stop building i915g at all, it's apparently never going to be a
+    suitable replacement for i915c.
 
  -- Cyril Brulebois <kibi@debian.org>  Wed, 15 Jun 2011 14:10:03 +0200
 
