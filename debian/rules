@@ -100,7 +100,7 @@ else
 
 	confflags_DIRECT_RENDERING = --enable-driglx-direct
 	confflags_EGL = --with-egl-platforms="$(EGL_DISPLAYS)"
-	confflags_GALLIUM = $(addprefix --enable-gallium-,$(GALLIUM_DRIVERS))
+	confflags_GALLIUM += $(addprefix --enable-gallium-,$(GALLIUM_DRIVERS))
 	confflags_GLES = --enable-gles1 --enable-gles2
 	confflags_STATE_TRACKERS = --with-state-trackers="$(GALLIUM_STATE_TRACKERS)"
 endif
