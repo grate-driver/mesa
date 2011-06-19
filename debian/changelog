@@ -1,4 +1,4 @@
-mesa (7.11~0-1) UNRELEASED; urgency=low
+mesa (7.11~0-1) experimental; urgency=low
 
   * New upstream snapshot, from the master branch (up to 2fe39b46e7).
   * Drop 05_hurd-ftbfs.diff, merged upstream (as 758561786c).
@@ -48,7 +48,7 @@ mesa (7.11~0-1) UNRELEASED; urgency=low
     libwayland-egl.so.1* in libegl1-mesa-drivers.
   * Update libegl1-mesa.symbols with new wl_drm_interface symbol.
 
- -- Cyril Brulebois <kibi@debian.org>  Wed, 15 Jun 2011 14:10:03 +0200
+ -- Cyril Brulebois <kibi@debian.org>  Sun, 19 Jun 2011 19:01:52 +0200
 
 mesa (7.10.3-3) unstable; urgency=low
 
