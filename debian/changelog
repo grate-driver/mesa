@@ -31,6 +31,8 @@ mesa (7.11~0-1) UNRELEASED; urgency=low
   * Add a gentarball target, to generate tarballs for git snapshots.
   * Replace “The OpenGL utility library…” with “Mesa OpenGL utility
     library…” in the description of the libglu1-mesa* packages.
+  * Replace radeon with r300 in GALLIUM_DRIVERS to match upstream renaming
+    (5722286be2).
 
  -- Cyril Brulebois <kibi@debian.org>  Wed, 15 Jun 2011 14:10:03 +0200
 
