@@ -34,7 +34,10 @@ mesa (7.11~0-1) UNRELEASED; urgency=low
   * Replace radeon with r300 in GALLIUM_DRIVERS to match upstream renaming
     (5722286be2).
   * Build r300 classic (through DRI_DRIVERS) everywhere, since r300g comes
-    with a few additional requirements.
+    with a few additional requirements: LLVM is needed for this driver,
+    and apparently only works fine on x86 platform. As a consequence, only
+    build r300g on amd and i386, and add llvm-2.9-dev build-dep on those
+    platforms accordingly. Disable it explicitly on other platforms.
   * Stop building i915g at all, it's apparently never going to be a
     suitable replacement for i915c.
 

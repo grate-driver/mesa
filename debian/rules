@@ -74,7 +74,7 @@ else
 
   ifeq ($(DEB_HOST_ARCH_OS), linux)
 # Gallium drivers require libdrm-{nouveau,radeon}, only available on Linux
-	GALLIUM_DRIVERS += nouveau r300 r600
+	GALLIUM_DRIVERS += nouveau r600
 # Although the KMS egl drivers will probably build on kfreebsd & hurd
 # only linux actually has KMS drivers implemented at this point.
 	EGL_DISPLAYS += drm
@@ -89,6 +89,13 @@ else
 	DRI_DRIVERS += i810 i915 i965 sis unichrome
   else ifeq ($(DEB_HOST_ARCH_CPU), amd64)
 	DRI_DRIVERS += i915 i965 sis unichrome
+  endif
+
+  # LLVM is required for r300g, and x86-ish:
+  ifneq (,$(filter $(DEB_HOST_ARCH),amd64 i386))
+	GALLIUM_DRIVERS += r300
+  else
+	confflags_GALLIUM = --disable-gallium-r300
   endif
 
 	confflags_DIRECT_RENDERING = --enable-driglx-direct
