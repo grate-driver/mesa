@@ -70,7 +70,7 @@ DRI_DRIVERS = swrast
 ifeq ($(DEB_HOST_ARCH_OS), hurd)
 	confflags_DIRECT_RENDERING = --disable-driglx-direct
 	confflags_EGL = --disable-egl
-	confflags_GALLIUM = --disable-gallium
+	confflags_GALLIUM = --disable-gallium --disable-gallium-r300
 else
 	EGL_DISPLAYS = x11
 	GALLIUM_DRIVERS = swrast
