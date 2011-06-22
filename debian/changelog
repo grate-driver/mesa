@@ -1,3 +1,11 @@
+mesa (7.10.3-4) UNRELEASED; urgency=low
+
+  * Accept libmotif-dev as an alternative to lesstif2-dev in
+    libglw1-mesa-dev's dependencies, as requested by Michael Hanke
+    (Closes: #631236).
+
+ -- Cyril Brulebois <kibi@debian.org>  Wed, 22 Jun 2011 11:18:36 +0200
+
 mesa (7.10.3-3) unstable; urgency=low
 
   * Update the “Breaks: xserver-xorg-core” from “(<= 2:1.10.2-1)” to

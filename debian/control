@@ -690,7 +690,7 @@ Depends:
  libglw1-mesa (= ${binary:Version}),
  libx11-dev,
  libxt-dev,
- lesstif2-dev,
+ lesstif2-dev | libmotif-dev,
  mesa-common-dev (= ${binary:Version}),
  ${shlibs:Depends},
  ${misc:Depends},
