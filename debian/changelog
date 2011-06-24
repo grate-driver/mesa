@@ -1,8 +1,10 @@
-mesa (7.10.3-0ubuntu4) UNRELEASED; urgency=low
+mesa (7.10.3-0ubuntu4) oneiric; urgency=low
 
-  * 
+  * debian/control:
+    - Make the Breaks against the proprietary drivers versioned again now that
+      the proprietary drivers work well with multi-arch mesa. (LP: #798049)
 
- -- Alberto Milone <alberto.milone@canonical.com>  Fri, 24 Jun 2011 12:08:21 +0200
+ -- Alberto Milone <alberto.milone@canonical.com>  Fri, 24 Jun 2011 12:18:53 +0200
 
 mesa (7.10.3-0ubuntu3) oneiric; urgency=low
 
