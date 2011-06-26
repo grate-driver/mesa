@@ -1,8 +1,13 @@
 mesa (7.10.3-4) UNRELEASED; urgency=low
 
+  [ Cyril Brulebois ]
   * Accept libmotif-dev as an alternative to lesstif2-dev in
     libglw1-mesa-dev's dependencies, as requested by Michael Hanke
     (Closes: #631236).
+
+  [ Sven Joachim ]
+  * Fix comments in libegl1-mesa.symbols to avoid impending FTBFS with
+    the upcoming dpkg-dev 1.16.1.
 
  -- Cyril Brulebois <kibi@debian.org>  Wed, 22 Jun 2011 11:18:36 +0200
 
