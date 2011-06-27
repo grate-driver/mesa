@@ -1,14 +1,13 @@
 Index: mesa/configure.ac
 ===================================================================
---- mesa.orig/configure.ac	2011-05-27 18:26:26.554238042 +1000
-+++ mesa/configure.ac	2011-05-27 18:27:10.375794856 +1000
-@@ -1582,8 +1582,7 @@
+--- mesa.orig/configure.ac	2011-06-27 14:47:42.000000000 +0100
++++ mesa/configure.ac	2011-06-27 14:58:32.858835646 +0100
+@@ -1715,7 +1715,7 @@
      if test "x$LLVM_CONFIG" != xno; then
  	LLVM_VERSION=`$LLVM_CONFIG --version`
  	LLVM_CFLAGS=`$LLVM_CONFIG --cppflags`
--	LLVM_LIBS="`$LLVM_CONFIG --libs jit interpreter nativecodegen bitwriter` -lstdc++"
--
+-	LLVM_LIBS="`$LLVM_CONFIG --libs` -lstdc++"
 +	LLVM_LIBS="-lLLVM-2.9 -lstdc++"
- 	if test "x$HAS_UDIS86" != xno; then
- 	    LLVM_LIBS="$LLVM_LIBS -ludis86"
- 	    DEFINES="$DEFINES -DHAVE_UDIS86"
+ 
+ 	LLVM_LDFLAGS=`$LLVM_CONFIG --ldflags`
+ 	GALLIUM_DRIVERS_DIRS="$GALLIUM_DRIVERS_DIRS llvmpipe"
