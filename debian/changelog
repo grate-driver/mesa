@@ -1,3 +1,146 @@
+mesa (7.11~0-2ubuntu1) UNRELEASED; urgency=low
+
+  * Merge from Debian experimental.  Remaining Ubuntu changes:
+   - debian/control
+      + Drop lesstif-dev from Build-Depends; it's in Universe.
+      + Comment out GLw libs since it depends on lesstif-dev.
+      + Drop i686 swx11 libgl package.
+      + Add libdrm-dev to mesa-common-dev Depends.
+      + Drop libwayland-dev from Build-Depends; it's in Universe.
+      + Update Breaks for Ubuntu versions
+    - debian/rules
+      + Use --disable-glw for swx11 targets too.
+      + Don't enable motif for swx11 targets.
+      + Use lzma compression for binary debs to save CD space.
+      + Drop unloved mach64 driver.
+      + Use --enable-shared-dricore to claw back CD space.
+      + Enable llvmpipe software rasteriser on amd64 and x86.
+      + Drop Wayland EGL platform.
+    - debian/patches
+      + 100_no_abi_tag.patch
+      + 101_ubuntu_hidden_glname.patch
+      + 103_savage-expose_fbmodes_with_nonzero_alpha.patch
+    - rules, libgl1-mesa-{glx,dev,swx11,swx11-dev}.install.in,
+      libgl1-mesa-{glx,swx11}.{postinst,prerm}.in, libgl1-mesa-dev.links.in:
+      Install libGL.so* in /usr/lib/mesa to allow things to work with
+      alternatives.
+    - debian/not-installed:
+      + Drop i686 files; we don't build 686-optimised packages in the first
+        place.
+    - debian/gbp.conf
+      + Point at Ubuntu branch to make git-buildpackage less narky.
+    - debian/libgl1-mesa-dri-experimental.install.{i386,amd64}.in:
+      + Install llvmpipe and i915g on i386 and amd64
+    - 113_fix_tls.diff: Fix crashes in unrelated code due to TLS usage.
+    - debian/patches/111_export_searchdirs_in_dripc.diff:
+      + Add drisearchdirs variable to dri.pc so the Xserver can pick up the
+        alternate DRI driver dirs.
+    - debian/patches/115_llvm_dynamic_linking.diff
+      + Dynamically link DRI drivers to libllvm.  Saves ~6MiB per DRI driver.
+    - debian/patches/116_use_shared_galliumcore.diff:
+    - debian/libgl1-mesa-dri.install.in:
+      + Link gallium DRI drivers against shared gallium routines to save CD
+        space.  
+
+ -- Christopher James Halse Rogers <raof@ubuntu.com>  Mon, 27 Jun 2011 14:33:41 +0100
+
+mesa (7.11~0-2) experimental; urgency=low
+
+  * Thank you sbuild for giving a green light when that's not actually the
+    case. Fix missing Pre-Depends for the libegl1-mesa-drivers package
+    (multiarch-support).
+
+ -- Cyril Brulebois <kibi@debian.org>  Sun, 19 Jun 2011 21:26:00 +0200
+
+mesa (7.11~0-1) experimental; urgency=low
+
+  * New upstream snapshot, from the master branch (up to 2fe39b46e7).
+  * Drop 05_hurd-ftbfs.diff, merged upstream (as 758561786c).
+  * Refresh 06_kfreebsd-ftbfs.diff (due to 8fd8de3995).
+  * Refresh 08-kfreebsd-gallium.diff (adjust offsets).
+  * Add 10-hurd-configure-tweaks.diff to enable x86 assembler on Hurd,
+    thanks to Pino Toscano.
+  * Refresh 11-hurd-ftbfs-again.diff (adjust offsets and drop the
+    src/gallium/auxiliary/os/os_time.c hunk, which should be OK since
+    PIPE_OS_UNIX is used there, and should happily replace the use of
+    PIPE_OS_HURD; and adapt for the removal of the PIPE_OS_EMBEDDED check).
+  * debian/libegl1-mesa.install.in: Stop trying to install egl_dri2.so and
+    egl_glx.so, since they are now built-in (since c98ea26e16).
+  * debian/libgles{1,2}-mesa.install.in: Stop trying to install
+    st_GLESv{1,2}_CM.so (respectively), which got removed. Quoting the
+    commit message: “Remove GLES overlay. With core mesa doing runtime API
+    checks, GLES overlay is no longer needed.” (12583174c5).
+  * Drop --enable-gles-overlay from debian/rules accordingly.
+  * Add 12-llvm-config-check.diff to handle --disable-gallium more
+    properly.
+  * Add 13-llvm-config-pick-a-version.diff, so that llvm-config-2.9 is
+    searched by configure, instead of unversioned llvm-config.
+  * Add a NOT_INSTALLED_EITHER variable to debian/not-installed. A few
+    files might have to be removed, but only if that's a git snapshot
+    (those files aren't in the released tarballs). Let's consider it's OK
+    to run “rm -f” on them: {,dri/}usr/include/GL/glut{,f90}.h
+  * Add libglapi-mesa{,-dbg} packages.
+  * Use a package-name-doesnt-match-sonames override accordingly.
+  * Update libegl1-mesa.symbols with new symbols.
+  * Update libgles{1,2}-mesa.symbols now that internal symbols (_glapi_*
+    and _glthread_GetID) moved to libglapi-mesa.
+  * Add a gentarball target, to generate tarballs for git snapshots.
+  * Replace “The OpenGL utility library…” with “Mesa OpenGL utility
+    library…” in the description of the libglu1-mesa* packages.
+  * Replace radeon with r300 in GALLIUM_DRIVERS to match upstream renaming
+    (5722286be2).
+  * Build r300 classic (through DRI_DRIVERS) everywhere, since r300g comes
+    with a few additional requirements: LLVM is needed for this driver,
+    and apparently only works fine on x86 platform. As a consequence, only
+    build r300g on amd and i386, and add llvm-2.9-dev build-dep on those
+    platforms accordingly. Disable it explicitly on other platforms.
+  * Stop building i915g at all, it's apparently never going to be a
+    suitable replacement for i915c.
+  * Add libwayland-dev build-dep.
+  * Add wayland to EGL_DISPLAYS on Linux.
+  * Ship wayland-egl.pc and libwayland-egl.so in libegl1-mesa-dev; and ship
+    libwayland-egl.so.1* in libegl1-mesa-drivers.
+  * Update libegl1-mesa.symbols with new wl_drm_interface symbol.
+
+ -- Cyril Brulebois <kibi@debian.org>  Sun, 19 Jun 2011 19:01:52 +0200
+
+mesa (7.10.3-3) unstable; urgency=low
+
+  * Update the “Breaks: xserver-xorg-core” from “(<= 2:1.10.2-1)” to
+    “(<< 2:1.10.2-2)”. The first binNMU migrated to testing too soon,
+    so it was needed to rebuild it again, in testing. Updating the
+    Breaks makes sure that a multiarch mesa doesn't get installed with
+    a server built against a pre-multiarch mesa.
+  * Merge upstream 7.10 branch up to 1ad06c7a25.
+
+ -- Cyril Brulebois <kibi@debian.org>  Sun, 19 Jun 2011 17:31:17 +0200
+
+mesa (7.10.3-2) unstable; urgency=low
+
+  [ Cyril Brulebois ]
+  * Add Breaks against nvidia and fglrx packages, since they are also
+    affected by the multiarch changes, and need fixing. Until fixed
+    packages reach the archive, nvidia and fglrx users should stick to
+    mesa 7.10.2-3 packages, currently available in testing. Thanks to
+    Andreas and Patrick for the version strings (Closes: #630710).
+  * Set CXXFLAGS along with CFLAGS (Closes: #630602). Thanks for the
+    report and the patch, Fabio Pedretti!
+
+  [ Julien Cristau ]
+  * Prepend the multiarch dir to the dri driver search path.  ${ORIGIN}/dri
+    works for libGL, but not for egl_dri2.so (which lives in /usr/lib/*/egl/).
+    Thanks to Michel Dänzer for the heads-up!
+
+ -- Cyril Brulebois <kibi@debian.org>  Fri, 17 Jun 2011 11:46:20 +0200
+
+mesa (7.10.3-1) unstable; urgency=low
+
+  * New upstream release.
+  * Add flex and bison build-deps (even though the generated files are
+    stored in VCS, and shipped…).
+
+ -- Cyril Brulebois <kibi@debian.org>  Tue, 14 Jun 2011 15:37:41 +0200
+
 mesa (7.10.3-0ubuntu4) oneiric; urgency=low
 
   * debian/control:
@@ -119,6 +262,29 @@ mesa (7.10.3-0ubuntu1) oneiric; urgency=low
       that works. (LP: #785368)
 
  -- Christopher James Halse Rogers <raof@ubuntu.com>  Mon, 06 Jun 2011 16:51:56 +1000
+
+mesa (7.10.2-4) unstable; urgency=low
+
+  [ Steve Langasek ]
+  * Build for multiarch.
+
+  [ Cyril Brulebois ]
+  * Explanation of the “Breaks: xserver-xorg-core” part for our users: the
+    server queries the DRI driver path at build time, which is getting
+    changed for multiarch, so the server needs be rebuilt; a binNMU will
+    take care of getting the server ready.
+  * Many thanks for multiarch, Steve!
+  * Update Uploaders list. Thanks, David and Brice!
+  * Wrap Build-Depends.
+
+ -- Cyril Brulebois <kibi@debian.org>  Tue, 14 Jun 2011 12:19:33 +0200
+
+mesa (7.10.2-3) unstable; urgency=low
+
+  * Merge upstream 7.10 branch up to eaadbacb5c.
+  * Ship r600g again, it should be more usable now.
+
+ -- Cyril Brulebois <kibi@debian.org>  Tue, 31 May 2011 17:48:47 +0200
 
 mesa (7.10.2-2) unstable; urgency=low
 

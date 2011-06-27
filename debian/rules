@@ -6,10 +6,13 @@
 #export DH_VERBOSE=1
 
 CFLAGS = -Wall -g
+CXXFLAGS = -Wall -g
 ifneq (,$(filter noopt,$(DEB_BUILD_OPTIONS)))
 	CFLAGS += -O0
+	CXXFLAGS += -O0
 else
 	CFLAGS += -O2
+	CXXFLAGS += -O2
 endif
 ifneq (,$(filter parallel=%,$(DEB_BUILD_OPTIONS)))
 	NUMJOBS = $(patsubst parallel=%,%,$(filter parallel=%,$(DEB_BUILD_OPTIONS)))
@@ -58,7 +61,8 @@ confflags-common = \
 	--disable-glu \
 	--disable-glut \
 	--disable-glw \
-	CFLAGS="$(CFLAGS)"
+	CFLAGS="$(CFLAGS)" \
+	CXXFLAGS="$(CXXFLAGS)"
 
 DRI_DRIVERS = swrast
 
@@ -66,15 +70,18 @@ DRI_DRIVERS = swrast
 ifeq ($(DEB_HOST_ARCH_OS), hurd)
 	confflags_DIRECT_RENDERING = --disable-driglx-direct
 	confflags_EGL = --disable-egl
-	confflags_GALLIUM = --disable-gallium
+	confflags_GALLIUM = --disable-gallium --disable-gallium-r300
 else
 	EGL_DISPLAYS = x11
-	GALLIUM_DRIVERS = swrast llvm
+	GALLIUM_DRIVERS = swrast
+  ifneq (,$(filter $(DEB_HOST_ARCH),amd64 i386))
+	GALLIUM_DRIVERS += llvm
+  endif
 	GALLIUM_STATE_TRACKERS = egl,glx,dri,vega
 
   ifeq ($(DEB_HOST_ARCH_OS), linux)
 # Gallium drivers require libdrm-{nouveau,radeon}, only available on Linux
-	GALLIUM_DRIVERS += nouveau radeon r600
+	GALLIUM_DRIVERS += nouveau r600
 # Although the KMS egl drivers will probably build on kfreebsd & hurd
 # only linux actually has KMS drivers implemented at this point.
 	EGL_DISPLAYS += drm
@@ -87,16 +94,21 @@ else
   endif
   ifeq ($(DEB_HOST_ARCH_CPU), i386)
 	DRI_DRIVERS += i810 i915 i965 sis unichrome
-	GALLIUM_DRIVERS += i915
   else ifeq ($(DEB_HOST_ARCH_CPU), amd64)
 	DRI_DRIVERS += i915 i965 sis unichrome
-	GALLIUM_DRIVERS += i915
+  endif
+
+  # LLVM is required for r300g, and x86-ish:
+  ifneq (,$(filter $(DEB_HOST_ARCH),amd64 i386))
+	GALLIUM_DRIVERS += r300
+  else
+	confflags_GALLIUM = --disable-gallium-r300
   endif
 
 	confflags_DIRECT_RENDERING = --enable-driglx-direct
 	confflags_EGL = --with-egl-platforms="$(EGL_DISPLAYS)"
-	confflags_GALLIUM = $(addprefix --enable-gallium-,$(GALLIUM_DRIVERS))
-	confflags_GLES = --enable-gles-overlay --enable-gles1 --enable-gles2
+	confflags_GALLIUM += $(addprefix --enable-gallium-,$(GALLIUM_DRIVERS))
+	confflags_GLES = --enable-gles1 --enable-gles2
 	confflags_STATE_TRACKERS = --with-state-trackers="$(GALLIUM_STATE_TRACKERS)"
 endif
 
@@ -164,7 +176,8 @@ confflags-swx11+glu = \
 	--disable-egl \
 	--disable-glut \
 	--disable-glw \
-	CFLAGS="$(CFLAGS)"
+	CFLAGS="$(CFLAGS)" \
+	CXXFLAGS="$(CXXFLAGS)"
 
 confflags-swx11+glu-static = \
 	--disable-egl \
@@ -175,7 +188,8 @@ confflags-swx11+glu-static = \
 	--disable-egl \
 	--disable-glut \
 	--disable-glw \
-	CFLAGS="$(CFLAGS)"
+	CFLAGS="$(CFLAGS)" \
+	CXXFLAGS="$(CXXFLAGS)"
 
 confflags-swx11+glu-i386-i686 = \
 	--disable-egl \
@@ -186,7 +200,8 @@ confflags-swx11+glu-i386-i686 = \
 	--disable-egl \
 	--disable-glw \
 	--libdir=/usr/lib/$(DEB_HOST_MULTIARCH)/i686/cmov \
-	CFLAGS="$(CFLAGS) -march=i686"
+	CFLAGS="$(CFLAGS) -march=i686" \
+	CXXFLAGS="$(CXXFLAGS) -march=i686"
 
 # Add /usr/lib/dri-alternates for classic fallback for gallium drivers
 ifeq ($(DEB_BUILD_ARCH),i386)
@@ -221,7 +236,7 @@ $(STAMP)-build-%: configure
 	find $(CURDIR)/* -maxdepth 0 -not -path '$(DEB_BUILD_DIR)*' | \
 		xargs cp -rlf -t $(DEB_BUILD_DIR)/$*
 	cd $(DEB_BUILD_DIR)/$* && \
-	LLVM_CONFIG=/usr/bin/llvm-config-2.9 ../../configure --prefix=/usr --mandir=\$${prefix}/share/man \
+	../../configure --prefix=/usr --mandir=\$${prefix}/share/man \
 	             --infodir=\$${prefix}/share/info --sysconfdir=/etc \
 	             --libdir=\$${prefix}/lib/$(DEB_HOST_MULTIARCH) \
 	             --localstatedir=/var $(confflags) $(confflags-$*)
@@ -252,6 +267,7 @@ install: build
 		    libgl1-mesa-swx11-dev.install libgl1-mesa-swx11.install \
 	   	    libgl1-mesa-glx.postinst libgl1-mesa-glx.prerm \
 		    libgl1-mesa-swx11.postinst libgl1-mesa-swx11.prerm; \
+	            libglapi-mesa.install; \
 	do \
 		sed -e"s,\$${DEB_HOST_MULTIARCH},$(DEB_HOST_MULTIARCH),g" \
 			debian/$${file}.in > debian/$$file; \
@@ -295,6 +311,10 @@ binary-arch: install
 	# Also get rid of other files which aren't installed. Do not
 	# use -f to ensure we notice disappearing files:
 	set -e; for file in $(NOT_INSTALLED); do rm debian/tmp/$$file; done
+	# Files only in git, not in tarballs, OK to use rm -f here:
+	set -e; for file in $(NOT_INSTALLED_EITHER); do rm -f debian/tmp/$$file; done
+	# No need for this .so, libglapi is just a convenience library:
+	rm debian/tmp/dri/usr/lib/${DEB_HOST_MULTIARCH}/libglapi.so
 
 	dh_install -s --fail-missing
 
@@ -323,6 +343,7 @@ binary-arch: install
 	dh_strip -plibgl1-mesa-dri-experimental --dbg-package=libgl1-mesa-dri-experimental-dbg
 	dh_strip -plibopenvg1-mesa --dbg-package=libopenvg1-mesa-dbg
 	dh_strip -plibegl1-mesa --dbg-package=libegl1-mesa-dbg
+	dh_strip -plibglapi-mesa --dbg-package=libglapi-mesa-dbg
 	dh_strip -plibgles1-mesa --dbg-package=libgles1-mesa-dbg
 	dh_strip -plibgles2-mesa --dbg-package=libgles2-mesa-dbg
 	dh_strip -plibegl1-mesa-drivers --dbg-package=libegl1-mesa-drivers-dbg
@@ -356,3 +377,9 @@ endif
 
 binary: binary-indep binary-arch
 .PHONY: configs build clean binary-indep binary-arch binary install
+
+# For maintainer use only, generate a tarball:
+gentarball: SOURCE=mesa
+gentarball: UV=$(shell dpkg-parsechangelog|awk '/^Version:/ {print $$2}'|sed 's/-.*$$//')
+gentarball:
+	git archive --format=tar upstream-experimental --prefix=$(SOURCE)-$(UV)/ | gzip -9 > ../$(SOURCE)_$(UV).orig.tar.gz
