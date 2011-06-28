@@ -250,6 +250,7 @@ install: build
 	            libgl1-mesa-dri.install.linux libegl1-mesa.install \
 	            libgl1-mesa-dri-experimental.install \
 	            libegl1-mesa-drivers.install libegl1-mesa-dev.install \
+		    libgbm1.install libgbm-dev.install \
 	            libglapi-mesa.install; \
 	do \
 		sed -e"s,\$${DEB_HOST_MULTIARCH},$(DEB_HOST_MULTIARCH),g" \
@@ -319,6 +320,7 @@ endif
 	dh_strip -plibgl1-mesa-dri --dbg-package=libgl1-mesa-dri-dbg
 	dh_strip -plibgl1-mesa-dri-experimental --dbg-package=libgl1-mesa-dri-experimental-dbg
 	dh_strip -plibopenvg1-mesa --dbg-package=libopenvg1-mesa-dbg
+	dh_strip -plibgbm1 --dbg-package=libgbm1-dbg
 	dh_strip -plibegl1-mesa --dbg-package=libegl1-mesa-dbg
 	dh_strip -plibglapi-mesa --dbg-package=libglapi-mesa-dbg
 	dh_strip -plibgles1-mesa --dbg-package=libgles1-mesa-dbg
@@ -328,6 +330,7 @@ endif
 	# builds (see changelog for mesa 7.10-1):
 	dh_strip \
 		-plibegl1-mesa-dev \
+		-plibgbm-dev \
 		-plibgl1-mesa-dev \
 		-plibgl1-mesa-swx11-dev \
 		-plibgles1-mesa-dev \
