@@ -94,8 +94,10 @@ else
   endif
   ifeq ($(DEB_HOST_ARCH_CPU), i386)
 	DRI_DRIVERS += i810 i915 i965 sis unichrome
+	GALLIUM_DRIVERS += i915
   else ifeq ($(DEB_HOST_ARCH_CPU), amd64)
 	DRI_DRIVERS += i915 i965 sis unichrome
+	GALLIUM_DRIVERS += i915
   endif
 
   # LLVM is required for r300g, and x86-ish:
