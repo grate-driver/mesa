@@ -1,11 +1,16 @@
 mesa (7.11~1-1) UNRELEASED; urgency=low
 
+  [ Cyril Brulebois ]
   * New upstream snapshot from the 7.11 branch (up to 1ad06c7a25):
     - Fix regression from 7.10, missing characters in text display with
       intel drivers (Closes: #631516). Thanks to Martin Steigerwald for
       the report and the tests.
 
- -- Cyril Brulebois <kibi@debian.org>  Tue, 28 Jun 2011 12:06:59 +0200
+  [ Christopher James Halse Rogers ]
+  * Temporarily disable Wayland EGL backend as it requires a newer 
+    libwayland-dev
+
+ -- Christopher James Halse Rogers <raof@ubuntu.com>  Tue, 28 Jun 2011 21:34:53 +0100
 
 mesa (7.11~0-2) experimental; urgency=low
 
