@@ -15,6 +15,7 @@ mesa (7.11~1-1) UNRELEASED; urgency=low
     - Stop tryingStop trying to install st_{GL,OpenVG} and pipe_*
       as they are all now built in to egl_gallium.so
   * Add libgbm{1,1-dbg,-dev} packages for the new buffer-manager library.
+  * Drop 12-llvm-config-check.diff; upstream.
 
  -- Christopher James Halse Rogers <raof@ubuntu.com>  Tue, 28 Jun 2011 21:34:53 +0100
 
