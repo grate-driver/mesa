@@ -31,8 +31,10 @@
 #include "intel_regions.h"
 #include "intel_tris.h"
 #include "intel_fbo.h"
+#include "tnl/tnl.h"
 #include "tnl/t_context.h"
 #include "tnl/t_vertex.h"
+#include "swrast_setup/swrast_setup.h"
 
 #define FILE_DEBUG_FLAG DEBUG_STATE
 
@@ -715,6 +717,12 @@ i830_assert_not_dirty( struct intel_context *intel )
 static void
 i830_invalidate_state(struct intel_context *intel, GLuint new_state)
 {
+   struct gl_context *ctx = &intel->ctx;
+
+   _swsetup_InvalidateState(ctx, new_state);
+   _tnl_InvalidateState(ctx, new_state);
+   _tnl_invalidate_vertex_state(ctx, new_state);
+
    if (new_state & _NEW_LIGHT)
       i830_update_provoking_vertex(&intel->ctx);
 }
