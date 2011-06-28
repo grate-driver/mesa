@@ -70,11 +70,10 @@ DRI_DRIVERS = swrast
 ifeq ($(DEB_HOST_ARCH_OS), hurd)
 	confflags_DIRECT_RENDERING = --disable-driglx-direct
 	confflags_EGL = --disable-egl
-	confflags_GALLIUM = --disable-gallium --disable-gallium-r300
+	confflags_GALLIUM = --with-gallium-drivers=
 else
 	EGL_DISPLAYS = x11
 	GALLIUM_DRIVERS = swrast
-	GALLIUM_STATE_TRACKERS = egl,glx,dri,vega
 
   ifeq ($(DEB_HOST_ARCH_OS), linux)
 # Gallium drivers require libdrm-{nouveau,radeon}, only available on Linux
@@ -98,15 +97,14 @@ else
   # LLVM is required for r300g, and x86-ish:
   ifneq (,$(filter $(DEB_HOST_ARCH),amd64 i386))
 	GALLIUM_DRIVERS += r300
-  else
-	confflags_GALLIUM = --disable-gallium-r300
+	confflags_GALLIUM += --enable-gallium-llvm
   endif
 
 	confflags_DIRECT_RENDERING = --enable-driglx-direct
 	confflags_EGL = --with-egl-platforms="$(EGL_DISPLAYS)"
-	confflags_GALLIUM += $(addprefix --enable-gallium-,$(GALLIUM_DRIVERS))
+	confflags_GALLIUM += --with-gallium-drivers="$(GALLIUM_DRIVERS)"
 	confflags_GLES = --enable-gles1 --enable-gles2
-	confflags_STATE_TRACKERS = --with-state-trackers="$(GALLIUM_STATE_TRACKERS)"
+	confflags_OPENVG = --enable-openvg --enable-gallium-egl
 endif
 
 confflags-dri = \
@@ -115,36 +113,37 @@ confflags-dri = \
 	--with-dri-driverdir=/usr/lib/$(DEB_HOST_MULTIARCH)/dri \
 	--with-dri-searchpath='/usr/lib/$(DEB_HOST_MULTIARCH)/dri:\$$$${ORIGIN}/dri:/usr/lib/dri' \
 	--enable-glx-tls \
+	--enable-shared-glapi \
 	$(confflags_DIRECT_RENDERING) \
 	$(confflags_EGL) \
 	$(confflags_GALLIUM) \
 	$(confflags_GLES) \
-	$(confflags_STATE_TRACKERS) \
+	$(confflags_OPENVG) \
 	$(confflags-common)
 
 confflags-osmesa = \
 	--disable-egl \
-	--disable-gallium \
+	--with-gallium-drivers= \
 	--with-driver=osmesa \
 	$(confflags-common)
 
 confflags-osmesa-static = \
 	--disable-egl \
-	--disable-gallium \
+	--with-gallium-drivers= \
 	--with-driver=osmesa \
 	--enable-static \
 	$(confflags-common)
 
 confflags-osmesa16 = \
 	--disable-egl \
-	--disable-gallium \
+	--with-gallium-drivers= \
 	--with-driver=osmesa \
 	--with-osmesa-bits=16 \
 	$(confflags-common)
 
 confflags-osmesa16-static = \
 	--disable-egl \
-	--disable-gallium \
+	--with-gallium-drivers= \
 	--with-driver=osmesa \
 	--with-osmesa-bits=16 \
 	--enable-static \
@@ -152,14 +151,14 @@ confflags-osmesa16-static = \
 
 confflags-osmesa32 = \
 	--disable-egl \
-	--disable-gallium \
+	--with-gallium-drivers= \
 	--with-driver=osmesa \
 	--with-osmesa-bits=32 \
 	$(confflags-common)
 
 confflags-osmesa32-static = \
 	--disable-egl \
-	--disable-gallium \
+	--with-gallium-drivers= \
 	--with-driver=osmesa \
 	--with-osmesa-bits=32 \
 	--enable-static \
@@ -167,7 +166,7 @@ confflags-osmesa32-static = \
 
 confflags-swx11+glu = \
 	--disable-egl \
-	--disable-gallium \
+	--with-gallium-drivers= \
 	--with-driver=xlib \
 	--disable-gl-osmesa \
 	--disable-egl \
@@ -178,7 +177,7 @@ confflags-swx11+glu = \
 
 confflags-swx11+glu-static = \
 	--disable-egl \
-	--disable-gallium \
+	--with-gallium-drivers= \
 	--with-driver=xlib \
 	--disable-gl-osmesa \
 	--enable-static \
@@ -190,7 +189,7 @@ confflags-swx11+glu-static = \
 
 confflags-swx11+glu-i386-i686 = \
 	--disable-egl \
-	--disable-gallium \
+	--with-gallium-drivers= \
 	--with-driver=xlib \
 	--disable-gl-osmesa \
 	--disable-glut \
