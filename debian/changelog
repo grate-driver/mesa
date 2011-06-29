@@ -18,6 +18,10 @@ mesa (7.11~1-1) UNRELEASED; urgency=low
   * Drop 12-llvm-config-check.diff; upstream.
   * Add strictly versioned dependencies on libglapi-mesa to libgl1-mesa-glx
     and libegl1-mesa-drivers as they also now depend on this internal library.
+  * debian/rules:
+  * debian/libgl1-mesa-dri.install.linux.in:
+    - Manually install r300g only when we actually build it.  Fixes build on
+      non-i386, non-amd64 linux.
 
  -- Christopher James Halse Rogers <raof@ubuntu.com>  Tue, 28 Jun 2011 21:34:53 +0100
 
