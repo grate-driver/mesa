@@ -41,7 +41,8 @@ mesa (7.11~1-0ubuntu1) UNRELEASED; urgency=low
     - debian/libgl1-mesa-dri.install.in:
       + Link gallium DRI drivers against shared gallium routines to save CD
         space.  
-
+  * Enable llvm on armel as well as i386 and amd64
+  
  -- Christopher James Halse Rogers <raof@ubuntu.com>  Mon, 27 Jun 2011 14:33:41 +0100
   
 mesa (7.11~1-1) UNRELEASED; urgency=low

@@ -97,7 +97,7 @@ else
   endif
 
   # LLVM is required for r300g, and x86-ish:
-  ifneq (,$(filter $(DEB_HOST_ARCH),amd64 i386))
+  ifneq (,$(filter $(DEB_HOST_ARCH),amd64 i386 armel))
 	GALLIUM_DRIVERS += r300
 	confflags_GALLIUM += --enable-gallium-llvm
   endif
