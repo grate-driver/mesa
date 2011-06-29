@@ -315,6 +315,9 @@ binary-arch: install
 	# No need for this .so, libglapi is just a convenience library:
 	rm debian/tmp/dri/usr/lib/${DEB_HOST_MULTIARCH}/libglapi.so
 
+ifneq (,$(filter r300,$(GALLIUM_DRIVERS)))
+	dh_install build/dri/$(DEB_HOST_MULTIARCH)/gallium/r300_dri.so
+endif
 	dh_install -s --fail-missing
 
 	# Create an ld.so.conf which says where to find libGL from Mesa
