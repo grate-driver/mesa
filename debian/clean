@@ -24,3 +24,5 @@ debian/libgl1-mesa-swx11.install
 debian/libgl1-mesa-swx11-dev.install
 debian/libgl1-mesa-swx11.postinst
 debian/libgl1-mesa-swx11.prerm
+debian/libgbm1.install
+debian/libgbm-dev.install

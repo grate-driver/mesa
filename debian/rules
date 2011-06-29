@@ -70,14 +70,10 @@ DRI_DRIVERS = swrast
 ifeq ($(DEB_HOST_ARCH_OS), hurd)
 	confflags_DIRECT_RENDERING = --disable-driglx-direct
 	confflags_EGL = --disable-egl
-	confflags_GALLIUM = --disable-gallium --disable-gallium-r300
+	confflags_GALLIUM = --with-gallium-drivers=
 else
 	EGL_DISPLAYS = x11
 	GALLIUM_DRIVERS = swrast
-  ifneq (,$(filter $(DEB_HOST_ARCH),amd64 i386))
-	GALLIUM_DRIVERS += llvm
-  endif
-	GALLIUM_STATE_TRACKERS = egl,glx,dri,vega
 
   ifeq ($(DEB_HOST_ARCH_OS), linux)
 # Gallium drivers require libdrm-{nouveau,radeon}, only available on Linux
@@ -103,15 +99,14 @@ else
   # LLVM is required for r300g, and x86-ish:
   ifneq (,$(filter $(DEB_HOST_ARCH),amd64 i386))
 	GALLIUM_DRIVERS += r300
-  else
-	confflags_GALLIUM = --disable-gallium-r300
+	confflags_GALLIUM += --enable-gallium-llvm
   endif
 
 	confflags_DIRECT_RENDERING = --enable-driglx-direct
 	confflags_EGL = --with-egl-platforms="$(EGL_DISPLAYS)"
-	confflags_GALLIUM += $(addprefix --enable-gallium-,$(GALLIUM_DRIVERS))
+	confflags_GALLIUM += --with-gallium-drivers="$(GALLIUM_DRIVERS)"
 	confflags_GLES = --enable-gles1 --enable-gles2
-	confflags_STATE_TRACKERS = --with-state-trackers="$(GALLIUM_STATE_TRACKERS)"
+	confflags_OPENVG = --enable-openvg --enable-gallium-egl
 endif
 
 confflags-dri = \
@@ -120,36 +115,37 @@ confflags-dri = \
 	--with-dri-driverdir=/usr/lib/$(DEB_HOST_MULTIARCH)/dri \
 	--enable-glx-tls \
 	--enable-shared-dricore \
+	--enable-shared-glapi \
 	$(confflags_DIRECT_RENDERING) \
 	$(confflags_EGL) \
 	$(confflags_GALLIUM) \
 	$(confflags_GLES) \
-	$(confflags_STATE_TRACKERS) \
+	$(confflags_OPENVG) \
 	$(confflags-common)
 
 confflags-osmesa = \
 	--disable-egl \
-	--disable-gallium \
+	--with-gallium-drivers= \
 	--with-driver=osmesa \
 	$(confflags-common)
 
 confflags-osmesa-static = \
 	--disable-egl \
-	--disable-gallium \
+	--with-gallium-drivers= \
 	--with-driver=osmesa \
 	--enable-static \
 	$(confflags-common)
 
 confflags-osmesa16 = \
 	--disable-egl \
-	--disable-gallium \
+	--with-gallium-drivers= \
 	--with-driver=osmesa \
 	--with-osmesa-bits=16 \
 	$(confflags-common)
 
 confflags-osmesa16-static = \
 	--disable-egl \
-	--disable-gallium \
+	--with-gallium-drivers= \
 	--with-driver=osmesa \
 	--with-osmesa-bits=16 \
 	--enable-static \
@@ -157,14 +153,14 @@ confflags-osmesa16-static = \
 
 confflags-osmesa32 = \
 	--disable-egl \
-	--disable-gallium \
+	--with-gallium-drivers= \
 	--with-driver=osmesa \
 	--with-osmesa-bits=32 \
 	$(confflags-common)
 
 confflags-osmesa32-static = \
 	--disable-egl \
-	--disable-gallium \
+	--with-gallium-drivers= \
 	--with-driver=osmesa \
 	--with-osmesa-bits=32 \
 	--enable-static \
@@ -172,7 +168,7 @@ confflags-osmesa32-static = \
 
 confflags-swx11+glu = \
 	--disable-egl \
-	--disable-gallium \
+	--with-gallium-drivers= \
 	--with-driver=xlib \
 	--disable-gl-osmesa \
 	--disable-egl \
@@ -183,7 +179,7 @@ confflags-swx11+glu = \
 
 confflags-swx11+glu-static = \
 	--disable-egl \
-	--disable-gallium \
+	--with-gallium-drivers= \
 	--with-driver=xlib \
 	--disable-gl-osmesa \
 	--enable-static \
@@ -195,7 +191,7 @@ confflags-swx11+glu-static = \
 
 confflags-swx11+glu-i386-i686 = \
 	--disable-egl \
-	--disable-gallium \
+	--with-gallium-drivers= \
 	--with-driver=xlib \
 	--disable-gl-osmesa \
 	--disable-glut \
@@ -269,6 +265,7 @@ install: build
 		    libgl1-mesa-swx11-dev.install libgl1-mesa-swx11.install \
 	   	    libgl1-mesa-glx.postinst libgl1-mesa-glx.prerm \
 		    libgl1-mesa-swx11.postinst libgl1-mesa-swx11.prerm \
+		    libgbm1.install libgbm-dev.install \
 	            libglapi-mesa.install; \
 	do \
 		sed -e"s,\$${DEB_HOST_MULTIARCH},$(DEB_HOST_MULTIARCH),g" \
@@ -344,6 +341,7 @@ binary-arch: install
 	dh_strip -plibgl1-mesa-dri --dbg-package=libgl1-mesa-dri-dbg
 	dh_strip -plibgl1-mesa-dri-experimental --dbg-package=libgl1-mesa-dri-experimental-dbg
 	dh_strip -plibopenvg1-mesa --dbg-package=libopenvg1-mesa-dbg
+	dh_strip -plibgbm1 --dbg-package=libgbm1-dbg
 	dh_strip -plibegl1-mesa --dbg-package=libegl1-mesa-dbg
 	dh_strip -plibglapi-mesa --dbg-package=libglapi-mesa-dbg
 	dh_strip -plibgles1-mesa --dbg-package=libgles1-mesa-dbg
@@ -353,6 +351,7 @@ binary-arch: install
 	# builds (see changelog for mesa 7.10-1):
 	dh_strip \
 		-plibegl1-mesa-dev \
+		-plibgbm-dev \
 		-plibgl1-mesa-dev \
 		-plibgl1-mesa-swx11-dev \
 		-plibgles1-mesa-dev \
