@@ -1,7 +1,7 @@
 mesa (7.11~1-1) UNRELEASED; urgency=low
 
   [ Cyril Brulebois ]
-  * New upstream snapshot from the 7.11 branch (up to 1ad06c7a25):
+  * New upstream snapshot from the 7.11 branch (up to 7377491b01):
     - Fix regression from 7.10, missing characters in text display with
       intel drivers (Closes: #631516). Thanks to Martin Steigerwald for
       the report and the tests.
