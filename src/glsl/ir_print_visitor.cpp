@@ -104,7 +104,11 @@ void ir_print_visitor::visit(ir_variable *ir)
 	  cent, inv, mode[ir->mode], interp[ir->interpolation]);
 
    print_type(ir->type);
-   printf(" %s@%p)", ir->name, (void *) ir);
+   if (ir->name == NULL) {
+      static unsigned arg = 1;
+      printf(" parameter@%u)", arg++);
+   } else
+      printf(" %s@%p)", ir->name, (void *) ir);
 }
 
 
