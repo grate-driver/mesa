@@ -1,3 +1,12 @@
+mesa (7.11~1-0ubuntu3) oneiric; urgency=low
+
+  * debian/rules:
+    - Fix the install of r300g: install it into the correct package, and
+      install it after the generic dh_install run so that it overwrites
+      r300c in libgl1-mesa-dri.  (LP: #804655)
+
+ -- Christopher James Halse Rogers <raof@ubuntu.com>  Thu, 07 Jul 2011 15:57:54 +1000
+
 mesa (7.11~1-0ubuntu2) oneiric; urgency=low
 
   * debian/rules:
