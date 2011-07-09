@@ -261,6 +261,7 @@ clean: unpatch
 	rm -rf $$(find -name Makefile.in)
 	rm -rf aclocal.m4 missing depcomp install-sh ltmain.sh
 	rm -rf $(STAMP_DIR)
+	for file in debian/*.in; do rm -f $${file%%.in}; done
 
 	dh_clean
 
