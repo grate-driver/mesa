@@ -241,17 +241,10 @@ install: build
 		$(MAKE) -C $(DEB_BUILD_DIR)/$$config DESTDIR=$(CURDIR)/debian/tmp install; \
 	done
 	$(MAKE) -C $(DEB_BUILD_DIR)/dri DESTDIR=$(CURDIR)/debian/tmp/dri install
-	for file in mesa-common-dev.install libopenvg1-mesa.install \
-	            libopenvg1-mesa-dev.install libgles2-mesa.install \
-	            libgles2-mesa-dev.install libgles1-mesa.install \
-	            libgles1-mesa-dev.install libgl1-mesa-glx.install \
-	            libgl1-mesa-glx-i686.install libgl1-mesa-dri.install \
-	            libgl1-mesa-dri.install.linux libegl1-mesa.install \
-	            libgl1-mesa-dri-experimental.install \
-	            libegl1-mesa-drivers.install libegl1-mesa-dev.install; \
+	for file in debian/*.in; \
 	do \
 		sed -e"s,\$${DEB_HOST_MULTIARCH},$(DEB_HOST_MULTIARCH),g" \
-			debian/$${file}.in > debian/$$file; \
+			$${file} > $${file%%.in}; \
 	done
 
 clean: unpatch

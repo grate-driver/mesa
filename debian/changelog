@@ -15,6 +15,7 @@ mesa (7.10.3-4) UNRELEASED; urgency=low
     library…” in the description of the libglu1-mesa* packages.
   * Rename all remaining *.install files as *.install.in and use
     “${DEB_HOST_MULTIARCH}” instead of “*”.
+  * Use the sed substitution on all debian/*.in files accordingly.
 
   [ Sven Joachim ]
   * Fix comments in libegl1-mesa.symbols to avoid impending FTBFS with
