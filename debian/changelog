@@ -6,6 +6,9 @@ mesa (7.10.3-4) UNRELEASED; urgency=low
     (Closes: #631236).
   * Merge upstream 7.10 branch up to e041956cb2.
   * Wrap Breaks fields.
+  * Add Breaks: {xserver-xorg-core,libgl1-mesa-glx}-no-multiarch to
+    libgl1-mesa-dri* to handle upgrades from squeeze-backports (without
+    multiarch) to wheezy (with multiarch).
 
   [ Sven Joachim ]
   * Fix comments in libegl1-mesa.symbols to avoid impending FTBFS with
