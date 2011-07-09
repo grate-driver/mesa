@@ -9,6 +9,8 @@ mesa (7.10.3-4) UNRELEASED; urgency=low
   * Add Breaks: {xserver-xorg-core,libgl1-mesa-glx}-no-multiarch to
     libgl1-mesa-dri* to handle upgrades from squeeze-backports (without
     multiarch) to wheezy (with multiarch).
+  * Add lintian overrides for breaks-without-version accordingly, those
+    packages are only provided in squeeze-backports.
 
   [ Sven Joachim ]
   * Fix comments in libegl1-mesa.symbols to avoid impending FTBFS with
