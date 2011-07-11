@@ -12,7 +12,7 @@ mesa (7.11~1-1) UNRELEASED; urgency=low
   * Update rules for configure changes
   * debian/lib{egl1,openvg1}-mesa.install.in:
   * debian/libegl1-mesa-drivers.install.in:
-    - Stop tryingStop trying to install st_{GL,OpenVG} and pipe_*
+    - Stop trying to install st_{GL,OpenVG} and pipe_*
       as they are all now built in to egl_gallium.so
   * Add libgbm{1,1-dbg,-dev} packages for the new buffer-manager library.
   * Drop 12-llvm-config-check.diff; upstream.
