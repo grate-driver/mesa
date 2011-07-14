@@ -8,10 +8,7 @@ set -e
 broken_symlinks=$(find -follow -type l)
 
 # Symlinks vs. directories:
-dirs_vs_symlinks='
-src/gallium/tests/graw/fragment-shader
-src/gallium/tests/graw/vertex-shader
-'
+dirs_vs_symlinks=''
 
 # Modified binaries:
 binaries='
