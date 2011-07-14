@@ -349,25 +349,25 @@ static const struct
    uint hw_swizzle;
 } fixup_formats[] = {
    { PIPE_FORMAT_R8G8B8A8_UNORM, 0x21030000 /* BGRA */},
-   { PIPE_FORMAT_L8_UNORM,       0x00000000 /* RRRR */},
-   { PIPE_FORMAT_I8_UNORM,       0x00000000 /* RRRR */},
+   { PIPE_FORMAT_L8_UNORM,       0x00030000 /* RRRA */},
+   { PIPE_FORMAT_I8_UNORM,       0x00030000 /* RRRA */},
    { PIPE_FORMAT_A8_UNORM,       0x33330000 /* AAAA */},
    { PIPE_FORMAT_NONE,           0x00000000},
 };
 
-static boolean need_fixup(struct pipe_surface* p)
+static uint need_target_fixup(struct pipe_surface* p)
 {
    enum pipe_format f;
    /* if we don't have a surface bound yet, we don't need to fixup the shader */
    if (!p)
-      return FALSE;
+      return 0;
 
    f = p->format;
    for(int i=0; fixup_formats[i].format != PIPE_FORMAT_NONE; i++)
       if (fixup_formats[i].format == f)
-         return TRUE;
+         return 1;
 
-   return FALSE;
+   return 0;
 }
 
 static uint fixup_swizzle(enum pipe_format f)
@@ -383,29 +383,35 @@ static void
 validate_program(struct i915_context *i915, unsigned *batch_space)
 {
    struct pipe_surface *cbuf_surface = i915->framebuffer.cbufs[0];
+   uint additional_size = need_target_fixup(cbuf_surface);
 
    /* we need more batch space if we want to emulate rgba framebuffers */
-   *batch_space = i915->fs->program_len + (need_fixup(cbuf_surface) ? 3 : 0);
+   *batch_space = i915->fs->program_len + 3 * additional_size;
 }
 
 static void
 emit_program(struct i915_context *i915)
 {
    struct pipe_surface *cbuf_surface = i915->framebuffer.cbufs[0];
-   boolean need_format_fixup = need_fixup(cbuf_surface);
+   uint target_fixup = need_target_fixup(cbuf_surface);
    uint i;
 
    /* we should always have, at least, a pass-through program */
    assert(i915->fs->program_len > 0);
-   for (i = 0; i < i915->fs->program_len; i++) {
-         if ((i == 0) && need_format_fixup)
-            OUT_BATCH(i915->fs->program[i] + 3);
-         else
-            OUT_BATCH(i915->fs->program[i]);
+
+   {
+      /* first word has the size, we have to adjust that */
+      uint size = (i915->fs->program[0]);
+      size += target_fixup * 3;
+      OUT_BATCH(size);
    }
 
+   /* output the declarations of the program */
+   for (i=1 ; i < i915->fs->program_len; i++) 
+      OUT_BATCH(i915->fs->program[i]);
+
    /* we emit an additional mov with swizzle to fake RGBA framebuffers */
-   if (need_format_fixup) {
+   if (target_fixup) {
       /* mov out_color, out_color.zyxw */
       OUT_BATCH(A0_MOV |
                 (REG_TYPE_OC << A0_DEST_TYPE_SHIFT) |

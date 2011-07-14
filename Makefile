@@ -183,7 +183,7 @@ ultrix-gcc:
 
 # Rules for making release tarballs
 
-VERSION=7.11-devel
+VERSION=7.11-rc1
 DIRECTORY = Mesa-$(VERSION)
 LIB_NAME = MesaLib-$(VERSION)
 GLUT_NAME = MesaGLUT-$(VERSION)
@@ -463,7 +463,7 @@ parsers: configure
 	-@touch $(TOP)/configs/current
 	$(MAKE) -C src/glsl glsl_parser.cpp glsl_parser.h glsl_lexer.cpp
 	$(MAKE) -C src/glsl/glcpp glcpp-lex.c glcpp-parse.c glcpp-parse.h
-	$(MAKE) -C src/mesa/program lex.yy.c program_parse.tab.c program_parse.tab.h
+	$(MAKE) -C src/mesa program/lex.yy.c program/program_parse.tab.c program/program_parse.tab.h
 
 # Everything for new a Mesa release:
 ARCHIVES = $(LIB_NAME).tar.gz \
