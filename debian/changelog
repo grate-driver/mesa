@@ -1,12 +1,9 @@
-mesa (7.11~1-1) UNRELEASED; urgency=low
+mesa (7.11~rc1-1) UNRELEASED; urgency=low
 
-  [ Cyril Brulebois ]
-  * New upstream snapshot from the 7.11 branch (up to 7377491b01):
+  * New upstream release candidate.
     - Fix regression from 7.10, missing characters in text display with
       intel drivers (Closes: #631516). Thanks to Martin Steigerwald for
       the report and the tests.
-
-  [ Christopher James Halse Rogers ]
   * Temporarily disable Wayland EGL backend as it requires a newer
     libwayland-dev
   * Update rules for configure changes
