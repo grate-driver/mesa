@@ -31,8 +31,6 @@ mesa (7.11~rc1-0ubuntu1) oneiric; urgency=low
         place.
     - debian/gbp.conf
       + Point at Ubuntu branch to make git-buildpackage less narky.
-    - debian/libgl1-mesa-dri-experimental.install.{i386,amd64}.in:
-      + Install llvmpipe and i915g on i386 and amd64
     - 113_fix_tls.diff: Fix crashes in unrelated code due to TLS usage.
     - debian/patches/111_export_searchdirs_in_dripc.diff:
       + Add drisearchdirs variable to dri.pc so the Xserver can pick up the
@@ -43,6 +41,10 @@ mesa (7.11~rc1-0ubuntu1) oneiric; urgency=low
     - debian/libgl1-mesa-dri.install.in:
       + Link gallium DRI drivers against shared gallium routines to save CD
         space.
+  * debian/rules:
+  * debian/libgl1-mesa-dri-experimental.install.{i386,amd64}.in
+    - Explicitly install i915g only when it has been built, matching what is
+      done with r300g.
 
  -- Christopher James Halse Rogers <raof@ubuntu.com>  Fri, 15 Jul 2011 11:38:48 +1000
 

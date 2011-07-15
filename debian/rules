@@ -266,8 +266,6 @@ install: build
 	            libgl1-mesa-glx-i686.install libgl1-mesa-dri.install \
 	            libgl1-mesa-dri.install.linux libegl1-mesa.install \
 	            libgl1-mesa-dri-experimental.install \
-		    libgl1-mesa-dri-experimental.install.i386 \
-		    libgl1-mesa-dri-experimental.install.amd64 \
 	            libegl1-mesa-drivers.install libegl1-mesa-dev.install \
 	            libgl1-mesa-dev.install libgl1-mesa-dev.links \
 		    libgl1-mesa-swx11-dev.install libgl1-mesa-swx11.install \
@@ -324,9 +322,14 @@ binary-arch: install
 	rm debian/tmp/dri/usr/lib/${DEB_HOST_MULTIARCH}/libglapi.so
 
 	dh_install -s --fail-missing
+	# Install arch-dependent drivers
 ifneq (,$(filter r300,$(GALLIUM_DRIVERS)))
 	dh_install -plibgl1-mesa-dri build/dri/$(DEB_HOST_MULTIARCH)/gallium/r300_dri.so usr/lib/${DEB_HOST_MULTIARCH}/dri
 endif
+ifneq (,$(filter i915,$(GALLIUM_DRIVERS)))
+	dh_install -plibgl1-mesa-dri-experimental build/dri/$(DEB_HOST_MULTIARCH)/gallium/i915_dri.so usr/lib/${DEB_HOST_MULTIARCH}/dri-alternates
+endif
+
 
 	# Create an ld.so.conf which says where to find libGL from Mesa
 	echo "/usr/lib/$(DEB_HOST_MULTIARCH)/mesa" \
