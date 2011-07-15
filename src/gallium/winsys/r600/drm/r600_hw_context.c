@@ -62,6 +62,8 @@ void r600_init_cs(struct r600_context *ctx)
 	ctx->pm4[ctx->pm4_cdwords++] = PKT3(PKT3_CONTEXT_CONTROL, 1, 0);
 	ctx->pm4[ctx->pm4_cdwords++] = 0x80000000;
 	ctx->pm4[ctx->pm4_cdwords++] = 0x80000000;
+
+	ctx->init_dwords = ctx->pm4_cdwords;
 }
 
 static void INLINE r600_context_update_fenced_list(struct r600_context *ctx)
@@ -1496,7 +1498,7 @@ void r600_context_flush(struct r600_context *ctx)
 	int r;
 	struct r600_block *enable_block = NULL;
 
-	if (!ctx->pm4_cdwords)
+	if (ctx->pm4_cdwords == ctx->init_dwords)
 		return;
 
 	/* suspend queries */
@@ -1563,7 +1565,7 @@ void r600_context_flush(struct r600_context *ctx)
 	r600_init_cs(ctx);
 
 	/* resume queries */
-	r600_context_queries_resume(ctx);
+	r600_context_queries_resume(ctx, TRUE);
 
 	/* set all valid group as dirty so they get reemited on
 	 * next draw command
@@ -1723,7 +1725,7 @@ static boolean r600_query_result(struct r600_context *ctx, struct r600_query *qu
 
 void r600_query_begin(struct r600_context *ctx, struct r600_query *query)
 {
-	unsigned required_space;
+	unsigned required_space, required_buffer;
 	int num_backends = r600_get_num_backends(ctx->radeon);
 
 	/* query request needs 6/8 dwords for begin + 6/8 dwords for end */
@@ -1737,9 +1739,13 @@ void r600_query_begin(struct r600_context *ctx, struct r600_query *query)
 		r600_context_flush(ctx);
 	}
 
+	required_buffer = query->num_results +
+		4 * (query->type == PIPE_QUERY_OCCLUSION_COUNTER ? ctx->max_db : 1);
+
 	/* if query buffer is full force a flush */
-	if (query->num_results*4 >= query->buffer_size - 16) {
-		r600_context_flush(ctx);
+	if (required_buffer*4 > query->buffer_size) {
+		if (!(query->state & R600_QUERY_STATE_FLUSHED))
+			r600_context_flush(ctx);
 		r600_query_result(ctx, query, TRUE);
 	}
 
@@ -1749,9 +1755,9 @@ void r600_query_begin(struct r600_context *ctx, struct r600_query *query)
 		u32 *results;
 		int i;
 
-		results = r600_bo_map(ctx->radeon, query->buffer, PB_USAGE_DONTBLOCK | PB_USAGE_CPU_WRITE, NULL);
+		results = r600_bo_map(ctx->radeon, query->buffer, PB_USAGE_CPU_WRITE, NULL);
 		if (results) {
-			memset(results + (query->num_results * 4), 0, ctx->max_db * 4 * 4);
+			memset(results + query->num_results, 0, ctx->max_db * 4 * 4);
 
 			for (i = num_backends; i < ctx->max_db; i++) {
 				results[(i * 4)+1] = 0x80000000;
@@ -1807,6 +1813,7 @@ void r600_query_end(struct r600_context *ctx, struct r600_query *query)
 	query->num_results += 4 * (query->type == PIPE_QUERY_OCCLUSION_COUNTER ? ctx->max_db : 1);
 	query->state ^= R600_QUERY_STATE_STARTED;
 	query->state |= R600_QUERY_STATE_ENDED;
+	query->state &= ~R600_QUERY_STATE_FLUSHED;
 	ctx->num_query_running--;
 }
 
@@ -1875,7 +1882,7 @@ boolean r600_context_query_result(struct r600_context *ctx,
 {
 	uint64_t *result = (uint64_t*)vresult;
 
-	if (query->num_results) {
+	if (query->num_results && !(query->state & R600_QUERY_STATE_FLUSHED)) {
 		r600_context_flush(ctx);
 	}
 	if (!r600_query_result(ctx, query, wait))
@@ -1900,7 +1907,7 @@ void r600_context_queries_suspend(struct r600_context *ctx)
 	}
 }
 
-void r600_context_queries_resume(struct r600_context *ctx)
+void r600_context_queries_resume(struct r600_context *ctx, boolean flushed)
 {
 	struct r600_query *query;
 
@@ -1908,6 +1915,7 @@ void r600_context_queries_resume(struct r600_context *ctx)
 		if (query->state & R600_QUERY_STATE_SUSPENDED) {
 			r600_query_begin(ctx, query);
 			query->state ^= R600_QUERY_STATE_SUSPENDED;
-		}
+		} else if (flushed && query->state==R600_QUERY_STATE_ENDED)
+			query->state |= R600_QUERY_STATE_FLUSHED;
 	}
 }

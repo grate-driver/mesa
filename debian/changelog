@@ -1,3 +1,31 @@
+mesa (7.11~rc1-1) UNRELEASED; urgency=low
+
+  * New upstream release candidate.
+    - Fix regression from 7.10, missing characters in text display with
+      intel drivers (Closes: #631516). Thanks to Martin Steigerwald for
+      the report and the tests.
+  * Temporarily disable Wayland EGL backend as it requires a newer
+    libwayland-dev
+  * Update rules for configure changes
+  * debian/lib{egl1,openvg1}-mesa.install.in:
+  * debian/libegl1-mesa-drivers.install.in:
+    - Stop trying to install st_{GL,OpenVG} and pipe_*
+      as they are all now built in to egl_gallium.so
+  * Add libgbm{1,1-dbg,-dev} packages for the new buffer-manager library.
+  * Drop 12-llvm-config-check.diff; upstream.
+  * Add strictly versioned dependencies on libglapi-mesa to libgl1-mesa-glx
+    and libegl1-mesa-drivers as they also now depend on this internal library.
+  * debian/rules:
+  * debian/libgl1-mesa-dri.install.linux.in:
+    - Manually install r300g only when we actually build it.  Fixes build on
+      non-i386, non-amd64 linux.
+  * debian/rules:
+    - Delete src/mesa/depend before building.  This is accidentally included
+      in the upstream tarball, and contains paths from whoever built the
+      tarball.
+
+ -- Christopher James Halse Rogers <raof@ubuntu.com>  Thu, 14 Jul 2011 16:17:15 +1000
+
 mesa (7.11~1-0ubuntu3) oneiric; urgency=low
 
   * debian/rules:
@@ -63,33 +91,6 @@ mesa (7.11~1-0ubuntu1) oneiric; urgency=low
   
  -- Christopher James Halse Rogers <raof@ubuntu.com>  Mon, 27 Jun 2011 14:33:41 +0100
   
-mesa (7.11~1-1) UNRELEASED; urgency=low
-
-  [ Cyril Brulebois ]
-  * New upstream snapshot from the 7.11 branch (up to 1ad06c7a25):
-    - Fix regression from 7.10, missing characters in text display with
-      intel drivers (Closes: #631516). Thanks to Martin Steigerwald for
-      the report and the tests.
-
-  [ Christopher James Halse Rogers ]
-  * Temporarily disable Wayland EGL backend as it requires a newer 
-    libwayland-dev
-  * Update rules for configure changes
-  * debian/lib{egl1,openvg1}-mesa.install.in: 
-  * debian/libegl1-mesa-drivers.install.in: 
-    - Stop tryingStop trying to install st_{GL,OpenVG} and pipe_*
-      as they are all now built in to egl_gallium.so
-  * Add libgbm{1,1-dbg,-dev} packages for the new buffer-manager library.
-  * Drop 12-llvm-config-check.diff; upstream.
-  * Add strictly versioned dependencies on libglapi-mesa to libgl1-mesa-glx
-    and libegl1-mesa-drivers as they also now depend on this internal library.
-  * debian/rules:
-  * debian/libgl1-mesa-dri.install.linux.in:
-    - Manually install r300g only when we actually build it.  Fixes build on
-      non-i386, non-amd64 linux.
-
- -- Christopher James Halse Rogers <raof@ubuntu.com>  Tue, 28 Jun 2011 21:34:53 +0100
-
 mesa (7.11~0-2) experimental; urgency=low
 
   * Thank you sbuild for giving a green light when that's not actually the
