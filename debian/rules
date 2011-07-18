@@ -239,7 +239,7 @@ $(STAMP)-build-%: configure
 	# so this isn't very useful.
 	#
 	# It will be regenerated with correct paths by make.
-	rm $(DEB_BUILD_DIR)/$*/src/mesa/depend
+	-rm $(DEB_BUILD_DIR)/$*/src/mesa/depend
 
 	cd $(DEB_BUILD_DIR)/$* && \
 	../../configure --prefix=/usr --mandir=\$${prefix}/share/man \
