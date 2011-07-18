@@ -45,8 +45,12 @@ mesa (7.11~rc1-0ubuntu1) oneiric; urgency=low
   * debian/libgl1-mesa-dri-experimental.install.{i386,amd64}.in
     - Explicitly install i915g only when it has been built, matching what is
       done with r300g.
+  * debian/rules:
+  * debian/control:
+  * debian/libegl1-mesa{,-dev}.install.in:
+    - Enable the Wayland EGL backend.
 
- -- Christopher James Halse Rogers <raof@ubuntu.com>  Fri, 15 Jul 2011 11:38:48 +1000
+ -- Christopher James Halse Rogers <raof@ubuntu.com>  Mon, 18 Jul 2011 18:36:04 +1000
 
 mesa (7.11~rc1-1) UNRELEASED; urgency=low
 

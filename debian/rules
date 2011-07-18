@@ -80,7 +80,7 @@ else
 	GALLIUM_DRIVERS += nouveau r600
 # Although the KMS egl drivers will probably build on kfreebsd & hurd
 # only linux actually has KMS drivers implemented at this point.
-	EGL_DISPLAYS += drm
+	EGL_DISPLAYS += drm wayland
 # Nouveau requires KMS, so even the classic DRI driver only works on linux
 	DRI_DRIVERS += nouveau
   endif
