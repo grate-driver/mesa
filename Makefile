@@ -253,7 +253,6 @@ MAIN_FILES = \
 	$(DIRECTORY)/src/mesa/descrip.mms				\
 	$(DIRECTORY)/src/mesa/gl.pc.in					\
 	$(DIRECTORY)/src/mesa/osmesa.pc.in				\
-	$(DIRECTORY)/src/mesa/depend					\
 	$(MAIN_ES_FILES)						\
 	$(DIRECTORY)/src/mesa/main/*.[chS]				\
 	$(DIRECTORY)/src/mesa/main/*.cpp				\
@@ -423,28 +422,19 @@ GLW_FILES = \
 	$(DIRECTORY)/src/glw/*.[ch]			\
 	$(DIRECTORY)/src/glw/Makefile*			\
 	$(DIRECTORY)/src/glw/README			\
-	$(DIRECTORY)/src/glw/glw.pc.in			\
-	$(DIRECTORY)/src/glw/depend
+	$(DIRECTORY)/src/glw/glw.pc.in
 
 GLUT_FILES = \
 	$(DIRECTORY)/include/GL/glut.h			\
 	$(DIRECTORY)/include/GL/glutf90.h		\
 	$(DIRECTORY)/src/glut/glx/Makefile*		\
 	$(DIRECTORY)/src/glut/glx/SConscript		\
-	$(DIRECTORY)/src/glut/glx/depend		\
 	$(DIRECTORY)/src/glut/glx/glut.pc.in		\
 	$(DIRECTORY)/src/glut/glx/*def			\
 	$(DIRECTORY)/src/glut/glx/*.[ch]		\
 	$(DIRECTORY)/src/glut/beos/*.[ch]		\
 	$(DIRECTORY)/src/glut/beos/*.cpp		\
 	$(DIRECTORY)/src/glut/beos/Makefile
-
-DEPEND_FILES = \
-	$(TOP)/src/mesa/depend		\
-	$(TOP)/src/glx/depend		\
-	$(TOP)/src/glw/depend		\
-	$(TOP)/src/glut/glx/depend	\
-	$(TOP)/src/glu/sgi/depend
 
 
 LIB_FILES = \
@@ -483,14 +473,8 @@ AUTOCONF = autoconf
 AC_FLAGS =
 aclocal.m4: configure.ac acinclude.m4
 	$(ACLOCAL) $(ACLOCAL_FLAGS)
-configure: rm_depend configure.ac aclocal.m4 acinclude.m4
+configure: configure.ac aclocal.m4 acinclude.m4
 	$(AUTOCONF) $(AC_FLAGS)
-
-rm_depend:
-	@for dep in $(DEPEND_FILES) ; do \
-		rm -f $$dep ; \
-		touch $$dep ; \
-	done
 
 rm_config: parsers
 	rm -f configs/current
@@ -502,7 +486,7 @@ $(LIB_NAME).tar: rm_config
 $(LIB_NAME).tar.gz: $(LIB_NAME).tar
 	gzip --stdout --best $(LIB_NAME).tar > $(LIB_NAME).tar.gz
 
-$(GLUT_NAME).tar: rm_depend
+$(GLUT_NAME).tar:
 	cd .. ; tar -cf $(DIRECTORY)/$(GLUT_NAME).tar $(GLUT_FILES)
 
 $(GLUT_NAME).tar.gz: $(GLUT_NAME).tar
@@ -534,4 +518,4 @@ md5: $(ARCHIVES)
 	@-md5sum $(GLUT_NAME).tar.bz2
 	@-md5sum $(GLUT_NAME).zip
 
-.PHONY: tarballs rm_depend rm_config md5
+.PHONY: tarballs rm_config md5
