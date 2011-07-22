@@ -211,6 +211,7 @@ static void brw_new_batch( struct intel_context *intel )
    intel->batch.need_workaround_flush = true;
 
    brw->vb.nr_current_buffers = 0;
+   brw->ib.type = -1;
 
    /* Mark that the current program cache BO has been used by the GPU.
     * It will be reallocated if we need to put new programs in for the
