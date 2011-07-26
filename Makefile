@@ -285,9 +285,6 @@ MAIN_FILES = \
 	$(DIRECTORY)/src/mesa/drivers/osmesa/descrip.mms		\
 	$(DIRECTORY)/src/mesa/drivers/osmesa/osmesa.def			\
 	$(DIRECTORY)/src/mesa/drivers/osmesa/*.[ch]			\
-	$(DIRECTORY)/src/mesa/drivers/dri/r300/compiler/*.[ch]		\
-	$(DIRECTORY)/src/mesa/drivers/dri/r300/compiler/Makefile	\
-	$(DIRECTORY)/src/mesa/drivers/dri/r300/compiler/SConscript	\
 	$(DIRECTORY)/src/mesa/drivers/windows/*/*.[ch]			\
 	$(DIRECTORY)/src/mesa/drivers/windows/*/*.def			\
 	$(DIRECTORY)/src/mesa/drivers/x11/Makefile			\
@@ -393,6 +390,7 @@ DRI_FILES = \
 	$(DIRECTORY)/src/mesa/drivers/dri/*/*/*.[chS]			\
 	$(DIRECTORY)/src/mesa/drivers/dri/*/Makefile			\
 	$(DIRECTORY)/src/mesa/drivers/dri/*/*/Makefile			\
+	$(DIRECTORY)/src/mesa/drivers/dri/*/*/SConscript		\
 	$(DIRECTORY)/src/mesa/drivers/dri/*/Doxyfile
 
 SGI_GLU_FILES = \
