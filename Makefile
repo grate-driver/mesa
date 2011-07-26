@@ -481,13 +481,13 @@ rm_config: parsers
 	rm -f configs/autoconf
 
 $(LIB_NAME).tar: rm_config
-	cd .. ; tar -cf $(DIRECTORY)/$(LIB_NAME).tar $(LIB_FILES)
+	cd .. ; tar --dereference -cf $(DIRECTORY)/$(LIB_NAME).tar $(LIB_FILES)
 
 $(LIB_NAME).tar.gz: $(LIB_NAME).tar
 	gzip --stdout --best $(LIB_NAME).tar > $(LIB_NAME).tar.gz
 
 $(GLUT_NAME).tar:
-	cd .. ; tar -cf $(DIRECTORY)/$(GLUT_NAME).tar $(GLUT_FILES)
+	cd .. ; tar --dereference -cf $(DIRECTORY)/$(GLUT_NAME).tar $(GLUT_FILES)
 
 $(GLUT_NAME).tar.gz: $(GLUT_NAME).tar
 	gzip --stdout --best $(GLUT_NAME).tar > $(GLUT_NAME).tar.gz
