@@ -1240,7 +1240,7 @@ if test "x$enable_gbm" = xyes; then
                       AC_MSG_ERROR([gbm needs udev]))
     GBM_LIB_DEPS="$DLOPEN_LIBS $LIBUDEV_LIBS"
 
-    if test "x$enable_dri" = xyes; then
+    if test "$mesa_driver" = dri; then
         GBM_BACKEND_DIRS="$GBM_BACKEND_DIRS dri"
         if test "$SHARED_GLAPI" -eq 0; then
             AC_MSG_ERROR([gbm_dri requires --enable-shared-glapi])
