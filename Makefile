@@ -183,7 +183,7 @@ ultrix-gcc:
 
 # Rules for making release tarballs
 
-VERSION=7.11-rc3
+VERSION=7.11-rc4
 DIRECTORY = Mesa-$(VERSION)
 LIB_NAME = MesaLib-$(VERSION)
 GLUT_NAME = MesaGLUT-$(VERSION)
