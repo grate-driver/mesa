@@ -13,6 +13,7 @@ mesa (7.11-1) UNRELEASED; urgency=low
       as they are all now built in to egl_gallium.so
   * Add libgbm{1,1-dbg,-dev} packages for the new buffer-manager library.
   * Drop 12-llvm-config-check.diff; upstream.
+  * Refresh 13-llvm-config-pick-a-version.diff for new upstream.
   * Add strictly versioned dependencies on libglapi-mesa to libgl1-mesa-glx
     and libegl1-mesa-drivers as they also now depend on this internal library.
   * debian/rules:
