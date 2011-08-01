@@ -20,10 +20,6 @@ mesa (7.11-1) UNRELEASED; urgency=low
   * debian/libgl1-mesa-dri.install.linux.in:
     - Manually install r300g only when we actually build it.  Fixes build on
       non-i386, non-amd64 linux.
-  * debian/rules:
-    - Delete src/mesa/depend before building.  This is accidentally included
-      in the upstream tarball, and contains paths from whoever built the
-      tarball.
 
  -- Christopher James Halse Rogers <raof@ubuntu.com>  Thu, 14 Jul 2011 16:17:15 +1000
 
