@@ -136,6 +136,7 @@ struct intel_context
                                struct intel_region * draw_regions[],
                                struct intel_region * depth_region,
 			       GLuint num_regions);
+      void (*update_draw_buffer)(struct intel_context *intel);
 
       void (*reduced_primitive_state) (struct intel_context * intel,
                                        GLenum rprim);
@@ -199,6 +200,7 @@ struct intel_context
    drm_intel_bo *first_post_swapbuffers_batch;
    GLboolean need_throttle;
    GLboolean no_batch_wrap;
+   bool tnl_pipeline_running; /**< Set while i915's _tnl_run_pipeline. */
 
    struct
    {
@@ -228,7 +230,6 @@ struct intel_context
    GLuint coloroffset;
    GLuint specoffset;
    GLuint wpos_offset;
-   GLuint wpos_size;
 
    struct tnl_attr_map vertex_attrs[VERT_ATTRIB_MAX];
    GLuint vertex_attr_count;
