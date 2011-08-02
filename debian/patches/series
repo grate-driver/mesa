@@ -15,3 +15,4 @@
 115_llvm_dynamic_linking.diff
 116_use_shared_galliumcore.diff
 117_handle_dri2connect_errors_when_indirect.diff
+118_fix_24bpp_software_renering.diff

@@ -60,6 +60,9 @@ mesa (7.11-0ubuntu1) oneiric; urgency=low
     - Use alternatives for libEGL to match the handling of libGL.
       libEGL (and associated GL|ES and OpenVG libraries) now live in
       /usr/lib/$MULTIARCH/mesa-egl.  (LP: #812639)
+  * debian/patches/118_fix_24bpp_software_rendering.diff:
+    - Cherry pick upstream patch from master fixing graphical corruption when
+      using a 24bpp framebuffer and software rendering. (LP: #810339)
 
  -- Christopher James Halse Rogers <raof@ubuntu.com>  Tue, 19 Jul 2011 09:15:22 +1000
 
