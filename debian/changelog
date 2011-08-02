@@ -48,6 +48,7 @@ mesa (7.11-0ubuntu1) oneiric; urgency=low
   * debian/rules:
   * debian/control:
   * debian/libegl1-mesa{,-dev}.install.in:
+  * debian/libegl1-mesa.symbols:
     - Enable the Wayland EGL backend.
   * debian/rules:
   * debian/libegl1-mesa.{postinst,prerm,install}.in:
