@@ -261,11 +261,14 @@ install: build
 	$(MAKE) -C $(DEB_BUILD_DIR)/dri DESTDIR=$(CURDIR)/debian/tmp/dri install
 	for file in mesa-common-dev.install libopenvg1-mesa.install \
 	            libopenvg1-mesa-dev.install libgles2-mesa.install \
+		    libgles1-mesa-dev.links libgles2-mesa-dev.links \
+		    libopenvg1-mesa-dev.links \
 	            libgles2-mesa-dev.install libgles1-mesa.install \
 	            libgles1-mesa-dev.install libgl1-mesa-glx.install \
 	            libgl1-mesa-glx-i686.install libgl1-mesa-dri.install \
 	            libgl1-mesa-dri.install.linux libegl1-mesa.install \
-	            libgl1-mesa-dri-experimental.install \
+		    libegl1-mesa-dev.links libegl1-mesa.postinst \
+		    libegl1-mesa.prerm libgl1-mesa-dri-experimental.install \
 	            libegl1-mesa-drivers.install libegl1-mesa-dev.install \
 	            libgl1-mesa-dev.install libgl1-mesa-dev.links \
 		    libgl1-mesa-swx11-dev.install libgl1-mesa-swx11.install \
@@ -341,6 +344,12 @@ endif
 	mkdir -p $(CURDIR)/debian/libgl1-mesa-glx/usr/lib/$(DEB_HOST_MULTIARCH)/xorg/x11-extra-modules
 	mkdir -p $(CURDIR)/debian/libgl1-mesa-swx11/usr/lib/$(DEB_HOST_MULTIARCH)/xorg/x11-extra-modules
 
+	# Create an ld.so.conf which says where to find libEGL, libGLES{1,2} 
+	# and libOpenVG from Mesa.
+
+	echo "/usr/lib/$(DEB_HOST_MULTIARCH)/mesa-egl" \
+	> $(CURDIR)/debian/libegl1-mesa/usr/lib/$(DEB_HOST_MULTIARCH)/mesa-egl/ld.so.conf
+
 	dh_installman -s
 	dh_lintian -s
 	dh_link -s
@@ -379,13 +388,23 @@ endif
 	dh_compress -s
 	dh_fixperms -s
 ifeq (,$(filter sparc sparc64,$(DEB_HOST_ARCH)))
-	dh_makeshlibs -s -- -c4
+	# Resolve EGL/GLES/OpenVG symbols in the private library path.
+	# Because there's no packaging problem so onerous that accomodating
+	# proprietary alternatives can't make more difficult…
+	set -e ; for PACKAGE in \
+		libegl1-mesa libgles1-mesa libgles2-mesa libopenvg1-mesa ; do \
+			dh_makeshlibs -p$$PACKAGE -- -c4 \
+			-edebian/$$PACKAGE/usr/lib/$(DEB_HOST_MULTIARCH)/mesa-egl/\* \
+		; done
+
+	dh_makeshlibs -s --remaining-packages -- -c4
 else
 	# Temporarily work around FTBFS on sparc, ignore new symbols:
 	dh_makeshlibs -s -- -c1
 endif
 	dh_installdeb -s
-	dh_shlibdeps -s -l/usr/lib/$(DEB_HOST_MULTIARCH)/mesa
+	dh_shlibdeps -s -l/usr/lib/$(DEB_HOST_MULTIARCH)/mesa:\
+/usr/lib/$(DEB_HOST_MULTIARCH)/mesa-egl
 	dh_gencontrol -s
 	dh_md5sums -s
 	dh_builddeb -s -- -Zlzma

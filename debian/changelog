@@ -49,8 +49,18 @@ mesa (7.11~rc1-0ubuntu1) oneiric; urgency=low
   * debian/control:
   * debian/libegl1-mesa{,-dev}.install.in:
     - Enable the Wayland EGL backend.
+  * debian/rules:
+  * debian/libegl1-mesa.{postinst,prerm,install}.in:
+  * debian/libegl1-mesa-dev.{install,links}.in:
+  * debian/libgles{1,2}-mesa.install.in:
+  * debian/libgles{1,2}-mesa-dev.links.in:
+  * debian/libopenvg1-mesa{,-dev}.install.in:
+  * debian/libopenvg1-mesa-dev.links.in:
+    - Use alternatives for libEGL to match the handling of libGL.
+      libEGL (and associated GL|ES and OpenVG libraries) now live in
+      /usr/lib/$MULTIARCH/mesa-egl.  (LP: #812639)
 
- -- Christopher James Halse Rogers <raof@ubuntu.com>  Mon, 18 Jul 2011 18:36:04 +1000
+ -- Christopher James Halse Rogers <raof@ubuntu.com>  Tue, 19 Jul 2011 09:15:22 +1000
 
 mesa (7.11~rc1-1) UNRELEASED; urgency=low
 
