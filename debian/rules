@@ -233,13 +233,6 @@ $(STAMP)-build-%: configure
 	mkdir -p $(DEB_BUILD_DIR)/$*
 	find $(CURDIR)/* -maxdepth 0 -not -path '$(DEB_BUILD_DIR)*' | \
 		xargs cp -rlf -t $(DEB_BUILD_DIR)/$*
-	# The 7.11-rc1 tarball ships the src/mesa/depend file from some
-	# (clearly RedHat!) developer's system.
-	# We don't have /usr/lib/gcc/x86_64-redhat-linux/4.6.0/include/stddef.h
-	# so this isn't very useful.
-	#
-	# It will be regenerated with correct paths by make.
-	-rm $(DEB_BUILD_DIR)/$*/src/mesa/depend
 
 	cd $(DEB_BUILD_DIR)/$* && \
 	../../configure --prefix=/usr --mandir=\$${prefix}/share/man \

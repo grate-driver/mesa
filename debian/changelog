@@ -1,4 +1,4 @@
-mesa (7.11~rc1-0ubuntu1) oneiric; urgency=low
+mesa (7.11-0ubuntu1) oneiric; urgency=low
 
   * Fake merge from Debian experimental, updating previous changelog entries.
     Remaining Ubuntu changes:
@@ -62,9 +62,9 @@ mesa (7.11~rc1-0ubuntu1) oneiric; urgency=low
 
  -- Christopher James Halse Rogers <raof@ubuntu.com>  Tue, 19 Jul 2011 09:15:22 +1000
 
-mesa (7.11~rc1-1) UNRELEASED; urgency=low
+mesa (7.11-1) UNRELEASED; urgency=low
 
-  * New upstream release candidate.
+  * New upstream release.
     - Fix regression from 7.10, missing characters in text display with
       intel drivers (Closes: #631516). Thanks to Martin Steigerwald for
       the report and the tests.
@@ -77,16 +77,13 @@ mesa (7.11~rc1-1) UNRELEASED; urgency=low
       as they are all now built in to egl_gallium.so
   * Add libgbm{1,1-dbg,-dev} packages for the new buffer-manager library.
   * Drop 12-llvm-config-check.diff; upstream.
+  * Refresh 13-llvm-config-pick-a-version.diff for new upstream.
   * Add strictly versioned dependencies on libglapi-mesa to libgl1-mesa-glx
     and libegl1-mesa-drivers as they also now depend on this internal library.
   * debian/rules:
   * debian/libgl1-mesa-dri.install.linux.in:
     - Manually install r300g only when we actually build it.  Fixes build on
       non-i386, non-amd64 linux.
-  * debian/rules:
-    - Delete src/mesa/depend before building.  This is accidentally included
-      in the upstream tarball, and contains paths from whoever built the
-      tarball.
 
  -- Christopher James Halse Rogers <raof@ubuntu.com>  Thu, 14 Jul 2011 16:17:15 +1000
 

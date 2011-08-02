@@ -563,9 +563,9 @@ AC_ARG_ENABLE([gallium_gbm],
     [AS_HELP_STRING([--enable-gallium-gbm],
         [enable optional gbm state tracker (not required for
          gbm support in Gallium)
-         @<:@default=disable@:>@])],
+         @<:@default=auto@:>@])],
     [enable_gallium_gbm="$enableval"],
-    [enable_gallium_gbm=no])
+    [enable_gallium_gbm=auto])
 
 # Option for Gallium drivers
 GALLIUM_DRIVERS_DEFAULT="r300,r600,swrast"
@@ -577,6 +577,13 @@ AC_ARG_WITH([gallium-drivers],
         @<:@default=r300,r600,swrast@:>@])],
     [with_gallium_drivers="$withval"],
     [with_gallium_drivers="$GALLIUM_DRIVERS_DEFAULT"])
+
+# Doing '--without-gallium-drivers' will set this variable to 'no'.  Clear it
+# here so that the script doesn't choke on an unknown driver name later.
+case "$with_gallium_drivers" in
+    yes) with_gallium_drivers="$GALLIUM_DRIVERS_DEFAULT" ;;
+    no) with_gallium_drivers='' ;;
+esac
 
 if test "x$enable_opengl" = xno -a \
         "x$enable_gles1" = xno -a \
@@ -822,7 +829,7 @@ xlib)
         GL_PC_LIB_PRIV="$GL_LIB_DEPS"
         GL_PC_CFLAGS="$X11_INCLUDES"
     fi
-    GL_LIB_DEPS="$GL_LIB_DEPS $SELINUX_LIBS -lm -lpthread"
+    GL_LIB_DEPS="$GL_LIB_DEPS $SELINUX_LIBS -lm -lpthread $DLOPEN_LIBS"
     GL_PC_LIB_PRIV="$GL_PC_LIB_PRIV $SELINUX_LIBS -lm -lpthread"
 
     # if static, move the external libraries to the programs
@@ -947,11 +954,6 @@ AC_SUBST([DRI_CFLAGS])
 AC_SUBST([MESA_MODULES])
 
 AC_SUBST([HAVE_XF86VIDMODE])
-
-PKG_CHECK_MODULES([LIBDRM_RADEON],
-		  [libdrm_radeon >= $LIBDRM_RADEON_REQUIRED],
-		  HAVE_LIBDRM_RADEON=yes,
-		  HAVE_LIBDRM_RADEON=no)
 
 dnl
 dnl More X11 setup
@@ -1139,6 +1141,11 @@ esac
 
 case $DRI_DIRS in
 *radeon*|*r200*|*r300*|*r600*)
+    PKG_CHECK_MODULES([LIBDRM_RADEON],
+		      [libdrm_radeon >= $LIBDRM_RADEON_REQUIRED],
+		      HAVE_LIBDRM_RADEON=yes,
+		      HAVE_LIBDRM_RADEON=no)
+
     if test "x$HAVE_LIBDRM_RADEON" = xyes; then
 	RADEON_CFLAGS="-DHAVE_LIBDRM_RADEON=1 $LIBDRM_RADEON_CFLAGS"
 	RADEON_LDFLAGS=$LIBDRM_RADEON_LIBS
@@ -1215,6 +1222,41 @@ AC_SUBST([OSMESA_PC_REQ])
 AC_SUBST([OSMESA_PC_LIB_PRIV])
 
 dnl
+dnl gbm configuration
+dnl
+if test "x$enable_gbm" = xauto; then
+    case "$with_egl_platforms" in
+        *drm*)
+            enable_gbm=yes ;;
+         *)
+            enable_gbm=no ;;
+    esac
+fi
+if test "x$enable_gbm" = xyes; then
+    SRC_DIRS="$SRC_DIRS gbm"
+    GBM_BACKEND_DIRS=""
+
+    PKG_CHECK_MODULES([LIBUDEV], [libudev], [],
+                      AC_MSG_ERROR([gbm needs udev]))
+    GBM_LIB_DEPS="$DLOPEN_LIBS $LIBUDEV_LIBS"
+
+    if test "$mesa_driver" = dri; then
+        GBM_BACKEND_DIRS="$GBM_BACKEND_DIRS dri"
+        if test "$SHARED_GLAPI" -eq 0; then
+            AC_MSG_ERROR([gbm_dri requires --enable-shared-glapi])
+        fi
+    fi
+fi
+AC_SUBST([GBM_LIB_DEPS])
+AC_SUBST([GBM_BACKEND_DIRS])
+GBM_PC_REQ_PRIV="libudev"
+GBM_PC_LIB_PRIV="$DLOPEN_LIBS"
+GBM_PC_CFLAGS=
+AC_SUBST([GBM_PC_REQ_PRIV])
+AC_SUBST([GBM_PC_LIB_PRIV])
+AC_SUBST([GBM_PC_CFLAGS])
+
+dnl
 dnl EGL configuration
 dnl
 EGL_CLIENT_APIS=""
@@ -1261,41 +1303,6 @@ AC_SUBST([EGL_LIB_DEPS])
 AC_SUBST([EGL_DRIVERS_DIRS])
 
 dnl
-dnl gbm configuration
-dnl
-if test "x$enable_gbm" = xauto; then
-    case "$with_egl_platforms" in
-        *drm*)
-            enable_gbm=yes ;;
-         *)
-            enable_gbm=no ;;
-    esac
-fi
-if test "x$enable_gbm" = xyes; then
-    SRC_DIRS="$SRC_DIRS gbm"
-    GBM_BACKEND_DIRS=""
-
-    PKG_CHECK_MODULES([LIBUDEV], [libudev], [],
-                      AC_MSG_ERROR([gbm needs udev]))
-    GBM_LIB_DEPS="$DLOPEN_LIBS $LIBUDEV_LIBS"
-
-    if test "$mesa_driver" = dri; then
-        GBM_BACKEND_DIRS="$GBM_BACKEND_DIRS dri"
-        if test "$SHARED_GLAPI" -eq 0; then
-            AC_MSG_ERROR([gbm_dri requires --enable-shared-glapi])
-        fi
-    fi
-fi
-AC_SUBST([GBM_LIB_DEPS])
-AC_SUBST([GBM_BACKEND_DIRS])
-GBM_PC_REQ_PRIV="libudev"
-GBM_PC_LIB_PRIV="$DLOPEN_LIBS"
-GBM_PC_CFLAGS=
-AC_SUBST([GBM_PC_REQ_PRIV])
-AC_SUBST([GBM_PC_LIB_PRIV])
-AC_SUBST([GBM_PC_CFLAGS])
-
-dnl
 dnl EGL Gallium configuration
 dnl
 if test "x$enable_gallium_egl" = xyes; then
@@ -1314,6 +1321,14 @@ fi
 dnl
 dnl gbm Gallium configuration
 dnl
+if test "x$enable_gallium_gbm" = xauto; then
+    case "$enable_gbm$HAVE_ST_EGL$with_egl_platforms" in
+        yesyes*drm*)
+            enable_gallium_gbm=yes ;;
+         *)
+            enable_gallium_gbm=no ;;
+    esac
+fi
 if test "x$enable_gallium_gbm" = xyes; then
     if test "x$with_gallium_drivers" = x; then
         AC_MSG_ERROR([cannot enable gbm_gallium without Gallium])
@@ -1595,9 +1610,6 @@ dnl Gallium configuration
 dnl
 if test "x$with_gallium_drivers" != x; then
     SRC_DIRS="$SRC_DIRS gallium gallium/winsys gallium/targets"
-    AC_PATH_PROG([LLVM_CONFIG], [llvm-config], [no])
-else
-    LLVM_CONFIG=no
 fi
 
 AC_SUBST([LLVM_CFLAGS])
@@ -1650,9 +1662,13 @@ yes)
 		WAYLAND_EGL_LIB_DEPS="$WAYLAND_LIBS $LIBDRM_LIBS"
                 GALLIUM_WINSYS_DIRS="$GALLIUM_WINSYS_DIRS sw/wayland"
 	fi
-        if test "$plat" = "drm" && test "x$enable_gbm" = no; then
+        if test "$plat" = "drm" && test "x$enable_gbm" = "xno"; then
                 AC_MSG_ERROR([EGL platform drm needs gbm])
         fi
+        case "$plat$have_libudev" in
+                waylandno|drmno)
+                    AC_MSG_ERROR([cannot build $plat platfrom without udev]) ;;
+        esac
     done
     EGL_PLATFORMS="$egl_platforms"
     ;;
@@ -1715,6 +1731,8 @@ if test "x$enable_gallium_llvm" = xauto; then
     esac
 fi
 if test "x$enable_gallium_llvm" = xyes; then
+    AC_PATH_PROG([LLVM_CONFIG], [llvm-config], [no])
+
     if test "x$LLVM_CONFIG" != xno; then
 	LLVM_VERSION=`$LLVM_CONFIG --version`
 	LLVM_CFLAGS=`$LLVM_CONFIG --cppflags`
@@ -1767,9 +1785,11 @@ if test "x$with_gallium_drivers" != x; then
             gallium_check_st "svga/drm" "dri-vmwgfx" "xorg-vmwgfx"
             ;;
         xi915)
+            PKG_CHECK_MODULES([INTEL], [libdrm_intel >= $LIBDRM_INTEL_REQUIRED])
             gallium_check_st "i915/drm" "dri-i915" "xorg-i915"
             ;;
         xi965)
+            PKG_CHECK_MODULES([INTEL], [libdrm_intel >= $LIBDRM_INTEL_REQUIRED])
             gallium_check_st "i965/drm" "dri-i965" "xorg-i965"
             ;;
         xr300)
@@ -1781,6 +1801,7 @@ if test "x$with_gallium_drivers" != x; then
             gallium_check_st "r600/drm" "dri-r600"
             ;;
         xnouveau)
+            PKG_CHECK_MODULES([NOUVEAU], [libdrm_nouveau >= $LIBDRM_NOUVEAU_REQUIRED])
             GALLIUM_DRIVERS_DIRS="$GALLIUM_DRIVERS_DIRS nouveau nvfx nv50 nvc0"
             gallium_check_st "nouveau/drm" "dri-nouveau" "xorg-nouveau"
             ;;
