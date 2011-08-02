@@ -1,6 +1,7 @@
 mesa (7.11-0ubuntu1) oneiric; urgency=low
 
   * Fake merge from Debian experimental, updating previous changelog entries.
+    New upstream release fixes infrequent X crash (LP: #800778).
     Remaining Ubuntu changes:
    - debian/control
       + Drop lesstif-dev from Build-Depends; it's in Universe.
