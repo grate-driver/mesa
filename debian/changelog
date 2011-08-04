@@ -1,4 +1,4 @@
-mesa (7.11-0ubuntu1) oneiric; urgency=low
+mesa (7.11-0ubuntu1) UNRELEASED; urgency=low
 
   * Fake merge from Debian experimental, updating previous changelog entries.
     New upstream release fixes infrequent X crash (LP: #800778).
