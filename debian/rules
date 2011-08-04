@@ -225,6 +225,10 @@ $(QUILT_STAMPFN): $(STAMP_DIR)/stamp
 build: build-stamp
 
 build-stamp: $(BUILD_STAMPS)
+	# Build pot file for pkgstriptranslations
+	# We do this only once, and outside the build trees, so that
+	# pkgstriptranslations doesn't get confused.
+	$(MAKE) -C src/mesa/drivers/dri/common/xmlpool pot
 	>$@
 
 $(STAMP)-build-%: configure
@@ -240,6 +244,11 @@ $(STAMP)-build-%: configure
 	             --libdir=\$${prefix}/lib/$(DEB_HOST_MULTIARCH) \
 	             --localstatedir=/var $(confflags) $(confflags-$*)
 	cd $(DEB_BUILD_DIR)/$* && $(MAKE)
+
+	# Remove extra po files.  These confuse pkgstriptranslations
+	# and aren't shipped anyway.
+	rm $(DEB_BUILD_DIR)/$*/src/mesa/drivers/dri/common/xmlpool/*.po ; \
+
 	>$@
 
 install: build

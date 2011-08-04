@@ -32,3 +32,6 @@ debian/libgl1-mesa-swx11.postinst
 debian/libgl1-mesa-swx11.prerm
 debian/libgbm1.install
 debian/libgbm-dev.install
+
+# And for pkgstriptranslation's benefit…
+src/mesa/drivers/dri/common/xmlpool/xmlpool.pot
