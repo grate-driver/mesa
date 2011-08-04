@@ -68,8 +68,11 @@ mesa (7.11-0ubuntu1) UNRELEASED; urgency=low
   * debian/clean:
     - Generate xmlpool pot file and clean up other po files for
       pkgbinarymangler's benefit (LP: #410264).
+  * debian/patches/119_r600g_gnome_shell_rendering_fix.diff:
+    - Cherry pick upstream commit fixing rendering corruption in gnome-shell
+      (and therefore likely Unity as well).
 
- -- Christopher James Halse Rogers <raof@ubuntu.com>  Tue, 19 Jul 2011 09:15:22 +1000
+ -- Christopher James Halse Rogers <raof@ubuntu.com>  Thu, 04 Aug 2011 16:25:08 +1000
 
 mesa (7.11-1) UNRELEASED; urgency=low
 
