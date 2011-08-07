@@ -1,4 +1,4 @@
-mesa (7.10.3-4) UNRELEASED; urgency=low
+mesa (7.10.3-4) UNRELEASED; urgency=medium
 
   [ Cyril Brulebois ]
   * Accept libmotif-dev as an alternative to lesstif2-dev in
@@ -18,6 +18,8 @@ mesa (7.10.3-4) UNRELEASED; urgency=low
   * Use the sed substitution on all debian/*.in files accordingly.
   * Remove debian/clean, and use the same for loop to remove the generated
     files.
+  * Set urgency to “medium” to speed things up. Migration to testing is
+    a prerequisite for squeeze backports.
 
   [ Sven Joachim ]
   * Fix comments in libegl1-mesa.symbols to avoid impending FTBFS with
