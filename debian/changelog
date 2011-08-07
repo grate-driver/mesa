@@ -1,4 +1,4 @@
-mesa (7.10.3-4) UNRELEASED; urgency=medium
+mesa (7.10.3-4) unstable; urgency=medium
 
   [ Cyril Brulebois ]
   * Accept libmotif-dev as an alternative to lesstif2-dev in
@@ -25,7 +25,7 @@ mesa (7.10.3-4) UNRELEASED; urgency=medium
   * Fix comments in libegl1-mesa.symbols to avoid impending FTBFS with
     the upcoming dpkg-dev 1.16.1.
 
- -- Cyril Brulebois <kibi@debian.org>  Wed, 22 Jun 2011 11:18:36 +0200
+ -- Cyril Brulebois <kibi@debian.org>  Sun, 07 Aug 2011 21:50:46 +0200
 
 mesa (7.10.3-3) unstable; urgency=low
 
