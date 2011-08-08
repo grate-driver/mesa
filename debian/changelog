@@ -1,3 +1,9 @@
+mesa (7.11-0ubuntu2) oneiric; urgency=low
+
+  * No change rebuild against new libwayland-dev.  Fixes PowerPC build.
+
+ -- Christopher James Halse Rogers <raof@ubuntu.com>  Mon, 08 Aug 2011 21:11:03 +1000
+
 mesa (7.11-0ubuntu1) oneiric; urgency=low
 
   * Fake merge from Debian experimental, updating previous changelog entries.
