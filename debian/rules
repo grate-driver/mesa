@@ -274,6 +274,7 @@ install: build
 	            libegl1-mesa-drivers.install libegl1-mesa-dev.install \
 	            libgl1-mesa-dev.install libgl1-mesa-dev.links \
 		    libgl1-mesa-swx11-dev.install libgl1-mesa-swx11.install \
+		    libgl1-mesa-swx11-dev.links \
 	   	    libgl1-mesa-glx.postinst libgl1-mesa-glx.prerm \
 		    libgl1-mesa-swx11.postinst libgl1-mesa-swx11.prerm \
 		    libgbm1.install libgbm-dev.install \

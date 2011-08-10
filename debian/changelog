@@ -4,11 +4,16 @@ mesa (7.11-0ubuntu3) UNRELEASED; urgency=low
   * debian/libopenvg1-mesa-dev.links.in:
     - Install a symlink to libOpenVG.so so that the linker can actually find
       it.
+  * debian/rules:
+  * debian/libgl1-mesa-swx11-dev.links.in:
+    - Make linking against libGL in libgl1-mesa-swx11-dev actually work.  This
+      seems to have been broken since Ubuntu 10.04 without complaint, so it's
+      fairly clear that no-one actually uses this package.
 
   [ Robert Hooker ]
   * Correct gbm.h install location in libgbm-dev.
 
- -- Christopher James Halse Rogers <raof@ubuntu.com>  Wed, 10 Aug 2011 12:26:53 +1000
+ -- Christopher James Halse Rogers <raof@ubuntu.com>  Wed, 10 Aug 2011 12:58:15 +1000
 
 mesa (7.11-0ubuntu2) oneiric; urgency=low
 
