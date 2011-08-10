@@ -1,0 +1,1 @@
+/usr/lib/${DEB_HOST_MULTIARCH}/mesa-egl/libOpenVG.so /usr/lib/${DEB_HOST_MULTIARCH}/libOpenVG.so

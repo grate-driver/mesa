@@ -2,8 +2,11 @@ mesa (7.11-0ubuntu3) UNRELEASED; urgency=low
 
   * debian/libgbm-dev.install.in:
     - Install gbm.h in the right place.
+  * debian/libopenvg1-mesa-dev.links.in:
+    - Install a symlink to libOpenVG.so so that the linker can actually find
+      it.
 
- -- Christopher James Halse Rogers <raof@ubuntu.com>  Wed, 10 Aug 2011 10:14:04 +1000
+ -- Christopher James Halse Rogers <raof@ubuntu.com>  Wed, 10 Aug 2011 10:56:43 +1000
 
 mesa (7.11-0ubuntu2) oneiric; urgency=low
 
