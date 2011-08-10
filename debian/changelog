@@ -1,4 +1,4 @@
-mesa (7.11-0ubuntu3) UNRELEASED; urgency=low
+mesa (7.11-0ubuntu3) oneiric; urgency=low
 
   [ Christopher James Halse Rogers ]
   * debian/libopenvg1-mesa-dev.links.in:
