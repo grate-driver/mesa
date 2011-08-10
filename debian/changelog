@@ -1,3 +1,10 @@
+mesa (7.11-0ubuntu3) UNRELEASED; urgency=low
+
+  * debian/libgbm-dev.install.in:
+    - Install gbm.h in the right place.
+
+ -- Christopher James Halse Rogers <raof@ubuntu.com>  Wed, 10 Aug 2011 10:14:04 +1000
+
 mesa (7.11-0ubuntu2) oneiric; urgency=low
 
   * No change rebuild against new libwayland-dev.  Fixes PowerPC build.
