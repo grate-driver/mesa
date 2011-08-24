@@ -1,4 +1,4 @@
-mesa (7.11-1) UNRELEASED; urgency=low
+mesa (7.11-1) unstable; urgency=low
 
   [ Christopher James Halse Rogers ]
   * New upstream release.
@@ -25,7 +25,7 @@ mesa (7.11-1) UNRELEASED; urgency=low
   [ Julien Cristau ]
   * Don't use dh_testroot in clean.
 
- -- Christopher James Halse Rogers <raof@ubuntu.com>  Thu, 14 Jul 2011 16:17:15 +1000
+ -- Julien Cristau <jcristau@debian.org>  Thu, 25 Aug 2011 00:15:27 +0200
 
 mesa (7.11~0-2) experimental; urgency=low
 
