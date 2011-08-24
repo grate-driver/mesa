@@ -260,7 +260,6 @@ install: build
 
 clean: unpatch
 	dh_testdir
-	dh_testroot
 	rm -rf .pc
 
 	rm -f config.cache config.log config.status

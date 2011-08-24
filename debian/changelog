@@ -1,5 +1,6 @@
 mesa (7.11-1) UNRELEASED; urgency=low
 
+  [ Christopher James Halse Rogers ]
   * New upstream release.
     - Fix regression from 7.10, missing characters in text display with
       intel drivers (Closes: #631516). Thanks to Martin Steigerwald for
@@ -20,6 +21,9 @@ mesa (7.11-1) UNRELEASED; urgency=low
   * debian/libgl1-mesa-dri.install.linux.in:
     - Manually install r300g only when we actually build it.  Fixes build on
       non-i386, non-amd64 linux.
+
+  [ Julien Cristau ]
+  * Don't use dh_testroot in clean.
 
  -- Christopher James Halse Rogers <raof@ubuntu.com>  Thu, 14 Jul 2011 16:17:15 +1000
 
