@@ -276,6 +276,8 @@ clean: unpatch
 # Build architecture-independent files here.
 binary-indep: install
 
+dbgpkg = $(filter %-dbg, $(shell dh_listpackages -s))
+otherpkg = $(filter-out %-dbg, $(shell dh_listpackages -s))
 
 # Build architecture-dependent files here.
 binary-arch: install
@@ -357,7 +359,8 @@ endif
 	dh_shlibdeps -s
 	dh_gencontrol -s
 	dh_md5sums -s
-	dh_builddeb -s
+	dh_builddeb $(foreach pkg,$(dbgpkg),-p$(pkg)) -- -Zxz
+	dh_builddeb $(foreach pkg,$(otherpkg),-p$(pkg))
 
 binary: binary-indep binary-arch
 .PHONY: configs build clean binary-indep binary-arch binary install
