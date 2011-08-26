@@ -2,6 +2,7 @@ mesa (7.11-4) UNRELEASED; urgency=low
 
   * Use xz compression for dbg packages.
   * Simplify dh_strip calls a bit using make variables.
+  * libgbm-dev is also linux-only, not just libgbm1.
 
  -- Julien Cristau <jcristau@debian.org>  Fri, 26 Aug 2011 15:38:29 +0200
 
