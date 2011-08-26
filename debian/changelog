@@ -1,6 +1,7 @@
 mesa (7.11-3) UNRELEASED; urgency=low
 
   * Don't build libgbm on kfreebsd, it needs KMS/udev.
+  * Build/ship r300g on all Linux architectures, not just x86.
 
  -- Julien Cristau <jcristau@debian.org>  Fri, 26 Aug 2011 10:58:06 +0200
 
