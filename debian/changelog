@@ -1,4 +1,4 @@
-mesa (7.11-5) UNRELEASED; urgency=low
+mesa (7.11-5) unstable; urgency=low
 
   * Merge patch from Pino Tiscano (thanks!):
     - Use hurd-any instead of: hurd-i386 (“wildcard archs are free”).
@@ -9,7 +9,7 @@ mesa (7.11-5) UNRELEASED; urgency=low
     - Switch libglapi-mesa{,-dbg} arch: any. This fixes the FTBFS on
       hurd-i386^Wany.
 
- -- Cyril Brulebois <kibi@debian.org>  Sun, 28 Aug 2011 18:55:28 +0200
+ -- Cyril Brulebois <kibi@debian.org>  Sun, 28 Aug 2011 19:07:48 +0200
 
 mesa (7.11-4) unstable; urgency=low
 
