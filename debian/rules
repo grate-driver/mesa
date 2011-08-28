@@ -20,7 +20,6 @@ ifneq (,$(filter parallel=%,$(DEB_BUILD_OPTIONS)))
 endif
 
 DEB_HOST_MULTIARCH ?= $(shell dpkg-architecture -qDEB_HOST_MULTIARCH)
-DEB_BUILD_ARCH     ?= $(shell dpkg-architecture -qDEB_BUILD_ARCH)
 DEB_HOST_ARCH      ?= $(shell dpkg-architecture -qDEB_HOST_ARCH)
 DEB_HOST_ARCH_OS   ?= $(shell dpkg-architecture -qDEB_HOST_ARCH_OS)
 DEB_HOST_GNU_TYPE  ?= $(shell dpkg-architecture -qDEB_HOST_GNU_TYPE)
@@ -33,15 +32,13 @@ else
 	confflags += --build=$(DEB_BUILD_GNU_TYPE) --host=$(DEB_HOST_GNU_TYPE)
 endif
 
-# choose which configurations to build
-include debian/scripts/choose-configs
-
 # keep a list of files we don't install (yet), but since it's a bit
 # large, use an external file:
 include debian/not-installed
 
 # build the following configurations by default
-CONFIGS = $(SWX11_GLU_CONFIGS) \
+CONFIGS = swx11+glu \
+	  swx11+glu-static \
 	  dri \
 	  osmesa \
 	  osmesa-static \
@@ -49,6 +46,10 @@ CONFIGS = $(SWX11_GLU_CONFIGS) \
 	  osmesa16-static \
 	  osmesa32 \
 	  osmesa32-static
+
+ifeq ($(DEB_HOST_ARCH_CPU), i386)
+	CONFIGS += swx11+glu-i386-i686
+endif
 
 STAMP_DIR = debian/stamp
 STAMP = $(STAMP_DIR)/$(DEB_BUILD_GNU_TYPE)
