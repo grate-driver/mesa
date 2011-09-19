@@ -891,7 +891,7 @@ unpack_image(struct gl_context *ctx, GLuint dimensions,
       return NULL;
    }
 
-   if (_mesa_bytes_per_pixel(format, type) <= 0) {
+   if (_mesa_bytes_per_pixel(format, type) < 0) {
       /* bad format and/or type */
       return NULL;
    }
