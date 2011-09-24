@@ -1,4 +1,4 @@
-mesa (7.11-6) UNRELEASED; urgency=low
+mesa (7.11-6) unstable; urgency=low
 
   [ Julien Cristau ]
   * Inline what's left of debian/scripts/choose-configs in debian/rules.
@@ -11,7 +11,7 @@ mesa (7.11-6) UNRELEASED; urgency=low
   [ Cyril Brulebois ]
   * Document the symlink dance in README.source.
 
- -- Julien Cristau <jcristau@debian.org>  Sun, 28 Aug 2011 19:46:58 +0200
+ -- Cyril Brulebois <kibi@debian.org>  Sat, 24 Sep 2011 20:32:55 +0200
 
 mesa (7.11-5) unstable; urgency=low
 
