@@ -114,6 +114,7 @@ confflags-dri = \
 	--with-dri-searchpath='/usr/lib/$(DEB_HOST_MULTIARCH)/dri:\$$$${ORIGIN}/dri:/usr/lib/dri' \
 	--enable-glx-tls \
 	--enable-shared-glapi \
+	--enable-texture-float \
 	$(confflags_DIRECT_RENDERING) \
 	$(confflags_EGL) \
 	$(confflags_GALLIUM) \
