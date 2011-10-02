@@ -1810,6 +1810,11 @@ if test "x$with_gallium_drivers" != x; then
             gallium_check_st "nouveau/drm" "dri-nouveau" "xorg-nouveau"
             ;;
         xswrast)
+            GALLIUM_DRIVERS_DIRS="$GALLIUM_DRIVERS_DIRS softpipe"
+            if test "x$MESA_LLVM" = x1; then
+                GALLIUM_DRIVERS_DIRS="$GALLIUM_DRIVERS_DIRS llvmpipe"
+            fi
+
             if test "x$HAVE_ST_DRI" = xyes; then
                 GALLIUM_TARGET_DIRS="$GALLIUM_TARGET_DIRS dri-swrast"
             fi
