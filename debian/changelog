@@ -1,3 +1,10 @@
+mesa (7.11-0ubuntu4) precise; urgency=low
+
+  * Fix comments in libegl1-mesa.symbols to avoid build failures with
+    dpkg-dev 1.16.1 (Closes: #642690, LP: #878562).
+
+ -- Benjamin Drung <bdrung@ubuntu.com>  Fri, 21 Oct 2011 13:53:25 +0200
+
 mesa (7.11-0ubuntu3) oneiric; urgency=low
 
   [ Christopher James Halse Rogers ]
