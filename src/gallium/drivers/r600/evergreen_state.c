@@ -809,9 +809,7 @@ static void evergreen_db(struct r600_pipe_context *rctx, struct r600_pipe_state 
 	struct r600_resource_texture *rtex;
 	struct r600_resource *rbuffer;
 	struct r600_surface *surf;
-	unsigned level;
-	unsigned pitch, slice, format, stencil_format;
-	unsigned offset;
+	unsigned level, pitch, slice, format, stencil_format, offset, array_mode;
 
 	if (state->zsbuf == NULL)
 		return;
@@ -823,9 +821,13 @@ static void evergreen_db(struct r600_pipe_context *rctx, struct r600_pipe_state 
 
 	rbuffer = &rtex->resource;
 
-	/* XXX quite sure for dx10+ hw don't need any offset hacks */
 	offset = r600_texture_get_offset((struct r600_resource_texture *)state->zsbuf->texture,
 					 level, state->zsbuf->u.tex.first_layer);
+
+	/* XXX remove this once tiling is properly supported */
+	array_mode = rtex->array_mode[level] ? rtex->array_mode[level] :
+					       V_028C70_ARRAY_1D_TILED_THIN1;
+
 	pitch = rtex->pitch_in_blocks[level] / 8 - 1;
 	slice = rtex->pitch_in_blocks[level] * surf->aligned_height / 64 - 1;
 	format = r600_translate_dbformat(state->zsbuf->texture->format);
@@ -851,7 +853,7 @@ static void evergreen_db(struct r600_pipe_context *rctx, struct r600_pipe_state 
 				S_028044_FORMAT(stencil_format), 0xFFFFFFFF, rbuffer->bo);
 
 	r600_pipe_state_add_reg(rstate, R_028040_DB_Z_INFO,
-				S_028040_ARRAY_MODE(rtex->array_mode[level]) | S_028040_FORMAT(format),
+				S_028040_ARRAY_MODE(array_mode) | S_028040_FORMAT(format),
 				0xFFFFFFFF, rbuffer->bo);
 	r600_pipe_state_add_reg(rstate, R_028058_DB_DEPTH_SIZE,
 				S_028058_PITCH_TILE_MAX(pitch),
