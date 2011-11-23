@@ -7,6 +7,7 @@ mesa (7.11.1-1) UNRELEASED; urgency=low
     (Closes: #605444).
     - New patch 14-load-swrastg-before-swrast.diff to prefer swrastg over
       swrast.
+    - Build-depend on llvm-2.9-dev also on kfreebsd-{amd64,i386}.
 
  -- Sven Joachim <svenjoac@gmx.de>  Wed, 23 Nov 2011 11:06:15 +0100
 
