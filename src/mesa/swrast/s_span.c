@@ -1395,6 +1395,7 @@ _swrast_read_rgba_span( struct gl_context *ctx, struct gl_renderbuffer *rb,
                         GLuint n, GLint x, GLint y,
                         GLvoid *rgba)
 {
+   struct swrast_renderbuffer *srb = swrast_renderbuffer(rb);
    GLenum dstType = GL_FLOAT;
    const GLint bufWidth = (GLint) rb->Width;
    const GLint bufHeight = (GLint) rb->Height;
@@ -1445,7 +1446,7 @@ _swrast_read_rgba_span( struct gl_context *ctx, struct gl_renderbuffer *rb,
 	     rb->_BaseFormat == GL_LUMINANCE_ALPHA ||
 	     rb->_BaseFormat == GL_ALPHA);
 
-      assert(rb->Map);
+      assert(srb->Map);
 
       src = _swrast_pixel_address(rb, x + skip, y);
 
