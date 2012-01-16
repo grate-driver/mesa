@@ -2528,7 +2528,6 @@ struct gl_renderbuffer
    GLuint Name;
    GLint RefCount;
    GLuint Width, Height;
-   GLint RowStride;       /**< Padded width in units of pixels */
    GLboolean Purgeable;   /**< Is the buffer purgeable under memory pressure? */
 
    GLboolean AttachedAnytime; /**< TRUE if it was attached to a framebuffer */
@@ -2540,8 +2539,14 @@ struct gl_renderbuffer
                                GL_STENCIL_INDEX. */
    gl_format Format;      /**< The actual renderbuffer memory format */
 
+   /* XXX the following 3 fields are obsolete and wil go away */
+   GLint RowStride;       /**< Padded width in units of pixels */
    GLenum DataType;      /**< Type of values passed to the Get/Put functions */
    GLvoid *Data;        /**< This may not be used by some kinds of RBs */
+
+   /** The following fields are only valid while the buffer is mapped */
+   GLubyte *Map;
+   GLint RowStrideBytes;
 
    /* Used to wrap one renderbuffer around another: */
    struct gl_renderbuffer *Wrapped;
