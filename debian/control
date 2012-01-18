@@ -25,6 +25,7 @@ Build-Depends:
  linux-libc-dev (>= 2.6.31) [linux-any],
  libx11-xcb-dev,
  libxcb-dri2-0-dev,
+ libxcb-glx0-dev,
  libxcb-xfixes0-dev,
  python-libxml2,
  libudev-dev [linux-any],

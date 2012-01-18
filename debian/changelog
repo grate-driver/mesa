@@ -15,6 +15,7 @@ mesa (8.0~rc1-1) UNRELEASED; urgency=low
 
   [ Timo Aaltonen ]
   * Refresh patches.
+  * control: Add libxcb-glx0-dev to build-depends.
 
  -- Cyril Brulebois <kibi@debian.org>  Fri, 23 Dec 2011 14:13:28 +0100
 
