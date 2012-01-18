@@ -1,5 +1,6 @@
 mesa (8.0~rc1-1) UNRELEASED; urgency=low
 
+  [ Cyril Brulebois ]
   * New upstream snapshot.
   * Disable patch temporarily (needs a refresh):
     - 11-hurd-ftbfs-again.diff
@@ -11,6 +12,9 @@ mesa (8.0~rc1-1) UNRELEASED; urgency=low
   * Update not-installed for removed files.
   * Stop trying to ship swrastg through libgl1-mesa-dri-experimental,
     it replaced the non-gallium variant.
+
+  [ Timo Aaltonen ]
+  * Refresh patches.
 
  -- Cyril Brulebois <kibi@debian.org>  Fri, 23 Dec 2011 14:13:28 +0100
 
