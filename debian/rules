@@ -61,7 +61,6 @@ include /usr/share/quilt/quilt.make
 confflags-common = \
 	--disable-glu \
 	--disable-glut \
-	--disable-glw \
 	CFLAGS="$(CFLAGS)" \
 	CXXFLAGS="$(CXXFLAGS)"
 
