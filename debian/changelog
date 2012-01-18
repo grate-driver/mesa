@@ -18,6 +18,7 @@ mesa (8.0~rc1-1) UNRELEASED; urgency=low
   * control: Add libxcb-glx0-dev to build-depends.
   * control: Drop libglw1-mesa, libglw1-mesa-dev, glw got moved to a
     separate source package.
+  * libegl-mesa.symbols, libgles2-mesa.symbols: Add new symbols.
 
  -- Cyril Brulebois <kibi@debian.org>  Fri, 23 Dec 2011 14:13:28 +0100
 
