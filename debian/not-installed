@@ -26,10 +26,6 @@ NOT_INSTALLED_i386 = \
 	usr/lib/*/i686/cmov/libGLU.so \
 	usr/lib/*/i686/cmov/libGLU.so.1 \
 	usr/lib/*/i686/cmov/libGLU.so.1.* \
-	usr/lib/*/i686/cmov/libGLw.so \
-	usr/lib/*/i686/cmov/libGLw.so.1 \
-	usr/lib/*/i686/cmov/libGLw.so.1.* \
-	usr/lib/*/i686/cmov/pkgconfig/glw.pc \
 	usr/lib/*/i686/cmov/pkgconfig/glu.pc \
 	usr/lib/*/i686/cmov/pkgconfig/gl.pc
 
