@@ -88,7 +88,7 @@ else
 	DRI_DRIVERS += r200 radeon
   endif
   ifeq ($(DEB_HOST_ARCH_CPU), i386)
-	DRI_DRIVERS += i810 i915 i965
+	DRI_DRIVERS += i915 i965
   else ifeq ($(DEB_HOST_ARCH_CPU), amd64)
 	DRI_DRIVERS += i915 i965
   endif
