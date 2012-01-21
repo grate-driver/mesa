@@ -722,7 +722,7 @@ static int check_vector(struct r600_bytecode *bc, struct r600_bytecode_alu *alu,
 					return r;
 			}
 		} else if (is_cfile(sel)) {
-			r = reserve_cfile(bc, bs, sel, elem);
+			r = reserve_cfile(bc, bs, (alu->src[src].kc_bank<<16) + sel, elem);
 			if (r)
 				return r;
 		}
@@ -749,7 +749,7 @@ static int check_scalar(struct r600_bytecode *bc, struct r600_bytecode_alu *alu,
 				const_count++;
 		}
 		if (is_cfile(sel)) {
-			r = reserve_cfile(bc, bs, sel, elem);
+			r = reserve_cfile(bc, bs, (alu->src[src].kc_bank<<16) + sel, elem);
 			if (r)
 				return r;
 		}
