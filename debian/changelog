@@ -2,6 +2,13 @@ mesa (8.0~rc1-1.1) UNRELEASED; urgency=low
 
   * clean, rules: Move cleaning of xmlpool.pot to rules and remove
     'clean'.
+  * Removed patches.
+    103_savage-expose_fbmodes_with_nonzero_alpha.patch:
+    - No driver left to patch
+    117_handle_dri2connect_errors_when_indirect.diff
+    118_fix_24bpp_software_renering.diff
+    119_r600g_gnome_shell_rendering_fix.diff:
+    - Included upstream.
 
  -- Timo Aaltonen <tjaalton@ubuntu.com>  Tue, 24 Jan 2012 12:47:07 +0200
 

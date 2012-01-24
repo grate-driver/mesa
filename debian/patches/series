@@ -10,11 +10,7 @@
 # Ubuntu patches.
 100_no_abi_tag.patch
 101_ubuntu_hidden_glname.patch
-103_savage-expose_fbmodes_with_nonzero_alpha.patch
 111_export_searchdirs_in_dripc.diff
 113_fix_tls.diff
 115_llvm_dynamic_linking.diff
 116_use_shared_galliumcore.diff
-117_handle_dri2connect_errors_when_indirect.diff
-118_fix_24bpp_software_renering.diff
-119_r600g_gnome_shell_rendering_fix.diff
