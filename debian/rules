@@ -275,6 +275,8 @@ clean: unpatch
 	rm -rf aclocal.m4 missing depcomp install-sh ltmain.sh
 	rm -rf $(STAMP_DIR)
 	for file in debian/*.in; do rm -f $${file%%.in}; done
+	# And for pkgstriptranslation's benefit…
+	src/mesa/drivers/dri/common/xmlpool/xmlpool.pot
 
 	dh_clean
 
