@@ -1,6 +1,1 @@
 # empty for now.
-
-# Install the classic radeon drivers for UMS fallback
-# Most users will not need these, and we don't want to support them
-build/dri/${DEB_HOST_MULTIARCH}/r300_dri.so usr/lib/${DEB_HOST_MULTIARCH}/dri-alternates
-build/dri/${DEB_HOST_MULTIARCH}/r600_dri.so usr/lib/${DEB_HOST_MULTIARCH}/dri-alternates
