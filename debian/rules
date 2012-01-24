@@ -20,7 +20,6 @@ ifneq (,$(filter parallel=%,$(DEB_BUILD_OPTIONS)))
 endif
 
 DEB_HOST_MULTIARCH ?= $(shell dpkg-architecture -qDEB_HOST_MULTIARCH)
-DEB_BUILD_ARCH     ?= $(shell dpkg-architecture -qDEB_BUILD_ARCH)
 DEB_HOST_ARCH      ?= $(shell dpkg-architecture -qDEB_HOST_ARCH)
 DEB_HOST_ARCH_OS   ?= $(shell dpkg-architecture -qDEB_HOST_ARCH_OS)
 DEB_HOST_GNU_TYPE  ?= $(shell dpkg-architecture -qDEB_HOST_GNU_TYPE)
@@ -191,13 +190,6 @@ confflags-swx11+glu-i386-i686 = \
 	CFLAGS="$(CFLAGS) -march=i686" \
 	CXXFLAGS="$(CXXFLAGS) -march=i686"
 
-# Add /usr/lib/dri-alternates for classic fallback for gallium drivers
-ifeq ($(DEB_BUILD_ARCH),i386)
-	confflags-dri += --with-dri-searchpath=/usr/lib/$(DEB_HOST_MULTIARCH)/dri:/usr/lib/dri:/usr/lib/$(DEB_HOST_MULTIARCH)/dri-alternates:/usr/lib/dri-alternates:/usr/lib32/dri:/usr/lib32/dri-alternates
-else
-	confflags-dri += --with-dri-searchpath=/usr/lib/$(DEB_HOST_MULTIARCH)/dri:/usr/lib/dri:/usr/lib/$(DEB_HOST_MULTIARCH)/dri-alternates:/usr/lib/dri-alternates
-endif
-
 configure: $(QUILT_STAMPFN) configure.ac
 	autoreconf -vfi
 
@@ -316,9 +308,6 @@ endif
 	# Install arch-dependent drivers
 ifneq (,$(filter r300,$(GALLIUM_DRIVERS)))
 	dh_install -plibgl1-mesa-dri build/dri/$(DEB_HOST_MULTIARCH)/gallium/r300_dri.so usr/lib/${DEB_HOST_MULTIARCH}/dri
-endif
-ifneq (,$(filter i915,$(GALLIUM_DRIVERS)))
-	dh_install -plibgl1-mesa-dri-experimental build/dri/$(DEB_HOST_MULTIARCH)/gallium/i915_dri.so usr/lib/${DEB_HOST_MULTIARCH}/dri-alternates
 endif
 
 	# Create an ld.so.conf which says where to find libGL from Mesa

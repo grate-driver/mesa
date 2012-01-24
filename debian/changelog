@@ -12,6 +12,8 @@ mesa (8.0~rc1-0ubuntu1) UNRELEASED; urgency=low
     - Included upstream.
   * Update 115_llvm_dynamic_linking.diff,
     116_use_shared_galliumcore.diff to apply.
+  * rules: Drop the dri-alternates driver search path, and don't ship
+    gallium version of i915_dri.so for now.
 
   [ Robert Hooker ]
   * Stop shipping r300/r600 classic drivers in libgl1-mesa-dri-experimental,
