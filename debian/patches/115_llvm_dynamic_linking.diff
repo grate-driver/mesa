@@ -1,13 +1,13 @@
 Index: mesa/configure.ac
 ===================================================================
---- mesa.orig/configure.ac	2011-06-27 14:47:42.000000000 +0100
-+++ mesa/configure.ac	2011-06-27 14:58:32.858835646 +0100
-@@ -1715,7 +1715,7 @@
+--- mesa.orig/configure.ac	2012-01-24 14:48:40.488101770 +0200
++++ mesa/configure.ac	2012-01-24 14:48:42.364157964 +0200
+@@ -1770,7 +1770,7 @@
      if test "x$LLVM_CONFIG" != xno; then
- 	LLVM_VERSION=`$LLVM_CONFIG --version`
- 	LLVM_CFLAGS=`$LLVM_CONFIG --cppflags`
--	LLVM_LIBS="`$LLVM_CONFIG --libs` -lstdc++"
-+	LLVM_LIBS="-lLLVM-2.9 -lstdc++"
+ 	LLVM_VERSION=`$LLVM_CONFIG --version | sed 's/svn.*//g'`
+ 	LLVM_CFLAGS=`$LLVM_CONFIG --cppflags|sed -e 's/-DNDEBUG\>//g' -e 's/-pedantic//g'`
+-	LLVM_LIBS="`$LLVM_CONFIG --libs`"
++	LLVM_LIBS="-lLLVM-2.9"
  
  	LLVM_LDFLAGS=`$LLVM_CONFIG --ldflags`
- 	GALLIUM_DRIVERS_DIRS="$GALLIUM_DRIVERS_DIRS llvmpipe"
+ 	DEFINES="$DEFINES -D__STDC_CONSTANT_MACROS"

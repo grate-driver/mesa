@@ -9,6 +9,7 @@ mesa (8.0~rc1-0ubuntu1) UNRELEASED; urgency=low
     118_fix_24bpp_software_renering.diff
     119_r600g_gnome_shell_rendering_fix.diff:
     - Included upstream.
+  * Update 115_llvm_dynamic_linking.diff to apply.
 
  -- Timo Aaltonen <tjaalton@ubuntu.com>  Tue, 24 Jan 2012 12:47:07 +0200
 
