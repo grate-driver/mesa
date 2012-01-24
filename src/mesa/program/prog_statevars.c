@@ -664,10 +664,13 @@ _mesa_program_state_flags(const gl_state_index state[STATE_LENGTH])
 {
    switch (state[0]) {
    case STATE_MATERIAL:
+   case STATE_LIGHTPROD:
+   case STATE_LIGHTMODEL_SCENECOLOR:
+      /* these can be effected by glColor when colormaterial mode is used */
+      return _NEW_LIGHT | _NEW_CURRENT_ATTRIB;
+
    case STATE_LIGHT:
    case STATE_LIGHTMODEL_AMBIENT:
-   case STATE_LIGHTMODEL_SCENECOLOR:
-   case STATE_LIGHTPROD:
       return _NEW_LIGHT;
 
    case STATE_TEXGEN:
@@ -1111,7 +1114,7 @@ _mesa_load_state_parameters(struct gl_context *ctx,
       if (paramList->Parameters[i].Type == PROGRAM_STATE_VAR) {
          _mesa_fetch_state(ctx,
 			   paramList->Parameters[i].StateIndexes,
-                           paramList->ParameterValues[i]);
+                           &paramList->ParameterValues[i][0].f);
       }
    }
 }

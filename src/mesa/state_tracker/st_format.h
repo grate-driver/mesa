@@ -54,7 +54,7 @@ extern enum pipe_format
 st_choose_format(struct pipe_screen *screen, GLenum internalFormat,
                  GLenum format, GLenum type,
                  enum pipe_texture_target target, unsigned sample_count,
-                 unsigned tex_usage);
+                 unsigned bindings);
 
 extern enum pipe_format
 st_choose_renderbuffer_format(struct pipe_screen *screen,
@@ -82,6 +82,5 @@ st_sampler_compat_formats(enum pipe_format format1, enum pipe_format format2);
 extern void
 st_translate_color(const GLfloat colorIn[4], GLenum baseFormat,
                    GLfloat colorOut[4]);
-
 
 #endif /* ST_FORMAT_H */

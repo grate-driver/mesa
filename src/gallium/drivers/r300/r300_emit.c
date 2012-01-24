@@ -574,11 +574,12 @@ static void r300_emit_query_end_frag_pipes(struct r300_context *r300,
                                            struct r300_query *query)
 {
     struct r300_capabilities* caps = &r300->screen->caps;
+    uint32_t gb_pipes = r300->screen->info.r300_num_gb_pipes;
     CS_LOCALS(r300);
 
-    assert(caps->num_frag_pipes);
+    assert(gb_pipes);
 
-    BEGIN_CS(6 * caps->num_frag_pipes + 2);
+    BEGIN_CS(6 * gb_pipes + 2);
     /* I'm not so sure I like this switch, but it's hard to be elegant
      * when there's so many special cases...
      *
@@ -587,7 +588,7 @@ static void r300_emit_query_end_frag_pipes(struct r300_context *r300,
      * 4-byte offset for each pipe. RV380 and older are special; they have
      * only two pipes, and the second pipe's enable is on bit 3, not bit 1,
      * so there's a chipset cap for that. */
-    switch (caps->num_frag_pipes) {
+    switch (gb_pipes) {
         case 4:
             /* pipe 3 only */
             OUT_CS_REG(R300_SU_REG_DEST, 1 << 3);
@@ -613,7 +614,7 @@ static void r300_emit_query_end_frag_pipes(struct r300_context *r300,
             break;
         default:
             fprintf(stderr, "r300: Implementation error: Chipset reports %d"
-                    " pixel pipes!\n", caps->num_frag_pipes);
+                    " pixel pipes!\n", gb_pipes);
             abort();
     }
 
@@ -663,7 +664,7 @@ void r300_emit_query_end(struct r300_context* r300)
         return;
 
     if (caps->family == CHIP_FAMILY_RV530) {
-        if (caps->num_z_pipes == 2)
+        if (r300->screen->info.r300_num_z_pipes == 2)
             rv530_emit_query_end_double_z(r300, query);
         else
             rv530_emit_query_end_single_z(r300, query);
@@ -674,8 +675,8 @@ void r300_emit_query_end(struct r300_context* r300)
     query->num_results += query->num_pipes;
 
     /* XXX grab all the results and reset the counter. */
-    if (query->num_results >= query->buffer_size / 4 - 4) {
-        query->num_results = (query->buffer_size / 4) / 2;
+    if (query->num_results >= query->buf->size / 4 - 4) {
+        query->num_results = (query->buf->size / 4) / 2;
         fprintf(stderr, "r300: Rewinding OQBO...\n");
     }
 }
@@ -822,8 +823,7 @@ void r300_emit_textures_state(struct r300_context *r300,
 void r300_emit_vertex_arrays(struct r300_context* r300, int offset,
                              boolean indexed, int instance_id)
 {
-    struct pipe_vertex_buffer *vbuf = r300->vbuf_mgr->vertex_buffer;
-    struct pipe_resource **valid_vbuf = r300->vbuf_mgr->real_vertex_buffer;
+    struct pipe_vertex_buffer *vbuf = r300->vbuf_mgr->real_vertex_buffer;
     struct pipe_vertex_element *velem = r300->velems->velem;
     struct r300_resource *buf;
     int i;
@@ -861,7 +861,7 @@ void r300_emit_vertex_arrays(struct r300_context* r300, int offset,
         }
 
         for (i = 0; i < vertex_array_count; i++) {
-            buf = r300_resource(valid_vbuf[velem[i].vertex_buffer_index]);
+            buf = r300_resource(vbuf[velem[i].vertex_buffer_index].buffer);
             OUT_CS_RELOC(buf);
         }
     } else {
@@ -913,7 +913,7 @@ void r300_emit_vertex_arrays(struct r300_context* r300, int offset,
         }
 
         for (i = 0; i < vertex_array_count; i++) {
-            buf = r300_resource(valid_vbuf[velem[i].vertex_buffer_index]);
+            buf = r300_resource(vbuf[velem[i].vertex_buffer_index].buffer);
             OUT_CS_RELOC(buf);
         }
     }
@@ -1189,14 +1189,16 @@ validate:
         for (i = 0; i < fb->nr_cbufs; i++) {
             tex = r300_resource(fb->cbufs[i]->texture);
             assert(tex && tex->buf && "cbuf is marked, but NULL!");
-            r300->rws->cs_add_reloc(r300->cs, tex->cs_buf, 0,
+            r300->rws->cs_add_reloc(r300->cs, tex->cs_buf,
+                                    RADEON_USAGE_READWRITE,
                                     r300_surface(fb->cbufs[i])->domain);
         }
         /* ...depth buffer... */
         if (fb->zsbuf) {
             tex = r300_resource(fb->zsbuf->texture);
             assert(tex && tex->buf && "zsbuf is marked, but NULL!");
-            r300->rws->cs_add_reloc(r300->cs, tex->cs_buf, 0,
+            r300->rws->cs_add_reloc(r300->cs, tex->cs_buf,
+                                    RADEON_USAGE_READWRITE,
                                     r300_surface(fb->zsbuf)->domain);
         }
     }
@@ -1208,42 +1210,47 @@ validate:
             }
 
             tex = r300_resource(texstate->sampler_views[i]->base.texture);
-            r300->rws->cs_add_reloc(r300->cs, tex->cs_buf, tex->domain, 0);
+            r300->rws->cs_add_reloc(r300->cs, tex->cs_buf, RADEON_USAGE_READ,
+                                    tex->domain);
         }
     }
     /* ...occlusion query buffer... */
     if (r300->query_current)
         r300->rws->cs_add_reloc(r300->cs, r300->query_current->cs_buf,
-                                0, r300->query_current->domain);
+                                RADEON_USAGE_WRITE, RADEON_DOMAIN_GTT);
     /* ...vertex buffer for SWTCL path... */
     if (r300->vbo)
         r300->rws->cs_add_reloc(r300->cs, r300_resource(r300->vbo)->cs_buf,
-                                r300_resource(r300->vbo)->domain, 0);
+                                RADEON_USAGE_READ,
+                                r300_resource(r300->vbo)->domain);
     /* ...vertex buffers for HWTCL path... */
     if (do_validate_vertex_buffers && r300->vertex_arrays_dirty) {
-        struct pipe_resource **buf = r300->vbuf_mgr->real_vertex_buffer;
-        struct pipe_resource **last = r300->vbuf_mgr->real_vertex_buffer +
+        struct pipe_vertex_buffer *vbuf = r300->vbuf_mgr->real_vertex_buffer;
+        struct pipe_vertex_buffer *last = r300->vbuf_mgr->real_vertex_buffer +
                                       r300->vbuf_mgr->nr_real_vertex_buffers;
-        for (; buf != last; buf++) {
-            if (!*buf)
+        struct pipe_resource *buf;
+        for (; vbuf != last; vbuf++) {
+            buf = vbuf->buffer;
+            if (!buf)
                 continue;
 
-            r300->rws->cs_add_reloc(r300->cs, r300_resource(*buf)->cs_buf,
-                                    r300_resource(*buf)->domain, 0);
+            r300->rws->cs_add_reloc(r300->cs, r300_resource(buf)->cs_buf,
+                                    RADEON_USAGE_READ,
+                                    r300_resource(buf)->domain);
         }
     }
     /* ...and index buffer for HWTCL path. */
     if (index_buffer)
         r300->rws->cs_add_reloc(r300->cs, r300_resource(index_buffer)->cs_buf,
-                                r300_resource(index_buffer)->domain, 0);
+                                RADEON_USAGE_READ,
+                                r300_resource(index_buffer)->domain);
 
-    /* Now do the validation. */
+    /* Now do the validation (flush is called inside cs_validate on failure). */
     if (!r300->rws->cs_validate(r300->cs)) {
         /* Ooops, an infinite loop, give up. */
         if (flushed)
             return FALSE;
 
-        r300_flush(&r300->context, RADEON_FLUSH_ASYNC, NULL);
         flushed = TRUE;
         goto validate;
     }

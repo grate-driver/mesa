@@ -52,6 +52,8 @@ _mesa_PixelZoom( GLfloat xfactor, GLfloat yfactor )
 {
    GET_CURRENT_CONTEXT(ctx);
 
+   ASSERT_OUTSIDE_BEGIN_END(ctx);
+
    if (ctx->Pixel.ZoomX == xfactor &&
        ctx->Pixel.ZoomY == yfactor)
       return;
@@ -504,7 +506,7 @@ _mesa_GetPixelMapusv( GLenum map, GLushort *values )
  * Implements glPixelTransfer[fi] whether called immediately or from a
  * display list.
  */
-static void GLAPIENTRY
+void GLAPIENTRY
 _mesa_PixelTransferf( GLenum pname, GLfloat param )
 {
    GET_CURRENT_CONTEXT(ctx);

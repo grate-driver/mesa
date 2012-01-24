@@ -33,7 +33,7 @@
 #include "main/macros.h"
 
 static void
-prepare_blend_state(struct brw_context *brw)
+gen6_upload_blend_state(struct brw_context *brw)
 {
    struct gl_context *ctx = &brw->intel.ctx;
    struct gen6_blend_state *blend;
@@ -51,19 +51,20 @@ prepare_blend_state(struct brw_context *brw)
       nr_draw_buffers = 1;
 
    size = sizeof(*blend) * nr_draw_buffers;
-   blend = brw_state_batch(brw, size, 64, &brw->cc.blend_state_offset);
+   blend = brw_state_batch(brw, AUB_TRACE_BLEND_STATE,
+			   size, 64, &brw->cc.blend_state_offset);
 
    memset(blend, 0, size);
 
    for (b = 0; b < nr_draw_buffers; b++) {
       /* _NEW_COLOR */
-      if (ctx->Color._LogicOpEnabled) {
+      if (ctx->Color.ColorLogicOpEnabled) {
 	 struct gl_renderbuffer *rb = ctx->DrawBuffer->_ColorDrawBuffers[b];
 	 /* _NEW_BUFFERS */
 	 /* Floating point RTs should have no effect from LogicOp,
 	  * except for disabling of blending
 	  */
-	 if (_mesa_get_format_datatype(rb->Format) != GL_FLOAT) {
+	 if (rb && _mesa_get_format_datatype(rb->Format) != GL_FLOAT) {
 	    blend[b].blend1.logic_op_enable = 1;
 	    blend[b].blend1.logic_op_func =
 	       intel_translate_logic_op(ctx->Color.LogicOp);
@@ -98,6 +99,26 @@ prepare_blend_state(struct brw_context *brw)
 					 eqA != eqRGB);
       }
 
+      /* See section 8.1.6 "Pre-Blend Color Clamping" of the
+       * SandyBridge PRM Volume 2 Part 1 for HW requirements.
+       *
+       * We do our ARB_color_buffer_float CLAMP_FRAGMENT_COLOR
+       * clamping in the fragment shader.  For its clamping of
+       * blending, the spec says:
+       *
+       *     "RESOLVED: For fixed-point color buffers, the inputs and
+       *      the result of the blending equation are clamped.  For
+       *      floating-point color buffers, no clamping occurs."
+       *
+       * So, generally, we want clamping to the render target's range.
+       * And, good news, the hardware tables for both pre- and
+       * post-blend color clamping are either ignored, or any are
+       * allowed, or clamping is required but RT range clamping is a
+       * valid option.
+       */
+      blend[b].blend1.pre_blend_clamp_enable = 1;
+      blend[b].blend1.post_blend_clamp_enable = 1;
+      blend[b].blend1.clamp_range = BRW_RENDERTARGET_CLAMPRANGE_FORMAT;
 
       /* _NEW_COLOR */
       if (ctx->Color.AlphaEnabled) {
@@ -130,16 +151,17 @@ const struct brw_tracked_state gen6_blend_state = {
       .brw = BRW_NEW_BATCH,
       .cache = 0,
    },
-   .prepare = prepare_blend_state,
+   .emit = gen6_upload_blend_state,
 };
 
 static void
-gen6_prepare_color_calc_state(struct brw_context *brw)
+gen6_upload_color_calc_state(struct brw_context *brw)
 {
    struct gl_context *ctx = &brw->intel.ctx;
    struct gen6_color_calc_state *cc;
 
-   cc = brw_state_batch(brw, sizeof(*cc), 64, &brw->cc.state_offset);
+   cc = brw_state_batch(brw, AUB_TRACE_CC_STATE,
+			sizeof(*cc), 64, &brw->cc.state_offset);
    memset(cc, 0, sizeof(*cc));
 
    /* _NEW_COLOR */
@@ -165,7 +187,7 @@ const struct brw_tracked_state gen6_color_calc_state = {
       .brw = BRW_NEW_BATCH,
       .cache = 0,
    },
-   .prepare = gen6_prepare_color_calc_state,
+   .emit = gen6_upload_color_calc_state,
 };
 
 static void upload_cc_state_pointers(struct brw_context *brw)

@@ -47,6 +47,7 @@
 #include "st_context.h"
 #include "st_cb_fbo.h"
 #include "st_cb_flush.h"
+#include "st_cb_texture.h"
 #include "st_format.h"
 #include "st_texture.h"
 #include "st_manager.h"
@@ -74,8 +75,18 @@ st_renderbuffer_alloc_storage(struct gl_context * ctx,
    enum pipe_format format;
    struct pipe_surface surf_tmpl;
 
-   format = st_choose_renderbuffer_format(screen, internalFormat,
-                                          rb->NumSamples);
+   if (internalFormat == GL_RGBA16_SNORM && strb->software) {
+      /* Special case for software accum buffers.  Otherwise, if the
+       * call to st_choose_renderbuffer_format() fails (because the
+       * driver doesn't support signed 16-bit/channel colors) we'd
+       * just return without allocating the software accum buffer.
+       */
+      format = PIPE_FORMAT_R16G16B16A16_SNORM;
+   }
+   else {
+      format = st_choose_renderbuffer_format(screen, internalFormat,
+                                             rb->NumSamples);
+   }
 
    if (format == PIPE_FORMAT_NONE) {
       return FALSE;
@@ -112,7 +123,11 @@ st_renderbuffer_alloc_storage(struct gl_context * ctx,
        */
       pipe_surface_reference( &strb->surface, NULL );
       pipe_resource_reference( &strb->texture, NULL );
-      pipe_sampler_view_reference(&strb->sampler_view, NULL);
+
+      if (width == 0 || height == 0) {
+         /* if size is zero, nothing to allocate */
+         return GL_TRUE;
+      }
 
       /* Setup new texture template.
        */
@@ -165,7 +180,6 @@ st_renderbuffer_delete(struct gl_renderbuffer *rb)
    ASSERT(strb);
    pipe_surface_reference(&strb->surface, NULL);
    pipe_resource_reference(&strb->texture, NULL);
-   pipe_sampler_view_reference(&strb->sampler_view, NULL);
    free(strb->data);
    free(strb);
 }
@@ -260,13 +274,13 @@ st_new_renderbuffer_fb(enum pipe_format format, int samples, boolean sw)
    case PIPE_FORMAT_Z32_UNORM:
       strb->Base.InternalFormat = GL_DEPTH_COMPONENT32;
       break;
-   case PIPE_FORMAT_Z24_UNORM_S8_USCALED:
-   case PIPE_FORMAT_S8_USCALED_Z24_UNORM:
+   case PIPE_FORMAT_Z24_UNORM_S8_UINT:
+   case PIPE_FORMAT_S8_UINT_Z24_UNORM:
    case PIPE_FORMAT_Z24X8_UNORM:
    case PIPE_FORMAT_X8Z24_UNORM:
       strb->Base.InternalFormat = GL_DEPTH24_STENCIL8_EXT;
       break;
-   case PIPE_FORMAT_S8_USCALED:
+   case PIPE_FORMAT_S8_UINT:
       strb->Base.InternalFormat = GL_STENCIL_INDEX8_EXT;
       break;
    case PIPE_FORMAT_R16G16B16A16_SNORM:
@@ -342,20 +356,26 @@ st_render_texture(struct gl_context *ctx,
    struct pipe_context *pipe = st->pipe;
    struct st_renderbuffer *strb;
    struct gl_renderbuffer *rb;
-   struct pipe_resource *pt = st_get_texobj_resource(att->Texture);
+   struct pipe_resource *pt;
    struct st_texture_object *stObj;
    const struct gl_texture_image *texImage;
    struct pipe_surface surf_tmpl;
 
-   /* When would this fail?  Perhaps assert? */
-   if (!pt) 
+   if (!st_finalize_texture(ctx, pipe, att->Texture))
       return;
+
+   pt = st_get_texobj_resource(att->Texture);
+   assert(pt);
 
    /* get pointer to texture image we're rendeing to */
    texImage = _mesa_get_attachment_teximage(att);
 
-   /* create new renderbuffer which wraps the texture image */
-   rb = st_new_renderbuffer(ctx, 0);
+   /* create new renderbuffer which wraps the texture image.
+    * Use the texture's name as the renderbuffer's name so that we have
+    * something that's non-zero (to determine vertical orientation) and
+    * possibly helpful for debugging.
+    */
+   rb = st_new_renderbuffer(ctx, att->Texture->Name);
    if (!rb) {
       _mesa_error(ctx, GL_OUT_OF_MEMORY, "glFramebufferTexture()");
       return;
@@ -380,6 +400,7 @@ st_render_texture(struct gl_context *ctx,
    rb->Width = texImage->Width2;
    rb->Height = texImage->Height2;
    rb->_BaseFormat = texImage->_BaseFormat;
+   rb->InternalFormat = texImage->InternalFormat;
    /*printf("***** render to texture level %d: %d x %d\n", att->TextureLevel, rb->Width, rb->Height);*/
 
    /*printf("***** pipe texture %d x %d\n", pt->width0, pt->height0);*/
@@ -387,9 +408,6 @@ st_render_texture(struct gl_context *ctx,
    pipe_resource_reference( &strb->texture, pt );
 
    pipe_surface_reference(&strb->surface, NULL);
-
-   pipe_sampler_view_reference(&strb->sampler_view,
-                               st_get_texture_sampler_view(stObj, pipe));
 
    assert(strb->rtt_level <= strb->texture->last_level);
 
@@ -631,6 +649,101 @@ st_ReadBuffer(struct gl_context *ctx, GLenum buffer)
 }
 
 
+
+/**
+ * Called via ctx->Driver.MapRenderbuffer.
+ */
+static void
+st_MapRenderbuffer(struct gl_context *ctx,
+                   struct gl_renderbuffer *rb,
+                   GLuint x, GLuint y, GLuint w, GLuint h,
+                   GLbitfield mode,
+                   GLubyte **mapOut, GLint *rowStrideOut)
+{
+   struct st_context *st = st_context(ctx);
+   struct st_renderbuffer *strb = st_renderbuffer(rb);
+   struct pipe_context *pipe = st->pipe;
+   const GLboolean invert = rb->Name == 0;
+   unsigned usage;
+   GLuint y2;
+
+   if (strb->software) {
+      /* software-allocated renderbuffer (probably an accum buffer) */
+      GLubyte *map = (GLubyte *) strb->data;
+      if (strb->data) {
+         map += strb->stride * y;
+         map += util_format_get_blocksize(strb->format) * x;
+         *mapOut = map;
+         *rowStrideOut = strb->stride;
+      }
+      else {
+         *mapOut = NULL;
+         *rowStrideOut = 0;
+      }
+      return;
+   }
+
+   usage = 0x0;
+   if (mode & GL_MAP_READ_BIT)
+      usage |= PIPE_TRANSFER_READ;
+   if (mode & GL_MAP_WRITE_BIT)
+      usage |= PIPE_TRANSFER_WRITE;
+
+   /* Note: y=0=bottom of buffer while y2=0=top of buffer.
+    * 'invert' will be true for window-system buffers and false for
+    * user-allocated renderbuffers and textures.
+    */
+   if (invert)
+      y2 = strb->Base.Height - y - h;
+   else
+      y2 = y;
+
+   strb->transfer = pipe_get_transfer(pipe,
+                                      strb->texture,
+                                      strb->rtt_level,
+                                      strb->rtt_face + strb->rtt_slice,
+                                      usage, x, y2, w, h);
+   if (strb->transfer) {
+      GLubyte *map = pipe_transfer_map(pipe, strb->transfer);
+      if (invert) {
+         *rowStrideOut = -strb->transfer->stride;
+         map += (h - 1) * strb->transfer->stride;
+      }
+      else {
+         *rowStrideOut = strb->transfer->stride;
+      }
+      *mapOut = map;
+   }
+   else {
+      *mapOut = NULL;
+      *rowStrideOut = 0;
+   }
+}
+
+
+/**
+ * Called via ctx->Driver.UnmapRenderbuffer.
+ */
+static void
+st_UnmapRenderbuffer(struct gl_context *ctx,
+                     struct gl_renderbuffer *rb)
+{
+   struct st_context *st = st_context(ctx);
+   struct st_renderbuffer *strb = st_renderbuffer(rb);
+   struct pipe_context *pipe = st->pipe;
+
+   if (strb->software) {
+      /* software-allocated renderbuffer (probably an accum buffer) */
+      return;
+   }
+
+   pipe_transfer_unmap(pipe, strb->transfer);
+   pipe->transfer_destroy(pipe, strb->transfer);
+   strb->transfer = NULL;
+}
+
+
+
 void st_init_fbo_functions(struct dd_function_table *functions)
 {
 #if FEATURE_EXT_framebuffer_object
@@ -648,16 +761,9 @@ void st_init_fbo_functions(struct dd_function_table *functions)
 
    functions->DrawBuffers = st_DrawBuffers;
    functions->ReadBuffer = st_ReadBuffer;
+
+   functions->MapRenderbuffer = st_MapRenderbuffer;
+   functions->UnmapRenderbuffer = st_UnmapRenderbuffer;
 }
 
-/* XXX unused ? */
-struct pipe_sampler_view *
-st_get_renderbuffer_sampler_view(struct st_renderbuffer *rb,
-                                 struct pipe_context *pipe)
-{
-   if (!rb->sampler_view) {
-      rb->sampler_view = st_create_texture_sampler_view(pipe, rb->texture);
-   }
 
-   return rb->sampler_view;
-}

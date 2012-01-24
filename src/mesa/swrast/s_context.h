@@ -109,6 +109,64 @@ typedef void (*validate_texture_image_func)(struct gl_context *ctx,
 			        _NEW_DEPTH)
 
 
+struct swrast_texture_image;
+
+
+/**
+ * Fetch a texel from texture image at given position.
+ */
+typedef void (*FetchTexelFunc)(const struct swrast_texture_image *texImage,
+                               GLint col, GLint row, GLint img,
+                               GLfloat *texelOut);
+
+
+typedef void (*StoreTexelFunc)(struct swrast_texture_image *texImage,
+                               GLint col, GLint row, GLint img,
+                               const void *texel);
+
+/**
+ * Subclass of gl_texture_image.
+ * We need extra fields/info to keep tracking of mapped texture buffers,
+ * strides and Fetch/Store functions.
+ */
+struct swrast_texture_image
+{
+   struct gl_texture_image Base;
+
+   GLboolean _IsPowerOfTwo;  /**< Are all dimensions powers of two? */
+
+   /** used for mipmap LOD computation */
+   GLfloat WidthScale, HeightScale, DepthScale;
+
+   /** These fields only valid when texture memory is mapped */
+   GLint RowStride;		/**< Padded width in units of texels */
+   GLuint *ImageOffsets;        /**< if 3D texture: array [Depth] of offsets to
+                                     each 2D slice in 'Data', in texels */
+   GLubyte *Data;		/**< Image data, accessed via FetchTexel() */
+
+   /** Malloc'd texture memory */
+   GLubyte *Buffer;
+
+   FetchTexelFunc FetchTexel;
+   StoreTexelFunc Store;
+};
+
+
+/** cast wrapper */
+static inline struct swrast_texture_image *
+swrast_texture_image(struct gl_texture_image *img)
+{
+   return (struct swrast_texture_image *) img;
+}
+
+/** cast wrapper */
+static inline const struct swrast_texture_image *
+swrast_texture_image_const(const struct gl_texture_image *img)
+{
+   return (const struct swrast_texture_image *) img;
+}
+
+
 /**
  * \struct SWcontext
  * \brief  Per-context state that's private to the software rasterizer module.
@@ -138,17 +196,12 @@ typedef struct
 
    /** List/array of the fragment attributes to interpolate */
    GLuint _ActiveAttribs[FRAG_ATTRIB_MAX];
-   /** Same info, but as a bitmask */
-   GLbitfield _ActiveAttribMask;
+   /** Same info, but as a bitmask of FRAG_BIT_x bits */
+   GLbitfield64 _ActiveAttribMask;
    /** Number of fragment attributes to interpolate */
    GLuint _NumActiveAttribs;
    /** Indicates how each attrib is to be interpolated (lines/tris) */
    GLenum _InterpMode[FRAG_ATTRIB_MAX]; /* GL_FLAT or GL_SMOOTH (for now) */
-
-   /* Accum buffer temporaries.
-    */
-   GLboolean _IntegerAccumMode;	/**< Storing unscaled integers? */
-   GLfloat _IntegerAccumScaler;	/**< Implicit scale factor */
 
    /* Working values:
     */
@@ -240,14 +293,14 @@ _swrast_update_texture_samplers(struct gl_context *ctx);
 
 
 /** Return SWcontext for the given struct gl_context */
-static INLINE SWcontext *
+static inline SWcontext *
 SWRAST_CONTEXT(struct gl_context *ctx)
 {
    return (SWcontext *) ctx->swrast_context;
 }
 
 /** const version of above */
-static INLINE const SWcontext *
+static inline const SWcontext *
 CONST_SWRAST_CONTEXT(const struct gl_context *ctx)
 {
    return (const SWcontext *) ctx->swrast_context;
@@ -259,7 +312,7 @@ CONST_SWRAST_CONTEXT(const struct gl_context *ctx)
  * For drivers that rely on swrast for fallback rendering, this is the
  * driver's opportunity to map renderbuffers and textures.
  */
-static INLINE void
+static inline void
 swrast_render_start(struct gl_context *ctx)
 {
    SWcontext *swrast = SWRAST_CONTEXT(ctx);
@@ -269,7 +322,7 @@ swrast_render_start(struct gl_context *ctx)
 
 
 /** Called after framebuffer reading/writing */
-static INLINE void
+static inline void
 swrast_render_finish(struct gl_context *ctx)
 {
    SWcontext *swrast = SWRAST_CONTEXT(ctx);
@@ -277,6 +330,31 @@ swrast_render_finish(struct gl_context *ctx)
       swrast->Driver.SpanRenderFinish(ctx);
 }
 
+
+extern void
+_swrast_span_render_start(struct gl_context *ctx);
+
+extern void
+_swrast_span_render_finish(struct gl_context *ctx);
+
+extern void
+_swrast_map_textures(struct gl_context *ctx);
+
+extern void
+_swrast_unmap_textures(struct gl_context *ctx);
+
+extern void
+_swrast_map_texture(struct gl_context *ctx, struct gl_texture_object *texObj);
+
+extern void
+_swrast_unmap_texture(struct gl_context *ctx, struct gl_texture_object *texObj);
+
+
+extern void
+_swrast_map_renderbuffers(struct gl_context *ctx);
+
+extern void
+_swrast_unmap_renderbuffers(struct gl_context *ctx);
 
 
 /**
@@ -342,6 +420,18 @@ swrast_render_finish(struct gl_context *ctx)
          const GLuint attr = swrast->_ActiveAttribs[a];
 
 #define ATTRIB_LOOP_END } }
+
+
+/**
+ * Return the address of a pixel value in a mapped renderbuffer.
+ */
+static inline GLubyte *
+_swrast_pixel_address(struct gl_renderbuffer *rb, GLint x, GLint y)
+{
+   const GLint bpp = _mesa_get_format_bytes(rb->Format);
+   const GLint rowStride = rb->RowStride * bpp;
+   return (GLubyte *) rb->Data + y * rowStride + x * bpp;
+}
 
 
 

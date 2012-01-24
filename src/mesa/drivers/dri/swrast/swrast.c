@@ -38,6 +38,7 @@
 #include "main/imports.h"
 #include "main/renderbuffer.h"
 #include "swrast/swrast.h"
+#include "swrast/s_renderbuffer.h"
 #include "swrast_setup/swrast_setup.h"
 #include "tnl/tnl.h"
 #include "tnl/t_context.h"
@@ -52,6 +53,7 @@
 #include "main/texstate.h"
 
 #include "swrast_priv.h"
+#include "swrast/s_context.h"
 
 
 /**
@@ -67,6 +69,7 @@ static void swrastSetTexBuffer2(__DRIcontext *pDRICtx, GLint target,
     struct gl_texture_unit *texUnit;
     struct gl_texture_object *texObj;
     struct gl_texture_image *texImage;
+    struct swrast_texture_image *swImage;
     uint32_t internalFormat;
     gl_format texFormat;
 
@@ -77,6 +80,7 @@ static void swrastSetTexBuffer2(__DRIcontext *pDRICtx, GLint target,
     texUnit = _mesa_get_current_tex_unit(&dri_ctx->Base);
     texObj = _mesa_select_tex_object(&dri_ctx->Base, texUnit, target);
     texImage = _mesa_get_tex_image(&dri_ctx->Base, texObj, target, 0);
+    swImage = swrast_texture_image(texImage);
 
     _mesa_lock_texture(&dri_ctx->Base, texObj);
 
@@ -87,10 +91,10 @@ static void swrastSetTexBuffer2(__DRIcontext *pDRICtx, GLint target,
     else
 	texFormat = MESA_FORMAT_ARGB8888;
 
-    _mesa_init_teximage_fields(&dri_ctx->Base, target, texImage,
+    _mesa_init_teximage_fields(&dri_ctx->Base, texImage,
 			       w, h, 1, 0, internalFormat, texFormat);
 
-    sPriv->swrast_loader->getImage(dPriv, x, y, w, h, (char *)texImage->Data,
+    sPriv->swrast_loader->getImage(dPriv, x, y, w, h, (char *)swImage->Data,
 				   dPriv->loaderPrivate);
 
     _mesa_unlock_texture(&dri_ctx->Base, texObj);
@@ -134,6 +138,9 @@ swrastFillInModes(__DRIscreen *psp,
     uint8_t depth_bits_array[4];
     uint8_t stencil_bits_array[4];
     uint8_t msaa_samples_array[1];
+
+    (void) psp;
+    (void) have_back_buffer;
 
     depth_bits_array[0] = 0;
     depth_bits_array[1] = 0;
@@ -215,6 +222,7 @@ static void
 dri_destroy_screen(__DRIscreen * sPriv)
 {
     TRACE;
+    (void) sPriv;
 }
 
 
@@ -278,10 +286,13 @@ swrast_alloc_front_storage(struct gl_context *ctx, struct gl_renderbuffer *rb,
 
     TRACE;
 
+    (void) ctx;
+    (void) internalFormat;
+
     rb->Data = NULL;
     rb->Width = width;
     rb->Height = height;
-
+    rb->RowStride = width;
     xrb->pitch = bytes_per_line(width * xrb->bpp, 32);
 
     return GL_TRUE;
@@ -305,7 +316,8 @@ swrast_alloc_back_storage(struct gl_context *ctx, struct gl_renderbuffer *rb,
 }
 
 static struct swrast_renderbuffer *
-swrast_new_renderbuffer(const struct gl_config *visual, GLboolean front)
+swrast_new_renderbuffer(const struct gl_config *visual, __DRIdrawable *dPriv,
+			GLboolean front)
 {
     struct swrast_renderbuffer *xrb = calloc(1, sizeof *xrb);
     GLuint pixel_format;
@@ -319,6 +331,7 @@ swrast_new_renderbuffer(const struct gl_config *visual, GLboolean front)
 
     pixel_format = choose_pixel_format(visual);
 
+    xrb->dPriv = dPriv;
     xrb->Base.Delete = swrast_delete_renderbuffer;
     if (front) {
 	xrb->Base.AllocStorage = swrast_alloc_front_storage;
@@ -365,6 +378,78 @@ swrast_new_renderbuffer(const struct gl_config *visual, GLboolean front)
     return xrb;
 }
 
+static void
+swrast_map_renderbuffer(struct gl_context *ctx,
+			struct gl_renderbuffer *rb,
+			GLuint x, GLuint y, GLuint w, GLuint h,
+			GLbitfield mode,
+			GLubyte **out_map,
+			GLint *out_stride)
+{
+   struct swrast_renderbuffer *xrb = swrast_renderbuffer(rb);
+   GLubyte *map = rb->Data;
+   int cpp = _mesa_get_format_bytes(rb->Format);
+   int stride = rb->RowStride * cpp;
+
+   if (rb->AllocStorage == swrast_alloc_front_storage) {
+      __DRIdrawable *dPriv = xrb->dPriv;
+      __DRIscreen *sPriv = dPriv->driScreenPriv;
+
+      xrb->map_mode = mode;
+      xrb->map_x = x;
+      xrb->map_y = y;
+      xrb->map_w = w;
+      xrb->map_h = h;
+
+      stride = w * cpp;
+      rb->Data = malloc(h * stride);
+
+      sPriv->swrast_loader->getImage(dPriv, x, y, w, h,
+				     (char *)rb->Data,
+				     dPriv->loaderPrivate);
+
+      *out_map = rb->Data;
+      *out_stride = stride;
+      return;
+   }
+
+   ASSERT(rb->Data);
+
+   if (rb->AllocStorage == swrast_alloc_back_storage) {
+      map += (rb->Height - 1) * stride;
+      stride = -stride;
+   }
+
+   map += (GLsizei)y * stride;
+   map += (GLsizei)x * cpp;
+
+   *out_map = map;
+   *out_stride = stride;
+}
+
+static void
+swrast_unmap_renderbuffer(struct gl_context *ctx,
+			  struct gl_renderbuffer *rb)
+{
+   struct swrast_renderbuffer *xrb = swrast_renderbuffer(rb);
+
+   if (rb->AllocStorage == swrast_alloc_front_storage) {
+      __DRIdrawable *dPriv = xrb->dPriv;
+      __DRIscreen *sPriv = dPriv->driScreenPriv;
+
+      if (xrb->map_mode & GL_MAP_WRITE_BIT) {
+	 sPriv->swrast_loader->putImage(dPriv, __DRI_SWRAST_IMAGE_OP_DRAW,
+					xrb->map_x, xrb->map_y,
+					xrb->map_w, xrb->map_h,
+					rb->Data,
+					dPriv->loaderPrivate);
+      }
+
+      free(rb->Data);
+      rb->Data = NULL;
+   }
+}
+
 static GLboolean
 dri_create_buffer(__DRIscreen * sPriv,
 		  __DRIdrawable * dPriv,
@@ -375,6 +460,9 @@ dri_create_buffer(__DRIscreen * sPriv,
     struct swrast_renderbuffer *frontrb, *backrb;
 
     TRACE;
+
+    (void) sPriv;
+    (void) isPixmap;
 
     drawable = CALLOC_STRUCT(dri_drawable);
     if (drawable == NULL)
@@ -393,23 +481,23 @@ dri_create_buffer(__DRIscreen * sPriv,
     _mesa_initialize_window_framebuffer(fb, visual);
 
     /* add front renderbuffer */
-    frontrb = swrast_new_renderbuffer(visual, GL_TRUE);
+    frontrb = swrast_new_renderbuffer(visual, dPriv, GL_TRUE);
     _mesa_add_renderbuffer(fb, BUFFER_FRONT_LEFT, &frontrb->Base);
 
     /* add back renderbuffer */
     if (visual->doubleBufferMode) {
-	backrb = swrast_new_renderbuffer(visual, GL_FALSE);
+	backrb = swrast_new_renderbuffer(visual, dPriv, GL_FALSE);
 	_mesa_add_renderbuffer(fb, BUFFER_BACK_LEFT, &backrb->Base);
     }
 
     /* add software renderbuffers */
-    _mesa_add_soft_renderbuffers(fb,
-				 GL_FALSE, /* color */
-				 visual->haveDepthBuffer,
-				 visual->haveStencilBuffer,
-				 visual->haveAccumBuffer,
-				 GL_FALSE, /* alpha */
-				 GL_FALSE /* aux bufs */);
+    _swrast_add_soft_renderbuffers(fb,
+                                   GL_FALSE, /* color */
+                                   visual->haveDepthBuffer,
+                                   visual->haveStencilBuffer,
+                                   visual->haveAccumBuffer,
+                                   GL_FALSE, /* alpha */
+                                   GL_FALSE /* aux bufs */);
 
     return GL_TRUE;
 
@@ -537,6 +625,10 @@ viewport(struct gl_context *ctx, GLint x, GLint y, GLsizei w, GLsizei h)
     struct gl_framebuffer *draw = ctx->WinSysDrawBuffer;
     struct gl_framebuffer *read = ctx->WinSysReadBuffer;
 
+    (void) x;
+    (void) y;
+    (void) w;
+    (void) h;
     swrast_check_and_update_window_size(ctx, draw);
     swrast_check_and_update_window_size(ctx, read);
 }
@@ -559,23 +651,17 @@ swrast_init_driver_functions(struct dd_function_table *driver)
     driver->GetBufferSize = NULL;
     driver->Viewport = viewport;
     driver->ChooseTextureFormat = swrastChooseTextureFormat;
+    driver->MapRenderbuffer = swrast_map_renderbuffer;
+    driver->UnmapRenderbuffer = swrast_unmap_renderbuffer;
 }
 
 static const char *es2_extensions[] = {
    /* Used by mesa internally (cf all_mesa_extensions in ../common/utils.c) */
-   "GL_ARB_draw_buffers",
-   "GL_ARB_multisample",
-   "GL_ARB_texture_compression",
    "GL_ARB_transpose_matrix",
-   "GL_ARB_vertex_buffer_object",
    "GL_ARB_window_pos",
    "GL_EXT_blend_func_separate",
    "GL_EXT_compiled_vertex_array",
    "GL_EXT_framebuffer_blit",
-   "GL_EXT_multi_draw_arrays",
-   "GL_EXT_polygon_offset",
-   "GL_EXT_texture_object",
-   "GL_EXT_vertex_array",
    "GL_IBM_multimode_draw_arrays",
    "GL_MESA_window_pos",
    "GL_NV_vertex_program",
@@ -583,17 +669,13 @@ static const char *es2_extensions[] = {
    /* Required by GLES2 */
    "GL_ARB_fragment_program",
    "GL_ARB_fragment_shader",
-   "GL_ARB_multitexture",
    "GL_ARB_shader_objects",
    "GL_ARB_texture_cube_map",
-   "GL_ARB_texture_mirrored_repeat",
    "GL_ARB_texture_non_power_of_two",
    "GL_ARB_vertex_shader",
    "GL_EXT_blend_color",
    "GL_EXT_blend_equation_separate",
    "GL_EXT_blend_minmax",
-   "GL_EXT_blend_subtract",
-   "GL_EXT_stencil_wrap",
 
    /* Optional GLES2 */
    "GL_ARB_framebuffer_object",
@@ -609,9 +691,6 @@ InitExtensionsES2(struct gl_context *ctx)
 {
    int i;
 
-   /* Can't use driInitExtensions() since it uses extensions from
-    * main/remap_helper.h when called the first time. */
-
    for (i = 0; es2_extensions[i]; i++)
       _mesa_enable_extension(ctx, es2_extensions[i]);
 }
@@ -623,7 +702,12 @@ InitExtensionsES2(struct gl_context *ctx)
 static GLboolean
 dri_create_context(gl_api api,
 		   const struct gl_config * visual,
-		   __DRIcontext * cPriv, void *sharedContextPrivate)
+		   __DRIcontext * cPriv,
+		   unsigned major_version,
+		   unsigned minor_version,
+		   uint32_t flags,
+		   unsigned *error,
+		   void *sharedContextPrivate)
 {
     struct dri_context *ctx = NULL;
     struct dri_context *share = (struct dri_context *)sharedContextPrivate;
@@ -633,9 +717,22 @@ dri_create_context(gl_api api,
 
     TRACE;
 
+    /* Flag filtering is handled in dri2CreateContextAttribs.
+     */
+    (void) flags;
+
+    if (api == API_OPENGL
+	&& (major_version > 2
+	    || (major_version == 2 && minor_version > 1))) {
+       *error = __DRI_CTX_ERROR_BAD_VERSION;
+       goto context_fail;
+    }
+
     ctx = CALLOC_STRUCT(dri_context);
-    if (ctx == NULL)
+    if (ctx == NULL) {
+	*error = __DRI_CTX_ERROR_NO_MEMORY;
 	goto context_fail;
+    }
 
     cPriv->driverPrivate = ctx;
     ctx->cPriv = cPriv;
@@ -652,6 +749,7 @@ dri_create_context(gl_api api,
 
     /* basic context setup */
     if (!_mesa_initialize_context(mesaCtx, api, visual, sharedCtx, &functions, (void *) cPriv)) {
+	*error = __DRI_CTX_ERROR_NO_MEMORY;
 	goto context_fail;
     }
 
@@ -681,8 +779,6 @@ dri_create_context(gl_api api,
         _mesa_enable_1_5_extensions(mesaCtx);
         _mesa_enable_2_0_extensions(mesaCtx);
         _mesa_enable_2_1_extensions(mesaCtx);
-
-        driInitExtensions( mesaCtx, NULL, GL_FALSE );
         break;
     case API_OPENGLES:
         _mesa_enable_1_3_extensions(mesaCtx);
@@ -695,6 +791,7 @@ dri_create_context(gl_api api,
         break;
     }
 
+    *error = __DRI_CTX_ERROR_SUCCESS;
     return GL_TRUE;
 
 context_fail:

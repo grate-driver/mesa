@@ -28,21 +28,24 @@
 
 #include <string.h>
 #include <assert.h>
+#include "main/mtypes.h" /* for gl_texture_index, C++'s enum rules are broken */
 
+#ifdef __cplusplus
 extern "C" {
-#include "GL/gl.h"
-}
-
-#include "ralloc.h"
+#endif
 
 struct _mesa_glsl_parse_state;
 struct glsl_symbol_table;
 
-extern "C" void
+extern void
 _mesa_glsl_initialize_types(struct _mesa_glsl_parse_state *state);
 
-extern "C" void
+extern void
 _mesa_glsl_release_types(void);
+
+#ifdef __cplusplus
+}
+#endif
 
 enum glsl_base_type {
    GLSL_TYPE_UINT = 0,
@@ -62,9 +65,13 @@ enum glsl_sampler_dim {
    GLSL_SAMPLER_DIM_3D,
    GLSL_SAMPLER_DIM_CUBE,
    GLSL_SAMPLER_DIM_RECT,
-   GLSL_SAMPLER_DIM_BUF
+   GLSL_SAMPLER_DIM_BUF,
+   GLSL_SAMPLER_DIM_EXTERNAL
 };
 
+#ifdef __cplusplus
+#include "GL/gl.h"
+#include "ralloc.h"
 
 struct glsl_type {
    GLenum gl_type;
@@ -178,6 +185,17 @@ struct glsl_type {
    const glsl_type *get_base_type() const;
 
    /**
+    * Get the basic scalar type which this type aggregates.
+    *
+    * If the type is a numeric or boolean scalar, vector, or matrix, or an
+    * array of any of those, this function gets the scalar type of the
+    * individual components.  For structs and arrays of structs, this function
+    * returns the struct type.  For samplers and arrays of samplers, this
+    * function returns the sampler type.
+    */
+   const glsl_type *get_scalar_type() const;
+
+   /**
     * Query the type of elements in an array
     *
     * \return
@@ -224,6 +242,41 @@ struct glsl_type {
     */
    unsigned component_slots() const;
 
+   /**
+    * \brief Can this type be implicitly converted to another?
+    *
+    * \return True if the types are identical or if this type can be converted
+    *         to \c desired according to Section 4.1.10 of the GLSL spec.
+    *
+    * \verbatim
+    * From page 25 (31 of the pdf) of the GLSL 1.50 spec, Section 4.1.10
+    * Implicit Conversions:
+    *
+    *     In some situations, an expression and its type will be implicitly
+    *     converted to a different type. The following table shows all allowed
+    *     implicit conversions:
+    *
+    *     Type of expression | Can be implicitly converted to
+    *     --------------------------------------------------
+    *     int                  float
+    *     uint
+    *
+    *     ivec2                vec2
+    *     uvec2
+    *
+    *     ivec3                vec3
+    *     uvec3
+    *
+    *     ivec4                vec4
+    *     uvec4
+    *
+    *     There are no implicit array or structure conversions. For example,
+    *     an array of int cannot be implicitly converted to an array of float.
+    *     There are no implicit conversions between signed and unsigned
+    *     integers.
+    * \endverbatim
+    */
+   bool can_implicitly_convert_to(const glsl_type *desired) const;
 
    /**
     * Query whether or not a type is a scalar (non-vector and non-matrix).
@@ -300,6 +353,11 @@ struct glsl_type {
     * types, contains a sampler.
     */
    bool contains_sampler() const;
+
+   /**
+    * Get the Mesa texture target index for a sampler type.
+    */
+   gl_texture_index sampler_index() const;
 
    /**
     * Query whether or not a type is an array
@@ -443,6 +501,7 @@ private:
    static const glsl_type builtin_ARB_texture_rectangle_types[];
    static const glsl_type builtin_EXT_texture_array_types[];
    static const glsl_type builtin_EXT_texture_buffer_object_types[];
+   static const glsl_type builtin_OES_EGL_image_external_types[];
    /*@}*/
 
    /**
@@ -461,6 +520,7 @@ private:
    static void generate_ARB_texture_rectangle_types(glsl_symbol_table *, bool);
    static void generate_EXT_texture_array_types(glsl_symbol_table *, bool);
    static void generate_OES_texture_3D_types(glsl_symbol_table *, bool);
+   static void generate_OES_EGL_image_external_types(glsl_symbol_table *, bool);
    /*@}*/
 
    /**
@@ -480,5 +540,7 @@ struct glsl_struct_field {
    const struct glsl_type *type;
    const char *name;
 };
+
+#endif /* __cplusplus */
 
 #endif /* GLSL_TYPES_H */

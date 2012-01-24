@@ -162,8 +162,9 @@ _swrast_span_default_attribs(struct gl_context *ctx, SWspan *span)
  * Perspective correction will be done.  The point/line/triangle function
  * should have computed attrStart/Step values for FRAG_ATTRIB_WPOS[3]!
  */
-static INLINE void
-interpolate_active_attribs(struct gl_context *ctx, SWspan *span, GLbitfield attrMask)
+static inline void
+interpolate_active_attribs(struct gl_context *ctx, SWspan *span,
+                           GLbitfield64 attrMask)
 {
    const SWcontext *swrast = SWRAST_CONTEXT(ctx);
 
@@ -174,7 +175,7 @@ interpolate_active_attribs(struct gl_context *ctx, SWspan *span, GLbitfield attr
    attrMask &= ~span->arrayAttribs;
 
    ATTRIB_LOOP_BEGIN
-      if (attrMask & (1 << attr)) {
+      if (attrMask & BITFIELD64_BIT(attr)) {
          const GLfloat dwdx = span->attrStepX[FRAG_ATTRIB_WPOS][3];
          GLfloat w = span->attrStart[FRAG_ATTRIB_WPOS][3];
          const GLfloat dv0dx = span->attrStepX[attr][0];
@@ -198,8 +199,8 @@ interpolate_active_attribs(struct gl_context *ctx, SWspan *span, GLbitfield attr
             v3 += dv3dx;
             w += dwdx;
          }
-         ASSERT((span->arrayAttribs & (1 << attr)) == 0);
-         span->arrayAttribs |= (1 << attr);
+         ASSERT((span->arrayAttribs & BITFIELD64_BIT(attr)) == 0);
+         span->arrayAttribs |= BITFIELD64_BIT(attr);
       }
    ATTRIB_LOOP_END
 }
@@ -209,13 +210,13 @@ interpolate_active_attribs(struct gl_context *ctx, SWspan *span, GLbitfield attr
  * Interpolate primary colors to fill in the span->array->rgba8 (or rgb16)
  * color array.
  */
-static INLINE void
+static inline void
 interpolate_int_colors(struct gl_context *ctx, SWspan *span)
 {
+#if CHAN_BITS != 32
    const GLuint n = span->end;
    GLuint i;
 
-#if CHAN_BITS != 32
    ASSERT(!(span->arrayMask & SPAN_RGBA));
 #endif
 
@@ -309,7 +310,7 @@ interpolate_int_colors(struct gl_context *ctx, SWspan *span)
 /**
  * Populate the FRAG_ATTRIB_COL0 array.
  */
-static INLINE void
+static inline void
 interpolate_float_colors(SWspan *span)
 {
    GLfloat (*col0)[4] = span->array->attribs[FRAG_ATTRIB_COL0];
@@ -490,6 +491,9 @@ interpolate_texcoords(struct gl_context *ctx, SWspan *span)
 
          if (obj) {
             const struct gl_texture_image *img = obj->Image[0][obj->BaseLevel];
+            const struct swrast_texture_image *swImg =
+               swrast_texture_image_const(img);
+
             needLambda = (obj->Sampler.MinFilter != obj->Sampler.MagFilter)
                || ctx->FragmentProgram._Current;
             /* LOD is calculated directly in the ansiotropic filter, we can
@@ -499,8 +503,8 @@ interpolate_texcoords(struct gl_context *ctx, SWspan *span)
                 obj->Sampler.MinFilter == GL_LINEAR_MIPMAP_LINEAR) {
                needLambda = GL_FALSE;
             }
-            texW = img->WidthScale;
-            texH = img->HeightScale;
+            texW = swImg->WidthScale;
+            texH = swImg->HeightScale;
          }
          else {
             /* using a fragment program */
@@ -608,7 +612,7 @@ interpolate_texcoords(struct gl_context *ctx, SWspan *span)
 /**
  * Fill in the arrays->attribs[FRAG_ATTRIB_WPOS] array.
  */
-static INLINE void
+static inline void
 interpolate_wpos(struct gl_context *ctx, SWspan *span)
 {
    GLfloat (*wpos)[4] = span->array->attribs[FRAG_ATTRIB_WPOS];
@@ -642,7 +646,7 @@ interpolate_wpos(struct gl_context *ctx, SWspan *span)
 /**
  * Apply the current polygon stipple pattern to a span of pixels.
  */
-static INLINE void
+static inline void
 stipple_polygon_span(struct gl_context *ctx, SWspan *span)
 {
    GLubyte *mask = span->array->mask;
@@ -687,7 +691,7 @@ stipple_polygon_span(struct gl_context *ctx, SWspan *span)
  * Return:   GL_TRUE   some pixels still visible
  *           GL_FALSE  nothing visible
  */
-static INLINE GLuint
+static inline GLuint
 clip_span( struct gl_context *ctx, SWspan *span )
 {
    const GLint xmin = ctx->DrawBuffer->_Xmin;
@@ -704,11 +708,13 @@ clip_span( struct gl_context *ctx, SWspan *span )
       const GLint n = span->end;
       GLubyte *mask = span->array->mask;
       GLint i;
+      GLuint passed = 0;
       if (span->arrayMask & SPAN_MASK) {
          /* note: using & intead of && to reduce branches */
          for (i = 0; i < n; i++) {
             mask[i] &= (x[i] >= xmin) & (x[i] < xmax)
                      & (y[i] >= ymin) & (y[i] < ymax);
+            passed += mask[i];
          }
       }
       else {
@@ -716,9 +722,10 @@ clip_span( struct gl_context *ctx, SWspan *span )
          for (i = 0; i < n; i++) {
             mask[i] = (x[i] >= xmin) & (x[i] < xmax)
                     & (y[i] >= ymin) & (y[i] < ymax);
+            passed += mask[i];
          }
       }
-      return GL_TRUE;  /* some pixels visible */
+      return passed > 0;
    }
    else {
       /* horizontal span of pixels */
@@ -770,7 +777,7 @@ clip_span( struct gl_context *ctx, SWspan *span )
          span->intTex[1] += leftClip * span->intTexStep[1];
 
 #define SHIFT_ARRAY(ARRAY, SHIFT, LEN) \
-         memcpy(ARRAY, ARRAY + (SHIFT), (LEN) * sizeof(ARRAY[0]))
+         memmove(ARRAY, ARRAY + (SHIFT), (LEN) * sizeof(ARRAY[0]))
 
          for (i = 0; i < FRAG_ATTRIB_MAX; i++) {
             if (span->arrayAttribs & (1 << i)) {
@@ -814,7 +821,7 @@ clip_span( struct gl_context *ctx, SWspan *span )
  * Only called during fixed-function operation.
  * Result is float color array (FRAG_ATTRIB_COL0).
  */
-static INLINE void
+static inline void
 add_specular(struct gl_context *ctx, SWspan *span)
 {
    const SWcontext *swrast = SWRAST_CONTEXT(ctx);
@@ -863,7 +870,7 @@ add_specular(struct gl_context *ctx, SWspan *span)
 /**
  * Apply antialiasing coverage value to alpha values.
  */
-static INLINE void
+static inline void
 apply_aa_coverage(SWspan *span)
 {
    const GLfloat *coverage = span->array->coverage;
@@ -897,7 +904,7 @@ apply_aa_coverage(SWspan *span)
 /**
  * Clamp span's float colors to [0,1]
  */
-static INLINE void
+static inline void
 clamp_colors(SWspan *span)
 {
    GLfloat (*rgba)[4] = span->array->attribs[FRAG_ATTRIB_COL0];
@@ -918,7 +925,7 @@ clamp_colors(SWspan *span)
  * program that writes to gl_FragData[1] or higher.
  * \param output  which fragment program color output is being processed
  */
-static INLINE void
+static inline void
 convert_color_type(SWspan *span, GLenum newType, GLuint output)
 {
    GLvoid *src, *dst;
@@ -958,20 +965,9 @@ convert_color_type(SWspan *span, GLenum newType, GLuint output)
 /**
  * Apply fragment shader, fragment program or normal texturing to span.
  */
-static INLINE void
+static inline void
 shade_texture_span(struct gl_context *ctx, SWspan *span)
 {
-   GLbitfield inputsRead;
-
-   /* Determine which fragment attributes are actually needed */
-   if (ctx->FragmentProgram._Current) {
-      inputsRead = ctx->FragmentProgram._Current->Base.InputsRead;
-   }
-   else {
-      /* XXX we could be a bit smarter about this */
-      inputsRead = ~0;
-   }
-
    if (ctx->FragmentProgram._Current ||
        ctx->ATIFragmentShader._Enabled) {
       /* programmable shading */
@@ -1043,7 +1039,7 @@ _swrast_write_rgba_span( struct gl_context *ctx, SWspan *span)
    const GLuint *colorMask = (GLuint *) ctx->Color.ColorMask;
    const GLbitfield origInterpMask = span->interpMask;
    const GLbitfield origArrayMask = span->arrayMask;
-   const GLbitfield origArrayAttribs = span->arrayAttribs;
+   const GLbitfield64 origArrayAttribs = span->arrayAttribs;
    const GLenum origChanType = span->array->ChanType;
    void * const origRgba = span->array->rgba;
    const GLboolean shader = (ctx->FragmentProgram._Current
@@ -1256,10 +1252,13 @@ _swrast_write_rgba_span( struct gl_context *ctx, SWspan *span)
                       4 * span->end * sizeof(GLchan));
             }
 
-            ASSERT(rb->_BaseFormat == GL_RGBA || rb->_BaseFormat == GL_RGB ||
+            ASSERT(rb->_BaseFormat == GL_RGBA ||
+                   rb->_BaseFormat == GL_RGB ||
+                   rb->_BaseFormat == GL_RED ||
+                   rb->_BaseFormat == GL_RG ||
 		   rb->_BaseFormat == GL_ALPHA);
 
-            if (ctx->Color._LogicOpEnabled) {
+            if (ctx->Color.ColorLogicOpEnabled) {
                _swrast_logicop_rgba_span(ctx, rb, span);
             }
             else if ((ctx->Color.BlendEnabled >> buf) & 1) {

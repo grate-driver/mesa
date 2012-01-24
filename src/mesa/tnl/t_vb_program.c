@@ -48,7 +48,7 @@
 
 #ifdef NAN_CHECK
 /** Check for NaNs and very large values */
-static INLINE void
+static inline void
 check_float(float x)
 {
    assert(!IS_INF_OR_NAN(x));
@@ -67,6 +67,8 @@ struct vp_stage_data {
    GLvector4f ndcCoords;              /**< normalized device coords */
    GLubyte *clipmask;                 /**< clip flags */
    GLubyte ormask, andmask;           /**< for clipping */
+
+   GLboolean vertex_textures;
 
    struct gl_program_machine machine;
 };
@@ -339,6 +341,17 @@ run_vp( struct gl_context *ctx, struct tnl_pipeline_stage *stage )
       }
    }
 
+   /* Allocate result vectors.  We delay this until now to avoid allocating
+    * memory that would never be used if we don't run the software tnl pipeline.
+    */
+   if (!store->results[0].storage) {
+      for (i = 0; i < VERT_RESULT_MAX; i++) {
+         assert(!store->results[i].storage);
+         _mesa_vector4f_alloc( &store->results[i], 0, VB->Size, 32 );
+         store->results[i].size = 4;
+      }
+   }
+
    map_textures(ctx, program);
 
    for (i = 0; i < VB->Count; i++) {
@@ -366,7 +379,7 @@ run_vp( struct gl_context *ctx, struct tnl_pipeline_stage *stage )
 
       /* the vertex array case */
       for (attr = 0; attr < VERT_ATTRIB_MAX; attr++) {
-	 if (program->Base.InputsRead & (1 << attr)) {
+	 if (program->Base.InputsRead & BITFIELD64_BIT(attr)) {
 	    const GLubyte *ptr = (const GLubyte*) VB->AttribPtr[attr]->data;
 	    const GLuint size = VB->AttribPtr[attr]->size;
 	    const GLuint stride = VB->AttribPtr[attr]->stride;
@@ -504,18 +517,11 @@ init_vp(struct gl_context *ctx, struct tnl_pipeline_stage *stage)
    struct vertex_buffer *VB = &(tnl->vb);
    struct vp_stage_data *store;
    const GLuint size = VB->Size;
-   GLuint i;
 
    stage->privatePtr = CALLOC(sizeof(*store));
    store = VP_STAGE_DATA(stage);
    if (!store)
       return GL_FALSE;
-
-   /* Allocate arrays of vertex output values */
-   for (i = 0; i < VERT_RESULT_MAX; i++) {
-      _mesa_vector4f_alloc( &store->results[i], 0, size, 32 );
-      store->results[i].size = 4;
-   }
 
    /* a few other misc allocations */
    _mesa_vector4f_alloc( &store->ndcCoords, 0, size, 32 );

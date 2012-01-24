@@ -36,11 +36,14 @@
 #include "formats.h"
 
 
-extern void *
-_mesa_alloc_texmemory(GLsizei bytes);
+/** Is the given value one of the 6 cube faces? */
+static inline GLboolean
+_mesa_is_cube_face(GLenum target)
+{
+   return (target >= GL_TEXTURE_CUBE_MAP_POSITIVE_X_ARB &&
+           target <= GL_TEXTURE_CUBE_MAP_NEGATIVE_Z_ARB);
+}
 
-extern void
-_mesa_free_texmemory(void *m);
 
 
 /** \name Internal functions */
@@ -62,13 +65,9 @@ extern void
 _mesa_delete_texture_image( struct gl_context *ctx,
                             struct gl_texture_image *teximage );
 
-extern void
-_mesa_free_texture_image_data( struct gl_context *ctx, 
-			       struct gl_texture_image *texImage );
-
 
 extern void
-_mesa_init_teximage_fields(struct gl_context *ctx, GLenum target,
+_mesa_init_teximage_fields(struct gl_context *ctx,
                            struct gl_texture_image *img,
                            GLsizei width, GLsizei height, GLsizei depth,
                            GLint border, GLenum internalFormat,
@@ -81,16 +80,14 @@ _mesa_choose_texture_format(struct gl_context *ctx,
                             GLenum target, GLint level,
                             GLenum internalFormat, GLenum format, GLenum type);
 
+extern void
+_mesa_update_fbo_texture(struct gl_context *ctx,
+                         struct gl_texture_object *texObj,
+                         GLuint face, GLuint level);
 
 extern void
 _mesa_clear_texture_image(struct gl_context *ctx,
                           struct gl_texture_image *texImage);
-
-
-extern void
-_mesa_set_tex_image(struct gl_texture_object *tObj,
-                    GLenum target, GLint level,
-                    struct gl_texture_image *texImage);
 
 
 extern struct gl_texture_object *
@@ -136,7 +133,7 @@ _mesa_get_texture_dimensions(GLenum target);
 /**
  * Lock a texture for updating.  See also _mesa_lock_context_textures().
  */
-static INLINE void
+static inline void
 _mesa_lock_texture(struct gl_context *ctx, struct gl_texture_object *texObj)
 {
    _glthread_LOCK_MUTEX(ctx->Shared->TexMutex);
@@ -144,9 +141,10 @@ _mesa_lock_texture(struct gl_context *ctx, struct gl_texture_object *texObj)
    (void) texObj;
 }
 
-static INLINE void
+static inline void
 _mesa_unlock_texture(struct gl_context *ctx, struct gl_texture_object *texObj)
 {
+   (void) texObj;
    _glthread_UNLOCK_MUTEX(ctx->Shared->TexMutex);
 }
 

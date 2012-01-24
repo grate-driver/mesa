@@ -1,3 +1,100 @@
+mesa (8.0~rc1-1) UNRELEASED; urgency=low
+
+  [ Cyril Brulebois ]
+  * New upstream snapshot.
+  * Disable patch temporarily (needs a refresh):
+    - 11-hurd-ftbfs-again.diff
+  * Drop patch, no longer needed since swrastg was renamed to swrast:
+    - 14-load-swrastg-before-swrast.diff
+  * Update rules file to strop building DRI1 drivers, they went away
+    with the following upstream commit:
+    - dri: Remove all DRI1 drivers (e4344161bd).
+  * Update not-installed for removed files.
+  * Stop trying to ship swrastg through libgl1-mesa-dri-experimental,
+    it replaced the non-gallium variant.
+
+  [ Timo Aaltonen ]
+  * Refresh patches.
+  * control: Add libxcb-glx0-dev to build-depends.
+  * control: Drop libglw1-mesa, libglw1-mesa-dev, glw got moved to a
+    separate source package.
+  * libegl-mesa.symbols, libgles2-mesa.symbols: Add new symbols.
+  * rules: Drop obsolete configure options.
+
+ -- Cyril Brulebois <kibi@debian.org>  Fri, 23 Dec 2011 14:13:28 +0100
+
+mesa (7.11.2-1) unstable; urgency=low
+
+  * New upstream release:
+    - Fix a few intel bugs.
+
+ -- Cyril Brulebois <kibi@debian.org>  Sun, 11 Dec 2011 15:43:40 +0100
+
+mesa (7.11.1-1) unstable; urgency=low
+
+  [ Sven Joachim ]
+  * New upstream release.
+  * Move the Nouveau drivers to the libgl1-mesa-dri package
+    (Closes: #645239).
+  * Install the swrastg driver in the libgl1-mesa-dri-experimental package
+    (Closes: #605444).
+    - New patch 14-load-swrastg-before-swrast.diff to prefer swrastg over
+      swrast.
+    - Build-depend on llvm-2.9-dev also on kfreebsd-{amd64,i386}.
+
+ -- Cyril Brulebois <kibi@debian.org>  Sun, 27 Nov 2011 18:54:24 +0100
+
+mesa (7.11-6) unstable; urgency=low
+
+  [ Julien Cristau ]
+  * Inline what's left of debian/scripts/choose-configs in debian/rules.
+  * Enable texture-float for dri (closes: #635651).
+  * Update from upstream's 7.11 branch (commit e7794048)
+  * Merge changes from 7.10.3-4, including:
+    - Fix comments in libegl1-mesa.symbols to avoid impending FTBFS with the
+      upcoming dpkg-dev 1.16.1 (closes: #642690)
+
+  [ Cyril Brulebois ]
+  * Document the symlink dance in README.source.
+
+ -- Cyril Brulebois <kibi@debian.org>  Sat, 24 Sep 2011 20:32:55 +0200
+
+mesa (7.11-5) unstable; urgency=low
+
+  * Merge patch from Pino Tiscano (thanks!):
+    - Use hurd-any instead of: hurd-i386 (“wildcard archs are free”).
+    - Use any-i386 instead of: i386 kfreebsd-i386 hurd-i386.
+    - Rewrite a check in debian/rules to follow the same logic.
+    - Switch libgbm1-dbg to arch: linux-any. This fixes uninstallability
+      on kfreebsd-* by getting rid of this package there.
+    - Switch libglapi-mesa{,-dbg} arch: any. This fixes the FTBFS on
+      hurd-i386^Wany.
+
+ -- Cyril Brulebois <kibi@debian.org>  Sun, 28 Aug 2011 19:07:48 +0200
+
+mesa (7.11-4) unstable; urgency=low
+
+  * Use xz compression for dbg packages.
+  * Simplify dh_strip calls a bit using make variables.
+  * libgbm-dev is also linux-only, not just libgbm1.
+
+ -- Julien Cristau <jcristau@debian.org>  Sat, 27 Aug 2011 12:02:42 +0200
+
+mesa (7.11-3) unstable; urgency=low
+
+  * Don't build libgbm on kfreebsd, it needs KMS/udev.
+  * Build/ship r300g on all Linux architectures, not just x86.
+
+ -- Julien Cristau <jcristau@debian.org>  Fri, 26 Aug 2011 11:04:45 +0200
+
+mesa (7.11-2) unstable; urgency=low
+
+  * Work around the lack of O_CLOEXEC on kfreebsd, fix FTBFS.
+  * Don't crash on BadRequest from DRI2Connect, just fall back to sw or
+    indirect.
+
+ -- Julien Cristau <jcristau@debian.org>  Thu, 25 Aug 2011 23:13:35 +0200
+
 mesa (7.11-0ubuntu4) precise; urgency=low
 
   * Fix comments in libegl1-mesa.symbols to avoid build failures with
@@ -104,8 +201,9 @@ mesa (7.11-0ubuntu1) oneiric; urgency=low
 
  -- Christopher James Halse Rogers <raof@ubuntu.com>  Thu, 04 Aug 2011 16:25:08 +1000
 
-mesa (7.11-1) UNRELEASED; urgency=low
+mesa (7.11-1) unstable; urgency=low
 
+  [ Christopher James Halse Rogers ]
   * New upstream release.
     - Fix regression from 7.10, missing characters in text display with
       intel drivers (Closes: #631516). Thanks to Martin Steigerwald for
@@ -127,7 +225,10 @@ mesa (7.11-1) UNRELEASED; urgency=low
     - Manually install r300g only when we actually build it.  Fixes build on
       non-i386, non-amd64 linux.
 
- -- Christopher James Halse Rogers <raof@ubuntu.com>  Thu, 14 Jul 2011 16:17:15 +1000
+  [ Julien Cristau ]
+  * Don't use dh_testroot in clean.
+
+ -- Julien Cristau <jcristau@debian.org>  Thu, 25 Aug 2011 00:15:27 +0200
 
 mesa (7.11~1-0ubuntu3) oneiric; urgency=low
 

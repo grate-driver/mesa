@@ -25,8 +25,7 @@
 
 /*
  * Templates for the span/pixel-array write/read functions called via
- * the gl_renderbuffer's GetRow, GetValues, PutRow, PutMonoRow, PutValues
- * and PutMonoValues functions.
+ * the gl_renderbuffer's GetRow, GetValues, PutRow, and PutValues.
  *
  * Define the following macros before including this file:
  *   NAME(BASE)  to generate the function name (i.e. add prefix or suffix)
@@ -65,6 +64,7 @@ NAME(get_row)( struct gl_context *ctx, struct gl_renderbuffer *rb,
       INC_PIXEL_PTR(pixel);
    }
    (void) rb;
+   (void) ctx;
 }
 
 
@@ -82,6 +82,7 @@ NAME(get_values)( struct gl_context *ctx, struct gl_renderbuffer *rb,
       FETCH_PIXEL(dest[i], pixel);
    }
    (void) rb;
+   (void) ctx;
 }
 
 
@@ -111,60 +112,7 @@ NAME(put_row)( struct gl_context *ctx, struct gl_renderbuffer *rb,
       }
    }
    (void) rb;
-}
-
-
-static void
-NAME(put_row_rgb)( struct gl_context *ctx, struct gl_renderbuffer *rb,
-                   GLuint count, GLint x, GLint y,
-                   const void *values, const GLubyte mask[] )
-{
-#ifdef SPAN_VARS
-   SPAN_VARS
-#endif
-   const RB_TYPE (*src)[3] = (const RB_TYPE (*)[3]) values;
-   GLuint i;
-   INIT_PIXEL_PTR(pixel, x, y);
-   for (i = 0; i < count; i++) {
-      if (!mask || mask[i]) {
-#ifdef STORE_PIXEL_RGB
-         STORE_PIXEL_RGB(pixel, x + i, y, src[i]);
-#else
-         STORE_PIXEL(pixel, x + i, y, src[i]);
-#endif
-      }
-      INC_PIXEL_PTR(pixel);
-   }
-   (void) rb;
-}
-
-
-static void
-NAME(put_mono_row)( struct gl_context *ctx, struct gl_renderbuffer *rb,
-                    GLuint count, GLint x, GLint y,
-                    const void *value, const GLubyte mask[] )
-{
-#ifdef SPAN_VARS
-   SPAN_VARS
-#endif
-   const RB_TYPE *src = (const RB_TYPE *) value;
-   GLuint i;
-   INIT_PIXEL_PTR(pixel, x, y);
-   if (mask) {
-      for (i = 0; i < count; i++) {
-         if (mask[i]) {
-            STORE_PIXEL(pixel, x + i, y, src);
-         }
-         INC_PIXEL_PTR(pixel);
-      }
-   }
-   else {
-      for (i = 0; i < count; i++) {
-         STORE_PIXEL(pixel, x + i, y, src);
-         INC_PIXEL_PTR(pixel);
-      }
-   }
-   (void) rb;
+   (void) ctx;
 }
 
 
@@ -186,27 +134,7 @@ NAME(put_values)( struct gl_context *ctx, struct gl_renderbuffer *rb,
       }
    }
    (void) rb;
-}
-
-
-static void
-NAME(put_mono_values)( struct gl_context *ctx, struct gl_renderbuffer *rb,
-                       GLuint count, const GLint x[], const GLint y[],
-                       const void *value, const GLubyte mask[] )
-{
-#ifdef SPAN_VARS
-   SPAN_VARS
-#endif
-   const RB_TYPE *src = (const RB_TYPE *) value;
-   GLuint i;
-   ASSERT(mask);
-   for (i = 0; i < count; i++) {
-      if (mask[i]) {
-         INIT_PIXEL_PTR(pixel, x[i], y[i]);
-         STORE_PIXEL(pixel, x[i], y[i], src);
-      }
-   }
-   (void) rb;
+   (void) ctx;
 }
 
 

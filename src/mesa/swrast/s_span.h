@@ -31,6 +31,8 @@
 #include "main/config.h"
 #include "main/glheader.h"
 #include "main/mtypes.h"
+#include "swrast/s_chan.h"
+
 
 struct gl_context;
 struct gl_renderbuffer;
@@ -153,7 +155,8 @@ typedef struct sw_span
     */
    GLbitfield arrayMask;
 
-   GLbitfield arrayAttribs;
+   /** Mask of FRAG_BIT_x bits */
+   GLbitfield64 arrayAttribs;
 
    /**
     * We store the arrays of fragment values in a separate struct so

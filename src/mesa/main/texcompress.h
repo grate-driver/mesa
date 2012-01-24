@@ -33,8 +33,11 @@ struct gl_context;
 
 #if _HAVE_FULL_GL
 
+extern GLenum
+_mesa_gl_compressed_format_base_format(GLenum format);
+
 extern GLuint
-_mesa_get_compressed_formats(struct gl_context *ctx, GLint *formats, GLboolean all);
+_mesa_get_compressed_formats(struct gl_context *ctx, GLint *formats);
 
 extern gl_format
 _mesa_glenum_to_compressed_format(GLenum format);
@@ -46,6 +49,11 @@ extern GLubyte *
 _mesa_compressed_image_address(GLint col, GLint row, GLint img,
                                gl_format mesaFormat,
                                GLsizei width, const GLubyte *image);
+
+extern void
+_mesa_decompress_image(gl_format format, GLuint width, GLuint height,
+                       const GLubyte *src, GLint srcRowStride,
+                       GLfloat *dest);
 
 #else /* _HAVE_FULL_GL */
 

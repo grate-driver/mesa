@@ -28,7 +28,6 @@
 
 #include "main/mfeatures.h"
 #include "main/texobj.h"
-#include "main/texfetch.h"
 #include "main/teximage.h"
 #include "util/u_inlines.h"
 #include "util/u_format.h"
@@ -54,7 +53,7 @@ st_pipe_format_to_base_format(enum pipe_format format)
          base_format = GL_DEPTH_STENCIL;
       }
       else {
-         if (format == PIPE_FORMAT_S8_USCALED)
+         if (format == PIPE_FORMAT_S8_UINT)
             base_format = GL_STENCIL_INDEX;
          else
             base_format = GL_DEPTH_COMPONENT;
@@ -126,7 +125,7 @@ st_bind_surface(struct gl_context *ctx, GLenum target,
 
    texFormat = st_pipe_format_to_mesa_format(ps->format);
 
-   _mesa_init_teximage_fields(ctx, target, texImage,
+   _mesa_init_teximage_fields(ctx, texImage,
                               ps->width, ps->height, 1, 0, internalFormat,
                               texFormat);
 

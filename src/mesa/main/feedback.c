@@ -64,7 +64,7 @@ _mesa_FeedbackBuffer( GLsizei size, GLenum type, GLfloat *buffer )
       _mesa_error( ctx, GL_INVALID_VALUE, "glFeedbackBuffer(size<0)" );
       return;
    }
-   if (!buffer) {
+   if (!buffer && size > 0) {
       _mesa_error( ctx, GL_INVALID_VALUE, "glFeedbackBuffer(buffer==NULL)" );
       ctx->Feedback.BufferSize = 0;
       return;
@@ -168,6 +168,11 @@ _mesa_SelectBuffer( GLsizei size, GLuint *buffer )
    GET_CURRENT_CONTEXT(ctx);
    ASSERT_OUTSIDE_BEGIN_END(ctx);
 
+   if (size < 0) {
+      _mesa_error(ctx, GL_INVALID_VALUE, "glSelectBuffer(size)");
+      return;
+   }
+
    if (ctx->RenderMode==GL_SELECT) {
       _mesa_error( ctx, GL_INVALID_OPERATION, "glSelectBuffer" );
       return;			/* KW: added return */
@@ -192,7 +197,7 @@ _mesa_SelectBuffer( GLsizei size, GLuint *buffer )
  * Verifies there is free space in the buffer to write the value and
  * increments the pointer.
  */
-static INLINE void
+static inline void
 write_record(struct gl_context *ctx, GLuint value)
 {
    if (ctx->Select.BufferCount < ctx->Select.BufferSize) {
@@ -413,7 +418,7 @@ _mesa_PopName( void )
  * __struct gl_contextRec::RenderMode and notifies the driver via the
  * dd_function_table::RenderMode callback.
  */
-static GLint GLAPIENTRY
+GLint GLAPIENTRY
 _mesa_RenderMode( GLenum mode )
 {
    GET_CURRENT_CONTEXT(ctx);

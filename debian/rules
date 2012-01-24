@@ -33,15 +33,13 @@ else
 	confflags += --build=$(DEB_BUILD_GNU_TYPE) --host=$(DEB_HOST_GNU_TYPE)
 endif
 
-# choose which configurations to build
-include debian/scripts/choose-configs
-
 # keep a list of files we don't install (yet), but since it's a bit
 # large, use an external file:
 include debian/not-installed
 
 # build the following configurations by default
-CONFIGS = $(SWX11_GLU_CONFIGS) \
+CONFIGS = swx11+glu \
+	  swx11+glu-static \
 	  dri \
 	  osmesa \
 	  osmesa-static \
@@ -49,6 +47,10 @@ CONFIGS = $(SWX11_GLU_CONFIGS) \
 	  osmesa16-static \
 	  osmesa32 \
 	  osmesa32-static
+
+ifeq ($(DEB_HOST_ARCH_CPU), i386)
+	CONFIGS += swx11+glu-i386-i686
+endif
 
 STAMP_DIR = debian/stamp
 STAMP = $(STAMP_DIR)/$(DEB_BUILD_GNU_TYPE)
@@ -59,8 +61,6 @@ include /usr/share/quilt/quilt.make
 
 confflags-common = \
 	--disable-glu \
-	--disable-glut \
-	--disable-glw \
 	CFLAGS="$(CFLAGS)" \
 	CXXFLAGS="$(CXXFLAGS)"
 
@@ -77,7 +77,7 @@ else
 
   ifeq ($(DEB_HOST_ARCH_OS), linux)
 # Gallium drivers require libdrm-{nouveau,radeon}, only available on Linux
-	GALLIUM_DRIVERS += nouveau r600
+	GALLIUM_DRIVERS += nouveau r600 r300
 # Although the KMS egl drivers will probably build on kfreebsd & hurd
 # only linux actually has KMS drivers implemented at this point.
 	EGL_DISPLAYS += drm wayland
@@ -86,19 +86,16 @@ else
   endif
 
   ifneq ($(DEB_HOST_ARCH), s390)
-	DRI_DRIVERS += mga r128 r200 r300 r600 radeon savage tdfx
+	DRI_DRIVERS += mach64 mga r128 r200 r300 r600 radeon savage tdfx
   endif
   ifeq ($(DEB_HOST_ARCH_CPU), i386)
-	DRI_DRIVERS += i810 i915 i965 sis unichrome
-	GALLIUM_DRIVERS += i915
+	DRI_DRIVERS += i915 i965
   else ifeq ($(DEB_HOST_ARCH_CPU), amd64)
-	DRI_DRIVERS += i915 i965 sis unichrome
-	GALLIUM_DRIVERS += i915
+	DRI_DRIVERS += i915 i965
   endif
 
-  # LLVM is required for r300g, and x86-ish:
-  ifneq (,$(filter $(DEB_HOST_ARCH),amd64 i386 armel))
-	GALLIUM_DRIVERS += r300
+  # LLVM is required for r300g and recommended for swrastg on x86:
+  ifneq (,$(filter $(DEB_HOST_ARCH),amd64 i386 kfreebsd-amd64 kfreebsd-i386))
 	confflags_GALLIUM += --enable-gallium-llvm
   endif
 
@@ -113,9 +110,11 @@ confflags-dri = \
 	--with-driver=dri \
 	--with-dri-drivers="$(DRI_DRIVERS)" \
 	--with-dri-driverdir=/usr/lib/$(DEB_HOST_MULTIARCH)/dri \
+	--with-dri-searchpath='/usr/lib/$(DEB_HOST_MULTIARCH)/dri:\$$$${ORIGIN}/dri:/usr/lib/dri' \
 	--enable-glx-tls \
 	--enable-shared-dricore \
 	--enable-shared-glapi \
+	--enable-texture-float \
 	$(confflags_DIRECT_RENDERING) \
 	$(confflags_EGL) \
 	$(confflags_GALLIUM) \
@@ -172,8 +171,6 @@ confflags-swx11+glu = \
 	--with-driver=xlib \
 	--disable-gl-osmesa \
 	--disable-egl \
-	--disable-glut \
-	--disable-glw \
 	CFLAGS="$(CFLAGS)" \
 	CXXFLAGS="$(CXXFLAGS)"
 
@@ -184,8 +181,6 @@ confflags-swx11+glu-static = \
 	--disable-gl-osmesa \
 	--enable-static \
 	--disable-egl \
-	--disable-glut \
-	--disable-glw \
 	CFLAGS="$(CFLAGS)" \
 	CXXFLAGS="$(CXXFLAGS)"
 
@@ -196,7 +191,6 @@ confflags-swx11+glu-i386-i686 = \
 	--disable-gl-osmesa \
 	--disable-glut \
 	--disable-egl \
-	--disable-glw \
 	--libdir=/usr/lib/$(DEB_HOST_MULTIARCH)/i686/cmov \
 	CFLAGS="$(CFLAGS) -march=i686" \
 	CXXFLAGS="$(CXXFLAGS) -march=i686"
@@ -261,32 +255,14 @@ install: build
 		$(MAKE) -C $(DEB_BUILD_DIR)/$$config DESTDIR=$(CURDIR)/debian/tmp install; \
 	done
 	$(MAKE) -C $(DEB_BUILD_DIR)/dri DESTDIR=$(CURDIR)/debian/tmp/dri install
-	for file in mesa-common-dev.install libopenvg1-mesa.install \
-	            libopenvg1-mesa-dev.install libgles2-mesa.install \
-		    libgles1-mesa-dev.links libgles2-mesa-dev.links \
-		    libopenvg1-mesa-dev.links \
-	            libgles2-mesa-dev.install libgles1-mesa.install \
-	            libgles1-mesa-dev.install libgl1-mesa-glx.install \
-	            libgl1-mesa-glx-i686.install libgl1-mesa-dri.install \
-	            libgl1-mesa-dri.install.linux libegl1-mesa.install \
-		    libegl1-mesa-dev.links libegl1-mesa.postinst \
-		    libegl1-mesa.prerm libgl1-mesa-dri-experimental.install \
-	            libegl1-mesa-drivers.install libegl1-mesa-dev.install \
-	            libgl1-mesa-dev.install libgl1-mesa-dev.links \
-		    libgl1-mesa-swx11-dev.install libgl1-mesa-swx11.install \
-		    libgl1-mesa-swx11-dev.links \
-	   	    libgl1-mesa-glx.postinst libgl1-mesa-glx.prerm \
-		    libgl1-mesa-swx11.postinst libgl1-mesa-swx11.prerm \
-		    libgbm1.install libgbm-dev.install \
-	            libglapi-mesa.install; \
+	for file in debian/*.in; \
 	do \
 		sed -e"s,\$${DEB_HOST_MULTIARCH},$(DEB_HOST_MULTIARCH),g" \
-			debian/$${file}.in > debian/$$file; \
+			$${file} > $${file%%.in}; \
 	done
 
 clean: unpatch
 	dh_testdir
-	dh_testroot
 	rm -rf .pc
 
 	rm -f config.cache config.log config.status
@@ -298,12 +274,18 @@ clean: unpatch
 	rm -rf $$(find -name Makefile.in)
 	rm -rf aclocal.m4 missing depcomp install-sh ltmain.sh
 	rm -rf $(STAMP_DIR)
+	for file in debian/*.in; do rm -f $${file%%.in}; done
 
 	dh_clean
 
 # Build architecture-independent files here.
 binary-indep: install
 
+allpkg = $(shell dh_listpackages -s)
+dbgpkg = $(filter %-dbg, $(allpkg))
+otherpkg = $(filter-out %-dbg, $(allpkg))
+havedbgpkg = $(patsubst %-dbg,%,$(dbgpkg))
+nodbgpkg = $(filter-out $(havedbgpkg),$(otherpkg))
 
 # Build architecture-dependent files here.
 binary-arch: install
@@ -318,6 +300,11 @@ binary-arch: install
 	# Remove the whole tree to avoid false-positives in --list-missing, and
 	# install the right files manually.
 	rm -r debian/tmp/dri/usr/lib/$(DEB_HOST_MULTIARCH)/dri
+
+	# Move nouveau_vieux alongside nouveau to install in dri-experimental package
+ifneq (,$(filter nouveau,$(DRI_DRIVERS)))
+	mv build/dri/$(DEB_HOST_MULTIARCH)/nouveau_vieux_dri.so build/dri/$(DEB_HOST_MULTIARCH)/gallium/
+endif
 
 	# Also get rid of other files which aren't installed. Do not
 	# use -f to ensure we notice disappearing files:
@@ -336,7 +323,6 @@ ifneq (,$(filter i915,$(GALLIUM_DRIVERS)))
 	dh_install -plibgl1-mesa-dri-experimental build/dri/$(DEB_HOST_MULTIARCH)/gallium/i915_dri.so usr/lib/${DEB_HOST_MULTIARCH}/dri-alternates
 endif
 
-
 	# Create an ld.so.conf which says where to find libGL from Mesa
 	echo "/usr/lib/$(DEB_HOST_MULTIARCH)/mesa" \
 	> $(CURDIR)/debian/libgl1-mesa-glx/usr/lib/$(DEB_HOST_MULTIARCH)/mesa/ld.so.conf
@@ -349,7 +335,6 @@ endif
 
 	# Create an ld.so.conf which says where to find libEGL, libGLES{1,2} 
 	# and libOpenVG from Mesa.
-
 	echo "/usr/lib/$(DEB_HOST_MULTIARCH)/mesa-egl" \
 	> $(CURDIR)/debian/libegl1-mesa/usr/lib/$(DEB_HOST_MULTIARCH)/mesa-egl/ld.so.conf
 
@@ -362,32 +347,12 @@ endif
 		install -m 644 debian/local/control debian/$$p/usr/share/bug/$$p && \
 		install -m 755 debian/local/script  debian/$$p/usr/share/bug/$$p; \
 	done
-	dh_strip -plibgl1-mesa-swx11 --dbg-package=libgl1-mesa-swx11-dbg
-	dh_strip -plibgl1-mesa-glx --dbg-package=libgl1-mesa-glx-dbg
-	dh_strip -plibgl1-mesa-dri --dbg-package=libgl1-mesa-dri-dbg
-	dh_strip -plibgl1-mesa-dri-experimental --dbg-package=libgl1-mesa-dri-experimental-dbg
-	dh_strip -plibopenvg1-mesa --dbg-package=libopenvg1-mesa-dbg
-	dh_strip -plibgbm1 --dbg-package=libgbm1-dbg
-	dh_strip -plibegl1-mesa --dbg-package=libegl1-mesa-dbg
-	dh_strip -plibglapi-mesa --dbg-package=libglapi-mesa-dbg
-	dh_strip -plibgles1-mesa --dbg-package=libgles1-mesa-dbg
-	dh_strip -plibgles2-mesa --dbg-package=libgles2-mesa-dbg
-	dh_strip -plibegl1-mesa-drivers --dbg-package=libegl1-mesa-drivers-dbg
+	set -e; for p in $(havedbgpkg); do \
+		dh_strip -p$${p} --dbg-package=$${p}-dbg; \
+	done
 	# dh_strip -s --remaining-packages doesn't work with resumed
 	# builds (see changelog for mesa 7.10-1):
-	dh_strip \
-		-plibegl1-mesa-dev \
-		-plibgbm-dev \
-		-plibgl1-mesa-dev \
-		-plibgl1-mesa-swx11-dev \
-		-plibgles1-mesa-dev \
-		-plibgles2-mesa-dev \
-		-plibglu1-mesa \
-		-plibglu1-mesa-dev \
-		-plibopenvg1-mesa-dev \
-		-plibosmesa6 \
-		-plibosmesa6-dev \
-		-pmesa-common-dev
+	dh_strip $(foreach p,$(nodbgpkg),-p$(p))
 	dh_compress -s
 	dh_fixperms -s
 ifeq (,$(filter sparc sparc64,$(DEB_HOST_ARCH)))
@@ -407,10 +372,11 @@ else
 endif
 	dh_installdeb -s
 	dh_shlibdeps -s -l/usr/lib/$(DEB_HOST_MULTIARCH)/mesa:\
-/usr/lib/$(DEB_HOST_MULTIARCH)/mesa-egl
+					/usr/lib/$(DEB_HOST_MULTIARCH)/mesa-egl
 	dh_gencontrol -s
 	dh_md5sums -s
-	dh_builddeb -s -- -Zlzma
+	dh_builddeb $(foreach pkg,$(dbgpkg),-p$(pkg)) -- -Zxz
+	dh_builddeb $(foreach pkg,$(otherpkg),-p$(pkg))
 
 binary: binary-indep binary-arch
 .PHONY: configs build clean binary-indep binary-arch binary install

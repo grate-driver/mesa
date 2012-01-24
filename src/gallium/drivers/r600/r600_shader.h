@@ -30,6 +30,7 @@ struct r600_shader_io {
 	unsigned		gpr;
 	unsigned		done;
 	int			sid;
+	int			spi_sid;
 	unsigned		interpolate;
 	boolean                 centroid;
 	unsigned		lds_pos; /* for evergreen */
@@ -37,13 +38,12 @@ struct r600_shader_io {
 
 struct r600_shader {
 	unsigned		processor_type;
-	struct r600_bc		bc;
+	struct r600_bytecode		bc;
 	unsigned		ninput;
 	unsigned		noutput;
 	unsigned		nlds;
 	struct r600_shader_io	input[32];
 	struct r600_shader_io	output[32];
-	enum radeon_family	family;
 	boolean			uses_kill;
 	boolean			fs_write_all;
 	boolean			clamp_color;

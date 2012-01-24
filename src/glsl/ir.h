@@ -34,6 +34,7 @@
 #include "list.h"
 #include "ir_visitor.h"
 #include "ir_hierarchical_visitor.h"
+#include "main/mtypes.h"
 
 /**
  * \defgroup IR Intermediate representation nodes
@@ -144,7 +145,7 @@ public:
 
    ir_rvalue *as_rvalue_to_saturate();
 
-   virtual bool is_lvalue()
+   virtual bool is_lvalue() const
    {
       return false;
    }
@@ -152,7 +153,7 @@ public:
    /**
     * Get the variable that is ultimately referenced by an r-value
     */
-   virtual ir_variable *variable_referenced()
+   virtual ir_variable *variable_referenced() const
    {
       return NULL;
    }
@@ -227,16 +228,10 @@ enum ir_variable_mode {
    ir_var_temporary	/**< Temporary variable generated during compilation. */
 };
 
-enum ir_variable_interpolation {
-   ir_var_smooth = 0,
-   ir_var_flat,
-   ir_var_noperspective
-};
-
 /**
  * \brief Layout qualifiers for gl_FragDepth.
  *
- * The AMD_conservative_depth extension allows gl_FragDepth to be redeclared
+ * The AMD/ARB_conservative_depth extensions allow gl_FragDepth to be redeclared
  * with a layout qualifier.
  */
 enum ir_depth_layout {
@@ -288,17 +283,24 @@ public:
     * \return The string that would be used in a shader to specify \c
     * mode will be returned.
     *
+    * This function is used to generate error messages of the form "shader
+    * uses %s interpolation qualifier", so in the case where there is no
+    * interpolation qualifier, it returns "no".
+    *
     * This function should only be used on a shader input or output variable.
     */
    const char *interpolation_string() const;
 
    /**
-    * Calculate the number of slots required to hold this variable
+    * Determine how this variable should be interpolated based on its
+    * interpolation qualifier (if present), whether it is gl_Color or
+    * gl_SecondaryColor, and whether flatshading is enabled in the current GL
+    * state.
     *
-    * This is used to determine how many uniform or varying locations a variable
-    * occupies.  The count is in units of floating point components.
+    * The return value will always be either INTERP_QUALIFIER_SMOOTH,
+    * INTERP_QUALIFIER_NOPERSPECTIVE, or INTERP_QUALIFIER_FLAT.
     */
-   unsigned component_slots() const;
+   glsl_interp_qualifier determine_interpolation_mode(bool flat_shade);
 
    /**
     * Delcared name of the variable
@@ -346,28 +348,12 @@ public:
    unsigned interpolation:2;
 
    /**
-    * Flag that the whole array is assignable
-    *
-    * In GLSL 1.20 and later whole arrays are assignable (and comparable for
-    * equality).  This flag enables this behavior.
-    */
-   unsigned array_lvalue:1;
-
-   /**
     * \name ARB_fragment_coord_conventions
     * @{
     */
    unsigned origin_upper_left:1;
    unsigned pixel_center_integer:1;
    /*@}*/
-
-   /**
-    * \brief Layout qualifier for gl_FragDepth.
-    *
-    * This is not equal to \c ir_depth_layout_none if and only if this
-    * variable is \c gl_FragDepth and a layout qualifier is specified.
-    */
-   ir_depth_layout depth_layout;
 
    /**
     * Was the location explicitly set in the shader?
@@ -377,6 +363,22 @@ public:
     * no effect).
     */
    unsigned explicit_location:1;
+
+   /**
+    * Does this variable have an initializer?
+    *
+    * This is used by the linker to cross-validiate initializers of global
+    * variables.
+    */
+   unsigned has_initializer:1;
+
+   /**
+    * \brief Layout qualifier for gl_FragDepth.
+    *
+    * This is not equal to \c ir_depth_layout_none if and only if this
+    * variable is \c gl_FragDepth and a layout qualifier is specified.
+    */
+   ir_depth_layout depth_layout;
 
    /**
     * Storage location of the base of this variable
@@ -420,6 +422,16 @@ public:
     * Value assigned in the initializer of a variable declared "const"
     */
    ir_constant *constant_value;
+
+   /**
+    * Constant expression assigned in the initializer of the variable
+    *
+    * \warning
+    * This field and \c ::constant_value are distinct.  Even if the two fields
+    * refer to constants with the same value, they must point to separate
+    * objects.
+    */
+   ir_constant *constant_initializer;
 };
 
 
@@ -554,6 +566,13 @@ public:
 
    /**
     * Find a signature that matches a set of actual parameters, taking implicit
+    * conversions into account.  Also flags whether the match was exact.
+    */
+   ir_function_signature *matching_signature(const exec_list *actual_param,
+					     bool *match_is_exact);
+
+   /**
+    * Find a signature that matches a set of actual parameters, taking implicit
     * conversions into account.
     */
    ir_function_signature *matching_signature(const exec_list *actual_param);
@@ -682,7 +701,7 @@ public:
 
 class ir_assignment : public ir_instruction {
 public:
-   ir_assignment(ir_rvalue *lhs, ir_rvalue *rhs, ir_rvalue *condition);
+   ir_assignment(ir_rvalue *lhs, ir_rvalue *rhs, ir_rvalue *condition = NULL);
 
    /**
     * Construct an assignment with an explicit write mask
@@ -789,6 +808,8 @@ enum ir_expression_operation {
    ir_unop_i2b,      /**< int-to-boolean conversion */
    ir_unop_b2i,      /**< Boolean-to-int conversion */
    ir_unop_u2f,      /**< Unsigned-to-float conversion. */
+   ir_unop_i2u,      /**< Integer-to-unsigned conversion. */
+   ir_unop_u2i,      /**< Unsigned-to-integer conversion. */
    ir_unop_any,
 
    /**
@@ -1210,7 +1231,8 @@ enum ir_texture_opcode {
    ir_txb,		/**< Texture look-up with LOD bias */
    ir_txl,		/**< Texture look-up with explicit LOD */
    ir_txd,		/**< Texture look-up with partial derivatvies */
-   ir_txf		/**< Texel fetch with explicit LOD */
+   ir_txf,		/**< Texel fetch with explicit LOD */
+   ir_txs		/**< Texture size */
 };
 
 
@@ -1231,6 +1253,7 @@ enum ir_texture_opcode {
  * (txl <type> <sampler> <coordinate> 0 1 ( ) <lod>)
  * (txd <type> <sampler> <coordinate> 0 1 ( ) (dPdx dPdy))
  * (txf <type> <sampler> <coordinate> 0       <lod>)
+ * (txs <type> <sampler> <lod>)
  */
 class ir_texture : public ir_rvalue {
 public:
@@ -1353,7 +1376,7 @@ public:
 
    virtual ir_visitor_status accept(ir_hierarchical_visitor *);
 
-   bool is_lvalue()
+   bool is_lvalue() const
    {
       return val->is_lvalue() && !mask.has_duplicates;
    }
@@ -1361,7 +1384,7 @@ public:
    /**
     * Get the variable that is ultimately referenced by an r-value
     */
-   virtual ir_variable *variable_referenced();
+   virtual ir_variable *variable_referenced() const;
 
    ir_rvalue *val;
    ir_swizzle_mask mask;
@@ -1385,12 +1408,12 @@ public:
       return this;
    }
 
-   bool is_lvalue();
+   bool is_lvalue() const;
 
    /**
     * Get the variable that is ultimately referenced by an r-value
     */
-   virtual ir_variable *variable_referenced() = 0;
+   virtual ir_variable *variable_referenced() const = 0;
 };
 
 
@@ -1411,7 +1434,7 @@ public:
    /**
     * Get the variable that is ultimately referenced by an r-value
     */
-   virtual ir_variable *variable_referenced()
+   virtual ir_variable *variable_referenced() const
    {
       return this->var;
    }
@@ -1460,7 +1483,7 @@ public:
    /**
     * Get the variable that is ultimately referenced by an r-value
     */
-   virtual ir_variable *variable_referenced()
+   virtual ir_variable *variable_referenced() const
    {
       return this->array->variable_referenced();
    }
@@ -1494,7 +1517,7 @@ public:
    /**
     * Get the variable that is ultimately referenced by an r-value
     */
-   virtual ir_variable *variable_referenced()
+   virtual ir_variable *variable_referenced() const
    {
       return this->record->variable_referenced();
    }
@@ -1691,7 +1714,8 @@ extern bool
 ir_has_call(ir_instruction *ir);
 
 extern void
-do_set_program_inouts(exec_list *instructions, struct gl_program *prog);
+do_set_program_inouts(exec_list *instructions, struct gl_program *prog,
+                      bool is_fragment_shader);
 
 extern char *
 prototype_string(const glsl_type *return_type, const char *name,
