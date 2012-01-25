@@ -76,7 +76,7 @@ else
 
   ifeq ($(DEB_HOST_ARCH_OS), linux)
 # Gallium drivers require libdrm-{nouveau,radeon}, only available on Linux
-	GALLIUM_DRIVERS += nouveau r600 r300
+	GALLIUM_DRIVERS += nouveau r600 r300 svga
 # Although the KMS egl drivers will probably build on kfreebsd & hurd
 # only linux actually has KMS drivers implemented at this point.
 	EGL_DISPLAYS += drm
@@ -113,6 +113,7 @@ confflags-dri = \
 	--enable-glx-tls \
 	--enable-shared-glapi \
 	--enable-texture-float \
+	--enable-xa \
 	$(confflags_DIRECT_RENDERING) \
 	$(confflags_EGL) \
 	$(confflags_GALLIUM) \
