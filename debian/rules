@@ -47,10 +47,6 @@ CONFIGS = swx11+glu \
 	  osmesa32 \
 	  osmesa32-static
 
-ifeq ($(DEB_HOST_ARCH_CPU), i386)
-	CONFIGS += swx11+glu-i386-i686
-endif
-
 STAMP_DIR = debian/stamp
 STAMP = $(STAMP_DIR)/$(DEB_BUILD_GNU_TYPE)
 BUILD_STAMPS = $(addprefix $(STAMP)-build-, $(CONFIGS))
