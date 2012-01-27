@@ -142,6 +142,52 @@ Description: free implementation of the OpenGL API -- development files
  a direct rendering-capable library, or one which uses GLX.  For that,
  please see libgl1-mesa-dev.
 
+Package: libxatracker1
+Section: libs
+Architecture: linux-any 
+Depends:
+ ${shlibs:Depends},
+ ${misc:Depends},
+Pre-Depends: ${misc:Pre-Depends}
+Multi-Arch: same
+Description: X acceleration library -- runtime
+ This package contains the XA (X acceleration) library.  It is used exclusively
+ by the X server to do render, copy and video acceleration.
+ .
+ XA is intended to be used by the vmware driver for virtualized X acceleration.
+
+Package: libxatracker1-dbg
+Section: debug
+Priority: extra
+Architecture: linux-any
+Depends:
+ libxatracker1 (= ${binary:Version}),
+ ${misc:Depends},
+Pre-Depends: ${misc:Pre-Depends}
+Multi-Arch: same
+Description: X acceleration library -- debugging symbols
+ This package contains the XA (X acceleration) library.  It is used exclusively
+ by the X server to do render, copy and video acceleration.
+ .
+ XA is intended to be used by the vmware driver for virtualized X acceleration.
+ .
+ This package contains the debugging symbols for the xatracker library.
+
+Package: libxatracker-dev
+Section: libdevel
+Architecture: linux-any
+Depends:
+ libxatracker1 (= ${binary:Version}),
+ ${misc:Depends},
+Description: X acceleration library -- development files
+ This package contains the XA (X acceleration) library.  It is used exclusively
+ by the X server to do render, copy and video acceleration.
+ .
+ XA is intended to be used by the vmware driver for virtualized X acceleration.
+ .
+ This package provides the development environment for compiling programs
+ against the xatracker library.
+
 Package: libgbm1
 Section: libs
 Architecture: linux-any

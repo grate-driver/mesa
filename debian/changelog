@@ -20,14 +20,14 @@ mesa (8.0~rc1-1) UNRELEASED; urgency=low
     separate source package.
   * libegl-mesa.symbols, libgles2-mesa.symbols: Add new symbols.
   * rules: Drop obsolete configure options.
-  * Enable vmwgfx gallium driver & xatracker.
-    TODO: decide where to ship libxatracker files
+  * Enable vmwgfx gallium driver & xatracker. (Closes: #652501).
 
   [ Robert Hooker ]
   * Bump libdrm build dep to 2.4.30, x11proto-gl-dev to 1.4.14, and
     x11proto-dri2-dev to 2.6.
+  * Add libxatracker packaging.
 
- -- Robert Hooker <sarvatt@ubuntu.com>  Tue, 24 Jan 2012 17:17:04 -0500
+ -- Robert Hooker <sarvatt@ubuntu.com>  Fri, 27 Jan 2012 10:45:34 -0500
 
 mesa (7.11.2-1) unstable; urgency=low
 
