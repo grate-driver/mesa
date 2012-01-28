@@ -114,14 +114,16 @@ gen6_hiz_get_framebuffer_enum(struct gl_context *ctx,
                               GLenum *bind_enum,
                               GLenum *get_enum)
 {
-   /* If the blit framebuffer extension isn't supported then Mesa will
-      report an error if we try to bind GL_DRAW_FRAMEBUFFER. However in
-      that case it should be safe to just save and restore
-      GL_FRAMEBUFFER instead. */
    if (ctx->Extensions.EXT_framebuffer_blit && ctx->API == API_OPENGL) {
+      /* Different buffers may be bound to GL_DRAW_FRAMEBUFFER and
+       * GL_READ_FRAMEBUFFER. Take care to not disrupt the read buffer.
+       */
       *bind_enum = GL_DRAW_FRAMEBUFFER;
       *get_enum = GL_DRAW_FRAMEBUFFER_BINDING;
    } else {
+      /* The enums GL_DRAW_FRAMEBUFFER and GL_READ_FRAMEBUFFER do not exist.
+       * The bound framebuffer is both the read and draw buffer.
+       */
       *bind_enum = GL_FRAMEBUFFER;
       *get_enum = GL_FRAMEBUFFER_BINDING;
    }
@@ -228,7 +230,6 @@ gen6_hiz_setup_depth_buffer(struct brw_context *brw,
 
    rb->Format = mt->format;
    rb->_BaseFormat = _mesa_get_format_base_format(rb->Format);
-   rb->DataType = intel_mesa_format_to_rb_datatype(rb->Format);
    rb->InternalFormat = rb->_BaseFormat;
    rb->Width = mt->level[level].width;
    rb->Height = mt->level[level].height;

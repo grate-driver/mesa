@@ -2286,11 +2286,6 @@ vec4_visitor::emit_urb_writes()
        */
       inst->offset = (max_usable_mrf - base_mrf) / 2;
    }
-
-   if (intel->gen == 6)
-      c->prog_data.urb_entry_size = ALIGN(c->vue_map.num_slots, 8) / 8;
-   else
-      c->prog_data.urb_entry_size = ALIGN(c->vue_map.num_slots, 4) / 4;
 }
 
 src_reg
@@ -2601,10 +2596,6 @@ vec4_visitor::vec4_visitor(struct brw_vs_compile *c,
    this->live_intervals_valid = false;
 
    this->uniforms = 0;
-
-   this->variable_ht = hash_table_ctor(0,
-				       hash_table_pointer_hash,
-				       hash_table_pointer_compare);
 }
 
 vec4_visitor::~vec4_visitor()

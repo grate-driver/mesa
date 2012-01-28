@@ -39,7 +39,7 @@
 #include "r600_shader.h"
 #include "r600_resource.h"
 
-#define R600_MAX_CONST_BUFFERS 1
+#define R600_MAX_CONST_BUFFERS 2
 #define R600_MAX_CONST_BUFFER_SIZE 4096
 
 #ifdef PIPE_ARCH_BIG_ENDIAN
@@ -108,7 +108,9 @@ struct r600_pipe_rasterizer {
 	boolean				clamp_vertex_color;
 	boolean				clamp_fragment_color;
 	boolean				flatshade;
+	boolean				two_side;
 	unsigned			sprite_coord_enable;
+	unsigned                        clip_plane_enable;
 	float				offset_units;
 	float				offset_scale;
 };
@@ -218,6 +220,9 @@ struct r600_pipe_context {
 	/* shader information */
 	boolean				clamp_vertex_color;
 	boolean				clamp_fragment_color;
+	boolean				two_side;
+	unsigned			user_clip_plane_enable;
+	unsigned			clip_dist_enable;
 	unsigned			sprite_coord_enable;
 	boolean				export_16bpc;
 	unsigned			alpha_ref;

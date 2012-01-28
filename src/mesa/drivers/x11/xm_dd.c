@@ -138,7 +138,7 @@ clear_pixmap(struct gl_context *ctx, struct xmesa_renderbuffer *xrb,
    assert(xmbuf->cleargc);
 
    XMesaFillRectangle( xmesa->display, xrb->pixmap, xmbuf->cleargc,
-                       x, xrb->Base.Height - y - height,
+                       x, xrb->Base.Base.Height - y - height,
                        width, height );
 }
 
@@ -215,9 +215,9 @@ clear_32bit_ximage(struct gl_context *ctx, struct xmesa_renderbuffer *xrb,
             | ((pixel << 24) & 0xff000000);
    }
 
-   if (width == xrb->Base.Width && height == xrb->Base.Height) {
+   if (width == xrb->Base.Base.Width && height == xrb->Base.Base.Height) {
       /* clearing whole buffer */
-      const GLuint n = xrb->Base.Width * xrb->Base.Height;
+      const GLuint n = xrb->Base.Base.Width * xrb->Base.Base.Height;
       GLuint *ptr4 = (GLuint *) xrb->ximage->data;
       if (pixel == 0) {
          /* common case */
@@ -329,10 +329,10 @@ can_do_DrawPixels_8R8G8B(struct gl_context *ctx, GLenum format, GLenum type)
       if ((swrast->_RasterMask & ~CLIP_BIT) == 0) /* no blend, z-test, etc */ {
          struct gl_renderbuffer *rb = ctx->DrawBuffer->_ColorDrawBuffers[0];
          if (rb) {
-            struct xmesa_renderbuffer *xrb = xmesa_renderbuffer(rb->Wrapped);
+            struct xmesa_renderbuffer *xrb = xmesa_renderbuffer(rb);
             if (xrb &&
                 xrb->pixmap && /* drawing to pixmap or window */
-                _mesa_get_format_bits(xrb->Base.Format, GL_ALPHA_BITS) == 0) {
+                _mesa_get_format_bits(xrb->Base.Base.Format, GL_ALPHA_BITS) == 0) {
                return GL_TRUE;
             }
          }
@@ -393,7 +393,7 @@ xmesa_DrawPixels_8R8G8B( struct gl_context *ctx,
          XMesaBuffer xmbuf = XMESA_BUFFER(ctx->DrawBuffer);
          const XMesaGC gc = xmbuf->cleargc;  /* effected by glColorMask */
          struct xmesa_renderbuffer *xrb
-            = xmesa_renderbuffer(ctx->DrawBuffer->_ColorDrawBuffers[0]->Wrapped);
+            = xmesa_renderbuffer(ctx->DrawBuffer->_ColorDrawBuffers[0]);
          const int srcX = clippedUnpack.SkipPixels;
          const int srcY = clippedUnpack.SkipRows;
          const int rowLength = clippedUnpack.RowLength;
@@ -462,10 +462,10 @@ can_do_DrawPixels_5R6G5B(struct gl_context *ctx, GLenum format, GLenum type)
       if ((swrast->_RasterMask & ~CLIP_BIT) == 0) /* no blend, z-test, etc */ {
          struct gl_renderbuffer *rb = ctx->DrawBuffer->_ColorDrawBuffers[0];
          if (rb) {
-            struct xmesa_renderbuffer *xrb = xmesa_renderbuffer(rb->Wrapped);
+            struct xmesa_renderbuffer *xrb = xmesa_renderbuffer(rb);
             if (xrb &&
                 xrb->pixmap && /* drawing to pixmap or window */
-                _mesa_get_format_bits(xrb->Base.Format, GL_ALPHA_BITS) == 0) {
+                _mesa_get_format_bits(xrb->Base.Base.Format, GL_ALPHA_BITS) == 0) {
                return GL_TRUE;
             }
          }
@@ -527,7 +527,7 @@ xmesa_DrawPixels_5R6G5B( struct gl_context *ctx,
          XMesaBuffer xmbuf = XMESA_BUFFER(ctx->DrawBuffer);
          const XMesaGC gc = xmbuf->cleargc;  /* effected by glColorMask */
          struct xmesa_renderbuffer *xrb
-            = xmesa_renderbuffer(ctx->DrawBuffer->_ColorDrawBuffers[0]->Wrapped);
+            = xmesa_renderbuffer(ctx->DrawBuffer->_ColorDrawBuffers[0]);
          const int srcX = clippedUnpack.SkipPixels;
          const int srcY = clippedUnpack.SkipRows;
          const int rowLength = clippedUnpack.RowLength;
@@ -597,9 +597,9 @@ can_do_CopyPixels(struct gl_context *ctx, GLenum type)
           ctx->DrawBuffer &&
           ctx->DrawBuffer->_ColorDrawBuffers[0]) {
          struct xmesa_renderbuffer *srcXrb
-            = xmesa_renderbuffer(ctx->ReadBuffer->_ColorReadBuffer->Wrapped);
+            = xmesa_renderbuffer(ctx->ReadBuffer->_ColorReadBuffer);
          struct xmesa_renderbuffer *dstXrb
-            = xmesa_renderbuffer(ctx->DrawBuffer->_ColorDrawBuffers[0]->Wrapped);
+            = xmesa_renderbuffer(ctx->DrawBuffer->_ColorDrawBuffers[0]);
          if (srcXrb->pixmap && dstXrb->pixmap) {
             return GL_TRUE;
          }
@@ -625,9 +625,9 @@ xmesa_CopyPixels( struct gl_context *ctx,
       XMesaBuffer xmbuf = XMESA_BUFFER(ctx->DrawBuffer);
       const XMesaGC gc = xmbuf->cleargc;  /* effected by glColorMask */
       struct xmesa_renderbuffer *srcXrb
-         = xmesa_renderbuffer(ctx->ReadBuffer->_ColorReadBuffer->Wrapped);
+         = xmesa_renderbuffer(ctx->ReadBuffer->_ColorReadBuffer);
       struct xmesa_renderbuffer *dstXrb
-         = xmesa_renderbuffer(ctx->DrawBuffer->_ColorDrawBuffers[0]->Wrapped);
+         = xmesa_renderbuffer(ctx->DrawBuffer->_ColorDrawBuffers[0]);
 
       ASSERT(dpy);
       ASSERT(gc);
@@ -720,15 +720,11 @@ xmesa_update_state( struct gl_context *ctx, GLbitfield new_state )
 
       front_xrb = xmbuf->frontxrb;
       if (front_xrb) {
-         xmesa_set_renderbuffer_funcs(front_xrb, xmesa->pixelformat,
-                                      xmesa->xm_visual->BitsPerPixel);
          front_xrb->clearFunc = clear_pixmap;
       }
 
       back_xrb = xmbuf->backxrb;
       if (back_xrb) {
-         xmesa_set_renderbuffer_funcs(back_xrb, xmesa->pixelformat,
-                                      xmesa->xm_visual->BitsPerPixel);
          if (xmbuf->backxrb->pixmap) {
             back_xrb->clearFunc = clear_pixmap;
          }

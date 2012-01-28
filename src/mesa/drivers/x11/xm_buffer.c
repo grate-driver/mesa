@@ -326,38 +326,37 @@ xmesa_new_renderbuffer(struct gl_context *ctx, GLuint name,
    struct xmesa_renderbuffer *xrb = CALLOC_STRUCT(xmesa_renderbuffer);
    if (xrb) {
       GLuint name = 0;
-      _mesa_init_renderbuffer(&xrb->Base, name);
+      _mesa_init_renderbuffer(&xrb->Base.Base, name);
 
-      xrb->Base.Delete = xmesa_delete_renderbuffer;
+      xrb->Base.Base.Delete = xmesa_delete_renderbuffer;
       if (backBuffer)
-         xrb->Base.AllocStorage = xmesa_alloc_back_storage;
+         xrb->Base.Base.AllocStorage = xmesa_alloc_back_storage;
       else
-         xrb->Base.AllocStorage = xmesa_alloc_front_storage;
+         xrb->Base.Base.AllocStorage = xmesa_alloc_front_storage;
 
-      xrb->Base.InternalFormat = GL_RGBA;
-      xrb->Base._BaseFormat = GL_RGBA;
-      xrb->Base.DataType = GL_UNSIGNED_BYTE;
-      xrb->Base.ClassID = XMESA_RENDERBUFFER;
+      xrb->Base.Base.InternalFormat = GL_RGBA;
+      xrb->Base.Base._BaseFormat = GL_RGBA;
+      xrb->Base.Base.ClassID = XMESA_RENDERBUFFER;
 
       switch (xmvis->undithered_pf) {
       case PF_8R8G8B:
          /* This will really only happen for pixmaps.  We'll access the
           * pixmap via a temporary XImage which will be 32bpp.
           */
-         xrb->Base.Format = MESA_FORMAT_XRGB8888;
+         xrb->Base.Base.Format = MESA_FORMAT_XRGB8888;
          break;
       case PF_8A8R8G8B:
-         xrb->Base.Format = MESA_FORMAT_ARGB8888;
+         xrb->Base.Base.Format = MESA_FORMAT_ARGB8888;
          break;
       case PF_8A8B8G8R:
-         xrb->Base.Format = MESA_FORMAT_RGBA8888_REV;
+         xrb->Base.Base.Format = MESA_FORMAT_RGBA8888_REV;
          break;
       case PF_5R6G5B:
-         xrb->Base.Format = MESA_FORMAT_RGB565;
+         xrb->Base.Base.Format = MESA_FORMAT_RGB565;
          break;
       default:
          _mesa_warning(ctx, "Bad pixel format in xmesa_new_renderbuffer");
-         xrb->Base.Format = MESA_FORMAT_ARGB8888;
+         xrb->Base.Base.Format = MESA_FORMAT_ARGB8888;
          break;
       }
 
@@ -410,12 +409,6 @@ xmesa_delete_framebuffer(struct gl_framebuffer *fb)
       }
    }
 
-   if (b->rowimage) {
-      free( b->rowimage->data );
-      b->rowimage->data = NULL;
-      XMesaDestroyImage( b->rowimage );
-   }
-
    _mesa_free_framebuffer_data(fb);
    free(fb);
 }
@@ -433,7 +426,7 @@ xmesa_MapRenderbuffer(struct gl_context *ctx,
 {
    struct xmesa_renderbuffer *xrb = xmesa_renderbuffer(rb);
 
-   if (xrb->Base.ClassID == XMESA_RENDERBUFFER) {
+   if (xrb->Base.Base.ClassID == XMESA_RENDERBUFFER) {
       XImage *ximage = xrb->ximage;
 
       assert(!xrb->map_mode); /* only a single mapping allowed */
@@ -495,7 +488,7 @@ xmesa_UnmapRenderbuffer(struct gl_context *ctx, struct gl_renderbuffer *rb)
 {
    struct xmesa_renderbuffer *xrb = xmesa_renderbuffer(rb);
 
-   if (xrb->Base.ClassID == XMESA_RENDERBUFFER) {
+   if (xrb->Base.Base.ClassID == XMESA_RENDERBUFFER) {
       XImage *ximage = xrb->ximage;
 
       if (!ximage) {

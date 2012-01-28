@@ -309,7 +309,7 @@ create_xmesa_buffer(XMesaDrawable d, BufferType type,
    b->frontxrb->drawable = d;
    b->frontxrb->pixmap = (XMesaPixmap) d;
    _mesa_add_renderbuffer(&b->mesa_buffer, BUFFER_FRONT_LEFT,
-                          &b->frontxrb->Base);
+                          &b->frontxrb->Base.Base);
 
    /*
     * Back renderbuffer
@@ -326,7 +326,7 @@ create_xmesa_buffer(XMesaDrawable d, BufferType type,
       b->db_mode = vis->ximage_flag ? BACK_XIMAGE : BACK_PIXMAP;
       
       _mesa_add_renderbuffer(&b->mesa_buffer, BUFFER_BACK_LEFT,
-                             &b->backxrb->Base);
+                             &b->backxrb->Base.Base);
    }
 
    /*
@@ -600,8 +600,6 @@ initialize_visual_and_buffer(XMesaVisual v, XMesaBuffer b,
    }
 
    if (b && window) {
-      char *data;
-
       /* Do window-specific initializations */
 
       /* these should have been set in create_xmesa_buffer */
@@ -633,19 +631,6 @@ initialize_visual_and_buffer(XMesaVisual v, XMesaBuffer b,
                                GCGraphicsExposures, &gcvalues);
       }
       XMesaSetFunction( v->display, b->swapgc, GXcopy );
-
-      /* Initialize the row buffer XImage for use in write_color_span() */
-      data = (char*) MALLOC(MAX_WIDTH*4);
-      b->rowimage = XCreateImage( v->display,
-                                  v->visinfo->visual,
-                                  v->visinfo->depth,
-                                  ZPixmap, 0,           /*format, offset*/
-                                  data,                 /*data*/
-                                  MAX_WIDTH, 1,         /*width, height*/
-                                  32,                   /*bitmap_pad*/
-                                  0                     /*bytes_per_line*/ );
-      if (!b->rowimage)
-         return GL_FALSE;
    }
 
    return GL_TRUE;
@@ -1484,7 +1469,9 @@ GLboolean XMesaGetDepthBuffer( XMesaBuffer b, GLint *width, GLint *height,
 {
    struct gl_renderbuffer *rb
       = b->mesa_buffer.Attachment[BUFFER_DEPTH].Renderbuffer;
-   if (!rb || !rb->Data) {
+   struct xmesa_renderbuffer *xrb = xmesa_renderbuffer(rb);
+
+   if (!xrb || !xrb->Base.Buffer) {
       *width = 0;
       *height = 0;
       *bytesPerValue = 0;
@@ -1496,7 +1483,7 @@ GLboolean XMesaGetDepthBuffer( XMesaBuffer b, GLint *width, GLint *height,
       *height = b->mesa_buffer.Height;
       *bytesPerValue = b->mesa_buffer.Visual.depthBits <= 16
          ? sizeof(GLushort) : sizeof(GLuint);
-      *buffer = rb->Data;
+      *buffer = (void *) xrb->Base.Buffer;
       return GL_TRUE;
    }
 }

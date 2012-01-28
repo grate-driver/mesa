@@ -74,6 +74,8 @@ gen7_update_texture_surface(struct gl_context *ctx, GLuint unit)
 
    if (mt->align_h == 4)
       surf->ss0.vertical_alignment = 1;
+   if (mt->align_w == 8)
+      surf->ss0.horizontal_alignment = 1;
 
    surf->ss0.surface_type = translate_tex_target(tObj->Target);
    surf->ss0.surface_format = translate_tex_format(mt->format,
@@ -94,8 +96,6 @@ gen7_update_texture_surface(struct gl_context *ctx, GLuint unit)
    gen7_set_surface_tiling(surf, intelObj->mt->region->tiling);
 
    /* ss0 remaining fields:
-    * - vertical_alignment
-    * - horizontal_alignment
     * - vert_line_stride (exists on gen6 but we ignore it)
     * - vert_line_stride_ofs (exists on gen6 but we ignore it)
     * - surface_array_spacing
@@ -157,7 +157,7 @@ gen7_create_constant_surface(struct brw_context *brw,
    surf->ss2.width = w & 0x7f;            /* bits 6:0 of size or width */
    surf->ss2.height = (w >> 7) & 0x1fff;  /* bits 19:7 of size or width */
    surf->ss3.depth = (w >> 20) & 0x7f;    /* bits 26:20 of size or width */
-   surf->ss3.pitch = (width * 16) - 1; /* ignored?? */
+   surf->ss3.pitch = (16 - 1); /* ignored */
    gen7_set_surface_tiling(surf, I915_TILING_NONE); /* tiling now allowed */
 
    /* Emit relocation to surface contents.  Section 5.1.1 of the gen4
@@ -200,6 +200,7 @@ gen7_update_renderbuffer_surface(struct brw_context *brw,
    struct intel_region *region = irb->mt->region;
    struct gen7_surface_state *surf;
    uint32_t tile_x, tile_y;
+   gl_format rb_format = intel_rb_format(irb);
 
    surf = brw_state_batch(brw, AUB_TRACE_SURFACE_STATE,
 			  sizeof(*surf), 32, &brw->bind.surf_offset[unit]);
@@ -207,22 +208,24 @@ gen7_update_renderbuffer_surface(struct brw_context *brw,
 
    if (irb->mt->align_h == 4)
       surf->ss0.vertical_alignment = 1;
+   if (irb->mt->align_w == 8)
+      surf->ss0.horizontal_alignment = 1;
 
-   switch (irb->Base.Format) {
+   switch (rb_format) {
    case MESA_FORMAT_SARGB8:
       /* without GL_EXT_framebuffer_sRGB we shouldn't bind sRGB
 	 surfaces to the blend/update as sRGB */
       if (ctx->Color.sRGBEnabled)
-	 surf->ss0.surface_format = brw_format_for_mesa_format(irb->Base.Format);
+	 surf->ss0.surface_format = brw_format_for_mesa_format(rb_format);
       else
 	 surf->ss0.surface_format = BRW_SURFACEFORMAT_B8G8R8A8_UNORM;
       break;
    default:
-      assert(brw_render_target_supported(intel, irb->Base.Format));
-      surf->ss0.surface_format = brw->render_target_format[irb->Base.Format];
-      if (unlikely(!brw->format_supported_as_render_target[irb->Base.Format])) {
+      assert(brw_render_target_supported(intel, rb_format));
+      surf->ss0.surface_format = brw->render_target_format[rb_format];
+      if (unlikely(!brw->format_supported_as_render_target[rb_format])) {
 	 _mesa_problem(ctx, "%s: renderbuffer format %s unsupported\n",
-		       __FUNCTION__, _mesa_get_format_name(irb->Base.Format));
+		       __FUNCTION__, _mesa_get_format_name(rb_format));
       }
        break;
    }

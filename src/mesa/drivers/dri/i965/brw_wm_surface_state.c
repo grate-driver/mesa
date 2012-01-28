@@ -553,6 +553,7 @@ brw_init_surface_formats(struct brw_context *brw)
    ctx->TextureFormatSupported[MESA_FORMAT_X8_Z24] = true;
    ctx->TextureFormatSupported[MESA_FORMAT_Z32_FLOAT] = true;
    ctx->TextureFormatSupported[MESA_FORMAT_Z32_FLOAT_X24S8] = true;
+   ctx->TextureFormatSupported[MESA_FORMAT_Z16] = true;
 }
 
 bool
@@ -698,11 +699,11 @@ brw_create_constant_surface(struct brw_context *brw,
 
    surf[1] = bo->offset; /* reloc */
 
-   surf[2] = (((w & 0x7f) - 1) << BRW_SURFACE_WIDTH_SHIFT |
-	      (((w >> 7) & 0x1fff) - 1) << BRW_SURFACE_HEIGHT_SHIFT);
+   surf[2] = ((w & 0x7f) << BRW_SURFACE_WIDTH_SHIFT |
+	      ((w >> 7) & 0x1fff) << BRW_SURFACE_HEIGHT_SHIFT);
 
-   surf[3] = ((((w >> 20) & 0x7f) - 1) << BRW_SURFACE_DEPTH_SHIFT |
-	      (width * 16 - 1) << BRW_SURFACE_PITCH_SHIFT);
+   surf[3] = (((w >> 20) & 0x7f) << BRW_SURFACE_DEPTH_SHIFT |
+	      (16 - 1) << BRW_SURFACE_PITCH_SHIFT); /* ignored */
 
    surf[4] = 0;
    surf[5] = 0;
@@ -905,24 +906,25 @@ brw_update_renderbuffer_surface(struct brw_context *brw,
    uint32_t *surf;
    uint32_t tile_x, tile_y;
    uint32_t format = 0;
+   gl_format rb_format = intel_rb_format(irb);
 
    surf = brw_state_batch(brw, AUB_TRACE_SURFACE_STATE,
 			  6 * 4, 32, &brw->bind.surf_offset[unit]);
 
-   switch (irb->Base.Format) {
+   switch (rb_format) {
    case MESA_FORMAT_SARGB8:
       /* without GL_EXT_framebuffer_sRGB we shouldn't bind sRGB
 	 surfaces to the blend/update as sRGB */
       if (ctx->Color.sRGBEnabled)
-	 format = brw_format_for_mesa_format(irb->Base.Format);
+	 format = brw_format_for_mesa_format(rb_format);
       else
 	 format = BRW_SURFACEFORMAT_B8G8R8A8_UNORM;
       break;
    default:
-      format = brw->render_target_format[irb->Base.Format];
-      if (unlikely(!brw->format_supported_as_render_target[irb->Base.Format])) {
+      format = brw->render_target_format[rb_format];
+      if (unlikely(!brw->format_supported_as_render_target[rb_format])) {
 	 _mesa_problem(ctx, "%s: renderbuffer format %s unsupported\n",
-		       __FUNCTION__, _mesa_get_format_name(irb->Base.Format));
+		       __FUNCTION__, _mesa_get_format_name(rb_format));
       }
       break;
    }

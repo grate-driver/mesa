@@ -42,6 +42,7 @@ struct nv50_ir_varying
    unsigned mask     : 4; /* vec4 mask */
    unsigned linear   : 1; /* linearly interpolated if true (and not flat) */
    unsigned flat     : 1;
+   unsigned sc       : 1; /* special colour interpolation mode (SHADE_MODEL) */
    unsigned centroid : 1;
    unsigned patch    : 1; /* patch constant value */
    unsigned regular  : 1; /* driver-specific meaning (e.g. input in sreg) */
@@ -155,6 +156,7 @@ struct nv50_ir_prog_info
       uint8_t cullDistanceMask;  /* clip distance mode (1 bit per output) */
       int8_t genUserClip;        /* request user clip planes for ClipVertex */
       uint8_t pointSize;         /* output index for PointSize */
+      uint8_t vertexId;          /* system value index of VertexID */
       uint8_t edgeFlagIn;
       uint8_t edgeFlagOut;
       uint8_t fragDepth;         /* output index of FragDepth */

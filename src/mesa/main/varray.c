@@ -194,7 +194,7 @@ update_array(struct gl_context *ctx,
       return;
    }
 
-   if (ctx->Array.ArrayObj->VBOonly &&
+   if (ctx->Array.ArrayObj->ARBsemantics &&
        !_mesa_is_bufferobj(ctx->Array.ArrayBufferObj)) {
       /* GL_ARB_vertex_array_object requires that all arrays reside in VBOs.
        * Generate GL_INVALID_OPERATION if that's not true.
@@ -555,7 +555,7 @@ get_vertex_array_attrib(struct gl_context *ctx, GLuint index, GLenum pname,
    case GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING_ARB:
       return array->BufferObj->Name;
    case GL_VERTEX_ATTRIB_ARRAY_INTEGER:
-      if (ctx->Extensions.EXT_gpu_shader4) {
+      if (ctx->VersionMajor >= 3 || ctx->Extensions.EXT_gpu_shader4) {
          return array->Integer;
       }
       goto error;
