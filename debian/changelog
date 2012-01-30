@@ -18,8 +18,9 @@ mesa (8.0~rc1-0ubuntu1) UNRELEASED; urgency=low
   [ Robert Hooker ]
   * Stop shipping r300/r600 classic drivers in libgl1-mesa-dri-experimental,
     no longer shipped upstream.
+  * Fix up 116_use_shared_galliumcore.diff so it works.
 
- -- Robert Hooker <sarvatt@ubuntu.com>  Tue, 24 Jan 2012 09:54:54 -0500
+ -- Robert Hooker <sarvatt@ubuntu.com>  Mon, 30 Jan 2012 15:52:13 -0500
 
 mesa (8.0~rc1-1) UNRELEASED; urgency=low
 
