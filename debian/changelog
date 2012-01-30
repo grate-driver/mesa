@@ -20,8 +20,9 @@ mesa (8.0~rc2-0ubuntu1) UNRELEASED; urgency=low
     no longer shipped upstream.
   * Fix up 116_use_shared_galliumcore.diff so it works.
   * debian/rules: Fix up dh_shlibdeps call.
+  * debian/control: Bump libwayland-dev build requirements.
 
- -- Robert Hooker <sarvatt@ubuntu.com>  Mon, 30 Jan 2012 16:25:36 -0500
+ -- Robert Hooker <sarvatt@ubuntu.com>  Mon, 30 Jan 2012 17:55:52 -0500
 
 mesa (8.0~rc2-1) UNRELEASED; urgency=low
 
