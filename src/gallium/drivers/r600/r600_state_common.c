@@ -103,6 +103,7 @@ void r600_bind_rs_state(struct pipe_context *ctx, void *state)
 	rctx->clamp_fragment_color = rs->clamp_fragment_color;
 
 	rctx->sprite_coord_enable = rs->sprite_coord_enable;
+	rctx->two_side = rs->two_side;
 
 	rctx->rasterizer = rs;
 
@@ -352,11 +353,11 @@ void r600_set_constant_buffer(struct pipe_context *ctx, uint shader, uint index,
 	case PIPE_SHADER_VERTEX:
 		rctx->vs_const_buffer.nregs = 0;
 		r600_pipe_state_add_reg(&rctx->vs_const_buffer,
-					R_028180_ALU_CONST_BUFFER_SIZE_VS_0,
+					R_028180_ALU_CONST_BUFFER_SIZE_VS_0 + index * 4,
 					ALIGN_DIVUP(buffer->width0 >> 4, 16),
 					0xFFFFFFFF, NULL, 0);
 		r600_pipe_state_add_reg(&rctx->vs_const_buffer,
-					R_028980_ALU_CONST_CACHE_VS_0,
+					R_028980_ALU_CONST_CACHE_VS_0 + index * 4,
 					offset >> 8, 0xFFFFFFFF, rbuffer, RADEON_USAGE_READ);
 		r600_context_pipe_state_set(&rctx->ctx, &rctx->vs_const_buffer);
 
@@ -549,6 +550,30 @@ static int r600_shader_rebuild(struct pipe_context * ctx, struct r600_pipe_shade
 static void r600_update_derived_state(struct r600_pipe_context *rctx)
 {
 	struct pipe_context * ctx = (struct pipe_context*)rctx;
+	struct r600_pipe_state rstate;
+	unsigned user_clip_plane_enable;
+	unsigned clip_dist_enable;
+
+	if (rctx->vs_shader->shader.clip_dist_write || rctx->vs_shader->shader.vs_prohibit_ucps)
+		user_clip_plane_enable = 0;
+	else
+		user_clip_plane_enable = rctx->rasterizer->clip_plane_enable & 0x3F;
+
+	clip_dist_enable = rctx->rasterizer->clip_plane_enable & rctx->vs_shader->shader.clip_dist_write;
+	rstate.nregs = 0;
+
+	if (user_clip_plane_enable != rctx->user_clip_plane_enable) {
+		r600_pipe_state_add_reg(&rstate, R_028810_PA_CL_CLIP_CNTL, user_clip_plane_enable , 0x3F, NULL, 0);
+		rctx->user_clip_plane_enable = user_clip_plane_enable;
+	}
+
+	if (clip_dist_enable != rctx->clip_dist_enable) {
+		r600_pipe_state_add_reg(&rstate, R_02881C_PA_CL_VS_OUT_CNTL, clip_dist_enable, 0xFF, NULL, 0);
+		rctx->clip_dist_enable = clip_dist_enable;
+	}
+
+	if (rstate.nregs)
+		r600_context_pipe_state_set(&rctx->ctx, &rstate);
 
 	if (!rctx->blitter->running) {
 		if (rctx->have_depth_fb || rctx->have_depth_texture)
@@ -564,6 +589,7 @@ static void r600_update_derived_state(struct r600_pipe_context *rctx)
 	}
 
 	if ((rctx->ps_shader->shader.clamp_color != rctx->clamp_fragment_color) ||
+	    (rctx->ps_shader->shader.two_side != rctx->two_side) ||
 	    ((rctx->chip_class >= EVERGREEN) && rctx->ps_shader->shader.fs_write_all &&
 	     (rctx->ps_shader->shader.nr_cbufs != rctx->nr_cbufs))) {
 		r600_shader_rebuild(&rctx->context, rctx->ps_shader);

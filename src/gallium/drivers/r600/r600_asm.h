@@ -32,6 +32,7 @@ struct r600_bytecode_alu_src {
 	unsigned			neg;
 	unsigned			abs;
 	unsigned			rel;
+	unsigned			kc_bank;
 	uint32_t			value;
 };
 
@@ -54,6 +55,7 @@ struct r600_bytecode_alu {
 	unsigned			bank_swizzle;
 	unsigned			bank_swizzle_force;
 	unsigned			omod;
+	unsigned                        index_mode;
 };
 
 struct r600_bytecode_tex {
@@ -143,8 +145,9 @@ struct r600_bytecode_cf {
 	unsigned			cond;
 	unsigned			pop_count;
 	unsigned			cf_addr; /* control flow addr */
-	struct r600_bytecode_kcache		kcache[2];
+	struct r600_bytecode_kcache		kcache[4];
 	unsigned			r6xx_uses_waterfall;
+	unsigned			eg_alu_extended;
 	struct list_head		alu;
 	struct list_head		tex;
 	struct list_head		vtx;
@@ -176,6 +179,10 @@ struct r600_cf_callstack {
 	int				max;
 };
 
+#define AR_HANDLE_NORMAL 0
+#define AR_HANDLE_RV6XX 1 /* except RV670 */
+
+
 struct r600_bytecode {
 	enum chip_class			chip_class;
 	int				type;
@@ -194,13 +201,15 @@ struct r600_bytecode {
 	struct r600_cf_callstack	callstack[SQ_MAX_CALL_DEPTH];
 	unsigned	ar_loaded;
 	unsigned	ar_reg;
+	unsigned        ar_handling;
+	unsigned        r6xx_nop_after_rel_dst;
 };
 
 /* eg_asm.c */
 int eg_bytecode_cf_build(struct r600_bytecode *bc, struct r600_bytecode_cf *cf);
 
 /* r600_asm.c */
-void r600_bytecode_init(struct r600_bytecode *bc, enum chip_class chip_class);
+void r600_bytecode_init(struct r600_bytecode *bc, enum chip_class chip_class, enum radeon_family family);
 void r600_bytecode_clear(struct r600_bytecode *bc);
 int r600_bytecode_add_alu(struct r600_bytecode *bc, const struct r600_bytecode_alu *alu);
 int r600_bytecode_add_vtx(struct r600_bytecode *bc, const struct r600_bytecode_vtx *vtx);

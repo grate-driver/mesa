@@ -209,8 +209,8 @@ brw_depthbuffer_format(struct brw_context *brw)
    if (!drb &&
        (srb = intel_get_renderbuffer(fb, BUFFER_STENCIL)) &&
        !srb->mt->stencil_mt &&
-       (srb->Base.Format == MESA_FORMAT_S8_Z24 ||
-	srb->Base.Format == MESA_FORMAT_Z32_FLOAT_X24S8)) {
+       (intel_rb_format(srb) == MESA_FORMAT_S8_Z24 ||
+	intel_rb_format(srb) == MESA_FORMAT_Z32_FLOAT_X24S8)) {
       drb = srb;
    }
 
@@ -223,17 +223,30 @@ brw_depthbuffer_format(struct brw_context *brw)
    case MESA_FORMAT_Z32_FLOAT:
       return BRW_DEPTHFORMAT_D32_FLOAT;
    case MESA_FORMAT_X8_Z24:
-      if (intel->gen >= 5)
+      if (intel->gen >= 6) {
 	 return BRW_DEPTHFORMAT_D24_UNORM_X8_UINT;
-      else /* Gen4 doesn't support X8; use S8 instead. */
+      } else {
+	 /* Use D24_UNORM_S8, not D24_UNORM_X8.
+	  *
+	  * D24_UNORM_X8 was not introduced until Gen5. (See the Ironlake PRM,
+	  * Volume 2, Part 1, Section 8.4.6 "Depth/Stencil Buffer State", Bits
+	  * 3DSTATE_DEPTH_BUFFER.Surface_Format).
+	  *
+	  * However, on Gen5, D24_UNORM_X8 may be used only if separate
+	  * stencil is enabled, and we never enable it. From the Ironlake PRM,
+	  * same section as above, Bit 3DSTATE_DEPTH_BUFFER.Separate_Stencil_Buffer_Enable:
+	  *     If this field is disabled, the Surface Format of the depth
+	  *     buffer cannot be D24_UNORM_X8_UINT.
+	  */
 	 return BRW_DEPTHFORMAT_D24_UNORM_S8_UINT;
+      }
    case MESA_FORMAT_S8_Z24:
       return BRW_DEPTHFORMAT_D24_UNORM_S8_UINT;
    case MESA_FORMAT_Z32_FLOAT_X24S8:
       return BRW_DEPTHFORMAT_D32_FLOAT_S8X24_UINT;
    default:
       _mesa_problem(ctx, "Unexpected depth format %s\n",
-		    _mesa_get_format_name(drb->Base.Format));
+		    _mesa_get_format_name(intel_rb_format(drb)));
       return BRW_DEPTHFORMAT_D16_UNORM;
    }
 }
@@ -341,8 +354,8 @@ static void emit_depthbuffer(struct brw_context *brw)
 	        (1 << 27) | /* tiled surface */
 	        (BRW_SURFACE_2D << 29));
       OUT_BATCH(0);
-      OUT_BATCH(((stencil_irb->Base.Width - 1) << 6) |
-	         (stencil_irb->Base.Height - 1) << 19);
+      OUT_BATCH(((stencil_irb->Base.Base.Width - 1) << 6) |
+	         (stencil_irb->Base.Base.Height - 1) << 19);
       OUT_BATCH(0);
       OUT_BATCH(0);
 
@@ -376,8 +389,8 @@ static void emit_depthbuffer(struct brw_context *brw)
 		I915_GEM_DOMAIN_RENDER, I915_GEM_DOMAIN_RENDER,
 		offset);
       OUT_BATCH((BRW_SURFACE_MIPMAPLAYOUT_BELOW << 1) |
-		(((depth_irb->Base.Width + tile_x)- 1) << 6) |
-		(((depth_irb->Base.Height + tile_y) - 1) << 19));
+		(((depth_irb->Base.Base.Width + tile_x) - 1) << 6) |
+		(((depth_irb->Base.Base.Height + tile_y) - 1) << 19));
       OUT_BATCH(0);
 
       if (intel->is_g4x || intel->gen >= 5)
@@ -756,7 +769,13 @@ static void upload_state_base_address( struct brw_context *brw )
 		 1); /* Instruction base address: shader kernels (incl. SIP) */
 
        OUT_BATCH(1); /* General state upper bound */
-       OUT_BATCH(1); /* Dynamic state upper bound */
+       /* Dynamic state upper bound.  Although the documentation says that
+	* programming it to zero will cause it to be ignored, that is a lie.
+	* If this isn't programmed to a real bound, the sampler border color
+	* pointer is rejected, causing border color to mysteriously fail.
+	*/
+       OUT_RELOC(intel->batch.bo, I915_GEM_DOMAIN_INSTRUCTION, 0,
+		 intel->batch.bo->size | 1);
        OUT_BATCH(1); /* Indirect object upper bound */
        OUT_BATCH(1); /* Instruction access upper bound */
        ADVANCE_BATCH();

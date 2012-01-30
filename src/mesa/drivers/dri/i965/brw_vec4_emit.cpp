@@ -25,6 +25,7 @@
 
 extern "C" {
 #include "brw_eu.h"
+#include "main/macros.h"
 };
 
 using namespace brw;
@@ -94,6 +95,13 @@ vec4_visitor::setup_attributes(int payload_reg)
       nr_attributes = 1;
 
    prog_data->urb_read_length = (nr_attributes + 1) / 2;
+
+   unsigned vue_entries = MAX2(nr_attributes, c->vue_map.num_slots);
+
+   if (intel->gen == 6)
+      c->prog_data.urb_entry_size = ALIGN(vue_entries, 8) / 8;
+   else
+      c->prog_data.urb_entry_size = ALIGN(vue_entries, 4) / 4;
 
    return payload_reg + nr_attributes;
 }
@@ -639,6 +647,23 @@ vec4_visitor::generate_pull_constant_load(vec4_instruction *inst,
 					  struct brw_reg dst,
 					  struct brw_reg index)
 {
+   if (intel->gen == 7) {
+      gen6_resolve_implied_move(p, &index, inst->base_mrf);
+      brw_instruction *insn = brw_next_insn(p, BRW_OPCODE_SEND);
+      brw_set_dest(p, insn, dst);
+      brw_set_src0(p, insn, index);
+      brw_set_sampler_message(p, insn,
+                              SURF_INDEX_VERT_CONST_BUFFER,
+                              0, /* LD message ignores sampler unit */
+                              GEN5_SAMPLER_MESSAGE_SAMPLE_LD,
+                              1, /* rlen */
+                              1, /* mlen */
+                              false, /* no header */
+                              BRW_SAMPLER_SIMD_MODE_SIMD4X2,
+                              0);
+      return;
+   }
+
    struct brw_reg header = brw_vec8_grf(0, 0);
 
    gen6_resolve_implied_move(p, &header, inst->base_mrf);

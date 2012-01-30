@@ -675,13 +675,6 @@
 #define   G_028814_MULTI_PRIM_IB_ENA(x)                (((x) >> 21) & 0x1)
 #define   C_028814_MULTI_PRIM_IB_ENA                   0xFFDFFFFF
 
-#define R_028004_DB_DEPTH_VIEW                       0x028004
-#define   S_028004_SLICE_START(x)                      (((x) & 0x7FF) << 0)
-#define   G_028004_SLICE_START(x)                      (((x) >> 0) & 0x7FF)
-#define   C_028004_SLICE_START                         0xFFFFF800
-#define   S_028004_SLICE_MAX(x)                        (((x) & 0x7FF) << 13)
-#define   G_028004_SLICE_MAX(x)                        (((x) >> 13) & 0x7FF)
-#define   C_028004_SLICE_MAX                           0xFF001FFF
 #define R_028D24_DB_HTILE_SURFACE                    0x028D24
 #define   S_028D24_HTILE_WIDTH(x)                      (((x) & 0x1) << 0)
 #define   G_028D24_HTILE_WIDTH(x)                      (((x) >> 0) & 0x1)
@@ -1469,6 +1462,12 @@
 #define   S_028004_ZPASS_INCREMENT_DISABLE        (((x) & 0x1) << 0)
 #define   S_028004_PERFECT_ZPASS_COUNTS(x)        (((x) & 0x1) << 1)
 #define R_028008_DB_DEPTH_VIEW                       0x00028008
+#define   S_028008_SLICE_START(x)                      (((x) & 0x7FF) << 0)
+#define   G_028008_SLICE_START(x)                      (((x) >> 0) & 0x7FF)
+#define   C_028008_SLICE_START                         0xFFFFF800
+#define   S_028008_SLICE_MAX(x)                        (((x) & 0x7FF) << 13)
+#define   G_028008_SLICE_MAX(x)                        (((x) >> 13) & 0x7FF)
+#define   C_028008_SLICE_MAX                           0xFF001FFF
 #define R_02800C_DB_RENDER_OVERRIDE                  0x0002800C
 #define   V_02800C_FORCE_OFF                         0
 #define   V_02800C_FORCE_ENABLE                      1
@@ -1524,7 +1523,9 @@
 #define R_028050_DB_Z_WRITE_BASE                     0x00028050
 #define R_028054_DB_STENCIL_WRITE_BASE               0x00028054
 #define R_028140_ALU_CONST_BUFFER_SIZE_PS_0          0x00028140
+#define R_028144_ALU_CONST_BUFFER_SIZE_PS_1          0x00028144
 #define R_028180_ALU_CONST_BUFFER_SIZE_VS_0          0x00028180
+#define R_028184_ALU_CONST_BUFFER_SIZE_VS_1          0x00028184
 #define R_028200_PA_SC_WINDOW_OFFSET                 0x00028200
 #define R_02820C_PA_SC_CLIPRECT_RULE                 0x0002820C
 #define R_028210_PA_SC_CLIPRECT_0_TL                 0x00028210
@@ -1701,7 +1702,9 @@
 #define R_028924_SQ_GS_VERT_ITEMSIZE_2               0x00028924
 #define R_028928_SQ_GS_VERT_ITEMSIZE_3               0x00028928
 #define R_028940_ALU_CONST_CACHE_PS_0                0x00028940
+#define R_028944_ALU_CONST_CACHE_PS_1                0x00028944
 #define R_028980_ALU_CONST_CACHE_VS_0                0x00028980
+#define R_028984_ALU_CONST_CACHE_VS_1                0x00028984
 #define R_028A04_PA_SU_POINT_MINMAX                  0x00028A04
 #define R_028A08_PA_SU_LINE_CNTL                     0x00028A08
 #define   S_028A08_WIDTH(x)                            (((x) & 0xFFFF) << 0)

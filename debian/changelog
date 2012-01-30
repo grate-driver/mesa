@@ -1,4 +1,4 @@
-mesa (8.0~rc1-0ubuntu1) UNRELEASED; urgency=low
+mesa (8.0~rc2-0ubuntu1) UNRELEASED; urgency=low
 
   [ Timo Aaltonen ]
   * clean, rules: Move cleaning of xmlpool.pot to rules and remove
@@ -23,7 +23,7 @@ mesa (8.0~rc1-0ubuntu1) UNRELEASED; urgency=low
 
  -- Robert Hooker <sarvatt@ubuntu.com>  Mon, 30 Jan 2012 16:25:36 -0500
 
-mesa (8.0~rc1-1) UNRELEASED; urgency=low
+mesa (8.0~rc2-1) UNRELEASED; urgency=low
 
   [ Cyril Brulebois ]
   * New upstream snapshot.
@@ -45,8 +45,14 @@ mesa (8.0~rc1-1) UNRELEASED; urgency=low
     separate source package.
   * libegl-mesa.symbols, libgles2-mesa.symbols: Add new symbols.
   * rules: Drop obsolete configure options.
+  * Enable vmwgfx gallium driver & xatracker. (Closes: #652501).
 
- -- Cyril Brulebois <kibi@debian.org>  Fri, 23 Dec 2011 14:13:28 +0100
+  [ Robert Hooker ]
+  * Bump libdrm build dep to 2.4.30, x11proto-gl-dev to 1.4.14, and
+    x11proto-dri2-dev to 2.6.
+  * Add libxatracker packaging.
+
+ -- Robert Hooker <sarvatt@ubuntu.com>  Fri, 27 Jan 2012 10:45:34 -0500
 
 mesa (7.11.2-1) unstable; urgency=low
 
@@ -120,112 +126,6 @@ mesa (7.11-2) unstable; urgency=low
 
  -- Julien Cristau <jcristau@debian.org>  Thu, 25 Aug 2011 23:13:35 +0200
 
-mesa (7.11-0ubuntu4) precise; urgency=low
-
-  * Fix comments in libegl1-mesa.symbols to avoid build failures with
-    dpkg-dev 1.16.1 (Closes: #642690, LP: #878562).
-
- -- Benjamin Drung <bdrung@ubuntu.com>  Fri, 21 Oct 2011 13:53:25 +0200
-
-mesa (7.11-0ubuntu3) oneiric; urgency=low
-
-  [ Christopher James Halse Rogers ]
-  * debian/libopenvg1-mesa-dev.links.in:
-    - Install a symlink to libOpenVG.so so that the linker can actually find
-      it.
-  * debian/rules:
-  * debian/libgl1-mesa-swx11-dev.links.in:
-    - Make linking against libGL in libgl1-mesa-swx11-dev actually work.  This
-      seems to have been broken since Ubuntu 10.04 without complaint, so it's
-      fairly clear that no-one actually uses this package.
-
-  [ Robert Hooker ]
-  * Correct gbm.h install location in libgbm-dev.
-
- -- Christopher James Halse Rogers <raof@ubuntu.com>  Wed, 10 Aug 2011 12:58:15 +1000
-
-mesa (7.11-0ubuntu2) oneiric; urgency=low
-
-  * No change rebuild against new libwayland-dev.  Fixes PowerPC build.
-
- -- Christopher James Halse Rogers <raof@ubuntu.com>  Mon, 08 Aug 2011 21:11:03 +1000
-
-mesa (7.11-0ubuntu1) oneiric; urgency=low
-
-  * Fake merge from Debian experimental, updating previous changelog entries.
-    New upstream release fixes infrequent X crash (LP: #800778).
-    Remaining Ubuntu changes:
-   - debian/control
-      + Drop lesstif-dev from Build-Depends; it's in Universe.
-      + Comment out GLw libs since it depends on lesstif-dev.
-      + Drop i686 swx11 libgl package.
-      + Add libdrm-dev to mesa-common-dev Depends.
-      + Drop libwayland-dev from Build-Depends; it's in Universe.
-      + Update Breaks for Ubuntu versions
-      + Enable llvm on armel as well as i386 and amd64
-    - debian/rules
-      + Use --disable-glw for swx11 targets too.
-      + Don't enable motif for swx11 targets.
-      + Use lzma compression for binary debs to save CD space.
-      + Drop unloved mach64 driver.
-      + Use --enable-shared-dricore to claw back CD space.
-      + Enable llvmpipe software rasteriser.
-      + Enable llvm on armel as well as i386 and amd64
-    - debian/patches
-      + 100_no_abi_tag.patch
-      + 101_ubuntu_hidden_glname.patch
-      + 103_savage-expose_fbmodes_with_nonzero_alpha.patch
-    - rules, libgl1-mesa-{glx,dev,swx11,swx11-dev}.install.in,
-      libgl1-mesa-{glx,swx11}.{postinst,prerm}.in, libgl1-mesa-dev.links.in:
-      Install libGL.so* in /usr/lib/mesa to allow things to work with
-      alternatives.
-    - debian/not-installed:
-      + Drop i686 files; we don't build 686-optimised packages in the first
-        place.
-    - debian/gbp.conf
-      + Point at Ubuntu branch to make git-buildpackage less narky.
-    - 113_fix_tls.diff: Fix crashes in unrelated code due to TLS usage.
-    - debian/patches/111_export_searchdirs_in_dripc.diff:
-      + Add drisearchdirs variable to dri.pc so the Xserver can pick up the
-        alternate DRI driver dirs.
-    - debian/patches/115_llvm_dynamic_linking.diff
-      + Dynamically link DRI drivers to libllvm.  Saves ~6MiB per DRI driver.
-    - debian/patches/116_use_shared_galliumcore.diff:
-    - debian/libgl1-mesa-dri.install.in:
-      + Link gallium DRI drivers against shared gallium routines to save CD
-        space.
-  * debian/rules:
-  * debian/libgl1-mesa-dri-experimental.install.{i386,amd64}.in
-    - Explicitly install i915g only when it has been built, matching what is
-      done with r300g.
-  * debian/rules:
-  * debian/control:
-  * debian/libegl1-mesa{,-dev}.install.in:
-  * debian/libegl1-mesa.symbols:
-    - Enable the Wayland EGL backend.
-  * debian/rules:
-  * debian/libegl1-mesa.{postinst,prerm,install}.in:
-  * debian/libegl1-mesa-dev.{install,links}.in:
-  * debian/libgles{1,2}-mesa.install.in:
-  * debian/libgles{1,2}-mesa-dev.links.in:
-  * debian/libopenvg1-mesa{,-dev}.install.in:
-  * debian/libopenvg1-mesa-dev.links.in:
-    - Use alternatives for libEGL to match the handling of libGL.
-      libEGL (and associated GL|ES and OpenVG libraries) now live in
-      /usr/lib/$MULTIARCH/mesa-egl.  (LP: #812639)
-  * debian/patches/118_fix_24bpp_software_rendering.diff:
-    - Cherry pick upstream patch from master fixing graphical corruption when
-      using a 24bpp framebuffer and software rendering. (LP: #810339)
-  * debian/rules:
-  * debian/clean:
-    - Generate xmlpool pot file and clean up other po files for
-      pkgbinarymangler's benefit (LP: #410264).
-  * debian/patches/119_r600g_gnome_shell_rendering_fix.diff:
-    - Cherry pick upstream commit fixing rendering corruption in gnome-shell
-      (and therefore likely Unity as well).
-
- -- Christopher James Halse Rogers <raof@ubuntu.com>  Thu, 04 Aug 2011 16:25:08 +1000
-
 mesa (7.11-1) unstable; urgency=low
 
   [ Christopher James Halse Rogers ]
@@ -255,71 +155,6 @@ mesa (7.11-1) unstable; urgency=low
 
  -- Julien Cristau <jcristau@debian.org>  Thu, 25 Aug 2011 00:15:27 +0200
 
-mesa (7.11~1-0ubuntu3) oneiric; urgency=low
-
-  * debian/rules:
-    - Fix the install of r300g: install it into the correct package, and
-      install it after the generic dh_install run so that it overwrites
-      r300c in libgl1-mesa-dri.  (LP: #804655)
-
- -- Christopher James Halse Rogers <raof@ubuntu.com>  Thu, 07 Jul 2011 15:57:54 +1000
-
-mesa (7.11~1-0ubuntu2) oneiric; urgency=low
-
-  * debian/rules:
-  * debian/libgl1-mesa-dri.install.linux.in:
-    - Manually install r300g only when we actually build it.  Fixes build on
-      non-i386, non-amd64 linux.
-
- -- Christopher James Halse Rogers <raof@ubuntu.com>  Wed, 29 Jun 2011 19:16:10 +0100
-
-mesa (7.11~1-0ubuntu1) oneiric; urgency=low
-
-  * Fake merge from Debian experimental git.  Remaining Ubuntu changes:
-   - debian/control
-      + Drop lesstif-dev from Build-Depends; it's in Universe.
-      + Comment out GLw libs since it depends on lesstif-dev.
-      + Drop i686 swx11 libgl package.
-      + Add libdrm-dev to mesa-common-dev Depends.
-      + Drop libwayland-dev from Build-Depends; it's in Universe.
-      + Update Breaks for Ubuntu versions
-    - debian/rules
-      + Use --disable-glw for swx11 targets too.
-      + Don't enable motif for swx11 targets.
-      + Use lzma compression for binary debs to save CD space.
-      + Drop unloved mach64 driver.
-      + Use --enable-shared-dricore to claw back CD space.
-      + Enable llvmpipe software rasteriser on amd64 and x86.
-      + Drop Wayland EGL platform.
-    - debian/patches
-      + 100_no_abi_tag.patch
-      + 101_ubuntu_hidden_glname.patch
-      + 103_savage-expose_fbmodes_with_nonzero_alpha.patch
-    - rules, libgl1-mesa-{glx,dev,swx11,swx11-dev}.install.in,
-      libgl1-mesa-{glx,swx11}.{postinst,prerm}.in, libgl1-mesa-dev.links.in:
-      Install libGL.so* in /usr/lib/mesa to allow things to work with
-      alternatives.
-    - debian/not-installed:
-      + Drop i686 files; we don't build 686-optimised packages in the first
-        place.
-    - debian/gbp.conf
-      + Point at Ubuntu branch to make git-buildpackage less narky.
-    - debian/libgl1-mesa-dri-experimental.install.{i386,amd64}.in:
-      + Install llvmpipe and i915g on i386 and amd64
-    - 113_fix_tls.diff: Fix crashes in unrelated code due to TLS usage.
-    - debian/patches/111_export_searchdirs_in_dripc.diff:
-      + Add drisearchdirs variable to dri.pc so the Xserver can pick up the
-        alternate DRI driver dirs.
-    - debian/patches/115_llvm_dynamic_linking.diff
-      + Dynamically link DRI drivers to libllvm.  Saves ~6MiB per DRI driver.
-    - debian/patches/116_use_shared_galliumcore.diff:
-    - debian/libgl1-mesa-dri.install.in:
-      + Link gallium DRI drivers against shared gallium routines to save CD
-        space.  
-  * Enable llvm on armel as well as i386 and amd64
-  
- -- Christopher James Halse Rogers <raof@ubuntu.com>  Mon, 27 Jun 2011 14:33:41 +0100
-  
 mesa (7.11~0-2) experimental; urgency=low
 
   * Thank you sbuild for giving a green light when that's not actually the
@@ -380,6 +215,35 @@ mesa (7.11~0-1) experimental; urgency=low
 
  -- Cyril Brulebois <kibi@debian.org>  Sun, 19 Jun 2011 19:01:52 +0200
 
+mesa (7.10.3-4) unstable; urgency=medium
+
+  [ Cyril Brulebois ]
+  * Accept libmotif-dev as an alternative to lesstif2-dev in
+    libglw1-mesa-dev's dependencies, as requested by Michael Hanke
+    (Closes: #631236).
+  * Merge upstream 7.10 branch up to e041956cb2.
+  * Wrap Breaks fields.
+  * Add Breaks: {xserver-xorg-core,libgl1-mesa-glx}-no-multiarch to
+    libgl1-mesa-dri* to handle upgrades from squeeze-backports (without
+    multiarch) to wheezy (with multiarch).
+  * Add lintian overrides for breaks-without-version accordingly, those
+    packages are only provided in squeeze-backports.
+  * Replace “The OpenGL utility library…” with “Mesa OpenGL utility
+    library…” in the description of the libglu1-mesa* packages.
+  * Rename all remaining *.install files as *.install.in and use
+    “${DEB_HOST_MULTIARCH}” instead of “*”.
+  * Use the sed substitution on all debian/*.in files accordingly.
+  * Remove debian/clean, and use the same for loop to remove the generated
+    files.
+  * Set urgency to “medium” to speed things up. Migration to testing is
+    a prerequisite for squeeze backports.
+
+  [ Sven Joachim ]
+  * Fix comments in libegl1-mesa.symbols to avoid impending FTBFS with
+    the upcoming dpkg-dev 1.16.1.
+
+ -- Cyril Brulebois <kibi@debian.org>  Sun, 07 Aug 2011 21:50:46 +0200
+
 mesa (7.10.3-3) unstable; urgency=low
 
   * Update the “Breaks: xserver-xorg-core” from “(<= 2:1.10.2-1)” to
@@ -416,128 +280,6 @@ mesa (7.10.3-1) unstable; urgency=low
     stored in VCS, and shipped…).
 
  -- Cyril Brulebois <kibi@debian.org>  Tue, 14 Jun 2011 15:37:41 +0200
-
-mesa (7.10.3-0ubuntu4) oneiric; urgency=low
-
-  * debian/control:
-    - Make the Breaks against the proprietary drivers versioned again now that
-      the proprietary drivers work well with multi-arch mesa. (LP: #798049)
-
- -- Alberto Milone <alberto.milone@canonical.com>  Fri, 24 Jun 2011 12:18:53 +0200
-
-mesa (7.10.3-0ubuntu3) oneiric; urgency=low
-
-  * debian/rules:
-    - Fix typo in previous armel change.  Really fix the build this time.
-  * debian/rules:
-    - Enable llvm support
-  * debian/libgl1-mesa-dri-experimental.install.in:
-  * debian/libgl1-mesa-dri-experimental.install.i386.in:
-  * debian/libgl1-mesa-dri-experimental.install.amd64.in:
-    - Ship llvmpipe software rasteriser in libgl1-mesa-dri-experimental
-  * debian/libgl1-mesa-dri-experimental.install.in:
-  * debian/libgl1-mesa-dri-experimental.i386.install.in:
-  * debian/libgl1-mesa-dir-experimental.amd64.install.in:
-    - Only i386 and amd64 build i915g.  Explicitly install it only on those
-      architectures, rather than trying to exclude it on architectures which
-      don't build it.  Fixes build (again) on armel and now powerpc as well.
-
- -- Christopher James Halse Rogers <raof@ubuntu.com>  Fri, 17 Jun 2011 11:24:37 +1000
-
-mesa (7.10.3-0ubuntu2) oneiric; urgency=low
-
-  * debian/control:
-    - Make the Breaks against the proprietary drivers unversioned.  A sneaky
-      nvidia-current upload broke my sly attempt at avoiding this work.
-      The Breaks: should therefore stay unversioned until we know the version
-      of the fixed packages.  (LP: #798007)
-  * debian/rules:
-  * debian/clean:
-  * debian/libgl1-mesa-dri-experimental.armel.install.in
-    - We don't build i915g on armel as there's no concievable hardware to
-      support.  Don't try to install it.  Fixes the build on armel.
-
- -- Christopher James Halse Rogers <raof@ubuntu.com>  Thu, 16 Jun 2011 20:45:20 +1000
-
-mesa (7.10.3-0ubuntu1) oneiric; urgency=low
-
-  * New upstream 7.10.3 bugfix release.
-   - Fixes infinite loop in GLSL compiler (LP: #788730)
-  * Merge with Debian unstable.  Remaining Ubuntu changes:
-   - debian/control
-      + Drop lesstif-dev from Build-Depends; it's in Universe.
-      + Comment out GLw libs since it depends on lesstif-dev.
-      + Drop i686 swx11 libgl package.
-      + Add libdrm-dev to mesa-common-dev Depends.
-    - debian/rules
-      + Use --disable-glw for swx11 targets too.
-      + Don't enable motif for swx11 targets.
-      + Use lzma compression for binary debs to save CD space.
-      + Drop unloved mach64 driver.
-      + Install both r300/r300g and r600/r600g
-      + Use --enable-shared-dricore to claw back CD space.
-    - debian/patches
-      + 100_no_abi_tag.patch
-      + 101_ubuntu_hidden_glname.patch
-      + 103_savage-expose_fbmodes_with_nonzero_alpha.patch
-    - rules, libgl1-mesa-{glx,dev,swx11,swx11-dev}.install.in,
-      libgl1-mesa-{glx,swx11}.{postinst,prerm}, libgl1-mesa-dev.links.in:
-      Install libGL.so* in /usr/lib/mesa to allow things to work with
-      alternatives.
-    - debian/not-installed:
-      + Drop i686 files; we don't build 686-optimised packages in the first
-        place.
-    - debian/gbp.conf
-      + Point at Ubuntu branch to make git-buildpackage less narky.
-    - debian/patches/105_use_shared_libdricore.patch, debian/rules:
-      + Link DRI drivers against shared dricore routines to save CD space.
-    - debian/patches/109_fix_length_of_glxgetfbconfigssgix.patch:
-      Fix "BadLength (poly request too large or internal Xlib length" 
-      when using non-C, non-en locales.  (LP 714280)
-    - debian/patches/108_fix_leaks_dri2_screen_creation.patch: Cherrypick
-      to fix some leaks in DRI2 screen creation failure paths.
-    - 114_intel_dri_renderer_string.diff: Re-add "GEM" to the dri renderer
-      string of the intel driver. (LP 753370)
-    - 113_fix_tls.diff: Fix crashes in unrelated code due to TLS usage.
-  * debian/rules:
-  * debian/libgl1-mesa-dri-experimental.install.in:
-    - Ship i915g in the experimental package.  We're already building it,
-      and it's apparently now comparable to i915c.
-  * debian/control:
-  * debian/libgl1-mesa-dri-experimental.install.in:
-  * debian/libgl1-mesa-dri.install.linux.in:
-    - Move nouveau gallium driver from -dri-experimental to -dri.  Upstream
-      is no longer adamant that bugs should be ignored.  Try installing it by
-      default to get a better Unity experience OOTB. (LP: #759562)
-  * debian/libgl1-mesa-dri-experimental.install.in:
-  * debian/libgl1-mesa-dri.install.linux.in:
-    - Move r300/r600 classic drivers to -experimental.  They're not supported.
-      Shave another ~1MB off the CD!
-  * debian/control:
-    - Add new bison and flex build-depends.
-  * debian/patches/115_llvm_dynamic_linking.diff
-    - Dynamically link DRI drivers to libllvm.  Saves ~6MiB per DRI driver.
-  * debian/rules:
-  * debian/patches/116_use_shared_galliumcore.diff:
-  * debian/libgl1-mesa-dri.install.in:
-    - Link gallium DRI drivers against shared gallium routines to save CD
-      space.
-  * Merge multiarch support branch:
-    - Declare Breaks: against old versions of xserver-xorg-core and
-      libgl1-mesa-glx that will look for DRI modules only in /usr/lib/dri.
-    - Fix up the maintainer scripts to transition to per-architecture
-      alternatives for ld.so configs.
-    - Declare Breaks: against nvidia-current, nvidia-173, and fglrx due to the
-      migration of alternatives for the ld.so.conf snippets.
-    - Use multiarch dirs for our dri module search path, with a fallback to
-      /usr/lib/dri.
-    - Use the right path for dh_shlibdeps.  
-  * debian/patches/117_handle_dri2connect_errors_when_indirect.diff:
-    - Handle BadRequest X protocol errors which DRI2 throws when remote
-      clients attempt to connect so that mesa can fall back to a codepath
-      that works. (LP: #785368)
-
- -- Christopher James Halse Rogers <raof@ubuntu.com>  Mon, 06 Jun 2011 16:51:56 +1000
 
 mesa (7.10.2-4) unstable; urgency=low
 
@@ -583,31 +325,6 @@ mesa (7.10.2-1) unstable; urgency=low
 
  -- Cyril Brulebois <kibi@debian.org>  Sun, 10 Apr 2011 23:42:41 +0200
 
-mesa (7.10.2-0ubuntu2) natty; urgency=low
-
-  [ Felix Geyer ]
-  * Add 114_intel_dri_renderer_string.diff: Re-add "GEM" to the dri renderer
-    string of the intel driver. Removing it breaks KDE's detection for the blur
-    effect. (LP: #753370)
-
- -- Timo Aaltonen <tjaalton@ubuntu.com>  Tue, 19 Apr 2011 12:38:25 +0300
-
-mesa (7.10.2-0ubuntu1) natty; urgency=low
-
-  [ Steve Langasek ]
-  * Fix alternatives removal on removal of libgl1-mesa-{swx11,glx}: the
-    files are in /usr/lib/mesa, not /usr/lib/GL.
-  * The architecture we're building for is DEB_HOST_ARCH, not
-    DEB_BUILD_ARCH.
-
-  [ Christopher James Halse Rogers ]
-  * New upstream bugfix release.
-    - Contains fix for KWin crash when enabling effects on r600 (LP: #738687)
-  * debian/patches/105_use_shared_libdricore.patch: Fix rpath for i386
-    libraries installed on amd64 via ia32-libs. (LP: #755720)
-
- -- Christopher James Halse Rogers <raof@ubuntu.com>  Mon, 11 Apr 2011 10:10:35 +1000
-
 mesa (7.10.1-1) experimental; urgency=low
 
   [ Cyril Brulebois ]
@@ -632,105 +349,6 @@ mesa (7.10.1-1) experimental; urgency=low
     (Closes: #586062)
 
  -- Cyril Brulebois <kibi@debian.org>  Sun, 03 Apr 2011 21:26:05 +0200
-
-mesa (7.10.1-0ubuntu3) natty; urgency=low
-
-  * debian/patches/113_partially_fix_tls.diff:
-    - Also fix the IA32 dispatch code, rename to 113_fix_tls.diff.
-  * debian/rules:
-    - Re-enable assembler on i386, now that the dispatch code has been fixed.
-      (LP: #735188)
-
- -- Christopher James Halse Rogers <raof@ubuntu.com>  Thu, 17 Mar 2011 15:14:43 +1100
-
-mesa (7.10.1-0ubuntu2) natty; urgency=low
-
-  * The “stop SIGSEGVing unrelated code” upload.
-  * debian/patches/113_partially_fix_tls.diff:
-    - Fix TLS usage: initial-exec is not appropriate for a library that
-      can be dynamically loaded with dlopen. (LP: #259219)
-    - Partial patch: missing IA32 assembler dispatch code.
-  * debian/rules:
-    - Build without optimised assembler on i386, as we haven't fixed that
-      yet.  Opens LP #735188.
-
- -- Christopher James Halse Rogers <raof@ubuntu.com>  Tue, 15 Mar 2011 10:24:52 +1100
-
-mesa (7.10.1-0ubuntu1) natty; urgency=low
-
-  * New upstream bugfix release.
-    - Drop cherry-picks now upstream:
-      + 110_nv50_fix_tgsi_sign_mode.diff
-      + 109_fix_length_of_glxgetfbconfigssgix.patch
-  * 112_fix_segfault_on_nvAF.diff:
-    - Fix from nouveau ML for segfault on X startup with nvAF cards.
-      Fixed differently in upstream/master, so drop after 7.10 (LP: #723012)
-
- -- Christopher James Halse Rogers <raof@ubuntu.com>  Tue, 08 Mar 2011 16:04:56 +1100
-
-mesa (7.10.1~git20110215.cc1636b6-0ubuntu2) natty; urgency=low
-
-  * debian/rules:
-  * debian/libgl1-mesa-dri.install.linux:
-    - Add /usr/lib/dri-alternates to the driver search path, and install the
-      classic r300 and r600 drivers there so mesa will fallback when the
-      gallium drivers are unavailable (such as when using UMS).
-  * debian/patches/111_export_searchdirs_in_dripc.diff:
-    - Add drisearchdirs variable to dri.pc so the Xserver can pick up the
-      alternate DRI driver dirs.
-
- -- Christopher James Halse Rogers <raof@ubuntu.com>  Fri, 18 Feb 2011 21:31:37 +1100
-
-mesa (7.10.1~git20110215.cc1636b6-0ubuntu1) natty; urgency=low
-
-  * Merge from Debian.  Remaining Ubuntu changes:
-   - debian/control
-      + Drop lesstif-dev from Build-Depends; it's in Universe.
-      + Comment out GLw libs since it depends on lesstif-dev.
-      + Drop i686 swx11 libgl package.
-      + Add libdrm-dev to mesa-common-dev Depends.
-      + Drop [linux-any] qualifier from libudev-dev to fix pbuilder FTBFS
-        (see deb bug 600823)
-    - debian/rules
-      + Use --disable-glw for swx11 targets too.
-      + Don't enable motif for swx11 targets.
-      + Use lzma compression for binary debs to save CD space.
-      + Drop unloved mach64 driver.
-      + Install both r300/r300g and r600/r600g
-    - debian/patches
-      + 100_no_abi_tag.patch
-      + 101_ubuntu_hidden_glname.patch
-      + 103_savage-expose_fbmodes_with_nonzero_alpha.patch
-    - rules, libgl1-mesa-{glx,dev,swx11,swx11-dev}.install,
-      libgl1-mesa-{glx,swx11}.{postinst,prerm}, libgl1-mesa-dev.links:
-      Install libGL.so* in /usr/lib/mesa to allow things to work with
-      alternatives.
-    - debian/gbp.conf
-      + Point at Ubuntu branch to make git-buildpackage less narky.
-    - debian/patches/105_use_shared_libdricore.patch, debian/rules:
-      + Link DRI drivers against shared dricore routines to save CD space.
-    - debian/patches/109_fix_length_of_glxgetfbconfigssgix.patch:
-      Fix "BadLength (poly request too large or internal Xlib length" 
-      when using non-C, non-en locales.  (LP 714280)
-    - debian/patches/108_fix_leaks_dri2_screen_creation.patch: Cherrypick
-      to fix some leaks in DRI2 screen creation failure paths.
-  * New upstream snapshot from 7.10 release branch.
-  * debian/patches/10_fix_talloc_linking.diff:
-    - Drop.  Upstream has replaced talloc with an in-tree replacement
-  * debian/patches/105_use_shared_libdricore.patch:
-    - Refresh for talloc-dropping buildsystem changes.
-  * debian/patches/107_winsys_buffer_nullptr.patch:
-    - Drop.  Included upstream.
-  * debian/patches/110_nv50_fix_tgsi_sign_mode.diff:
-    - Cherry-pick from master.  Fixes assert hit by Unity on nv5x hardware
-      (LP: #710588)
-  * debian/control:
-    - Drop no-longer-used libtalloc-dev build-dependency.
-  * debian/not-installed:
-    - Remove i686 files from not-installed list; we don't build the i686 swx11
-      packages.
-
- -- Christopher James Halse Rogers <raof@ubuntu.com>  Wed, 16 Feb 2011 10:37:07 +1100
 
 mesa (7.10-4) unstable; urgency=low
 
@@ -794,67 +412,6 @@ mesa (7.10-2) unstable; urgency=low
 
  -- Cyril Brulebois <kibi@debian.org>  Sat, 05 Feb 2011 11:16:26 +0100
 
-mesa (7.10-1ubuntu3) natty; urgency=low
-
-  * Add 109_fix_length_of_glxgetfbconfigssgix.patch: Second try at fix for
-    "BadLength (poly request too large or internal Xlib length" when using
-    non-C, non-en locales.  This time with the real fix.
-    (LP: #714280)
-
- -- Bryce Harrington <bryce@ubuntu.com>  Tue, 15 Feb 2011 15:28:33 -0800
-
-mesa (7.10-1ubuntu2) natty; urgency=low
-
-  * Add 108_fix_leaks_dri2_screen_creation.patch: Cherrypick from upstream
-    to fix leaks in DRI2 screen creation error paths, which causes Clutter
-    applications to fail with error, "BadLength (poly request too large or
-    internal Xlib length".
-    (LP: #714280)
-  * Change dep on libudev-dev to not limit to linux-any (fixes FTBS when
-    using pbuilder, see deb bug 600823)
-
- -- Bryce Harrington <bryce@ubuntu.com>  Mon, 14 Feb 2011 11:44:22 -0800
-
-mesa (7.10-1ubuntu1) natty; urgency=low
-
-  * Merge from Debian experimental.  Remaining Ubuntu changes:
-   - debian/control
-      + Drop lesstif-dev from Build-Depends; it's in Universe.
-      + Comment out GLw libs since it depends on lesstif-dev.
-      + Drop i686 swx11 libgl package.
-      + Add libdrm-dev to mesa-common-dev Depends.
-    - debian/rules
-      + Use --disable-glw for swx11 targets too.
-      + Don't enable motif for swx11 targets.
-      + Use lzma compression for binary debs to save CD space.
-      + Drop unloved mach64 driver.
-      + Install both r300/r300g and r600/r600g
-    - debian/patches
-      + 100_no_abi_tag.patch
-      + 101_ubuntu_hidden_glname.patch
-      + 103_savage-expose_fbmodes_with_nonzero_alpha.patch
-    - rules, libgl1-mesa-{glx,dev,swx11,swx11-dev}.install,
-      libgl1-mesa-{glx,swx11}.{postinst,prerm}, libgl1-mesa-dev.links:
-      Install libGL.so* in /usr/lib/mesa to allow things to work with
-      alternatives.
-    - debian/gbp.conf
-      + Point at Ubuntu branch to make git-buildpackage less narky.
-    - debian/patches/105_use_shared_libdricore.patch, debian/rules:
-      + Link DRI drivers against shared dricore routines to save CD space.
-  * debian/patches/104_i915_fragment_shader_disable.patch:
-    - Drop to re-expose ARB_fragment_shader support by default as new upstream
-      version contains many fixes.  May re-open LP 628930.
-  * debian/patches/108-r300g-fixup-rs690-tiling-stride-align.patch:
-  * debian/patches/106_fix_renderbuffer_segfault.patch:
-    - Drop; these cherry-picks are in 7.10
-  * debian/not-installed:
-    - Remove GLw headers from not-installed list.  We don't build GLw, so
-      these files aren't put into the install directory in the first place.
-  * debian/rules:
-    - Don't try to dh_strip GLw packages.  We don't build them.
-
- -- Christopher James Halse Rogers <raof@ubuntu.com>  Tue, 25 Jan 2011 12:58:00 +1100
-
 mesa (7.10-1) experimental; urgency=low
 
   * New upstream release.
@@ -904,92 +461,6 @@ mesa (7.9+repack-2) experimental; urgency=low
 
  -- Julien Cristau <jcristau@debian.org>  Tue, 04 Jan 2011 12:46:59 +0100
 
-mesa (7.9+repack-1ubuntu5) natty; urgency=low
-
-  * debian/patches/108-r300g-fixup-rs690-tiling-stride-align.patch
-    - Cherry pick 32218e4cc88f7dedebadffe4a80247decf4498f1 from upstream
-      r300g: fixup rs690 tiling stride alignment calculations
-      itself cherrypicked from d19b5cbd317620f3977e68fffb7a74793436b7e2
-      addressing unity (and other) text and icon rendering problems.
-      (LP: #681915)
-
- -- John S Gruber <JohnSGruber@gmail.com>  Sun, 09 Jan 2011 14:25:53 -0500
-
-mesa (7.9+repack-1ubuntu4) natty; urgency=low
-
-  * debian/patches/winsys_buffer_nullptr.patch: Null pointer check for
-    winsys buffer.
-    (LP: #691653)
-
- -- Bryce Harrington <bryce@ubuntu.com>  Thu, 06 Jan 2011 14:44:43 -0800
-
-mesa (7.9+repack-1ubuntu3) natty; urgency=low
-
-  * debian/patches/106_fix_renderbuffer_segfault.patch:
-    - Cherrypick of 9b1ac4d1 from 7.9 branch to fix segfault in
-      renderbuffer update that occurs in Compiz while resizing windows,
-      giving the error message "failed to attach dri2 front buffer XX"
-      (LP: #683361)
-
- -- Bryce Harrington <bryce@ubuntu.com>  Thu, 02 Dec 2010 17:15:02 -0800
-
-mesa (7.9+repack-1ubuntu2) natty; urgency=low
-
-  * debian/patches/105_use_shared_libdricore.patch:
-    - Fix makefile dependencies to ensure libdricore gets built before
-      the DRI drivers.  Fixes FTBFS on buildds, which ues parallel builds.
-
- -- Christopher James Halse Rogers <raof@ubuntu.com>  Fri, 26 Nov 2010 13:24:55 +1100
-
-mesa (7.9+repack-1ubuntu1) natty; urgency=low
-
-  * Merge from Debian experimental.  Remaining Ubuntu changes:
-   - debian/control
-      + Drop lesstif-dev from Build-Depends; it's in Universe.
-      + Comment out GLw libs since it depends on lesstif-dev.
-      + Drop i686 swx11 libgl package.
-      + Add libdrm-dev to mesa-common-dev Depends.
-    - debian/rules
-      + Unexport LDFLAGS (amd64 FTBFS).
-      + Use --disable-glw for swx11 targets too.
-      + Don't enable motif for swx11 targets.
-      + Use lzma compression for binary debs to save CD space.
-      + Drop unloved mach64 driver.
-    - debian/patches
-      + 100_no_abi_tag.patch
-      + 101_ubuntu_hidden_glname.patch
-      + 103_savage-expose_fbmodes_with_nonzero_alpha.patch
-      + 104_i915_fragment_shader_disable.patch:
-        - Disable the (experimental) ARB_fragment_shader option by default
-  	  on i915, which breaks KDE compositing (LP 628930).
-      + 107_glxgears_is_not_a_benchmark.patch
-    - rules, libgl1-mesa-{glx,dev,swx11,swx11-dev}.install,
-      libgl1-mesa-{glx,swx11}.{postinst,prerm}, libgl1-mesa-dev.links:
-      Install libGL.so* in /usr/lib/mesa to allow things to work with
-      alternatives.
-    - debian/gbp.conf
-      + Point at Ubuntu branch to make git-buildpackage less narky.
-  * Drop 107_glxgears_is_not_a_benchmark.patch.  Demos have been moved out to
-    the mesa-demos package.
-  * debian/rules:
-  * debian/libgl1-mesa-dri.install:
-    - Install both r300c/r300g and r600c/r600g, renaming the non-default
-      r300c to r300c_dri.so and r600g to r600g_dri.so to avoid conflicts.
-      The radeon DDX will get a patch to select between these appropriately.
-  * debian/patches/105_use_shared_libdricore.patch:
-  * debian/rules:
-  * debian/libgl1-mesa-dri.install
-    - Build a shared library of common mesa routines and link DRI drivers
-      against it.  Shaves about 30MiB of disc space off the DRI drivers.
-  * debian/control:
-    - Add libudev-dev to build-depends.  This is requried for the DRI2 EGL
-      driver to work with a drm display.
-  * debian/control:
-    - Build classic nouveau_vieux DRI driver, and install in libgl1-mesa-dri.
-      this is no less stable than other DRI drivers we ship there.
-
- -- Christopher James Halse Rogers <raof@ubuntu.com>  Wed, 24 Nov 2010 11:46:17 +1100
-
 mesa (7.9+repack-1) experimental; urgency=low
 
   * Repack the upstream tarball to get rid of duplicate files which make dpkg
@@ -1038,126 +509,6 @@ mesa (7.9-1) experimental; urgency=low
 
  -- Julien Cristau <jcristau@debian.org>  Sat, 13 Nov 2010 00:36:11 +0100
 
-mesa (7.9~git20100924-0ubuntu3) natty; urgency=low
-
-  * debian/control:
-    - libgl1-mesa-dev should depends on libxext-dev other pkg-config gl fails.
-
- -- Didier Roche <didrocks@ubuntu.com>  Fri, 12 Nov 2010 15:37:48 +0100
-  
-mesa (7.9~git20100924-0ubuntu2) maverick; urgency=low
-
-  * Cherry-pick b24238c4 from 7.9 release branch.  Fixes the lookup of
-    drawables after switching the GLX context, which was causing BadDrawable
-    errors in clutter applications which use multiple stages (LP: #561734)
-
- -- Christopher James Halse Rogers <raof@ubuntu.com>  Thu, 30 Sep 2010 14:48:12 +1000
-
-mesa (7.9~git20100924-0ubuntu1) maverick; urgency=low
-
-  * New upstream snapshot from the 7.9 release branch up to commit 3ad02793.
-    - Fixes GPU hang in occlusion-query on i965 (LP: #634683)
-    - Fixes hang/crash when changing desktop-effects settings in
-      KDE. (LP: #633406)
-  * debian/rules:
-    - Update configure options for kms → drm EGL backend name change
-    - Remove unused HAVE_KMS variable.
-
- -- Christopher James Halse Rogers <raof@ubuntu.com>  Thu, 23 Sep 2010 11:25:10 +1000
-
-mesa (7.9~git20100909-0ubuntu3) maverick; urgency=low
-
-  * Drop the changes from previous upload.  The Unity white screen problem
-    is clutter bug #632352, fixed in clutter-1.0 1.2.12-0ubuntu12.
-
- -- Christopher James Halse Rogers <raof@ubuntu.com>  Thu, 16 Sep 2010 16:04:28 +0200
-
-mesa (7.9~git20100909-0ubuntu2) maverick; urgency=low
-
-  * 105_old_gc_ignore_destroyed_drawable_events.patch (revert),
-    106_old_gc_fix_use_after_free.patch (revert),
-    107_old_gc_drop_broken_drawable_garbage_collector.patch (revert):
-    These three related patches introduced a new garbage collector, however
-    this introduces a regression causing clutter/mutter/unity to load with
-    a blank white screen.  Revert these three patches to restore mesa to
-    a working condition for unity.
-    (LP: #638808, #638725)
-
- -- Bryce Harrington <bryce@ubuntu.com>  Wed, 15 Sep 2010 19:32:52 -0700
-
-mesa (7.9~git20100909-0ubuntu1) maverick; urgency=low
-
-  [ Robert Hooker ]
-  * New upstream git snapshot up to commit 94118fe2d4b1e5 (LP: #631413)
-  * New features include ATI HD5xxx series support in r600, and a vastly
-    improved glsl compiler.
-  * Remove pre-generated .pc's, use the ones generated at build time
-    instead.
-  * Remove all references to mesa-utils now that its no longer shipped
-    with the mesa source.
-  * Add 104_i915_fragment_shader_disable.patch:
-    - Disable the experimental ARB_fragment_shader option by default on
-    i915, it exposes incomplete functionality that breaks KDE compositing
-    among other things. It can be enabled via driconf still. (LP: #628930).
-
-  [ Christopher James Halse Rogers ]
-  * debian/patches/04_osmesa_version.diff:
-    - Refresh for new upstream
-  * Bugs fixed in this release:
-    - Fixes severe rendering corruption in Unity on radeon (LP: #628727,
-      LP: #596292, LP: #599741, LP: #630315, LP: #613694, LP: #599741).
-    - Also fixes rendering in gnome-shell (LP: #578619).
-    - Flickering in OpenGL apps on radeon (LP: #626943, LP: #610541).
-    - Provides preliminary support for new intel chips (LP: #601052).
-  * debian/rules:
-    - Update configure flags to match upstream reshuffling.
-    - Explicitly remove gallium DRI drivers that we don't want to ship.
-  * Update debian/gbp.conf for this Maverick-specific packaging
-  * libegl1-mesa-dri-x11,kms: There are no longer separate kms or x11 drivers
-    for EGL, libegl1-mesa-drivers now contains a single driver that provides
-    both backends.
-
- -- Robert Hooker <robert.hooker@canonical.com>  Tue, 14 Sep 2010 08:55:40 -0400
-
-mesa (7.8.2-2ubuntu2) maverick; urgency=low
-
-  * Cherry-pick EGL/GL|ES/OpenVG virtual packages from Debian experimental git
-  * debian/control:
-    - Add EGL, GLESv1, GLESv2, and OpenVG virtual packages.  The Khronos group
-      specifies a de-facto linux ABI for these libraries.  We have a similar
-      package for libgl1.
-  * debian/README.Debian:
-    - Document the virtual packages above.
-
- -- Christopher James Halse Rogers <raof@ubuntu.com>  Fri, 30 Jul 2010 19:08:57 +1000
-
-mesa (7.8.2-2ubuntu1) maverick; urgency=low
-
-  * Merge from Debian experimental.  Remaining Ubuntu changes:
-   - debian/control
-      + Drop lesstif-dev from Build-Depends.
-      + Comment out GLw libs since it depends on lesstif-dev.
-      + Drop i686 swx11 libgl package.
-      + Add libdrm-dev to mesa-common-dev Depends.
-    - debian/rules
-      + Unexport LDFLAGS (amd64 FTBFS).
-      + Use --disable-glw for swx11 targets too.
-      + Don't enable motif for swx11 targets.
-      + Use lzma compression for binary debs to save CD space.
-    - debian/patches
-      + 100_no_abi_tag.patch
-      + 101_ubuntu_hidden_glname.patch
-      + 103_savage-expose_fbmodes_with_nonzero_alpha.patch
-      + 107_glxgears_is_not_a_benchmark.patch
-    - rules, libgl1-mesa-{glx,dev,swx11,swx11-dev}.install,
-      libgl1-mesa-{glx,swx11}.{postinst,prerm}, libgl1-mesa-dev.links:
-      Install libGL.so* in /usr/lib/mesa to allow things to work with
-      alternatives.  
-  * debian/rules: Drop get-orig-source target.  mesa-demos is now split out
-    of git, so this divergence from Debian will no longer be informative.
-
- -- Christopher James Halse Rogers <raof@ubuntu.com>  Tue, 27 Jul 2010 16:31:13 +1000
-
 mesa (7.8.2-2) experimental; urgency=low
 
   * Add missing dependencies to libegl1-mesa-dev, thanks to Alexandros
@@ -1204,48 +555,6 @@ mesa (7.8.2-1) experimental; urgency=low
       Part of the fix for FTBFS on Hurd and kFreeBSD.
 
  -- Julien Cristau <jcristau@debian.org>  Thu, 01 Jul 2010 12:50:18 +0200
-
-mesa (7.8.1-3ubuntu3) maverick; urgency=low
-
-  [ Alexandros Frantzis ]
-  * Make libegl1-mesa-dev depend on the following libraries which
-    contain the required .pc files, as specified in egl.pc:
-    libdrm-dev, x11proto-dri2-dev, x11proto-gl-dev, libx11-dev,
-    libxext-dev, libxxf86vm-dev, libxdamage-dev, libxfixes-dev.
-
- -- Alberto Milone <alberto.milone@canonical.com>  Thu, 15 Jul 2010 19:01:10 +0200
-
-mesa (7.8.1-3ubuntu2) maverick; urgency=low
-
-  * Fix up the mesa-common-dev header installation location
-    causing FTBS on packages needing GL headers (LP: #594863)
-
- -- Robert Hooker <sarvatt@ubuntu.com>  Tue, 15 Jun 2010 19:04:38 -0400
-
-mesa (7.8.1-3ubuntu1) maverick; urgency=low
-
-  * Merge from Debian experimental git.  Remaining Ubuntu changes:
-   - debian/control
-      + Drop lesstif-dev from Build-Depends.
-      + Comment out GLw libs since it depends on lesstif-dev.
-      + Drop i686 swx11 libgl package.
-      + Add libdrm-dev to mesa-common-dev Depends.
-    - debian/rules
-      + Unexport LDFLAGS (amd64 FTBFS).
-      + Use --disable-glw for swx11 targets too.
-      + Don't enable motif for swx11 targets.
-      + Use lzma compression for binary debs to save CD space.
-    - debian/patches
-      + 100_no_abi_tag.patch
-      + 101_ubuntu_hidden_glname.patch
-      + 103_savage-expose_fbmodes_with_nonzero_alpha.patch
-      + 107_glxgears_is_not_a_benchmark.patch
-    - rules, libgl1-mesa-{glx,dev,swx11,swx11-dev}.install,
-      libgl1-mesa-{glx,swx11}.{postinst,prerm}, libgl1-mesa-dev.links:
-      Install libGL.so* in /usr/lib/mesa to allow things to work with
-      alternatives.
-
- -- Christopher James Halse Rogers <raof@ubuntu.com>  Tue, 15 Jun 2010 08:49:05 +1000
 
 mesa (7.8.1-2) experimental; urgency=low
 
@@ -1304,63 +613,6 @@ mesa (7.8.1-2) experimental; urgency=low
 
  -- Julien Cristau <jcristau@debian.org>  Fri, 11 Jun 2010 03:19:09 +0200
 
-mesa (7.8.1-1ubuntu1) maverick; urgency=low
-
-  [ Timo Aaltonen ]
-  * Merged from Debian experimental, remaining changes:
-   - debian/control
-      + Drop lesstif-dev from Build-Depends.
-      + Comment out GLw libs since it depends on lesstif-dev.
-    - debian/rules
-      + Unexport LDFLAGS (amd64 FTBFS).
-      + Use --disable-glw for swx11 targets too.
-      + Don't enable motif for swx11 targets.
-    - debian/patches
-      + 100_no_abi_tag.patch
-      + 101_ubuntu_hidden_glname.patch
-      + 103_savage-expose_fbmodes_with_nonzero_alpha.patch
-      + 107_glxgears_is_not_a_benchmark.patch
-    - rules, libgl1-mesa-{glx,dev,swx11,swx11-dev}.install,
-      libgl1-mesa-{glx,swx11}.{postinst,prerm}, libgl1-mesa-dev.links:
-      Install libGL.so* in /usr/lib/mesa to allow things to work with
-      alternatives.
-  * Dropped patches:
-    - 102_dont_vblank.patch: should be obsolete by now
-    - 104_savage_init_mesa.patch: merged upstream
-  * control: Drop dependencies on dpkg, since lucid has it and it's the
-    only version where upgrades are supported from.
-  * libgl1-mesa-dri.postinst: Drop, same as above.
-
-  [ Robert Hooker ]
-  * debian/rules: Stop building/shipping abandoned the mach64 DRI driver.
-
-  [ Christopher James Halse Rogers ]
-  * debian/patches/103_savage-expose_fbmodes_with_nonzero_alpha.patch
-    - Refresh for driCreateConfigs API change
-  * debian/gbp.conf
-    - Set debian-branch=ubuntu to make git-buildpackage less annoying
-  * debian/rules
-    - Add get-orig-source target to document the way the orig.tar.gz is
-      generated.
-    - The i386 architecture for Maverick is now i686, not i486.  Adapt rules
-      so that the Intel DRI drivers are actually built.
-    - Drop LDFLAGS unexport.  Mesa builds fine on amd64 with Ubuntu's
-      default LDFLAGS.
-  * debian/control:
-    - Drop libgl1-mesa-swx11-i686 package.  This package is pointless on
-      Maverick, as i386 now defaults to i686
-  * debian/scripts/choose-configs:
-    - Drop libgl1-mesa-swx11-i686 from CPU-optimised swrast configs.
-
-  * Changes from unreleased debian-expemental 7.8.1-2 packaging:
-  [ Tormod Volden ]
-  * debian/rules: Do not strip the same packages twice
-
-  [ Julien Cristau ]
-  * Stop building the ffb dri driver on sparc, it no longer exists.
-  
- -- Christopher James Halse Rogers <raof@ubuntu.com>  Wed, 19 May 2010 14:47:25 +1000
-
 mesa (7.8.1-1) experimental; urgency=low
 
   * New upstream release.
@@ -1380,36 +632,6 @@ mesa (7.7.1-2) unstable; urgency=low
 
  -- Julien Cristau <jcristau@debian.org>  Thu, 20 May 2010 17:34:19 +0200
 
-mesa (7.7.1-1ubuntu3) lucid-proposed; urgency=low
-
-  * Add 104_savage_init_mesa.patch: Savage driver needs to initialize
-    &ctx->Meta->Save.  Fixes crash when using _mesa_CopyTexImage2D
-    on Savage hardware.  Cherrypick from upstream.  Thanks Tormod.
-    (LP: #562718)
-  
- -- Bryce Harrington <bryce@ubuntu.com>  Wed, 21 Apr 2010 09:48:09 -0700
-
-mesa (7.7.1-1ubuntu2) lucid; urgency=low
-
-  * Add 103_savage-expose_fbmodes_with_nonzero_alpha.patch: Expose
-    fbmodes with non-zero alpha depth.  Fixes issue where clutter apps
-    crash when using the savage driver.  Thanks to knarf for developing
-    the fix.
-    (LP: #467474)
-  * mesa-common-dev should depend on libdrm-dev
-    (LP: #490811)
-
- -- Bryce Harrington <bryce@ubuntu.com>  Wed, 14 Apr 2010 12:06:00 -0700
-
-mesa (7.7.1-1ubuntu1) lucid; urgency=low
-
-  [ Alberto Milone ]
-  * debian/rules: pass --with-dri-searchpath=/usr/lib/dri:/usr/lib32/dri
-    to confflags-dri on i386 so that /usr/lib32/dri is used for 32 bit
-    compatibility on 64 bit systems (LP: #248392).
-
- -- Timo Aaltonen <tjaalton@ubuntu.com>  Thu, 01 Apr 2010 13:31:09 +0300
-
 mesa (7.7.1-1) unstable; urgency=low
 
   [ Brice Goglin ]
@@ -1421,37 +643,12 @@ mesa (7.7.1-1) unstable; urgency=low
 
  -- Brice Goglin <bgoglin@debian.org>  Tue, 30 Mar 2010 17:15:09 +0200
 
-mesa (7.7-4ubuntu1) lucid; urgency=low
-
-  [Timo Aaltonen]
-  * libgl1-mesa-dri: Get rid of the old hook (65mesa-check-x86-64).
-    (LP: #460809)
-
-  [Rolf Leggewie]
-  * debian/control: depend on dpkg package where u-a supports --force
-    (LP: #525592)
-
- -- Timo Aaltonen <tjaalton@ubuntu.com>  Tue, 02 Mar 2010 17:11:31 +0200
-
 mesa (7.7-4) unstable; urgency=low
 
   * Pull from upstream mesa_7_7_branch up to commit 293f4d51.
     + r6xx/r7xx: emit relocation for FRAG & TILE buffer, closes: #569663.
 
  -- Brice Goglin <bgoglin@debian.org>  Wed, 24 Feb 2010 22:44:11 +0100
-
-mesa (7.7-3ubuntu1) lucid; urgency=low
-
-  [ Timo Aaltonen ]
-  * Merge from Debian experimental.
-
-  [ Robert Hooker ]
-  * Add 100_no_abi_tag.patch: Removes the ABI tag in /usr/lib/libGL.so.1
-    which prevented ldconfig from using a libGL from another directory
-    at a higher priority than the one in /usr/lib.
-  * Install libGL alternatives with libgl1-mesa-swx11 as well. (LP: #522048)
-
- -- Timo Aaltonen <tjaalton@ubuntu.com>  Fri, 19 Feb 2010 15:52:12 +0200
 
 mesa (7.7-3) experimental; urgency=low
 
@@ -1472,85 +669,6 @@ mesa (7.7-2) experimental; urgency=low
     + Fix funky colors on radeon/r200/r300.
 
  -- Brice Goglin <bgoglin@debian.org>  Wed, 27 Jan 2010 09:14:38 +0100
-
-mesa (7.7-0ubuntu8) lucid; urgency=low
-
-  * debian/libgl1-mesa-glx.postinst:
-    - Pass LDCONFIG_NOTRIGGER=y to ldconfig as it needs to be run
-      immediately as we're changing /etc/ld.so.conf.d/ with
-      alternatives.
-
- -- Alberto Milone <alberto.milone@canonical.com>  Wed, 20 Jan 2010 13:17:54 +0100
-
-mesa (7.7-0ubuntu7) lucid; urgency=low
-
-  * debian/libgl1-mesa-glx.postinst
-    - Install alternative with --force so that files that
-      already exist are overwritten thus avoiding to install a
-      broken alternative.
-
- -- Alberto Milone <alberto.milone@canonical.com>  Tue, 19 Jan 2010 17:29:19 +0100
-
-mesa (7.7-0ubuntu6) lucid; urgency=low
-
-  * debian/libgl1-mesa-glx.postinst
-    - Remove gl_libraries slave link as the file in ld.so.conf.d is
-      enough. 
-
- -- Alberto Milone <alberto.milone@canonical.com>  Sun, 17 Jan 2010 16:55:36 +0100
-
-mesa (7.7-0ubuntu5) lucid; urgency=low
-
-  * debian/rules:
-    - Remove invalid "install -d" command.
-    - Do not pass --libdir=/usr/lib/mesa flag any more. 
-  * debian/libgl1-mesa-dev.install, libgl1-mesa-swx11-dev.install,
-    libgl1-mesa-swx11.install, libglu1-mesa-dev.install,
-    libglu1-mesa.install:
-    - Install *.pc files in /usr/lib/pkgconfig instead of
-      /usr/lib/mesa/pkgconfig.
-    - Do not Install libGLU* in /usr/lib/mesa (LP: #506547).
-  * debian/libglu1-mesa-dev.links:
-    - Remove file as we install libGLU in the right place now.
-
- -- Alberto Milone <alberto.milone@canonical.com>  Wed, 13 Jan 2010 20:18:17 +0100
-
-mesa (7.7-0ubuntu4) lucid; urgency=low
-
-  * debian/libgl1-mesa-dev.links:
-    - Add link to /usr/lib/mesa/libGL.so in /usr/lib so as not to break
-      software that build against mesa (LP: #505359).
-  * debian/libgl1-mesa-glx.{postinst|prerm}:
-    - Use alternatives so that /usr/lib/GL is a slave which points to
-      /usr/lib/mesa.
-  * debian/libglu-mesa-dev.links:
-    - Add link to /usr/lib/mesa/libGLU.so in /usr/lib/libGLU.so.
-  * debian/rules:
-    - Install /usr/lib/mesa/ld.so.conf
-    - Create an empty directory (for alternatives) just to be sure:
-      /usr/lib/xorg/x11-extra-modules.
-
- -- Alberto Milone <alberto.milone@canonical.com>  Mon, 11 Jan 2010 16:49:14 +0100
-
-mesa (7.7-0ubuntu3) lucid; urgency=low
-
-  * Add -l/usr/lib/mesa to dh_shlibdeps to fix FTBFS, thanks to 
-    Albert Damen for the patch!
-
- -- Stefan Potyra <sistpoty@ubuntu.com>  Sun, 10 Jan 2010 00:41:48 +0100
-
-mesa (7.7-0ubuntu2) lucid; urgency=low
-
-  * Moving just libGL.so.* to /usr/lib/mesa broke all builds depending on
-    libGL.so or gl.pc. Fix the swx11 target --libdir to use /usr/lib/mesa.
-
- -- Timo Aaltonen <tjaalton@ubuntu.com>  Sat, 09 Jan 2010 11:21:13 +0200
-
-mesa (7.7-0ubuntu1) lucid; urgency=low
-
-  * Merge from Debian experimental.
-
- -- Timo Aaltonen <tjaalton@ubuntu.com>  Sat, 09 Jan 2010 00:12:29 +0200
 
 mesa (7.7-1) experimental; urgency=low
 
@@ -1584,20 +702,6 @@ mesa (7.6.1-1) unstable; urgency=low
 
  -- Julien Cristau <jcristau@debian.org>  Tue, 29 Dec 2009 10:42:24 +0000
 
-mesa (7.6.1~rc3-1ubuntu2) lucid; urgency=low
-
-  * debian/libgl1-mesa-glx.install:
-    - Install libGL.so* in /usr/lib/mesa so as to allow things to
-      work with alternatives.
-
- -- Alberto Milone <alberto.milone@canonical.com>  Fri, 08 Jan 2010 19:38:14 +0100
-
-mesa (7.6.1~rc3-1ubuntu1) lucid; urgency=low
-
-  * Merge from Debian unstable.
-
- -- Timo Aaltonen <tjaalton@ubuntu.com>  Mon, 14 Dec 2009 16:49:11 +0200
-
 mesa (7.6.1~rc3-1) unstable; urgency=low
 
   * New upstream release candidate.
@@ -1608,28 +712,6 @@ mesa (7.6.1~rc3-1) unstable; urgency=low
   * Build r600 DRI driver.
 
  -- Brice Goglin <bgoglin@debian.org>  Fri, 11 Dec 2009 18:36:36 +0100
-
-mesa (7.6.1~rc2-1ubuntu1) lucid; urgency=low
-
-  * Merge from Debian unstable, remaining changes:
-    - debian/control
-      + Drop lesstif-dev from Build-Depends.
-      + Comment out GLw libs since it depends on lesstif-dev.
-    - debian/rules
-      + Unexport LDFLAGS (amd64 FTBFS).
-      + Use --disable-glw for swx11 targets too.
-      + Don't enable motif for swx11 targets.
-      + Build .debs with lzma compression.
-    - debian/patches
-      + 101_ubuntu_hidden_glname.patch
-      + 102_dont_vblank.patch
-      + 107_glxgears_is_not_a_benchmark.patch
-  * Drop patches now included upstream:
-    - 108_fix_scissors_regression.patch
-    - 109_revert-dma-reuse.patch
-    - 110_dont_free.patch
-
- -- Timo Aaltonen <tjaalton@ubuntu.com>  Mon, 07 Dec 2009 18:07:26 +0200
 
 mesa (7.6.1~rc2-1) unstable; urgency=low
 
@@ -1644,65 +726,6 @@ mesa (7.6.1~rc2-1) unstable; urgency=low
 
  -- Brice Goglin <bgoglin@debian.org>  Sun, 06 Dec 2009 00:14:34 +0100
 
-mesa (7.6.0-1ubuntu4) karmic; urgency=low
-  
-  * Add 110_dont_free.patch: It is not necessary to worry about freeing
-    the textures, VBOs, etc. in _mesa_meta_free() since these are already
-    handled by the normal context deallocation code.  Fixes a crash in
-    Blender in brw_prepare_vertices().
-    (LP: #438657)
-
- -- Bryce Harrington <bryce@ubuntu.com>  Tue, 13 Oct 2009 13:48:03 -0700
-
-mesa (7.6.0-1ubuntu3) karmic; urgency=low
-
-  * Add 109_revert-dma-reuse.patch: Fix assertion failure leading to crash
-    on kwin when compositing is enabled.  This reverts commit 284a7af27.
-    (LP: #446578)
-
- -- Bryce Harrington <bryce@ubuntu.com>  Tue, 13 Oct 2009 00:52:32 -0700
-
-mesa (7.6.0-1ubuntu2) karmic; urgency=low
-
-  * Add 108_fix_scissors_regression.patch: Fix window drawing regression
-    in Kwin on older Radeon hardware.
-    (LP: #446425)
-
- -- Bryce Harrington <bryce@ubuntu.com>  Fri, 09 Oct 2009 14:12:44 -0700
-
-mesa (7.6.0-1ubuntu1) karmic; urgency=low
-
-  * Merge from Debian.  (LP: #420803)
-    Remaining Ubuntu changes:
-    - debian/control
-      + Change maintainer address to Ubuntu.
-      + Drop lesstif-dev from Build-Depends.
-      + Comment out GLw libs since it depends on lesstif-dev.
-      + Require at least libdrm_2.4.12+git20090801.45078630
-    - debian/rules
-      + Unexport LDFLAGS (amd64 FTBFS).
-      + Use --disable-glw for swx11 targets too.
-      + Don't enable motif for swx11 targets.
-      + Build .debs with lzma compression.
-      + Serialize install phase as suggested by Julien Cristau,
-        fixes amd64 FTBFS.
-    - debian/patches
-      + 101_ubuntu_hidden_glname.patch
-      + 102_dont_vblank.patch
-      + 107_glxgears_is_not_a_benchmark.patch
-  * Drop patches now included upstream:
-    + 108_big_endian.patch
-    + 109_fix_relocation_delta_for_wm_surfaces.patch
-    + 110_deassociate_drawables.patch
-    + 111_dridrawable_nullptr.patch
-    + 112_dont_corrupt_random_number_state.patch
-  * Mesa 7.6 fixes the following Ubuntu bugs:
-    + Suppress excessive warnings on unsupported GLX 1.3 calls.
-      (LP: #433488)
-  * See http://www.mesa3d.org/relnotes-7.6.html for more details.
-
- -- Bryce Harrington <bryce@ubuntu.com>  Wed, 07 Oct 2009 14:51:41 -0700
-  
 mesa (7.6-1) unstable; urgency=low
 
   [ Brice Goglin ]
@@ -1716,88 +739,6 @@ mesa (7.6-1) unstable; urgency=low
     suggestions.
 
  -- Brice Goglin <bgoglin@debian.org>  Tue, 29 Sep 2009 11:51:58 +0200
-
-mesa (7.6.0~git20090817.7c422387-0ubuntu8) karmic; urgency=low
-
-  * Add 112_dont_corrupt_random_number_state.patch: Fix predictable
-    numbers being seeded into the RNG in OpenGL when glutCreateWindow() is
-    called.
-    (LP: #421651)
-
- -- Bryce Harrington <bryce@ubuntu.com>  Wed, 07 Oct 2009 00:38:40 -0700
-
-mesa (7.6.0~git20090817.7c422387-0ubuntu7) karmic; urgency=low
-
-  * Add 110_deassociate_drawables.patch, 111_dridrawable_nullptr.patch:
-    Fix X crash when 3D wine applications are closed.
-    (LP: #401067)
-
- -- Bryce Harrington <bryce@ubuntu.com>  Fri, 02 Oct 2009 18:00:02 -0700
-
-mesa (7.6.0~git20090817.7c422387-0ubuntu6) karmic; urgency=low
-
-  * Fix build failures for big endian architectures, update
-    108_big_endian.patch.
-
- -- Matthias Klose <doko@ubuntu.com>  Sun, 27 Sep 2009 15:34:47 +0200
-
-mesa (7.6.0~git20090817.7c422387-0ubuntu5) karmic; urgency=low
-
-  * debian/rules: Disable r600: Disable r600 as 3D support is still
-    experimental and causes problems with the gnome session when
-    compiz is enabled (LP: #419126).
-
- -- Alberto Milone <alberto.milone@canonical.com>  Wed, 16 Sep 2009 17:43:59 +0200
-
-mesa (7.6.0~git20090817.7c422387-0ubuntu4) karmic; urgency=low
-
-  * Add 109_fix_relocation_delta_for_wm_surfaces.patch: Fix relocation
-    delta for WM surfaces. This was a regression introduced in
-    0f328c90dbc893e15005f2ab441d309c1c176245 (LP: #429241).
-
- -- Alberto Milone <alberto.milone@canonical.com>  Tue, 15 Sep 2009 18:14:48 +0200
-
-mesa (7.6.0~git20090817.7c422387-0ubuntu3) karmic; urgency=low
-
-  * Add 108_big_endian.patch:  Fix a couple build issues on big-endian hw.
-  * changelog:  Restore missing changelog entries lost during merge.
-
- -- Bryce Harrington <bryce@ubuntu.com>  Wed, 26 Aug 2009 13:25:56 -0700
-
-mesa (7.6.0~git20090817.7c422387-0ubuntu2) karmic; urgency=low
-
-  * control:  Require at least libdrm_2.4.12+git20090801.45078630
-
- -- Bryce Harrington <bryce@ubuntu.com>  Fri, 21 Aug 2009 21:09:03 -0700
-
-mesa (7.6.0~git20090817.7c422387-0ubuntu1) karmic; urgency=low
-
-  [Bryce Harrington]
-  * Checkout from git 20090817 (master branch) up to commit
-    7c4223876b4f8a78335687c7fcd7448b5a83ad10
-    + Add DRI2 support to -ati
-      (LP: #329654, #404428, #327698, #321108)
-    + Fix portion of MythTV Frontend does not work with RADEON DRI
-      (LP: #341898)
-    + Fix selection mode on RS482
-      (LP: #273329)
-    + Fix issue running 3D acceleration games on ATI chipsets
-      (LP: #374590)
-    + Provide DRI2 swap buffers
-      (LP: #377090)
-    + Fix blender unusable with UXA when DRI2 enabled
-      (LP: #353763)
-    + Fix glxgears blanking screens on -ati
-      (LP: #411251)
-  * Drop 108_bo_assertion.patch (applied upstream)
-
-  [Robert Hooker]
-  * Only added debian/ tree from origin/ubuntu
-  * Enable r600 driver. Note that it requires seperate drm modules
-    not provided in this PPA or in ubuntu, and also does not work with
-    KMS.
-
- -- Bryce Harrington <bryce@ubuntu.com>  Fri, 21 Aug 2009 19:14:36 -0700
 
 mesa (7.5.1-1) unstable; urgency=low
 
@@ -1832,32 +773,6 @@ mesa (7.5-2) unstable; urgency=low
 
  -- Brice Goglin <bgoglin@debian.org>  Tue, 21 Jul 2009 22:21:50 +0200
 
-mesa (7.5-1ubuntu1) karmic; urgency=low
-  
-  * Merge from Debian.  Remaining Ubuntu changes:
-    - debian/control
-      + Change maintainer address to Ubuntu.
-      + Drop lesstif-dev from Build-Depends.
-      + Comment out GLw libs since it depends on lesstif-dev.
-    - debian/rules
-      + Unexport LDFLAGS (amd64 FTBFS).
-      + Use --disable-glw for swx11 targets too.
-      + Don't enable motif for swx11 targets.
-      + Build .debs with lzma compression.
-      + Serialize install phase as suggested by Julien Cristau,
-        fixes amd64 FTBFS.
-    - debian/patches
-      + 101_ubuntu_hidden_glname.patch
-      + 102_dont_vblank.patch
-      + 107_glxgears_is_not_a_benchmark.patch
-  * Dropped patches, applied upstream:
-    - 108_bo_assertion.patch
-  * Mesa 7.5 fixes the following Ubuntu bugs:
-    - Fixes intelTexImage Assertion failed (LP: #358403)
-    - Fixes segv during glean/makeCurrent (LP: #333748)
-
- -- Bryce Harrington <bryce@ubuntu.com>  Tue, 21 Jul 2009 00:41:19 -0700
-
 mesa (7.5-1) unstable; urgency=low
 
   [ Timo Aaltonen ]
@@ -1872,47 +787,6 @@ mesa (7.5-1) unstable; urgency=low
       closes: #532980.
 
  -- Brice Goglin <bgoglin@debian.org>  Sun, 19 Jul 2009 12:53:41 +0200
-
-mesa (7.5~rc4-1ubuntu3) karmic; urgency=low
-
-  * Add 108_bo_assertion.patch: Fix assertion failure on remapping a 
-    non-BO-backed VBO with intel video. (LP: #396667)
-
- -- Robert Hooker (Sarvatt) <sarvatt@gmail.com>  Tue, 07 Jul 2009 14:35:54 -0400
-
-mesa (7.5~rc4-1ubuntu2) karmic; urgency=low
-
-  * rules: Add a missing semicolon (FTBFS).
-
- -- Timo Aaltonen <tjaalton@ubuntu.com>  Tue, 30 Jun 2009 19:49:17 +0300
-
-mesa (7.5~rc4-1ubuntu1) karmic; urgency=low
-
-  * Merge from Debian experimental, remaining changes:
-    - debian/control
-      + Change maintainer address to Ubuntu.
-      + Drop lesstif-dev from Build-Depends.
-      + Comment out GLw libs since it depends on lesstif-dev.
-    - debian/rules
-      + Unexport LDFLAGS (amd64 FTBFS).
-      + Use --disable-glw for swx11 targets too.
-      + Don't enable motif for swx11 targets.
-      + Build .debs with lzma compression.  
-    - debian/patches
-      + 101_ubuntu_hidden_glname.patch refreshed.
-      + 102_dont_vblank.patch refreshed.
-    - debian/mesa-common-dev.install
-      + Install dri.pc
-  * Dropped patches, applied upstream:
-    104_fix_dri2_ext_tfp.diff
-    105_glXWaitX_segfaults.patch
-    108_destroy_intel_fb.patch
-    109_release_direct_rendering_resources.patch
-    110_null_ptr_during_screen_tear_down.patch
-  * rules: Serialize install phase as suggested by Julien Cristau,
-    fixes amd64 FTBFS.
-
- -- Timo Aaltonen <tjaalton@ubuntu.com>  Tue, 30 Jun 2009 17:52:14 +0300
 
 mesa (7.5~rc4-1) experimental; urgency=low
 
@@ -1945,70 +819,6 @@ mesa (7.4.4-1) unstable; urgency=low
   * Enable motif in GLw, closes: #527483.
 
  -- Julien Cristau <jcristau@debian.org>  Sun, 28 Jun 2009 18:58:27 +0200
-
-mesa (7.4.1-1ubuntu6) karmic; urgency=low
-  
-  * Install dri.pc in libgl1-mesa-dev as well
-    (LP: #379797)
-
- -- Robert Hooker <sarvatt@gmail.com>  Wed, 24 Jun 2009 17:47:08 -0400
-
-mesa (7.4.1-1ubuntu5) karmic; urgency=low
-
-  * Drop 111_fix_mesa_ref_fb_call_syntax.patch: Testing showed that 110
-    alone is sufficient to fix the issue.
-
- -- Bryce Harrington <bryce@ubuntu.com>  Wed, 24 Jun 2009 17:07:33 -0700
-
-mesa (7.4.1-1ubuntu4) karmic; urgency=low
-
-  * Add 110_null_ptr_during_screen_tear_down.patch and
-    111_fix_mesa_ref_fb_call_syntax.patch to fix crashes caused by errors
-    in the previous memory leak fixes in -1u3.
-    (LP: #391808)
-
- -- Bryce Harrington <bryce@ubuntu.com>  Wed, 24 Jun 2009 15:32:54 -0700
-
-mesa (7.4.1-1ubuntu3) karmic; urgency=low
-
-  * Add 108_destroy_intel_fb.patch: Release fb backing regions in
-    intelDestroyBuffer(). Cherrypicked patch.  Fixes memory leak when
-    destroying framebuffers.
-    (LP: #360319)
-  * Add 109_release_direct_rendering_resources.patch: Cherrypicked patch.
-    Also release direct rendering resources in glXDestroyGLXPixmap.
-    Fixes leak running compiz with direct rendering.
-    (LP: #376092)
-
- -- Bryce Harrington <bryce@ubuntu.com>  Tue, 23 Jun 2009 13:44:02 -0700
-
-mesa (7.4.1-1ubuntu2) karmic; urgency=low
-
-  * Add 107_glxgears_is_not_a_benchmark.patch:  glxgears makes
-    troubleshooting performance issues difficult because bug reporters
-    see it provides fps output, and end up not looking for a better
-    benchmark.
-
- -- Bryce Harrington <bryce@ubuntu.com>  Mon, 04 May 2009 12:49:12 -0700
-
-mesa (7.4.1-1ubuntu1) karmic; urgency=low
-
-  * Merge from debian unstable, remaining changes:
-    - debian/control
-      + Change maintainer address to Ubuntu.
-      + Drop lesstif-dev from Build-Depends.
-      + Comment out GLw libs since it depends on lesstif-dev.
-    - debian/rules
-      + Unexport LDFLAGS (amd64 FTBFS).
-      + use --disable-glw for swx11 targets too.
-      + Build .debs with lzma compression.
-    - debian/patches
-      + 101_ubuntu_hidden_glname.patch.
-      + 102_dont_vblank.patch:
-      + 104_fix_dri2_ext_tfp.diff
-      + 105_glXWaitX_segfaults.patch
-
- -- Timo Aaltonen <tjaalton@ubuntu.com>  Fri, 15 May 2009 14:50:57 +0300
 
 mesa (7.4.1-1) unstable; urgency=low
 
@@ -2047,44 +857,6 @@ mesa (7.4-1) experimental; urgency=low
 
  -- Julien Cristau <jcristau@debian.org>  Wed, 01 Apr 2009 20:25:00 +0200
 
-mesa (7.4-0ubuntu4) karmic; urgency=low
-
-  * debian/patches/106_compiz_ring_switcher_xorg_segv_on_radeon.diff:
-    fix xserver segv triggered by compiz ring switcher plugin for users
-    with r300/r400 radeon chipsets and -ati driver. Patch previously
-    commited to mesa master as c28707b50701b1cf8727be29d61e2d939c6ee58f
-    and also to mesa_7_4_branch as a1ce4efefbb7f796a0a24544a1e893a56848f0c1.
-    Note: it was commited to the 7.4 branch after mesa 7.4.0 release.
-    (LP: #368049)
-
- -- Martin Olsson <martin@minimum.se>  Mon, 04 May 2009 12:25:29 +0200
-
-mesa (7.4-0ubuntu3) jaunty; urgency=low
-
-  * Disable 103_bump_965_texture_limit.diff.  This is suspected to cause X
-    freeze issues.
-    (LP: 359392, Reopen: 146298)
-
- -- Bryce Harrington <bryce@ubuntu.com>  Fri, 17 Apr 2009 11:48:50 -0700
-
-mesa (7.4-0ubuntu2) jaunty; urgency=low
-
-  * Add 105_glXWaitX_segfaults.patch. Resolves segfaults from unitialized
-    variables when using swrast based drivers. (LP: #355242)
-
- -- Mario Limonciello <superm1@ubuntu.com>  Wed, 15 Apr 2009 01:03:30 -0500
-
-mesa (7.4-0ubuntu1) jaunty; urgency=low
-
-  * New upstream release, merge from debian-experimental
-    (LP: #330476, #347171, #349127)
-  * Drop 103_rs600_support.patch, included in this version.
-  * Drop 104_swrast_fbconfigs.patch, included in this version.
-  * Add 103_bump_965_texture_limit.diff. (LP: #146298)
-  * Add 104_fix_dri2_ext_tfp.diff. (LP: #324854)
-
- -- Timo Aaltonen <tjaalton@ubuntu.com>  Fri, 03 Apr 2009 12:42:06 +0300
-
 mesa (7.4~rc1-1) experimental; urgency=low
 
   * New upstream release candidate.
@@ -2098,41 +870,6 @@ mesa (7.4~rc1-1) experimental; urgency=low
 
  -- Julien Cristau <jcristau@debian.org>  Wed, 25 Mar 2009 11:34:42 +0100
 
-mesa (7.3-1ubuntu4) jaunty; urgency=low
-
-  * Backport 104_swrast_fbconfigs.patch from mesa git.
-    - Properly assigns an fbconfig for the root visual.  This fixes
-      issues with MythTV not being able to show fonts when using a software
-      rasterizer. (LP: #341898)
-
- -- Mario Limonciello <superm1@ubuntu.com>  Fri, 27 Mar 2009 02:50:13 -0500
-
-mesa (7.3-1ubuntu3) jaunty; urgency=low
-
-  * Add 103_rs600_support.patch: Adds support for the RS600 chip and sets
-    the number of gb pipes properly for r3xx/r5xx cards.
-
- -- Bryce Harrington <bryce@ubuntu.com>  Tue, 03 Mar 2009 00:26:59 -0800
-
-mesa (7.3-1ubuntu2) jaunty; urgency=low
-
-  [ Julien Cristau ]
-  * Drop CFLAGS mangling for lpia and armel from debian/rules, the issue has
-    been fixed upstream.
-
-  [ Timo Aaltonen ]
-  * 102_dont_vblank.patch: Disable vblank again for intel, and revisit it
-    again during the next cycle.
-
- -- Timo Aaltonen <tjaalton@ubuntu.com>  Mon, 23 Feb 2009 16:48:56 +0200
-
-mesa (7.3-1ubuntu1) jaunty; urgency=low
-
-  * Merge with Debian experimental.
-  * Drop 102_remove_flip.diff, included in 7.3..
-
- -- Timo Aaltonen <tjaalton@ubuntu.com>  Sat, 31 Jan 2009 12:38:44 +0200
-
 mesa (7.3-1) experimental; urgency=low
 
   [ Timo Aaltonen ]
@@ -2143,23 +880,6 @@ mesa (7.3-1) experimental; urgency=low
     upstream git but not in tarballs.
 
  -- Julien Cristau <jcristau@debian.org>  Fri, 30 Jan 2009 20:00:34 +0100
-
-mesa (7.3~rc3-1ubuntu2) jaunty; urgency=low
-
-  * 102_remove_flip.diff: Add a patch from upstream which removes the
-    remaining bits of pageflipping support. (LP: #320690)
-
- -- Timo Aaltonen <tjaalton@ubuntu.com>  Sun, 25 Jan 2009 00:00:04 +0200
-
-mesa (7.3~rc3-1ubuntu1) jaunty; urgency=low
-
-  * Merge with Debian experimental.
-  * Drop 102_dont_vblank.patch, since the new drm code in the kernel
-    fixes the bugs that it worked around.
-  * Bump the build-dependency of libdrm to 2.4.4. It's the first version
-    with necessary changes to build this.
-
- -- Timo Aaltonen <tjaalton@ubuntu.com>  Fri, 23 Jan 2009 10:20:24 +0200
 
 mesa (7.3~rc3-1) experimental; urgency=low
 
@@ -2193,47 +913,6 @@ mesa (7.3~rc1-1) experimental; urgency=low
 
  -- Julien Cristau <jcristau@debian.org>  Sat, 10 Jan 2009 22:14:55 +0100
 
-mesa (7.2+git20081209.a0d5c3cf-0ubuntu4) jaunty; urgency=low
-
-  * debian/rules: Add -D_GNU_SOURCE for lpia & armel (FTBFS).
-
- -- Timo Aaltonen <tjaalton@ubuntu.com>  Fri, 12 Dec 2008 02:15:40 +0200
-
-mesa (7.2+git20081209.a0d5c3cf-0ubuntu3) jaunty; urgency=low
-
-  * debian/rules (CFLAGS): Avoid recursive reference.
-
- -- Matthias Klose <doko@ubuntu.com>  Thu, 11 Dec 2008 22:34:43 +0100
-
-mesa (7.2+git20081209.a0d5c3cf-0ubuntu2) jaunty; urgency=low
-
-  * debian/rules: Add -D_BSD_SOURCE to CFLAGS for lpia & armel (FTBFS).
-  * Drop the Xsession.d hook, not needed anymore.
-
- -- Timo Aaltonen <tjaalton@ubuntu.com>  Thu, 11 Dec 2008 23:20:47 +0200
-
-mesa (7.2+git20081209.a0d5c3cf-0ubuntu1) jaunty; urgency=low
-
-  * Merge from debian-experimental git branch.
-  * 103_fix-crash-in-i830_emit_state.dpatch: deleted, included
-    upstream.
-
- -- Timo Aaltonen <tjaalton@ubuntu.com>  Tue, 09 Dec 2008 21:54:28 +0200
-
-mesa (7.2-1ubuntu2) intrepid; urgency=low
-
-  * debian/patches/103_fix-crash-in-i830_emit_state.dpatch:
-    - Apply upstream commit to fix a crash in i830_emit_state
-      (LP: #277709)
-
- -- Chris Coulson <chrisccoulson@googlemail.com>  Tue, 21 Oct 2008 17:55:10 +0100
-
-mesa (7.2-1ubuntu1) intrepid; urgency=low
-
-  * Merge from Debian experimental.
-
- -- Timo Aaltonen <tepsipakki@ubuntu.com>  Wed, 24 Sep 2008 21:00:38 +0300
-
 mesa (7.2-1) experimental; urgency=low
 
   [ Brice Goglin ]
@@ -2250,45 +929,6 @@ mesa (7.2-1) experimental; urgency=low
 
  -- Julien Cristau <jcristau@debian.org>  Wed, 24 Sep 2008 14:28:21 +0200
 
-mesa (7.1-1ubuntu3) intrepid; urgency=low
-
-  * debian/rules: Build i915 and i965 DRI drivers on lpia. (LP: #270106)
-
- -- Timo Aaltonen <tepsipakki@ubuntu.com>  Tue, 16 Sep 2008 13:07:02 +0300
-
-mesa (7.1-1ubuntu2) intrepid; urgency=low
-
-  * 102_dont_vblank.patch
-    - Revert the commit which defaults to vblank on intel. It breaks
-      DPMS with compiz, resulting in a hang. (LP: 262605)
-
- -- Timo Aaltonen <tepsipakki@ubuntu.com>  Fri, 12 Sep 2008 11:25:01 +0300
-
-mesa (7.1-1ubuntu1) intrepid; urgency=low
-
-  * Merge from debian experimental, remaining changes:
-    - debian/control
-      + Change maintainer address to Ubuntu.
-      + Drop lesstif-dev from Build-Depends since it's a universe component
-        that Ubuntu doesn't want in main due to security concerns about it
-        (it's a large codebase without active development - last release >2
-        yrs ago).
-      + Comment out GLw libs since it depends on lesstif-dev.
-      + Add lpia to -dri and -dri-dbg package in.
-      + Add Pre-Depends: dpkg (>= 1.14.12ubuntu3) to ensure dpkg
-        support for lzma.
-    - debian/rules
-      + Unexport LDFLAGS (amd64 FTBFS).
-      + Add Xsession hook to disable ASM optimizations when running on
-        64-but processors that don't support them
-        (LP: 87661, Deb: 484180, fdo: 8724)
-      + use --disable-glw for swx11 targets too.
-      + Build .debs with lzma compression.
-    - debian/patches
-      + Add 101_ubuntu_hidden_glname.patch.
-
- -- Timo Aaltonen <tepsipakki@ubuntu.com>  Thu, 28 Aug 2008 01:18:35 +0300
-
 mesa (7.1-1) experimental; urgency=low
 
   * Add parallel build support.
@@ -2297,32 +937,6 @@ mesa (7.1-1) experimental; urgency=low
   * Some more parallel build updates.
 
  -- Julien Cristau <jcristau@debian.org>  Wed, 27 Aug 2008 19:52:24 +0200
-
-mesa (7.1~rc3-1ubuntu4) intrepid; urgency=low
-
-  * debian/control: Add Pre-Depends: dpkg (>= 1.14.12ubuntu3) to ensure dpkg
-    support for lzma.
-
- -- Martin Pitt <martin.pitt@ubuntu.com>  Sun, 11 May 2008 10:42:54 +0200
-
-mesa (7.1~rc3-1ubuntu3) intrepid; urgency=low
-
-  * Build .debs with lzma compression to reduce libgl1-mesa-dri from 13.2 to
-    2.8 MB.
-
- -- Martin Pitt <martin.pitt@ubuntu.com>  Tue, 12 Aug 2008 09:31:01 +0200
-
-mesa (7.1~rc3-1ubuntu2) intrepid; urgency=low
-
-  * 102_fix-fdo-14441.diff: fix tfp on i965. (LP: #245888)
-
- -- Timo Aaltonen <tepsipakki@ubuntu.com>  Fri, 01 Aug 2008 16:08:01 +0300
-
-mesa (7.1~rc3-1ubuntu1) intrepid; urgency=low
-
-  * merged with debian-experimental
-
- -- Michael Vogt <michael.vogt@ubuntu.com>  Tue, 15 Jul 2008 15:07:41 +0100
 
 mesa (7.1~rc3-1) experimental; urgency=low
 
@@ -2346,39 +960,6 @@ mesa (7.1~rc3-1) experimental; urgency=low
   * Use --enable-glx-tls for dri.
 
  -- Julien Cristau <jcristau@debian.org>  Sun, 13 Jul 2008 19:41:42 +0200
-
-mesa (7.1~rc1-0ubuntu2) intrepid; urgency=low
-
-  * Merge with debian git, fixes FTBFS on sparc/hppa/ia64.
-
- -- Timo Aaltonen <tepsipakki@ubuntu.com>  Mon, 07 Jul 2008 11:12:26 +0300
-
-mesa (7.1~rc1-0ubuntu1) intrepid; urgency=low
-
-  [ Bryce Harrington ]
-  * Merge from git.debian.org, remaining changes:
-    - Change maintainer address to Ubuntu.
-    - Drop lesstif-dev from Build-Depends since it's a universe component
-      that Ubuntu doesn't want in main due to security concerns about it
-      (it's a large codebase without active development - last release >2
-      yrs ago).
-    - Comment out GLw libs from control since it depends on lesstif-dev.
-    - Add lpia to -dri and -dri-dbg package in debian/control.
-    - Add Xsession hook to disable ASM optimizations when running on
-      64-but processors that don't support them
-      (LP: 87661, Deb: 484180, fdo: 8724)
-    - Add 101_ubuntu_hidden_glname.patch.
-
-  [ Timo Aaltonen ]
-  * Dropped patches
-    102_ubuntu_no_glw.patch:
-    - the new build system handles this better
-    103_dlopen_in_driveropen.diff and 104_fix_driveropen.diff:
-    - upstream
-  * debian/rules: use --disable-glw for swx11 targets too.
-  * Unexport LDFLAGS (amd64 FTBFS).
-
- -- Timo Aaltonen <tepsipakki@ubuntu.com>  Fri, 04 Jul 2008 13:19:57 +0300
 
 mesa (7.0.3-7) unstable; urgency=low
 
@@ -2413,29 +994,6 @@ mesa (7.0.3-4) unstable; urgency=low
 
  -- Brice Goglin <bgoglin@debian.org>  Wed, 18 Jun 2008 20:59:14 +0200
 
-mesa (7.0.3-3ubuntu1) intrepid; urgency=low
-
-  * Merge from debian unstable, remaining changes:
-     - Change maintainer address to Ubuntu.
-       - Drop lesstif-dev from Build-Depends since it's a universe component
-         that Ubuntu doesn't want in main due to security concerns about it
-         (it's a large codebase without active development - last release >2
-         yrs ago).
-       - Comment out GLw libs from control since it depends on lesstif-dev.
-       - Add lpia to -dri and -dri-dbg package in debian/control.
-       - Add lpia to ARCH_X86 in configs/debian-dri-default.
-       - Add 101_ubuntu_hidden_glname.patch
-       - Add 102_ubuntu_no_glw.patch to remove lesstif build depends since
-         its a universe component.
-       - Add 103_dlopen_in_driveropen.diff and 104_fix_driveropen.diff from
-         upstream; "Always call dlopen in DriverOpen".
-         (LP: 189580, fdo: 13541)
-       - Add Xsession hook to disable ASM optimizations when running on
-         64-but processors that don't support them
-         (LP: 87661, Deb: 484180, fdo: 8724)
-
- -- Bryce Harrington <bryce@ubuntu.com>  Tue, 17 Jun 2008 16:47:35 -0700
-
 mesa (7.0.3-3) unstable; urgency=low
 
   * Pull from mesa_7_0_branch (718724de).
@@ -2459,28 +1017,6 @@ mesa (7.0.3-2) unstable; urgency=low
 
  -- Brice Goglin <bgoglin@debian.org>  Fri, 13 Jun 2008 06:53:29 +0200
 
-mesa (7.0.3-1ubuntu2) intrepid; urgency=low
-
-  * Add Xsession hook to disable ASM optimizations when running on 
-    64-but processors that don't support them (LP: #87661)
-
- -- Tormod Volden <debian.tormod@gmail.com>  Thu, 05 Jun 2008 12:41:25 +0200
-
-mesa (7.0.3-1ubuntu1) intrepid; urgency=low
-
-  * Merge from debian unstable, remaining changes:
-    - Change maintainer address.
-    - Drop lesstif-dev from Build-Depends.
-    - Comment out GLw libs from control.
-    - Add lpia to -dri and -dri-dbg package in debian/control.
-    - Add lpia to ARCH_X86 in configs/debian-dri-default.
-    - Add 101_ubuntu_hidden_glname.patch
-    - Add 102_ubuntu_no_glw.patch
-    - Add 103_dlopen_in_driveropen.diff and 104_fix_driveropen.diff from
-      upstream; "Always call dlopen in DriverOpen". (LP: #189580)
-
- -- Timo Aaltonen <tepsipakki@ubuntu.com>  Wed, 04 Jun 2008 18:38:43 +0300
-
 mesa (7.0.3-1) unstable; urgency=low
 
   * New upstream release.
@@ -2499,44 +1035,6 @@ mesa (7.0.3~rc2-2) unstable; urgency=low
 
  -- Julien Cristau <jcristau@debian.org>  Mon, 31 Mar 2008 16:47:31 +0200
 
-mesa (7.0.3~rc2-1ubuntu3) hardy; urgency=low
-
-  * debian/patches/107_fix_-ve_rhw_regression.patch: Fixes regression
-    introduced upstream where a -ve rhw workaround is being applied only
-    for IGD systems, when it should be applied only for *non*-IGD systems.
-    This resulted in rendering issues in 3D games and drawing programs.
-    (LP: #199823, #206287)
-
- -- Bryce Harrington <bryce@ubuntu.com>  Fri, 04 Apr 2008 19:46:40 -0700
-
-mesa (7.0.3~rc2-1ubuntu2) hardy; urgency=low
-
-  [ Laurent Bigonville ]
-  * debian/patches/105_vblank_fix.patch: Fix "drmWaitVBlank returned -1" error
-    (LP: #186764)
-
-  [ Timo Aaltonen ]
-  * Add 106_i965_wine_fix.diff from upstream, "Only call
-    ProgramStringNotify if program parsing succeeded". (LP: #178292)
-
- -- Timo Aaltonen <tepsipakki@ubuntu.com>  Wed, 12 Mar 2008 12:33:41 +0200
-
-mesa (7.0.3~rc2-1ubuntu1) hardy; urgency=low
-
-  * Merge from debian unstable (LP: #189167), remaining changes:
-    - Change maintainer address.
-    - Drop lesstif-dev from Build-Depends.
-    - Comment out GLw libs from control.
-    - Add lpia to -dri and -dri-dbg package in debian/control.
-    - Add lpia to ARCH_X86 in configs/debian-dri-default.
-    - Add 101_ubuntu_hidden_glname.patch
-    - Add 102_ubuntu_no_glw.patch
-  * Drop patch 103_fix_rv410se.diff, applied upstream.
-  * Add 103_dlopen_in_driveropen.diff and 104_fix_driveropen.diff from
-    upstream; "Always call dlopen in DriverOpen". (LP: #189580)
- 
- -- Timo Aaltonen <tepsipakki@ubuntu.com>  Tue, 26 Feb 2008 13:07:45 +0200
-
 mesa (7.0.3~rc2-1) unstable; urgency=low
 
   * New upstream release candidate.
@@ -2547,48 +1045,12 @@ mesa (7.0.3~rc2-1) unstable; urgency=low
 
  -- Julien Cristau <jcristau@debian.org>  Sun, 24 Feb 2008 10:22:54 +0100
 
-mesa (7.0.2-4ubuntu2) hardy; urgency=low
-
-  * 103_fix_rv410se.diff:
-    - patch from upstream; "Fix rendering on x700 SE chips."
-      (LP: #151974)
-
- -- Timo Aaltonen <tepsipakki@ubuntu.com>  Wed, 30 Jan 2008 13:18:23 +0200
-
-mesa (7.0.2-4ubuntu1) hardy; urgency=low
-
-  * Merge from debian unstable (LP: #151974), remaining changes:
-    - Change maintainer address.
-    - Drop lesstif-dev from Build-Depends.
-    - Comment out GLw libs from control.
-    - Add lpia to -dri and -dri-dbg package in debian/control.
-    - Add lpia to ARCH_X86 in configs/debian-dri-default.
-    - Add 101_ubuntu_hidden_glname.patch
-    - Add 102_ubuntu_no_glw.patch
-
- -- Timo Aaltonen <tepsipakki@ubuntu.com>  Tue, 29 Jan 2008 12:09:30 +0200
-
 mesa (7.0.2-4) unstable; urgency=low
 
   * Update to mesa_7_0_branch head (commit 48ae5cf0).
   * Add Vcs-Git, Vcs-Browser and Homepage fields in debian/control.
 
  -- Julien Cristau <jcristau@debian.org>  Thu, 17 Jan 2008 22:23:06 +0100
-
-mesa (7.0.2-3ubuntu1) hardy; urgency=low
-
-  * Merge from debian unstable, remaining changes:
-    - Change maintainer address.
-    - Drop lesstif-dev from Build-Depends.
-    - Comment out GLw libs from control.
-    - Add lpia to -dri and -dri-dbg package in debian/control.
-    - Add lpia to ARCH_X86 in configs/debian-dri-default.
-    - Add 101_ubuntu_hidden_glname.patch
-    - Add 102_ubuntu_no_glw.patch
-  * debian/control: Do not build-depend on gcc-3.4 anymore.
-  * Drop 110_ubuntu_use_gcc-3.4_for_i965.patch
-
- -- Timo Aaltonen <tepsipakki@ubuntu.com>  Sat, 05 Jan 2008 00:45:31 +0200
 
 mesa (7.0.2-3) unstable; urgency=low
 
@@ -2602,21 +1064,6 @@ mesa (7.0.2-3) unstable; urgency=low
 
  -- Julien Cristau <jcristau@debian.org>  Tue, 18 Dec 2007 19:13:18 +0100
 
-mesa (7.0.2-2ubuntu1) hardy; urgency=low
-
-  * Merge from debian unstable, remaining changes:
-    - Change maintainer address.
-    - Add gcc-3.4 as a build dependency for amd64, i386 and lpia.
-    - Drop lesstif-dev from Build-Depends.
-    - Comment out GLw libs from control.
-    - Add lpia to -dri and -dri-dbg package in debian/control.
-    - Add lpia to ARCH_X86 in configs/debian-dri-default.
-    - Add 101_ubuntu_hidden_glname.patch
-    - Add 102_ubuntu_no_glw.patch
-    - Add 110_ubuntu_use_gcc-3.4_for_i965.patch
-  
- -- Timo Aaltonen <tepsipakki@ubuntu.com>  Fri, 16 Nov 2007 09:00:24 +0200
-
 mesa (7.0.2-2) unstable; urgency=low
 
   [ Julien Cristau ]
@@ -2626,27 +1073,6 @@ mesa (7.0.2-2) unstable; urgency=low
   * Add build-dep on libxext-dev.  Thanks, Timo Aaltonen!
 
  -- Brice Goglin <bgoglin@debian.org>  Tue, 13 Nov 2007 21:43:40 +0100
-
-mesa (7.0.2-1ubuntu2) hardy; urgency=low
-
-  * Add libxext-dev to Build-Depends.
-
- -- Timo Aaltonen <tepsipakki@ubuntu.com>  Mon, 12 Nov 2007 14:50:38 +0200
-
-mesa (7.0.2-1ubuntu1) hardy; urgency=low
-
-  * Merge from debian unstable, remaining changes:
-    - Change maintainer address.
-    - Add gcc-3.4 as a build dependency for amd64, i386 and lpia.
-    - Drop lesstif-dev from Build-Depends.
-    - Comment out GLw libs from control.
-    - Add lpia to -dri and -dri-dbg package in debian/control.
-    - Add lpia to ARCH_X86 in configs/debian-dri-default.
-    - Add 101_ubuntu_hidden_glname.patch
-    - Add 102_ubuntu_no_glw.patch
-    - Add 110_ubuntu_use_gcc-3.4_for_i965.patch
-  
- -- Timo Aaltonen <tepsipakki@ubuntu.com>  Mon, 12 Nov 2007 12:55:33 +0200
 
 mesa (7.0.2-1) unstable; urgency=low
 
@@ -2673,37 +1099,6 @@ mesa (7.0.1-2) unstable; urgency=low
 
  -- Julien Cristau <jcristau@debian.org>  Tue, 28 Aug 2007 12:11:30 +0200
 
-mesa (7.0.1-1ubuntu3) gutsy; urgency=low
-
-  * Add lpia to -dri and -dri-dbg package in debian/control.
-  * Add lpa top ARCH_X86 in configs/debian-dri-default.
-
- -- Tollef Fog Heen <tfheen@ubuntu.com>  Fri, 12 Oct 2007 14:12:21 +0200
-
-mesa (7.0.1-1ubuntu2) gutsy; urgency=low
-
-  * Add fix-965-vblank.patch, pulled from upstream
-    b3fc9a1585f390274fa26b3e3f80bc6d16f4388a which fixes missed vbl
-    interrupts on Intel i965 hardware.
-
- -- Kyle McMartin <kyle@ubuntu.com>  Wed,  3 Oct 2007 11:11:22 -0400
-
-mesa (7.0.1-1ubuntu1) gutsy; urgency=low
-
-  * Merge from debian unstable, remaining changes:
-    - Change maintainer to Ubuntu
-    - Add gcc-3.4 as a build dependency for lpia.
-    - Add support for Intel 945GME, G33, Q33, Q35
-      + 200_945gme.patch, upstream a74eec5af5397b612d60dd4b0d81666027f19bb0,
-        ad6351a994fd14af9d07da4f06837a7f9b9d0de4
-      + 201_g33.patch, upstream 8331d9d7aa7cde7126d38d4e1eb5fe8a168077f3
-    - Comment out GLw libs from control file
-    - Dropped Ubuntu addition of conflicts of libgl1-mesa-glx against
-      libgl1-mesa-swx11, since Debian has hadded a shlibs file for
-      libgl1-mesa-swx11-i686
-
- -- Bryce Harrington <bryce@ubuntu.com>  Wed, 15 Aug 2007 15:08:32 -0700
-
 mesa (7.0.1-1) unstable; urgency=low
 
   * New upstream release.
@@ -2723,81 +1118,6 @@ mesa (7.0.1~rc2-1) experimental; urgency=low
   * Add a shlibs file for libgl1-mesa-swx11-i686.
 
  -- Julien Cristau <jcristau@debian.org>  Fri, 27 Jul 2007 20:17:48 +0200
-
-mesa (7.0.0-0ubuntu3) gutsy; urgency=low
-
-  * Add gcc-3.4 as a build dependency for lpia.
-
- -- Matthias Klose <doko@ubuntu.com>  Tue, 07 Aug 2007 17:15:37 +0000
-
-mesa (7.0.0-0ubuntu2) gutsy; urgency=low
-
-  [ Kyle McMartin ]
-  * Add support for Intel 945GME, G33, Q33, Q35
-    - 200_945gme.patch, upstream a74eec5af5397b612d60dd4b0d81666027f19bb0,
-      ad6351a994fd14af9d07da4f06837a7f9b9d0de4
-    - 201_g33.patch, upstream 8331d9d7aa7cde7126d38d4e1eb5fe8a168077f3
-
- --  Kyle McMartin <kyle@ubuntu.com>  Tue, 03 Jul 2007 19:32:39 +0000
-
-mesa (7.0.0-0ubuntu1) gutsy; urgency=low
-
-  [ Bryce Harrington ]
-  * New upstream release
-    - Adds OpenGL 2.0 and 2.1 API support.
-    - Fixed a few fog-related bugs.
-    - Fixed broken GLSL mix() function.
-    - Fixed broken GLSL exp() functions.
-    - Fixed GLSL mod4(vec4, vec4) bug.
-    - Implemented GLSL asin(), acos(), atan() functions.
-    - Fixed an R300 driver bug that caused Xorg composite manager to
-      crash
-    - Fixed R300 vertex program/matrix bug (fdo# 10848)
-    - GLSL dFdx() and dFdy() work for fragment program inputs now
-      (texcoords)
-    - Fixed potential crash when specifying an invalid texture unit as a
-      sampler
-    - Fixed incorrect GLX protocol request for glXDestroyPBuffer()
-      (fdo# 10983)
-    - ARB vp state.light[n].half value was incorrect (fdo# 10987)
-    - Fixed a positional light source bug (fdo# 11009)
-    - Fixed point size attenuation problem (fdo# 11042)
-    - Fixed problem where glPopAttrib didn't restore texture object's
-      LOD bias (fdo# 11049)
-    - Fixed a TLS / TEXTREL problem (fdo# 7459)
-    - Some texture code consolidation and simplifiction
-    - R300 driver clean-ups.
-
-  [ Sarah Hobbs ]
-  * Added a conflicts of libgl1-mesa-glx against libgl1-mesa-swx11, and vice
-    versa
-
- -- Sarah Hobbs <hobbsee@ubuntu.com>  Tue, 26 Jun 2007 15:32:00 +1000
-
-mesa (6.5.3-1ubuntu1) gutsy; urgency=low
-
-  * Update Maintainer for Ubuntu
-
-  [ Kyle McMartin ]
-  * Merge with Debian experimental:
-    - Remove lesstif-dev from Build-Depends (Timo Aaltonen)
-    - Comment out GLw libs from control file
-    - Add 102_ubuntu_no_glw.patch to remove lesstif build depends
-    - Add libxext-dev to Build-Depends (Paul Sladen)
-    - Add gcc-3.4 [i386 amd64] to Build-Depends (Ben Collins)
-    - Add 110_ubuntu_use_gcc-3.4_for_i965.patch (Timo Aaltonen)
-    - Add 101_ubuntu_hidden_glname.patch
-    - Add 112_fedora-hush-synthetic-visual-warning.patch (Adam Jackson)
-
-  * Dropped patches:
-    - 103_ubuntu_fd.org-9686-fog.patch merged upstream
-    - 104_r300_call_radeonsetcliprects.patch merged upstream
-    - 105_radeon_call_radeonsetcliprects.patch merged upstream
-    - 106_r200_call_radeonsetcliprects.patch merged upstream
-    - 107_r200_simplify_r200setcliprects.patch merged upstream
-    - 111_unichrome_remove_xdrawoffset.patch merged upstream
-
- -- Kyle McMartin <kyle@ubuntu.com>  Fri, 25 May 2007 16:43:31 +0000
 
 mesa (6.5.3-1) experimental; urgency=low
 
