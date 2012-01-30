@@ -354,9 +354,8 @@ else
 	dh_makeshlibs -s -- -c1
 endif
 	dh_installdeb -s
-	dh_shlibdeps -s \
-		-l/usr/lib/$(DEB_HOST_MULTIARCH)/mesa:\
-		/usr/lib/$(DEB_HOST_MULTIARCH)/mesa-egl
+	dh_shlibdeps -s -l/usr/lib/$(DEB_HOST_MULTIARCH)/mesa:\
+/usr/lib/$(DEB_HOST_MULTIARCH)/mesa-egl
 	dh_gencontrol -s
 	dh_md5sums -s
 	dh_builddeb $(foreach pkg,$(dbgpkg),-p$(pkg)) -- -Zxz
