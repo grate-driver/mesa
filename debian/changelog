@@ -1,4 +1,4 @@
-mesa (8.0~rc2-0ubuntu1) UNRELEASED; urgency=low
+mesa (8.0~rc2-0ubuntu1) precise; urgency=low
 
   [ Timo Aaltonen ]
   * clean, rules: Move cleaning of xmlpool.pot to rules and remove
@@ -23,7 +23,7 @@ mesa (8.0~rc2-0ubuntu1) UNRELEASED; urgency=low
   * debian/control: Bump libwayland-dev build requirements.
   * Switch to llvm 3.0.
 
- -- Robert Hooker <sarvatt@ubuntu.com>  Mon, 30 Jan 2012 17:55:52 -0500
+ -- Robert Hooker <sarvatt@ubuntu.com>  Mon, 30 Jan 2012 20:56:01 -0500
 
 mesa (8.0~rc2-1) UNRELEASED; urgency=low
 
