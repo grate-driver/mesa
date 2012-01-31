@@ -134,11 +134,11 @@ Package: libxatracker1-dbg
 Section: debug
 Priority: extra
 Architecture: linux-any
-Pre-Depends: dpkg (>= 1.15.6~)
+Pre-Depends: ${misc:Pre-Depends},
+ dpkg (>= 1.15.6~),
 Depends:
  libxatracker1 (= ${binary:Version}),
  ${misc:Depends},
-Pre-Depends: ${misc:Pre-Depends}
 Multi-Arch: same
 Description: X acceleration library -- debugging symbols
  This package contains the XA (X acceleration) library.  It is used exclusively
@@ -181,11 +181,11 @@ Package: libgbm1-dbg
 Section: debug
 Priority: extra
 Architecture: linux-any
-Pre-Depends: dpkg (>= 1.15.6~)
+Pre-Depends: ${misc:Pre-Depends},
+ dpkg (>= 1.15.6~),
 Depends:
  libgbm1 (= ${binary:Version}),
  ${misc:Depends},
-Pre-Depends: ${misc:Pre-Depends}
 Multi-Arch: same
 Description: generic buffer management API -- debugging symbols
  This package contains the GBM buffer management library.  It provides a
