@@ -7,7 +7,7 @@ Index: mesa/configure.ac
  	LLVM_VERSION=`$LLVM_CONFIG --version | sed 's/svn.*//g'`
  	LLVM_CFLAGS=`$LLVM_CONFIG --cppflags|sed -e 's/-DNDEBUG\>//g' -e 's/-pedantic//g'`
 -	LLVM_LIBS="`$LLVM_CONFIG --libs`"
-+	LLVM_LIBS="-lLLVM-2.9"
++	LLVM_LIBS="-lLLVM-3.0"
  
  	LLVM_LDFLAGS=`$LLVM_CONFIG --ldflags`
  	DEFINES="$DEFINES -D__STDC_CONSTANT_MACROS"
