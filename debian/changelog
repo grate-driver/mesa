@@ -21,6 +21,7 @@ mesa (8.0~rc2-0ubuntu1) UNRELEASED; urgency=low
   * Fix up 116_use_shared_galliumcore.diff so it works.
   * debian/rules: Fix up dh_shlibdeps call.
   * debian/control: Bump libwayland-dev build requirements.
+  * Switch to llvm 3.0.
 
  -- Robert Hooker <sarvatt@ubuntu.com>  Mon, 30 Jan 2012 17:55:52 -0500
 
