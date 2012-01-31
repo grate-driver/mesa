@@ -1,3 +1,9 @@
+mesa (8.0~rc2-0ubuntu2) precise; urgency=low
+
+  * Add Pre-Depends: dpkg (>= 1.15.6~) to all -dbg packages.
+
+ -- Timo Aaltonen <tjaalton@ubuntu.com>  Tue, 31 Jan 2012 16:07:29 +0200
+
 mesa (8.0~rc2-0ubuntu1) precise; urgency=low
 
   [ Timo Aaltonen ]

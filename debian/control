@@ -69,6 +69,7 @@ Package: libgl1-mesa-swx11-dbg
 Section: debug
 Priority: extra
 Architecture: any
+Pre-Depends: dpkg (>= 1.15.6~)
 Depends:
  libgl1-mesa-swx11 (= ${binary:Version}),
  ${misc:Depends},
@@ -133,6 +134,7 @@ Package: libxatracker1-dbg
 Section: debug
 Priority: extra
 Architecture: linux-any
+Pre-Depends: dpkg (>= 1.15.6~)
 Depends:
  libxatracker1 (= ${binary:Version}),
  ${misc:Depends},
@@ -179,6 +181,7 @@ Package: libgbm1-dbg
 Section: debug
 Priority: extra
 Architecture: linux-any
+Pre-Depends: dpkg (>= 1.15.6~)
 Depends:
  libgbm1 (= ${binary:Version}),
  ${misc:Depends},
@@ -232,6 +235,7 @@ Package: libegl1-mesa-dbg
 Section: debug
 Priority: extra
 Architecture: linux-any kfreebsd-any
+Pre-Depends: dpkg (>= 1.15.6~)
 Depends:
  libegl1-mesa (= ${binary:Version}),
  ${misc:Depends},
@@ -288,6 +292,7 @@ Package: libegl1-mesa-drivers-dbg
 Section: debug
 Priority: extra
 Architecture: linux-any kfreebsd-any
+Pre-Depends: dpkg (>= 1.15.6~)
 Depends:
  libegl1-mesa-drivers (= ${binary:Version}),
  ${misc:Depends},
@@ -322,6 +327,7 @@ Package: libopenvg1-mesa-dbg
 Section: debug
 Priority: extra
 Architecture: linux-any kfreebsd-any
+Pre-Depends: dpkg (>= 1.15.6~)
 Depends:
  libopenvg1-mesa (= ${binary:Version}),
  ${misc:Depends},
@@ -376,6 +382,7 @@ Package: libgles1-mesa-dbg
 Section: debug
 Priority: extra
 Architecture: linux-any kfreebsd-any
+Pre-Depends: dpkg (>= 1.15.6~)
 Depends:
  libgles1-mesa (= ${binary:Version}),
  ${misc:Depends},
@@ -433,6 +440,7 @@ Package: libgles2-mesa-dbg
 Section: debug
 Priority: extra
 Architecture: linux-any kfreebsd-any
+Pre-Depends: dpkg (>= 1.15.6~)
 Depends:
  libgles2-mesa (= ${binary:Version}),
  ${misc:Depends},
@@ -484,6 +492,7 @@ Package: libglapi-mesa-dbg
 Section: debug
 Priority: extra
 Architecture: any
+Pre-Depends: dpkg (>= 1.15.6~)
 Depends:
  libglapi-mesa (= ${binary:Version}),
  ${misc:Depends},
@@ -526,6 +535,7 @@ Package: libgl1-mesa-glx-dbg
 Section: debug
 Priority: extra
 Architecture: any
+Pre-Depends: dpkg (>= 1.15.6~)
 Depends:
  libgl1-mesa-glx (= ${binary:Version}),
  ${misc:Depends},
@@ -599,6 +609,7 @@ Package: libgl1-mesa-dri-dbg
 Section: debug
 Priority: extra
 Architecture: any
+Pre-Depends: dpkg (>= 1.15.6~)
 Depends:
  libgl1-mesa-dri (= ${binary:Version}),
  ${misc:Depends},
@@ -647,6 +658,7 @@ Package: libgl1-mesa-dri-experimental-dbg
 Section: debug
 Priority: extra
 Architecture: linux-any
+Pre-Depends: dpkg (>= 1.15.6~)
 Depends:
  libgl1-mesa-dri-experimental (= ${binary:Version}),
  ${misc:Depends},
