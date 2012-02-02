@@ -59,16 +59,17 @@ confflags-common = \
 	CFLAGS="$(CFLAGS)" \
 	CXXFLAGS="$(CXXFLAGS)"
 
-DRI_DRIVERS = swrast
+DRI_DRIVERS =
+GALLIUM_DRIVERS =
 
 # hurd doesn't do direct rendering
 ifeq ($(DEB_HOST_ARCH_OS), hurd)
 	confflags_DIRECT_RENDERING = --disable-driglx-direct
 	confflags_EGL = --disable-egl
 	confflags_GALLIUM = --with-gallium-drivers=
+	DRI_DRIVERS += swrast
 else
 	EGL_DISPLAYS = x11
-	GALLIUM_DRIVERS = swrast
 
   ifeq ($(DEB_HOST_ARCH_OS), linux)
 # Gallium drivers require libdrm-{nouveau,radeon}, only available on Linux
@@ -83,9 +84,12 @@ else
   ifneq ($(DEB_HOST_ARCH), s390)
 	DRI_DRIVERS += r200 radeon
   endif
-  ifeq ($(DEB_HOST_ARCH_CPU), i386)
-	DRI_DRIVERS += i915 i965
-  else ifeq ($(DEB_HOST_ARCH_CPU), amd64)
+
+# Build the llvmpipe driver only on amd64, i386 until it's tested elsewhere
+  ifeq (,$(filter $(DEB_HOST_ARCH_CPU), amd64 i386))
+	DRI_DRIVERS += swrast
+  else
+	GALLIUM_DRIVERS += swrast
 	DRI_DRIVERS += i915 i965
   endif
 
@@ -208,6 +212,7 @@ build-stamp: $(BUILD_STAMPS)
 	# We do this only once, and outside the build trees, so that
 	# pkgstriptranslations doesn't get confused.
 	$(MAKE) -C src/mesa/drivers/dri/common/xmlpool pot
+
 	>$@
 
 $(STAMP)-build-%: configure
@@ -288,11 +293,6 @@ binary-arch: install
 	# install the right files manually.
 	rm -r debian/tmp/dri/usr/lib/$(DEB_HOST_MULTIARCH)/dri
 
-	# Move nouveau_vieux alongside nouveau to install in dri-experimental package
-ifneq (,$(filter nouveau,$(DRI_DRIVERS)))
-	mv build/dri/$(DEB_HOST_MULTIARCH)/nouveau_vieux_dri.so build/dri/$(DEB_HOST_MULTIARCH)/gallium/
-endif
-
 	# Also get rid of other files which aren't installed. Do not
 	# use -f to ensure we notice disappearing files:
 	set -e; for file in $(NOT_INSTALLED); do rm debian/tmp/$$file; done
@@ -302,9 +302,11 @@ endif
 	rm debian/tmp/dri/usr/lib/${DEB_HOST_MULTIARCH}/libglapi.so
 
 	dh_install -s --fail-missing
-	# Install arch-dependent drivers
-ifneq (,$(filter r300,$(GALLIUM_DRIVERS)))
-	dh_install -plibgl1-mesa-dri build/dri/$(DEB_HOST_MULTIARCH)/gallium/r300_dri.so usr/lib/${DEB_HOST_MULTIARCH}/dri
+
+# If the llvmpipe driver was built, copy it to the package dir
+ifneq (,$(filter swrast,$(GALLIUM_DRIVERS)))
+	dh_install -plibgl1-mesa-dri build/dri/$(DEB_HOST_MULTIARCH)/gallium/swrast_dri.so \
+		usr/lib/${DEB_HOST_MULTIARCH}/dri
 endif
 
 	# Create an ld.so.conf which says where to find libGL from Mesa
