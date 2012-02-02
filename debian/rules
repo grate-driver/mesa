@@ -284,11 +284,6 @@ binary-arch: install
 	# install the right files manually.
 	rm -r debian/tmp/dri/usr/lib/$(DEB_HOST_MULTIARCH)/dri
 
-	# Move nouveau_vieux alongside nouveau to install in dri-experimental package
-ifneq (,$(filter nouveau,$(DRI_DRIVERS)))
-	mv build/dri/$(DEB_HOST_MULTIARCH)/nouveau_vieux_dri.so build/dri/$(DEB_HOST_MULTIARCH)/gallium/
-endif
-
 	# Also get rid of other files which aren't installed. Do not
 	# use -f to ensure we notice disappearing files:
 	set -e; for file in $(NOT_INSTALLED); do rm debian/tmp/$$file; done
