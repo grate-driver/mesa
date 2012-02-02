@@ -293,14 +293,13 @@ binary-arch: install
 	rm debian/tmp/dri/usr/lib/${DEB_HOST_MULTIARCH}/libglapi.so
 
 	dh_install -s --fail-missing
-ifneq (,$(filter r300,$(GALLIUM_DRIVERS)))
-	dh_install -plibgl1-mesa-dri build/dri/$(DEB_HOST_MULTIARCH)/gallium/r300_dri.so usr/lib/${DEB_HOST_MULTIARCH}/dri
-endif
+
 # If the llvmpipe driver was built, copy it to the package dir
 ifneq (,$(filter swrast,$(GALLIUM_DRIVERS)))
 	dh_install -plibgl1-mesa-dri build/dri/$(DEB_HOST_MULTIARCH)/gallium/swrast_dri.so \
 		usr/lib/${DEB_HOST_MULTIARCH}/dri
 endif
+
 	dh_installman -s
 	dh_lintian -s
 	dh_link -s
