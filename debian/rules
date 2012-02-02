@@ -63,16 +63,17 @@ confflags-common = \
 	CFLAGS="$(CFLAGS)" \
 	CXXFLAGS="$(CXXFLAGS)"
 
-DRI_DRIVERS = swrast
+DRI_DRIVERS =
+GALLIUM_DRIVERS =
 
 # hurd doesn't do direct rendering
 ifeq ($(DEB_HOST_ARCH_OS), hurd)
 	confflags_DIRECT_RENDERING = --disable-driglx-direct
 	confflags_EGL = --disable-egl
 	confflags_GALLIUM = --with-gallium-drivers=
+	DRI_DRIVERS += swrast
 else
 	EGL_DISPLAYS = x11
-	GALLIUM_DRIVERS = swrast
 
   ifeq ($(DEB_HOST_ARCH_OS), linux)
 # Gallium drivers require libdrm-{nouveau,radeon}, only available on Linux
@@ -87,9 +88,12 @@ else
   ifneq ($(DEB_HOST_ARCH), s390)
 	DRI_DRIVERS += r200 radeon
   endif
-  ifeq ($(DEB_HOST_ARCH_CPU), i386)
-	DRI_DRIVERS += i915 i965
-  else ifeq ($(DEB_HOST_ARCH_CPU), amd64)
+
+# Build the llvmpipe driver only on amd64, i386 until it's tested elsewhere
+  ifeq (,$(filter $(DEB_HOST_ARCH_CPU), amd64 i386))
+	DRI_DRIVERS += swrast
+  else
+	GALLIUM_DRIVERS += swrast
 	DRI_DRIVERS += i915 i965
   endif
 
@@ -296,6 +300,11 @@ endif
 	dh_install -s --fail-missing
 ifneq (,$(filter r300,$(GALLIUM_DRIVERS)))
 	dh_install -plibgl1-mesa-dri build/dri/$(DEB_HOST_MULTIARCH)/gallium/r300_dri.so usr/lib/${DEB_HOST_MULTIARCH}/dri
+endif
+# If the llvmpipe driver was built, copy it to the package dir
+ifneq (,$(filter swrast,$(GALLIUM_DRIVERS)))
+	dh_install -plibgl1-mesa-dri build/dri/$(DEB_HOST_MULTIARCH)/gallium/swrast_dri.so \
+		usr/lib/${DEB_HOST_MULTIARCH}/dri
 endif
 	dh_installman -s
 	dh_lintian -s

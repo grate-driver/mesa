@@ -21,6 +21,8 @@ mesa (8.0~rc2-1) UNRELEASED; urgency=low
   * libegl-mesa.symbols, libgles2-mesa.symbols: Add new symbols.
   * rules: Drop obsolete configure options.
   * Enable vmwgfx gallium driver & xatracker. (Closes: #652501).
+  * Build llvmpipe swrast only on non-hurd x86, traditional for the
+    rest.
 
   [ Robert Hooker ]
   * Bump libdrm build dep to 2.4.30, x11proto-gl-dev to 1.4.14, and
