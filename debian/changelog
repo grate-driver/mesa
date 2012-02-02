@@ -1,3 +1,10 @@
+mesa (8.0~rc2-0ubuntu4) UNRELEASED; urgency=low
+
+  * Drop drisearchdir handling, it is no longer needed with multiarch
+    and dri-alternates being removed.
+
+ -- Robert Hooker <sarvatt@ubuntu.com>  Thu, 02 Feb 2012 12:05:48 -0500
+
 mesa (8.0~rc2-0ubuntu3) precise; urgency=low
 
   * Merge from debian-experimental git.
