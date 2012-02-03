@@ -1,4 +1,4 @@
-mesa (8.0~rc2-0ubuntu4) UNRELEASED; urgency=low
+mesa (8.0~rc2-0ubuntu4) precise; urgency=low
 
   * Drop drisearchdir handling, it is no longer needed with multiarch
     and dri-alternates being removed.
