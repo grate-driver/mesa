@@ -32,8 +32,9 @@ mesa (8.0~rc2-1) UNRELEASED; urgency=low
   * Bump libdrm build dep to 2.4.30, x11proto-gl-dev to 1.4.14, and
     x11proto-dri2-dev to 2.6.
   * Add libxatracker packaging.
+  * Add libxcb-glx0-dev to libegl1-mesa-dev depends.
 
- -- Robert Hooker <sarvatt@ubuntu.com>  Fri, 27 Jan 2012 10:45:34 -0500
+ -- Robert Hooker <sarvatt@ubuntu.com>  Fri, 03 Feb 2012 10:19:43 -0500
 
 mesa (7.11.2-1) unstable; urgency=low
 
