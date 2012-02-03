@@ -1,3 +1,9 @@
+mesa (8.0~rc2-0ubuntu5) precise; urgency=low
+
+  * debian/control: Add libxcb-glx0-dev to libegl1-mesa-dev depends.
+
+ -- Robert Hooker <sarvatt@ubuntu.com>  Fri, 03 Feb 2012 15:31:14 -0500
+
 mesa (8.0~rc2-0ubuntu4) precise; urgency=low
 
   * Drop drisearchdir handling, it is no longer needed with multiarch
