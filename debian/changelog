@@ -1,8 +1,12 @@
 mesa (8.0~rc2-0ubuntu5) precise; urgency=low
 
+  [ Robert Hooker ]
   * debian/control: Add libxcb-glx0-dev to libegl1-mesa-dev depends.
 
- -- Robert Hooker <sarvatt@ubuntu.com>  Fri, 03 Feb 2012 15:31:14 -0500
+  [ Christopher James Halse Rogers ]
+  * debian/control: Add libx11-xcb-dev to libegl1-mesa-dev depends.
+
+ -- Christopher James Halse Rogers <raof@ubuntu.com>  Thu, 09 Feb 2012 16:49:26 +1100
 
 mesa (8.0~rc2-0ubuntu4) precise; urgency=low
 
