@@ -34,6 +34,9 @@ mesa (8.0~rc2-1) UNRELEASED; urgency=low
   * Add libxatracker packaging.
   * Add libxcb-glx0-dev to libegl1-mesa-dev depends.
 
+  [ Christopher James Halse Rogers ]
+  * debian/control: Add libx11-xcb-dev to libegl1-mesa-dev depends.
+
  -- Robert Hooker <sarvatt@ubuntu.com>  Fri, 03 Feb 2012 10:19:43 -0500
 
 mesa (7.11.2-1) unstable; urgency=low
