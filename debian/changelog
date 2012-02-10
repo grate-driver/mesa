@@ -1,7 +1,16 @@
 mesa (8.0-2) UNRELEASED; urgency=low
 
+  [ Julien Cristau ]
   * Only build the radeon, r200, i915 and i965 dri drivers on Linux.  They
     require KMS.
+
+  [ Cyril Brulebois ]
+  * Enable wayland support again, but only on Linux. Wayland needs some
+    porting (it uses *CLOEXEC flags and epoll). For that, add those files
+    since EGL packages are also shipped on GNU/kFreeBSD, and we need to
+    add a few files for Wayland, but only for Linux:
+    - libegl1-mesa-dev.install.linux.in
+    - libegl1-mesa-drivers.install.linux.in
 
  -- Julien Cristau <jcristau@debian.org>  Sat, 11 Feb 2012 11:49:06 +0100
 

@@ -81,6 +81,8 @@ else
 # Although the KMS egl drivers will probably build on kfreebsd & hurd
 # only linux actually has KMS drivers implemented at this point.
 	EGL_DISPLAYS += drm
+# Non-Linux ports also lack *_CLOEXEC and epoll, so wayland isn't ready yet:
+	EGL_DISPLAYS += wayland
     ifeq (,$(filter $(DEB_HOST_ARCH), s390 s390x))
 	DRI_DRIVERS += r200 radeon nouveau
     endif
