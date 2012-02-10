@@ -1046,6 +1046,7 @@ static struct pipe_sampler_view *evergreen_create_sampler_view(struct pipe_conte
 							struct pipe_resource *texture,
 							const struct pipe_sampler_view *state)
 {
+	struct r600_pipe_context *rctx = (struct r600_pipe_context *)ctx;
 	struct r600_pipe_sampler_view *view = CALLOC_STRUCT(r600_pipe_sampler_view);
 	struct r600_pipe_resource_state *rstate;
 	struct r600_resource_texture *tmp = (struct r600_resource_texture*)texture;
@@ -1107,8 +1108,11 @@ static struct pipe_sampler_view *evergreen_create_sampler_view(struct pipe_conte
 
 	rstate->val[0] = (S_030000_DIM(r600_tex_dim(texture->target)) |
 			  S_030000_PITCH((pitch / 8) - 1) |
-			  S_030000_NON_DISP_TILING_ORDER(tile_type) |
 			  S_030000_TEX_WIDTH(texture->width0 - 1));
+	if (rctx->chip_class == CAYMAN)
+		rstate->val[0] |= CM_S_030000_NON_DISP_TILING_ORDER(tile_type);
+	else
+		rstate->val[0] |= S_030000_NON_DISP_TILING_ORDER(tile_type);
 	rstate->val[1] = (S_030004_TEX_HEIGHT(height - 1) |
 			  S_030004_TEX_DEPTH(depth - 1) |
 			  S_030004_ARRAY_MODE(array_mode));
