@@ -1,7 +1,7 @@
-mesa (8.0~rc2-1) UNRELEASED; urgency=low
+mesa (8.0-1) UNRELEASED; urgency=low
 
   [ Cyril Brulebois ]
-  * New upstream snapshot.
+  * New upstream release.
   * Disable patch temporarily (needs a refresh):
     - 11-hurd-ftbfs-again.diff
   * Drop patch, no longer needed since swrastg was renamed to swrast:
