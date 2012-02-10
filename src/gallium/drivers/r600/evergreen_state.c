@@ -1093,6 +1093,11 @@ static struct pipe_sampler_view *evergreen_create_sampler_view(struct pipe_conte
 		      util_format_get_blockwidth(state->format), 8);
 	array_mode = tmp->array_mode[0];
 	tile_type = tmp->tile_type;
+	/* 128 bit formats require tile type = 1 */
+	if (rctx->chip_class == CAYMAN) {
+		if (util_format_get_blocksize(state->format) >= 16)
+			tile_type = 1;
+	}
 
 	if (texture->target == PIPE_TEXTURE_1D_ARRAY) {
 	        height = 1;
@@ -1461,6 +1466,11 @@ static void evergreen_cb(struct r600_pipe_context *rctx, struct r600_pipe_state 
 		tile_type = rtex->tile_type;
 	} else /* workaround for linear buffers */
 		tile_type = 1;
+	/* 128 bit formats require tile type = 1 */
+	if (rctx->chip_class == CAYMAN) {
+		if (util_format_get_blocksize(surf->base.format) >= 16)
+			tile_type = 1;
+	}
 
 	/* FIXME handle enabling of CB beyond BASE8 which has different offset */
 	r600_pipe_state_add_reg(rstate,
