@@ -59,15 +59,6 @@
 static struct gl_renderbuffer *
 intel_new_renderbuffer(struct gl_context * ctx, GLuint name);
 
-static bool
-intel_renderbuffer_update_wrapper(struct intel_context *intel,
-                                  struct intel_renderbuffer *irb,
-                                  struct intel_mipmap_tree *mt,
-                                  uint32_t level,
-                                  uint32_t layer,
-                                  gl_format format,
-                                  GLenum internal_format);
-
 bool
 intel_framebuffer_has_hiz(struct gl_framebuffer *fb)
 {
@@ -128,15 +119,16 @@ intel_map_renderbuffer(struct gl_context *ctx,
 		       GLint *out_stride)
 {
    struct intel_context *intel = intel_context(ctx);
+   struct swrast_renderbuffer *srb = (struct swrast_renderbuffer *)rb;
    struct intel_renderbuffer *irb = intel_renderbuffer(rb);
    void *map;
    int stride;
 
-   if (!irb && irb->Base.Buffer) {
-      /* this is a malloc'd renderbuffer (accum buffer) */
+   if (srb->Buffer) {
+      /* this is a malloc'd renderbuffer (accum buffer), not an irb */
       GLint bpp = _mesa_get_format_bytes(rb->Format);
-      GLint rowStride = irb->Base.RowStride;
-      *out_map = (GLubyte *) irb->Base.Buffer + y * rowStride + x * bpp;
+      GLint rowStride = srb->RowStride;
+      *out_map = (GLubyte *) srb->Buffer + y * rowStride + x * bpp;
       *out_stride = rowStride;
       return;
    }
@@ -180,12 +172,13 @@ intel_unmap_renderbuffer(struct gl_context *ctx,
 			 struct gl_renderbuffer *rb)
 {
    struct intel_context *intel = intel_context(ctx);
+   struct swrast_renderbuffer *srb = (struct swrast_renderbuffer *)rb;
    struct intel_renderbuffer *irb = intel_renderbuffer(rb);
 
    DBG("%s: rb %d (%s)\n", __FUNCTION__,
        rb->Name, _mesa_get_format_name(rb->Format));
 
-   if (!irb && irb->Base.Buffer) {
+   if (srb->Buffer) {
       /* this is a malloc'd renderbuffer (accum buffer) */
       /* nothing to do */
       return;
@@ -455,14 +448,6 @@ intel_framebuffer_renderbuffer(struct gl_context * ctx,
    intel_draw_buffer(ctx);
 }
 
-static struct intel_renderbuffer*
-intel_renderbuffer_wrap_miptree(struct intel_context *intel,
-                                struct intel_mipmap_tree *mt,
-                                uint32_t level,
-                                uint32_t layer,
-                                gl_format format,
-                                GLenum internal_format);
-
 /**
  * \par Special case for separate stencil
  *
@@ -476,20 +461,21 @@ intel_renderbuffer_wrap_miptree(struct intel_context *intel,
  *
  * @return true on success
  */
+
 static bool
 intel_renderbuffer_update_wrapper(struct intel_context *intel,
                                   struct intel_renderbuffer *irb,
-                                  struct intel_mipmap_tree *mt,
-                                  uint32_t level,
-                                  uint32_t layer,
-                                  gl_format format,
-                                  GLenum internal_format)
+				  struct gl_texture_image *image,
+                                  uint32_t layer)
 {
    struct gl_renderbuffer *rb = &irb->Base.Base;
+   struct intel_texture_image *intel_image = intel_texture_image(image);
+   struct intel_mipmap_tree *mt = intel_image->mt;
+   int level = image->Level;
 
-   rb->Format = format;
-   rb->InternalFormat = internal_format;
-   rb->_BaseFormat = _mesa_get_format_base_format(rb->Format);
+   rb->Format = image->TexFormat;
+   rb->InternalFormat = image->InternalFormat;
+   rb->_BaseFormat = image->_BaseFormat;
    rb->Width = mt->level[level].width;
    rb->Height = mt->level[level].height;
 
@@ -512,45 +498,6 @@ intel_renderbuffer_update_wrapper(struct intel_context *intel,
    }
 
    return true;
-}
-
-/**
- * \brief Wrap a renderbuffer around a single slice of a miptree.
- *
- * Called by glFramebufferTexture*(). This just allocates a
- * ``struct intel_renderbuffer`` then calls
- * intel_renderbuffer_update_wrapper() to do the real work.
- *
- * \see intel_renderbuffer_update_wrapper()
- */
-static struct intel_renderbuffer*
-intel_renderbuffer_wrap_miptree(struct intel_context *intel,
-                                struct intel_mipmap_tree *mt,
-                                uint32_t level,
-                                uint32_t layer,
-                                gl_format format,
-                                GLenum internal_format)
-
-{
-   struct gl_context *ctx = &intel->ctx;
-   struct gl_renderbuffer *rb;
-   struct intel_renderbuffer *irb;
-
-   intel_miptree_check_level_layer(mt, level, layer);
-
-   rb = intel_new_renderbuffer(ctx, ~0);
-   irb = intel_renderbuffer(rb);
-   if (!irb)
-      return NULL;
-
-   if (!intel_renderbuffer_update_wrapper(intel, irb,
-                                          mt, level, layer,
-                                          format, internal_format)) {
-      free(irb);
-      return NULL;
-   }
-
-   return irb;
 }
 
 void
@@ -658,12 +605,9 @@ intel_render_texture(struct gl_context * ctx,
       return;
    }
    else if (!irb) {
-      irb = intel_renderbuffer_wrap_miptree(intel,
-                                            mt,
-                                            att->TextureLevel,
-                                            layer,
-                                            image->TexFormat,
-                                            image->InternalFormat);
+      intel_miptree_check_level_layer(mt, att->TextureLevel, layer);
+
+      irb = (struct intel_renderbuffer *)intel_new_renderbuffer(ctx, ~0);
 
       if (irb) {
          /* bind the wrapper to the attachment point */
@@ -676,10 +620,7 @@ intel_render_texture(struct gl_context * ctx,
       }
    }
 
-   if (!intel_renderbuffer_update_wrapper(intel, irb,
-                                          mt, att->TextureLevel, layer,
-                                          image->TexFormat,
-                                          image->InternalFormat)) {
+   if (!intel_renderbuffer_update_wrapper(intel, irb, image, layer)) {
        _mesa_reference_renderbuffer(&att->Renderbuffer, NULL);
        _swrast_render_texture(ctx, fb, att);
        return;
@@ -821,6 +762,17 @@ intel_validate_framebuffer(struct gl_context *ctx, struct gl_framebuffer *fb)
 	 continue;
       }
 
+      if (fb->Attachment[i].Type == GL_TEXTURE) {
+	 const struct gl_texture_image *img =
+	    _mesa_get_attachment_teximage_const(&fb->Attachment[i]);
+
+	 if (img->Border) {
+	    DBG("texture with border\n");
+	    fb->_Status = GL_FRAMEBUFFER_UNSUPPORTED_EXT;
+	    continue;
+	 }
+      }
+
       irb = intel_renderbuffer(rb);
       if (irb == NULL) {
 	 DBG("software rendering renderbuffer\n");
@@ -828,7 +780,7 @@ intel_validate_framebuffer(struct gl_context *ctx, struct gl_framebuffer *fb)
 	 continue;
       }
 
-      if (!intel->vtbl.render_target_supported(intel, intel_rb_format(irb))) {
+      if (!intel->vtbl.render_target_supported(intel, rb)) {
 	 DBG("Unsupported HW texture/renderbuffer format attached: %s\n",
 	     _mesa_get_format_name(intel_rb_format(irb)));
 	 fb->_Status = GL_FRAMEBUFFER_UNSUPPORTED_EXT;

@@ -195,7 +195,7 @@ pp_debug(const char *fmt, ...)
 /** Allocate the temp FBOs. Called on makecurrent and resize. */
 void
 pp_init_fbos(struct pp_queue_t *ppq, unsigned int w,
-             unsigned int h, struct pipe_resource *indepth)
+             unsigned int h)
 {
 
    struct program *p = ppq->p;  /* The lazy will inherit the earth */
@@ -242,11 +242,7 @@ pp_init_fbos(struct pp_queue_t *ppq, unsigned int w,
          goto error;
    }
 
-   tmp_res.format = p->surf.format = indepth->format;
    tmp_res.bind = p->surf.usage = PIPE_BIND_DEPTH_STENCIL;
-   ppq->depth = indepth;
-   if (!ppq->depth)
-      goto error;
 
    tmp_res.format = p->surf.format = PIPE_FORMAT_S8_UINT_Z24_UNORM;
 

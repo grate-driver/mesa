@@ -557,12 +557,23 @@ brw_init_surface_formats(struct brw_context *brw)
 }
 
 bool
-brw_render_target_supported(struct intel_context *intel, gl_format format)
+brw_render_target_supported(struct intel_context *intel,
+			    struct gl_renderbuffer *rb)
 {
    struct brw_context *brw = brw_context(&intel->ctx);
-   /* Not exactly true, as some of those formats are not renderable.
-    * But at least we know how to translate them.
+   gl_format format = rb->Format;
+
+   /* Many integer formats are promoted to RGBA (like XRGB8888 is), which means
+    * we would consider them renderable even though we don't have surface
+    * support for their alpha behavior and don't have the blending unit
+    * available to fake it like we do for XRGB8888.  Force them to being
+    * unsupported.
     */
+   if ((rb->_BaseFormat != GL_RGBA &&
+	rb->_BaseFormat != GL_RG &&
+	rb->_BaseFormat != GL_RED) && _mesa_is_format_integer_color(format))
+      return false;
+
    return brw->format_supported_as_render_target[format];
 }
 
@@ -730,7 +741,10 @@ brw_update_sol_surface(struct brw_context *brw,
                        uint32_t *out_offset, unsigned num_vector_components,
                        unsigned stride_dwords, unsigned offset_dwords)
 {
-   drm_intel_bo *bo = intel_buffer_object(buffer_obj)->buffer;
+   struct intel_context *intel = &brw->intel;
+   struct intel_buffer_object *intel_bo = intel_buffer_object(buffer_obj);
+   drm_intel_bo *bo =
+      intel_bufferobj_buffer(intel, intel_bo, INTEL_WRITE_PART);
    uint32_t *surf = brw_state_batch(brw, AUB_TRACE_SURFACE_STATE, 6 * 4, 32,
                                     out_offset);
    uint32_t pitch_minus_1 = 4*stride_dwords - 1;

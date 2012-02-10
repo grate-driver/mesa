@@ -1627,6 +1627,11 @@ struct gl_array_object
     */
    GLboolean ARBsemantics;
 
+   /**
+    * Has this array object been bound?
+    */
+   GLboolean _Used;
+
    /** Vertex attribute arrays */
    struct gl_client_array VertexAttrib[VERT_ATTRIB_MAX];
 
@@ -2766,6 +2771,12 @@ struct gl_constants
    GLuint MaxGeometryTotalOutputComponents;
 
    GLuint GLSLVersion;  /**< GLSL version supported (ex: 120 = 1.20) */
+
+   /**
+    * Changes default GLSL extension behavior from "error" to "warn".  It's out
+    * of spec, but it can make some apps work that otherwise wouldn't.
+    */
+   GLboolean ForceGLSLExtensionsWarn;
 
    /**
     * Does the driver support real 32-bit integers?  (Otherwise, integers are

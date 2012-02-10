@@ -42,14 +42,14 @@ void
 pp_run(struct pp_queue_t *ppq, struct pipe_resource *in,
        struct pipe_resource *out, struct pipe_resource *indepth)
 {
-
+   struct pipe_resource *refin = NULL, *refout = NULL;
    unsigned int i;
 
    if (in->width0 != ppq->p->framebuffer.width ||
        in->height0 != ppq->p->framebuffer.height) {
       pp_debug("Resizing the temp pp buffers\n");
       pp_free_fbos(ppq);
-      pp_init_fbos(ppq, in->width0, in->height0, indepth);
+      pp_init_fbos(ppq, in->width0, in->height0);
    }
 
    if (in == out && ppq->n_filters == 1) {
@@ -63,6 +63,11 @@ pp_run(struct pp_queue_t *ppq, struct pipe_resource *in,
 
       in = ppq->tmp[0];
    }
+
+   // Kept only for this frame.
+   pipe_resource_reference(&ppq->depth, indepth);
+   pipe_resource_reference(&refin, in);
+   pipe_resource_reference(&refout, out);
 
    switch (ppq->n_filters) {
    case 1:                     /* No temp buf */
@@ -93,6 +98,10 @@ pp_run(struct pp_queue_t *ppq, struct pipe_resource *in,
 
       break;
    }
+
+   pipe_resource_reference(&ppq->depth, NULL);
+   pipe_resource_reference(&refin, NULL);
+   pipe_resource_reference(&refout, NULL);
 }
 
 
