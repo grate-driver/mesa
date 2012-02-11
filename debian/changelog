@@ -1,3 +1,10 @@
+mesa (8.0-2) UNRELEASED; urgency=low
+
+  * Only build the radeon, r200, i915 and i965 dri drivers on Linux.  They
+    require KMS.
+
+ -- Julien Cristau <jcristau@debian.org>  Sat, 11 Feb 2012 11:49:06 +0100
+
 mesa (8.0-1) experimental; urgency=low
 
   [ Cyril Brulebois ]
