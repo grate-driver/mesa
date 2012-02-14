@@ -1,4 +1,4 @@
-mesa (8.0-2) UNRELEASED; urgency=low
+mesa (8.0-2) experimental; urgency=low
 
   [ Julien Cristau ]
   * Only build the radeon, r200, i915 and i965 dri drivers on Linux.  They
@@ -23,7 +23,7 @@ mesa (8.0-2) UNRELEASED; urgency=low
     the clean target. The first two are modified, the last one needs to be
     turned back into a symlink.
 
- -- Julien Cristau <jcristau@debian.org>  Sat, 11 Feb 2012 11:49:06 +0100
+ -- Cyril Brulebois <kibi@debian.org>  Tue, 14 Feb 2012 16:18:14 +0100
 
 mesa (8.0-1) experimental; urgency=low
 
