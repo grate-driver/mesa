@@ -11,6 +11,10 @@ mesa (8.0-2) UNRELEASED; urgency=low
     add a few files for Wayland, but only for Linux:
     - libegl1-mesa-dev.install.linux.in
     - libegl1-mesa-drivers.install.linux.in
+  * Limit the wl_drm_interface symbol to arch=linux-any accordingly,
+    and bump the version.
+  * Limit the build-dependency on libwayland-dev to linux-any too, and
+    bump it.
 
  -- Julien Cristau <jcristau@debian.org>  Sat, 11 Feb 2012 11:49:06 +0100
 
