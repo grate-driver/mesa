@@ -1,7 +1,14 @@
 mesa (8.0-2) UNRELEASED; urgency=low
 
+  [ Julien Cristau ]
   * Only build the radeon, r200, i915 and i965 dri drivers on Linux.  They
     require KMS.
+
+  [ Cyril Brulebois ]
+  * Fix FTBFS on GNU/kFreeBSD with libgl1-mesa-dri.install.kfreebsd.in:
+    there's no *_dri.so file left in the top directory, only swrast is
+    built and shipped under gallium/. So mention it explicitly, in the
+    same way as it is done in the libgl1-mesa-dri.install.linux.in file.
 
  -- Julien Cristau <jcristau@debian.org>  Sat, 11 Feb 2012 11:49:06 +0100
 
