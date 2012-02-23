@@ -1451,7 +1451,12 @@ _mesa_meta_BlitFramebuffer(struct gl_context *ctx,
    struct vertex verts[4];
    GLboolean newTex;
 
-   if (srcW > maxTexSize || srcH > maxTexSize) {
+   /* In addition to falling back if the blit size is larger than the maximum
+    * texture size, fallback if the source is multisampled.  This fallback can
+    * be removed once Mesa gets support ARB_texture_multisample.
+    */
+   if (srcW > maxTexSize || srcH > maxTexSize
+       || ctx->ReadBuffer->Visual.samples > 0) {
       /* XXX avoid this fallback */
       _swrast_BlitFramebuffer(ctx, srcX0, srcY0, srcX1, srcY1,
                               dstX0, dstY0, dstX1, dstY1, mask, filter);
@@ -3238,7 +3243,7 @@ decompress_texture_image(struct gl_context *ctx,
                          struct gl_texture_image *texImage,
                          GLuint slice,
                          GLenum destFormat, GLenum destType,
-                         GLvoid *dest, GLint destRowLength)
+                         GLvoid *dest)
 {
    struct decompress_state *decompress = &ctx->Meta->Decompress;
    struct gl_texture_object *texObj = texImage->TexObject;
@@ -3268,7 +3273,7 @@ decompress_texture_image(struct gl_context *ctx,
    fboDrawSave = ctx->DrawBuffer->Name;
    fboReadSave = ctx->ReadBuffer->Name;
 
-   _mesa_meta_begin(ctx, MESA_META_ALL);
+   _mesa_meta_begin(ctx, MESA_META_ALL & ~MESA_META_PIXEL_STORE);
 
    /* Create/bind FBO/renderbuffer */
    if (decompress->FBO == 0) {
@@ -3286,7 +3291,7 @@ decompress_texture_image(struct gl_context *ctx,
    }
 
    /* alloc dest surface */
-   if (width != decompress->Width || height != decompress->Height) {
+   if (width > decompress->Width || height > decompress->Height) {
       _mesa_RenderbufferStorageEXT(GL_RENDERBUFFER_EXT, GL_RGBA,
                                    width, height);
       decompress->Width = width;
@@ -3403,7 +3408,6 @@ decompress_texture_image(struct gl_context *ctx,
          _mesa_PixelTransferf(GL_BLUE_SCALE, 0.0f);
       }
 
-      ctx->Pack.RowLength = destRowLength;
       _mesa_ReadPixels(0, 0, width, height, destFormat, destType, dest);
    }
 
@@ -3444,8 +3448,7 @@ _mesa_meta_GetTexImage(struct gl_context *ctx,
       const GLuint slice = 0; /* only 2D compressed textures for now */
       /* Need to unlock the texture here to prevent deadlock... */
       _mesa_unlock_texture(ctx, texObj);
-      decompress_texture_image(ctx, texImage, slice, format, type, pixels,
-                               ctx->Pack.RowLength);
+      decompress_texture_image(ctx, texImage, slice, format, type, pixels);
       /* ... and relock it */
       _mesa_lock_texture(ctx, texObj);
    }

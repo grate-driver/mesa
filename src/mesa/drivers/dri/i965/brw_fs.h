@@ -286,6 +286,18 @@ public:
 	      offset == inst->offset);
    }
 
+   int regs_written()
+   {
+      if (is_tex())
+	 return 4;
+
+      /* The SINCOS and INT_DIV_QUOTIENT_AND_REMAINDER math functions return 2,
+       * but we don't currently use them...nor do we have an opcode for them.
+       */
+
+      return 1;
+   }
+
    bool is_tex()
    {
       return (opcode == SHADER_OPCODE_TEX ||
@@ -379,6 +391,7 @@ public:
       this->frag_depth = NULL;
       memset(this->outputs, 0, sizeof(this->outputs));
       this->first_non_payload_grf = 0;
+      this->max_grf = intel->gen >= 7 ? GEN7_MRF_HACK_START : BRW_MAX_GRF;
 
       this->current_annotation = NULL;
       this->base_ir = NULL;
@@ -583,6 +596,7 @@ public:
    ir_variable *frag_depth;
    fs_reg outputs[BRW_MAX_DRAW_BUFFERS];
    int first_non_payload_grf;
+   int max_grf;
    int urb_setup[FRAG_ATTRIB_MAX];
    bool kill_emitted;
 

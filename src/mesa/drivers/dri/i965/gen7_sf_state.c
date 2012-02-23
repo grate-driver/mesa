@@ -48,6 +48,9 @@ upload_sbe_state(struct brw_context *brw)
    int urb_entry_read_offset = 1;
    bool userclip_active = (ctx->Transform.ClipPlanesEnabled != 0);
    uint16_t attr_overrides[FRAG_ATTRIB_MAX];
+   /* _NEW_BUFFERS */
+   bool render_to_fbo = ctx->DrawBuffer->Name != 0;
+   uint32_t point_sprite_origin;
 
    brw_compute_vue_map(&vue_map, intel, userclip_active, vs_outputs_written);
    urb_entry_read_length = (vue_map.num_slots + 1)/2 - urb_entry_read_offset;
@@ -65,9 +68,18 @@ upload_sbe_state(struct brw_context *brw)
       urb_entry_read_length << GEN7_SBE_URB_ENTRY_READ_LENGTH_SHIFT |
       urb_entry_read_offset << GEN7_SBE_URB_ENTRY_READ_OFFSET_SHIFT;
 
-   /* _NEW_POINT */
-   if (ctx->Point.SpriteOrigin == GL_LOWER_LEFT)
-      dw1 |= GEN6_SF_POINT_SPRITE_LOWERLEFT;
+   /* _NEW_POINT
+    *
+    * Window coordinates in an FBO are inverted, which means point
+    * sprite origin must be inverted.
+    */
+   if ((ctx->Point.SpriteOrigin == GL_LOWER_LEFT) != render_to_fbo) {
+      point_sprite_origin = GEN6_SF_POINT_SPRITE_LOWERLEFT;
+   } else {
+      point_sprite_origin = GEN6_SF_POINT_SPRITE_UPPERLEFT;
+   }
+   dw1 |= point_sprite_origin;
+
 
    dw10 = 0;
    dw11 = 0;
@@ -137,8 +149,7 @@ const struct brw_tracked_state gen7_sbe_state = {
 		_NEW_PROGRAM |
 		_NEW_TRANSFORM),
       .brw   = (BRW_NEW_CONTEXT |
-		BRW_NEW_FRAGMENT_PROGRAM |
-		BRW_NEW_HIZ),
+		BRW_NEW_FRAGMENT_PROGRAM),
       .cache = CACHE_NEW_VS_PROG
    },
    .emit = upload_sbe_state,
@@ -154,17 +165,8 @@ upload_sf_state(struct brw_context *brw)
    /* _NEW_BUFFERS */
    bool render_to_fbo = brw->intel.ctx.DrawBuffer->Name != 0;
 
-   dw1 = GEN6_SF_STATISTICS_ENABLE;
-
-   /* Enable viewport transform only if no HiZ operation is progress
-    *
-    * From page 11 of the SandyBridge PRM, Volume 2, Part 1, Section 1.3, "3D
-    * Primitives Overview":
-    *     RECTLIST: Viewport Mapping must be DISABLED (as is typical with the
-    *     use of screen- space coordinates).
-    */
-   if (!brw->hiz.op)
-      dw1 |= GEN6_SF_VIEWPORT_TRANSFORM_ENABLE;
+   dw1 = GEN6_SF_STATISTICS_ENABLE |
+         GEN6_SF_VIEWPORT_TRANSFORM_ENABLE;
 
    /* _NEW_BUFFERS */
    dw1 |= (brw_depthbuffer_format(brw) << GEN7_SF_DEPTH_BUFFER_SURFACE_FORMAT_SHIFT);
@@ -298,8 +300,7 @@ const struct brw_tracked_state gen7_sf_state = {
 		_NEW_SCISSOR |
 		_NEW_BUFFERS |
 		_NEW_POINT),
-      .brw   = (BRW_NEW_CONTEXT |
-		BRW_NEW_HIZ),
+      .brw   = BRW_NEW_CONTEXT,
       .cache = CACHE_NEW_VS_PROG
    },
    .emit = upload_sf_state,

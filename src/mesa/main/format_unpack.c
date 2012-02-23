@@ -2210,6 +2210,58 @@ unpack_int_rgba_RG_UINT32(const GLuint *src, GLuint dst[][4], GLuint n)
 }
 
 static void
+unpack_int_rgba_RG_UINT16(const GLushort *src, GLuint dst[][4], GLuint n)
+{
+   unsigned int i;
+
+   for (i = 0; i < n; i++) {
+      dst[i][0] = src[i * 2 + 0];
+      dst[i][1] = src[i * 2 + 1];
+      dst[i][2] = 0;
+      dst[i][3] = 1;
+   }
+}
+
+static void
+unpack_int_rgba_RG_INT16(const GLshort *src, GLuint dst[][4], GLuint n)
+{
+   unsigned int i;
+
+   for (i = 0; i < n; i++) {
+      dst[i][0] = src[i * 2 + 0];
+      dst[i][1] = src[i * 2 + 1];
+      dst[i][2] = 0;
+      dst[i][3] = 1;
+   }
+}
+
+static void
+unpack_int_rgba_RG_UINT8(const GLubyte *src, GLuint dst[][4], GLuint n)
+{
+   unsigned int i;
+
+   for (i = 0; i < n; i++) {
+      dst[i][0] = src[i * 2 + 0];
+      dst[i][1] = src[i * 2 + 1];
+      dst[i][2] = 0;
+      dst[i][3] = 1;
+   }
+}
+
+static void
+unpack_int_rgba_RG_INT8(const GLbyte *src, GLuint dst[][4], GLuint n)
+{
+   unsigned int i;
+
+   for (i = 0; i < n; i++) {
+      dst[i][0] = src[i * 2 + 0];
+      dst[i][1] = src[i * 2 + 1];
+      dst[i][2] = 0;
+      dst[i][3] = 1;
+   }
+}
+
+static void
 unpack_int_rgba_R_UINT32(const GLuint *src, GLuint dst[][4], GLuint n)
 {
    unsigned int i;
@@ -2219,6 +2271,113 @@ unpack_int_rgba_R_UINT32(const GLuint *src, GLuint dst[][4], GLuint n)
       dst[i][1] = 0;
       dst[i][2] = 0;
       dst[i][3] = 1;
+   }
+}
+
+static void
+unpack_int_rgba_R_UINT16(const GLushort *src, GLuint dst[][4], GLuint n)
+{
+   unsigned int i;
+
+   for (i = 0; i < n; i++) {
+      dst[i][0] = src[i];
+      dst[i][1] = 0;
+      dst[i][2] = 0;
+      dst[i][3] = 1;
+   }
+}
+
+static void
+unpack_int_rgba_R_INT16(const GLshort *src, GLuint dst[][4], GLuint n)
+{
+   unsigned int i;
+
+   for (i = 0; i < n; i++) {
+      dst[i][0] = src[i];
+      dst[i][1] = 0;
+      dst[i][2] = 0;
+      dst[i][3] = 1;
+   }
+}
+
+static void
+unpack_int_rgba_R_UINT8(const GLubyte *src, GLuint dst[][4], GLuint n)
+{
+   unsigned int i;
+
+   for (i = 0; i < n; i++) {
+      dst[i][0] = src[i];
+      dst[i][1] = 0;
+      dst[i][2] = 0;
+      dst[i][3] = 1;
+   }
+}
+
+static void
+unpack_int_rgba_R_INT8(const GLbyte *src, GLuint dst[][4], GLuint n)
+{
+   unsigned int i;
+
+   for (i = 0; i < n; i++) {
+      dst[i][0] = src[i];
+      dst[i][1] = 0;
+      dst[i][2] = 0;
+      dst[i][3] = 1;
+   }
+}
+
+static void
+unpack_int_rgba_ALPHA_UINT32(const GLuint *src, GLuint dst[][4], GLuint n)
+{
+   unsigned int i;
+
+   for (i = 0; i < n; i++) {
+      dst[i][0] = dst[i][1] = dst[i][2] = 0;
+      dst[i][3] = src[i];
+   }
+}
+
+static void
+unpack_int_rgba_ALPHA_UINT16(const GLushort *src, GLuint dst[][4], GLuint n)
+{
+   unsigned int i;
+
+   for (i = 0; i < n; i++) {
+      dst[i][0] = dst[i][1] = dst[i][2] = 0;
+      dst[i][3] = src[i];
+   }
+}
+
+static void
+unpack_int_rgba_ALPHA_INT16(const GLshort *src, GLuint dst[][4], GLuint n)
+{
+   unsigned int i;
+
+   for (i = 0; i < n; i++) {
+      dst[i][0] = dst[i][1] = dst[i][2] = 0;
+      dst[i][3] = src[i];
+   }
+}
+
+static void
+unpack_int_rgba_ALPHA_UINT8(const GLubyte *src, GLuint dst[][4], GLuint n)
+{
+   unsigned int i;
+
+   for (i = 0; i < n; i++) {
+      dst[i][0] = dst[i][1] = dst[i][2] = 0;
+      dst[i][3] = src[i];
+   }
+}
+
+static void
+unpack_int_rgba_ALPHA_INT8(const GLbyte *src, GLuint dst[][4], GLuint n)
+{
+   unsigned int i;
+
+   for (i = 0; i < n; i++) {
+      dst[i][0] = dst[i][1] = dst[i][2] = 0;
+      dst[i][3] = src[i];
    }
 }
 
@@ -2245,7 +2404,91 @@ unpack_int_rgba_LUMINANCE_ALPHA_UINT32(const GLuint *src, GLuint dst[][4], GLuin
 }
 
 static void
+unpack_int_rgba_LUMINANCE_ALPHA_UINT16(const GLushort *src, GLuint dst[][4], GLuint n)
+{
+   unsigned int i;
+
+   for (i = 0; i < n; i++) {
+      dst[i][0] = dst[i][1] = dst[i][2] = src[i * 2 + 0];
+      dst[i][3] = src[i * 2 + 1];
+   }
+}
+
+static void
+unpack_int_rgba_LUMINANCE_ALPHA_INT16(const GLshort *src, GLuint dst[][4], GLuint n)
+{
+   unsigned int i;
+
+   for (i = 0; i < n; i++) {
+      dst[i][0] = dst[i][1] = dst[i][2] = src[i * 2 + 0];
+      dst[i][3] = src[i * 2 + 1];
+   }
+}
+
+static void
+unpack_int_rgba_LUMINANCE_ALPHA_UINT8(const GLubyte *src, GLuint dst[][4], GLuint n)
+{
+   unsigned int i;
+
+   for (i = 0; i < n; i++) {
+      dst[i][0] = dst[i][1] = dst[i][2] = src[i * 2 + 0];
+      dst[i][3] = src[i * 2 + 1];
+   }
+}
+
+static void
+unpack_int_rgba_LUMINANCE_ALPHA_INT8(const GLbyte *src, GLuint dst[][4], GLuint n)
+{
+   unsigned int i;
+
+   for (i = 0; i < n; i++) {
+      dst[i][0] = dst[i][1] = dst[i][2] = src[i * 2 + 0];
+      dst[i][3] = src[i * 2 + 1];
+   }
+}
+
+static void
 unpack_int_rgba_INTENSITY_UINT32(const GLuint *src, GLuint dst[][4], GLuint n)
+{
+   unsigned int i;
+
+   for (i = 0; i < n; i++) {
+      dst[i][0] = dst[i][1] = dst[i][2] = dst[i][3] = src[i];
+   }
+}
+
+static void
+unpack_int_rgba_INTENSITY_UINT16(const GLushort *src, GLuint dst[][4], GLuint n)
+{
+   unsigned int i;
+
+   for (i = 0; i < n; i++) {
+      dst[i][0] = dst[i][1] = dst[i][2] = dst[i][3] = src[i];
+   }
+}
+
+static void
+unpack_int_rgba_INTENSITY_INT16(const GLshort *src, GLuint dst[][4], GLuint n)
+{
+   unsigned int i;
+
+   for (i = 0; i < n; i++) {
+      dst[i][0] = dst[i][1] = dst[i][2] = dst[i][3] = src[i];
+   }
+}
+
+static void
+unpack_int_rgba_INTENSITY_UINT8(const GLubyte *src, GLuint dst[][4], GLuint n)
+{
+   unsigned int i;
+
+   for (i = 0; i < n; i++) {
+      dst[i][0] = dst[i][1] = dst[i][2] = dst[i][3] = src[i];
+   }
+}
+
+static void
+unpack_int_rgba_INTENSITY_INT8(const GLbyte *src, GLuint dst[][4], GLuint n)
 {
    unsigned int i;
 
@@ -2318,22 +2561,100 @@ _mesa_unpack_uint_rgba_row(gl_format format, GLuint n,
    case MESA_FORMAT_RG_INT32:
       unpack_int_rgba_RG_UINT32(src, dst, n);
       break;
+
+   case MESA_FORMAT_RG_UINT16:
+      unpack_int_rgba_RG_UINT16(src, dst, n);
+      break;
+   case MESA_FORMAT_RG_INT16:
+      unpack_int_rgba_RG_INT16(src, dst, n);
+      break;
+
+   case MESA_FORMAT_RG_UINT8:
+      unpack_int_rgba_RG_UINT8(src, dst, n);
+      break;
+   case MESA_FORMAT_RG_INT8:
+      unpack_int_rgba_RG_INT8(src, dst, n);
+      break;
+
    case MESA_FORMAT_R_UINT32:
    case MESA_FORMAT_R_INT32:
       unpack_int_rgba_R_UINT32(src, dst, n);
+      break;
+
+   case MESA_FORMAT_R_UINT16:
+      unpack_int_rgba_R_UINT16(src, dst, n);
+      break;
+   case MESA_FORMAT_R_INT16:
+      unpack_int_rgba_R_INT16(src, dst, n);
+      break;
+
+   case MESA_FORMAT_R_UINT8:
+      unpack_int_rgba_R_UINT8(src, dst, n);
+      break;
+   case MESA_FORMAT_R_INT8:
+      unpack_int_rgba_R_INT8(src, dst, n);
+      break;
+
+   case MESA_FORMAT_ALPHA_UINT32:
+   case MESA_FORMAT_ALPHA_INT32:
+      unpack_int_rgba_ALPHA_UINT32(src, dst, n);
+      break;
+
+   case MESA_FORMAT_ALPHA_UINT16:
+      unpack_int_rgba_ALPHA_UINT16(src, dst, n);
+      break;
+   case MESA_FORMAT_ALPHA_INT16:
+      unpack_int_rgba_ALPHA_INT16(src, dst, n);
+      break;
+
+   case MESA_FORMAT_ALPHA_UINT8:
+      unpack_int_rgba_ALPHA_UINT8(src, dst, n);
+      break;
+   case MESA_FORMAT_ALPHA_INT8:
+      unpack_int_rgba_ALPHA_INT8(src, dst, n);
       break;
 
    case MESA_FORMAT_LUMINANCE_UINT32:
    case MESA_FORMAT_LUMINANCE_INT32:
       unpack_int_rgba_LUMINANCE_UINT32(src, dst, n);
       break;
+
    case MESA_FORMAT_LUMINANCE_ALPHA_UINT32:
    case MESA_FORMAT_LUMINANCE_ALPHA_INT32:
       unpack_int_rgba_LUMINANCE_ALPHA_UINT32(src, dst, n);
       break;
+
+   case MESA_FORMAT_LUMINANCE_ALPHA_UINT16:
+      unpack_int_rgba_LUMINANCE_ALPHA_UINT16(src, dst, n);
+      break;
+   case MESA_FORMAT_LUMINANCE_ALPHA_INT16:
+      unpack_int_rgba_LUMINANCE_ALPHA_INT16(src, dst, n);
+      break;
+
+   case MESA_FORMAT_LUMINANCE_ALPHA_UINT8:
+      unpack_int_rgba_LUMINANCE_ALPHA_UINT8(src, dst, n);
+      break;
+   case MESA_FORMAT_LUMINANCE_ALPHA_INT8:
+      unpack_int_rgba_LUMINANCE_ALPHA_INT8(src, dst, n);
+      break;
+
    case MESA_FORMAT_INTENSITY_UINT32:
    case MESA_FORMAT_INTENSITY_INT32:
       unpack_int_rgba_INTENSITY_UINT32(src, dst, n);
+      break;
+
+   case MESA_FORMAT_INTENSITY_UINT16:
+      unpack_int_rgba_INTENSITY_UINT16(src, dst, n);
+      break;
+   case MESA_FORMAT_INTENSITY_INT16:
+      unpack_int_rgba_INTENSITY_INT16(src, dst, n);
+      break;
+
+   case MESA_FORMAT_INTENSITY_UINT8:
+      unpack_int_rgba_INTENSITY_UINT8(src, dst, n);
+      break;
+   case MESA_FORMAT_INTENSITY_INT8:
+      unpack_int_rgba_INTENSITY_INT8(src, dst, n);
       break;
 
    case MESA_FORMAT_ARGB2101010_UINT:
@@ -2537,6 +2858,32 @@ unpack_uint_z_Z32(const void *src, GLuint *dst, GLuint n)
    memcpy(dst, src, n * sizeof(GLuint));
 }
 
+static void
+unpack_uint_z_Z32_FLOAT(const void *src, GLuint *dst, GLuint n)
+{
+   const float *s = (const float *)src;
+   GLuint i;
+   for (i = 0; i < n; i++) {
+      dst[i] = FLOAT_TO_UINT(IROUND(CLAMP((s[i]), 0.0F, 1.0F)));
+   }
+}
+
+static void
+unpack_uint_z_Z32_FLOAT_X24S8(const void *src, GLuint *dst, GLuint n)
+{
+   struct z32f_x24s8 {
+      float z;
+      uint32_t x24s8;
+   };
+
+   const struct z32f_x24s8 *s = (const struct z32f_x24s8 *) src;
+   GLuint i;
+
+   for (i = 0; i < n; i++) {
+      dst[i] = FLOAT_TO_UINT(IROUND(CLAMP((s[i].z), 0.0F, 1.0F)));
+   }
+}
+
 
 /**
  * Unpack Z values.
@@ -2563,6 +2910,12 @@ _mesa_unpack_uint_z_row(gl_format format, GLuint n,
       break;
    case MESA_FORMAT_Z32:
       unpack = unpack_uint_z_Z32;
+      break;
+   case MESA_FORMAT_Z32_FLOAT:
+      unpack = unpack_uint_z_Z32_FLOAT;
+      break;
+   case MESA_FORMAT_Z32_FLOAT_X24S8:
+      unpack = unpack_uint_z_Z32_FLOAT_X24S8;
       break;
    default:
       _mesa_problem(NULL, "bad format %s in _mesa_unpack_uint_z_row",

@@ -32,7 +32,7 @@ Build-Depends:
  flex,
  bison,
  llvm-3.0-dev [amd64 i386 kfreebsd-amd64 kfreebsd-i386],
- libwayland-dev (>= 0.1.0~2-1),
+ libwayland-dev (>= 0.85.0) [linux-any],
 Vcs-Git: git://git.debian.org/git/pkg-xorg/lib/mesa
 Vcs-Browser: http://git.debian.org/?p=pkg-xorg/lib/mesa.git
 Homepage: http://mesa3d.sourceforge.net/
@@ -94,6 +94,7 @@ Description: free implementation of the OpenGL API -- debugging symbols
  This package contains debugging symbols for the software rasterization GL
  library.
 
+
 Package: libgl1-mesa-swx11-dev
 Section: libdevel
 Priority: extra
@@ -134,11 +135,11 @@ Package: libxatracker1-dbg
 Section: debug
 Priority: extra
 Architecture: linux-any
-Pre-Depends: ${misc:Pre-Depends},
- dpkg (>= 1.15.6~),
 Depends:
  libxatracker1 (= ${binary:Version}),
  ${misc:Depends},
+Pre-Depends: ${misc:Pre-Depends},
+ dpkg (>= 1.15.6~),
 Multi-Arch: same
 Description: X acceleration library -- debugging symbols
  This package contains the XA (X acceleration) library.  It is used exclusively
@@ -181,11 +182,11 @@ Package: libgbm1-dbg
 Section: debug
 Priority: extra
 Architecture: linux-any
-Pre-Depends: ${misc:Pre-Depends},
- dpkg (>= 1.15.6~),
 Depends:
  libgbm1 (= ${binary:Version}),
  ${misc:Depends},
+Pre-Depends: ${misc:Pre-Depends},
+ dpkg (>= 1.15.6~),
 Multi-Arch: same
 Description: generic buffer management API -- debugging symbols
  This package contains the GBM buffer management library.  It provides a
