@@ -1,3 +1,9 @@
+mesa (8.0.1-1) UNRELEASED; urgency=low
+
+  * New upstream bugfix release. (LP: #926379)
+
+ -- Timo Aaltonen <tjaalton@ubuntu.com>  Thu, 23 Feb 2012 10:58:33 +0200
+
 mesa (8.0-2) experimental; urgency=low
 
   [ Julien Cristau ]
