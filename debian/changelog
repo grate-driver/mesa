@@ -1,4 +1,4 @@
-mesa (8.0.1-0ubuntu1) UNRELEASED; urgency=low
+mesa (8.0.1-0ubuntu1) precise; urgency=low
 
   * Merge from Debian experimental.
 
