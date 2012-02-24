@@ -1,3 +1,15 @@
+mesa (8.0.1-0ubuntu2) precise; urgency=low
+
+  * debian/libegl1-mesa-dev.install.linux.in:
+  * debian/libegl1-mesa-dev.install.in:
+    - Reinstate handling of libEGL.so symlink accidentally dropped in merge;
+      we install this in $libdir/mesa-egl so proprietary drivers may divert
+      this via alternates.
+      Fixes libqt-x11 FTBFS (and anything else that tried to build against
+      EGL).
+
+ -- Christopher James Halse Rogers <raof@ubuntu.com>  Fri, 24 Feb 2012 13:43:12 +1100
+
 mesa (8.0.1-0ubuntu1) precise; urgency=low
 
   * Merge from Debian experimental.
