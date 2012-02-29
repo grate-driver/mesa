@@ -1,3 +1,9 @@
+mesa (8.0.1-0ubuntu2) UNRELEASED; urgency=low
+
+  * Fix the install path of libEGL.so and libwayland-egl.so. (LP: #939730)
+
+ -- Timo Aaltonen <tjaalton@ubuntu.com>  Wed, 29 Feb 2012 14:45:38 +0200
+
 mesa (8.0.1-0ubuntu1) precise; urgency=low
 
   * Merge from Debian experimental.
