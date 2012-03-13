@@ -1,3 +1,10 @@
+mesa (8.0.1-0ubuntu3) UNRELEASED; urgency=low
+
+  * Ship libwayland-egl.so.* only in libegl1-mesa-drivers, replace
+    the old libegl-mesa.
+
+ -- Timo Aaltonen <tjaalton@ubuntu.com>  Tue, 13 Mar 2012 15:20:55 +0200
+
 mesa (8.0.1-0ubuntu2) precise; urgency=low
 
   * debian/libegl1-mesa-dev.install.linux.in:

@@ -283,6 +283,7 @@ Depends:
  libglapi-mesa (= ${binary:Version}),
 Pre-Depends: ${misc:Pre-Depends}
 Multi-Arch: same
+Replaces: libegl1-mesa (<= 8.0.1-0ubuntu2)
 Description: free implementation of the EGL API -- hardware drivers
  This package contains the EGL native platform graphics interface library.
  EGL provides a platform-agnostic mechanism for creating rendering surfaces
