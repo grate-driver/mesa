@@ -64,11 +64,3 @@ libEGL.so.1 libegl1-mesa #MINVER# | libegl1-x11
  eglWaitGL@Base 7.8.1
  eglWaitNative@Base 7.8.1
  (arch=linux-any)wl_drm_interface@Base 8.0-2~
-libwayland-egl.so.1 libegl1-mesa #MINVER#
- wl_egl_pixmap_create@Base 7.11
- wl_egl_pixmap_create_buffer@Base 7.11
- wl_egl_pixmap_destroy@Base 7.11
- wl_egl_window_create@Base 7.11
- wl_egl_window_destroy@Base 7.11
- wl_egl_window_get_attached_size@Base 7.11
- wl_egl_window_resize@Base 7.11
