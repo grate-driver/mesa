@@ -1,3 +1,10 @@
+mesa (8.0.1-0ubuntu4) UNRELEASED; urgency=low
+
+  * control: libegl1-mesa-dev should depend on -drivers so that the
+    symlinks work.
+
+ -- Timo Aaltonen <tjaalton@ubuntu.com>  Sat, 17 Mar 2012 17:53:08 +0200
+
 mesa (8.0.1-0ubuntu3) precise; urgency=low
 
   * Ship libwayland-egl.so.* only in libegl1-mesa-drivers, replace
