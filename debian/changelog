@@ -1,9 +1,21 @@
-mesa (8.0.1-0ubuntu4) precise; urgency=low
+mesa (8.0.1-0ubuntu5) precise; urgency=low
 
   * control: libegl1-mesa-dev should depend on -drivers so that the
     symlinks work.
 
  -- Timo Aaltonen <tjaalton@ubuntu.com>  Sat, 17 Mar 2012 18:56:24 +0200
+
+mesa (8.0.1-0ubuntu4) precise; urgency=low
+
+  * Add 117_i965_only_set_last_render_target_last.patch: Fix GPU lockups
+    on Intel when playing certain games (Ski Challenge 2012, OilRush,
+    Trine, and possibly others).  These games use MRT (multiple render
+    targets), and mesa was not setting the Last Render Target Select
+    properly.  Cherrypick from upstream, will be included in the upcoming
+    8.0.2 release.
+    (LP: #899159)
+
+ -- Bryce Harrington <bryce@ubuntu.com>  Tue, 13 Mar 2012 14:26:30 -0700
 
 mesa (8.0.1-0ubuntu3) precise; urgency=low
 
