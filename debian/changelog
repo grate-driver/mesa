@@ -1,9 +1,9 @@
-mesa (8.0.1-0ubuntu4) UNRELEASED; urgency=low
+mesa (8.0.1-0ubuntu4) precise; urgency=low
 
   * control: libegl1-mesa-dev should depend on -drivers so that the
     symlinks work.
 
- -- Timo Aaltonen <tjaalton@ubuntu.com>  Sat, 17 Mar 2012 17:53:08 +0200
+ -- Timo Aaltonen <tjaalton@ubuntu.com>  Sat, 17 Mar 2012 18:56:24 +0200
 
 mesa (8.0.1-0ubuntu3) precise; urgency=low
 
