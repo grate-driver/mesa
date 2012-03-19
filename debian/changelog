@@ -1,10 +1,14 @@
 mesa (8.0.1-1) UNRELEASED; urgency=low
 
+  [ Timo Aaltonen ]
   * New upstream bugfix release. (LP: #926379)
   * control: libegl1-mesa-dev should depend on -drivers so that the
     symlinks work.
 
- -- Timo Aaltonen <tjaalton@ubuntu.com>  Thu, 23 Feb 2012 10:58:33 +0200
+  [ Robert Hooker ]
+  * Add libudev-dev to libgbm-dev dependencies.
+
+ -- Robert Hooker <sarvatt@ubuntu.com>  Mon, 19 Mar 2012 17:02:47 -0400
 
 mesa (8.0-2) experimental; urgency=low
 
