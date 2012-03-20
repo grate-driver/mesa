@@ -1,3 +1,9 @@
+mesa (8.0.1-0ubuntu6) UNRELEASED; urgency=low
+
+  * Use lzma for non-dbg deb package compression. (LP: #959374)
+
+ -- Robert Hooker <sarvatt@ubuntu.com>  Tue, 20 Mar 2012 16:00:38 -0400
+
 mesa (8.0.1-0ubuntu5) precise; urgency=low
 
   * control: libegl1-mesa-dev should depend on -drivers so that the
