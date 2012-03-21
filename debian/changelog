@@ -1,60 +1,14 @@
-mesa (8.0.1-0ubuntu6) UNRELEASED; urgency=low
+mesa (8.0.2-1) UNRELEASED; urgency=low
 
-  * Use lzma for non-dbg deb package compression. (LP: #959374)
-
- -- Robert Hooker <sarvatt@ubuntu.com>  Tue, 20 Mar 2012 16:00:38 -0400
-
-mesa (8.0.1-0ubuntu5) precise; urgency=low
-
+  [ Timo Aaltonen ]
+  * New upstream bugfix release. (LP: #926379)
   * control: libegl1-mesa-dev should depend on -drivers so that the
     symlinks work.
 
- -- Timo Aaltonen <tjaalton@ubuntu.com>  Sat, 17 Mar 2012 18:56:24 +0200
+  [ Robert Hooker ]
+  * Add libudev-dev to libgbm-dev dependencies.
 
-mesa (8.0.1-0ubuntu4) precise; urgency=low
-
-  * Add 117_i965_only_set_last_render_target_last.patch: Fix GPU lockups
-    on Intel when playing certain games (Ski Challenge 2012, OilRush,
-    Trine, and possibly others).  These games use MRT (multiple render
-    targets), and mesa was not setting the Last Render Target Select
-    properly.  Cherrypick from upstream, will be included in the upcoming
-    8.0.2 release.
-    (LP: #899159)
-
- -- Bryce Harrington <bryce@ubuntu.com>  Tue, 13 Mar 2012 14:26:30 -0700
-
-mesa (8.0.1-0ubuntu3) precise; urgency=low
-
-  * Ship libwayland-egl.so.* only in libegl1-mesa-drivers, replace
-    the old libegl-mesa.
-  * Ship libwayland-egl.so in ../mesa-egl, like the rest of the EGL stuff.
-    Symlink pointing there was already being created.
-
- -- Timo Aaltonen <tjaalton@ubuntu.com>  Tue, 13 Mar 2012 17:07:39 +0200
-
-mesa (8.0.1-0ubuntu2) precise; urgency=low
-
-  * debian/libegl1-mesa-dev.install.linux.in:
-  * debian/libegl1-mesa-dev.install.in:
-    - Reinstate handling of libEGL.so symlink accidentally dropped in merge;
-      we install this in $libdir/mesa-egl so proprietary drivers may divert
-      this via alternates.
-      Fixes libqt-x11 FTBFS (and anything else that tried to build against
-      EGL).
-
- -- Christopher James Halse Rogers <raof@ubuntu.com>  Fri, 24 Feb 2012 13:43:12 +1100
-
-mesa (8.0.1-0ubuntu1) precise; urgency=low
-
-  * Merge from Debian experimental.
-
- -- Timo Aaltonen <tjaalton@ubuntu.com>  Thu, 23 Feb 2012 11:34:05 +0200
-
-mesa (8.0.1-1) UNRELEASED; urgency=low
-
-  * New upstream bugfix release. (LP: #926379)
-
- -- Timo Aaltonen <tjaalton@ubuntu.com>  Thu, 23 Feb 2012 10:58:33 +0200
+ -- Robert Hooker <sarvatt@ubuntu.com>  Mon, 19 Mar 2012 17:02:47 -0400
 
 mesa (8.0-2) experimental; urgency=low
 
