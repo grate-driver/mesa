@@ -1,8 +1,9 @@
-mesa (8.0.2-1ubuntu1) precise; urgency=low
+mesa (8.0.2-1ubuntu1) UNRELEASED; urgency=low
 
   * New upstream bugfix release.
+  * Drop 117_i965_only_set_last_render_target_last.patch, applied upstream.
 
- -- Robert Hooker <sarvatt@ubuntu.com>  Wed, 21 Mar 2012 18:46:05 -0400
+ -- Robert Hooker <sarvatt@ubuntu.com>  Wed, 21 Mar 2012 18:46:48 -0400
 
 mesa (8.0.2-1) UNRELEASED; urgency=low
 

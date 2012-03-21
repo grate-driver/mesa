@@ -13,4 +13,3 @@
 113_fix_tls.diff
 115_llvm_dynamic_linking.diff
 116_use_shared_galliumcore.diff
-117_i965_only_set_last_render_target_last.patch
