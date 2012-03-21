@@ -1,4 +1,4 @@
-mesa (8.0.1-1) UNRELEASED; urgency=low
+mesa (8.0.2-1) UNRELEASED; urgency=low
 
   [ Timo Aaltonen ]
   * New upstream bugfix release. (LP: #926379)
