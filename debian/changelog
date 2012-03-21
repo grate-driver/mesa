@@ -1,3 +1,9 @@
+mesa (8.0.2-1ubuntu1) precise; urgency=low
+
+  * New upstream bugfix release.
+
+ -- Robert Hooker <sarvatt@ubuntu.com>  Wed, 21 Mar 2012 18:46:05 -0400
+
 mesa (8.0.2-1) UNRELEASED; urgency=low
 
   [ Timo Aaltonen ]
