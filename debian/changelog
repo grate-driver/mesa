@@ -1,3 +1,10 @@
+mesa (8.0.2-0ubuntu2) UNRELEASED; urgency=low
+
+  * Add 117_intel_fix_hiz_null_dereference.patch fixing a null deference
+    when processing HiZ buffers (LP: #926379)
+
+ -- Robert Hooker <sarvatt@ubuntu.com>  Thu, 22 Mar 2012 15:16:25 -0400
+
 mesa (8.0.2-0ubuntu1) precise; urgency=low
 
   [ Robert Hooker ]
