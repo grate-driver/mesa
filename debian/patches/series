@@ -10,7 +10,6 @@
 # Ubuntu patches.
 100_no_abi_tag.patch
 101_ubuntu_hidden_glname.patch
-113_fix_tls.diff
 115_llvm_dynamic_linking.diff
 116_use_shared_galliumcore.diff
 117_intel_fix_hiz_null_dereference.patch

@@ -1,3 +1,11 @@
+mesa (8.0.2-0ubuntu3) precise; urgency=low
+
+  * Drop 113_fix_tls.diff - this turns out to have been working around a libc
+    bug (most likely Debian bug #637239) which is now fixed.  It also seems
+    to be causing problems itself now.  (LP: #965798)
+
+ -- Christopher James Halse Rogers <raof@ubuntu.com>  Tue, 27 Mar 2012 12:51:58 +1100
+
 mesa (8.0.2-0ubuntu2) precise; urgency=low
 
   [ Robert Hooker ]
