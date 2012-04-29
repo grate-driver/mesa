@@ -1,4 +1,4 @@
-mesa (8.0.2-1) UNRELEASED; urgency=low
+mesa (8.0.2-1) experimental; urgency=low
 
   [ Timo Aaltonen ]
   * New upstream bugfix release. (LP: #926379)
@@ -8,7 +8,7 @@ mesa (8.0.2-1) UNRELEASED; urgency=low
   [ Robert Hooker ]
   * Add libudev-dev to libgbm-dev dependencies.
 
- -- Robert Hooker <sarvatt@ubuntu.com>  Mon, 19 Mar 2012 17:02:47 -0400
+ -- Cyril Brulebois <kibi@debian.org>  Sun, 29 Apr 2012 15:51:10 +0200
 
 mesa (8.0-2) experimental; urgency=low
 
