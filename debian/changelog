@@ -1,3 +1,14 @@
+mesa (8.0.2-0ubuntu4) quantal; urgency=low
+
+  * Add 118_fix_rendering_from_textures.patch: Postpone the setup of the
+    workaround render target miptree until update_renderbuffer time.
+    Fixes a GPU hang preceded by corruption which can be triggered using
+    the Unity 3D application switcher.  Cherrypick from the upstream
+    8.0 (stable) tree.
+    (LP: #980017)
+
+ -- Bryce Harrington <bryce@ubuntu.com>  Mon, 14 May 2012 10:06:36 -0700
+
 mesa (8.0.2-0ubuntu3) precise; urgency=low
 
   * Drop 113_fix_tls.diff - this turns out to have been working around a libc

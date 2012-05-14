@@ -1,0 +1,226 @@
+commit 93e94cbb48a679b7bf67594adb6f858526b37935
+Author: Eric Anholt <eric@anholt.net>
+Date:   Fri Feb 10 12:54:25 2012 -0800
+
+    intel: Fix rendering from textures after RenderTexture().
+    
+    There's a serious trap for drivers: RenderTexture() does not indicate
+    that the texture is currently bound to the draw buffer, despite
+    FinishRenderTexture() signaling that the texture is just now being
+    unbound from the draw buffer.
+    
+    We were acting as if RenderTexture() *was* the start of rendering and
+    that we could make texturing incoherent with the current contents of
+    the renderbuffer.  This caused intel oglconform sRGB
+    Mipmap.1D_textures to fail, because we got a call to TexImage() and
+    thus RenderTexture() on a texture bound to a framebuffer that wasn't
+    the draw buffer, so we skipped validating the new image into the
+    texture object used for rendering.
+    
+    We can't (easily) make RenderTexture() indicate the start of drawing,
+    because both our driver and gallium are using it as the moment to set
+    up the renderbuffer wrapper used for things like MapRenderbuffer().
+    Instead, postpone the setup of the workaround render target miptree
+    until update_renderbuffer time, so that we no longer need to skip
+    validation of miptrees used as render targets.  As a bonus, this
+    should make GL_NV_texture_barrier possible.
+    
+    (This also fixes a regression in the gen4 small-mipmap rendering since
+    3b38b33c1648b07e75dc4d8340758171e109c598, which switched
+    set_draw_offset from image->mt to irb->mt but didn't move the irb->mt
+    replacement up before set_draw_offset).
+    
+    Bugzilla: https://bugs.freedesktop.org/show_bug.cgi?id=44961
+    NOTE: This is a candidate for the 8.0 branch.
+
+diff --git a/src/mesa/drivers/dri/i965/brw_wm_surface_state.c b/src/mesa/drivers/dri/i965/brw_wm_surface_state.c
+index 51d3a46..97ae489 100644
+--- a/src/mesa/drivers/dri/i965/brw_wm_surface_state.c
++++ b/src/mesa/drivers/dri/i965/brw_wm_surface_state.c
+@@ -916,12 +916,48 @@ brw_update_renderbuffer_surface(struct brw_context *brw,
+    struct gl_context *ctx = &intel->ctx;
+    struct intel_renderbuffer *irb = intel_renderbuffer(rb);
+    struct intel_mipmap_tree *mt = irb->mt;
+-   struct intel_region *region = irb->mt->region;
++   struct intel_region *region;
+    uint32_t *surf;
+    uint32_t tile_x, tile_y;
+    uint32_t format = 0;
+    gl_format rb_format = intel_rb_format(irb);
+ 
++   if (irb->tex_image && !brw->has_surface_tile_offset) {
++      intel_renderbuffer_tile_offsets(irb, &tile_x, &tile_y);
++
++      if (tile_x != 0 || tile_y != 0) {
++	 /* Original gen4 hardware couldn't draw to a non-tile-aligned
++	  * destination in a miptree unless you actually setup your renderbuffer
++	  * as a miptree and used the fragile lod/array_index/etc. controls to
++	  * select the image.  So, instead, we just make a new single-level
++	  * miptree and render into that.
++	  */
++	 struct intel_context *intel = intel_context(ctx);
++	 struct intel_texture_image *intel_image =
++	    intel_texture_image(irb->tex_image);
++	 struct intel_mipmap_tree *new_mt;
++	 int width, height, depth;
++
++	 intel_miptree_get_dimensions_for_image(irb->tex_image, &width, &height, &depth);
++
++	 new_mt = intel_miptree_create(intel, irb->tex_image->TexObject->Target,
++				       intel_image->base.Base.TexFormat,
++				       intel_image->base.Base.Level,
++				       intel_image->base.Base.Level,
++				       width, height, depth,
++				       true);
++
++	 intel_miptree_copy_teximage(intel, intel_image, new_mt);
++	 intel_miptree_reference(&irb->mt, intel_image->mt);
++	 intel_renderbuffer_set_draw_offset(irb);
++	 intel_miptree_release(&new_mt);
++
++	 mt = irb->mt;
++      }
++   }
++
++   region = irb->mt->region;
++
+    surf = brw_state_batch(brw, AUB_TRACE_SURFACE_STATE,
+ 			  6 * 4, 32, &brw->bind.surf_offset[unit]);
+ 
+diff --git a/src/mesa/drivers/dri/intel/intel_fbo.c b/src/mesa/drivers/dri/intel/intel_fbo.c
+index 185602a..c5097c3 100644
+--- a/src/mesa/drivers/dri/intel/intel_fbo.c
++++ b/src/mesa/drivers/dri/intel/intel_fbo.c
+@@ -553,22 +553,6 @@ intel_renderbuffer_tile_offsets(struct intel_renderbuffer *irb,
+    }
+ }
+ 
+-#ifndef I915
+-static bool
+-need_tile_offset_workaround(struct brw_context *brw,
+-			    struct intel_renderbuffer *irb)
+-{
+-   uint32_t tile_x, tile_y;
+-
+-   if (brw->has_surface_tile_offset)
+-      return false;
+-
+-   intel_renderbuffer_tile_offsets(irb, &tile_x, &tile_y);
+-
+-   return tile_x != 0 || tile_y != 0;
+-}
+-#endif
+-
+ /**
+  * Called by glFramebufferTexture[123]DEXT() (and other places) to
+  * prepare for rendering into texture memory.  This might be called
+@@ -626,42 +610,13 @@ intel_render_texture(struct gl_context * ctx,
+        return;
+    }
+ 
++   irb->tex_image = image;
++
+    DBG("Begin render %s texture tex=%u w=%d h=%d refcount=%d\n",
+        _mesa_get_format_name(image->TexFormat),
+        att->Texture->Name, image->Width, image->Height,
+        irb->Base.Base.RefCount);
+ 
+-   intel_image->used_as_render_target = true;
+-
+-#ifndef I915
+-   if (need_tile_offset_workaround(brw_context(ctx), irb)) {
+-      /* Original gen4 hardware couldn't draw to a non-tile-aligned
+-       * destination in a miptree unless you actually setup your
+-       * renderbuffer as a miptree and used the fragile
+-       * lod/array_index/etc. controls to select the image.  So,
+-       * instead, we just make a new single-level miptree and render
+-       * into that.
+-       */
+-      struct intel_context *intel = intel_context(ctx);
+-      struct intel_mipmap_tree *new_mt;
+-      int width, height, depth;
+-
+-      intel_miptree_get_dimensions_for_image(image, &width, &height, &depth);
+-
+-      new_mt = intel_miptree_create(intel, image->TexObject->Target,
+-				    intel_image->base.Base.TexFormat,
+-				    intel_image->base.Base.Level,
+-				    intel_image->base.Base.Level,
+-                                    width, height, depth,
+-				    true);
+-
+-      intel_miptree_copy_teximage(intel, intel_image, new_mt);
+-      intel_renderbuffer_set_draw_offset(irb);
+-
+-      intel_miptree_reference(&irb->mt, intel_image->mt);
+-      intel_miptree_release(&new_mt);
+-   }
+-#endif
+    /* update drawing region, etc */
+    intel_draw_buffer(ctx);
+ }
+@@ -678,14 +633,13 @@ intel_finish_render_texture(struct gl_context * ctx,
+    struct gl_texture_object *tex_obj = att->Texture;
+    struct gl_texture_image *image =
+       tex_obj->Image[att->CubeMapFace][att->TextureLevel];
+-   struct intel_texture_image *intel_image = intel_texture_image(image);
++   struct intel_renderbuffer *irb = intel_renderbuffer(att->Renderbuffer);
+ 
+    DBG("Finish render %s texture tex=%u\n",
+        _mesa_get_format_name(image->TexFormat), att->Texture->Name);
+ 
+-   /* Flag that this image may now be validated into the object's miptree. */
+-   if (intel_image)
+-      intel_image->used_as_render_target = false;
++   if (irb)
++      irb->tex_image = NULL;
+ 
+    /* Since we've (probably) rendered to the texture and will (likely) use
+     * it in the texture domain later on in this batchbuffer, flush the
+diff --git a/src/mesa/drivers/dri/intel/intel_fbo.h b/src/mesa/drivers/dri/intel/intel_fbo.h
+index a2c1b1a..724f141 100644
+--- a/src/mesa/drivers/dri/intel/intel_fbo.h
++++ b/src/mesa/drivers/dri/intel/intel_fbo.h
+@@ -47,6 +47,9 @@ struct intel_renderbuffer
+    struct intel_mipmap_tree *mt; /**< The renderbuffer storage. */
+    drm_intel_bo *map_bo;
+ 
++   /* Current texture image this renderbuffer is attached to. */
++   struct gl_texture_image *tex_image;
++
+    /**
+     * \name Miptree view
+     * \{
+diff --git a/src/mesa/drivers/dri/intel/intel_tex_obj.h b/src/mesa/drivers/dri/intel/intel_tex_obj.h
+index 8b278ba..d1a5f05 100644
+--- a/src/mesa/drivers/dri/intel/intel_tex_obj.h
++++ b/src/mesa/drivers/dri/intel/intel_tex_obj.h
+@@ -65,7 +65,6 @@ struct intel_texture_image
+     * Else there is no image data.
+     */
+    struct intel_mipmap_tree *mt;
+-   bool used_as_render_target;
+ };
+ 
+ static INLINE struct intel_texture_object *
+diff --git a/src/mesa/drivers/dri/intel/intel_tex_validate.c b/src/mesa/drivers/dri/intel/intel_tex_validate.c
+index b96f2a4..a63068b 100644
+--- a/src/mesa/drivers/dri/intel/intel_tex_validate.c
++++ b/src/mesa/drivers/dri/intel/intel_tex_validate.c
+@@ -97,14 +97,8 @@ intel_finalize_mipmap_tree(struct intel_context *intel, GLuint unit)
+ 	 /* skip too small size mipmap */
+  	 if (intelImage == NULL)
+ 		 break;
+-	 /* Need to import images in main memory or held in other trees.
+-	  * If it's a render target, then its data isn't needed to be in
+-	  * the object tree (otherwise we'd be FBO incomplete), and we need
+-	  * to keep track of the image's MT as needing to be pulled in still,
+-	  * or we'll lose the rendering that's done to it.
+-          */
+-         if (intelObj->mt != intelImage->mt &&
+-	     !intelImage->used_as_render_target) {
++
++         if (intelObj->mt != intelImage->mt) {
+             intel_miptree_copy_teximage(intel, intelImage, intelObj->mt);
+          }
+       }
