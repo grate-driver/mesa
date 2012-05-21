@@ -1,8 +1,9 @@
 mesa (8.0.3-1) UNRELEASED; urgency=low
 
   * New upstream stable release (Closes: #673532)
+  * Refresh patches.
 
- -- Robert Hooker <sarvatt@ubuntu.com>  Mon, 21 May 2012 16:03:26 -0400
+ -- Robert Hooker <sarvatt@ubuntu.com>  Mon, 21 May 2012 18:21:40 -0400
 
 mesa (8.0.2-2) unstable; urgency=low
 
