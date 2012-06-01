@@ -1,3 +1,16 @@
+mesa (8.0.3-1) UNRELEASED; urgency=low
+
+  * New upstream stable release (Closes: #673532)
+  * Refresh patches.
+
+ -- Robert Hooker <sarvatt@ubuntu.com>  Mon, 21 May 2012 18:21:40 -0400
+
+mesa (8.0.2-2) unstable; urgency=low
+
+  * Upload to unstable.
+
+ -- Cyril Brulebois <kibi@debian.org>  Tue, 01 May 2012 21:42:35 +0200
+
 mesa (8.0.2-0ubuntu4) quantal; urgency=low
 
   * Add 118_fix_rendering_from_textures.patch: Postpone the setup of the
