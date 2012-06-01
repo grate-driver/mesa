@@ -12,5 +12,3 @@
 101_ubuntu_hidden_glname.patch
 115_llvm_dynamic_linking.diff
 116_use_shared_galliumcore.diff
-117_intel_fix_hiz_null_dereference.patch
-118_fix_rendering_from_textures.patch
