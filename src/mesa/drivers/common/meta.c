@@ -3256,6 +3256,7 @@ decompress_texture_image(struct gl_context *ctx,
    };
    struct vertex verts[4];
    GLuint fboDrawSave, fboReadSave;
+   GLuint rbSave;
 
    if (slice > 0) {
       assert(target == GL_TEXTURE_3D ||
@@ -3272,6 +3273,7 @@ decompress_texture_image(struct gl_context *ctx,
    /* save fbo bindings (not saved by _mesa_meta_begin()) */
    fboDrawSave = ctx->DrawBuffer->Name;
    fboReadSave = ctx->ReadBuffer->Name;
+   rbSave = ctx->CurrentRenderbuffer ? ctx->CurrentRenderbuffer->Name : 0;
 
    _mesa_meta_begin(ctx, MESA_META_ALL & ~MESA_META_PIXEL_STORE);
 
@@ -3292,6 +3294,7 @@ decompress_texture_image(struct gl_context *ctx,
 
    /* alloc dest surface */
    if (width > decompress->Width || height > decompress->Height) {
+      _mesa_BindRenderbufferEXT(GL_RENDERBUFFER_EXT, decompress->RBO);
       _mesa_RenderbufferStorageEXT(GL_RENDERBUFFER_EXT, GL_RGBA,
                                    width, height);
       decompress->Width = width;
@@ -3424,6 +3427,7 @@ decompress_texture_image(struct gl_context *ctx,
       _mesa_BindFramebufferEXT(GL_DRAW_FRAMEBUFFER_EXT, fboDrawSave);
       _mesa_BindFramebufferEXT(GL_READ_FRAMEBUFFER_EXT, fboReadSave);
    }
+   _mesa_BindRenderbufferEXT(GL_RENDERBUFFER_EXT, rbSave);
 }
 
 
