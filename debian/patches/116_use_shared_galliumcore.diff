@@ -1,8 +1,8 @@
-diff --git a/bin/mklib b/bin/mklib
-index 2c7ed38..14bca63 100755
---- a/bin/mklib
-+++ b/bin/mklib
-@@ -147,6 +147,7 @@ ARCHOPT=""
+Index: mesa/bin/mklib
+===================================================================
+--- mesa.orig/bin/mklib	2012-06-01 13:01:25.243165726 -0400
++++ mesa/bin/mklib	2012-06-01 13:02:46.827167952 -0400
+@@ -147,6 +147,7 @@
  NOPREFIX=0
  EXPORTS=""
  ID=""
@@ -10,7 +10,7 @@ index 2c7ed38..14bca63 100755
  
  #
  # Parse arguments
-@@ -191,6 +192,18 @@ do
+@@ -191,6 +192,18 @@
  	-R*)
  	    DEPS="$DEPS $1"
  	    ;;
@@ -29,7 +29,7 @@ index 2c7ed38..14bca63 100755
  	-Wl*)
              DEPS="$DEPS $1"
              ;;
-@@ -271,6 +284,10 @@ if [ $STATIC = 1 ]; then
+@@ -271,6 +284,10 @@
      OBJECTS=$NEWOBJECTS
  fi
  
@@ -40,7 +40,7 @@ index 2c7ed38..14bca63 100755
  
  #
  # Error checking
-@@ -284,7 +301,6 @@ if [ "x${OBJECTS}" = "x" ] ; then
+@@ -284,7 +301,6 @@
      exit 1
  fi
  
@@ -48,7 +48,7 @@ index 2c7ed38..14bca63 100755
  #
  # Debugging info
  #
-@@ -343,6 +359,7 @@ case $ARCH in
+@@ -345,6 +361,7 @@
              fi
  
              rm -f ${LIBNAME}
@@ -56,11 +56,11 @@ index 2c7ed38..14bca63 100755
              # make lib
              ${LINK} ${OPTS} ${LDFLAGS} -o ${LIBNAME} ${OBJECTS} ${DEPS}
              # finish up
-diff --git a/configs/autoconf.in b/configs/autoconf.in
-index 37b7ea5..b479f2b 100644
---- a/configs/autoconf.in
-+++ b/configs/autoconf.in
-@@ -121,6 +121,7 @@ DRI_DIRS = @DRI_DIRS@
+Index: mesa/configs/autoconf.in
+===================================================================
+--- mesa.orig/configs/autoconf.in	2012-06-01 13:01:25.243165726 -0400
++++ mesa/configs/autoconf.in	2012-06-01 13:02:46.831167952 -0400
+@@ -124,6 +124,7 @@
  DRICORE_GLSL_LIBS = @DRICORE_GLSL_LIBS@
  DRICORE_LIBS = @DRICORE_LIBS@
  DRICORE_LIB_DEPS = @DRICORE_LIB_DEPS@
@@ -68,12 +68,12 @@ index 37b7ea5..b479f2b 100644
  EGL_PLATFORMS = @EGL_PLATFORMS@
  EGL_CLIENT_APIS = @EGL_CLIENT_APIS@
  
-diff --git a/configure.ac b/configure.ac
-index 0ea264e..684f5b0 100644
---- a/configure.ac
-+++ b/configure.ac
-@@ -1036,6 +1036,41 @@ AC_SUBST([GLESv2_PC_LIB_PRIV])
- GLAPI_LIB_DEPS="-lpthread"
+Index: mesa/configure.ac
+===================================================================
+--- mesa.orig/configure.ac	2012-06-01 13:02:46.511167943 -0400
++++ mesa/configure.ac	2012-06-01 13:02:46.831167952 -0400
+@@ -1068,6 +1068,41 @@
+ GLAPI_LIB_DEPS="-lpthread $SELINUX_LIBS"
  AC_SUBST([GLAPI_LIB_DEPS])
  
 +dnl Setup default DRI CFLAGS
@@ -114,11 +114,11 @@ index 0ea264e..684f5b0 100644
  
  dnl Setup default DRI CFLAGS
  DRI_CFLAGS='$(CFLAGS)'
-diff --git a/src/gallium/Makefile.template b/src/gallium/Makefile.template
-index 036c119..3f01d08 100644
---- a/src/gallium/Makefile.template
-+++ b/src/gallium/Makefile.template
-@@ -30,7 +30,7 @@ endif
+Index: mesa/src/gallium/Makefile.template
+===================================================================
+--- mesa.orig/src/gallium/Makefile.template	2012-06-01 13:01:25.247165726 -0400
++++ mesa/src/gallium/Makefile.template	2012-06-01 13:02:46.831167952 -0400
+@@ -30,7 +30,7 @@
  
  ##### TARGETS #####
  
@@ -127,7 +127,7 @@ index 036c119..3f01d08 100644
  
  lib$(LIBNAME).a: $(OBJECTS) $(EXTRA_OBJECTS) Makefile $(TOP)/src/gallium/Makefile.template
  	$(MKLIB) -o $(LIBNAME) -static $(OBJECTS) $(EXTRA_OBJECTS)
-@@ -58,16 +58,16 @@ install:
+@@ -58,16 +58,16 @@
  ##### RULES #####
  
  %.s: %.c
@@ -148,11 +148,11 @@ index 036c119..3f01d08 100644
  
  
  sinclude depend
-diff --git a/src/gallium/auxiliary/Makefile b/src/gallium/auxiliary/Makefile
-index 7dae7bc..9a08acb 100644
---- a/src/gallium/auxiliary/Makefile
-+++ b/src/gallium/auxiliary/Makefile
-@@ -213,6 +213,14 @@ endif
+Index: mesa/src/gallium/auxiliary/Makefile
+===================================================================
+--- mesa.orig/src/gallium/auxiliary/Makefile	2012-06-01 13:01:25.247165726 -0400
++++ mesa/src/gallium/auxiliary/Makefile	2012-06-01 13:02:46.831167952 -0400
+@@ -18,6 +18,14 @@
  
  include ../Makefile.template
  
@@ -167,18 +167,18 @@ index 7dae7bc..9a08acb 100644
  
  indices/u_indices_gen.c: indices/u_indices_gen.py
  	$(PYTHON2) $< > $@
-@@ -228,4 +236,6 @@ util/u_format_table.c: util/u_format_table.py util/u_format_pack.py util/u_forma
+@@ -33,4 +41,6 @@
  
  util/u_half.c: util/u_half.py
  	$(PYTHON2) util/u_half.py > $@
 +
 +default:: $(TOP)/$(LIB_DIR)/libgallium.so
  # DO NOT DELETE
-diff --git a/src/gallium/targets/Makefile.dri b/src/gallium/targets/Makefile.dri
-index 857ebfe..bb08ba0 100644
---- a/src/gallium/targets/Makefile.dri
-+++ b/src/gallium/targets/Makefile.dri
-@@ -9,7 +9,6 @@ LDFLAGS += -lstdc++
+Index: mesa/src/gallium/targets/Makefile.dri
+===================================================================
+--- mesa.orig/src/gallium/targets/Makefile.dri	2012-06-01 13:01:25.251165726 -0400
++++ mesa/src/gallium/targets/Makefile.dri	2012-06-01 13:02:46.831167952 -0400
+@@ -7,7 +7,6 @@
  endif
  
  MESA_MODULES = \
@@ -186,7 +186,7 @@ index 857ebfe..bb08ba0 100644
  	$(GALLIUM_AUXILIARIES)
  
  COMMON_GALLIUM_SOURCES = \
-@@ -78,8 +77,8 @@ $(LIBNAME): $(OBJECTS) $(MESA_MODULES) $(PIPE_DRIVERS) Makefile \
+@@ -73,8 +72,8 @@
  	$(MKLIB) -o $@.tmp -noprefix -linker '$(CXX)' -ldflags '$(LDFLAGS)' \
  		$(OBJECTS) $(PIPE_DRIVERS) \
                  -Wl,--start-group $(MESA_MODULES) -Wl,--end-group \
@@ -197,13 +197,13 @@ index 857ebfe..bb08ba0 100644
  	@rm -f $@.test
  	mv -f $@.tmp $@
  
-diff --git a/src/mesa/Makefile b/src/mesa/Makefile
-index a903a26..c4ab43c 100644
---- a/src/mesa/Makefile
-+++ b/src/mesa/Makefile
-@@ -17,6 +17,9 @@ MESA_GALLIUM_OBJECTS := $(addprefix $(MESA_OBJ_DIR)/, $(MESA_GALLIUM_OBJECTS))
- 
- DRICORE_OBJECTS := $(addprefix $(DRICORE_OBJ_DIR)/, $(MESA_OBJECTS))
+Index: mesa/src/mesa/Makefile
+===================================================================
+--- mesa.orig/src/mesa/Makefile	2012-06-01 13:01:25.259165726 -0400
++++ mesa/src/mesa/Makefile	2012-06-01 13:02:46.831167952 -0400
+@@ -16,6 +16,9 @@
+ MESA_OBJECTS := $(addprefix $(MESA_OBJ_DIR)/, $(MESA_OBJECTS))
+ MESA_GALLIUM_OBJECTS := $(addprefix $(MESA_OBJ_DIR)/, $(MESA_GALLIUM_OBJECTS))
  
 +DRICORE_OBJECTS := $(addprefix $(DRICORE_OBJ_DIR)/, $(MESA_OBJECTS))
 +GALLIUMCORE_OBJECTS := $(addprefix $(DRICORE_OBJ_DIR)/, $(filter-out $(MESA_OBJECTS), $(MESA_GALLIUM_OBJECTS)))
@@ -211,17 +211,17 @@ index a903a26..c4ab43c 100644
  # define preprocessor flags
  MESA_CPPFLAGS := $(API_DEFINES) $(DEFINES)
  
-@@ -66,7 +69,7 @@ $(DRICORE_OBJ_DIR)/%.o: %.S
+@@ -65,7 +68,7 @@
  
  # Default: build dependencies, then asm_subdirs, GLSL built-in lib,
  # then convenience libs (.a) and finally the device drivers:
 -default: $(DEPENDS) asm_subdirs $(MESA_LIBS) $(DRICORE_LIBS) driver_subdirs
 +default: $(DEPENDS) asm_subdirs $(MESA_LIBS) $(DRICORE_LIBS) libgalliumcore.a driver_subdirs
  
- main/api_exec_es1.c: main/APIspec.xml main/es_generator.py main/APIspecutil.py main/APIspec.py
- 	$(PYTHON2) $(PYTHON_FLAGS) main/es_generator.py -S main/APIspec.xml -V GLES1.1 > $@
-@@ -125,6 +128,10 @@ depend: $(ALL_SOURCES)
- 	@$(MKDEP) $(MKDEP_OPTIONS) -p$(MESA_OBJ_DIR)/ $(MESA_CPPFLAGS) \
+ # include glapi_gen.mk for generating glapi headers for GLES
+ GLAPI := $(TOP)/src/mapi/glapi/gen
+@@ -146,6 +149,10 @@
+ 	@$(MKDEP) $(MKDEP_OPTIONS) -a -p$(DRICORE_OBJ_DIR)/ $(MESA_CPPFLAGS) \
  		$(ALL_SOURCES) > /dev/null 2>/dev/null
  
 +# Make archive of subset of core mesa object files for gallium

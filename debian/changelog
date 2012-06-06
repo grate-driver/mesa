@@ -3,6 +3,7 @@ mesa (8.0.3-0ubuntu1) UNRELEASED; urgency=low
   * New upstream stable release.
   * Drop 118_fix_rendering_from_textures.patch and
     117_intel_fix_hiz_null_dereference.patch, both included upstream.
+  * Refresh patches.
 
  -- Robert Hooker <sarvatt@ubuntu.com>  Fri, 01 Jun 2012 13:01:35 -0400
 

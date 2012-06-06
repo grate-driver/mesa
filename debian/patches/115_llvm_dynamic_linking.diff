@@ -1,8 +1,8 @@
 Index: mesa/configure.ac
 ===================================================================
---- mesa.orig/configure.ac	2012-01-24 14:48:40.488101770 +0200
-+++ mesa/configure.ac	2012-01-24 14:48:42.364157964 +0200
-@@ -1770,7 +1770,7 @@
+--- mesa.orig/configure.ac	2012-06-01 13:02:45.535167916 -0400
++++ mesa/configure.ac	2012-06-01 13:02:46.511167943 -0400
+@@ -1767,7 +1767,7 @@
      if test "x$LLVM_CONFIG" != xno; then
  	LLVM_VERSION=`$LLVM_CONFIG --version | sed 's/svn.*//g'`
  	LLVM_CFLAGS=`$LLVM_CONFIG --cppflags|sed -e 's/-DNDEBUG\>//g' -e 's/-pedantic//g'`
