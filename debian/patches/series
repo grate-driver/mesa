@@ -12,3 +12,4 @@
 101_ubuntu_hidden_glname.patch
 115_llvm_dynamic_linking.diff
 116_use_shared_galliumcore.diff
+117_nullptr_check_in_query_version.patch

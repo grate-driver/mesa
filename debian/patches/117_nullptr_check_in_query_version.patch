@@ -1,0 +1,25 @@
+commit 7062625c601478d108da1c8da7201f023bd35b54
+Author: Bryce Harrington <bryce@canonical.com>
+Date:   Tue Jun 12 17:32:21 2012 -0700
+
+    Check for NULL return from xcb_glx_query_version_reply() before deref.
+    
+    This can get triggered during login when called from
+    gnome-session-check-accelerated-helper.
+    
+    Fixes:  https://bugs.launchpad.net/ubuntu/+source/mesa/+bug/968284
+    Signed-off-by: Bryce Harrington <bryce@canonical.com>
+
+diff --git a/src/glx/glxext.c b/src/glx/glxext.c
+index 12fff22..5da2570 100644
+--- a/src/glx/glxext.c
++++ b/src/glx/glxext.c
+@@ -293,6 +293,8 @@ QueryVersion(Display * dpy, int opcode, int *major, int *minor)
+                                                                        GLX_MINOR_VERSION),
+                                                                       NULL);
+ 
++   if (!reply)
++      return GL_FALSE;
+    if (reply->major_version != GLX_MAJOR_VERSION) {
+       free(reply);
+       return GL_FALSE;
