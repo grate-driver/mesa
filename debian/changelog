@@ -1,9 +1,24 @@
 mesa (8.0.3-0ubuntu1) UNRELEASED; urgency=low
 
   * New upstream stable release.
+    + Fixes crash in intel_miptree_release()
+      (LP: #952896)
+    + Fixes slow WebGL in firefox
+      (LP: #988343)
+
+  [ Robert Hooker ]
   * Drop 118_fix_rendering_from_textures.patch and
     117_intel_fix_hiz_null_dereference.patch, both included upstream.
   * Refresh patches.
+
+  [ Bryce Harrington ]
+  * Add 117_nullptr_check_in_query_version.patch: Fix null pointer
+    deref in QueryVersion() during login.
+    (LP: #968284)
+  * Add 118_glsl_initialize_samplers.patch: Initialize samplers to 0, as
+    required by the spec.  Fixes rendering corruption in MapsGL labels.
+    Cherrypick from mesa master.
+    (LP: #981883)
 
  -- Robert Hooker <sarvatt@ubuntu.com>  Fri, 01 Jun 2012 13:01:35 -0400
 
