@@ -1,0 +1,53 @@
+commit b610881317a7775a7ffe5f032099d8b2dc45eff0
+Author: Ian Romanick <ian.d.romanick@intel.com>
+Date:   Tue Apr 10 10:40:11 2012 -0700
+
+    glsl: Initialize samplers to 0, propagate sampler values to the gl_program
+    
+    The spec requires that samplers be initialized to 0.  Since this
+    differs from the 1-to-1 mapping of samplers to texture units assumed
+    by ARB assembly shaders (and the gl_program structure), be sure to
+    propagate this date from the gl_shader_program to the gl_program.
+    
+    Signed-off-by: Ian Romanick <ian.d.romanick@intel.com>
+    Reviewed-by: Eric Anholt <eric@anholt.net>
+    Reviewed-by: Kenneth Graunke <kenneth@whitecape.org>
+    CC: Vadim Girlin <vadimgirlin@gmail.com>
+    Bugzilla: https://bugs.freedesktop.org/show_bug.cgi?id=49088
+
+diff --git a/src/glsl/link_uniforms.cpp b/src/glsl/link_uniforms.cpp
+index 81a995e..92e2a1f 100644
+--- a/src/glsl/link_uniforms.cpp
++++ b/src/glsl/link_uniforms.cpp
+@@ -329,9 +329,16 @@ link_assign_uniform_locations(struct gl_shader_program *prog)
+       prog->UniformHash = new string_to_uint_map;
+    }
+ 
+-   for (unsigned i = 0; i < Elements(prog->SamplerUnits); i++) {
+-      prog->SamplerUnits[i] = i;
+-   }
++   /* Uniforms that lack an initializer in the shader code have an initial
++    * value of zero.  This includes sampler uniforms.
++    *
++    * Page 24 (page 30 of the PDF) of the GLSL 1.20 spec says:
++    *
++    *     "The link time initial value is either the value of the variable's
++    *     initializer, if present, or 0 if no initializer is present. Sampler
++    *     types cannot have initializers."
++    */
++   memset(prog->SamplerUnits, 0, sizeof(prog->SamplerUnits));
+ 
+    /* First pass: Count the uniform resources used by the user-defined
+     * uniforms.  While this happens, each active uniform will have an index
+diff --git a/src/mesa/main/uniforms.c b/src/mesa/main/uniforms.c
+index be1e172..e6604b1 100644
+--- a/src/mesa/main/uniforms.c
++++ b/src/mesa/main/uniforms.c
+@@ -65,6 +65,7 @@ _mesa_update_shader_textures_used(struct gl_shader_program *shProg,
+ {
+    GLuint s;
+ 
++   memcpy(prog->SamplerUnits, shProg->SamplerUnits, sizeof(prog->SamplerUnits));
+    memset(prog->TexturesUsed, 0, sizeof(prog->TexturesUsed));
+ 
+    for (s = 0; s < MAX_SAMPLERS; s++) {
