@@ -1,4 +1,4 @@
-mesa (8.0.3-0ubuntu1) UNRELEASED; urgency=low
+mesa (8.0.3-0ubuntu1) quantal; urgency=low
 
   * New upstream stable release.
     + Fixes crash in intel_miptree_release()
@@ -20,7 +20,7 @@ mesa (8.0.3-0ubuntu1) UNRELEASED; urgency=low
     Cherrypick from mesa master.
     (LP: #981883)
 
- -- Robert Hooker <sarvatt@ubuntu.com>  Fri, 01 Jun 2012 13:01:35 -0400
+ -- Bryce Harrington <bryce@ubuntu.com>  Mon, 18 Jun 2012 19:02:09 -0700
 
 mesa (8.0.3-1) UNRELEASED; urgency=low
 
