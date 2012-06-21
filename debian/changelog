@@ -1,3 +1,11 @@
+mesa (8.0.2-0ubuntu4) UNRELEASED; urgency=low
+
+  * Add g3dvl.diff from Debian bug 656719: Enables gallium vdpau and xvmc
+    driver support on at least Radeon r300+ and r600+.
+    (LP: #1002224)
+
+ -- Timo <timo.jyrinki@iki.fi>  Mon, 21 May 2012 12:46:40 +0300
+
 mesa (8.0.3-0ubuntu1) quantal; urgency=low
 
   * New upstream stable release.

@@ -1,0 +1,4 @@
+build/dri/${DEB_HOST_MULTIARCH}/gallium/libvdpau_* usr/lib/vdpau
+build/dri/${DEB_HOST_MULTIARCH}/gallium/libXvMC* usr/lib/dri
+build/dri/${DEB_HOST_MULTIARCH}/gallium/XvMCConfig usr/lib
+build/dri/${DEB_HOST_MULTIARCH}/gallium/XvMCConfig etc
