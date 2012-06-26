@@ -18,10 +18,7 @@ NOT_INSTALLED := \
 	usr/include/GL/glx_mangle.h \
 	usr/include/GL/vms_x_fix.h \
 	usr/include/GL/wglext.h \
-	usr/include/GL/wmesa.h \
-	dri/usr/lib/*/libXvMC* \
-	dri/usr/*/libXvMC* \
-	dri/usr/lib/*/vdpau/
+	usr/include/GL/wmesa.h
 
 # Same for linux, kfreebsd, and hurd on i386:
 NOT_INSTALLED_kfreebsd-i386 = $(NOT_INSTALLED_i386)

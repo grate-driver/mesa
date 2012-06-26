@@ -115,7 +115,6 @@ confflags-dri = \
 	--enable-shared-dricore \
 	--enable-shared-glapi \
 	--enable-texture-float \
-	--enable-gallium-g3dvl \
 	--enable-xa \
 	$(confflags_DIRECT_RENDERING) \
 	$(confflags_EGL) \
@@ -211,8 +210,6 @@ $(STAMP_DIR)/stamp:
 $(QUILT_STAMPFN): $(STAMP_DIR)/stamp
 
 build: build-stamp
-	# XvMCConfig configuration file:
-	ln -s /etc/X11/XvMCConfig build/dri/$(DEB_HOST_MULTIARCH)/gallium/XvMCConfig
 
 build-stamp: $(BUILD_STAMPS)
 	# Build pot file for pkgstriptranslations
@@ -306,7 +303,7 @@ binary-arch: install
 
 	# Also get rid of other files which aren't installed. Do not
 	# use -f to ensure we notice disappearing files:
-	set -e; for file in $(NOT_INSTALLED); do rm -r debian/tmp/$$file; done
+	set -e; for file in $(NOT_INSTALLED); do rm debian/tmp/$$file; done
 	# Files only in git, not in tarballs, OK to use rm -f here:
 	set -e; for file in $(NOT_INSTALLED_EITHER); do rm -f debian/tmp/$$file; done
 	# No need for this .so, libglapi is just a convenience library:
