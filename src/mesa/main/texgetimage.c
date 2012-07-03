@@ -734,7 +734,7 @@ getteximage_error_check(struct gl_context *ctx, GLenum target, GLint level,
    if (!ctx->Extensions.ATI_envmap_bumpmap
        && _mesa_is_dudv_format(format)) {
       _mesa_error(ctx, GL_INVALID_ENUM, "glGetTexImage(format)");
-      return;
+      return GL_TRUE;
    }
 
    err = _mesa_error_check_format_and_type(ctx, format, type);
