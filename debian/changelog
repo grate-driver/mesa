@@ -1,3 +1,12 @@
+mesa (8.0.3-0ubuntu2) UNRELEASED; urgency=low
+
+  [ Maarten Lankhorst ]
+  * Add 14-libdrm_nouveau1.diff to build with new libdrm
+    - old libdrm_nouveau has been changed to require -ldrm_nouveau1
+  * Bump minimum required libdrm-dev to 2.4.34 as a result
+
+ -- Maarten Lankhorst <maarten.lankhorst@canonical.com>  Tue, 10 Jul 2012 08:44:39 +0200
+
 mesa (8.0.3-0ubuntu1) quantal; urgency=low
 
   * New upstream stable release.
