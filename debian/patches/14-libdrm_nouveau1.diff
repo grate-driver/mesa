@@ -1,0 +1,138 @@
+--- a/configure.ac
++++ b/configure.ac
+@@ -1287,7 +1287,7 @@
+ 
+ case $DRI_DIRS in
+ *nouveau*)
+-    PKG_CHECK_MODULES([NOUVEAU], [libdrm_nouveau >= $LIBDRM_NOUVEAU_REQUIRED])
++    PKG_CHECK_MODULES([NOUVEAU], [libdrm_nouveau1 >= $LIBDRM_NOUVEAU_REQUIRED])
+     ;;
+ esac
+ 
+@@ -1870,7 +1870,7 @@
+             gallium_check_st "radeon/drm" "dri-r600" "xorg-r600" "" "xvmc-r600" "vdpau-r600" "va-r600"
+             ;;
+         xnouveau)
+-            PKG_CHECK_MODULES([NOUVEAU], [libdrm_nouveau >= $LIBDRM_NOUVEAU_REQUIRED])
++            PKG_CHECK_MODULES([NOUVEAU], [libdrm_nouveau1 >= $LIBDRM_NOUVEAU_REQUIRED])
+             GALLIUM_DRIVERS_DIRS="$GALLIUM_DRIVERS_DIRS nouveau nvfx nv50 nvc0"
+             gallium_check_st "nouveau/drm" "dri-nouveau" "xorg-nouveau" "" "xvmc-nouveau" "vdpau-nouveau"
+             ;;
+--- a/configs/linux-dri
++++ b/configs/linux-dri
+@@ -67,8 +67,8 @@
+ INTEL_LIBS = $(shell $(PKG_CONFIG) --libs libdrm_intel)
+ INTEL_CFLAGS = $(shell $(PKG_CONFIG) --cflags libdrm_intel)
+ 
+-NOUVEAU_LIBS = $(shell $(PKG_CONFIG) --libs libdrm_nouveau)
+-NOUVEAU_CFLAGS = $(shell $(PKG_CONFIG) --cflags libdrm_nouveau)
++NOUVEAU_LIBS = $(shell $(PKG_CONFIG) --libs libdrm_nouveau1)
++NOUVEAU_CFLAGS = $(shell $(PKG_CONFIG) --cflags libdrm_nouveau1)
+ 
+ RADEON_LIBS = $(shell $(PKG_CONFIG) --libs libdrm_radeon)
+ RADEON_CFLAGS = $(shell $(PKG_CONFIG) --cflags libdrm_radeon)
+--- a/src/egl/main/Android.mk
++++ b/src/egl/main/Android.mk
+@@ -104,7 +104,7 @@
+ 	libmesa_pipe_nv50 \
+ 	libmesa_pipe_nvc0 \
+ 	libmesa_pipe_nouveau
+-LOCAL_SHARED_LIBRARIES += libdrm_nouveau
++LOCAL_SHARED_LIBRARIES += libdrm_nouveau1
+ endif
+ 
+ # r300g/r600g
+--- a/src/gallium/drivers/nouveau/Makefile
++++ b/src/gallium/drivers/nouveau/Makefile
+@@ -7,8 +7,8 @@
+ 	$(LIBDRM_CFLAGS) \
+ 	-I$(TOP)/src/gallium/drivers/nouveau/include
+ 
+-LIBRARY_INCLUDES += $(shell $(PKG_CONFIG) libdrm libdrm_nouveau --cflags-only-I)
+-LIBRARY_DEFINES += $(shell $(PKG_CONFIG) libdrm libdrm_nouveau --cflags-only-other)
++LIBRARY_INCLUDES += $(shell $(PKG_CONFIG) libdrm libdrm_nouveau1 --cflags-only-I)
++LIBRARY_DEFINES += $(shell $(PKG_CONFIG) libdrm libdrm_nouveau1 --cflags-only-other)
+ 
+ # get C_SOURCES
+ include Makefile.sources
+--- a/src/gallium/targets/dri-nouveau/Makefile
++++ b/src/gallium/targets/dri-nouveau/Makefile
+@@ -23,6 +23,6 @@
+ 
+ include ../Makefile.dri
+ 
+-DRI_LIB_DEPS += $(shell $(PKG_CONFIG) libdrm_nouveau --libs)
++DRI_LIB_DEPS += $(shell $(PKG_CONFIG) libdrm_nouveau1 --libs)
+ 
+ symlinks:
+--- a/src/gallium/targets/vdpau-nouveau/Makefile
++++ b/src/gallium/targets/vdpau-nouveau/Makefile
+@@ -19,7 +19,7 @@
+ 	$(COMMON_GALLIUM_SOURCES) \
+ 	$(DRIVER_SOURCES)
+ 
+-DRIVER_LIBS = $(shell $(PKG_CONFIG) libdrm_nouveau --libs) -lXfixes
++DRIVER_LIBS = $(shell $(PKG_CONFIG) libdrm_nouveau1 --libs) -lXfixes
+ 
+ LINK_WITH_CXX=1
+ 
+--- a/src/gallium/targets/xorg-nouveau/Makefile
++++ b/src/gallium/targets/xorg-nouveau/Makefile
+@@ -21,10 +21,10 @@
+ 	$(TOP)/src/gallium/drivers/rbug/librbug.a
+ 
+ DRIVER_LINKS = \
+-	$(shell $(PKG_CONFIG) --libs libdrm libdrm_nouveau)
++	$(shell $(PKG_CONFIG) --libs libdrm libdrm_nouveau1)
+ 
+ DRIVER_INCLUDES = \
+-	$(shell $(PKG_CONFIG) --cflags-only-I libdrm libdrm_nouveau xf86driproto)
++	$(shell $(PKG_CONFIG) --cflags-only-I libdrm libdrm_nouveau1 xf86driproto)
+ 
+ LINK_WITH_CXX=1
+ 
+--- a/src/gallium/targets/xvmc-nouveau/Makefile
++++ b/src/gallium/targets/xvmc-nouveau/Makefile
+@@ -19,7 +19,7 @@
+ 	$(COMMON_GALLIUM_SOURCES) \
+ 	$(DRIVER_SOURCES)
+ 
+-DRIVER_LIBS = $(shell $(PKG_CONFIG) libdrm_nouveau --libs) -lXfixes
++DRIVER_LIBS = $(shell $(PKG_CONFIG) libdrm_nouveau1 --libs) -lXfixes
+ 
+ LINK_WITH_CXX=1
+ 
+--- a/src/gallium/winsys/nouveau/drm/Makefile
++++ b/src/gallium/winsys/nouveau/drm/Makefile
+@@ -5,7 +5,7 @@
+ 
+ C_SOURCES = nouveau_drm_winsys.c
+ 
+-LIBRARY_INCLUDES = $(shell $(PKG_CONFIG) libdrm libdrm_nouveau --cflags-only-I)
+-LIBRARY_DEFINES = $(shell $(PKG_CONFIG) libdrm libdrm_nouveau --cflags-only-other)
++LIBRARY_INCLUDES = $(shell $(PKG_CONFIG) libdrm libdrm_nouveau1 --cflags-only-I)
++LIBRARY_DEFINES = $(shell $(PKG_CONFIG) libdrm libdrm_nouveau1 --cflags-only-other)
+ 
+ include ../../../Makefile.template
+--- a/src/gallium/targets/egl-static/Makefile
++++ b/src/gallium/targets/egl-static/Makefile
+@@ -105,7 +105,7 @@
+ 	$(TOP)/src/gallium/drivers/nv50/libnv50.a \
+ 	$(TOP)/src/gallium/drivers/nvc0/libnvc0.a \
+ 	$(TOP)/src/gallium/drivers/nouveau/libnouveau.a
+-egl_SYS += -ldrm_nouveau
++egl_SYS += -ldrm_nouveau1
+ endif
+ 
+ # r300
+--- a/src/gallium/targets/gbm/Makefile
++++ b/src/gallium/targets/gbm/Makefile
+@@ -66,7 +66,7 @@
+ 	$(TOP)/src/gallium/drivers/nv50/libnv50.a \
+ 	$(TOP)/src/gallium/drivers/nvc0/libnvc0.a \
+ 	$(TOP)/src/gallium/drivers/nouveau/libnouveau.a
+-nouveau_SYS = -ldrm_nouveau
++nouveau_SYS = -ldrm_nouveau1
+ 
+ # r300 pipe driver
+ r300_LIBS = \
