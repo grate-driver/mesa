@@ -1,6 +1,8 @@
 mesa (8.0.4-1) UNRELEASED; urgency=low
 
   * New upstream stable release (Closes: #682703).
+  * Cherry-pick commit fbf86c7f0f (i965/gen7: Reduce GT1 WM thread count
+    according to updated BSpec.) from upstream.
 
  -- Sven Joachim <svenjoac@gmx.de>  Thu, 26 Jul 2012 18:46:22 +0200
 
