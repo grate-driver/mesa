@@ -1,11 +1,19 @@
-mesa (8.0.3-0ubuntu2) UNRELEASED; urgency=low
+mesa (8.0.4-1) unstable; urgency=low
 
-  [ Maarten Lankhorst ]
-  * Add 14-libdrm_nouveau1.diff to build with new libdrm
-    - old libdrm_nouveau has been changed to require -ldrm_nouveau1
-  * Bump minimum required libdrm-dev to 2.4.34 as a result
+  [ Sven Joachim ]
+  * New upstream stable release (Closes: #682703).
+  * Cherry-pick commit fbf86c7f0f (i965/gen7: Reduce GT1 WM thread count
+    according to updated BSpec.) from upstream.
 
- -- Maarten Lankhorst <maarten.lankhorst@canonical.com>  Tue, 10 Jul 2012 08:44:39 +0200
+ -- Cyril Brulebois <kibi@debian.org>  Sun, 29 Jul 2012 13:17:06 +0200
+
+mesa (8.0.3-1) unstable; urgency=low
+
+  [ Robert Hooker ]
+  * New upstream stable release (Closes: #673532)
+  * Refresh patches.
+
+ -- Cyril Brulebois <kibi@debian.org>  Wed, 13 Jun 2012 14:58:54 +0200
 
 mesa (8.0.3-0ubuntu1) quantal; urgency=low
 
@@ -31,56 +39,13 @@ mesa (8.0.3-0ubuntu1) quantal; urgency=low
 
  -- Bryce Harrington <bryce@ubuntu.com>  Mon, 18 Jun 2012 19:02:09 -0700
 
-mesa (8.0.3-1) UNRELEASED; urgency=low
-
-  * New upstream stable release (Closes: #673532)
-  * Refresh patches.
-
- -- Robert Hooker <sarvatt@ubuntu.com>  Mon, 21 May 2012 18:21:40 -0400
-
 mesa (8.0.2-2) unstable; urgency=low
 
   * Upload to unstable.
 
  -- Cyril Brulebois <kibi@debian.org>  Tue, 01 May 2012 21:42:35 +0200
 
-mesa (8.0.2-0ubuntu4) quantal; urgency=low
-
-  * Add 118_fix_rendering_from_textures.patch: Postpone the setup of the
-    workaround render target miptree until update_renderbuffer time.
-    Fixes a GPU hang preceded by corruption which can be triggered using
-    the Unity 3D application switcher.  Cherrypick from the upstream
-    8.0 (stable) tree.
-    (LP: #980017)
-
- -- Bryce Harrington <bryce@ubuntu.com>  Mon, 14 May 2012 10:06:36 -0700
-
-mesa (8.0.2-0ubuntu3) precise; urgency=low
-
-  * Drop 113_fix_tls.diff - this turns out to have been working around a libc
-    bug (most likely Debian bug #637239) which is now fixed.  It also seems
-    to be causing problems itself now.  (LP: #965798)
-
- -- Christopher James Halse Rogers <raof@ubuntu.com>  Tue, 27 Mar 2012 12:51:58 +1100
-
-mesa (8.0.2-0ubuntu2) precise; urgency=low
-
-  [ Robert Hooker ]
-  * Add 117_intel_fix_hiz_null_dereference.patch fixing a null deference
-    when processing HiZ buffers (LP: #926379)
-
- -- Timo Aaltonen <tjaalton@ubuntu.com>  Thu, 22 Mar 2012 21:25:52 +0200
-
-mesa (8.0.2-0ubuntu1) precise; urgency=low
-
-  [ Robert Hooker ]
-  * New upstream bugfix release.
-  * Drop 117_i965_only_set_last_render_target_last.patch, applied upstream.
-  * Compress non-debug debs with lzma
-
- -- Timo Aaltonen <tjaalton@ubuntu.com>  Thu, 22 Mar 2012 17:20:35 +0200
-
-mesa (8.0.2-1) UNRELEASED; urgency=low
+mesa (8.0.2-1) experimental; urgency=low
 
   [ Timo Aaltonen ]
   * New upstream bugfix release. (LP: #926379)
@@ -90,7 +55,7 @@ mesa (8.0.2-1) UNRELEASED; urgency=low
   [ Robert Hooker ]
   * Add libudev-dev to libgbm-dev dependencies.
 
- -- Robert Hooker <sarvatt@ubuntu.com>  Mon, 19 Mar 2012 17:02:47 -0400
+ -- Cyril Brulebois <kibi@debian.org>  Sun, 29 Apr 2012 15:51:10 +0200
 
 mesa (8.0-2) experimental; urgency=low
 
@@ -118,63 +83,6 @@ mesa (8.0-2) experimental; urgency=low
     turned back into a symlink.
 
  -- Cyril Brulebois <kibi@debian.org>  Tue, 14 Feb 2012 16:18:14 +0100
-
-mesa (8.0~rc2-0ubuntu5) precise; urgency=low
-
-  [ Robert Hooker ]
-  * debian/control: Add libxcb-glx0-dev to libegl1-mesa-dev depends.
-
-  [ Christopher James Halse Rogers ]
-  * debian/control: Add libx11-xcb-dev to libegl1-mesa-dev depends.
-
- -- Christopher James Halse Rogers <raof@ubuntu.com>  Thu, 09 Feb 2012 16:49:26 +1100
-
-mesa (8.0~rc2-0ubuntu4) precise; urgency=low
-
-  * Drop drisearchdir handling, it is no longer needed with multiarch
-    and dri-alternates being removed.
-
- -- Robert Hooker <sarvatt@ubuntu.com>  Thu, 02 Feb 2012 12:05:48 -0500
-
-mesa (8.0~rc2-0ubuntu3) precise; urgency=low
-
-  * Merge from debian-experimental git.
-    - Install the llvmpipe swrast driver.
-
- -- Timo Aaltonen <tjaalton@ubuntu.com>  Thu, 02 Feb 2012 12:38:06 +0200
-
-mesa (8.0~rc2-0ubuntu2) precise; urgency=low
-
-  * Add Pre-Depends: dpkg (>= 1.15.6~) to all -dbg packages.
-
- -- Timo Aaltonen <tjaalton@ubuntu.com>  Tue, 31 Jan 2012 16:07:29 +0200
-
-mesa (8.0~rc2-0ubuntu1) precise; urgency=low
-
-  [ Timo Aaltonen ]
-  * clean, rules: Move cleaning of xmlpool.pot to rules and remove
-    'clean'.
-  * Removed patches.
-    103_savage-expose_fbmodes_with_nonzero_alpha.patch:
-    - No driver left to patch
-    117_handle_dri2connect_errors_when_indirect.diff
-    118_fix_24bpp_software_renering.diff
-    119_r600g_gnome_shell_rendering_fix.diff:
-    - Included upstream.
-  * Update 115_llvm_dynamic_linking.diff,
-    116_use_shared_galliumcore.diff to apply.
-  * rules: Drop the dri-alternates driver search path, and don't ship
-    gallium version of i915_dri.so for now.
-
-  [ Robert Hooker ]
-  * Stop shipping r300/r600 classic drivers in libgl1-mesa-dri-experimental,
-    no longer shipped upstream.
-  * Fix up 116_use_shared_galliumcore.diff so it works.
-  * debian/rules: Fix up dh_shlibdeps call.
-  * debian/control: Bump libwayland-dev build requirements.
-  * Switch to llvm 3.0.
-
- -- Robert Hooker <sarvatt@ubuntu.com>  Mon, 30 Jan 2012 20:56:01 -0500
 
 mesa (8.0-1) experimental; urgency=low
 
