@@ -1,3 +1,9 @@
+mesa (8.0.4-1ubuntu1) quantal; urgency=low
+
+  * Merge from unstable. (LP: #1031784)
+
+ -- Timo Aaltonen <tjaalton@ubuntu.com>  Fri, 03 Aug 2012 09:27:48 +0300
+
 mesa (8.0.4-1) unstable; urgency=low
 
   [ Sven Joachim ]
