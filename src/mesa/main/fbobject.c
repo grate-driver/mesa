@@ -2535,6 +2535,8 @@ _mesa_GenerateMipmapEXT(GLenum target)
    srcImage = _mesa_select_tex_image(ctx, texObj, target, texObj->BaseLevel);
    if (!srcImage) {
       _mesa_unlock_texture(ctx, texObj);
+      _mesa_error(ctx, GL_INVALID_OPERATION,
+                  "glGenerateMipmap(zero size base image)");
       return;
    }
 
