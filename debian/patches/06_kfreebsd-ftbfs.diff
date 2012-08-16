@@ -5,11 +5,9 @@ mesa fails to build on GNU/kFreeBSD, since some parts are not enabled.
 
 Debian bug: http://bugs.debian.org/524690
 
-Index: mesa/configure.ac
-===================================================================
---- mesa.orig/configure.ac	2012-05-21 18:19:36.835922738 -0400
-+++ mesa/configure.ac	2012-05-21 18:19:43.047922906 -0400
-@@ -1215,7 +1215,7 @@
+--- a/configure.ac
++++ b/configure.ac
+@@ -1160,7 +1160,7 @@
              ;;
          esac
          ;;

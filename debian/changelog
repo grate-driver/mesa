@@ -5,6 +5,9 @@ mesa (8.1~git20120816.1597176f-1) UNRELEASED; urgency=low
 
   [ Timo Aaltonen ]
   * New upstream git snapshot.
+  * Refresh patches
+    - disable 05_kfreebsd-egl-x11.diff for now.
+    - switch to llvm-3.1.
 
  -- Julien Cristau <jcristau@debian.org>  Fri, 03 Aug 2012 23:17:16 +0200
 
