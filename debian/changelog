@@ -12,6 +12,7 @@ mesa (8.1~git20120816.1597176f-1) UNRELEASED; urgency=low
     autoconf, automake from Depends.
   * rules: Drop special handling of config.{guess,sub}, not needed anymore.
   * rules, libosmesa*: Build only the 32bit OSMesa library.
+  * control: Bump libdrm build-dep to 2.4.38.
 
  -- Julien Cristau <jcristau@debian.org>  Fri, 03 Aug 2012 23:17:16 +0200
 
