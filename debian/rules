@@ -39,13 +39,7 @@ include debian/not-installed
 # build the following configurations by default
 CONFIGS = swx11+glu \
 	  swx11+glu-static \
-	  dri \
-	  osmesa \
-	  osmesa-static \
-	  osmesa16 \
-	  osmesa16-static \
-	  osmesa32 \
-	  osmesa32-static
+	  dri
 
 ifeq ($(DEB_HOST_ARCH_CPU), i386)
 	CONFIGS += swx11+glu-i386-i686
@@ -116,6 +110,7 @@ confflags-dri = \
 	--with-dri-drivers="$(DRI_DRIVERS)" \
 	--with-dri-driverdir=/usr/lib/$(DEB_HOST_MULTIARCH)/dri \
 	--with-dri-searchpath='/usr/lib/$(DEB_HOST_MULTIARCH)/dri:\$$$${ORIGIN}/dri:/usr/lib/dri' \
+	--enable-gl-osmesa \
 	--enable-glx-tls \
 	--enable-shared-glapi \
 	--enable-texture-float \
@@ -125,49 +120,6 @@ confflags-dri = \
 	$(confflags_GALLIUM) \
 	$(confflags_GLES) \
 	$(confflags_OPENVG) \
-	$(confflags-common)
-
-confflags-osmesa = \
-	--disable-egl \
-	--with-gallium-drivers= \
-	--with-driver=osmesa \
-	$(confflags-common)
-
-confflags-osmesa-static = \
-	--disable-egl \
-	--with-gallium-drivers= \
-	--with-driver=osmesa \
-	--enable-static \
-	$(confflags-common)
-
-confflags-osmesa16 = \
-	--disable-egl \
-	--with-gallium-drivers= \
-	--with-driver=osmesa \
-	--with-osmesa-bits=16 \
-	$(confflags-common)
-
-confflags-osmesa16-static = \
-	--disable-egl \
-	--with-gallium-drivers= \
-	--with-driver=osmesa \
-	--with-osmesa-bits=16 \
-	--enable-static \
-	$(confflags-common)
-
-confflags-osmesa32 = \
-	--disable-egl \
-	--with-gallium-drivers= \
-	--with-driver=osmesa \
-	--with-osmesa-bits=32 \
-	$(confflags-common)
-
-confflags-osmesa32-static = \
-	--disable-egl \
-	--with-gallium-drivers= \
-	--with-driver=osmesa \
-	--with-osmesa-bits=32 \
-	--enable-static \
 	$(confflags-common)
 
 confflags-swx11+glu = \
