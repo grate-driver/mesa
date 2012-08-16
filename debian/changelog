@@ -1,6 +1,10 @@
-mesa (8.0.4-2) UNRELEASED; urgency=low
+mesa (8.1~git20120816.1597176f-1) UNRELEASED; urgency=low
 
+  [ Julien Cristau ]
   * Use xz for all binary packages not just *-dbg.
+
+  [ Timo Aaltonen ]
+  * New upstream git snapshot.
 
  -- Julien Cristau <jcristau@debian.org>  Fri, 03 Aug 2012 23:17:16 +0200
 
