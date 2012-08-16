@@ -207,12 +207,16 @@ clean: unpatch
 	rm -f conftest* */conftest*
 	rm -rf autom4te.cache */autom4te.cache
 	rm -rf build
-	rm -rf configure config.guess config.sub config.h.in
+	rm -rf configure bin/config.guess bin/config.sub config.h.in
 	rm -rf $$(find -name Makefile.in)
-	rm -rf aclocal.m4 missing depcomp install-sh ltmain.sh
+	rm -rf aclocal.m4 bin/missing bin/depcomp install-sh bin/ltmain.sh
+	rm -f bin/ar-lib bin/compile bin/ylwrap
 	rm -rf $(STAMP_DIR)
 	for file in debian/*.in; do rm -f $${file%%.in}; done
 	ln -sf minstall bin/install-sh
+	rm -f src/glsl/builtins/tools/texture_builtins.pyc
+	rm -f src/mapi/glapi/gen/*.pyc
+	rm -f src/mesa/main/*.pyc
 
 	dh_clean
 
