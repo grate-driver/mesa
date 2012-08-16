@@ -10,6 +10,7 @@ mesa (8.1~git20120816.1597176f-1) UNRELEASED; urgency=low
     - switch to llvm-3.1.
   * control: Depend on dh-autoreconf, which pulls in libtool. Drop
     autoconf, automake from Depends.
+  * rules: Drop special handling of config.{guess,sub}, not needed anymore.
 
  -- Julien Cristau <jcristau@debian.org>  Fri, 03 Aug 2012 23:17:16 +0200
 
