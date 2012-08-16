@@ -30,7 +30,7 @@ Build-Depends:
  flex,
  bison,
  llvm-3.1-dev [amd64 i386 kfreebsd-amd64 kfreebsd-i386],
- libwayland-dev (>= 0.85.0) [linux-any],
+ libwayland-dev (>= 0.95.0) [linux-any],
 Vcs-Git: git://git.debian.org/git/pkg-xorg/lib/mesa
 Vcs-Browser: http://git.debian.org/?p=pkg-xorg/lib/mesa.git
 Homepage: http://mesa3d.sourceforge.net/
