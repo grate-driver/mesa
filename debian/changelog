@@ -1,6 +1,7 @@
 mesa (8.1~git20120816.1597176f-0ubuntu1) UNRELEASED; urgency=low
 
   * Merge from unreleased debian git.
+    - Includes support for ATI Trinity PCI IDs (LP: #1009089)
   * rules, control, libgl1-mesa-swx11*: Remove swx11 support.
   * Refresh patches:
     - drop 115_llvm_dynamic_linking.diff,
