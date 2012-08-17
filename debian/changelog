@@ -8,8 +8,7 @@ mesa (8.1~git20120816.1597176f-1) UNRELEASED; urgency=low
   * Refresh patches
     - disable 05_kfreebsd-egl-x11.diff for now.
     - switch to llvm-3.1.
-  * control: Depend on dh-autoreconf, which pulls in libtool. Drop
-    autoconf, automake from Depends.
+  * control: Added libtool to build-depends.
   * rules: Drop special handling of config.{guess,sub}, not needed anymore.
   * rules, libosmesa*: Build only the 32bit OSMesa library.
   * control: Bump libdrm build-dep to 2.4.38.
