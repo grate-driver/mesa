@@ -1,6 +1,7 @@
 mesa (8.1~git20120816.1597176f-0ubuntu1) UNRELEASED; urgency=low
 
   * Merge from unreleased debian git.
+  * rules, control, libgl1-mesa-swx11*: Remove swx11 support.
 
  -- Timo Aaltonen <tjaalton@ubuntu.com>  Fri, 17 Aug 2012 11:08:47 +0300
 

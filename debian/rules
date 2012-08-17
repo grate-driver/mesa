@@ -37,9 +37,7 @@ endif
 include debian/not-installed
 
 # build the following configurations by default
-CONFIGS = swx11+glu \
-	  swx11+glu-static \
-	  dri
+CONFIGS = dri
 
 STAMP_DIR = debian/stamp
 STAMP = $(STAMP_DIR)/$(DEB_BUILD_GNU_TYPE)
@@ -118,32 +116,6 @@ confflags-dri = \
 	$(confflags_GLES) \
 	$(confflags_OPENVG) \
 	$(confflags-common)
-
-confflags-swx11+glu = \
-	--disable-egl \
-	--with-gallium-drivers= \
-	--with-driver=xlib \
-	--disable-egl \
-	CFLAGS="$(CFLAGS)" \
-	CXXFLAGS="$(CXXFLAGS)"
-
-confflags-swx11+glu-static = \
-	--disable-egl \
-	--with-gallium-drivers= \
-	--with-driver=xlib \
-	--enable-static \
-	--disable-egl \
-	CFLAGS="$(CFLAGS)" \
-	CXXFLAGS="$(CXXFLAGS)"
-
-confflags-swx11+glu-i386-i686 = \
-	--disable-egl \
-	--with-gallium-drivers= \
-	--with-driver=xlib \
-	--disable-egl \
-	--libdir=/usr/lib/$(DEB_HOST_MULTIARCH)/i686/cmov \
-	CFLAGS="$(CFLAGS) -march=i686" \
-	CXXFLAGS="$(CXXFLAGS) -march=i686"
 
 configure: $(QUILT_STAMPFN) configure.ac
 	autoreconf -vfi
@@ -272,12 +244,9 @@ endif
 	# Create an ld.so.conf which says where to find libGL from Mesa
 	echo "/usr/lib/$(DEB_HOST_MULTIARCH)/mesa" \
 	> $(CURDIR)/debian/libgl1-mesa-glx/usr/lib/$(DEB_HOST_MULTIARCH)/mesa/ld.so.conf
-	echo "/usr/lib/$(DEB_HOST_MULTIARCH)/mesa" \
-	> $(CURDIR)/debian/libgl1-mesa-swx11/usr/lib/$(DEB_HOST_MULTIARCH)/mesa/ld.so.conf
 
 	# Empty directory for the alternative
 	mkdir -p $(CURDIR)/debian/libgl1-mesa-glx/usr/lib/$(DEB_HOST_MULTIARCH)/xorg/x11-extra-modules
-	mkdir -p $(CURDIR)/debian/libgl1-mesa-swx11/usr/lib/$(DEB_HOST_MULTIARCH)/xorg/x11-extra-modules
 
 	# Create an ld.so.conf which says where to find libEGL, libGLES{1,2} 
 	# and libOpenVG from Mesa.

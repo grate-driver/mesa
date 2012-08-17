@@ -38,85 +38,6 @@ Vcs-Git: git://git.debian.org/git/pkg-xorg/lib/mesa
 Vcs-Browser: http://git.debian.org/?p=pkg-xorg/lib/mesa.git
 Homepage: http://mesa3d.sourceforge.net/
 
-Package: libgl1-mesa-swx11
-Section: libs
-Priority: extra
-Architecture: any
-Depends:
- libosmesa6 (>= 6.5.2-1),
- ${shlibs:Depends},
- ${misc:Depends},
-Conflicts: mesag3-glide, mesag3-glide2, mesag3+ggi, libgl1, nvidia-glx, mesag3, libgl1-mesa-swrast,
- nvidia-current, fglrx
-Provides: libgl1, mesag3, libgl1-mesa-swrast
-Replaces: libgl1, mesag3, libgl1-mesa-swrast
-Pre-Depends: ${misc:Pre-Depends}
-Multi-Arch: same
-Description: free implementation of the OpenGL API -- runtime
- Mesa is a 3-D graphics library with an API which is very similar to
- that of OpenGL.  To the extent that Mesa utilizes the OpenGL command
- syntax or state machine, it is being used with authorization from
- Silicon Graphics, Inc.  However, the author makes no claim that Mesa
- is in any way a compatible replacement for OpenGL or associated with
- Silicon Graphics, Inc.
- .
- This library provides a pure software rasteriser; it does not provide
- a direct rendering-capable library, or one which uses GLX.  For that,
- please see libgl1-mesa-glx.
- .
- On Linux, this library is also known as libGL or libGL.so.1.
-
-Package: libgl1-mesa-swx11-dbg
-Section: debug
-Priority: extra
-Architecture: any
-Pre-Depends: dpkg (>= 1.15.6~)
-Depends:
- libgl1-mesa-swx11 (= ${binary:Version}),
- ${misc:Depends},
-Conflicts: libgl1-mesa-swrast-dbg
-Provides: libgl1-mesa-swrast-dbg
-Replaces: libgl1-mesa-swrast-dbg
-Multi-Arch: same
-Description: free implementation of the OpenGL API -- debugging symbols
- Mesa is a 3-D graphics library with an API which is very similar to
- that of OpenGL.  To the extent that Mesa utilizes the OpenGL command
- syntax or state machine, it is being used with authorization from
- Silicon Graphics, Inc.  However, the author makes no claim that Mesa
- is in any way a compatible replacement for OpenGL or associated with
- Silicon Graphics, Inc.
- .
- This library provides a pure software rasteriser; it does not provide
- a direct rendering-capable library, or one which uses GLX.  For that,
- please see libgl1-mesa-glx.
- .
- On Linux, this library is also known as libGL or libGL.so.1.
- .
- This package contains debugging symbols for the software rasterization GL
- library.
-
-Package: libgl1-mesa-swx11-dev
-Section: libdevel
-Priority: extra
-Architecture: any
-Depends:
- libgl1-mesa-swx11 (= ${binary:Version}),
- libx11-dev,
- libxext6,
- mesa-common-dev (= ${binary:Version}),
- ${misc:Depends},
-Provides: libgl-dev, mesag-dev, libgl1-mesa-swrast-dev
-Conflicts: mesa-dev, libgl-dev, mesag3 (<< 3.1-1), nvidia-glx-dev, mesag-dev, libgl1-mesa-swrast-dev
-Replaces: libgl-dev, mesag-dev, libgl1-mesa-swrast-dev
-Description: free implementation of the OpenGL API -- development files
- This package provides the development environment required for
- compiling programs with Mesa.  For a complete description of Mesa,
- please look at the libgl1-mesa-swx11 package.
- .
- This library provides a pure software rasteriser; it does not provide
- a direct rendering-capable library, or one which uses GLX.  For that,
- please see libgl1-mesa-dev.
-
 Package: libxatracker1
 Section: libs
 Architecture: linux-any 
@@ -527,15 +448,19 @@ Breaks:
 Pre-Depends: ${misc:Pre-Depends}
 Multi-Arch: same
 Description: free implementation of the OpenGL API -- GLX runtime
+ Mesa is a 3-D graphics library with an API which is very similar to
+ that of OpenGL.  To the extent that Mesa utilizes the OpenGL command
+ syntax or state machine, it is being used with authorization from
+ Silicon Graphics, Inc.  However, the author makes no claim that Mesa
+ is in any way a compatible replacement for OpenGL or associated with
+ Silicon Graphics, Inc.
+ .
  This version of Mesa provides GLX and DRI capabilities: it is capable of
  both direct and indirect rendering.  For direct rendering, it can use DRI
  modules from the libgl1-mesa-dri package to accelerate drawing.
  .
  This package does not include the modules themselves: these can be found
  in the libgl1-mesa-dri package.
- .
- For a complete description of Mesa, please look at the
- libgl1-mesa-swx11 package.
 
 Package: libgl1-mesa-glx-dbg
 Section: debug
@@ -555,7 +480,7 @@ Description: Debugging symbols for the Mesa GLX runtime
  in the libgl1-mesa-dri package.
  .
  For a complete description of Mesa, please look at the
- libgl1-mesa-swx11 package.
+ libgl1-mesa-glx package.
  .
  This package contains debugging symbols for the GL library with GLX and DRI
  capabilities.
@@ -574,7 +499,7 @@ Description: Debugging symbols for the Mesa GLX runtime
 # in the libgl1-mesa-dri package.
 # .
 # For a complete description of Mesa, please look at the
-# libgl1-mesa-swx11 package.
+# libgl1-mesa-glx11 package.
 # .
 # This set of libraries is optimized for i686 machines and will only be used if
 # you are running a 2.6 kernel on an i686 class CPU. This includes Pentium Pro,
@@ -607,7 +532,7 @@ Description: free implementation of the OpenGL API -- DRI modules
  modules for accelerating direct rendering.
  .
  For a complete description of Mesa, please look at the
- libgl1-mesa-swx11 package.
+ libgl1-mesa-glx package.
  .
  The tdfx DRI module needs libglide3 to enable direct rendering.
 
@@ -630,7 +555,7 @@ Description: Debugging symbols for the Mesa DRI modules
  modules for accelerating direct rendering.
  .
  For a complete description of Mesa, please look at the
- libgl1-mesa-swx11 package.
+ libgl1-mesa-glx package.
  .
  This package contains debugging symbols for the DRI modules.
 
@@ -658,7 +583,7 @@ Description: free implementation of the OpenGL API -- Extra DRI modules
  libgl1-mesa-dri at the cost of less stability.
  .
  For a complete description of Mesa, please look at the
- libgl1-mesa-swx11 package.
+ libgl1-mesa-glx package.
 
 Package: libgl1-mesa-dri-experimental-dbg
 Section: debug
@@ -678,7 +603,7 @@ Description: Debugging symbols for the experimental Mesa DRI modules
  modules for accelerating direct rendering.
  .
  For a complete description of Mesa, please look at the
- libgl1-mesa-swx11 package.
+ libgl1-mesa-glx package.
  .
  This package contains debugging symbols for the extra DRI modules.
 
@@ -701,7 +626,7 @@ Description: free implementation of the OpenGL API -- GLX development files
  This package includes headers and static libraries for compiling
  programs with Mesa.
  .
- For a complete description of Mesa, please look at the libgl1-mesa-swx11
+ For a complete description of Mesa, please look at the libgl1-mesa-glx
  package.
 
 Package: mesa-common-dev
