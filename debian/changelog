@@ -1,3 +1,9 @@
+mesa (8.1~git20120816.1597176f-0ubuntu1) UNRELEASED; urgency=low
+
+  * Merge from unreleased debian git.
+
+ -- Timo Aaltonen <tjaalton@ubuntu.com>  Fri, 17 Aug 2012 11:08:47 +0300
+
 mesa (8.1~git20120816.1597176f-1) UNRELEASED; urgency=low
 
   [ Julien Cristau ]
