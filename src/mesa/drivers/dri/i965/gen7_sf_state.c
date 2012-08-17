@@ -26,6 +26,7 @@
 #include "brw_defines.h"
 #include "brw_util.h"
 #include "main/macros.h"
+#include "main/fbobject.h"
 #include "intel_batchbuffer.h"
 
 static void
@@ -33,10 +34,7 @@ upload_sbe_state(struct brw_context *brw)
 {
    struct intel_context *intel = &brw->intel;
    struct gl_context *ctx = &intel->ctx;
-   struct brw_vue_map vue_map;
    uint32_t urb_entry_read_length;
-   /* CACHE_NEW_VS_PROG */
-   GLbitfield64 vs_outputs_written = brw->vs.prog_data->outputs_written;
    /* BRW_NEW_FRAGMENT_PROGRAM */
    uint32_t num_outputs = _mesa_bitcount_64(brw->fragment_program->Base.InputsRead);
    /* _NEW_LIGHT */
@@ -44,16 +42,15 @@ upload_sbe_state(struct brw_context *brw)
    uint32_t dw1, dw10, dw11;
    int i;
    int attr = 0, input_index = 0;
-   /* _NEW_TRANSFORM */
    int urb_entry_read_offset = 1;
-   bool userclip_active = (ctx->Transform.ClipPlanesEnabled != 0);
    uint16_t attr_overrides[FRAG_ATTRIB_MAX];
    /* _NEW_BUFFERS */
-   bool render_to_fbo = ctx->DrawBuffer->Name != 0;
+   bool render_to_fbo = _mesa_is_user_fbo(ctx->DrawBuffer);
    uint32_t point_sprite_origin;
 
-   brw_compute_vue_map(&vue_map, intel, userclip_active, vs_outputs_written);
-   urb_entry_read_length = (vue_map.num_slots + 1)/2 - urb_entry_read_offset;
+   /* CACHE_NEW_VS_PROG */
+   urb_entry_read_length = ((brw->vs.prog_data->vue_map.num_slots + 1) / 2 -
+			    urb_entry_read_offset);
    if (urb_entry_read_length == 0) {
       /* Setting the URB entry read length to 0 causes undefined behavior, so
        * if we have no URB data to read, set it to 1.
@@ -117,9 +114,10 @@ upload_sbe_state(struct brw_context *brw)
        */
       assert(input_index < 16 || attr == input_index);
 
-      /* _NEW_LIGHT | _NEW_PROGRAM */
+      /* CACHE_NEW_VS_PROG | _NEW_LIGHT | _NEW_PROGRAM */
       attr_overrides[input_index++] =
-         get_attr_override(&vue_map, urb_entry_read_offset, attr,
+         get_attr_override(&brw->vs.prog_data->vue_map,
+			   urb_entry_read_offset, attr,
                            ctx->VertexProgram._TwoSideEnabled);
    }
 
@@ -146,8 +144,7 @@ const struct brw_tracked_state gen7_sbe_state = {
    .dirty = {
       .mesa  = (_NEW_LIGHT |
 		_NEW_POINT |
-		_NEW_PROGRAM |
-		_NEW_TRANSFORM),
+		_NEW_PROGRAM),
       .brw   = (BRW_NEW_CONTEXT |
 		BRW_NEW_FRAGMENT_PROGRAM),
       .cache = CACHE_NEW_VS_PROG
@@ -163,7 +160,8 @@ upload_sf_state(struct brw_context *brw)
    uint32_t dw1, dw2, dw3;
    float point_size;
    /* _NEW_BUFFERS */
-   bool render_to_fbo = brw->intel.ctx.DrawBuffer->Name != 0;
+   bool render_to_fbo = _mesa_is_user_fbo(brw->intel.ctx.DrawBuffer);
+   bool multisampled_fbo = ctx->DrawBuffer->Visual.samples > 1;
 
    dw1 = GEN6_SF_STATISTICS_ENABLE |
          GEN6_SF_VIEWPORT_TRANSFORM_ENABLE;
@@ -246,13 +244,24 @@ upload_sf_state(struct brw_context *brw)
       dw2 |= GEN6_SF_SCISSOR_ENABLE;
 
    /* _NEW_LINE */
-   dw2 |= U_FIXED(CLAMP(ctx->Line.Width, 0.0, 7.99), 7) <<
-      GEN6_SF_LINE_WIDTH_SHIFT;
+   {
+      uint32_t line_width_u3_7 = U_FIXED(CLAMP(ctx->Line.Width, 0.0, 7.99), 7);
+      /* TODO: line width of 0 is not allowed when MSAA enabled */
+      if (line_width_u3_7 == 0)
+         line_width_u3_7 = 1;
+      dw2 |= line_width_u3_7 << GEN6_SF_LINE_WIDTH_SHIFT;
+   }
    if (ctx->Line.SmoothFlag) {
       dw2 |= GEN6_SF_LINE_AA_ENABLE;
       dw2 |= GEN6_SF_LINE_AA_MODE_TRUE;
       dw2 |= GEN6_SF_LINE_END_CAP_WIDTH_1_0;
    }
+   if (ctx->Line.StippleFlag && intel->is_haswell) {
+      dw2 |= HSW_SF_LINE_STIPPLE_ENABLE;
+   }
+   /* _NEW_MULTISAMPLE */
+   if (multisampled_fbo && ctx->Multisample.Enabled)
+      dw2 |= GEN6_SF_MSRAST_ON_PATTERN;
 
    /* FINISHME: Last Pixel Enable?  Vertex Sub Pixel Precision Select?
     * FINISHME: AA Line Distance Mode?
@@ -299,7 +308,8 @@ const struct brw_tracked_state gen7_sf_state = {
 		_NEW_LINE |
 		_NEW_SCISSOR |
 		_NEW_BUFFERS |
-		_NEW_POINT),
+		_NEW_POINT |
+                _NEW_MULTISAMPLE),
       .brw   = BRW_NEW_CONTEXT,
       .cache = CACHE_NEW_VS_PROG
    },

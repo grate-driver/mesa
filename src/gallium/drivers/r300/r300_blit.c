@@ -62,14 +62,9 @@ static void r300_blitter_begin(struct r300_context* r300, enum r300_blitter_op o
     util_blitter_save_fragment_shader(r300->blitter, r300->fs.state);
     util_blitter_save_vertex_shader(r300->blitter, r300->vs_state.state);
     util_blitter_save_viewport(r300->blitter, &r300->viewport);
+    util_blitter_save_vertex_buffers(r300->blitter, r300->nr_vertex_buffers,
+                                     r300->vertex_buffer);
     util_blitter_save_vertex_elements(r300->blitter, r300->velems);
-    if (r300->vbuf_mgr) {
-        util_blitter_save_vertex_buffers(r300->blitter, r300->vbuf_mgr->nr_vertex_buffers,
-                                         r300->vbuf_mgr->vertex_buffer);
-    } else {
-        util_blitter_save_vertex_buffers(r300->blitter, r300->swtcl_nr_vertex_buffers,
-                                         r300->swtcl_vertex_buffer);
-    }
 
     if (op & R300_SAVE_FRAMEBUFFER) {
         util_blitter_save_framebuffer(r300->blitter, r300->fb_state.state);
@@ -403,7 +398,7 @@ void r300_decompress_zmask(struct r300_context *r300)
     r300_mark_atom_dirty(r300, &r300->hyperz_state);
 
     r300_blitter_begin(r300, R300_DECOMPRESS);
-    util_blitter_clear_depth_custom(r300->blitter, fb->width, fb->height, 0,
+    util_blitter_custom_clear_depth(r300->blitter, fb->width, fb->height, 0,
                                     r300->dsa_decompress_zmask);
     r300_blitter_end(r300);
 
@@ -582,9 +577,9 @@ static void r300_resource_copy_region(struct pipe_context *pipe,
     src_view = r300_create_sampler_view_custom(pipe, src, &src_templ, src_width0, src_height0);
 
     r300_blitter_begin(r300, R300_COPY);
-    util_blitter_copy_texture_view(r300->blitter, dst_view, dstx, dsty,
-                                   src_view, src_box,
-                                   src_width0, src_height0);
+    util_blitter_copy_texture_view(r300->blitter, dst_view, ~0, dstx, dsty,
+                                   src_view, 0, src_box,
+                                   src_width0, src_height0, PIPE_MASK_RGBAZS);
     r300_blitter_end(r300);
 
     pipe_surface_reference(&dst_view, NULL);

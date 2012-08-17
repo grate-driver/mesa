@@ -103,7 +103,7 @@ vs_exec_run_linear( struct draw_vertex_shader *shader,
    if (shader->info.uses_instanceid) {
       unsigned i = machine->SysSemanticToIndex[TGSI_SEMANTIC_INSTANCEID];
       assert(i < Elements(machine->SystemValue));
-      for (j = 0; j < QUAD_SIZE; j++)
+      for (j = 0; j < TGSI_QUAD_SIZE; j++)
          machine->SystemValue[i].i[j] = shader->draw->instance_id;
    }
 
@@ -168,7 +168,12 @@ vs_exec_run_linear( struct draw_vertex_shader *shader,
                output[slot][2] = CLAMP(machine->Outputs[slot].xyzw[2].f[j], 0.0f, 1.0f);
                output[slot][3] = CLAMP(machine->Outputs[slot].xyzw[3].f[j], 0.0f, 1.0f);
             }
-            else
+            else if (name == TGSI_SEMANTIC_FOG) {
+               output[slot][0] = machine->Outputs[slot].xyzw[0].f[j];
+               output[slot][1] = 0;
+               output[slot][2] = 0;
+               output[slot][3] = 1;
+	    } else
             {
                output[slot][0] = machine->Outputs[slot].xyzw[0].f[j];
                output[slot][1] = machine->Outputs[slot].xyzw[1].f[j];

@@ -381,8 +381,10 @@ void radeonEmitAOS( r100ContextPtr rmesa,
 static void radeonClear( struct gl_context *ctx, GLbitfield mask )
 {
    r100ContextPtr rmesa = R100_CONTEXT(ctx);
-   GLuint flags = 0;
-   GLuint orig_mask = mask;
+   GLuint hwmask, swmask;
+   GLuint hwbits = BUFFER_BIT_FRONT_LEFT | BUFFER_BIT_BACK_LEFT |
+                   BUFFER_BIT_DEPTH | BUFFER_BIT_STENCIL |
+                   BUFFER_BIT_COLOR0;
 
    if (mask & (BUFFER_BIT_FRONT_LEFT | BUFFER_BIT_FRONT_RIGHT)) {
       rmesa->radeon.front_buffer_dirty = GL_TRUE;
@@ -394,46 +396,19 @@ static void radeonClear( struct gl_context *ctx, GLbitfield mask )
 
    radeon_firevertices(&rmesa->radeon);
 
-   if ( mask & BUFFER_BIT_FRONT_LEFT ) {
-      flags |= RADEON_FRONT;
-      mask &= ~BUFFER_BIT_FRONT_LEFT;
-   }
+   hwmask = mask & hwbits;
+   swmask = mask & ~hwbits;
 
-   if ( mask & BUFFER_BIT_BACK_LEFT ) {
-      flags |= RADEON_BACK;
-      mask &= ~BUFFER_BIT_BACK_LEFT;
-   }
-
-   if ( mask & BUFFER_BIT_DEPTH ) {
-      flags |= RADEON_DEPTH;
-      mask &= ~BUFFER_BIT_DEPTH;
-   }
-
-   if ( (mask & BUFFER_BIT_STENCIL) ) {
-      flags |= RADEON_STENCIL;
-      mask &= ~BUFFER_BIT_STENCIL;
-   }
-
-   if ( mask ) {
+   if ( swmask ) {
       if (RADEON_DEBUG & RADEON_FALLBACKS)
-	 fprintf(stderr, "%s: swrast clear, mask: %x\n", __FUNCTION__, mask);
-      _swrast_Clear( ctx, mask );
+	 fprintf(stderr, "%s: swrast clear, mask: %x\n", __FUNCTION__, swmask);
+      _swrast_Clear( ctx, swmask );
    }
 
-   if ( !flags )
+   if ( !hwmask )
       return;
 
-   if (rmesa->using_hyperz) {
-      flags |= RADEON_USE_COMP_ZBUF;
-/*      if (rmesa->radeon.radeonScreen->chipset & RADEON_CHIPSET_TCL)
-         flags |= RADEON_USE_HIERZ; */
-      if (((flags & RADEON_DEPTH) && (flags & RADEON_STENCIL) &&
-	    ((rmesa->radeon.state.stencil.clear & RADEON_STENCIL_WRITE_MASK) == RADEON_STENCIL_WRITE_MASK))) {
-	  flags |= RADEON_CLEAR_FASTZ;
-      }
-   }
-
-   radeonUserClear(ctx, orig_mask);
+   radeonUserClear(ctx, hwmask);
 }
 
 void radeonInitIoctlFuncs( struct gl_context *ctx )

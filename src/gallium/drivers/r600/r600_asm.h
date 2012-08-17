@@ -23,8 +23,10 @@
 #ifndef R600_ASM_H
 #define R600_ASM_H
 
+#include "r600.h"
+
 struct r600_vertex_element;
-struct r600_pipe_context;
+struct r600_context;
 
 struct r600_bytecode_alu_src {
 	unsigned			sel;
@@ -51,7 +53,9 @@ struct r600_bytecode_alu {
 	unsigned			inst;
 	unsigned			last;
 	unsigned			is_op3;
-	unsigned			predicate;
+	unsigned			execute_mask;
+	unsigned			update_pred;
+	unsigned			pred_sel;
 	unsigned			bank_swizzle;
 	unsigned			bank_swizzle_force;
 	unsigned			omod;
@@ -133,6 +137,14 @@ struct r600_bytecode_kcache {
 	unsigned			addr;
 };
 
+/* A value of CF_NATIVE in r600_bytecode_cf::inst means that this instruction
+ * has already been encoded, and the encoding has been stored in
+ * r600_bytecode::isa.  This is used by the LLVM backend to emit CF instructions
+ * e.g. RAT_WRITE_* that can't be properly represented by struct
+ * r600_bytecode_cf.
+ */
+#define CF_NATIVE ~0
+
 struct r600_bytecode_cf {
 	struct list_head		list;
 
@@ -155,6 +167,7 @@ struct r600_bytecode_cf {
 	struct r600_bytecode_alu		*curr_bs_head;
 	struct r600_bytecode_alu		*prev_bs_head;
 	struct r600_bytecode_alu		*prev2_bs_head;
+	unsigned isa[2];
 };
 
 #define FC_NONE				0
@@ -194,8 +207,8 @@ struct r600_bytecode {
 	unsigned			nstack;
 	unsigned			nresource;
 	unsigned			force_add_cf;
-	u32				*bytecode;
-	u32				fc_sp;
+	uint32_t			*bytecode;
+	uint32_t			fc_sp;
 	struct r600_cf_stack_entry	fc_stack[32];
 	unsigned			call_sp;
 	struct r600_cf_callstack	callstack[SQ_MAX_CALL_DEPTH];
@@ -218,12 +231,12 @@ int r600_bytecode_add_output(struct r600_bytecode *bc, const struct r600_bytecod
 int r600_bytecode_build(struct r600_bytecode *bc);
 int r600_bytecode_add_cfinst(struct r600_bytecode *bc, int inst);
 int r600_bytecode_add_alu_type(struct r600_bytecode *bc, const struct r600_bytecode_alu *alu, int type);
-void r600_bytecode_special_constants(u32 value, unsigned *sel, unsigned *neg);
+void r600_bytecode_special_constants(uint32_t value, unsigned *sel, unsigned *neg);
 void r600_bytecode_dump(struct r600_bytecode *bc);
 
 int cm_bytecode_add_cf_end(struct r600_bytecode *bc);
 
-int r600_vertex_elements_build_fetch_shader(struct r600_pipe_context *rctx, struct r600_vertex_element *ve);
+int r600_vertex_elements_build_fetch_shader(struct r600_context *rctx, struct r600_vertex_element *ve);
 
 /* r700_asm.c */
 void r700_bytecode_cf_vtx_build(uint32_t *bytecode, const struct r600_bytecode_cf *cf);

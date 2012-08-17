@@ -63,6 +63,11 @@ legal_src_factor(const struct gl_context *ctx, GLenum factor)
    case GL_CONSTANT_ALPHA:
    case GL_ONE_MINUS_CONSTANT_ALPHA:
       return GL_TRUE;
+   case GL_SRC1_COLOR:
+   case GL_SRC1_ALPHA:
+   case GL_ONE_MINUS_SRC1_COLOR:
+   case GL_ONE_MINUS_SRC1_ALPHA:
+      return ctx->Extensions.ARB_blend_func_extended;
    default:
       return GL_FALSE;
    }
@@ -93,6 +98,12 @@ legal_dst_factor(const struct gl_context *ctx, GLenum factor)
    case GL_CONSTANT_ALPHA:
    case GL_ONE_MINUS_CONSTANT_ALPHA:
       return GL_TRUE;
+   case GL_SRC_ALPHA_SATURATE:
+   case GL_SRC1_COLOR:
+   case GL_SRC1_ALPHA:
+   case GL_ONE_MINUS_SRC1_COLOR:
+   case GL_ONE_MINUS_SRC1_ALPHA:
+      return ctx->Extensions.ARB_blend_func_extended;
    default:
       return GL_FALSE;
    }
@@ -155,6 +166,24 @@ _mesa_BlendFunc( GLenum sfactor, GLenum dfactor )
    _mesa_BlendFuncSeparateEXT(sfactor, dfactor, sfactor, dfactor);
 }
 
+static GLboolean
+blend_factor_is_dual_src(GLenum factor)
+{
+   return (factor == GL_SRC1_COLOR ||
+	   factor == GL_SRC1_ALPHA ||
+	   factor == GL_ONE_MINUS_SRC1_COLOR ||
+	   factor == GL_ONE_MINUS_SRC1_ALPHA);
+}
+
+static void
+update_uses_dual_src(struct gl_context *ctx, int buf)
+{
+   ctx->Color.Blend[buf]._UsesDualSrc =
+      (blend_factor_is_dual_src(ctx->Color.Blend[buf].SrcRGB) ||
+       blend_factor_is_dual_src(ctx->Color.Blend[buf].DstRGB) ||
+       blend_factor_is_dual_src(ctx->Color.Blend[buf].SrcA) ||
+       blend_factor_is_dual_src(ctx->Color.Blend[buf].DstA));
+}
 
 /**
  * Set the separate blend source/dest factors for all draw buffers.
@@ -209,6 +238,7 @@ _mesa_BlendFuncSeparateEXT( GLenum sfactorRGB, GLenum dfactorRGB,
       ctx->Color.Blend[buf].DstRGB = dfactorRGB;
       ctx->Color.Blend[buf].SrcA = sfactorA;
       ctx->Color.Blend[buf].DstA = dfactorA;
+      update_uses_dual_src(ctx, buf);
    }
    ctx->Color._BlendFuncPerBuffer = GL_FALSE;
 
@@ -271,6 +301,7 @@ _mesa_BlendFuncSeparatei(GLuint buf, GLenum sfactorRGB, GLenum dfactorRGB,
    ctx->Color.Blend[buf].DstRGB = dfactorRGB;
    ctx->Color.Blend[buf].SrcA = sfactorA;
    ctx->Color.Blend[buf].DstA = dfactorA;
+   update_uses_dual_src(ctx, buf);
    ctx->Color._BlendFuncPerBuffer = GL_TRUE;
 
    if (ctx->Driver.BlendFuncSeparatei) {

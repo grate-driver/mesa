@@ -30,6 +30,7 @@
 #include "main/context.h"
 #include "main/enums.h"
 #include "main/colormac.h"
+#include "main/fbobject.h"
 
 #include "intel_blit.h"
 #include "intel_buffers.h"
@@ -248,7 +249,7 @@ intelClearWithBlit(struct gl_context *ctx, GLbitfield mask)
    }
 
    cx = fb->_Xmin;
-   if (fb->Name == 0)
+   if (_mesa_is_winsys_fbo(fb))
       cy = ctx->DrawBuffer->Height - fb->_Ymax;
    else
       cy = fb->_Ymin;
@@ -261,7 +262,7 @@ intelClearWithBlit(struct gl_context *ctx, GLbitfield mask)
    /* Loop over all renderbuffers */
    mask &= (1 << BUFFER_COUNT) - 1;
    while (mask) {
-      GLuint buf = _mesa_ffs(mask) - 1;
+      GLuint buf = ffs(mask) - 1;
       bool is_depth_stencil = buf == BUFFER_DEPTH || buf == BUFFER_STENCIL;
       struct intel_renderbuffer *irb;
       int x1, y1, x2, y2;

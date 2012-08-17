@@ -30,6 +30,7 @@
 #include "i915_context.h"
 #include "i915_batch.h"
 #include "i915_debug.h"
+#include "i915_fpc.h"
 #include "i915_resource.h"
 
 #include "pipe/p_context.h"
@@ -151,8 +152,25 @@ emit_immediate(struct i915_context *i915)
    }
 
    for (i = 1; i < I915_MAX_IMMEDIATE; i++) {
-      if (dirty & (1 << i))
-         OUT_BATCH(i915->current.immediate[i]);
+      if (dirty & (1 << i)) {
+         /* Fixup blend function for A8 dst buffers.
+          * When we blend to an A8 buffer, the GPU thinks it's a G8 buffer,
+          * and therefore we need to use the color factor for alphas. */
+         if ((i == I915_IMMEDIATE_S6) &&
+             (i915->current.target_fixup_format == PIPE_FORMAT_A8_UNORM)) {
+            uint32_t imm = i915->current.immediate[i];
+            uint32_t srcRGB = (imm >> S6_CBUF_SRC_BLEND_FACT_SHIFT) & BLENDFACT_MASK;
+            if (srcRGB == BLENDFACT_DST_ALPHA)
+               srcRGB = BLENDFACT_DST_COLR;
+            else if (srcRGB == BLENDFACT_INV_DST_ALPHA)
+               srcRGB = BLENDFACT_INV_DST_COLR;
+            imm &= ~SRC_BLND_FACT(BLENDFACT_MASK);
+            imm |= SRC_BLND_FACT(srcRGB);
+            OUT_BATCH(imm);
+         } else {
+            OUT_BATCH(i915->current.immediate[i]);
+         }
+      }
    }
 }
 
@@ -296,11 +314,42 @@ emit_sampler(struct i915_context *i915)
    }
 }
 
+static boolean is_tex_instruction(uint32_t* instruction)
+{
+   uint32_t op = instruction[0] &0xFF000000;
+   return ( (op == T0_TEXLD) ||
+            (op == T0_TEXLDP) ||
+            (op == T0_TEXLDB));
+}
+
+static uint32_t tex_sampler(uint32_t* instruction)
+{
+   return ( instruction[0] & T0_SAMPLER_NR_MASK);
+}
+
+static uint additional_constants(struct i915_context *i915)
+{
+   int i;
+
+   for (i = 0 ; i < i915->fs->program_len; i+=3) {
+      if ( is_tex_instruction(i915->fs->program + i)) {
+           int sampler = tex_sampler(i915->fs->program + i);
+           assert(sampler < I915_TEX_UNITS);
+           if ( i915->current.sampler_srgb[sampler] )
+              return 1;
+      }
+   }
+   return 0;
+}
+
 static void
 validate_constants(struct i915_context *i915, unsigned *batch_space)
 {
-   *batch_space = i915->fs->num_constants ?
+   int nr = i915->fs->num_constants ?
       2 + 4*i915->fs->num_constants : 0;
+
+   nr += 4*additional_constants(i915);
+   *batch_space = nr;
 }
 
 static void
@@ -309,8 +358,11 @@ emit_constants(struct i915_context *i915)
    /* Collate the user-defined constants with the fragment shader's
     * immediates according to the constant_flags[] array.
     */
-   const uint nr = i915->fs->num_constants;
+   const uint nr = i915->fs->num_constants + additional_constants(i915);
+
+   assert(nr < I915_MAX_CONSTANT);
    if (nr) {
+      const float srgb_constants[4] = {1.0/1.055, 0.055/1.055, 2.4, 0.0822};
       uint i;
 
       OUT_BATCH( _3DSTATE_PIXEL_SHADER_CONSTANTS | (nr * 4) );
@@ -323,9 +375,16 @@ emit_constants(struct i915_context *i915)
             c = (uint *) i915_buffer(i915->constants[PIPE_SHADER_FRAGMENT])->data;
             c += 4 * i;
          }
-         else {
+         else if (i < i915->fs->num_constants) {
             /* emit program constant */
             c = (uint *) i915->fs->constants[i];
+         } else {
+            /* emit constants for sRGB */
+
+            /* save const position in context for use in shader emit */
+            i915->current.srgb_const_offset = i;
+
+            c = (uint *) srgb_constants;
          }
 #if 0 /* debug */
          {
@@ -346,34 +405,104 @@ emit_constants(struct i915_context *i915)
 static void
 validate_program(struct i915_context *i915, unsigned *batch_space)
 {
-   uint additional_size = i915->current.need_target_fixup;
+   uint additional_size = 0, i;
 
-   /* we need more batch space if we want to emulate rgba framebuffers */
-   *batch_space = i915->fs->program_len + 3 * additional_size;
+   additional_size += i915->current.target_fixup_format ? 3 : 0;
+
+   for (i = 0 ; i < i915->fs->program_len; i+=3)
+      if ( is_tex_instruction(i915->fs->program + i) &&
+           i915->current.sampler_srgb[tex_sampler(i915->fs->program+i)] )
+         additional_size += 3 * 8 /* 8 instructions for srgb emulation */;
+
+   /* we need more batch space if we want to emulate rgba framebuffers
+    * or sRGB textures */
+   *batch_space = i915->fs->decl_len + i915->fs->program_len + additional_size;
+}
+
+static void emit_instruction(struct i915_context *i915,
+                             int op,
+                             int dst_mask,
+			     int dst_reg,
+                             int src0_reg,
+                             int src1_reg,
+                             int src2_reg)
+{
+   OUT_BATCH(op |
+             dst_mask |
+             0 | /* saturate */
+             A0_DEST(dst_reg) |
+             A0_SRC0(src0_reg)
+             );
+   OUT_BATCH(A1_SRC0(src0_reg) | A1_SRC1(src1_reg));
+   OUT_BATCH(A2_SRC1(src1_reg) | A2_SRC2(src2_reg));
+}
+
+static void
+emit_srgb_fixup(struct i915_context *i915,
+                uint *program)
+{
+   int dst_reg =
+       (program[0] & UREG_TYPE_NR_MASK) >> UREG_A0_DEST_SHIFT_LEFT;
+   int dst_mask = program[0] & A0_DEST_CHANNEL_ALL;
+   int cst_idx = i915->current.srgb_const_offset;
+   int cst0_reg = swizzle(UREG(REG_TYPE_CONST, cst_idx), X, X, X, X);
+   int cst1_reg = swizzle(UREG(REG_TYPE_CONST, cst_idx), Y, Y, Y, Y);
+   int cst2_reg = swizzle(UREG(REG_TYPE_CONST, cst_idx), Z, Z, Z, Z);
+   int t1_reg = UREG(REG_TYPE_R, 1);
+   int t1x_reg = swizzle(UREG(REG_TYPE_R, 1), X, X, X, X);
+   int t1y_reg = swizzle(UREG(REG_TYPE_R, 1), Y, Y, Y, Y);
+   int t1z_reg = swizzle(UREG(REG_TYPE_R, 1), Z, Z, Z, Z);
+   
+   emit_instruction(i915, A0_MAD, A0_DEST_CHANNEL_ALL, t1_reg, dst_reg, cst0_reg, cst1_reg);
+   emit_instruction(i915, A0_LOG, A0_DEST_CHANNEL_X, t1_reg, t1x_reg, 0, 0);
+   emit_instruction(i915, A0_LOG, A0_DEST_CHANNEL_Y, t1_reg, t1y_reg, 0, 0);
+   emit_instruction(i915, A0_LOG, A0_DEST_CHANNEL_Z, t1_reg, t1z_reg, 0, 0);
+   emit_instruction(i915, A0_MUL, A0_DEST_CHANNEL_ALL, t1_reg, t1_reg, cst2_reg, 0);
+   emit_instruction(i915, A0_EXP, dst_mask & A0_DEST_CHANNEL_X, dst_reg, t1x_reg, 0, 0);
+   emit_instruction(i915, A0_EXP, dst_mask & A0_DEST_CHANNEL_Y, dst_reg, t1y_reg, 0, 0);
+   emit_instruction(i915, A0_EXP, dst_mask & A0_DEST_CHANNEL_Z, dst_reg, t1z_reg, 0, 0);
 }
 
 static void
 emit_program(struct i915_context *i915)
 {
-   uint target_fixup = i915->current.need_target_fixup;
+   uint additional_size = 0;
    uint i;
+
+   /* count how much additional space we'll need */
+   validate_program(i915, &additional_size);
+   additional_size -= i915->fs->decl_len + i915->fs->program_len;
 
    /* we should always have, at least, a pass-through program */
    assert(i915->fs->program_len > 0);
 
+   /* output the declarations */
    {
       /* first word has the size, we have to adjust that */
-      uint size = (i915->fs->program[0]);
-      size += target_fixup * 3;
+      uint size = (i915->fs->decl[0]);
+      size += additional_size;
       OUT_BATCH(size);
    }
 
-   /* output the declarations of the program */
-   for (i=1 ; i < i915->fs->program_len; i++)
+   for (i = 1 ; i < i915->fs->decl_len; i++)
+      OUT_BATCH(i915->fs->decl[i]);
+
+   /* output the program */
+   assert(i915->fs->program_len % 3 == 0);
+   for (i = 0 ; i < i915->fs->program_len; i+=3) {
       OUT_BATCH(i915->fs->program[i]);
+      OUT_BATCH(i915->fs->program[i+1]);
+      OUT_BATCH(i915->fs->program[i+2]);
+      
+      /* TEX fixup for sRGB */
+      if ( is_tex_instruction(i915->fs->program+i) &&
+           i915->current.sampler_srgb[tex_sampler(i915->fs->program+i)] )
+         emit_srgb_fixup(i915, i915->fs->program);
+
+   }
 
    /* we emit an additional mov with swizzle to fake RGBA framebuffers */
-   if (target_fixup) {
+   if (i915->current.target_fixup_format) {
       /* mov out_color, out_color.zyxw */
       OUT_BATCH(A0_MOV |
                 (REG_TYPE_OC << A0_DEST_TYPE_SHIFT) |
@@ -408,10 +537,22 @@ i915_validate_state(struct i915_context *i915, unsigned *batch_space)
    else
       *batch_space = 0;
 
+#if 0
+static int counter_total = 0;
+#define VALIDATE_ATOM(atom, hw_dirty) \
+   if (i915->hardware_dirty & hw_dirty) { \
+      static int counter_##atom = 0;\
+      validate_##atom(i915, &tmp); \
+      *batch_space += tmp;\
+      counter_##atom += tmp;\
+      counter_total += tmp;\
+      printf("%s: \t%d/%d \t%2.2f\n",#atom, counter_##atom, counter_total, counter_##atom*100.f/counter_total);}
+#else
 #define VALIDATE_ATOM(atom, hw_dirty) \
    if (i915->hardware_dirty & hw_dirty) { \
       validate_##atom(i915, &tmp); \
       *batch_space += tmp; }
+#endif
    VALIDATE_ATOM(flush, I915_HW_FLUSH);
    VALIDATE_ATOM(immediate, I915_HW_IMMEDIATE);
    VALIDATE_ATOM(dynamic, I915_HW_DYNAMIC);

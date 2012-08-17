@@ -487,6 +487,7 @@ dri2_create_image_from_name(__DRIscreen *_screen,
 
    img->level = 0;
    img->layer = 0;
+   img->dri_format = format;
    img->loader_private = loaderPrivate;
 
    return img;
@@ -569,6 +570,7 @@ dri2_create_image(__DRIscreen *_screen,
 
    img->level = 0;
    img->layer = 0;
+   img->dri_format = format;
 
    img->loader_private = loaderPrivate;
    return img;
@@ -597,6 +599,9 @@ dri2_query_image(__DRIimage *image, int attrib, int *value)
       image->texture->screen->resource_get_handle(image->texture->screen,
          image->texture, &whandle);
       *value = whandle.handle;
+      return GL_TRUE;
+   case __DRI_IMAGE_ATTRIB_FORMAT:
+      *value = image->dri_format;
       return GL_TRUE;
    default:
       return GL_FALSE;
@@ -629,7 +634,7 @@ dri2_destroy_image(__DRIimage *img)
 }
 
 static struct __DRIimageExtensionRec dri2ImageExtension = {
-    { __DRI_IMAGE, __DRI_IMAGE_VERSION },
+    { __DRI_IMAGE, 1 },
     dri2_create_image_from_name,
     dri2_create_image_from_renderbuffer,
     dri2_destroy_image,

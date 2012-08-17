@@ -173,8 +173,7 @@ draw_llvm_sampler_soa_emit_fetch_texel(const struct lp_build_sampler_soa *base,
                                        unsigned unit,
                                        unsigned num_coords,
                                        const LLVMValueRef *coords,
-                                       const LLVMValueRef *ddx,
-                                       const LLVMValueRef *ddy,
+                                       const struct lp_derivatives *derivs,
                                        LLVMValueRef lod_bias, /* optional */
                                        LLVMValueRef explicit_lod, /* optional */
                                        LLVMValueRef *texel)
@@ -189,11 +188,35 @@ draw_llvm_sampler_soa_emit_fetch_texel(const struct lp_build_sampler_soa *base,
                        type,
                        unit,
                        num_coords, coords,
-                       ddx, ddy,
+                       derivs,
                        lod_bias, explicit_lod,
                        texel);
 }
 
+
+/**
+ * Fetch the texture size.
+ */
+static void
+draw_llvm_sampler_soa_emit_size_query(const struct lp_build_sampler_soa *base,
+                                      struct gallivm_state *gallivm,
+                                      struct lp_type type,
+                                      unsigned unit,
+                                      LLVMValueRef explicit_lod, /* optional */
+                                      LLVMValueRef *sizes_out)
+{
+   struct draw_llvm_sampler_soa *sampler = (struct draw_llvm_sampler_soa *)base;
+
+   assert(unit < PIPE_MAX_VERTEX_SAMPLERS);
+
+   lp_build_size_query_soa(gallivm,
+                           &sampler->dynamic_state.static_state[unit],
+                           &sampler->dynamic_state.base,
+			   type,
+                           unit,
+                           explicit_lod,
+                           sizes_out);
+}
 
 struct lp_build_sampler_soa *
 draw_llvm_sampler_soa_create(const struct lp_sampler_static_state *static_state,
@@ -207,6 +230,7 @@ draw_llvm_sampler_soa_create(const struct lp_sampler_static_state *static_state,
 
    sampler->base.destroy = draw_llvm_sampler_soa_destroy;
    sampler->base.emit_fetch_texel = draw_llvm_sampler_soa_emit_fetch_texel;
+   sampler->base.emit_size_query = draw_llvm_sampler_soa_emit_size_query;
    sampler->dynamic_state.base.width = draw_llvm_texture_width;
    sampler->dynamic_state.base.height = draw_llvm_texture_height;
    sampler->dynamic_state.base.depth = draw_llvm_texture_depth;

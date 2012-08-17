@@ -41,6 +41,12 @@ _mesa_reference_shader(struct gl_context *ctx, struct gl_shader **ptr,
    *ptr = sh;
 }
 
+void
+_mesa_shader_debug(struct gl_context *, GLenum, GLuint,
+                   const char *, int)
+{
+}
+
 struct gl_shader *
 _mesa_new_shader(struct gl_context *ctx, GLuint name, GLenum type)
 {
@@ -73,6 +79,7 @@ void initialize_context_to_defaults(struct gl_context *ctx, gl_api api)
    ctx->Extensions.NV_texture_rectangle = true;
    ctx->Extensions.EXT_texture3D = true;
    ctx->Extensions.OES_EGL_image_external = true;
+   ctx->Extensions.ARB_shader_bit_encoding = true;
 
    ctx->Const.GLSLVersion = 120;
 

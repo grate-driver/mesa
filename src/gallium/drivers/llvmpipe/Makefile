@@ -5,6 +5,7 @@ LIBNAME = llvmpipe
 
 C_SOURCES = \
 	lp_bld_alpha.c \
+	lp_bld_blend.c \
 	lp_bld_blend_aos.c \
 	lp_bld_blend_logicop.c \
 	lp_bld_blend_soa.c \
@@ -54,16 +55,12 @@ PROGS := lp_test_format	\
 	 lp_test_arit	\
 	 lp_test_blend	\
 	 lp_test_conv	\
-	 lp_test_printf \
-	 lp_test_round \
-         lp_test_sincos
+	 lp_test_printf
 
 # Need this for the lp_test_*.o files
 CLEAN_EXTRA = *.o
 
 include ../../Makefile.template
-
-lp_test_sincos.o : sse_mathfun.h
 
 PROGS_DEPS := ../../auxiliary/libgallium.a
 

@@ -57,6 +57,10 @@
 #include "program/hash_table.h"
 #include "ir.h"
 
+static void
+detect_conflicting_assignments(struct _mesa_glsl_parse_state *state,
+			       exec_list *instructions);
+
 void
 _mesa_ast_to_hir(exec_list *instructions, struct _mesa_glsl_parse_state *state)
 {
@@ -87,6 +91,7 @@ _mesa_ast_to_hir(exec_list *instructions, struct _mesa_glsl_parse_state *state)
       ast->hir(instructions, state);
 
    detect_recursion_unlinked(state, instructions);
+   detect_conflicting_assignments(state, instructions);
 
    state->toplevel_ir = NULL;
 }
@@ -672,6 +677,10 @@ do_assignment(exec_list *instructions, struct _mesa_glsl_parse_state *state,
    void *ctx = state;
    bool error_emitted = (lhs->type->is_error() || rhs->type->is_error());
 
+   ir_variable *lhs_var = lhs->variable_referenced();
+   if (lhs_var)
+      lhs_var->assigned = true;
+
    if (!error_emitted) {
       if (non_lvalue_description != NULL) {
          _mesa_glsl_error(&lhs_loc, state,
@@ -751,13 +760,11 @@ do_assignment(exec_list *instructions, struct _mesa_glsl_parse_state *state,
 					   ir_var_temporary);
    ir_dereference_variable *deref_var = new(ctx) ir_dereference_variable(var);
    instructions->push_tail(var);
-   instructions->push_tail(new(ctx) ir_assignment(deref_var,
-						  rhs,
-						  NULL));
+   instructions->push_tail(new(ctx) ir_assignment(deref_var, rhs));
    deref_var = new(ctx) ir_dereference_variable(var);
 
    if (!error_emitted)
-      instructions->push_tail(new(ctx) ir_assignment(lhs, deref_var, NULL));
+      instructions->push_tail(new(ctx) ir_assignment(lhs, deref_var));
 
    return new(ctx) ir_dereference_variable(var);
 }
@@ -774,7 +781,7 @@ get_lvalue_copy(exec_list *instructions, ir_rvalue *lvalue)
    var->mode = ir_var_auto;
 
    instructions->push_tail(new(ctx) ir_assignment(new(ctx) ir_dereference_variable(var),
-						  lvalue, NULL));
+						  lvalue));
 
    return new(ctx) ir_dereference_variable(var);
 }
@@ -1199,15 +1206,9 @@ ast_expression::hir(exec_list *instructions,
       op[1] = get_scalar_boolean_operand(&rhs_instructions, state, this, 1,
 					 "RHS", &error_emitted);
 
-      ir_constant *op0_const = op[0]->constant_expression_value();
-      if (op0_const) {
-	 if (op0_const->value.b[0]) {
-	    instructions->append_list(&rhs_instructions);
-	    result = op[1];
-	 } else {
-	    result = op0_const;
-	 }
-	 type = glsl_type::bool_type;
+      if (rhs_instructions.is_empty()) {
+	 result = new(ctx) ir_expression(ir_binop_logic_and, op[0], op[1]);
+	 type = result->type;
       } else {
 	 ir_variable *const tmp = new(ctx) ir_variable(glsl_type::bool_type,
 						       "and_tmp",
@@ -1220,12 +1221,12 @@ ast_expression::hir(exec_list *instructions,
 	 stmt->then_instructions.append_list(&rhs_instructions);
 	 ir_dereference *const then_deref = new(ctx) ir_dereference_variable(tmp);
 	 ir_assignment *const then_assign =
-	    new(ctx) ir_assignment(then_deref, op[1], NULL);
+	    new(ctx) ir_assignment(then_deref, op[1]);
 	 stmt->then_instructions.push_tail(then_assign);
 
 	 ir_dereference *const else_deref = new(ctx) ir_dereference_variable(tmp);
 	 ir_assignment *const else_assign =
-	    new(ctx) ir_assignment(else_deref, new(ctx) ir_constant(false), NULL);
+	    new(ctx) ir_assignment(else_deref, new(ctx) ir_constant(false));
 	 stmt->else_instructions.push_tail(else_assign);
 
 	 result = new(ctx) ir_dereference_variable(tmp);
@@ -1241,14 +1242,9 @@ ast_expression::hir(exec_list *instructions,
       op[1] = get_scalar_boolean_operand(&rhs_instructions, state, this, 1,
 					 "RHS", &error_emitted);
 
-      ir_constant *op0_const = op[0]->constant_expression_value();
-      if (op0_const) {
-	 if (op0_const->value.b[0]) {
-	    result = op0_const;
-	 } else {
-	    result = op[1];
-	 }
-	 type = glsl_type::bool_type;
+      if (rhs_instructions.is_empty()) {
+	 result = new(ctx) ir_expression(ir_binop_logic_or, op[0], op[1]);
+	 type = result->type;
       } else {
 	 ir_variable *const tmp = new(ctx) ir_variable(glsl_type::bool_type,
 						       "or_tmp",
@@ -1260,13 +1256,13 @@ ast_expression::hir(exec_list *instructions,
 
 	 ir_dereference *const then_deref = new(ctx) ir_dereference_variable(tmp);
 	 ir_assignment *const then_assign =
-	    new(ctx) ir_assignment(then_deref, new(ctx) ir_constant(true), NULL);
+	    new(ctx) ir_assignment(then_deref, new(ctx) ir_constant(true));
 	 stmt->then_instructions.push_tail(then_assign);
 
 	 stmt->else_instructions.append_list(&rhs_instructions);
 	 ir_dereference *const else_deref = new(ctx) ir_dereference_variable(tmp);
 	 ir_assignment *const else_assign =
-	    new(ctx) ir_assignment(else_deref, op[1], NULL);
+	    new(ctx) ir_assignment(else_deref, op[1]);
 	 stmt->else_instructions.push_tail(else_assign);
 
 	 result = new(ctx) ir_dereference_variable(tmp);
@@ -1454,14 +1450,14 @@ ast_expression::hir(exec_list *instructions,
 	 ir_dereference *const then_deref =
 	    new(ctx) ir_dereference_variable(tmp);
 	 ir_assignment *const then_assign =
-	    new(ctx) ir_assignment(then_deref, op[1], NULL);
+	    new(ctx) ir_assignment(then_deref, op[1]);
 	 stmt->then_instructions.push_tail(then_assign);
 
 	 else_instructions.move_nodes_to(& stmt->else_instructions);
 	 ir_dereference *const else_deref =
 	    new(ctx) ir_dereference_variable(tmp);
 	 ir_assignment *const else_assign =
-	    new(ctx) ir_assignment(else_deref, op[2], NULL);
+	    new(ctx) ir_assignment(else_deref, op[2]);
 	 stmt->else_instructions.push_tail(else_assign);
 
 	 result = new(ctx) ir_dereference_variable(tmp);
@@ -1703,14 +1699,14 @@ ast_expression::hir(exec_list *instructions,
       ir_variable *var = 
 	 state->symbols->get_variable(this->primary_expression.identifier);
 
-      result = new(ctx) ir_dereference_variable(var);
-
       if (var != NULL) {
 	 var->used = true;
+	 result = new(ctx) ir_dereference_variable(var);
       } else {
 	 _mesa_glsl_error(& loc, state, "`%s' undeclared",
 			  this->primary_expression.identifier);
 
+	 result = ir_rvalue::error_value(ctx);
 	 error_emitted = true;
       }
       break;
@@ -1921,7 +1917,8 @@ static void
 apply_type_qualifier_to_variable(const struct ast_type_qualifier *qual,
 				 ir_variable *var,
 				 struct _mesa_glsl_parse_state *state,
-				 YYLTYPE *loc)
+				 YYLTYPE *loc,
+				 bool ubo_qualifiers_valid)
 {
    if (qual->flags.q.invariant) {
       if (var->used) {
@@ -2014,24 +2011,10 @@ apply_type_qualifier_to_variable(const struct ast_type_qualifier *qual,
    if (var->interpolation != INTERP_QUALIFIER_NONE &&
        !(state->target == vertex_shader && var->mode == ir_var_out) &&
        !(state->target == fragment_shader && var->mode == ir_var_in)) {
-      const char *qual_string = NULL;
-      switch (var->interpolation) {
-      case INTERP_QUALIFIER_FLAT:
-	 qual_string = "flat";
-	 break;
-      case INTERP_QUALIFIER_NOPERSPECTIVE:
-	 qual_string = "noperspective";
-	 break;
-      case INTERP_QUALIFIER_SMOOTH:
-	 qual_string = "smooth";
-	 break;
-      }
-
       _mesa_glsl_error(loc, state,
 		       "interpolation qualifier `%s' can only be applied to "
 		       "vertex shader outputs and fragment shader inputs.",
-		       qual_string);
-
+		       var->interpolation_string());
    }
 
    var->pixel_center_integer = qual->flags.q.pixel_center_integer;
@@ -2103,14 +2086,21 @@ apply_type_qualifier_to_variable(const struct ast_type_qualifier *qual,
 	 } else {
 	    var->location = qual->location;
 	 }
+	 if (qual->flags.q.explicit_index) {
+	    var->explicit_index = true;
+	    var->index = qual->index;
+	 }
       }
+   } else if (qual->flags.q.explicit_index) {
+	 _mesa_glsl_error(loc, state,
+			  "explicit index requires explicit location\n");
    }
 
    /* Does the declaration use the 'layout' keyword?
     */
    const bool uses_layout = qual->flags.q.pixel_center_integer
       || qual->flags.q.origin_upper_left
-      || qual->flags.q.explicit_location;
+      || qual->flags.q.explicit_location; /* no need for index since it relies on location */
 
    /* Does the declaration use the deprecated 'attribute' or 'varying'
     * keywords?
@@ -2188,6 +2178,23 @@ apply_type_qualifier_to_variable(const struct ast_type_qualifier *qual,
        var->depth_layout = ir_depth_layout_unchanged;
    else
        var->depth_layout = ir_depth_layout_none;
+
+   if (qual->flags.q.std140 ||
+       qual->flags.q.packed ||
+       qual->flags.q.shared) {
+      _mesa_glsl_error(loc, state,
+                       "uniform block layout qualifiers std140, packed, and "
+		       "shared can only be applied to uniform blocks, not "
+		       "members");
+   }
+
+   if (!ubo_qualifiers_valid &&
+       (qual->flags.q.row_major || qual->flags.q.column_major)) {
+      _mesa_glsl_error(loc, state,
+                       "uniform block layout qualifiers row_major and "
+		       "column_major can only be applied to uniform block "
+		       "members");
+   }
 }
 
 /**
@@ -2608,7 +2615,7 @@ ast_declarator_list::hir(exec_list *instructions,
       }
 
       apply_type_qualifier_to_variable(& this->type->qualifier, var, state,
-				       & loc);
+				       & loc, this->ubo_qualifiers_valid);
 
       if (this->type->qualifier.flags.q.invariant) {
 	 if ((state->target == vertex_shader) && !(var->mode == ir_var_out ||
@@ -3025,7 +3032,8 @@ ast_parameter_declarator::hir(exec_list *instructions,
    /* Apply any specified qualifiers to the parameter declaration.  Note that
     * for function parameters the default mode is 'in'.
     */
-   apply_type_qualifier_to_variable(& this->type->qualifier, var, state, & loc);
+   apply_type_qualifier_to_variable(& this->type->qualifier, var, state, & loc,
+				    false);
 
    /* From page 17 (page 23 of the PDF) of the GLSL 1.20 spec:
     *
@@ -3433,9 +3441,7 @@ ast_jump_statement::hir(exec_list *instructions,
 	       new(ctx) ir_dereference_variable(is_break_var);
 	    ir_constant *const true_val = new(ctx) ir_constant(true);
 	    ir_assignment *const set_break_var =
-	       new(ctx) ir_assignment(deref_is_break_var,
-				      true_val,
-				      NULL);
+	       new(ctx) ir_assignment(deref_is_break_var, true_val);
 	    
 	    instructions->push_tail(set_break_var);
 	 }
@@ -3549,8 +3555,7 @@ ast_switch_statement::hir(exec_list *instructions,
    ir_dereference_variable *deref_is_fallthru_var =
       new(ctx) ir_dereference_variable(state->switch_state.is_fallthru_var);
    instructions->push_tail(new(ctx) ir_assignment(deref_is_fallthru_var,
-						  is_fallthru_val,
-						  NULL));
+						  is_fallthru_val));
 
    /* Initalize is_break state to false.
     */
@@ -3563,8 +3568,7 @@ ast_switch_statement::hir(exec_list *instructions,
    ir_dereference_variable *deref_is_break_var =
       new(ctx) ir_dereference_variable(state->switch_state.is_break_var);
    instructions->push_tail(new(ctx) ir_assignment(deref_is_break_var,
-						  is_break_val,
-						  NULL));
+						  is_break_val));
 
    /* Cache test expression.
     */
@@ -3601,8 +3605,7 @@ ast_switch_statement::test_to_hir(exec_list *instructions,
       new(ctx) ir_dereference_variable(state->switch_state.test_var);
 
    instructions->push_tail(state->switch_state.test_var);
-   instructions->push_tail(new(ctx) ir_assignment(deref_test_var, test_val,
-						  NULL));
+   instructions->push_tail(new(ctx) ir_assignment(deref_test_var, test_val));
 }
 
 
@@ -3747,7 +3750,7 @@ ast_case_label::hir(exec_list *instructions,
 
       /* Set falltrhu state. */
       ir_assignment *set_fallthru =
-	 new(ctx) ir_assignment(deref_fallthru_var, true_val, NULL);
+	 new(ctx) ir_assignment(deref_fallthru_var, true_val);
 
       instructions->push_tail(set_fallthru);
    }
@@ -3888,8 +3891,8 @@ ast_type_specifier::hir(exec_list *instructions,
                           "arrays");
          return NULL;
       }
-      if (this->type_specifier != ast_float
-          && this->type_specifier != ast_int) {
+      if (strcmp(this->type_name, "float") != 0 &&
+	  strcmp(this->type_name, "int") != 0) {
          _mesa_glsl_error(&loc, state,
                           "default precision statements apply only to types "
                           "float and int");
@@ -3989,4 +3992,155 @@ ast_struct_specifier::hir(exec_list *instructions,
    /* Structure type definitions do not have r-values.
     */
    return NULL;
+}
+
+static struct gl_uniform_block *
+get_next_uniform_block(struct _mesa_glsl_parse_state *state)
+{
+   if (state->num_uniform_blocks >= state->uniform_block_array_size) {
+      state->uniform_block_array_size *= 2;
+      if (state->uniform_block_array_size <= 4)
+	 state->uniform_block_array_size = 4;
+
+      state->uniform_blocks = reralloc(state,
+				       state->uniform_blocks,
+				       struct gl_uniform_block,
+				       state->uniform_block_array_size);
+   }
+
+   memset(&state->uniform_blocks[state->num_uniform_blocks],
+	  0, sizeof(*state->uniform_blocks));
+   return &state->uniform_blocks[state->num_uniform_blocks++];
+}
+
+ir_rvalue *
+ast_uniform_block::hir(exec_list *instructions,
+		       struct _mesa_glsl_parse_state *state)
+{
+   /* The ast_uniform_block has a list of ast_declarator_lists.  We
+    * need to turn those into ir_variables with an association
+    * with this uniform block.
+    */
+   struct gl_uniform_block *ubo = get_next_uniform_block(state);
+   ubo->Name = ralloc_strdup(state->uniform_blocks, this->block_name);
+
+   unsigned int num_variables = 0;
+   foreach_list_typed(ast_declarator_list, decl_list, link, &declarations) {
+      foreach_list_const(node, &decl_list->declarations) {
+	 num_variables++;
+      }
+   }
+
+   bool block_row_major = this->layout.flags.q.row_major;
+
+   ubo->Uniforms = rzalloc_array(state->uniform_blocks,
+				 struct gl_uniform_buffer_variable,
+				 num_variables);
+
+   foreach_list_typed(ast_declarator_list, decl_list, link, &declarations) {
+      exec_list declared_variables;
+
+      decl_list->hir(&declared_variables, state);
+
+      foreach_list_const(node, &declared_variables) {
+	 struct ir_variable *var = (ir_variable *)node;
+
+	 struct gl_uniform_buffer_variable *ubo_var =
+	    &ubo->Uniforms[ubo->NumUniforms++];
+
+	 var->uniform_block = ubo - state->uniform_blocks;
+
+	 ubo_var->Name = ralloc_strdup(state->uniform_blocks, var->name);
+	 ubo_var->Type = var->type;
+	 ubo_var->Buffer = ubo - state->uniform_blocks;
+	 ubo_var->Offset = 0; /* Assigned at link time. */
+
+	 if (var->type->is_matrix() ||
+	     (var->type->is_array() && var->type->fields.array->is_matrix())) {
+	    ubo_var->RowMajor = block_row_major;
+	    if (decl_list->type->qualifier.flags.q.row_major)
+	       ubo_var->RowMajor = true;
+	    else if (decl_list->type->qualifier.flags.q.column_major)
+	       ubo_var->RowMajor = false;
+	 }
+
+	 /* From the GL_ARB_uniform_buffer_object spec:
+	  *
+	  *     "Sampler types are not allowed inside of uniform
+	  *      blocks. All other types, arrays, and structures
+	  *      allowed for uniforms are allowed within a uniform
+	  *      block."
+	  */
+	 if (var->type->contains_sampler()) {
+	    YYLTYPE loc = decl_list->get_location();
+	    _mesa_glsl_error(&loc, state,
+			     "Uniform in non-default uniform block contains sampler\n");
+	 }
+      }
+
+      instructions->append_list(&declared_variables);
+   }
+
+   return NULL;
+}
+
+static void
+detect_conflicting_assignments(struct _mesa_glsl_parse_state *state,
+			       exec_list *instructions)
+{
+   bool gl_FragColor_assigned = false;
+   bool gl_FragData_assigned = false;
+   bool user_defined_fs_output_assigned = false;
+   ir_variable *user_defined_fs_output = NULL;
+
+   /* It would be nice to have proper location information. */
+   YYLTYPE loc;
+   memset(&loc, 0, sizeof(loc));
+
+   foreach_list(node, instructions) {
+      ir_variable *var = ((ir_instruction *)node)->as_variable();
+
+      if (!var || !var->assigned)
+	 continue;
+
+      if (strcmp(var->name, "gl_FragColor") == 0)
+	 gl_FragColor_assigned = true;
+      else if (strcmp(var->name, "gl_FragData") == 0)
+	 gl_FragData_assigned = true;
+      else if (strncmp(var->name, "gl_", 3) != 0) {
+	 if (state->target == fragment_shader &&
+	     (var->mode == ir_var_out || var->mode == ir_var_inout)) {
+	    user_defined_fs_output_assigned = true;
+	    user_defined_fs_output = var;
+	 }
+      }
+   }
+
+   /* From the GLSL 1.30 spec:
+    *
+    *     "If a shader statically assigns a value to gl_FragColor, it
+    *      may not assign a value to any element of gl_FragData. If a
+    *      shader statically writes a value to any element of
+    *      gl_FragData, it may not assign a value to
+    *      gl_FragColor. That is, a shader may assign values to either
+    *      gl_FragColor or gl_FragData, but not both. Multiple shaders
+    *      linked together must also consistently write just one of
+    *      these variables.  Similarly, if user declared output
+    *      variables are in use (statically assigned to), then the
+    *      built-in variables gl_FragColor and gl_FragData may not be
+    *      assigned to. These incorrect usages all generate compile
+    *      time errors."
+    */
+   if (gl_FragColor_assigned && gl_FragData_assigned) {
+      _mesa_glsl_error(&loc, state, "fragment shader writes to both "
+		       "`gl_FragColor' and `gl_FragData'\n");
+   } else if (gl_FragColor_assigned && user_defined_fs_output_assigned) {
+      _mesa_glsl_error(&loc, state, "fragment shader writes to both "
+		       "`gl_FragColor' and `%s'\n",
+		       user_defined_fs_output->name);
+   } else if (gl_FragData_assigned && user_defined_fs_output_assigned) {
+      _mesa_glsl_error(&loc, state, "fragment shader writes to both "
+		       "`gl_FragData' and `%s'\n",
+		       user_defined_fs_output->name);
+   }
 }

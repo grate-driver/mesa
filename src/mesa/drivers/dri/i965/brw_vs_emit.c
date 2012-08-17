@@ -325,14 +325,12 @@ static void brw_vs_alloc_regs( struct brw_vs_compile *c )
 
    /* Allocate outputs.  The non-position outputs go straight into message regs.
     */
-   brw_compute_vue_map(&c->vue_map, intel, c->key.userclip_active,
-                       c->prog_data.outputs_written);
    c->first_output = reg;
 
    first_reladdr_output = get_first_reladdr_output(&c->vp->program);
 
-   for (slot = 0; slot < c->vue_map.num_slots; slot++) {
-      int vert_result = c->vue_map.slot_to_vert_result[slot];
+   for (slot = 0; slot < c->prog_data.vue_map.num_slots; slot++) {
+      int vert_result = c->prog_data.vue_map.slot_to_vert_result[slot];
       assert(vert_result < Elements(c->regs[PROGRAM_OUTPUT]));
       if (can_use_direct_mrf(vert_result, first_reladdr_output, slot)) {
          c->regs[PROGRAM_OUTPUT][vert_result] = brw_message_reg(slot + 1);
@@ -380,11 +378,6 @@ static void brw_vs_alloc_regs( struct brw_vs_compile *c )
       }
    }
 
-   if (c->needs_stack) {
-      c->stack =  brw_uw16_reg(BRW_GENERAL_REGISTER_FILE, reg, 0);
-      reg += 2;
-   }
-
    /* Some opcodes need an internal temporary:
     */
    c->first_tmp = reg;
@@ -405,7 +398,7 @@ static void brw_vs_alloc_regs( struct brw_vs_compile *c )
    /* The VS VUEs are shared by VF (outputting our inputs) and VS, so size
     * them to fit the biggest thing they need to.
     */
-   attributes_in_vue = MAX2(c->vue_map.num_slots, c->nr_inputs);
+   attributes_in_vue = MAX2(c->prog_data.vue_map.num_slots, c->nr_inputs);
 
    if (intel->gen == 6) {
       /* Each attribute is 32 bytes (2 vec4s), so dividing by 8 gives us the
@@ -677,7 +670,6 @@ static void emit_math1_gen4(struct brw_vs_compile *c,
    brw_math(p, 
 	    tmp,
 	    function,
-	    BRW_MATH_SATURATE_NONE,
 	    2,
 	    arg0,
 	    BRW_MATH_DATA_SCALAR,
@@ -712,7 +704,6 @@ emit_math1_gen6(struct brw_vs_compile *c,
    brw_math(p,
 	    tmp_dst,
 	    function,
-	    BRW_MATH_SATURATE_NONE,
 	    2,
 	    tmp_src,
 	    BRW_MATH_DATA_SCALAR,
@@ -764,7 +755,6 @@ static void emit_math2_gen4( struct brw_vs_compile *c,
    brw_math(p, 
 	    tmp,
 	    function,
-	    BRW_MATH_SATURATE_NONE,
 	    2,
  	    arg0,
 	    BRW_MATH_DATA_SCALAR,
@@ -1678,12 +1668,12 @@ static void emit_vertex_write( struct brw_vs_compile *c)
    }
 
    /* Move variable-addressed, non-overflow outputs to their MRFs. */
-   for (slot = len_vertex_header; slot < c->vue_map.num_slots; ++slot) {
+   for (slot = len_vertex_header; slot < c->prog_data.vue_map.num_slots; ++slot) {
       if (slot >= MAX_SLOTS_IN_FIRST_URB_WRITE)
          break;
 
       int mrf = slot + 1;
-      int vert_result = c->vue_map.slot_to_vert_result[slot];
+      int vert_result = c->prog_data.vue_map.slot_to_vert_result[slot];
       if (c->regs[PROGRAM_OUTPUT][vert_result].file ==
           BRW_GENERAL_REGISTER_FILE) {
          brw_MOV(p, brw_message_reg(mrf),
@@ -1691,7 +1681,7 @@ static void emit_vertex_write( struct brw_vs_compile *c)
       }
    }
 
-   eot = (slot >= c->vue_map.num_slots);
+   eot = (slot >= c->prog_data.vue_map.num_slots);
 
    /* Message header, plus the (first part of the) VUE. */
    msg_len = 1 + slot;
@@ -1712,14 +1702,14 @@ static void emit_vertex_write( struct brw_vs_compile *c)
 		 0, 		/* urb destination offset */
 		 BRW_URB_SWIZZLE_INTERLEAVE);
 
-   if (slot < c->vue_map.num_slots) {
+   if (slot < c->prog_data.vue_map.num_slots) {
       /* Not all of the vertex outputs/results fit into the MRF.
        * Move the overflowed attributes from the GRF to the MRF and
        * issue another brw_urb_WRITE().
        */
       GLuint mrf = 1;
-      for (; slot < c->vue_map.num_slots; ++slot) {
-         int vert_result = c->vue_map.slot_to_vert_result[slot];
+      for (; slot < c->prog_data.vue_map.num_slots; ++slot) {
+         int vert_result = c->prog_data.vue_map.slot_to_vert_result[slot];
          /* move from GRF to MRF */
          brw_MOV(p, brw_message_reg(mrf),
                  c->regs[PROGRAM_OUTPUT][vert_result]);
@@ -1844,7 +1834,6 @@ void brw_old_vs_emit(struct brw_vs_compile *c )
    struct intel_context *intel = &brw->intel;
    const GLuint nr_insns = c->vp->program.Base.NumInstructions;
    GLuint insn;
-   const struct brw_indirect stack_index = brw_indirect(0, 0);   
    GLuint index;
    GLuint file;
 
@@ -1874,15 +1863,6 @@ void brw_old_vs_emit(struct brw_vs_compile *c )
 	   if (file == PROGRAM_OUTPUT && index != VERT_RESULT_HPOS)
 	       c->output_regs[index].used_in_src = true;
        }
-
-       switch (inst->Opcode) {
-       case OPCODE_CAL:
-       case OPCODE_RET:
-	  c->needs_stack = true;
-	  break;
-       default:
-	  break;
-       }
    }
 
    /* Static register allocation
@@ -1890,9 +1870,6 @@ void brw_old_vs_emit(struct brw_vs_compile *c )
    brw_vs_alloc_regs(c);
 
    brw_vs_rescale_gl_fixed(c);
-
-   if (c->needs_stack)
-      brw_MOV(p, get_addr_reg(stack_index), brw_address(c->stack));
 
    for (insn = 0; insn < nr_insns; insn++) {
 
@@ -2117,32 +2094,10 @@ void brw_old_vs_emit(struct brw_vs_compile *c )
          brw_ADD(p, brw_ip_reg(), brw_ip_reg(), brw_imm_d(1*16));
 	 brw_set_predicate_control(p, BRW_PREDICATE_NONE);
          break;
-      case OPCODE_CAL:
-	 brw_set_access_mode(p, BRW_ALIGN_1);
-	 brw_ADD(p, deref_1d(stack_index, 0), brw_ip_reg(), brw_imm_d(3*16));
-	 brw_set_access_mode(p, BRW_ALIGN_16);
-	 brw_ADD(p, get_addr_reg(stack_index),
-			 get_addr_reg(stack_index), brw_imm_d(4));
-         brw_save_call(p, inst->Comment, p->nr_insn);
-	 brw_ADD(p, brw_ip_reg(), brw_ip_reg(), brw_imm_d(1*16));
-         break;
-      case OPCODE_RET:
-	 brw_ADD(p, get_addr_reg(stack_index),
-			 get_addr_reg(stack_index), brw_imm_d(-4));
-	 brw_set_access_mode(p, BRW_ALIGN_1);
-         brw_MOV(p, brw_ip_reg(), deref_1d(stack_index, 0));
-	 brw_set_access_mode(p, BRW_ALIGN_16);
-	 break;
       case OPCODE_END:
 	 emit_vertex_write(c);
          break;
       case OPCODE_PRINT:
-         /* no-op */
-         break;
-      case OPCODE_BGNSUB:
-         brw_save_label(p, inst->Comment, p->nr_insn);
-         break;
-      case OPCODE_ENDSUB:
          /* no-op */
          break;
       default:
@@ -2202,7 +2157,6 @@ void brw_old_vs_emit(struct brw_vs_compile *c )
       release_tmps(c);
    }
 
-   brw_resolve_cals(p);
    brw_set_uip_jip(p);
 
    brw_optimize(p);

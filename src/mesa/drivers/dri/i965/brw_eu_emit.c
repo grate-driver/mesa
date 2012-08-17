@@ -429,7 +429,6 @@ static void brw_set_math_message( struct brw_compile *p,
 				  GLuint function,
 				  GLuint integer_type,
 				  bool low_precision,
-				  bool saturate,
 				  GLuint dataType )
 {
    struct brw_context *brw = p->brw;
@@ -461,22 +460,24 @@ static void brw_set_math_message( struct brw_compile *p,
       break;
    }
 
+
    brw_set_message_descriptor(p, insn, BRW_SFID_MATH,
 			      msg_length, response_length, false, false);
    if (intel->gen == 5) {
       insn->bits3.math_gen5.function = function;
       insn->bits3.math_gen5.int_type = integer_type;
       insn->bits3.math_gen5.precision = low_precision;
-      insn->bits3.math_gen5.saturate = saturate;
+      insn->bits3.math_gen5.saturate = insn->header.saturate;
       insn->bits3.math_gen5.data_type = dataType;
       insn->bits3.math_gen5.snapshot = 0;
    } else {
       insn->bits3.math.function = function;
       insn->bits3.math.int_type = integer_type;
       insn->bits3.math.precision = low_precision;
-      insn->bits3.math.saturate = saturate;
+      insn->bits3.math.saturate = insn->header.saturate;
       insn->bits3.math.data_type = dataType;
    }
+   insn->header.saturate = 0;
 }
 
 
@@ -749,6 +750,78 @@ static struct brw_instruction *brw_alu2(struct brw_compile *p,
    return insn;
 }
 
+static int
+get_3src_subreg_nr(struct brw_reg reg)
+{
+   if (reg.vstride == BRW_VERTICAL_STRIDE_0) {
+      assert(brw_is_single_value_swizzle(reg.dw1.bits.swizzle));
+      return reg.subnr / 4 + BRW_GET_SWZ(reg.dw1.bits.swizzle, 0);
+   } else {
+      return reg.subnr / 4;
+   }
+}
+
+static struct brw_instruction *brw_alu3(struct brw_compile *p,
+					GLuint opcode,
+					struct brw_reg dest,
+					struct brw_reg src0,
+					struct brw_reg src1,
+					struct brw_reg src2)
+{
+   struct brw_instruction *insn = next_insn(p, opcode);
+
+   gen7_convert_mrf_to_grf(p, &dest);
+
+   assert(insn->header.access_mode == BRW_ALIGN_16);
+
+   assert(dest.file == BRW_GENERAL_REGISTER_FILE ||
+	  dest.file == BRW_MESSAGE_REGISTER_FILE);
+   assert(dest.nr < 128);
+   assert(dest.address_mode == BRW_ADDRESS_DIRECT);
+   assert(dest.type = BRW_REGISTER_TYPE_F);
+   insn->bits1.da3src.dest_reg_file = (dest.file == BRW_MESSAGE_REGISTER_FILE);
+   insn->bits1.da3src.dest_reg_nr = dest.nr;
+   insn->bits1.da3src.dest_subreg_nr = dest.subnr / 16;
+   insn->bits1.da3src.dest_writemask = dest.dw1.bits.writemask;
+   guess_execution_size(p, insn, dest);
+
+   assert(src0.file == BRW_GENERAL_REGISTER_FILE);
+   assert(src0.address_mode == BRW_ADDRESS_DIRECT);
+   assert(src0.nr < 128);
+   assert(src0.type == BRW_REGISTER_TYPE_F);
+   insn->bits2.da3src.src0_swizzle = src0.dw1.bits.swizzle;
+   insn->bits2.da3src.src0_subreg_nr = get_3src_subreg_nr(src0);
+   insn->bits2.da3src.src0_reg_nr = src0.nr;
+   insn->bits1.da3src.src0_abs = src0.abs;
+   insn->bits1.da3src.src0_negate = src0.negate;
+   insn->bits2.da3src.src0_rep_ctrl = src0.vstride == BRW_VERTICAL_STRIDE_0;
+
+   assert(src1.file == BRW_GENERAL_REGISTER_FILE);
+   assert(src1.address_mode == BRW_ADDRESS_DIRECT);
+   assert(src1.nr < 128);
+   assert(src1.type == BRW_REGISTER_TYPE_F);
+   insn->bits2.da3src.src1_swizzle = src1.dw1.bits.swizzle;
+   insn->bits2.da3src.src1_subreg_nr_low = get_3src_subreg_nr(src1) & 0x3;
+   insn->bits3.da3src.src1_subreg_nr_high = get_3src_subreg_nr(src1) >> 2;
+   insn->bits2.da3src.src1_rep_ctrl = src1.vstride == BRW_VERTICAL_STRIDE_0;
+   insn->bits3.da3src.src1_reg_nr = src1.nr;
+   insn->bits1.da3src.src1_abs = src1.abs;
+   insn->bits1.da3src.src1_negate = src1.negate;
+
+   assert(src2.file == BRW_GENERAL_REGISTER_FILE);
+   assert(src2.address_mode == BRW_ADDRESS_DIRECT);
+   assert(src2.nr < 128);
+   assert(src2.type == BRW_REGISTER_TYPE_F);
+   insn->bits3.da3src.src2_swizzle = src2.dw1.bits.swizzle;
+   insn->bits3.da3src.src2_subreg_nr = get_3src_subreg_nr(src2);
+   insn->bits3.da3src.src2_rep_ctrl = src2.vstride == BRW_VERTICAL_STRIDE_0;
+   insn->bits3.da3src.src2_reg_nr = src2.nr;
+   insn->bits1.da3src.src2_abs = src2.abs;
+   insn->bits1.da3src.src2_negate = src2.negate;
+
+   return insn;
+}
+
 
 /***********************************************************************
  * Convenience routines.
@@ -768,6 +841,16 @@ struct brw_instruction *brw_##OP(struct brw_compile *p,	\
 	      struct brw_reg src1)   			\
 {							\
    return brw_alu2(p, BRW_OPCODE_##OP, dest, src0, src1);	\
+}
+
+#define ALU3(OP)					\
+struct brw_instruction *brw_##OP(struct brw_compile *p,	\
+	      struct brw_reg dest,			\
+	      struct brw_reg src0,			\
+	      struct brw_reg src1,			\
+	      struct brw_reg src2)   			\
+{							\
+   return brw_alu3(p, BRW_OPCODE_##OP, dest, src0, src1, src2);	\
 }
 
 /* Rounding operations (other than RNDD) require two instructions - the first
@@ -818,7 +901,7 @@ ALU2(DP3)
 ALU2(DP2)
 ALU2(LINE)
 ALU2(PLN)
-
+ALU3(MAD)
 
 ROUND(RNDZ)
 ROUND(RNDE)
@@ -845,6 +928,28 @@ struct brw_instruction *brw_ADD(struct brw_compile *p,
    }
 
    return brw_alu2(p, BRW_OPCODE_ADD, dest, src0, src1);
+}
+
+struct brw_instruction *brw_AVG(struct brw_compile *p,
+                                struct brw_reg dest,
+                                struct brw_reg src0,
+                                struct brw_reg src1)
+{
+   assert(dest.type == src0.type);
+   assert(src0.type == src1.type);
+   switch (src0.type) {
+   case BRW_REGISTER_TYPE_B:
+   case BRW_REGISTER_TYPE_UB:
+   case BRW_REGISTER_TYPE_W:
+   case BRW_REGISTER_TYPE_UW:
+   case BRW_REGISTER_TYPE_D:
+   case BRW_REGISTER_TYPE_UD:
+      break;
+   default:
+      assert(!"Bad type for brw_AVG");
+   }
+
+   return brw_alu2(p, BRW_OPCODE_AVG, dest, src0, src1);
 }
 
 struct brw_instruction *brw_MUL(struct brw_compile *p,
@@ -1339,20 +1444,6 @@ struct brw_instruction *brw_CONT(struct brw_compile *p)
    return insn;
 }
 
-struct brw_instruction *gen6_HALT(struct brw_compile *p)
-{
-   struct brw_instruction *insn;
-
-   insn = next_insn(p, BRW_OPCODE_HALT);
-   brw_set_dest(p, insn, retype(brw_null_reg(), BRW_REGISTER_TYPE_D));
-   brw_set_src0(p, insn, retype(brw_null_reg(), BRW_REGISTER_TYPE_D));
-   brw_set_src1(p, insn, brw_imm_d(0x0)); /* UIP and JIP, updated later. */
-
-   insn->header.compression_control = BRW_COMPRESSION_NONE;
-   insn->header.execution_size = BRW_EXECUTE_8;
-   return insn;
-}
-
 /* DO/WHILE loop:
  *
  * The DO/WHILE is just an unterminated loop -- break or continue are
@@ -1567,7 +1658,6 @@ void brw_WAIT (struct brw_compile *p)
 void brw_math( struct brw_compile *p,
 	       struct brw_reg dest,
 	       GLuint function,
-	       GLuint saturate,
 	       GLuint msg_reg_nr,
 	       struct brw_reg src,
 	       GLuint data_type,
@@ -1603,7 +1693,6 @@ void brw_math( struct brw_compile *p,
        * becomes FC[3:0] and ThreadCtrl becomes FC[5:4].
        */
       insn->header.destreg__conditionalmod = function;
-      insn->header.saturate = saturate;
 
       brw_set_dest(p, insn, dest);
       brw_set_src0(p, insn, src);
@@ -1624,7 +1713,6 @@ void brw_math( struct brw_compile *p,
 			   function,
 			   src.type == BRW_REGISTER_TYPE_D,
 			   precision,
-			   saturate,
 			   data_type);
    }
 }
@@ -1689,7 +1777,6 @@ void brw_math2(struct brw_compile *p,
 void brw_math_16( struct brw_compile *p,
 		  struct brw_reg dest,
 		  GLuint function,
-		  GLuint saturate,
 		  GLuint msg_reg_nr,
 		  struct brw_reg src,
 		  GLuint precision )
@@ -1704,7 +1791,6 @@ void brw_math_16( struct brw_compile *p,
        * becomes FC[3:0] and ThreadCtrl becomes FC[5:4].
        */
       insn->header.destreg__conditionalmod = function;
-      insn->header.saturate = saturate;
 
       /* Source modifiers are ignored for extended math instructions. */
       assert(!src.negate);
@@ -1732,7 +1818,6 @@ void brw_math_16( struct brw_compile *p,
 			function,
 			BRW_MATH_INTEGER_UNSIGNED,
 			precision,
-			saturate,
 			BRW_MATH_DATA_VECTOR);
 
    /* Second instruction:
@@ -1748,7 +1833,6 @@ void brw_math_16( struct brw_compile *p,
 			function,
 			BRW_MATH_INTEGER_UNSIGNED,
 			precision,
-			saturate,
 			BRW_MATH_DATA_VECTOR);
 
    brw_pop_insn_state(p);
@@ -2152,6 +2236,7 @@ void brw_fb_WRITE(struct brw_compile *p,
 		  int dispatch_width,
                   GLuint msg_reg_nr,
                   struct brw_reg src0,
+                  GLuint msg_control,
                   GLuint binding_table_index,
                   GLuint msg_length,
                   GLuint response_length,
@@ -2160,7 +2245,7 @@ void brw_fb_WRITE(struct brw_compile *p,
 {
    struct intel_context *intel = &p->brw->intel;
    struct brw_instruction *insn;
-   GLuint msg_control, msg_type;
+   GLuint msg_type;
    struct brw_reg dest;
 
    if (dispatch_width == 16)
@@ -2168,7 +2253,7 @@ void brw_fb_WRITE(struct brw_compile *p,
    else
       dest = retype(vec8(brw_null_reg()), BRW_REGISTER_TYPE_UW);
 
-   if (intel->gen >= 6 && binding_table_index == 0) {
+   if (intel->gen >= 6) {
       insn = next_insn(p, BRW_OPCODE_SENDC);
    } else {
       insn = next_insn(p, BRW_OPCODE_SEND);
@@ -2187,11 +2272,6 @@ void brw_fb_WRITE(struct brw_compile *p,
 
       msg_type = BRW_DATAPORT_WRITE_MESSAGE_RENDER_TARGET_WRITE;
    }
-
-   if (dispatch_width == 16)
-      msg_control = BRW_DATAPORT_RENDER_TARGET_WRITE_SIMD16_SINGLE_SOURCE;
-   else
-      msg_control = BRW_DATAPORT_RENDER_TARGET_WRITE_SIMD8_SINGLE_SOURCE_SUBSPAN01;
 
    brw_set_dest(p, insn, dest);
    brw_set_src0(p, insn, src0);
@@ -2409,8 +2489,8 @@ brw_find_next_block_end(struct brw_compile *p, int start)
 	 return ip;
       }
    }
-
-   return 0;
+   assert(!"not reached");
+   return start + 1;
 }
 
 /* There is no DO instruction on gen6, so to find the end of the loop
@@ -2439,7 +2519,7 @@ brw_find_loop_end(struct brw_compile *p, int start)
 }
 
 /* After program generation, go back and update the UIP and JIP of
- * BREAK, CONT, and HALT instructions to their correct locations.
+ * BREAK and CONT instructions to their correct locations.
  */
 void
 brw_set_uip_jip(struct brw_compile *p)
@@ -2453,47 +2533,18 @@ brw_set_uip_jip(struct brw_compile *p)
 
    for (ip = 0; ip < p->nr_insn; ip++) {
       struct brw_instruction *insn = &p->store[ip];
-      int block_end_ip = 0;
-
-      if (insn->header.opcode == BRW_OPCODE_BREAK ||
-	  insn->header.opcode == BRW_OPCODE_CONTINUE ||
-	  insn->header.opcode == BRW_OPCODE_HALT) {
-	 block_end_ip = brw_find_next_block_end(p, ip);
-      }
 
       switch (insn->header.opcode) {
       case BRW_OPCODE_BREAK:
-	 assert(block_end_ip != 0);
-	 insn->bits3.break_cont.jip = br * (block_end_ip - ip);
+	 insn->bits3.break_cont.jip = br * (brw_find_next_block_end(p, ip) - ip);
 	 /* Gen7 UIP points to WHILE; Gen6 points just after it */
 	 insn->bits3.break_cont.uip =
 	    br * (brw_find_loop_end(p, ip) - ip + (intel->gen == 6 ? 1 : 0));
 	 break;
       case BRW_OPCODE_CONTINUE:
-	 assert(block_end_ip != 0);
-	 insn->bits3.break_cont.jip = br * (block_end_ip - ip);
+	 insn->bits3.break_cont.jip = br * (brw_find_next_block_end(p, ip) - ip);
 	 insn->bits3.break_cont.uip = br * (brw_find_loop_end(p, ip) - ip);
 
-	 assert(insn->bits3.break_cont.uip != 0);
-	 assert(insn->bits3.break_cont.jip != 0);
-	 break;
-      case BRW_OPCODE_HALT:
-	 /* From the Sandy Bridge PRM (volume 4, part 2, section 8.3.19):
-	  *
-	  *    "In case of the halt instruction not inside any conditional code
-	  *     block, the value of <JIP> and <UIP> should be the same. In case
-	  *     of the halt instruction inside conditional code block, the <UIP>
-	  *     should be the end of the program, and the <JIP> should be end of
-	  *     the most inner conditional code block."
-	  *
-	  * The uip will have already been set by whoever set up the
-	  * instruction.
-	  */
-	 if (block_end_ip == 0) {
-	    insn->bits3.break_cont.jip = insn->bits3.break_cont.uip;
-	 } else {
-	    insn->bits3.break_cont.jip = br * (block_end_ip - ip);
-	 }
 	 assert(insn->bits3.break_cont.uip != 0);
 	 assert(insn->bits3.break_cont.jip != 0);
 	 break;

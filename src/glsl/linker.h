@@ -37,6 +37,18 @@ link_invalidate_variable_locations(gl_shader *sh, enum ir_variable_mode mode,
 extern void
 link_assign_uniform_locations(struct gl_shader_program *prog);
 
+extern void
+link_set_uniform_initializers(struct gl_shader_program *prog);
+
+extern int
+link_cross_validate_uniform_block(void *mem_ctx,
+				  struct gl_uniform_block **linked_blocks,
+				  unsigned int *num_linked_blocks,
+				  struct gl_uniform_block *new_block);
+
+void
+link_assign_uniform_block_offsets(struct gl_shader *shader);
+
 /**
  * Class for processing all of the leaf fields of an uniform
  *
@@ -76,7 +88,7 @@ private:
     * \param name_length  Length of the current name \b not including the
     *                     terminating \c NUL character.
     */
-   void recursion(const glsl_type *t, char **name, unsigned name_length);
+   void recursion(const glsl_type *t, char **name, size_t name_length);
 };
 
 #endif /* GLSL_LINKER_H */

@@ -55,12 +55,11 @@ _mesa_lookup_samplerobj(struct gl_context *ctx, GLuint name)
  * Handle reference counting.
  */
 void
-_mesa_reference_sampler_object(struct gl_context *ctx,
-                               struct gl_sampler_object **ptr,
-                               struct gl_sampler_object *samp)
+_mesa_reference_sampler_object_(struct gl_context *ctx,
+                                struct gl_sampler_object **ptr,
+                                struct gl_sampler_object *samp)
 {
-   if (*ptr == samp)
-      return;
+   assert(*ptr != samp); /* The inline wrapper should prevent no-op calls */
 
    if (*ptr) {
       /* Unreference the old sampler */
@@ -131,12 +130,9 @@ _mesa_init_sampler_object(struct gl_sampler_object *sampObj, GLuint name)
    sampObj->MaxAnisotropy = 1.0F;
    sampObj->CompareMode = GL_NONE;
    sampObj->CompareFunc = GL_LEQUAL;
-   sampObj->CompareFailValue = 0.0;
    sampObj->sRGBDecode = GL_DECODE_EXT;
    sampObj->CubeMapSeamless = GL_FALSE;
-   sampObj->DepthMode = 0;
 }
-
 
 /**
  * Fallback for ctx->Driver.NewSamplerObject();
@@ -163,7 +159,7 @@ _mesa_delete_sampler_object(struct gl_context *ctx,
 }
 
 
-static void GLAPIENTRY
+void GLAPIENTRY
 _mesa_GenSamplers(GLsizei count, GLuint *samplers)
 {
    GET_CURRENT_CONTEXT(ctx);
@@ -195,7 +191,7 @@ _mesa_GenSamplers(GLsizei count, GLuint *samplers)
 }
 
 
-static void GLAPIENTRY
+void GLAPIENTRY
 _mesa_DeleteSamplers(GLsizei count, const GLuint *samplers)
 {
    GET_CURRENT_CONTEXT(ctx);
@@ -245,7 +241,7 @@ _mesa_IsSampler(GLuint sampler)
 }
 
 
-static void GLAPIENTRY
+void GLAPIENTRY
 _mesa_BindSampler(GLuint unit, GLuint sampler)
 {
    struct gl_sampler_object *sampObj;
@@ -585,8 +581,25 @@ set_sampler_cube_map_seamless(struct gl_context *ctx,
    return GL_TRUE;
 }
 
+static GLuint
+set_sampler_srgb_decode(struct gl_context *ctx,
+                              struct gl_sampler_object *samp, GLenum param)
+{
+   if (!ctx->Extensions.EXT_texture_sRGB_decode)
+      return INVALID_PNAME;
 
-static void GLAPIENTRY
+   if (samp->sRGBDecode == param)
+      return GL_FALSE;
+
+   if (param != GL_DECODE_EXT && param != GL_SKIP_DECODE_EXT)
+      return INVALID_VALUE;
+
+   flush(ctx);
+   samp->sRGBDecode = param;
+   return GL_TRUE;
+}
+
+void GLAPIENTRY
 _mesa_SamplerParameteri(GLuint sampler, GLenum pname, GLint param)
 {
    struct gl_sampler_object *sampObj;
@@ -636,6 +649,9 @@ _mesa_SamplerParameteri(GLuint sampler, GLenum pname, GLint param)
       break;
    case GL_TEXTURE_CUBE_MAP_SEAMLESS:
       res = set_sampler_cube_map_seamless(ctx, sampObj, param);
+      break;
+   case GL_TEXTURE_SRGB_DECODE_EXT:
+      res = set_sampler_srgb_decode(ctx, sampObj, param);
       break;
    case GL_TEXTURE_BORDER_COLOR:
       /* fall-through */
@@ -721,6 +737,9 @@ _mesa_SamplerParameterf(GLuint sampler, GLenum pname, GLfloat param)
    case GL_TEXTURE_CUBE_MAP_SEAMLESS:
       res = set_sampler_cube_map_seamless(ctx, sampObj, (GLboolean) param);
       break;
+   case GL_TEXTURE_SRGB_DECODE_EXT:
+      res = set_sampler_srgb_decode(ctx, sampObj, (GLenum) param);
+      break;
    case GL_TEXTURE_BORDER_COLOR:
       /* fall-through */
    default:
@@ -801,6 +820,9 @@ _mesa_SamplerParameteriv(GLuint sampler, GLenum pname, const GLint *params)
       break;
    case GL_TEXTURE_CUBE_MAP_SEAMLESS:
       res = set_sampler_cube_map_seamless(ctx, sampObj, params[0]);
+      break;
+   case GL_TEXTURE_SRGB_DECODE_EXT:
+      res = set_sampler_srgb_decode(ctx, sampObj, params[0]);
       break;
    case GL_TEXTURE_BORDER_COLOR:
       {
@@ -893,6 +915,9 @@ _mesa_SamplerParameterfv(GLuint sampler, GLenum pname, const GLfloat *params)
    case GL_TEXTURE_CUBE_MAP_SEAMLESS:
       res = set_sampler_cube_map_seamless(ctx, sampObj, (GLboolean) params[0]);
       break;
+   case GL_TEXTURE_SRGB_DECODE_EXT:
+      res = set_sampler_srgb_decode(ctx, sampObj, (GLenum) params[0]);
+      break;
    case GL_TEXTURE_BORDER_COLOR:
       res = set_sampler_border_colorf(ctx, sampObj, params);
       break;
@@ -974,6 +999,9 @@ _mesa_SamplerParameterIiv(GLuint sampler, GLenum pname, const GLint *params)
       break;
    case GL_TEXTURE_CUBE_MAP_SEAMLESS:
       res = set_sampler_cube_map_seamless(ctx, sampObj, params[0]);
+      break;
+   case GL_TEXTURE_SRGB_DECODE_EXT:
+      res = set_sampler_srgb_decode(ctx, sampObj, (GLenum) params[0]);
       break;
    case GL_TEXTURE_BORDER_COLOR:
       res = set_sampler_border_colori(ctx, sampObj, params);
@@ -1057,6 +1085,9 @@ _mesa_SamplerParameterIuiv(GLuint sampler, GLenum pname, const GLuint *params)
       break;
    case GL_TEXTURE_CUBE_MAP_SEAMLESS:
       res = set_sampler_cube_map_seamless(ctx, sampObj, params[0]);
+      break;
+   case GL_TEXTURE_SRGB_DECODE_EXT:
+      res = set_sampler_srgb_decode(ctx, sampObj, (GLenum) params[0]);
       break;
    case GL_TEXTURE_BORDER_COLOR:
       res = set_sampler_border_colorui(ctx, sampObj, params);
@@ -1152,6 +1183,11 @@ _mesa_GetSamplerParameteriv(GLuint sampler, GLenum pname, GLint *params)
          goto invalid_pname;
       *params = sampObj->CubeMapSeamless;
       break;
+   case GL_TEXTURE_SRGB_DECODE_EXT:
+      if (!ctx->Extensions.EXT_texture_sRGB_decode)
+         goto invalid_pname;
+      *params = (GLenum) sampObj->sRGBDecode;
+      break;
    default:
       goto invalid_pname;
    }
@@ -1224,6 +1260,11 @@ _mesa_GetSamplerParameterfv(GLuint sampler, GLenum pname, GLfloat *params)
       if (!ctx->Extensions.AMD_seamless_cubemap_per_texture)
          goto invalid_pname;
       *params = (GLfloat) sampObj->CubeMapSeamless;
+      break;
+   case GL_TEXTURE_SRGB_DECODE_EXT:
+      if (!ctx->Extensions.EXT_texture_sRGB_decode)
+         goto invalid_pname;
+      *params = (GLfloat) sampObj->sRGBDecode;
       break;
    default:
       goto invalid_pname;
@@ -1299,6 +1340,11 @@ _mesa_GetSamplerParameterIiv(GLuint sampler, GLenum pname, GLint *params)
          goto invalid_pname;
       *params = sampObj->CubeMapSeamless;
       break;
+   case GL_TEXTURE_SRGB_DECODE_EXT:
+      if (!ctx->Extensions.EXT_texture_sRGB_decode)
+         goto invalid_pname;
+      *params = (GLenum) sampObj->sRGBDecode;
+      break;
    default:
       goto invalid_pname;
    }
@@ -1372,6 +1418,11 @@ _mesa_GetSamplerParameterIuiv(GLuint sampler, GLenum pname, GLuint *params)
       if (!ctx->Extensions.AMD_seamless_cubemap_per_texture)
          goto invalid_pname;
       *params = sampObj->CubeMapSeamless;
+      break;
+   case GL_TEXTURE_SRGB_DECODE_EXT:
+      if (!ctx->Extensions.EXT_texture_sRGB_decode)
+         goto invalid_pname;
+      *params = (GLenum) sampObj->sRGBDecode;
       break;
    default:
       goto invalid_pname;

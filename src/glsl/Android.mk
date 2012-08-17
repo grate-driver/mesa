@@ -25,6 +25,7 @@
 
 LOCAL_PATH := $(call my-dir)
 
+GLSL_SRCDIR = .
 include $(LOCAL_PATH)/Makefile.sources
 
 # ---------------------------------------
@@ -34,9 +35,9 @@ include $(LOCAL_PATH)/Makefile.sources
 include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES := \
-	$(LIBGLCPP_SOURCES) \
-	$(LIBGLSL_SOURCES) \
-	$(LIBGLSL_CXX_SOURCES)
+	$(LIBGLCPP_FILES) \
+	$(LIBGLSL_FILES) \
+	$(LIBGLSL_CXX_FILES)
 
 LOCAL_C_INCLUDES := \
 	external/astl/include \
@@ -56,11 +57,11 @@ include $(BUILD_STATIC_LIBRARY)
 include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES := \
-	$(LIBGLCPP_SOURCES) \
-	$(LIBGLSL_SOURCES) \
-	$(LIBGLSL_CXX_SOURCES) \
-	$(BUILTIN_COMPILER_CXX_SOURCES) \
-	$(GLSL_COMPILER_CXX_SOURCES)
+	$(LIBGLCPP_FILES) \
+	$(LIBGLSL_FILES) \
+	$(LIBGLSL_CXX_FILES) \
+	$(BUILTIN_COMPILER_CXX_FILES) \
+	$(GLSL_COMPILER_CXX_FILES)
 
 LOCAL_C_INCLUDES := \
 	$(MESA_TOP)/src/mapi \
@@ -83,7 +84,7 @@ include $(BUILD_HOST_EXECUTABLE)
 include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES := \
-	$(GLSL_COMPILER_CXX_SOURCES)
+	$(GLSL_COMPILER_CXX_FILES)
 
 LOCAL_C_INCLUDES := \
 	$(MESA_TOP)/src/mapi \

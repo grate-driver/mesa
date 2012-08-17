@@ -390,6 +390,10 @@ update_tex_combine(struct gl_context *ctx, struct gl_texture_unit *texUnit)
 {
    struct gl_tex_env_combine_state *combine;
 
+   /* No combiners will apply to this. */
+   if (texUnit->_Current->Target == GL_TEXTURE_BUFFER)
+      return;
+
    /* Set the texUnit->_CurrentCombine field to point to the user's combiner
     * state, or the combiner state which is derived from traditional texenv
     * mode.
@@ -403,7 +407,7 @@ update_tex_combine(struct gl_context *ctx, struct gl_texture_unit *texUnit)
       GLenum format = texObj->Image[0][texObj->BaseLevel]->_BaseFormat;
 
       if (format == GL_DEPTH_COMPONENT || format == GL_DEPTH_STENCIL_EXT) {
-         format = texObj->Sampler.DepthMode;
+         format = texObj->DepthMode;
       }
       calculate_derived_texenv(&texUnit->_EnvMode, texUnit->EnvMode, format);
       texUnit->_CurrentCombine = & texUnit->_EnvMode;
@@ -569,10 +573,13 @@ update_texture_state( struct gl_context *ctx )
       for (texIndex = 0; texIndex < NUM_TEXTURE_TARGETS; texIndex++) {
          if (enabledTargets & (1 << texIndex)) {
             struct gl_texture_object *texObj = texUnit->CurrentTex[texIndex];
-            if (!texObj->_Complete) {
+            struct gl_sampler_object *sampler = texUnit->Sampler ?
+               texUnit->Sampler : &texObj->Sampler;
+
+            if (!_mesa_is_texture_complete(texObj, sampler)) {
                _mesa_test_texobj_completeness(ctx, texObj);
             }
-            if (texObj->_Complete) {
+            if (_mesa_is_texture_complete(texObj, sampler)) {
                texUnit->_ReallyEnabled = 1 << texIndex;
                _mesa_reference_texobj(&texUnit->_Current, texObj);
                break;
@@ -586,9 +593,15 @@ update_texture_state( struct gl_context *ctx )
              * object, but there isn't one (or it's incomplete).  Use the
              * fallback texture.
              */
-            struct gl_texture_object *texObj = _mesa_get_fallback_texture(ctx);
-            texUnit->_ReallyEnabled = 1 << TEXTURE_2D_INDEX;
+            struct gl_texture_object *texObj;
+            gl_texture_index texTarget;
+
+            assert(_mesa_bitcount(enabledTargets) == 1);
+
+            texTarget = (gl_texture_index) (ffs(enabledTargets) - 1);
+            texObj = _mesa_get_fallback_texture(ctx, texTarget);
             _mesa_reference_texobj(&texUnit->_Current, texObj);
+            texUnit->_ReallyEnabled = 1 << texTarget;
          }
          else {
             /* fixed-function: texture unit is really disabled */

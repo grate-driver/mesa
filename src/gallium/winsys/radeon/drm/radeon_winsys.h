@@ -40,14 +40,14 @@
  * - R16F/RG16F
  */
 
-#include "pipebuffer/pb_bufmgr.h"
-#include "pipe/p_defines.h"
-#include "pipe/p_state.h"
+#include "pipebuffer/pb_buffer.h"
+#include "libdrm/radeon_surface.h"
 
 #define RADEON_MAX_CMDBUF_DWORDS (16 * 1024)
 
-#define RADEON_FLUSH_ASYNC             (1 << 0)
-#define RADEON_FLUSH_KEEP_TILING_FLAGS (1 << 1) /* needs DRM 2.12.0 */
+#define RADEON_FLUSH_ASYNC		(1 << 0)
+#define RADEON_FLUSH_KEEP_TILING_FLAGS	(1 << 1) /* needs DRM 2.12.0 */
+#define RADEON_FLUSH_COMPUTE		(1 << 2)
 
 /* Tiling flags. */
 enum radeon_bo_layout {
@@ -70,15 +70,7 @@ enum radeon_bo_usage { /* bitfield */
 };
 
 struct winsys_handle;
-
-struct radeon_winsys_cs_handle {   /* for write_reloc etc. */
-    struct {
-        struct pb_buffer base;
-    } _private;
-
-    unsigned last_flush;
-    unsigned binding;
-};
+struct radeon_winsys_cs_handle;
 
 struct radeon_winsys_cs {
     unsigned cdw;  /* Number of used dwords. */
@@ -103,6 +95,10 @@ struct radeon_info {
     uint32_t r600_num_tile_pipes;
     uint32_t r600_backend_map;
     boolean r600_backend_map_valid;
+    boolean r600_virtual_address;
+    uint32_t r600_va_start;
+    uint32_t r600_ib_vm_max_size;
+    uint32_t r600_max_pipes;
 };
 
 enum radeon_feature_id {
@@ -163,7 +159,7 @@ struct radeon_winsys {
      * \param usage     A bitmask of the PIPE_TRANSFER_* flags.
      * \return          The pointer at the beginning of the buffer.
      */
-    void *(*buffer_map)(struct pb_buffer *buf,
+    void *(*buffer_map)(struct radeon_winsys_cs_handle *buf,
                         struct radeon_winsys_cs *cs,
                         enum pipe_transfer_usage usage);
 
@@ -172,7 +168,7 @@ struct radeon_winsys {
      *
      * \param buf       A winsys buffer object to unmap.
      */
-    void (*buffer_unmap)(struct pb_buffer *buf);
+    void (*buffer_unmap)(struct radeon_winsys_cs_handle *buf);
 
     /**
      * Return TRUE if a buffer object is being used by the GPU.
@@ -205,7 +201,11 @@ struct radeon_winsys {
      */
     void (*buffer_get_tiling)(struct pb_buffer *buf,
                               enum radeon_bo_layout *microtile,
-                              enum radeon_bo_layout *macrotile);
+                              enum radeon_bo_layout *macrotile,
+                              unsigned *bankw, unsigned *bankh,
+                              unsigned *tile_split,
+                              unsigned *stencil_tile_split,
+                              unsigned *mtilea);
 
     /**
      * Set tiling flags describing a memory layout of a buffer object.
@@ -219,9 +219,13 @@ struct radeon_winsys {
      * \note microtile and macrotile are not bitmasks!
      */
     void (*buffer_set_tiling)(struct pb_buffer *buf,
-                              struct radeon_winsys_cs *cs,
+                              struct radeon_winsys_cs *rcs,
                               enum radeon_bo_layout microtile,
                               enum radeon_bo_layout macrotile,
+                              unsigned bankw, unsigned bankh,
+                              unsigned tile_split,
+                              unsigned stencil_tile_split,
+                              unsigned mtilea,
                               unsigned stride);
 
     /**
@@ -249,6 +253,14 @@ struct radeon_winsys {
     boolean (*buffer_get_handle)(struct pb_buffer *buf,
                                  unsigned stride,
                                  struct winsys_handle *whandle);
+
+    /**
+     * Return the virtual address of a buffer.
+     *
+     * \param buf       A winsys buffer object
+     * \return          virtual address
+     */
+    uint64_t (*buffer_get_virtual_address)(struct radeon_winsys_cs_handle *buf);
 
     /**************************************************************************
      * Command submission.
@@ -332,7 +344,8 @@ struct radeon_winsys {
      * \param buf       A winsys buffer.
      */
     boolean (*cs_is_buffer_referenced)(struct radeon_winsys_cs *cs,
-                                       struct radeon_winsys_cs_handle *buf);
+                                       struct radeon_winsys_cs_handle *buf,
+                                       enum radeon_bo_usage usage);
 
     /**
      * Request access to a feature for a command stream.
@@ -344,6 +357,31 @@ struct radeon_winsys {
     boolean (*cs_request_feature)(struct radeon_winsys_cs *cs,
                                   enum radeon_feature_id fid,
                                   boolean enable);
+
+    /**
+     * Initialize surface
+     *
+     * \param ws        The winsys this function is called from.
+     * \param surf      Surface structure ptr
+     */
+    int (*surface_init)(struct radeon_winsys *ws,
+                        struct radeon_surface *surf);
+
+    /**
+     * Find best values for a surface
+     *
+     * \param ws        The winsys this function is called from.
+     * \param surf      Surface structure ptr
+     */
+    int (*surface_best)(struct radeon_winsys *ws,
+                        struct radeon_surface *surf);
+
+    /**
+     * Return the current timestamp (gpu clock) on r600 and later GPUs.
+     *
+     * \param ws        The winsys this function is called from.
+     */
+    uint64_t (*query_timestamp)(struct radeon_winsys *ws);
 };
 
 #endif

@@ -59,15 +59,6 @@
 static struct gl_renderbuffer *
 intel_new_renderbuffer(struct gl_context * ctx, GLuint name);
 
-bool
-intel_framebuffer_has_hiz(struct gl_framebuffer *fb)
-{
-   struct intel_renderbuffer *rb = NULL;
-   if (fb)
-      rb = intel_get_renderbuffer(fb, BUFFER_DEPTH);
-   return rb && rb->mt && rb->mt->hiz_mt;
-}
-
 struct intel_region*
 intel_get_rb_region(struct gl_framebuffer *fb, GLuint attIndex)
 {
@@ -189,6 +180,43 @@ intel_unmap_renderbuffer(struct gl_context *ctx,
 
 
 /**
+ * Round up the requested multisample count to the next supported sample size.
+ */
+unsigned
+intel_quantize_num_samples(struct intel_screen *intel, unsigned num_samples)
+{
+   switch (intel->gen) {
+   case 6:
+      /* Gen6 supports only 4x multisampling. */
+      if (num_samples > 0)
+         return 4;
+      else
+         return 0;
+   case 7:
+      /* Gen7 supports 4x and 8x multisampling. */
+      if (num_samples > 4)
+         return 8;
+      else if (num_samples > 0)
+         return 4;
+      else
+         return 0;
+      return 0;
+   default:
+      /* MSAA unsupported.  However, a careful reading of
+       * EXT_framebuffer_multisample reveals that we need to permit
+       * num_samples to be 1 (since num_samples is permitted to be as high as
+       * GL_MAX_SAMPLES, and GL_MAX_SAMPLES must be at least 1).  Since
+       * platforms before Gen6 don't support MSAA, this is safe, because
+       * multisampling won't happen anyhow.
+       */
+      if (num_samples > 0)
+         return 1;
+      return 0;
+   }
+}
+
+
+/**
  * Called via glRenderbufferStorageEXT() to set the format and allocate
  * storage for a user-created renderbuffer.
  */
@@ -198,9 +226,9 @@ intel_alloc_renderbuffer_storage(struct gl_context * ctx, struct gl_renderbuffer
                                  GLuint width, GLuint height)
 {
    struct intel_context *intel = intel_context(ctx);
+   struct intel_screen *screen = intel->intelScreen;
    struct intel_renderbuffer *irb = intel_renderbuffer(rb);
-
-   ASSERT(rb->Name != 0);
+   rb->NumSamples = intel_quantize_num_samples(screen, rb->NumSamples);
 
    switch (internalFormat) {
    default:
@@ -241,17 +269,10 @@ intel_alloc_renderbuffer_storage(struct gl_context * ctx, struct gl_renderbuffer
       return true;
 
    irb->mt = intel_miptree_create_for_renderbuffer(intel, rb->Format,
-						   width, height);
+						   width, height,
+                                                   rb->NumSamples);
    if (!irb->mt)
       return false;
-
-   if (intel->vtbl.is_hiz_depth_format(intel, rb->Format)) {
-      bool ok = intel_miptree_alloc_hiz(intel, irb->mt);
-      if (!ok) {
-	 intel_miptree_release(&irb->mt);
-	 return false;
-      }
-   }
 
    return true;
 }
@@ -331,7 +352,7 @@ intel_resize_buffers(struct gl_context *ctx, struct gl_framebuffer *fb,
 
    fb->Initialized = true; /* XXX remove someday */
 
-   if (fb->Name != 0) {
+   if (_mesa_is_user_fbo(fb)) {
       return;
    }
 
@@ -360,9 +381,11 @@ intel_nop_alloc_storage(struct gl_context * ctx, struct gl_renderbuffer *rb,
 /**
  * Create a new intel_renderbuffer which corresponds to an on-screen window,
  * not a user-created renderbuffer.
+ *
+ * \param num_samples must be quantized.
  */
 struct intel_renderbuffer *
-intel_create_renderbuffer(gl_format format)
+intel_create_renderbuffer(gl_format format, unsigned num_samples)
 {
    struct intel_renderbuffer *irb;
    struct gl_renderbuffer *rb;
@@ -382,10 +405,30 @@ intel_create_renderbuffer(gl_format format)
    rb->_BaseFormat = _mesa_get_format_base_format(format);
    rb->Format = format;
    rb->InternalFormat = rb->_BaseFormat;
+   rb->NumSamples = num_samples;
 
    /* intel-specific methods */
    rb->Delete = intel_delete_renderbuffer;
    rb->AllocStorage = intel_alloc_window_storage;
+
+   return irb;
+}
+
+/**
+ * Private window-system buffers (as opposed to ones shared with the display
+ * server created with intel_create_renderbuffer()) are most similar in their
+ * handling to user-created renderbuffers, but they have a resize handler that
+ * may be called at intel_update_renderbuffers() time.
+ *
+ * \param num_samples must be quantized.
+ */
+struct intel_renderbuffer *
+intel_create_private_renderbuffer(gl_format format, unsigned num_samples)
+{
+   struct intel_renderbuffer *irb;
+
+   irb = intel_create_renderbuffer(format, num_samples);
+   irb->Base.Base.AllocStorage = intel_alloc_renderbuffer_storage;
 
    return irb;
 }
@@ -495,7 +538,7 @@ intel_renderbuffer_update_wrapper(struct intel_context *intel,
 
    if (mt->hiz_mt == NULL &&
        intel->vtbl.is_hiz_depth_format(intel, rb->Format)) {
-      intel_miptree_alloc_hiz(intel, mt);
+      intel_miptree_alloc_hiz(intel, mt, 0 /* num_samples */);
       if (!mt->hiz_mt)
 	 return false;
    }
@@ -535,25 +578,14 @@ intel_renderbuffer_tile_offsets(struct intel_renderbuffer *irb,
 				uint32_t *tile_y)
 {
    struct intel_region *region = irb->mt->region;
-   int cpp = region->cpp;
-   uint32_t pitch = region->pitch * cpp;
+   uint32_t mask_x, mask_y;
 
-   if (region->tiling == I915_TILING_NONE) {
-      *tile_x = 0;
-      *tile_y = 0;
-      return irb->draw_x * cpp + irb->draw_y * pitch;
-   } else if (region->tiling == I915_TILING_X) {
-      *tile_x = irb->draw_x % (512 / cpp);
-      *tile_y = irb->draw_y % 8;
-      return ((irb->draw_y / 8) * (8 * pitch) +
-	      (irb->draw_x - *tile_x) / (512 / cpp) * 4096);
-   } else {
-      assert(region->tiling == I915_TILING_Y);
-      *tile_x = irb->draw_x % (128 / cpp);
-      *tile_y = irb->draw_y % 32;
-      return ((irb->draw_y / 32) * (32 * pitch) +
-	      (irb->draw_x - *tile_x) / (128 / cpp) * 4096);
-   }
+   intel_region_get_tile_masks(region, &mask_x, &mask_y);
+
+   *tile_x = irb->draw_x & mask_x;
+   *tile_y = irb->draw_y & mask_y;
+   return intel_region_get_aligned_offset(region, irb->draw_x & ~mask_x,
+                                          irb->draw_y & ~mask_y);
 }
 
 /**
@@ -666,6 +698,10 @@ intel_validate_framebuffer(struct gl_context *ctx, struct gl_framebuffer *fb)
    struct intel_mipmap_tree *depth_mt = NULL, *stencil_mt = NULL;
    int i;
 
+   DBG("%s() on fb %p (%s)\n", __FUNCTION__,
+       fb, (fb == ctx->DrawBuffer ? "drawbuffer" :
+	    (fb == ctx->ReadBuffer ? "readbuffer" : "other buffer")));
+
    if (depthRb)
       depth_mt = depthRb->mt;
    if (stencilRb) {
@@ -682,13 +718,23 @@ intel_validate_framebuffer(struct gl_context *ctx, struct gl_framebuffer *fb)
 	  */
 	 if (depthRb->mt_level != stencilRb->mt_level ||
 	     depthRb->mt_layer != stencilRb->mt_layer) {
+	    DBG("depth image level/layer %d/%d != stencil image %d/%d\n",
+		depthRb->mt_level,
+		depthRb->mt_layer,
+		stencilRb->mt_level,
+		stencilRb->mt_layer);
 	    fb->_Status = GL_FRAMEBUFFER_UNSUPPORTED_EXT;
 	 }
       } else {
-	 if (!intel->has_separate_stencil)
+	 if (!intel->has_separate_stencil) {
+	    DBG("separate stencil unsupported\n");
 	    fb->_Status = GL_FRAMEBUFFER_UNSUPPORTED_EXT;
-	 if (stencil_mt->format != MESA_FORMAT_S8)
+	 }
+	 if (stencil_mt->format != MESA_FORMAT_S8) {
+	    DBG("separate stencil is %s instead of S8\n",
+		_mesa_get_format_name(stencil_mt->format));
 	    fb->_Status = GL_FRAMEBUFFER_UNSUPPORTED_EXT;
+	 }
 	 if (intel->gen < 7 && depth_mt->hiz_mt == NULL) {
 	    /* Before Gen7, separate depth and stencil buffers can be used
 	     * only if HiZ is enabled. From the Sandybridge PRM, Volume 2,
@@ -696,6 +742,7 @@ intel_validate_framebuffer(struct gl_context *ctx, struct gl_framebuffer *fb)
 	     *     [DevSNB]: This field must be set to the same value (enabled
 	     *     or disabled) as Hierarchical Depth Buffer Enable.
 	     */
+	    DBG("separate stencil without HiZ\n");
 	    fb->_Status = GL_FRAMEBUFFER_UNSUPPORTED;
 	 }
       }
@@ -819,10 +866,29 @@ intel_blit_framebuffer(struct gl_context *ctx,
    if (mask == 0x0)
       return;
 
+#ifndef I915
+   mask = brw_blorp_framebuffer(intel_context(ctx),
+                                srcX0, srcY0, srcX1, srcY1,
+                                dstX0, dstY0, dstX1, dstY1,
+                                mask, filter);
+   if (mask == 0x0)
+      return;
+#endif
+
    _mesa_meta_BlitFramebuffer(ctx,
                               srcX0, srcY0, srcX1, srcY1,
                               dstX0, dstY0, dstX1, dstY1,
                               mask, filter);
+}
+
+/**
+ * This is a no-op except on multisample buffers shared with DRI2.
+ */
+void
+intel_renderbuffer_set_needs_downsample(struct intel_renderbuffer *irb)
+{
+   if (irb->mt && irb->mt->singlesample_mt)
+      irb->mt->need_downsample = true;
 }
 
 void

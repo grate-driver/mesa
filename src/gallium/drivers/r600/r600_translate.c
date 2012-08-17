@@ -23,13 +23,12 @@
  * Authors: Dave Airlie <airlied@redhat.com>
  */
 
-#include "util/u_index_modify.h"
-#include "util/u_inlines.h"
-#include "util/u_upload_mgr.h"
 #include "r600_pipe.h"
+#include "util/u_index_modify.h"
+#include "util/u_upload_mgr.h"
 
 
-void r600_translate_index_buffer(struct r600_pipe_context *r600,
+void r600_translate_index_buffer(struct r600_context *r600,
 				 struct pipe_index_buffer *ib,
 				 unsigned count)
 {
@@ -39,11 +38,11 @@ void r600_translate_index_buffer(struct r600_pipe_context *r600,
 
 	switch (ib->index_size) {
 	case 1:
-		u_upload_alloc(r600->vbuf_mgr->uploader, 0, count * 2,
+		u_upload_alloc(r600->uploader, 0, count * 2,
 			       &out_offset, &out_buffer, &ptr);
 
 		util_shorten_ubyte_elts_to_userptr(
-				&r600->context, ib->buffer, 0, ib->offset, count, ptr);
+				&r600->context, ib, 0, ib->offset, count, ptr);
 
 		pipe_resource_reference(&ib->buffer, NULL);
 		ib->buffer = out_buffer;

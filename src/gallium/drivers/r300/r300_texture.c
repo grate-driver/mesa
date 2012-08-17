@@ -728,7 +728,7 @@ void r300_texture_setup_format_state(struct r300_screen *screen,
                                      unsigned height0_override,
                                      struct r300_texture_format_state *out)
 {
-    struct pipe_resource *pt = &tex->b.b.b;
+    struct pipe_resource *pt = &tex->b.b;
     struct r300_texture_desc *desc = &tex->tex;
     boolean is_r500 = screen->caps.is_r500;
     unsigned width, height, depth;
@@ -843,7 +843,7 @@ boolean r300_resource_get_handle(struct pipe_screen* screen,
                                  struct pipe_resource *texture,
                                  struct winsys_handle *whandle)
 {
-    struct radeon_winsys *rws = (struct radeon_winsys *)screen->winsys;
+    struct radeon_winsys *rws = r300_screen(screen)->rws;
     struct r300_resource* tex = (struct r300_resource*)texture;
 
     if (!tex) {
@@ -863,7 +863,7 @@ static const struct u_resource_vtbl r300_texture_vtbl =
     r300_texture_transfer_map,      /* transfer_map */
     NULL,                           /* transfer_flush_region */
     r300_texture_transfer_unmap,    /* transfer_unmap */
-    u_default_transfer_inline_write /* transfer_inline_write */
+    NULL /* transfer_inline_write */
 };
 
 /* The common texture constructor. */
@@ -883,12 +883,15 @@ r300_texture_create_object(struct r300_screen *rscreen,
         return NULL;
     }
 
-    pipe_reference_init(&tex->b.b.b.reference, 1);
-    tex->b.b.b.screen = &rscreen->screen;
-    tex->b.b.b.usage = base->usage;
-    tex->b.b.b.bind = base->bind;
-    tex->b.b.b.flags = base->flags;
-    tex->b.b.vtbl = &r300_texture_vtbl;
+    if (base->nr_samples > 1)
+        return NULL;
+
+    pipe_reference_init(&tex->b.b.reference, 1);
+    tex->b.b.screen = &rscreen->screen;
+    tex->b.b.usage = base->usage;
+    tex->b.b.bind = base->bind;
+    tex->b.b.flags = base->flags;
+    tex->b.vtbl = &r300_texture_vtbl;
     tex->tex.microtile = microtile;
     tex->tex.macrotile[0] = macrotile;
     tex->tex.stride_in_bytes_override = stride_in_bytes_override;
@@ -914,6 +917,7 @@ r300_texture_create_object(struct r300_screen *rscreen,
 
     rws->buffer_set_tiling(tex->buf, NULL,
             tex->tex.microtile, tex->tex.macrotile[0],
+            0, 0, 0, 0, 0,
             tex->tex.stride_in_bytes[0]);
 
     return tex;
@@ -945,8 +949,8 @@ struct pipe_resource *r300_texture_from_handle(struct pipe_screen *screen,
                                                const struct pipe_resource *base,
                                                struct winsys_handle *whandle)
 {
-    struct radeon_winsys *rws = (struct radeon_winsys*)screen->winsys;
     struct r300_screen *rscreen = r300_screen(screen);
+    struct radeon_winsys *rws = rscreen->rws;
     struct pb_buffer *buffer;
     enum radeon_bo_layout microtile, macrotile;
     unsigned stride;
@@ -963,7 +967,7 @@ struct pipe_resource *r300_texture_from_handle(struct pipe_screen *screen,
     if (!buffer)
         return NULL;
 
-    rws->buffer_get_tiling(buffer, &microtile, &macrotile);
+    rws->buffer_get_tiling(buffer, &microtile, &macrotile, NULL, NULL, NULL, NULL, NULL);
 
     /* Enforce a microtiled zbuffer. */
     if (util_format_is_depth_or_stencil(base->format) &&
@@ -1030,7 +1034,7 @@ struct pipe_surface* r300_create_surface_custom(struct pipe_context * ctx,
 
         /* Height must be aligned to the size of a tile. */
         tile_height = r300_get_pixel_alignment(surface->base.format,
-                                               tex->b.b.b.nr_samples,
+                                               tex->b.b.nr_samples,
                                                tex->tex.microtile,
                                                tex->tex.macrotile[level],
                                                DIM_HEIGHT, 0);

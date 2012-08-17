@@ -33,6 +33,7 @@
 #include "brw_wm.h"
 #include "brw_state.h"
 #include "main/formats.h"
+#include "main/fbobject.h"
 #include "main/samplerobj.h"
 #include "program/prog_parameter.h"
 
@@ -128,8 +129,9 @@ brw_wm_non_glsl_emit(struct brw_context *brw, struct brw_wm_compile *c)
  * Return a bitfield where bit n is set if barycentric interpolation mode n
  * (see enum brw_wm_barycentric_interp_mode) is needed by the fragment shader.
  */
-unsigned
-brw_compute_barycentric_interp_modes(bool shade_model_flat,
+static unsigned
+brw_compute_barycentric_interp_modes(struct brw_context *brw,
+                                     bool shade_model_flat,
                                      const struct gl_fragment_program *fprog)
 {
    unsigned barycentric_interp_modes = 0;
@@ -142,6 +144,7 @@ brw_compute_barycentric_interp_modes(bool shade_model_flat,
    for (attr = 0; attr < FRAG_ATTRIB_MAX; ++attr) {
       enum glsl_interp_qualifier interp_qualifier =
          fprog->InterpQualifier[attr];
+      bool is_centroid = fprog->IsCentroid & BITFIELD64_BIT(attr);
       bool is_gl_Color = attr == FRAG_ATTRIB_COL0 || attr == FRAG_ATTRIB_COL1;
 
       /* Ignore unused inputs. */
@@ -152,14 +155,32 @@ brw_compute_barycentric_interp_modes(bool shade_model_flat,
       if (attr == FRAG_ATTRIB_WPOS || attr == FRAG_ATTRIB_FACE)
          continue;
 
+      /* Determine the set (or sets) of barycentric coordinates needed to
+       * interpolate this variable.  Note that when
+       * brw->needs_unlit_centroid_workaround is set, centroid interpolation
+       * uses PIXEL interpolation for unlit pixels and CENTROID interpolation
+       * for lit pixels, so we need both sets of barycentric coordinates.
+       */
       if (interp_qualifier == INTERP_QUALIFIER_NOPERSPECTIVE) {
-         barycentric_interp_modes |=
-            1 << BRW_WM_NONPERSPECTIVE_PIXEL_BARYCENTRIC;
+         if (is_centroid) {
+            barycentric_interp_modes |=
+               1 << BRW_WM_NONPERSPECTIVE_CENTROID_BARYCENTRIC;
+         }
+         if (!is_centroid || brw->needs_unlit_centroid_workaround) {
+            barycentric_interp_modes |=
+               1 << BRW_WM_NONPERSPECTIVE_PIXEL_BARYCENTRIC;
+         }
       } else if (interp_qualifier == INTERP_QUALIFIER_SMOOTH ||
                  (!(shade_model_flat && is_gl_Color) &&
                   interp_qualifier == INTERP_QUALIFIER_NONE)) {
-         barycentric_interp_modes |=
-            1 << BRW_WM_PERSPECTIVE_PIXEL_BARYCENTRIC;
+         if (is_centroid) {
+            barycentric_interp_modes |=
+               1 << BRW_WM_PERSPECTIVE_CENTROID_BARYCENTRIC;
+         }
+         if (!is_centroid || brw->needs_unlit_centroid_workaround) {
+            barycentric_interp_modes |=
+               1 << BRW_WM_PERSPECTIVE_PIXEL_BARYCENTRIC;
+         }
       }
    }
 
@@ -174,9 +195,7 @@ brw_wm_payload_setup(struct brw_context *brw,
    struct intel_context *intel = &brw->intel;
    bool uses_depth = (c->fp->program.Base.InputsRead &
 		      (1 << FRAG_ATTRIB_WPOS)) != 0;
-   unsigned barycentric_interp_modes =
-      brw_compute_barycentric_interp_modes(c->key.flat_shade,
-                                           &c->fp->program);
+   unsigned barycentric_interp_modes = c->prog_data.barycentric_interp_modes;
    int i;
 
    if (intel->gen >= 6) {
@@ -278,6 +297,10 @@ bool do_wm_prog(struct brw_context *brw,
 
    brw_init_compile(brw, &c->func, c);
 
+   c->prog_data.barycentric_interp_modes =
+      brw_compute_barycentric_interp_modes(brw, c->key.flat_shade,
+                                           &fp->program);
+
    if (prog && prog->_LinkedShaders[MESA_SHADER_FRAGMENT]) {
       if (!brw_wm_fs_emit(brw, c, prog))
 	 return false;
@@ -298,6 +321,10 @@ bool do_wm_prog(struct brw_context *brw,
 
    /* Scratch space is used for register spilling */
    if (c->last_scratch) {
+      perf_debug("Fragment shader triggered register spilling.  "
+                 "Try reducing the number of live scalar values to "
+                 "improve performance.\n");
+
       c->prog_data.total_scratch = brw_get_scratch_size(c->last_scratch);
 
       brw_get_scratch_bo(intel, &brw->wm.scratch_bo,
@@ -320,88 +347,174 @@ bool do_wm_prog(struct brw_context *brw,
    return true;
 }
 
+static bool
+key_debug(const char *name, int a, int b)
+{
+   if (a != b) {
+      perf_debug("  %s %d->%d\n", name, a, b);
+      return true;
+   } else {
+      return false;
+   }
+}
+
+bool
+brw_debug_recompile_sampler_key(const struct brw_sampler_prog_key_data *old_key,
+                                const struct brw_sampler_prog_key_data *key)
+{
+   bool found = false;
+
+   for (unsigned int i = 0; i < BRW_MAX_TEX_UNIT; i++) {
+      found |= key_debug("EXT_texture_swizzle or DEPTH_TEXTURE_MODE",
+                         key->swizzles[i], old_key->swizzles[i]);
+   }
+   found |= key_debug("GL_CLAMP enabled on any texture unit's 1st coordinate",
+                      key->gl_clamp_mask[0], old_key->gl_clamp_mask[0]);
+   found |= key_debug("GL_CLAMP enabled on any texture unit's 2nd coordinate",
+                      key->gl_clamp_mask[1], old_key->gl_clamp_mask[1]);
+   found |= key_debug("GL_CLAMP enabled on any texture unit's 3rd coordinate",
+                      key->gl_clamp_mask[2], old_key->gl_clamp_mask[2]);
+   found |= key_debug("GL_MESA_ycbcr texturing\n",
+                      key->yuvtex_mask, old_key->yuvtex_mask);
+   found |= key_debug("GL_MESA_ycbcr UV swapping\n",
+                      key->yuvtex_swap_mask, old_key->yuvtex_swap_mask);
+
+   return found;
+}
+
+void
+brw_wm_debug_recompile(struct brw_context *brw,
+                       struct gl_shader_program *prog,
+                       const struct brw_wm_prog_key *key)
+{
+   struct brw_cache_item *c = NULL;
+   const struct brw_wm_prog_key *old_key = NULL;
+   bool found = false;
+
+   perf_debug("Recompiling fragment shader for program %d\n", prog->Name);
+
+   for (unsigned int i = 0; i < brw->cache.size; i++) {
+      for (c = brw->cache.items[i]; c; c = c->next) {
+         if (c->cache_id == BRW_WM_PROG) {
+            old_key = c->key;
+
+            if (old_key->program_string_id == key->program_string_id)
+               break;
+         }
+      }
+      if (c)
+         break;
+   }
+
+   if (!c) {
+      perf_debug("  Didn't find previous compile in the shader cache for "
+                 "debug\n");
+      return;
+   }
+
+   found |= key_debug("alphatest, computed depth, depth test, or depth write",
+                      key->iz_lookup, old_key->iz_lookup);
+   found |= key_debug("depth statistics", key->stats_wm, old_key->stats_wm);
+   found |= key_debug("flat shading", key->flat_shade, old_key->flat_shade);
+   found |= key_debug("number of color buffers", key->nr_color_regions, old_key->nr_color_regions);
+   found |= key_debug("rendering to FBO", key->render_to_fbo, old_key->render_to_fbo);
+   found |= key_debug("fragment color clamping", key->clamp_fragment_color, old_key->clamp_fragment_color);
+   found |= key_debug("line smoothing", key->line_aa, old_key->line_aa);
+   found |= key_debug("proj_attrib_mask", key->proj_attrib_mask, old_key->proj_attrib_mask);
+   found |= key_debug("renderbuffer height", key->drawable_height, old_key->drawable_height);
+   found |= key_debug("vertex shader outputs", key->vp_outputs_written, old_key->vp_outputs_written);
+
+   found |= brw_debug_recompile_sampler_key(&key->tex, &old_key->tex);
+
+   if (!found) {
+      perf_debug("  Something else\n");
+   }
+}
+
 void
 brw_populate_sampler_prog_key_data(struct gl_context *ctx,
-				   struct brw_sampler_prog_key_data *key,
-				   int i)
+				   const struct gl_program *prog,
+				   struct brw_sampler_prog_key_data *key)
 {
-   const struct gl_texture_unit *unit = &ctx->Texture.Unit[i];
+   for (int i = 0; i < BRW_MAX_TEX_UNIT; i++) {
+      if (!prog->TexturesUsed[i])
+	 continue;
 
-   if (unit->_ReallyEnabled) {
-      const struct gl_texture_object *t = unit->_Current;
-      const struct gl_texture_image *img = t->Image[0][t->BaseLevel];
-      struct gl_sampler_object *sampler = _mesa_get_samplerobj(ctx, i);
-      int swizzles[SWIZZLE_NIL + 1] = {
-	 SWIZZLE_X,
-	 SWIZZLE_Y,
-	 SWIZZLE_Z,
-	 SWIZZLE_W,
-	 SWIZZLE_ZERO,
-	 SWIZZLE_ONE,
-	 SWIZZLE_NIL
-      };
+      const struct gl_texture_unit *unit = &ctx->Texture.Unit[i];
 
-      if (img->_BaseFormat == GL_DEPTH_COMPONENT ||
-	  img->_BaseFormat == GL_DEPTH_STENCIL) {
-	 if (sampler->CompareMode == GL_COMPARE_R_TO_TEXTURE_ARB)
-	    key->compare_funcs[i] = sampler->CompareFunc;
+      if (unit->_ReallyEnabled && unit->_Current->Target != GL_TEXTURE_BUFFER) {
+	 const struct gl_texture_object *t = unit->_Current;
+	 const struct gl_texture_image *img = t->Image[0][t->BaseLevel];
+	 struct gl_sampler_object *sampler = _mesa_get_samplerobj(ctx, i);
+	 int swizzles[SWIZZLE_NIL + 1] = {
+	    SWIZZLE_X,
+	    SWIZZLE_Y,
+	    SWIZZLE_Z,
+	    SWIZZLE_W,
+	    SWIZZLE_ZERO,
+	    SWIZZLE_ONE,
+	    SWIZZLE_NIL
+	 };
 
-	 /* We handle GL_DEPTH_TEXTURE_MODE here instead of as surface format
-	  * overrides because shadow comparison always returns the result of
-	  * the comparison in all channels anyway.
-	  */
-	 switch (sampler->DepthMode) {
-	 case GL_ALPHA:
-	    swizzles[0] = SWIZZLE_ZERO;
-	    swizzles[1] = SWIZZLE_ZERO;
-	    swizzles[2] = SWIZZLE_ZERO;
-	    swizzles[3] = SWIZZLE_X;
-	    break;
-	 case GL_LUMINANCE:
-	    swizzles[0] = SWIZZLE_X;
-	    swizzles[1] = SWIZZLE_X;
-	    swizzles[2] = SWIZZLE_X;
-	    swizzles[3] = SWIZZLE_ONE;
-	    break;
-	 case GL_INTENSITY:
-	    swizzles[0] = SWIZZLE_X;
-	    swizzles[1] = SWIZZLE_X;
-	    swizzles[2] = SWIZZLE_X;
-	    swizzles[3] = SWIZZLE_X;
-	    break;
-	 case GL_RED:
-	    swizzles[0] = SWIZZLE_X;
-	    swizzles[1] = SWIZZLE_ZERO;
-	    swizzles[2] = SWIZZLE_ZERO;
-	    swizzles[3] = SWIZZLE_ONE;
-	    break;
+	 if (img->_BaseFormat == GL_DEPTH_COMPONENT ||
+	     img->_BaseFormat == GL_DEPTH_STENCIL) {
+	    /* We handle GL_DEPTH_TEXTURE_MODE here instead of as surface
+	     * format overrides because shadow comparison always returns the
+	     * result of the comparison in all channels anyway.
+	     */
+	    switch (t->DepthMode) {
+	    case GL_ALPHA:
+	       swizzles[0] = SWIZZLE_ZERO;
+	       swizzles[1] = SWIZZLE_ZERO;
+	       swizzles[2] = SWIZZLE_ZERO;
+	       swizzles[3] = SWIZZLE_X;
+	       break;
+	    case GL_LUMINANCE:
+	       swizzles[0] = SWIZZLE_X;
+	       swizzles[1] = SWIZZLE_X;
+	       swizzles[2] = SWIZZLE_X;
+	       swizzles[3] = SWIZZLE_ONE;
+	       break;
+	    case GL_INTENSITY:
+	       swizzles[0] = SWIZZLE_X;
+	       swizzles[1] = SWIZZLE_X;
+	       swizzles[2] = SWIZZLE_X;
+	       swizzles[3] = SWIZZLE_X;
+	       break;
+	    case GL_RED:
+	       swizzles[0] = SWIZZLE_X;
+	       swizzles[1] = SWIZZLE_ZERO;
+	       swizzles[2] = SWIZZLE_ZERO;
+	       swizzles[3] = SWIZZLE_ONE;
+	       break;
+	    }
+	 }
+
+	 if (img->InternalFormat == GL_YCBCR_MESA) {
+	    key->yuvtex_mask |= 1 << i;
+	    if (img->TexFormat == MESA_FORMAT_YCBCR)
+		key->yuvtex_swap_mask |= 1 << i;
+	 }
+
+	 key->swizzles[i] =
+	    MAKE_SWIZZLE4(swizzles[GET_SWZ(t->_Swizzle, 0)],
+			  swizzles[GET_SWZ(t->_Swizzle, 1)],
+			  swizzles[GET_SWZ(t->_Swizzle, 2)],
+			  swizzles[GET_SWZ(t->_Swizzle, 3)]);
+
+	 if (sampler->MinFilter != GL_NEAREST &&
+	     sampler->MagFilter != GL_NEAREST) {
+	    if (sampler->WrapS == GL_CLAMP)
+	       key->gl_clamp_mask[0] |= 1 << i;
+	    if (sampler->WrapT == GL_CLAMP)
+	       key->gl_clamp_mask[1] |= 1 << i;
+	    if (sampler->WrapR == GL_CLAMP)
+	       key->gl_clamp_mask[2] |= 1 << i;
 	 }
       }
-
-      if (img->InternalFormat == GL_YCBCR_MESA) {
-	 key->yuvtex_mask |= 1 << i;
-	 if (img->TexFormat == MESA_FORMAT_YCBCR)
-	     key->yuvtex_swap_mask |= 1 << i;
+      else {
+	 key->swizzles[i] = SWIZZLE_NOOP;
       }
-
-      key->swizzles[i] =
-	 MAKE_SWIZZLE4(swizzles[GET_SWZ(t->_Swizzle, 0)],
-		       swizzles[GET_SWZ(t->_Swizzle, 1)],
-		       swizzles[GET_SWZ(t->_Swizzle, 2)],
-		       swizzles[GET_SWZ(t->_Swizzle, 3)]);
-
-      if (sampler->MinFilter != GL_NEAREST &&
-	  sampler->MagFilter != GL_NEAREST) {
-	 if (sampler->WrapS == GL_CLAMP)
-	    key->gl_clamp_mask[0] |= 1 << i;
-	 if (sampler->WrapT == GL_CLAMP)
-	    key->gl_clamp_mask[1] |= 1 << i;
-	 if (sampler->WrapR == GL_CLAMP)
-	    key->gl_clamp_mask[2] |= 1 << i;
-      }
-   }
-   else {
-      key->swizzles[i] = SWIZZLE_NOOP;
    }
 }
 
@@ -409,42 +522,43 @@ static void brw_wm_populate_key( struct brw_context *brw,
 				 struct brw_wm_prog_key *key )
 {
    struct gl_context *ctx = &brw->intel.ctx;
+   struct intel_context *intel = &brw->intel;
    /* BRW_NEW_FRAGMENT_PROGRAM */
    const struct brw_fragment_program *fp = 
       (struct brw_fragment_program *)brw->fragment_program;
    const struct gl_program *prog = (struct gl_program *) brw->fragment_program;
    GLuint lookup = 0;
    GLuint line_aa;
-   GLuint i;
+   bool program_uses_dfdy = fp->program.UsesDFdy;
 
    memset(key, 0, sizeof(*key));
 
    /* Build the index for table lookup
     */
-   /* _NEW_COLOR */
-   key->alpha_test = ctx->Color.AlphaEnabled;
-   if (fp->program.UsesKill ||
-       ctx->Color.AlphaEnabled)
-      lookup |= IZ_PS_KILL_ALPHATEST_BIT;
+   if (intel->gen < 6) {
+      /* _NEW_COLOR */
+      if (fp->program.UsesKill || ctx->Color.AlphaEnabled)
+	 lookup |= IZ_PS_KILL_ALPHATEST_BIT;
 
-   if (fp->program.Base.OutputsWritten & BITFIELD64_BIT(FRAG_RESULT_DEPTH))
-      lookup |= IZ_PS_COMPUTES_DEPTH_BIT;
+      if (fp->program.Base.OutputsWritten & BITFIELD64_BIT(FRAG_RESULT_DEPTH))
+	 lookup |= IZ_PS_COMPUTES_DEPTH_BIT;
 
-   /* _NEW_DEPTH */
-   if (ctx->Depth.Test)
-      lookup |= IZ_DEPTH_TEST_ENABLE_BIT;
+      /* _NEW_DEPTH */
+      if (ctx->Depth.Test)
+	 lookup |= IZ_DEPTH_TEST_ENABLE_BIT;
 
-   if (ctx->Depth.Test &&  
-       ctx->Depth.Mask) /* ?? */
-      lookup |= IZ_DEPTH_WRITE_ENABLE_BIT;
+      if (ctx->Depth.Test && ctx->Depth.Mask) /* ?? */
+	 lookup |= IZ_DEPTH_WRITE_ENABLE_BIT;
 
-   /* _NEW_STENCIL */
-   if (ctx->Stencil._Enabled) {
-      lookup |= IZ_STENCIL_TEST_ENABLE_BIT;
+      /* _NEW_STENCIL */
+      if (ctx->Stencil._Enabled) {
+	 lookup |= IZ_STENCIL_TEST_ENABLE_BIT;
 
-      if (ctx->Stencil.WriteMask[0] ||
-	  ctx->Stencil.WriteMask[ctx->Stencil._BackFace])
-	 lookup |= IZ_STENCIL_WRITE_ENABLE_BIT;
+	 if (ctx->Stencil.WriteMask[0] ||
+	     ctx->Stencil.WriteMask[ctx->Stencil._BackFace])
+	    lookup |= IZ_STENCIL_WRITE_ENABLE_BIT;
+      }
+      key->iz_lookup = lookup;
    }
 
    line_aa = AA_NEVER;
@@ -473,7 +587,6 @@ static void brw_wm_populate_key( struct brw_context *brw,
       }
    }
 
-   key->iz_lookup = lookup;
    key->line_aa = line_aa;
    key->stats_wm = brw->intel.stats_wm;
 
@@ -487,10 +600,7 @@ static void brw_wm_populate_key( struct brw_context *brw,
    key->clamp_fragment_color = ctx->Color._ClampFragmentColor;
 
    /* _NEW_TEXTURE */
-   for (i = 0; i < BRW_MAX_TEX_UNIT; i++) {
-      if (prog->TexturesUsed[i])
-	 brw_populate_sampler_prog_key_data(ctx, &key->tex, i);
-   }
+   brw_populate_sampler_prog_key_data(ctx, prog, &key->tex);
 
    /* _NEW_BUFFERS */
    /*
@@ -515,7 +625,10 @@ static void brw_wm_populate_key( struct brw_context *brw,
     */
    if (fp->program.Base.InputsRead & FRAG_BIT_WPOS) {
       key->drawable_height = ctx->DrawBuffer->Height;
-      key->render_to_fbo = ctx->DrawBuffer->Name != 0;
+   }
+
+   if ((fp->program.Base.InputsRead & FRAG_BIT_WPOS) || program_uses_dfdy) {
+      key->render_to_fbo = _mesa_is_user_fbo(ctx->DrawBuffer);
    }
 
    /* _NEW_BUFFERS */

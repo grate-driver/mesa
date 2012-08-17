@@ -39,6 +39,7 @@
 
 #include "pipe/p_context.h"
 #include "pipe/p_defines.h"
+#include "pipe/p_screen.h"
 #include "st_context.h"
 #include "st_cb_queryobj.h"
 #include "st_cb_bitmap.h"
@@ -133,6 +134,11 @@ st_EndQuery(struct gl_context *ctx, struct gl_query_object *q)
 
    st_flush_bitmap_cache(st_context(ctx));
 
+   if (q->Target == GL_TIMESTAMP && !stq->pq) {
+      stq->pq = pipe->create_query(pipe, PIPE_QUERY_TIMESTAMP);
+      stq->type = PIPE_QUERY_TIMESTAMP;
+   }
+
    pipe->end_query(pipe, stq->pq);
 }
 
@@ -150,7 +156,7 @@ st_WaitQuery(struct gl_context *ctx, struct gl_query_object *q)
 	  !pipe->get_query_result(pipe, 
 				  stq->pq,
 				  TRUE,
-				  &q->Result))
+				  (void*)&q->Result))
    {
       /* nothing */
    }
@@ -165,10 +171,17 @@ st_CheckQuery(struct gl_context *ctx, struct gl_query_object *q)
    struct pipe_context *pipe = st_context(ctx)->pipe;
    struct st_query_object *stq = st_query_object(q);
    assert(!q->Ready);   /* we should not get called if Ready is TRUE */
-   q->Ready = pipe->get_query_result(pipe, stq->pq, FALSE, &q->Result);
+   q->Ready = pipe->get_query_result(pipe, stq->pq, FALSE, (void*)&q->Result);
 }
 
 
+static uint64_t
+st_GetTimestamp(struct gl_context *ctx)
+{
+   struct pipe_screen *screen = st_context(ctx)->pipe->screen;
+
+   return screen->get_timestamp(screen);
+}
 
 
 void st_init_query_functions(struct dd_function_table *functions)
@@ -179,6 +192,7 @@ void st_init_query_functions(struct dd_function_table *functions)
    functions->EndQuery = st_EndQuery;
    functions->WaitQuery = st_WaitQuery;
    functions->CheckQuery = st_CheckQuery;
+   functions->GetTimestamp = st_GetTimestamp;
 }
 
 #endif /* FEATURE_queryobj */

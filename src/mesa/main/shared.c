@@ -71,13 +71,15 @@ _mesa_alloc_shared_state(struct gl_context *ctx)
    shared->Programs = _mesa_NewHashTable();
 
 #if FEATURE_ARB_vertex_program
-   shared->DefaultVertexProgram = (struct gl_vertex_program *)
-      ctx->Driver.NewProgram(ctx, GL_VERTEX_PROGRAM_ARB, 0);
+   shared->DefaultVertexProgram =
+      gl_vertex_program(ctx->Driver.NewProgram(ctx,
+                                               GL_VERTEX_PROGRAM_ARB, 0));
 #endif
 
 #if FEATURE_ARB_fragment_program
-   shared->DefaultFragmentProgram = (struct gl_fragment_program *)
-      ctx->Driver.NewProgram(ctx, GL_FRAGMENT_PROGRAM_ARB, 0);
+   shared->DefaultFragmentProgram =
+      gl_fragment_program(ctx->Driver.NewProgram(ctx,
+                                                 GL_FRAGMENT_PROGRAM_ARB, 0));
 #endif
 
 #if FEATURE_ATI_fragment_shader
@@ -307,9 +309,11 @@ free_shared_state(struct gl_context *ctx, struct gl_shared_state *shared)
 {
    GLuint i;
 
-   /* Free the dummy/fallback texture object */
-   if (shared->FallbackTex)
-      ctx->Driver.DeleteTexture(ctx, shared->FallbackTex);
+   /* Free the dummy/fallback texture objects */
+   for (i = 0; i < NUM_TEXTURE_TARGETS; i++) {
+      if (shared->FallbackTex[i])
+         ctx->Driver.DeleteTexture(ctx, shared->FallbackTex[i]);
+   }
 
    /*
     * Free display lists

@@ -167,6 +167,8 @@
 
 #define BRW_SPRITE_POINT_ENABLE  16
 
+#define BRW_CUT_INDEX_ENABLE     (1 << 10)
+
 #define BRW_INDEX_BYTE     0
 #define BRW_INDEX_WORD     1
 #define BRW_INDEX_DWORD    2
@@ -437,6 +439,9 @@
 #define BRW_SURFACE_BUFFER  4
 #define BRW_SURFACE_NULL    7
 
+#define GEN7_SURFACE_ARYSPC_FULL	0
+#define GEN7_SURFACE_ARYSPC_LOD0	1
+
 /* Surface state DW2 */
 #define BRW_SURFACE_HEIGHT_SHIFT	19
 #define BRW_SURFACE_HEIGHT_MASK		INTEL_MASK(31, 19)
@@ -456,6 +461,13 @@
 /* Surface state DW4 */
 #define BRW_SURFACE_MIN_LOD_SHIFT	28
 #define BRW_SURFACE_MIN_LOD_MASK	INTEL_MASK(31, 28)
+#define BRW_SURFACE_MULTISAMPLECOUNT_1  (0 << 4)
+#define BRW_SURFACE_MULTISAMPLECOUNT_4  (2 << 4)
+#define GEN7_SURFACE_MULTISAMPLECOUNT_1 0
+#define GEN7_SURFACE_MULTISAMPLECOUNT_4 2
+#define GEN7_SURFACE_MULTISAMPLECOUNT_8 3
+#define GEN7_SURFACE_MSFMT_MSS			0
+#define GEN7_SURFACE_MSFMT_DEPTH_STENCIL	1
 
 /* Surface state DW5 */
 #define BRW_SURFACE_X_OFFSET_SHIFT		25
@@ -463,6 +475,14 @@
 #define BRW_SURFACE_VERTICAL_ALIGN_ENABLE	(1 << 24)
 #define BRW_SURFACE_Y_OFFSET_SHIFT		20
 #define BRW_SURFACE_Y_OFFSET_MASK		INTEL_MASK(23, 20)
+
+/* Surface state DW7 */
+#define HSW_SCS_ZERO                     0
+#define HSW_SCS_ONE                      1
+#define HSW_SCS_RED                      4
+#define HSW_SCS_GREEN                    5
+#define HSW_SCS_BLUE                     6
+#define HSW_SCS_ALPHA                    7
 
 #define BRW_TEXCOORDMODE_WRAP            0
 #define BRW_TEXCOORDMODE_MIRROR          1
@@ -620,6 +640,7 @@ enum opcode {
    BRW_OPCODE_DPA2 =	88,
    BRW_OPCODE_LINE =	89,
    BRW_OPCODE_PLN =	90,
+   BRW_OPCODE_MAD =	91,
    BRW_OPCODE_NOP =	126,
 
    /* These are compiler backend opcodes that get translated into other
@@ -654,6 +675,7 @@ enum opcode {
    FS_OPCODE_SPILL,
    FS_OPCODE_UNSPILL,
    FS_OPCODE_PULL_CONSTANT_LOAD,
+   FS_OPCODE_MOV_DISPATCH_TO_FLAGS,
 
    VS_OPCODE_URB_WRITE,
    VS_OPCODE_SCRATCH_READ,
@@ -816,6 +838,9 @@ enum brw_message_target {
 #define GEN5_SAMPLER_MESSAGE_SAMPLE_LOD_COMPARE  6
 #define GEN5_SAMPLER_MESSAGE_SAMPLE_LD           7
 #define GEN5_SAMPLER_MESSAGE_SAMPLE_RESINFO      10
+#define GEN7_SAMPLER_MESSAGE_SAMPLE_LD_MCS       29
+#define GEN7_SAMPLER_MESSAGE_SAMPLE_LD2DMS       30
+#define GEN7_SAMPLER_MESSAGE_SAMPLE_LD2DSS       31
 
 /* for GEN5 only */
 #define BRW_SAMPLER_SIMD_MODE_SIMD4X2                   0
@@ -983,6 +1008,7 @@ enum brw_message_target {
 # define BRW_VE0_FORMAT_SHIFT		16
 # define BRW_VE0_VALID			(1 << 26)
 # define GEN6_VE0_VALID			(1 << 25)
+# define GEN6_VE0_EDGE_FLAG_ENABLE	(1 << 15)
 # define BRW_VE0_SRC_OFFSET_SHIFT	0
 # define BRW_VE1_COMPONENT_NOSTORE	0
 # define BRW_VE1_COMPONENT_STORE_SRC	1
@@ -1046,6 +1072,7 @@ enum brw_message_target {
 # define GEN6_VS_URB_ENTRY_READ_OFFSET_SHIFT		4
 /* DW5 */
 # define GEN6_VS_MAX_THREADS_SHIFT			25
+# define HSW_VS_MAX_THREADS_SHIFT			23
 # define GEN6_VS_STATISTICS_ENABLE			(1 << 10)
 # define GEN6_VS_CACHE_DISABLE				(1 << 1)
 # define GEN6_VS_ENABLE					(1 << 0)
@@ -1208,6 +1235,8 @@ enum brw_message_target {
  */
 /* GEN7/DW1: */
 # define GEN7_SF_DEPTH_BUFFER_SURFACE_FORMAT_SHIFT	12
+/* GEN7/DW2: */
+# define HSW_SF_LINE_STIPPLE_ENABLE			14
 
 #define _3DSTATE_SBE				0x781F /* GEN7+ */
 /* DW1 */
@@ -1232,6 +1261,10 @@ enum brw_wm_barycentric_interp_mode {
    BRW_WM_NONPERSPECTIVE_SAMPLE_BARYCENTRIC	= 5,
    BRW_WM_BARYCENTRIC_INTERP_MODE_COUNT  = 6
 };
+#define BRW_WM_NONPERSPECTIVE_BARYCENTRIC_BITS \
+   ((1 << BRW_WM_NONPERSPECTIVE_PIXEL_BARYCENTRIC) | \
+    (1 << BRW_WM_NONPERSPECTIVE_CENTROID_BARYCENTRIC) | \
+    (1 << BRW_WM_NONPERSPECTIVE_SAMPLE_BARYCENTRIC))
 
 #define _3DSTATE_WM				0x7814 /* GEN6+ */
 /* DW1: kernel pointer */
@@ -1293,6 +1326,7 @@ enum brw_wm_barycentric_interp_mode {
 # define GEN6_WM_MSRAST_OFF_PATTERN			(1 << 1)
 # define GEN6_WM_MSRAST_ON_PIXEL			(2 << 1)
 # define GEN6_WM_MSRAST_ON_PATTERN			(3 << 1)
+# define GEN6_WM_MSDISPMODE_PERSAMPLE			(0 << 0)
 # define GEN6_WM_MSDISPMODE_PERPIXEL			(1 << 0)
 /* DW7: kernel 1 pointer */
 /* DW8: kernel 2 pointer */
@@ -1376,6 +1410,7 @@ enum brw_wm_barycentric_interp_mode {
 # define GEN7_WM_MSRAST_ON_PIXEL			(2 << 0)
 # define GEN7_WM_MSRAST_ON_PATTERN			(3 << 0)
 /* DW2 */
+# define GEN7_WM_MSDISPMODE_PERSAMPLE			(0 << 31)
 # define GEN7_WM_MSDISPMODE_PERPIXEL			(1 << 31)
 
 #define _3DSTATE_PS				0x7820 /* GEN7+ */
@@ -1389,7 +1424,10 @@ enum brw_wm_barycentric_interp_mode {
 # define GEN7_PS_FLOATING_POINT_MODE_ALT		(1 << 16)
 /* DW3: scratch space */
 /* DW4 */
-# define GEN7_PS_MAX_THREADS_SHIFT			24
+# define IVB_PS_MAX_THREADS_SHIFT			24
+# define HSW_PS_MAX_THREADS_SHIFT			23
+# define HSW_PS_SAMPLE_MASK_SHIFT		        12
+# define HSW_PS_SAMPLE_MASK_MASK			INTEL_MASK(19, 12)
 # define GEN7_PS_PUSH_CONSTANT_ENABLE		        (1 << 11)
 # define GEN7_PS_ATTRIBUTE_ENABLE		        (1 << 10)
 # define GEN7_PS_OMASK_TO_RENDER_TARGET			(1 << 9)
@@ -1440,11 +1478,14 @@ enum brw_wm_barycentric_interp_mode {
 #define GEN7_3DSTATE_CLEAR_PARAMS		0x7804
 #define GEN7_3DSTATE_DEPTH_BUFFER		0x7805
 #define GEN7_3DSTATE_STENCIL_BUFFER		0x7806
+# define HSW_STENCIL_ENABLED                            (1 << 31)
 #define GEN7_3DSTATE_HIER_DEPTH_BUFFER		0x7807
 
 #define _3DSTATE_CLEAR_PARAMS			0x7910 /* ILK, SNB */
-# define DEPTH_CLEAR_VALID				(1 << 15)
+# define GEN5_DEPTH_CLEAR_VALID				(1 << 15)
 /* DW1: depth clear value */
+/* DW2 */
+# define GEN7_DEPTH_CLEAR_VALID				(1 << 0)
 
 #define _3DSTATE_SO_DECL_LIST			0x7917 /* GEN7+ */
 /* DW1 */

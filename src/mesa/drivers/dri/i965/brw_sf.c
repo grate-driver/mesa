@@ -32,7 +32,9 @@
 
 #include "main/glheader.h"
 #include "main/macros.h"
+#include "main/mtypes.h"
 #include "main/enums.h"
+#include "main/fbobject.h"
 
 #include "intel_batchbuffer.h"
 
@@ -63,7 +65,7 @@ static void compile_sf_prog( struct brw_context *brw,
    brw_init_compile(brw, &c.func, mem_ctx);
 
    c.key = *key;
-   brw_compute_vue_map(&c.vue_map, intel, c.key.userclip_active, c.key.attrs);
+   c.vue_map = brw->vs.prog_data->vue_map;
    if (c.key.do_point_coord) {
       /*
        * gl_PointCoord is a FS instead of VS builtin variable, thus it's
@@ -136,7 +138,7 @@ brw_upload_sf_prog(struct brw_context *brw)
    struct gl_context *ctx = &brw->intel.ctx;
    struct brw_sf_prog_key key;
    /* _NEW_BUFFERS */
-   bool render_to_fbo = ctx->DrawBuffer->Name != 0;
+   bool render_to_fbo = _mesa_is_user_fbo(ctx->DrawBuffer);
 
    memset(&key, 0, sizeof(key));
 

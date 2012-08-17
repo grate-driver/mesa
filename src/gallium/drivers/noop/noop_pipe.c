@@ -68,7 +68,8 @@ static void noop_end_query(struct pipe_context *ctx, struct pipe_query *query)
 
 static boolean noop_get_query_result(struct pipe_context *ctx,
 					struct pipe_query *query,
-					boolean wait, void *vresult)
+					boolean wait,
+					union pipe_query_result *vresult)
 {
 	uint64_t *result = (uint64_t*)vresult;
 
@@ -139,23 +140,6 @@ static void noop_resource_destroy(struct pipe_screen *screen,
 
 	FREE(nresource->data);
 	FREE(resource);
-}
-
-static struct pipe_resource *noop_user_buffer_create(struct pipe_screen *screen,
-							void *ptr, unsigned bytes,
-							unsigned bind)
-{
-	struct pipe_resource templ;
-
-	templ.target = PIPE_BUFFER;
-	templ.format = PIPE_FORMAT_R8_UNORM;
-	templ.usage = PIPE_USAGE_IMMUTABLE;
-	templ.bind = bind;
-	templ.width0 = bytes;
-	templ.height0 = 1;
-	templ.depth0 = 1;
-	templ.flags = 0;
-	return noop_resource_create(screen, &templ);
 }
 
 
@@ -276,7 +260,6 @@ static struct pipe_context *noop_create_context(struct pipe_screen *screen, void
 
 	if (ctx == NULL)
 		return NULL;
-	ctx->winsys = screen->winsys;
 	ctx->screen = screen;
 	ctx->priv = priv;
 	ctx->destroy = noop_destroy_context;
@@ -355,6 +338,11 @@ static boolean noop_is_format_supported(struct pipe_screen* pscreen,
 	return screen->is_format_supported(screen, format, target, sample_count, usage);
 }
 
+static uint64_t noop_get_timestamp(struct pipe_screen *pscreen)
+{
+	return 0;
+}
+
 static void noop_destroy_screen(struct pipe_screen *screen)
 {
 	struct noop_pipe_screen *noop_screen = (struct noop_pipe_screen*)screen;
@@ -380,7 +368,6 @@ struct pipe_screen *noop_screen_create(struct pipe_screen *oscreen)
 	noop_screen->oscreen = oscreen;
 	screen = &noop_screen->pscreen;
 
-	screen->winsys = oscreen->winsys;
 	screen->destroy = noop_destroy_screen;
 	screen->get_name = noop_get_name;
 	screen->get_vendor = noop_get_vendor;
@@ -393,8 +380,8 @@ struct pipe_screen *noop_screen_create(struct pipe_screen *oscreen)
 	screen->resource_from_handle = noop_resource_from_handle;
 	screen->resource_get_handle = noop_resource_get_handle;
 	screen->resource_destroy = noop_resource_destroy;
-	screen->user_buffer_create = noop_user_buffer_create;
 	screen->flush_frontbuffer = noop_flush_frontbuffer;
+        screen->get_timestamp = noop_get_timestamp;
 
 	return screen;
 }

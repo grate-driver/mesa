@@ -43,6 +43,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "main/glheader.h"
 #include "main/texformat.h"
 #include "main/renderbuffer.h"
+#include "main/samplerobj.h"
 #include "swrast/swrast.h"
 #include "swrast/s_renderbuffer.h"
 
@@ -66,6 +67,8 @@ radeon_renderbuffer_map(struct gl_context *ctx, struct gl_renderbuffer *rb)
 
 	rrb->base.Map = map;
 	rrb->base.RowStride = stride;
+	/* No floating point color buffers, use GLubytes */
+	rrb->base.ColorType = GL_UNSIGNED_BYTE;
 }
 
 static void
@@ -122,7 +125,8 @@ static void radeonSpanRenderStart(struct gl_context * ctx)
 
 	for (i = 0; i < ctx->Const.MaxTextureImageUnits; i++) {
 		if (ctx->Texture.Unit[i]._ReallyEnabled) {
-			radeon_validate_texture_miptree(ctx, ctx->Texture.Unit[i]._Current);
+			radeon_validate_texture_miptree(ctx, _mesa_get_samplerobj(ctx, i),
+							ctx->Texture.Unit[i]._Current);
 			radeon_swrast_map_texture_images(ctx, ctx->Texture.Unit[i]._Current);
 		}
 	}

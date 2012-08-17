@@ -1,0 +1,55 @@
+
+GENERATED_SOURCES := \
+	R600Intrinsics.td		\
+	R600RegisterInfo.td		\
+	SIRegisterInfo.td		\
+	SIRegisterGetHWRegNum.inc		\
+	AMDGPUGenRegisterInfo.inc	\
+	AMDGPUGenInstrInfo.inc		\
+	AMDGPUGenAsmWriter.inc		\
+	AMDGPUGenDAGISel.inc		\
+	AMDGPUGenCallingConv.inc		\
+	AMDGPUGenSubtargetInfo.inc		\
+	AMDGPUGenEDInfo.inc		\
+	AMDGPUGenIntrinsics.inc		\
+	AMDGPUGenCodeEmitter.inc	\
+	AMDGPUGenDFAPacketizer.inc
+
+CPP_SOURCES := \
+	AMDIL7XXDevice.cpp		\
+	AMDILCFGStructurizer.cpp	\
+	AMDILDevice.cpp			\
+	AMDILDeviceInfo.cpp		\
+	AMDILEvergreenDevice.cpp	\
+	AMDILFrameLowering.cpp		\
+	AMDILIntrinsicInfo.cpp		\
+	AMDILISelDAGToDAG.cpp		\
+	AMDILISelLowering.cpp		\
+	AMDILNIDevice.cpp		\
+	AMDILPeepholeOptimizer.cpp	\
+	AMDILSIDevice.cpp		\
+	AMDGPUSubtarget.cpp		\
+	AMDGPUTargetMachine.cpp		\
+	AMDGPUISelLowering.cpp		\
+	AMDGPUConvertToISA.cpp		\
+	AMDGPUInstrInfo.cpp		\
+	AMDGPURegisterInfo.cpp		\
+	R600CodeEmitter.cpp		\
+	R600ISelLowering.cpp		\
+	R600InstrInfo.cpp		\
+	R600KernelParameters.cpp	\
+	R600MachineFunctionInfo.cpp	\
+	R600RegisterInfo.cpp		\
+	SIAssignInterpRegs.cpp		\
+	SICodeEmitter.cpp		\
+	SIInstrInfo.cpp			\
+	SIISelLowering.cpp		\
+	SIMachineFunctionInfo.cpp	\
+	SIRegisterInfo.cpp		\
+	MCTargetDesc/AMDILMCAsmInfo.cpp	\
+	MCTargetDesc/AMDILMCTargetDesc.cpp	\
+	TargetInfo/AMDILTargetInfo.cpp	\
+	radeon_llvm_emit.cpp
+
+C_SOURCES := \
+	radeon_setup_tgsi_llvm.c

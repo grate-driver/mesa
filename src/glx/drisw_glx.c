@@ -433,6 +433,7 @@ drisw_create_context_attribs(struct glx_screen *base,
    uint32_t major_ver = 0;
    uint32_t flags = 0;
    unsigned api;
+   int reset = __DRI_CTX_RESET_NO_NOTIFICATION;
    uint32_t ctx_attribs[2 * 4];
    unsigned num_ctx_attribs = 0;
 
@@ -445,8 +446,11 @@ drisw_create_context_attribs(struct glx_screen *base,
    /* Remap the GLX tokens to DRI2 tokens.
     */
    if (!dri2_convert_glx_attribs(num_attribs, attribs,
-				 &major_ver, &minor_ver, &flags, &api,
+				 &major_ver, &minor_ver, &flags, &api, &reset,
 				 error))
+      return NULL;
+
+   if (reset != __DRI_CTX_RESET_NO_NOTIFICATION)
       return NULL;
 
    if (shareList) {
@@ -578,13 +582,15 @@ driswDestroyScreen(struct glx_screen *base)
       dlclose(psc->driver);
 }
 
+#define SWRAST_DRIVER_NAME "swrast"
+
 static void *
 driOpenSwrast(void)
 {
    void *driver = NULL;
 
    if (driver == NULL)
-      driver = driOpenDriver("swrast");
+      driver = driOpenDriver(SWRAST_DRIVER_NAME);
 
    return driver;
 }
@@ -709,7 +715,7 @@ driswCreateScreen(int screen, struct glx_display *priv)
    glx_screen_cleanup(&psc->base);
    Xfree(psc);
 
-   ErrorMessageF("reverting to indirect rendering\n");
+   CriticalErrorMessageF("failed to load driver: %s\n", SWRAST_DRIVER_NAME);
 
    return NULL;
 }

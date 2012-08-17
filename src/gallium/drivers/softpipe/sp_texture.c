@@ -454,7 +454,7 @@ softpipe_transfer_unmap(struct pipe_context *pipe,
 /**
  * Create buffer which wraps user-space data.
  */
-static struct pipe_resource *
+struct pipe_resource *
 softpipe_user_buffer_create(struct pipe_screen *screen,
                             void *ptr,
                             unsigned bytes,
@@ -506,6 +506,4 @@ softpipe_init_screen_texture_funcs(struct pipe_screen *screen)
    screen->resource_destroy = softpipe_resource_destroy;
    screen->resource_from_handle = softpipe_resource_from_handle;
    screen->resource_get_handle = softpipe_resource_get_handle;
-   screen->user_buffer_create = softpipe_user_buffer_create;
-
 }

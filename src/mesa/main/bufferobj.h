@@ -89,6 +89,8 @@ _mesa_reference_buffer_object(struct gl_context *ctx,
       _mesa_reference_buffer_object_(ctx, ptr, bufObj);
 }
 
+extern GLuint
+_mesa_total_buffer_object_memory(struct gl_context *ctx);
 
 extern void
 _mesa_init_buffer_object_functions(struct dd_function_table *driver);
@@ -156,5 +158,16 @@ _mesa_ObjectUnpurgeableAPPLE(GLenum objectType, GLuint name, GLenum option);
 extern void GLAPIENTRY
 _mesa_GetObjectParameterivAPPLE(GLenum objectType, GLuint name, GLenum pname, GLint* params);
 #endif
+
+void GLAPIENTRY
+_mesa_BindBufferBase(GLenum target, GLuint index, GLuint buffer);
+
+void GLAPIENTRY
+_mesa_BindBufferRange(GLenum target, GLuint index,
+                      GLuint buffer, GLintptr offset, GLsizeiptr size);
+
+extern void
+_mesa_init_bufferobj_dispatch(struct gl_context *ctx,
+                              struct _glapi_table *disp);
 
 #endif

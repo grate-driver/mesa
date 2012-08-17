@@ -18,6 +18,14 @@ endif
 
 include ../Makefile.template
 
+default install clean: %: subdirs-%
+
+subdirs-%:
+	@for dir in $(SUBDIRS) ; do \
+		if [ -d $$dir ] ; then \
+			(cd $$dir && $(MAKE) $*) || exit 1; \
+		fi \
+	done
 
 indices/u_indices_gen.c: indices/u_indices_gen.py
 	$(PYTHON2) $< > $@
@@ -31,6 +39,4 @@ util/u_format_srgb.c: util/u_format_srgb.py
 util/u_format_table.c: util/u_format_table.py util/u_format_pack.py util/u_format_parse.py util/u_format.csv
 	$(PYTHON2) util/u_format_table.py util/u_format.csv > $@
 
-util/u_half.c: util/u_half.py
-	$(PYTHON2) util/u_half.py > $@
 # DO NOT DELETE

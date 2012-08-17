@@ -20,14 +20,12 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
  * USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-#include <stdio.h>
-#include <errno.h>
-#include "util/u_memory.h"
 #include "r600_pipe.h"
-#include "r600_asm.h"
-#include "eg_sq.h"
 #include "r600_opcodes.h"
-#include "evergreend.h"
+
+#include "util/u_memory.h"
+#include "eg_sq.h"
+#include <errno.h>
 
 int eg_bytecode_cf_build(struct r600_bytecode *bc, struct r600_bytecode_cf *cf)
 {
@@ -134,6 +132,10 @@ int eg_bytecode_cf_build(struct r600_bytecode *bc, struct r600_bytecode_cf *cf)
 					S_SQ_CF_WORD1_BARRIER(1) |
 					S_SQ_CF_WORD1_COND(cf->cond) |
 					S_SQ_CF_WORD1_POP_COUNT(cf->pop_count);
+		break;
+	case CF_NATIVE:
+		bc->bytecode[id++] = cf->isa[0];
+		bc->bytecode[id++] = cf->isa[1];
 		break;
 	default:
 		R600_ERR("unsupported CF instruction (0x%X)\n", cf->inst);

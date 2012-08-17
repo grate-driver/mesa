@@ -38,7 +38,7 @@
 
 #include "compiler.h"
 #include "glheader.h"
-
+#include "errors.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -99,21 +99,13 @@ typedef union { GLfloat f; GLint i; } fi_type;
 /***
  *** SQRTF: single-precision square root
  ***/
-#if 0 /* _mesa_sqrtf() not accurate enough - temporarily disabled */
-#  define SQRTF(X)  _mesa_sqrtf(X)
-#else
-#  define SQRTF(X)  (float) sqrt((float) (X))
-#endif
+#define SQRTF(X)  (float) sqrt((float) (X))
 
 
 /***
  *** INV_SQRTF: single-precision inverse square root
  ***/
-#if 0
-#define INV_SQRTF(X) _mesa_inv_sqrt(X)
-#else
-#define INV_SQRTF(X) (1.0F / SQRTF(X))  /* this is faster on a P4 */
-#endif
+#define INV_SQRTF(X) (1.0F / SQRTF(X))
 
 
 /**
@@ -127,7 +119,7 @@ typedef union { GLfloat f; GLint i; } fi_type;
 #define asinf(f) ((float) asin(f))
 #define atan2f(x,y) ((float) atan2(x,y))
 #define atanf(f) ((float) atan(f))
-#define cielf(f) ((float) ciel(f))
+#define ceilf(f) ((float) ceil(f))
 #define cosf(f) ((float) cos(f))
 #define coshf(f) ((float) cosh(f))
 #define expf(f) ((float) exp(f))
@@ -285,19 +277,47 @@ static inline int GET_FLOAT_BITS( float x )
 #endif
 
 
-/***
- *** IROUND: return (as an integer) float rounded to nearest integer
- ***/
+/**
+ * Convert float to int by rounding to nearest integer, away from zero.
+ */
+static inline int IROUND(float f)
+{
+   return (int) ((f >= 0.0F) ? (f + 0.5F) : (f - 0.5F));
+}
+
+
+/**
+ * Convert float to int64 by rounding to nearest integer.
+ */
+static inline GLint64 IROUND64(float f)
+{
+   return (GLint64) ((f >= 0.0F) ? (f + 0.5F) : (f - 0.5F));
+}
+
+
+/**
+ * Convert positive float to int by rounding to nearest integer.
+ */
+static inline int IROUND_POS(float f)
+{
+   assert(f >= 0.0F);
+   return (int) (f + 0.5F);
+}
+
+
+/**
+ * Convert float to int using a fast method.  The rounding mode may vary.
+ * XXX We could use an x86-64/SSE2 version here.
+ */
 #if defined(USE_X86_ASM) && defined(__GNUC__) && defined(__i386__)
-static inline int iround(float f)
+static inline int F_TO_I(float f)
 {
    int r;
    __asm__ ("fistpl %0" : "=m" (r) : "t" (f) : "st");
    return r;
 }
-#define IROUND(x)  iround(x)
 #elif defined(USE_X86_ASM) && defined(_MSC_VER)
-static inline int iround(float f)
+static inline int F_TO_I(float f)
 {
    int r;
    _asm {
@@ -306,9 +326,8 @@ static inline int iround(float f)
 	}
    return r;
 }
-#define IROUND(x)  iround(x)
 #elif defined(__WATCOMC__) && defined(__386__)
-long iround(float f);
+long F_TO_I(float f);
 #pragma aux iround =                    \
 	"push   eax"                        \
 	"fistp  dword ptr [esp]"            \
@@ -316,20 +335,8 @@ long iround(float f);
 	parm [8087]                         \
 	value [eax]                         \
 	modify exact [eax];
-#define IROUND(x)  iround(x)
 #else
-#define IROUND(f)  ((int) (((f) >= 0.0F) ? ((f) + 0.5F) : ((f) - 0.5F)))
-#endif
-
-#define IROUND64(f)  ((GLint64) (((f) >= 0.0F) ? ((f) + 0.5F) : ((f) - 0.5F)))
-
-/***
- *** IROUND_POS: return (as an integer) positive float rounded to nearest int
- ***/
-#ifdef DEBUG
-#define IROUND_POS(f) (assert((f) >= 0.0F), IROUND(f))
-#else
-#define IROUND_POS(f) (IROUND(f))
+#define F_TO_I(f)  IROUND(f)
 #endif
 
 
@@ -551,21 +558,9 @@ _mesa_exec_free( void *addr );
 extern void *
 _mesa_realloc( void *oldBuffer, size_t oldSize, size_t newSize );
 
-extern void
-_mesa_memset16( unsigned short *dst, unsigned short val, size_t n );
 
-extern double
-_mesa_sqrtd(double x);
-
-extern float
-_mesa_sqrtf(float x);
-
-extern float
-_mesa_inv_sqrtf(float x);
-
-extern void
-_mesa_init_sqrt_table(void);
-
+#ifndef FFS_DEFINED
+#define FFS_DEFINED 1
 #ifdef __GNUC__
 
 #if defined(__MINGW32__) || defined(__CYGWIN__) || defined(ANDROID) || defined(__APPLE__)
@@ -573,10 +568,16 @@ _mesa_init_sqrt_table(void);
 #define ffsll __builtin_ffsll
 #endif
 
-#define _mesa_ffs(i)  ffs(i)
-#define _mesa_ffsll(i)  ffsll(i)
+#else
 
-#if ((__GNUC__ * 100 + __GNUC_MINOR__) >= 304) /* gcc 3.4 or later */
+extern int ffs(int i);
+extern int ffsll(long long int i);
+
+#endif /*__ GNUC__ */
+#endif /* FFS_DEFINED */
+
+
+#if defined(__GNUC__) && ((__GNUC__ * 100 + __GNUC_MINOR__) >= 304) /* gcc 3.4 or later */
 #define _mesa_bitcount(i) __builtin_popcount(i)
 #define _mesa_bitcount_64(i) __builtin_popcountll(i)
 #else
@@ -586,16 +587,6 @@ extern unsigned int
 _mesa_bitcount_64(uint64_t n);
 #endif
 
-#else
-extern int
-_mesa_ffs(int32_t i);
-
-extern int
-_mesa_ffsll(int64_t i);
-
-extern unsigned int
-_mesa_bitcount(unsigned int n);
-#endif
 
 extern GLhalfARB
 _mesa_float_to_half(float f);
@@ -623,19 +614,8 @@ _mesa_str_checksum(const char *str);
 extern int
 _mesa_snprintf( char *str, size_t size, const char *fmt, ... ) PRINTFLIKE(3, 4);
 
-struct gl_context;
-
-extern void
-_mesa_warning( struct gl_context *gc, const char *fmtString, ... ) PRINTFLIKE(2, 3);
-
-extern void
-_mesa_problem( const struct gl_context *ctx, const char *fmtString, ... ) PRINTFLIKE(2, 3);
-
-extern void
-_mesa_error( struct gl_context *ctx, GLenum error, const char *fmtString, ... ) PRINTFLIKE(3, 4);
-
-extern void
-_mesa_debug( const struct gl_context *ctx, const char *fmtString, ... ) PRINTFLIKE(2, 3);
+extern int
+_mesa_vsnprintf(char *str, size_t size, const char *fmt, va_list arg);
 
 
 #if defined(_MSC_VER) && !defined(snprintf)

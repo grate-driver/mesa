@@ -482,9 +482,9 @@ bind_samplers(struct xorg_xv_port_priv *port)
    samplers[2] = &sampler;
 
 
-   cso_set_samplers(port->r->cso, 3,
+   cso_set_samplers(port->r->cso, PIPE_SHADER_FRAGMENT, 3,
                     (const struct pipe_sampler_state **)samplers);
-   cso_set_fragment_sampler_views(port->r->cso, 3, dst_views);
+   cso_set_sampler_views(port->r->cso, PIPE_SHADER_FRAGMENT, 3, dst_views);
 }
 
 static int
@@ -592,7 +592,7 @@ put_image(ScrnInfoPtr pScrn,
           DrawablePtr pDraw)
 {
    struct xorg_xv_port_priv *pPriv = (struct xorg_xv_port_priv *) data;
-   ScreenPtr pScreen = screenInfo.screens[pScrn->scrnIndex];
+   ScreenPtr pScreen = xf86ScrnToScreen(pScrn);
    PixmapPtr pPixmap;
    INT32 x1, x2, y1, y2;
    BoxRec dstBox;
@@ -658,7 +658,7 @@ port_priv_create(struct xorg_renderer *r)
 static XF86VideoAdaptorPtr
 xorg_setup_textured_adapter(ScreenPtr pScreen)
 {
-   ScrnInfoPtr pScrn = xf86Screens[pScreen->myNum];
+   ScrnInfoPtr pScrn = xf86ScreenToScrn(pScreen);
    modesettingPtr ms = modesettingPTR(pScrn);
    XF86VideoAdaptorPtr adapt;
    XF86AttributePtr attrs;
@@ -720,7 +720,7 @@ xorg_setup_textured_adapter(ScreenPtr pScreen)
 void
 xorg_xv_init(ScreenPtr pScreen)
 {
-   ScrnInfoPtr pScrn = xf86Screens[pScreen->myNum];
+   ScrnInfoPtr pScrn = xf86ScreenToScrn(pScreen);
    /*modesettingPtr ms = modesettingPTR(pScrn);*/
    XF86VideoAdaptorPtr *adaptors, *new_adaptors = NULL;
    XF86VideoAdaptorPtr textured_adapter;

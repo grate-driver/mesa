@@ -35,12 +35,13 @@
 #include "main/context.h"
 #include "main/enums.h"
 #include "main/formats.h"
-#include "main/image.h"
+#include "main/glformats.h"
 #include "main/macros.h"
 #include "main/mfeatures.h"
 #include "main/mtypes.h"
 #include "main/state.h"
 #include "main/texcompress.h"
+#include "main/texobj.h"
 #include "main/texparam.h"
 #include "main/teximage.h"
 #include "main/texstate.h"
@@ -211,8 +212,7 @@ flush(struct gl_context *ctx)
 
 /**
  * This is called just prior to changing any texture object state which
- * can effect texture completeness (texture base level, max level,
- * minification filter).
+ * can effect texture completeness (texture base level, max level).
  * Any pending rendering will be flushed out, we'll set the _NEW_TEXTURE
  * state flag and then mark the texture object as 'incomplete' so that any
  * per-texture derived state gets recomputed.
@@ -221,7 +221,7 @@ static inline void
 incomplete(struct gl_context *ctx, struct gl_texture_object *texObj)
 {
    FLUSH_VERTICES(ctx, _NEW_TEXTURE);
-   texObj->_Complete = GL_FALSE;
+   _mesa_dirty_texobj(ctx, texObj, GL_TRUE);
 }
 
 
@@ -241,7 +241,7 @@ set_tex_parameteri(struct gl_context *ctx,
       switch (params[0]) {
       case GL_NEAREST:
       case GL_LINEAR:
-         incomplete(ctx, texObj);
+         flush(ctx);
          texObj->Sampler.MinFilter = params[0];
          return GL_TRUE;
       case GL_NEAREST_MIPMAP_NEAREST:
@@ -250,7 +250,7 @@ set_tex_parameteri(struct gl_context *ctx,
       case GL_LINEAR_MIPMAP_LINEAR:
          if (texObj->Target != GL_TEXTURE_RECTANGLE_NV &&
              texObj->Target != GL_TEXTURE_EXTERNAL_OES) {
-            incomplete(ctx, texObj);
+            flush(ctx);
             texObj->Sampler.MinFilter = params[0];
             return GL_TRUE;
          }
@@ -383,14 +383,14 @@ set_tex_parameteri(struct gl_context *ctx,
 
    case GL_DEPTH_TEXTURE_MODE_ARB:
       if (ctx->Extensions.ARB_depth_texture) {
-         if (texObj->Sampler.DepthMode == params[0])
+         if (texObj->DepthMode == params[0])
             return GL_FALSE;
          if (params[0] == GL_LUMINANCE ||
              params[0] == GL_INTENSITY ||
              params[0] == GL_ALPHA ||
              (ctx->Extensions.ARB_texture_rg && params[0] == GL_RED)) {
             flush(ctx);
-            texObj->Sampler.DepthMode = params[0];
+            texObj->DepthMode = params[0];
             return GL_TRUE;
          }
          goto invalid_param;
@@ -538,20 +538,6 @@ set_tex_parameterf(struct gl_context *ctx,
          if (count++ < 10)
             _mesa_error(ctx, GL_INVALID_ENUM,
                         "glTexParameter(pname=GL_TEXTURE_MAX_ANISOTROPY_EXT)");
-      }
-      return GL_FALSE;
-
-   case GL_TEXTURE_COMPARE_FAIL_VALUE_ARB:
-      if (ctx->Extensions.ARB_shadow_ambient) {
-         if (texObj->Sampler.CompareFailValue != params[0]) {
-            flush(ctx);
-            texObj->Sampler.CompareFailValue = CLAMP(params[0], 0.0F, 1.0F);
-            return GL_TRUE;
-         }
-      }
-      else {
-         _mesa_error(ctx, GL_INVALID_ENUM,
-                    "glTexParameter(pname=GL_TEXTURE_COMPARE_FAIL_VALUE_ARB)");
       }
       return GL_FALSE;
 
@@ -1016,7 +1002,7 @@ _mesa_GetTexLevelParameteriv( GLenum target, GLint level,
          *params = _mesa_get_format_bits(texFormat, pname);
          break;
       case GL_TEXTURE_SHARED_SIZE:
-         if (ctx->VersionMajor < 3 &&
+         if (ctx->Version < 30 &&
              !ctx->Extensions.EXT_texture_shared_exponent)
             goto invalid_pname;
          *params = texFormat == MESA_FORMAT_RGB9_E5_FLOAT ? 5 : 0;
@@ -1136,11 +1122,6 @@ _mesa_GetTexParameterfv( GLenum target, GLenum pname, GLfloat *params )
             goto invalid_pname;
          *params = obj->Sampler.MaxAnisotropy;
          break;
-      case GL_TEXTURE_COMPARE_FAIL_VALUE_ARB:
-         if (!ctx->Extensions.ARB_shadow_ambient)
-            goto invalid_pname;
-         *params = obj->Sampler.CompareFailValue;
-         break;
       case GL_GENERATE_MIPMAP_SGIS:
 	 *params = (GLfloat) obj->GenerateMipmap;
          break;
@@ -1157,7 +1138,7 @@ _mesa_GetTexParameterfv( GLenum target, GLenum pname, GLfloat *params )
       case GL_DEPTH_TEXTURE_MODE_ARB:
          if (!ctx->Extensions.ARB_depth_texture)
             goto invalid_pname;
-         *params = (GLfloat) obj->Sampler.DepthMode;
+         *params = (GLfloat) obj->DepthMode;
          break;
       case GL_TEXTURE_LOD_BIAS:
          *params = obj->Sampler.LodBias;
@@ -1233,19 +1214,19 @@ _mesa_GetTexParameteriv( GLenum target, GLenum pname, GLint *params )
    switch (pname) {
       case GL_TEXTURE_MAG_FILTER:
          *params = (GLint) obj->Sampler.MagFilter;
-         break;;
+         break;
       case GL_TEXTURE_MIN_FILTER:
          *params = (GLint) obj->Sampler.MinFilter;
-         break;;
+         break;
       case GL_TEXTURE_WRAP_S:
          *params = (GLint) obj->Sampler.WrapS;
-         break;;
+         break;
       case GL_TEXTURE_WRAP_T:
          *params = (GLint) obj->Sampler.WrapT;
-         break;;
+         break;
       case GL_TEXTURE_WRAP_R:
          *params = (GLint) obj->Sampler.WrapR;
-         break;;
+         break;
       case GL_TEXTURE_BORDER_COLOR:
          {
             GLfloat b[4];
@@ -1258,34 +1239,29 @@ _mesa_GetTexParameteriv( GLenum target, GLenum pname, GLint *params )
             params[2] = FLOAT_TO_INT(b[2]);
             params[3] = FLOAT_TO_INT(b[3]);
          }
-         break;;
+         break;
       case GL_TEXTURE_RESIDENT:
          *params = 1;
-         break;;
+         break;
       case GL_TEXTURE_PRIORITY:
          *params = FLOAT_TO_INT(obj->Priority);
-         break;;
+         break;
       case GL_TEXTURE_MIN_LOD:
          *params = (GLint) obj->Sampler.MinLod;
-         break;;
+         break;
       case GL_TEXTURE_MAX_LOD:
          *params = (GLint) obj->Sampler.MaxLod;
-         break;;
+         break;
       case GL_TEXTURE_BASE_LEVEL:
          *params = obj->BaseLevel;
-         break;;
+         break;
       case GL_TEXTURE_MAX_LEVEL:
          *params = obj->MaxLevel;
-         break;;
+         break;
       case GL_TEXTURE_MAX_ANISOTROPY_EXT:
          if (!ctx->Extensions.EXT_texture_filter_anisotropic)
             goto invalid_pname;
          *params = (GLint) obj->Sampler.MaxAnisotropy;
-         break;
-      case GL_TEXTURE_COMPARE_FAIL_VALUE_ARB:
-         if (!ctx->Extensions.ARB_shadow_ambient)
-            goto invalid_pname;
-         *params = (GLint) FLOAT_TO_INT(obj->Sampler.CompareFailValue);
          break;
       case GL_GENERATE_MIPMAP_SGIS:
 	 *params = (GLint) obj->GenerateMipmap;
@@ -1303,7 +1279,7 @@ _mesa_GetTexParameteriv( GLenum target, GLenum pname, GLint *params )
       case GL_DEPTH_TEXTURE_MODE_ARB:
          if (!ctx->Extensions.ARB_depth_texture)
             goto invalid_pname;
-         *params = (GLint) obj->Sampler.DepthMode;
+         *params = (GLint) obj->DepthMode;
          break;
       case GL_TEXTURE_LOD_BIAS:
          *params = (GLint) obj->Sampler.LodBias;

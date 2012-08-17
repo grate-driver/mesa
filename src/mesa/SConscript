@@ -6,6 +6,7 @@ Import('*')
 import filecmp
 import os
 import subprocess
+from sys import executable as python_cmd
 
 env = env.Clone()
 
@@ -64,6 +65,7 @@ main_sources = [
     'main/drawtex.c',
     'main/enable.c',
     'main/enums.c',
+    'main/errors.c',
     'main/eval.c',
     'main/execmem.c',
     'main/extensions.c',
@@ -78,6 +80,7 @@ main_sources = [
     'main/framebuffer.c',
     'main/get.c',
     'main/getstring.c',
+    'main/glformats.c',
     'main/hash.c',
     'main/hint.c',
     'main/histogram.c',
@@ -214,6 +217,7 @@ vbo_sources = [
     'vbo/vbo_exec_draw.c',
     'vbo/vbo_exec_eval.c',
     'vbo/vbo_noop.c',
+    'vbo/vbo_primitive_restart.c',
     'vbo/vbo_rebase.c',
     'vbo/vbo_split.c',
     'vbo/vbo_split_copy.c',
@@ -226,6 +230,7 @@ vbo_sources = [
 
 statetracker_sources = [
     'state_tracker/st_atom.c',
+    'state_tracker/st_atom_array.c',
     'state_tracker/st_atom_blend.c',
     'state_tracker/st_atom_clip.c',
     'state_tracker/st_atom_constbuf.c',
@@ -326,8 +331,9 @@ mesa_sources = (
     statetracker_sources
 )
 
+GLAPI = '#src/mapi/glapi/'
+
 if env['gles']:
-    from sys import executable as python_cmd
 
     env.Append(CPPDEFINES = ['FEATURE_ES1=1', 'FEATURE_ES2=1'])
 
@@ -347,7 +353,6 @@ if env['gles']:
     )
 
     # generate GLES headers
-    GLAPI = '#src/mapi/glapi/'
     gles_headers = []
     gles_headers += env.CodeGenerate(
         target = 'main/api_exec_es1_dispatch.h',
@@ -384,7 +389,7 @@ if env['gles']:
 #
 # Assembly sources
 #
-if env['gcc'] and env['platform'] != 'windows':
+if env['gcc'] and env['platform'] not in ('darwin', 'windows'):
     if env['machine'] == 'x86':
         env.Append(CPPDEFINES = [
             'USE_X86_ASM',
@@ -423,18 +428,10 @@ if env['gcc'] and env['platform'] != 'windows':
             'x86-64/x86-64.c',
             'x86-64/xform4.S',
         ]
-    elif env['machine'] == 'ppc':
-        env.Append(CPPDEFINES = [
-            'USE_PPC_ASM',
-            'USE_VMX_ASM',
-        ])
-        mesa_sources += [
-            'ppc/common_ppc.c',
-        ]
     elif env['machine'] == 'sparc':
         mesa_sources += [
             'sparc/sparc.c',
-            'sparc/clip.S',
+            'sparc/sparc_clip.S',
             'sparc/norm.S',
             'sparc/xform.S',
         ]
@@ -458,6 +455,16 @@ if env['gcc'] and env['platform'] != 'windows':
         env.Append(CPPPATH = [matypes[0].dir])
 
 
+# The enums.c file is generated from the GL/ES API.xml file
+env.CodeGenerate(
+    target = 'main/enums.c',
+    script = GLAPI + 'gen/gl_enums.py',
+    source = GLAPI + 'gen/gl_and_es_API.xml',
+    command = python_cmd + ' $SCRIPT -f $SOURCE > $TARGET'
+    )
+
+# We also depend on the auto-generated GL API headers
+env.Depends(mesa_sources, glapi_headers)
 
 
 def write_git_sha1_h_file(filename):

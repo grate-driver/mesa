@@ -29,6 +29,7 @@
 #include "imports.h"
 #include "mfeatures.h"
 #include "mtypes.h"
+#include "enums.h"
 #include "vbo/vbo.h"
 
 
@@ -127,6 +128,7 @@ check_valid_to_render(struct gl_context *ctx, const char *function)
 
 #if FEATURE_GL
    case API_OPENGL:
+   case API_OPENGL_CORE:
       {
          const struct gl_shader_program *vsProg =
             ctx->Shader.CurrentVertexProgram;
@@ -184,7 +186,7 @@ check_index_bounds(struct gl_context *ctx, GLsizei count, GLenum type,
    ib.ptr = indices;
    ib.obj = ctx->Array.ArrayObj->ElementArrayBufferObj;
 
-   vbo_get_minmax_index(ctx, &prim, &ib, &min, &max);
+   vbo_get_minmax_indices(ctx, &prim, &ib, &min, &max, 1);
 
    if ((int)(min + basevertex) < 0 ||
        max + basevertex >= ctx->Array.ArrayObj->_MaxElement) {
@@ -204,18 +206,60 @@ check_index_bounds(struct gl_context *ctx, GLsizei count, GLenum type,
  * are supported.
  */
 GLboolean
-_mesa_valid_prim_mode(const struct gl_context *ctx, GLenum mode)
+_mesa_valid_prim_mode(struct gl_context *ctx, GLenum mode, const char *name)
 {
    if (ctx->Extensions.ARB_geometry_shader4 &&
        mode > GL_TRIANGLE_STRIP_ADJACENCY_ARB) {
+      _mesa_error(ctx, GL_INVALID_ENUM, "%s(mode=%x)", name, mode);
       return GL_FALSE;
    }
    else if (mode > GL_POLYGON) {
+      _mesa_error(ctx, GL_INVALID_ENUM, "%s(mode=%x)", name, mode);
       return GL_FALSE;
    }
-   else {
-      return GL_TRUE;
+
+   /* From the GL_EXT_transform_feedback spec:
+    *
+    *     "The error INVALID_OPERATION is generated if Begin, or any command
+    *      that performs an explicit Begin, is called when:
+    *
+    *      * a geometry shader is not active and <mode> does not match the
+    *        allowed begin modes for the current transform feedback state as
+    *        given by table X.1.
+    *
+    *      * a geometry shader is active and the output primitive type of the
+    *        geometry shader does not match the allowed begin modes for the
+    *        current transform feedback state as given by table X.1.
+    *
+    */
+   if (ctx->TransformFeedback.CurrentObject->Active &&
+       !ctx->TransformFeedback.CurrentObject->Paused) {
+      GLboolean pass = GL_TRUE;
+
+      switch (mode) {
+      case GL_POINTS:
+         pass = ctx->TransformFeedback.Mode == GL_POINTS;
+	 break;
+      case GL_LINES:
+      case GL_LINE_STRIP:
+      case GL_LINE_LOOP:
+         pass = ctx->TransformFeedback.Mode == GL_LINES;
+	 break;
+      default:
+         pass = ctx->TransformFeedback.Mode == GL_TRIANGLES;
+	 break;
+      }
+      if (!pass) {
+	 _mesa_error(ctx, GL_INVALID_OPERATION,
+		     "%s(mode=%s vs transform feedback %s)",
+		     name,
+		     _mesa_lookup_prim_by_nr(mode),
+		     _mesa_lookup_prim_by_nr(ctx->TransformFeedback.Mode));
+	 return GL_FALSE;
+      }
    }
+
+   return GL_TRUE;
 }
 
 
@@ -230,6 +274,7 @@ _mesa_validate_DrawElements(struct gl_context *ctx,
 			    const GLvoid *indices, GLint basevertex)
 {
    ASSERT_OUTSIDE_BEGIN_END_WITH_RETVAL(ctx, GL_FALSE);
+   FLUSH_CURRENT(ctx, 0);
 
    if (count <= 0) {
       if (count < 0)
@@ -237,8 +282,7 @@ _mesa_validate_DrawElements(struct gl_context *ctx,
       return GL_FALSE;
    }
 
-   if (!_mesa_valid_prim_mode(ctx, mode)) {
-      _mesa_error(ctx, GL_INVALID_ENUM, "glDrawElements(mode)" );
+   if (!_mesa_valid_prim_mode(ctx, mode, "glDrawElements")) {
       return GL_FALSE;
    }
 
@@ -276,6 +320,77 @@ _mesa_validate_DrawElements(struct gl_context *ctx,
 
 
 /**
+ * Error checking for glMultiDrawElements().  Includes parameter checking
+ * and VBO bounds checking.
+ * \return GL_TRUE if OK to render, GL_FALSE if error found
+ */
+GLboolean
+_mesa_validate_MultiDrawElements(struct gl_context *ctx,
+                                 GLenum mode, const GLsizei *count,
+                                 GLenum type, const GLvoid * const *indices,
+                                 GLuint primcount, const GLint *basevertex)
+{
+   unsigned i;
+
+   ASSERT_OUTSIDE_BEGIN_END_WITH_RETVAL(ctx, GL_FALSE);
+   FLUSH_CURRENT(ctx, 0);
+
+   for (i = 0; i < primcount; i++) {
+      if (count[i] <= 0) {
+         if (count[i] < 0)
+            _mesa_error(ctx, GL_INVALID_VALUE,
+                        "glMultiDrawElements(count)" );
+         return GL_FALSE;
+      }
+   }
+
+   if (!_mesa_valid_prim_mode(ctx, mode, "glMultiDrawElements")) {
+      return GL_FALSE;
+   }
+
+   if (type != GL_UNSIGNED_INT &&
+       type != GL_UNSIGNED_BYTE &&
+       type != GL_UNSIGNED_SHORT)
+   {
+      _mesa_error(ctx, GL_INVALID_ENUM, "glMultiDrawElements(type)" );
+      return GL_FALSE;
+   }
+
+   if (!check_valid_to_render(ctx, "glMultiDrawElements"))
+      return GL_FALSE;
+
+   /* Vertex buffer object tests */
+   if (_mesa_is_bufferobj(ctx->Array.ArrayObj->ElementArrayBufferObj)) {
+      /* use indices in the buffer object */
+      /* make sure count doesn't go outside buffer bounds */
+      for (i = 0; i < primcount; i++) {
+         if (index_bytes(type, count[i]) >
+             ctx->Array.ArrayObj->ElementArrayBufferObj->Size) {
+            _mesa_warning(ctx,
+                          "glMultiDrawElements index out of buffer bounds");
+            return GL_FALSE;
+         }
+      }
+   }
+   else {
+      /* not using a VBO */
+      for (i = 0; i < primcount; i++) {
+         if (!indices[i])
+            return GL_FALSE;
+      }
+   }
+
+   for (i = 0; i < primcount; i++) {
+      if (!check_index_bounds(ctx, count[i], type, indices[i],
+                              basevertex ? basevertex[i] : 0))
+         return GL_FALSE;
+   }
+
+   return GL_TRUE;
+}
+
+
+/**
  * Error checking for glDrawRangeElements().  Includes parameter checking
  * and VBO bounds checking.
  * \return GL_TRUE if OK to render, GL_FALSE if error found
@@ -287,6 +402,7 @@ _mesa_validate_DrawRangeElements(struct gl_context *ctx, GLenum mode,
 				 const GLvoid *indices, GLint basevertex)
 {
    ASSERT_OUTSIDE_BEGIN_END_WITH_RETVAL(ctx, GL_FALSE);
+   FLUSH_CURRENT(ctx, 0);
 
    if (count <= 0) {
       if (count < 0)
@@ -294,8 +410,7 @@ _mesa_validate_DrawRangeElements(struct gl_context *ctx, GLenum mode,
       return GL_FALSE;
    }
 
-   if (!_mesa_valid_prim_mode(ctx, mode)) {
-      _mesa_error(ctx, GL_INVALID_ENUM, "glDrawRangeElements(mode)" );
+   if (!_mesa_valid_prim_mode(ctx, mode, "glDrawRangeElements")) {
       return GL_FALSE;
    }
 
@@ -346,6 +461,7 @@ _mesa_validate_DrawArrays(struct gl_context *ctx,
 			  GLenum mode, GLint start, GLsizei count)
 {
    ASSERT_OUTSIDE_BEGIN_END_WITH_RETVAL(ctx, GL_FALSE);
+   FLUSH_CURRENT(ctx, 0);
 
    if (count <= 0) {
       if (count < 0)
@@ -353,8 +469,7 @@ _mesa_validate_DrawArrays(struct gl_context *ctx,
       return GL_FALSE;
    }
 
-   if (!_mesa_valid_prim_mode(ctx, mode)) {
-      _mesa_error(ctx, GL_INVALID_ENUM, "glDrawArrays(mode)" );
+   if (!_mesa_valid_prim_mode(ctx, mode, "glDrawArrays")) {
       return GL_FALSE;
    }
 
@@ -375,6 +490,7 @@ _mesa_validate_DrawArraysInstanced(struct gl_context *ctx, GLenum mode, GLint fi
                                    GLsizei count, GLsizei numInstances)
 {
    ASSERT_OUTSIDE_BEGIN_END_WITH_RETVAL(ctx, GL_FALSE);
+   FLUSH_CURRENT(ctx, 0);
 
    if (count <= 0) {
       if (count < 0)
@@ -389,9 +505,7 @@ _mesa_validate_DrawArraysInstanced(struct gl_context *ctx, GLenum mode, GLint fi
       return GL_FALSE;
    }
 
-   if (!_mesa_valid_prim_mode(ctx, mode)) {
-      _mesa_error(ctx, GL_INVALID_ENUM,
-                  "glDrawArraysInstanced(mode=0x%x)", mode);
+   if (!_mesa_valid_prim_mode(ctx, mode, "glDrawArraysInstanced")) {
       return GL_FALSE;
    }
 
@@ -421,6 +535,7 @@ _mesa_validate_DrawElementsInstanced(struct gl_context *ctx,
                                      GLint basevertex)
 {
    ASSERT_OUTSIDE_BEGIN_END_WITH_RETVAL(ctx, GL_FALSE);
+   FLUSH_CURRENT(ctx, 0);
 
    if (count <= 0) {
       if (count < 0)
@@ -429,9 +544,7 @@ _mesa_validate_DrawElementsInstanced(struct gl_context *ctx,
       return GL_FALSE;
    }
 
-   if (!_mesa_valid_prim_mode(ctx, mode)) {
-      _mesa_error(ctx, GL_INVALID_ENUM,
-                  "glDrawElementsInstanced(mode = 0x%x)", mode);
+   if (!_mesa_valid_prim_mode(ctx, mode, "glDrawElementsInstanced")) {
       return GL_FALSE;
    }
 
@@ -481,26 +594,42 @@ _mesa_validate_DrawElementsInstanced(struct gl_context *ctx,
 GLboolean
 _mesa_validate_DrawTransformFeedback(struct gl_context *ctx,
                                      GLenum mode,
-                                     struct gl_transform_feedback_object *obj)
+                                     struct gl_transform_feedback_object *obj,
+                                     GLuint stream,
+                                     GLsizei numInstances)
 {
    ASSERT_OUTSIDE_BEGIN_END_WITH_RETVAL(ctx, GL_FALSE);
+   FLUSH_CURRENT(ctx, 0);
 
-   if (!_mesa_valid_prim_mode(ctx, mode)) {
-      _mesa_error(ctx, GL_INVALID_ENUM, "glDrawTransformFeedback(mode)");
+   if (!_mesa_valid_prim_mode(ctx, mode, "glDrawTransformFeedback*(mode)")) {
       return GL_FALSE;
    }
 
    if (!obj) {
-      _mesa_error(ctx, GL_INVALID_VALUE, "glDrawTransformFeedback(name)");
+      _mesa_error(ctx, GL_INVALID_VALUE, "glDrawTransformFeedback*(name)");
       return GL_FALSE;
    }
 
    if (!obj->EndedAnytime) {
-      _mesa_error(ctx, GL_INVALID_OPERATION, "glDrawTransformFeedback");
+      _mesa_error(ctx, GL_INVALID_OPERATION, "glDrawTransformFeedback*");
       return GL_FALSE;
    }
 
-   if (!check_valid_to_render(ctx, "glDrawTransformFeedback")) {
+   if (stream >= ctx->Const.MaxVertexStreams) {
+      _mesa_error(ctx, GL_INVALID_VALUE,
+                  "glDrawTransformFeedbackStream*(index>=MaxVertexStream)");
+      return GL_FALSE;
+   }
+
+   if (numInstances <= 0) {
+      if (numInstances < 0)
+         _mesa_error(ctx, GL_INVALID_VALUE,
+                     "glDrawTransformFeedback*Instanced(numInstances=%d)",
+                     numInstances);
+      return GL_FALSE;
+   }
+
+   if (!check_valid_to_render(ctx, "glDrawTransformFeedback*")) {
       return GL_FALSE;
    }
 

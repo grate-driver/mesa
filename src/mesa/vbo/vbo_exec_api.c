@@ -450,7 +450,7 @@ vbo_Materialfv(GLenum face, GLenum pname, const GLfloat *params)
     * indicating which material attributes can actually be updated below.
     */
    if (ctx->Light.ColorMaterialEnabled) {
-      updateMats = ~ctx->Light.ColorMaterialBitmask;
+      updateMats = ~ctx->Light._ColorMaterialBitmask;
    }
    else {
       /* GL_COLOR_MATERIAL is disabled so don't skip any material updates */
@@ -791,12 +791,11 @@ static void GLAPIENTRY vbo_exec_Begin( GLenum mode )
       struct vbo_exec_context *exec = &vbo_context(ctx)->exec;
       int i;
 
-      if (!_mesa_valid_prim_mode(ctx, mode)) {
-         _mesa_error(ctx, GL_INVALID_ENUM, "glBegin");
+      if (!_mesa_valid_prim_mode(ctx, mode, "glBegin")) {
          return;
       }
 
-      vbo_draw_method(exec, DRAW_BEGIN_END);
+      vbo_draw_method(vbo_context(ctx), DRAW_BEGIN_END);
 
       if (ctx->Driver.PrepareExecBegin)
 	 ctx->Driver.PrepareExecBegin(ctx);
@@ -828,6 +827,7 @@ static void GLAPIENTRY vbo_exec_Begin( GLenum mode )
       exec->vtx.prim[i].start = exec->vtx.vert_count;
       exec->vtx.prim[i].count = 0;
       exec->vtx.prim[i].num_instances = 1;
+      exec->vtx.prim[i].base_instance = 0;
 
       ctx->Driver.CurrentExecPrimitive = mode;
    }
@@ -863,6 +863,10 @@ static void GLAPIENTRY vbo_exec_End( void )
    }
    else 
       _mesa_error( ctx, GL_INVALID_OPERATION, "glEnd" );
+
+   if (MESA_DEBUG_FLAGS & DEBUG_ALWAYS_FLUSH) {
+      _mesa_flush(ctx);
+   }
 }
 
 
@@ -1185,24 +1189,26 @@ void vbo_exec_vtx_init( struct vbo_exec_context *exec )
       struct gl_client_array *arrays = exec->vtx.arrays;
       unsigned i;
 
-      memcpy(arrays, vbo->legacy_currval,
+      memcpy(arrays, &vbo->currval[VBO_ATTRIB_POS],
              VERT_ATTRIB_FF_MAX * sizeof(arrays[0]));
       for (i = 0; i < VERT_ATTRIB_FF_MAX; ++i) {
          struct gl_client_array *array;
          array = &arrays[VERT_ATTRIB_FF(i)];
          array->BufferObj = NULL;
          _mesa_reference_buffer_object(ctx, &arrays->BufferObj,
-                                       vbo->legacy_currval[i].BufferObj);
+                                 vbo->currval[VBO_ATTRIB_POS+i].BufferObj);
       }
 
-      memcpy(arrays + VERT_ATTRIB_GENERIC(0), vbo->generic_currval,
+      memcpy(arrays + VERT_ATTRIB_GENERIC(0),
+             &vbo->currval[VBO_ATTRIB_GENERIC0],
              VERT_ATTRIB_GENERIC_MAX * sizeof(arrays[0]));
+
       for (i = 0; i < VERT_ATTRIB_GENERIC_MAX; ++i) {
          struct gl_client_array *array;
          array = &arrays[VERT_ATTRIB_GENERIC(i)];
          array->BufferObj = NULL;
          _mesa_reference_buffer_object(ctx, &array->BufferObj,
-                                       vbo->generic_currval[i].BufferObj);
+                           vbo->currval[VBO_ATTRIB_GENERIC0+i].BufferObj);
       }
    }
 

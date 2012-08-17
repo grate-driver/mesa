@@ -118,7 +118,7 @@ client_state(struct gl_context *ctx, GLenum cap, GLboolean state)
          CHECK_EXTENSION(NV_vertex_program, cap);
          {
             GLint n = (GLint) cap - GL_VERTEX_ATTRIB_ARRAY0_NV;
-            ASSERT(VERT_ATTRIB_GENERIC(n) < Elements(ctx->Array.ArrayObj->VertexAttrib));
+            ASSERT(VERT_ATTRIB_GENERIC(n) < Elements(arrayObj->VertexAttrib));
             var = &arrayObj->VertexAttrib[VERT_ATTRIB_GENERIC(n)].Enabled;
             flag = VERT_BIT_GENERIC(n);
          }
@@ -142,16 +142,17 @@ client_state(struct gl_context *ctx, GLenum cap, GLboolean state)
       return;
 
    FLUSH_VERTICES(ctx, _NEW_ARRAY);
-   ctx->Array.NewState |= flag;
 
    _ae_invalidate_state(ctx, _NEW_ARRAY);
 
    *var = state;
 
    if (state)
-      ctx->Array.ArrayObj->_Enabled |= flag;
+      arrayObj->_Enabled |= flag;
    else
-      ctx->Array.ArrayObj->_Enabled &= ~flag;
+      arrayObj->_Enabled &= ~flag;
+
+   arrayObj->NewArrays |= flag;
 
    if (ctx->Driver.Enable) {
       ctx->Driver.Enable( ctx, cap, state );
@@ -160,8 +161,8 @@ client_state(struct gl_context *ctx, GLenum cap, GLboolean state)
    return;
 
 invalid_enum_error:
-   _mesa_error(ctx, GL_INVALID_ENUM, "gl%sClientState(0x%x)",
-               state ? "Enable" : "Disable", cap);
+   _mesa_error(ctx, GL_INVALID_ENUM, "gl%sClientState(%s)",
+               state ? "Enable" : "Disable", _mesa_lookup_enum_by_nr(cap));
 }
 
 
@@ -347,6 +348,9 @@ _mesa_set_enable(struct gl_context *ctx, GLenum cap, GLboolean state)
             return;
          FLUSH_VERTICES(ctx, _NEW_DEPTH);
          ctx->Depth.Test = state;
+         break;
+      case GL_DEBUG_OUTPUT_SYNCHRONOUS_ARB:
+         ctx->Debug.SyncOutput = state;
          break;
       case GL_DITHER:
          if (ctx->Color.DitherFlag == state)
@@ -819,10 +823,8 @@ _mesa_set_enable(struct gl_context *ctx, GLenum cap, GLboolean state)
          ctx->Stencil.TestTwoSide = state;
          if (state) {
             ctx->Stencil._BackFace = 2;
-            ctx->_TriangleCaps |= DD_TRI_TWOSTENCIL;
          } else {
             ctx->Stencil._BackFace = 1;
-            ctx->_TriangleCaps &= ~DD_TRI_TWOSTENCIL;
          }
          break;
 
@@ -900,7 +902,7 @@ _mesa_set_enable(struct gl_context *ctx, GLenum cap, GLboolean state)
        * GL_PRIMITIVE_RESTART_NV (which is client state).
        */
       case GL_PRIMITIVE_RESTART:
-         if (ctx->VersionMajor * 10 + ctx->VersionMinor < 31) {
+         if (ctx->Version < 31) {
             goto invalid_enum_error;
          }
          if (ctx->Array.PrimitiveRestart != state) {
@@ -935,8 +937,8 @@ _mesa_set_enable(struct gl_context *ctx, GLenum cap, GLboolean state)
    return;
 
 invalid_enum_error:
-   _mesa_error(ctx, GL_INVALID_ENUM, "gl%s(0x%x)",
-               state ? "Enable" : "Disable", cap);
+   _mesa_error(ctx, GL_INVALID_ENUM, "gl%s(%s)",
+               state ? "Enable" : "Disable", _mesa_lookup_enum_by_nr(cap));
 }
 
 
@@ -1114,6 +1116,8 @@ _mesa_IsEnabled( GLenum cap )
 	 return ctx->Light.ColorMaterialEnabled;
       case GL_CULL_FACE:
          return ctx->Polygon.CullFlag;
+      case GL_DEBUG_OUTPUT_SYNCHRONOUS_ARB:
+         return ctx->Debug.SyncOutput;
       case GL_DEPTH_TEST:
          return ctx->Depth.Test;
       case GL_DITHER:
@@ -1415,7 +1419,7 @@ _mesa_IsEnabled( GLenum cap )
 
       /* GL 3.1 primitive restart */
       case GL_PRIMITIVE_RESTART:
-         if (ctx->VersionMajor * 10 + ctx->VersionMinor < 31) {
+         if (ctx->Version < 31) {
             goto invalid_enum_error;
          }
          return ctx->Array.PrimitiveRestart;
@@ -1437,6 +1441,7 @@ _mesa_IsEnabled( GLenum cap )
    return GL_FALSE;
 
 invalid_enum_error:
-   _mesa_error(ctx, GL_INVALID_ENUM, "glIsEnabled(0x%x)", (int) cap);
+   _mesa_error(ctx, GL_INVALID_ENUM, "glIsEnabled(%s)",
+               _mesa_lookup_enum_by_nr(cap));
    return GL_FALSE;
 }

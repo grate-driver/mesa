@@ -54,7 +54,7 @@ static void r300_copy_from_tiled_texture(struct pipe_context *ctx,
     struct pipe_transfer *transfer = (struct pipe_transfer*)r300transfer;
     struct pipe_resource *tex = transfer->resource;
 
-    ctx->resource_copy_region(ctx, &r300transfer->linear_texture->b.b.b, 0,
+    ctx->resource_copy_region(ctx, &r300transfer->linear_texture->b.b, 0,
                               0, 0, 0,
                               tex, transfer->level, &transfer->box);
 }
@@ -70,7 +70,7 @@ static void r300_copy_into_tiled_texture(struct pipe_context *ctx,
 
     ctx->resource_copy_region(ctx, tex, transfer->level,
                               transfer->box.x, transfer->box.y, transfer->box.z,
-                              &r300transfer->linear_texture->b.b.b, 0, &src_box);
+                              &r300transfer->linear_texture->b.b, 0, &src_box);
 
     /* XXX remove this. */
     r300_flush(ctx, 0, NULL);
@@ -89,12 +89,8 @@ r300_texture_get_transfer(struct pipe_context *ctx,
     struct pipe_resource base;
     boolean referenced_cs, referenced_hw;
 
-    if (usage & (PIPE_TRANSFER_MAP_DIRECTLY | PIPE_TRANSFER_MAP_PERMANENTLY)) {
-        return NULL;
-    }
-
     referenced_cs =
-        r300->rws->cs_is_buffer_referenced(r300->cs, tex->cs_buf);
+        r300->rws->cs_is_buffer_referenced(r300->cs, tex->cs_buf, RADEON_USAGE_READWRITE);
     if (referenced_cs) {
         referenced_hw = TRUE;
     } else {
@@ -231,22 +227,19 @@ void* r300_texture_transfer_map(struct pipe_context *ctx,
 				struct pipe_transfer *transfer)
 {
     struct r300_context *r300 = r300_context(ctx);
-    struct radeon_winsys *rws = (struct radeon_winsys *)ctx->winsys;
     struct r300_transfer *r300transfer = r300_transfer(transfer);
     struct r300_resource *tex = r300_resource(transfer->resource);
     char *map;
-    enum pipe_format format = tex->b.b.b.format;
+    enum pipe_format format = tex->b.b.format;
 
     if (r300transfer->linear_texture) {
         /* The detiled texture is of the same size as the region being mapped
          * (no offset needed). */
-        return rws->buffer_map(r300transfer->linear_texture->buf,
-                               r300->cs,
-                               transfer->usage);
+        return r300->rws->buffer_map(r300transfer->linear_texture->cs_buf,
+				     r300->cs, transfer->usage);
     } else {
         /* Tiling is disabled. */
-        map = rws->buffer_map(tex->buf, r300->cs,
-                              transfer->usage);
+        map = r300->rws->buffer_map(tex->cs_buf, r300->cs, transfer->usage);
 
         if (!map) {
             return NULL;
@@ -261,13 +254,13 @@ void* r300_texture_transfer_map(struct pipe_context *ctx,
 void r300_texture_transfer_unmap(struct pipe_context *ctx,
 				 struct pipe_transfer *transfer)
 {
-    struct radeon_winsys *rws = (struct radeon_winsys *)ctx->winsys;
+    struct radeon_winsys *rws = r300_context(ctx)->rws;
     struct r300_transfer *r300transfer = r300_transfer(transfer);
     struct r300_resource *tex = r300_resource(transfer->resource);
 
     if (r300transfer->linear_texture) {
-        rws->buffer_unmap(r300transfer->linear_texture->buf);
+        rws->buffer_unmap(r300transfer->linear_texture->cs_buf);
     } else {
-        rws->buffer_unmap(tex->buf);
+        rws->buffer_unmap(tex->cs_buf);
     }
 }

@@ -34,57 +34,15 @@ extern "C" {
 } /* extern "C" */
 
 #include "brw_fs.h"
+#include "brw_fs_cfg.h"
 #include "glsl/ir_print_visitor.h"
-
-void
-fs_visitor::patch_discard_jumps_to_fb_writes()
-{
-   if (intel->gen < 6 || this->discard_halt_patches.is_empty())
-      return;
-
-   /* There is a somewhat strange undocumented requirement of using
-    * HALT, according to the simulator.  If some channel has HALTed to
-    * a particular UIP, then by the end of the program, every channel
-    * must have HALTed to that UIP.  Furthermore, the tracking is a
-    * stack, so you can't do the final halt of a UIP after starting
-    * halting to a new UIP.
-    *
-    * Symptoms of not emitting this instruction on actual hardware
-    * included GPU hangs and sparkly rendering on the piglit discard
-    * tests.
-    */
-   struct brw_instruction *last_halt = gen6_HALT(p);
-   last_halt->bits3.break_cont.uip = 2;
-   last_halt->bits3.break_cont.jip = 2;
-
-   int ip = p->nr_insn;
-
-   foreach_list(node, &this->discard_halt_patches) {
-      ip_record *patch_ip = (ip_record *)node;
-      struct brw_instruction *patch = &p->store[patch_ip->ip];
-      int br = (intel->gen >= 5) ? 2 : 1;
-
-      /* HALT takes a distance from the pre-incremented IP, so '1'
-       * would be the next instruction after jmpi.
-       */
-      assert(patch->header.opcode == BRW_OPCODE_HALT);
-      patch->bits3.break_cont.uip = (ip - patch_ip->ip) * br;
-   }
-
-   this->discard_halt_patches.make_empty();
-}
 
 void
 fs_visitor::generate_fb_write(fs_inst *inst)
 {
    bool eot = inst->eot;
    struct brw_reg implied_header;
-
-   /* Note that the jumps emitted to this point mean that the g0 ->
-    * base_mrf setup must be inside of this function, so that we jump
-    * to a point containing it.
-    */
-   patch_discard_jumps_to_fb_writes();
+   uint32_t msg_control;
 
    /* Header is 2 regs, g0 and g1 are the contents. g0 will be implied
     * move, here's g1.
@@ -121,12 +79,20 @@ fs_visitor::generate_fb_write(fs_inst *inst)
       implied_header = brw_null_reg();
    }
 
+   if (this->dual_src_output.file != BAD_FILE)
+      msg_control = BRW_DATAPORT_RENDER_TARGET_WRITE_SIMD8_DUAL_SOURCE_SUBSPAN01;
+   else if (c->dispatch_width == 16)
+      msg_control = BRW_DATAPORT_RENDER_TARGET_WRITE_SIMD16_SINGLE_SOURCE;
+   else
+      msg_control = BRW_DATAPORT_RENDER_TARGET_WRITE_SIMD8_SINGLE_SOURCE_SUBSPAN01;
+
    brw_pop_insn_state(p);
 
    brw_fb_WRITE(p,
 		c->dispatch_width,
 		inst->base_mrf,
 		implied_header,
+		msg_control,
 		inst->target,
 		inst->mlen,
 		0,
@@ -194,8 +160,6 @@ fs_visitor::generate_math1_gen7(fs_inst *inst,
    assert(inst->mlen == 0);
    brw_math(p, dst,
 	    brw_math_function(inst->opcode),
-	    inst->saturate ? BRW_MATH_SATURATE_SATURATE
-			   : BRW_MATH_SATURATE_NONE,
 	    0, src0,
 	    BRW_MATH_DATA_VECTOR,
 	    BRW_MATH_PRECISION_FULL);
@@ -223,8 +187,6 @@ fs_visitor::generate_math1_gen6(fs_inst *inst,
    brw_set_compression_control(p, BRW_COMPRESSION_NONE);
    brw_math(p, dst,
 	    op,
-	    inst->saturate ? BRW_MATH_SATURATE_SATURATE :
-	    BRW_MATH_SATURATE_NONE,
 	    0, src0,
 	    BRW_MATH_DATA_VECTOR,
 	    BRW_MATH_PRECISION_FULL);
@@ -233,8 +195,6 @@ fs_visitor::generate_math1_gen6(fs_inst *inst,
       brw_set_compression_control(p, BRW_COMPRESSION_2NDHALF);
       brw_math(p, sechalf(dst),
 	       op,
-	       inst->saturate ? BRW_MATH_SATURATE_SATURATE :
-	       BRW_MATH_SATURATE_NONE,
 	       0, sechalf(src0),
 	       BRW_MATH_DATA_VECTOR,
 	       BRW_MATH_PRECISION_FULL);
@@ -274,8 +234,6 @@ fs_visitor::generate_math_gen4(fs_inst *inst,
    brw_set_compression_control(p, BRW_COMPRESSION_NONE);
    brw_math(p, dst,
 	    op,
-	    inst->saturate ? BRW_MATH_SATURATE_SATURATE :
-	    BRW_MATH_SATURATE_NONE,
 	    inst->base_mrf, src,
 	    BRW_MATH_DATA_VECTOR,
 	    BRW_MATH_PRECISION_FULL);
@@ -284,8 +242,6 @@ fs_visitor::generate_math_gen4(fs_inst *inst,
       brw_set_compression_control(p, BRW_COMPRESSION_2NDHALF);
       brw_math(p, sechalf(dst),
 	       op,
-	       inst->saturate ? BRW_MATH_SATURATE_SATURATE :
-	       BRW_MATH_SATURATE_NONE,
 	       inst->base_mrf + 1, sechalf(src),
 	       BRW_MATH_DATA_VECTOR,
 	       BRW_MATH_PRECISION_FULL);
@@ -415,6 +371,27 @@ fs_visitor::generate_tex(fs_inst *inst, struct brw_reg dst, struct brw_reg src)
       dst = vec16(dst);
    }
 
+   /* Load the message header if present.  If there's a texture offset,
+    * we need to set it up explicitly and load the offset bitfield.
+    * Otherwise, we can use an implied move from g0 to the first message reg.
+    */
+   if (inst->texture_offset) {
+      brw_push_insn_state(p);
+      brw_set_compression_control(p, BRW_COMPRESSION_NONE);
+      /* Explicitly set up the message header by copying g0 to the MRF. */
+      brw_MOV(p, retype(brw_message_reg(inst->base_mrf), BRW_REGISTER_TYPE_UD),
+                 retype(brw_vec8_grf(0, 0), BRW_REGISTER_TYPE_UD));
+
+      /* Then set the offset bits in DWord 2. */
+      brw_MOV(p, retype(brw_vec1_reg(BRW_MESSAGE_REGISTER_FILE,
+                                     inst->base_mrf, 2), BRW_REGISTER_TYPE_UD),
+                 brw_imm_ud(inst->texture_offset));
+      brw_pop_insn_state(p);
+   } else if (inst->header_present) {
+      /* Set up an implied move from g0 to the MRF. */
+      src = retype(brw_vec8_grf(0, 0), BRW_REGISTER_TYPE_UW);
+   }
+
    brw_SAMPLE(p,
 	      retype(dst, BRW_REGISTER_TYPE_UW),
 	      inst->base_mrf,
@@ -475,8 +452,13 @@ fs_visitor::generate_ddx(fs_inst *inst, struct brw_reg dst, struct brw_reg src)
    brw_ADD(p, dst, src0, negate(src1));
 }
 
+/* The negate_value boolean is used to negate the derivative computation for
+ * FBOs, since they place the origin at the upper left instead of the lower
+ * left.
+ */
 void
-fs_visitor::generate_ddy(fs_inst *inst, struct brw_reg dst, struct brw_reg src)
+fs_visitor::generate_ddy(fs_inst *inst, struct brw_reg dst, struct brw_reg src,
+                         bool negate_value)
 {
    struct brw_reg src0 = brw_reg(src.file, src.nr, 0,
 				 BRW_REGISTER_TYPE_F,
@@ -490,7 +472,10 @@ fs_visitor::generate_ddy(fs_inst *inst, struct brw_reg dst, struct brw_reg src)
 				 BRW_WIDTH_4,
 				 BRW_HORIZONTAL_STRIDE_0,
 				 BRW_SWIZZLE_XYZW, WRITEMASK_XYZW);
-   brw_ADD(p, dst, src0, negate(src1));
+   if (negate_value)
+      brw_ADD(p, dst, src1, negate(src0));
+   else
+      brw_ADD(p, dst, src0, negate(src1));
 }
 
 void
@@ -526,17 +511,6 @@ fs_visitor::generate_discard(fs_inst *inst)
       brw_set_mask_control(p, BRW_MASK_DISABLE);
       brw_AND(p, g1, f0, g1);
       brw_pop_insn_state(p);
-
-      /* GLSL 1.30+ say that discarded channels should stop executing
-       * (so, for example, an infinite loop that would otherwise in
-       * just that channel does not occur.
-       *
-       * This HALT will be patched up at FB write time to point UIP at
-       * the end of the program, and at brw_uip_jip() JIP will be set
-       * to the end of the current block (or the program).
-       */
-      this->discard_halt_patches.push_tail(new(mem_ctx) ip_record(p->nr_insn));
-      gen6_HALT(p);
    } else {
       struct brw_reg g0 = retype(brw_vec1_grf(0, 0), BRW_REGISTER_TYPE_UW);
 
@@ -599,7 +573,9 @@ fs_visitor::generate_unspill(fs_inst *inst, struct brw_reg dst)
 }
 
 void
-fs_visitor::generate_pull_constant_load(fs_inst *inst, struct brw_reg dst)
+fs_visitor::generate_pull_constant_load(fs_inst *inst, struct brw_reg dst,
+					struct brw_reg index,
+					struct brw_reg offset)
 {
    assert(inst->mlen != 0);
 
@@ -616,8 +592,16 @@ fs_visitor::generate_pull_constant_load(fs_inst *inst, struct brw_reg dst)
    if (intel->gen == 4 && !intel->is_g4x)
       brw_MOV(p, brw_null_reg(), dst);
 
+   assert(index.file == BRW_IMMEDIATE_VALUE &&
+	  index.type == BRW_REGISTER_TYPE_UD);
+   uint32_t surf_index = index.dw1.ud;
+
+   assert(offset.file == BRW_IMMEDIATE_VALUE &&
+	  offset.type == BRW_REGISTER_TYPE_UD);
+   uint32_t read_offset = offset.dw1.ud;
+
    brw_oword_block_read(p, dst, brw_message_reg(inst->base_mrf),
-			inst->offset, SURF_INDEX_FRAG_CONST_BUFFER);
+			read_offset, surf_index);
 
    if (intel->gen == 4 && !intel->is_g4x) {
       /* gen4 errata: destination from a send can't be used as a
@@ -627,6 +611,27 @@ fs_visitor::generate_pull_constant_load(fs_inst *inst, struct brw_reg dst)
       brw_MOV(p, brw_null_reg(), dst);
    }
 }
+
+
+/**
+ * Cause the current pixel/sample mask (from R1.7 bits 15:0) to be transferred
+ * into the flags register (f0.0).
+ *
+ * Used only on Gen6 and above.
+ */
+void
+fs_visitor::generate_mov_dispatch_to_flags()
+{
+   struct brw_reg f0 = brw_flag_reg();
+   struct brw_reg g1 = retype(brw_vec1_grf(1, 7), BRW_REGISTER_TYPE_UW);
+
+   assert (intel->gen >= 6);
+   brw_push_insn_state(p);
+   brw_set_mask_control(p, BRW_MASK_DISABLE);
+   brw_MOV(p, f0, g1);
+   brw_pop_insn_state(p);
+}
+
 
 static uint32_t brw_file_from_reg(fs_reg *reg)
 {
@@ -716,11 +721,31 @@ fs_visitor::generate_code()
 	     prog->Name, c->dispatch_width);
    }
 
+   fs_cfg *cfg = NULL;
+   if (unlikely(INTEL_DEBUG & DEBUG_WM))
+      cfg = new(mem_ctx) fs_cfg(this);
+
    foreach_list(node, &this->instructions) {
       fs_inst *inst = (fs_inst *)node;
       struct brw_reg src[3], dst;
 
       if (unlikely(INTEL_DEBUG & DEBUG_WM)) {
+	 foreach_list(node, &cfg->block_list) {
+	    fs_bblock_link *link = (fs_bblock_link *)node;
+	    fs_bblock *block = link->block;
+
+	    if (block->start == inst) {
+	       printf("   START B%d", block->block_num);
+	       foreach_list(predecessor_node, &block->parents) {
+		  fs_bblock_link *predecessor_link =
+		     (fs_bblock_link *)predecessor_node;
+		  fs_bblock *predecessor_block = predecessor_link->block;
+		  printf(" <-B%d", predecessor_block->block_num);
+	       }
+	       printf("\n");
+	    }
+	 }
+
 	 if (last_annotation_ir != inst->ir) {
 	    last_annotation_ir = inst->ir;
 	    if (last_annotation_ir) {
@@ -778,6 +803,20 @@ fs_visitor::generate_code()
 	 brw_set_acc_write_control(p, 1);
 	 brw_MACH(p, dst, src[0], src[1]);
 	 brw_set_acc_write_control(p, 0);
+	 break;
+
+      case BRW_OPCODE_MAD:
+	 brw_set_access_mode(p, BRW_ALIGN_16);
+	 if (c->dispatch_width == 16) {
+	    brw_set_compression_control(p, BRW_COMPRESSION_NONE);
+	    brw_MAD(p, dst, src[0], src[1], src[2]);
+	    brw_set_compression_control(p, BRW_COMPRESSION_2NDHALF);
+	    brw_MAD(p, sechalf(dst), sechalf(src[0]), sechalf(src[1]), sechalf(src[2]));
+	    brw_set_compression_control(p, BRW_COMPRESSION_COMPRESSED);
+	 } else {
+	    brw_MAD(p, dst, src[0], src[1], src[2]);
+	 }
+	 brw_set_access_mode(p, BRW_ALIGN_1);
 	 break;
 
       case BRW_OPCODE_FRC:
@@ -913,7 +952,11 @@ fs_visitor::generate_code()
 	 generate_ddx(inst, dst, src[0]);
 	 break;
       case FS_OPCODE_DDY:
-	 generate_ddy(inst, dst, src[0]);
+         /* Make sure fp->UsesDFdy flag got set (otherwise there's no
+          * guarantee that c->key.render_to_fbo is set).
+          */
+         assert(fp->UsesDFdy);
+	 generate_ddy(inst, dst, src[0], c->key.render_to_fbo);
 	 break;
 
       case FS_OPCODE_SPILL:
@@ -925,12 +968,17 @@ fs_visitor::generate_code()
 	 break;
 
       case FS_OPCODE_PULL_CONSTANT_LOAD:
-	 generate_pull_constant_load(inst, dst);
+	 generate_pull_constant_load(inst, dst, src[0], src[1]);
 	 break;
 
       case FS_OPCODE_FB_WRITE:
 	 generate_fb_write(inst);
 	 break;
+
+      case FS_OPCODE_MOV_DISPATCH_TO_FLAGS:
+         generate_mov_dispatch_to_flags();
+         break;
+
       default:
 	 if (inst->opcode < (int)ARRAY_SIZE(brw_opcodes)) {
 	    _mesa_problem(ctx, "Unsupported opcode `%s' in FS",
@@ -951,6 +999,22 @@ fs_visitor::generate_code()
 		      ((uint32_t *)&p->store[i])[0]);
 	    }
 	    brw_disasm(stdout, &p->store[i], intel->gen);
+	 }
+
+	 foreach_list(node, &cfg->block_list) {
+	    fs_bblock_link *link = (fs_bblock_link *)node;
+	    fs_bblock *block = link->block;
+
+	    if (block->end == inst) {
+	       printf("   END B%d", block->block_num);
+	       foreach_list(successor_node, &block->children) {
+		  fs_bblock_link *successor_link =
+		     (fs_bblock_link *)successor_node;
+		  fs_bblock *successor_block = successor_link->block;
+		  printf(" ->B%d", successor_block->block_num);
+	       }
+	       printf("\n");
+	    }
 	 }
       }
 

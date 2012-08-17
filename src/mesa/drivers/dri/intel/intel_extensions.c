@@ -44,11 +44,11 @@ intelInitExtensions(struct gl_context *ctx)
 
    ctx->Extensions.ARB_draw_elements_base_vertex = true;
    ctx->Extensions.ARB_explicit_attrib_location = true;
-   ctx->Extensions.ARB_framebuffer_object = true;
+   if (_mesa_is_desktop_gl(ctx))
+      ctx->Extensions.ARB_framebuffer_object = true;
    ctx->Extensions.ARB_half_float_pixel = true;
    ctx->Extensions.ARB_map_buffer_range = true;
    ctx->Extensions.ARB_point_sprite = true;
-   ctx->Extensions.ARB_sampler_objects = true;
    ctx->Extensions.ARB_shader_objects = true;
    ctx->Extensions.ARB_shading_language_100 = true;
    ctx->Extensions.ARB_sync = true;
@@ -57,6 +57,7 @@ intelInitExtensions(struct gl_context *ctx)
    ctx->Extensions.ARB_texture_env_combine = true;
    ctx->Extensions.ARB_texture_env_crossbar = true;
    ctx->Extensions.ARB_texture_env_dot3 = true;
+   ctx->Extensions.ARB_texture_storage = true;
    ctx->Extensions.ARB_vertex_array_object = true;
    ctx->Extensions.ARB_vertex_program = true;
    ctx->Extensions.ARB_vertex_shader = true;
@@ -89,6 +90,9 @@ intelInitExtensions(struct gl_context *ctx)
 #if FEATURE_OES_EGL_image
    ctx->Extensions.OES_EGL_image = true;
 #endif
+   ctx->Extensions.OES_draw_texture = true;
+   ctx->Extensions.OES_compressed_ETC1_RGB8_texture = true;
+   ctx->Extensions.ARB_texture_rgb10_a2ui = true;
 
    if (intel->gen >= 6)
       ctx->Const.GLSLVersion = 130;
@@ -100,6 +104,12 @@ intelInitExtensions(struct gl_context *ctx)
        (intel->gen == 7 && intel->intelScreen->kernel_has_gen7_sol_reset))
       ctx->Extensions.EXT_transform_feedback = true;
 
+   if (intel->gen >= 6) {
+      ctx->Extensions.ARB_blend_func_extended = !driQueryOptionb(&intel->optionCache, "disable_blend_func_extended");
+      ctx->Extensions.ARB_draw_buffers_blend = true;
+      ctx->Extensions.ARB_uniform_buffer_object = true;
+   }
+
    if (intel->gen >= 5)
       ctx->Extensions.EXT_timer_query = true;
 
@@ -107,6 +117,8 @@ intelInitExtensions(struct gl_context *ctx)
       ctx->Extensions.ARB_color_buffer_float = true;
       ctx->Extensions.ARB_depth_buffer_float = true;
       ctx->Extensions.ARB_depth_clamp = true;
+      ctx->Extensions.ARB_draw_instanced = true;
+      ctx->Extensions.ARB_instanced_arrays = true;
       ctx->Extensions.ARB_fragment_coord_conventions = true;
       ctx->Extensions.ARB_fragment_program_shadow = true;
       ctx->Extensions.ARB_fragment_shader = true;
@@ -114,6 +126,7 @@ intelInitExtensions(struct gl_context *ctx)
       ctx->Extensions.ARB_occlusion_query = true;
       ctx->Extensions.ARB_point_sprite = true;
       ctx->Extensions.ARB_seamless_cube_map = true;
+      ctx->Extensions.ARB_shader_bit_encoding = true;
       ctx->Extensions.ARB_shader_texture_lod = true;
 #ifdef TEXTURE_FLOAT_ENABLED
       ctx->Extensions.ARB_texture_float = true;
@@ -161,5 +174,9 @@ intelInitExtensions(struct gl_context *ctx)
    }
    else if (driQueryOptionb(&intel->optionCache, "force_s3tc_enable")) {
       ctx->Extensions.EXT_texture_compression_s3tc = true;
+   }
+
+   if (intel->gen >= 4) {
+      ctx->Extensions.NV_primitive_restart = true;
    }
 }

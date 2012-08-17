@@ -99,7 +99,9 @@ intel_miptree_create_for_teximage(struct intel_context *intel,
 			       width,
 			       height,
 			       depth,
-			       expect_accelerated_upload);
+			       expect_accelerated_upload,
+                               0 /* num_samples */,
+                               INTEL_MSAA_LAYOUT_NONE);
 }
 
 /* There are actually quite a few combinations this will work for,
@@ -131,8 +133,7 @@ static bool
 try_pbo_upload(struct gl_context *ctx,
                struct gl_texture_image *image,
                const struct gl_pixelstore_attrib *unpack,
-	       GLenum format, GLenum type,
-               GLint width, GLint height, const void *pixels)
+	       GLenum format, GLenum type, const void *pixels)
 {
    struct intel_texture_image *intelImage = intel_texture_image(image);
    struct intel_context *intel = intel_context(ctx);
@@ -159,8 +160,7 @@ try_pbo_upload(struct gl_context *ctx,
       return false;
    }
 
-   ctx->Driver.AllocTextureImageBuffer(ctx, image, image->TexFormat,
-                                       width, height, 1);
+   ctx->Driver.AllocTextureImageBuffer(ctx, image);
 
    if (!intelImage->mt) {
       DBG("%s: no miptree\n", __FUNCTION__);
@@ -175,7 +175,7 @@ try_pbo_upload(struct gl_context *ctx,
    if (unpack->RowLength > 0)
       src_stride = unpack->RowLength;
    else
-      src_stride = width;
+      src_stride = image->Width;
 
    intel_miptree_get_image_offset(intelImage->mt, intelImage->base.Base.Level,
 				  intelImage->base.Base.Face, 0,
@@ -189,7 +189,7 @@ try_pbo_upload(struct gl_context *ctx,
 			  src_offset, false,
 			  dst_stride, dst_buffer, 0,
 			  intelImage->mt->region->tiling,
-			  0, 0, dst_x, dst_y, width, height,
+			  0, 0, dst_x, dst_y, image->Width, image->Height,
 			  GL_COPY)) {
       DBG("%s: blit failed\n", __FUNCTION__);
       return false;
@@ -201,75 +201,28 @@ try_pbo_upload(struct gl_context *ctx,
 
 static void
 intelTexImage(struct gl_context * ctx,
-              GLint dims,
+              GLuint dims,
               struct gl_texture_image *texImage,
-              GLint internalFormat,
-              GLint width, GLint height, GLint depth,
               GLenum format, GLenum type, const void *pixels,
-              const struct gl_pixelstore_attrib *unpack,
-              GLsizei imageSize)
+              const struct gl_pixelstore_attrib *unpack)
 {
    DBG("%s target %s level %d %dx%dx%d\n", __FUNCTION__,
        _mesa_lookup_enum_by_nr(texImage->TexObject->Target),
-       texImage->Level, width, height, depth);
+       texImage->Level, texImage->Width, texImage->Height, texImage->Depth);
 
    /* Attempt to use the blitter for PBO image uploads.
     */
    if (dims <= 2 &&
-       try_pbo_upload(ctx, texImage, unpack, format, type,
-		      width, height, pixels)) {
+       try_pbo_upload(ctx, texImage, unpack, format, type, pixels)) {
       return;
    }
 
    DBG("%s: upload image %dx%dx%d pixels %p\n",
-       __FUNCTION__, width, height, depth, pixels);
+       __FUNCTION__, texImage->Width, texImage->Height, texImage->Depth,
+       pixels);
 
-   _mesa_store_teximage3d(ctx, texImage, internalFormat,
-			  width, height, depth, 0,
-			  format, type, pixels, unpack);
-}
-
-
-static void
-intelTexImage3D(struct gl_context * ctx,
-                struct gl_texture_image *texImage,
-                GLint internalFormat,
-                GLint width, GLint height, GLint depth,
-                GLint border,
-                GLenum format, GLenum type, const void *pixels,
-                const struct gl_pixelstore_attrib *unpack)
-{
-   intelTexImage(ctx, 3, texImage,
-                 internalFormat, width, height, depth,
-                 format, type, pixels, unpack, 0);
-}
-
-
-static void
-intelTexImage2D(struct gl_context * ctx,
-                struct gl_texture_image *texImage,
-                GLint internalFormat,
-                GLint width, GLint height, GLint border,
-                GLenum format, GLenum type, const void *pixels,
-                const struct gl_pixelstore_attrib *unpack)
-{
-   intelTexImage(ctx, 2, texImage,
-                 internalFormat, width, height, 1,
-                 format, type, pixels, unpack, 0);
-}
-
-
-static void
-intelTexImage1D(struct gl_context * ctx,
-                struct gl_texture_image *texImage,
-                GLint internalFormat,
-                GLint width, GLint border,
-                GLenum format, GLenum type, const void *pixels,
-                const struct gl_pixelstore_attrib *unpack)
-{
-   intelTexImage(ctx, 1, texImage,
-                 internalFormat, width, 1, 1,
-                 format, type, pixels, unpack, 0);
+   _mesa_store_teximage(ctx, dims, texImage,
+                        format, type, pixels, unpack);
 }
 
 
@@ -284,7 +237,8 @@ intel_set_texture_image_region(struct gl_context *ctx,
 			       struct intel_region *region,
 			       GLenum target,
 			       GLenum internalFormat,
-			       gl_format format)
+			       gl_format format,
+                               uint32_t offset)
 {
    struct intel_context *intel = intel_context(ctx);
    struct intel_texture_image *intel_image = intel_texture_image(image);
@@ -303,6 +257,7 @@ intel_set_texture_image_region(struct gl_context *ctx,
    if (intel_image->mt == NULL)
        return;
 
+   intel_image->mt->offset = offset;
    intel_image->base.RowStride = region->pitch;
 
    /* Immediately validate the image to the object. */
@@ -321,8 +276,8 @@ intelSetTexBuffer2(__DRIcontext *pDRICtx, GLint target,
    struct intel_renderbuffer *rb;
    struct gl_texture_object *texObj;
    struct gl_texture_image *texImage;
-   int level = 0, internalFormat;
-   gl_format texFormat;
+   int level = 0, internalFormat = 0;
+   gl_format texFormat = MESA_FORMAT_NONE;
 
    texObj = _mesa_get_current_tex_object(ctx, target);
    intelObj = intel_texture_object(texObj);
@@ -358,7 +313,7 @@ intelSetTexBuffer2(__DRIcontext *pDRICtx, GLint target,
    _mesa_lock_texture(&intel->ctx, texObj);
    texImage = _mesa_get_tex_image(ctx, texObj, target, level);
    intel_set_texture_image_region(ctx, texImage, rb->mt->region, target,
-				  internalFormat, texFormat);
+				  internalFormat, texFormat, 0);
    _mesa_unlock_texture(&intel->ctx, texObj);
 }
 
@@ -389,16 +344,15 @@ intel_image_target_texture_2d(struct gl_context *ctx, GLenum target,
       return;
 
    intel_set_texture_image_region(ctx, texImage, image->region,
-				  target, image->internal_format, image->format);
+				  target, image->internal_format,
+                                  image->format, image->offset);
 }
 #endif
 
 void
 intelInitTextureImageFuncs(struct dd_function_table *functions)
 {
-   functions->TexImage1D = intelTexImage1D;
-   functions->TexImage2D = intelTexImage2D;
-   functions->TexImage3D = intelTexImage3D;
+   functions->TexImage = intelTexImage;
 
 #if FEATURE_OES_EGL_image
    functions->EGLImageTargetTexture2D = intel_image_target_texture_2d;

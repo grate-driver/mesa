@@ -83,6 +83,8 @@ get_shader_flags(void)
          flags |= GLSL_UNIFORMS;
       if (strstr(env, "useprog"))
          flags |= GLSL_USE_PROG;
+      if (strstr(env, "errors"))
+         flags |= GLSL_REPORT_ERRORS;
    }
 
    return flags;
@@ -128,66 +130,6 @@ _mesa_free_shader_state(struct gl_context *ctx)
    _mesa_reference_shader_program(ctx, &ctx->Shader._CurrentFragmentProgram,
 				  NULL);
    _mesa_reference_shader_program(ctx, &ctx->Shader.ActiveProgram, NULL);
-}
-
-
-/**
- * Return the size of the given GLSL datatype, in floats (components).
- */
-GLint
-_mesa_sizeof_glsl_type(GLenum type)
-{
-   switch (type) {
-   case GL_FLOAT:
-   case GL_INT:
-   case GL_UNSIGNED_INT:
-   case GL_BOOL:
-   case GL_SAMPLER_1D:
-   case GL_SAMPLER_2D:
-   case GL_SAMPLER_3D:
-   case GL_SAMPLER_CUBE:
-   case GL_SAMPLER_1D_SHADOW:
-   case GL_SAMPLER_2D_SHADOW:
-   case GL_SAMPLER_2D_RECT_ARB:
-   case GL_SAMPLER_2D_RECT_SHADOW_ARB:
-   case GL_SAMPLER_1D_ARRAY_EXT:
-   case GL_SAMPLER_2D_ARRAY_EXT:
-   case GL_SAMPLER_1D_ARRAY_SHADOW_EXT:
-   case GL_SAMPLER_2D_ARRAY_SHADOW_EXT:
-   case GL_SAMPLER_CUBE_SHADOW_EXT:
-   case GL_SAMPLER_EXTERNAL_OES:
-      return 1;
-   case GL_FLOAT_VEC2:
-   case GL_INT_VEC2:
-   case GL_UNSIGNED_INT_VEC2:
-   case GL_BOOL_VEC2:
-      return 2;
-   case GL_FLOAT_VEC3:
-   case GL_INT_VEC3:
-   case GL_UNSIGNED_INT_VEC3:
-   case GL_BOOL_VEC3:
-      return 3;
-   case GL_FLOAT_VEC4:
-   case GL_INT_VEC4:
-   case GL_UNSIGNED_INT_VEC4:
-   case GL_BOOL_VEC4:
-      return 4;
-   case GL_FLOAT_MAT2:
-   case GL_FLOAT_MAT2x3:
-   case GL_FLOAT_MAT2x4:
-      return 8; /* two float[4] vectors */
-   case GL_FLOAT_MAT3:
-   case GL_FLOAT_MAT3x2:
-   case GL_FLOAT_MAT3x4:
-      return 12; /* three float[4] vectors */
-   case GL_FLOAT_MAT4:
-   case GL_FLOAT_MAT4x2:
-   case GL_FLOAT_MAT4x3:
-      return 16;  /* four float[4] vectors */
-   default:
-      _mesa_problem(NULL, "Invalid type in _mesa_sizeof_glsl_type()");
-      return 1;
-   }
 }
 
 
@@ -404,10 +346,12 @@ delete_shader(struct gl_context *ctx, GLuint shader)
    if (!sh)
       return;
 
-   sh->DeletePending = GL_TRUE;
+   if (!sh->DeletePending) {
+      sh->DeletePending = GL_TRUE;
 
-   /* effectively, decr sh's refcount */
-   _mesa_reference_shader(ctx, &sh, NULL);
+      /* effectively, decr sh's refcount */
+      _mesa_reference_shader(ctx, &sh, NULL);
+   }
 }
 
 
@@ -600,6 +544,35 @@ get_programiv(struct gl_context *ctx, GLuint program, GLenum pname, GLint *param
       *params = shProg->Geom.OutputType;
       break;
 #endif
+   case GL_ACTIVE_UNIFORM_BLOCK_MAX_NAME_LENGTH: {
+      unsigned i;
+      GLint max_len = 0;
+
+      if (!ctx->Extensions.ARB_uniform_buffer_object) {
+         _mesa_error(ctx, GL_INVALID_ENUM, "glGetProgramiv(pname)");
+         return;
+      }
+
+      for (i = 0; i < shProg->NumUniformBlocks; i++) {
+	 /* Add one for the terminating NUL character.
+	  */
+	 const GLint len = strlen(shProg->UniformBlocks[i].Name) + 1;
+
+	 if (len > max_len)
+	    max_len = len;
+      }
+
+      *params = max_len;
+      break;
+   }
+   case GL_ACTIVE_UNIFORM_BLOCKS:
+      if (!ctx->Extensions.ARB_uniform_buffer_object) {
+         _mesa_error(ctx, GL_INVALID_ENUM, "glGetProgramiv(pname)");
+         return;
+      }
+
+      *params = shProg->NumUniformBlocks;
+      break;
    default:
       _mesa_error(ctx, GL_INVALID_ENUM, "glGetProgramiv(pname)");
       return;
@@ -687,7 +660,8 @@ get_shader_source(struct gl_context *ctx, GLuint shader, GLsizei maxLength,
 
 
 /**
- * Set/replace shader source code.
+ * Set/replace shader source code.  A helper function used by
+ * glShaderSource[ARB] and glCreateShaderProgramEXT.
  */
 static void
 shader_source(struct gl_context *ctx, GLuint shader, const GLchar *source)
@@ -732,6 +706,12 @@ compile_shader(struct gl_context *ctx, GLuint shaderObj)
     * compilation was successful.
     */
    _mesa_glsl_compile_shader(ctx, sh);
+
+   if (sh->CompileStatus == GL_FALSE && 
+       (ctx->Shader.Flags & GLSL_REPORT_ERRORS)) {
+      _mesa_debug(ctx, "Error compiling shader %u:\n%s\n",
+                  sh->Name, sh->InfoLog);
+   }
 }
 
 
@@ -761,6 +741,12 @@ link_program(struct gl_context *ctx, GLuint program)
    FLUSH_VERTICES(ctx, _NEW_PROGRAM);
 
    _mesa_glsl_link_shader(ctx, shProg);
+
+   if (shProg->LinkStatus == GL_FALSE && 
+       (ctx->Shader.Flags & GLSL_REPORT_ERRORS)) {
+      _mesa_debug(ctx, "Error linking program %u:\n%s\n",
+                  shProg->Name, shProg->InfoLog);
+   }
 
    /* debug code */
    if (0) {
@@ -927,6 +913,7 @@ _mesa_use_program(struct gl_context *ctx, struct gl_shader_program *shProg)
    if (ctx->Driver.UseProgram)
       ctx->Driver.UseProgram(ctx, shProg);
 }
+
 
 /**
  * Do validation of the given shader program.
@@ -1593,6 +1580,10 @@ _mesa_use_shader_program(struct gl_context *ctx, GLenum type,
       ctx->Driver.UseProgram(ctx, shProg);
 }
 
+
+/**
+ * For GL_EXT_separate_shader_objects
+ */
 void GLAPIENTRY
 _mesa_UseShaderProgramEXT(GLenum type, GLuint program)
 {
@@ -1629,6 +1620,10 @@ _mesa_UseShaderProgramEXT(GLenum type, GLuint program)
    _mesa_use_shader_program(ctx, type, shProg);
 }
 
+
+/**
+ * For GL_EXT_separate_shader_objects
+ */
 void GLAPIENTRY
 _mesa_ActiveProgramEXT(GLuint program)
 {
@@ -1641,6 +1636,10 @@ _mesa_ActiveProgramEXT(GLuint program)
    return;
 }
 
+
+/**
+ * For GL_EXT_separate_shader_objects
+ */
 GLuint GLAPIENTRY
 _mesa_CreateShaderProgramEXT(GLenum type, const GLchar *string)
 {
@@ -1747,6 +1746,9 @@ _mesa_init_shader_dispatch(struct _glapi_table *exec)
    SET_ReleaseShaderCompiler(exec, _mesa_ReleaseShaderCompiler);
    SET_GetShaderPrecisionFormat(exec, _mesa_GetShaderPrecisionFormat);
 
+   /* GL_ARB_blend_func_extended */
+   SET_BindFragDataLocationIndexed(exec, _mesa_BindFragDataLocationIndexed);
+   SET_GetFragDataIndex(exec, _mesa_GetFragDataIndex);
 #endif /* FEATURE_GL */
 }
 

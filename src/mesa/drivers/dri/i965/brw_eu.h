@@ -38,6 +38,10 @@
 #include "brw_defines.h"
 #include "program/prog_instruction.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define BRW_SWIZZLE4(a,b,c,d) (((a)<<0) | ((b)<<2) | ((c)<<4) | ((d)<<6))
 #define BRW_GET_SWZ(swz, idx) (((swz) >> ((idx)*2)) & 0x3)
 
@@ -49,6 +53,13 @@
 #define BRW_SWIZZLE_WWWW      BRW_SWIZZLE4(3,3,3,3)
 #define BRW_SWIZZLE_XYXY      BRW_SWIZZLE4(0,1,0,1)
 
+static inline bool brw_is_single_value_swizzle(int swiz)
+{
+   return (swiz == BRW_SWIZZLE_XXXX ||
+	   swiz == BRW_SWIZZLE_YYYY ||
+	   swiz == BRW_SWIZZLE_ZZZZ ||
+	   swiz == BRW_SWIZZLE_WWWW);
+}
 
 #define REG_SIZE (8*4)
 
@@ -95,11 +106,6 @@ struct brw_indirect {
 };
 
 
-struct brw_glsl_label;
-struct brw_glsl_call;
-
-
-
 #define BRW_EU_MAX_INSN_STACK 5
 
 struct brw_compile {
@@ -144,22 +150,7 @@ struct brw_compile {
    int *if_depth_in_loop;
    int loop_stack_depth;
    int loop_stack_array_size;
-
-   struct brw_glsl_label *first_label;  /**< linked list of labels */
-   struct brw_glsl_call *first_call;    /**< linked list of CALs */
 };
-
-
-void
-brw_save_label(struct brw_compile *c, const char *name, GLuint position);
-
-void
-brw_save_call(struct brw_compile *c, const char *name, GLuint call_pos);
-
-void
-brw_resolve_cals(struct brw_compile *c);
-
-
 
 static INLINE int type_sz( GLuint type )
 {
@@ -811,7 +802,7 @@ static INLINE struct brw_instruction *current_insn( struct brw_compile *p)
 void brw_pop_insn_state( struct brw_compile *p );
 void brw_push_insn_state( struct brw_compile *p );
 void brw_set_mask_control( struct brw_compile *p, GLuint value );
-void brw_set_saturate( struct brw_compile *p, GLuint value );
+void brw_set_saturate( struct brw_compile *p, bool enable );
 void brw_set_access_mode( struct brw_compile *p, GLuint access_mode );
 void brw_set_compression_control(struct brw_compile *p, enum brw_compression c);
 void brw_set_predicate_control_flag_value( struct brw_compile *p, GLuint value );
@@ -847,9 +838,15 @@ struct brw_instruction *brw_##OP(struct brw_compile *p,	\
 	      struct brw_reg src0,			\
 	      struct brw_reg src1);
 
+#define ALU3(OP)					\
+struct brw_instruction *brw_##OP(struct brw_compile *p,	\
+	      struct brw_reg dest,			\
+	      struct brw_reg src0,			\
+	      struct brw_reg src1,			\
+	      struct brw_reg src2);
+
 #define ROUND(OP) \
 void brw_##OP(struct brw_compile *p, struct brw_reg dest, struct brw_reg src0);
-
 
 ALU1(MOV)
 ALU2(SEL)
@@ -864,6 +861,7 @@ ALU2(RSL)
 ALU2(ASR)
 ALU2(JMPI)
 ALU2(ADD)
+ALU2(AVG)
 ALU2(MUL)
 ALU1(FRC)
 ALU1(RNDD)
@@ -876,12 +874,14 @@ ALU2(DP3)
 ALU2(DP2)
 ALU2(LINE)
 ALU2(PLN)
+ALU3(MAD)
 
 ROUND(RNDZ)
 ROUND(RNDE)
 
 #undef ALU1
 #undef ALU2
+#undef ALU3
 #undef ROUND
 
 
@@ -951,6 +951,7 @@ void brw_fb_WRITE(struct brw_compile *p,
 		  int dispatch_width,
 		   GLuint msg_reg_nr,
 		   struct brw_reg src0,
+		   GLuint msg_control,
 		   GLuint binding_table_index,
 		   GLuint msg_length,
 		   GLuint response_length,
@@ -974,7 +975,6 @@ void brw_SAMPLE(struct brw_compile *p,
 void brw_math_16( struct brw_compile *p,
 		  struct brw_reg dest,
 		  GLuint function,
-		  GLuint saturate,
 		  GLuint msg_reg_nr,
 		  struct brw_reg src,
 		  GLuint precision );
@@ -982,7 +982,6 @@ void brw_math_16( struct brw_compile *p,
 void brw_math( struct brw_compile *p,
 	       struct brw_reg dest,
 	       GLuint function,
-	       GLuint saturate,
 	       GLuint msg_reg_nr,
 	       struct brw_reg src,
 	       GLuint data_type,
@@ -1048,7 +1047,6 @@ struct brw_instruction *brw_WHILE(struct brw_compile *p);
 struct brw_instruction *brw_BREAK(struct brw_compile *p);
 struct brw_instruction *brw_CONT(struct brw_compile *p);
 struct brw_instruction *gen6_CONT(struct brw_compile *p);
-struct brw_instruction *gen6_HALT(struct brw_compile *p);
 /* Forward jumps:
  */
 void brw_land_fwd_jump(struct brw_compile *p, int jmp_insn_idx);
@@ -1111,5 +1109,9 @@ uint32_t brw_swap_cmod(uint32_t cmod);
 void brw_optimize(struct brw_compile *p);
 void brw_remove_duplicate_mrf_moves(struct brw_compile *p);
 void brw_remove_grf_to_mrf_moves(struct brw_compile *p);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

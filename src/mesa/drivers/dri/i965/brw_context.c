@@ -75,27 +75,61 @@ bool
 brwCreateContext(int api,
 	         const struct gl_config *mesaVis,
 		 __DRIcontext *driContextPriv,
+                 unsigned major_version,
+                 unsigned minor_version,
+                 unsigned *error,
 	         void *sharedContextPrivate)
 {
    __DRIscreen *sPriv = driContextPriv->driScreenPriv;
    struct intel_screen *screen = sPriv->driverPrivate;
    struct dd_function_table functions;
-   struct brw_context *brw = rzalloc(NULL, struct brw_context);
-   struct intel_context *intel = &brw->intel;
-   struct gl_context *ctx = &intel->ctx;
    unsigned i;
 
+   /* Filter against the requested API and version.
+    */
+   switch (api) {
+   case API_OPENGL: {
+#ifdef TEXTURE_FLOAT_ENABLED
+      const unsigned max_version =
+         (screen->gen == 6 ||
+          (screen->gen == 7 && screen->kernel_has_gen7_sol_reset))
+         ? 30 : 21;
+#else
+      const unsigned max_version = 21;
+#endif
+      const unsigned req_version = major_version * 10 + minor_version;
+
+      if (req_version > max_version) {
+         *error = __DRI_CTX_ERROR_BAD_VERSION;
+         return false;
+      }
+      break;
+   }
+   case API_OPENGLES:
+   case API_OPENGLES2:
+      break;
+   default:
+      *error = __DRI_CTX_ERROR_BAD_API;
+      return false;
+   }
+
+   struct brw_context *brw = rzalloc(NULL, struct brw_context);
    if (!brw) {
       printf("%s: failed to alloc context\n", __FUNCTION__);
+      *error = __DRI_CTX_ERROR_NO_MEMORY;
       return false;
    }
 
    brwInitDriverFunctions(screen, &functions);
 
+   struct intel_context *intel = &brw->intel;
+   struct gl_context *ctx = &intel->ctx;
+
    if (!intelInitContext( intel, api, mesaVis, driContextPriv,
 			  sharedContextPrivate, &functions )) {
       printf("%s: failed to init intel context\n", __FUNCTION__);
       FREE(brw);
+      *error = __DRI_CTX_ERROR_NO_MEMORY;
       return false;
    }
 
@@ -108,6 +142,7 @@ brwCreateContext(int api,
 
    TNL_CONTEXT(ctx)->Driver.RunPipeline = _tnl_run_pipeline;
 
+   ctx->Const.MaxDualSourceDrawBuffers = 1;
    ctx->Const.MaxDrawBuffers = BRW_MAX_DRAW_BUFFERS;
    ctx->Const.MaxTextureImageUnits = BRW_MAX_TEX_UNIT;
    ctx->Const.MaxTextureCoordUnits = 8; /* Mesa limit */
@@ -137,7 +172,7 @@ brwCreateContext(int api,
     * So we need to override the Mesa default (which is based only on software
     * limits).
     */
-   ctx->Const.MaxTransformFeedbackSeparateAttribs = BRW_MAX_SOL_BUFFERS;
+   ctx->Const.MaxTransformFeedbackBuffers = BRW_MAX_SOL_BUFFERS;
 
    /* On Gen6, in the worst case, we use up one binding table entry per
     * transform feedback component (see comments above the definition of
@@ -153,13 +188,10 @@ brwCreateContext(int api,
    ctx->Const.MaxTransformFeedbackSeparateComponents =
       BRW_MAX_SOL_BINDINGS / BRW_MAX_SOL_BUFFERS;
 
-   /* Claim to support 4 multisamples, even though we don't.  This is a
-    * requirement for GL 3.0 that we missed until the last minute.  Go ahead and
-    * claim the limit, so that usage of the 4 multisample-based API that is
-    * guaranteed in 3.0 succeeds, even though we only rasterize a single sample.
-    */
-   if (intel->gen >= 6)
+   if (intel->gen == 6)
       ctx->Const.MaxSamples = 4;
+   else if (intel->gen >= 7)
+      ctx->Const.MaxSamples = 8;
 
    /* if conformance mode is set, swrast can handle any size AA point */
    ctx->Const.MaxPointSizeAA = 255.0;
@@ -247,7 +279,7 @@ brwCreateContext(int api,
 	 brw->urb.max_vs_entries = 512;
 	 brw->urb.max_gs_entries = 192;
       } else if (intel->gt == 2) {
-	 brw->max_wm_threads = 86;
+	 brw->max_wm_threads = 172;
 	 brw->max_vs_threads = 128;
 	 brw->max_gs_threads = 128;
 	 brw->urb.size = 256;
@@ -258,11 +290,7 @@ brwCreateContext(int api,
       }
    } else if (intel->gen == 6) {
       if (intel->gt == 2) {
-	 /* This could possibly be 80, but is supposed to require
-	  * disabling of WIZ hashing (bit 6 of GT_MODE, 0x20d0) and a
-	  * GPU reset to change.
-	  */
-	 brw->max_wm_threads = 40;
+	 brw->max_wm_threads = 80;
 	 brw->max_vs_threads = 60;
 	 brw->max_gs_threads = 60;
 	 brw->urb.size = 64;            /* volume 5c.5 section 5.1 */
@@ -273,7 +301,7 @@ brwCreateContext(int api,
 	 brw->max_vs_threads = 24;
 	 brw->max_gs_threads = 21; /* conservative; 24 if rendering disabled */
 	 brw->urb.size = 32;            /* volume 5c.5 section 5.1 */
-	 brw->urb.max_vs_entries = 128; /* volume 2a (see 3DSTATE_URB) */
+	 brw->urb.max_vs_entries = 256; /* volume 2a (see 3DSTATE_URB) */
 	 brw->urb.max_gs_entries = 256;
       }
       brw->urb.gen6_gs_previously_active = false;
@@ -294,6 +322,14 @@ brwCreateContext(int api,
       brw->max_wm_threads = 8 * 4;
       brw->has_negative_rhw_bug = true;
    }
+
+   if (intel->gen <= 7) {
+      brw->needs_unlit_centroid_workaround = true;
+   }
+
+   brw->prim_restart.in_progress = false;
+   brw->prim_restart.enable_cut_index = false;
+   intel->hw_ctx = drm_intel_gem_context_create(intel->bufmgr);
 
    brw_init_state( brw );
 

@@ -57,8 +57,8 @@ struct llvmpipe_context {
 
    /** Constant state objects */
    const struct pipe_blend_state *blend;
-   const struct pipe_sampler_state *sampler[PIPE_MAX_SAMPLERS];
-   struct pipe_sampler_state *vertex_samplers[PIPE_MAX_VERTEX_SAMPLERS];
+   struct pipe_sampler_state *samplers[PIPE_SHADER_TYPES][PIPE_MAX_SAMPLERS];
+
    const struct pipe_depth_stencil_alpha_state *depth_stencil;
    const struct pipe_rasterizer_state *rasterizer;
    struct lp_fragment_shader *fs;
@@ -75,8 +75,8 @@ struct llvmpipe_context {
    struct pipe_framebuffer_state framebuffer;
    struct pipe_poly_stipple poly_stipple;
    struct pipe_scissor_state scissor;
-   struct pipe_sampler_view *fragment_sampler_views[PIPE_MAX_SAMPLERS];
-   struct pipe_sampler_view *vertex_sampler_views[PIPE_MAX_VERTEX_SAMPLERS];
+   struct pipe_sampler_view *sampler_views[PIPE_SHADER_TYPES][PIPE_MAX_SAMPLERS];
+
    struct pipe_viewport_state viewport;
    struct pipe_vertex_buffer vertex_buffer[PIPE_MAX_ATTRIBS];
    struct pipe_index_buffer index_buffer;
@@ -88,10 +88,9 @@ struct llvmpipe_context {
    } so_target;
    struct pipe_resource *mapped_vs_tex[PIPE_MAX_VERTEX_SAMPLERS];
 
-   unsigned num_samplers;
-   unsigned num_fragment_sampler_views;
-   unsigned num_vertex_samplers;
-   unsigned num_vertex_sampler_views;
+   unsigned num_samplers[PIPE_SHADER_TYPES];
+   unsigned num_sampler_views[PIPE_SHADER_TYPES];
+
    unsigned num_vertex_buffers;
 
    unsigned dirty; /**< Mask of LP_NEW_x flags */
@@ -131,10 +130,6 @@ struct llvmpipe_context {
    unsigned nr_fs_variants;
    unsigned nr_fs_instrs;
 
-   /** JIT code generation */
-   struct gallivm_state *gallivm;
-   LLVMTypeRef jit_context_ptr_type;
-
    struct lp_setup_variant_list_item setup_variants_list;
    unsigned nr_setup_variants;
 
@@ -154,6 +149,12 @@ extern unsigned llvmpipe_variant_count;
 
 struct pipe_context *
 llvmpipe_create_context( struct pipe_screen *screen, void *priv );
+
+struct pipe_resource *
+llvmpipe_user_buffer_create(struct pipe_screen *screen,
+                            void *ptr,
+                            unsigned bytes,
+			    unsigned bind_flags);
 
 
 static INLINE struct llvmpipe_context *

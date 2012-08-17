@@ -1,17 +1,14 @@
-i965_INCLUDES := \
+i965_INCLUDES = \
 	$(MESA_TOP)/src \
 	$(MESA_TOP)/src/mesa/drivers/dri/intel
 
-i965_C_SOURCES := \
+i965_C_FILES = \
 	intel_batchbuffer.c \
 	intel_blit.c \
 	intel_buffer_objects.c \
 	intel_buffers.c \
-	intel_clear.c \
 	intel_context.c \
-	intel_decode.c \
 	intel_extensions.c \
-	intel_extensions_es.c \
 	intel_fbo.c \
 	intel_mipmap_tree.c \
 	intel_regions.c \
@@ -33,6 +30,7 @@ i965_C_SOURCES := \
 	intel_tex_subimage.c \
 	intel_tex_validate.c \
 	brw_cc.c \
+	brw_clear.c \
 	brw_clip.c \
 	brw_clip_line.c \
 	brw_clip_point.c \
@@ -56,6 +54,7 @@ i965_C_SOURCES := \
 	brw_misc_state.c \
 	brw_optimize.c \
 	brw_program.c \
+	brw_primitive_restart.c \
 	brw_queryobj.c \
 	brw_sf.c \
 	brw_sf_emit.c \
@@ -89,7 +88,7 @@ i965_C_SOURCES := \
 	gen6_clip_state.c \
 	gen6_depthstencil.c \
 	gen6_gs_state.c \
-	gen6_hiz.c \
+        gen6_multisample_state.c \
 	gen6_sampler_state.c \
 	gen6_scissor_state.c \
 	gen6_sf_state.c \
@@ -101,7 +100,6 @@ i965_C_SOURCES := \
 	gen7_cc_state.c \
 	gen7_clip_state.c \
 	gen7_disable.c \
-	gen7_hiz.c \
 	gen7_misc_state.c \
 	gen7_sampler_state.c \
 	gen7_sf_state.c \
@@ -110,22 +108,31 @@ i965_C_SOURCES := \
 	gen7_viewport_state.c \
 	gen7_vs_state.c \
 	gen7_wm_state.c \
-	gen7_wm_surface_state.c \
+	gen7_wm_surface_state.c
 
-i965_CXX_SOURCES := \
+i965_CXX_FILES = \
+	brw_blorp.cpp \
+	brw_blorp_blit.cpp \
 	brw_cubemap_normalize.cpp \
 	brw_fs.cpp \
+	brw_fs_cfg.cpp \
+	brw_fs_cse.cpp \
+	brw_fs_copy_propagation.cpp \
 	brw_fs_emit.cpp \
+	brw_fs_live_variables.cpp \
 	brw_fs_visitor.cpp \
 	brw_fs_channel_expressions.cpp \
 	brw_fs_reg_allocate.cpp \
 	brw_fs_schedule_instructions.cpp \
 	brw_fs_vector_splitting.cpp \
+	brw_lower_texture_gradients.cpp \
 	brw_shader.cpp \
 	brw_vec4.cpp \
 	brw_vec4_emit.cpp \
 	brw_vec4_copy_propagation.cpp \
 	brw_vec4_reg_allocate.cpp \
-	brw_vec4_visitor.cpp
+	brw_vec4_visitor.cpp \
+	gen6_blorp.cpp \
+	gen7_blorp.cpp
 
-i965_ASM_SOURCES :=
+i965_ASM_FILES =

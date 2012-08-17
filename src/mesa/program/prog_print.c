@@ -29,6 +29,8 @@
  * \author Brian Paul
  */
 
+#include <inttypes.h>  /* for PRIx64 macro */
+
 #include "main/glheader.h"
 #include "main/context.h"
 #include "main/imports.h"
@@ -194,7 +196,7 @@ _mesa_print_vp_inputs(GLbitfield inputs)
 {
    printf("VP Inputs 0x%x: \n", inputs);
    while (inputs) {
-      GLint attr = _mesa_ffs(inputs) - 1;
+      GLint attr = ffs(inputs) - 1;
       const char *name = arb_input_attrib_string(attr,
                                                  GL_VERTEX_PROGRAM_ARB);
       printf("  %d: %s\n", attr, name);
@@ -212,7 +214,7 @@ _mesa_print_fp_inputs(GLbitfield inputs)
 {
    printf("FP Inputs 0x%x: \n", inputs);
    while (inputs) {
-      GLint attr = _mesa_ffs(inputs) - 1;
+      GLint attr = ffs(inputs) - 1;
       const char *name = arb_input_attrib_string(attr,
                                                  GL_FRAGMENT_PROGRAM_ARB);
       printf("  %d: %s\n", attr, name);
@@ -970,11 +972,10 @@ _mesa_fprint_program_parameters(FILE *f,
 {
    GLuint i;
 
-   fprintf(f, "InputsRead: 0x%llx (0b%s)\n",
-           (unsigned long long) prog->InputsRead, binary(prog->InputsRead));
-   fprintf(f, "OutputsWritten: 0x%llx (0b%s)\n",
-                 (unsigned long long)prog->OutputsWritten, 
-		 binary(prog->OutputsWritten));
+   fprintf(f, "InputsRead: %" PRIx64 " (0b%s)\n",
+           (uint64_t) prog->InputsRead, binary(prog->InputsRead));
+   fprintf(f, "OutputsWritten: %" PRIx64 " (0b%s)\n",
+           (uint64_t) prog->OutputsWritten, binary(prog->OutputsWritten));
    fprintf(f, "NumInstructions=%d\n", prog->NumInstructions);
    fprintf(f, "NumTemporaries=%d\n", prog->NumTemporaries);
    fprintf(f, "NumParameters=%d\n", prog->NumParameters);

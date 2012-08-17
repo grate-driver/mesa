@@ -31,26 +31,6 @@
 #include "brw_util.h"
 #include "intel_batchbuffer.h"
 
-/**
- * Return true if at least one of the inputs used by the given fragment
- * program has the GLSL "noperspective" interpolation qualifier.
- */
-bool
-brw_fprog_uses_noperspective(const struct gl_fragment_program *fprog)
-{
-   int attr;
-   for (attr = 0; attr < FRAG_ATTRIB_MAX; ++attr) {
-      /* Ignore unused inputs. */
-      if (!(fprog->Base.InputsRead & BITFIELD64_BIT(attr)))
-         continue;
-
-      if (fprog->InterpQualifier[attr] == INTERP_QUALIFIER_NOPERSPECTIVE)
-         return true;
-   }
-   return false;
-}
-
-
 static void
 upload_clip_state(struct brw_context *brw)
 {
@@ -59,10 +39,10 @@ upload_clip_state(struct brw_context *brw)
    uint32_t depth_clamp = 0;
    uint32_t provoking, userclip;
    uint32_t nonperspective_barycentric_enable_flag = 0;
-   /* BRW_NEW_FRAGMENT_PROGRAM */
-   const struct gl_fragment_program *fprog = brw->fragment_program;
 
-   if (brw_fprog_uses_noperspective(fprog)) {
+   /* CACHE_NEW_WM_PROG */
+   if (brw->wm.prog_data->barycentric_interp_modes &
+       BRW_WM_NONPERSPECTIVE_BARYCENTRIC_BITS) {
       nonperspective_barycentric_enable_flag =
          GEN6_CLIP_NON_PERSPECTIVE_BARYCENTRIC_ENABLE;
    }
@@ -94,6 +74,7 @@ upload_clip_state(struct brw_context *brw)
 	     GEN6_CLIP_MODE_NORMAL |
              nonperspective_barycentric_enable_flag |
 	     GEN6_CLIP_XY_TEST |
+	     GEN6_CLIP_GB_TEST |
 	     userclip << GEN6_USER_CLIP_CLIP_DISTANCES_SHIFT |
 	     depth_clamp |
 	     provoking);
@@ -106,9 +87,8 @@ upload_clip_state(struct brw_context *brw)
 const struct brw_tracked_state gen6_clip_state = {
    .dirty = {
       .mesa  = _NEW_TRANSFORM | _NEW_LIGHT,
-      .brw   = (BRW_NEW_CONTEXT |
-                BRW_NEW_FRAGMENT_PROGRAM),
-      .cache = 0
+      .brw   = (BRW_NEW_CONTEXT),
+      .cache = CACHE_NEW_WM_PROG
    },
    .emit = upload_clip_state,
 };

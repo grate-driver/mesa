@@ -30,6 +30,7 @@
 
 #include "pipe/p_context.h"
 #include "pipe/p_defines.h"
+#include "pipe/p_shader_tokens.h"
 #include "pipe/p_state.h"
 #include "pipe/p_screen.h"
 #include "util/u_debug.h"
@@ -135,6 +136,28 @@ pipe_sampler_view_reference(struct pipe_sampler_view **ptr, struct pipe_sampler_
    *ptr = view;
 }
 
+/**
+ * Similar to pipe_sampler_view_reference() but always set the pointer to
+ * NULL and pass in an explicit context.  Passing an explicit context is a
+ * work-around for fixing a dangling context pointer problem when textures
+ * are shared by multiple contexts.  XXX fix this someday.
+ */
+static INLINE void
+pipe_sampler_view_release(struct pipe_context *ctx,
+                          struct pipe_sampler_view **ptr)
+{
+   struct pipe_sampler_view *old_view = *ptr;
+   if (*ptr && (*ptr)->context != ctx) {
+      debug_printf_once(("context mis-match in pipe_sampler_view_release()\n"));
+   }
+   if (pipe_reference_described(&(*ptr)->reference, NULL,
+                    (debug_reference_descriptor)debug_describe_sampler_view)) {
+      ctx->sampler_view_destroy(ctx, old_view);
+   }
+   *ptr = NULL;
+}
+
+
 static INLINE void
 pipe_so_target_reference(struct pipe_stream_output_target **ptr,
                          struct pipe_stream_output_target *target)
@@ -209,14 +232,6 @@ pipe_buffer_create( struct pipe_screen *screen,
    buffer.depth0 = 1;
    buffer.array_size = 1;
    return screen->resource_create(screen, &buffer);
-}
-
-
-static INLINE struct pipe_resource *
-pipe_user_buffer_create( struct pipe_screen *screen, void *ptr, unsigned size,
-			 unsigned usage )
-{
-   return screen->user_buffer_create(screen, ptr, size, usage);
 }
 
 static INLINE void *
@@ -348,10 +363,23 @@ pipe_buffer_write_nooverlap(struct pipe_context *pipe,
                                buf,
                                0,
                                (PIPE_TRANSFER_WRITE |
-                                PIPE_TRANSFER_NOOVERWRITE),
+                                PIPE_TRANSFER_UNSYNCHRONIZED),
                                &box,
                                data,
                                0, 0);
+}
+
+static INLINE struct pipe_resource *
+pipe_buffer_create_with_data(struct pipe_context *pipe,
+                             unsigned bind,
+                             unsigned usage,
+                             unsigned size,
+                             void *ptr)
+{
+   struct pipe_resource *res = pipe_buffer_create(pipe->screen,
+                                                  bind, usage, size);
+   pipe_buffer_write_nooverlap(pipe, res, 0, size, ptr);
+   return res;
 }
 
 static INLINE void
@@ -415,6 +443,22 @@ pipe_transfer_destroy( struct pipe_context *context,
    context->transfer_destroy(context, transfer);
 }
 
+static INLINE void
+pipe_set_constant_buffer(struct pipe_context *pipe, uint shader, uint index,
+                         struct pipe_resource *buf)
+{
+   if (buf) {
+      struct pipe_constant_buffer cb;
+      cb.buffer = buf;
+      cb.buffer_offset = 0;
+      cb.buffer_size = buf->width0;
+      cb.user_buffer = NULL;
+      pipe->set_constant_buffer(pipe, shader, index, &cb);
+   } else {
+      pipe->set_constant_buffer(pipe, shader, index, NULL);
+   }
+}
+
 
 static INLINE boolean util_get_offset( 
    const struct pipe_rasterizer_state *templ,
@@ -459,6 +503,86 @@ static INLINE void util_copy_vertex_buffers(struct pipe_vertex_buffer *dst,
     * of pipe_vertex_buffer. */
    *dst_count = src_count;
    memcpy(dst, src, src_count * sizeof(struct pipe_vertex_buffer));
+}
+
+static INLINE float
+util_get_min_point_size(const struct pipe_rasterizer_state *state)
+{
+   /* The point size should be clamped to this value at the rasterizer stage.
+    */
+   return state->gl_rasterization_rules &&
+          !state->point_quad_rasterization &&
+          !state->point_smooth &&
+          !state->multisample ? 1.0f : 0.0f;
+}
+
+static INLINE void
+util_query_clear_result(union pipe_query_result *result, unsigned type)
+{
+   switch (type) {
+   case PIPE_QUERY_OCCLUSION_PREDICATE:
+   case PIPE_QUERY_SO_OVERFLOW_PREDICATE:
+   case PIPE_QUERY_GPU_FINISHED:
+      result->b = FALSE;
+      break;
+   case PIPE_QUERY_OCCLUSION_COUNTER:
+   case PIPE_QUERY_TIMESTAMP:
+   case PIPE_QUERY_TIME_ELAPSED:
+   case PIPE_QUERY_PRIMITIVES_GENERATED:
+   case PIPE_QUERY_PRIMITIVES_EMITTED:
+      result->u64 = 0;
+      break;
+   case PIPE_QUERY_SO_STATISTICS:
+      memset(&result->so_statistics, 0, sizeof(result->so_statistics));
+      break;
+   case PIPE_QUERY_TIMESTAMP_DISJOINT:
+      memset(&result->timestamp_disjoint, 0, sizeof(result->timestamp_disjoint));
+      break;
+   case PIPE_QUERY_PIPELINE_STATISTICS:
+      memset(&result->pipeline_statistics, 0, sizeof(result->pipeline_statistics));
+      break;
+   default:
+      assert(0);
+   }
+}
+
+/** Convert PIPE_TEXTURE_x to TGSI_TEXTURE_x */
+static INLINE unsigned
+util_pipe_tex_to_tgsi_tex(enum pipe_texture_target pipe_tex_target,
+                          unsigned nr_samples)
+{
+   switch (pipe_tex_target) {
+   case PIPE_TEXTURE_1D:
+      assert(nr_samples <= 1);
+      return TGSI_TEXTURE_1D;
+
+   case PIPE_TEXTURE_2D:
+      return nr_samples > 1 ? TGSI_TEXTURE_2D_MSAA : TGSI_TEXTURE_2D;
+
+   case PIPE_TEXTURE_RECT:
+      assert(nr_samples <= 1);
+      return TGSI_TEXTURE_RECT;
+
+   case PIPE_TEXTURE_3D:
+      assert(nr_samples <= 1);
+      return TGSI_TEXTURE_3D;
+
+   case PIPE_TEXTURE_CUBE:
+      assert(nr_samples <= 1);
+      return TGSI_TEXTURE_CUBE;
+
+   case PIPE_TEXTURE_1D_ARRAY:
+      assert(nr_samples <= 1);
+      return TGSI_TEXTURE_1D_ARRAY;
+
+   case PIPE_TEXTURE_2D_ARRAY:
+      return nr_samples > 1 ? TGSI_TEXTURE_2D_ARRAY_MSAA :
+                              TGSI_TEXTURE_2D_ARRAY;
+
+   default:
+      assert(0 && "unexpected texture target");
+      return TGSI_TEXTURE_UNKNOWN;
+   }
 }
 
 #ifdef __cplusplus

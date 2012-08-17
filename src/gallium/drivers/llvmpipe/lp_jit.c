@@ -41,7 +41,7 @@
 
 
 static void
-lp_jit_create_types(struct llvmpipe_context *lp)
+lp_jit_create_types(struct lp_fragment_shader_variant *lp)
 {
    struct gallivm_state *gallivm = lp->gallivm;
    LLVMContextRef lc = gallivm->context;
@@ -68,13 +68,9 @@ lp_jit_create_types(struct llvmpipe_context *lp)
       elem_types[LP_JIT_TEXTURE_BORDER_COLOR] = 
          LLVMArrayType(LLVMFloatTypeInContext(lc), 4);
 
-#if HAVE_LLVM >= 0x0300
-   texture_type = LLVMStructCreateNamed(gallivm->context, "texture");
-   LLVMStructSetBody(texture_type, elem_types,
-                     Elements(elem_types), 0);
-#else
       texture_type = LLVMStructTypeInContext(lc, elem_types,
                                              Elements(elem_types), 0);
+#if HAVE_LLVM < 0x0300
       LLVMAddTypeName(gallivm->module, "texture", texture_type);
 
       LLVMInvalidateStructLayout(gallivm->target, texture_type);
@@ -134,14 +130,10 @@ lp_jit_create_types(struct llvmpipe_context *lp)
       elem_types[LP_JIT_CTX_TEXTURES] = LLVMArrayType(texture_type,
                                                       PIPE_MAX_SAMPLERS);
 
-#if HAVE_LLVM >= 0x0300
-   context_type = LLVMStructCreateNamed(gallivm->context, "context");
-   LLVMStructSetBody(context_type, elem_types,
-                     Elements(elem_types), 0);
-#else
       context_type = LLVMStructTypeInContext(lc, elem_types,
                                              Elements(elem_types), 0);
 
+#if HAVE_LLVM < 0x0300
       LLVMInvalidateStructLayout(gallivm->target, context_type);
 
       LLVMAddTypeName(gallivm->module, "context", context_type);
@@ -191,11 +183,9 @@ lp_jit_screen_init(struct llvmpipe_screen *screen)
 }
 
 
-LLVMTypeRef
-lp_jit_get_context_type(struct llvmpipe_context *lp)
+void
+lp_jit_init_types(struct lp_fragment_shader_variant *lp)
 {
    if (!lp->jit_context_ptr_type)
       lp_jit_create_types(lp);
-
-   return lp->jit_context_ptr_type;
 }

@@ -720,14 +720,9 @@ i915_texture_get_transfer(struct pipe_context *pipe,
 {
    struct i915_context *i915 = i915_context(pipe);
    struct i915_texture *tex = i915_texture(resource);
-   struct i915_transfer *transfer;
+   struct i915_transfer *transfer = util_slab_alloc(&i915->texture_transfer_pool);
    boolean use_staging_texture = FALSE;
 
-   if (usage & PIPE_TRANSFER_MAP_PERMANENTLY) {
-      return NULL;
-   }
-
-   transfer = util_slab_alloc(&i915->texture_transfer_pool);
    if (transfer == NULL)
       return NULL;
 
@@ -744,11 +739,8 @@ i915_texture_get_transfer(struct pipe_context *pipe,
    /* if we use staging transfers, only support textures we can render to,
     * because we need that for u_blitter */
    if (i915->blitter &&
-       i915_is_format_supported(NULL, /* screen */
-                                transfer->b.resource->format,
-                                0, /* target */
-                                1, /* sample count */
-                                PIPE_BIND_RENDER_TARGET) &&
+       util_blitter_is_copy_supported(i915->blitter, resource, resource,
+				      PIPE_MASK_RGBAZS) &&
        (usage & PIPE_TRANSFER_WRITE) &&
        !(usage & (PIPE_TRANSFER_READ | PIPE_TRANSFER_DONTBLOCK | PIPE_TRANSFER_UNSYNCHRONIZED)))
       use_staging_texture = TRUE;

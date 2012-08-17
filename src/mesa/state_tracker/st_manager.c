@@ -26,16 +26,6 @@
  *    Chia-I Wu <olv@lunarg.com>
  */
 
-#include "state_tracker/st_gl_api.h"
-
-#include "pipe/p_context.h"
-#include "pipe/p_screen.h"
-#include "util/u_format.h"
-#include "util/u_pointer.h"
-#include "util/u_inlines.h"
-#include "util/u_atomic.h"
-#include "util/u_surface.h"
-
 #include "main/mtypes.h"
 #include "main/context.h"
 #include "main/mfeatures.h"
@@ -54,6 +44,16 @@
 #include "st_cb_flush.h"
 #include "st_manager.h"
 
+#include "state_tracker/st_gl_api.h"
+
+#include "pipe/p_context.h"
+#include "pipe/p_screen.h"
+#include "util/u_format.h"
+#include "util/u_pointer.h"
+#include "util/u_inlines.h"
+#include "util/u_atomic.h"
+#include "util/u_surface.h"
+
 /**
  * Cast wrapper to convert a struct gl_framebuffer to an st_framebuffer.
  * Return NULL if the struct gl_framebuffer is a user-created framebuffer.
@@ -64,7 +64,9 @@ static INLINE struct st_framebuffer *
 st_ws_framebuffer(struct gl_framebuffer *fb)
 {
    /* FBO cannot be casted.  See st_new_framebuffer */
-   return (struct st_framebuffer *) ((fb && !fb->Name) ? fb : NULL);
+   if (fb && _mesa_is_winsys_fbo(fb))
+      return (struct st_framebuffer *) fb;
+   return NULL;
 }
 
 /**
@@ -650,8 +652,7 @@ st_api_create_context(struct st_api *stapi, struct st_manager *smapi,
        * yet enforce the added restrictions of a forward-looking context, so
        * fail that too.
        */
-      if (st->ctx->VersionMajor * 10 + st->ctx->VersionMinor <
-          attribs->major * 10 + attribs->minor
+      if (st->ctx->Version < attribs->major * 10 + attribs->minor
 	  || (attribs->flags & ~ST_CONTEXT_FLAG_DEBUG) != 0) {
 	 *error = ST_CONTEXT_ERROR_BAD_VERSION;
          st_destroy_context(st);
@@ -805,9 +806,7 @@ st_manager_get_egl_image_surface(struct st_context *st,
    if (!smapi->get_egl_image(smapi, eglimg, &stimg))
       return NULL;
 
-   memset(&surf_tmpl, 0, sizeof(surf_tmpl));
-   surf_tmpl.format = stimg.texture->format;
-   surf_tmpl.usage = usage;
+   u_surface_default_template(&surf_tmpl, stimg.texture, usage);
    surf_tmpl.u.tex.level = stimg.level;
    surf_tmpl.u.tex.first_layer = stimg.layer;
    surf_tmpl.u.tex.last_layer = stimg.layer;
@@ -892,6 +891,7 @@ static const struct st_api st_gl_api = {
 #if FEATURE_ES2
    ST_PROFILE_OPENGL_ES2_MASK |
 #endif
+   0,
    0,
    st_api_destroy,
    st_api_get_proc_address,

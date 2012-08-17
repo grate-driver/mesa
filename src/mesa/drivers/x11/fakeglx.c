@@ -428,7 +428,7 @@ create_glx_visual( Display *dpy, XVisualInfo *visinfo )
 			      GL_TRUE,   /* double */
 			      GL_FALSE,  /* stereo */
 			      zBits,
-			      STENCIL_BITS,
+			      8,       /* stencil bits */
 			      accBits, /* r */
 			      accBits, /* g */
 			      accBits, /* b */
@@ -1153,6 +1153,7 @@ choose_visual( Display *dpy, int screen, const int *list, GLboolean fbConfig )
       return NULL;
 
    (void) caveat;
+   (void) min_ci;
 
    /*
     * Since we're only simulating the GLX extension this function will never
@@ -1174,7 +1175,7 @@ choose_visual( Display *dpy, int screen, const int *list, GLboolean fbConfig )
          if (vis->depth <= 8)
 	    return NULL;
          depth_size = default_depth_bits();
-         stencil_size = STENCIL_BITS;
+         stencil_size = 8;
          /* XXX accum??? */
       }
    }
@@ -1215,7 +1216,7 @@ choose_visual( Display *dpy, int screen, const int *list, GLboolean fbConfig )
 
       /* we only support one size of stencil and accum buffers. */
       if (stencil_size > 0)
-         stencil_size = STENCIL_BITS;
+         stencil_size = 8;
       if (accumRedSize > 0 || accumGreenSize > 0 || accumBlueSize > 0 ||
           accumAlphaSize > 0) {
          accumRedSize = 
@@ -2220,13 +2221,13 @@ Fake_glXCreatePbuffer( Display *dpy, GLXFBConfig config,
    if (width == 0 || height == 0)
       return 0;
 
-   if (width > MAX_WIDTH || height > MAX_HEIGHT) {
+   if (width > SWRAST_MAX_WIDTH || height > SWRAST_MAX_HEIGHT) {
       /* If allocation would have failed and GLX_LARGEST_PBUFFER is set,
        * allocate the largest possible buffer.
        */
       if (useLargest) {
-         width = MAX_WIDTH;
-         height = MAX_HEIGHT;
+         width = SWRAST_MAX_WIDTH;
+         height = SWRAST_MAX_HEIGHT;
       }
    }
 

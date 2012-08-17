@@ -131,7 +131,8 @@ enum value_extra {
    EXTRA_VERSION_30,
    EXTRA_VERSION_31,
    EXTRA_VERSION_32,
-   EXTRA_VERSION_ES2,
+   EXTRA_API_GL,
+   EXTRA_API_ES2,
    EXTRA_NEW_BUFFERS, 
    EXTRA_NEW_FRAG_CLAMP,
    EXTRA_VALID_DRAW_BUFFER,
@@ -283,8 +284,9 @@ static const int extra_GLSL_130[] = {
    EXTRA_END
 };
 
-static const int extra_ARB_sampler_objects[] = {
-   EXT(ARB_sampler_objects),
+static const int extra_ARB_uniform_buffer_object_and_geometry_shader[] = {
+   EXT(ARB_uniform_buffer_object),
+   EXT(ARB_geometry_shader4),
    EXTRA_END
 };
 
@@ -321,6 +323,7 @@ EXTRA_EXT(ARB_sync);
 EXTRA_EXT(ARB_vertex_shader);
 EXTRA_EXT(EXT_transform_feedback);
 EXTRA_EXT(ARB_transform_feedback2);
+EXTRA_EXT(ARB_transform_feedback3);
 EXTRA_EXT(EXT_pixel_buffer_object);
 EXTRA_EXT(ARB_vertex_program);
 EXTRA_EXT2(NV_point_sprite, ARB_point_sprite);
@@ -333,6 +336,9 @@ EXTRA_EXT(ARB_copy_buffer);
 EXTRA_EXT(EXT_framebuffer_sRGB);
 EXTRA_EXT(ARB_texture_buffer_object);
 EXTRA_EXT(OES_EGL_image_external);
+EXTRA_EXT(ARB_blend_func_extended);
+EXTRA_EXT(ARB_uniform_buffer_object);
+EXTRA_EXT(ARB_timer_query);
 
 static const int
 extra_ARB_vertex_program_ARB_fragment_program_NV_vertex_program[] = {
@@ -362,15 +368,25 @@ static const int extra_version_31[] = { EXTRA_VERSION_31, EXTRA_END };
 static const int extra_version_32[] = { EXTRA_VERSION_32, EXTRA_END };
 
 static const int
-extra_ARB_vertex_program_version_es2[] = {
+extra_ARB_vertex_program_api_es2[] = {
    EXT(ARB_vertex_program),
-   EXTRA_VERSION_ES2,
+   EXTRA_API_ES2,
+   EXTRA_END
+};
+
+/* The ReadBuffer get token is valid under either full GL or under
+ * GLES2 if the NV_read_buffer extension is available. */
+static const int
+extra_NV_read_buffer_api_gl[] = {
+   EXT(NV_read_buffer),
+   EXTRA_API_GL,
    EXTRA_END
 };
 
 #define API_OPENGL_BIT (1 << API_OPENGL)
 #define API_OPENGLES_BIT (1 << API_OPENGLES)
 #define API_OPENGLES2_BIT (1 << API_OPENGLES2)
+#define API_OPENGL_CORE_BIT (1 << API_OPENGL_CORE)
 
 /* This is the big table describing all the enums we accept in
  * glGet*v().  The table is partitioned into six parts: enums
@@ -385,7 +401,9 @@ extra_ARB_vertex_program_version_es2[] = {
 static const struct value_desc values[] = {
    /* Enums shared between OpenGL, GLES1 and GLES2 */
    { 0, 0, TYPE_API_MASK,
-     API_OPENGL_BIT | API_OPENGLES_BIT | API_OPENGLES2_BIT, NO_EXTRA},
+     API_OPENGL_BIT | API_OPENGLES_BIT | API_OPENGLES2_BIT |
+       API_OPENGL_CORE_BIT,
+     NO_EXTRA},
    { GL_ALPHA_BITS, BUFFER_INT(Visual.alphaBits), extra_new_buffers },
    { GL_BLEND, CONTEXT_BIT0(Color.BlendEnabled), NO_EXTRA },
    { GL_BLEND_SRC, CONTEXT_ENUM(Color.Blend[0].SrcRGB), NO_EXTRA },
@@ -514,7 +532,7 @@ static const struct value_desc values[] = {
 
 #if FEATURE_GL || FEATURE_ES1
    /* Enums in OpenGL and GLES1 */
-   { 0, 0, TYPE_API_MASK, API_OPENGL_BIT | API_OPENGLES_BIT, NO_EXTRA },
+   { 0, 0, TYPE_API_MASK, API_OPENGL_BIT | API_OPENGLES_BIT | API_OPENGL_CORE_BIT, NO_EXTRA },
    { GL_MAX_LIGHTS, CONTEXT_INT(Const.MaxLights), NO_EXTRA },
    { GL_LIGHT0, CONTEXT_BOOL(Light.Light[0].Enabled), NO_EXTRA },
    { GL_LIGHT1, CONTEXT_BOOL(Light.Light[1].Enabled), NO_EXTRA },
@@ -739,7 +757,7 @@ static const struct value_desc values[] = {
 
    { GL_MAX_VERTEX_ATTRIBS_ARB,
      CONTEXT_INT(Const.VertexProgram.MaxAttribs),
-     extra_ARB_vertex_program_version_es2 },
+     extra_ARB_vertex_program_api_es2 },
 
    /* OES_texture_3D */
    { GL_TEXTURE_BINDING_3D, LOC_CUSTOM, TYPE_INT, TEXTURE_3D_INDEX, NO_EXTRA },
@@ -749,6 +767,11 @@ static const struct value_desc values[] = {
    /* GL_ARB_fragment_program/OES_standard_derivatives */
    { GL_FRAGMENT_SHADER_DERIVATIVE_HINT_ARB,
      CONTEXT_ENUM(Hint.FragmentShaderDerivative), extra_ARB_fragment_shader },
+
+   /* GL_NV_read_buffer */
+   { GL_READ_BUFFER,
+     LOC_CUSTOM, TYPE_ENUM, NO_OFFSET, extra_NV_read_buffer_api_gl },
+
 #endif /* FEATURE_GL || FEATURE_ES2 */
 
 #if FEATURE_ES2
@@ -771,7 +794,7 @@ static const struct value_desc values[] = {
 
 #if FEATURE_GL
    /* Remaining enums are only in OpenGL */
-   { 0, 0, TYPE_API_MASK, API_OPENGL_BIT, NO_EXTRA },
+   { 0, 0, TYPE_API_MASK, API_OPENGL_BIT | API_OPENGL_CORE_BIT, NO_EXTRA },
    { GL_ACCUM_RED_BITS, BUFFER_INT(Visual.accumRedBits), NO_EXTRA },
    { GL_ACCUM_GREEN_BITS, BUFFER_INT(Visual.accumGreenBits), NO_EXTRA },
    { GL_ACCUM_BLUE_BITS, BUFFER_INT(Visual.accumBlueBits), NO_EXTRA },
@@ -883,7 +906,6 @@ static const struct value_desc values[] = {
    { GL_POLYGON_SMOOTH, CONTEXT_BOOL(Polygon.SmoothFlag), NO_EXTRA },
    { GL_POLYGON_SMOOTH_HINT, CONTEXT_ENUM(Hint.PolygonSmooth), NO_EXTRA },
    { GL_POLYGON_STIPPLE, CONTEXT_BOOL(Polygon.StippleFlag), NO_EXTRA },
-   { GL_READ_BUFFER, LOC_CUSTOM, TYPE_ENUM, NO_OFFSET, NO_EXTRA },
    { GL_RED_BIAS, CONTEXT_FLOAT(Pixel.RedBias), NO_EXTRA },
    { GL_RED_SCALE, CONTEXT_FLOAT(Pixel.RedScale), NO_EXTRA },
    { GL_RENDER_MODE, CONTEXT_ENUM(RenderMode), NO_EXTRA },
@@ -1210,7 +1232,7 @@ static const struct value_desc values[] = {
      CONTEXT_INT(Const.MaxTransformFeedbackInterleavedComponents),
      extra_EXT_transform_feedback },
    { GL_MAX_TRANSFORM_FEEDBACK_SEPARATE_ATTRIBS,
-     CONTEXT_INT(Const.MaxTransformFeedbackSeparateAttribs),
+     CONTEXT_INT(Const.MaxTransformFeedbackBuffers),
      extra_EXT_transform_feedback },
    { GL_MAX_TRANSFORM_FEEDBACK_SEPARATE_COMPONENTS,
      CONTEXT_INT(Const.MaxTransformFeedbackSeparateComponents),
@@ -1223,6 +1245,14 @@ static const struct value_desc values[] = {
      extra_ARB_transform_feedback2 },
    { GL_TRANSFORM_FEEDBACK_BINDING, LOC_CUSTOM, TYPE_INT, 0,
      extra_ARB_transform_feedback2 },
+
+   /* GL_ARB_transform_feedback3 */
+   { GL_MAX_TRANSFORM_FEEDBACK_BUFFERS,
+     CONTEXT_INT(Const.MaxTransformFeedbackBuffers),
+     extra_ARB_transform_feedback3 },
+   { GL_MAX_VERTEX_STREAMS,
+     CONTEXT_INT(Const.MaxVertexStreams),
+     extra_ARB_transform_feedback3 },
 
    /* GL_ARB_geometry_shader4 */
    { GL_MAX_GEOMETRY_TEXTURE_IMAGE_UNITS_ARB,
@@ -1269,12 +1299,12 @@ static const struct value_desc values[] = {
 
    /* GL_ARB_sampler_objects / GL 3.3 */
    { GL_SAMPLER_BINDING,
-     LOC_CUSTOM, TYPE_INT, GL_SAMPLER_BINDING, extra_ARB_sampler_objects },
+     LOC_CUSTOM, TYPE_INT, GL_SAMPLER_BINDING, NO_EXTRA },
 
    /* GL 3.0 */
    { GL_NUM_EXTENSIONS, LOC_CUSTOM, TYPE_INT, 0, extra_version_30 },
-   { GL_MAJOR_VERSION, CONTEXT_INT(VersionMajor), extra_version_30 },
-   { GL_MINOR_VERSION, CONTEXT_INT(VersionMinor), extra_version_30  },
+   { GL_MAJOR_VERSION, LOC_CUSTOM, TYPE_INT, 0, extra_version_30 },
+   { GL_MINOR_VERSION, LOC_CUSTOM, TYPE_INT, 0, extra_version_30  },
    { GL_CONTEXT_FLAGS, CONTEXT_INT(Const.ContextFlags), extra_version_30  },
 
    /* GL3.0 / GL_EXT_framebuffer_sRGB */
@@ -1297,6 +1327,43 @@ static const struct value_desc values[] = {
 
    /* GL_ARB_robustness */
    { GL_RESET_NOTIFICATION_STRATEGY_ARB, CONTEXT_ENUM(Const.ResetStrategy), NO_EXTRA },
+
+   /* GL_ARB_debug_output */
+   { GL_DEBUG_LOGGED_MESSAGES_ARB, CONTEXT_INT(Debug.NumMessages), NO_EXTRA },
+   { GL_DEBUG_NEXT_LOGGED_MESSAGE_LENGTH_ARB, CONTEXT_INT(Debug.NextMsgLength), NO_EXTRA },
+   { GL_MAX_DEBUG_LOGGED_MESSAGES_ARB, CONST(MAX_DEBUG_LOGGED_MESSAGES), NO_EXTRA },
+   { GL_MAX_DEBUG_MESSAGE_LENGTH_ARB, CONST(MAX_DEBUG_MESSAGE_LENGTH), NO_EXTRA },
+
+   { GL_MAX_DUAL_SOURCE_DRAW_BUFFERS, CONTEXT_INT(Const.MaxDualSourceDrawBuffers), extra_ARB_blend_func_extended },
+
+   /* GL_ARB_uniform_buffer_object */
+   { GL_MAX_VERTEX_UNIFORM_BLOCKS, CONTEXT_INT(Const.VertexProgram.MaxUniformBlocks),
+     extra_ARB_uniform_buffer_object },
+   { GL_MAX_FRAGMENT_UNIFORM_BLOCKS, CONTEXT_INT(Const.FragmentProgram.MaxUniformBlocks),
+     extra_ARB_uniform_buffer_object },
+   { GL_MAX_GEOMETRY_UNIFORM_BLOCKS, CONTEXT_INT(Const.GeometryProgram.MaxUniformBlocks),
+     extra_ARB_uniform_buffer_object_and_geometry_shader },
+   { GL_MAX_COMBINED_UNIFORM_BLOCKS, CONTEXT_INT(Const.MaxCombinedUniformBlocks),
+     extra_ARB_uniform_buffer_object },
+   { GL_MAX_UNIFORM_BLOCK_SIZE, CONTEXT_INT(Const.MaxUniformBlockSize),
+     extra_ARB_uniform_buffer_object },
+   { GL_MAX_UNIFORM_BUFFER_BINDINGS, CONTEXT_INT(Const.MaxUniformBufferBindings),
+     extra_ARB_uniform_buffer_object },
+
+   { GL_MAX_COMBINED_VERTEX_UNIFORM_COMPONENTS, CONTEXT_INT(Const.VertexProgram.MaxCombinedUniformComponents),
+     extra_ARB_uniform_buffer_object },
+   { GL_MAX_COMBINED_FRAGMENT_UNIFORM_COMPONENTS, CONTEXT_INT(Const.FragmentProgram.MaxCombinedUniformComponents),
+     extra_ARB_uniform_buffer_object },
+   { GL_MAX_COMBINED_GEOMETRY_UNIFORM_COMPONENTS, CONTEXT_INT(Const.GeometryProgram.MaxCombinedUniformComponents),
+     extra_ARB_uniform_buffer_object_and_geometry_shader },
+   { GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, CONTEXT_INT(Const.UniformBufferOffsetAlignment),
+     extra_ARB_uniform_buffer_object },
+
+   { GL_UNIFORM_BUFFER_BINDING, LOC_CUSTOM, TYPE_INT, 0, extra_ARB_uniform_buffer_object },
+
+   /* GL_ARB_timer_query */
+   { GL_TIMESTAMP, LOC_CUSTOM, TYPE_INT64, 0, extra_ARB_timer_query }
+
 #endif /* FEATURE_GL */
 };
 
@@ -1419,6 +1486,13 @@ find_custom_value(struct gl_context *ctx, const struct value_desc *d, union valu
    GLuint unit, *p;
 
    switch (d->pname) {
+   case GL_MAJOR_VERSION:
+      v->value_int = ctx->Version / 10;
+      break;
+   case GL_MINOR_VERSION:
+      v->value_int = ctx->Version % 10;
+      break;
+
    case GL_TEXTURE_1D:
    case GL_TEXTURE_2D:
    case GL_TEXTURE_3D:
@@ -1747,7 +1821,20 @@ find_custom_value(struct gl_context *ctx, const struct value_desc *d, union valu
          v->value_int = samp ? samp->Name : 0;
       }
       break;
-   }   
+   /* GL_ARB_uniform_buffer_object */
+   case GL_UNIFORM_BUFFER_BINDING:
+      v->value_int = ctx->UniformBuffer->Name;
+      break;
+   /* GL_ARB_timer_query */
+   case GL_TIMESTAMP:
+      if (ctx->Driver.GetTimestamp) {
+         v->value_int64 = ctx->Driver.GetTimestamp(ctx);
+      }
+      else {
+         _mesa_problem(ctx, "driver doesn't implement GetTimestamp");
+      }
+      break;
+   }
 }
 
 /**
@@ -1768,7 +1855,7 @@ find_custom_value(struct gl_context *ctx, const struct value_desc *d, union valu
 static GLboolean
 check_extra(struct gl_context *ctx, const char *func, const struct value_desc *d)
 {
-   const GLuint version = ctx->VersionMajor * 10 + ctx->VersionMinor;
+   const GLuint version = ctx->Version;
    int total, enabled;
    const int *e;
 
@@ -1798,8 +1885,14 @@ check_extra(struct gl_context *ctx, const char *func, const struct value_desc *d
          if (ctx->NewState & (_NEW_BUFFERS | _NEW_FRAG_CLAMP))
             _mesa_update_state(ctx);
          break;
-      case EXTRA_VERSION_ES2:
+      case EXTRA_API_ES2:
 	 if (ctx->API == API_OPENGLES2) {
+	    total++;
+	    enabled++;
+	 }
+	 break;
+      case EXTRA_API_GL:
+	 if (_mesa_is_desktop_gl(ctx)) {
 	    total++;
 	    enabled++;
 	 }
@@ -2478,7 +2571,7 @@ find_value_indexed(const char *func, GLenum pname, int index, union value *v)
       return TYPE_INT_4;
 
    case GL_TRANSFORM_FEEDBACK_BUFFER_START:
-      if (index >= ctx->Const.MaxTransformFeedbackSeparateAttribs)
+      if (index >= ctx->Const.MaxTransformFeedbackBuffers)
 	 goto invalid_value;
       if (!ctx->Extensions.EXT_transform_feedback)
 	 goto invalid_enum;
@@ -2486,7 +2579,7 @@ find_value_indexed(const char *func, GLenum pname, int index, union value *v)
       return TYPE_INT64;
 
    case GL_TRANSFORM_FEEDBACK_BUFFER_SIZE:
-      if (index >= ctx->Const.MaxTransformFeedbackSeparateAttribs)
+      if (index >= ctx->Const.MaxTransformFeedbackBuffers)
 	 goto invalid_value;
       if (!ctx->Extensions.EXT_transform_feedback)
 	 goto invalid_enum;
@@ -2494,11 +2587,35 @@ find_value_indexed(const char *func, GLenum pname, int index, union value *v)
       return TYPE_INT64;
 
    case GL_TRANSFORM_FEEDBACK_BUFFER_BINDING:
-      if (index >= ctx->Const.MaxTransformFeedbackSeparateAttribs)
+      if (index >= ctx->Const.MaxTransformFeedbackBuffers)
 	 goto invalid_value;
       if (!ctx->Extensions.EXT_transform_feedback)
 	 goto invalid_enum;
       v->value_int = ctx->TransformFeedback.CurrentObject->BufferNames[index];
+      return TYPE_INT;
+
+   case GL_UNIFORM_BUFFER_BINDING:
+      if (index >= ctx->Const.MaxUniformBufferBindings)
+	 goto invalid_value;
+      if (!ctx->Extensions.ARB_uniform_buffer_object)
+	 goto invalid_enum;
+      v->value_int = ctx->UniformBufferBindings[index].BufferObject->Name;
+      return TYPE_INT;
+
+   case GL_UNIFORM_BUFFER_START:
+      if (index >= ctx->Const.MaxUniformBufferBindings)
+	 goto invalid_value;
+      if (!ctx->Extensions.ARB_uniform_buffer_object)
+	 goto invalid_enum;
+      v->value_int = ctx->UniformBufferBindings[index].Offset;
+      return TYPE_INT;
+
+   case GL_UNIFORM_BUFFER_SIZE:
+      if (index >= ctx->Const.MaxUniformBufferBindings)
+	 goto invalid_value;
+      if (!ctx->Extensions.ARB_uniform_buffer_object)
+	 goto invalid_enum;
+      v->value_int = ctx->UniformBufferBindings[index].Size;
       return TYPE_INT;
    }
 

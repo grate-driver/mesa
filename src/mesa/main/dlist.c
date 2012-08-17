@@ -51,6 +51,7 @@
 #endif
 #include "framebuffer.h"
 #include "glapi/glapi.h"
+#include "glformats.h"
 #include "hash.h"
 #include "image.h"
 #include "light.h"
@@ -134,7 +135,7 @@ do {						\
 do {									\
    if (ctx->Driver.CurrentSavePrimitive <= GL_POLYGON ||		\
        ctx->Driver.CurrentSavePrimitive == PRIM_INSIDE_UNKNOWN_PRIM) {	\
-      _mesa_compile_error( ctx, GL_INVALID_OPERATION, "begin/end" );	\
+      _mesa_compile_error( ctx, GL_INVALID_OPERATION, "glBegin/End" );	\
       return retval;							\
    }									\
 } while (0)
@@ -149,7 +150,7 @@ do {									\
 do {									\
    if (ctx->Driver.CurrentSavePrimitive <= GL_POLYGON ||		\
        ctx->Driver.CurrentSavePrimitive == PRIM_INSIDE_UNKNOWN_PRIM) {	\
-      _mesa_compile_error( ctx, GL_INVALID_OPERATION, "begin/end" );	\
+      _mesa_compile_error( ctx, GL_INVALID_OPERATION, "glBegin/End" );	\
       return;								\
    }									\
 } while (0)
@@ -469,6 +470,21 @@ typedef enum
    OPCODE_BEGIN_CONDITIONAL_RENDER,
    OPCODE_END_CONDITIONAL_RENDER,
 
+   /* ARB_timer_query */
+   OPCODE_QUERY_COUNTER,
+
+   /* ARB_transform_feedback3 */
+   OPCODE_BEGIN_QUERY_INDEXED,
+   OPCODE_END_QUERY_INDEXED,
+   OPCODE_DRAW_TRANSFORM_FEEDBACK_STREAM,
+
+   /* ARB_transform_feedback_instanced */
+   OPCODE_DRAW_TRANSFORM_FEEDBACK_INSTANCED,
+   OPCODE_DRAW_TRANSFORM_FEEDBACK_STREAM_INSTANCED,
+
+   /* ARB_uniform_buffer_object */
+   OPCODE_UNIFORM_BLOCK_BINDING,
+
    /* The following three are meta instructions */
    OPCODE_ERROR,                /* raise compiled-in error */
    OPCODE_CONTINUE,
@@ -501,6 +517,7 @@ union gl_dlist_node
    GLuint ui;
    GLenum e;
    GLfloat f;
+   GLsizei si;
    GLvoid *data;
    void *next;                  /* If prev node's opcode==OPCODE_CONTINUE */
 };
@@ -1335,6 +1352,46 @@ save_DrawElementsInstancedBaseVertexARB(GLenum mode,
    GET_CURRENT_CONTEXT(ctx);
    _mesa_error(ctx, GL_INVALID_OPERATION,
 	       "glDrawElementsInstancedBaseVertex() during display list compile");
+}
+
+/* GL_ARB_base_instance. */
+static void GLAPIENTRY
+save_DrawArraysInstancedBaseInstance(GLenum mode,
+                                     GLint first,
+                                     GLsizei count,
+                                     GLsizei primcount,
+                                     GLuint baseinstance)
+{
+   GET_CURRENT_CONTEXT(ctx);
+   _mesa_error(ctx, GL_INVALID_OPERATION,
+	       "glDrawArraysInstancedBaseInstance() during display list compile");
+}
+
+static void APIENTRY
+save_DrawElementsInstancedBaseInstance(GLenum mode,
+                                       GLsizei count,
+                                       GLenum type,
+                                       const void *indices,
+                                       GLsizei primcount,
+                                       GLuint baseinstance)
+{
+   GET_CURRENT_CONTEXT(ctx);
+   _mesa_error(ctx, GL_INVALID_OPERATION,
+	       "glDrawElementsInstancedBaseInstance() during display list compile");
+}
+
+static void APIENTRY
+save_DrawElementsInstancedBaseVertexBaseInstance(GLenum mode,
+                                                 GLsizei count,
+                                                 GLenum type,
+                                                 const void *indices,
+                                                 GLsizei primcount,
+                                                 GLint basevertex,
+                                                 GLuint baseinstance)
+{
+   GET_CURRENT_CONTEXT(ctx);
+   _mesa_error(ctx, GL_INVALID_OPERATION,
+	       "glDrawElementsInstancedBaseVertexBaseInstance() during display list compile");
 }
 
 static void invalidate_saved_current_state( struct gl_context *ctx )
@@ -5295,7 +5352,6 @@ save_BeginQueryARB(GLenum target, GLuint id)
    }
 }
 
-
 static void GLAPIENTRY
 save_EndQueryARB(GLenum target)
 {
@@ -5308,6 +5364,55 @@ save_EndQueryARB(GLenum target)
    }
    if (ctx->ExecuteFlag) {
       CALL_EndQueryARB(ctx->Exec, (target));
+   }
+}
+
+static void GLAPIENTRY
+save_QueryCounter(GLuint id, GLenum target)
+{
+   GET_CURRENT_CONTEXT(ctx);
+   Node *n;
+   ASSERT_OUTSIDE_SAVE_BEGIN_END_AND_FLUSH(ctx);
+   n = alloc_instruction(ctx, OPCODE_QUERY_COUNTER, 2);
+   if (n) {
+      n[1].ui = id;
+      n[2].e = target;
+   }
+   if (ctx->ExecuteFlag) {
+      CALL_QueryCounter(ctx->Exec, (id, target));
+   }
+}
+
+static void GLAPIENTRY
+save_BeginQueryIndexed(GLenum target, GLuint index, GLuint id)
+{
+   GET_CURRENT_CONTEXT(ctx);
+   Node *n;
+   ASSERT_OUTSIDE_SAVE_BEGIN_END_AND_FLUSH(ctx);
+   n = alloc_instruction(ctx, OPCODE_BEGIN_QUERY_INDEXED, 3);
+   if (n) {
+      n[1].e = target;
+      n[2].ui = index;
+      n[3].ui = id;
+   }
+   if (ctx->ExecuteFlag) {
+      CALL_BeginQueryIndexed(ctx->Exec, (target, index, id));
+   }
+}
+
+static void GLAPIENTRY
+save_EndQueryIndexed(GLenum target, GLuint index)
+{
+   GET_CURRENT_CONTEXT(ctx);
+   Node *n;
+   ASSERT_OUTSIDE_SAVE_BEGIN_END_AND_FLUSH(ctx);
+   n = alloc_instruction(ctx, OPCODE_END_QUERY_INDEXED, 2);
+   if (n) {
+      n[1].e = target;
+      n[2].ui = index;
+   }
+   if (ctx->ExecuteFlag) {
+      CALL_EndQueryIndexed(ctx->Exec, (target, index));
    }
 }
 
@@ -5673,17 +5778,25 @@ save_Indexfv(const GLfloat * v)
 static void GLAPIENTRY
 save_EdgeFlag(GLboolean x)
 {
-   save_Attr1fNV(VERT_ATTRIB_EDGEFLAG, x ? (GLfloat)1.0 : (GLfloat)0.0);
+   save_Attr1fNV(VERT_ATTRIB_EDGEFLAG, x ? 1.0f : 0.0f);
 }
 
-static inline GLboolean compare4fv( const GLfloat *a,
-                                    const GLfloat *b,
-                                    GLuint count )
+
+/**
+ * Compare 'count' elements of vectors 'a' and 'b'.
+ * \return GL_TRUE if equal, GL_FALSE if different.
+ */
+static inline GLboolean
+compare_vec(const GLfloat *a, const GLfloat *b, GLuint count)
 {
    return memcmp( a, b, count * sizeof(GLfloat) ) == 0;
 }
-                              
 
+
+/**
+ * This glMaterial function is used for glMaterial calls that are outside
+ * a glBegin/End pair.  For glMaterial inside glBegin/End, see the VBO code.
+ */
 static void GLAPIENTRY
 save_Materialfv(GLenum face, GLenum pname, const GLfloat * param)
 {
@@ -5698,7 +5811,7 @@ save_Materialfv(GLenum face, GLenum pname, const GLfloat * param)
    case GL_FRONT_AND_BACK:
       break;
    default:
-      _mesa_compile_error(ctx, GL_INVALID_ENUM, "material(face)");
+      _mesa_compile_error(ctx, GL_INVALID_ENUM, "glMaterial(face)");
       return;
    }
 
@@ -5717,7 +5830,7 @@ save_Materialfv(GLenum face, GLenum pname, const GLfloat * param)
       args = 3;
       break;
    default:
-      _mesa_compile_error(ctx, GL_INVALID_ENUM, "material(pname)");
+      _mesa_compile_error(ctx, GL_INVALID_ENUM, "glMaterial(pname)");
       return;
    }
    
@@ -5734,7 +5847,8 @@ save_Materialfv(GLenum face, GLenum pname, const GLfloat * param)
    for (i = 0; i < MAT_ATTRIB_MAX; i++) {
       if (bitmask & (1 << i)) {
          if (ctx->ListState.ActiveMaterialSize[i] == args &&
-             compare4fv(ctx->ListState.CurrentMaterial[i], param, args)) {
+             compare_vec(ctx->ListState.CurrentMaterial[i], param, args)) {
+            /* no change in material value */
             bitmask &= ~(1 << i);
          }
          else {
@@ -5744,8 +5858,7 @@ save_Materialfv(GLenum face, GLenum pname, const GLfloat * param)
       }
    }
 
-   /* If this call has effect, return early:
-    */
+   /* If this call has no effect, return early */
    if (bitmask == 0)
       return;
 
@@ -5767,10 +5880,16 @@ save_Begin(GLenum mode)
    Node *n;
    GLboolean error = GL_FALSE;
 
-   if (!_mesa_valid_prim_mode(ctx, mode)) {
-      _mesa_compile_error(ctx, GL_INVALID_ENUM, "glBegin(mode)");
+   if (mode > GL_POLYGON) {
+      _mesa_error(ctx, GL_INVALID_ENUM, "glBegin(mode=%x)", mode);
       error = GL_TRUE;
    }
+   if (ctx->ExecuteFlag) {
+      if (!_mesa_valid_prim_mode(ctx, mode, "glBegin")) {
+	 error = GL_TRUE;
+      }
+   }
+
    else if (ctx->Driver.CurrentSavePrimitive == PRIM_UNKNOWN) {
       /* Typically the first begin.  This may raise an error on
        * playback, depending on whether CallList is issued from inside
@@ -6367,6 +6486,60 @@ save_DrawTransformFeedback(GLenum mode, GLuint name)
    }
 }
 
+static void GLAPIENTRY
+save_DrawTransformFeedbackStream(GLenum mode, GLuint name, GLuint stream)
+{
+   GET_CURRENT_CONTEXT(ctx);
+   Node *n;
+   ASSERT_OUTSIDE_SAVE_BEGIN_END_AND_FLUSH(ctx);
+   n = alloc_instruction(ctx, OPCODE_DRAW_TRANSFORM_FEEDBACK_STREAM, 3);
+   if (n) {
+      n[1].e = mode;
+      n[2].ui = name;
+      n[3].ui = stream;
+   }
+   if (ctx->ExecuteFlag) {
+      CALL_DrawTransformFeedbackStream(ctx->Exec, (mode, name, stream));
+   }
+}
+
+static void GLAPIENTRY
+save_DrawTransformFeedbackInstanced(GLenum mode, GLuint name,
+                                    GLsizei primcount)
+{
+   GET_CURRENT_CONTEXT(ctx);
+   Node *n;
+   ASSERT_OUTSIDE_SAVE_BEGIN_END_AND_FLUSH(ctx);
+   n = alloc_instruction(ctx, OPCODE_DRAW_TRANSFORM_FEEDBACK_INSTANCED, 3);
+   if (n) {
+      n[1].e = mode;
+      n[2].ui = name;
+      n[3].si = primcount;
+   }
+   if (ctx->ExecuteFlag) {
+      CALL_DrawTransformFeedbackInstanced(ctx->Exec, (mode, name, primcount));
+   }
+}
+
+static void GLAPIENTRY
+save_DrawTransformFeedbackStreamInstanced(GLenum mode, GLuint name,
+                                          GLuint stream, GLsizei primcount)
+{
+   GET_CURRENT_CONTEXT(ctx);
+   Node *n;
+   ASSERT_OUTSIDE_SAVE_BEGIN_END_AND_FLUSH(ctx);
+   n = alloc_instruction(ctx, OPCODE_DRAW_TRANSFORM_FEEDBACK_STREAM_INSTANCED, 4);
+   if (n) {
+      n[1].e = mode;
+      n[2].ui = name;
+      n[3].ui = stream;
+      n[4].si = primcount;
+   }
+   if (ctx->ExecuteFlag) {
+      CALL_DrawTransformFeedbackStreamInstanced(ctx->Exec, (mode, name, stream,
+                                                            primcount));
+   }
+}
 
 /* aka UseProgram() */
 static void GLAPIENTRY
@@ -7412,6 +7585,23 @@ save_EndConditionalRender(void)
    }
 }
 
+static void GLAPIENTRY
+save_UniformBlockBinding(GLuint prog, GLuint index, GLuint binding)
+{
+   GET_CURRENT_CONTEXT(ctx);
+   Node *n;
+   ASSERT_OUTSIDE_SAVE_BEGIN_END_AND_FLUSH(ctx);
+   n = alloc_instruction(ctx, OPCODE_UNIFORM_BLOCK_BINDING, 3);
+   if (n) {
+      n[1].ui = prog;
+      n[2].ui = index;
+      n[3].ui = binding;
+   }
+   if (ctx->ExecuteFlag) {
+      CALL_UniformBlockBinding(ctx->Exec, (prog, index, binding));
+   }
+}
+
 
 /**
  * Save an error-generating command into display list.
@@ -8291,6 +8481,15 @@ execute_list(struct gl_context *ctx, GLuint list)
          case OPCODE_END_QUERY_ARB:
             CALL_EndQueryARB(ctx->Exec, (n[1].e));
             break;
+         case OPCODE_QUERY_COUNTER:
+            CALL_QueryCounter(ctx->Exec, (n[1].ui, n[2].e));
+            break;
+         case OPCODE_BEGIN_QUERY_INDEXED:
+            CALL_BeginQueryIndexed(ctx->Exec, (n[1].e, n[2].ui, n[3].ui));
+            break;
+         case OPCODE_END_QUERY_INDEXED:
+            CALL_EndQueryIndexed(ctx->Exec, (n[1].e, n[2].ui));
+            break;
 #endif
          case OPCODE_DRAW_BUFFERS_ARB:
             {
@@ -8609,6 +8808,18 @@ execute_list(struct gl_context *ctx, GLuint list)
          case OPCODE_DRAW_TRANSFORM_FEEDBACK:
             CALL_DrawTransformFeedback(ctx->Exec, (n[1].e, n[2].ui));
             break;
+         case OPCODE_DRAW_TRANSFORM_FEEDBACK_STREAM:
+            CALL_DrawTransformFeedbackStream(ctx->Exec,
+                                             (n[1].e, n[2].ui, n[3].ui));
+            break;
+         case OPCODE_DRAW_TRANSFORM_FEEDBACK_INSTANCED:
+            CALL_DrawTransformFeedbackInstanced(ctx->Exec,
+                                                (n[1].e, n[2].ui, n[3].si));
+            break;
+         case OPCODE_DRAW_TRANSFORM_FEEDBACK_STREAM_INSTANCED:
+            CALL_DrawTransformFeedbackStreamInstanced(ctx->Exec,
+                                       (n[1].e, n[2].ui, n[3].ui, n[4].si));
+            break;
 
 
          case OPCODE_BIND_SAMPLER:
@@ -8684,6 +8895,10 @@ execute_list(struct gl_context *ctx, GLuint list)
             break;
          case OPCODE_END_CONDITIONAL_RENDER:
             CALL_EndConditionalRenderNV(ctx->Exec, ());
+            break;
+
+         case OPCODE_UNIFORM_BLOCK_BINDING:
+            CALL_UniformBlockBinding(ctx->Exec, (n[1].ui, n[2].ui, n[3].ui));
             break;
 
          case OPCODE_CONTINUE:
@@ -10255,6 +10470,7 @@ _mesa_create_save_table(void)
    _mesa_init_queryobj_dispatch(table); /* glGetQuery, etc */
    SET_BeginQueryARB(table, save_BeginQueryARB);
    SET_EndQueryARB(table, save_EndQueryARB);
+   SET_QueryCounter(table, save_QueryCounter);
 #endif
 
    SET_DrawBuffersARB(table, save_DrawBuffersARB);
@@ -10312,6 +10528,9 @@ _mesa_create_save_table(void)
    SET_MapBufferRange(table, _mesa_MapBufferRange); /* no dlist save */
    SET_FlushMappedBufferRange(table, _mesa_FlushMappedBufferRange); /* no dl */
 #endif
+
+   /* ARB 51. GL_ARB_texture_buffer_object */
+   SET_TexBufferARB(table, _mesa_TexBuffer); /* no dlist save */
 
    /* ARB 59. GL_ARB_copy_buffer */
    SET_CopyBufferSubData(table, _mesa_CopyBufferSubData); /* no dlist save */
@@ -10380,6 +10599,15 @@ _mesa_create_save_table(void)
    SET_PauseTransformFeedback(table, save_PauseTransformFeedback);
    SET_ResumeTransformFeedback(table, save_ResumeTransformFeedback);
    SET_DrawTransformFeedback(table, save_DrawTransformFeedback);
+   SET_DrawTransformFeedbackStream(table, save_DrawTransformFeedbackStream);
+   SET_DrawTransformFeedbackInstanced(table,
+                                      save_DrawTransformFeedbackInstanced);
+   SET_DrawTransformFeedbackStreamInstanced(table,
+                                save_DrawTransformFeedbackStreamInstanced);
+#if FEATURE_queryobj
+   SET_BeginQueryIndexed(table, save_BeginQueryIndexed);
+   SET_EndQueryIndexed(table, save_EndQueryIndexed);
+#endif
 #endif
 
    /* GL_ARB_instanced_arrays */
@@ -10424,6 +10652,15 @@ _mesa_create_save_table(void)
    SET_TextureStorage1DEXT(table, _mesa_TextureStorage1DEXT);
    SET_TextureStorage2DEXT(table, _mesa_TextureStorage2DEXT);
    SET_TextureStorage3DEXT(table, _mesa_TextureStorage3DEXT);
+
+   /* GL_ARB_debug_output (no dlist support) */
+   _mesa_init_errors_dispatch(table);
+
+   /* GL_ARB_uniform_buffer_object */
+   SET_UniformBlockBinding(table, save_UniformBlockBinding);
+
+   /* GL_NV_primitive_restart */
+   SET_PrimitiveRestartIndexNV(table, _mesa_PrimitiveRestartIndex);
 
    return table;
 }
@@ -10792,6 +11029,11 @@ _mesa_save_vtxfmt_init(GLvertexformat * vfmt)
 
    /* GL_ARB_draw_elements_base_vertex */
    vfmt->DrawElementsInstancedBaseVertex = save_DrawElementsInstancedBaseVertexARB;
+
+   /* GL_ARB_base_instance */
+   vfmt->DrawArraysInstancedBaseInstance = save_DrawArraysInstancedBaseInstance;
+   vfmt->DrawElementsInstancedBaseInstance = save_DrawElementsInstancedBaseInstance;
+   vfmt->DrawElementsInstancedBaseVertexBaseInstance = save_DrawElementsInstancedBaseVertexBaseInstance;
 
    /* The driver is required to implement these as
     * 1) They can probably do a better job.

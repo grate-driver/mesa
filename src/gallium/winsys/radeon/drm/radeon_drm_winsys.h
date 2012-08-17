@@ -35,7 +35,8 @@
 
 enum radeon_generation {
     R300,
-    R600
+    R600,
+    SI
 };
 
 struct radeon_drm_winsys {
@@ -49,6 +50,7 @@ struct radeon_drm_winsys {
 
     struct pb_manager *kman;
     struct pb_manager *cman;
+    struct radeon_surface_manager *surf_man;
 
     uint32_t num_cpus;      /* Number of CPUs. */
 

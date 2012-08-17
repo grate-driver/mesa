@@ -239,15 +239,11 @@ upload_sol_state(struct brw_context *brw)
    struct gl_transform_feedback_object *xfb_obj =
       ctx->TransformFeedback.CurrentObject;
    bool active = xfb_obj->Active && !xfb_obj->Paused;
-   struct brw_vue_map vue_map;
-
-   /* _NEW_TRANSFORM, CACHE_NEW_VS_PROG */
-   brw_compute_vue_map(&vue_map, intel, ctx->Transform.ClipPlanesEnabled != 0,
-                       brw->vs.prog_data->outputs_written);
 
    if (active) {
       upload_3dstate_so_buffers(brw);
-      upload_3dstate_so_decl_list(brw, &vue_map);
+      /* CACHE_NEW_VS_PROG */
+      upload_3dstate_so_decl_list(brw, &brw->vs.prog_data->vue_map);
 
       intel->batch.needs_sol_reset = true;
    }
@@ -257,15 +253,14 @@ upload_sol_state(struct brw_context *brw)
     * MMIO register updates (current performed by the kernel at each batch
     * emit).
     */
-   upload_3dstate_streamout(brw, active, &vue_map);
+   upload_3dstate_streamout(brw, active, &brw->vs.prog_data->vue_map);
 }
 
 const struct brw_tracked_state gen7_sol_state = {
    .dirty = {
       .mesa  = (_NEW_RASTERIZER_DISCARD |
 		_NEW_LIGHT |
-		_NEW_TRANSFORM_FEEDBACK |
-		_NEW_TRANSFORM),
+		_NEW_TRANSFORM_FEEDBACK),
       .brw   = (BRW_NEW_BATCH |
 		BRW_NEW_VERTEX_PROGRAM),
       .cache = CACHE_NEW_VS_PROG,

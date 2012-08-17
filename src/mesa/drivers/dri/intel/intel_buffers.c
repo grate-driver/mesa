@@ -30,6 +30,7 @@
 #include "intel_fbo.h"
 #include "intel_mipmap_tree.h"
 
+#include "main/fbobject.h"
 #include "main/framebuffer.h"
 #include "main/renderbuffer.h"
 
@@ -69,7 +70,7 @@ void
 intel_check_front_buffer_rendering(struct intel_context *intel)
 {
    const struct gl_framebuffer *fb = intel->ctx.DrawBuffer;
-   if (fb->Name == 0) {
+   if (_mesa_is_winsys_fbo(fb)) {
       /* drawing to window system buffer */
       if (fb->_NumColorDrawBuffers > 0) {
          if (fb->_ColorDrawBufferIndexes[0] == BUFFER_FRONT_LEFT) {
@@ -82,7 +83,7 @@ intel_check_front_buffer_rendering(struct intel_context *intel)
 static void
 intelDrawBuffer(struct gl_context * ctx, GLenum mode)
 {
-   if ((ctx->DrawBuffer != NULL) && (ctx->DrawBuffer->Name == 0)) {
+   if (ctx->DrawBuffer && _mesa_is_winsys_fbo(ctx->DrawBuffer)) {
       struct intel_context *const intel = intel_context(ctx);
       const bool was_front_buffer_rendering =
 	intel->is_front_buffer_rendering;
@@ -105,7 +106,7 @@ intelDrawBuffer(struct gl_context * ctx, GLenum mode)
 static void
 intelReadBuffer(struct gl_context * ctx, GLenum mode)
 {
-   if ((ctx->DrawBuffer != NULL) && (ctx->DrawBuffer->Name == 0)) {
+   if (ctx->DrawBuffer && _mesa_is_winsys_fbo(ctx->DrawBuffer)) {
       struct intel_context *const intel = intel_context(ctx);
       const bool was_front_buffer_reading =
 	intel->is_front_buffer_reading;

@@ -66,7 +66,7 @@ wayland_shm_display_destroy(struct native_display *ndpy)
    if (shmdpy->base.configs)
       FREE(shmdpy->base.configs);
    if (shmdpy->base.own_dpy)
-      wl_display_destroy(shmdpy->base.dpy);
+      wl_display_disconnect(shmdpy->base.dpy);
 
    ndpy_uninit(ndpy);
 
@@ -84,6 +84,8 @@ wayland_create_shm_buffer(struct wayland_display *display,
    struct winsys_handle wsh;
    uint width, height;
    enum wl_shm_format format;
+   struct wl_buffer *buffer;
+   struct wl_shm_pool *pool;
 
    resource = resource_surface_get_single_resource(surface->rsurf, attachment);
    resource_surface_get_size(surface->rsurf, &width, &height);
@@ -104,9 +106,12 @@ wayland_create_shm_buffer(struct wayland_display *display,
       break;
    }
 
-   return wl_shm_create_buffer(shmdpy->wl_shm, wsh.fd,
-                               width, height,
-                               wsh.stride, format);
+   pool = wl_shm_create_pool(shmdpy->wl_shm, wsh.fd, wsh.size);
+   buffer = wl_shm_pool_create_buffer(pool, 0, width, height,
+                                      wsh.stride, format);
+   wl_shm_pool_destroy(pool);
+
+   return buffer;
 }
 
 static void

@@ -40,6 +40,8 @@
 #include "brw_state.h"
 #include "brw_defines.h"
 
+#include "main/fbobject.h"
+
 /* Constant single cliprect for framebuffer object or DRI2 drawing */
 static void upload_drawing_rect(struct brw_context *brw)
 {
@@ -77,11 +79,11 @@ static void upload_binding_table_pointers(struct brw_context *brw)
 
    BEGIN_BATCH(6);
    OUT_BATCH(_3DSTATE_BINDING_TABLE_POINTERS << 16 | (6 - 2));
-   OUT_BATCH(brw->bind.bo_offset);
+   OUT_BATCH(brw->vs.bind_bo_offset);
    OUT_BATCH(0); /* gs */
    OUT_BATCH(0); /* clip */
    OUT_BATCH(0); /* sf */
-   OUT_BATCH(brw->bind.bo_offset);
+   OUT_BATCH(brw->wm.bind_bo_offset);
    ADVANCE_BATCH();
 }
 
@@ -115,9 +117,9 @@ static void upload_gen6_binding_table_pointers(struct brw_context *brw)
 	     GEN6_BINDING_TABLE_MODIFY_GS |
 	     GEN6_BINDING_TABLE_MODIFY_PS |
 	     (4 - 2));
-   OUT_BATCH(brw->bind.bo_offset); /* vs */
-   OUT_BATCH(brw->bind.bo_offset); /* gs */
-   OUT_BATCH(brw->bind.bo_offset); /* wm/ps */
+   OUT_BATCH(brw->vs.bind_bo_offset); /* vs */
+   OUT_BATCH(brw->gs.bind_bo_offset); /* gs */
+   OUT_BATCH(brw->wm.bind_bo_offset); /* wm/ps */
    ADVANCE_BATCH();
 }
 
@@ -264,10 +266,45 @@ static void emit_depthbuffer(struct brw_context *brw)
    unsigned int len;
    bool separate_stencil = false;
 
+   /* Amount by which drawing should be offset in order to draw to the
+    * appropriate miplevel/zoffset/cubeface.  We will extract these values
+    * from depth_irb or stencil_irb once we determine which is present.
+    */
+   uint32_t draw_x = 0, draw_y = 0;
+
+   /* Masks used to determine how much of the draw_x and draw_y offsets should
+    * be performed using the fine adjustment of "depth coordinate offset X/Y"
+    * (dw5 of 3DSTATE_DEPTH_BUFFER).  Any remaining coarse adjustment will be
+    * performed by changing the base addresses of the buffers.
+    *
+    * Since the HiZ, depth, and stencil buffers all use the same "depth
+    * coordinate offset X/Y" values, we need to make sure that the coarse
+    * adjustment will be possible to apply to all three buffers.  Since coarse
+    * adjustment can only be applied in multiples of the tile size, we will OR
+    * together the tile masks of all the buffers to determine which offsets to
+    * perform as fine adjustments.
+    */
+   uint32_t tile_mask_x = 0, tile_mask_y = 0;
+
+   if (depth_irb) {
+      intel_region_get_tile_masks(depth_irb->mt->region,
+                                  &tile_mask_x, &tile_mask_y);
+   }
+
    if (depth_irb &&
        depth_irb->mt &&
        depth_irb->mt->hiz_mt) {
       hiz_region = depth_irb->mt->hiz_mt->region;
+
+      uint32_t hiz_tile_mask_x, hiz_tile_mask_y;
+      intel_region_get_tile_masks(hiz_region,
+                                  &hiz_tile_mask_x, &hiz_tile_mask_y);
+
+      /* Each HiZ row represents 2 rows of pixels */
+      hiz_tile_mask_y = hiz_tile_mask_y << 1 | 1;
+
+      tile_mask_x |= hiz_tile_mask_x;
+      tile_mask_y |= hiz_tile_mask_y;
    }
 
    /* 3DSTATE_DEPTH_BUFFER, 3DSTATE_STENCIL_BUFFER are both
@@ -284,8 +321,21 @@ static void emit_depthbuffer(struct brw_context *brw)
       if (stencil_mt->stencil_mt)
 	 stencil_mt = stencil_mt->stencil_mt;
 
-      if (stencil_mt->format == MESA_FORMAT_S8)
+      if (stencil_mt->format == MESA_FORMAT_S8) {
 	 separate_stencil = true;
+
+         /* Separate stencil buffer uses 64x64 tiles. */
+         tile_mask_x |= 63;
+         tile_mask_y |= 63;
+      } else {
+         uint32_t stencil_tile_mask_x, stencil_tile_mask_y;
+         intel_region_get_tile_masks(stencil_mt->region,
+                                     &stencil_tile_mask_x,
+                                     &stencil_tile_mask_y);
+
+         tile_mask_x |= stencil_tile_mask_x;
+         tile_mask_y |= stencil_tile_mask_y;
+      }
    }
 
    /* If there's a packed depth/stencil bound to stencil only, we need to
@@ -319,16 +369,14 @@ static void emit_depthbuffer(struct brw_context *brw)
       ADVANCE_BATCH();
 
    } else if (!depth_irb && separate_stencil) {
+      uint32_t tile_x, tile_y;
+
       /*
        * There exists a separate stencil buffer but no depth buffer.
        *
        * The stencil buffer inherits most of its fields from
        * 3DSTATE_DEPTH_BUFFER: namely the tile walk, surface type, width, and
        * height.
-       *
-       * Since the stencil buffer has quirky pitch requirements, its region
-       * was allocated with half height and double cpp. So we need
-       * a multiplier of 2 to obtain the surface's real height.
        *
        * Enable the hiz bit because it and the separate stencil bit must have
        * the same value. From Section 2.11.5.6.1.1 3DSTATE_DEPTH_BUFFER, Bit
@@ -345,6 +393,29 @@ static void emit_depthbuffer(struct brw_context *brw)
        */
       assert(intel->has_separate_stencil);
 
+      draw_x = stencil_irb->draw_x;
+      draw_y = stencil_irb->draw_y;
+      tile_x = draw_x & tile_mask_x;
+      tile_y = draw_y & tile_mask_y;
+
+      /* According to the Sandy Bridge PRM, volume 2 part 1, pp326-327
+       * (3DSTATE_DEPTH_BUFFER dw5), in the documentation for "Depth
+       * Coordinate Offset X/Y":
+       *
+       *   "The 3 LSBs of both offsets must be zero to ensure correct
+       *   alignment"
+       *
+       * We have no guarantee that tile_x and tile_y are correctly aligned,
+       * since they are determined by the mipmap layout, which is only aligned
+       * to multiples of 4.
+       *
+       * So, to avoid hanging the GPU, just smash the low order 3 bits of
+       * tile_x and tile_y to 0.  This is a temporary workaround until we come
+       * up with a better solution.
+       */
+      tile_x &= ~7;
+      tile_y &= ~7;
+
       BEGIN_BATCH(len);
       OUT_BATCH(_3DSTATE_DEPTH_BUFFER << 16 | (len - 2));
       OUT_BATCH((BRW_DEPTHFORMAT_D32_FLOAT << 18) |
@@ -354,10 +425,14 @@ static void emit_depthbuffer(struct brw_context *brw)
 	        (1 << 27) | /* tiled surface */
 	        (BRW_SURFACE_2D << 29));
       OUT_BATCH(0);
-      OUT_BATCH(((stencil_irb->Base.Base.Width - 1) << 6) |
-	         (stencil_irb->Base.Base.Height - 1) << 19);
+      OUT_BATCH(((stencil_irb->Base.Base.Width + tile_x - 1) << 6) |
+	         (stencil_irb->Base.Base.Height + tile_y - 1) << 19);
       OUT_BATCH(0);
-      OUT_BATCH(0);
+
+      if (intel->is_g4x || intel->gen >= 5)
+         OUT_BATCH(tile_x | (tile_y << 16));
+      else
+	 assert(tile_x == 0 && tile_y == 0);
 
       if (intel->gen >= 6)
 	 OUT_BATCH(0);
@@ -371,10 +446,35 @@ static void emit_depthbuffer(struct brw_context *brw)
       /* If using separate stencil, hiz must be enabled. */
       assert(!separate_stencil || hiz_region);
 
-      offset = intel_renderbuffer_tile_offsets(depth_irb, &tile_x, &tile_y);
-
       assert(intel->gen < 6 || region->tiling == I915_TILING_Y);
       assert(!hiz_region || region->tiling == I915_TILING_Y);
+
+      draw_x = depth_irb->draw_x;
+      draw_y = depth_irb->draw_y;
+      tile_x = draw_x & tile_mask_x;
+      tile_y = draw_y & tile_mask_y;
+
+      /* According to the Sandy Bridge PRM, volume 2 part 1, pp326-327
+       * (3DSTATE_DEPTH_BUFFER dw5), in the documentation for "Depth
+       * Coordinate Offset X/Y":
+       *
+       *   "The 3 LSBs of both offsets must be zero to ensure correct
+       *   alignment"
+       *
+       * We have no guarantee that tile_x and tile_y are correctly aligned,
+       * since they are determined by the mipmap layout, which is only aligned
+       * to multiples of 4.
+       *
+       * So, to avoid hanging the GPU, just smash the low order 3 bits of
+       * tile_x and tile_y to 0.  This is a temporary workaround until we come
+       * up with a better solution.
+       */
+      tile_x &= ~7;
+      tile_y &= ~7;
+
+      offset = intel_region_get_aligned_offset(region,
+                                               draw_x & ~tile_mask_x,
+                                               draw_y & ~tile_mask_y);
 
       BEGIN_BATCH(len);
       OUT_BATCH(_3DSTATE_DEPTH_BUFFER << 16 | (len - 2));
@@ -415,12 +515,17 @@ static void emit_depthbuffer(struct brw_context *brw)
 
       /* Emit hiz buffer. */
       if (hiz_region) {
+         uint32_t hiz_offset =
+            intel_region_get_aligned_offset(hiz_region,
+                                            draw_x & ~tile_mask_x,
+                                            (draw_y & ~tile_mask_y) / 2);
+
 	 BEGIN_BATCH(3);
 	 OUT_BATCH((_3DSTATE_HIER_DEPTH_BUFFER << 16) | (3 - 2));
 	 OUT_BATCH(hiz_region->pitch * hiz_region->cpp - 1);
 	 OUT_RELOC(hiz_region->bo,
 		   I915_GEM_DOMAIN_RENDER, I915_GEM_DOMAIN_RENDER,
-		   0);
+		   hiz_offset);
 	 ADVANCE_BATCH();
       } else {
 	 BEGIN_BATCH(3);
@@ -433,12 +538,26 @@ static void emit_depthbuffer(struct brw_context *brw)
       /* Emit stencil buffer. */
       if (separate_stencil) {
 	 struct intel_region *region = stencil_mt->region;
+
+         /* Note: we can't compute the stencil offset using
+          * intel_region_get_aligned_offset(), because stencil_region claims
+          * that the region is untiled; in fact it's W tiled.
+          */
+         uint32_t stencil_offset =
+            (draw_y & ~tile_mask_y) * region->pitch +
+            (draw_x & ~tile_mask_x) * 64;
+
 	 BEGIN_BATCH(3);
 	 OUT_BATCH((_3DSTATE_STENCIL_BUFFER << 16) | (3 - 2));
-	 OUT_BATCH(region->pitch * region->cpp - 1);
+         /* The stencil buffer has quirky pitch requirements.  From Vol 2a,
+          * 11.5.6.2.1 3DSTATE_STENCIL_BUFFER, field "Surface Pitch":
+          *    The pitch must be set to 2x the value computed based on width, as
+          *    the stencil buffer is stored with two rows interleaved.
+          */
+	 OUT_BATCH(2 * region->pitch * region->cpp - 1);
 	 OUT_RELOC(region->bo,
 		   I915_GEM_DOMAIN_RENDER, I915_GEM_DOMAIN_RENDER,
-		   0);
+		   stencil_offset);
 	 ADVANCE_BATCH();
       } else {
 	 BEGIN_BATCH(3);
@@ -462,8 +581,10 @@ static void emit_depthbuffer(struct brw_context *brw)
 	 intel_emit_post_sync_nonzero_flush(intel);
 
       BEGIN_BATCH(2);
-      OUT_BATCH(_3DSTATE_CLEAR_PARAMS << 16 | (2 - 2));
-      OUT_BATCH(0);
+      OUT_BATCH(_3DSTATE_CLEAR_PARAMS << 16 |
+		GEN5_DEPTH_CLEAR_VALID |
+		(2 - 2));
+      OUT_BATCH(depth_irb ? depth_irb->mt->depth_clear_value : 0);
       ADVANCE_BATCH();
    }
 }
@@ -506,7 +627,7 @@ static void upload_polygon_stipple(struct brw_context *brw)
     * to a FBO (i.e. any named frame buffer object), we *don't*
     * need to invert - we already match the layout.
     */
-   if (ctx->DrawBuffer->Name == 0) {
+   if (_mesa_is_winsys_fbo(ctx->DrawBuffer)) {
       for (i = 0; i < 32; i++)
 	  OUT_BATCH(ctx->PolygonStipple[31 - i]); /* invert */
    }
@@ -549,15 +670,13 @@ static void upload_polygon_stipple_offset(struct brw_context *brw)
 
    /* _NEW_BUFFERS
     *
-    * If we're drawing to a system window (ctx->DrawBuffer->Name == 0),
-    * we have to invert the Y axis in order to match the OpenGL
-    * pixel coordinate system, and our offset must be matched
-    * to the window position.  If we're drawing to a FBO
-    * (ctx->DrawBuffer->Name != 0), then our native pixel coordinate
-    * system works just fine, and there's no window system to
-    * worry about.
+    * If we're drawing to a system window we have to invert the Y axis
+    * in order to match the OpenGL pixel coordinate system, and our
+    * offset must be matched to the window position.  If we're drawing
+    * to a user-created FBO then our native pixel coordinate system
+    * works just fine, and there's no window system to worry about.
     */
-   if (brw->intel.ctx.DrawBuffer->Name == 0)
+   if (_mesa_is_winsys_fbo(brw->intel.ctx.DrawBuffer))
       OUT_BATCH((32 - (ctx->DrawBuffer->Height & 31)) & 31);
    else
       OUT_BATCH(0);
@@ -665,33 +784,16 @@ static void upload_invariant_state( struct brw_context *brw )
       ADVANCE_BATCH();
    }
 
-   if (intel->gen >= 6) {
+   if (intel->gen == 6) {
       int i;
-      int len = intel->gen >= 7 ? 4 : 3;
 
-      BEGIN_BATCH(len);
-      OUT_BATCH(_3DSTATE_MULTISAMPLE << 16 | (len - 2));
-      OUT_BATCH(MS_PIXEL_LOCATION_CENTER |
-		MS_NUMSAMPLES_1);
-      OUT_BATCH(0); /* positions for 4/8-sample */
-      if (intel->gen >= 7)
-	 OUT_BATCH(0);
-      ADVANCE_BATCH();
-
-      BEGIN_BATCH(2);
-      OUT_BATCH(_3DSTATE_SAMPLE_MASK << 16 | (2 - 2));
-      OUT_BATCH(1);
-      ADVANCE_BATCH();
-
-      if (intel->gen < 7) {
-	 for (i = 0; i < 4; i++) {
-	    BEGIN_BATCH(4);
-	    OUT_BATCH(_3DSTATE_GS_SVB_INDEX << 16 | (4 - 2));
-	    OUT_BATCH(i << SVB_INDEX_SHIFT);
-	    OUT_BATCH(0);
-	    OUT_BATCH(0xffffffff);
-	    ADVANCE_BATCH();
-	 }
+      for (i = 0; i < 4; i++) {
+         BEGIN_BATCH(4);
+         OUT_BATCH(_3DSTATE_GS_SVB_INDEX << 16 | (4 - 2));
+         OUT_BATCH(i << SVB_INDEX_SHIFT);
+         OUT_BATCH(0);
+         OUT_BATCH(0xffffffff);
+         ADVANCE_BATCH();
       }
    }
 

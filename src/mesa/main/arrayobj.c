@@ -123,14 +123,15 @@ _mesa_delete_array_object( struct gl_context *ctx, struct gl_array_object *obj )
 
 /**
  * Set ptr to arrayObj w/ reference counting.
+ * Note: this should only be called from the _mesa_reference_array_object()
+ * inline function.
  */
 void
-_mesa_reference_array_object(struct gl_context *ctx,
-                             struct gl_array_object **ptr,
-                             struct gl_array_object *arrayObj)
+_mesa_reference_array_object_(struct gl_context *ctx,
+                              struct gl_array_object **ptr,
+                              struct gl_array_object *arrayObj)
 {
-   if (*ptr == arrayObj)
-      return;
+   assert(*ptr != arrayObj);
 
    if (*ptr) {
       /* Unreference the old array object */
@@ -280,15 +281,26 @@ remove_array_object( struct gl_context *ctx, struct gl_array_object *obj )
 
 
 /**
- * Helper for update_arrays().
- * \return  min(current min, array->_MaxElement).
+ * Helper for _mesa_update_array_object_max_element().
+ * \return  min(arrayObj->VertexAttrib[*]._MaxElement).
  */
 static GLuint
-update_min(GLuint min, struct gl_client_array *array)
+compute_max_element(struct gl_array_object *arrayObj, GLbitfield64 enabled)
 {
-   assert(array->Enabled);
-   _mesa_update_array_max_element(array);
-   return MIN2(min, array->_MaxElement);
+   GLuint min = ~((GLuint)0);
+   
+   while (enabled) {
+      struct gl_client_array *client_array;
+      GLint attrib = ffsll(enabled) - 1;
+      enabled ^= BITFIELD64_BIT(attrib);
+      
+      client_array = &arrayObj->VertexAttrib[attrib];
+      assert(client_array->Enabled);
+      _mesa_update_array_max_element(client_array);
+      min = MIN2(min, client_array->_MaxElement);
+   }
+   
+   return min;
 }
 
 
@@ -299,17 +311,19 @@ void
 _mesa_update_array_object_max_element(struct gl_context *ctx,
                                       struct gl_array_object *arrayObj)
 {
-   GLbitfield64 enabled = arrayObj->_Enabled;
-   GLuint min = ~0u;
+   GLbitfield64 enabled;
 
-   while (enabled) {
-      GLint attrib = _mesa_ffsll(enabled) - 1;
-      enabled &= ~BITFIELD64_BIT(attrib);
-      min = update_min(min, &arrayObj->VertexAttrib[attrib]);
+   if (!ctx->VertexProgram._Current ||
+       ctx->VertexProgram._Current == ctx->VertexProgram._TnlProgram) {
+      enabled = _mesa_array_object_get_enabled_ff(arrayObj);
+   } else if (ctx->VertexProgram._Current->IsNVProgram) {
+      enabled = _mesa_array_object_get_enabled_nv(arrayObj);
+   } else {
+      enabled = _mesa_array_object_get_enabled_arb(arrayObj);
    }
 
    /* _MaxElement is one past the last legal array element */
-   arrayObj->_MaxElement = min;
+   arrayObj->_MaxElement = compute_max_element(arrayObj, enabled);
 }
 
 
@@ -376,7 +390,6 @@ bind_vertex_array(struct gl_context *ctx, GLuint id, GLboolean genRequired)
    }
 
    ctx->NewState |= _NEW_ARRAY;
-   ctx->Array.NewState |= VERT_BIT_ALL;
    _mesa_reference_array_object(ctx, &ctx->Array.ArrayObj, newObj);
 
    /* Pass BindVertexArray call to device driver */

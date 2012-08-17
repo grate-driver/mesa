@@ -25,6 +25,7 @@
 #include "brw_state.h"
 #include "brw_defines.h"
 #include "intel_batchbuffer.h"
+#include "main/fbobject.h"
 
 static void
 gen7_upload_sf_clip_viewport(struct brw_context *brw)
@@ -33,7 +34,7 @@ gen7_upload_sf_clip_viewport(struct brw_context *brw)
    struct gl_context *ctx = &intel->ctx;
    const GLfloat depth_scale = 1.0F / ctx->DrawBuffer->_DepthMaxF;
    GLfloat y_scale, y_bias;
-   const bool render_to_fbo = (ctx->DrawBuffer->Name != 0);
+   const bool render_to_fbo = _mesa_is_user_fbo(ctx->DrawBuffer);
    const GLfloat *v = ctx->Viewport._WindowMap.m;
    struct gen7_sf_clip_viewport *vp;
 
@@ -42,11 +43,20 @@ gen7_upload_sf_clip_viewport(struct brw_context *brw)
    /* Also assign to clip.vp_offset in case something uses it. */
    brw->clip.vp_offset = brw->sf.vp_offset;
 
-   /* Disable guardband clipping (see gen6_viewport_state.c for rationale). */
-   vp->guardband.xmin = -1.0;
-   vp->guardband.xmax = 1.0;
-   vp->guardband.ymin = -1.0;
-   vp->guardband.ymax = 1.0;
+   /* According to the "Vertex X,Y Clamping and Quantization" section of the
+    * Strips and Fans documentation, Ivybridge and later don't have a maximum
+    * post-clamp delta.  However, the guardband extent must fit in [-32K, 32K)
+    * which gives us a maximum size of 64K.  Use 65000 rather than 65536 to be
+    * somewhat cautious---make the guardband slightly smaller than the maximum.
+    */
+   const float maximum_guardband_extent = 65000;
+   float gbx = maximum_guardband_extent / (float) ctx->Viewport.Width;
+   float gby = maximum_guardband_extent / (float) ctx->Viewport.Height;
+
+   vp->guardband.xmin = -gbx;
+   vp->guardband.xmax = gbx;
+   vp->guardband.ymin = -gby;
+   vp->guardband.ymax = gby;
 
    /* _NEW_BUFFERS */
    if (render_to_fbo) {

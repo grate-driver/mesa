@@ -120,6 +120,23 @@ to the array index which is used for sampling.
 * ``sampler_view_destroy`` destroys a sampler view and releases its reference
   to associated texture.
 
+Shader Resources
+^^^^^^^^^^^^^^^^
+
+Shader resources are textures or buffers that may be read or written
+from a shader without an associated sampler.  This means that they
+have no support for floating point coordinates, address wrap modes or
+filtering.
+
+Shader resources are specified for all the shader stages at once using
+the ``set_shader_resources`` method.  When binding texture resources,
+the ``level``, ``first_layer`` and ``last_layer`` pipe_surface fields
+specify the mipmap level and the range of layers the texture will be
+constrained to.  In the case of buffers, ``first_element`` and
+``last_element`` specify the range within the buffer that will be used
+by the shader resource.  Writes to a shader resource are only allowed
+when the ``writable`` flag is set.
+
 Surfaces
 ^^^^^^^^
 
@@ -482,20 +499,6 @@ the beginning of the resource.
 
 
 
-.. _redefine_user_buffer:
-
-redefine_user_buffer
-%%%%%%%%%%%%%%%%%%%%
-
-This function notifies a driver that the user buffer content has been changed.
-The updated region starts at ``offset`` and is ``size`` bytes large.
-The ``offset`` is relative to the pointer specified in ``user_buffer_create``.
-While uploading the user buffer, the driver is allowed not to upload
-the memory outside of this region.
-The width0 is redefined to ``MAX2(width0, offset+size)``.
-
-
-
 .. _texture_barrier
 
 texture_barrier
@@ -542,3 +545,44 @@ These flags control the behavior of a transfer object.
 ``PIPE_TRANSFER_FLUSH_EXPLICIT``
   Written ranges will be notified later with :ref:`transfer_flush_region`.
   Cannot be used with ``PIPE_TRANSFER_READ``.
+
+
+Compute kernel execution
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+A compute program can be defined, bound or destroyed using
+``create_compute_state``, ``bind_compute_state`` or
+``destroy_compute_state`` respectively.
+
+Any of the subroutines contained within the compute program can be
+executed on the device using the ``launch_grid`` method.  This method
+will execute as many instances of the program as elements in the
+specified N-dimensional grid, hopefully in parallel.
+
+The compute program has access to four special resources:
+
+* ``GLOBAL`` represents a memory space shared among all the threads
+  running on the device.  An arbitrary buffer created with the
+  ``PIPE_BIND_GLOBAL`` flag can be mapped into it using the
+  ``set_global_binding`` method.
+
+* ``LOCAL`` represents a memory space shared among all the threads
+  running in the same working group.  The initial contents of this
+  resource are undefined.
+
+* ``PRIVATE`` represents a memory space local to a single thread.
+  The initial contents of this resource are undefined.
+
+* ``INPUT`` represents a read-only memory space that can be
+  initialized at ``launch_grid`` time.
+
+These resources use a byte-based addressing scheme, and they can be
+accessed from the compute program by means of the LOAD/STORE TGSI
+opcodes.  Additional resources to be accessed using the same opcodes
+may be specified by the user with the ``set_compute_resources``
+method.
+
+In addition, normal texture sampling is allowed from the compute
+program: ``bind_compute_sampler_states`` may be used to set up texture
+samplers for the compute stage and ``set_compute_sampler_views`` may
+be used to bind a number of sampler views to it.

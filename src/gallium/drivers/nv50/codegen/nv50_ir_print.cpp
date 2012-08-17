@@ -37,9 +37,8 @@ enum TextStyle
    TXT_INSN
 };
 
-static const char *colour[8] =
+static const char *_colour[8] =
 {
-#if 1
    "\x1b[00m",
    "\x1b[34m",
    "\x1b[35m",
@@ -48,9 +47,41 @@ static const char *colour[8] =
    "\x1b[33m",
    "\x1b[37m",
    "\x1b[32m"
-#else
-   "", "", "", "", "", "", "", ""
-#endif
+};
+
+static const char *_nocolour[8] =
+{
+      "", "", "", "", "", "", "", ""
+};
+
+static const char **colour;
+
+static void init_colours()
+{
+   if (getenv("NV50_PROG_DEBUG_NO_COLORS") != NULL)
+      colour = _nocolour;
+   else
+      colour = _colour;
+}
+
+static const char *OpClassStr[OPCLASS_OTHER + 1] =
+{
+   "MOVE",
+   "LOAD",
+   "STORE",
+   "ARITH",
+   "SHIFT",
+   "SFU",
+   "LOGIC",
+   "COMPARE",
+   "CONVERT",
+   "ATOMIC",
+   "TEXTURE",
+   "SURFACE",
+   "FLOW",
+   "(INVALID)",
+   "PSEUDO",
+   "OTHER"
 };
 
 const char *operationStr[OP_LAST + 1] =
@@ -147,6 +178,7 @@ const char *operationStr[OP_LAST + 1] =
    "popcnt",
    "insbf",
    "extbf",
+   "texbar",
    "(invalid)"
 };
 
@@ -227,6 +259,26 @@ static const char *SemanticStr[SV_LAST + 1] =
    "(INVALID)"
 };
 
+static const char *interpStr[16] =
+{
+   "pass",
+   "mul",
+   "flat",
+   "sc",
+   "cent pass",
+   "cent mul",
+   "cent flat",
+   "cent sc",
+   "off pass",
+   "off mul",
+   "off flat",
+   "off sc",
+   "samp pass",
+   "samp mul",
+   "samp flat",
+   "samp sc"
+};
+
 #define PRINT(args...)                                \
    do {                                               \
       pos += snprintf(&buf[pos], size - pos, args);   \
@@ -265,7 +317,7 @@ int Modifier::print(char *buf, size_t size) const
 
    return pos;
 }
-   
+
 int LValue::print(char *buf, size_t size, DataType ty) const
 {
    const char *postFix = "";
@@ -278,11 +330,23 @@ int LValue::print(char *buf, size_t size, DataType ty) const
    switch (reg.file) {
    case FILE_GPR:
       r = 'r'; col = TXT_GPR;
-      if (reg.size == 8)
+      if (reg.size == 2) {
+         if (p == '$') {
+            postFix = (idx & 1) ? "h" : "l";
+            idx /= 2;
+         } else {
+            postFix = "s";
+         }
+      } else
+      if (reg.size == 8) {
          postFix = "d";
-      else
-      if (reg.size == 16)
+      } else
+      if (reg.size == 16) {
          postFix = "q";
+      } else
+      if (reg.size == 12) {
+         postFix = "t";
+      }
       break;
    case FILE_PREDICATE:
       r = 'p'; col = TXT_REGISTER;
@@ -416,9 +480,9 @@ void Instruction::print() const
       } else {
          PRINT("%s", CondCodeStr[cc]);
       }
-      if (pos > pre + 1)
+      if (pos > pre)
          SPACE();
-      pos += src[predSrc].get()->print(&buf[pos], BUFSZ - pos);
+      pos += getSrc(predSrc)->print(&buf[pos], BUFSZ - pos);
       PRINT(" %s", colour[TXT_INSN]);
    }
 
@@ -431,12 +495,16 @@ void Instruction::print() const
          PRINT(" %sBUILTIN:%i", colour[TXT_BRA], asFlow()->target.builtin);
       } else
       if (op == OP_CALL && asFlow()->target.fn) {
-         PRINT(" %s%s", colour[TXT_BRA], asFlow()->target.fn->getName());
+         PRINT(" %s%s:%i", colour[TXT_BRA],
+               asFlow()->target.fn->getName(),
+               asFlow()->target.fn->getLabel());
       } else
       if (asFlow()->target.bb)
          PRINT(" %sBB:%i", colour[TXT_BRA], asFlow()->target.bb->getId());
    } else {
       PRINT("%s ", operationStr[op]);
+      if (op == OP_LINTERP || op == OP_PINTERP)
+         PRINT("%s ", interpStr[ipa]);
       if (subOp)
          PRINT("(SUBOP:%u) ", subOp);
       if (perPatch)
@@ -451,11 +519,11 @@ void Instruction::print() const
    if (rnd != ROUND_N)
       PRINT(" %s", RoundModeStr[rnd]);
 
-   if (def[1].exists())
+   if (defExists(1))
       PRINT(" {");
    for (d = 0; defExists(d); ++d) {
       SPACE();
-      pos += def[d].get()->print(&buf[pos], size - pos);
+      pos += getDef(d)->print(&buf[pos], size - pos);
    }
    if (d > 1)
       PRINT(" %s}", colour[TXT_INSN]);
@@ -470,20 +538,22 @@ void Instruction::print() const
       PRINT(" %s%s", colour[TXT_INSN], DataTypeStr[sType]);
 
    for (s = 0; srcExists(s); ++s) {
-      if (s == predSrc || src[s].usedAsPtr)
+      if (s == predSrc || src(s).usedAsPtr)
          continue;
       const size_t pre = pos;
       SPACE();
-      pos += src[s].mod.print(&buf[pos], BUFSZ - pos);
+      pos += src(s).mod.print(&buf[pos], BUFSZ - pos);
       if (pos > pre + 1)
          SPACE();
-      if (src[s].isIndirect(0) || src[s].isIndirect(1))
-         pos += src[s].get()->asSym()->print(&buf[pos], BUFSZ - pos,
-                                             getIndirect(s, 0),
-                                             getIndirect(s, 1));
+      if (src(s).isIndirect(0) || src(s).isIndirect(1))
+         pos += getSrc(s)->asSym()->print(&buf[pos], BUFSZ - pos,
+                                          getIndirect(s, 0),
+                                          getIndirect(s, 1));
       else
-         pos += src[s].get()->print(&buf[pos], BUFSZ - pos, sType);
+         pos += getSrc(s)->print(&buf[pos], BUFSZ - pos, sType);
    }
+   if (exit)
+      PRINT("%s exit", colour[TXT_INSN]);
 
    PRINT("%s", colour[TXT_DEFAULT]);
 
@@ -508,7 +578,7 @@ private:
 bool
 PrintPass::visit(Function *fn)
 {
-   INFO("\n%s:\n", fn->getName());
+   INFO("\n%s:%i\n", fn->getName(), fn->getLabel());
 
    return true;
 }
@@ -561,6 +631,7 @@ void
 Program::print()
 {
    PrintPass pass;
+   init_colours();
    pass.run(this, true, false);
 }
 

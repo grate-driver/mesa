@@ -42,6 +42,7 @@
 #include "lp_tile_soa.h"
 #include "gallivm/lp_bld_debug.h"
 #include "lp_scene.h"
+#include "lp_tex_sample.h"
 
 
 #ifdef DEBUG
@@ -225,7 +226,7 @@ lp_rast_clear_zstencil(struct lp_rasterizer_task *task,
            __FUNCTION__, clear_value, clear_mask);
 
    /*
-    * Clear the aera of the swizzled depth/depth buffer matching this tile, in
+    * Clear the area of the swizzled depth/depth buffer matching this tile, in
     * stripes of TILE_VECTOR_HEIGHT x TILE_SIZE at a time.
     *
     * The swizzled depth format is such that the depths for
@@ -701,28 +702,32 @@ rasterize_scene(struct lp_rasterizer_task *task,
                 struct lp_scene *scene)
 {
    task->scene = scene;
-   /* loop over scene bins, rasterize each */
+
+   if (!task->rast->no_rast) {
+      /* loop over scene bins, rasterize each */
 #if 0
-   {
-      unsigned i, j;
-      for (i = 0; i < scene->tiles_x; i++) {
-         for (j = 0; j < scene->tiles_y; j++) {
-            struct cmd_bin *bin = lp_scene_get_bin(scene, i, j);
-            rasterize_bin(task, bin, i, j);
+      {
+         unsigned i, j;
+         for (i = 0; i < scene->tiles_x; i++) {
+            for (j = 0; j < scene->tiles_y; j++) {
+               struct cmd_bin *bin = lp_scene_get_bin(scene, i, j);
+               rasterize_bin(task, bin, i, j);
+            }
          }
       }
-   }
 #else
-   {
-      struct cmd_bin *bin;
+      {
+         struct cmd_bin *bin;
 
-      assert(scene);
-      while ((bin = lp_scene_bin_iter_next(scene))) {
-         if (!is_empty_bin( bin ))
-            rasterize_bin(task, bin);
+         assert(scene);
+         while ((bin = lp_scene_bin_iter_next(scene))) {
+            if (!is_empty_bin( bin ))
+               rasterize_bin(task, bin);
+         }
       }
-   }
 #endif
+   }
+
 
    if (scene->fence) {
       lp_fence_signal(scene->fence);
@@ -895,6 +900,8 @@ lp_rast_create( unsigned num_threads )
    }
 
    rast->num_threads = num_threads;
+
+   rast->no_rast = debug_get_bool_option("LP_NO_RAST", FALSE);
 
    create_rast_threads(rast);
 

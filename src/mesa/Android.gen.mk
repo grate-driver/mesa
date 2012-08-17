@@ -29,15 +29,19 @@ endif
 
 intermediates := $(call local-intermediates-dir)
 
+# This is the list of auto-generated files: sources and headers
 sources := \
+	main/enums.c \
 	main/api_exec_es1.c \
 	main/api_exec_es1_dispatch.h \
 	main/api_exec_es1_remap_helper.h \
 	main/api_exec_es2.c \
 	main/api_exec_es2_dispatch.h \
-	main/api_exec_es2_remap_helper.h \
+	program/program_parse.tab.c \
 	program/lex.yy.c \
-	program/program_parse.tab.c
+	main/dispatch.h \
+	main/remap_helper.h \
+	main/api_exec_es2_remap_helper.h
 
 LOCAL_SRC_FILES := $(filter-out $(sources), $(LOCAL_SRC_FILES))
 
@@ -53,6 +57,7 @@ endif
 sources += main/git_sha1.h
 
 sources := $(addprefix $(intermediates)/, $(sources))
+
 LOCAL_GENERATED_SOURCES += $(sources)
 
 glapi := $(MESA_TOP)/src/mapi/glapi/gen
@@ -67,12 +72,6 @@ es_hdr_deps := \
 	$(wildcard $(glapi)/*.py) \
 	$(wildcard $(glapi)/*.xml)
 
-define es-gen
-	@mkdir -p $(dir $@)
-	@echo "Gen ES: $(PRIVATE_MODULE) <= $(notdir $(@))"
-	$(hide) $(PRIVATE_SCRIPT) $(1) $(PRIVATE_XML) > $@
-endef
-
 define local-l-to-c
 	@mkdir -p $(dir $@)
 	@echo "Mesa Lex: $(PRIVATE_MODULE) <= $<"
@@ -85,6 +84,12 @@ define local-y-to-c-and-h
 	$(hide) $(YACC) -o $@ $<
 endef
 
+define es-gen
+	@mkdir -p $(dir $@)
+	@echo "Gen ES: $(PRIVATE_MODULE) <= $(notdir $(@))"
+	$(hide) $(PRIVATE_SCRIPT) $(1) $(PRIVATE_XML) > $@
+endef
+
 $(intermediates)/main/api_exec_%.c: PRIVATE_SCRIPT := $(MESA_PYTHON2) $(LOCAL_PATH)/main/es_generator.py
 $(intermediates)/main/api_exec_%.c: PRIVATE_XML := -S $(LOCAL_PATH)/main/APIspec.xml
 $(intermediates)/main/api_exec_%_dispatch.h: PRIVATE_SCRIPT := $(MESA_PYTHON2) $(glapi)/gl_table.py
@@ -93,10 +98,10 @@ $(intermediates)/main/api_exec_%_remap_helper.h: PRIVATE_SCRIPT := $(MESA_PYTHON
 $(intermediates)/main/api_exec_%_remap_helper.h: PRIVATE_XML := -f $(glapi)/gl_and_es_API.xml
 
 $(intermediates)/main/api_exec_es1.c: $(es_src_deps)
-	$(call es-gen,-V GLES1.1)
+	$(call es-gen, -V GLES1.1)
 
 $(intermediates)/main/api_exec_es2.c: $(es_src_deps)
-	$(call es-gen,-V GLES2.0)
+	$(call es-gen, -V GLES2.0)
 
 $(intermediates)/main/api_exec_%_dispatch.h: $(es_hdr_deps)
 	$(call es-gen, -c $* -m remap_table)
@@ -129,3 +134,21 @@ $(intermediates)/x86/matypes.h: $(matypes_deps)
 	@mkdir -p $(dir $@)
 	@echo "MATYPES: $(PRIVATE_MODULE) <= $(notdir $@)"
 	$(hide) $< > $@
+
+$(intermediates)/main/dispatch.h: PRIVATE_SCRIPT := $(MESA_PYTHON2) $(glapi)/gl_table.py
+$(intermediates)/main/dispatch.h: PRIVATE_XML := -f $(glapi)/gl_and_es_API.xml
+
+$(intermediates)/main/dispatch.h: $(es_hdr_deps)
+	$(call es-gen, $* -m remap_table)
+
+$(intermediates)/main/remap_helper.h: PRIVATE_SCRIPT := $(MESA_PYTHON2) $(glapi)/remap_helper.py
+$(intermediates)/main/remap_helper.h: PRIVATE_XML := -f $(glapi)/gl_API.xml
+
+$(intermediates)/main/remap_helper.h: $(es_hdr_deps)
+	$(call es-gen, $*)
+
+$(intermediates)/main/enums.c: PRIVATE_SCRIPT :=$(MESA_PYTHON2) $(glapi)/gl_enums.py
+$(intermediates)/main/enums.c: PRIVATE_XML := -f $(glapi)/gl_and_es_API.xml
+
+$(intermediates)/main/enums.c: $(es_src_deps)
+	$(call es-gen)

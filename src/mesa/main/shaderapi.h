@@ -39,9 +39,6 @@ struct _glapi_table;
 struct gl_context;
 struct gl_shader_program;
 
-extern GLint
-_mesa_sizeof_glsl_type(GLenum type);
-
 extern void
 _mesa_copy_string(GLchar *dst, GLsizei maxLength,
                   GLsizei *length, const GLchar *src);
@@ -86,6 +83,9 @@ _mesa_GetAttachedObjectsARB(GLhandleARB, GLsizei, GLsizei *, GLhandleARB *);
 extern GLint GLAPIENTRY
 _mesa_GetFragDataLocation(GLuint program, const GLchar *name);
 
+extern GLint GLAPIENTRY
+_mesa_GetFragDataIndex(GLuint program, const GLchar *name);
+
 extern GLhandleARB GLAPIENTRY
 _mesa_GetHandleARB(GLenum pname);
 
@@ -126,6 +126,10 @@ _mesa_BindAttribLocationARB(GLhandleARB, GLuint, const GLcharARB *);
 extern void GLAPIENTRY
 _mesa_BindFragDataLocation(GLuint program, GLuint colorNumber,
                            const GLchar *name);
+
+extern void GLAPIENTRY
+_mesa_BindFragDataLocationIndexed(GLuint program, GLuint colorNumber,
+                                  GLuint index, const GLchar *name);
 
 extern void GLAPIENTRY
 _mesa_GetActiveAttribARB(GLhandleARB, GLuint, GLsizei, GLsizei *, GLint *,

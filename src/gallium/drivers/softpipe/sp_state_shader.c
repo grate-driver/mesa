@@ -158,8 +158,10 @@ softpipe_bind_fs_state(struct pipe_context *pipe, void *fs)
 
    softpipe->fs = fs;
 
-   if (fs == NULL)
-      softpipe->fs_variant = NULL;
+   /* This depends on the current fragment shader and must always be
+    * re-validated before use.
+    */
+   softpipe->fs_variant = NULL;
 
    if (state)
       draw_bind_fragment_shader(softpipe->draw,
@@ -342,11 +344,22 @@ softpipe_delete_gs_state(struct pipe_context *pipe, void *gs)
 static void
 softpipe_set_constant_buffer(struct pipe_context *pipe,
                              uint shader, uint index,
-                             struct pipe_resource *constants)
+                             struct pipe_constant_buffer *cb)
 {
    struct softpipe_context *softpipe = softpipe_context(pipe);
-   unsigned size = constants ? constants->width0 : 0;
-   const void *data = constants ? softpipe_resource(constants)->data : NULL;
+   struct pipe_resource *constants = cb ? cb->buffer : NULL;
+   unsigned size;
+   const void *data;
+
+   if (cb && cb->user_buffer) {
+      constants = softpipe_user_buffer_create(pipe->screen,
+                                              (void *) cb->user_buffer,
+                                              cb->buffer_size,
+                                              PIPE_BIND_CONSTANT_BUFFER);
+   }
+
+   size = constants ? constants->width0 : 0;
+   data = constants ? softpipe_resource(constants)->data : NULL;
 
    assert(shader < PIPE_SHADER_TYPES);
 
@@ -363,6 +376,10 @@ softpipe_set_constant_buffer(struct pipe_context *pipe,
    softpipe->const_buffer_size[shader][index] = size;
 
    softpipe->dirty |= SP_NEW_CONSTANTS;
+
+   if (cb && cb->user_buffer) {
+      pipe_resource_reference(&constants, NULL);
+   }
 }
 
 

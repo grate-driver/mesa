@@ -36,9 +36,7 @@
 #define EG_BOOL_CONST_OFFSET               0x0003A500
 #define EG_BOOL_CONST_END                  0x0003A506
 
-#define R600_CONFIG_REG_OFFSET                 0X00008000
 #define R600_CONFIG_REG_END                    0X0000AC00
-#define R600_CONTEXT_REG_OFFSET                0X00028000
 #define R600_CONTEXT_REG_END                   0X00029000
 #define R600_ALU_CONST_OFFSET                  0X00030000
 #define R600_ALU_CONST_END                     0X00032000
@@ -46,7 +44,6 @@
 #define R600_RESOURCE_END                      0X0003C000
 #define R600_SAMPLER_OFFSET                    0X0003C000
 #define R600_SAMPLER_END                       0X0003CFF0
-#define R600_CTL_CONST_OFFSET                  0X0003CFF0
 #define R600_CTL_CONST_END                     0X0003E200
 #define R600_LOOP_CONST_OFFSET                 0X0003E200
 #define R600_LOOP_CONST_END                    0X0003E380
@@ -95,7 +92,6 @@
 #define		WAIT_REG_MEM_EQUAL		3
 #define PKT3_MEM_WRITE                         0x3D
 #define PKT3_INDIRECT_BUFFER                   0x32
-#define PKT3_CP_INTERRUPT                      0x40
 #define PKT3_SURFACE_SYNC                      0x43
 #define PKT3_ME_INITIALIZE                     0x44
 #define PKT3_COND_WRITE                        0x45
@@ -110,6 +106,7 @@
 #define PKT3_SET_RESOURCE                      0x6D
 #define PKT3_SET_SAMPLER                       0x6E
 #define PKT3_SET_CTL_CONST                     0x6F
+#define PKT3_STRMOUT_BASE_UPDATE	       0x72
 #define PKT3_SURFACE_BASE_UPDATE               0x73
 #define		SURFACE_BASE_UPDATE_DEPTH      (1 << 0)
 #define		SURFACE_BASE_UPDATE_COLOR(x)   (2 << (x))
@@ -159,7 +156,6 @@
 #define PKT3_IT_OPCODE_C                0xFFFF00FF
 #define PKT3_PRED_S(x)               (((x) >> 0) & 0x1)
 #define PKT0(index, count) (PKT_TYPE_S(0) | PKT0_BASE_INDEX_S(index) | PKT_COUNT_S(count))
-#define PKT3(op, count, predicate) (PKT_TYPE_S(3) | PKT3_IT_OPCODE_S(op) | PKT_COUNT_S(count) | PKT3_PRED_S(predicate))
 
 /* Registers */
 #define R_008490_CP_STRMOUT_CNTL		     0x008490
@@ -422,6 +418,8 @@
 #define   G_028808_DEGAMMA_ENABLE(x)                   (((x) >> 3) & 0x1)
 #define   C_028808_DEGAMMA_ENABLE                      0xFFFFFFF7
 #define   S_028808_SPECIAL_OP(x)                       (((x) & 0x7) << 4)
+#define		V_028808_NORMAL				0
+#define		V_028808_DISABLE			1
 #define   G_028808_SPECIAL_OP(x)                       (((x) >> 4) & 0x7)
 #define   C_028808_SPECIAL_OP                          0xFFFFFF8F
 #define   S_028808_PER_MRT_BLEND(x)                    (((x) & 0x1) << 7)
@@ -815,6 +813,11 @@
 #define   S_028A40_CUT_MODE(x)                         (((x) & 0x3) << 3)
 #define   G_028A40_CUT_MODE(x)                         (((x) >> 3) & 0x3)
 #define   C_028A40_CUT_MODE                            0xFFFFFFE7
+#define R_028A6C_VGT_GS_OUT_PRIM_TYPE                0x028A6C
+#define   S_028A6C_OUTPRIM_TYPE(x)                     (((x) & 0x3F) << 0)
+#define     V_028A6C_OUTPRIM_TYPE_POINTLIST            0
+#define     V_028A6C_OUTPRIM_TYPE_LINESTRIP            1
+#define     V_028A6C_OUTPRIM_TYPE_TRISTRIP             2
 #define R_008040_WAIT_UNTIL                          0x008040
 #define   S_008040_WAIT_CP_DMA_IDLE(x)                 (((x) & 0x1) << 8)
 #define   G_008040_WAIT_CP_DMA_IDLE(x)                 (((x) >> 8) & 0x1)
@@ -2250,6 +2253,12 @@
 #define R_028D2C_DB_SRESULTS_COMPARE_STATE1          0x028D2C
 #define R_028D30_DB_PRELOAD_CONTROL                  0x028D30
 #define R_028D44_DB_ALPHA_TO_MASK                    0x028D44
+#define   S_028D44_ALPHA_TO_MASK_ENABLE(x)		(((x) & 0x1) << 0)
+#define   S_028D44_ALPHA_TO_MASK_OFFSET0(x)		(((x) & 0x3) << 8)
+#define   S_028D44_ALPHA_TO_MASK_OFFSET1(x)		(((x) & 0x3) << 10)
+#define   S_028D44_ALPHA_TO_MASK_OFFSET2(x)		(((x) & 0x3) << 12)
+#define   S_028D44_ALPHA_TO_MASK_OFFSET3(x)		(((x) & 0x3) << 14)
+#define   S_028D44_OFFSET_ROUND(x)			(((x) & 0x1) << 16)
 #define R_028868_SQ_PGM_RESOURCES_VS                 0x028868
 #define R_0286CC_SPI_PS_IN_CONTROL_0                 0x0286CC
 #define R_0286D0_SPI_PS_IN_CONTROL_1                 0x0286D0
@@ -2745,6 +2754,8 @@
 #define   S_028350_MULTIPASS(x)                        (((x) & 0x1) << 0)
 #define   G_028350_MULTIPASS(x)                        (((x) >> 0) & 0x1)
 #define   C_028350_MULTIPASS                           0xFFFFFFFE
+#define R_028354_SX_SURFACE_SYNC                     0x028354
+#define   S_028354_SURFACE_SYNC_MASK(x)                (((x) & 0x1FF) << 0)
 #define R_028380_SQ_VTX_SEMANTIC_0                   0x028380
 #define   S_028380_SEMANTIC_ID(x)                      (((x) & 0xFF) << 0)
 #define   G_028380_SEMANTIC_ID(x)                      (((x) >> 0) & 0xFF)
@@ -3137,6 +3148,8 @@
 #define   S_028A4C_PS_ITER_SAMPLE(x)                   (((x) & 0x1) << 17)
 #define   G_028A4C_PS_ITER_SAMPLE(x)                   (((x) >> 17) & 0x1)
 #define   C_028A4C_PS_ITER_SAMPLE                      0xFFFDFFFF
+#define   S_028A4C_R700_ZMM_LINE_OFFSET(x)             (((x) & 0x1) << 20)
+#define   S_028A4C_R700_VPORT_SCISSOR_ENABLE(x)        (((x) & 0x1) << 22)
 #define R_028A84_VGT_PRIMITIVEID_EN                  0x028A84
 #define   S_028A84_PRIMITIVEID_EN(x)                   (((x) & 0x1) << 0)
 #define   G_028A84_PRIMITIVEID_EN(x)                   (((x) >> 0) & 0x1)
@@ -3271,6 +3284,7 @@
 #define   S_0085F0_SO3_DEST_BASE_ENA(x)                (((x) & 0x1) << 5)
 #define   G_0085F0_SO3_DEST_BASE_ENA(x)                (((x) >> 5) & 0x1)
 #define   C_0085F0_SO3_DEST_BASE_ENA                   0xFFFFFFDF
+#define   S_0085F0_CB0_DEST_BASE_ENA_SHIFT             6
 #define   S_0085F0_CB0_DEST_BASE_ENA(x)                (((x) & 0x1) << 6)
 #define   G_0085F0_CB0_DEST_BASE_ENA(x)                (((x) >> 6) & 0x1)
 #define   C_0085F0_CB0_DEST_BASE_ENA                   0xFFFFFFBF

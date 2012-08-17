@@ -30,6 +30,7 @@
 #include "main/image.h"
 #include "main/teximage.h"
 #include "main/texstate.h"
+#include "main/fbobject.h"
 
 #include "drivers/common/meta.h"
 
@@ -60,7 +61,7 @@ intel_copy_texsubimage(struct intel_context *intel,
    intel_prepare_render(intel);
 
    if (!intelImage->mt || !irb || !irb->mt) {
-      if (unlikely(INTEL_DEBUG & DEBUG_FALLBACKS))
+      if (unlikely(INTEL_DEBUG & DEBUG_PERF))
 	 fprintf(stderr, "%s fail %p %p (0x%08x)\n",
 		 __FUNCTION__, intelImage->mt, irb, internalFormat);
       return false;
@@ -84,7 +85,7 @@ intel_copy_texsubimage(struct intel_context *intel,
    }
 
    if (!copy_supported && !copy_supported_with_alpha_override) {
-      if (unlikely(INTEL_DEBUG & DEBUG_FALLBACKS))
+      if (unlikely(INTEL_DEBUG & DEBUG_PERF))
 	 fprintf(stderr, "%s mismatched formats %s, %s\n",
 		 __FUNCTION__,
 		 _mesa_get_format_name(intelImage->base.Base.TexFormat),
@@ -108,7 +109,7 @@ intel_copy_texsubimage(struct intel_context *intel,
 	 return false;
       }
 
-      if (ctx->ReadBuffer->Name == 0) {
+      if (_mesa_is_winsys_fbo(ctx->ReadBuffer)) {
 	 /* Flip vertical orientation for system framebuffers */
 	 y = ctx->ReadBuffer->Height - (y + height);
 	 src_pitch = -region->pitch;
@@ -144,38 +145,21 @@ intel_copy_texsubimage(struct intel_context *intel,
 
 
 static void
-intelCopyTexSubImage1D(struct gl_context *ctx,
-                       struct gl_texture_image *texImage,
-                       GLint xoffset,
-                       struct gl_renderbuffer *rb,
-                       GLint x, GLint y, GLsizei width)
+intelCopyTexSubImage(struct gl_context *ctx, GLuint dims,
+                     struct gl_texture_image *texImage,
+                     GLint xoffset, GLint yoffset, GLint zoffset,
+                     struct gl_renderbuffer *rb,
+                     GLint x, GLint y,
+                     GLsizei width, GLsizei height)
 {
-   if (!intel_copy_texsubimage(intel_context(ctx),
-                               intel_texture_image(texImage),
-                               xoffset, 0,
-                               intel_renderbuffer(rb), x, y, width, 1)) {
-      fallback_debug("%s - fallback to swrast\n", __FUNCTION__);
-      _mesa_meta_CopyTexSubImage1D(ctx, texImage, xoffset,
-                                   rb, x, y, width);
-   }
-}
-
-
-static void
-intelCopyTexSubImage2D(struct gl_context *ctx,
-                       struct gl_texture_image *texImage,
-                       GLint xoffset, GLint yoffset,
-                       struct gl_renderbuffer *rb,
-                       GLint x, GLint y, GLsizei width, GLsizei height)
-{
-   if (!intel_copy_texsubimage(intel_context(ctx),
+   if (dims == 3 || !intel_copy_texsubimage(intel_context(ctx),
                                intel_texture_image(texImage),
                                xoffset, yoffset,
                                intel_renderbuffer(rb), x, y, width, height)) {
       fallback_debug("%s - fallback to swrast\n", __FUNCTION__);
-      _mesa_meta_CopyTexSubImage2D(ctx, texImage,
-                                   xoffset, yoffset,
-                                   rb, x, y, width, height);
+      _mesa_meta_CopyTexSubImage(ctx, dims, texImage,
+                                 xoffset, yoffset, zoffset,
+                                 rb, x, y, width, height);
    }
 }
 
@@ -183,6 +167,5 @@ intelCopyTexSubImage2D(struct gl_context *ctx,
 void
 intelInitTextureCopyImageFuncs(struct dd_function_table *functions)
 {
-   functions->CopyTexSubImage1D = intelCopyTexSubImage1D;
-   functions->CopyTexSubImage2D = intelCopyTexSubImage2D;
+   functions->CopyTexSubImage = intelCopyTexSubImage;
 }

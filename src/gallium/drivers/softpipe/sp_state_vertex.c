@@ -106,8 +106,6 @@ softpipe_set_index_buffer(struct pipe_context *pipe,
       memcpy(&softpipe->index_buffer, ib, sizeof(softpipe->index_buffer));
    else
       memset(&softpipe->index_buffer, 0, sizeof(softpipe->index_buffer));
-
-   draw_set_index_buffer(softpipe->draw, ib);
 }
 
 
@@ -120,5 +118,4 @@ softpipe_init_vertex_funcs(struct pipe_context *pipe)
 
    pipe->set_vertex_buffers = softpipe_set_vertex_buffers;
    pipe->set_index_buffer = softpipe_set_index_buffer;
-   pipe->redefine_user_buffer = u_default_redefine_user_buffer;
 }

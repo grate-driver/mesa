@@ -4,10 +4,9 @@
 
 #include "util/u_transfer.h"
 #include "util/u_double_list.h"
-#define NOUVEAU_NVC0
+
 #include "nouveau/nouveau_winsys.h"
 #include "nouveau/nouveau_buffer.h"
-#undef NOUVEAU_NVC0
 
 #ifndef __NVC0_RESOURCE_H__ /* make sure we don't use these in nvc0: */
 
@@ -19,12 +18,12 @@ nv50_screen_init_resource_functions(struct pipe_screen *pscreen);
 
 
 #define NV50_TILE_SHIFT_X(m) 6
-#define NV50_TILE_SHIFT_Y(m) ((((m) >> 0) & 0xf) + 2)
-#define NV50_TILE_SHIFT_Z(m) ((((m) >> 4) & 0xf) + 0)
+#define NV50_TILE_SHIFT_Y(m) ((((m) >> 4) & 0xf) + 2)
+#define NV50_TILE_SHIFT_Z(m) ((((m) >> 8) & 0xf) + 0)
 
 #define NV50_TILE_SIZE_X(m) 64
-#define NV50_TILE_SIZE_Y(m) ( 4 << (((m) >> 0) & 0xf))
-#define NV50_TILE_SIZE_Z(m) ( 1 << (((m) >> 4) & 0xf))
+#define NV50_TILE_SIZE_Y(m) ( 4 << (((m) >> 4) & 0xf))
+#define NV50_TILE_SIZE_Z(m) ( 1 << (((m) >> 8) & 0xf))
 
 #define NV50_TILE_SIZE_2D(m) (NV50_TILE_SIZE_X(m) << NV50_TILE_SHIFT_Y(m))
 
@@ -95,6 +94,18 @@ static INLINE struct nv50_surface *
 nv50_surface(struct pipe_surface *ps)
 {
    return (struct nv50_surface *)ps;
+}
+
+static INLINE enum pipe_format
+nv50_zs_to_s_format(enum pipe_format format)
+{
+   switch (format) {
+   case PIPE_FORMAT_Z24_UNORM_S8_UINT: return PIPE_FORMAT_X24S8_UINT;
+   case PIPE_FORMAT_S8_UINT_Z24_UNORM: return PIPE_FORMAT_S8X24_UINT;
+   case PIPE_FORMAT_Z32_FLOAT_S8X24_UINT: return PIPE_FORMAT_X32_S8X24_UINT;
+   default:
+      return format;
+   }
 }
 
 #ifndef __NVC0_RESOURCE_H__

@@ -35,6 +35,7 @@
 static void
 gen6_upload_blend_state(struct brw_context *brw)
 {
+   bool is_buffer_zero_integer_format = false;
    struct gl_context *ctx = &brw->intel.ctx;
    struct gen6_blend_state *blend;
    int b;
@@ -68,13 +69,15 @@ gen6_upload_blend_state(struct brw_context *brw)
 	 rb_type = GL_UNSIGNED_NORMALIZED;
 
       /* Used for implementing the following bit of GL_EXT_texture_integer:
-       *
        *     "Per-fragment operations that require floating-point color
        *      components, including multisample alpha operations, alpha test,
        *      blending, and dithering, have no effect when the corresponding
        *      colors are written to an integer color buffer."
       */
       integer = (rb_type == GL_INT || rb_type == GL_UNSIGNED_INT);
+
+      if(b == 0 && integer)
+         is_buffer_zero_integer_format = true;
 
       /* _NEW_COLOR */
       if (ctx->Color.ColorLogicOpEnabled) {
@@ -92,12 +95,12 @@ gen6_upload_blend_state(struct brw_context *brw)
 	       intel_translate_logic_op(ctx->Color.LogicOp);
 	 }
       } else if (ctx->Color.BlendEnabled & (1 << b) && !integer) {
-	 GLenum eqRGB = ctx->Color.Blend[0].EquationRGB;
-	 GLenum eqA = ctx->Color.Blend[0].EquationA;
-	 GLenum srcRGB = ctx->Color.Blend[0].SrcRGB;
-	 GLenum dstRGB = ctx->Color.Blend[0].DstRGB;
-	 GLenum srcA = ctx->Color.Blend[0].SrcA;
-	 GLenum dstA = ctx->Color.Blend[0].DstA;
+	 GLenum eqRGB = ctx->Color.Blend[b].EquationRGB;
+	 GLenum eqA = ctx->Color.Blend[b].EquationA;
+	 GLenum srcRGB = ctx->Color.Blend[b].SrcRGB;
+	 GLenum dstRGB = ctx->Color.Blend[b].DstRGB;
+	 GLenum srcA = ctx->Color.Blend[b].SrcA;
+	 GLenum dstA = ctx->Color.Blend[b].DstA;
 
 	 if (eqRGB == GL_MIN || eqRGB == GL_MAX) {
 	    srcRGB = dstRGB = GL_ONE;
@@ -161,6 +164,24 @@ gen6_upload_blend_state(struct brw_context *brw)
       blend[b].blend1.write_disable_g = !ctx->Color.ColorMask[b][1];
       blend[b].blend1.write_disable_b = !ctx->Color.ColorMask[b][2];
       blend[b].blend1.write_disable_a = !ctx->Color.ColorMask[b][3];
+
+      /* OpenGL specification 3.3 (page 196), section 4.1.3 says:
+       * "If drawbuffer zero is not NONE and the buffer it references has an
+       * integer format, the SAMPLE_ALPHA_TO_COVERAGE and SAMPLE_ALPHA_TO_ONE
+       * operations are skipped."
+       */
+      if(!is_buffer_zero_integer_format) {
+         /* _NEW_MULTISAMPLE */
+         blend[b].blend1.alpha_to_coverage =
+            ctx->Multisample._Enabled && ctx->Multisample.SampleAlphaToCoverage;
+         blend[b].blend1.alpha_to_one =
+            ctx->Multisample._Enabled && ctx->Multisample.SampleAlphaToOne;
+         blend[b].blend1.alpha_to_coverage_dither = (brw->intel.gen >= 7);
+      }
+      else {
+         blend[b].blend1.alpha_to_coverage = false;
+         blend[b].blend1.alpha_to_one = false;
+      }
    }
 
    brw->state.dirty.cache |= CACHE_NEW_BLEND_STATE;
@@ -169,7 +190,8 @@ gen6_upload_blend_state(struct brw_context *brw)
 const struct brw_tracked_state gen6_blend_state = {
    .dirty = {
       .mesa = (_NEW_COLOR |
-	       _NEW_BUFFERS),
+               _NEW_BUFFERS |
+               _NEW_MULTISAMPLE),
       .brw = BRW_NEW_BATCH,
       .cache = 0,
    },

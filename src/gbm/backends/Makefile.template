@@ -15,14 +15,8 @@
 GBM_BACKEND_PATH = $(TOP)/$(LIB_DIR)/gbm/$(GBM_BACKEND).so
 GBM_OBJECTS = $(GBM_SOURCES:.c=.o)
 
-# built-in or external
-ifeq ($(GBM_BUILTIN), true)
-GBM_TARGET = lib$(GBM_BACKEND).a
-GBM_INSTALL =
-else
 GBM_TARGET = $(GBM_BACKEND_PATH)
 GBM_INSTALL = install-so
-endif
 
 default: depend $(GBM_TARGET) $(GBM_EXTRA_TARGETS)
 
@@ -34,23 +28,19 @@ $(GBM_BACKEND).so: $(GBM_OBJECTS) Makefile $(TOP)/src/gbm/backends/Makefile.temp
 	@$(MKLIB) -o $(GBM_BACKEND).so -noprefix \
 		-linker '$(CC)' -ldflags '-L$(TOP)/$(LIB_DIR) $(LDFLAGS)' \
 		$(MKLIB_OPTIONS) \
-		$(GBM_OBJECTS) $(GBM_LIBS) -l$(GBM_LIB)
-
-lib$(GBM_BACKEND).a: $(GBM_OBJECTS) Makefile $(TOP)/src/gbm/backends/Makefile.template
-	@$(MKLIB) -o $(GBM_BACKEND) -static $(GBM_OBJECTS)
+		$(GBM_OBJECTS) $(GBM_LIBS) -lgbm
 
 .c.o:
 	$(CC) -c $(GBM_INCLUDES) $(CFLAGS) $(GBM_CFLAGS) $< -o $@
 
 install-so: $(GBM_BACKEND_PATH)
-	$(INSTALL) -d $(DESTDIR)$(GBM_BACKEND_INSTALL_DIR)
-	$(MINSTALL) $(GBM_BACKEND_PATH) $(DESTDIR)$(GBM_BACKEND_INSTALL_DIR)
+	$(INSTALL) -d $(DESTDIR)$(INSTALL_LIB_DIR)/gbm
+	$(MINSTALL) $(GBM_BACKEND_PATH) $(DESTDIR)$(INSTALL_LIB_DIR)/gbm
 
 install: $(GBM_INSTALL) $(GBM_EXTRA_INSTALL)
 
 clean: $(GBM_EXTRA_CLEAN)
 	rm -f $(GBM_BACKEND).so
-	rm -f lib$(GBM_BACKEND).a
 	rm -f $(GBM_OBJECTS)
 	rm -f depend depend.bak
 

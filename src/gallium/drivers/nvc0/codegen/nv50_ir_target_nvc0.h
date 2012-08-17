@@ -45,10 +45,13 @@ public:
    virtual bool insnCanLoad(const Instruction *insn, int s,
                             const Instruction *ld) const;
    virtual bool isOpSupported(operation, DataType) const;
+   virtual bool isAccessSupported(DataFile, DataType) const;
    virtual bool isModSupported(const Instruction *, int s, Modifier) const;
    virtual bool isSatSupported(const Instruction *) const;
+   virtual bool isPostMultiplySupported(operation, float, int& e) const;
    virtual bool mayPredicate(const Instruction *, const Value *) const;
 
+   virtual bool canDualIssue(const Instruction *, const Instruction *) const;
    virtual int getLatency(const Instruction *) const;
    virtual int getThroughput(const Instruction *) const;
 

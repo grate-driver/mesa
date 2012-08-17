@@ -85,7 +85,12 @@ typedef enum {
 	 * Indicates this register should use the result of the presubtract
 	 * operation.
 	 */
-	RC_FILE_PRESUB
+	RC_FILE_PRESUB,
+
+	/**
+	 * Indicates that the source index has been encoded as a 7-bit float.
+	 */
+	RC_FILE_INLINE
 } rc_register_file;
 
 enum {
@@ -197,5 +202,11 @@ static inline int rc_presubtract_src_reg_count(rc_presubtract_op op){
 #define RC_SOURCE_NONE  0x0
 #define RC_SOURCE_RGB   0x1
 #define RC_SOURCE_ALPHA 0x2
+
+typedef enum {
+	RC_PRED_DISABLED,
+	RC_PRED_SET,
+	RC_PRED_INV
+} rc_predicate_mode;
 
 #endif /* RADEON_PROGRAM_CONSTANTS_H */

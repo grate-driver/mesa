@@ -60,6 +60,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "r200_vertprog.h"
 #include "radeon_queryobj.h"
 #include "r200_blit.h"
+#include "radeon_fog.h"
 
 #include "radeon_span.h"
 
@@ -211,9 +212,22 @@ GLboolean r200CreateContext( gl_api api,
    int i;
    int tcl_mode;
 
-   /* API and flag filtering is handled in dri2CreateContextAttribs.
+   switch (api) {
+   case API_OPENGL:
+      if (major_version > 1 || minor_version > 3) {
+         *error = __DRI_CTX_ERROR_BAD_VERSION;
+         return GL_FALSE;
+      }
+      break;
+   case API_OPENGLES:
+      break;
+   default:
+      *error = __DRI_CTX_ERROR_BAD_API;
+      return GL_FALSE;
+   }
+
+   /* Flag filtering is handled in dri2CreateContextAttribs.
     */
-   (void) api;
    (void) flags;
 
    assert(glVisual);
@@ -230,7 +244,7 @@ GLboolean r200CreateContext( gl_api api,
    rmesa->radeon.radeonScreen = screen;
    r200_init_vtbl(&rmesa->radeon);
    /* init exp fog table data */
-   r200InitStaticFogData();
+   radeonInitStaticFogData();
 
    /* Parse configuration files.
     * Do this here so that initialMaxAnisotropy is set before we create
@@ -453,13 +467,6 @@ GLboolean r200CreateContext( gl_api api,
    }
 
    _mesa_compute_version(ctx);
-   if (ctx->VersionMajor < major_version
-       || (ctx->VersionMajor == major_version
-	   && ctx->VersionMinor < minor_version)) {
-      r200DestroyContext(driContextPriv);
-      *error = __DRI_CTX_ERROR_BAD_VERSION;
-      return GL_FALSE;
-   }
 
    *error = __DRI_CTX_ERROR_SUCCESS;
    return GL_TRUE;

@@ -34,8 +34,9 @@
 
 #include "compiler.h"
 #include "glheader.h"
+#include "mtypes.h"
+#include "samplerobj.h"
 
-struct gl_context;
 
 /**
  * \name Internal functions
@@ -77,6 +78,26 @@ _mesa_reference_texobj(struct gl_texture_object **ptr,
 }
 
 
+/** Is the texture "complete" with respect to the given sampler state? */
+static inline GLboolean
+_mesa_is_texture_complete(const struct gl_texture_object *texObj,
+                          const struct gl_sampler_object *sampler)
+{
+   if (texObj->_IsIntegerFormat &&
+       (sampler->MagFilter != GL_NEAREST ||
+        (sampler->MinFilter != GL_NEAREST &&
+         sampler->MinFilter != GL_NEAREST_MIPMAP_NEAREST))) {
+      /* If the format is integer, only nearest filtering is allowed */
+      return GL_FALSE;
+   }
+
+   if (_mesa_is_mipmap_filter(sampler))
+      return texObj->_MipmapComplete;
+   else
+      return texObj->_BaseComplete;
+}
+
+
 extern void
 _mesa_test_texobj_completeness( const struct gl_context *ctx,
                                 struct gl_texture_object *obj );
@@ -89,7 +110,10 @@ _mesa_dirty_texobj(struct gl_context *ctx, struct gl_texture_object *texObj,
                    GLboolean invalidate_state);
 
 extern struct gl_texture_object *
-_mesa_get_fallback_texture(struct gl_context *ctx);
+_mesa_get_fallback_texture(struct gl_context *ctx, gl_texture_index tex);
+
+extern GLuint
+_mesa_total_texture_memory(struct gl_context *ctx);
 
 extern void
 _mesa_unlock_context_textures( struct gl_context *ctx );
@@ -127,6 +151,14 @@ _mesa_AreTexturesResident( GLsizei n, const GLuint *textures,
 
 extern GLboolean GLAPIENTRY
 _mesa_IsTexture( GLuint texture );
+
+extern void GLAPIENTRY
+_mesa_InvalidateTexSubImage(GLuint texture, GLint level, GLint xoffset,
+                            GLint yoffset, GLint zoffset, GLsizei width,
+                            GLsizei height, GLsizei depth);
+
+extern void GLAPIENTRY
+_mesa_InvalidateTexImage(GLuint texture, GLint level);
 
 /*@}*/
 

@@ -177,7 +177,9 @@ static void i915_bind_blend_state(struct pipe_context *pipe,
                                   void *blend)
 {
    struct i915_context *i915 = i915_context(pipe);
-   draw_flush(i915->draw);
+
+   if (i915->blend == blend)
+      return;
 
    i915->blend = (struct i915_blend_state*)blend;
 
@@ -194,7 +196,9 @@ static void i915_set_blend_color( struct pipe_context *pipe,
                                   const struct pipe_blend_color *blend_color )
 {
    struct i915_context *i915 = i915_context(pipe);
-   draw_flush(i915->draw);
+
+   if (!blend_color)
+      return;
 
    i915->blend_color = *blend_color;
 
@@ -205,7 +209,6 @@ static void i915_set_stencil_ref( struct pipe_context *pipe,
                                   const struct pipe_stencil_ref *stencil_ref )
 {
    struct i915_context *i915 = i915_context(pipe);
-   draw_flush(i915->draw);
 
    i915->stencil_ref = *stencil_ref;
 
@@ -314,8 +317,6 @@ i915_bind_vertex_sampler_states(struct pipe_context *pipe,
        !memcmp(i915->vertex_samplers, samplers, num_samplers * sizeof(void *)))
       return;
 
-   draw_flush(i915->draw);
-
    for (i = 0; i < num_samplers; ++i)
       i915->vertex_samplers[i] = samplers[i];
    for (i = num_samplers; i < PIPE_MAX_VERTEX_SAMPLERS; ++i)
@@ -340,8 +341,6 @@ static void i915_bind_fragment_sampler_states(struct pipe_context *pipe,
    if (num == i915->num_samplers &&
        !memcmp(i915->sampler, sampler, num * sizeof(void *)))
       return;
-
-   draw_flush(i915->draw);
 
    for (i = 0; i < num; ++i)
       i915->sampler[i] = sampler[i];
@@ -527,7 +526,9 @@ static void i915_bind_depth_stencil_state(struct pipe_context *pipe,
                                           void *depth_stencil)
 {
    struct i915_context *i915 = i915_context(pipe);
-   draw_flush(i915->draw);
+
+   if (i915->depth_stencil == depth_stencil)
+      return;
 
    i915->depth_stencil = (const struct i915_depth_stencil_state *)depth_stencil;
 
@@ -545,7 +546,6 @@ static void i915_set_scissor_state( struct pipe_context *pipe,
                                  const struct pipe_scissor_state *scissor )
 {
    struct i915_context *i915 = i915_context(pipe);
-   draw_flush(i915->draw);
 
    memcpy( &i915->scissor, scissor, sizeof(*scissor) );
    i915->dirty |= I915_NEW_SCISSOR;
@@ -583,7 +583,9 @@ static void
 i915_fixup_bind_fs_state(struct pipe_context *pipe, void *shader)
 {
    struct i915_context *i915 = i915_context(pipe);
-   draw_flush(i915->draw);
+
+   if (i915->saved_fs == shader)
+      return;
 
    i915->saved_fs = shader;
 
@@ -594,7 +596,9 @@ static void
 i915_bind_fs_state(struct pipe_context *pipe, void *shader)
 {
    struct i915_context *i915 = i915_context(pipe);
-   draw_flush(i915->draw);
+
+   if (i915->fs == shader)
+      return;
 
    i915->fs = (struct i915_fragment_shader*) shader;
 
@@ -608,6 +612,11 @@ void i915_delete_fs_state(struct pipe_context *pipe, void *shader)
 {
    struct i915_fragment_shader *ifs = (struct i915_fragment_shader *) shader;
 
+   if (ifs->decl) {
+      FREE(ifs->decl);
+      ifs->decl = NULL;
+   }
+
    if (ifs->program) {
       FREE(ifs->program);
       ifs->program = NULL;
@@ -615,6 +624,7 @@ void i915_delete_fs_state(struct pipe_context *pipe, void *shader)
       ifs->state.tokens = NULL;
    }
    ifs->program_len = 0;
+   ifs->decl_len = 0;
 
    FREE(ifs);
 }
@@ -634,6 +644,9 @@ static void i915_bind_vs_state(struct pipe_context *pipe, void *shader)
 {
    struct i915_context *i915 = i915_context(pipe);
 
+   if (i915->saved_vs == shader)
+      return;
+
    i915->saved_vs = shader;
 
    /* just pass-through to draw module */
@@ -652,16 +665,22 @@ static void i915_delete_vs_state(struct pipe_context *pipe, void *shader)
 
 static void i915_set_constant_buffer(struct pipe_context *pipe,
                                      uint shader, uint index,
-                                     struct pipe_resource *buf)
+                                     struct pipe_constant_buffer *cb)
 {
    struct i915_context *i915 = i915_context(pipe);
+   struct pipe_resource *buf = cb ? cb->buffer : NULL;
    unsigned new_num = 0;
    boolean diff = TRUE;
-
 
    /* XXX don't support geom shaders now */
    if (shader == PIPE_SHADER_GEOMETRY)
       return;
+
+   if (cb && cb->user_buffer) {
+      buf = i915_user_buffer_create(pipe->screen, (void *) cb->user_buffer,
+                                    cb->buffer_size,
+                                    PIPE_BIND_CONSTANT_BUFFER);
+   }
 
    /* if we have a new buffer compare it with the old one */
    if (buf) {
@@ -688,17 +707,15 @@ static void i915_set_constant_buffer(struct pipe_context *pipe,
       diff = i915->current.num_user_constants[shader] != 0;
    }
 
-   /*
-    * flush before updateing the state.
-    */
-   if (diff && shader == PIPE_SHADER_FRAGMENT)
-      draw_flush(i915->draw);
-
    pipe_resource_reference(&i915->constants[shader], buf);
    i915->current.num_user_constants[shader] = new_num;
 
    if (diff)
       i915->dirty |= shader == PIPE_SHADER_VERTEX ? I915_NEW_VS_CONSTANTS : I915_NEW_FS_CONSTANTS;
+
+   if (cb && cb->user_buffer) {
+      pipe_resource_reference(&buf, NULL);
+   }
 }
 
 
@@ -737,9 +754,6 @@ static void i915_set_fragment_sampler_views(struct pipe_context *pipe,
        !memcmp(i915->fragment_sampler_views, views, num * sizeof(struct pipe_sampler_view *)))
       return;
 
-   /* Fixes wrong texture in texobj with VBUF */
-   draw_flush(i915->draw);
-
    for (i = 0; i < num; i++)
       pipe_sampler_view_reference(&i915->fragment_sampler_views[i],
                                   views[i]);
@@ -768,8 +782,6 @@ i915_set_vertex_sampler_views(struct pipe_context *pipe,
        !memcmp(i915->vertex_sampler_views, views, num * sizeof(struct pipe_sampler_view *))) {
       return;
    }
-
-   draw_flush(i915->draw);
 
    for (i = 0; i < PIPE_MAX_VERTEX_SAMPLERS; i++) {
       struct pipe_sampler_view *view = i < num ? views[i] : NULL;
@@ -819,8 +831,6 @@ static void i915_set_framebuffer_state(struct pipe_context *pipe,
    struct i915_context *i915 = i915_context(pipe);
    int i;
 
-   draw_flush(i915->draw);
-
    i915->framebuffer.width = fb->width;
    i915->framebuffer.height = fb->height;
    i915->framebuffer.nr_cbufs = fb->nr_cbufs;
@@ -839,7 +849,6 @@ static void i915_set_clip_state( struct pipe_context *pipe,
 			     const struct pipe_clip_state *clip )
 {
    struct i915_context *i915 = i915_context(pipe);
-   draw_flush(i915->draw);
 
    i915->saved_clip = *clip;
 
@@ -940,6 +949,9 @@ static void i915_bind_rasterizer_state( struct pipe_context *pipe,
 {
    struct i915_context *i915 = i915_context(pipe);
 
+   if (i915->rasterizer == raster)
+      return;
+
    i915->rasterizer = (struct i915_rasterizer_state *)raster;
 
    /* pass-through to draw module */
@@ -980,7 +992,9 @@ static void i915_set_vertex_buffers(struct pipe_context *pipe,
 
    /* map new */
    for (i = 0; i < count; i++) {
-      void *buf = i915_buffer(buffers[i].buffer)->data;
+      const void *buf = buffers[i].user_buffer;
+      if (!buf)
+            buf = i915_buffer(buffers[i].buffer)->data;
       draw_set_mapped_vertex_buffer(draw, i, buf);
    }
 }
@@ -1007,6 +1021,9 @@ i915_bind_vertex_elements_state(struct pipe_context *pipe,
    struct i915_context *i915 = i915_context(pipe);
    struct i915_velems_state *i915_velems = (struct i915_velems_state *) velems;
 
+   if (i915->saved_velems == velems)
+      return;
+
    i915->saved_velems = velems;
 
    /* pass-through to draw module */
@@ -1031,9 +1048,6 @@ static void i915_set_index_buffer(struct pipe_context *pipe,
       memcpy(&i915->index_buffer, ib, sizeof(i915->index_buffer));
    else
       memset(&i915->index_buffer, 0, sizeof(i915->index_buffer));
-
-   /* pass-through to draw module */
-   draw_set_index_buffer(i915->draw, ib);
 }
 
 static void
@@ -1087,7 +1101,6 @@ i915_init_state_functions( struct i915_context *i915 )
    i915->base.set_viewport_state = i915_set_viewport_state;
    i915->base.set_vertex_buffers = i915_set_vertex_buffers;
    i915->base.set_index_buffer = i915_set_index_buffer;
-   i915->base.redefine_user_buffer = u_default_redefine_user_buffer;
 }
 
 void

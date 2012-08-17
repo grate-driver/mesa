@@ -28,12 +28,12 @@
 #include "nouveau_context.h"
 #include "nouveau_fbo.h"
 #include "nouveau_texture.h"
-#include "nouveau_drmif.h"
 #include "nv04_driver.h"
 #include "nv10_driver.h"
 #include "nv20_driver.h"
 
 #include "main/framebuffer.h"
+#include "main/fbobject.h"
 #include "main/renderbuffer.h"
 #include "swrast/s_renderbuffer.h"
 
@@ -79,8 +79,7 @@ nouveau_get_configs(void)
 					  GL_TRUE);
 		assert(config);
 
-		configs = configs ? driConcatConfigs(configs, config)
-			: config;
+		configs = driConcatConfigs(configs, config);
 	}
 
 	return (const __DRIconfig **)configs;
@@ -103,8 +102,7 @@ nouveau_init_screen2(__DRIscreen *dri_screen)
 	screen->dri_screen = dri_screen;
 
 	/* Open the DRM device. */
-	ret = nouveau_device_open_existing(&screen->device, 0, dri_screen->fd,
-					   0);
+	ret = nouveau_device_wrap(dri_screen->fd, 0, &screen->device);
 	if (ret) {
 		nouveau_error("Error opening the DRM device.\n");
 		goto fail;
@@ -144,8 +142,7 @@ nouveau_destroy_screen(__DRIscreen *dri_screen)
 	if (!screen)
 		return;
 
-	if (screen->device)
-		nouveau_device_close(&screen->device);
+	nouveau_device_del(&screen->device);
 
 	FREE(screen);
 	dri_screen->driverPrivate = NULL;

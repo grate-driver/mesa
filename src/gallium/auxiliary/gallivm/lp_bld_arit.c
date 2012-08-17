@@ -63,7 +63,7 @@
 
 #define EXP_POLY_DEGREE 5
 
-#define LOG_POLY_DEGREE 5
+#define LOG_POLY_DEGREE 4
 
 
 /**
@@ -75,9 +75,9 @@ lp_build_min_simple(struct lp_build_context *bld,
                     LLVMValueRef a,
                     LLVMValueRef b)
 {
-   LLVMBuilderRef builder = bld->gallivm->builder;
    const struct lp_type type = bld->type;
    const char *intrinsic = NULL;
+   unsigned intr_size = 0;
    LLVMValueRef cond;
 
    assert(lp_check_value(type, a));
@@ -85,31 +85,71 @@ lp_build_min_simple(struct lp_build_context *bld,
 
    /* TODO: optimize the constant case */
 
-   if(type.width * type.length == 128) {
-      if(type.floating) {
-         if(type.width == 32 && util_cpu_caps.has_sse)
+   if (type.floating && util_cpu_caps.has_sse) {
+      if (type.width == 32) {
+         if (type.length == 1) {
+            intrinsic = "llvm.x86.sse.min.ss";
+            intr_size = 128;
+         }
+         else if (type.length <= 4 || !util_cpu_caps.has_avx) {
             intrinsic = "llvm.x86.sse.min.ps";
-         if(type.width == 64 && util_cpu_caps.has_sse2)
-            intrinsic = "llvm.x86.sse2.min.pd";
+            intr_size = 128;
+         }
+         else {
+            intrinsic = "llvm.x86.avx.min.ps.256";
+            intr_size = 256;
+         }
       }
-      else {
-         if(type.width == 8 && !type.sign && util_cpu_caps.has_sse2)
-            intrinsic = "llvm.x86.sse2.pminu.b";
-         if(type.width == 8 && type.sign && util_cpu_caps.has_sse4_1)
+      if (type.width == 64 && util_cpu_caps.has_sse2) {
+         if (type.length == 1) {
+            intrinsic = "llvm.x86.sse2.min.sd";
+            intr_size = 128;
+         }
+         else if (type.length == 2 || !util_cpu_caps.has_avx) {
+            intrinsic = "llvm.x86.sse2.min.pd";
+            intr_size = 128;
+         }
+         else {
+            intrinsic = "llvm.x86.avx.min.pd.256";
+            intr_size = 256;
+         }
+      }
+   }
+   else if (util_cpu_caps.has_sse2 && type.length >= 2) {
+      intr_size = 128;
+      if ((type.width == 8 || type.width == 16) &&
+          (type.width * type.length <= 64) &&
+          (gallivm_debug & GALLIVM_DEBUG_PERF)) {
+         debug_printf("%s: inefficient code, bogus shuffle due to packing\n",
+                      __FUNCTION__);
+         }
+      if (type.width == 8 && !type.sign) {
+         intrinsic = "llvm.x86.sse2.pminu.b";
+      }
+      else if (type.width == 16 && type.sign) {
+         intrinsic = "llvm.x86.sse2.pmins.w";
+      }
+      if (util_cpu_caps.has_sse4_1) {
+         if (type.width == 8 && type.sign) {
             intrinsic = "llvm.x86.sse41.pminsb";
-         if(type.width == 16 && !type.sign && util_cpu_caps.has_sse4_1)
+         }
+         if (type.width == 16 && !type.sign) {
             intrinsic = "llvm.x86.sse41.pminuw";
-         if(type.width == 16 && type.sign && util_cpu_caps.has_sse2)
-            intrinsic = "llvm.x86.sse2.pmins.w";
-         if(type.width == 32 && !type.sign && util_cpu_caps.has_sse4_1)
+         }
+         if (type.width == 32 && !type.sign) {
             intrinsic = "llvm.x86.sse41.pminud";
-         if(type.width == 32 && type.sign && util_cpu_caps.has_sse4_1)
+        }
+         if (type.width == 32 && type.sign) {
             intrinsic = "llvm.x86.sse41.pminsd";
+         }
       }
    }
 
-   if(intrinsic)
-      return lp_build_intrinsic_binary(builder, intrinsic, lp_build_vec_type(bld->gallivm, bld->type), a, b);
+   if(intrinsic) {
+      return lp_build_intrinsic_binary_anylength(bld->gallivm, intrinsic,
+                                                 type,
+                                                 intr_size, a, b);
+   }
 
    cond = lp_build_cmp(bld, PIPE_FUNC_LESS, a, b);
    return lp_build_select(bld, cond, a, b);
@@ -125,9 +165,9 @@ lp_build_max_simple(struct lp_build_context *bld,
                     LLVMValueRef a,
                     LLVMValueRef b)
 {
-   LLVMBuilderRef builder = bld->gallivm->builder;
    const struct lp_type type = bld->type;
    const char *intrinsic = NULL;
+   unsigned intr_size = 0;
    LLVMValueRef cond;
 
    assert(lp_check_value(type, a));
@@ -135,31 +175,72 @@ lp_build_max_simple(struct lp_build_context *bld,
 
    /* TODO: optimize the constant case */
 
-   if(type.width * type.length == 128) {
-      if(type.floating) {
-         if(type.width == 32 && util_cpu_caps.has_sse)
+   if (type.floating && util_cpu_caps.has_sse) {
+      if (type.width == 32) {
+         if (type.length == 1) {
+            intrinsic = "llvm.x86.sse.max.ss";
+            intr_size = 128;
+         }
+         else if (type.length <= 4 || !util_cpu_caps.has_avx) {
             intrinsic = "llvm.x86.sse.max.ps";
-         if(type.width == 64 && util_cpu_caps.has_sse2)
-            intrinsic = "llvm.x86.sse2.max.pd";
+            intr_size = 128;
+         }
+         else {
+            intrinsic = "llvm.x86.avx.max.ps.256";
+            intr_size = 256;
+         }
       }
-      else {
-         if(type.width == 8 && !type.sign && util_cpu_caps.has_sse2)
-            intrinsic = "llvm.x86.sse2.pmaxu.b";
-         if(type.width == 8 && type.sign && util_cpu_caps.has_sse4_1)
+      if (type.width == 64 && util_cpu_caps.has_sse2) {
+         if (type.length == 1) {
+            intrinsic = "llvm.x86.sse2.max.sd";
+            intr_size = 128;
+         }
+         else if (type.length == 2 || !util_cpu_caps.has_avx) {
+            intrinsic = "llvm.x86.sse2.max.pd";
+            intr_size = 128;
+         }
+         else {
+            intrinsic = "llvm.x86.avx.max.pd.256";
+            intr_size = 256;
+         }
+      }
+   }
+   else if (util_cpu_caps.has_sse2 && type.length >= 2) {
+      intr_size = 128;
+      if ((type.width == 8 || type.width == 16) &&
+          (type.width * type.length <= 64) &&
+          (gallivm_debug & GALLIVM_DEBUG_PERF)) {
+         debug_printf("%s: inefficient code, bogus shuffle due to packing\n",
+                      __FUNCTION__);
+         }
+      if (type.width == 8 && !type.sign) {
+         intrinsic = "llvm.x86.sse2.pmaxu.b";
+         intr_size = 128;
+      }
+      else if (type.width == 16 && type.sign) {
+         intrinsic = "llvm.x86.sse2.pmaxs.w";
+      }
+      if (util_cpu_caps.has_sse4_1) {
+         if (type.width == 8 && type.sign) {
             intrinsic = "llvm.x86.sse41.pmaxsb";
-         if(type.width == 16 && !type.sign && util_cpu_caps.has_sse4_1)
+         }
+         if (type.width == 16 && !type.sign) {
             intrinsic = "llvm.x86.sse41.pmaxuw";
-         if(type.width == 16 && type.sign && util_cpu_caps.has_sse2)
-            intrinsic = "llvm.x86.sse2.pmaxs.w";
-         if(type.width == 32 && !type.sign && util_cpu_caps.has_sse4_1)
+         }
+         if (type.width == 32 && !type.sign) {
             intrinsic = "llvm.x86.sse41.pmaxud";
-         if(type.width == 32 && type.sign && util_cpu_caps.has_sse4_1)
+        }
+         if (type.width == 32 && type.sign) {
             intrinsic = "llvm.x86.sse41.pmaxsd";
+         }
       }
    }
 
-   if(intrinsic)
-      return lp_build_intrinsic_binary(builder, intrinsic, lp_build_vec_type(bld->gallivm, bld->type), a, b);
+   if(intrinsic) {
+      return lp_build_intrinsic_binary_anylength(bld->gallivm, intrinsic,
+                                                 type,
+                                                 intr_size, a, b);
+   }
 
    cond = lp_build_cmp(bld, PIPE_FUNC_GREATER, a, b);
    return lp_build_select(bld, cond, a, b);
@@ -265,15 +346,20 @@ lp_build_add(struct lp_build_context *bld,
 }
 
 
-/** Return the scalar sum of the elements of a */
+/** Return the scalar sum of the elements of a.
+ * Should avoid this operation whenever possible.
+ */
 LLVMValueRef
-lp_build_sum_vector(struct lp_build_context *bld,
-                    LLVMValueRef a)
+lp_build_horizontal_add(struct lp_build_context *bld,
+                        LLVMValueRef a)
 {
    LLVMBuilderRef builder = bld->gallivm->builder;
    const struct lp_type type = bld->type;
    LLVMValueRef index, res;
-   unsigned i;
+   unsigned i, length;
+   LLVMValueRef shuffles1[LP_MAX_VECTOR_LENGTH / 2];
+   LLVMValueRef shuffles2[LP_MAX_VECTOR_LENGTH / 2];
+   LLVMValueRef vecres, elem2;
 
    assert(lp_check_value(type, a));
 
@@ -283,26 +369,191 @@ lp_build_sum_vector(struct lp_build_context *bld,
 
    assert(!bld->type.norm);
 
-   index = lp_build_const_int32(bld->gallivm, 0);
-   res = LLVMBuildExtractElement(builder, a, index, "");
+   /*
+    * for byte vectors can do much better with psadbw.
+    * Using repeated shuffle/adds here. Note with multiple vectors
+    * this can be done more efficiently as outlined in the intel
+    * optimization manual.
+    * Note: could cause data rearrangement if used with smaller element
+    * sizes.
+    */
 
-   for (i = 1; i < type.length; i++) {
-      index = lp_build_const_int32(bld->gallivm, i);
-      if (type.floating)
-         res = LLVMBuildFAdd(builder, res,
-                            LLVMBuildExtractElement(builder,
-                                                    a, index, ""),
-                            "");
-      else
-         res = LLVMBuildAdd(builder, res,
-                            LLVMBuildExtractElement(builder,
-                                                    a, index, ""),
-                            "");
+   vecres = a;
+   length = type.length / 2;
+   while (length > 1) {
+      LLVMValueRef vec1, vec2;
+      for (i = 0; i < length; i++) {
+         shuffles1[i] = lp_build_const_int32(bld->gallivm, i);
+         shuffles2[i] = lp_build_const_int32(bld->gallivm, i + length);
+      }
+      vec1 = LLVMBuildShuffleVector(builder, vecres, vecres,
+                                    LLVMConstVector(shuffles1, length), "");
+      vec2 = LLVMBuildShuffleVector(builder, vecres, vecres,
+                                    LLVMConstVector(shuffles2, length), "");
+      if (type.floating) {
+         vecres = LLVMBuildFAdd(builder, vec1, vec2, "");
+      }
+      else {
+         vecres = LLVMBuildAdd(builder, vec1, vec2, "");
+      }
+      length = length >> 1;
    }
+
+   /* always have vector of size 2 here */
+   assert(length == 1);
+
+   index = lp_build_const_int32(bld->gallivm, 0);
+   res = LLVMBuildExtractElement(builder, vecres, index, "");
+   index = lp_build_const_int32(bld->gallivm, 1);
+   elem2 = LLVMBuildExtractElement(builder, vecres, index, "");
+
+   if (type.floating)
+      res = LLVMBuildFAdd(builder, res, elem2, "");
+    else
+      res = LLVMBuildAdd(builder, res, elem2, "");
 
    return res;
 }
 
+/**
+ * Return the horizontal sums of 4 float vectors as a float4 vector.
+ * This uses the technique as outlined in Intel Optimization Manual.
+ */
+static LLVMValueRef
+lp_build_horizontal_add4x4f(struct lp_build_context *bld,
+                            LLVMValueRef src[4])
+{
+   struct gallivm_state *gallivm = bld->gallivm;
+   LLVMBuilderRef builder = gallivm->builder;
+   LLVMValueRef shuffles[4];
+   LLVMValueRef tmp[4];
+   LLVMValueRef sumtmp[2], shuftmp[2];
+
+   /* lower half of regs */
+   shuffles[0] = lp_build_const_int32(gallivm, 0);
+   shuffles[1] = lp_build_const_int32(gallivm, 1);
+   shuffles[2] = lp_build_const_int32(gallivm, 4);
+   shuffles[3] = lp_build_const_int32(gallivm, 5);
+   tmp[0] = LLVMBuildShuffleVector(builder, src[0], src[1],
+                                   LLVMConstVector(shuffles, 4), "");
+   tmp[2] = LLVMBuildShuffleVector(builder, src[2], src[3],
+                                   LLVMConstVector(shuffles, 4), "");
+
+   /* upper half of regs */
+   shuffles[0] = lp_build_const_int32(gallivm, 2);
+   shuffles[1] = lp_build_const_int32(gallivm, 3);
+   shuffles[2] = lp_build_const_int32(gallivm, 6);
+   shuffles[3] = lp_build_const_int32(gallivm, 7);
+   tmp[1] = LLVMBuildShuffleVector(builder, src[0], src[1],
+                                   LLVMConstVector(shuffles, 4), "");
+   tmp[3] = LLVMBuildShuffleVector(builder, src[2], src[3],
+                                   LLVMConstVector(shuffles, 4), "");
+
+   sumtmp[0] = LLVMBuildFAdd(builder, tmp[0], tmp[1], "");
+   sumtmp[1] = LLVMBuildFAdd(builder, tmp[2], tmp[3], "");
+
+   shuffles[0] = lp_build_const_int32(gallivm, 0);
+   shuffles[1] = lp_build_const_int32(gallivm, 2);
+   shuffles[2] = lp_build_const_int32(gallivm, 4);
+   shuffles[3] = lp_build_const_int32(gallivm, 6);
+   shuftmp[0] = LLVMBuildShuffleVector(builder, sumtmp[0], sumtmp[1],
+                                       LLVMConstVector(shuffles, 4), "");
+
+   shuffles[0] = lp_build_const_int32(gallivm, 1);
+   shuffles[1] = lp_build_const_int32(gallivm, 3);
+   shuffles[2] = lp_build_const_int32(gallivm, 5);
+   shuffles[3] = lp_build_const_int32(gallivm, 7);
+   shuftmp[1] = LLVMBuildShuffleVector(builder, sumtmp[0], sumtmp[1],
+                                       LLVMConstVector(shuffles, 4), "");
+
+   return LLVMBuildFAdd(builder, shuftmp[0], shuftmp[1], "");
+}
+
+
+/*
+ * partially horizontally add 2-4 float vectors with length nx4,
+ * i.e. only four adjacent values in each vector will be added,
+ * assuming values are really grouped in 4 which also determines
+ * output order.
+ *
+ * Return a vector of the same length as the initial vectors,
+ * with the excess elements (if any) being undefined.
+ * The element order is independent of number of input vectors.
+ * For 3 vectors x0x1x2x3x4x5x6x7, y0y1y2y3y4y5y6y7, z0z1z2z3z4z5z6z7
+ * the output order thus will be
+ * sumx0-x3,sumy0-y3,sumz0-z3,undef,sumx4-x7,sumy4-y7,sumz4z7,undef
+ */
+LLVMValueRef
+lp_build_hadd_partial4(struct lp_build_context *bld,
+                       LLVMValueRef vectors[],
+                       unsigned num_vecs)
+{
+   struct gallivm_state *gallivm = bld->gallivm;
+   LLVMBuilderRef builder = gallivm->builder;
+   LLVMValueRef ret_vec;
+   LLVMValueRef tmp[4];
+   const char *intrinsic = NULL;
+
+   assert(num_vecs >= 2 && num_vecs <= 4);
+   assert(bld->type.floating);
+
+   /* only use this with at least 2 vectors, as it is sort of expensive
+    * (depending on cpu) and we always need two horizontal adds anyway,
+    * so a shuffle/add approach might be better.
+    */
+
+   tmp[0] = vectors[0];
+   tmp[1] = vectors[1];
+
+   tmp[2] = num_vecs > 2 ? vectors[2] : vectors[0];
+   tmp[3] = num_vecs > 3 ? vectors[3] : vectors[0];
+
+   if (util_cpu_caps.has_sse3 && bld->type.width == 32 &&
+       bld->type.length == 4) {
+      intrinsic = "llvm.x86.sse3.hadd.ps";
+   }
+   else if (util_cpu_caps.has_avx && bld->type.width == 32 &&
+            bld->type.length == 8) {
+      intrinsic = "llvm.x86.avx.hadd.ps.256";
+   }
+   if (intrinsic) {
+      tmp[0] = lp_build_intrinsic_binary(builder, intrinsic,
+                                       lp_build_vec_type(gallivm, bld->type),
+                                       tmp[0], tmp[1]);
+      if (num_vecs > 2) {
+         tmp[1] = lp_build_intrinsic_binary(builder, intrinsic,
+                                          lp_build_vec_type(gallivm, bld->type),
+                                          tmp[2], tmp[3]);
+      }
+      else {
+         tmp[1] = tmp[0];
+      }
+      return lp_build_intrinsic_binary(builder, intrinsic,
+                                       lp_build_vec_type(gallivm, bld->type),
+                                       tmp[0], tmp[1]);
+   }
+
+   if (bld->type.length == 4) {
+      ret_vec = lp_build_horizontal_add4x4f(bld, tmp);
+   }
+   else {
+      LLVMValueRef partres[LP_MAX_VECTOR_LENGTH/4];
+      unsigned j;
+      unsigned num_iter = bld->type.length / 4;
+      struct lp_type parttype = bld->type;
+      parttype.length = 4;
+      for (j = 0; j < num_iter; j++) {
+         LLVMValueRef partsrc[4];
+         unsigned i;
+         for (i = 0; i < 4; i++) {
+            partsrc[i] = lp_build_extract_range(gallivm, tmp[i], j*4, 4);
+         }
+         partres[j] = lp_build_horizontal_add4x4f(bld, partsrc);
+      }
+      ret_vec = lp_build_concat(gallivm, partres, parttype, num_iter);
+   }
+   return ret_vec;
+}
 
 /**
  * Generate a - b
@@ -553,7 +804,7 @@ lp_build_mul_imm(struct lp_build_context *bld,
       if(bld->type.floating) {
 #if 0
          /*
-          * Power of two multiplication by directly manipulating the mantissa.
+          * Power of two multiplication by directly manipulating the exponent.
           *
           * XXX: This might not be always faster, it will introduce a small error
           * for multiplication by zero, and it will produce wrong results
@@ -612,7 +863,9 @@ lp_build_div(struct lp_build_context *bld,
          return LLVMConstUDiv(a, b);
    }
 
-   if(util_cpu_caps.has_sse && type.width == 32 && type.length == 4)
+   if(((util_cpu_caps.has_sse && type.width == 32 && type.length == 4) ||
+       (util_cpu_caps.has_avx && type.width == 32 && type.length == 8)) &&
+      type.floating)
       return lp_build_mul(bld, a, lp_build_rcp(bld, b));
 
    if (type.floating)
@@ -762,9 +1015,12 @@ lp_build_min(struct lp_build_context *bld,
    if(a == b)
       return a;
 
-   if(bld->type.norm) {
-      if(a == bld->zero || b == bld->zero)
-         return bld->zero;
+   if (bld->type.norm) {
+      if (!bld->type.sign) {
+         if (a == bld->zero || b == bld->zero) {
+            return bld->zero;
+         }
+      }
       if(a == bld->one)
          return b;
       if(b == bld->one)
@@ -796,10 +1052,14 @@ lp_build_max(struct lp_build_context *bld,
    if(bld->type.norm) {
       if(a == bld->one || b == bld->one)
          return bld->one;
-      if(a == bld->zero)
-         return b;
-      if(b == bld->zero)
-         return a;
+      if (!bld->type.sign) {
+         if (a == bld->zero) {
+            return b;
+         }
+         if (b == bld->zero) {
+            return a;
+         }
+      }
    }
 
    return lp_build_max_simple(bld, a, b);
@@ -863,6 +1123,12 @@ lp_build_abs(struct lp_build_context *bld,
          return lp_build_intrinsic_unary(builder, "llvm.x86.ssse3.pabs.d.128", vec_type, a);
       }
    }
+   else if (type.width*type.length == 256 && util_cpu_caps.has_ssse3 &&
+            (gallivm_debug & GALLIVM_DEBUG_PERF) &&
+            (type.width == 8 || type.width == 16 || type.width == 32)) {
+      debug_printf("%s: inefficient code, should split vectors manually\n",
+                   __FUNCTION__);
+   }
 
    return lp_build_max(bld, a, LLVMBuildNeg(builder, a, ""));
 }
@@ -925,6 +1191,8 @@ lp_build_sgn(struct lp_build_context *bld,
    }
    else
    {
+      /* signed int/norm/fixed point */
+      /* could use psign with sse3 and appropriate vectors here */
       LLVMValueRef minus_one = lp_build_const_vec(bld->gallivm, type, -1.0);
       cond = lp_build_cmp(bld, PIPE_FUNC_GREATER, a, bld->zero);
       res = lp_build_select(bld, cond, bld->one, minus_one);
@@ -991,7 +1259,16 @@ lp_build_int_to_float(struct lp_build_context *bld,
    return LLVMBuildSIToFP(builder, a, vec_type, "");
 }
 
+static boolean
+sse41_rounding_available(const struct lp_type type)
+{
+   if ((util_cpu_caps.has_sse4_1 &&
+       (type.length == 1 || type.width*type.length == 128)) ||
+       (util_cpu_caps.has_avx && type.width*type.length == 256))
+      return TRUE;
 
+   return FALSE;
+}
 
 enum lp_build_round_sse41_mode
 {
@@ -1056,18 +1333,34 @@ lp_build_round_sse41(struct lp_build_context *bld,
       res = LLVMBuildExtractElement(builder, res, index0, "");
    }
    else {
-      assert(type.width*type.length == 128);
+      if (type.width * type.length == 128) {
+         switch(type.width) {
+         case 32:
+            intrinsic = "llvm.x86.sse41.round.ps";
+            break;
+         case 64:
+            intrinsic = "llvm.x86.sse41.round.pd";
+            break;
+         default:
+            assert(0);
+            return bld->undef;
+         }
+      }
+      else {
+         assert(type.width * type.length == 256);
+         assert(util_cpu_caps.has_avx);
 
-      switch(type.width) {
-      case 32:
-         intrinsic = "llvm.x86.sse41.round.ps";
-         break;
-      case 64:
-         intrinsic = "llvm.x86.sse41.round.pd";
-         break;
-      default:
-         assert(0);
-         return bld->undef;
+         switch(type.width) {
+         case 32:
+            intrinsic = "llvm.x86.avx.round.ps.256";
+            break;
+         case 64:
+            intrinsic = "llvm.x86.avx.round.pd.256";
+            break;
+         default:
+            assert(0);
+            return bld->undef;
+         }
       }
 
       res = lp_build_intrinsic_binary(builder, intrinsic,
@@ -1116,10 +1409,15 @@ lp_build_iround_nearest_sse2(struct lp_build_context *bld,
                                      ret_type, arg);
    }
    else {
-      assert(type.width*type.length == 128);
+      if (type.width* type.length == 128) {
+         intrinsic = "llvm.x86.sse2.cvtps2dq";
+      }
+      else {
+         assert(type.width*type.length == 256);
+         assert(util_cpu_caps.has_avx);
 
-      intrinsic = "llvm.x86.sse2.cvtps2dq";
-
+         intrinsic = "llvm.x86.avx.cvt.ps2dq.256";
+      }
       res = lp_build_intrinsic_unary(builder, intrinsic,
                                      ret_type, a);
    }
@@ -1143,8 +1441,7 @@ lp_build_trunc(struct lp_build_context *bld,
    assert(type.floating);
    assert(lp_check_value(type, a));
 
-   if (util_cpu_caps.has_sse4_1 &&
-       (type.length == 1 || type.width*type.length == 128)) {
+   if (sse41_rounding_available(type)) {
       return lp_build_round_sse41(bld, a, LP_BUILD_ROUND_SSE41_TRUNCATE);
    }
    else {
@@ -1174,8 +1471,7 @@ lp_build_round(struct lp_build_context *bld,
    assert(type.floating);
    assert(lp_check_value(type, a));
 
-   if (util_cpu_caps.has_sse4_1 &&
-       (type.length == 1 || type.width*type.length == 128)) {
+   if (sse41_rounding_available(type)) {
       return lp_build_round_sse41(bld, a, LP_BUILD_ROUND_SSE41_NEAREST);
    }
    else {
@@ -1203,8 +1499,7 @@ lp_build_floor(struct lp_build_context *bld,
    assert(type.floating);
    assert(lp_check_value(type, a));
 
-   if (util_cpu_caps.has_sse4_1 &&
-       (type.length == 1 || type.width*type.length == 128)) {
+   if (sse41_rounding_available(type)) {
       return lp_build_round_sse41(bld, a, LP_BUILD_ROUND_SSE41_FLOOR);
    }
    else {
@@ -1232,8 +1527,7 @@ lp_build_ceil(struct lp_build_context *bld,
    assert(type.floating);
    assert(lp_check_value(type, a));
 
-   if (util_cpu_caps.has_sse4_1 &&
-       (type.length == 1 || type.width*type.length == 128)) {
+   if (sse41_rounding_available(type)) {
       return lp_build_round_sse41(bld, a, LP_BUILD_ROUND_SSE41_CEIL);
    }
    else {
@@ -1256,6 +1550,34 @@ lp_build_fract(struct lp_build_context *bld,
 {
    assert(bld->type.floating);
    return lp_build_sub(bld, a, lp_build_floor(bld, a));
+}
+
+
+/**
+ * Prevent returning a fractional part of 1.0 for very small negative values of
+ * 'a' by clamping against 0.99999(9).
+ */
+static inline LLVMValueRef
+clamp_fract(struct lp_build_context *bld, LLVMValueRef fract)
+{
+   LLVMValueRef max;
+
+   /* this is the largest number smaller than 1.0 representable as float */
+   max = lp_build_const_vec(bld->gallivm, bld->type,
+                            1.0 - 1.0/(1LL << (lp_mantissa(bld->type) + 1)));
+   return lp_build_min(bld, fract, max);
+}
+
+
+/**
+ * Same as lp_build_fract, but guarantees that the result is always smaller
+ * than one.
+ */
+LLVMValueRef
+lp_build_fract_safe(struct lp_build_context *bld,
+                    LLVMValueRef a)
+{
+   return clamp_fract(bld, lp_build_fract(bld, a));
 }
 
 
@@ -1298,12 +1620,12 @@ lp_build_iround(struct lp_build_context *bld,
 
    assert(lp_check_value(type, a));
 
-   if (util_cpu_caps.has_sse2 &&
-       ((type.width == 32) && (type.length == 1 || type.length == 4))) {
+   if ((util_cpu_caps.has_sse2 &&
+       ((type.width == 32) && (type.length == 1 || type.length == 4))) ||
+       (util_cpu_caps.has_avx && type.width == 32 && type.length == 8)) {
       return lp_build_iround_nearest_sse2(bld, a);
    }
-   else if (util_cpu_caps.has_sse4_1 &&
-       (type.length == 1 || type.width*type.length == 128)) {
+   if (sse41_rounding_available(type)) {
       res = lp_build_round_sse41(bld, a, LP_BUILD_ROUND_SSE41_NEAREST);
    }
    else {
@@ -1353,14 +1675,12 @@ lp_build_ifloor(struct lp_build_context *bld,
    assert(type.floating);
    assert(lp_check_value(type, a));
 
-   if (util_cpu_caps.has_sse4_1 &&
-       (type.length == 1 || type.width*type.length == 128)) {
-      res = lp_build_round_sse41(bld, a, LP_BUILD_ROUND_SSE41_FLOOR);
-   }
-   else {
-      res = a;
-
-      if (type.sign) {
+   res = a;
+   if (type.sign) {
+      if (sse41_rounding_available(type)) {
+         res = lp_build_round_sse41(bld, a, LP_BUILD_ROUND_SSE41_FLOOR);
+      }
+      else {
          /* Take the sign bit and add it to 1 constant */
          LLVMTypeRef vec_type = bld->vec_type;
          unsigned mantissa = lp_mantissa(type);
@@ -1414,8 +1734,7 @@ lp_build_iceil(struct lp_build_context *bld,
    assert(type.floating);
    assert(lp_check_value(type, a));
 
-   if (util_cpu_caps.has_sse4_1 &&
-       (type.length == 1 || type.width*type.length == 128)) {
+   if (sse41_rounding_available(type)) {
       res = lp_build_round_sse41(bld, a, LP_BUILD_ROUND_SSE41_CEIL);
    }
    else {
@@ -1461,7 +1780,7 @@ lp_build_iceil(struct lp_build_context *bld,
  * Combined ifloor() & fract().
  *
  * Preferred to calling the functions separately, as it will ensure that the
- * stratergy (floor() vs ifloor()) that results in less redundant work is used.
+ * strategy (floor() vs ifloor()) that results in less redundant work is used.
  */
 void
 lp_build_ifloor_fract(struct lp_build_context *bld,
@@ -1476,8 +1795,7 @@ lp_build_ifloor_fract(struct lp_build_context *bld,
    assert(type.floating);
    assert(lp_check_value(type, a));
 
-   if (util_cpu_caps.has_sse4_1 &&
-       (type.length == 1 || type.width*type.length == 128)) {
+   if (sse41_rounding_available(type)) {
       /*
        * floor() is easier.
        */
@@ -1498,6 +1816,21 @@ lp_build_ifloor_fract(struct lp_build_context *bld,
 }
 
 
+/**
+ * Same as lp_build_ifloor_fract, but guarantees that the fractional part is
+ * always smaller than one.
+ */
+void
+lp_build_ifloor_fract_safe(struct lp_build_context *bld,
+                           LLVMValueRef a,
+                           LLVMValueRef *out_ipart,
+                           LLVMValueRef *out_fpart)
+{
+   lp_build_ifloor_fract(bld, a, out_ipart, out_fpart);
+   *out_fpart = clamp_fract(bld, *out_fpart);
+}
+
+
 LLVMValueRef
 lp_build_sqrt(struct lp_build_context *bld,
               LLVMValueRef a)
@@ -1510,10 +1843,14 @@ lp_build_sqrt(struct lp_build_context *bld,
    assert(lp_check_value(type, a));
 
    /* TODO: optimize the constant case */
-   /* TODO: optimize the constant case */
 
    assert(type.floating);
-   util_snprintf(intrinsic, sizeof intrinsic, "llvm.sqrt.v%uf%u", type.length, type.width);
+   if (type.length == 1) {
+      util_snprintf(intrinsic, sizeof intrinsic, "llvm.sqrt.f%u", type.width);
+   }
+   else {
+      util_snprintf(intrinsic, sizeof intrinsic, "llvm.sqrt.v%uf%u", type.length, type.width);
+   }
 
    return lp_build_intrinsic_unary(builder, intrinsic, vec_type, a);
 }
@@ -1577,19 +1914,28 @@ lp_build_rcp(struct lp_build_context *bld,
     * - it doesn't even get the reciprocate of 1.0 exactly
     * - doing Newton-Rapshon steps yields wrong (NaN) values for 0.0 or Inf
     * - for recent processors the benefit over DIVPS is marginal, a case
-    *   depedent
+    *   dependent
     *
     * We could still use it on certain processors if benchmarks show that the
     * RCPPS plus necessary workarounds are still preferrable to DIVPS; or for
     * particular uses that require less workarounds.
     */
 
-   if (FALSE && util_cpu_caps.has_sse && type.width == 32 && type.length == 4) {
+   if (FALSE && ((util_cpu_caps.has_sse && type.width == 32 && type.length == 4) ||
+         (util_cpu_caps.has_avx && type.width == 32 && type.length == 8))){
       const unsigned num_iterations = 0;
       LLVMValueRef res;
       unsigned i;
+      const char *intrinsic = NULL;
 
-      res = lp_build_intrinsic_unary(builder, "llvm.x86.sse.rcp.ps", bld->vec_type, a);
+      if (type.length == 4) {
+         intrinsic = "llvm.x86.sse.rcp.ps";
+      }
+      else {
+         intrinsic = "llvm.x86.avx.rcp.ps.256";
+      }
+
+      res = lp_build_intrinsic_unary(builder, intrinsic, bld->vec_type, a);
 
       for (i = 0; i < num_iterations; ++i) {
          res = lp_build_rcp_refine(bld, a, res);
@@ -1644,12 +1990,22 @@ lp_build_rsqrt(struct lp_build_context *bld,
 
    assert(type.floating);
 
-   if (util_cpu_caps.has_sse && type.width == 32 && type.length == 4) {
+   if ((util_cpu_caps.has_sse && type.width == 32 && type.length == 4) ||
+        (util_cpu_caps.has_avx && type.width == 32 && type.length == 8)) {
       const unsigned num_iterations = 1;
       LLVMValueRef res;
       unsigned i;
+      const char *intrinsic = NULL;
 
-      res = lp_build_intrinsic_unary(builder, "llvm.x86.sse.rsqrt.ps", bld->vec_type, a);
+      if (type.length == 4) {
+         intrinsic = "llvm.x86.sse.rsqrt.ps";
+      }
+      else {
+         intrinsic = "llvm.x86.avx.rsqrt.ps.256";
+      }
+
+      res = lp_build_intrinsic_unary(builder, intrinsic, bld->vec_type, a);
+
 
       for (i = 0; i < num_iterations; ++i) {
          res = lp_build_rsqrt_refine(bld, a, res);
@@ -1662,23 +2018,6 @@ lp_build_rsqrt(struct lp_build_context *bld,
 }
 
 
-static inline LLVMValueRef
-lp_build_const_v4si(struct gallivm_state *gallivm, unsigned long value)
-{
-   LLVMValueRef element = lp_build_const_int32(gallivm, value);
-   LLVMValueRef elements[4] = { element, element, element, element };
-   return LLVMConstVector(elements, 4);
-}
-
-static inline LLVMValueRef
-lp_build_const_v4sf(struct gallivm_state *gallivm, float value)
-{
-   LLVMValueRef element = lp_build_const_float(gallivm, value);
-   LLVMValueRef elements[4] = { element, element, element, element };
-   return LLVMConstVector(elements, 4);
-}
-
-
 /**
  * Generate sin(a) using SSE2
  */
@@ -1686,29 +2025,27 @@ LLVMValueRef
 lp_build_sin(struct lp_build_context *bld,
              LLVMValueRef a)
 {
-   LLVMBuilderRef builder = bld->gallivm->builder;
    struct gallivm_state *gallivm = bld->gallivm;
+   LLVMBuilderRef builder = gallivm->builder;
    struct lp_type int_type = lp_int_type(bld->type);
    LLVMBuilderRef b = builder;
-   LLVMTypeRef v4sf = LLVMVectorType(LLVMFloatTypeInContext(bld->gallivm->context), 4);
-   LLVMTypeRef v4si = LLVMVectorType(LLVMInt32TypeInContext(bld->gallivm->context), 4);
 
    /*
     *  take the absolute value,
     *  x = _mm_and_ps(x, *(v4sf*)_ps_inv_sign_mask);
     */
 
-   LLVMValueRef inv_sig_mask = lp_build_const_v4si(bld->gallivm, ~0x80000000);
-   LLVMValueRef a_v4si = LLVMBuildBitCast(b, a, v4si, "a_v4si");
+   LLVMValueRef inv_sig_mask = lp_build_const_int_vec(gallivm, bld->type, ~0x80000000);
+   LLVMValueRef a_v4si = LLVMBuildBitCast(b, a, bld->int_vec_type, "a_v4si");
 
    LLVMValueRef absi = LLVMBuildAnd(b, a_v4si, inv_sig_mask, "absi");
-   LLVMValueRef x_abs = LLVMBuildBitCast(b, absi, v4sf, "x_abs");
+   LLVMValueRef x_abs = LLVMBuildBitCast(b, absi, bld->vec_type, "x_abs");
 
    /*
     * extract the sign bit (upper one)
     * sign_bit = _mm_and_ps(sign_bit, *(v4sf*)_ps_sign_mask);
     */
-   LLVMValueRef sig_mask = lp_build_const_v4si(bld->gallivm, 0x80000000);
+   LLVMValueRef sig_mask = lp_build_const_int_vec(gallivm, bld->type, 0x80000000);
    LLVMValueRef sign_bit_i = LLVMBuildAnd(b, a_v4si, sig_mask, "sign_bit_i");
 
    /*
@@ -1716,7 +2053,7 @@ lp_build_sin(struct lp_build_context *bld,
     * y = _mm_mul_ps(x, *(v4sf*)_ps_cephes_FOPI);
     */
    
-   LLVMValueRef FOPi = lp_build_const_v4sf(gallivm, 1.27323954473516);
+   LLVMValueRef FOPi = lp_build_const_vec(gallivm, bld->type, 1.27323954473516);
    LLVMValueRef scale_y = LLVMBuildFMul(b, x_abs, FOPi, "scale_y");
 
    /*
@@ -1724,36 +2061,36 @@ lp_build_sin(struct lp_build_context *bld,
     * emm2 = _mm_cvttps_epi32(y);
     */
    
-   LLVMValueRef emm2_i = LLVMBuildFPToSI(b, scale_y, v4si, "emm2_i");
+   LLVMValueRef emm2_i = LLVMBuildFPToSI(b, scale_y, bld->int_vec_type, "emm2_i");
 
    /*
     * j=(j+1) & (~1) (see the cephes sources)
     * emm2 = _mm_add_epi32(emm2, *(v4si*)_pi32_1);
     */
 
-   LLVMValueRef all_one = lp_build_const_v4si(bld->gallivm, 1);
+   LLVMValueRef all_one = lp_build_const_int_vec(gallivm, bld->type, 1);
    LLVMValueRef emm2_add =  LLVMBuildAdd(b, emm2_i, all_one, "emm2_add");
    /*
     * emm2 = _mm_and_si128(emm2, *(v4si*)_pi32_inv1);
     */
-   LLVMValueRef inv_one = lp_build_const_v4si(bld->gallivm, ~1);
+   LLVMValueRef inv_one = lp_build_const_int_vec(gallivm, bld->type, ~1);
    LLVMValueRef emm2_and =  LLVMBuildAnd(b, emm2_add, inv_one, "emm2_and");
 
    /*
     * y = _mm_cvtepi32_ps(emm2);
     */
-   LLVMValueRef y_2 = LLVMBuildSIToFP(b, emm2_and, v4sf, "y_2");
+   LLVMValueRef y_2 = LLVMBuildSIToFP(b, emm2_and, bld->vec_type, "y_2");
 
    /* get the swap sign flag
     * emm0 = _mm_and_si128(emm2, *(v4si*)_pi32_4);
     */
-   LLVMValueRef pi32_4 = lp_build_const_v4si(bld->gallivm, 4);
+   LLVMValueRef pi32_4 = lp_build_const_int_vec(gallivm, bld->type, 4);
    LLVMValueRef emm0_and =  LLVMBuildAnd(b, emm2_add, pi32_4, "emm0_and");
    
    /*
     * emm2 = _mm_slli_epi32(emm0, 29);
     */  
-   LLVMValueRef const_29 = lp_build_const_v4si(bld->gallivm, 29);
+   LLVMValueRef const_29 = lp_build_const_int_vec(gallivm, bld->type, 29);
    LLVMValueRef swap_sign_bit = LLVMBuildShl(b, emm0_and, const_29, "swap_sign_bit");
 
    /*
@@ -1766,11 +2103,11 @@ lp_build_sin(struct lp_build_context *bld,
     * emm2 = _mm_cmpeq_epi32(emm2, _mm_setzero_si128());
     */
 
-   LLVMValueRef pi32_2 = lp_build_const_v4si(bld->gallivm, 2);
+   LLVMValueRef pi32_2 = lp_build_const_int_vec(gallivm, bld->type, 2);
    LLVMValueRef emm2_3 =  LLVMBuildAnd(b, emm2_and, pi32_2, "emm2_3");
-   LLVMValueRef poly_mask = lp_build_compare(bld->gallivm,
+   LLVMValueRef poly_mask = lp_build_compare(gallivm,
                                              int_type, PIPE_FUNC_EQUAL,
-                                             emm2_3, lp_build_const_v4si(bld->gallivm, 0));
+                                             emm2_3, lp_build_const_int_vec(gallivm, bld->type, 0));
    /*
     *   sign_bit = _mm_xor_ps(sign_bit, swap_sign_bit);
     */
@@ -1781,9 +2118,9 @@ lp_build_sin(struct lp_build_context *bld,
     * _PS_CONST(minus_cephes_DP2, -2.4187564849853515625e-4);
     * _PS_CONST(minus_cephes_DP3, -3.77489497744594108e-8);
     */
-   LLVMValueRef DP1 = lp_build_const_v4sf(gallivm, -0.78515625);
-   LLVMValueRef DP2 = lp_build_const_v4sf(gallivm, -2.4187564849853515625e-4);
-   LLVMValueRef DP3 = lp_build_const_v4sf(gallivm, -3.77489497744594108e-8);
+   LLVMValueRef DP1 = lp_build_const_vec(gallivm, bld->type, -0.78515625);
+   LLVMValueRef DP2 = lp_build_const_vec(gallivm, bld->type, -2.4187564849853515625e-4);
+   LLVMValueRef DP3 = lp_build_const_vec(gallivm, bld->type, -3.77489497744594108e-8);
 
    /*
     * The magic pass: "Extended precision modular arithmetic" 
@@ -1818,9 +2155,9 @@ lp_build_sin(struct lp_build_context *bld,
     * _PS_CONST(coscof_p1, -1.388731625493765E-003);
     * _PS_CONST(coscof_p2,  4.166664568298827E-002);
     */
-   LLVMValueRef coscof_p0 = lp_build_const_v4sf(gallivm, 2.443315711809948E-005);
-   LLVMValueRef coscof_p1 = lp_build_const_v4sf(gallivm, -1.388731625493765E-003);
-   LLVMValueRef coscof_p2 = lp_build_const_v4sf(gallivm, 4.166664568298827E-002);
+   LLVMValueRef coscof_p0 = lp_build_const_vec(gallivm, bld->type, 2.443315711809948E-005);
+   LLVMValueRef coscof_p1 = lp_build_const_vec(gallivm, bld->type, -1.388731625493765E-003);
+   LLVMValueRef coscof_p2 = lp_build_const_vec(gallivm, bld->type, 4.166664568298827E-002);
 
    /*
     * y = *(v4sf*)_ps_coscof_p0;
@@ -1839,10 +2176,10 @@ lp_build_sin(struct lp_build_context *bld,
     * y = _mm_sub_ps(y, tmp);
     * y = _mm_add_ps(y, *(v4sf*)_ps_1);
     */ 
-   LLVMValueRef half = lp_build_const_v4sf(gallivm, 0.5);
+   LLVMValueRef half = lp_build_const_vec(gallivm, bld->type, 0.5);
    LLVMValueRef tmp = LLVMBuildFMul(b, z, half, "tmp");
    LLVMValueRef y_9 = LLVMBuildFSub(b, y_8, tmp, "y_8");
-   LLVMValueRef one = lp_build_const_v4sf(gallivm, 1.0);
+   LLVMValueRef one = lp_build_const_vec(gallivm, bld->type, 1.0);
    LLVMValueRef y_10 = LLVMBuildFAdd(b, y_9, one, "y_9");
 
    /*
@@ -1850,9 +2187,9 @@ lp_build_sin(struct lp_build_context *bld,
     * _PS_CONST(sincof_p1,  8.3321608736E-3);
     * _PS_CONST(sincof_p2, -1.6666654611E-1);
     */
-   LLVMValueRef sincof_p0 = lp_build_const_v4sf(gallivm, -1.9515295891E-4);
-   LLVMValueRef sincof_p1 = lp_build_const_v4sf(gallivm, 8.3321608736E-3);
-   LLVMValueRef sincof_p2 = lp_build_const_v4sf(gallivm, -1.6666654611E-1);
+   LLVMValueRef sincof_p0 = lp_build_const_vec(gallivm, bld->type, -1.9515295891E-4);
+   LLVMValueRef sincof_p1 = lp_build_const_vec(gallivm, bld->type, 8.3321608736E-3);
+   LLVMValueRef sincof_p2 = lp_build_const_vec(gallivm, bld->type, -1.6666654611E-1);
 
    /*
     * Evaluate the second polynom  (Pi/4 <= x <= 0)
@@ -1882,10 +2219,10 @@ lp_build_sin(struct lp_build_context *bld,
     * y = _mm_andnot_ps(xmm3, y);
     * y = _mm_add_ps(y,y2);
     */
-   LLVMValueRef y2_i = LLVMBuildBitCast(b, y2_9, v4si, "y2_i");
-   LLVMValueRef y_i = LLVMBuildBitCast(b, y_10, v4si, "y_i");
+   LLVMValueRef y2_i = LLVMBuildBitCast(b, y2_9, bld->int_vec_type, "y2_i");
+   LLVMValueRef y_i = LLVMBuildBitCast(b, y_10, bld->int_vec_type, "y_i");
    LLVMValueRef y2_and = LLVMBuildAnd(b, y2_i, poly_mask, "y2_and");
-   LLVMValueRef inv = lp_build_const_v4si(bld->gallivm, ~0);
+   LLVMValueRef inv = lp_build_const_int_vec(gallivm, bld->type, ~0);
    LLVMValueRef poly_mask_inv = LLVMBuildXor(b, poly_mask, inv, "poly_mask_inv");
    LLVMValueRef y_and = LLVMBuildAnd(b, y_i, poly_mask_inv, "y_and");
    LLVMValueRef y_combine = LLVMBuildAdd(b, y_and, y2_and, "y_combine");
@@ -1895,7 +2232,7 @@ lp_build_sin(struct lp_build_context *bld,
     * y = _mm_xor_ps(y, sign_bit);
     */
    LLVMValueRef y_sign = LLVMBuildXor(b, y_combine, sign_bit_1, "y_sin");
-   LLVMValueRef y_result = LLVMBuildBitCast(b, y_sign, v4sf, "y_result");
+   LLVMValueRef y_result = LLVMBuildBitCast(b, y_sign, bld->vec_type, "y_result");
    return y_result;
 }
 
@@ -1907,30 +2244,28 @@ LLVMValueRef
 lp_build_cos(struct lp_build_context *bld,
              LLVMValueRef a)
 {
-   LLVMBuilderRef builder = bld->gallivm->builder;
    struct gallivm_state *gallivm = bld->gallivm;
+   LLVMBuilderRef builder = gallivm->builder;
    struct lp_type int_type = lp_int_type(bld->type);
    LLVMBuilderRef b = builder;
-   LLVMTypeRef v4sf = LLVMVectorType(LLVMFloatTypeInContext(bld->gallivm->context), 4);
-   LLVMTypeRef v4si = LLVMVectorType(LLVMInt32TypeInContext(bld->gallivm->context), 4);
 
    /*
     *  take the absolute value,
     *  x = _mm_and_ps(x, *(v4sf*)_ps_inv_sign_mask);
     */
 
-   LLVMValueRef inv_sig_mask = lp_build_const_v4si(bld->gallivm, ~0x80000000);
-   LLVMValueRef a_v4si = LLVMBuildBitCast(b, a, v4si, "a_v4si");
+   LLVMValueRef inv_sig_mask = lp_build_const_int_vec(gallivm, bld->type, ~0x80000000);
+   LLVMValueRef a_v4si = LLVMBuildBitCast(b, a, bld->int_vec_type, "a_v4si");
 
    LLVMValueRef absi = LLVMBuildAnd(b, a_v4si, inv_sig_mask, "absi");
-   LLVMValueRef x_abs = LLVMBuildBitCast(b, absi, v4sf, "x_abs");
+   LLVMValueRef x_abs = LLVMBuildBitCast(b, absi, bld->vec_type, "x_abs");
 
    /*
     * scale by 4/Pi
     * y = _mm_mul_ps(x, *(v4sf*)_ps_cephes_FOPI);
     */
    
-   LLVMValueRef FOPi = lp_build_const_v4sf(gallivm, 1.27323954473516);
+   LLVMValueRef FOPi = lp_build_const_vec(gallivm, bld->type, 1.27323954473516);
    LLVMValueRef scale_y = LLVMBuildFMul(b, x_abs, FOPi, "scale_y");
 
    /*
@@ -1938,46 +2273,46 @@ lp_build_cos(struct lp_build_context *bld,
     * emm2 = _mm_cvttps_epi32(y);
     */
    
-   LLVMValueRef emm2_i = LLVMBuildFPToSI(b, scale_y, v4si, "emm2_i");
+   LLVMValueRef emm2_i = LLVMBuildFPToSI(b, scale_y, bld->int_vec_type, "emm2_i");
 
    /*
     * j=(j+1) & (~1) (see the cephes sources)
     * emm2 = _mm_add_epi32(emm2, *(v4si*)_pi32_1);
     */
 
-   LLVMValueRef all_one = lp_build_const_v4si(bld->gallivm, 1);
+   LLVMValueRef all_one = lp_build_const_int_vec(gallivm, bld->type, 1);
    LLVMValueRef emm2_add =  LLVMBuildAdd(b, emm2_i, all_one, "emm2_add");
    /*
     * emm2 = _mm_and_si128(emm2, *(v4si*)_pi32_inv1);
     */
-   LLVMValueRef inv_one = lp_build_const_v4si(bld->gallivm, ~1);
+   LLVMValueRef inv_one = lp_build_const_int_vec(gallivm, bld->type, ~1);
    LLVMValueRef emm2_and =  LLVMBuildAnd(b, emm2_add, inv_one, "emm2_and");
 
    /*
     * y = _mm_cvtepi32_ps(emm2);
     */
-   LLVMValueRef y_2 = LLVMBuildSIToFP(b, emm2_and, v4sf, "y_2");
+   LLVMValueRef y_2 = LLVMBuildSIToFP(b, emm2_and, bld->vec_type, "y_2");
 
 
    /*
     * emm2 = _mm_sub_epi32(emm2, *(v4si*)_pi32_2);
     */
-   LLVMValueRef const_2 = lp_build_const_v4si(bld->gallivm, 2);
+   LLVMValueRef const_2 = lp_build_const_int_vec(gallivm, bld->type, 2);
    LLVMValueRef emm2_2 = LLVMBuildSub(b, emm2_and, const_2, "emm2_2");
 
 
    /* get the swap sign flag
     * emm0 = _mm_andnot_si128(emm2, *(v4si*)_pi32_4);
     */
-   LLVMValueRef inv = lp_build_const_v4si(bld->gallivm, ~0);
+   LLVMValueRef inv = lp_build_const_int_vec(gallivm, bld->type, ~0);
    LLVMValueRef emm0_not = LLVMBuildXor(b, emm2_2, inv, "emm0_not");
-   LLVMValueRef pi32_4 = lp_build_const_v4si(bld->gallivm, 4);
+   LLVMValueRef pi32_4 = lp_build_const_int_vec(gallivm, bld->type, 4);
    LLVMValueRef emm0_and =  LLVMBuildAnd(b, emm0_not, pi32_4, "emm0_and");
    
    /*
     * emm2 = _mm_slli_epi32(emm0, 29);
     */  
-   LLVMValueRef const_29 = lp_build_const_v4si(bld->gallivm, 29);
+   LLVMValueRef const_29 = lp_build_const_int_vec(gallivm, bld->type, 29);
    LLVMValueRef sign_bit = LLVMBuildShl(b, emm0_and, const_29, "sign_bit");
 
    /*
@@ -1990,20 +2325,20 @@ lp_build_cos(struct lp_build_context *bld,
     * emm2 = _mm_cmpeq_epi32(emm2, _mm_setzero_si128());
     */
 
-   LLVMValueRef pi32_2 = lp_build_const_v4si(bld->gallivm, 2);
+   LLVMValueRef pi32_2 = lp_build_const_int_vec(gallivm, bld->type, 2);
    LLVMValueRef emm2_3 =  LLVMBuildAnd(b, emm2_2, pi32_2, "emm2_3");
-   LLVMValueRef poly_mask = lp_build_compare(bld->gallivm,
+   LLVMValueRef poly_mask = lp_build_compare(gallivm,
                                              int_type, PIPE_FUNC_EQUAL,
-   				             emm2_3, lp_build_const_v4si(bld->gallivm, 0));
+   				             emm2_3, lp_build_const_int_vec(gallivm, bld->type, 0));
 
    /*
     * _PS_CONST(minus_cephes_DP1, -0.78515625);
     * _PS_CONST(minus_cephes_DP2, -2.4187564849853515625e-4);
     * _PS_CONST(minus_cephes_DP3, -3.77489497744594108e-8);
     */
-   LLVMValueRef DP1 = lp_build_const_v4sf(gallivm, -0.78515625);
-   LLVMValueRef DP2 = lp_build_const_v4sf(gallivm, -2.4187564849853515625e-4);
-   LLVMValueRef DP3 = lp_build_const_v4sf(gallivm, -3.77489497744594108e-8);
+   LLVMValueRef DP1 = lp_build_const_vec(gallivm, bld->type, -0.78515625);
+   LLVMValueRef DP2 = lp_build_const_vec(gallivm, bld->type, -2.4187564849853515625e-4);
+   LLVMValueRef DP3 = lp_build_const_vec(gallivm, bld->type, -3.77489497744594108e-8);
 
    /*
     * The magic pass: "Extended precision modular arithmetic" 
@@ -2038,9 +2373,9 @@ lp_build_cos(struct lp_build_context *bld,
     * _PS_CONST(coscof_p1, -1.388731625493765E-003);
     * _PS_CONST(coscof_p2,  4.166664568298827E-002);
     */
-   LLVMValueRef coscof_p0 = lp_build_const_v4sf(gallivm, 2.443315711809948E-005);
-   LLVMValueRef coscof_p1 = lp_build_const_v4sf(gallivm, -1.388731625493765E-003);
-   LLVMValueRef coscof_p2 = lp_build_const_v4sf(gallivm, 4.166664568298827E-002);
+   LLVMValueRef coscof_p0 = lp_build_const_vec(gallivm, bld->type, 2.443315711809948E-005);
+   LLVMValueRef coscof_p1 = lp_build_const_vec(gallivm, bld->type, -1.388731625493765E-003);
+   LLVMValueRef coscof_p2 = lp_build_const_vec(gallivm, bld->type, 4.166664568298827E-002);
 
    /*
     * y = *(v4sf*)_ps_coscof_p0;
@@ -2059,10 +2394,10 @@ lp_build_cos(struct lp_build_context *bld,
     * y = _mm_sub_ps(y, tmp);
     * y = _mm_add_ps(y, *(v4sf*)_ps_1);
     */ 
-   LLVMValueRef half = lp_build_const_v4sf(gallivm, 0.5);
+   LLVMValueRef half = lp_build_const_vec(gallivm, bld->type, 0.5);
    LLVMValueRef tmp = LLVMBuildFMul(b, z, half, "tmp");
    LLVMValueRef y_9 = LLVMBuildFSub(b, y_8, tmp, "y_8");
-   LLVMValueRef one = lp_build_const_v4sf(gallivm, 1.0);
+   LLVMValueRef one = lp_build_const_vec(gallivm, bld->type, 1.0);
    LLVMValueRef y_10 = LLVMBuildFAdd(b, y_9, one, "y_9");
 
    /*
@@ -2070,9 +2405,9 @@ lp_build_cos(struct lp_build_context *bld,
     * _PS_CONST(sincof_p1,  8.3321608736E-3);
     * _PS_CONST(sincof_p2, -1.6666654611E-1);
     */
-   LLVMValueRef sincof_p0 = lp_build_const_v4sf(gallivm, -1.9515295891E-4);
-   LLVMValueRef sincof_p1 = lp_build_const_v4sf(gallivm, 8.3321608736E-3);
-   LLVMValueRef sincof_p2 = lp_build_const_v4sf(gallivm, -1.6666654611E-1);
+   LLVMValueRef sincof_p0 = lp_build_const_vec(gallivm, bld->type, -1.9515295891E-4);
+   LLVMValueRef sincof_p1 = lp_build_const_vec(gallivm, bld->type, 8.3321608736E-3);
+   LLVMValueRef sincof_p2 = lp_build_const_vec(gallivm, bld->type, -1.6666654611E-1);
 
    /*
     * Evaluate the second polynom  (Pi/4 <= x <= 0)
@@ -2102,8 +2437,8 @@ lp_build_cos(struct lp_build_context *bld,
     * y = _mm_andnot_ps(xmm3, y);
     * y = _mm_add_ps(y,y2);
     */
-   LLVMValueRef y2_i = LLVMBuildBitCast(b, y2_9, v4si, "y2_i");
-   LLVMValueRef y_i = LLVMBuildBitCast(b, y_10, v4si, "y_i");
+   LLVMValueRef y2_i = LLVMBuildBitCast(b, y2_9, bld->int_vec_type, "y2_i");
+   LLVMValueRef y_i = LLVMBuildBitCast(b, y_10, bld->int_vec_type, "y_i");
    LLVMValueRef y2_and = LLVMBuildAnd(b, y2_i, poly_mask, "y2_and");
    LLVMValueRef poly_mask_inv = LLVMBuildXor(b, poly_mask, inv, "poly_mask_inv");
    LLVMValueRef y_and = LLVMBuildAnd(b, y_i, poly_mask_inv, "y_and");
@@ -2114,7 +2449,7 @@ lp_build_cos(struct lp_build_context *bld,
     * y = _mm_xor_ps(y, sign_bit);
     */
    LLVMValueRef y_sign = LLVMBuildXor(b, y_combine, sign_bit, "y_sin");
-   LLVMValueRef y_result = LLVMBuildBitCast(b, y_sign, v4sf, "y_result");
+   LLVMValueRef y_result = LLVMBuildBitCast(b, y_sign, bld->vec_type, "y_result");
    return y_result;
 }
 
@@ -2183,7 +2518,8 @@ lp_build_polynomial(struct lp_build_context *bld,
                     unsigned num_coeffs)
 {
    const struct lp_type type = bld->type;
-   LLVMValueRef res = NULL;
+   LLVMValueRef even = NULL, odd = NULL;
+   LLVMValueRef x2;
    unsigned i;
 
    assert(lp_check_value(bld->type, x));
@@ -2195,19 +2531,36 @@ lp_build_polynomial(struct lp_build_context *bld,
                    __FUNCTION__);
    }
 
+   /*
+    * Calculate odd and even terms seperately to decrease data dependency
+    * Ex:
+    *     c[0] + x^2 * c[2] + x^4 * c[4] ...
+    *     + x * (c[1] + x^2 * c[3] + x^4 * c[5]) ...
+    */
+   x2 = lp_build_mul(bld, x, x);
+
    for (i = num_coeffs; i--; ) {
       LLVMValueRef coeff;
 
       coeff = lp_build_const_vec(bld->gallivm, type, coeffs[i]);
 
-      if(res)
-         res = lp_build_add(bld, coeff, lp_build_mul(bld, x, res));
-      else
-         res = coeff;
+      if (i % 2 == 0) {
+         if (even)
+            even = lp_build_add(bld, coeff, lp_build_mul(bld, x2, even));
+         else
+            even = coeff;
+      } else {
+         if (odd)
+            odd = lp_build_add(bld, coeff, lp_build_mul(bld, x2, odd));
+         else
+            odd = coeff;
+      }
    }
 
-   if(res)
-      return res;
+   if (odd)
+      return lp_build_add(bld, lp_build_mul(bld, odd, x), even);
+   else if (even)
+      return even;
    else
       return bld->undef;
 }
@@ -2390,41 +2743,38 @@ lp_build_extract_mantissa(struct lp_build_context *bld,
 
 
 /**
- * Minimax polynomial fit of log2(x)/(x - 1), for x in range [1, 2[
+ * Minimax polynomial fit of log2((1.0 + sqrt(x))/(1.0 - sqrt(x)))/sqrt(x) ,for x in range of [0, 1/9[
  * These coefficients can be generate with
  * http://www.boost.org/doc/libs/1_36_0/libs/math/doc/sf_and_dist/html/math_toolkit/toolkit/internals2/minimax.html
  */
 const double lp_build_log2_polynomial[] = {
-#if LOG_POLY_DEGREE == 6
-   3.11578814719469302614,
-   -3.32419399085241980044,
-   2.59883907202499966007,
-   -1.23152682416275988241,
-   0.318212422185251071475,
-   -0.0344359067839062357313
-#elif LOG_POLY_DEGREE == 5
-   2.8882704548164776201,
-   -2.52074962577807006663,
-   1.48116647521213171641,
-   -0.465725644288844778798,
-   0.0596515482674574969533
+#if LOG_POLY_DEGREE == 5
+   2.88539008148777786488L,
+   0.961796878841293367824L,
+   0.577058946784739859012L,
+   0.412914355135828735411L,
+   0.308591899232910175289L,
+   0.352376952300281371868L,
 #elif LOG_POLY_DEGREE == 4
-   2.61761038894603480148,
-   -1.75647175389045657003,
-   0.688243882994381274313,
-   -0.107254423828329604454
+   2.88539009343309178325L,
+   0.961791550404184197881L,
+   0.577440339438736392009L,
+   0.403343858251329912514L,
+   0.406718052498846252698L,
 #elif LOG_POLY_DEGREE == 3
-   2.28330284476918490682,
-   -1.04913055217340124191,
-   0.204446009836232697516
+   2.88538959748872753838L,
+   0.961932915889597772928L,
+   0.571118517972136195241L,
+   0.493997535084709500285L,
 #else
 #error
 #endif
 };
 
-
 /**
  * See http://www.devmaster.net/forums/showthread.php?p=43580
+ * http://en.wikipedia.org/wiki/Logarithm#Calculation
+ * http://www.nezumi.demon.co.uk/consult/logx.htm
  */
 void
 lp_build_log2_approx(struct lp_build_context *bld,
@@ -2443,6 +2793,8 @@ lp_build_log2_approx(struct lp_build_context *bld,
    LLVMValueRef one = LLVMConstBitCast(bld->one, int_vec_type);
 
    LLVMValueRef i = NULL;
+   LLVMValueRef y = NULL;
+   LLVMValueRef z = NULL;
    LLVMValueRef exp = NULL;
    LLVMValueRef mant = NULL;
    LLVMValueRef logexp = NULL;
@@ -2480,18 +2832,28 @@ lp_build_log2_approx(struct lp_build_context *bld,
    }
 
    if(p_log2) {
-      /* mant = (float) mantissa(x) */
+      /* mant = 1 + (float) mantissa(x) */
       mant = LLVMBuildAnd(builder, i, mantmask, "");
       mant = LLVMBuildOr(builder, mant, one, "");
       mant = LLVMBuildBitCast(builder, mant, vec_type, "");
 
-      logmant = lp_build_polynomial(bld, mant, lp_build_log2_polynomial,
+      /* y = (mant - 1) / (mant + 1) */
+      y = lp_build_div(bld,
+         lp_build_sub(bld, mant, bld->one),
+         lp_build_add(bld, mant, bld->one)
+      );
+
+      /* z = y^2 */
+      z = lp_build_mul(bld, y, y);
+
+      /* compute P(z) */
+      logmant = lp_build_polynomial(bld, z, lp_build_log2_polynomial,
                                     Elements(lp_build_log2_polynomial));
 
-      /* This effectively increases the polynomial degree by one, but ensures that log2(1) == 0*/
-      logmant = LLVMBuildFMul(builder, logmant, LLVMBuildFSub(builder, mant, bld->one, ""), "");
+      /* logmant = y * P(z) */
+      logmant = lp_build_mul(bld, y, logmant);
 
-      res = LLVMBuildFAdd(builder, logmant, logexp, "");
+      res = lp_build_add(bld, logmant, logexp);
    }
 
    if(p_exp) {
@@ -2575,4 +2937,25 @@ lp_build_ilog2(struct lp_build_context *bld,
    ipart = lp_build_extract_exponent(bld, x, 0);
 
    return ipart;
+}
+
+LLVMValueRef
+lp_build_mod(struct lp_build_context *bld,
+             LLVMValueRef x,
+             LLVMValueRef y)
+{
+   LLVMBuilderRef builder = bld->gallivm->builder;
+   LLVMValueRef res;
+   const struct lp_type type = bld->type;
+
+   assert(lp_check_value(type, x));
+   assert(lp_check_value(type, y));
+
+   if (type.floating)
+      res = LLVMBuildFRem(builder, x, y, "");
+   else if (type.sign)
+      res = LLVMBuildSRem(builder, x, y, "");
+   else
+      res = LLVMBuildURem(builder, x, y, "");
+   return res;
 }

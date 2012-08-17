@@ -27,6 +27,13 @@
 #include "ir_uniform.h"
 #include "glsl_symbol_table.h"
 #include "program/hash_table.h"
+#include "program.h"
+
+static inline unsigned int
+align(unsigned int a, unsigned int align)
+{
+   return (a + align - 1) / align * align;
+}
 
 /**
  * \file link_uniforms.cpp
@@ -67,7 +74,7 @@ uniform_field_visitor::process(ir_variable *var)
 
 void
 uniform_field_visitor::recursion(const glsl_type *t, char **name,
-				 unsigned name_length)
+				 size_t name_length)
 {
    /* Records need to have each field processed individually.
     *
@@ -78,22 +85,21 @@ uniform_field_visitor::recursion(const glsl_type *t, char **name,
    if (t->is_record()) {
       for (unsigned i = 0; i < t->length; i++) {
 	 const char *field = t->fields.structure[i].name;
+	 size_t new_length = name_length;
 
 	 /* Append '.field' to the current uniform name. */
-	 ralloc_asprintf_rewrite_tail(name, name_length, ".%s", field);
+	 ralloc_asprintf_rewrite_tail(name, &new_length, ".%s", field);
 
-	 recursion(t->fields.structure[i].type, name,
-		   name_length + 1 + strlen(field));
+	 recursion(t->fields.structure[i].type, name, new_length);
       }
    } else if (t->is_array() && t->fields.array->is_record()) {
       for (unsigned i = 0; i < t->length; i++) {
-	 char subscript[13];
+	 size_t new_length = name_length;
 
 	 /* Append the subscript to the current uniform name */
-	 const unsigned subscript_length = snprintf(subscript, 13, "[%u]", i);
-	 ralloc_asprintf_rewrite_tail(name, name_length, "%s", subscript);
+	 ralloc_asprintf_rewrite_tail(name, &new_length, "[%u]", i);
 
-	 recursion(t->fields.array, name, name_length + subscript_length);
+	 recursion(t->fields.array, name, new_length);
       }
    } else {
       this->visit_field(t, *name);
@@ -217,6 +223,38 @@ public:
       this->shader_shadow_samplers = 0;
    }
 
+   void set_and_process(struct gl_shader_program *prog,
+			struct gl_shader *shader,
+			ir_variable *var)
+   {
+      ubo_var = NULL;
+      if (var->uniform_block != -1) {
+	 struct gl_uniform_block *block =
+	    &shader->UniformBlocks[var->uniform_block];
+
+	 ubo_block_index = -1;
+	 for (unsigned i = 0; i < prog->NumUniformBlocks; i++) {
+	    if (!strcmp(prog->UniformBlocks[i].Name,
+			shader->UniformBlocks[var->uniform_block].Name)) {
+	       ubo_block_index = i;
+	       break;
+	    }
+	 }
+	 assert(ubo_block_index != -1);
+
+	 ubo_var_index = var->location;
+	 ubo_var = &block->Uniforms[var->location];
+	 ubo_byte_offset = ubo_var->Offset;
+      }
+
+      process(var);
+   }
+
+   struct gl_uniform_buffer_variable *ubo_var;
+   int ubo_block_index;
+   int ubo_var_index;
+   int ubo_byte_offset;
+
 private:
    virtual void visit_field(const glsl_type *type, const char *name)
    {
@@ -292,6 +330,36 @@ private:
       this->uniforms[id].num_driver_storage = 0;
       this->uniforms[id].driver_storage = NULL;
       this->uniforms[id].storage = this->values;
+      if (this->ubo_var) {
+	 this->uniforms[id].block_index = this->ubo_block_index;
+
+	 unsigned alignment = type->std140_base_alignment(ubo_var->RowMajor);
+	 this->ubo_byte_offset = align(this->ubo_byte_offset, alignment);
+	 this->uniforms[id].offset = this->ubo_byte_offset;
+	 this->ubo_byte_offset += type->std140_size(ubo_var->RowMajor);
+
+	 if (type->is_array()) {
+	    this->uniforms[id].array_stride =
+	       align(type->fields.array->std140_size(ubo_var->RowMajor), 16);
+	 } else {
+	    this->uniforms[id].array_stride = 0;
+	 }
+
+	 if (type->is_matrix() ||
+	     (type->is_array() && type->fields.array->is_matrix())) {
+	    this->uniforms[id].matrix_stride = 16;
+	    this->uniforms[id].row_major = ubo_var->RowMajor;
+	 } else {
+	    this->uniforms[id].matrix_stride = 0;
+	    this->uniforms[id].row_major = false;
+	 }
+      } else {
+	 this->uniforms[id].block_index = -1;
+	 this->uniforms[id].offset = -1;
+	 this->uniforms[id].array_stride = -1;
+	 this->uniforms[id].matrix_stride = -1;
+	 this->uniforms[id].row_major = false;
+      }
 
       this->values += values_for_type(type);
    }
@@ -317,6 +385,137 @@ public:
    unsigned shader_shadow_samplers;
 };
 
+/**
+ * Merges a uniform block into an array of uniform blocks that may or
+ * may not already contain a copy of it.
+ *
+ * Returns the index of the new block in the array.
+ */
+int
+link_cross_validate_uniform_block(void *mem_ctx,
+				  struct gl_uniform_block **linked_blocks,
+				  unsigned int *num_linked_blocks,
+				  struct gl_uniform_block *new_block)
+{
+   for (unsigned int i = 0; i < *num_linked_blocks; i++) {
+      struct gl_uniform_block *old_block = &(*linked_blocks)[i];
+      if (strcmp(old_block->Name, new_block->Name) == 0) {
+	 if (old_block->NumUniforms != new_block->NumUniforms) {
+	    return -1;
+	 }
+
+	 for (unsigned j = 0; j < old_block->NumUniforms; j++) {
+	    if (strcmp(old_block->Uniforms[j].Name,
+		       new_block->Uniforms[j].Name) != 0)
+	       return -1;
+
+	    if (old_block->Uniforms[j].Offset !=
+		new_block->Uniforms[j].Offset)
+	       return -1;
+
+	    if (old_block->Uniforms[j].RowMajor !=
+		new_block->Uniforms[j].RowMajor)
+	       return -1;
+	 }
+	 return i;
+      }
+   }
+
+   *linked_blocks = reralloc(mem_ctx, *linked_blocks,
+			     struct gl_uniform_block,
+			     *num_linked_blocks + 1);
+   int linked_block_index = (*num_linked_blocks)++;
+   struct gl_uniform_block *linked_block = &(*linked_blocks)[linked_block_index];
+
+   memcpy(linked_block, new_block, sizeof(*new_block));
+   linked_block->Uniforms = ralloc_array(*linked_blocks,
+					 struct gl_uniform_buffer_variable,
+					 linked_block->NumUniforms);
+
+   memcpy(linked_block->Uniforms,
+	  new_block->Uniforms,
+	  sizeof(*linked_block->Uniforms) * linked_block->NumUniforms);
+
+   for (unsigned int i = 0; i < linked_block->NumUniforms; i++) {
+      struct gl_uniform_buffer_variable *ubo_var =
+	 &linked_block->Uniforms[i];
+
+      ubo_var->Name = ralloc_strdup(*linked_blocks, ubo_var->Name);
+   }
+
+   return linked_block_index;
+}
+
+/**
+ * Walks the IR and update the references to uniform blocks in the
+ * ir_variables to point at linked shader's list (previously, they
+ * would point at the uniform block list in one of the pre-linked
+ * shaders).
+ */
+static bool
+link_update_uniform_buffer_variables(struct gl_shader *shader)
+{
+   foreach_list(node, shader->ir) {
+      ir_variable *const var = ((ir_instruction *) node)->as_variable();
+
+      if ((var == NULL) || (var->uniform_block == -1))
+	 continue;
+
+      assert(var->mode == ir_var_uniform);
+
+      bool found = false;
+      for (unsigned i = 0; i < shader->NumUniformBlocks; i++) {
+	 for (unsigned j = 0; j < shader->UniformBlocks[i].NumUniforms; j++) {
+	    if (!strcmp(var->name, shader->UniformBlocks[i].Uniforms[j].Name)) {
+	       found = true;
+	       var->uniform_block = i;
+	       var->location = j;
+	       break;
+	    }
+	 }
+	 if (found)
+	    break;
+      }
+      assert(found);
+   }
+
+   return true;
+}
+
+void
+link_assign_uniform_block_offsets(struct gl_shader *shader)
+{
+   for (unsigned b = 0; b < shader->NumUniformBlocks; b++) {
+      struct gl_uniform_block *block = &shader->UniformBlocks[b];
+
+      unsigned offset = 0;
+      for (unsigned int i = 0; i < block->NumUniforms; i++) {
+	 struct gl_uniform_buffer_variable *ubo_var = &block->Uniforms[i];
+	 const struct glsl_type *type = ubo_var->Type;
+
+	 unsigned alignment = type->std140_base_alignment(ubo_var->RowMajor);
+	 unsigned size = type->std140_size(ubo_var->RowMajor);
+
+	 offset = align(offset, alignment);
+	 ubo_var->Offset = offset;
+	 offset += size;
+      }
+
+      /* From the GL_ARB_uniform_buffer_object spec:
+       *
+       *     "For uniform blocks laid out according to [std140] rules,
+       *      the minimum buffer object size returned by the
+       *      UNIFORM_BLOCK_DATA_SIZE query is derived by taking the
+       *      offset of the last basic machine unit consumed by the
+       *      last uniform of the uniform block (including any
+       *      end-of-array or end-of-structure padding), adding one,
+       *      and rounding up to the next multiple of the base
+       *      alignment required for a vec4."
+       */
+      block->UniformBufferSize = align(offset, 16);
+   }
+}
+
 void
 link_assign_uniform_locations(struct gl_shader_program *prog)
 {
@@ -330,8 +529,23 @@ link_assign_uniform_locations(struct gl_shader_program *prog)
       prog->UniformHash = new string_to_uint_map;
    }
 
-   for (unsigned i = 0; i < Elements(prog->SamplerUnits); i++) {
-      prog->SamplerUnits[i] = i;
+   /* Uniforms that lack an initializer in the shader code have an initial
+    * value of zero.  This includes sampler uniforms.
+    *
+    * Page 24 (page 30 of the PDF) of the GLSL 1.20 spec says:
+    *
+    *     "The link time initial value is either the value of the variable's
+    *     initializer, if present, or 0 if no initializer is present. Sampler
+    *     types cannot have initializers."
+    */
+   memset(prog->SamplerUnits, 0, sizeof(prog->SamplerUnits));
+
+   for (unsigned i = 0; i < MESA_SHADER_TYPES; i++) {
+      if (prog->_LinkedShaders[i] == NULL)
+	 continue;
+
+      if (!link_update_uniform_buffer_variables(prog->_LinkedShaders[i]))
+	 return;
    }
 
    /* First pass: Count the uniform resources used by the user-defined
@@ -406,7 +620,7 @@ link_assign_uniform_locations(struct gl_shader_program *prog)
 	 if (strncmp("gl_", var->name, 3) == 0)
 	    continue;
 
-	 parcel.process(var);
+	 parcel.set_and_process(prog, prog->_LinkedShaders[i], var);
       }
 
       prog->_LinkedShaders[i]->active_samplers = parcel.shader_samplers_used;
@@ -426,6 +640,8 @@ link_assign_uniform_locations(struct gl_shader_program *prog)
 
    prog->NumUserUniformStorage = num_user_uniforms;
    prog->UniformStorage = uniforms;
+
+   link_set_uniform_initializers(prog);
 
    return;
 }

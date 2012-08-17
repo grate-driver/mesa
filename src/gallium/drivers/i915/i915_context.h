@@ -104,6 +104,9 @@ struct i915_fragment_shader
 
    struct draw_fragment_shader *draw_data;
 
+   uint *decl;
+   uint decl_len;
+
    uint *program;
    uint program_len;
 
@@ -152,6 +155,8 @@ struct i915_state
    unsigned sampler[I915_TEX_UNITS][3];
    unsigned sampler_enable_flags;
    unsigned sampler_enable_nr;
+   boolean sampler_srgb[I915_TEX_UNITS];
+   int srgb_const_offset;
 
    /* texture image buffers */
    unsigned texbuffer[I915_TEX_UNITS][2];
@@ -167,7 +172,7 @@ struct i915_state
    unsigned dst_buf_vars;
    uint32_t draw_offset;
    uint32_t draw_size;
-   unsigned need_target_fixup;
+   uint32_t target_fixup_format;
    uint32_t fixup_swizzle;
 
    unsigned id;			/* track lost context events */

@@ -314,6 +314,8 @@ radeon_create_image(__DRIscreen *screen,
    if (image == NULL)
       return NULL;
 
+   image->dri_format = format;
+
    switch (format) {
    case __DRI_IMAGE_FORMAT_RGB565:
       image->format = MESA_FORMAT_RGB565;
@@ -375,7 +377,7 @@ radeon_query_image(__DRIimage *image, int attrib, int *value)
 }
 
 static struct __DRIimageExtensionRec radeonImageExtension = {
-    { __DRI_IMAGE, __DRI_IMAGE_VERSION },
+    { __DRI_IMAGE, 1 },
    radeon_create_image_from_name,
    radeon_create_image_from_renderbuffer,
    radeon_destroy_image,
@@ -514,7 +516,7 @@ radeonCreateScreen2(__DRIscreen *sPriv)
    if (ret == -1)
      return NULL;
 
-   if (getenv("R300_NO_TCL"))
+   if (getenv("RADEON_NO_TCL"))
 	   screen->chip_flags &= ~RADEON_CHIPSET_TCL;
 
    i = 0;
@@ -758,10 +760,7 @@ __DRIconfig **radeonInitScreen2(__DRIscreen *psp)
 				     msaa_samples_array,
 				     ARRAY_SIZE(msaa_samples_array),
 				     GL_TRUE);
-      if (configs == NULL)
-	 configs = new_configs;
-      else
-	 configs = driConcatConfigs(configs, new_configs);
+      configs = driConcatConfigs(configs, new_configs);
    }
 
    if (configs == NULL) {

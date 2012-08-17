@@ -147,10 +147,11 @@ static void vbo_bind_vertex_list(struct gl_context *ctx,
    switch (get_program_mode(ctx)) {
    case VP_NONE:
       for (attr = 0; attr < VERT_ATTRIB_FF_MAX; attr++) {
-         save->inputs[attr] = &vbo->legacy_currval[attr];
+         save->inputs[attr] = &vbo->currval[VBO_ATTRIB_POS+attr];
       }
       for (attr = 0; attr < MAT_ATTRIB_MAX; attr++) {
-         save->inputs[VERT_ATTRIB_GENERIC(attr)] = &vbo->mat_currval[attr];
+         save->inputs[VERT_ATTRIB_GENERIC(attr)] =
+            &vbo->currval[VBO_ATTRIB_MAT_FRONT_AMBIENT+attr];
       }
       map = vbo->map_vp_none;
       break;
@@ -161,10 +162,11 @@ static void vbo_bind_vertex_list(struct gl_context *ctx,
        * nor attributes greater than VERT_ATTRIB_TEX7.  
        */
       for (attr = 0; attr < VERT_ATTRIB_FF_MAX; attr++) {
-         save->inputs[attr] = &vbo->legacy_currval[attr];
+         save->inputs[attr] = &vbo->currval[VBO_ATTRIB_POS+attr];
       }
       for (attr = 0; attr < VERT_ATTRIB_GENERIC_MAX; attr++) {
-         save->inputs[VERT_ATTRIB_GENERIC(attr)] = &vbo->generic_currval[attr];
+         save->inputs[VERT_ATTRIB_GENERIC(attr)] =
+            &vbo->currval[VBO_ATTRIB_GENERIC0+attr];
       }
       map = vbo->map_vp_arb;
 
@@ -207,11 +209,11 @@ static void vbo_bind_vertex_list(struct gl_context *ctx,
 
 	 buffer_offset += node_attrsz[src] * sizeof(GLfloat);
          varying_inputs |= VERT_BIT(attr);
-         ctx->NewState |= _NEW_ARRAY;
       }
    }
 
    _mesa_set_varying_vp_inputs( ctx, varying_inputs );
+   ctx->NewDriverState |= ctx->DriverFlags.NewArray;
 }
 
 
@@ -248,7 +250,19 @@ vbo_save_playback_vertex_list(struct gl_context *ctx, void *data)
    const struct vbo_save_vertex_list *node =
       (const struct vbo_save_vertex_list *) data;
    struct vbo_save_context *save = &vbo_context(ctx)->save;
-   struct vbo_exec_context *exec = &vbo_context(ctx)->exec;
+   GLboolean remap_vertex_store = GL_FALSE;
+
+   if (save->vertex_store->buffer) {
+      /* The vertex store is currently mapped but we're about to replay
+       * a display list.  This can happen when a nested display list is
+       * being build with GL_COMPILE_AND_EXECUTE.
+       * We never want to have mapped vertex buffers when we're drawing.
+       * Unmap the vertex store, execute the list, then remap the vertex
+       * store.
+       */
+      vbo_save_unmap_vertex_store(ctx, save->vertex_store);
+      remap_vertex_store = GL_TRUE;
+   }
 
    FLUSH_CURRENT(ctx, 0);
 
@@ -264,14 +278,16 @@ vbo_save_playback_vertex_list(struct gl_context *ctx, void *data)
 	    printf("displaylist recursive begin");
 
 	 vbo_save_loopback_vertex_list( ctx, node );
-	 return;
+
+         goto end;
       }
       else if (save->replay_flags) {
 	 /* Various degnerate cases: translate into immediate mode
 	  * calls rather than trying to execute in place.
 	  */
 	 vbo_save_loopback_vertex_list( ctx, node );
-	 return;
+
+         goto end;
       }
       
       if (ctx->NewState)
@@ -287,7 +303,7 @@ vbo_save_playback_vertex_list(struct gl_context *ctx, void *data)
 
       vbo_bind_vertex_list( ctx, node );
 
-      vbo_draw_method(exec, DRAW_DISPLAY_LIST);
+      vbo_draw_method(vbo_context(ctx), DRAW_DISPLAY_LIST);
 
       /* Again...
        */
@@ -296,8 +312,7 @@ vbo_save_playback_vertex_list(struct gl_context *ctx, void *data)
 
       if (node->count > 0) {
          vbo_context(ctx)->draw_prims(ctx, 
-                                      save->inputs, 
-                                      node->prim, 
+                                      node->prim,
                                       node->prim_count,
                                       NULL,
                                       GL_TRUE,
@@ -310,6 +325,11 @@ vbo_save_playback_vertex_list(struct gl_context *ctx, void *data)
    /* Copy to current?
     */
    _playback_copy_to_current( ctx, node );
+
+end:
+   if (remap_vertex_store) {
+      save->buffer_ptr = vbo_save_map_vertex_store(ctx, save->vertex_store);
+   }
 }
 
 

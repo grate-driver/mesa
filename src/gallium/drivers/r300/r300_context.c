@@ -36,26 +36,6 @@
 #include "r300_screen.h"
 #include "r300_screen_buffer.h"
 
-static void r300_update_num_contexts(struct r300_screen *r300screen,
-                                     int diff)
-{
-    pipe_mutex_lock(r300screen->num_contexts_mutex);
-    if (diff > 0) {
-        r300screen->num_contexts++;
-
-        if (r300screen->num_contexts > 1)
-            util_slab_set_thread_safety(&r300screen->pool_buffers,
-                                        UTIL_SLAB_MULTITHREADED);
-    } else {
-        r300screen->num_contexts--;
-
-        if (r300screen->num_contexts <= 1)
-            util_slab_set_thread_safety(&r300screen->pool_buffers,
-                                        UTIL_SLAB_SINGLETHREADED);
-    }
-    pipe_mutex_unlock(r300screen->num_contexts_mutex);
-}
-
 static void r300_release_referenced_objects(struct r300_context *r300)
 {
     struct pipe_framebuffer_state *fb =
@@ -80,7 +60,7 @@ static void r300_release_referenced_objects(struct r300_context *r300)
     }
 
     /* Manually-created vertex buffers. */
-    pipe_resource_reference(&r300->dummy_vb, NULL);
+    pipe_resource_reference(&r300->dummy_vb.buffer, NULL);
     pipe_resource_reference(&r300->vbo, NULL);
 
     r300->context.delete_depth_stencil_alpha_state(&r300->context,
@@ -100,8 +80,8 @@ static void r300_destroy_context(struct pipe_context* context)
     if (r300->draw)
         draw_destroy(r300->draw);
 
-    if (r300->vbuf_mgr)
-        u_vbuf_destroy(r300->vbuf_mgr);
+    if (r300->uploader)
+        u_upload_destroy(r300->uploader);
 
     /* XXX: This function assumes r300->query_list was initialized */
     r300_release_referenced_objects(r300);
@@ -111,8 +91,6 @@ static void r300_destroy_context(struct pipe_context* context)
 
     /* XXX: No way to tell if this was initialized or not? */
     util_slab_destroy(&r300->pool_transfers);
-
-    r300_update_num_contexts(r300->screen, -1);
 
     /* Free the structs allocated in r300_setup_atoms() */
     if (r300->aa_state.state) {
@@ -380,12 +358,9 @@ struct pipe_context* r300_create_context(struct pipe_screen* screen,
     if (!r300)
         return NULL;
 
-    r300_update_num_contexts(r300screen, 1);
-
     r300->rws = rws;
     r300->screen = r300screen;
 
-    r300->context.winsys = (struct pipe_winsys*)rws;
     r300->context.screen = screen;
     r300->context.priv = priv;
 
@@ -409,6 +384,9 @@ struct pipe_context* r300_create_context(struct pipe_screen* screen,
         /* Disable converting points/lines to triangles. */
         draw_wide_line_threshold(r300->draw, 10000000.f);
         draw_wide_point_threshold(r300->draw, 10000000.f);
+        draw_wide_point_sprites(r300->draw, FALSE);
+        draw_enable_line_stipple(r300->draw, TRUE);
+        draw_enable_point_sprites(r300->draw, FALSE);
     }
 
     if (!r300_setup_atoms(r300))
@@ -419,27 +397,21 @@ struct pipe_context* r300_create_context(struct pipe_screen* screen,
     r300_init_query_functions(r300);
     r300_init_state_functions(r300);
     r300_init_resource_functions(r300);
+    r300_init_render_functions(r300);
+    r300_init_states(&r300->context);
 
     r300->context.create_video_decoder = vl_create_decoder;
     r300->context.create_video_buffer = vl_video_buffer_create;
 
-    if (r300->screen->caps.has_tcl) {
-        r300->vbuf_mgr = u_vbuf_create(&r300->context, 1024 * 1024, 16,
-                                       PIPE_BIND_VERTEX_BUFFER |
-                                       PIPE_BIND_INDEX_BUFFER,
-                                       U_VERTEX_FETCH_DWORD_ALIGNED);
-        if (!r300->vbuf_mgr)
-            goto fail;
-        r300->vbuf_mgr->caps.format_fixed32 = 0;
+    if (r300screen->caps.has_tcl) {
+        r300->uploader = u_upload_create(&r300->context, 256 * 1024, 4,
+                                         PIPE_BIND_INDEX_BUFFER);
     }
 
     r300->blitter = util_blitter_create(&r300->context);
     if (r300->blitter == NULL)
         goto fail;
-
-    /* Render functions must be initialized after blitter. */
-    r300_init_render_functions(r300);
-    r300_init_states(&r300->context);
+    r300->blitter->draw_rectangle = r300_blitter_draw_rectangle;
 
     rws->cs_set_flush_callback(r300->cs, r300_flush_callback, r300);
 
@@ -468,7 +440,7 @@ struct pipe_context* r300_create_context(struct pipe_screen* screen,
         pipe_resource_reference(&tex, NULL);
     }
 
-    {
+    if (r300screen->caps.has_tcl) {
         struct pipe_resource vb;
         memset(&vb, 0, sizeof(vb));
         vb.target = PIPE_BUFFER;
@@ -479,7 +451,7 @@ struct pipe_context* r300_create_context(struct pipe_screen* screen,
         vb.height0 = 1;
         vb.depth0 = 1;
 
-        r300->dummy_vb = screen->resource_create(screen, &vb);
+        r300->dummy_vb.buffer = screen->resource_create(screen, &vb);
     }
 
     {

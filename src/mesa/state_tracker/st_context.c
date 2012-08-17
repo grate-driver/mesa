@@ -63,6 +63,7 @@
 #include "st_program.h"
 #include "pipe/p_context.h"
 #include "util/u_inlines.h"
+#include "util/u_upload_mgr.h"
 #include "cso_cache/cso_context.h"
 
 
@@ -75,6 +76,17 @@ DEBUG_GET_ONCE_BOOL_OPTION(mesa_mvp_dp4, "MESA_MVP_DP4", FALSE)
 void st_invalidate_state(struct gl_context * ctx, GLuint new_state)
 {
    struct st_context *st = st_context(ctx);
+
+   /* Replace _NEW_FRAG_CLAMP with ST_NEW_FRAGMENT_PROGRAM for the fallback. */
+   if (st->clamp_frag_color_in_shader && (new_state & _NEW_FRAG_CLAMP)) {
+      new_state &= ~_NEW_FRAG_CLAMP;
+      st->dirty.st |= ST_NEW_FRAGMENT_PROGRAM;
+   }
+
+   /* Update the vertex shader if ctx->Light._ClampVertexColor was changed. */
+   if (st->clamp_vert_color_in_shader && (new_state & _NEW_LIGHT)) {
+      st->dirty.st |= ST_NEW_VERTEX_PROGRAM;
+   }
 
    st->dirty.mesa |= new_state;
    st->dirty.st |= ST_NEW_MESA;
@@ -99,9 +111,12 @@ st_get_msaa(void)
 }
 
 
+
+
 static struct st_context *
 st_create_context_priv( struct gl_context *ctx, struct pipe_context *pipe )
 {
+   struct pipe_screen *screen = pipe->screen;
    uint i;
    struct st_context *st = ST_CALLOC_STRUCT( st_context );
    
@@ -118,6 +133,21 @@ st_create_context_priv( struct gl_context *ctx, struct pipe_context *pipe )
 
    st->dirty.mesa = ~0;
    st->dirty.st = ~0;
+
+   st->uploader = u_upload_create(st->pipe, 65536, 4, PIPE_BIND_VERTEX_BUFFER);
+
+   if (!screen->get_param(screen, PIPE_CAP_USER_INDEX_BUFFERS)) {
+      st->indexbuf_uploader = u_upload_create(st->pipe, 128 * 1024, 4,
+                                              PIPE_BIND_INDEX_BUFFER);
+   }
+
+   if (!screen->get_param(screen, PIPE_CAP_USER_CONSTANT_BUFFERS)) {
+      unsigned alignment =
+         screen->get_param(screen, PIPE_CAP_CONSTANT_BUFFER_OFFSET_ALIGNMENT);
+
+      st->constbuf_uploader = u_upload_create(pipe, 128 * 1024, alignment,
+                                              PIPE_BIND_CONSTANT_BUFFER);
+   }
 
    st->cso_context = cso_create_context(pipe);
 
@@ -157,6 +187,8 @@ st_create_context_priv( struct gl_context *ctx, struct pipe_context *pipe )
    st->pixel_xfer.cache = _mesa_new_program_cache();
 
    st->force_msaa = st_get_msaa();
+   st->has_stencil_export =
+      screen->get_param(screen, PIPE_CAP_SHADER_STENCIL_EXPORT);
 
    /* GL limits and extensions */
    st_init_limits(st);
@@ -165,6 +197,10 @@ st_create_context_priv( struct gl_context *ctx, struct pipe_context *pipe )
    return st;
 }
 
+static void st_init_driver_flags(struct gl_driver_flags *f)
+{
+   f->NewArray = ST_NEW_VERTEX_ARRAYS;
+}
 
 struct st_context *st_create_context(gl_api api, struct pipe_context *pipe,
                                      const struct gl_config *visual,
@@ -175,9 +211,9 @@ struct st_context *st_create_context(gl_api api, struct pipe_context *pipe,
    struct dd_function_table funcs;
 
    /* Sanity checks */
-   assert(MESA_SHADER_VERTEX == PIPE_SHADER_VERTEX);
-   assert(MESA_SHADER_FRAGMENT == PIPE_SHADER_FRAGMENT);
-   assert(MESA_SHADER_GEOMETRY == PIPE_SHADER_GEOMETRY);
+   STATIC_ASSERT(MESA_SHADER_VERTEX == PIPE_SHADER_VERTEX);
+   STATIC_ASSERT(MESA_SHADER_FRAGMENT == PIPE_SHADER_FRAGMENT);
+   STATIC_ASSERT(MESA_SHADER_GEOMETRY == PIPE_SHADER_GEOMETRY);
 
    memset(&funcs, 0, sizeof(funcs));
    st_init_driver_functions(&funcs);
@@ -186,6 +222,8 @@ struct st_context *st_create_context(gl_api api, struct pipe_context *pipe,
    if (!ctx) {
       return NULL;
    }
+
+   st_init_driver_flags(&ctx->DriverFlags);
 
    /* XXX: need a capability bit in gallium to query if the pipe
     * driver prefers DP4 or MUL/MAD for vertex transformation.
@@ -210,13 +248,14 @@ static void st_destroy_context_priv( struct st_context *st )
    st_destroy_drawpix(st);
    st_destroy_drawtex(st);
 
-   /* Unreference any user vertex buffers. */
-   for (i = 0; i < st->num_user_attribs; i++) {
-      pipe_resource_reference(&st->user_attrib[i].buffer, NULL);
+   for (i = 0; i < Elements(st->state.fragment_sampler_views); i++) {
+      pipe_sampler_view_release(st->pipe,
+                                &st->state.fragment_sampler_views[i]);
    }
 
-   for (i = 0; i < Elements(st->state.sampler_views); i++) {
-      pipe_sampler_view_reference(&st->state.sampler_views[i], NULL);
+   for (i = 0; i < Elements(st->state.vertex_sampler_views); i++) {
+      pipe_sampler_view_release(st->pipe,
+                                &st->state.vertex_sampler_views[i]);
    }
 
    if (st->default_texture) {
@@ -224,6 +263,13 @@ static void st_destroy_context_priv( struct st_context *st )
       st->default_texture = NULL;
    }
 
+   u_upload_destroy(st->uploader);
+   if (st->indexbuf_uploader) {
+      u_upload_destroy(st->indexbuf_uploader);
+   }
+   if (st->constbuf_uploader) {
+      u_upload_destroy(st->constbuf_uploader);
+   }
    free( st );
 }
 
@@ -261,7 +307,10 @@ void st_destroy_context( struct st_context *st )
 
    _mesa_free_context_data(ctx);
 
+   /* This will free the st_context too, so 'st' must not be accessed
+    * afterwards. */
    st_destroy_context_priv(st);
+   st = NULL;
 
    cso_destroy_context(cso);
 

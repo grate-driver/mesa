@@ -42,6 +42,7 @@
 
 #if HAVE_LLVM
 #include "gallivm/lp_bld_init.h"
+#include "gallivm/lp_bld_limits.h"
 #include "draw_llvm.h"
 
 static boolean
@@ -69,8 +70,7 @@ draw_get_option_use_llvm(void)
  * Create new draw module context with gallivm state for LLVM JIT.
  */
 static struct draw_context *
-draw_create_context(struct pipe_context *pipe, boolean try_llvm,
-                    struct gallivm_state *gallivm)
+draw_create_context(struct pipe_context *pipe, boolean try_llvm)
 {
    struct draw_context *draw = CALLOC_STRUCT( draw_context );
    if (draw == NULL)
@@ -78,25 +78,16 @@ draw_create_context(struct pipe_context *pipe, boolean try_llvm,
 
 #if HAVE_LLVM
    if (try_llvm && draw_get_option_use_llvm()) {
-      if (!gallivm) {
-         gallivm = gallivm_create();
-         draw->own_gallivm = gallivm;
-      }
-
-      if (!gallivm)
-         goto err_destroy;
-
-      draw->llvm = draw_llvm_create(draw, gallivm);
-
+      draw->llvm = draw_llvm_create(draw);
       if (!draw->llvm)
          goto err_destroy;
    }
 #endif
 
+   draw->pipe = pipe;
+
    if (!draw_init(draw))
       goto err_destroy;
-
-   draw->pipe = pipe;
 
    return draw;
 
@@ -113,7 +104,7 @@ err_out:
 struct draw_context *
 draw_create(struct pipe_context *pipe)
 {
-   return draw_create_context(pipe, TRUE, NULL);
+   return draw_create_context(pipe, TRUE);
 }
 
 
@@ -123,17 +114,7 @@ draw_create(struct pipe_context *pipe)
 struct draw_context *
 draw_create_no_llvm(struct pipe_context *pipe)
 {
-   return draw_create_context(pipe, FALSE, NULL);
-}
-
-
-/**
- * Create new draw module context with gallivm state for LLVM JIT.
- */
-struct draw_context *
-draw_create_gallivm(struct pipe_context *pipe, struct gallivm_state *gallivm)
-{
-   return draw_create_context(pipe, TRUE, gallivm);
+   return draw_create_context(pipe, FALSE);
 }
 
 
@@ -155,8 +136,6 @@ boolean draw_init(struct draw_context *draw)
    draw->clip_z = TRUE;
 
    draw->pt.user.planes = (float (*) [DRAW_TOTAL_CLIP_PLANES][4]) &(draw->plane[0]);
-   draw->reduced_prim = ~0; /* != any of PIPE_PRIM_x */
-
 
    if (!draw_pipeline_init( draw ))
       return FALSE;
@@ -169,6 +148,9 @@ boolean draw_init(struct draw_context *draw)
 
    if (!draw_gs_init( draw ))
       return FALSE;
+
+   draw->quads_always_flatshade_last = !draw->pipe->screen->get_param(
+      draw->pipe->screen, PIPE_CAP_QUADS_FOLLOW_PROVOKING_VERTEX_CONVENTION);
 
    return TRUE;
 }
@@ -211,9 +193,6 @@ void draw_destroy( struct draw_context *draw )
 #ifdef HAVE_LLVM
    if (draw->llvm)
       draw_llvm_destroy( draw->llvm );
-
-   if (draw->own_gallivm)
-      gallivm_destroy(draw->own_gallivm);
 #endif
 
    FREE( draw );
@@ -356,6 +335,10 @@ draw_set_vertex_elements(struct draw_context *draw,
                          const struct pipe_vertex_element *elements)
 {
    assert(count <= PIPE_MAX_ATTRIBS);
+
+   /* We could improve this by only flushing the frontend and the fetch part
+    * of the middle. This would avoid recalculating the emit keys.*/
+   draw_do_flush( draw, DRAW_FLUSH_STATE_CHANGE );
 
    memcpy(draw->pt.vertex_element, elements, count * sizeof(elements[0]));
    draw->pt.nr_vertex_elements = count;
@@ -622,25 +605,23 @@ void draw_set_render( struct draw_context *draw,
 }
 
 
-void
-draw_set_index_buffer(struct draw_context *draw,
-                      const struct pipe_index_buffer *ib)
-{
-   if (ib)
-      memcpy(&draw->pt.index_buffer, ib, sizeof(draw->pt.index_buffer));
-   else
-      memset(&draw->pt.index_buffer, 0, sizeof(draw->pt.index_buffer));
-}
-
-
 /**
- * Tell drawing context where to find mapped index/element buffer.
+ * Tell the draw module where vertex indexes/elements are located, and
+ * their size (in bytes).
+ *
+ * Note: the caller must apply the pipe_index_buffer::offset value to
+ * the address.  The draw module doesn't do that.
  */
 void
-draw_set_mapped_index_buffer(struct draw_context *draw,
-                             const void *elements)
+draw_set_indexes(struct draw_context *draw,
+                 const void *elements, unsigned elem_size)
 {
-    draw->pt.user.elts = elements;
+   assert(elem_size == 0 ||
+          elem_size == 1 ||
+          elem_size == 2 ||
+          elem_size == 4);
+   draw->pt.user.elts = elements;
+   draw->pt.user.eltSize = elem_size;
 }
 
 
@@ -656,8 +637,8 @@ void draw_do_flush( struct draw_context *draw, unsigned flags )
 
       draw_pipeline_flush( draw, flags );
 
-      draw->reduced_prim = ~0; /* is reduced_prim needed any more? */
-      
+      draw_pt_flush( draw, flags );
+
       draw->flushing = FALSE;
    }
 }
@@ -827,3 +808,43 @@ draw_set_mapped_texture(struct draw_context *draw,
                                 row_stride, img_stride, data);
 #endif
 }
+
+/**
+ * XXX: Results for PIPE_SHADER_CAP_MAX_TEXTURE_SAMPLERS because there are two
+ * different ways of setting textures, and drivers typically only support one.
+ */
+int
+draw_get_shader_param_no_llvm(unsigned shader, enum pipe_shader_cap param)
+{
+   switch(shader) {
+   case PIPE_SHADER_VERTEX:
+   case PIPE_SHADER_GEOMETRY:
+      return tgsi_exec_get_shader_param(param);
+   default:
+      return 0;
+   }
+}
+
+/**
+ * XXX: Results for PIPE_SHADER_CAP_MAX_TEXTURE_SAMPLERS because there are two
+ * different ways of setting textures, and drivers typically only support one.
+ */
+int
+draw_get_shader_param(unsigned shader, enum pipe_shader_cap param)
+{
+
+#ifdef HAVE_LLVM
+   if (draw_get_option_use_llvm()) {
+      switch(shader) {
+      case PIPE_SHADER_VERTEX:
+      case PIPE_SHADER_GEOMETRY:
+         return gallivm_get_shader_param(param);
+      default:
+         return 0;
+      }
+   }
+#endif
+
+   return draw_get_shader_param_no_llvm(shader, param);
+}
+

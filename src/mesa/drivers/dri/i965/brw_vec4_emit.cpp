@@ -96,7 +96,7 @@ vec4_visitor::setup_attributes(int payload_reg)
 
    prog_data->urb_read_length = (nr_attributes + 1) / 2;
 
-   unsigned vue_entries = MAX2(nr_attributes, c->vue_map.num_slots);
+   unsigned vue_entries = MAX2(nr_attributes, c->prog_data.vue_map.num_slots);
 
    if (intel->gen == 6)
       c->prog_data.urb_entry_size = ALIGN(vue_entries, 8) / 8;
@@ -262,7 +262,6 @@ vec4_visitor::generate_math1_gen4(vec4_instruction *inst,
    brw_math(p,
 	    dst,
 	    brw_math_function(inst->opcode),
-	    BRW_MATH_SATURATE_NONE,
 	    inst->base_mrf,
 	    src,
 	    BRW_MATH_DATA_VECTOR,
@@ -291,7 +290,6 @@ vec4_visitor::generate_math1_gen6(vec4_instruction *inst,
    brw_math(p,
 	    dst,
 	    brw_math_function(inst->opcode),
-	    BRW_MATH_SATURATE_NONE,
 	    inst->base_mrf,
 	    src,
 	    BRW_MATH_DATA_SCALAR,
@@ -350,12 +348,15 @@ vec4_visitor::generate_math2_gen4(vec4_instruction *inst,
    struct brw_reg &op0 = is_int_div ? src1 : src0;
    struct brw_reg &op1 = is_int_div ? src0 : src1;
 
+   brw_push_insn_state(p);
+   brw_set_saturate(p, false);
+   brw_set_predicate_control(p, BRW_PREDICATE_NONE);
    brw_MOV(p, retype(brw_message_reg(inst->base_mrf + 1), op1.type), op1);
+   brw_pop_insn_state(p);
 
    brw_math(p,
 	    dst,
 	    brw_math_function(inst->opcode),
-	    BRW_MATH_SATURATE_NONE,
 	    inst->base_mrf,
 	    op0,
 	    BRW_MATH_DATA_VECTOR,
@@ -465,7 +466,7 @@ vec4_visitor::generate_tex(vec4_instruction *inst,
 	      dst,
 	      inst->base_mrf,
 	      src,
-	      SURF_INDEX_TEXTURE(inst->sampler),
+	      SURF_INDEX_VS_TEXTURE(inst->sampler),
 	      inst->sampler,
 	      WRITEMASK_XYZW,
 	      msg_type,
@@ -645,15 +646,20 @@ vec4_visitor::generate_scratch_write(vec4_instruction *inst,
 void
 vec4_visitor::generate_pull_constant_load(vec4_instruction *inst,
 					  struct brw_reg dst,
-					  struct brw_reg index)
+					  struct brw_reg index,
+					  struct brw_reg offset)
 {
+   assert(index.file == BRW_IMMEDIATE_VALUE &&
+	  index.type == BRW_REGISTER_TYPE_UD);
+   uint32_t surf_index = index.dw1.ud;
+
    if (intel->gen == 7) {
-      gen6_resolve_implied_move(p, &index, inst->base_mrf);
+      gen6_resolve_implied_move(p, &offset, inst->base_mrf);
       brw_instruction *insn = brw_next_insn(p, BRW_OPCODE_SEND);
       brw_set_dest(p, insn, dst);
-      brw_set_src0(p, insn, index);
+      brw_set_src0(p, insn, offset);
       brw_set_sampler_message(p, insn,
-                              SURF_INDEX_VERT_CONST_BUFFER,
+                              surf_index,
                               0, /* LD message ignores sampler unit */
                               GEN5_SAMPLER_MESSAGE_SAMPLE_LD,
                               1, /* rlen */
@@ -669,7 +675,7 @@ vec4_visitor::generate_pull_constant_load(vec4_instruction *inst,
    gen6_resolve_implied_move(p, &header, inst->base_mrf);
 
    brw_MOV(p, retype(brw_message_reg(inst->base_mrf + 1), BRW_REGISTER_TYPE_D),
-	   index);
+	   offset);
 
    uint32_t msg_type;
 
@@ -689,7 +695,7 @@ vec4_visitor::generate_pull_constant_load(vec4_instruction *inst,
    if (intel->gen < 6)
       send->header.destreg__conditionalmod = inst->base_mrf;
    brw_set_dp_read_message(p, send,
-			   SURF_INDEX_VERT_CONST_BUFFER,
+			   surf_index,
 			   BRW_DATAPORT_OWORD_DUAL_BLOCK_1OWORD,
 			   msg_type,
 			   BRW_DATAPORT_READ_TARGET_DATA_CACHE,
@@ -753,7 +759,7 @@ vec4_visitor::generate_vs_instruction(vec4_instruction *instruction,
       break;
 
    case VS_OPCODE_PULL_CONSTANT_LOAD:
-      generate_pull_constant_load(inst, dst, src[0]);
+      generate_pull_constant_load(inst, dst, src[0], src[1]);
       break;
 
    default:
@@ -1017,8 +1023,18 @@ extern "C" {
 bool
 brw_vs_emit(struct gl_shader_program *prog, struct brw_vs_compile *c)
 {
+   struct intel_context *intel = &c->func.brw->intel;
+   bool start_busy = false;
+   float start_time = 0;
+
    if (!prog)
       return false;
+
+   if (unlikely(INTEL_DEBUG & DEBUG_PERF)) {
+      start_busy = (intel->batch.last_bo &&
+                    drm_intel_bo_busy(intel->batch.last_bo));
+      start_time = get_time();
+   }
 
    struct brw_shader *shader =
      (brw_shader *) prog->_LinkedShaders[MESA_SHADER_VERTEX];
@@ -1031,12 +1047,24 @@ brw_vs_emit(struct gl_shader_program *prog, struct brw_vs_compile *c)
       printf("\n\n");
    }
 
+   if (unlikely(INTEL_DEBUG & DEBUG_PERF)) {
+      if (shader->compiled_once) {
+         perf_debug("Recompiling vertex shader for program %d\n", prog->Name);
+      }
+      if (start_busy && !drm_intel_bo_busy(intel->batch.last_bo)) {
+         perf_debug("VS compile took %.03f ms and stalled the GPU\n",
+                    (get_time() - start_time) * 1000);
+      }
+   }
+
    vec4_visitor v(c, prog, shader);
    if (!v.run()) {
       prog->LinkStatus = false;
       ralloc_strcat(&prog->InfoLog, v.fail_msg);
       return false;
    }
+
+   shader->compiled_once = true;
 
    return true;
 }

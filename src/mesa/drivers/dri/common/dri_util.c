@@ -1,3 +1,27 @@
+/*
+ * (C) Copyright IBM Corporation 2002, 2004
+ * All Rights Reserved.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
+ * copy of this software and associated documentation files (the "Software"),
+ * to deal in the Software without restriction, including without limitation
+ * on the rights to use, copy, modify, merge, publish, distribute, sub
+ * license, and/or sell copies of the Software, and to permit persons to whom
+ * the Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice (including the next
+ * paragraph) shall be included in all copies or substantial portions of the
+ * Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT.  IN NO EVENT SHALL
+ * THE AUTHORS AND/OR THEIR SUPPLIERS BE LIABLE FOR ANY CLAIM,
+ * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+ * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+ * USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+
 /**
  * \file dri_util.c
  * DRI utility functions.
@@ -168,14 +192,10 @@ dri2CreateContextAttribs(__DRIscreen *screen, int api,
 	mesa_api = API_OPENGLES2;
 	break;
     case __DRI_API_OPENGL_CORE:
+        mesa_api = API_OPENGL_CORE;
+        break;
     default:
 	*error = __DRI_CTX_ERROR_BAD_API;
-	return NULL;
-    }
-
-    if (mesa_api != API_OPENGL && num_attribs != 0) {
-	*error = __DRI_CTX_ERROR_UNKNOWN_ATTRIBUTE;
-	assert(!"Should not get here.");
 	return NULL;
     }
 
@@ -198,6 +218,37 @@ dri2CreateContextAttribs(__DRIscreen *screen, int api,
 	    *error = __DRI_CTX_ERROR_UNKNOWN_ATTRIBUTE;
 	    return NULL;
 	}
+    }
+
+    /* Mesa does not support the GL_ARB_compatibilty extension or the
+     * compatibility profile.  This means that we treat a API_OPENGL 3.1 as
+     * API_OPENGL_CORE and reject API_OPENGL 3.2+.
+     */
+    if (mesa_api == API_OPENGL && major_version == 3 && minor_version == 1)
+       mesa_api = API_OPENGL_CORE;
+
+    if (mesa_api == API_OPENGL
+        && ((major_version > 3)
+            || (major_version == 3 && minor_version >= 2))) {
+       *error = __DRI_CTX_ERROR_BAD_API;
+       return NULL;
+    }
+
+    /* The EGL_KHR_create_context spec says:
+     *
+     *     "Flags are only defined for OpenGL context creation, and specifying
+     *     a flags value other than zero for other types of contexts,
+     *     including OpenGL ES contexts, will generate an error."
+     *
+     * The GLX_EXT_create_context_es2_profile specification doesn't say
+     * anything specific about this case.  However, none of the known flags
+     * have any meaning in an ES context, so this seems safe.
+     */
+    if (mesa_api != API_OPENGL
+        && mesa_api != API_OPENGL_CORE
+        && flags != 0) {
+	*error = __DRI_CTX_ERROR_BAD_FLAG;
+	return NULL;
     }
 
     /* There are no forward-compatible contexts before OpenGL 3.0.  The
@@ -530,7 +581,7 @@ const __DRIcoreExtension driCoreExtension = {
 
 /** DRI2 interface */
 const __DRIdri2Extension driDRI2Extension = {
-    { __DRI_DRI2, __DRI_DRI2_VERSION },
+    { __DRI_DRI2, 3 },
     dri2CreateNewScreen,
     dri2CreateNewDrawable,
     dri2CreateNewContext,

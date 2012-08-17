@@ -251,7 +251,7 @@ svga_texture_get_transfer(struct pipe_context *pipe,
    unsigned nblocksy = util_format_get_nblocksy(texture->format, box->height);
 
    /* We can't map texture storage directly */
-   if (usage & (PIPE_TRANSFER_MAP_DIRECTLY | PIPE_TRANSFER_MAP_PERMANENTLY))
+   if (usage & PIPE_TRANSFER_MAP_DIRECTLY)
       return NULL;
 
    assert(box->depth == 1);
@@ -433,8 +433,7 @@ svga_texture_create(struct pipe_screen *screen,
       tex->key.numFaces = 1;
    }
 
-   /* XXX: Disabled for now */
-   tex->key.cachable = 0;
+   tex->key.cachable = 1;
 
    if (template->bind & PIPE_BIND_SAMPLER_VIEW)
       tex->key.flags |= SVGA3D_SURFACE_HINT_TEXTURE;

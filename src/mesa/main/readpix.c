@@ -36,6 +36,8 @@
 #include "pack.h"
 #include "pbo.h"
 #include "state.h"
+#include "glformats.h"
+#include "fbobject.h"
 
 
 /**
@@ -110,6 +112,7 @@ read_depth_pixels( struct gl_context *ctx,
    GLint j;
    GLubyte *dst, *map;
    int dstStride, stride;
+   GLfloat *depthValues;
 
    if (!rb)
       return;
@@ -119,8 +122,6 @@ read_depth_pixels( struct gl_context *ctx,
    ASSERT(y >= 0);
    ASSERT(x + width <= (GLint) rb->Width);
    ASSERT(y + height <= (GLint) rb->Height);
-   /* width should never be > MAX_WIDTH since we did clipping earlier */
-   ASSERT(width <= MAX_WIDTH);
 
    if (fast_read_depth_pixels(ctx, x, y, width, height, type, pixels, packing))
       return;
@@ -136,15 +137,23 @@ read_depth_pixels( struct gl_context *ctx,
       return;
    }
 
-   /* General case (slower) */
-   for (j = 0; j < height; j++, y++) {
-      GLfloat depthValues[MAX_WIDTH];
-      _mesa_unpack_float_z_row(rb->Format, width, map, depthValues);
-      _mesa_pack_depth_span(ctx, width, dst, type, depthValues, packing);
+   depthValues = (GLfloat *) malloc(width * sizeof(GLfloat));
 
-      dst += dstStride;
-      map += stride;
+   if (depthValues) {
+      /* General case (slower) */
+      for (j = 0; j < height; j++, y++) {
+         _mesa_unpack_float_z_row(rb->Format, width, map, depthValues);
+         _mesa_pack_depth_span(ctx, width, dst, type, depthValues, packing);
+
+         dst += dstStride;
+         map += stride;
+      }
    }
+   else {
+      _mesa_error(ctx, GL_OUT_OF_MEMORY, "glReadPixels");
+   }
+
+   free(depthValues);
 
    ctx->Driver.UnmapRenderbuffer(ctx, rb);
 }
@@ -163,14 +172,11 @@ read_stencil_pixels( struct gl_context *ctx,
    struct gl_framebuffer *fb = ctx->ReadBuffer;
    struct gl_renderbuffer *rb = fb->Attachment[BUFFER_STENCIL].Renderbuffer;
    GLint j;
-   GLubyte *map;
+   GLubyte *map, *stencil;
    GLint stride;
 
    if (!rb)
       return;
-
-   /* width should never be > MAX_WIDTH since we did clipping earlier */
-   ASSERT(width <= MAX_WIDTH);
 
    ctx->Driver.MapRenderbuffer(ctx, rb, x, y, width, height, GL_MAP_READ_BIT,
 			       &map, &stride);
@@ -179,19 +185,27 @@ read_stencil_pixels( struct gl_context *ctx,
       return;
    }
 
-   /* process image row by row */
-   for (j = 0; j < height; j++) {
-      GLvoid *dest;
-      GLubyte stencil[MAX_WIDTH];
+   stencil = (GLubyte *) malloc(width * sizeof(GLubyte));
 
-      _mesa_unpack_ubyte_stencil_row(rb->Format, width, map, stencil);
-      dest = _mesa_image_address2d(packing, pixels, width, height,
-                                   GL_STENCIL_INDEX, type, j, 0);
+   if (stencil) {
+      /* process image row by row */
+      for (j = 0; j < height; j++) {
+         GLvoid *dest;
 
-      _mesa_pack_stencil_span(ctx, width, type, dest, stencil, packing);
+         _mesa_unpack_ubyte_stencil_row(rb->Format, width, map, stencil);
+         dest = _mesa_image_address2d(packing, pixels, width, height,
+                                      GL_STENCIL_INDEX, type, j, 0);
 
-      map += stride;
+         _mesa_pack_stencil_span(ctx, width, type, dest, stencil, packing);
+
+         map += stride;
+      }
    }
+   else {
+      _mesa_error(ctx, GL_OUT_OF_MEMORY, "glReadPixels");
+   }
+
+   free(stencil);
 
    ctx->Driver.UnmapRenderbuffer(ctx, rb);
 }
@@ -218,21 +232,19 @@ fast_read_rgba_pixels_memcpy( struct gl_context *ctx,
    /* XXX we could check for other swizzle/special cases here as needed */
    if (rb->Format == MESA_FORMAT_RGBA8888_REV &&
        format == GL_BGRA &&
-       type == GL_UNSIGNED_INT_8_8_8_8_REV) {
+       type == GL_UNSIGNED_INT_8_8_8_8_REV &&
+       !ctx->Pack.SwapBytes) {
       swizzle_rb = GL_TRUE;
    }
    else if (rb->Format == MESA_FORMAT_XRGB8888 &&
-            format == GL_BGRA &&
-            type == GL_UNSIGNED_INT_8_8_8_8_REV) {
+       format == GL_BGRA &&
+       type == GL_UNSIGNED_INT_8_8_8_8_REV &&
+       !ctx->Pack.SwapBytes) {
       copy_xrgb = GL_TRUE;
    }
-   else if (!_mesa_format_matches_format_and_type(rb->Format, format, type))
+   else if (!_mesa_format_matches_format_and_type(rb->Format, format, type,
+                                                  ctx->Pack.SwapBytes))
       return GL_FALSE;
-
-   /* check for things we can't handle here */
-   if (packing->SwapBytes) {
-      return GL_FALSE;
-   }
 
    /* If the format is unsigned normalized then we can ignore clamping
     * because the values are already in the range [0,1] so it won't
@@ -310,6 +322,8 @@ slow_read_rgba_pixels( struct gl_context *ctx,
    void *rgba;
    GLubyte *dst, *map;
    int dstStride, stride, j;
+   GLboolean dst_is_integer = _mesa_is_enum_format_integer(format);
+   GLboolean dst_is_uint = _mesa_is_format_unsigned(rbFormat);
 
    dstStride = _mesa_image_row_stride(packing, width, format, type);
    dst = (GLubyte *) _mesa_image_address2d(packing, pixels, width, height,
@@ -327,12 +341,17 @@ slow_read_rgba_pixels( struct gl_context *ctx,
       goto done;
 
    for (j = 0; j < height; j++) {
-      if (_mesa_is_integer_format(format)) {
+      if (dst_is_integer) {
 	 _mesa_unpack_uint_rgba_row(rbFormat, width, map, (GLuint (*)[4]) rgba);
          _mesa_rebase_rgba_uint(width, (GLuint (*)[4]) rgba,
                                 rb->_BaseFormat);
-	 _mesa_pack_rgba_span_int(ctx, width, (GLuint (*)[4]) rgba, format,
-                                  type, dst);
+         if (dst_is_uint) {
+            _mesa_pack_rgba_span_from_uints(ctx, width, (GLuint (*)[4]) rgba, format,
+                                            type, dst);
+         } else {
+            _mesa_pack_rgba_span_from_ints(ctx, width, (GLint (*)[4]) rgba, format,
+                                           type, dst);
+         }
       } else {
 	 _mesa_unpack_rgba_row(rbFormat, width, map, (GLfloat (*)[4]) rgba);
          _mesa_rebase_rgba_float(width, (GLfloat (*)[4]) rgba,
@@ -368,7 +387,7 @@ read_rgba_pixels( struct gl_context *ctx,
       return;
 
    if ((ctx->Color._ClampReadColor == GL_TRUE || type != GL_FLOAT) &&
-       !_mesa_is_integer_format(format)) {
+       !_mesa_is_enum_format_integer(format)) {
       transferOps |= IMAGE_CLAMP_BIT;
    }
 
@@ -440,7 +459,7 @@ fast_read_depth_stencil_pixels_separate(struct gl_context *ctx,
    struct gl_framebuffer *fb = ctx->ReadBuffer;
    struct gl_renderbuffer *depthRb = fb->Attachment[BUFFER_DEPTH].Renderbuffer;
    struct gl_renderbuffer *stencilRb = fb->Attachment[BUFFER_STENCIL].Renderbuffer;
-   GLubyte *depthMap, *stencilMap;
+   GLubyte *depthMap, *stencilMap, *stencilVals;
    int depthStride, stencilStride, i, j;
 
    if (_mesa_get_format_datatype(depthRb->Format) != GL_UNSIGNED_NORMALIZED)
@@ -461,21 +480,28 @@ fast_read_depth_stencil_pixels_separate(struct gl_context *ctx,
       return GL_TRUE;  /* don't bother trying the slow path */
    }
 
-   for (j = 0; j < height; j++) {
-      GLubyte stencilVals[MAX_WIDTH];
+   stencilVals = (GLubyte *) malloc(width * sizeof(GLubyte));
 
-      _mesa_unpack_uint_z_row(depthRb->Format, width, depthMap, dst);
-      _mesa_unpack_ubyte_stencil_row(stencilRb->Format, width,
-				     stencilMap, stencilVals);
+   if (stencilVals) {
+      for (j = 0; j < height; j++) {
+         _mesa_unpack_uint_z_row(depthRb->Format, width, depthMap, dst);
+         _mesa_unpack_ubyte_stencil_row(stencilRb->Format, width,
+                                        stencilMap, stencilVals);
 
-      for (i = 0; i < width; i++) {
-	 dst[i] = (dst[i] & 0xffffff00) | stencilVals[i];
+         for (i = 0; i < width; i++) {
+            dst[i] = (dst[i] & 0xffffff00) | stencilVals[i];
+         }
+
+         depthMap += depthStride;
+         stencilMap += stencilStride;
+         dst += dstStride / 4;
       }
-
-      depthMap += depthStride;
-      stencilMap += stencilStride;
-      dst += dstStride / 4;
    }
+   else {
+      _mesa_error(ctx, GL_OUT_OF_MEMORY, "glReadPixels");
+   }
+
+   free(stencilVals);
 
    ctx->Driver.UnmapRenderbuffer(ctx, depthRb);
    ctx->Driver.UnmapRenderbuffer(ctx, stencilRb);
@@ -496,6 +522,9 @@ slow_read_depth_stencil_pixels_separate(struct gl_context *ctx,
    struct gl_renderbuffer *stencilRb = fb->Attachment[BUFFER_STENCIL].Renderbuffer;
    GLubyte *depthMap, *stencilMap;
    int depthStride, stencilStride, j;
+   GLubyte *stencilVals;
+   GLfloat *depthVals;
+
 
    /* The depth and stencil buffers might be separate, or a single buffer.
     * If one buffer, only map it once.
@@ -522,21 +551,29 @@ slow_read_depth_stencil_pixels_separate(struct gl_context *ctx,
       stencilStride = depthStride;
    }
 
-   for (j = 0; j < height; j++) {
-      GLubyte stencilVals[MAX_WIDTH];
-      GLfloat depthVals[MAX_WIDTH];
+   stencilVals = (GLubyte *) malloc(width * sizeof(GLubyte));
+   depthVals = (GLfloat *) malloc(width * sizeof(GLfloat));
 
-      _mesa_unpack_float_z_row(depthRb->Format, width, depthMap, depthVals);
-      _mesa_unpack_ubyte_stencil_row(stencilRb->Format, width,
-				     stencilMap, stencilVals);
+   if (stencilVals && depthVals) {
+      for (j = 0; j < height; j++) {
+         _mesa_unpack_float_z_row(depthRb->Format, width, depthMap, depthVals);
+         _mesa_unpack_ubyte_stencil_row(stencilRb->Format, width,
+                                        stencilMap, stencilVals);
 
-      _mesa_pack_depth_stencil_span(ctx, width, type, (GLuint *)dst,
-				    depthVals, stencilVals, packing);
+         _mesa_pack_depth_stencil_span(ctx, width, type, (GLuint *)dst,
+                                       depthVals, stencilVals, packing);
 
-      depthMap += depthStride;
-      stencilMap += stencilStride;
-      dst += dstStride;
+         depthMap += depthStride;
+         stencilMap += stencilStride;
+         dst += dstStride;
+      }
    }
+   else {
+      _mesa_error(ctx, GL_OUT_OF_MEMORY, "glReadPixels");
+   }
+
+   free(stencilVals);
+   free(depthVals);
 
    ctx->Driver.UnmapRenderbuffer(ctx, depthRb);
    if (stencilRb != depthRb) {
@@ -637,163 +674,13 @@ _mesa_readpixels(struct gl_context *ctx,
 }
 
 
-/**
- * Do error checking of the format/type parameters to glReadPixels and
- * glDrawPixels.
- * \param drawing if GL_TRUE do checking for DrawPixels, else do checking
- *                for ReadPixels.
- * \return GL_TRUE if error detected, GL_FALSE if no errors
- */
-GLboolean
-_mesa_error_check_format_type(struct gl_context *ctx, GLenum format,
-                              GLenum type, GLboolean drawing)
-{
-   const char *readDraw = drawing ? "Draw" : "Read";
-   const GLboolean reading = !drawing;
-   GLenum err;
-
-   /* state validation should have already been done */
-   ASSERT(ctx->NewState == 0x0);
-
-   if (ctx->Extensions.EXT_packed_depth_stencil
-       && type == GL_UNSIGNED_INT_24_8_EXT
-       && format != GL_DEPTH_STENCIL_EXT) {
-      _mesa_error(ctx, GL_INVALID_OPERATION,
-                  "gl%sPixels(format is not GL_DEPTH_STENCIL_EXT)", readDraw);
-      return GL_TRUE;
-   }
-
-   if (ctx->Extensions.ARB_depth_buffer_float
-       && type == GL_FLOAT_32_UNSIGNED_INT_24_8_REV
-       && format != GL_DEPTH_STENCIL_EXT) {
-      _mesa_error(ctx, GL_INVALID_OPERATION,
-                  "gl%sPixels(format is not GL_DEPTH_STENCIL_EXT)", readDraw);
-      return GL_TRUE;
-   }
-
-   /* basic combinations test */
-   err = _mesa_error_check_format_and_type(ctx, format, type);
-   if (err != GL_NO_ERROR) {
-      _mesa_error(ctx, err, "gl%sPixels(format or type)", readDraw);
-      return GL_TRUE;
-   }
-
-   /* additional checks */
-   switch (format) {
-   case GL_RG:
-   case GL_RED:
-   case GL_GREEN:
-   case GL_BLUE:
-   case GL_ALPHA:
-   case GL_LUMINANCE:
-   case GL_LUMINANCE_ALPHA:
-   case GL_RGB:
-   case GL_BGR:
-   case GL_RGBA:
-   case GL_BGRA:
-   case GL_ABGR_EXT:
-   case GL_RED_INTEGER_EXT:
-   case GL_GREEN_INTEGER_EXT:
-   case GL_BLUE_INTEGER_EXT:
-   case GL_ALPHA_INTEGER_EXT:
-   case GL_RGB_INTEGER_EXT:
-   case GL_RGBA_INTEGER_EXT:
-   case GL_BGR_INTEGER_EXT:
-   case GL_BGRA_INTEGER_EXT:
-   case GL_LUMINANCE_INTEGER_EXT:
-   case GL_LUMINANCE_ALPHA_INTEGER_EXT:
-      if (!drawing) {
-         /* reading */
-         if (!_mesa_source_buffer_exists(ctx, GL_COLOR)) {
-            _mesa_error(ctx, GL_INVALID_OPERATION,
-                        "glReadPixels(no color buffer)");
-            return GL_TRUE;
-         }
-      }
-      break;
-   case GL_COLOR_INDEX:
-      if (drawing) {
-         if (ctx->PixelMaps.ItoR.Size == 0 ||
-	     ctx->PixelMaps.ItoG.Size == 0 ||
-	     ctx->PixelMaps.ItoB.Size == 0) {
-            _mesa_error(ctx, GL_INVALID_OPERATION,
-                   "glDrawPixels(drawing color index pixels into RGB buffer)");
-            return GL_TRUE;
-         }
-      }
-      else {
-         /* reading */
-         if (!_mesa_source_buffer_exists(ctx, GL_COLOR)) {
-            _mesa_error(ctx, GL_INVALID_OPERATION,
-                        "glReadPixels(no color buffer)");
-            return GL_TRUE;
-         }
-         /* We no longer support CI-mode color buffers so trying to read
-          * GL_COLOR_INDEX pixels is always an error.
-          */
-         _mesa_error(ctx, GL_INVALID_OPERATION,
-                     "glReadPixels(color buffer is RGB)");
-         return GL_TRUE;
-      }
-      break;
-   case GL_STENCIL_INDEX:
-      if ((drawing && !_mesa_dest_buffer_exists(ctx, format)) ||
-          (reading && !_mesa_source_buffer_exists(ctx, format))) {
-         _mesa_error(ctx, GL_INVALID_OPERATION,
-                     "gl%sPixels(no stencil buffer)", readDraw);
-         return GL_TRUE;
-      }
-      break;
-   case GL_DEPTH_COMPONENT:
-      if ((drawing && !_mesa_dest_buffer_exists(ctx, format))) {
-         _mesa_error(ctx, GL_INVALID_OPERATION,
-                     "gl%sPixels(no depth buffer)", readDraw);
-         return GL_TRUE;
-      }
-      break;
-   case GL_DEPTH_STENCIL_EXT:
-      /* Check validity of the type first. */
-      switch (type) {
-         case GL_UNSIGNED_INT_24_8_EXT:
-            if (!ctx->Extensions.EXT_packed_depth_stencil) {
-               _mesa_error(ctx, GL_INVALID_ENUM, "gl%sPixels(type)", readDraw);
-               return GL_TRUE;
-            }
-            break;
-         case GL_FLOAT_32_UNSIGNED_INT_24_8_REV:
-            if (!ctx->Extensions.ARB_depth_buffer_float) {
-               _mesa_error(ctx, GL_INVALID_ENUM, "gl%sPixels(type)", readDraw);
-               return GL_TRUE;
-            }
-            break;
-         default:
-            _mesa_error(ctx, GL_INVALID_ENUM, "gl%sPixels(type)", readDraw);
-            return GL_TRUE;
-      }
-      if ((drawing && !_mesa_dest_buffer_exists(ctx, format)) ||
-          (reading && !_mesa_source_buffer_exists(ctx, format))) {
-         _mesa_error(ctx, GL_INVALID_OPERATION,
-                     "gl%sPixels(no depth or stencil buffer)", readDraw);
-         return GL_TRUE;
-      }
-      break;
-   default:
-      /* this should have been caught in _mesa_error_check_format_type() */
-      _mesa_problem(ctx, "unexpected format in _mesa_%sPixels", readDraw);
-      return GL_TRUE;
-   }
-
-   /* no errors */
-   return GL_FALSE;
-}
-      
-
-
 void GLAPIENTRY
 _mesa_ReadnPixelsARB( GLint x, GLint y, GLsizei width, GLsizei height,
 		      GLenum format, GLenum type, GLsizei bufSize,
                       GLvoid *pixels )
 {
+   GLenum err;
+
    GET_CURRENT_CONTEXT(ctx);
    ASSERT_OUTSIDE_BEGIN_END_AND_FLUSH(ctx);
 
@@ -815,8 +702,11 @@ _mesa_ReadnPixelsARB( GLint x, GLint y, GLsizei width, GLsizei height,
    if (ctx->NewState)
       _mesa_update_state(ctx);
 
-   if (_mesa_error_check_format_type(ctx, format, type, GL_FALSE)) {
-      /* found an error */
+   err = _mesa_error_check_format_and_type(ctx, format, type);
+   if (err != GL_NO_ERROR) {
+      _mesa_error(ctx, err, "glReadPixels(invalid format %s and/or type %s)",
+                  _mesa_lookup_enum_by_nr(format),
+                  _mesa_lookup_enum_by_nr(type));
       return;
    }
 
@@ -832,7 +722,7 @@ _mesa_ReadnPixelsARB( GLint x, GLint y, GLsizei width, GLsizei height,
    if (ctx->Extensions.EXT_texture_integer && _mesa_is_color_format(format)) {
       const struct gl_renderbuffer *rb = ctx->ReadBuffer->_ColorReadBuffer;
       const GLboolean srcInteger = _mesa_is_format_integer_color(rb->Format);
-      const GLboolean dstInteger = _mesa_is_integer_format(format);
+      const GLboolean dstInteger = _mesa_is_enum_format_integer(format);
       if (dstInteger != srcInteger) {
          _mesa_error(ctx, GL_INVALID_OPERATION,
                      "glReadPixels(integer / non-integer format mismatch");
@@ -840,7 +730,8 @@ _mesa_ReadnPixelsARB( GLint x, GLint y, GLsizei width, GLsizei height,
       }
    }
 
-   if (ctx->ReadBuffer->Name != 0 && ctx->ReadBuffer->Visual.samples > 0) {
+   if (_mesa_is_user_fbo(ctx->ReadBuffer) &&
+       ctx->ReadBuffer->Visual.samples > 0) {
       _mesa_error(ctx, GL_INVALID_OPERATION, "glReadPixels(multisample FBO)");
       return;
    }

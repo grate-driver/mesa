@@ -242,6 +242,7 @@ _mesa_init_shader_program(struct gl_context *ctx, struct gl_shader_program *prog
 
    prog->AttributeBindings = string_to_uint_map_ctor();
    prog->FragDataBindings = string_to_uint_map_ctor();
+   prog->FragDataIndexBindings = string_to_uint_map_ctor();
 
 #if FEATURE_ARB_geometry_shader4
    prog->Geom.VerticesOut = 0;
@@ -277,7 +278,8 @@ _mesa_clear_shader_program_data(struct gl_context *ctx,
                                 struct gl_shader_program *shProg)
 {
    if (shProg->UniformStorage) {
-      for (unsigned i = 0; i < shProg->NumUserUniformStorage; ++i)
+      unsigned i;
+      for (i = 0; i < shProg->NumUserUniformStorage; ++i)
          _mesa_uniform_detach_all_driver_storage(&shProg->UniformStorage[i]);
       ralloc_free(shProg->UniformStorage);
       shProg->NumUserUniformStorage = 0;
@@ -318,6 +320,11 @@ _mesa_free_shader_program_data(struct gl_context *ctx,
    if (shProg->FragDataBindings) {
       string_to_uint_map_dtor(shProg->FragDataBindings);
       shProg->FragDataBindings = NULL;
+   }
+
+   if (shProg->FragDataIndexBindings) {
+      string_to_uint_map_dtor(shProg->FragDataIndexBindings);
+      shProg->FragDataIndexBindings = NULL;
    }
 
    /* detach shaders */

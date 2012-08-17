@@ -53,7 +53,7 @@ i915_draw_vbo(struct pipe_context *pipe, const struct pipe_draw_info *info)
 {
    struct i915_context *i915 = i915_context(pipe);
    struct draw_context *draw = i915->draw;
-   void *mapped_indices = NULL;
+   const void *mapped_indices = NULL;
 
 
    /*
@@ -67,9 +67,14 @@ i915_draw_vbo(struct pipe_context *pipe, const struct pipe_draw_info *info)
    /*
     * Map index buffer, if present
     */
-   if (info->indexed && i915->index_buffer.buffer)
-      mapped_indices = i915_buffer(i915->index_buffer.buffer)->data;
-   draw_set_mapped_index_buffer(draw, mapped_indices);
+   if (info->indexed) {
+      mapped_indices = i915->index_buffer.user_buffer;
+      if (!mapped_indices)
+         mapped_indices = i915_buffer(i915->index_buffer.buffer)->data;
+      draw_set_indexes(draw,
+                       (ubyte *) mapped_indices + i915->index_buffer.offset,
+                       i915->index_buffer.index_size);
+   }
 
    if (i915->constants[PIPE_SHADER_VERTEX])
       draw_set_mapped_constant_buffer(draw, PIPE_SHADER_VERTEX, 0,
@@ -88,15 +93,14 @@ i915_draw_vbo(struct pipe_context *pipe, const struct pipe_draw_info *info)
    draw_vbo(i915->draw, info);
 
    if (mapped_indices)
-      draw_set_mapped_index_buffer(draw, NULL);
+      draw_set_indexes(draw, NULL, 0);
 
    if (i915->num_vertex_sampler_views > 0)
       i915_cleanup_vertex_sampling(i915);
 
    /*
-    * TODO: Flush only when a user vertex/index buffer is present
-    * (or even better, modify draw module to do this
-    * internally when this condition is seen?)
+    * Instead of flushing on every state change, we flush once here
+    * when we fire the vbo.
     */
    draw_flush(i915->draw);
 }
@@ -144,7 +148,6 @@ i915_create_context(struct pipe_screen *screen, void *priv)
       return NULL;
 
    i915->iws = i915_screen(screen)->iws;
-   i915->base.winsys = NULL;
    i915->base.screen = screen;
    i915->base.priv = priv;
 

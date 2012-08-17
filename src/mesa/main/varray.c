@@ -92,7 +92,7 @@ type_to_bit(const struct gl_context *ctx, GLenum type)
    case GL_DOUBLE:
       return DOUBLE_BIT;
    case GL_FIXED:
-      return ctx->API == API_OPENGL ? FIXED_GL_BIT : FIXED_ES_BIT;
+      return _mesa_is_desktop_gl(ctx) ? FIXED_GL_BIT : FIXED_ES_BIT;
    case GL_UNSIGNED_INT_2_10_10_10_REV:
       return UNSIGNED_INT_2_10_10_10_REV_BIT;
    case GL_INT_2_10_10_10_REV:
@@ -221,7 +221,7 @@ update_array(struct gl_context *ctx,
                                  ctx->Array.ArrayBufferObj);
 
    ctx->NewState |= _NEW_ARRAY;
-   ctx->Array.NewState |= VERT_BIT(attrib);
+   ctx->Array.ArrayObj->NewArrays |= VERT_BIT(attrib);
 }
 
 
@@ -483,6 +483,7 @@ _mesa_VertexAttribIPointer(GLuint index, GLint size, GLenum type,
 void GLAPIENTRY
 _mesa_EnableVertexAttribArrayARB(GLuint index)
 {
+   struct gl_array_object *arrayObj;
    GET_CURRENT_CONTEXT(ctx);
    ASSERT_OUTSIDE_BEGIN_END(ctx);
 
@@ -492,18 +493,24 @@ _mesa_EnableVertexAttribArrayARB(GLuint index)
       return;
    }
 
-   ASSERT(VERT_ATTRIB_GENERIC(index) < Elements(ctx->Array.ArrayObj->VertexAttrib));
+   arrayObj = ctx->Array.ArrayObj;
 
-   FLUSH_VERTICES(ctx, _NEW_ARRAY);
-   ctx->Array.ArrayObj->VertexAttrib[VERT_ATTRIB_GENERIC(index)].Enabled = GL_TRUE;
-   ctx->Array.ArrayObj->_Enabled |= VERT_BIT_GENERIC(index);
-   ctx->Array.NewState |= VERT_BIT_GENERIC(index);
+   ASSERT(VERT_ATTRIB_GENERIC(index) < Elements(arrayObj->VertexAttrib));
+
+   if (!arrayObj->VertexAttrib[VERT_ATTRIB_GENERIC(index)].Enabled) {
+      /* was disabled, now being enabled */
+      FLUSH_VERTICES(ctx, _NEW_ARRAY);
+      arrayObj->VertexAttrib[VERT_ATTRIB_GENERIC(index)].Enabled = GL_TRUE;
+      arrayObj->_Enabled |= VERT_BIT_GENERIC(index);
+      arrayObj->NewArrays |= VERT_BIT_GENERIC(index);
+   }
 }
 
 
 void GLAPIENTRY
 _mesa_DisableVertexAttribArrayARB(GLuint index)
 {
+   struct gl_array_object *arrayObj;
    GET_CURRENT_CONTEXT(ctx);
    ASSERT_OUTSIDE_BEGIN_END(ctx);
 
@@ -513,12 +520,17 @@ _mesa_DisableVertexAttribArrayARB(GLuint index)
       return;
    }
 
-   ASSERT(VERT_ATTRIB_GENERIC(index) < Elements(ctx->Array.ArrayObj->VertexAttrib));
+   arrayObj = ctx->Array.ArrayObj;
 
-   FLUSH_VERTICES(ctx, _NEW_ARRAY);
-   ctx->Array.ArrayObj->VertexAttrib[VERT_ATTRIB_GENERIC(index)].Enabled = GL_FALSE;
-   ctx->Array.ArrayObj->_Enabled &= ~VERT_BIT_GENERIC(index);
-   ctx->Array.NewState |= VERT_BIT_GENERIC(index);
+   ASSERT(VERT_ATTRIB_GENERIC(index) < Elements(arrayObj->VertexAttrib));
+
+   if (arrayObj->VertexAttrib[VERT_ATTRIB_GENERIC(index)].Enabled) {
+      /* was enabled, now being disabled */
+      FLUSH_VERTICES(ctx, _NEW_ARRAY);
+      arrayObj->VertexAttrib[VERT_ATTRIB_GENERIC(index)].Enabled = GL_FALSE;
+      arrayObj->_Enabled &= ~VERT_BIT_GENERIC(index);
+      arrayObj->NewArrays |= VERT_BIT_GENERIC(index);
+   }
 }
 
 
@@ -556,7 +568,7 @@ get_vertex_array_attrib(struct gl_context *ctx, GLuint index, GLenum pname,
    case GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING_ARB:
       return array->BufferObj->Name;
    case GL_VERTEX_ATTRIB_ARRAY_INTEGER:
-      if (ctx->VersionMajor >= 3 || ctx->Extensions.EXT_gpu_shader4) {
+      if (ctx->Version >= 30 || ctx->Extensions.EXT_gpu_shader4) {
          return array->Integer;
       }
       goto error;
@@ -989,7 +1001,6 @@ _mesa_LockArraysEXT(GLint first, GLsizei count)
    ctx->Array.LockCount = count;
 
    ctx->NewState |= _NEW_ARRAY;
-   ctx->Array.NewState |= VERT_BIT_ALL;
 }
 
 
@@ -1010,7 +1021,6 @@ _mesa_UnlockArraysEXT( void )
    ctx->Array.LockFirst = 0;
    ctx->Array.LockCount = 0;
    ctx->NewState |= _NEW_ARRAY;
-   ctx->Array.NewState |= VERT_BIT_ALL;
 }
 
 
@@ -1082,17 +1092,17 @@ _mesa_PrimitiveRestartIndex(GLuint index)
 {
    GET_CURRENT_CONTEXT(ctx);
 
-   if (!ctx->Extensions.NV_primitive_restart &&
-       ctx->VersionMajor * 10 + ctx->VersionMinor < 31) {
+   if (!ctx->Extensions.NV_primitive_restart && ctx->Version < 31) {
       _mesa_error(ctx, GL_INVALID_OPERATION, "glPrimitiveRestartIndexNV()");
       return;
    }
 
-   ASSERT_OUTSIDE_BEGIN_END_AND_FLUSH(ctx);
+   ASSERT_OUTSIDE_BEGIN_END(ctx);
 
-   FLUSH_VERTICES(ctx, _NEW_TRANSFORM);
-
-   ctx->Array.RestartIndex = index;
+   if (ctx->Array.RestartIndex != index) {
+      FLUSH_VERTICES(ctx, _NEW_TRANSFORM);
+      ctx->Array.RestartIndex = index;
+   }
 }
 
 
@@ -1104,8 +1114,9 @@ _mesa_PrimitiveRestartIndex(GLuint index)
 void GLAPIENTRY
 _mesa_VertexAttribDivisor(GLuint index, GLuint divisor)
 {
+   struct gl_client_array *array;
    GET_CURRENT_CONTEXT(ctx);
-   ASSERT_OUTSIDE_BEGIN_END_AND_FLUSH(ctx);
+   ASSERT_OUTSIDE_BEGIN_END(ctx);
 
    if (!ctx->Extensions.ARB_instanced_arrays) {
       _mesa_error(ctx, GL_INVALID_OPERATION, "glVertexAttribDivisor()");
@@ -1120,7 +1131,12 @@ _mesa_VertexAttribDivisor(GLuint index, GLuint divisor)
 
    ASSERT(VERT_ATTRIB_GENERIC(index) < Elements(ctx->Array.ArrayObj->VertexAttrib));
 
-   ctx->Array.ArrayObj->VertexAttrib[VERT_ATTRIB_GENERIC(index)].InstanceDivisor = divisor;
+   array = &ctx->Array.ArrayObj->VertexAttrib[VERT_ATTRIB_GENERIC(index)];
+   if (array->InstanceDivisor != divisor) {
+      FLUSH_VERTICES(ctx, _NEW_ARRAY);
+      array->InstanceDivisor = divisor;
+      ctx->Array.ArrayObj->NewArrays |= VERT_BIT(VERT_ATTRIB_GENERIC(index));
+   }
 }
 
 
@@ -1202,7 +1218,7 @@ _mesa_print_arrays(struct gl_context *ctx)
 void 
 _mesa_init_varray(struct gl_context *ctx)
 {
-   ctx->Array.DefaultArrayObj = _mesa_new_array_object(ctx, 0);
+   ctx->Array.DefaultArrayObj = ctx->Driver.NewArrayObject(ctx, 0);
    _mesa_reference_array_object(ctx, &ctx->Array.ArrayObj,
                                 ctx->Array.DefaultArrayObj);
    ctx->Array.ActiveTexture = 0;   /* GL_ARB_multitexture */

@@ -32,6 +32,28 @@
 struct gl_context;
 struct gl_texture_object;
 
+
+/**
+ * Is the given FBO a user-created FBO?
+ */
+static inline GLboolean
+_mesa_is_user_fbo(const struct gl_framebuffer *fb)
+{
+   return fb->Name != 0;
+}
+
+
+/**
+ * Is the given FBO a window system FBO (like an X window)?
+ */
+static inline GLboolean
+_mesa_is_winsys_fbo(const struct gl_framebuffer *fb)
+{
+   return fb->Name == 0;
+}
+
+
+
 extern void
 _mesa_init_fbobjects(struct gl_context *ctx);
 
@@ -191,5 +213,14 @@ extern void GLAPIENTRY
 _mesa_FramebufferTextureFaceARB(GLenum target, GLenum attachment,
                                 GLuint texture, GLint level, GLenum face);
 
+
+extern void GLAPIENTRY
+_mesa_InvalidateSubFramebuffer(GLenum target, GLsizei numAttachments,
+                               const GLenum *attachments, GLint x, GLint y,
+                               GLsizei width, GLsizei height);
+
+extern void GLAPIENTRY
+_mesa_InvalidateFramebuffer(GLenum target, GLsizei numAttachments,
+                            const GLenum *attachments);
 
 #endif /* FBOBJECT_H */

@@ -713,6 +713,7 @@ static void r300_tex_set_tiling_flags(struct r300_context *r300,
         tex->tex.macrotile[level]) {
         r300->rws->buffer_set_tiling(tex->buf, r300->cs,
                 tex->tex.microtile, tex->tex.macrotile[level],
+                0, 0, 0, 0, 0,
                 tex->tex.stride_in_bytes[0]);
 
         tex->surface_level = level;
@@ -1017,7 +1018,6 @@ static void* r300_create_rs_state(struct pipe_context* pipe,
                                   const struct pipe_rasterizer_state* state)
 {
     struct r300_rs_state* rs = CALLOC_STRUCT(r300_rs_state);
-    float psiz;
     uint32_t vap_control_status;    /* R300_VAP_CNTL_STATUS: 0x2140 */
     uint32_t vap_clip_cntl;         /* R300_VAP_CLIP_CNTL: 0x221C */
     uint32_t point_size;            /* R300_GA_POINT_SIZE: 0x421c */
@@ -1036,7 +1036,8 @@ static void* r300_create_rs_state(struct pipe_context* pipe,
     float point_texcoord_bottom = 0;/* R300_GA_POINT_T0: 0x4204 */
     float point_texcoord_right = 1; /* R300_GA_POINT_S1: 0x4208 */
     float point_texcoord_top = 0;   /* R300_GA_POINT_T1: 0x420c */
-    boolean vclamp = state->clamp_vertex_color;
+    boolean vclamp = state->clamp_vertex_color ||
+                     !r300_context(pipe)->screen->caps.is_r500;
     CB_LOCALS;
 
     /* Copy rasterizer state. */
@@ -1073,14 +1074,16 @@ static void* r300_create_rs_state(struct pipe_context* pipe,
     if (state->point_size_per_vertex) {
         /* Per-vertex point size.
          * Clamp to [0, max FB size] */
-        psiz = pipe->screen->get_paramf(pipe->screen,
+        float min_psiz = util_get_min_point_size(state);
+        float max_psiz = pipe->screen->get_paramf(pipe->screen,
                                         PIPE_CAPF_MAX_POINT_WIDTH);
         point_minmax =
-            pack_float_16_6x(psiz) << R300_GA_POINT_MINMAX_MAX_SHIFT;
+            (pack_float_16_6x(min_psiz) << R300_GA_POINT_MINMAX_MIN_SHIFT) |
+            (pack_float_16_6x(max_psiz) << R300_GA_POINT_MINMAX_MAX_SHIFT);
     } else {
         /* We cannot disable the point-size vertex output,
          * so clamp it. */
-        psiz = state->point_size;
+        float psiz = state->point_size;
         point_minmax =
             (pack_float_16_6x(psiz) << R300_GA_POINT_MINMAX_MIN_SHIFT) |
             (pack_float_16_6x(psiz) << R300_GA_POINT_MINMAX_MAX_SHIFT);
@@ -1234,7 +1237,6 @@ static void r300_bind_rs_state(struct pipe_context* pipe, void* state)
     struct r300_rs_state* rs = (struct r300_rs_state*)state;
     int last_sprite_coord_enable = r300->sprite_coord_enable;
     boolean last_two_sided_color = r300->two_sided_color;
-    boolean last_frag_clamp = r300->frag_clamp;
 
     if (r300->draw && rs) {
         draw_set_rasterizer_state(r300->draw, &rs->rs_draw, state);
@@ -1244,12 +1246,10 @@ static void r300_bind_rs_state(struct pipe_context* pipe, void* state)
         r300->polygon_offset_enabled = rs->polygon_offset_enable;
         r300->sprite_coord_enable = rs->rs.sprite_coord_enable;
         r300->two_sided_color = rs->rs.light_twoside;
-        r300->frag_clamp = rs->rs.clamp_fragment_color;
     } else {
         r300->polygon_offset_enabled = FALSE;
         r300->sprite_coord_enable = 0;
         r300->two_sided_color = FALSE;
-        r300->frag_clamp = FALSE;
     }
 
     UPDATE_STATE(state, r300->rs_state);
@@ -1258,11 +1258,6 @@ static void r300_bind_rs_state(struct pipe_context* pipe, void* state)
     if (last_sprite_coord_enable != r300->sprite_coord_enable ||
         last_two_sided_color != r300->two_sided_color) {
         r300_mark_atom_dirty(r300, &r300->rs_block_state);
-    }
-
-    if (last_frag_clamp != r300->frag_clamp &&
-        r300->fs_status == FRAGMENT_SHADER_VALID) {
-        r300->fs_status = FRAGMENT_SHADER_MAYBE_DIRTY;
     }
 }
 
@@ -1594,46 +1589,76 @@ static void r300_set_viewport_state(struct pipe_context* pipe,
     }
 }
 
-static void r300_set_vertex_buffers(struct pipe_context* pipe,
+static void r300_set_vertex_buffers_hwtcl(struct pipe_context* pipe,
                                     unsigned count,
                                     const struct pipe_vertex_buffer* buffers)
 {
     struct r300_context* r300 = r300_context(pipe);
-    struct pipe_vertex_buffer dummy_vb = {0};
 
     /* There must be at least one vertex buffer set, otherwise it locks up. */
     if (!count) {
-        dummy_vb.buffer = r300->dummy_vb;
-        buffers = &dummy_vb;
+        buffers = &r300->dummy_vb;
         count = 1;
     }
 
-    if (r300->screen->caps.has_tcl) {
-        u_vbuf_set_vertex_buffers(r300->vbuf_mgr, count, buffers);
-        r300->vertex_arrays_dirty = TRUE;
-    } else {
-        util_copy_vertex_buffers(r300->swtcl_vertex_buffer,
-                                 &r300->swtcl_nr_vertex_buffers,
-                                 buffers, count);
-        draw_set_vertex_buffers(r300->draw, count, buffers);
+    util_copy_vertex_buffers(r300->vertex_buffer,
+                             &r300->nr_vertex_buffers,
+                             buffers, count);
+
+    r300->vertex_arrays_dirty = TRUE;
+}
+
+static void r300_set_vertex_buffers_swtcl(struct pipe_context* pipe,
+                                    unsigned count,
+                                    const struct pipe_vertex_buffer* buffers)
+{
+    struct r300_context* r300 = r300_context(pipe);
+    unsigned i;
+
+    util_copy_vertex_buffers(r300->vertex_buffer,
+                             &r300->nr_vertex_buffers,
+                             buffers, count);
+    draw_set_vertex_buffers(r300->draw, count, buffers);
+
+    for (i = 0; i < count; i++) {
+        if (buffers[i].user_buffer) {
+            draw_set_mapped_vertex_buffer(r300->draw, i,
+                                          buffers[i].user_buffer);
+        } else if (buffers[i].buffer) {
+            draw_set_mapped_vertex_buffer(r300->draw, i,
+                r300_resource(buffers[i].buffer)->malloced_buffer);
+        }
     }
 }
 
-static void r300_set_index_buffer(struct pipe_context* pipe,
-                                  const struct pipe_index_buffer *ib)
+static void r300_set_index_buffer_hwtcl(struct pipe_context* pipe,
+                                        const struct pipe_index_buffer *ib)
 {
     struct r300_context* r300 = r300_context(pipe);
 
-    if (r300->screen->caps.has_tcl) {
-        u_vbuf_set_index_buffer(r300->vbuf_mgr, ib);
+    if (ib) {
+        pipe_resource_reference(&r300->index_buffer.buffer, ib->buffer);
+        memcpy(&r300->index_buffer, ib, sizeof(*ib));
     } else {
-        if (ib) {
-            pipe_resource_reference(&r300->swtcl_index_buffer.buffer, ib->buffer);
-            memcpy(&r300->swtcl_index_buffer, ib, sizeof(*ib));
-        } else {
-            pipe_resource_reference(&r300->swtcl_index_buffer.buffer, NULL);
+        pipe_resource_reference(&r300->index_buffer.buffer, NULL);
+    }
+}
+
+static void r300_set_index_buffer_swtcl(struct pipe_context* pipe,
+                                        const struct pipe_index_buffer *ib)
+{
+    struct r300_context* r300 = r300_context(pipe);
+
+    if (ib) {
+        const void *buf = NULL;
+        if (ib->user_buffer) {
+            buf = ib->user_buffer;
+        } else if (ib->buffer) {
+            buf = r300_resource(ib->buffer)->malloced_buffer;
         }
-        draw_set_index_buffer(r300->draw, ib);
+        draw_set_indexes(r300->draw,
+                         (const ubyte *) buf + ib->offset,
+                         ib->index_size);
     }
 }
 
@@ -1685,7 +1710,6 @@ static void* r300_create_vertex_elements_state(struct pipe_context* pipe,
                                                unsigned count,
                                                const struct pipe_vertex_element* attribs)
 {
-    struct r300_context *r300 = r300_context(pipe);
     struct r300_vertex_element_state *velems;
     unsigned i;
     struct pipe_vertex_element dummy_attrib = {0};
@@ -1706,11 +1730,9 @@ static void* r300_create_vertex_elements_state(struct pipe_context* pipe,
         return NULL;
 
     velems->count = count;
+    memcpy(velems->velem, attribs, sizeof(struct pipe_vertex_element) * count);
 
     if (r300_screen(pipe->screen)->caps.has_tcl) {
-        velems->vmgr_elements =
-            u_vbuf_create_vertex_elements(r300->vbuf_mgr, count, attribs,
-                                          velems->velem);
         /* Setup PSC.
          * The unused components will be replaced by (..., 0, 1). */
         r300_vertex_psc(velems);
@@ -1720,8 +1742,6 @@ static void* r300_create_vertex_elements_state(struct pipe_context* pipe,
                 align(util_format_get_blocksize(velems->velem[i].src_format), 4);
             velems->vertex_size_dwords += velems->format_size[i] / 4;
         }
-    } else {
-        memcpy(velems->velem, attribs, count * sizeof(struct pipe_vertex_element));
     }
 
     return velems;
@@ -1739,9 +1759,7 @@ static void r300_bind_vertex_elements_state(struct pipe_context *pipe,
 
     r300->velems = velems;
 
-    if (r300->screen->caps.has_tcl) {
-        u_vbuf_bind_vertex_elements(r300->vbuf_mgr, state, velems->vmgr_elements);
-    } else {
+    if (r300->draw) {
         draw_set_vertex_elements(r300->draw, velems->count, velems->velem);
         return;
     }
@@ -1753,12 +1771,6 @@ static void r300_bind_vertex_elements_state(struct pipe_context *pipe,
 
 static void r300_delete_vertex_elements_state(struct pipe_context *pipe, void *state)
 {
-    struct r300_context *r300 = r300_context(pipe);
-    struct r300_vertex_element_state *velems = state;
-
-    if (r300->screen->caps.has_tcl) {
-        u_vbuf_destroy_vertex_elements(r300->vbuf_mgr, velems->vmgr_elements);
-    }
     FREE(state);
 }
 
@@ -1841,12 +1853,14 @@ static void r300_delete_vs_state(struct pipe_context* pipe, void* shader)
 
 static void r300_set_constant_buffer(struct pipe_context *pipe,
                                      uint shader, uint index,
-                                     struct pipe_resource *buf)
+                                     struct pipe_constant_buffer *cb)
 {
     struct r300_context* r300 = r300_context(pipe);
     struct r300_constant_buffer *cbuf;
-    struct r300_resource *rbuf = r300_resource(buf);
     uint32_t *mapped;
+
+    if (!cb)
+        return;
 
     switch (shader) {
         case PIPE_SHADER_VERTEX:
@@ -1859,15 +1873,17 @@ static void r300_set_constant_buffer(struct pipe_context *pipe,
             return;
     }
 
-    if (buf == NULL || buf->width0 == 0)
-        return;
 
-    if (rbuf->b.user_ptr)
-        mapped = (uint32_t*)rbuf->b.user_ptr;
-    else if (rbuf->constant_buffer)
-        mapped = (uint32_t*)rbuf->constant_buffer;
-    else
-        return;
+    if (cb->user_buffer)
+        mapped = (uint32_t*)cb->user_buffer;
+    else {
+        struct r300_resource *rbuf = r300_resource(cb->buffer);
+
+        if (rbuf && rbuf->malloced_buffer)
+            mapped = (uint32_t*)rbuf->malloced_buffer;
+        else
+            return;
+    }
 
     if (shader == PIPE_SHADER_FRAGMENT ||
         (shader == PIPE_SHADER_VERTEX && r300->screen->caps.has_tcl)) {
@@ -1894,7 +1910,7 @@ static void r300_set_constant_buffer(struct pipe_context *pipe,
             r300_mark_atom_dirty(r300, &r300->vs_constants);
         } else if (r300->draw) {
             draw_set_mapped_constant_buffer(r300->draw, PIPE_SHADER_VERTEX,
-                0, mapped, buf->width0);
+                0, mapped, cb->buffer_size);
         }
     } else if (shader == PIPE_SHADER_FRAGMENT) {
         r300_mark_atom_dirty(r300, &r300->fs_constants);
@@ -1953,9 +1969,13 @@ void r300_init_state_functions(struct r300_context* r300)
 
     r300->context.set_viewport_state = r300_set_viewport_state;
 
-    r300->context.set_vertex_buffers = r300_set_vertex_buffers;
-    r300->context.set_index_buffer = r300_set_index_buffer;
-    r300->context.redefine_user_buffer = u_default_redefine_user_buffer;
+    if (r300->screen->caps.has_tcl) {
+        r300->context.set_vertex_buffers = r300_set_vertex_buffers_hwtcl;
+        r300->context.set_index_buffer = r300_set_index_buffer_hwtcl;
+    } else {
+        r300->context.set_vertex_buffers = r300_set_vertex_buffers_swtcl;
+        r300->context.set_index_buffer = r300_set_index_buffer_swtcl;
+    }
 
     r300->context.create_vertex_elements_state = r300_create_vertex_elements_state;
     r300->context.bind_vertex_elements_state = r300_bind_vertex_elements_state;

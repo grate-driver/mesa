@@ -29,6 +29,13 @@
 #include "../../gallium/auxiliary/util/u_format_r11g11b10f.h"
 
 
+/** Helper struct for MESA_FORMAT_Z32_FLOAT_X24S8 */
+struct z32f_x24s8
+{
+   float z;
+   uint32_t x24s8;
+};
+
 
 /* Expand 1, 2, 3, 4, 5, 6-bit values to fill 8 bits */
 
@@ -598,6 +605,20 @@ unpack_ARGB2101010(const void *src, GLfloat dst[][4], GLuint n)
       dst[i][GCOMP] = ((s[i] >> 10) & 0x3ff) * (1.0F / 1023.0F);
       dst[i][BCOMP] = ((s[i] >>  0) & 0x3ff) * (1.0F / 1023.0F);
       dst[i][ACOMP] = ((s[i] >> 30) &  0x03) * (1.0F / 3.0F);
+   }
+}
+
+
+static void
+unpack_ABGR2101010_UINT(const void *src, GLfloat dst[][4], GLuint n)
+{
+   const GLuint *s = ((const GLuint *) src);
+   GLuint i;
+   for (i = 0; i < n; i++) {
+      dst[i][RCOMP] = (GLfloat)((s[i] >>  0) & 0x3ff);
+      dst[i][GCOMP] = (GLfloat)((s[i] >> 10) & 0x3ff);
+      dst[i][BCOMP] = (GLfloat)((s[i] >> 20) & 0x3ff);
+      dst[i][ACOMP] = (GLfloat)((s[i] >> 30) &  0x03);
    }
 }
 
@@ -1492,6 +1513,7 @@ get_unpack_rgba_function(gl_format format)
       table[MESA_FORMAT_RG1616] = unpack_RG1616;
       table[MESA_FORMAT_RG1616_REV] = unpack_RG1616_REV;
       table[MESA_FORMAT_ARGB2101010] = unpack_ARGB2101010;
+      table[MESA_FORMAT_ABGR2101010_UINT] = unpack_ABGR2101010_UINT;
       table[MESA_FORMAT_Z24_S8] = unpack_Z24_S8;
       table[MESA_FORMAT_S8_Z24] = unpack_S8_Z24;
       table[MESA_FORMAT_Z16] = unpack_Z16;
@@ -1580,6 +1602,11 @@ get_unpack_rgba_function(gl_format format)
       table[MESA_FORMAT_Z32_FLOAT_X24S8] = unpack_Z32_FLOAT_X24S8;
 
       initialized = GL_TRUE;
+   }
+
+   if (table[format] == NULL) {
+      _mesa_problem(NULL, "unsupported unpack for format %s",
+                    _mesa_get_format_name(format));
    }
 
    return table[format];
@@ -2132,6 +2159,32 @@ unpack_int_rgba_RGBA_INT8(const GLbyte *src, GLuint dst[][4], GLuint n)
 }
 
 static void
+unpack_int_rgba_ARGB8888(const GLbyte *src, GLuint dst[][4], GLuint n)
+{
+   unsigned int i;
+
+   for (i = 0; i < n; i++) {
+      dst[i][RCOMP] = (GLubyte) src[i * 4 + 2];
+      dst[i][GCOMP] = (GLubyte) src[i * 4 + 1];
+      dst[i][BCOMP] = (GLubyte) src[i * 4 + 0];
+      dst[i][ACOMP] = (GLubyte) src[i * 4 + 3];
+   }
+}
+
+static void
+unpack_int_rgba_XRGB8888(const GLbyte *src, GLuint dst[][4], GLuint n)
+{
+   unsigned int i;
+
+   for (i = 0; i < n; i++) {
+      dst[i][RCOMP] = (GLubyte) src[i * 4 + 2];
+      dst[i][GCOMP] = (GLubyte) src[i * 4 + 1];
+      dst[i][BCOMP] = (GLubyte) src[i * 4 + 0];
+      dst[i][ACOMP] = (GLubyte) 0xff;
+   }
+}
+
+static void
 unpack_int_rgba_RGB_UINT32(const GLuint *src, GLuint dst[][4], GLuint n)
 {
    unsigned int i;
@@ -2556,6 +2609,20 @@ unpack_int_rgba_ARGB2101010_UINT(const GLuint *src, GLuint dst[][4], GLuint n)
    }
 }
 
+static void
+unpack_int_rgba_ABGR2101010_UINT(const GLuint *src, GLuint dst[][4], GLuint n)
+{
+   unsigned int i;
+
+   for (i = 0; i < n; i++) {
+      GLuint tmp = src[i];
+      dst[i][0] = (tmp >> 0) & 0x3ff;
+      dst[i][1] = (tmp >> 10) & 0x3ff;
+      dst[i][2] = (tmp >> 20) & 0x3ff;
+      dst[i][3] = (tmp >> 30) & 0x3;
+   }
+}
+
 void
 _mesa_unpack_uint_rgba_row(gl_format format, GLuint n,
                            const void *src, GLuint dst[][4])
@@ -2581,6 +2648,14 @@ _mesa_unpack_uint_rgba_row(gl_format format, GLuint n,
       break;
    case MESA_FORMAT_RGBA_INT8:
       unpack_int_rgba_RGBA_INT8(src, dst, n);
+      break;
+
+   case MESA_FORMAT_ARGB8888:
+      unpack_int_rgba_ARGB8888(src, dst, n);
+      break;
+
+   case MESA_FORMAT_XRGB8888:
+      unpack_int_rgba_XRGB8888(src, dst, n);
       break;
 
    case MESA_FORMAT_RGB_UINT32:
@@ -2718,6 +2793,11 @@ _mesa_unpack_uint_rgba_row(gl_format format, GLuint n,
    case MESA_FORMAT_ARGB2101010_UINT:
       unpack_int_rgba_ARGB2101010_UINT(src, dst, n);
       break;
+
+   case MESA_FORMAT_ABGR2101010_UINT:
+      unpack_int_rgba_ABGR2101010_UINT(src, dst, n);
+      break;
+
    default:
       _mesa_problem(NULL, "%s: bad format %s", __FUNCTION__,
                     _mesa_get_format_name(format));
@@ -2825,10 +2905,10 @@ unpack_float_z_Z32F(GLuint n, const void *src, GLfloat *dst)
 static void
 unpack_float_z_Z32X24S8(GLuint n, const void *src, GLfloat *dst)
 {
-   const GLfloat *s = ((const GLfloat *) src);
+   const struct z32f_x24s8 *s = (const struct z32f_x24s8 *) src;
    GLuint i;
    for (i = 0; i < n; i++) {
-      dst[i] = s[i * 2];
+      dst[i] = s[i].z;
    }
 }
 
@@ -2929,11 +3009,6 @@ unpack_uint_z_Z32_FLOAT(const void *src, GLuint *dst, GLuint n)
 static void
 unpack_uint_z_Z32_FLOAT_X24S8(const void *src, GLuint *dst, GLuint n)
 {
-   struct z32f_x24s8 {
-      float z;
-      uint32_t x24s8;
-   };
-
    const struct z32f_x24s8 *s = (const struct z32f_x24s8 *) src;
    GLuint i;
 
@@ -3015,10 +3090,10 @@ static void
 unpack_ubyte_s_Z32_FLOAT_X24S8(const void *src, GLubyte *dst, GLuint n)
 {
    GLuint i;
-   const GLuint *src32 = src;
+   const struct z32f_x24s8 *s = (const struct z32f_x24s8 *) src;
 
    for (i = 0; i < n; i++)
-      dst[i] = src32[i * 2 + 1] & 0xff;
+      dst[i] = s[i].x24s8 & 0xff;
 }
 
 void

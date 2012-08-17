@@ -34,6 +34,10 @@
 #include "intel_context.h"
 #include "intel_screen.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 struct intel_context;
 struct intel_mipmap_tree;
 struct intel_texture_image;
@@ -125,12 +129,11 @@ intel_rb_format(const struct intel_renderbuffer *rb)
    return rb->Base.Base.Format;
 }
 
-
-bool
-intel_framebuffer_has_hiz(struct gl_framebuffer *fb);
-
 extern struct intel_renderbuffer *
-intel_create_renderbuffer(gl_format format);
+intel_create_renderbuffer(gl_format format, unsigned num_samples);
+
+struct intel_renderbuffer *
+intel_create_private_renderbuffer(gl_format format, unsigned num_samples);
 
 struct gl_renderbuffer*
 intel_create_wrapped_renderbuffer(struct gl_context * ctx,
@@ -153,6 +156,11 @@ intel_flip_renderbuffers(struct gl_framebuffer *fb);
 void
 intel_renderbuffer_set_draw_offset(struct intel_renderbuffer *irb);
 
+void
+intel_renderbuffer_fine_offset_masks(struct intel_renderbuffer *irb,
+                                     uint32_t *fine_offset_mask_x,
+                                     uint32_t *fine_offset_mask_y);
+
 uint32_t
 intel_renderbuffer_tile_offsets(struct intel_renderbuffer *irb,
 				uint32_t *tile_x,
@@ -160,6 +168,9 @@ intel_renderbuffer_tile_offsets(struct intel_renderbuffer *irb,
 
 struct intel_region*
 intel_get_rb_region(struct gl_framebuffer *fb, GLuint attIndex);
+
+void
+intel_renderbuffer_set_needs_downsample(struct intel_renderbuffer *irb);
 
 void
 intel_renderbuffer_set_needs_hiz_resolve(struct intel_renderbuffer *irb);
@@ -191,5 +202,12 @@ intel_renderbuffer_resolve_hiz(struct intel_context *intel,
 bool
 intel_renderbuffer_resolve_depth(struct intel_context *intel,
 				 struct intel_renderbuffer *irb);
+
+unsigned
+intel_quantize_num_samples(struct intel_screen *intel, unsigned num_samples);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* INTEL_FBO_H */

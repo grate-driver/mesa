@@ -39,13 +39,7 @@ include debian/not-installed
 # build the following configurations by default
 CONFIGS = swx11+glu \
 	  swx11+glu-static \
-	  dri \
-	  osmesa \
-	  osmesa-static \
-	  osmesa16 \
-	  osmesa16-static \
-	  osmesa32 \
-	  osmesa32-static
+	  dri
 
 STAMP_DIR = debian/stamp
 STAMP = $(STAMP_DIR)/$(DEB_BUILD_GNU_TYPE)
@@ -111,6 +105,8 @@ confflags-dri = \
 	--with-driver=dri \
 	--with-dri-drivers="$(DRI_DRIVERS)" \
 	--with-dri-driverdir=/usr/lib/$(DEB_HOST_MULTIARCH)/dri \
+	--with-dri-searchpath='/usr/lib/$(DEB_HOST_MULTIARCH)/dri:\$$$${ORIGIN}/dri:/usr/lib/dri' \
+	--enable-gl-osmesa \
 	--enable-glx-tls \
 	--enable-shared-dricore \
 	--enable-shared-glapi \
@@ -121,49 +117,6 @@ confflags-dri = \
 	$(confflags_GALLIUM) \
 	$(confflags_GLES) \
 	$(confflags_OPENVG) \
-	$(confflags-common)
-
-confflags-osmesa = \
-	--disable-egl \
-	--with-gallium-drivers= \
-	--with-driver=osmesa \
-	$(confflags-common)
-
-confflags-osmesa-static = \
-	--disable-egl \
-	--with-gallium-drivers= \
-	--with-driver=osmesa \
-	--enable-static \
-	$(confflags-common)
-
-confflags-osmesa16 = \
-	--disable-egl \
-	--with-gallium-drivers= \
-	--with-driver=osmesa \
-	--with-osmesa-bits=16 \
-	$(confflags-common)
-
-confflags-osmesa16-static = \
-	--disable-egl \
-	--with-gallium-drivers= \
-	--with-driver=osmesa \
-	--with-osmesa-bits=16 \
-	--enable-static \
-	$(confflags-common)
-
-confflags-osmesa32 = \
-	--disable-egl \
-	--with-gallium-drivers= \
-	--with-driver=osmesa \
-	--with-osmesa-bits=32 \
-	$(confflags-common)
-
-confflags-osmesa32-static = \
-	--disable-egl \
-	--with-gallium-drivers= \
-	--with-driver=osmesa \
-	--with-osmesa-bits=32 \
-	--enable-static \
 	$(confflags-common)
 
 confflags-swx11+glu = \
@@ -192,10 +145,7 @@ confflags-swx11+glu-i386-i686 = \
 	CFLAGS="$(CFLAGS) -march=i686" \
 	CXXFLAGS="$(CXXFLAGS) -march=i686"
 
-autotools_files = bin/config.guess bin/config.sub
-
 configure: $(QUILT_STAMPFN) configure.ac
-	for file in $(autotools_files); do cp $$file $$file.pristine; done
 	autoreconf -vfi
 
 # list the configurations that will built
@@ -264,14 +214,16 @@ clean: unpatch
 	rm -f conftest* */conftest*
 	rm -rf autom4te.cache */autom4te.cache
 	rm -rf build
-	rm -rf configure config.guess config.sub config.h.in
+	rm -rf configure bin/config.guess bin/config.sub config.h.in
 	rm -rf $$(find -name Makefile.in)
-	rm -rf aclocal.m4 missing depcomp install-sh ltmain.sh
+	rm -rf aclocal.m4 bin/missing bin/depcomp install-sh bin/ltmain.sh
+	rm -f bin/ar-lib bin/compile bin/ylwrap
 	rm -rf $(STAMP_DIR)
 	for file in debian/*.in; do rm -f $${file%%.in}; done
-	# Those are auto-updated, grr:
-	for file in $(autotools_files); do if [ -f $$file.pristine ]; then mv -f $$file.pristine $$file; fi; done
 	ln -sf minstall bin/install-sh
+	rm -f src/glsl/builtins/tools/texture_builtins.pyc
+	rm -f src/mapi/glapi/gen/*.pyc
+	rm -f src/mesa/main/*.pyc
 
 	# And for pkgstriptranslation's benefit…
 	rm -f src/mesa/drivers/dri/common/xmlpool/xmlpool.pot
@@ -369,8 +321,7 @@ endif
 /usr/lib/$(DEB_HOST_MULTIARCH)/mesa-egl
 	dh_gencontrol -s
 	dh_md5sums -s
-	dh_builddeb $(foreach pkg,$(dbgpkg),-p$(pkg)) -- -Zxz
-	dh_builddeb $(foreach pkg,$(otherpkg),-p$(pkg)) -- -Zlzma
+	dh_builddeb -s -- -Zxz
 
 binary: binary-indep binary-arch
 .PHONY: configs build clean binary-indep binary-arch binary install

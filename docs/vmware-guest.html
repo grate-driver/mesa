@@ -1,11 +1,11 @@
-<html>
-
-<title>VMware guest GL driver</title>
-
-<link rel="stylesheet" type="text/css" href="mesa.css"></head>
-
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <title>VMware guest GL driver</title>
+  <link rel="stylesheet" type="text/css" href="mesa.css">
+</head>
 <body>
-
 
 <h1>VMware guest GL driver</h1>
 
@@ -55,13 +55,16 @@ The components involved in this include:
   <pre>
   sudo apt-get install git-core
   sudo apt-get install automake libtool libpthread-stubs0-dev
-  sudo apt-get install xserver-xorg-dev x11proto-xinerama-dev
+  sudo apt-get install xserver-xorg-dev x11proto-xinerama-dev libx11-xcb-dev
+  sudo apt-get install libxcb-glx0-dev libxrender-dev
   sudo apt-get build-dep libgl1-mesa-dri libxcb-glx0-dev
   </pre>
 <li>Fedora: For Fedora you also need to install a number of build dependencies. 
   <pre>
   sudo yum install mesa-libGL-devel xorg-x11-server-devel xorg-x11-util-macros
+  sudo yum install libXrender-devel.i686
   sudo yum install automake gcc libtool expat-devel kernel-devel git-core
+  sudo yum install makedepend flex bison
   </pre>
 </ul>
 
@@ -183,13 +186,13 @@ OpenGL renderer string: Gallium 0.4 on SVGA3D; build: RELEASE;
 OpenGL version string: 2.1 Mesa 8.0
 </pre>
 
+<p>
 If you don't see this, try setting this environment variable:
   <pre>
   export LIBGL_DEBUG=verbose</pre>
+<p>
 then rerun glxinfo and examine the output for error messages.
 </p>
-
-
 
 </body>
 </html>

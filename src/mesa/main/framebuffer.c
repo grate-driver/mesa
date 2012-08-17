@@ -281,8 +281,8 @@ _mesa_resize_framebuffer(struct gl_context *ctx, struct gl_framebuffer *fb,
     * and return early.
     */
 
-   /* For window system framebuffers, Name is zero */
-   assert(fb->Name == 0);
+   /* Can only resize win-sys framebuffer objects */
+   assert(_mesa_is_winsys_fbo(fb));
 
    for (i = 0; i < BUFFER_COUNT; i++) {
       struct gl_renderbuffer_attachment *att = &fb->Attachment[i];
@@ -347,7 +347,7 @@ _mesa_resizebuffers( struct gl_context *ctx )
       GLuint newWidth, newHeight;
       struct gl_framebuffer *buffer = ctx->WinSysDrawBuffer;
 
-      assert(buffer->Name == 0);
+      assert(_mesa_is_winsys_fbo(buffer));
 
       /* ask device driver for size of output buffer */
       ctx->Driver.GetBufferSize( buffer, &newWidth, &newHeight );
@@ -364,7 +364,7 @@ _mesa_resizebuffers( struct gl_context *ctx )
       GLuint newWidth, newHeight;
       struct gl_framebuffer *buffer = ctx->WinSysReadBuffer;
 
-      assert(buffer->Name == 0);
+      assert(_mesa_is_winsys_fbo(buffer));
 
       /* ask device driver for size of read buffer */
       ctx->Driver.GetBufferSize( buffer, &newWidth, &newHeight );
@@ -408,7 +408,7 @@ update_framebuffer_size(struct gl_context *ctx, struct gl_framebuffer *fb)
    GLuint i;
 
    /* user-created framebuffers only */
-   assert(fb->Name);
+   assert(_mesa_is_user_fbo(fb));
 
    for (i = 0; i < BUFFER_COUNT; i++) {
       struct gl_renderbuffer_attachment *att = &fb->Attachment[i];
@@ -444,7 +444,7 @@ _mesa_update_draw_buffer_bounds(struct gl_context *ctx)
    if (!buffer)
       return;
 
-   if (buffer->Name) {
+   if (_mesa_is_user_fbo(buffer)) {
       /* user-created framebuffer size depends on the renderbuffers */
       update_framebuffer_size(ctx, buffer);
    }
@@ -517,6 +517,13 @@ _mesa_update_framebuffer_visual(struct gl_context *ctx,
          const GLenum baseFormat = _mesa_get_format_base_format(rb->Format);
          const gl_format fmt = rb->Format;
 
+         /* Grab samples and sampleBuffers from any attachment point (assuming
+          * the framebuffer is complete, we'll get the same answer from all
+          * attachments).
+          */
+         fb->Visual.samples = rb->NumSamples;
+         fb->Visual.sampleBuffers = rb->NumSamples > 0 ? 1 : 0;
+
          if (_mesa_is_legal_color_format(ctx, baseFormat)) {
             fb->Visual.redBits = _mesa_get_format_bits(fmt, GL_RED_BITS);
             fb->Visual.greenBits = _mesa_get_format_bits(fmt, GL_GREEN_BITS);
@@ -524,10 +531,8 @@ _mesa_update_framebuffer_visual(struct gl_context *ctx,
             fb->Visual.alphaBits = _mesa_get_format_bits(fmt, GL_ALPHA_BITS);
             fb->Visual.rgbBits = fb->Visual.redBits
                + fb->Visual.greenBits + fb->Visual.blueBits;
-            fb->Visual.samples = rb->NumSamples;
-            fb->Visual.sampleBuffers = rb->NumSamples > 0 ? 1 : 0;
             if (_mesa_get_format_color_encoding(fmt) == GL_SRGB)
-                fb->Visual.sRGBCapable = ctx->Const.sRGBCapable;
+                fb->Visual.sRGBCapable = ctx->Extensions.EXT_framebuffer_sRGB;
             break;
          }
       }
@@ -687,7 +692,7 @@ update_color_read_buffer(struct gl_context *ctx, struct gl_framebuffer *fb)
 static void
 update_framebuffer(struct gl_context *ctx, struct gl_framebuffer *fb)
 {
-   if (fb->Name == 0) {
+   if (_mesa_is_winsys_fbo(fb)) {
       /* This is a window-system framebuffer */
       /* Need to update the FB's GL_DRAW_BUFFER state to match the
        * context state (GL_READ_BUFFER too).
@@ -851,7 +856,6 @@ _mesa_source_buffer_exists(struct gl_context *ctx, GLenum format)
 
 /**
  * As above, but for drawing operations.
- * XXX could do some code merging w/ above function.
  */
 GLboolean
 _mesa_dest_buffer_exists(struct gl_context *ctx, GLenum format)

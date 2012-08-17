@@ -102,8 +102,6 @@ llvmpipe_set_index_buffer(struct pipe_context *pipe,
       memcpy(&llvmpipe->index_buffer, ib, sizeof(llvmpipe->index_buffer));
    else
       memset(&llvmpipe->index_buffer, 0, sizeof(llvmpipe->index_buffer));
-
-   draw_set_index_buffer(llvmpipe->draw, ib);
 }
 
 void
@@ -115,6 +113,4 @@ llvmpipe_init_vertex_funcs(struct llvmpipe_context *llvmpipe)
 
    llvmpipe->pipe.set_vertex_buffers = llvmpipe_set_vertex_buffers;
    llvmpipe->pipe.set_index_buffer = llvmpipe_set_index_buffer;
-
-   llvmpipe->pipe.redefine_user_buffer = u_default_redefine_user_buffer;
 }

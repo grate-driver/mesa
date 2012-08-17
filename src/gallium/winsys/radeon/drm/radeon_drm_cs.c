@@ -71,18 +71,34 @@
 #include <stdint.h>
 #include <xf86drm.h>
 
+/*
+ * this are copy from radeon_drm, once an updated libdrm is released
+ * we should bump configure.ac requirement for it and remove the following
+ * field
+ */
 #ifndef RADEON_CHUNK_ID_FLAGS
-#define RADEON_CHUNK_ID_FLAGS	0x03
+#define RADEON_CHUNK_ID_FLAGS       0x03
 
 /* The first dword of RADEON_CHUNK_ID_FLAGS is a uint32 of these flags: */
 #define RADEON_CS_KEEP_TILING_FLAGS 0x01
+
+
 #endif
+
+#ifndef RADEON_CS_USE_VM
+#define RADEON_CS_USE_VM            0x02
+/* The second dword of RADEON_CHUNK_ID_FLAGS is a uint32 that sets the ring type */
+#define RADEON_CS_RING_GFX          0
+#define RADEON_CS_RING_COMPUTE      1
+#endif
+
 
 #define RELOC_DWORDS (sizeof(struct drm_radeon_cs_reloc) / sizeof(uint32_t))
 
-static boolean radeon_init_cs_context(struct radeon_cs_context *csc, int fd)
+static boolean radeon_init_cs_context(struct radeon_cs_context *csc,
+                                      struct radeon_drm_winsys *ws)
 {
-    csc->fd = fd;
+    csc->fd = ws->fd;
     csc->nrelocs = 512;
     csc->relocs_bo = (struct radeon_bo**)
                      CALLOC(1, csc->nrelocs * sizeof(struct radeon_bo*));
@@ -104,7 +120,7 @@ static boolean radeon_init_cs_context(struct radeon_cs_context *csc, int fd)
     csc->chunks[1].length_dw = 0;
     csc->chunks[1].chunk_data = (uint64_t)(uintptr_t)csc->relocs;
     csc->chunks[2].chunk_id = RADEON_CHUNK_ID_FLAGS;
-    csc->chunks[2].length_dw = 1;
+    csc->chunks[2].length_dw = 2;
     csc->chunks[2].chunk_data = (uint64_t)(uintptr_t)&csc->flags;
 
     csc->chunk_array[0] = (uint64_t)(uintptr_t)&csc->chunks[0];
@@ -157,11 +173,11 @@ static struct radeon_winsys_cs *radeon_drm_cs_create(struct radeon_winsys *rws)
 
     cs->ws = ws;
 
-    if (!radeon_init_cs_context(&cs->csc1, cs->ws->fd)) {
+    if (!radeon_init_cs_context(&cs->csc1, cs->ws)) {
         FREE(cs);
         return NULL;
     }
-    if (!radeon_init_cs_context(&cs->csc2, cs->ws->fd)) {
+    if (!radeon_init_cs_context(&cs->csc2, cs->ws)) {
         radeon_destroy_cs_context(&cs->csc1);
         FREE(cs);
         return NULL;
@@ -422,6 +438,10 @@ static void radeon_drm_cs_flush(struct radeon_winsys_cs *rcs, unsigned flags)
     struct radeon_drm_cs *cs = radeon_drm_cs(rcs);
     struct radeon_cs_context *tmp;
 
+    if (rcs->cdw > RADEON_MAX_CMDBUF_DWORDS) {
+       fprintf(stderr, "radeon: command stream overflowed\n");
+    }
+
     radeon_drm_cs_sync_flush(cs);
 
     /* Flip command streams. */
@@ -429,8 +449,8 @@ static void radeon_drm_cs_flush(struct radeon_winsys_cs *rcs, unsigned flags)
     cs->csc = cs->cst;
     cs->cst = tmp;
 
-    /* If the CS is not empty, emit it in a separate thread. */
-    if (cs->base.cdw) {
+    /* If the CS is not empty or overflowed, emit it in a separate thread. */
+    if (cs->base.cdw && cs->base.cdw <= RADEON_MAX_CMDBUF_DWORDS) {
         unsigned i, crelocs = cs->cst->crelocs;
 
         cs->cst->chunks[0].length_dw = cs->base.cdw;
@@ -440,11 +460,20 @@ static void radeon_drm_cs_flush(struct radeon_winsys_cs *rcs, unsigned flags)
             p_atomic_inc(&cs->cst->relocs_bo[i]->num_active_ioctls);
         }
 
+        cs->cst->flags[0] = 0;
+        cs->cst->flags[1] = RADEON_CS_RING_GFX;
+        cs->cst->cs.num_chunks = 2;
         if (flags & RADEON_FLUSH_KEEP_TILING_FLAGS) {
+            cs->cst->flags[0] |= RADEON_CS_KEEP_TILING_FLAGS;
             cs->cst->cs.num_chunks = 3;
-            cs->cst->flags = RADEON_CS_KEEP_TILING_FLAGS;
-        } else {
-            cs->cst->cs.num_chunks = 2;
+        }
+        if (cs->ws->info.r600_virtual_address) {
+            cs->cst->flags[0] |= RADEON_CS_USE_VM;
+            cs->cst->cs.num_chunks = 3;
+        }
+        if (flags & RADEON_FLUSH_COMPUTE) {
+            cs->cst->flags[1] = RADEON_CS_RING_COMPUTE;
+            cs->cst->cs.num_chunks = 3;
         }
 
         if (cs->thread &&
@@ -472,7 +501,6 @@ static void radeon_drm_cs_destroy(struct radeon_winsys_cs *rcs)
         pipe_semaphore_signal(&cs->flush_queued);
         pipe_semaphore_wait(&cs->flush_completed);
         pipe_thread_wait(cs->thread);
-        pipe_thread_destroy(cs->thread);
     }
     pipe_semaphore_destroy(&cs->flush_queued);
     pipe_semaphore_destroy(&cs->flush_completed);
@@ -494,12 +522,26 @@ static void radeon_drm_cs_set_flush(struct radeon_winsys_cs *rcs,
 }
 
 static boolean radeon_bo_is_referenced(struct radeon_winsys_cs *rcs,
-                                       struct radeon_winsys_cs_handle *_buf)
+                                       struct radeon_winsys_cs_handle *_buf,
+                                       enum radeon_bo_usage usage)
 {
     struct radeon_drm_cs *cs = radeon_drm_cs(rcs);
     struct radeon_bo *bo = (struct radeon_bo*)_buf;
+    int index;
 
-    return radeon_bo_is_referenced_by_cs(cs, bo);
+    if (!bo->num_cs_references)
+        return FALSE;
+
+    index = radeon_get_reloc(cs->csc, bo);
+    if (index == -1)
+        return FALSE;
+
+    if ((usage & RADEON_USAGE_WRITE) && cs->csc->relocs[index].write_domain)
+        return TRUE;
+    if ((usage & RADEON_USAGE_READ) && cs->csc->relocs[index].read_domains)
+        return TRUE;
+
+    return FALSE;
 }
 
 void radeon_drm_cs_init_functions(struct radeon_drm_winsys *ws)

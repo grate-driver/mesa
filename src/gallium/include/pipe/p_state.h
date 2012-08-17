@@ -62,6 +62,7 @@ extern "C" {
 #define PIPE_MAX_GEOMETRY_SAMPLERS  16
 #define PIPE_MAX_SHADER_INPUTS    32
 #define PIPE_MAX_SHADER_OUTPUTS   32
+#define PIPE_MAX_SHADER_SAMPLER_VIEWS 32
 #define PIPE_MAX_SHADER_RESOURCES 32
 #define PIPE_MAX_TEXTURE_LEVELS   16
 #define PIPE_MAX_SO_BUFFERS        4
@@ -190,16 +191,19 @@ struct pipe_clip_state
 struct pipe_stream_output_info
 {
    unsigned num_outputs;
-   /** stride for an entire vertex, only used if all output_buffers are 0 */
-   unsigned stride;
+   /** stride for an entire vertex for each buffer in dwords */
+   unsigned stride[PIPE_MAX_SO_BUFFERS];
+
    /**
     * Array of stream outputs, in the order they are to be written in.
     * Selected components are tightly packed into the output buffer.
     */
    struct {
-      unsigned register_index:8; /**< 0 to PIPE_MAX_SHADER_OUTPUTS */
-      unsigned register_mask:4;  /**< TGSI_WRITEMASK_x */
-      unsigned output_buffer:4;  /**< 0 to PIPE_MAX_SO_BUFFERS */
+      unsigned register_index:8;  /**< 0 to PIPE_MAX_SHADER_OUTPUTS */
+      unsigned start_component:2; /** 0 to 3 */
+      unsigned num_components:3;  /** 1 to 4 */
+      unsigned output_buffer:3;   /**< 0 to PIPE_MAX_SO_BUFFERS */
+      unsigned dst_offset:16;     /**< offset into the buffer in dwords */
    } output[PIPE_MAX_SHADER_OUTPUTS];
 };
 
@@ -326,7 +330,7 @@ struct pipe_surface
 {
    struct pipe_reference reference;
    struct pipe_resource *texture; /**< resource into which this is a view  */
-   struct pipe_context *context; /**< context this view belongs to */
+   struct pipe_context *context; /**< context this surface belongs to */
    enum pipe_format format;
 
    /* XXX width/height should be removed */
@@ -334,6 +338,7 @@ struct pipe_surface
    unsigned height;              /**< logical height in pixels */
 
    unsigned usage;               /**< bitmask of PIPE_BIND_x */
+   unsigned writable:1;          /**< writable shader resource */
 
    union {
       struct {
@@ -382,12 +387,12 @@ struct pipe_sampler_view
  */
 struct pipe_box
 {
-   unsigned x;
-   unsigned y;
-   unsigned z;
-   unsigned width;
-   unsigned height;
-   unsigned depth;
+   int x;
+   int y;
+   int z;
+   int width;
+   int height;
+   int depth;
 };
 
 
@@ -441,6 +446,19 @@ struct pipe_vertex_buffer
    unsigned stride;    /**< stride to same attrib in next vertex, in bytes */
    unsigned buffer_offset;  /**< offset to start of data in buffer, in bytes */
    struct pipe_resource *buffer;  /**< the actual buffer */
+   const void *user_buffer;  /**< pointer to a user buffer if buffer == NULL */
+};
+
+
+/**
+ * A constant buffer.  A subrange of an existing buffer can be set
+ * as a constant buffer.
+ */
+struct pipe_constant_buffer {
+   struct pipe_resource *buffer; /**< the actual buffer */
+   unsigned buffer_offset; /**< offset to start of data in buffer, in bytes */
+   unsigned buffer_size;   /**< how much data can be read in shader */
+   const void *user_buffer;  /**< pointer to a user buffer if buffer == NULL */
 };
 
 
@@ -460,8 +478,8 @@ struct pipe_vertex_buffer
 struct pipe_stream_output_target
 {
    struct pipe_reference reference;
-   struct pipe_resource *buffer; /**< buffer into which this is a target view */
-   struct pipe_context *context; /**< context this view belongs to */
+   struct pipe_resource *buffer; /**< the output buffer */
+   struct pipe_context *context; /**< context this SO target belongs to */
 
    unsigned buffer_offset;  /**< offset where data should be written, in bytes */
    unsigned buffer_size;    /**< how much data is allowed to be written */
@@ -499,6 +517,7 @@ struct pipe_index_buffer
    unsigned index_size;  /**< size of an index, in bytes */
    unsigned offset;  /**< offset to start of data in buffer, in bytes */
    struct pipe_resource *buffer; /**< the actual buffer */
+   const void *user_buffer;  /**< pointer to a user buffer if buffer == NULL */
 };
 
 
@@ -574,6 +593,21 @@ struct pipe_resolve_info
    unsigned mask; /**< PIPE_MASK_RGBA, Z, S or ZS */
 };
 
+/**
+ * Structure used as a header for serialized LLVM programs.
+ */
+struct pipe_llvm_program_header
+{
+   uint32_t num_bytes; /**< Number of bytes in the LLVM bytecode program. */
+};
+
+struct pipe_compute_state
+{
+   const void *prog; /**< Compute program to be executed. */
+   unsigned req_local_mem; /**< Required size of the LOCAL resource. */
+   unsigned req_private_mem; /**< Required size of the PRIVATE resource. */
+   unsigned req_input_mem; /**< Required size of the INPUT resource. */
+};
 
 #ifdef __cplusplus
 }

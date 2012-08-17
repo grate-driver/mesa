@@ -47,8 +47,8 @@
 #include "tgsi/tgsi_scan.h"
 
 #ifdef HAVE_LLVM
-#include <llvm-c/ExecutionEngine.h>
 struct draw_llvm;
+struct gallivm_state;
 #endif
 
 
@@ -63,6 +63,7 @@ struct draw_stage;
 struct vbuf_render;
 struct tgsi_exec_machine;
 struct tgsi_sampler;
+struct draw_pt_front_end;
 
 
 /**
@@ -137,6 +138,12 @@ struct draw_context
    /* Support prototype passthrough path:
     */
    struct {
+      /* Current active frontend */
+      struct draw_pt_front_end *frontend;
+      unsigned prim;
+      unsigned opt;
+      unsigned eltSize; /* saved eltSize for flushing */
+
       struct {
          struct draw_pt_middle_end *fetch_emit;
          struct draw_pt_middle_end *fetch_shade_emit;
@@ -161,8 +168,6 @@ struct draw_context
 
       struct pipe_vertex_element vertex_element[PIPE_MAX_ATTRIBS];
       unsigned nr_vertex_elements;
-
-      struct pipe_index_buffer index_buffer;
 
       /* user-space vertex data, buffers */
       struct {
@@ -196,6 +201,8 @@ struct draw_context
       boolean bypass_clip_z;
       boolean guard_band_xy;
    } driver;
+
+   boolean quads_always_flatshade_last;
 
    boolean flushing;         /**< debugging/sanity */
    boolean suspend_flushing; /**< internally set */
@@ -290,13 +297,10 @@ struct draw_context
       uint slot[10];
    } extra_shader_outputs;
 
-   unsigned reduced_prim;
-
    unsigned instance_id;
 
 #ifdef HAVE_LLVM
    struct draw_llvm *llvm;
-   struct gallivm_state *own_gallivm;
 #endif
 
    struct pipe_sampler_view *sampler_views[PIPE_MAX_VERTEX_SAMPLERS];
@@ -393,6 +397,7 @@ void draw_remove_extra_vertex_attribs(struct draw_context *draw);
 boolean draw_pt_init( struct draw_context *draw );
 void draw_pt_destroy( struct draw_context *draw );
 void draw_pt_reset_vertex_ids( struct draw_context *draw );
+void draw_pt_flush( struct draw_context *draw, unsigned flags );
 
 
 /*******************************************************************************

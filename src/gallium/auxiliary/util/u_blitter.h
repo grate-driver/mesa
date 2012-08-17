@@ -94,6 +94,8 @@ struct blitter_context
    struct pipe_framebuffer_state saved_fb_state;  /**< framebuffer state */
    struct pipe_stencil_ref saved_stencil_ref;     /**< stencil ref */
    struct pipe_viewport_state saved_viewport;
+   boolean is_sample_mask_saved;
+   unsigned saved_sample_mask;
 
    int saved_num_sampler_states;
    void *saved_sampler_states[PIPE_MAX_SAMPLERS];
@@ -154,10 +156,16 @@ void util_blitter_clear(struct blitter_context *blitter,
                         const union pipe_color_union *color,
                         double depth, unsigned stencil);
 
-void util_blitter_clear_depth_custom(struct blitter_context *blitter,
-                                     unsigned width, unsigned height,
-                                     double depth, void *custom_dsa);
-
+/**
+ * Check if the blitter (with the help of the driver) can blit between
+ * the two resources.
+ * The mask is a combination of the PIPE_MASK_* flags.
+ * Set to PIPE_MASK_RGBAZS if unsure.
+ */
+boolean util_blitter_is_copy_supported(struct blitter_context *blitter,
+                                       const struct pipe_resource *dst,
+                                       const struct pipe_resource *src,
+                                       unsigned mask);
 /**
  * Copy a block of pixels from one surface to another.
  *
@@ -166,13 +174,10 @@ void util_blitter_clear_depth_custom(struct blitter_context *blitter,
  * a software fallback path is taken and both surfaces must be of the same
  * format.
  *
- * The same holds for depth-stencil formats with the exception that stencil
- * cannot be copied unless you set ignore_stencil to FALSE. In that case,
- * a software fallback path is taken and both surfaces must be of the same
- * format.
- * XXX implement hw-accel stencil copy using shader stencil export.
- *
- * Use pipe_screen->is_format_supported to know your options.
+ * Only one sample of a multisample texture can be copied and is specified by
+ * src_sample. If the destination is a multisample resource, dst_sample_mask
+ * specifies the sample mask. For single-sample resources, set dst_sample_mask
+ * to ~0.
  *
  * These states must be saved in the blitter in addition to the state objects
  * already required to be saved:
@@ -185,12 +190,11 @@ void util_blitter_clear_depth_custom(struct blitter_context *blitter,
  */
 void util_blitter_copy_texture(struct blitter_context *blitter,
                                struct pipe_resource *dst,
-                               unsigned dstlevel,
+                               unsigned dst_level, unsigned dst_sample_mask,
                                unsigned dstx, unsigned dsty, unsigned dstz,
                                struct pipe_resource *src,
-                               unsigned srclevel,
-                               const struct pipe_box *srcbox,
-                               boolean ignore_stencil);
+                               unsigned src_level, unsigned src_sample,
+                               const struct pipe_box *srcbox);
 
 /**
  * Same as util_blitter_copy_texture, but dst and src are pipe_surface and
@@ -207,14 +211,20 @@ void util_blitter_copy_texture(struct blitter_context *blitter,
  * coordinates. The dst dimensions are supplied through pipe_surface::width
  * and height.
  *
+ * The mask is a combination of the PIPE_MASK_* flags.
+ * Set to PIPE_MASK_RGBAZS if unsure.
+ *
  * NOTE: There are no checks whether the blit is actually supported.
  */
 void util_blitter_copy_texture_view(struct blitter_context *blitter,
                                     struct pipe_surface *dst,
+                                    unsigned dst_sample_mask,
                                     unsigned dstx, unsigned dsty,
                                     struct pipe_sampler_view *src,
+                                    unsigned src_sample,
                                     const struct pipe_box *srcbox,
-                                    unsigned src_width0, unsigned src_height0);
+                                    unsigned src_width0, unsigned src_height0,
+                                    unsigned mask);
 
 /**
  * Helper function to initialize a view for copy_texture_view.
@@ -280,10 +290,32 @@ void util_blitter_clear_depth_stencil(struct blitter_context *blitter,
                                       unsigned dstx, unsigned dsty,
                                       unsigned width, unsigned height);
 
+/* The following functions are customized variants of the clear functions.
+ * Some drivers use them internally to do things like MSAA resolve
+ * and resource decompression. It usually consists of rendering a full-screen
+ * quad with a special blend or DSA state.
+ */
+
+/* Used by r300g for depth decompression. */
+void util_blitter_custom_clear_depth(struct blitter_context *blitter,
+                                     unsigned width, unsigned height,
+                                     double depth, void *custom_dsa);
+
+/* Used by r600g for depth decompression. */
 void util_blitter_custom_depth_stencil(struct blitter_context *blitter,
 				       struct pipe_surface *zsurf,
 				       struct pipe_surface *cbsurf,
+				       unsigned sample_mask,
 				       void *dsa_stage, float depth);
+
+/* Used by r600g for MSAA color resolve. */
+void util_blitter_custom_resolve_color(struct blitter_context *blitter,
+                                       struct pipe_resource *dst,
+                                       unsigned dst_level,
+                                       unsigned dst_layer,
+                                       struct pipe_resource *src,
+                                       unsigned src_layer,
+                                       void *custom_blend);
 
 /* The functions below should be used to save currently bound constant state
  * objects inside a driver. The objects are automatically restored at the end
@@ -416,6 +448,14 @@ util_blitter_save_so_targets(struct blitter_context *blitter,
    for (i = 0; i < num_targets; i++)
       pipe_so_target_reference(&blitter->saved_so_targets[i],
                                targets[i]);
+}
+
+static INLINE void
+util_blitter_save_sample_mask(struct blitter_context *blitter,
+                              unsigned sample_mask)
+{
+   blitter->is_sample_mask_saved = TRUE;
+   blitter->saved_sample_mask = sample_mask;
 }
 
 #ifdef __cplusplus

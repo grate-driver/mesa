@@ -27,6 +27,7 @@
 
 extern "C" {
 #include "main/core.h" /* for struct gl_context */
+#include "main/context.h"
 }
 
 #include "ralloc.h"
@@ -36,8 +37,9 @@ extern "C" {
 #include "ir_optimization.h"
 #include "loop_analysis.h"
 
-_mesa_glsl_parse_state::_mesa_glsl_parse_state(struct gl_context *ctx,
+_mesa_glsl_parse_state::_mesa_glsl_parse_state(struct gl_context *_ctx,
 					       GLenum target, void *mem_ctx)
+ : ctx(_ctx)
 {
    switch (target) {
    case GL_VERTEX_SHADER:   this->target = vertex_shader; break;
@@ -83,23 +85,11 @@ _mesa_glsl_parse_state::_mesa_glsl_parse_state(struct gl_context *ctx,
 
    this->Const.MaxDrawBuffers = ctx->Const.MaxDrawBuffers;
 
-   /* Note: Once the OpenGL 3.0 'forward compatible' context or the OpenGL 3.2
-    * Core context is supported, this logic will need change.  Older versions of
-    * GLSL are no longer supported outside the compatibility contexts of 3.x.
-    */
-   this->Const.GLSL_100ES = (ctx->API == API_OPENGLES2)
-      || ctx->Extensions.ARB_ES2_compatibility;
-   this->Const.GLSL_110 = (ctx->API == API_OPENGL);
-   this->Const.GLSL_120 = (ctx->API == API_OPENGL)
-      && (ctx->Const.GLSLVersion >= 120);
-   this->Const.GLSL_130 = (ctx->API == API_OPENGL)
-      && (ctx->Const.GLSLVersion >= 130);
-
    const unsigned lowest_version =
       (ctx->API == API_OPENGLES2) || ctx->Extensions.ARB_ES2_compatibility
       ? 100 : 110;
    const unsigned highest_version =
-      (ctx->API == API_OPENGL) ? ctx->Const.GLSLVersion : 100;
+      _mesa_is_desktop_gl(ctx) ? ctx->Const.GLSLVersion : 100;
    char *supported = ralloc_strdup(this, "");
 
    for (unsigned ver = lowest_version; ver <= highest_version; ver += 10) {
@@ -117,6 +107,10 @@ _mesa_glsl_parse_state::_mesa_glsl_parse_state(struct gl_context *ctx,
 
    if (ctx->Const.ForceGLSLExtensionsWarn)
       _mesa_glsl_process_extension("all", NULL, "warn", NULL, this);
+
+   this->default_uniform_qualifier = new(this) ast_type_qualifier();
+   this->default_uniform_qualifier->flags.q.shared = 1;
+   this->default_uniform_qualifier->flags.q.column_major = 1;
 }
 
 const char *
@@ -132,24 +126,49 @@ _mesa_glsl_shader_target_name(enum _mesa_glsl_parser_targets target)
    return "unknown";
 }
 
+/* This helper function will append the given message to the shader's
+   info log and report it via GL_ARB_debug_output. Per that extension,
+   'type' is one of the enum values classifying the message, and
+   'id' is the implementation-defined ID of the given message. */
+static void
+_mesa_glsl_msg(const YYLTYPE *locp, _mesa_glsl_parse_state *state,
+               GLenum type, GLuint id, const char *fmt, va_list ap)
+{
+   bool error = (type == GL_DEBUG_TYPE_ERROR_ARB);
+
+   assert(state->info_log != NULL);
+
+   /* Get the offset that the new message will be written to. */
+   int msg_offset = strlen(state->info_log);
+
+   ralloc_asprintf_append(&state->info_log, "%u:%u(%u): %s: ",
+					    locp->source,
+					    locp->first_line,
+					    locp->first_column,
+					    error ? "error" : "warning");
+   ralloc_vasprintf_append(&state->info_log, fmt, ap);
+
+   const char *const msg = &state->info_log[msg_offset];
+   struct gl_context *ctx = state->ctx;
+   /* Report the error via GL_ARB_debug_output. */
+   if (error)
+      _mesa_shader_debug(ctx, type, id, msg, strlen(msg));
+
+   ralloc_strcat(&state->info_log, "\n");
+}
 
 void
 _mesa_glsl_error(YYLTYPE *locp, _mesa_glsl_parse_state *state,
 		 const char *fmt, ...)
 {
    va_list ap;
+   GLenum type = GL_DEBUG_TYPE_ERROR_ARB;
 
    state->error = true;
 
-   assert(state->info_log != NULL);
-   ralloc_asprintf_append(&state->info_log, "%u:%u(%u): error: ",
-					    locp->source,
-					    locp->first_line,
-					    locp->first_column);
    va_start(ap, fmt);
-   ralloc_vasprintf_append(&state->info_log, fmt, ap);
+   _mesa_glsl_msg(locp, state, type, SHADER_ERROR_UNKNOWN, fmt, ap);
    va_end(ap);
-   ralloc_strcat(&state->info_log, "\n");
 }
 
 
@@ -158,16 +177,11 @@ _mesa_glsl_warning(const YYLTYPE *locp, _mesa_glsl_parse_state *state,
 		   const char *fmt, ...)
 {
    va_list ap;
+   GLenum type = GL_DEBUG_TYPE_OTHER_ARB;
 
-   assert(state->info_log != NULL);
-   ralloc_asprintf_append(&state->info_log, "%u:%u(%u): warning: ",
-					    locp->source,
-					    locp->first_line,
-					    locp->first_column);
    va_start(ap, fmt);
-   ralloc_vasprintf_append(&state->info_log, fmt, ap);
+   _mesa_glsl_msg(locp, state, type, 0, fmt, ap);
    va_end(ap);
-   ralloc_strcat(&state->info_log, "\n");
 }
 
 
@@ -272,6 +286,9 @@ static const _mesa_glsl_extension _mesa_glsl_supported_extensions[] = {
    EXT(AMD_shader_stencil_export,      false, false, true,  true,  false,     ARB_shader_stencil_export),
    EXT(OES_texture_3D,                 true,  false, true,  false, true,      EXT_texture3D),
    EXT(OES_EGL_image_external,         true,  false, true,  false, true,      OES_EGL_image_external),
+   EXT(ARB_shader_bit_encoding,        true,  true,  true,  true,  false,     ARB_shader_bit_encoding),
+   EXT(ARB_uniform_buffer_object,      true,  false, true,  true,  false,     ARB_uniform_buffer_object),
+   EXT(OES_standard_derivatives,       false, false, true,  false,  true,     OES_standard_derivatives),
 };
 
 #undef EXT
@@ -711,7 +728,7 @@ ast_declaration::print(void) const
 }
 
 
-ast_declaration::ast_declaration(char *identifier, int is_array,
+ast_declaration::ast_declaration(const char *identifier, int is_array,
 				 ast_expression *array_size,
 				 ast_expression *initializer)
 {
@@ -748,6 +765,7 @@ ast_declarator_list::ast_declarator_list(ast_fully_specified_type *type)
 {
    this->type = type;
    this->invariant = false;
+   this->ubo_qualifiers_valid = false;
 }
 
 void
@@ -977,8 +995,8 @@ ast_struct_specifier::print(void) const
 }
 
 
-ast_struct_specifier::ast_struct_specifier(char *identifier,
-					   ast_node *declarator_list)
+ast_struct_specifier::ast_struct_specifier(const char *identifier,
+					   ast_declarator_list *declarator_list)
 {
    if (identifier == NULL) {
       static unsigned anon_count = 1;
@@ -1021,7 +1039,6 @@ do_common_optimization(exec_list *ir, bool linked,
       progress = do_structure_splitting(ir) || progress;
    }
    progress = do_if_simplification(ir) || progress;
-   progress = do_discard_simplification(ir) || progress;
    progress = do_copy_propagation(ir) || progress;
    progress = do_copy_propagation_elements(ir) || progress;
    if (linked)
@@ -1042,6 +1059,7 @@ do_common_optimization(exec_list *ir, bool linked,
    progress = do_swizzle_swizzle(ir) || progress;
    progress = do_noop_swizzle(ir) || progress;
 
+   progress = optimize_split_arrays(ir, linked) || progress;
    progress = optimize_redundant_jumps(ir) || progress;
 
    loop_state *ls = analyze_loop_variables(ir);

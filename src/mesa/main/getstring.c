@@ -41,6 +41,7 @@ shading_language_version(struct gl_context *ctx)
 {
    switch (ctx->API) {
    case API_OPENGL:
+   case API_OPENGL_CORE:
       if (!ctx->Extensions.ARB_shader_objects) {
          _mesa_error(ctx, GL_INVALID_ENUM, "glGetString");
          return (const GLubyte *) 0;
@@ -53,6 +54,18 @@ shading_language_version(struct gl_context *ctx)
          return (const GLubyte *) "1.20";
       case 130:
          return (const GLubyte *) "1.30";
+      case 140:
+         return (const GLubyte *) "1.40";
+      case 150:
+         return (const GLubyte *) "1.50";
+      case 330:
+         return (const GLubyte *) "3.30";
+      case 400:
+         return (const GLubyte *) "4.00";
+      case 410:
+         return (const GLubyte *) "4.10";
+      case 420:
+         return (const GLubyte *) "4.20";
       default:
          _mesa_problem(ctx,
                        "Invalid GLSL version in shading_language_version()");
@@ -224,6 +237,12 @@ _mesa_GetPointerv( GLenum pname, GLvoid **params )
          *params = (GLvoid *) ctx->Array.ArrayObj->VertexAttrib[VERT_ATTRIB_POINT_SIZE].Ptr;
          break;
 #endif
+      case GL_DEBUG_CALLBACK_FUNCTION_ARB:
+         *params = (GLvoid *) ctx->Debug.Callback;
+         break;
+      case GL_DEBUG_CALLBACK_USER_PARAM_ARB:
+         *params = ctx->Debug.CallbackData;
+         break;
       default:
          _mesa_error( ctx, GL_INVALID_ENUM, "glGetPointerv" );
          return;

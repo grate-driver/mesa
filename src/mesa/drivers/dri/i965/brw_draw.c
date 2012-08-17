@@ -191,7 +191,7 @@ static void brw_emit_prim(struct brw_context *brw,
 	     vertex_access_type);
    OUT_BATCH(verts_per_instance);
    OUT_BATCH(start_vertex_location);
-   OUT_BATCH(1); // instance count
+   OUT_BATCH(prim->num_instances);
    OUT_BATCH(0); // start instance location
    OUT_BATCH(base_vertex_location);
    ADVANCE_BATCH();
@@ -247,7 +247,7 @@ static void gen7_emit_prim(struct brw_context *brw,
    OUT_BATCH(hw_prim | vertex_access_type);
    OUT_BATCH(verts_per_instance);
    OUT_BATCH(start_vertex_location);
-   OUT_BATCH(1); // instance count
+   OUT_BATCH(prim->num_instances);
    OUT_BATCH(0); // start instance location
    OUT_BATCH(base_vertex_location);
    ADVANCE_BATCH();
@@ -326,18 +326,28 @@ brw_predraw_resolve_buffers(struct brw_context *brw)
  * If the depth buffer was written to and if it has an accompanying HiZ
  * buffer, then mark that it needs a depth resolve.
  *
- * (In the future, this will also mark needed MSAA resolves).
+ * If the color buffer is a multisample window system buffer, then
+ * mark that it needs a downsample.
  */
 static void brw_postdraw_set_buffers_need_resolve(struct brw_context *brw)
 {
+   struct intel_context *intel = &brw->intel;
    struct gl_context *ctx = &brw->intel.ctx;
    struct gl_framebuffer *fb = ctx->DrawBuffer;
-   struct intel_renderbuffer *depth_irb =
-	 intel_get_renderbuffer(fb, BUFFER_DEPTH);
 
-   if (depth_irb && ctx->Depth.Mask) {
+   struct intel_renderbuffer *front_irb = NULL;
+   struct intel_renderbuffer *back_irb = intel_get_renderbuffer(fb, BUFFER_BACK_LEFT);
+   struct intel_renderbuffer *depth_irb = intel_get_renderbuffer(fb, BUFFER_DEPTH);
+
+   if (intel->is_front_buffer_rendering)
+      front_irb = intel_get_renderbuffer(fb, BUFFER_FRONT_LEFT);
+
+   if (front_irb)
+      intel_renderbuffer_set_needs_downsample(front_irb);
+   if (back_irb)
+      intel_renderbuffer_set_needs_downsample(back_irb);
+   if (depth_irb && ctx->Depth.Mask)
       intel_renderbuffer_set_needs_depth_resolve(depth_irb);
-   }
 }
 
 static int
@@ -466,6 +476,7 @@ static bool brw_try_draw_prims( struct gl_context *ctx,
       intel_batchbuffer_require_space(intel, estimated_max_prim_size, false);
       intel_batchbuffer_save_state(intel);
 
+      brw->num_instances = prim->num_instances;
       if (intel->gen < 6)
 	 brw_set_prim(brw, &prim[i]);
       else
@@ -531,7 +542,6 @@ retry:
 }
 
 void brw_draw_prims( struct gl_context *ctx,
-		     const struct gl_client_array *arrays[],
 		     const struct _mesa_prim *prim,
 		     GLuint nr_prims,
 		     const struct _mesa_index_buffer *ib,
@@ -540,14 +550,21 @@ void brw_draw_prims( struct gl_context *ctx,
 		     GLuint max_index,
 		     struct gl_transform_feedback_object *tfb_vertcount )
 {
+   const struct gl_client_array **arrays = ctx->Array._DrawArrays;
    bool retval;
 
    if (!_mesa_check_conditional_render(ctx))
       return;
 
+   /* Handle primitive restart if needed */
+   if (brw_handle_primitive_restart(ctx, prim, nr_prims, ib)) {
+      /* The draw was handled, so we can exit now */
+      return;
+   }
+
    if (!vbo_all_varyings_in_vbos(arrays)) {
       if (!index_bounds_valid)
-	 vbo_get_minmax_index(ctx, prim, ib, &min_index, &max_index);
+	 vbo_get_minmax_indices(ctx, prim, ib, &min_index, &max_index, nr_prims);
 
       /* Decide if we want to rebase.  If so we end up recursing once
        * only into this function.

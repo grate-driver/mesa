@@ -59,6 +59,13 @@ i915_surface_copy_render(struct pipe_context *pipe,
       return;
    }
 
+   if (!util_blitter_is_copy_supported(i915->blitter, dst, src,
+                                       PIPE_MASK_RGBAZS)) {
+      util_resource_copy_region(pipe, dst, dst_level, dstx, dsty, dstz,
+                                src, src_level, src_box);
+      return;
+   }
+
    util_blitter_save_blend(i915->blitter, (void *)i915->blend);
    util_blitter_save_depth_stencil_alpha(i915->blitter, (void *)i915->depth_stencil);
    util_blitter_save_stencil_ref(i915->blitter, &i915->stencil_ref);
@@ -79,8 +86,8 @@ i915_surface_copy_render(struct pipe_context *pipe,
                                             i915->saved_nr_sampler_views,
                                             i915->saved_sampler_views);
 
-   util_blitter_copy_texture(i915->blitter, dst, dst_level, dstx, dsty, dstz,
-                            src, src_level, src_box, TRUE);
+   util_blitter_copy_texture(i915->blitter, dst, dst_level, ~0, dstx, dsty, dstz,
+                            src, src_level, 0, src_box);
 }
 
 static void

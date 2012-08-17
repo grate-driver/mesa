@@ -598,8 +598,6 @@ dri2_swap_buffers(_EGLDriver *drv, _EGLDisplay *disp, _EGLSurface *draw)
 	    wayland_create_buffer(dri2_surf,
 		  dri2_surf->dri_buffers[__DRI_BUFFER_FRONT_LEFT]);
 
-      wl_buffer_damage(dri2_surf->wl_drm_buffer[WL_BUFFER_FRONT], 0, 0,
-		       dri2_surf->base.Width, dri2_surf->base.Height);
       wl_surface_attach(dri2_surf->wl_win->surface,
 	    dri2_surf->wl_drm_buffer[WL_BUFFER_FRONT],
 	    dri2_surf->dx, dri2_surf->dy);
@@ -731,7 +729,7 @@ dri2_terminate(_EGLDriver *drv, _EGLDisplay *disp)
    free(dri2_dpy->device_name);
    wl_drm_destroy(dri2_dpy->wl_drm);
    if (dri2_dpy->own_device)
-      wl_display_destroy(dri2_dpy->wl_dpy);
+      wl_display_disconnect(dri2_dpy->wl_dpy);
    free(dri2_dpy);
    disp->DriverData = NULL;
 
@@ -748,7 +746,16 @@ drm_handle_device(void *data, struct wl_drm *drm, const char *device)
    if (!dri2_dpy->device_name)
       return;
 
-   dri2_dpy->fd = open(dri2_dpy->device_name, O_RDWR);
+#ifdef O_CLOEXEC
+   dri2_dpy->fd = open(dri2_dpy->device_name, O_RDWR | O_CLOEXEC);
+   if (dri2_dpy->fd == -1 && errno == EINVAL)
+#endif
+   {
+      dri2_dpy->fd = open(dri2_dpy->device_name, O_RDWR);
+      if (dri2_dpy->fd != -1)
+         fcntl(dri2_dpy->fd, F_SETFD, fcntl(dri2_dpy->fd, F_GETFD) |
+            FD_CLOEXEC);
+   }
    if (dri2_dpy->fd == -1) {
       _eglLog(_EGL_WARNING, "wayland-egl: could not open %s (%s)",
 	      dri2_dpy->device_name, strerror(errno));

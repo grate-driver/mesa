@@ -35,6 +35,7 @@
 #include "context.h"
 #include "formats.h"
 #include "format_unpack.h"
+#include "glformats.h"
 #include "image.h"
 #include "mfeatures.h"
 #include "mtypes.h"
@@ -246,23 +247,12 @@ get_tex_rgba_compressed(struct gl_context *ctx, GLuint dimensions,
    {
       GLubyte *srcMap;
       GLint srcRowStride;
-      GLuint bytes, bw, bh;
-
-      bytes = _mesa_get_format_bytes(texFormat);
-      _mesa_get_format_block_size(texFormat, &bw, &bh);
 
       ctx->Driver.MapTextureImage(ctx, texImage, 0,
                                   0, 0, width, height,
                                   GL_MAP_READ_BIT,
                                   &srcMap, &srcRowStride);
       if (srcMap) {
-         /* XXX This line is a bit of a hack to work around the
-          * mismatch of compressed row strides as returned by
-          * MapTextureImage() vs. what the texture decompression code
-          * uses.  This will be fixed in the future.
-          */
-         srcRowStride = srcRowStride * bh / bytes;
-
          _mesa_decompress_image(texFormat, width, height,
                                 srcMap, srcRowStride, tempImage);
 
@@ -270,6 +260,8 @@ get_tex_rgba_compressed(struct gl_context *ctx, GLuint dimensions,
       }
       else {
          _mesa_error(ctx, GL_OUT_OF_MEMORY, "glGetTexImage");
+         free(tempImage);
+         return;
       }
    }
 
@@ -314,7 +306,8 @@ get_tex_rgba_uncompressed(struct gl_context *ctx, GLuint dimensions,
    GLuint img, row;
    GLfloat (*rgba)[4];
    GLuint (*rgba_uint)[4];
-   GLboolean is_integer = _mesa_is_format_integer_color(texImage->TexFormat);
+   GLboolean tex_is_integer = _mesa_is_format_integer_color(texImage->TexFormat);
+   GLboolean tex_is_uint = _mesa_is_format_unsigned(texImage->TexFormat);
 
    /* Allocate buffer for one row of texels */
    rgba = (GLfloat (*)[4]) malloc(4 * width * sizeof(GLfloat));
@@ -366,12 +359,19 @@ get_tex_rgba_uncompressed(struct gl_context *ctx, GLuint dimensions,
                                              width, height, format, type,
                                              img, row, 0);
 
-	    if (is_integer) {
+	    if (tex_is_integer) {
 	       _mesa_unpack_uint_rgba_row(texFormat, width, src, rgba_uint);
                if (rebaseFormat)
                   _mesa_rebase_rgba_uint(width, rgba_uint, rebaseFormat);
-	       _mesa_pack_rgba_span_int(ctx, width, rgba_uint,
-					format, type, dest);
+               if (tex_is_uint) {
+                  _mesa_pack_rgba_span_from_uints(ctx, width,
+                                                  (GLuint (*)[4]) rgba_uint,
+                                                  format, type, dest);
+               } else {
+                  _mesa_pack_rgba_span_from_ints(ctx, width,
+                                                 (GLint (*)[4]) rgba_uint,
+                                                 format, type, dest);
+               }
 	    } else {
 	       _mesa_unpack_rgba_row(texFormat, width, src, rgba);
                if (rebaseFormat)
@@ -453,52 +453,17 @@ get_tex_memcpy(struct gl_context *ctx, GLenum format, GLenum type,
    GLboolean memCopy = GL_FALSE;
 
    /*
-    * Check if the src/dst formats are compatible.
-    * Also note that GL's pixel transfer ops don't apply to glGetTexImage()
-    * so we don't have to worry about those.
-    * XXX more format combinations could be supported here.
+    * Check if we can use memcpy to copy from the hardware texture
+    * format to the user's format/type.
+    * Note that GL's pixel transfer ops don't apply to glGetTexImage()
     */
    if (target == GL_TEXTURE_1D ||
        target == GL_TEXTURE_2D ||
        target == GL_TEXTURE_RECTANGLE ||
        _mesa_is_cube_face(target)) {
-      if ((texImage->TexFormat == MESA_FORMAT_ARGB8888 ||
-             texImage->TexFormat == MESA_FORMAT_SARGB8) &&
-          format == GL_BGRA &&
-          (type == GL_UNSIGNED_BYTE || type == GL_UNSIGNED_INT_8_8_8_8_REV) &&
-          !ctx->Pack.SwapBytes &&
-          _mesa_little_endian()) {
-         memCopy = GL_TRUE;
-      }
-      else if ((texImage->TexFormat == MESA_FORMAT_AL88 ||
-                  texImage->TexFormat == MESA_FORMAT_SLA8) &&
-               format == GL_LUMINANCE_ALPHA &&
-               type == GL_UNSIGNED_BYTE &&
-               !ctx->Pack.SwapBytes &&
-               _mesa_little_endian()) {
-         memCopy = GL_TRUE;
-      }
-      else if ((texImage->TexFormat == MESA_FORMAT_L8 ||
-                  texImage->TexFormat == MESA_FORMAT_SL8) &&
-               format == GL_LUMINANCE &&
-               type == GL_UNSIGNED_BYTE) {
-         memCopy = GL_TRUE;
-      }
-      else if (texImage->TexFormat == MESA_FORMAT_L16 &&
-               format == GL_LUMINANCE &&
-               type == GL_UNSIGNED_SHORT) {
-         memCopy = GL_TRUE;
-      }
-      else if (texImage->TexFormat == MESA_FORMAT_A8 &&
-               format == GL_ALPHA &&
-               type == GL_UNSIGNED_BYTE) {
-         memCopy = GL_TRUE;
-      }
-      else if (texImage->TexFormat == MESA_FORMAT_A16 &&
-               format == GL_ALPHA &&
-               type == GL_UNSIGNED_SHORT) {
-         memCopy = GL_TRUE;
-      }
+      memCopy = _mesa_format_matches_format_and_type(texImage->TexFormat,
+                                                     format, type,
+                                                     ctx->Pack.SwapBytes);
    }
 
    if (memCopy) {
@@ -700,40 +665,6 @@ getteximage_error_check(struct gl_context *ctx, GLenum target, GLint level,
 
    if (level < 0 || level >= maxLevels) {
       _mesa_error( ctx, GL_INVALID_VALUE, "glGetTexImage(level)" );
-      return GL_TRUE;
-   }
-
-   if (_mesa_sizeof_packed_type(type) <= 0) {
-      _mesa_error( ctx, GL_INVALID_ENUM, "glGetTexImage(type)" );
-      return GL_TRUE;
-   }
-
-   if (_mesa_components_in_format(format) <= 0 ||
-       format == GL_STENCIL_INDEX ||
-       format == GL_COLOR_INDEX) {
-      _mesa_error( ctx, GL_INVALID_ENUM, "glGetTexImage(format)" );
-      return GL_TRUE;
-   }
-
-   if (!ctx->Extensions.ARB_depth_texture && _mesa_is_depth_format(format)) {
-      _mesa_error(ctx, GL_INVALID_ENUM, "glGetTexImage(format)");
-      return GL_TRUE;
-   }
-
-   if (!ctx->Extensions.MESA_ycbcr_texture && _mesa_is_ycbcr_format(format)) {
-      _mesa_error(ctx, GL_INVALID_ENUM, "glGetTexImage(format)");
-      return GL_TRUE;
-   }
-
-   if (!ctx->Extensions.EXT_packed_depth_stencil
-       && _mesa_is_depthstencil_format(format)) {
-      _mesa_error(ctx, GL_INVALID_ENUM, "glGetTexImage(format)");
-      return GL_TRUE;
-   }
-
-   if (!ctx->Extensions.ATI_envmap_bumpmap
-       && _mesa_is_dudv_format(format)) {
-      _mesa_error(ctx, GL_INVALID_ENUM, "glGetTexImage(format)");
       return GL_TRUE;
    }
 

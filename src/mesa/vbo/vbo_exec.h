@@ -78,25 +78,11 @@ struct vbo_exec_copied_vtx {
 };
 
 
-/** Used to signal when transitioning from one kind of drawing method
- * to another.
- */
-enum draw_method
-{
-   DRAW_NONE,          /**< Initial value only */
-   DRAW_BEGIN_END,
-   DRAW_DISPLAY_LIST,
-   DRAW_ARRAYS
-};
-
-
 struct vbo_exec_context
 {
    struct gl_context *ctx;   
    GLvertexformat vtxfmt;
    GLvertexformat vtxfmt_noop;
-
-   enum draw_method last_draw_method;
 
    struct {
       struct gl_buffer_object *bufferobj;
@@ -141,6 +127,7 @@ struct vbo_exec_context
        * programs:
        */
       const struct gl_client_array *inputs[VERT_ATTRIB_MAX];
+      GLboolean recalculate_inputs;
    } array;
 
    /* Which flags to set in vbo_exec_BeginVertices() */
@@ -171,27 +158,6 @@ void vbo_exec_array_destroy( struct vbo_exec_context *exec );
 
 void vbo_exec_vtx_init( struct vbo_exec_context *exec );
 void vbo_exec_vtx_destroy( struct vbo_exec_context *exec );
-
-
-/**
- * This is called by glBegin, glDrawArrays and glDrawElements (and
- * variations of those calls).  When we transition from immediate mode
- * drawing to array drawing we need to invalidate the array state.
- *
- * glBegin/End builds vertex arrays.  Those arrays may look identical
- * to glDrawArrays arrays except that the position of the elements may
- * be different.  For example, arrays of (position3v, normal3f) vs. arrays
- * of (normal3f, position3f).  So we need to make sure we notify drivers
- * that arrays may be changing.
- */
-static inline void
-vbo_draw_method(struct vbo_exec_context *exec, enum draw_method method)
-{
-   if (exec->last_draw_method != method) {
-      exec->ctx->NewState |= _NEW_ARRAY;
-      exec->last_draw_method = method;
-   }
-}
 
 
 #if FEATURE_beginend

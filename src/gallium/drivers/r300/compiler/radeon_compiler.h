@@ -114,7 +114,6 @@ struct r300_fragment_program_compiler {
 	struct rX00_fragment_program_code *code;
 	/* Optional transformations and features. */
 	struct r300_fragment_program_external_state state;
-	unsigned enable_shadow_ambient;
 	/* Register corresponding to the depthbuffer. */
 	unsigned OutputDepth;
 	/* Registers corresponding to the four colorbuffers. */
@@ -137,11 +136,10 @@ struct r300_vertex_program_compiler {
 	void * UserData;
 	void (*SetHwInputOutput)(struct r300_vertex_program_compiler * c);
 
-	int PredicateIndex;
-	unsigned int PredicateMask;
 };
 
 void r3xx_compile_vertex_program(struct r300_vertex_program_compiler* c);
+void rc_vert_fc(struct radeon_compiler *compiler, void *user);
 void r300_vertex_program_dump(struct radeon_compiler *compiler, void *user);
 
 struct radeon_compiler_pass {
@@ -161,6 +159,7 @@ struct rc_program_stats {
 	unsigned num_presub_ops;
 	unsigned num_temp_regs;
 	unsigned num_omod_ops;
+	unsigned num_inline_literals;
 };
 
 void rc_get_stats(struct radeon_compiler *c, struct rc_program_stats *s);

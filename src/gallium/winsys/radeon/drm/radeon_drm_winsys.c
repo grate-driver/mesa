@@ -41,6 +41,11 @@
 #include <xf86drm.h>
 #include <stdio.h>
 
+/*
+ * this are copy from radeon_drm, once an updated libdrm is released
+ * we should bump configure.ac requirement for it and remove the following
+ * field
+ */
 #ifndef RADEON_INFO_TILING_CONFIG
 #define RADEON_INFO_TILING_CONFIG 6
 #endif
@@ -68,6 +73,22 @@
 #ifndef RADEON_INFO_BACKEND_MAP
 #define RADEON_INFO_BACKEND_MAP 0xd
 #endif
+
+#ifndef RADEON_INFO_VA_START
+/* virtual address start, va < start are reserved by the kernel */
+#define RADEON_INFO_VA_START        0x0e
+/* maximum size of ib using the virtual memory cs */
+#define RADEON_INFO_IB_VM_MAX_SIZE  0x0f
+#endif
+
+#ifndef RADEON_INFO_MAX_PIPES
+#define RADEON_INFO_MAX_PIPES 0x10
+#endif
+
+#ifndef RADEON_INFO_TIMESTAMP
+#define RADEON_INFO_TIMESTAMP 0x11
+#endif
+
 
 /* Enable/disable feature access for one command stream.
  * If enable == TRUE, return TRUE on success.
@@ -213,6 +234,12 @@ static boolean do_winsys_init(struct radeon_drm_winsys *ws)
         ws->gen = R600;
         break;
 
+#define CHIPSET(pci_id, name, family) case pci_id:
+#include "pci_ids/radeonsi_pci_ids.h"
+#undef CHIPSET
+        ws->gen = SI;
+        break;
+
     default:
         fprintf(stderr, "radeon: Invalid PCI ID.\n");
         return FALSE;
@@ -243,7 +270,7 @@ static boolean do_winsys_init(struct radeon_drm_winsys *ws)
                                   &ws->info.r300_num_z_pipes))
             return FALSE;
     }
-    else if (ws->gen == R600) {
+    else if (ws->gen >= R600) {
         if (ws->info.drm_minor >= 9 &&
             !radeon_get_drm_value(ws->fd, RADEON_INFO_NUM_BACKENDS,
                                   "num backends",
@@ -265,7 +292,24 @@ static boolean do_winsys_init(struct radeon_drm_winsys *ws)
                                       &ws->info.r600_backend_map))
                 ws->info.r600_backend_map_valid = TRUE;
         }
+
+        ws->info.r600_virtual_address = FALSE;
+        if (ws->info.drm_minor >= 13) {
+            ws->info.r600_virtual_address = TRUE;
+            if (!radeon_get_drm_value(ws->fd, RADEON_INFO_VA_START, NULL,
+                                      &ws->info.r600_va_start))
+                ws->info.r600_virtual_address = FALSE;
+            if (!radeon_get_drm_value(ws->fd, RADEON_INFO_IB_VM_MAX_SIZE, NULL,
+                                      &ws->info.r600_ib_vm_max_size))
+                ws->info.r600_virtual_address = FALSE;
+        }
     }
+
+    /* Get max pipes, this is only needed for compute shaders.  All evergreen+
+     * chips have at least 2 pipes, so we use 2 as a default. */
+    ws->info.r600_max_pipes = 2;
+    radeon_get_drm_value(ws->fd, RADEON_INFO_MAX_PIPES, NULL,
+                         &ws->info.r600_max_pipes);
 
     return TRUE;
 }
@@ -279,6 +323,9 @@ static void radeon_winsys_destroy(struct radeon_winsys *rws)
 
     ws->cman->destroy(ws->cman);
     ws->kman->destroy(ws->kman);
+    if (ws->gen >= R600) {
+        radeon_surface_manager_free(ws->surf_man);
+    }
     FREE(rws);
 }
 
@@ -316,6 +363,38 @@ static boolean radeon_cs_request_feature(struct radeon_winsys_cs *rcs,
     return FALSE;
 }
 
+static int radeon_drm_winsys_surface_init(struct radeon_winsys *rws,
+                                          struct radeon_surface *surf)
+{
+    struct radeon_drm_winsys *ws = (struct radeon_drm_winsys*)rws;
+
+    return radeon_surface_init(ws->surf_man, surf);
+}
+
+static int radeon_drm_winsys_surface_best(struct radeon_winsys *rws,
+                                          struct radeon_surface *surf)
+{
+    struct radeon_drm_winsys *ws = (struct radeon_drm_winsys*)rws;
+
+    return radeon_surface_best(ws->surf_man, surf);
+}
+
+static uint64_t radeon_query_timestamp(struct radeon_winsys *rws)
+{
+    struct radeon_drm_winsys *ws = (struct radeon_drm_winsys*)rws;
+    uint64_t ts = 0;
+
+    if (ws->info.drm_minor < 20 ||
+        ws->gen < R600) {
+        assert(0);
+        return 0;
+    }
+
+    radeon_get_drm_value(ws->fd, RADEON_INFO_TIMESTAMP, "timestamp",
+                         (uint32_t*)&ts);
+    return ts;
+}
+
 struct radeon_winsys *radeon_drm_winsys_create(int fd)
 {
     struct radeon_drm_winsys *ws = CALLOC_STRUCT(radeon_drm_winsys);
@@ -336,10 +415,19 @@ struct radeon_winsys *radeon_drm_winsys_create(int fd)
     if (!ws->cman)
         goto fail;
 
+    if (ws->gen >= R600) {
+        ws->surf_man = radeon_surface_manager_new(fd);
+        if (!ws->surf_man)
+            goto fail;
+    }
+
     /* Set functions. */
     ws->base.destroy = radeon_winsys_destroy;
     ws->base.query_info = radeon_query_info;
     ws->base.cs_request_feature = radeon_cs_request_feature;
+    ws->base.surface_init = radeon_drm_winsys_surface_init;
+    ws->base.surface_best = radeon_drm_winsys_surface_best;
+    ws->base.query_timestamp = radeon_query_timestamp;
 
     radeon_bomgr_init_functions(ws);
     radeon_drm_cs_init_functions(ws);
@@ -354,6 +442,8 @@ fail:
         ws->cman->destroy(ws->cman);
     if (ws->kman)
         ws->kman->destroy(ws->kman);
+    if (ws->surf_man)
+        radeon_surface_manager_free(ws->surf_man);
     FREE(ws);
     return NULL;
 }

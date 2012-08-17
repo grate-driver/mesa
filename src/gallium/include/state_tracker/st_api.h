@@ -70,6 +70,17 @@ enum st_profile_type
 #define ST_PROFILE_OPENGL_ES2_MASK   (1 << ST_PROFILE_OPENGL_ES2)
 
 /**
+ * Optional API/state tracker features.
+ */
+enum st_api_feature
+{
+   ST_API_FEATURE_MS_VISUALS  /**< support for multisample visuals */
+};
+
+/* for feature_mask in st_api */
+#define ST_API_FEATURE_MS_VISUALS_MASK (1 << ST_API_FEATURE_MS_VISUALS)
+
+/**
  * New context flags for GL 3.0 and beyond.
  *
  * Profile information (core vs. compatibilty for OpenGL 3.2+) is communicated
@@ -176,7 +187,7 @@ struct pipe_fence_handle;
  */
 struct st_context_resource
 {
-   /* these fields are filled by the caller */
+   /* these fields are filled in by the caller */
    enum st_context_resource_type type;
    void *resource;
 
@@ -251,17 +262,17 @@ struct st_context_attribs
  * The framebuffer is implemented by the state tracker manager and
  * used by the state trackers.
  *
- * Instead of the winsys pokeing into the API context to figure
+ * Instead of the winsys poking into the API context to figure
  * out what buffers that might be needed in the future by the API
  * context, it calls into the framebuffer to get the textures.
  *
  * This structure along with the notify_invalid_framebuffer
  * allows framebuffers to be shared between different threads
  * but at the same make the API context free from thread
- * syncronisation primitves, with the exception of a small
+ * synchronization primitves, with the exception of a small
  * atomic flag used for notification of framebuffer dirty status.
  *
- * The thread syncronisation is put inside the framebuffer
+ * The thread synchronization is put inside the framebuffer
  * and only called once the framebuffer has become dirty.
  */
 struct st_framebuffer_iface
@@ -269,7 +280,6 @@ struct st_framebuffer_iface
    /**
     * Atomic stamp which changes when framebuffers need to be updated.
     */
-
    int32_t stamp;
 
    /**
@@ -345,7 +355,8 @@ struct st_context_iface
     *
     * This function is optional.
     */
-   boolean (*teximage)(struct st_context_iface *stctxi, enum st_texture_type target,
+   boolean (*teximage)(struct st_context_iface *stctxi,
+                       enum st_texture_type target,
                        int level, enum pipe_format internal_format,
                        struct pipe_resource *tex, boolean mipmap);
 
@@ -428,6 +439,11 @@ struct st_api
     * The supported profiles.  Tested with ST_PROFILE_*_MASK.
     */
    unsigned profile_mask;
+
+   /**
+    * The supported optional features.  Tested with ST_FEATURE_*_MASK.
+    */
+   unsigned feature_mask;
 
    /**
     * Destroy the API.

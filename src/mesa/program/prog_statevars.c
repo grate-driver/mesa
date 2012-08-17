@@ -34,8 +34,10 @@
 #include "main/imports.h"
 #include "main/macros.h"
 #include "main/mtypes.h"
+#include "main/fbobject.h"
 #include "prog_statevars.h"
 #include "prog_parameter.h"
+#include "main/samplerobj.h"
 
 
 /**
@@ -322,7 +324,6 @@ _mesa_fetch_state(struct gl_context *ctx, const gl_state_index state[],
              modifier == STATE_MATRIX_INVTRANS) {
             /* Be sure inverse is up to date:
 	     */
-            _math_matrix_alloc_inv( (GLmatrix *) matrix );
 	    _math_matrix_analyse( (GLmatrix*) matrix );
             m = matrix->inv;
          }
@@ -495,29 +496,6 @@ _mesa_fetch_state(struct gl_context *ctx, const gl_state_index state[],
             value[3] = ctx->Point.Threshold;
          }
          return;
-      case STATE_POINT_SIZE_IMPL_CLAMP:
-         {
-           /* for implementation clamp only in vs */
-            GLfloat minImplSize;
-            GLfloat maxImplSize;
-            if (ctx->Point.PointSprite) {
-               minImplSize = ctx->Const.MinPointSizeAA;
-               maxImplSize = ctx->Const.MaxPointSize;
-            }
-            else if (ctx->Point.SmoothFlag || ctx->Multisample._Enabled) {
-               minImplSize = ctx->Const.MinPointSizeAA;
-               maxImplSize = ctx->Const.MaxPointSizeAA;
-            }
-            else {
-               minImplSize = ctx->Const.MinPointSize;
-               maxImplSize = ctx->Const.MaxPointSize;
-            }
-            value[0] = ctx->Point.Size;
-            value[1] = minImplSize;
-            value[2] = maxImplSize;
-            value[3] = ctx->Point.Threshold;
-         }
-         return;
       case STATE_LIGHT_SPOT_DIR_NORMALIZED:
          {
             /* here, state[2] is the light number */
@@ -573,20 +551,6 @@ _mesa_fetch_state(struct gl_context *ctx, const gl_state_index state[],
          value[3] = ctx->Pixel.AlphaBias;
          return;
 
-      case STATE_SHADOW_AMBIENT:
-         {
-            const int unit = (int) state[2];
-            const struct gl_texture_object *texObj
-               = ctx->Texture.Unit[unit]._Current;
-            if (texObj) {
-               value[0] =
-               value[1] =
-               value[2] =
-               value[3] = texObj->Sampler.CompareFailValue;
-            }
-         }
-         return;
-
       case STATE_FB_SIZE:
          value[0] = (GLfloat) (ctx->DrawBuffer->Width - 1);
          value[1] = (GLfloat) (ctx->DrawBuffer->Height - 1);
@@ -597,7 +561,7 @@ _mesa_fetch_state(struct gl_context *ctx, const gl_state_index state[],
       case STATE_FB_WPOS_Y_TRANSFORM:
          /* A driver may negate this conditional by using ZW swizzle
           * instead of XY (based on e.g. some other state). */
-         if (ctx->DrawBuffer->Name != 0) {
+         if (_mesa_is_user_fbo(ctx->DrawBuffer)) {
             /* Identity (XY) followed by flipping Y upside down (ZW). */
             value[0] = 1.0F;
             value[1] = 0.0F;
@@ -722,14 +686,12 @@ _mesa_program_state_flags(const gl_state_index state[STATE_LENGTH])
          return _NEW_MODELVIEW;
 
       case STATE_TEXRECT_SCALE:
-      case STATE_SHADOW_AMBIENT:
       case STATE_ROT_MATRIX_0:
       case STATE_ROT_MATRIX_1:
 	 return _NEW_TEXTURE;
       case STATE_FOG_PARAMS_OPTIMIZED:
 	 return _NEW_FOG;
       case STATE_POINT_SIZE_CLAMPED:
-      case STATE_POINT_SIZE_IMPL_CLAMP:
          return _NEW_POINT | _NEW_MULTISAMPLE;
       case STATE_LIGHT_SPOT_DIR_NORMALIZED:
       case STATE_LIGHT_POSITION:
@@ -921,9 +883,6 @@ append_token(char *dst, gl_state_index k)
    case STATE_POINT_SIZE_CLAMPED:
       append(dst, "pointSizeClamped");
       break;
-   case STATE_POINT_SIZE_IMPL_CLAMP:
-      append(dst, "pointSizeImplClamp");
-      break;
    case STATE_LIGHT_SPOT_DIR_NORMALIZED:
       append(dst, "lightSpotDirNormalized");
       break;
@@ -941,9 +900,6 @@ append_token(char *dst, gl_state_index k)
       break;
    case STATE_PT_BIAS:
       append(dst, "PTbias");
-      break;
-   case STATE_SHADOW_AMBIENT:
-      append(dst, "CompareFailValue");
       break;
    case STATE_FB_SIZE:
       append(dst, "FbSize");

@@ -28,13 +28,14 @@
 #include "intel_batchbuffer.h"
 #include "intel_tex.h"
 #include "intel_fbo.h"
+#include "intel_buffer_objects.h"
 
 #include "brw_context.h"
 #include "brw_state.h"
 #include "brw_defines.h"
 #include "brw_wm.h"
 
-static void
+void
 gen7_set_surface_tiling(struct gen7_surface_state *surf, uint32_t tiling)
 {
    switch (tiling) {
@@ -53,6 +54,212 @@ gen7_set_surface_tiling(struct gen7_surface_state *surf, uint32_t tiling)
    }
 }
 
+
+void
+gen7_set_surface_msaa(struct gen7_surface_state *surf, unsigned num_samples,
+                      enum intel_msaa_layout layout)
+{
+   if (num_samples > 4)
+      surf->ss4.num_multisamples = GEN7_SURFACE_MULTISAMPLECOUNT_8;
+   else if (num_samples > 1)
+      surf->ss4.num_multisamples = GEN7_SURFACE_MULTISAMPLECOUNT_4;
+   else
+      surf->ss4.num_multisamples = GEN7_SURFACE_MULTISAMPLECOUNT_1;
+
+   surf->ss4.multisampled_surface_storage_format =
+      layout == INTEL_MSAA_LAYOUT_IMS ?
+      GEN7_SURFACE_MSFMT_DEPTH_STENCIL :
+      GEN7_SURFACE_MSFMT_MSS;
+}
+
+
+void
+gen7_set_surface_mcs_info(struct brw_context *brw,
+                          struct gen7_surface_state *surf,
+                          uint32_t surf_offset,
+                          const struct intel_mipmap_tree *mcs_mt,
+                          bool is_render_target)
+{
+   /* From the Ivy Bridge PRM, Vol4 Part1 p76, "MCS Base Address":
+    *
+    *     "The MCS surface must be stored as Tile Y."
+    */
+   assert(mcs_mt->region->tiling == I915_TILING_Y);
+
+   /* Compute the pitch in units of tiles.  To do this we need to divide the
+    * pitch in bytes by 128, since a single Y-tile is 128 bytes wide.
+    */
+   unsigned pitch_bytes = mcs_mt->region->pitch * mcs_mt->cpp;
+   unsigned pitch_tiles = pitch_bytes / 128;
+
+   /* The upper 20 bits of surface state DWORD 6 are the upper 20 bits of the
+    * GPU address of the MCS buffer; the lower 12 bits contain other control
+    * information.  Since buffer addresses are always on 4k boundaries (and
+    * thus have their lower 12 bits zero), we can use an ordinary reloc to do
+    * the necessary address translation.
+    */
+   assert ((mcs_mt->region->bo->offset & 0xfff) == 0);
+   surf->ss6.mcs_enabled.mcs_enable = 1;
+   surf->ss6.mcs_enabled.mcs_surface_pitch = pitch_tiles - 1;
+   surf->ss6.mcs_enabled.mcs_base_address = mcs_mt->region->bo->offset >> 12;
+   drm_intel_bo_emit_reloc(brw->intel.batch.bo,
+                           surf_offset +
+                           offsetof(struct gen7_surface_state, ss6),
+                           mcs_mt->region->bo,
+                           surf->ss6.raw_data & 0xfff,
+                           is_render_target ? I915_GEM_DOMAIN_RENDER
+                           : I915_GEM_DOMAIN_SAMPLER,
+                           is_render_target ? I915_GEM_DOMAIN_RENDER : 0);
+}
+
+
+void
+gen7_check_surface_setup(struct gen7_surface_state *surf,
+                         bool is_render_target)
+{
+   bool is_multisampled =
+      surf->ss4.num_multisamples != GEN7_SURFACE_MULTISAMPLECOUNT_1;
+   /* From the Graphics BSpec: vol5c Shared Functions [SNB+] > State >
+    * SURFACE_STATE > SURFACE_STATE for most messages [DevIVB]: Surface Array
+    * Spacing:
+    *
+    *   If Multisampled Surface Storage Format is MSFMT_MSS and Number of
+    *   Multisamples is not MULTISAMPLECOUNT_1, this field must be set to
+    *   ARYSPC_LOD0.
+    */
+   if (surf->ss4.multisampled_surface_storage_format == GEN7_SURFACE_MSFMT_MSS
+       && is_multisampled)
+      assert(surf->ss0.surface_array_spacing == GEN7_SURFACE_ARYSPC_LOD0);
+
+   /* From the Graphics BSpec: vol5c Shared Functions [SNB+] > State >
+    * SURFACE_STATE > SURFACE_STATE for most messages [DevIVB]: Multisampled
+    * Surface Storage Format:
+    *
+    *   All multisampled render target surfaces must have this field set to
+    *   MSFMT_MSS.
+    *
+    * But also:
+    *
+    *   This field is ignored if Number of Multisamples is MULTISAMPLECOUNT_1.
+    */
+   if (is_render_target && is_multisampled) {
+      assert(surf->ss4.multisampled_surface_storage_format ==
+             GEN7_SURFACE_MSFMT_MSS);
+   }
+
+   /* From the Graphics BSpec: vol5c Shared Functions [SNB+] > State >
+    * SURFACE_STATE > SURFACE_STATE for most messages [DevIVB]: Multisampled
+    * Surface Storage Format:
+    *
+    *   If the surface’s Number of Multisamples is MULTISAMPLECOUNT_8, Width
+    *   is >= 8192 (meaning the actual surface width is >= 8193 pixels), this
+    *   field must be set to MSFMT_MSS.
+    */
+   if (surf->ss4.num_multisamples == GEN7_SURFACE_MULTISAMPLECOUNT_8 &&
+       surf->ss2.width >= 8192) {
+      assert(surf->ss4.multisampled_surface_storage_format ==
+             GEN7_SURFACE_MSFMT_MSS);
+   }
+
+   /* From the Graphics BSpec: vol5c Shared Functions [SNB+] > State >
+    * SURFACE_STATE > SURFACE_STATE for most messages [DevIVB]: Multisampled
+    * Surface Storage Format:
+    *
+    *   If the surface’s Number of Multisamples is MULTISAMPLECOUNT_8,
+    *   ((Depth+1) * (Height+1)) is > 4,194,304, OR if the surface’s Number of
+    *   Multisamples is MULTISAMPLECOUNT_4, ((Depth+1) * (Height+1)) is >
+    *   8,388,608, this field must be set to MSFMT_DEPTH_STENCIL.This field
+    *   must be set to MSFMT_DEPTH_STENCIL if Surface Format is one of the
+    *   following: I24X8_UNORM, L24X8_UNORM, A24X8_UNORM, or
+    *   R24_UNORM_X8_TYPELESS.
+    *
+    * But also:
+    *
+    *   This field is ignored if Number of Multisamples is MULTISAMPLECOUNT_1.
+    */
+   uint32_t depth = surf->ss3.depth + 1;
+   uint32_t height = surf->ss2.height + 1;
+   if (surf->ss4.num_multisamples == GEN7_SURFACE_MULTISAMPLECOUNT_8 &&
+       depth * height > 4194304) {
+      assert(surf->ss4.multisampled_surface_storage_format ==
+             GEN7_SURFACE_MSFMT_DEPTH_STENCIL);
+   }
+   if (surf->ss4.num_multisamples == GEN7_SURFACE_MULTISAMPLECOUNT_4 &&
+       depth * height > 8388608) {
+      assert(surf->ss4.multisampled_surface_storage_format ==
+             GEN7_SURFACE_MSFMT_DEPTH_STENCIL);
+   }
+   if (is_multisampled) {
+      switch (surf->ss0.surface_format) {
+      case BRW_SURFACEFORMAT_I24X8_UNORM:
+      case BRW_SURFACEFORMAT_L24X8_UNORM:
+      case BRW_SURFACEFORMAT_A24X8_UNORM:
+      case BRW_SURFACEFORMAT_R24_UNORM_X8_TYPELESS:
+         assert(surf->ss4.multisampled_surface_storage_format ==
+                GEN7_SURFACE_MSFMT_DEPTH_STENCIL);
+      }
+   }
+}
+
+
+static void
+gen7_update_buffer_texture_surface(struct gl_context *ctx, GLuint unit)
+{
+   struct brw_context *brw = brw_context(ctx);
+   struct gl_texture_object *tObj = ctx->Texture.Unit[unit]._Current;
+   const GLuint surf_index = SURF_INDEX_TEXTURE(unit);
+   struct gen7_surface_state *surf;
+   struct intel_buffer_object *intel_obj =
+      intel_buffer_object(tObj->BufferObject);
+   drm_intel_bo *bo = intel_obj ? intel_obj->buffer : NULL;
+   gl_format format = tObj->_BufferObjectFormat;
+   int texel_size = _mesa_get_format_bytes(format);
+
+   surf = brw_state_batch(brw, AUB_TRACE_SURFACE_STATE,
+			  sizeof(*surf), 32, &brw->wm.surf_offset[surf_index]);
+   memset(surf, 0, sizeof(*surf));
+
+   surf->ss0.surface_type = BRW_SURFACE_BUFFER;
+   surf->ss0.surface_format = brw_format_for_mesa_format(format);
+
+   surf->ss0.render_cache_read_write = 1;
+
+   if (surf->ss0.surface_format == 0 && format != MESA_FORMAT_RGBA_FLOAT32) {
+      _mesa_problem(NULL, "bad format %s for texture buffer\n",
+		    _mesa_get_format_name(format));
+   }
+
+   if (bo) {
+      surf->ss1.base_addr = bo->offset; /* reloc */
+
+      /* Emit relocation to surface contents.  Section 5.1.1 of the gen4
+       * bspec ("Data Cache") says that the data cache does not exist as
+       * a separate cache and is just the sampler cache.
+       */
+      drm_intel_bo_emit_reloc(brw->intel.batch.bo,
+			      (brw->wm.surf_offset[surf_index] +
+			       offsetof(struct gen7_surface_state, ss1)),
+			      bo, 0,
+			      I915_GEM_DOMAIN_SAMPLER, 0);
+
+      int w = intel_obj->Base.Size / texel_size;
+      surf->ss2.width = w & 0x7f;            /* bits 6:0 of size or width */
+      surf->ss2.height = (w >> 7) & 0x1fff;  /* bits 19:7 of size or width */
+      surf->ss3.depth = (w >> 20) & 0x7f;    /* bits 26:20 of size or width */
+      surf->ss3.pitch = texel_size - 1;
+} else {
+      surf->ss1.base_addr = 0;
+      surf->ss2.width = 0;
+      surf->ss2.height = 0;
+      surf->ss3.depth = 0;
+      surf->ss3.pitch = 0;
+   }
+
+   gen7_set_surface_tiling(surf, I915_TILING_NONE);
+
+   gen7_check_surface_setup(surf, false /* is_render_target */);
+}
+
 static void
 gen7_update_texture_surface(struct gl_context *ctx, GLuint unit)
 {
@@ -66,10 +273,19 @@ gen7_update_texture_surface(struct gl_context *ctx, GLuint unit)
    struct gen7_surface_state *surf;
    int width, height, depth;
 
+   if (tObj->Target == GL_TEXTURE_BUFFER) {
+      gen7_update_buffer_texture_surface(ctx, unit);
+      return;
+   }
+
+   /* We don't support MSAA for textures. */
+   assert(!mt->array_spacing_lod0);
+   assert(mt->num_samples <= 1);
+
    intel_miptree_get_dimensions_for_image(firstImage, &width, &height, &depth);
 
    surf = brw_state_batch(brw, AUB_TRACE_SURFACE_STATE,
-			  sizeof(*surf), 32, &brw->bind.surf_offset[surf_index]);
+			  sizeof(*surf), 32, &brw->wm.surf_offset[surf_index]);
    memset(surf, 0, sizeof(*surf));
 
    if (mt->align_h == 4)
@@ -80,7 +296,7 @@ gen7_update_texture_surface(struct gl_context *ctx, GLuint unit)
    surf->ss0.surface_type = translate_tex_target(tObj->Target);
    surf->ss0.surface_format = translate_tex_format(mt->format,
                                                    firstImage->InternalFormat,
-                                                   sampler->DepthMode,
+                                                   tObj->DepthMode,
                                                    sampler->sRGBDecode);
    if (tObj->Target == GL_TEXTURE_CUBE_MAP) {
       surf->ss0.cube_pos_x = 1;
@@ -102,7 +318,8 @@ gen7_update_texture_surface(struct gl_context *ctx, GLuint unit)
     * - render_cache_read_write (exists on gen6 but ignored here)
     */
 
-   surf->ss1.base_addr = intelObj->mt->region->bo->offset; /* reloc */
+   surf->ss1.base_addr =
+      intelObj->mt->region->bo->offset + intelObj->mt->offset; /* reloc */
 
    surf->ss2.width = width - 1;
    surf->ss2.height = height - 1;
@@ -121,12 +338,21 @@ gen7_update_texture_surface(struct gl_context *ctx, GLuint unit)
     * - cache_control
     */
 
+   if (brw->intel.is_haswell) {
+      surf->ss7.shader_channel_select_r = HSW_SCS_RED;
+      surf->ss7.shader_channel_select_g = HSW_SCS_GREEN;
+      surf->ss7.shader_channel_select_b = HSW_SCS_BLUE;
+      surf->ss7.shader_channel_select_a = HSW_SCS_ALPHA;
+   }
+
    /* Emit relocation to surface contents */
    drm_intel_bo_emit_reloc(brw->intel.batch.bo,
-			   brw->bind.surf_offset[surf_index] +
+			   brw->wm.surf_offset[surf_index] +
 			   offsetof(struct gen7_surface_state, ss1),
-			   intelObj->mt->region->bo, 0,
+			   intelObj->mt->region->bo, intelObj->mt->offset,
 			   I915_GEM_DOMAIN_SAMPLER, 0);
+
+   gen7_check_surface_setup(surf, false /* is_render_target */);
 }
 
 /**
@@ -136,6 +362,7 @@ gen7_update_texture_surface(struct gl_context *ctx, GLuint unit)
 void
 gen7_create_constant_surface(struct brw_context *brw,
 			     drm_intel_bo *bo,
+			     uint32_t offset,
 			     int width,
 			     uint32_t *out_offset)
 {
@@ -152,13 +379,20 @@ gen7_create_constant_surface(struct brw_context *brw,
    surf->ss0.render_cache_read_write = 1;
 
    assert(bo);
-   surf->ss1.base_addr = bo->offset; /* reloc */
+   surf->ss1.base_addr = bo->offset + offset; /* reloc */
 
    surf->ss2.width = w & 0x7f;            /* bits 6:0 of size or width */
    surf->ss2.height = (w >> 7) & 0x1fff;  /* bits 19:7 of size or width */
    surf->ss3.depth = (w >> 20) & 0x7f;    /* bits 26:20 of size or width */
-   surf->ss3.pitch = (16 - 1); /* ignored */
+   surf->ss3.pitch = (16 - 1); /* stride between samples */
    gen7_set_surface_tiling(surf, I915_TILING_NONE); /* tiling now allowed */
+
+   if (brw->intel.is_haswell) {
+      surf->ss7.shader_channel_select_r = HSW_SCS_RED;
+      surf->ss7.shader_channel_select_g = HSW_SCS_GREEN;
+      surf->ss7.shader_channel_select_b = HSW_SCS_BLUE;
+      surf->ss7.shader_channel_select_a = HSW_SCS_ALPHA;
+   }
 
    /* Emit relocation to surface contents.  Section 5.1.1 of the gen4
     * bspec ("Data Cache") says that the data cache does not exist as
@@ -167,21 +401,54 @@ gen7_create_constant_surface(struct brw_context *brw,
    drm_intel_bo_emit_reloc(brw->intel.batch.bo,
 			   (*out_offset +
 			    offsetof(struct gen7_surface_state, ss1)),
-			   bo, 0,
+			   bo, offset,
 			   I915_GEM_DOMAIN_SAMPLER, 0);
+
+   gen7_check_surface_setup(surf, false /* is_render_target */);
 }
 
 static void
 gen7_update_null_renderbuffer_surface(struct brw_context *brw, unsigned unit)
 {
+   /* From the Ivy bridge PRM, Vol4 Part1 p62 (Surface Type: Programming
+    * Notes):
+    *
+    *     A null surface is used in instances where an actual surface is not
+    *     bound. When a write message is generated to a null surface, no
+    *     actual surface is written to. When a read message (including any
+    *     sampling engine message) is generated to a null surface, the result
+    *     is all zeros. Note that a null surface type is allowed to be used
+    *     with all messages, even if it is not specificially indicated as
+    *     supported. All of the remaining fields in surface state are ignored
+    *     for null surfaces, with the following exceptions: Width, Height,
+    *     Depth, LOD, and Render Target View Extent fields must match the
+    *     depth buffer’s corresponding state for all render target surfaces,
+    *     including null.
+    */
+   struct intel_context *intel = &brw->intel;
+   struct gl_context *ctx = &intel->ctx;
    struct gen7_surface_state *surf;
 
+   /* _NEW_BUFFERS */
+   const struct gl_framebuffer *fb = ctx->DrawBuffer;
+
    surf = brw_state_batch(brw, AUB_TRACE_SURFACE_STATE,
-			  sizeof(*surf), 32, &brw->bind.surf_offset[unit]);
+			  sizeof(*surf), 32, &brw->wm.surf_offset[unit]);
    memset(surf, 0, sizeof(*surf));
 
    surf->ss0.surface_type = BRW_SURFACE_NULL;
    surf->ss0.surface_format = BRW_SURFACEFORMAT_B8G8R8A8_UNORM;
+
+   surf->ss2.width = fb->Width - 1;
+   surf->ss2.height = fb->Height - 1;
+
+   /* From the Ivy bridge PRM, Vol4 Part1 p65 (Tiled Surface: Programming Notes):
+    *
+    *     If Surface Type is SURFTYPE_NULL, this field must be TRUE.
+    */
+   gen7_set_surface_tiling(surf, I915_TILING_Y);
+
+   gen7_check_surface_setup(surf, true /* is_render_target */);
 }
 
 /**
@@ -203,8 +470,11 @@ gen7_update_renderbuffer_surface(struct brw_context *brw,
    gl_format rb_format = intel_rb_format(irb);
 
    surf = brw_state_batch(brw, AUB_TRACE_SURFACE_STATE,
-			  sizeof(*surf), 32, &brw->bind.surf_offset[unit]);
+			  sizeof(*surf), 32, &brw->wm.surf_offset[unit]);
    memset(surf, 0, sizeof(*surf));
+
+   /* Render targets can't use IMS layout */
+   assert(irb->mt->msaa_layout != INTEL_MSAA_LAYOUT_IMS);
 
    if (irb->mt->align_h == 4)
       surf->ss0.vertical_alignment = 1;
@@ -213,8 +483,11 @@ gen7_update_renderbuffer_surface(struct brw_context *brw,
 
    switch (rb_format) {
    case MESA_FORMAT_SARGB8:
-      /* without GL_EXT_framebuffer_sRGB we shouldn't bind sRGB
-	 surfaces to the blend/update as sRGB */
+      /* _NEW_BUFFERS
+       *
+       * Without GL_EXT_framebuffer_sRGB we shouldn't bind sRGB surfaces to the
+       * blend/update as sRGB.
+       */
       if (ctx->Color.sRGBEnabled)
 	 surf->ss0.surface_format = brw_format_for_mesa_format(rb_format);
       else
@@ -231,6 +504,9 @@ gen7_update_renderbuffer_surface(struct brw_context *brw,
    }
 
    surf->ss0.surface_type = BRW_SURFACE_2D;
+   surf->ss0.surface_array_spacing = irb->mt->array_spacing_lod0 ?
+      GEN7_SURFACE_ARYSPC_LOD0 : GEN7_SURFACE_ARYSPC_FULL;
+
    /* reloc */
    surf->ss1.base_addr = intel_renderbuffer_tile_offsets(irb, &tile_x, &tile_y);
    surf->ss1.base_addr += region->bo->offset; /* reloc */
@@ -249,13 +525,29 @@ gen7_update_renderbuffer_surface(struct brw_context *brw,
    gen7_set_surface_tiling(surf, region->tiling);
    surf->ss3.pitch = (region->pitch * region->cpp) - 1;
 
+   gen7_set_surface_msaa(surf, irb->mt->num_samples, irb->mt->msaa_layout);
+
+   if (irb->mt->msaa_layout == INTEL_MSAA_LAYOUT_CMS) {
+      gen7_set_surface_mcs_info(brw, surf, brw->wm.surf_offset[unit],
+                                irb->mt->mcs_mt, true /* is_render_target */);
+   }
+
+   if (intel->is_haswell) {
+      surf->ss7.shader_channel_select_r = HSW_SCS_RED;
+      surf->ss7.shader_channel_select_g = HSW_SCS_GREEN;
+      surf->ss7.shader_channel_select_b = HSW_SCS_BLUE;
+      surf->ss7.shader_channel_select_a = HSW_SCS_ALPHA;
+   }
+
    drm_intel_bo_emit_reloc(brw->intel.batch.bo,
-			   brw->bind.surf_offset[unit] +
+			   brw->wm.surf_offset[unit] +
 			   offsetof(struct gen7_surface_state, ss1),
 			   region->bo,
 			   surf->ss1.base_addr - region->bo->offset,
 			   I915_GEM_DOMAIN_RENDER,
 			   I915_GEM_DOMAIN_RENDER);
+
+   gen7_check_surface_setup(surf, true /* is_render_target */);
 }
 
 void

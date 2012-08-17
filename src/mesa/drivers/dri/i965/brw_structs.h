@@ -854,13 +854,38 @@ struct gen7_surface_state
       GLuint x_offset:7;
    } ss5;
 
-   struct {
-      GLuint pad; /* Multisample Control Surface stuff */
+   union {
+      GLuint raw_data;
+      struct {
+         GLuint y_offset_for_uv_plane:14;
+         GLuint pad1:2;
+         GLuint x_offset_for_uv_plane:14;
+         GLuint pad0:2;
+      } planar; /** Interpretation when Surface Format == PLANAR */
+      struct {
+         GLuint mcs_enable:1;
+         GLuint append_counter_enable:1;
+         GLuint pad:4;
+         GLuint append_counter_address:26;
+      } mcs_disabled; /** Interpretation when mcs_enable == 0 */
+      struct {
+         GLuint mcs_enable:1;
+         GLuint pad:2;
+         GLuint mcs_surface_pitch:9;
+         GLuint mcs_base_address:20;
+      } mcs_enabled; /** Interpretation when mcs_enable == 1 */
    } ss6;
 
    struct {
       GLuint resource_min_lod:12;
-      GLuint pad0:16;
+
+      /* Only on Haswell */
+      GLuint pad0:4;
+      GLuint shader_channel_select_a:3;
+      GLuint shader_channel_select_b:3;
+      GLuint shader_channel_select_g:3;
+      GLuint shader_channel_select_r:3;
+
       GLuint alpha_clear_color:1;
       GLuint blue_clear_color:1;
       GLuint green_clear_color:1;
@@ -1007,6 +1032,22 @@ struct brw_instruction
 
 	 GLint jump_count:16;
       } branch_gen6;
+
+      struct {
+	 GLuint dest_reg_file:1;
+	 GLuint flag_subreg_num:1;
+	 GLuint pad0:2;
+	 GLuint src0_abs:1;
+	 GLuint src0_negate:1;
+	 GLuint src1_abs:1;
+	 GLuint src1_negate:1;
+	 GLuint src2_abs:1;
+	 GLuint src2_negate:1;
+	 GLuint pad1:7;
+	 GLuint dest_writemask:4;
+	 GLuint dest_subreg_nr:3;
+	 GLuint dest_reg_nr:8;
+      } da3src;
    } bits1;
 
 
@@ -1086,6 +1127,16 @@ struct brw_instruction
            GLuint sfid:4;
        } send_gen5;  /* for Ironlake only */
 
+      struct {
+	 GLuint src0_rep_ctrl:1;
+	 GLuint src0_swizzle:8;
+	 GLuint src0_subreg_nr:3;
+	 GLuint src0_reg_nr:8;
+	 GLuint pad0:1;
+	 GLuint src1_rep_ctrl:1;
+	 GLuint src1_swizzle:8;
+	 GLuint src1_subreg_nr_low:2;
+      } da3src;
    } bits2;
 
    union
@@ -1465,6 +1516,17 @@ struct brw_instruction
 	 GLuint end_of_thread:1;
       } gen7_dp;
       /** @} */
+
+      struct {
+	 GLuint src1_subreg_nr_high:1;
+	 GLuint src1_reg_nr:8;
+	 GLuint pad0:1;
+	 GLuint src2_rep_ctrl:1;
+	 GLuint src2_swizzle:8;
+	 GLuint src2_subreg_nr:3;
+	 GLuint src2_reg_nr:8;
+	 GLuint pad1:2;
+      } da3src;
 
       GLint d;
       GLuint ud;

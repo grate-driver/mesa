@@ -27,6 +27,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <errno.h>
 
 #include "util/u_memory.h"
 #include "egllog.h"
@@ -149,15 +150,6 @@ static struct native_display_buffer drm_display_buffer = {
    drm_display_export_native_buffer
 };
 
-static int
-drm_display_authenticate(void *user_data, uint32_t magic)
-{
-   struct native_display *ndpy = user_data;
-   struct drm_display *drmdpy = drm_display(ndpy);
-
-   return drmAuthMagic(drmdpy->fd, magic);
-}
-
 static char *
 drm_get_device_name(int fd)
 {
@@ -195,6 +187,15 @@ out:
 }
 
 #ifdef HAVE_WAYLAND_BACKEND
+
+static int
+drm_display_authenticate(void *user_data, uint32_t magic)
+{
+   struct native_display *ndpy = user_data;
+   struct drm_display *drmdpy = drm_display(ndpy);
+
+   return drmAuthMagic(drmdpy->fd, magic);
+}
 
 static struct wayland_drm_callbacks wl_drm_callbacks = {
    drm_display_authenticate,
@@ -239,7 +240,8 @@ drm_display_unbind_wayland_display(struct native_display *ndpy,
 static struct native_display_wayland_bufmgr drm_display_wayland_bufmgr = {
    drm_display_bind_wayland_display,
    drm_display_unbind_wayland_display,
-   egl_g3d_wl_drm_common_wl_buffer_get_resource
+   egl_g3d_wl_drm_common_wl_buffer_get_resource,
+   egl_g3d_wl_drm_common_query_buffer
 };
 
 #endif /* HAVE_WAYLAND_BACKEND */
@@ -312,7 +314,16 @@ native_create_display(void *dpy, boolean use_sw)
    gbm = dpy;
 
    if (gbm == NULL) {
-      fd = open("/dev/dri/card0", O_RDWR);
+      const char *device_name="/dev/dri/card0";
+#ifdef O_CLOEXEC
+      fd = open(device_name, O_RDWR | O_CLOEXEC);
+      if (fd == -1 && errno == EINVAL)
+#endif
+      {
+         fd = open(device_name, O_RDWR);
+         if (fd != -1)
+            fcntl(fd, F_SETFD, fcntl(fd, F_GETFD) | FD_CLOEXEC);
+      }
       /* FIXME: Use an internal constructor to create a gbm
        * device with gallium backend directly, without setenv */
       setenv("GBM_BACKEND", "gbm_gallium_drm.so", 1);

@@ -147,10 +147,7 @@ static void get_external_state(
     struct r300_fragment_program_external_state* state)
 {
     struct r300_textures_state *texstate = r300->textures_state.state;
-    struct r300_rs_state *rs = r300->rs_state.state;
     unsigned i;
-
-    state->frag_clamp = rs ? rs->rs.clamp_fragment_color : 0;
 
     for (i = 0; i < texstate->sampler_state_count; i++) {
         struct r300_sampler_state *s = texstate->sampler_states[i];
@@ -215,7 +212,7 @@ static void get_external_state(
                 state->unit[i].wrap_mode = RC_WRAP_NONE;
             }
 
-            if (t->b.b.b.target == PIPE_TEXTURE_3D)
+            if (t->b.b.target == PIPE_TEXTURE_3D)
                 state->unit[i].clamp_and_scale_before_fetch = TRUE;
         }
     }

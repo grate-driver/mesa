@@ -37,7 +37,7 @@ struct radeon_cs_context {
     struct drm_radeon_cs        cs;
     struct drm_radeon_cs_chunk  chunks[3];
     uint64_t                    chunk_array[3];
-    uint32_t                    flags;
+    uint32_t                    flags[2];
 
     /* Relocs. */
     unsigned                    nrelocs;
@@ -51,8 +51,8 @@ struct radeon_cs_context {
     struct drm_radeon_cs_reloc  *relocs_hashlist[256];
     unsigned                    reloc_indices_hashlist[256];
 
-    unsigned used_vram;
-    unsigned used_gart;
+    unsigned                    used_vram;
+    unsigned                    used_gart;
 };
 
 struct radeon_drm_cs {

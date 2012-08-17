@@ -97,56 +97,56 @@
 #include "lp_state_fs.h"
 
 
-#include <llvm-c/Analysis.h>
-#include <llvm-c/BitWriter.h>
-
-
 /** Fragment shader number (for debugging) */
 static unsigned fs_no = 0;
 
 
 /**
- * Expand the relevent bits of mask_input to a 4-dword mask for the 
- * four pixels in a 2x2 quad.  This will set the four elements of the
+ * Expand the relevant bits of mask_input to a n*4-dword mask for the
+ * n*four pixels in n 2x2 quads.  This will set the n*four elements of the
  * quad mask vector to 0 or ~0.
+ * Grouping is 01, 23 for 2 quad mode hence only 0 and 2 are valid
+ * quad arguments with fs length 8.
  *
- * \param quad  which quad of the quad group to test, in [0,3]
+ * \param first_quad  which quad(s) of the quad group to test, in [0,3]
  * \param mask_input  bitwise mask for the whole 4x4 stamp
  */
 static LLVMValueRef
 generate_quad_mask(struct gallivm_state *gallivm,
                    struct lp_type fs_type,
-                   unsigned quad,
+                   unsigned first_quad,
                    LLVMValueRef mask_input) /* int32 */
 {
    LLVMBuilderRef builder = gallivm->builder;
    struct lp_type mask_type;
    LLVMTypeRef i32t = LLVMInt32TypeInContext(gallivm->context);
-   LLVMValueRef bits[4];
+   LLVMValueRef bits[16];
    LLVMValueRef mask;
-   int shift;
+   int shift, i;
 
    /*
     * XXX: We'll need a different path for 16 x u8
     */
    assert(fs_type.width == 32);
-   assert(fs_type.length == 4);
+   assert(fs_type.length <= Elements(bits));
    mask_type = lp_int_type(fs_type);
 
    /*
     * mask_input >>= (quad * 4)
     */
-   switch (quad) {
+   switch (first_quad) {
    case 0:
       shift = 0;
       break;
    case 1:
+      assert(fs_type.length == 4);
       shift = 2;
       break;
    case 2:
       shift = 8;
       break;
    case 3:
+      assert(fs_type.length == 4);
       shift = 10;
       break;
    default:
@@ -166,12 +166,14 @@ generate_quad_mask(struct gallivm_state *gallivm,
                              lp_build_vec_type(gallivm, mask_type),
                              mask_input);
 
-   bits[0] = LLVMConstInt(i32t, 1 << 0, 0);
-   bits[1] = LLVMConstInt(i32t, 1 << 1, 0);
-   bits[2] = LLVMConstInt(i32t, 1 << 4, 0);
-   bits[3] = LLVMConstInt(i32t, 1 << 5, 0);
-   
-   mask = LLVMBuildAnd(builder, mask, LLVMConstVector(bits, 4), "");
+   for (i = 0; i < fs_type.length / 4; i++) {
+      unsigned j = 2 * (i % 2) + (i / 2) * 8;
+      bits[4*i + 0] = LLVMConstInt(i32t, 1 << (j + 0), 0);
+      bits[4*i + 1] = LLVMConstInt(i32t, 1 << (j + 1), 0);
+      bits[4*i + 2] = LLVMConstInt(i32t, 1 << (j + 4), 0);
+      bits[4*i + 3] = LLVMConstInt(i32t, 1 << (j + 5), 0);
+   }
+   mask = LLVMBuildAnd(builder, mask, LLVMConstVector(bits, fs_type.length), "");
 
    /*
     * mask = mask != 0 ? ~0 : 0
@@ -233,7 +235,7 @@ generate_fs(struct gallivm_state *gallivm,
    const struct tgsi_token *tokens = shader->base.tokens;
    LLVMTypeRef vec_type;
    LLVMValueRef consts_ptr;
-   LLVMValueRef outputs[PIPE_MAX_SHADER_OUTPUTS][NUM_CHANNELS];
+   LLVMValueRef outputs[PIPE_MAX_SHADER_OUTPUTS][TGSI_NUM_CHANNELS];
    LLVMValueRef z;
    LLVMValueRef zs_value = NULL;
    LLVMValueRef stencil_refs[2];
@@ -245,6 +247,9 @@ generate_fs(struct gallivm_state *gallivm,
    unsigned chan;
    unsigned cbuf;
    unsigned depth_mode;
+   struct lp_bld_tgsi_system_values system_values;
+
+   memset(&system_values, 0, sizeof(system_values));
 
    if (key->depth.enabled ||
        key->stencil[0].enabled ||
@@ -289,15 +294,15 @@ generate_fs(struct gallivm_state *gallivm,
 
    /* Declare the color and z variables */
    for(cbuf = 0; cbuf < key->nr_cbufs; cbuf++) {
-      for(chan = 0; chan < NUM_CHANNELS; ++chan) {
-	 color[cbuf][chan] = lp_build_alloca(gallivm, vec_type, "color");
+      for(chan = 0; chan < TGSI_NUM_CHANNELS; ++chan) {
+         color[cbuf][chan] = lp_build_alloca(gallivm, vec_type, "color");
       }
    }
 
    /* do triangle edge testing */
    if (partial_mask) {
       *pmask = generate_quad_mask(gallivm, type,
-                                  i, mask_input);
+                                  i*type.length/4, mask_input);
    }
    else {
       *pmask = lp_build_const_int_vec(gallivm, type, ~0);
@@ -309,7 +314,7 @@ generate_fs(struct gallivm_state *gallivm,
    if (!(depth_mode & EARLY_DEPTH_TEST) && !simple_shader)
       lp_build_mask_check(&mask);
 
-   lp_build_interp_soa_update_pos(interp, gallivm, i);
+   lp_build_interp_soa_update_pos(interp, gallivm, i*type.length/4);
    z = interp->pos[2];
 
    if (depth_mode & EARLY_DEPTH_TEST) {
@@ -330,11 +335,11 @@ generate_fs(struct gallivm_state *gallivm,
       }
    }
 
-   lp_build_interp_soa_update_inputs(interp, gallivm, i);
-   
+   lp_build_interp_soa_update_inputs(interp, gallivm, i*type.length/4);
+
    /* Build the actual shader */
    lp_build_tgsi_soa(gallivm, tokens, type, &mask,
-                     consts_ptr, NULL, /* sys values array */
+                     consts_ptr, &system_values,
                      interp->pos, interp->inputs,
                      outputs, sampler, &shader->info.base);
 
@@ -345,13 +350,16 @@ generate_fs(struct gallivm_state *gallivm,
                                            0);
 
       if (color0 != -1 && outputs[color0][3]) {
+         const struct util_format_description *cbuf_format_desc;
          LLVMValueRef alpha = LLVMBuildLoad(builder, outputs[color0][3], "alpha");
          LLVMValueRef alpha_ref_value;
 
          alpha_ref_value = lp_jit_context_alpha_ref_value(gallivm, context_ptr);
          alpha_ref_value = lp_build_broadcast(gallivm, vec_type, alpha_ref_value);
 
-         lp_build_alpha_test(gallivm, key->alpha.func, type,
+         cbuf_format_desc = util_format_description(key->cbuf_format[0]);
+
+         lp_build_alpha_test(gallivm, key->alpha.func, type, cbuf_format_desc,
                              &mask, alpha, alpha_ref_value,
                              (depth_mode & LATE_DEPTH_TEST) != 0);
       }
@@ -406,7 +414,7 @@ generate_fs(struct gallivm_state *gallivm,
           shader->info.base.output_semantic_index[attrib] < key->nr_cbufs)
       {
          unsigned cbuf = shader->info.base.output_semantic_index[attrib];
-         for(chan = 0; chan < NUM_CHANNELS; ++chan) {
+         for(chan = 0; chan < TGSI_NUM_CHANNELS; ++chan) {
             if(outputs[attrib][chan]) {
                /* XXX: just initialize outputs to point at colors[] and
                 * skip this.
@@ -424,6 +432,252 @@ generate_fs(struct gallivm_state *gallivm,
                                lp_build_mask_value(&mask), counter);
 
    *pmask = lp_build_mask_end(&mask);
+}
+
+
+/**
+ * Generate the fragment shader, depth/stencil test, and alpha tests.
+ */
+static void
+generate_fs_loop(struct gallivm_state *gallivm,
+                 struct lp_fragment_shader *shader,
+                 const struct lp_fragment_shader_variant_key *key,
+                 LLVMBuilderRef builder,
+                 struct lp_type type,
+                 LLVMValueRef context_ptr,
+                 LLVMValueRef num_loop,
+                 struct lp_build_interp_soa_context *interp,
+                 struct lp_build_sampler_soa *sampler,
+                 LLVMValueRef mask_store,
+                 LLVMValueRef (*out_color)[4],
+                 LLVMValueRef depth_ptr,
+                 unsigned depth_bits,
+                 LLVMValueRef facing,
+                 LLVMValueRef counter)
+{
+   const struct util_format_description *zs_format_desc = NULL;
+   const struct tgsi_token *tokens = shader->base.tokens;
+   LLVMTypeRef vec_type;
+   LLVMValueRef mask_ptr, mask_val;
+   LLVMValueRef consts_ptr;
+   LLVMValueRef z;
+   LLVMValueRef zs_value = NULL;
+   LLVMValueRef stencil_refs[2];
+   LLVMValueRef depth_ptr_i;
+   LLVMValueRef depth_offset;
+   LLVMValueRef outputs[PIPE_MAX_SHADER_OUTPUTS][TGSI_NUM_CHANNELS];
+   struct lp_build_for_loop_state loop_state;
+   struct lp_build_mask_context mask;
+   boolean simple_shader = (shader->info.base.file_count[TGSI_FILE_SAMPLER] == 0 &&
+                            shader->info.base.num_inputs < 3 &&
+                            shader->info.base.num_instructions < 8);
+   unsigned attrib;
+   unsigned chan;
+   unsigned cbuf;
+   unsigned depth_mode;
+
+   struct lp_bld_tgsi_system_values system_values;
+
+   memset(&system_values, 0, sizeof(system_values));
+
+   if (key->depth.enabled ||
+       key->stencil[0].enabled ||
+       key->stencil[1].enabled) {
+
+      zs_format_desc = util_format_description(key->zsbuf_format);
+      assert(zs_format_desc);
+
+      if (!shader->info.base.writes_z) {
+         if (key->alpha.enabled || shader->info.base.uses_kill)
+            /* With alpha test and kill, can do the depth test early
+             * and hopefully eliminate some quads.  But need to do a
+             * special deferred depth write once the final mask value
+             * is known.
+             */
+            depth_mode = EARLY_DEPTH_TEST | LATE_DEPTH_WRITE;
+         else
+            depth_mode = EARLY_DEPTH_TEST | EARLY_DEPTH_WRITE;
+      }
+      else {
+         depth_mode = LATE_DEPTH_TEST | LATE_DEPTH_WRITE;
+      }
+
+      if (!(key->depth.enabled && key->depth.writemask) &&
+          !(key->stencil[0].enabled && key->stencil[0].writemask))
+         depth_mode &= ~(LATE_DEPTH_WRITE | EARLY_DEPTH_WRITE);
+   }
+   else {
+      depth_mode = 0;
+   }
+
+
+   stencil_refs[0] = lp_jit_context_stencil_ref_front_value(gallivm, context_ptr);
+   stencil_refs[1] = lp_jit_context_stencil_ref_back_value(gallivm, context_ptr);
+
+   vec_type = lp_build_vec_type(gallivm, type);
+
+   consts_ptr = lp_jit_context_constants(gallivm, context_ptr);
+
+   lp_build_for_loop_begin(&loop_state, gallivm,
+                           lp_build_const_int32(gallivm, 0),
+                           LLVMIntULT,
+                           num_loop,
+                           lp_build_const_int32(gallivm, 1));
+
+   mask_ptr = LLVMBuildGEP(builder, mask_store,
+                           &loop_state.counter, 1, "mask_ptr");
+   mask_val = LLVMBuildLoad(builder, mask_ptr, "");
+
+   depth_offset = LLVMBuildMul(builder, loop_state.counter,
+                               lp_build_const_int32(gallivm, depth_bits * type.length),
+                               "");
+
+   depth_ptr_i = LLVMBuildGEP(builder, depth_ptr, &depth_offset, 1, "");
+
+   memset(outputs, 0, sizeof outputs);
+
+   for(cbuf = 0; cbuf < key->nr_cbufs; cbuf++) {
+      for(chan = 0; chan < TGSI_NUM_CHANNELS; ++chan) {
+         out_color[cbuf][chan] = lp_build_array_alloca(gallivm,
+                                                       lp_build_vec_type(gallivm,
+                                                                         type),
+                                                       num_loop, "color");
+      }
+   }
+
+
+
+   /* 'mask' will control execution based on quad's pixel alive/killed state */
+   lp_build_mask_begin(&mask, gallivm, type, mask_val);
+
+   if (!(depth_mode & EARLY_DEPTH_TEST) && !simple_shader)
+      lp_build_mask_check(&mask);
+
+   lp_build_interp_soa_update_pos_dyn(interp, gallivm, loop_state.counter);
+   z = interp->pos[2];
+
+   if (depth_mode & EARLY_DEPTH_TEST) {
+      lp_build_depth_stencil_test(gallivm,
+                                  &key->depth,
+                                  key->stencil,
+                                  type,
+                                  zs_format_desc,
+                                  &mask,
+                                  stencil_refs,
+                                  z,
+                                  depth_ptr_i, facing,
+                                  &zs_value,
+                                  !simple_shader);
+
+      if (depth_mode & EARLY_DEPTH_WRITE) {
+         lp_build_depth_write(builder, zs_format_desc, depth_ptr_i, zs_value);
+      }
+   }
+
+   lp_build_interp_soa_update_inputs_dyn(interp, gallivm, loop_state.counter);
+
+   /* Build the actual shader */
+   lp_build_tgsi_soa(gallivm, tokens, type, &mask,
+                     consts_ptr, &system_values,
+                     interp->pos, interp->inputs,
+                     outputs, sampler, &shader->info.base);
+
+   /* Alpha test */
+   if (key->alpha.enabled) {
+      int color0 = find_output_by_semantic(&shader->info.base,
+                                           TGSI_SEMANTIC_COLOR,
+                                           0);
+
+      if (color0 != -1 && outputs[color0][3]) {
+         const struct util_format_description *cbuf_format_desc;
+         LLVMValueRef alpha = LLVMBuildLoad(builder, outputs[color0][3], "alpha");
+         LLVMValueRef alpha_ref_value;
+
+         alpha_ref_value = lp_jit_context_alpha_ref_value(gallivm, context_ptr);
+         alpha_ref_value = lp_build_broadcast(gallivm, vec_type, alpha_ref_value);
+
+         cbuf_format_desc = util_format_description(key->cbuf_format[0]);
+
+         lp_build_alpha_test(gallivm, key->alpha.func, type, cbuf_format_desc,
+                             &mask, alpha, alpha_ref_value,
+                             (depth_mode & LATE_DEPTH_TEST) != 0);
+      }
+   }
+
+   /* Late Z test */
+   if (depth_mode & LATE_DEPTH_TEST) {
+      int pos0 = find_output_by_semantic(&shader->info.base,
+                                         TGSI_SEMANTIC_POSITION,
+                                         0);
+
+      if (pos0 != -1 && outputs[pos0][2]) {
+         z = LLVMBuildLoad(builder, outputs[pos0][2], "output.z");
+      }
+
+      lp_build_depth_stencil_test(gallivm,
+                                  &key->depth,
+                                  key->stencil,
+                                  type,
+                                  zs_format_desc,
+                                  &mask,
+                                  stencil_refs,
+                                  z,
+                                  depth_ptr_i, facing,
+                                  &zs_value,
+                                  !simple_shader);
+      /* Late Z write */
+      if (depth_mode & LATE_DEPTH_WRITE) {
+         lp_build_depth_write(builder, zs_format_desc, depth_ptr_i, zs_value);
+      }
+   }
+   else if ((depth_mode & EARLY_DEPTH_TEST) &&
+            (depth_mode & LATE_DEPTH_WRITE))
+   {
+      /* Need to apply a reduced mask to the depth write.  Reload the
+       * depth value, update from zs_value with the new mask value and
+       * write that out.
+       */
+      lp_build_deferred_depth_write(gallivm,
+                                    type,
+                                    zs_format_desc,
+                                    &mask,
+                                    depth_ptr_i,
+                                    zs_value);
+   }
+
+
+   /* Color write  */
+   for (attrib = 0; attrib < shader->info.base.num_outputs; ++attrib)
+   {
+      if (shader->info.base.output_semantic_name[attrib] == TGSI_SEMANTIC_COLOR &&
+          shader->info.base.output_semantic_index[attrib] < key->nr_cbufs)
+      {
+         unsigned cbuf = shader->info.base.output_semantic_index[attrib];
+         for(chan = 0; chan < TGSI_NUM_CHANNELS; ++chan) {
+            if(outputs[attrib][chan]) {
+               /* XXX: just initialize outputs to point at colors[] and
+                * skip this.
+                */
+               LLVMValueRef out = LLVMBuildLoad(builder, outputs[attrib][chan], "");
+               LLVMValueRef color_ptr;
+               color_ptr = LLVMBuildGEP(builder, out_color[cbuf][chan],
+                                        &loop_state.counter, 1, "");
+               lp_build_name(out, "color%u.%c", attrib, "rgba"[chan]);
+               LLVMBuildStore(builder, out, color_ptr);
+            }
+         }
+      }
+   }
+
+   if (key->occlusion_count) {
+      lp_build_name(counter, "counter");
+      lp_build_occlusion_count(gallivm, type,
+                               lp_build_mask_value(&mask), counter);
+   }
+
+   mask_val = lp_build_mask_end(&mask);
+   LLVMBuildStore(builder, mask_val, mask_ptr);
+   lp_build_for_loop_end(&loop_state);
 }
 
 
@@ -509,7 +763,7 @@ generate_fragment(struct llvmpipe_context *lp,
                   struct lp_fragment_shader_variant *variant,
                   unsigned partial_mask)
 {
-   struct gallivm_state *gallivm = lp->gallivm;
+   struct gallivm_state *gallivm = variant->gallivm;
    const struct lp_fragment_shader_variant_key *key = &variant->key;
    struct lp_shader_input inputs[PIPE_MAX_SHADER_INPUTS];
    char func_name[256];
@@ -535,8 +789,8 @@ generate_fragment(struct llvmpipe_context *lp,
    LLVMBuilderRef builder;
    struct lp_build_sampler_soa *sampler;
    struct lp_build_interp_soa_context interp;
-   LLVMValueRef fs_mask[LP_MAX_VECTOR_LENGTH];
-   LLVMValueRef fs_out_color[PIPE_MAX_COLOR_BUFS][NUM_CHANNELS][LP_MAX_VECTOR_LENGTH];
+   LLVMValueRef fs_mask[16 / 4];
+   LLVMValueRef fs_out_color[PIPE_MAX_COLOR_BUFS][TGSI_NUM_CHANNELS][16 / 4];
    LLVMValueRef blend_mask;
    LLVMValueRef function;
    LLVMValueRef facing;
@@ -546,6 +800,9 @@ generate_fragment(struct llvmpipe_context *lp,
    unsigned chan;
    unsigned cbuf;
    boolean cbuf0_write_all;
+   boolean try_loop = TRUE;
+
+   assert(lp_native_vector_width / 32 >= 4);
 
    /* Adjust color input interpolation according to flatshade state:
     */
@@ -555,7 +812,7 @@ generate_fragment(struct llvmpipe_context *lp,
 	 if (key->flatshade)
 	    inputs[i].interp = LP_INTERP_CONSTANT;
 	 else
-	    inputs[i].interp = LP_INTERP_LINEAR;
+	    inputs[i].interp = LP_INTERP_PERSPECTIVE;
       }
    }
 
@@ -573,12 +830,12 @@ generate_fragment(struct llvmpipe_context *lp,
     * characteristics. */
 
    memset(&fs_type, 0, sizeof fs_type);
-   fs_type.floating = TRUE; /* floating point values */
-   fs_type.sign = TRUE;     /* values are signed */
-   fs_type.norm = FALSE;    /* values are not limited to [0,1] or [-1,1] */
-   fs_type.width = 32;      /* 32-bit float */
-   fs_type.length = 4;      /* 4 elements per vector */
-   num_fs = 4;              /* number of quads per block */
+   fs_type.floating = TRUE;      /* floating point values */
+   fs_type.sign = TRUE;          /* values are signed */
+   fs_type.norm = FALSE;         /* values are not limited to [0,1] or [-1,1] */
+   fs_type.width = 32;           /* 32-bit float */
+   fs_type.length = MIN2(lp_native_vector_width / 32, 16); /* n*4 elements per vector */
+   num_fs = 16 / fs_type.length; /* number of loops per 4x4 stamp */
 
    memset(&blend_type, 0, sizeof blend_type);
    blend_type.floating = FALSE; /* values are integers */
@@ -599,7 +856,7 @@ generate_fragment(struct llvmpipe_context *lp,
    util_snprintf(func_name, sizeof(func_name), "fs%u_variant%u_%s", 
 		 shader->no, variant->no, partial_mask ? "partial" : "whole");
 
-   arg_types[0] = lp_jit_get_context_type(lp);         /* context */
+   arg_types[0] = variant->jit_context_ptr_type;       /* context */
    arg_types[1] = int32_type;                          /* x */
    arg_types[2] = int32_type;                          /* y */
    arg_types[3] = int32_type;                          /* facing */
@@ -661,54 +918,126 @@ generate_fragment(struct llvmpipe_context *lp,
    assert(builder);
    LLVMPositionBuilderAtEnd(builder, block);
 
-   /*
-    * The shader input interpolation info is not explicitely baked in the
-    * shader key, but everything it derives from (TGSI, and flatshade) is
-    * already included in the shader key.
-    */
-   lp_build_interp_soa_init(&interp, 
-                            gallivm,
-                            shader->info.base.num_inputs,
-                            inputs,
-                            builder, fs_type,
-                            a0_ptr, dadx_ptr, dady_ptr,
-                            x, y);
-
    /* code generated texture sampling */
    sampler = lp_llvm_sampler_soa_create(key->sampler, context_ptr);
 
-   /* loop over quads in the block */
    zs_format_desc = util_format_description(key->zsbuf_format);
 
-   for(i = 0; i < num_fs; ++i) {
-      LLVMValueRef depth_offset = LLVMConstInt(int32_type,
-                                               i*fs_type.length*zs_format_desc->block.bits/8,
-                                               0);
-      LLVMValueRef out_color[PIPE_MAX_COLOR_BUFS][NUM_CHANNELS];
-      LLVMValueRef depth_ptr_i;
+   if (!try_loop) {
+      /*
+       * The shader input interpolation info is not explicitely baked in the
+       * shader key, but everything it derives from (TGSI, and flatshade) is
+       * already included in the shader key.
+       */
+      lp_build_interp_soa_init(&interp,
+                               gallivm,
+                               shader->info.base.num_inputs,
+                               inputs,
+                               builder, fs_type,
+                               FALSE,
+                               a0_ptr, dadx_ptr, dady_ptr,
+                               x, y);
 
-      depth_ptr_i = LLVMBuildGEP(builder, depth_ptr, &depth_offset, 1, "");
+      /* loop over quads in the block */
+      for(i = 0; i < num_fs; ++i) {
+         LLVMValueRef depth_offset = LLVMConstInt(int32_type,
+                                                  i*fs_type.length*zs_format_desc->block.bits/8,
+                                                  0);
+         LLVMValueRef out_color[PIPE_MAX_COLOR_BUFS][TGSI_NUM_CHANNELS];
+         LLVMValueRef depth_ptr_i;
 
-      generate_fs(gallivm,
-                  shader, key,
-                  builder,
-                  fs_type,
-                  context_ptr,
-                  i,
-                  &interp,
-                  sampler,
-                  &fs_mask[i], /* output */
-                  out_color,
-                  depth_ptr_i,
-                  facing,
-                  partial_mask,
-                  mask_input,
-                  counter);
+         depth_ptr_i = LLVMBuildGEP(builder, depth_ptr, &depth_offset, 1, "");
 
-      for (cbuf = 0; cbuf < key->nr_cbufs; cbuf++)
-         for (chan = 0; chan < NUM_CHANNELS; ++chan)
-            fs_out_color[cbuf][chan][i] =
-               out_color[cbuf * !cbuf0_write_all][chan];
+         generate_fs(gallivm,
+                     shader, key,
+                     builder,
+                     fs_type,
+                     context_ptr,
+                     i,
+                     &interp,
+                     sampler,
+                     &fs_mask[i], /* output */
+                     out_color,
+                     depth_ptr_i,
+                     facing,
+                     partial_mask,
+                     mask_input,
+                     counter);
+
+         for (cbuf = 0; cbuf < key->nr_cbufs; cbuf++)
+            for (chan = 0; chan < TGSI_NUM_CHANNELS; ++chan)
+               fs_out_color[cbuf][chan][i] =
+                  out_color[cbuf * !cbuf0_write_all][chan];
+      }
+   }
+   else {
+      unsigned depth_bits = zs_format_desc->block.bits/8;
+      LLVMValueRef num_loop = lp_build_const_int32(gallivm, num_fs);
+      LLVMTypeRef mask_type = lp_build_int_vec_type(gallivm, fs_type);
+      LLVMValueRef mask_store = lp_build_array_alloca(gallivm, mask_type,
+                                                      num_loop, "mask_store");
+      LLVMValueRef color_store[PIPE_MAX_COLOR_BUFS][TGSI_NUM_CHANNELS];
+
+      /*
+       * The shader input interpolation info is not explicitely baked in the
+       * shader key, but everything it derives from (TGSI, and flatshade) is
+       * already included in the shader key.
+       */
+      lp_build_interp_soa_init(&interp,
+                               gallivm,
+                               shader->info.base.num_inputs,
+                               inputs,
+                               builder, fs_type,
+                               TRUE,
+                               a0_ptr, dadx_ptr, dady_ptr,
+                               x, y);
+
+      for (i = 0; i < num_fs; i++) {
+         LLVMValueRef mask;
+         LLVMValueRef indexi = lp_build_const_int32(gallivm, i);
+         LLVMValueRef mask_ptr = LLVMBuildGEP(builder, mask_store,
+                                              &indexi, 1, "mask_ptr");
+
+         if (partial_mask) {
+            mask = generate_quad_mask(gallivm, fs_type,
+                                      i*fs_type.length/4, mask_input);
+         }
+         else {
+            mask = lp_build_const_int_vec(gallivm, fs_type, ~0);
+         }
+         LLVMBuildStore(builder, mask, mask_ptr);
+      }
+
+      generate_fs_loop(gallivm,
+                       shader, key,
+                       builder,
+                       fs_type,
+                       context_ptr,
+                       num_loop,
+                       &interp,
+                       sampler,
+                       mask_store, /* output */
+                       color_store,
+                       depth_ptr,
+                       depth_bits,
+                       facing,
+                       counter);
+
+      for (i = 0; i < num_fs; i++) {
+         LLVMValueRef indexi = lp_build_const_int32(gallivm, i);
+         LLVMValueRef ptr = LLVMBuildGEP(builder, mask_store,
+                                         &indexi, 1, "");
+         fs_mask[i] = LLVMBuildLoad(builder, ptr, "mask");
+         /* This is fucked up need to reorganize things */
+         for (cbuf = 0; cbuf < key->nr_cbufs; cbuf++) {
+            for (chan = 0; chan < TGSI_NUM_CHANNELS; ++chan) {
+               ptr = LLVMBuildGEP(builder,
+                                  color_store[cbuf * !cbuf0_write_all][chan],
+                                  &indexi, 1, "");
+               fs_out_color[cbuf][chan][i] = ptr;
+            }
+         }
+      }
    }
 
    sampler->destroy(sampler);
@@ -718,13 +1047,13 @@ generate_fragment(struct llvmpipe_context *lp,
    for(cbuf = 0; cbuf < key->nr_cbufs; cbuf++) {
       LLVMValueRef color_ptr;
       LLVMValueRef index = lp_build_const_int32(gallivm, cbuf);
-      LLVMValueRef blend_in_color[NUM_CHANNELS];
+      LLVMValueRef blend_in_color[TGSI_NUM_CHANNELS];
       unsigned rt;
 
       /* 
-       * Convert the fs's output color and mask to fit to the blending type. 
+       * Convert the fs's output color and mask to fit to the blending type.
        */
-      for(chan = 0; chan < NUM_CHANNELS; ++chan) {
+      for(chan = 0; chan < TGSI_NUM_CHANNELS; ++chan) {
          LLVMValueRef fs_color_vals[LP_MAX_VECTOR_LENGTH];
          
          for (i = 0; i < num_fs; i++) {
@@ -732,25 +1061,25 @@ generate_fragment(struct llvmpipe_context *lp,
                LLVMBuildLoad(builder, fs_out_color[cbuf][chan][i], "fs_color_vals");
          }
 
-	 lp_build_conv(gallivm, fs_type, blend_type,
+         lp_build_conv(gallivm, fs_type, blend_type,
                        fs_color_vals,
                        num_fs,
-		       &blend_in_color[chan], 1);
+                       &blend_in_color[chan], 1);
 
-	 lp_build_name(blend_in_color[chan], "color%d.%c", cbuf, "rgba"[chan]);
+         lp_build_name(blend_in_color[chan], "color%d.%c", cbuf, "rgba"[chan]);
       }
 
       if (partial_mask || !variant->opaque) {
-         lp_build_conv_mask(lp->gallivm, fs_type, blend_type,
+         lp_build_conv_mask(variant->gallivm, fs_type, blend_type,
                             fs_mask, num_fs,
                             &blend_mask, 1);
       } else {
-         blend_mask = lp_build_const_int_vec(lp->gallivm, blend_type, ~0);
+         blend_mask = lp_build_const_int_vec(variant->gallivm, blend_type, ~0);
       }
 
       color_ptr = LLVMBuildLoad(builder, 
-				LLVMBuildGEP(builder, color_ptr_ptr, &index, 1, ""),
-				"");
+                                LLVMBuildGEP(builder, color_ptr_ptr, &index, 1, ""),
+                                "");
       lp_build_name(color_ptr, "color_ptr%d", cbuf);
 
       /* which blend/colormask state to use */
@@ -766,7 +1095,7 @@ generate_fragment(struct llvmpipe_context *lp,
                               !key->alpha.enabled &&
                               !shader->info.base.uses_kill);
 
-         generate_blend(lp->gallivm,
+         generate_blend(variant->gallivm,
                         &key->blend,
                         rt,
                         builder,
@@ -781,43 +1110,9 @@ generate_fragment(struct llvmpipe_context *lp,
 
    LLVMBuildRetVoid(builder);
 
-   /* Verify the LLVM IR.  If invalid, dump and abort */
-#ifdef DEBUG
-   if(LLVMVerifyFunction(function, LLVMPrintMessageAction)) {
-      if (1)
-         lp_debug_dump_value(function);
-      abort();
-   }
-#endif
-
-   /* Apply optimizations to LLVM IR */
-   LLVMRunFunctionPassManager(gallivm->passmgr, function);
-
-   if ((gallivm_debug & GALLIVM_DEBUG_IR) || (LP_DEBUG & DEBUG_FS)) {
-      /* Print the LLVM IR to stderr */
-      lp_debug_dump_value(function);
-      debug_printf("\n");
-   }
-
-   /* Dump byte code to a file */
-   if (0) {
-      LLVMWriteBitcodeToFile(gallivm->module, "llvmpipe.bc");
-   }
+   gallivm_verify_function(gallivm, function);
 
    variant->nr_instrs += lp_build_count_instructions(function);
-   /*
-    * Translate the LLVM IR into machine code.
-    */
-   {
-      void *f = LLVMGetPointerToGlobal(gallivm->engine, function);
-
-      variant->jit_function[partial_mask] = (lp_jit_frag_func)pointer_to_func(f);
-
-      if ((gallivm_debug & GALLIVM_DEBUG_ASM) || (LP_DEBUG & DEBUG_FS)) {
-         lp_disassemble(f);
-      }
-      lp_func_delete_body(function);
-   }
 }
 
 
@@ -924,11 +1219,18 @@ generate_variant(struct llvmpipe_context *lp,
                  const struct lp_fragment_shader_variant_key *key)
 {
    struct lp_fragment_shader_variant *variant;
+   const struct util_format_description *cbuf0_format_desc;
    boolean fullcolormask;
 
    variant = CALLOC_STRUCT(lp_fragment_shader_variant);
    if(!variant)
       return NULL;
+
+   variant->gallivm = gallivm_create();
+   if (!variant->gallivm) {
+      FREE(variant);
+      return NULL;
+   }
 
    variant->shader = shader;
    variant->list_item_global.base = variant;
@@ -942,12 +1244,8 @@ generate_variant(struct llvmpipe_context *lp,
     */
    fullcolormask = FALSE;
    if (key->nr_cbufs == 1) {
-      const struct util_format_description *format_desc;
-      format_desc = util_format_description(key->cbuf_format[0]);
-      if ((~key->blend.rt[0].colormask &
-           util_format_colormask(format_desc)) == 0) {
-         fullcolormask = TRUE;
-      }
+      cbuf0_format_desc = util_format_description(key->cbuf_format[0]);
+      fullcolormask = util_format_colormask_full(cbuf0_format_desc, key->blend.rt[0].colormask);
    }
 
    variant->opaque =
@@ -965,12 +1263,35 @@ generate_variant(struct llvmpipe_context *lp,
       lp_debug_fs_variant(variant);
    }
 
-   generate_fragment(lp, shader, variant, RAST_EDGE_TEST);
+   lp_jit_init_types(variant);
+   
+   if (variant->jit_function[RAST_EDGE_TEST] == NULL)
+      generate_fragment(lp, shader, variant, RAST_EDGE_TEST);
 
-   if (variant->opaque) {
-      /* Specialized shader, which doesn't need to read the color buffer. */
-      generate_fragment(lp, shader, variant, RAST_WHOLE);
-   } else {
+   if (variant->jit_function[RAST_WHOLE] == NULL) {
+      if (variant->opaque) {
+         /* Specialized shader, which doesn't need to read the color buffer. */
+         generate_fragment(lp, shader, variant, RAST_WHOLE);
+      }
+   }
+
+   /*
+    * Compile everything
+    */
+
+   gallivm_compile_module(variant->gallivm);
+
+   if (variant->function[RAST_EDGE_TEST]) {
+      variant->jit_function[RAST_EDGE_TEST] = (lp_jit_frag_func)
+            gallivm_jit_function(variant->gallivm,
+                                 variant->function[RAST_EDGE_TEST]);
+   }
+
+   if (variant->function[RAST_WHOLE]) {
+         variant->jit_function[RAST_WHOLE] = (lp_jit_frag_func)
+               gallivm_jit_function(variant->gallivm,
+                                    variant->function[RAST_WHOLE]);
+   } else if (!variant->jit_function[RAST_WHOLE]) {
       variant->jit_function[RAST_WHOLE] = variant->jit_function[RAST_EDGE_TEST];
    }
 
@@ -1014,6 +1335,7 @@ llvmpipe_create_fs_state(struct pipe_context *pipe,
 
    for (i = 0; i < shader->info.base.num_inputs; i++) {
       shader->inputs[i].usage_mask = shader->info.base.input_usage_mask[i];
+      shader->inputs[i].cyl_wrap = shader->info.base.input_cylindrical_wrap[i];
 
       switch (shader->info.base.input_interpolate[i]) {
       case TGSI_INTERPOLATE_CONSTANT:
@@ -1112,12 +1434,13 @@ llvmpipe_remove_shader_variant(struct llvmpipe_context *lp,
    /* free all the variant's JIT'd functions */
    for (i = 0; i < Elements(variant->function); i++) {
       if (variant->function[i]) {
-         if (variant->jit_function[i])
-            LLVMFreeMachineCodeForFunction(lp->gallivm->engine,
-                                           variant->function[i]);
-         LLVMDeleteFunction(variant->function[i]);
+         gallivm_free_function(variant->gallivm,
+                               variant->function[i],
+                               variant->jit_function[i]);
       }
    }
+
+   gallivm_destroy(variant->gallivm);
 
    /* remove from shader's list */
    remove_from_list(&variant->list_item_local);
@@ -1169,11 +1492,22 @@ llvmpipe_delete_fs_state(struct pipe_context *pipe, void *fs)
 static void
 llvmpipe_set_constant_buffer(struct pipe_context *pipe,
                              uint shader, uint index,
-                             struct pipe_resource *constants)
+                             struct pipe_constant_buffer *cb)
 {
    struct llvmpipe_context *llvmpipe = llvmpipe_context(pipe);
-   unsigned size = constants ? constants->width0 : 0;
-   const void *data = constants ? llvmpipe_resource_data(constants) : NULL;
+   struct pipe_resource *constants = cb ? cb->buffer : NULL;
+   unsigned size;
+   const void *data;
+
+   if (cb && cb->user_buffer) {
+      constants = llvmpipe_user_buffer_create(pipe->screen,
+                                              (void *) cb->user_buffer,
+                                              cb->buffer_size,
+                                              PIPE_BIND_CONSTANT_BUFFER);
+   }
+
+   size = constants ? constants->width0 : 0;
+   data = constants ? llvmpipe_resource_data(constants) : NULL;
 
    assert(shader < PIPE_SHADER_TYPES);
    assert(index < PIPE_MAX_CONSTANT_BUFFERS);
@@ -1193,6 +1527,10 @@ llvmpipe_set_constant_buffer(struct pipe_context *pipe,
    }
 
    llvmpipe->dirty |= LP_NEW_CONSTANTS;
+
+   if (cb && cb->user_buffer) {
+      pipe_resource_reference(&constants, NULL);
+   }
 }
 
 
@@ -1307,8 +1645,8 @@ make_variant_key(struct llvmpipe_context *lp,
    for(i = 0; i < key->nr_samplers; ++i) {
       if(shader->info.base.file_mask[TGSI_FILE_SAMPLER] & (1 << i)) {
          lp_sampler_static_state(&key->sampler[i],
-				 lp->fragment_sampler_views[i],
-				 lp->sampler[i]);
+				 lp->sampler_views[PIPE_SHADER_FRAGMENT][i],
+				 lp->samplers[PIPE_SHADER_FRAGMENT][i]);
       }
    }
 }

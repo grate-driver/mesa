@@ -8,10 +8,9 @@ INCLUDES = -I$(TOP)/src/gallium/include \
 	   -I$(TOP)/src/gallium/drivers \
 	   -I$(TOP)/src/gallium/auxiliary \
 	   -I$(TOP)/src/gallium/winsys \
-	   -I$(TOP)/src/gallium/winsys/g3dvl \
 	   $(DRIVER_INCLUDES)
 DEFINES = -DGALLIUM_TRACE -DVER_MAJOR=$(VDPAU_MAJOR) -DVER_MINOR=$(VDPAU_MINOR) $(DRIVER_DEFINES)
-LIBS = $(EXTRA_LIB_PATH) $(DRIVER_LIBS) -lvdpau -lXext -lX11 -lm -lrt
+LIBS = $(EXTRA_LIB_PATH) $(DRIVER_LIBS) -lvdpau -lX11-xcb -lxcb-dri2 -lm -lrt
 STATE_TRACKER_LIB = $(TOP)/src/gallium/state_trackers/vdpau/libvdpautracker.a
 
 ifeq ($(MESA_LLVM),1)
@@ -27,9 +26,9 @@ else
 endif
 
 # XXX: Hack, VDPAU public funcs aren't exported if we link to libvdpautracker.a :(
+C_SOURCES += $(TOP)/src/gallium/state_trackers/vdpau/device.c
 OBJECTS = $(C_SOURCES:.c=.o) \
-	  $(ASM_SOURCES:.S=.o) \
-	  $(TOP)/src/gallium/state_trackers/vdpau/*.o
+	  $(ASM_SOURCES:.S=.o)
 
 ##### RULES #####
 
@@ -64,7 +63,7 @@ tags:
 
 # Remove .o and backup files
 clean:
-	-rm -f *.o *~ *.so $(SYMLINKS)
+	-rm -f $(OBJECTS) *~ *.so $(SYMLINKS)
 	-rm -f depend depend.bak
 
 install: default

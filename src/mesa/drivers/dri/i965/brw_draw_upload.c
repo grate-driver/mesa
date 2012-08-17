@@ -361,9 +361,22 @@ static void brw_prepare_vertices(struct brw_context *brw)
    unsigned int min_index = brw->vb.min_index;
    unsigned int max_index = brw->vb.max_index;
    int delta, i, j;
+   GLboolean can_merge_uploads = GL_TRUE;
 
    struct brw_vertex_element *upload[VERT_ATTRIB_MAX];
    GLuint nr_uploads = 0;
+
+   /* _NEW_POLYGON
+    *
+    * On gen6+, edge flags don't end up in the VUE (either in or out of the
+    * VS).  Instead, they're uploaded as the last vertex element, and the data
+    * is passed sideband through the fixed function units.  So, we need to
+    * prepare the vertex buffer for it, but it's not present in inputs_read.
+    */
+   if (intel->gen >= 6 && (ctx->Polygon.FrontMode != GL_FILL ||
+                           ctx->Polygon.BackMode != GL_FILL)) {
+      vs_inputs |= VERT_BIT_EDGEFLAG;
+   }
 
    /* First build an array of pointers to ve's in vb.inputs_read
     */
@@ -403,6 +416,7 @@ static void brw_prepare_vertices(struct brw_context *brw)
 	    const struct gl_client_array *other = brw->vb.enabled[k]->glarray;
 	    if (glarray->BufferObj == other->BufferObj &&
 		glarray->StrideB == other->StrideB &&
+		glarray->InstanceDivisor == other->InstanceDivisor &&
 		(uintptr_t)(glarray->Ptr - other->Ptr) < glarray->StrideB)
 	    {
 	       input->buffer = brw->vb.enabled[k]->buffer;
@@ -420,6 +434,7 @@ static void brw_prepare_vertices(struct brw_context *brw)
 	    drm_intel_bo_reference(buffer->bo);
 	    buffer->offset += (uintptr_t)glarray->Ptr;
 	    buffer->stride = glarray->StrideB;
+	    buffer->step_rate = glarray->InstanceDivisor;
 
 	    input->buffer = j++;
 	    input->offset = 0;
@@ -465,8 +480,13 @@ static void brw_prepare_vertices(struct brw_context *brw)
 	 }
 
 	 upload[nr_uploads++] = input;
+
 	 total_size = ALIGN(total_size, type_size);
 	 total_size += input->element_size;
+
+         if (glarray->InstanceDivisor != 0) {
+            can_merge_uploads = GL_FALSE;
+         }
       }
    }
 
@@ -504,7 +524,7 @@ static void brw_prepare_vertices(struct brw_context *brw)
 
 	 nr_uploads = 0;
       }
-      else if (total_size < 2048) {
+      else if ((total_size < 2048) && can_merge_uploads) {
 	 /* Upload non-interleaved arrays into a single interleaved array */
 	 struct brw_vertex_buffer *buffer;
 	 int count = MAX2(max_index - min_index + 1, 1);
@@ -539,6 +559,7 @@ static void brw_prepare_vertices(struct brw_context *brw)
 	 intel_upload_unmap(&brw->intel, map, offset * count, offset,
 			    &buffer->bo, &buffer->offset);
 	 buffer->stride = offset;
+	 buffer->step_rate = 0;
 	 buffer->offset -= delta * offset;
 
 	 nr_uploads = 0;
@@ -547,9 +568,21 @@ static void brw_prepare_vertices(struct brw_context *brw)
    /* Upload non-interleaved arrays */
    for (i = 0; i < nr_uploads; i++) {
       struct brw_vertex_buffer *buffer = &brw->vb.buffers[j];
-      copy_array_to_vbo_array(brw, upload[i], min_index, max_index,
-			      buffer, upload[i]->element_size);
+      if (upload[i]->glarray->InstanceDivisor == 0) {
+         copy_array_to_vbo_array(brw, upload[i], min_index, max_index,
+                                 buffer, upload[i]->element_size);
+      } else {
+         /* This is an instanced attribute, since its InstanceDivisor
+          * is not zero. Therefore, its data will be stepped after the
+          * instanced draw has been run InstanceDivisor times.
+          */
+         uint32_t instanced_attr_max_index =
+            (brw->num_instances - 1) / upload[i]->glarray->InstanceDivisor;
+         copy_array_to_vbo_array(brw, upload[i], 0, instanced_attr_max_index,
+                                 buffer, upload[i]->element_size);
+      }
       buffer->offset -= delta * buffer->stride;
+      buffer->step_rate = upload[i]->glarray->InstanceDivisor;
       upload[i]->buffer = j++;
       upload[i]->offset = 0;
    }
@@ -561,7 +594,8 @@ static void brw_prepare_vertices(struct brw_context *brw)
 	 int d;
 
 	 if (brw->vb.current_buffers[i].handle != brw->vb.buffers[i].bo->handle ||
-	     brw->vb.current_buffers[i].stride != brw->vb.buffers[i].stride)
+	     brw->vb.current_buffers[i].stride != brw->vb.buffers[i].stride ||
+	     brw->vb.current_buffers[i].step_rate != brw->vb.buffers[i].step_rate)
 	    break;
 
 	 d = brw->vb.buffers[i].offset - brw->vb.current_buffers[i].offset;
@@ -643,9 +677,15 @@ static void brw_emit_vertices(struct brw_context *brw)
 	 uint32_t dw0;
 
 	 if (intel->gen >= 6) {
-	    dw0 = GEN6_VB0_ACCESS_VERTEXDATA | (i << GEN6_VB0_INDEX_SHIFT);
+	    dw0 = buffer->step_rate
+	             ? GEN6_VB0_ACCESS_INSTANCEDATA
+	             : GEN6_VB0_ACCESS_VERTEXDATA;
+	    dw0 |= i << GEN6_VB0_INDEX_SHIFT;
 	 } else {
-	    dw0 = BRW_VB0_ACCESS_VERTEXDATA | (i << BRW_VB0_INDEX_SHIFT);
+	    dw0 = buffer->step_rate
+	             ? BRW_VB0_ACCESS_INSTANCEDATA
+	             : BRW_VB0_ACCESS_VERTEXDATA;
+	    dw0 |= i << BRW_VB0_INDEX_SHIFT;
 	 }
 
 	 if (intel->gen >= 7)
@@ -657,11 +697,12 @@ static void brw_emit_vertices(struct brw_context *brw)
 	    OUT_RELOC(buffer->bo, I915_GEM_DOMAIN_VERTEX, 0, buffer->bo->size - 1);
 	 } else
 	    OUT_BATCH(0);
-	 OUT_BATCH(0); /* Instance data step rate */
+	 OUT_BATCH(buffer->step_rate);
 
 	 brw->vb.current_buffers[i].handle = buffer->bo->handle;
 	 brw->vb.current_buffers[i].offset = buffer->offset;
 	 brw->vb.current_buffers[i].stride = buffer->stride;
+	 brw->vb.current_buffers[i].step_rate = buffer->step_rate;
       }
       brw->vb.nr_current_buffers = i;
       ADVANCE_BATCH();
@@ -678,6 +719,8 @@ static void brw_emit_vertices(struct brw_context *brw)
       assert(nr_elements <= 18);
    }
 
+   struct brw_vertex_element *gen6_edgeflag_input = NULL;
+
    BEGIN_BATCH(1 + nr_elements * 2);
    OUT_BATCH((_3DSTATE_VERTEX_ELEMENTS << 16) | (2 * nr_elements - 1));
    for (i = 0; i < brw->vb.nr_enabled; i++) {
@@ -691,6 +734,26 @@ static void brw_emit_vertices(struct brw_context *brw)
       uint32_t comp1 = BRW_VE1_COMPONENT_STORE_SRC;
       uint32_t comp2 = BRW_VE1_COMPONENT_STORE_SRC;
       uint32_t comp3 = BRW_VE1_COMPONENT_STORE_SRC;
+
+      /* The gen4 driver expects edgeflag to come in as a float, and passes
+       * that float on to the tests in the clipper.  Mesa's current vertex
+       * attribute value for EdgeFlag is stored as a float, which works out.
+       * glEdgeFlagPointer, on the other hand, gives us an unnormalized
+       * integer ubyte.  Just rewrite that to convert to a float.
+       */
+      if (input->attrib == VERT_ATTRIB_EDGEFLAG) {
+         /* Gen6+ passes edgeflag as sideband along with the vertex, instead
+          * of in the VUE.  We have to upload it sideband as the last vertex
+          * element according to the B-Spec.
+          */
+         if (intel->gen >= 6) {
+            gen6_edgeflag_input = input;
+            continue;
+         }
+
+         if (format == BRW_SURFACEFORMAT_R8_UINT)
+            format = BRW_SURFACEFORMAT_R8_SSCALED;
+      }
 
       switch (input->glarray->Size) {
       case 0: comp0 = BRW_VE1_COMPONENT_STORE_0;
@@ -726,12 +789,30 @@ static void brw_emit_vertices(struct brw_context *brw)
                     ((i * 4) << BRW_VE1_DST_OFFSET_SHIFT));
    }
 
+   if (intel->gen >= 6 && gen6_edgeflag_input) {
+      uint32_t format = get_surface_type(gen6_edgeflag_input->glarray->Type,
+                                         gen6_edgeflag_input->glarray->Size,
+                                         gen6_edgeflag_input->glarray->Format,
+                                         gen6_edgeflag_input->glarray->Normalized,
+                                         gen6_edgeflag_input->glarray->Integer);
+
+      OUT_BATCH((gen6_edgeflag_input->buffer << GEN6_VE0_INDEX_SHIFT) |
+                GEN6_VE0_VALID |
+                GEN6_VE0_EDGE_FLAG_ENABLE |
+                (format << BRW_VE0_FORMAT_SHIFT) |
+                (gen6_edgeflag_input->offset << BRW_VE0_SRC_OFFSET_SHIFT));
+      OUT_BATCH((BRW_VE1_COMPONENT_STORE_SRC << BRW_VE1_COMPONENT_0_SHIFT) |
+                (BRW_VE1_COMPONENT_STORE_0 << BRW_VE1_COMPONENT_1_SHIFT) |
+                (BRW_VE1_COMPONENT_STORE_0 << BRW_VE1_COMPONENT_2_SHIFT) |
+                (BRW_VE1_COMPONENT_STORE_0 << BRW_VE1_COMPONENT_3_SHIFT));
+   }
+
    if (brw->vs.prog_data->uses_vertexid) {
       uint32_t dw0 = 0, dw1 = 0;
 
       dw1 = ((BRW_VE1_COMPONENT_STORE_VID << BRW_VE1_COMPONENT_0_SHIFT) |
 	     (BRW_VE1_COMPONENT_STORE_IID << BRW_VE1_COMPONENT_1_SHIFT) |
-	     (BRW_VE1_COMPONENT_STORE_PID << BRW_VE1_COMPONENT_2_SHIFT) |
+	     (BRW_VE1_COMPONENT_STORE_0 << BRW_VE1_COMPONENT_2_SHIFT) |
 	     (BRW_VE1_COMPONENT_STORE_0 << BRW_VE1_COMPONENT_3_SHIFT));
 
       if (intel->gen >= 6) {
@@ -754,7 +835,7 @@ static void brw_emit_vertices(struct brw_context *brw)
 
 const struct brw_tracked_state brw_vertices = {
    .dirty = {
-      .mesa = 0,
+      .mesa = _NEW_POLYGON,
       .brw = BRW_NEW_BATCH | BRW_NEW_VERTICES,
       .cache = CACHE_NEW_VS_PROG,
    },
@@ -851,13 +932,20 @@ static void brw_emit_index_buffer(struct brw_context *brw)
 {
    struct intel_context *intel = &brw->intel;
    const struct _mesa_index_buffer *index_buffer = brw->ib.ib;
+   GLuint cut_index_setting;
 
    if (index_buffer == NULL)
       return;
 
+   if (brw->prim_restart.enable_cut_index) {
+      cut_index_setting = BRW_CUT_INDEX_ENABLE;
+   } else {
+      cut_index_setting = 0;
+   }
+
    BEGIN_BATCH(3);
    OUT_BATCH(CMD_INDEX_BUFFER << 16 |
-             /* cut index enable << 10 */
+             cut_index_setting |
              get_index_type(index_buffer->type) << 8 |
              1);
    OUT_RELOC(brw->ib.bo,

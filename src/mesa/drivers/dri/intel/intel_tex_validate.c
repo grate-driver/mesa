@@ -43,9 +43,13 @@ intel_finalize_mipmap_tree(struct intel_context *intel, GLuint unit)
    struct intel_texture_image *firstImage;
    int width, height, depth;
 
+   /* TBOs require no validation -- they always just point to their BO. */
+   if (tObj->Target == GL_TEXTURE_BUFFER)
+      return true;
+
    /* We know/require this is true by now: 
     */
-   assert(intelObj->base._Complete);
+   assert(intelObj->base._BaseComplete);
 
    /* What levels must the tree include at a minimum?
     */
@@ -82,7 +86,9 @@ intel_finalize_mipmap_tree(struct intel_context *intel, GLuint unit)
                                           width,
                                           height,
                                           depth,
-					  true);
+					  true,
+                                          0 /* num_samples */,
+                                          INTEL_MSAA_LAYOUT_NONE);
       if (!intelObj->mt)
          return false;
    }

@@ -135,6 +135,9 @@ struct gl_enable_attrib
    /* GL_ARB_point_sprite / GL_NV_point_sprite */
    GLboolean PointSprite;
    GLboolean FragmentShaderATI;
+
+   /* GL_ARB_framebuffer_sRGB / GL_EXT_framebuffer_sRGB */
+   GLboolean sRGBEnabled;
 };
 
 
@@ -322,6 +325,9 @@ _mesa_PushAttrib(GLbitfield mask)
       attr->VertexProgramPointSize = ctx->VertexProgram.PointSizeEnabled;
       attr->VertexProgramTwoSide = ctx->VertexProgram.TwoSideEnabled;
       save_attrib_data(&head, GL_ENABLE_BIT, attr);
+
+      /* GL_ARB_framebuffer_sRGB / GL_EXT_framebuffer_sRGB */
+      attr->sRGBEnabled = ctx->Color.sRGBEnabled;
    }
 
    if (mask & GL_EVAL_BIT) {
@@ -617,6 +623,10 @@ pop_enable_group(struct gl_context *ctx, const struct gl_enable_attrib *enable)
                    enable->VertexProgramTwoSide,
                    GL_VERTEX_PROGRAM_TWO_SIDE_ARB);
 
+   /* GL_ARB_framebuffer_sRGB / GL_EXT_framebuffer_sRGB */
+   TEST_AND_UPDATE(ctx->Color.sRGBEnabled, enable->sRGBEnabled,
+                   GL_FRAMEBUFFER_SRGB);
+
    /* texture unit enables */
    for (i = 0; i < ctx->Const.MaxTextureUnits; i++) {
       const GLbitfield enabled = enable->Texture[i];
@@ -795,10 +805,6 @@ pop_texture_group(struct gl_context *ctx, struct texture_state *texstate)
             _mesa_TexParameterf(target, GL_TEXTURE_MAX_ANISOTROPY_EXT,
                                 samp->MaxAnisotropy);
          }
-         if (ctx->Extensions.ARB_shadow_ambient) {
-            _mesa_TexParameterf(target, GL_TEXTURE_COMPARE_FAIL_VALUE_ARB,
-                                samp->CompareFailValue);
-         }
          if (ctx->Extensions.ARB_shadow) {
             _mesa_TexParameteri(target, GL_TEXTURE_COMPARE_MODE,
                                 samp->CompareMode);
@@ -806,7 +812,7 @@ pop_texture_group(struct gl_context *ctx, struct texture_state *texstate)
                                 samp->CompareFunc);
          }
          if (ctx->Extensions.ARB_depth_texture)
-            _mesa_TexParameteri(target, GL_DEPTH_TEXTURE_MODE, samp->DepthMode);
+            _mesa_TexParameteri(target, GL_DEPTH_TEXTURE_MODE, obj->DepthMode);
       }
 
       /* remove saved references to the texture objects */
@@ -981,6 +987,9 @@ _mesa_PopAttrib(void)
                _mesa_set_enable(ctx, GL_DITHER, color->DitherFlag);
                _mesa_ClampColorARB(GL_CLAMP_FRAGMENT_COLOR_ARB, color->ClampFragmentColor);
                _mesa_ClampColorARB(GL_CLAMP_READ_COLOR_ARB, color->ClampReadColor);
+
+               /* GL_ARB_framebuffer_sRGB / GL_EXT_framebuffer_sRGB */
+               _mesa_set_enable(ctx, GL_FRAMEBUFFER_SRGB, color->sRGBEnabled);
             }
             break;
          case GL_CURRENT_BIT:
@@ -1257,7 +1266,6 @@ _mesa_PopAttrib(void)
             }
             break;
          case GL_TEXTURE_BIT:
-            /* Take care of texture object reference counters */
             {
                struct texture_state *texstate
                   = (struct texture_state *) attr->data;
@@ -1456,16 +1464,6 @@ restore_array_attrib(struct gl_context *ctx,
        || _mesa_IsBufferARB(src->ArrayObj->ElementArrayBufferObj->Name))
       _mesa_BindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB,
 			  src->ArrayObj->ElementArrayBufferObj->Name);
-
-   /* Better safe than sorry?! */
-   dest->RebindArrays = GL_TRUE;
-
-   /* FIXME: Should some bits in ctx->Array->NewState also be set
-    * FIXME: here?  It seems like it should be set to inclusive-or
-    * FIXME: of the old ArrayObj->_Enabled and the new _Enabled.
-    * ... just do it.
-    */
-   dest->NewState |= src->ArrayObj->_Enabled | dest->ArrayObj->_Enabled;
 }
 
 /**

@@ -63,6 +63,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "radeon_tcl.h"
 #include "radeon_queryobj.h"
 #include "radeon_blit.h"
+#include "radeon_fog.h"
 
 #include "utils.h"
 #include "xmlpool.h" /* for symbolic values of enum-type options */
@@ -177,9 +178,22 @@ r100CreateContext( gl_api api,
    int i;
    int tcl_mode, fthrottle_mode;
 
-   /* API and flag filtering is handled in dri2CreateContextAttribs.
+   switch (api) {
+   case API_OPENGL:
+      if (major_version > 1 || minor_version > 3) {
+         *error = __DRI_CTX_ERROR_BAD_VERSION;
+         return GL_FALSE;
+      }
+      break;
+   case API_OPENGLES:
+      break;
+   default:
+      *error = __DRI_CTX_ERROR_BAD_API;
+      return GL_FALSE;
+   }
+
+   /* Flag filtering is handled in dri2CreateContextAttribs.
     */
-   (void) api;
    (void) flags;
 
    assert(glVisual);
@@ -401,13 +415,6 @@ r100CreateContext( gl_api api,
    }
 
    _mesa_compute_version(ctx);
-   if (ctx->VersionMajor < major_version
-       || (ctx->VersionMajor == major_version
-	   && ctx->VersionMinor < minor_version)) {
-      radeonDestroyContext(driContextPriv);
-      *error = __DRI_CTX_ERROR_BAD_VERSION;
-      return GL_FALSE;
-   }
 
    *error = __DRI_CTX_ERROR_SUCCESS;
    return GL_TRUE;

@@ -41,6 +41,10 @@
 #include "main/mtypes.h"
 #include "intel_bufmgr.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 struct intel_context;
 struct intel_buffer_object;
 
@@ -129,12 +133,26 @@ void _mesa_copy_rect(GLubyte * dst,
                 const GLubyte * src,
                 GLuint src_pitch, GLuint src_x, GLuint src_y);
 
+void
+intel_region_get_tile_masks(struct intel_region *region,
+                            uint32_t *mask_x, uint32_t *mask_y);
+
+uint32_t
+intel_region_get_aligned_offset(struct intel_region *region, uint32_t x,
+                                uint32_t y);
+
 struct __DRIimageRec {
    struct intel_region *region;
    GLenum internal_format;
+   uint32_t usage;
+   uint32_t dri_format;
    GLuint format;
-   GLenum data_type;
+   uint32_t offset;
    void *data;
 };
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
