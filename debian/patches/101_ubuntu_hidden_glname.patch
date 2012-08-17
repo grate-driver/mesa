@@ -1,12 +1,10 @@
-Index: mesa/src/mapi/glapi/glapi_x86.S
-===================================================================
---- mesa.orig/src/mapi/glapi/glapi_x86.S	2012-06-01 13:02:45.863167925 -0400
-+++ mesa/src/mapi/glapi/glapi_x86.S	2012-06-01 13:02:46.203167935 -0400
-@@ -147,7 +147,6 @@
- 
- 		ALIGNTEXT16
- 		GLOBL GLNAME(gl_dispatch_functions_start)
--		HIDDEN(GLNAME(gl_dispatch_functions_start))
- GLNAME(gl_dispatch_functions_start):
- 
- 	GL_STUB(NewList, 0, NewList@8)
+--- a/src/mapi/glapi/gen/gl_x86_asm.py
++++ b/src/mapi/glapi/gen/gl_x86_asm.py
+@@ -176,7 +176,6 @@
+ 		print ''
+ 		print '\t\tALIGNTEXT16'
+ 		print '\t\tGLOBL GLNAME(gl_dispatch_functions_start)'
+-		print '\t\tHIDDEN(GLNAME(gl_dispatch_functions_start))'
+ 		print 'GLNAME(gl_dispatch_functions_start):'
+ 		print ''
+ 		return

@@ -2,6 +2,12 @@ mesa (8.1~git20120816.1597176f-0ubuntu1) UNRELEASED; urgency=low
 
   * Merge from unreleased debian git.
   * rules, control, libgl1-mesa-swx11*: Remove swx11 support.
+  * Refresh patches:
+    - drop 115_llvm_dynamic_linking.diff,
+      117_nullptr_check_in_query_version.patch, and
+      118_glsl_initialize_samplers.patch, all upstream
+    - disable 116_use_shared_galliumcore.diff until it's reviewed and
+      reworked to apply
 
  -- Timo Aaltonen <tjaalton@ubuntu.com>  Fri, 17 Aug 2012 11:08:47 +0300
 
