@@ -1,15 +1,11 @@
----
- src/mesa/drivers/osmesa/Makefile |    2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
---- a/src/mesa/drivers/osmesa/Makefile.am
-+++ b/src/mesa/drivers/osmesa/Makefile.am
-@@ -35,7 +35,7 @@
+--- a/configure.ac
++++ b/configure.ac
+@@ -1325,7 +1325,7 @@
+     OSMESA_PC_LIB_PRIV="-lm -lpthread $SELINUX_LIBS $DLOPEN_LIBS"
+ fi
  
- lib@OSMESA_LIB@_la_SOURCES = osmesa.c
+-OSMESA_VERSION=`echo "$VERSION" | $SED 's/\./:/g'`
++OSMESA_VERSION="6:5:3"
  
--lib@OSMESA_LIB@_la_LDFLAGS = -module -version-number @OSMESA_VERSION@ -shared -no-undefined
-+lib@OSMESA_LIB@_la_LDFLAGS = -module -version-number 6.5.3 -shared -no-undefined
- lib@OSMESA_LIB@_la_LIBADD = \
- 	$(top_builddir)/src/mesa/libmesa.la \
- 	$(top_builddir)/src/mapi/glapi/libglapi.la
+ AC_SUBST([OSMESA_LIB_DEPS])
+ AC_SUBST([OSMESA_MESA_DEPS])
