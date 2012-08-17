@@ -8,6 +8,8 @@ mesa (8.1~git20120816.1597176f-0ubuntu1) UNRELEASED; urgency=low
       118_glsl_initialize_samplers.patch, all upstream
     - disable 116_use_shared_galliumcore.diff until it's reviewed and
       reworked to apply
+  * not-installed, libegl1-mesa-drivers-install.linux.in: Updated to
+    match the single-pass build.
 
  -- Timo Aaltonen <tjaalton@ubuntu.com>  Fri, 17 Aug 2012 11:08:47 +0300
 
