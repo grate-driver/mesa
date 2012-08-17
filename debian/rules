@@ -127,6 +127,7 @@ confflags-swx11+glu = \
 	--with-gallium-drivers= \
 	--with-driver=xlib \
 	--disable-egl \
+	--disable-shared-glapi \
 	CFLAGS="$(CFLAGS)" \
 	CXXFLAGS="$(CXXFLAGS)"
 
@@ -136,6 +137,7 @@ confflags-swx11+glu-static = \
 	--with-driver=xlib \
 	--enable-static \
 	--disable-egl \
+	--disable-shared-glapi \
 	CFLAGS="$(CFLAGS)" \
 	CXXFLAGS="$(CXXFLAGS)"
 
