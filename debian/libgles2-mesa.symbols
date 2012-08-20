@@ -104,6 +104,7 @@ libGLESv2.so.2 libgles2-mesa #MINVER# | libgles2
  glPixelStorei@Base 7.8.1
  glPolygonOffset@Base 7.8.1
  glProgramBinaryOES@Base 7.8.1
+ glReadBufferNV@Base 8.1~0
  glReadPixels@Base 7.8.1
  glReleaseShaderCompiler@Base 7.8.1
  glRenderbufferStorage@Base 7.8.1
