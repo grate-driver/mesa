@@ -47,7 +47,6 @@ QUILT_STAMPFN = $(STAMP_DIR)/patch
 include /usr/share/quilt/quilt.make
 
 confflags-common = \
-	--disable-glu \
 	CFLAGS="$(CFLAGS)" \
 	CXXFLAGS="$(CXXFLAGS)"
 

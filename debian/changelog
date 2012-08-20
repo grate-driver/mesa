@@ -15,6 +15,8 @@ mesa (8.1~git20120816.1597176f-0ubuntu1) UNRELEASED; urgency=low
     libdricore.so now.
   * libgl1-mesa-dri.*install.in: libdricore is versioned now, install
     the right files.
+  * rules: Don't disable GLU on the common flags, we need to build it
+    on the dri target.
 
  -- Timo Aaltonen <tjaalton@ubuntu.com>  Fri, 17 Aug 2012 11:08:47 +0300
 
