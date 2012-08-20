@@ -13,6 +13,8 @@ mesa (8.1~git20120816.1597176f-0ubuntu1) UNRELEASED; urgency=low
     match the single-pass build.
   * libgl1-mesa-dri.*install.in: Drop libglsl.so, it's included in
     libdricore.so now.
+  * libgl1-mesa-dri.*install.in: libdricore is versioned now, install
+    the right files.
 
  -- Timo Aaltonen <tjaalton@ubuntu.com>  Fri, 17 Aug 2012 11:08:47 +0300
 
