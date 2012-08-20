@@ -36,6 +36,7 @@ mesa (8.1~git20120816.1597176f-1) UNRELEASED; urgency=low
   * rules: Update the clean target.
   * rules: Add --disable-shared-glapi to the swx11 targets.
   * libosmesa*.install.in: Install files from the correct path.
+  * rules: --with-driver= is deprecated, use --enable-foo.
 
  -- Julien Cristau <jcristau@debian.org>  Fri, 03 Aug 2012 23:17:16 +0200
 
