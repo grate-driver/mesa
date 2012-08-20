@@ -106,7 +106,7 @@ else
 endif
 
 confflags-dri = \
-	--with-driver=dri \
+	--enable-dri \
 	--with-dri-drivers="$(DRI_DRIVERS)" \
 	--with-dri-driverdir=/usr/lib/$(DEB_HOST_MULTIARCH)/dri \
 	--with-dri-searchpath='/usr/lib/$(DEB_HOST_MULTIARCH)/dri:\$$$${ORIGIN}/dri:/usr/lib/dri' \
@@ -125,7 +125,7 @@ confflags-dri = \
 confflags-swx11+glu = \
 	--disable-egl \
 	--with-gallium-drivers= \
-	--with-driver=xlib \
+	--enable-xlib-glx \
 	--disable-egl \
 	--disable-shared-glapi \
 	CFLAGS="$(CFLAGS)" \
@@ -134,7 +134,7 @@ confflags-swx11+glu = \
 confflags-swx11+glu-static = \
 	--disable-egl \
 	--with-gallium-drivers= \
-	--with-driver=xlib \
+	--enable-xlib-glx \
 	--enable-static \
 	--disable-egl \
 	--disable-shared-glapi \
@@ -144,7 +144,7 @@ confflags-swx11+glu-static = \
 confflags-swx11+glu-i386-i686 = \
 	--disable-egl \
 	--with-gallium-drivers= \
-	--with-driver=xlib \
+	--enable-xlib-glx \
 	--disable-egl \
 	--libdir=/usr/lib/$(DEB_HOST_MULTIARCH)/i686/cmov \
 	CFLAGS="$(CFLAGS) -march=i686" \
