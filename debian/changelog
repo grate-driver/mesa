@@ -19,6 +19,8 @@ mesa (8.1~git20120816.1597176f-1) UNRELEASED; urgency=low
   * rules: --with-driver= is deprecated, use --enable-foo.
   * rules: Purge .la files before dh_install.
   * Update symbols.
+  * Added 14-fix-osmesa-build.diff, fixes glapi includes with out-of-tree
+    builds.
 
  -- Julien Cristau <jcristau@debian.org>  Fri, 03 Aug 2012 23:17:16 +0200
 
