@@ -17,6 +17,8 @@ mesa (8.1~git20120816.1597176f-0ubuntu1) UNRELEASED; urgency=low
     the right files.
   * rules: Don't disable GLU on the common flags, we need to build it
     on the dri target.
+  * libglu*install.in: Fix the source file paths to match the build target.
+    Drop the static lib from -dev since only shared libs get built.
 
  -- Timo Aaltonen <tjaalton@ubuntu.com>  Fri, 17 Aug 2012 11:08:47 +0300
 
