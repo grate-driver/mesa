@@ -9,10 +9,10 @@ receives bug fixes quickly, so pick 3.1 for now.
  if test "x$enable_gallium_llvm" = xyes; then
      if test "x$llvm_prefix" != x; then
 -        AC_PATH_PROG([LLVM_CONFIG], [llvm-config], [no], ["$llvm_prefix/bin"])
-+        AC_PATH_PROG([LLVM_CONFIG], [llvm-config-3.0], [no], ["$llvm_prefix/bin"])
++        AC_PATH_PROG([LLVM_CONFIG], [llvm-config-3.1], [no], ["$llvm_prefix/bin"])
      else
 -        AC_PATH_PROG([LLVM_CONFIG], [llvm-config], [no])
-+        AC_PATH_PROG([LLVM_CONFIG], [llvm-config-3.0], [no])
++        AC_PATH_PROG([LLVM_CONFIG], [llvm-config-3.1], [no])
      fi
  
      if test "x$LLVM_CONFIG" != xno; then
