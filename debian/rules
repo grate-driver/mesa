@@ -64,7 +64,8 @@ else
 
   ifeq ($(DEB_HOST_ARCH_OS), linux)
 # Gallium drivers require libdrm-{nouveau,radeon}, only available on Linux
-	GALLIUM_DRIVERS += nouveau r600 r300 radeonsi svga
+	GALLIUM_DRIVERS += nouveau r600 r300 svga
+#
 # Although the KMS egl drivers will probably build on kfreebsd & hurd
 # only linux actually has KMS drivers implemented at this point.
 	EGL_DISPLAYS += drm
@@ -73,8 +74,10 @@ else
     ifeq (,$(filter $(DEB_HOST_ARCH), s390 s390x))
 	DRI_DRIVERS += r200 radeon nouveau
     endif
+# Radeonsi needs LLVM, so only build it on the subset of archs where we
+# have LLVM enabled.
     ifneq (,$(filter $(DEB_HOST_ARCH_CPU), amd64 i386))
-	DRI_DRIVERS += i915 i965
+	DRI_DRIVERS += i915 i965 radeonsi
     endif
   endif
 
