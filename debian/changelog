@@ -1,4 +1,4 @@
-mesa (8.1~git20120816.1597176f-1) UNRELEASED; urgency=low
+mesa (9.0~git20120821.c1114c61-1) UNRELEASED; urgency=low
 
   [ Julien Cristau ]
   * Use xz for all binary packages not just *-dbg.
