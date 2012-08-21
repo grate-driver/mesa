@@ -461,6 +461,11 @@ static INLINE void r600_atom_dirty(struct r600_context *rctx, struct r600_atom *
 }
 
 /* evergreen_state.c */
+void evergreen_init_common_regs(struct r600_command_buffer *cb,
+				enum chip_class ctx_chip_class,
+				enum radeon_family ctx_family,
+				int ctx_drm_minor);
+
 void evergreen_init_state_functions(struct r600_context *rctx);
 void evergreen_init_atom_start_cs(struct r600_context *rctx);
 void evergreen_pipe_shader_ps(struct pipe_context *ctx, struct r600_pipe_shader *shader);
@@ -484,8 +489,8 @@ void r600_copy_buffer(struct pipe_context *ctx, struct
 		      struct pipe_resource *src, const struct pipe_box *src_box);
 void r600_init_blit_functions(struct r600_context *rctx);
 void r600_blit_uncompress_depth(struct pipe_context *ctx,
-		struct r600_resource_texture *texture,
-		struct r600_resource_texture *staging,
+		struct r600_texture *texture,
+		struct r600_texture *staging,
 		unsigned first_level, unsigned last_level,
 		unsigned first_layer, unsigned last_layer,
 		unsigned first_sample, unsigned last_sample);
@@ -546,7 +551,7 @@ void r600_init_surface_functions(struct r600_context *r600);
 uint32_t r600_translate_texformat(struct pipe_screen *screen, enum pipe_format format,
 				  const unsigned char *swizzle_view,
 				  uint32_t *word4_p, uint32_t *yuv_format_p);
-unsigned r600_texture_get_offset(struct r600_resource_texture *rtex,
+unsigned r600_texture_get_offset(struct r600_texture *rtex,
 					unsigned level, unsigned layer);
 
 /* r600_translate.c */
@@ -568,8 +573,9 @@ void r600_set_vertex_buffers(struct pipe_context *ctx, unsigned count,
 			     const struct pipe_vertex_buffer *input);
 void r600_sampler_views_dirty(struct r600_context *rctx,
 			      struct r600_samplerview_state *state);
-void r600_set_sampler_views(struct r600_context *rctx,
-			    struct r600_textures_info *dst,
+void r600_set_sampler_views(struct pipe_context *pipe,
+                            unsigned shader,
+                            unsigned start,
 			    unsigned count,
 			    struct pipe_sampler_view **views);
 void r600_bind_vs_samplers(struct pipe_context *ctx, unsigned count, void **states);

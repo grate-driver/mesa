@@ -120,7 +120,7 @@ struct radeon_bomgr {
 
     /* is virtual address supported */
     bool va;
-    unsigned va_offset;
+    uint64_t va_offset;
     struct list_head va_holes;
 };
 
@@ -221,15 +221,20 @@ static uint64_t radeon_bomgr_find_va(struct radeon_bomgr *mgr, uint64_t size, ui
             pipe_mutex_unlock(mgr->bo_va_mutex);
             return offset;
         }
-        if ((hole->size - waste) >= size) {
+        if ((hole->size - waste) > size) {
             if (waste) {
                 n = CALLOC_STRUCT(radeon_bo_va_hole);
                 n->size = waste;
                 n->offset = hole->offset;
-                list_add(&n->list, &mgr->va_holes);
+                list_add(&n->list, &hole->list);
             }
             hole->size -= (size + waste);
             hole->offset += size + waste;
+            pipe_mutex_unlock(mgr->bo_va_mutex);
+            return offset;
+        }
+        if ((hole->size - waste) == size) {
+            hole->size = waste;
             pipe_mutex_unlock(mgr->bo_va_mutex);
             return offset;
         }
@@ -240,6 +245,12 @@ static uint64_t radeon_bomgr_find_va(struct radeon_bomgr *mgr, uint64_t size, ui
     if (alignment) {
         waste = offset % alignment;
         waste = waste ? alignment - waste : 0;
+    }
+    if (waste) {
+        n = CALLOC_STRUCT(radeon_bo_va_hole);
+        n->size = waste;
+        n->offset = offset;
+        list_add(&n->list, &mgr->va_holes);
     }
     offset += waste;
     mgr->va_offset += size + waste;
@@ -263,18 +274,25 @@ static void radeon_bomgr_force_va(struct radeon_bomgr *mgr, uint64_t va, uint64_
         mgr->va_offset = va + size;
     } else {
         struct radeon_bo_va_hole *hole, *n;
-        uint64_t stmp, etmp;
+        uint64_t hole_end, va_end;
 
-        /* free all holes that fall into the range
-         * NOTE that we might lose virtual address space
+        /* Prune/free all holes that fall into the range
          */
         LIST_FOR_EACH_ENTRY_SAFE(hole, n, &mgr->va_holes, list) {
-            stmp = hole->offset;
-            etmp = stmp + hole->size;
-            if (va >= stmp && va < etmp) {
+            hole_end = hole->offset + hole->size;
+            va_end = va + size;
+            if (hole->offset >= va_end || hole_end <= va)
+                continue;
+            if (hole->offset >= va && hole_end <= va_end) {
                 list_del(&hole->list);
                 FREE(hole);
+                continue;
             }
+            if (hole->offset >= va)
+                hole->offset = va_end;
+            else
+                hole_end = va;
+            hole->size = hole_end - hole->offset;
         }
     }
     pipe_mutex_unlock(mgr->bo_va_mutex);
@@ -282,22 +300,64 @@ static void radeon_bomgr_force_va(struct radeon_bomgr *mgr, uint64_t va, uint64_
 
 static void radeon_bomgr_free_va(struct radeon_bomgr *mgr, uint64_t va, uint64_t size)
 {
+    struct radeon_bo_va_hole *hole;
+
     pipe_mutex_lock(mgr->bo_va_mutex);
     if ((va + size) == mgr->va_offset) {
         mgr->va_offset = va;
+        /* Delete uppermost hole if it reaches the new top */
+        if (!LIST_IS_EMPTY(&mgr->va_holes)) {
+            hole = container_of(mgr->va_holes.next, hole, list);
+            if ((hole->offset + hole->size) == va) {
+                mgr->va_offset = hole->offset;
+                list_del(&hole->list);
+                FREE(hole);
+            }
+        }
     } else {
-        struct radeon_bo_va_hole *hole;
+        struct radeon_bo_va_hole *next;
+
+        hole = container_of(&mgr->va_holes, hole, list);
+        LIST_FOR_EACH_ENTRY(next, &mgr->va_holes, list) {
+	    if (next->offset < va)
+	        break;
+            hole = next;
+        }
+
+        if (&hole->list != &mgr->va_holes) {
+            /* Grow upper hole if it's adjacent */
+            if (hole->offset == (va + size)) {
+                hole->offset = va;
+                hole->size += size;
+                /* Merge lower hole if it's adjacent */
+                if (next != hole && &next->list != &mgr->va_holes &&
+                    (next->offset + next->size) == va) {
+                    next->size += hole->size;
+                    list_del(&hole->list);
+                    FREE(hole);
+                }
+                goto out;
+            }
+        }
+
+        /* Grow lower hole if it's adjacent */
+        if (next != hole && &next->list != &mgr->va_holes &&
+            (next->offset + next->size) == va) {
+            next->size += size;
+            goto out;
+        }
 
         /* FIXME on allocation failure we just lose virtual address space
          * maybe print a warning
          */
-        hole = CALLOC_STRUCT(radeon_bo_va_hole);
-        if (hole) {
-            hole->size = size;
-            hole->offset = va;
-            list_add(&hole->list, &mgr->va_holes);
+        next = CALLOC_STRUCT(radeon_bo_va_hole);
+        if (next) {
+            next->size = size;
+            next->offset = va;
+            list_add(&next->list, &hole->list);
         }
     }
+out:
     pipe_mutex_unlock(mgr->bo_va_mutex);
 }
 
@@ -845,7 +905,7 @@ done:
     if (stride)
         *stride = whandle->stride;
 
-    if (mgr->va) {
+    if (mgr->va && !bo->va) {
         struct drm_radeon_gem_va va;
 
         bo->va_size = ((bo->base.size + 4095) & ~4095);

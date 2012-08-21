@@ -288,45 +288,71 @@ trace_context_create_sampler_state(struct pipe_context *_pipe,
 
 
 static INLINE void
-trace_context_bind_fragment_sampler_states(struct pipe_context *_pipe,
-                                           unsigned num_states,
-                                           void **states)
+trace_context_bind_sampler_states(struct pipe_context *_pipe,
+                                  unsigned shader,
+                                  unsigned start,
+                                  unsigned num_states,
+                                  void **states)
 {
    struct trace_context *tr_ctx = trace_context(_pipe);
    struct pipe_context *pipe = tr_ctx->pipe;
 
-   trace_dump_call_begin("pipe_context", "bind_fragment_sampler_states");
+   /* remove this when we have pipe->bind_sampler_states(..., start, ...) */
+   assert(start == 0);
+
+   switch (shader) {
+   case PIPE_SHADER_VERTEX:
+      trace_dump_call_begin("pipe_context", "bind_vertex_sampler_states");
+      break;
+   case PIPE_SHADER_GEOMETRY:
+      trace_dump_call_begin("pipe_context", "bind_geometry_sampler_states");
+      break;
+   case PIPE_SHADER_FRAGMENT:
+      trace_dump_call_begin("pipe_context", "bind_fragment_sampler_states");
+      break;
+   default:
+      debug_error("Unexpected shader in trace_context_bind_sampler_states()");
+   }
 
    trace_dump_arg(ptr, pipe);
    trace_dump_arg(uint, num_states);
    trace_dump_arg_array(ptr, states, num_states);
 
-   pipe->bind_fragment_sampler_states(pipe, num_states, states);
+   switch (shader) {
+   case PIPE_SHADER_VERTEX:
+      pipe->bind_vertex_sampler_states(pipe, num_states, states);
+      break;
+   case PIPE_SHADER_GEOMETRY:
+      pipe->bind_geometry_sampler_states(pipe, num_states, states);
+      break;
+   case PIPE_SHADER_FRAGMENT:
+      pipe->bind_fragment_sampler_states(pipe, num_states, states);
+      break;
+   default:
+      debug_error("Unexpected shader in trace_context_bind_sampler_states()");
+   }
 
    trace_dump_call_end();
 }
 
 
 static INLINE void
+trace_context_bind_fragment_sampler_states(struct pipe_context *_pipe,
+                                           unsigned num,
+                                           void **states)
+{
+   trace_context_bind_sampler_states(_pipe, PIPE_SHADER_FRAGMENT,
+                                     0, num, states);
+}
+
+
+static INLINE void
 trace_context_bind_vertex_sampler_states(struct pipe_context *_pipe,
-                                         unsigned num_states,
+                                         unsigned num,
                                          void **states)
 {
-   struct trace_context *tr_ctx = trace_context(_pipe);
-   struct pipe_context *pipe = tr_ctx->pipe;
-
-   if (!pipe->bind_vertex_sampler_states)
-      return;
-
-   trace_dump_call_begin("pipe_context", "bind_vertex_sampler_states");
-
-   trace_dump_arg(ptr, pipe);
-   trace_dump_arg(uint, num_states);
-   trace_dump_arg_array(ptr, states, num_states);
-
-   pipe->bind_vertex_sampler_states(pipe, num_states, states);
-
-   trace_dump_call_end();
+   trace_context_bind_sampler_states(_pipe, PIPE_SHADER_VERTEX,
+                                     0, num, states);
 }
 
 
@@ -962,9 +988,11 @@ trace_context_surface_destroy(struct pipe_context *_pipe,
 
 
 static INLINE void
-trace_context_set_fragment_sampler_views(struct pipe_context *_pipe,
-                                         unsigned num,
-                                         struct pipe_sampler_view **views)
+trace_context_set_sampler_views(struct pipe_context *_pipe,
+                                unsigned shader,
+                                unsigned start,
+                                unsigned num,
+                                struct pipe_sampler_view **views)
 {
    struct trace_context *tr_ctx = trace_context(_pipe);
    struct trace_sampler_view *tr_view;
@@ -972,21 +1000,58 @@ trace_context_set_fragment_sampler_views(struct pipe_context *_pipe,
    struct pipe_sampler_view *unwrapped_views[PIPE_MAX_SAMPLERS];
    unsigned i;
 
+   /* remove this when we have pipe->set_sampler_views(..., start, ...) */
+   assert(start == 0);
+
    for(i = 0; i < num; ++i) {
       tr_view = trace_sampler_view(views[i]);
       unwrapped_views[i] = tr_view ? tr_view->sampler_view : NULL;
    }
    views = unwrapped_views;
 
-   trace_dump_call_begin("pipe_context", "set_fragment_sampler_views");
+   switch (shader) {
+   case PIPE_SHADER_VERTEX:
+      trace_dump_call_begin("pipe_context", "set_vertex_sampler_views");
+      break;
+   case PIPE_SHADER_GEOMETRY:
+      trace_dump_call_begin("pipe_context", "set_geometry_sampler_views");
+      break;
+   case PIPE_SHADER_FRAGMENT:
+      trace_dump_call_begin("pipe_context", "set_fragment_sampler_views");
+      break;
+   default:
+      debug_error("Unexpected shader in trace_context_set_sampler_views()");
+   }
 
    trace_dump_arg(ptr, pipe);
+   /*trace_dump_arg(uint, shader);*/
    trace_dump_arg(uint, num);
    trace_dump_arg_array(ptr, views, num);
 
-   pipe->set_fragment_sampler_views(pipe, num, views);
+   switch (shader) {
+   case PIPE_SHADER_VERTEX:
+      pipe->set_vertex_sampler_views(pipe, num, views);
+      break;
+   case PIPE_SHADER_GEOMETRY:
+      pipe->set_geometry_sampler_views(pipe, num, views);
+      break;
+   case PIPE_SHADER_FRAGMENT:
+      pipe->set_fragment_sampler_views(pipe, num, views);
+      break;
+   default:
+      debug_error("Unexpected shader in trace_context_set_sampler_views()");
+   }
 
    trace_dump_call_end();
+}
+
+
+static INLINE void
+trace_context_set_fragment_sampler_views(struct pipe_context *_pipe,
+                                         unsigned num,
+                                         struct pipe_sampler_view **views)
+{
+   trace_context_set_sampler_views(_pipe, PIPE_SHADER_FRAGMENT, 0, num, views);
 }
 
 
@@ -995,30 +1060,7 @@ trace_context_set_vertex_sampler_views(struct pipe_context *_pipe,
                                        unsigned num,
                                        struct pipe_sampler_view **views)
 {
-   struct trace_context *tr_ctx = trace_context(_pipe);
-   struct trace_sampler_view *tr_view;
-   struct pipe_context *pipe = tr_ctx->pipe;
-   struct pipe_sampler_view *unwrapped_views[PIPE_MAX_VERTEX_SAMPLERS];
-   unsigned i;
-
-   if (!pipe->set_vertex_sampler_views)
-      return;
-
-   for(i = 0; i < num; ++i) {
-      tr_view = trace_sampler_view(views[i]);
-      unwrapped_views[i] = tr_view ? tr_view->sampler_view : NULL;
-   }
-   views = unwrapped_views;
-
-   trace_dump_call_begin("pipe_context", "set_vertex_sampler_views");
-
-   trace_dump_arg(ptr, pipe);
-   trace_dump_arg(uint, num);
-   trace_dump_arg_array(ptr, views, num);
-
-   pipe->set_vertex_sampler_views(pipe, num, views);
-
-   trace_dump_call_end();
+   trace_context_set_sampler_views(_pipe, PIPE_SHADER_VERTEX, 0, num, views);
 }
 
 

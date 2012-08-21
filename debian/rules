@@ -64,7 +64,7 @@ else
 
   ifeq ($(DEB_HOST_ARCH_OS), linux)
 # Gallium drivers require libdrm-{nouveau,radeon}, only available on Linux
-	GALLIUM_DRIVERS += nouveau r600 r300 svga
+	GALLIUM_DRIVERS += nouveau r600 r300 radeonsi svga
 # Although the KMS egl drivers will probably build on kfreebsd & hurd
 # only linux actually has KMS drivers implemented at this point.
 	EGL_DISPLAYS += drm
@@ -89,6 +89,7 @@ else
   # LLVM is required for r300g and recommended for swrastg on x86:
   ifneq (,$(filter $(DEB_HOST_ARCH),amd64 i386 kfreebsd-amd64 kfreebsd-i386))
 	confflags_GALLIUM += --enable-gallium-llvm
+	confflags_GALLIUM += --with-llvm-shared-libs
   endif
 
 	confflags_DIRECT_RENDERING = --enable-driglx-direct

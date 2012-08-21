@@ -613,7 +613,16 @@ Architecture: any
 Depends:
  mesa-common-dev (= ${binary:Version}),
  libgl1-mesa-glx (= ${binary:Version}),
+ libdrm-dev (>= 2.4.24) [!hurd-any],
+ libx11-dev,
+ libx11-xcb-dev,
+ libxcb-glx0-dev,
+ libxdamage-dev,
  libxext-dev,
+ libxfixes-dev,
+ libxxf86vm-dev,
+ x11proto-dri2-dev (>= 2.6),
+ x11proto-gl-dev (>= 1.4.14),
  ${misc:Depends},
 Conflicts: libgl-dev, libgl1-mesa-dri-dev
 Replaces: libgl-dev, libgl1-mesa-dri-dev

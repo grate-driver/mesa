@@ -240,12 +240,14 @@ struct draw_context
       uint edgeflag_output;
       uint clipvertex_output;
       uint clipdistance_output[2];
-      /** TGSI program interpreter runtime state */
-      struct tgsi_exec_machine *machine;
 
-      uint num_samplers;
-      struct tgsi_sampler **samplers;
+      /** Fields for TGSI interpreter / execution */
+      struct {
+         struct tgsi_exec_machine *machine;
 
+         struct tgsi_sampler **samplers;
+         uint num_samplers;
+      } tgsi;
 
       const void *aligned_constants[PIPE_MAX_CONSTANT_BUFFERS];
 
@@ -265,11 +267,14 @@ struct draw_context
       uint num_gs_outputs;  /**< convenience, from geometry_shader */
       uint position_output;
 
-      /** TGSI program interpreter runtime state */
-      struct tgsi_exec_machine *machine;
+      /** Fields for TGSI interpreter / execution */
+      struct {
+         struct tgsi_exec_machine *machine;
 
-      uint num_samplers;
-      struct tgsi_sampler **samplers;
+         struct tgsi_sampler **samplers;
+         uint num_samplers;
+      } tgsi;
+
    } gs;
 
    /** Fragment shader state */
@@ -303,10 +308,15 @@ struct draw_context
    struct draw_llvm *llvm;
 #endif
 
-   struct pipe_sampler_view *sampler_views[PIPE_MAX_VERTEX_SAMPLERS];
-   unsigned num_sampler_views;
-   const struct pipe_sampler_state *samplers[PIPE_MAX_VERTEX_SAMPLERS];
-   unsigned num_samplers;
+   /** Texture sampler and sampler view state.
+    * Note that we have arrays indexed by shader type.  At this time
+    * we only handle vertex and geometry shaders in the draw module, but
+    * there may be more in the future (ex: hull and tessellation).
+    */
+   struct pipe_sampler_view *sampler_views[PIPE_SHADER_TYPES][PIPE_MAX_SAMPLERS];
+   unsigned num_sampler_views[PIPE_SHADER_TYPES];
+   const struct pipe_sampler_state *samplers[PIPE_SHADER_TYPES][PIPE_MAX_SAMPLERS];
+   unsigned num_samplers[PIPE_SHADER_TYPES];
 
    void *driver_private;
 };

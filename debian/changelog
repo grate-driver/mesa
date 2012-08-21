@@ -1,4 +1,4 @@
-mesa (8.1~git20120816.1597176f-0ubuntu1) UNRELEASED; urgency=low
+mesa (9.0~git20120821.c1114c61-0ubuntu1) UNRELEASED; urgency=low
 
   * Merge from unreleased debian git.
     - Includes support for ATI Trinity PCI IDs (LP: #1009089)
@@ -20,7 +20,7 @@ mesa (8.1~git20120816.1597176f-0ubuntu1) UNRELEASED; urgency=low
 
  -- Timo Aaltonen <tjaalton@ubuntu.com>  Fri, 17 Aug 2012 11:08:47 +0300
 
-mesa (8.1~git20120816.1597176f-1) UNRELEASED; urgency=low
+mesa (9.0~git20120821.c1114c61-1) UNRELEASED; urgency=low
 
   [ Julien Cristau ]
   * Use xz for all binary packages not just *-dbg.
@@ -44,6 +44,9 @@ mesa (8.1~git20120816.1597176f-1) UNRELEASED; urgency=low
   * Added 14-fix-osmesa-build.diff, fixes glapi includes with out-of-tree
     builds.
   * libgl1-mesa-dri.install*.in: Add libdricore.
+  * control: Add new dependencies to libgl1-mesa-dev.
+  * rules, libgl1-mesa-dri.install.linux.in: Add support for radeonsi.
+  * rules: Build llvm shared libs on platforms that support llvm.
 
  -- Julien Cristau <jcristau@debian.org>  Fri, 03 Aug 2012 23:17:16 +0200
 
@@ -69,30 +72,6 @@ mesa (8.0.3-1) unstable; urgency=low
   * Refresh patches.
 
  -- Cyril Brulebois <kibi@debian.org>  Wed, 13 Jun 2012 14:58:54 +0200
-
-mesa (8.0.3-0ubuntu1) quantal; urgency=low
-
-  * New upstream stable release.
-    + Fixes crash in intel_miptree_release()
-      (LP: #952896)
-    + Fixes slow WebGL in firefox
-      (LP: #988343)
-
-  [ Robert Hooker ]
-  * Drop 118_fix_rendering_from_textures.patch and
-    117_intel_fix_hiz_null_dereference.patch, both included upstream.
-  * Refresh patches.
-
-  [ Bryce Harrington ]
-  * Add 117_nullptr_check_in_query_version.patch: Fix null pointer
-    deref in QueryVersion() during login.
-    (LP: #968284)
-  * Add 118_glsl_initialize_samplers.patch: Initialize samplers to 0, as
-    required by the spec.  Fixes rendering corruption in MapsGL labels.
-    Cherrypick from mesa master.
-    (LP: #981883)
-
- -- Bryce Harrington <bryce@ubuntu.com>  Mon, 18 Jun 2012 19:02:09 -0700
 
 mesa (8.0.2-2) unstable; urgency=low
 

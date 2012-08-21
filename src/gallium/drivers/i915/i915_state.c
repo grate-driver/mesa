@@ -310,7 +310,7 @@ i915_bind_vertex_sampler_states(struct pipe_context *pipe,
    struct i915_context *i915 = i915_context(pipe);
    unsigned i;
 
-   assert(num_samplers <= PIPE_MAX_VERTEX_SAMPLERS);
+   assert(num_samplers <= Elements(i915->vertex_samplers));
 
    /* Check for no-op */
    if (num_samplers == i915->num_vertex_samplers &&
@@ -319,12 +319,13 @@ i915_bind_vertex_sampler_states(struct pipe_context *pipe,
 
    for (i = 0; i < num_samplers; ++i)
       i915->vertex_samplers[i] = samplers[i];
-   for (i = num_samplers; i < PIPE_MAX_VERTEX_SAMPLERS; ++i)
+   for (i = num_samplers; i < Elements(i915->vertex_samplers); ++i)
       i915->vertex_samplers[i] = NULL;
 
    i915->num_vertex_samplers = num_samplers;
 
    draw_set_samplers(i915->draw,
+                     PIPE_SHADER_VERTEX,
                      i915->vertex_samplers,
                      i915->num_vertex_samplers);
 }
@@ -373,11 +374,11 @@ i915_prepare_vertex_sampling(struct i915_context *i915)
    unsigned num = i915->num_vertex_sampler_views;
    struct pipe_sampler_view **views = i915->vertex_sampler_views;
 
-   assert(num <= PIPE_MAX_VERTEX_SAMPLERS);
+   assert(num <= PIPE_MAX_SAMPLERS);
    if (!num)
       return;
 
-   for (i = 0; i < PIPE_MAX_VERTEX_SAMPLERS; i++) {
+   for (i = 0; i < PIPE_MAX_SAMPLERS; i++) {
       struct pipe_sampler_view *view = i < num ? views[i] : NULL;
 
       if (view) {
@@ -405,6 +406,7 @@ i915_prepare_vertex_sampling(struct i915_context *i915)
          }
 
          draw_set_mapped_texture(i915->draw,
+                                 PIPE_SHADER_VERTEX,
                                  i,
                                  tex->width0, tex->height0, tex->depth0,
                                  view->u.tex.first_level, tex->last_level,
@@ -775,7 +777,7 @@ i915_set_vertex_sampler_views(struct pipe_context *pipe,
    struct i915_context *i915 = i915_context(pipe);
    uint i;
 
-   assert(num <= PIPE_MAX_VERTEX_SAMPLERS);
+   assert(num <= Elements(i915->vertex_sampler_views));
 
    /* Check for no-op */
    if (num == i915->num_vertex_sampler_views &&
@@ -783,7 +785,7 @@ i915_set_vertex_sampler_views(struct pipe_context *pipe,
       return;
    }
 
-   for (i = 0; i < PIPE_MAX_VERTEX_SAMPLERS; i++) {
+   for (i = 0; i < Elements(i915->vertex_sampler_views); i++) {
       struct pipe_sampler_view *view = i < num ? views[i] : NULL;
 
       pipe_sampler_view_reference(&i915->vertex_sampler_views[i], view);
@@ -792,6 +794,7 @@ i915_set_vertex_sampler_views(struct pipe_context *pipe,
    i915->num_vertex_sampler_views = num;
 
    draw_set_sampler_views(i915->draw,
+                          PIPE_SHADER_VERTEX,
                           i915->vertex_sampler_views,
                           i915->num_vertex_sampler_views);
 }
