@@ -265,7 +265,7 @@ update_textures(struct st_context *st,
 {
    const GLuint old_max = *num_textures;
    GLbitfield samplers_used = prog->SamplersUsed;
-   GLuint unit;
+   GLuint unit, new_count;
 
    if (samplers_used == 0x0 && old_max == 0)
       return;
@@ -294,9 +294,16 @@ update_textures(struct st_context *st,
       pipe_sampler_view_reference(&(sampler_views[unit]), sampler_view);
    }
 
+   /* Ex: if old_max = 3 and *num_textures = 1, we need to pass an
+    * array of views={X, NULL, NULL} to unref the old texture views
+    * at positions [1] and [2].
+    */
+   new_count = MAX2(*num_textures, old_max);
+   assert(new_count <= max_units);
+
    cso_set_sampler_views(st->cso_context,
                          shader_stage,
-                         MIN2(*num_textures, max_units),
+                         new_count,
                          sampler_views);
 }
 
@@ -312,8 +319,8 @@ update_vertex_textures(struct st_context *st)
                       PIPE_SHADER_VERTEX,
                       &ctx->VertexProgram._Current->Base,
                       ctx->Const.MaxVertexTextureImageUnits,
-                      st->state.vertex_sampler_views,
-                      &st->state.num_vertex_textures);
+                      st->state.sampler_views[PIPE_SHADER_VERTEX],
+                      &st->state.num_sampler_views[PIPE_SHADER_VERTEX]);
    }
 }
 
@@ -327,12 +334,28 @@ update_fragment_textures(struct st_context *st)
                    PIPE_SHADER_FRAGMENT,
                    &ctx->FragmentProgram._Current->Base,
                    ctx->Const.MaxTextureImageUnits,
-                   st->state.fragment_sampler_views,
-                   &st->state.num_fragment_textures);
+                   st->state.sampler_views[PIPE_SHADER_FRAGMENT],
+                   &st->state.num_sampler_views[PIPE_SHADER_FRAGMENT]);
 }
 
 
-const struct st_tracked_state st_update_texture = {
+static void
+update_geometry_textures(struct st_context *st)
+{
+   const struct gl_context *ctx = st->ctx;
+
+   if (ctx->GeometryProgram._Current) {
+      update_textures(st,
+                      PIPE_SHADER_GEOMETRY,
+                      &ctx->GeometryProgram._Current->Base,
+                      ctx->Const.MaxTextureImageUnits,
+                      st->state.sampler_views[PIPE_SHADER_GEOMETRY],
+                      &st->state.num_sampler_views[PIPE_SHADER_GEOMETRY]);
+   }
+}
+
+
+const struct st_tracked_state st_update_fragment_texture = {
    "st_update_texture",					/* name */
    {							/* dirty */
       _NEW_TEXTURE,					/* mesa */
@@ -349,6 +372,16 @@ const struct st_tracked_state st_update_vertex_texture = {
       ST_NEW_VERTEX_PROGRAM,				/* st */
    },
    update_vertex_textures				/* update */
+};
+
+
+const struct st_tracked_state st_update_geometry_texture = {
+   "st_update_geometry_texture",			/* name */
+   {							/* dirty */
+      _NEW_TEXTURE,					/* mesa */
+      ST_NEW_GEOMETRY_PROGRAM,				/* st */
+   },
+   update_geometry_textures				/* update */
 };
 
 

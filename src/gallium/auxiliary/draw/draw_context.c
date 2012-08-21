@@ -576,7 +576,7 @@ draw_num_shader_outputs(const struct draw_context *draw)
 
 /**
  * Provide TGSI sampler objects for vertex/geometry shaders that use
- * texture fetches.
+ * texture fetches.  This state only needs to be set once per context.
  * This might only be used by software drivers for the time being.
  */
 void
@@ -586,12 +586,12 @@ draw_texture_samplers(struct draw_context *draw,
                       struct tgsi_sampler **samplers)
 {
    if (shader == PIPE_SHADER_VERTEX) {
-      draw->vs.num_samplers = num_samplers;
-      draw->vs.samplers = samplers;
+      draw->vs.tgsi.num_samplers = num_samplers;
+      draw->vs.tgsi.samplers = samplers;
    } else {
       debug_assert(shader == PIPE_SHADER_GEOMETRY);
-      draw->gs.num_samplers = num_samplers;
-      draw->gs.samplers = samplers;
+      draw->gs.tgsi.num_samplers = num_samplers;
+      draw->gs.tgsi.samplers = samplers;
    }
 }
 
@@ -754,45 +754,50 @@ draw_set_so_state(struct draw_context *draw,
 
 void
 draw_set_sampler_views(struct draw_context *draw,
+                       unsigned shader_stage,
                        struct pipe_sampler_view **views,
                        unsigned num)
 {
    unsigned i;
 
-   debug_assert(num <= PIPE_MAX_VERTEX_SAMPLERS);
+   debug_assert(num <= Elements(draw->sampler_views));
+   debug_assert(shader_stage <= PIPE_SHADER_TYPES);
 
    for (i = 0; i < num; ++i)
-      draw->sampler_views[i] = views[i];
-   for (i = num; i < PIPE_MAX_VERTEX_SAMPLERS; ++i)
-      draw->sampler_views[i] = NULL;
+      draw->sampler_views[shader_stage][i] = views[i];
+   for (i = num; i < Elements(draw->sampler_views); ++i)
+      draw->sampler_views[shader_stage][i] = NULL;
 
-   draw->num_sampler_views = num;
+   draw->num_sampler_views[shader_stage] = num;
 }
 
 void
 draw_set_samplers(struct draw_context *draw,
+                  unsigned shader_stage,
                   struct pipe_sampler_state **samplers,
                   unsigned num)
 {
    unsigned i;
 
-   debug_assert(num <= PIPE_MAX_VERTEX_SAMPLERS);
+   debug_assert(num <= Elements(draw->samplers));
+   debug_assert(shader_stage <= PIPE_SHADER_TYPES);
 
    for (i = 0; i < num; ++i)
-      draw->samplers[i] = samplers[i];
-   for (i = num; i < PIPE_MAX_VERTEX_SAMPLERS; ++i)
-      draw->samplers[i] = NULL;
+      draw->samplers[shader_stage][i] = samplers[i];
+   for (i = num; i < Elements(draw->samplers); ++i)
+      draw->samplers[shader_stage][i] = NULL;
 
-   draw->num_samplers = num;
+   draw->num_samplers[shader_stage] = num;
 
 #ifdef HAVE_LLVM
-   if (draw->llvm)
+   if (draw->llvm && shader_stage == PIPE_SHADER_VERTEX)
       draw_llvm_set_sampler_state(draw);
 #endif
 }
 
 void
 draw_set_mapped_texture(struct draw_context *draw,
+                        unsigned shader_stage,
                         unsigned sampler_idx,
                         uint32_t width, uint32_t height, uint32_t depth,
                         uint32_t first_level, uint32_t last_level,
@@ -800,13 +805,15 @@ draw_set_mapped_texture(struct draw_context *draw,
                         uint32_t img_stride[PIPE_MAX_TEXTURE_LEVELS],
                         const void *data[PIPE_MAX_TEXTURE_LEVELS])
 {
+   if (shader_stage == PIPE_SHADER_VERTEX) {
 #ifdef HAVE_LLVM
-   if(draw->llvm)
-      draw_llvm_set_mapped_texture(draw,
-                                sampler_idx,
-                                width, height, depth, first_level, last_level,
-                                row_stride, img_stride, data);
+      if (draw->llvm)
+         draw_llvm_set_mapped_texture(draw,
+                                      sampler_idx,
+                                      width, height, depth, first_level, last_level,
+                                      row_stride, img_stride, data);
 #endif
+   }
 }
 
 /**

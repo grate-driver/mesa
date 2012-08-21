@@ -979,7 +979,7 @@ static struct pipe_sampler_view *r600_create_sampler_view(struct pipe_context *c
 							const struct pipe_sampler_view *state)
 {
 	struct r600_pipe_sampler_view *view = CALLOC_STRUCT(r600_pipe_sampler_view);
-	struct r600_resource_texture *tmp = (struct r600_resource_texture*)texture;
+	struct r600_texture *tmp = (struct r600_texture*)texture;
 	unsigned format, endian;
 	uint32_t word4 = 0, yuv_format = 0, pitch = 0;
 	unsigned char swizzle[4], array_mode = 0, tile_type = 0;
@@ -1081,15 +1081,13 @@ static struct pipe_sampler_view *r600_create_sampler_view(struct pipe_context *c
 static void r600_set_vs_sampler_views(struct pipe_context *ctx, unsigned count,
 				      struct pipe_sampler_view **views)
 {
-	struct r600_context *rctx = (struct r600_context *)ctx;
-	r600_set_sampler_views(rctx, &rctx->vs_samplers, count, views);
+	r600_set_sampler_views(ctx, PIPE_SHADER_VERTEX, 0, count, views);
 }
 
 static void r600_set_ps_sampler_views(struct pipe_context *ctx, unsigned count,
 				      struct pipe_sampler_view **views)
 {
-	struct r600_context *rctx = (struct r600_context *)ctx;
-	r600_set_sampler_views(rctx, &rctx->ps_samplers, count, views);
+	r600_set_sampler_views(ctx, PIPE_SHADER_FRAGMENT, 0, count, views);
 }
 
 static void r600_set_clip_state(struct pipe_context *ctx,
@@ -1199,7 +1197,7 @@ static void r600_set_viewport_state(struct pipe_context *ctx,
 static void r600_init_color_surface(struct r600_context *rctx,
 				    struct r600_surface *surf)
 {
-	struct r600_resource_texture *rtex = (struct r600_resource_texture*)surf->base.texture;
+	struct r600_texture *rtex = (struct r600_texture*)surf->base.texture;
 	unsigned level = surf->base.u.tex.level;
 	unsigned pitch, slice;
 	unsigned color_info;
@@ -1347,7 +1345,7 @@ static void r600_init_color_surface(struct r600_context *rctx,
 static void r600_init_depth_surface(struct r600_context *rctx,
 				    struct r600_surface *surf)
 {
-	struct r600_resource_texture *rtex = (struct r600_resource_texture*)surf->base.texture;
+	struct r600_texture *rtex = (struct r600_texture*)surf->base.texture;
 	unsigned level, pitch, slice, format, offset, array_mode;
 
 	level = surf->base.u.tex.level;
@@ -1437,6 +1435,9 @@ static void r600_set_framebuffer_state(struct pipe_context *ctx,
 		r600_pipe_state_add_reg_bo(rstate, R_0280A0_CB_COLOR0_INFO + 1 * 4,
 					   surf->cb_color_info, res, RADEON_USAGE_READWRITE);
 		i++;
+	}
+	for (; i < 8 ; i++) {
+		r600_pipe_state_add_reg(rstate, R_0280A0_CB_COLOR0_INFO + i * 4, 0);
 	}
 
 	/* Update alpha-test state dependencies.

@@ -159,16 +159,40 @@ identity_create_sampler_state(struct pipe_context *_pipe,
 }
 
 static void
-identity_bind_fragment_sampler_states(struct pipe_context *_pipe,
-                                      unsigned num_samplers,
-                                      void **samplers)
+identity_bind_sampler_states(struct pipe_context *_pipe,
+                             unsigned shader,
+                             unsigned start,
+                             unsigned num_samplers,
+                             void **samplers)
 {
    struct identity_context *id_pipe = identity_context(_pipe);
    struct pipe_context *pipe = id_pipe->pipe;
 
-   pipe->bind_fragment_sampler_states(pipe,
-                                      num_samplers,
-                                      samplers);
+   /* remove this when we have pipe->bind_sampler_states(..., start, ...) */
+   assert(start == 0);
+
+   switch (shader) {
+   case PIPE_SHADER_VERTEX:
+      pipe->bind_vertex_sampler_states(pipe, num_samplers, samplers);
+      break;
+   case PIPE_SHADER_GEOMETRY:
+      pipe->bind_geometry_sampler_states(pipe, num_samplers, samplers);
+      break;
+   case PIPE_SHADER_FRAGMENT:
+      pipe->bind_fragment_sampler_states(pipe, num_samplers, samplers);
+      break;
+   default:
+      debug_error("Unexpected shader in identity_bind_sampler_states()");
+   }
+}
+
+static void
+identity_bind_fragment_sampler_states(struct pipe_context *_pipe,
+                                      unsigned num_samplers,
+                                      void **samplers)
+{
+   identity_bind_sampler_states(_pipe, PIPE_SHADER_FRAGMENT,
+                                0, num_samplers, samplers);
 }
 
 static void
@@ -176,12 +200,8 @@ identity_bind_vertex_sampler_states(struct pipe_context *_pipe,
                                     unsigned num_samplers,
                                     void **samplers)
 {
-   struct identity_context *id_pipe = identity_context(_pipe);
-   struct pipe_context *pipe = id_pipe->pipe;
-
-   pipe->bind_vertex_sampler_states(pipe,
-                                    num_samplers,
-                                    samplers);
+   identity_bind_sampler_states(_pipe, PIPE_SHADER_VERTEX,
+                                0, num_samplers, samplers);
 }
 
 static void
@@ -488,15 +508,20 @@ identity_set_viewport_state(struct pipe_context *_pipe,
 }
 
 static void
-identity_set_fragment_sampler_views(struct pipe_context *_pipe,
-                                    unsigned num,
-                                    struct pipe_sampler_view **_views)
+identity_set_sampler_views(struct pipe_context *_pipe,
+                           unsigned shader,
+                           unsigned start,
+                           unsigned num,
+                           struct pipe_sampler_view **_views)
 {
    struct identity_context *id_pipe = identity_context(_pipe);
    struct pipe_context *pipe = id_pipe->pipe;
    struct pipe_sampler_view *unwrapped_views[PIPE_MAX_SAMPLERS];
    struct pipe_sampler_view **views = NULL;
    unsigned i;
+
+   /* remove this when we have pipe->set_sampler_views(..., start, ...) */
+   assert(start == 0);
 
    if (_views) {
       for (i = 0; i < num; i++)
@@ -507,7 +532,27 @@ identity_set_fragment_sampler_views(struct pipe_context *_pipe,
       views = unwrapped_views;
    }
 
-   pipe->set_fragment_sampler_views(pipe, num, views);
+   switch (shader) {
+   case PIPE_SHADER_VERTEX:
+      pipe->set_vertex_sampler_views(pipe, num, views);
+      break;
+   case PIPE_SHADER_GEOMETRY:
+      pipe->set_geometry_sampler_views(pipe, num, views);
+      break;
+   case PIPE_SHADER_FRAGMENT:
+      pipe->set_fragment_sampler_views(pipe, num, views);
+      break;
+   default:
+      debug_error("Unexpected shader in identity_set_sampler_views()");
+   }
+}
+
+static void
+identity_set_fragment_sampler_views(struct pipe_context *_pipe,
+                                    unsigned num,
+                                    struct pipe_sampler_view **_views)
+{
+   identity_set_sampler_views(_pipe, PIPE_SHADER_FRAGMENT, 0, num, _views);
 }
 
 static void
@@ -515,22 +560,7 @@ identity_set_vertex_sampler_views(struct pipe_context *_pipe,
                                   unsigned num,
                                   struct pipe_sampler_view **_views)
 {
-   struct identity_context *id_pipe = identity_context(_pipe);
-   struct pipe_context *pipe = id_pipe->pipe;
-   struct pipe_sampler_view *unwrapped_views[PIPE_MAX_VERTEX_SAMPLERS];
-   struct pipe_sampler_view **views = NULL;
-   unsigned i;
-
-   if (_views) {
-      for (i = 0; i < num; i++)
-         unwrapped_views[i] = identity_sampler_view_unwrap(_views[i]);
-      for (; i < PIPE_MAX_VERTEX_SAMPLERS; i++)
-         unwrapped_views[i] = NULL;
-
-      views = unwrapped_views;
-   }
-
-   pipe->set_vertex_sampler_views(pipe, num, views);
+   identity_set_sampler_views(_pipe, PIPE_SHADER_VERTEX, 0, num, _views);
 }
 
 static void

@@ -42,17 +42,9 @@ struct r600_resource_global {
 	struct compute_memory_item *chunk;
 };
 
-struct r600_resource_texture {
+struct r600_texture {
 	struct r600_resource		resource;
 
-	/* If this resource is a depth-stencil buffer on evergreen, this contains
-	 * the depth part of the format. There is a separate stencil resource
-	 * for the stencil buffer below. */
-	enum pipe_format		real_format;
-
-	unsigned			offset[PIPE_MAX_TEXTURE_LEVELS];
-	unsigned			pitch_in_bytes[PIPE_MAX_TEXTURE_LEVELS];  /* transfer */
-	unsigned			layer_size[PIPE_MAX_TEXTURE_LEVELS];
 	unsigned			array_mode[PIPE_MAX_TEXTURE_LEVELS];
 	unsigned			pitch_override;
 	unsigned			size;
@@ -60,7 +52,7 @@ struct r600_resource_texture {
 	bool				is_depth;
 	bool				is_rat;
 	unsigned			dirty_db_mask; /* each bit says if that miplevel is dirty */
-	struct r600_resource_texture	*flushed_depth_texture;
+	struct r600_texture		*flushed_depth_texture;
 	boolean				is_flushing_texture;
 	struct radeon_surface		surface;
 };
@@ -117,7 +109,7 @@ static INLINE struct r600_resource *r600_resource(struct pipe_resource *r)
 
 bool r600_init_flushed_depth_texture(struct pipe_context *ctx,
 				     struct pipe_resource *texture,
-				     struct r600_resource_texture **staging);
+				     struct r600_texture **staging);
 
 /* r600_texture.c texture transfer functions. */
 struct pipe_transfer* r600_texture_get_transfer(struct pipe_context *ctx,

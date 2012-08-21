@@ -128,15 +128,15 @@ static unsigned u_max_sample(struct pipe_resource *r)
 }
 
 void r600_blit_uncompress_depth(struct pipe_context *ctx,
-		struct r600_resource_texture *texture,
-		struct r600_resource_texture *staging,
+		struct r600_texture *texture,
+		struct r600_texture *staging,
 		unsigned first_level, unsigned last_level,
 		unsigned first_layer, unsigned last_layer,
 		unsigned first_sample, unsigned last_sample)
 {
 	struct r600_context *rctx = (struct r600_context *)ctx;
 	unsigned layer, level, sample, checked_last_layer, max_layer, max_sample;
-	struct r600_resource_texture *flushed_depth_texture = staging ?
+	struct r600_texture *flushed_depth_texture = staging ?
 			staging : texture->flushed_depth_texture;
 	const struct util_format_description *desc =
 		util_format_description(texture->resource.b.b.format);
@@ -178,7 +178,7 @@ void r600_blit_uncompress_depth(struct pipe_context *ctx,
 					r600_atom_dirty(rctx, &rctx->db_misc_state.atom);
 				}
 
-				surf_tmpl.format = texture->real_format;
+				surf_tmpl.format = texture->resource.b.b.format;
 				surf_tmpl.u.tex.level = level;
 				surf_tmpl.u.tex.first_layer = layer;
 				surf_tmpl.u.tex.last_layer = layer;
@@ -186,7 +186,7 @@ void r600_blit_uncompress_depth(struct pipe_context *ctx,
 
 				zsurf = ctx->create_surface(ctx, &texture->resource.b.b, &surf_tmpl);
 
-				surf_tmpl.format = flushed_depth_texture->real_format;
+				surf_tmpl.format = flushed_depth_texture->resource.b.b.format;
 				surf_tmpl.u.tex.level = level;
 				surf_tmpl.u.tex.first_layer = layer;
 				surf_tmpl.u.tex.last_layer = layer;
@@ -226,14 +226,14 @@ void r600_flush_depth_textures(struct r600_context *rctx,
 
 	while (depth_texture_mask) {
 		struct pipe_sampler_view *view;
-		struct r600_resource_texture *tex;
+		struct r600_texture *tex;
 
 		i = u_bit_scan(&depth_texture_mask);
 
 		view = &textures->views[i]->base;
 		assert(view);
 
-		tex = (struct r600_resource_texture *)view->texture;
+		tex = (struct r600_texture *)view->texture;
 		assert(tex->is_depth && !tex->is_flushing_texture);
 
 		r600_blit_uncompress_depth(&rctx->context, tex, NULL,
@@ -247,7 +247,7 @@ static void r600_copy_first_sample(struct pipe_context *ctx,
 				   const struct pipe_resolve_info *info)
 {
 	struct r600_context *rctx = (struct r600_context *)ctx;
-	struct r600_resource_texture *rsrc = (struct r600_resource_texture*)info->src.res;
+	struct r600_texture *rsrc = (struct r600_texture*)info->src.res;
 	struct pipe_surface *dst_view, dst_templ;
 	struct pipe_sampler_view src_templ, *src_view;
 	struct pipe_box box;
@@ -471,8 +471,8 @@ static void r600_compressed_to_blittable(struct pipe_resource *tex,
 				   unsigned level,
 				   struct texture_orig_info *orig)
 {
-	struct r600_resource_texture *rtex = (struct r600_resource_texture*)tex;
-	unsigned pixsize = util_format_get_blocksize(rtex->real_format);
+	struct r600_texture *rtex = (struct r600_texture*)tex;
+	unsigned pixsize = util_format_get_blocksize(rtex->resource.b.b.format);
 	int new_format;
 	int new_height, new_width;
 
@@ -501,12 +501,32 @@ static void r600_compressed_to_blittable(struct pipe_resource *tex,
 	rtex->surface.level[level].npix_y = util_format_get_nblocksy(orig->format, orig->npix_y);
 }
 
+static void r600_subsampled_2x1_32bpp_to_blittable(struct pipe_resource *tex,
+						   unsigned level,
+						   struct texture_orig_info *orig)
+{
+	struct r600_texture *rtex = (struct r600_texture*)tex;
+
+	orig->format = tex->format;
+	orig->width0 = tex->width0;
+	orig->height0 = tex->height0;
+	orig->npix0_x = rtex->surface.level[0].npix_x;
+	orig->npix0_y = rtex->surface.level[0].npix_y;
+	orig->npix_x = rtex->surface.level[level].npix_x;
+	orig->npix_y = rtex->surface.level[level].npix_y;
+
+	tex->width0 = util_format_get_nblocksx(orig->format, orig->width0);
+	tex->format = PIPE_FORMAT_R8G8B8A8_UINT;
+	rtex->surface.level[0].npix_x = util_format_get_nblocksx(orig->format, orig->npix0_x);
+	rtex->surface.level[level].npix_x = util_format_get_nblocksx(orig->format, orig->npix_x);
+}
+
 static void r600_change_format(struct pipe_resource *tex,
 			       unsigned level,
 			       struct texture_orig_info *orig,
 			       enum pipe_format format)
 {
-	struct r600_resource_texture *rtex = (struct r600_resource_texture*)tex;
+	struct r600_texture *rtex = (struct r600_texture*)tex;
 
 	orig->format = tex->format;
 	orig->width0 = tex->width0;
@@ -523,7 +543,7 @@ static void r600_reset_blittable_to_orig(struct pipe_resource *tex,
 					 unsigned level,
 					 struct texture_orig_info *orig)
 {
-	struct r600_resource_texture *rtex = (struct r600_resource_texture*)tex;
+	struct r600_texture *rtex = (struct r600_texture*)tex;
 
 	tex->format = orig->format;
 	tex->width0 = orig->width0;
@@ -532,6 +552,16 @@ static void r600_reset_blittable_to_orig(struct pipe_resource *tex,
 	rtex->surface.level[0].npix_y = orig->npix0_y;
 	rtex->surface.level[level].npix_x = orig->npix_x;
 	rtex->surface.level[level].npix_y = orig->npix_y;
+}
+
+static bool util_format_is_subsampled_2x1_32bpp(enum pipe_format format)
+{
+	const struct util_format_description *desc = util_format_description(format);
+
+	return desc->layout == UTIL_FORMAT_LAYOUT_SUBSAMPLED &&
+	       desc->block.width == 2 &&
+	       desc->block.height == 1 &&
+	       desc->block.bits == 32;
 }
 
 static void r600_resource_copy_region(struct pipe_context *ctx,
@@ -543,7 +573,7 @@ static void r600_resource_copy_region(struct pipe_context *ctx,
 				      const struct pipe_box *src_box)
 {
 	struct r600_context *rctx = (struct r600_context *)ctx;
-	struct r600_resource_texture *rsrc = (struct r600_resource_texture*)src;
+	struct r600_texture *rsrc = (struct r600_texture*)src;
 	struct texture_orig_info orig_info[2];
 	struct pipe_box sbox;
 	const struct pipe_box *psbox = src_box;
@@ -584,7 +614,7 @@ static void r600_resource_copy_region(struct pipe_context *ctx,
 		sbox.width = util_format_get_nblocksx(orig_info[0].format, src_box->width);
 		sbox.height = util_format_get_nblocksy(orig_info[0].format, src_box->height);
 		sbox.depth = src_box->depth;
-		psbox=&sbox;
+		psbox = &sbox;
 
 		r600_compressed_to_blittable(dst, dst_level, &orig_info[1]);
 		restore_orig[1] = TRUE;
@@ -593,25 +623,38 @@ static void r600_resource_copy_region(struct pipe_context *ctx,
 		dsty = util_format_get_nblocksy(orig_info[1].format, dsty);
 	} else if (!util_blitter_is_copy_supported(rctx->blitter, dst, src,
 						   PIPE_MASK_RGBAZS)) {
-		unsigned blocksize = util_format_get_blocksize(src->format);
+		if (util_format_is_subsampled_2x1_32bpp(src->format) &&
+		    util_format_is_subsampled_2x1_32bpp(dst->format)) {
+			r600_subsampled_2x1_32bpp_to_blittable(src, src_level, &orig_info[0]);
+			r600_subsampled_2x1_32bpp_to_blittable(dst, dst_level, &orig_info[1]);
 
-		switch (blocksize) {
-		case 1:
-			r600_change_format(src, src_level, &orig_info[0],
-					   PIPE_FORMAT_R8_UNORM);
-			r600_change_format(dst, dst_level, &orig_info[1],
-					   PIPE_FORMAT_R8_UNORM);
-			break;
-		case 4:
-			r600_change_format(src, src_level, &orig_info[0],
-					   PIPE_FORMAT_R8G8B8A8_UNORM);
-			r600_change_format(dst, dst_level, &orig_info[1],
-					   PIPE_FORMAT_R8G8B8A8_UNORM);
-			break;
-		default:
-			fprintf(stderr, "Unhandled format %s with blocksize %u\n",
-				util_format_short_name(src->format), blocksize);
-			assert(0);
+			sbox = *src_box;
+			sbox.x = util_format_get_nblocksx(orig_info[0].format, src_box->x);
+			sbox.width = util_format_get_nblocksx(orig_info[0].format, src_box->width);
+			psbox = &sbox;
+
+			dstx = util_format_get_nblocksx(orig_info[1].format, dstx);
+		} else {
+			unsigned blocksize = util_format_get_blocksize(src->format);
+
+			switch (blocksize) {
+			case 1:
+				r600_change_format(src, src_level, &orig_info[0],
+						   PIPE_FORMAT_R8_UNORM);
+				r600_change_format(dst, dst_level, &orig_info[1],
+						   PIPE_FORMAT_R8_UNORM);
+				break;
+			case 4:
+				r600_change_format(src, src_level, &orig_info[0],
+						   PIPE_FORMAT_R8G8B8A8_UNORM);
+				r600_change_format(dst, dst_level, &orig_info[1],
+						   PIPE_FORMAT_R8G8B8A8_UNORM);
+				break;
+			default:
+				fprintf(stderr, "Unhandled format %s with blocksize %u\n",
+					util_format_short_name(src->format), blocksize);
+				assert(0);
+			}
 		}
 		restore_orig[0] = TRUE;
 		restore_orig[1] = TRUE;
