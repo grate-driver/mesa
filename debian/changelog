@@ -47,6 +47,8 @@ mesa (9.0~git20120821.c1114c61-1) UNRELEASED; urgency=low
   * control: Add new dependencies to libgl1-mesa-dev.
   * rules, libgl1-mesa-dri.install.linux.in: Add support for radeonsi.
   * rules: Build llvm shared libs on platforms that support llvm.
+  * Added 15-fix-llvmpipe-test-linking.diff: Fix link failure when building
+    llvmpipe with --with-llvm-shared-libs. Patch from fdo bug #52617.
 
  -- Julien Cristau <jcristau@debian.org>  Fri, 03 Aug 2012 23:17:16 +0200
 
