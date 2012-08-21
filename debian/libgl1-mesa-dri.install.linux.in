@@ -5,5 +5,6 @@ dri/usr/lib/${DEB_HOST_MULTIARCH}/libdricore*.so*
 # This part is Linux-specific:
 build/dri/${DEB_HOST_MULTIARCH}/gallium/r300_dri.so usr/lib/${DEB_HOST_MULTIARCH}/dri
 build/dri/${DEB_HOST_MULTIARCH}/gallium/r600_dri.so usr/lib/${DEB_HOST_MULTIARCH}/dri
+build/dri/${DEB_HOST_MULTIARCH}/gallium/radeonsi_dri.so usr/lib/${DEB_HOST_MULTIARCH}/dri
 build/dri/${DEB_HOST_MULTIARCH}/gallium/nouveau_dri.so usr/lib/${DEB_HOST_MULTIARCH}/dri
 build/dri/${DEB_HOST_MULTIARCH}/gallium/vmwgfx_dri.so usr/lib/${DEB_HOST_MULTIARCH}/dri

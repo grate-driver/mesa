@@ -23,6 +23,7 @@ mesa (8.1~git20120816.1597176f-1) UNRELEASED; urgency=low
     builds.
   * libgl1-mesa-dri.install*.in: Add libdricore.
   * control: Add new dependencies to libgl1-mesa-dev.
+  * rules, libgl1-mesa-dri.install.linux.in: Add support for radeonsi.
 
  -- Julien Cristau <jcristau@debian.org>  Fri, 03 Aug 2012 23:17:16 +0200
 
