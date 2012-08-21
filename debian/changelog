@@ -19,6 +19,8 @@ mesa (9.0~git20120821.c1114c61-0ubuntu1) UNRELEASED; urgency=low
     Drop the static lib from -dev since only shared libs get built.
   * libgl1-mesa-dev.install.in: Fix the source file paths to match the
     build target.
+  * libgl1-mesa-dri.install.linux.in: Don't try to install libgallium.so,
+    which isn't built yet.
 
  -- Timo Aaltonen <tjaalton@ubuntu.com>  Fri, 17 Aug 2012 11:08:47 +0300
 
