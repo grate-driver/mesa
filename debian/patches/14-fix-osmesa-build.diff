@@ -1,13 +1,10 @@
-diff --git a/src/mesa/drivers/osmesa/Makefile.am b/src/mesa/drivers/osmesa/Makefile.am
-index dbee925..0afc1c7 100644
 --- a/src/mesa/drivers/osmesa/Makefile.am
 +++ b/src/mesa/drivers/osmesa/Makefile.am
-@@ -28,6 +28,7 @@ AM_CFLAGS = \
-        -I$(top_srcdir)/include \
-        -I$(top_srcdir)/src/mapi \
-        -I$(top_srcdir)/src/mesa/ \
-+       -I$(top_builddir)/src/mapi \
-        $(DEFINES) \
-        $(API_DEFINES)
+@@ -28,6 +28,7 @@
+ 	-I$(top_srcdir)/include \
+ 	-I$(top_srcdir)/src/mapi \
+ 	-I$(top_srcdir)/src/mesa/ \
++	-I$(top_builddir)/src/mapi \
+ 	$(DEFINES) \
+ 	$(API_DEFINES)
  
-
