@@ -13,8 +13,6 @@ mesa (8.1~git20120816.1597176f-0ubuntu1) UNRELEASED; urgency=low
     match the single-pass build.
   * libgl1-mesa-dri.*install.in: Drop libglsl.so, it's included in
     libdricore.so now.
-  * libgl1-mesa-dri.*install.in: libdricore is versioned now, install
-    the right files.
   * rules: Don't disable GLU on the common flags, we need to build it
     on the dri target.
   * libglu*install.in: Fix the source file paths to match the build target.
@@ -45,6 +43,7 @@ mesa (8.1~git20120816.1597176f-1) UNRELEASED; urgency=low
   * Update symbols.
   * Added 14-fix-osmesa-build.diff, fixes glapi includes with out-of-tree
     builds.
+  * libgl1-mesa-dri.install*.in: Add libdricore.
 
  -- Julien Cristau <jcristau@debian.org>  Fri, 03 Aug 2012 23:17:16 +0200
 
