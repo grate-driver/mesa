@@ -81,10 +81,11 @@ else
     ifeq (,$(filter $(DEB_HOST_ARCH), s390 s390x))
 	DRI_DRIVERS += r200 radeon nouveau
     endif
-# Radeonsi needs LLVM, so only build it on the subset of archs where we
-# have LLVM enabled.
     ifneq (,$(filter $(DEB_HOST_ARCH_CPU), amd64 i386))
-	DRI_DRIVERS += i915 i965 radeonsi
+	DRI_DRIVERS += i915 i965
+	# Radeonsi needs LLVM, so only build it on the subset of archs
+	# where we have LLVM enabled.
+	GALLIUM_DRIVERS += radeonsi
     endif
   endif
 
