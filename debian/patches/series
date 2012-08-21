@@ -7,3 +7,4 @@
 #11-hurd-ftbfs-again.diff
 13-llvm-config-pick-a-version.diff
 14-fix-osmesa-build.diff
+15-fix-llvmpipe-test-linking.diff
