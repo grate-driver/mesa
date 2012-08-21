@@ -1,0 +1,443 @@
+diff --git a/configs/current.in b/configs/current.in
+index c490842..73d08be 100644
+--- a/configs/current.in
++++ b/configs/current.in
+@@ -13,6 +13,7 @@ PIC_FLAGS = @PIC_FLAGS@
+ DEFINES = @DEFINES@
+ API_DEFINES = @API_DEFINES@
+ SHARED_GLAPI = @SHARED_GLAPI@
++SHARED_GALLIUM = @SHARED_GALLIUM@
+ CFLAGS_NOVISIBILITY = @CPPFLAGS@ @CFLAGS@ \
+ 	$(PIC_FLAGS) $(DEFINES)
+ CXXFLAGS_NOVISIBILITY = @CPPFLAGS@ @CXXFLAGS@ \
+@@ -112,7 +113,11 @@ GALLIUM_DRIVERS_DIRS = @GALLIUM_DRIVERS_DIRS@
+ GALLIUM_WINSYS_DIRS = @GALLIUM_WINSYS_DIRS@
+ GALLIUM_TARGET_DIRS = @GALLIUM_TARGET_DIRS@
+ GALLIUM_STATE_TRACKERS_DIRS = @GALLIUM_STATE_TRACKERS_DIRS@
+-GALLIUM_AUXILIARIES = $(TOP)/src/gallium/auxiliary/libgallium.a
++ifeq (@SHARED_GALLIUM@,1)
++GALLIUM_AUXILIARIES = $(TOP)/src/gallium/auxiliary/.libs/libgallium.so
++else
++GALLIUM_AUXILIARIES = $(TOP)/src/gallium/auxiliary/.libs/libgallium.a
++endif
+ GALLIUM_DRIVERS = $(foreach DIR,$(GALLIUM_DRIVERS_DIRS),$(TOP)/src/gallium/drivers/$(DIR)/lib$(DIR).a)
+ 
+ # Driver specific build vars
+diff --git a/configure.ac b/configure.ac
+index 7dac091..be21c4a 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -698,6 +698,19 @@ fi
+ AC_SUBST([SHARED_GLAPI])
+ AM_CONDITIONAL(HAVE_SHARED_GLAPI, test $SHARED_GLAPI = 1)
+ 
++AC_ARG_ENABLE([shared-gallium],
++    [AS_HELP_STRING([--enable-shared-gallium],
++        [Enable shared gallium core @<:@default=yes@:>@])],
++    [enable_shared_gallium="$enableval"],
++    [enable_shared_gallium=yes])
++
++SHARED_GALLIUM="0"
++if test "x$enable_shared_gallium" = xyes; then
++    SHARED_GALLIUM="1"
++fi
++AC_SUBST([SHARED_GALLIUM])
++AM_CONDITIONAL(HAVE_SHARED_GALLIUM, test $SHARED_GALLIUM = 1)
++
+ dnl
+ dnl Driver configuration. Options are xlib, dri and osmesa right now.
+ dnl More later: fbdev, ...
+@@ -1810,6 +1823,7 @@ if test "x$enable_gallium_llvm" = xyes; then
+ else
+     MESA_LLVM=0
+ fi
++AM_CONDITIONAL(HAVE_MESA_LLVM, test "x$MESA_LLVM" = x1)
+ 
+ dnl Directory for XVMC libs
+ AC_ARG_WITH([xvmc-libdir],
+@@ -2070,6 +2084,7 @@ AC_CONFIG_FILES([configs/current
+ 		Makefile
+ 		src/Makefile
+ 		src/gallium/Makefile
++		src/gallium/auxiliary/Makefile
+ 		src/gallium/auxiliary/pipe-loader/Makefile
+ 		src/gallium/state_trackers/clover/Makefile
+ 		src/gallium/drivers/Makefile
+diff --git a/debian/patches/15-fix-llvmpipe-test-linking.diff b/debian/patches/15-fix-llvmpipe-test-linking.diff
+index 92893a3..4c4a86d 100644
+--- a/debian/patches/15-fix-llvmpipe-test-linking.diff
++++ b/debian/patches/15-fix-llvmpipe-test-linking.diff
+@@ -16,11 +16,11 @@ Bugzilla: https://bugs.freedesktop.org/show_bug.cgi?id=52167
+  src/gallium/state_trackers/d3d1x/gd3d1x/Makefile | 3 ++-
+  3 files changed, 5 insertions(+), 3 deletions(-)
+ 
+-diff --git a/src/gallium/Makefile.template b/src/gallium/Makefile.template
+-index 036c119..c30477a 100644
+---- a/src/gallium/Makefile.template
+-+++ b/src/gallium/Makefile.template
+-@@ -41,7 +41,7 @@ depend: $(C_SOURCES) $(CPP_SOURCES) $(ASM_SOURCES) $(SYMLINKS) $(GENERATED_SOURC
++Index: mesa/src/gallium/Makefile.template
++===================================================================
++--- mesa.orig/src/gallium/Makefile.template	2012-08-21 14:40:03.449673454 +0000
+++++ mesa/src/gallium/Makefile.template	2012-08-21 14:40:04.020675436 +0000
++@@ -41,7 +41,7 @@
+  	$(MKDEP) $(MKDEP_OPTIONS) $(INCLUDES) $(C_SOURCES) $(CPP_SOURCES) $(ASM_SOURCES) $(GENERATED_SOURCES) 2> /dev/null
+  
+  $(PROGS): % : %.o $(PROGS_DEPS)
+@@ -29,25 +29,30 @@ index 036c119..c30477a 100644
+  
+  # Emacs tags
+  tags:
+-diff --git a/src/gallium/drivers/llvmpipe/Makefile b/src/gallium/drivers/llvmpipe/Makefile
+-index ef16fc7..35f8fe8 100644
+---- a/src/gallium/drivers/llvmpipe/Makefile
+-+++ b/src/gallium/drivers/llvmpipe/Makefile
+-@@ -68,7 +68,8 @@ lp_tile_soa.c: lp_tile_soa.py ../../auxiliary/util/u_format_parse.py ../../auxil
++Index: mesa/src/gallium/drivers/llvmpipe/Makefile
++===================================================================
++--- mesa.orig/src/gallium/drivers/llvmpipe/Makefile	2012-08-21 14:40:03.449673454 +0000
+++++ mesa/src/gallium/drivers/llvmpipe/Makefile	2012-08-21 14:49:20.395606825 +0000
++@@ -68,7 +68,13 @@
+  	$(PYTHON2) $(PYTHON_FLAGS) lp_tile_soa.py ../../auxiliary/util/u_format.csv > $@
+  
+  LDFLAGS += $(LLVM_LDFLAGS)
+--LIBS += -L../../auxiliary/ -lgallium libllvmpipe.a $(LLVM_LIBS) $(GL_LIB_DEPS)
+-+LIBS += -L../../auxiliary/ -lgallium libllvmpipe.a
++-LIBS += $(GALLIUM_AUXILIARIES) libllvmpipe.a $(LLVM_LIBS) $(GL_LIB_DEPS)
+++ifeq ($(SHARED_GALLIUM),1)
+++LIBS = libllvmpipe.a
+++LDADD = $(GALLIUM_AUXILIARIES) $(LLVM_LIBS) $(GL_LIB_DEPS)
+++else
+++LIBS += $(GALLIUM_AUXILIARIES) libllvmpipe.a
+ +LDADD += $(LLVM_LIBS) $(GL_LIB_DEPS)
+++endif
+  LD=$(CXX)
+  
+  $(PROGS): lp_test_main.o libllvmpipe.a
+-diff --git a/src/gallium/state_trackers/d3d1x/gd3d1x/Makefile b/src/gallium/state_trackers/d3d1x/gd3d1x/Makefile
+-index 32d2956..f9cad05 100644
+---- a/src/gallium/state_trackers/d3d1x/gd3d1x/Makefile
+-+++ b/src/gallium/state_trackers/d3d1x/gd3d1x/Makefile
+-@@ -3,5 +3,6 @@ CPP_SOURCES=$(wildcard *.cpp)
++Index: mesa/src/gallium/state_trackers/d3d1x/gd3d1x/Makefile
++===================================================================
++--- mesa.orig/src/gallium/state_trackers/d3d1x/gd3d1x/Makefile	2012-08-21 14:40:03.449673454 +0000
+++++ mesa/src/gallium/state_trackers/d3d1x/gd3d1x/Makefile	2012-08-21 14:40:04.021175438 +0000
++@@ -3,5 +3,6 @@
+  LIBRARY_INCLUDES=-Iinclude -I../gd3dapi -I../d3dapi -I../w32api -I../d3d1xstutil/include -I../d3d1xshader/include -I../../../include -I../../../auxiliary -I../../../state_trackers/egl/common
+  PROGS=tools/dxbc2tgsi
+  PROGS_DEPS=libgd3d1x.a ../d3d1xshader/libd3d1xshader.a ../d3d1xstutil/libd3d1xstutil.a ../../../auxiliary/libgallium.a
+@@ -55,7 +60,3 @@ index 32d2956..f9cad05 100644
+ +LIBS=$(PROGS_DEPS)
+ +LDADD=-ldl
+  include ../Makefile.inc
+--- 
+-1.7.11.4
+-
+-
+diff --git a/src/gallium/auxiliary/Makefile b/src/gallium/auxiliary/Makefile
+deleted file mode 100644
+index 3ba3f9c..0000000
+--- a/src/gallium/auxiliary/Makefile
++++ /dev/null
+@@ -1,42 +0,0 @@
+-TOP = ../../..
+-include $(TOP)/configs/current
+-
+-LIBNAME = gallium
+-
+-# get source lists
+-include Makefile.sources
+-
+-C_SOURCES += $(GENERATED_SOURCES)
+-
+-ifeq ($(MESA_LLVM),1)
+-C_SOURCES += \
+-	$(GALLIVM_SOURCES)
+-CPP_SOURCES += \
+-	$(GALLIVM_CPP_SOURCES)
+-endif
+-
+-
+-include ../Makefile.template
+-
+-default install clean: %: subdirs-%
+-
+-subdirs-%:
+-	@for dir in $(SUBDIRS) ; do \
+-		if [ -d $$dir ] ; then \
+-			(cd $$dir && $(MAKE) $*) || exit 1; \
+-		fi \
+-	done
+-
+-indices/u_indices_gen.c: indices/u_indices_gen.py
+-	$(PYTHON2) $< > $@
+-
+-indices/u_unfilled_gen.c: indices/u_unfilled_gen.py
+-	$(PYTHON2) $< > $@
+-
+-util/u_format_srgb.c: util/u_format_srgb.py
+-	$(PYTHON2) $< > $@
+-
+-util/u_format_table.c: util/u_format_table.py util/u_format_pack.py util/u_format_parse.py util/u_format.csv
+-	$(PYTHON2) util/u_format_table.py util/u_format.csv > $@
+-
+-# DO NOT DELETE
+diff --git a/src/gallium/auxiliary/Makefile.am b/src/gallium/auxiliary/Makefile.am
+new file mode 100644
+index 0000000..2c6bde1
+--- /dev/null
++++ b/src/gallium/auxiliary/Makefile.am
+@@ -0,0 +1,48 @@
++TOP = $(top_srcdir)
++
++include $(srcdir)/Makefile.sources
++
++AM_CFLAGS = \
++	-I$(top_srcdir)/src/gallium/include \
++	@CPPFLAGS@ @CFLAGS@ @DEFINES@
++
++AM_CXXFLAGS = \
++	-I$(top_srcdir)/src/gallium/include \
++	@CPPFLAGS@ @CXXFLAGS@ @DEFINES@
++
++C_SOURCES += $(GENERATED_SOURCES)
++
++if HAVE_MESA_LLVM
++C_SOURCES += \
++	$(GALLIVM_SOURCES)
++CPP_SOURCES = \
++	$(GALLIVM_CPP_SOURCES)
++
++AM_CFLAGS += @LLVM_CPPFLAGS@ @LLVM_CFLAGS@
++AM_CXXFLAGS += @LLVM_CPPFLAGS@ @LLVM_CXXFLAGS@
++endif
++
++lib_LTLIBRARIES = libgallium.la
++libgallium_la_SOURCES = $(C_SOURCES) $(CPP_SOURCES)
++libgallium_la_LDFLAGS = -no-undefined @LLVM_LDFLAGS@ @LLVM_LIBS@
++if HAVE_SHARED_GALLIUM
++AM_CFLAGS += -shared
++AM_CXXFLAGS += -shared
++else
++AM_CFLAGS += -static  @VISIBILITY_CFLAGS@
++AM_CXXFLAGS += -static  @VISIBILITY_CXXFLAGS@
++endif
++
++indices/u_indices_gen.c: indices/u_indices_gen.py
++	$(PYTHON2) $< > $@
++
++indices/u_unfilled_gen.c: indices/u_unfilled_gen.py
++	$(PYTHON2) $< > $@
++
++util/u_format_srgb.c: util/u_format_srgb.py
++	$(PYTHON2) $< > $@
++
++util/u_format_table.c: util/u_format_table.py util/u_format_pack.py util/u_format_parse.py util/u_format.csv
++	$(PYTHON2) util/u_format_table.py util/u_format.csv > $@
++
++# DO NOT DELETE
+diff --git a/src/gallium/drivers/llvmpipe/Makefile b/src/gallium/drivers/llvmpipe/Makefile
+index ef16fc7..531420b 100644
+--- a/src/gallium/drivers/llvmpipe/Makefile
++++ b/src/gallium/drivers/llvmpipe/Makefile
+@@ -62,13 +62,13 @@ CLEAN_EXTRA = *.o
+ 
+ include ../../Makefile.template
+ 
+-PROGS_DEPS := ../../auxiliary/libgallium.a
++PROGS_DEPS := $(GALLIUM_AUXILIARIES)
+ 
+ lp_tile_soa.c: lp_tile_soa.py ../../auxiliary/util/u_format_parse.py ../../auxiliary/util/u_format_pack.py ../../auxiliary/util/u_format.csv
+ 	$(PYTHON2) $(PYTHON_FLAGS) lp_tile_soa.py ../../auxiliary/util/u_format.csv > $@
+ 
+ LDFLAGS += $(LLVM_LDFLAGS)
+-LIBS += -L../../auxiliary/ -lgallium libllvmpipe.a $(LLVM_LIBS) $(GL_LIB_DEPS)
++LIBS += $(GALLIUM_AUXILIARIES) libllvmpipe.a $(LLVM_LIBS) $(GL_LIB_DEPS)
+ LD=$(CXX)
+ 
+ $(PROGS): lp_test_main.o libllvmpipe.a
+diff --git a/src/gallium/targets/Makefile.dri b/src/gallium/targets/Makefile.dri
+index 5b6676d..d04be29 100644
+--- a/src/gallium/targets/Makefile.dri
++++ b/src/gallium/targets/Makefile.dri
+@@ -6,6 +6,10 @@ LDFLAGS += $(LLVM_LDFLAGS)
+ DRIVER_EXTRAS = $(LLVM_LIBS)
+ endif
+ 
++ifeq ($(SHARED_GALLIUM),1)
++LDFLAGS += -L$(TOP)/src/gallium/auxiliary/.libs -Wl,--as-needed -lgallium -Wl,--no-as-needed
++endif
++
+ MESA_MODULES = \
+ 	$(TOP)/src/mesa/libmesagallium.a \
+ 	$(GALLIUM_AUXILIARIES)
+diff --git a/src/gallium/targets/opencl/Makefile.am b/src/gallium/targets/opencl/Makefile.am
+index 4c89e36..ec1fe7f 100644
+--- a/src/gallium/targets/opencl/Makefile.am
++++ b/src/gallium/targets/opencl/Makefile.am
+@@ -8,7 +8,7 @@ libOpenCL_la_LDFLAGS = \
+ 
+ libOpenCL_la_LIBADD = \
+ 	$(top_builddir)/src/gallium/state_trackers/clover/libclover.la \
+-	$(top_builddir)/src/gallium/auxiliary/libgallium.a \
++	$(GALLIUM_AUXILIARIES) \
+ 	$(GALLIUM_PIPE_LOADER_LIBS) $(LIBUDEV_LIBS) \
+ 	-ldl \
+ 	-lclangCodeGen \
+diff --git a/src/gallium/targets/va-r300/Makefile b/src/gallium/targets/va-r300/Makefile
+index 7c89c79..a618698 100644
+--- a/src/gallium/targets/va-r300/Makefile
++++ b/src/gallium/targets/va-r300/Makefile
+@@ -11,7 +11,7 @@ PIPE_DRIVERS = \
+         $(TOP)/src/gallium/winsys/radeon/drm/libradeonwinsys.a \
+ 	$(TOP)/src/gallium/drivers/softpipe/libsoftpipe.a \
+         $(TOP)/src/gallium/drivers/trace/libtrace.a \
+-	$(TOP)/src/gallium/auxiliary/libgallium.a
++	$(GALLIUM_AUXILIARIES)
+ 
+ C_SOURCES = \
+ 	target.c \
+diff --git a/src/gallium/targets/va-r600/Makefile b/src/gallium/targets/va-r600/Makefile
+index 50e7fa5..5e94191 100644
+--- a/src/gallium/targets/va-r600/Makefile
++++ b/src/gallium/targets/va-r600/Makefile
+@@ -11,7 +11,7 @@ PIPE_DRIVERS = \
+ 	$(TOP)/src/gallium/winsys/radeon/drm/libradeonwinsys.a \
+ 	$(TOP)/src/gallium/drivers/softpipe/libsoftpipe.a \
+ 	$(TOP)/src/gallium/drivers/trace/libtrace.a \
+-	$(TOP)/src/gallium/auxiliary/libgallium.a
++	$(GALLIUM_AUXILIARIES)
+ 
+ C_SOURCES = \
+ 	target.c \
+diff --git a/src/gallium/targets/va-softpipe/Makefile b/src/gallium/targets/va-softpipe/Makefile
+index 536cb7b..2fd74c7 100644
+--- a/src/gallium/targets/va-softpipe/Makefile
++++ b/src/gallium/targets/va-softpipe/Makefile
+@@ -9,7 +9,7 @@ DRIVER_INCLUDES =
+ PIPE_DRIVERS = \
+ 	$(TOP)/src/gallium/winsys/sw/xlib/libws_xlib.a \
+ 	$(TOP)/src/gallium/drivers/softpipe/libsoftpipe.a \
+-	$(TOP)/src/gallium/auxiliary/libgallium.a
++	$(GALLIUM_AUXILIARIES)
+ 
+ C_SOURCES = \
+ 	$(TOP)/src/gallium/auxiliary/vl/vl_winsys_xsp.c
+diff --git a/src/gallium/targets/vdpau-nouveau/Makefile b/src/gallium/targets/vdpau-nouveau/Makefile
+index bb971c6..2f2b7ff 100644
+--- a/src/gallium/targets/vdpau-nouveau/Makefile
++++ b/src/gallium/targets/vdpau-nouveau/Makefile
+@@ -12,7 +12,7 @@ PIPE_DRIVERS = \
+ 	$(TOP)/src/gallium/drivers/nvc0/libnvc0.a \
+ 	$(TOP)/src/gallium/drivers/nouveau/libnouveau.a \
+ 	$(TOP)/src/gallium/drivers/trace/libtrace.a \
+-	$(TOP)/src/gallium/auxiliary/libgallium.a
++	$(GALLIUM_AUXILIARIES)
+ 
+ 
+ C_SOURCES = \
+diff --git a/src/gallium/targets/vdpau-r300/Makefile b/src/gallium/targets/vdpau-r300/Makefile
+index 1ada550..7cf3345 100644
+--- a/src/gallium/targets/vdpau-r300/Makefile
++++ b/src/gallium/targets/vdpau-r300/Makefile
+@@ -12,7 +12,7 @@ PIPE_DRIVERS = \
+         $(TOP)/src/gallium/drivers/rbug/librbug.a \
+         $(TOP)/src/gallium/drivers/trace/libtrace.a \
+         $(TOP)/src/gallium/drivers/galahad/libgalahad.a \
+-	$(TOP)/src/gallium/auxiliary/libgallium.a \
++	$(GALLIUM_AUXILIARIES) \
+ 	$(TOP)/src/mesa/libmesagallium.a
+ 
+ C_SOURCES = \
+diff --git a/src/gallium/targets/vdpau-r600/Makefile b/src/gallium/targets/vdpau-r600/Makefile
+index 05e0b4f..04b1529 100644
+--- a/src/gallium/targets/vdpau-r600/Makefile
++++ b/src/gallium/targets/vdpau-r600/Makefile
+@@ -9,7 +9,7 @@ PIPE_DRIVERS = \
+ 	$(TOP)/src/gallium/drivers/r600/libr600.a \
+ 	$(TOP)/src/gallium/winsys/radeon/drm/libradeonwinsys.a \
+ 	$(TOP)/src/gallium/drivers/trace/libtrace.a \
+-	$(TOP)/src/gallium/auxiliary/libgallium.a
++	$(GALLIUM_AUXILIARIES)
+ 
+ C_SOURCES = \
+ 	target.c \
+diff --git a/src/gallium/targets/vdpau-radeonsi/Makefile b/src/gallium/targets/vdpau-radeonsi/Makefile
+index 6dd2be9..3446f56 100644
+--- a/src/gallium/targets/vdpau-radeonsi/Makefile
++++ b/src/gallium/targets/vdpau-radeonsi/Makefile
+@@ -12,7 +12,7 @@ PIPE_DRIVERS = \
+ 	$(TOP)/src/gallium/drivers/trace/libtrace.a \
+ 	$(TOP)/src/gallium/drivers/rbug/librbug.a \
+ 	$(TOP)/src/gallium/drivers/noop/libnoop.a \
+-	$(TOP)/src/gallium/auxiliary/libgallium.a
++	$(GALLIUM_AUXILIARIES)
+ 
+ C_SOURCES = \
+ 	target.c \
+diff --git a/src/gallium/targets/vdpau-softpipe/Makefile b/src/gallium/targets/vdpau-softpipe/Makefile
+index 41cc514..a894540 100644
+--- a/src/gallium/targets/vdpau-softpipe/Makefile
++++ b/src/gallium/targets/vdpau-softpipe/Makefile
+@@ -9,7 +9,7 @@ DRIVER_INCLUDES =
+ PIPE_DRIVERS = \
+ 	$(TOP)/src/gallium/winsys/sw/xlib/libws_xlib.a \
+ 	$(TOP)/src/gallium/drivers/softpipe/libsoftpipe.a \
+-	$(TOP)/src/gallium/auxiliary/libgallium.a
++	$(GALLIUM_AUXILIARIES)
+ 
+ C_SOURCES = \
+ 	$(TOP)/src/gallium/auxiliary/vl/vl_winsys_xsp.c
+diff --git a/src/gallium/targets/xvmc-nouveau/Makefile b/src/gallium/targets/xvmc-nouveau/Makefile
+index f81f409..1665ca0 100644
+--- a/src/gallium/targets/xvmc-nouveau/Makefile
++++ b/src/gallium/targets/xvmc-nouveau/Makefile
+@@ -9,7 +9,7 @@ PIPE_DRIVERS = \
+ 	$(TOP)/src/gallium/drivers/nvc0/libnvc0.a \
+ 	$(TOP)/src/gallium/drivers/nouveau/libnouveau.a \
+ 	$(TOP)/src/gallium/drivers/trace/libtrace.a \
+-	$(TOP)/src/gallium/auxiliary/libgallium.a
++	$(GALLIUM_AUXILIARIES)
+ 
+ 
+ C_SOURCES = \
+diff --git a/src/gallium/targets/xvmc-r300/Makefile b/src/gallium/targets/xvmc-r300/Makefile
+index 800f8d5..aed613e 100644
+--- a/src/gallium/targets/xvmc-r300/Makefile
++++ b/src/gallium/targets/xvmc-r300/Makefile
+@@ -9,7 +9,7 @@ PIPE_DRIVERS = \
+         $(TOP)/src/gallium/drivers/r300/libr300.a \
+         $(TOP)/src/gallium/winsys/radeon/drm/libradeonwinsys.a \
+         $(TOP)/src/gallium/drivers/trace/libtrace.a \
+-	$(TOP)/src/gallium/auxiliary/libgallium.a
++	$(GALLIUM_AUXILIARIES)
+ 
+ C_SOURCES = \
+ 	target.c \
+diff --git a/src/gallium/targets/xvmc-r600/Makefile b/src/gallium/targets/xvmc-r600/Makefile
+index d9ce72f..92a0991 100644
+--- a/src/gallium/targets/xvmc-r600/Makefile
++++ b/src/gallium/targets/xvmc-r600/Makefile
+@@ -9,7 +9,7 @@ PIPE_DRIVERS = \
+ 	$(TOP)/src/gallium/drivers/r600/libr600.a \
+ 	$(TOP)/src/gallium/winsys/radeon/drm/libradeonwinsys.a \
+ 	$(TOP)/src/gallium/drivers/trace/libtrace.a \
+-	$(TOP)/src/gallium/auxiliary/libgallium.a
++	$(GALLIUM_AUXILIARIES)
+ 
+ C_SOURCES = \
+ 	target.c \
+diff --git a/src/gallium/targets/xvmc-softpipe/Makefile b/src/gallium/targets/xvmc-softpipe/Makefile
+index 35db16f..151567b 100644
+--- a/src/gallium/targets/xvmc-softpipe/Makefile
++++ b/src/gallium/targets/xvmc-softpipe/Makefile
+@@ -9,7 +9,7 @@ DRIVER_INCLUDES =
+ PIPE_DRIVERS = \
+ 	$(TOP)/src/gallium/winsys/sw/xlib/libws_xlib.a \
+ 	$(TOP)/src/gallium/drivers/softpipe/libsoftpipe.a \
+-	$(TOP)/src/gallium/auxiliary/libgallium.a
++	$(GALLIUM_AUXILIARIES)
+ 
+ C_SOURCES = \
+ 	$(TOP)/src/gallium/auxiliary/vl/vl_winsys_xsp.c
