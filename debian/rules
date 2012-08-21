@@ -189,10 +189,9 @@ clean: unpatch
 	rm -rf configure bin/config.guess bin/config.sub config.h.in
 	rm -rf $$(find -name Makefile.in)
 	rm -rf aclocal.m4 bin/missing bin/depcomp install-sh bin/ltmain.sh
-	rm -f bin/ar-lib bin/compile bin/ylwrap
+	rm -f bin/ar-lib bin/compile bin/ylwrap bin/install-sh
 	rm -rf $(STAMP_DIR)
 	for file in debian/*.in; do rm -f $${file%%.in}; done
-	ln -sf minstall bin/install-sh
 	rm -f src/glsl/builtins/tools/texture_builtins.pyc
 	rm -f src/mapi/glapi/gen/*.pyc
 	rm -f src/mesa/main/*.pyc
