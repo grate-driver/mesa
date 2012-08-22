@@ -79,8 +79,6 @@ else
 	# Radeonsi needs LLVM, so only build it on the subset of archs
 	# where we have LLVM enabled.
 	GALLIUM_DRIVERS += radeonsi
-    else
-	EXTRA_SED=-e"/radeonsi_dri.so/ s/^/\#/"
     endif
   endif
 
@@ -180,7 +178,6 @@ install: build
 	for file in debian/*.in; \
 	do \
 		sed -e"s,\$${DEB_HOST_MULTIARCH},$(DEB_HOST_MULTIARCH),g" \
-		    $(EXTRA_SED) \
 			$${file} > $${file%%.in}; \
 	done
 
