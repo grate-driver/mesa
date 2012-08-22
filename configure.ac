@@ -448,7 +448,7 @@ if test "x$enable_asm" = xyes; then
     case "$host_cpu" in
     i?86)
         case "$host_os" in
-        linux* | *freebsd* | dragonfly* | *netbsd* | gnu*)
+        linux* | *freebsd* | dragonfly* | *netbsd*)
             test "x$enable_64bit" = xyes && asm_arch=x86_64 || asm_arch=x86
             ;;
         esac
@@ -1103,7 +1103,7 @@ if test "x$enable_dri" = xyes; then
             ;;
         esac
         ;;
-    freebsd* | dragonfly* | *netbsd* | kfreebsd*-gnu*)
+    freebsd* | dragonfly* | *netbsd*)
         DEFINES="$DEFINES -DPTHREADS -DUSE_EXTERNAL_DXTN_LIB=1"
         DEFINES="$DEFINES -DIN_DRI_DRIVER -DHAVE_ALIAS"
 
@@ -1268,7 +1268,7 @@ if test "x$enable_osmesa" = xyes; then
     OSMESA_PC_LIB_PRIV="-lm -lpthread $SELINUX_LIBS $DLOPEN_LIBS"
 fi
 
-OSMESA_VERSION="6:5:3"
+OSMESA_VERSION=`echo "$VERSION" | $SED 's/\./:/g'`
 
 AC_SUBST([OSMESA_LIB_DEPS])
 AC_SUBST([OSMESA_MESA_DEPS])
@@ -1765,9 +1765,9 @@ if test "x$enable_gallium_llvm" = xauto; then
 fi
 if test "x$enable_gallium_llvm" = xyes; then
     if test "x$llvm_prefix" != x; then
-        AC_PATH_PROG([LLVM_CONFIG], [llvm-config-3.1], [no], ["$llvm_prefix/bin"])
+        AC_PATH_PROG([LLVM_CONFIG], [llvm-config], [no], ["$llvm_prefix/bin"])
     else
-        AC_PATH_PROG([LLVM_CONFIG], [llvm-config-3.1], [no])
+        AC_PATH_PROG([LLVM_CONFIG], [llvm-config], [no])
     fi
 
     if test "x$LLVM_CONFIG" != xno; then

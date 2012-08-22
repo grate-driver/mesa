@@ -37,7 +37,7 @@
 
 #include "rtasm_execmem.h"
 
-#ifndef MAP_ANONYMOUS
+#if defined(PIPE_OS_BSD)
 #define MAP_ANONYMOUS MAP_ANON
 #endif
 

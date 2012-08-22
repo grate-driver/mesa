@@ -68,8 +68,7 @@ lp_tile_soa.c: lp_tile_soa.py ../../auxiliary/util/u_format_parse.py ../../auxil
 	$(PYTHON2) $(PYTHON_FLAGS) lp_tile_soa.py ../../auxiliary/util/u_format.csv > $@
 
 LDFLAGS += $(LLVM_LDFLAGS)
-LIBS += -L../../auxiliary/ -lgallium libllvmpipe.a
-LDADD += $(LLVM_LIBS) $(GL_LIB_DEPS)
+LIBS += -L../../auxiliary/ -lgallium libllvmpipe.a $(LLVM_LIBS) $(GL_LIB_DEPS)
 LD=$(CXX)
 
 $(PROGS): lp_test_main.o libllvmpipe.a
