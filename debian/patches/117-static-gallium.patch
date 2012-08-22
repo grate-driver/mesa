@@ -24,7 +24,7 @@ index c490842..73d08be 100644
  
  # Driver specific build vars
 diff --git a/configure.ac b/configure.ac
-index 7dac091..be21c4a 100644
+index ee19d0a..d5fbbc2 100644
 --- a/configure.ac
 +++ b/configure.ac
 @@ -698,6 +698,19 @@ fi
@@ -63,78 +63,6 @@ index 7dac091..be21c4a 100644
  		src/gallium/auxiliary/pipe-loader/Makefile
  		src/gallium/state_trackers/clover/Makefile
  		src/gallium/drivers/Makefile
-diff --git a/debian/patches/15-fix-llvmpipe-test-linking.diff b/debian/patches/15-fix-llvmpipe-test-linking.diff
-index 92893a3..4c4a86d 100644
---- a/debian/patches/15-fix-llvmpipe-test-linking.diff
-+++ b/debian/patches/15-fix-llvmpipe-test-linking.diff
-@@ -16,11 +16,11 @@ Bugzilla: https://bugs.freedesktop.org/show_bug.cgi?id=52167
-  src/gallium/state_trackers/d3d1x/gd3d1x/Makefile | 3 ++-
-  3 files changed, 5 insertions(+), 3 deletions(-)
- 
--diff --git a/src/gallium/Makefile.template b/src/gallium/Makefile.template
--index 036c119..c30477a 100644
----- a/src/gallium/Makefile.template
--+++ b/src/gallium/Makefile.template
--@@ -41,7 +41,7 @@ depend: $(C_SOURCES) $(CPP_SOURCES) $(ASM_SOURCES) $(SYMLINKS) $(GENERATED_SOURC
-+Index: mesa/src/gallium/Makefile.template
-+===================================================================
-+--- mesa.orig/src/gallium/Makefile.template	2012-08-21 14:40:03.449673454 +0000
-++++ mesa/src/gallium/Makefile.template	2012-08-21 14:40:04.020675436 +0000
-+@@ -41,7 +41,7 @@
-  	$(MKDEP) $(MKDEP_OPTIONS) $(INCLUDES) $(C_SOURCES) $(CPP_SOURCES) $(ASM_SOURCES) $(GENERATED_SOURCES) 2> /dev/null
-  
-  $(PROGS): % : %.o $(PROGS_DEPS)
-@@ -29,25 +29,30 @@ index 036c119..c30477a 100644
-  
-  # Emacs tags
-  tags:
--diff --git a/src/gallium/drivers/llvmpipe/Makefile b/src/gallium/drivers/llvmpipe/Makefile
--index ef16fc7..35f8fe8 100644
----- a/src/gallium/drivers/llvmpipe/Makefile
--+++ b/src/gallium/drivers/llvmpipe/Makefile
--@@ -68,7 +68,8 @@ lp_tile_soa.c: lp_tile_soa.py ../../auxiliary/util/u_format_parse.py ../../auxil
-+Index: mesa/src/gallium/drivers/llvmpipe/Makefile
-+===================================================================
-+--- mesa.orig/src/gallium/drivers/llvmpipe/Makefile	2012-08-21 14:40:03.449673454 +0000
-++++ mesa/src/gallium/drivers/llvmpipe/Makefile	2012-08-21 14:49:20.395606825 +0000
-+@@ -68,7 +68,13 @@
-  	$(PYTHON2) $(PYTHON_FLAGS) lp_tile_soa.py ../../auxiliary/util/u_format.csv > $@
-  
-  LDFLAGS += $(LLVM_LDFLAGS)
---LIBS += -L../../auxiliary/ -lgallium libllvmpipe.a $(LLVM_LIBS) $(GL_LIB_DEPS)
--+LIBS += -L../../auxiliary/ -lgallium libllvmpipe.a
-+-LIBS += $(GALLIUM_AUXILIARIES) libllvmpipe.a $(LLVM_LIBS) $(GL_LIB_DEPS)
-++ifeq ($(SHARED_GALLIUM),1)
-++LIBS = libllvmpipe.a
-++LDADD = $(GALLIUM_AUXILIARIES) $(LLVM_LIBS) $(GL_LIB_DEPS)
-++else
-++LIBS += $(GALLIUM_AUXILIARIES) libllvmpipe.a
- +LDADD += $(LLVM_LIBS) $(GL_LIB_DEPS)
-++endif
-  LD=$(CXX)
-  
-  $(PROGS): lp_test_main.o libllvmpipe.a
--diff --git a/src/gallium/state_trackers/d3d1x/gd3d1x/Makefile b/src/gallium/state_trackers/d3d1x/gd3d1x/Makefile
--index 32d2956..f9cad05 100644
----- a/src/gallium/state_trackers/d3d1x/gd3d1x/Makefile
--+++ b/src/gallium/state_trackers/d3d1x/gd3d1x/Makefile
--@@ -3,5 +3,6 @@ CPP_SOURCES=$(wildcard *.cpp)
-+Index: mesa/src/gallium/state_trackers/d3d1x/gd3d1x/Makefile
-+===================================================================
-+--- mesa.orig/src/gallium/state_trackers/d3d1x/gd3d1x/Makefile	2012-08-21 14:40:03.449673454 +0000
-++++ mesa/src/gallium/state_trackers/d3d1x/gd3d1x/Makefile	2012-08-21 14:40:04.021175438 +0000
-+@@ -3,5 +3,6 @@
-  LIBRARY_INCLUDES=-Iinclude -I../gd3dapi -I../d3dapi -I../w32api -I../d3d1xstutil/include -I../d3d1xshader/include -I../../../include -I../../../auxiliary -I../../../state_trackers/egl/common
-  PROGS=tools/dxbc2tgsi
-  PROGS_DEPS=libgd3d1x.a ../d3d1xshader/libd3d1xshader.a ../d3d1xstutil/libd3d1xstutil.a ../../../auxiliary/libgallium.a
-@@ -55,7 +60,3 @@ index 32d2956..f9cad05 100644
- +LIBS=$(PROGS_DEPS)
- +LDADD=-ldl
-  include ../Makefile.inc
---- 
--1.7.11.4
--
--
 diff --git a/src/gallium/auxiliary/Makefile b/src/gallium/auxiliary/Makefile
 deleted file mode 100644
 index 3ba3f9c..0000000
@@ -238,22 +166,21 @@ index 0000000..2c6bde1
 +
 +# DO NOT DELETE
 diff --git a/src/gallium/drivers/llvmpipe/Makefile b/src/gallium/drivers/llvmpipe/Makefile
-index ef16fc7..531420b 100644
+index 35f8fe8..952fc94 100644
 --- a/src/gallium/drivers/llvmpipe/Makefile
 +++ b/src/gallium/drivers/llvmpipe/Makefile
-@@ -62,13 +62,13 @@ CLEAN_EXTRA = *.o
- 
- include ../../Makefile.template
- 
--PROGS_DEPS := ../../auxiliary/libgallium.a
-+PROGS_DEPS := $(GALLIUM_AUXILIARIES)
- 
- lp_tile_soa.c: lp_tile_soa.py ../../auxiliary/util/u_format_parse.py ../../auxiliary/util/u_format_pack.py ../../auxiliary/util/u_format.csv
+@@ -68,8 +68,13 @@ lp_tile_soa.c: lp_tile_soa.py ../../auxiliary/util/u_format_parse.py ../../auxil
  	$(PYTHON2) $(PYTHON_FLAGS) lp_tile_soa.py ../../auxiliary/util/u_format.csv > $@
  
  LDFLAGS += $(LLVM_LDFLAGS)
--LIBS += -L../../auxiliary/ -lgallium libllvmpipe.a $(LLVM_LIBS) $(GL_LIB_DEPS)
-+LIBS += $(GALLIUM_AUXILIARIES) libllvmpipe.a $(LLVM_LIBS) $(GL_LIB_DEPS)
+-LIBS += -L../../auxiliary/ -lgallium libllvmpipe.a
++ifeq ($(SHARED_GALLIUM),1)
++LIBS = libllvmpipe.a
++LDADD = $(GALLIUM_AUXILIARIES) $(LLVM_LIBS) $(GL_LIB_DEPS)
++else
++LIBS += $(GALLIUM_AUXILIARIES) libllvmpipe.a
+ LDADD += $(LLVM_LIBS) $(GL_LIB_DEPS)
++endif
  LD=$(CXX)
  
  $(PROGS): lp_test_main.o libllvmpipe.a
@@ -285,6 +212,38 @@ index 4c89e36..ec1fe7f 100644
  	$(GALLIUM_PIPE_LOADER_LIBS) $(LIBUDEV_LIBS) \
  	-ldl \
  	-lclangCodeGen \
+diff --git a/src/gallium/targets/pipe-loader/Makefile b/src/gallium/targets/pipe-loader/Makefile
+index 596539c..f17a69b 100644
+--- a/src/gallium/targets/pipe-loader/Makefile
++++ b/src/gallium/targets/pipe-loader/Makefile
+@@ -21,8 +21,7 @@ PIPE_LIBS = \
+ 	$(TOP)/src/gallium/drivers/identity/libidentity.a \
+ 	$(TOP)/src/gallium/drivers/galahad/libgalahad.a \
+ 	$(TOP)/src/gallium/drivers/trace/libtrace.a \
+-	$(TOP)/src/gallium/drivers/rbug/librbug.a \
+-	$(GALLIUM_AUXILIARIES)
++	$(TOP)/src/gallium/drivers/rbug/librbug.a
+ 
+ PIPE_SYS = $(LIBDRM_LIB) -lm -lpthread $(DLOPEN_LIBS)
+ 
+@@ -78,10 +77,16 @@ endif
+ 
+ # LLVM
+ ifeq ($(MESA_LLVM),1)
+-   PIPE_SYS += $(LLVM_LIBS)
++   PIPE_SYS += $(LLVM_LIBS) $(GALLIUM_AUXILIARIES)
+    PIPE_LDFLAGS += $(LLVM_LDFLAGS)
+ endif
+ 
++ifeq ($(SHARED_GALLIUM),1)
++   PIPE_SYS += $(GALLIUM_AUXILIARIES)
++else
++   PIPE_LIBS += $(GALLIUM_AUXILIARIES)
++endif
++
+ # determine the targets/sources
+ _PIPE_TARGETS_CC =
+ _PIPE_TARGETS_CXX =
 diff --git a/src/gallium/targets/va-r300/Makefile b/src/gallium/targets/va-r300/Makefile
 index 7c89c79..a618698 100644
 --- a/src/gallium/targets/va-r300/Makefile

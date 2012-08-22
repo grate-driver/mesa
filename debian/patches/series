@@ -12,4 +12,4 @@
 # Ubuntu patches.
 100_no_abi_tag.patch
 101_ubuntu_hidden_glname.patch
-#116_use_shared_galliumcore.diff
+117-static-gallium.patch
