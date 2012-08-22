@@ -35,6 +35,10 @@ mesa (9.0~git20120821.c1114c61-1) UNRELEASED; urgency=low
     avoids rpath problems with libtool linking to in-tree convenience
     libraries.
   * debian/rules: don't install libdricore*.so, this isn't a public library.
+  * Add Pre-Depends on multiarch-support to libgl1-mesa-dri, since we're
+    shipping a shared library in the package; not an issue in practice since
+    this is all post-wheezy / post-precise, but it's an archive reject error
+    in Debian right now so let's just be complete.
 
  -- Julien Cristau <jcristau@debian.org>  Fri, 03 Aug 2012 23:17:16 +0200
 

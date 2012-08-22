@@ -601,6 +601,7 @@ Package: libgl1-mesa-dri
 Section: libs
 Priority: optional
 Architecture: any
+Pre-Depends: ${misc:Pre-Depends}
 Depends:
  ${shlibs:Depends},
  ${misc:Depends}
