@@ -34,6 +34,7 @@ mesa (9.0~git20120821.c1114c61-1) UNRELEASED; urgency=low
     already that we're only building drivers that we want to ship, and
     avoids rpath problems with libtool linking to in-tree convenience
     libraries.
+  * debian/rules: don't install libdricore*.so, this isn't a public library.
 
  -- Julien Cristau <jcristau@debian.org>  Fri, 03 Aug 2012 23:17:16 +0200
 
