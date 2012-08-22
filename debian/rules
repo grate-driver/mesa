@@ -248,11 +248,6 @@ binary-arch: install
 	dh_installdocs -s
 	dh_installexamples -s
 
-	# Classic DRI and Gallium DRI are mixed up together here
-	# Remove the whole tree to avoid false-positives in --list-missing, and
-	# install the right files manually.
-	rm -r debian/tmp/dri/usr/lib/$(DEB_HOST_MULTIARCH)/dri
-
 	# Also get rid of other files which aren't installed. Do not
 	# use -f to ensure we notice disappearing files:
 	set -e; for file in $(NOT_INSTALLED); do rm debian/tmp/$$file; done
@@ -264,12 +259,6 @@ binary-arch: install
 	find debian/tmp/ -name '*.la' -exec rm '{}' ';'
 
 	dh_install -s --fail-missing
-
-# If the llvmpipe driver was built, copy it to the package dir
-ifneq (,$(filter swrast,$(GALLIUM_DRIVERS)))
-	dh_install -plibgl1-mesa-dri build/dri/$(DEB_HOST_MULTIARCH)/gallium/swrast_dri.so \
-		usr/lib/${DEB_HOST_MULTIARCH}/dri
-endif
 
 	dh_installman -s
 	dh_lintian -s
