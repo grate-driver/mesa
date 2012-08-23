@@ -1,4 +1,4 @@
-mesa (9.0~git20120821.c1114c61-0ubuntu1) UNRELEASED; urgency=low
+mesa (9.0~git20120821.c1114c61-0ubuntu1) quantal; urgency=low
 
   * Merge from unreleased debian git.
     - Includes support for ATI Trinity PCI IDs (LP: #1009089)
@@ -27,7 +27,7 @@ mesa (9.0~git20120821.c1114c61-0ubuntu1) UNRELEASED; urgency=low
   * control: Add Pre-Depends on dpkg-dev due to the binaries using xz
     compression.
 
- -- Timo Aaltonen <tjaalton@ubuntu.com>  Fri, 17 Aug 2012 11:08:47 +0300
+ -- Timo Aaltonen <tjaalton@ubuntu.com>  Thu, 23 Aug 2012 15:37:30 +0300
 
 mesa (9.0~git20120821.c1114c61-1) UNRELEASED; urgency=low
 
