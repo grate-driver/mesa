@@ -1,0 +1,53 @@
+commit 4b8b6f385e855ecb6da0b7dea56e70e69d1517b9
+Author: Paul Berry <stereotype441@gmail.com>
+Date:   Wed Aug 22 08:01:58 2012 -0700
+
+    i965/HiZ: remove assertion from intel_resolve_map_set().
+    
+    There are three possible resolve map states for each (level, layer) of
+    a depth miptree: "needs HiZ resolve", "needs depth resolve", and
+    "needs neither".  When HiZ was first implemented on i965, any attempt
+    to directly transition between "needs HiZ resolve" and "needs depth
+    resolve" without passing through the "needs neither" state would have
+    been a bug indicating that a necessary resolve hadn't been performed.
+    Accordingly, intel_resolve_map_set() contained an assertion to verify
+    that no such direct transition happened.
+    
+    However, now that we support fast depth clears, there is a valid
+    transition from the "needs HiZ resolve" to the "needs depth resolve"
+    state.  When doing a fast depth clear, the old state of the buffer is
+    irrelevant, since we are completely replacing it with the clear value,
+    so it is not necessary to do any resolves before clearing--we can
+    transition, if necessary, directly from the "needs HiZ resolve" state
+    to the "needs depth resolve" state.
+    
+    To avoid spurious assertions in this valid case, this patch just
+    removes the assertion.
+    
+    Reviewed-by: Eric Anholt <eric@anholt.net>
+    Reviewed-by: Chad Versace <chad.versace@linux.intel.com>
+
+diff --git a/src/mesa/drivers/dri/intel/intel_resolve_map.c b/src/mesa/drivers/dri/intel/intel_resolve_map.c
+index 471988d..04b5c94 100644
+--- a/src/mesa/drivers/dri/intel/intel_resolve_map.c
++++ b/src/mesa/drivers/dri/intel/intel_resolve_map.c
+@@ -29,8 +29,8 @@
+ /**
+  * \brief Set that the miptree slice at (level, layer) needs a resolve.
+  *
+- * \pre If a map element already exists with the given key, then
+- *      the new and existing element value must be identical.
++ * If a map element already exists with the given key, then the value is
++ * changed to the given value of \c need.
+  */
+ void
+ intel_resolve_map_set(struct intel_resolve_map *head,
+@@ -43,7 +43,7 @@ intel_resolve_map_set(struct intel_resolve_map *head,
+ 
+    while (*tail) {
+       if ((*tail)->level == level && (*tail)->layer == layer) {
+-	 assert((*tail)->need == need);
++         (*tail)->need = need;
+ 	 return;
+       }
+       prev = *tail;
