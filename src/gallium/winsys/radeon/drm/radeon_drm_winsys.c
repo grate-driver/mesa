@@ -303,6 +303,9 @@ static boolean do_winsys_init(struct radeon_drm_winsys *ws)
                                       &ws->info.r600_ib_vm_max_size))
                 ws->info.r600_virtual_address = FALSE;
         }
+        /* Remove this line once the virtual address space feature is fixed. */
+        if (ws->gen == R600 && !debug_get_bool_option("RADEON_VA", FALSE))
+            ws->info.r600_virtual_address = FALSE;
     }
 
     /* Get max pipes, this is only needed for compute shaders.  All evergreen+
