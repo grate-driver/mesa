@@ -71,7 +71,8 @@ else
 
   ifeq ($(DEB_HOST_ARCH_OS), linux)
 # Gallium drivers require libdrm-{nouveau,radeon}, only available on Linux
-	GALLIUM_DRIVERS += nouveau r600 r300 radeonsi svga
+	GALLIUM_DRIVERS += nouveau r600 r300 svga
+#
 # Although the KMS egl drivers will probably build on kfreebsd & hurd
 # only linux actually has KMS drivers implemented at this point.
 	EGL_DISPLAYS += drm
@@ -82,6 +83,11 @@ else
     endif
     ifneq (,$(filter $(DEB_HOST_ARCH_CPU), amd64 i386))
 	DRI_DRIVERS += i915 i965
+	# Radeonsi needs LLVM, so only build it on the subset of archs
+	# where we have LLVM enabled.
+	GALLIUM_DRIVERS += radeonsi
+    else
+	EXTRA_SED=-e"/radeonsi_dri.so/ s/^/\#/"
     endif
   endif
 
@@ -198,6 +204,7 @@ install: build
 	for file in debian/*.in; \
 	do \
 		sed -e"s,\$${DEB_HOST_MULTIARCH},$(DEB_HOST_MULTIARCH),g" \
+		    $(EXTRA_SED) \
 			$${file} > $${file%%.in}; \
 	done
 
@@ -241,28 +248,18 @@ binary-arch: install
 	dh_installdocs -s
 	dh_installexamples -s
 
-	# Classic DRI and Gallium DRI are mixed up together here
-	# Remove the whole tree to avoid false-positives in --list-missing, and
-	# install the right files manually.
-	rm -r debian/tmp/dri/usr/lib/$(DEB_HOST_MULTIARCH)/dri
-
 	# Also get rid of other files which aren't installed. Do not
 	# use -f to ensure we notice disappearing files:
 	set -e; for file in $(NOT_INSTALLED); do rm debian/tmp/$$file; done
 	# Files only in git, not in tarballs, OK to use rm -f here:
 	set -e; for file in $(NOT_INSTALLED_EITHER); do rm -f debian/tmp/$$file; done
-	# No need for this .so, libglapi is just a convenience library:
+	# No need for these .so, they're just convenience libraries:
 	rm debian/tmp/dri/usr/lib/${DEB_HOST_MULTIARCH}/libglapi.so
+	rm debian/tmp/dri/usr/lib/${DEB_HOST_MULTIARCH}/libdricore*.so
 	# purge .la files
 	find debian/tmp/ -name '*.la' -exec rm '{}' ';'
 
 	dh_install -s --fail-missing
-
-# If the llvmpipe driver was built, copy it to the package dir
-ifneq (,$(filter swrast,$(GALLIUM_DRIVERS)))
-	dh_install -plibgl1-mesa-dri build/dri/$(DEB_HOST_MULTIARCH)/gallium/swrast_dri.so \
-		usr/lib/${DEB_HOST_MULTIARCH}/dri
-endif
 
 	dh_installman -s
 	dh_lintian -s

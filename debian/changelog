@@ -28,6 +28,18 @@ mesa (9.0~git20120830.2d2f1fd1-1) UNRELEASED; urgency=low
   * Added 15-fix-llvmpipe-test-linking.diff: Fix link failure when building
     llvmpipe with --with-llvm-shared-libs. Patch from fdo bug #52617.
 
+  [ Steve Langasek ]
+  * Install all dri drivers from the DESTDIR tree, instead of copying them
+    from the build tree; this simplifies the install rules since we know
+    already that we're only building drivers that we want to ship, and
+    avoids rpath problems with libtool linking to in-tree convenience
+    libraries.
+  * debian/rules: don't install libdricore*.so, this isn't a public library.
+  * Add Pre-Depends on multiarch-support to libgl1-mesa-dri, since we're
+    shipping a shared library in the package; not an issue in practice since
+    this is all post-wheezy / post-precise, but it's an archive reject error
+    in Debian right now so let's just be complete.
+
  -- Julien Cristau <jcristau@debian.org>  Fri, 03 Aug 2012 23:17:16 +0200
 
 mesa (8.0.4-1) unstable; urgency=low
