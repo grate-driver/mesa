@@ -85,7 +85,7 @@ PUBLIC const char __driConfigOptions[] =
 	 DRI_CONF_DESC(en, "Enable stub ARB_occlusion_query support on 915/945.")
       DRI_CONF_OPT_END
 
-      DRI_CONF_OPT_BEGIN(shader_precompile, bool, false)
+      DRI_CONF_OPT_BEGIN(shader_precompile, bool, true)
 	 DRI_CONF_DESC(en, "Perform code generation at shader link time.")
       DRI_CONF_OPT_END
    DRI_CONF_SECTION_END
@@ -339,13 +339,7 @@ intel_create_image(__DRIscreen *screen,
       tiling = I915_TILING_NONE;
    }
 
-   /* We only support write for cursor drm images */
-   if ((use & __DRI_IMAGE_USE_WRITE) &&
-       use != (__DRI_IMAGE_USE_WRITE | __DRI_IMAGE_USE_CURSOR))
-      return NULL;
-
    image = intel_allocate_image(format, loaderPrivate);
-   image->usage = use;
    cpp = _mesa_get_format_bytes(image->format);
    image->region =
       intel_region_alloc(intelScreen, tiling, cpp, width, height, true);
@@ -399,7 +393,6 @@ intel_dup_image(__DRIimage *orig_image, void *loaderPrivate)
    }
 
    image->internal_format = orig_image->internal_format;
-   image->usage           = orig_image->usage;
    image->dri_format      = orig_image->dri_format;
    image->format          = orig_image->format;
    image->offset          = orig_image->offset;
@@ -416,27 +409,7 @@ intel_validate_usage(__DRIimage *image, unsigned int use)
 	 return GL_FALSE;
    }
 
-   /* We only support write for cursor drm images */
-   if ((use & __DRI_IMAGE_USE_WRITE) &&
-       use != (__DRI_IMAGE_USE_WRITE | __DRI_IMAGE_USE_CURSOR))
-      return GL_FALSE;
-
    return GL_TRUE;
-}
-
-static int
-intel_image_write(__DRIimage *image, const void *buf, size_t count)
-{
-   if (image->region->map_refcount)
-      return -1;
-   if (!(image->usage & __DRI_IMAGE_USE_WRITE))
-      return -1;
-
-   drm_intel_bo_map(image->region->bo, true);
-   memcpy(image->region->bo->virtual, buf, count);
-   drm_intel_bo_unmap(image->region->bo);
-
-   return 0;
 }
 
 static __DRIimage *
@@ -490,7 +463,6 @@ static struct __DRIimageExtensionRec intelImageExtension = {
     intel_query_image,
     intel_dup_image,
     intel_validate_usage,
-    intel_image_write,
     intel_create_sub_image
 };
 
@@ -673,6 +645,7 @@ brwCreateContext(int api,
 	         __DRIcontext *driContextPriv,
                  unsigned major_version,
                  unsigned minor_version,
+                 uint32_t flags,
                  unsigned *error,
 		 void *sharedContextPrivate);
 
@@ -690,23 +663,6 @@ intelCreateContext(gl_api api,
    struct intel_screen *intelScreen = sPriv->driverPrivate;
    bool success = false;
 
-   switch (api) {
-   case API_OPENGL:
-   case API_OPENGLES:
-      break;
-   case API_OPENGLES2:
-#ifdef I915
-      if (!IS_9XX(intelScreen->deviceID)) {
-         *error = __DRI_CTX_ERROR_BAD_API;
-         return false;
-      }
-#endif
-      break;
-   case API_OPENGL_CORE:
-      *error = __DRI_CTX_ERROR_BAD_API;
-      return GL_FALSE;
-   }
-
 #ifdef I915
    if (IS_9XX(intelScreen->deviceID)) {
       success = i915CreateContext(api, mesaVis, driContextPriv,
@@ -717,47 +673,35 @@ intelCreateContext(gl_api api,
       case API_OPENGL:
          if (major_version > 1 || minor_version > 3) {
             *error = __DRI_CTX_ERROR_BAD_VERSION;
-            return false;
+            success = false;
          }
          break;
       case API_OPENGLES:
          break;
       default:
          *error = __DRI_CTX_ERROR_BAD_API;
-         return false;
+         success = false;
       }
 
-      intelScreen->no_vbo = true;
-      success = i830CreateContext(mesaVis, driContextPriv,
-				  sharedContextPrivate);
-      if (!success) {
-         *error = __DRI_CTX_ERROR_NO_MEMORY;
-         return false;
+      if (success) {
+         intelScreen->no_vbo = true;
+         success = i830CreateContext(mesaVis, driContextPriv,
+                                     sharedContextPrivate);
+         if (!success)
+            *error = __DRI_CTX_ERROR_NO_MEMORY;
       }
    }
 #else
    success = brwCreateContext(api, mesaVis,
                               driContextPriv,
-                              major_version, minor_version, error,
-                              sharedContextPrivate);
+                              major_version, minor_version, flags,
+                              error, sharedContextPrivate);
 #endif
 
-   if (success) {
-      struct gl_context *ctx =
-	 (struct gl_context *) driContextPriv->driverPrivate;
+   if (success)
+      return true;
 
-      _mesa_compute_version(ctx);
-      if (ctx->Version >= major_version * 10 + minor_version) {
-	 return true;
-      }
-
-      *error = __DRI_CTX_ERROR_BAD_VERSION;
-      intelDestroyContext(driContextPriv);
-   } else {
-      *error = __DRI_CTX_ERROR_NO_MEMORY;
-      fprintf(stderr, "Unrecognized deviceID 0x%x\n", intelScreen->deviceID);
-   }
-
+   intelDestroyContext(driContextPriv);
    return false;
 }
 

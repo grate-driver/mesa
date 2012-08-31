@@ -126,15 +126,16 @@ struct r600_context {
 	unsigned			pa_cl_vs_out_cntl;
 	/* for saving when using blitter */
 	struct pipe_stencil_ref		stencil_ref;
-	struct si_pipe_shader		*ps_shader;
-	struct si_pipe_shader		*vs_shader;
+	struct si_pipe_shader_selector	*ps_shader;
+	struct si_pipe_shader_selector	*vs_shader;
 	struct pipe_query		*current_render_cond;
 	unsigned			current_render_cond_mode;
 	struct pipe_query		*saved_render_cond;
 	unsigned			saved_render_cond_mode;
 	/* shader information */
 	unsigned			sprite_coord_enable;
-	boolean				export_16bpc;
+	unsigned			export_16bpc;
+	unsigned			spi_shader_col_format;
 	unsigned			alpha_ref;
 	boolean				alpha_ref_dirty;
 	struct r600_textures_info	vs_samplers;

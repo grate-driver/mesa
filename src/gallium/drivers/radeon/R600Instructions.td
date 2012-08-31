@@ -20,7 +20,8 @@ class InstR600 <bits<32> inst, dag outs, dag ins, string asm, list<dag> pattern,
   field bits<32> Inst;
   bit Trig = 0;
   bit Op3 = 0;
-  bit isVector = 0; 
+  bit isVector = 0;
+  bits<2> FlagOperandIdx = 0;
 
   let Inst = inst;
   let Namespace = "AMDGPU";
@@ -36,6 +37,7 @@ class InstR600 <bits<32> inst, dag outs, dag ins, string asm, list<dag> pattern,
   // Vector instructions are instructions that must fill all slots in an
   // instruction group
   let TSFlags{6} = isVector;
+  let TSFlags{8-7} = FlagOperandIdx;
 }
 
 class InstR600ISA <dag outs, dag ins, string asm, list<dag> pattern> :
@@ -107,21 +109,20 @@ class R600_3OP <bits<32> inst, string opName, list<dag> pattern,
 
 
 
-def PRED_X : AMDGPUInst <(outs R600_Predicate_Bit:$dst),
-           (ins R600_Reg32:$src0, i32imm:$src1),
+def PRED_X : InstR600 <0, (outs R600_Predicate_Bit:$dst),
+           (ins R600_Reg32:$src0, i32imm:$src1, i32imm:$flags),
            "PRED $dst, $src0, $src1",
-           []>
+           [], NullALU>
 {
   let DisableEncoding = "$src0";
   field bits<32> Inst;
   bits<32> src1;
 
   let Inst = src1;
+  let FlagOperandIdx = 3;
 }
 
-
-
-let isTerminator = 1, isBranch = 1 in {
+let isTerminator = 1, isBranch = 1, isPseudo = 1 in {
 def JUMP : InstR600 <0x10,
           (outs),
           (ins brtarget:$target, R600_Pred:$p),
@@ -174,14 +175,14 @@ class EG_CF_RAT <bits <8> cf_inst, bits <6> rat_inst, bits<4> rat_id, dag outs,
   bits<4>  COMP_MASK;
   bits<4>  BURST_COUNT;
   bits<1>  VPM;
-  bits<1>  EOP;
+  bits<1>  eop;
   bits<1>  MARK;
   bits<1>  BARRIER;
 
-  /* CF_ALLOC_EXPORT_WORD0_RAT */
+  // CF_ALLOC_EXPORT_WORD0_RAT
   let Inst{3-0}   = rat_id;
   let Inst{9-4}   = rat_inst;
-  let Inst{10}    = 0; /* Reserved */
+  let Inst{10}    = 0; // Reserved
   let Inst{12-11} = RIM;
   let Inst{14-13} = TYPE;
   let Inst{21-15} = RW_GPR;
@@ -189,31 +190,16 @@ class EG_CF_RAT <bits <8> cf_inst, bits <6> rat_inst, bits<4> rat_id, dag outs,
   let Inst{29-23} = INDEX_GPR;
   let Inst{31-30} = ELEM_SIZE;
 
-  /* CF_ALLOC_EXPORT_WORD1_BUF */
+  // CF_ALLOC_EXPORT_WORD1_BUF
   let Inst{43-32} = ARRAY_SIZE;
   let Inst{47-44} = COMP_MASK;
   let Inst{51-48} = BURST_COUNT;
   let Inst{52}    = VPM;
-  let Inst{53}    = EOP;
+  let Inst{53}    = eop;
   let Inst{61-54} = cf_inst;
   let Inst{62}    = MARK;
   let Inst{63}    = BARRIER;
 }
-
-/*
-def store_global : PatFrag<(ops node:$value, node:$ptr),
-                           (store node:$value, node:$ptr),
-                           [{
-                            const Value *Src;
-                            const PointerType *Type;
-                            if ((src = cast<StoreSDNode>(N)->getSrcValue() &&
-                                 PT = dyn_cast<PointerType>(Src->getType()))) {
-                              return PT->getAddressSpace() == 1;
-                            }
-                            return false;
-                           }]>;
-
-*/
 
 def load_param : PatFrag<(ops node:$ptr),
                          (load node:$ptr),
@@ -226,36 +212,6 @@ def load_param : PatFrag<(ops node:$ptr),
                            return false;
                           }]>;
 
-//class EG_CF <bits<32> inst, string asm> :
-//    InstR600 <inst, (outs), (ins), asm, []>;
-
-/* XXX: We will use this when we emit the real ISA.
-  bits<24> ADDR = 0;
-  bits<3> JTS = 0;
-
-  bits<3> PC = 0;
-  bits<5> CF_CONS = 0;
-  bits<2> COND = 0;
-  bits<6> COUNT = 0;
-  bits<1> VPM = 0;
-  bits<1> EOP = 0;
-  bits<8> CF_INST = 0;
-  bits<1> WQM = 0;
-  bits<1> B = 0;
-
-  let Inst{23-0} = ADDR;
-  let Inst{26-24} = JTS;
-  let Inst{34-32} = PC;
-  let Inst{39-35} = CF_CONST;
-  let Inst{41-40} = COND;
-  let Inst{47-42} = COUNT;
-  let Inst{52} = VPM;
-  let Inst{53} = EOP;
-  let Inst{61-54} = CF_INST;
-  let Inst{62} = WQM;
-  let Inst{63} = B;
-//}
-*/
 def isR600 : Predicate<"Subtarget.device()"
                             "->getGeneration() == AMDGPUDeviceInfo::HD4XXX">;
 def isR700 : Predicate<"Subtarget.device()"
@@ -278,9 +234,10 @@ def isR600toCayman : Predicate<
 
 let Predicates = [isR600toCayman] in { 
 
-/* ------------------------------------------- */
-/* Common Instructions R600, R700, Evergreen, Cayman */
-/* ------------------------------------------- */
+//===----------------------------------------------------------------------===//
+// Common Instructions R600, R700, Evergreen, Cayman
+//===----------------------------------------------------------------------===//
+
 def ADD : R600_2OP <
   0x0, "ADD",
   [(set R600_Reg32:$dst, (fadd R600_Reg32:$src0, R600_Reg32:$src1))]
@@ -307,10 +264,9 @@ def MIN : R600_2OP <
   [(set R600_Reg32:$dst, (AMDGPUfmin R600_Reg32:$src0, R600_Reg32:$src1))]
 >;
 
-/* For the SET* instructions there is a naming conflict in TargetSelectionDAG.td,
- * so some of the instruction names don't match the asm string.
- * XXX: Use the defs in TargetSelectionDAG.td instead of intrinsics.
- */
+// For the SET* instructions there is a naming conflict in TargetSelectionDAG.td,
+// so some of the instruction names don't match the asm string.
+// XXX: Use the defs in TargetSelectionDAG.td instead of intrinsics.
 
 def SETE : R600_2OP <
   0x08, "SETE",
@@ -365,7 +321,12 @@ def FLOOR : R600_1OP <
   [(set R600_Reg32:$dst, (int_AMDGPU_floor R600_Reg32:$src))]
 >;
 
-def MOV : R600_1OP <0x19, "MOV", []>;
+def MOV : InstR600 <0x19, (outs R600_Reg32:$dst),
+                          (ins R600_Reg32:$src0, i32imm:$flags,
+                               R600_Pred:$p),
+                          "MOV $dst, $src0", [], AnyALU> {
+  let FlagOperandIdx = 2;
+}
 
 class MOV_IMM <ValueType vt, Operand immType> : InstR600 <0x19,
   (outs R600_Reg32:$dst),
@@ -386,10 +347,15 @@ def : Pat <
   (MOV_IMM_F32 (i32 ALU_LITERAL_X), fpimm:$val)
 >;
 
-def KILLGT : R600_2OP <
-  0x2D, "KILLGT",
-  []
->;
+def KILLGT : InstR600 <0x2D,
+          (outs R600_Reg32:$dst),
+          (ins R600_Reg32:$src0, R600_Reg32:$src1, i32imm:$flags, R600_Pred:$p,
+               variable_ops),
+          "KILLGT $dst, $src0, $src1, $flags ($p)",
+          [],
+          NullALU>{
+  let FlagOperandIdx = 3;
+}
 
 def AND_INT : R600_2OP <
   0x30, "AND_INT",
@@ -481,8 +447,9 @@ def CNDE_INT : R600_3OP <
    (select R600_Reg32:$src0, R600_Reg32:$src2, R600_Reg32:$src1))]
 >;
 
-/* Texture instructions */
-
+//===----------------------------------------------------------------------===//
+// Texture instructions
+//===----------------------------------------------------------------------===//
 
 def TEX_LD : R600_TEX <
   0x03, "TEX_LD",
@@ -557,7 +524,9 @@ def TEX_SAMPLE_C_G : R600_TEX <
   []
 >;
 
-/* Helper classes for common instructions */
+//===----------------------------------------------------------------------===//
+// Helper classes for common instructions
+//===----------------------------------------------------------------------===//
 
 class MUL_LIT_Common <bits<32> inst> : R600_3OP <
   inst, "MUL_LIT",
@@ -588,19 +557,39 @@ class CNDGE_Common <bits<32> inst> : R600_3OP <
 
 class DOT4_Common <bits<32> inst> : R600_REDUCTION <
   inst,
-  (ins R600_Reg128:$src0, R600_Reg128:$src1),
+  (ins R600_Reg128:$src0, R600_Reg128:$src1, i32imm:$flags),
   "DOT4 $dst $src0, $src1",
-  [(set R600_Reg32:$dst, (int_AMDGPU_dp4 R600_Reg128:$src0, R600_Reg128:$src1))]
+  []
+  > {
+  let FlagOperandIdx = 3;
+}
+
+class DOT4_Pat <Instruction dot4> : Pat <
+  (int_AMDGPU_dp4 R600_Reg128:$src0, R600_Reg128:$src1),
+  (dot4 R600_Reg128:$src0, R600_Reg128:$src1, 0)
 >;
 
-class CUBE_Common <bits<32> inst> : InstR600 <
-  inst,
-  (outs R600_Reg128:$dst),
-  (ins R600_Reg128:$src),
-  "CUBE $dst $src",
-  [(set R600_Reg128:$dst, (int_AMDGPU_cube R600_Reg128:$src))],
-  VecALU
->;
+multiclass CUBE_Common <bits<32> inst> {
+
+  def _pseudo : InstR600 <
+    inst,
+    (outs R600_Reg128:$dst),
+    (ins R600_Reg128:$src),
+    "CUBE $dst $src",
+    [(set R600_Reg128:$dst, (int_AMDGPU_cube R600_Reg128:$src))],
+    VecALU
+  >;
+
+  def _real : InstR600 <
+    inst,
+    (outs R600_Reg32:$dst),
+    (ins R600_Reg32:$src0, R600_Reg32:$src1, i32imm:$flags),
+    "CUBE $dst, $src0, $src1",
+    [], VecALU
+  >{
+    let FlagOperandIdx = 3;
+  }
+}
 
 class EXP_IEEE_Common <bits<32> inst> : R600_1OP <
   inst, "EXP_IEEE",
@@ -707,8 +696,9 @@ class COS_Common <bits<32> inst> : R600_1OP <
   let Trig = 1;
 }
 
-/* Helper patterns for complex intrinsics */
-/* -------------------------------------- */
+//===----------------------------------------------------------------------===//
+// Helper patterns for complex intrinsics
+//===----------------------------------------------------------------------===//
 
 class DIV_Common <InstR600 recip_ieee> : Pat<
   (int_AMDGPU_div R600_Reg32:$src0, R600_Reg32:$src1),
@@ -725,9 +715,9 @@ class TGSI_LIT_Z_Common <InstR600 mul_lit, InstR600 log_clamped, InstR600 exp_ie
   (exp_ieee (mul_lit (log_clamped (MAX R600_Reg32:$src_y, (f32 ZERO))), R600_Reg32:$src_w, R600_Reg32:$src_x))
 >;
 
-/* ---------------------- */
-/* R600 / R700 Only Instructions */
-/* ---------------------- */
+//===----------------------------------------------------------------------===//
+// R600 / R700 Instructions
+//===----------------------------------------------------------------------===//
 
 let Predicates = [isR600] in {
 
@@ -737,7 +727,8 @@ let Predicates = [isR600] in {
   def CNDGT_r600 : CNDGT_Common<0x19>;
   def CNDGE_r600 : CNDGE_Common<0x1A>;
   def DOT4_r600 : DOT4_Common<0x50>;
-  def CUBE_r600 : CUBE_Common<0x52>;
+  def : DOT4_Pat <DOT4_r600>;
+  defm CUBE_r600 : CUBE_Common<0x52>;
   def EXP_IEEE_r600 : EXP_IEEE_Common<0x61>;
   def LOG_CLAMPED_r600 : LOG_CLAMPED_Common<0x62>;
   def LOG_IEEE_r600 : LOG_IEEE_Common<0x63>;
@@ -803,9 +794,9 @@ def RECIP_UINT_eg : RECIP_UINT_Common<0x94>;
 
 } // End Predicates = [isEG]
 
-/* ------------------------------- */
-/* Evergreen / Cayman Instructions */
-/* ------------------------------- */
+//===----------------------------------------------------------------------===//
+// Evergreen / Cayman Instructions
+//===----------------------------------------------------------------------===//
 
 let Predicates = [isEGorCayman] in {
 
@@ -853,7 +844,8 @@ let Predicates = [isEGorCayman] in {
   def SIN_eg : SIN_Common<0x8D>;
   def COS_eg : COS_Common<0x8E>;
   def DOT4_eg : DOT4_Common<0xBE>;
-  def CUBE_eg : CUBE_Common<0xC0>;
+  def : DOT4_Pat <DOT4_eg>;
+  defm CUBE_eg : CUBE_Common<0xC0>;
 
   def DIV_eg : DIV_Common<RECIP_IEEE_eg>;
   def POW_eg : POW_Common<LOG_IEEE_eg, EXP_IEEE_eg, MUL, GPRF32>;
@@ -888,12 +880,12 @@ let Predicates = [isEGorCayman] in {
 let usesCustomInserter = 1 in {
 
 def RAT_WRITE_CACHELESS_eg : EG_CF_RAT <0x57, 0x2, 0, (outs),
-  (ins R600_TReg32_X:$rw_gpr, R600_TReg32_X:$index_gpr),
-  "RAT_WRITE_CACHELESS_eg $rw_gpr, $index_gpr",
-  [(global_store (i32 R600_TReg32_X:$rw_gpr), R600_TReg32_X:$index_gpr)]>
+  (ins R600_TReg32_X:$rw_gpr, R600_TReg32_X:$index_gpr, i32imm:$eop),
+  "RAT_WRITE_CACHELESS_eg $rw_gpr, $index_gpr, $eop",
+  []>
 {
   let RIM         = 0;
-  /* XXX: Have a separate instruction for non-indexed writes. */
+  // XXX: Have a separate instruction for non-indexed writes.
   let TYPE        = 1;
   let RW_REL      = 0;
   let ELEM_SIZE   = 0;
@@ -902,17 +894,22 @@ def RAT_WRITE_CACHELESS_eg : EG_CF_RAT <0x57, 0x2, 0, (outs),
   let COMP_MASK   = 1;
   let BURST_COUNT = 0;
   let VPM         = 0;
-  let EOP         = 0;
   let MARK        = 0;
   let BARRIER     = 1;
 }
 
 } // End usesCustomInserter = 1
 
+// i32 global_store
+def : Pat <
+  (global_store (i32 R600_TReg32_X:$val), R600_TReg32_X:$ptr),
+  (RAT_WRITE_CACHELESS_eg R600_TReg32_X:$val, R600_TReg32_X:$ptr, 0)
+>;
+
 // Floating point global_store
 def : Pat <
   (global_store (f32 R600_TReg32_X:$val), R600_TReg32_X:$ptr),
-  (RAT_WRITE_CACHELESS_eg R600_TReg32_X:$val, R600_TReg32_X:$ptr)
+  (RAT_WRITE_CACHELESS_eg R600_TReg32_X:$val, R600_TReg32_X:$ptr, 0)
 >;
 
 class VTX_READ_eg <bits<8> buffer_id, dag outs, list<dag> pattern>
@@ -1091,31 +1088,7 @@ def : Pat <
 
 } // End isCayman
 
-/* Other Instructions */
-
 let isCodeGenOnly = 1 in {
-/*
-  def SWIZZLE : AMDGPUShaderInst <
-    (outs GPRV4F32:$dst),
-    (ins GPRV4F32:$src0, i32imm:$src1),
-    "SWIZZLE $dst, $src0, $src1",
-    [(set GPRV4F32:$dst, (int_AMDGPU_swizzle GPRV4F32:$src0, imm:$src1))]
-  >;
-*/
-
-  def LAST : AMDGPUShaderInst <
-    (outs),
-    (ins),
-    "LAST",
-    []
-  >;
-
-  def GET_CHAN : AMDGPUShaderInst <
-    (outs R600_Reg32:$dst),
-    (ins R600_Reg128:$src0, i32imm:$src1),
-    "GET_CHAN $dst, $src0, $src1",
-    []
-  >;
 
   def MULLIT : AMDGPUShaderInst <
     (outs R600_Reg128:$dst),
@@ -1180,6 +1153,14 @@ def MASK_WRITE : AMDGPUShaderInst <
 
 } // End usesCustomInserter = 1
 
+//===---------------------------------------------------------------------===//
+// Return instruction
+//===---------------------------------------------------------------------===//
+let isTerminator = 1, isReturn = 1, isBarrier = 1, hasCtrlDep = 1 in {
+  def RETURN          : ILFormat<(outs), (ins variable_ops),
+      "RETURN", [(IL_retflag)]>;
+}
+
 //===----------------------------------------------------------------------===//
 // ISel Patterns
 //===----------------------------------------------------------------------===//
@@ -1187,12 +1168,12 @@ def MASK_WRITE : AMDGPUShaderInst <
 // KIL Patterns
 def KILP : Pat <
   (int_AMDGPU_kilp),
-  (MASK_WRITE (KILLGT (f32 ONE), (f32 ZERO)))
+  (MASK_WRITE (KILLGT (f32 ONE), (f32 ZERO), 0))
 >;
 
 def KIL : Pat <
   (int_AMDGPU_kill R600_Reg32:$src0),
-  (MASK_WRITE (KILLGT (f32 ZERO), (f32 R600_Reg32:$src0)))
+  (MASK_WRITE (KILLGT (f32 ZERO), (f32 R600_Reg32:$src0), 0))
 >;
 
 // SGT Reverse args

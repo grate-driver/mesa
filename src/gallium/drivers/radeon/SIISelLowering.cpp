@@ -127,7 +127,10 @@ MachineBasicBlock * SITargetLowering::EmitInstrWithCustomInserter(
     LowerSI_INTERP(MI, *BB, I, MRI);
     break;
   case AMDGPU::SI_INTERP_CONST:
-    LowerSI_INTERP_CONST(MI, *BB, I);
+    LowerSI_INTERP_CONST(MI, *BB, I, MRI);
+    break;
+  case AMDGPU::SI_KIL:
+    LowerSI_KIL(MI, *BB, I, MRI);
     break;
   case AMDGPU::SI_V_CNDLT:
     LowerSI_V_CNDLT(MI, *BB, I, MRI);
@@ -147,6 +150,7 @@ void SITargetLowering::LowerSI_INTERP(MachineInstr *MI, MachineBasicBlock &BB,
     MachineBasicBlock::iterator I, MachineRegisterInfo & MRI) const
 {
   unsigned tmp = MRI.createVirtualRegister(&AMDGPU::VReg_32RegClass);
+  unsigned M0 = MRI.createVirtualRegister(&AMDGPU::M0RegRegClass);
   MachineOperand dst = MI->getOperand(0);
   MachineOperand iReg = MI->getOperand(1);
   MachineOperand jReg = MI->getOperand(2);
@@ -154,41 +158,76 @@ void SITargetLowering::LowerSI_INTERP(MachineInstr *MI, MachineBasicBlock &BB,
   MachineOperand attr = MI->getOperand(4);
   MachineOperand params = MI->getOperand(5);
 
-  BuildMI(BB, I, BB.findDebugLoc(I), TII->get(AMDGPU::S_MOV_B32))
-          .addReg(AMDGPU::M0)
+  BuildMI(BB, I, BB.findDebugLoc(I), TII->get(AMDGPU::S_MOV_B32), M0)
           .addOperand(params);
 
   BuildMI(BB, I, BB.findDebugLoc(I), TII->get(AMDGPU::V_INTERP_P1_F32), tmp)
           .addOperand(iReg)
           .addOperand(attr_chan)
-          .addOperand(attr);
+          .addOperand(attr)
+	  .addReg(M0);
 
   BuildMI(BB, I, BB.findDebugLoc(I), TII->get(AMDGPU::V_INTERP_P2_F32))
           .addOperand(dst)
           .addReg(tmp)
           .addOperand(jReg)
           .addOperand(attr_chan)
-          .addOperand(attr);
+          .addOperand(attr)
+	  .addReg(M0);
 
   MI->eraseFromParent();
 }
 
 void SITargetLowering::LowerSI_INTERP_CONST(MachineInstr *MI,
-    MachineBasicBlock &BB, MachineBasicBlock::iterator I) const
+    MachineBasicBlock &BB, MachineBasicBlock::iterator I,
+    MachineRegisterInfo &MRI) const
 {
   MachineOperand dst = MI->getOperand(0);
   MachineOperand attr_chan = MI->getOperand(1);
   MachineOperand attr = MI->getOperand(2);
   MachineOperand params = MI->getOperand(3);
+  unsigned M0 = MRI.createVirtualRegister(&AMDGPU::M0RegRegClass);
 
-  BuildMI(BB, I, BB.findDebugLoc(I), TII->get(AMDGPU::S_MOV_B32))
-          .addReg(AMDGPU::M0)
+  BuildMI(BB, I, BB.findDebugLoc(I), TII->get(AMDGPU::S_MOV_B32), M0)
           .addOperand(params);
 
   BuildMI(BB, I, BB.findDebugLoc(I), TII->get(AMDGPU::V_INTERP_MOV_F32))
           .addOperand(dst)
           .addOperand(attr_chan)
-          .addOperand(attr);
+          .addOperand(attr)
+	  .addReg(M0);
+
+  MI->eraseFromParent();
+}
+
+void SITargetLowering::LowerSI_KIL(MachineInstr *MI, MachineBasicBlock &BB,
+    MachineBasicBlock::iterator I, MachineRegisterInfo & MRI) const
+{
+  // Clear this pixel from the exec mask if the operand is negative
+  BuildMI(BB, I, BB.findDebugLoc(I), TII->get(AMDGPU::V_CMPX_LE_F32_e32),
+          AMDGPU::VCC)
+          .addReg(AMDGPU::SREG_LIT_0)
+          .addOperand(MI->getOperand(0));
+
+  // If the exec mask is non-zero, skip the next two instructions
+  BuildMI(BB, I, BB.findDebugLoc(I), TII->get(AMDGPU::S_CBRANCH_EXECNZ))
+          .addImm(3)
+          .addReg(AMDGPU::EXEC);
+
+  // Exec mask is zero: Export to NULL target...
+  BuildMI(BB, I, BB.findDebugLoc(I), TII->get(AMDGPU::EXP))
+          .addImm(0)
+          .addImm(0x09) // V_008DFC_SQ_EXP_NULL
+          .addImm(0)
+          .addImm(1)
+          .addImm(1)
+          .addReg(AMDGPU::SREG_LIT_0)
+          .addReg(AMDGPU::SREG_LIT_0)
+          .addReg(AMDGPU::SREG_LIT_0)
+          .addReg(AMDGPU::SREG_LIT_0);
+
+  // ... and terminate wavefront
+  BuildMI(BB, I, BB.findDebugLoc(I), TII->get(AMDGPU::S_ENDPGM));
 
   MI->eraseFromParent();
 }

@@ -8,8 +8,8 @@
 CONFIG_NAME = default
 
 # Version info
-MESA_MAJOR=8
-MESA_MINOR=1
+MESA_MAJOR=9
+MESA_MINOR=0
 MESA_TINY=0
 MESA_VERSION = $(MESA_MAJOR).$(MESA_MINOR).$(MESA_TINY)
 
@@ -95,7 +95,6 @@ MOTIF_CFLAGS = -I/usr/include/Motif1.2
 LIB_DIR = lib
 SRC_DIRS = glsl mapi/glapi mapi/vgapi mesa \
 	gallium egl gallium/winsys gallium/targets glu
-GLU_DIRS = sgi
 DRIVER_DIRS = x11 osmesa
 
 # Gallium directories and

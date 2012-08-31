@@ -47,10 +47,8 @@ namespace llvm {
 
   bool isTrig(const MachineInstr &MI) const;
   bool isPlaceHolderOpcode(unsigned opcode) const;
-  bool isTexOp(unsigned opcode) const;
   bool isReductionOp(unsigned opcode) const;
   bool isCubeOp(unsigned opcode) const;
-  bool isFCOp(unsigned opcode) const;
 
   /// isVector - Vector instructions are instructions that must fill all
   /// instruction slots within an instruction group.
@@ -111,6 +109,22 @@ namespace llvm {
 
   virtual int getInstrLatency(const InstrItineraryData *ItinData,
                               SDNode *Node) const { return 1;}
+
+  ///hasFlagOperand - Returns true if this instruction has an operand for
+  /// storing target flags.
+  bool hasFlagOperand(const MachineInstr &MI) const;
+
+  ///addFlag - Add one of the MO_FLAG* flags to the specified Operand.
+  void addFlag(MachineInstr *MI, unsigned Operand, unsigned Flag) const;
+
+  ///isFlagSet - Determine if the specified flag is set on this Operand.
+  bool isFlagSet(const MachineInstr &MI, unsigned Operand, unsigned Flag) const;
+
+  ///getFlagOp - Return the operand containing the flags for this instruction.
+  MachineOperand &getFlagOp(MachineInstr *MI) const;
+
+  ///clearFlag - Clear the specified flag on the instruction.
+  void clearFlag(MachineInstr *MI, unsigned Operand, unsigned Flag) const;
 };
 
 } // End llvm namespace
@@ -124,6 +138,7 @@ namespace R600_InstFlag {
 		TRIG = (1 << 4),
 		OP3 = (1 << 5),
 		VECTOR = (1 << 6)
+    //FlagOperand bits 7, 8
 	};
 }
 

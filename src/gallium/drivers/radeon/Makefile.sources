@@ -13,6 +13,7 @@ GENERATED_SOURCES := \
 	AMDGPUGenEDInfo.inc		\
 	AMDGPUGenIntrinsics.inc		\
 	AMDGPUGenCodeEmitter.inc	\
+	AMDGPUGenMCCodeEmitter.inc	\
 	AMDGPUGenDFAPacketizer.inc
 
 CPP_SOURCES := \
@@ -28,27 +29,32 @@ CPP_SOURCES := \
 	AMDILNIDevice.cpp		\
 	AMDILPeepholeOptimizer.cpp	\
 	AMDILSIDevice.cpp		\
+	AMDGPUAsmPrinter.cpp \
+	AMDGPUMCInstLower.cpp \
 	AMDGPUSubtarget.cpp		\
 	AMDGPUTargetMachine.cpp		\
 	AMDGPUISelLowering.cpp		\
 	AMDGPUConvertToISA.cpp		\
 	AMDGPUInstrInfo.cpp		\
 	AMDGPURegisterInfo.cpp		\
-	R600CodeEmitter.cpp		\
+	R600ExpandSpecialInstrs.cpp	\
 	R600ISelLowering.cpp		\
 	R600InstrInfo.cpp		\
 	R600KernelParameters.cpp	\
 	R600MachineFunctionInfo.cpp	\
 	R600RegisterInfo.cpp		\
 	SIAssignInterpRegs.cpp		\
-	SICodeEmitter.cpp		\
 	SIInstrInfo.cpp			\
 	SIISelLowering.cpp		\
 	SIMachineFunctionInfo.cpp	\
 	SIRegisterInfo.cpp		\
-	MCTargetDesc/AMDILMCAsmInfo.cpp	\
-	MCTargetDesc/AMDILMCTargetDesc.cpp	\
-	TargetInfo/AMDILTargetInfo.cpp	\
+	InstPrinter/AMDGPUInstPrinter.cpp \
+	MCTargetDesc/AMDGPUMCAsmInfo.cpp	\
+	MCTargetDesc/AMDGPUAsmBackend.cpp \
+	MCTargetDesc/AMDGPUMCTargetDesc.cpp	\
+	MCTargetDesc/SIMCCodeEmitter.cpp \
+	MCTargetDesc/R600MCCodeEmitter.cpp \
+	TargetInfo/AMDGPUTargetInfo.cpp	\
 	radeon_llvm_emit.cpp
 
 C_SOURCES := \

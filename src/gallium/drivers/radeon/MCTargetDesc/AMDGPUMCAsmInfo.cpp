@@ -1,4 +1,4 @@
-//===-- MCTargetDesc/AMDILMCAsmInfo.cpp - TODO: Add brief description -------===//
+//===-- MCTargetDesc/AMDGPUMCAsmInfo.cpp - Assembly Info ------------------===//
 //
 //                     The LLVM Compiler Infrastructure
 //
@@ -6,19 +6,14 @@
 // License. See LICENSE.TXT for details.
 //
 //===----------------------------------------------------------------------===//
-//
-// TODO: Add full description
-//
-//===----------------------------------------------------------------------===//
 
-#include "AMDILMCAsmInfo.h"
-#ifndef NULL
-#define NULL 0
-#endif
+#include "AMDGPUMCAsmInfo.h"
 
 using namespace llvm;
-AMDILMCAsmInfo::AMDILMCAsmInfo(const Target &T, StringRef &TT) : MCAsmInfo()
+AMDGPUMCAsmInfo::AMDGPUMCAsmInfo(const Target &T, StringRef &TT) : MCAsmInfo()
 {
+  HasSingleParameterDotFile = false;
+  WeakDefDirective = 0;
   //===------------------------------------------------------------------===//
   HasSubsectionsViaSymbols = true;
   HasMachoZeroFillDirective = false;
@@ -49,7 +44,7 @@ AMDILMCAsmInfo::AMDILMCAsmInfo(const Target &T, StringRef &TT) : MCAsmInfo()
   Data16bitsDirective = ".short\t";
   Data32bitsDirective = ".long\t";
   Data64bitsDirective = ".quad\t";
-  GPRel32Directive = NULL;
+  GPRel32Directive = 0;
   SunStyleELFSectionSwitchSyntax = true;
   UsesELFSectionDirectiveForBSS = true;
   HasMicrosoftFastStdCallMangling = false;
@@ -67,16 +62,10 @@ AMDILMCAsmInfo::AMDILMCAsmInfo(const Target &T, StringRef &TT) : MCAsmInfo()
   LCOMMDirectiveType = LCOMM::None;
   COMMDirectiveAlignmentIsInBytes = false;
   HasDotTypeDotSizeDirective = false;
-  HasSingleParameterDotFile = true;
   HasNoDeadStrip = true;
   HasSymbolResolver = false;
   WeakRefDirective = ".weakref\t";
-  WeakDefDirective = ".weakdef\t";
-  LinkOnceDirective = NULL;
-  HiddenVisibilityAttr = MCSA_Hidden;
-  HiddenDeclarationVisibilityAttr = MCSA_Hidden;
-  ProtectedVisibilityAttr = MCSA_Protected;
-
+  LinkOnceDirective = 0;
   //===--- Dwarf Emission Directives -----------------------------------===//
   HasLEB128 = true;
   SupportsDebugInformation = true;
@@ -86,22 +75,22 @@ AMDILMCAsmInfo::AMDILMCAsmInfo(const Target &T, StringRef &TT) : MCAsmInfo()
   DwarfUsesLabelOffsetForRanges = true;
 
   //===--- CBE Asm Translation Table -----------------------------------===//
-  AsmTransCBE = NULL;
+  AsmTransCBE = 0;
 }
 const char*
-AMDILMCAsmInfo::getDataASDirective(unsigned int Size, unsigned int AS) const
+AMDGPUMCAsmInfo::getDataASDirective(unsigned int Size, unsigned int AS) const
 {
   switch (AS) {
     default:
-      return NULL;
+      return 0;
     case 0:
-      return NULL;
+      return 0;
   };
-  return NULL;
+  return 0;
 }
 
 const MCSection*
-AMDILMCAsmInfo::getNonexecutableStackSection(MCContext &CTX) const
+AMDGPUMCAsmInfo::getNonexecutableStackSection(MCContext &CTX) const
 {
-  return NULL;
+  return 0;
 }

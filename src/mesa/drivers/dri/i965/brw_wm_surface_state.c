@@ -654,12 +654,14 @@ brw_get_surface_num_multisamples(unsigned num_samples)
 
 
 static void
-brw_update_buffer_texture_surface(struct gl_context *ctx, GLuint unit)
+brw_update_buffer_texture_surface(struct gl_context *ctx,
+                                  unsigned unit,
+                                  uint32_t *binding_table,
+                                  unsigned surf_index)
 {
    struct brw_context *brw = brw_context(ctx);
    struct intel_context *intel = &brw->intel;
    struct gl_texture_object *tObj = ctx->Texture.Unit[unit]._Current;
-   const GLuint surf_index = SURF_INDEX_TEXTURE(unit);
    uint32_t *surf;
    struct intel_buffer_object *intel_obj =
       intel_buffer_object(tObj->BufferObject);
@@ -674,7 +676,7 @@ brw_update_buffer_texture_surface(struct gl_context *ctx, GLuint unit)
    }
 
    surf = brw_state_batch(brw, AUB_TRACE_SURFACE_STATE,
-			  6 * 4, 32, &brw->wm.surf_offset[surf_index]);
+			  6 * 4, 32, &binding_table[surf_index]);
 
    surf[0] = (BRW_SURFACE_BUFFER << BRW_SURFACE_TYPE_SHIFT |
 	      (brw_format_for_mesa_format(format) << BRW_SURFACE_FORMAT_SHIFT));
@@ -687,7 +689,7 @@ brw_update_buffer_texture_surface(struct gl_context *ctx, GLuint unit)
 
       /* Emit relocation to surface contents. */
       drm_intel_bo_emit_reloc(brw->intel.batch.bo,
-			      brw->wm.surf_offset[surf_index] + 4,
+			      binding_table[surf_index] + 4,
 			      bo, 0, I915_GEM_DOMAIN_SAMPLER, 0);
 
       int w = intel_obj->Base.Size / texel_size;
@@ -706,7 +708,10 @@ brw_update_buffer_texture_surface(struct gl_context *ctx, GLuint unit)
 }
 
 static void
-brw_update_texture_surface( struct gl_context *ctx, GLuint unit )
+brw_update_texture_surface(struct gl_context *ctx,
+                           unsigned unit,
+                           uint32_t *binding_table,
+                           unsigned surf_index)
 {
    struct brw_context *brw = brw_context(ctx);
    struct gl_texture_object *tObj = ctx->Texture.Unit[unit]._Current;
@@ -714,19 +719,18 @@ brw_update_texture_surface( struct gl_context *ctx, GLuint unit )
    struct intel_mipmap_tree *mt = intelObj->mt;
    struct gl_texture_image *firstImage = tObj->Image[0][tObj->BaseLevel];
    struct gl_sampler_object *sampler = _mesa_get_samplerobj(ctx, unit);
-   const GLuint surf_index = SURF_INDEX_TEXTURE(unit);
    uint32_t *surf;
    int width, height, depth;
 
    if (tObj->Target == GL_TEXTURE_BUFFER) {
-      brw_update_buffer_texture_surface(ctx, unit);
+      brw_update_buffer_texture_surface(ctx, unit, binding_table, surf_index);
       return;
    }
 
    intel_miptree_get_dimensions_for_image(firstImage, &width, &height, &depth);
 
    surf = brw_state_batch(brw, AUB_TRACE_SURFACE_STATE,
-			  6 * 4, 32, &brw->wm.surf_offset[surf_index]);
+			  6 * 4, 32, &binding_table[surf_index]);
 
    surf[0] = (translate_tex_target(tObj->Target) << BRW_SURFACE_TYPE_SHIFT |
 	      BRW_SURFACE_MIPMAPLAYOUT_BELOW << BRW_SURFACE_MIPLAYOUT_SHIFT |
@@ -754,7 +758,7 @@ brw_update_texture_surface( struct gl_context *ctx, GLuint unit )
 
    /* Emit relocation to surface contents */
    drm_intel_bo_emit_reloc(brw->intel.batch.bo,
-			   brw->wm.surf_offset[surf_index] + 4,
+			   binding_table[surf_index] + 4,
 			   intelObj->mt->region->bo,
                            intelObj->mt->offset,
 			   I915_GEM_DOMAIN_SAMPLER, 0);
@@ -1234,22 +1238,45 @@ const struct brw_tracked_state gen6_renderbuffer_surfaces = {
 static void
 brw_update_texture_surfaces(struct brw_context *brw)
 {
-   struct gl_context *ctx = &brw->intel.ctx;
+   struct intel_context *intel = &brw->intel;
+   struct gl_context *ctx = &intel->ctx;
 
-   for (unsigned i = 0; i < BRW_MAX_TEX_UNIT; i++) {
-      const struct gl_texture_unit *texUnit = &ctx->Texture.Unit[i];
-      const GLuint surf = SURF_INDEX_TEXTURE(i);
+   /* BRW_NEW_VERTEX_PROGRAM and BRW_NEW_FRAGMENT_PROGRAM:
+    * Unfortunately, we're stuck using the gl_program structs until the
+    * ARB_fragment_program front-end gets converted to GLSL IR.  These
+    * have the downside that SamplerUnits is split and only contains the
+    * mappings for samplers active in that stage.
+    */
+   struct gl_program *vs = (struct gl_program *) brw->vertex_program;
+   struct gl_program *fs = (struct gl_program *) brw->fragment_program;
 
-      /* _NEW_TEXTURE */
-      if (texUnit->_ReallyEnabled) {
-	 brw->intel.vtbl.update_texture_surface(ctx, i);
-      } else {
-         brw->wm.surf_offset[surf] = 0;
+   unsigned num_samplers = _mesa_bitcount(vs->SamplersUsed | fs->SamplersUsed);
+
+   for (unsigned s = 0; s < num_samplers; s++) {
+      brw->vs.surf_offset[SURF_INDEX_VS_TEXTURE(s)] = 0;
+      brw->wm.surf_offset[SURF_INDEX_TEXTURE(s)] = 0;
+
+      if (vs->SamplersUsed & (1 << s)) {
+         const unsigned unit = vs->SamplerUnits[s];
+
+         /* _NEW_TEXTURE */
+         if (ctx->Texture.Unit[unit]._ReallyEnabled) {
+            intel->vtbl.update_texture_surface(ctx, unit,
+                                               brw->vs.surf_offset,
+                                               SURF_INDEX_VS_TEXTURE(s));
+         }
       }
 
-      /* For now, just mirror the texture setup to the VS slots. */
-      brw->vs.surf_offset[SURF_INDEX_VS_TEXTURE(i)] =
-	 brw->wm.surf_offset[surf];
+      if (fs->SamplersUsed & (1 << s)) {
+         const unsigned unit = fs->SamplerUnits[s];
+
+         /* _NEW_TEXTURE */
+         if (ctx->Texture.Unit[unit]._ReallyEnabled) {
+            intel->vtbl.update_texture_surface(ctx, unit,
+                                               brw->wm.surf_offset,
+                                               SURF_INDEX_TEXTURE(s));
+         }
+      }
    }
 
    brw->state.dirty.brw |= BRW_NEW_SURFACES;
@@ -1258,7 +1285,9 @@ brw_update_texture_surfaces(struct brw_context *brw)
 const struct brw_tracked_state brw_texture_surfaces = {
    .dirty = {
       .mesa = _NEW_TEXTURE,
-      .brw = BRW_NEW_BATCH,
+      .brw = BRW_NEW_BATCH |
+             BRW_NEW_VERTEX_PROGRAM |
+             BRW_NEW_FRAGMENT_PROGRAM,
       .cache = 0
    },
    .emit = brw_update_texture_surfaces,

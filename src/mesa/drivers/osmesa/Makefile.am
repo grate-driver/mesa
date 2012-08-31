@@ -35,16 +35,19 @@ lib_LTLIBRARIES = lib@OSMESA_LIB@.la
 
 lib@OSMESA_LIB@_la_SOURCES = osmesa.c
 
-lib@OSMESA_LIB@_la_LDFLAGS = -module -version-number @OSMESA_VERSION@ -no-undefined
+lib@OSMESA_LIB@_la_LDFLAGS = -module -version-number @VERSION_NUMBER@ -no-undefined
 lib@OSMESA_LIB@_la_LIBADD = \
 	$(top_builddir)/src/mesa/libmesa.la \
 	$(top_builddir)/src/mapi/glapi/libglapi.la
 
+if BUILD_SHARED
 # Provide compatibility with scripts for the old Mesa build system for
 # a while by putting a link to the driver into /lib of the build tree.
 all-local: lib@OSMESA_LIB@.la
 	$(MKDIR_P) $(top_builddir)/$(LIB_DIR);
 	ln -f .libs/lib@OSMESA_LIB@.so $(top_builddir)/$(LIB_DIR)/lib@OSMESA_LIB@.so;
+	ln -f .libs/lib@OSMESA_LIB@.so.@VERSION@ $(top_builddir)/$(LIB_DIR)/lib@OSMESA_LIB@.so.@VERSION@;
+endif
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = osmesa.pc

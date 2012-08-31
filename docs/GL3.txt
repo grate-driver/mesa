@@ -42,13 +42,13 @@ GLX_ARB_create_context (GLX 1.4 is required)          DONE
 
 GL 3.1:
 
-GLSL 1.40                                             needs UBOs (in progress)
-Forward compatibile context support/deprecations      not started
+GLSL 1.40                                             DONE (i965)
+Forward compatibile context support/deprecations      DONE (i965)
 Instanced drawing (GL_ARB_draw_instanced)             DONE (i965, gallium, swrast)
 Buffer copying (GL_ARB_copy_buffer)                   DONE (i965, r300, r600, swrast)
 Primitive restart (GL_NV_primitive_restart)           DONE (i965, r600)
 16 vertex texture image units                         DONE
-Texture buffer objs (GL_ARB_texture_buffer_object)    needs GL3.1 enabling (i965)
+Texture buffer objs (GL_ARB_texture_buffer_object)    DONE for OpenGL 3.1 contexts (i965)
 Rectangular textures (GL_ARB_texture_rectangle)       DONE (i965, r300, r600, swrast)
 Uniform buffer objs (GL_ARB_uniform_buffer_object)    DONE (i965)
 Signed normalized textures (GL_EXT_texture_snorm)     DONE (i965, r300, r600)
@@ -56,7 +56,7 @@ Signed normalized textures (GL_EXT_texture_snorm)     DONE (i965, r300, r600)
 
 GL 3.2:
 
-Core/compatibility profiles                           not started
+Core/compatibility profiles                           DONE
 GLSL 1.50                                             not started
 Geometry shaders (GL_ARB_geometry_shader4)            partially done (Zack)
 BGRA vertex order (GL_ARB_vertex_array_bgra)          DONE (i965, r300, r600, swrast)
@@ -75,12 +75,12 @@ GL 3.3:
 GLSL 3.30                                             new features in this version pretty much done
 GL_ARB_blend_func_extended                            DONE (i965, r600, softpipe)
 GL_ARB_explicit_attrib_location                       DONE (i915, i965, r300, r600, swrast)
-GL_ARB_occlusion_query2                               DONE (r300, r600, swrast)
+GL_ARB_occlusion_query2                               DONE (i965, r300, r600, swrast)
 GL_ARB_sampler_objects                                DONE (i965, r300, r600)
 GL_ARB_shader_bit_encoding                            DONE
 GL_ARB_texture_rgb10_a2ui                             DONE (i965, r600)
 GL_ARB_texture_swizzle                                DONE (same as EXT version) (i965, r300, r600, swrast)
-GL_ARB_timer_query                                    DONE
+GL_ARB_timer_query                                    DONE (i965)
 GL_ARB_instanced_arrays                               DONE (i965, r300, r600)
 GL_ARB_vertex_type_2_10_10_10_rev                     DONE (r600)
 

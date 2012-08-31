@@ -12,6 +12,7 @@ def isSI : Predicate<"Subtarget.device()"
 
 let Predicates = [isSI] in {
 
+let neverHasSideEffects = 1 in {
 def S_MOV_B32 : SOP1_32 <0x00000003, "S_MOV_B32", []>;
 def S_MOV_B64 : SOP1_64 <0x00000004, "S_MOV_B64", []>;
 def S_CMOV_B32 : SOP1_32 <0x00000005, "S_CMOV_B32", []>;
@@ -22,6 +23,7 @@ def S_WQM_B32 : SOP1_32 <0x00000009, "S_WQM_B32", []>;
 def S_WQM_B64 : SOP1_64 <0x0000000a, "S_WQM_B64", []>;
 def S_BREV_B32 : SOP1_32 <0x0000000b, "S_BREV_B32", []>;
 def S_BREV_B64 : SOP1_64 <0x0000000c, "S_BREV_B64", []>;
+} // End neverHasSideEffects = 1
 ////def S_BCNT0_I32_B32 : SOP1_BCNT0 <0x0000000d, "S_BCNT0_I32_B32", []>;
 ////def S_BCNT0_I32_B64 : SOP1_BCNT0 <0x0000000e, "S_BCNT0_I32_B64", []>;
 ////def S_BCNT1_I32_B32 : SOP1_BCNT1 <0x0000000f, "S_BCNT1_I32_B32", []>;
@@ -564,39 +566,43 @@ defm V_MOVRELSD_B32 : VOP1_32 <0x00000044, "V_MOVRELSD_B32", []>;
 def V_INTERP_P1_F32 : VINTRP <
   0x00000000,
   (outs VReg_32:$dst),
-  (ins VReg_32:$i, i32imm:$attr_chan, i32imm:$attr),
+  (ins VReg_32:$i, i32imm:$attr_chan, i32imm:$attr, M0Reg:$m0),
   "V_INTERP_P1_F32",
-  []
->;
+  []> {
+  let DisableEncoding = "$m0";
+}
 
 def V_INTERP_P2_F32 : VINTRP <
   0x00000001,
   (outs VReg_32:$dst),
-  (ins VReg_32:$src0, VReg_32:$j, i32imm:$attr_chan, i32imm:$attr),
+  (ins VReg_32:$src0, VReg_32:$j, i32imm:$attr_chan, i32imm:$attr, M0Reg:$m0),
   "V_INTERP_P2_F32",
   []> {
 
   let Constraints = "$src0 = $dst";
-  let DisableEncoding = "$src0";
+  let DisableEncoding = "$src0,$m0";
 
 }
 
 def V_INTERP_MOV_F32 : VINTRP <
   0x00000002,
   (outs VReg_32:$dst),
-  (ins i32imm:$attr_chan, i32imm:$attr),
+  (ins i32imm:$attr_chan, i32imm:$attr, M0Reg:$m0),
   "V_INTERP_MOV_F32",
   []> {
   let VSRC = 0;
+  let DisableEncoding = "$m0";
 }
 
-//def V_INTERP_MOV_F32 : VINTRP_32 <0x00000002, "V_INTERP_MOV_F32", []>;
 //def S_NOP : SOPP_ <0x00000000, "S_NOP", []>;
 
 let isTerminator = 1 in {
 
-def S_ENDPGM : SOPP <0x00000001, (ins), "S_ENDPGM", []> {
+def S_ENDPGM : SOPP <0x00000001, (ins), "S_ENDPGM",
+  [(IL_retflag)]> {
   let SIMM16 = 0;
+  let isBarrier = 1;
+  let hasCtrlDep = 1;
 }
 
 let isBranch = 1 in {
@@ -627,8 +633,19 @@ def S_CBRANCH_VCCNZ : SOPP <
   "S_CBRANCH_VCCNZ",
   []
 >;
-//def S_CBRANCH_EXECZ : SOPP_ <0x00000008, "S_CBRANCH_EXECZ", []>;
-//def S_CBRANCH_EXECNZ : SOPP_ <0x00000009, "S_CBRANCH_EXECNZ", []>;
+
+let DisableEncoding = "$exec" in {
+def S_CBRANCH_EXECZ : SOPP <
+  0x00000008, (ins brtarget:$target, EXECReg:$exec),
+  "S_CBRANCH_EXECZ",
+  []
+>;
+def S_CBRANCH_EXECNZ : SOPP <
+  0x00000009, (ins brtarget:$target, EXECReg:$exec),
+  "S_CBRANCH_EXECNZ",
+  []
+>;
+} // End DisableEncoding = "$exec"
 
 
 } // End isBranch = 1
@@ -723,7 +740,9 @@ defm V_LDEXP_F32 : VOP2_32 <0x0000002b, "V_LDEXP_F32", []>;
 ////def V_CVT_PKACCUM_U8_F32 : VOP2_U8 <0x0000002c, "V_CVT_PKACCUM_U8_F32", []>;
 ////def V_CVT_PKNORM_I16_F32 : VOP2_I16 <0x0000002d, "V_CVT_PKNORM_I16_F32", []>;
 ////def V_CVT_PKNORM_U16_F32 : VOP2_U16 <0x0000002e, "V_CVT_PKNORM_U16_F32", []>;
-////def V_CVT_PKRTZ_F16_F32 : VOP2_F16 <0x0000002f, "V_CVT_PKRTZ_F16_F32", []>;
+defm V_CVT_PKRTZ_F16_F32 : VOP2_32 <0x0000002f, "V_CVT_PKRTZ_F16_F32",
+ [(set VReg_32:$dst, (int_SI_packf16 AllReg_32:$src0, VReg_32:$src1))]
+>;
 ////def V_CVT_PK_U16_U32 : VOP2_U16 <0x00000030, "V_CVT_PK_U16_U32", []>;
 ////def V_CVT_PK_I16_I32 : VOP2_I16 <0x00000031, "V_CVT_PK_I16_I32", []>;
 def S_CMP_EQ_I32 : SOPC_32 <0x00000000, "S_CMP_EQ_I32", []>;
@@ -941,6 +960,13 @@ def SI_INTERP_CONST : InstSI <
   "SI_INTERP_CONST $dst, $attr_chan, $attr, $params",
   [(set VReg_32:$dst, (int_SI_fs_interp_constant imm:$attr_chan,
                                                  imm:$attr, SReg_32:$params))]
+>;
+
+def SI_KIL : InstSI <
+	(outs),
+	(ins VReg_32:$src),
+	"SI_KIL $src",
+	[(int_AMDGPU_kill VReg_32:$src)]
 >;
 
 } // end usesCustomInserter 

@@ -1833,7 +1833,6 @@ void
 vec4_visitor::visit(ir_texture *ir)
 {
    int sampler = _mesa_get_sampler_uniform_value(ir->sampler, prog, &vp->Base);
-   sampler = vp->Base.SamplerUnits[sampler];
 
    /* Should be lowered by do_lower_texture_projection */
    assert(!ir->projector);

@@ -189,7 +189,10 @@ struct intel_context
        * Surface state operations (i965+ only)
        * \{
        */
-      void (*update_texture_surface)(struct gl_context *ctx, unsigned unit);
+      void (*update_texture_surface)(struct gl_context *ctx,
+                                     unsigned unit,
+                                     uint32_t *binding_table,
+                                     unsigned surf_index);
       void (*update_renderbuffer_surface)(struct brw_context *brw,
 					  struct gl_renderbuffer *rb,
 					  unsigned unit);
@@ -508,7 +511,6 @@ void intel_init_syncobj_functions(struct dd_function_table *functions);
 /* ================================================================
  * intel_state.c:
  */
-extern void intelInitStateFuncs(struct dd_function_table *functions);
 
 #define COMPAREFUNC_ALWAYS		0
 #define COMPAREFUNC_NEVER		0x1

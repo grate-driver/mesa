@@ -50,6 +50,9 @@ lib@GL_LIB@_la_SOURCES = \
 	xm_line.c \
 	xm_tri.c
 
+# Force usage of a C++ linker
+nodist_EXTRA_lib@GL_LIB@_la_SOURCES = dummy.cpp
+
 GL_MAJOR = 1
 GL_MINOR = 6
 GL_PATCH = 0
@@ -62,13 +65,11 @@ lib@GL_LIB@_la_LDFLAGS = \
 	-no-undefined \
 	$(GL_LIB_DEPS)
 
-if HAVE_SHARED_GLAPI
-lib@GL_LIB@_la_LDFLAGS += -L$(top_builddir)/$(LIB_DIR) -l$(GLAPI_LIB)
-endif
-
+if BUILD_SHARED
 # Provide compatibility with scripts for the old Mesa build system for
 # a while by putting a link to the driver into /lib of the build tree.
 all-local: lib@GL_LIB@.la
 	$(MKDIR_P) $(top_builddir)/$(LIB_DIR);
 	ln -f .libs/lib@GL_LIB@.so.$(GL_MAJOR).$(GL_MINOR).$(GL_PATCH) $(top_builddir)/$(LIB_DIR)/lib@GL_LIB@.so.$(GL_MAJOR)
 	ln -sf lib@GL_LIB@.so.$(GL_MAJOR) $(top_builddir)/$(LIB_DIR)/lib@GL_LIB@.so
+endif

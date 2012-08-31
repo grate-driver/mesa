@@ -500,7 +500,8 @@ intelInvalidateState(struct gl_context * ctx, GLuint new_state)
 {
     struct intel_context *intel = intel_context(ctx);
 
-   _swrast_InvalidateState(ctx, new_state);
+    if (ctx->swrast_context)
+       _swrast_InvalidateState(ctx, new_state);
    _vbo_InvalidateState(ctx, new_state);
 
    intel->NewGLState |= new_state;
@@ -569,7 +570,6 @@ intelInitDriverFunctions(struct dd_function_table *functions)
    intelInitTextureImageFuncs(functions);
    intelInitTextureSubImageFuncs(functions);
    intelInitTextureCopyImageFuncs(functions);
-   intelInitStateFuncs(functions);
    intelInitClearFuncs(functions);
    intelInitBufferFuncs(functions);
    intelInitPixelFuncs(functions);
@@ -697,15 +697,25 @@ intelInitContext(struct intel_context *intel,
       ctx->Const.MaxRenderbufferSize = 2048;
    }
 
-   /* Initialize the software rasterizer and helper modules. */
-   _swrast_CreateContext(ctx);
+   /* Initialize the software rasterizer and helper modules.
+    *
+    * As of GL 3.1 core, the gen4+ driver doesn't need the swrast context for
+    * software fallbacks (which we have to support on legacy GL to do weird
+    * glDrawPixels(), glBitmap(), and other functions).
+    */
+   if (intel->gen <= 3 || api != API_OPENGL_CORE) {
+      _swrast_CreateContext(ctx);
+   }
+
    _vbo_CreateContext(ctx);
-   _tnl_CreateContext(ctx);
-   _swsetup_CreateContext(ctx);
- 
-   /* Configure swrast to match hardware characteristics: */
-   _swrast_allow_pixel_fog(ctx, false);
-   _swrast_allow_vertex_fog(ctx, true);
+   if (ctx->swrast_context) {
+      _tnl_CreateContext(ctx);
+      _swsetup_CreateContext(ctx);
+
+      /* Configure swrast to match hardware characteristics: */
+      _swrast_allow_pixel_fog(ctx, false);
+      _swrast_allow_vertex_fog(ctx, true);
+   }
 
    _mesa_meta_init(ctx);
 
@@ -758,10 +768,12 @@ intelInitContext(struct intel_context *intel,
    intel->prim.primitive = ~0;
 
    /* Force all software fallbacks */
+#ifdef I915
    if (driQueryOptionb(&intel->optionCache, "no_rast")) {
       fprintf(stderr, "disabling 3D rasterization\n");
       intel->no_rast = 1;
    }
+#endif
 
    if (driQueryOptionb(&intel->optionCache, "always_flush_batch")) {
       fprintf(stderr, "flushing batchbuffer before/after each draw call\n");
@@ -781,6 +793,7 @@ intelDestroyContext(__DRIcontext * driContextPriv)
 {
    struct intel_context *intel =
       (struct intel_context *) driContextPriv->driverPrivate;
+   struct gl_context *ctx = &intel->ctx;
 
    assert(intel);               /* should never be null */
    if (intel) {
@@ -796,11 +809,14 @@ intelDestroyContext(__DRIcontext * driContextPriv)
 
       intel->vtbl.destroy(intel);
 
-      _swsetup_DestroyContext(&intel->ctx);
-      _tnl_DestroyContext(&intel->ctx);
+      if (ctx->swrast_context) {
+         _swsetup_DestroyContext(&intel->ctx);
+         _tnl_DestroyContext(&intel->ctx);
+      }
       _vbo_DestroyContext(&intel->ctx);
 
-      _swrast_DestroyContext(&intel->ctx);
+      if (ctx->swrast_context)
+         _swrast_DestroyContext(&intel->ctx);
       intel->Fallback = 0x0;      /* don't call _swrast_Flush later */
 
       intel_batchbuffer_free(intel);

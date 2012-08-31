@@ -44,7 +44,6 @@ enum intel_msaa_layout;
 extern const struct brw_tracked_state brw_blend_constant_color;
 extern const struct brw_tracked_state brw_cc_vp;
 extern const struct brw_tracked_state brw_cc_unit;
-extern const struct brw_tracked_state brw_check_fallback;
 extern const struct brw_tracked_state brw_clip_prog;
 extern const struct brw_tracked_state brw_clip_unit;
 extern const struct brw_tracked_state brw_vs_pull_constants;
@@ -225,7 +224,7 @@ void gen7_create_constant_surface(struct brw_context *brw,
 uint32_t translate_wrap_mode(GLenum wrap, bool using_nearest);
 void upload_default_color(struct brw_context *brw,
 			  struct gl_sampler_object *sampler,
-			  int unit);
+			  int unit, int ss_index);
 
 /* gen6_sf_state.c */
 uint32_t

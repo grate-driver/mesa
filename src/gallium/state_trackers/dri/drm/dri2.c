@@ -314,6 +314,9 @@ dri2_allocate_buffer(__DRIscreen *sPriv,
          break;
    }
 
+   /* because we get the handle and stride */
+   bind |= PIPE_BIND_SHARED;
+
    switch (format) {
       case 32:
          pf = PIPE_FORMAT_B8G8R8A8_UNORM;
@@ -603,6 +606,12 @@ dri2_query_image(__DRIimage *image, int attrib, int *value)
    case __DRI_IMAGE_ATTRIB_FORMAT:
       *value = image->dri_format;
       return GL_TRUE;
+   case __DRI_IMAGE_ATTRIB_WIDTH:
+      *value = image->texture->width0;
+      return GL_TRUE;
+   case __DRI_IMAGE_ATTRIB_HEIGHT:
+      *value = image->texture->height0;
+      return GL_TRUE;
    default:
       return GL_FALSE;
    }
@@ -626,6 +635,20 @@ dri2_dup_image(__DRIimage *image, void *loaderPrivate)
    return img;
 }
 
+static GLboolean
+dri2_validate_usage(__DRIimage *image, unsigned int use)
+{
+   /*
+    * Gallium drivers are bad at adding usages to the resources
+    * once opened again in another process, which is the main use
+    * case for this, so we have to lie.
+    */
+   if (image != NULL)
+      return GL_TRUE;
+   else
+      return GL_FALSE;
+}
+
 static void
 dri2_destroy_image(__DRIimage *img)
 {
@@ -634,13 +657,14 @@ dri2_destroy_image(__DRIimage *img)
 }
 
 static struct __DRIimageExtensionRec dri2ImageExtension = {
-    { __DRI_IMAGE, 1 },
+    { __DRI_IMAGE, 4 },
     dri2_create_image_from_name,
     dri2_create_image_from_renderbuffer,
     dri2_destroy_image,
     dri2_create_image,
     dri2_query_image,
     dri2_dup_image,
+    dri2_validate_usage,
 };
 
 /*

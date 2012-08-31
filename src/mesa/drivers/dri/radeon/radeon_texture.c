@@ -311,6 +311,7 @@ static gl_format radeonChoose8888TexFormat(radeonContextPtr rmesa,
 }
 
 gl_format radeonChooseTextureFormat_mesa(struct gl_context * ctx,
+					 GLenum target,
 					 GLint internalFormat,
 					 GLenum format,
 					 GLenum type)
@@ -750,7 +751,7 @@ radeon_swrast_map_texture_images(struct gl_context *ctx,
 				 struct gl_texture_object *texObj)
 {
 	radeonContextPtr rmesa = RADEON_CONTEXT(ctx);
-	GLuint nr_faces = (texObj->Target == GL_TEXTURE_CUBE_MAP) ? 6 : 1;
+	GLuint nr_faces = _mesa_num_tex_faces(texObj->Target);
 	int i, face;
 
 	for (i = texObj->BaseLevel; i <= texObj->_MaxLevel; i++) {
@@ -766,7 +767,7 @@ radeon_swrast_unmap_texture_images(struct gl_context *ctx,
 				   struct gl_texture_object *texObj)
 {
 	radeonContextPtr rmesa = RADEON_CONTEXT(ctx);
-	GLuint nr_faces = (texObj->Target == GL_TEXTURE_CUBE_MAP) ? 6 : 1;
+	GLuint nr_faces = _mesa_num_tex_faces(texObj->Target);
 	int i, face;
 
 	for (i = texObj->BaseLevel; i <= texObj->_MaxLevel; i++) {
