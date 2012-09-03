@@ -27,6 +27,8 @@ mesa (9.0~git20120903.e1673d20-1) UNRELEASED; urgency=low
   * rules: Build llvm shared libs on platforms that support llvm.
   * Added 15-fix-llvmpipe-test-linking.diff: Fix link failure when building
     llvmpipe with --with-llvm-shared-libs. Patch from fdo bug #52617.
+  * control, rules, libglu*: Remove libglu packaging, since it's been split
+    off upstream.
 
   [ Steve Langasek ]
   * Install all dri drivers from the DESTDIR tree, instead of copying them
