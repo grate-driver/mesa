@@ -1,11 +1,11 @@
---- a/configure.ac
-+++ b/configure.ac
-@@ -1325,7 +1325,7 @@
-     OSMESA_PC_LIB_PRIV="-lm -lpthread $SELINUX_LIBS $DLOPEN_LIBS"
- fi
+--- a/src/mesa/drivers/osmesa/Makefile.am
++++ b/src/mesa/drivers/osmesa/Makefile.am
+@@ -35,7 +35,7 @@
  
--OSMESA_VERSION=`echo "$VERSION" | $SED 's/\./:/g'`
-+OSMESA_VERSION="6:5:3"
+ lib@OSMESA_LIB@_la_SOURCES = osmesa.c
  
- AC_SUBST([OSMESA_LIB_DEPS])
- AC_SUBST([OSMESA_MESA_DEPS])
+-lib@OSMESA_LIB@_la_LDFLAGS = -module -version-number @VERSION_NUMBER@ -no-undefined
++lib@OSMESA_LIB@_la_LDFLAGS = -module -version-number 6:5:3 -no-undefined
+ lib@OSMESA_LIB@_la_LIBADD = \
+ 	$(top_builddir)/src/mesa/libmesa.la \
+ 	$(top_builddir)/src/mapi/glapi/libglapi.la
