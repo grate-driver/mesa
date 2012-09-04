@@ -42,7 +42,7 @@ CONFIGS = swx11 \
 	  dri
 
 ifeq ($(DEB_HOST_ARCH_CPU), i386)
-	CONFIGS += swx11+glu-i386-i686
+	CONFIGS += swx11-i386-i686
 endif
 
 STAMP_DIR = debian/stamp
@@ -149,7 +149,7 @@ confflags-swx11-static = \
 	CFLAGS="$(CFLAGS)" \
 	CXXFLAGS="$(CXXFLAGS)"
 
-confflags-swx11+glu-i386-i686 = \
+confflags-swx11-i386-i686 = \
 	--disable-dri \
 	--disable-egl \
 	--with-gallium-drivers= \
