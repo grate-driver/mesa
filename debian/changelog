@@ -11,7 +11,7 @@ mesa (9.0~git20120903.e1673d20-1) UNRELEASED; urgency=low
   * control: Added libtool to build-depends.
   * rules: Drop special handling of config.{guess,sub}, not needed anymore.
   * rules, libosmesa*: Build only the 32bit OSMesa library.
-  * control: Bump libdrm build-dep to 2.4.38.
+  * control: Bump libdrm build-dep to 2.4.39.
   * control: Bump libwayland-dev build-dep to 0.95.
   * rules: Update the clean target.
   * rules: Add --disable-shared-glapi to the swx11 targets.
