@@ -39,6 +39,8 @@ main/git_sha1.h: main/git_sha1.h.tmp
 	@echo "updating main/git_sha1.h"
 	@if ! cmp -s main/git_sha1.h.tmp main/git_sha1.h; then \
 		mv main/git_sha1.h.tmp main/git_sha1.h ;\
+	else \
+		rm main/git_sha1.h.tmp ;\
 	fi
 
 # include glapi_gen.mk for generating glapi headers for GLES
@@ -49,10 +51,7 @@ BUILT_SOURCES = \
 	main/git_sha1.h \
 	main/api_exec_es1_dispatch.h \
 	main/api_exec_es1_remap_helper.h \
-	main/api_exec_es2_dispatch.h \
-	main/api_exec_es2_remap_helper.h \
 	main/api_exec_es1.c \
-	main/api_exec_es2.c \
 	program/program_parse.tab.c \
 	program/program_parse.tab.h \
 	program/lex.yy.c
@@ -68,21 +67,9 @@ main/api_exec_es1_remap_helper.h: $(GLAPI)/gl_and_es_API.xml $(glapi_gen_remap_d
 
 main/api_exec_es1.o: main/api_exec_es1_dispatch.h main/api_exec_es1_remap_helper.h
 
-main/api_exec_es2_dispatch.h: $(GLAPI)/gl_and_es_API.xml $(glapi_gen_dispatch_deps)
-	$(call glapi_gen_dispatch,$<,es2)
-
-main/api_exec_es2_remap_helper.h: $(GLAPI)/gl_and_es_API.xml $(glapi_gen_remap_deps)
-	$(call glapi_gen_remap,$<,es2)
-
-main/api_exec_es2.o: main/api_exec_es2_dispatch.h main/api_exec_es2_remap_helper.h
-
 main/api_exec_es1.c: main/APIspec.xml main/es_generator.py main/APIspecutil.py main/APIspec.py
 	$(AM_V_GEN) $(PYTHON2) $(PYTHON_FLAGS) $(srcdir)/main/es_generator.py \
 	  -S $(srcdir)/main/APIspec.xml -V GLES1.1 > $@
-
-main/api_exec_es2.c: main/APIspec.xml main/es_generator.py main/APIspecutil.py main/APIspec.py
-	$(AM_V_GEN) $(PYTHON2) $(PYTHON_FLAGS) $(srcdir)/main/es_generator.py \
-	  -S $(srcdir)/main/APIspec.xml -V GLES2.0 > $@
 
 program/program_parse.tab.c program/program_parse.tab.h: program/program_parse.y
 	$(MKDIR_P) program
@@ -92,7 +79,15 @@ program/lex.yy.c: program/program_lexer.l
 	$(MKDIR_P) program
 	$(AM_V_GEN) $(LEX) --never-interactive --outfile=$@ $<
 
-noinst_LTLIBRARIES = libmesa.la libmesagallium.la
+noinst_LTLIBRARIES =
+if NEED_LIBMESA
+noinst_LTLIBRARIES += libmesa.la
+else
+check_LTLIBRARIES = libmesa.la
+endif
+if HAVE_GALLIUM
+noinst_LTLIBRARIES += libmesagallium.la
+endif
 
 SRCDIR = $(top_srcdir)/src/mesa/
 BUILDDIR = $(top_builddir)/src/mesa/
@@ -140,13 +135,14 @@ libmesagallium_la_SOURCES = \
 libmesagallium_la_LIBADD = $(top_builddir)/src/glsl/libglsl.la
 libmesagallium_la_LDFLAGS =
 
+if HAVE_GALLIUM
 # Provide compatibility with scripts for the old Mesa build system for
 # a while by putting a link to the library in the current directory.
-all-local: libmesa.la libmesagallium.la
-	ln -f .libs/libmesa.a .
+all-local: $(noinst_LTLIBRARIES)
 	ln -f .libs/libmesagallium.a .
+endif
 
-CLEANFILES += libmesa.a libmesagallium.a
+CLEANFILES += libmesagallium.a
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = gl.pc

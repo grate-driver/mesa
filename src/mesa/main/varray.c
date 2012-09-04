@@ -133,16 +133,54 @@ update_array(struct gl_context *ctx,
    GLsizei elementSize;
    GLenum format = GL_RGBA;
 
-   if (ctx->API != API_OPENGLES && ctx->API != API_OPENGLES2) {
-      /* fixed point arrays / data is only allowed with OpenGL ES 1.x/2.0 */
+   /* Page 407 (page 423 of the PDF) of the OpenGL 3.0 spec says:
+    *
+    *     "Client vertex arrays - all vertex array attribute pointers must
+    *     refer to buffer objects (section 2.9.2). The default vertex array
+    *     object (the name zero) is also deprecated. Calling
+    *     VertexAttribPointer when no buffer object or no vertex array object
+    *     is bound will generate an INVALID_OPERATION error..."
+    *
+    * The check for VBOs is handled below.
+    */
+   if (ctx->API == API_OPENGL_CORE
+       && (ctx->Array.ArrayObj == ctx->Array.DefaultArrayObj)) {
+      _mesa_error(ctx, GL_INVALID_OPERATION, "%s(no array object bound)",
+                  func);
+      return;
+   }
+
+   if (_mesa_is_gles(ctx)) {
+      /* Once Mesa gets support for GL_OES_vertex_half_float this mask will
+       * change.  Adding support for this extension isn't quite as trivial as
+       * we'd like because ES uses a different enum value for GL_HALF_FLOAT.
+       */
+      legalTypesMask &= ~(FIXED_GL_BIT | HALF_BIT | DOUBLE_BIT);
+
+      /* GL_INT and GL_UNSIGNED_INT data is not allowed in OpenGL ES until
+       * 3.0.  The 2_10_10_10 types are added in OpenGL ES 3.0 or
+       * GL_OES_vertex_type_10_10_10_2.
+       */
+      if (ctx->Version < 30) {
+         legalTypesMask &= ~(UNSIGNED_INT_BIT
+                             | INT_BIT
+                             | UNSIGNED_INT_2_10_10_10_REV_BIT
+                             | INT_2_10_10_10_REV_BIT);
+      }
+
+      /* BGRA ordering is not supported in ES contexts.
+       */
+      if (sizeMax == BGRA_OR_4)
+         sizeMax = 4;
+   } else {
       legalTypesMask &= ~FIXED_ES_BIT;
-   }
-   if (!ctx->Extensions.ARB_ES2_compatibility) {
-      legalTypesMask &= ~FIXED_GL_BIT;
-   }
-   if (!ctx->Extensions.ARB_vertex_type_2_10_10_10_rev) {
-      legalTypesMask &= ~(UNSIGNED_INT_2_10_10_10_REV_BIT |
-                          INT_2_10_10_10_REV_BIT);
+
+      if (!ctx->Extensions.ARB_ES2_compatibility)
+         legalTypesMask &= ~FIXED_GL_BIT;
+
+      if (!ctx->Extensions.ARB_vertex_type_2_10_10_10_rev)
+         legalTypesMask &= ~(UNSIGNED_INT_2_10_10_10_REV_BIT |
+                             INT_2_10_10_10_REV_BIT);
    }
 
    typeBit = type_to_bit(ctx, type);
@@ -195,11 +233,20 @@ update_array(struct gl_context *ctx,
       return;
    }
 
-   if (ctx->Array.ArrayObj->ARBsemantics &&
+   /* Page 29 (page 44 of the PDF) of the OpenGL 3.3 spec says:
+    *
+    *     "An INVALID_OPERATION error is generated under any of the following
+    *     conditions:
+    *
+    *     ...
+    *
+    *     * any of the *Pointer commands specifying the location and
+    *       organization of vertex array data are called while zero is bound
+    *       to the ARRAY_BUFFER buffer object binding point (see section
+    *       2.9.6), and the pointer argument is not NULL."
+    */
+   if (ptr != NULL && ctx->Array.ArrayObj->ARBsemantics &&
        !_mesa_is_bufferobj(ctx->Array.ArrayBufferObj)) {
-      /* GL_ARB_vertex_array_object requires that all arrays reside in VBOs.
-       * Generate GL_INVALID_OPERATION if that's not true.
-       */
       _mesa_error(ctx, GL_INVALID_OPERATION, "%s(non-VBO array)", func);
       return;
    }
@@ -228,15 +275,14 @@ update_array(struct gl_context *ctx,
 void GLAPIENTRY
 _mesa_VertexPointer(GLint size, GLenum type, GLsizei stride, const GLvoid *ptr)
 {
-   GLbitfield legalTypes = (SHORT_BIT | INT_BIT | FLOAT_BIT |
-                            DOUBLE_BIT | HALF_BIT | FIXED_ES_BIT |
-                            UNSIGNED_INT_2_10_10_10_REV_BIT |
-                            INT_2_10_10_10_REV_BIT);
    GET_CURRENT_CONTEXT(ctx);
+   GLbitfield legalTypes = (ctx->API == API_OPENGLES)
+      ? (BYTE_BIT | SHORT_BIT | FLOAT_BIT | FIXED_ES_BIT)
+      : (SHORT_BIT | INT_BIT | FLOAT_BIT |
+         DOUBLE_BIT | HALF_BIT |
+         UNSIGNED_INT_2_10_10_10_REV_BIT |
+         INT_2_10_10_10_REV_BIT);
    ASSERT_OUTSIDE_BEGIN_END_AND_FLUSH(ctx);
-
-   if (ctx->API == API_OPENGLES)
-      legalTypes |= BYTE_BIT;
 
    update_array(ctx, "glVertexPointer", VERT_ATTRIB_POS,
                 legalTypes, 2, 4,
@@ -247,12 +293,13 @@ _mesa_VertexPointer(GLint size, GLenum type, GLsizei stride, const GLvoid *ptr)
 void GLAPIENTRY
 _mesa_NormalPointer(GLenum type, GLsizei stride, const GLvoid *ptr )
 {
-   const GLbitfield legalTypes = (BYTE_BIT | SHORT_BIT | INT_BIT |
-                                  HALF_BIT | FLOAT_BIT | DOUBLE_BIT |
-                                  FIXED_ES_BIT |
-                                  UNSIGNED_INT_2_10_10_10_REV_BIT |
-                                  INT_2_10_10_10_REV_BIT);
    GET_CURRENT_CONTEXT(ctx);
+   const GLbitfield legalTypes = (ctx->API == API_OPENGLES)
+      ? (BYTE_BIT | SHORT_BIT | FLOAT_BIT | FIXED_ES_BIT)
+      : (BYTE_BIT | SHORT_BIT | INT_BIT |
+         HALF_BIT | FLOAT_BIT | DOUBLE_BIT |
+         UNSIGNED_INT_2_10_10_10_REV_BIT |
+         INT_2_10_10_10_REV_BIT);
    ASSERT_OUTSIDE_BEGIN_END_AND_FLUSH(ctx);
 
    update_array(ctx, "glNormalPointer", VERT_ATTRIB_NORMAL,
@@ -264,18 +311,20 @@ _mesa_NormalPointer(GLenum type, GLsizei stride, const GLvoid *ptr )
 void GLAPIENTRY
 _mesa_ColorPointer(GLint size, GLenum type, GLsizei stride, const GLvoid *ptr)
 {
-   const GLbitfield legalTypes = (BYTE_BIT | UNSIGNED_BYTE_BIT |
-                                  SHORT_BIT | UNSIGNED_SHORT_BIT |
-                                  INT_BIT | UNSIGNED_INT_BIT |
-                                  HALF_BIT | FLOAT_BIT | DOUBLE_BIT |
-                                  FIXED_ES_BIT |
-                                  UNSIGNED_INT_2_10_10_10_REV_BIT |
-                                  INT_2_10_10_10_REV_BIT);
    GET_CURRENT_CONTEXT(ctx);
+   const GLbitfield legalTypes = (ctx->API == API_OPENGLES)
+      ? (UNSIGNED_BYTE_BIT | HALF_BIT | FLOAT_BIT | FIXED_ES_BIT)
+      : (BYTE_BIT | UNSIGNED_BYTE_BIT |
+         SHORT_BIT | UNSIGNED_SHORT_BIT |
+         INT_BIT | UNSIGNED_INT_BIT |
+         HALF_BIT | FLOAT_BIT | DOUBLE_BIT |
+         UNSIGNED_INT_2_10_10_10_REV_BIT |
+         INT_2_10_10_10_REV_BIT);
+   const GLint sizeMin = (ctx->API == API_OPENGLES) ? 4 : 3;
    ASSERT_OUTSIDE_BEGIN_END_AND_FLUSH(ctx);
 
    update_array(ctx, "glColorPointer", VERT_ATTRIB_COLOR0,
-                legalTypes, 3, BGRA_OR_4,
+                legalTypes, sizeMin, BGRA_OR_4,
                 size, type, stride, GL_TRUE, GL_FALSE, ptr);
 }
 
@@ -330,20 +379,19 @@ void GLAPIENTRY
 _mesa_TexCoordPointer(GLint size, GLenum type, GLsizei stride,
                       const GLvoid *ptr)
 {
-   GLbitfield legalTypes = (SHORT_BIT | INT_BIT |
-                            HALF_BIT | FLOAT_BIT | DOUBLE_BIT |
-                            FIXED_ES_BIT |
-                            UNSIGNED_INT_2_10_10_10_REV_BIT |
-                            INT_2_10_10_10_REV_BIT);
    GET_CURRENT_CONTEXT(ctx);
+   GLbitfield legalTypes = (ctx->API == API_OPENGLES)
+      ? (BYTE_BIT | SHORT_BIT | FLOAT_BIT | FIXED_ES_BIT)
+      : (SHORT_BIT | INT_BIT |
+         HALF_BIT | FLOAT_BIT | DOUBLE_BIT |
+         UNSIGNED_INT_2_10_10_10_REV_BIT |
+         INT_2_10_10_10_REV_BIT);
+   const GLint sizeMin = (ctx->API == API_OPENGLES) ? 2 : 1;
    const GLuint unit = ctx->Array.ActiveTexture;
    ASSERT_OUTSIDE_BEGIN_END_AND_FLUSH(ctx);
 
-   if (ctx->API == API_OPENGLES)
-      legalTypes |= BYTE_BIT;
-
    update_array(ctx, "glTexCoordPointer", VERT_ATTRIB_TEX(unit),
-                legalTypes, 1, 4,
+                legalTypes, sizeMin, 4,
                 size, type, stride, GL_FALSE, GL_FALSE,
                 ptr);
 }
@@ -568,12 +616,15 @@ get_vertex_array_attrib(struct gl_context *ctx, GLuint index, GLenum pname,
    case GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING_ARB:
       return array->BufferObj->Name;
    case GL_VERTEX_ATTRIB_ARRAY_INTEGER:
-      if (ctx->Version >= 30 || ctx->Extensions.EXT_gpu_shader4) {
+      if ((_mesa_is_desktop_gl(ctx)
+           && (ctx->Version >= 30 || ctx->Extensions.EXT_gpu_shader4))
+          || _mesa_is_gles3(ctx)) {
          return array->Integer;
       }
       goto error;
    case GL_VERTEX_ATTRIB_ARRAY_DIVISOR_ARB:
-      if (ctx->Extensions.ARB_instanced_arrays) {
+      if ((_mesa_is_desktop_gl(ctx) && ctx->Extensions.ARB_instanced_arrays)
+          || _mesa_is_gles3(ctx)) {
          return array->InstanceDivisor;
       }
       goto error;
@@ -591,7 +642,13 @@ static const GLfloat *
 get_current_attrib(struct gl_context *ctx, GLuint index, const char *function)
 {
    if (index == 0) {
-      if (ctx->API != API_OPENGLES2) {
+      /* In OpenGL 3.1 attribute 0 becomes non-magic, just like in OpenGL ES
+       * 2.0.  Note that we cannot just check for API_OPENGL_CORE here because
+       * that will erroneously allow this usage in a 3.0 forward-compatible
+       * context too.
+       */
+      if ((ctx->API != API_OPENGL_CORE || ctx->Version < 31)
+          && ctx->API != API_OPENGLES2) {
 	 _mesa_error(ctx, GL_INVALID_OPERATION, "%s(index==0)", function);
 	 return NULL;
       }

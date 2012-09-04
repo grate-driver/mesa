@@ -989,6 +989,16 @@ st_CopyTexSubImage(struct gl_context *ctx, GLuint dims,
       goto fallback;
    }
 
+   if (texImage->TexObject->Target == GL_TEXTURE_1D_ARRAY) {
+      /* 1D arrays might be thought of as 2D images but the actual layout
+       * might not be that way.  At some points, we convert OpenGL's 1D
+       * array 'height' into gallium 'layers' and that prevents the blit
+       * utility code from doing the right thing.  Simpy use the memcpy-based
+       * fallback.
+       */
+      goto fallback;
+   }
+
    if (matching_base_formats &&
        src_format == dest_format &&
        !do_flip) {
@@ -1299,7 +1309,7 @@ st_AllocTextureStorage(struct gl_context *ctx,
                        GLsizei levels, GLsizei width,
                        GLsizei height, GLsizei depth)
 {
-   const GLuint numFaces = (texObj->Target == GL_TEXTURE_CUBE_MAP) ? 6 : 1;
+   const GLuint numFaces = _mesa_num_tex_faces(texObj->Target);
    struct st_context *st = st_context(ctx);
    struct st_texture_object *stObj = st_texture_object(texObj);
    GLuint ptWidth, ptHeight, ptDepth, ptLayers, bindings;

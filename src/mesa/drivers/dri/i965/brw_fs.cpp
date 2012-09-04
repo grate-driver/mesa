@@ -979,7 +979,7 @@ fs_visitor::calculate_urb_setup()
        *
        * See compile_sf_prog() for more info.
        */
-      if (brw->fragment_program->Base.InputsRead & BITFIELD64_BIT(FRAG_ATTRIB_PNTC))
+      if (fp->Base.InputsRead & BITFIELD64_BIT(FRAG_ATTRIB_PNTC))
          urb_setup[FRAG_ATTRIB_PNTC] = urb_next++;
    }
 
@@ -2130,6 +2130,7 @@ bool
 brw_fs_precompile(struct gl_context *ctx, struct gl_shader_program *prog)
 {
    struct brw_context *brw = brw_context(ctx);
+   struct intel_context *intel = &brw->intel;
    struct brw_wm_prog_key key;
 
    if (!prog->_LinkedShaders[MESA_SHADER_FRAGMENT])
@@ -2142,34 +2143,50 @@ brw_fs_precompile(struct gl_context *ctx, struct gl_shader_program *prog)
 
    memset(&key, 0, sizeof(key));
 
-   if (fp->UsesKill)
-      key.iz_lookup |= IZ_PS_KILL_ALPHATEST_BIT;
+   if (intel->gen < 6) {
+      if (fp->UsesKill)
+         key.iz_lookup |= IZ_PS_KILL_ALPHATEST_BIT;
 
-   if (fp->Base.OutputsWritten & BITFIELD64_BIT(FRAG_RESULT_DEPTH))
-      key.iz_lookup |= IZ_PS_COMPUTES_DEPTH_BIT;
+      if (fp->Base.OutputsWritten & BITFIELD64_BIT(FRAG_RESULT_DEPTH))
+         key.iz_lookup |= IZ_PS_COMPUTES_DEPTH_BIT;
 
-   /* Just assume depth testing. */
-   key.iz_lookup |= IZ_DEPTH_TEST_ENABLE_BIT;
-   key.iz_lookup |= IZ_DEPTH_WRITE_ENABLE_BIT;
+      /* Just assume depth testing. */
+      key.iz_lookup |= IZ_DEPTH_TEST_ENABLE_BIT;
+      key.iz_lookup |= IZ_DEPTH_WRITE_ENABLE_BIT;
+   }
 
-   key.vp_outputs_written |= BITFIELD64_BIT(FRAG_ATTRIB_WPOS);
+   if (prog->Name != 0)
+      key.proj_attrib_mask = 0xffffffff;
+
+   if (intel->gen < 6)
+      key.vp_outputs_written |= BITFIELD64_BIT(FRAG_ATTRIB_WPOS);
+
    for (int i = 0; i < FRAG_ATTRIB_MAX; i++) {
       if (!(fp->Base.InputsRead & BITFIELD64_BIT(i)))
 	 continue;
 
-      key.proj_attrib_mask |= 1 << i;
+      if (prog->Name == 0)
+         key.proj_attrib_mask |= 1 << i;
 
-      int vp_index = _mesa_vert_result_to_frag_attrib((gl_vert_result) i);
+      if (intel->gen < 6) {
+         int vp_index = _mesa_vert_result_to_frag_attrib((gl_vert_result) i);
 
-      if (vp_index >= 0)
-	 key.vp_outputs_written |= BITFIELD64_BIT(vp_index);
+         if (vp_index >= 0)
+            key.vp_outputs_written |= BITFIELD64_BIT(vp_index);
+      }
    }
 
    key.clamp_fragment_color = true;
 
-   for (int i = 0; i < BRW_MAX_TEX_UNIT; i++) {
-      /* FINISHME: depth compares might use (0,0,0,W) for example */
-      key.tex.swizzles[i] = SWIZZLE_XYZW;
+   for (int i = 0; i < MAX_SAMPLERS; i++) {
+      if (fp->Base.ShadowSamplers & (1 << i)) {
+         /* Assume DEPTH_TEXTURE_MODE is the default: X, X, X, 1 */
+         key.tex.swizzles[i] =
+            MAKE_SWIZZLE4(SWIZZLE_X, SWIZZLE_X, SWIZZLE_X, SWIZZLE_ONE);
+      } else {
+         /* Color sampler: assume no swizzling. */
+         key.tex.swizzles[i] = SWIZZLE_XYZW;
+      }
    }
 
    if (fp->Base.InputsRead & FRAG_BIT_WPOS) {

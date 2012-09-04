@@ -282,7 +282,8 @@ static void declare_input_fs(
 	switch (decl->Interp.Interpolate) {
 	case TGSI_INTERPOLATE_COLOR:
 		/* XXX: Flat shading hangs the GPU */
-		if (si_shader_ctx->rctx->queued.named.rasterizer->flatshade) {
+		if (si_shader_ctx->rctx->queued.named.rasterizer &&
+		    si_shader_ctx->rctx->queued.named.rasterizer->flatshade) {
 #if 0
 			intr_name = "llvm.SI.fs.interp.constant";
 #else
@@ -328,8 +329,8 @@ static void declare_input_fs(
 		args[1] = attr_number;
 		args[2] = params;
 		si_shader_ctx->radeon_bld.inputs[soa_index] =
-			lp_build_intrinsic(gallivm->builder, intr_name,
-						input_type, args, 3);
+			build_intrinsic(base->gallivm->builder, intr_name,
+				input_type, args, 3, LLVMReadOnlyAttribute);
 	}
 }
 
@@ -361,6 +362,13 @@ static LLVMValueRef fetch_constant(
 	LLVMValueRef offset;
 	LLVMValueRef load;
 
+	/* currently not supported */
+	if (reg->Register.Indirect) {
+		assert(0);
+		load = lp_build_const_int32(base->gallivm, 0);
+		return bitcast(bld_base, type, load);
+	}
+
 	/* XXX: Assume the pointer to the constant buffer is being stored in
 	 * SGPR[0:1] */
 	const_ptr = use_sgpr(base->gallivm, SGPR_CONST_PTR_F32, 0);
@@ -373,6 +381,84 @@ static LLVMValueRef fetch_constant(
 
 	load = build_indexed_load(base->gallivm, const_ptr, offset);
 	return bitcast(bld_base, type, load);
+}
+
+/* Initialize arguments for the shader export intrinsic */
+static void si_llvm_init_export_args(struct lp_build_tgsi_context *bld_base,
+				     struct tgsi_full_declaration *d,
+				     unsigned index,
+				     unsigned target,
+				     LLVMValueRef *args)
+{
+	struct si_shader_context *si_shader_ctx = si_shader_context(bld_base);
+	struct lp_build_context *uint =
+				&si_shader_ctx->radeon_bld.soa.bld_base.uint_bld;
+	struct lp_build_context *base = &bld_base->base;
+	unsigned compressed = 0;
+	unsigned chan;
+
+	if (si_shader_ctx->type == TGSI_PROCESSOR_FRAGMENT) {
+		int cbuf = target - V_008DFC_SQ_EXP_MRT;
+
+		if (cbuf >= 0 && cbuf < 8) {
+			struct r600_context *rctx = si_shader_ctx->rctx;
+			compressed = (rctx->export_16bpc >> cbuf) & 0x1;
+		}
+	}
+
+	if (compressed) {
+		/* Pixel shader needs to pack output values before export */
+		for (chan = 0; chan < 2; chan++ ) {
+			LLVMValueRef *out_ptr =
+				si_shader_ctx->radeon_bld.soa.outputs[index];
+			args[0] = LLVMBuildLoad(base->gallivm->builder,
+						out_ptr[2 * chan], "");
+			args[1] = LLVMBuildLoad(base->gallivm->builder,
+						out_ptr[2 * chan + 1], "");
+			args[chan + 5] =
+				build_intrinsic(base->gallivm->builder,
+						"llvm.SI.packf16",
+						LLVMInt32TypeInContext(base->gallivm->context),
+						args, 2,
+						LLVMReadNoneAttribute);
+			args[chan + 7] = args[chan + 5];
+		}
+
+		/* Set COMPR flag */
+		args[4] = uint->one;
+	} else {
+		for (chan = 0; chan < 4; chan++ ) {
+			LLVMValueRef out_ptr =
+				si_shader_ctx->radeon_bld.soa.outputs[index][chan];
+			/* +5 because the first output value will be
+			 * the 6th argument to the intrinsic. */
+			args[chan + 5] = LLVMBuildLoad(base->gallivm->builder,
+						       out_ptr, "");
+		}
+
+		/* Clear COMPR flag */
+		args[4] = uint->zero;
+	}
+
+	/* XXX: This controls which components of the output
+	 * registers actually get exported. (e.g bit 0 means export
+	 * X component, bit 1 means export Y component, etc.)  I'm
+	 * hard coding this to 0xf for now.  In the future, we might
+	 * want to do something else. */
+	args[0] = lp_build_const_int32(base->gallivm, 0xf);
+
+	/* Specify whether the EXEC mask represents the valid mask */
+	args[1] = uint->zero;
+
+	/* Specify whether this is the last export */
+	args[2] = uint->zero;
+
+	/* Specify the target we are exporting */
+	args[3] = lp_build_const_int32(base->gallivm, target);
+
+	/* XXX: We probably need to keep track of the output
+	 * values, so we know what we are passing to the next
+	 * stage. */
 }
 
 /* XXX: This is partially implemented for VS only at this point.  It is not complete */
@@ -389,13 +475,6 @@ static void si_llvm_emit_epilogue(struct lp_build_tgsi_context * bld_base)
 	unsigned param_count = 0;
 
 	while (!tgsi_parse_end_of_tokens(parse)) {
-		/* XXX: component_bits controls which components of the output
-		 * registers actually get exported. (e.g bit 0 means export
-		 * X component, bit 1 means export Y component, etc.)  I'm
-		 * hard coding this to 0xf for now.  In the future, we might
-		 * want to do something else. */
-		unsigned component_bits = 0xf;
-		unsigned chan;
 		struct tgsi_full_declaration *d =
 					&parse->FullToken.FullDeclaration;
 		LLVMValueRef args[9];
@@ -428,22 +507,9 @@ static void si_llvm_emit_epilogue(struct lp_build_tgsi_context * bld_base)
 		}
 
 		for (index = d->Range.First; index <= d->Range.Last; index++) {
-			for (chan = 0; chan < 4; chan++ ) {
-				LLVMValueRef out_ptr =
-					si_shader_ctx->radeon_bld.soa.outputs
-					[index][chan];
-				/* +5 because the first output value will be
-				 * the 6th argument to the intrinsic. */
-				args[chan + 5]= LLVMBuildLoad(
-					base->gallivm->builder,	out_ptr, "");
-			}
-
-			/* XXX: We probably need to keep track of the output
-			 * values, so we know what we are passing to the next
-			 * stage. */
-
 			/* Select the correct target */
 			switch(d->Semantic.Name) {
+			case TGSI_SEMANTIC_PSIZE:
 			case TGSI_SEMANTIC_POSITION:
 				target = V_008DFC_SQ_EXP_POS;
 				break;
@@ -469,21 +535,7 @@ static void si_llvm_emit_epilogue(struct lp_build_tgsi_context * bld_base)
 					d->Semantic.Name);
 			}
 
-			/* Specify which components to enable */
-			args[0] = lp_build_const_int32(base->gallivm,
-								component_bits);
-
-			/* Specify whether the EXEC mask represents the valid mask */
-			args[1] = lp_build_const_int32(base->gallivm, 0);
-
-			/* Specify whether this is the last export */
-			args[2] = lp_build_const_int32(base->gallivm, 0);
-
-			/* Specify the target we are exporting */
-			args[3] = lp_build_const_int32(base->gallivm, target);
-
-			/* Set COMPR flag to zero to export data as 32-bit */
-			args[4] = uint->zero;
+			si_llvm_init_export_args(bld_base, d, index, target, args);
 
 			if (si_shader_ctx->type == TGSI_PROCESSOR_VERTEX ?
 			    (d->Semantic.Name == TGSI_SEMANTIC_POSITION) :
@@ -617,6 +669,7 @@ int si_pipe_shader_create(
 	struct si_pipe_shader *shader)
 {
 	struct r600_context *rctx = (struct r600_context*)ctx;
+	struct si_pipe_shader_selector *sel = shader->selector;
 	struct si_shader_context si_shader_ctx;
 	struct tgsi_shader_info shader_info;
 	struct lp_build_tgsi_context * bld_base;
@@ -633,7 +686,7 @@ int si_pipe_shader_create(
 	radeon_llvm_context_init(&si_shader_ctx.radeon_bld);
 	bld_base = &si_shader_ctx.radeon_bld.soa.bld_base;
 
-	tgsi_scan_shader(shader->tokens, &shader_info);
+	tgsi_scan_shader(sel->tokens, &shader_info);
 	bld_base->info = &shader_info;
 	bld_base->emit_fetch_funcs[TGSI_FILE_CONSTANT] = fetch_constant;
 	bld_base->emit_epilogue = si_llvm_emit_epilogue;
@@ -642,7 +695,7 @@ int si_pipe_shader_create(
 	bld_base->op_actions[TGSI_OPCODE_TXP] = tex_action;
 
 	si_shader_ctx.radeon_bld.load_input = declare_input;
-	si_shader_ctx.tokens = shader->tokens;
+	si_shader_ctx.tokens = sel->tokens;
 	tgsi_parse_init(&si_shader_ctx.parse, si_shader_ctx.tokens);
 	si_shader_ctx.shader = shader;
 	si_shader_ctx.type = si_shader_ctx.parse.FullHeader.Processor.Processor;
@@ -653,10 +706,10 @@ int si_pipe_shader_create(
 	/* Dump TGSI code before doing TGSI->LLVM conversion in case the
 	 * conversion fails. */
 	if (dump) {
-		tgsi_dump(shader->tokens, 0);
+		tgsi_dump(sel->tokens, 0);
 	}
 
-	if (!lp_build_tgsi_llvm(bld_base, shader->tokens)) {
+	if (!lp_build_tgsi_llvm(bld_base, sel->tokens)) {
 		fprintf(stderr, "Failed to translate shader from TGSI to LLVM\n");
 		return -EINVAL;
 	}
@@ -710,6 +763,4 @@ int si_pipe_shader_create(
 void si_pipe_shader_destroy(struct pipe_context *ctx, struct si_pipe_shader *shader)
 {
 	si_resource_reference(&shader->bo, NULL);
-
-	memset(&shader->shader,0,sizeof(struct si_shader));
 }

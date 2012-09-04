@@ -252,6 +252,129 @@ static const struct u_resource_vtbl r600_texture_vtbl =
 	NULL				/* transfer_inline_write */
 };
 
+/* The number of samples can be specified independently of the texture. */
+void r600_texture_get_fmask_info(struct r600_screen *rscreen,
+				 struct r600_texture *rtex,
+				 unsigned nr_samples,
+				 struct r600_fmask_info *out)
+{
+	/* FMASK is allocated pretty much like an ordinary texture.
+	 * Here we use bpe in the units of bits, not bytes. */
+	struct radeon_surface fmask = rtex->surface;
+
+	switch (nr_samples) {
+	case 2:
+		/* This should be 8,1, but we should set nsamples > 1
+		 * for the allocator to treat it as a multisample surface.
+		 * Let's set 4,2 then. */
+	case 4:
+		fmask.bpe = 4;
+		fmask.nsamples = 2;
+		break;
+	case 8:
+		fmask.bpe = 8;
+		fmask.nsamples = 4;
+		break;
+	case 16:
+		fmask.bpe = 16;
+		fmask.nsamples = 4;
+		break;
+	default:
+		R600_ERR("Invalid sample count for FMASK allocation.\n");
+		return;
+	}
+
+	/* R600-R700 errata? Anyway, this fixes colorbuffer corruption. */
+	if (rscreen->chip_class <= R700) {
+		fmask.bpe *= 2;
+	}
+
+	if (rscreen->chip_class >= EVERGREEN) {
+		fmask.bankh = nr_samples <= 4 ? 4 : 1;
+	}
+
+	if (rscreen->ws->surface_init(rscreen->ws, &fmask)) {
+		R600_ERR("Got error in surface_init while allocating FMASK.\n");
+		return;
+	}
+	assert(fmask.level[0].mode == RADEON_SURF_MODE_2D);
+
+	out->bank_height = fmask.bankh;
+	out->alignment = MAX2(256, fmask.bo_alignment);
+	out->size = (fmask.bo_size + 7) / 8;
+}
+
+static void r600_texture_allocate_fmask(struct r600_screen *rscreen,
+					struct r600_texture *rtex)
+{
+	struct r600_fmask_info fmask;
+
+	r600_texture_get_fmask_info(rscreen, rtex,
+				    rtex->resource.b.b.nr_samples, &fmask);
+
+	/* Reserve space for FMASK while converting bits back to bytes. */
+	rtex->fmask_bank_height = fmask.bank_height;
+	rtex->fmask_offset = align(rtex->size, fmask.alignment);
+	rtex->fmask_size = fmask.size;
+	rtex->size = rtex->fmask_offset + rtex->fmask_size;
+#if 0
+	printf("FMASK width=%u, height=%i, bits=%u, size=%u\n",
+	       fmask.npix_x, fmask.npix_y, fmask.bpe * fmask.nsamples, rtex->fmask_size);
+#endif
+}
+
+void r600_texture_get_cmask_info(struct r600_screen *rscreen,
+				 struct r600_texture *rtex,
+				 struct r600_cmask_info *out)
+{
+	unsigned cmask_tile_width = 8;
+	unsigned cmask_tile_height = 8;
+	unsigned cmask_tile_elements = cmask_tile_width * cmask_tile_height;
+	unsigned element_bits = 4;
+	unsigned cmask_cache_bits = 1024;
+	unsigned num_pipes = rscreen->tiling_info.num_channels;
+	unsigned pipe_interleave_bytes = rscreen->tiling_info.group_bytes;
+
+	unsigned elements_per_macro_tile = (cmask_cache_bits / element_bits) * num_pipes;
+	unsigned pixels_per_macro_tile = elements_per_macro_tile * cmask_tile_elements;
+	unsigned sqrt_pixels_per_macro_tile = sqrt(pixels_per_macro_tile);
+	unsigned macro_tile_width = util_next_power_of_two(sqrt_pixels_per_macro_tile);
+	unsigned macro_tile_height = pixels_per_macro_tile / macro_tile_width;
+
+	unsigned pitch_elements = align(rtex->surface.npix_x, macro_tile_width);
+	unsigned height = align(rtex->surface.npix_y, macro_tile_height);
+
+	unsigned base_align = num_pipes * pipe_interleave_bytes;
+	unsigned slice_bytes =
+		((pitch_elements * height * element_bits + 7) / 8) / cmask_tile_elements;
+
+	assert(macro_tile_width % 128 == 0);
+	assert(macro_tile_height % 128 == 0);
+
+	out->slice_tile_max = ((pitch_elements * height) / (128*128)) - 1;
+	out->alignment = MAX2(256, base_align);
+	out->size = rtex->surface.array_size * align(slice_bytes, base_align);
+}
+
+static void r600_texture_allocate_cmask(struct r600_screen *rscreen,
+					struct r600_texture *rtex)
+{
+	struct r600_cmask_info cmask;
+
+	r600_texture_get_cmask_info(rscreen, rtex, &cmask);
+
+	rtex->cmask_slice_tile_max = cmask.slice_tile_max;
+	rtex->cmask_offset = align(rtex->size, cmask.alignment);
+	rtex->cmask_size = cmask.size;
+	rtex->size = rtex->cmask_offset + rtex->cmask_size;
+#if 0
+	printf("CMASK: macro tile width = %u, macro tile height = %u, "
+	       "pitch elements = %u, height = %u, slice tile max = %u\n",
+	       macro_tile_width, macro_tile_height, pitch_elements, height,
+	       rtex->cmask_slice_tile_max);
+#endif
+}
+
 static struct r600_texture *
 r600_texture_create_object(struct pipe_screen *screen,
 			   const struct pipe_resource *base,
@@ -287,6 +410,17 @@ r600_texture_create_object(struct pipe_screen *screen,
 		return NULL;
 	}
 
+	if (base->nr_samples > 1 && !rtex->is_depth && alloc_bo) {
+		r600_texture_allocate_cmask(rscreen, rtex);
+		r600_texture_allocate_fmask(rscreen, rtex);
+	}
+
+	if (!rtex->is_depth && base->nr_samples > 1 &&
+	    (!rtex->fmask_size || !rtex->cmask_size)) {
+		FREE(rtex);
+		return NULL;
+	}
+
 	/* Now create the backing buffer. */
 	if (!buf && alloc_bo) {
 		unsigned base_align = rtex->surface.bo_alignment;
@@ -300,6 +434,13 @@ r600_texture_create_object(struct pipe_screen *screen,
 		resource->buf = buf;
 		resource->cs_buf = rscreen->ws->buffer_get_cs_handle(buf);
 		resource->domains = RADEON_DOMAIN_GTT | RADEON_DOMAIN_VRAM;
+	}
+
+	if (rtex->cmask_size) {
+		/* Initialize the cmask to 0xCC (= compressed state). */
+		char *ptr = rscreen->ws->buffer_map(resource->cs_buf, NULL, PIPE_TRANSFER_WRITE);
+		memset(ptr + rtex->cmask_offset, 0xCC, rtex->cmask_size);
+		rscreen->ws->buffer_unmap(resource->cs_buf);
 	}
 	return rtex;
 }
@@ -365,6 +506,9 @@ static struct pipe_surface *r600_create_surface(struct pipe_context *pipe,
 static void r600_surface_destroy(struct pipe_context *pipe,
 				 struct pipe_surface *surface)
 {
+	struct r600_surface *surf = (struct r600_surface*)surface;
+	pipe_resource_reference((struct pipe_resource**)&surf->cb_buffer_fmask, NULL);
+	pipe_resource_reference((struct pipe_resource**)&surf->cb_buffer_cmask, NULL);
 	pipe_resource_reference(&surface->texture, NULL);
 	FREE(surface);
 }
@@ -517,7 +661,7 @@ struct pipe_transfer* r600_texture_get_transfer(struct pipe_context *ctx,
 			return NULL;
 		}
 
-		r600_blit_uncompress_depth(ctx, rtex, staging_depth,
+		r600_blit_decompress_depth(ctx, rtex, staging_depth,
 					   level, level,
 					   box->z, box->z + box->depth - 1,
 					   0, 0);

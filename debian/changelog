@@ -35,7 +35,7 @@ mesa (9.0~git20120821.c1114c61-0ubuntu1) quantal; urgency=low
 
  -- Timo Aaltonen <tjaalton@ubuntu.com>  Thu, 23 Aug 2012 15:37:30 +0300
 
-mesa (9.0~git20120821.c1114c61-1) UNRELEASED; urgency=low
+mesa (9.0~git20120903.e1673d20-1) UNRELEASED; urgency=low
 
   [ Julien Cristau ]
   * Use xz for all binary packages not just *-dbg.
@@ -48,7 +48,7 @@ mesa (9.0~git20120821.c1114c61-1) UNRELEASED; urgency=low
   * control: Added libtool to build-depends.
   * rules: Drop special handling of config.{guess,sub}, not needed anymore.
   * rules, libosmesa*: Build only the 32bit OSMesa library.
-  * control: Bump libdrm build-dep to 2.4.38.
+  * control: Bump libdrm build-dep to 2.4.39.
   * control: Bump libwayland-dev build-dep to 0.95.
   * rules: Update the clean target.
   * rules: Add --disable-shared-glapi to the swx11 targets.
@@ -64,6 +64,12 @@ mesa (9.0~git20120821.c1114c61-1) UNRELEASED; urgency=low
   * rules: Build llvm shared libs on platforms that support llvm.
   * Added 15-fix-llvmpipe-test-linking.diff: Fix link failure when building
     llvmpipe with --with-llvm-shared-libs. Patch from fdo bug #52617.
+  * control, rules, libglu*: Remove libglu packaging, since it's been split
+    off upstream.
+  * rules: Disable dri for the swx11 targets.
+  * not-installed: Updated.
+  * Update symbols for libgles2-mesa
+  * libegl1-mesa-drivers.install.linux: Bump libwayland-egl.so version
 
   [ Steve Langasek ]
   * Install all dri drivers from the DESTDIR tree, instead of copying them
@@ -78,12 +84,6 @@ mesa (9.0~git20120821.c1114c61-1) UNRELEASED; urgency=low
     in Debian right now so let's just be complete.
 
  -- Julien Cristau <jcristau@debian.org>  Fri, 03 Aug 2012 23:17:16 +0200
-
-mesa (8.0.4-1ubuntu1) quantal; urgency=low
-
-  * Merge from unstable. (LP: #1031784)
-
- -- Timo Aaltonen <tjaalton@ubuntu.com>  Fri, 03 Aug 2012 09:27:48 +0300
 
 mesa (8.0.4-1) unstable; urgency=low
 

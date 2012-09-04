@@ -171,7 +171,7 @@ bits_per_pixel( XMesaVisual xmv )
    /* Create a temporary XImage */
    img = XCreateImage( dpy, visinfo->visual, visinfo->depth,
 		       ZPixmap, 0,           /*format, offset*/
-		       (char*) MALLOC(8),    /*data*/
+		       (char*) malloc(8),    /*data*/
 		       1, 1,                 /*width, height*/
 		       32,                   /*bitmap_pad*/
 		       0                     /*bytes_per_line*/
@@ -781,7 +781,7 @@ XMesaVisual XMesaCreateVisual( XMesaDisplay *display,
     * the struct but we may need some of the information contained in it
     * at a later time.
     */
-   v->visinfo = (XVisualInfo *) MALLOC(sizeof(*visinfo));
+   v->visinfo = (XVisualInfo *) malloc(sizeof(*visinfo));
    if(!v->visinfo) {
       free(v);
       return NULL;
@@ -921,13 +921,11 @@ XMesaContext XMesaCreateContext( XMesaVisual v, XMesaContext share_list )
    _mesa_enable_1_5_extensions(mesaCtx);
    _mesa_enable_2_0_extensions(mesaCtx);
    _mesa_enable_2_1_extensions(mesaCtx);
-#if ENABLE_EXT_texure_compression_s3tc
     if (mesaCtx->Mesa_DXTn) {
        _mesa_enable_extension(mesaCtx, "GL_EXT_texture_compression_s3tc");
        _mesa_enable_extension(mesaCtx, "GL_S3_s3tc");
     }
     _mesa_enable_extension(mesaCtx, "GL_3DFX_texture_compression_FXT1");
-#endif
 #if ENABLE_EXT_timer_query
     _mesa_enable_extension(mesaCtx, "GL_EXT_timer_query");
 #endif

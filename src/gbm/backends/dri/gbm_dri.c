@@ -299,13 +299,21 @@ gbm_dri_is_format_supported(struct gbm_device *gbm,
 static int
 gbm_dri_bo_write(struct gbm_bo *_bo, const void *buf, size_t count)
 {
-   struct gbm_dri_device *dri = gbm_dri_device(_bo->gbm);
    struct gbm_dri_bo *bo = gbm_dri_bo(_bo);
+   void *ptr;
+   int ret;
 
-   if (dri->image->base.version < 4)
+   if (bo->bo == NULL)
       return -1;
 
-   return dri->image->write(bo->image, buf, count);
+   ret = kms_bo_map(bo->bo, &ptr);
+   if (ret < 0)
+      return -1;
+
+   memcpy(ptr, buf, count);
+
+   kms_bo_unmap(bo->bo);
+   return 0;
 }
 
 static void
@@ -314,7 +322,10 @@ gbm_dri_bo_destroy(struct gbm_bo *_bo)
    struct gbm_dri_device *dri = gbm_dri_device(_bo->gbm);
    struct gbm_dri_bo *bo = gbm_dri_bo(_bo);
 
-   dri->image->destroyImage(bo->image);
+   if (bo->image != NULL)
+      dri->image->destroyImage(bo->image);
+   if (bo->bo != NULL)
+      kms_bo_destroy(&bo->bo);
    free(bo);
 }
 
@@ -352,7 +363,11 @@ gbm_dri_bo_import(struct gbm_device *gbm,
    struct gbm_dri_bo *bo;
    __DRIimage *image;
    unsigned dri_use = 0;
-   int dri_format, width, height, gbm_format, stride, cpp, offset;
+   int gbm_format;
+
+   /* Required for query image WIDTH & HEIGHT */
+   if (dri->image->base.version < 4)
+      return NULL;
 
    switch (type) {
 #if HAVE_WAYLAND_PLATFORM
@@ -361,20 +376,15 @@ gbm_dri_bo_import(struct gbm_device *gbm,
       struct wl_drm_buffer *wb = (struct wl_drm_buffer *) buffer;
 
       image = wb->driver_buffer;
-      stride = wb->stride[0];
-      offset = wb->offset[0];
-      cpp = 4;
+
       switch (wb->format) {
       case WL_DRM_FORMAT_XRGB8888:
-         dri_format = __DRI_IMAGE_FORMAT_XRGB8888;
          gbm_format = GBM_FORMAT_XRGB8888;
          break;
       case WL_DRM_FORMAT_ARGB8888:
-         dri_format = __DRI_IMAGE_FORMAT_ARGB8888;
          gbm_format = GBM_FORMAT_ARGB8888;
          break;
       case WL_DRM_FORMAT_YUYV:
-         dri_format = __DRI_IMAGE_FORMAT_ARGB8888;
          gbm_format = GBM_FORMAT_YUYV;
          break;
       default:
@@ -386,15 +396,15 @@ gbm_dri_bo_import(struct gbm_device *gbm,
 
    case GBM_BO_IMPORT_EGL_IMAGE:
    {
+      int dri_format;
       if (dri->lookup_image == NULL)
          return NULL;
 
       image = dri->lookup_image(dri->screen, buffer, dri->lookup_user_data);
       dri->image->queryImage(image, __DRI_IMAGE_ATTRIB_FORMAT, &dri_format);
       gbm_format = gbm_dri_to_gbm_format(dri_format);
-      dri->image->queryImage(image, __DRI_IMAGE_ATTRIB_STRIDE, &stride);
-      offset = 0;
-      cpp = 4;
+      if (gbm_format == 0)
+         return NULL;
       break;
    }
 
@@ -407,13 +417,7 @@ gbm_dri_bo_import(struct gbm_device *gbm,
    if (bo == NULL)
       return NULL;
 
-   dri->image->queryImage(image, __DRI_IMAGE_ATTRIB_WIDTH, &width);
-   dri->image->queryImage(image, __DRI_IMAGE_ATTRIB_HEIGHT, &height);
-
-   bo->image = dri->image->createSubImage(image,
-                                          width, height, dri_format,
-                                          offset, stride / cpp, NULL);
-
+   bo->image = dri->image->dupImage(image, NULL);
 
    if (usage & GBM_BO_USE_SCANOUT)
       dri_use |= __DRI_IMAGE_USE_SCANOUT;
@@ -426,10 +430,14 @@ gbm_dri_bo_import(struct gbm_device *gbm,
    }
 
    bo->base.base.gbm = gbm;
-   bo->base.base.width = width;
-   bo->base.base.height = height;
-   bo->base.base.stride = stride;
    bo->base.base.format = gbm_format;
+
+   dri->image->queryImage(bo->image, __DRI_IMAGE_ATTRIB_WIDTH,
+                          (int*)&bo->base.base.width);
+   dri->image->queryImage(bo->image, __DRI_IMAGE_ATTRIB_HEIGHT,
+                          (int*)&bo->base.base.height);
+   dri->image->queryImage(bo->image, __DRI_IMAGE_ATTRIB_STRIDE,
+                          (int*)&bo->base.base.stride);
    dri->image->queryImage(bo->image, __DRI_IMAGE_ATTRIB_HANDLE,
                           &bo->base.base.handle.s32);
 
@@ -446,9 +454,6 @@ gbm_dri_bo_create(struct gbm_device *gbm,
    int dri_format;
    unsigned dri_use = 0;
 
-   if (dri->image->base.version < 4 && (usage & GBM_BO_USE_WRITE))
-      return NULL;
-
    bo = calloc(1, sizeof *bo);
    if (bo == NULL)
       return NULL;
@@ -456,6 +461,33 @@ gbm_dri_bo_create(struct gbm_device *gbm,
    bo->base.base.gbm = gbm;
    bo->base.base.width = width;
    bo->base.base.height = height;
+
+   if (usage & GBM_BO_USE_WRITE) {
+      int ret;
+      unsigned attrs[7] = {
+         KMS_WIDTH, 64,
+         KMS_HEIGHT, 64,
+         KMS_BO_TYPE, KMS_BO_TYPE_SCANOUT_X8R8G8B8,
+         KMS_TERMINATE_PROP_LIST,
+      };
+
+      if (!(usage & GBM_BO_USE_CURSOR_64X64))
+         return NULL;
+
+      if (dri->kms == NULL)
+         return NULL;
+
+      ret = kms_bo_create(dri->kms, attrs, &bo->bo);
+      if (ret < 0) {
+         free(bo);
+         return NULL;
+      }
+
+      kms_bo_get_prop(bo->bo, KMS_PITCH, &bo->base.base.stride);
+      kms_bo_get_prop(bo->bo, KMS_HANDLE, (unsigned*)&bo->base.base.handle);
+
+      return &bo->base.base;
+   }
 
    switch (format) {
    case GBM_FORMAT_RGB565:
@@ -480,8 +512,9 @@ gbm_dri_bo_create(struct gbm_device *gbm,
       dri_use |= __DRI_IMAGE_USE_SCANOUT;
    if (usage & GBM_BO_USE_CURSOR_64X64)
       dri_use |= __DRI_IMAGE_USE_CURSOR;
-   if (usage & GBM_BO_USE_WRITE)
-      dri_use |= __DRI_IMAGE_USE_WRITE;
+
+   /* Gallium drivers requires shared in order to get the handle/stride */
+   dri_use |= __DRI_IMAGE_USE_SHARE;
 
    bo->image =
       dri->image->createImage(dri->screen,
@@ -561,13 +594,21 @@ dri_device_create(int fd)
    dri->base.type = GBM_DRM_DRIVER_TYPE_DRI;
    dri->base.base.name = "drm";
 
+   kms_create(fd, &dri->kms);
+   if (dri->kms == NULL)
+      goto err_kms;
+
    ret = dri_screen_create(dri);
-   if (ret) {
-      free(dri);
-      return NULL;
-   }
+   if (ret)
+      goto err_dri;
 
    return &dri->base.base;
+
+err_dri:
+   kms_destroy(&dri->kms);
+err_kms:
+   free(dri);
+   return NULL;
 }
 
 struct gbm_backend gbm_dri_backend = {

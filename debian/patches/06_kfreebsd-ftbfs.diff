@@ -7,7 +7,7 @@ Debian bug: http://bugs.debian.org/524690
 
 --- a/configure.ac
 +++ b/configure.ac
-@@ -1160,7 +1160,7 @@
+@@ -1022,7 +1022,7 @@
              ;;
          esac
          ;;

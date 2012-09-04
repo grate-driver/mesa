@@ -88,8 +88,10 @@ class SGPR_256 <bits<8> num, string name, list<Register> subregs> :
     SI_256 <name, subregs>;
 
 def VCC : SIReg<"VCC">;
+def EXEC : SIReg<"EXEC">;
 def SCC : SIReg<"SCC">;
 def SREG_LIT_0 : SIReg <"S LIT 0">;
+def SI_LITERAL_CONSTANT : SIReg<"LITERAL CONSTANT">;
 
 def M0 : SIReg <"M0">;
 
@@ -169,6 +171,9 @@ def AllReg_32 : RegisterClass<"AMDGPU", [f32, i32], 32,
 
 def SCCReg : RegisterClass<"AMDGPU", [i1], 1, (add SCC)>;
 def VCCReg : RegisterClass<"AMDGPU", [i1], 1, (add VCC)>;
+def EXECReg : RegisterClass<"AMDGPU", [i1], 1, (add EXEC)>;
+def M0Reg : RegisterClass<"AMDGPU", [i32], 32, (add M0)>;
+
 
 STRING
 
@@ -269,6 +274,11 @@ sub print_reg_class {
   #Add VCC to SReg_64
   if ($class_prefix eq 'SReg' and $reg_width == 64) {
     push (@registers, 'VCC')
+  }
+
+  #Add EXEC to SReg_64
+  if ($class_prefix eq 'SReg' and $reg_width == 64) {
+    push (@registers, 'EXEC')
   }
 
   my $reg_list = join(', ', @registers);

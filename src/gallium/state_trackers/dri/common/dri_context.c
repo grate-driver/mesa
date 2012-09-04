@@ -34,6 +34,7 @@
 #include "dri_screen.h"
 #include "dri_drawable.h"
 #include "dri_context.h"
+#include "state_tracker/drm_driver.h"
 
 #include "pipe/p_context.h"
 #include "state_tracker/st_context.h"
@@ -46,6 +47,13 @@ dri_pp_query(struct dri_context *ctx)
    for (i = 0; i < PP_FILTERS; i++) {
       ctx->pp_enabled[i] = driQueryOptioni(&ctx->optionCache, pp_filters[i].name);
    }
+}
+
+static void dri_fill_st_options(struct st_config_options *options,
+                                const struct driOptionCache * optionCache)
+{
+   options->force_glsl_extensions_warn =
+      driQueryOptionb(optionCache, "force_glsl_extensions_warn");
 }
 
 GLboolean
@@ -104,8 +112,9 @@ dri_create_context(gl_api api, const struct gl_config * visual,
    ctx->sPriv = sPriv;
 
    driParseConfigFiles(&ctx->optionCache,
-		       &screen->optionCache, sPriv->myNum, "dri");
+		       &screen->optionCache, sPriv->myNum, driver_descriptor.name);
 
+   dri_fill_st_options(&attribs.options, &ctx->optionCache);
    dri_fill_st_visual(&attribs.visual, screen, visual);
    ctx->st = stapi->create_context(stapi, &screen->base, &attribs, &ctx_err,
 				   st_share);
@@ -150,7 +159,7 @@ dri_create_context(gl_api api, const struct gl_config * visual,
    if (ctx && ctx->st)
       ctx->st->destroy(ctx->st);
 
-   FREE(ctx);
+   free(ctx);
    return GL_FALSE;
 }
 
@@ -163,7 +172,7 @@ dri_destroy_context(__DRIcontext * cPriv)
     * driParseConfigFiles allocated values only - the rest
     * is owned by screen optionCache.
     */
-   FREE(ctx->optionCache.values);
+   free(ctx->optionCache.values);
 
    /* No particular reason to wait for command completion before
     * destroying a context, but we flush the context here
@@ -175,7 +184,7 @@ dri_destroy_context(__DRIcontext * cPriv)
 
    if (ctx->pp) pp_free(ctx->pp);
 
-   FREE(ctx);
+   free(ctx);
 }
 
 GLboolean

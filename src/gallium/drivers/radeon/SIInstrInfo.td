@@ -86,16 +86,6 @@ class GPR2Align <RegisterClass rc, ValueType vt> : Operand <vt> {
   let MIOperandInfo = (ops rc:$reg);
 }
 
-def i32Literal : Operand <i32> {
-  let EncoderMethod = "i32LiteralEncode";
-}
-
-// i64Literal uses the same encoder method as i32 literal, because an
-// i64Literal is really a i32 literal with the top 32-bits all set to zero.
-def i64Literal : Operand <i64> {
-  let EncoderMethod = "i32LiteralEncode";
-}
-
 def SMRDmemrr : Operand<iPTR> {
   let MIOperandInfo = (ops SReg_64, SReg_32);
   let EncoderMethod = "GPR2AlignEncode";
@@ -363,7 +353,7 @@ class VINTRP <bits <2> op, dag outs, dag ins, string asm, list<dag> pattern> :
   let Inst{31-26} = 0x32; // encoding
   let EncodingType = 11; // SIInstrEncodingType::VINTRP
 
-  let Uses = [M0];
+  let neverHasSideEffects = 1;
 }
 
 class VOP1 <bits<8> op, dag outs, dag ins, string asm, list<dag> pattern> :

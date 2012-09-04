@@ -127,7 +127,7 @@ static unsigned u_max_sample(struct pipe_resource *r)
 	return r->nr_samples ? r->nr_samples - 1 : 0;
 }
 
-void r600_blit_uncompress_depth(struct pipe_context *ctx,
+void r600_blit_decompress_depth(struct pipe_context *ctx,
 		struct r600_texture *texture,
 		struct r600_texture *staging,
 		unsigned first_level, unsigned last_level,
@@ -142,8 +142,18 @@ void r600_blit_uncompress_depth(struct pipe_context *ctx,
 		util_format_description(texture->resource.b.b.format);
 	float depth;
 
-	if (!staging && !texture->dirty_db_mask)
+	if (!staging && !texture->dirty_level_mask)
 		return;
+
+	max_sample = u_max_sample(&texture->resource.b.b);
+
+	/* XXX Decompressing MSAA depth textures is broken on R6xx.
+	 * There is also a hardlock if CMASK and FMASK are not present.
+	 * Just skip this until we find out how to fix it. */
+	if (rctx->chip_class == R600 && max_sample > 0) {
+		texture->dirty_level_mask = 0;
+		return;
+	}
 
 	if (rctx->family == CHIP_RV610 || rctx->family == CHIP_RV630 ||
 	    rctx->family == CHIP_RV620 || rctx->family == CHIP_RV635)
@@ -158,10 +168,9 @@ void r600_blit_uncompress_depth(struct pipe_context *ctx,
 	rctx->db_misc_state.copy_sample = first_sample;
 	r600_atom_dirty(rctx, &rctx->db_misc_state.atom);
 
-	max_sample = u_max_sample(&texture->resource.b.b);
 
 	for (level = first_level; level <= last_level; level++) {
-		if (!staging && !(texture->dirty_db_mask & (1 << level)))
+		if (!staging && !(texture->dirty_level_mask & (1 << level)))
 			continue;
 
 		/* The smaller the mipmap level, the less layers there are
@@ -209,7 +218,7 @@ void r600_blit_uncompress_depth(struct pipe_context *ctx,
 		if (!staging &&
 		    first_layer == 0 && last_layer == max_layer &&
 		    first_sample == 0 && last_sample == max_sample) {
-			texture->dirty_db_mask &= ~(1 << level);
+			texture->dirty_level_mask &= ~(1 << level);
 		}
 	}
 
@@ -218,11 +227,11 @@ void r600_blit_uncompress_depth(struct pipe_context *ctx,
 	r600_atom_dirty(rctx, &rctx->db_misc_state.atom);
 }
 
-void r600_flush_depth_textures(struct r600_context *rctx,
+void r600_decompress_depth_textures(struct r600_context *rctx,
 			       struct r600_samplerview_state *textures)
 {
 	unsigned i;
-	unsigned depth_texture_mask = textures->depth_texture_mask;
+	unsigned depth_texture_mask = textures->compressed_depthtex_mask;
 
 	while (depth_texture_mask) {
 		struct pipe_sampler_view *view;
@@ -236,10 +245,89 @@ void r600_flush_depth_textures(struct r600_context *rctx,
 		tex = (struct r600_texture *)view->texture;
 		assert(tex->is_depth && !tex->is_flushing_texture);
 
-		r600_blit_uncompress_depth(&rctx->context, tex, NULL,
+		r600_blit_decompress_depth(&rctx->context, tex, NULL,
 					   view->u.tex.first_level, view->u.tex.last_level,
 					   0, u_max_layer(&tex->resource.b.b, view->u.tex.first_level),
 					   0, u_max_sample(&tex->resource.b.b));
+	}
+}
+
+static void r600_blit_decompress_color(struct pipe_context *ctx,
+		struct r600_texture *rtex,
+		unsigned first_level, unsigned last_level,
+		unsigned first_layer, unsigned last_layer)
+{
+	struct r600_context *rctx = (struct r600_context *)ctx;
+	unsigned layer, level, checked_last_layer, max_layer;
+
+	assert(rctx->chip_class != CAYMAN);
+
+	if (!rtex->dirty_level_mask)
+		return;
+
+	for (level = first_level; level <= last_level; level++) {
+		if (!(rtex->dirty_level_mask & (1 << level)))
+			continue;
+
+		/* The smaller the mipmap level, the less layers there are
+		 * as far as 3D textures are concerned. */
+		max_layer = u_max_layer(&rtex->resource.b.b, level);
+		checked_last_layer = last_layer < max_layer ? last_layer : max_layer;
+
+		for (layer = first_layer; layer <= checked_last_layer; layer++) {
+			struct pipe_surface *cbsurf, surf_tmpl;
+
+			surf_tmpl.format = rtex->resource.b.b.format;
+			surf_tmpl.u.tex.level = level;
+			surf_tmpl.u.tex.first_layer = layer;
+			surf_tmpl.u.tex.last_layer = layer;
+			surf_tmpl.usage = PIPE_BIND_RENDER_TARGET;
+			cbsurf = ctx->create_surface(ctx, &rtex->resource.b.b, &surf_tmpl);
+
+			r600_blitter_begin(ctx, R600_DECOMPRESS);
+			util_blitter_custom_color(rctx->blitter, cbsurf,
+						  rctx->custom_blend_decompress);
+			r600_blitter_end(ctx);
+
+			pipe_surface_reference(&cbsurf, NULL);
+		}
+
+		/* The texture will always be dirty if some layers or samples aren't flushed.
+		 * I don't think this case occurs often though. */
+		if (first_layer == 0 && last_layer == max_layer) {
+			rtex->dirty_level_mask &= ~(1 << level);
+		}
+	}
+}
+
+void r600_decompress_color_textures(struct r600_context *rctx,
+				    struct r600_samplerview_state *textures)
+{
+	unsigned i;
+	unsigned mask = textures->compressed_colortex_mask;
+
+	/* Cayman cannot decompress an MSAA colorbuffer,
+	 * but it can read it compressed, so skip this. */
+	assert(rctx->chip_class != CAYMAN);
+	if (rctx->chip_class == CAYMAN) {
+		return;
+	}
+
+	while (mask) {
+		struct pipe_sampler_view *view;
+		struct r600_texture *tex;
+
+		i = u_bit_scan(&mask);
+
+		view = &textures->views[i]->base;
+		assert(view);
+
+		tex = (struct r600_texture *)view->texture;
+		assert(tex->cmask_size && tex->fmask_size);
+
+		r600_blit_decompress_color(&rctx->context, tex,
+					   view->u.tex.first_level, view->u.tex.last_level,
+					   0, u_max_layer(&tex->resource.b.b, view->u.tex.first_level));
 	}
 }
 
@@ -257,10 +345,15 @@ static void r600_copy_first_sample(struct pipe_context *ctx,
 			return; /* error */
 
 		/* Decompress the first sample only. */
-		r600_blit_uncompress_depth(ctx,	rsrc, NULL,
+		r600_blit_decompress_depth(ctx,	rsrc, NULL,
 					   0, 0,
 					   info->src.layer, info->src.layer,
 					   0, 0);
+	}
+	if (rctx->chip_class != CAYMAN && rsrc->fmask_size && rsrc->cmask_size) {
+		r600_blit_decompress_color(ctx, rsrc,
+					   0, 0,
+					   info->src.layer, info->src.layer);
 	}
 
 	/* this is correct for upside-down blits too */
@@ -315,6 +408,8 @@ static void r600_color_resolve(struct pipe_context *ctx,
 	struct pipe_screen *screen = ctx->screen;
 	struct pipe_resource *tmp, templ;
 	struct pipe_box box;
+	unsigned sample_mask =
+		rctx->chip_class == CAYMAN ? ~0 : ((1ull << MAX2(1, info->src.res->nr_samples)) - 1);
 
 	assert((info->mask & PIPE_MASK_RGBA) == PIPE_MASK_RGBA);
 
@@ -323,7 +418,7 @@ static void r600_color_resolve(struct pipe_context *ctx,
 		util_blitter_custom_resolve_color(rctx->blitter,
 						  info->dst.res, info->dst.level, info->dst.layer,
 						  info->src.res, info->src.layer,
-						  rctx->custom_blend_resolve);
+						  sample_mask, rctx->custom_blend_resolve);
 		r600_blitter_end(ctx);
 		return;
 	}
@@ -348,7 +443,7 @@ static void r600_color_resolve(struct pipe_context *ctx,
 	util_blitter_custom_resolve_color(rctx->blitter,
 					  tmp, 0, 0,
 					  info->src.res, info->src.layer,
-					  rctx->custom_blend_resolve);
+					  sample_mask, rctx->custom_blend_resolve);
 	r600_blitter_end(ctx);
 
 	/* this is correct for upside-down blits too */
@@ -596,10 +691,14 @@ static void r600_resource_copy_region(struct pipe_context *ctx,
 		if (!r600_init_flushed_depth_texture(ctx, src, NULL))
 			return; /* error */
 
-		r600_blit_uncompress_depth(ctx, rsrc, NULL,
+		r600_blit_decompress_depth(ctx, rsrc, NULL,
 					   src_level, src_level,
 					   src_box->z, src_box->z + src_box->depth - 1,
 					   0, u_max_sample(src));
+	}
+	if (rctx->chip_class != CAYMAN && rsrc->fmask_size && rsrc->cmask_size) {
+		r600_blit_decompress_color(ctx, rsrc, src_level, src_level,
+					   src_box->z, src_box->z + src_box->depth - 1);
 	}
 
 	restore_orig[0] = restore_orig[1] = FALSE;
@@ -660,11 +759,20 @@ static void r600_resource_copy_region(struct pipe_context *ctx,
 		restore_orig[1] = TRUE;
 	}
 
-	for (i = 0; i <= last_sample; i++) {
+	/* XXX Properly implement multisample textures on Cayman. In the meantime,
+	 * copy only the first sample (which is the only one that doesn't return garbage). */
+	if (rctx->chip_class == CAYMAN) {
 		r600_blitter_begin(ctx, R600_COPY_TEXTURE);
-		util_blitter_copy_texture(rctx->blitter, dst, dst_level, 1 << i, dstx, dsty, dstz,
-					  src, src_level, i, psbox);
+		util_blitter_copy_texture(rctx->blitter, dst, dst_level, ~0, dstx, dsty, dstz,
+					  src, src_level, 0, psbox);
 		r600_blitter_end(ctx);
+	} else {
+		for (i = 0; i <= last_sample; i++) {
+			r600_blitter_begin(ctx, R600_COPY_TEXTURE);
+			util_blitter_copy_texture(rctx->blitter, dst, dst_level, 1 << i, dstx, dsty, dstz,
+						  src, src_level, i, psbox);
+			r600_blitter_end(ctx);
+		}
 	}
 
 	if (restore_orig[0])

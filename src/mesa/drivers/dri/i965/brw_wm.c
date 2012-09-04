@@ -364,20 +364,20 @@ brw_debug_recompile_sampler_key(const struct brw_sampler_prog_key_data *old_key,
 {
    bool found = false;
 
-   for (unsigned int i = 0; i < BRW_MAX_TEX_UNIT; i++) {
+   for (unsigned int i = 0; i < MAX_SAMPLERS; i++) {
       found |= key_debug("EXT_texture_swizzle or DEPTH_TEXTURE_MODE",
-                         key->swizzles[i], old_key->swizzles[i]);
+                         old_key->swizzles[i], key->swizzles[i]);
    }
    found |= key_debug("GL_CLAMP enabled on any texture unit's 1st coordinate",
-                      key->gl_clamp_mask[0], old_key->gl_clamp_mask[0]);
+                      old_key->gl_clamp_mask[0], key->gl_clamp_mask[0]);
    found |= key_debug("GL_CLAMP enabled on any texture unit's 2nd coordinate",
-                      key->gl_clamp_mask[1], old_key->gl_clamp_mask[1]);
+                      old_key->gl_clamp_mask[1], key->gl_clamp_mask[1]);
    found |= key_debug("GL_CLAMP enabled on any texture unit's 3rd coordinate",
-                      key->gl_clamp_mask[2], old_key->gl_clamp_mask[2]);
+                      old_key->gl_clamp_mask[2], key->gl_clamp_mask[2]);
    found |= key_debug("GL_MESA_ycbcr texturing\n",
-                      key->yuvtex_mask, old_key->yuvtex_mask);
+                      old_key->yuvtex_mask, key->yuvtex_mask);
    found |= key_debug("GL_MESA_ycbcr UV swapping\n",
-                      key->yuvtex_swap_mask, old_key->yuvtex_swap_mask);
+                      old_key->yuvtex_swap_mask, key->yuvtex_swap_mask);
 
    return found;
 }
@@ -413,18 +413,18 @@ brw_wm_debug_recompile(struct brw_context *brw,
    }
 
    found |= key_debug("alphatest, computed depth, depth test, or depth write",
-                      key->iz_lookup, old_key->iz_lookup);
-   found |= key_debug("depth statistics", key->stats_wm, old_key->stats_wm);
-   found |= key_debug("flat shading", key->flat_shade, old_key->flat_shade);
-   found |= key_debug("number of color buffers", key->nr_color_regions, old_key->nr_color_regions);
-   found |= key_debug("rendering to FBO", key->render_to_fbo, old_key->render_to_fbo);
-   found |= key_debug("fragment color clamping", key->clamp_fragment_color, old_key->clamp_fragment_color);
-   found |= key_debug("line smoothing", key->line_aa, old_key->line_aa);
-   found |= key_debug("proj_attrib_mask", key->proj_attrib_mask, old_key->proj_attrib_mask);
-   found |= key_debug("renderbuffer height", key->drawable_height, old_key->drawable_height);
-   found |= key_debug("vertex shader outputs", key->vp_outputs_written, old_key->vp_outputs_written);
+                      old_key->iz_lookup, key->iz_lookup);
+   found |= key_debug("depth statistics", old_key->stats_wm, key->stats_wm);
+   found |= key_debug("flat shading", old_key->flat_shade, key->flat_shade);
+   found |= key_debug("number of color buffers", old_key->nr_color_regions, key->nr_color_regions);
+   found |= key_debug("rendering to FBO", old_key->render_to_fbo, key->render_to_fbo);
+   found |= key_debug("fragment color clamping", old_key->clamp_fragment_color, key->clamp_fragment_color);
+   found |= key_debug("line smoothing", old_key->line_aa, key->line_aa);
+   found |= key_debug("proj_attrib_mask", old_key->proj_attrib_mask, key->proj_attrib_mask);
+   found |= key_debug("renderbuffer height", old_key->drawable_height, key->drawable_height);
+   found |= key_debug("vertex shader outputs", old_key->vp_outputs_written, key->vp_outputs_written);
 
-   found |= brw_debug_recompile_sampler_key(&key->tex, &old_key->tex);
+   found |= brw_debug_recompile_sampler_key(&old_key->tex, &key->tex);
 
    if (!found) {
       perf_debug("  Something else\n");
@@ -436,16 +436,19 @@ brw_populate_sampler_prog_key_data(struct gl_context *ctx,
 				   const struct gl_program *prog,
 				   struct brw_sampler_prog_key_data *key)
 {
-   for (int i = 0; i < BRW_MAX_TEX_UNIT; i++) {
-      if (!prog->TexturesUsed[i])
+   for (int s = 0; s < MAX_SAMPLERS; s++) {
+      key->swizzles[s] = SWIZZLE_NOOP;
+
+      if (!(prog->SamplersUsed & (1 << s)))
 	 continue;
 
-      const struct gl_texture_unit *unit = &ctx->Texture.Unit[i];
+      int unit_id = prog->SamplerUnits[s];
+      const struct gl_texture_unit *unit = &ctx->Texture.Unit[unit_id];
 
       if (unit->_ReallyEnabled && unit->_Current->Target != GL_TEXTURE_BUFFER) {
 	 const struct gl_texture_object *t = unit->_Current;
 	 const struct gl_texture_image *img = t->Image[0][t->BaseLevel];
-	 struct gl_sampler_object *sampler = _mesa_get_samplerobj(ctx, i);
+	 struct gl_sampler_object *sampler = _mesa_get_samplerobj(ctx, unit_id);
 	 int swizzles[SWIZZLE_NIL + 1] = {
 	    SWIZZLE_X,
 	    SWIZZLE_Y,
@@ -491,12 +494,12 @@ brw_populate_sampler_prog_key_data(struct gl_context *ctx,
 	 }
 
 	 if (img->InternalFormat == GL_YCBCR_MESA) {
-	    key->yuvtex_mask |= 1 << i;
+	    key->yuvtex_mask |= 1 << s;
 	    if (img->TexFormat == MESA_FORMAT_YCBCR)
-		key->yuvtex_swap_mask |= 1 << i;
+		key->yuvtex_swap_mask |= 1 << s;
 	 }
 
-	 key->swizzles[i] =
+	 key->swizzles[s] =
 	    MAKE_SWIZZLE4(swizzles[GET_SWZ(t->_Swizzle, 0)],
 			  swizzles[GET_SWZ(t->_Swizzle, 1)],
 			  swizzles[GET_SWZ(t->_Swizzle, 2)],
@@ -505,15 +508,12 @@ brw_populate_sampler_prog_key_data(struct gl_context *ctx,
 	 if (sampler->MinFilter != GL_NEAREST &&
 	     sampler->MagFilter != GL_NEAREST) {
 	    if (sampler->WrapS == GL_CLAMP)
-	       key->gl_clamp_mask[0] |= 1 << i;
+	       key->gl_clamp_mask[0] |= 1 << s;
 	    if (sampler->WrapT == GL_CLAMP)
-	       key->gl_clamp_mask[1] |= 1 << i;
+	       key->gl_clamp_mask[1] |= 1 << s;
 	    if (sampler->WrapR == GL_CLAMP)
-	       key->gl_clamp_mask[2] |= 1 << i;
+	       key->gl_clamp_mask[2] |= 1 << s;
 	 }
-      }
-      else {
-	 key->swizzles[i] = SWIZZLE_NOOP;
       }
    }
 }
@@ -588,10 +588,18 @@ static void brw_wm_populate_key( struct brw_context *brw,
    }
 
    key->line_aa = line_aa;
-   key->stats_wm = brw->intel.stats_wm;
+
+   if (intel->gen < 6)
+      key->stats_wm = brw->intel.stats_wm;
 
    /* BRW_NEW_WM_INPUT_DIMENSIONS */
-   key->proj_attrib_mask = brw->wm.input_size_masks[4-1];
+   /* Only set this for fixed function.  The optimization it enables isn't
+    * useful for programs using shaders.
+    */
+   if (ctx->Shader.CurrentFragmentProgram)
+      key->proj_attrib_mask = 0xffffffff;
+   else
+      key->proj_attrib_mask = brw->wm.input_size_masks[4-1];
 
    /* _NEW_LIGHT */
    key->flat_shade = (ctx->Light.ShadeModel == GL_FLAT);
@@ -633,9 +641,12 @@ static void brw_wm_populate_key( struct brw_context *brw,
 
    /* _NEW_BUFFERS */
    key->nr_color_regions = ctx->DrawBuffer->_NumColorDrawBuffers;
+  /* _NEW_MULTISAMPLE */
+   key->sample_alpha_to_coverage = ctx->Multisample.SampleAlphaToCoverage;
 
    /* CACHE_NEW_VS_PROG */
-   key->vp_outputs_written = brw->vs.prog_data->outputs_written;
+   if (intel->gen < 6)
+      key->vp_outputs_written = brw->vs.prog_data->outputs_written;
 
    /* The unique fragment program ID */
    key->program_string_id = fp->id;
@@ -674,7 +685,8 @@ const struct brw_tracked_state brw_wm_prog = {
 		_NEW_LIGHT |
 		_NEW_FRAG_CLAMP |
 		_NEW_BUFFERS |
-		_NEW_TEXTURE),
+		_NEW_TEXTURE |
+		_NEW_MULTISAMPLE),
       .brw   = (BRW_NEW_FRAGMENT_PROGRAM |
 		BRW_NEW_WM_INPUT_DIMENSIONS |
 		BRW_NEW_REDUCED_PRIMITIVE),

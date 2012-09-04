@@ -268,7 +268,7 @@ swrast_delete_renderbuffer(struct gl_renderbuffer *rb)
     TRACE;
 
     free(xrb->Base.Buffer);
-    free(xrb);
+    _mesa_delete_renderbuffer(rb);
 }
 
 /* see bytes_per_line in libGL */
@@ -504,7 +504,7 @@ drawable_fail:
     if (drawable)
 	free(drawable->row);
 
-    FREE(drawable);
+    free(drawable);
 
     return GL_FALSE;
 }
@@ -632,13 +632,14 @@ viewport(struct gl_context *ctx, GLint x, GLint y, GLsizei w, GLsizei h)
 }
 
 static gl_format swrastChooseTextureFormat(struct gl_context * ctx,
+                                           GLenum target,
 					   GLint internalFormat,
 					   GLenum format,
 					   GLenum type)
 {
     if (internalFormat == GL_RGB)
 	return MESA_FORMAT_XRGB8888;
-    return _mesa_choose_tex_format(ctx, internalFormat, format, type);
+    return _mesa_choose_tex_format(ctx, target, internalFormat, format, type);
 }
 
 static void
@@ -805,7 +806,7 @@ dri_create_context(gl_api api,
 
 context_fail:
 
-    FREE(ctx);
+    free(ctx);
 
     return GL_FALSE;
 }

@@ -156,6 +156,12 @@ static void r600_destroy_context(struct pipe_context *context)
 {
 	struct r600_context *rctx = (struct r600_context *)context;
 
+	pipe_resource_reference((struct pipe_resource**)&rctx->dummy_cmask, NULL);
+	pipe_resource_reference((struct pipe_resource**)&rctx->dummy_fmask, NULL);
+
+	if (rctx->no_blend) {
+		rctx->context.delete_blend_state(&rctx->context, rctx->no_blend);
+	}
 	if (rctx->dummy_pixel_shader) {
 		rctx->context.delete_fs_state(&rctx->context, rctx->dummy_pixel_shader);
 	}
@@ -164,6 +170,9 @@ static void r600_destroy_context(struct pipe_context *context)
 	}
 	if (rctx->custom_blend_resolve) {
 		rctx->context.delete_blend_state(&rctx->context, rctx->custom_blend_resolve);
+	}
+	if (rctx->custom_blend_decompress) {
+		rctx->context.delete_blend_state(&rctx->context, rctx->custom_blend_decompress);
 	}
 	util_unreference_framebuffer_state(&rctx->framebuffer);
 
@@ -195,6 +204,7 @@ static struct pipe_context *r600_create_context(struct pipe_screen *screen, void
 {
 	struct r600_context *rctx = CALLOC_STRUCT(r600_context);
 	struct r600_screen* rscreen = (struct r600_screen *)screen;
+	struct pipe_blend_state no_blend = {};
 
 	if (rctx == NULL)
 		return NULL;
@@ -243,6 +253,9 @@ static struct pipe_context *r600_create_context(struct pipe_screen *screen, void
 		if (r600_context_init(rctx))
 			goto fail;
 		rctx->custom_dsa_flush = r600_create_db_flush_dsa(rctx);
+		rctx->custom_blend_resolve = rctx->chip_class == R700 ? r700_create_resolve_blend(rctx)
+								      : r600_create_resolve_blend(rctx);
+		rctx->custom_blend_decompress = r600_create_decompress_blend(rctx);
 		rctx->has_vertex_cache = !(rctx->family == CHIP_RV610 ||
 					   rctx->family == CHIP_RV620 ||
 					   rctx->family == CHIP_RS780 ||
@@ -258,6 +271,7 @@ static struct pipe_context *r600_create_context(struct pipe_screen *screen, void
 			goto fail;
 		rctx->custom_dsa_flush = evergreen_create_db_flush_dsa(rctx);
 		rctx->custom_blend_resolve = evergreen_create_resolve_blend(rctx);
+		rctx->custom_blend_decompress = evergreen_create_decompress_blend(rctx);
 		rctx->has_vertex_cache = !(rctx->family == CHIP_CEDAR ||
 					   rctx->family == CHIP_PALM ||
 					   rctx->family == CHIP_SUMO ||
@@ -284,6 +298,7 @@ static struct pipe_context *r600_create_context(struct pipe_screen *screen, void
 	rctx->blitter = util_blitter_create(&rctx->context);
 	if (rctx->blitter == NULL)
 		goto fail;
+	rctx->blitter->draw_rectangle = r600_draw_rectangle;
 
 	r600_get_backend_mask(rctx); /* this emits commands and must be last */
 
@@ -295,6 +310,9 @@ static struct pipe_context *r600_create_context(struct pipe_screen *screen, void
 						     TGSI_SEMANTIC_GENERIC,
 						     TGSI_INTERPOLATE_CONSTANT);
 	rctx->context.bind_fs_state(&rctx->context, rctx->dummy_pixel_shader);
+
+	no_blend.rt[0].colormask = 0xF;
+	rctx->no_blend = rctx->context.create_blend_state(&rctx->context, &no_blend);
 
 	return &rctx->context;
 
@@ -916,14 +934,12 @@ struct pipe_screen *r600_screen_create(struct radeon_winsys *ws)
 	switch (rscreen->chip_class) {
 	case R600:
 	case EVERGREEN:
+	case CAYMAN:
 		rscreen->has_streamout = rscreen->info.drm_minor >= 14;
 		break;
 	case R700:
 		rscreen->has_streamout = rscreen->info.drm_minor >= 17;
 		break;
-	/* TODO: Cayman */
-	default:
-		rscreen->has_streamout = debug_get_bool_option("R600_STREAMOUT", FALSE);
 	}
 
 	if (r600_init_tiling(rscreen)) {

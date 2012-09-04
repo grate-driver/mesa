@@ -31,6 +31,7 @@
 #include "intel_chipset.h"
 #include "intel_context.h"
 #include "intel_extensions.h"
+#include "intel_reg.h"
 #include "utils.h"
 
 /**
@@ -58,7 +59,6 @@ intelInitExtensions(struct gl_context *ctx)
    ctx->Extensions.ARB_texture_env_crossbar = true;
    ctx->Extensions.ARB_texture_env_dot3 = true;
    ctx->Extensions.ARB_texture_storage = true;
-   ctx->Extensions.ARB_vertex_array_object = true;
    ctx->Extensions.ARB_vertex_program = true;
    ctx->Extensions.ARB_vertex_shader = true;
    ctx->Extensions.EXT_blend_color = true;
@@ -79,7 +79,6 @@ intelInitExtensions(struct gl_context *ctx)
    ctx->Extensions.EXT_texture_env_dot3 = true;
    ctx->Extensions.EXT_texture_filter_anisotropic = true;
    ctx->Extensions.APPLE_object_purgeable = true;
-   ctx->Extensions.APPLE_vertex_array_object = true;
    ctx->Extensions.MESA_pack_invert = true;
    ctx->Extensions.MESA_ycbcr_texture = true;
    ctx->Extensions.NV_blend_square = true;
@@ -95,7 +94,11 @@ intelInitExtensions(struct gl_context *ctx)
    ctx->Extensions.ARB_texture_rgb10_a2ui = true;
 
    if (intel->gen >= 6)
-      ctx->Const.GLSLVersion = 130;
+      if (ctx->API == API_OPENGL_CORE) {
+         ctx->Const.GLSLVersion = 140;
+      } else {
+         ctx->Const.GLSLVersion = 130;
+      }
    else
       ctx->Const.GLSLVersion = 120;
    _mesa_override_glsl_version(ctx);
@@ -108,10 +111,21 @@ intelInitExtensions(struct gl_context *ctx)
       ctx->Extensions.ARB_blend_func_extended = !driQueryOptionb(&intel->optionCache, "disable_blend_func_extended");
       ctx->Extensions.ARB_draw_buffers_blend = true;
       ctx->Extensions.ARB_uniform_buffer_object = true;
+
+      if (ctx->API == API_OPENGL_CORE) {
+         ctx->Extensions.ARB_texture_buffer_object = true;
+      }
    }
 
    if (intel->gen >= 5)
       ctx->Extensions.EXT_timer_query = true;
+
+   if (intel->gen >= 6) {
+      uint64_t dummy;
+      /* Test if the kernel has the ioctl. */
+      if (drm_intel_reg_read(intel->bufmgr, TIMESTAMP, &dummy) == 0)
+         ctx->Extensions.ARB_timer_query = true;
+   }
 
    if (intel->gen >= 4) {
       ctx->Extensions.ARB_color_buffer_float = true;
@@ -124,6 +138,7 @@ intelInitExtensions(struct gl_context *ctx)
       ctx->Extensions.ARB_fragment_shader = true;
       ctx->Extensions.ARB_half_float_vertex = true;
       ctx->Extensions.ARB_occlusion_query = true;
+      ctx->Extensions.ARB_occlusion_query2 = true;
       ctx->Extensions.ARB_point_sprite = true;
       ctx->Extensions.ARB_seamless_cube_map = true;
       ctx->Extensions.ARB_shader_bit_encoding = true;

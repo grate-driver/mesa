@@ -85,7 +85,7 @@ PUBLIC const char __driConfigOptions[] =
 	 DRI_CONF_DESC(en, "Enable stub ARB_occlusion_query support on 915/945.")
       DRI_CONF_OPT_END
 
-      DRI_CONF_OPT_BEGIN(shader_precompile, bool, false)
+      DRI_CONF_OPT_BEGIN(shader_precompile, bool, true)
 	 DRI_CONF_DESC(en, "Perform code generation at shader link time.")
       DRI_CONF_OPT_END
    DRI_CONF_SECTION_END
@@ -190,12 +190,65 @@ static const struct __DRI2flushExtensionRec intelFlushExtension = {
     dri2InvalidateDrawable,
 };
 
+struct intel_image_format intel_image_formats[] = {
+   { __DRI_IMAGE_FOURCC_ARGB8888, __DRI_IMAGE_COMPONENTS_RGBA, 1,
+     { { 0, 0, 0, __DRI_IMAGE_FORMAT_ARGB8888, 4 } } },
+
+   { __DRI_IMAGE_FOURCC_XRGB8888, __DRI_IMAGE_COMPONENTS_RGB, 1,
+     { { 0, 0, 0, __DRI_IMAGE_FORMAT_XRGB8888, 4 }, } },
+
+   { __DRI_IMAGE_FOURCC_YUV410, __DRI_IMAGE_COMPONENTS_Y_U_V, 3,
+     { { 0, 0, 0, __DRI_IMAGE_FORMAT_R8, 1 },
+       { 1, 2, 2, __DRI_IMAGE_FORMAT_R8, 1 },
+       { 2, 2, 2, __DRI_IMAGE_FORMAT_R8, 1 } } },
+
+   { __DRI_IMAGE_FOURCC_YUV411, __DRI_IMAGE_COMPONENTS_Y_U_V, 3,
+     { { 0, 0, 0, __DRI_IMAGE_FORMAT_R8, 1 },
+       { 1, 2, 0, __DRI_IMAGE_FORMAT_R8, 1 },
+       { 2, 2, 0, __DRI_IMAGE_FORMAT_R8, 1 } } },
+
+   { __DRI_IMAGE_FOURCC_YUV420, __DRI_IMAGE_COMPONENTS_Y_U_V, 3,
+     { { 0, 0, 0, __DRI_IMAGE_FORMAT_R8, 1 },
+       { 1, 1, 1, __DRI_IMAGE_FORMAT_R8, 1 },
+       { 2, 1, 1, __DRI_IMAGE_FORMAT_R8, 1 } } },
+
+   { __DRI_IMAGE_FOURCC_YUV422, __DRI_IMAGE_COMPONENTS_Y_U_V, 3,
+     { { 0, 0, 0, __DRI_IMAGE_FORMAT_R8, 1 },
+       { 1, 1, 0, __DRI_IMAGE_FORMAT_R8, 1 },
+       { 2, 1, 0, __DRI_IMAGE_FORMAT_R8, 1 } } },
+
+   { __DRI_IMAGE_FOURCC_YUV444, __DRI_IMAGE_COMPONENTS_Y_U_V, 3,
+     { { 0, 0, 0, __DRI_IMAGE_FORMAT_R8, 1 },
+       { 1, 0, 0, __DRI_IMAGE_FORMAT_R8, 1 },
+       { 2, 0, 0, __DRI_IMAGE_FORMAT_R8, 1 } } },
+
+   { __DRI_IMAGE_FOURCC_NV12, __DRI_IMAGE_COMPONENTS_Y_UV, 2,
+     { { 0, 0, 0, __DRI_IMAGE_FORMAT_R8, 1 },
+       { 1, 1, 1, __DRI_IMAGE_FORMAT_GR88, 2 } } },
+
+   { __DRI_IMAGE_FOURCC_NV16, __DRI_IMAGE_COMPONENTS_Y_UV, 2,
+     { { 0, 0, 0, __DRI_IMAGE_FORMAT_R8, 1 },
+       { 1, 1, 0, __DRI_IMAGE_FORMAT_GR88, 2 } } },
+
+   /* For YUYV buffers, we set up two overlapping DRI images and treat
+    * them as planar buffers in the compositors.  Plane 0 is GR88 and
+    * samples YU or YV pairs and places Y into the R component, while
+    * plane 1 is ARGB and samples YUYV clusters and places pairs and
+    * places U into the G component and V into A.  This lets the
+    * texture sampler interpolate the Y components correctly when
+    * sampling from plane 0, and interpolate U and V correctly when
+    * sampling from plane 1. */
+   { __DRI_IMAGE_FOURCC_YUYV, __DRI_IMAGE_COMPONENTS_Y_XUXV, 2,
+     { { 0, 0, 0, __DRI_IMAGE_FORMAT_GR88, 2 },
+       { 0, 1, 0, __DRI_IMAGE_FORMAT_ARGB8888, 4 } } }
+};
+
 static __DRIimage *
 intel_allocate_image(int dri_format, void *loaderPrivate)
 {
     __DRIimage *image;
 
-    image = CALLOC(sizeof *image);
+    image = calloc(1, sizeof *image);
     if (image == NULL)
 	return NULL;
 
@@ -249,14 +302,14 @@ intel_create_image_from_name(__DRIscreen *screen,
 
     image = intel_allocate_image(format, loaderPrivate);
     if (image->format == MESA_FORMAT_NONE)
-       cpp = 0;
+       cpp = 1;
     else
        cpp = _mesa_get_format_bytes(image->format);
     image->region = intel_region_alloc_for_handle(intelScreen,
 						  cpp, width, height,
 						  pitch, name, "image");
     if (image->region == NULL) {
-       FREE(image);
+       free(image);
        return NULL;
     }
 
@@ -280,7 +333,7 @@ intel_create_image_from_renderbuffer(__DRIcontext *context,
    }
 
    irb = intel_renderbuffer(rb);
-   image = CALLOC(sizeof *image);
+   image = calloc(1, sizeof *image);
    if (image == NULL)
       return NULL;
 
@@ -318,7 +371,7 @@ static void
 intel_destroy_image(__DRIimage *image)
 {
     intel_region_release(&image->region);
-    FREE(image);
+    free(image);
 }
 
 static __DRIimage *
@@ -339,18 +392,12 @@ intel_create_image(__DRIscreen *screen,
       tiling = I915_TILING_NONE;
    }
 
-   /* We only support write for cursor drm images */
-   if ((use & __DRI_IMAGE_USE_WRITE) &&
-       use != (__DRI_IMAGE_USE_WRITE | __DRI_IMAGE_USE_CURSOR))
-      return NULL;
-
    image = intel_allocate_image(format, loaderPrivate);
-   image->usage = use;
    cpp = _mesa_get_format_bytes(image->format);
    image->region =
       intel_region_alloc(intelScreen, tiling, cpp, width, height, true);
    if (image->region == NULL) {
-      FREE(image);
+      free(image);
       return NULL;
    }
    
@@ -378,6 +425,11 @@ intel_query_image(__DRIimage *image, int attrib, int *value)
    case __DRI_IMAGE_ATTRIB_HEIGHT:
       *value = image->region->height;
       return true;
+   case __DRI_IMAGE_ATTRIB_COMPONENTS:
+      if (image->planar_format == NULL)
+         return false;
+      *value = image->planar_format->components;
+      return true;
   default:
       return false;
    }
@@ -388,23 +440,26 @@ intel_dup_image(__DRIimage *orig_image, void *loaderPrivate)
 {
    __DRIimage *image;
 
-   image = CALLOC(sizeof *image);
+   image = calloc(1, sizeof *image);
    if (image == NULL)
       return NULL;
 
    intel_region_reference(&image->region, orig_image->region);
    if (image->region == NULL) {
-      FREE(image);
+      free(image);
       return NULL;
    }
 
    image->internal_format = orig_image->internal_format;
-   image->usage           = orig_image->usage;
+   image->planar_format   = orig_image->planar_format;
    image->dri_format      = orig_image->dri_format;
    image->format          = orig_image->format;
    image->offset          = orig_image->offset;
    image->data            = loaderPrivate;
-   
+
+   memcpy(image->strides, orig_image->strides, sizeof(image->strides));
+   memcpy(image->offsets, orig_image->offsets, sizeof(image->offsets));
+
    return image;
 }
 
@@ -416,49 +471,85 @@ intel_validate_usage(__DRIimage *image, unsigned int use)
 	 return GL_FALSE;
    }
 
-   /* We only support write for cursor drm images */
-   if ((use & __DRI_IMAGE_USE_WRITE) &&
-       use != (__DRI_IMAGE_USE_WRITE | __DRI_IMAGE_USE_CURSOR))
-      return GL_FALSE;
-
    return GL_TRUE;
 }
 
-static int
-intel_image_write(__DRIimage *image, const void *buf, size_t count)
+static __DRIimage *
+intel_create_image_from_names(__DRIscreen *screen,
+                              int width, int height, int fourcc,
+                              int *names, int num_names,
+                              int *strides, int *offsets,
+                              void *loaderPrivate)
 {
-   if (image->region->map_refcount)
-      return -1;
-   if (!(image->usage & __DRI_IMAGE_USE_WRITE))
-      return -1;
+    struct intel_image_format *f = NULL;
+    __DRIimage *image;
+    int i, index;
 
-   drm_intel_bo_map(image->region->bo, true);
-   memcpy(image->region->bo->virtual, buf, count);
-   drm_intel_bo_unmap(image->region->bo);
+    if (screen == NULL || names == NULL || num_names != 1)
+        return NULL;
 
-   return 0;
+    for (i = 0; i < ARRAY_SIZE(intel_image_formats); i++) {
+        if (intel_image_formats[i].fourcc == fourcc) {
+           f = &intel_image_formats[i];
+        }
+    }
+
+    if (f == NULL)
+        return NULL;
+
+    image = intel_create_image_from_name(screen, width, height,
+                                         __DRI_IMAGE_FORMAT_NONE,
+                                         names[0], strides[0],
+                                         loaderPrivate);
+
+    if (image == NULL)
+        return NULL;
+
+    image->planar_format = f;
+    for (i = 0; i < f->nplanes; i++) {
+        index = f->planes[i].buffer_index;
+        image->offsets[index] = offsets[index];
+        image->strides[index] = strides[index];
+    }
+
+    return image;
 }
 
 static __DRIimage *
-intel_create_sub_image(__DRIimage *parent,
-                       int width, int height, int dri_format,
-                       int offset, int pitch, void *loaderPrivate)
+intel_from_planar(__DRIimage *parent, int plane, void *loaderPrivate)
 {
-    __DRIimage *image;
-    int cpp;
+    int width, height, offset, stride, dri_format, cpp, index, pitch;
+    struct intel_image_format *f;
     uint32_t mask_x, mask_y;
+    __DRIimage *image;
+
+    if (parent == NULL || parent->planar_format == NULL)
+        return NULL;
+
+    f = parent->planar_format;
+
+    if (plane >= f->nplanes)
+        return NULL;
+
+    width = parent->region->width >> f->planes[plane].width_shift;
+    height = parent->region->height >> f->planes[plane].height_shift;
+    dri_format = f->planes[plane].dri_format;
+    index = f->planes[plane].buffer_index;
+    offset = parent->offsets[index];
+    stride = parent->strides[index];
 
     image = intel_allocate_image(dri_format, loaderPrivate);
-    cpp = _mesa_get_format_bytes(image->format);
+    cpp = _mesa_get_format_bytes(image->format); /* safe since no none format */
+    pitch = stride / cpp;
     if (offset + height * cpp * pitch > parent->region->bo->size) {
        _mesa_warning(NULL, "intel_create_sub_image: subimage out of bounds");
-       FREE(image);
+       free(image);
        return NULL;
     }
 
     image->region = calloc(sizeof(*image->region), 1);
     if (image->region == NULL) {
-       FREE(image);
+       free(image);
        return NULL;
     }
 
@@ -490,8 +581,8 @@ static struct __DRIimageExtensionRec intelImageExtension = {
     intel_query_image,
     intel_dup_image,
     intel_validate_usage,
-    intel_image_write,
-    intel_create_sub_image
+    intel_create_image_from_names,
+    intel_from_planar
 };
 
 static const __DRIextension *intelScreenExtensions[] = {
@@ -548,7 +639,7 @@ intelDestroyScreen(__DRIscreen * sPriv)
    _mesa_HashDeleteAll(intelScreen->named_regions, nop_callback, NULL);
    _mesa_DeleteHashTable(intelScreen->named_regions);
 
-   FREE(intelScreen);
+   free(intelScreen);
    sPriv->driverPrivate = NULL;
 }
 
@@ -673,6 +764,7 @@ brwCreateContext(int api,
 	         __DRIcontext *driContextPriv,
                  unsigned major_version,
                  unsigned minor_version,
+                 uint32_t flags,
                  unsigned *error,
 		 void *sharedContextPrivate);
 
@@ -690,23 +782,6 @@ intelCreateContext(gl_api api,
    struct intel_screen *intelScreen = sPriv->driverPrivate;
    bool success = false;
 
-   switch (api) {
-   case API_OPENGL:
-   case API_OPENGLES:
-      break;
-   case API_OPENGLES2:
-#ifdef I915
-      if (!IS_9XX(intelScreen->deviceID)) {
-         *error = __DRI_CTX_ERROR_BAD_API;
-         return false;
-      }
-#endif
-      break;
-   case API_OPENGL_CORE:
-      *error = __DRI_CTX_ERROR_BAD_API;
-      return GL_FALSE;
-   }
-
 #ifdef I915
    if (IS_9XX(intelScreen->deviceID)) {
       success = i915CreateContext(api, mesaVis, driContextPriv,
@@ -717,47 +792,35 @@ intelCreateContext(gl_api api,
       case API_OPENGL:
          if (major_version > 1 || minor_version > 3) {
             *error = __DRI_CTX_ERROR_BAD_VERSION;
-            return false;
+            success = false;
          }
          break;
       case API_OPENGLES:
          break;
       default:
          *error = __DRI_CTX_ERROR_BAD_API;
-         return false;
+         success = false;
       }
 
-      intelScreen->no_vbo = true;
-      success = i830CreateContext(mesaVis, driContextPriv,
-				  sharedContextPrivate);
-      if (!success) {
-         *error = __DRI_CTX_ERROR_NO_MEMORY;
-         return false;
+      if (success) {
+         intelScreen->no_vbo = true;
+         success = i830CreateContext(mesaVis, driContextPriv,
+                                     sharedContextPrivate);
+         if (!success)
+            *error = __DRI_CTX_ERROR_NO_MEMORY;
       }
    }
 #else
    success = brwCreateContext(api, mesaVis,
                               driContextPriv,
-                              major_version, minor_version, error,
-                              sharedContextPrivate);
+                              major_version, minor_version, flags,
+                              error, sharedContextPrivate);
 #endif
 
-   if (success) {
-      struct gl_context *ctx =
-	 (struct gl_context *) driContextPriv->driverPrivate;
+   if (success)
+      return true;
 
-      _mesa_compute_version(ctx);
-      if (ctx->Version >= major_version * 10 + minor_version) {
-	 return true;
-      }
-
-      *error = __DRI_CTX_ERROR_BAD_VERSION;
-      intelDestroyContext(driContextPriv);
-   } else {
-      *error = __DRI_CTX_ERROR_NO_MEMORY;
-      fprintf(stderr, "Unrecognized deviceID 0x%x\n", intelScreen->deviceID);
-   }
-
+   intelDestroyContext(driContextPriv);
    return false;
 }
 
@@ -998,7 +1061,7 @@ __DRIconfig **intelInitScreen2(__DRIscreen *psp)
    }
 
    /* Allocate the private area */
-   intelScreen = CALLOC(sizeof *intelScreen);
+   intelScreen = calloc(1, sizeof *intelScreen);
    if (!intelScreen) {
       fprintf(stderr, "\nERROR!  Allocating private area failed\n");
       return false;
@@ -1080,7 +1143,7 @@ intelAllocateBuffer(__DRIscreen *screen,
    assert(attachment == __DRI_BUFFER_FRONT_LEFT ||
           attachment == __DRI_BUFFER_BACK_LEFT);
 
-   intelBuffer = CALLOC(sizeof *intelBuffer);
+   intelBuffer = calloc(1, sizeof *intelBuffer);
    if (intelBuffer == NULL)
       return NULL;
 
@@ -1093,7 +1156,7 @@ intelAllocateBuffer(__DRIscreen *screen,
                                             true);
    
    if (intelBuffer->region == NULL) {
-	   FREE(intelBuffer);
+	   free(intelBuffer);
 	   return NULL;
    }
    
