@@ -1,3 +1,10 @@
+mesa (9.0~git20120903.e1673d20-0ubuntu1) UNRELEASED; urgency=low
+
+  * Merge from unreleased debian git.
+  * Remove 118-remove-assertion.diff, included upstream.
+
+ -- Timo Aaltonen <tjaalton@ubuntu.com>  Tue, 04 Sep 2012 17:25:27 +0300
+
 mesa (9.0~git20120821.c1114c61-0ubuntu2) quantal; urgency=low
 
   * Added 118-remove-assertion.diff from upstream (LP: #1042293).
