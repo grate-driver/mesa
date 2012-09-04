@@ -6,6 +6,7 @@ libGLESv2.so.2 libgles2-mesa #MINVER# | libgles2
  glBindFramebuffer@Base 7.8.1
  glBindRenderbuffer@Base 7.8.1
  glBindTexture@Base 7.8.1
+ glBindVertexArrayOES@Base 9.0~0
  glBlendColor@Base 7.8.1
  glBlendEquation@Base 7.8.1
  glBlendEquationSeparate@Base 7.8.1
@@ -36,6 +37,7 @@ libGLESv2.so.2 libgles2-mesa #MINVER# | libgles2
  glDeleteRenderbuffers@Base 7.8.1
  glDeleteShader@Base 7.8.1
  glDeleteTextures@Base 7.8.1
+ glDeleteVertexArraysOES@Base 9.0~0
  glDepthFunc@Base 7.8.1
  glDepthMask@Base 7.8.1
  glDepthRangef@Base 7.8.1
@@ -59,6 +61,7 @@ libGLESv2.so.2 libgles2-mesa #MINVER# | libgles2
  glGenFramebuffers@Base 7.8.1
  glGenRenderbuffers@Base 7.8.1
  glGenTextures@Base 7.8.1
+ glGenVertexArraysOES@Base 9.0~0
  glGenerateMipmap@Base 7.8.1
  glGetActiveAttrib@Base 7.8.1
  glGetActiveUniform@Base 7.8.1
@@ -96,6 +99,7 @@ libGLESv2.so.2 libgles2-mesa #MINVER# | libgles2
  glIsRenderbuffer@Base 7.8.1
  glIsShader@Base 7.8.1
  glIsTexture@Base 7.8.1
+ glIsVertexArrayOES@Base 9.0~0
  glLineWidth@Base 7.8.1
  glLinkProgram@Base 7.8.1
  glMapBufferOES@Base 7.8.1
