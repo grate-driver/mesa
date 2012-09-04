@@ -2,9 +2,7 @@
 
 # Common list:
 NOT_INSTALLED := \
-	dri/usr/include/GL/glu.h \
-	dri/usr/include/GL/glu_mangle.h \
-	dri/usr/include/GL/osmesa.h \
+	dri/etc/drirc \
 	dri/usr/include/GL/vms_x_fix.h \
 	dri/usr/include/GL/wglext.h \
 	dri/usr/include/GL/wmesa.h \
@@ -16,6 +14,7 @@ NOT_INSTALLED := \
 	usr/include/GL/glxext.h \
 	usr/include/GL/glx.h \
 	usr/include/GL/glx_mangle.h \
+	usr/include/GL/osmesa.h \
 	usr/include/GL/vms_x_fix.h \
 	usr/include/GL/wglext.h \
 	usr/include/GL/wmesa.h
@@ -23,13 +22,9 @@ NOT_INSTALLED := \
 # Architecture-specific additional files:
 NOT_INSTALLED_i386 = \
 	usr/lib/*/i686/cmov/libGL.so \
-	usr/lib/*/i686/cmov/libGLU.so \
-	usr/lib/*/i686/cmov/libGLU.so.1 \
-	usr/lib/*/i686/cmov/libGLU.so.1.* \
 	usr/lib/*/i686/cmov/libOSMesa.so \
 	usr/lib/*/i686/cmov/libOSMesa.so.6 \
 	usr/lib/*/i686/cmov/libOSMesa.so.6.* \
-	usr/lib/*/i686/cmov/pkgconfig/glu.pc \
 	usr/lib/*/i686/cmov/pkgconfig/gl.pc \
 	usr/lib/*/i686/cmov/pkgconfig/osmesa.pc
 
