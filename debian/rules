@@ -129,6 +129,7 @@ confflags-dri = \
 	$(confflags-common)
 
 confflags-swx11 = \
+	--disable-dri \
 	--disable-egl \
 	--with-gallium-drivers= \
 	--enable-xlib-glx \
@@ -138,6 +139,7 @@ confflags-swx11 = \
 	CXXFLAGS="$(CXXFLAGS)"
 
 confflags-swx11-static = \
+	--disable-dri \
 	--disable-egl \
 	--with-gallium-drivers= \
 	--enable-xlib-glx \
@@ -148,6 +150,7 @@ confflags-swx11-static = \
 	CXXFLAGS="$(CXXFLAGS)"
 
 confflags-swx11+glu-i386-i686 = \
+	--disable-dri \
 	--disable-egl \
 	--with-gallium-drivers= \
 	--enable-xlib-glx \
