@@ -32,6 +32,7 @@ mesa (9.0~git20120903.e1673d20-1) UNRELEASED; urgency=low
   * rules: Disable dri for the swx11 targets.
   * not-installed: Updated.
   * Update symbols for libgles2-mesa
+  * libegl1-mesa-drivers.install.linux: Bump libwayland-egl.so version
 
   [ Steve Langasek ]
   * Install all dri drivers from the DESTDIR tree, instead of copying them
