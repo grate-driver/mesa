@@ -734,6 +734,7 @@ Architecture: any
 Replaces: xlibmesa-gl-dev (<< 1:7), xlibosmesa-dev, libgl1-mesa-swx11-dev (<< 6.5.2), libgl1-mesa-dev (<< 7.5~rc4-2)
 Depends:
  libx11-dev,
+ libdrm-dev [!hurd-any],
  ${misc:Depends},
 Description: Developer documentation for Mesa
  This package includes the specifications for the Mesa-specific OpenGL
