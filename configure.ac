@@ -916,7 +916,6 @@ AC_SUBST([GLESv2_LIB_DEPS])
 AC_SUBST([GLESv2_PC_LIB_PRIV])
 
 DRI_LIB_DEPS="\$(top_builddir)/src/mesa/libdricore/libdricore${VERSION}.la"
-GALLIUM_DRI_LIB_DEPS="\$(TOP)/\$(LIB_DIR)/libdricore${VERSION}.so"
 
 AC_SUBST([HAVE_XF86VIDMODE])
 
