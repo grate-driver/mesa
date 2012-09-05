@@ -384,7 +384,7 @@ _mesa_create_exec_table(struct gl_context *ctx)
 
 #if FEATURE_ARB_shader_objects
    _mesa_init_shader_dispatch(ctx, exec);
-   _mesa_init_shader_uniform_dispatch(exec);
+   _mesa_init_shader_uniform_dispatch(ctx, exec);
 #endif
 
    /* 2. GL_EXT_blend_color */
