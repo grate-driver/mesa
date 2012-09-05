@@ -383,7 +383,7 @@ _mesa_create_exec_table(struct gl_context *ctx)
    SET_StencilOpSeparate(exec, _mesa_StencilOpSeparate);
 
 #if FEATURE_ARB_shader_objects
-   _mesa_init_shader_dispatch(exec);
+   _mesa_init_shader_dispatch(ctx, exec);
    _mesa_init_shader_uniform_dispatch(exec);
 #endif
 
