@@ -920,10 +920,12 @@ _mesa_create_exec_table(struct gl_context *ctx)
       SET_TexStorage1D(exec, _mesa_TexStorage1D);
       SET_TextureStorage1DEXT(exec, _mesa_TextureStorage1DEXT);
    }
-   SET_TexStorage2D(exec, _mesa_TexStorage2D);
-   SET_TexStorage3D(exec, _mesa_TexStorage3D);
-   SET_TextureStorage2DEXT(exec, _mesa_TextureStorage2DEXT);
-   SET_TextureStorage3DEXT(exec, _mesa_TextureStorage3DEXT);
+   if (_mesa_is_desktop_gl(ctx) || _mesa_is_gles3(ctx)) {
+      SET_TexStorage2D(exec, _mesa_TexStorage2D);
+      SET_TexStorage3D(exec, _mesa_TexStorage3D);
+      SET_TextureStorage2DEXT(exec, _mesa_TextureStorage2DEXT);
+      SET_TextureStorage3DEXT(exec, _mesa_TextureStorage3DEXT);
+   }
 
 #if FEATURE_ARB_sampler_objects
    if (ctx->API != API_OPENGLES2) {
