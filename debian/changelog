@@ -1,3 +1,10 @@
+mesa (9.0~git20120903.e1673d20-0ubuntu2) UNRELEASED; urgency=low
+
+  * revert-c8a86f717f8e30204c615d06bcec159410ac06c5.diff
+    Revert an upstream commit to fix i915_dri. (LP: #1047306)
+
+ -- Timo Aaltonen <tjaalton@ubuntu.com>  Thu, 13 Sep 2012 20:25:01 +0300
+
 mesa (9.0~git20120903.e1673d20-0ubuntu1) quantal; urgency=low
 
   * Merge from unreleased debian git.

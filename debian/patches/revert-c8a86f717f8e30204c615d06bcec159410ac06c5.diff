@@ -1,0 +1,91 @@
+commit b156d8c4bf28fcbf469bb71b78fdb45887cb2dad
+Author: Timo Aaltonen <tjaalton@ubuntu.com>
+Date:   Thu Sep 13 20:23:51 2012 +0300
+
+    Revert "mesa: move IS_NEGATIVE() and DIFFERENT_SIGNS() to macros.h"
+    
+    This reverts commit c8a86f717f8e30204c615d06bcec159410ac06c5.
+
+diff --git a/src/mesa/main/imports.h b/src/mesa/main/imports.h
+index 2f854e5..bb42094 100644
+--- a/src/mesa/main/imports.h
++++ b/src/mesa/main/imports.h
+@@ -223,6 +223,35 @@ static inline int IS_INF_OR_NAN( float x )
+ 
+ 
+ /***
++ *** IS_NEGATIVE: test if float is negative
++ ***/
++#if defined(USE_IEEE)
++static inline int GET_FLOAT_BITS( float x )
++{
++   fi_type fi;
++   fi.f = x;
++   return fi.i;
++}
++#define IS_NEGATIVE(x) (GET_FLOAT_BITS(x) < 0)
++#else
++#define IS_NEGATIVE(x) (x < 0.0F)
++#endif
++
++
++/***
++ *** DIFFERENT_SIGNS: test if two floats have opposite signs
++ ***/
++#if defined(USE_IEEE)
++#define DIFFERENT_SIGNS(x,y) ((GET_FLOAT_BITS(x) ^ GET_FLOAT_BITS(y)) & (1<<31))
++#else
++/* Could just use (x*y<0) except for the flatshading requirements.
++ * Maybe there's a better way?
++ */
++#define DIFFERENT_SIGNS(x,y) ((x) * (y) <= 0.0F && (x) - (y) != 0.0F)
++#endif
++
++
++/***
+  *** CEILF: ceiling of float
+  *** FLOORF: floor of float
+  *** FABSF: absolute value of float
+diff --git a/src/mesa/main/macros.h b/src/mesa/main/macros.h
+index 7d0a375..5af9487 100644
+--- a/src/mesa/main/macros.h
++++ b/src/mesa/main/macros.h
+@@ -689,38 +689,6 @@ NORMALIZE_3FV(GLfloat v[3])
+ }
+ 
+ 
+-/** Is float value negative? */
+-static inline GLboolean
+-IS_NEGATIVE(float x)
+-{
+-#if defined(USE_IEEE)
+-   fi_type fi;
+-   fi.f = x;
+-   return fi.i < 0;
+-#else
+-   return x < 0.0F;
+-#endif
+-}
+-
+-
+-/** Test two floats have opposite signs */
+-static inline GLboolean
+-DIFFERENT_SIGNS(GLfloat x, GLfloat y)
+-{
+-#if defined(USE_IEEE)
+-   fi_type xfi, yfi;
+-   xfi.f = x;
+-   yfi.f = y;
+-   return (xfi.i ^ yfi.i) & (1u << 31);
+-#else
+-   /* Could just use (x*y<0) except for the flatshading requirements.
+-    * Maybe there's a better way?
+-    */
+-   return ((x) * (y) <= 0.0F && (x) - (y) != 0.0F);
+-#endif
+-}
+-
+-
+ /** Compute ceiling of integer quotient of A divided by B. */
+ #define CEILING( A, B )  ( (A) % (B) == 0 ? (A)/(B) : (A)/(B)+1 )
+ 

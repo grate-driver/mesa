@@ -13,3 +13,4 @@
 100_no_abi_tag.patch
 101_ubuntu_hidden_glname.patch
 #117-static-gallium.patch
+revert-c8a86f717f8e30204c615d06bcec159410ac06c5.diff
