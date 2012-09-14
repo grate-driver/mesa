@@ -663,6 +663,8 @@ _mesa_meta_begin(struct gl_context *ctx, GLbitfield state)
                   _mesa_set_enable(ctx, GL_TEXTURE_GEN_T, GL_FALSE);
                   _mesa_set_enable(ctx, GL_TEXTURE_GEN_R, GL_FALSE);
                   _mesa_set_enable(ctx, GL_TEXTURE_GEN_Q, GL_FALSE);
+               } else {
+                  _mesa_set_enable(ctx, GL_TEXTURE_GEN_STR_OES, GL_FALSE);
                }
             }
          }
