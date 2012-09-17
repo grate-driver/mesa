@@ -67,7 +67,7 @@ radeon_delete_renderbuffer(struct gl_renderbuffer *rb)
   if (rrb && rrb->bo) {
     radeon_bo_unref(rrb->bo);
   }
-  _mesa_delete_renderbuffer(rb);
+  free(rrb);
 }
 
 #if defined(RADEON_R100)

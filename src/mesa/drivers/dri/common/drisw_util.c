@@ -68,7 +68,7 @@ driCreateNewScreen(int scrn, const __DRIextension **extensions,
 
     *driver_configs = driDriverAPI.InitScreen(psp);
     if (*driver_configs == NULL) {
-	free(psp);
+	FREE(psp);
 	return NULL;
     }
 
@@ -79,7 +79,7 @@ static void driDestroyScreen(__DRIscreen *psp)
 {
     if (psp) {
 	driDriverAPI.DestroyScreen(psp);
-	free(psp);
+	FREE(psp);
     }
 }
 
@@ -178,7 +178,7 @@ driCreateContextAttribs(__DRIscreen *screen, int api,
     if (!driDriverAPI.CreateContext(mesa_api, modes, pcp,
 				    major_version, minor_version,
 				    flags, error, shareCtx)) {
-        free(pcp);
+        FREE(pcp);
         return NULL;
     }
 
@@ -209,7 +209,7 @@ driDestroyContext(__DRIcontext *pcp)
 {
     if (pcp) {
 	driDriverAPI.DestroyContext(pcp);
-	free(pcp);
+	FREE(pcp);
     }
 }
 
@@ -289,7 +289,7 @@ static void dri_put_drawable(__DRIdrawable *pdp)
 	    return;
 
 	driDriverAPI.DestroyBuffer(pdp);
-	free(pdp);
+	FREE(pdp);
     }
 }
 
@@ -311,7 +311,7 @@ driCreateNewDrawable(__DRIscreen *psp,
     dri_get_drawable(pdp);
 
     if (!driDriverAPI.CreateBuffer(psp, pdp, &config->modes, GL_FALSE)) {
-	free(pdp);
+	FREE(pdp);
 	return NULL;
     }
 

@@ -65,7 +65,7 @@ i830CreateContext(const struct gl_config * mesaVis,
 
    if (!intelInitContext(intel, __DRI_API_OPENGL, mesaVis, driContextPriv,
                          sharedContextPrivate, &functions)) {
-      free(i830);
+      FREE(i830);
       return false;
    }
 

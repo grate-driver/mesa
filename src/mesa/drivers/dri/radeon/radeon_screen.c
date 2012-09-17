@@ -212,7 +212,7 @@ radeon_create_image_from_name(__DRIscreen *screen,
    if (name == 0)
       return NULL;
 
-   image = calloc(1, sizeof *image);
+   image = CALLOC(sizeof *image);
    if (image == NULL)
       return NULL;
 
@@ -251,7 +251,7 @@ radeon_create_image_from_name(__DRIscreen *screen,
                               0);
 
    if (image->bo == NULL) {
-      free(image);
+      FREE(image);
       return NULL;
    }
 
@@ -275,7 +275,7 @@ radeon_create_image_from_renderbuffer(__DRIcontext *context,
    }
 
    rrb = radeon_renderbuffer(rb);
-   image = calloc(1, sizeof *image);
+   image = CALLOC(sizeof *image);
    if (image == NULL)
       return NULL;
 
@@ -298,7 +298,7 @@ static void
 radeon_destroy_image(__DRIimage *image)
 {
    radeon_bo_unref(image->bo);
-   free(image);
+   FREE(image);
 }
 
 static __DRIimage *
@@ -310,7 +310,7 @@ radeon_create_image(__DRIscreen *screen,
    __DRIimage *image;
    radeonScreenPtr radeonScreen = screen->driverPrivate;
 
-   image = calloc(1, sizeof *image);
+   image = CALLOC(sizeof *image);
    if (image == NULL)
       return NULL;
 
@@ -351,7 +351,7 @@ radeon_create_image(__DRIscreen *screen,
                               0);
 
    if (image->bo == NULL) {
-      free(image);
+      FREE(image);
       return NULL;
    }
 
@@ -488,7 +488,7 @@ radeonCreateScreen2(__DRIscreen *sPriv)
    uint32_t device_id = 0;
 
    /* Allocate the private area */
-   screen = (radeonScreenPtr) calloc(1, sizeof(*screen));
+   screen = (radeonScreenPtr) CALLOC( sizeof(*screen) );
    if ( !screen ) {
       fprintf(stderr, "%s: Could not allocate memory for screen structure", __FUNCTION__);
       fprintf(stderr, "leaving here\n");
@@ -507,7 +507,7 @@ radeonCreateScreen2(__DRIscreen *sPriv)
 
    ret = radeonGetParam(sPriv, RADEON_PARAM_DEVICE_ID, &device_id);
    if (ret) {
-     free( screen );
+     FREE( screen );
      fprintf(stderr, "drm_radeon_getparam_t (RADEON_PARAM_DEVICE_ID): %d\n", ret);
      return NULL;
    }
@@ -561,7 +561,7 @@ radeonDestroyScreen( __DRIscreen *sPriv )
     /* free all option information */
     driDestroyOptionInfo (&screen->optionCache);
 
-    free( screen );
+    FREE( screen );
     sPriv->driverPrivate = NULL;
 }
 

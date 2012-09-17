@@ -720,7 +720,7 @@ GLboolean
 _swrast_CreateContext( struct gl_context *ctx )
 {
    GLuint i;
-   SWcontext *swrast = (SWcontext *) calloc(1, sizeof(SWcontext));
+   SWcontext *swrast = (SWcontext *)CALLOC(sizeof(SWcontext));
 #ifdef _OPENMP
    const GLuint maxThreads = omp_get_max_threads();
 #else
@@ -775,9 +775,9 @@ _swrast_CreateContext( struct gl_context *ctx )
     * using multiple threads, it is necessary to have one SpanArrays instance
     * per thread.
     */
-   swrast->SpanArrays = (SWspanarrays *) malloc(maxThreads * sizeof(SWspanarrays));
+   swrast->SpanArrays = (SWspanarrays *) MALLOC(maxThreads * sizeof(SWspanarrays));
    if (!swrast->SpanArrays) {
-      free(swrast);
+      FREE(swrast);
       return GL_FALSE;
    }
    for(i = 0; i < maxThreads; i++) {
@@ -828,17 +828,17 @@ _swrast_DestroyContext( struct gl_context *ctx )
       _mesa_debug(ctx, "_swrast_DestroyContext\n");
    }
 
-   free( swrast->SpanArrays );
+   FREE( swrast->SpanArrays );
    if (swrast->ZoomedArrays)
-      free( swrast->ZoomedArrays );
-   free( swrast->TexelBuffer );
+      FREE( swrast->ZoomedArrays );
+   FREE( swrast->TexelBuffer );
 
    free(swrast->stencil_temp.buf1);
    free(swrast->stencil_temp.buf2);
    free(swrast->stencil_temp.buf3);
    free(swrast->stencil_temp.buf4);
 
-   free( swrast );
+   FREE( swrast );
 
    ctx->swrast_context = 0;
 }

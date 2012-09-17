@@ -1259,9 +1259,9 @@ st_translate_mesa_program(
    }
 
 out:
-   free(t->insn);
-   free(t->labels);
-   free(t->constants);
+   FREE(t->insn);
+   FREE(t->labels);
+   FREE(t->constants);
 
    if (t->error) {
       debug_printf("%s: translate error flag set\n", __FUNCTION__);
@@ -1278,5 +1278,5 @@ out:
 void
 st_free_tokens(const struct tgsi_token *tokens)
 {
-   free((void *)tokens);
+   FREE((void *)tokens);
 }

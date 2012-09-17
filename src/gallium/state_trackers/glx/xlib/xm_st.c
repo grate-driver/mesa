@@ -279,9 +279,9 @@ xmesa_create_st_framebuffer(XMesaDisplay xmdpy, XMesaBuffer b)
    xstfb = CALLOC_STRUCT(xmesa_st_framebuffer);
    if (!stfbi || !xstfb) {
       if (stfbi)
-         free(stfbi);
+         FREE(stfbi);
       if (xstfb)
-         free(xstfb);
+         FREE(xstfb);
       return NULL;
    }
 
@@ -314,8 +314,8 @@ xmesa_destroy_st_framebuffer(struct st_framebuffer_iface *stfbi)
    for (i = 0; i < ST_ATTACHMENT_COUNT; i++)
       pipe_resource_reference(&xstfb->textures[i], NULL);
 
-   free(xstfb);
-   free(stfbi);
+   FREE(xstfb);
+   FREE(stfbi);
 }
 
 void

@@ -292,6 +292,7 @@ static int r600_get_param(struct pipe_screen* pscreen, enum pipe_cap param)
 
 	switch (param) {
 	/* Supported features (boolean caps). */
+	case PIPE_CAP_NPOT_TEXTURES:
 	case PIPE_CAP_TWO_SIDED_STENCIL:
 	case PIPE_CAP_MAX_DUAL_SOURCE_RENDER_TARGETS:
 	case PIPE_CAP_ANISOTROPIC_FILTER:
@@ -332,7 +333,6 @@ static int r600_get_param(struct pipe_screen* pscreen, enum pipe_cap param)
 		return debug_get_bool_option("R600_GLSL130", FALSE) ? 130 : 120;
 
 	/* Unsupported features. */
-	case PIPE_CAP_NPOT_TEXTURES:
 	case PIPE_CAP_TGSI_INSTANCEID:
 	case PIPE_CAP_TGSI_FS_COORD_ORIGIN_LOWER_LEFT:
 	case PIPE_CAP_TGSI_FS_COORD_PIXEL_CENTER_INTEGER:
@@ -367,7 +367,7 @@ static int r600_get_param(struct pipe_screen* pscreen, enum pipe_cap param)
 	case PIPE_CAP_MAX_TEXTURE_CUBE_LEVELS:
 			return 15;
 	case PIPE_CAP_MAX_TEXTURE_ARRAY_LAYERS:
-		return /*rscreen->info.drm_minor >= 9 ? 16384 :*/ 0;
+		return rscreen->info.drm_minor >= 9 ? 16384 : 0;
 	case PIPE_CAP_MAX_COMBINED_SAMPLERS:
 		return 32;
 

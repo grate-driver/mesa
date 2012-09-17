@@ -101,13 +101,13 @@ void vbo_save_destroy( struct gl_context *ctx )
 
    if (save->prim_store) {
       if ( --save->prim_store->refcount == 0 ) {
-         free(save->prim_store);
+         FREE( save->prim_store );
          save->prim_store = NULL;
       }
       if ( --save->vertex_store->refcount == 0 ) {
          _mesa_reference_buffer_object(ctx,
                                        &save->vertex_store->bufferobj, NULL);
-         free(save->vertex_store);
+         FREE( save->vertex_store );
          save->vertex_store = NULL;
       }
    }

@@ -120,7 +120,7 @@ rehash(struct brw_cache *cache)
 	 items[c->hash % size] = c;
       }
 
-   free(cache->items);
+   FREE(cache->items);
    cache->items = items;
    cache->size = size;
 }

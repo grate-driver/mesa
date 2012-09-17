@@ -137,8 +137,6 @@ bool AMDGPUPassConfig::addPreEmitPass() {
   if (ST.device()->getGeneration() <= AMDGPUDeviceInfo::HD6XXX) {
     PM->add(createR600ExpandSpecialInstrsPass(*TM));
     addPass(FinalizeMachineBundlesID);
-  } else {
-    PM->add(createSILowerLiteralConstantsPass(*TM));
   }
 
   return false;

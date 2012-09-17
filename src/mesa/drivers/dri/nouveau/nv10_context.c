@@ -423,7 +423,7 @@ nv10_context_destroy(struct gl_context *ctx)
 	nouveau_object_del(&nctx->hw.eng3d);
 
 	nouveau_context_deinit(ctx);
-	free(ctx);
+	FREE(ctx);
 }
 
 static struct gl_context *

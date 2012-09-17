@@ -144,7 +144,7 @@ nouveau_destroy_screen(__DRIscreen *dri_screen)
 
 	nouveau_device_del(&screen->device);
 
-	free(screen);
+	FREE(screen);
 	dri_screen->driverPrivate = NULL;
 }
 

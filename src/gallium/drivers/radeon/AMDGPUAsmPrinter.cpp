@@ -81,13 +81,9 @@ void AMDGPUAsmPrinter::EmitProgramInfo(MachineFunction &MF) {
           VCCUsed = true;
           continue;
         }
-        switch (reg) {
-        default: break;
-        case AMDGPU::EXEC:
-        case AMDGPU::SI_LITERAL_CONSTANT:
+        if (reg == AMDGPU::EXEC) {
           continue;
         }
-
         if (AMDGPU::SReg_32RegClass.contains(reg)) {
           isSGPR = true;
           width = 1;
@@ -110,7 +106,7 @@ void AMDGPUAsmPrinter::EmitProgramInfo(MachineFunction &MF) {
           isSGPR = true;
           width = 8;
         } else {
-          assert(!"Unknown register class");
+          assert("!Unknown register class");
         }
         hwReg = RI->getHWRegNum(reg);
         maxUsed = hwReg + width - 1;
