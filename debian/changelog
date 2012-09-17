@@ -1,8 +1,6 @@
 mesa (9.0~git20120917.7cfd42ce-0ubuntu1) UNRELEASED; urgency=low
 
-  * Merge from unreleased debian git.
-  * revert-c8a86f717f8e30204c615d06bcec159410ac06c5.diff
-    Revert an upstream commit in order to fix i915_dri. (LP: #1047306)
+  * Merge from unreleased debian git. (LP: #1047306)
 
  -- Timo Aaltonen <tjaalton@ubuntu.com>  Thu, 13 Sep 2012 20:25:01 +0300
 
