@@ -1448,6 +1448,12 @@ _mesa_GetTexParameterfv( GLenum target, GLenum pname, GLfloat *params )
          *params = (GLfloat) obj->Immutable;
          break;
 
+      case GL_TEXTURE_SRGB_DECODE_EXT:
+         if (!ctx->Extensions.EXT_texture_sRGB_decode)
+            goto invalid_pname;
+         *params = (GLfloat) obj->Sampler.sRGBDecode;
+         break;
+
       default:
          goto invalid_pname;
    }
@@ -1620,6 +1626,12 @@ _mesa_GetTexParameteriv( GLenum target, GLenum pname, GLint *params )
          if (!_mesa_is_gles(ctx) || !ctx->Extensions.OES_EGL_image_external)
             goto invalid_pname;
          *params = obj->RequiredTextureImageUnits;
+         break;
+
+      case GL_TEXTURE_SRGB_DECODE_EXT:
+         if (!ctx->Extensions.EXT_texture_sRGB_decode)
+            goto invalid_pname;
+         *params = obj->Sampler.sRGBDecode;
          break;
 
       default:
