@@ -452,7 +452,9 @@ Depends:
  ${shlibs:Depends},
  libglapi-mesa (= ${binary:Version}),
  ${misc:Depends}
-Recommends: libgl1-mesa-dri (>= 7.2)
+Recommends:
+ libgl1-mesa-dri (>= 7.2),
+ libtxc-dxtn-s2tc0
 Conflicts: libgl1, libgl1-mesa-dri (<< 6.4.0)
 Replaces: libgl1, libgl1-mesa-dri (<< 6.4.0)
 Provides: libgl1

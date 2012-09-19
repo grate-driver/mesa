@@ -1,3 +1,12 @@
+mesa (9.0~git20120917.7cfd42ce-0ubuntu2) quantal; urgency=low
+
+  * Add Recommends on libtxc-dxtn-s2tc0, required by Bastion, Psychonauts,
+    Amnesia and other games on Intel graphics.  This package provides
+    patent-free s3tc texture support.
+    (LP: #1053029)
+
+ -- Bryce Harrington <bryce@ubuntu.com>  Tue, 18 Sep 2012 21:17:11 -0700
+
 mesa (9.0~git20120917.7cfd42ce-0ubuntu1) quantal; urgency=low
 
   * Merge from unreleased debian git. (LP: #1047306)
