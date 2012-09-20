@@ -1,4 +1,4 @@
-mesa (9.0~git20120917.7cfd42ce-0ubuntu3) UNRELEASED; urgency=low
+mesa (9.0~git20120917.7cfd42ce-0ubuntu3) quantal; urgency=low
 
   * Add 118-undefined-symbols.patch, fixing libglapi and libosmesa
     missing symbols. (LP: #1053088)
