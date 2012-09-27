@@ -502,6 +502,10 @@ AC_CHECK_FUNC([posix_memalign], [DEFINES="$DEFINES -DHAVE_POSIX_MEMALIGN"])
 
 dnl Check for pthreads
 AX_PTHREAD
+dnl AX_PTHREADS leaves PTHREAD_LIBS empty for gcc and sets PTHREAD_CFLAGS
+dnl to -pthread, which causes problems if we need -lpthread to appear in
+dnl pkgconfig files.
+test -z "$PTHREAD_LIBS" && PTHREAD_LIBS="-lpthread"
 
 dnl SELinux awareness.
 AC_ARG_ENABLE([selinux],
