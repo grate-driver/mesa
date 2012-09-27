@@ -3659,6 +3659,11 @@ compressed_subtexture_error_check2(struct gl_context *ctx, GLuint dims,
                                    GLsizei depth, GLenum format,
                                    struct gl_texture_image *texImage)
 {
+   if (!texImage) {
+      _mesa_error(ctx, GL_INVALID_OPERATION,
+                  "glCompressedTexSubImage%uD(undefined image level)", dims);
+      return GL_TRUE;
+   }
 
    if ((GLint) format != texImage->InternalFormat) {
       _mesa_error(ctx, GL_INVALID_OPERATION,
@@ -3770,7 +3775,6 @@ compressed_tex_sub_image(GLuint dims, GLenum target, GLint level,
    _mesa_lock_texture(ctx, texObj);
    {
       texImage = _mesa_select_tex_image(ctx, texObj, target, level);
-      assert(texImage);
 
       if (compressed_subtexture_error_check2(ctx, dims, width, height, depth,
                                              format, texImage)) {
