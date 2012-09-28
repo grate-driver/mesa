@@ -820,7 +820,9 @@ intelCreateContext(gl_api api,
    if (success)
       return true;
 
-   intelDestroyContext(driContextPriv);
+   if (driContextPriv->driverPrivate != NULL)
+      intelDestroyContext(driContextPriv);
+
    return false;
 }
 
