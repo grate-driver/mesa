@@ -1,3 +1,9 @@
+mesa (9.0~git20121002.9fc4a39d-0ubuntu1) UNRELEASED; urgency=low
+
+  * Merge from unreleased debian git.
+
+ -- Timo Aaltonen <tjaalton@ubuntu.com>  Wed, 03 Oct 2012 18:23:24 +0300
+
 mesa (9.0~git20120917.7cfd42ce-0ubuntu3) quantal; urgency=low
 
   * Add 118-undefined-symbols.patch, fixing libglapi and libosmesa
