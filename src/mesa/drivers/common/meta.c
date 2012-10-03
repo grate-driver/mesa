@@ -648,19 +648,24 @@ _mesa_meta_begin(struct gl_context *ctx, GLbitfield state)
             if (ctx->Texture.Unit[u].Enabled ||
                 ctx->Texture.Unit[u].TexGenEnabled) {
                _mesa_ActiveTextureARB(GL_TEXTURE0 + u);
-               _mesa_set_enable(ctx, GL_TEXTURE_1D, GL_FALSE);
                _mesa_set_enable(ctx, GL_TEXTURE_2D, GL_FALSE);
-               _mesa_set_enable(ctx, GL_TEXTURE_3D, GL_FALSE);
                if (ctx->Extensions.ARB_texture_cube_map)
                   _mesa_set_enable(ctx, GL_TEXTURE_CUBE_MAP, GL_FALSE);
-               if (ctx->Extensions.NV_texture_rectangle)
-                  _mesa_set_enable(ctx, GL_TEXTURE_RECTANGLE, GL_FALSE);
                if (ctx->Extensions.OES_EGL_image_external)
                   _mesa_set_enable(ctx, GL_TEXTURE_EXTERNAL_OES, GL_FALSE);
-               _mesa_set_enable(ctx, GL_TEXTURE_GEN_S, GL_FALSE);
-               _mesa_set_enable(ctx, GL_TEXTURE_GEN_T, GL_FALSE);
-               _mesa_set_enable(ctx, GL_TEXTURE_GEN_R, GL_FALSE);
-               _mesa_set_enable(ctx, GL_TEXTURE_GEN_Q, GL_FALSE);
+
+               if (ctx->API == API_OPENGL) {
+                  _mesa_set_enable(ctx, GL_TEXTURE_1D, GL_FALSE);
+                  _mesa_set_enable(ctx, GL_TEXTURE_3D, GL_FALSE);
+                  if (ctx->Extensions.NV_texture_rectangle)
+                     _mesa_set_enable(ctx, GL_TEXTURE_RECTANGLE, GL_FALSE);
+                  _mesa_set_enable(ctx, GL_TEXTURE_GEN_S, GL_FALSE);
+                  _mesa_set_enable(ctx, GL_TEXTURE_GEN_T, GL_FALSE);
+                  _mesa_set_enable(ctx, GL_TEXTURE_GEN_R, GL_FALSE);
+                  _mesa_set_enable(ctx, GL_TEXTURE_GEN_Q, GL_FALSE);
+               } else {
+                  _mesa_set_enable(ctx, GL_TEXTURE_GEN_STR_OES, GL_FALSE);
+               }
             }
          }
       }
@@ -3395,12 +3400,16 @@ get_temp_image_type(struct gl_context *ctx, gl_format format)
    case GL_LUMINANCE:
    case GL_LUMINANCE_ALPHA:
    case GL_INTENSITY:
-      if (ctx->DrawBuffer->Visual.redBits <= 8)
+      if (ctx->DrawBuffer->Visual.redBits <= 8) {
          return GL_UNSIGNED_BYTE;
-      else if (ctx->DrawBuffer->Visual.redBits <= 16)
+      } else if (ctx->DrawBuffer->Visual.redBits <= 16) {
          return GL_UNSIGNED_SHORT;
-      else
-         return _mesa_get_format_datatype(format);
+      } else {
+         GLenum datatype = _mesa_get_format_datatype(format);
+         if (datatype == GL_INT || datatype == GL_UNSIGNED_INT)
+            return datatype;
+         return GL_FLOAT;
+      }
    case GL_DEPTH_COMPONENT:
       return GL_UNSIGNED_INT;
    case GL_DEPTH_STENCIL:

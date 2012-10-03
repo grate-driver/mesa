@@ -1009,7 +1009,7 @@ _mesa_initialize_context(struct gl_context *ctx,
    switch (ctx->API) {
    case API_OPENGL:
 #if FEATURE_dlist
-      ctx->Save = _mesa_create_save_table();
+      ctx->Save = _mesa_create_save_table(ctx);
       if (!ctx->Save) {
          _mesa_reference_shared_state(ctx, &ctx->Shared, NULL);
 	 free(ctx->Exec);

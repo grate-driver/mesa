@@ -112,9 +112,8 @@ clip_or_scissor(bool mirror, GLint &src_x0, GLint &src_x1, GLint &dst_x0,
 
 
 static struct intel_mipmap_tree *
-find_miptree(GLbitfield buffer_bit, struct gl_renderbuffer *rb)
+find_miptree(GLbitfield buffer_bit, struct intel_renderbuffer *irb)
 {
-   struct intel_renderbuffer *irb = intel_renderbuffer(rb);
    struct intel_mipmap_tree *mt = irb->mt;
    if (buffer_bit == GL_STENCIL_BUFFER_BIT && mt->stencil_mt)
       mt = mt->stencil_mt;
@@ -124,14 +123,17 @@ find_miptree(GLbitfield buffer_bit, struct gl_renderbuffer *rb)
 void
 brw_blorp_blit_miptrees(struct intel_context *intel,
                         struct intel_mipmap_tree *src_mt,
+                        unsigned src_level, unsigned src_layer,
                         struct intel_mipmap_tree *dst_mt,
+                        unsigned dst_level, unsigned dst_layer,
                         int src_x0, int src_y0,
                         int dst_x0, int dst_y0,
                         int dst_x1, int dst_y1,
                         bool mirror_x, bool mirror_y)
 {
    brw_blorp_blit_params params(brw_context(&intel->ctx),
-                                src_mt, dst_mt,
+                                src_mt, src_level, src_layer,
+                                dst_mt, dst_level, dst_layer,
                                 src_x0, src_y0,
                                 dst_x0, dst_y0,
                                 dst_x1, dst_y1,
@@ -141,42 +143,48 @@ brw_blorp_blit_miptrees(struct intel_context *intel,
 
 static void
 do_blorp_blit(struct intel_context *intel, GLbitfield buffer_bit,
-              struct gl_renderbuffer *src_rb, struct gl_renderbuffer *dst_rb,
+              struct intel_renderbuffer *src_irb,
+              struct intel_renderbuffer *dst_irb,
               GLint srcX0, GLint srcY0,
               GLint dstX0, GLint dstY0, GLint dstX1, GLint dstY1,
               bool mirror_x, bool mirror_y)
 {
    /* Find source/dst miptrees */
-   struct intel_mipmap_tree *src_mt = find_miptree(buffer_bit, src_rb);
-   struct intel_mipmap_tree *dst_mt = find_miptree(buffer_bit, dst_rb);
+   struct intel_mipmap_tree *src_mt = find_miptree(buffer_bit, src_irb);
+   struct intel_mipmap_tree *dst_mt = find_miptree(buffer_bit, dst_irb);
 
    /* Get ready to blit.  This includes depth resolving the src and dst
     * buffers if necessary.
     */
-   intel_renderbuffer_resolve_depth(intel, intel_renderbuffer(src_rb));
-   intel_renderbuffer_resolve_depth(intel, intel_renderbuffer(dst_rb));
+   intel_renderbuffer_resolve_depth(intel, src_irb);
+   intel_renderbuffer_resolve_depth(intel, dst_irb);
 
    /* Do the blit */
-   brw_blorp_blit_miptrees(intel, src_mt, dst_mt,
+   brw_blorp_blit_miptrees(intel,
+                           src_mt, src_irb->mt_level, src_irb->mt_layer,
+                           dst_mt, dst_irb->mt_level, dst_irb->mt_layer,
                            srcX0, srcY0, dstX0, dstY0, dstX1, dstY1,
                            mirror_x, mirror_y);
 
-   intel_renderbuffer_set_needs_hiz_resolve(intel_renderbuffer(dst_rb));
-   intel_renderbuffer_set_needs_downsample(intel_renderbuffer(dst_rb));
+   intel_renderbuffer_set_needs_hiz_resolve(dst_irb);
+   intel_renderbuffer_set_needs_downsample(dst_irb);
 }
 
 
 static bool
-formats_match(GLbitfield buffer_bit, struct gl_renderbuffer *src_rb,
-              struct gl_renderbuffer *dst_rb)
+formats_match(GLbitfield buffer_bit, struct intel_renderbuffer *src_irb,
+              struct intel_renderbuffer *dst_irb)
 {
    /* Note: don't just check gl_renderbuffer::Format, because in some cases
     * multiple gl_formats resolve to the same native type in the miptree (for
     * example MESA_FORMAT_X8_Z24 and MESA_FORMAT_S8_Z24), and we can blit
     * between those formats.
     */
-   return find_miptree(buffer_bit, src_rb)->format ==
-      find_miptree(buffer_bit, dst_rb)->format;
+   gl_format src_format = find_miptree(buffer_bit, src_irb)->format;
+   gl_format dst_format = find_miptree(buffer_bit, dst_irb)->format;
+
+   return _mesa_get_srgb_format_linear(src_format) ==
+          _mesa_get_srgb_format_linear(dst_format);
 }
 
 
@@ -243,36 +251,40 @@ try_blorp_blit(struct intel_context *intel,
    }
 
    /* Find buffers */
-   struct gl_renderbuffer *src_rb;
-   struct gl_renderbuffer *dst_rb;
+   struct intel_renderbuffer *src_irb;
+   struct intel_renderbuffer *dst_irb;
    switch (buffer_bit) {
    case GL_COLOR_BUFFER_BIT:
-      src_rb = read_fb->_ColorReadBuffer;
+      src_irb = intel_renderbuffer(read_fb->_ColorReadBuffer);
       for (unsigned i = 0; i < ctx->DrawBuffer->_NumColorDrawBuffers; ++i) {
-         dst_rb = ctx->DrawBuffer->_ColorDrawBuffers[i];
-         if (dst_rb && !formats_match(buffer_bit, src_rb, dst_rb))
+         dst_irb = intel_renderbuffer(ctx->DrawBuffer->_ColorDrawBuffers[i]);
+         if (dst_irb && !formats_match(buffer_bit, src_irb, dst_irb))
             return false;
       }
       for (unsigned i = 0; i < ctx->DrawBuffer->_NumColorDrawBuffers; ++i) {
-         dst_rb = ctx->DrawBuffer->_ColorDrawBuffers[i];
-         do_blorp_blit(intel, buffer_bit, src_rb, dst_rb, srcX0, srcY0,
+         dst_irb = intel_renderbuffer(ctx->DrawBuffer->_ColorDrawBuffers[i]);
+         do_blorp_blit(intel, buffer_bit, src_irb, dst_irb, srcX0, srcY0,
                        dstX0, dstY0, dstX1, dstY1, mirror_x, mirror_y);
       }
       break;
    case GL_DEPTH_BUFFER_BIT:
-      src_rb = read_fb->Attachment[BUFFER_DEPTH].Renderbuffer;
-      dst_rb = draw_fb->Attachment[BUFFER_DEPTH].Renderbuffer;
-      if (!formats_match(buffer_bit, src_rb, dst_rb))
+      src_irb =
+         intel_renderbuffer(read_fb->Attachment[BUFFER_DEPTH].Renderbuffer);
+      dst_irb =
+         intel_renderbuffer(draw_fb->Attachment[BUFFER_DEPTH].Renderbuffer);
+      if (!formats_match(buffer_bit, src_irb, dst_irb))
          return false;
-      do_blorp_blit(intel, buffer_bit, src_rb, dst_rb, srcX0, srcY0,
+      do_blorp_blit(intel, buffer_bit, src_irb, dst_irb, srcX0, srcY0,
                     dstX0, dstY0, dstX1, dstY1, mirror_x, mirror_y);
       break;
    case GL_STENCIL_BUFFER_BIT:
-      src_rb = read_fb->Attachment[BUFFER_STENCIL].Renderbuffer;
-      dst_rb = draw_fb->Attachment[BUFFER_STENCIL].Renderbuffer;
-      if (!formats_match(buffer_bit, src_rb, dst_rb))
+      src_irb =
+         intel_renderbuffer(read_fb->Attachment[BUFFER_STENCIL].Renderbuffer);
+      dst_irb =
+         intel_renderbuffer(draw_fb->Attachment[BUFFER_STENCIL].Renderbuffer);
+      if (!formats_match(buffer_bit, src_irb, dst_irb))
          return false;
-      do_blorp_blit(intel, buffer_bit, src_rb, dst_rb, srcX0, srcY0,
+      do_blorp_blit(intel, buffer_bit, src_irb, dst_irb, srcX0, srcY0,
                     dstX0, dstY0, dstX1, dstY1, mirror_x, mirror_y);
       break;
    default:
@@ -1618,14 +1630,29 @@ compute_msaa_layout_for_pipeline(struct brw_context *brw, unsigned num_samples,
 
 brw_blorp_blit_params::brw_blorp_blit_params(struct brw_context *brw,
                                              struct intel_mipmap_tree *src_mt,
+                                             unsigned src_level, unsigned src_layer,
                                              struct intel_mipmap_tree *dst_mt,
+                                             unsigned dst_level, unsigned dst_layer,
                                              GLuint src_x0, GLuint src_y0,
                                              GLuint dst_x0, GLuint dst_y0,
                                              GLuint dst_x1, GLuint dst_y1,
                                              bool mirror_x, bool mirror_y)
 {
-   src.set(brw, src_mt, 0, 0);
-   dst.set(brw, dst_mt, 0, 0);
+   src.set(brw, src_mt, src_level, src_layer);
+   dst.set(brw, dst_mt, dst_level, dst_layer);
+
+   /* If we are blitting from sRGB to linear or vice versa, we still want the
+    * blit to be a direct copy, so we need source and destination to use the
+    * same format.  However, we want the destination sRGB/linear state to be
+    * correct (so that sRGB blending is used when doing an MSAA resolve to an
+    * sRGB surface, and linear blending is used when doing an MSAA resolve to
+    * a linear surface).  Since blorp blits don't support any format
+    * conversion (except between sRGB and linear), we can accomplish this by
+    * simply setting up the source to use the same format as the destination.
+    */
+   assert(_mesa_get_srgb_format_linear(src_mt->format) ==
+          _mesa_get_srgb_format_linear(dst_mt->format));
+   src.brw_surfaceformat = dst.brw_surfaceformat;
 
    use_wm_prog = true;
    memset(&wm_prog_key, 0, sizeof(wm_prog_key));
@@ -1766,29 +1793,79 @@ brw_blorp_blit_params::brw_blorp_blit_params(struct brw_context *brw,
    }
 
    if (dst.map_stencil_as_y_tiled) {
-      /* We must modify the rectangle we send through the rendering pipeline,
-       * to account for the fact that we are mapping it as Y-tiled when it is
-       * in fact W-tiled.  Y tiles have dimensions 128x32 whereas W tiles have
-       * dimensions 64x64.  We must also align it to a multiple of the tile
-       * size, because the differences between W and Y tiling formats will
-       * mean that pixels are scrambled within the tile.
+      /* We must modify the rectangle we send through the rendering pipeline
+       * (and the size and x/y offset of the destination surface), to account
+       * for the fact that we are mapping it as Y-tiled when it is in fact
+       * W-tiled.
        *
-       * Note: if the destination surface configured to use IMS layout, then
-       * the effective tile size we need to align it to is smaller, because
-       * each pixel covers a 2x2 or a 4x2 block of samples.
+       * Both Y tiling and W tiling can be understood as organizations of
+       * 32-byte sub-tiles; within each 32-byte sub-tile, the layout of pixels
+       * is different, but the layout of the 32-byte sub-tiles within the 4k
+       * tile is the same (8 sub-tiles across by 16 sub-tiles down, in
+       * column-major order).  In Y tiling, the sub-tiles are 16 bytes wide
+       * and 2 rows high; in W tiling, they are 8 bytes wide and 4 rows high.
        *
-       * TODO: what if this makes the coordinates too large?
+       * Therefore, to account for the layout differences within the 32-byte
+       * sub-tiles, we must expand the rectangle so the X coordinates of its
+       * edges are multiples of 8 (the W sub-tile width), and its Y
+       * coordinates of its edges are multiples of 4 (the W sub-tile height).
+       * Then we need to scale the X and Y coordinates of the rectangle to
+       * account for the differences in aspect ratio between the Y and W
+       * sub-tiles.  We need to modify the layer width and height similarly.
+       *
+       * A correction needs to be applied when MSAA is in use: since
+       * INTEL_MSAA_LAYOUT_IMS uses an interleaving pattern whose height is 4,
+       * we need to align the Y coordinates to multiples of 8, so that when
+       * they are divided by two they are still multiples of 4.
+       *
+       * Note: Since the x/y offset of the surface will be applied using the
+       * SURFACE_STATE command packet, it will be invisible to the swizzling
+       * code in the shader; therefore it needs to be in a multiple of the
+       * 32-byte sub-tile size.  Fortunately it is, since the sub-tile is 8
+       * pixels wide and 4 pixels high (when viewed as a W-tiled stencil
+       * buffer), and the miplevel alignment used for stencil buffers is 8
+       * pixels horizontally and either 4 or 8 pixels vertically (see
+       * intel_horizontal_texture_alignment_unit() and
+       * intel_vertical_texture_alignment_unit()).
+       *
+       * Note: Also, since the SURFACE_STATE command packet can only apply
+       * offsets that are multiples of 4 pixels horizontally and 2 pixels
+       * vertically, it is important that the offsets will be multiples of
+       * these sizes after they are converted into Y-tiled coordinates.
+       * Fortunately they will be, since we know from above that the offsets
+       * are a multiple of the 32-byte sub-tile size, and in Y-tiled
+       * coordinates the sub-tile is 16 pixels wide and 2 pixels high.
+       *
+       * TODO: what if this makes the coordinates (or the texture size) too
+       * large?
        */
-      unsigned x_align = 64, y_align = 64;
-      if (dst_mt->msaa_layout == INTEL_MSAA_LAYOUT_IMS) {
-         x_align /= (dst_mt->num_samples == 4 ? 2 : 4);
-         y_align /= 2;
-      }
+      const unsigned x_align = 8, y_align = dst.num_samples != 0 ? 8 : 4;
       x0 = ROUND_DOWN_TO(x0, x_align) * 2;
       y0 = ROUND_DOWN_TO(y0, y_align) / 2;
       x1 = ALIGN(x1, x_align) * 2;
       y1 = ALIGN(y1, y_align) / 2;
+      dst.width = ALIGN(dst.width, x_align) * 2;
+      dst.height = ALIGN(dst.height, y_align) / 2;
+      dst.x_offset *= 2;
+      dst.y_offset /= 2;
       wm_prog_key.use_kill = true;
+   }
+
+   if (src.map_stencil_as_y_tiled) {
+      /* We must modify the size and x/y offset of the source surface to
+       * account for the fact that we are mapping it as Y-tiled when it is in
+       * fact W tiled.
+       *
+       * See the comments above concerning x/y offset alignment for the
+       * destination surface.
+       *
+       * TODO: what if this makes the texture size too large?
+       */
+      const unsigned x_align = 8, y_align = src.num_samples != 0 ? 8 : 4;
+      src.width = ALIGN(src.width, x_align) * 2;
+      src.height = ALIGN(src.height, y_align) / 2;
+      src.x_offset *= 2;
+      src.y_offset /= 2;
    }
 }
 

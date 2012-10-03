@@ -564,7 +564,7 @@ intel_from_planar(__DRIimage *parent, int plane, void *loaderPrivate)
     image->region->screen = parent->region->screen;
     image->offset = offset;
 
-    intel_region_get_tile_masks(image->region, &mask_x, &mask_y);
+    intel_region_get_tile_masks(image->region, &mask_x, &mask_y, false);
     if (offset & mask_x)
        _mesa_warning(NULL,
                      "intel_create_sub_image: offset not on tile boundary");
@@ -820,7 +820,9 @@ intelCreateContext(gl_api api,
    if (success)
       return true;
 
-   intelDestroyContext(driContextPriv);
+   if (driContextPriv->driverPrivate != NULL)
+      intelDestroyContext(driContextPriv);
+
    return false;
 }
 
