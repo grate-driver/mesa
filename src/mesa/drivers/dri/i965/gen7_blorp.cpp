@@ -142,13 +142,15 @@ gen7_blorp_emit_surface_state(struct brw_context *brw,
    struct intel_context *intel = &brw->intel;
 
    uint32_t wm_surf_offset;
-   uint32_t width, height;
-   surface->get_miplevel_dims(&width, &height);
-   if (surface->map_stencil_as_y_tiled) {
-      width *= 2;
-      height /= 2;
-   }
+   uint32_t width = surface->width;
+   uint32_t height = surface->height;
+   /* Note: since gen7 uses INTEL_MSAA_LAYOUT_CMS or INTEL_MSAA_LAYOUT_UMS for
+    * color surfaces, width and height are measured in pixels; we don't need
+    * to divide them by 2 as we do for Gen6 (see
+    * gen6_blorp_emit_surface_state).
+    */
    struct intel_region *region = surface->mt->region;
+   uint32_t tile_x, tile_y;
 
    struct gen7_surface_state *surf = (struct gen7_surface_state *)
       brw_state_batch(brw, AUB_TRACE_SURFACE_STATE, sizeof(*surf), 32,
@@ -166,7 +168,16 @@ gen7_blorp_emit_surface_state(struct brw_context *brw,
       GEN7_SURFACE_ARYSPC_LOD0 : GEN7_SURFACE_ARYSPC_FULL;
 
    /* reloc */
-   surf->ss1.base_addr = region->bo->offset; /* No tile offsets needed */
+   surf->ss1.base_addr = surface->compute_tile_offsets(&tile_x, &tile_y);
+   surf->ss1.base_addr += region->bo->offset;
+
+   /* Note that the low bits of these fields are missing, so
+    * there's the possibility of getting in trouble.
+    */
+   assert(tile_x % 4 == 0);
+   assert(tile_y % 2 == 0);
+   surf->ss5.x_offset = tile_x / 4;
+   surf->ss5.y_offset = tile_y / 2;
 
    surf->ss2.width = width - 1;
    surf->ss2.height = height - 1;
@@ -567,25 +578,20 @@ gen7_blorp_emit_depth_stencil_config(struct brw_context *brw,
                                      const brw_blorp_params *params)
 {
    struct intel_context *intel = &brw->intel;
-   uint32_t draw_x, draw_y;
+   uint32_t draw_x = params->depth.x_offset;
+   uint32_t draw_y = params->depth.y_offset;
    uint32_t tile_mask_x, tile_mask_y;
 
-   if (params->depth.mt) {
-      params->depth.get_draw_offsets(&draw_x, &draw_y);
-      gen6_blorp_compute_tile_masks(params, &tile_mask_x, &tile_mask_y);
-   }
+   gen6_blorp_compute_tile_masks(params, &tile_mask_x, &tile_mask_y);
 
    /* 3DSTATE_DEPTH_BUFFER */
    {
-      uint32_t width, height;
-      params->depth.get_miplevel_dims(&width, &height);
-
       uint32_t tile_x = draw_x & tile_mask_x;
       uint32_t tile_y = draw_y & tile_mask_y;
       uint32_t offset =
          intel_region_get_aligned_offset(params->depth.mt->region,
                                          draw_x & ~tile_mask_x,
-                                         draw_y & ~tile_mask_y);
+                                         draw_y & ~tile_mask_y, false);
 
       /* According to the Sandy Bridge PRM, volume 2 part 1, pp326-327
        * (3DSTATE_DEPTH_BUFFER dw5), in the documentation for "Depth
@@ -619,8 +625,8 @@ gen7_blorp_emit_depth_stencil_config(struct brw_context *brw,
       OUT_RELOC(params->depth.mt->region->bo,
                 I915_GEM_DOMAIN_RENDER, I915_GEM_DOMAIN_RENDER,
                 offset);
-      OUT_BATCH((width + tile_x - 1) << 4 |
-                (height + tile_y - 1) << 18);
+      OUT_BATCH((params->depth.width + tile_x - 1) << 4 |
+                (params->depth.height + tile_y - 1) << 18);
       OUT_BATCH(0);
       OUT_BATCH(tile_x |
                 tile_y << 16);
@@ -634,7 +640,7 @@ gen7_blorp_emit_depth_stencil_config(struct brw_context *brw,
       uint32_t hiz_offset =
          intel_region_get_aligned_offset(hiz_region,
                                          draw_x & ~tile_mask_x,
-                                         (draw_y & ~tile_mask_y) / 2);
+                                         (draw_y & ~tile_mask_y) / 2, false);
 
       BEGIN_BATCH(3);
       OUT_BATCH((GEN7_3DSTATE_HIER_DEPTH_BUFFER << 16) | (3 - 2));

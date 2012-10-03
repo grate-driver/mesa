@@ -30,8 +30,10 @@
 
 brw_blorp_mip_info::brw_blorp_mip_info()
    : mt(NULL),
-     level(0),
-     layer(0)
+     width(0),
+     height(0),
+     x_offset(0),
+     y_offset(0)
 {
 }
 
@@ -48,8 +50,17 @@ brw_blorp_mip_info::set(struct intel_mipmap_tree *mt,
    intel_miptree_check_level_layer(mt, level, layer);
 
    this->mt = mt;
-   this->level = level;
-   this->layer = layer;
+   this->width = mt->level[level].width;
+   this->height = mt->level[level].height;
+
+   /* Construct a dummy renderbuffer just to extract tile offsets. */
+   struct intel_renderbuffer rb;
+   rb.mt = mt;
+   rb.mt_level = level;
+   rb.mt_layer = layer;
+   intel_renderbuffer_set_draw_offset(&rb);
+   x_offset = rb.draw_x;
+   y_offset = rb.draw_y;
 }
 
 void
@@ -91,11 +102,10 @@ brw_blorp_surface_info::set(struct brw_context *brw,
       this->brw_surfaceformat = BRW_SURFACEFORMAT_R8G8_UNORM;
       break;
    default:
-      /* Blorp blits don't support any sort of format conversion, so we can
-       * safely assume that the same format is being used for the source and
-       * destination.  Therefore the format must be supported as a render
-       * target, even if this is the source image.  So we can convert to a
-       * surface format using brw->render_target_format.
+      /* Blorp blits don't support any sort of format conversion (except
+       * between sRGB and linear), so we can safely assume that the format is
+       * supported as a render target, even if this is the source image.  So
+       * we can convert to a surface format using brw->render_target_format.
        */
       assert(brw->format_supported_as_render_target[mt->format]);
       this->brw_surfaceformat = brw->render_target_format[mt->format];
@@ -103,18 +113,32 @@ brw_blorp_surface_info::set(struct brw_context *brw,
    }
 }
 
-void
-brw_blorp_mip_info::get_draw_offsets(uint32_t *draw_x, uint32_t *draw_y) const
+
+/**
+ * Split x_offset and y_offset into a base offset (in bytes) and a remaining
+ * x/y offset (in pixels).  Note: we can't do this by calling
+ * intel_renderbuffer_tile_offsets(), because the offsets may have been
+ * adjusted to account for Y vs. W tiling differences.  So we compute it
+ * directly from the adjusted offsets.
+ */
+uint32_t
+brw_blorp_surface_info::compute_tile_offsets(uint32_t *tile_x,
+                                             uint32_t *tile_y) const
 {
-   /* Construct a dummy renderbuffer just to extract tile offsets. */
-   struct intel_renderbuffer rb;
-   rb.mt = mt;
-   rb.mt_level = level;
-   rb.mt_layer = layer;
-   intel_renderbuffer_set_draw_offset(&rb);
-   *draw_x = rb.draw_x;
-   *draw_y = rb.draw_y;
+   struct intel_region *region = mt->region;
+   uint32_t mask_x, mask_y;
+
+   intel_region_get_tile_masks(region, &mask_x, &mask_y,
+                               map_stencil_as_y_tiled);
+
+   *tile_x = x_offset & mask_x;
+   *tile_y = y_offset & mask_y;
+
+   return intel_region_get_aligned_offset(region, x_offset & ~mask_x,
+                                          y_offset & ~mask_y,
+                                          map_stencil_as_y_tiled);
 }
+
 
 brw_blorp_params::brw_blorp_params()
    : x0(0),
@@ -164,7 +188,8 @@ brw_hiz_op_params::brw_hiz_op_params(struct intel_mipmap_tree *mt,
    this->hiz_op = op;
 
    depth.set(mt, level, layer);
-   depth.get_miplevel_dims(&x1, &y1);
+   x1 = depth.width;
+   y1 = depth.height;
 
    assert(mt->hiz_mt != NULL);
 

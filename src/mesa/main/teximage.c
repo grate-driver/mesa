@@ -2808,7 +2808,7 @@ _mesa_choose_texture_format(struct gl_context *ctx,
    /* If the application requested compression to an S3TC format but we don't
     * have the DTXn library, force a generic compressed format instead.
     */
-   if (internalFormat != format) {
+   if (internalFormat != format && format != GL_NONE) {
       const GLenum before = internalFormat;
 
       switch (internalFormat) {
@@ -3633,13 +3633,13 @@ compressed_subtexture_error_check(struct gl_context *ctx, GLint dimensions,
    get_compressed_block_size(format, &bw, &bh);
 
    if ((xoffset % bw != 0) || (yoffset % bh != 0))
-      return GL_INVALID_VALUE;
+      return GL_INVALID_OPERATION;
 
    if ((width % bw != 0) && width != 2 && width != 1)
-      return GL_INVALID_VALUE;
+      return GL_INVALID_OPERATION;
 
    if ((height % bh != 0) && height != 2 && height != 1)
-      return GL_INVALID_VALUE;
+      return GL_INVALID_OPERATION;
 
    expectedSize = compressed_tex_size(width, height, depth, format);
    if (expectedSize != imageSize)
@@ -3659,6 +3659,11 @@ compressed_subtexture_error_check2(struct gl_context *ctx, GLuint dims,
                                    GLsizei depth, GLenum format,
                                    struct gl_texture_image *texImage)
 {
+   if (!texImage) {
+      _mesa_error(ctx, GL_INVALID_OPERATION,
+                  "glCompressedTexSubImage%uD(undefined image level)", dims);
+      return GL_TRUE;
+   }
 
    if ((GLint) format != texImage->InternalFormat) {
       _mesa_error(ctx, GL_INVALID_OPERATION,
@@ -3770,7 +3775,6 @@ compressed_tex_sub_image(GLuint dims, GLenum target, GLint level,
    _mesa_lock_texture(ctx, texObj);
    {
       texImage = _mesa_select_tex_image(ctx, texObj, target, level);
-      assert(texImage);
 
       if (compressed_subtexture_error_check2(ctx, dims, width, height, depth,
                                              format, texImage)) {

@@ -200,6 +200,7 @@ intel_miptree_create(struct intel_context *intel,
    uint32_t tiling = I915_TILING_NONE;
    GLenum base_format;
    bool wraps_etc1 = false;
+   GLuint total_width, total_height;
 
    if (format == MESA_FORMAT_ETC1_RGB8) {
       format = MESA_FORMAT_RGBX8888_REV;
@@ -231,16 +232,6 @@ intel_miptree_create(struct intel_context *intel,
 	 tiling = I915_TILING_X;
    }
 
-   if (format == MESA_FORMAT_S8) {
-      /* The stencil buffer is W tiled. However, we request from the kernel a
-       * non-tiled buffer because the GTT is incapable of W fencing.  So round
-       * up the width and height to match the size of W tiles (64x64).
-       */
-      tiling = I915_TILING_NONE;
-      width0 = ALIGN(width0, 64);
-      height0 = ALIGN(height0, 64);
-   }
-
    mt = intel_miptree_create_internal(intel, target, format,
 				      first_level, last_level, width0,
 				      height0, depth0,
@@ -253,12 +244,25 @@ intel_miptree_create(struct intel_context *intel,
       return NULL;
    }
 
+   total_width = mt->total_width;
+   total_height = mt->total_height;
+
+   if (format == MESA_FORMAT_S8) {
+      /* The stencil buffer is W tiled. However, we request from the kernel a
+       * non-tiled buffer because the GTT is incapable of W fencing.  So round
+       * up the width and height to match the size of W tiles (64x64).
+       */
+      tiling = I915_TILING_NONE;
+      total_width = ALIGN(total_width, 64);
+      total_height = ALIGN(total_height, 64);
+   }
+
    mt->wraps_etc1 = wraps_etc1;
    mt->region = intel_region_alloc(intel->intelScreen,
 				   tiling,
 				   mt->cpp,
-				   mt->total_width,
-				   mt->total_height,
+				   total_width,
+				   total_height,
 				   expect_accelerated_upload);
    mt->offset = 0;
 
@@ -985,7 +989,8 @@ intel_miptree_updownsample(struct intel_context *intel,
    intel_miptree_slice_resolve_depth(intel, dst, 0, 0);
 
    brw_blorp_blit_miptrees(intel,
-                           src, dst,
+                           src, 0 /* level */, 0 /* layer */,
+                           dst, 0 /* level */, 0 /* layer */,
                            src_x0, src_y0,
                            dst_x0, dst_y0,
                            width, height,
@@ -993,7 +998,8 @@ intel_miptree_updownsample(struct intel_context *intel,
 
    if (src->stencil_mt) {
       brw_blorp_blit_miptrees(intel,
-                              src->stencil_mt, dst->stencil_mt,
+                              src->stencil_mt, 0 /* level */, 0 /* layer */,
+                              dst->stencil_mt, 0 /* level */, 0 /* layer */,
                               src_x0, src_y0,
                               dst_x0, dst_y0,
                               width, height,

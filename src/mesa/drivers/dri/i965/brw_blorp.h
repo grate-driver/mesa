@@ -37,7 +37,9 @@ extern "C" {
 void
 brw_blorp_blit_miptrees(struct intel_context *intel,
                         struct intel_mipmap_tree *src_mt,
+                        unsigned src_level, unsigned src_layer,
                         struct intel_mipmap_tree *dst_mt,
+                        unsigned dst_level, unsigned dst_layer,
                         int src_x0, int src_y0,
                         int dst_x0, int dst_y0,
                         int dst_x1, int dst_y1,
@@ -63,17 +65,34 @@ public:
 
    void set(struct intel_mipmap_tree *mt,
             unsigned int level, unsigned int layer);
-   void get_draw_offsets(uint32_t *draw_x, uint32_t *draw_y) const;
-
-   void get_miplevel_dims(uint32_t *width, uint32_t *height) const
-   {
-      *width = mt->level[level].width;
-      *height = mt->level[level].height;
-   }
 
    struct intel_mipmap_tree *mt;
-   unsigned int level;
-   unsigned int layer;
+
+   /**
+    * Width of the miplevel to be used.  For surfaces using
+    * INTEL_MSAA_LAYOUT_IMS, this is measured in samples, not pixels.
+    */
+   uint32_t width;
+
+   /**
+    * Height of the miplevel to be used.  For surfaces using
+    * INTEL_MSAA_LAYOUT_IMS, this is measured in samples, not pixels.
+    */
+   uint32_t height;
+
+   /**
+    * X offset within the surface to texture from (or render to).  For
+    * surfaces using INTEL_MSAA_LAYOUT_IMS, this is measured in samples, not
+    * pixels.
+    */
+   uint32_t x_offset;
+
+   /**
+    * Y offset within the surface to texture from (or render to).  For
+    * surfaces using INTEL_MSAA_LAYOUT_IMS, this is measured in samples, not
+    * pixels.
+    */
+   uint32_t y_offset;
 };
 
 class brw_blorp_surface_info : public brw_blorp_mip_info
@@ -84,6 +103,8 @@ public:
 void set(struct brw_context *brw,
          struct intel_mipmap_tree *mt,
             unsigned int level, unsigned int layer);
+
+   uint32_t compute_tile_offsets(uint32_t *tile_x, uint32_t *tile_y) const;
 
    /* Setting this flag indicates that the buffer's contents are W-tiled
     * stencil data, but the surface state should be set up for Y tiled
@@ -278,7 +299,9 @@ class brw_blorp_blit_params : public brw_blorp_params
 public:
    brw_blorp_blit_params(struct brw_context *brw,
                          struct intel_mipmap_tree *src_mt,
+                         unsigned src_level, unsigned src_layer,
                          struct intel_mipmap_tree *dst_mt,
+                         unsigned dst_level, unsigned dst_layer,
                          GLuint src_x0, GLuint src_y0,
                          GLuint dst_x0, GLuint dst_y0,
                          GLuint width, GLuint height,

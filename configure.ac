@@ -9,6 +9,7 @@ See docs/autoconf.html for more details on the options for Mesa.])
 AC_INIT([Mesa], [9.0.0],
     [https://bugs.freedesktop.org/enter_bug.cgi?product=Mesa])
 AC_CONFIG_AUX_DIR([bin])
+AC_CONFIG_MACRO_DIR([m4])
 AC_CANONICAL_HOST
 AM_INIT_AUTOMAKE([foreign])
 
@@ -499,6 +500,9 @@ AC_SUBST([DLOPEN_LIBS])
 dnl See if posix_memalign is available
 AC_CHECK_FUNC([posix_memalign], [DEFINES="$DEFINES -DHAVE_POSIX_MEMALIGN"])
 
+dnl Check for pthreads
+AX_PTHREAD
+
 dnl SELinux awareness.
 AC_ARG_ENABLE([selinux],
     [AS_HELP_STRING([--enable-selinux],
@@ -513,6 +517,7 @@ if test "x$enable_selinux" = "xyes"; then
     SELINUX_LIBS="-lselinux"
     DEFINES="$DEFINES -DMESA_SELINUX"
 fi
+AC_SUBST([SELINUX_LIBS])
 
 dnl Options for APIs
 AC_ARG_ENABLE([opengl],
@@ -859,13 +864,12 @@ xyesyes)
 xyesno)
     # DRI-based GLX
     PKG_CHECK_MODULES([GLPROTO], [glproto >= $GLPROTO_REQUIRED])
-    GL_PC_REQ_PRIV="glproto >= $GLPROTO_REQUIRED"
     if test x"$driglx_direct" = xyes; then
         if test "x$have_libdrm" != xyes; then
             AC_MSG_ERROR([Direct rendering requires libdrm >= $LIBDRM_REQUIRED])
         fi
         PKG_CHECK_MODULES([DRI2PROTO], [dri2proto >= $DRI2PROTO_REQUIRED])
-        GL_PC_REQ_PRIV="$GL_PC_REQ_PRIV libdrm >= $LIBDRM_REQUIRED dri2proto >= $DRI2PROTO_REQUIRED"
+        GL_PC_REQ_PRIV="$GL_PC_REQ_PRIV libdrm >= $LIBDRM_REQUIRED"
     fi
 
     # find the DRI deps for libGL
@@ -906,10 +910,6 @@ AC_SUBST([GLESv1_CM_LIB_DEPS])
 AC_SUBST([GLESv1_CM_PC_LIB_PRIV])
 AC_SUBST([GLESv2_LIB_DEPS])
 AC_SUBST([GLESv2_PC_LIB_PRIV])
-
-GLAPI_LIB_DEPS="-lpthread $SELINUX_LIBS"
-AC_SUBST([GLAPI_LIB_DEPS])
-
 
 DRI_LIB_DEPS="\$(top_builddir)/src/mesa/libdricore/libdricore${VERSION}.la"
 GALLIUM_DRI_LIB_DEPS="\$(TOP)/\$(LIB_DIR)/libdricore${VERSION}.so"
