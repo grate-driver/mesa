@@ -1,10 +1,7 @@
 mesa (9.0~git20121004.b2048c5e-0ubuntu1) UNRELEASED; urgency=low
 
-  [ Timo Aaltonen ]
   * Merge from unreleased debian git.
-
-  [ Maarten Lankhorst ]
-  * Replace 118-undefined-symbols.patch with a patch from upstream.
+  * Drop patch 118, obsolete.
 
  -- Timo Aaltonen <tjaalton@ubuntu.com>  Wed, 03 Oct 2012 18:23:24 +0300
 

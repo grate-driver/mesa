@@ -13,4 +13,3 @@
 100_no_abi_tag.patch
 101_ubuntu_hidden_glname.patch
 #117-static-gallium.patch
-118-undefined-symbols.patch
