@@ -1,4 +1,4 @@
-mesa (9.0~git20121002.9fc4a39d-0ubuntu1) UNRELEASED; urgency=low
+mesa (9.0~git20121004.b2048c5e-0ubuntu1) UNRELEASED; urgency=low
 
   [ Timo Aaltonen ]
   * Merge from unreleased debian git.
@@ -74,7 +74,7 @@ mesa (9.0~git20120821.c1114c61-0ubuntu1) quantal; urgency=low
 
  -- Timo Aaltonen <tjaalton@ubuntu.com>  Thu, 23 Aug 2012 15:37:30 +0300
 
-mesa (9.0~git20121002.9fc4a39d-1) UNRELEASED; urgency=low
+mesa (9.0~git20121004.b2048c5e-1) UNRELEASED; urgency=low
 
   [ Julien Cristau ]
   * Use xz for all binary packages not just *-dbg.

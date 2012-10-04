@@ -34,6 +34,7 @@ AM_CFLAGS = \
 	-I$(top_srcdir)/src/mesa/drivers/dri/common \
 	$(DEFINES) \
 	$(API_DEFINES) \
+	$(VISIBILITY_CFLAGS) \
 	$(NOUVEAU_CFLAGS)
 
 dridir = $(DRI_DRIVER_INSTALL_DIR)
@@ -47,9 +48,9 @@ nouveau_vieux_dri_la_SOURCES = \
 
 nouveau_vieux_dri_la_LDFLAGS = -module -avoid-version -shared
 nouveau_vieux_dri_la_LIBADD = \
+	../common/libdricommon.la \
 	$(DRI_LIB_DEPS) \
-	$(NOUVEAU_LIBS) \
-	../common/libdricommon.la
+	$(NOUVEAU_LIBS)
 
 # Provide compatibility with scripts for the old Mesa build system for
 # a while by putting a link to the driver into /lib of the build tree.

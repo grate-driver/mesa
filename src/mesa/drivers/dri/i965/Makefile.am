@@ -36,6 +36,7 @@ AM_CFLAGS = \
 	-I$(top_srcdir)/src/mesa/drivers/dri/intel/server \
 	$(DEFINES) \
 	$(API_DEFINES) \
+	$(VISIBILITY_CFLAGS) \
 	$(INTEL_CFLAGS)
 
 AM_CXXFLAGS = $(AM_CFLAGS)
@@ -52,9 +53,9 @@ i965_dri_la_SOURCES = \
 
 i965_dri_la_LDFLAGS = -module -avoid-version -shared
 i965_dri_la_LIBADD = \
+	../common/libdricommon.la \
 	$(DRI_LIB_DEPS) \
-	$(INTEL_LIBS) \
-	../common/libdricommon.la
+	$(INTEL_LIBS)
 
 # Provide compatibility with scripts for the old Mesa build system for
 # a while by putting a link to the driver into /lib of the build tree.
