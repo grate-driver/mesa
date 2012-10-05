@@ -3598,10 +3598,10 @@ compressed_subtexture_error_check(struct gl_context *ctx, GLint dimensions,
    if (!_mesa_is_compressed_format(ctx, format))
       return GL_INVALID_ENUM;
 
-   if (width < 1 || width > maxTextureSize)
+   if (width < 0 || width > maxTextureSize)
       return GL_INVALID_VALUE;
 
-   if ((height < 1 || height > maxTextureSize)
+   if ((height < 0 || height > maxTextureSize)
        && dimensions > 1)
       return GL_INVALID_VALUE;
 
