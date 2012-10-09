@@ -72,13 +72,13 @@ mesa (9.0~git20120821.c1114c61-0ubuntu1) quantal; urgency=low
 
  -- Timo Aaltonen <tjaalton@ubuntu.com>  Thu, 23 Aug 2012 15:37:30 +0300
 
-mesa (9.0~git20121004.b2048c5e-1) UNRELEASED; urgency=low
+mesa (9.0-1) UNRELEASED; urgency=low
 
   [ Julien Cristau ]
   * Use xz for all binary packages not just *-dbg.
 
   [ Timo Aaltonen ]
-  * New upstream git snapshot.
+  * New upstream release 9.0.
   * Refresh patches
     - disable 05_kfreebsd-egl-x11.diff for now.
     - switch to llvm-3.1.
