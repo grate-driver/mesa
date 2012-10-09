@@ -1,3 +1,12 @@
+mesa (9.0-0ubuntu1) UNRELEASED; urgency=low
+
+  * Merge from unreleased debian git.
+    - final 9.0 release.
+  * rules: Don't try building gallium swrast for arm, since it doesn't
+    work and wasn't actually built anyway.
+
+ -- Timo Aaltonen <tjaalton@ubuntu.com>  Tue, 09 Oct 2012 15:55:51 +0300
+
 mesa (9.0~git20121004.b2048c5e-0ubuntu1) quantal; urgency=low
 
   * Merge from unreleased debian git.
