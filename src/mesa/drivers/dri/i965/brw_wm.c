@@ -417,7 +417,13 @@ static void brw_wm_populate_key( struct brw_context *brw,
    GLuint lookup = 0;
    GLuint line_aa;
    GLuint i;
-   bool program_uses_dfdy = fp->program.UsesDFdy;
+
+   /* As a temporary measure we assume that all programs use dFdy() (and hence
+    * need to be compiled differently depending on whether we're rendering to
+    * an FBO).  FIXME: set this bool correctly based on the contents of the
+    * program.
+    */
+   bool program_uses_dfdy = true;
 
    memset(key, 0, sizeof(*key));
 
