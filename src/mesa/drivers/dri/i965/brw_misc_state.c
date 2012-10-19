@@ -413,8 +413,10 @@ static void emit_depthbuffer(struct brw_context *brw)
        * tile_x and tile_y to 0.  This is a temporary workaround until we come
        * up with a better solution.
        */
-      tile_x &= ~7;
-      tile_y &= ~7;
+      if (intel->gen >= 6) {
+         tile_x &= ~7;
+         tile_y &= ~7;
+      }
 
       BEGIN_BATCH(len);
       OUT_BATCH(_3DSTATE_DEPTH_BUFFER << 16 | (len - 2));
