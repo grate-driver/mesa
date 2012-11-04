@@ -1603,7 +1603,8 @@ texture_error_check( struct gl_context *ctx,
 
    /* Check border */
    if (border < 0 || border > 1 ||
-       ((target == GL_TEXTURE_RECTANGLE_NV ||
+       ((ctx->API != API_OPENGL ||
+         target == GL_TEXTURE_RECTANGLE_NV ||
          target == GL_PROXY_TEXTURE_RECTANGLE_NV) && border != 0)) {
       if (!isProxy) {
          _mesa_error(ctx, GL_INVALID_VALUE,
@@ -1984,7 +1985,7 @@ copytexture_error_check( struct gl_context *ctx, GLuint dimensions,
    }
 
    /* Check that the source buffer is complete */
-   if (ctx->ReadBuffer->Name) {
+   if (_mesa_is_user_fbo(ctx->ReadBuffer)) {
       if (ctx->ReadBuffer->_Status == 0) {
          _mesa_test_framebuffer_completeness(ctx, ctx->ReadBuffer);
       }
@@ -2004,8 +2005,11 @@ copytexture_error_check( struct gl_context *ctx, GLuint dimensions,
 
    /* Check border */
    if (border < 0 || border > 1 ||
-       ((target == GL_TEXTURE_RECTANGLE_NV ||
+       ((ctx->API != API_OPENGL ||
+         target == GL_TEXTURE_RECTANGLE_NV ||
          target == GL_PROXY_TEXTURE_RECTANGLE_NV) && border != 0)) {
+      _mesa_error(ctx, GL_INVALID_VALUE,
+                  "glCopyTexImage%dD(border=%d)", dimensions, border);
       return GL_TRUE;
    }
 
@@ -2109,7 +2113,7 @@ copytexsubimage_error_check1( struct gl_context *ctx, GLuint dimensions,
                               GLenum target, GLint level)
 {
    /* Check that the source buffer is complete */
-   if (ctx->ReadBuffer->Name) {
+   if (_mesa_is_user_fbo(ctx->ReadBuffer)) {
       if (ctx->ReadBuffer->_Status == 0) {
          _mesa_test_framebuffer_completeness(ctx, ctx->ReadBuffer);
       }
@@ -2301,7 +2305,7 @@ check_rtt_cb(GLuint key, void *data, void *userData)
    const GLuint level = info->level, face = info->face;
 
    /* If this is a user-created FBO */
-   if (fb->Name) {
+   if (_mesa_is_user_fbo(fb)) {
       GLuint i;
       /* check if any of the FBO's attachments point to 'texObj' */
       for (i = 0; i < BUFFER_COUNT; i++) {
@@ -3399,13 +3403,13 @@ compressed_subtexture_error_check(struct gl_context *ctx, GLint dimensions,
    get_compressed_block_size(format, &bw, &bh);
 
    if ((xoffset % bw != 0) || (yoffset % bh != 0))
-      return GL_INVALID_VALUE;
+      return GL_INVALID_OPERATION;
 
    if ((width % bw != 0) && width != 2 && width != 1)
-      return GL_INVALID_VALUE;
+      return GL_INVALID_OPERATION;
 
    if ((height % bh != 0) && height != 2 && height != 1)
-      return GL_INVALID_VALUE;
+      return GL_INVALID_OPERATION;
 
    expectedSize = compressed_tex_size(width, height, depth, format);
    if (expectedSize != imageSize)
