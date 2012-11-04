@@ -3,6 +3,8 @@ mesa (8.0.5-1) UNRELEASED; urgency=low
   * New upstream stable release
   * Pull a couple more fixes from upstream's 8.0 branch, including:
     - nvfx: handle some unknown PIPE_CAPs (closes: 674965)
+  * Install drirc in libgl1-mesa-dri package with some settings for i965
+    (closes: #671747).
 
  -- Julien Cristau <jcristau@debian.org>  Sun, 04 Nov 2012 14:26:02 +0100
 
