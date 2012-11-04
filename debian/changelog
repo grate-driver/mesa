@@ -1,3 +1,11 @@
+mesa (8.0.5-1) UNRELEASED; urgency=low
+
+  * New upstream stable release
+  * Pull a couple more fixes from upstream's 8.0 branch, including:
+    - nvfx: handle some unknown PIPE_CAPs (closes: 674965)
+
+ -- Julien Cristau <jcristau@debian.org>  Sun, 04 Nov 2012 14:26:02 +0100
+
 mesa (8.0.4-2) unstable; urgency=high
 
   * Use xz for all binary packages not just *-dbg.
