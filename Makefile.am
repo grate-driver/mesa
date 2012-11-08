@@ -54,7 +54,7 @@ distclean-local:
 
 # Rules for making release tarballs
 
-PACKAGE_VERSION=9.0
+PACKAGE_VERSION=9.0.1
 PACKAGE_DIR = Mesa-$(PACKAGE_VERSION)
 PACKAGE_NAME = MesaLib-$(PACKAGE_VERSION)
 
