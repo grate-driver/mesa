@@ -1,0 +1,10 @@
+# These commits were cherry picked without using -x.
+# TBD
+
+# Causes too many regressions...
+413c4914129cd26ca87960852d8c0264c0fb29e7 intel: Improve teximage perf for Google Chrome paint rects (v3)
+b1d0fe022dc4826dadce014ab8fe062a82f75a16 intel: Fix segfault in intel_texsubimage_tiled_memcpy
+b5891286202987dfc2606ac716050c0ee426de11 intel: Fix yet-another-bug in intel_texsubimage_tiled_memcpy
+
+# Introduces performance regressions for other games... don't cherry-pick for now
+fa58644855e44830e0b91dc627703c236fa6712a r600g: fix abysmal performance in Reaction Quake
