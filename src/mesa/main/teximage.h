@@ -146,6 +146,10 @@ extern GLenum
 _mesa_es_error_check_format_and_type(GLenum format, GLenum type,
                                      unsigned dimensions);
 
+extern GLsizei
+_mesa_get_tex_max_num_levels(GLenum target, GLsizei width, GLsizei height,
+                             GLsizei depth);
+
 /**
  * Lock a texture for updating.  See also _mesa_lock_context_textures().
  */
