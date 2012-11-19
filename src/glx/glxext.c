@@ -83,6 +83,7 @@ static /* const */ char *error_list[] = {
    "GLXBadPbuffer",
    "GLXBadCurrentDrawable",
    "GLXBadWindow",
+   "GLXBadProfileARB",
 };
 
 #ifdef GLX_USE_APPLEGL
@@ -403,6 +404,8 @@ __glXInitializeVisualConfigFromTags(struct glx_config * config, int count,
       count -= __GLX_MIN_CONFIG_PROPS;
 #endif
    }
+
+   config->sRGBCapable = GL_FALSE;
 
    /*
     ** Additional properties may be in a list at the end

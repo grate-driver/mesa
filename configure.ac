@@ -6,7 +6,7 @@ dnl Tell the user about autoconf.html in the --help output
 m4_divert_once([HELP_END], [
 See docs/autoconf.html for more details on the options for Mesa.])
 
-AC_INIT([Mesa], [9.0.0],
+AC_INIT([Mesa], [9.0.1],
     [https://bugs.freedesktop.org/enter_bug.cgi?product=Mesa])
 AC_CONFIG_AUX_DIR([bin])
 AC_CONFIG_MACRO_DIR([m4])
@@ -160,13 +160,13 @@ DEFINES=""
 AC_SUBST([DEFINES])
 case "$host_os" in
 linux*|*-gnu*|gnu*)
-    DEFINES="$DEFINES -D_GNU_SOURCE"
+    DEFINES="$DEFINES -D_GNU_SOURCE -DHAVE_PTHREAD"
     ;;
 solaris*)
-    DEFINES="$DEFINES -DSVR4"
+    DEFINES="$DEFINES -DHAVE_PTHREAD -DSVR4"
     ;;
 cygwin*)
-    DEFINES="$DEFINES"
+    DEFINES="$DEFINES -DHAVE_PTHREAD"
     ;;
 esac
 
@@ -946,7 +946,7 @@ AC_ARG_ENABLE([glx-tls],
 AC_SUBST(GLX_TLS, ${GLX_USE_TLS})
 
 AS_IF([test "x$GLX_USE_TLS" = xyes -a "x$ax_pthread_ok" = xyes],
-      [DEFINES="${DEFINES} -DGLX_USE_TLS"])
+      [DEFINES="${DEFINES} -DGLX_USE_TLS -DHAVE_PTHREAD"])
 
 dnl
 dnl More DRI setup
@@ -1030,7 +1030,7 @@ if test "x$enable_dri" = xyes; then
         esac
         ;;
     freebsd* | dragonfly* | *netbsd*)
-        DEFINES="$DEFINES -DUSE_EXTERNAL_DXTN_LIB=1"
+        DEFINES="$DEFINES -DHAVE_PTHREAD -DUSE_EXTERNAL_DXTN_LIB=1"
         DEFINES="$DEFINES -DIN_DRI_DRIVER -DHAVE_ALIAS"
 
         if test "x$DRI_DIRS" = "xyes"; then
@@ -1222,8 +1222,6 @@ if test "x$enable_gbm" = xyes; then
         if test "x$enable_shared_glapi" = xno; then
             AC_MSG_ERROR([gbm_dri requires --enable-shared-glapi])
         fi
-        PKG_CHECK_MODULES([LIBKMS], [libkms], [],
-                          AC_MSG_ERROR([gbm needs libkms]))
     fi
 fi
 GBM_PC_REQ_PRIV="libudev"
@@ -1518,7 +1516,7 @@ for plat in $egl_platforms; do
 		;;
 
 	wayland)
-		PKG_CHECK_MODULES([WAYLAND], [wayland-client wayland-server],, \
+		PKG_CHECK_MODULES([WAYLAND], [wayland-client >= 0.99.0 wayland-server >= 0.99.0],, \
 				  [AC_MSG_ERROR([cannot find libwayland-client])])
 		GALLIUM_WINSYS_DIRS="$GALLIUM_WINSYS_DIRS sw/wayland"
 
