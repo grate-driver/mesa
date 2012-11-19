@@ -1,4 +1,4 @@
-mesa (9.0-1) UNRELEASED; urgency=low
+mesa (9.0.1-1) UNRELEASED; urgency=low
 
   [ Julien Cristau ]
   * Use xz for all binary packages not just *-dbg.
@@ -46,6 +46,9 @@ mesa (9.0-1) UNRELEASED; urgency=low
     shipping a shared library in the package; not an issue in practice since
     this is all post-wheezy / post-precise, but it's an archive reject error
     in Debian right now so let's just be complete.
+
+  [ Maarten Lankhorst ]
+  * New upstream release 9.0.1
 
  -- Julien Cristau <jcristau@debian.org>  Fri, 03 Aug 2012 23:17:16 +0200
 
