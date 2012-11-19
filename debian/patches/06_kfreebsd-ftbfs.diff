@@ -13,6 +13,6 @@ Debian bug: http://bugs.debian.org/524690
          ;;
 -    freebsd* | dragonfly* | *netbsd*)
 +    freebsd* | dragonfly* | *netbsd* | kfreebsd*-gnu*)
-         DEFINES="$DEFINES -DUSE_EXTERNAL_DXTN_LIB=1"
+         DEFINES="$DEFINES -DHAVE_PTHREAD -DUSE_EXTERNAL_DXTN_LIB=1"
          DEFINES="$DEFINES -DIN_DRI_DRIVER -DHAVE_ALIAS"
  
