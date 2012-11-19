@@ -1130,10 +1130,17 @@ copy_image_data_to_texture(struct st_context *st,
       /* Copy potentially with the blitter:
        */
       GLuint src_level;
-      if (stImage->pt != stObj->pt)
+      if (stImage->pt->last_level == 0)
          src_level = 0;
       else
          src_level = stImage->base.Level;
+
+      assert(src_level <= stImage->pt->last_level);
+      assert(u_minify(stImage->pt->width0, src_level) == stImage->base.Width);
+      assert(stImage->pt->target == PIPE_TEXTURE_1D_ARRAY ||
+             u_minify(stImage->pt->height0, src_level) == stImage->base.Height);
+      assert(stImage->pt->target == PIPE_TEXTURE_2D_ARRAY ||
+             u_minify(stImage->pt->depth0, src_level) == stImage->base.Depth);
 
       st_texture_image_copy(st->pipe,
                             stObj->pt, dstLevel,  /* dest texture, level */
