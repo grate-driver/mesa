@@ -49,6 +49,7 @@ mesa (9.0.1-1) UNRELEASED; urgency=low
 
   [ Maarten Lankhorst ]
   * New upstream release 9.0.1
+  * Bump standards-version to 3.9.3
 
  -- Julien Cristau <jcristau@debian.org>  Fri, 03 Aug 2012 23:17:16 +0200
 
