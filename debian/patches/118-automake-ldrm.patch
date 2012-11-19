@@ -1,0 +1,297 @@
+From b2f18cd2b0f75d200d4fc713325269171ac87616 Mon Sep 17 00:00:00 2001
+From: Maarten Lankhorst <maarten.lankhorst@canonical.com>
+Date: Fri, 16 Nov 2012 18:50:57 +0100
+Subject: [PATCH 08/10] [PATCH] makefiles: use configured name for -ldrm*
+ where possible
+
+For precise lts support I had to do some magic with the library names, which works fine
+as long as the libraries from pkg-config are used.
+
+The parts with src/gallium/targets/va-*/Makefile will not apply on the master branch,
+but do apply to the 9.0 branch.
+
+NOTE: This is a candidate for the 9.0 branch.
+
+Signed-off-by: Maarten Lankhorst <maarten.lankhorst@canonical.com>
+Acked-by: Matt Turner <mattst88@gmail.com>
+(cherry picked from commit 4f0537e645f9c34e305f2808c70eafbbc1c7689c)
+---
+ configs/current.in                          |  2 +-
+ src/gallium/targets/dri-i915/Makefile       |  2 +-
+ src/gallium/targets/dri-r300/Makefile       |  2 +-
+ src/gallium/targets/dri-r600/Makefile       |  2 +-
+ src/gallium/targets/dri-radeonsi/Makefile   |  2 +-
+ src/gallium/targets/egl-static/Makefile     | 16 ++++++++--------
+ src/gallium/targets/gbm/Makefile            |  2 +-
+ src/gallium/targets/pipe-loader/Makefile    | 12 ++++++------
+ src/gallium/targets/vdpau-r300/Makefile     |  2 +-
+ src/gallium/targets/vdpau-r600/Makefile     |  2 +-
+ src/gallium/targets/vdpau-radeonsi/Makefile |  2 +-
+ src/gallium/targets/xvmc-r300/Makefile      |  2 +-
+ src/gallium/targets/xvmc-r600/Makefile      |  2 +-
+ 13 files changed, 25 insertions(+), 25 deletions(-)
+
+diff --git a/configs/current.in b/configs/current.in
+index 1802271..62edfa5 100644
+--- a/configs/current.in
++++ b/configs/current.in
+@@ -144,7 +144,7 @@ GLAPI_LIB_DEPS = @GLAPI_LIB_DEPS@
+ DRI_LIB_DEPS = @DRI_LIB_DEPS@
+ GALLIUM_DRI_LIB_DEPS = @GALLIUM_DRI_LIB_DEPS@
+ LIBDRM_CFLAGS = @LIBDRM_CFLAGS@
+-LIBDRM_LIB = @LIBDRM_LIBS@
++LIBDRM_LIBS = @LIBDRM_LIBS@
+ DRI2PROTO_CFLAGS = @DRI2PROTO_CFLAGS@
+ GLPROTO_CFLAGS = @GLPROTO_CFLAGS@
+ EXPAT_INCLUDES = @EXPAT_INCLUDES@
+diff --git a/src/gallium/targets/dri-i915/Makefile b/src/gallium/targets/dri-i915/Makefile
+index ddebff2..a835ee7 100644
+--- a/src/gallium/targets/dri-i915/Makefile
++++ b/src/gallium/targets/dri-i915/Makefile
+@@ -28,6 +28,6 @@ endif
+ 
+ include ../Makefile.dri
+ 
+-GALLIUM_DRI_LIB_DEPS += -ldrm_intel
++GALLIUM_DRI_LIB_DEPS += $(INTEL_LIBS)
+ 
+ symlinks:
+diff --git a/src/gallium/targets/dri-r300/Makefile b/src/gallium/targets/dri-r300/Makefile
+index 256aa23..63a2956 100644
+--- a/src/gallium/targets/dri-r300/Makefile
++++ b/src/gallium/targets/dri-r300/Makefile
+@@ -21,6 +21,6 @@ DRIVER_DEFINES = \
+ 
+ include ../Makefile.dri
+ 
+-GALLIUM_DRI_LIB_DEPS += -ldrm_radeon
++GALLIUM_DRI_LIB_DEPS += $(RADEON_LIBS)
+ 
+ symlinks:
+diff --git a/src/gallium/targets/dri-r600/Makefile b/src/gallium/targets/dri-r600/Makefile
+index 7402750..2499ede 100644
+--- a/src/gallium/targets/dri-r600/Makefile
++++ b/src/gallium/targets/dri-r600/Makefile
+@@ -21,6 +21,6 @@ DRIVER_DEFINES = \
+ 
+ include ../Makefile.dri
+ 
+-GALLIUM_DRI_LIB_DEPS += -ldrm_radeon
++GALLIUM_DRI_LIB_DEPS += $(RADEON_LIBS)
+ 
+ symlinks:
+diff --git a/src/gallium/targets/dri-radeonsi/Makefile b/src/gallium/targets/dri-radeonsi/Makefile
+index b45f243..588946e 100644
+--- a/src/gallium/targets/dri-radeonsi/Makefile
++++ b/src/gallium/targets/dri-radeonsi/Makefile
+@@ -21,6 +21,6 @@ DRIVER_DEFINES = \
+ 
+ include ../Makefile.dri
+ 
+-GALLIUM_DRI_LIB_DEPS += -ldrm_radeon
++GALLIUM_DRI_LIB_DEPS += $(RADEON_LIBS)
+ 
+ symlinks:
+diff --git a/src/gallium/targets/egl-static/Makefile b/src/gallium/targets/egl-static/Makefile
+index f05c81d..08626a9 100644
+--- a/src/gallium/targets/egl-static/Makefile
++++ b/src/gallium/targets/egl-static/Makefile
+@@ -48,17 +48,17 @@ egl_SYS += $(LIBUDEV_LIBS) $(DLOPEN_LIBS) -lEGL -lm -lpthread
+ ifneq ($(findstring x11, $(EGL_PLATFORMS)),)
+ egl_CPPFLAGS += $(LIBDRM_CFLAGS)
+ egl_LIBS += $(TOP)/src/gallium/winsys/sw/xlib/libws_xlib.a
+-egl_SYS += -lX11 -lXext -lXfixes $(LIBDRM_LIB)
++egl_SYS += -lX11 -lXext -lXfixes $(LIBDRM_LIBS)
+ endif
+ ifneq ($(findstring wayland, $(EGL_PLATFORMS)),)
+ egl_CPPFLAGS += $(LIBDRM_CFLAGS)
+ egl_LIBS += $(TOP)/src/gallium/winsys/sw/wayland/libws_wayland.a
+ egl_LIBS += $(TOP)/src/egl/wayland/wayland-drm/.libs/libwayland-drm.a
+-egl_SYS += $(LIBDRM_LIB) $(WAYLAND_LIBS)
++egl_SYS += $(LIBDRM_LIBS) $(WAYLAND_LIBS)
+ endif
+ ifneq ($(findstring drm, $(EGL_PLATFORMS)),)
+ egl_CPPFLAGS += $(LIBDRM_CFLAGS)
+-egl_SYS += $(LIBDRM_LIB) -lgbm
++egl_SYS += $(LIBDRM_LIBS) -lgbm
+ endif
+ ifneq ($(findstring fbdev, $(EGL_PLATFORMS)),)
+ egl_LIBS += $(TOP)/src/gallium/winsys/sw/fbdev/libfbdev.a
+@@ -93,7 +93,7 @@ egl_CPPFLAGS += -D_EGL_PIPE_I915=1
+ egl_LIBS += \
+ 	$(TOP)/src/gallium/winsys/i915/drm/libi915drm.a \
+ 	$(TOP)/src/gallium/drivers/i915/libi915.a
+-egl_SYS += -ldrm_intel
++egl_SYS += $(INTEL_LIBS)
+ endif
+ 
+ # nouveau
+@@ -105,7 +105,7 @@ egl_LIBS += \
+ 	$(TOP)/src/gallium/drivers/nv50/libnv50.a \
+ 	$(TOP)/src/gallium/drivers/nvc0/libnvc0.a \
+ 	$(TOP)/src/gallium/drivers/nouveau/libnouveau.a
+-egl_SYS += -ldrm_nouveau
++egl_SYS += $(NOUVEAU_LIBS)
+ endif
+ 
+ # r300
+@@ -115,7 +115,7 @@ egl_CPPFLAGS += -D_EGL_PIPE_R300=1
+ egl_LIBS += \
+ 	$(TOP)/src/gallium/winsys/radeon/drm/libradeonwinsys.a \
+ 	$(TOP)/src/gallium/drivers/r300/libr300.a
+-egl_SYS += -ldrm_radeon
++egl_SYS += $(RADEON_LIBS)
+ endif
+ endif
+ 
+@@ -126,7 +126,7 @@ egl_CPPFLAGS += -D_EGL_PIPE_R600=1
+ egl_LIBS += \
+ 	$(TOP)/src/gallium/winsys/radeon/drm/libradeonwinsys.a \
+ 	$(TOP)/src/gallium/drivers/r600/libr600.a
+-egl_SYS += -ldrm_radeon
++egl_SYS += $(RADEON_LIBS)
+ endif
+ endif
+ 
+@@ -137,7 +137,7 @@ egl_CPPFLAGS += -D_EGL_PIPE_RADEONSI=1
+ egl_LIBS += \
+ 	$(TOP)/src/gallium/winsys/radeon/drm/libradeonwinsys.a \
+ 	$(TOP)/src/gallium/drivers/radeonsi/libradeonsi.a
+-egl_SYS += -ldrm_radeon
++egl_SYS += $(RADEON_LIBS)
+ endif
+ endif
+ 
+diff --git a/src/gallium/targets/gbm/Makefile b/src/gallium/targets/gbm/Makefile
+index 423debf..17d5648 100644
+--- a/src/gallium/targets/gbm/Makefile
++++ b/src/gallium/targets/gbm/Makefile
+@@ -14,7 +14,7 @@ GBM_INCLUDES = \
+ 	       -I$(TOP)/src/gallium/winsys \
+ 	       -I$(TOP)/src/gallium/include
+ 
+-GBM_LIBS = $(LIBUDEV_LIBS) $(LIBDRM_LIB) -lm \
++GBM_LIBS = $(LIBUDEV_LIBS) $(LIBDRM_LIBS) -lm \
+ 	   $(TOP)/src/gallium/state_trackers/gbm/libgbm.a \
+ 	   $(GALLIUM_PIPE_LOADER_LIBS) $(GALLIUM_AUXILIARIES)
+ 
+diff --git a/src/gallium/targets/pipe-loader/Makefile b/src/gallium/targets/pipe-loader/Makefile
+index 596539c..f15cd25 100644
+--- a/src/gallium/targets/pipe-loader/Makefile
++++ b/src/gallium/targets/pipe-loader/Makefile
+@@ -24,7 +24,7 @@ PIPE_LIBS = \
+ 	$(TOP)/src/gallium/drivers/rbug/librbug.a \
+ 	$(GALLIUM_AUXILIARIES)
+ 
+-PIPE_SYS = $(LIBDRM_LIB) -lm -lpthread $(DLOPEN_LIBS)
++PIPE_SYS = $(LIBDRM_LIBS) -lm -lpthread $(DLOPEN_LIBS)
+ 
+ PIPE_CFLAGS = $(LIBDRM_CFLAGS)
+ 
+@@ -34,7 +34,7 @@ PIPE_LDFLAGS = -Wl,--no-undefined
+ i915_LIBS = \
+ 	$(TOP)/src/gallium/winsys/i915/drm/libi915drm.a \
+ 	$(TOP)/src/gallium/drivers/i915/libi915.a
+-i915_SYS = -ldrm_intel
++i915_SYS = $(INTEL_LIBS)
+ 
+ # nouveau pipe driver
+ nouveau_LIBS = \
+@@ -43,25 +43,25 @@ nouveau_LIBS = \
+ 	$(TOP)/src/gallium/drivers/nv50/libnv50.a \
+ 	$(TOP)/src/gallium/drivers/nvc0/libnvc0.a \
+ 	$(TOP)/src/gallium/drivers/nouveau/libnouveau.a
+-nouveau_SYS = -ldrm_nouveau
++nouveau_SYS = $(NOUVEAU_LIBS)
+ 
+ # r300 pipe driver
+ r300_LIBS = \
+ 	$(TOP)/src/gallium/winsys/radeon/drm/libradeonwinsys.a \
+ 	$(TOP)/src/gallium/drivers/r300/libr300.a
+-r300_SYS += -ldrm_radeon
++r300_SYS += $(RADEON_LIBS)
+ 
+ # r600 pipe driver
+ r600_LIBS = \
+ 	$(TOP)/src/gallium/winsys/radeon/drm/libradeonwinsys.a \
+ 	$(TOP)/src/gallium/drivers/r600/libr600.a
+-r600_SYS += -ldrm_radeon
++r600_SYS += $(RADEON_LIBS)
+ 
+ # radeonsi pipe driver
+ radeonsi_LIBS = \
+ 	$(TOP)/src/gallium/winsys/radeon/drm/libradeonwinsys.a \
+ 	$(TOP)/src/gallium/drivers/radeonsi/libradeonsi.a
+-radeonsi_SYS += -ldrm_radeon
++radeonsi_SYS += $(RADEON_LIBS)
+ 
+ # vmwgfx pipe driver
+ vmwgfx_LIBS = \
+diff --git a/src/gallium/targets/vdpau-r300/Makefile b/src/gallium/targets/vdpau-r300/Makefile
+index 1ada550..e79c920 100644
+--- a/src/gallium/targets/vdpau-r300/Makefile
++++ b/src/gallium/targets/vdpau-r300/Makefile
+@@ -21,7 +21,7 @@ C_SOURCES = \
+ 	$(COMMON_GALLIUM_SOURCES) \
+ 	$(DRIVER_SOURCES)
+ 
+-DRIVER_LIBS = $(shell $(PKG_CONFIG) libdrm --libs) -lXfixes -ldrm_radeon
++DRIVER_LIBS = $(LIBDRM_LIBS) $(RADEON_LIBS) -lXfixes
+ 
+ include ../Makefile.vdpau
+ 
+diff --git a/src/gallium/targets/vdpau-r600/Makefile b/src/gallium/targets/vdpau-r600/Makefile
+index 05e0b4f..6ef7f90 100644
+--- a/src/gallium/targets/vdpau-r600/Makefile
++++ b/src/gallium/targets/vdpau-r600/Makefile
+@@ -17,7 +17,7 @@ C_SOURCES = \
+ 	$(COMMON_GALLIUM_SOURCES) \
+ 	$(DRIVER_SOURCES)
+ 
+-DRIVER_LIBS = $(shell $(PKG_CONFIG) libdrm --libs) -lXfixes -ldrm_radeon
++DRIVER_LIBS = $(LIBDRM_LIBS) $(RADEON_LIBS) -lXfixes
+ 
+ include ../Makefile.vdpau
+ 
+diff --git a/src/gallium/targets/vdpau-radeonsi/Makefile b/src/gallium/targets/vdpau-radeonsi/Makefile
+index 6dd2be9..4ff6743 100644
+--- a/src/gallium/targets/vdpau-radeonsi/Makefile
++++ b/src/gallium/targets/vdpau-radeonsi/Makefile
+@@ -23,7 +23,7 @@ C_SOURCES = \
+ DRIVER_DEFINES = \
+ 	-DGALLIUM_RBUG -DGALLIUM_TRACE -DGALLIUM_NOOP
+ 
+-DRIVER_LIBS = $(shell $(PKG_CONFIG) libdrm --libs) -lXfixes -ldrm_radeon
++DRIVER_LIBS = $(LIBDRM_LIBS) $(RADEON_LIBS) -lXfixes
+ 
+ include ../Makefile.vdpau
+ 
+diff --git a/src/gallium/targets/xvmc-r300/Makefile b/src/gallium/targets/xvmc-r300/Makefile
+index 800f8d5..d2ab488 100644
+--- a/src/gallium/targets/xvmc-r300/Makefile
++++ b/src/gallium/targets/xvmc-r300/Makefile
+@@ -17,7 +17,7 @@ C_SOURCES = \
+ 	$(COMMON_GALLIUM_SOURCES) \
+ 	$(DRIVER_SOURCES)
+ 
+-DRIVER_LIBS = $(shell $(PKG_CONFIG) libdrm --libs) -lXfixes -ldrm_radeon
++DRIVER_LIBS = $(LIBDRM_LIBS) $(RADEON_LIBS) -lXfixes
+ 
+ include ../Makefile.xvmc
+ 
+diff --git a/src/gallium/targets/xvmc-r600/Makefile b/src/gallium/targets/xvmc-r600/Makefile
+index d9ce72f..3ef5b1a 100644
+--- a/src/gallium/targets/xvmc-r600/Makefile
++++ b/src/gallium/targets/xvmc-r600/Makefile
+@@ -17,7 +17,7 @@ C_SOURCES = \
+ 	$(COMMON_GALLIUM_SOURCES) \
+ 	$(DRIVER_SOURCES)
+ 
+-DRIVER_LIBS = $(shell $(PKG_CONFIG) libdrm --libs) -lXfixes -ldrm_radeon
++DRIVER_LIBS = $(LIBDRM_LIBS) $(RADEON_LIBS) -lXfixes
+ 
+ include ../Makefile.xvmc
+ 
+-- 
+1.8.0
+
