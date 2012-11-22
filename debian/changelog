@@ -5,6 +5,7 @@ mesa (9.0.1-1) UNRELEASED; urgency=low
 
   [ Timo Aaltonen ]
   * New upstream release 9.0.
+    - Set close on exec flag when opening dri devices (Closes: #651370).
   * Refresh patches
     - disable 05_kfreebsd-egl-x11.diff for now.
     - switch to llvm-3.1.
