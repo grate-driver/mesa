@@ -8,7 +8,7 @@ mesa (9.0.1-1) UNRELEASED; urgency=low
     - Set close on exec flag when opening dri devices (Closes: #651370).
   * Refresh patches
     - disable 05_kfreebsd-egl-x11.diff for now.
-    - switch to llvm-3.1.
+    - switch to llvm-3.1 (Closes: #678822).
   * control: Added libtool to build-depends.
   * rules: Drop special handling of config.{guess,sub}, not needed anymore.
   * rules, libosmesa*: Build only the 32bit OSMesa library.
