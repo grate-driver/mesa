@@ -250,6 +250,8 @@ _mesa_init_shader_program(struct gl_context *ctx, struct gl_shader_program *prog
    prog->Geom.OutputType = GL_TRIANGLE_STRIP;
 #endif
 
+   prog->TransformFeedback.BufferMode = GL_INTERLEAVED_ATTRIBS;
+
    prog->InfoLog = ralloc_strdup(prog, "");
 }
 
