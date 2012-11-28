@@ -6,4 +6,3 @@
 10-hurd-configure-tweaks.diff
 #11-hurd-ftbfs-again.diff
 13-llvm-config-pick-a-version.diff
-Revert-mesa-Fix-glPopAttrib-behavior-on-GL_FRAMEBUFF.diff
