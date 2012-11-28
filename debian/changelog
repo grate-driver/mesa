@@ -1,3 +1,10 @@
+mesa (8.0.5-2) UNRELEASED; urgency=low
+
+  * Revert a commit from 8.0.5 that was reported as causing a regression
+    (thanks, Simon Chopin).
+
+ -- Julien Cristau <jcristau@debian.org>  Wed, 28 Nov 2012 19:21:15 +0100
+
 mesa (8.0.5-1) unstable; urgency=low
 
   * New upstream stable release

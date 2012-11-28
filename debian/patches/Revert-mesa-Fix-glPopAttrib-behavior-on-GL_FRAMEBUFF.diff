@@ -1,0 +1,61 @@
+From 72851f44b7be6de1fd076b507c18cca2aa863416 Mon Sep 17 00:00:00 2001
+From: Julien Cristau <jcristau@debian.org>
+Date: Wed, 28 Nov 2012 19:20:02 +0100
+Subject: [PATCH] Revert "mesa: Fix glPopAttrib() behavior on
+ GL_FRAMEBUFFER_SRGB."
+
+This reverts commit bd9f729091bbbce521d4526afd0230da2a7cf350.
+
+Breaks pioneer (git://github.com/pioneerspacesim/pioneer) on llvmpipe.
+---
+ src/mesa/main/attrib.c |   13 -------------
+ 1 file changed, 13 deletions(-)
+
+diff --git a/src/mesa/main/attrib.c b/src/mesa/main/attrib.c
+index 225ac89..ca81602 100644
+--- a/src/mesa/main/attrib.c
++++ b/src/mesa/main/attrib.c
+@@ -135,9 +135,6 @@ struct gl_enable_attrib
+    /* GL_ARB_point_sprite / GL_NV_point_sprite */
+    GLboolean PointSprite;
+    GLboolean FragmentShaderATI;
+-
+-   /* GL_ARB_framebuffer_sRGB / GL_EXT_framebuffer_sRGB */
+-   GLboolean sRGBEnabled;
+ };
+ 
+ 
+@@ -325,9 +322,6 @@ _mesa_PushAttrib(GLbitfield mask)
+       attr->VertexProgramPointSize = ctx->VertexProgram.PointSizeEnabled;
+       attr->VertexProgramTwoSide = ctx->VertexProgram.TwoSideEnabled;
+       save_attrib_data(&head, GL_ENABLE_BIT, attr);
+-
+-      /* GL_ARB_framebuffer_sRGB / GL_EXT_framebuffer_sRGB */
+-      attr->sRGBEnabled = ctx->Color.sRGBEnabled;
+    }
+ 
+    if (mask & GL_EVAL_BIT) {
+@@ -623,10 +617,6 @@ pop_enable_group(struct gl_context *ctx, const struct gl_enable_attrib *enable)
+                    enable->VertexProgramTwoSide,
+                    GL_VERTEX_PROGRAM_TWO_SIDE_ARB);
+ 
+-   /* GL_ARB_framebuffer_sRGB / GL_EXT_framebuffer_sRGB */
+-   TEST_AND_UPDATE(ctx->Color.sRGBEnabled, enable->sRGBEnabled,
+-                   GL_FRAMEBUFFER_SRGB);
+-
+    /* texture unit enables */
+    for (i = 0; i < ctx->Const.MaxTextureUnits; i++) {
+       const GLbitfield enabled = enable->Texture[i];
+@@ -991,9 +981,6 @@ _mesa_PopAttrib(void)
+                _mesa_set_enable(ctx, GL_DITHER, color->DitherFlag);
+                _mesa_ClampColorARB(GL_CLAMP_FRAGMENT_COLOR_ARB, color->ClampFragmentColor);
+                _mesa_ClampColorARB(GL_CLAMP_READ_COLOR_ARB, color->ClampReadColor);
+-
+-               /* GL_ARB_framebuffer_sRGB / GL_EXT_framebuffer_sRGB */
+-               _mesa_set_enable(ctx, GL_FRAMEBUFFER_SRGB, color->sRGBEnabled);
+             }
+             break;
+          case GL_CURRENT_BIT:
+-- 
+1.7.10.4
+
