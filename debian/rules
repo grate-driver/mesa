@@ -235,7 +235,7 @@ binary-arch: install
 	# No need for these .so, they're just convenience libraries:
 	rm debian/tmp/dri/usr/lib/${DEB_HOST_MULTIARCH}/libglapi.so
 	rm debian/tmp/dri/usr/lib/${DEB_HOST_MULTIARCH}/libdricore*.so
-#	rm debian/tmp/dri/usr/lib/${DEB_HOST_MULTIARCH}/libgallium*.so
+	rm debian/tmp/dri/usr/lib/${DEB_HOST_MULTIARCH}/libgallium*.so
 	# purge .la files
 	find debian/tmp/ -name '*.la' -exec rm '{}' ';'
 

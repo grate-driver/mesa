@@ -63,6 +63,14 @@ mesa (9.0.1-1) UNRELEASED; urgency=low
 
  -- Julien Cristau <jcristau@debian.org>  Fri, 03 Aug 2012 23:17:16 +0200
 
+mesa (9.0-0ubuntu1.1) UNRELEASED; urgency=low
+
+  * Decrease size of mesa's libgl1-mesa-dri again
+    - re-enable 117-static-gallium.patch
+    - add 118-dricore-gallium.patch to link against libdricore again
+
+ -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Tue, 22 Jan 2013 11:54:09 +0100
+
 mesa (9.0-0ubuntu2) raring; urgency=low
 
   * patches/118-wayland-0.99.diff: Upstream port to wayland 0.99 API
