@@ -15,7 +15,7 @@
  # make st/mesa built-in when there is a single glapi provider
  ifeq ($(SHARED_GLAPI),1)
 -egl_LIBS += $(TOP)/src/mesa/libmesagallium.a
-+egl_LIBS += $(GALLIUM_DRI_LIB_DEPS)
++egl_LIBS += $(GALLIUM_DRI_LIB_DEPS)  $(GALLIUM_AUXILIARIES)
  egl_SYS += -lm -lpthread $(DLOPEN_LIBS) -l$(GLAPI_LIB)
  else
  egl_CPPFLAGS += -D_EGL_EXTERNAL_GL=1
@@ -28,18 +28,6 @@
  st_GL_SYS := -lm -lpthread $(DLOPEN_LIBS)
  
  # LLVM
---- a/src/mesa/libdricore/Makefile.am
-+++ b/src/mesa/libdricore/Makefile.am
-@@ -45,6 +45,9 @@
- 	$(LIBGLSL_CXX_FILES) \
- 	$(BUILTIN_COMPILER_GENERATED_CXX_FILES) \
- 	$(top_builddir)/src/glsl/builtin_function.cpp
-+if HAVE_GALLIUM
-+libdricore@VERSION@_la_SOURCES += $(STATETRACKER_FILES) $(SRCDIR)state_tracker/st_glsl_to_tgsi.cpp
-+endif
- libdricore@VERSION@_la_LDFLAGS = -version-number 1:0
- libdricore@VERSION@_la_LIBADD = libdricore-asm.la
- 
 --- a/src/gallium/targets/libgl-xlib/Makefile
 +++ b/src/gallium/targets/libgl-xlib/Makefile
 @@ -46,7 +46,6 @@
@@ -50,26 +38,6 @@
  	$(GALLIUM_AUXILIARIES) \
  
  
---- a/src/mesa/Makefile.am
-+++ b/src/mesa/Makefile.am
-@@ -90,7 +90,7 @@
- check_LTLIBRARIES = libmesa.la
- endif
- if HAVE_GALLIUM
--noinst_LTLIBRARIES += libmesagallium.la
-+#noinst_LTLIBRARIES += libmesagallium.la
- endif
- 
- SRCDIR = $(top_srcdir)/src/mesa/
-@@ -143,7 +143,7 @@
- # Provide compatibility with scripts for the old Mesa build system for
- # a while by putting a link to the library in the current directory.
- all-local: $(noinst_LTLIBRARIES)
--	ln -f .libs/libmesagallium.a .
-+#	ln -f .libs/libmesagallium.a .
- endif
- 
- CLEANFILES += libmesagallium.a
 --- a/src/gallium/targets/Makefile.dri
 +++ b/src/gallium/targets/Makefile.dri
 @@ -11,7 +11,6 @@
@@ -80,3 +48,76 @@
  	$(GALLIUM_AUXILIARIES)
  
  COMMON_GALLIUM_SOURCES = \
+--- a/src/mesa/libdricore/Makefile.am
++++ b/src/mesa/libdricore/Makefile.am
+@@ -46,7 +46,7 @@
+ 	$(BUILTIN_COMPILER_GENERATED_CXX_FILES) \
+ 	$(top_builddir)/src/glsl/builtin_function.cpp
+ libdricore@VERSION@_la_LDFLAGS = -version-number 1:0
+-libdricore@VERSION@_la_LIBADD = libdricore-asm.la
++libdricore@VERSION@_la_LIBADD = libdricore-asm.la $(top_builddir)/src/mapi/shared-glapi/libglapi.la
+ 
+ # This is separated from libdricore to avoid conflics in object
+ # outputs between main/clip.c and sparc/clip.c.  The documented way to
+@@ -81,6 +81,17 @@
+ noinst_LTLIBRARIES = libdricore-asm.la
+ lib_LTLIBRARIES = libdricore@VERSION@.la
+ 
++libmesagallium@VERSION@_la_SOURCES = \
++	$(STATETRACKER_FILES) $(SRCDIR)state_tracker/st_glsl_to_tgsi.cpp
++libmesagallium@VERSION@_la_CFLAGS = $(LLVM_CFLAGS) $(CFLAGS_NOVISIBILITY)
++libmesagallium@VERSION@_la_CXXFLAGS = $(LLVM_CXXFLAGS) $(CXXFLAGS_NOVISIBILITY)
++libmesagallium@VERSION@_la_LIBADD = libdricore@VERSION@.la
++libmesagallium@VERSION@_la_LDFLAGS =
++
++if HAVE_GALLIUM
++noinst_LTLIBRARIES += libmesagallium@VERSION@.la
++endif
++
+ # Provide compatibility with scripts for the old Mesa build system for
+ # a while by putting a link to the driver into /lib of the build tree.
+ all-local: libdricore@VERSION@.la
+--- a/src/mesa/Makefile.am
++++ b/src/mesa/Makefile.am
+@@ -89,9 +89,6 @@
+ else
+ check_LTLIBRARIES = libmesa.la
+ endif
+-if HAVE_GALLIUM
+-noinst_LTLIBRARIES += libmesagallium.la
+-endif
+ 
+ SRCDIR = $(top_srcdir)/src/mesa/
+ BUILDDIR = $(top_builddir)/src/mesa/
+@@ -131,21 +128,6 @@
+ libmesa_la_LIBADD = $(top_builddir)/src/glsl/libglsl.la
+ libmesa_la_LDFLAGS =
+ 
+-libmesagallium_la_SOURCES = \
+-	$(MESA_GALLIUM_FILES) \
+-	$(MESA_GALLIUM_CXX_FILES) \
+-        $(MESA_ASM_FILES_FOR_ARCH)
+-
+-libmesagallium_la_LIBADD = $(top_builddir)/src/glsl/libglsl.la
+-libmesagallium_la_LDFLAGS =
+-
+-if HAVE_GALLIUM
+-# Provide compatibility with scripts for the old Mesa build system for
+-# a while by putting a link to the library in the current directory.
+-all-local: $(noinst_LTLIBRARIES)
+-	ln -f .libs/libmesagallium.a .
+-endif
+-
+ CLEANFILES += libmesagallium.a
+ 
+ pkgconfigdir = $(libdir)/pkgconfig
+--- a/src/gallium/auxiliary/Makefile.am
++++ b/src/gallium/auxiliary/Makefile.am
+@@ -25,6 +25,7 @@
+ lib_LTLIBRARIES = libgallium.la
+ libgallium_la_SOURCES = $(C_SOURCES) $(CPP_SOURCES)
+ libgallium_la_LDFLAGS = -no-undefined @LLVM_LDFLAGS@ @LLVM_LIBS@
++libgallium_la_LIBADD = $(top_builddir)/src/mesa/libdricore/libmesagallium@VERSION@.la
+ if HAVE_SHARED_GALLIUM
+ AM_CFLAGS += -shared
+ AM_CXXFLAGS += -shared
