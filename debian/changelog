@@ -8,7 +8,7 @@ mesa (9.0.2-1) UNRELEASED; urgency=low
     - Set close on exec flag when opening dri devices (Closes: #651370).
   * Refresh patches
     - disable 05_kfreebsd-egl-x11.diff for now.
-    - switch to llvm-3.2 (Closes: #678822).
+    - switch to llvm-3.1 (Closes: #678822).
   * control: Added libtool to build-depends.
   * rules: Drop special handling of config.{guess,sub}, not needed anymore.
   * rules, libosmesa*: Build only the 32bit OSMesa library.
@@ -53,6 +53,7 @@ mesa (9.0.2-1) UNRELEASED; urgency=low
   * Bump standards-version to 3.9.3.
   * control: Bump libwayland-dev build-dep to 1.0.2.
   * Remove 13-llvm-config-pick-a-version.diff and just pass a flag to configure.
+  * Add 16-radeon-ndebug.diff to fix a build failure against llvm
 
  -- Julien Cristau <jcristau@debian.org>  Fri, 03 Aug 2012 23:17:16 +0200
 
