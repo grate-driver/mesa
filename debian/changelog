@@ -1,3 +1,12 @@
+mesa (9.0-0ubuntu1) UNRELEASED; urgency=low
+
+  * New upstream release.
+  * Decrease size of mesa's libgl1-mesa-dri again
+    - re-enable 117-static-gallium.patch
+    - add 118-dricore-gallium.patch to link against libdricore again
+
+ -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Tue, 22 Jan 2013 11:54:09 +0100
+
 mesa (9.0.2-1) UNRELEASED; urgency=low
 
   [ Julien Cristau ]
@@ -56,14 +65,6 @@ mesa (9.0.2-1) UNRELEASED; urgency=low
   * Add 16-radeon-ndebug.diff to fix a build failure against llvm
 
  -- Julien Cristau <jcristau@debian.org>  Fri, 03 Aug 2012 23:17:16 +0200
-
-mesa (9.0-0ubuntu1.1) UNRELEASED; urgency=low
-
-  * Decrease size of mesa's libgl1-mesa-dri again
-    - re-enable 117-static-gallium.patch
-    - add 118-dricore-gallium.patch to link against libdricore again
-
- -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Tue, 22 Jan 2013 11:54:09 +0100
 
 mesa (9.0.1-0ubuntu1) raring; urgency=low
 
