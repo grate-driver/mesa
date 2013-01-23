@@ -1,4 +1,4 @@
-mesa (9.0.1-1) UNRELEASED; urgency=low
+mesa (9.0.2-1) UNRELEASED; urgency=low
 
   [ Julien Cristau ]
   * Use xz for all binary packages not just *-dbg.
@@ -49,9 +49,10 @@ mesa (9.0.1-1) UNRELEASED; urgency=low
     in Debian right now so let's just be complete.
 
   [ Maarten Lankhorst ]
-  * New upstream release 9.0.1
-  * Bump standards-version to 3.9.3
-  * control: Bump libwayland-dev build-dep to 0.99.
+  * New upstream release 9.0.2.
+  * Bump standards-version to 3.9.3.
+  * control: Bump libwayland-dev build-dep to 1.0.2.
+  * Remove 13-llvm-config-pick-a-version.diff and just pass a flag to configure.
 
  -- Julien Cristau <jcristau@debian.org>  Fri, 03 Aug 2012 23:17:16 +0200
 
