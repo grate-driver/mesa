@@ -1,30 +1,14 @@
-mesa (9.0-0ubuntu1.1) UNRELEASED; urgency=low
-
-  * Decrease size of mesa's libgl1-mesa-dri again
-    - re-enable 117-static-gallium.patch
-    - add 118-dricore-gallium.patch to link against libdricore again
-
- -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Tue, 22 Jan 2013 11:54:09 +0100
-
-mesa (9.0.1-0ubuntu1) raring; urgency=low
-
-  * Merge from unreleased debian git.
-    - release 9.0.1
-  * add 118-automake-ldrm.patch to ease backport to precise
-    - upstream commit, targeted for 9.0.2
-
- -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Mon, 19 Nov 2012 12:03:50 +0100
-
-mesa (9.0.1-1) UNRELEASED; urgency=low
+mesa (9.0.2-1) UNRELEASED; urgency=low
 
   [ Julien Cristau ]
   * Use xz for all binary packages not just *-dbg.
 
   [ Timo Aaltonen ]
   * New upstream release 9.0.
+    - Set close on exec flag when opening dri devices (Closes: #651370).
   * Refresh patches
     - disable 05_kfreebsd-egl-x11.diff for now.
-    - switch to llvm-3.1.
+    - switch to llvm-3.1 (Closes: #678822).
   * control: Added libtool to build-depends.
   * rules: Drop special handling of config.{guess,sub}, not needed anymore.
   * rules, libosmesa*: Build only the 32bit OSMesa library.
@@ -65,11 +49,30 @@ mesa (9.0.1-1) UNRELEASED; urgency=low
     in Debian right now so let's just be complete.
 
   [ Maarten Lankhorst ]
-  * New upstream release 9.0.1
-  * Bump standards-version to 3.9.3
-  * control: Bump libwayland-dev build-dep to 0.99.
+  * New upstream release 9.0.2.
+  * Bump standards-version to 3.9.3.
+  * control: Bump libwayland-dev build-dep to 1.0.2.
+  * Remove 13-llvm-config-pick-a-version.diff and just pass a flag to configure.
+  * Add 16-radeon-ndebug.diff to fix a build failure against llvm
 
  -- Julien Cristau <jcristau@debian.org>  Fri, 03 Aug 2012 23:17:16 +0200
+
+mesa (9.0-0ubuntu1.1) UNRELEASED; urgency=low
+
+  * Decrease size of mesa's libgl1-mesa-dri again
+    - re-enable 117-static-gallium.patch
+    - add 118-dricore-gallium.patch to link against libdricore again
+
+ -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Tue, 22 Jan 2013 11:54:09 +0100
+
+mesa (9.0.1-0ubuntu1) raring; urgency=low
+
+  * Merge from unreleased debian git.
+    - release 9.0.1
+  * add 118-automake-ldrm.patch to ease backport to precise
+    - upstream commit, targeted for 9.0.2
+
+ -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Mon, 19 Nov 2012 12:03:50 +0100
 
 mesa (9.0-0ubuntu2) raring; urgency=low
 

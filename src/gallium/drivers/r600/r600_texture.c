@@ -454,7 +454,9 @@ struct pipe_resource *r600_texture_create(struct pipe_screen *screen,
 	int r;
 
 	if (!(templ->flags & R600_RESOURCE_FLAG_TRANSFER)) {
-		if (!(templ->bind & PIPE_BIND_SCANOUT) &&
+		if (templ->flags & R600_RESOURCE_FLAG_FORCE_TILING) {
+			array_mode = V_038000_ARRAY_2D_TILED_THIN1;
+		} else if (!(templ->bind & PIPE_BIND_SCANOUT) &&
 		    templ->usage != PIPE_USAGE_STAGING &&
 		    templ->usage != PIPE_USAGE_STREAM) {
 			array_mode = V_038000_ARRAY_2D_TILED_THIN1;

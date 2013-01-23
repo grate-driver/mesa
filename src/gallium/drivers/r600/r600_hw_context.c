@@ -1080,13 +1080,14 @@ void r600_context_streamout_begin(struct r600_context *ctx)
 	unsigned *stride_in_dw = ctx->vs_shader->so.stride;
 	unsigned buffer_en, i, update_flags = 0;
 	uint64_t va;
+	unsigned num_cs_dw_streamout_end;
 
 	buffer_en = (ctx->num_so_targets >= 1 && t[0] ? 1 : 0) |
 		    (ctx->num_so_targets >= 2 && t[1] ? 2 : 0) |
 		    (ctx->num_so_targets >= 3 && t[2] ? 4 : 0) |
 		    (ctx->num_so_targets >= 4 && t[3] ? 8 : 0);
 
-	ctx->num_cs_dw_streamout_end =
+	num_cs_dw_streamout_end =
 		12 + /* flush_vgt_streamout */
 		util_bitcount(buffer_en) * 8 + /* STRMOUT_BUFFER_UPDATE */
 		3 /* set_streamout_enable(0) */;
@@ -1095,11 +1096,15 @@ void r600_context_streamout_begin(struct r600_context *ctx)
 			   12 + /* flush_vgt_streamout */
 			   6 + /* set_streamout_enable */
 			   util_bitcount(buffer_en) * 7 + /* SET_CONTEXT_REG */
-			   (ctx->chip_class == R700 ? util_bitcount(buffer_en) * 5 : 0) + /* STRMOUT_BASE_UPDATE */
+			   (ctx->family >= CHIP_RS780 &&
+			    ctx->family <= CHIP_RV740 ? util_bitcount(buffer_en) * 5 : 0) + /* STRMOUT_BASE_UPDATE */
 			   util_bitcount(buffer_en & ctx->streamout_append_bitmask) * 8 + /* STRMOUT_BUFFER_UPDATE */
 			   util_bitcount(buffer_en & ~ctx->streamout_append_bitmask) * 6 + /* STRMOUT_BUFFER_UPDATE */
-			   (ctx->family > CHIP_R600 && ctx->family < CHIP_RV770 ? 2 : 0) + /* SURFACE_BASE_UPDATE */
-			   ctx->num_cs_dw_streamout_end, TRUE);
+			   (ctx->family > CHIP_R600 && ctx->family < CHIP_RS780 ? 2 : 0) + /* SURFACE_BASE_UPDATE */
+			   num_cs_dw_streamout_end, TRUE);
+
+	/* This must be set after r600_need_cs_space. */
+	ctx->num_cs_dw_streamout_end = num_cs_dw_streamout_end;
 
 	if (ctx->chip_class >= EVERGREEN) {
 		evergreen_flush_vgt_streamout(ctx);
@@ -1133,7 +1138,7 @@ void r600_context_streamout_begin(struct r600_context *ctx)
 
 			/* R7xx requires this packet after updating BUFFER_BASE.
 			 * Without this, R7xx locks up. */
-			if (ctx->chip_class == R700) {
+			if (ctx->family >= CHIP_RS780 && ctx->family <= CHIP_RV740) {
 				cs->buf[cs->cdw++] = PKT3(PKT3_STRMOUT_BASE_UPDATE, 1, 0);
 				cs->buf[cs->cdw++] = i;
 				cs->buf[cs->cdw++] = va >> 8;
@@ -1173,7 +1178,7 @@ void r600_context_streamout_begin(struct r600_context *ctx)
 		}
 	}
 
-	if (ctx->family > CHIP_R600 && ctx->family < CHIP_RV770) {
+	if (ctx->family > CHIP_R600 && ctx->family < CHIP_RS780) {
 		cs->buf[cs->cdw++] = PKT3(PKT3_SURFACE_BASE_UPDATE, 0, 0);
 		cs->buf[cs->cdw++] = update_flags;
 	}

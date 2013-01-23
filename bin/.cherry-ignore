@@ -1,5 +1,10 @@
 # These commits were cherry picked without using -x.
-# TBD
+ca3ed3e024864e91ca3cccc59fb96950e1d079b5 egl/wayland: Don't invalidate drawable on swap buffers
+89ba4368fd86778405eea163e2b27812055f0df9 egl/wayland: Add invalidate back in eglSwapBuffers()
+60a11e295b86475ff334291a5b483e422371b21c egl/wayland: Dispatch the event queue before get_buffers
+41e105d5beb78c42993a602cc58d0f990739b088 nvc0: add missing call to map edge flag in push_vbo
+be75a9373a6d0f9e2ef35ac376a541e60d72d306 nv50/ir: wrap assertion using typeid in #ifndef NDEBUG
+7d2d450ea6d8082db14cd3f86c6c25442bf771c5 nouveau: fix undefined behaviour when testing sample_count
 
 # Causes too many regressions...
 413c4914129cd26ca87960852d8c0264c0fb29e7 intel: Improve teximage perf for Google Chrome paint rects (v3)

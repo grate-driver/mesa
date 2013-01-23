@@ -6,7 +6,7 @@ dnl Tell the user about autoconf.html in the --help output
 m4_divert_once([HELP_END], [
 See docs/autoconf.html for more details on the options for Mesa.])
 
-AC_INIT([Mesa], [9.0.1],
+AC_INIT([Mesa], [9.0.2],
     [https://bugs.freedesktop.org/enter_bug.cgi?product=Mesa])
 AC_CONFIG_AUX_DIR([bin])
 AC_CONFIG_MACRO_DIR([m4])
@@ -1433,9 +1433,16 @@ dnl
 
 AC_ARG_WITH([libclc-path],
    [AS_HELP_STRING([--with-libclc-path],
-         [Path to libclc builtins library.  Example: --with-libclc-path=\$HOME/libclc/])],
+         [DEPRECATED: See http://dri.freedesktop.org/wiki/GalliumCompute#How_to_Install])],
    [LIBCLC_PATH="$withval"],
    [LIBCLC_PATH=""])
+
+if test "x$LIBCLC_PATH" != x; then
+   AC_MSG_ERROR([The --with-libclc-path option has been deprecated.
+                  Please review the updated build instructions for clover:
+		  http://dri.freedesktop.org/wiki/GalliumCompute])
+fi
+
 
 AC_ARG_WITH([clang-libdir],
    [AS_HELP_STRING([--with-clang-libdir],
@@ -1443,7 +1450,10 @@ AC_ARG_WITH([clang-libdir],
    [CLANG_LIBDIR="$withval"],
    [CLANG_LIBDIR=""])
 
-AC_SUBST([LIBCLC_PATH])
+LIBCLC_INCLUDEDIR=`pkg-config --variable=includedir libclc`
+LIBCLC_LIBEXECDIR=`pkg-config --variable=libexecdir libclc`
+AC_SUBST([LIBCLC_INCLUDEDIR])
+AC_SUBST([LIBCLC_LIBEXECDIR])
 
 if test "x$enable_opencl" = xyes; then
     if test "x$with_gallium_drivers" = x; then
@@ -1452,6 +1462,10 @@ if test "x$enable_opencl" = xyes; then
 
     if test $GCC_VERSION_MAJOR -lt 4 -o $GCC_VERSION_MAJOR -eq 4 -a $GCC_VERSION_MINOR -lt 6; then
         AC_MSG_ERROR([gcc >= 4.6 is required to build clover])
+    fi
+
+    if test "x$LIBCLC_INCLUDEDIR" == x || test "x$LIBCLC_LIBEXECDIR" == x; then
+        AC_MSG_ERROR([pkg-config cannot use libclc.pc which is required to build clover])
     fi
 
     GALLIUM_STATE_TRACKERS_DIRS="$GALLIUM_STATE_TRACKERS_DIRS clover"
@@ -1516,8 +1530,7 @@ for plat in $egl_platforms; do
 		;;
 
 	wayland)
-		PKG_CHECK_MODULES([WAYLAND], [wayland-client >= 0.99.0 wayland-server >= 0.99.0],, \
-				  [AC_MSG_ERROR([cannot find libwayland-client])])
+		PKG_CHECK_MODULES([WAYLAND], [wayland-client >= 1.0.2 wayland-server >= 1.0.2])
 		GALLIUM_WINSYS_DIRS="$GALLIUM_WINSYS_DIRS sw/wayland"
 
                 WAYLAND_PREFIX=`$PKG_CONFIG --variable=prefix wayland-client`
@@ -1661,8 +1674,8 @@ if test "x$enable_gallium_llvm" = xyes; then
 	fi
 	LLVM_LDFLAGS=`$LLVM_CONFIG --ldflags`
 	LLVM_BINDIR=`$LLVM_CONFIG --bindir`
-	LLVM_CXXFLAGS=`$LLVM_CONFIG --cxxflags`
-	LLVM_CPPFLAGS=`$LLVM_CONFIG --cppflags`
+	LLVM_CXXFLAGS=`$LLVM_CONFIG --cxxflags|sed -e 's/-DNDEBUG\>//g' -e 's/-pedantic//g' -e 's/-Wcovered-switch-default//g'`
+	LLVM_CPPFLAGS=`$LLVM_CONFIG --cppflags|sed -e 's/-DNDEBUG\>//g' -e 's/-pedantic//g' -e 's/-Wcovered-switch-default//g'`
 	LLVM_INCLUDEDIR=`$LLVM_CONFIG --includedir`
 	LLVM_LIBDIR=`$LLVM_CONFIG --libdir`
 	DEFINES="${DEFINES} -DHAVE_LLVM=`echo $LLVM_VERSION | sed -e 's/\([[0-9]]\)\.\([[0-9]]\)/0x0\10\2/g'`"
