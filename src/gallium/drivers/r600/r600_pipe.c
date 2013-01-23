@@ -443,7 +443,7 @@ static int r600_get_param(struct pipe_screen* pscreen, enum pipe_cap param)
 		return rscreen->has_streamout ? 1 : 0;
 	case PIPE_CAP_MAX_STREAM_OUTPUT_SEPARATE_COMPONENTS:
 	case PIPE_CAP_MAX_STREAM_OUTPUT_INTERLEAVED_COMPONENTS:
-		return 16*4;
+		return 32*4;
 
 	/* Texturing. */
 	case PIPE_CAP_MAX_TEXTURE_2D_LEVELS:
@@ -933,12 +933,18 @@ struct pipe_screen *r600_screen_create(struct radeon_winsys *ws)
 	/* Figure out streamout kernel support. */
 	switch (rscreen->chip_class) {
 	case R600:
-	case EVERGREEN:
-	case CAYMAN:
-		rscreen->has_streamout = rscreen->info.drm_minor >= 14;
+		if (rscreen->family < CHIP_RS780) {
+			rscreen->has_streamout = rscreen->info.drm_minor >= 14;
+		} else {
+			rscreen->has_streamout = rscreen->info.drm_minor >= 23;
+		}
 		break;
 	case R700:
 		rscreen->has_streamout = rscreen->info.drm_minor >= 17;
+		break;
+	case EVERGREEN:
+	case CAYMAN:
+		rscreen->has_streamout = rscreen->info.drm_minor >= 14;
 		break;
 	}
 

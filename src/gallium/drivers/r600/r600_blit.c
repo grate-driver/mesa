@@ -387,6 +387,8 @@ static boolean is_simple_resolve(const struct pipe_resolve_info *info)
 {
    unsigned dst_width = u_minify(info->dst.res->width0, info->dst.level);
    unsigned dst_height = u_minify(info->dst.res->height0, info->dst.level);
+   struct r600_texture *dst = (struct r600_texture*)info->dst.res;
+   unsigned dst_tile_mode = dst->surface.level[info->dst.level].mode;
 
    return info->dst.res->format == info->src.res->format &&
           dst_width == info->src.res->width0 &&
@@ -398,7 +400,10 @@ static boolean is_simple_resolve(const struct pipe_resolve_info *info)
           info->src.x0 == 0 &&
           info->src.y0 == 0 &&
           info->src.x1 == dst_width &&
-          info->src.y1 == dst_height;
+          info->src.y1 == dst_height &&
+          /* Dst must be tiled. If it's not, we have to use a temporary
+	   * resource which is tiled. */
+	  dst_tile_mode >= RADEON_SURF_MODE_1D;
 }
 
 static void r600_color_resolve(struct pipe_context *ctx,
@@ -434,7 +439,7 @@ static void r600_color_resolve(struct pipe_context *ctx,
 	templ.nr_samples = 0;
 	templ.usage = PIPE_USAGE_STATIC;
 	templ.bind = PIPE_BIND_RENDER_TARGET | PIPE_BIND_SAMPLER_VIEW;
-	templ.flags = 0;
+	templ.flags = R600_RESOURCE_FLAG_FORCE_TILING; /* dst must not have a linear layout */
 
 	tmp = screen->resource_create(screen, &templ);
 

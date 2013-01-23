@@ -177,6 +177,7 @@ struct dri2_egl_surface
    __DRIbuffer           *third_buffer;
    __DRIbuffer           *pending_buffer;
    struct wl_callback    *frame_callback;
+   struct wl_callback    *pending_buffer_callback;
    int			  format;
 #endif
 

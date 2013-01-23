@@ -4012,6 +4012,23 @@ static int tgsi_tex(struct r600_shader_ctx *ctx)
 			if (r)
 				return r;
 		}
+
+		/* for cube forms of lod and bias we need to route the lod
+		   value into Z */
+		if (inst->Instruction.Opcode == TGSI_OPCODE_TXB ||
+		    inst->Instruction.Opcode == TGSI_OPCODE_TXL) {
+			memset(&alu, 0, sizeof(struct r600_bytecode_alu));
+			alu.inst = CTX_INST(V_SQ_ALU_WORD1_OP2_SQ_OP2_INST_MOV);
+			r600_bytecode_src(&alu.src[0], &ctx->src[0], 3);
+			alu.dst.sel = ctx->temp_reg;
+			alu.dst.chan = 2;
+			alu.last = 1;
+			alu.dst.write = 1;
+			r = r600_bytecode_add_alu(ctx->bc, &alu);
+			if (r)
+				return r;
+		}
+
 		src_loaded = TRUE;
 		src_gpr = ctx->temp_reg;
 	}
@@ -4087,17 +4104,12 @@ static int tgsi_tex(struct r600_shader_ctx *ctx)
 		tex.src_rel = ctx->src[0].rel;
 	}
 
-	if (inst->Texture.Texture == TGSI_TEXTURE_CUBE) {
+	if (inst->Texture.Texture == TGSI_TEXTURE_CUBE ||
+	    inst->Texture.Texture == TGSI_TEXTURE_SHADOWCUBE) {
 		tex.src_sel_x = 1;
 		tex.src_sel_y = 0;
 		tex.src_sel_z = 3;
-		tex.src_sel_w = 1;
-	}
-	if (inst->Texture.Texture == TGSI_TEXTURE_SHADOWCUBE) {
-		tex.src_sel_x = 1;
-		tex.src_sel_y = 0;
-		tex.src_sel_z = 3;
-		tex.src_sel_w = 2; /* route Z compare value into W */
+		tex.src_sel_w = 2; /* route Z compare or Lod value into W */
 	}
 
 	if (inst->Texture.Texture != TGSI_TEXTURE_RECT &&
@@ -5102,7 +5114,9 @@ static int tgsi_endif(struct r600_shader_ctx *ctx)
 
 static int tgsi_bgnloop(struct r600_shader_ctx *ctx)
 {
-	r600_bytecode_add_cfinst(ctx->bc, CTX_INST(V_SQ_CF_WORD1_SQ_CF_INST_LOOP_START_NO_AL));
+	/* LOOP_START_DX10 ignores the LOOP_CONFIG* registers, so it is not
+	 * limited to 4096 iterations, like the other LOOP_* instructions. */
+	r600_bytecode_add_cfinst(ctx->bc, CTX_INST(V_SQ_CF_WORD1_SQ_CF_INST_LOOP_START_DX10));
 
 	fc_pushlevel(ctx, FC_LOOP);
 

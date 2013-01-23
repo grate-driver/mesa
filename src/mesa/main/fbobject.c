@@ -2645,6 +2645,15 @@ _mesa_GenerateMipmapEXT(GLenum target)
       return;
    }
 
+   if (_mesa_is_enum_format_integer(srcImage->InternalFormat) ||
+       _mesa_is_depthstencil_format(srcImage->InternalFormat) ||
+       _mesa_is_stencil_format(srcImage->InternalFormat)) {
+      _mesa_unlock_texture(ctx, texObj);
+      _mesa_error(ctx, GL_INVALID_OPERATION,
+                  "glGenerateMipmap(invalid internal format)");
+      return;
+   }
+
    if (target == GL_TEXTURE_CUBE_MAP) {
       GLuint face;
       for (face = 0; face < 6; face++)
@@ -2796,11 +2805,41 @@ get_nongeneric_internalformat(GLenum format)
 }
 
 
+static GLenum
+get_linear_internalformat(GLenum format)
+{
+   switch (format) {
+   case GL_SRGB:
+      return GL_RGB;
+
+   case GL_SRGB_ALPHA:
+      return GL_RGBA;
+
+   case GL_SRGB8:
+      return GL_RGB8;
+
+   case GL_SRGB8_ALPHA8:
+      return GL_RGBA8;
+
+   case GL_SLUMINANCE:
+      return GL_LUMINANCE8;
+
+   case GL_SLUMINANCE_ALPHA:
+      return GL_LUMINANCE8_ALPHA8;
+
+   default:
+      return format;
+   }
+}
+
+
 static GLboolean
 compatible_resolve_formats(const struct gl_renderbuffer *colorReadRb,
                            const struct gl_renderbuffer *colorDrawRb)
 {
-   /* The simple case where we know the backing formats are the same.
+   GLenum readFormat, drawFormat;
+
+   /* The simple case where we know the backing Mesa formats are the same.
     */
    if (_mesa_get_srgb_format_linear(colorReadRb->Format) ==
        _mesa_get_srgb_format_linear(colorDrawRb->Format)) {
@@ -2814,9 +2853,15 @@ compatible_resolve_formats(const struct gl_renderbuffer *colorReadRb,
     * textures and get two entirely different Mesa formats like RGBA8888 and
     * ARGB8888. Drivers behaving like that should be able to cope with
     * non-matching formats by themselves, because it's not the user's fault.
+    *
+    * Blits between linear and sRGB formats are also allowed.
     */
-   if (get_nongeneric_internalformat(colorReadRb->InternalFormat) ==
-       get_nongeneric_internalformat(colorDrawRb->InternalFormat)) {
+   readFormat = get_nongeneric_internalformat(colorReadRb->InternalFormat);
+   drawFormat = get_nongeneric_internalformat(colorDrawRb->InternalFormat);
+   readFormat = get_linear_internalformat(readFormat);
+   drawFormat = get_linear_internalformat(drawFormat);
+
+   if (readFormat == drawFormat) {
       return GL_TRUE;
    }
 

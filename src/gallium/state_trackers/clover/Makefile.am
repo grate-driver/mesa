@@ -23,7 +23,8 @@ libclllvm_la_CXXFLAGS = \
 	-std=c++98 \
 	$(LLVM_CPPFLAGS) \
 	$(DEFINES) \
-	-DLIBCLC_PATH=\"$(LIBCLC_PATH)/\" \
+	-DLIBCLC_INCLUDEDIR=\"$(LIBCLC_INCLUDEDIR)/\" \
+	-DLIBCLC_LIBEXECDIR=\"$(LIBCLC_LIBEXECDIR)/\" \
 	-DCLANG_RESOURCE_DIR=\"$(CLANG_RESOURCE_DIR)\"
 
 libclllvm_la_SOURCES = \
@@ -73,3 +74,13 @@ libclover_la_SOURCES = \
 	api/event.cpp \
 	api/program.cpp \
 	api/kernel.cpp
+
+cldir = $(includedir)/CL
+cl_HEADERS = \
+	$(top_srcdir)/include/CL/cl.h \
+	$(top_srcdir)/include/CL/cl_ext.h \
+	$(top_srcdir)/include/CL/cl_gl.h \
+	$(top_srcdir)/include/CL/cl_gl_ext.h \
+	$(top_srcdir)/include/CL/cl_platform.h \
+	$(top_srcdir)/include/CL/opencl.h \
+	$(top_srcdir)/include/CL/cl.hpp

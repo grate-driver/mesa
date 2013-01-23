@@ -241,6 +241,8 @@ nv30_screen_is_format_supported(struct pipe_screen *pscreen,
                                 unsigned sample_count,
                                 unsigned bindings)
 {
+   if (sample_count > 4)
+      return FALSE;
    if (!(0x00000017 & (1 << sample_count)))
       return FALSE;
 
