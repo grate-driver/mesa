@@ -1,4 +1,4 @@
-mesa (9.0-0ubuntu1) UNRELEASED; urgency=low
+mesa (9.0.2-0ubuntu1) raring; urgency=low
 
   * New upstream release.
   * Decrease size of mesa's libgl1-mesa-dri again
