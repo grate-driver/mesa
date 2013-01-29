@@ -424,6 +424,8 @@ public:
       this->virtual_grf_use = NULL;
       this->live_intervals_valid = false;
 
+      this->params_remap = NULL;
+
       this->kill_emitted = false;
       this->force_uncompressed_stack = 0;
       this->force_sechalf_stack = 0;
