@@ -504,7 +504,8 @@ void r600_set_index_buffer(struct pipe_context *ctx,
 
 	if (ib) {
 		pipe_resource_reference(&rctx->index_buffer.buffer, ib->buffer);
-	        memcpy(&rctx->index_buffer, ib, sizeof(*ib));
+		memcpy(&rctx->index_buffer, ib, sizeof(*ib));
+		r600_context_add_resource_size(ctx, ib->buffer);
 	} else {
 		pipe_resource_reference(&rctx->index_buffer.buffer, NULL);
 	}
@@ -549,6 +550,7 @@ void r600_set_vertex_buffers(struct pipe_context *ctx, unsigned count,
 				vb[i].buffer_offset = input[i].buffer_offset;
 				pipe_resource_reference(&vb[i].buffer, input[i].buffer);
 				new_buffer_mask |= 1 << i;
+				r600_context_add_resource_size(ctx, input[i].buffer);
 			} else {
 				pipe_resource_reference(&vb[i].buffer, NULL);
 				disable_mask |= 1 << i;
@@ -648,6 +650,7 @@ void r600_set_sampler_views(struct pipe_context *pipe,
 
 			pipe_sampler_view_reference((struct pipe_sampler_view **)&dst->views.views[i], views[i]);
 			new_mask |= 1 << i;
+			r600_context_add_resource_size(pipe, views[i]->texture);
 		} else {
 			pipe_sampler_view_reference((struct pipe_sampler_view **)&dst->views.views[i], NULL);
 			disable_mask |= 1 << i;
@@ -822,6 +825,8 @@ void r600_bind_ps_shader(struct pipe_context *ctx, void *state)
 	rctx->ps_shader = (struct r600_pipe_shader_selector *)state;
 	r600_context_pipe_state_set(rctx, &rctx->ps_shader->current->rstate);
 
+	r600_context_add_resource_size(ctx, (struct pipe_resource *)rctx->ps_shader->current->bo);
+
 	if (rctx->chip_class <= R700) {
 		bool multiwrite = rctx->ps_shader->current->shader.fs_write_all;
 
@@ -847,6 +852,8 @@ void r600_bind_vs_shader(struct pipe_context *ctx, void *state)
 	rctx->vs_shader = (struct r600_pipe_shader_selector *)state;
 	if (state) {
 		r600_context_pipe_state_set(rctx, &rctx->vs_shader->current->rstate);
+
+		r600_context_add_resource_size(ctx, (struct pipe_resource *)rctx->vs_shader->current->bo);
 
 		if (rctx->chip_class < EVERGREEN && rctx->ps_shader)
 			r600_adjust_gprs(rctx);
@@ -957,10 +964,13 @@ void r600_set_constant_buffer(struct pipe_context *ctx, uint shader, uint index,
 		} else {
 			u_upload_data(rctx->uploader, 0, input->buffer_size, ptr, &cb->buffer_offset, &cb->buffer);
 		}
+		/* account it in gtt */
+		rctx->gtt += input->buffer_size;
 	} else {
 		/* Setup the hw buffer. */
 		cb->buffer_offset = input->buffer_offset;
 		pipe_resource_reference(&cb->buffer, input->buffer);
+		r600_context_add_resource_size(ctx, input->buffer);
 	}
 
 	state->enabled_mask |= 1 << index;
@@ -1023,6 +1033,7 @@ void r600_set_so_targets(struct pipe_context *ctx,
 	/* Set the new targets. */
 	for (i = 0; i < num_targets; i++) {
 		pipe_so_target_reference((struct pipe_stream_output_target**)&rctx->so_targets[i], targets[i]);
+		r600_context_add_resource_size(ctx, targets[i]->buffer);
 	}
 	for (; i < rctx->num_so_targets; i++) {
 		pipe_so_target_reference((struct pipe_stream_output_target**)&rctx->so_targets[i], NULL);

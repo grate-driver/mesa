@@ -371,6 +371,10 @@ struct r600_context {
 
 	unsigned default_ps_gprs, default_vs_gprs;
 
+	/* current unaccounted memory usage */
+	uint64_t			vram;
+	uint64_t			gtt;
+
 	/* States based on r600_atom. */
 	struct list_head		dirty_states;
 	struct r600_command_buffer	start_cs_cmd; /* invariant state mostly */
@@ -884,6 +888,30 @@ static INLINE uint64_t r600_resource_va(struct pipe_screen *screen, struct pipe_
 	struct r600_resource *rresource = (struct r600_resource*)resource;
 
 	return rscreen->ws->buffer_get_virtual_address(rresource->cs_buf);
+}
+
+static INLINE void r600_context_add_resource_size(struct pipe_context *ctx, struct pipe_resource *r)
+{
+	struct r600_context *rctx = (struct r600_context *)ctx;
+	struct r600_resource *rr = (struct r600_resource *)r;
+
+	if (r == NULL) {
+		return;
+	}
+
+	/*
+	 * The idea is to compute a gross estimate of memory requirement of
+	 * each draw call. After each draw call, memory will be precisely
+	 * accounted. So the uncertainty is only on the current draw call.
+	 * In practice this gave very good estimate (+/- 10% of the target
+	 * memory limit).
+	 */
+	if (rr->domains & RADEON_DOMAIN_GTT) {
+		rctx->gtt += rr->buf->size;
+	}
+	if (rr->domains & RADEON_DOMAIN_VRAM) {
+		rctx->vram += rr->buf->size;
+	}
 }
 
 #endif

@@ -635,6 +635,16 @@ void r600_need_cs_space(struct r600_context *ctx, unsigned num_dw,
 {
 	struct r600_atom *state;
 
+	if (!ctx->ws->cs_memory_below_limit(ctx->cs, ctx->vram, ctx->gtt)) {
+		ctx->gtt = 0;
+		ctx->vram = 0;
+		r600_flush(&ctx->context, NULL, RADEON_FLUSH_ASYNC);
+		return;
+	}
+	/* all will be accounted once relocation are emited */
+	ctx->gtt = 0;
+	ctx->vram = 0;
+
 	/* The number of dwords we already used in the CS so far. */
 	num_dw += ctx->cs->cdw;
 
@@ -953,6 +963,8 @@ void r600_context_flush(struct r600_context *ctx, unsigned flags)
 
 	ctx->pm4_dirty_cdwords = 0;
 	ctx->flags = 0;
+	ctx->gtt = 0;
+	ctx->vram = 0;
 
 	/* Begin a new CS. */
 	r600_emit_atom(ctx, &ctx->start_cs_cmd.atom);
