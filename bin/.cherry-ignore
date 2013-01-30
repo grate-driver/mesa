@@ -13,3 +13,9 @@ b5891286202987dfc2606ac716050c0ee426de11 intel: Fix yet-another-bug in intel_tex
 
 # Introduces performance regressions for other games... don't cherry-pick for now
 fa58644855e44830e0b91dc627703c236fa6712a r600g: fix abysmal performance in Reaction Quake
+
+# i965 guardband clipping is disabled in 9.0, so no need to fix bugs in it
+23e7b81f2d742d292d77b53ac9cf72c3d89fc798 i965: Use fewer temporary variables in c
+lip setup.
+d411bbd5bd895617e265e023213895100e4509ef i965: Disable the GB clip test when a li
+mited viewport is set.
