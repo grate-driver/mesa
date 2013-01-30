@@ -19,3 +19,6 @@ fa58644855e44830e0b91dc627703c236fa6712a r600g: fix abysmal performance in React
 lip setup.
 d411bbd5bd895617e265e023213895100e4509ef i965: Disable the GB clip test when a li
 mited viewport is set.
+
+# Candidates for 9.1
+1559994cba380a4e87a5e8dbb04b0a7475711756 i965: Fix assignment instead of comparison in asserts.
