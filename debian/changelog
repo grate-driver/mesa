@@ -37,6 +37,8 @@ mesa (9.1~git20130207.f1c46c84-1) UNRELEASED; urgency=low
   * 15-fix-oot-build.diff: Use correct includes to fix out-of-tree builds.
   * libgl1-mesa-dri.install.in: Include gallium-pipe/*.so and libllvmradeon*.so.
   * rules: Add files to clean.
+  * 16-avoid-symbols-from-static-llvm.diff: Temporary patch to keep
+    libxatracker1.symbols sane.
 
   [ Steve Langasek ]
   * Install all dri drivers from the DESTDIR tree, instead of copying them

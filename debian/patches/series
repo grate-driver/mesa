@@ -7,3 +7,4 @@
 #11-hurd-ftbfs-again.diff
 14-fix-osmesa-build.diff
 15-fix-oot-build.diff
+16-avoid-symbols-from-static-llvm.diff
