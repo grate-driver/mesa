@@ -6,5 +6,4 @@
 10-hurd-configure-tweaks.diff
 #11-hurd-ftbfs-again.diff
 14-fix-osmesa-build.diff
-15-fix-llvmpipe-test-linking.diff
-16-radeon-ndebug.diff
+15-fix-oot-build.diff

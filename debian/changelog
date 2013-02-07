@@ -1,14 +1,14 @@
-mesa (9.0.2-1) UNRELEASED; urgency=low
+mesa (9.1~git20130207.f1c46c84-1) UNRELEASED; urgency=low
+
+  * New upstream snapshot.
+    - Set close on exec flag when opening dri devices (Closes: #651370).
 
   [ Julien Cristau ]
   * Use xz for all binary packages not just *-dbg.
 
   [ Timo Aaltonen ]
-  * New upstream release 9.0.
-    - Set close on exec flag when opening dri devices (Closes: #651370).
   * Refresh patches
     - disable 05_kfreebsd-egl-x11.diff for now.
-    - switch to llvm-3.1 (Closes: #678822).
   * control: Added libtool to build-depends.
   * rules: Drop special handling of config.{guess,sub}, not needed anymore.
   * rules, libosmesa*: Build only the 32bit OSMesa library.
@@ -26,15 +26,17 @@ mesa (9.0.2-1) UNRELEASED; urgency=low
   * control: Add new dependencies to libgl1-mesa-dev.
   * rules, libgl1-mesa-dri.install.linux.in: Add support for radeonsi.
   * rules: Build llvm shared libs on platforms that support llvm.
-  * Added 15-fix-llvmpipe-test-linking.diff: Fix link failure when building
-    llvmpipe with --with-llvm-shared-libs. Patch from fdo bug #52617.
   * control, rules, libglu*: Remove libglu packaging, since it's been split
     off upstream.
   * rules: Disable dri for the swx11 targets.
   * not-installed: Updated.
-  * Update symbols for libgles2-mesa
+  * Update symbols for libgles2-mesa and libxatracker1.
   * libegl1-mesa-drivers.install.linux: Bump libwayland-egl.so version
   * control: Add libdrm-dev to mesa-common-dev Depends.
+  * control: Build-depend on llvm-3.2-dev (Closes: #678822).
+  * 15-fix-oot-build.diff: Use correct includes to fix out-of-tree builds.
+  * libgl1-mesa-dri.install.in: Include gallium-pipe/*.so and libllvmradeon*.so.
+  * rules: Add files to clean.
 
   [ Steve Langasek ]
   * Install all dri drivers from the DESTDIR tree, instead of copying them
@@ -49,11 +51,9 @@ mesa (9.0.2-1) UNRELEASED; urgency=low
     in Debian right now so let's just be complete.
 
   [ Maarten Lankhorst ]
-  * New upstream release 9.0.2.
   * Bump standards-version to 3.9.3.
   * control: Bump libwayland-dev build-dep to 1.0.2.
   * Remove 13-llvm-config-pick-a-version.diff and just pass a flag to configure.
-  * Add 16-radeon-ndebug.diff to fix a build failure against llvm
 
  -- Julien Cristau <jcristau@debian.org>  Fri, 03 Aug 2012 23:17:16 +0200
 
