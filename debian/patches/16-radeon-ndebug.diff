@@ -1,0 +1,13 @@
+diff --git a/src/gallium/drivers/radeon/Makefile b/src/gallium/drivers/radeon/Makefile
+index 7f1c613..2dfad85 100644
+--- a/src/gallium/drivers/radeon/Makefile
++++ b/src/gallium/drivers/radeon/Makefile
+@@ -14,7 +14,7 @@ CXXFLAGS+= $(LLVM_CXXFLAGS)
+ 
+ include ../../Makefile.template
+ 
+-CXXFLAGS := $(filter-out -DDEBUG, $(CXXFLAGS))
++CXXFLAGS := $(filter-out -DDEBUG, $(CXXFLAGS)) -DNDEBUG
+ 
+ tablegen = $(TBLGEN) -I $(LLVM_INCLUDEDIR) $1 $2 -o $3
+ 

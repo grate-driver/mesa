@@ -1,0 +1,18 @@
+From: Aurelien Jarno <aurel32@debian.org>
+From: Cyril Brulebois <kibi@debian.org>
+    
+mesa fails to build on GNU/kFreeBSD, since some parts are not enabled.
+
+Debian bug: http://bugs.debian.org/524690
+
+--- a/configure.ac
++++ b/configure.ac
+@@ -1026,7 +1026,7 @@
+             ;;
+         esac
+         ;;
+-    freebsd* | dragonfly* | *netbsd*)
++    freebsd* | dragonfly* | *netbsd* | kfreebsd*-gnu*)
+         DEFINES="$DEFINES -DHAVE_PTHREAD -DUSE_EXTERNAL_DXTN_LIB=1"
+         DEFINES="$DEFINES -DIN_DRI_DRIVER -DHAVE_ALIAS"
+ 

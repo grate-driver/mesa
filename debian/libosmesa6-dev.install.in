@@ -1,0 +1,3 @@
+dri/usr/include/GL/osmesa.h
+dri/usr/lib/${DEB_HOST_MULTIARCH}/libOSMesa.so
+dri/usr/lib/${DEB_HOST_MULTIARCH}/pkgconfig/osmesa.pc
