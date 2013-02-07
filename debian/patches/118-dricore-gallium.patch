@@ -17,7 +17,7 @@
  endif
  
 +libmesagallium@VERSION@_la_SOURCES = \
-+	$(STATETRACKER_FILES) $(SRCDIR)state_tracker/st_glsl_to_tgsi.cpp
++	$(STATETRACKER_FILES)
 +libmesagallium@VERSION@_la_CFLAGS = $(LLVM_CFLAGS)
 +libmesagallium@VERSION@_la_CXXFLAGS = $(LLVM_CXXFLAGS)
 +libmesagallium@VERSION@_la_LIBADD = libdricore@VERSION@.la
@@ -37,7 +37,7 @@
  AC_SUBST([GLESv2_PC_LIB_PRIV])
  
  DRI_LIB_DEPS="\$(top_builddir)/src/mesa/libdricore/libdricore${VERSION}.la"
-+MESAGALLIUM_LIBS="\$(top_builddir)/src/mesa/libdricore/libmesagallium${VERSION}.la"
++MESAGALLIUM_LIBS="\$(top_builddir)/src/mesa/libdricore/libmesagallium${VERSION}.la $(DRI_LIB_DEPS)"
  
  AC_SUBST([HAVE_XF86VIDMODE])
  
