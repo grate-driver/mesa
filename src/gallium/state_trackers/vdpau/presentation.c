@@ -236,7 +236,6 @@ vlVdpPresentationQueueDisplay(VdpPresentationQueue presentation_queue,
 
    memset(&surf_templ, 0, sizeof(surf_templ));
    surf_templ.format = tex->format;
-   surf_templ.usage = PIPE_BIND_RENDER_TARGET;
    surf_draw = pipe->create_surface(pipe, tex, &surf_templ);
 
    surf->timestamp = (vlVdpTime)earliest_presentation_time;
@@ -276,7 +275,7 @@ vlVdpPresentationQueueDisplay(VdpPresentationQueue presentation_queue,
    );
 
    pipe->screen->fence_reference(pipe->screen, &surf->fence, NULL);
-   pipe->flush(pipe, &surf->fence);
+   pipe->flush(pipe, &surf->fence, 0);
 
    if (dump_window == -1) {
       dump_window = debug_get_num_option("VDPAU_DUMP", 0);

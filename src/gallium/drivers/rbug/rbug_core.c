@@ -266,12 +266,10 @@ rbug_texture_read(struct rbug_rbug *tr_rbug, struct rbug_header *header, uint32_
    }
 
    tex = tr_tex->resource;
-   t = pipe_get_transfer(context, tex,
-                         gptr->level, gptr->face + gptr->zslice,
-                         PIPE_TRANSFER_READ,
-                         gptr->x, gptr->y, gptr->w, gptr->h);
-
-   map = context->transfer_map(context, t);
+   map = pipe_transfer_map(context, tex,
+                           gptr->level, gptr->face + gptr->zslice,
+                           PIPE_TRANSFER_READ,
+                           gptr->x, gptr->y, gptr->w, gptr->h, &t);
 
    rbug_send_texture_read_reply(tr_rbug->con, serial,
                                 t->resource->format,
@@ -285,7 +283,6 @@ rbug_texture_read(struct rbug_rbug *tr_rbug, struct rbug_header *header, uint32_
                                 NULL);
 
    context->transfer_unmap(context, t);
-   context->transfer_destroy(context, t);
 
    pipe_mutex_unlock(rb_screen->list_mutex);
 
@@ -500,7 +497,7 @@ rbug_context_flush(struct rbug_rbug *tr_rbug, struct rbug_header *header, uint32
    /* protect the pipe context */
    pipe_mutex_lock(rb_context->call_mutex);
 
-   rb_context->pipe->flush(rb_context->pipe, NULL);
+   rb_context->pipe->flush(rb_context->pipe, NULL, 0);
 
    pipe_mutex_unlock(rb_context->call_mutex);
    pipe_mutex_unlock(rb_screen->list_mutex);

@@ -350,19 +350,6 @@ extern char *__progname;
 #define ARRAY_SIZE(x) (sizeof(x) / sizeof(x[0]))
 
 /**
- * Align a value up to an alignment value
- *
- * If \c value is not already aligned to the requested alignment value, it
- * will be rounded up.
- *
- * \param value  Value to be rounded
- * \param alignment  Alignment value to be used.  This must be a power of two.
- *
- * \sa ROUND_DOWN_TO()
- */
-#define ALIGN(value, alignment)  (((value) + alignment - 1) & ~(alignment - 1))
-
-/**
  * Align a value down to an alignment value
  *
  * If \c value is not already aligned to the requested alignment value, it
@@ -456,21 +443,45 @@ extern int INTEL_DEBUG;
 #define DEBUG_VS        0x1000000
 #define DEBUG_CLIP      0x2000000
 #define DEBUG_AUB       0x4000000
+#define DEBUG_SHADER_TIME 0x8000000
+#define DEBUG_NO16      0x20000000
+
+#ifdef HAVE_ANDROID_PLATFORM
+#define LOG_TAG "INTEL-MESA"
+#include <cutils/log.h>
+#ifndef ALOGW
+#define ALOGW LOGW
+#endif
+#define dbg_printf(...)	ALOGW(__VA_ARGS__)
+#else
+#define dbg_printf(...)	printf(__VA_ARGS__)
+#endif /* HAVE_ANDROID_PLATFORM */
 
 #define DBG(...) do {						\
 	if (unlikely(INTEL_DEBUG & FILE_DEBUG_FLAG))		\
-		printf(__VA_ARGS__);			\
+		dbg_printf(__VA_ARGS__);			\
 } while(0)
 
 #define fallback_debug(...) do {				\
 	if (unlikely(INTEL_DEBUG & DEBUG_PERF))			\
-		printf(__VA_ARGS__);				\
+		dbg_printf(__VA_ARGS__);			\
 } while(0)
 
 #define perf_debug(...) do {					\
 	if (unlikely(INTEL_DEBUG & DEBUG_PERF))			\
-		printf(__VA_ARGS__);				\
+		dbg_printf(__VA_ARGS__);			\
 } while(0)
+
+#define WARN_ONCE(cond, fmt...) do {                            \
+   if (unlikely(cond)) {                                        \
+      static bool _warned = false;                              \
+      if (!_warned) {                                           \
+         fprintf(stderr, "WARNING: ");                          \
+         fprintf(stderr, fmt);                                  \
+         _warned = true;                                        \
+      }                                                         \
+   }                                                            \
+} while (0)
 
 #define PCI_CHIP_845_G			0x2562
 #define PCI_CHIP_I830_M			0x3577
@@ -491,11 +502,14 @@ extern int INTEL_DEBUG;
  */
 
 extern bool intelInitContext(struct intel_context *intel,
-				  int api,
-                                  const struct gl_config * mesaVis,
-                                  __DRIcontext * driContextPriv,
-                                  void *sharedContextPrivate,
-                                  struct dd_function_table *functions);
+                             int api,
+                             unsigned major_version,
+                             unsigned minor_version,
+                             const struct gl_config * mesaVis,
+                             __DRIcontext * driContextPriv,
+                             void *sharedContextPrivate,
+                             struct dd_function_table *functions,
+                             unsigned *dri_ctx_error);
 
 extern void intelFinish(struct gl_context * ctx);
 extern void intel_flush_rendering_to_batch(struct gl_context *ctx);

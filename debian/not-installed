@@ -3,9 +3,27 @@
 # Common list:
 NOT_INSTALLED := \
 	dri/etc/drirc \
-	dri/usr/include/GL/vms_x_fix.h \
 	dri/usr/include/GL/wglext.h \
-	dri/usr/include/GL/wmesa.h
+	dri/usr/include/GL/wmesa.h \
+	dri/usr/include/GLES3/gl3platform.h \
+	dri/usr/include/GLES3/gl3ext.h \
+	dri/usr/include/GLES3/gl3.h \
+	dri/usr/lib/*/libGL.so \
+	dri/usr/lib/*/pkgconfig/gl.pc \
+	usr/include/GL/glext.h \
+	usr/include/GL/gl.h \
+	usr/include/GL/gl_mangle.h \
+	usr/include/GL/glxext.h \
+	usr/include/GL/glx.h \
+	usr/include/GL/glx_mangle.h \
+	usr/include/GL/osmesa.h \
+	usr/include/GL/wglext.h \
+	usr/include/GL/wmesa.h
+
+# Architecture-specific additional files:
+NOT_INSTALLED_i386 = \
+	usr/lib/*/i686/cmov/libGL.so \
+	usr/lib/*/i686/cmov/pkgconfig/gl.pc
 
 # Same for linux, kfreebsd, and hurd on i386:
 NOT_INSTALLED_kfreebsd-i386 = $(NOT_INSTALLED_i386)

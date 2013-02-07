@@ -172,9 +172,11 @@ struct lp_build_sampler_soa
    (*emit_fetch_texel)( const struct lp_build_sampler_soa *sampler,
                         struct gallivm_state *gallivm,
                         struct lp_type type,
-                        unsigned unit,
-                        unsigned num_coords,
+                        boolean is_fetch,
+                        unsigned texture_index,
+                        unsigned sampler_index,
                         const LLVMValueRef *coords,
+                        const LLVMValueRef *offsets,
                         const struct lp_derivatives *derivs,
                         LLVMValueRef lod_bias, /* optional */
                         LLVMValueRef explicit_lod, /* optional */
@@ -553,6 +555,14 @@ lp_build_emit_fetch(
    struct lp_build_tgsi_context *bld_base,
    const struct tgsi_full_instruction *inst,
    unsigned src_op,
+   const unsigned chan_index);
+
+
+LLVMValueRef
+lp_build_emit_fetch_texoffset(
+   struct lp_build_tgsi_context *bld_base,
+   const struct tgsi_full_instruction *inst,
+   unsigned tex_off_op,
    const unsigned chan_index);
 
 boolean

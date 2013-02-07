@@ -7,6 +7,13 @@
 </head>
 <body>
 
+<div class="header">
+  <h1>The Mesa 3D Graphics Library</h1>
+</div>
+
+<iframe src="contents.html"></iframe>
+<div class="content">
+
 <h1>Development Notes</h1>
 
 
@@ -149,6 +156,30 @@ src/mesa/state_tracker/st_glsl_to_tgsi.cpp can serve as examples.
 </p>
 
 
+<h2>Marking a commit as a candidate for a stable branch</h2>
+
+<p>
+If you want a commit to be applied to a stable branch,
+you should add an appropriate note to the commit message.
+</p>
+
+<p>
+Here are some examples of such a note:
+</p>
+<ul>
+  <li>NOTE: This is a candidate for the 9.0 branch.</li>
+  <li>NOTE: This is a candidate for the 8.0 and 9.0 branches.</li>
+  <li>NOTE: This is a candidate for the stable branches.</li>
+</ul>
+
+
+<h2>Cherry-picking candidates for a stable branch</h2>
+
+<p>
+Please use <code>git cherry-pick -x &lt;commit&gt;</code> for cherry-picking a commit
+from master to a stable branch.
+</p>
+
 <h2>Making a New Mesa Release</h2>
 
 <p>
@@ -165,8 +196,6 @@ branch is relevant.
 <h3>Verify and update version info</h3>
 
 <dl>
-  <dt>configs/default</dt>
-  <dd>MESA_MAJOR, MESA_MINOR and MESA_TINY</dd>
   <dt>Makefile.am</dt>
   <dd>PACKAGE_VERSION</dd>
   <dt>configure.ac</dt>
@@ -183,7 +212,7 @@ Link the new docs/relnotes-x.y.z.html file into the main <a href="relnotes.html"
 </p>
 
 <p>
-Update <a href="news.html">docs/news.html</a>.
+Update <a href="index.html">docs/index.html</a>.
 </p>
 
 <p>
@@ -243,5 +272,6 @@ and
 <em>m</em><em>e</em><em>s</em><em>a</em><em>-</em><em>a</em><em>n</em><em>n</em><em>o</em><em>u</em><em>n</em><em>c</em><em>e</em><em>@</em><em>l</em><em>i</em><em>s</em><em>t</em><em>s</em><em>.</em><em>f</em><em>r</em><em>e</em><em>e</em><em>d</em><em>e</em><em>s</em><em>k</em><em>t</em><em>o</em><em>p</em><em>.</em><em>o</em><em>r</em><em>g</em>
 </p>
 
+</div>
 </body>
 </html>

@@ -40,6 +40,11 @@ struct intel_screen
    int deviceID;
    int gen;
 
+   int max_gl_core_version;
+   int max_gl_compat_version;
+   int max_gl_es1_version;
+   int max_gl_es2_version;
+
    int logTextureGranularity;
 
    __DRIscreen *driScrnPriv;
@@ -63,6 +68,11 @@ struct intel_screen
    bool no_vbo;
    dri_bufmgr *bufmgr;
    struct _mesa_HashTable *named_regions;
+
+   /**
+    * A unique ID for shader programs.
+    */
+   unsigned program_id;
 
    /**
    * Configuration cache with default values for all contexts

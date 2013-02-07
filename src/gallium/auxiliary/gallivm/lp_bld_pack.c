@@ -129,7 +129,8 @@ lp_build_const_unpack_shuffle_half(struct gallivm_state *gallivm,
 }
 
 /**
- * Build shuffle vectors that match PACKxx instructions.
+ * Build shuffle vectors that match PACKxx (SSE) instructions or
+ * VPERM (Altivec).
  */
 static LLVMValueRef
 lp_build_const_pack_shuffle(struct gallivm_state *gallivm, unsigned n)
@@ -140,7 +141,11 @@ lp_build_const_pack_shuffle(struct gallivm_state *gallivm, unsigned n)
    assert(n <= LP_MAX_VECTOR_LENGTH);
 
    for(i = 0; i < n; ++i)
+#ifdef PIPE_ARCH_LITTLE_ENDIAN
       elems[i] = lp_build_const_int32(gallivm, 2*i);
+#else
+      elems[i] = lp_build_const_int32(gallivm, 2*i+1);
+#endif
 
    return LLVMConstVector(elems, n);
 }
@@ -210,6 +215,42 @@ lp_build_concat(struct gallivm_state *gallivm,
 
    return tmp[0];
 }
+
+
+/**
+ * Combines vectors to reduce from num_srcs to num_dsts.
+ * Returns the number of src vectors concatenated in a single dst.
+ *
+ * num_srcs must be exactly divisible by num_dsts.
+ *
+ * e.g. For num_srcs = 4 and src = [x, y, z, w]
+ *          num_dsts = 1  dst = [xyzw]    return = 4
+ *          num_dsts = 2  dst = [xy, zw]  return = 2
+ */
+int
+lp_build_concat_n(struct gallivm_state *gallivm,
+                  struct lp_type src_type,
+                  LLVMValueRef *src,
+                  unsigned num_srcs,
+                  LLVMValueRef *dst,
+                  unsigned num_dsts)
+{
+   int size = num_srcs / num_dsts;
+   int i;
+
+   assert(num_srcs >= num_dsts);
+   assert((num_srcs % size) == 0);
+
+   if (num_srcs == num_dsts)
+      return 1;
+
+   for (i = 0; i < num_dsts; ++i) {
+      dst[i] = lp_build_concat(gallivm, &src[i * size], src_type, size);
+   }
+
+   return size;
+}
+
 
 /**
  * Interleave vector elements.
@@ -397,30 +438,46 @@ lp_build_pack2(struct gallivm_state *gallivm,
    assert(src_type.length * 2 == dst_type.length);
 
    /* Check for special cases first */
-   if(util_cpu_caps.has_sse2 && src_type.width * src_type.length >= 128) {
+   if((util_cpu_caps.has_sse2 || util_cpu_caps.has_altivec) &&
+       src_type.width * src_type.length >= 128) {
       const char *intrinsic = NULL;
 
       switch(src_type.width) {
       case 32:
-         if(dst_type.sign) {
-            intrinsic = "llvm.x86.sse2.packssdw.128";
-         }
-         else {
-            if (util_cpu_caps.has_sse4_1) {
-               intrinsic = "llvm.x86.sse41.packusdw";
+         if (util_cpu_caps.has_sse2) {
+           if(dst_type.sign) {
+              intrinsic = "llvm.x86.sse2.packssdw.128";
+           }
+           else {
+              if (util_cpu_caps.has_sse4_1) {
+                 intrinsic = "llvm.x86.sse41.packusdw";
 #if HAVE_LLVM < 0x0207
-               /* llvm < 2.7 has inconsistent signatures except for packusdw */
-               intr_type = dst_type;
+                 /* llvm < 2.7 has inconsistent signatures except for packusdw */
+                 intr_type = dst_type;
 #endif
-            }
+              }
+           }
+         } else if (util_cpu_caps.has_altivec) {
+            if (dst_type.sign) {
+              intrinsic = "llvm.ppc.altivec.vpkswus";
+           } else {
+              intrinsic = "llvm.ppc.altivec.vpkuwus";
+           }
          }
          break;
       case 16:
          if (dst_type.sign) {
-            intrinsic = "llvm.x86.sse2.packsswb.128";
-         }
-         else {
-            intrinsic = "llvm.x86.sse2.packuswb.128";
+            if (util_cpu_caps.has_sse2) {
+              intrinsic = "llvm.x86.sse2.packsswb.128";
+            } else if (util_cpu_caps.has_altivec) {
+              intrinsic = "llvm.ppc.altivec.vpkshss";
+            }
+         } else {
+            if (util_cpu_caps.has_sse2) {
+              intrinsic = "llvm.x86.sse2.packuswb.128";
+            } else if (util_cpu_caps.has_altivec) {
+	      intrinsic = "llvm.ppc.altivec.vpkshus";
+            }
          }
          break;
       /* default uses generic shuffle below */
@@ -745,32 +802,38 @@ lp_build_resize(struct gallivm_state *gallivm,
  */
 LLVMValueRef
 lp_build_pad_vector(struct gallivm_state *gallivm,
-                       LLVMValueRef src,
-                       struct lp_type src_type,
-                       unsigned dst_length)
+                    LLVMValueRef src,
+                    unsigned dst_length)
 {
-   LLVMValueRef undef = LLVMGetUndef(lp_build_vec_type(gallivm, src_type));
    LLVMValueRef elems[LP_MAX_VECTOR_LENGTH];
-   unsigned i;
+   LLVMValueRef undef;
+   LLVMTypeRef type;
+   unsigned i, src_length;
 
-   assert(dst_length <= Elements(elems));
-   assert(dst_length > src_type.length);
+   type = LLVMTypeOf(src);
 
-   if (src_type.length == dst_length)
-      return src;
-
-   /* If its a single scalar type, no need to reinvent the wheel */
-   if (src_type.length == 1) {
-      return lp_build_broadcast(gallivm, LLVMVectorType(lp_build_elem_type(gallivm, src_type), dst_length), src);
+   if (LLVMGetTypeKind(type) != LLVMVectorTypeKind) {
+      /* Can't use ShuffleVector on non-vector type */
+      undef = LLVMGetUndef(LLVMVectorType(type, dst_length));
+      return LLVMBuildInsertElement(gallivm->builder, undef, src, lp_build_const_int32(gallivm, 0), "");
    }
 
+   undef      = LLVMGetUndef(type);
+   src_length = LLVMGetVectorSize(type);
+
+   assert(dst_length <= Elements(elems));
+   assert(dst_length >= src_length);
+
+   if (src_length == dst_length)
+      return src;
+
    /* All elements from src vector */
-   for (i = 0; i < src_type.length; ++i)
+   for (i = 0; i < src_length; ++i)
       elems[i] = lp_build_const_int32(gallivm, i);
 
    /* Undef fill remaining space */
-   for (i = src_type.length; i < dst_length; ++i)
-      elems[i] = lp_build_const_int32(gallivm, src_type.length);
+   for (i = src_length; i < dst_length; ++i)
+      elems[i] = lp_build_const_int32(gallivm, src_length);
 
    /* Combine the two vectors */
    return LLVMBuildShuffleVector(gallivm->builder, src, undef, LLVMConstVector(elems, dst_length), "");

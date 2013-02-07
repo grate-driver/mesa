@@ -75,14 +75,6 @@ softpipe_flush( struct pipe_context *pipe,
 
    softpipe->dirty_render_cache = FALSE;
 
-   /* Need this call for hardware buffers before swapbuffers.
-    *
-    * there should probably be another/different flush-type function
-    * that's called before swapbuffers because we don't always want
-    * to unmap surfaces when flushing.
-    */
-   softpipe_unmap_transfers(softpipe);
-
    /* Enable to dump BMPs of the color/depth buffers each frame */
 #if 0
    if(flags & PIPE_FLUSH_FRAME) {
@@ -101,8 +93,9 @@ softpipe_flush( struct pipe_context *pipe,
 }
 
 void
-softpipe_flush_wrapped( struct pipe_context *pipe,
-                        struct pipe_fence_handle **fence )
+softpipe_flush_wrapped(struct pipe_context *pipe,
+                       struct pipe_fence_handle **fence,
+                       enum pipe_flush_flags flags)
 {
    softpipe_flush(pipe, SP_FLUSH_TEXTURE_CACHE, fence);
 }

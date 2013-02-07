@@ -49,7 +49,6 @@
 #define PROGRAM_ANY_CONST ((1 << PROGRAM_LOCAL_PARAM) |  \
                            (1 << PROGRAM_ENV_PARAM) |    \
                            (1 << PROGRAM_STATE_VAR) |    \
-                           (1 << PROGRAM_NAMED_PARAM) |  \
                            (1 << PROGRAM_CONSTANT) |     \
                            (1 << PROGRAM_UNIFORM))
 
@@ -215,7 +214,6 @@ src_register( struct st_translate *t,
          t->temps[index] = ureg_DECL_temporary( t->ureg );
       return ureg_src(t->temps[index]);
 
-   case PROGRAM_NAMED_PARAM:
    case PROGRAM_ENV_PARAM:
    case PROGRAM_LOCAL_PARAM:
    case PROGRAM_UNIFORM:
@@ -265,15 +263,18 @@ st_translate_texture_target( GLuint textarget,
       case TEXTURE_1D_ARRAY_INDEX: return TGSI_TEXTURE_SHADOW1D_ARRAY;
       case TEXTURE_2D_ARRAY_INDEX: return TGSI_TEXTURE_SHADOW2D_ARRAY;
       case TEXTURE_CUBE_INDEX: return TGSI_TEXTURE_SHADOWCUBE;
+      case TEXTURE_CUBE_ARRAY_INDEX: return TGSI_TEXTURE_SHADOWCUBE_ARRAY;
       default: break;
       }
    }
 
    switch( textarget ) {
+   case TEXTURE_BUFFER_INDEX: return TGSI_TEXTURE_BUFFER;
    case TEXTURE_1D_INDEX:   return TGSI_TEXTURE_1D;
    case TEXTURE_2D_INDEX:   return TGSI_TEXTURE_2D;
    case TEXTURE_3D_INDEX:   return TGSI_TEXTURE_3D;
    case TEXTURE_CUBE_INDEX: return TGSI_TEXTURE_CUBE;
+   case TEXTURE_CUBE_ARRAY_INDEX: return TGSI_TEXTURE_CUBE_ARRAY;
    case TEXTURE_RECT_INDEX: return TGSI_TEXTURE_RECT;
    case TEXTURE_1D_ARRAY_INDEX:   return TGSI_TEXTURE_1D_ARRAY;
    case TEXTURE_2D_ARRAY_INDEX:   return TGSI_TEXTURE_2D_ARRAY;
@@ -537,8 +538,6 @@ translate_opcode( unsigned op )
       return TGSI_OPCODE_BGNLOOP;
    case OPCODE_BGNSUB:
       return TGSI_OPCODE_BGNSUB;
-   case OPCODE_BRA:
-      return TGSI_OPCODE_BRA;
    case OPCODE_BRK:
       return TGSI_OPCODE_BRK;
    case OPCODE_CAL:
@@ -567,10 +566,6 @@ translate_opcode( unsigned op )
       return TGSI_OPCODE_DST;
    case OPCODE_ELSE:
       return TGSI_OPCODE_ELSE;
-   case OPCODE_EMIT_VERTEX:
-      return TGSI_OPCODE_EMIT;
-   case OPCODE_END_PRIMITIVE:
-      return TGSI_OPCODE_ENDPRIM;
    case OPCODE_ENDIF:
       return TGSI_OPCODE_ENDIF;
    case OPCODE_ENDLOOP:
@@ -1050,19 +1045,10 @@ st_translate_mesa_program(
     */
    if (procType == TGSI_PROCESSOR_FRAGMENT) {
       for (i = 0; i < numInputs; i++) {
-         if (program->InputFlags[0] & PROG_PARAM_BIT_CYL_WRAP) {
-            t->inputs[i] = ureg_DECL_fs_input_cyl(ureg,
-                                                  inputSemanticName[i],
-                                                  inputSemanticIndex[i],
-                                                  interpMode[i],
-                                                  TGSI_CYLINDRICAL_WRAP_X);
-         }
-         else {
-            t->inputs[i] = ureg_DECL_fs_input(ureg,
-                                              inputSemanticName[i],
-                                              inputSemanticIndex[i],
-                                              interpMode[i]);
-         }
+         t->inputs[i] = ureg_DECL_fs_input(ureg,
+                                           inputSemanticName[i],
+                                           inputSemanticIndex[i],
+                                           interpMode[i]);
       }
 
       if (program->InputsRead & FRAG_BIT_WPOS) {
@@ -1166,6 +1152,7 @@ st_translate_mesa_program(
                struct pipe_screen *pscreen = st->pipe->screen;
                assert(procType == TGSI_PROCESSOR_VERTEX);
                assert(pscreen->get_shader_param(pscreen, PIPE_SHADER_VERTEX, PIPE_SHADER_CAP_INTEGERS));
+               (void) pscreen;  /* silence non-debug build warnings */
                if (!ctx->Const.NativeIntegers) {
                   struct ureg_dst temp = ureg_DECL_local_temporary(t->ureg);
                   ureg_U2F( t->ureg, ureg_writemask(temp, TGSI_WRITEMASK_X), t->systemValues[i]);
@@ -1204,7 +1191,6 @@ st_translate_mesa_program(
          case PROGRAM_ENV_PARAM:
          case PROGRAM_LOCAL_PARAM:
          case PROGRAM_STATE_VAR:
-         case PROGRAM_NAMED_PARAM:
          case PROGRAM_UNIFORM:
             t->constants[i] = ureg_DECL_constant( ureg, i );
             break;
@@ -1253,9 +1239,9 @@ st_translate_mesa_program(
    }
 
 out:
-   FREE(t->insn);
-   FREE(t->labels);
-   FREE(t->constants);
+   free(t->insn);
+   free(t->labels);
+   free(t->constants);
 
    if (t->error) {
       debug_printf("%s: translate error flag set\n", __FUNCTION__);

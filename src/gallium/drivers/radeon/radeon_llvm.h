@@ -54,6 +54,17 @@ struct radeon_llvm_context {
 
 	struct lp_build_tgsi_soa_context soa;
 
+	unsigned chip_class;
+	unsigned type;
+	unsigned face_gpr;
+	unsigned two_side;
+	unsigned clip_vertex;
+	struct r600_shader_io * r600_inputs;
+	struct r600_shader_io * r600_outputs;
+	struct pipe_stream_output_info *stream_outputs;
+	unsigned color_buffer_count;
+	unsigned fs_color_all;
+
 	/*=== Front end configuration ===*/
 
 	/* Special Intrinsics */
@@ -97,7 +108,6 @@ struct radeon_llvm_context {
 
 	LLVMValueRef system_values[RADEON_LLVM_MAX_SYSTEM_VALUES];
 
-	unsigned reserved_reg_count;
 	/*=== Private Members ===*/
 
 	struct radeon_llvm_branch branch[RADEON_LLVM_MAX_BRANCH_DEPTH];
@@ -142,6 +152,10 @@ static inline LLVMValueRef bitcast(
 		return value;
 }
 
+
+void radeon_llvm_emit_prepare_cube_coords(struct lp_build_tgsi_context * bld_base,
+                                          struct lp_build_emit_data * emit_data,
+                                          LLVMValueRef *coords_arg);
 
 void radeon_llvm_context_init(struct radeon_llvm_context * ctx);
 

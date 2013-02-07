@@ -19,7 +19,7 @@
 
 struct nvc0_context;
 
-struct nvc0_blitctx;
+struct nvc0_blitter;
 
 struct nvc0_screen {
    struct nouveau_screen base;
@@ -39,7 +39,7 @@ struct nvc0_screen {
    struct nouveau_heap *text_heap;
    struct nouveau_heap *lib_code; /* allocated from text_heap */
 
-   struct nvc0_blitctx *blitctx;
+   struct nvc0_blitter *blitter;
 
    struct {
       void **entries;
@@ -72,7 +72,8 @@ nvc0_screen(struct pipe_screen *screen)
    return (struct nvc0_screen *)screen;
 }
 
-boolean nvc0_blitctx_create(struct nvc0_screen *);
+boolean nvc0_blitter_create(struct nvc0_screen *);
+void nvc0_blitter_destroy(struct nvc0_screen *);
 
 void nvc0_screen_make_buffers_resident(struct nvc0_screen *);
 
@@ -96,7 +97,8 @@ nvc0_resource_validate(struct nv04_resource *res, uint32_t flags)
 {
    if (likely(res->bo)) {
       if (flags & NOUVEAU_BO_WR)
-         res->status |= NOUVEAU_BUFFER_STATUS_GPU_WRITING;
+         res->status |= NOUVEAU_BUFFER_STATUS_GPU_WRITING |
+            NOUVEAU_BUFFER_STATUS_DIRTY;
       if (flags & NOUVEAU_BO_RD)
          res->status |= NOUVEAU_BUFFER_STATUS_GPU_READING;
 

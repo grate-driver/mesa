@@ -67,13 +67,14 @@ lp_build_extract_broadcast(struct gallivm_state *gallivm,
 
 
 /**
- * Broadcast one channel of a vector composed of arrays of XYZW structures into
- * all four channel.
+ * Broadcast one channel of a vector composed of arrays of XYZ.. structures into
+ * all channels XXX...
  */
 LLVMValueRef
 lp_build_swizzle_scalar_aos(struct lp_build_context *bld,
-                       LLVMValueRef a,
-                       unsigned channel);
+                            LLVMValueRef a,
+                            unsigned channel,
+                            unsigned num_channels);
 
 
 /**
@@ -85,6 +86,14 @@ LLVMValueRef
 lp_build_swizzle_aos(struct lp_build_context *bld,
                      LLVMValueRef a,
                      const unsigned char swizzles[4]);
+
+
+LLVMValueRef
+lp_build_swizzle_aos_n(struct gallivm_state* gallivm,
+                       LLVMValueRef src,
+                       const unsigned char* swizzles,
+                       unsigned num_swizzles,
+                       unsigned dst_len);
 
 
 LLVMValueRef
@@ -113,11 +122,20 @@ lp_build_transpose_aos(struct gallivm_state *gallivm,
                        LLVMValueRef dst[4]);
 
 
+void
+lp_build_transpose_aos_n(struct gallivm_state *gallivm,
+                         struct lp_type type,
+                         const LLVMValueRef* src,
+                         unsigned num_srcs,
+                         LLVMValueRef* dst);
+
+
 LLVMValueRef
 lp_build_pack_aos_scalars(struct gallivm_state *gallivm,
                           struct lp_type src_type,
                           struct lp_type dst_type,
-                          const LLVMValueRef src);
+                          const LLVMValueRef src,
+                          unsigned channel);
 
 
 LLVMValueRef

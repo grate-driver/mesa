@@ -90,8 +90,8 @@ vbo_get_minmax_index(struct gl_context *ctx,
 		     GLuint *min_index, GLuint *max_index,
 		     const GLuint count)
 {
-   const GLboolean restart = ctx->Array.PrimitiveRestart;
-   const GLuint restartIndex = ctx->Array.RestartIndex;
+   const GLboolean restart = ctx->Array._PrimitiveRestart;
+   const GLuint restartIndex = ctx->Array._RestartIndex;
    const int index_size = vbo_sizeof_ib_type(ib->type);
    const char *indices;
    GLuint i;
@@ -440,32 +440,6 @@ recalculate_input_bindings(struct gl_context *ctx)
       }
       break;
 
-   case VP_NV:
-      /* NV_vertex_program - attribute arrays alias and override
-       * conventional, legacy arrays.  No materials, and the generic
-       * slots are vacant.
-       */
-      for (i = 0; i < VERT_ATTRIB_FF_MAX; i++) {
-	 if (i < VERT_ATTRIB_GENERIC_MAX
-             && vertexAttrib[VERT_ATTRIB_GENERIC(i)].Enabled)
-	    inputs[i] = &vertexAttrib[VERT_ATTRIB_GENERIC(i)];
-	 else if (vertexAttrib[VERT_ATTRIB_FF(i)].Enabled)
-	    inputs[i] = &vertexAttrib[VERT_ATTRIB_FF(i)];
-	 else {
-	    inputs[i] = &vbo->currval[VBO_ATTRIB_POS+i];
-            const_inputs |= VERT_BIT_FF(i);
-         }
-      }
-
-      /* Could use just about anything, just to fill in the empty
-       * slots:
-       */
-      for (i = 0; i < VERT_ATTRIB_GENERIC_MAX; i++) {
-	 inputs[VERT_ATTRIB_GENERIC(i)] = &vbo->currval[VBO_ATTRIB_GENERIC0+i];
-         const_inputs |= VERT_BIT_GENERIC(i);
-      }
-      break;
-
    case VP_ARB:
       /* GL_ARB_vertex_program or GLSL vertex shader - Only the generic[0]
        * attribute array aliases and overrides the legacy position array.  
@@ -562,7 +536,7 @@ vbo_handle_primitive_restart(struct gl_context *ctx,
 
    if ((ib != NULL) &&
        ctx->Const.PrimitiveRestartInSoftware &&
-       ctx->Array.PrimitiveRestart) {
+       ctx->Array._PrimitiveRestart) {
       /* Handle primitive restart in software */
       vbo_sw_primitive_restart(ctx, prim, nr_prims, ib);
    } else {
@@ -598,10 +572,10 @@ vbo_draw_arrays(struct gl_context *ctx, GLenum mode, GLint start,
    prim[0].base_instance = baseInstance;
 
    /* Implement the primitive restart index */
-   if (ctx->Array.PrimitiveRestart && ctx->Array.RestartIndex < count) {
+   if (ctx->Array._PrimitiveRestart && ctx->Array._RestartIndex < count) {
       GLuint primCount = 0;
 
-      if (ctx->Array.RestartIndex == start) {
+      if (ctx->Array._RestartIndex == start) {
          /* special case: RestartIndex at beginning */
          if (count > 1) {
             prim[0].start = start + 1;
@@ -609,7 +583,7 @@ vbo_draw_arrays(struct gl_context *ctx, GLenum mode, GLint start,
             primCount = 1;
          }
       }
-      else if (ctx->Array.RestartIndex == start + count - 1) {
+      else if (ctx->Array._RestartIndex == start + count - 1) {
          /* special case: RestartIndex at end */
          if (count > 1) {
             prim[0].start = start;
@@ -620,10 +594,10 @@ vbo_draw_arrays(struct gl_context *ctx, GLenum mode, GLint start,
       else {
          /* general case: RestartIndex in middle, split into two prims */
          prim[0].start = start;
-         prim[0].count = ctx->Array.RestartIndex - start;
+         prim[0].count = ctx->Array._RestartIndex - start;
 
          prim[1] = prim[0];
-         prim[1].start = ctx->Array.RestartIndex + 1;
+         prim[1].start = ctx->Array._RestartIndex + 1;
          prim[1].count = count - prim[1].start;
 
          primCount = 2;
@@ -805,7 +779,7 @@ vbo_validated_drawrangeelements(struct gl_context *ctx, GLenum mode,
 				GLuint start, GLuint end,
 				GLsizei count, GLenum type,
 				const GLvoid *indices,
-				GLint basevertex, GLint numInstances,
+				GLint basevertex, GLuint numInstances,
 				GLuint baseInstance)
 {
    struct vbo_context *vbo = vbo_context(ctx);
@@ -1281,8 +1255,6 @@ vbo_exec_MultiDrawElementsBaseVertex(GLenum mode,
 				   basevertex);
 }
 
-#if FEATURE_EXT_transform_feedback
-
 static void
 vbo_draw_transform_feedback(struct gl_context *ctx, GLenum mode,
                             struct gl_transform_feedback_object *obj,
@@ -1387,8 +1359,6 @@ vbo_exec_DrawTransformFeedbackStreamInstanced(GLenum mode, GLuint name,
    vbo_draw_transform_feedback(ctx, mode, obj, stream, primcount);
 }
 
-#endif
-
 /**
  * Plug in the immediate-mode vertex array drawing commands into the
  * givven vbo_exec_context object.
@@ -1409,7 +1379,6 @@ vbo_exec_array_init( struct vbo_exec_context *exec )
    exec->vtxfmt.DrawElementsInstancedBaseInstance = vbo_exec_DrawElementsInstancedBaseInstance;
    exec->vtxfmt.DrawElementsInstancedBaseVertex = vbo_exec_DrawElementsInstancedBaseVertex;
    exec->vtxfmt.DrawElementsInstancedBaseVertexBaseInstance = vbo_exec_DrawElementsInstancedBaseVertexBaseInstance;
-#if FEATURE_EXT_transform_feedback
    exec->vtxfmt.DrawTransformFeedback = vbo_exec_DrawTransformFeedback;
    exec->vtxfmt.DrawTransformFeedbackStream =
          vbo_exec_DrawTransformFeedbackStream;
@@ -1417,7 +1386,6 @@ vbo_exec_array_init( struct vbo_exec_context *exec )
          vbo_exec_DrawTransformFeedbackInstanced;
    exec->vtxfmt.DrawTransformFeedbackStreamInstanced =
          vbo_exec_DrawTransformFeedbackStreamInstanced;
-#endif
 }
 
 
@@ -1494,12 +1462,8 @@ _mesa_MultiDrawElementsBaseVertex(GLenum mode,
 					primcount, basevertex);
 }
 
-#if FEATURE_EXT_transform_feedback
-
 void GLAPIENTRY
 _mesa_DrawTransformFeedback(GLenum mode, GLuint name)
 {
    vbo_exec_DrawTransformFeedback(mode, name);
 }
-
-#endif

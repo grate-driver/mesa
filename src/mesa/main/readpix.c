@@ -38,13 +38,7 @@
 #include "state.h"
 #include "glformats.h"
 #include "fbobject.h"
-#include "teximage.h"
 
-/* Inexplicably, GL_HALF_FLOAT_OES has a different value than GL_HALF_FLOAT.
- */
-#ifndef GL_HALF_FLOAT_OES
-#define GL_HALF_FLOAT_OES 0x8D61
-#endif
 
 /**
  * Tries to implement glReadPixels() of GL_DEPTH_COMPONENT using memcpy of the
@@ -143,7 +137,7 @@ read_depth_pixels( struct gl_context *ctx,
       return;
    }
 
-   depthValues = (GLfloat *) malloc(width * sizeof(GLfloat));
+   depthValues = malloc(width * sizeof(GLfloat));
 
    if (depthValues) {
       /* General case (slower) */
@@ -191,7 +185,7 @@ read_stencil_pixels( struct gl_context *ctx,
       return;
    }
 
-   stencil = (GLubyte *) malloc(width * sizeof(GLubyte));
+   stencil = malloc(width * sizeof(GLubyte));
 
    if (stencil) {
       /* process image row by row */
@@ -486,7 +480,7 @@ fast_read_depth_stencil_pixels_separate(struct gl_context *ctx,
       return GL_TRUE;  /* don't bother trying the slow path */
    }
 
-   stencilVals = (GLubyte *) malloc(width * sizeof(GLubyte));
+   stencilVals = malloc(width * sizeof(GLubyte));
 
    if (stencilVals) {
       for (j = 0; j < height; j++) {
@@ -557,8 +551,8 @@ slow_read_depth_stencil_pixels_separate(struct gl_context *ctx,
       stencilStride = depthStride;
    }
 
-   stencilVals = (GLubyte *) malloc(width * sizeof(GLubyte));
-   depthVals = (GLfloat *) malloc(width * sizeof(GLfloat));
+   stencilVals = malloc(width * sizeof(GLubyte));
+   depthVals = malloc(width * sizeof(GLfloat));
 
    if (stencilVals && depthVals) {
       for (j = 0; j < height; j++) {
@@ -680,16 +674,65 @@ _mesa_readpixels(struct gl_context *ctx,
 }
 
 
+static GLenum
+read_pixels_es3_error_check(GLenum format, GLenum type,
+                            const struct gl_renderbuffer *rb)
+{
+   const GLenum internalFormat = rb->InternalFormat;
+   const GLenum data_type = _mesa_get_format_datatype(rb->Format);
+   GLboolean is_unsigned_int = GL_FALSE;
+   GLboolean is_signed_int = GL_FALSE;
+
+   if (!_mesa_is_color_format(internalFormat)) {
+      return GL_INVALID_OPERATION;
+   }
+
+   is_unsigned_int = _mesa_is_enum_format_unsigned_int(internalFormat);
+   if (!is_unsigned_int) {
+      is_signed_int = _mesa_is_enum_format_signed_int(internalFormat);
+   }
+
+   switch (format) {
+   case GL_RGBA:
+      if (type == GL_FLOAT && data_type == GL_FLOAT)
+         return GL_NO_ERROR; /* EXT_color_buffer_float */
+      if (type == GL_UNSIGNED_BYTE && data_type == GL_UNSIGNED_NORMALIZED)
+         return GL_NO_ERROR;
+      if (internalFormat == GL_RGB10_A2 &&
+          type == GL_UNSIGNED_INT_2_10_10_10_REV)
+         return GL_NO_ERROR;
+      if (internalFormat == GL_RGB10_A2UI && type == GL_UNSIGNED_BYTE)
+         return GL_NO_ERROR;
+      break;
+   case GL_BGRA:
+      /* GL_EXT_read_format_bgra */
+      if (type == GL_UNSIGNED_BYTE ||
+          type == GL_UNSIGNED_SHORT_4_4_4_4_REV ||
+          type == GL_UNSIGNED_SHORT_1_5_5_5_REV)
+         return GL_NO_ERROR;
+      break;
+   case GL_RGBA_INTEGER:
+      if ((is_signed_int && type == GL_INT) ||
+          (is_unsigned_int && type == GL_UNSIGNED_INT))
+         return GL_NO_ERROR;
+      break;
+   }
+
+   return GL_INVALID_OPERATION;
+}
+
+
 void GLAPIENTRY
 _mesa_ReadnPixelsARB( GLint x, GLint y, GLsizei width, GLsizei height,
 		      GLenum format, GLenum type, GLsizei bufSize,
                       GLvoid *pixels )
 {
-   GLenum err;
+   GLenum err = GL_NO_ERROR;
+   struct gl_renderbuffer *rb;
 
    GET_CURRENT_CONTEXT(ctx);
-   ASSERT_OUTSIDE_BEGIN_END_AND_FLUSH(ctx);
 
+   FLUSH_VERTICES(ctx, 0);
    FLUSH_CURRENT(ctx, 0);
 
    if (MESA_VERBOSE & VERBOSE_API)
@@ -705,6 +748,22 @@ _mesa_ReadnPixelsARB( GLint x, GLint y, GLsizei width, GLsizei height,
       return;
    }
 
+   if (ctx->NewState)
+      _mesa_update_state(ctx);
+
+   if (ctx->ReadBuffer->_Status != GL_FRAMEBUFFER_COMPLETE_EXT) {
+      _mesa_error(ctx, GL_INVALID_FRAMEBUFFER_OPERATION_EXT,
+                  "glReadPixels(incomplete framebuffer)" );
+      return;
+   }
+
+   rb = _mesa_get_read_renderbuffer_for_format(ctx, format);
+   if (rb == NULL) {
+      _mesa_error(ctx, GL_INVALID_OPERATION,
+                  "glReadPixels(read buffer)");
+      return;
+   }
+
    /* OpenGL ES 1.x and OpenGL ES 2.0 impose additional restrictions on the
     * combinations of format and type that can be used.
     *
@@ -713,15 +772,26 @@ _mesa_ReadnPixelsARB( GLint x, GLint y, GLsizei width, GLsizei height,
     * preferred combination.  This code doesn't know what that preferred
     * combination is, and Mesa can handle anything valid.  Just work instead.
     */
-   if (_mesa_is_gles(ctx) && ctx->Version < 30) {
-      err = _mesa_es_error_check_format_and_type(format, type, 2);
-      if (err == GL_NO_ERROR) {
-         if (type == GL_FLOAT || type == GL_HALF_FLOAT_OES) {
-            err = GL_INVALID_OPERATION;
-         } else if (format == GL_DEPTH_COMPONENT
-                    || format == GL_DEPTH_STENCIL) {
-            err = GL_INVALID_ENUM;
+   if (_mesa_is_gles(ctx)) {
+      if (ctx->API == API_OPENGLES2 &&
+          _mesa_is_color_format(format) &&
+          _mesa_get_color_read_format(ctx) == format &&
+          _mesa_get_color_read_type(ctx) == type) {
+         err = GL_NO_ERROR;
+      } else if (ctx->Version < 30) {
+         err = _mesa_es_error_check_format_and_type(format, type, 2);
+         if (err == GL_NO_ERROR) {
+            if (type == GL_FLOAT || type == GL_HALF_FLOAT_OES) {
+               err = GL_INVALID_OPERATION;
+            }
          }
+      } else {
+         err = read_pixels_es3_error_check(format, type, rb);
+      }
+
+      if (err == GL_NO_ERROR && (format == GL_DEPTH_COMPONENT
+          || format == GL_DEPTH_STENCIL)) {
+         err = GL_INVALID_ENUM;
       }
 
       if (err != GL_NO_ERROR) {
@@ -732,20 +802,11 @@ _mesa_ReadnPixelsARB( GLint x, GLint y, GLsizei width, GLsizei height,
       }
    }
 
-   if (ctx->NewState)
-      _mesa_update_state(ctx);
-
    err = _mesa_error_check_format_and_type(ctx, format, type);
    if (err != GL_NO_ERROR) {
       _mesa_error(ctx, err, "glReadPixels(invalid format %s and/or type %s)",
                   _mesa_lookup_enum_by_nr(format),
                   _mesa_lookup_enum_by_nr(type));
-      return;
-   }
-
-   if (ctx->ReadBuffer->_Status != GL_FRAMEBUFFER_COMPLETE_EXT) {
-      _mesa_error(ctx, GL_INVALID_FRAMEBUFFER_OPERATION_EXT,
-                  "glReadPixels(incomplete framebuffer)" );
       return;
    }
 

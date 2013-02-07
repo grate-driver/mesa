@@ -116,7 +116,6 @@ static struct pipe_surface *noop_create_surface(struct pipe_context *ctx,
 	surface->format = surf_tmpl->format;
 	surface->width = texture->width0;
 	surface->height = texture->height0;
-	surface->usage = surf_tmpl->usage;
 	surface->texture = texture;
 	surface->u.tex.first_layer = surf_tmpl->u.tex.first_layer;
 	surface->u.tex.last_layer = surf_tmpl->u.tex.last_layer;
@@ -215,8 +214,9 @@ static void noop_set_index_buffer(struct pipe_context *ctx,
 {
 }
 
-static void noop_set_vertex_buffers(struct pipe_context *ctx, unsigned count,
-					const struct pipe_vertex_buffer *buffers)
+static void noop_set_vertex_buffers(struct pipe_context *ctx,
+				    unsigned start_slot, unsigned count,
+				    const struct pipe_vertex_buffer *buffers)
 {
 }
 

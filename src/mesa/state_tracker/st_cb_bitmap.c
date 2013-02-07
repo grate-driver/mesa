@@ -57,8 +57,6 @@
 #include "cso_cache/cso_context.h"
 
 
-#if FEATURE_drawpix
-
 /**
  * glBitmaps are drawn as textured quads.  The user's bitmap pattern
  * is stored in a texture image.  An alpha8 texture format is used.
@@ -308,11 +306,9 @@ make_bitmap_texture(struct gl_context *ctx, GLsizei width, GLsizei height,
       return NULL;
    }
 
-   transfer = pipe_get_transfer(st->pipe, pt, 0, 0,
-                                PIPE_TRANSFER_WRITE,
-                                0, 0, width, height);
-
-   dest = pipe_transfer_map(pipe, transfer);
+   dest = pipe_transfer_map(st->pipe, pt, 0, 0,
+                            PIPE_TRANSFER_WRITE,
+                            0, 0, width, height, &transfer);
 
    /* Put image into texture transfer */
    memset(dest, 0xff, height * transfer->stride);
@@ -323,8 +319,6 @@ make_bitmap_texture(struct gl_context *ctx, GLsizei width, GLsizei height,
 
    /* Release transfer */
    pipe_transfer_unmap(pipe, transfer);
-   pipe->transfer_destroy(pipe, transfer);
-
    return pt;
 }
 
@@ -356,9 +350,8 @@ setup_bitmap_vertex_data(struct st_context *st, bool normalized,
       tBot = (GLfloat) height;
    }
 
-   u_upload_alloc(st->uploader, 0, 4 * sizeof(vertices[0]), vbuf_offset, vbuf,
-		  (void**)&vertices);
-   if (!vbuf) {
+   if (u_upload_alloc(st->uploader, 0, 4 * sizeof(vertices[0]),
+                      vbuf_offset, vbuf, (void **) &vertices) != PIPE_OK) {
       return;
    }
 
@@ -463,7 +456,7 @@ draw_bitmap_quad(struct gl_context *ctx, GLint x, GLint y, GLfloat z,
    cso_save_vertex_shader(cso);
    cso_save_geometry_shader(cso);
    cso_save_vertex_elements(cso);
-   cso_save_vertex_buffers(cso);
+   cso_save_aux_vertex_buffer_slot(cso);
 
    /* rasterizer state: just scissor */
    st->bitmap.rasterizer.scissor = ctx->Scissor.Enabled;
@@ -532,7 +525,9 @@ draw_bitmap_quad(struct gl_context *ctx, GLint x, GLint y, GLfloat z,
 			    x, y, width, height, z, color, &vbuf, &offset);
 
    if (vbuf) {
-      util_draw_vertex_buffer(pipe, st->cso_context, vbuf, offset,
+      util_draw_vertex_buffer(pipe, st->cso_context, vbuf,
+                              cso_get_aux_vertex_buffer_slot(st->cso_context),
+                              offset,
                               PIPE_PRIM_TRIANGLE_FAN,
                               4,  /* verts */
                               3); /* attribs/vert */
@@ -547,7 +542,7 @@ draw_bitmap_quad(struct gl_context *ctx, GLint x, GLint y, GLfloat z,
    cso_restore_vertex_shader(cso);
    cso_restore_geometry_shader(cso);
    cso_restore_vertex_elements(cso);
-   cso_restore_vertex_buffers(cso);
+   cso_restore_aux_vertex_buffer_slot(cso);
    cso_restore_stream_outputs(cso);
 
    pipe_resource_reference(&vbuf, NULL);
@@ -557,7 +552,6 @@ draw_bitmap_quad(struct gl_context *ctx, GLint x, GLint y, GLfloat z,
 static void
 reset_cache(struct st_context *st)
 {
-   struct pipe_context *pipe = st->pipe;
    struct bitmap_cache *cache = st->bitmap.cache;
 
    /*memset(cache->buffer, 0xff, sizeof(cache->buffer));*/
@@ -567,11 +561,6 @@ reset_cache(struct st_context *st)
    cache->xmax = -1000000;
    cache->ymin = 1000000;
    cache->ymax = -1000000;
-
-   if (cache->trans) {
-      pipe->transfer_destroy(pipe, cache->trans);
-      cache->trans = NULL;
-   }
 
    assert(!cache->texture);
 
@@ -619,11 +608,10 @@ create_cache_trans(struct st_context *st)
    /* Map the texture transfer.
     * Subsequent glBitmap calls will write into the texture image.
     */
-   cache->trans = pipe_get_transfer(st->pipe, cache->texture, 0, 0,
-                                    PIPE_TRANSFER_WRITE, 0, 0,
-                                    BITMAP_CACHE_WIDTH,
-                                    BITMAP_CACHE_HEIGHT);
-   cache->buffer = pipe_transfer_map(pipe, cache->trans);
+   cache->buffer = pipe_transfer_map(pipe, cache->texture, 0, 0,
+                                     PIPE_TRANSFER_WRITE, 0, 0,
+                                     BITMAP_CACHE_WIDTH,
+                                     BITMAP_CACHE_HEIGHT, &cache->trans);
 
    /* init image to all 0xff */
    memset(cache->buffer, 0xff, cache->trans->stride * BITMAP_CACHE_HEIGHT);
@@ -653,13 +641,11 @@ st_flush_bitmap_cache(struct st_context *st)
       /* The texture transfer has been mapped until now.
           * So unmap and release the texture transfer before drawing.
           */
-      if (cache->trans) {
+      if (cache->trans && cache->buffer) {
          if (0)
             print_cache(cache);
          pipe_transfer_unmap(pipe, cache->trans);
          cache->buffer = NULL;
-
-         pipe->transfer_destroy(pipe, cache->trans);
          cache->trans = NULL;
       }
 
@@ -875,14 +861,11 @@ st_destroy_bitmap(struct st_context *st)
    }
 
    if (cache) {
-      if (cache->trans) {
+      if (cache->trans && cache->buffer) {
          pipe_transfer_unmap(pipe, cache->trans);
-         pipe->transfer_destroy(pipe, cache->trans);
       }
       pipe_resource_reference(&st->bitmap.cache->texture, NULL);
       free(st->bitmap.cache);
       st->bitmap.cache = NULL;
    }
 }
-
-#endif /* FEATURE_drawpix */

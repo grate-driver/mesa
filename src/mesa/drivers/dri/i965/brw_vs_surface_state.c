@@ -44,16 +44,11 @@
 static void
 brw_upload_vs_pull_constants(struct brw_context *brw)
 {
-   struct gl_context *ctx = &brw->intel.ctx;
    struct intel_context *intel = &brw->intel;
    /* BRW_NEW_VERTEX_PROGRAM */
    struct brw_vertex_program *vp =
       (struct brw_vertex_program *) brw->vertex_program;
-   const struct gl_program_parameter_list *params = vp->program.Base.Parameters;
    int i;
-
-   if (vp->program.IsNVProgram)
-      _mesa_load_tracked_matrices(ctx);
 
    /* Updates the ParamaterValues[i] pointers for all parameters of the
     * basic type of PROGRAM_STATE_VAR.
@@ -85,7 +80,7 @@ brw_upload_vs_pull_constants(struct brw_context *brw)
    }
 
    if (0) {
-      for (i = 0; i < params->NumParameters; i++) {
+      for (i = 0; i < ALIGN(brw->vs.prog_data->nr_pull_params, 4) / 4; i++) {
 	 float *row = (float *)brw->vs.const_bo->virtual + i * 4;
 	 printf("vs const surface %3d: %4.3f %4.3f %4.3f %4.3f\n",
 		i, row[0], row[1], row[2], row[3]);
@@ -96,7 +91,7 @@ brw_upload_vs_pull_constants(struct brw_context *brw)
 
    const int surf = SURF_INDEX_VERT_CONST_BUFFER;
    intel->vtbl.create_constant_surface(brw, brw->vs.const_bo, 0,
-				       params->NumParameters,
+				       ALIGN(brw->vs.prog_data->nr_pull_params, 4) / 4,
 				       &brw->vs.surf_offset[surf]);
 
    brw->state.dirty.brw |= BRW_NEW_VS_CONSTBUF;
@@ -142,8 +137,18 @@ const struct brw_tracked_state brw_vs_ubo_surfaces = {
 static void
 brw_vs_upload_binding_table(struct brw_context *brw)
 {
+   struct intel_context *intel = &brw->intel;
    uint32_t *bind;
    int i;
+
+   if (INTEL_DEBUG & DEBUG_SHADER_TIME) {
+      intel->vtbl.create_constant_surface(brw, brw->shader_time.bo, 0,
+                                          brw->shader_time.bo->size,
+                                          &brw->vs.surf_offset[SURF_INDEX_VS_SHADER_TIME]);
+
+      assert(brw->vs.prog_data->num_surfaces <= SURF_INDEX_VS_SHADER_TIME);
+      brw->vs.prog_data->num_surfaces = SURF_INDEX_VS_SHADER_TIME;
+   }
 
    /* CACHE_NEW_VS_PROG: Skip making a binding table if we don't use textures or
     * pull constants.

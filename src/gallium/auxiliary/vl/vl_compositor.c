@@ -199,13 +199,15 @@ create_frag_shader_weave(struct vl_compositor *c)
 
    /* calculate the texture offsets
     * t_tc.x = i_tc.x
-    * t_tc.y = (round(i_tc.y) + 0.5) / height * 2
+    * t_tc.y = (round(i_tc.y - 0.5) + 0.5) / height * 2
     */
    for (i = 0; i < 2; ++i) {
       ureg_MOV(shader, ureg_writemask(t_tc[i], TGSI_WRITEMASK_X), i_tc[i]);
-      ureg_ROUND(shader, ureg_writemask(t_tc[i], TGSI_WRITEMASK_YZ), i_tc[i]);
+      ureg_SUB(shader, ureg_writemask(t_tc[i], TGSI_WRITEMASK_YZ),
+               i_tc[i], ureg_imm1f(shader, 0.5f));
+      ureg_ROUND(shader, ureg_writemask(t_tc[i], TGSI_WRITEMASK_YZ), ureg_src(t_tc[i]));
       ureg_MOV(shader, ureg_writemask(t_tc[i], TGSI_WRITEMASK_W),
-               ureg_imm1f(shader, i ? 0.75f : 0.25f));
+               ureg_imm1f(shader, i ? -0.25f : 0.25f));
       ureg_ADD(shader, ureg_writemask(t_tc[i], TGSI_WRITEMASK_YZ),
                ureg_src(t_tc[i]), ureg_imm1f(shader, 0.5f));
       ureg_MUL(shader, ureg_writemask(t_tc[i], TGSI_WRITEMASK_Y),
@@ -234,11 +236,11 @@ create_frag_shader_weave(struct vl_compositor *c)
    ureg_ROUND(shader, ureg_writemask(t_tc[0], TGSI_WRITEMASK_YZ), i_tc[0]);
    ureg_ADD(shader, ureg_writemask(t_tc[0], TGSI_WRITEMASK_YZ),
             ureg_src(t_tc[0]), ureg_negate(i_tc[0]));
-   ureg_MUL(shader, ureg_writemask(t_tc[0], TGSI_WRITEMASK_XY),
+   ureg_MUL(shader, ureg_writemask(t_tc[0], TGSI_WRITEMASK_YZ),
             ureg_abs(ureg_src(t_tc[0])), ureg_imm1f(shader, 2.0f));
    ureg_LRP(shader, t_texel[0], ureg_swizzle(ureg_src(t_tc[0]),
             TGSI_SWIZZLE_Y, TGSI_SWIZZLE_Z, TGSI_SWIZZLE_Z, TGSI_SWIZZLE_Z),
-            ureg_src(t_texel[1]), ureg_src(t_texel[0]));
+            ureg_src(t_texel[0]), ureg_src(t_texel[1]));
 
    /* and finally do colour space transformation
     * fragment = csc * texel
@@ -1013,7 +1015,7 @@ vl_compositor_render(struct vl_compositor_state *s,
    c->pipe->set_scissor_state(c->pipe, &s->scissor);
    c->pipe->set_framebuffer_state(c->pipe, &c->fb_state);
    c->pipe->bind_vs_state(c->pipe, c->vs);
-   c->pipe->set_vertex_buffers(c->pipe, 1, &c->vertex_buf);
+   c->pipe->set_vertex_buffers(c->pipe, 0, 1, &c->vertex_buf);
    c->pipe->bind_vertex_elements_state(c->pipe, c->vertex_elems_state);
    pipe_set_constant_buffer(c->pipe, PIPE_SHADER_FRAGMENT, 0, s->csc_matrix);
    c->pipe->bind_rasterizer_state(c->pipe, c->rast);

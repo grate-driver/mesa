@@ -43,8 +43,14 @@ nvc0_mesa_varying_hack(struct nv50_ir_varying *var)
       for (c = 0; c < 4; ++c)
          var->slot[c] = (0x2e0 + c * 0x4) / 4;
    else
+   if (var->si <= 39)
       for (c = 0; c < 4; ++c) /* move down user varyings (first has index 8) */
          var->slot[c] -= 0x80 / 4;
+   else {
+      NOUVEAU_ERR("too many varyings / invalid location: %u !\n", var->si);
+      for (c = 0; c < 4; ++c)
+         var->slot[c] = (0x270 + c * 0x4) / 4; /* catch invalid indices */
+   }
 }
 
 static uint32_t
@@ -574,8 +580,7 @@ nvc0_program_translate(struct nvc0_program *prog, uint16_t chipset)
       NOUVEAU_ERR("shader translation failed: %i\n", ret);
       goto out;
    }
-   if (info->bin.syms) /* we don't need them yet */
-      FREE(info->bin.syms);
+   FREE(info->bin.syms);
 
    prog->code = info->bin.code;
    prog->code_size = info->bin.codeSize;
@@ -671,8 +676,20 @@ nvc0_program_upload_code(struct nvc0_context *nvc0, struct nvc0_program *prog)
 
    ret = nouveau_heap_alloc(screen->text_heap, size, prog, &prog->mem);
    if (ret) {
-      NOUVEAU_ERR("out of code space\n");
-      return FALSE;
+      struct nouveau_heap *heap = screen->text_heap;
+      struct nouveau_heap *iter;
+      for (iter = heap; iter && iter->next != heap; iter = iter->next) {
+         struct nvc0_program *evict = iter->priv;
+         if (evict)
+            nouveau_heap_free(&evict->mem);
+      }
+      debug_printf("WARNING: out of code space, evicting all shaders.\n");
+      ret = nouveau_heap_alloc(heap, size, prog, &prog->mem);
+      if (ret) {
+         NOUVEAU_ERR("shader too large (0x%x) to fit in code space ?\n", size);
+         return FALSE;
+      }
+      IMMED_NVC0(nvc0->base.pushbuf, NVC0_3D(SERIALIZE), 0);
    }
    prog->code_base = prog->mem->start;
    prog->immd_base = align(prog->mem->start + prog->immd_base, 0x100);
@@ -752,12 +769,9 @@ nvc0_program_destroy(struct nvc0_context *nvc0, struct nvc0_program *prog)
    if (prog->mem)
       nouveau_heap_free(&prog->mem);
 
-   if (prog->code)
-      FREE(prog->code);
-   if (prog->immd_data)
-      FREE(prog->immd_data);
-   if (prog->relocs)
-      FREE(prog->relocs);
+   FREE(prog->code);
+   FREE(prog->immd_data);
+   FREE(prog->relocs);
    if (prog->tfb) {
       if (nvc0->state.tfb == prog->tfb)
          nvc0->state.tfb = NULL;

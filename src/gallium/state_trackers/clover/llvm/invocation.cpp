@@ -23,6 +23,7 @@
 #include "core/compiler.hpp"
 
 #include <clang/Frontend/CompilerInstance.h>
+#include <clang/Frontend/TextDiagnosticBuffer.h>
 #include <clang/Frontend/TextDiagnosticPrinter.h>
 #include <clang/CodeGen/CodeGenAction.h>
 #include <llvm/Bitcode/BitstreamWriter.h>
@@ -35,9 +36,14 @@
 #include <llvm/Support/TargetSelect.h>
 #include <llvm/Support/MemoryBuffer.h>
 #include <llvm/Support/PathV1.h>
-#include <llvm/Target/TargetData.h>
 #include <llvm/Transforms/IPO.h>
 #include <llvm/Transforms/IPO/PassManagerBuilder.h>
+
+#if HAVE_LLVM < 0x0302
+#include <llvm/Target/TargetData.h>
+#else
+#include <llvm/DataLayout.h>
+#endif
 
 #include "pipe/p_state.h"
 #include "util/u_memory.h"
@@ -46,6 +52,7 @@
 #include <iomanip>
 #include <fstream>
 #include <cstdio>
+#include <sstream>
 
 using namespace clover;
 
@@ -93,15 +100,49 @@ namespace {
 
    llvm::Module *
    compile(const std::string &source, const std::string &name,
-           const std::string &triple) {
+           const std::string &triple, const std::string &opts) {
 
       clang::CompilerInstance c;
+      clang::CompilerInvocation invocation;
       clang::EmitLLVMOnlyAction act(&llvm::getGlobalContext());
       std::string log;
       llvm::raw_string_ostream s_log(log);
 
-      c.getFrontendOpts().Inputs.push_back(
-            clang::FrontendInputFile(name, clang::IK_OpenCL));
+      // Parse the compiler options:
+      std::vector<std::string> opts_array;
+      std::istringstream ss(opts);
+
+      while (!ss.eof()) {
+         std::string opt;
+         getline(ss, opt, ' ');
+         opts_array.push_back(opt);
+      }
+
+      opts_array.push_back(name);
+
+      std::vector<const char *> opts_carray;
+      for (unsigned i = 0; i < opts_array.size(); i++) {
+         opts_carray.push_back(opts_array.at(i).c_str());
+      }
+
+      llvm::IntrusiveRefCntPtr<clang::DiagnosticIDs> DiagID;
+      llvm::IntrusiveRefCntPtr<clang::DiagnosticOptions> DiagOpts;
+      clang::TextDiagnosticBuffer *DiagsBuffer;
+
+      DiagID = new clang::DiagnosticIDs();
+      DiagOpts = new clang::DiagnosticOptions();
+      DiagsBuffer = new clang::TextDiagnosticBuffer();
+
+      clang::DiagnosticsEngine Diags(DiagID, &*DiagOpts, DiagsBuffer);
+      bool Success;
+
+      Success = clang::CompilerInvocation::CreateFromArgs(c.getInvocation(),
+                                        opts_carray.data(),
+                                        opts_carray.data() + opts_carray.size(),
+                                        Diags);
+      if (!Success) {
+         throw invalid_option_error();
+      }
       c.getFrontendOpts().ProgramAction = clang::frontend::EmitLLVMOnly;
       c.getHeaderSearchOpts().UseBuiltinIncludes = true;
       c.getHeaderSearchOpts().UseStandardSystemIncludes = true;
@@ -120,9 +161,19 @@ namespace {
 
       c.getLangOpts().NoBuiltin = true;
       c.getTargetOpts().Triple = triple;
+#if HAVE_LLVM <= 0x0301
       c.getInvocation().setLangDefaults(clang::IK_OpenCL);
+#else
+      c.getInvocation().setLangDefaults(c.getLangOpts(), clang::IK_OpenCL,
+                                        clang::LangStandard::lang_opencl11);
+#endif
       c.createDiagnostics(0, NULL, new clang::TextDiagnosticPrinter(
-                          s_log, c.getDiagnosticOpts()));
+                          s_log,
+#if HAVE_LLVM <= 0x0301
+                                 c.getDiagnosticOpts()));
+#else
+                                 &c.getDiagnosticOpts()));
+#endif
 
       c.getPreprocessorOpts().addRemappedFile(name,
                                       llvm::MemoryBuffer::getMemBuffer(source));
@@ -199,41 +250,46 @@ namespace {
       llvm::WriteBitcodeToFile(mod, bitcode_ostream);
       bitcode_ostream.flush();
 
-      llvm::Function *kernel_func;
-      std::string kernel_name;
-      compat::vector<module::argument> args;
+      for (unsigned i = 0; i < kernels.size(); ++i) {
+         llvm::Function *kernel_func;
+         std::string kernel_name;
+         compat::vector<module::argument> args;
 
-      // XXX: Support more than one kernel
-      assert(kernels.size() == 1);
+         kernel_func = kernels[i];
+         kernel_name = kernel_func->getName();
 
-      kernel_func = kernels[0];
-      kernel_name = kernel_func->getName();
+         for (llvm::Function::arg_iterator I = kernel_func->arg_begin(),
+                                      E = kernel_func->arg_end(); I != E; ++I) {
+            llvm::Argument &arg = *I;
+            llvm::Type *arg_type = arg.getType();
+#if HAVE_LLVM < 0x0302
+            llvm::TargetData TD(kernel_func->getParent());
+#else
+            llvm::DataLayout TD(kernel_func->getParent()->getDataLayout());
+#endif
+            unsigned arg_size = TD.getTypeStoreSize(arg_type);
 
-      for (llvm::Function::arg_iterator I = kernel_func->arg_begin(),
-                                   E = kernel_func->arg_end(); I != E; ++I) {
-         llvm::Argument &arg = *I;
-         llvm::Type *arg_type = arg.getType();
-         llvm::TargetData TD(kernel_func->getParent());
-         unsigned arg_size = TD.getTypeStoreSize(arg_type);
-
-         if (llvm::isa<llvm::PointerType>(arg_type) && arg.hasByValAttr()) {
-            arg_type =
-               llvm::dyn_cast<llvm::PointerType>(arg_type)->getElementType();
-         }
-
-         if (arg_type->isPointerTy()) {
-            // XXX: Figure out LLVM->OpenCL address space mappings for each
-            // target.  I think we need to ask clang what these are.  For now,
-            // pretend everything is in the global address space.
-            unsigned address_space = llvm::cast<llvm::PointerType>(arg_type)->getAddressSpace();
-            switch (address_space) {
-               default:
-                  args.push_back(module::argument(module::argument::global, arg_size));
-                  break;
+            if (llvm::isa<llvm::PointerType>(arg_type) && arg.hasByValAttr()) {
+               arg_type =
+                  llvm::dyn_cast<llvm::PointerType>(arg_type)->getElementType();
             }
-         } else {
-            args.push_back(module::argument(module::argument::scalar, arg_size));
+
+            if (arg_type->isPointerTy()) {
+               // XXX: Figure out LLVM->OpenCL address space mappings for each
+               // target.  I think we need to ask clang what these are.  For now,
+               // pretend everything is in the global address space.
+               unsigned address_space = llvm::cast<llvm::PointerType>(arg_type)->getAddressSpace();
+               switch (address_space) {
+                  default:
+                     args.push_back(module::argument(module::argument::global, arg_size));
+                     break;
+               }
+            } else {
+               args.push_back(module::argument(module::argument::scalar, arg_size));
+            }
          }
+
+         m.syms.push_back(module::symbol(kernel_name, 0, i, args ));
       }
 
       header.num_bytes = llvm_bitcode.size();
@@ -241,7 +297,6 @@ namespace {
       data.insert(0, (char*)(&header), sizeof(header));
       data.insert(data.end(), llvm_bitcode.begin(),
                                   llvm_bitcode.end());
-      m.syms.push_back(module::symbol(kernel_name, 0, 0, args ));
       m.secs.push_back(module::section(0, module::section::text,
                                        header.num_bytes, data));
 
@@ -252,11 +307,14 @@ namespace {
 module
 clover::compile_program_llvm(const compat::string &source,
                              enum pipe_shader_ir ir,
-                             const compat::string &triple) {
+                             const compat::string &triple,
+                             const compat::string &opts) {
 
    std::vector<llvm::Function *> kernels;
 
-   llvm::Module *mod = compile(source, "cl_input", triple);
+   // The input file name must have the .cl extension in order for the
+   // CompilerInvocation class to recognize it as an OpenCL source file.
+   llvm::Module *mod = compile(source, "input.cl", triple, opts);
 
    find_kernels(mod, kernels);
 

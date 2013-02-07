@@ -551,7 +551,7 @@ void xorg_flush(ScreenPtr pScreen)
 	ms->ctx->flush(ms->ctx,
 		       ms->dirtyThrottling ?
 		       &ms->fence[XORG_NR_FENCES-1] :
-		       NULL);
+		       NULL, 0);
        
 	if (ms->dirtyThrottling) {
 	    if (ms->fence[0])
@@ -852,7 +852,6 @@ drv_screen_init(SCREEN_INIT_ARGS_DECL)
 
     xf86DrvMsg(pScrn->scrnIndex, X_INFO, "##################################\n");
 
-    miInitializeBackingStore(pScreen);
     xf86SetBackingStore(pScreen);
     xf86SetSilkenMouse(pScreen);
     miDCInitialize(pScreen, xf86GetPointerScreenFuncs());

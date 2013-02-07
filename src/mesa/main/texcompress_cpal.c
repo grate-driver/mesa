@@ -40,8 +40,6 @@
 #include "texcompress_cpal.h"
 #include "teximage.h"
 
-#if FEATURE_ES
-
 
 static const struct cpal_format_info {
    GLenum cpal_format;
@@ -142,21 +140,6 @@ _mesa_cpal_compressed_size(int level, GLenum internalFormat,
    return expect_size;
 }
 
-void
-_mesa_cpal_compressed_format_type(GLenum internalFormat, GLenum *format,
-				  GLenum *type)
-{
-   const struct cpal_format_info *info;
-
-   if (internalFormat < GL_PALETTE4_RGB8_OES
-       || internalFormat > GL_PALETTE8_RGB5_A1_OES) {
-      return;
-   }
-
-   info = &formats[internalFormat - GL_PALETTE4_RGB8_OES];
-   *format = info->format;
-   *type = info->type;
-}
 
 /**
  * Convert a call to glCompressedTexImage2D() where internalFormat is a
@@ -208,14 +191,13 @@ _mesa_cpal_compressed_teximage2d(GLenum target, GLint level,
 
       /* allocate and fill dest image buffer */
       if (palette) {
-         image = (GLubyte *) malloc(num_texels * info->size);
+         image = malloc(num_texels * info->size);
          paletted_to_color(info, palette, indices, num_texels, image);
       }
 
       _mesa_TexImage2D(target, lvl, info->format, w, h, 0,
                        info->format, info->type, image);
-      if (image)
-         free(image);
+      free(image);
 
       /* advance index pointer to point to next src mipmap */
       if (info->palette_size == 16)
@@ -227,5 +209,3 @@ _mesa_cpal_compressed_teximage2d(GLenum target, GLint level,
    if (saved_align != align)
       _mesa_PixelStorei(GL_UNPACK_ALIGNMENT, saved_align);
 }
-
-#endif

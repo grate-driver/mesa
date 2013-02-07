@@ -151,21 +151,21 @@ update_array(struct gl_context *ctx,
    }
 
    if (_mesa_is_gles(ctx)) {
-      /* Once Mesa gets support for GL_OES_vertex_half_float this mask will
-       * change.  Adding support for this extension isn't quite as trivial as
-       * we'd like because ES uses a different enum value for GL_HALF_FLOAT.
-       */
-      legalTypesMask &= ~(FIXED_GL_BIT | HALF_BIT | DOUBLE_BIT);
+      legalTypesMask &= ~(FIXED_GL_BIT | DOUBLE_BIT);
 
       /* GL_INT and GL_UNSIGNED_INT data is not allowed in OpenGL ES until
        * 3.0.  The 2_10_10_10 types are added in OpenGL ES 3.0 or
-       * GL_OES_vertex_type_10_10_10_2.
+       * GL_OES_vertex_type_10_10_10_2.  GL_HALF_FLOAT data is not allowed
+       * until 3.0 or with the GL_OES_vertex_half float extension, which isn't
+       * quite as trivial as we'd like because it uses a different enum value
+       * for GL_HALF_FLOAT_OES.
        */
       if (ctx->Version < 30) {
          legalTypesMask &= ~(UNSIGNED_INT_BIT
                              | INT_BIT
                              | UNSIGNED_INT_2_10_10_10_REV_BIT
-                             | INT_2_10_10_10_REV_BIT);
+                             | INT_2_10_10_10_REV_BIT
+                             | HALF_BIT);
       }
 
       /* BGRA ordering is not supported in ES contexts.
@@ -251,7 +251,8 @@ update_array(struct gl_context *ctx,
       return;
    }
 
-   elementSize = _mesa_sizeof_type(type) * size;
+   elementSize = _mesa_bytes_per_vertex_attrib(size, type);
+   assert(elementSize != -1);
 
    array = &ctx->Array.ArrayObj->VertexAttrib[attrib];
    array->Size = size;
@@ -282,7 +283,8 @@ _mesa_VertexPointer(GLint size, GLenum type, GLsizei stride, const GLvoid *ptr)
          DOUBLE_BIT | HALF_BIT |
          UNSIGNED_INT_2_10_10_10_REV_BIT |
          INT_2_10_10_10_REV_BIT);
-   ASSERT_OUTSIDE_BEGIN_END_AND_FLUSH(ctx);
+
+   FLUSH_VERTICES(ctx, 0);
 
    update_array(ctx, "glVertexPointer", VERT_ATTRIB_POS,
                 legalTypes, 2, 4,
@@ -300,7 +302,8 @@ _mesa_NormalPointer(GLenum type, GLsizei stride, const GLvoid *ptr )
          HALF_BIT | FLOAT_BIT | DOUBLE_BIT |
          UNSIGNED_INT_2_10_10_10_REV_BIT |
          INT_2_10_10_10_REV_BIT);
-   ASSERT_OUTSIDE_BEGIN_END_AND_FLUSH(ctx);
+
+   FLUSH_VERTICES(ctx, 0);
 
    update_array(ctx, "glNormalPointer", VERT_ATTRIB_NORMAL,
                 legalTypes, 3, 3,
@@ -321,7 +324,8 @@ _mesa_ColorPointer(GLint size, GLenum type, GLsizei stride, const GLvoid *ptr)
          UNSIGNED_INT_2_10_10_10_REV_BIT |
          INT_2_10_10_10_REV_BIT);
    const GLint sizeMin = (ctx->API == API_OPENGLES) ? 4 : 3;
-   ASSERT_OUTSIDE_BEGIN_END_AND_FLUSH(ctx);
+
+   FLUSH_VERTICES(ctx, 0);
 
    update_array(ctx, "glColorPointer", VERT_ATTRIB_COLOR0,
                 legalTypes, sizeMin, BGRA_OR_4,
@@ -330,11 +334,12 @@ _mesa_ColorPointer(GLint size, GLenum type, GLsizei stride, const GLvoid *ptr)
 
 
 void GLAPIENTRY
-_mesa_FogCoordPointerEXT(GLenum type, GLsizei stride, const GLvoid *ptr)
+_mesa_FogCoordPointer(GLenum type, GLsizei stride, const GLvoid *ptr)
 {
    const GLbitfield legalTypes = (HALF_BIT | FLOAT_BIT | DOUBLE_BIT);
    GET_CURRENT_CONTEXT(ctx);
-   ASSERT_OUTSIDE_BEGIN_END_AND_FLUSH(ctx);
+
+   FLUSH_VERTICES(ctx, 0);
 
    update_array(ctx, "glFogCoordPointer", VERT_ATTRIB_FOG,
                 legalTypes, 1, 1,
@@ -348,7 +353,8 @@ _mesa_IndexPointer(GLenum type, GLsizei stride, const GLvoid *ptr)
    const GLbitfield legalTypes = (UNSIGNED_BYTE_BIT | SHORT_BIT | INT_BIT |
                                   FLOAT_BIT | DOUBLE_BIT);
    GET_CURRENT_CONTEXT(ctx);
-   ASSERT_OUTSIDE_BEGIN_END_AND_FLUSH(ctx);
+
+   FLUSH_VERTICES(ctx, 0);
 
    update_array(ctx, "glIndexPointer", VERT_ATTRIB_COLOR_INDEX,
                 legalTypes, 1, 1,
@@ -357,7 +363,7 @@ _mesa_IndexPointer(GLenum type, GLsizei stride, const GLvoid *ptr)
 
 
 void GLAPIENTRY
-_mesa_SecondaryColorPointerEXT(GLint size, GLenum type,
+_mesa_SecondaryColorPointer(GLint size, GLenum type,
 			       GLsizei stride, const GLvoid *ptr)
 {
    const GLbitfield legalTypes = (BYTE_BIT | UNSIGNED_BYTE_BIT |
@@ -367,7 +373,8 @@ _mesa_SecondaryColorPointerEXT(GLint size, GLenum type,
                                   UNSIGNED_INT_2_10_10_10_REV_BIT |
                                   INT_2_10_10_10_REV_BIT);
    GET_CURRENT_CONTEXT(ctx);
-   ASSERT_OUTSIDE_BEGIN_END_AND_FLUSH(ctx);
+
+   FLUSH_VERTICES(ctx, 0);
 
    update_array(ctx, "glSecondaryColorPointer", VERT_ATTRIB_COLOR1,
                 legalTypes, 3, BGRA_OR_4,
@@ -388,7 +395,8 @@ _mesa_TexCoordPointer(GLint size, GLenum type, GLsizei stride,
          INT_2_10_10_10_REV_BIT);
    const GLint sizeMin = (ctx->API == API_OPENGLES) ? 2 : 1;
    const GLuint unit = ctx->Array.ActiveTexture;
-   ASSERT_OUTSIDE_BEGIN_END_AND_FLUSH(ctx);
+
+   FLUSH_VERTICES(ctx, 0);
 
    update_array(ctx, "glTexCoordPointer", VERT_ATTRIB_TEX(unit),
                 legalTypes, sizeMin, 4,
@@ -404,7 +412,8 @@ _mesa_EdgeFlagPointer(GLsizei stride, const GLvoid *ptr)
    /* see table 2.4 edits in GL_EXT_gpu_shader4 spec: */
    const GLboolean integer = GL_TRUE;
    GET_CURRENT_CONTEXT(ctx);
-   ASSERT_OUTSIDE_BEGIN_END_AND_FLUSH(ctx);
+
+   FLUSH_VERTICES(ctx, 0);
 
    update_array(ctx, "glEdgeFlagPointer", VERT_ATTRIB_EDGEFLAG,
                 legalTypes, 1, 1,
@@ -413,11 +422,12 @@ _mesa_EdgeFlagPointer(GLsizei stride, const GLvoid *ptr)
 
 
 void GLAPIENTRY
-_mesa_PointSizePointer(GLenum type, GLsizei stride, const GLvoid *ptr)
+_mesa_PointSizePointerOES(GLenum type, GLsizei stride, const GLvoid *ptr)
 {
    const GLbitfield legalTypes = (FLOAT_BIT | FIXED_ES_BIT);
    GET_CURRENT_CONTEXT(ctx);
-   ASSERT_OUTSIDE_BEGIN_END_AND_FLUSH(ctx);
+
+   FLUSH_VERTICES(ctx, 0);
 
    if (ctx->API != API_OPENGLES) {
       _mesa_error(ctx, GL_INVALID_OPERATION,
@@ -431,48 +441,13 @@ _mesa_PointSizePointer(GLenum type, GLsizei stride, const GLvoid *ptr)
 }
 
 
-#if FEATURE_NV_vertex_program
-/**
- * Set a vertex attribute array.
- * Note that these arrays DO alias the conventional GL vertex arrays
- * (position, normal, color, fog, texcoord, etc).
- * The generic attribute slots at #16 and above are not touched.
- */
-void GLAPIENTRY
-_mesa_VertexAttribPointerNV(GLuint index, GLint size, GLenum type,
-                            GLsizei stride, const GLvoid *ptr)
-{
-   const GLbitfield legalTypes = (UNSIGNED_BYTE_BIT | SHORT_BIT |
-                                  FLOAT_BIT | DOUBLE_BIT);
-   GLboolean normalized = GL_FALSE;
-   GET_CURRENT_CONTEXT(ctx);
-   ASSERT_OUTSIDE_BEGIN_END(ctx);
-
-   if (index >= MAX_NV_VERTEX_PROGRAM_INPUTS) {
-      _mesa_error(ctx, GL_INVALID_VALUE, "glVertexAttribPointerNV(index)");
-      return;
-   }
-
-   if (type == GL_UNSIGNED_BYTE && size != 4) {
-      _mesa_error(ctx, GL_INVALID_VALUE, "glVertexAttribPointerNV(size!=4)");
-      return;
-   }
-
-   update_array(ctx, "glVertexAttribPointerNV", VERT_ATTRIB_GENERIC(index),
-                legalTypes, 1, BGRA_OR_4,
-                size, type, stride, normalized, GL_FALSE, ptr);
-}
-#endif
-
-
-#if FEATURE_ARB_vertex_program
 /**
  * Set a generic vertex attribute array.
  * Note that these arrays DO NOT alias the conventional GL vertex arrays
  * (position, normal, color, fog, texcoord, etc).
  */
 void GLAPIENTRY
-_mesa_VertexAttribPointerARB(GLuint index, GLint size, GLenum type,
+_mesa_VertexAttribPointer(GLuint index, GLint size, GLenum type,
                              GLboolean normalized,
                              GLsizei stride, const GLvoid *ptr)
 {
@@ -484,7 +459,6 @@ _mesa_VertexAttribPointerARB(GLuint index, GLint size, GLenum type,
                                   UNSIGNED_INT_2_10_10_10_REV_BIT |
                                   INT_2_10_10_10_REV_BIT);
    GET_CURRENT_CONTEXT(ctx);
-   ASSERT_OUTSIDE_BEGIN_END(ctx);
 
    if (index >= ctx->Const.VertexProgram.MaxAttribs) {
       _mesa_error(ctx, GL_INVALID_VALUE, "glVertexAttribPointerARB(index)");
@@ -495,7 +469,6 @@ _mesa_VertexAttribPointerARB(GLuint index, GLint size, GLenum type,
                 legalTypes, 1, BGRA_OR_4,
                 size, type, stride, normalized, GL_FALSE, ptr);
 }
-#endif
 
 
 /**
@@ -514,7 +487,6 @@ _mesa_VertexAttribIPointer(GLuint index, GLint size, GLenum type,
    const GLboolean normalized = GL_FALSE;
    const GLboolean integer = GL_TRUE;
    GET_CURRENT_CONTEXT(ctx);
-   ASSERT_OUTSIDE_BEGIN_END(ctx);
 
    if (index >= ctx->Const.VertexProgram.MaxAttribs) {
       _mesa_error(ctx, GL_INVALID_VALUE, "glVertexAttribIPointer(index)");
@@ -529,11 +501,10 @@ _mesa_VertexAttribIPointer(GLuint index, GLint size, GLenum type,
 
 
 void GLAPIENTRY
-_mesa_EnableVertexAttribArrayARB(GLuint index)
+_mesa_EnableVertexAttribArray(GLuint index)
 {
    struct gl_array_object *arrayObj;
    GET_CURRENT_CONTEXT(ctx);
-   ASSERT_OUTSIDE_BEGIN_END(ctx);
 
    if (index >= ctx->Const.VertexProgram.MaxAttribs) {
       _mesa_error(ctx, GL_INVALID_VALUE,
@@ -556,11 +527,10 @@ _mesa_EnableVertexAttribArrayARB(GLuint index)
 
 
 void GLAPIENTRY
-_mesa_DisableVertexAttribArrayARB(GLuint index)
+_mesa_DisableVertexAttribArray(GLuint index)
 {
    struct gl_array_object *arrayObj;
    GET_CURRENT_CONTEXT(ctx);
-   ASSERT_OUTSIDE_BEGIN_END(ctx);
 
    if (index >= ctx->Const.VertexProgram.MaxAttribs) {
       _mesa_error(ctx, GL_INVALID_VALUE,
@@ -666,10 +636,9 @@ get_current_attrib(struct gl_context *ctx, GLuint index, const char *function)
 }
 
 void GLAPIENTRY
-_mesa_GetVertexAttribfvARB(GLuint index, GLenum pname, GLfloat *params)
+_mesa_GetVertexAttribfv(GLuint index, GLenum pname, GLfloat *params)
 {
    GET_CURRENT_CONTEXT(ctx);
-   ASSERT_OUTSIDE_BEGIN_END(ctx);
 
    if (pname == GL_CURRENT_VERTEX_ATTRIB_ARB) {
       const GLfloat *v = get_current_attrib(ctx, index, "glGetVertexAttribfv");
@@ -685,10 +654,9 @@ _mesa_GetVertexAttribfvARB(GLuint index, GLenum pname, GLfloat *params)
 
 
 void GLAPIENTRY
-_mesa_GetVertexAttribdvARB(GLuint index, GLenum pname, GLdouble *params)
+_mesa_GetVertexAttribdv(GLuint index, GLenum pname, GLdouble *params)
 {
    GET_CURRENT_CONTEXT(ctx);
-   ASSERT_OUTSIDE_BEGIN_END(ctx);
 
    if (pname == GL_CURRENT_VERTEX_ATTRIB_ARB) {
       const GLfloat *v = get_current_attrib(ctx, index, "glGetVertexAttribdv");
@@ -707,10 +675,9 @@ _mesa_GetVertexAttribdvARB(GLuint index, GLenum pname, GLdouble *params)
 
 
 void GLAPIENTRY
-_mesa_GetVertexAttribivARB(GLuint index, GLenum pname, GLint *params)
+_mesa_GetVertexAttribiv(GLuint index, GLenum pname, GLint *params)
 {
    GET_CURRENT_CONTEXT(ctx);
-   ASSERT_OUTSIDE_BEGIN_END(ctx);
 
    if (pname == GL_CURRENT_VERTEX_ATTRIB_ARB) {
       const GLfloat *v = get_current_attrib(ctx, index, "glGetVertexAttribiv");
@@ -734,7 +701,6 @@ void GLAPIENTRY
 _mesa_GetVertexAttribIiv(GLuint index, GLenum pname, GLint *params)
 {
    GET_CURRENT_CONTEXT(ctx);
-   ASSERT_OUTSIDE_BEGIN_END(ctx);
 
    if (pname == GL_CURRENT_VERTEX_ATTRIB_ARB) {
       const GLint *v = (const GLint *)
@@ -755,7 +721,6 @@ void GLAPIENTRY
 _mesa_GetVertexAttribIuiv(GLuint index, GLenum pname, GLuint *params)
 {
    GET_CURRENT_CONTEXT(ctx);
-   ASSERT_OUTSIDE_BEGIN_END(ctx);
 
    if (pname == GL_CURRENT_VERTEX_ATTRIB_ARB) {
       const GLuint *v = (const GLuint *)
@@ -772,10 +737,9 @@ _mesa_GetVertexAttribIuiv(GLuint index, GLenum pname, GLuint *params)
 
 
 void GLAPIENTRY
-_mesa_GetVertexAttribPointervARB(GLuint index, GLenum pname, GLvoid **pointer)
+_mesa_GetVertexAttribPointerv(GLuint index, GLenum pname, GLvoid **pointer)
 {
    GET_CURRENT_CONTEXT(ctx);
-   ASSERT_OUTSIDE_BEGIN_END(ctx);
 
    if (index >= ctx->Const.VertexProgram.MaxAttribs) {
       _mesa_error(ctx, GL_INVALID_VALUE, "glGetVertexAttribPointerARB(index)");
@@ -858,7 +822,7 @@ _mesa_InterleavedArrays(GLenum format, GLsizei stride, const GLvoid *pointer)
    GLint defstride;                /* default stride */
    GLint c, f;
 
-   ASSERT_OUTSIDE_BEGIN_END_AND_FLUSH(ctx);
+   FLUSH_VERTICES(ctx, 0);
 
    f = sizeof(GLfloat);
    c = f * ((4 * sizeof(GLubyte) + (f - 1)) / f);
@@ -1028,7 +992,8 @@ void GLAPIENTRY
 _mesa_LockArraysEXT(GLint first, GLsizei count)
 {
    GET_CURRENT_CONTEXT(ctx);
-   ASSERT_OUTSIDE_BEGIN_END_AND_FLUSH(ctx);
+
+   FLUSH_VERTICES(ctx, 0);
 
    if (MESA_VERBOSE & VERBOSE_API)
       _mesa_debug(ctx, "glLockArrays %d %d\n", first, count);
@@ -1057,7 +1022,8 @@ void GLAPIENTRY
 _mesa_UnlockArraysEXT( void )
 {
    GET_CURRENT_CONTEXT(ctx);
-   ASSERT_OUTSIDE_BEGIN_END_AND_FLUSH(ctx);
+
+   FLUSH_VERTICES(ctx, 0);
 
    if (MESA_VERBOSE & VERBOSE_API)
       _mesa_debug(ctx, "glUnlockArrays\n");
@@ -1075,13 +1041,13 @@ _mesa_UnlockArraysEXT( void )
 
 /* GL_EXT_multi_draw_arrays */
 void GLAPIENTRY
-_mesa_MultiDrawArraysEXT( GLenum mode, const GLint *first,
+_mesa_MultiDrawArrays( GLenum mode, const GLint *first,
                           const GLsizei *count, GLsizei primcount )
 {
    GET_CURRENT_CONTEXT(ctx);
    GLint i;
 
-   ASSERT_OUTSIDE_BEGIN_END_AND_FLUSH(ctx);
+   FLUSH_VERTICES(ctx, 0);
 
    for (i = 0; i < primcount; i++) {
       if (count[i] > 0) {
@@ -1100,7 +1066,7 @@ _mesa_MultiModeDrawArraysIBM( const GLenum * mode, const GLint * first,
    GET_CURRENT_CONTEXT(ctx);
    GLint i;
 
-   ASSERT_OUTSIDE_BEGIN_END_AND_FLUSH(ctx);
+   FLUSH_VERTICES(ctx, 0);
 
    for ( i = 0 ; i < primcount ; i++ ) {
       if ( count[i] > 0 ) {
@@ -1120,7 +1086,7 @@ _mesa_MultiModeDrawElementsIBM( const GLenum * mode, const GLsizei * count,
    GET_CURRENT_CONTEXT(ctx);
    GLint i;
 
-   ASSERT_OUTSIDE_BEGIN_END_AND_FLUSH(ctx);
+   FLUSH_VERTICES(ctx, 0);
 
    /* XXX not sure about ARB_vertex_buffer_object handling here */
 
@@ -1146,11 +1112,10 @@ _mesa_PrimitiveRestartIndex(GLuint index)
       return;
    }
 
-   ASSERT_OUTSIDE_BEGIN_END(ctx);
-
-   if (ctx->Array.RestartIndex != index) {
+   ctx->Array.RestartIndex = index;
+   if (ctx->Array.PrimitiveRestart && ctx->Array._RestartIndex != index) {
       FLUSH_VERTICES(ctx, _NEW_TRANSFORM);
-      ctx->Array.RestartIndex = index;
+      ctx->Array._RestartIndex = index;
    }
 }
 
@@ -1165,7 +1130,6 @@ _mesa_VertexAttribDivisor(GLuint index, GLuint divisor)
 {
    struct gl_client_array *array;
    GET_CURRENT_CONTEXT(ctx);
-   ASSERT_OUTSIDE_BEGIN_END(ctx);
 
    if (!ctx->Extensions.ARB_instanced_arrays) {
       _mesa_error(ctx, GL_INVALID_OPERATION, "glVertexAttribDivisor()");
@@ -1173,7 +1137,7 @@ _mesa_VertexAttribDivisor(GLuint index, GLuint divisor)
    }
 
    if (index >= ctx->Const.VertexProgram.MaxAttribs) {
-      _mesa_error(ctx, GL_INVALID_ENUM, "glVertexAttribDivisor(index = %u)",
+      _mesa_error(ctx, GL_INVALID_VALUE, "glVertexAttribDivisor(index = %u)",
                   index);
       return;
    }

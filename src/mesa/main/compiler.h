@@ -90,7 +90,7 @@ extern "C" {
 /**
  * Disable assorted warnings
  */
-#if !defined(OPENSTEP) && (defined(__WIN32__) && !defined(__CYGWIN__)) && !defined(BUILD_FOR_SNAP)
+#if !defined(OPENSTEP) && (defined(_WIN32) && !defined(__CYGWIN__)) && !defined(BUILD_FOR_SNAP)
 #  if !defined(__GNUC__) /* mingw environment */
 #    pragma warning( disable : 4068 ) /* unknown pragma */
 #    pragma warning( disable : 4710 ) /* function 'foo' not inlined */
@@ -161,17 +161,6 @@ extern "C" {
 
 
 /**
- * Some compilers don't like some of Mesa's const usage.  In those places use
- * CONST instead of const.  Pass -DNO_CONST to compilers where this matters.
- */
-#ifdef NO_CONST
-#  define CONST
-#else
-#  define CONST const
-#endif
-
-
-/**
  * __builtin_expect macros
  */
 #if !defined(__GNUC__)
@@ -194,9 +183,7 @@ extern "C" {
  * Don't define it if using a newer Windows compiler.
  */
 #ifndef __FUNCTION__
-# if defined(__VMS)
-#  define __FUNCTION__ "VMS$NL:"
-# elif !defined(__GNUC__) && !defined(__xlC__) &&	\
+# if !defined(__GNUC__) && !defined(__xlC__) &&	\
       (!defined(_MSC_VER) || _MSC_VER < 1300)
 #  if (__STDC_VERSION__ >= 199901L) /* C99 */ || \
     (defined(__SUNPRO_C) && defined(__C99FEATURES__))
@@ -257,7 +244,7 @@ static INLINE GLuint CPU_TO_LE32(GLuint x)
 
 
 
-#if !defined(CAPI) && defined(WIN32) && !defined(BUILD_FOR_SNAP)
+#if !defined(CAPI) && defined(_WIN32) && !defined(BUILD_FOR_SNAP)
 #define CAPI _cdecl
 #endif
 
@@ -267,7 +254,7 @@ static INLINE GLuint CPU_TO_LE32(GLuint x)
  * than GNU C
  */
 #ifndef _ASMAPI
-#if defined(WIN32) && !defined(BUILD_FOR_SNAP)/* was: !defined( __GNUC__ ) && !defined( VMS ) && !defined( __INTEL_COMPILER )*/
+#if defined(_WIN32) && !defined(BUILD_FOR_SNAP)/* was: !defined( __GNUC__ ) && !defined( VMS ) && !defined( __INTEL_COMPILER )*/
 #define _ASMAPI __cdecl
 #else
 #define _ASMAPI
@@ -374,7 +361,7 @@ static INLINE GLuint CPU_TO_LE32(GLuint x)
     defined(__arm__) || \
     defined(__sh__) || defined(__m32r__) || \
     (defined(__sun) && defined(_IEEE_754)) || \
-    (defined(__alpha__) && (defined(__IEEE_FLOAT) || !defined(VMS)))
+    (defined(__alpha__) && defined(__IEEE_FLOAT))
 #define USE_IEEE
 #define IEEE_ONE 0x3f800000
 #endif

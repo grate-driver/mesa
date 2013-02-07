@@ -207,8 +207,7 @@ the framebuffer to particular RGBA, depth, or stencil values.
 Currently, this does not take into account color or stencil write masks (as
 used by GL), and always clears the whole surfaces (no scissoring as used by
 GL clear or explicit rectangles like d3d9 uses). It can, however, also clear
-only depth or stencil in a combined depth/stencil surface, if the driver
-supports PIPE_CAP_DEPTHSTENCIL_CLEAR_SEPARATE.
+only depth or stencil in a combined depth/stencil surface.
 If a surface includes several layers then all layers will be cleared.
 
 ``clear_render_target`` clears a single color rendertarget with the specified
@@ -434,42 +433,35 @@ formats, i.e., formats for which copying the bytes from the source resource
 unmodified to the destination resource will achieve the same effect of a
 textured quad blitter.. The source and destination may be the same resource,
 but overlapping blits are not permitted.
+This can be considered the equivalent of a CPU memcpy.
 
-``resource_resolve`` resolves a multisampled resource into a non-multisampled
-one. Their formats must match. This function must be present if a driver
-supports multisampling.
-The region that is to be resolved is described by ``pipe_resolve_info``, which
-provides a source and a destination rectangle.
-The source rectangle may be vertically flipped, but otherwise the dimensions
-of the rectangles must match, unless PIPE_CAP_SCALED_RESOLVE is supported,
-in which case scaling and horizontal flipping are allowed as well.
-The result of resolving depth/stencil values may be any function of the values at
-the sample points, but returning the value of the centermost sample is preferred.
+``blit`` blits a region of a resource to a region of another resource, including
+scaling, format conversion, and up-/downsampling, as well as
+a destination clip rectangle (scissors).
+As opposed to manually drawing a textured quad, this lets the pipe driver choose
+the optimal method for blitting (like using a special 2D engine), and usually
+offers, for example, accelerated stencil-only copies even where
+PIPE_CAP_SHADER_STENCIL_EXPORT is not available.
 
-The interfaces to these calls are likely to change to make it easier
-for a driver to batch multiple blits with the same source and
-destination.
 
 Transfers
 ^^^^^^^^^
 
 These methods are used to get data to/from a resource.
 
-``get_transfer`` creates a transfer object.
+``transfer_map`` creates a memory mapping and the transfer object
+associated with it.
+The returned pointer points to the start of the mapped range according to
+the box region, not the beginning of the resource. If transfer_map fails,
+the returned pointer to the buffer memory is NULL, and the pointer
+to the transfer object remains unchanged (i.e. it can be non-NULL).
 
-``transfer_destroy`` destroys the transfer object. May cause
-data to be written to the resource at this point.
-
-``transfer_map`` creates a memory mapping for the transfer object.
-The returned map points to the start of the mapped range according to
-the box region, not the beginning of the resource.
-
-``transfer_unmap`` remove the memory mapping for the transfer object.
-Any pointers into the map should be considered invalid and discarded.
+``transfer_unmap`` remove the memory mapping for and destroy
+the transfer object. The pointer into the resource should be considered
+invalid and discarded.
 
 ``transfer_inline_write`` performs a simplified transfer for simple writes.
-Basically get_transfer, transfer_map, data write, transfer_unmap, and
-transfer_destroy all in one.
+Basically transfer_map, data write, and transfer_unmap all in one.
 
 
 The box parameter to some of these functions defines a 1D, 2D or 3D
@@ -499,7 +491,7 @@ the beginning of the resource.
 
 
 
-.. _texture_barrier
+.. _texture_barrier:
 
 texture_barrier
 %%%%%%%%%%%%%%%
@@ -520,7 +512,7 @@ These flags control the behavior of a transfer object.
   Resource contents read back (or accessed directly) at transfer create time.
 
 ``PIPE_TRANSFER_WRITE``
-  Resource contents will be written back at transfer_destroy time (or modified
+  Resource contents will be written back at transfer_unmap time (or modified
   as a result of being accessed directly).
 
 ``PIPE_TRANSFER_MAP_DIRECTLY``

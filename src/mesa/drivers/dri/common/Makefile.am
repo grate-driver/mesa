@@ -19,6 +19,8 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
 
+SUBDIRS = xmlpool
+
 AM_CFLAGS = \
 	-I$(top_srcdir)/include \
 	-I$(top_srcdir)/src/ \
@@ -29,11 +31,17 @@ AM_CFLAGS = \
 	$(LIBDRM_CFLAGS) \
 	$(VISIBILITY_CFLAGS)
 
-noinst_LTLIBRARIES = libdricommon.la
+noinst_LTLIBRARIES = \
+	libdricommon.la \
+	libdri_test_stubs.la
 
 libdricommon_la_SOURCES = \
 	utils.c \
 	dri_util.c \
 	xmlconfig.c
+
+libdri_test_stubs_la_SOURCES = \
+	dri_test.c
+libdri_test_stubs_la_CFLAGS = $(AM_CFLAGS) -DNO_MAIN
 
 sysconf_DATA = drirc

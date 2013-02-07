@@ -30,31 +30,13 @@ check-local:
 	$(MAKE) -C src/mapi/glapi/tests check
 	$(MAKE) -C src/mapi/shared-glapi/tests check
 	$(MAKE) -C src/mesa/main/tests check
-	$(MAKE) -C src/glsl/tests check
 	$(MAKE) -C src/glx/tests check
-
-clean-local:
-	-@touch $(top_builddir)/configs/current
-	-@for dir in $(SUBDIRS) ; do \
-		if [ -d $$dir ] ; then \
-			(cd $$dir && $(MAKE) clean) ; \
-		fi \
-	done
-	-@test -s $(top_builddir)/configs/current || rm -f $(top_builddir)/configs/current
-
-
-
-distclean-local:
-	-rm -rf lib*
-	-rm -f $(top_builddir)/configs/current
-	-find . '(' -name '*.o' -o -name '*.a' -o -name '*.so' -o \
-	  -name depend -o -name depend.bak ')' -exec rm -f '{}' ';'
 
 .PHONY: doxygen
 
 # Rules for making release tarballs
 
-PACKAGE_VERSION=9.0.2
+PACKAGE_VERSION=9.1-devel
 PACKAGE_DIR = Mesa-$(PACKAGE_VERSION)
 PACKAGE_NAME = MesaLib-$(PACKAGE_VERSION)
 
@@ -70,9 +52,9 @@ EXTRA_FILES = \
 	bin/ltmain.sh					\
 	bin/missing					\
 	bin/ylwrap					\
-	src/glsl/glsl_parser.cc				\
+	src/glsl/glsl_parser.cpp			\
 	src/glsl/glsl_parser.h				\
-	src/glsl/glsl_lexer.cc				\
+	src/glsl/glsl_lexer.cpp				\
 	src/glsl/glcpp/glcpp-lex.c			\
 	src/glsl/glcpp/glcpp-parse.c			\
 	src/glsl/glcpp/glcpp-parse.h			\
@@ -93,10 +75,8 @@ IGNORE_FILES = \
 
 
 parsers: configure
-	-@touch $(top_builddir)/configs/current
-	$(MAKE) -C src/glsl glsl_parser.cc glsl_parser.h glsl_lexer.cc
-	$(MAKE) -C src/glsl/glcpp glcpp-lex.c glcpp-parse.c glcpp-parse.h
-	$(MAKE) -C src/mesa program/lex.yy.c program/program_parse.tab.c program/program_parse.tab.h
+	$(MAKE) -C src/glsl glsl_parser.cpp glsl_parser.h glsl_lexer.cpp glcpp/glcpp-lex.c glcpp/glcpp-parse.c glcpp/glcpp-parse.h
+	$(MAKE) -C src/mesa/program lex.yy.c program_parse.tab.c program_parse.tab.h
 
 # Everything for new a Mesa release:
 ARCHIVES = $(PACKAGE_NAME).tar.gz \

@@ -270,7 +270,7 @@ void radeonAllocDmaRegion(radeonContextPtr rmesa,
 		fprintf(stderr, "%s %d\n", __FUNCTION__, bytes);
 
 	if (rmesa->dma.flush)
-		rmesa->dma.flush(rmesa->glCtx);
+		rmesa->dma.flush(&rmesa->glCtx);
 
 	assert(rmesa->dma.current_used == rmesa->dma.current_vertexptr);
 
@@ -302,19 +302,19 @@ void radeonFreeDmaRegions(radeonContextPtr rmesa)
 	foreach_s(dma_bo, temp, &rmesa->dma.free) {
 		remove_from_list(dma_bo);
 	        radeon_bo_unref(dma_bo->bo);
-		FREE(dma_bo);
+		free(dma_bo);
 	}
 
 	foreach_s(dma_bo, temp, &rmesa->dma.wait) {
 		remove_from_list(dma_bo);
 	        radeon_bo_unref(dma_bo->bo);
-		FREE(dma_bo);
+		free(dma_bo);
 	}
 
 	foreach_s(dma_bo, temp, &rmesa->dma.reserved) {
 		remove_from_list(dma_bo);
 	        radeon_bo_unref(dma_bo->bo);
-		FREE(dma_bo);
+		free(dma_bo);
 	}
 }
 
@@ -371,14 +371,14 @@ void radeonReleaseDmaRegions(radeonContextPtr rmesa)
 			WARN_ONCE("Leaking dma buffer object!\n");
 			radeon_bo_unref(dma_bo->bo);
 			remove_from_list(dma_bo);
-			FREE(dma_bo);
+			free(dma_bo);
 			continue;
 		}
 		/* free objects that are too small to be used because of large request */
 		if (dma_bo->bo->size < rmesa->dma.minimum_size) {
 		   radeon_bo_unref(dma_bo->bo);
 		   remove_from_list(dma_bo);
-		   FREE(dma_bo);
+		   free(dma_bo);
 		   continue;
 		}
 		if (!radeon_bo_is_idle(dma_bo->bo)) {
@@ -396,7 +396,7 @@ void radeonReleaseDmaRegions(radeonContextPtr rmesa)
 		if (dma_bo->bo->size < rmesa->dma.minimum_size) {
 		   radeon_bo_unref(dma_bo->bo);
 		   remove_from_list(dma_bo);
-		   FREE(dma_bo);
+		   free(dma_bo);
 		   continue;
 		}
 		remove_from_list(dma_bo);
@@ -410,7 +410,7 @@ void radeonReleaseDmaRegions(radeonContextPtr rmesa)
 			break;
 		remove_from_list(dma_bo);
 	        radeon_bo_unref(dma_bo->bo);
-		FREE(dma_bo);
+		free(dma_bo);
 	}
 
 }
@@ -459,7 +459,7 @@ rcommonAllocDmaLowVerts( radeonContextPtr rmesa, int nverts, int vsize )
 	if(is_empty_list(&rmesa->dma.reserved)
 	      ||rmesa->dma.current_vertexptr + bytes > first_elem(&rmesa->dma.reserved)->bo->size) {
 		if (rmesa->dma.flush) {
-			rmesa->dma.flush(rmesa->glCtx);
+			rmesa->dma.flush(&rmesa->glCtx);
 		}
 
                 radeonRefillCurrentDmaRegion(rmesa, bytes);
@@ -469,7 +469,7 @@ rcommonAllocDmaLowVerts( radeonContextPtr rmesa, int nverts, int vsize )
 
         if (!rmesa->dma.flush) {
 		/* if cmdbuf flushed DMA restart */
-                rmesa->glCtx->Driver.NeedFlush |= FLUSH_STORED_VERTICES;
+                rmesa->glCtx.Driver.NeedFlush |= FLUSH_STORED_VERTICES;
                 rmesa->dma.flush = rcommon_flush_last_swtcl_prim;
         }
 
@@ -499,7 +499,7 @@ void radeonReleaseArrays( struct gl_context *ctx, GLuint newinputs )
 		fprintf(stderr, "%s\n", __FUNCTION__);
 
    if (radeon->dma.flush) {
-       radeon->dma.flush(radeon->glCtx);
+       radeon->dma.flush(&radeon->glCtx);
    }
    for (i = 0; i < radeon->tcl.aos_count; i++) {
       if (radeon->tcl.aos[i].bo) {

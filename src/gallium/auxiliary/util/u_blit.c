@@ -133,7 +133,7 @@ util_create_blit(struct pipe_context *pipe, struct cso_context *cso)
    for (i = 0; i < 2; i++) {
       ctx->velem[i].src_offset = i * 4 * sizeof(float);
       ctx->velem[i].instance_divisor = 0;
-      ctx->velem[i].vertex_buffer_index = 0;
+      ctx->velem[i].vertex_buffer_index = cso_get_aux_vertex_buffer_slot(cso);
       ctx->velem[i].src_format = PIPE_FORMAT_R32G32B32A32_FLOAT;
    }
 
@@ -665,7 +665,8 @@ util_blit_pixels(struct blit_state *ctx,
    cso_save_vertex_shader(ctx->cso);
    cso_save_geometry_shader(ctx->cso);
    cso_save_vertex_elements(ctx->cso);
-   cso_save_vertex_buffers(ctx->cso);
+   cso_save_aux_vertex_buffer_slot(ctx->cso);
+   cso_save_render_condition(ctx->cso);
 
    /* set misc state we care about */
    if (writemask)
@@ -677,6 +678,7 @@ util_blit_pixels(struct blit_state *ctx,
    cso_set_rasterizer(ctx->cso, &ctx->rasterizer);
    cso_set_vertex_elements(ctx->cso, 2, ctx->velem);
    cso_set_stream_outputs(ctx->cso, 0, NULL, 0);
+   cso_set_render_condition(ctx->cso, NULL, 0);
 
    /* default sampler state */
    ctx->sampler.normalized_coords = normalized;
@@ -776,7 +778,9 @@ util_blit_pixels(struct blit_state *ctx,
                                   z);
 
    if (ctx->vbuf) {
-      util_draw_vertex_buffer(ctx->pipe, ctx->cso, ctx->vbuf, offset,
+      util_draw_vertex_buffer(ctx->pipe, ctx->cso, ctx->vbuf,
+                              cso_get_aux_vertex_buffer_slot(ctx->cso),
+                              offset,
                               PIPE_PRIM_TRIANGLE_FAN,
                               4,  /* verts */
                               2); /* attribs/vert */
@@ -795,8 +799,9 @@ util_blit_pixels(struct blit_state *ctx,
    cso_restore_vertex_shader(ctx->cso);
    cso_restore_geometry_shader(ctx->cso);
    cso_restore_vertex_elements(ctx->cso);
-   cso_restore_vertex_buffers(ctx->cso);
+   cso_restore_aux_vertex_buffer_slot(ctx->cso);
    cso_restore_stream_outputs(ctx->cso);
+   cso_restore_render_condition(ctx->cso);
 
    pipe_sampler_view_reference(&sampler_view, NULL);
    if (dst_surface != dst)
@@ -869,7 +874,7 @@ util_blit_pixels_tex(struct blit_state *ctx,
    cso_save_vertex_shader(ctx->cso);
    cso_save_geometry_shader(ctx->cso);
    cso_save_vertex_elements(ctx->cso);
-   cso_save_vertex_buffers(ctx->cso);
+   cso_save_aux_vertex_buffer_slot(ctx->cso);
 
    /* set misc state we care about */
    cso_set_blend(ctx->cso, &ctx->blend_write_color);
@@ -923,8 +928,9 @@ util_blit_pixels_tex(struct blit_state *ctx,
                                   s0, t0, s1, t1,
                                   z);
 
-   util_draw_vertex_buffer(ctx->pipe, ctx->cso,
-                           ctx->vbuf, offset,
+   util_draw_vertex_buffer(ctx->pipe, ctx->cso, ctx->vbuf,
+                           cso_get_aux_vertex_buffer_slot(ctx->cso),
+                           offset,
                            PIPE_PRIM_TRIANGLE_FAN,
                            4,  /* verts */
                            2); /* attribs/vert */
@@ -942,6 +948,6 @@ util_blit_pixels_tex(struct blit_state *ctx,
    cso_restore_vertex_shader(ctx->cso);
    cso_restore_geometry_shader(ctx->cso);
    cso_restore_vertex_elements(ctx->cso);
-   cso_restore_vertex_buffers(ctx->cso);
+   cso_restore_aux_vertex_buffer_slot(ctx->cso);
    cso_restore_stream_outputs(ctx->cso);
 }

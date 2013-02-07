@@ -39,7 +39,7 @@ enum pipe_error
 svga_swtnl_draw_vbo(struct svga_context *svga,
                     const struct pipe_draw_info *info)
 {
-   struct pipe_transfer *vb_transfer[PIPE_MAX_ATTRIBS];
+   struct pipe_transfer *vb_transfer[PIPE_MAX_ATTRIBS] = { 0 };
    struct pipe_transfer *ib_transfer = NULL;
    struct pipe_transfer *cb_transfer = NULL;
    struct draw_context *draw = svga->swtnl.draw;
@@ -154,6 +154,13 @@ boolean svga_init_swtnl( struct svga_context *svga )
 
    draw_set_render(svga->swtnl.draw, svga->swtnl.backend);
 
+   svga->blitter = util_blitter_create(&svga->pipe);
+   if (!svga->blitter)
+      goto fail;
+
+   /* must be done before installing Draw stages */
+   util_blitter_cache_all_shaders(svga->blitter);
+
    draw_install_aaline_stage(svga->swtnl.draw, &svga->pipe);
    draw_install_aapoint_stage(svga->swtnl.draw, &svga->pipe);
    draw_install_pstipple_stage(svga->swtnl.draw, &svga->pipe);
@@ -164,6 +171,9 @@ boolean svga_init_swtnl( struct svga_context *svga )
    return TRUE;
 
 fail:
+   if (svga->blitter)
+      util_blitter_destroy(svga->blitter);
+
    if (svga->swtnl.backend)
       svga->swtnl.backend->destroy( svga->swtnl.backend );
 

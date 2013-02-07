@@ -34,9 +34,6 @@
 #include "cso_cache/cso_context.h"
 
 
-#if FEATURE_OES_draw_texture
-
-
 struct cached_shader
 {
    void *handle;
@@ -151,10 +148,9 @@ st_DrawTex(struct gl_context *ctx, GLfloat x, GLfloat y, GLfloat z,
       GLfloat *vbuf = NULL;
       GLuint attr;
 
-      u_upload_alloc(st->uploader, 0,
-		     numAttribs * 4 * 4 * sizeof(GLfloat),
-		     &offset, &vbuffer, (void**)&vbuf);
-      if (!vbuffer) {
+      if (u_upload_alloc(st->uploader, 0,
+                         numAttribs * 4 * 4 * sizeof(GLfloat),
+                         &offset, &vbuffer, (void **) &vbuf) != PIPE_OK) {
          return;
       }
       
@@ -231,7 +227,7 @@ st_DrawTex(struct gl_context *ctx, GLfloat x, GLfloat y, GLfloat z,
    cso_save_vertex_shader(cso);
    cso_save_geometry_shader(cso);
    cso_save_vertex_elements(cso);
-   cso_save_vertex_buffers(cso);
+   cso_save_aux_vertex_buffer_slot(cso);
 
    {
       void *vs = lookup_shader(pipe, numAttribs,
@@ -269,6 +265,7 @@ st_DrawTex(struct gl_context *ctx, GLfloat x, GLfloat y, GLfloat z,
 
 
    util_draw_vertex_buffer(pipe, cso, vbuffer,
+			   cso_get_aux_vertex_buffer_slot(cso),
                            offset,  /* offset */
                            PIPE_PRIM_TRIANGLE_FAN,
                            4,  /* verts */
@@ -282,7 +279,7 @@ st_DrawTex(struct gl_context *ctx, GLfloat x, GLfloat y, GLfloat z,
    cso_restore_vertex_shader(cso);
    cso_restore_geometry_shader(cso);
    cso_restore_vertex_elements(cso);
-   cso_restore_vertex_buffers(cso);
+   cso_restore_aux_vertex_buffer_slot(cso);
    cso_restore_stream_outputs(cso);
 }
 
@@ -306,6 +303,3 @@ st_destroy_drawtex(struct st_context *st)
    }
    NumCachedShaders = 0;
 }
-
-
-#endif /* FEATURE_OES_draw_texture */

@@ -197,10 +197,13 @@ struct intel_mipmap_tree
     * MESA_FORMAT_Z32_FLOAT, otherwise for MESA_FORMAT_S8_Z24 objects it will be
     * MESA_FORMAT_X8_Z24.
     *
-    * For ETC1 textures, this is MESA_FORMAT_RGBX8888_REV if the hardware
-    * lacks support for ETC1. See @ref wraps_etc1.
+    * For ETC1/ETC2 textures, this is one of the uncompressed mesa texture
+    * formats if the hardware lacks support for ETC1/ETC2. See @ref wraps_etc.
     */
    gl_format format;
+
+   /** This variable stores the value of ETC compressed texture format */
+   gl_format etc_format;
 
    /**
     * The X offset of each image in the miptree must be aligned to this. See
@@ -212,22 +215,29 @@ struct intel_mipmap_tree
    GLuint first_level;
    GLuint last_level;
 
-   GLuint width0, height0, depth0; /**< Level zero image dimensions */
+   /**
+    * Level zero image dimensions.  These dimensions correspond to the
+    * physical layout of data in memory.  Accordingly, they account for the
+    * extra width, height, and or depth that must be allocated in order to
+    * accommodate multisample formats, and they account for the extra factor
+    * of 6 in depth that must be allocated in order to accommodate cubemap
+    * textures.
+    */
+   GLuint physical_width0, physical_height0, physical_depth0;
+
    GLuint cpp;
    GLuint num_samples;
    bool compressed;
 
    /**
-    * If num_samples > 0, then singlesample_width0 is the value that width0
-    * would have if instead a singlesample miptree were created. Note that,
-    * for non-interleaved msaa layouts, the two values are the same.
-    *
-    * If num_samples == 0, then singlesample_width0 is undefined.
+    * Level zero image dimensions.  These dimensions correspond to the
+    * logical width, height, and depth of the region as seen by client code.
+    * Accordingly, they do not account for the extra width, height, and/or
+    * depth that must be allocated in order to accommodate multisample
+    * formats, nor do they account for the extra factor of 6 in depth that
+    * must be allocated in order to accommodate cubemap textures.
     */
-   uint32_t singlesample_width0;
-
-   /** \see singlesample_width0 */
-   uint32_t singlesample_height0;
+   uint32_t logical_width0, logical_height0, logical_depth0;
 
    /**
     * For 1D array, 2D array, cube, and 2D multisampled surfaces on Gen7: true
@@ -351,16 +361,18 @@ struct intel_mipmap_tree
    struct intel_mipmap_tree *mcs_mt;
 
    /**
-    * \brief The miptree contains RGBX data that was originally ETC1 data.
+    * \brief The miptree contains uncompressed data that was originally
+    * ETC1/ETC2 data.
     *
-    * On hardware that lacks support for ETC1 textures, we do the
-    * following on calls to glCompressedTexImage2D(GL_ETC1_RGB8_OES):
-    *   1. Create a miptree whose format is MESA_FORMAT_RGBX8888_REV with
-    *      the wraps_etc1 flag set.
-    *   2. Translate the ETC1 data into RGBX.
-    *   3. Store the RGBX data into the miptree and discard the ETC1 data.
+    * On hardware that lacks support for ETC1/ETC2 textures, we do the following
+    * on calls to glCompressedTexImage2D() with an ETC1/ETC2 texture format:
+    *   1. Create a miptree whose format is a suitable uncompressed mesa format
+    *      with the wraps_etc flag set.
+    *   2. Translate the ETC1/ETC2 data into uncompressed mesa format.
+    *   3. Store the uncompressed  data into the miptree and discard the ETC1/ETC2
+    *      data.
     */
-   bool wraps_etc1;
+   bool wraps_etc;
 
    /* These are also refcounted:
     */
@@ -379,7 +391,7 @@ struct intel_mipmap_tree *intel_miptree_create(struct intel_context *intel,
                                                GLuint depth0,
 					       bool expect_accelerated_upload,
                                                GLuint num_samples,
-                                               enum intel_msaa_layout msaa_layout);
+                                               bool force_y_tiling);
 
 struct intel_mipmap_tree *
 intel_miptree_create_for_region(struct intel_context *intel,
@@ -436,7 +448,7 @@ bool intel_miptree_match_image(struct intel_mipmap_tree *mt,
 
 void
 intel_miptree_get_image_offset(struct intel_mipmap_tree *mt,
-			       GLuint level, GLuint face, GLuint depth,
+			       GLuint level, GLuint slice,
 			       GLuint *x, GLuint *y);
 
 void
@@ -513,11 +525,6 @@ void
 intel_miptree_slice_set_needs_depth_resolve(struct intel_mipmap_tree *mt,
                                             uint32_t level,
 					    uint32_t depth);
-void
-intel_miptree_all_slices_set_need_hiz_resolve(struct intel_mipmap_tree *mt);
-
-void
-intel_miptree_all_slices_set_need_depth_resolve(struct intel_mipmap_tree *mt);
 
 /**
  * \return false if no resolve was needed

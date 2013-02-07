@@ -121,7 +121,7 @@ draw_pt_arrays(struct draw_context *draw,
          /* Flush draw state if eltSize changed.
           * This could be improved so only the frontend is flushed since it
           * converts all indices to ushorts and the fetch part of the middle
-          * always perpares both linear and indexed.
+          * always prepares both linear and indexed.
           */
          frontend->flush( frontend, DRAW_FLUSH_STATE_CHANGE );
          frontend = NULL;
@@ -139,6 +139,12 @@ draw_pt_arrays(struct draw_context *draw,
       draw->pt.opt = opt;
    }
 
+   if (draw->pt.rebind_parameters) {
+      /* update constants, viewport dims, clip planes, etc */
+      middle->bind_parameters(middle);
+      draw->pt.rebind_parameters = FALSE;
+   }
+
    frontend->run( frontend, start, count );
 
    return TRUE;
@@ -146,12 +152,18 @@ draw_pt_arrays(struct draw_context *draw,
 
 void draw_pt_flush( struct draw_context *draw, unsigned flags )
 {
+   assert(flags);
+
    if (draw->pt.frontend) {
       draw->pt.frontend->flush( draw->pt.frontend, flags );
 
       /* don't prepare if we only are flushing the backend */
-      if (!(flags & DRAW_FLUSH_BACKEND))
+      if (flags & DRAW_FLUSH_STATE_CHANGE)
          draw->pt.frontend = NULL;
+   }
+
+   if (flags & DRAW_FLUSH_PARAMETER_CHANGE) {
+      draw->pt.rebind_parameters = TRUE;
    }
 }
 
@@ -443,9 +455,8 @@ draw_arrays_instanced(struct draw_context *draw,
 /**
  * Draw vertex arrays.
  * This is the main entrypoint into the drawing module.  If drawing an indexed
- * primitive, the draw_set_index_buffer() and draw_set_mapped_index_buffer()
- * functions should have already been called to specify the element/index
- * buffer information.
+ * primitive, the draw_set_indexes() function should have already been called
+ * to specify the element/index buffer information.
  */
 void
 draw_vbo(struct draw_context *draw,
@@ -453,7 +464,7 @@ draw_vbo(struct draw_context *draw,
 {
    unsigned instance;
    unsigned index_limit;
-
+   unsigned count;
    assert(info->instance_count > 0);
    if (info->indexed)
       assert(draw->pt.user.elts);
@@ -507,6 +518,11 @@ draw_vbo(struct draw_context *draw,
 
    draw->pt.max_index = index_limit - 1;
 
+   count = info->count;
+   if (count == 0) {
+      if (info->count_from_stream_output)
+         count = draw->pt.max_index + 1;
+   }
 
    /*
     * TODO: We could use draw->pt.max_index to further narrow
@@ -520,7 +536,7 @@ draw_vbo(struct draw_context *draw,
          draw_pt_arrays_restart(draw, info);
       }
       else {
-         draw_pt_arrays(draw, info->mode, info->start, info->count);
+         draw_pt_arrays(draw, info->mode, info->start, count);
       }
    }
 }

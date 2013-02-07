@@ -130,6 +130,7 @@ static void set_vertices( void )
    handle = ctx->create_vertex_elements_state(ctx, 3, ve);
    ctx->bind_vertex_elements_state(ctx, handle);
 
+   memset(&vbuf, 0, sizeof vbuf);
 
    /* vertex data */
    vbuf[0].stride = sizeof( struct vertex );
@@ -149,7 +150,7 @@ static void set_vertices( void )
                                                  sizeof(inst_data),
                                                  inst_data);
 
-   ctx->set_vertex_buffers(ctx, 2, vbuf);
+   ctx->set_vertex_buffers(ctx, 0, 2, vbuf);
 
    /* index data */
    ibuf.buffer = pipe_buffer_create_with_data(ctx,
@@ -214,7 +215,7 @@ static void draw( void )
 
    ctx->draw_vbo(ctx, &info);
 
-   ctx->flush(ctx, NULL);
+   ctx->flush(ctx, NULL, 0);
 
    graw_save_surface_to_file(ctx, surf, NULL);
 
@@ -268,7 +269,6 @@ static void init( void )
       exit(4);
 
    surf_tmpl.format = templat.format;
-   surf_tmpl.usage = PIPE_BIND_RENDER_TARGET;
    surf_tmpl.u.tex.level = 0;
    surf_tmpl.u.tex.first_layer = 0;
    surf_tmpl.u.tex.last_layer = 0;

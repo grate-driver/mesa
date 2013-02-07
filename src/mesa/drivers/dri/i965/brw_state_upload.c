@@ -179,7 +179,7 @@ static const struct brw_tracked_state *gen6_atoms[] =
    &brw_vertices,
 };
 
-const struct brw_tracked_state *gen7_atoms[] =
+static const struct brw_tracked_state *gen7_atoms[] =
 {
    &brw_wm_input_sizes,
    &brw_vs_prog,
@@ -246,6 +246,8 @@ const struct brw_tracked_state *gen7_atoms[] =
    &brw_indices,
    &brw_index_buffer,
    &brw_vertices,
+
+   &haswell_cut_index,
 };
 
 

@@ -158,6 +158,7 @@ enum st_context_resource_type {
  * Flush flags.
  */
 #define ST_FLUSH_FRONT                    (1 << 0)
+#define ST_FLUSH_END_OF_FRAME             (1 << 1)
 
 /**
  * Value to st_manager->get_param function.
@@ -250,8 +251,7 @@ struct st_context_attribs
     * The profile and minimal version to support.
     *
     * The valid profiles and versions are rendering API dependent.  The latest
-    * version satisfying the request should be returned, unless the
-    * ST_CONTEXT_FLAG_FORWARD_COMPATIBLE bit is set.
+    * version satisfying the request should be returned.
     */
    enum st_profile_type profile;
    int major, minor;
@@ -269,6 +269,8 @@ struct st_context_attribs
     */
    struct st_config_options options;
 };
+
+struct st_context_iface;
 
 /**
  * Represent a windowing system drawable.
@@ -314,7 +316,8 @@ struct st_framebuffer_iface
     *
     * @att is one of the front buffer attachments.
     */
-   boolean (*flush_front)(struct st_framebuffer_iface *stfbi,
+   boolean (*flush_front)(struct st_context_iface *stctx,
+                          struct st_framebuffer_iface *stfbi,
                           enum st_attachment_type statt);
 
    /**
@@ -352,6 +355,17 @@ struct st_context_iface
     */
    void *st_context_private;
    void *st_manager_private;
+
+   /**
+    * The CSO context associated with this context in case we need to draw
+    * something before swap buffers.
+    */
+   struct cso_context *cso_context;
+
+   /**
+    * The gallium context.
+    */
+   struct pipe_context *pipe;
 
    /**
     * Destroy the context.

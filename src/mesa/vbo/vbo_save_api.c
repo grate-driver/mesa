@@ -84,9 +84,6 @@ USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "vbo_noop.h"
 
 
-#if FEATURE_dlist
-
-
 #ifdef ERROR
 #undef ERROR
 #endif
@@ -233,7 +230,7 @@ free_vertex_store(struct gl_context *ctx,
       _mesa_reference_buffer_object(ctx, &vertex_store->bufferobj, NULL);
    }
 
-   FREE(vertex_store);
+   free(vertex_store);
 }
 
 
@@ -354,7 +351,7 @@ _save_compile_vertex_list(struct gl_context *ctx)
          /* If the malloc fails, we just pull the data out of the VBO
           * later instead.
           */
-         node->current_data = MALLOC(node->current_size * sizeof(GLfloat));
+         node->current_data = malloc(node->current_size * sizeof(GLfloat));
          if (node->current_data) {
             const char *buffer = (const char *) save->vertex_store->buffer;
             unsigned attr_offset = node->attrsz[0] * sizeof(GLfloat);
@@ -1579,12 +1576,10 @@ vbo_destroy_vertex_list(struct gl_context *ctx, void *data)
       free_vertex_store(ctx, node->vertex_store);
 
    if (--node->prim_store->refcount == 0)
-      FREE(node->prim_store);
+      free(node->prim_store);
 
-   if (node->current_data) {
-      FREE(node->current_data);
-      node->current_data = NULL;
-   }
+   free(node->current_data);
+   node->current_data = NULL;
 }
 
 
@@ -1672,8 +1667,4 @@ vbo_save_api_init(struct vbo_save_context *save)
    ctx->ListState.ListVtxfmt.DrawRangeElements = _save_OBE_DrawRangeElements;
    ctx->ListState.ListVtxfmt.MultiDrawElementsEXT = _save_OBE_MultiDrawElements;
    ctx->ListState.ListVtxfmt.MultiDrawElementsBaseVertex = _save_OBE_MultiDrawElementsBaseVertex;
-   _mesa_install_save_vtxfmt(ctx, &ctx->ListState.ListVtxfmt);
 }
-
-
-#endif /* FEATURE_dlist */

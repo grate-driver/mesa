@@ -140,12 +140,6 @@ intel_create_wrapped_renderbuffer(struct gl_context * ctx,
 				  int width, int height,
 				  gl_format format);
 
-GLboolean
-intel_alloc_renderbuffer_storage(struct gl_context * ctx,
-				 struct gl_renderbuffer *rb,
-                                 GLenum internalFormat,
-                                 GLuint width, GLuint height);
-
 extern void
 intel_fbo_init(struct intel_context *intel);
 
@@ -155,11 +149,6 @@ intel_flip_renderbuffers(struct gl_framebuffer *fb);
 
 void
 intel_renderbuffer_set_draw_offset(struct intel_renderbuffer *irb);
-
-void
-intel_renderbuffer_fine_offset_masks(struct intel_renderbuffer *irb,
-                                     uint32_t *fine_offset_mask_x,
-                                     uint32_t *fine_offset_mask_y);
 
 uint32_t
 intel_renderbuffer_tile_offsets(struct intel_renderbuffer *irb,
@@ -202,6 +191,9 @@ intel_renderbuffer_resolve_hiz(struct intel_context *intel,
 bool
 intel_renderbuffer_resolve_depth(struct intel_context *intel,
 				 struct intel_renderbuffer *irb);
+
+void intel_renderbuffer_move_to_temp(struct intel_context *intel,
+                                     struct intel_renderbuffer *irb);
 
 unsigned
 intel_quantize_num_samples(struct intel_screen *intel, unsigned num_samples);

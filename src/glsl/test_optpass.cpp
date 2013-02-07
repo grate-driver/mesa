@@ -197,7 +197,7 @@ int test_optpass(int argc, char **argv)
 
    struct gl_context local_ctx;
    struct gl_context *ctx = &local_ctx;
-   initialize_context_to_defaults(ctx, API_OPENGL);
+   initialize_context_to_defaults(ctx, API_OPENGL_COMPAT);
 
    ctx->Driver.NewShader = _mesa_new_shader;
 
@@ -217,7 +217,7 @@ int test_optpass(int argc, char **argv)
       shader->Source = input.c_str();
       const char *source = shader->Source;
       state->error = glcpp_preprocess(state, &source, &state->info_log,
-                                state->extensions, ctx->API) != 0;
+                                state->extensions, ctx) != 0;
 
       if (!state->error) {
          _mesa_glsl_lexer_ctor(state, source);

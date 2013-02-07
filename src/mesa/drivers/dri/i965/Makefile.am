@@ -23,8 +23,7 @@
 
 include Makefile.sources
 
-# Hack to make some of the non-automake variables work.
-TOP=$(top_builddir)
+if HAVE_I965_DRI
 
 AM_CFLAGS = \
 	-I$(top_srcdir)/include \
@@ -34,6 +33,8 @@ AM_CFLAGS = \
 	-I$(top_srcdir)/src/mesa/drivers/dri/common \
 	-I$(top_srcdir)/src/mesa/drivers/dri/intel \
 	-I$(top_srcdir)/src/mesa/drivers/dri/intel/server \
+	-I$(top_srcdir)/src/gtest/include \
+	-I$(top_builddir)/src/mesa/drivers/dri/common \
 	$(DEFINES) \
 	$(API_DEFINES) \
 	$(VISIBILITY_CFLAGS) \
@@ -43,22 +44,47 @@ AM_CXXFLAGS = $(AM_CFLAGS)
 
 dridir = $(DRI_DRIVER_INSTALL_DIR)
 
-if HAVE_I965_DRI
+noinst_LTLIBRARIES = libi965_dri.la
 dri_LTLIBRARIES = i965_dri.la
-endif
 
-i965_dri_la_SOURCES = \
-	$(i965_C_FILES) \
-	$(i965_CXX_FILES)
+libi965_dri_la_SOURCES = $(i965_FILES)
 
-i965_dri_la_LDFLAGS = -module -avoid-version -shared
-i965_dri_la_LIBADD = \
+# list of libs to be linked against by i965_dri.so and i965 test programs.
+COMMON_LIBS = \
+	libi965_dri.la \
 	../common/libdricommon.la \
 	$(DRI_LIB_DEPS) \
 	$(INTEL_LIBS)
+
+TEST_LIBS = \
+	$(COMMON_LIBS) \
+        -lrt \
+	../common/libdri_test_stubs.la
+
+i965_dri_la_SOURCES =
+i965_dri_la_LIBADD = $(COMMON_LIBS)
+i965_dri_la_LDFLAGS = -module -avoid-version -shared
+
+TESTS = \
+        test_eu_compact \
+        test_vec4_register_coalesce
+check_PROGRAMS = $(TESTS)
+
+test_vec4_register_coalesce_SOURCES = \
+	test_vec4_register_coalesce.cpp
+test_vec4_register_coalesce_LDADD = \
+        $(TEST_LIBS) \
+        $(top_builddir)/src/gtest/libgtest.la
+
+test_eu_compact_SOURCES = \
+	test_eu_compact.c
+nodist_EXTRA_test_eu_compact_SOURCES = dummy.cpp
+test_eu_compact_LDADD = $(TEST_LIBS)
 
 # Provide compatibility with scripts for the old Mesa build system for
 # a while by putting a link to the driver into /lib of the build tree.
 all-local: i965_dri.la
 	$(MKDIR_P) $(top_builddir)/$(LIB_DIR);
 	ln -f .libs/i965_dri.so $(top_builddir)/$(LIB_DIR)/i965_dri.so;
+
+endif

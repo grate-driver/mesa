@@ -325,11 +325,11 @@ public:
    void *mem_ctx;
 };
 
-src_reg undef_src = src_reg(PROGRAM_UNDEFINED, 0, NULL);
+static src_reg undef_src = src_reg(PROGRAM_UNDEFINED, 0, NULL);
 
-dst_reg undef_dst = dst_reg(PROGRAM_UNDEFINED, SWIZZLE_NOOP);
+static dst_reg undef_dst = dst_reg(PROGRAM_UNDEFINED, SWIZZLE_NOOP);
 
-dst_reg address_reg = dst_reg(PROGRAM_ADDRESS, WRITEMASK_X);
+static dst_reg address_reg = dst_reg(PROGRAM_ADDRESS, WRITEMASK_X);
 
 static int
 swizzle_for_size(int size)
@@ -623,10 +623,14 @@ type_size(const struct glsl_type *type)
        * at link time.
        */
       return 1;
-   default:
-      assert(0);
-      return 0;
+   case GLSL_TYPE_VOID:
+   case GLSL_TYPE_ERROR:
+   case GLSL_TYPE_INTERFACE:
+      assert(!"Invalid type in type_size");
+      break;
    }
+
+   return 0;
 }
 
 /**
@@ -1427,7 +1431,21 @@ ir_to_mesa_visitor::visit(ir_expression *ir)
    case ir_unop_fract:
       emit(ir, OPCODE_FRC, result_dst, op[0]);
       break;
-
+   case ir_unop_pack_snorm_2x16:
+   case ir_unop_pack_snorm_4x8:
+   case ir_unop_pack_unorm_2x16:
+   case ir_unop_pack_unorm_4x8:
+   case ir_unop_pack_half_2x16:
+   case ir_unop_unpack_snorm_2x16:
+   case ir_unop_unpack_snorm_4x8:
+   case ir_unop_unpack_unorm_2x16:
+   case ir_unop_unpack_unorm_4x8:
+   case ir_unop_unpack_half_2x16:
+   case ir_unop_unpack_half_2x16_split_x:
+   case ir_unop_unpack_half_2x16_split_y:
+   case ir_binop_pack_half_2x16_split:
+      assert(!"not supported");
+      break;
    case ir_binop_min:
       emit(ir, OPCODE_MIN, result_dst, op[0], op[1]);
       break;
@@ -1529,21 +1547,18 @@ ir_to_mesa_visitor::visit(ir_dereference_variable *ir)
 					       var->location);
 	 this->variables.push_tail(entry);
 	 break;
-      case ir_var_in:
-      case ir_var_inout:
+      case ir_var_shader_in:
 	 /* The linker assigns locations for varyings and attributes,
 	  * including deprecated builtins (like gl_Color),
 	  * user-assigned generic attributes (glBindVertexLocation),
 	  * and user-defined varyings.
-	  *
-	  * FINISHME: We would hit this path for function arguments.  Fix!
 	  */
 	 assert(var->location != -1);
          entry = new(mem_ctx) variable_storage(var,
                                                PROGRAM_INPUT,
                                                var->location);
          break;
-      case ir_var_out:
+      case ir_var_shader_out:
 	 assert(var->location != -1);
          entry = new(mem_ctx) variable_storage(var,
                                                PROGRAM_OUTPUT,
@@ -2378,7 +2393,8 @@ public:
    }
 
 private:
-   virtual void visit_field(const glsl_type *type, const char *name);
+   virtual void visit_field(const glsl_type *type, const char *name,
+                            bool row_major);
 
    struct gl_shader_program *shader_program;
    struct gl_program_parameter_list *params;
@@ -2386,9 +2402,12 @@ private:
 };
 
 void
-add_uniform_to_shader::visit_field(const glsl_type *type, const char *name)
+add_uniform_to_shader::visit_field(const glsl_type *type, const char *name,
+                                   bool row_major)
 {
    unsigned int size;
+
+   (void) row_major;
 
    if (type->is_vector() || type->is_scalar()) {
       size = type->vector_elements;
@@ -2407,7 +2426,7 @@ add_uniform_to_shader::visit_field(const glsl_type *type, const char *name)
    int index = _mesa_lookup_parameter_index(params, -1, name);
    if (index < 0) {
       index = _mesa_add_parameter(params, file, name, size, type->gl_type,
-				  NULL, NULL, 0x0);
+				  NULL, NULL);
 
       /* Sampler uniform values are stored in prog->SamplerUnits,
        * and the entry in that array is selected by this index we
@@ -2459,7 +2478,7 @@ _mesa_generate_parameters_list_for_uniforms(struct gl_shader_program
       ir_variable *var = ((ir_instruction *) node)->as_variable();
 
       if ((var == NULL) || (var->mode != ir_var_uniform)
-	  || var->uniform_block != -1 || (strncmp(var->name, "gl_", 3) == 0))
+	  || var->is_in_uniform_block() || (strncmp(var->name, "gl_", 3) == 0))
 	 continue;
 
       add.process(var);
@@ -2522,7 +2541,11 @@ _mesa_associate_uniform_storage(struct gl_context *ctx,
 	    format = uniform_native;
 	    columns = 1;
 	    break;
-	 default:
+         case GLSL_TYPE_ARRAY:
+         case GLSL_TYPE_VOID:
+         case GLSL_TYPE_STRUCT:
+         case GLSL_TYPE_ERROR:
+         case GLSL_TYPE_INTERFACE:
 	    assert(!"Should not get here.");
 	    break;
 	 }
@@ -3061,7 +3084,7 @@ _mesa_glsl_compile_shader(struct gl_context *ctx, struct gl_shader *shader)
    }
 
    state->error = glcpp_preprocess(state, &source, &state->info_log,
-			     &ctx->Extensions, ctx->API);
+			     &ctx->Extensions, ctx);
 
    if (ctx->Shader.Flags & GLSL_DUMP) {
       printf("GLSL source for %s shader %d:\n",

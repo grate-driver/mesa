@@ -27,8 +27,10 @@
 #include "pipe/p_shader_tokens.h"
 #include "util/u_blitter.h"
 #include "util/u_format_s3tc.h"
+#include "util/u_memory.h"
 #include "util/u_simple_shaders.h"
 #include "util/u_upload_mgr.h"
+#include "util/u_math.h"
 #include "vl/vl_decoder.h"
 #include "vl/vl_video_buffer.h"
 #include "os/os_time.h"
@@ -52,9 +54,7 @@ static struct r600_fence *r600_create_fence(struct r600_context *rctx)
 			R600_ERR("r600: failed to create bo for fence objects\n");
 			goto out;
 		}
-		rscreen->fences.data = rctx->ws->buffer_map(rscreen->fences.bo->cs_buf,
-							   rctx->cs,
-							   PIPE_TRANSFER_READ_WRITE);
+		rscreen->fences.data = r600_buffer_mmap_sync_with_rings(rctx, rscreen->fences.bo, PIPE_TRANSFER_READ_WRITE);
 	}
 
 	if (!LIST_IS_EMPTY(&rscreen->fences.pool)) {
@@ -107,25 +107,20 @@ static struct r600_fence *r600_create_fence(struct r600_context *rctx)
 			pipe_buffer_create(&rctx->screen->screen, PIPE_BIND_CUSTOM,
 					   PIPE_USAGE_STAGING, 1);
 	/* Add the fence as a dummy relocation. */
-	r600_context_bo_reloc(rctx, fence->sleep_bo, RADEON_USAGE_READWRITE);
+	r600_context_bo_reloc(rctx, &rctx->rings.gfx, fence->sleep_bo, RADEON_USAGE_READWRITE);
 
 out:
 	pipe_mutex_unlock(rscreen->fences.mutex);
 	return fence;
 }
 
-
-void r600_flush(struct pipe_context *ctx, struct pipe_fence_handle **fence,
-		unsigned flags)
+static void r600_flush(struct pipe_context *ctx, unsigned flags)
 {
 	struct r600_context *rctx = (struct r600_context *)ctx;
-	struct r600_fence **rfence = (struct r600_fence**)fence;
 	struct pipe_query *render_cond = NULL;
 	unsigned render_cond_mode = 0;
 
-	if (rfence)
-		*rfence = r600_create_fence(rctx);
-
+	rctx->rings.gfx.flushing = true;
 	/* Disable render condition. */
 	if (rctx->current_render_cond) {
 		render_cond = rctx->current_render_cond;
@@ -134,6 +129,8 @@ void r600_flush(struct pipe_context *ctx, struct pipe_fence_handle **fence,
 	}
 
 	r600_context_flush(rctx, flags);
+	rctx->rings.gfx.flushing = false;
+	r600_begin_new_cs(rctx);
 
 	/* Re-enable render condition. */
 	if (render_cond) {
@@ -142,14 +139,121 @@ void r600_flush(struct pipe_context *ctx, struct pipe_fence_handle **fence,
 }
 
 static void r600_flush_from_st(struct pipe_context *ctx,
-			       struct pipe_fence_handle **fence)
+			       struct pipe_fence_handle **fence,
+			       enum pipe_flush_flags flags)
 {
-	r600_flush(ctx, fence, 0);
+	struct r600_context *rctx = (struct r600_context *)ctx;
+	struct r600_fence **rfence = (struct r600_fence**)fence;
+	unsigned fflags;
+
+	fflags = flags & PIPE_FLUSH_END_OF_FRAME ? RADEON_FLUSH_END_OF_FRAME : 0;
+	if (rfence) {
+		*rfence = r600_create_fence(rctx);
+	}
+	/* flush gfx & dma ring, order does not matter as only one can be live */
+	if (rctx->rings.dma.cs) {
+		rctx->rings.dma.flush(rctx, fflags);
+	}
+	rctx->rings.gfx.flush(rctx, fflags);
+}
+
+static void r600_flush_gfx_ring(void *ctx, unsigned flags)
+{
+	r600_flush((struct pipe_context*)ctx, flags);
+}
+
+static void r600_flush_dma_ring(void *ctx, unsigned flags)
+{
+	struct r600_context *rctx = (struct r600_context *)ctx;
+
+	if (!rctx->rings.dma.cs->cdw) {
+		return;
+	}
+	rctx->rings.dma.flushing = true;
+	rctx->ws->cs_flush(rctx->rings.dma.cs, flags);
+	rctx->rings.dma.flushing = false;
+}
+
+boolean r600_rings_is_buffer_referenced(struct r600_context *ctx,
+					struct radeon_winsys_cs_handle *buf,
+					enum radeon_bo_usage usage)
+{
+	if (ctx->ws->cs_is_buffer_referenced(ctx->rings.gfx.cs, buf, usage)) {
+		return TRUE;
+	}
+	if (ctx->rings.dma.cs) {
+		if (ctx->ws->cs_is_buffer_referenced(ctx->rings.dma.cs, buf, usage)) {
+			return TRUE;
+		}
+	}
+	return FALSE;
+}
+
+void *r600_buffer_mmap_sync_with_rings(struct r600_context *ctx,
+					struct r600_resource *resource,
+					unsigned usage)
+{
+	enum radeon_bo_usage rusage = RADEON_USAGE_READWRITE;
+	unsigned flags = 0;
+	bool sync_flush = TRUE;
+
+	if (usage & PIPE_TRANSFER_UNSYNCHRONIZED) {
+		return ctx->ws->buffer_map(resource->cs_buf, NULL, usage);
+	}
+
+	if (!(usage & PIPE_TRANSFER_WRITE)) {
+		/* have to wait for pending read */
+		rusage = RADEON_USAGE_WRITE;
+	}
+	if (usage & PIPE_TRANSFER_DONTBLOCK) {
+		flags |= RADEON_FLUSH_ASYNC;
+	}
+
+	if (ctx->ws->cs_is_buffer_referenced(ctx->rings.gfx.cs, resource->cs_buf, rusage) && ctx->rings.gfx.cs->cdw) {
+		ctx->rings.gfx.flush(ctx, flags);
+		if (usage & PIPE_TRANSFER_DONTBLOCK) {
+			return NULL;
+		}
+	}
+	if (ctx->rings.dma.cs) {
+		if (ctx->ws->cs_is_buffer_referenced(ctx->rings.dma.cs, resource->cs_buf, rusage) && ctx->rings.dma.cs->cdw) {
+			ctx->rings.dma.flush(ctx, flags);
+			if (usage & PIPE_TRANSFER_DONTBLOCK) {
+				return NULL;
+			}
+		}
+	}
+
+	if (usage & PIPE_TRANSFER_DONTBLOCK) {
+		if (ctx->ws->buffer_is_busy(resource->buf, rusage)) {
+			return NULL;
+		}
+	}
+	if (sync_flush) {
+		/* Try to avoid busy-waiting in radeon_bo_wait. */
+		ctx->ws->cs_sync_flush(ctx->rings.gfx.cs);
+		if (ctx->rings.dma.cs) {
+			ctx->ws->cs_sync_flush(ctx->rings.dma.cs);
+		}
+	}
+	ctx->ws->buffer_wait(resource->buf, rusage);
+
+	/* at this point everything is synchronized */
+	return ctx->ws->buffer_map(resource->cs_buf, NULL, usage | PIPE_TRANSFER_UNSYNCHRONIZED);
 }
 
 static void r600_flush_from_winsys(void *ctx, unsigned flags)
 {
-	r600_flush((struct pipe_context*)ctx, NULL, flags);
+	struct r600_context *rctx = (struct r600_context *)ctx;
+
+	rctx->rings.gfx.flush(rctx, flags);
+}
+
+static void r600_flush_dma_from_winsys(void *ctx, unsigned flags)
+{
+	struct r600_context *rctx = (struct r600_context *)ctx;
+
+	rctx->rings.dma.flush(rctx, flags);
 }
 
 static void r600_destroy_context(struct pipe_context *context)
@@ -159,9 +263,6 @@ static void r600_destroy_context(struct pipe_context *context)
 	pipe_resource_reference((struct pipe_resource**)&rctx->dummy_cmask, NULL);
 	pipe_resource_reference((struct pipe_resource**)&rctx->dummy_fmask, NULL);
 
-	if (rctx->no_blend) {
-		rctx->context.delete_blend_state(&rctx->context, rctx->no_blend);
-	}
 	if (rctx->dummy_pixel_shader) {
 		rctx->context.delete_fs_state(&rctx->context, rctx->dummy_pixel_shader);
 	}
@@ -174,26 +275,34 @@ static void r600_destroy_context(struct pipe_context *context)
 	if (rctx->custom_blend_decompress) {
 		rctx->context.delete_blend_state(&rctx->context, rctx->custom_blend_decompress);
 	}
-	util_unreference_framebuffer_state(&rctx->framebuffer);
+	if (rctx->custom_blend_fmask_decompress) {
+		rctx->context.delete_blend_state(&rctx->context, rctx->custom_blend_fmask_decompress);
+	}
+	util_unreference_framebuffer_state(&rctx->framebuffer.state);
 
 	r600_context_fini(rctx);
 
 	if (rctx->blitter) {
 		util_blitter_destroy(rctx->blitter);
 	}
-	for (int i = 0; i < R600_PIPE_NSTATES; i++) {
-		free(rctx->states[i]);
-	}
-
 	if (rctx->uploader) {
 		u_upload_destroy(rctx->uploader);
+	}
+	if (rctx->allocator_so_filled_size) {
+		u_suballocator_destroy(rctx->allocator_so_filled_size);
+	}
+	if (rctx->allocator_fetch_shader) {
+		u_suballocator_destroy(rctx->allocator_fetch_shader);
 	}
 	util_slab_destroy(&rctx->pool_transfers);
 
 	r600_release_command_buffer(&rctx->start_cs_cmd);
 
-	if (rctx->cs) {
-		rctx->ws->cs_destroy(rctx->cs);
+	if (rctx->rings.gfx.cs) {
+		rctx->ws->cs_destroy(rctx->rings.gfx.cs);
+	}
+	if (rctx->rings.dma.cs) {
+		rctx->ws->cs_destroy(rctx->rings.dma.cs);
 	}
 
 	FREE(rctx->range);
@@ -204,7 +313,6 @@ static struct pipe_context *r600_create_context(struct pipe_screen *screen, void
 {
 	struct r600_context *rctx = CALLOC_STRUCT(r600_context);
 	struct r600_screen* rscreen = (struct r600_screen *)screen;
-	struct pipe_blend_state no_blend = {};
 
 	if (rctx == NULL)
 		return NULL;
@@ -223,9 +331,8 @@ static struct pipe_context *r600_create_context(struct pipe_screen *screen, void
 	rctx->ws = rscreen->ws;
 	rctx->family = rscreen->family;
 	rctx->chip_class = rscreen->chip_class;
+	rctx->keep_tiling_flags = rscreen->info.drm_minor >= 12;
 
-	LIST_INITHEAD(&rctx->dirty_states);
-	LIST_INITHEAD(&rctx->active_timer_queries);
 	LIST_INITHEAD(&rctx->active_nontimer_queries);
 	LIST_INITHEAD(&rctx->dirty);
 	LIST_INITHEAD(&rctx->enable_list);
@@ -238,12 +345,12 @@ static struct pipe_context *r600_create_context(struct pipe_screen *screen, void
 	r600_init_query_functions(rctx);
 	r600_init_context_resource_functions(rctx);
 	r600_init_surface_functions(rctx);
-	rctx->context.draw_vbo = r600_draw_vbo;
+
 
 	rctx->context.create_video_decoder = vl_create_decoder;
 	rctx->context.create_video_buffer = vl_video_buffer_create;
 
-	r600_init_common_atoms(rctx);
+	r600_init_common_state_functions(rctx);
 
 	switch (rctx->chip_class) {
 	case R600:
@@ -272,6 +379,7 @@ static struct pipe_context *r600_create_context(struct pipe_screen *screen, void
 		rctx->custom_dsa_flush = evergreen_create_db_flush_dsa(rctx);
 		rctx->custom_blend_resolve = evergreen_create_resolve_blend(rctx);
 		rctx->custom_blend_decompress = evergreen_create_decompress_blend(rctx);
+		rctx->custom_blend_fmask_decompress = evergreen_create_fmask_decompress_blend(rctx);
 		rctx->has_vertex_cache = !(rctx->family == CHIP_CEDAR ||
 					   rctx->family == CHIP_PALM ||
 					   rctx->family == CHIP_SUMO ||
@@ -285,34 +393,49 @@ static struct pipe_context *r600_create_context(struct pipe_screen *screen, void
 		goto fail;
 	}
 
-	rctx->cs = rctx->ws->cs_create(rctx->ws);
-	rctx->ws->cs_set_flush_callback(rctx->cs, r600_flush_from_winsys, rctx);
-	r600_emit_atom(rctx, &rctx->start_cs_cmd.atom);
+	rctx->rings.gfx.cs = rctx->ws->cs_create(rctx->ws, RING_GFX);
+	rctx->rings.gfx.flush = r600_flush_gfx_ring;
+	rctx->ws->cs_set_flush_callback(rctx->rings.gfx.cs, r600_flush_from_winsys, rctx);
+	rctx->rings.gfx.flushing = false;
 
-        rctx->uploader = u_upload_create(&rctx->context, 1024 * 1024, 256,
-                                         PIPE_BIND_INDEX_BUFFER |
-                                         PIPE_BIND_CONSTANT_BUFFER);
-        if (!rctx->uploader)
-                goto fail;
+	rctx->rings.dma.cs = NULL;
+	if (rscreen->info.r600_has_dma) {
+		rctx->rings.dma.cs = rctx->ws->cs_create(rctx->ws, RING_DMA);
+		rctx->rings.dma.flush = r600_flush_dma_ring;
+		rctx->ws->cs_set_flush_callback(rctx->rings.dma.cs, r600_flush_dma_from_winsys, rctx);
+		rctx->rings.dma.flushing = false;
+	}
+
+	rctx->uploader = u_upload_create(&rctx->context, 1024 * 1024, 256,
+					PIPE_BIND_INDEX_BUFFER |
+					PIPE_BIND_CONSTANT_BUFFER);
+	if (!rctx->uploader)
+		goto fail;
+
+	rctx->allocator_fetch_shader = u_suballocator_create(&rctx->context, 64 * 1024, 256,
+							     0, PIPE_USAGE_STATIC, FALSE);
+	if (!rctx->allocator_fetch_shader)
+		goto fail;
+
+	rctx->allocator_so_filled_size = u_suballocator_create(&rctx->context, 4096, 4,
+								0, PIPE_USAGE_STATIC, TRUE);
+        if (!rctx->allocator_so_filled_size)
+		goto fail;
 
 	rctx->blitter = util_blitter_create(&rctx->context);
 	if (rctx->blitter == NULL)
 		goto fail;
+	util_blitter_set_texture_multisample(rctx->blitter, rscreen->has_msaa);
 	rctx->blitter->draw_rectangle = r600_draw_rectangle;
 
+	r600_begin_new_cs(rctx);
 	r600_get_backend_mask(rctx); /* this emits commands and must be last */
-
-	if (rctx->chip_class == R600)
-		r600_set_max_scissor(rctx);
 
 	rctx->dummy_pixel_shader =
 		util_make_fragment_cloneinput_shader(&rctx->context, 0,
 						     TGSI_SEMANTIC_GENERIC,
 						     TGSI_INTERPOLATE_CONSTANT);
 	rctx->context.bind_fs_state(&rctx->context, rctx->dummy_pixel_shader);
-
-	no_blend.rt[0].colormask = 0xF;
-	rctx->no_blend = rctx->context.create_blend_state(&rctx->context, &no_blend);
 
 	return &rctx->context;
 
@@ -384,7 +507,6 @@ static int r600_get_param(struct pipe_screen* pscreen, enum pipe_cap param)
 	case PIPE_CAP_TEXTURE_MIRROR_CLAMP:
 	case PIPE_CAP_BLEND_EQUATION_SEPARATE:
 	case PIPE_CAP_TEXTURE_SWIZZLE:
-	case PIPE_CAP_DEPTHSTENCIL_CLEAR_SEPARATE:
 	case PIPE_CAP_DEPTH_CLIP_DISABLE:
 	case PIPE_CAP_SHADER_STENCIL_EXPORT:
 	case PIPE_CAP_VERTEX_ELEMENT_INSTANCE_DIVISOR:
@@ -407,13 +529,20 @@ static int r600_get_param(struct pipe_screen* pscreen, enum pipe_cap param)
 	case PIPE_CAP_COMPUTE:
 	case PIPE_CAP_START_INSTANCE:
 	case PIPE_CAP_MAX_DUAL_SOURCE_RENDER_TARGETS:
+	case PIPE_CAP_TEXTURE_BUFFER_OBJECTS:
 		return 1;
+
+        case PIPE_CAP_MIN_MAP_BUFFER_ALIGNMENT:
+                return R600_MAP_BUFFER_ALIGNMENT;
 
 	case PIPE_CAP_CONSTANT_BUFFER_OFFSET_ALIGNMENT:
 		return 256;
 
 	case PIPE_CAP_GLSL_FEATURE_LEVEL:
-		return 130;
+		return 140;
+
+	case PIPE_CAP_TEXTURE_MULTISAMPLE:
+		return rscreen->msaa_texture_support != MSAA_TEXTURE_SAMPLE_ZERO;
 
 	/* Supported except the original R600. */
 	case PIPE_CAP_INDEP_BLEND_ENABLE:
@@ -423,6 +552,7 @@ static int r600_get_param(struct pipe_screen* pscreen, enum pipe_cap param)
 
 	/* Supported on Evergreen. */
 	case PIPE_CAP_SEAMLESS_CUBE_MAP_PER_TEXTURE:
+	case PIPE_CAP_CUBE_MAP_ARRAY:
 		return family >= CHIP_CEDAR ? 1 : 0;
 
 	/* Unsupported features. */
@@ -465,7 +595,7 @@ static int r600_get_param(struct pipe_screen* pscreen, enum pipe_cap param)
 		return 8;
 
 	/* Timer queries, present when the clock frequency is non zero. */
-	case PIPE_CAP_TIMER_QUERY:
+	case PIPE_CAP_QUERY_TIME_ELAPSED:
 		return rscreen->info.r600_clock_crystal_freq != 0;
 	case PIPE_CAP_QUERY_TIMESTAMP:
 		return rscreen->info.drm_minor >= 20 &&
@@ -534,10 +664,7 @@ static int r600_get_shader_param(struct pipe_screen* pscreen, unsigned shader, e
 	case PIPE_SHADER_CAP_MAX_CONTROL_FLOW_DEPTH:
 		return 8; /* XXX */
 	case PIPE_SHADER_CAP_MAX_INPUTS:
-		if(shader == PIPE_SHADER_FRAGMENT)
-			return 34;
-		else
-			return 32;
+		return 32;
 	case PIPE_SHADER_CAP_MAX_TEMPS:
 		return 256; /* Max native temporaries. */
 	case PIPE_SHADER_CAP_MAX_ADDRS:
@@ -546,7 +673,7 @@ static int r600_get_shader_param(struct pipe_screen* pscreen, unsigned shader, e
 	case PIPE_SHADER_CAP_MAX_CONSTS:
 		return R600_MAX_CONST_BUFFER_SIZE;
 	case PIPE_SHADER_CAP_MAX_CONST_BUFFERS:
-		return R600_MAX_CONST_BUFFERS-1;
+		return R600_MAX_USER_CONST_BUFFERS;
 	case PIPE_SHADER_CAP_MAX_PREDS:
 		return 0; /* nothing uses this */
 	case PIPE_SHADER_CAP_TGSI_CONT_SUPPORTED:
@@ -644,10 +771,9 @@ static int r600_get_compute_param(struct pipe_screen *screen,
 	case PIPE_COMPUTE_CAP_MAX_GLOBAL_SIZE:
 		if (ret) {
 			uint64_t * max_global_size = ret;
-			/* XXX: This is 64kb for now until we get the
-			 * compute memory pool working correctly.
-			 */
-			*max_global_size = 1024 * 16 * 4;
+			/* XXX: This is what the proprietary driver reports, we
+			 * may want to use a different value. */
+			*max_global_size = 201326592;
 		}
 		return sizeof(uint64_t);
 
@@ -664,6 +790,22 @@ static int r600_get_compute_param(struct pipe_screen *screen,
 			/* XXX: This is what the proprietary driver reports, we
 			 * may want to use a different value. */
 			*max_local_size = 32768;
+		}
+		return sizeof(uint64_t);
+
+	case PIPE_COMPUTE_CAP_MAX_MEM_ALLOC_SIZE:
+		if (ret) {
+			uint64_t max_global_size;
+			uint64_t * max_mem_alloc_size = ret;
+			r600_get_compute_param(screen,
+					PIPE_COMPUTE_CAP_MAX_GLOBAL_SIZE,
+					&max_global_size);
+			/* OpenCL requres this value be at least
+			 * max(MAX_GLOBAL_SIZE / 4, 128 * 1024 *1024)
+			 * I'm really not sure what value to report here, but
+			 * MAX_GLOBAL_SIZE / 4 seems resonable.
+			 */
+			*max_mem_alloc_size = max_global_size / 4;
 		}
 		return sizeof(uint64_t);
 
@@ -695,6 +837,12 @@ static void r600_destroy_screen(struct pipe_screen* pscreen)
 		rscreen->ws->buffer_unmap(rscreen->fences.bo->cs_buf);
 		pipe_resource_reference((struct pipe_resource**)&rscreen->fences.bo, NULL);
 	}
+#if R600_TRACE_CS
+	if (rscreen->trace_bo) {
+		rscreen->ws->buffer_unmap(rscreen->trace_bo->cs_buf);
+		pipe_resource_reference((struct pipe_resource**)&rscreen->trace_bo, NULL);
+	}
+#endif
 	pipe_mutex_destroy(rscreen->fences.mutex);
 
 	rscreen->ws->destroy(rscreen->ws);
@@ -725,7 +873,7 @@ static boolean r600_fence_signalled(struct pipe_screen *pscreen,
 	struct r600_screen *rscreen = (struct r600_screen *)pscreen;
 	struct r600_fence *rfence = (struct r600_fence*)fence;
 
-	return rscreen->fences.data[rfence->index];
+	return rscreen->fences.data[rfence->index] != 0;
 }
 
 static boolean r600_fence_finish(struct pipe_screen *pscreen,
@@ -882,17 +1030,6 @@ static int r600_init_tiling(struct r600_screen *rscreen)
 	}
 }
 
-static unsigned radeon_family_from_device(unsigned device)
-{
-	switch (device) {
-#define CHIPSET(pciid, name, family) case pciid: return CHIP_##family;
-#include "pci_ids/r600_pci_ids.h"
-#undef CHIPSET
-	default:
-		return CHIP_UNKNOWN;
-	}
-}
-
 static uint64_t r600_get_timestamp(struct pipe_screen *screen)
 {
 	struct r600_screen *rscreen = (struct r600_screen*)screen;
@@ -912,22 +1049,12 @@ struct pipe_screen *r600_screen_create(struct radeon_winsys *ws)
 	rscreen->ws = ws;
 	ws->query_info(ws, &rscreen->info);
 
-	rscreen->family = radeon_family_from_device(rscreen->info.pci_id);
+	rscreen->family = rscreen->info.family;
+	rscreen->chip_class = rscreen->info.chip_class;
 	if (rscreen->family == CHIP_UNKNOWN) {
 		fprintf(stderr, "r600: Unknown chipset 0x%04X\n", rscreen->info.pci_id);
 		FREE(rscreen);
 		return NULL;
-	}
-
-	/* setup class */
-	if (rscreen->family >= CHIP_CAYMAN) {
-		rscreen->chip_class = CAYMAN;
-	} else if (rscreen->family >= CHIP_CEDAR) {
-		rscreen->chip_class = EVERGREEN;
-	} else if (rscreen->family >= CHIP_RV770) {
-		rscreen->chip_class = R700;
-	} else {
-		rscreen->chip_class = R600;
 	}
 
 	/* Figure out streamout kernel support. */
@@ -945,6 +1072,33 @@ struct pipe_screen *r600_screen_create(struct radeon_winsys *ws)
 	case EVERGREEN:
 	case CAYMAN:
 		rscreen->has_streamout = rscreen->info.drm_minor >= 14;
+		break;
+	default:
+		rscreen->has_streamout = FALSE;
+		break;
+	}
+
+	/* MSAA support. */
+	switch (rscreen->chip_class) {
+	case R600:
+	case R700:
+		rscreen->has_msaa = rscreen->info.drm_minor >= 22;
+		rscreen->msaa_texture_support = MSAA_TEXTURE_DECOMPRESSED;
+		break;
+	case EVERGREEN:
+		rscreen->has_msaa = rscreen->info.drm_minor >= 19;
+		rscreen->msaa_texture_support =
+			rscreen->info.drm_minor >= 24 ? MSAA_TEXTURE_COMPRESSED :
+							MSAA_TEXTURE_DECOMPRESSED;
+		break;
+	case CAYMAN:
+		rscreen->has_msaa = rscreen->info.drm_minor >= 19;
+		/* We should be able to read compressed MSAA textures, but it doesn't work. */
+		rscreen->msaa_texture_support = MSAA_TEXTURE_SAMPLE_ZERO;
+		break;
+	default:
+		rscreen->has_msaa = FALSE;
+		rscreen->msaa_texture_support = 0;
 		break;
 	}
 
@@ -965,8 +1119,10 @@ struct pipe_screen *r600_screen_create(struct radeon_winsys *ws)
 
 	if (rscreen->chip_class >= EVERGREEN) {
 		rscreen->screen.is_format_supported = evergreen_is_format_supported;
+		rscreen->dma_blit = &evergreen_dma_blit;
 	} else {
 		rscreen->screen.is_format_supported = r600_is_format_supported;
+		rscreen->dma_blit = &r600_dma_blit;
 	}
 	rscreen->screen.is_video_format_supported = vl_video_buffer_is_format_supported;
 	rscreen->screen.context_create = r600_create_context;
@@ -984,7 +1140,29 @@ struct pipe_screen *r600_screen_create(struct radeon_winsys *ws)
 	LIST_INITHEAD(&rscreen->fences.blocks);
 	pipe_mutex_init(rscreen->fences.mutex);
 
+	/* Hyperz is very lockup prone any code that touch related part should be
+	 * carefully tested especialy on r6xx/r7xx Development show that some piglit
+	 * case were triggering lockup quickly such as :
+	 * piglit/bin/depthstencil-render-miplevels 1024 d=s=z24_s8
+	 */
+	rscreen->use_hyperz = debug_get_bool_option("R600_HYPERZ", TRUE);
+	rscreen->use_hyperz = rscreen->info.drm_minor >= 26 ? rscreen->use_hyperz : FALSE;
+
 	rscreen->global_pool = compute_memory_pool_new(rscreen);
+
+#if R600_TRACE_CS
+	rscreen->cs_count = 0;
+	if (rscreen->info.drm_minor >= 28) {
+		rscreen->trace_bo = (struct r600_resource*)pipe_buffer_create(&rscreen->screen,
+										PIPE_BIND_CUSTOM,
+										PIPE_USAGE_STAGING,
+										4096);
+		if (rscreen->trace_bo) {
+			rscreen->trace_ptr = rscreen->ws->buffer_map(rscreen->trace_bo->cs_buf, NULL,
+									PIPE_TRANSFER_UNSYNCHRONIZED);
+		}
+	}
+#endif
 
 	return &rscreen->screen;
 }

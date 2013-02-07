@@ -175,16 +175,12 @@ static void init_prog(struct program *p)
 		box.width = 2;
 		box.height = 2;
 
-		t = p->pipe->get_transfer(p->pipe, p->tex, 0, PIPE_TRANSFER_WRITE, &box);
-
-		ptr = p->pipe->transfer_map(p->pipe, t);
+		ptr = p->pipe->transfer_map(p->pipe, p->tex, 0, PIPE_TRANSFER_WRITE, &box, &t);
 		ptr[0] = 0xffff0000;
 		ptr[1] = 0xff0000ff;
 		ptr[2] = 0xff00ff00;
 		ptr[3] = 0xffffff00;
 		p->pipe->transfer_unmap(p->pipe, t);
-
-		p->pipe->transfer_destroy(p->pipe, t);
 
 		u_sampler_view_default_template(&v_tmplt, p->tex, p->tex->format);
 
@@ -215,7 +211,6 @@ static void init_prog(struct program *p)
 	p->sampler.normalized_coords = 1;
 
 	surf_tmpl.format = PIPE_FORMAT_B8G8R8A8_UNORM; /* All drivers support this */
-	surf_tmpl.usage = PIPE_BIND_RENDER_TARGET;
 	surf_tmpl.u.tex.level = 0;
 	surf_tmpl.u.tex.first_layer = 0;
 	surf_tmpl.u.tex.last_layer = 0;
@@ -319,8 +314,8 @@ static void draw(struct program *p)
 	cso_set_viewport(p->cso, &p->viewport);
 
 	/* sampler */
-	cso_single_sampler(p->cso, 0, &p->sampler);
-	cso_single_sampler_done(p->cso);
+	cso_single_sampler(p->cso, PIPE_SHADER_FRAGMENT, 0, &p->sampler);
+	cso_single_sampler_done(p->cso, PIPE_SHADER_FRAGMENT);
 
 	/* texture sampler view */
 	cso_set_sampler_views(p->cso, PIPE_SHADER_FRAGMENT, 1, &p->view);
@@ -333,12 +328,12 @@ static void draw(struct program *p)
 	cso_set_vertex_elements(p->cso, 2, p->velem);
 
 	util_draw_vertex_buffer(p->pipe, p->cso,
-	                        p->vbuf, 0,
+	                        p->vbuf, 0, 0,
 	                        PIPE_PRIM_QUADS,
 	                        4,  /* verts */
 	                        2); /* attribs/vert */
 
-        p->pipe->flush(p->pipe, NULL);
+        p->pipe->flush(p->pipe, NULL, 0);
 
 	debug_dump_surface_bmp(p->pipe, "result.bmp", p->framebuffer.cbufs[0]);
 }

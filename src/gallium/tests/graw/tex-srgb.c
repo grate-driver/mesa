@@ -69,6 +69,7 @@ set_vertices(struct vertex *verts, unsigned num_verts)
    handle = info.ctx->create_vertex_elements_state(info.ctx, 2, ve);
    info.ctx->bind_vertex_elements_state(info.ctx, handle);
 
+   memset(&vbuf, 0, sizeof vbuf);
 
    vbuf.stride = sizeof(struct vertex);
    vbuf.buffer_offset = 0;
@@ -78,7 +79,7 @@ set_vertices(struct vertex *verts, unsigned num_verts)
                                               num_verts * sizeof(struct vertex),
                                               verts);
 
-   info.ctx->set_vertex_buffers(info.ctx, 1, &vbuf);
+   info.ctx->set_vertex_buffers(info.ctx, 0, 1, &vbuf);
 }
 
 static void set_vertex_shader( void )
@@ -135,7 +136,7 @@ static void draw( void )
    set_vertices(vertices2, 4);
    util_draw_arrays(info.ctx, PIPE_PRIM_QUADS, 0, 4);
 
-   info.ctx->flush(info.ctx, NULL);
+   info.ctx->flush(info.ctx, NULL, 0);
 
    graw_util_flush_front(&info);
 }

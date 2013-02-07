@@ -453,7 +453,7 @@ static void *radeon_bo_map(struct radeon_winsys_cs_handle *buf,
                 } else {
                     /* Try to avoid busy-waiting in radeon_bo_wait. */
                     if (p_atomic_read(&bo->num_active_ioctls))
-                        radeon_drm_cs_sync_flush(cs);
+                        radeon_drm_cs_sync_flush(rcs);
                 }
 
                 radeon_bo_wait((struct pb_buffer*)bo, RADEON_USAGE_READWRITE);
@@ -802,8 +802,7 @@ static void radeon_bo_set_tiling(struct pb_buffer *_buf,
                         sizeof(args));
 }
 
-static struct radeon_winsys_cs_handle *radeon_drm_get_cs_handle(
-        struct pb_buffer *_buf)
+static struct radeon_winsys_cs_handle *radeon_drm_get_cs_handle(struct pb_buffer *_buf)
 {
     /* return radeon_bo. */
     return (struct radeon_winsys_cs_handle*)get_radeon_bo(_buf);
@@ -813,7 +812,7 @@ static struct pb_buffer *
 radeon_winsys_bo_create(struct radeon_winsys *rws,
                         unsigned size,
                         unsigned alignment,
-                        unsigned bind,
+                        boolean use_reusable_pool,
                         enum radeon_bo_domain domain)
 {
     struct radeon_drm_winsys *ws = radeon_drm_winsys(rws);
@@ -829,8 +828,7 @@ radeon_winsys_bo_create(struct radeon_winsys *rws,
     desc.initial_domains = domain;
 
     /* Assign a buffer manager. */
-    if (bind & (PIPE_BIND_VERTEX_BUFFER | PIPE_BIND_INDEX_BUFFER |
-                PIPE_BIND_CONSTANT_BUFFER | PIPE_BIND_CUSTOM))
+    if (use_reusable_pool)
         provider = ws->cman;
     else
         provider = ws->kman;

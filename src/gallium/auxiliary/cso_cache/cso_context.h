@@ -102,10 +102,14 @@ void cso_restore_vertex_elements(struct cso_context *ctx);
 
 
 void cso_set_vertex_buffers(struct cso_context *ctx,
-                            unsigned count,
+                            unsigned start_slot, unsigned count,
                             const struct pipe_vertex_buffer *buffers);
-void cso_save_vertex_buffers(struct cso_context *ctx);
-void cso_restore_vertex_buffers(struct cso_context *ctx);
+
+/* One vertex buffer slot is provided with the save/restore functionality.
+ * cso_context chooses the slot, it can be non-zero. */
+void cso_save_aux_vertex_buffer_slot(struct cso_context *ctx);
+void cso_restore_aux_vertex_buffer_slot(struct cso_context *ctx);
+unsigned cso_get_aux_vertex_buffer_slot(struct cso_context *ctx);
 
 
 void cso_set_stream_outputs(struct cso_context *ctx,
@@ -123,51 +127,52 @@ void cso_restore_stream_outputs(struct cso_context *ctx);
  * the state tracker to implement their own specialized caching.
  */
 
-enum pipe_error cso_set_fragment_shader_handle(struct cso_context *ctx,
-                                               void *handle );
+void cso_set_fragment_shader_handle(struct cso_context *ctx, void *handle);
 void cso_delete_fragment_shader(struct cso_context *ctx, void *handle );
 void cso_save_fragment_shader(struct cso_context *cso);
 void cso_restore_fragment_shader(struct cso_context *cso);
 
 
-enum pipe_error cso_set_vertex_shader_handle(struct cso_context *ctx,
-                                             void *handle );
+void cso_set_vertex_shader_handle(struct cso_context *ctx, void *handle);
 void cso_delete_vertex_shader(struct cso_context *ctx, void *handle );
 void cso_save_vertex_shader(struct cso_context *cso);
 void cso_restore_vertex_shader(struct cso_context *cso);
 
 
-enum pipe_error cso_set_geometry_shader_handle(struct cso_context *ctx,
-                                               void *handle);
+void cso_set_geometry_shader_handle(struct cso_context *ctx, void *handle);
 void cso_delete_geometry_shader(struct cso_context *ctx, void *handle);
 void cso_save_geometry_shader(struct cso_context *cso);
 void cso_restore_geometry_shader(struct cso_context *cso);
 
 
-enum pipe_error cso_set_framebuffer(struct cso_context *cso,
-                                    const struct pipe_framebuffer_state *fb);
+void cso_set_framebuffer(struct cso_context *cso,
+                         const struct pipe_framebuffer_state *fb);
 void cso_save_framebuffer(struct cso_context *cso);
 void cso_restore_framebuffer(struct cso_context *cso);
 
 
-enum pipe_error cso_set_viewport(struct cso_context *cso,
-                                 const struct pipe_viewport_state *vp);
+void cso_set_viewport(struct cso_context *cso,
+                      const struct pipe_viewport_state *vp);
 void cso_save_viewport(struct cso_context *cso);
 void cso_restore_viewport(struct cso_context *cso);
 
 
-enum pipe_error cso_set_blend_color(struct cso_context *cso,
-                                    const struct pipe_blend_color *bc);
+void cso_set_blend_color(struct cso_context *cso,
+                         const struct pipe_blend_color *bc);
 
-enum pipe_error cso_set_sample_mask(struct cso_context *cso,
-                                    unsigned stencil_mask);
+void cso_set_sample_mask(struct cso_context *cso, unsigned stencil_mask);
 void cso_save_sample_mask(struct cso_context *ctx);
 void cso_restore_sample_mask(struct cso_context *ctx);
 
-enum pipe_error cso_set_stencil_ref(struct cso_context *cso,
-                                    const struct pipe_stencil_ref *sr);
+void cso_set_stencil_ref(struct cso_context *cso,
+                         const struct pipe_stencil_ref *sr);
 void cso_save_stencil_ref(struct cso_context *cso);
 void cso_restore_stencil_ref(struct cso_context *cso);
+
+void cso_set_render_condition(struct cso_context *cso,
+                              struct pipe_query *query, uint mode);
+void cso_save_render_condition(struct cso_context *cso);
+void cso_restore_render_condition(struct cso_context *cso);
 
 
 /* clip state */

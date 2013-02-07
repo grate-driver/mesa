@@ -31,12 +31,14 @@
 #include "nouveau_fbo.h"
 #include "nv_object.xml.h"
 
+#include "main/api_exec.h"
 #include "main/dd.h"
 #include "main/framebuffer.h"
 #include "main/fbobject.h"
 #include "main/light.h"
 #include "main/state.h"
 #include "main/version.h"
+#include "main/vtxfmt.h"
 #include "drivers/common/meta.h"
 #include "drivers/common/driverfuncs.h"
 #include "swrast/swrast.h"
@@ -60,7 +62,7 @@ nouveau_context_create(gl_api api,
 	struct gl_context *ctx;
 
 	switch (api) {
-	case API_OPENGL:
+	case API_OPENGL_COMPAT:
 		/* Do after-the-fact version checking (below).
 		 */
 		break;
@@ -103,6 +105,10 @@ nouveau_context_create(gl_api api,
 	   return GL_FALSE;
 	}
 
+	/* Exec table initialization requires the version to be computed */
+	_mesa_initialize_dispatch_tables(ctx);
+	_mesa_initialize_vbo_vtxfmt(ctx);
+
 	if (nouveau_bo_new(context_dev(ctx), NOUVEAU_BO_VRAM, 0, 4096,
 			   NULL, &nctx->fence)) {
 		nouveau_context_destroy(dri_ctx);
@@ -133,8 +139,8 @@ nouveau_context_init(struct gl_context *ctx, struct nouveau_screen *screen,
 	nouveau_fbo_functions_init(&functions);
 
 	/* Initialize the mesa context. */
-	_mesa_initialize_context(ctx, API_OPENGL, visual,
-                                 share_ctx, &functions, NULL);
+	_mesa_initialize_context(ctx, API_OPENGL_COMPAT, visual,
+                                 share_ctx, &functions);
 
 	nouveau_state_init(ctx);
 	nouveau_scratch_init(ctx);

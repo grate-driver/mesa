@@ -68,8 +68,12 @@ llvmpipe_draw_vbo(struct pipe_context *pipe, const struct pipe_draw_info *info)
     */
    for (i = 0; i < lp->num_vertex_buffers; i++) {
       const void *buf = lp->vertex_buffer[i].user_buffer;
-      if (!buf)
+      if (!buf) {
+         if (!lp->vertex_buffer[i].buffer) {
+            continue;
+         }
          buf = llvmpipe_resource_data(lp->vertex_buffer[i].buffer);
+      }
       draw_set_mapped_vertex_buffer(draw, i, buf);
    }
 
@@ -83,6 +87,13 @@ llvmpipe_draw_vbo(struct pipe_context *pipe, const struct pipe_draw_info *info)
                        (ubyte *) mapped_indices + lp->index_buffer.offset,
                        lp->index_buffer.index_size);
    }
+
+   for (i = 0; i < lp->num_so_targets; i++) {
+      void *buf = llvmpipe_resource(lp->so_targets[i]->target.buffer)->data;
+      lp->so_targets[i]->mapping = buf;
+   }
+   draw_set_mapped_so_targets(draw, lp->num_so_targets,
+                              lp->so_targets);
 
    llvmpipe_prepare_vertex_sampling(lp,
                                     lp->num_sampler_views[PIPE_SHADER_VERTEX],
@@ -100,6 +111,8 @@ llvmpipe_draw_vbo(struct pipe_context *pipe, const struct pipe_draw_info *info)
    if (mapped_indices) {
       draw_set_indexes(draw, NULL, 0);
    }
+   draw_set_mapped_so_targets(draw, 0, NULL);
+
    llvmpipe_cleanup_vertex_sampling(lp);
 
    /*

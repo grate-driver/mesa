@@ -49,7 +49,7 @@ struct r600_texture {
 	unsigned			array_mode[PIPE_MAX_TEXTURE_LEVELS];
 	unsigned			pitch_override;
 	unsigned			size;
-	unsigned			tile_type;
+	bool				non_disp_tiling;
 	bool				is_depth;
 	bool				is_rat;
 	unsigned			dirty_level_mask; /* each bit says if that mipmap is compressed */
@@ -61,6 +61,10 @@ struct r600_texture {
 	 * MSAA textures cannot have mipmaps. */
 	unsigned			fmask_offset, fmask_size, fmask_bank_height;
 	unsigned			cmask_offset, cmask_size, cmask_slice_tile_max;
+
+	struct r600_resource		*htile;
+	/* use htile only for first level */
+	float				depth_clear;
 };
 
 #define R600_TEX_IS_TILED(tex, level) ((tex)->array_mode[level] != V_038000_ARRAY_LINEAR_GENERAL && (tex)->array_mode[level] != V_038000_ARRAY_LINEAR_ALIGNED)
@@ -113,7 +117,21 @@ struct r600_surface {
 	unsigned db_stencil_base;	/* EG only */
 	unsigned db_stencil_info;	/* EG only */
 	unsigned db_prefetch_limit;	/* R600 only */
+	unsigned pa_su_poly_offset_db_fmt_cntl;
+
+	unsigned			htile_enabled;
+	unsigned			db_htile_surface;
+	unsigned			db_htile_data_base;
+	unsigned			db_preload_control;
 };
+
+/* Return if the depth format can be read without the DB->CB copy on r6xx-r7xx. */
+static INLINE bool r600_can_read_depth(struct r600_texture *rtex)
+{
+	return rtex->resource.b.b.nr_samples <= 1 &&
+	       (rtex->resource.b.b.format == PIPE_FORMAT_Z16_UNORM ||
+		rtex->resource.b.b.format == PIPE_FORMAT_Z32_FLOAT);
+}
 
 void r600_resource_destroy(struct pipe_screen *screen, struct pipe_resource *res);
 void r600_init_screen_resource_functions(struct pipe_screen *screen);
@@ -140,18 +158,5 @@ static INLINE struct r600_resource *r600_resource(struct pipe_resource *r)
 bool r600_init_flushed_depth_texture(struct pipe_context *ctx,
 				     struct pipe_resource *texture,
 				     struct r600_texture **staging);
-
-/* r600_texture.c texture transfer functions. */
-struct pipe_transfer* r600_texture_get_transfer(struct pipe_context *ctx,
-						struct pipe_resource *texture,
-						unsigned level,
-						unsigned usage,
-						const struct pipe_box *box);
-void r600_texture_transfer_destroy(struct pipe_context *ctx,
-				   struct pipe_transfer *trans);
-void* r600_texture_transfer_map(struct pipe_context *ctx,
-				struct pipe_transfer* transfer);
-void r600_texture_transfer_unmap(struct pipe_context *ctx,
-				 struct pipe_transfer* transfer);
 
 #endif

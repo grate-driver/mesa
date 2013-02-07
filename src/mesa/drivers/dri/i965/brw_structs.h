@@ -33,24 +33,6 @@
 #ifndef BRW_STRUCTS_H
 #define BRW_STRUCTS_H
 
-
-/** Number of general purpose registers (VS, WM, etc) */
-#define BRW_MAX_GRF 128
-
-/**
- * First GRF used for the MRF hack.
- *
- * On gen7, MRFs are no longer used, and contiguous GRFs are used instead.  We
- * haven't converted our compiler to be aware of this, so it asks for MRFs and
- * brw_eu_emit.c quietly converts them to be accesses of the top GRFs.  The
- * register allocators have to be careful of this to avoid corrupting the "MRF"s
- * with actual GRF allocations.
- */
-#define GEN7_MRF_HACK_START 112.
-
-/** Number of message register file registers */
-#define BRW_MAX_MRF 16
-
 /* These seem to be passed around as function args, so it works out
  * better to keep them as #defines:
  */
@@ -792,108 +774,6 @@ struct gen7_sf_clip_viewport {
    GLfloat pad1[4];
 };
 
-/* volume 5c Shared Functions - 1.13.4.1.2 */
-struct gen7_surface_state
-{
-   struct {
-      GLuint cube_pos_z:1;
-      GLuint cube_neg_z:1;
-      GLuint cube_pos_y:1;
-      GLuint cube_neg_y:1;
-      GLuint cube_pos_x:1;
-      GLuint cube_neg_x:1;
-      GLuint pad2:2;
-      GLuint render_cache_read_write:1;
-      GLuint pad1:1;
-      GLuint surface_array_spacing:1;
-      GLuint vert_line_stride_ofs:1;
-      GLuint vert_line_stride:1;
-      GLuint tile_walk:1;
-      GLuint tiled_surface:1;
-      GLuint horizontal_alignment:1;
-      GLuint vertical_alignment:2;
-      GLuint surface_format:9;     /**< BRW_SURFACEFORMAT_x */
-      GLuint pad0:1;
-      GLuint is_array:1;
-      GLuint surface_type:3;       /**< BRW_SURFACE_1D/2D/3D/CUBE */
-   } ss0;
-
-   struct {
-      GLuint base_addr;
-   } ss1;
-
-   struct {
-      GLuint width:14;
-      GLuint pad1:2;
-      GLuint height:14;
-      GLuint pad0:2;
-   } ss2;
-
-   struct {
-      GLuint pitch:18;
-      GLuint pad:3;
-      GLuint depth:11;
-   } ss3;
-
-   struct {
-      GLuint multisample_position_palette_index:3;
-      GLuint num_multisamples:3;
-      GLuint multisampled_surface_storage_format:1;
-      GLuint render_target_view_extent:11;
-      GLuint min_array_elt:11;
-      GLuint rotation:2;
-      GLuint pad0:1;
-   } ss4;
-
-   struct {
-      GLuint mip_count:4;
-      GLuint min_lod:4;
-      GLuint pad1:12;
-      GLuint y_offset:4;
-      GLuint pad0:1;
-      GLuint x_offset:7;
-   } ss5;
-
-   union {
-      GLuint raw_data;
-      struct {
-         GLuint y_offset_for_uv_plane:14;
-         GLuint pad1:2;
-         GLuint x_offset_for_uv_plane:14;
-         GLuint pad0:2;
-      } planar; /** Interpretation when Surface Format == PLANAR */
-      struct {
-         GLuint mcs_enable:1;
-         GLuint append_counter_enable:1;
-         GLuint pad:4;
-         GLuint append_counter_address:26;
-      } mcs_disabled; /** Interpretation when mcs_enable == 0 */
-      struct {
-         GLuint mcs_enable:1;
-         GLuint pad:2;
-         GLuint mcs_surface_pitch:9;
-         GLuint mcs_base_address:20;
-      } mcs_enabled; /** Interpretation when mcs_enable == 1 */
-   } ss6;
-
-   struct {
-      GLuint resource_min_lod:12;
-
-      /* Only on Haswell */
-      GLuint pad0:4;
-      GLuint shader_channel_select_a:3;
-      GLuint shader_channel_select_b:3;
-      GLuint shader_channel_select_g:3;
-      GLuint shader_channel_select_r:3;
-
-      GLuint alpha_clear_color:1;
-      GLuint blue_clear_color:1;
-      GLuint green_clear_color:1;
-      GLuint red_clear_color:1;
-   } ss7;
-};
-
-
 struct brw_vertex_element_state
 {
    struct
@@ -1048,6 +928,8 @@ struct brw_instruction
 	 GLuint dest_subreg_nr:3;
 	 GLuint dest_reg_nr:8;
       } da3src;
+
+      uint32_t ud;
    } bits1;
 
 
@@ -1062,8 +944,9 @@ struct brw_instruction
 	 GLuint src0_horiz_stride:2;
 	 GLuint src0_width:3;
 	 GLuint src0_vert_stride:4;
+	 GLuint flag_subreg_nr:1;
 	 GLuint flag_reg_nr:1;
-	 GLuint pad:6;
+	 GLuint pad:5;
       } da1;
 
       struct
@@ -1076,8 +959,9 @@ struct brw_instruction
 	 GLuint src0_horiz_stride:2;
 	 GLuint src0_width:3;
 	 GLuint src0_vert_stride:4;
+	 GLuint flag_subreg_nr:1;
 	 GLuint flag_reg_nr:1;
-	 GLuint pad:6;	
+	 GLuint pad:5;
       } ia1;
 
       struct
@@ -1093,8 +977,9 @@ struct brw_instruction
 	 GLuint src0_swz_w:2;
 	 GLuint pad0:1;
 	 GLuint src0_vert_stride:4;
+	 GLuint flag_subreg_nr:1;
 	 GLuint flag_reg_nr:1;
-	 GLuint pad1:6;
+	 GLuint pad1:5;
       } da16;
 
       struct
@@ -1110,8 +995,9 @@ struct brw_instruction
 	 GLuint src0_swz_w:2;
 	 GLuint pad0:1;
 	 GLuint src0_vert_stride:4;
+	 GLuint flag_subreg_nr:1;
 	 GLuint flag_reg_nr:1;
-	 GLuint pad1:6;
+	 GLuint pad1:5;
       } ia16;
 
       /* Extended Message Descriptor for Ironlake (Gen5) SEND instruction.
@@ -1137,6 +1023,8 @@ struct brw_instruction
 	 GLuint src1_swizzle:8;
 	 GLuint src1_subreg_nr_low:2;
       } da3src;
+
+      uint32_t ud;
    } bits2;
 
    union
@@ -1180,8 +1068,7 @@ struct brw_instruction
 	 GLuint src1_horiz_stride:2;
 	 GLuint src1_width:3;
 	 GLuint src1_vert_stride:4;
-	 GLuint flag_reg_nr:1;
-	 GLuint pad1:6;	
+	 GLuint pad1:7;
       } ia1;
 
       struct
@@ -1197,8 +1084,7 @@ struct brw_instruction
 	 GLuint src1_swz_w:2;
 	 GLuint pad1:1;
 	 GLuint src1_vert_stride:4;
-	 GLuint flag_reg_nr:1;
-	 GLuint pad2:6;
+	 GLuint pad2:7;
       } ia16;
 
 
@@ -1534,5 +1420,27 @@ struct brw_instruction
    } bits3;
 };
 
+struct brw_compact_instruction {
+   struct {
+      unsigned opcode:7;          /*  0- 6 */
+      unsigned debug_control:1;   /*  7- 7 */
+      unsigned control_index:5;   /*  8-12 */
+      unsigned data_type_index:5; /* 13-17 */
+      unsigned sub_reg_index:5;   /* 18-22 */
+      unsigned acc_wr_control:1;  /* 23-23 */
+      unsigned conditionalmod:4;  /* 24-27 */
+      unsigned flag_subreg_nr:1;     /* 28-28 */
+      unsigned cmpt_ctrl:1;       /* 29-29 */
+      unsigned src0_index:2;      /* 30-31 */
+   } dw0;
+
+   struct {
+      unsigned src0_index:3;  /* 32-24 */
+      unsigned src1_index:5;  /* 35-39 */
+      unsigned dst_reg_nr:8;  /* 40-47 */
+      unsigned src0_reg_nr:8; /* 48-55 */
+      unsigned src1_reg_nr:8; /* 56-63 */
+   } dw1;
+};
 
 #endif

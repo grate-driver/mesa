@@ -322,7 +322,7 @@ _mesa_log_msg(struct gl_context *ctx, GLenum source, GLenum type,
 
    assert(!emptySlot->message && !emptySlot->length);
 
-   emptySlot->message = MALLOC(len+1);
+   emptySlot->message = malloc(len+1);
    if (emptySlot->message) {
       (void) strncpy(emptySlot->message, buf, (size_t)len);
       emptySlot->message[len] = '\0';
@@ -391,7 +391,7 @@ _mesa_get_msg(struct gl_context *ctx, GLenum *source, GLenum *type,
    }
 
    if (msg->message != (char*)out_of_memory)
-      FREE(msg->message);
+      free(msg->message);
    msg->message = NULL;
    msg->length = 0;
 
@@ -477,7 +477,7 @@ error:
    return GL_FALSE;
 }
 
-static void GLAPIENTRY
+void GLAPIENTRY
 _mesa_DebugMessageInsertARB(GLenum source, GLenum type, GLuint id,
                             GLenum severity, GLint length,
                             const GLcharARB* buf)
@@ -501,7 +501,7 @@ _mesa_DebugMessageInsertARB(GLenum source, GLenum type, GLuint id,
    _mesa_log_msg(ctx, source, type, id, severity, length, buf);
 }
 
-static GLuint GLAPIENTRY
+GLuint GLAPIENTRY
 _mesa_GetDebugMessageLogARB(GLuint count, GLsizei logSize, GLenum* sources,
                             GLenum* types, GLenum* ids, GLenum* severities,
                             GLsizei* lengths, GLcharARB* messageLog)
@@ -672,7 +672,7 @@ control_app_messages(struct gl_context *ctx, GLenum esource, GLenum etype,
    control_app_messages_by_group(ctx, source, type, severity, enabled);
 }
 
-static void GLAPIENTRY
+void GLAPIENTRY
 _mesa_DebugMessageControlARB(GLenum source, GLenum type, GLenum severity,
                              GLsizei count, const GLuint *ids,
                              GLboolean enabled)
@@ -717,21 +717,12 @@ _mesa_DebugMessageControlARB(GLenum source, GLenum type, GLenum severity,
    }
 }
 
-static void GLAPIENTRY
+void GLAPIENTRY
 _mesa_DebugMessageCallbackARB(GLDEBUGPROCARB callback, const GLvoid *userParam)
 {
    GET_CURRENT_CONTEXT(ctx);
    ctx->Debug.Callback = callback;
    ctx->Debug.CallbackData = (void *) userParam;
-}
-
-void
-_mesa_init_errors_dispatch(struct _glapi_table *disp)
-{
-   SET_DebugMessageCallbackARB(disp, _mesa_DebugMessageCallbackARB);
-   SET_DebugMessageControlARB(disp, _mesa_DebugMessageControlARB);
-   SET_DebugMessageInsertARB(disp, _mesa_DebugMessageInsertARB);
-   SET_GetDebugMessageLogARB(disp, _mesa_GetDebugMessageLogARB);
 }
 
 void
@@ -786,7 +777,7 @@ _mesa_free_errors_data(struct gl_context *ctx)
 
             foreach_s(node, tmp, &ClientIDs->Namespaces[s][t].Severity[sev]) {
                entry = (struct gl_client_severity *)node;
-               FREE(entry);
+               free(entry);
             }
          }
       }

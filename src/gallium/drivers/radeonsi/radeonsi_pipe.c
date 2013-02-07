@@ -158,9 +158,11 @@ void radeonsi_flush(struct pipe_context *ctx, struct pipe_fence_handle **fence,
 }
 
 static void r600_flush_from_st(struct pipe_context *ctx,
-			       struct pipe_fence_handle **fence)
+			       struct pipe_fence_handle **fence,
+                               enum pipe_flush_flags flags)
 {
-	radeonsi_flush(ctx, fence, 0);
+	radeonsi_flush(ctx, fence,
+                       flags & PIPE_FLUSH_END_OF_FRAME ? RADEON_FLUSH_END_OF_FRAME : 0);
 }
 
 static void r600_flush_from_winsys(void *ctx, unsigned flags)
@@ -172,10 +174,15 @@ static void r600_destroy_context(struct pipe_context *context)
 {
 	struct r600_context *rctx = (struct r600_context *)context;
 
+	si_resource_reference(&rctx->border_color_table, NULL);
+
 	if (rctx->dummy_pixel_shader) {
 		rctx->context.delete_fs_state(&rctx->context, rctx->dummy_pixel_shader);
 	}
-	rctx->context.delete_depth_stencil_alpha_state(&rctx->context, rctx->custom_dsa_flush);
+	rctx->context.delete_depth_stencil_alpha_state(&rctx->context, rctx->custom_dsa_flush_depth_stencil);
+	rctx->context.delete_depth_stencil_alpha_state(&rctx->context, rctx->custom_dsa_flush_depth);
+	rctx->context.delete_depth_stencil_alpha_state(&rctx->context, rctx->custom_dsa_flush_stencil);
+	rctx->context.delete_depth_stencil_alpha_state(&rctx->context, rctx->custom_dsa_flush_inplace);
 	util_unreference_framebuffer_state(&rctx->framebuffer);
 
 	util_blitter_destroy(rctx->blitter);
@@ -217,10 +224,9 @@ static struct pipe_context *r600_create_context(struct pipe_screen *screen, void
 	switch (rctx->chip_class) {
 	case TAHITI:
 		si_init_state_functions(rctx);
-		if (si_context_init(rctx)) {
-			r600_destroy_context(&rctx->context);
-			return NULL;
-		}
+		LIST_INITHEAD(&rctx->active_query_list);
+		rctx->cs = rctx->ws->cs_create(rctx->ws, RING_GFX);
+		rctx->max_db = 8;
 		si_init_config(rctx);
 		break;
 	default:
@@ -274,6 +280,7 @@ static const char *r600_get_family_name(enum radeon_family family)
 	case CHIP_TAHITI: return "AMD TAHITI";
 	case CHIP_PITCAIRN: return "AMD PITCAIRN";
 	case CHIP_VERDE: return "AMD CAPE VERDE";
+	case CHIP_OLAND: return "AMD OLAND";
 	default: return "AMD unknown";
 	}
 }
@@ -288,11 +295,9 @@ static const char* r600_get_name(struct pipe_screen* pscreen)
 static int r600_get_param(struct pipe_screen* pscreen, enum pipe_cap param)
 {
 	struct r600_screen *rscreen = (struct r600_screen *)pscreen;
-	enum radeon_family family = rscreen->family;
 
 	switch (param) {
 	/* Supported features (boolean caps). */
-	case PIPE_CAP_NPOT_TEXTURES:
 	case PIPE_CAP_TWO_SIDED_STENCIL:
 	case PIPE_CAP_MAX_DUAL_SOURCE_RENDER_TARGETS:
 	case PIPE_CAP_ANISOTROPIC_FILTER:
@@ -302,7 +307,6 @@ static int r600_get_param(struct pipe_screen* pscreen, enum pipe_cap param)
 	case PIPE_CAP_TEXTURE_MIRROR_CLAMP:
 	case PIPE_CAP_BLEND_EQUATION_SEPARATE:
 	case PIPE_CAP_TEXTURE_SWIZZLE:
-	case PIPE_CAP_DEPTHSTENCIL_CLEAR_SEPARATE:
 	case PIPE_CAP_DEPTH_CLIP_DISABLE:
 	case PIPE_CAP_SHADER_STENCIL_EXPORT:
 	case PIPE_CAP_VERTEX_ELEMENT_INSTANCE_DIVISOR:
@@ -324,7 +328,11 @@ static int r600_get_param(struct pipe_screen* pscreen, enum pipe_cap param)
 	case PIPE_CAP_USER_INDEX_BUFFERS:
 	case PIPE_CAP_USER_CONSTANT_BUFFERS:
 	case PIPE_CAP_START_INSTANCE:
+	case PIPE_CAP_NPOT_TEXTURES:
 		return 1;
+
+        case PIPE_CAP_MIN_MAP_BUFFER_ALIGNMENT:
+                return 64;
 
 	case PIPE_CAP_CONSTANT_BUFFER_OFFSET_ALIGNMENT:
 		return 256;
@@ -343,6 +351,11 @@ static int r600_get_param(struct pipe_screen* pscreen, enum pipe_cap param)
 	case PIPE_CAP_VERTEX_COLOR_CLAMPED:
 	case PIPE_CAP_QUADS_FOLLOW_PROVOKING_VERTEX_CONVENTION:
 	case PIPE_CAP_USER_VERTEX_BUFFERS:
+	case PIPE_CAP_TEXTURE_MULTISAMPLE:
+	case PIPE_CAP_COMPUTE:
+	case PIPE_CAP_QUERY_TIMESTAMP:
+	case PIPE_CAP_CUBE_MAP_ARRAY:
+	case PIPE_CAP_TEXTURE_BUFFER_OBJECTS:
 		return 0;
 
 	/* Stream output. */
@@ -367,7 +380,7 @@ static int r600_get_param(struct pipe_screen* pscreen, enum pipe_cap param)
 	case PIPE_CAP_MAX_TEXTURE_CUBE_LEVELS:
 			return 15;
 	case PIPE_CAP_MAX_TEXTURE_ARRAY_LAYERS:
-		return rscreen->info.drm_minor >= 9 ? 16384 : 0;
+		return 16384;
 	case PIPE_CAP_MAX_COMBINED_SAMPLERS:
 		return 32;
 
@@ -377,7 +390,7 @@ static int r600_get_param(struct pipe_screen* pscreen, enum pipe_cap param)
 		return 8;
 
 	/* Timer queries, present when the clock frequency is non zero. */
-	case PIPE_CAP_TIMER_QUERY:
+	case PIPE_CAP_QUERY_TIME_ELAPSED:
 		return rscreen->info.r600_clock_crystal_freq != 0;
 
 	case PIPE_CAP_MIN_TEXEL_OFFSET:
@@ -392,9 +405,6 @@ static int r600_get_param(struct pipe_screen* pscreen, enum pipe_cap param)
 static float r600_get_paramf(struct pipe_screen* pscreen,
 			     enum pipe_capf param)
 {
-	struct r600_screen *rscreen = (struct r600_screen *)pscreen;
-	enum radeon_family family = rscreen->family;
-
 	switch (param) {
 	case PIPE_CAPF_MAX_LINE_WIDTH:
 	case PIPE_CAPF_MAX_LINE_WIDTH_AA:
@@ -416,7 +426,6 @@ static float r600_get_paramf(struct pipe_screen* pscreen,
 
 static int r600_get_shader_param(struct pipe_screen* pscreen, unsigned shader, enum pipe_shader_cap param)
 {
-	struct r600_screen *rscreen = (struct r600_screen *)pscreen;
 	switch(shader)
 	{
 	case PIPE_SHADER_FRAGMENT:
@@ -450,9 +459,9 @@ static int r600_get_shader_param(struct pipe_screen* pscreen, unsigned shader, e
 		/* FIXME Isn't this equal to TEMPS? */
 		return 1; /* Max native address registers */
 	case PIPE_SHADER_CAP_MAX_CONSTS:
-		return R600_MAX_CONST_BUFFER_SIZE;
+		return 64;
 	case PIPE_SHADER_CAP_MAX_CONST_BUFFERS:
-		return R600_MAX_CONST_BUFFERS;
+		return 1;
 	case PIPE_SHADER_CAP_MAX_PREDS:
 		return 0; /* FIXME */
 	case PIPE_SHADER_CAP_TGSI_CONT_SUPPORTED:
@@ -468,6 +477,8 @@ static int r600_get_shader_param(struct pipe_screen* pscreen, unsigned shader, e
 		return 0;
 	case PIPE_SHADER_CAP_MAX_TEXTURE_SAMPLERS:
 		return 16;
+	case PIPE_SHADER_CAP_PREFERRED_IR:
+		return PIPE_SHADER_IR_TGSI;
 	}
 	return 0;
 }
@@ -539,7 +550,7 @@ static boolean r600_fence_signalled(struct pipe_screen *pscreen,
 	struct r600_screen *rscreen = (struct r600_screen *)pscreen;
 	struct r600_fence *rfence = (struct r600_fence*)fence;
 
-	return rscreen->fences.data[rfence->index];
+	return rscreen->fences.data[rfence->index] != 0;
 }
 
 static boolean r600_fence_finish(struct pipe_screen *pscreen,

@@ -36,28 +36,16 @@
 #include <llvm/Support/TargetRegistry.h>
 #include <llvm/Support/TargetSelect.h>
 #include <llvm/Support/Threading.h>
-#include <llvm/Target/TargetData.h>
 #include <llvm/Target/TargetMachine.h>
-
 #include <llvm/Transforms/Scalar.h>
-
 #include <llvm-c/Target.h>
+#include <llvm/DataLayout.h>
 
 #include <iostream>
 #include <stdlib.h>
 #include <stdio.h>
 
 using namespace llvm;
-
-#ifndef EXTERNAL_LLVM
-extern "C" {
-
-void LLVMInitializeAMDGPUAsmPrinter(void);
-void LLVMInitializeAMDGPUTargetMC(void);
-void LLVMInitializeAMDGPUTarget(void);
-void LLVMInitializeAMDGPUTargetInfo(void);
-}
-#endif
 
 namespace {
 
@@ -86,16 +74,11 @@ radeon_llvm_compile(LLVMModuleRef M, unsigned char ** bytes,
 
    Triple AMDGPUTriple(sys::getDefaultTargetTriple());
 
-#ifdef EXTERNAL_LLVM
-   /* XXX: Can we just initialize the AMDGPU target here? */
-   InitializeAllTargets();
-   InitializeAllTargetMCs();
-#else
-   LLVMInitializeAMDGPUTargetInfo();
-   LLVMInitializeAMDGPUTarget();
-   LLVMInitializeAMDGPUTargetMC();
-   LLVMInitializeAMDGPUAsmPrinter();
-#endif
+   LLVMInitializeR600TargetInfo();
+   LLVMInitializeR600Target();
+   LLVMInitializeR600TargetMC();
+   LLVMInitializeR600AsmPrinter();
+
    std::string err;
    const Target * AMDGPUTarget = TargetRegistry::lookupTarget("r600", err);
    if(!AMDGPUTarget) {
@@ -125,7 +108,7 @@ radeon_llvm_compile(LLVMModuleRef M, unsigned char ** bytes,
                      ));
    TargetMachine &AMDGPUTargetMachine = *tm.get();
    PassManager PM;
-   PM.add(new TargetData(*AMDGPUTargetMachine.getTargetData()));
+   PM.add(new DataLayout(*AMDGPUTargetMachine.getDataLayout()));
    PM.add(createPromoteMemoryToRegisterPass());
    AMDGPUTargetMachine.setAsmVerbosityDefault(true);
 

@@ -43,6 +43,7 @@
 #include "intel_fbo.h"
 
 #include "brw_context.h"
+#include "brw_program.h"
 #include "brw_defines.h"
 #include "brw_state.h"
 #include "brw_draw.h"
@@ -69,10 +70,16 @@ static void brw_destroy_context( struct intel_context *intel )
 {
    struct brw_context *brw = brw_context(&intel->ctx);
 
+   if (INTEL_DEBUG & DEBUG_SHADER_TIME) {
+      /* Force a report. */
+      brw->shader_time.report_time = 0;
+
+      brw_collect_and_report_shader_time(brw);
+      brw_destroy_shader_time(brw);
+   }
+
    brw_destroy_state(brw);
    brw_draw_destroy( brw );
-
-   ralloc_free(brw->wm.compile_data);
 
    dri_bo_release(&brw->curbe.curbe_bo);
    dri_bo_release(&brw->vs.const_bo);
@@ -196,7 +203,6 @@ static void brw_new_batch( struct intel_context *intel )
     */
    brw->sol.offset_0_batch_start = brw->sol.svbi_0_starting_index;
 
-   brw->vb.nr_current_buffers = 0;
    brw->ib.type = -1;
 
    /* Mark that the current program cache BO has been used by the GPU.
@@ -204,6 +210,14 @@ static void brw_new_batch( struct intel_context *intel )
     * next batch.
     */
    brw->cache.bo_used_by_gpu = true;
+
+   /* We need to periodically reap the shader time results, because rollover
+    * happens every few seconds.  We also want to see results every once in a
+    * while, because many programs won't cleanly destroy our context, so the
+    * end-of-run printout may not happen.
+    */
+   if (INTEL_DEBUG & DEBUG_SHADER_TIME)
+      brw_collect_and_report_shader_time(brw);
 }
 
 static void brw_invalidate_state( struct intel_context *intel, GLuint new_state )
@@ -225,6 +239,7 @@ static bool brw_is_hiz_depth_format(struct intel_context *intel,
    case MESA_FORMAT_Z32_FLOAT_X24S8:
    case MESA_FORMAT_X8_Z24:
    case MESA_FORMAT_S8_Z24:
+   case MESA_FORMAT_Z16:
       return true;
    default:
       return false;

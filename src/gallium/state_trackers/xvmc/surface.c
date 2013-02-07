@@ -386,7 +386,6 @@ Status XvMCPutSurface(Display *dpy, XvMCSurface *surface, Drawable drawable,
 
    memset(&surf_templ, 0, sizeof(surf_templ));
    surf_templ.format = tex->format;
-   surf_templ.usage = PIPE_BIND_RENDER_TARGET;
    surf = pipe->create_surface(pipe, tex, &surf_templ);
 
    if (!surf)
@@ -435,7 +434,7 @@ Status XvMCPutSurface(Display *dpy, XvMCSurface *surface, Drawable drawable,
    vl_compositor_set_layer_dst_area(cstate, 1, &dst_rect);
    vl_compositor_render(cstate, compositor, surf, dirty_area);
 
-   pipe->flush(pipe, &surface_priv->fence);
+   pipe->flush(pipe, &surface_priv->fence, 0);
 
    XVMC_MSG(XVMC_TRACE, "[XvMC] Submitted surface %p for display. Pushing to front buffer.\n", surface);
 

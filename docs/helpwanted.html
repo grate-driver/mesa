@@ -7,6 +7,13 @@
 </head>
 <body>
 
+<div class="header">
+  <h1>The Mesa 3D Graphics Library</h1>
+</div>
+
+<iframe src="contents.html"></iframe>
+<div class="content">
+
 <h1>Help Wanted / To-Do List</h1>
 
 <p>
@@ -17,12 +24,12 @@ Here are some specific ideas and areas where help would be appreciated:
 <ol>
 <li>
 <b>Driver patching and testing.</b>
-Patches are often posted to the <a href="http://lists.freedesktop.org/mailman/listinfo/mesa-dev" target="_parent">mesa-dev mailing list</a>, but aren't
+Patches are often posted to the <a href="http://lists.freedesktop.org/mailman/listinfo/mesa-dev">mesa-dev mailing list</a>, but aren't
 immediately checked into git because not enough people are testing them.
 Just applying patches, testing and reporting back is helpful.
 <li>
 <b>Driver debugging.</b>
-There are plenty of open bugs in the <a href="https://bugs.freedesktop.org/describecomponents.cgi?product=Mesa" target="_parent">bug database</a>.
+There are plenty of open bugs in the <a href="https://bugs.freedesktop.org/describecomponents.cgi?product=Mesa">bug database</a>.
 <li>
 <b>Remove aliasing warnings.</b>
 Enable gcc -Wstrict-aliasing=2 -fstrict-aliasing and track down aliasing
@@ -32,7 +39,7 @@ issues in the code.
 Fixing MSVC builds.
 <li>
 <b>Contribute more tests to
-<a href="http://piglit.freedesktop.org/" target="_parent">Piglit</a>.</b>
+<a href="http://piglit.freedesktop.org/">Piglit</a>.</b>
 <li>
 <b>Automatic testing.
 </b>
@@ -44,21 +51,31 @@ the mailing list.
 <p>
 You can find some further To-do lists here:
 </p>
+
+<p>
+<b>Common To-Do lists:</b>
+</p>
 <ul>
-  <li><a href="http://cgit.freedesktop.org/mesa/mesa/tree/docs/GL3.txt"
-    target="_parent"><b>GL3.txt</b></a></li>
-  <li><a href="http://cgit.freedesktop.org/mesa/mesa/tree/src/gallium/docs/llvm-todo.txt"
-    target="_parent"><b>LLVMpipe - todo</b></a></li>
-  <li><a href="http://dri.freedesktop.org/wiki/MissingFunctionality"
-    target="_parent"><b>MissingFunctionality</b></a></li>
-  <li><a href="http://dri.freedesktop.org/wiki/RadeonsiToDo"
-    target="_parent"><b>RadeonsiToDo</b></a></li>
-  <li><a href="http://dri.freedesktop.org/wiki/R600ToDo"
-    target="_parent"><b>R600ToDo</b></a></li>
-  <li><a href="http://dri.freedesktop.org/wiki/R300ToDo"
-    target="_parent"><b>R300ToDo</b></a></li>
-  <li><a href="http://cgit.freedesktop.org/mesa/mesa/tree/src/gallium/drivers/i915/TODO"
-    target="_parent"><b>i915g TODO</b></a></li>
+  <li><a href="http://cgit.freedesktop.org/mesa/mesa/tree/docs/GL3.txt">
+    <b>GL3.txt</b></a> - Status of OpenGL 3.x / 4.x features in Mesa.</li>
+  <li><a href="http://dri.freedesktop.org/wiki/MissingFunctionality">
+    <b>MissingFunctionality</b></a> - Detailed information about missing OpenGL features.</li>
+</ul>
+
+<p>
+<b>Driver specific To-Do lists:</b>
+</p>
+<ul>
+  <li><a href="http://cgit.freedesktop.org/mesa/mesa/tree/src/gallium/docs/llvm-todo.txt">
+    <b>LLVMpipe</b></a> - Software driver using LLVM for runtime code generation.</li>
+  <li><a href="http://dri.freedesktop.org/wiki/RadeonsiToDo">
+    <b>radeonsi</b></a> - Driver for AMD Southern Island.</li>
+  <li><a href="http://dri.freedesktop.org/wiki/R600ToDo">
+    <b>r600g</b></a> - Driver for ATI/AMD R600 - Northern Island.</li>
+  <li><a href="http://dri.freedesktop.org/wiki/R300ToDo">
+    <b>r300g</b></a> - Driver for ATI R300 - R500.</li>
+  <li><a href="http://cgit.freedesktop.org/mesa/mesa/tree/src/gallium/drivers/i915/TODO">
+    <b>i915g</b></a> - Driver for Intel i915/i945.</li>
 </ul>
 
 <p>
@@ -83,6 +100,6 @@ Finally:
 <li>Test your code thoroughly.  Include test programs if appropriate.
 </ol>
 
-
+</div>
 </body>
 </html>

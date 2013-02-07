@@ -49,6 +49,7 @@
 #include "lp_bld_gather.h"
 #include "lp_bld_debug.h"
 #include "lp_bld_format.h"
+#include "lp_bld_intr.h"
 
 
 /**
@@ -171,6 +172,10 @@ lp_build_unpack_arith_rgba_aos(struct gallivm_state *gallivm,
     * matches floating point size */
    assert (LLVMTypeOf(packed) == LLVMInt32TypeInContext(gallivm->context));
 
+#ifdef PIPE_ARCH_BIG_ENDIAN
+   packed = lp_build_bswap(gallivm, packed, lp_type_uint(32));
+#endif
+
    /* Broadcast the packed value to all four channels
     * before: packed = BGRA
     * after: packed = {BGRA, BGRA, BGRA, BGRA}
@@ -228,7 +233,6 @@ lp_build_unpack_arith_rgba_aos(struct gallivm_state *gallivm,
     */
    shifted = LLVMBuildLShr(builder, packed, LLVMConstVector(shifts, 4), "");
    masked = LLVMBuildAnd(builder, shifted, LLVMConstVector(masks, 4), "");
-
 
    if (!needs_uitofp) {
       /* UIToFP can't be expressed in SSE2 */
@@ -396,6 +400,8 @@ lp_build_fetch_rgba_aos(struct gallivm_state *gallivm,
        format_desc->block.bits <= type.width * 4 &&
        util_is_power_of_two(format_desc->block.bits)) {
       LLVMValueRef packed;
+      LLVMTypeRef dst_vec_type = lp_build_vec_type(gallivm, type);
+      unsigned vec_len = type.width * type.length;
 
       /*
        * The format matches the type (apart of a swizzle) so no need for
@@ -406,11 +412,14 @@ lp_build_fetch_rgba_aos(struct gallivm_state *gallivm,
                                format_desc->block.bits, type.width*4,
                                base_ptr, offset);
 
-      assert(format_desc->block.bits <= type.width * type.length);
+      assert(format_desc->block.bits <= vec_len);
 
-      packed = LLVMBuildBitCast(gallivm->builder, packed,
-                                lp_build_vec_type(gallivm, type), "");
-
+      packed = LLVMBuildBitCast(gallivm->builder, packed, dst_vec_type, "");
+#ifdef PIPE_ARCH_BIG_ENDIAN
+      if (type.floating)
+         packed = lp_build_bswap_vec(gallivm, packed, type,
+                                    lp_type_float_vec(type.width, vec_len));
+#endif
       return lp_build_format_swizzle_aos(format_desc, &bld, packed);
    }
 
@@ -428,7 +437,8 @@ lp_build_fetch_rgba_aos(struct gallivm_state *gallivm,
        format_desc->is_bitmask &&
        !format_desc->is_mixed &&
        (format_desc->channel[0].type == UTIL_FORMAT_TYPE_UNSIGNED ||
-        format_desc->channel[1].type == UTIL_FORMAT_TYPE_UNSIGNED)) {
+        format_desc->channel[1].type == UTIL_FORMAT_TYPE_UNSIGNED) &&
+       !format_desc->channel[0].pure_integer) {
 
       LLVMValueRef tmps[LP_MAX_VECTOR_LENGTH/4];
       LLVMValueRef res;
@@ -471,7 +481,9 @@ lp_build_fetch_rgba_aos(struct gallivm_state *gallivm,
    }
 
    /* If all channels are of same type and we are not using half-floats */
-   if (util_format_is_array(format_desc)) {
+   if (format_desc->is_array &&
+       format_desc->colorspace == UTIL_FORMAT_COLORSPACE_RGB) {
+      assert(!format_desc->is_mixed);
       return lp_build_fetch_rgba_aos_array(gallivm, format_desc, type, base_ptr, offset);
    }
 
@@ -697,6 +709,8 @@ lp_build_fetch_rgba_aos(struct gallivm_state *gallivm,
 
       return res;
    }
+
+   assert(!util_format_is_pure_integer(format_desc->format));
 
    assert(0);
    return lp_build_undef(gallivm, type);

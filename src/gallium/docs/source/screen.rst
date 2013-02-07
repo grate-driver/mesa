@@ -33,7 +33,7 @@ The integer capabilities:
 * ``PIPE_CAP_MAX_RENDER_TARGETS``: The maximum number of render targets that may be
   bound.
 * ``PIPE_CAP_OCCLUSION_QUERY``: Whether occlusion queries are available.
-* ``PIPE_CAP_TIMER_QUERY``: Whether timer queries are available.
+* ``PIPE_CAP_QUERY_TIME_ELAPSED``: Whether PIPE_QUERY_TIME_ELAPSED queries are available.
 * ``PIPE_CAP_TEXTURE_SHADOW_MAP``: indicates whether the fragment shader hardware
   can do the depth texture / Z comparison operation in TEX instructions
   for shadow testing.
@@ -61,8 +61,6 @@ The integer capabilities:
 * ``PIPE_CAP_INDEP_BLEND_FUNC``: Whether per-rendertarget blend functions are
   available. If 0, then the first rendertarget's blend functions affect all
   MRTs.
-* ``PIPE_CAP_DEPTHSTENCIL_CLEAR_SEPARATE``: Whether clearing only depth or only
-  stencil in a combined depth-stencil buffer is supported.
 * ``PIPE_CAP_MAX_TEXTURE_ARRAY_LAYERS``: The maximum number of texture array
   layers supported. If 0, the array textures are not supported at all and
   the ARRAY texture targets are invalid.
@@ -130,6 +128,12 @@ The integer capabilities:
   pipe_draw_info::start_instance.
 * ``PIPE_CAP_QUERY_TIMESTAMP``: Whether PIPE_QUERY_TIMESTAMP and
   the pipe_screen::get_timestamp hook are implemented.
+* ``PIPE_CAP_TEXTURE_MULTISAMPLE``: Whether all MSAA resources supported
+  for rendering are also supported for texturing.
+* ``PIPE_CAP_MIN_MAP_BUFFER_ALIGNMENT``: The minimum alignment that should be
+  expected for a pointer returned by transfer_map if the resource is
+  PIPE_BUFFER. In other words, the pointer returned by transfer_map is
+  always aligned to this value.
 
 
 .. _pipe_capf:
@@ -239,6 +243,8 @@ pipe_screen::get_compute_param.
   resource.  Value type: ``uint64_t``.
 * ``PIPE_COMPUTE_CAP_MAX_INPUT_SIZE``: Maximum size of the INPUT
   resource.  Value type: ``uint64_t``.
+* ``PIPE_COMPUTE_CAP_MAX_MEM_ALLOC_SIZE``: Maximum size of a memory object
+  allocation in bytes.  Value type: ``uint64_t``.
 
 .. _pipe_bind:
 
@@ -357,6 +363,16 @@ the maximum allowed legal value is 32.
 **geom_flags** is a bitmask of PIPE_TEXTURE_GEOM_x flags.
 
 Returns TRUE if all usages can be satisfied.
+
+
+can_create_resource
+^^^^^^^^^^^^^^^^^^^
+
+Check if a resource can actually be created (but don't actually allocate any
+memory).  This is used to implement OpenGL's proxy textures.  Typically, a
+driver will simply check if the total size of the given resource is less than
+some limit.
+
 
 .. _resource_create:
 

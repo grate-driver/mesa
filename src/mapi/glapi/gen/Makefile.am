@@ -1,11 +1,3 @@
-# This file isn't used during a normal compilation since we don't want to
-# require Python in order to compile Mesa.
-# Instead, when the Mesa developers update/change the API interface it's
-# up to him/her to re-run this makefile and check in the newly generated files.
-
-
-TOP = ../../../..
-
 # These are the "official" xserver indent flags from utils/modular/x-indent.sh
 XORG_INDENT_FLAGS = -linux -bad -bap -blf -bli0 -cbi0 -cdw -nce -cs -i4 -lc80 -psl -nbbo \
     -nbc -psl -nbfda -nut -nss -T pointer -T ScreenPtr -T ScrnInfoPtr -T pointer \
@@ -26,10 +18,10 @@ XORG_INDENT_FLAGS = -linux -bad -bap -blf -bli0 -cbi0 -cdw -nce -cs -i4 -lc80 -p
     -T _XFUNCPROTOBEGIN -T _XFUNCPROTOEND -T _X_EXPORT
 
 
-MESA_DIR = $(TOP)/src/mesa
-MESA_GLAPI_DIR = $(TOP)/src/mapi/glapi
-MESA_MAPI_DIR = $(TOP)/src/mapi/mapi
-MESA_GLX_DIR = $(TOP)/src/glx
+MESA_DIR = $(top_srcdir)/src/mesa
+MESA_GLAPI_DIR = $(top_srcdir)/src/mapi/glapi
+MESA_MAPI_DIR = $(top_srcdir)/src/mapi/mapi
+MESA_GLX_DIR = $(top_srcdir)/src/glx
 
 MESA_GLAPI_OUTPUTS = \
 	$(MESA_GLAPI_DIR)/glapi_mapi_tmp.h \
@@ -51,10 +43,11 @@ if HAVE_SPARC_ASM
 MESA_GLAPI_ASM_OUTPUTS += $(MESA_GLAPI_DIR)/glapi_sparc.S
 endif
 
-MESA_OUTPUTS = \
+BUILT_SOURCES = \
 	$(MESA_GLAPI_OUTPUTS) \
 	$(MESA_GLAPI_ASM_OUTPUTS) \
 	$(MESA_DIR)/main/enums.c \
+	$(MESA_DIR)/main/api_exec.c \
 	$(MESA_DIR)/main/dispatch.h \
 	$(MESA_DIR)/main/remap_helper.h \
 	$(MESA_GLX_DIR)/indirect.c \
@@ -62,6 +55,11 @@ MESA_OUTPUTS = \
 	$(MESA_GLX_DIR)/indirect_init.c \
 	$(MESA_GLX_DIR)/indirect_size.h \
 	$(MESA_GLX_DIR)/indirect_size.c
+EXTRA_DIST= \
+	$(BUILT_SOURCES) \
+	$(MESA_GLAPI_DIR)/glapi_x86.S \
+	$(MESA_GLAPI_DIR)/glapi_x86-64.S \
+	$(MESA_GLAPI_DIR)/glapi_sparc.S
 
 ######################################################################
 
@@ -100,6 +98,7 @@ API_XML = \
 	ARB_draw_elements_base_vertex.xml \
 	ARB_draw_instanced.xml \
 	ARB_ES2_compatibility.xml \
+	ARB_ES3_compatibility.xml \
 	ARB_framebuffer_object.xml \
 	ARB_geometry_shader4.xml \
 	ARB_instanced_arrays.xml \
@@ -135,13 +134,15 @@ API_XML = \
 	GL3x.xml
 
 
-COMMON = $(API_XML) gl_XML.py glX_XML.py license.py typeexpr.py
-
-COMMON_ES = \
-	$(COMMON) \
+COMMON = $(API_XML) \
+	gl_XML.py \
+	glX_XML.py \
+	license.py \
+	typeexpr.py \
 	gl_and_es_API.xml \
 	es_EXT.xml \
 	ARB_ES2_compatibility.xml \
+	ARB_ES3_compatibility.xml \
 	ARB_get_program_binary.xml \
 	OES_fixed_point.xml \
 	OES_single_precision.xml
@@ -151,8 +152,6 @@ COMMON_GLX = $(COMMON) glX_API.xml glX_XML.py glX_proto_common.py
 PYTHON_GEN = $(AM_V_GEN) $(PYTHON2) $(PYTHON_FLAGS)
 
 ######################################################################
-
-all-local: $(MESA_OUTPUTS)
 
 xorg: check-xorg-source $(XORG_OUTPUTS)
 
@@ -167,7 +166,6 @@ check-xorg-source:
 
 clean-local:
 	-rm -f *~ *.pyo
-	-rm -f $(MESA_OUTPUTS)
 
 ######################################################################
 
@@ -182,43 +180,46 @@ $(XORG_GLAPI_DIR)/%.h: $(MESA_GLAPI_DIR)/%.h
 
 ######################################################################
 
-$(MESA_GLAPI_DIR)/glapi_mapi_tmp.h: $(MESA_MAPI_DIR)/mapi_abi.py $(COMMON_ES)
+$(MESA_GLAPI_DIR)/glapi_mapi_tmp.h: $(MESA_MAPI_DIR)/mapi_abi.py $(COMMON)
 	$(PYTHON_GEN) $< \
 		--printer glapi --mode lib $(srcdir)/gl_and_es_API.xml > $@
 
 $(MESA_GLAPI_DIR)/glprocs.h: gl_procs.py $(COMMON)
-	$(PYTHON_GEN) $< -f $(srcdir)/gl_API.xml > $@
+	$(PYTHON_GEN) $< -f $(srcdir)/gl_and_es_API.xml > $@
 
 $(MESA_GLAPI_DIR)/glapitemp.h: gl_apitemp.py $(COMMON)
-	$(PYTHON_GEN) $< -f $(srcdir)/gl_API.xml > $@
+	$(PYTHON_GEN) $< -f $(srcdir)/gl_and_es_API.xml > $@
 
 $(MESA_GLAPI_DIR)/glapitable.h: gl_table.py $(COMMON)
-	$(PYTHON_GEN) $< -f $(srcdir)/gl_API.xml > $@
+	$(PYTHON_GEN) $< -f $(srcdir)/gl_and_es_API.xml > $@
 
 $(MESA_GLAPI_DIR)/glapi_gentable.c: gl_gentable.py $(COMMON)
-	$(PYTHON_GEN) $< -f $(srcdir)/gl_API.xml > $@
+	$(PYTHON_GEN) $< -f $(srcdir)/gl_and_es_API.xml > $@
 
 ######################################################################
 
 $(MESA_GLAPI_DIR)/glapi_x86.S: gl_x86_asm.py $(COMMON)
-	$(PYTHON_GEN) $< -f $(srcdir)/gl_API.xml > $@
+	$(PYTHON_GEN) $< -f $(srcdir)/gl_and_es_API.xml > $@
 
 $(MESA_GLAPI_DIR)/glapi_x86-64.S: gl_x86-64_asm.py $(COMMON)
-	$(PYTHON_GEN) $< -f $(srcdir)/gl_API.xml > $@
+	$(PYTHON_GEN) $< -f $(srcdir)/gl_and_es_API.xml > $@
 
 $(MESA_GLAPI_DIR)/glapi_sparc.S: gl_SPARC_asm.py $(COMMON)
-	$(PYTHON_GEN) $< -f $(srcdir)/gl_API.xml > $@
+	$(PYTHON_GEN) $< -f $(srcdir)/gl_and_es_API.xml > $@
 
 ######################################################################
 
-$(MESA_DIR)/main/enums.c: gl_enums.py $(COMMON_ES)
+$(MESA_DIR)/main/enums.c: gl_enums.py $(COMMON)
+	$(PYTHON_GEN) $< -f $(srcdir)/gl_and_es_API.xml > $@
+
+$(MESA_DIR)/main/api_exec.c: gl_genexec.py $(COMMON)
 	$(PYTHON_GEN) $< -f $(srcdir)/gl_and_es_API.xml > $@
 
 $(MESA_DIR)/main/dispatch.h: gl_table.py $(COMMON)
-	$(PYTHON_GEN) $< -f $(srcdir)/gl_API.xml -m remap_table > $@
+	$(PYTHON_GEN) $< -f $(srcdir)/gl_and_es_API.xml -m remap_table > $@
 
 $(MESA_DIR)/main/remap_helper.h: remap_helper.py $(COMMON)
-	$(PYTHON_GEN) $< -f $(srcdir)/gl_API.xml > $@
+	$(PYTHON_GEN) $< -f $(srcdir)/gl_and_es_API.xml > $@
 
 ######################################################################
 

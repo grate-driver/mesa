@@ -48,6 +48,7 @@
 #include "st_atom.h"
 #include "st_cb_bufferobjects.h"
 #include "st_cb_xformfb.h"
+#include "st_debug.h"
 #include "st_draw.h"
 #include "st_program.h"
 
@@ -83,7 +84,12 @@ all_varyings_in_vbos(const struct gl_client_array *arrays[])
 }
 
 
-static void
+/**
+ * Basically, translate Mesa's index buffer information into
+ * a pipe_index_buffer object.
+ * \return TRUE or FALSE for success/failure
+ */
+static boolean
 setup_index_buffer(struct st_context *st,
                    const struct _mesa_index_buffer *ib,
                    struct pipe_index_buffer *ibuffer)
@@ -99,8 +105,12 @@ setup_index_buffer(struct st_context *st,
       ibuffer->offset = pointer_to_offset(ib->ptr);
    }
    else if (st->indexbuf_uploader) {
-      u_upload_data(st->indexbuf_uploader, 0, ib->count * ibuffer->index_size,
-                    ib->ptr, &ibuffer->offset, &ibuffer->buffer);
+      if (u_upload_data(st->indexbuf_uploader, 0,
+                        ib->count * ibuffer->index_size, ib->ptr,
+                        &ibuffer->offset, &ibuffer->buffer) != PIPE_OK) {
+         /* out of memory */
+         return FALSE;
+      }
       u_upload_unmap(st->indexbuf_uploader);
    }
    else {
@@ -109,6 +119,7 @@ setup_index_buffer(struct st_context *st,
    }
 
    cso_set_index_buffer(st->cso_context, ibuffer);
+   return TRUE;
 }
 
 
@@ -219,7 +230,10 @@ st_draw_vbo(struct gl_context *ctx,
             vbo_get_minmax_indices(ctx, prims, ib, &min_index, &max_index,
                                    nr_prims);
 
-      setup_index_buffer(st, ib, &ibuffer);
+      if (!setup_index_buffer(st, ib, &ibuffer)) {
+         /* out of memory */
+         return;
+      }
 
       info.indexed = TRUE;
       if (min_index != ~0 && max_index != ~0) {
@@ -230,8 +244,8 @@ st_draw_vbo(struct gl_context *ctx,
       /* The VBO module handles restart for the non-indexed GLDrawArrays
        * so we only set these fields for indexed drawing:
        */
-      info.primitive_restart = ctx->Array.PrimitiveRestart;
-      info.restart_index = ctx->Array.RestartIndex;
+      info.primitive_restart = ctx->Array._PrimitiveRestart;
+      info.restart_index = ctx->Array._RestartIndex;
    }
    else {
       /* Transform feedback drawing is always non-indexed. */
@@ -252,6 +266,14 @@ st_draw_vbo(struct gl_context *ctx,
       if (!ib) {
          info.min_index = info.start;
          info.max_index = info.start + info.count - 1;
+      }
+
+      if (ST_DEBUG & DEBUG_DRAW) {
+         debug_printf("st/draw: mode %s  start %u  count %u  indexed %d\n",
+                      u_prim_name(info.mode),
+                      info.start,
+                      info.count,
+                      info.indexed);
       }
 
       if (info.count_from_stream_output) {
@@ -278,7 +300,6 @@ st_init_draw(struct st_context *st)
 
    vbo_set_draw_func(ctx, st_draw_vbo);
 
-#if FEATURE_feedback || FEATURE_rastpos
    st->draw = draw_create(st->pipe); /* for selection/feedback */
 
    /* Disable draw options that might convert points/lines to tris, etc.
@@ -288,14 +309,11 @@ st_init_draw(struct st_context *st)
    draw_wide_point_threshold(st->draw, 1000.0f);
    draw_enable_line_stipple(st->draw, FALSE);
    draw_enable_point_sprites(st->draw, FALSE);
-#endif
 }
 
 
 void
 st_destroy_draw(struct st_context *st)
 {
-#if FEATURE_feedback || FEATURE_rastpos
    draw_destroy(st->draw);
-#endif
 }

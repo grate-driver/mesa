@@ -143,7 +143,7 @@ zoom_span( struct gl_context *ctx, GLint imgX, GLint imgY, const SWspan *span,
 
    if (!swrast->ZoomedArrays) {
       /* allocate on demand */
-      swrast->ZoomedArrays = (SWspanarrays *) CALLOC(sizeof(SWspanarrays));
+      swrast->ZoomedArrays = (SWspanarrays *) calloc(1, sizeof(SWspanarrays));
       if (!swrast->ZoomedArrays)
          return;
    }
@@ -234,7 +234,7 @@ zoom_span( struct gl_context *ctx, GLint imgX, GLint imgY, const SWspan *span,
          for (i = 0; i < zoomedWidth; i++) {
             GLint j = unzoom_x(ctx->Pixel.ZoomX, imgX, x0 + i) - span->x;
             ASSERT(j >= 0);
-            ASSERT(j < span->end);
+            ASSERT(j < (GLint) span->end);
             COPY_4V(zoomed.array->attribs[FRAG_ATTRIB_COL0][i], rgba[j]);
          }
       }
@@ -272,7 +272,7 @@ zoom_span( struct gl_context *ctx, GLint imgX, GLint imgY, const SWspan *span,
          for (i = 0; i < zoomedWidth; i++) {
             GLint j = unzoom_x(ctx->Pixel.ZoomX, imgX, x0 + i) - span->x;
             ASSERT(j >= 0);
-            ASSERT(j < span->end);
+            ASSERT(j < (GLint) span->end);
             zoomed.array->attribs[FRAG_ATTRIB_COL0][i][0] = rgb[j][0];
             zoomed.array->attribs[FRAG_ATTRIB_COL0][i][1] = rgb[j][1];
             zoomed.array->attribs[FRAG_ATTRIB_COL0][i][2] = rgb[j][2];
@@ -375,7 +375,7 @@ _swrast_write_zoomed_stencil_span(struct gl_context *ctx, GLint imgX, GLint imgY
    ASSERT(zoomedWidth > 0);
    ASSERT(zoomedWidth <= SWRAST_MAX_WIDTH);
 
-   zoomedVals = (GLubyte *) malloc(zoomedWidth * sizeof(GLubyte));
+   zoomedVals = malloc(zoomedWidth * sizeof(GLubyte));
    if (!zoomedVals)
       return;
 
@@ -420,7 +420,7 @@ _swrast_write_zoomed_z_span(struct gl_context *ctx, GLint imgX, GLint imgY,
    ASSERT(zoomedWidth > 0);
    ASSERT(zoomedWidth <= SWRAST_MAX_WIDTH);
 
-   zoomedVals = (GLuint *) malloc(zoomedWidth * sizeof(GLuint));
+   zoomedVals = malloc(zoomedWidth * sizeof(GLuint));
    if (!zoomedVals)
       return;
 

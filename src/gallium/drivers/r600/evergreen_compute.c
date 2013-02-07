@@ -96,18 +96,18 @@ static void evergreen_cs_set_vertex_buffer(
 	vb->buffer = buffer;
 	vb->user_buffer = NULL;
 
-	r600_inval_vertex_cache(rctx);
+	/* The vertex instructions in the compute shaders use the texture cache,
+	 * so we need to invalidate it. */
+	rctx->flags |= R600_CONTEXT_INVAL_READ_CACHES;
 	state->enabled_mask |= 1 << vb_index;
 	state->dirty_mask |= 1 << vb_index;
-	r600_atom_dirty(rctx, &state->atom);
+	state->atom.dirty = true;
 }
 
-const struct u_resource_vtbl r600_global_buffer_vtbl =
+static const struct u_resource_vtbl r600_global_buffer_vtbl =
 {
 	u_default_resource_get_handle, /* get_handle */
 	r600_compute_global_buffer_destroy, /* resource_destroy */
-	r600_compute_global_get_transfer, /* get_transfer */
-	r600_compute_global_transfer_destroy, /* transfer_destroy */
 	r600_compute_global_transfer_map, /* transfer_map */
 	r600_compute_global_transfer_flush_region,/* transfer_flush_region */
 	r600_compute_global_transfer_unmap, /* transfer_unmap */
@@ -121,11 +121,11 @@ void *evergreen_create_compute_state(
 {
 	struct r600_context *ctx = (struct r600_context *)ctx_;
 	struct r600_pipe_compute *shader = CALLOC_STRUCT(r600_pipe_compute);
-	void *p;
 
 #ifdef HAVE_OPENCL
 	const struct pipe_llvm_program_header * header;
 	const unsigned char * code;
+	unsigned i;
 
 	COMPUTE_DBG("*** evergreen_create_compute_state\n");
 
@@ -142,18 +142,15 @@ void *evergreen_create_compute_state(
 	shader->input_size = cso->req_input_mem;
 
 #ifdef HAVE_OPENCL 
-	shader->mod = llvm_parse_bitcode(code, header->num_bytes);
+	shader->num_kernels = llvm_get_num_kernels(code, header->num_bytes);
+	shader->kernels = CALLOC(sizeof(struct r600_kernel), shader->num_kernels);
 
-	r600_compute_shader_create(ctx_, shader->mod, &shader->bc);
+	for (i = 0; i < shader->num_kernels; i++) {
+		struct r600_kernel *kernel = &shader->kernels[i];
+		kernel->llvm_module = llvm_get_kernel_module(i, code,
+							header->num_bytes);
+	}
 #endif
-	shader->shader_code_bo = r600_compute_buffer_alloc_vram(ctx->screen,
-							shader->bc.ndw * 4);
-
-	p = ctx->ws->buffer_map(shader->shader_code_bo->cs_buf, ctx->cs,
-							PIPE_TRANSFER_WRITE);
-
-	memcpy(p, shader->bc.bytecode, shader->bc.ndw * 4);
-	ctx->ws->buffer_unmap(shader->shader_code_bo->cs_buf);
 	return shader;
 }
 
@@ -213,8 +210,7 @@ void evergreen_compute_upload_input(
 						ctx->screen, buffer_size);
 	}
 
-	num_work_groups_start = ctx->ws->buffer_map(
-		shader->kernel_param->cs_buf, ctx->cs, PIPE_TRANSFER_WRITE);
+	num_work_groups_start = r600_buffer_mmap_sync_with_rings(ctx, shader->kernel_param, PIPE_TRANSFER_WRITE);
 	global_size_start = num_work_groups_start + (3 * (sizeof(uint) /4));
 	local_size_start = global_size_start + (3 * (sizeof(uint)) / 4);
 	kernel_parameters_start = local_size_start + (3 * (sizeof(uint)) / 4);
@@ -254,7 +250,7 @@ static void evergreen_emit_direct_dispatch(
 		const uint *block_layout, const uint *grid_layout)
 {
 	int i;
-	struct radeon_winsys_cs *cs = rctx->cs;
+	struct radeon_winsys_cs *cs = rctx->rings.gfx.cs;
 	unsigned num_waves;
 	unsigned num_pipes = rctx->screen->info.r600_max_pipes;
 	unsigned wave_divisor = (16 * num_pipes);
@@ -317,24 +313,55 @@ static void evergreen_emit_direct_dispatch(
 static void compute_emit_cs(struct r600_context *ctx, const uint *block_layout,
 		const uint *grid_layout)
 {
-	struct radeon_winsys_cs *cs = ctx->cs;
+	struct radeon_winsys_cs *cs = ctx->rings.gfx.cs;
+	unsigned flush_flags = 0;
 	int i;
-
 	struct r600_resource *onebo = NULL;
-	struct r600_pipe_state *cb_state;
 	struct evergreen_compute_resource *resources =
 					ctx->cs_shader_state.shader->resources;
+
+	/* make sure that the gfx ring is only one active */
+	if (ctx->rings.dma.cs) {
+		ctx->rings.dma.flush(ctx, RADEON_FLUSH_ASYNC);
+	}
 
 	/* Initialize all the compute-related registers.
 	 *
 	 * See evergreen_init_atom_start_compute_cs() in this file for the list
 	 * of registers initialized by the start_compute_cs_cmd atom.
 	 */
-	r600_emit_atom(ctx, &ctx->start_compute_cs_cmd.atom);
+	r600_emit_command_buffer(cs, &ctx->start_compute_cs_cmd);
 
-	/* Emit cb_state */
-        cb_state = ctx->states[R600_PIPE_STATE_FRAMEBUFFER];
-	r600_context_pipe_state_emit(ctx, cb_state, RADEON_CP_PACKET3_COMPUTE_MODE);
+	ctx->flags |= R600_CONTEXT_WAIT_3D_IDLE | R600_CONTEXT_FLUSH_AND_INV;
+	r600_flush_emit(ctx);
+
+	/* Emit colorbuffers. */
+	for (i = 0; i < ctx->framebuffer.state.nr_cbufs; i++) {
+		struct r600_surface *cb = (struct r600_surface*)ctx->framebuffer.state.cbufs[i];
+		unsigned reloc = r600_context_bo_reloc(ctx, &ctx->rings.gfx,
+						       (struct r600_resource*)cb->base.texture,
+						       RADEON_USAGE_READWRITE);
+
+		r600_write_compute_context_reg_seq(cs, R_028C60_CB_COLOR0_BASE + i * 0x3C, 7);
+		r600_write_value(cs, cb->cb_color_base);	/* R_028C60_CB_COLOR0_BASE */
+		r600_write_value(cs, cb->cb_color_pitch);	/* R_028C64_CB_COLOR0_PITCH */
+		r600_write_value(cs, cb->cb_color_slice);	/* R_028C68_CB_COLOR0_SLICE */
+		r600_write_value(cs, cb->cb_color_view);	/* R_028C6C_CB_COLOR0_VIEW */
+		r600_write_value(cs, cb->cb_color_info);	/* R_028C70_CB_COLOR0_INFO */
+		r600_write_value(cs, cb->cb_color_attrib);	/* R_028C74_CB_COLOR0_ATTRIB */
+		r600_write_value(cs, cb->cb_color_dim);		/* R_028C78_CB_COLOR0_DIM */
+
+		r600_write_value(cs, PKT3(PKT3_NOP, 0, 0)); /* R_028C60_CB_COLOR0_BASE */
+		r600_write_value(cs, reloc);
+
+		if (!ctx->keep_tiling_flags) {
+			r600_write_value(cs, PKT3(PKT3_NOP, 0, 0)); /* R_028C70_CB_COLOR0_INFO */
+			r600_write_value(cs, reloc);
+		}
+
+		r600_write_value(cs, PKT3(PKT3_NOP, 0, 0)); /* R_028C74_CB_COLOR0_ATTRIB */
+		r600_write_value(cs, reloc);
+	}
 
 	/* Set CB_TARGET_MASK  XXX: Use cb_misc_state */
 	r600_write_compute_context_reg(cs, R_028238_CB_TARGET_MASK,
@@ -384,15 +411,10 @@ static void compute_emit_cs(struct r600_context *ctx, const uint *block_layout,
 	/* Emit dispatch state and dispatch packet */
 	evergreen_emit_direct_dispatch(ctx, block_layout, grid_layout);
 
-	/* r600_flush_framebuffer() updates the cb_flush_flags and then
-	 * calls r600_emit_atom() on the ctx->surface_sync_cmd.atom, which emits
-	 * a SURFACE_SYNC packet via r600_emit_surface_sync().
-	 *
-	 * XXX r600_emit_surface_sync() hardcodes the CP_COHER_SIZE to
-	 * 0xffffffff, so we will need to add a field to struct
-	 * r600_surface_sync_cmd if we want to manually set this value.
+	/* XXX evergreen_flush_emit() hardcodes the CP_COHER_SIZE to 0xffffffff
 	 */
-	r600_flush_framebuffer(ctx, true /* Flush now */);
+	ctx->flags |= R600_CONTEXT_INVAL_READ_CACHES;
+	r600_flush_emit(ctx);
 
 #if 0
 	COMPUTE_DBG("cdw: %i\n", cs->cdw);
@@ -401,7 +423,12 @@ static void compute_emit_cs(struct r600_context *ctx, const uint *block_layout,
 	}
 #endif
 
-	ctx->ws->cs_flush(ctx->cs, RADEON_FLUSH_ASYNC | RADEON_FLUSH_COMPUTE);
+	flush_flags = RADEON_FLUSH_ASYNC | RADEON_FLUSH_COMPUTE;
+	if (ctx->keep_tiling_flags) {
+		flush_flags |= RADEON_FLUSH_KEEP_TILING_FLAGS;
+	}
+
+	ctx->ws->cs_flush(ctx->rings.gfx.cs, flush_flags);
 
 	ctx->pm4_dirty_cdwords = 0;
 	ctx->flags = 0;
@@ -428,23 +455,24 @@ void evergreen_emit_cs_shader(
 	struct r600_cs_shader_state *state =
 					(struct r600_cs_shader_state*)atom;
 	struct r600_pipe_compute *shader = state->shader;
-	struct radeon_winsys_cs *cs = rctx->cs;
+	struct r600_kernel *kernel = &shader->kernels[state->kernel_index];
+	struct radeon_winsys_cs *cs = rctx->rings.gfx.cs;
 	uint64_t va;
 
-	va = r600_resource_va(&rctx->screen->screen, &shader->shader_code_bo->b.b);
+	va = r600_resource_va(&rctx->screen->screen, &kernel->code_bo->b.b);
 
 	r600_write_compute_context_reg_seq(cs, R_0288D0_SQ_PGM_START_LS, 3);
 	r600_write_value(cs, va >> 8); /* R_0288D0_SQ_PGM_START_LS */
 	r600_write_value(cs,           /* R_0288D4_SQ_PGM_RESOURCES_LS */
-			S_0288D4_NUM_GPRS(shader->bc.ngpr)
-			| S_0288D4_STACK_SIZE(shader->bc.nstack));
+			S_0288D4_NUM_GPRS(kernel->bc.ngpr)
+			| S_0288D4_STACK_SIZE(kernel->bc.nstack));
 	r600_write_value(cs, 0);	/* R_0288D8_SQ_PGM_RESOURCES_LS_2 */
 
 	r600_write_value(cs, PKT3C(PKT3_NOP, 0, 0));
-	r600_write_value(cs, r600_context_bo_reloc(rctx, shader->shader_code_bo,
-							RADEON_USAGE_READ));
+	r600_write_value(cs, r600_context_bo_reloc(rctx, &rctx->rings.gfx,
+							kernel->code_bo, RADEON_USAGE_READ));
 
-	r600_inval_shader_cache(rctx);
+	rctx->flags |= R600_CONTEXT_INVAL_READ_CACHES;
 }
 
 static void evergreen_launch_grid(
@@ -454,8 +482,23 @@ static void evergreen_launch_grid(
 {
 	struct r600_context *ctx = (struct r600_context *)ctx_;
 
-	COMPUTE_DBG("PC: %i\n", pc);
+#ifdef HAVE_OPENCL 
+	COMPUTE_DBG("*** evergreen_launch_grid: pc = %u\n", pc);
 
+	struct r600_pipe_compute *shader = ctx->cs_shader_state.shader;
+	if (!shader->kernels[pc].code_bo) {
+		void *p;
+		struct r600_kernel *kernel = &shader->kernels[pc];
+		r600_compute_shader_create(ctx_, kernel->llvm_module, &kernel->bc);
+		kernel->code_bo = r600_compute_buffer_alloc_vram(ctx->screen,
+							kernel->bc.ndw * 4);
+		p = r600_buffer_mmap_sync_with_rings(ctx, kernel->code_bo, PIPE_TRANSFER_WRITE);
+		memcpy(p, kernel->bc.bytecode, kernel->bc.ndw * 4);
+		ctx->ws->buffer_unmap(kernel->code_bo->cs_buf);
+	}
+#endif
+
+	ctx->cs_shader_state.kernel_index = pc;
 	evergreen_compute_upload_input(ctx_, block_layout, grid_layout, input);
 	compute_emit_cs(ctx, block_layout, grid_layout);
 }
@@ -583,8 +626,17 @@ void evergreen_init_atom_start_compute_cs(struct r600_context *ctx)
 	/* since all required registers are initialised in the
 	 * start_compute_cs_cmd atom, we can EMIT_EARLY here.
 	 */
-	r600_init_command_buffer(cb, 256, EMIT_EARLY);
+	r600_init_command_buffer(cb, 256);
 	cb->pkt_flags = RADEON_CP_PACKET3_COMPUTE_MODE;
+
+	/* This must be first. */
+	r600_store_value(cb, PKT3(PKT3_CONTEXT_CONTROL, 1, 0));
+	r600_store_value(cb, 0x80000000);
+	r600_store_value(cb, 0x80000000);
+
+	/* We're setting config registers here. */
+	r600_store_value(cb, PKT3(PKT3_EVENT_WRITE, 0, 0));
+	r600_store_value(cb, EVENT_TYPE(EVENT_TYPE_CS_PARTIAL_FLUSH) | EVENT_INDEX(4));
 
 	switch (ctx->family) {
 	case CHIP_CEDAR:
@@ -632,8 +684,12 @@ void evergreen_init_atom_start_compute_cs(struct r600_context *ctx)
 	}
 
 	/* Config Registers */
-	evergreen_init_common_regs(cb, ctx->chip_class
-			, ctx->family, ctx->screen->info.drm_minor);
+	if (ctx->chip_class < CAYMAN)
+		evergreen_init_common_regs(cb, ctx->chip_class, ctx->family,
+					   ctx->screen->info.drm_minor);
+	else
+		cayman_init_common_regs(cb, ctx->chip_class, ctx->family,
+					ctx->screen->info.drm_minor);
 
 	/* The primitive type always needs to be POINTLIST for compute. */
 	r600_store_config_reg(cb, R_008958_VGT_PRIMITIVE_TYPE,
@@ -751,15 +807,19 @@ struct pipe_resource *r600_compute_global_buffer_create(
 	struct pipe_screen *screen,
 	const struct pipe_resource *templ)
 {
+	struct r600_resource_global* result = NULL;
+	struct r600_screen* rscreen = NULL;
+	int size_in_dw = 0;
+
 	assert(templ->target == PIPE_BUFFER);
 	assert(templ->bind & PIPE_BIND_GLOBAL);
 	assert(templ->array_size == 1 || templ->array_size == 0);
 	assert(templ->depth0 == 1 || templ->depth0 == 0);
 	assert(templ->height0 == 1 || templ->height0 == 0);
 
-	struct r600_resource_global* result = (struct r600_resource_global*)
-		CALLOC(sizeof(struct r600_resource_global), 1);
-	struct r600_screen* rscreen = (struct r600_screen*)screen;
+	result = (struct r600_resource_global*)
+	CALLOC(sizeof(struct r600_resource_global), 1);
+	rscreen = (struct r600_screen*)screen;
 
 	COMPUTE_DBG("*** r600_compute_global_buffer_create\n");
 	COMPUTE_DBG("width = %u array_size = %u\n", templ->width0,
@@ -770,7 +830,7 @@ struct pipe_resource *r600_compute_global_buffer_create(
 	result->base.b.b = *templ;
 	pipe_reference_init(&result->base.b.b.reference, 1);
 
-	int size_in_dw = (templ->width0+3) / 4;
+	size_in_dw = (templ->width0+3) / 4;
 
 	result->chunk = compute_memory_alloc(rscreen->global_pool, size_in_dw);
 
@@ -787,11 +847,14 @@ void r600_compute_global_buffer_destroy(
 	struct pipe_screen *screen,
 	struct pipe_resource *res)
 {
+	struct r600_resource_global* buffer = NULL;
+	struct r600_screen* rscreen = NULL;
+
 	assert(res->target == PIPE_BUFFER);
 	assert(res->bind & PIPE_BIND_GLOBAL);
 
-	struct r600_resource_global* buffer = (struct r600_resource_global*)res;
-	struct r600_screen* rscreen = (struct r600_screen*)screen;
+	buffer = (struct r600_resource_global*)res;
+	rscreen = (struct r600_screen*)screen;
 
 	compute_memory_free(rscreen->global_pool, buffer->chunk->id);
 
@@ -799,61 +862,30 @@ void r600_compute_global_buffer_destroy(
 	free(res);
 }
 
-void* r600_compute_global_transfer_map(
-	struct pipe_context *ctx_,
-	struct pipe_transfer* transfer)
-{
-	assert(transfer->resource->target == PIPE_BUFFER);
-	assert(transfer->resource->bind & PIPE_BIND_GLOBAL);
-	assert(transfer->box.x >= 0);
-	assert(transfer->box.y == 0);
-	assert(transfer->box.z == 0);
-
-	struct r600_context *ctx = (struct r600_context *)ctx_;
-	struct r600_resource_global* buffer =
-		(struct r600_resource_global*)transfer->resource;
-
-	uint32_t* map;
-	///TODO: do it better, mapping is not possible if the pool is too big
-
-	if (!(map = ctx->ws->buffer_map(buffer->chunk->pool->bo->cs_buf,
-						ctx->cs, transfer->usage))) {
-		return NULL;
-	}
-
-	COMPUTE_DBG("buffer start: %lli\n", buffer->chunk->start_in_dw);
-	return ((char*)(map + buffer->chunk->start_in_dw)) + transfer->box.x;
-}
-
-void r600_compute_global_transfer_unmap(
-	struct pipe_context *ctx_,
-	struct pipe_transfer* transfer)
-{
-	assert(transfer->resource->target == PIPE_BUFFER);
-	assert(transfer->resource->bind & PIPE_BIND_GLOBAL);
-
-	struct r600_context *ctx = (struct r600_context *)ctx_;
-	struct r600_resource_global* buffer =
-		(struct r600_resource_global*)transfer->resource;
-
-	ctx->ws->buffer_unmap(buffer->chunk->pool->bo->cs_buf);
-}
-
-struct pipe_transfer * r600_compute_global_get_transfer(
+void *r600_compute_global_transfer_map(
 	struct pipe_context *ctx_,
 	struct pipe_resource *resource,
 	unsigned level,
 	unsigned usage,
-	const struct pipe_box *box)
+	const struct pipe_box *box,
+	struct pipe_transfer **ptransfer)
 {
-	struct r600_context *ctx = (struct r600_context *)ctx_;
-	struct compute_memory_pool *pool = ctx->screen->global_pool;
+	struct r600_context *rctx = (struct r600_context*)ctx_;
+	struct compute_memory_pool *pool = rctx->screen->global_pool;
+	struct pipe_transfer *transfer = util_slab_alloc(&rctx->pool_transfers);
+	struct r600_resource_global* buffer =
+		(struct r600_resource_global*)resource;
+	uint32_t* map;
 
 	compute_memory_finalize_pending(pool, ctx_);
 
 	assert(resource->target == PIPE_BUFFER);
-	struct r600_context *rctx = (struct r600_context*)ctx_;
-	struct pipe_transfer *transfer = util_slab_alloc(&rctx->pool_transfers);
+
+	COMPUTE_DBG("* r600_compute_global_get_transfer()\n"
+			"level = %u, usage = %u, box(x = %u, y = %u, z = %u "
+			"width = %u, height = %u, depth = %u)\n", level, usage,
+			box->x, box->y, box->z, box->width, box->height,
+			box->depth);
 
 	transfer->resource = resource;
 	transfer->level = level;
@@ -861,20 +893,46 @@ struct pipe_transfer * r600_compute_global_get_transfer(
 	transfer->box = *box;
 	transfer->stride = 0;
 	transfer->layer_stride = 0;
-	transfer->data = NULL;
 
-	/* Note strides are zero, this is ok for buffers, but not for
-	* textures 2d & higher at least.
-	*/
-	return transfer;
+	assert(transfer->resource->target == PIPE_BUFFER);
+	assert(transfer->resource->bind & PIPE_BIND_GLOBAL);
+	assert(transfer->box.x >= 0);
+	assert(transfer->box.y == 0);
+	assert(transfer->box.z == 0);
+
+	///TODO: do it better, mapping is not possible if the pool is too big
+
+	COMPUTE_DBG("* r600_compute_global_transfer_map()\n");
+
+	if (!(map = r600_buffer_mmap_sync_with_rings(rctx, buffer->chunk->pool->bo, transfer->usage))) {
+		util_slab_free(&rctx->pool_transfers, transfer);
+		return NULL;
+	}
+
+	*ptransfer = transfer;
+
+	COMPUTE_DBG("Buffer: %p + %u (buffer offset in global memory) "
+		"+ %u (box.x)\n", map, buffer->chunk->start_in_dw, transfer->box.x);
+	return ((char*)(map + buffer->chunk->start_in_dw)) + transfer->box.x;
 }
 
-void r600_compute_global_transfer_destroy(
+void r600_compute_global_transfer_unmap(
 	struct pipe_context *ctx_,
-	struct pipe_transfer *transfer)
+	struct pipe_transfer* transfer)
 {
-	struct r600_context *rctx = (struct r600_context*)ctx_;
-	util_slab_free(&rctx->pool_transfers, transfer);
+	struct r600_context *ctx = NULL;
+	struct r600_resource_global* buffer = NULL;
+
+	assert(transfer->resource->target == PIPE_BUFFER);
+	assert(transfer->resource->bind & PIPE_BIND_GLOBAL);
+
+	ctx = (struct r600_context *)ctx_;
+	buffer = (struct r600_resource_global*)transfer->resource;
+
+	COMPUTE_DBG("* r600_compute_global_transfer_unmap()\n");
+
+	ctx->ws->buffer_unmap(buffer->chunk->pool->bo->cs_buf);
+	util_slab_free(&ctx->pool_transfers, transfer);
 }
 
 void r600_compute_global_transfer_flush_region(

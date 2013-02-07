@@ -28,6 +28,7 @@
 #include <assert.h>
 #include <error.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include "testlib.h"
 
 static void PrintGUID(const char *guid)
@@ -174,7 +175,7 @@ int main(int argc, char **argv)
 
 	assert(XvMCDestroyContext(display, &context) == Success);
 
-	XFree(subpics);
+	free(subpics);
 	XvUngrabPort(display, port_num, CurrentTime);
 	XCloseDisplay(display);
 

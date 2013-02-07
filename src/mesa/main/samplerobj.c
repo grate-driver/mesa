@@ -110,7 +110,7 @@ _mesa_reference_sampler_object_(struct gl_context *ctx,
 /**
  * Initialize the fields of the given sampler object.
  */
-void
+static void
 _mesa_init_sampler_object(struct gl_sampler_object *sampObj, GLuint name)
 {
    sampObj->Name = name;
@@ -151,11 +151,11 @@ _mesa_new_sampler_object(struct gl_context *ctx, GLuint name)
 /**
  * Fallback for ctx->Driver.DeleteSamplerObject();
  */
-void
+static void
 _mesa_delete_sampler_object(struct gl_context *ctx,
                             struct gl_sampler_object *sampObj)
 {
-   FREE(sampObj);
+   free(sampObj);
 }
 
 
@@ -165,8 +165,6 @@ _mesa_GenSamplers(GLsizei count, GLuint *samplers)
    GET_CURRENT_CONTEXT(ctx);
    GLuint first;
    GLint i;
-
-   ASSERT_OUTSIDE_BEGIN_END(ctx);
 
    if (MESA_VERBOSE & VERBOSE_API)
       _mesa_debug(ctx, "glGenSamplers(%d)\n", count);
@@ -197,7 +195,6 @@ _mesa_DeleteSamplers(GLsizei count, const GLuint *samplers)
    GET_CURRENT_CONTEXT(ctx);
    GLsizei i;
 
-   ASSERT_OUTSIDE_BEGIN_END(ctx);
    FLUSH_VERTICES(ctx, 0);
 
    if (count < 0) {
@@ -224,7 +221,7 @@ _mesa_DeleteSamplers(GLsizei count, const GLuint *samplers)
 }
 
 
-static GLboolean GLAPIENTRY
+GLboolean GLAPIENTRY
 _mesa_IsSampler(GLuint sampler)
 {
    struct gl_sampler_object *sampObj;
@@ -684,14 +681,12 @@ _mesa_SamplerParameteri(GLuint sampler, GLenum pname, GLint param)
 }
 
 
-static void GLAPIENTRY
+void GLAPIENTRY
 _mesa_SamplerParameterf(GLuint sampler, GLenum pname, GLfloat param)
 {
    struct gl_sampler_object *sampObj;
    GLuint res;
    GET_CURRENT_CONTEXT(ctx);
-
-   ASSERT_OUTSIDE_BEGIN_END(ctx);
 
    sampObj = _mesa_lookup_samplerobj(ctx, sampler);
    if (!sampObj) {
@@ -770,7 +765,7 @@ _mesa_SamplerParameterf(GLuint sampler, GLenum pname, GLfloat param)
    }
 }
 
-static void GLAPIENTRY
+void GLAPIENTRY
 _mesa_SamplerParameteriv(GLuint sampler, GLenum pname, const GLint *params)
 {
    struct gl_sampler_object *sampObj;
@@ -862,14 +857,12 @@ _mesa_SamplerParameteriv(GLuint sampler, GLenum pname, const GLint *params)
    }
 }
 
-static void GLAPIENTRY
+void GLAPIENTRY
 _mesa_SamplerParameterfv(GLuint sampler, GLenum pname, const GLfloat *params)
 {
    struct gl_sampler_object *sampObj;
    GLuint res;
    GET_CURRENT_CONTEXT(ctx);
-
-   ASSERT_OUTSIDE_BEGIN_END(ctx);
 
    sampObj = _mesa_lookup_samplerobj(ctx, sampler);
    if (!sampObj) {
@@ -949,7 +942,7 @@ _mesa_SamplerParameterfv(GLuint sampler, GLenum pname, const GLfloat *params)
    }
 }
 
-static void GLAPIENTRY
+void GLAPIENTRY
 _mesa_SamplerParameterIiv(GLuint sampler, GLenum pname, const GLint *params)
 {
    struct gl_sampler_object *sampObj;
@@ -1035,7 +1028,7 @@ _mesa_SamplerParameterIiv(GLuint sampler, GLenum pname, const GLint *params)
 }
 
 
-static void GLAPIENTRY
+void GLAPIENTRY
 _mesa_SamplerParameterIuiv(GLuint sampler, GLenum pname, const GLuint *params)
 {
    struct gl_sampler_object *sampObj;
@@ -1121,7 +1114,7 @@ _mesa_SamplerParameterIuiv(GLuint sampler, GLenum pname, const GLuint *params)
 }
 
 
-static void GLAPIENTRY
+void GLAPIENTRY
 _mesa_GetSamplerParameteriv(GLuint sampler, GLenum pname, GLint *params)
 {
    struct gl_sampler_object *sampObj;
@@ -1199,7 +1192,7 @@ invalid_pname:
 }
 
 
-static void GLAPIENTRY
+void GLAPIENTRY
 _mesa_GetSamplerParameterfv(GLuint sampler, GLenum pname, GLfloat *params)
 {
    struct gl_sampler_object *sampObj;
@@ -1277,7 +1270,7 @@ invalid_pname:
 }
 
 
-static void GLAPIENTRY
+void GLAPIENTRY
 _mesa_GetSamplerParameterIiv(GLuint sampler, GLenum pname, GLint *params)
 {
    struct gl_sampler_object *sampObj;
@@ -1356,7 +1349,7 @@ invalid_pname:
 }
 
 
-static void GLAPIENTRY
+void GLAPIENTRY
 _mesa_GetSamplerParameterIuiv(GLuint sampler, GLenum pname, GLuint *params)
 {
    struct gl_sampler_object *sampObj;
@@ -1440,24 +1433,4 @@ _mesa_init_sampler_object_functions(struct dd_function_table *driver)
 {
    driver->NewSamplerObject = _mesa_new_sampler_object;
    driver->DeleteSamplerObject = _mesa_delete_sampler_object;
-}
-
-
-void
-_mesa_init_sampler_object_dispatch(struct _glapi_table *disp)
-{
-   SET_GenSamplers(disp, _mesa_GenSamplers);
-   SET_DeleteSamplers(disp, _mesa_DeleteSamplers);
-   SET_IsSampler(disp, _mesa_IsSampler);
-   SET_BindSampler(disp, _mesa_BindSampler);
-   SET_SamplerParameteri(disp, _mesa_SamplerParameteri);
-   SET_SamplerParameterf(disp, _mesa_SamplerParameterf);
-   SET_SamplerParameteriv(disp, _mesa_SamplerParameteriv);
-   SET_SamplerParameterfv(disp, _mesa_SamplerParameterfv);
-   SET_SamplerParameterIiv(disp, _mesa_SamplerParameterIiv);
-   SET_SamplerParameterIuiv(disp, _mesa_SamplerParameterIuiv);
-   SET_GetSamplerParameteriv(disp, _mesa_GetSamplerParameteriv);
-   SET_GetSamplerParameterfv(disp, _mesa_GetSamplerParameterfv);
-   SET_GetSamplerParameterIiv(disp, _mesa_GetSamplerParameterIiv);
-   SET_GetSamplerParameterIuiv(disp, _mesa_GetSamplerParameterIuiv);
 }

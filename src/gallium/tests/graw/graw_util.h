@@ -87,7 +87,6 @@ graw_util_create_window(struct graw_info *info,
 
       /* create color surface */
       surface_temp.format = resource_temp.format;
-      surface_temp.usage = PIPE_BIND_RENDER_TARGET;
       surface_temp.u.tex.level = 0;
       surface_temp.u.tex.first_layer = 0;
       surface_temp.u.tex.last_layer = 0;
@@ -118,7 +117,6 @@ graw_util_create_window(struct graw_info *info,
 
    /* create z surface */
    surface_temp.format = resource_temp.format;
-   surface_temp.usage = PIPE_BIND_DEPTH_STENCIL;
    surface_temp.u.tex.level = 0;
    surface_temp.u.tex.first_layer = 0;
    surface_temp.u.tex.last_layer = 0;
@@ -259,7 +257,7 @@ graw_util_create_tex2d(const struct graw_info *info,
    {
       struct pipe_transfer *t;
       uint32_t *ptr;
-      t = pipe_get_transfer(info->ctx, samptex,
+      t = pipe_transfer_map(info->ctx, samptex,
                             0, 0, /* level, layer */
                             PIPE_TRANSFER_READ,
                             0, 0, SIZE, SIZE); /* x, y, width, height */

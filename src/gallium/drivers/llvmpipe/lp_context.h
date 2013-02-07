@@ -34,6 +34,7 @@
 #include "pipe/p_context.h"
 
 #include "draw/draw_vertex.h"
+#include "util/u_blitter.h"
 
 #include "lp_tex_sample.h"
 #include "lp_jit.h"
@@ -71,31 +72,30 @@ struct llvmpipe_context {
    struct pipe_blend_color blend_color;
    struct pipe_stencil_ref stencil_ref;
    struct pipe_clip_state clip;
-   struct pipe_resource *constants[PIPE_SHADER_TYPES][PIPE_MAX_CONSTANT_BUFFERS];
+   struct pipe_constant_buffer constants[PIPE_SHADER_TYPES][LP_MAX_TGSI_CONST_BUFFERS];
    struct pipe_framebuffer_state framebuffer;
    struct pipe_poly_stipple poly_stipple;
    struct pipe_scissor_state scissor;
-   struct pipe_sampler_view *sampler_views[PIPE_SHADER_TYPES][PIPE_MAX_SAMPLERS];
+   struct pipe_sampler_view *sampler_views[PIPE_SHADER_TYPES][PIPE_MAX_SHADER_SAMPLER_VIEWS];
 
    struct pipe_viewport_state viewport;
    struct pipe_vertex_buffer vertex_buffer[PIPE_MAX_ATTRIBS];
    struct pipe_index_buffer index_buffer;
-   struct {
-      struct llvmpipe_resource *buffer[PIPE_MAX_SO_BUFFERS];
-      int offset[PIPE_MAX_SO_BUFFERS];
-      int so_count[PIPE_MAX_SO_BUFFERS];
-      int num_buffers;
-   } so_target;
-   struct pipe_resource *mapped_vs_tex[PIPE_MAX_SAMPLERS];
+   struct pipe_resource *mapped_vs_tex[PIPE_MAX_SHADER_SAMPLER_VIEWS];
 
    unsigned num_samplers[PIPE_SHADER_TYPES];
    unsigned num_sampler_views[PIPE_SHADER_TYPES];
 
    unsigned num_vertex_buffers;
 
+   struct draw_so_target *so_targets[PIPE_MAX_SO_BUFFERS];
+   int num_so_targets;
+   struct pipe_query_data_so_statistics so_stats;
+   unsigned num_primitives_generated;
+
    unsigned dirty; /**< Mask of LP_NEW_x flags */
 
-   int active_query_count;
+   unsigned active_occlusion_query;
 
    /** Mapped vertex buffers */
    ubyte *mapped_vbuffer[PIPE_MAX_ATTRIBS];
@@ -121,6 +121,8 @@ struct llvmpipe_context {
 
    /** The primitive drawing context */
    struct draw_context *draw;
+
+   struct blitter_context *blitter;
 
    unsigned tex_timestamp;
    boolean no_rast;

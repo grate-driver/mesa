@@ -52,6 +52,7 @@ static void set_vertices( void )
    handle = info.ctx->create_vertex_elements_state(info.ctx, 2, ve);
    info.ctx->bind_vertex_elements_state(info.ctx, handle);
 
+   memset(&vbuf, 0, sizeof vbuf);
 
    vbuf.stride = sizeof( struct vertex );
    vbuf.buffer_offset = 0;
@@ -61,7 +62,7 @@ static void set_vertices( void )
                                               sizeof(vertices),
                                               vertices);
 
-   info.ctx->set_vertex_buffers(info.ctx, 1, &vbuf);
+   info.ctx->set_vertex_buffers(info.ctx, 0, 1, &vbuf);
 }
 
 
@@ -104,7 +105,7 @@ static void draw( void )
 
    info.ctx->clear(info.ctx, PIPE_CLEAR_COLOR, &clear_color, 0, 0);
    util_draw_arrays(info.ctx, PIPE_PRIM_TRIANGLES, 0, 3);
-   info.ctx->flush(info.ctx, NULL);
+   info.ctx->flush(info.ctx, NULL, 0);
 
    graw_save_surface_to_file(info.ctx, info.color_surf[0], NULL);
 

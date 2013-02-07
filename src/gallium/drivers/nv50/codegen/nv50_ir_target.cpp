@@ -47,7 +47,7 @@ const uint8_t Target::operationSrcNr[OP_LAST + 1] =
    1, 1, 1, 1, 1,          // TXF, TXQ, TXD, TXG, TEXCSAA
    1, 2,                   // SULD, SUST
    1, 1,                   // DFDX, DFDY
-   1, 2, 2, 2, 0, 0,       // RDSV, WRSV, PIXLD, QUADOP, QUADON, QUADPOP
+   1, 2, 2, 2, 0, 0,       // RDSV, WRSV, TEXPREP, QUADOP, QUADON, QUADPOP
    2, 3, 2, 0,             // POPCNT, INSBF, EXTBF, TEXBAR
    0
 };
@@ -101,7 +101,7 @@ const OpClass Target::operationClass[OP_LAST + 1] =
    OPCLASS_TEXTURE, OPCLASS_TEXTURE, OPCLASS_TEXTURE, OPCLASS_TEXTURE,
    // SULD, SUST
    OPCLASS_SURFACE, OPCLASS_SURFACE,
-   // DFDX, DFDY, RDSV, WRSV; PIXLD, QUADOP, QUADON, QUADPOP
+   // DFDX, DFDY, RDSV, WRSV; TEXPREP, QUADOP, QUADON, QUADPOP
    OPCLASS_OTHER, OPCLASS_OTHER, OPCLASS_OTHER, OPCLASS_OTHER,
    OPCLASS_OTHER, OPCLASS_OTHER, OPCLASS_OTHER, OPCLASS_OTHER,
    // POPCNT, INSBF, EXTBF
@@ -121,6 +121,7 @@ Target *Target::create(unsigned int chipset)
    case 0xc0:
    case 0xd0:
    case 0xe0:
+   case NVISA_GK110_CHIPSET:
       return getTargetNVC0(chipset);
    case 0x50:
    case 0x80:

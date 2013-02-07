@@ -40,7 +40,6 @@
 
 
 #include "pipe/p_compiler.h"
-#include "util/u_debug.h"
 
 
 #ifdef __cplusplus
@@ -483,12 +482,16 @@ unsigned ffs( unsigned u )
  */
 static INLINE unsigned util_last_bit(unsigned u)
 {
+#if defined(__GNUC__) && ((__GNUC__ * 100 + __GNUC_MINOR__) >= 304)
+   return u == 0 ? 0 : 32 - __builtin_clz(u);
+#else
    unsigned r = 0;
    while (u) {
        r++;
        u >>= 1;
    }
    return r;
+#endif
 }
 
 

@@ -56,25 +56,17 @@ lp_build_blend(struct lp_build_context *bld,
 LLVMValueRef
 lp_build_blend_aos(struct gallivm_state *gallivm,
                    const struct pipe_blend_state *blend,
-                   const enum pipe_format *cbuf_format,
+                   const enum pipe_format cbuf_format,
                    struct lp_type type,
                    unsigned rt,
                    LLVMValueRef src,
+                   LLVMValueRef src_alpha,
                    LLVMValueRef dst,
                    LLVMValueRef mask,
                    LLVMValueRef const_,
-                   const unsigned char swizzle[4]);
-
-
-void
-lp_build_blend_soa(struct gallivm_state *gallivm,
-                   const struct pipe_blend_state *blend,
-                   struct lp_type type,
-                   unsigned rt,
-                   LLVMValueRef src[4],
-                   LLVMValueRef dst[4],
-                   LLVMValueRef const_[4],
-                   LLVMValueRef res[4]);
+                   LLVMValueRef const_alpha,
+                   const unsigned char swizzle[4],
+                   int nr_channels);
 
 
 /**

@@ -229,10 +229,8 @@ static void make_state_key( struct gl_context *ctx, struct state_key *key )
    if (ctx->Point._Attenuated)
       key->point_attenuated = 1;
 
-#if FEATURE_point_size_array
    if (ctx->Array.ArrayObj->VertexAttrib[VERT_ATTRIB_POINT_SIZE].Enabled)
       key->point_array = 1;
-#endif
 
    if (ctx->Texture._TexGenEnabled ||
        ctx->Texture._TexMatEnabled ||
@@ -546,7 +544,6 @@ static void emit_dst( struct prog_dst_register *dst,
    dst->WriteMask = mask ? mask : WRITEMASK_XYZW;
    dst->CondMask = COND_TR;  /* always pass cond test */
    dst->CondSwizzle = SWIZZLE_NOOP;
-   dst->CondSrc = 0;
    /* Check that bitfield sizes aren't exceeded */
    ASSERT(dst->Index == reg.idx);
 }

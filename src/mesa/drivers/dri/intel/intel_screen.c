@@ -80,6 +80,7 @@ PUBLIC const char __driConfigOptions[] =
      DRI_CONF_ALWAYS_FLUSH_BATCH(false)
      DRI_CONF_ALWAYS_FLUSH_CACHE(false)
      DRI_CONF_FORCE_GLSL_EXTENSIONS_WARN(false)
+     DRI_CONF_DISABLE_GLSL_LINE_CONTINUATIONS(false)
      DRI_CONF_DISABLE_BLEND_FUNC_EXTENDED(false)
 
       DRI_CONF_OPT_BEGIN(stub_occlusion_query, bool, false)
@@ -92,7 +93,7 @@ PUBLIC const char __driConfigOptions[] =
    DRI_CONF_SECTION_END
 DRI_CONF_END;
 
-const GLuint __driNConfigOptions = 15;
+const GLuint __driNConfigOptions = 16;
 
 #include "intel_batchbuffer.h"
 #include "intel_buffers.h"
@@ -144,23 +145,25 @@ aub_dump_bmp(struct gl_context *ctx)
 	    continue;
 	 }
 
+         assert(irb->mt->region->pitch % irb->mt->region->cpp == 0);
 	 drm_intel_gem_bo_aub_dump_bmp(irb->mt->region->bo,
 				       irb->draw_x,
 				       irb->draw_y,
 				       irb->Base.Base.Width,
 				       irb->Base.Base.Height,
 				       format,
-				       irb->mt->region->pitch *
-				       irb->mt->region->cpp,
+				       irb->mt->region->pitch,
 				       0);
       }
    }
 }
 
 static const __DRItexBufferExtension intelTexBufferExtension = {
-    { __DRI_TEX_BUFFER, __DRI_TEX_BUFFER_VERSION },
-   intelSetTexBuffer,
-   intelSetTexBuffer2,
+   .base = { __DRI_TEX_BUFFER, __DRI_TEX_BUFFER_VERSION },
+
+   .setTexBuffer        = intelSetTexBuffer,
+   .setTexBuffer2       = intelSetTexBuffer2,
+   .releaseTexBuffer    = NULL,
 };
 
 static void
@@ -186,12 +189,13 @@ intelDRI2Flush(__DRIdrawable *drawable)
 }
 
 static const struct __DRI2flushExtensionRec intelFlushExtension = {
-    { __DRI2_FLUSH, __DRI2_FLUSH_VERSION },
-    intelDRI2Flush,
-    dri2InvalidateDrawable,
+    .base = { __DRI2_FLUSH, 3 },
+
+    .flush              = intelDRI2Flush,
+    .invalidate         = dri2InvalidateDrawable,
 };
 
-struct intel_image_format intel_image_formats[] = {
+static struct intel_image_format intel_image_formats[] = {
    { __DRI_IMAGE_FOURCC_ARGB8888, __DRI_IMAGE_COMPONENTS_RGBA, 1,
      { { 0, 0, 0, __DRI_IMAGE_FORMAT_ARGB8888, 4 } } },
 
@@ -249,7 +253,7 @@ intel_allocate_image(int dri_format, void *loaderPrivate)
 {
     __DRIimage *image;
 
-    image = CALLOC(sizeof *image);
+    image = calloc(1, sizeof *image);
     if (image == NULL)
 	return NULL;
 
@@ -310,7 +314,7 @@ intel_create_image_from_name(__DRIscreen *screen,
 						  cpp, width, height,
 						  pitch, name, "image");
     if (image->region == NULL) {
-       FREE(image);
+       free(image);
        return NULL;
     }
 
@@ -334,7 +338,7 @@ intel_create_image_from_renderbuffer(__DRIcontext *context,
    }
 
    irb = intel_renderbuffer(rb);
-   image = CALLOC(sizeof *image);
+   image = calloc(1, sizeof *image);
    if (image == NULL)
       return NULL;
 
@@ -372,7 +376,7 @@ static void
 intel_destroy_image(__DRIimage *image)
 {
     intel_region_release(&image->region);
-    FREE(image);
+    free(image);
 }
 
 static __DRIimage *
@@ -398,7 +402,7 @@ intel_create_image(__DRIscreen *screen,
    image->region =
       intel_region_alloc(intelScreen, tiling, cpp, width, height, true);
    if (image->region == NULL) {
-      FREE(image);
+      free(image);
       return NULL;
    }
    
@@ -410,7 +414,7 @@ intel_query_image(__DRIimage *image, int attrib, int *value)
 {
    switch (attrib) {
    case __DRI_IMAGE_ATTRIB_STRIDE:
-      *value = image->region->pitch * image->region->cpp;
+      *value = image->region->pitch;
       return true;
    case __DRI_IMAGE_ATTRIB_HANDLE:
       *value = image->region->bo->handle;
@@ -441,13 +445,13 @@ intel_dup_image(__DRIimage *orig_image, void *loaderPrivate)
 {
    __DRIimage *image;
 
-   image = CALLOC(sizeof *image);
+   image = calloc(1, sizeof *image);
    if (image == NULL)
       return NULL;
 
    intel_region_reference(&image->region, orig_image->region);
    if (image->region == NULL) {
-      FREE(image);
+      free(image);
       return NULL;
    }
 
@@ -519,7 +523,7 @@ intel_create_image_from_names(__DRIscreen *screen,
 static __DRIimage *
 intel_from_planar(__DRIimage *parent, int plane, void *loaderPrivate)
 {
-    int width, height, offset, stride, dri_format, cpp, index, pitch;
+    int width, height, offset, stride, dri_format, index;
     struct intel_image_format *f;
     uint32_t mask_x, mask_y;
     __DRIimage *image;
@@ -540,24 +544,22 @@ intel_from_planar(__DRIimage *parent, int plane, void *loaderPrivate)
     stride = parent->strides[index];
 
     image = intel_allocate_image(dri_format, loaderPrivate);
-    cpp = _mesa_get_format_bytes(image->format); /* safe since no none format */
-    pitch = stride / cpp;
-    if (offset + height * cpp * pitch > parent->region->bo->size) {
+    if (offset + height * stride > parent->region->bo->size) {
        _mesa_warning(NULL, "intel_create_sub_image: subimage out of bounds");
-       FREE(image);
+       free(image);
        return NULL;
     }
 
     image->region = calloc(sizeof(*image->region), 1);
     if (image->region == NULL) {
-       FREE(image);
+       free(image);
        return NULL;
     }
 
     image->region->cpp = _mesa_get_format_bytes(image->format);
     image->region->width = width;
     image->region->height = height;
-    image->region->pitch = pitch;
+    image->region->pitch = stride;
     image->region->refcount = 1;
     image->region->bo = parent->region->bo;
     drm_intel_bo_reference(image->region->bo);
@@ -574,16 +576,17 @@ intel_from_planar(__DRIimage *parent, int plane, void *loaderPrivate)
 }
 
 static struct __DRIimageExtensionRec intelImageExtension = {
-    { __DRI_IMAGE, 5 },
-    intel_create_image_from_name,
-    intel_create_image_from_renderbuffer,
-    intel_destroy_image,
-    intel_create_image,
-    intel_query_image,
-    intel_dup_image,
-    intel_validate_usage,
-    intel_create_image_from_names,
-    intel_from_planar
+    .base = { __DRI_IMAGE, 5 },
+
+    .createImageFromName                = intel_create_image_from_name,
+    .createImageFromRenderbuffer        = intel_create_image_from_renderbuffer,
+    .destroyImage                       = intel_destroy_image,
+    .createImage                        = intel_create_image,
+    .queryImage                         = intel_query_image,
+    .dupImage                           = intel_dup_image,
+    .validateUsage                      = intel_validate_usage,
+    .createImageFromNames               = intel_create_image_from_names,
+    .fromPlanar                         = intel_from_planar
 };
 
 static const __DRIextension *intelScreenExtensions[] = {
@@ -640,7 +643,7 @@ intelDestroyScreen(__DRIscreen * sPriv)
    _mesa_HashDeleteAll(intelScreen->named_regions, nop_callback, NULL);
    _mesa_DeleteHashTable(intelScreen->named_regions);
 
-   FREE(intelScreen);
+   free(intelScreen);
    sPriv->driverPrivate = NULL;
 }
 
@@ -670,6 +673,8 @@ intelCreateBuffer(__DRIscreen * driScrnPriv,
 
    if (mesaVis->redBits == 5)
       rgbFormat = MESA_FORMAT_RGB565;
+   else if (mesaVis->sRGBCapable)
+      rgbFormat = MESA_FORMAT_SARGB8;
    else if (mesaVis->alphaBits == 0)
       rgbFormat = MESA_FORMAT_XRGB8888;
    else
@@ -747,8 +752,12 @@ intelDestroyBuffer(__DRIdrawable * driDrawPriv)
  * functions.
  */
 extern bool
-i830CreateContext(const struct gl_config *mesaVis,
+i830CreateContext(int api,
+                  const struct gl_config *mesaVis,
 		  __DRIcontext *driContextPriv,
+		  unsigned major_version,
+		  unsigned minor_version,
+		  unsigned *error,
 		  void *sharedContextPrivate);
 
 extern bool
@@ -779,37 +788,21 @@ intelCreateContext(gl_api api,
 		   unsigned *error,
                    void *sharedContextPrivate)
 {
-   __DRIscreen *sPriv = driContextPriv->driScreenPriv;
-   struct intel_screen *intelScreen = sPriv->driverPrivate;
    bool success = false;
 
 #ifdef I915
+   __DRIscreen *sPriv = driContextPriv->driScreenPriv;
+   struct intel_screen *intelScreen = sPriv->driverPrivate;
+
    if (IS_9XX(intelScreen->deviceID)) {
       success = i915CreateContext(api, mesaVis, driContextPriv,
                                   major_version, minor_version, error,
                                   sharedContextPrivate);
    } else {
-      switch (api) {
-      case API_OPENGL:
-         if (major_version > 1 || minor_version > 3) {
-            *error = __DRI_CTX_ERROR_BAD_VERSION;
-            success = false;
-         }
-         break;
-      case API_OPENGLES:
-         break;
-      default:
-         *error = __DRI_CTX_ERROR_BAD_API;
-         success = false;
-      }
-
-      if (success) {
-         intelScreen->no_vbo = true;
-         success = i830CreateContext(mesaVis, driContextPriv,
-                                     sharedContextPrivate);
-         if (!success)
-            *error = __DRI_CTX_ERROR_NO_MEMORY;
-      }
+      intelScreen->no_vbo = true;
+      success = i830CreateContext(api, mesaVis, driContextPriv,
+                                  major_version, minor_version, error,
+                                  sharedContextPrivate);
    }
 #else
    success = brwCreateContext(api, mesaVis,
@@ -911,54 +904,53 @@ intel_detect_swizzling(struct intel_screen *screen)
 static __DRIconfig**
 intel_screen_make_configs(__DRIscreen *dri_screen)
 {
+   static const gl_format formats[] = {
+      MESA_FORMAT_RGB565,
+      MESA_FORMAT_ARGB8888
+   };
+
+   /* GLX_SWAP_COPY_OML is not supported due to page flipping. */
    static const GLenum back_buffer_modes[] = {
-       GLX_NONE, GLX_SWAP_UNDEFINED_OML, GLX_SWAP_COPY_OML
+       GLX_SWAP_UNDEFINED_OML, GLX_NONE,
    };
 
    static const uint8_t singlesample_samples[1] = {0};
    static const uint8_t multisample_samples[2]  = {4, 8};
 
    struct intel_screen *screen = dri_screen->driverPrivate;
-   GLenum fb_format[3];
-   GLenum fb_type[3];
    uint8_t depth_bits[4], stencil_bits[4];
    __DRIconfig **configs = NULL;
 
-   fb_format[0] = GL_RGB;
-   fb_type[0] = GL_UNSIGNED_SHORT_5_6_5;
-
-   fb_format[1] = GL_BGR;
-   fb_type[1] = GL_UNSIGNED_INT_8_8_8_8_REV;
-
-   fb_format[2] = GL_BGRA;
-   fb_type[2] = GL_UNSIGNED_INT_8_8_8_8_REV;
-
    /* Generate singlesample configs without accumulation buffer. */
-   for (int i = 0; i < ARRAY_SIZE(fb_format); i++) {
+   for (int i = 0; i < ARRAY_SIZE(formats); i++) {
       __DRIconfig **new_configs;
-      const int num_depth_stencil_bits = 2;
+      int num_depth_stencil_bits = 2;
 
       /* Starting with DRI2 protocol version 1.1 we can request a depth/stencil
        * buffer that has a different number of bits per pixel than the color
-       * buffer.  This isn't yet supported here.
+       * buffer, gen >= 6 supports this.
        */
       depth_bits[0] = 0;
       stencil_bits[0] = 0;
 
-      if (fb_type[i] == GL_UNSIGNED_SHORT_5_6_5) {
+      if (formats[i] == MESA_FORMAT_RGB565) {
          depth_bits[1] = 16;
          stencil_bits[1] = 0;
+         if (screen->gen >= 6) {
+             depth_bits[2] = 24;
+             stencil_bits[2] = 8;
+             num_depth_stencil_bits = 3;
+         }
       } else {
          depth_bits[1] = 24;
          stencil_bits[1] = 8;
       }
 
-      new_configs = driCreateConfigs(fb_format[i], fb_type[i],
+      new_configs = driCreateConfigs(formats[i],
                                      depth_bits,
                                      stencil_bits,
                                      num_depth_stencil_bits,
-                                     back_buffer_modes,
-                                     ARRAY_SIZE(back_buffer_modes),
+                                     back_buffer_modes, 2,
                                      singlesample_samples, 1,
                                      false);
       configs = driConcatConfigs(configs, new_configs);
@@ -967,10 +959,10 @@ intel_screen_make_configs(__DRIscreen *dri_screen)
    /* Generate the minimum possible set of configs that include an
     * accumulation buffer.
     */
-   for (int i = 0; i < ARRAY_SIZE(fb_format); i++) {
+   for (int i = 0; i < ARRAY_SIZE(formats); i++) {
       __DRIconfig **new_configs;
 
-      if (fb_type[i] == GL_UNSIGNED_SHORT_5_6_5) {
+      if (formats[i] == MESA_FORMAT_RGB565) {
          depth_bits[0] = 16;
          stencil_bits[0] = 0;
       } else {
@@ -978,9 +970,9 @@ intel_screen_make_configs(__DRIscreen *dri_screen)
          stencil_bits[0] = 8;
       }
 
-      new_configs = driCreateConfigs(fb_format[i], fb_type[i],
+      new_configs = driCreateConfigs(formats[i],
                                      depth_bits, stencil_bits, 1,
-                                     back_buffer_modes + 1, 1,
+                                     back_buffer_modes, 1,
                                      singlesample_samples, 1,
                                      true);
       configs = driConcatConfigs(configs, new_configs);
@@ -997,9 +989,9 @@ intel_screen_make_configs(__DRIscreen *dri_screen)
     *
     * Only doublebuffer configs with GLX_SWAP_UNDEFINED_OML behavior are
     * supported.  Singlebuffer configs are not supported because no one wants
-    * them. GLX_SWAP_COPY_OML is not supported due to page flipping.
+    * them.
     */
-   for (int i = 0; i < ARRAY_SIZE(fb_format); i++) {
+   for (int i = 0; i < ARRAY_SIZE(formats); i++) {
       if (screen->gen < 6)
          break;
 
@@ -1010,7 +1002,7 @@ intel_screen_make_configs(__DRIscreen *dri_screen)
       depth_bits[0] = 0;
       stencil_bits[0] = 0;
 
-      if (fb_type[i] == GL_UNSIGNED_SHORT_5_6_5) {
+      if (formats[i] == MESA_FORMAT_RGB565) {
          depth_bits[1] = 16;
          stencil_bits[1] = 0;
       } else {
@@ -1023,11 +1015,11 @@ intel_screen_make_configs(__DRIscreen *dri_screen)
       else if (screen->gen == 6)
          num_msaa_modes = 1;
 
-      new_configs = driCreateConfigs(fb_format[i], fb_type[i],
+      new_configs = driCreateConfigs(formats[i],
                                      depth_bits,
                                      stencil_bits,
                                      num_depth_stencil_bits,
-                                     back_buffer_modes + 1, 1,
+                                     back_buffer_modes, 1,
                                      multisample_samples,
                                      num_msaa_modes,
                                      false);
@@ -1043,6 +1035,77 @@ intel_screen_make_configs(__DRIscreen *dri_screen)
    return configs;
 }
 
+static void
+set_max_gl_versions(struct intel_screen *screen)
+{
+   switch (screen->gen) {
+   case 7:
+      if (screen->kernel_has_gen7_sol_reset) {
+         screen->max_gl_core_version = 31;
+         screen->max_gl_compat_version = 30;
+         screen->max_gl_es1_version = 11;
+         screen->max_gl_es2_version = 30;
+      } else {
+         screen->max_gl_core_version = 0;
+         screen->max_gl_compat_version = 21;
+         screen->max_gl_es1_version = 11;
+         screen->max_gl_es2_version = 20;
+      }
+      break;
+   case 6:
+      screen->max_gl_core_version = 31;
+      screen->max_gl_compat_version = 30;
+      screen->max_gl_es1_version = 11;
+      screen->max_gl_es2_version = 20;
+      break;
+   case 5:
+   case 4:
+      screen->max_gl_core_version = 0;
+      screen->max_gl_compat_version = 21;
+      screen->max_gl_es1_version = 11;
+      screen->max_gl_es2_version = 20;
+      break;
+   case 3: {
+      bool has_fragment_shader = driQueryOptionb(&screen->optionCache, "fragment_shader");
+      bool has_occlusion_query = driQueryOptionb(&screen->optionCache, "stub_occlusion_query");
+
+      screen->max_gl_core_version = 0;
+      screen->max_gl_es1_version = 11;
+
+      if (has_fragment_shader && has_occlusion_query) {
+         screen->max_gl_compat_version = 21;
+      } else {
+         screen->max_gl_compat_version = 14;
+      }
+
+      if (has_fragment_shader) {
+         screen->max_gl_es2_version = 20;
+      } else {
+         screen->max_gl_es2_version = 0;
+      }
+
+      break;
+   }
+   case 2:
+      screen->max_gl_core_version = 0;
+      screen->max_gl_compat_version = 13;
+      screen->max_gl_es1_version = 11;
+      screen->max_gl_es2_version = 0;
+      break;
+   default:
+      assert(!"unrecognized intel_screen::gen");
+      break;
+   }
+
+#ifndef FEATURE_ES1
+   screen->max_gl_es1_version = 0;
+#endif
+
+#ifndef FEATURE_ES2
+   screen->max_gl_es2_version = 0;
+#endif
+}
+
 /**
  * This is the driver specific part of the createNewScreen entry point.
  * Called when using DRI2.
@@ -1053,7 +1116,6 @@ static const
 __DRIconfig **intelInitScreen2(__DRIscreen *psp)
 {
    struct intel_screen *intelScreen;
-   unsigned int api_mask;
 
    if (psp->dri2.loader->base.version <= 2 ||
        psp->dri2.loader->getBuffersWithFormat == NULL) {
@@ -1064,7 +1126,7 @@ __DRIconfig **intelInitScreen2(__DRIscreen *psp)
    }
 
    /* Allocate the private area */
-   intelScreen = CALLOC(sizeof *intelScreen);
+   intelScreen = calloc(1, sizeof *intelScreen);
    if (!intelScreen) {
       fprintf(stderr, "\nERROR!  Allocating private area failed\n");
       return false;
@@ -1112,18 +1174,17 @@ __DRIconfig **intelInitScreen2(__DRIscreen *psp)
 
    intel_override_separate_stencil(intelScreen);
 
-   api_mask = (1 << __DRI_API_OPENGL);
-#if FEATURE_ES1
-   api_mask |= (1 << __DRI_API_GLES);
-#endif
-#if FEATURE_ES2
-   api_mask |= (1 << __DRI_API_GLES2);
-#endif
-
-   if (IS_9XX(intelScreen->deviceID) || IS_965(intelScreen->deviceID))
-      psp->api_mask = api_mask;
-
    intelScreen->hw_has_swizzling = intel_detect_swizzling(intelScreen);
+
+   set_max_gl_versions(intelScreen);
+
+   psp->api_mask = (1 << __DRI_API_OPENGL);
+   if (intelScreen->max_gl_es1_version > 0)
+      psp->api_mask |= (1 << __DRI_API_GLES);
+   if (intelScreen->max_gl_es2_version > 0)
+      psp->api_mask |= (1 << __DRI_API_GLES2);
+   if (intelScreen->max_gl_es2_version >= 30)
+      psp->api_mask |= (1 << __DRI_API_GLES3);
 
    psp->extensions = intelScreenExtensions;
 
@@ -1146,7 +1207,7 @@ intelAllocateBuffer(__DRIscreen *screen,
    assert(attachment == __DRI_BUFFER_FRONT_LEFT ||
           attachment == __DRI_BUFFER_BACK_LEFT);
 
-   intelBuffer = CALLOC(sizeof *intelBuffer);
+   intelBuffer = calloc(1, sizeof *intelBuffer);
    if (intelBuffer == NULL)
       return NULL;
 
@@ -1159,7 +1220,7 @@ intelAllocateBuffer(__DRIscreen *screen,
                                             true);
    
    if (intelBuffer->region == NULL) {
-	   FREE(intelBuffer);
+	   free(intelBuffer);
 	   return NULL;
    }
    
@@ -1167,8 +1228,7 @@ intelAllocateBuffer(__DRIscreen *screen,
 
    intelBuffer->base.attachment = attachment;
    intelBuffer->base.cpp = intelBuffer->region->cpp;
-   intelBuffer->base.pitch =
-         intelBuffer->region->pitch * intelBuffer->region->cpp;
+   intelBuffer->base.pitch = intelBuffer->region->pitch;
 
    return &intelBuffer->base;
 }

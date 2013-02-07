@@ -48,6 +48,7 @@ static const char* r300_get_vendor(struct pipe_screen* pscreen)
 }
 
 static const char* chip_families[] = {
+    "unknown",
     "ATI R300",
     "ATI R350",
     "ATI RV350",
@@ -105,7 +106,11 @@ static int r300_get_param(struct pipe_screen* pscreen, enum pipe_cap param)
         case PIPE_CAP_VERTEX_COLOR_CLAMPED:
         case PIPE_CAP_USER_INDEX_BUFFERS:
         case PIPE_CAP_USER_CONSTANT_BUFFERS:
+        case PIPE_CAP_DEPTH_CLIP_DISABLE: /* XXX implemented, but breaks Regnum Online */
             return 1;
+
+        case PIPE_CAP_MIN_MAP_BUFFER_ALIGNMENT:
+            return R300_BUFFER_ALIGNMENT;
 
         case PIPE_CAP_CONSTANT_BUFFER_OFFSET_ALIGNMENT:
             return 16;
@@ -124,12 +129,10 @@ static int r300_get_param(struct pipe_screen* pscreen, enum pipe_cap param)
             return is_r500 ? 1 : 0;
 
         /* Unsupported features. */
-        case PIPE_CAP_TIMER_QUERY:
+        case PIPE_CAP_QUERY_TIME_ELAPSED:
         case PIPE_CAP_MAX_DUAL_SOURCE_RENDER_TARGETS:
         case PIPE_CAP_INDEP_BLEND_ENABLE:
         case PIPE_CAP_INDEP_BLEND_FUNC:
-        case PIPE_CAP_DEPTH_CLIP_DISABLE:
-        case PIPE_CAP_DEPTHSTENCIL_CLEAR_SEPARATE:
         case PIPE_CAP_SHADER_STENCIL_EXPORT:
         case PIPE_CAP_MAX_TEXTURE_ARRAY_LAYERS:
         case PIPE_CAP_TGSI_INSTANCEID:
@@ -149,6 +152,9 @@ static int r300_get_param(struct pipe_screen* pscreen, enum pipe_cap param)
         case PIPE_CAP_COMPUTE:
         case PIPE_CAP_START_INSTANCE:
         case PIPE_CAP_QUERY_TIMESTAMP:
+        case PIPE_CAP_TEXTURE_MULTISAMPLE:
+        case PIPE_CAP_CUBE_MAP_ARRAY:
+        case PIPE_CAP_TEXTURE_BUFFER_OBJECTS:
             return 0;
 
         /* SWTCL-only features. */
@@ -344,6 +350,32 @@ static int r300_get_video_param(struct pipe_screen *screen,
    }
 }
 
+/**
+ * Whether the format matches:
+ *   PIPE_FORMAT_?10?10?10?2_UNORM
+ */
+static INLINE boolean
+util_format_is_rgba1010102_variant(const struct util_format_description *desc)
+{
+   static const unsigned size[4] = {10, 10, 10, 2};
+   unsigned chan;
+
+   if (desc->block.width != 1 ||
+       desc->block.height != 1 ||
+       desc->block.bits != 32)
+      return FALSE;
+
+   for (chan = 0; chan < 4; ++chan) {
+      if(desc->channel[chan].type != UTIL_FORMAT_TYPE_UNSIGNED &&
+         desc->channel[chan].type != UTIL_FORMAT_TYPE_VOID)
+         return FALSE;
+      if (desc->channel[chan].size != size[chan])
+         return FALSE;
+   }
+
+   return TRUE;
+}
+
 static boolean r300_is_format_supported(struct pipe_screen* screen,
                                         enum pipe_format format,
                                         enum pipe_texture_target target,
@@ -376,6 +408,7 @@ static boolean r300_is_format_supported(struct pipe_screen* screen,
                             format == PIPE_FORMAT_R16G16_FLOAT ||
                             format == PIPE_FORMAT_R16G16B16_FLOAT ||
                             format == PIPE_FORMAT_R16G16B16A16_FLOAT;
+    const struct util_format_description *desc;
 
     if (!util_format_is_supported(format, usage))
        return FALSE;
@@ -386,17 +419,41 @@ static boolean r300_is_format_supported(struct pipe_screen* screen,
         case 1:
             break;
         case 2:
-        case 3:
         case 4:
         case 6:
-            return FALSE;
-#if 0
-            if (usage != PIPE_BIND_RENDER_TARGET ||
-                !util_format_is_rgba8_variant(
-                    util_format_description(format))) {
+            /* We need DRM 2.8.0. */
+            if (!drm_2_8_0) {
                 return FALSE;
             }
-#endif
+            /* Only support R500, because I didn't test older chipsets,
+             * but MSAA should work there too. */
+            if (!is_r500 && !debug_get_bool_option("RADEON_MSAA", FALSE)) {
+                return FALSE;
+            }
+            /* No texturing and scanout. */
+            if (usage & (PIPE_BIND_SAMPLER_VIEW |
+                         PIPE_BIND_DISPLAY_TARGET |
+                         PIPE_BIND_SCANOUT)) {
+                return FALSE;
+            }
+
+            desc = util_format_description(format);
+
+            if (is_r500) {
+                /* Only allow depth/stencil, RGBA8, RGBA1010102, RGBA16F. */
+                if (!util_format_is_depth_or_stencil(format) &&
+                    !util_format_is_rgba8_variant(desc) &&
+                    !util_format_is_rgba1010102_variant(desc) &&
+                    format != PIPE_FORMAT_R16G16B16A16_FLOAT) {
+                    return FALSE;
+                }
+            } else {
+                /* Only allow depth/stencil, RGBA8. */
+                if (!util_format_is_depth_or_stencil(format) &&
+                    !util_format_is_rgba8_variant(desc)) {
+                    return FALSE;
+                }
+            }
             break;
         default:
             return FALSE;
@@ -464,6 +521,8 @@ static void r300_destroy_screen(struct pipe_screen* pscreen)
 {
     struct r300_screen* r300screen = r300_screen(pscreen);
     struct radeon_winsys *rws = radeon_winsys(pscreen);
+
+    pipe_mutex_destroy(r300screen->cmask_mutex);
 
     if (rws)
       rws->destroy(rws);
@@ -555,6 +614,7 @@ struct pipe_screen* r300_screen_create(struct radeon_winsys *rws)
     r300_init_screen_resource_functions(r300screen);
 
     util_format_s3tc_init();
+    pipe_mutex_init(r300screen->cmask_mutex);
 
     return &r300screen->screen;
 }

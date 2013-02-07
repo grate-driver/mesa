@@ -8,7 +8,7 @@ libOpenCL_la_LDFLAGS = \
 
 libOpenCL_la_LIBADD = \
 	$(top_builddir)/src/gallium/state_trackers/clover/libclover.la \
-	$(top_builddir)/src/gallium/auxiliary/libgallium.a \
+	$(top_builddir)/src/gallium/auxiliary/libgallium.la \
 	$(GALLIUM_PIPE_LOADER_LIBS) $(LIBUDEV_LIBS) \
 	-ldl \
 	-lclangCodeGen \
@@ -20,7 +20,6 @@ libOpenCL_la_LIBADD = \
 	-lclangParse \
 	-lclangSema \
 	-lclangAnalysis \
-	-lclangRewrite \
 	-lclangAST \
 	-lclangLex \
 	-lclangBasic \
@@ -41,13 +40,3 @@ all-local: libOpenCL.la
 	@$(MAKE) -C $(PIPE_SRC_DIR)
 	$(MKDIR_P) $(top_builddir)/$(LIB_DIR)
 	ln -f .libs/libOpenCL.so* $(top_builddir)/$(LIB_DIR)/
-
-install-exec-local:
-	@$(MAKE) -C $(PIPE_SRC_DIR) PIPE_INSTALL_DIR=$(OPENCL_LIB_INSTALL_DIR) install
-
-clean-local:
-	@$(MAKE) -C $(PIPE_SRC_DIR) clean
-
-# FIXME: Remove when the rest of Gallium is converted to automake.
-TOP=$(top_builddir)
-default: all

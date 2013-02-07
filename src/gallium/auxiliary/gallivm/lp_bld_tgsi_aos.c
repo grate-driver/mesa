@@ -94,7 +94,7 @@ swizzle_scalar_aos(struct lp_build_tgsi_aos_context *bld,
                    unsigned chan)
 {
    chan = bld->swizzles[chan];
-   return lp_build_swizzle_scalar_aos(&bld->bld_base.base, a, chan);
+   return lp_build_swizzle_scalar_aos(&bld->bld_base.base, a, chan, 4);
 }
 
 
@@ -329,6 +329,7 @@ lp_emit_store_aos(
       writemask = lp_build_const_mask_aos_swizzled(bld->bld_base.base.gallivm,
                                                    bld->bld_base.base.type,
                                                    reg->Register.WriteMask,
+                                                   TGSI_NUM_CHANNELS,
                                                    bld->swizzles);
 
       if (mask) {
@@ -362,8 +363,6 @@ emit_tex(struct lp_build_tgsi_aos_context *bld,
    unsigned target;
    unsigned unit;
    LLVMValueRef coords;
-   LLVMValueRef ddx;
-   LLVMValueRef ddy;
    struct lp_derivatives derivs;
 
    if (!bld->sampler) {
@@ -376,8 +375,8 @@ emit_tex(struct lp_build_tgsi_aos_context *bld,
    coords = lp_build_emit_fetch( &bld->bld_base, inst, 0 , LP_CHAN_ALL);
 
    if (0 && modifier == LP_BLD_TEX_MODIFIER_EXPLICIT_DERIV) {
-      ddx = lp_build_emit_fetch( &bld->bld_base, inst, 1 , LP_CHAN_ALL);
-      ddy = lp_build_emit_fetch( &bld->bld_base, inst, 2 , LP_CHAN_ALL);
+      lp_build_emit_fetch( &bld->bld_base, inst, 1 , LP_CHAN_ALL);
+      lp_build_emit_fetch( &bld->bld_base, inst, 2 , LP_CHAN_ALL);
       unit = inst->Src[3].Register.Index;
    }  else {
 #if 0
@@ -624,7 +623,7 @@ lp_emit_instruction_aos(
 
    case TGSI_OPCODE_EX2:
       src0 = lp_build_emit_fetch(&bld->bld_base, inst, 0, LP_CHAN_ALL);
-      tmp0 = lp_build_swizzle_scalar_aos(&bld->bld_base.base, src0, TGSI_SWIZZLE_X);
+      tmp0 = lp_build_swizzle_scalar_aos(&bld->bld_base.base, src0, TGSI_SWIZZLE_X, TGSI_NUM_CHANNELS);
       dst0 = lp_build_exp2(&bld->bld_base.base, tmp0);
       break;
 

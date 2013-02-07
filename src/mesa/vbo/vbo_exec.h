@@ -55,7 +55,6 @@ USE OR OTHER DEALINGS IN THE SOFTWARE.
 /** Current vertex program mode */
 enum vp_mode {
    VP_NONE,   /**< fixed function */
-   VP_NV,     /**< NV vertex program */
    VP_ARB     /**< ARB vertex program or GLSL vertex shader */
 };
 
@@ -161,24 +160,9 @@ void vbo_exec_vtx_init( struct vbo_exec_context *exec );
 void vbo_exec_vtx_destroy( struct vbo_exec_context *exec );
 
 
-#if FEATURE_beginend
-
 void vbo_exec_vtx_flush( struct vbo_exec_context *exec, GLboolean unmap );
 void vbo_exec_vtx_map( struct vbo_exec_context *exec );
 
-#else /* FEATURE_beginend */
-
-static inline void
-vbo_exec_vtx_flush( struct vbo_exec_context *exec, GLboolean unmap )
-{
-}
-
-static inline void
-vbo_exec_vtx_map( struct vbo_exec_context *exec )
-{
-}
-
-#endif /* FEATURE_beginend */
 
 void vbo_exec_vtx_wrap( struct vbo_exec_context *exec );
 

@@ -57,17 +57,18 @@ void si_pm4_set_reg(struct si_pm4_state *state, unsigned reg, uint32_t val)
 {
 	unsigned opcode;
 
-	if (reg >= SI_CONFIG_REG_OFFSET && reg <= SI_CONFIG_REG_END) {
+	if (reg >= SI_CONFIG_REG_OFFSET && reg < SI_CONFIG_REG_END) {
 		opcode = PKT3_SET_CONFIG_REG;
 		reg -= SI_CONFIG_REG_OFFSET;
 
-	} else if (reg >= SI_SH_REG_OFFSET && reg <= SI_SH_REG_END) {
+	} else if (reg >= SI_SH_REG_OFFSET && reg < SI_SH_REG_END) {
 		opcode = PKT3_SET_SH_REG;
 		reg -= SI_SH_REG_OFFSET;
 
-	} else if (reg >= SI_CONTEXT_REG_OFFSET && reg <= SI_CONTEXT_REG_END) {
+	} else if (reg >= SI_CONTEXT_REG_OFFSET && reg < SI_CONTEXT_REG_END) {
 		opcode = PKT3_SET_CONTEXT_REG;
 		reg -= SI_CONTEXT_REG_OFFSET;
+
 	} else {
 		R600_ERR("Invalid register offset %08x!\n", reg);
 		return;
@@ -106,9 +107,10 @@ void si_pm4_sh_data_add(struct si_pm4_state *state, uint32_t dw)
 	si_pm4_cmd_add(state, dw);
 }
 
-void si_pm4_sh_data_end(struct si_pm4_state *state, unsigned reg)
+void si_pm4_sh_data_end(struct si_pm4_state *state, unsigned base, unsigned idx)
 {
 	unsigned offs = state->last_pm4 + 1;
+	unsigned reg = base + idx * 4;
 
 	/* Bail if no data was added */
 	if (state->ndw == offs) {

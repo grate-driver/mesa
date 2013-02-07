@@ -476,6 +476,7 @@ static const struct dri_debug_control debug_control[] = {
    { "buf",   DEBUG_BUFMGR},
    { "reg",   DEBUG_REGION},
    { "fbo",   DEBUG_FBO},
+   { "fs",    DEBUG_WM },
    { "gs",    DEBUG_GS},
    { "sync",  DEBUG_SYNC},
    { "prim",  DEBUG_PRIMS },
@@ -491,6 +492,8 @@ static const struct dri_debug_control debug_control[] = {
    { "vs",    DEBUG_VS },
    { "clip",  DEBUG_CLIP },
    { "aub",   DEBUG_AUB },
+   { "shader_time", DEBUG_SHADER_TIME },
+   { "no16",  DEBUG_NO16 },
    { NULL,    0 }
 };
 
@@ -577,13 +580,55 @@ intelInitDriverFunctions(struct dd_function_table *functions)
    intel_init_syncobj_functions(functions);
 }
 
+static bool
+validate_context_version(struct intel_screen *screen,
+                         int mesa_api,
+                         unsigned major_version,
+                         unsigned minor_version,
+                         unsigned *dri_ctx_error)
+{
+   unsigned req_version = 10 * major_version + minor_version;
+   unsigned max_version = 0;
+
+   switch (mesa_api) {
+   case API_OPENGL_COMPAT:
+      max_version = screen->max_gl_compat_version;
+      break;
+   case API_OPENGL_CORE:
+      max_version = screen->max_gl_core_version;
+      break;
+   case API_OPENGLES:
+      max_version = screen->max_gl_es1_version;
+      break;
+   case API_OPENGLES2:
+      max_version = screen->max_gl_es2_version;
+      break;
+   default:
+      max_version = 0;
+      break;
+   }
+
+   if (max_version == 0) {
+      *dri_ctx_error = __DRI_CTX_ERROR_BAD_API;
+      return false;
+   } else if (req_version > max_version) {
+      *dri_ctx_error = __DRI_CTX_ERROR_BAD_VERSION;
+      return false;
+   }
+
+   return true;
+}
+
 bool
 intelInitContext(struct intel_context *intel,
-		 int api,
+                 int api,
+                 unsigned major_version,
+                 unsigned minor_version,
                  const struct gl_config * mesaVis,
                  __DRIcontext * driContextPriv,
                  void *sharedContextPrivate,
-                 struct dd_function_table *functions)
+                 struct dd_function_table *functions,
+                 unsigned *dri_ctx_error)
 {
    struct gl_context *ctx = &intel->ctx;
    struct gl_context *shareCtx = (struct gl_context *) sharedContextPrivate;
@@ -593,7 +638,14 @@ intelInitContext(struct intel_context *intel,
    struct gl_config visual;
 
    /* we can't do anything without a connection to the device */
-   if (intelScreen->bufmgr == NULL)
+   if (intelScreen->bufmgr == NULL) {
+      *dri_ctx_error = __DRI_CTX_ERROR_NO_MEMORY;
+      return false;
+   }
+
+   if (!validate_context_version(intelScreen,
+                                 api, major_version, minor_version,
+                                 dri_ctx_error))
       return false;
 
    /* Can't rely on invalidate events, fall back to glViewport hack */
@@ -607,14 +659,16 @@ intelInitContext(struct intel_context *intel,
       mesaVis = &visual;
    }
 
+   intel->intelScreen = intelScreen;
+
    if (!_mesa_initialize_context(&intel->ctx, api, mesaVis, shareCtx,
-                                 functions, (void *) intel)) {
+                                 functions)) {
+      *dri_ctx_error = __DRI_CTX_ERROR_NO_MEMORY;
       printf("%s: failed to init mesa context\n", __FUNCTION__);
       return false;
    }
 
    driContextPriv->driverPrivate = intel;
-   intel->intelScreen = intelScreen;
    intel->driContext = driContextPriv;
    intel->driFd = sPriv->fd;
 
@@ -679,7 +733,7 @@ intelInitContext(struct intel_context *intel,
    ctx->Const.MaxPointSizeAA = 3.0;
    ctx->Const.PointSizeGranularity = 1.0;
 
-   ctx->Const.MaxSamples = 1.0;
+   ctx->Const.MaxSamples = 1;
 
    if (intel->gen >= 6)
       ctx->Const.MaxClipPlanes = 8;
@@ -746,6 +800,11 @@ intelInitContext(struct intel_context *intel,
    INTEL_DEBUG = driParseDebugString(getenv("INTEL_DEBUG"), debug_control);
    if (INTEL_DEBUG & DEBUG_BUFMGR)
       dri_bufmgr_set_debug(intel->bufmgr, true);
+   if ((INTEL_DEBUG & DEBUG_SHADER_TIME) && intel->gen < 7) {
+      fprintf(stderr,
+              "shader_time debugging requires gen7 (Ivybridge) or better.\n");
+      INTEL_DEBUG &= ~DEBUG_SHADER_TIME;
+   }
 
    if (INTEL_DEBUG & DEBUG_AUB)
       drm_intel_bufmgr_gem_set_aub_dump(intel->bufmgr, true);
@@ -925,8 +984,8 @@ intel_query_dri2_buffers(struct intel_context *intel,
    __DRIscreen *screen = intel->intelScreen->driScrnPriv;
    struct gl_framebuffer *fb = drawable->driverPrivate;
    int i = 0;
-   const int max_attachments = 4;
-   unsigned *attachments = calloc(2 * max_attachments, sizeof(unsigned));
+   unsigned attachments[8];
+   const int max_attachments = ARRAY_SIZE(attachments) / 2;
 
    struct intel_renderbuffer *front_rb;
    struct intel_renderbuffer *back_rb;
@@ -934,6 +993,7 @@ intel_query_dri2_buffers(struct intel_context *intel,
    front_rb = intel_get_renderbuffer(fb, BUFFER_FRONT_LEFT);
    back_rb = intel_get_renderbuffer(fb, BUFFER_BACK_LEFT);
 
+   memset(attachments, 0, sizeof(attachments));
    if ((intel->is_front_buffer_rendering ||
 	intel->is_front_buffer_reading ||
 	!back_rb) && front_rb) {
@@ -954,7 +1014,6 @@ intel_query_dri2_buffers(struct intel_context *intel,
 							attachments, i / 2,
 							buffer_count,
 							drawable->loaderPrivate);
-   free(attachments);
 }
 
 /**
@@ -1015,7 +1074,7 @@ intel_process_dri2_buffer(struct intel_context *intel,
                                           buffer->cpp,
                                           drawable->w,
                                           drawable->h,
-                                          buffer->pitch / buffer->cpp,
+                                          buffer->pitch,
                                           buffer->name,
                                           buffer_name);
    if (!region)

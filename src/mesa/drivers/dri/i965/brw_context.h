@@ -36,6 +36,7 @@
 #include "intel_context.h"
 #include "brw_structs.h"
 #include "main/imports.h"
+#include "main/macros.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -262,7 +263,6 @@ static inline uint32_t AUB_TRACE_SUBTYPE(enum state_struct_type ss_type)
 struct brw_vertex_program {
    struct gl_vertex_program program;
    GLuint id;
-   bool use_const_buffer;
 };
 
 
@@ -281,14 +281,13 @@ struct brw_shader {
    struct exec_list *ir;
 };
 
-struct brw_shader_program {
-   struct gl_shader_program base;
-};
-
 /* Data about a particular attempt to compile a program.  Note that
  * there can be many of these, each in a different GL state
  * corresponding to a different brw_wm_prog_key struct, with different
- * compiled programs:
+ * compiled programs.
+ *
+ * Note: brw_wm_prog_data_compare() must be updated when adding fields to this
+ * struct!
  */
 struct brw_wm_prog_data {
    GLuint curb_read_length;
@@ -313,11 +312,14 @@ struct brw_wm_prog_data {
     */
    uint32_t barycentric_interp_modes;
 
-   /* Pointer to tracked values (only valid once
+   /* Pointers to tracked values (only valid once
     * _mesa_load_state_parameters has been called at runtime).
+    *
+    * These must be the last fields of the struct (see
+    * brw_wm_prog_data_compare()).
     */
-   const float *param[MAX_UNIFORMS * 4]; /* should be: BRW_MAX_CURBE */
-   const float *pull_param[MAX_UNIFORMS * 4];
+   const float **param;
+   const float **pull_param;
 };
 
 /**
@@ -426,6 +428,9 @@ struct brw_gs_prog_data {
    unsigned svbi_postincrement_value;
 };
 
+/* Note: brw_vs_prog_data_compare() must be updated when adding fields to this
+ * struct!
+ */
 struct brw_vs_prog_data {
    struct brw_vue_map vue_map;
 
@@ -443,23 +448,15 @@ struct brw_vs_prog_data {
     */
    GLuint urb_entry_size;
 
-   const float *param[MAX_UNIFORMS * 4]; /* should be: BRW_MAX_CURBE */
-   const float *pull_param[MAX_UNIFORMS * 4];
-
-   bool uses_new_param_layout;
    bool uses_vertexid;
    bool userclip;
 
    int num_surfaces;
+
+   /* These pointers must appear last.  See brw_vs_prog_data_compare(). */
+   const float **param;
+   const float **pull_param;
 };
-
-
-/* Size == 0 if output either not written, or always [0,0,0,1]
- */
-struct brw_vs_ouput_sizes {
-   GLubyte output_size[VERT_RESULT_MAX];
-};
-
 
 /** Number of texture sampler units */
 #define BRW_MAX_TEX_UNIT 16
@@ -563,14 +560,15 @@ struct brw_vs_ouput_sizes {
 #define SURF_INDEX_FRAG_CONST_BUFFER (BRW_MAX_DRAW_BUFFERS + 1)
 #define SURF_INDEX_TEXTURE(t)        (BRW_MAX_DRAW_BUFFERS + 2 + (t))
 #define SURF_INDEX_WM_UBO(u)         (SURF_INDEX_TEXTURE(BRW_MAX_TEX_UNIT) + u)
-
+#define SURF_INDEX_WM_SHADER_TIME    (SURF_INDEX_WM_UBO(12))
 /** Maximum size of the binding table. */
-#define BRW_MAX_WM_SURFACES          SURF_INDEX_WM_UBO(BRW_MAX_WM_UBOS)
+#define BRW_MAX_WM_SURFACES          (SURF_INDEX_WM_SHADER_TIME + 1)
 
 #define SURF_INDEX_VERT_CONST_BUFFER (0)
 #define SURF_INDEX_VS_TEXTURE(t)     (SURF_INDEX_VERT_CONST_BUFFER + 1 + (t))
 #define SURF_INDEX_VS_UBO(u)         (SURF_INDEX_VS_TEXTURE(BRW_MAX_TEX_UNIT) + u)
-#define BRW_MAX_VS_SURFACES          SURF_INDEX_VS_UBO(BRW_MAX_VS_UBOS)
+#define SURF_INDEX_VS_SHADER_TIME    (SURF_INDEX_VS_UBO(12))
+#define BRW_MAX_VS_SURFACES          (SURF_INDEX_VS_SHADER_TIME + 1)
 
 #define SURF_INDEX_SOL_BINDING(t)    ((t))
 #define BRW_MAX_GS_SURFACES          SURF_INDEX_SOL_BINDING(BRW_MAX_SOL_BINDINGS)
@@ -619,6 +617,9 @@ struct brw_cache_item {
 };   
 
 
+typedef bool (*cache_aux_compare_func)(const void *a, const void *b,
+                                       int aux_size, const void *key);
+typedef void (*cache_aux_free_func)(const void *aux);
 
 struct brw_cache {
    struct brw_context *brw;
@@ -629,6 +630,15 @@ struct brw_cache {
 
    uint32_t next_offset;
    bool bo_used_by_gpu;
+
+   /**
+    * Optional functions used in determining whether the prog_data for a new
+    * cache item matches an existing cache item (in case there's relevant data
+    * outside of the prog_data).  If NULL, a plain memcmp is done.
+    */
+   cache_aux_compare_func aux_compare[BRW_MAX_CACHE];
+   /** Optional functions for freeing other pointers attached to a prog_data. */
+   cache_aux_free_func aux_free[BRW_MAX_CACHE];
 };
 
 
@@ -641,6 +651,19 @@ struct brw_cache {
 struct brw_tracked_state {
    struct brw_state_flags dirty;
    void (*emit)( struct brw_context *brw );
+};
+
+enum shader_time_shader_type {
+   ST_NONE,
+   ST_VS,
+   ST_VS_WRITTEN,
+   ST_VS_RESET,
+   ST_FS8,
+   ST_FS8_WRITTEN,
+   ST_FS8_RESET,
+   ST_FS16,
+   ST_FS16_WRITTEN,
+   ST_FS16_RESET,
 };
 
 /* Flags for brw->state.cache.
@@ -692,8 +715,6 @@ struct brw_vertex_element {
 
    /** The corresponding Mesa vertex attribute */
    gl_vert_attrib attrib;
-   /** Size of a complete element */
-   GLuint element_size;
    /** Offset of the first element within the buffer object */
    unsigned int offset;
 };
@@ -751,16 +772,10 @@ struct brw_context
    struct {
       struct brw_vertex_element inputs[VERT_ATTRIB_MAX];
       struct brw_vertex_buffer buffers[VERT_ATTRIB_MAX];
-      struct {
-	      uint32_t handle;
-	      uint32_t offset;
-	      uint32_t stride;
-	      uint32_t step_rate;
-      } current_buffers[VERT_ATTRIB_MAX];
 
       struct brw_vertex_element *enabled[VERT_ATTRIB_MAX];
       GLuint nr_enabled;
-      GLuint nr_buffers, nr_current_buffers;
+      GLuint nr_buffers;
 
       /* Summary of size and varying of active arrays, so we can check
        * for changes to this state:
@@ -963,7 +978,6 @@ struct brw_context
 
    struct {
       struct brw_wm_prog_data *prog_data;
-      struct brw_wm_compile *compile_data;
 
       /** Input sizes, calculated from active vertex program.
        * One bit per fragment program input attribute.
@@ -1001,28 +1015,26 @@ struct brw_context
       uint32_t bind_bo_offset;
       uint32_t surf_offset[BRW_MAX_WM_SURFACES];
 
-      /** @{ register allocator */
+      struct {
+         struct ra_regs *regs;
 
-      struct ra_regs *regs;
+         /** Array of the ra classes for the unaligned contiguous
+          * register block sizes used.
+          */
+         int *classes;
 
-      /** Array of the ra classes for the unaligned contiguous
-       * register block sizes used.
-       */
-      int *classes;
+         /**
+          * Mapping for register-allocated objects in *regs to the first
+          * GRF for that object.
+          */
+         uint8_t *ra_reg_to_grf;
 
-      /**
-       * Mapping for register-allocated objects in *regs to the first
-       * GRF for that object.
-      */
-      uint8_t *ra_reg_to_grf;
-
-      /**
-       * ra class for the aligned pairs we use for PLN, which doesn't
-       * appear in *classes.
-       */
-      int aligned_pairs_class;
-
-      /** @} */
+         /**
+          * ra class for the aligned pairs we use for PLN, which doesn't
+          * appear in *classes.
+          */
+         int aligned_pairs_class;
+      } reg_sets[2];
    } wm;
 
 
@@ -1037,11 +1049,8 @@ struct brw_context
       struct brw_query_object *obj;
       drm_intel_bo *bo;
       int index;
-      bool active;
+      bool begin_emitted;
    } query;
-   /* Used to give every program string a unique id
-    */
-   GLuint program_id;
 
    int num_atoms;
    const struct brw_tracked_state **atoms;
@@ -1073,20 +1082,34 @@ struct brw_context
       bool enable_cut_index;
    } prim_restart;
 
+   /** Computed depth/stencil/hiz state from the current attached
+    * renderbuffers, valid only during the drawing state upload loop after
+    * brw_workaround_depthstencil_alignment().
+    */
+   struct {
+      struct intel_mipmap_tree *depth_mt;
+      struct intel_mipmap_tree *stencil_mt;
+      struct intel_mipmap_tree *hiz_mt;
+
+      /* Inter-tile (page-aligned) byte offsets. */
+      uint32_t depth_offset, hiz_offset, stencil_offset;
+      /* Intra-tile x,y offsets for drawing to depth/stencil/hiz */
+      uint32_t tile_x, tile_y;
+   } depthstencil;
+
    uint32_t num_instances;
+   int basevertex;
+
+   struct {
+      drm_intel_bo *bo;
+      struct gl_shader_program **programs;
+      enum shader_time_shader_type *types;
+      uint64_t *cumulative;
+      int num_entries;
+      int max_entries;
+      double report_time;
+   } shader_time;
 };
-
-
-
-#define BRW_PACKCOLOR8888(r,g,b,a)  ((r<<24) | (g<<16) | (b<<8) | a)
-
-struct brw_instruction_info {
-    char    *name;
-    int	    nsrc;
-    int	    ndst;
-    bool is_arith;
-};
-extern const struct brw_instruction_info brw_opcodes[128];
 
 /*======================================================================
  * brw_vtbl.c
@@ -1106,10 +1129,18 @@ bool brwCreateContext(int api,
 		      void *sharedContextPrivate);
 
 /*======================================================================
+ * brw_misc_state.c
+ */
+void brw_get_depthstencil_tile_masks(struct intel_mipmap_tree *depth_mt,
+                                     struct intel_mipmap_tree *stencil_mt,
+                                     uint32_t *out_tile_mask_x,
+                                     uint32_t *out_tile_mask_y);
+void brw_workaround_depthstencil_alignment(struct brw_context *brw);
+
+/*======================================================================
  * brw_queryobj.c
  */
 void brw_init_queryobj_functions(struct dd_function_table *functions);
-void brw_prepare_query_begin(struct brw_context *brw);
 void brw_emit_query_begin(struct brw_context *brw);
 void brw_emit_query_end(struct brw_context *brw);
 
@@ -1133,7 +1164,9 @@ void brwInitFragProgFuncs( struct dd_function_table *functions );
 int brw_get_scratch_size(int size);
 void brw_get_scratch_bo(struct intel_context *intel,
 			drm_intel_bo **scratch_bo, int size);
-
+void brw_init_shader_time(struct brw_context *brw);
+void brw_collect_and_report_shader_time(struct brw_context *brw);
+void brw_destroy_shader_time(struct brw_context *brw);
 
 /* brw_urb.c
  */
@@ -1142,6 +1175,10 @@ void brw_upload_urb_fence(struct brw_context *brw);
 /* brw_curbe.c
  */
 void brw_upload_cs_urb_state(struct brw_context *brw);
+
+/* brw_fs_reg_allocate.cpp
+ */
+void brw_fs_alloc_reg_sets(struct brw_context *brw);
 
 /* brw_disasm.c */
 int brw_disasm (FILE *file, struct brw_instruction *inst, int gen);
@@ -1266,6 +1303,14 @@ brw_program_reloc(struct brw_context *brw, uint32_t state_offset,
 
 bool brw_do_cubemap_normalize(struct exec_list *instructions);
 bool brw_lower_texture_gradients(struct exec_list *instructions);
+
+struct opcode_desc {
+    char    *name;
+    int	    nsrc;
+    int	    ndst;
+};
+
+extern const struct opcode_desc opcode_descs[128];
 
 #ifdef __cplusplus
 }

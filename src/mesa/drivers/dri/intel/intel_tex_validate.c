@@ -21,12 +21,18 @@ intel_update_max_level(struct intel_texture_object *intelObj,
 		       struct gl_sampler_object *sampler)
 {
    struct gl_texture_object *tObj = &intelObj->base;
+   int maxlevel;
 
    if (sampler->MinFilter == GL_NEAREST ||
        sampler->MinFilter == GL_LINEAR) {
-      intelObj->_MaxLevel = tObj->BaseLevel;
+      maxlevel = tObj->BaseLevel;
    } else {
-      intelObj->_MaxLevel = tObj->_MaxLevel;
+      maxlevel = tObj->_MaxLevel;
+   }
+
+   if (intelObj->_MaxLevel != maxlevel) {
+      intelObj->_MaxLevel = maxlevel;
+      intelObj->needs_validate = true;
    }
 }
 
@@ -55,6 +61,12 @@ intel_finalize_mipmap_tree(struct intel_context *intel, GLuint unit)
    /* What levels must the tree include at a minimum?
     */
    intel_update_max_level(intelObj, sampler);
+   if (intelObj->mt && intelObj->mt->first_level != tObj->BaseLevel)
+      intelObj->needs_validate = true;
+
+   if (!intelObj->needs_validate)
+      return true;
+
    firstImage = intel_texture_image(tObj->Image[0][tObj->BaseLevel]);
 
    /* Check tree can hold all active levels.  Check tree matches
@@ -79,6 +91,11 @@ intel_finalize_mipmap_tree(struct intel_context *intel, GLuint unit)
       intel_miptree_get_dimensions_for_image(&firstImage->base.Base,
 					     &width, &height, &depth);
 
+      perf_debug("Creating new %s %dx%dx%d %d..%d miptree to handle finalized "
+                 "texture miptree.\n",
+                 _mesa_get_format_name(firstImage->base.Base.TexFormat),
+                 width, height, depth, tObj->BaseLevel, intelObj->_MaxLevel);
+
       intelObj->mt = intel_miptree_create(intel,
                                           intelObj->base.Target,
 					  firstImage->base.Base.TexFormat,
@@ -89,7 +106,7 @@ intel_finalize_mipmap_tree(struct intel_context *intel, GLuint unit)
                                           depth,
 					  true,
                                           0 /* num_samples */,
-                                          INTEL_MSAA_LAYOUT_NONE);
+                                          false /* force_y_tiling */);
       if (!intelObj->mt)
          return false;
    }
@@ -108,8 +125,16 @@ intel_finalize_mipmap_tree(struct intel_context *intel, GLuint unit)
          if (intelObj->mt != intelImage->mt) {
             intel_miptree_copy_teximage(intel, intelImage, intelObj->mt);
          }
+
+         /* After we're done, we'd better agree that our layout is
+          * appropriate, or we'll end up hitting this function again on the
+          * next draw
+          */
+         assert(intel_miptree_match_image(intelObj->mt, &intelImage->base.Base));
       }
    }
+
+   intelObj->needs_validate = false;
 
    return true;
 }
@@ -146,8 +171,9 @@ intel_tex_map_image_for_swrast(struct intel_context *intel,
        * share code with the normal path.
        */
       for (i = 0; i < mt->level[level].depth; i++) {
-	 intel_miptree_get_image_offset(mt, level, face, i, &x, &y);
-	 intel_image->base.ImageOffsets[i] = x + y * mt->region->pitch;
+	 intel_miptree_get_image_offset(mt, level, i, &x, &y);
+	 intel_image->base.ImageOffsets[i] = x + y * (mt->region->pitch /
+                                                      mt->region->cpp);
       }
 
       DBG("%s \n", __FUNCTION__);
@@ -155,16 +181,17 @@ intel_tex_map_image_for_swrast(struct intel_context *intel,
       intel_image->base.Map = intel_region_map(intel, mt->region, mode);
    } else {
       assert(intel_image->base.Base.Depth == 1);
-      intel_miptree_get_image_offset(mt, level, face, 0, &x, &y);
+      intel_miptree_get_image_offset(mt, level, face, &x, &y);
 
       DBG("%s: (%d,%d) -> (%d, %d)/%d\n",
-	  __FUNCTION__, face, level, x, y, mt->region->pitch * mt->cpp);
+	  __FUNCTION__, face, level, x, y, mt->region->pitch);
 
       intel_image->base.Map = intel_region_map(intel, mt->region, mode) +
-	 (x + y * mt->region->pitch) * mt->cpp;
+	 x * mt->cpp + y * mt->region->pitch;
    }
 
-   intel_image->base.RowStride = mt->region->pitch;
+   assert(mt->region->pitch % mt->region->cpp == 0);
+   intel_image->base.RowStride = mt->region->pitch / mt->region->cpp;
 }
 
 static void

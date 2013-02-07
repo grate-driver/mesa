@@ -53,38 +53,6 @@
 #include "sp_screen.h"
 
 
-/**
- * Map any drawing surfaces which aren't already mapped
- */
-void
-softpipe_map_transfers(struct softpipe_context *sp)
-{
-   unsigned i;
-
-   for (i = 0; i < sp->framebuffer.nr_cbufs; i++) {
-      sp_tile_cache_map_transfers(sp->cbuf_cache[i]);
-   }
-
-   sp_tile_cache_map_transfers(sp->zsbuf_cache);
-}
-
-
-/**
- * Unmap any mapped drawing surfaces
- */
-void
-softpipe_unmap_transfers(struct softpipe_context *sp)
-{
-   uint i;
-
-   for (i = 0; i < sp->framebuffer.nr_cbufs; i++) {
-      sp_tile_cache_unmap_transfers(sp->cbuf_cache[i]);
-   }
-
-   sp_tile_cache_unmap_transfers(sp->zsbuf_cache);
-}
-
-
 static void
 softpipe_destroy( struct pipe_context *pipe )
 {
@@ -98,6 +66,10 @@ softpipe_destroy( struct pipe_context *pipe )
    pipe_resource_reference(&softpipe->pstipple.texture, NULL);
    pipe_sampler_view_reference(&softpipe->pstipple.sampler_view, NULL);
 #endif
+
+   if (softpipe->blitter) {
+      util_blitter_destroy(softpipe->blitter);
+   }
 
    if (softpipe->draw)
       draw_destroy( softpipe->draw );
@@ -310,6 +282,13 @@ softpipe_create_context( struct pipe_screen *screen,
    draw_set_rasterize_stage(softpipe->draw, softpipe->vbuf);
    draw_set_render(softpipe->draw, softpipe->vbuf_backend);
 
+   softpipe->blitter = util_blitter_create(&softpipe->pipe);
+   if (!softpipe->blitter) {
+      goto fail;
+   }
+
+   /* must be done before installing Draw stages */
+   util_blitter_cache_all_shaders(softpipe->blitter);
 
    /* plug in AA line/point stages */
    draw_install_aaline_stage(softpipe->draw, &softpipe->pipe);

@@ -23,6 +23,7 @@
 #include "r600_sq.h"
 #include "r600_opcodes.h"
 #include "r600_formats.h"
+#include "r600_shader.h"
 #include "r600d.h"
 
 #include <errno.h>
@@ -39,6 +40,7 @@ static inline unsigned int r600_bytecode_get_num_operands(struct r600_bytecode *
 		return 3;
 
 	switch (bc->chip_class) {
+	default:
 	case R600:
 	case R700:
 		switch (alu->inst) {
@@ -200,8 +202,8 @@ static inline unsigned int r600_bytecode_get_num_operands(struct r600_bytecode *
 		case EG_V_SQ_ALU_WORD1_OP2_SQ_OP2_INST_RECIP_INT:
 		case EG_V_SQ_ALU_WORD1_OP2_SQ_OP2_INST_RECIP_UINT:
 			return 1;
-		default: R600_ERR(
-			"Need instruction operand number for 0x%x.\n", alu->inst);
+		default:
+			R600_ERR("Need instruction operand number for 0x%x.\n", alu->inst);
 		}
 		break;
 	}
@@ -254,7 +256,10 @@ static struct r600_bytecode_tex *r600_bytecode_tex(void)
 	return tex;
 }
 
-void r600_bytecode_init(struct r600_bytecode *bc, enum chip_class chip_class, enum radeon_family family)
+void r600_bytecode_init(struct r600_bytecode *bc,
+			enum chip_class chip_class,
+			enum radeon_family family,
+			enum r600_msaa_texture_mode msaa_texture_mode)
 {
 	if ((chip_class == R600) &&
 	    (family != CHIP_RV670 && family != CHIP_RS780 && family != CHIP_RS880)) {
@@ -267,6 +272,7 @@ void r600_bytecode_init(struct r600_bytecode *bc, enum chip_class chip_class, en
 
 	LIST_INITHEAD(&bc->cf);
 	bc->chip_class = chip_class;
+	bc->msaa_texture_mode = msaa_texture_mode;
 }
 
 static int r600_bytecode_add_cf(struct r600_bytecode *bc)
@@ -472,6 +478,23 @@ static int is_alu_mova_inst(struct r600_bytecode *bc, struct r600_bytecode_alu *
 		return !alu->is_op3 && (
 			alu->inst == EG_V_SQ_ALU_WORD1_OP2_SQ_OP2_INST_MOVA_INT);
 	}
+}
+
+static int alu_uses_rel(struct r600_bytecode *bc, struct r600_bytecode_alu *alu)
+{
+	unsigned num_src = r600_bytecode_get_num_operands(bc, alu);
+	unsigned src;
+
+	if (alu->dst.rel) {
+		return 1;
+	}
+
+	for (src = 0; src < num_src; ++src) {
+		if (alu->src[src].rel) {
+			return 1;
+		}
+	}
+	return 0;
 }
 
 static int is_opcode_in_range(unsigned opcode, unsigned min, unsigned max)
@@ -1078,6 +1101,14 @@ static int merge_inst_groups(struct r600_bytecode *bc, struct r600_bytecode_alu 
 					return 0;
 				have_mova = 1;
 			}
+
+			if (alu_uses_rel(bc, prev[i])) {
+				if (have_mova) {
+					return 0;
+				}
+				have_rel = 1;
+			}
+
 			num_once_inst += is_alu_once_inst(bc, prev[i]);
 		}
 		if (slots[i] && r600_bytecode_alu_nliterals(bc, slots[i], literal, &nliteral))
@@ -1125,21 +1156,23 @@ static int merge_inst_groups(struct r600_bytecode *bc, struct r600_bytecode_alu 
 		if (is_nop_inst(bc, alu))
 			return 0;
 
-		/* Let's check dst gpr. */
-		if (alu->dst.rel) {
-			if (have_mova)
+		if (is_alu_mova_inst(bc, alu)) {
+			if (have_rel) {
 				return 0;
+			}
+			have_mova = 1;
+		}
+
+		if (alu_uses_rel(bc, alu)) {
+			if (have_mova) {
+				return 0;
+			}
 			have_rel = 1;
 		}
 
 		/* Let's check source gprs */
 		num_src = r600_bytecode_get_num_operands(bc, alu);
 		for (src = 0; src < num_src; ++src) {
-			if (alu->src[src].rel) {
-				if (have_mova)
-					return 0;
-				have_rel = 1;
-			}
 
 			/* Constants don't matter. */
 			if (!is_gpr(alu->src[src].sel))
@@ -1388,6 +1421,7 @@ static int load_ar_r6xx(struct r600_bytecode *bc)
 	memset(&alu, 0, sizeof(alu));
 	alu.inst = V_SQ_ALU_WORD1_OP2_SQ_OP2_INST_MOVA_GPR_INT;
 	alu.src[0].sel = bc->ar_reg;
+	alu.src[0].chan = bc->ar_chan;
 	alu.last = 1;
 	alu.index_mode = INDEX_MODE_LOOP;
 	r = r600_bytecode_add_alu(bc, &alu);
@@ -1418,6 +1452,7 @@ static int load_ar(struct r600_bytecode *bc)
 	memset(&alu, 0, sizeof(alu));
 	alu.inst = BC_INST(bc, V_SQ_ALU_WORD1_OP2_SQ_OP2_INST_MOVA_INT);
 	alu.src[0].sel = bc->ar_reg;
+	alu.src[0].chan = bc->ar_chan;
 	alu.last = 1;
 	r = r600_bytecode_add_alu(bc, &alu);
 	if (r)
@@ -1619,6 +1654,7 @@ int r600_bytecode_add_vtx(struct r600_bytecode *bc, const struct r600_bytecode_v
 			break;
 		default:
 			R600_ERR("Unknown chip class %d.\n", bc->chip_class);
+			free(nvtx);
 			return -EINVAL;
 		}
 	}
@@ -1735,6 +1771,7 @@ static int r600_bytecode_vtx_build(struct r600_bytecode *bc, struct r600_bytecod
 static int r600_bytecode_tex_build(struct r600_bytecode *bc, struct r600_bytecode_tex *tex, unsigned id)
 {
 	bc->bytecode[id++] = S_SQ_TEX_WORD0_TEX_INST(tex->inst) |
+			     EG_S_SQ_TEX_WORD0_INST_MOD(tex->inst_mod) |
 				S_SQ_TEX_WORD0_RESOURCE_ID(tex->resource_id) |
 				S_SQ_TEX_WORD0_SRC_GPR(tex->src_gpr) |
 				S_SQ_TEX_WORD0_SRC_REL(tex->src_rel);
@@ -2601,7 +2638,7 @@ void r600_bytecode_dump(struct r600_bytecode *bc)
 	fprintf(stderr, "--------------------------------------\n");
 }
 
-static void r600_vertex_data_type(enum pipe_format pformat,
+void r600_vertex_data_type(enum pipe_format pformat,
 				  unsigned *format,
 				  unsigned *num_format, unsigned *format_comp, unsigned *endian)
 {
@@ -2747,23 +2784,28 @@ out_unknown:
 	R600_ERR("unsupported vertex format %s\n", util_format_name(pformat));
 }
 
-int r600_vertex_elements_build_fetch_shader(struct r600_context *rctx, struct r600_vertex_element *ve)
+void *r600_create_vertex_fetch_shader(struct pipe_context *ctx,
+				      unsigned count,
+				      const struct pipe_vertex_element *elements)
 {
+	struct r600_context *rctx = (struct r600_context *)ctx;
 	static int dump_shaders = -1;
-
 	struct r600_bytecode bc;
 	struct r600_bytecode_vtx vtx;
-	struct pipe_vertex_element *elements = ve->elements;
 	const struct util_format_description *desc;
 	unsigned fetch_resource_start = rctx->chip_class >= EVERGREEN ? 0 : 160;
 	unsigned format, num_format, format_comp, endian;
 	uint32_t *bytecode;
-	int i, j, r;
+	int i, j, r, fs_size;
+	struct r600_fetch_shader *shader;
+
+	assert(count < 32);
 
 	memset(&bc, 0, sizeof(bc));
-	r600_bytecode_init(&bc, rctx->chip_class, rctx->family);
+	r600_bytecode_init(&bc, rctx->chip_class, rctx->family,
+			   rctx->screen->msaa_texture_support);
 
-	for (i = 0; i < ve->count; i++) {
+	for (i = 0; i < count; i++) {
 		if (elements[i].instance_divisor > 1) {
 			if (rctx->chip_class == CAYMAN) {
 				for (j = 0; j < 4; j++) {
@@ -2780,7 +2822,7 @@ int r600_vertex_elements_build_fetch_shader(struct r600_context *rctx, struct r6
 					alu.last = j == 3;
 					if ((r = r600_bytecode_add_alu(&bc, &alu))) {
 						r600_bytecode_clear(&bc);
-						return r;
+						return NULL;
 					}
 				}
 			} else {
@@ -2797,27 +2839,27 @@ int r600_vertex_elements_build_fetch_shader(struct r600_context *rctx, struct r6
 				alu.last = 1;
 				if ((r = r600_bytecode_add_alu(&bc, &alu))) {
 					r600_bytecode_clear(&bc);
-					return r;
+					return NULL;
 				}
 			}
 		}
 	}
 
-	for (i = 0; i < ve->count; i++) {
-		r600_vertex_data_type(ve->elements[i].src_format,
+	for (i = 0; i < count; i++) {
+		r600_vertex_data_type(elements[i].src_format,
 				      &format, &num_format, &format_comp, &endian);
 
-		desc = util_format_description(ve->elements[i].src_format);
+		desc = util_format_description(elements[i].src_format);
 		if (desc == NULL) {
 			r600_bytecode_clear(&bc);
-			R600_ERR("unknown format %d\n", ve->elements[i].src_format);
-			return -EINVAL;
+			R600_ERR("unknown format %d\n", elements[i].src_format);
+			return NULL;
 		}
 
 		if (elements[i].src_offset > 65535) {
 			r600_bytecode_clear(&bc);
 			R600_ERR("too big src_offset: %u\n", elements[i].src_offset);
-			return -EINVAL;
+			return NULL;
 		}
 
 		memset(&vtx, 0, sizeof(vtx));
@@ -2840,7 +2882,7 @@ int r600_vertex_elements_build_fetch_shader(struct r600_context *rctx, struct r6
 
 		if ((r = r600_bytecode_add_vtx(&bc, &vtx))) {
 			r600_bytecode_clear(&bc);
-			return r;
+			return NULL;
 		}
 	}
 
@@ -2848,7 +2890,7 @@ int r600_vertex_elements_build_fetch_shader(struct r600_context *rctx, struct r6
 
 	if ((r = r600_bytecode_build(&bc))) {
 		r600_bytecode_clear(&bc);
-		return r;
+		return NULL;
 	}
 
 	if (dump_shaders == -1)
@@ -2860,39 +2902,99 @@ int r600_vertex_elements_build_fetch_shader(struct r600_context *rctx, struct r6
 		fprintf(stderr, "______________________________________________________________\n");
 	}
 
-	ve->fs_size = bc.ndw*4;
+	fs_size = bc.ndw*4;
 
-	ve->fetch_shader = (struct r600_resource*)
-			pipe_buffer_create(rctx->context.screen,
-					   PIPE_BIND_CUSTOM,
-					   PIPE_USAGE_IMMUTABLE, ve->fs_size);
-	if (ve->fetch_shader == NULL) {
+	/* Allocate the CSO. */
+	shader = CALLOC_STRUCT(r600_fetch_shader);
+	if (!shader) {
 		r600_bytecode_clear(&bc);
-		return -ENOMEM;
+		return NULL;
 	}
 
-	bytecode = rctx->ws->buffer_map(ve->fetch_shader->cs_buf, rctx->cs, PIPE_TRANSFER_WRITE);
-	if (bytecode == NULL) {
+	u_suballocator_alloc(rctx->allocator_fetch_shader, fs_size, &shader->offset,
+			     (struct pipe_resource**)&shader->buffer);
+	if (!shader->buffer) {
 		r600_bytecode_clear(&bc);
-		pipe_resource_reference((struct pipe_resource**)&ve->fetch_shader, NULL);
-		return -ENOMEM;
+		FREE(shader);
+		return NULL;
 	}
+
+	bytecode = r600_buffer_mmap_sync_with_rings(rctx, shader->buffer, PIPE_TRANSFER_WRITE | PIPE_TRANSFER_UNSYNCHRONIZED);
+	bytecode += shader->offset / 4;
 
 	if (R600_BIG_ENDIAN) {
-		for (i = 0; i < ve->fs_size / 4; ++i) {
+		for (i = 0; i < fs_size / 4; ++i) {
 			bytecode[i] = bswap_32(bc.bytecode[i]);
 		}
 	} else {
-		memcpy(bytecode, bc.bytecode, ve->fs_size);
+		memcpy(bytecode, bc.bytecode, fs_size);
 	}
+	rctx->ws->buffer_unmap(shader->buffer->cs_buf);
 
-	rctx->ws->buffer_unmap(ve->fetch_shader->cs_buf);
 	r600_bytecode_clear(&bc);
+	return shader;
+}
 
-	if (rctx->chip_class >= EVERGREEN)
-		evergreen_fetch_shader(&rctx->context, ve);
-	else
-		r600_fetch_shader(&rctx->context, ve);
+void r600_bytecode_alu_read(struct r600_bytecode_alu *alu, uint32_t word0, uint32_t word1)
+{
+	/* WORD0 */
+	alu->src[0].sel = G_SQ_ALU_WORD0_SRC0_SEL(word0);
+	alu->src[0].rel = G_SQ_ALU_WORD0_SRC0_REL(word0);
+	alu->src[0].chan = G_SQ_ALU_WORD0_SRC0_CHAN(word0);
+	alu->src[0].neg = G_SQ_ALU_WORD0_SRC0_NEG(word0);
+	alu->src[1].sel = G_SQ_ALU_WORD0_SRC1_SEL(word0);
+	alu->src[1].rel = G_SQ_ALU_WORD0_SRC1_REL(word0);
+	alu->src[1].chan = G_SQ_ALU_WORD0_SRC1_CHAN(word0);
+	alu->src[1].neg = G_SQ_ALU_WORD0_SRC1_NEG(word0);
+	alu->index_mode = G_SQ_ALU_WORD0_INDEX_MODE(word0);
+	alu->pred_sel = G_SQ_ALU_WORD0_PRED_SEL(word0);
+	alu->last = G_SQ_ALU_WORD0_LAST(word0);
 
-	return 0;
+	/* WORD1 */
+	alu->bank_swizzle = G_SQ_ALU_WORD1_BANK_SWIZZLE(word1);
+	if (alu->bank_swizzle)
+		alu->bank_swizzle_force = alu->bank_swizzle;
+	alu->dst.sel = G_SQ_ALU_WORD1_DST_GPR(word1);
+	alu->dst.rel = G_SQ_ALU_WORD1_DST_REL(word1);
+	alu->dst.chan = G_SQ_ALU_WORD1_DST_CHAN(word1);
+	alu->dst.clamp = G_SQ_ALU_WORD1_CLAMP(word1);
+	if (G_SQ_ALU_WORD1_ENCODING(word1)) /*ALU_DWORD1_OP3*/
+	{
+		alu->is_op3 = 1;
+		alu->src[2].sel = G_SQ_ALU_WORD1_OP3_SRC2_SEL(word1);
+		alu->src[2].rel = G_SQ_ALU_WORD1_OP3_SRC2_REL(word1);
+		alu->src[2].chan = G_SQ_ALU_WORD1_OP3_SRC2_CHAN(word1);
+		alu->src[2].neg = G_SQ_ALU_WORD1_OP3_SRC2_NEG(word1);
+		alu->inst = G_SQ_ALU_WORD1_OP3_ALU_INST(word1);
+	}
+	else /*ALU_DWORD1_OP2*/
+	{
+		alu->src[0].abs = G_SQ_ALU_WORD1_OP2_SRC0_ABS(word1);
+		alu->src[1].abs = G_SQ_ALU_WORD1_OP2_SRC1_ABS(word1);
+		alu->inst = G_SQ_ALU_WORD1_OP2_ALU_INST(word1);
+		alu->omod = G_SQ_ALU_WORD1_OP2_OMOD(word1);
+		alu->dst.write = G_SQ_ALU_WORD1_OP2_WRITE_MASK(word1);
+		alu->update_pred = G_SQ_ALU_WORD1_OP2_UPDATE_PRED(word1);
+		alu->execute_mask =
+			G_SQ_ALU_WORD1_OP2_UPDATE_EXECUTE_MASK(word1);
+	}
+}
+
+void r600_bytecode_export_read(struct r600_bytecode_output *output, uint32_t word0, uint32_t word1)
+{
+	output->array_base = G_SQ_CF_ALLOC_EXPORT_WORD0_ARRAY_BASE(word0);
+	output->type = G_SQ_CF_ALLOC_EXPORT_WORD0_TYPE(word0);
+	output->gpr = G_SQ_CF_ALLOC_EXPORT_WORD0_RW_GPR(word0);
+	output->elem_size = G_SQ_CF_ALLOC_EXPORT_WORD0_ELEM_SIZE(word0);
+
+	output->swizzle_x = G_SQ_CF_ALLOC_EXPORT_WORD1_SWIZ_SEL_X(word1);
+	output->swizzle_y = G_SQ_CF_ALLOC_EXPORT_WORD1_SWIZ_SEL_Y(word1);
+	output->swizzle_z = G_SQ_CF_ALLOC_EXPORT_WORD1_SWIZ_SEL_Z(word1);
+	output->swizzle_w = G_SQ_CF_ALLOC_EXPORT_WORD1_SWIZ_SEL_W(word1);
+	output->burst_count = G_SQ_CF_ALLOC_EXPORT_WORD1_BURST_COUNT(word1);
+	output->end_of_program = G_SQ_CF_ALLOC_EXPORT_WORD1_END_OF_PROGRAM(word1);
+	output->inst = R600_S_SQ_CF_ALLOC_EXPORT_WORD1_CF_INST(G_SQ_CF_ALLOC_EXPORT_WORD1_CF_INST(word1));
+	output->barrier = G_SQ_CF_ALLOC_EXPORT_WORD1_BARRIER(word1);
+	output->array_size = G_SQ_CF_ALLOC_EXPORT_WORD1_BUF_ARRAY_SIZE(word1);
+	output->comp_mask = G_SQ_CF_ALLOC_EXPORT_WORD1_BUF_COMP_MASK(word1);
 }

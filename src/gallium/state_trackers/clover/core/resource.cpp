@@ -31,9 +31,9 @@ namespace {
    class box {
    public:
       box(const resource::point &origin, const resource::point &size) :
-         pipe({ (unsigned)origin[0], (unsigned)origin[1],
-                (unsigned)origin[2], (unsigned)size[0],
-                (unsigned)size[1], (unsigned)size[2] }) {
+         pipe({ (int)origin[0], (int)origin[1],
+                (int)origin[2], (int)size[0],
+                (int)size[1], (int)size[2] }) {
       }
 
       operator const pipe_box *() {
@@ -100,7 +100,6 @@ resource::bind_surface(clover::command_queue &q, bool rw) {
    pipe_surface info {};
 
    info.format = pipe->format;
-   info.usage = pipe->bind;
    info.writable = rw;
 
    if (pipe->target == PIPE_BUFFER)
@@ -177,14 +176,10 @@ mapping::mapping(command_queue &q, resource &r,
                      (flags & CL_MAP_READ ? PIPE_TRANSFER_READ : 0 ) |
                      (blocking ? PIPE_TRANSFER_UNSYNCHRONIZED : 0));
 
-   pxfer = pctx->get_transfer(pctx, r.pipe, 0, usage,
-                              box(origin + r.offset, region));
-   if (!pxfer)
-      throw error(CL_OUT_OF_RESOURCES);
-
-   p = pctx->transfer_map(pctx, pxfer);
+   p = pctx->transfer_map(pctx, r.pipe, 0, usage,
+                          box(origin + r.offset, region), &pxfer);
    if (!p) {
-      pctx->transfer_destroy(pctx, pxfer);
+      pxfer = NULL;
       throw error(CL_OUT_OF_RESOURCES);
    }
 }
@@ -198,6 +193,5 @@ mapping::mapping(mapping &&m) :
 mapping::~mapping() {
    if (pxfer) {
       pctx->transfer_unmap(pctx, pxfer);
-      pctx->transfer_destroy(pctx, pxfer);
    }
 }

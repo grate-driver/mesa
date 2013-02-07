@@ -22,7 +22,7 @@
  */
 
 #include "brw_fs.h"
-#include "brw_fs_cfg.h"
+#include "brw_cfg.h"
 
 /** @file brw_fs_cse.cpp
  *
@@ -81,18 +81,18 @@ operands_match(fs_reg *xs, fs_reg *ys)
 }
 
 bool
-fs_visitor::opt_cse_local(fs_bblock *block, exec_list *aeb)
+fs_visitor::opt_cse_local(bblock_t *block, exec_list *aeb)
 {
    bool progress = false;
 
    void *mem_ctx = ralloc_context(this->mem_ctx);
 
-   for (fs_inst *inst = block->start;
+   for (fs_inst *inst = (fs_inst *)block->start;
 	inst != block->end->next;
 	inst = (fs_inst *) inst->next) {
 
       /* Skip some cases. */
-      if (is_expression(inst) && !inst->predicated && inst->mlen == 0 &&
+      if (is_expression(inst) && !inst->predicate && inst->mlen == 0 &&
           !inst->force_uncompressed && !inst->force_sechalf &&
           !inst->conditional_mod)
       {
@@ -176,10 +176,10 @@ fs_visitor::opt_cse()
 {
    bool progress = false;
 
-   fs_cfg cfg(this);
+   cfg_t cfg(this);
 
    for (int b = 0; b < cfg.num_blocks; b++) {
-      fs_bblock *block = cfg.blocks[b];
+      bblock_t *block = cfg.blocks[b];
       exec_list aeb;
 
       progress = opt_cse_local(block, &aeb) || progress;

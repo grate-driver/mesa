@@ -142,6 +142,9 @@ brw_queryobj_get_results(struct gl_context *ctx,
    if (query->bo == NULL)
       return;
 
+   if (drm_intel_bo_references(intel->batch.bo, query->bo))
+      intel_batchbuffer_flush(intel);
+
    if (unlikely(INTEL_DEBUG & DEBUG_PERF)) {
       if (drm_intel_bo_busy(query->bo)) {
          perf_debug("Stalling on the GPU waiting for a query object.\n");
@@ -188,6 +191,17 @@ brw_queryobj_get_results(struct gl_context *ctx,
       /* Map and count the pixels from the current query BO */
       for (i = query->first_index; i <= query->last_index; i++) {
 	 query->Base.Result += results[i * 2 + 1] - results[i * 2];
+      }
+      break;
+
+   case GL_ANY_SAMPLES_PASSED:
+   case GL_ANY_SAMPLES_PASSED_CONSERVATIVE:
+      /* Set true if any of the sub-queries passed. */
+      for (i = query->first_index; i <= query->last_index; i++) {
+	 if (results[i * 2 + 1] != results[i * 2]) {
+            query->Base.Result = GL_TRUE;
+            break;
+         }
       }
       break;
 
@@ -247,6 +261,8 @@ brw_begin_query(struct gl_context *ctx, struct gl_query_object *q)
       write_timestamp(intel, query->bo, 0);
       break;
 
+   case GL_ANY_SAMPLES_PASSED:
+   case GL_ANY_SAMPLES_PASSED_CONSERVATIVE:
    case GL_SAMPLES_PASSED_ARB:
       /* Reset our driver's tracking of query state. */
       drm_intel_bo_unreference(query->bo);
@@ -299,17 +315,30 @@ brw_end_query(struct gl_context *ctx, struct gl_query_object *q)
 
    case GL_TIME_ELAPSED_EXT:
       write_timestamp(intel, query->bo, 1);
-      intel_batchbuffer_flush(intel);
       break;
 
+   case GL_ANY_SAMPLES_PASSED:
+   case GL_ANY_SAMPLES_PASSED_CONSERVATIVE:
    case GL_SAMPLES_PASSED_ARB:
-      /* Flush the batchbuffer in case it has writes to our query BO.
-       * Have later queries write to a new query BO so that further rendering
-       * doesn't delay the collection of our results.
+
+      /* No query->bo means that EndQuery was called after BeginQuery with no
+       * intervening drawing. Rather than doing nothing at all here in this
+       * case, we emit the query_begin and query_end state to the
+       * hardware. This is to guarantee that waiting on the result of this
+       * empty state will cause all previous queries to complete at all, as
+       * required by the specification:
+       *
+       * 	It must always be true that if any query object
+       *	returns a result available of TRUE, all queries of the
+       *	same type issued prior to that query must also return
+       *	TRUE. [Open GL 4.3 (Core Profile) Section 4.2.1]
        */
+      if (!query->bo) {
+         brw_emit_query_begin(brw);
+      }
+
       if (query->bo) {
 	 brw_emit_query_end(brw);
-	 intel_batchbuffer_flush(intel);
 
 	 drm_intel_bo_unreference(brw->query.bo);
 	 brw->query.bo = NULL;
@@ -364,7 +393,18 @@ static void brw_wait_query(struct gl_context *ctx, struct gl_query_object *q)
 
 static void brw_check_query(struct gl_context *ctx, struct gl_query_object *q)
 {
+   struct intel_context *intel = intel_context(ctx);
    struct brw_query_object *query = (struct brw_query_object *)q;
+
+   /* From the GL_ARB_occlusion_query spec:
+    *
+    *     "Instead of allowing for an infinite loop, performing a
+    *      QUERY_RESULT_AVAILABLE_ARB will perform a flush if the result is
+    *      not ready yet on the first time it is queried.  This ensures that
+    *      the async query will return true in finite time.
+    */
+   if (query->bo && drm_intel_bo_references(intel->batch.bo, query->bo))
+      intel_batchbuffer_flush(intel);
 
    if (query->bo == NULL || !drm_intel_bo_busy(query->bo)) {
       brw_queryobj_get_results(ctx, query);
@@ -372,14 +412,16 @@ static void brw_check_query(struct gl_context *ctx, struct gl_query_object *q)
    }
 }
 
-/** Called to set up the query BO and account for its aperture space */
+/** Called just before primitive drawing to get a beginning PS_DEPTH_COUNT. */
 void
-brw_prepare_query_begin(struct brw_context *brw)
+brw_emit_query_begin(struct brw_context *brw)
 {
    struct intel_context *intel = &brw->intel;
+   struct gl_context *ctx = &intel->ctx;
+   struct brw_query_object *query = brw->query.obj;
 
-   /* Skip if we're not doing any queries. */
-   if (!brw->query.obj)
+   /* Skip if we're not doing any queries, or we've emitted the start. */
+   if (!query || brw->query.begin_emitted)
       return;
 
    /* Get a new query BO if we're going to need it. */
@@ -397,19 +439,6 @@ brw_prepare_query_begin(struct brw_context *brw)
 
       brw->query.index = 0;
    }
-}
-
-/** Called just before primitive drawing to get a beginning PS_DEPTH_COUNT. */
-void
-brw_emit_query_begin(struct brw_context *brw)
-{
-   struct intel_context *intel = &brw->intel;
-   struct gl_context *ctx = &intel->ctx;
-   struct brw_query_object *query = brw->query.obj;
-
-   /* Skip if we're not doing any queries, or we've emitted the start. */
-   if (!query || brw->query.active)
-      return;
 
    write_depth_count(intel, brw->query.bo, brw->query.index * 2);
 
@@ -421,7 +450,7 @@ brw_emit_query_begin(struct brw_context *brw)
       query->first_index = brw->query.index;
    }
    query->last_index = brw->query.index;
-   brw->query.active = true;
+   brw->query.begin_emitted = true;
 }
 
 /** Called at batchbuffer flush to get an ending PS_DEPTH_COUNT */
@@ -430,12 +459,12 @@ brw_emit_query_end(struct brw_context *brw)
 {
    struct intel_context *intel = &brw->intel;
 
-   if (!brw->query.active)
+   if (!brw->query.begin_emitted)
       return;
 
    write_depth_count(intel, brw->query.bo, brw->query.index * 2 + 1);
 
-   brw->query.active = false;
+   brw->query.begin_emitted = false;
    brw->query.index++;
 }
 

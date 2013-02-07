@@ -133,6 +133,7 @@ extern const struct brw_tracked_state gen7_wm_constants;
 extern const struct brw_tracked_state gen7_wm_constant_surface;
 extern const struct brw_tracked_state gen7_wm_state;
 extern const struct brw_tracked_state gen7_wm_surfaces;
+extern const struct brw_tracked_state haswell_cut_index;
 
 /* brw_misc_state.c */
 uint32_t
@@ -201,24 +202,19 @@ GLuint translate_tex_format(gl_format mesa_format,
 			    GLenum depth_mode,
 			    GLenum srgb_decode);
 
+int brw_get_texture_swizzle(const struct gl_context *ctx,
+                            const struct gl_texture_object *t);
+
 /* gen7_wm_surface_state.c */
-void gen7_set_surface_tiling(struct gen7_surface_state *surf, uint32_t tiling);
-void gen7_set_surface_msaa(struct gen7_surface_state *surf,
-                           unsigned num_samples,
-                           enum intel_msaa_layout layout);
+uint32_t gen7_surface_tiling_mode(uint32_t tiling);
+uint32_t gen7_surface_msaa_bits(unsigned num_samples, enum intel_msaa_layout l);
 void gen7_set_surface_mcs_info(struct brw_context *brw,
-                               struct gen7_surface_state *surf,
+                               uint32_t *surf,
                                uint32_t surf_offset,
                                const struct intel_mipmap_tree *mcs_mt,
                                bool is_render_target);
-void gen7_check_surface_setup(struct gen7_surface_state *surf,
-                              bool is_render_target);
+void gen7_check_surface_setup(uint32_t *surf, bool is_render_target);
 void gen7_init_vtable_surface_functions(struct brw_context *brw);
-void gen7_create_constant_surface(struct brw_context *brw,
-				  drm_intel_bo *bo,
-				  uint32_t offset,
-				  int width,
-				  uint32_t *out_offset);
 
 /* brw_wm_sampler_state.c */
 uint32_t translate_wrap_mode(GLenum wrap, bool using_nearest);

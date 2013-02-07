@@ -69,25 +69,12 @@ void draw_gs_destroy( struct draw_context *draw )
    tgsi_exec_machine_destroy(draw->gs.tgsi.machine);
 }
 
-void
-draw_gs_set_constants(struct draw_context *draw,
-                      unsigned slot,
-                      const void *constants,
-                      unsigned size)
-{
-   /* noop. added here for symmetry with the VS
-    * code and in case we'll ever want to allign
-    * the constants, e.g. when we'll change to a
-    * different interpreter */
-}
-
-
 struct draw_geometry_shader *
 draw_create_geometry_shader(struct draw_context *draw,
                             const struct pipe_shader_state *state)
 {
    struct draw_geometry_shader *gs;
-   int i;
+   unsigned i;
 
    gs = CALLOC_STRUCT(draw_geometry_shader);
 
@@ -156,13 +143,15 @@ void draw_bind_geometry_shader(struct draw_context *draw,
 void draw_delete_geometry_shader(struct draw_context *draw,
                                  struct draw_geometry_shader *dgs)
 {
+   FREE(dgs->primitive_lengths);
+   FREE((void*) dgs->state.tokens);
    FREE(dgs);
 }
 
 /*#define DEBUG_OUTPUTS 1*/
 static INLINE void
 draw_geometry_fetch_outputs(struct draw_geometry_shader *shader,
-                            int num_primitives,
+                            unsigned num_primitives,
                             float (**p_output)[4])
 {
    struct tgsi_exec_machine *machine = shader->machine;
@@ -422,9 +411,10 @@ int draw_geometry_shader_run(struct draw_geometry_shader *shader,
                 __FUNCTION__, num_input_verts, num_in_primitives);
    debug_printf("\tlinear = %d, prim_info->count = %d\n",
                 input_prim->linear, input_prim->count);
-   debug_printf("\tprimt pipe = %d, shader in = %d, shader out = %d, max out = %d\n",
-                input_prim->prim, shader->input_primitive,
-                shader->output_primitive,
+   debug_printf("\tprim pipe = %s, shader in = %s, shader out = %s, max out = %d\n",
+                u_prim_name(input_prim->prim),
+                u_prim_name(shader->input_primitive),
+                u_prim_name(shader->output_primitive),
                 shader->max_output_vertices);
 #endif
 
@@ -435,9 +425,7 @@ int draw_geometry_shader_run(struct draw_geometry_shader *shader,
    shader->in_prim_idx = 0;
    shader->input_vertex_stride = input_stride;
    shader->input = input;
-   if (shader->primitive_lengths) {
-      FREE(shader->primitive_lengths);
-   }
+   FREE(shader->primitive_lengths);
    shader->primitive_lengths = MALLOC(max_out_prims * sizeof(unsigned));
 
    tgsi_exec_set_constant_buffers(machine, PIPE_MAX_CONSTANT_BUFFERS,
@@ -469,12 +457,6 @@ int draw_geometry_shader_run(struct draw_geometry_shader *shader,
 #endif
 
    return shader->emitted_vertices;
-}
-
-void draw_geometry_shader_delete(struct draw_geometry_shader *shader)
-{
-   FREE((void*) shader->state.tokens);
-   FREE(shader);
 }
 
 void draw_geometry_shader_prepare(struct draw_geometry_shader *shader,

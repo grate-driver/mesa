@@ -33,7 +33,8 @@
 
 static void
 nv50_flush(struct pipe_context *pipe,
-           struct pipe_fence_handle **fence)
+           struct pipe_fence_handle **fence,
+           enum pipe_flush_flags flags)
 {
    struct nouveau_screen *screen = nouveau_screen(pipe->screen);
 
@@ -41,6 +42,8 @@ nv50_flush(struct pipe_context *pipe,
       nouveau_fence_ref(screen->fence.current, (struct nouveau_fence **)fence);
 
    PUSH_KICK(screen->pushbuf);
+
+   nouveau_context_update_frame_stats(nouveau_context(pipe));
 }
 
 static void
@@ -114,6 +117,83 @@ nv50_destroy(struct pipe_context *pipe)
    nouveau_context_destroy(&nv50->base);
 }
 
+static int
+nv50_invalidate_resource_storage(struct nouveau_context *ctx,
+                                 struct pipe_resource *res,
+                                 int ref)
+{
+   struct nv50_context *nv50 = nv50_context(&ctx->pipe);
+   unsigned s, i;
+
+   if (res->bind & PIPE_BIND_RENDER_TARGET) {
+      for (i = 0; i < nv50->framebuffer.nr_cbufs; ++i) {
+         if (nv50->framebuffer.cbufs[i] &&
+             nv50->framebuffer.cbufs[i]->texture == res) {
+            nv50->dirty |= NV50_NEW_FRAMEBUFFER;
+            nouveau_bufctx_reset(nv50->bufctx_3d, NV50_BIND_FB);
+            if (!--ref)
+               return ref;
+         }
+      }
+   }
+   if (res->bind & PIPE_BIND_DEPTH_STENCIL) {
+      if (nv50->framebuffer.zsbuf &&
+          nv50->framebuffer.zsbuf->texture == res) {
+         nv50->dirty |= NV50_NEW_FRAMEBUFFER;
+         nouveau_bufctx_reset(nv50->bufctx_3d, NV50_BIND_FB);
+         if (!--ref)
+            return ref;
+      }
+   }
+
+   if (res->bind & PIPE_BIND_VERTEX_BUFFER) {
+      for (i = 0; i < nv50->num_vtxbufs; ++i) {
+         if (nv50->vtxbuf[i].buffer == res) {
+            nv50->dirty |= NV50_NEW_ARRAYS;
+            nouveau_bufctx_reset(nv50->bufctx_3d, NV50_BIND_VERTEX);
+            if (!--ref)
+               return ref;
+         }
+      }
+   }
+   if (res->bind & PIPE_BIND_INDEX_BUFFER) {
+      if (nv50->idxbuf.buffer == res)
+         if (!--ref)
+            return ref;
+   }
+
+   if (res->bind & PIPE_BIND_SAMPLER_VIEW) {
+      for (s = 0; s < 5; ++s) {
+      for (i = 0; i < nv50->num_textures[s]; ++i) {
+         if (nv50->textures[s][i] &&
+             nv50->textures[s][i]->texture == res) {
+            nv50->dirty |= NV50_NEW_TEXTURES;
+            nouveau_bufctx_reset(nv50->bufctx_3d, NV50_BIND_TEXTURES);
+            if (!--ref)
+               return ref;
+         }
+      }
+      }
+   }
+
+   if (res->bind & PIPE_BIND_CONSTANT_BUFFER) {
+      for (s = 0; s < 5; ++s) {
+      for (i = 0; i < nv50->num_vtxbufs; ++i) {
+         if (!nv50->constbuf[s][i].user &&
+             nv50->constbuf[s][i].u.buf == res) {
+            nv50->dirty |= NV50_NEW_CONSTBUF;
+            nv50->constbuf_dirty[s] |= 1 << i;
+            nouveau_bufctx_reset(nv50->bufctx_3d, NV50_BIND_CB(s, i));
+            if (!--ref)
+               return ref;
+         }
+      }
+      }
+   }
+
+   return ref;
+}
+
 struct pipe_context *
 nv50_create(struct pipe_screen *pscreen, void *priv)
 {
@@ -128,7 +208,11 @@ nv50_create(struct pipe_screen *pscreen, void *priv)
       return NULL;
    pipe = &nv50->base.pipe;
 
+   if (!nv50_blitctx_create(nv50))
+      goto out_err;
+
    nv50->base.pushbuf = screen->base.pushbuf;
+   nv50->base.client = screen->base.client;
 
    ret = nouveau_bufctx_new(screen->base.client, NV50_BIND_COUNT,
                             &nv50->bufctx_3d);
@@ -164,6 +248,8 @@ nv50_create(struct pipe_screen *pscreen, void *priv)
    nv50_init_state_functions(nv50);
    nv50_init_resource_functions(pipe);
 
+   nv50->base.invalidate_resource_storage = nv50_invalidate_resource_storage;
+
 #ifdef NV50_WITH_DRAW_MODULE
    /* no software fallbacks implemented */
    nv50->draw = draw_create(pipe);
@@ -195,6 +281,8 @@ out_err:
          nouveau_bufctx_del(&nv50->bufctx_3d);
       if (nv50->bufctx)
          nouveau_bufctx_del(&nv50->bufctx);
+      if (nv50->blit)
+         FREE(nv50->blit);
       FREE(nv50);
    }
    return NULL;

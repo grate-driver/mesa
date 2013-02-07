@@ -65,6 +65,18 @@ nvc0_screen_is_format_supported(struct pipe_screen *pscreen,
    return (nvc0_format_table[format].usage & bindings) == bindings;
 }
 
+static boolean
+nvc0_screen_video_supported(struct pipe_screen *screen,
+                            enum pipe_format format,
+                            enum pipe_video_profile profile)
+{
+   if (profile != PIPE_VIDEO_PROFILE_UNKNOWN)
+      return format == PIPE_FORMAT_NV12;
+
+   return vl_video_buffer_is_format_supported(screen, format, profile);
+}
+
+
 static int
 nvc0_screen_get_param(struct pipe_screen *pscreen, enum pipe_cap param)
 {
@@ -90,12 +102,12 @@ nvc0_screen_get_param(struct pipe_screen *pscreen, enum pipe_cap param)
    case PIPE_CAP_NPOT_TEXTURES:
    case PIPE_CAP_ANISOTROPIC_FILTER:
    case PIPE_CAP_SEAMLESS_CUBE_MAP:
+   case PIPE_CAP_CUBE_MAP_ARRAY:
       return 1;
    case PIPE_CAP_SEAMLESS_CUBE_MAP_PER_TEXTURE:
       return (class_3d >= NVE4_3D_CLASS) ? 1 : 0;
    case PIPE_CAP_TWO_SIDED_STENCIL:
    case PIPE_CAP_DEPTH_CLIP_DISABLE:
-   case PIPE_CAP_DEPTHSTENCIL_CLEAR_SEPARATE:
    case PIPE_CAP_POINT_SPRITE:
       return 1;
    case PIPE_CAP_SM3:
@@ -111,7 +123,7 @@ nvc0_screen_get_param(struct pipe_screen *pscreen, enum pipe_cap param)
    case PIPE_CAP_VERTEX_COLOR_CLAMPED:
       return 1;
    case PIPE_CAP_QUERY_TIMESTAMP:
-   case PIPE_CAP_TIMER_QUERY:
+   case PIPE_CAP_QUERY_TIME_ELAPSED:
    case PIPE_CAP_OCCLUSION_QUERY:
    case PIPE_CAP_STREAM_OUTPUT_PAUSE_RESUME:
       return 1;
@@ -150,9 +162,13 @@ nvc0_screen_get_param(struct pipe_screen *pscreen, enum pipe_cap param)
       return 1;
    case PIPE_CAP_CONSTANT_BUFFER_OFFSET_ALIGNMENT:
       return 256;
+   case PIPE_CAP_MIN_MAP_BUFFER_ALIGNMENT:
+      return NOUVEAU_MIN_BUFFER_MAP_ALIGN;
    case PIPE_CAP_VERTEX_BUFFER_OFFSET_4BYTE_ALIGNED_ONLY:
    case PIPE_CAP_VERTEX_BUFFER_STRIDE_4BYTE_ALIGNED_ONLY:
    case PIPE_CAP_VERTEX_ELEMENT_SRC_OFFSET_4BYTE_ALIGNED_ONLY:
+   case PIPE_CAP_TEXTURE_MULTISAMPLE:
+   case PIPE_CAP_TEXTURE_BUFFER_OBJECTS:
       return 0;
    default:
       NOUVEAU_ERR("unknown PIPE_CAP %d\n", param);
@@ -258,8 +274,8 @@ nvc0_screen_destroy(struct pipe_screen *pscreen)
    if (screen->base.pushbuf)
       screen->base.pushbuf->user_priv = NULL;
 
-   if (screen->blitctx)
-      FREE(screen->blitctx);
+   if (screen->blitter)
+      nvc0_blitter_destroy(screen);
 
    nouveau_bo_ref(NULL, &screen->text);
    nouveau_bo_ref(NULL, &screen->uniform_bo);
@@ -271,8 +287,7 @@ nvc0_screen_destroy(struct pipe_screen *pscreen)
    nouveau_heap_destroy(&screen->lib_code);
    nouveau_heap_destroy(&screen->text_heap);
 
-   if (screen->tic.entries)
-      FREE(screen->tic.entries);
+   FREE(screen->tic.entries);
 
    nouveau_mm_destroy(screen->mm_VRAM_fe0);
 
@@ -445,7 +460,8 @@ nvc0_screen_create(struct nouveau_device *dev)
 
    nvc0_screen_init_resource_functions(pscreen);
 
-   nouveau_screen_init_vdec(&screen->base);
+   screen->base.base.get_video_param = nvc0_screen_get_video_param;
+   screen->base.base.is_video_format_supported = nvc0_screen_video_supported;
 
    ret = nouveau_bo_new(dev, NOUVEAU_BO_GART | NOUVEAU_BO_MAP, 0, 4096, NULL,
                         &screen->fence.bo);
@@ -760,7 +776,7 @@ nvc0_screen_create(struct nouveau_device *dev)
    mm_config.nvc0.memtype = 0xfe0;
    screen->mm_VRAM_fe0 = nouveau_mm_create(dev, NOUVEAU_BO_VRAM, &mm_config);
 
-   if (!nvc0_blitctx_create(screen))
+   if (!nvc0_blitter_create(screen))
       goto fail;
 
    nouveau_fence_new(&screen->base, &screen->base.fence.current, FALSE);

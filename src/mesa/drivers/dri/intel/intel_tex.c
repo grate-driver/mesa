@@ -36,6 +36,8 @@ intelNewTextureObject(struct gl_context * ctx, GLuint name, GLenum target)
    DBG("%s\n", __FUNCTION__);
    _mesa_initialize_texture_object(&obj->base, name, target);
 
+   obj->needs_validate = true;
+
    return &obj->base;
 }
 
@@ -107,6 +109,8 @@ intel_alloc_texture_image_buffer(struct gl_context *ctx,
           image->Width, image->Height, image->Depth, intel_image->mt);
    }
 
+   intel_texobj->needs_validate = true;
+
    return true;
 }
 
@@ -150,10 +154,8 @@ intel_free_texture_image_buffer(struct gl_context * ctx,
       intelImage->base.Buffer = NULL;
    }
 
-   if (intelImage->base.ImageOffsets) {
-      free(intelImage->base.ImageOffsets);
-      intelImage->base.ImageOffsets = NULL;
-   }
+   free(intelImage->base.ImageOffsets);
+   intelImage->base.ImageOffsets = NULL;
 }
 
 /**

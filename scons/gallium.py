@@ -361,14 +361,13 @@ def generate(env):
                 ccflags += [
                     '-mstackrealign', # ensure stack is aligned
                     '-march=i586', # Haiku target is Pentium
-                    '-mtune=i686', # use i686 where we can
-                    '-mmmx' # use mmx math where we can
+                    '-mtune=i686' # use i686 where we can
                 ]
         if env['machine'] == 'x86_64':
             ccflags += ['-m64']
             if platform == 'darwin':
                 ccflags += ['-fno-common']
-        if env['platform'] not in ('windows', 'haiku'):
+        if env['platform'] not in ('cygwin', 'haiku', 'windows'):
             ccflags += ['-fvisibility=hidden']
         # See also:
         # - http://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html
@@ -400,7 +399,6 @@ def generate(env):
             ccflags += [
               '/Od', # disable optimizations
               '/Oi', # enable intrinsic functions
-              '/Oy-', # disable frame pointer omission
             ]
         else:
             ccflags += [
@@ -412,6 +410,7 @@ def generate(env):
             ]
         else:
             ccflags += [
+                '/Oy-', # disable frame pointer omission
                 '/GL-', # disable whole program optimization
             ]
         ccflags += [
@@ -500,6 +499,8 @@ def generate(env):
     libs = []
     if env['platform'] in ('darwin', 'freebsd', 'linux', 'posix', 'sunos'):
         libs += ['m', 'pthread', 'dl']
+    if env['platform'] in ('linux',):
+        libs += ['rt']
     env.Append(LIBS = libs)
 
     # OpenMP
@@ -529,7 +530,7 @@ def generate(env):
     env.PkgCheckModules('XF86VIDMODE', ['xxf86vm'])
     env.PkgCheckModules('DRM', ['libdrm >= 2.4.24'])
     env.PkgCheckModules('DRM_INTEL', ['libdrm_intel >= 2.4.30'])
-    env.PkgCheckModules('DRM_RADEON', ['libdrm_radeon >= 2.4.31'])
+    env.PkgCheckModules('DRM_RADEON', ['libdrm_radeon >= 2.4.42'])
     env.PkgCheckModules('XORG', ['xorg-server >= 1.6.0'])
     env.PkgCheckModules('KMS', ['libkms >= 2.4.24'])
     env.PkgCheckModules('UDEV', ['libudev > 150'])

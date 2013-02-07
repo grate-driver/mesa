@@ -23,9 +23,6 @@
 
 include Makefile.sources
 
-# Hack to make some of the non-automake variables work.
-TOP=$(top_builddir)
-
 AM_CFLAGS = \
 	-DRADEON_R200 \
 	-I$(top_srcdir)/include \
@@ -34,6 +31,7 @@ AM_CFLAGS = \
 	-I$(top_srcdir)/src/mesa/ \
 	-I$(top_srcdir)/src/mesa/drivers/dri/common \
 	-I$(top_srcdir)/src/mesa/drivers/dri/r200/server \
+	-I$(top_builddir)/src/mesa/drivers/dri/common \
 	$(DEFINES) \
 	$(API_DEFINES) \
 	$(VISIBILITY_CFLAGS) \

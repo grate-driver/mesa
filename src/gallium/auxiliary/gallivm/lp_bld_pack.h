@@ -87,6 +87,15 @@ lp_build_concat(struct gallivm_state *gallivm,
                 struct lp_type src_type,
                 unsigned num_vectors);
 
+int
+lp_build_concat_n(struct gallivm_state *gallivm,
+                  struct lp_type src_type,
+                  LLVMValueRef *src,
+                  unsigned num_srcs,
+                  LLVMValueRef *dst,
+                  unsigned num_dsts);
+
+
 LLVMValueRef
 lp_build_packs2(struct gallivm_state *gallivm,
                 struct lp_type src_type,
@@ -122,7 +131,6 @@ lp_build_resize(struct gallivm_state *gallivm,
 LLVMValueRef
 lp_build_pad_vector(struct gallivm_state *gallivm,
                     LLVMValueRef src,
-                    struct lp_type src_type,
                     unsigned dst_length);
 
 #endif /* !LP_BLD_PACK_H */

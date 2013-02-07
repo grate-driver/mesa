@@ -44,7 +44,6 @@ void GLAPIENTRY
 _mesa_PointSize( GLfloat size )
 {
    GET_CURRENT_CONTEXT(ctx);
-   ASSERT_OUTSIDE_BEGIN_END(ctx);
 
    if (size <= 0.0) {
       _mesa_error( ctx, GL_INVALID_VALUE, "glPointSize" );
@@ -60,9 +59,6 @@ _mesa_PointSize( GLfloat size )
    if (ctx->Driver.PointSize)
       ctx->Driver.PointSize(ctx, size);
 }
-
-
-#if _HAVE_FULL_GL
 
 
 void GLAPIENTRY
@@ -102,7 +98,6 @@ void GLAPIENTRY
 _mesa_PointParameterfv( GLenum pname, const GLfloat *params)
 {
    GET_CURRENT_CONTEXT(ctx);
-   ASSERT_OUTSIDE_BEGIN_END(ctx);
 
    /* Drivers that support point sprites must also support point parameters.
     * If point parameters aren't supported, then this function shouldn't even
@@ -193,7 +188,7 @@ _mesa_PointParameterfv( GLenum pname, const GLfloat *params)
 	 /* GL_POINT_SPRITE_COORD_ORIGIN was added to point sprites when the
 	  * extension was merged into OpenGL 2.0.
 	  */
-         if ((ctx->API == API_OPENGL && ctx->Version >= 20)
+         if ((ctx->API == API_OPENGL_COMPAT && ctx->Version >= 20)
              || ctx->API == API_OPENGL_CORE) {
             GLenum value = (GLenum) params[0];
             if (value != GL_LOWER_LEFT && value != GL_UPPER_LEFT) {
@@ -221,7 +216,6 @@ _mesa_PointParameterfv( GLenum pname, const GLfloat *params)
    if (ctx->Driver.PointParameterfv)
       (*ctx->Driver.PointParameterfv)(ctx, pname, params);
 }
-#endif
 
 
 

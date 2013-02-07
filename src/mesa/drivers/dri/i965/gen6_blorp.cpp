@@ -45,31 +45,6 @@
                              * sizeof(float))
 /** \} */
 
-
-/**
- * Compute masks to determine how much of draw_x and draw_y should be
- * performed using the fine adjustment of "depth coordinate offset X/Y"
- * (dw5 of 3DSTATE_DEPTH_BUFFER).  See the emit_depthbuffer() function for
- * details.
- */
-void
-gen6_blorp_compute_tile_masks(const brw_blorp_params *params,
-                              uint32_t *tile_mask_x, uint32_t *tile_mask_y)
-{
-   uint32_t depth_mask_x, depth_mask_y, hiz_mask_x, hiz_mask_y;
-   intel_region_get_tile_masks(params->depth.mt->region,
-                               &depth_mask_x, &depth_mask_y, false);
-   intel_region_get_tile_masks(params->depth.mt->hiz_mt->region,
-                               &hiz_mask_x, &hiz_mask_y, false);
-
-   /* Each HiZ row represents 2 rows of pixels */
-   hiz_mask_y = hiz_mask_y << 1 | 1;
-
-   *tile_mask_x = depth_mask_x | hiz_mask_x;
-   *tile_mask_y = depth_mask_y | hiz_mask_y;
-}
-
-
 void
 gen6_blorp_emit_batch_head(struct brw_context *brw,
                            const brw_blorp_params *params)
@@ -188,9 +163,9 @@ gen6_blorp_emit_vertices(struct brw_context *brw,
       float *vertex_data;
 
       const float vertices[GEN6_BLORP_VBO_SIZE] = {
-         /* v0 */ 0, 0, 0, 0,     params->x0, params->y1, 0, 1,
-         /* v1 */ 0, 0, 0, 0,     params->x1, params->y1, 0, 1,
-         /* v2 */ 0, 0, 0, 0,     params->x0, params->y0, 0, 1,
+         /* v0 */ 0, 0, 0, 0,     (float) params->x0, (float) params->y1, 0, 1,
+         /* v1 */ 0, 0, 0, 0,     (float) params->x1, (float) params->y1, 0, 1,
+         /* v2 */ 0, 0, 0, 0,     (float) params->x0, (float) params->y0, 0, 1,
       };
 
       vertex_data = (float *) brw_state_batch(brw, AUB_TRACE_VERTEX_BUFFER,
@@ -446,7 +421,7 @@ gen6_blorp_emit_surface_state(struct brw_context *brw,
    uint32_t tiling = surface->map_stencil_as_y_tiled
       ? BRW_SURFACE_TILED | BRW_SURFACE_TILED_Y
       : brw_get_surface_tiling_bits(region->tiling);
-   uint32_t pitch_bytes = region->pitch * region->cpp;
+   uint32_t pitch_bytes = region->pitch;
    if (surface->map_stencil_as_y_tiled)
       pitch_bytes *= 2;
    surf[3] = (tiling |
@@ -834,7 +809,8 @@ gen6_blorp_emit_depth_stencil_config(struct brw_context *brw,
    uint32_t draw_y = params->depth.y_offset;
    uint32_t tile_mask_x, tile_mask_y;
 
-   gen6_blorp_compute_tile_masks(params, &tile_mask_x, &tile_mask_y);
+   brw_get_depthstencil_tile_masks(params->depth.mt, NULL,
+                                   &tile_mask_x, &tile_mask_y);
 
    /* 3DSTATE_DEPTH_BUFFER */
    {
@@ -868,9 +844,7 @@ gen6_blorp_emit_depth_stencil_config(struct brw_context *brw,
 
       BEGIN_BATCH(7);
       OUT_BATCH(_3DSTATE_DEPTH_BUFFER << 16 | (7 - 2));
-      uint32_t pitch_bytes =
-         params->depth.mt->region->pitch * params->depth.mt->region->cpp;
-      OUT_BATCH((pitch_bytes - 1) |
+      OUT_BATCH((params->depth.mt->region->pitch - 1) |
                 params->depth_format << 18 |
                 1 << 21 | /* separate stencil enable */
                 1 << 22 | /* hiz enable */
@@ -900,7 +874,7 @@ gen6_blorp_emit_depth_stencil_config(struct brw_context *brw,
 
       BEGIN_BATCH(3);
       OUT_BATCH((_3DSTATE_HIER_DEPTH_BUFFER << 16) | (3 - 2));
-      OUT_BATCH(hiz_region->pitch * hiz_region->cpp - 1);
+      OUT_BATCH(hiz_region->pitch - 1);
       OUT_RELOC(hiz_region->bo,
                 I915_GEM_DOMAIN_RENDER, I915_GEM_DOMAIN_RENDER,
                 hiz_offset);

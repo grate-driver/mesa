@@ -81,11 +81,19 @@ _mesa_reference_texobj(struct gl_texture_object **ptr,
 /**
  * Return number of faces for a texture target.  This will be 6 for
  * cube maps (and cube map arrays) and 1 otherwise.
+ * NOTE: this function is not used for cube map arrays which operate
+ * more like 2D arrays than cube maps.
  */
 static inline GLuint
 _mesa_num_tex_faces(GLenum target)
 {
-   return target == GL_TEXTURE_CUBE_MAP ? 6 : 1;
+   switch (target) {
+   case GL_TEXTURE_CUBE_MAP:
+   case GL_PROXY_TEXTURE_CUBE_MAP:
+      return 6;
+   default:
+      return 1;
+   }
 }
 
 

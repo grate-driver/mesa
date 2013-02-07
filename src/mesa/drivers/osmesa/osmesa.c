@@ -35,6 +35,7 @@
 
 #include "main/glheader.h"
 #include "GL/osmesa.h"
+#include "main/api_exec.h"
 #include "main/context.h"
 #include "main/extensions.h"
 #include "main/formats.h"
@@ -43,6 +44,8 @@
 #include "main/macros.h"
 #include "main/mtypes.h"
 #include "main/renderbuffer.h"
+#include "main/version.h"
+#include "main/vtxfmt.h"
 #include "swrast/swrast.h"
 #include "swrast_setup/swrast_setup.h"
 #include "swrast/s_context.h"
@@ -386,9 +389,9 @@ compute_row_addresses( OSMesaContext osmesa )
  * Don't use _mesa_delete_renderbuffer since we can't free rb->Buffer.
  */
 static void
-osmesa_delete_renderbuffer(struct gl_renderbuffer *rb)
+osmesa_delete_renderbuffer(struct gl_context *ctx, struct gl_renderbuffer *rb)
 {
-   free(rb);
+   _mesa_delete_renderbuffer(ctx, rb);
 }
 
 
@@ -709,11 +712,11 @@ OSMesaCreateContextExt( GLenum format, GLint depthBits, GLint stencilBits,
       functions.GetBufferSize = NULL;
 
       if (!_mesa_initialize_context(&osmesa->mesa,
-                                    API_OPENGL,
+                                    API_OPENGL_COMPAT,
                                     osmesa->gl_visual,
                                     sharelist ? &sharelist->mesa
                                               : (struct gl_context *) NULL,
-                                    &functions, (void *) osmesa)) {
+                                    &functions)) {
          _mesa_destroy_visual( osmesa->gl_visual );
          free(osmesa);
          return NULL;
@@ -786,6 +789,12 @@ OSMesaCreateContextExt( GLenum format, GLint depthBits, GLint stencilBits,
          swrast = SWRAST_CONTEXT( ctx );
          swrast->choose_line = osmesa_choose_line;
          swrast->choose_triangle = osmesa_choose_triangle;
+
+         _mesa_compute_version(ctx);
+
+         /* Exec table initialization requires the version to be computed */
+         _mesa_initialize_dispatch_tables(ctx);
+         _mesa_initialize_vbo_vtxfmt(ctx);
       }
    }
    return osmesa;

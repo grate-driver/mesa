@@ -49,7 +49,10 @@
  *   - MC-JIT supports limited OSes (MacOSX and Linux)
  * - standard JIT in LLVM 3.1, with backports
  */
-#if HAVE_LLVM >= 0x0302 || (HAVE_LLVM == 0x0301 && defined(HAVE_JIT_AVX_SUPPORT))
+#if defined(PIPE_ARCH_PPC_64)
+#  define USE_MCJIT 1
+#  define HAVE_AVX 0
+#elif HAVE_LLVM >= 0x0302 || (HAVE_LLVM == 0x0301 && defined(HAVE_JIT_AVX_SUPPORT))
 #  define USE_MCJIT 0
 #  define HAVE_AVX 1
 #elif HAVE_LLVM == 0x0301 && (defined(PIPE_OS_LINUX) || defined(PIPE_OS_APPLE))
@@ -255,11 +258,12 @@ init_gallivm_engine(struct gallivm_state *gallivm)
          optlevel = Default;
       }
 
-#if USE_MCJIT
-      ret = lp_build_create_mcjit_compiler_for_module(&gallivm->engine,
-                                                      gallivm->module,
-                                                      (unsigned) optlevel,
-                                                      &error);
+#if HAVE_LLVM >= 0x0301
+      ret = lp_build_create_jit_compiler_for_module(&gallivm->engine,
+                                                    gallivm->module,
+                                                    (unsigned) optlevel,
+                                                    USE_MCJIT,
+                                                    &error);
 #else
       ret = LLVMCreateJITCompiler(&gallivm->engine, gallivm->provider,
                                   (unsigned) optlevel, &error);
@@ -434,8 +438,16 @@ lp_build_init(void)
 
    util_cpu_detect();
 
+   /* AMD Bulldozer AVX's throughput is the same as SSE2; and because using
+    * 8-wide vector needs more floating ops than 4-wide (due to padding), it is
+    * actually more efficient to use 4-wide vectors on this processor.
+    *
+    * See also:
+    * - http://www.anandtech.com/show/4955/the-bulldozer-review-amd-fx8150-tested/2
+    */
    if (HAVE_AVX &&
-       util_cpu_caps.has_avx) {
+       util_cpu_caps.has_avx &&
+       util_cpu_caps.has_intel) {
       lp_native_vector_width = 256;
    } else {
       /* Leave it at 128, even when no SIMD extensions are available.
@@ -447,6 +459,34 @@ lp_build_init(void)
    lp_native_vector_width = debug_get_num_option("LP_NATIVE_VECTOR_WIDTH",
                                                  lp_native_vector_width);
 
+   if (lp_native_vector_width <= 128) {
+      /* Hide AVX support, as often LLVM AVX instrinsics are only guarded by
+       * "util_cpu_caps.has_avx" predicate, and lack the
+       * "lp_native_vector_width > 128" predicate. And also to ensure a more
+       * consistent behavior, allowing one to test SSE2 on AVX machines.
+       */
+      util_cpu_caps.has_avx = 0;
+   }
+
+#ifdef PIPE_ARCH_PPC_64
+   /* Set the NJ bit in VSCR to 0 so denormalized values are handled as
+    * specified by IEEE standard (PowerISA 2.06 - Section 6.3). This garantees
+    * that some rounding and half-float to float handling does not round
+    * incorrectly to 0.
+    */
+   if (util_cpu_caps.has_altivec) {
+      unsigned short mask[] = { 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF,
+                                0xFFFF, 0xFFFF, 0xFFFE, 0xFFFF };
+      __asm (
+        "mfvscr %%v1\n"
+        "vand   %0,%%v1,%0\n"
+        "mtvscr %0"
+        :
+        : "r" (*mask)
+      );
+   }
+#endif
+
    gallivm_initialized = TRUE;
 
 #if 0
@@ -454,6 +494,7 @@ lp_build_init(void)
    util_cpu_caps.has_sse3 = 0;
    util_cpu_caps.has_ssse3 = 0;
    util_cpu_caps.has_sse4_1 = 0;
+   util_cpu_caps.has_avx = 0;
 #endif
 }
 

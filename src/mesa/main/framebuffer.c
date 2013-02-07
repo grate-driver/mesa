@@ -42,6 +42,7 @@
 #include "framebuffer.h"
 #include "renderbuffer.h"
 #include "texobj.h"
+#include "glformats.h"
 
 
 
@@ -334,7 +335,7 @@ _mesa_resize_framebuffer(struct gl_context *ctx, struct gl_framebuffer *fb,
 void
 _mesa_resizebuffers( struct gl_context *ctx )
 {
-   ASSERT_OUTSIDE_BEGIN_END_AND_FLUSH( ctx );
+   FLUSH_VERTICES(ctx, 0);
 
    if (MESA_VERBOSE & VERBOSE_API)
       _mesa_debug(ctx, "glResizeBuffersMESA\n");
@@ -870,13 +871,20 @@ _mesa_dest_buffer_exists(struct gl_context *ctx, GLenum format)
 GLenum
 _mesa_get_color_read_format(struct gl_context *ctx)
 {
+   const GLenum data_type = _mesa_get_format_datatype(
+                               ctx->ReadBuffer->_ColorReadBuffer->Format);
+
    switch (ctx->ReadBuffer->_ColorReadBuffer->Format) {
    case MESA_FORMAT_ARGB8888:
       return GL_BGRA;
    case MESA_FORMAT_RGB565:
       return GL_BGR;
    default:
-      return GL_RGBA;
+      if (data_type == GL_UNSIGNED_INT || data_type == GL_INT) {
+         return GL_RGBA_INTEGER;
+      } else {
+         return GL_RGBA;
+      }
    }
 }
 
@@ -887,13 +895,46 @@ _mesa_get_color_read_format(struct gl_context *ctx)
 GLenum
 _mesa_get_color_read_type(struct gl_context *ctx)
 {
+   const GLenum data_type = _mesa_get_format_datatype(
+                               ctx->ReadBuffer->_ColorReadBuffer->Format);
+
    switch (ctx->ReadBuffer->_ColorReadBuffer->Format) {
-   case MESA_FORMAT_ARGB8888:
-      return GL_UNSIGNED_BYTE;
    case MESA_FORMAT_RGB565:
       return GL_UNSIGNED_SHORT_5_6_5_REV;
    default:
+      break;
+   }
+
+   switch (data_type) {
+   case GL_SIGNED_NORMALIZED:
+      return GL_BYTE;
+   case GL_UNSIGNED_INT:
+   case GL_INT:
+   case GL_FLOAT:
+      return data_type;
+   case GL_UNSIGNED_NORMALIZED:
+   default:
       return GL_UNSIGNED_BYTE;
+   }
+}
+
+
+/**
+ * Returns the read renderbuffer for the specified format.
+ */
+struct gl_renderbuffer *
+_mesa_get_read_renderbuffer_for_format(struct gl_context *ctx,
+                                       GLenum format)
+{
+   struct gl_framebuffer *rfb = ctx->ReadBuffer;
+
+   if (_mesa_is_color_format(format)) {
+      return rfb->Attachment[rfb->_ColorReadBufferIndex].Renderbuffer;
+   } else if (_mesa_is_depth_format(format) ||
+              _mesa_is_depthstencil_format(format)) {
+      return rfb->Attachment[BUFFER_DEPTH].Renderbuffer;
+   } else {
+      return rfb->Attachment[BUFFER_STENCIL].Renderbuffer;
    }
 }
 

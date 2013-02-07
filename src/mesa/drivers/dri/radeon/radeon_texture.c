@@ -87,7 +87,7 @@ void copy_rows(void* dst, GLuint dststride, const void* src, GLuint srcstride,
  */
 struct gl_texture_image *radeonNewTextureImage(struct gl_context *ctx)
 {
-	return CALLOC(sizeof(radeon_texture_image));
+	return calloc(1, sizeof(radeon_texture_image));
 }
 
 
@@ -148,10 +148,8 @@ void radeonFreeTextureImageBuffer(struct gl_context *ctx, struct gl_texture_imag
 		image->base.Buffer = NULL;
 	}
 
-	if (image->base.ImageOffsets) {
-		free(image->base.ImageOffsets);
-		image->base.ImageOffsets = NULL;
-	}
+	free(image->base.ImageOffsets);
+	image->base.ImageOffsets = NULL;
 }
 
 /* Set Data pointer and additional data for mapped texture image */
@@ -588,7 +586,6 @@ unsigned radeonIsFormatRenderable(gl_format mesa_format)
 	}
 }
 
-#if FEATURE_OES_EGL_image
 void radeon_image_target_texture_2d(struct gl_context *ctx, GLenum target,
 				    struct gl_texture_object *texObj,
 				    struct gl_texture_image *texImage,
@@ -647,7 +644,6 @@ void radeon_image_target_texture_2d(struct gl_context *ctx, GLenum target,
 	if (!radeon_miptree_matches_image(t->mt, &radeonImage->base.Base))
 		fprintf(stderr, "miptree doesn't match image\n");
 }
-#endif
 
 gl_format _radeon_texformat_rgba8888 = MESA_FORMAT_NONE;
 gl_format _radeon_texformat_argb8888 = MESA_FORMAT_NONE;
@@ -695,9 +691,7 @@ radeon_init_common_texture_funcs(radeonContextPtr radeon,
 	functions->CopyTexSubImage = radeonCopyTexSubImage;
 
 	functions->Bitmap = _mesa_meta_Bitmap;
-#if FEATURE_OES_EGL_image
 	functions->EGLImageTargetTexture2D = radeon_image_target_texture_2d;
-#endif
 
 	radeonInitTextureFormats();
 }

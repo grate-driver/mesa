@@ -28,32 +28,10 @@
 #include "nvc0_context.h"
 #include "nvc0_resource.h"
 
-uint32_t
+static uint32_t
 nvc0_tex_choose_tile_dims(unsigned nx, unsigned ny, unsigned nz)
 {
-   uint32_t tile_mode = 0x000;
-
-   if (ny > 64) tile_mode = 0x040; /* height 128 tiles */
-   else
-   if (ny > 32) tile_mode = 0x030; /* height 64 tiles */
-   else
-   if (ny > 16) tile_mode = 0x020; /* height 32 tiles */
-   else
-   if (ny >  8) tile_mode = 0x010; /* height 16 tiles */
-
-   if (nz == 1)
-      return tile_mode;
-   else
-   if (tile_mode > 0x020)
-      tile_mode = 0x020;
-
-   if (nz > 16 && tile_mode < 0x020)
-      return tile_mode | 0x500; /* depth 32 tiles */
-   if (nz > 8) return tile_mode | 0x400; /* depth 16 tiles */
-   if (nz > 4) return tile_mode | 0x300; /* depth 8 tiles */
-   if (nz > 2) return tile_mode | 0x200; /* depth 4 tiles */
-
-   return tile_mode | 0x100;
+   return nv50_tex_choose_tile_dims_helper(nx, ny, nz);
 }
 
 static uint32_t
@@ -189,18 +167,15 @@ nvc0_miptree_init_layout_video(struct nv50_miptree *mt)
    const struct pipe_resource *pt = &mt->base.base;
    const unsigned blocksize = util_format_get_blocksize(pt->format);
 
-   unsigned nbx = util_format_get_nblocksx(pt->format, pt->width0);
-   unsigned nby = util_format_get_nblocksy(pt->format, pt->height0);
-
    assert(pt->last_level == 0);
-   assert(mt->ms_x == 0 &&
-          mt->ms_y == 0);
+   assert(mt->ms_x == 0 && mt->ms_y == 0);
    assert(!util_format_is_compressed(pt->format));
 
-   assert(nby > 8);
+   mt->layout_3d = pt->target == PIPE_TEXTURE_3D;
+
    mt->level[0].tile_mode = 0x10;
-   mt->level[0].pitch = align(nbx * blocksize, 64);
-   mt->total_size = align(nby, 16) * mt->level[0].pitch;
+   mt->level[0].pitch = align(pt->width0 * blocksize, 64);
+   mt->total_size = align(pt->height0, 16) * mt->level[0].pitch * (mt->layout_3d ? pt->depth0 : 1);
 
    if (pt->array_size > 1) {
       mt->layer_stride = align(mt->total_size, NVC0_TILE_SIZE(0x10));
@@ -259,8 +234,6 @@ const struct u_resource_vtbl nvc0_miptree_vtbl =
 {
    nv50_miptree_get_handle,         /* get_handle */
    nv50_miptree_destroy,            /* resource_destroy */
-   nvc0_miptree_transfer_new,       /* get_transfer */
-   nvc0_miptree_transfer_del,       /* transfer_destroy */
    nvc0_miptree_transfer_map,       /* transfer_map */
    u_default_transfer_flush_region, /* transfer_flush_region */
    nvc0_miptree_transfer_unmap,     /* transfer_unmap */

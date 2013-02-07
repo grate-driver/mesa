@@ -1506,15 +1506,16 @@ struct GalliumD3D10Device : public GalliumD3D10ScreenImpl<threadsafe>
 			return E_INVALIDARG;
 		if(map_type & D3D10_MAP_FLAG_DO_NOT_WAIT)
 			usage |= PIPE_TRANSFER_DONTBLOCK;
-		struct pipe_transfer* transfer = pipe->get_transfer(pipe, resource->resource, level, usage, &box);
-		if(!transfer) {
+		struct pipe_transfer* transfer;
+                void *map = pipe->transfer_map(pipe, resource->resource, level, usage, &box, &transfer);
+		if(!map) {
 			if(map_type & D3D10_MAP_FLAG_DO_NOT_WAIT)
 				return DXGI_ERROR_WAS_STILL_DRAWING;
 			else
 				return E_FAIL;
 		}
 		resource->transfers[subresource] = transfer;
-		mapped_resource->pData = pipe->transfer_map(pipe, transfer);
+		mapped_resource->pData = map;
 		mapped_resource->RowPitch = transfer->stride;
 		mapped_resource->DepthPitch = transfer->layer_stride;
 		return S_OK;
@@ -1530,7 +1531,6 @@ struct GalliumD3D10Device : public GalliumD3D10ScreenImpl<threadsafe>
 		if(i != resource->transfers.end())
 		{
 			pipe->transfer_unmap(pipe, i->second);
-			pipe->transfer_destroy(pipe, i->second);
 			resource->transfers.erase(i);
 		}
 	}
@@ -1755,6 +1755,7 @@ struct GalliumD3D10Device : public GalliumD3D10ScreenImpl<threadsafe>
 		unsigned src_subresource,
 		DXGI_FORMAT format)
 	{
+#if 0
 		SYNCHRONIZED;
 		GalliumD3D11Resource<>* dst = (GalliumD3D11Resource<>*)dst_resource;
 		GalliumD3D11Resource<>* src = (GalliumD3D11Resource<>*)src_resource;
@@ -1778,6 +1779,7 @@ struct GalliumD3D10Device : public GalliumD3D10ScreenImpl<threadsafe>
 		info.mask = PIPE_MASK_RGBA | PIPE_MASK_ZS;
 
 		pipe->resource_resolve(pipe, &info);
+#endif
 	}
 
 #if API >= 11

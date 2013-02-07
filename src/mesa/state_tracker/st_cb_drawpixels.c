@@ -71,8 +71,6 @@
 #include "cso_cache/cso_context.h"
 
 
-#if FEATURE_drawpix
-
 /**
  * Check if the given program is:
  * 0: MOVE result.color, fragment.color;
@@ -398,6 +396,8 @@ internal_format(struct gl_context *ctx, GLenum format, GLenum type)
 
          case GL_UNSIGNED_BYTE_3_3_2:
          case GL_UNSIGNED_BYTE_2_3_3_REV:
+            return GL_R3_G3_B2;
+
          case GL_UNSIGNED_SHORT_4_4_4_4:
          case GL_UNSIGNED_SHORT_4_4_4_4_REV:
             return GL_RGBA4;
@@ -516,12 +516,10 @@ make_texture(struct st_context *st,
       /* we'll do pixel transfer in a fragment shader */
       ctx->_ImageTransferState = 0x0;
 
-      transfer = pipe_get_transfer(st->pipe, pt, 0, 0,
-                                   PIPE_TRANSFER_WRITE, 0, 0,
-                                   width, height);
-
       /* map texture transfer */
-      dest = pipe_transfer_map(pipe, transfer);
+      dest = pipe_transfer_map(pipe, pt, 0, 0,
+                               PIPE_TRANSFER_WRITE, 0, 0,
+                               width, height, &transfer);
 
 
       /* Put image into texture transfer.
@@ -540,7 +538,6 @@ make_texture(struct st_context *st,
 
       /* unmap */
       pipe_transfer_unmap(pipe, transfer);
-      pipe->transfer_destroy(pipe, transfer);
 
       assert(success);
 
@@ -571,9 +568,8 @@ draw_quad(struct gl_context *ctx, GLfloat x0, GLfloat y0, GLfloat z,
    struct pipe_resource *buf = NULL;
    unsigned offset;
 
-   u_upload_alloc(st->uploader, 0, 4 * sizeof(verts[0]), &offset, &buf,
-		  (void**)&verts);
-   if (!buf) {
+   if (u_upload_alloc(st->uploader, 0, 4 * sizeof(verts[0]), &offset,
+                      &buf, (void **) &verts) != PIPE_OK) {
       return;
    }
 
@@ -640,7 +636,9 @@ draw_quad(struct gl_context *ctx, GLfloat x0, GLfloat y0, GLfloat z,
    }
 
    u_upload_unmap(st->uploader);
-   util_draw_vertex_buffer(pipe, st->cso_context, buf, offset,
+   util_draw_vertex_buffer(pipe, st->cso_context, buf,
+                           cso_get_aux_vertex_buffer_slot(st->cso_context),
+                           offset,
 			   PIPE_PRIM_QUADS,
 			   4,  /* verts */
 			   3); /* attribs/vert */
@@ -686,7 +684,7 @@ draw_textured_quad(struct gl_context *ctx, GLint x, GLint y, GLfloat z,
    cso_save_vertex_shader(cso);
    cso_save_geometry_shader(cso);
    cso_save_vertex_elements(cso);
-   cso_save_vertex_buffers(cso);
+   cso_save_aux_vertex_buffer_slot(cso);
    if (write_stencil) {
       cso_save_depth_stencil_alpha(cso);
       cso_save_blend(cso);
@@ -796,7 +794,7 @@ draw_textured_quad(struct gl_context *ctx, GLint x, GLint y, GLfloat z,
    y1 = y + height * ctx->Pixel.ZoomY;
 
    /* convert Z from [0,1] to [-1,-1] to match viewport Z scale/bias */
-   z = z * 2.0 - 1.0;
+   z = z * 2.0f - 1.0f;
 
    draw_quad(ctx, x0, y0, z, x1, y1, color, invertTex,
              normalized ? ((GLfloat) width / sv[0]->texture->width0) : (GLfloat)width,
@@ -811,7 +809,7 @@ draw_textured_quad(struct gl_context *ctx, GLint x, GLint y, GLfloat z,
    cso_restore_vertex_shader(cso);
    cso_restore_geometry_shader(cso);
    cso_restore_vertex_elements(cso);
-   cso_restore_vertex_buffers(cso);
+   cso_restore_aux_vertex_buffer_slot(cso);
    cso_restore_stream_outputs(cso);
    if (write_stencil) {
       cso_restore_depth_stencil_alpha(cso);
@@ -865,18 +863,16 @@ draw_stencil_pixels(struct gl_context *ctx, GLint x, GLint y,
       usage = PIPE_TRANSFER_WRITE;
    }
 
-   pt = pipe_get_transfer(pipe, strb->texture,
-                          strb->rtt_level, strb->rtt_face + strb->rtt_slice,
-                          usage, x, y,
-                          width, height);
-
-   stmap = pipe_transfer_map(pipe, pt);
+   stmap = pipe_transfer_map(pipe, strb->texture,
+                             strb->rtt_level, strb->rtt_face + strb->rtt_slice,
+                             usage, x, y,
+                             width, height, &pt);
 
    pixels = _mesa_map_pbo_source(ctx, &clippedUnpack, pixels);
    assert(pixels);
 
-   sValues = (GLubyte *) malloc(width * sizeof(GLubyte));
-   zValues = (GLuint *) malloc(width * sizeof(GLuint));
+   sValues = malloc(width * sizeof(GLubyte));
+   zValues = malloc(width * sizeof(GLuint));
 
    if (sValues && zValues) {
       GLint row;
@@ -998,7 +994,6 @@ draw_stencil_pixels(struct gl_context *ctx, GLint x, GLint y,
 
    /* unmap the stencil buffer */
    pipe_transfer_unmap(pipe, pt);
-   pipe->transfer_destroy(pipe, pt);
 }
 
 
@@ -1067,7 +1062,7 @@ static void
 clamp_size(struct pipe_context *pipe, GLsizei *width, GLsizei *height,
            struct gl_pixelstore_attrib *unpack)
 {
-   const unsigned maxSize = 
+   const int maxSize =
       1 << (pipe->screen->get_param(pipe->screen,
                                     PIPE_CAP_MAX_TEXTURE_2D_LEVELS) - 1);
 
@@ -1249,18 +1244,16 @@ copy_stencil_pixels(struct gl_context *ctx, GLint srcx, GLint srcy,
       dsty = rbDraw->Base.Height - dsty - height;
    }
 
-   ptDraw = pipe_get_transfer(pipe,
-                              rbDraw->texture,
-                              rbDraw->rtt_level,
-                              rbDraw->rtt_face + rbDraw->rtt_slice,
-                              usage, dstx, dsty,
-                              width, height);
-
-   assert(util_format_get_blockwidth(ptDraw->resource->format) == 1);
-   assert(util_format_get_blockheight(ptDraw->resource->format) == 1);
+   assert(util_format_get_blockwidth(rbDraw->texture->format) == 1);
+   assert(util_format_get_blockheight(rbDraw->texture->format) == 1);
 
    /* map the stencil buffer */
-   drawMap = pipe_transfer_map(pipe, ptDraw);
+   drawMap = pipe_transfer_map(pipe,
+                               rbDraw->texture,
+                               rbDraw->rtt_level,
+                               rbDraw->rtt_face + rbDraw->rtt_slice,
+                               usage, dstx, dsty,
+                               width, height, &ptDraw);
 
    /* draw */
    /* XXX PixelZoom not handled yet */
@@ -1285,7 +1278,6 @@ copy_stencil_pixels(struct gl_context *ctx, GLint srcx, GLint srcy,
 
    /* unmap the stencil buffer */
    pipe_transfer_unmap(pipe, ptDraw);
-   pipe->transfer_destroy(pipe, ptDraw);
 }
 
 
@@ -1575,13 +1567,15 @@ st_CopyPixels(struct gl_context *ctx, GLint srcx, GLint srcy,
    }
    else {
       /* CPU-based fallback/conversion */
-      struct pipe_transfer *ptRead =
-         pipe_get_transfer(st->pipe, rbRead->texture,
+      struct pipe_transfer *ptRead;
+      void *mapRead =
+         pipe_transfer_map(st->pipe, rbRead->texture,
                            rbRead->rtt_level,
                            rbRead->rtt_face + rbRead->rtt_slice,
                            PIPE_TRANSFER_READ,
-                           readX, readY, readW, readH);
+                           readX, readY, readW, readH, &ptRead);
       struct pipe_transfer *ptTex;
+      void *mapTex;
       enum pipe_transfer_usage transfer_usage;
 
       if (ST_DEBUG & DEBUG_FALLBACK)
@@ -1592,33 +1586,34 @@ st_CopyPixels(struct gl_context *ctx, GLint srcx, GLint srcy,
       else
          transfer_usage = PIPE_TRANSFER_WRITE;
 
-      ptTex = pipe_get_transfer(st->pipe, pt, 0, 0, transfer_usage,
-                                0, 0, width, height);
+      mapTex = pipe_transfer_map(st->pipe, pt, 0, 0, transfer_usage,
+                                 0, 0, width, height, &ptTex);
 
       /* copy image from ptRead surface to ptTex surface */
       if (type == GL_COLOR) {
          /* alternate path using get/put_tile() */
-         GLfloat *buf = (GLfloat *) malloc(width * height * 4 * sizeof(GLfloat));
+         GLfloat *buf = malloc(width * height * 4 * sizeof(GLfloat));
          enum pipe_format readFormat, drawFormat;
          readFormat = util_format_linear(rbRead->texture->format);
          drawFormat = util_format_linear(pt->format);
-         pipe_get_tile_rgba_format(pipe, ptRead, 0, 0, readW, readH,
+         pipe_get_tile_rgba_format(ptRead, mapRead, 0, 0, readW, readH,
                                    readFormat, buf);
-         pipe_put_tile_rgba_format(pipe, ptTex, pack.SkipPixels, pack.SkipRows,
+         pipe_put_tile_rgba_format(ptTex, mapTex, pack.SkipPixels,
+                                   pack.SkipRows,
                                    readW, readH, drawFormat, buf);
          free(buf);
       }
       else {
          /* GL_DEPTH */
-         GLuint *buf = (GLuint *) malloc(width * height * sizeof(GLuint));
-         pipe_get_tile_z(pipe, ptRead, 0, 0, readW, readH, buf);
-         pipe_put_tile_z(pipe, ptTex, pack.SkipPixels, pack.SkipRows,
+         GLuint *buf = malloc(width * height * sizeof(GLuint));
+         pipe_get_tile_z(ptRead, mapRead, 0, 0, readW, readH, buf);
+         pipe_put_tile_z(ptTex, mapTex, pack.SkipPixels, pack.SkipRows,
                          readW, readH, buf);
          free(buf);
       }
 
-      pipe->transfer_destroy(pipe, ptRead);
-      pipe->transfer_destroy(pipe, ptTex);
+      pipe->transfer_unmap(pipe, ptRead);
+      pipe->transfer_unmap(pipe, ptTex);
    }
 
    /* OK, the texture 'pt' contains the src image/pixels.  Now draw a
@@ -1661,5 +1656,3 @@ st_destroy_drawpix(struct st_context *st)
    if (st->drawpix.vert_shaders[1])
       cso_delete_vertex_shader(st->cso_context, st->drawpix.vert_shaders[1]);
 }
-
-#endif /* FEATURE_drawpix */

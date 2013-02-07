@@ -100,8 +100,8 @@ class brw_blorp_surface_info : public brw_blorp_mip_info
 public:
    brw_blorp_surface_info();
 
-void set(struct brw_context *brw,
-         struct intel_mipmap_tree *mt,
+   void set(struct brw_context *brw,
+            struct intel_mipmap_tree *mt,
             unsigned int level, unsigned int layer);
 
    uint32_t compute_tile_offsets(uint32_t *tile_x, uint32_t *tile_y) const;
@@ -323,10 +323,6 @@ private:
 
 void
 gen6_blorp_init(struct brw_context *brw);
-
-void
-gen6_blorp_compute_tile_masks(const brw_blorp_params *params,
-                              uint32_t *tile_mask_x, uint32_t *tile_mask_y);
 
 void
 gen6_blorp_emit_batch_head(struct brw_context *brw,

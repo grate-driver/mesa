@@ -31,6 +31,7 @@
 #include "pipe/p_defines.h"
 #include "pipe/p_state.h"
 
+#include "util/u_blitter.h"
 #include "util/u_double_list.h"
 
 #include "tgsi/tgsi_scan.h"
@@ -233,8 +234,6 @@ struct svga_state
       unsigned flag_1d;
       unsigned flag_srgb;
    } tex_flags;
-
-   boolean any_user_vertex_buffers;
 };
 
 struct svga_prescale {
@@ -314,6 +313,7 @@ struct svga_context
 {
    struct pipe_context pipe;
    struct svga_winsys_context *swc;
+   struct blitter_context *blitter;
 
    struct {
       boolean no_swtnl;

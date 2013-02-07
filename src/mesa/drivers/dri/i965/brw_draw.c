@@ -34,6 +34,7 @@
 #include "main/state.h"
 #include "main/enums.h"
 #include "main/macros.h"
+#include "main/transformfeedback.h"
 #include "tnl/tnl.h"
 #include "vbo/vbo_context.h"
 #include "swrast/swrast.h"
@@ -192,7 +193,7 @@ static void brw_emit_prim(struct brw_context *brw,
    OUT_BATCH(verts_per_instance);
    OUT_BATCH(start_vertex_location);
    OUT_BATCH(prim->num_instances);
-   OUT_BATCH(0); // start instance location
+   OUT_BATCH(prim->base_instance);
    OUT_BATCH(base_vertex_location);
    ADVANCE_BATCH();
 
@@ -248,7 +249,7 @@ static void gen7_emit_prim(struct brw_context *brw,
    OUT_BATCH(verts_per_instance);
    OUT_BATCH(start_vertex_location);
    OUT_BATCH(prim->num_instances);
-   OUT_BATCH(0); // start instance location
+   OUT_BATCH(prim->base_instance);
    OUT_BATCH(base_vertex_location);
    ADVANCE_BATCH();
 
@@ -381,10 +382,11 @@ static void
 brw_update_primitive_count(struct brw_context *brw,
                            const struct _mesa_prim *prim)
 {
-   uint32_t count = count_tessellated_primitives(prim);
+   uint32_t count
+      = vbo_count_tessellated_primitives(prim->mode, prim->count,
+                                         prim->num_instances);
    brw->sol.primitives_generated += count;
-   if (brw->intel.ctx.TransformFeedback.CurrentObject->Active &&
-       !brw->intel.ctx.TransformFeedback.CurrentObject->Paused) {
+   if (_mesa_is_xfb_active_and_unpaused(&brw->intel.ctx)) {
       /* Update brw->sol.svbi_0_max_index to reflect the amount by which the
        * hardware is going to increment SVBI 0 when this drawing operation
        * occurs.  This is necessary because the kernel does not (yet) save and
@@ -434,6 +436,11 @@ static bool brw_try_draw_prims( struct gl_context *ctx,
 
    intel_prepare_render(intel);
 
+   /* This workaround has to happen outside of brw_state_upload() because it
+    * may flush the batchbuffer for a blit, affecting the state flags.
+    */
+   brw_workaround_depthstencil_alignment(brw);
+
    /* Resolves must occur after updating renderbuffers, updating context state,
     * and finalizing textures but before setting up any hardware state for
     * this draw call.
@@ -450,13 +457,6 @@ static bool brw_try_draw_prims( struct gl_context *ctx,
    brw->vb.min_index = min_index;
    brw->vb.max_index = max_index;
    brw->state.dirty.brw |= BRW_NEW_VERTICES;
-
-   /* Have to validate state quite late.  Will rebuild tnl_program,
-    * which depends on varying information.  
-    * 
-    * Note this is where brw->vs->prog_data.inputs_read is calculated,
-    * so can't access it earlier.
-    */
 
    for (i = 0; i < nr_prims; i++) {
       int estimated_max_prim_size;
@@ -476,7 +476,14 @@ static bool brw_try_draw_prims( struct gl_context *ctx,
       intel_batchbuffer_require_space(intel, estimated_max_prim_size, false);
       intel_batchbuffer_save_state(intel);
 
-      brw->num_instances = prim->num_instances;
+      if (brw->num_instances != prim->num_instances) {
+         brw->num_instances = prim->num_instances;
+         brw->state.dirty.brw |= BRW_NEW_VERTICES;
+      }
+      if (brw->basevertex != prim->basevertex) {
+         brw->basevertex = prim->basevertex;
+         brw->state.dirty.brw |= BRW_NEW_VERTICES;
+      }
       if (intel->gen < 6)
 	 brw_set_prim(brw, &prim[i]);
       else
@@ -554,21 +561,12 @@ void brw_draw_prims( struct gl_context *ctx,
       return;
    }
 
-   if (!vbo_all_varyings_in_vbos(arrays)) {
-      if (!index_bounds_valid)
-	 vbo_get_minmax_indices(ctx, prim, ib, &min_index, &max_index, nr_prims);
-
-      /* Decide if we want to rebase.  If so we end up recursing once
-       * only into this function.
-       */
-      if (min_index != 0 && !vbo_any_varyings_in_vbos(arrays)) {
-	 vbo_rebase_prims(ctx, arrays,
-			  prim, nr_prims,
-			  ib, min_index, max_index,
-			  brw_draw_prims );
-	 return;
-      }
-   }
+   /* If we're going to have to upload any of the user's vertex arrays, then
+    * get the minimum and maximum of their index buffer so we know what range
+    * to upload.
+    */
+   if (!vbo_all_varyings_in_vbos(arrays) && !index_bounds_valid)
+      vbo_get_minmax_indices(ctx, prim, ib, &min_index, &max_index, nr_prims);
 
    /* Do GL_SELECT and GL_FEEDBACK rendering using swrast, even though it
     * won't support all the extensions we support.

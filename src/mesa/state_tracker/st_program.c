@@ -66,15 +66,13 @@ delete_vp_variant(struct st_context *st, struct st_vp_variant *vpv)
    if (vpv->driver_shader) 
       cso_delete_vertex_shader(st->cso_context, vpv->driver_shader);
       
-#if FEATURE_feedback || FEATURE_rastpos
    if (vpv->draw_shader)
       draw_delete_vertex_shader( st->draw, vpv->draw_shader );
-#endif
       
    if (vpv->tgsi.tokens)
       st_free_tokens(vpv->tgsi.tokens);
       
-   FREE( vpv );
+   free( vpv );
 }
 
 
@@ -112,7 +110,7 @@ delete_fp_variant(struct st_context *st, struct st_fp_variant *fpv)
       _mesa_free_parameter_list(fpv->parameters);
    if (fpv->tgsi.tokens)
       st_free_tokens(fpv->tgsi.tokens);
-   FREE(fpv);
+   free(fpv);
 }
 
 
@@ -144,7 +142,7 @@ delete_gp_variant(struct st_context *st, struct st_gp_variant *gpv)
    if (gpv->driver_shader) 
       cso_delete_geometry_shader(st->cso_context, gpv->driver_shader);
       
-   FREE(gpv);
+   free(gpv);
 }
 
 
@@ -311,12 +309,11 @@ st_translate_vertex_program(struct st_context *st,
    if (!stvp->glsl_to_tgsi)
    {
       _mesa_remove_output_reads(&stvp->Base.Base, PROGRAM_OUTPUT);
-      _mesa_remove_output_reads(&stvp->Base.Base, PROGRAM_VARYING);
    }
 
    ureg = ureg_create( TGSI_PROCESSOR_VERTEX );
    if (ureg == NULL) {
-      FREE(vpv);
+      free(vpv);
       return NULL;
    }
 
@@ -497,7 +494,6 @@ st_translate_fragment_program(struct st_context *st,
 
    assert(!(key->bitmap && key->drawpixels));
 
-#if FEATURE_drawpix
    if (key->bitmap) {
       /* glBitmap drawing */
       struct gl_fragment_program *fp; /* we free this temp program below */
@@ -525,7 +521,6 @@ st_translate_fragment_program(struct st_context *st,
       }
       stfp = st_fragment_program(fp);
    }
-#endif
 
    if (!stfp->glsl_to_tgsi)
       _mesa_remove_output_reads(&stfp->Base.Base, PROGRAM_OUTPUT);
@@ -676,7 +671,7 @@ st_translate_fragment_program(struct st_context *st,
 
    ureg = ureg_create( TGSI_PROCESSOR_FRAGMENT );
    if (ureg == NULL) {
-      FREE(variant);
+      free(variant);
       return NULL;
    }
 
@@ -832,11 +827,10 @@ st_translate_geometry_program(struct st_context *st,
       return NULL;
 
    _mesa_remove_output_reads(&stgp->Base.Base, PROGRAM_OUTPUT);
-   _mesa_remove_output_reads(&stgp->Base.Base, PROGRAM_VARYING);
 
    ureg = ureg_create( TGSI_PROCESSOR_GEOMETRY );
    if (ureg == NULL) {
-      FREE(gpv);
+      free(gpv);
       return NULL;
    }
 

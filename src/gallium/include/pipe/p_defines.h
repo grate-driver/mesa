@@ -150,6 +150,7 @@ enum pipe_texture_target {
    PIPE_TEXTURE_RECT     = 5,
    PIPE_TEXTURE_1D_ARRAY = 6,
    PIPE_TEXTURE_2D_ARRAY = 7,
+   PIPE_TEXTURE_CUBE_ARRAY = 8,
    PIPE_MAX_TEXTURE_TYPES
 };
 
@@ -205,7 +206,7 @@ enum pipe_transfer_usage {
    PIPE_TRANSFER_READ = (1 << 0),
    
    /**
-    * Resource contents will be written back at transfer_destroy
+    * Resource contents will be written back at transfer_unmap
     * time (or modified as a result of being accessed directly).
     */
    PIPE_TRANSFER_WRITE = (1 << 1),
@@ -287,6 +288,12 @@ enum pipe_transfer_usage {
 
 };
 
+/**
+ * Flags for the flush function.
+ */
+enum pipe_flush_flags {
+   PIPE_FLUSH_END_OF_FRAME = (1 << 0)
+};
 
 /*
  * Resource binding flags -- state tracker must specify in advance all
@@ -300,8 +307,8 @@ enum pipe_transfer_usage {
 #define PIPE_BIND_INDEX_BUFFER         (1 << 5) /* draw_elements */
 #define PIPE_BIND_CONSTANT_BUFFER      (1 << 6) /* set_constant_buffer */
 #define PIPE_BIND_DISPLAY_TARGET       (1 << 8) /* flush_front_buffer */
-#define PIPE_BIND_TRANSFER_WRITE       (1 << 9) /* get_transfer */
-#define PIPE_BIND_TRANSFER_READ        (1 << 10) /* get_transfer */
+#define PIPE_BIND_TRANSFER_WRITE       (1 << 9) /* transfer_map */
+#define PIPE_BIND_TRANSFER_READ        (1 << 10) /* transfer_map */
 #define PIPE_BIND_STREAM_OUTPUT        (1 << 11) /* set_stream_output_buffers */
 #define PIPE_BIND_CURSOR               (1 << 16) /* mouse cursor */
 #define PIPE_BIND_CUSTOM               (1 << 17) /* state-tracker/winsys usages */
@@ -432,7 +439,7 @@ enum pipe_cap {
    PIPE_CAP_POINT_SPRITE = 6,
    PIPE_CAP_MAX_RENDER_TARGETS = 7,
    PIPE_CAP_OCCLUSION_QUERY = 8,
-   PIPE_CAP_TIMER_QUERY = 9,
+   PIPE_CAP_QUERY_TIME_ELAPSED = 9,
    PIPE_CAP_TEXTURE_SHADOW_MAP = 10,
    PIPE_CAP_TEXTURE_SWIZZLE = 11,
    PIPE_CAP_MAX_TEXTURE_2D_LEVELS = 12,
@@ -450,7 +457,6 @@ enum pipe_cap {
    PIPE_CAP_INDEP_BLEND_ENABLE = 33,
    /** different blend funcs per rendertarget */
    PIPE_CAP_INDEP_BLEND_FUNC = 34,
-   PIPE_CAP_DEPTHSTENCIL_CLEAR_SEPARATE = 35,
    PIPE_CAP_MAX_TEXTURE_ARRAY_LAYERS = 36,
    PIPE_CAP_TGSI_FS_COORD_ORIGIN_UPPER_LEFT = 37,
    PIPE_CAP_TGSI_FS_COORD_ORIGIN_LOWER_LEFT = 38,
@@ -487,7 +493,11 @@ enum pipe_cap {
    PIPE_CAP_USER_CONSTANT_BUFFERS = 70,
    PIPE_CAP_CONSTANT_BUFFER_OFFSET_ALIGNMENT = 71,
    PIPE_CAP_START_INSTANCE = 72,
-   PIPE_CAP_QUERY_TIMESTAMP = 73
+   PIPE_CAP_QUERY_TIMESTAMP = 73,
+   PIPE_CAP_TEXTURE_MULTISAMPLE = 74,
+   PIPE_CAP_MIN_MAP_BUFFER_ALIGNMENT = 75,
+   PIPE_CAP_CUBE_MAP_ARRAY = 76,
+   PIPE_CAP_TEXTURE_BUFFER_OBJECTS = 77
 };
 
 /**
@@ -557,7 +567,8 @@ enum pipe_compute_cap
    PIPE_COMPUTE_CAP_MAX_GLOBAL_SIZE,
    PIPE_COMPUTE_CAP_MAX_LOCAL_SIZE,
    PIPE_COMPUTE_CAP_MAX_PRIVATE_SIZE,
-   PIPE_COMPUTE_CAP_MAX_INPUT_SIZE
+   PIPE_COMPUTE_CAP_MAX_INPUT_SIZE,
+   PIPE_COMPUTE_CAP_MAX_MEM_ALLOC_SIZE
 };
 
 /**

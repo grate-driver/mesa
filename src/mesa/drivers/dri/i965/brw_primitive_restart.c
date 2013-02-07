@@ -29,7 +29,10 @@
 #include "main/bufferobj.h"
 
 #include "brw_context.h"
+#include "brw_defines.h"
 #include "brw_draw.h"
+
+#include "intel_batchbuffer.h"
 
 /**
  * Check if the hardware's cut index support can handle the primitive
@@ -39,17 +42,23 @@ static bool
 can_cut_index_handle_restart_index(struct gl_context *ctx,
                                    const struct _mesa_index_buffer *ib)
 {
+   struct intel_context *intel = intel_context(ctx);
+
+   /* Haswell supports an arbitrary cut index. */
+   if (intel->is_haswell)
+      return true;
+
    bool cut_index_will_work;
 
    switch (ib->type) {
    case GL_UNSIGNED_BYTE:
-      cut_index_will_work = (ctx->Array.RestartIndex & 0xff) == 0xff;
+      cut_index_will_work = (ctx->Array._RestartIndex & 0xff) == 0xff;
       break;
    case GL_UNSIGNED_SHORT:
-      cut_index_will_work = (ctx->Array.RestartIndex & 0xffff) == 0xffff;
+      cut_index_will_work = (ctx->Array._RestartIndex & 0xffff) == 0xffff;
       break;
    case GL_UNSIGNED_INT:
-      cut_index_will_work = ctx->Array.RestartIndex == 0xffffffff;
+      cut_index_will_work = ctx->Array._RestartIndex == 0xffffffff;
       break;
    default:
       cut_index_will_work = false;
@@ -148,7 +157,7 @@ brw_handle_primitive_restart(struct gl_context *ctx,
    /* If PrimitiveRestart is not enabled, then we aren't concerned about
     * handling this draw.
     */
-   if (!(ctx->Array.PrimitiveRestart)) {
+   if (!(ctx->Array._PrimitiveRestart)) {
       return GL_FALSE;
    }
 
@@ -176,3 +185,30 @@ brw_handle_primitive_restart(struct gl_context *ctx,
    return GL_TRUE;
 }
 
+static void
+haswell_upload_cut_index(struct brw_context *brw)
+{
+   struct intel_context *intel = &brw->intel;
+   struct gl_context *ctx = &intel->ctx;
+
+   /* Don't trigger on Ivybridge */
+   if (!intel->is_haswell)
+      return;
+
+   const unsigned cut_index_setting =
+      ctx->Array.PrimitiveRestart ? HSW_CUT_INDEX_ENABLE : 0;
+
+   BEGIN_BATCH(2);
+   OUT_BATCH(_3DSTATE_VF << 16 | cut_index_setting | (2 - 2));
+   OUT_BATCH(ctx->Array.RestartIndex);
+   ADVANCE_BATCH();
+}
+
+const struct brw_tracked_state haswell_cut_index = {
+   .dirty = {
+      .mesa  = _NEW_TRANSFORM,
+      .brw   = 0,
+      .cache = 0,
+   },
+   .emit = haswell_upload_cut_index,
+};

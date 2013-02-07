@@ -43,7 +43,7 @@ public:
 
    bool assign(int32_t& reg, DataFile f, unsigned int size);
    void release(DataFile f, int32_t reg, unsigned int size);
-   bool occupy(DataFile f, int32_t reg, unsigned int size);
+   bool occupy(DataFile f, int32_t reg, unsigned int size, bool noTest = false);
    bool occupy(const Value *);
    void occupyMask(DataFile f, int32_t reg, uint8_t mask);
 
@@ -167,9 +167,9 @@ RegisterSet::occupyMask(DataFile f, int32_t reg, uint8_t mask)
 }
 
 bool
-RegisterSet::occupy(DataFile f, int32_t reg, unsigned int size)
+RegisterSet::occupy(DataFile f, int32_t reg, unsigned int size, bool noTest)
 {
-   if (bits[f].testRange(reg, size))
+   if (!noTest && bits[f].testRange(reg, size))
       return false;
 
    bits[f].setRange(reg, size);
@@ -263,7 +263,7 @@ public:
 
    bool run(const std::list<ValuePair>&);
 
-   Symbol *assignSlot(const Interval&, unsigned int size);
+   Symbol *assignSlot(const Interval&, const unsigned int size);
    inline int32_t getStackSize() const { return stackSize; }
 
 private:
@@ -1235,7 +1235,7 @@ GCRA::checkInterference(const RIG_Node *node, Graph::EdgeIterator& ei)
       INFO_DBG(prog->dbgFlags, REG_ALLOC,
                "(%%%i) X (%%%i): $r%i + %u\n",
                vA->id, vB->id, intf->reg, intf->colors);
-      regs.occupy(node->f, intf->reg, intf->colors);
+      regs.occupy(node->f, intf->reg, intf->colors, true);
    }
 }
 
@@ -1384,7 +1384,7 @@ GCRA::cleanup(const bool success)
 }
 
 Symbol *
-SpillCodeInserter::assignSlot(const Interval &livei, unsigned int size)
+SpillCodeInserter::assignSlot(const Interval &livei, const unsigned int size)
 {
    SpillSlot slot;
    int32_t offsetBase = stackSize;
@@ -1397,21 +1397,22 @@ SpillCodeInserter::assignSlot(const Interval &livei, unsigned int size)
    slot.sym = NULL;
 
    for (offset = offsetBase; offset < stackSize; offset += size) {
+      const int32_t entryEnd = offset + size;
       while (it != slots.end() && it->offset < offset)
          ++it;
       if (it == slots.end()) // no slots left
          break;
       std::list<SpillSlot>::iterator bgn = it;
 
-      while (it != slots.end() && it->offset < (offset + size)) {
+      while (it != slots.end() && it->offset < entryEnd) {
          it->occup.print();
          if (it->occup.overlaps(livei))
             break;
          ++it;
       }
-      if (it == slots.end() || it->offset >= (offset + size)) {
+      if (it == slots.end() || it->offset >= entryEnd) {
          // fits
-         for (; bgn != slots.end() && bgn->offset < (offset + size); ++bgn) {
+         for (; bgn != slots.end() && bgn->offset < entryEnd; ++bgn) {
             bgn->occup.insert(livei);
             if (bgn->size() == size)
                slot.sym = bgn->sym;
@@ -1907,6 +1908,7 @@ RegAlloc::InsertConstraintsPass::visit(BasicBlock *bb)
             texConstraintNVC0(tex);
             break;
          case 0xe0:
+         case NVISA_GK110_CHIPSET:
             texConstraintNVE0(tex);
             break;
          default:

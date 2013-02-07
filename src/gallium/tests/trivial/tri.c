@@ -156,7 +156,6 @@ static void init_prog(struct program *p)
 	p->rasterizer.depth_clip = 1;
 
 	surf_tmpl.format = PIPE_FORMAT_B8G8R8A8_UNORM;
-	surf_tmpl.usage = PIPE_BIND_RENDER_TARGET;
 	surf_tmpl.u.tex.level = 0;
 	surf_tmpl.u.tex.first_layer = 0;
 	surf_tmpl.u.tex.last_layer = 0;
@@ -217,7 +216,8 @@ static void init_prog(struct program *p)
 	}
 
 	/* fragment shader */
-	p->fs = util_make_fragment_passthrough_shader(p->pipe);
+	p->fs = util_make_fragment_passthrough_shader(p->pipe,
+                    TGSI_SEMANTIC_COLOR, TGSI_INTERPOLATE_PERSPECTIVE);
 }
 
 static void close_prog(struct program *p)
@@ -262,12 +262,12 @@ static void draw(struct program *p)
 	cso_set_vertex_elements(p->cso, 2, p->velem);
 
 	util_draw_vertex_buffer(p->pipe, p->cso,
-	                        p->vbuf, 0,
+	                        p->vbuf, 0, 0,
 	                        PIPE_PRIM_TRIANGLES,
 	                        3,  /* verts */
 	                        2); /* attribs/vert */
 
-        p->pipe->flush(p->pipe, NULL);
+        p->pipe->flush(p->pipe, NULL, 0);
 
 	debug_dump_surface_bmp(p->pipe, "result.bmp", p->framebuffer.cbufs[0]);
 }

@@ -201,6 +201,22 @@ struct dd_function_table {
                                      GLenum srcFormat, GLenum srcType );
 
    /**
+    * Determine sample counts support for a particular format
+    *
+    * \param ctx            GL context
+    * \param internalFormat GL format enum
+    * \param samples        Buffer to hold the returned sample counts.
+    *                       Drivers \b must \b not return more than 16 counts.
+    *
+    * \returns
+    * The number of sample counts actually written to \c samples.  If
+    * \c internaFormat is not renderable, zero is returned.
+    */
+   size_t (*QuerySamplesForFormat)(struct gl_context *ctx,
+                                   GLenum internalFormat,
+                                   int samples[16]);
+
+   /**
     * Called by glTexImage[123]D() and glCopyTexImage[12]D()
     * Allocate texture memory and copy the user's image to the buffer.
     * The gl_texture_image fields, etc. will be fully initialized.
@@ -251,14 +267,14 @@ struct dd_function_table {
                           struct gl_texture_object *texObj);
 
    /**
-    * Called by glTexImage[123]D when user specifies a proxy texture
-    * target.  
-    *
-    * \return GL_TRUE if the proxy test passes, or GL_FALSE if the test fails.
+    * Called by glTexImage, glCompressedTexImage, glCopyTexImage
+    * and glTexStorage to check if the dimensions of the texture image
+    * are too large.
+    * \param target  any GL_PROXY_TEXTURE_x target
+    * \return GL_TRUE if the image is OK, GL_FALSE if too large
     */
    GLboolean (*TestProxyTexImage)(struct gl_context *ctx, GLenum target,
-                                  GLint level, GLint internalFormat,
-                                  GLenum format, GLenum type,
+                                  GLint level, gl_format format,
                                   GLint width, GLint height,
                                   GLint depth, GLint border);
    /*@}*/
@@ -707,14 +723,6 @@ struct dd_function_table {
    void (*SaveFlushVertices)( struct gl_context *ctx );
 
    /**
-    * \brief Hook for drivers to prepare for a glBegin/glEnd block
-    *
-    * This hook is called in vbo_exec_Begin() before any action, including
-    * state updates, occurs.
-    */
-   void (*PrepareExecBegin)( struct gl_context *ctx );
-
-   /**
     * Give the driver the opportunity to hook in its own vtxfmt for
     * compiling optimized display lists.  This is called on each valid
     * glBegin() during list compilation.
@@ -903,7 +911,7 @@ typedef struct {
    void (GLAPIENTRYP Begin)( GLenum );
    void (GLAPIENTRYP End)( void );
    void (GLAPIENTRYP PrimitiveRestartNV)( void );
-   /* GL_NV_vertex_program */
+   /* Originally for GL_NV_vertex_program, now used only dlist.c and friends */
    void (GLAPIENTRYP VertexAttrib1fNV)( GLuint index, GLfloat x );
    void (GLAPIENTRYP VertexAttrib1fvNV)( GLuint index, const GLfloat *v );
    void (GLAPIENTRYP VertexAttrib2fNV)( GLuint index, GLfloat x, GLfloat y );

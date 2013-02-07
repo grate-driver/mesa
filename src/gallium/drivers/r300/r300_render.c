@@ -395,16 +395,6 @@ static void r300_draw_arrays_immediate(struct r300_context *r300,
         }
     }
     END_CS;
-
-    /* Unmap buffers. */
-    for (i = 0; i < vertex_element_count; i++) {
-        vbi = r300->velems->velem[i].vertex_buffer_index;
-
-        if (map[vbi]) {
-            r300->rws->buffer_unmap(r300_resource(r300->vertex_buffer[vbi].buffer)->cs_buf);
-            map[vbi] = NULL;
-        }
-    }
 }
 
 static void r300_emit_draw_arrays(struct r300_context *r300,
@@ -630,7 +620,6 @@ static void r300_draw_elements(struct r300_context *r300,
             r300_upload_index_buffer(r300, &indexBuffer, indexSize, &start,
                                      count, (uint8_t*)ptr);
         }
-        r300->rws->buffer_unmap(r300_resource(orgIndexBuffer)->cs_buf);
     } else {
         if (r300->index_buffer.user_buffer)
             r300_upload_index_buffer(r300, &indexBuffer, indexSize,
@@ -855,7 +844,6 @@ static void r300_swtcl_draw_vbo(struct pipe_context* pipe,
                                 const struct pipe_draw_info *info)
 {
     struct r300_context* r300 = r300_context(pipe);
-    boolean indexed = info->indexed;
 
     if (r300->skip_rendering) {
         return;
@@ -863,16 +851,8 @@ static void r300_swtcl_draw_vbo(struct pipe_context* pipe,
 
     r300_update_derived_state(r300);
 
-    r300_reserve_cs_dwords(r300,
-            PREP_EMIT_STATES | PREP_EMIT_VARRAYS_SWTCL |
-            (indexed ? PREP_INDEXED : 0),
-            indexed ? 256 : 6);
-
-    r300->draw_vbo_locked = TRUE;
-    r300->draw_first_emitted = FALSE;
     draw_vbo(r300->draw, info);
     draw_flush(r300->draw);
-    r300->draw_vbo_locked = FALSE;
 }
 
 /* Object for rendering using Draw. */
@@ -890,9 +870,7 @@ struct r300_render {
 
     /* VBO */
     size_t vbo_max_used;
-    void * vbo_ptr;
-
-    struct pipe_transfer *vbo_transfer;
+    uint8_t *vbo_ptr;
 };
 
 static INLINE struct r300_render*
@@ -911,30 +889,36 @@ r300_render_get_vertex_info(struct vbuf_render* render)
 }
 
 static boolean r300_render_allocate_vertices(struct vbuf_render* render,
-                                                   ushort vertex_size,
-                                                   ushort count)
+                                             ushort vertex_size,
+                                             ushort count)
 {
     struct r300_render* r300render = r300_render(render);
     struct r300_context* r300 = r300render->r300;
-    struct pipe_screen* screen = r300->context.screen;
+    struct radeon_winsys *rws = r300->rws;
     size_t size = (size_t)vertex_size * (size_t)count;
 
     DBG(r300, DBG_DRAW, "r300: render_allocate_vertices (size: %d)\n", size);
 
-    if (size + r300->draw_vbo_offset > r300->draw_vbo_size)
-    {
-	pipe_resource_reference(&r300->vbo, NULL);
-        r300->vbo = pipe_buffer_create(screen,
-				       PIPE_BIND_CUSTOM,
-				       PIPE_USAGE_STREAM,
-				       R300_MAX_DRAW_VBO_SIZE);
+    if (!r300->vbo || size + r300->draw_vbo_offset > r300->vbo->size) {
+	pb_reference(&r300->vbo, NULL);
+        r300->vbo_cs = NULL;
+        r300render->vbo_ptr = NULL;
+
+        r300->vbo = rws->buffer_create(rws,
+                                       MAX2(R300_MAX_DRAW_VBO_SIZE, size),
+                                       R300_BUFFER_ALIGNMENT, TRUE,
+                                       RADEON_DOMAIN_GTT);
+        if (!r300->vbo) {
+            return FALSE;
+        }
+        r300->vbo_cs = rws->buffer_get_cs_handle(r300->vbo);
         r300->draw_vbo_offset = 0;
-        r300->draw_vbo_size = R300_MAX_DRAW_VBO_SIZE;
+        r300render->vbo_ptr = rws->buffer_map(r300->vbo_cs, r300->cs,
+                                              PIPE_TRANSFER_WRITE);
     }
 
     r300render->vertex_size = vertex_size;
-
-    return (r300->vbo) ? TRUE : FALSE;
+    return TRUE;
 }
 
 static void* r300_render_map_vertices(struct vbuf_render* render)
@@ -942,19 +926,10 @@ static void* r300_render_map_vertices(struct vbuf_render* render)
     struct r300_render* r300render = r300_render(render);
     struct r300_context* r300 = r300render->r300;
 
-    assert(!r300render->vbo_transfer);
-
     DBG(r300, DBG_DRAW, "r300: render_map_vertices\n");
 
-    r300render->vbo_ptr = pipe_buffer_map(&r300render->r300->context,
-					  r300->vbo,
-                                          PIPE_TRANSFER_WRITE |
-                                          PIPE_TRANSFER_UNSYNCHRONIZED,
-					  &r300render->vbo_transfer);
-
     assert(r300render->vbo_ptr);
-
-    return ((uint8_t*)r300render->vbo_ptr + r300->draw_vbo_offset);
+    return r300render->vbo_ptr + r300->draw_vbo_offset;
 }
 
 static void r300_render_unmap_vertices(struct vbuf_render* render,
@@ -962,18 +937,12 @@ static void r300_render_unmap_vertices(struct vbuf_render* render,
                                              ushort max)
 {
     struct r300_render* r300render = r300_render(render);
-    struct pipe_context* context = &r300render->r300->context;
     struct r300_context* r300 = r300render->r300;
-
-    assert(r300render->vbo_transfer);
 
     DBG(r300, DBG_DRAW, "r300: render_unmap_vertices\n");
 
     r300render->vbo_max_used = MAX2(r300render->vbo_max_used,
                                     r300render->vertex_size * (max + 1));
-    pipe_buffer_unmap(context, r300render->vbo_transfer);
-
-    r300render->vbo_transfer = NULL;
 }
 
 static void r300_render_release_vertices(struct vbuf_render* render)
@@ -1009,18 +978,15 @@ static void r300_render_draw_arrays(struct vbuf_render* render,
     CS_LOCALS(r300);
     (void) i; (void) ptr;
 
+    assert(start == 0);
+    assert(count < (1 << 16));
+
     DBG(r300, DBG_DRAW, "r300: render_draw_arrays (count: %d)\n", count);
 
-    if (r300->draw_first_emitted) {
-        if (!r300_prepare_for_rendering(r300,
-                PREP_EMIT_STATES | PREP_EMIT_VARRAYS_SWTCL,
-                NULL, dwords, 0, 0, -1))
-            return;
-    } else {
-        if (!r300_emit_states(r300,
-                PREP_EMIT_STATES | PREP_EMIT_VARRAYS_SWTCL,
-                NULL, 0, 0, -1))
-            return;
+    if (!r300_prepare_for_rendering(r300,
+                                    PREP_EMIT_STATES | PREP_EMIT_VARRAYS_SWTCL,
+                                    NULL, dwords, 0, 0, -1)) {
+        return;
     }
 
     BEGIN_CS(dwords);
@@ -1031,8 +997,6 @@ static void r300_render_draw_arrays(struct vbuf_render* render,
     OUT_CS(R300_VAP_VF_CNTL__PRIM_WALK_VERTEX_LIST | (count << 16) |
            r300render->hwprim);
     END_CS;
-
-    r300->draw_first_emitted = TRUE;
 }
 
 static void r300_render_draw_elements(struct vbuf_render* render,
@@ -1041,9 +1005,9 @@ static void r300_render_draw_elements(struct vbuf_render* render,
 {
     struct r300_render* r300render = r300_render(render);
     struct r300_context* r300 = r300render->r300;
-    int i;
+    struct radeon_winsys_cs *cs = r300->cs;
     unsigned end_cs_dwords;
-    unsigned max_index = (r300->draw_vbo_size - r300->draw_vbo_offset) /
+    unsigned max_index = (r300->vbo->size - r300->draw_vbo_offset) /
                          (r300render->r300->vertex_info.size * 4) - 1;
     unsigned short_count;
     unsigned free_dwords;
@@ -1051,16 +1015,11 @@ static void r300_render_draw_elements(struct vbuf_render* render,
     CS_LOCALS(r300);
     DBG(r300, DBG_DRAW, "r300: render_draw_elements (count: %d)\n", count);
 
-    if (r300->draw_first_emitted) {
-        if (!r300_prepare_for_rendering(r300,
-                PREP_EMIT_STATES | PREP_EMIT_VARRAYS_SWTCL | PREP_INDEXED,
-                NULL, 256, 0, 0, -1))
-            return;
-    } else {
-        if (!r300_emit_states(r300,
-                PREP_EMIT_STATES | PREP_EMIT_VARRAYS_SWTCL | PREP_INDEXED,
-                NULL, 0, 0, -1))
-            return;
+    if (!r300_prepare_for_rendering(r300,
+                                    PREP_EMIT_STATES |
+                                    PREP_EMIT_VARRAYS_SWTCL | PREP_INDEXED,
+                                    NULL, 256, 0, 0, -1)) {
+        return;
     }
 
     /* Below we manage the CS space manually because there may be more
@@ -1069,24 +1028,22 @@ static void r300_render_draw_elements(struct vbuf_render* render,
     end_cs_dwords = r300_get_num_cs_end_dwords(r300);
 
     while (count) {
-        free_dwords = RADEON_MAX_CMDBUF_DWORDS - r300->cs->cdw;
+        free_dwords =
+            RADEON_MAX_CMDBUF_DWORDS - r300->cs->cdw - end_cs_dwords - 6;
 
-        short_count = MIN2(count, (free_dwords - end_cs_dwords - 6) * 2);
+        short_count = MIN2(count, free_dwords * 2);
 
-        BEGIN_CS(6 + (short_count+1)/2);
+        BEGIN_CS(6);
         OUT_CS_REG(R300_GA_COLOR_CONTROL,
                 r300_provoking_vertex_fixes(r300, r300render->prim));
         OUT_CS_REG(R300_VAP_VF_MAX_VTX_INDX, max_index);
         OUT_CS_PKT3(R300_PACKET3_3D_DRAW_INDX_2, (short_count+1)/2);
         OUT_CS(R300_VAP_VF_CNTL__PRIM_WALK_INDICES | (short_count << 16) |
                r300render->hwprim);
-        for (i = 0; i < short_count-1; i += 2) {
-            OUT_CS(indices[i+1] << 16 | indices[i]);
-        }
-        if (short_count % 2) {
-            OUT_CS(indices[short_count-1]);
-        }
         END_CS;
+
+        memcpy(cs->buf+cs->cdw, indices, short_count * 2);
+        cs->cdw += (short_count + 1) / 2;
 
         /* OK now subtract the emitted indices and see if we need to emit
          * another draw packet. */
@@ -1102,8 +1059,6 @@ static void r300_render_draw_elements(struct vbuf_render* render,
             end_cs_dwords = r300_get_num_cs_end_dwords(r300);
         }
     }
-
-    r300->draw_first_emitted = TRUE;
 }
 
 static void r300_render_destroy(struct vbuf_render* render)
@@ -1117,7 +1072,7 @@ static struct vbuf_render* r300_render_create(struct r300_context* r300)
 
     r300render->r300 = r300;
 
-    r300render->base.max_vertex_buffer_bytes = 1024 * 1024;
+    r300render->base.max_vertex_buffer_bytes = R300_MAX_DRAW_VBO_SIZE;
     r300render->base.max_indices = 16 * 1024;
 
     r300render->base.get_vertex_info = r300_render_get_vertex_info;
@@ -1156,12 +1111,6 @@ struct draw_stage* r300_draw_stage(struct r300_context* r300)
     return stage;
 }
 
-void r300_draw_flush_vbuf(struct r300_context *r300)
-{
-    pipe_resource_reference(&r300->vbo, NULL);
-    r300->draw_vbo_size = 0;
-}
-
 /****************************************************************************
  *                         End of SW TCL functions                          *
  ***************************************************************************/
@@ -1172,8 +1121,7 @@ void r300_draw_flush_vbuf(struct r300_context *r300)
  * would be computed and stored twice, which makes the clear/copy codepaths
  * somewhat inefficient. Instead we use a rectangular point sprite. */
 void r300_blitter_draw_rectangle(struct blitter_context *blitter,
-                                 unsigned x1, unsigned y1,
-                                 unsigned x2, unsigned y2,
+                                 int x1, int y1, int x2, int y2,
                                  float depth,
                                  enum blitter_attrib_type type,
                                  const union pipe_color_union *attrib)
@@ -1191,8 +1139,6 @@ void r300_blitter_draw_rectangle(struct blitter_context *blitter,
 
     if (r300->skip_rendering)
         return;
-
-    r300->context.set_vertex_buffers(&r300->context, 0, NULL);
 
     if (type == UTIL_BLITTER_ATTRIB_TEXCOORD)
         r300->sprite_coord_enable = 1;
@@ -1255,56 +1201,6 @@ done:
     r300->sprite_coord_enable = last_sprite_coord_enable;
 }
 
-static void r300_resource_resolve(struct pipe_context *pipe,
-                                  const struct pipe_resolve_info *info)
-{
-    struct r300_context *r300 = r300_context(pipe);
-    struct pipe_surface *srcsurf, *dstsurf, surf_tmpl;
-    struct r300_aa_state *aa = (struct r300_aa_state*)r300->aa_state.state;
-    static const union pipe_color_union color;
-
-    assert(0 && "Resource resolve is unsupported, invalid call.");
-
-    memset(&surf_tmpl, 0, sizeof(surf_tmpl));
-    surf_tmpl.format = info->src.res->format;
-    surf_tmpl.u.tex.first_layer =
-    surf_tmpl.u.tex.last_layer = info->src.layer;
-    srcsurf = pipe->create_surface(pipe, info->src.res, &surf_tmpl);
-    /* XXX Offset both surfaces by x0,y1. */
-
-    surf_tmpl.format = info->dst.res->format;
-    surf_tmpl.u.tex.level = info->dst.level;
-    surf_tmpl.u.tex.first_layer =
-    surf_tmpl.u.tex.last_layer = info->dst.layer;
-    dstsurf = pipe->create_surface(pipe, info->dst.res, &surf_tmpl);
-
-    DBG(r300, DBG_DRAW, "r300: Resolving resource...\n");
-
-    /* Enable AA resolve. */
-    aa->dest = r300_surface(dstsurf);
-    aa->aaresolve_ctl =
-        R300_RB3D_AARESOLVE_CTL_AARESOLVE_MODE_RESOLVE |
-        R300_RB3D_AARESOLVE_CTL_AARESOLVE_ALPHA_AVERAGE;
-    r300->aa_state.size = 10;
-    r300_mark_atom_dirty(r300, &r300->aa_state);
-
-    /* Resolve the surface. */
-    /* XXX: y1 < 0 ==> Y flip */
-    r300->context.clear_render_target(pipe,
-                                      srcsurf, &color, 0, 0,
-                                      info->dst.x1 - info->dst.x0,
-                                      info->dst.y1 - info->dst.y0);
-
-    /* Disable AA resolve. */
-    aa->dest = NULL;
-    aa->aaresolve_ctl = 0;
-    r300->aa_state.size = 4;
-    r300_mark_atom_dirty(r300, &r300->aa_state);
-
-    pipe_surface_reference(&srcsurf, NULL);
-    pipe_surface_reference(&dstsurf, NULL);
-}
-
 void r300_init_render_functions(struct r300_context *r300)
 {
     /* Set draw functions based on presence of HW TCL. */
@@ -1313,8 +1209,6 @@ void r300_init_render_functions(struct r300_context *r300)
     } else {
         r300->context.draw_vbo = r300_swtcl_draw_vbo;
     }
-
-    r300->context.resource_resolve = r300_resource_resolve;
 
     /* Plug in the two-sided stencil reference value fallback if needed. */
     if (!r300->screen->caps.is_r500)

@@ -41,9 +41,6 @@
 #include "r600_resource.h"
 #include "sid.h"
 
-#define R600_MAX_CONST_BUFFERS 1
-#define R600_MAX_CONST_BUFFER_SIZE 4096
-
 #ifdef PIPE_ARCH_BIG_ENDIAN
 #define R600_BIG_ENDIAN 1
 #else
@@ -74,11 +71,13 @@ struct r600_screen {
 
 struct si_pipe_sampler_view {
 	struct pipe_sampler_view	base;
+	struct si_resource		*resource;
 	uint32_t			state[8];
 };
 
 struct si_pipe_sampler_state {
 	uint32_t			val[4];
+	float				border_color[4];
 };
 
 /* needed for blitter save */
@@ -88,6 +87,7 @@ struct r600_textures_info {
 	struct si_pipe_sampler_view	*views[NUM_TEX_UNITS];
 	struct si_pipe_sampler_state	*samplers[NUM_TEX_UNITS];
 	unsigned			n_views;
+	uint32_t			depth_texture_mask; /* which textures are depth */
 	unsigned			n_samplers;
 	bool				samplers_dirty;
 	bool				is_array_sampler[NUM_TEX_UNITS];
@@ -115,7 +115,10 @@ struct r600_context {
 	struct blitter_context		*blitter;
 	enum radeon_family		family;
 	enum chip_class			chip_class;
-	void				*custom_dsa_flush;
+	void				*custom_dsa_flush_depth_stencil;
+	void				*custom_dsa_flush_depth;
+	void				*custom_dsa_flush_stencil;
+	void				*custom_dsa_flush_inplace;
 	struct r600_screen		*screen;
 	struct radeon_winsys		*ws;
 	struct si_vertex_element	*vertex_elements;
@@ -135,16 +138,13 @@ struct r600_context {
 	/* shader information */
 	unsigned			sprite_coord_enable;
 	unsigned			export_16bpc;
-	unsigned			spi_shader_col_format;
-	unsigned			alpha_ref;
-	boolean				alpha_ref_dirty;
 	struct r600_textures_info	vs_samplers;
 	struct r600_textures_info	ps_samplers;
-	boolean				shader_dirty;
+	struct si_resource		*border_color_table;
+	unsigned			border_color_offset;
 
 	struct u_upload_mgr	        *uploader;
 	struct util_slab_mempool	pool_transfers;
-	boolean				have_depth_texture, have_depth_fb;
 
 	unsigned default_ps_gprs, default_vs_gprs;
 
@@ -188,15 +188,19 @@ struct r600_context {
 
 /* r600_blit.c */
 void si_init_blit_functions(struct r600_context *rctx);
-void si_blit_uncompress_depth(struct pipe_context *ctx, struct r600_resource_texture *texture);
-void r600_blit_push_depth(struct pipe_context *ctx, struct r600_resource_texture *texture);
-void si_flush_depth_textures(struct r600_context *rctx);
+void si_blit_uncompress_depth(struct pipe_context *ctx,
+		struct r600_resource_texture *texture,
+		struct r600_resource_texture *staging,
+		unsigned first_level, unsigned last_level,
+		unsigned first_layer, unsigned last_layer);
+void si_flush_depth_textures(struct r600_context *rctx,
+			     struct r600_textures_info *textures);
 
 /* r600_buffer.c */
 bool si_init_resource(struct r600_screen *rscreen,
 		      struct si_resource *res,
 		      unsigned size, unsigned alignment,
-		      unsigned bind, unsigned usage);
+		      boolean use_reusable_pool, unsigned usage);
 struct pipe_resource *si_buffer_create(struct pipe_screen *screen,
 				       const struct pipe_resource *templ);
 void r600_upload_index_buffer(struct r600_context *rctx,

@@ -43,10 +43,12 @@
 #define EVERGREEN_CTL_CONST_OFFSET                  0x0003CFF0
 #define EVERGREEN_CTL_CONST_END                     0x0003FF0C
 
+#define EVENT_TYPE_CS_PARTIAL_FLUSH            0x07
 #define EVENT_TYPE_PS_PARTIAL_FLUSH            0x10
 #define EVENT_TYPE_ZPASS_DONE                  0x15
 #define EVENT_TYPE_CACHE_FLUSH_AND_INV_EVENT   0x16
-#define EVENT_TYPE_SO_VGTSTREAMOUT_FLUSH	0x1f
+#define EVENT_TYPE_SO_VGTSTREAMOUT_FLUSH       0x1f
+#define EVENT_TYPE_FLUSH_AND_INV_DB_META       0x2c
 
 #define		EVENT_TYPE(x)                           ((x) << 0)
 #define		EVENT_INDEX(x)                          ((x) << 8)
@@ -364,9 +366,16 @@
 #define   S_028C70_RAT(x)                              (((x) & 0x1) << 26)
 #define   G_028C70_RAT(x)                              (((x) >> 26) & 0x1)
 #define   C_028C70_RAT                                 0xFBFFFFFF
+/* RESOURCE_TYPE is only used for compute shaders */
 #define   S_028C70_RESOURCE_TYPE(x)                    (((x) & 0x7) << 27)
 #define   G_028C70_RESOURCE_TYPE(x)                    (((x) >> 27) & 0x7)
 #define   C_028C70_RESOURCE_TYPE                       0xC7FFFFFF
+#define     V_028C70_BUFFER                            0x0
+#define     V_028C70_TEXTURE1D                         0x1
+#define     V_028C70_TEXTURE1DARRAY                    0x2
+#define     V_028C70_TEXTURE2D                         0x3
+#define     V_028C70_TEXTURE2DARRAY                    0x4
+#define     V_028C70_TEXTURE3D                         0x5
 
 #define R_028C74_CB_COLOR0_ATTRIB                      0x028C74
 #define   S_028C74_NON_DISP_TILING_ORDER(x)            (((x) & 0x1) << 4)
@@ -477,7 +486,7 @@
 #define      V_028808_CB_ELIMINATE_FAST_CLEAR          0x00000002
 #define      V_028808_CB_RESOLVE                       0x00000003
 #define      V_028808_CB_DECOMPRESS                    0x00000004
-#define      V_028808_CB_FASK_DECOMPRESS               0x00000005
+#define      V_028808_CB_FMASK_DECOMPRESS              0x00000005
 #define   S_028808_ROP3(x)                             (((x) & 0xFF) << 16)
 #define   G_028808_ROP3(x)                             (((x) >> 16) & 0xFF)
 #define   C_028808_ROP3                                0xFF00FFFF
@@ -566,6 +575,8 @@
 
 #define R_028044_DB_STENCIL_INFO                     0x028044
 #define   S_028044_FORMAT(x)                           (((x) & 0x1) << 0)
+#define     V_028044_STENCIL_INVALID			0
+#define     V_028044_STENCIL_8				1
 #define   G_028044_FORMAT(x)                           (((x) >> 0) & 0x1)
 #define   C_028044_FORMAT                              0xFFFFFFFE
 #define   S_028044_TILE_SPLIT(x)                       (((x) & 0x7) << 8)
@@ -1098,9 +1109,13 @@
 #define   C_030018_INTERLACED                          0xFFFFFFBF
 #define   S_030018_TILE_SPLIT(x)                       (((x) & 0x7) << 29)
 #define R_03001C_SQ_TEX_RESOURCE_WORD7_0             0x03001C
+#define   S_03001C_DATA_FORMAT(x)                      (((x) & 0x3F) << 0)
+#define   G_03001C_DATA_FORMAT(x)                      (((x) >> 0) & 0x3F)
+#define   C_03001C_DATA_FORMAT                         0xFFFFFFC0
 #define   S_03001C_MACRO_TILE_ASPECT(x)                (((x) & 0x3) << 6)
 #define   S_03001C_BANK_WIDTH(x)                       (((x) & 0x3) << 8)
 #define   S_03001C_BANK_HEIGHT(x)                      (((x) & 0x3) << 10)
+#define   S_03001C_DEPTH_SAMPLE_ORDER(x)               (((x) & 0x1) << 15)
 #define   S_03001C_NUM_BANKS(x)                        (((x) & 0x3) << 16)
 #define   S_03001C_TYPE(x)                             (((x) & 0x3) << 30)
 #define   G_03001C_TYPE(x)                             (((x) >> 30) & 0x3)
@@ -1109,9 +1124,6 @@
 #define     V_03001C_SQ_TEX_VTX_INVALID_BUFFER         0x00000001
 #define     V_03001C_SQ_TEX_VTX_VALID_TEXTURE          0x00000002
 #define     V_03001C_SQ_TEX_VTX_VALID_BUFFER           0x00000003
-#define   S_03001C_DATA_FORMAT(x)                      (((x) & 0x3F) << 0)
-#define   G_03001C_DATA_FORMAT(x)                      (((x) >> 0) & 0x3F)
-#define   C_03001C_DATA_FORMAT                         0xFFFFFFC0
 
 #define R_030008_SQ_VTX_CONSTANT_WORD2_0             0x030008
 #define   S_030008_BASE_ADDRESS_HI(x)                  (((x) & 0xFF) << 0)
@@ -1633,6 +1645,9 @@
 #define   S_02800C_IGNORE_SC_ZRANGE(x)                 (((x) & 0x1) << 17)
 #define   G_02800C_IGNORE_SC_ZRANGE(x)                 (((x) >> 17) & 0x1)
 #define   C_02800C_IGNORE_SC_ZRANGE                    0xFFFDFFFF
+#define   S_02800C_DISABLE_PIXEL_RATE_TILES(x)         (((x) & 0x1) << 26)
+#define   G_02800C_DISABLE_PIXEL_RATE_TILES(x)         (((x) >> 26) & 0x1)
+#define   C_02800C_DISABLE_PIXEL_RATE_TILES            0xFFFDFFFF
 #define R_028010_DB_RENDER_OVERRIDE2                 0x00028010
 #define R_028014_DB_HTILE_DATA_BASE                  0x00028014
 #define R_028028_DB_STENCIL_CLEAR                    0x00028028
@@ -1645,6 +1660,7 @@
 #define R_028144_ALU_CONST_BUFFER_SIZE_PS_1          0x00028144
 #define R_028180_ALU_CONST_BUFFER_SIZE_VS_0          0x00028180
 #define R_028184_ALU_CONST_BUFFER_SIZE_VS_1          0x00028184
+#define R_0281C0_ALU_CONST_BUFFER_SIZE_GS_0          0x000281C0
 #define R_028200_PA_SC_WINDOW_OFFSET                 0x00028200
 #define R_02820C_PA_SC_CLIPRECT_RULE                 0x0002820C
 #define R_028210_PA_SC_CLIPRECT_0_TL                 0x00028210
@@ -1697,6 +1713,7 @@
 #define R_0283F4_SQ_VTX_SEMANTIC_29                  0x000283F4
 #define R_0283F8_SQ_VTX_SEMANTIC_30                  0x000283F8
 #define R_0283FC_SQ_VTX_SEMANTIC_31                  0x000283FC
+#define R_0288F0_SQ_VTX_SEMANTIC_CLEAR               0x000288F0
 #define R_0282D0_PA_SC_VPORT_ZMIN_0                  0x000282D0
 #define R_0282D4_PA_SC_VPORT_ZMAX_0                  0x000282D4
 #define R_028400_VGT_MAX_VTX_INDX                    0x00028400
@@ -1833,6 +1850,7 @@
 #define R_028944_ALU_CONST_CACHE_PS_1                0x00028944
 #define R_028980_ALU_CONST_CACHE_VS_0                0x00028980
 #define R_028984_ALU_CONST_CACHE_VS_1                0x00028984
+#define R_0289C0_ALU_CONST_CACHE_GS_0                0x000289C0
 #define R_028A04_PA_SU_POINT_MINMAX                  0x00028A04
 #define   S_028A04_MIN_SIZE(x)                         (((x) & 0xFFFF) << 0)
 #define   G_028A04_MIN_SIZE(x)                         (((x) >> 0) & 0xFFFF)
@@ -1870,6 +1888,8 @@
 #define R_028AC0_DB_SRESULTS_COMPARE_STATE0          0x00028AC0
 #define R_028AC4_DB_SRESULTS_COMPARE_STATE1          0x00028AC4
 #define R_028AC8_DB_PRELOAD_CONTROL                  0x00028AC8
+#define   S_028AC8_MAX_X(x)                            (((x) & 0xff) << 16)
+#define   S_028AC8_MAX_Y(x)                            (((x) & 0xff) << 24)
 #define R_028AD0_VGT_STRMOUT_BUFFER_SIZE_0	     0x028AD0
 #define R_028AD4_VGT_STRMOUT_VTX_STRIDE_0	     0x028AD4
 #define R_028AD8_VGT_STRMOUT_BUFFER_BASE_0	     0x028AD8
@@ -2186,16 +2206,12 @@
 #define   C_0085F0_DB_DEST_BASE_ENA                    0xFFFFBFFF
 #define   S_0085F0_CB8_DEST_BASE_ENA(x)                (((x) & 0x1) << 15)
 #define   G_0085F0_CB8_DEST_BASE_ENA(x)                (((x) >> 15) & 0x1)
-
 #define   S_0085F0_CB9_DEST_BASE_ENA(x)                (((x) & 0x1) << 16)
 #define   G_0085F0_CB9_DEST_BASE_ENA(x)                (((x) >> 16) & 0x1)
-
 #define   S_0085F0_CB10_DEST_BASE_ENA(x)               (((x) & 0x1) << 17)
 #define   G_0085F0_CB10_DEST_BASE_ENA(x)               (((x) >> 17) & 0x1)
-
 #define   S_0085F0_CB11_DEST_BASE_ENA(x)               (((x) & 0x1) << 18)
 #define   G_0085F0_CB11_DEST_BASE_ENA(x)               (((x) >> 18) & 0x1)
-
 #define   S_0085F0_TC_ACTION_ENA(x)                    (((x) & 0x1) << 23)
 #define   G_0085F0_TC_ACTION_ENA(x)                    (((x) >> 23) & 0x1)
 #define   C_0085F0_TC_ACTION_ENA                       0xFF7FFFFF
@@ -2300,5 +2316,20 @@
 #define   S_028AA8_SWITCH_ON_EOP(x)                    (((x) & 0x1) << 17)
 #define   G_028AA8_SWITCH_ON_EOP(x)                    (((x) >> 17) & 0x1)
 #define   C_028AA8_SWITCH_ON_EOP                       0xFFFDFFFF
+
+/* async DMA packets */
+#define DMA_PACKET(cmd, sub_cmd, n) ((((cmd) & 0xF) << 28) |    \
+                                    (((sub_cmd) & 0xFF) << 20) |\
+                                    (((n) & 0xFFFFF) << 0))
+/* async DMA Packet types */
+#define    DMA_PACKET_WRITE                     0x2
+#define    DMA_PACKET_COPY                      0x3
+#define    DMA_PACKET_INDIRECT_BUFFER           0x4
+#define    DMA_PACKET_SEMAPHORE                 0x5
+#define    DMA_PACKET_FENCE                     0x6
+#define    DMA_PACKET_TRAP                      0x7
+#define    DMA_PACKET_SRBM_WRITE                0x9
+#define    DMA_PACKET_CONSTANT_FILL             0xd
+#define    DMA_PACKET_NOP                       0xf
 
 #endif

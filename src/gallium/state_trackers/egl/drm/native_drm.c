@@ -123,8 +123,7 @@ drm_display_destroy(struct native_display *ndpy)
 {
    struct drm_display *drmdpy = drm_display(ndpy);
 
-   if (drmdpy->config)
-      FREE(drmdpy->config);
+   FREE(drmdpy->config);
 
    drm_display_fini_modeset(&drmdpy->base);
 
@@ -132,8 +131,7 @@ drm_display_destroy(struct native_display *ndpy)
    ndpy->screen = NULL;
    ndpy_uninit(ndpy);
 
-   if (drmdpy->device_name)
-      FREE(drmdpy->device_name);
+   FREE(drmdpy->device_name);
 
    if (drmdpy->own_gbm) {
       gbm_device_destroy(&drmdpy->gbmdrm->base.base);
@@ -163,23 +161,24 @@ drm_get_device_name(int fd)
    udev = udev_new();
    if (fstat(fd, &buf) < 0) {
       _eglLog(_EGL_WARNING, "failed to stat fd %d", fd);
-      goto out;
+      goto outudev;
    }
 
    device = udev_device_new_from_devnum(udev, 'c', buf.st_rdev);
    if (device == NULL) {
       _eglLog(_EGL_WARNING,
               "could not create udev device for fd %d", fd);
-      goto out;
+      goto outdevice;
    }
 
    tmp = udev_device_get_devnode(device);
    if (!tmp)
-      goto out;
+      goto outdevice;
    device_name = strdup(tmp);
 
-out:
+outdevice:
    udev_device_unref(device);
+outudev:
    udev_unref(udev);
 
 #endif

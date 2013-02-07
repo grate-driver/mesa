@@ -170,7 +170,7 @@ validate_blend_factors(struct gl_context *ctx, const char *func,
 void GLAPIENTRY
 _mesa_BlendFunc( GLenum sfactor, GLenum dfactor )
 {
-   _mesa_BlendFuncSeparateEXT(sfactor, dfactor, sfactor, dfactor);
+   _mesa_BlendFuncSeparate(sfactor, dfactor, sfactor, dfactor);
 }
 
 static GLboolean
@@ -201,13 +201,12 @@ update_uses_dual_src(struct gl_context *ctx, int buf)
  * \param dfactorA alpha destination factor operator.
  */
 void GLAPIENTRY
-_mesa_BlendFuncSeparateEXT( GLenum sfactorRGB, GLenum dfactorRGB,
+_mesa_BlendFuncSeparate( GLenum sfactorRGB, GLenum dfactorRGB,
                             GLenum sfactorA, GLenum dfactorA )
 {
    GLuint buf, numBuffers;
    GLboolean changed;
    GET_CURRENT_CONTEXT(ctx);
-   ASSERT_OUTSIDE_BEGIN_END(ctx);
 
    if (MESA_VERBOSE & VERBOSE_API)
       _mesa_debug(ctx, "glBlendFuncSeparate %s %s %s %s\n",
@@ -256,16 +255,13 @@ _mesa_BlendFuncSeparateEXT( GLenum sfactorRGB, GLenum dfactorRGB,
 }
 
 
-#if _HAVE_FULL_GL
-
-
 /**
  * Set blend source/dest factors for one color buffer/target.
  */
 void GLAPIENTRY
-_mesa_BlendFunci(GLuint buf, GLenum sfactor, GLenum dfactor)
+_mesa_BlendFunciARB(GLuint buf, GLenum sfactor, GLenum dfactor)
 {
-   _mesa_BlendFuncSeparatei(buf, sfactor, dfactor, sfactor, dfactor);
+   _mesa_BlendFuncSeparateiARB(buf, sfactor, dfactor, sfactor, dfactor);
 }
 
 
@@ -273,11 +269,10 @@ _mesa_BlendFunci(GLuint buf, GLenum sfactor, GLenum dfactor)
  * Set separate blend source/dest factors for one color buffer/target.
  */
 void GLAPIENTRY
-_mesa_BlendFuncSeparatei(GLuint buf, GLenum sfactorRGB, GLenum dfactorRGB,
+_mesa_BlendFuncSeparateiARB(GLuint buf, GLenum sfactorRGB, GLenum dfactorRGB,
                          GLenum sfactorA, GLenum dfactorA)
 {
    GET_CURRENT_CONTEXT(ctx);
-   ASSERT_OUTSIDE_BEGIN_END(ctx);
 
    if (!ctx->Extensions.ARB_draw_buffers_blend) {
       _mesa_error(ctx, GL_INVALID_OPERATION, "glBlendFunc[Separate]i()");
@@ -346,7 +341,6 @@ _mesa_BlendEquation( GLenum mode )
    GLuint buf, numBuffers;
    GLboolean changed;
    GET_CURRENT_CONTEXT(ctx);
-   ASSERT_OUTSIDE_BEGIN_END(ctx);
 
    if (MESA_VERBOSE & VERBOSE_API)
       _mesa_debug(ctx, "glBlendEquation(%s)\n",
@@ -387,10 +381,9 @@ _mesa_BlendEquation( GLenum mode )
  * Set blend equation for one color buffer/target.
  */
 void GLAPIENTRY
-_mesa_BlendEquationi(GLuint buf, GLenum mode)
+_mesa_BlendEquationiARB(GLuint buf, GLenum mode)
 {
    GET_CURRENT_CONTEXT(ctx);
-   ASSERT_OUTSIDE_BEGIN_END(ctx);
 
    if (MESA_VERBOSE & VERBOSE_API)
       _mesa_debug(ctx, "glBlendEquationi(%u, %s)\n",
@@ -422,12 +415,11 @@ _mesa_BlendEquationi(GLuint buf, GLenum mode)
 
 
 void GLAPIENTRY
-_mesa_BlendEquationSeparateEXT( GLenum modeRGB, GLenum modeA )
+_mesa_BlendEquationSeparate( GLenum modeRGB, GLenum modeA )
 {
    GLuint buf, numBuffers;
    GLboolean changed;
    GET_CURRENT_CONTEXT(ctx);
-   ASSERT_OUTSIDE_BEGIN_END(ctx);
 
    if (MESA_VERBOSE & VERBOSE_API)
       _mesa_debug(ctx, "glBlendEquationSeparateEXT(%s %s)\n",
@@ -480,10 +472,9 @@ _mesa_BlendEquationSeparateEXT( GLenum modeRGB, GLenum modeA )
  * Set separate blend equations for one color buffer/target.
  */
 void GLAPIENTRY
-_mesa_BlendEquationSeparatei(GLuint buf, GLenum modeRGB, GLenum modeA)
+_mesa_BlendEquationSeparateiARB(GLuint buf, GLenum modeRGB, GLenum modeA)
 {
    GET_CURRENT_CONTEXT(ctx);
-   ASSERT_OUTSIDE_BEGIN_END(ctx);
 
    if (MESA_VERBOSE & VERBOSE_API)
       _mesa_debug(ctx, "glBlendEquationSeparatei(%u, %s %s)\n", buf,
@@ -520,10 +511,6 @@ _mesa_BlendEquationSeparatei(GLuint buf, GLenum modeRGB, GLenum modeA)
 }
 
 
-
-#endif /* _HAVE_FULL_GL */
-
-
 /**
  * Set the blending color.
  *
@@ -543,7 +530,6 @@ _mesa_BlendColor( GLclampf red, GLclampf green, GLclampf blue, GLclampf alpha )
 {
    GLfloat tmp[4];
    GET_CURRENT_CONTEXT(ctx);
-   ASSERT_OUTSIDE_BEGIN_END(ctx);
 
    tmp[0] = red;
    tmp[1] = green;
@@ -580,7 +566,6 @@ void GLAPIENTRY
 _mesa_AlphaFunc( GLenum func, GLclampf ref )
 {
    GET_CURRENT_CONTEXT(ctx);
-   ASSERT_OUTSIDE_BEGIN_END(ctx);
 
    if (MESA_VERBOSE & VERBOSE_API)
       _mesa_debug(ctx, "glAlphaFunc(%s, %f)\n",
@@ -628,7 +613,6 @@ void GLAPIENTRY
 _mesa_LogicOp( GLenum opcode )
 {
    GET_CURRENT_CONTEXT(ctx);
-   ASSERT_OUTSIDE_BEGIN_END(ctx);
 
    if (MESA_VERBOSE & VERBOSE_API)
       _mesa_debug(ctx, "glLogicOp(%s)\n", _mesa_lookup_enum_by_nr(opcode));
@@ -666,12 +650,11 @@ _mesa_LogicOp( GLenum opcode )
       ctx->Driver.LogicOpcode( ctx, opcode );
 }
 
-#if _HAVE_FULL_GL
+
 void GLAPIENTRY
 _mesa_IndexMask( GLuint mask )
 {
    GET_CURRENT_CONTEXT(ctx);
-   ASSERT_OUTSIDE_BEGIN_END(ctx);
 
    if (ctx->Color.IndexMask == mask)
       return;
@@ -679,7 +662,6 @@ _mesa_IndexMask( GLuint mask )
    FLUSH_VERTICES(ctx, _NEW_COLOR);
    ctx->Color.IndexMask = mask;
 }
-#endif
 
 
 /**
@@ -704,7 +686,6 @@ _mesa_ColorMask( GLboolean red, GLboolean green,
    GLubyte tmp[4];
    GLuint i;
    GLboolean flushed;
-   ASSERT_OUTSIDE_BEGIN_END(ctx);
 
    if (MESA_VERBOSE & VERBOSE_API)
       _mesa_debug(ctx, "glColorMask(%d, %d, %d, %d)\n",
@@ -738,12 +719,11 @@ _mesa_ColorMask( GLboolean red, GLboolean green,
  * For GL_EXT_draw_buffers2 and GL3
  */
 void GLAPIENTRY
-_mesa_ColorMaskIndexed( GLuint buf, GLboolean red, GLboolean green,
+_mesa_ColorMaski( GLuint buf, GLboolean red, GLboolean green,
                         GLboolean blue, GLboolean alpha )
 {
    GLubyte tmp[4];
    GET_CURRENT_CONTEXT(ctx);
-   ASSERT_OUTSIDE_BEGIN_END(ctx);
 
    if (MESA_VERBOSE & VERBOSE_API)
       _mesa_debug(ctx, "glColorMaskIndexed %u %d %d %d %d\n",
@@ -774,11 +754,9 @@ _mesa_ColorMaskIndexed( GLuint buf, GLboolean red, GLboolean green,
 
 
 void GLAPIENTRY
-_mesa_ClampColorARB(GLenum target, GLenum clamp)
+_mesa_ClampColor(GLenum target, GLenum clamp)
 {
    GET_CURRENT_CONTEXT(ctx);
-
-   ASSERT_OUTSIDE_BEGIN_END(ctx);
 
    if (clamp != GL_TRUE && clamp != GL_FALSE && clamp != GL_FIXED_ONLY_ARB) {
       _mesa_error(ctx, GL_INVALID_ENUM, "glClampColorARB(clamp)");
@@ -858,6 +836,13 @@ void _mesa_init_color( struct gl_context * ctx )
    ctx->Color._ClampFragmentColor = GL_TRUE;
    ctx->Color.ClampReadColor = GL_FIXED_ONLY_ARB;
    ctx->Color._ClampReadColor = GL_TRUE;
+
+   if (ctx->API == API_OPENGLES2) {
+      /* GLES 3 behaves as though GL_FRAMEBUFFER_SRGB is always enabled. */
+      ctx->Color.sRGBEnabled = GL_TRUE;
+   } else {
+      ctx->Color.sRGBEnabled = GL_FALSE;
+   }
 }
 
 /*@}*/

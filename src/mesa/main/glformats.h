@@ -49,6 +49,9 @@ _mesa_components_in_format( GLenum format );
 extern GLint
 _mesa_bytes_per_pixel( GLenum format, GLenum type );
 
+extern GLint
+_mesa_bytes_per_vertex_attrib(GLint comps, GLenum type);
+
 extern GLboolean
 _mesa_is_type_integer(GLenum type);
 
@@ -57,6 +60,12 @@ _mesa_is_type_unsigned(GLenum type);
 
 extern GLboolean
 _mesa_is_enum_format_integer(GLenum format);
+
+extern GLboolean
+_mesa_is_enum_format_unsigned_int(GLenum format);
+
+extern GLboolean
+_mesa_is_enum_format_signed_int(GLenum format);
 
 extern GLboolean
 _mesa_is_enum_format_or_type_integer(GLenum format, GLenum type);
@@ -91,12 +100,29 @@ _mesa_base_format_to_integer_format(GLenum format);
 extern GLboolean
 _mesa_base_format_has_channel(GLenum base_format, GLenum pname);
 
+extern GLint
+_mesa_base_format_component_count(GLenum base_format);
+
 extern GLenum
 _mesa_generic_compressed_format_to_uncompressed_format(GLenum format);
 
 extern GLenum
+_mesa_get_nongeneric_internalformat(GLenum format);
+
+extern GLenum
+_mesa_get_linear_internalformat(GLenum format);
+
+extern GLenum
 _mesa_error_check_format_and_type(const struct gl_context *ctx,
                                   GLenum format, GLenum type);
+
+extern GLenum
+_mesa_es_error_check_format_and_type(GLenum format, GLenum type,
+                                     unsigned dimensions);
+
+extern GLenum
+_mesa_es3_error_check_format_and_type(GLenum format, GLenum type,
+                                      GLenum internalFormat);
 
 
 #ifdef __cplusplus

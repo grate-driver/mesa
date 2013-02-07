@@ -343,8 +343,7 @@ nv50_program_translate(struct nv50_program *prog, uint16_t chipset)
       NOUVEAU_ERR("shader translation failed: %i\n", ret);
       goto out;
    }
-   if (info->bin.syms) /* we don't need them yet */
-      FREE(info->bin.syms);
+   FREE(info->bin.syms);
 
    prog->code = info->bin.code;
    prog->code_size = info->bin.codeSize;
@@ -397,6 +396,11 @@ nv50_program_upload_code(struct nv50_context *nv50, struct nv50_program *prog)
             nouveau_heap_free(&evict->mem);
       }
       debug_printf("WARNING: out of code space, evicting all shaders.\n");
+      ret = nouveau_heap_alloc(heap, size, prog, &prog->mem);
+      if (ret) {
+         NOUVEAU_ERR("shader too large (0x%x) to fit in code space ?\n", size);
+         return FALSE;
+      }
    }
    prog->code_base = prog->mem->start;
 
@@ -428,14 +432,11 @@ nv50_program_destroy(struct nv50_context *nv50, struct nv50_program *p)
    if (p->mem)
       nouveau_heap_free(&p->mem);
 
-   if (p->code)
-      FREE(p->code);
+   FREE(p->code);
 
-   if (p->fixups)
-      FREE(p->fixups);
+   FREE(p->fixups);
 
-   if (p->so)
-      FREE(p->so);
+   FREE(p->so);
 
    memset(p, 0, sizeof(*p));
 

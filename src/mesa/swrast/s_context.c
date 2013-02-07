@@ -251,9 +251,7 @@ _swrast_update_fog_state( struct gl_context *ctx )
    SWcontext *swrast = SWRAST_CONTEXT(ctx);
    const struct gl_fragment_program *fp = ctx->FragmentProgram._Current;
 
-   assert((fp == NULL) ||
-          (fp->Base.Target == GL_FRAGMENT_PROGRAM_ARB) ||
-          (fp->Base.Target == GL_FRAGMENT_PROGRAM_NV));
+   assert(fp == NULL || fp->Base.Target == GL_FRAGMENT_PROGRAM_ARB);
 
    /* determine if fog is needed, and if so, which fog mode */
    swrast->_FogEnabled = (!_swrast_use_fragment_program(ctx) &&
@@ -720,7 +718,7 @@ GLboolean
 _swrast_CreateContext( struct gl_context *ctx )
 {
    GLuint i;
-   SWcontext *swrast = (SWcontext *)CALLOC(sizeof(SWcontext));
+   SWcontext *swrast = calloc(1, sizeof(SWcontext));
 #ifdef _OPENMP
    const GLuint maxThreads = omp_get_max_threads();
 #else
@@ -775,9 +773,9 @@ _swrast_CreateContext( struct gl_context *ctx )
     * using multiple threads, it is necessary to have one SpanArrays instance
     * per thread.
     */
-   swrast->SpanArrays = (SWspanarrays *) MALLOC(maxThreads * sizeof(SWspanarrays));
+   swrast->SpanArrays = malloc(maxThreads * sizeof(SWspanarrays));
    if (!swrast->SpanArrays) {
-      FREE(swrast);
+      free(swrast);
       return GL_FALSE;
    }
    for(i = 0; i < maxThreads; i++) {
@@ -803,10 +801,10 @@ _swrast_CreateContext( struct gl_context *ctx )
 
    ctx->swrast_context = swrast;
 
-   swrast->stencil_temp.buf1 = (GLubyte *) malloc(SWRAST_MAX_WIDTH * sizeof(GLubyte));
-   swrast->stencil_temp.buf2 = (GLubyte *) malloc(SWRAST_MAX_WIDTH * sizeof(GLubyte));
-   swrast->stencil_temp.buf3 = (GLubyte *) malloc(SWRAST_MAX_WIDTH * sizeof(GLubyte));
-   swrast->stencil_temp.buf4 = (GLubyte *) malloc(SWRAST_MAX_WIDTH * sizeof(GLubyte));
+   swrast->stencil_temp.buf1 = malloc(SWRAST_MAX_WIDTH * sizeof(GLubyte));
+   swrast->stencil_temp.buf2 = malloc(SWRAST_MAX_WIDTH * sizeof(GLubyte));
+   swrast->stencil_temp.buf3 = malloc(SWRAST_MAX_WIDTH * sizeof(GLubyte));
+   swrast->stencil_temp.buf4 = malloc(SWRAST_MAX_WIDTH * sizeof(GLubyte));
 
    if (!swrast->stencil_temp.buf1 ||
        !swrast->stencil_temp.buf2 ||
@@ -828,17 +826,16 @@ _swrast_DestroyContext( struct gl_context *ctx )
       _mesa_debug(ctx, "_swrast_DestroyContext\n");
    }
 
-   FREE( swrast->SpanArrays );
-   if (swrast->ZoomedArrays)
-      FREE( swrast->ZoomedArrays );
-   FREE( swrast->TexelBuffer );
+   free( swrast->SpanArrays );
+   free( swrast->ZoomedArrays );
+   free( swrast->TexelBuffer );
 
    free(swrast->stencil_temp.buf1);
    free(swrast->stencil_temp.buf2);
    free(swrast->stencil_temp.buf3);
    free(swrast->stencil_temp.buf4);
 
-   FREE( swrast );
+   free( swrast );
 
    ctx->swrast_context = 0;
 }

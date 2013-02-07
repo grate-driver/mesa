@@ -110,6 +110,7 @@
 #define PKT3_SURFACE_BASE_UPDATE               0x73
 #define		SURFACE_BASE_UPDATE_DEPTH      (1 << 0)
 #define		SURFACE_BASE_UPDATE_COLOR(x)   (2 << (x))
+#define		SURFACE_BASE_UPDATE_COLOR_NUM(x) (((1 << x) - 1) << 1)
 #define		SURFACE_BASE_UPDATE_STRMOUT(x) (0x200 << (x))
 
 #define EVENT_TYPE_PS_PARTIAL_FLUSH            0x10
@@ -118,6 +119,7 @@
 #define EVENT_TYPE_CACHE_FLUSH_AND_INV_EVENT   0x16
 #define EVENT_TYPE_SO_VGTSTREAMOUT_FLUSH	0x1f
 #define EVENT_TYPE_SAMPLE_STREAMOUTSTATS	0x20
+#define EVENT_TYPE_FLUSH_AND_INV_CB_META	46 /* supported on r700+ */
 #define		EVENT_TYPE(x)                           ((x) << 0)
 #define		EVENT_INDEX(x)                          ((x) << 8)
                 /* 0 - any non-TS event
@@ -156,6 +158,40 @@
 #define PKT3_IT_OPCODE_C                0xFFFF00FF
 #define PKT3_PRED_S(x)               (((x) >> 0) & 0x1)
 #define PKT0(index, count) (PKT_TYPE_S(0) | PKT0_BASE_INDEX_S(index) | PKT_COUNT_S(count))
+
+#define PKT3_CP_DMA					0x41
+/* 1. header
+ * 2. SRC_ADDR_LO [31:0]
+ * 3. CP_SYNC [31] | SRC_ADDR_HI [7:0]
+ * 4. DST_ADDR_LO [31:0]
+ * 5. DST_ADDR_HI [7:0]
+ * 6. COMMAND [29:22] | BYTE_COUNT [20:0]
+ */
+#define PKT3_CP_DMA_CP_SYNC       (1 << 31)
+/* COMMAND */
+#define PKT3_CP_DMA_CMD_SRC_SWAP(x) ((x) << 23)
+/* 0 - none
+ * 1 - 8 in 16
+ * 2 - 8 in 32
+ * 3 - 8 in 64
+ */
+#define PKT3_CP_DMA_CMD_DST_SWAP(x) ((x) << 24)
+/* 0 - none
+ * 1 - 8 in 16
+ * 2 - 8 in 32
+ * 3 - 8 in 64
+ */
+#define PKT3_CP_DMA_CMD_SAS       (1 << 26)
+/* 0 - memory
+ * 1 - register
+ */
+#define PKT3_CP_DMA_CMD_DAS       (1 << 27)
+/* 0 - memory
+ * 1 - register
+ */
+#define PKT3_CP_DMA_CMD_SAIC      (1 << 28)
+#define PKT3_CP_DMA_CMD_DAIC      (1 << 29)
+
 
 /* Registers */
 #define R_008490_CP_STRMOUT_CNTL		     0x008490
@@ -528,6 +564,7 @@
 #define   S_028010_ZRANGE_PRECISION(x)                 (((x) & 0x1) << 31)
 #define   G_028010_ZRANGE_PRECISION(x)                 (((x) >> 31) & 0x1)
 #define   C_028010_ZRANGE_PRECISION                    0x7FFFFFFF
+#define R_028014_DB_HTILE_DATA_BASE                  0x00028014
 #define R_028414_CB_BLEND_RED                        0x028414
 #define   S_028414_BLEND_RED(x)                        (((x) & 0xFFFFFFFF) << 0)
 #define   G_028414_BLEND_RED(x)                        (((x) >> 0) & 0xFFFFFFFF)
@@ -986,6 +1023,7 @@
 #define   G_0287F0_SOURCE_SELECT(x)                    (((x) >> 0) & 0x3)
 #define   C_0287F0_SOURCE_SELECT                       0xFFFFFFFC
 #define     V_0287F0_DI_SRC_SEL_DMA                    0
+#define     V_0287F0_DI_SRC_SEL_IMMEDIATE              1
 #define     V_0287F0_DI_SRC_SEL_AUTO_INDEX             2
 #define   S_0287F0_MAJOR_MODE(x)                       (((x) & 0x3) << 2)
 #define   G_0287F0_MAJOR_MODE(x)                       (((x) >> 2) & 0x3)
@@ -2820,6 +2858,7 @@
 #define R_0283F4_SQ_VTX_SEMANTIC_29                  0x0283F4
 #define R_0283F8_SQ_VTX_SEMANTIC_30                  0x0283F8
 #define R_0283FC_SQ_VTX_SEMANTIC_31                  0x0283FC
+#define R_0288E0_SQ_VTX_SEMANTIC_CLEAR               0x0288E0
 #define R_028400_VGT_MAX_VTX_INDX                    0x028400
 #define   S_028400_MAX_INDX(x)                         (((x) & 0xFFFFFFFF) << 0)
 #define   G_028400_MAX_INDX(x)                         (((x) >> 0) & 0xFFFFFFFF)
@@ -3341,9 +3380,25 @@
 #define   S_0085F0_DB_DEST_BASE_ENA(x)                 (((x) & 0x1) << 14)
 #define   G_0085F0_DB_DEST_BASE_ENA(x)                 (((x) >> 14) & 0x1)
 #define   C_0085F0_DB_DEST_BASE_ENA                    0xFFFFBFFF
+/* r600 only start */
 #define   S_0085F0_CR_DEST_BASE_ENA(x)                 (((x) & 0x1) << 15)
 #define   G_0085F0_CR_DEST_BASE_ENA(x)                 (((x) >> 15) & 0x1)
 #define   C_0085F0_CR_DEST_BASE_ENA                    0xFFFF7FFF
+/* r600 only end */
+/* evergreen only start */
+#define   S_0085F0_CB8_DEST_BASE_ENA(x)                (((x) & 0x1) << 15)
+#define   G_0085F0_CB8_DEST_BASE_ENA(x)                (((x) >> 15) & 0x1)
+#define   S_0085F0_CB9_DEST_BASE_ENA(x)                (((x) & 0x1) << 16)
+#define   G_0085F0_CB9_DEST_BASE_ENA(x)                (((x) >> 16) & 0x1)
+#define   S_0085F0_CB10_DEST_BASE_ENA(x)               (((x) & 0x1) << 17)
+#define   G_0085F0_CB10_DEST_BASE_ENA(x)               (((x) >> 17) & 0x1)
+#define   S_0085F0_CB11_DEST_BASE_ENA(x)               (((x) & 0x1) << 18)
+#define   G_0085F0_CB11_DEST_BASE_ENA(x)               (((x) >> 18) & 0x1)
+/* evergreen only end */
+/* evergreen and r7xx only */
+#define   S_0085F0_FULL_CACHE_ENA(x)                   (((x) & 0x1) << 20)
+#define   G_0085F0_FULL_CACHE_ENA(x)                   (((x) >> 20) & 0x1)
+/* evergreen and r7xx only end */
 #define   S_0085F0_TC_ACTION_ENA(x)                    (((x) & 0x1) << 23)
 #define   G_0085F0_TC_ACTION_ENA(x)                    (((x) >> 23) & 0x1)
 #define   C_0085F0_TC_ACTION_ENA                       0xFF7FFFFF
@@ -3584,10 +3639,12 @@
 #define R_028144_ALU_CONST_BUFFER_SIZE_PS_1          0x00028144
 #define R_028180_ALU_CONST_BUFFER_SIZE_VS_0          0x00028180
 #define R_028184_ALU_CONST_BUFFER_SIZE_VS_1          0x00028184
+#define R_0281C0_ALU_CONST_BUFFER_SIZE_GS_0          0x000281C0
 #define R_028940_ALU_CONST_CACHE_PS_0                0x00028940
 #define R_028944_ALU_CONST_CACHE_PS_1                0x00028944
 #define R_028980_ALU_CONST_CACHE_VS_0                0x00028980
 #define R_028984_ALU_CONST_CACHE_VS_1                0x00028984
+#define R_0289C0_ALU_CONST_CACHE_GS_0                0x000289C0
 
 #define R_03CFF0_SQ_VTX_BASE_VTX_LOC                 0x03CFF0
 #define R_03CFF4_SQ_VTX_START_INST_LOC               0x03CFF4
@@ -3623,5 +3680,20 @@
 #define SQ_TEX_INST_SAMPLE_C_G_L	0x1D
 #define SQ_TEX_INST_SAMPLE_C_G_LB	0x1E
 #define SQ_TEX_INST_SAMPLE_C_G_LZ	0x1F
+
+/* async DMA packets */
+#define DMA_PACKET(cmd, t, s, n)	((((cmd) & 0xF) << 28) |	\
+					(((t) & 0x1) << 23) |		\
+					(((s) & 0x1) << 22) |		\
+					(((n) & 0xFFFF) << 0))
+/* async DMA Packet types */
+#define DMA_PACKET_WRITE		0x2
+#define DMA_PACKET_COPY			0x3
+#define DMA_PACKET_INDIRECT_BUFFER	0x4
+#define DMA_PACKET_SEMAPHORE		0x5
+#define DMA_PACKET_FENCE		0x6
+#define DMA_PACKET_TRAP			0x7
+#define DMA_PACKET_CONSTANT_FILL	0xd /* 7xx only */
+#define DMA_PACKET_NOP			0xf
 
 #endif

@@ -149,6 +149,8 @@ static void get_external_state(
     struct r300_textures_state *texstate = r300->textures_state.state;
     unsigned i;
 
+    state->alpha_to_one = r300->alpha_to_one && r300->msaa_enable;
+
     for (i = 0; i < texstate->sampler_state_count; i++) {
         struct r300_sampler_state *s = texstate->sampler_states[i];
         struct r300_sampler_view *v = texstate->sampler_views[i];
@@ -442,7 +444,7 @@ static void r300_translate_fragment_shader(
 
     /* Setup the compiler. */
     memset(&compiler, 0, sizeof(compiler));
-    rc_init(&compiler.Base);
+    rc_init(&compiler.Base, &r300->fs_regalloc_state);
     DBG_ON(r300, DBG_FP) ? compiler.Base.Debug |= RC_DBG_LOG : 0;
     DBG_ON(r300, DBG_P_STAT) ? compiler.Base.Debug |= RC_DBG_STATS : 0;
 

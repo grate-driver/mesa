@@ -263,8 +263,9 @@ try_blorp_blit(struct intel_context *intel,
       }
       for (unsigned i = 0; i < ctx->DrawBuffer->_NumColorDrawBuffers; ++i) {
          dst_irb = intel_renderbuffer(ctx->DrawBuffer->_ColorDrawBuffers[i]);
-         do_blorp_blit(intel, buffer_bit, src_irb, dst_irb, srcX0, srcY0,
-                       dstX0, dstY0, dstX1, dstY1, mirror_x, mirror_y);
+	 if (dst_irb)
+            do_blorp_blit(intel, buffer_bit, src_irb, dst_irb, srcX0, srcY0,
+                          dstX0, dstY0, dstX1, dstY1, mirror_x, mirror_y);
       }
       break;
    case GL_DEPTH_BUFFER_BIT:
@@ -1175,7 +1176,7 @@ brw_blorp_blit_program::decode_msaa(unsigned num_samples,
 void
 brw_blorp_blit_program::kill_if_outside_dst_rect()
 {
-   struct brw_reg f0 = brw_flag_reg();
+   struct brw_reg f0 = brw_flag_reg(0, 0);
    struct brw_reg g1 = retype(brw_vec1_grf(1, 7), BRW_REGISTER_TYPE_UW);
    struct brw_reg null16 = vec16(retype(brw_null_reg(), BRW_REGISTER_TYPE_UW));
 

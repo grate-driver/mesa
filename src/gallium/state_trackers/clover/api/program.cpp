@@ -35,7 +35,7 @@ clCreateProgramWithSource(cl_context ctx, cl_uint count,
       throw error(CL_INVALID_CONTEXT);
 
    if (!count || !strings ||
-       any_of(is_zero<const char *>(), strings, strings + count))
+       any_of(is_zero<const char *>, strings, strings + count))
       throw error(CL_INVALID_VALUE);
 
    // Concatenate all the provided fragments together
@@ -142,15 +142,18 @@ clBuildProgram(cl_program prog, cl_uint count, const cl_device_id *devs,
        (!pfn_notify && user_data))
       throw error(CL_INVALID_VALUE);
 
+   if (!opts)
+      opts = "";
+
    if (devs) {
       if (any_of([&](const cl_device_id dev) {
                return !prog->ctx.has_device(dev);
             }, devs, devs + count))
          throw error(CL_INVALID_DEVICE);
 
-      prog->build({ devs, devs + count });
+      prog->build({ devs, devs + count }, opts);
    } else {
-      prog->build(prog->ctx.devs);
+      prog->build(prog->ctx.devs, opts);
    }
 
    return CL_SUCCESS;

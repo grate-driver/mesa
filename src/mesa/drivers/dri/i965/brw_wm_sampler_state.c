@@ -89,7 +89,8 @@ upload_default_color(struct brw_context *brw, struct gl_sampler_object *sampler,
    struct gl_texture_image *firstImage = texObj->Image[0][texObj->BaseLevel];
    float color[4];
 
-   if (firstImage->_BaseFormat == GL_DEPTH_COMPONENT) {
+   switch (firstImage->_BaseFormat) {
+   case GL_DEPTH_COMPONENT:
       /* GL specs that border color for depth textures is taken from the
        * R channel, while the hardware uses A.  Spam R into all the
        * channels for safety.
@@ -98,12 +99,45 @@ upload_default_color(struct brw_context *brw, struct gl_sampler_object *sampler,
       color[1] = sampler->BorderColor.f[0];
       color[2] = sampler->BorderColor.f[0];
       color[3] = sampler->BorderColor.f[0];
-   } else {
+      break;
+   case GL_ALPHA:
+      color[0] = 0.0;
+      color[1] = 0.0;
+      color[2] = 0.0;
+      color[3] = sampler->BorderColor.f[3];
+      break;
+   case GL_INTENSITY:
+      color[0] = sampler->BorderColor.f[0];
+      color[1] = sampler->BorderColor.f[0];
+      color[2] = sampler->BorderColor.f[0];
+      color[3] = sampler->BorderColor.f[0];
+      break;
+   case GL_LUMINANCE:
+      color[0] = sampler->BorderColor.f[0];
+      color[1] = sampler->BorderColor.f[0];
+      color[2] = sampler->BorderColor.f[0];
+      color[3] = 1.0;
+      break;
+   case GL_LUMINANCE_ALPHA:
+      color[0] = sampler->BorderColor.f[0];
+      color[1] = sampler->BorderColor.f[0];
+      color[2] = sampler->BorderColor.f[0];
+      color[3] = sampler->BorderColor.f[3];
+      break;
+   default:
       color[0] = sampler->BorderColor.f[0];
       color[1] = sampler->BorderColor.f[1];
       color[2] = sampler->BorderColor.f[2];
       color[3] = sampler->BorderColor.f[3];
+      break;
    }
+
+   /* In some cases we use an RGBA surface format for GL RGB textures,
+    * where we've initialized the A channel to 1.0.  We also have to set
+    * the border color alpha to 1.0 in that case.
+    */
+   if (firstImage->_BaseFormat == GL_RGB)
+      color[3] = 1.0;
 
    if (intel->gen == 5 || intel->gen == 6) {
       struct gen5_sampler_default_color *sdc;
@@ -241,7 +275,8 @@ static void brw_update_sampler_state(struct brw_context *brw,
    /* Cube-maps on 965 and later must use the same wrap mode for all 3
     * coordinate dimensions.  Futher, only CUBE and CLAMP are valid.
     */
-   if (texObj->Target == GL_TEXTURE_CUBE_MAP) {
+   if (texObj->Target == GL_TEXTURE_CUBE_MAP ||
+       texObj->Target == GL_TEXTURE_CUBE_MAP_ARRAY) {
       if (ctx->Texture.CubeMapSeamless &&
 	  (gl_sampler->MinFilter != GL_NEAREST ||
 	   gl_sampler->MagFilter != GL_NEAREST)) {

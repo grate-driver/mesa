@@ -34,9 +34,6 @@
 #include "vbo_context.h"
 
 
-#if FEATURE_dlist
-
-
 static void vbo_save_callback_init( struct gl_context *ctx )
 {
    ctx->Driver.NewList = vbo_save_NewList;
@@ -101,13 +98,13 @@ void vbo_save_destroy( struct gl_context *ctx )
 
    if (save->prim_store) {
       if ( --save->prim_store->refcount == 0 ) {
-         FREE( save->prim_store );
+         free(save->prim_store);
          save->prim_store = NULL;
       }
       if ( --save->vertex_store->refcount == 0 ) {
          _mesa_reference_buffer_object(ctx,
                                        &save->vertex_store->bufferobj, NULL);
-         FREE( save->vertex_store );
+         free(save->vertex_store);
          save->vertex_store = NULL;
       }
    }
@@ -131,6 +128,3 @@ void vbo_save_fallback( struct gl_context *ctx, GLboolean fallback )
    else
       save->replay_flags &= ~VBO_SAVE_FALLBACK;
 }
-
-
-#endif /* FEATURE_dlist */

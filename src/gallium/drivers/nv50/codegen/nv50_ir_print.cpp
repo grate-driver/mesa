@@ -23,6 +23,9 @@
 #include "nv50_ir.h"
 #include "nv50_ir_target.h"
 
+#define __STDC_FORMAT_MACROS
+#include <inttypes.h>
+
 namespace nv50_ir {
 
 enum TextStyle
@@ -63,26 +66,6 @@ static void init_colours()
    else
       colour = _colour;
 }
-
-static const char *OpClassStr[OPCLASS_OTHER + 1] =
-{
-   "MOVE",
-   "LOAD",
-   "STORE",
-   "ARITH",
-   "SHIFT",
-   "SFU",
-   "LOGIC",
-   "COMPARE",
-   "CONVERT",
-   "ATOMIC",
-   "TEXTURE",
-   "SURFACE",
-   "FLOW",
-   "(INVALID)",
-   "PSEUDO",
-   "OTHER"
-};
 
 const char *operationStr[OP_LAST + 1] =
 {
@@ -171,7 +154,7 @@ const char *operationStr[OP_LAST + 1] =
    "dfdy",
    "rdsv",
    "wrsv",
-   "pixld",
+   "texprep",
    "quadop",
    "quadon",
    "quadpop",
@@ -391,7 +374,7 @@ int ImmediateValue::print(char *buf, size_t size, DataType ty) const
    case TYPE_U64:
    case TYPE_S64:
    default:
-      PRINT("0x%016lx", reg.data.u64);
+      PRINT("0x%016"PRIx64, reg.data.u64);
       break;
    }
    return pos;

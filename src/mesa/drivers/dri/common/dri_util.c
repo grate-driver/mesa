@@ -183,12 +183,13 @@ dri2CreateContextAttribs(__DRIscreen *screen, int api,
 
     switch (api) {
     case __DRI_API_OPENGL:
-	mesa_api = API_OPENGL;
+	mesa_api = API_OPENGL_COMPAT;
 	break;
     case __DRI_API_GLES:
 	mesa_api = API_OPENGLES;
 	break;
     case __DRI_API_GLES2:
+    case __DRI_API_GLES3:
 	mesa_api = API_OPENGLES2;
 	break;
     case __DRI_API_OPENGL_CORE:
@@ -221,13 +222,13 @@ dri2CreateContextAttribs(__DRIscreen *screen, int api,
     }
 
     /* Mesa does not support the GL_ARB_compatibilty extension or the
-     * compatibility profile.  This means that we treat a API_OPENGL 3.1 as
-     * API_OPENGL_CORE and reject API_OPENGL 3.2+.
+     * compatibility profile.  This means that we treat a API_OPENGL_COMPAT 3.1 as
+     * API_OPENGL_CORE and reject API_OPENGL_COMPAT 3.2+.
      */
-    if (mesa_api == API_OPENGL && major_version == 3 && minor_version == 1)
+    if (mesa_api == API_OPENGL_COMPAT && major_version == 3 && minor_version == 1)
        mesa_api = API_OPENGL_CORE;
 
-    if (mesa_api == API_OPENGL
+    if (mesa_api == API_OPENGL_COMPAT
         && ((major_version > 3)
             || (major_version == 3 && minor_version >= 2))) {
        *error = __DRI_CTX_ERROR_BAD_API;
@@ -244,7 +245,7 @@ dri2CreateContextAttribs(__DRIscreen *screen, int api,
      * anything specific about this case.  However, none of the known flags
      * have any meaning in an ES context, so this seems safe.
      */
-    if (mesa_api != API_OPENGL
+    if (mesa_api != API_OPENGL_COMPAT
         && mesa_api != API_OPENGL_CORE
         && flags != 0) {
 	*error = __DRI_CTX_ERROR_BAD_FLAG;
@@ -563,40 +564,43 @@ dri2GetAPIMask(__DRIscreen *screen)
 
 /** Core interface */
 const __DRIcoreExtension driCoreExtension = {
-    { __DRI_CORE, __DRI_CORE_VERSION },
-    NULL,
-    driDestroyScreen,
-    driGetExtensions,
-    driGetConfigAttrib,
-    driIndexConfigAttrib,
-    NULL,
-    driDestroyDrawable,
-    NULL,
-    NULL,
-    driCopyContext,
-    driDestroyContext,
-    driBindContext,
-    driUnbindContext
+    .base = { __DRI_CORE, __DRI_CORE_VERSION },
+
+    .createNewScreen            = NULL,
+    .destroyScreen              = driDestroyScreen,
+    .getExtensions              = driGetExtensions,
+    .getConfigAttrib            = driGetConfigAttrib,
+    .indexConfigAttrib          = driIndexConfigAttrib,
+    .createNewDrawable          = NULL,
+    .destroyDrawable            = driDestroyDrawable,
+    .swapBuffers                = NULL,
+    .createNewContext           = NULL,
+    .copyContext                = driCopyContext,
+    .destroyContext             = driDestroyContext,
+    .bindContext                = driBindContext,
+    .unbindContext              = driUnbindContext
 };
 
 /** DRI2 interface */
 const __DRIdri2Extension driDRI2Extension = {
-    { __DRI_DRI2, 3 },
-    dri2CreateNewScreen,
-    dri2CreateNewDrawable,
-    dri2CreateNewContext,
-    dri2GetAPIMask,
-    dri2CreateNewContextForAPI,
-    dri2AllocateBuffer,
-    dri2ReleaseBuffer,
-    dri2CreateContextAttribs
+    .base = { __DRI_DRI2, 3 },
+
+    .createNewScreen            = dri2CreateNewScreen,
+    .createNewDrawable          = dri2CreateNewDrawable,
+    .createNewContext           = dri2CreateNewContext,
+    .getAPIMask                 = dri2GetAPIMask,
+    .createNewContextForAPI     = dri2CreateNewContextForAPI,
+    .allocateBuffer             = dri2AllocateBuffer,
+    .releaseBuffer              = dri2ReleaseBuffer,
+    .createContextAttribs       = dri2CreateContextAttribs
 };
 
 const __DRI2configQueryExtension dri2ConfigQueryExtension = {
-   { __DRI2_CONFIG_QUERY, __DRI2_CONFIG_QUERY_VERSION },
-   dri2ConfigQueryb,
-   dri2ConfigQueryi,
-   dri2ConfigQueryf,
+   .base = { __DRI2_CONFIG_QUERY, __DRI2_CONFIG_QUERY_VERSION },
+
+   .configQueryb        = dri2ConfigQueryb,
+   .configQueryi        = dri2ConfigQueryi,
+   .configQueryf        = dri2ConfigQueryf,
 };
 
 void

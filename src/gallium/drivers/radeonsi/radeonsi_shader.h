@@ -29,6 +29,14 @@
 #ifndef RADEONSI_SHADER_H
 #define RADEONSI_SHADER_H
 
+#define SI_SGPR_CONST		0
+#define SI_SGPR_SAMPLER		2
+#define SI_SGPR_RESOURCE	4
+#define SI_SGPR_VERTEX_BUFFER	6
+
+#define SI_VS_NUM_USER_SGPR	8
+#define SI_PS_NUM_USER_SGPR	6
+
 struct si_shader_io {
 	unsigned		name;
 	int			sid;
@@ -63,9 +71,18 @@ struct si_shader {
 	unsigned		noutput;
 	struct si_shader_io	output[32];
 
+	unsigned		ninterp;
 	bool			uses_kill;
 	bool			fs_write_all;
 	unsigned		nr_cbufs;
+};
+
+struct si_shader_key {
+	unsigned		export_16bpc:8;
+	unsigned		nr_cbufs:4;
+	unsigned		color_two_side:1;
+	unsigned		alpha_func:3;
+	float			alpha_ref;
 };
 
 struct si_pipe_shader {
@@ -77,13 +94,15 @@ struct si_pipe_shader {
 	unsigned			num_sgprs;
 	unsigned			num_vgprs;
 	unsigned			spi_ps_input_ena;
+	unsigned			spi_shader_col_format;
 	unsigned			sprite_coord_enable;
 	unsigned			so_strides[4];
-	unsigned			key;
+	struct si_shader_key		key;
 };
 
 /* radeonsi_shader.c */
-int si_pipe_shader_create(struct pipe_context *ctx, struct si_pipe_shader *shader);
+int si_pipe_shader_create(struct pipe_context *ctx, struct si_pipe_shader *shader,
+			  struct si_shader_key key);
 void si_pipe_shader_destroy(struct pipe_context *ctx, struct si_pipe_shader *shader);
 
 #endif

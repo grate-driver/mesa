@@ -39,19 +39,17 @@
 #include "fbobject.h"
 
 
-#if FEATURE_drawpix
-
-
 /*
  * Execute glDrawPixels
  */
-static void GLAPIENTRY
+void GLAPIENTRY
 _mesa_DrawPixels( GLsizei width, GLsizei height,
                   GLenum format, GLenum type, const GLvoid *pixels )
 {
    GLenum err;
    GET_CURRENT_CONTEXT(ctx);
-   ASSERT_OUTSIDE_BEGIN_END_AND_FLUSH(ctx);
+
+   FLUSH_VERTICES(ctx, 0);
 
    if (MESA_VERBOSE & VERBOSE_API)
       _mesa_debug(ctx, "glDrawPixels(%d, %d, %s, %s, %p) // to %s at %d, %d\n",
@@ -189,12 +187,13 @@ end:
 }
 
 
-static void GLAPIENTRY
+void GLAPIENTRY
 _mesa_CopyPixels( GLint srcx, GLint srcy, GLsizei width, GLsizei height,
                   GLenum type )
 {
    GET_CURRENT_CONTEXT(ctx);
-   ASSERT_OUTSIDE_BEGIN_END_AND_FLUSH(ctx);
+
+   FLUSH_VERTICES(ctx, 0);
 
    if (MESA_VERBOSE & VERBOSE_API)
       _mesa_debug(ctx,
@@ -294,13 +293,14 @@ end:
 }
 
 
-static void GLAPIENTRY
+void GLAPIENTRY
 _mesa_Bitmap( GLsizei width, GLsizei height,
               GLfloat xorig, GLfloat yorig, GLfloat xmove, GLfloat ymove,
               const GLubyte *bitmap )
 {
    GET_CURRENT_CONTEXT(ctx);
-   ASSERT_OUTSIDE_BEGIN_END_AND_FLUSH(ctx);
+
+   FLUSH_VERTICES(ctx, 0);
 
    if (width < 0 || height < 0) {
       _mesa_error( ctx, GL_INVALID_VALUE, "glBitmap(width or height < 0)" );
@@ -347,7 +347,6 @@ _mesa_Bitmap( GLsizei width, GLsizei height,
          ctx->Driver.Bitmap( ctx, x, y, width, height, &ctx->Unpack, bitmap );
       }
    }
-#if _HAVE_FULL_GL
    else if (ctx->RenderMode == GL_FEEDBACK) {
       FLUSH_CURRENT(ctx, 0);
       _mesa_feedback_token( ctx, (GLfloat) (GLint) GL_BITMAP_TOKEN );
@@ -360,7 +359,6 @@ _mesa_Bitmap( GLsizei width, GLsizei height,
       ASSERT(ctx->RenderMode == GL_SELECT);
       /* Do nothing.  See OpenGL Spec, Appendix B, Corollary 6. */
    }
-#endif
 
    /* update raster position */
    ctx->Current.RasterPos[0] += xmove;
@@ -370,15 +368,3 @@ _mesa_Bitmap( GLsizei width, GLsizei height,
       _mesa_flush(ctx);
    }
 }
-
-
-void
-_mesa_init_drawpix_dispatch(struct _glapi_table *disp)
-{
-   SET_Bitmap(disp, _mesa_Bitmap);
-   SET_CopyPixels(disp, _mesa_CopyPixels);
-   SET_DrawPixels(disp, _mesa_DrawPixels);
-}
-
-
-#endif /* FEATURE_drawpix */

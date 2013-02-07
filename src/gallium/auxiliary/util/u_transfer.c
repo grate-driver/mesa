@@ -1,5 +1,5 @@
 #include "pipe/p_context.h"
-#include "util/u_rect.h"
+#include "util/u_surface.h"
 #include "util/u_inlines.h"
 #include "util/u_transfer.h"
 #include "util/u_memory.h"
@@ -31,17 +31,13 @@ void u_default_transfer_inline_write( struct pipe_context *pipe,
       usage |= PIPE_TRANSFER_DISCARD_RANGE;
    }
 
-   transfer = pipe->get_transfer(pipe,
-                                 resource,
-                                 level,
-                                 usage,
-                                 box );
-   if (transfer == NULL)
-      goto out;
-
-   map = pipe_transfer_map(pipe, transfer);
+   map = pipe->transfer_map(pipe,
+                            resource,
+                            level,
+                            usage,
+                            box, &transfer);
    if (map == NULL)
-      goto out;
+      return;
 
    if (resource->target == PIPE_BUFFER) {
       assert(box->height == 1);
@@ -51,29 +47,22 @@ void u_default_transfer_inline_write( struct pipe_context *pipe,
    }
    else {
       const uint8_t *src_data = data;
-      unsigned i;
 
-      for (i = 0; i < box->depth; i++) {
-         util_copy_rect(map,
-                        resource->format,
-                        transfer->stride, /* bytes */
-                        0, 0,
-                        box->width,
-                        box->height,
-                        src_data,
-                        stride,       /* bytes */
-                        0, 0);
-         map += transfer->layer_stride;
-         src_data += layer_stride;
-      }
+      util_copy_box(map,
+		    resource->format,
+		    transfer->stride, /* bytes */
+		    transfer->layer_stride, /* bytes */
+                    0, 0, 0,
+		    box->width,
+		    box->height,
+		    box->depth,
+		    src_data,
+		    stride,       /* bytes */
+		    layer_stride, /* bytes */
+		    0, 0, 0);
    }
 
-out:
-   if (map)
-      pipe_transfer_unmap(pipe, transfer);
-
-   if (transfer)
-      pipe_transfer_destroy(pipe, transfer);
+   pipe_transfer_unmap(pipe, transfer);
 }
 
 
@@ -94,34 +83,7 @@ void u_default_transfer_flush_region( struct pipe_context *pipe,
     */
 }
 
-struct pipe_transfer * u_default_get_transfer(struct pipe_context *context,
-                                              struct pipe_resource *resource,
-                                              unsigned level,
-                                              unsigned usage,
-                                              const struct pipe_box *box)
-{
-   struct pipe_transfer *transfer = CALLOC_STRUCT(pipe_transfer);
-   if (transfer == NULL)
-      return NULL;
-
-   transfer->resource = resource;
-   transfer->level = level;
-   transfer->usage = usage;
-   transfer->box = *box;
-
-   /* Note strides are zero, this is ok for buffers, but not for
-    * textures 2d & higher at least. 
-    */
-   return transfer;
-}
-
 void u_default_transfer_unmap( struct pipe_context *pipe,
                                struct pipe_transfer *transfer )
 {
-}
-
-void u_default_transfer_destroy(struct pipe_context *pipe,
-                                struct pipe_transfer *transfer)
-{
-   FREE(transfer);
 }

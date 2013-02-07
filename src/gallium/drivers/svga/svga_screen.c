@@ -113,8 +113,8 @@ svga_get_paramf(struct pipe_screen *screen, enum pipe_capf param)
 
    case PIPE_CAPF_MAX_TEXTURE_ANISOTROPY:
       if(!sws->get_cap(sws, SVGA3D_DEVCAP_MAX_TEXTURE_ANISOTROPY, &result))
-         return 4.0;
-      return result.u;
+         return 4.0f;
+      return (float) result.u;
 
    case PIPE_CAPF_MAX_TEXTURE_LOD_BIAS:
       return 15.0;
@@ -158,7 +158,7 @@ svga_get_param(struct pipe_screen *screen, enum pipe_cap param)
       return MIN2(result.u, PIPE_MAX_COLOR_BUFS);
    case PIPE_CAP_OCCLUSION_QUERY:
       return 1;
-   case PIPE_CAP_TIMER_QUERY:
+   case PIPE_CAP_QUERY_TIME_ELAPSED:
       return 0;
    case PIPE_CAP_TEXTURE_SHADOW_MAP:
       return 1;
@@ -209,9 +209,6 @@ svga_get_param(struct pipe_screen *screen, enum pipe_cap param)
    case PIPE_CAP_TGSI_FS_COORD_PIXEL_CENTER_INTEGER:
       return 0;
 
-   case PIPE_CAP_DEPTHSTENCIL_CLEAR_SEPARATE:
-      return 1;
-
    case PIPE_CAP_VERTEX_COLOR_UNCLAMPED:
       return 1; /* The color outputs of vertex shaders are not clamped */
    case PIPE_CAP_VERTEX_COLOR_CLAMPED:
@@ -255,6 +252,10 @@ svga_get_param(struct pipe_screen *screen, enum pipe_cap param)
    case PIPE_CAP_COMPUTE:
    case PIPE_CAP_START_INSTANCE:
    case PIPE_CAP_QUERY_TIMESTAMP:
+   case PIPE_CAP_TEXTURE_MULTISAMPLE:
+   case PIPE_CAP_MIN_MAP_BUFFER_ALIGNMENT:
+   case PIPE_CAP_CUBE_MAP_ARRAY:
+   case PIPE_CAP_TEXTURE_BUFFER_OBJECTS:
       return 0;
    case PIPE_CAP_VERTEX_ELEMENT_SRC_OFFSET_4BYTE_ALIGNED_ONLY:
       return 1;

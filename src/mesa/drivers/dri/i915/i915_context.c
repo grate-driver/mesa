@@ -26,8 +26,11 @@
  **************************************************************************/
 
 #include "i915_context.h"
+#include "main/api_exec.h"
 #include "main/imports.h"
 #include "main/macros.h"
+#include "main/version.h"
+#include "main/vtxfmt.h"
 #include "intel_tris.h"
 #include "tnl/t_context.h"
 #include "tnl/t_pipeline.h"
@@ -165,33 +168,11 @@ i915CreateContext(int api,
 
    i915InitDriverFunctions(&functions);
 
-   if (!intelInitContext(intel, api, mesaVis, driContextPriv,
-                         sharedContextPrivate, &functions)) {
-      *error = __DRI_CTX_ERROR_NO_MEMORY;
-      return false;
-   }
-
-   /* Now that the extension bits are known, filter against the requested API
-    * and version.
-    */
-   switch (api) {
-   case API_OPENGL: {
-      const unsigned max_version =
-         (ctx->Extensions.ARB_fragment_shader &&
-          ctx->Extensions.ARB_occlusion_query) ? 20 : 15;
-      const unsigned req_version = major_version * 10 + minor_version;
-
-      if (req_version > max_version) {
-         *error = __DRI_CTX_ERROR_BAD_VERSION;
-         return false;
-      }
-      break;
-   }
-   case API_OPENGLES:
-   case API_OPENGLES2:
-      break;
-   default:
-      *error = __DRI_CTX_ERROR_BAD_API;
+   if (!intelInitContext(intel, api, major_version, minor_version,
+                         mesaVis, driContextPriv,
+                         sharedContextPrivate, &functions,
+                         error)) {
+      ralloc_free(i915);
       return false;
    }
 
@@ -294,6 +275,11 @@ i915CreateContext(int api,
     */
    _tnl_allow_vertex_fog(ctx, 0);
    _tnl_allow_pixel_fog(ctx, 1);
+
+   _mesa_compute_version(ctx);
+
+   _mesa_initialize_dispatch_tables(ctx);
+   _mesa_initialize_vbo_vtxfmt(ctx);
 
    return true;
 }

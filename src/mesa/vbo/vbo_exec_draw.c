@@ -38,9 +38,6 @@
 #include "vbo_noop.h"
 
 
-#if FEATURE_beginend
-
-
 static void
 vbo_exec_debug_verts( struct vbo_exec_context *exec )
 {
@@ -183,12 +180,7 @@ vbo_exec_bind_arrays( struct gl_context *ctx )
       }
       map = vbo->map_vp_none;
       break;
-   case VP_NV:
    case VP_ARB:
-      /* The aliasing of attributes for NV vertex programs has already
-       * occurred.  NV vertex programs cannot access material values,
-       * nor attributes greater than VERT_ATTRIB_TEX7.  
-       */
       for (attr = 0; attr < VERT_ATTRIB_FF_MAX; attr++) {
          exec->vtx.inputs[attr] = &vbo->currval[VBO_ATTRIB_POS+attr];
       }
@@ -440,6 +432,3 @@ vbo_exec_vtx_flush(struct vbo_exec_context *exec, GLboolean keepUnmapped)
    exec->vtx.prim_count = 0;
    exec->vtx.vert_count = 0;
 }
-
-
-#endif /* FEATURE_beginend */

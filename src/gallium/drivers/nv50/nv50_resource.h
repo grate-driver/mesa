@@ -32,8 +32,7 @@ nv50_screen_init_resource_functions(struct pipe_screen *pscreen);
 #endif /* __NVC0_RESOURCE_H__ */
 
 uint32_t
-nvc0_tex_choose_tile_dims(unsigned nx, unsigned ny, unsigned nz);
-
+nv50_tex_choose_tile_dims_helper(unsigned nx, unsigned ny, unsigned nz);
 
 struct nv50_miptree_level {
    uint32_t offset;
@@ -59,6 +58,11 @@ nv50_miptree(struct pipe_resource *pt)
 {
    return (struct nv50_miptree *)pt;
 }
+
+
+#define NV50_TEXVIEW_SCALED_COORDS     (1 << 0)
+#define NV50_TEXVIEW_FILTER_MSAA8      (1 << 1)
+
 
 /* Internal functions:
  */
@@ -118,18 +122,13 @@ nv50_miptree_surface_new(struct pipe_context *,
                          struct pipe_resource *,
                          const struct pipe_surface *templ);
 
-struct pipe_transfer *
-nv50_miptree_transfer_new(struct pipe_context *pcontext,
-                          struct pipe_resource *pt,
+void *
+nv50_miptree_transfer_map(struct pipe_context *pctx,
+                          struct pipe_resource *res,
                           unsigned level,
                           unsigned usage,
-                          const struct pipe_box *box);
-void
-nv50_miptree_transfer_del(struct pipe_context *pcontext,
-                          struct pipe_transfer *ptx);
-void *
-nv50_miptree_transfer_map(struct pipe_context *pcontext,
-                          struct pipe_transfer *ptx);
+                          const struct pipe_box *box,
+                          struct pipe_transfer **ptransfer);
 void
 nv50_miptree_transfer_unmap(struct pipe_context *pcontext,
                             struct pipe_transfer *ptx);

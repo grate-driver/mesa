@@ -65,9 +65,6 @@
          fi.i = 0xFF800000;                  \
          x = fi.f;                           \
    } while (0)
-#elif defined(VMS)
-#define SET_POS_INFINITY(x)  x = __MAXFLOAT
-#define SET_NEG_INFINITY(x)  x = -__MAXFLOAT
 #else
 #define SET_POS_INFINITY(x)  x = (GLfloat) HUGE_VAL
 #define SET_NEG_INFINITY(x)  x = (GLfloat) -HUGE_VAL
@@ -77,23 +74,6 @@
 
 
 static const GLfloat ZeroVec[4] = { 0.0F, 0.0F, 0.0F, 0.0F };
-
-
-
-/**
- * Return TRUE for +0 and other positive values, FALSE otherwise.
- * Used for RCC opcode.
- */
-static inline GLboolean
-positive(float x)
-{
-   fi_type fi;
-   fi.f = x;
-   if (fi.i & 0x80000000)
-      return GL_FALSE;
-   return GL_TRUE;
-}
-
 
 
 /**
@@ -153,8 +133,6 @@ get_src_register_pointer(const struct prog_src_register *source,
    case PROGRAM_CONSTANT:
       /* Fallthrough */
    case PROGRAM_UNIFORM:
-      /* Fallthrough */
-   case PROGRAM_NAMED_PARAM:
       if (reg >= (GLint) prog->Parameters->NumParameters)
          return ZeroVec;
       return (GLfloat *) prog->Parameters->ParameterValues[reg];
@@ -201,9 +179,6 @@ get_dst_register_pointer(const struct prog_dst_register *dest,
       if (reg >= MAX_PROGRAM_OUTPUTS)
          return dummyReg;
       return machine->Outputs[reg];
-
-   case PROGRAM_WRITE_ONLY:
-      return dummyReg;
 
    default:
       _mesa_problem(NULL,
@@ -728,13 +703,6 @@ _mesa_execute_program(struct gl_context * ctx,
          break;
       case OPCODE_ENDSUB:      /* end subroutine */
          break;
-      case OPCODE_BRA:         /* branch (conditional) */
-         if (eval_condition(machine, inst)) {
-            /* take branch */
-            /* Subtract 1 here since we'll do pc++ below */
-            pc = inst->BranchTarget - 1;
-         }
-         break;
       case OPCODE_BRK:         /* break out of loop (conditional) */
          ASSERT(program->Instructions[inst->BranchTarget].Opcode
                 == OPCODE_ENDLOOP);
@@ -1056,15 +1024,7 @@ _mesa_execute_program(struct gl_context * ctx,
             fetch_vector1(&inst->SrcReg[0], machine, t);
             abs_t0 = FABSF(t[0]);
             if (abs_t0 != 0.0F) {
-               /* Since we really can't handle infinite values on VMS
-                * like other OSes we'll use __MAXFLOAT to represent
-                * infinity.  This may need some tweaking.
-                */
-#ifdef VMS
-               if (abs_t0 == __MAXFLOAT)
-#else
                if (IS_INF_OR_NAN(abs_t0))
-#endif
                {
                   SET_POS_INFINITY(q[0]);
                   q[1] = 1.0F;
@@ -1364,43 +1324,6 @@ _mesa_execute_program(struct gl_context * ctx,
             fetch_vector1(&inst->SrcReg[1], machine, b);
             result[0] = result[1] = result[2] = result[3]
                = (GLfloat) pow(a[0], b[0]);
-            store_vector4(inst, machine, result);
-         }
-         break;
-      case OPCODE_RCC:  /* clamped riciprocal */
-         {
-            const float largest = 1.884467e+19, smallest = 5.42101e-20;
-            GLfloat a[4], r, result[4];
-            fetch_vector1(&inst->SrcReg[0], machine, a);
-            if (DEBUG_PROG) {
-               if (a[0] == 0)
-                  printf("RCC(0)\n");
-               else if (IS_INF_OR_NAN(a[0]))
-                  printf("RCC(inf)\n");
-            }
-            if (a[0] == 1.0F) {
-               r = 1.0F;
-            }
-            else {
-               r = 1.0F / a[0];
-            }
-            if (positive(r)) {
-               if (r > largest) {
-                  r = largest;
-               }
-               else if (r < smallest) {
-                  r = smallest;
-               }
-            }
-            else {
-               if (r < -largest) {
-                  r = -largest;
-               }
-               else if (r > -smallest) {
-                  r = -smallest;
-               }
-            }
-            result[0] = result[1] = result[2] = result[3] = r;
             store_vector4(inst, machine, result);
          }
          break;

@@ -206,7 +206,7 @@ st_renderbuffer_alloc_storage(struct gl_context * ctx,
    if (!strb->texture)
       return FALSE;
 
-   u_surface_default_template(&surf_tmpl, strb->texture, templ.bind);
+   u_surface_default_template(&surf_tmpl, strb->texture);
    strb->surface = pipe->create_surface(pipe,
                                         strb->texture,
                                         &surf_tmpl);
@@ -225,14 +225,16 @@ st_renderbuffer_alloc_storage(struct gl_context * ctx,
  * gl_renderbuffer::Delete()
  */
 static void
-st_renderbuffer_delete(struct gl_renderbuffer *rb)
+st_renderbuffer_delete(struct gl_context *ctx, struct gl_renderbuffer *rb)
 {
    struct st_renderbuffer *strb = st_renderbuffer(rb);
-   ASSERT(strb);
-   pipe_surface_reference(&strb->surface, NULL);
+   if (ctx) {
+      struct st_context *st = st_context(ctx);
+      pipe_surface_release(st->pipe, &strb->surface);
+   }
    pipe_resource_reference(&strb->texture, NULL);
    free(strb->data);
-   free(strb);
+   _mesa_delete_renderbuffer(ctx, rb);
 }
 
 
@@ -315,9 +317,11 @@ st_new_renderbuffer_fb(enum pipe_format format, int samples, boolean sw)
       break;
    case PIPE_FORMAT_Z24_UNORM_S8_UINT:
    case PIPE_FORMAT_S8_UINT_Z24_UNORM:
+      strb->Base.InternalFormat = GL_DEPTH24_STENCIL8_EXT;
+      break;
    case PIPE_FORMAT_Z24X8_UNORM:
    case PIPE_FORMAT_X8Z24_UNORM:
-      strb->Base.InternalFormat = GL_DEPTH24_STENCIL8_EXT;
+      strb->Base.InternalFormat = GL_DEPTH_COMPONENT24;
       break;
    case PIPE_FORMAT_S8_UINT:
       strb->Base.InternalFormat = GL_STENCIL_INDEX8_EXT;
@@ -434,7 +438,7 @@ st_render_texture(struct gl_context *ctx,
 
    pipe_resource_reference( &strb->texture, pt );
 
-   pipe_surface_reference(&strb->surface, NULL);
+   pipe_surface_release(pipe, &strb->surface);
 
    assert(strb->rtt_level <= strb->texture->last_level);
 
@@ -442,7 +446,6 @@ st_render_texture(struct gl_context *ctx,
    memset(&surf_tmpl, 0, sizeof(surf_tmpl));
    surf_tmpl.format = ctx->Color.sRGBEnabled
       ? strb->texture->format : util_format_linear(strb->texture->format);
-   surf_tmpl.usage = PIPE_BIND_RENDER_TARGET;
    surf_tmpl.u.tex.level = strb->rtt_level;
    surf_tmpl.u.tex.first_layer = strb->rtt_face + strb->rtt_slice;
    surf_tmpl.u.tex.last_layer = strb->rtt_face + strb->rtt_slice;
@@ -708,6 +711,7 @@ st_MapRenderbuffer(struct gl_context *ctx,
    const GLboolean invert = rb->Name == 0;
    unsigned usage;
    GLuint y2;
+   GLubyte *map;
 
    if (strb->software) {
       /* software-allocated renderbuffer (probably an accum buffer) */
@@ -742,15 +746,14 @@ st_MapRenderbuffer(struct gl_context *ctx,
    else
       y2 = y;
 
-   strb->transfer = pipe_get_transfer(pipe,
-                                      strb->texture,
-                                      strb->rtt_level,
-                                      strb->rtt_face + strb->rtt_slice,
-                                      usage, x, y2, w, h);
-   if (strb->transfer) {
-      GLubyte *map = pipe_transfer_map(pipe, strb->transfer);
+    map = pipe_transfer_map(pipe,
+                            strb->texture,
+                            strb->rtt_level,
+                            strb->rtt_face + strb->rtt_slice,
+                            usage, x, y2, w, h, &strb->transfer);
+   if (map) {
       if (invert) {
-         *rowStrideOut = -strb->transfer->stride;
+         *rowStrideOut = -(int) strb->transfer->stride;
          map += (h - 1) * strb->transfer->stride;
       }
       else {
@@ -782,7 +785,6 @@ st_UnmapRenderbuffer(struct gl_context *ctx,
    }
 
    pipe_transfer_unmap(pipe, strb->transfer);
-   pipe->transfer_destroy(pipe, strb->transfer);
    strb->transfer = NULL;
 }
 
@@ -790,7 +792,6 @@ st_UnmapRenderbuffer(struct gl_context *ctx,
 
 void st_init_fbo_functions(struct dd_function_table *functions)
 {
-#if FEATURE_EXT_framebuffer_object
    functions->NewFramebuffer = st_new_framebuffer;
    functions->NewRenderbuffer = st_new_renderbuffer;
    functions->BindFramebuffer = st_bind_framebuffer;
@@ -798,7 +799,6 @@ void st_init_fbo_functions(struct dd_function_table *functions)
    functions->RenderTexture = st_render_texture;
    functions->FinishRenderTexture = st_finish_render_texture;
    functions->ValidateFramebuffer = st_validate_framebuffer;
-#endif
 
    functions->DrawBuffers = st_DrawBuffers;
    functions->ReadBuffer = st_ReadBuffer;

@@ -36,9 +36,8 @@
 #include "eval.h"
 #include "dlist.h"
 #include "main/dispatch.h"
+#include "vbo/vbo_context.h"
 
-
-#if FEATURE_beginend
 
 /**
  * Use the per-vertex functions found in <vfmt> to initialize the given
@@ -48,35 +47,46 @@ static void
 install_vtxfmt(struct gl_context *ctx, struct _glapi_table *tab,
                const GLvertexformat *vfmt)
 {
+   assert(ctx->Version > 0);
+
    if (ctx->API != API_OPENGL_CORE && ctx->API != API_OPENGLES2) {
+      SET_Color4f(tab, vfmt->Color4f);
+   }
+
+   if (ctx->API == API_OPENGL_COMPAT) {
       _mesa_install_arrayelt_vtxfmt(tab, vfmt);
       SET_Color3f(tab, vfmt->Color3f);
       SET_Color3fv(tab, vfmt->Color3fv);
-      SET_Color4f(tab, vfmt->Color4f);
       SET_Color4fv(tab, vfmt->Color4fv);
       SET_EdgeFlag(tab, vfmt->EdgeFlag);
    }
 
-   if (ctx->API == API_OPENGL) {
+   if (ctx->API == API_OPENGL_COMPAT) {
       _mesa_install_eval_vtxfmt(tab, vfmt);
    }
 
    if (ctx->API != API_OPENGL_CORE && ctx->API != API_OPENGLES2) {
+      SET_Materialfv(tab, vfmt->Materialfv);
+      SET_MultiTexCoord4fARB(tab, vfmt->MultiTexCoord4fARB);
+      SET_Normal3f(tab, vfmt->Normal3f);
+   }
+
+   if (ctx->API == API_OPENGL_COMPAT) {
       SET_FogCoordfEXT(tab, vfmt->FogCoordfEXT);
       SET_FogCoordfvEXT(tab, vfmt->FogCoordfvEXT);
       SET_Indexf(tab, vfmt->Indexf);
       SET_Indexfv(tab, vfmt->Indexfv);
-      SET_Materialfv(tab, vfmt->Materialfv);
       SET_MultiTexCoord1fARB(tab, vfmt->MultiTexCoord1fARB);
       SET_MultiTexCoord1fvARB(tab, vfmt->MultiTexCoord1fvARB);
       SET_MultiTexCoord2fARB(tab, vfmt->MultiTexCoord2fARB);
       SET_MultiTexCoord2fvARB(tab, vfmt->MultiTexCoord2fvARB);
       SET_MultiTexCoord3fARB(tab, vfmt->MultiTexCoord3fARB);
       SET_MultiTexCoord3fvARB(tab, vfmt->MultiTexCoord3fvARB);
-      SET_MultiTexCoord4fARB(tab, vfmt->MultiTexCoord4fARB);
       SET_MultiTexCoord4fvARB(tab, vfmt->MultiTexCoord4fvARB);
-      SET_Normal3f(tab, vfmt->Normal3f);
       SET_Normal3fv(tab, vfmt->Normal3fv);
+   }
+
+   if (ctx->API == API_OPENGL_COMPAT) {
       SET_SecondaryColor3fEXT(tab, vfmt->SecondaryColor3fEXT);
       SET_SecondaryColor3fvEXT(tab, vfmt->SecondaryColor3fvEXT);
       SET_TexCoord1f(tab, vfmt->TexCoord1f);
@@ -95,7 +105,7 @@ install_vtxfmt(struct gl_context *ctx, struct _glapi_table *tab,
       SET_Vertex4fv(tab, vfmt->Vertex4fv);
    }
 
-   if (ctx->API == API_OPENGL) {
+   if (ctx->API == API_OPENGL_COMPAT) {
       _mesa_install_dlist_vtxfmt(tab, vfmt);   /* glCallList / glCallLists */
 
       SET_Begin(tab, vfmt->Begin);
@@ -107,13 +117,13 @@ install_vtxfmt(struct gl_context *ctx, struct _glapi_table *tab,
 
    SET_DrawArrays(tab, vfmt->DrawArrays);
    SET_DrawElements(tab, vfmt->DrawElements);
-   if (ctx->API != API_OPENGLES2 || _mesa_is_gles3(ctx)) {
+   if (_mesa_is_desktop_gl(ctx) || _mesa_is_gles3(ctx)) {
       SET_DrawRangeElements(tab, vfmt->DrawRangeElements);
    }
 
    SET_MultiDrawElementsEXT(tab, vfmt->MultiDrawElementsEXT);
 
-   if (ctx->API != API_OPENGLES2) {
+   if (_mesa_is_desktop_gl(ctx)) {
       SET_DrawElementsBaseVertex(tab, vfmt->DrawElementsBaseVertex);
       SET_DrawRangeElementsBaseVertex(tab, vfmt->DrawRangeElementsBaseVertex);
       SET_MultiDrawElementsBaseVertex(tab, vfmt->MultiDrawElementsBaseVertex);
@@ -123,12 +133,12 @@ install_vtxfmt(struct gl_context *ctx, struct _glapi_table *tab,
       SET_DrawElementsInstancedBaseVertexBaseInstance(tab, vfmt->DrawElementsInstancedBaseVertexBaseInstance);
    }
 
-   if (ctx->API != API_OPENGLES2 || _mesa_is_gles3(ctx)) {
+   if (_mesa_is_desktop_gl(ctx) || _mesa_is_gles3(ctx)) {
       SET_DrawArraysInstancedARB(tab, vfmt->DrawArraysInstanced);
       SET_DrawElementsInstancedARB(tab, vfmt->DrawElementsInstanced);
    }
 
-   if (ctx->API != API_OPENGLES2) {
+   if (_mesa_is_desktop_gl(ctx)) {
       SET_DrawTransformFeedback(tab, vfmt->DrawTransformFeedback);
       SET_DrawTransformFeedbackStream(tab, vfmt->DrawTransformFeedbackStream);
       SET_DrawTransformFeedbackInstanced(tab,
@@ -137,9 +147,8 @@ install_vtxfmt(struct gl_context *ctx, struct _glapi_table *tab,
                                                vfmt->DrawTransformFeedbackStreamInstanced);
    }
 
-   /* GL_NV_vertex_program */
-#if FEATURE_ARB_vertex_program
-   if (ctx->API == API_OPENGL) {
+   /* Originally for GL_NV_vertex_program, this is also used by dlist.c */
+   if (ctx->API == API_OPENGL_COMPAT) {
       SET_VertexAttrib1fNV(tab, vfmt->VertexAttrib1fNV);
       SET_VertexAttrib1fvNV(tab, vfmt->VertexAttrib1fvNV);
       SET_VertexAttrib2fNV(tab, vfmt->VertexAttrib2fNV);
@@ -150,18 +159,19 @@ install_vtxfmt(struct gl_context *ctx, struct _glapi_table *tab,
       SET_VertexAttrib4fvNV(tab, vfmt->VertexAttrib4fvNV);
    }
 
-   SET_VertexAttrib1fARB(tab, vfmt->VertexAttrib1fARB);
-   SET_VertexAttrib1fvARB(tab, vfmt->VertexAttrib1fvARB);
-   SET_VertexAttrib2fARB(tab, vfmt->VertexAttrib2fARB);
-   SET_VertexAttrib2fvARB(tab, vfmt->VertexAttrib2fvARB);
-   SET_VertexAttrib3fARB(tab, vfmt->VertexAttrib3fARB);
-   SET_VertexAttrib3fvARB(tab, vfmt->VertexAttrib3fvARB);
-   SET_VertexAttrib4fARB(tab, vfmt->VertexAttrib4fARB);
-   SET_VertexAttrib4fvARB(tab, vfmt->VertexAttrib4fvARB);
-#endif
+   if (ctx->API != API_OPENGLES) {
+      SET_VertexAttrib1fARB(tab, vfmt->VertexAttrib1fARB);
+      SET_VertexAttrib1fvARB(tab, vfmt->VertexAttrib1fvARB);
+      SET_VertexAttrib2fARB(tab, vfmt->VertexAttrib2fARB);
+      SET_VertexAttrib2fvARB(tab, vfmt->VertexAttrib2fvARB);
+      SET_VertexAttrib3fARB(tab, vfmt->VertexAttrib3fARB);
+      SET_VertexAttrib3fvARB(tab, vfmt->VertexAttrib3fvARB);
+      SET_VertexAttrib4fARB(tab, vfmt->VertexAttrib4fARB);
+      SET_VertexAttrib4fvARB(tab, vfmt->VertexAttrib4fvARB);
+   }
 
    /* GL_EXT_gpu_shader4 / OpenGL 3.0 */
-   if (ctx->API != API_OPENGLES2) {
+   if (_mesa_is_desktop_gl(ctx)) {
       SET_VertexAttribI1iEXT(tab, vfmt->VertexAttribI1i);
       SET_VertexAttribI2iEXT(tab, vfmt->VertexAttribI2i);
       SET_VertexAttribI3iEXT(tab, vfmt->VertexAttribI3i);
@@ -175,14 +185,14 @@ install_vtxfmt(struct gl_context *ctx, struct _glapi_table *tab,
       SET_VertexAttribI3uivEXT(tab, vfmt->VertexAttribI3uiv);
    }
 
-   if (ctx->API != API_OPENGLES2 || _mesa_is_gles3(ctx)) {
+   if (_mesa_is_desktop_gl(ctx) || _mesa_is_gles3(ctx)) {
       SET_VertexAttribI4iEXT(tab, vfmt->VertexAttribI4i);
       SET_VertexAttribI4ivEXT(tab, vfmt->VertexAttribI4iv);
       SET_VertexAttribI4uiEXT(tab, vfmt->VertexAttribI4ui);
       SET_VertexAttribI4uivEXT(tab, vfmt->VertexAttribI4uiv);
    }
 
-   if (ctx->API != API_OPENGL_CORE && ctx->API != API_OPENGLES2) {
+   if (ctx->API == API_OPENGL_COMPAT) {
       /* GL_ARB_vertex_type_10_10_10_2_rev / GL 3.3 */
       SET_VertexP2ui(tab, vfmt->VertexP2ui);
       SET_VertexP2uiv(tab, vfmt->VertexP2uiv);
@@ -221,7 +231,7 @@ install_vtxfmt(struct gl_context *ctx, struct _glapi_table *tab,
       SET_SecondaryColorP3uiv(tab, vfmt->SecondaryColorP3uiv);
    }
 
-   if (ctx->API != API_OPENGLES2) {
+   if (_mesa_is_desktop_gl(ctx)) {
       SET_VertexAttribP1ui(tab, vfmt->VertexAttribP1ui);
       SET_VertexAttribP2ui(tab, vfmt->VertexAttribP2ui);
       SET_VertexAttribP3ui(tab, vfmt->VertexAttribP3ui);
@@ -242,6 +252,8 @@ void
 _mesa_install_exec_vtxfmt(struct gl_context *ctx, const GLvertexformat *vfmt)
 {
    install_vtxfmt( ctx, ctx->Exec, vfmt );
+   if (ctx->BeginEnd)
+      install_vtxfmt( ctx, ctx->BeginEnd, vfmt );
 }
 
 
@@ -257,4 +269,18 @@ _mesa_install_save_vtxfmt(struct gl_context *ctx, const GLvertexformat *vfmt)
 }
 
 
-#endif /* FEATURE_beginend */
+/**
+ * Install VBO vtxfmt functions.
+ *
+ * This function depends on ctx->Version.
+ */
+void
+_mesa_initialize_vbo_vtxfmt(struct gl_context *ctx)
+{
+   struct vbo_exec_context *exec = &vbo_context(ctx)->exec;
+   _mesa_install_exec_vtxfmt(ctx, &exec->vtxfmt);
+   if (ctx->API == API_OPENGL_COMPAT) {
+      _mesa_install_save_vtxfmt(ctx, &ctx->ListState.ListVtxfmt);
+   }
+}
+

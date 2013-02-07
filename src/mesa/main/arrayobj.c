@@ -236,11 +236,9 @@ _mesa_initialize_array_object( struct gl_context *ctx,
       case VERT_ATTRIB_EDGEFLAG:
          init_array(ctx, &obj->VertexAttrib[VERT_ATTRIB_EDGEFLAG], 1, GL_BOOL);
          break;
-#if FEATURE_point_size_array
       case VERT_ATTRIB_POINT_SIZE:
          init_array(ctx, &obj->VertexAttrib[VERT_ATTRIB_POINT_SIZE], 1, GL_FLOAT);
          break;
-#endif
       default:
          init_array(ctx, &obj->VertexAttrib[i], 4, GL_FLOAT);
          break;
@@ -316,8 +314,6 @@ _mesa_update_array_object_max_element(struct gl_context *ctx,
    if (!ctx->VertexProgram._Current ||
        ctx->VertexProgram._Current == ctx->VertexProgram._TnlProgram) {
       enabled = _mesa_array_object_get_enabled_ff(arrayObj);
-   } else if (ctx->VertexProgram._Current->IsNVProgram) {
-      enabled = _mesa_array_object_get_enabled_nv(arrayObj);
    } else {
       enabled = _mesa_array_object_get_enabled_arb(arrayObj);
    }
@@ -342,7 +338,6 @@ bind_vertex_array(struct gl_context *ctx, GLuint id, GLboolean genRequired)
 {
    struct gl_array_object * const oldObj = ctx->Array.ArrayObj;
    struct gl_array_object *newObj = NULL;
-   ASSERT_OUTSIDE_BEGIN_END(ctx);
 
    ASSERT(oldObj != NULL);
 
@@ -363,7 +358,7 @@ bind_vertex_array(struct gl_context *ctx, GLuint id, GLboolean genRequired)
       newObj = lookup_arrayobj(ctx, id);
       if (!newObj) {
          if (genRequired) {
-            _mesa_error(ctx, GL_INVALID_OPERATION, "glBindVertexArray(id)");
+            _mesa_error(ctx, GL_INVALID_OPERATION, "glBindVertexArray(non-gen name)");
             return;
          }
 
@@ -377,7 +372,7 @@ bind_vertex_array(struct gl_context *ctx, GLuint id, GLboolean genRequired)
          save_array_object(ctx, newObj);
       }
 
-      if (!newObj->_Used) {
+      if (!newObj->EverBound) {
          /* The "Interactions with APPLE_vertex_array_object" section of the
           * GL_ARB_vertex_array_object spec says:
           *
@@ -385,7 +380,7 @@ bind_vertex_array(struct gl_context *ctx, GLuint id, GLboolean genRequired)
           *     BindVertexArrayAPPLE, determines the semantic of the object."
           */
          newObj->ARBsemantics = genRequired;
-         newObj->_Used = GL_TRUE;
+         newObj->EverBound = GL_TRUE;
       }
    }
 
@@ -435,11 +430,10 @@ _mesa_BindVertexArrayAPPLE( GLuint id )
  * \param ids    Array of \c n array object IDs.
  */
 void GLAPIENTRY
-_mesa_DeleteVertexArraysAPPLE(GLsizei n, const GLuint *ids)
+_mesa_DeleteVertexArrays(GLsizei n, const GLuint *ids)
 {
    GET_CURRENT_CONTEXT(ctx);
    GLsizei i;
-   ASSERT_OUTSIDE_BEGIN_END(ctx);
 
    if (n < 0) {
       _mesa_error(ctx, GL_INVALID_VALUE, "glDeleteVertexArrayAPPLE(n)");
@@ -484,7 +478,6 @@ gen_vertex_arrays(struct gl_context *ctx, GLsizei n, GLuint *arrays)
 {
    GLuint first;
    GLint i;
-   ASSERT_OUTSIDE_BEGIN_END(ctx);
 
    if (n < 0) {
       _mesa_error(ctx, GL_INVALID_VALUE, "glGenVertexArraysAPPLE");
@@ -545,7 +538,7 @@ _mesa_GenVertexArraysAPPLE(GLsizei n, GLuint *arrays)
  *          \c GL_FALSE otherwise.
  */
 GLboolean GLAPIENTRY
-_mesa_IsVertexArrayAPPLE( GLuint id )
+_mesa_IsVertexArray( GLuint id )
 {
    struct gl_array_object * obj;
    GET_CURRENT_CONTEXT(ctx);
@@ -555,6 +548,8 @@ _mesa_IsVertexArrayAPPLE( GLuint id )
       return GL_FALSE;
 
    obj = lookup_arrayobj(ctx, id);
+   if (obj == NULL)
+      return GL_FALSE;
 
-   return (obj != NULL) ? GL_TRUE : GL_FALSE;
+   return obj->EverBound;
 }

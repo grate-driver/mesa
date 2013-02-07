@@ -67,7 +67,9 @@ resource_is_texture(const struct pipe_resource *resource)
    case PIPE_BUFFER:
       return FALSE;
    case PIPE_TEXTURE_1D:
+   case PIPE_TEXTURE_1D_ARRAY:
    case PIPE_TEXTURE_2D:
+   case PIPE_TEXTURE_2D_ARRAY:
    case PIPE_TEXTURE_RECT:
    case PIPE_TEXTURE_3D:
    case PIPE_TEXTURE_CUBE:
@@ -105,14 +107,16 @@ alloc_layout_array(unsigned num_slices, unsigned width, unsigned height)
  */
 static boolean
 llvmpipe_texture_layout(struct llvmpipe_screen *screen,
-                        struct llvmpipe_resource *lpr)
+                        struct llvmpipe_resource *lpr,
+                        boolean allocate)
 {
    struct pipe_resource *pt = &lpr->base;
    unsigned level;
    unsigned width = pt->width0;
    unsigned height = pt->height0;
    unsigned depth = pt->depth0;
-   size_t total_size = 0;
+   uint64_t total_size = 0;
+   unsigned layers = pt->array_size;
 
    assert(LP_MAX_TEXTURE_2D_LEVELS <= LP_MAX_TEXTURE_LEVELS);
    assert(LP_MAX_TEXTURE_3D_LEVELS <= LP_MAX_TEXTURE_LEVELS);
@@ -125,6 +129,8 @@ llvmpipe_texture_layout(struct llvmpipe_screen *screen,
 
          /* For non-compressed formats we need to align the texture size
           * to the tile size to facilitate render-to-texture.
+          * XXX this blows up 1d/1d array textures by unreasonable
+          * amount (factor 64), probably should do something about it.
           */
          if (util_format_is_compressed(pt->format))
             alignment = 1;
@@ -139,6 +145,12 @@ llvmpipe_texture_layout(struct llvmpipe_screen *screen,
 
          lpr->row_stride[level] = align(nblocksx * block_size, 16);
 
+         /* if row_stride * height > LP_MAX_TEXTURE_SIZE */
+         if (lpr->row_stride[level] > LP_MAX_TEXTURE_SIZE / nblocksy) {
+            /* image too large */
+            goto fail;
+         }
+
          lpr->img_stride[level] = lpr->row_stride[level] * nblocksy;
       }
 
@@ -150,7 +162,7 @@ llvmpipe_texture_layout(struct llvmpipe_screen *screen,
          lpr->tiles_per_image[level] = width_t * height_t;
       }
 
-      /* Number of 3D image slices or cube faces */
+      /* Number of 3D image slices, cube faces or texture array layers */
       {
          unsigned num_slices;
 
@@ -158,18 +170,31 @@ llvmpipe_texture_layout(struct llvmpipe_screen *screen,
             num_slices = 6;
          else if (lpr->base.target == PIPE_TEXTURE_3D)
             num_slices = depth;
+         else if (lpr->base.target == PIPE_TEXTURE_1D_ARRAY ||
+                  lpr->base.target == PIPE_TEXTURE_2D_ARRAY)
+            num_slices = layers;
          else
             num_slices = 1;
 
          lpr->num_slices_faces[level] = num_slices;
 
-         lpr->layout[level] = alloc_layout_array(num_slices, width, height);
-         if (!lpr->layout[level]) {
-            goto fail;
+         if (allocate) {
+            lpr->layout[level] = alloc_layout_array(num_slices, width, height);
+            if (!lpr->layout[level]) {
+               goto fail;
+            }
          }
       }
 
-      total_size += lpr->num_slices_faces[level] * lpr->img_stride[level];
+      /* if img_stride * num_slices_faces > LP_MAX_TEXTURE_SIZE */
+      if (lpr->img_stride[level] >
+          LP_MAX_TEXTURE_SIZE / lpr->num_slices_faces[level]) {
+         /* volume too large */
+         goto fail;
+      }
+
+      total_size += (uint64_t) lpr->num_slices_faces[level]
+                  * (uint64_t) lpr->img_stride[level];
       if (total_size > LP_MAX_TEXTURE_SIZE) {
          goto fail;
       }
@@ -184,14 +209,26 @@ llvmpipe_texture_layout(struct llvmpipe_screen *screen,
 
 fail:
    for (level = 0; level <= pt->last_level; level++) {
-      if (lpr->layout[level]) {
-         FREE(lpr->layout[level]);
-      }
+      FREE(lpr->layout[level]);
    }
 
    return FALSE;
 }
 
+
+/**
+ * Check the size of the texture specified by 'res'.
+ * \return TRUE if OK, FALSE if too large.
+ */
+static boolean
+llvmpipe_can_create_resource(struct pipe_screen *screen,
+                             const struct pipe_resource *res)
+{
+   struct llvmpipe_resource lpr;
+   memset(&lpr, 0, sizeof(lpr));
+   lpr.base = *res;
+   return llvmpipe_texture_layout(llvmpipe_screen(screen), &lpr, FALSE);
+}
 
 
 static boolean
@@ -266,7 +303,7 @@ llvmpipe_resource_create(struct pipe_screen *_screen,
       }
       else {
          /* texture map */
-         if (!llvmpipe_texture_layout(screen, lpr))
+         if (!llvmpipe_texture_layout(screen, lpr, TRUE))
             goto fail;
          assert(lpr->layout[0][0] == LP_TEX_LAYOUT_NONE);
       }
@@ -303,7 +340,7 @@ llvmpipe_resource_create(struct pipe_screen *_screen,
 
 static void
 llvmpipe_resource_destroy(struct pipe_screen *pscreen,
-			  struct pipe_resource *pt)
+                          struct pipe_resource *pt)
 {
    struct llvmpipe_screen *screen = llvmpipe_screen(pscreen);
    struct llvmpipe_resource *lpr = llvmpipe_resource(pt);
@@ -313,9 +350,9 @@ llvmpipe_resource_destroy(struct pipe_screen *pscreen,
       struct sw_winsys *winsys = screen->winsys;
       winsys->displaytarget_destroy(winsys, lpr->dt);
 
-      if (lpr->tiled[0].data) {
-         align_free(lpr->tiled[0].data);
-         lpr->tiled[0].data = NULL;
+      if (lpr->tiled_img.data) {
+         align_free(lpr->tiled_img.data);
+         lpr->tiled_img.data = NULL;
       }
 
       FREE(lpr->layout[0]);
@@ -325,23 +362,19 @@ llvmpipe_resource_destroy(struct pipe_screen *pscreen,
       uint level;
 
       /* free linear image data */
-      for (level = 0; level < Elements(lpr->linear); level++) {
-         if (lpr->linear[level].data) {
-            align_free(lpr->linear[level].data);
-            lpr->linear[level].data = NULL;
-         }
+      if (lpr->linear_img.data) {
+         align_free(lpr->linear_img.data);
+         lpr->linear_img.data = NULL;
       }
 
       /* free tiled image data */
-      for (level = 0; level < Elements(lpr->tiled); level++) {
-         if (lpr->tiled[level].data) {
-            align_free(lpr->tiled[level].data);
-            lpr->tiled[level].data = NULL;
-         }
+      if (lpr->tiled_img.data) {
+         align_free(lpr->tiled_img.data);
+         lpr->tiled_img.data = NULL;
       }
 
       /* free layout flag arrays */
-      for (level = 0; level < Elements(lpr->tiled); level++) {
+      for (level = 0; level < Elements(lpr->layout); level++) {
          FREE(lpr->layout[level]);
          lpr->layout[level] = NULL;
       }
@@ -405,7 +438,7 @@ llvmpipe_resource_map(struct pipe_resource *resource,
       map = winsys->displaytarget_map(winsys, lpr->dt, dt_usage);
 
       /* install this linear image in texture data structure */
-      lpr->linear[level].data = map;
+      lpr->linear_img.data = map;
 
       /* make sure tiled data gets converted to linear data */
       map2 = llvmpipe_get_texture_image(lpr, 0, 0, tex_usage, layout);
@@ -467,8 +500,8 @@ llvmpipe_resource_data(struct pipe_resource *resource)
 
 static struct pipe_resource *
 llvmpipe_resource_from_handle(struct pipe_screen *screen,
-			      const struct pipe_resource *template,
-			      struct winsys_handle *whandle)
+                              const struct pipe_resource *template,
+                              struct winsys_handle *whandle)
 {
    struct sw_winsys *winsys = llvmpipe_screen(screen)->winsys;
    struct llvmpipe_resource *lpr;
@@ -569,7 +602,6 @@ llvmpipe_create_surface(struct pipe_context *pipe,
       ps->format = surf_tmpl->format;
       ps->width = u_minify(pt->width0, surf_tmpl->u.tex.level);
       ps->height = u_minify(pt->height0, surf_tmpl->u.tex.level);
-      ps->usage = surf_tmpl->usage;
 
       ps->u.tex.level = surf_tmpl->u.tex.level;
       ps->u.tex.first_layer = surf_tmpl->u.tex.first_layer;
@@ -593,16 +625,23 @@ llvmpipe_surface_destroy(struct pipe_context *pipe,
 }
 
 
-static struct pipe_transfer *
-llvmpipe_get_transfer(struct pipe_context *pipe,
-                      struct pipe_resource *resource,
-                      unsigned level,
-                      unsigned usage,
-                      const struct pipe_box *box)
+static void *
+llvmpipe_transfer_map( struct pipe_context *pipe,
+                       struct pipe_resource *resource,
+                       unsigned level,
+                       unsigned usage,
+                       const struct pipe_box *box,
+                       struct pipe_transfer **transfer )
 {
    struct llvmpipe_context *llvmpipe = llvmpipe_context(pipe);
-   struct llvmpipe_resource *lprex = llvmpipe_resource(resource);
-   struct llvmpipe_transfer *lpr;
+   struct llvmpipe_screen *screen = llvmpipe_screen(pipe->screen);
+   struct llvmpipe_resource *lpr = llvmpipe_resource(resource);
+   struct llvmpipe_transfer *lpt;
+   struct pipe_transfer *pt;
+   ubyte *map;
+   enum pipe_format format;
+   enum lp_texture_usage tex_usage;
+   const char *mode;
 
    assert(resource);
    assert(level <= resource->last_level);
@@ -629,51 +668,26 @@ llvmpipe_get_transfer(struct pipe_context *pipe,
       }
    }
 
-   if (resource == llvmpipe->constants[PIPE_SHADER_FRAGMENT][0])
+   /* Check if we're mapping the current constant buffer */
+   if ((usage & PIPE_TRANSFER_WRITE) &&
+       resource == llvmpipe->constants[PIPE_SHADER_FRAGMENT][0].buffer) {
+      /* constants may have changed */
       llvmpipe->dirty |= LP_NEW_CONSTANTS;
-
-   lpr = CALLOC_STRUCT(llvmpipe_transfer);
-   if (lpr) {
-      struct pipe_transfer *pt = &lpr->base;
-      pipe_resource_reference(&pt->resource, resource);
-      pt->box = *box;
-      pt->level = level;
-      pt->stride = lprex->row_stride[level];
-      pt->layer_stride = lprex->img_stride[level];
-      pt->usage = usage;
-
-      return pt;
    }
-   return NULL;
-}
 
+   lpt = CALLOC_STRUCT(llvmpipe_transfer);
+   if (!lpt)
+      return NULL;
+   pt = &lpt->base;
+   pipe_resource_reference(&pt->resource, resource);
+   pt->box = *box;
+   pt->level = level;
+   pt->stride = lpr->row_stride[level];
+   pt->layer_stride = lpr->img_stride[level];
+   pt->usage = usage;
+   *transfer = pt;
 
-static void 
-llvmpipe_transfer_destroy(struct pipe_context *pipe,
-                              struct pipe_transfer *transfer)
-{
-   /* Effectively do the texture_update work here - if texture images
-    * needed post-processing to put them into hardware layout, this is
-    * where it would happen.  For llvmpipe, nothing to do.
-    */
-   assert (transfer->resource);
-   pipe_resource_reference(&transfer->resource, NULL);
-   FREE(transfer);
-}
-
-
-static void *
-llvmpipe_transfer_map( struct pipe_context *pipe,
-                       struct pipe_transfer *transfer )
-{
-   struct llvmpipe_screen *screen = llvmpipe_screen(pipe->screen);
-   ubyte *map;
-   struct llvmpipe_resource *lpr;
-   enum pipe_format format;
-   enum lp_texture_usage tex_usage;
-   const char *mode;
-
-   assert(transfer->level < LP_MAX_TEXTURE_LEVELS);
+   assert(level < LP_MAX_TEXTURE_LEVELS);
 
    /*
    printf("tex_transfer_map(%d, %d  %d x %d of %d x %d,  usage %d )\n",
@@ -683,7 +697,7 @@ llvmpipe_transfer_map( struct pipe_context *pipe,
           transfer->usage);
    */
 
-   if (transfer->usage == PIPE_TRANSFER_READ) {
+   if (usage == PIPE_TRANSFER_READ) {
       tex_usage = LP_TEX_USAGE_READ;
       mode = "read";
    }
@@ -693,33 +707,29 @@ llvmpipe_transfer_map( struct pipe_context *pipe,
    }
 
    if (0) {
-      struct llvmpipe_resource *lpr = llvmpipe_resource(transfer->resource);
       printf("transfer map tex %u  mode %s\n", lpr->id, mode);
    }
 
-
-   assert(transfer->resource);
-   lpr = llvmpipe_resource(transfer->resource);
    format = lpr->base.format;
 
-   map = llvmpipe_resource_map(transfer->resource,
-                               transfer->level,
-                               transfer->box.z,
+   map = llvmpipe_resource_map(resource,
+                               level,
+                               box->z,
                                tex_usage, LP_TEX_LAYOUT_LINEAR);
 
 
    /* May want to do different things here depending on read/write nature
     * of the map:
     */
-   if (transfer->usage & PIPE_TRANSFER_WRITE) {
+   if (usage & PIPE_TRANSFER_WRITE) {
       /* Do something to notify sharing contexts of a texture change.
        */
       screen->timestamp++;
    }
 
    map +=
-      transfer->box.y / util_format_get_blockheight(format) * transfer->stride +
-      transfer->box.x / util_format_get_blockwidth(format) * util_format_get_blocksize(format);
+      box->y / util_format_get_blockheight(format) * pt->stride +
+      box->x / util_format_get_blockwidth(format) * util_format_get_blocksize(format);
 
    return map;
 }
@@ -734,6 +744,14 @@ llvmpipe_transfer_unmap(struct pipe_context *pipe,
    llvmpipe_resource_unmap(transfer->resource,
                            transfer->level,
                            transfer->box.z);
+
+   /* Effectively do the texture_update work here - if texture images
+    * needed post-processing to put them into hardware layout, this is
+    * where it would happen.  For llvmpipe, nothing to do.
+    */
+   assert (transfer->resource);
+   pipe_resource_reference(&transfer->resource, NULL);
+   FREE(transfer);
 }
 
 unsigned int
@@ -749,6 +767,34 @@ llvmpipe_is_resource_referenced( struct pipe_context *pipe,
    return lp_setup_is_resource_referenced(llvmpipe->setup, presource);
 }
 
+
+/**
+ * Returns the largest possible alignment for a format in llvmpipe
+ */
+unsigned
+llvmpipe_get_format_alignment( enum pipe_format format )
+{
+   const struct util_format_description *desc = util_format_description(format);
+   unsigned size = 0;
+   unsigned bytes;
+   unsigned i;
+
+   for (i = 0; i < desc->nr_channels; ++i) {
+      size += desc->channel[i].size;
+   }
+
+   bytes = size / 8;
+
+   if (!util_is_power_of_two(bytes)) {
+      bytes /= desc->nr_channels;
+   }
+
+   if (bytes % 2 || bytes < 1) {
+      return 1;
+   } else {
+      return bytes;
+   }
+}
 
 
 /**
@@ -785,7 +831,7 @@ llvmpipe_user_buffer_create(struct pipe_screen *screen,
 
 /**
  * Compute size (in bytes) need to store a texture image / mipmap level,
- * for just one cube face or one 3D texture slice
+ * for just one cube face, one array layer or one 3D texture slice
  */
 static unsigned
 tex_image_face_size(const struct llvmpipe_resource *lpr, unsigned level,
@@ -900,17 +946,17 @@ llvmpipe_get_texture_image_address(struct llvmpipe_resource *lpr,
    unsigned offset;
 
    if (layout == LP_TEX_LAYOUT_LINEAR) {
-      img = &lpr->linear[level];
+      img = &lpr->linear_img;
+      offset = lpr->linear_mip_offsets[level];
    }
    else {
       assert (layout == LP_TEX_LAYOUT_TILED);
-      img = &lpr->tiled[level];
+      img = &lpr->tiled_img;
+      offset = lpr->tiled_mip_offsets[level];
    }
 
    if (face_slice > 0)
-      offset = face_slice * tex_image_face_size(lpr, level, layout);
-   else
-      offset = 0;
+      offset += face_slice * tex_image_face_size(lpr, level, layout);
 
    return (ubyte *) img->data + offset;
 }
@@ -965,23 +1011,29 @@ llvmpipe_set_texture_image_layout(struct llvmpipe_resource *lpr,
 
 /**
  * Allocate storage for a linear or tile texture image (all cube
- * faces and all 3D slices.
+ * faces and all 3D slices, all levels).
  */
 static void
-alloc_image_data(struct llvmpipe_resource *lpr, unsigned level,
+alloc_image_data(struct llvmpipe_resource *lpr,
                  enum lp_texture_layout layout)
 {
    uint alignment = MAX2(16, util_cpu_caps.cacheline);
+   uint level;
+   uint offset = 0;
 
    if (lpr->dt)
-      assert(level == 0);
+      assert(lpr->base.last_level == 0);
 
    if (layout == LP_TEX_LAYOUT_TILED) {
       /* tiled data is stored in regular memory */
-      uint buffer_size = tex_image_size(lpr, level, layout);
-      lpr->tiled[level].data = align_malloc(buffer_size, alignment);
-      if (lpr->tiled[level].data) {
-         memset(lpr->tiled[level].data, 0, buffer_size);
+      for (level = 0; level <= lpr->base.last_level; level++) {
+         uint buffer_size = tex_image_size(lpr, level, layout);
+         lpr->tiled_mip_offsets[level] = offset;
+         offset += align(buffer_size, alignment);
+      }
+      lpr->tiled_img.data = align_malloc(offset, alignment);
+      if (lpr->tiled_img.data) {
+         memset(lpr->tiled_img.data, 0, offset);
       }
    }
    else {
@@ -993,16 +1045,24 @@ alloc_image_data(struct llvmpipe_resource *lpr, unsigned level,
          struct llvmpipe_screen *screen = llvmpipe_screen(lpr->base.screen);
          struct sw_winsys *winsys = screen->winsys;
 
-         lpr->linear[0].data =
+         lpr->linear_img.data =
             winsys->displaytarget_map(winsys, lpr->dt,
                                       PIPE_TRANSFER_READ_WRITE);
       }
       else {
          /* not a display target - allocate regular memory */
-         uint buffer_size = tex_image_size(lpr, level, LP_TEX_LAYOUT_LINEAR);
-         lpr->linear[level].data = align_malloc(buffer_size, alignment);
-         if (lpr->linear[level].data) {
-            memset(lpr->linear[level].data, 0, buffer_size);
+         /*
+          * Offset calculation for start of a specific mip/layer is always
+          * offset = lpr->linear_mip_offsets[level] + lpr->img_stride[level] * layer
+          */
+         for (level = 0; level <= lpr->base.last_level; level++) {
+            uint buffer_size = tex_image_size(lpr, level, LP_TEX_LAYOUT_LINEAR);
+            lpr->linear_mip_offsets[level] = offset;
+            offset += align(buffer_size, alignment);
+         }
+         lpr->linear_img.data = align_malloc(offset, alignment);
+         if (lpr->linear_img.data) {
+            memset(lpr->linear_img.data, 0, offset);
          }
       }
    }
@@ -1038,6 +1098,8 @@ llvmpipe_get_texture_image(struct llvmpipe_resource *lpr,
    const unsigned height = u_minify(lpr->base.height0, level);
    const unsigned width_t = align(width, TILE_SIZE) / TILE_SIZE;
    const unsigned height_t = align(height, TILE_SIZE) / TILE_SIZE;
+   unsigned target_offset, other_offset;
+   unsigned *target_off_ptr, *other_off_ptr;
    enum lp_texture_layout other_layout;
    boolean only_allocate;
 
@@ -1059,18 +1121,22 @@ llvmpipe_get_texture_image(struct llvmpipe_resource *lpr,
    }
 
    if (lpr->dt) {
-      assert(lpr->linear[level].data);
+      assert(lpr->linear_img.data);
    }
 
    /* which is target?  which is other? */
    if (layout == LP_TEX_LAYOUT_LINEAR) {
-      target_img = &lpr->linear[level];
-      other_img = &lpr->tiled[level];
+      target_img = &lpr->linear_img;
+      target_off_ptr = lpr->linear_mip_offsets;
+      other_img = &lpr->tiled_img;
+      other_off_ptr = lpr->tiled_mip_offsets;
       other_layout = LP_TEX_LAYOUT_TILED;
    }
    else {
-      target_img = &lpr->tiled[level];
-      other_img = &lpr->linear[level];
+      target_img = &lpr->tiled_img;
+      target_off_ptr = lpr->tiled_mip_offsets;
+      other_img = &lpr->linear_img;
+      other_off_ptr = lpr->linear_mip_offsets;
       other_layout = LP_TEX_LAYOUT_LINEAR;
    }
 
@@ -1079,21 +1145,23 @@ llvmpipe_get_texture_image(struct llvmpipe_resource *lpr,
 
    if (!target_data) {
       /* allocate memory for the target image now */
-      alloc_image_data(lpr, level, layout);
+      alloc_image_data(lpr, layout);
       target_data = target_img->data;
    }
 
-   if (face_slice > 0) {
-      unsigned target_offset, other_offset;
+   target_offset = target_off_ptr[level];
+   other_offset = other_off_ptr[level];
 
-      target_offset = face_slice * tex_image_face_size(lpr, level, layout);
-      other_offset = face_slice * tex_image_face_size(lpr, level, other_layout);
-      if (target_data) {
-         target_data = (uint8_t *) target_data + target_offset;
-      }
-      if (other_data) {
-         other_data = (uint8_t *) other_data + other_offset;
-      }
+   if (face_slice > 0) {
+      target_offset += face_slice * tex_image_face_size(lpr, level, layout);
+      other_offset += face_slice * tex_image_face_size(lpr, level, other_layout);
+   }
+
+   if (target_data) {
+      target_data = (uint8_t *) target_data + target_offset;
+   }
+   if (other_data) {
+      other_data = (uint8_t *) other_data + other_offset;
    }
 
    if (only_allocate) {
@@ -1191,7 +1259,7 @@ llvmpipe_get_texture_tile_linear(struct llvmpipe_resource *lpr,
                                  enum lp_texture_usage usage,
                                  unsigned x, unsigned y)
 {
-   struct llvmpipe_texture_image *linear_img = &lpr->linear[level];
+   struct llvmpipe_texture_image *linear_img = &lpr->linear_img;
    enum lp_texture_layout cur_layout, new_layout;
    const unsigned tx = x / TILE_SIZE, ty = y / TILE_SIZE;
    boolean convert;
@@ -1203,7 +1271,7 @@ llvmpipe_get_texture_tile_linear(struct llvmpipe_resource *lpr,
 
    if (!linear_img->data) {
       /* allocate memory for the linear image now */
-      alloc_image_data(lpr, level, LP_TEX_LAYOUT_LINEAR);
+      alloc_image_data(lpr, LP_TEX_LAYOUT_LINEAR);
    }
 
    /* compute address of the slice/face of the image that contains the tile */
@@ -1242,7 +1310,7 @@ llvmpipe_get_texture_tile(struct llvmpipe_resource *lpr,
                           enum lp_texture_usage usage,
                           unsigned x, unsigned y)
 {
-   struct llvmpipe_texture_image *tiled_img = &lpr->tiled[level];
+   struct llvmpipe_texture_image *tiled_img = &lpr->tiled_img;
    enum lp_texture_layout cur_layout, new_layout;
    const unsigned tx = x / TILE_SIZE, ty = y / TILE_SIZE;
    boolean convert;
@@ -1254,7 +1322,7 @@ llvmpipe_get_texture_tile(struct llvmpipe_resource *lpr,
 
    if (!tiled_img->data) {
       /* allocate memory for the tiled image now */
-      alloc_image_data(lpr, level, LP_TEX_LAYOUT_TILED);
+      alloc_image_data(lpr, LP_TEX_LAYOUT_TILED);
    }
 
    /* compute address of the slice/face of the image that contains the tile */
@@ -1289,94 +1357,6 @@ llvmpipe_get_texture_tile(struct llvmpipe_resource *lpr,
 
 
 /**
- * Get pointer to tiled data for rendering.
- * \return pointer to the tiled data at the given tile position
- */
-void
-llvmpipe_unswizzle_cbuf_tile(struct llvmpipe_resource *lpr,
-                             unsigned face_slice, unsigned level,
-                             unsigned x, unsigned y,
-                             uint8_t *tile)
-{
-   struct llvmpipe_texture_image *linear_img = &lpr->linear[level];
-   const unsigned tx = x / TILE_SIZE, ty = y / TILE_SIZE;
-   uint8_t *linear_image;
-
-   assert(x % TILE_SIZE == 0);
-   assert(y % TILE_SIZE == 0);
-
-   if (!linear_img->data) {
-      /* allocate memory for the linear image now */
-      alloc_image_data(lpr, level, LP_TEX_LAYOUT_LINEAR);
-   }
-
-   /* compute address of the slice/face of the image that contains the tile */
-   linear_image = llvmpipe_get_texture_image_address(lpr, face_slice, level,
-                                                     LP_TEX_LAYOUT_LINEAR);
-
-   {
-      uint ii = x, jj = y;
-      uint tile_offset = jj / TILE_SIZE + ii / TILE_SIZE;
-      uint byte_offset = tile_offset * TILE_SIZE * TILE_SIZE * 4;
-      
-      /* Note that lp_tiled_to_linear expects the tile parameter to
-       * point at the first tile in a whole-image sized array.  In
-       * this code, we have only a single tile and have to do some
-       * pointer arithmetic to figure out where the "image" would have
-       * started.
-       */
-      lp_tiled_to_linear(tile - byte_offset, linear_image,
-                         x, y, TILE_SIZE, TILE_SIZE,
-                         lpr->base.format,
-                         lpr->row_stride[level],
-                         1);       /* tiles per row */
-   }
-
-   llvmpipe_set_texture_tile_layout(lpr, face_slice, level, tx, ty,
-                                    LP_TEX_LAYOUT_LINEAR);
-}
-
-
-/**
- * Get pointer to tiled data for rendering.
- * \return pointer to the tiled data at the given tile position
- */
-void
-llvmpipe_swizzle_cbuf_tile(struct llvmpipe_resource *lpr,
-                           unsigned face_slice, unsigned level,
-                           unsigned x, unsigned y,
-                           uint8_t *tile)
-{
-   uint8_t *linear_image;
-
-   assert(x % TILE_SIZE == 0);
-   assert(y % TILE_SIZE == 0);
-
-   /* compute address of the slice/face of the image that contains the tile */
-   linear_image = llvmpipe_get_texture_image_address(lpr, face_slice, level,
-                                                     LP_TEX_LAYOUT_LINEAR);
-
-   if (linear_image) {
-      uint ii = x, jj = y;
-      uint tile_offset = jj / TILE_SIZE + ii / TILE_SIZE;
-      uint byte_offset = tile_offset * TILE_SIZE * TILE_SIZE * 4;
-
-      /* Note that lp_linear_to_tiled expects the tile parameter to
-       * point at the first tile in a whole-image sized array.  In
-       * this code, we have only a single tile and have to do some
-       * pointer arithmetic to figure out where the "image" would have
-       * started.
-       */
-      lp_linear_to_tiled(linear_image, tile - byte_offset,
-                         x, y, TILE_SIZE, TILE_SIZE,
-                         lpr->base.format,
-                         lpr->row_stride[level],
-                         1);       /* tiles per row */
-   }
-}
-
-
-/**
  * Return size of resource in bytes
  */
 unsigned
@@ -1386,10 +1366,10 @@ llvmpipe_resource_size(const struct pipe_resource *resource)
    unsigned lvl, size = 0;
 
    for (lvl = 0; lvl <= lpr->base.last_level; lvl++) {
-      if (lpr->linear[lvl].data)
+      if (lpr->linear_img.data)
          size += tex_image_size(lpr, lvl, LP_TEX_LAYOUT_LINEAR);
 
-      if (lpr->tiled[lvl].data)
+      if (lpr->tiled_img.data)
          size += tex_image_size(lpr, lvl, LP_TEX_LAYOUT_TILED);
    }
 
@@ -1438,14 +1418,13 @@ llvmpipe_init_screen_resource_funcs(struct pipe_screen *screen)
    screen->resource_destroy = llvmpipe_resource_destroy;
    screen->resource_from_handle = llvmpipe_resource_from_handle;
    screen->resource_get_handle = llvmpipe_resource_get_handle;
+   screen->can_create_resource = llvmpipe_can_create_resource;
 }
 
 
 void
 llvmpipe_init_context_resource_funcs(struct pipe_context *pipe)
 {
-   pipe->get_transfer = llvmpipe_get_transfer;
-   pipe->transfer_destroy = llvmpipe_transfer_destroy;
    pipe->transfer_map = llvmpipe_transfer_map;
    pipe->transfer_unmap = llvmpipe_transfer_unmap;
  

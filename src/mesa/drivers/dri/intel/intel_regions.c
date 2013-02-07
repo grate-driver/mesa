@@ -210,7 +210,7 @@ intel_region_alloc(struct intel_screen *screen,
       return NULL;
 
    region = intel_region_alloc_internal(screen, cpp, width, height,
-                                        aligned_pitch / cpp, tiling, buffer);
+                                        aligned_pitch, tiling, buffer);
    if (region == NULL) {
       drm_intel_bo_unreference(buffer);
       return NULL;
@@ -344,8 +344,6 @@ _mesa_copy_rect(GLubyte * dst,
 {
    GLuint i;
 
-   dst_pitch *= cpp;
-   src_pitch *= cpp;
    dst += dst_x * cpp;
    src += src_x * cpp;
    dst += dst_y * dst_pitch;
@@ -440,7 +438,7 @@ intel_region_get_aligned_offset(struct intel_region *region, uint32_t x,
                                 uint32_t y, bool map_stencil_as_y_tiled)
 {
    int cpp = region->cpp;
-   uint32_t pitch = region->pitch * cpp;
+   uint32_t pitch = region->pitch;
    uint32_t tiling = region->tiling;
 
    if (map_stencil_as_y_tiled) {

@@ -41,12 +41,10 @@
 
 
 
-#if _HAVE_FULL_GL
 void GLAPIENTRY
 _mesa_ClearIndex( GLfloat c )
 {
    GET_CURRENT_CONTEXT(ctx);
-   ASSERT_OUTSIDE_BEGIN_END(ctx);
 
    if (ctx->Color.ClearIndex == (GLuint) c)
       return;
@@ -54,7 +52,6 @@ _mesa_ClearIndex( GLfloat c )
    FLUSH_VERTICES(ctx, _NEW_COLOR);
    ctx->Color.ClearIndex = (GLuint) c;
 }
-#endif
 
 
 /**
@@ -76,7 +73,6 @@ _mesa_ClearColor( GLclampf red, GLclampf green, GLclampf blue, GLclampf alpha )
 {
    GLfloat tmp[4];
    GET_CURRENT_CONTEXT(ctx);
-   ASSERT_OUTSIDE_BEGIN_END(ctx);
 
    tmp[0] = red;
    tmp[1] = green;
@@ -99,7 +95,6 @@ _mesa_ClearColorIiEXT(GLint r, GLint g, GLint b, GLint a)
 {
    GLint tmp[4];
    GET_CURRENT_CONTEXT(ctx);
-   ASSERT_OUTSIDE_BEGIN_END(ctx);
 
    tmp[0] = r;
    tmp[1] = g;
@@ -122,7 +117,6 @@ _mesa_ClearColorIuiEXT(GLuint r, GLuint g, GLuint b, GLuint a)
 {
    GLuint tmp[4];
    GET_CURRENT_CONTEXT(ctx);
-   ASSERT_OUTSIDE_BEGIN_END(ctx);
 
    tmp[0] = r;
    tmp[1] = g;
@@ -151,7 +145,7 @@ void GLAPIENTRY
 _mesa_Clear( GLbitfield mask )
 {
    GET_CURRENT_CONTEXT(ctx);
-   ASSERT_OUTSIDE_BEGIN_END_AND_FLUSH(ctx);
+   FLUSH_VERTICES(ctx, 0);
 
    FLUSH_CURRENT(ctx, 0);
 
@@ -307,7 +301,7 @@ void GLAPIENTRY
 _mesa_ClearBufferiv(GLenum buffer, GLint drawbuffer, const GLint *value)
 {
    GET_CURRENT_CONTEXT(ctx);
-   ASSERT_OUTSIDE_BEGIN_END_AND_FLUSH(ctx);
+   FLUSH_VERTICES(ctx, 0);
 
    FLUSH_CURRENT(ctx, 0);
 
@@ -398,8 +392,8 @@ void GLAPIENTRY
 _mesa_ClearBufferuiv(GLenum buffer, GLint drawbuffer, const GLuint *value)
 {
    GET_CURRENT_CONTEXT(ctx);
-   ASSERT_OUTSIDE_BEGIN_END_AND_FLUSH(ctx);
 
+   FLUSH_VERTICES(ctx, 0);
    FLUSH_CURRENT(ctx, 0);
 
    if (ctx->NewState) {
@@ -470,8 +464,8 @@ void GLAPIENTRY
 _mesa_ClearBufferfv(GLenum buffer, GLint drawbuffer, const GLfloat *value)
 {
    GET_CURRENT_CONTEXT(ctx);
-   ASSERT_OUTSIDE_BEGIN_END_AND_FLUSH(ctx);
 
+   FLUSH_VERTICES(ctx, 0);
    FLUSH_CURRENT(ctx, 0);
 
    if (ctx->NewState) {
@@ -565,8 +559,7 @@ _mesa_ClearBufferfi(GLenum buffer, GLint drawbuffer,
    GET_CURRENT_CONTEXT(ctx);
    GLbitfield mask = 0;
 
-   ASSERT_OUTSIDE_BEGIN_END_AND_FLUSH(ctx);
-
+   FLUSH_VERTICES(ctx, 0);
    FLUSH_CURRENT(ctx, 0);
 
    if (buffer != GL_DEPTH_STENCIL) {

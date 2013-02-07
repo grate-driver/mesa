@@ -100,7 +100,7 @@ set_vertices(struct vertex *vertices, unsigned bytes)
                                               bytes,
                                               vertices);
 
-   info.ctx->set_vertex_buffers(info.ctx, 1, &vbuf);
+   info.ctx->set_vertex_buffers(info.ctx, 0, 1, &vbuf);
 }
 
 
@@ -158,7 +158,7 @@ draw(void)
    union pipe_color_union clear_color;
 
    struct pipe_query *q1, *q2;
-   uint64_t res1, res2;
+   union pipe_query_result res1, res2;
 
    clear_color.f[0] = 0.25;
    clear_color.f[1] = 0.25;
@@ -187,13 +187,13 @@ draw(void)
    info.ctx->get_query_result(info.ctx, q1, TRUE, &res1);
    info.ctx->get_query_result(info.ctx, q2, TRUE, &res2);
 
-   printf("result1 = %lu  result2 = %lu\n", res1, res2);
-   if (res1 < expected1_min || res1 > expected1_max)
+   printf("result1 = %lu  result2 = %lu\n", res1.u64, res2.u64);
+   if (res1.u64 < expected1_min || res1.u64 > expected1_max)
       printf("  Failure: result1 should be near %d\n", expected1);
-   if (res2 < expected2_min || res2 > expected2_max)
+   if (res2.u64 < expected2_min || res2.u64 > expected2_max)
       printf("  Failure: result2 should be near %d\n", expected2);
 
-   info.ctx->flush(info.ctx, NULL);
+   info.ctx->flush(info.ctx, NULL, 0);
 
    graw_util_flush_front(&info);
 

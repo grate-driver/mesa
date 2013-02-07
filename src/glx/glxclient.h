@@ -47,7 +47,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
-#ifdef WIN32
+#ifdef _WIN32
 #include <stdint.h>
 #endif
 #include "GL/glxproto.h"
@@ -113,9 +113,9 @@ struct __GLXDRIscreenRec {
 				       struct glx_config *config);
 
    int64_t (*swapBuffers)(__GLXDRIdrawable *pdraw, int64_t target_msc,
-			  int64_t divisor, int64_t remainder);
+			  int64_t divisor, int64_t remainder, Bool flush);
    void (*copySubBuffer)(__GLXDRIdrawable *pdraw,
-			 int x, int y, int width, int height);
+			 int x, int y, int width, int height, Bool flush);
    int (*getDrawableMSC)(struct glx_screen *psc, __GLXDRIdrawable *pdraw,
 			 int64_t *ust, int64_t *msc, int64_t *sbc);
    int (*waitForMSC)(__GLXDRIdrawable *pdraw, int64_t target_msc,

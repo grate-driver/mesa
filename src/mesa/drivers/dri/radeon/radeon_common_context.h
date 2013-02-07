@@ -384,7 +384,7 @@ struct radeon_cmdbuf {
 };
 
 struct radeon_context {
-   struct gl_context *glCtx;
+   struct gl_context glCtx;             /**< base class, must be first */
    radeonScreenPtr radeonScreen;	/* Screen private DRI data */
 
    /* Texture object bookkeeping
@@ -499,7 +499,10 @@ struct radeon_context {
    } vtbl;
 };
 
-#define RADEON_CONTEXT(glctx) ((radeonContextPtr)(ctx->DriverCtx))
+static inline radeonContextPtr RADEON_CONTEXT(struct gl_context *ctx)
+{
+	return (radeonContextPtr) ctx;
+}
 
 static inline __DRIdrawable* radeon_get_drawable(radeonContextPtr radeon)
 {

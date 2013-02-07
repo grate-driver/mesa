@@ -26,7 +26,8 @@
 #include "util/u_transfer.h"
 
 /* flag to indicate a resource is to be used as a transfer so should not be tiled */
-#define R600_RESOURCE_FLAG_TRANSFER     PIPE_RESOURCE_FLAG_DRV_PRIV
+#define R600_RESOURCE_FLAG_TRANSFER		PIPE_RESOURCE_FLAG_DRV_PRIV
+#define R600_RESOURCE_FLAG_FLUSHED_DEPTH	(PIPE_RESOURCE_FLAG_DRV_PRIV << 1)
 
 /* Texture transfer. */
 struct r600_transfer {
@@ -35,7 +36,7 @@ struct r600_transfer {
 	/* Buffer transfer. */
 	struct pipe_transfer		*buffer_transfer;
 	unsigned			offset;
-	struct pipe_resource		*staging_texture;
+	struct pipe_resource		*staging;
 };
 
 struct r600_resource_texture {
@@ -47,8 +48,8 @@ struct r600_resource_texture {
 	enum pipe_format		real_format;
 
 	unsigned			pitch_override;
-	unsigned			depth;
-	unsigned			dirty_db;
+	unsigned			is_depth;
+	unsigned			dirty_db_mask; /* each bit says if that miplevel is dirty */
 	struct r600_resource_texture	*flushed_depth_texture;
 	boolean				is_flushing_texture;
 	struct radeon_surface		surface;
@@ -67,7 +68,9 @@ struct pipe_resource *si_texture_from_handle(struct pipe_screen *screen,
 					     const struct pipe_resource *base,
 					     struct winsys_handle *whandle);
 
-int r600_texture_depth_flush(struct pipe_context *ctx, struct pipe_resource *texture, boolean just_create);
+bool r600_init_flushed_depth_texture(struct pipe_context *ctx,
+				     struct pipe_resource *texture,
+				     struct r600_resource_texture **staging);
 
 
 struct r600_context;

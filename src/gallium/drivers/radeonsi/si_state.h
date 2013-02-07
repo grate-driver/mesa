@@ -43,6 +43,7 @@ struct si_state_viewport {
 struct si_state_rasterizer {
 	struct si_pm4_state	pm4;
 	bool			flatshade;
+	bool			two_side;
 	unsigned		sprite_coord_enable;
 	unsigned		pa_sc_line_stipple;
 	unsigned		pa_su_sc_mode_cntl;
@@ -54,7 +55,8 @@ struct si_state_rasterizer {
 
 struct si_state_dsa {
 	struct si_pm4_state	pm4;
-	unsigned		alpha_ref;
+	float			alpha_ref;
+	unsigned		alpha_func;
 	unsigned		db_render_override;
 	unsigned		db_render_control;
 	uint8_t			valuemask[2];
@@ -84,6 +86,8 @@ union si_state {
 		struct si_pm4_state		*fb_blend;
 		struct si_pm4_state		*dsa_stencil_ref;
 		struct si_pm4_state		*vs;
+		struct si_pm4_state		*vs_sampler_views;
+		struct si_pm4_state		*vs_sampler;
 		struct si_pm4_state		*vs_const;
 		struct si_pm4_state		*ps;
 		struct si_pm4_state		*ps_sampler_views;
@@ -100,6 +104,9 @@ union si_state {
 
 #define si_pm4_block_idx(member) \
 	(offsetof(union si_state, named.member) / sizeof(struct si_pm4_state *))
+
+#define si_pm4_state_changed(rctx, member) \
+	((rctx)->queued.named.member != (rctx)->emitted.named.member)
 
 #define si_pm4_bind_state(rctx, member, value) \
 	do { \
@@ -128,11 +135,11 @@ union si_state {
 /* si_state.c */
 struct si_pipe_shader_selector;
 
-bool si_is_format_supported(struct pipe_screen *screen,
-			    enum pipe_format format,
-			    enum pipe_texture_target target,
-			    unsigned sample_count,
-			    unsigned usage);
+boolean si_is_format_supported(struct pipe_screen *screen,
+                               enum pipe_format format,
+                               enum pipe_texture_target target,
+                               unsigned sample_count,
+                               unsigned usage);
 int si_shader_select(struct pipe_context *ctx,
 		     struct si_pipe_shader_selector *sel,
 		     unsigned *dirty);
@@ -156,6 +163,12 @@ void si_set_so_targets(struct pipe_context *ctx,
 void si_draw_vbo(struct pipe_context *ctx, const struct pipe_draw_info *dinfo);
 
 /* si_commands.c */
+void si_cmd_context_control(struct si_pm4_state *pm4);
+void si_cmd_draw_index_2(struct si_pm4_state *pm4, uint32_t max_size,
+			 uint64_t index_base, uint32_t index_count,
+			 uint32_t initiator, bool predicate);
+void si_cmd_draw_index_auto(struct si_pm4_state *pm4, uint32_t count,
+			    uint32_t initiator, bool predicate);
 void si_cmd_surface_sync(struct si_pm4_state *pm4, uint32_t cp_coher_cntl);
 
 #endif

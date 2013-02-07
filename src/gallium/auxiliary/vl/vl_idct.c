@@ -603,7 +603,6 @@ init_source(struct vl_idct *idct, struct vl_idct_buffer *buffer)
    surf_templ.format = tex->format;
    surf_templ.u.tex.first_layer = 0;
    surf_templ.u.tex.last_layer = 0;
-   surf_templ.usage = PIPE_BIND_SAMPLER_VIEW | PIPE_BIND_RENDER_TARGET;
    buffer->fb_state_mismatch.cbufs[0] = idct->pipe->create_surface(idct->pipe, tex, &surf_templ);
 
    buffer->viewport_mismatch.scale[0] = tex->width0;
@@ -643,7 +642,6 @@ init_intermediate(struct vl_idct *idct, struct vl_idct_buffer *buffer)
       surf_templ.format = tex->format;
       surf_templ.u.tex.first_layer = i;
       surf_templ.u.tex.last_layer = i;
-      surf_templ.usage = PIPE_BIND_SAMPLER_VIEW | PIPE_BIND_RENDER_TARGET;
       buffer->fb_state.cbufs[i] = idct->pipe->create_surface(
          idct->pipe, tex, &surf_templ);
 
@@ -713,20 +711,14 @@ vl_idct_upload_matrix(struct pipe_context *pipe, float scale)
    if (!matrix)
       goto error_matrix;
 
-   buf_transfer = pipe->get_transfer
-   (
-      pipe, matrix,
-      0, PIPE_TRANSFER_WRITE | PIPE_TRANSFER_DISCARD_RANGE,
-      &rect
-   );
-   if (!buf_transfer)
-      goto error_transfer;
-
-   pitch = buf_transfer->stride / sizeof(float);
-
-   f = pipe->transfer_map(pipe, buf_transfer);
+   f = pipe->transfer_map(pipe, matrix, 0,
+                                     PIPE_TRANSFER_WRITE |
+                                     PIPE_TRANSFER_DISCARD_RANGE,
+                                     &rect, &buf_transfer);
    if (!f)
       goto error_map;
+
+   pitch = buf_transfer->stride / sizeof(float);
 
    for(i = 0; i < VL_BLOCK_HEIGHT; ++i)
       for(j = 0; j < VL_BLOCK_WIDTH; ++j)
@@ -734,7 +726,6 @@ vl_idct_upload_matrix(struct pipe_context *pipe, float scale)
          f[i * pitch + j] = ((const float (*)[8])const_matrix)[j][i] * scale;
 
    pipe->transfer_unmap(pipe, buf_transfer);
-   pipe->transfer_destroy(pipe, buf_transfer);
 
    memset(&sv_templ, 0, sizeof(sv_templ));
    u_sampler_view_default_template(&sv_templ, matrix, matrix->format);
@@ -746,9 +737,6 @@ vl_idct_upload_matrix(struct pipe_context *pipe, float scale)
    return sv;
 
 error_map:
-   pipe->transfer_destroy(pipe, buf_transfer);
-
-error_transfer:
    pipe_resource_reference(&matrix, NULL);
 
 error_matrix:

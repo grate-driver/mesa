@@ -64,7 +64,7 @@ validate_texture_wrap_mode(struct gl_context * ctx, GLenum target, GLenum wrap)
       /* GL_CLAMP was removed in the core profile, and it has never existed in
        * OpenGL ES.
        */
-      supported = (ctx->API == API_OPENGL)
+      supported = (ctx->API == API_OPENGL_COMPAT)
          && (target != GL_TEXTURE_EXTERNAL_OES);
       break;
 
@@ -168,6 +168,11 @@ get_texobj(struct gl_context *ctx, GLenum target, GLboolean get)
    case GL_TEXTURE_EXTERNAL_OES:
       if (_mesa_is_gles(ctx) && ctx->Extensions.OES_EGL_image_external) {
          return texUnit->CurrentTex[TEXTURE_EXTERNAL_INDEX];
+      }
+      break;
+   case GL_TEXTURE_CUBE_MAP_ARRAY:
+      if (ctx->Extensions.ARB_texture_cube_map_array) {
+         return texUnit->CurrentTex[TEXTURE_CUBE_ARRAY_INDEX];
       }
       break;
    default:
@@ -344,7 +349,7 @@ set_tex_parameteri(struct gl_context *ctx,
       if (texObj->MaxLevel == params[0])
          return GL_FALSE;
       if (params[0] < 0 || texObj->Target == GL_TEXTURE_RECTANGLE_ARB) {
-         _mesa_error(ctx, GL_INVALID_OPERATION,
+         _mesa_error(ctx, GL_INVALID_VALUE,
                      "glTexParameter(param=%d)", params[0]);
          return GL_FALSE;
       }
@@ -353,7 +358,7 @@ set_tex_parameteri(struct gl_context *ctx,
       return GL_TRUE;
 
    case GL_GENERATE_MIPMAP_SGIS:
-      if (ctx->API != API_OPENGL && ctx->API != API_OPENGLES)
+      if (ctx->API != API_OPENGL_COMPAT && ctx->API != API_OPENGLES)
          goto invalid_pname;
 
       if (params[0] && texObj->Target == GL_TEXTURE_EXTERNAL_OES)
@@ -413,7 +418,7 @@ set_tex_parameteri(struct gl_context *ctx,
       /* GL_DEPTH_TEXTURE_MODE_ARB is removed in core-profile and it has never
        * existed in OpenGL ES.
        */
-      if (ctx->API == API_OPENGL && ctx->Extensions.ARB_depth_texture) {
+      if (ctx->API == API_OPENGL_COMPAT && ctx->Extensions.ARB_depth_texture) {
          if (texObj->DepthMode == params[0])
             return GL_FALSE;
          if (params[0] == GL_LUMINANCE ||
@@ -428,7 +433,6 @@ set_tex_parameteri(struct gl_context *ctx,
       }
       goto invalid_pname;
 
-#if FEATURE_OES_draw_texture
    case GL_TEXTURE_CROP_RECT_OES:
       if (ctx->API != API_OPENGLES || !ctx->Extensions.OES_draw_texture)
          goto invalid_pname;
@@ -438,7 +442,6 @@ set_tex_parameteri(struct gl_context *ctx,
       texObj->CropRect[2] = params[2];
       texObj->CropRect[3] = params[3];
       return GL_TRUE;
-#endif
 
    case GL_TEXTURE_SWIZZLE_R_EXT:
    case GL_TEXTURE_SWIZZLE_G_EXT:
@@ -559,7 +562,7 @@ set_tex_parameterf(struct gl_context *ctx,
       return GL_TRUE;
 
    case GL_TEXTURE_PRIORITY:
-      if (ctx->API != API_OPENGL)
+      if (ctx->API != API_OPENGL_COMPAT)
          goto invalid_pname;
 
       flush(ctx);
@@ -592,7 +595,7 @@ set_tex_parameterf(struct gl_context *ctx,
        * It was removed in core-profile, and it has never existed in OpenGL
        * ES.
        */
-      if (ctx->API != API_OPENGL)
+      if (ctx->API != API_OPENGL_COMPAT)
          goto invalid_pname;
 
       if (texObj->Sampler.LodBias != params[0]) {
@@ -639,7 +642,6 @@ _mesa_TexParameterf(GLenum target, GLenum pname, GLfloat param)
    GLboolean need_update;
    struct gl_texture_object *texObj;
    GET_CURRENT_CONTEXT(ctx);
-   ASSERT_OUTSIDE_BEGIN_END(ctx);
 
    texObj = get_texobj(ctx, target, GL_FALSE);
    if (!texObj)
@@ -659,21 +661,16 @@ _mesa_TexParameterf(GLenum target, GLenum pname, GLfloat param)
    case GL_DEPTH_TEXTURE_MODE_ARB:
    case GL_TEXTURE_SRGB_DECODE_EXT:
    case GL_TEXTURE_CUBE_MAP_SEAMLESS:
-      {
-         /* convert float param to int */
-         GLint p[4];
-         p[0] = (GLint) param;
-         p[1] = p[2] = p[3] = 0;
-         need_update = set_tex_parameteri(ctx, texObj, pname, p);
-      }
-      break;
    case GL_TEXTURE_SWIZZLE_R_EXT:
    case GL_TEXTURE_SWIZZLE_G_EXT:
    case GL_TEXTURE_SWIZZLE_B_EXT:
    case GL_TEXTURE_SWIZZLE_A_EXT:
       {
          GLint p[4];
-         p[0] = (GLint) param;
+         p[0] = (param > 0) ?
+                ((param > INT_MAX) ? INT_MAX : (GLint) (param + 0.5)) :
+                ((param < INT_MIN) ? INT_MIN : (GLint) (param - 0.5));
+
          p[1] = p[2] = p[3] = 0;
          need_update = set_tex_parameteri(ctx, texObj, pname, p);
       }
@@ -700,7 +697,6 @@ _mesa_TexParameterfv(GLenum target, GLenum pname, const GLfloat *params)
    GLboolean need_update;
    struct gl_texture_object *texObj;
    GET_CURRENT_CONTEXT(ctx);
-   ASSERT_OUTSIDE_BEGIN_END(ctx);
 
    texObj = get_texobj(ctx, target, GL_FALSE);
    if (!texObj)
@@ -728,8 +724,6 @@ _mesa_TexParameterfv(GLenum target, GLenum pname, const GLfloat *params)
          need_update = set_tex_parameteri(ctx, texObj, pname, p);
       }
       break;
-
-#if FEATURE_OES_draw_texture
    case GL_TEXTURE_CROP_RECT_OES:
       {
          /* convert float params to int */
@@ -741,8 +735,6 @@ _mesa_TexParameterfv(GLenum target, GLenum pname, const GLfloat *params)
          need_update = set_tex_parameteri(ctx, texObj, pname, iparams);
       }
       break;
-#endif
-
    case GL_TEXTURE_SWIZZLE_R_EXT:
    case GL_TEXTURE_SWIZZLE_G_EXT:
    case GL_TEXTURE_SWIZZLE_B_EXT:
@@ -776,7 +768,6 @@ _mesa_TexParameteri(GLenum target, GLenum pname, GLint param)
    GLboolean need_update;
    struct gl_texture_object *texObj;
    GET_CURRENT_CONTEXT(ctx);
-   ASSERT_OUTSIDE_BEGIN_END(ctx);
 
    texObj = get_texobj(ctx, target, GL_FALSE);
    if (!texObj)
@@ -820,7 +811,6 @@ _mesa_TexParameteriv(GLenum target, GLenum pname, const GLint *params)
    GLboolean need_update;
    struct gl_texture_object *texObj;
    GET_CURRENT_CONTEXT(ctx);
-   ASSERT_OUTSIDE_BEGIN_END(ctx);
 
    texObj = get_texobj(ctx, target, GL_FALSE);
    if (!texObj)
@@ -881,7 +871,6 @@ _mesa_TexParameterIiv(GLenum target, GLenum pname, const GLint *params)
 {
    struct gl_texture_object *texObj;
    GET_CURRENT_CONTEXT(ctx);
-   ASSERT_OUTSIDE_BEGIN_END(ctx);
 
    texObj = get_texobj(ctx, target, GL_FALSE);
    if (!texObj)
@@ -911,7 +900,6 @@ _mesa_TexParameterIuiv(GLenum target, GLenum pname, const GLuint *params)
 {
    struct gl_texture_object *texObj;
    GET_CURRENT_CONTEXT(ctx);
-   ASSERT_OUTSIDE_BEGIN_END(ctx);
 
    texObj = get_texobj(ctx, target, GL_FALSE);
    if (!texObj)
@@ -977,7 +965,7 @@ legal_get_tex_level_parameter_target(struct gl_context *ctx, GLenum target)
        * From the OpenGL 3.1 spec:
        * "target may also be TEXTURE_BUFFER, indicating the texture buffer."
        */
-      return _mesa_is_desktop_gl(ctx) && ctx->Version >= 31;
+      return ctx->API == API_OPENGL_CORE && ctx->Version >= 31;
    default:
       return GL_FALSE;
    }
@@ -1248,7 +1236,6 @@ _mesa_GetTexLevelParameteriv( GLenum target, GLint level,
    struct gl_texture_object *texObj;
    GLint maxLevels;
    GET_CURRENT_CONTEXT(ctx);
-   ASSERT_OUTSIDE_BEGIN_END(ctx);
 
    if (ctx->Texture.CurrentUnit >= ctx->Const.MaxCombinedTextureImageUnits) {
       _mesa_error(ctx, GL_INVALID_OPERATION,
@@ -1286,7 +1273,6 @@ _mesa_GetTexParameterfv( GLenum target, GLenum pname, GLfloat *params )
 {
    struct gl_texture_object *obj;
    GET_CURRENT_CONTEXT(ctx);
-   ASSERT_OUTSIDE_BEGIN_END(ctx);
 
    obj = get_texobj(ctx, target, GL_TRUE);
    if (!obj)
@@ -1329,13 +1315,13 @@ _mesa_GetTexParameterfv( GLenum target, GLenum pname, GLfloat *params )
          }
          break;
       case GL_TEXTURE_RESIDENT:
-         if (ctx->API != API_OPENGL)
+         if (ctx->API != API_OPENGL_COMPAT)
             goto invalid_pname;
 
          *params = 1.0F;
          break;
       case GL_TEXTURE_PRIORITY:
-         if (ctx->API != API_OPENGL)
+         if (ctx->API != API_OPENGL_COMPAT)
             goto invalid_pname;
 
          *params = obj->Priority;
@@ -1367,7 +1353,7 @@ _mesa_GetTexParameterfv( GLenum target, GLenum pname, GLfloat *params )
          *params = obj->Sampler.MaxAnisotropy;
          break;
       case GL_GENERATE_MIPMAP_SGIS:
-         if (ctx->API != API_OPENGL && ctx->API != API_OPENGLES)
+         if (ctx->API != API_OPENGL_COMPAT && ctx->API != API_OPENGLES)
             goto invalid_pname;
 
 	 *params = (GLfloat) obj->GenerateMipmap;
@@ -1388,27 +1374,25 @@ _mesa_GetTexParameterfv( GLenum target, GLenum pname, GLfloat *params )
          /* GL_DEPTH_TEXTURE_MODE_ARB is removed in core-profile and it has
           * never existed in OpenGL ES.
           */
-         if (ctx->API != API_OPENGL || !ctx->Extensions.ARB_depth_texture)
+         if (ctx->API != API_OPENGL_COMPAT || !ctx->Extensions.ARB_depth_texture)
             goto invalid_pname;
          *params = (GLfloat) obj->DepthMode;
          break;
       case GL_TEXTURE_LOD_BIAS:
-         if (ctx->API != API_OPENGL)
+         if (ctx->API != API_OPENGL_COMPAT)
             goto invalid_pname;
 
          *params = obj->Sampler.LodBias;
          break;
-#if FEATURE_OES_draw_texture
       case GL_TEXTURE_CROP_RECT_OES:
          if (ctx->API != API_OPENGLES || !ctx->Extensions.OES_draw_texture)
             goto invalid_pname;
 
-         params[0] = obj->CropRect[0];
-         params[1] = obj->CropRect[1];
-         params[2] = obj->CropRect[2];
-         params[3] = obj->CropRect[3];
+         params[0] = (GLfloat) obj->CropRect[0];
+         params[1] = (GLfloat) obj->CropRect[1];
+         params[2] = (GLfloat) obj->CropRect[2];
+         params[3] = (GLfloat) obj->CropRect[3];
          break;
-#endif
 
       case GL_TEXTURE_SWIZZLE_R_EXT:
       case GL_TEXTURE_SWIZZLE_G_EXT:
@@ -1473,7 +1457,6 @@ _mesa_GetTexParameteriv( GLenum target, GLenum pname, GLint *params )
 {
    struct gl_texture_object *obj;
    GET_CURRENT_CONTEXT(ctx);
-   ASSERT_OUTSIDE_BEGIN_END(ctx);
 
    obj = get_texobj(ctx, target, GL_TRUE);
    if (!obj)
@@ -1513,13 +1496,13 @@ _mesa_GetTexParameteriv( GLenum target, GLenum pname, GLint *params )
          }
          break;
       case GL_TEXTURE_RESIDENT:
-         if (ctx->API != API_OPENGL)
+         if (ctx->API != API_OPENGL_COMPAT)
             goto invalid_pname;
 
          *params = 1;
          break;
       case GL_TEXTURE_PRIORITY:
-         if (ctx->API != API_OPENGL)
+         if (ctx->API != API_OPENGL_COMPAT)
             goto invalid_pname;
 
          *params = FLOAT_TO_INT(obj->Priority);
@@ -1551,7 +1534,7 @@ _mesa_GetTexParameteriv( GLenum target, GLenum pname, GLint *params )
          *params = (GLint) obj->Sampler.MaxAnisotropy;
          break;
       case GL_GENERATE_MIPMAP_SGIS:
-         if (ctx->API != API_OPENGL && ctx->API != API_OPENGLES)
+         if (ctx->API != API_OPENGL_COMPAT && ctx->API != API_OPENGLES)
             goto invalid_pname;
 
 	 *params = (GLint) obj->GenerateMipmap;
@@ -1569,17 +1552,16 @@ _mesa_GetTexParameteriv( GLenum target, GLenum pname, GLint *params )
          *params = (GLint) obj->Sampler.CompareFunc;
          break;
       case GL_DEPTH_TEXTURE_MODE_ARB:
-         if (ctx->API != API_OPENGL || !ctx->Extensions.ARB_depth_texture)
+         if (ctx->API != API_OPENGL_COMPAT || !ctx->Extensions.ARB_depth_texture)
             goto invalid_pname;
          *params = (GLint) obj->DepthMode;
          break;
       case GL_TEXTURE_LOD_BIAS:
-         if (ctx->API != API_OPENGL)
+         if (ctx->API != API_OPENGL_COMPAT)
             goto invalid_pname;
 
          *params = (GLint) obj->Sampler.LodBias;
          break;
-#if FEATURE_OES_draw_texture
       case GL_TEXTURE_CROP_RECT_OES:
          if (ctx->API != API_OPENGLES || !ctx->Extensions.OES_draw_texture)
             goto invalid_pname;
@@ -1589,7 +1571,6 @@ _mesa_GetTexParameteriv( GLenum target, GLenum pname, GLint *params )
          params[2] = obj->CropRect[2];
          params[3] = obj->CropRect[3];
          break;
-#endif
       case GL_TEXTURE_SWIZZLE_R_EXT:
       case GL_TEXTURE_SWIZZLE_G_EXT:
       case GL_TEXTURE_SWIZZLE_B_EXT:
@@ -1654,7 +1635,6 @@ _mesa_GetTexParameterIiv(GLenum target, GLenum pname, GLint *params)
 {
    struct gl_texture_object *texObj;
    GET_CURRENT_CONTEXT(ctx);
-   ASSERT_OUTSIDE_BEGIN_END(ctx);
 
    texObj = get_texobj(ctx, target, GL_TRUE);
    if (!texObj)
@@ -1676,7 +1656,6 @@ _mesa_GetTexParameterIuiv(GLenum target, GLenum pname, GLuint *params)
 {
    struct gl_texture_object *texObj;
    GET_CURRENT_CONTEXT(ctx);
-   ASSERT_OUTSIDE_BEGIN_END(ctx);
 
    texObj = get_texobj(ctx, target, GL_TRUE);
    if (!texObj)

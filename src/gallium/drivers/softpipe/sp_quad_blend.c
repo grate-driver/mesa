@@ -568,9 +568,9 @@ blend_quad(struct quad_stage *qs,
          float diff[4], temp[4];
          VEC4_SUB(diff, one, blend_dest[3]);
          VEC4_MIN(temp, alpha, diff);
-         VEC4_MUL(blend_dest[0], quadColor[0], temp); /* R */
-         VEC4_MUL(blend_dest[1], quadColor[1], temp); /* G */
-         VEC4_MUL(blend_dest[2], quadColor[2], temp); /* B */
+         VEC4_MUL(blend_dest[0], blend_dest[0], temp); /* R */
+         VEC4_MUL(blend_dest[1], blend_dest[1], temp); /* G */
+         VEC4_MUL(blend_dest[2], blend_dest[2], temp); /* B */
       }
       break;
    case PIPE_BLENDFACTOR_CONST_COLOR:
@@ -949,7 +949,7 @@ blend_fallback(struct quad_stage *qs,
       for (q = 0; q < nr; q++) {
          struct quad_header *quad = quads[q];
          float (*quadColor)[4];
-         float (*quadColor2)[4];
+         float (*quadColor2)[4] = NULL;
          float temp_quad_color[TGSI_QUAD_SIZE][4];
          const int itx = (quad->input.x0 & (TILE_SIZE-1));
          const int ity = (quad->input.y0 & (TILE_SIZE-1));

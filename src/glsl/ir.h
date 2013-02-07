@@ -265,9 +265,11 @@ protected:
 enum ir_variable_mode {
    ir_var_auto = 0,     /**< Function local variables and globals. */
    ir_var_uniform,      /**< Variable declared as a uniform. */
-   ir_var_in,
-   ir_var_out,
-   ir_var_inout,
+   ir_var_shader_in,
+   ir_var_shader_out,
+   ir_var_function_in,
+   ir_var_function_out,
+   ir_var_function_inout,
    ir_var_const_in,	/**< "in" param that must be a constant expression */
    ir_var_system_value, /**< Ex: front-face, instance-id, etc. */
    ir_var_temporary	/**< Temporary variable generated during compilation. */
@@ -348,6 +350,41 @@ public:
    glsl_interp_qualifier determine_interpolation_mode(bool flat_shade);
 
    /**
+    * Determine whether or not a variable is part of a uniform block.
+    */
+   inline bool is_in_uniform_block() const
+   {
+      return this->mode == ir_var_uniform && this->interface_type != NULL;
+   }
+
+   /**
+    * Determine whether or not a variable is the declaration of an interface
+    * block
+    *
+    * For the first declaration below, there will be an \c ir_variable named
+    * "instance" whose type and whose instance_type will be the same
+    *  \cglsl_type.  For the second declaration, there will be an \c ir_variable
+    * named "f" whose type is float and whose instance_type is B2.
+    *
+    * "instance" is an interface instance variable, but "f" is not.
+    *
+    * uniform B1 {
+    *     float f;
+    * } instance;
+    *
+    * uniform B2 {
+    *     float f;
+    * };
+    */
+   inline bool is_interface_instance() const
+   {
+      const glsl_type *const t = this->type;
+
+      return (t == this->interface_type)
+         || (t->is_array() && t->fields.array == this->interface_type);
+    }
+
+   /**
     * Declared type of the variable
     */
    const struct glsl_type *type;
@@ -401,7 +438,7 @@ public:
     *
     * \sa ir_variable_mode
     */
-   unsigned mode:3;
+   unsigned mode:4;
 
    /**
     * Interpolation mode for shader inputs / outputs
@@ -437,6 +474,24 @@ public:
    unsigned has_initializer:1;
 
    /**
+    * Is this variable a generic output or input that has not yet been matched
+    * up to a variable in another stage of the pipeline?
+    *
+    * This is used by the linker as scratch storage while assigning locations
+    * to generic inputs and outputs.
+    */
+   unsigned is_unmatched_generic_inout:1;
+
+   /**
+    * If non-zero, then this variable may be packed along with other variables
+    * into a single varying slot, so this offset should be applied when
+    * accessing components.  For example, an offset of 1 means that the x
+    * component of this variable is actually stored in component y of the
+    * location specified by \c location.
+    */
+   unsigned location_frac:2;
+
+   /**
     * \brief Layout qualifier for gl_FragDepth.
     *
     * This is not equal to \c ir_depth_layout_none if and only if this
@@ -461,16 +516,6 @@ public:
     * slot has not been assigned, the value will be -1.
     */
    int location;
-
-   /**
-    * Uniform block number for uniforms.
-    *
-    * This index is into the shader's list of uniform blocks, not the
-    * linked program's merged list.
-    *
-    * If the variable is not in a uniform block, the value will be -1.
-    */
-   int uniform_block;
 
    /**
     * output index for dual source blending.
@@ -512,6 +557,14 @@ public:
     * objects.
     */
    ir_constant *constant_initializer;
+
+   /**
+    * For variables that are in an interface block or are an instance of an
+    * interface block, this is the \c GLSL_TYPE_INTERFACE type for that block.
+    *
+    * \sa ir_variable::location
+    */
+   const glsl_type *interface_type;
 };
 
 
@@ -890,7 +943,7 @@ public:
    unsigned write_mask:4;
 };
 
-/* Update ir_expression::num_operands() and operator_strs when
+/* Update ir_expression::get_num_operands() and operator_strs when
  * updating this list.
  */
 enum ir_expression_operation {
@@ -949,6 +1002,32 @@ enum ir_expression_operation {
    /*@{*/
    ir_unop_dFdx,
    ir_unop_dFdy,
+   /*@}*/
+
+   /**
+    * \name Floating point pack and unpack operations.
+    */
+   /*@{*/
+   ir_unop_pack_snorm_2x16,
+   ir_unop_pack_snorm_4x8,
+   ir_unop_pack_unorm_2x16,
+   ir_unop_pack_unorm_4x8,
+   ir_unop_pack_half_2x16,
+   ir_unop_unpack_snorm_2x16,
+   ir_unop_unpack_snorm_4x8,
+   ir_unop_unpack_unorm_2x16,
+   ir_unop_unpack_unorm_4x8,
+   ir_unop_unpack_half_2x16,
+   /*@}*/
+
+   /**
+    * \name Lowered floating point unpacking operations.
+    *
+    * \see lower_packing_builtins_visitor::split_unpack_half_2x16
+    */
+   /*@{*/
+   ir_unop_unpack_half_2x16_split_x,
+   ir_unop_unpack_half_2x16_split_y,
    /*@}*/
 
    ir_unop_noise,
@@ -1016,6 +1095,15 @@ enum ir_expression_operation {
    ir_binop_max,
 
    ir_binop_pow,
+
+   /**
+    * \name Lowered floating point packing operations.
+    *
+    * \see lower_packing_builtins_visitor::split_pack_half_2x16
+    */
+   /*@{*/
+   ir_binop_pack_half_2x16_split,
+   /*@}*/
 
    /**
     * Load a value the size of a given GLSL type from a uniform block.

@@ -124,8 +124,7 @@ _mesa_new_shader(struct gl_context *ctx, GLuint name, GLenum type)
 static void
 _mesa_delete_shader(struct gl_context *ctx, struct gl_shader *sh)
 {
-   if (sh->Source)
-      free((void *) sh->Source);
+   free((void *)sh->Source);
    _mesa_reference_program(ctx, &sh->Program, NULL);
    ralloc_free(sh);
 }
@@ -244,11 +243,11 @@ _mesa_init_shader_program(struct gl_context *ctx, struct gl_shader_program *prog
    prog->FragDataBindings = string_to_uint_map_ctor();
    prog->FragDataIndexBindings = string_to_uint_map_ctor();
 
-#if FEATURE_ARB_geometry_shader4
    prog->Geom.VerticesOut = 0;
    prog->Geom.InputType = GL_TRIANGLES;
    prog->Geom.OutputType = GL_TRIANGLE_STRIP;
-#endif
+
+   prog->TransformFeedback.BufferMode = GL_INTERLEAVED_ATTRIBS;
 
    prog->InfoLog = ralloc_strdup(prog, "");
 }
@@ -333,10 +332,8 @@ _mesa_free_shader_program_data(struct gl_context *ctx,
    }
    shProg->NumShaders = 0;
 
-   if (shProg->Shaders) {
-      free(shProg->Shaders);
-      shProg->Shaders = NULL;
-   }
+   free(shProg->Shaders);
+   shProg->Shaders = NULL;
 
    /* Transform feedback varying vars */
    for (i = 0; i < shProg->TransformFeedback.NumVarying; i++) {

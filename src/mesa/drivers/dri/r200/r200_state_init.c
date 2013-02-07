@@ -617,7 +617,7 @@ static void cube_emit_cs(struct gl_context *ctx, struct radeon_state_atom *atom)
  */
 void r200InitState( r200ContextPtr rmesa )
 {
-   struct gl_context *ctx = rmesa->radeon.glCtx;
+   struct gl_context *ctx = &rmesa->radeon.glCtx;
    GLuint i;
 
    rmesa->radeon.Fallback = 0;
@@ -627,8 +627,8 @@ void r200InitState( r200ContextPtr rmesa )
 #define ALLOC_STATE( ATOM, CHK, SZ, NM, IDX )				\
    do {								\
       rmesa->hw.ATOM.cmd_size = SZ;				\
-      rmesa->hw.ATOM.cmd = (GLuint *)CALLOC(SZ * sizeof(int));	\
-      rmesa->hw.ATOM.lastcmd = (GLuint *)CALLOC(SZ * sizeof(int));	\
+      rmesa->hw.ATOM.cmd = (GLuint *) calloc(SZ, sizeof(int));          \
+      rmesa->hw.ATOM.lastcmd = (GLuint *) calloc(SZ, sizeof(int));	\
       rmesa->hw.ATOM.name = NM;					\
       rmesa->hw.ATOM.idx = IDX;					\
       if (check_##CHK != check_never) {				\

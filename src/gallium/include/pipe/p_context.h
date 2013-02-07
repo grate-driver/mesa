@@ -31,6 +31,7 @@
 #include "p_compiler.h"
 #include "p_format.h"
 #include "p_video_enums.h"
+#include "p_defines.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -39,6 +40,7 @@ extern "C" {
 
 struct pipe_blend_color;
 struct pipe_blend_state;
+struct pipe_blit_info;
 struct pipe_box;
 struct pipe_clip_state;
 struct pipe_constant_buffer;
@@ -59,6 +61,7 @@ struct pipe_shader_state;
 struct pipe_stencil_ref;
 struct pipe_stream_output_target;
 struct pipe_surface;
+struct pipe_transfer;
 struct pipe_vertex_buffer;
 struct pipe_vertex_element;
 struct pipe_video_buffer;
@@ -235,7 +238,7 @@ struct pipe_context {
     * graphics pipeline.  Any resources that were previously bound to
     * the specified range will be unbound after this call.
     *
-    * \param first      first resource to bind.
+    * \param start      first resource to bind.
     * \param count      number of consecutive resources to bind.
     * \param resources  array of pointers to the resources to bind, it
     *                   should contain at least \a count elements
@@ -247,6 +250,7 @@ struct pipe_context {
                                 struct pipe_surface **resources);
 
    void (*set_vertex_buffers)( struct pipe_context *,
+                               unsigned start_slot,
                                unsigned num_buffers,
                                const struct pipe_vertex_buffer * );
 
@@ -280,7 +284,7 @@ struct pipe_context {
    /**
     * Resource functions for blit-like functionality
     *
-    * If a driver supports multisampling, resource_resolve must be available.
+    * If a driver supports multisampling, blit must implement color resolve.
     */
    /*@{*/
 
@@ -297,12 +301,11 @@ struct pipe_context {
                                 unsigned src_level,
                                 const struct pipe_box *src_box);
 
-   /**
-    * Resolve a multisampled resource into a non-multisampled one.
-    * Source and destination must be of the same format.
+   /* Optimal hardware path for blitting pixels.
+    * Scaling, format conversion, up- and downsampling (resolve) are allowed.
     */
-   void (*resource_resolve)(struct pipe_context *pipe,
-                            const struct pipe_resolve_info *info);
+   void (*blit)(struct pipe_context *pipe,
+                const struct pipe_blit_info *info);
 
    /*@}*/
 
@@ -347,8 +350,9 @@ struct pipe_context {
 
    /** Flush draw commands
     */
-   void (*flush)( struct pipe_context *pipe,
-                  struct pipe_fence_handle **fence );
+   void (*flush)(struct pipe_context *pipe,
+                 struct pipe_fence_handle **fence,
+                 enum pipe_flush_flags flags);
 
    /**
     * Create a view on a texture to be used by a shader stage.
@@ -364,7 +368,6 @@ struct pipe_context {
    /**
     * Get a surface which is a "view" into a resource, used by
     * render target / depth stencil stages.
-    * \param usage  bitmaks of PIPE_BIND_* flags
     */
    struct pipe_surface *(*create_surface)(struct pipe_context *ctx,
                                           struct pipe_resource *resource,
@@ -374,22 +377,21 @@ struct pipe_context {
                            struct pipe_surface *);
 
    /**
-    * Get a transfer object for transferring data to/from a texture.
+    * Map a resource.
     *
     * Transfers are (by default) context-private and allow uploads to be
-    * interleaved with
+    * interleaved with rendering.
+    *
+    * out_transfer will contain the transfer object that must be passed
+    * to all the other transfer functions. It also contains useful
+    * information (like texture strides).
     */
-   struct pipe_transfer *(*get_transfer)(struct pipe_context *,
-                                         struct pipe_resource *resource,
-                                         unsigned level,
-                                         unsigned usage,  /* a combination of PIPE_TRANSFER_x */
-                                         const struct pipe_box *);
-
-   void (*transfer_destroy)(struct pipe_context *,
-                            struct pipe_transfer *);
-
-   void *(*transfer_map)( struct pipe_context *,
-                          struct pipe_transfer *transfer );
+   void *(*transfer_map)(struct pipe_context *,
+                         struct pipe_resource *resource,
+                         unsigned level,
+                         unsigned usage,  /* a combination of PIPE_TRANSFER_x */
+                         const struct pipe_box *,
+                         struct pipe_transfer **out_transfer);
 
    /* If transfer was created with WRITE|FLUSH_EXPLICIT, only the
     * regions specified with this call are guaranteed to be written to
@@ -399,9 +401,8 @@ struct pipe_context {
 				  struct pipe_transfer *transfer,
 				  const struct pipe_box *);
 
-   void (*transfer_unmap)( struct pipe_context *,
-                           struct pipe_transfer *transfer );
-
+   void (*transfer_unmap)(struct pipe_context *,
+                          struct pipe_transfer *transfer);
 
    /* One-shot transfer operation with data supplied in a user
     * pointer.  XXX: strides??
@@ -454,7 +455,7 @@ struct pipe_context {
     * compute program.  Any resources that were previously bound to
     * the specified range will be unbound after this call.
     *
-    * \param first      first resource to bind.
+    * \param start      first resource to bind.
     * \param count      number of consecutive resources to bind.
     * \param resources  array of pointers to the resources to bind, it
     *                   should contain at least \a count elements
@@ -506,6 +507,10 @@ struct pipe_context {
     * PIPE_COMPUTE_CAP_GRID_DIMENSION that determine the layout of the
     * grid (in block units) and working block (in thread units) to be
     * used, respectively.
+    *
+    * \a pc For drivers that use PIPE_SHADER_IR_LLVM as their prefered IR,
+    * this value will be the index of the kernel in the opencl.kernels
+    * metadata list.
     *
     * \a input will be used to initialize the INPUT resource, and it
     * should point to a buffer of at least

@@ -403,9 +403,9 @@ setup_interleaved_attribs(const struct st_vertex_program *vp,
       const GLuint mesaAttr = vp->index_to_input[attr];
       const struct gl_client_array *array = arrays[mesaAttr];
       unsigned src_offset = (unsigned) (array->Ptr - low_addr);
-      GLuint element_size = array->_ElementSize;
 
-      assert(element_size == array->Size * _mesa_sizeof_type(array->Type));
+      assert(array->_ElementSize ==
+             _mesa_bytes_per_vertex_attrib(array->Size, array->Type));
 
       velements[attr].src_offset = src_offset;
       velements[attr].instance_divisor = array->InstanceDivisor;
@@ -474,7 +474,8 @@ setup_non_interleaved_attribs(struct st_context *st,
       struct gl_buffer_object *bufobj = array->BufferObj;
       GLsizei stride = array->StrideB;
 
-      assert(array->_ElementSize == array->Size * _mesa_sizeof_type(array->Type));
+      assert(array->_ElementSize ==
+             _mesa_bytes_per_vertex_attrib(array->Size, array->Type));
 
       if (_mesa_is_bufferobj(bufobj)) {
          /* Attribute data is in a VBO.
@@ -574,7 +575,13 @@ static void update_array(struct st_context *st)
       num_velements = vpv->num_inputs;
    }
 
-   cso_set_vertex_buffers(st->cso_context, num_vbuffers, vbuffer);
+   cso_set_vertex_buffers(st->cso_context, 0, num_vbuffers, vbuffer);
+   if (st->last_num_vbuffers > num_vbuffers) {
+      /* Unbind remaining buffers, if any. */
+      cso_set_vertex_buffers(st->cso_context, num_vbuffers,
+                             st->last_num_vbuffers - num_vbuffers, NULL);
+   }
+   st->last_num_vbuffers = num_vbuffers;
    cso_set_vertex_elements(st->cso_context, num_velements, velements);
 }
 
@@ -582,7 +589,7 @@ static void update_array(struct st_context *st)
 const struct st_tracked_state st_update_array = {
    "st_update_array",					/* name */
    {							/* dirty */
-      (_NEW_PROGRAM | _NEW_BUFFER_OBJECT),		/* mesa */
+      _NEW_BUFFER_OBJECT,                               /* mesa */
       ST_NEW_VERTEX_ARRAYS | ST_NEW_VERTEX_PROGRAM,     /* st */
    },
    update_array						/* update */

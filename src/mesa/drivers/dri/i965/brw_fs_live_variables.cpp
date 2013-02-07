@@ -25,7 +25,7 @@
  *
  */
 
-#include "brw_fs_cfg.h"
+#include "brw_cfg.h"
 #include "brw_fs_live_variables.h"
 
 using namespace brw;
@@ -52,13 +52,13 @@ fs_live_variables::setup_def_use()
    int ip = 0;
 
    for (int b = 0; b < cfg->num_blocks; b++) {
-      fs_bblock *block = cfg->blocks[b];
+      bblock_t *block = cfg->blocks[b];
 
       assert(ip == block->start_ip);
       if (b > 0)
 	 assert(cfg->blocks[b - 1]->end_ip == ip - 1);
 
-      for (fs_inst *inst = block->start;
+      for (fs_inst *inst = (fs_inst *)block->start;
 	   inst != block->end->next;
 	   inst = (fs_inst *)inst->next) {
 
@@ -78,7 +78,7 @@ fs_live_variables::setup_def_use()
 	  */
 	 if (inst->dst.file == GRF &&
 	     inst->regs_written() == v->virtual_grf_sizes[inst->dst.reg] &&
-	     !inst->predicated &&
+	     !inst->predicate &&
 	     !inst->force_uncompressed &&
 	     !inst->force_sechalf) {
 	    int reg = inst->dst.reg;
@@ -118,8 +118,8 @@ fs_live_variables::compute_live_variables()
 
 	 /* Update liveout */
 	 foreach_list(block_node, &cfg->blocks[b]->children) {
-	    fs_bblock_link *link = (fs_bblock_link *)block_node;
-	    fs_bblock *block = link->block;
+	    bblock_link *link = (bblock_link *)block_node;
+	    bblock_t *block = link->block;
 
 	    for (int i = 0; i < num_vars; i++) {
 	       if (bd[block->block_num].livein[i] && !bd[b].liveout[i]) {
@@ -132,7 +132,7 @@ fs_live_variables::compute_live_variables()
    }
 }
 
-fs_live_variables::fs_live_variables(fs_visitor *v, fs_cfg *cfg)
+fs_live_variables::fs_live_variables(fs_visitor *v, cfg_t *cfg)
    : v(v), cfg(cfg)
 {
    mem_ctx = ralloc_context(cfg->mem_ctx);
@@ -203,7 +203,7 @@ fs_visitor::calculate_live_intervals()
    }
 
    /* Now, extend those intervals using our analysis of control flow. */
-   fs_cfg cfg(this);
+   cfg_t cfg(this);
    fs_live_variables livevars(this, &cfg);
 
    for (int b = 0; b < cfg.num_blocks; b++) {
@@ -280,10 +280,10 @@ fs_visitor::virtual_grf_interferes(int a, int b)
     * so our second half values in g6 got overwritten in the first
     * half.
     */
-   if (c->dispatch_width == 16 && (this->pixel_x.reg == a ||
-				   this->pixel_x.reg == b ||
-				   this->pixel_y.reg == a ||
-				   this->pixel_y.reg == b)) {
+   if (dispatch_width == 16 && (this->pixel_x.reg == a ||
+				this->pixel_x.reg == b ||
+				this->pixel_y.reg == a ||
+				this->pixel_y.reg == b)) {
       return start <= end;
    }
 

@@ -99,7 +99,7 @@ _mesa_uniform_attach_driver_storage(struct gl_uniform_storage *uni,
 				    enum gl_uniform_driver_format format,
 				    void *data)
 {
-   uni->driver_storage = (struct gl_uniform_driver_storage*)
+   uni->driver_storage =
       realloc(uni->driver_storage,
 	      sizeof(struct gl_uniform_driver_storage)
 	      * (uni->num_driver_storage + 1));
@@ -128,14 +128,14 @@ _mesa_uniform_detach_all_driver_storage(struct gl_uniform_storage *uni)
 }
 
 void GLAPIENTRY
-_mesa_Uniform1fARB(GLint location, GLfloat v0)
+_mesa_Uniform1f(GLint location, GLfloat v0)
 {
    GET_CURRENT_CONTEXT(ctx);
    _mesa_uniform(ctx, ctx->Shader.ActiveProgram, location, 1, &v0, GL_FLOAT);
 }
 
 void GLAPIENTRY
-_mesa_Uniform2fARB(GLint location, GLfloat v0, GLfloat v1)
+_mesa_Uniform2f(GLint location, GLfloat v0, GLfloat v1)
 {
    GET_CURRENT_CONTEXT(ctx);
    GLfloat v[2];
@@ -145,7 +145,7 @@ _mesa_Uniform2fARB(GLint location, GLfloat v0, GLfloat v1)
 }
 
 void GLAPIENTRY
-_mesa_Uniform3fARB(GLint location, GLfloat v0, GLfloat v1, GLfloat v2)
+_mesa_Uniform3f(GLint location, GLfloat v0, GLfloat v1, GLfloat v2)
 {
    GET_CURRENT_CONTEXT(ctx);
    GLfloat v[3];
@@ -156,7 +156,7 @@ _mesa_Uniform3fARB(GLint location, GLfloat v0, GLfloat v1, GLfloat v2)
 }
 
 void GLAPIENTRY
-_mesa_Uniform4fARB(GLint location, GLfloat v0, GLfloat v1, GLfloat v2,
+_mesa_Uniform4f(GLint location, GLfloat v0, GLfloat v1, GLfloat v2,
                    GLfloat v3)
 {
    GET_CURRENT_CONTEXT(ctx);
@@ -169,14 +169,14 @@ _mesa_Uniform4fARB(GLint location, GLfloat v0, GLfloat v1, GLfloat v2,
 }
 
 void GLAPIENTRY
-_mesa_Uniform1iARB(GLint location, GLint v0)
+_mesa_Uniform1i(GLint location, GLint v0)
 {
    GET_CURRENT_CONTEXT(ctx);
    _mesa_uniform(ctx, ctx->Shader.ActiveProgram, location, 1, &v0, GL_INT);
 }
 
 void GLAPIENTRY
-_mesa_Uniform2iARB(GLint location, GLint v0, GLint v1)
+_mesa_Uniform2i(GLint location, GLint v0, GLint v1)
 {
    GET_CURRENT_CONTEXT(ctx);
    GLint v[2];
@@ -186,7 +186,7 @@ _mesa_Uniform2iARB(GLint location, GLint v0, GLint v1)
 }
 
 void GLAPIENTRY
-_mesa_Uniform3iARB(GLint location, GLint v0, GLint v1, GLint v2)
+_mesa_Uniform3i(GLint location, GLint v0, GLint v1, GLint v2)
 {
    GET_CURRENT_CONTEXT(ctx);
    GLint v[3];
@@ -197,7 +197,7 @@ _mesa_Uniform3iARB(GLint location, GLint v0, GLint v1, GLint v2)
 }
 
 void GLAPIENTRY
-_mesa_Uniform4iARB(GLint location, GLint v0, GLint v1, GLint v2, GLint v3)
+_mesa_Uniform4i(GLint location, GLint v0, GLint v1, GLint v2, GLint v3)
 {
    GET_CURRENT_CONTEXT(ctx);
    GLint v[4];
@@ -209,56 +209,56 @@ _mesa_Uniform4iARB(GLint location, GLint v0, GLint v1, GLint v2, GLint v3)
 }
 
 void GLAPIENTRY
-_mesa_Uniform1fvARB(GLint location, GLsizei count, const GLfloat * value)
+_mesa_Uniform1fv(GLint location, GLsizei count, const GLfloat * value)
 {
    GET_CURRENT_CONTEXT(ctx);
    _mesa_uniform(ctx, ctx->Shader.ActiveProgram, location, count, value, GL_FLOAT);
 }
 
 void GLAPIENTRY
-_mesa_Uniform2fvARB(GLint location, GLsizei count, const GLfloat * value)
+_mesa_Uniform2fv(GLint location, GLsizei count, const GLfloat * value)
 {
    GET_CURRENT_CONTEXT(ctx);
    _mesa_uniform(ctx, ctx->Shader.ActiveProgram, location, count, value, GL_FLOAT_VEC2);
 }
 
 void GLAPIENTRY
-_mesa_Uniform3fvARB(GLint location, GLsizei count, const GLfloat * value)
+_mesa_Uniform3fv(GLint location, GLsizei count, const GLfloat * value)
 {
    GET_CURRENT_CONTEXT(ctx);
    _mesa_uniform(ctx, ctx->Shader.ActiveProgram, location, count, value, GL_FLOAT_VEC3);
 }
 
 void GLAPIENTRY
-_mesa_Uniform4fvARB(GLint location, GLsizei count, const GLfloat * value)
+_mesa_Uniform4fv(GLint location, GLsizei count, const GLfloat * value)
 {
    GET_CURRENT_CONTEXT(ctx);
    _mesa_uniform(ctx, ctx->Shader.ActiveProgram, location, count, value, GL_FLOAT_VEC4);
 }
 
 void GLAPIENTRY
-_mesa_Uniform1ivARB(GLint location, GLsizei count, const GLint * value)
+_mesa_Uniform1iv(GLint location, GLsizei count, const GLint * value)
 {
    GET_CURRENT_CONTEXT(ctx);
    _mesa_uniform(ctx, ctx->Shader.ActiveProgram, location, count, value, GL_INT);
 }
 
 void GLAPIENTRY
-_mesa_Uniform2ivARB(GLint location, GLsizei count, const GLint * value)
+_mesa_Uniform2iv(GLint location, GLsizei count, const GLint * value)
 {
    GET_CURRENT_CONTEXT(ctx);
    _mesa_uniform(ctx, ctx->Shader.ActiveProgram, location, count, value, GL_INT_VEC2);
 }
 
 void GLAPIENTRY
-_mesa_Uniform3ivARB(GLint location, GLsizei count, const GLint * value)
+_mesa_Uniform3iv(GLint location, GLsizei count, const GLint * value)
 {
    GET_CURRENT_CONTEXT(ctx);
    _mesa_uniform(ctx, ctx->Shader.ActiveProgram, location, count, value, GL_INT_VEC3);
 }
 
 void GLAPIENTRY
-_mesa_Uniform4ivARB(GLint location, GLsizei count, const GLint * value)
+_mesa_Uniform4iv(GLint location, GLsizei count, const GLint * value)
 {
    GET_CURRENT_CONTEXT(ctx);
    _mesa_uniform(ctx, ctx->Shader.ActiveProgram, location, count, value, GL_INT_VEC4);
@@ -337,7 +337,7 @@ _mesa_Uniform4uiv(GLint location, GLsizei count, const GLuint *value)
 
 
 void GLAPIENTRY
-_mesa_UniformMatrix2fvARB(GLint location, GLsizei count, GLboolean transpose,
+_mesa_UniformMatrix2fv(GLint location, GLsizei count, GLboolean transpose,
                           const GLfloat * value)
 {
    GET_CURRENT_CONTEXT(ctx);
@@ -346,7 +346,7 @@ _mesa_UniformMatrix2fvARB(GLint location, GLsizei count, GLboolean transpose,
 }
 
 void GLAPIENTRY
-_mesa_UniformMatrix3fvARB(GLint location, GLsizei count, GLboolean transpose,
+_mesa_UniformMatrix3fv(GLint location, GLsizei count, GLboolean transpose,
                           const GLfloat * value)
 {
    GET_CURRENT_CONTEXT(ctx);
@@ -355,7 +355,7 @@ _mesa_UniformMatrix3fvARB(GLint location, GLsizei count, GLboolean transpose,
 }
 
 void GLAPIENTRY
-_mesa_UniformMatrix4fvARB(GLint location, GLsizei count, GLboolean transpose,
+_mesa_UniformMatrix4fv(GLint location, GLsizei count, GLboolean transpose,
                           const GLfloat * value)
 {
    GET_CURRENT_CONTEXT(ctx);
@@ -431,7 +431,7 @@ _mesa_GetnUniformfvARB(GLhandleARB program, GLint location,
 }
 
 void GLAPIENTRY
-_mesa_GetUniformfvARB(GLhandleARB program, GLint location, GLfloat *params)
+_mesa_GetUniformfv(GLhandleARB program, GLint location, GLfloat *params)
 {
    _mesa_GetnUniformfvARB(program, location, INT_MAX, params);
 }
@@ -446,7 +446,7 @@ _mesa_GetnUniformivARB(GLhandleARB program, GLint location,
 }
 
 void GLAPIENTRY
-_mesa_GetUniformivARB(GLhandleARB program, GLint location, GLint *params)
+_mesa_GetUniformiv(GLhandleARB program, GLint location, GLint *params)
 {
    _mesa_GetnUniformivARB(program, location, INT_MAX, params);
 }
@@ -495,7 +495,7 @@ _mesa_GetUniformdv(GLhandleARB program, GLint location, GLdouble *params)
 
 
 GLint GLAPIENTRY
-_mesa_GetUniformLocationARB(GLhandleARB programObj, const GLcharARB *name)
+_mesa_GetUniformLocation(GLhandleARB programObj, const GLcharARB *name)
 {
    struct gl_shader_program *shProg;
    GLuint index, offset;
@@ -535,7 +535,7 @@ _mesa_GetUniformLocationARB(GLhandleARB programObj, const GLcharARB *name)
    return _mesa_uniform_merge_location_offset(index, offset);
 }
 
-static GLuint GLAPIENTRY
+GLuint GLAPIENTRY
 _mesa_GetUniformBlockIndex(GLuint program,
 			   const GLchar *uniformBlockName)
 {
@@ -561,7 +561,7 @@ _mesa_GetUniformBlockIndex(GLuint program,
    return GL_INVALID_INDEX;
 }
 
-static void GLAPIENTRY
+void GLAPIENTRY
 _mesa_GetUniformIndices(GLuint program,
 			GLsizei uniformCount,
 			const GLchar * const *uniformNames,
@@ -594,7 +594,7 @@ _mesa_GetUniformIndices(GLuint program,
    }
 }
 
-static void GLAPIENTRY
+void GLAPIENTRY
 _mesa_UniformBlockBinding(GLuint program,
 			  GLuint uniformBlockIndex,
 			  GLuint uniformBlockBinding)
@@ -614,14 +614,14 @@ _mesa_UniformBlockBinding(GLuint program,
 
    if (uniformBlockIndex >= shProg->NumUniformBlocks) {
       _mesa_error(ctx, GL_INVALID_VALUE,
-		  "glUniformBlockBinding(block index %d >= %d)",
+		  "glUniformBlockBinding(block index %u >= %u)",
 		  uniformBlockIndex, shProg->NumUniformBlocks);
       return;
    }
 
    if (uniformBlockBinding >= ctx->Const.MaxUniformBufferBindings) {
       _mesa_error(ctx, GL_INVALID_VALUE,
-		  "glUniformBlockBinding(block binding %d >= %d)",
+		  "glUniformBlockBinding(block binding %u >= %u)",
 		  uniformBlockBinding, ctx->Const.MaxUniformBufferBindings);
       return;
    }
@@ -644,7 +644,7 @@ _mesa_UniformBlockBinding(GLuint program,
    }
 }
 
-static void GLAPIENTRY
+void GLAPIENTRY
 _mesa_GetActiveUniformBlockiv(GLuint program,
 			      GLuint uniformBlockIndex,
 			      GLenum pname,
@@ -667,7 +667,7 @@ _mesa_GetActiveUniformBlockiv(GLuint program,
 
    if (uniformBlockIndex >= shProg->NumUniformBlocks) {
       _mesa_error(ctx, GL_INVALID_VALUE,
-		  "glGetActiveUniformBlockiv(block index %d >= %d)",
+		  "glGetActiveUniformBlockiv(block index %u >= %u)",
 		  uniformBlockIndex, shProg->NumUniformBlocks);
       return;
    }
@@ -695,7 +695,7 @@ _mesa_GetActiveUniformBlockiv(GLuint program,
       for (i = 0; i < block->NumUniforms; i++) {
 	 unsigned offset;
 	 params[i] = _mesa_get_uniform_location(ctx, shProg,
-						block->Uniforms[i].Name,
+						block->Uniforms[i].IndexName,
 						&offset);
       }
       return;
@@ -720,7 +720,7 @@ _mesa_GetActiveUniformBlockiv(GLuint program,
    }
 }
 
-static void GLAPIENTRY
+void GLAPIENTRY
 _mesa_GetActiveUniformBlockName(GLuint program,
 				GLuint uniformBlockIndex,
 				GLsizei bufSize,
@@ -750,7 +750,7 @@ _mesa_GetActiveUniformBlockName(GLuint program,
 
    if (uniformBlockIndex >= shProg->NumUniformBlocks) {
       _mesa_error(ctx, GL_INVALID_VALUE,
-		  "glGetActiveUniformBlockiv(block index %d >= %d)",
+		  "glGetActiveUniformBlockiv(block index %u >= %u)",
 		  uniformBlockIndex, shProg->NumUniformBlocks);
       return;
    }
@@ -762,7 +762,7 @@ _mesa_GetActiveUniformBlockName(GLuint program,
    }
 }
 
-static void GLAPIENTRY
+void GLAPIENTRY
 _mesa_GetActiveUniformName(GLuint program, GLuint uniformIndex,
 			   GLsizei bufSize, GLsizei *length,
 			   GLchar *uniformName)
@@ -782,8 +782,6 @@ _mesa_GetActiveUniformName(GLuint program, GLuint uniformIndex,
       return;
    }
 
-   ASSERT_OUTSIDE_BEGIN_END(ctx);
-
    shProg = _mesa_lookup_shader_program_err(ctx, program, "glGetActiveUniformName");
 
    if (!shProg)
@@ -795,78 +793,46 @@ _mesa_GetActiveUniformName(GLuint program, GLuint uniformIndex,
    }
 
    if (uniformName) {
-      _mesa_copy_string(uniformName, bufSize, length,
-			shProg->UniformStorage[uniformIndex].name);
+      _mesa_get_uniform_name(& shProg->UniformStorage[uniformIndex],
+                             bufSize, length, uniformName);
    }
 }
 
-/**
- * Plug in shader uniform-related functions into API dispatch table.
- */
 void
-_mesa_init_shader_uniform_dispatch(const struct gl_context *ctx,
-                                   struct _glapi_table *exec)
+_mesa_get_uniform_name(const struct gl_uniform_storage *uni,
+                       GLsizei maxLength, GLsizei *length,
+                       GLchar *nameOut)
 {
-#if FEATURE_GL
-   SET_Uniform1fARB(exec, _mesa_Uniform1fARB);
-   SET_Uniform2fARB(exec, _mesa_Uniform2fARB);
-   SET_Uniform3fARB(exec, _mesa_Uniform3fARB);
-   SET_Uniform4fARB(exec, _mesa_Uniform4fARB);
-   SET_Uniform1iARB(exec, _mesa_Uniform1iARB);
-   SET_Uniform2iARB(exec, _mesa_Uniform2iARB);
-   SET_Uniform3iARB(exec, _mesa_Uniform3iARB);
-   SET_Uniform4iARB(exec, _mesa_Uniform4iARB);
-   SET_Uniform1fvARB(exec, _mesa_Uniform1fvARB);
-   SET_Uniform2fvARB(exec, _mesa_Uniform2fvARB);
-   SET_Uniform3fvARB(exec, _mesa_Uniform3fvARB);
-   SET_Uniform4fvARB(exec, _mesa_Uniform4fvARB);
-   SET_Uniform1ivARB(exec, _mesa_Uniform1ivARB);
-   SET_Uniform2ivARB(exec, _mesa_Uniform2ivARB);
-   SET_Uniform3ivARB(exec, _mesa_Uniform3ivARB);
-   SET_Uniform4ivARB(exec, _mesa_Uniform4ivARB);
-   SET_UniformMatrix2fvARB(exec, _mesa_UniformMatrix2fvARB);
-   SET_UniformMatrix3fvARB(exec, _mesa_UniformMatrix3fvARB);
-   SET_UniformMatrix4fvARB(exec, _mesa_UniformMatrix4fvARB);
+   GLsizei localLength;
 
-   SET_GetActiveUniformARB(exec, _mesa_GetActiveUniformARB);
-   SET_GetUniformLocationARB(exec, _mesa_GetUniformLocationARB);
-   SET_GetUniformfvARB(exec, _mesa_GetUniformfvARB);
-   SET_GetUniformivARB(exec, _mesa_GetUniformivARB);
+   if (length == NULL)
+      length = &localLength;
 
-   /* OpenGL 2.1 */
-   if (ctx->API != API_OPENGLES2 || _mesa_is_gles3(ctx)) {
-      SET_UniformMatrix2x3fv(exec, _mesa_UniformMatrix2x3fv);
-      SET_UniformMatrix3x2fv(exec, _mesa_UniformMatrix3x2fv);
-      SET_UniformMatrix2x4fv(exec, _mesa_UniformMatrix2x4fv);
-      SET_UniformMatrix4x2fv(exec, _mesa_UniformMatrix4x2fv);
-      SET_UniformMatrix3x4fv(exec, _mesa_UniformMatrix3x4fv);
-      SET_UniformMatrix4x3fv(exec, _mesa_UniformMatrix4x3fv);
+   _mesa_copy_string(nameOut, maxLength, length, uni->name);
 
-      /* OpenGL 3.0 */
-      SET_Uniform1uiEXT(exec, _mesa_Uniform1ui);
-      SET_Uniform2uiEXT(exec, _mesa_Uniform2ui);
-      SET_Uniform3uiEXT(exec, _mesa_Uniform3ui);
-      SET_Uniform4uiEXT(exec, _mesa_Uniform4ui);
-      SET_Uniform1uivEXT(exec, _mesa_Uniform1uiv);
-      SET_Uniform2uivEXT(exec, _mesa_Uniform2uiv);
-      SET_Uniform3uivEXT(exec, _mesa_Uniform3uiv);
-      SET_Uniform4uivEXT(exec, _mesa_Uniform4uiv);
-      SET_GetUniformuivEXT(exec, _mesa_GetUniformuiv);
+   /* Page 61 (page 73 of the PDF) in section 2.11 of the OpenGL ES 3.0
+    * spec says:
+    *
+    *     "If the active uniform is an array, the uniform name returned in
+    *     name will always be the name of the uniform array appended with
+    *     "[0]"."
+    *
+    * The same text also appears in the OpenGL 4.2 spec.  It does not,
+    * however, appear in any previous spec.  Previous specifications are
+    * ambiguous in this regard.  However, either name can later be passed
+    * to glGetUniformLocation (and related APIs), so there shouldn't be any
+    * harm in always appending "[0]" to uniform array names.
+    */
+   if (uni->array_elements != 0) {
+      unsigned i;
 
-      /* GL_ARB_robustness */
-      SET_GetnUniformfvARB(exec, _mesa_GetnUniformfvARB);
-      SET_GetnUniformivARB(exec, _mesa_GetnUniformivARB);
-      SET_GetnUniformuivARB(exec, _mesa_GetnUniformuivARB);
-      SET_GetnUniformdvARB(exec, _mesa_GetnUniformdvARB); /* GL 4.0 */
+      /* The comparison is strange because *length does *NOT* include the
+       * terminating NUL, but maxLength does.
+       */
+      for (i = 0; i < 3 && (*length + i + 1) < maxLength; i++)
+         nameOut[*length + i] = "[0]"[i];
 
-      /* GL_ARB_uniform_buffer_object / GL 3.1 */
-      SET_GetUniformBlockIndex(exec, _mesa_GetUniformBlockIndex);
-      SET_GetUniformIndices(exec, _mesa_GetUniformIndices);
-      SET_GetActiveUniformsiv(exec, _mesa_GetActiveUniformsiv);
-      SET_GetActiveUniformBlockiv(exec, _mesa_GetActiveUniformBlockiv);
-      SET_GetActiveUniformBlockName(exec, _mesa_GetActiveUniformBlockName);
-      SET_GetActiveUniformName(exec, _mesa_GetActiveUniformName);
-      SET_UniformBlockBinding(exec, _mesa_UniformBlockBinding);
+      nameOut[*length + i] = '\0';
+      *length += i;
    }
-#endif /* FEATURE_GL */
 }

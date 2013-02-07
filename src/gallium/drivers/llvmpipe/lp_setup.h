@@ -55,7 +55,7 @@ lp_setup_create( struct pipe_context *pipe,
 
 void
 lp_setup_clear(struct lp_setup_context *setup,
-               const float *clear_color,
+               const union pipe_color_union *clear_color,
                double clear_depth,
                unsigned clear_stencil,
                unsigned flags);
@@ -100,8 +100,8 @@ lp_setup_set_fs_variant( struct lp_setup_context *setup,
 
 void
 lp_setup_set_fs_constants(struct lp_setup_context *setup,
-                          struct pipe_resource *buffer);
-
+                          unsigned num,
+                          struct pipe_constant_buffer *buffers);
 
 void
 lp_setup_set_alpha_ref_value( struct lp_setup_context *setup,
@@ -136,6 +136,10 @@ lp_setup_is_resource_referenced( const struct lp_setup_context *setup,
 void
 lp_setup_set_flatshade_first( struct lp_setup_context *setup, 
                               boolean flatshade_first );
+
+void
+lp_setup_set_rasterizer_discard( struct lp_setup_context *setup, 
+                                 boolean rasterizer_discard );
 
 void
 lp_setup_set_vertex_info( struct lp_setup_context *setup, 

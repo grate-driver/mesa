@@ -55,7 +55,7 @@ CONCAT(vsplit_primitive_, ELT_TYPE)(struct vsplit_frontend *vsplit,
 
       for (i = 0; i < icount; i++) {
          ELT_TYPE idx = ib[i];
-            if (idx < min_index || idx > max_index) {
+         if (idx < min_index || idx > max_index) {
             debug_printf("warning: index out of range\n");
          }
       }
@@ -71,7 +71,7 @@ CONCAT(vsplit_primitive_, ELT_TYPE)(struct vsplit_frontend *vsplit,
    if (max_index - min_index > icount - 1)
       return FALSE;
 
-   if (elt_bias < 0 && min_index < -elt_bias)
+   if (elt_bias < 0 && (int) min_index < -elt_bias)
       return FALSE;
 
    /* why this check? */
@@ -90,7 +90,7 @@ CONCAT(vsplit_primitive_, ELT_TYPE)(struct vsplit_frontend *vsplit,
 
             if (idx < min_index || idx > max_index) {
                debug_printf("warning: index out of range\n");
-	    }
+            }
             vsplit->draw_elts[i] = (ushort) idx;
          }
       }
@@ -100,7 +100,7 @@ CONCAT(vsplit_primitive_, ELT_TYPE)(struct vsplit_frontend *vsplit,
 
             if (idx < min_index || idx > max_index) {
                debug_printf("warning: index out of range\n");
-	    }
+            }
             vsplit->draw_elts[i] = (ushort) (idx - min_index);
          }
       }
@@ -158,19 +158,19 @@ CONCAT(vsplit_segment_cache_, ELT_TYPE)(struct vsplit_frontend *vsplit,
    }
    else {
       if (spoken) {
-         if (ib[ispoken] < -ibias)
+         if ((int) ib[ispoken] < -ibias)
             return;
          ADD_CACHE(vsplit, ib[ispoken] + ibias);
       }
 
       for (i = spoken; i < icount; i++) {
-         if (ib[istart + i] < -ibias)
+         if ((int) ib[istart + i] < -ibias)
             return;
          ADD_CACHE(vsplit, ib[istart + i] + ibias);
       }
 
       if (close) {
-         if (ib[iclose] < -ibias)
+         if ((int) ib[iclose] < -ibias)
             return;
          ADD_CACHE(vsplit, ib[iclose] + ibias);
       }

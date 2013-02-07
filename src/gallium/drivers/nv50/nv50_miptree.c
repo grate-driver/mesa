@@ -28,10 +28,38 @@
 #include "nv50_context.h"
 #include "nv50_resource.h"
 
-static INLINE uint32_t
+uint32_t
+nv50_tex_choose_tile_dims_helper(unsigned nx, unsigned ny, unsigned nz)
+{
+   uint32_t tile_mode = 0x000;
+
+   if (ny > 64) tile_mode = 0x040; /* height 128 tiles */
+   else
+   if (ny > 32) tile_mode = 0x030; /* height 64 tiles */
+   else
+   if (ny > 16) tile_mode = 0x020; /* height 32 tiles */
+   else
+   if (ny >  8) tile_mode = 0x010; /* height 16 tiles */
+
+   if (nz == 1)
+      return tile_mode;
+   else
+      if (tile_mode > 0x020)
+         tile_mode = 0x020;
+
+   if (nz > 16 && tile_mode < 0x020)
+      return tile_mode | 0x500; /* depth 32 tiles */
+   if (nz > 8) return tile_mode | 0x400; /* depth 16 tiles */
+   if (nz > 4) return tile_mode | 0x300; /* depth 8 tiles */
+   if (nz > 2) return tile_mode | 0x200; /* depth 4 tiles */
+
+   return tile_mode | 0x100;
+}
+
+static uint32_t
 nv50_tex_choose_tile_dims(unsigned nx, unsigned ny, unsigned nz)
 {
-   return nvc0_tex_choose_tile_dims(nx, ny * 2, nz);
+   return nv50_tex_choose_tile_dims_helper(nx, ny * 2, nz);
 }
 
 static uint32_t
@@ -145,8 +173,6 @@ const struct u_resource_vtbl nv50_miptree_vtbl =
 {
    nv50_miptree_get_handle,         /* get_handle */
    nv50_miptree_destroy,            /* resource_destroy */
-   nv50_miptree_transfer_new,       /* get_transfer */
-   nv50_miptree_transfer_del,       /* transfer_destroy */
    nv50_miptree_transfer_map,       /* transfer_map */
    u_default_transfer_flush_region, /* transfer_flush_region */
    nv50_miptree_transfer_unmap,     /* transfer_unmap */
@@ -380,7 +406,6 @@ nv50_surface_from_miptree(struct nv50_miptree *mt,
    pipe_resource_reference(&ps->texture, &mt->base.base);
 
    ps->format = templ->format;
-   ps->usage = templ->usage;
    ps->u.tex.level = templ->u.tex.level;
    ps->u.tex.first_layer = templ->u.tex.first_layer;
    ps->u.tex.last_layer = templ->u.tex.last_layer;

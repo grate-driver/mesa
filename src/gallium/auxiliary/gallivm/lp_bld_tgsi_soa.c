@@ -63,6 +63,7 @@
 #include "lp_bld_debug.h"
 #include "lp_bld_printf.h"
 #include "lp_bld_sample.h"
+#include "lp_bld_struct.h"
 
 
 static void lp_exec_mask_init(struct lp_exec_mask *mask, struct lp_build_context *bld)
@@ -532,9 +533,24 @@ get_indirect_index(struct lp_build_tgsi_soa_context *bld,
    base = lp_build_const_int_vec(bld->bld_base.base.gallivm, uint_bld->type, reg_index);
 
    assert(swizzle < 4);
-   rel = LLVMBuildLoad(builder,
-                        bld->addr[indirect_reg->Index][swizzle],
-                        "load addr reg");
+   switch (indirect_reg->File) {
+   case TGSI_FILE_ADDRESS:
+      rel = LLVMBuildLoad(builder,
+                          bld->addr[indirect_reg->Index][swizzle],
+                          "load addr reg");
+      /* ADDR LLVM values already have LLVM integer type. */
+      break;
+   case TGSI_FILE_TEMPORARY:
+      rel = lp_get_temp_ptr_soa(bld, indirect_reg->Index, swizzle);
+      rel = LLVMBuildLoad(builder, rel, "load temp reg");
+      /* TEMP LLVM values always have LLVM float type, but for indirection, the
+       * value actually stored is expected to be an integer */
+      rel = LLVMBuildBitCast(builder, rel, uint_bld->vec_type, "");
+      break;
+   default:
+      assert(0);
+      rel = uint_bld->zero;
+   }
 
    index = lp_build_add(uint_bld, base, rel);
 
@@ -588,9 +604,21 @@ emit_fetch_constant(
    struct lp_build_context *uint_bld = &bld_base->uint_bld;
    LLVMValueRef indirect_index = NULL;
    struct lp_build_context *bld_fetch = stype_to_fetch(bld_base, stype);
-   
+   unsigned dimension = 0;
+   LLVMValueRef dimension_index;
+   LLVMValueRef consts_ptr;
+
    /* XXX: Handle fetching xyzw components as a vector */
    assert(swizzle != ~0);
+
+   if (reg->Register.Dimension) {
+      assert(!reg->Dimension.Indirect);
+      dimension = reg->Dimension.Index;
+      assert(dimension < LP_MAX_TGSI_CONST_BUFFERS);
+   }
+
+   dimension_index = lp_build_const_int32(gallivm, dimension);
+   consts_ptr = lp_build_array_get(gallivm, bld->consts_ptr, dimension_index);
 
    if (reg->Register.Indirect) {
       indirect_index = get_indirect_index(bld,
@@ -609,7 +637,7 @@ emit_fetch_constant(
       index_vec = lp_build_add(uint_bld, index_vec, swizzle_vec);
 
       /* Gather values from the constant buffer */
-      return build_gather(bld_fetch, bld->consts_ptr, index_vec);
+      return build_gather(bld_fetch, consts_ptr, index_vec);
    }
    else {
       LLVMValueRef index;  /* index into the const buffer */
@@ -617,7 +645,7 @@ emit_fetch_constant(
 
       index = lp_build_const_int32(gallivm, reg->Register.Index*4 + swizzle);
 
-      scalar_ptr = LLVMBuildGEP(builder, bld->consts_ptr,
+      scalar_ptr = LLVMBuildGEP(builder, consts_ptr,
                                    &index, 1, "");
 
       if (stype != TGSI_TYPE_FLOAT && stype != TGSI_TYPE_UNTYPED) {
@@ -1146,7 +1174,8 @@ emit_tex( struct lp_build_tgsi_soa_context *bld,
    unsigned unit;
    LLVMValueRef lod_bias, explicit_lod;
    LLVMValueRef oow = NULL;
-   LLVMValueRef coords[3];
+   LLVMValueRef coords[4];
+   LLVMValueRef offsets[3] = { NULL };
    struct lp_derivatives derivs;
    unsigned num_coords;
    unsigned dims;
@@ -1194,6 +1223,7 @@ emit_tex( struct lp_build_tgsi_soa_context *bld,
       dims = 3;
       break;
    case TGSI_TEXTURE_SHADOW2D_ARRAY:
+   case TGSI_TEXTURE_SHADOWCUBE:
       num_coords = 4;
       dims = 2;
       break;
@@ -1202,11 +1232,14 @@ emit_tex( struct lp_build_tgsi_soa_context *bld,
       return;
    }
 
+   /* Note lod and especially projected are illegal in a LOT of cases */
    if (modifier == LP_BLD_TEX_MODIFIER_LOD_BIAS) {
+      assert(num_coords < 4);
       lod_bias = lp_build_emit_fetch( &bld->bld_base, inst, 0, 3 );
       explicit_lod = NULL;
    }
    else if (modifier == LP_BLD_TEX_MODIFIER_EXPLICIT_LOD) {
+      assert(num_coords < 4);
       lod_bias = NULL;
       explicit_lod = lp_build_emit_fetch( &bld->bld_base, inst, 0, 3 );
    }
@@ -1216,6 +1249,7 @@ emit_tex( struct lp_build_tgsi_soa_context *bld,
    }
 
    if (modifier == LP_BLD_TEX_MODIFIER_PROJECTED) {
+      assert(num_coords < 4);
       oow = lp_build_emit_fetch( &bld->bld_base, inst, 0, 3 );
       oow = lp_build_rcp(&bld->bld_base.base, oow);
    }
@@ -1225,7 +1259,7 @@ emit_tex( struct lp_build_tgsi_soa_context *bld,
       if (modifier == LP_BLD_TEX_MODIFIER_PROJECTED)
          coords[i] = lp_build_mul(&bld->bld_base.base, coords[i], oow);
    }
-   for (i = num_coords; i < 3; i++) {
+   for (i = num_coords; i < 4; i++) {
       coords[i] = bld->bld_base.base.undef;
    }
 
@@ -1285,12 +1319,110 @@ emit_tex( struct lp_build_tgsi_soa_context *bld,
       unit = inst->Src[1].Register.Index;
    }
 
+   /* some advanced gather instructions (txgo) would require 4 offsets */
+   if (inst->Texture.NumOffsets == 1) {
+      unsigned dim;
+      for (dim = 0; dim < dims; dim++) {
+         offsets[dim] = lp_build_emit_fetch_texoffset(&bld->bld_base, inst, 0, dim );
+      }
+   }
+
    bld->sampler->emit_fetch_texel(bld->sampler,
                                   bld->bld_base.base.gallivm,
                                   bld->bld_base.base.type,
-                                  unit, num_coords, coords,
+                                  FALSE,
+                                  unit, unit,
+                                  coords,
+                                  offsets,
                                   &derivs,
                                   lod_bias, explicit_lod,
+                                  texel);
+}
+
+static void
+emit_txf( struct lp_build_tgsi_soa_context *bld,
+          const struct tgsi_full_instruction *inst,
+          LLVMValueRef *texel)
+{
+   unsigned unit;
+   LLVMValueRef coord_undef = LLVMGetUndef(bld->bld_base.base.int_vec_type);
+   LLVMValueRef explicit_lod = NULL;
+   LLVMValueRef coords[3];
+   LLVMValueRef offsets[3] = { NULL };
+   struct lp_derivatives derivs;
+   unsigned num_coords;
+   unsigned dims;
+   unsigned i;
+
+   if (!bld->sampler) {
+      _debug_printf("warning: found texture instruction but no sampler generator supplied\n");
+      for (i = 0; i < 4; i++) {
+         texel[i] = coord_undef;
+      }
+      return;
+   }
+
+   derivs.ddx_ddy[0] = coord_undef;
+   derivs.ddx_ddy[1] = coord_undef;
+
+   switch (inst->Texture.Texture) {
+   case TGSI_TEXTURE_1D:
+   case TGSI_TEXTURE_BUFFER:
+      num_coords = 1;
+      dims = 1;
+      break;
+   case TGSI_TEXTURE_1D_ARRAY:
+      num_coords = 2;
+      dims = 1;
+      break;
+   case TGSI_TEXTURE_2D:
+   case TGSI_TEXTURE_RECT:
+      num_coords = 2;
+      dims = 2;
+      break;
+   case TGSI_TEXTURE_2D_ARRAY:
+      num_coords = 3;
+      dims = 2;
+      break;
+   case TGSI_TEXTURE_3D:
+      num_coords = 3;
+      dims = 3;
+      break;
+   default:
+      assert(0);
+      return;
+   }
+
+   /* always have lod except for buffers ? */
+   if (inst->Texture.Texture != TGSI_TEXTURE_BUFFER) {
+      explicit_lod = lp_build_emit_fetch( &bld->bld_base, inst, 0, 3 );
+   }
+
+   for (i = 0; i < num_coords; i++) {
+      coords[i] = lp_build_emit_fetch( &bld->bld_base, inst, 0, i );
+   }
+   for (i = num_coords; i < 3; i++) {
+      coords[i] = coord_undef;
+   }
+
+   unit = inst->Src[1].Register.Index;
+
+   if (inst->Texture.NumOffsets == 1) {
+      unsigned dim;
+      for (dim = 0; dim < dims; dim++) {
+         offsets[dim] = lp_build_emit_fetch_texoffset(&bld->bld_base, inst, 0, dim );
+      }
+   }
+
+   bld->sampler->emit_fetch_texel(bld->sampler,
+                                  bld->bld_base.base.gallivm,
+                                  bld->bld_base.base.type,
+                                  TRUE,
+                                  unit, unit,
+                                  coords,
+                                  offsets,
+                                  &derivs,
+                                  NULL, explicit_lod,
                                   texel);
 }
 
@@ -1306,13 +1438,13 @@ emit_txq( struct lp_build_tgsi_soa_context *bld,
    switch (inst->Texture.Texture) {
    case TGSI_TEXTURE_1D:
    case TGSI_TEXTURE_SHADOW1D:
-   case TGSI_TEXTURE_SHADOW2D:
-   case TGSI_TEXTURE_SHADOWCUBE:
       num_coords = 1;
       has_lod = 1;
       break;
    case TGSI_TEXTURE_2D:
+   case TGSI_TEXTURE_SHADOW2D:
    case TGSI_TEXTURE_CUBE:
+   case TGSI_TEXTURE_SHADOWCUBE:
    case TGSI_TEXTURE_1D_ARRAY:
    case TGSI_TEXTURE_SHADOW1D_ARRAY:
       num_coords = 2;
@@ -1756,6 +1888,17 @@ txq_emit(
 }
 
 static void
+txf_emit(
+   const struct lp_build_tgsi_action * action,
+   struct lp_build_tgsi_context * bld_base,
+   struct lp_build_emit_data * emit_data)
+{
+   struct lp_build_tgsi_soa_context * bld = lp_soa_context(bld_base);
+
+   emit_txf(bld, emit_data->inst, emit_data->output);
+}
+
+static void
 cal_emit(
    const struct lp_build_tgsi_action * action,
    struct lp_build_tgsi_context * bld_base,
@@ -2126,6 +2269,7 @@ lp_build_tgsi_soa(struct gallivm_state *gallivm,
    bld.bld_base.op_actions[TGSI_OPCODE_TXL].emit = txl_emit;
    bld.bld_base.op_actions[TGSI_OPCODE_TXP].emit = txp_emit;
    bld.bld_base.op_actions[TGSI_OPCODE_TXQ].emit = txq_emit;
+   bld.bld_base.op_actions[TGSI_OPCODE_TXF].emit = txf_emit;
 
    lp_exec_mask_init(&bld.exec_mask, &bld.bld_base.base);
 

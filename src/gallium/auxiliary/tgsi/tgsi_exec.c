@@ -653,15 +653,11 @@ tgsi_exec_machine_bind_shader(
 
    if (!tokens) {
       /* unbind and free all */
-      if (mach->Declarations) {
-         FREE( mach->Declarations );
-      }
+      FREE(mach->Declarations);
       mach->Declarations = NULL;
       mach->NumDeclarations = 0;
 
-      if (mach->Instructions) {
-         FREE( mach->Instructions );
-      }
+      FREE(mach->Instructions);
       mach->Instructions = NULL;
       mach->NumInstructions = 0;
 
@@ -804,15 +800,11 @@ tgsi_exec_machine_bind_shader(
    }
    tgsi_parse_free (&parse);
 
-   if (mach->Declarations) {
-      FREE( mach->Declarations );
-   }
+   FREE(mach->Declarations);
    mach->Declarations = declarations;
    mach->NumDeclarations = numDeclarations;
 
-   if (mach->Instructions) {
-      FREE( mach->Instructions );
-   }
+   FREE(mach->Instructions);
    mach->Instructions = instructions;
    mach->NumInstructions = numInstructions;
 }
@@ -875,10 +867,8 @@ void
 tgsi_exec_machine_destroy(struct tgsi_exec_machine *mach)
 {
    if (mach) {
-      if (mach->Instructions)
-         FREE(mach->Instructions);
-      if (mach->Declarations)
-         FREE(mach->Declarations);
+      FREE(mach->Instructions);
+      FREE(mach->Declarations);
 
       align_free(mach->Inputs);
       align_free(mach->Outputs);
@@ -1067,7 +1057,7 @@ fetch_src_file_channel(const struct tgsi_exec_machine *mach,
             const uint *buf = (const uint *)mach->Consts[constbuf];
             const int pos = index->i[i] * 4 + swizzle;
             /* const buffer bounds check */
-            if (pos < 0 || pos >= mach->ConstsSize[constbuf]) {
+            if (pos < 0 || pos >= (int) mach->ConstsSize[constbuf]) {
                if (0) {
                   /* Debug: print warning */
                   static int count = 0;
@@ -1223,7 +1213,6 @@ fetch_source(const struct tgsi_exec_machine *mach,
       index2.i[1] =
       index2.i[2] =
       index2.i[3] = reg->Indirect.Index;
-      assert(reg->Indirect.File == TGSI_FILE_ADDRESS);
       /* get current value of address register[swizzle] */
       swizzle = tgsi_util_get_src_register_swizzle( &reg->Indirect, TGSI_CHAN_X );
       fetch_src_file_channel(mach,
@@ -1719,6 +1708,7 @@ fetch_texel( struct tgsi_sampler *sampler,
              const union tgsi_exec_channel *t,
              const union tgsi_exec_channel *p,
              const union tgsi_exec_channel *c0,
+             const union tgsi_exec_channel *c1,
              enum tgsi_sampler_control control,
              union tgsi_exec_channel *r,
              union tgsi_exec_channel *g,
@@ -1728,7 +1718,7 @@ fetch_texel( struct tgsi_sampler *sampler,
    uint j;
    float rgba[TGSI_NUM_CHANNELS][TGSI_QUAD_SIZE];
 
-   sampler->get_samples(sampler, s->f, t->f, p->f, c0->f, control, rgba);
+   sampler->get_samples(sampler, s->f, t->f, p->f, c0->f, c1->f, control, rgba);
 
    for (j = 0; j < 4; j++) {
       r->f[j] = rgba[0][j];
@@ -1744,19 +1734,25 @@ fetch_texel( struct tgsi_sampler *sampler,
 #define TEX_MODIFIER_LOD_BIAS       2
 #define TEX_MODIFIER_EXPLICIT_LOD   3
 
-
+/*
+ * execute a texture instruction.
+ *
+ * modifier is used to control the channel routing for the\
+ * instruction variants like proj, lod, and texture with lod bias.
+ * sampler indicates which src register the sampler is contained in.
+ */
 static void
 exec_tex(struct tgsi_exec_machine *mach,
          const struct tgsi_full_instruction *inst,
-         uint modifier)
+         uint modifier, uint sampler)
 {
-   const uint unit = inst->Src[1].Register.Index;
-   union tgsi_exec_channel r[4];
+   const uint unit = inst->Src[sampler].Register.Index;
+   union tgsi_exec_channel r[4], cubearraycomp, cubelod;
    const union tgsi_exec_channel *lod = &ZeroVec;
    enum tgsi_sampler_control control;
    uint chan;
 
-   if (modifier != TEX_MODIFIER_NONE) {
+   if (modifier != TEX_MODIFIER_NONE && (sampler == 1)) {
       FETCH(&r[3], 0, TGSI_CHAN_W);
       if (modifier != TEX_MODIFIER_PROJECTED) {
          lod = &r[3];
@@ -1778,7 +1774,7 @@ exec_tex(struct tgsi_exec_machine *mach,
       }
 
       fetch_texel(mach->Samplers[unit],
-                  &r[0], &ZeroVec, &ZeroVec, lod,  /* S, T, P, LOD */
+                  &r[0], &ZeroVec, &ZeroVec, lod, &ZeroVec, /* S, T, P, LOD */
                   control,
                   &r[0], &r[1], &r[2], &r[3]);     /* R, G, B, A */
       break;
@@ -1791,7 +1787,7 @@ exec_tex(struct tgsi_exec_machine *mach,
       }
 
       fetch_texel(mach->Samplers[unit],
-                  &r[0], &ZeroVec, &r[2], lod,  /* S, T, P, LOD */
+                  &r[0], &ZeroVec, &r[2], lod, &ZeroVec, /* S, T, P, LOD */
                   control,
                   &r[0], &r[1], &r[2], &r[3]);     /* R, G, B, A */
       break;
@@ -1811,7 +1807,7 @@ exec_tex(struct tgsi_exec_machine *mach,
       }
 
       fetch_texel(mach->Samplers[unit],
-                  &r[0], &r[1], &r[2], lod,     /* S, T, P, LOD */
+                  &r[0], &r[1], &r[2], lod, &ZeroVec,    /* S, T, P, LOD */
                   control,
                   &r[0], &r[1], &r[2], &r[3]);  /* outputs */
       break;
@@ -1825,7 +1821,7 @@ exec_tex(struct tgsi_exec_machine *mach,
       }
 
       fetch_texel(mach->Samplers[unit],
-                  &r[0], &r[1], &ZeroVec, lod,     /* S, T, P, LOD */
+                  &r[0], &r[1], &ZeroVec, lod, &ZeroVec,    /* S, T, P, LOD */
                   control,
                   &r[0], &r[1], &r[2], &r[3]);  /* outputs */
       break;
@@ -1839,7 +1835,7 @@ exec_tex(struct tgsi_exec_machine *mach,
       }
 
       fetch_texel(mach->Samplers[unit],
-                  &r[0], &r[1], &r[2], lod,     /* S, T, P, LOD */
+                  &r[0], &r[1], &r[2], lod, &ZeroVec,    /* S, T, P, LOD */
                   control,
                   &r[0], &r[1], &r[2], &r[3]);  /* outputs */
       break;
@@ -1855,7 +1851,7 @@ exec_tex(struct tgsi_exec_machine *mach,
       }
 
       fetch_texel(mach->Samplers[unit],
-                  &r[0], &r[1], &r[2], lod,     /* S, T, P, LOD */
+                  &r[0], &r[1], &r[2], lod, &ZeroVec,    /* S, T, P, LOD */
                   control,
                   &r[0], &r[1], &r[2], &r[3]);  /* outputs */
       break;
@@ -1867,7 +1863,24 @@ exec_tex(struct tgsi_exec_machine *mach,
       FETCH(&r[3], 0, TGSI_CHAN_W);
 
       fetch_texel(mach->Samplers[unit],
-                  &r[0], &r[1], &r[2], &r[3],     /* S, T, P, LOD */
+                  &r[0], &r[1], &r[2], &r[3], &ZeroVec,    /* S, T, P, LOD */
+                  control,
+                  &r[0], &r[1], &r[2], &r[3]);  /* outputs */
+      break;
+   case TGSI_TEXTURE_CUBE_ARRAY:
+      FETCH(&r[0], 0, TGSI_CHAN_X);
+      FETCH(&r[1], 0, TGSI_CHAN_Y);
+      FETCH(&r[2], 0, TGSI_CHAN_Z);
+      FETCH(&r[3], 0, TGSI_CHAN_W);
+
+      if (modifier == TEX_MODIFIER_EXPLICIT_LOD ||
+          modifier == TEX_MODIFIER_LOD_BIAS)
+         FETCH(&cubelod, 1, TGSI_CHAN_X);
+      else
+         cubelod = ZeroVec;
+
+      fetch_texel(mach->Samplers[unit],
+                  &r[0], &r[1], &r[2], &r[3], &cubelod,    /* S, T, P, LOD */
                   control,
                   &r[0], &r[1], &r[2], &r[3]);  /* outputs */
       break;
@@ -1884,11 +1897,24 @@ exec_tex(struct tgsi_exec_machine *mach,
       }
 
       fetch_texel(mach->Samplers[unit],
-                  &r[0], &r[1], &r[2], lod,
+                  &r[0], &r[1], &r[2], lod, &ZeroVec,
                   control,
                   &r[0], &r[1], &r[2], &r[3]);
       break;
 
+   case TGSI_TEXTURE_SHADOWCUBE_ARRAY:
+      FETCH(&r[0], 0, TGSI_CHAN_X);
+      FETCH(&r[1], 0, TGSI_CHAN_Y);
+      FETCH(&r[2], 0, TGSI_CHAN_Z);
+      FETCH(&r[3], 0, TGSI_CHAN_W);
+
+      FETCH(&cubearraycomp, 1, TGSI_CHAN_X);
+
+      fetch_texel(mach->Samplers[unit],
+                  &r[0], &r[1], &r[2], &r[3], &cubearraycomp, /* S, T, P, LOD */
+                  control,
+                  &r[0], &r[1], &r[2], &r[3]);  /* outputs */
+      break;
    default:
       assert(0);
    }
@@ -1930,7 +1956,7 @@ exec_txd(struct tgsi_exec_machine *mach,
       FETCH(&r[0], 0, TGSI_CHAN_X);
 
       fetch_texel(mach->Samplers[unit],
-                  &r[0], &ZeroVec, &ZeroVec, &ZeroVec,   /* S, T, P, BIAS */
+                  &r[0], &ZeroVec, &ZeroVec, &ZeroVec, &ZeroVec,   /* S, T, P, BIAS */
                   tgsi_sampler_lod_bias,
                   &r[0], &r[1], &r[2], &r[3]);           /* R, G, B, A */
       break;
@@ -1947,7 +1973,7 @@ exec_txd(struct tgsi_exec_machine *mach,
       FETCH(&r[2], 0, TGSI_CHAN_Z);
 
       fetch_texel(mach->Samplers[unit],
-                  &r[0], &r[1], &r[2], &ZeroVec,   /* inputs */
+                  &r[0], &r[1], &r[2], &ZeroVec, &ZeroVec,   /* inputs */
                   tgsi_sampler_lod_bias,
                   &r[0], &r[1], &r[2], &r[3]);     /* outputs */
       break;
@@ -1955,13 +1981,13 @@ exec_txd(struct tgsi_exec_machine *mach,
    case TGSI_TEXTURE_2D_ARRAY:
    case TGSI_TEXTURE_3D:
    case TGSI_TEXTURE_CUBE:
-
+   case TGSI_TEXTURE_CUBE_ARRAY:
       FETCH(&r[0], 0, TGSI_CHAN_X);
       FETCH(&r[1], 0, TGSI_CHAN_Y);
       FETCH(&r[2], 0, TGSI_CHAN_Z);
 
       fetch_texel(mach->Samplers[unit],
-                  &r[0], &r[1], &r[2], &ZeroVec,
+                  &r[0], &r[1], &r[2], &ZeroVec, &ZeroVec,
                   tgsi_sampler_lod_bias,
                   &r[0], &r[1], &r[2], &r[3]);
       break;
@@ -1974,7 +2000,7 @@ exec_txd(struct tgsi_exec_machine *mach,
       FETCH(&r[3], 0, TGSI_CHAN_W);
 
       fetch_texel(mach->Samplers[unit],
-                  &r[0], &r[1], &r[2], &r[3],
+                  &r[0], &r[1], &r[2], &r[3], &ZeroVec,
                   tgsi_sampler_lod_bias,
                   &r[0], &r[1], &r[2], &r[3]);
       break;
@@ -2035,6 +2061,7 @@ exec_txf(struct tgsi_exec_machine *mach,
    case TGSI_TEXTURE_1D_ARRAY:
       IFETCH(&r[1], 0, TGSI_CHAN_Y);
       /* fallthrough */
+   case TGSI_TEXTURE_BUFFER:
    case TGSI_TEXTURE_1D:
    case TGSI_TEXTURE_SHADOW1D:
       IFETCH(&r[0], 0, TGSI_CHAN_X);
@@ -2131,7 +2158,7 @@ exec_sample(struct tgsi_exec_machine *mach,
       }
 
       fetch_texel(mach->Samplers[sampler_unit],
-                  &r[0], &ZeroVec, &ZeroVec, lod,  /* S, T, P, LOD */
+                  &r[0], &ZeroVec, &ZeroVec, lod, &ZeroVec,  /* S, T, P, LOD */
                   control,
                   &r[0], &r[1], &r[2], &r[3]);     /* R, G, B, A */
       break;
@@ -2153,7 +2180,7 @@ exec_sample(struct tgsi_exec_machine *mach,
       }
 
       fetch_texel(mach->Samplers[sampler_unit],
-                  &r[0], &r[1], &r[2], lod,     /* S, T, P, LOD */
+                  &r[0], &r[1], &r[2], lod, &ZeroVec,     /* S, T, P, LOD */
                   control,
                   &r[0], &r[1], &r[2], &r[3]);  /* outputs */
       break;
@@ -2161,6 +2188,7 @@ exec_sample(struct tgsi_exec_machine *mach,
    case TGSI_TEXTURE_2D_ARRAY:
    case TGSI_TEXTURE_3D:
    case TGSI_TEXTURE_CUBE:
+   case TGSI_TEXTURE_CUBE_ARRAY:
       FETCH(&r[0], 0, TGSI_CHAN_X);
       FETCH(&r[1], 0, TGSI_CHAN_Y);
       FETCH(&r[2], 0, TGSI_CHAN_Z);
@@ -2172,7 +2200,7 @@ exec_sample(struct tgsi_exec_machine *mach,
       }
 
       fetch_texel(mach->Samplers[sampler_unit],
-                  &r[0], &r[1], &r[2], lod,
+                  &r[0], &r[1], &r[2], lod, &ZeroVec,
                   control,
                   &r[0], &r[1], &r[2], &r[3]);
       break;
@@ -2187,7 +2215,7 @@ exec_sample(struct tgsi_exec_machine *mach,
       assert(modifier != TEX_MODIFIER_PROJECTED);
 
       fetch_texel(mach->Samplers[sampler_unit],
-                  &r[0], &r[1], &r[2], &r[3],
+                  &r[0], &r[1], &r[2], &r[3], &ZeroVec,
                   control,
                   &r[0], &r[1], &r[2], &r[3]);
       break;
@@ -2222,7 +2250,7 @@ exec_sample_d(struct tgsi_exec_machine *mach,
       FETCH(&r[0], 0, TGSI_CHAN_X);
 
       fetch_texel(mach->Samplers[sampler_unit],
-                  &r[0], &ZeroVec, &ZeroVec, &ZeroVec,   /* S, T, P, BIAS */
+                  &r[0], &ZeroVec, &ZeroVec, &ZeroVec, &ZeroVec,   /* S, T, P, BIAS */
                   tgsi_sampler_lod_bias,
                   &r[0], &r[1], &r[2], &r[3]);           /* R, G, B, A */
       break;
@@ -2237,20 +2265,21 @@ exec_sample_d(struct tgsi_exec_machine *mach,
       FETCH(&r[2], 0, TGSI_CHAN_Z);
 
       fetch_texel(mach->Samplers[sampler_unit],
-                  &r[0], &r[1], &r[2], &ZeroVec,   /* inputs */
+                  &r[0], &r[1], &r[2], &ZeroVec, &ZeroVec,   /* inputs */
                   tgsi_sampler_lod_bias,
                   &r[0], &r[1], &r[2], &r[3]);     /* outputs */
       break;
 
    case TGSI_TEXTURE_3D:
    case TGSI_TEXTURE_CUBE:
+   case TGSI_TEXTURE_CUBE_ARRAY:
 
       FETCH(&r[0], 0, TGSI_CHAN_X);
       FETCH(&r[1], 0, TGSI_CHAN_Y);
       FETCH(&r[2], 0, TGSI_CHAN_Z);
 
       fetch_texel(mach->Samplers[sampler_unit],
-                  &r[0], &r[1], &r[2], &ZeroVec,
+                  &r[0], &r[1], &r[2], &ZeroVec, &ZeroVec,
                   tgsi_sampler_lod_bias,
                   &r[0], &r[1], &r[2], &r[3]);
       break;
@@ -3653,14 +3682,14 @@ exec_instruction(
       /* simple texture lookup */
       /* src[0] = texcoord */
       /* src[1] = sampler unit */
-      exec_tex(mach, inst, TEX_MODIFIER_NONE);
+      exec_tex(mach, inst, TEX_MODIFIER_NONE, 1);
       break;
 
    case TGSI_OPCODE_TXB:
       /* Texture lookup with lod bias */
       /* src[0] = texcoord (src[0].w = LOD bias) */
       /* src[1] = sampler unit */
-      exec_tex(mach, inst, TEX_MODIFIER_LOD_BIAS);
+      exec_tex(mach, inst, TEX_MODIFIER_LOD_BIAS, 1);
       break;
 
    case TGSI_OPCODE_TXD:
@@ -3676,14 +3705,14 @@ exec_instruction(
       /* Texture lookup with explit LOD */
       /* src[0] = texcoord (src[0].w = LOD) */
       /* src[1] = sampler unit */
-      exec_tex(mach, inst, TEX_MODIFIER_EXPLICIT_LOD);
+      exec_tex(mach, inst, TEX_MODIFIER_EXPLICIT_LOD, 1);
       break;
 
    case TGSI_OPCODE_TXP:
       /* Texture lookup with projection */
       /* src[0] = texcoord (src[0].w = projection) */
       /* src[1] = sampler unit */
-      exec_tex(mach, inst, TEX_MODIFIER_PROJECTED);
+      exec_tex(mach, inst, TEX_MODIFIER_PROJECTED, 1);
       break;
 
    case TGSI_OPCODE_UP2H:
@@ -4218,6 +4247,27 @@ exec_instruction(
       exec_vector_unary(mach, inst, micro_isgn, TGSI_EXEC_DATA_INT, TGSI_EXEC_DATA_INT);
       break;
 
+   case TGSI_OPCODE_TEX2:
+      /* simple texture lookup */
+      /* src[0] = texcoord */
+      /* src[1] = compare */
+      /* src[2] = sampler unit */
+      exec_tex(mach, inst, TEX_MODIFIER_NONE, 2);
+      break;
+   case TGSI_OPCODE_TXB2:
+      /* simple texture lookup */
+      /* src[0] = texcoord */
+      /* src[1] = bias */
+      /* src[2] = sampler unit */
+      exec_tex(mach, inst, TEX_MODIFIER_LOD_BIAS, 2);
+      break;
+   case TGSI_OPCODE_TXL2:
+      /* simple texture lookup */
+      /* src[0] = texcoord */
+      /* src[1] = lod */
+      /* src[2] = sampler unit */
+      exec_tex(mach, inst, TEX_MODIFIER_EXPLICIT_LOD, 2);
+      break;
    default:
       assert( 0 );
    }

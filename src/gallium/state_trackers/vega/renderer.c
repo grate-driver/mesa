@@ -308,7 +308,8 @@ static void renderer_set_fs(struct renderer *r, RendererFs id)
 
       switch (id) {
       case RENDERER_FS_COLOR:
-         fs = util_make_fragment_passthrough_shader(r->pipe);
+         fs = util_make_fragment_passthrough_shader(r->pipe,
+                          TGSI_SEMANTIC_COLOR, TGSI_INTERPOLATE_PERSPECTIVE);
          break;
       case RENDERER_FS_TEXTURE:
          fs = util_make_fragment_tex_shader(r->pipe,
@@ -870,8 +871,7 @@ VGboolean renderer_filter_begin(struct renderer *renderer,
    if (!renderer_can_support(renderer, dst, PIPE_BIND_RENDER_TARGET))
       return VG_FALSE;
 
-   u_surface_default_template(&surf_tmpl, dst,
-                              PIPE_BIND_RENDER_TARGET);
+   u_surface_default_template(&surf_tmpl, dst);
    surf = renderer->pipe->create_surface(renderer->pipe, dst, &surf_tmpl);
    if (!surf)
       return VG_FALSE;
@@ -1040,7 +1040,7 @@ void renderer_polygon_stencil(struct renderer *renderer,
 {
    assert(renderer->state == RENDERER_STATE_POLYGON_STENCIL);
 
-   cso_set_vertex_buffers(renderer->cso, 1, vbuf);
+   cso_set_vertex_buffers(renderer->cso, 0, 1, vbuf);
 
    if (!renderer->u.polygon_stencil.manual_two_sides) {
       cso_draw_arrays(renderer->cso, mode, start, count);

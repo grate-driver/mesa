@@ -84,10 +84,10 @@ intel_miptree_create_for_teximage(struct intel_context *intel,
 	  intelImage->base.Base.Level == firstLevel &&
 	  (intel->gen < 4 || firstLevel == 0)) {
 	 lastLevel = firstLevel;
-      } else if (intelObj->base.Target == GL_TEXTURE_EXTERNAL_OES) {
-	 lastLevel = firstLevel;
       } else {
-	 lastLevel = firstLevel + _mesa_logbase2(MAX2(MAX2(width, height), depth));
+	 lastLevel = (firstLevel +
+                      _mesa_get_tex_max_num_levels(intelObj->base.Target,
+                                                   width, height, depth) - 1);
       }
    }
 
@@ -101,7 +101,7 @@ intel_miptree_create_for_teximage(struct intel_context *intel,
 			       depth,
 			       expect_accelerated_upload,
                                0 /* num_samples */,
-                               INTEL_MSAA_LAYOUT_NONE);
+                               false /* force_y_tiling */);
 }
 
 /* There are actually quite a few combinations this will work for,
@@ -139,7 +139,7 @@ try_pbo_upload(struct gl_context *ctx,
    struct intel_context *intel = intel_context(ctx);
    struct intel_buffer_object *pbo = intel_buffer_object(unpack->BufferObj);
    GLuint src_offset, src_stride;
-   GLuint dst_x, dst_y, dst_stride;
+   GLuint dst_x, dst_y;
    drm_intel_bo *dst_buffer, *src_buffer;
 
    if (!_mesa_is_bufferobj(unpack->BufferObj))
@@ -167,6 +167,12 @@ try_pbo_upload(struct gl_context *ctx,
       return false;
    }
 
+   if (image->TexObject->Target == GL_TEXTURE_1D_ARRAY ||
+       image->TexObject->Target == GL_TEXTURE_2D_ARRAY) {
+      DBG("%s: no support for array textures\n", __FUNCTION__);
+      return false;
+   }
+
    dst_buffer = intelImage->mt->region->bo;
    src_buffer = intel_bufferobj_source(intel, pbo, 64, &src_offset);
    /* note: potential 64-bit ptr to 32-bit int cast */
@@ -176,18 +182,17 @@ try_pbo_upload(struct gl_context *ctx,
       src_stride = unpack->RowLength;
    else
       src_stride = image->Width;
+   src_stride *= intelImage->mt->region->cpp;
 
    intel_miptree_get_image_offset(intelImage->mt, intelImage->base.Base.Level,
-				  intelImage->base.Base.Face, 0,
+				  intelImage->base.Base.Face,
 				  &dst_x, &dst_y);
-
-   dst_stride = intelImage->mt->region->pitch;
 
    if (!intelEmitCopyBlit(intel,
 			  intelImage->mt->cpp,
 			  src_stride, src_buffer,
 			  src_offset, false,
-			  dst_stride, dst_buffer, 0,
+			  intelImage->mt->region->pitch, dst_buffer, 0,
 			  intelImage->mt->region->tiling,
 			  0, 0, dst_x, dst_y, image->Width, image->Height,
 			  GL_COPY)) {
@@ -206,9 +211,21 @@ intelTexImage(struct gl_context * ctx,
               GLenum format, GLenum type, const void *pixels,
               const struct gl_pixelstore_attrib *unpack)
 {
+   bool ok;
+
    DBG("%s target %s level %d %dx%dx%d\n", __FUNCTION__,
        _mesa_lookup_enum_by_nr(texImage->TexObject->Target),
        texImage->Level, texImage->Width, texImage->Height, texImage->Depth);
+
+   ok = intel_texsubimage_tiled_memcpy(ctx, dims, texImage,
+                                       0, 0, 0, /*x,y,z offsets*/
+                                       texImage->Width,
+                                       texImage->Height,
+                                       texImage->Depth,
+                                       format, type, pixels, unpack,
+                                       true /*for_glTexImage*/);
+   if (ok)
+      return;
 
    /* Attempt to use the blitter for PBO image uploads.
     */
@@ -256,9 +273,11 @@ intel_set_texture_image_region(struct gl_context *ctx,
 						     region);
    if (intel_image->mt == NULL)
        return;
+   intel_texobj->needs_validate = true;
 
    intel_image->mt->offset = offset;
-   intel_image->base.RowStride = region->pitch;
+   assert(region->pitch % region->cpp == 0);
+   intel_image->base.RowStride = region->pitch / region->cpp;
 
    /* Immediately validate the image to the object. */
    intel_miptree_reference(&intel_texobj->mt, intel_image->mt);
@@ -326,7 +345,6 @@ intelSetTexBuffer(__DRIcontext *pDRICtx, GLint target, __DRIdrawable *dPriv)
    intelSetTexBuffer2(pDRICtx, target, __DRI_TEXTURE_FORMAT_RGBA, dPriv);
 }
 
-#if FEATURE_OES_EGL_image
 static void
 intel_image_target_texture_2d(struct gl_context *ctx, GLenum target,
 			      struct gl_texture_object *texObj,
@@ -347,14 +365,10 @@ intel_image_target_texture_2d(struct gl_context *ctx, GLenum target,
 				  target, image->internal_format,
                                   image->format, image->offset);
 }
-#endif
 
 void
 intelInitTextureImageFuncs(struct dd_function_table *functions)
 {
    functions->TexImage = intelTexImage;
-
-#if FEATURE_OES_EGL_image
    functions->EGLImageTargetTexture2D = intel_image_target_texture_2d;
-#endif
 }

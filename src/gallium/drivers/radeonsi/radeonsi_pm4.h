@@ -29,7 +29,7 @@
 
 #include "../../winsys/radeon/drm/radeon_winsys.h"
 
-#define SI_PM4_MAX_DW		128
+#define SI_PM4_MAX_DW		256
 #define SI_PM4_MAX_BO		32
 #define SI_PM4_MAX_RELOCS	4
 
@@ -71,7 +71,7 @@ void si_pm4_add_bo(struct si_pm4_state *state,
 
 void si_pm4_sh_data_begin(struct si_pm4_state *state);
 void si_pm4_sh_data_add(struct si_pm4_state *state, uint32_t dw);
-void si_pm4_sh_data_end(struct si_pm4_state *state, unsigned reg);
+void si_pm4_sh_data_end(struct si_pm4_state *state, unsigned base, unsigned idx);
 
 void si_pm4_inval_shader_cache(struct si_pm4_state *state);
 void si_pm4_inval_texture_cache(struct si_pm4_state *state);

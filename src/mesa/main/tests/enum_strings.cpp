@@ -28,17 +28,6 @@ extern "C" {
 #include "main/enums.h"
 }
 
-/* Stub this out because the real Mesa implementation is tied into a
- * bunch of the GL_ARB_debug infrastructure.  This results in pulling
- * in most of libmesa.a and a cacade of missing symbols, etc.
- */
-extern "C" void
-_mesa_warning( struct gl_context *ctx, const char *fmtString, ... )
-{
-   (void) ctx;
-   (void) fmtString;
-}
-
 struct enum_info {
    int value;
    const char *name;
@@ -818,6 +807,7 @@ const struct enum_info everything[] = {
    { 0x8256, "GL_RESET_NOTIFICATION_STRATEGY_ARB" },
    { 0x8257, "GL_PROGRAM_BINARY_RETRIEVABLE_HINT" },
    { 0x8261, "GL_NO_RESET_NOTIFICATION_ARB" },
+   { 0x82DF, "GL_TEXTURE_IMMUTABLE_LEVELS" },
    { 0x8362, "GL_UNSIGNED_BYTE_2_3_3_REV" },
    { 0x8363, "GL_UNSIGNED_SHORT_5_6_5" },
    { 0x8364, "GL_UNSIGNED_SHORT_5_6_5_REV" },
@@ -835,8 +825,8 @@ const struct enum_info everything[] = {
    { 0x83A3, "GL_RGBA4_S3TC" },
    { 0x83F0, "GL_COMPRESSED_RGB_S3TC_DXT1_EXT" },
    { 0x83F1, "GL_COMPRESSED_RGBA_S3TC_DXT1_EXT" },
-   { 0x83F2, "GL_COMPRESSED_RGBA_S3TC_DXT3_EXT" },
-   { 0x83F3, "GL_COMPRESSED_RGBA_S3TC_DXT5_EXT" },
+   { 0x83F2, "GL_COMPRESSED_RGBA_S3TC_DXT3_ANGLE" },
+   { 0x83F3, "GL_COMPRESSED_RGBA_S3TC_DXT5_ANGLE" },
    { 0x844D, "GL_NEAREST_CLIPMAP_NEAREST_SGIX" },
    { 0x844E, "GL_NEAREST_CLIPMAP_LINEAR_SGIX" },
    { 0x844F, "GL_LINEAR_CLIPMAP_NEAREST_SGIX" },
@@ -1673,6 +1663,9 @@ const struct enum_info everything[] = {
    { 0x8D55, "GL_RENDERBUFFER_STENCIL_SIZE" },
    { 0x8D56, "GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE" },
    { 0x8D57, "GL_MAX_SAMPLES" },
+   { 0x8D69, "GL_PRIMITIVE_RESTART_FIXED_INDEX" },
+   { 0x8D6A, "GL_ANY_SAMPLES_PASSED_CONSERVATIVE" },
+   { 0x8D6B, "GL_MAX_ELEMENT_INDEX" },
    { 0x8D70, "GL_RGBA32UI" },
    { 0x8D71, "GL_RGB32UI" },
    { 0x8D72, "GL_ALPHA32UI_EXT" },
@@ -1839,6 +1832,16 @@ const struct enum_info everything[] = {
    { 0x9146, "GL_DEBUG_SEVERITY_HIGH_ARB" },
    { 0x9147, "GL_DEBUG_SEVERITY_MEDIUM_ARB" },
    { 0x9148, "GL_DEBUG_SEVERITY_LOW_ARB" },
+   { 0x9274, "GL_COMPRESSED_RGB8_ETC2" },
+   { 0x9275, "GL_COMPRESSED_SRGB8_ETC2" },
+   { 0x9276, "GL_COMPRESSED_RGB8_PUNCHTHROUGH_ALPHA1_ETC2" },
+   { 0x9277, "GL_COMPRESSED_SRGB8_PUNCHTHROUGH_ALPHA1_ETC2" },
+   { 0x9278, "GL_COMPRESSED_RGBA8_ETC2_EAC" },
+   { 0x9279, "GL_COMPRESSED_SRGB8_ALPHA8_ETC2_EAC" },
+   { 0x9270, "GL_COMPRESSED_R11_EAC" },
+   { 0x9271, "GL_COMPRESSED_SIGNED_R11_EAC" },
+   { 0x9272, "GL_COMPRESSED_RG11_EAC" },
+   { 0x9273, "GL_COMPRESSED_SIGNED_RG11_EAC" },
    { 0x19262, "GL_RASTER_POSITION_UNCLIPPED_IBM" },
    { 0, NULL }
 };

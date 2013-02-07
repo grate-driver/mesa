@@ -52,13 +52,13 @@ static struct pipe_query *r300_create_query(struct pipe_context *pipe,
         return (struct pipe_query*)q;
     }
 
-    if (r300screen->caps.family == CHIP_FAMILY_RV530)
+    if (r300screen->caps.family == CHIP_RV530)
         q->num_pipes = r300screen->info.r300_num_z_pipes;
     else
         q->num_pipes = r300screen->info.r300_num_gb_pipes;
 
-    q->buf = r300->rws->buffer_create(r300->rws, 4096, 4096,
-                                      PIPE_BIND_CUSTOM, RADEON_DOMAIN_GTT);
+    q->buf = r300->rws->buffer_create(r300->rws, 4096, 4096, TRUE,
+                                      RADEON_DOMAIN_GTT);
     if (!q->buf) {
         FREE(q);
         return NULL;

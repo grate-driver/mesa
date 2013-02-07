@@ -178,9 +178,9 @@ vlVdpVideoSurfaceSize(vlVdpSurface *p_surf, int component,
       } else if (p_surf->templat.chroma_format == PIPE_VIDEO_CHROMA_FORMAT_422) {
          *height /= 2;
       }
-      if (p_surf->templat.interlaced)
-         *height /= 2;
    }
+   if (p_surf->templat.interlaced)
+      *height /= 2;
 }
 
 /**
@@ -236,15 +236,9 @@ vlVdpVideoSurfaceGetBitsYCbCr(VdpVideoSurface surface,
          struct pipe_transfer *transfer;
          uint8_t *map;
 
-         transfer = pipe->get_transfer(pipe, sv->texture, 0, PIPE_TRANSFER_READ, &box);
-         if (transfer == NULL) {
-            pipe_mutex_unlock(vlsurface->device->mutex);
-            return VDP_STATUS_RESOURCES;
-         }
-
-         map = pipe_transfer_map(pipe, transfer);
-         if (map == NULL) {
-            pipe_transfer_destroy(pipe, transfer);
+         map = pipe->transfer_map(pipe, sv->texture, 0,
+                                       PIPE_TRANSFER_READ, &box, &transfer);
+         if (!map) {
             pipe_mutex_unlock(vlsurface->device->mutex);
             return VDP_STATUS_RESOURCES;
          }
@@ -254,7 +248,6 @@ vlVdpVideoSurfaceGetBitsYCbCr(VdpVideoSurface surface,
                         box.width, box.height, map, transfer->stride, 0, 0);
 
          pipe_transfer_unmap(pipe, transfer);
-         pipe_transfer_destroy(pipe, transfer);
       }
    }
    pipe_mutex_unlock(vlsurface->device->mutex);
@@ -366,5 +359,5 @@ vlVdpVideoSurfaceClear(vlVdpSurface *vlsurf)
       pipe->clear_render_target(pipe, surfaces[i], &c, 0, 0,
                                 surfaces[i]->width, surfaces[i]->height);
    }
-   pipe->flush(pipe, NULL);
+   pipe->flush(pipe, NULL, 0);
 }

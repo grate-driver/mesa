@@ -63,32 +63,39 @@ _mesa_reference_sampler_object(struct gl_context *ctx,
 }
 
 
-extern void
-_mesa_init_sampler_object(struct gl_sampler_object *sampObj, GLuint name);
-
 extern struct gl_sampler_object *
 _mesa_new_sampler_object(struct gl_context *ctx, GLuint name);
 
 extern void
-_mesa_delete_sampler_object(struct gl_context *ctx,
-                            struct gl_sampler_object *sampObj);
-
-extern void
 _mesa_init_sampler_object_functions(struct dd_function_table *driver);
 
-extern void
-_mesa_init_sampler_object_dispatch(struct _glapi_table *disp);
-
-extern void GLAPIENTRY
-_mesa_BindSampler(GLuint unit, GLuint sampler);
-
-extern void GLAPIENTRY
+void GLAPIENTRY
 _mesa_GenSamplers(GLsizei count, GLuint *samplers);
-
-extern void GLAPIENTRY
+void GLAPIENTRY
 _mesa_DeleteSamplers(GLsizei count, const GLuint *samplers);
-
-extern void GLAPIENTRY
+GLboolean GLAPIENTRY
+_mesa_IsSampler(GLuint sampler);
+void GLAPIENTRY
+_mesa_BindSampler(GLuint unit, GLuint sampler);
+void GLAPIENTRY
 _mesa_SamplerParameteri(GLuint sampler, GLenum pname, GLint param);
+void GLAPIENTRY
+_mesa_SamplerParameterf(GLuint sampler, GLenum pname, GLfloat param);
+void GLAPIENTRY
+_mesa_SamplerParameteriv(GLuint sampler, GLenum pname, const GLint *params);
+void GLAPIENTRY
+_mesa_SamplerParameterfv(GLuint sampler, GLenum pname, const GLfloat *params);
+void GLAPIENTRY
+_mesa_SamplerParameterIiv(GLuint sampler, GLenum pname, const GLint *params);
+void GLAPIENTRY
+_mesa_SamplerParameterIuiv(GLuint sampler, GLenum pname, const GLuint *params);
+void GLAPIENTRY
+_mesa_GetSamplerParameteriv(GLuint sampler, GLenum pname, GLint *params);
+void GLAPIENTRY
+_mesa_GetSamplerParameterfv(GLuint sampler, GLenum pname, GLfloat *params);
+void GLAPIENTRY
+_mesa_GetSamplerParameterIiv(GLuint sampler, GLenum pname, GLint *params);
+void GLAPIENTRY
+_mesa_GetSamplerParameterIuiv(GLuint sampler, GLenum pname, GLuint *params);
 
 #endif /* SAMPLEROBJ_H */

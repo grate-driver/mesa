@@ -262,10 +262,8 @@ dri2_add_config(_EGLDisplay *disp, const __DRIconfig *dri_config, int id,
    if (double_buffer) {
       surface_type &= ~EGL_PIXMAP_BIT;
 
-      if (dri2_dpy->swap_available) {
-         conf->base.MinSwapInterval = 0;
-         conf->base.MaxSwapInterval = 1000; /* XXX arbitrary value */
-      }
+      conf->base.MinSwapInterval = dri2_dpy->min_swap_interval;
+      conf->base.MaxSwapInterval = dri2_dpy->max_swap_interval;
    }
 
    conf->base.SurfaceType |= surface_type;
@@ -467,7 +465,10 @@ dri2_setup_screen(_EGLDisplay *disp)
       api_mask = dri2_dpy->dri2->getAPIMask(dri2_dpy->dri_screen);
    } else {
       assert(dri2_dpy->swrast);
-      api_mask = 1 << __DRI_API_OPENGL | 1 << __DRI_API_GLES | 1 << __DRI_API_GLES2;
+      api_mask = 1 << __DRI_API_OPENGL |
+                 1 << __DRI_API_GLES |
+                 1 << __DRI_API_GLES2 |
+                 1 << __DRI_API_GLES3;
    }
 
    disp->ClientAPIs = 0;
@@ -477,6 +478,8 @@ dri2_setup_screen(_EGLDisplay *disp)
       disp->ClientAPIs |= EGL_OPENGL_ES_BIT;
    if (api_mask & (1 << __DRI_API_GLES2))
       disp->ClientAPIs |= EGL_OPENGL_ES2_BIT;
+   if (api_mask & (1 << __DRI_API_GLES3))
+      disp->ClientAPIs |= EGL_OPENGL_ES3_BIT_KHR;
 
    assert(dri2_dpy->dri2 || dri2_dpy->swrast);
    disp->Extensions.KHR_surfaceless_context = EGL_TRUE;
@@ -532,6 +535,9 @@ dri2_create_screen(_EGLDisplay *disp)
       for (i = 0; extensions[i]; i++) {
 	 if (strcmp(extensions[i]->name, __DRI2_ROBUSTNESS) == 0) {
             dri2_dpy->robustness = (__DRIrobustnessExtension *) extensions[i];
+	 }
+	 if (strcmp(extensions[i]->name, __DRI2_CONFIG_QUERY) == 0) {
+	    dri2_dpy->config = (__DRI2configQueryExtension *) extensions[i];
 	 }
       }
    } else {
@@ -611,8 +617,7 @@ dri2_terminate(_EGLDriver *drv, _EGLDisplay *disp)
       close(dri2_dpy->fd);
    if (dri2_dpy->driver)
       dlclose(dri2_dpy->driver);
-   if (dri2_dpy->device_name)
-      free(dri2_dpy->device_name);
+   free(dri2_dpy->device_name);
 
    if (disp->PlatformDisplay == NULL) {
       switch (disp->Platform) {
@@ -737,8 +742,10 @@ dri2_create_context(_EGLDriver *drv, _EGLDisplay *disp, _EGLConfig *conf,
          api = __DRI_API_GLES;
          break;
       case 2:
-      case 3:
          api = __DRI_API_GLES2;
+         break;
+      case 3:
+         api = __DRI_API_GLES3;
          break;
       default:
 	 _eglError(EGL_BAD_PARAMETER, "eglCreateContext");
@@ -1542,11 +1549,9 @@ _eglBuiltInDriverDRI2(const char *args)
 
    (void) args;
 
-   dri2_drv = malloc(sizeof *dri2_drv);
+   dri2_drv = calloc(1, sizeof *dri2_drv);
    if (!dri2_drv)
       return NULL;
-
-   memset(dri2_drv, 0, sizeof *dri2_drv);
 
    if (!dri2_load(&dri2_drv->base)) {
       free(dri2_drv);

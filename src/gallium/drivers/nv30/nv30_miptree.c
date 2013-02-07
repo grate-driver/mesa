@@ -147,6 +147,7 @@ void
 nv30_resource_resolve(struct pipe_context *pipe,
                       const struct pipe_resolve_info *info)
 {
+#if 0
    struct nv30_context *nv30 = nv30_context(pipe);
    struct nv30_rect src, dst;
 
@@ -156,16 +157,75 @@ nv30_resource_resolve(struct pipe_context *pipe,
                info->dst.x1 - info->dst.x0, info->dst.y1 - info->dst.y0, &dst);
 
    nv30_transfer_rect(nv30, BILINEAR, &src, &dst);
+#endif
 }
 
-static struct pipe_transfer *
-nv30_miptree_transfer_new(struct pipe_context *pipe, struct pipe_resource *pt,
+void
+nv30_blit(struct pipe_context *pipe,
+          const struct pipe_blit_info *blit_info)
+{
+   struct nv30_context *nv30 = nv30_context(pipe);
+   struct pipe_blit_info info = *blit_info;
+
+   if (info.src.resource->nr_samples > 1 &&
+       info.dst.resource->nr_samples <= 1 &&
+       !util_format_is_depth_or_stencil(info.src.resource->format) &&
+       !util_format_is_pure_integer(info.src.resource->format)) {
+      debug_printf("nv30: color resolve unimplemented\n");
+      return;
+   }
+
+   if (util_try_blit_via_copy_region(pipe, &info)) {
+      return; /* done */
+   }
+
+   if (info.mask & PIPE_MASK_S) {
+      debug_printf("nv30: cannot blit stencil, skipping\n");
+      info.mask &= ~PIPE_MASK_S;
+   }
+
+   if (!util_blitter_is_blit_supported(nv30->blitter, &info)) {
+      debug_printf("nv30: blit unsupported %s -> %s\n",
+                   util_format_short_name(info.src.resource->format),
+                   util_format_short_name(info.dst.resource->format));
+      return;
+   }
+
+   /* XXX turn off occlusion queries */
+
+   util_blitter_save_vertex_buffer_slot(nv30->blitter, nv30->vtxbuf);
+   util_blitter_save_vertex_elements(nv30->blitter, nv30->vertex);
+   util_blitter_save_vertex_shader(nv30->blitter, nv30->vertprog.program);
+   util_blitter_save_rasterizer(nv30->blitter, nv30->rast);
+   util_blitter_save_viewport(nv30->blitter, &nv30->viewport);
+   util_blitter_save_scissor(nv30->blitter, &nv30->scissor);
+   util_blitter_save_fragment_shader(nv30->blitter, nv30->fragprog.program);
+   util_blitter_save_blend(nv30->blitter, nv30->blend);
+   util_blitter_save_depth_stencil_alpha(nv30->blitter,
+                                         nv30->zsa);
+   util_blitter_save_stencil_ref(nv30->blitter, &nv30->stencil_ref);
+   util_blitter_save_sample_mask(nv30->blitter, nv30->sample_mask);
+   util_blitter_save_framebuffer(nv30->blitter, &nv30->framebuffer);
+   util_blitter_save_fragment_sampler_states(nv30->blitter,
+                     nv30->fragprog.num_samplers,
+                     (void**)nv30->fragprog.samplers);
+   util_blitter_save_fragment_sampler_views(nv30->blitter,
+                     nv30->fragprog.num_textures, nv30->fragprog.textures);
+   util_blitter_save_render_condition(nv30->blitter, nv30->render_cond_query,
+                                      nv30->render_cond_mode);
+   util_blitter_blit(nv30->blitter, &info);
+}
+
+static void *
+nv30_miptree_transfer_map(struct pipe_context *pipe, struct pipe_resource *pt,
                           unsigned level, unsigned usage,
-                          const struct pipe_box *box)
+                          const struct pipe_box *box,
+                          struct pipe_transfer **ptransfer)
 {
    struct nv30_context *nv30 = nv30_context(pipe);
    struct nouveau_device *dev = nv30->screen->base.device;
    struct nv30_transfer *tx;
+   unsigned access = 0;
    int ret;
 
    tx = CALLOC_STRUCT(nv30_transfer);
@@ -210,11 +270,30 @@ nv30_miptree_transfer_new(struct pipe_context *pipe, struct pipe_resource *pt,
    if (usage & PIPE_TRANSFER_READ)
       nv30_transfer_rect(nv30, NEAREST, &tx->img, &tx->tmp);
 
-   return &tx->base;
+   if (tx->tmp.bo->map) {
+      *ptransfer = &tx->base;
+      return tx->tmp.bo->map;
+   }
+
+   if (usage & PIPE_TRANSFER_READ)
+      access |= NOUVEAU_BO_RD;
+   if (usage & PIPE_TRANSFER_WRITE)
+      access |= NOUVEAU_BO_WR;
+
+   ret = nouveau_bo_map(tx->tmp.bo, access, nv30->base.client);
+   if (ret) {
+      pipe_resource_reference(&tx->base.resource, NULL);
+      FREE(tx);
+      return NULL;
+   }
+
+   *ptransfer = &tx->base;
+   return tx->tmp.bo->map;
 }
 
 static void
-nv30_miptree_transfer_del(struct pipe_context *pipe, struct pipe_transfer *ptx)
+nv30_miptree_transfer_unmap(struct pipe_context *pipe,
+                            struct pipe_transfer *ptx)
 {
    struct nv30_context *nv30 = nv30_context(pipe);
    struct nv30_transfer *tx = nv30_transfer(ptx);
@@ -227,39 +306,9 @@ nv30_miptree_transfer_del(struct pipe_context *pipe, struct pipe_transfer *ptx)
    FREE(tx);
 }
 
-static void *
-nv30_miptree_transfer_map(struct pipe_context *pipe, struct pipe_transfer *ptx)
-{
-   struct nv30_context *nv30 = nv30_context(pipe);
-   struct nv30_transfer *tx = nv30_transfer(ptx);
-   unsigned access = 0;
-   int ret;
-
-   if (tx->tmp.bo->map)
-      return tx->tmp.bo->map;
-
-   if (ptx->usage & PIPE_TRANSFER_READ)
-      access |= NOUVEAU_BO_RD;
-   if (ptx->usage & PIPE_TRANSFER_WRITE)
-      access |= NOUVEAU_BO_WR;
-
-   ret = nouveau_bo_map(tx->tmp.bo, access, nv30->base.client);
-   if (ret)
-      return NULL;
-   return tx->tmp.bo->map;
-}
-
-static void
-nv30_miptree_transfer_unmap(struct pipe_context *pipe,
-                            struct pipe_transfer *ptx)
-{
-}
-
 const struct u_resource_vtbl nv30_miptree_vtbl = {
    nv30_miptree_get_handle,
    nv30_miptree_destroy,
-   nv30_miptree_transfer_new,
-   nv30_miptree_transfer_del,
    nv30_miptree_transfer_map,
    u_default_transfer_flush_region,
    nv30_miptree_transfer_unmap,
@@ -411,7 +460,6 @@ nv30_miptree_surface_new(struct pipe_context *pipe,
    pipe_resource_reference(&ps->texture, pt);
    ps->context = pipe;
    ps->format = tmpl->format;
-   ps->usage = tmpl->usage;
    ps->u.tex.level = tmpl->u.tex.level;
    ps->u.tex.first_layer = tmpl->u.tex.first_layer;
    ps->u.tex.last_layer = tmpl->u.tex.last_layer;

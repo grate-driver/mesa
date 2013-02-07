@@ -110,7 +110,6 @@ private:
    void emitTEX(const TexInstruction *);
    void emitTEXCSAA(const TexInstruction *);
    void emitTXQ(const TexInstruction *);
-   void emitPIXLD(const TexInstruction *);
 
    void emitQUADOP(const Instruction *, uint8_t qOp, uint8_t laneMask);
 
@@ -648,17 +647,17 @@ CodeEmitterNVC0::emitLogicOp(const Instruction *i, uint8_t subOp)
       if (isLIMM(i->src(1), TYPE_U32)) {
          emitForm_A(i, HEX64(38000000, 00000002));
 
-         if (i->srcExists(2))
+         if (i->flagsDef >= 0)
             code[1] |= 1 << 26;
       } else {
          emitForm_A(i, HEX64(68000000, 00000003));
 
-         if (i->srcExists(2))
+         if (i->flagsDef >= 0)
             code[1] |= 1 << 16;
       }
       code[0] |= subOp << 6;
 
-      if (i->srcExists(2)) // carry
+      if (i->flagsSrc >= 0) // carry
          code[0] |= 1 << 5;
 
       if (i->src(0).mod & Modifier(NV50_IR_MOD_NOT)) code[0] |= 1 << 9;
@@ -2298,6 +2297,13 @@ SchedDataCalculator::recordRd(const Value *v, const int ready)
    }
 }
 
+bool
+calculateSchedDataNVC0(const Target *targ, Function *func)
+{
+   SchedDataCalculator sched(targ);
+   return sched.run(func, true, true);
+}
+
 void
 CodeEmitterNVC0::prepareEmission(Function *func)
 {
@@ -2305,10 +2311,8 @@ CodeEmitterNVC0::prepareEmission(Function *func)
 
    CodeEmitter::prepareEmission(func);
 
-   if (targ->hasSWSched) {
-      SchedDataCalculator sched(targ);
-      sched.run(func, true, true);
-   }
+   if (targ->hasSWSched)
+      calculateSchedDataNVC0(targ, func);
 }
 
 CodeEmitterNVC0::CodeEmitterNVC0(const TargetNVC0 *target)
@@ -2321,11 +2325,19 @@ CodeEmitterNVC0::CodeEmitterNVC0(const TargetNVC0 *target)
 }
 
 CodeEmitter *
-TargetNVC0::getCodeEmitter(Program::Type type)
+TargetNVC0::createCodeEmitterNVC0(Program::Type type)
 {
    CodeEmitterNVC0 *emit = new CodeEmitterNVC0(this);
    emit->setProgramType(type);
    return emit;
+}
+
+CodeEmitter *
+TargetNVC0::getCodeEmitter(Program::Type type)
+{
+   if (chipset >= NVISA_GK110_CHIPSET)
+      return createCodeEmitterGK110(type);
+   return createCodeEmitterNVC0(type);
 }
 
 } // namespace nv50_ir

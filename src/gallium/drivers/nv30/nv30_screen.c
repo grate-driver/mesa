@@ -23,6 +23,7 @@
  *
  */
 
+#include "util/u_format.h"
 #include "util/u_format_s3tc.h"
 
 #include "nouveau/nv_object.xml.h"
@@ -69,11 +70,10 @@ nv30_screen_get_param(struct pipe_screen *pscreen, enum pipe_cap param)
    case PIPE_CAP_POINT_SPRITE:
    case PIPE_CAP_SCALED_RESOLVE:
    case PIPE_CAP_OCCLUSION_QUERY:
-   case PIPE_CAP_TIMER_QUERY:
+   case PIPE_CAP_QUERY_TIME_ELAPSED:
    case PIPE_CAP_QUERY_TIMESTAMP:
    case PIPE_CAP_TEXTURE_SHADOW_MAP:
    case PIPE_CAP_TEXTURE_SWIZZLE:
-   case PIPE_CAP_DEPTHSTENCIL_CLEAR_SEPARATE:
    case PIPE_CAP_DEPTH_CLIP_DISABLE:
    case PIPE_CAP_TGSI_FS_COORD_ORIGIN_UPPER_LEFT:
    case PIPE_CAP_TGSI_FS_COORD_ORIGIN_LOWER_LEFT:
@@ -117,6 +117,9 @@ nv30_screen_get_param(struct pipe_screen *pscreen, enum pipe_cap param)
    case PIPE_CAP_QUADS_FOLLOW_PROVOKING_VERTEX_CONVENTION:
    case PIPE_CAP_MIXED_COLORBUFFER_FORMATS:
    case PIPE_CAP_START_INSTANCE:
+   case PIPE_CAP_TEXTURE_MULTISAMPLE:
+   case PIPE_CAP_MIN_MAP_BUFFER_ALIGNMENT:
+   case PIPE_CAP_TEXTURE_BUFFER_OBJECTS:
       return 0;
    case PIPE_CAP_VERTEX_BUFFER_OFFSET_4BYTE_ALIGNED_ONLY:
    case PIPE_CAP_VERTEX_BUFFER_STRIDE_4BYTE_ALIGNED_ONLY:
@@ -246,16 +249,8 @@ nv30_screen_is_format_supported(struct pipe_screen *pscreen,
    if (!(0x00000017 & (1 << sample_count)))
       return FALSE;
 
-   if (!util_format_s3tc_enabled) {
-      switch (format) {
-      case PIPE_FORMAT_DXT1_RGB:
-      case PIPE_FORMAT_DXT1_RGBA:
-      case PIPE_FORMAT_DXT3_RGBA:
-      case PIPE_FORMAT_DXT5_RGBA:
-         return FALSE;
-      default:
-         break;
-      }
+   if (!util_format_is_supported(format, bindings)) {
+      return FALSE;
    }
 
    /* transfers & shared are always supported */

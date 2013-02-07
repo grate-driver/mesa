@@ -23,10 +23,7 @@
 #ifndef R600_ASM_H
 #define R600_ASM_H
 
-#include "r600.h"
-
-struct r600_vertex_element;
-struct r600_context;
+#include "r600_pipe.h"
 
 struct r600_bytecode_alu_src {
 	unsigned			sel;
@@ -65,6 +62,7 @@ struct r600_bytecode_alu {
 struct r600_bytecode_tex {
 	struct list_head		list;
 	unsigned			inst;
+	unsigned			inst_mod;
 	unsigned			resource_id;
 	unsigned			src_gpr;
 	unsigned			src_rel;
@@ -79,9 +77,9 @@ struct r600_bytecode_tex {
 	unsigned			coord_type_y;
 	unsigned			coord_type_z;
 	unsigned			coord_type_w;
-	unsigned			offset_x;
-	unsigned			offset_y;
-	unsigned			offset_z;
+	int				offset_x;
+	int				offset_y;
+	int				offset_z;
 	unsigned			sampler_id;
 	unsigned			src_sel_x;
 	unsigned			src_sel_y;
@@ -198,6 +196,7 @@ struct r600_cf_callstack {
 
 struct r600_bytecode {
 	enum chip_class			chip_class;
+	enum r600_msaa_texture_mode	msaa_texture_mode;
 	int				type;
 	struct list_head		cf;
 	struct r600_bytecode_cf		*cf_last;
@@ -214,6 +213,7 @@ struct r600_bytecode {
 	struct r600_cf_callstack	callstack[SQ_MAX_CALL_DEPTH];
 	unsigned	ar_loaded;
 	unsigned	ar_reg;
+	unsigned	ar_chan;
 	unsigned        ar_handling;
 	unsigned        r6xx_nop_after_rel_dst;
 };
@@ -222,7 +222,10 @@ struct r600_bytecode {
 int eg_bytecode_cf_build(struct r600_bytecode *bc, struct r600_bytecode_cf *cf);
 
 /* r600_asm.c */
-void r600_bytecode_init(struct r600_bytecode *bc, enum chip_class chip_class, enum radeon_family family);
+void r600_bytecode_init(struct r600_bytecode *bc,
+			enum chip_class chip_class,
+			enum radeon_family family,
+			enum r600_msaa_texture_mode msaa_texture_mode);
 void r600_bytecode_clear(struct r600_bytecode *bc);
 int r600_bytecode_add_alu(struct r600_bytecode *bc, const struct r600_bytecode_alu *alu);
 int r600_bytecode_add_vtx(struct r600_bytecode *bc, const struct r600_bytecode_vtx *vtx);
@@ -233,13 +236,21 @@ int r600_bytecode_add_cfinst(struct r600_bytecode *bc, int inst);
 int r600_bytecode_add_alu_type(struct r600_bytecode *bc, const struct r600_bytecode_alu *alu, int type);
 void r600_bytecode_special_constants(uint32_t value, unsigned *sel, unsigned *neg);
 void r600_bytecode_dump(struct r600_bytecode *bc);
+void r600_bytecode_alu_read(struct r600_bytecode_alu *alu, uint32_t word0, uint32_t word1);
 
 int cm_bytecode_add_cf_end(struct r600_bytecode *bc);
 
-int r600_vertex_elements_build_fetch_shader(struct r600_context *rctx, struct r600_vertex_element *ve);
+void *r600_create_vertex_fetch_shader(struct pipe_context *ctx,
+				      unsigned count,
+				      const struct pipe_vertex_element *elements);
 
 /* r700_asm.c */
 void r700_bytecode_cf_vtx_build(uint32_t *bytecode, const struct r600_bytecode_cf *cf);
 int r700_bytecode_alu_build(struct r600_bytecode *bc, struct r600_bytecode_alu *alu, unsigned id);
+void r700_bytecode_alu_read(struct r600_bytecode_alu *alu, uint32_t word0, uint32_t word1);
+void r600_bytecode_export_read(struct r600_bytecode_output *output, uint32_t word0, uint32_t word1);
+void eg_bytecode_export_read(struct r600_bytecode_output *output, uint32_t word0, uint32_t word1);
 
+void r600_vertex_data_type(enum pipe_format pformat, unsigned *format,
+			   unsigned *num_format, unsigned *format_comp, unsigned *endian);
 #endif

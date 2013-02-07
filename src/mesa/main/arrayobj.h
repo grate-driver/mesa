@@ -87,18 +87,6 @@ _mesa_array_object_get_enabled_ff(const struct gl_array_object *arrayObj)
    return arrayObj->_Enabled & VERT_BIT_FF_ALL;
 }
 
-/** Returns the bitmask of all enabled arrays in nv shader mode.
- *
- *  In nv shader mode, the nv generic arrays take precedence over
- *  the legacy arrays.
- */
-static inline GLbitfield64
-_mesa_array_object_get_enabled_nv(const struct gl_array_object *arrayObj)
-{
-   GLbitfield64 enabled = arrayObj->_Enabled;
-   return enabled & ~(VERT_BIT_FF_NVALIAS & (enabled >> VERT_ATTRIB_GENERIC0));
-}
-
 /** Returns the bitmask of all enabled arrays in arb/glsl shader mode.
  *
  *  In arb/glsl shader mode all the fixed function and the arb/glsl generic
@@ -122,12 +110,12 @@ void GLAPIENTRY _mesa_BindVertexArray( GLuint id );
 
 void GLAPIENTRY _mesa_BindVertexArrayAPPLE( GLuint id );
 
-void GLAPIENTRY _mesa_DeleteVertexArraysAPPLE(GLsizei n, const GLuint *ids);
+void GLAPIENTRY _mesa_DeleteVertexArrays(GLsizei n, const GLuint *ids);
 
 void GLAPIENTRY _mesa_GenVertexArrays(GLsizei n, GLuint *arrays);
 
 void GLAPIENTRY _mesa_GenVertexArraysAPPLE(GLsizei n, GLuint *buffer);
 
-GLboolean GLAPIENTRY _mesa_IsVertexArrayAPPLE( GLuint id );
+GLboolean GLAPIENTRY _mesa_IsVertexArray( GLuint id );
 
 #endif /* ARRAYOBJ_H */

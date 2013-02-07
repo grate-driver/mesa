@@ -32,10 +32,66 @@
 #include "lp_bld_type.h"
 #include "lp_bld_conv.h"
 #include "lp_bld_pack.h"
+#include "lp_bld_intr.h"
+#include "lp_bld_gather.h"
 
 #include "util/u_memory.h"
 #include "util/u_format.h"
 #include "pipe/p_state.h"
+
+
+#ifdef PIPE_ARCH_BIG_ENDIAN
+static LLVMValueRef
+lp_build_read_int_bswap(struct gallivm_state *gallivm,
+                        LLVMValueRef base_ptr,
+                        unsigned src_width,
+                        LLVMTypeRef src_type,
+                        unsigned i,
+                        LLVMTypeRef dst_type)
+{
+   LLVMBuilderRef builder = gallivm->builder;
+   LLVMValueRef index = lp_build_const_int32(gallivm, i);
+   LLVMValueRef ptr = LLVMBuildGEP(builder, base_ptr, &index, 1, "");
+   LLVMValueRef res = LLVMBuildLoad(builder, ptr, "");
+   res = lp_build_bswap(gallivm, res, lp_type_uint(src_width));
+   return LLVMBuildBitCast(builder, res, dst_type, "");
+}
+
+static LLVMValueRef
+lp_build_fetch_read_big_endian(struct gallivm_state *gallivm,
+                               struct lp_type src_type,
+                               LLVMValueRef base_ptr)
+{
+   LLVMBuilderRef builder = gallivm->builder;
+   unsigned src_width = src_type.width;
+   unsigned length = src_type.length;
+   LLVMTypeRef src_elem_type = LLVMIntTypeInContext(gallivm->context, src_width);
+   LLVMTypeRef dst_elem_type = lp_build_elem_type (gallivm, src_type);
+   LLVMTypeRef src_ptr_type = LLVMPointerType(src_elem_type, 0);
+   LLVMValueRef res;
+
+   base_ptr = LLVMBuildPointerCast(builder, base_ptr, src_ptr_type, "");
+   if (length == 1) {
+      /* Scalar */
+      res = lp_build_read_int_bswap(gallivm, base_ptr, src_width, src_elem_type,
+                                    0, dst_elem_type);
+   } else {
+      /* Vector */
+      LLVMTypeRef dst_vec_type = LLVMVectorType(dst_elem_type, length);
+      unsigned i;
+
+      res = LLVMGetUndef(dst_vec_type);
+      for (i = 0; i < length; ++i) {
+         LLVMValueRef index = lp_build_const_int32(gallivm, i);
+         LLVMValueRef elem = lp_build_read_int_bswap(gallivm, base_ptr, src_width,
+                                                     src_elem_type, i, dst_elem_type);
+         res = LLVMBuildInsertElement(builder, res, elem, index, "");
+      }
+   }
+
+   return res;
+}
+#endif
 
 /**
  * @brief lp_build_fetch_rgba_aos_array
@@ -57,26 +113,24 @@ lp_build_fetch_rgba_aos_array(struct gallivm_state *gallivm,
    LLVMTypeRef src_vec_type;
    LLVMValueRef ptr, res = NULL;
    struct lp_type src_type;
+   boolean pure_integer = format_desc->channel[0].pure_integer;
+   struct lp_type tmp_type;
 
-   memset(&src_type, 0, sizeof src_type);
-   src_type.floating = format_desc->channel[0].type == UTIL_FORMAT_TYPE_FLOAT;
-   src_type.fixed    = format_desc->channel[0].type == UTIL_FORMAT_TYPE_FIXED;
-   src_type.sign     = format_desc->channel[0].type != UTIL_FORMAT_TYPE_UNSIGNED;
-   src_type.norm     = format_desc->channel[0].normalized;
-   src_type.width    = format_desc->channel[0].size;
-   src_type.length   = format_desc->nr_channels;
+   lp_type_from_format_desc(&src_type, format_desc);
 
    assert(src_type.length <= dst_type.length);
 
    src_vec_type  = lp_build_vec_type(gallivm,  src_type);
 
    /* Read whole vector from memory, unaligned */
-   if (!res) {
-      ptr = LLVMBuildGEP(builder, base_ptr, &offset, 1, "");
-      ptr = LLVMBuildPointerCast(builder, ptr, LLVMPointerType(src_vec_type, 0), "");
-      res = LLVMBuildLoad(builder, ptr, "");
-      lp_set_load_alignment(res, src_type.width / 8);
-   }
+   ptr = LLVMBuildGEP(builder, base_ptr, &offset, 1, "");
+#ifdef PIPE_ARCH_BIG_ENDIAN
+   res = lp_build_fetch_read_big_endian(gallivm, src_type, ptr);
+#else
+   ptr = LLVMBuildPointerCast(builder, ptr, LLVMPointerType(src_vec_type, 0), "");
+   res = LLVMBuildLoad(builder, ptr, "");
+   lp_set_load_alignment(res, src_type.width / 8);
+#endif
 
    /* Truncate doubles to float */
    if (src_type.floating && src_type.width == 64) {
@@ -88,14 +142,28 @@ lp_build_fetch_rgba_aos_array(struct gallivm_state *gallivm,
 
    /* Expand to correct length */
    if (src_type.length < dst_type.length) {
-      res = lp_build_pad_vector(gallivm, res, src_type, dst_type.length);
+      res = lp_build_pad_vector(gallivm, res, dst_type.length);
       src_type.length = dst_type.length;
    }
 
+   tmp_type = dst_type;
+   if (pure_integer) {
+       /* some callers expect (fake) floats other real ints. */
+      tmp_type.floating = 0;
+      tmp_type.sign = src_type.sign;
+   }
+
    /* Convert to correct format */
-   lp_build_conv(gallivm, src_type, dst_type, &res, 1, &res, 1);
+   lp_build_conv(gallivm, src_type, tmp_type, &res, 1, &res, 1);
 
    /* Swizzle it */
-   lp_build_context_init(&bld, gallivm, dst_type);
-   return lp_build_format_swizzle_aos(format_desc, &bld, res);
+   lp_build_context_init(&bld, gallivm, tmp_type);
+   res = lp_build_format_swizzle_aos(format_desc, &bld, res);
+
+   /* Bitcast to floats (for pure integers) when requested */
+   if (pure_integer && dst_type.floating) {
+      res = LLVMBuildBitCast(builder, res, lp_build_vec_type(gallivm, dst_type), "");
+   }
+
+   return res;
 }

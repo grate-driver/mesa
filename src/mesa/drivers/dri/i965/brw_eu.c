@@ -70,7 +70,7 @@ void brw_set_predicate_control_flag_value( struct brw_compile *p, GLuint value )
    if (value != 0xff) {
       if (value != p->flag_value) {
 	 brw_push_insn_state(p);
-	 brw_MOV(p, brw_flag_reg(), brw_imm_uw(value));
+	 brw_MOV(p, brw_flag_reg(0, 0), brw_imm_uw(value));
 	 p->flag_value = value;
 	 brw_pop_insn_state(p);
       }
@@ -92,6 +92,12 @@ void brw_set_predicate_inverse(struct brw_compile *p, bool predicate_inverse)
 void brw_set_conditionalmod( struct brw_compile *p, GLuint conditional )
 {
    p->current->header.destreg__conditionalmod = conditional;
+}
+
+void brw_set_flag_reg(struct brw_compile *p, int reg, int subreg)
+{
+   p->current->bits2.da1.flag_reg_nr = reg;
+   p->current->bits2.da1.flag_subreg_nr = subreg;
 }
 
 void brw_set_access_mode( struct brw_compile *p, GLuint access_mode )
@@ -173,6 +179,8 @@ void brw_pop_insn_state( struct brw_compile *p )
 void
 brw_init_compile(struct brw_context *brw, struct brw_compile *p, void *mem_ctx)
 {
+   memset(p, 0, sizeof(*p));
+
    p->brw = brw;
    /*
     * Set the initial instruction store array size to 1024, if found that
@@ -204,17 +212,55 @@ brw_init_compile(struct brw_context *brw, struct brw_compile *p, void *mem_ctx)
    p->loop_stack_array_size = 16;
    p->loop_stack = rzalloc_array(mem_ctx, int, p->loop_stack_array_size);
    p->if_depth_in_loop = rzalloc_array(mem_ctx, int, p->loop_stack_array_size);
+
+   brw_init_compaction_tables(&brw->intel);
 }
 
 
 const GLuint *brw_get_program( struct brw_compile *p,
 			       GLuint *sz )
 {
-   GLuint i;
+   brw_compact_instructions(p);
 
-   for (i = 0; i < 8; i++)
-      brw_NOP(p);
-
-   *sz = p->nr_insn * sizeof(struct brw_instruction);
+   *sz = p->next_insn_offset;
    return (const GLuint *)p->store;
+}
+
+void
+brw_dump_compile(struct brw_compile *p, FILE *out, int start, int end)
+{
+   struct brw_context *brw = p->brw;
+   struct intel_context *intel = &brw->intel;
+   void *store = p->store;
+   bool dump_hex = false;
+
+   for (int offset = start; offset < end;) {
+      struct brw_instruction *insn = store + offset;
+      struct brw_instruction uncompacted;
+      printf("0x%08x: ", offset);
+
+      if (insn->header.cmpt_control) {
+	 struct brw_compact_instruction *compacted = (void *)insn;
+	 if (dump_hex) {
+	    printf("0x%08x 0x%08x                       ",
+		   ((uint32_t *)insn)[1],
+		   ((uint32_t *)insn)[0]);
+	 }
+
+	 brw_uncompact_instruction(intel, &uncompacted, compacted);
+	 insn = &uncompacted;
+	 offset += 8;
+      } else {
+	 if (dump_hex) {
+	    printf("0x%08x 0x%08x 0x%08x 0x%08x ",
+		   ((uint32_t *)insn)[3],
+		   ((uint32_t *)insn)[2],
+		   ((uint32_t *)insn)[1],
+		   ((uint32_t *)insn)[0]);
+	 }
+	 offset += 16;
+      }
+
+      brw_disasm(stdout, insn, p->brw->intel.gen);
+   }
 }
