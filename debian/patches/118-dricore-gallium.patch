@@ -1,6 +1,14 @@
 --- a/src/mesa/libdricore/Makefile.am
 +++ b/src/mesa/libdricore/Makefile.am
-@@ -65,8 +65,10 @@
+@@ -42,6 +42,7 @@
+ libdricore@VERSION@_la_LDFLAGS = -version-number 1:0
+ libdricore@VERSION@_la_LIBADD = \
+         ../program/libdricore_program.la \
++        $(top_builddir)/src/mapi/shared-glapi/libglapi.la
+         $()
+ 
+ if HAVE_X86_ASM
+@@ -65,8 +66,10 @@
          -I$(top_srcdir)/src/mesa/sparc
  endif
  
@@ -12,19 +20,18 @@
  
  # Provide compatibility with scripts for the old Mesa build system for
  # a while by putting a link to the driver into /lib of the build tree.
-@@ -76,6 +78,18 @@
+@@ -76,6 +79,17 @@
  	ln -sf libdricore@VERSION@.so.1 $(top_builddir)/$(LIB_DIR)/libdricore@VERSION@.so
  endif
  
-+libmesagallium@VERSION@_la_SOURCES = \
++libmesagallium_la_SOURCES = \
 +	$(STATETRACKER_FILES)
-+libmesagallium@VERSION@_la_CFLAGS = $(LLVM_CFLAGS)
-+libmesagallium@VERSION@_la_CXXFLAGS = $(LLVM_CXXFLAGS)
-+libmesagallium@VERSION@_la_LIBADD = libdricore@VERSION@.la
-+libmesagallium@VERSION@_la_LDFLAGS =
++libmesagallium_la_CFLAGS = @LLVM_CFLAGS@
++libmesagallium_la_CXXFLAGS = @LLVM_CXXFLAGS@
++libmesagallium_la_LIBADD = libdricore@VERSION@.la $(LLVM_LIBS)
 +
 +if HAVE_GALLIUM
-+lib_LTLIBRARIES += libmesagallium@VERSION@.la
++noinst_LTLIBRARIES = libmesagallium.la
 +endif
 +
 +
@@ -37,7 +44,7 @@
  AC_SUBST([GLESv2_PC_LIB_PRIV])
  
  DRI_LIB_DEPS="\$(top_builddir)/src/mesa/libdricore/libdricore${VERSION}.la"
-+MESAGALLIUM_LIBS="\$(top_builddir)/src/mesa/libdricore/libmesagallium${VERSION}.la ${DRI_LIB_DEPS}"
++MESAGALLIUM_LIBS="${DRI_LIB_DEPS}"
 +AC_SUBST([MESAGALLIUM_LIBS], ${MESAGALLIUM_LIBS})
  
  AC_SUBST([HAVE_XF86VIDMODE])
@@ -158,3 +165,22 @@
  pkgconfigdir = $(libdir)/pkgconfig
  pkgconfig_DATA = gl.pc
  
+--- a/src/gallium/auxiliary/Makefile.am
++++ b/src/gallium/auxiliary/Makefile.am
+@@ -34,14 +34,14 @@
+ 
+ AM_CXXFLAGS += -fno-rtti
+ 
+-libgallium_la_LIBADD = $(LLVM_LIBS)
+-
+ endif
+ 
+ libgallium_la_SOURCES += \
+ 	$(GALLIVM_SOURCES) \
+ 	$(GALLIVM_CPP_SOURCES)
+ 
++libgallium_la_LIBADD = ../../mesa/libdricore/libmesagallium.la $(LLVM_LIBS) $(GALLIUM_DRI_LIB_DEPS)
++
+ endif
+ 
+ indices/u_indices_gen.c: $(srcdir)/indices/u_indices_gen.py

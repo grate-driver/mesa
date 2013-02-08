@@ -14,3 +14,4 @@
 101_ubuntu_hidden_glname.patch
 117-static-gallium.patch
 118-dricore-gallium.patch
+119-libllvmradeon-link.patch
