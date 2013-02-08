@@ -141,11 +141,6 @@ $(QUILT_STAMPFN): $(STAMP_DIR)/stamp
 build: build-stamp
 
 build-stamp: $(BUILD_STAMPS)
-	# Build pot file for pkgstriptranslations
-	# We do this only once, and outside the build trees, so that
-	# pkgstriptranslations doesn't get confused.
-	$(MAKE) -C src/mesa/drivers/dri/common/xmlpool pot
-
 	>$@
 
 $(STAMP)-build-%: configure
@@ -205,10 +200,6 @@ clean: unpatch
 	rm -f src/mapi/glapi/gen/*.pyc
 	rm -f src/mesa/main/*.pyc
 	rm -f src/gallium/auxiliary/util/*.pyc
-
-	# And for pkgstriptranslation's benefit…
-	rm -f src/mesa/drivers/dri/common/xmlpool/xmlpool.pot
-
 	dh_clean
 
 # Build architecture-independent files here.
@@ -232,8 +223,6 @@ binary-arch: install
 	# Also get rid of other files which aren't installed. Do not
 	# use -f to ensure we notice disappearing files:
 	set -e; for file in $(NOT_INSTALLED); do rm debian/tmp/$$file; done
-	# Files only in git, not in tarballs, OK to use rm -f here:
-	set -e; for file in $(NOT_INSTALLED_EITHER); do rm -f debian/tmp/$$file; done
 	# No need for these .so, they're just convenience libraries:
 	rm debian/tmp/dri/usr/lib/${DEB_HOST_MULTIARCH}/libglapi.so
 	rm debian/tmp/dri/usr/lib/${DEB_HOST_MULTIARCH}/libdricore*.so
