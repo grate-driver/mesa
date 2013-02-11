@@ -900,9 +900,9 @@ static void read_rgba_pixels_16(struct gl_context *ctx,
 
 
 static void
-wmesa_delete_renderbuffer(struct gl_renderbuffer *rb)
+wmesa_delete_renderbuffer(struct gl_context *ctx, struct gl_renderbuffer *rb)
 {
-    free(rb);
+    _mesa_delete_renderbuffer(ctx, rb);
 }
 
 
