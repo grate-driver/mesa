@@ -57,6 +57,9 @@ mesa (9.1~git20130207.f1c46c84-1) UNRELEASED; urgency=low
   * control: Bump libwayland-dev build-dep to 1.0.2.
   * Remove 13-llvm-config-pick-a-version.diff and just pass a flag to configure.
 
+  [ Robert Hooker ]
+  * Drop xutils-dev build dep, makedepend is no longer required
+
  -- Julien Cristau <jcristau@debian.org>  Fri, 03 Aug 2012 23:17:16 +0200
 
 mesa (8.0.4-1) unstable; urgency=low
