@@ -472,9 +472,6 @@ _mesa_enable_sw_extensions(struct gl_context *ctx)
 #if FEATURE_EXT_framebuffer_blit
    ctx->Extensions.EXT_framebuffer_blit = GL_TRUE;
 #endif
-#if FEATURE_ARB_framebuffer_object
-   ctx->Extensions.EXT_framebuffer_multisample = GL_TRUE;
-#endif
    ctx->Extensions.EXT_packed_depth_stencil = GL_TRUE;
 #if FEATURE_EXT_pixel_buffer_object
    ctx->Extensions.EXT_pixel_buffer_object = GL_TRUE;
