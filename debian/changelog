@@ -59,6 +59,8 @@ mesa (9.1~git20130207.f1c46c84-1) UNRELEASED; urgency=low
 
   [ Robert Hooker ]
   * Drop xutils-dev build dep, makedepend is no longer required
+  * Recommend libtxc-dxtn0 in libgl1-mesa-dri for easier use with multiarch
+    installs (Closes: #668645).
 
  -- Julien Cristau <jcristau@debian.org>  Fri, 03 Aug 2012 23:17:16 +0200
 
