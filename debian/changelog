@@ -64,6 +64,13 @@ mesa (9.1~git20130207.f1c46c84-1) UNRELEASED; urgency=low
   * control: Bump libwayland-dev build-dep to 1.0.2.
   * Remove 13-llvm-config-pick-a-version.diff and just pass a flag to configure.
 
+  [ Robert Hooker ]
+  * Drop xutils-dev build dep, makedepend is no longer required
+  * Recommend libtxc-dxtn0 in libgl1-mesa-dri for easier use with multiarch
+    installs (Closes: #668645).
+  * 04_osmesa_version.diff: Switch to a less fragile way of forcing the version
+    (Closes: 697745)
+
  -- Julien Cristau <jcristau@debian.org>  Fri, 03 Aug 2012 23:17:16 +0200
 
 mesa (9.0.2-0ubuntu1) raring; urgency=low
