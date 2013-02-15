@@ -62,6 +62,9 @@ mesa (9.1~git20130207.f1c46c84-1) UNRELEASED; urgency=low
   * Recommend libtxc-dxtn0 in libgl1-mesa-dri for easier use with multiarch
     installs (Closes: #668645).
 
+  [ Sven Joachim ]
+  * Bump libdrm-dev build-dependency to 2.4.42.
+
  -- Julien Cristau <jcristau@debian.org>  Fri, 03 Aug 2012 23:17:16 +0200
 
 mesa (8.0.4-1) unstable; urgency=low
