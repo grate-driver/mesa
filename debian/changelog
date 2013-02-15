@@ -46,6 +46,7 @@ mesa (9.1~git20130207.f1c46c84-1) UNRELEASED; urgency=low
   * rules: Add files to clean.
   * 16-avoid-symbols-from-static-llvm.diff: Temporary patch to keep
     libxatracker1.symbols sane.
+  * control: Add libxcb-dri2-0-dev to libgl1-mesa-dev depends.
 
   [ Steve Langasek ]
   * Install all dri drivers from the DESTDIR tree, instead of copying them
@@ -63,6 +64,14 @@ mesa (9.1~git20130207.f1c46c84-1) UNRELEASED; urgency=low
   * Bump standards-version to 3.9.3.
   * control: Bump libwayland-dev build-dep to 1.0.2.
   * Remove 13-llvm-config-pick-a-version.diff and just pass a flag to configure.
+
+  [ Robert Hooker ]
+  * Drop xutils-dev build dep, makedepend is no longer required
+  * Recommend libtxc-dxtn0 in libgl1-mesa-dri for easier use with multiarch
+    installs (Closes: #668645).
+
+  [ Sven Joachim ]
+  * Bump libdrm-dev build-dependency to 2.4.42.
 
  -- Julien Cristau <jcristau@debian.org>  Fri, 03 Aug 2012 23:17:16 +0200
 

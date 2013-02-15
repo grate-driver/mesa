@@ -9,9 +9,8 @@ Build-Depends:
  debhelper (>= 8.1.3),
  quilt (>= 0.40),
  pkg-config,
- libdrm-dev (>= 2.4.39) [!hurd-any],
+ libdrm-dev (>= 2.4.42) [!hurd-any],
  libx11-dev,
- xutils-dev,
  x11proto-gl-dev (>= 1.4.14),
  libxxf86vm-dev,
  libexpat1-dev,
@@ -532,6 +531,7 @@ Pre-Depends: dpkg (>= 1.15.6~),
 Depends:
  ${shlibs:Depends},
  ${misc:Depends}
+Recommends: libtxc-dxtn0
 Suggests: libglide3
 Conflicts: xlibmesa-dri (<< 1:7.0.0)
 Replaces: xlibmesa-dri (<< 1:7.0.0), libgl1-mesa-dri-experimental (<< 7.11.1)
@@ -637,6 +637,7 @@ Depends:
  libdrm-dev (>= 2.4.24) [!hurd-any],
  libx11-dev,
  libx11-xcb-dev,
+ libxcb-dri2-0-dev,
  libxcb-glx0-dev,
  libxdamage-dev,
  libxext-dev,
