@@ -1,7 +1,12 @@
 mesa (9.1~git20130207.f1c46c84-0ubuntu1) UNRELEASED; urgency=low
 
+  [ Timo Aaltonen ]
   * Merge from unreleased debian git.
   * Refresh patches.
+
+  [ Robert Hooker ]
+  * Drop ubuntu specific libtxc-dxtn-s2tc0 recommends from libgl1-mesa-glx,
+    libgl1-mesa-dri now recommends libtxc-dxtn0.
 
  -- Timo Aaltonen <tjaalton@ubuntu.com>  Thu, 07 Feb 2013 18:09:58 +0200
 
