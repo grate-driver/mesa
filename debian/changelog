@@ -39,6 +39,7 @@ mesa (9.1~git20130207.f1c46c84-1) UNRELEASED; urgency=low
   * rules: Add files to clean.
   * 16-avoid-symbols-from-static-llvm.diff: Temporary patch to keep
     libxatracker1.symbols sane.
+  * control: Add libxcb-dri2-0-dev to libgl1-mesa-dev depends.
 
   [ Steve Langasek ]
   * Install all dri drivers from the DESTDIR tree, instead of copying them

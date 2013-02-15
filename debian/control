@@ -706,6 +706,7 @@ Depends:
  libdrm-dev (>= 2.4.24) [!hurd-any],
  libx11-dev,
  libx11-xcb-dev,
+ libxcb-dri2-0-dev,
  libxcb-glx0-dev,
  libxdamage-dev,
  libxext-dev,
