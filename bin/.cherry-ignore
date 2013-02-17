@@ -1,0 +1,3 @@
+d60da27273d2cdb68bc32cae2ca66718dab15f27 st/mesa: set ctx->Const.MaxSamples = 0, not 1
+5c86a728d4f688c0fe7fbf9f4b8f88060b65c4ee r600g: fix htile buffer leak
+496928a442cec980b534bc5da2523b3632b21b61 CopyTexImage: Don't check sRGB vs LINEAR for desktop GL
