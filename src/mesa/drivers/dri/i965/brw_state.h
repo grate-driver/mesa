@@ -197,7 +197,8 @@ uint32_t brw_format_for_mesa_format(gl_format mesa_format);
 
 GLuint translate_tex_target(GLenum target);
 
-GLuint translate_tex_format(gl_format mesa_format,
+GLuint translate_tex_format(struct intel_context *intel,
+                            gl_format mesa_format,
 			    GLenum internal_format,
 			    GLenum depth_mode,
 			    GLenum srgb_decode);
@@ -225,7 +226,7 @@ void upload_default_color(struct brw_context *brw,
 /* gen6_sf_state.c */
 uint32_t
 get_attr_override(struct brw_vue_map *vue_map, int urb_entry_read_offset,
-                  int fs_attr, bool two_side_color);
+                  int fs_attr, bool two_side_color, uint32_t *max_source_attr);
 
 #ifdef __cplusplus
 }
