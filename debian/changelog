@@ -1,6 +1,6 @@
-mesa (9.1~git20130207.f1c46c84-1) UNRELEASED; urgency=low
+mesa (9.1~rc2-1) UNRELEASED; urgency=low
 
-  * New upstream snapshot.
+  * New upstream release candidate.
     - Set close on exec flag when opening dri devices (Closes: #651370).
 
   [ Julien Cristau ]
