@@ -633,9 +633,13 @@ void r600_flush_emit(struct r600_context *rctx)
 		/* Use of WAIT_UNTIL is deprecated on Cayman+ */
 		if (rctx->family >= CHIP_CAYMAN) {
 			/* emit a PS partial flush on Cayman/TN */
-			cs->buf[cs->cdw++] = PKT3(PKT3_EVENT_WRITE, 0, 0);
-			cs->buf[cs->cdw++] = EVENT_TYPE(EVENT_TYPE_PS_PARTIAL_FLUSH) | EVENT_INDEX(4);
+			rctx->flags |= R600_CONTEXT_PS_PARTIAL_FLUSH;
 		}
+	}
+
+	if (rctx->flags & R600_CONTEXT_PS_PARTIAL_FLUSH) {
+		cs->buf[cs->cdw++] = PKT3(PKT3_EVENT_WRITE, 0, 0);
+		cs->buf[cs->cdw++] = EVENT_TYPE(EVENT_TYPE_PS_PARTIAL_FLUSH) | EVENT_INDEX(4);
 	}
 
 	if (rctx->chip_class >= R700 &&
@@ -1157,6 +1161,9 @@ void r600_cp_dma_copy_buffer(struct r600_context *rctx,
 		src_offset += byte_count;
 		dst_offset += byte_count;
 	}
+
+	/* Invalidate the read caches. */
+	rctx->flags |= R600_CONTEXT_INVAL_READ_CACHES;
 }
 
 void r600_need_dma_space(struct r600_context *ctx, unsigned num_dw)
