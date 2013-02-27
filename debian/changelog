@@ -1,3 +1,12 @@
+mesa (9.1-0ubuntu1) UNRELEASED; urgency=low
+
+  * Merge from unreleased debian git
+    - new upstream release
+  * gbm-remember-to-init-format.patch: Commit from master to
+    init format on gbm_dri_bo_create. (LP: #1112147)
+
+ -- Timo Aaltonen <tjaalton@ubuntu.com>  Wed, 27 Feb 2013 11:12:43 +0200
+
 mesa (9.1-1) UNRELEASED; urgency=low
 
   * New upstream release.
