@@ -20,7 +20,8 @@ echo \#buildapi-variable-no-builddir >/dev/null
 # Support silent build rules, requires at least automake-1.11. Disable
 # by either passing --disable-silent-rules to configure or passing V=1
 # to make
-m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
+m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])],
+    [AC_SUBST([AM_DEFAULT_VERBOSITY], [1])])
 
 m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
 
@@ -611,7 +612,7 @@ AC_ARG_ENABLE([opencl],
          [enable OpenCL library NOTE: Enabling this option will also enable
           --with-llvm-shared-libs
           @<:@default=no@:>@])],
-   [enable_opencl="$enableval" with_llvm_shared_libs="$enableval"],
+   [],
    [enable_opencl=no])
 AC_ARG_ENABLE([xlib_glx],
     [AS_HELP_STRING([--enable-xlib-glx],
@@ -699,6 +700,16 @@ fi
 
 if test "x$enable_dri$enable_xlib_glx" = xyesyes; then
     AC_MSG_ERROR([DRI and Xlib-GLX cannot be built together])
+fi
+
+if test "x$enable_opengl$enable_xlib_glx" = xnoyes; then
+    AC_MSG_ERROR([Xlib-GLX cannot be built without OpenGL])
+fi
+
+# Disable GLX if OpenGL is not enabled
+if test "x$enable_glx$enable_opengl" = xyesno; then
+    AC_MSG_WARN([OpenGL not enabled, disabling GLX])
+    enable_glx=no
 fi
 
 # Disable GLX if DRI and Xlib-GLX are not enabled
@@ -1619,8 +1630,13 @@ AC_ARG_ENABLE([gallium-llvm],
 AC_ARG_WITH([llvm-shared-libs],
     [AS_HELP_STRING([--with-llvm-shared-libs],
         [link with LLVM shared libraries @<:@default=disabled@:>@])],
-    [with_llvm_shared_libs=yes],
+    [],
     [with_llvm_shared_libs=no])
+AS_IF([test x$enable_opencl = xyes],
+    [
+        AC_MSG_WARN([OpenCL required, forcing LLVM shared libraries])
+        with_llvm_shared_libs=yes
+    ])
 
 AC_ARG_WITH([llvm-prefix],
     [AS_HELP_STRING([--with-llvm-prefix],
@@ -1662,16 +1678,14 @@ if test "x$enable_gallium_llvm" = xyes; then
     if test "x$LLVM_CONFIG" != xno; then
 	LLVM_VERSION=`$LLVM_CONFIG --version | sed 's/svn.*//g'`
 	LLVM_VERSION_INT=`echo $LLVM_VERSION | sed -e 's/\([[0-9]]\)\.\([[0-9]]\)/\10\2/g'`
-        if test "x$with_llvm_shared_libs" != xyes; then
-            LLVM_COMPONENTS="engine bitwriter"
-            if $LLVM_CONFIG --components | grep -q '\<mcjit\>'; then
-                LLVM_COMPONENTS="${LLVM_COMPONENTS} mcjit"
-            fi
+        LLVM_COMPONENTS="engine bitwriter"
+        if $LLVM_CONFIG --components | grep -q '\<mcjit\>'; then
+            LLVM_COMPONENTS="${LLVM_COMPONENTS} mcjit"
+        fi
 
-            if test "x$enable_opencl" = xyes; then
-                LLVM_COMPONENTS="${LLVM_COMPONENTS} ipo linker instrumentation"
-            fi
-	fi
+        if test "x$enable_opencl" = xyes; then
+            LLVM_COMPONENTS="${LLVM_COMPONENTS} ipo linker instrumentation"
+        fi
 	LLVM_LDFLAGS=`$LLVM_CONFIG --ldflags`
 	LLVM_BINDIR=`$LLVM_CONFIG --bindir`
 	LLVM_CPPFLAGS=`strip_unwanted_llvm_flags "$LLVM_CONFIG --cppflags"`
@@ -1839,6 +1853,9 @@ if test "x$with_gallium_drivers" != x; then
             fi
             if test "x$enable_r600_llvm" = xyes; then
                 USE_R600_LLVM_COMPILER=yes;
+            fi
+            if test "x$enable_opencl" = xyes; then
+                LLVM_COMPONENTS="${LLVM_COMPONENTS} bitreader asmparser"
             fi
             gallium_check_st "radeon/drm" "dri-r600" "xorg-r600" "" "xvmc-r600" "vdpau-r600"
             ;;

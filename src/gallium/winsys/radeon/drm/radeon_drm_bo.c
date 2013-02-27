@@ -593,10 +593,11 @@ static struct pb_buffer *radeon_bomgr_create_bo(struct pb_manager *_mgr,
         va.offset = bo->va;
         r = drmCommandWriteRead(rws->fd, DRM_RADEON_GEM_VA, &va, sizeof(va));
         if (r && va.operation == RADEON_VA_RESULT_ERROR) {
-            fprintf(stderr, "radeon: Failed to allocate a buffer:\n");
+            fprintf(stderr, "radeon: Failed to allocate virtual address for buffer:\n");
             fprintf(stderr, "radeon:    size      : %d bytes\n", size);
             fprintf(stderr, "radeon:    alignment : %d bytes\n", desc->alignment);
             fprintf(stderr, "radeon:    domains   : %d\n", args.initial_domain);
+            fprintf(stderr, "radeon:    va        : 0x%016llx\n", (unsigned long long)bo->va);
             radeon_bo_destroy(&bo->base);
             return NULL;
         }
@@ -961,6 +962,10 @@ static boolean radeon_winsys_bo_get_handle(struct pb_buffer *buffer,
     } else if (whandle->type == DRM_API_HANDLE_TYPE_KMS) {
         whandle->handle = bo->handle;
     }
+
+    pipe_mutex_lock(bo->mgr->bo_handles_mutex);
+    util_hash_table_set(bo->mgr->bo_handles, (void*)(uintptr_t)whandle->handle, bo);
+    pipe_mutex_unlock(bo->mgr->bo_handles_mutex);
 
     whandle->stride = stride;
     return TRUE;

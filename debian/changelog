@@ -1,18 +1,6 @@
-mesa (9.1~git20130207.f1c46c84-0ubuntu1) UNRELEASED; urgency=low
+mesa (9.1-1) UNRELEASED; urgency=low
 
-  [ Timo Aaltonen ]
-  * Merge from unreleased debian git.
-  * Refresh patches.
-
-  [ Robert Hooker ]
-  * Drop ubuntu specific libtxc-dxtn-s2tc0 recommends from libgl1-mesa-glx,
-    libgl1-mesa-dri now recommends libtxc-dxtn0.
-
- -- Timo Aaltonen <tjaalton@ubuntu.com>  Thu, 07 Feb 2013 18:09:58 +0200
-
-mesa (9.1~git20130207.f1c46c84-1) UNRELEASED; urgency=low
-
-  * New upstream snapshot.
+  * New upstream release.
     - Set close on exec flag when opening dri devices (Closes: #651370).
 
   [ Julien Cristau ]
@@ -79,6 +67,18 @@ mesa (9.1~git20130207.f1c46c84-1) UNRELEASED; urgency=low
   * Bump libdrm-dev build-dependency to 2.4.42.
 
  -- Julien Cristau <jcristau@debian.org>  Fri, 03 Aug 2012 23:17:16 +0200
+
+mesa (9.1~git20130207.f1c46c84-0ubuntu1) UNRELEASED; urgency=low
+
+  [ Timo Aaltonen ]
+  * Merge from unreleased debian git.
+  * Refresh patches.
+
+  [ Robert Hooker ]
+  * Drop ubuntu specific libtxc-dxtn-s2tc0 recommends from libgl1-mesa-glx,
+    libgl1-mesa-dri now recommends libtxc-dxtn0.
+
+ -- Timo Aaltonen <tjaalton@ubuntu.com>  Thu, 07 Feb 2013 18:09:58 +0200
 
 mesa (9.0.2-0ubuntu1) raring; urgency=low
 

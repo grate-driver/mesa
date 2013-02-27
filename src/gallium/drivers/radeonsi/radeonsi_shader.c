@@ -263,6 +263,14 @@ static void declare_input_fs(
 				build_intrinsic(base->gallivm->builder,
 					"llvm.SI.fs.read.pos", input_type,
 					args, 1, LLVMReadNoneAttribute);
+
+			if (chan == 3)
+				/* RCP for fragcoord.w */
+				si_shader_ctx->radeon_bld.inputs[soa_index] =
+					LLVMBuildFDiv(gallivm->builder,
+						      lp_build_const_float(gallivm, 1.0f),
+						      si_shader_ctx->radeon_bld.inputs[soa_index],
+						      "");
 		}
 		return;
 	}
@@ -433,6 +441,15 @@ static LLVMValueRef fetch_constant(
 	LLVMValueRef offset;
 	LLVMValueRef load;
 
+	if (swizzle == LP_CHAN_ALL) {
+		unsigned chan;
+		LLVMValueRef values[4];
+		for (chan = 0; chan < TGSI_NUM_CHANNELS; ++chan)
+			values[chan] = fetch_constant(bld_base, reg, type, chan);
+
+		return lp_build_gather_values(bld_base->base.gallivm, values, 4);
+	}
+
 	/* currently not supported */
 	if (reg->Register.Indirect) {
 		assert(0);
@@ -446,12 +463,6 @@ static LLVMValueRef fetch_constant(
 	 * CONST[0].x will have an offset of 0 and CONST[1].x will have an
 	 * offset of 4. */
 	idx = (reg->Register.Index * 4) + swizzle;
-
-	/* index loads above 255 are currently not supported */
-	if (idx > 255) {
-		assert(0);
-		idx = 0;
-	}
 	offset = lp_build_const_int32(base->gallivm, idx);
 
 	load = build_indexed_load(base->gallivm, const_ptr, offset);
@@ -612,6 +623,12 @@ static void si_llvm_emit_epilogue(struct lp_build_tgsi_context * bld_base)
 		int i;
 
 		tgsi_parse_token(parse);
+
+		if (parse->FullToken.Token.Type == TGSI_TOKEN_TYPE_PROPERTY &&
+		    parse->FullToken.FullProperty.Property.PropertyName ==
+		    TGSI_PROPERTY_FS_COLOR0_WRITES_ALL_CBUFS)
+			shader->fs_write_all = TRUE;
+
 		if (parse->FullToken.Token.Type != TGSI_TOKEN_TYPE_DECLARATION)
 			continue;
 
@@ -775,6 +792,29 @@ static void si_llvm_emit_epilogue(struct lp_build_tgsi_context * bld_base)
 	last_args[1] = lp_build_const_int32(base->gallivm,
 					    si_shader_ctx->type == TGSI_PROCESSOR_FRAGMENT);
 
+	if (shader->fs_write_all && shader->nr_cbufs > 1) {
+		int i;
+
+		/* Specify that this is not yet the last export */
+		last_args[2] = lp_build_const_int32(base->gallivm, 0);
+
+		for (i = 1; i < shader->nr_cbufs; i++) {
+			/* Specify the target we are exporting */
+			last_args[3] = lp_build_const_int32(base->gallivm,
+							    V_008DFC_SQ_EXP_MRT + i);
+
+			lp_build_intrinsic(base->gallivm->builder,
+					   "llvm.SI.export",
+					   LLVMVoidTypeInContext(base->gallivm->context),
+					   last_args, 9);
+
+			si_shader_ctx->shader->spi_shader_col_format |=
+				si_shader_ctx->shader->spi_shader_col_format << 4;
+		}
+
+		last_args[3] = lp_build_const_int32(base->gallivm, V_008DFC_SQ_EXP_MRT);
+	}
+
 	/* Specify that this is the last export */
 	last_args[2] = lp_build_const_int32(base->gallivm, 1);
 
@@ -911,8 +951,6 @@ static void tex_fetch_args(
 	while (count < util_next_power_of_two(count))
 		address[count++] = LLVMGetUndef(LLVMInt32TypeInContext(gallivm->context));
 
-	emit_data->dst_type = LLVMVectorType(LLVMInt32TypeInContext(gallivm->context),
-					     count);
 	emit_data->args[1] = lp_build_gather_values(gallivm, address, count);
 
 	/* Resource */
@@ -940,21 +978,36 @@ static void tex_fetch_args(
 			4);
 }
 
+static void build_tex_intrinsic(const struct lp_build_tgsi_action * action,
+				struct lp_build_tgsi_context * bld_base,
+				struct lp_build_emit_data * emit_data)
+{
+	struct lp_build_context * base = &bld_base->base;
+	char intr_name[23];
+
+	sprintf(intr_name, "%sv%ui32", action->intr_name,
+		LLVMGetVectorSize(LLVMTypeOf(emit_data->args[1])));
+
+	emit_data->output[emit_data->chan] = lp_build_intrinsic(
+		base->gallivm->builder, intr_name, emit_data->dst_type,
+		emit_data->args, emit_data->arg_count);
+}
+
 static const struct lp_build_tgsi_action tex_action = {
 	.fetch_args = tex_fetch_args,
-	.emit = lp_build_tgsi_intrinsic,
+	.emit = build_tex_intrinsic,
 	.intr_name = "llvm.SI.sample."
 };
 
 static const struct lp_build_tgsi_action txb_action = {
 	.fetch_args = tex_fetch_args,
-	.emit = lp_build_tgsi_intrinsic,
+	.emit = build_tex_intrinsic,
 	.intr_name = "llvm.SI.sampleb."
 };
 
 static const struct lp_build_tgsi_action txl_action = {
 	.fetch_args = tex_fetch_args,
-	.emit = lp_build_tgsi_intrinsic,
+	.emit = build_tex_intrinsic,
 	.intr_name = "llvm.SI.samplel."
 };
 

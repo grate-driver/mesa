@@ -789,9 +789,11 @@ dri2XcbSwapBuffers(Display *dpy,
 
    swap_buffers_reply =
       xcb_dri2_swap_buffers_reply(c, swap_buffers_cookie, NULL);
-   ret = merge_counter(swap_buffers_reply->swap_hi,
-                       swap_buffers_reply->swap_lo);
-   free(swap_buffers_reply);
+   if (swap_buffers_reply) {
+      ret = merge_counter(swap_buffers_reply->swap_hi,
+                          swap_buffers_reply->swap_lo);
+      free(swap_buffers_reply);
+   }
    return ret;
 }
 
@@ -1053,7 +1055,8 @@ static const struct glx_context_vtable dri2_context_vtable = {
 };
 
 static void
-dri2BindExtensions(struct dri2_screen *psc, const __DRIextension **extensions)
+dri2BindExtensions(struct dri2_screen *psc, const __DRIextension **extensions,
+                   const char *driverName)
 {
    int i;
 
@@ -1062,7 +1065,15 @@ dri2BindExtensions(struct dri2_screen *psc, const __DRIextension **extensions)
    __glXEnableDirectExtension(&psc->base, "GLX_MESA_swap_control");
    __glXEnableDirectExtension(&psc->base, "GLX_SGI_make_current_read");
 
-   if (psc->dri2->base.version >= 4) {
+   /*
+    * GLX_INTEL_swap_event is broken on the server side, where it's
+    * currently unconditionally enabled. This completely breaks
+    * systems running on drivers which don't support that extension.
+    * There's no way to test for its presence on this side, so instead
+    * of disabling it uncondtionally, just disable it for drivers
+    * which are known to not support it.
+    */
+   if (strcmp(driverName, "vmwgfx") != 0) {
       __glXEnableDirectExtension(&psc->base, "GLX_INTEL_swap_event");
    }
 
@@ -1206,7 +1217,7 @@ dri2CreateScreen(int screen, struct glx_display * priv)
    }
 
    extensions = psc->core->getExtensions(psc->driScreen);
-   dri2BindExtensions(psc, extensions);
+   dri2BindExtensions(psc, extensions, driverName);
 
    configs = driConvertConfigs(psc->core, psc->base.configs, driver_configs);
    visuals = driConvertConfigs(psc->core, psc->base.visuals, driver_configs);

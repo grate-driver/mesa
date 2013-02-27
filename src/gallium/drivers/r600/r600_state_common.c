@@ -293,6 +293,11 @@ static void r600_bind_dsa_state(struct pipe_context *ctx, void *state)
 		rctx->alphatest_state.sx_alpha_test_control = dsa->sx_alpha_test_control;
 		rctx->alphatest_state.sx_alpha_ref = dsa->alpha_ref;
 		rctx->alphatest_state.atom.dirty = true;
+		if (rctx->chip_class >= EVERGREEN) {
+			evergreen_update_db_shader_control(rctx);
+		} else {
+			r600_update_db_shader_control(rctx);
+		}
 	}
 }
 
@@ -1352,6 +1357,12 @@ static void r600_draw_vbo(struct pipe_context *ctx, const struct pipe_draw_info 
 		rctx->vgt_state.vgt_multi_prim_ib_reset_en = info.primitive_restart;
 		rctx->vgt_state.vgt_multi_prim_ib_reset_indx = info.restart_index;
 		rctx->vgt_state.atom.dirty = true;
+	}
+
+	/* Workaround for hardware deadlock on certain R600 ASICs: write into a CB register. */
+	if (rctx->chip_class == R600) {
+		rctx->flags |= R600_CONTEXT_PS_PARTIAL_FLUSH;
+		rctx->cb_misc_state.atom.dirty = true;
 	}
 
 	/* Emit states. */

@@ -597,7 +597,7 @@ decompress_with_blit(struct gl_context * ctx,
 
    /* Find the best match for the format+type combo. */
    pipe_format = st_choose_format(pipe->screen, GL_RGBA8, format, type,
-                                  pipe_target, 0, bind);
+                                  pipe_target, 0, bind, FALSE);
    if (pipe_format == PIPE_FORMAT_NONE) {
       /* unable to get an rgba format!?! */
       _mesa_problem(ctx, "%s: cannot find a supported format", __func__);
@@ -1047,8 +1047,8 @@ st_CopyTexSubImage(struct gl_context *ctx, GLuint dims,
    assert(strb->surface);
    assert(stImage->pt);
 
-   src_format = strb->surface->format;
-   dest_format = stImage->pt->format;
+   src_format = util_format_linear(strb->surface->format);
+   dest_format = util_format_linear(stImage->pt->format);
 
    if (do_flip) {
       srcY1 = strb->Base.Height - srcY - height;
