@@ -1,4 +1,4 @@
-mesa (8.0.5-4) UNRELEASED; urgency=low
+mesa (8.0.5-4) unstable; urgency=low
 
   * Cherry-pick commit 17f1cb1d99 (dri/nouveau: fix crash in
     nouveau_flush) from upstream master branch.
