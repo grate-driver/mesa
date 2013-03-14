@@ -6,7 +6,7 @@ dnl Tell the user about autoconf.html in the --help output
 m4_divert_once([HELP_END], [
 See docs/autoconf.html for more details on the options for Mesa.])
 
-AC_INIT([Mesa], [9.0.2],
+AC_INIT([Mesa], [9.0.3],
     [https://bugs.freedesktop.org/enter_bug.cgi?product=Mesa])
 AC_CONFIG_AUX_DIR([bin])
 AC_CONFIG_MACRO_DIR([m4])
@@ -50,6 +50,7 @@ AM_PROG_CC_C_O
 AM_PROG_AS
 AC_CHECK_PROGS([MAKE], [gmake make])
 AC_CHECK_PROGS([PYTHON2], [python2 python])
+AX_PYTHON_MODULE([libxml2], [needed])
 AC_PROG_SED
 AC_PROG_MKDIR_P
 AC_PATH_PROG([MKDEP], [makedepend])
@@ -671,6 +672,17 @@ if test "x$enable_opengl" = xno -a \
     AC_MSG_ERROR([at least one API should be enabled])
 fi
 
+# Building OpenGL ES1 and/or ES2 without OpenGL is not supported on mesa 9.0.x
+if test "x$enable_opengl" = xno -a \
+        "x$enable_gles1" = xyes; then
+    AC_MSG_ERROR([Building OpenGL ES1 without OpenGL is not supported])
+fi
+
+if test "x$enable_opengl" = xno -a \
+        "x$enable_gles2" = xyes; then
+    AC_MSG_ERROR([Building OpenGL ES2 without OpenGL is not supported])
+fi
+
 API_DEFINES=""
 if test "x$enable_opengl" = xno; then
     API_DEFINES="$API_DEFINES -DFEATURE_GL=0"
@@ -692,6 +704,16 @@ fi
 
 if test "x$enable_dri$enable_xlib_glx" = xyesyes; then
     AC_MSG_ERROR([DRI and Xlib-GLX cannot be built together])
+fi
+
+if test "x$enable_opengl$enable_xlib_glx" = xnoyes; then
+    AC_MSG_ERROR([Xlib-GLX cannot be built without OpenGL])
+fi
+
+# Disable GLX if OpenGL is not enabled
+if test "x$enable_glx$enable_opengl" = xyesno; then
+    AC_MSG_WARN([OpenGL not enabled, disabling GLX])
+    enable_glx=no
 fi
 
 # Disable GLX if DRI and Xlib-GLX are not enabled

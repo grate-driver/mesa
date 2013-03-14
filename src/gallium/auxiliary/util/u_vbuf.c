@@ -256,7 +256,7 @@ void u_vbuf_destroy(struct u_vbuf *mgr)
    FREE(mgr);
 }
 
-static void
+static enum pipe_error
 u_vbuf_translate_buffers(struct u_vbuf *mgr, struct translate_key *key,
                          unsigned vb_mask, unsigned out_vb,
                          int start_vertex, unsigned num_vertices,
@@ -267,7 +267,8 @@ u_vbuf_translate_buffers(struct u_vbuf *mgr, struct translate_key *key,
    struct pipe_transfer *vb_transfer[PIPE_MAX_ATTRIBS] = {0};
    struct pipe_resource *out_buffer = NULL;
    uint8_t *out_map;
-   unsigned i, out_offset;
+   unsigned out_offset, i;
+   enum pipe_error err;
 
    /* Get a translate object. */
    tr = translate_cache_find(mgr->translate_cache, key);
@@ -311,6 +312,14 @@ u_vbuf_translate_buffers(struct u_vbuf *mgr, struct translate_key *key,
 
       assert((ib->buffer || ib->user_buffer) && ib->index_size);
 
+      /* Create and map the output buffer. */
+      err = u_upload_alloc(mgr->uploader, 0,
+                           key->output_stride * num_indices,
+                           &out_offset, &out_buffer,
+                           (void**)&out_map);
+      if (err != PIPE_OK)
+         return err;
+
       if (ib->user_buffer) {
          map = (uint8_t*)ib->user_buffer + offset;
       } else {
@@ -318,12 +327,6 @@ u_vbuf_translate_buffers(struct u_vbuf *mgr, struct translate_key *key,
                                      num_indices * ib->index_size,
                                      PIPE_TRANSFER_READ, &transfer);
       }
-
-      /* Create and map the output buffer. */
-      u_upload_alloc(mgr->uploader, 0,
-                     key->output_stride * num_indices,
-                     &out_offset, &out_buffer,
-                     (void**)&out_map);
 
       switch (ib->index_size) {
       case 4:
@@ -342,11 +345,13 @@ u_vbuf_translate_buffers(struct u_vbuf *mgr, struct translate_key *key,
       }
    } else {
       /* Create and map the output buffer. */
-      u_upload_alloc(mgr->uploader,
-                     key->output_stride * start_vertex,
-                     key->output_stride * num_vertices,
-                     &out_offset, &out_buffer,
-                     (void**)&out_map);
+      err = u_upload_alloc(mgr->uploader,
+                           key->output_stride * start_vertex,
+                           key->output_stride * num_vertices,
+                           &out_offset, &out_buffer,
+                           (void**)&out_map);
+      if (err != PIPE_OK)
+         return err;
 
       out_offset -= key->output_stride * start_vertex;
 
@@ -368,6 +373,8 @@ u_vbuf_translate_buffers(struct u_vbuf *mgr, struct translate_key *key,
    pipe_resource_reference(
       &mgr->real_vertex_buffer[out_vb].buffer, NULL);
    mgr->real_vertex_buffer[out_vb].buffer = out_buffer;
+
+   return PIPE_OK;
 }
 
 static boolean
@@ -512,11 +519,14 @@ u_vbuf_translate_begin(struct u_vbuf *mgr,
    /* Translate buffers. */
    for (type = 0; type < VB_NUM; type++) {
       if (key[type].nr_elements) {
-         u_vbuf_translate_buffers(mgr, &key[type], mask[type],
-                                  mgr->fallback_vbs[type],
-                                  start[type], num[type],
-                                  start_index, num_indices, min_index,
-                                  unroll_indices && type == VB_VERTEX);
+         enum pipe_error err;
+         err = u_vbuf_translate_buffers(mgr, &key[type], mask[type],
+                                        mgr->fallback_vbs[type],
+                                        start[type], num[type],
+                                        start_index, num_indices, min_index,
+                                        unroll_indices && type == VB_VERTEX);
+         if (err != PIPE_OK)
+            return FALSE;
 
          /* Fixup the stride for constant attribs. */
          if (type == VB_CONST) {
@@ -775,7 +785,7 @@ void u_vbuf_set_index_buffer(struct u_vbuf *mgr,
    pipe->set_index_buffer(pipe, ib);
 }
 
-static void
+static enum pipe_error
 u_vbuf_upload_buffers(struct u_vbuf *mgr,
                       int start_vertex, unsigned num_vertices,
                       int start_instance, unsigned num_instances)
@@ -840,6 +850,7 @@ u_vbuf_upload_buffers(struct u_vbuf *mgr,
       unsigned start, end = end_offset[i];
       struct pipe_vertex_buffer *real_vb;
       const uint8_t *ptr;
+      enum pipe_error err;
 
       if (!end) {
          continue;
@@ -851,11 +862,15 @@ u_vbuf_upload_buffers(struct u_vbuf *mgr,
       real_vb = &mgr->real_vertex_buffer[i];
       ptr = mgr->vertex_buffer[i].user_buffer;
 
-      u_upload_data(mgr->uploader, start, end - start, ptr + start,
-                    &real_vb->buffer_offset, &real_vb->buffer);
+      err = u_upload_data(mgr->uploader, start, end - start, ptr + start,
+                          &real_vb->buffer_offset, &real_vb->buffer);
+      if (err != PIPE_OK)
+         return err;
 
       real_vb->buffer_offset -= start;
    }
+
+   return PIPE_OK;
 }
 
 static boolean u_vbuf_need_minmax_index(struct u_vbuf *mgr)
@@ -1048,11 +1063,13 @@ void u_vbuf_draw_vbo(struct u_vbuf *mgr, const struct pipe_draw_info *info)
    if (unroll_indices ||
        mgr->incompatible_vb_mask ||
        mgr->ve->incompatible_elem_mask) {
-      /* XXX check the return value */
-      u_vbuf_translate_begin(mgr, start_vertex, num_vertices,
-                             info->start_instance, info->instance_count,
-                             info->start, info->count, min_index,
-                             unroll_indices);
+      if (!u_vbuf_translate_begin(mgr, start_vertex, num_vertices,
+                                  info->start_instance, info->instance_count,
+                                  info->start, info->count, min_index,
+                                  unroll_indices)) {
+         debug_warn_once("u_vbuf_translate_begin() failed");
+         return;
+      }
 
       user_vb_mask &= ~(mgr->incompatible_vb_mask |
                         mgr->ve->incompatible_vb_mask_all);
@@ -1060,8 +1077,12 @@ void u_vbuf_draw_vbo(struct u_vbuf *mgr, const struct pipe_draw_info *info)
 
    /* Upload user buffers. */
    if (user_vb_mask) {
-      u_vbuf_upload_buffers(mgr, start_vertex, num_vertices,
-                            info->start_instance, info->instance_count);
+      if (u_vbuf_upload_buffers(mgr, start_vertex, num_vertices,
+                                info->start_instance,
+                                info->instance_count) != PIPE_OK) {
+         debug_warn_once("u_vbuf_upload_buffers() failed");
+         return;
+      }
    }
 
    /*

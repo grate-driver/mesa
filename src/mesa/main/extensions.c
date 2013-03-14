@@ -288,7 +288,7 @@ static const struct extension extension_table[] = {
    { "GL_ATI_texture_float",                       o(ARB_texture_float),                       GL,             2002 },
    { "GL_ATI_texture_mirror_once",                 o(ATI_texture_mirror_once),                 GL,             2006 },
    { "GL_IBM_multimode_draw_arrays",               o(IBM_multimode_draw_arrays),               GL,             1998 },
-   { "GL_IBM_rasterpos_clip",                      o(IBM_rasterpos_clip),                      GL,             1996 },
+   { "GL_IBM_rasterpos_clip",                      o(IBM_rasterpos_clip),                      GLL,            1996 },
    { "GL_IBM_texture_mirrored_repeat",             o(dummy_true),                              GLL,            1998 },
    { "GL_INGR_blend_func_separate",                o(EXT_blend_func_separate),                 GLL,            1999 },
    { "GL_MESA_pack_invert",                        o(MESA_pack_invert),                        GL,             2002 },
@@ -308,7 +308,7 @@ static const struct extension extension_table[] = {
    { "GL_NV_light_max_exponent",                   o(NV_light_max_exponent),                   GLL,            1999 },
    { "GL_NV_packed_depth_stencil",                 o(EXT_packed_depth_stencil),                GL,             2000 },
    { "GL_NV_point_sprite",                         o(NV_point_sprite),                         GL,             2001 },
-   { "GL_NV_primitive_restart",                    o(NV_primitive_restart),                    GL,             2002 },
+   { "GL_NV_primitive_restart",                    o(NV_primitive_restart),                    GLL,            2002 },
    { "GL_NV_read_buffer",                          o(dummy_true),                              ES2,            2011 },
    { "GL_NV_texgen_reflection",                    o(NV_texgen_reflection),                    GLL,            1999 },
    { "GL_NV_texture_barrier",                      o(NV_texture_barrier),                      GL,             2009 },
@@ -471,9 +471,6 @@ _mesa_enable_sw_extensions(struct gl_context *ctx)
 #endif
 #if FEATURE_EXT_framebuffer_blit
    ctx->Extensions.EXT_framebuffer_blit = GL_TRUE;
-#endif
-#if FEATURE_ARB_framebuffer_object
-   ctx->Extensions.EXT_framebuffer_multisample = GL_TRUE;
 #endif
    ctx->Extensions.EXT_packed_depth_stencil = GL_TRUE;
 #if FEATURE_EXT_pixel_buffer_object

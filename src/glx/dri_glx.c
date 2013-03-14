@@ -865,7 +865,6 @@ driCreateScreen(int screen, struct glx_display *priv)
    }
 
    psc->driver = driOpenDriver(driverName);
-   Xfree(driverName);
    if (psc->driver == NULL)
       goto cleanup;
 
@@ -913,10 +912,14 @@ driCreateScreen(int screen, struct glx_display *priv)
    psp->setSwapInterval = driSetSwapInterval;
    psp->getSwapInterval = driGetSwapInterval;
 
+   free(driverName);
+
    return &psc->base;
 
 cleanup:
    CriticalErrorMessageF("failed to load driver: %s\n", driverName);
+
+   free(driverName);
 
    if (psc->driver)
       dlclose(psc->driver);

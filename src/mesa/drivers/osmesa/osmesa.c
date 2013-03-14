@@ -41,6 +41,7 @@
 #include "main/framebuffer.h"
 #include "main/imports.h"
 #include "main/macros.h"
+#include "main/mipmap.h"
 #include "main/mtypes.h"
 #include "main/renderbuffer.h"
 #include "swrast/swrast.h"
@@ -386,9 +387,9 @@ compute_row_addresses( OSMesaContext osmesa )
  * Don't use _mesa_delete_renderbuffer since we can't free rb->Buffer.
  */
 static void
-osmesa_delete_renderbuffer(struct gl_renderbuffer *rb)
+osmesa_delete_renderbuffer(struct gl_context *ctx, struct gl_renderbuffer *rb)
 {
-   free(rb);
+   _mesa_delete_renderbuffer(ctx, rb);
 }
 
 
@@ -779,6 +780,8 @@ OSMesaCreateContextExt( GLenum format, GLint depthBits, GLint stencilBits,
 
          ctx->Driver.MapRenderbuffer = osmesa_MapRenderbuffer;
          ctx->Driver.UnmapRenderbuffer = osmesa_UnmapRenderbuffer;
+
+         ctx->Driver.GenerateMipmap = _mesa_generate_mipmap;
 
          /* Extend the software rasterizer with our optimized line and triangle
           * drawing functions.

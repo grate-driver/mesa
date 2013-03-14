@@ -133,6 +133,7 @@ extern const struct brw_tracked_state gen7_wm_constants;
 extern const struct brw_tracked_state gen7_wm_constant_surface;
 extern const struct brw_tracked_state gen7_wm_state;
 extern const struct brw_tracked_state gen7_wm_surfaces;
+extern const struct brw_tracked_state haswell_cut_index;
 
 /* brw_misc_state.c */
 uint32_t
@@ -201,6 +202,8 @@ GLuint translate_tex_format(gl_format mesa_format,
 			    GLenum depth_mode,
 			    GLenum srgb_decode);
 
+int brw_get_texture_swizzle(const struct gl_texture_object *t);
+
 /* gen7_wm_surface_state.c */
 void gen7_set_surface_tiling(struct gen7_surface_state *surf, uint32_t tiling);
 void gen7_set_surface_msaa(struct gen7_surface_state *surf,
@@ -229,7 +232,7 @@ void upload_default_color(struct brw_context *brw,
 /* gen6_sf_state.c */
 uint32_t
 get_attr_override(struct brw_vue_map *vue_map, int urb_entry_read_offset,
-                  int fs_attr, bool two_side_color);
+                  int fs_attr, bool two_side_color, uint32_t *max_source_attr);
 
 #ifdef __cplusplus
 }

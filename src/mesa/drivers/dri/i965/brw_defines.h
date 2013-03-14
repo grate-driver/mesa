@@ -838,6 +838,7 @@ enum brw_message_target {
 #define GEN5_SAMPLER_MESSAGE_SAMPLE_LOD_COMPARE  6
 #define GEN5_SAMPLER_MESSAGE_SAMPLE_LD           7
 #define GEN5_SAMPLER_MESSAGE_SAMPLE_RESINFO      10
+#define HSW_SAMPLER_MESSAGE_SAMPLE_DERIV_COMPARE 20
 #define GEN7_SAMPLER_MESSAGE_SAMPLE_LD_MCS       29
 #define GEN7_SAMPLER_MESSAGE_SAMPLE_LD2DMS       30
 #define GEN7_SAMPLER_MESSAGE_SAMPLE_LD2DSS       31
@@ -1036,6 +1037,9 @@ enum brw_message_target {
 # define GEN6_URB_VS_ENTRIES_SHIFT			0
 # define GEN6_URB_GS_ENTRIES_SHIFT			8
 # define GEN6_URB_GS_SIZE_SHIFT				0
+
+#define _3DSTATE_VF                             0x780c /* GEN7.5+ */
+#define HSW_CUT_INDEX_ENABLE                            (1 << 8)
 
 #define _3DSTATE_URB_VS                         0x7830 /* GEN7+ */
 #define _3DSTATE_URB_HS                         0x7831 /* GEN7+ */

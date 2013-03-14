@@ -166,15 +166,13 @@ soft_renderbuffer_storage(struct gl_context *ctx, struct gl_renderbuffer *rb,
  * Called via gl_renderbuffer::Delete()
  */
 static void
-soft_renderbuffer_delete(struct gl_renderbuffer *rb)
+soft_renderbuffer_delete(struct gl_context *ctx, struct gl_renderbuffer *rb)
 {
    struct swrast_renderbuffer *srb = swrast_renderbuffer(rb);
 
-   if (srb->Buffer) {
-      free(srb->Buffer);
-      srb->Buffer = NULL;
-   }
-   free(srb);
+   free(srb->Buffer);
+   srb->Buffer = NULL;
+   _mesa_delete_renderbuffer(ctx, rb);
 }
 
 

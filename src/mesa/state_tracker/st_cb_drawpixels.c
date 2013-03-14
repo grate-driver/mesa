@@ -398,6 +398,8 @@ internal_format(struct gl_context *ctx, GLenum format, GLenum type)
 
          case GL_UNSIGNED_BYTE_3_3_2:
          case GL_UNSIGNED_BYTE_2_3_3_REV:
+            return GL_R3_G3_B2;
+
          case GL_UNSIGNED_SHORT_4_4_4_4:
          case GL_UNSIGNED_SHORT_4_4_4_4_REV:
             return GL_RGBA4;
@@ -571,9 +573,8 @@ draw_quad(struct gl_context *ctx, GLfloat x0, GLfloat y0, GLfloat z,
    struct pipe_resource *buf = NULL;
    unsigned offset;
 
-   u_upload_alloc(st->uploader, 0, 4 * sizeof(verts[0]), &offset, &buf,
-		  (void**)&verts);
-   if (!buf) {
+   if (u_upload_alloc(st->uploader, 0, 4 * sizeof(verts[0]), &offset,
+                      &buf, (void **) &verts) != PIPE_OK) {
       return;
    }
 

@@ -504,7 +504,6 @@ void st_init_extensions(struct st_context *st)
    ctx->Extensions.EXT_blend_minmax = GL_TRUE;
    ctx->Extensions.EXT_framebuffer_blit = GL_TRUE;
    ctx->Extensions.EXT_framebuffer_object = GL_TRUE;
-   ctx->Extensions.EXT_framebuffer_multisample = GL_TRUE;
    ctx->Extensions.EXT_fog_coord = GL_TRUE;
    ctx->Extensions.EXT_gpu_program_parameters = GL_TRUE;
    ctx->Extensions.EXT_pixel_buffer_object = GL_TRUE;
@@ -629,6 +628,13 @@ void st_init_extensions(struct st_context *st)
          ctx->Const.MaxSamples = i;
          break;
       }
+   }
+   if (ctx->Const.MaxSamples == 1) {
+      /* one sample doesn't really make sense */
+      ctx->Const.MaxSamples = 0;
+   }
+   else if (ctx->Const.MaxSamples >= 2) {
+      ctx->Extensions.EXT_framebuffer_multisample = GL_TRUE;
    }
 
    if (ctx->Const.MaxDualSourceDrawBuffers > 0)

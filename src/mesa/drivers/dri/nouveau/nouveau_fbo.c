@@ -102,12 +102,12 @@ nouveau_renderbuffer_storage(struct gl_context *ctx, struct gl_renderbuffer *rb,
 }
 
 static void
-nouveau_renderbuffer_del(struct gl_renderbuffer *rb)
+nouveau_renderbuffer_del(struct gl_context *ctx, struct gl_renderbuffer *rb)
 {
 	struct nouveau_surface *s = &to_nouveau_renderbuffer(rb)->surface;
 
 	nouveau_surface_ref(NULL, s);
-	FREE(rb);
+	_mesa_delete_renderbuffer(ctx, rb);
 }
 
 static struct gl_renderbuffer *
@@ -195,7 +195,7 @@ nouveau_renderbuffer_dri_new(GLenum format, __DRIdrawable *drawable)
 	rb->AllocStorage = nouveau_renderbuffer_dri_storage;
 
 	if (!set_renderbuffer_format(rb, format)) {
-		nouveau_renderbuffer_del(rb);
+		nouveau_renderbuffer_del(NULL, rb);
 		return NULL;
 	}
 

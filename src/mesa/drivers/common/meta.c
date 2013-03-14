@@ -133,6 +133,7 @@ struct save_state
    struct gl_vertex_program *VertexProgram;
    GLboolean FragmentProgramEnabled;
    struct gl_fragment_program *FragmentProgram;
+   GLboolean ATIFragmentShaderEnabled;
    struct gl_shader_program *VertexShader;
    struct gl_shader_program *GeometryShader;
    struct gl_shader_program *FragmentShader;
@@ -626,6 +627,11 @@ _mesa_meta_begin(struct gl_context *ctx, GLbitfield state)
          _mesa_set_enable(ctx, GL_FRAGMENT_PROGRAM_ARB, GL_FALSE);
       }
 
+      if (ctx->API == API_OPENGL && ctx->Extensions.ATI_fragment_shader) {
+         save->ATIFragmentShaderEnabled = ctx->ATIFragmentShader.Enabled;
+         _mesa_set_enable(ctx, GL_FRAGMENT_SHADER_ATI, GL_FALSE);
+      }
+
       if (ctx->Extensions.ARB_shader_objects) {
 	 _mesa_reference_shader_program(ctx, &save->VertexShader,
 					ctx->Shader.CurrentVertexProgram);
@@ -940,6 +946,11 @@ _mesa_meta_end(struct gl_context *ctx)
          _mesa_reference_fragprog(ctx, &ctx->FragmentProgram.Current,
                                   save->FragmentProgram);
 	 _mesa_reference_fragprog(ctx, &save->FragmentProgram, NULL);
+      }
+
+      if (ctx->API == API_OPENGL && ctx->Extensions.ATI_fragment_shader) {
+         _mesa_set_enable(ctx, GL_FRAGMENT_SHADER_ATI,
+                          save->ATIFragmentShaderEnabled);
       }
 
       if (ctx->Extensions.ARB_vertex_shader)
@@ -3745,6 +3756,7 @@ decompress_texture_image(struct gl_context *ctx,
    /* read pixels from renderbuffer */
    {
       GLenum baseTexFormat = texImage->_BaseFormat;
+      GLenum destBaseFormat = _mesa_base_tex_format(ctx, destFormat);
 
       /* The pixel transfer state will be set to default values at this point
        * (see MESA_META_PIXEL_TRANSFER) so pixel transfer ops are effectively
@@ -3753,9 +3765,19 @@ decompress_texture_image(struct gl_context *ctx,
        * returned as red and two-channel texture values are returned as
        * red/alpha.
        */
-      if (baseTexFormat == GL_LUMINANCE ||
-          baseTexFormat == GL_LUMINANCE_ALPHA ||
-          baseTexFormat == GL_INTENSITY) {
+      if ((baseTexFormat == GL_LUMINANCE ||
+           baseTexFormat == GL_LUMINANCE_ALPHA ||
+           baseTexFormat == GL_INTENSITY) ||
+          /* If we're reading back an RGB(A) texture (using glGetTexImage) as
+	   * luminance then we need to return L=tex(R).
+	   */
+          ((baseTexFormat == GL_RGBA ||
+            baseTexFormat == GL_RGB  ||
+            baseTexFormat == GL_RG) &&
+          (destBaseFormat == GL_LUMINANCE ||
+           destBaseFormat == GL_LUMINANCE_ALPHA ||
+           destBaseFormat == GL_LUMINANCE_INTEGER_EXT ||
+           destBaseFormat == GL_LUMINANCE_ALPHA_INTEGER_EXT))) {
          /* Green and blue must be zero */
          _mesa_PixelTransferf(GL_GREEN_SCALE, 0.0f);
          _mesa_PixelTransferf(GL_BLUE_SCALE, 0.0f);
