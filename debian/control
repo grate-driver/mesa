@@ -286,6 +286,7 @@ Depends:
  libxdamage-dev,
  libxfixes-dev,
  libxcb-glx0-dev,
+ libxcb-dri2-0-dev,
  libx11-xcb-dev,
  ${misc:Depends},
 Description: free implementation of the EGL API -- development files
