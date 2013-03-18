@@ -86,7 +86,7 @@ else
 	# where we have LLVM enabled.
 	GALLIUM_DRIVERS += radeonsi
     else
-	EXTRA_SED=-e"/radeonsi_dri.so/ s/^/\#/"
+	EXTRA_SED="-e/libllvmradeon/ s/^/\#/"
     endif
   endif
 
@@ -99,7 +99,7 @@ else
   endif
 
   # LLVM is required for r300g and recommended for swrastg on x86:
-  ifneq (,$(filter $(DEB_HOST_ARCH),amd64 i386 kfreebsd-amd64 kfreebsd-i386))
+  ifneq (,$(filter $(DEB_HOST_ARCH),amd64 i386 kfreebsd-amd64 kfreebsd-i386 armhf))
 	confflags_GALLIUM += --enable-gallium-llvm
 	confflags_GALLIUM += --with-llvm-shared-libs
   endif
