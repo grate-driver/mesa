@@ -3,9 +3,6 @@ mesa (9.1.1-1) UNRELEASED; urgency=low
   * New upstream release.
     - Set close on exec flag when opening dri devices (Closes: #651370).
 
-  [ Julien Cristau ]
-  * Use xz for all binary packages not just *-dbg.
-
   [ Timo Aaltonen ]
   * Refresh patches
     - disable 05_kfreebsd-egl-x11.diff for now.
