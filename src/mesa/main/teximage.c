@@ -520,7 +520,7 @@ _mesa_base_tex_format( struct gl_context *ctx, GLint internalFormat )
       }
    }
 
-   if (_mesa_is_gles3(ctx)) {
+   if (_mesa_is_gles3(ctx) || ctx->Extensions.ARB_ES3_compatibility) {
       switch (internalFormat) {
       case GL_COMPRESSED_RGB8_ETC2:
       case GL_COMPRESSED_SRGB8_ETC2:
@@ -3184,6 +3184,12 @@ _mesa_EGLImageTargetTexture2DOES (GLenum target, GLeglImageOES image)
    if (!valid_target) {
       _mesa_error(ctx, GL_INVALID_ENUM,
 		  "glEGLImageTargetTexture2D(target=%d)", target);
+      return;
+   }
+
+   if (!image) {
+      _mesa_error(ctx, GL_INVALID_OPERATION,
+		  "glEGLImageTargetTexture2D(image=%p)", image);
       return;
    }
 
