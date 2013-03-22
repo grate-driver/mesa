@@ -15,4 +15,3 @@
 117-static-gallium.patch
 118-dricore-gallium.patch
 119-libllvmradeon-link.patch
-gbm-remember-to-init-format.patch
