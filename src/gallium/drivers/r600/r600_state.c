@@ -802,6 +802,7 @@ static void *r600_create_dsa_state(struct pipe_context *ctx,
 	dsa->valuemask[1] = state->stencil[1].valuemask;
 	dsa->writemask[0] = state->stencil[0].writemask;
 	dsa->writemask[1] = state->stencil[1].writemask;
+	dsa->zwritemask = state->depth.writemask;
 
 	db_depth_control = S_028800_Z_ENABLE(state->depth.enabled) |
 		S_028800_Z_WRITE_ENABLE(state->depth.writemask) |
@@ -1515,6 +1516,11 @@ static void r600_set_framebuffer_state(struct pipe_context *ctx,
 	}
 	if (rctx->framebuffer.state.zsbuf) {
 		rctx->flags |= R600_CONTEXT_WAIT_3D_IDLE | R600_CONTEXT_FLUSH_AND_INV;
+
+		rtex = (struct r600_texture*)rctx->framebuffer.state.zsbuf->texture;
+		if (rctx->chip_class >= R700 && rtex->htile) {
+			rctx->flags |= R600_CONTEXT_FLUSH_AND_INV_DB_META;
+		}
 	}
 
 	/* Set the new state. */

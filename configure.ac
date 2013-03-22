@@ -6,7 +6,7 @@ dnl Tell the user about autoconf.html in the --help output
 m4_divert_once([HELP_END], [
 See docs/autoconf.html for more details on the options for Mesa.])
 
-AC_INIT([Mesa], [9.1.0],
+AC_INIT([Mesa], [9.1.1],
     [https://bugs.freedesktop.org/enter_bug.cgi?product=Mesa])
 AC_CONFIG_AUX_DIR([bin])
 AC_CONFIG_MACRO_DIR([m4])
@@ -1681,6 +1681,9 @@ if test "x$enable_gallium_llvm" = xyes; then
         LLVM_COMPONENTS="engine bitwriter"
         if $LLVM_CONFIG --components | grep -q '\<mcjit\>'; then
             LLVM_COMPONENTS="${LLVM_COMPONENTS} mcjit"
+        fi
+        if $LLVM_CONFIG --components | grep -q '\<oprofilejit\>'; then
+            LLVM_COMPONENTS="${LLVM_COMPONENTS} oprofilejit"
         fi
 
         if test "x$enable_opencl" = xyes; then

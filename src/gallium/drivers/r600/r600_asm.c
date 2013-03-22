@@ -322,6 +322,7 @@ int r600_bytecode_add_output(struct r600_bytecode *bc, const struct r600_bytecod
 		output->swizzle_y == bc->cf_last->output.swizzle_y &&
 		output->swizzle_z == bc->cf_last->output.swizzle_z &&
 		output->swizzle_w == bc->cf_last->output.swizzle_w &&
+		output->comp_mask == bc->cf_last->output.comp_mask &&
 		(output->burst_count + bc->cf_last->output.burst_count) <= 16) {
 
 		if ((output->gpr + output->burst_count) == bc->cf_last->output.gpr &&
@@ -873,12 +874,6 @@ static int check_and_set_bank_swizzle(struct r600_bytecode *bc,
 	bank_swizzle[4] = SQ_ALU_SCL_210;
 	while(bank_swizzle[4] <= SQ_ALU_SCL_221) {
 
-		if (max_slots == 4) {
-			for (i = 0; i < max_slots; i++) {
-				if (bank_swizzle[i] == SQ_ALU_VEC_210)
-				  return -1;
-			}
-		}
 		init_bank_swizzle(&bs);
 		if (scalar_only == false) {
 			for (i = 0; i < 4; i++) {
@@ -910,8 +905,10 @@ static int check_and_set_bank_swizzle(struct r600_bytecode *bc,
 					bank_swizzle[i]++;
 					if (bank_swizzle[i] <= SQ_ALU_VEC_210)
 						break;
-					else
+					else if (i < max_slots - 1)
 						bank_swizzle[i] = SQ_ALU_VEC_012;
+					else
+						return -1;
 				}
 			}
 		}

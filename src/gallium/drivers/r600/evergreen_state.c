@@ -808,6 +808,7 @@ static void *evergreen_create_dsa_state(struct pipe_context *ctx,
 	dsa->valuemask[1] = state->stencil[1].valuemask;
 	dsa->writemask[0] = state->stencil[0].writemask;
 	dsa->writemask[1] = state->stencil[1].writemask;
+	dsa->zwritemask = state->depth.writemask;
 
 	db_depth_control = S_028800_Z_ENABLE(state->depth.enabled) |
 		S_028800_Z_WRITE_ENABLE(state->depth.writemask) |
@@ -1321,6 +1322,10 @@ void evergreen_init_color_surface_rat(struct r600_context *rctx,
 	 * elements. */
 	surf->cb_color_dim = pipe_buffer->width0;
 
+	/* Set the buffer range the GPU will have access to: */
+	util_range_add(&r600_resource(pipe_buffer)->valid_buffer_range,
+		       0, pipe_buffer->width0);
+
 	surf->cb_color_cmask = surf->cb_color_base;
 	surf->cb_color_cmask_slice = 0;
 	surf->cb_color_fmask = surf->cb_color_base;
@@ -1405,10 +1410,15 @@ void evergreen_init_color_surface(struct r600_context *rctx,
 			S_028C74_NON_DISP_TILING_ORDER(non_disp_tiling) |
 		        S_028C74_FMASK_BANK_HEIGHT(fmask_bankh);
 
-	if (rctx->chip_class == CAYMAN && rtex->resource.b.b.nr_samples > 1) {
-		unsigned log_samples = util_logbase2(rtex->resource.b.b.nr_samples);
-		color_attrib |= S_028C74_NUM_SAMPLES(log_samples) |
-				S_028C74_NUM_FRAGMENTS(log_samples);
+	if (rctx->chip_class == CAYMAN) {
+		color_attrib |=	S_028C74_FORCE_DST_ALPHA_1(desc->swizzle[3] ==
+							   UTIL_FORMAT_SWIZZLE_1);
+
+		if (rtex->resource.b.b.nr_samples > 1) {
+			unsigned log_samples = util_logbase2(rtex->resource.b.b.nr_samples);
+			color_attrib |= S_028C74_NUM_SAMPLES(log_samples) |
+					S_028C74_NUM_FRAGMENTS(log_samples);
+		}
 	}
 
 	ntype = V_028C70_NUMBER_UNORM;
@@ -1647,6 +1657,11 @@ static void evergreen_set_framebuffer_state(struct pipe_context *ctx,
 	}
 	if (rctx->framebuffer.state.zsbuf) {
 		rctx->flags |= R600_CONTEXT_WAIT_3D_IDLE | R600_CONTEXT_FLUSH_AND_INV;
+
+		rtex = (struct r600_texture*)rctx->framebuffer.state.zsbuf->texture;
+		if (rtex->htile) {
+			rctx->flags |= R600_CONTEXT_FLUSH_AND_INV_DB_META;
+		}
 	}
 
 	util_copy_framebuffer_state(&rctx->framebuffer.state, state);
@@ -2222,7 +2237,14 @@ static void evergreen_emit_db_misc_state(struct r600_context *rctx, struct r600_
 		}
 		db_render_override |= S_02800C_NOOP_CULL_DISABLE(1);
 	}
-	if (rctx->db_state.rsurf && rctx->db_state.rsurf->htile_enabled) {
+	/* FIXME we should be able to use hyperz even if we are not writing to
+	 * zbuffer but somehow this trigger GPU lockup. See :
+	 *
+	 * https://bugs.freedesktop.org/show_bug.cgi?id=60848
+	 *
+	 * Disable hyperz for now if not writing to zbuffer.
+	 */
+	if (rctx->db_state.rsurf && rctx->db_state.rsurf->htile_enabled && rctx->zwritemask) {
 		/* FORCE_OFF means HiZ/HiS are determined by DB_SHADER_CONTROL */
 		db_render_override |= S_02800C_FORCE_HIZ_ENABLE(V_02800C_FORCE_OFF);
 		/* This is to fix a lockup when hyperz and alpha test are enabled at
@@ -3651,6 +3673,17 @@ boolean evergreen_dma_blit(struct pipe_context *ctx,
 	 * but keep them around so we don't forget about those
 	 */
 	if ((src_pitch & 0x7) || (src_box->x & 0x7) || (dst_x & 0x7) || (src_box->y & 0x7) || (dst_y & 0x7)) {
+		return FALSE;
+	}
+
+	/* 128 bpp surfaces require non_disp_tiling for both
+	 * tiled and linear buffers on cayman.  However, async
+	 * DMA only supports it on the tiled side.  As such
+	 * the tile order is backwards after a L2T/T2L packet.
+	 */
+	if ((rctx->chip_class == CAYMAN) &&
+	    (src_mode != dst_mode) &&
+	    (util_format_get_blocksize(src->format) >= 16)) {
 		return FALSE;
 	}
 

@@ -28,6 +28,7 @@
 
 #include "../../winsys/radeon/drm/radeon_winsys.h"
 #include "util/u_double_list.h"
+#include "util/u_range.h"
 #include "util/u_transfer.h"
 
 #define R600_ERR(fmt, args...) \
@@ -50,6 +51,16 @@ struct r600_resource {
 
 	/* Resource state. */
 	unsigned			domains;
+
+	/* The buffer range which is initialized (with a write transfer,
+	 * streamout, DMA, or as a random access target). The rest of
+	 * the buffer is considered invalid and can be mapped unsynchronized.
+	 *
+	 * This allows unsychronized mapping of a buffer range which hasn't
+	 * been used yet. It's for applications which forget to use
+	 * the unsynchronized map flag and expect the driver to figure it out.
+         */
+	struct util_range		valid_buffer_range;
 };
 
 #define R600_BLOCK_MAX_BO		32
@@ -152,6 +163,7 @@ struct r600_so_target {
 #define R600_CONTEXT_FLUSH_AND_INV		(1 << 4)
 #define R600_CONTEXT_FLUSH_AND_INV_CB_META	(1 << 5)
 #define R600_CONTEXT_PS_PARTIAL_FLUSH		(1 << 6)
+#define R600_CONTEXT_FLUSH_AND_INV_DB_META      (1 << 7)
 
 struct r600_context;
 struct r600_screen;

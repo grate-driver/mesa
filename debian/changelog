@@ -1,4 +1,4 @@
-mesa (9.1-0ubuntu1) UNRELEASED; urgency=low
+mesa (9.1.1-0ubuntu1) UNRELEASED; urgency=low
 
   [ Timo Aaltonen ]
   * Merge from unreleased debian git
@@ -6,18 +6,12 @@ mesa (9.1-0ubuntu1) UNRELEASED; urgency=low
   * gbm-remember-to-init-format.patch: Commit from master to
     init format on gbm_dri_bo_create. (LP: #1112147)
 
-  [ Rico Tzschichholz ]
-  * Update packaging mesa packaging with xorg-edgers
-
  -- Timo Aaltonen <tjaalton@ubuntu.com>  Wed, 27 Feb 2013 11:12:43 +0200
 
-mesa (9.1-1) UNRELEASED; urgency=low
+mesa (9.1.1-1) UNRELEASED; urgency=low
 
   * New upstream release.
     - Set close on exec flag when opening dri devices (Closes: #651370).
-
-  [ Julien Cristau ]
-  * Use xz for all binary packages not just *-dbg.
 
   [ Timo Aaltonen ]
   * Refresh patches
@@ -78,6 +72,9 @@ mesa (9.1-1) UNRELEASED; urgency=low
 
   [ Sven Joachim ]
   * Bump libdrm-dev build-dependency to 2.4.42.
+
+  [ Rico Tzschichholz ]
+  * Update packaging mesa packaging with xorg-edgers
 
  -- Julien Cristau <jcristau@debian.org>  Fri, 03 Aug 2012 23:17:16 +0200
 
@@ -202,6 +199,45 @@ mesa (9.0~git20120821.c1114c61-0ubuntu1) quantal; urgency=low
     compression.
 
  -- Timo Aaltonen <tjaalton@ubuntu.com>  Thu, 23 Aug 2012 15:37:30 +0300
+
+mesa (8.0.5-4) unstable; urgency=low
+
+  * Cherry-pick commit 17f1cb1d99 (dri/nouveau: fix crash in
+    nouveau_flush) from upstream master branch.
+
+ -- Sven Joachim <svenjoac@gmx.de>  Wed, 13 Mar 2013 17:52:18 +0100
+
+mesa (8.0.5-3) unstable; urgency=high
+
+  * mesa: add bounds checking for uniform array access (CVE-2012-5129).
+
+ -- Julien Cristau <jcristau@debian.org>  Thu, 06 Dec 2012 10:20:40 +0100
+
+mesa (8.0.5-2) unstable; urgency=low
+
+  * Fix regression in 8.0.5 (spurious GL_INVALID_ENUM errors):
+    mesa: test for GL_EXT_framebuffer_sRGB in glPopAttrib().
+    Thanks to Simon Chopin for the report.
+
+ -- Julien Cristau <jcristau@debian.org>  Wed, 28 Nov 2012 22:09:14 +0100
+
+mesa (8.0.5-1) unstable; urgency=low
+
+  * New upstream stable release
+  * Pull a couple more fixes from upstream's 8.0 branch, including:
+    - nvfx: handle some unknown PIPE_CAPs (closes: 674965)
+  * Install drirc in libgl1-mesa-dri package with some settings for i965
+    (closes: #671747).
+
+ -- Julien Cristau <jcristau@debian.org>  Sun, 04 Nov 2012 16:55:17 +0100
+
+mesa (8.0.4-2) unstable; urgency=high
+
+  * Use xz for all binary packages not just *-dbg.
+  * glsl/linker: Avoid buffer over-run in
+    parcel_out_uniform_storage::visit_field (CVE-2012-2864; closes: #685667).
+
+ -- Julien Cristau <jcristau@debian.org>  Fri, 24 Aug 2012 00:09:47 +0200
 
 mesa (8.0.4-1) unstable; urgency=low
 
