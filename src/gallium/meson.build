@@ -72,6 +72,12 @@ if with_gallium_freedreno
 else
   driver_freedreno = declare_dependency()
 endif
+if with_gallium_tegra
+  subdir('winsys/tegra/drm')
+  subdir('drivers/tegra')
+else
+  driver_tegra = declare_dependency()
+endif
 if with_gallium_vc4
   subdir('winsys/vc4/drm')
   subdir('drivers/vc4')

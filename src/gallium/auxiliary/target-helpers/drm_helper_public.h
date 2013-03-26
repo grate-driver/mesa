@@ -37,6 +37,9 @@ struct pipe_screen *
 pipe_virgl_create_screen(int fd, const struct pipe_screen_config *config);
 
 struct pipe_screen *
+pipe_tegra_create_screen(int fd, const struct pipe_screen_config *config);
+
+struct pipe_screen *
 pipe_vc4_create_screen(int fd, const struct pipe_screen_config *config);
 
 struct pipe_screen *
