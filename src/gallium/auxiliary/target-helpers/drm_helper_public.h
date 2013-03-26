@@ -58,6 +58,9 @@ struct pipe_screen *
 pipe_tegra_create_screen(int fd, const struct pipe_screen_config *config);
 
 struct pipe_screen *
+pipe_grate_create_screen(int fd, const struct pipe_screen_config *config);
+
+struct pipe_screen *
 pipe_lima_create_screen(int fd, const struct pipe_screen_config *config);
 
 struct pipe_screen *

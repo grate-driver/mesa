@@ -27,13 +27,16 @@
 #include "util/u_debug.h"
 
 #include "tegra/tegra_screen.h"
+#include "grate/grate_screen.h"
+
+#include <libdrm/tegra.h>
 
 struct pipe_screen *tegra_drm_screen_create(int fd);
 
 struct pipe_screen *tegra_drm_screen_create(int fd)
 {
+#if 0
    struct pipe_screen *screen;
-
    /*
     * NOTE: There are reportedly issues with reusing the file descriptor
     * as-is related to Xinerama. Duplicate it to side-step any issues.
@@ -47,4 +50,12 @@ struct pipe_screen *tegra_drm_screen_create(int fd)
       close(fd);
 
    return screen;
+#else
+  struct drm_tegra *drm;
+  int err = drm_tegra_new(&drm, fd);
+  if (err < 0)
+          return NULL;
+
+  return grate_screen_create(drm);
+#endif
 }
