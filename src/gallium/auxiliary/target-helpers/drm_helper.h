@@ -364,7 +364,7 @@ DRM_DRIVER_DESCRIPTOR(etnaviv, NULL, 0)
 DRM_DRIVER_DESCRIPTOR_STUB(etnaviv)
 #endif
 
-#ifdef GALLIUM_TEGRA
+#if defined(GALLIUM_TEGRA) || defined(GALLIUM_GRATE)
 #include "tegra/drm/tegra_drm_public.h"
 
 static struct pipe_screen *
