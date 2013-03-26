@@ -79,3 +79,14 @@ DEFINE_LOADER_DRM_ENTRYPOINT(vc4)
 DEFINE_LOADER_DRM_ENTRYPOINT(imx_drm)
 DEFINE_LOADER_DRM_ENTRYPOINT(etnaviv)
 #endif
+
+#if defined(GALLIUM_TEGRA)
+
+const __DRIextension **__driDriverGetExtensions_tegra(void);
+
+PUBLIC const __DRIextension **__driDriverGetExtensions_tegra(void)
+{
+   globalDriverAPI = &galliumdrm_driver_api;
+   return galliumdrm_driver_extensions;
+}
+#endif

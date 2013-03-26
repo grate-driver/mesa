@@ -73,6 +73,11 @@ ifneq ($(filter swrast,$(MESA_GPU_DRIVERS)),)
 gallium_DRIVERS += libmesa_pipe_softpipe libmesa_winsys_sw_dri
 LOCAL_CFLAGS += -DGALLIUM_SOFTPIPE
 endif
+ifneq ($(filter tegra,$(MESA_GPU_DRIVERS)),)
+LOCAL_CFLAGS += -DGALLIUM_TEGRA
+gallium_DRIVERS += libmesa_winsys_tegra libmesa_pipe_tegra
+LOCAL_SHARED_LIBRARIES += libdrm_tegra
+endif
 ifneq ($(filter vc4,$(MESA_GPU_DRIVERS)),)
 LOCAL_CFLAGS += -DGALLIUM_VC4
 gallium_DRIVERS += libmesa_winsys_vc4 libmesa_pipe_vc4

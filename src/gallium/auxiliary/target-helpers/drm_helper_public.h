@@ -29,6 +29,9 @@ struct pipe_screen *
 pipe_freedreno_create_screen(int fd);
 
 struct pipe_screen *
+pipe_tegra_create_screen(int fd);
+
+struct pipe_screen *
 pipe_virgl_create_screen(int fd);
 
 struct pipe_screen *

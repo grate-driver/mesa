@@ -73,6 +73,11 @@ endif
 endif
 endif
 
+# tegra
+ifneq ($(filter tegra, $(MESA_GPU_DRIVERS)),)
+SUBDIRS += winsys/tegra/drm drivers/tegra
+endif
+
 # vc4
 ifneq ($(filter vc4, $(MESA_GPU_DRIVERS)),)
 SUBDIRS += winsys/vc4/drm drivers/vc4
