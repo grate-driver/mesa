@@ -91,7 +91,7 @@ DEFINE_LOADER_DRM_ENTRYPOINT(panfrost)
 DEFINE_LOADER_DRM_ENTRYPOINT(etnaviv)
 #endif
 
-#if defined(GALLIUM_TEGRA)
+#if defined(GALLIUM_TEGRA) || defined(GALLIUM_GRATE)
 DEFINE_LOADER_DRM_ENTRYPOINT(tegra);
 #endif
 
