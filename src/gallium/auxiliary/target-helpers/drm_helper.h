@@ -367,7 +367,7 @@ pipe_etna_create_screen(int fd, const struct pipe_screen_config *config)
 
 #endif
 
-#ifdef GALLIUM_TEGRA
+#if defined(GALLIUM_TEGRA) || defined(GALLIUM_GRATE)
 #include "tegra/drm/tegra_drm_public.h"
 
 struct pipe_screen *
