@@ -61,8 +61,9 @@ libgallium_dri = shared_library(
   dependencies : [
     dep_selinux, dep_expat, dep_libdrm, dep_llvm, dep_thread,
     driver_swrast, driver_r300, driver_r600, driver_radeonsi, driver_nouveau,
-    driver_pl111, driver_vc4, driver_vc5, driver_freedreno, driver_etnaviv,
-    driver_imx, driver_i915, driver_svga, driver_virgl, driver_swr,
+    driver_pl111, driver_vc4, driver_vc5, driver_grate, driver_freedreno,
+    driver_etnaviv, driver_imx, driver_i915, driver_svga, driver_virgl,
+    driver_swr,
   ],
 )
 
@@ -72,6 +73,7 @@ foreach d : [[with_gallium_pl111, 'pl111_dri.so'],
              [with_gallium_freedreno, ['msm_dri.so', 'kgsl_dri.so']],
              [with_gallium_softpipe or with_gallium_swr, 'swrast_dri.so'],
              [with_gallium_softpipe and with_gallium_drisw_kms, 'kms_swrast_dri.so'],
+             [with_gallium_grate, 'tegra_dri.so'],
              [with_gallium_vc4, 'vc4_dri.so'],
              [with_gallium_vc5, 'vc5_dri.so'],
              [with_gallium_etnaviv, 'etnaviv_dri.so'],
