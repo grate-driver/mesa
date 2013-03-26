@@ -25,6 +25,7 @@ libtegradrm = static_library(
     inc_include, inc_src, inc_gallium, inc_gallium_aux, inc_gallium_drivers,
     inc_gallium_winsys
   ],
+  dependencies : [dep_libdrm, dep_libdrm_tegra],
 )
 
 driver_tegra = declare_dependency(
