@@ -58,7 +58,7 @@ libgallium_dri = shared_library(
     driver_kmsro, driver_v3d, driver_vc4, driver_freedreno, driver_etnaviv,
     driver_tegra, driver_i915, driver_svga, driver_virgl,
     driver_panfrost, driver_iris, driver_lima, driver_zink, driver_d3d12,
-    driver_asahi, driver_crocus
+    driver_asahi, driver_crocus, driver_grate
   ],
   # Will be deleted during installation, see install_megadrivers.py
   install : true,
@@ -102,6 +102,7 @@ foreach d : [[with_gallium_kmsro, [
              [with_gallium_panfrost, 'panfrost_dri.so'],
              [with_gallium_etnaviv, 'etnaviv_dri.so'],
              [with_gallium_tegra, 'tegra_dri.so'],
+             [with_gallium_tegra or with_gallium_grate, 'tegra_dri.so'],
              [with_gallium_crocus, 'crocus_dri.so'],
              [with_gallium_iris, 'iris_dri.so'],
              [with_gallium_i915, 'i915_dri.so'],
