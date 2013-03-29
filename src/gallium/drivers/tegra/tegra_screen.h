@@ -7,6 +7,8 @@
 
 struct tegra_screen {
 	struct pipe_screen base;
+
+	struct drm_tegra *drm;
 };
 
 static inline struct tegra_screen *tegra_screen(struct pipe_screen *screen)

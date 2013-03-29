@@ -2,12 +2,21 @@
 #define TEGRA_RESOURCE_H
 
 #include "pipe/p_screen.h"
-#include "pipe/p_state.h"
+#include "util/u_transfer.h"
 
 struct tegra_resource {
-	struct pipe_resource base;
+	struct u_resource base;
+	struct drm_tegra_bo *bo;
+	unsigned int pitch;
 };
 
+static inline struct tegra_resource *
+tegra_resource(struct pipe_resource *resource)
+{
+	return (struct tegra_resource *)resource;
+}
+
+void tegra_context_resource_init(struct pipe_context *pcontext);
 void tegra_screen_resource_init(struct pipe_screen *pscreen);
 
 #endif

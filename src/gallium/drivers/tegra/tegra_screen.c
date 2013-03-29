@@ -6,7 +6,13 @@
 
 static void tegra_screen_destroy(struct pipe_screen *pscreen)
 {
+	struct tegra_screen *screen = tegra_screen(pscreen);
+
 	fprintf(stdout, "> %s(pscreen=%p)\n", __func__, pscreen);
+
+	drm_tegra_close(screen->drm);
+	free(screen);
+
 	fprintf(stdout, "< %s()\n", __func__);
 }
 
@@ -29,580 +35,301 @@ static const char *tegra_screen_get_vendor(struct pipe_screen *pscreen)
 static int tegra_screen_get_param(struct pipe_screen *pscreen,
 				  enum pipe_cap param)
 {
-	int ret = 0;
-
-	//fprintf(stdout, "> %s(pscreen=%p, param=%d)\n", __func__, pscreen,
-	//	param);
-
 	switch (param) {
 	case PIPE_CAP_NPOT_TEXTURES:
-		fprintf(stdout, "  PIPE_CAP_NPOT_TEXTURES\n");
-		ret = 1;
-		break;
+		return 1; /* not really, but mesa requires it for now! */
 
 	case PIPE_CAP_TWO_SIDED_STENCIL:
-		fprintf(stdout, "  PIPE_CAP_TWO_SIDED_STENCIL\n");
-		ret = 1;
-		break;
+		return 0;
 
 	case PIPE_CAP_MAX_DUAL_SOURCE_RENDER_TARGETS:
-		fprintf(stdout, "  PIPE_CAP_MAX_DUAL_SOURCE_RENDER_TARGETS\n");
-		ret = 1;
-		break;
+		return 0; /* ??? */
 
 	case PIPE_CAP_ANISOTROPIC_FILTER:
-		fprintf(stdout, "  PIPE_CAP_ANISOTROPIC_FILTER\n");
-		ret = 1;
-		break;
+		return 0;
 
 	case PIPE_CAP_POINT_SPRITE:
-		fprintf(stdout, "  PIPE_CAP_POINT_SPRITE\n");
-		ret = 1;
-		break;
+		return 1;
 
 	case PIPE_CAP_MAX_RENDER_TARGETS:
-		fprintf(stdout, "  PIPE_CAP_MAX_RENDER_TARGETS\n");
-		ret = 8;
-		break;
+		return 8; /* ??? */
 
 	case PIPE_CAP_OCCLUSION_QUERY:
-		fprintf(stdout, "  PIPE_CAP_OCCLUSION_QUERY\n");
-		ret = 0;
-		break;
+		return 0; /* ??? */
 
 	case PIPE_CAP_QUERY_TIME_ELAPSED:
-		fprintf(stdout, "  PIPE_CAP_QUERY_TIME_ELAPSED\n");
-		ret = 0;
-		break;
+		return 0; /* ??? - can we use syncpts for this? */
 
 	case PIPE_CAP_TEXTURE_SHADOW_MAP:
-		fprintf(stdout, "  PIPE_CAP_TEXTURE_SHADOW_MAP\n");
-		ret = 1;
-		break;
+		return 0;
 
 	case PIPE_CAP_TEXTURE_SWIZZLE:
-		fprintf(stdout, "  PIPE_CAP_TEXTURE_SWIZZLE\n");
-		ret = 1;
-		break;
+		return 0;
 
 	case PIPE_CAP_MAX_TEXTURE_2D_LEVELS:
-		fprintf(stdout, "  PIPE_CAP_MAX_TEXTURE_2D_LEVELS\n");
-		ret = 1;
-		break;
+		return 16;
 
 	case PIPE_CAP_MAX_TEXTURE_3D_LEVELS:
-		fprintf(stdout, "  PIPE_CAP_MAX_TEXTURE_3D_LEVELS\n");
-		ret = 1;
-		break;
+		return 0;
 
 	case PIPE_CAP_MAX_TEXTURE_CUBE_LEVELS:
-		fprintf(stdout, "  PIPE_CAP_MAX_TEXTURE_CUBE_LEVELS\n");
-		ret = 1;
-		break;
+		return 16; /* ??? */
 
 	case PIPE_CAP_TEXTURE_MIRROR_CLAMP:
-		fprintf(stdout, "  PIPE_CAP_TEXTURE_MIRROR_CLAMP\n");
-		ret = 1;
-		break;
+		return 0;
 
 	case PIPE_CAP_BLEND_EQUATION_SEPARATE:
-		fprintf(stdout, "  PIPE_CAP_BLEND_EQUATION_SEPARATE\n");
-		ret = 1;
-		break;
+		return 1;
 
 	case PIPE_CAP_SM3:
-		fprintf(stdout, "  PIPE_CAP_SM3\n");
-		ret = 1;
-		break;
+		return 1; /* well, not quite. but perhaps close enough? */
 
 	case PIPE_CAP_MAX_STREAM_OUTPUT_BUFFERS:
-		fprintf(stdout, "  PIPE_CAP_MAX_STREAM_OUTPUT_BUFFERS\n");
-		ret = 0;
-		break;
+		return 0;
 
 	case PIPE_CAP_PRIMITIVE_RESTART:
-		fprintf(stdout, "  PIPE_CAP_PRIMITIVE_RESTART\n");
-		ret = 1;
-		break;
+		return 0; /* probably possible to do by splitting draws, but not sure */
 
 	case PIPE_CAP_INDEP_BLEND_ENABLE:
-		fprintf(stdout, "  PIPE_CAP_INDEP_BLEND_ENABLE\n");
-		ret = 0;
-		break;
+		return 0; /* ??? */
 
 	case PIPE_CAP_INDEP_BLEND_FUNC:
-		fprintf(stdout, "  PIPE_CAP_INDEP_BLEND_FUNC\n");
-		ret = 0;
-		break;
+		return 0; /* ??? */
 
 	case PIPE_CAP_MAX_TEXTURE_ARRAY_LAYERS:
-		fprintf(stdout, "  PIPE_CAP_MAX_TEXTURE_ARRAY_LAYERS\n");
-		ret = 1;
-		break;
+		return 0;
 
 	case PIPE_CAP_DEPTH_CLIP_DISABLE:
-		fprintf(stdout, "  PIPE_CAP_DEPTH_CLIP_DISABLE\n");
-		ret = 0;
-		break;
+		return 0; /* ??? */
 
 	case PIPE_CAP_SHADER_STENCIL_EXPORT:
-		fprintf(stdout, "  PIPE_CAP_SHADER_STENCIL_EXPORT\n");
-		ret = 1;
-		break;
+		return 0; /* ??? */
 
 	case PIPE_CAP_TGSI_INSTANCEID:
-		fprintf(stdout, "  PIPE_CAP_TGSI_INSTANCEID\n");
-		ret = 1;
-		break;
-
 	case PIPE_CAP_VERTEX_ELEMENT_INSTANCE_DIVISOR:
-		fprintf(stdout, "  PIPE_CAP_VERTEX_ELEMENT_INSTANCE_DIVISOR\n");
-		ret = 1;
-		break;
+		return 0;
 
 	case PIPE_CAP_FRAGMENT_COLOR_CLAMPED:
-		fprintf(stdout, "  PIPE_CAP_FRAGMENT_COLOR_CLAMPED\n");
-		ret = 0;
-		break;
+		return 0; /* probably not */
 
 	case PIPE_CAP_SEAMLESS_CUBE_MAP:
-		fprintf(stdout, "  PIPE_CAP_SEAMLESS_CUBE_MAP\n");
-		ret = 1;
-		break;
-
 	case PIPE_CAP_SEAMLESS_CUBE_MAP_PER_TEXTURE:
-		fprintf(stdout, "  PIPE_CAP_SEAMLESS_CUBE_MAP_PER_TEXTURE\n");
-		ret = 0;
-		break;
+		return 0; /* probably not */
 
 	case PIPE_CAP_MIN_TEXEL_OFFSET:
-		fprintf(stdout, "  PIPE_CAP_MIN_TEXEL_OFFSET\n");
-		ret = 0;
-		break;
-
 	case PIPE_CAP_MAX_TEXEL_OFFSET:
-		fprintf(stdout, "  PIPE_CAP_MAX_TEXEL_OFFSET\n");
-		ret = 0;
-		break;
+		return 0;
 
 	case PIPE_CAP_CONDITIONAL_RENDER:
-		fprintf(stdout, "  PIPE_CAP_CONDITIONAL_RENDER\n");
-		ret = 1;
-		break;
+		return 0; /* probably not */
 
 	case PIPE_CAP_TEXTURE_BARRIER:
-		fprintf(stdout, "  PIPE_CAP_TEXTURE_BARRIER\n");
-		ret = 1;
-		break;
+		return 0; /* no clue */
 
 	case PIPE_CAP_MAX_STREAM_OUTPUT_SEPARATE_COMPONENTS:
-		fprintf(stdout, "  PIPE_CAP_MAX_STREAM_OUTPUT_SEPARATE_COMPONENTS\n");
-		ret = 0;
-		break;
-
 	case PIPE_CAP_MAX_STREAM_OUTPUT_INTERLEAVED_COMPONENTS:
-		fprintf(stdout, "  PIPE_CAP_MAX_STREAM_OUTPUT_INTERLEAVED_COMPONENTS\n");
-		ret = 0;
-		break;
-
 	case PIPE_CAP_STREAM_OUTPUT_PAUSE_RESUME:
-		fprintf(stdout, "  PIPE_CAP_STREAM_OUTPUT_PAUSE_RESUME\n");
-		ret = 0;
-		break;
+		return 0;
 
 	case PIPE_CAP_TGSI_CAN_COMPACT_CONSTANTS:
-		fprintf(stdout, "  PIPE_CAP_TGSI_CAN_COMPACT_CONSTANTS\n");
-		ret = 0;
-		break;
+		return 0; /* probably */
 
 	case PIPE_CAP_VERTEX_COLOR_UNCLAMPED:
-		fprintf(stdout, "  PIPE_CAP_VERTEX_COLOR_UNCLAMPED\n");
-		ret = 1;
-		break;
+		return 1; /* probably irrelevant for GLES2 */
 
 	case PIPE_CAP_VERTEX_COLOR_CLAMPED:
-		fprintf(stdout, "  PIPE_CAP_VERTEX_COLOR_CLAMPED\n");
-		ret = 0;
-		break;
+		return 0; /* probably irrelevant for GLES2 */
 
 	case PIPE_CAP_GLSL_FEATURE_LEVEL:
-		fprintf(stdout, "  PIPE_CAP_GLSL_FEATURE_LEVEL\n");
-		ret = 120;
-		break;
+		return 120; /* no clue */
 
 	case PIPE_CAP_QUADS_FOLLOW_PROVOKING_VERTEX_CONVENTION:
-		fprintf(stdout, "  PIPE_CAP_QUADS_FOLLOW_PROVOKING_VERTEX_CONVENTION\n");
-		ret = 1;
-		break;
+		return 0; /* no idea, need to test */
 
 	case PIPE_CAP_USER_VERTEX_BUFFERS:
-		fprintf(stdout, "  PIPE_CAP_USER_VERTEX_BUFFERS\n");
-		ret = 1;
-		break;
+	case PIPE_CAP_USER_CONSTANT_BUFFERS:
+		return 0; /* probably possible, but nasty for kernel */
 
 	case PIPE_CAP_VERTEX_BUFFER_OFFSET_4BYTE_ALIGNED_ONLY:
-		fprintf(stdout, "  PIPE_CAP_VERTEX_BUFFER_OFFSET_4BYTE_ALIGNED_ONLY\n");
-		ret = 0;
-		break;
-
 	case PIPE_CAP_VERTEX_BUFFER_STRIDE_4BYTE_ALIGNED_ONLY:
-		fprintf(stdout, "  PIPE_CAP_VERTEX_BUFFER_STRIDE_4BYTE_ALIGNED_ONLY\n");
-		ret = 0;
-		break;
-
 	case PIPE_CAP_VERTEX_ELEMENT_SRC_OFFSET_4BYTE_ALIGNED_ONLY:
-		fprintf(stdout, "  PIPE_CAP_VERTEX_ELEMENT_SRC_OFFSET_4BYTE_ALIGNED_ONLY\n");
-		ret = 0;
-		break;
-
-	case PIPE_CAP_USER_CONSTANT_BUFFERS:
-		fprintf(stdout, "  PIPE_CAP_USER_CONSTANT_BUFFERS\n");
-		ret = 1;
-		break;
+		return 0;
 
 	case PIPE_CAP_CONSTANT_BUFFER_OFFSET_ALIGNMENT:
-		fprintf(stdout, "  PIPE_CAP_CONSTANT_BUFFER_OFFSET_ALIGNMENT\n");
-		ret = 64;
-		break;
+		return 4; /* DWORD aligned, can do pure data GATHER */
 
 	case PIPE_CAP_START_INSTANCE:
-		fprintf(stdout, "  PIPE_CAP_START_INSTANCE\n");
-		ret = 1;
-		break;
+		return 0;
 
 	case PIPE_CAP_QUERY_TIMESTAMP:
-		fprintf(stdout, "  PIPE_CAP_QUERY_TIMESTAMP\n");
-		ret = 0;
-		break;
+		return 0; /* dunno */
 
 	case PIPE_CAP_MIN_MAP_BUFFER_ALIGNMENT:
-		fprintf(stdout, "  PIPE_CAP_MIN_MAP_BUFFER_ALIGNMENT\n");
-		ret = 1;
-		break;
+		return 0;
 
 	case PIPE_CAP_CUBE_MAP_ARRAY:
-		fprintf(stdout, "  PIPE_CAP_CUBE_MAP_ARRAY\n");
-		ret = 0;
-		break;
+		return 0;
 
 	case PIPE_CAP_TEXTURE_BUFFER_OBJECTS:
-		fprintf(stdout, "  PIPE_CAP_TEXTURE_BUFFER_OBJECTS\n");
-		ret = 1;
-		break;
+		return 1; /* what is this? */
 
 	case PIPE_CAP_TEXTURE_BUFFER_OFFSET_ALIGNMENT:
-		fprintf(stdout, "  PIPE_CAP_TEXTURE_BUFFER_OFFSET_ALIGNMENT\n");
-		ret = 64;
-		break;
+		return 1; /* what is this? */
 
 	case PIPE_CAP_TGSI_TEXCOORD:
-		fprintf(stdout, "  PIPE_CAP_TGSI_TEXCOORD\n");
-		ret = 0;
-		break;
+		return 0;
 
 	case PIPE_CAP_PREFER_BLIT_BASED_TEXTURE_TRANSFER:
-		fprintf(stdout, "  PIPE_CAP_PREFER_BLIT_BASED_TEXTURE_TRANSFER\n");
-		ret = 0;
-		break;
+		return 0;
 
 	default:
 		fprintf(stdout, "  unsupported parameter: %d\n", param);
-		break;
+		return 0;
 	}
-
-	//fprintf(stdout, "< %s() = %d\n", __func__, ret);
-	return ret;
 }
 
 static float tegra_screen_get_paramf(struct pipe_screen *pscreen,
 				     enum pipe_capf param)
 {
-	float ret = 0.0f;
-
-	//fprintf(stdout, "> %s(pscreen=%p, param=%d)\n", __func__, pscreen,
-	//	param);
-
 	switch (param) {
 	case PIPE_CAPF_MAX_LINE_WIDTH:
-		fprintf(stdout, "  PIPE_CAPF_MAX_LINE_WIDTH\n");
-		ret = 8192.0f;
-		break;
-
 	case PIPE_CAPF_MAX_LINE_WIDTH_AA:
-		fprintf(stdout, "  PIPE_CAPF_MAX_LINE_WIDTH_AA\n");
-		ret = 8192.0f;
-		break;
-
 	case PIPE_CAPF_MAX_POINT_WIDTH:
-		fprintf(stdout, "  PIPE_CAPF_MAX_POINT_WIDTH\n");
-		ret = 8192.0f;
-		break;
-
 	case PIPE_CAPF_MAX_POINT_WIDTH_AA:
-		fprintf(stdout, "  PIPE_CAPF_MAX_POINT_WIDTH_AA\n");
-		ret = 8192.0f;
-		break;
+		return 8192.0f; /* no clue */
 
 	case PIPE_CAPF_MAX_TEXTURE_ANISOTROPY:
-		fprintf(stdout, "  PIPE_CAPF_MAX_TEXTURE_ANISOTROPY\n");
-		ret = 16.0f;
-		break;
+		return 0.0f;
 
 	case PIPE_CAPF_MAX_TEXTURE_LOD_BIAS:
-		fprintf(stdout, "  PIPE_CAPF_MAX_TEXTURE_LOD_BIAS\n");
-		ret = 16.0f;
-		break;
+		return 16.0f;
 
 	default:
 		fprintf(stdout, "  unsupported parameter: %d\n", param);
-		ret = 0.0f;
-		break;
+		return 0.0f;
 	}
-
-	//fprintf(stdout, "< %s() = %f\n", __func__, ret);
-	return ret;
 }
 
 static int tegra_screen_get_shader_param(struct pipe_screen *pscreen,
 					 unsigned int shader,
 					 enum pipe_shader_cap param)
 {
-	int ret = 0;
-
-	//fprintf(stdout, "> %s(pscreen=%p, shader=%u, param=%d)\n", __func__,
-	//	pscreen, shader, param);
-
 	switch (shader) {
 	case PIPE_SHADER_VERTEX:
-		fprintf(stdout, "  PIPE_SHADER_VERTEX: ");
-
 		switch (param) {
+
 		case PIPE_SHADER_CAP_MAX_INSTRUCTIONS:
-			fprintf(stdout, "PIPE_SHADER_CAP_MAX_INSTRUCTIONS\n");
-			ret = 1024;
-			break;
-
 		case PIPE_SHADER_CAP_MAX_ALU_INSTRUCTIONS:
-			fprintf(stdout, "PIPE_SHADER_CAP_MAX_ALU_INSTRUCTIONS\n");
-			ret = 1024;
-			break;
+			return 1024;
 
+		/* no vertex-texturing */
 		case PIPE_SHADER_CAP_MAX_TEX_INSTRUCTIONS:
-			fprintf(stdout, "PIPE_SHADER_CAP_MAX_TEX_INSTRUCTIONS\n");
-			ret = 1024;
-			break;
-
 		case PIPE_SHADER_CAP_MAX_TEX_INDIRECTIONS:
-			fprintf(stdout, "PIPE_SHADER_CAP_MAX_TEX_INDIRECTIONS\n");
-			ret = 8;
-			break;
+		case PIPE_SHADER_CAP_MAX_TEXTURE_SAMPLERS:
+			return 0;
 
 		case PIPE_SHADER_CAP_MAX_CONTROL_FLOW_DEPTH:
-			fprintf(stdout, "PIPE_SHADER_CAP_MAX_CONTROL_FLOW_DEPTH\n");
-			ret = 4;
-			break;
+		case PIPE_SHADER_CAP_TGSI_CONT_SUPPORTED:
+		case PIPE_SHADER_CAP_SUBROUTINES:
+			return 0;
 
 		case PIPE_SHADER_CAP_MAX_INPUTS:
-			fprintf(stdout, "PIPE_SHADER_CAP_MAX_INPUTS\n");
-			ret = 16;
-			break;
-
 		case PIPE_SHADER_CAP_MAX_OUTPUTS:
-			fprintf(stdout, "PIPE_SHADER_CAP_MAX_OUTPUTS\n");
-			ret = 16;
-			break;
+			return 16;
 
 		case PIPE_SHADER_CAP_MAX_CONST_BUFFER_SIZE:
-			fprintf(stdout, "PIPE_SHADER_CAP_MAX_CONST_BUFFER_SIZE\n");
-			ret = 64;
-			break;
-
 		case PIPE_SHADER_CAP_MAX_CONST_BUFFERS:
-			fprintf(stdout, "PIPE_SHADER_CAP_MAX_CONST_BUFFERS\n");
-			ret = 64;
-			break;
+			return 1024;
 
 		case PIPE_SHADER_CAP_MAX_TEMPS:
-			fprintf(stdout, "PIPE_SHADER_CAP_MAX_TEMPS\n");
-			ret = 16;
-			break;
+			return 64 * 4; /* 64 vec4s */
 
-		case PIPE_SHADER_CAP_TGSI_CONT_SUPPORTED:
-			fprintf(stdout, "PIPE_SHADER_CAP_TGSI_CONT_SUPPORTED\n");
-			ret = 1;
-			break;
-
+		/* cannot index attributes, varyings nor GPRs */
 		case PIPE_SHADER_CAP_INDIRECT_INPUT_ADDR:
-			fprintf(stdout, "PIPE_SHADER_CAP_INDIRECT_INPUT_ADDR\n");
-			ret = 1;
-			break;
-
 		case PIPE_SHADER_CAP_INDIRECT_OUTPUT_ADDR:
-			fprintf(stdout, "PIPE_SHADER_CAP_INDIRECT_OUTPUT_ADDR\n");
-			ret = 1;
-			break;
-
 		case PIPE_SHADER_CAP_INDIRECT_TEMP_ADDR:
-			fprintf(stdout, "PIPE_SHADER_CAP_INDIRECT_TEMP_ADDR\n");
-			ret = 1;
-			break;
+			return 0;
 
 		case PIPE_SHADER_CAP_INDIRECT_CONST_ADDR:
-			fprintf(stdout, "PIPE_SHADER_CAP_INDIRECT_CONST_ADDR\n");
-			ret = 1;
-			break;
-
-		case PIPE_SHADER_CAP_SUBROUTINES:
-			fprintf(stdout, "PIPE_SHADER_CAP_SUBROUTINES\n");
-			ret = 0;
-			break;
+			return 1; /* can index constant registers */
 
 		case PIPE_SHADER_CAP_INTEGERS:
-			fprintf(stdout, "PIPE_SHADER_CAP_INTEGERS\n");
-			ret = 1;
-			break;
-
-		case PIPE_SHADER_CAP_MAX_TEXTURE_SAMPLERS:
-			fprintf(stdout, "PIPE_SHADER_CAP_MAX_TEXTURE_SAMPLERS\n");
-			ret = 8;
-			break;
+			return 0;
 
 		case PIPE_SHADER_CAP_TGSI_SQRT_SUPPORTED:
-			fprintf(stdout, "PIPE_SHADER_CAP_TGSI_SQRT_SUPPORTED\n");
-			ret = 0;
-			break;
+			return 1;
 
 		default:
-			fprintf(stdout, "unsupported parameter: %d\n", param);
-			ret = 0;
-			break;
+			fprintf(stdout, "unsupported vertex-shader parameter: %d\n", param);
+			return 0;
 		}
-		break;
 
 	case PIPE_SHADER_FRAGMENT:
-		fprintf(stdout, "  PIPE_SHADER_FRAGMENT: ");
 
 		switch (param) {
 		case PIPE_SHADER_CAP_MAX_INSTRUCTIONS:
-			fprintf(stdout, "PIPE_SHADER_CAP_MAX_INSTRUCTIONS\n");
-			ret = 1024;
-			break;
+			return 4 * 128;
 
 		case PIPE_SHADER_CAP_MAX_ALU_INSTRUCTIONS:
-			fprintf(stdout, "PIPE_SHADER_CAP_MAX_ALU_INSTRUCTIONS\n");
-			ret = 1024;
-			break;
+			return 4 * 128;
 
 		case PIPE_SHADER_CAP_MAX_TEX_INSTRUCTIONS:
-			fprintf(stdout, "PIPE_SHADER_CAP_MAX_TEX_INSTRUCTIONS\n");
-			ret = 1024;
-			break;
+			return 128;
 
 		case PIPE_SHADER_CAP_MAX_TEX_INDIRECTIONS:
-			fprintf(stdout, "PIPE_SHADER_CAP_MAX_TEX_INDIRECTIONS\n");
-			ret = 8;
-			break;
+			return 128;
 
+		/* no control flow */
 		case PIPE_SHADER_CAP_MAX_CONTROL_FLOW_DEPTH:
-			fprintf(stdout, "PIPE_SHADER_CAP_MAX_CONTROL_FLOW_DEPTH\n");
-			ret = 4;
-			break;
+		case PIPE_SHADER_CAP_TGSI_CONT_SUPPORTED:
+		case PIPE_SHADER_CAP_SUBROUTINES:
+			return 0;
 
 		case PIPE_SHADER_CAP_MAX_INPUTS:
-			fprintf(stdout, "PIPE_SHADER_CAP_MAX_INPUTS\n");
-			ret = 16;
-			break;
-
 		case PIPE_SHADER_CAP_MAX_OUTPUTS:
-			fprintf(stdout, "PIPE_SHADER_CAP_MAX_OUTPUTS\n");
-			ret = 16;
-			break;
+			return 16;
 
 		case PIPE_SHADER_CAP_MAX_CONST_BUFFER_SIZE:
-			fprintf(stdout, "PIPE_SHADER_CAP_MAX_CONST_BUFFER_SIZE\n");
-			ret = 64;
-			break;
-
 		case PIPE_SHADER_CAP_MAX_CONST_BUFFERS:
-			fprintf(stdout, "PIPE_SHADER_CAP_MAX_CONST_BUFFERS\n");
-			ret = 64;
-			break;
+			return 32;
 
 		case PIPE_SHADER_CAP_MAX_TEMPS:
-			fprintf(stdout, "PIPE_SHADER_CAP_MAX_TEMPS\n");
-			ret = 16;
-			break;
+			return 16; /* scalars */
 
-		case PIPE_SHADER_CAP_TGSI_CONT_SUPPORTED:
-			fprintf(stdout, "PIPE_SHADER_CAP_TGSI_CONT_SUPPORTED\n");
-			ret = 1;
-			break;
-
+		/* no indirection */
 		case PIPE_SHADER_CAP_INDIRECT_INPUT_ADDR:
-			fprintf(stdout, "PIPE_SHADER_CAP_INDIRECT_INPUT_ADDR\n");
-			ret = 1;
-			break;
-
 		case PIPE_SHADER_CAP_INDIRECT_OUTPUT_ADDR:
-			fprintf(stdout, "PIPE_SHADER_CAP_INDIRECT_OUTPUT_ADDR\n");
-			ret = 1;
-			break;
-
 		case PIPE_SHADER_CAP_INDIRECT_TEMP_ADDR:
-			fprintf(stdout, "PIPE_SHADER_CAP_INDIRECT_TEMP_ADDR\n");
-			ret = 1;
-			break;
-
 		case PIPE_SHADER_CAP_INDIRECT_CONST_ADDR:
-			fprintf(stdout, "PIPE_SHADER_CAP_INDIRECT_CONST_ADDR\n");
-			ret = 1;
-			break;
-
-		case PIPE_SHADER_CAP_SUBROUTINES:
-			fprintf(stdout, "PIPE_SHADER_CAP_SUBROUTINES\n");
-			ret = 0;
-			break;
+			return 0;
 
 		case PIPE_SHADER_CAP_INTEGERS:
-			fprintf(stdout, "PIPE_SHADER_CAP_INTEGERS\n");
-			ret = 1;
-			break;
+			return 0;
 
 		case PIPE_SHADER_CAP_MAX_TEXTURE_SAMPLERS:
-			fprintf(stdout, "PIPE_SHADER_CAP_MAX_TEXTURE_SAMPLERS\n");
-			ret = 8;
-			break;
+			return 16;
 
 		case PIPE_SHADER_CAP_TGSI_SQRT_SUPPORTED:
-			fprintf(stdout, "PIPE_SHADER_CAP_TGSI_SQRT_SUPPORTED\n");
-			ret = 0;
-			break;
+			return 1;
 
 		default:
 			fprintf(stdout, "unsupported parameter: %d\n", param);
-			ret = 0;
-			break;
+			return 0;
 		}
 		break;
 
 	case PIPE_SHADER_GEOMETRY:
 		fprintf(stdout, "  PIPE_SHADER_GEOMETRY not supported\n");
-		ret = 0;
-		break;
+		return 0;
 
 	case PIPE_SHADER_COMPUTE:
 		fprintf(stdout, "  PIPE_SHADER_COMPUTE not supported\n");
-		ret = 0;
-		break;
+		return 0;
 
 	default:
 		fprintf(stdout, "  unknown shader type: %u\n", shader);
-		ret = 0;
-		break;
+		return 0;
 	}
-
-	//fprintf(stdout, "< %s() = %d\n", __func__, ret);
-	return ret;
 }
 
 static boolean tegra_screen_is_format_supported(struct pipe_screen *pscreen,
@@ -629,6 +356,8 @@ struct pipe_screen *tegra_screen_create(struct drm_tegra *drm)
 		fprintf(stdout, "< %s() = NULL\n", __func__);
 		return NULL;
 	}
+
+	screen->drm = drm;
 
 	screen->base.destroy = tegra_screen_destroy;
 	screen->base.get_name = tegra_screen_get_name;

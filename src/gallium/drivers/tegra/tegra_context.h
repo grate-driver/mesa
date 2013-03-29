@@ -2,9 +2,35 @@
 #define TEGRA_CONTEXT_H
 
 #include "pipe/p_context.h"
+#include "pipe/p_state.h"
+
+#include "tegra_state.h"
+#include "tegra_stream.h"
+
+struct tegra_fence {
+	struct pipe_reference reference;
+};
+
+struct tegra_framebuffer_state {
+	struct pipe_framebuffer_state base;
+};
+
+struct tegra_channel {
+	struct tegra_context *context;
+	struct tegra_stream stream;
+};
 
 struct tegra_context {
 	struct pipe_context base;
+
+	struct tegra_channel *gr2d;
+	struct tegra_channel *gr3d;
+
+	struct tegra_framebuffer_state framebuffer;
+
+	struct tegra_vertex_state *vs;
+	struct tegra_vertexbuf_state vbs;
+	struct pipe_index_buffer index_buffer;
 };
 
 static inline struct tegra_context *tegra_context(struct pipe_context *context)
