@@ -1,0 +1,57 @@
+commit de7cb1cff3dbe30bbd691ed56e61c9d37ba5f2da
+Author: Eric Anholt <eric@anholt.net>
+Date:   Fri Feb 15 19:55:46 2013 -0800
+
+    i965/fs: Add a bit more instruction dumping useful for upcoming work.
+    
+    Reviewed-by: Kenneth Graunke <kenneth@whitecape.org>
+
+diff --git a/src/mesa/drivers/dri/i965/brw_fs.cpp b/src/mesa/drivers/dri/i965/brw_fs.cpp
+index c1ccd92..35cdc6a 100644
+--- a/src/mesa/drivers/dri/i965/brw_fs.cpp
++++ b/src/mesa/drivers/dri/i965/brw_fs.cpp
+@@ -2460,7 +2460,20 @@ fs_visitor::dump_instruction(fs_inst *inst)
+        opcode_descs[inst->opcode].name) {
+       printf("%s", opcode_descs[inst->opcode].name);
+    } else {
+-      printf("op%d", inst->opcode);
++      switch (inst->opcode) {
++      case FS_OPCODE_UNIFORM_PULL_CONSTANT_LOAD:
++         printf("uniform_pull_const");
++         break;
++      case FS_OPCODE_UNIFORM_PULL_CONSTANT_LOAD_GEN7:
++         printf("uniform_pull_const_gen7");
++         break;
++      case FS_OPCODE_SET_GLOBAL_OFFSET:
++         printf("set_global_offset");
++         break;
++      default:
++         printf("op%d", inst->opcode);
++         break;
++      }
+    }
+    if (inst->saturate)
+       printf(".sat");
+@@ -2519,6 +2532,22 @@ fs_visitor::dump_instruction(fs_inst *inst)
+       case BAD_FILE:
+          printf("(null)");
+          break;
++      case IMM:
++         switch (inst->src[i].type) {
++         case BRW_REGISTER_TYPE_F:
++            printf("%ff", inst->src[i].imm.f);
++            break;
++         case BRW_REGISTER_TYPE_D:
++            printf("%dd", inst->src[i].imm.i);
++            break;
++         case BRW_REGISTER_TYPE_UD:
++            printf("%uu", inst->src[i].imm.u);
++            break;
++         default:
++            printf("???");
++            break;
++         }
++         break;
+       default:
+          printf("???");
+          break;

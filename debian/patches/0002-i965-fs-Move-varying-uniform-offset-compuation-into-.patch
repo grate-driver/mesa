@@ -1,0 +1,90 @@
+From 88a5caea52f56aab5641fddfd23732cb3ecfaf13 Mon Sep 17 00:00:00 2001
+From: Eric Anholt <eric@anholt.net>
+Date: Wed, 13 Mar 2013 12:27:17 -0700
+Subject: [PATCH 02/12] i965/fs: Move varying uniform offset compuation into
+ the helper func.
+
+I'm going to want to change the math for gen7 using sampler LD
+instructions in a way that gets CSE to occur like we'd hope.
+
+NOTE: This is a candidate for the 9.1 branch.
+---
+ src/mesa/drivers/dri/i965/brw_fs.cpp         | 16 +++++++++-------
+ src/mesa/drivers/dri/i965/brw_fs.h           |  3 ++-
+ src/mesa/drivers/dri/i965/brw_fs_visitor.cpp |  5 ++---
+ 3 files changed, 13 insertions(+), 11 deletions(-)
+
+diff --git a/src/mesa/drivers/dri/i965/brw_fs.cpp b/src/mesa/drivers/dri/i965/brw_fs.cpp
+index 2fb8989..89b08e8 100644
+--- a/src/mesa/drivers/dri/i965/brw_fs.cpp
++++ b/src/mesa/drivers/dri/i965/brw_fs.cpp
+@@ -229,11 +229,15 @@ fs_visitor::CMP(fs_reg dst, fs_reg src0, fs_reg src1, uint32_t condition)
+ 
+ exec_list
+ fs_visitor::VARYING_PULL_CONSTANT_LOAD(fs_reg dst, fs_reg surf_index,
+-                                       fs_reg offset)
++                                       fs_reg varying_offset,
++                                       uint32_t const_offset)
+ {
+    exec_list instructions;
+    fs_inst *inst;
+ 
++   fs_reg offset = fs_reg(this, glsl_type::uint_type);
++   instructions.push_tail(ADD(offset, varying_offset, fs_reg(const_offset)));
++
+    if (intel->gen >= 7) {
+       inst = new(mem_ctx) fs_inst(FS_OPCODE_VARYING_PULL_CONSTANT_LOAD_GEN7,
+                                   dst, surf_index, offset);
+@@ -1625,15 +1629,13 @@ fs_visitor::move_uniform_array_access_to_pull_constants()
+          base_ir = inst->ir;
+          current_annotation = inst->annotation;
+ 
+-         fs_reg offset = fs_reg(this, glsl_type::int_type);
+-         inst->insert_before(ADD(offset, *inst->src[i].reladdr,
+-                                 fs_reg(pull_constant_loc[uniform] +
+-                                        inst->src[i].reg_offset)));
+-
+          fs_reg surf_index = fs_reg((unsigned)SURF_INDEX_FRAG_CONST_BUFFER);
+          fs_reg temp = fs_reg(this, glsl_type::float_type);
+          exec_list list = VARYING_PULL_CONSTANT_LOAD(temp,
+-                                                     surf_index, offset);
++                                                     surf_index,
++                                                     *inst->src[i].reladdr,
++                                                     pull_constant_loc[uniform] +
++                                                     inst->src[i].reg_offset);
+          inst->insert_before(&list);
+ 
+          inst->src[i].file = temp.file;
+diff --git a/src/mesa/drivers/dri/i965/brw_fs.h b/src/mesa/drivers/dri/i965/brw_fs.h
+index 254a534..76130b1 100644
+--- a/src/mesa/drivers/dri/i965/brw_fs.h
++++ b/src/mesa/drivers/dri/i965/brw_fs.h
+@@ -294,7 +294,8 @@ public:
+ 					   fs_reg reg);
+ 
+    exec_list VARYING_PULL_CONSTANT_LOAD(fs_reg dst, fs_reg surf_index,
+-                                        fs_reg offset);
++                                        fs_reg varying_offset,
++                                        uint32_t const_offset);
+ 
+    bool run();
+    void setup_payload_gen4();
+diff --git a/src/mesa/drivers/dri/i965/brw_fs_visitor.cpp b/src/mesa/drivers/dri/i965/brw_fs_visitor.cpp
+index 735a33d..6b6af8d 100644
+--- a/src/mesa/drivers/dri/i965/brw_fs_visitor.cpp
++++ b/src/mesa/drivers/dri/i965/brw_fs_visitor.cpp
+@@ -650,9 +650,8 @@ fs_visitor::visit(ir_expression *ir)
+          emit(SHR(base_offset, op[1], fs_reg(2)));
+ 
+          for (int i = 0; i < ir->type->vector_elements; i++) {
+-            fs_reg offset = fs_reg(this, glsl_type::int_type);
+-            emit(ADD(offset, base_offset, fs_reg(i)));
+-            emit(VARYING_PULL_CONSTANT_LOAD(result, surf_index, offset));
++            emit(VARYING_PULL_CONSTANT_LOAD(result, surf_index,
++                                            base_offset, i));
+ 
+             if (ir->type->base_type == GLSL_TYPE_BOOL)
+                emit(CMP(result, result, fs_reg(0), BRW_CONDITIONAL_NZ));
+-- 
+1.8.1.2
+

@@ -1,0 +1,27 @@
+commit 1323772543083dec23baf5a50222bdfc88ff6c3a
+Author: Eric Anholt <eric@anholt.net>
+Date:   Wed Mar 6 15:58:46 2013 -0800
+
+    i965/fs: Fix broken rendering in large shaders with UBO loads.
+    
+    The lowering process creates a new vgrf on gen7 that should be represented
+    in live interval analysis.  As-is, it was getting a conflicting allocation
+    with gl_FragDepth in the dolphin emulator, producing broken rendering.
+    
+    NOTE: This is a candidate for the 9.1 branch.
+    Bugzilla: https://bugs.freedesktop.org/show_bug.cgi?id=61317
+    Reviewed-by: Kenneth Graunke <kenneth@whitecape.org>
+
+diff --git a/src/mesa/drivers/dri/i965/brw_fs.cpp b/src/mesa/drivers/dri/i965/brw_fs.cpp
+index 927cf13..b97a19e 100644
+--- a/src/mesa/drivers/dri/i965/brw_fs.cpp
++++ b/src/mesa/drivers/dri/i965/brw_fs.cpp
+@@ -2499,6 +2499,8 @@ fs_visitor::lower_uniform_pull_constant_loads()
+          inst->insert_before(setup2);
+          inst->opcode = FS_OPCODE_UNIFORM_PULL_CONSTANT_LOAD_GEN7;
+          inst->src[1] = payload;
++
++         this->live_intervals_valid = false;
+       } else {
+          /* Before register allocation, we didn't tell the scheduler about the
+           * MRF we use.  We know it's safe to use this MRF because nothing

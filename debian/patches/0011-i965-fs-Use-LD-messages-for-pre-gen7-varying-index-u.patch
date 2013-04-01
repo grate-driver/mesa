@@ -1,0 +1,258 @@
+From cd61482ae60efb0fce944e8747dc2797acd62db6 Mon Sep 17 00:00:00 2001
+From: Eric Anholt <eric@anholt.net>
+Date: Mon, 18 Mar 2013 10:16:42 -0700
+Subject: [PATCH 11/12] i965/fs: Use LD messages for pre-gen7 varying-index
+ uniform loads
+
+This comes at a minor performance cost at the moment (-3.2% +/- 0.2%, n=14 on
+my GM45 forced to load all uniforms through the varying-index path), but we
+get a whole vec4 at a time to reuse in the next commit.
+
+NOTE: This is a candidate for the 9.1 branch.
+---
+ src/mesa/drivers/dri/i965/brw_fs.cpp      | 92 +++++++++++++++----------------
+ src/mesa/drivers/dri/i965/brw_fs.h        |  3 +-
+ src/mesa/drivers/dri/i965/brw_fs_cse.cpp  |  1 +
+ src/mesa/drivers/dri/i965/brw_fs_emit.cpp | 55 ++++++++++++------
+ 4 files changed, 84 insertions(+), 67 deletions(-)
+
+diff --git a/src/mesa/drivers/dri/i965/brw_fs.cpp b/src/mesa/drivers/dri/i965/brw_fs.cpp
+index 5d83e50..e504e3a 100644
+--- a/src/mesa/drivers/dri/i965/brw_fs.cpp
++++ b/src/mesa/drivers/dri/i965/brw_fs.cpp
+@@ -238,57 +238,53 @@ fs_visitor::VARYING_PULL_CONSTANT_LOAD(fs_reg dst, fs_reg surf_index,
+    exec_list instructions;
+    fs_inst *inst;
+ 
+-   if (intel->gen >= 7) {
+-      /* We have our constant surface use a pitch of 4 bytes, so our index can
+-       * be any component of a vector, and then we load 4 contiguous
+-       * components starting from that.
+-       *
+-       * We break down the const_offset to a portion added to the variable
+-       * offset and a portion done using reg_offset, which means that if you
+-       * have GLSL using something like "uniform vec4 a[20]; gl_FragColor =
+-       * a[i]", we'll temporarily generate 4 vec4 loads from offset i * 4, and
+-       * CSE can later notice that those loads are all the same and eliminate
+-       * the redundant ones.
+-       */
+-      fs_reg vec4_offset = fs_reg(this, glsl_type::int_type);
+-      instructions.push_tail(ADD(vec4_offset,
+-                                 varying_offset, const_offset & ~3));
+-
+-      fs_reg vec4_result = fs_reg(GRF, virtual_grf_alloc(4), dst.type);
+-      inst = new(mem_ctx) fs_inst(FS_OPCODE_VARYING_PULL_CONSTANT_LOAD_GEN7,
+-                                  vec4_result, surf_index, vec4_offset);
+-      inst->regs_written = 4;
+-      instructions.push_tail(inst);
+-
+-      vec4_result.reg_offset += const_offset & 3;
+-      instructions.push_tail(MOV(dst, vec4_result));
+-   } else {
+-      fs_reg offset = fs_reg(this, glsl_type::uint_type);
+-      instructions.push_tail(ADD(offset, varying_offset, fs_reg(const_offset)));
+-
+-      int base_mrf = 13;
+-      bool header_present = true;
+-
+-      fs_reg mrf = fs_reg(MRF, base_mrf + header_present);
+-      mrf.type = BRW_REGISTER_TYPE_D;
+-
+-      /* On gen6+ we want the dword offset passed in, but on gen4/5 we need a
+-       * dword-aligned byte offset.
++   /* We have our constant surface use a pitch of 4 bytes, so our index can
++    * be any component of a vector, and then we load 4 contiguous
++    * components starting from that.
++    *
++    * We break down the const_offset to a portion added to the variable
++    * offset and a portion done using reg_offset, which means that if you
++    * have GLSL using something like "uniform vec4 a[20]; gl_FragColor =
++    * a[i]", we'll temporarily generate 4 vec4 loads from offset i * 4, and
++    * CSE can later notice that those loads are all the same and eliminate
++    * the redundant ones.
++    */
++   fs_reg vec4_offset = fs_reg(this, glsl_type::int_type);
++   instructions.push_tail(ADD(vec4_offset,
++                              varying_offset, const_offset & ~3));
++
++   int scale = 1;
++   if (intel->gen == 4 && dispatch_width == 8) {
++      /* Pre-gen5, we can either use a SIMD8 message that requires (header,
++       * u, v, r) as parameters, or we can just use the SIMD16 message
++       * consisting of (header, u).  We choose the second, at the cost of a
++       * longer return length.
+        */
+-      if (intel->gen == 6) {
+-         instructions.push_tail(MOV(mrf, offset));
+-      } else {
+-         instructions.push_tail(MUL(mrf, offset, fs_reg(4)));
+-      }
+-      inst = new(mem_ctx) fs_inst(FS_OPCODE_VARYING_PULL_CONSTANT_LOAD,
+-                                  dst, surf_index);
+-      inst->header_present = header_present;
+-      inst->base_mrf = base_mrf;
+-      inst->mlen = header_present + dispatch_width / 8;
++      scale = 2;
++   }
+ 
+-      instructions.push_tail(inst);
++   enum opcode op;
++   if (intel->gen >= 7)
++      op = FS_OPCODE_VARYING_PULL_CONSTANT_LOAD_GEN7;
++   else
++      op = FS_OPCODE_VARYING_PULL_CONSTANT_LOAD;
++   fs_reg vec4_result = fs_reg(GRF, virtual_grf_alloc(4 * scale), dst.type);
++   inst = new(mem_ctx) fs_inst(op, vec4_result, surf_index, vec4_offset);
++   inst->regs_written = 4 * scale;
++   instructions.push_tail(inst);
++
++   if (intel->gen < 7) {
++      inst->base_mrf = 13;
++      inst->header_present = true;
++      if (intel->gen == 4)
++         inst->mlen = 3;
++      else
++         inst->mlen = 1 + dispatch_width / 8;
+    }
+ 
++   vec4_result.reg_offset += (const_offset & 3) * scale;
++   instructions.push_tail(MOV(dst, vec4_result));
++
+    return instructions;
+ }
+ 
+@@ -766,7 +762,7 @@ fs_visitor::implied_mrf_writes(fs_inst *inst)
+    case FS_OPCODE_UNSPILL:
+       return 1;
+    case FS_OPCODE_VARYING_PULL_CONSTANT_LOAD:
+-      return inst->header_present;
++      return inst->mlen;
+    case FS_OPCODE_SPILL:
+       return 2;
+    default:
+diff --git a/src/mesa/drivers/dri/i965/brw_fs.h b/src/mesa/drivers/dri/i965/brw_fs.h
+index 0c5aad1..b19dcf5 100644
+--- a/src/mesa/drivers/dri/i965/brw_fs.h
++++ b/src/mesa/drivers/dri/i965/brw_fs.h
+@@ -541,7 +541,8 @@ private:
+                                                  struct brw_reg surf_index,
+                                                  struct brw_reg offset);
+    void generate_varying_pull_constant_load(fs_inst *inst, struct brw_reg dst,
+-                                            struct brw_reg index);
++                                            struct brw_reg index,
++                                            struct brw_reg offset);
+    void generate_varying_pull_constant_load_gen7(fs_inst *inst,
+                                                  struct brw_reg dst,
+                                                  struct brw_reg index,
+diff --git a/src/mesa/drivers/dri/i965/brw_fs_cse.cpp b/src/mesa/drivers/dri/i965/brw_fs_cse.cpp
+index 01a64d2..6984e1a 100644
+--- a/src/mesa/drivers/dri/i965/brw_fs_cse.cpp
++++ b/src/mesa/drivers/dri/i965/brw_fs_cse.cpp
+@@ -69,6 +69,7 @@ is_expression(const fs_inst *const inst)
+    case BRW_OPCODE_LRP:
+    case FS_OPCODE_UNIFORM_PULL_CONSTANT_LOAD:
+    case FS_OPCODE_VARYING_PULL_CONSTANT_LOAD_GEN7:
++   case FS_OPCODE_VARYING_PULL_CONSTANT_LOAD:
+    case FS_OPCODE_CINTERP:
+    case FS_OPCODE_LINTERP:
+       return true;
+diff --git a/src/mesa/drivers/dri/i965/brw_fs_emit.cpp b/src/mesa/drivers/dri/i965/brw_fs_emit.cpp
+index 4b3c43f..6fec526 100644
+--- a/src/mesa/drivers/dri/i965/brw_fs_emit.cpp
++++ b/src/mesa/drivers/dri/i965/brw_fs_emit.cpp
+@@ -677,47 +677,66 @@ fs_generator::generate_uniform_pull_constant_load_gen7(fs_inst *inst,
+ void
+ fs_generator::generate_varying_pull_constant_load(fs_inst *inst,
+                                                   struct brw_reg dst,
+-                                                  struct brw_reg index)
++                                                  struct brw_reg index,
++                                                  struct brw_reg offset)
+ {
+    assert(intel->gen < 7); /* Should use the gen7 variant. */
+    assert(inst->header_present);
++   assert(inst->mlen);
+ 
+    assert(index.file == BRW_IMMEDIATE_VALUE &&
+ 	  index.type == BRW_REGISTER_TYPE_UD);
+    uint32_t surf_index = index.dw1.ud;
+ 
+-   uint32_t msg_type, msg_control, rlen;
+-   if (intel->gen >= 6)
+-      msg_type = GEN6_DATAPORT_READ_MESSAGE_DWORD_SCATTERED_READ;
+-   else if (intel->gen == 5 || intel->is_g4x)
+-      msg_type = G45_DATAPORT_READ_MESSAGE_DWORD_SCATTERED_READ;
+-   else
+-      msg_type = BRW_DATAPORT_READ_MESSAGE_DWORD_SCATTERED_READ;
+-
++   uint32_t simd_mode, rlen, msg_type;
+    if (dispatch_width == 16) {
+-      msg_control = BRW_DATAPORT_DWORD_SCATTERED_BLOCK_16DWORDS;
+-      rlen = 2;
++      simd_mode = BRW_SAMPLER_SIMD_MODE_SIMD16;
++      rlen = 8;
+    } else {
+-      msg_control = BRW_DATAPORT_DWORD_SCATTERED_BLOCK_8DWORDS;
+-      rlen = 1;
++      simd_mode = BRW_SAMPLER_SIMD_MODE_SIMD8;
++      rlen = 4;
++   }
++
++   if (intel->gen >= 5)
++      msg_type = GEN5_SAMPLER_MESSAGE_SAMPLE_LD;
++   else {
++      /* We always use the SIMD16 message so that we only have to load U, and
++       * not V/R/LOD.
++       */
++      msg_type = BRW_SAMPLER_MESSAGE_SIMD16_LD;
++      assert(inst->mlen == 3);
++      assert(inst->regs_written == 8);
++      rlen = 8;
++      simd_mode = BRW_SAMPLER_SIMD_MODE_SIMD16;
+    }
+ 
++   struct brw_reg offset_mrf = retype(brw_message_reg(inst->base_mrf + 1),
++                                      BRW_REGISTER_TYPE_D);
++   brw_MOV(p, offset_mrf, offset);
++
+    struct brw_reg header = brw_vec8_grf(0, 0);
+    gen6_resolve_implied_move(p, &header, inst->base_mrf);
+ 
+    struct brw_instruction *send = brw_next_insn(p, BRW_OPCODE_SEND);
++   send->header.compression_control = BRW_COMPRESSION_NONE;
+    brw_set_dest(p, send, dst);
+    brw_set_src0(p, send, header);
+    if (intel->gen < 6)
+       send->header.destreg__conditionalmod = inst->base_mrf;
+-   brw_set_dp_read_message(p, send,
++
++   /* Our surface is set up as floats, regardless of what actual data is
++    * stored in it.
++    */
++   uint32_t return_format = BRW_SAMPLER_RETURN_FORMAT_FLOAT32;
++   brw_set_sampler_message(p, send,
+                            surf_index,
+-                           msg_control,
++                           0, /* sampler (unused) */
+                            msg_type,
+-                           BRW_DATAPORT_READ_TARGET_DATA_CACHE,
++                           rlen,
+                            inst->mlen,
+                            inst->header_present,
+-                           rlen);
++                           simd_mode,
++                           return_format);
+ }
+ 
+ void
+@@ -1272,7 +1291,7 @@ fs_generator::generate_code(exec_list *instructions)
+ 	 break;
+ 
+       case FS_OPCODE_VARYING_PULL_CONSTANT_LOAD:
+-	 generate_varying_pull_constant_load(inst, dst, src[0]);
++	 generate_varying_pull_constant_load(inst, dst, src[0], src[1]);
+ 	 break;
+ 
+       case FS_OPCODE_VARYING_PULL_CONSTANT_LOAD_GEN7:
+-- 
+1.8.1.2
+
