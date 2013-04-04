@@ -5,6 +5,9 @@ mesa (9.1.1-0ubuntu1) UNRELEASED; urgency=low
     - new upstream release (LP: #1112147)
   * Added a bunch of patches to fix slow blur on intel.
 
+  [ Maarten Lankhorst ]
+  * Add some more patches to fix image copy regressions on nouveau.
+
  -- Timo Aaltonen <tjaalton@ubuntu.com>  Wed, 27 Feb 2013 11:12:43 +0200
 
 mesa (9.1.1-1) UNRELEASED; urgency=low

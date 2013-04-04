@@ -1,0 +1,56 @@
+From 5ba62ee2011b44e8a40bab6435a8edaf03cda612 Mon Sep 17 00:00:00 2001
+From: Christoph Bumiller <e0425955@student.tuwien.ac.at>
+Date: Sun, 31 Mar 2013 22:10:02 +0200
+Subject: [PATCH 2/4] nv50,nvc0: disable DEPTH_RANGE_NEAR/FAR clipping during
+ blit
+
+We send position.z == 0, DEPTH_RANGE may be some arbitrary range
+not including 0 (for exmaple in piglit's hiz tests).
+---
+ src/gallium/drivers/nv50/nv50_surface.c | 2 ++
+ src/gallium/drivers/nvc0/nvc0_3d.xml.h  | 2 +-
+ src/gallium/drivers/nvc0/nvc0_surface.c | 2 ++
+ 3 files changed, 5 insertions(+), 1 deletion(-)
+
+diff --git a/src/gallium/drivers/nv50/nv50_surface.c b/src/gallium/drivers/nv50/nv50_surface.c
+index 7a0470c..b1b5cb3 100644
+--- a/src/gallium/drivers/nv50/nv50_surface.c
++++ b/src/gallium/drivers/nv50/nv50_surface.c
+@@ -977,6 +977,8 @@ nv50_blit_3d(struct nv50_context *nv50, const struct pipe_blit_info *info)
+ 
+    BEGIN_NV04(push, NV50_3D(VIEWPORT_TRANSFORM_EN), 1);
+    PUSH_DATA (push, 0);
++   BEGIN_NV04(push, NV50_3D(VIEW_VOLUME_CLIP_CTRL), 1);
++   PUSH_DATA (push, 0x1);
+ 
+    /* Draw a large triangle in screen coordinates covering the whole
+     * render target, with scissors defining the destination region.
+diff --git a/src/gallium/drivers/nvc0/nvc0_3d.xml.h b/src/gallium/drivers/nvc0/nvc0_3d.xml.h
+index 1cf1f96..bd3de58 100644
+--- a/src/gallium/drivers/nvc0/nvc0_3d.xml.h
++++ b/src/gallium/drivers/nvc0/nvc0_3d.xml.h
+@@ -1041,7 +1041,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ #define NVC0_3D_VIEWPORT_TRANSFORM_EN				0x0000192c
+ 
+ #define NVC0_3D_VIEW_VOLUME_CLIP_CTRL				0x0000193c
+-#define NVC0_3D_VIEW_VOLUME_CLIP_CTRL_UNK0			0x00000001
++#define NVC0_3D_VIEW_VOLUME_CLIP_CTRL_DEPTH_RANGE_0_1		0x00000001
+ #define NVC0_3D_VIEW_VOLUME_CLIP_CTRL_UNK1__MASK		0x00000006
+ #define NVC0_3D_VIEW_VOLUME_CLIP_CTRL_UNK1__SHIFT		1
+ #define NVC0_3D_VIEW_VOLUME_CLIP_CTRL_UNK1_UNK0			0x00000000
+diff --git a/src/gallium/drivers/nvc0/nvc0_surface.c b/src/gallium/drivers/nvc0/nvc0_surface.c
+index 281d740..94ac241 100644
+--- a/src/gallium/drivers/nvc0/nvc0_surface.c
++++ b/src/gallium/drivers/nvc0/nvc0_surface.c
+@@ -859,6 +859,8 @@ nvc0_blit_3d(struct nvc0_context *nvc0, const struct pipe_blit_info *info)
+       z += 0.5f * dz;
+ 
+    IMMED_NVC0(push, NVC0_3D(VIEWPORT_TRANSFORM_EN), 0);
++   IMMED_NVC0(push, NVC0_3D(VIEW_VOLUME_CLIP_CTRL), 0x2 |
++              NVC0_3D_VIEW_VOLUME_CLIP_CTRL_DEPTH_RANGE_0_1);
+    BEGIN_NVC0(push, NVC0_3D(VIEWPORT_HORIZ(0)), 2);
+    PUSH_DATA (push, nvc0->framebuffer.width << 16);
+    PUSH_DATA (push, nvc0->framebuffer.height << 16);
+-- 
+1.8.2
+
