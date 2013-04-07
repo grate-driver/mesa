@@ -171,8 +171,14 @@ tegra_screen_resource_create(struct pipe_screen *pscreen,
 
 	resource->pitch = align(template->width0 * util_format_get_blocksize(template->format), 32);
 
-	flags = DRM_TEGRA_GEM_CREATE_TILED | DRM_TEGRA_GEM_CREATE_BOTTOM_UP;
-	size = resource->pitch * align(template->height0, 16);
+	flags = DRM_TEGRA_GEM_CREATE_BOTTOM_UP;
+
+	/* use linear layout for staging and shared resources, otherwise tiled */
+	if (template->usage != PIPE_USAGE_STAGING && !(template->bind & PIPE_BIND_SHARED)) {
+		flags |= DRM_TEGRA_GEM_CREATE_TILED;
+		size = resource->pitch * align(template->height0, 16);
+	} else
+		size = resource->pitch * template->height0;
 
 	fprintf(stdout, "  pitch:%u size:%u flags:%x\n", resource->pitch, size, flags);
 
