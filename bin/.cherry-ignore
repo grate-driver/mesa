@@ -5,3 +5,6 @@ d60da27273d2cdb68bc32cae2ca66718dab15f27 st/mesa: set ctx->Const.MaxSamples = 0,
 
 # Already cherry picked without -x
 96b3ca89b153f358de74059151d2b0e8bd884dfa scons: Allows choosing VS 10 or 11.
+
+# This patch is superceded by 7d4f1e6
+dbf94d105a48b7aafb2c8cf64d8b4392d87efea1 glsl: Replace constant-index vector array accesses with swizzles
