@@ -35,7 +35,10 @@ i965-specialize-surface_state-creation.diff
 0010-i965-fs-Don-t-double-emit-SEND-dependency-workaround.patch
 0011-i965-fs-Use-LD-messages-for-pre-gen7-varying-index-u.patch
 0012-i965-fs-Allow-CSE-on-pre-gen7-varying-index-uniform-.patch
+
 0001-nv50-fix-3D-render-target-setup.patch
 0002-nv50-nvc0-disable-DEPTH_RANGE_NEAR-FAR-clipping-duri.patch
 0003-nv50-nvc0-fix-3d-blits-restore-viewport-after-blit.patch
 0004-nvc0-fix-for-2d-engine-R-source-formats-writing-RRR1.patch
+
+vbo-fix-crash.diff
