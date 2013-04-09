@@ -3,7 +3,7 @@ mesa (9.1.1-0ubuntu1) UNRELEASED; urgency=low
   [ Timo Aaltonen ]
   * Merge from unreleased debian git
     - new upstream release (LP: #1112147)
-  * Added a bunch of patches to fix slow blur on intel.
+  * Revert a commit to fix slow blur on intel.
   * vbo-fix-crash.diff: Patch from the stable tree that fixes a crasher
     with shared display lists.
 

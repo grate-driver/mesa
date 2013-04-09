@@ -1,0 +1,392 @@
+--- a/src/mesa/drivers/dri/i965/brw_fs.cpp
++++ b/src/mesa/drivers/dri/i965/brw_fs.cpp
+@@ -219,45 +219,6 @@ fs_visitor::CMP(fs_reg dst, fs_reg src0,
+    return inst;
+ }
+ 
+-exec_list
+-fs_visitor::VARYING_PULL_CONSTANT_LOAD(fs_reg dst, fs_reg surf_index,
+-                                       fs_reg offset)
+-{
+-   exec_list instructions;
+-   fs_inst *inst;
+-
+-   if (intel->gen >= 7) {
+-      inst = new(mem_ctx) fs_inst(FS_OPCODE_VARYING_PULL_CONSTANT_LOAD_GEN7,
+-                                  dst, surf_index, offset);
+-      instructions.push_tail(inst);
+-   } else {
+-      int base_mrf = 13;
+-      bool header_present = true;
+-
+-      fs_reg mrf = fs_reg(MRF, base_mrf + header_present);
+-      mrf.type = BRW_REGISTER_TYPE_D;
+-
+-      /* On gen6+ we want the dword offset passed in, but on gen4/5 we need a
+-       * dword-aligned byte offset.
+-       */
+-      if (intel->gen == 6) {
+-         instructions.push_tail(MOV(mrf, offset));
+-      } else {
+-         instructions.push_tail(MUL(mrf, offset, fs_reg(4)));
+-      }
+-      inst = MOV(mrf, offset);
+-      inst = new(mem_ctx) fs_inst(FS_OPCODE_VARYING_PULL_CONSTANT_LOAD,
+-                                  dst, surf_index);
+-      inst->header_present = header_present;
+-      inst->base_mrf = base_mrf;
+-      inst->mlen = header_present + dispatch_width / 8;
+-
+-      instructions.push_tail(inst);
+-   }
+-
+-   return instructions;
+-}
+-
+ /**
+  * A helper for MOV generation for fixing up broken hardware SEND dependency
+  * handling.
+@@ -443,7 +404,6 @@ fs_reg::equals(const fs_reg &r) const
+            type == r.type &&
+            negate == r.negate &&
+            abs == r.abs &&
+-           !reladdr && !r.reladdr &&
+            memcmp(&fixed_hw_reg, &r.fixed_hw_reg,
+                   sizeof(fixed_hw_reg)) == 0 &&
+            smear == r.smear &&
+@@ -1561,81 +1521,6 @@ fs_visitor::remove_dead_constants()
+    return true;
+ }
+ 
+-/*
+- * Implements array access of uniforms by inserting a
+- * PULL_CONSTANT_LOAD instruction.
+- *
+- * Unlike temporary GRF array access (where we don't support it due to
+- * the difficulty of doing relative addressing on instruction
+- * destinations), we could potentially do array access of uniforms
+- * that were loaded in GRF space as push constants.  In real-world
+- * usage we've seen, though, the arrays being used are always larger
+- * than we could load as push constants, so just always move all
+- * uniform array access out to a pull constant buffer.
+- */
+-void
+-fs_visitor::move_uniform_array_access_to_pull_constants()
+-{
+-   int pull_constant_loc[c->prog_data.nr_params];
+-
+-   for (unsigned int i = 0; i < c->prog_data.nr_params; i++) {
+-      pull_constant_loc[i] = -1;
+-   }
+-
+-   /* Walk through and find array access of uniforms.  Put a copy of that
+-    * uniform in the pull constant buffer.
+-    *
+-    * Note that we don't move constant-indexed accesses to arrays.  No
+-    * testing has been done of the performance impact of this choice.
+-    */
+-   foreach_list_safe(node, &this->instructions) {
+-      fs_inst *inst = (fs_inst *)node;
+-
+-      for (int i = 0 ; i < 3; i++) {
+-         if (inst->src[i].file != UNIFORM || !inst->src[i].reladdr)
+-            continue;
+-
+-         int uniform = inst->src[i].reg;
+-
+-         /* If this array isn't already present in the pull constant buffer,
+-          * add it.
+-          */
+-         if (pull_constant_loc[uniform] == -1) {
+-            const float **values = &c->prog_data.param[uniform];
+-
+-            pull_constant_loc[uniform] = c->prog_data.nr_pull_params;
+-
+-            assert(param_size[uniform]);
+-
+-            for (int j = 0; j < param_size[uniform]; j++) {
+-               c->prog_data.pull_param[c->prog_data.nr_pull_params++] =
+-                  values[j];
+-            }
+-         }
+-
+-         /* Set up the annotation tracking for new generated instructions. */
+-         base_ir = inst->ir;
+-         current_annotation = inst->annotation;
+-
+-         fs_reg offset = fs_reg(this, glsl_type::int_type);
+-         inst->insert_before(ADD(offset, *inst->src[i].reladdr,
+-                                 fs_reg(pull_constant_loc[uniform] +
+-                                        inst->src[i].reg_offset)));
+-
+-         fs_reg surf_index = fs_reg((unsigned)SURF_INDEX_FRAG_CONST_BUFFER);
+-         fs_reg temp = fs_reg(this, glsl_type::float_type);
+-         exec_list list = VARYING_PULL_CONSTANT_LOAD(temp,
+-                                                     surf_index, offset);
+-         inst->insert_before(&list);
+-
+-         inst->src[i].file = temp.file;
+-         inst->src[i].reg = temp.reg;
+-         inst->src[i].reg_offset = temp.reg_offset;
+-         inst->src[i].reladdr = NULL;
+-      }
+-   }
+-}
+-
+ /**
+  * Choose accesses from the UNIFORM file to demote to using the pull
+  * constant buffer.
+@@ -1662,31 +1547,8 @@ fs_visitor::setup_pull_constants()
+    /* Just demote the end of the list.  We could probably do better
+     * here, demoting things that are rarely used in the program first.
+     */
+-   unsigned int pull_uniform_base = max_uniform_components;
+-
+-   int pull_constant_loc[c->prog_data.nr_params];
+-   for (unsigned int i = 0; i < c->prog_data.nr_params; i++) {
+-      if (i < pull_uniform_base) {
+-         pull_constant_loc[i] = -1;
+-      } else {
+-         pull_constant_loc[i] = -1;
+-         /* If our constant is already being uploaded for reladdr purposes,
+-          * reuse it.
+-          */
+-         for (unsigned int j = 0; j < c->prog_data.nr_pull_params; j++) {
+-            if (c->prog_data.pull_param[j] == c->prog_data.param[i]) {
+-               pull_constant_loc[i] = j;
+-               break;
+-            }
+-         }
+-         if (pull_constant_loc[i] == -1) {
+-            int pull_index = c->prog_data.nr_pull_params++;
+-            c->prog_data.pull_param[pull_index] = c->prog_data.param[i];
+-            pull_constant_loc[i] = pull_index;;
+-         }
+-      }
+-   }
+-   c->prog_data.nr_params = pull_uniform_base;
++   int pull_uniform_base = max_uniform_components;
++   int pull_uniform_count = c->prog_data.nr_params - pull_uniform_base;
+ 
+    foreach_list(node, &this->instructions) {
+       fs_inst *inst = (fs_inst *)node;
+@@ -1695,16 +1557,14 @@ fs_visitor::setup_pull_constants()
+ 	 if (inst->src[i].file != UNIFORM)
+ 	    continue;
+ 
+-         int pull_index = pull_constant_loc[inst->src[i].reg +
+-                                            inst->src[i].reg_offset];
+-         if (pull_index == -1)
++	 int uniform_nr = inst->src[i].reg + inst->src[i].reg_offset;
++	 if (uniform_nr < pull_uniform_base)
+ 	    continue;
+ 
+-         assert(!inst->src[i].reladdr);
+-
+ 	 fs_reg dst = fs_reg(this, glsl_type::float_type);
+ 	 fs_reg index = fs_reg((unsigned)SURF_INDEX_FRAG_CONST_BUFFER);
+-	 fs_reg offset = fs_reg((unsigned)(pull_index * 4) & ~15);
++	 fs_reg offset = fs_reg((unsigned)(((uniform_nr -
++                                             pull_uniform_base) * 4) & ~15));
+ 	 fs_inst *pull =
+             new(mem_ctx) fs_inst(FS_OPCODE_UNIFORM_PULL_CONSTANT_LOAD,
+                                  dst, index, offset);
+@@ -1716,9 +1576,15 @@ fs_visitor::setup_pull_constants()
+ 	 inst->src[i].file = GRF;
+ 	 inst->src[i].reg = dst.reg;
+ 	 inst->src[i].reg_offset = 0;
+-	 inst->src[i].smear = pull_index & 3;
++	 inst->src[i].smear = (uniform_nr - pull_uniform_base) & 3;
+       }
+    }
++
++   for (int i = 0; i < pull_uniform_count; i++) {
++      c->prog_data.pull_param[i] = c->prog_data.param[pull_uniform_base + i];
++   }
++   c->prog_data.nr_params -= pull_uniform_count;
++   c->prog_data.nr_pull_params = pull_uniform_count;
+ }
+ 
+ bool
+@@ -2633,7 +2499,6 @@ fs_visitor::get_instruction_generating_r
+        end->predicate ||
+        end->force_uncompressed ||
+        end->force_sechalf ||
+-       reg.reladdr ||
+        !reg.equals(end->dst)) {
+       return NULL;
+    } else {
+@@ -2754,7 +2619,6 @@ fs_visitor::run()
+ 
+       split_virtual_grfs();
+ 
+-      move_uniform_array_access_to_pull_constants();
+       setup_pull_constants();
+ 
+       bool progress;
+--- a/src/mesa/drivers/dri/i965/brw_fs.h
++++ b/src/mesa/drivers/dri/i965/brw_fs.h
+@@ -121,8 +121,6 @@ public:
+       uint32_t u;
+       float f;
+    } imm;
+-
+-   fs_reg *reladdr;
+ };
+ 
+ static const fs_reg reg_undef;
+@@ -256,7 +254,6 @@ public:
+ 
+    fs_inst *emit(fs_inst inst);
+    fs_inst *emit(fs_inst *inst);
+-   void emit(exec_list list);
+ 
+    fs_inst *emit(enum opcode opcode);
+    fs_inst *emit(enum opcode opcode, fs_reg dst);
+@@ -292,8 +289,6 @@ public:
+ 					   fs_inst *end,
+ 					   fs_reg reg);
+ 
+-   exec_list VARYING_PULL_CONSTANT_LOAD(fs_reg dst, fs_reg surf_index,
+-                                        fs_reg offset);
+ 
+    bool run();
+    void setup_payload_gen4();
+@@ -311,7 +306,6 @@ public:
+    void spill_reg(int spill_reg);
+    void split_virtual_grfs();
+    void compact_virtual_grfs();
+-   void move_uniform_array_access_to_pull_constants();
+    void setup_pull_constants();
+    void calculate_live_intervals();
+    bool opt_algebraic();
+@@ -424,8 +418,6 @@ public:
+    struct brw_wm_compile *c;
+    unsigned int sanity_param_count;
+ 
+-   int param_size[MAX_UNIFORMS * 4];
+-
+    int *virtual_grf_sizes;
+    int virtual_grf_count;
+    int virtual_grf_array_size;
+--- a/src/mesa/drivers/dri/i965/brw_fs_visitor.cpp
++++ b/src/mesa/drivers/dri/i965/brw_fs_visitor.cpp
+@@ -117,7 +117,6 @@ fs_visitor::visit(ir_variable *ir)
+ 	 return;
+       }
+ 
+-      param_size[param_index] = type_size(ir->type);
+       if (!strncmp(ir->name, "gl_", 3)) {
+ 	 setup_builtin_uniform_values(ir);
+       } else {
+@@ -161,41 +160,21 @@ fs_visitor::visit(ir_dereference_record
+ void
+ fs_visitor::visit(ir_dereference_array *ir)
+ {
+-   ir_constant *constant_index;
+-   fs_reg src;
+-   int element_size = type_size(ir->type);
+-
+-   constant_index = ir->array_index->as_constant();
++   ir_constant *index;
++   int element_size;
+ 
+    ir->array->accept(this);
+-   src = this->result;
+-   src.type = brw_type_for_base_type(ir->type);
+-
+-   if (constant_index) {
+-      assert(src.file == UNIFORM || src.file == GRF);
+-      src.reg_offset += constant_index->value.i[0] * element_size;
+-   } else {
+-      /* Variable index array dereference.  We attach the variable index
+-       * component to the reg as a pointer to a register containing the
+-       * offset.  Currently only uniform arrays are supported in this patch,
+-       * and that reladdr pointer is resolved by
+-       * move_uniform_array_access_to_pull_constants().  All other array types
+-       * are lowered by lower_variable_index_to_cond_assign().
+-       */
+-      ir->array_index->accept(this);
+-
+-      fs_reg index_reg;
+-      index_reg = fs_reg(this, glsl_type::int_type);
+-      emit(BRW_OPCODE_MUL, index_reg, this->result, fs_reg(element_size));
++   index = ir->array_index->as_constant();
+ 
+-      if (src.reladdr) {
+-         emit(BRW_OPCODE_ADD, index_reg, *src.reladdr, index_reg);
+-      }
++   element_size = type_size(ir->type);
++   this->result.type = brw_type_for_base_type(ir->type);
+ 
+-      src.reladdr = ralloc(mem_ctx, fs_reg);
+-      memcpy(src.reladdr, &index_reg, sizeof(index_reg));
++   if (index) {
++      assert(this->result.file == UNIFORM || this->result.file == GRF);
++      this->result.reg_offset += index->value.i[0] * element_size;
++   } else {
++      assert(!"FINISHME: non-constant array element");
+    }
+-   this->result = src;
+ }
+ 
+ void
+@@ -620,21 +599,6 @@ fs_visitor::visit(ir_expression *ir)
+              */
+             assert(packed_consts.smear < 8);
+          }
+-      } else {
+-         /* Turn the byte offset into a dword offset. */
+-         fs_reg base_offset = fs_reg(this, glsl_type::int_type);
+-         emit(SHR(base_offset, op[1], fs_reg(2)));
+-
+-         for (int i = 0; i < ir->type->vector_elements; i++) {
+-            fs_reg offset = fs_reg(this, glsl_type::int_type);
+-            emit(ADD(offset, base_offset, fs_reg(i)));
+-            emit(VARYING_PULL_CONSTANT_LOAD(result, surf_index, offset));
+-
+-            if (ir->type->base_type == GLSL_TYPE_BOOL)
+-               emit(CMP(result, result, fs_reg(0), BRW_CONDITIONAL_NZ));
+-
+-            result.reg_offset++;
+-         }
+       }
+ 
+       result.reg_offset = 0;
+@@ -1884,16 +1848,6 @@ fs_visitor::emit(fs_inst *inst)
+    return inst;
+ }
+ 
+-void
+-fs_visitor::emit(exec_list list)
+-{
+-   foreach_list_safe(node, &list) {
+-      fs_inst *inst = (fs_inst *)node;
+-      inst->remove();
+-      emit(inst);
+-   }
+-}
+-
+ /** Emits a dummy fragment shader consisting of magenta for bringup purposes. */
+ void
+ fs_visitor::emit_dummy_fs()
+@@ -2322,8 +2276,6 @@ fs_visitor::fs_visitor(struct brw_contex
+ 
+    this->force_uncompressed_stack = 0;
+    this->force_sechalf_stack = 0;
+-
+-   memset(&this->param_size, 0, sizeof(this->param_size));
+ }
+ 
+ fs_visitor::~fs_visitor()
+--- a/src/mesa/drivers/dri/i965/brw_shader.cpp
++++ b/src/mesa/drivers/dri/i965/brw_shader.cpp
+@@ -174,7 +174,7 @@ brw_link_shader(struct gl_context *ctx,
+       bool input = true;
+       bool output = stage == MESA_SHADER_FRAGMENT;
+       bool temp = stage == MESA_SHADER_FRAGMENT;
+-      bool uniform = false;
++      bool uniform = stage == MESA_SHADER_FRAGMENT;
+ 
+       bool lowered_variable_indexing =
+          lower_variable_index_to_cond_assign(shader->ir,
