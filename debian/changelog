@@ -1,8 +1,8 @@
-mesa (9.1.1-0ubuntu1) UNRELEASED; urgency=low
+mesa (9.1.1-0ubuntu1) raring; urgency=low
 
   [ Timo Aaltonen ]
   * Merge from unreleased debian git
-    - new upstream release (LP: #1112147)
+    - new upstream release (LP: #1112147, #1164093)
   * Revert a commit to fix slow blur on intel.
   * vbo-fix-crash.diff: Patch from the stable tree that fixes a crasher
     with shared display lists.
@@ -10,7 +10,7 @@ mesa (9.1.1-0ubuntu1) UNRELEASED; urgency=low
   [ Maarten Lankhorst ]
   * Add some more patches to fix image copy regressions on nouveau.
 
- -- Timo Aaltonen <tjaalton@ubuntu.com>  Wed, 27 Feb 2013 11:12:43 +0200
+ -- Timo Aaltonen <tjaalton@ubuntu.com>  Tue, 16 Apr 2013 15:35:32 +0300
 
 mesa (9.1.1-1) UNRELEASED; urgency=low
 
