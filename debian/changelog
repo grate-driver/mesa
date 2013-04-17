@@ -1,3 +1,10 @@
+mesa (9.1.1-0ubuntu2) raring; urgency=low
+
+  * control, rules: Add llvm-3.2-dev to build-depends for powerpc, enable
+    gallium llvm and shared libs (FTBFS).
+
+ -- Timo Aaltonen <tjaalton@ubuntu.com>  Wed, 17 Apr 2013 01:42:38 -0600
+
 mesa (9.1.1-0ubuntu1) raring; urgency=low
 
   [ Timo Aaltonen ]
