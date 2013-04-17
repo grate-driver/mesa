@@ -101,6 +101,12 @@ mesa (9.1~git20130207.f1c46c84-0ubuntu1) UNRELEASED; urgency=low
 
  -- Timo Aaltonen <tjaalton@ubuntu.com>  Thu, 07 Feb 2013 18:09:58 +0200
 
+mesa (9.0.3-0ubuntu1) raring; urgency=low
+
+  * New upstream release. (LP: #1134466)
+
+ -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Thu, 14 Mar 2013 12:18:29 +0100
+
 mesa (9.0.2-0ubuntu1) raring; urgency=low
 
   * New upstream release.
