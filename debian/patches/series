@@ -16,26 +16,6 @@
 118-dricore-gallium.patch
 119-libllvmradeon-link.patch
 
-# fix slow blur
-#i965-enable-cse-on-uniform-pull-constant-loads.diff
-#i965-add-a-bit-more-instruction-dumping.diff
-#i965-fix-broken-rendering-in-large-shaders.diff
-#i965-switch-to-using-sampler-ld-messages.diff
-#i965-also-do-the-gen4-send-dependency.diff
-#i965-specialize-surface_state-creation.diff
-#0001-i965-fs-Remove-creation-of-a-MOV-instruction-that-s-.patch
-#0002-i965-fs-Move-varying-uniform-offset-compuation-into-.patch
-#0003-i965-Make-the-constant-surface-interface-take-a-norm.patch
-#0004-i965-Make-the-fragment-shader-pull-constants-index-b.patch
-#0005-i965-fs-Avoid-inappropriate-optimization-with-regs_w.patch
-#0006-i965-fs-Improve-performance-of-varying-index-uniform.patch
-#0007-i965-fs-Do-CSE-on-gen7-s-varying-index-pull-constant.patch
-#0008-i965-fs-Clean-up-the-setup-of-gen4-simd16-message-de.patch
-#0009-i965-fs-Bake-regs_written-into-the-IR-instead-of-rec.patch
-#0010-i965-fs-Don-t-double-emit-SEND-dependency-workaround.patch
-#0011-i965-fs-Use-LD-messages-for-pre-gen7-varying-index-u.patch
-#0012-i965-fs-Allow-CSE-on-pre-gen7-varying-index-uniform-.patch
-
 0001-nv50-fix-3D-render-target-setup.patch
 0002-nv50-nvc0-disable-DEPTH_RANGE_NEAR-FAR-clipping-duri.patch
 0003-nv50-nvc0-fix-3d-blits-restore-viewport-after-blit.patch
