@@ -65,13 +65,14 @@ PUBLIC const char __driConfigOptions[] =
 
       DRI_CONF_SECTION_DEBUG
          DRI_CONF_FORCE_GLSL_EXTENSIONS_WARN(false)
+         DRI_CONF_DISABLE_GLSL_LINE_CONTINUATIONS(false)
       DRI_CONF_SECTION_END
 
    DRI_CONF_END;
 
 #define false 0
 
-static const uint __driNConfigOptions = 10;
+static const uint __driNConfigOptions = 11;
 
 static const __DRIconfig **
 dri_fill_in_modes(struct dri_screen *screen)
