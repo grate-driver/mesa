@@ -1,0 +1,29 @@
+See LP #1170074
+
+The refresh of linking libgallium against dricore patch caused a conflict.
+x86sse was taken from an earlier gallium implementation, but is no longer compatible.
+Fortunately these symbols are not needed outside libdricore, so the entire
+implementation can be hidden, forcing it to use the correct implementation in libgallium
+and in libdricore.
+
+diff --git a/src/mesa/x86/rtasm/x86sse.h b/src/mesa/x86/rtasm/x86sse.h
+index f6282f5..35d8906 100644
+--- a/src/mesa/x86/rtasm/x86sse.h
++++ b/src/mesa/x86/rtasm/x86sse.h
+@@ -4,6 +4,8 @@
+ 
+ #if defined(__i386__) || defined(__386__)
+ 
++#pragma GCC visibility push(internal)
++
+ /* It is up to the caller to ensure that instructions issued are
+  * suitable for the host cpu.  There are no checks made in this module
+  * for mmx/sse/sse2 support on the cpu.
+@@ -252,5 +254,7 @@ void x87_fucom( struct x86_function *p, struct x86_reg arg );
+  */
+ struct x86_reg x86_fn_arg( struct x86_function *p, unsigned arg );
+ 
++#pragma GCC visibility pop
++
+ #endif
+ #endif
