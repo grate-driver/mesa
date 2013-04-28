@@ -5,7 +5,6 @@ NOT_INSTALLED := \
 	dri/etc/drirc \
 	dri/usr/include/GL/wglext.h \
 	dri/usr/include/GL/wmesa.h \
-	dri/usr/lib/*/libGL.so \
 	dri/usr/lib/*/pkgconfig/gl.pc \
 	usr/include/GL/glext.h \
 	usr/include/GL/gl.h \
