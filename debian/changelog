@@ -1,6 +1,14 @@
 mesa (9.1.2-0ubuntu1) saucy; urgency=low
 
   * New upstream bug-fix release.
+  * Drop upstream patches:
+     - 0001-nv50-fix-3D-render-target-setup.patch
+     - 0002-nv50-nvc0-disable-DEPTH_RANGE_NEAR-FAR-clipping-duri.patch
+     - 0003-nv50-nvc0-fix-3d-blits-restore-viewport-after-blit.patch
+     - 0004-nvc0-fix-for-2d-engine-R-source-formats-writing-RRR1.patch
+     - 100_no_abi_tag.patch
+     - 119-libllvmradeon-link.patch
+     - vbo-fix-crash.diff
 
  -- Robert Hooker <sarvatt@ubuntu.com>  Wed, 01 May 2013 16:40:16 -0400
 

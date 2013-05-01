@@ -5,17 +5,9 @@
 #11-hurd-ftbfs-again.diff
 
 # Ubuntu patches.
-100_no_abi_tag.patch
 101_ubuntu_hidden_glname.patch
 117-static-gallium.patch
 118-dricore-gallium.patch
-119-libllvmradeon-link.patch
 120-hide-x86sse.patch
 
-0001-nv50-fix-3D-render-target-setup.patch
-0002-nv50-nvc0-disable-DEPTH_RANGE_NEAR-FAR-clipping-duri.patch
-0003-nv50-nvc0-fix-3d-blits-restore-viewport-after-blit.patch
-0004-nvc0-fix-for-2d-engine-R-source-formats-writing-RRR1.patch
-
-vbo-fix-crash.diff
 revert-a64c1eb9b110.diff
