@@ -113,7 +113,6 @@ confflags-dri = \
 	--with-dri-searchpath='/usr/lib/$(DEB_HOST_MULTIARCH)/dri:\$$$${ORIGIN}/dri:/usr/lib/dri' \
 	--enable-osmesa \
 	--enable-glx-tls \
-	--enable-shared-dricore \
 	--enable-shared-glapi \
 	--enable-texture-float \
 	--enable-xa \
@@ -200,6 +199,8 @@ clean: unpatch
 	rm -f src/mapi/glapi/gen/*.pyc
 	rm -f src/mesa/main/*.pyc
 	rm -f src/gallium/auxiliary/util/*.pyc
+	rm -f m4/libtool.m4 m4/ltoptions.m4 m4/ltsugar.m4 m4/ltversion.m4 m4/lt~obsolete.m4
+
 	dh_clean
 
 # Build architecture-independent files here.
@@ -223,6 +224,8 @@ binary-arch: install
 	# Also get rid of other files which aren't installed. Do not
 	# use -f to ensure we notice disappearing files:
 	set -e; for file in $(NOT_INSTALLED); do rm debian/tmp/$$file; done
+	# Files only in git, not in tarballs, OK to use rm -f here:
+	set -e; for file in $(NOT_INSTALLED_EITHER); do rm -f debian/tmp/$$file; done
 	# No need for these .so, they're just convenience libraries:
 	rm debian/tmp/dri/usr/lib/${DEB_HOST_MULTIARCH}/libglapi.so
 	rm debian/tmp/dri/usr/lib/${DEB_HOST_MULTIARCH}/libdricore*.so

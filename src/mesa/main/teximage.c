@@ -1362,6 +1362,7 @@ _mesa_legal_texture_dimensions(struct gl_context *ctx, GLenum target,
          return GL_FALSE;
       return GL_TRUE;
 
+   case GL_TEXTURE_CUBE_MAP:
    case GL_TEXTURE_CUBE_MAP_POSITIVE_X:
    case GL_TEXTURE_CUBE_MAP_NEGATIVE_X:
    case GL_TEXTURE_CUBE_MAP_POSITIVE_Y:
@@ -3438,19 +3439,21 @@ copyteximage(struct gl_context *ctx, GLuint dims,
          _mesa_init_teximage_fields(ctx, texImage, width, height, 1,
                                     border, internalFormat, texFormat);
 
-         /* Allocate texture memory (no pixel data yet) */
-         ctx->Driver.AllocTextureImageBuffer(ctx, texImage);
+         if (width && height) {
+            /* Allocate texture memory (no pixel data yet) */
+            ctx->Driver.AllocTextureImageBuffer(ctx, texImage);
 
-         if (_mesa_clip_copytexsubimage(ctx, &dstX, &dstY, &srcX, &srcY,
-                                        &width, &height)) {
-            struct gl_renderbuffer *srcRb =
-               get_copy_tex_image_source(ctx, texImage->TexFormat);
+            if (_mesa_clip_copytexsubimage(ctx, &dstX, &dstY, &srcX, &srcY,
+                                           &width, &height)) {
+               struct gl_renderbuffer *srcRb =
+                  get_copy_tex_image_source(ctx, texImage->TexFormat);
 
-            ctx->Driver.CopyTexSubImage(ctx, dims, texImage, dstX, dstY, dstZ,
-                                        srcRb, srcX, srcY, width, height);
+               ctx->Driver.CopyTexSubImage(ctx, dims, texImage, dstX, dstY, dstZ,
+                                           srcRb, srcX, srcY, width, height);
+            }
+
+            check_gen_mipmap(ctx, target, texObj, level);
          }
-
-         check_gen_mipmap(ctx, target, texObj, level);
 
          _mesa_update_fbo_texture(ctx, texObj, face, level);
 

@@ -62,8 +62,12 @@ brw_compute_vue_map(struct brw_context *brw, struct brw_vs_compile *c)
 {
    const struct intel_context *intel = &brw->intel;
    struct brw_vue_map *vue_map = &c->prog_data.vue_map;
-   GLbitfield64 outputs_written = c->prog_data.outputs_written;
+   GLbitfield64 outputs_written;
    int i;
+
+   if (intel->gen < 6)
+      c->prog_data.outputs_written &= ~BITFIELD64_BIT(VERT_RESULT_CLIP_VERTEX);
+   outputs_written = c->prog_data.outputs_written;
 
    vue_map->num_slots = 0;
    for (i = 0; i < BRW_VERT_RESULT_MAX; ++i) {
@@ -150,8 +154,6 @@ brw_compute_vue_map(struct brw_context *brw, struct brw_vs_compile *c)
     * feedback is enabled or disabled, just go ahead and assign a slot for it.
     */
    for (int i = 0; i < VERT_RESULT_MAX; ++i) {
-      if (intel->gen < 6 && i == VERT_RESULT_CLIP_VERTEX)
-         continue;
       if ((outputs_written & BITFIELD64_BIT(i)) &&
           vue_map->vert_result_to_slot[i] == -1) {
          assign_vue_slot(vue_map, i);
