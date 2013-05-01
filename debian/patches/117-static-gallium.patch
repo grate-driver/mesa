@@ -1,6 +1,8 @@
+diff --git a/configure.ac b/configure.ac
+index b9fcb0b..be89843 100644
 --- a/configure.ac
 +++ b/configure.ac
-@@ -733,6 +733,19 @@
+@@ -747,6 +747,19 @@ if test "x$enable_shared_glapi" = xyes; then
  fi
  AM_CONDITIONAL(HAVE_SHARED_GLAPI, test "x$enable_shared_glapi" = xyes)
  
@@ -20,9 +22,11 @@
  dnl
  dnl Driver specific build directories
  dnl
+diff --git a/src/gallium/auxiliary/Makefile.am b/src/gallium/auxiliary/Makefile.am
+index f14279b..3cdec83 100644
 --- a/src/gallium/auxiliary/Makefile.am
 +++ b/src/gallium/auxiliary/Makefile.am
-@@ -3,13 +3,19 @@
+@@ -3,14 +3,19 @@ AUTOMAKE_OPTIONS = subdir-objects
  include Makefile.sources
  include $(top_srcdir)/src/gallium/Automake.inc
  
@@ -30,12 +34,13 @@
 -
  AM_CFLAGS = \
  	-I$(top_srcdir)/src/gallium/auxiliary/util \
--	$(GALLIUM_CFLAGS) $(VISIBILITY_CFLAGS)
+-	$(GALLIUM_CFLAGS) \
+-	$(VISIBILITY_CFLAGS)
 +	$(GALLIUM_CFLAGS)
-+
-+AM_CXXFLAGS =
  
 -AM_CXXFLAGS = $(VISIBILITY_CXXFLAGS)
++AM_CXXFLAGS =
++
 +if HAVE_SHARED_GALLIUM
 +lib_LTLIBRARIES = libgallium.la
 +else
@@ -46,7 +51,7 @@
  
  libgallium_la_SOURCES = \
  	$(C_SOURCES) \
-@@ -28,6 +34,8 @@
+@@ -29,6 +34,8 @@ if LLVM_NEEDS_FNORTTI
  
  AM_CXXFLAGS += -fno-rtti
  

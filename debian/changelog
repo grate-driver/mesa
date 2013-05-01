@@ -9,6 +9,8 @@ mesa (9.1.2-0ubuntu1) saucy; urgency=low
      - 100_no_abi_tag.patch
      - 119-libllvmradeon-link.patch
      - vbo-fix-crash.diff
+  * debian/patches/117-static-gallium.patch: Refresh for minor change
+    in 9.1.2
 
  -- Robert Hooker <sarvatt@ubuntu.com>  Wed, 01 May 2013 16:40:16 -0400
 
