@@ -1,3 +1,9 @@
+mesa (9.1.2-0ubuntu1) saucy; urgency=low
+
+  * New upstream bug-fix release.
+
+ -- Robert Hooker <sarvatt@ubuntu.com>  Wed, 01 May 2013 16:40:16 -0400
+
 mesa (9.1.1-0ubuntu3) raring; urgency=low
 
   * Hide x86sse symbols on i386, preventing conflicts. (LP: #1170074)
