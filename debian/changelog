@@ -59,6 +59,7 @@ mesa (9.1.2-1) UNRELEASED; urgency=low
   * Drop xutils-dev build dep, makedepend is no longer required
   * Recommend libtxc-dxtn0 in libgl1-mesa-dri for easier use with multiarch
     installs (Closes: #668645).
+  * Drop 02_use-ieee-fp-on-s390-and-m68k.patch, upstream in 9.1.2.
 
   [ Sven Joachim ]
   * Bump libdrm-dev build-dependency to 2.4.42.
