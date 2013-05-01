@@ -2,6 +2,7 @@ mesa (9.1.2-1) UNRELEASED; urgency=low
 
   * New upstream release.
     - Set close on exec flag when opening dri devices (Closes: #651370).
+    - Don't emit a .note.ABI-tag section anymore (Closes: #628758).
 
   [ Timo Aaltonen ]
   * Refresh patches
