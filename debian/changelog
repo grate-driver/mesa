@@ -1,4 +1,4 @@
-mesa (9.1.2-0ubuntu1) saucy; urgency=low
+mesa (9.1.2-0ubuntu1) UNRELEASED; urgency=low
 
   * New upstream bug-fix release.
   * Drop upstream patches:
