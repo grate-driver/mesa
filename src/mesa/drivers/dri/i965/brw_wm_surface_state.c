@@ -770,7 +770,8 @@ brw_get_texture_swizzle(const struct gl_context *ctx,
    case GL_RED:
    case GL_RG:
    case GL_RGB:
-      swizzles[3] = SWIZZLE_ONE;
+      if (_mesa_get_format_bits(img->TexFormat, GL_ALPHA_BITS) > 0)
+         swizzles[3] = SWIZZLE_ONE;
       break;
    }
 
@@ -1468,14 +1469,11 @@ const struct brw_tracked_state brw_wm_ubo_surfaces = {
 static void
 brw_upload_wm_binding_table(struct brw_context *brw)
 {
-   struct intel_context *intel = &brw->intel;
    uint32_t *bind;
    int i;
 
    if (INTEL_DEBUG & DEBUG_SHADER_TIME) {
-      intel->vtbl.create_constant_surface(brw, brw->shader_time.bo, 0,
-                                          brw->shader_time.bo->size,
-                                          &brw->wm.surf_offset[SURF_INDEX_WM_SHADER_TIME]);
+      gen7_create_shader_time_surface(brw, &brw->wm.surf_offset[SURF_INDEX_WM_SHADER_TIME]);
    }
 
    /* Might want to calculate nr_surfaces first, to avoid taking up so much

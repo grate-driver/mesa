@@ -6,7 +6,7 @@ dnl Tell the user about autoconf.html in the --help output
 m4_divert_once([HELP_END], [
 See docs/autoconf.html for more details on the options for Mesa.])
 
-AC_INIT([Mesa], [9.1.1],
+AC_INIT([Mesa], [9.1.2],
     [https://bugs.freedesktop.org/enter_bug.cgi?product=Mesa])
 AC_CONFIG_AUX_DIR([bin])
 AC_CONFIG_MACRO_DIR([m4])
@@ -452,6 +452,9 @@ if test "x$enable_asm" = xyes; then
         linux* | *freebsd* | dragonfly* | *netbsd*)
             test "x$enable_64bit" = xyes && asm_arch=x86_64 || asm_arch=x86
             ;;
+        gnu*)
+            asm_arch=x86
+            ;;
         esac
         ;;
     x86_64)
@@ -824,20 +827,6 @@ if test "x$enable_dri" = xyes; then
     if test "x$have_libdrm" = xyes; then
         DRI_PC_REQ_PRIV="libdrm >= $LIBDRM_REQUIRED"
     fi
-fi
-
-dnl Find out if X is available.
-PKG_CHECK_MODULES([X11], [x11], [no_x=no], [no_x=yes])
-
-dnl Try to tell the user that the --x-* options are only used when
-dnl pkg-config is not available. This must be right after AC_PATH_XTRA.
-m4_divert_once([HELP_BEGIN],
-[These options are only used when the X libraries cannot be found by the
-pkg-config utility.])
-
-dnl We need X for xlib and dri, so bomb now if it's not found
-if test "x$enable_glx" = xyes -a "x$no_x" = xyes; then
-    AC_MSG_ERROR([X11 development libraries needed for GLX])
 fi
 
 dnl Direct rendering or just indirect rendering
