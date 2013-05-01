@@ -60,6 +60,7 @@ mesa (9.1.2-1) UNRELEASED; urgency=low
   * Recommend libtxc-dxtn0 in libgl1-mesa-dri for easier use with multiarch
     installs (Closes: #668645).
   * Drop 02_use-ieee-fp-on-s390-and-m68k.patch, upstream in 9.1.2.
+  * Drop 10-hurd-configure-tweaks.diff, upstream in 9.1.2.
 
   [ Sven Joachim ]
   * Bump libdrm-dev build-dependency to 2.4.42.
