@@ -18,8 +18,6 @@ mesa (9.1.2-1) UNRELEASED; urgency=low
   * rules: --with-driver= is deprecated, use --enable-foo.
   * rules: Purge .la files before dh_install.
   * Update symbols.
-  * Added 14-fix-osmesa-build.diff, fixes glapi includes with out-of-tree
-    builds.
   * libgl1-mesa-dri.install*.in: Add libdricore.
   * control: Add new dependencies to libgl1-mesa-dev.
   * rules, libgl1-mesa-dri.install.linux.in: Add support for radeonsi.
@@ -32,11 +30,8 @@ mesa (9.1.2-1) UNRELEASED; urgency=low
   * libegl1-mesa-drivers.install.linux: Bump libwayland-egl.so version
   * control: Add libdrm-dev to mesa-common-dev Depends.
   * control: Build-depend on llvm-3.2-dev (Closes: #678822).
-  * 15-fix-oot-build.diff: Use correct includes to fix out-of-tree builds.
   * libgl1-mesa-dri.install.in: Include gallium-pipe/*.so and libllvmradeon*.so.
   * rules: Add files to clean.
-  * 16-avoid-symbols-from-static-llvm.diff: Temporary patch to keep
-    libxatracker1.symbols sane.
   * control: Add libxcb-dri2-0-dev to libgl1-mesa-dev depends.
 
   [ Steve Langasek ]
@@ -62,8 +57,6 @@ mesa (9.1.2-1) UNRELEASED; urgency=low
     installs (Closes: #668645).
   * Drop 02_use-ieee-fp-on-s390-and-m68k.patch, upstream in 9.1.2.
   * Drop 10-hurd-configure-tweaks.diff, upstream in 9.1.2.
-  * Drop 14-fix-osmesa-build.diff, 15-fix-oot-build.diff and 
-    16-avoid-symbols-from-static-llvm.diff also in 9.1.2.
 
   [ Sven Joachim ]
   * Bump libdrm-dev build-dependency to 2.4.42.
