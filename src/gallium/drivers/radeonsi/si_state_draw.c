@@ -309,9 +309,9 @@ static bool si_update_draw_info_state(struct r600_context *rctx,
 		       /*| (rctx->rasterizer->clip_plane_enable &
 		       rctx->vs_shader->shader.clip_dist_write)*/);
 	si_pm4_set_reg(pm4, R_028810_PA_CL_CLIP_CNTL, rctx->pa_cl_clip_cntl
-			/*| (rctx->vs_shader->shader.clip_dist_write ||
+			| (/*rctx->vs_shader->shader.clip_dist_write ||
 			rctx->vs_shader->shader.vs_prohibit_ucps ?
-			0 : rctx->rasterizer->clip_plane_enable & 0x3F)*/);
+			0 :*/ rctx->queued.named.rasterizer->clip_plane_enable & 0x3F));
 
 	si_pm4_set_state(rctx, draw_info, pm4);
 	return true;
