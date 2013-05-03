@@ -74,6 +74,8 @@ struct si_shader {
 	unsigned		ninterp;
 	bool			uses_kill;
 	bool			fs_write_all;
+	bool			vs_out_misc_write;
+	bool			vs_out_point_size;
 	unsigned		nr_cbufs;
 };
 
