@@ -369,6 +369,7 @@ intel_create_image_from_renderbuffer(__DRIcontext *context,
       break;
    }
 
+   rb->NeedsFinishRenderTexture = true;
    return image;
 }
 
