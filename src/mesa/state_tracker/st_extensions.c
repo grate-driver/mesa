@@ -208,6 +208,7 @@ void st_init_limits(struct st_context *st)
          screen->get_shader_param(screen, sh, PIPE_SHADER_CAP_MAX_CONST_BUFFERS);
       if (pc->MaxUniformBlocks)
          pc->MaxUniformBlocks -= 1; /* The first one is for ordinary uniforms. */
+      pc->MaxUniformBlocks = _min(pc->MaxUniformBlocks, MAX_UNIFORM_BUFFERS);
 
       pc->MaxCombinedUniformComponents = (pc->MaxUniformComponents +
                                           c->MaxUniformBlockSize / 4 *
@@ -287,6 +288,7 @@ void st_init_limits(struct st_context *st)
          c->VertexProgram.MaxUniformBlocks +
          c->GeometryProgram.MaxUniformBlocks +
          c->FragmentProgram.MaxUniformBlocks;
+      assert(c->MaxCombinedUniformBlocks <= MAX_COMBINED_UNIFORM_BUFFERS);
    }
 }
 

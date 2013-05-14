@@ -3623,7 +3623,8 @@ struct gl_context
     * associated with uniform blocks by glUniformBlockBinding()'s state in the
     * shader program.
     */
-   struct gl_uniform_buffer_binding *UniformBufferBindings;
+   struct gl_uniform_buffer_binding
+      UniformBufferBindings[MAX_COMBINED_UNIFORM_BUFFERS];
 
    /*@}*/
 
