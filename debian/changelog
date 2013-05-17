@@ -1,3 +1,10 @@
+mesa (8.0.5-5) sid; urgency=low
+
+  * Reupload with no source changes to restore multiarch installability
+    (closes: #708029, #708055)
+
+ -- Julien Cristau <jcristau@debian.org>  Fri, 17 May 2013 10:10:05 +0200
+
 mesa (8.0.5-4) unstable; urgency=low
 
   * Cherry-pick commit 17f1cb1d99 (dri/nouveau: fix crash in
