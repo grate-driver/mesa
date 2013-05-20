@@ -1368,9 +1368,7 @@ glXDestroyContext( Display *dpy, GLXContext ctx )
 PUBLIC Bool
 glXIsDirect( Display *dpy, GLXContext ctx )
 {
-   GLXContext glxCtx = ctx;
-   (void) ctx;
-   return glxCtx->isDirect;
+   return ctx ? ctx->isDirect : False;
 }
 
 
