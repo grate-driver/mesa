@@ -11,3 +11,6 @@ dbf94d105a48b7aafb2c8cf64d8b4392d87efea1 glsl: Replace constant-index vector arr
 
 # This patch is superceded by 34a4fc5
 0967c362bf378b7415c30ca6d9523d3b2a3a7f5d i965: Fix an inconsistency inb the VUE map with gl_ClipVertex on gen4/5.
+
+# This patch was backported as c3eb301
+a8246927e35a49097f70cffb7fa8dd05ec1365e1 r600g: Fix UMAD on Cayman
