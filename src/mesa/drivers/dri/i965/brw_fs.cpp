@@ -221,10 +221,14 @@ fs_visitor::CMP(fs_reg dst, fs_reg src0, fs_reg src1, uint32_t condition)
 
 exec_list
 fs_visitor::VARYING_PULL_CONSTANT_LOAD(fs_reg dst, fs_reg surf_index,
-                                       fs_reg offset)
+                                       fs_reg varying_offset,
+                                       uint32_t const_offset)
 {
    exec_list instructions;
    fs_inst *inst;
+
+   fs_reg offset = fs_reg(this, glsl_type::uint_type);
+   instructions.push_tail(ADD(offset, varying_offset, fs_reg(const_offset)));
 
    if (intel->gen >= 7) {
       inst = new(mem_ctx) fs_inst(FS_OPCODE_VARYING_PULL_CONSTANT_LOAD_GEN7,
@@ -245,7 +249,6 @@ fs_visitor::VARYING_PULL_CONSTANT_LOAD(fs_reg dst, fs_reg surf_index,
       } else {
          instructions.push_tail(MUL(mrf, offset, fs_reg(4)));
       }
-      inst = MOV(mrf, offset);
       inst = new(mem_ctx) fs_inst(FS_OPCODE_VARYING_PULL_CONSTANT_LOAD,
                                   dst, surf_index);
       inst->header_present = header_present;
@@ -959,16 +962,24 @@ fs_visitor::emit_linterp(const fs_reg &attr, const fs_reg &interp,
                          bool is_centroid)
 {
    brw_wm_barycentric_interp_mode barycoord_mode;
-   if (is_centroid) {
-      if (interpolation_mode == INTERP_QUALIFIER_SMOOTH)
-         barycoord_mode = BRW_WM_PERSPECTIVE_CENTROID_BARYCENTRIC;
-      else
-         barycoord_mode = BRW_WM_NONPERSPECTIVE_CENTROID_BARYCENTRIC;
+   if (intel->gen >= 6) {
+      if (is_centroid) {
+         if (interpolation_mode == INTERP_QUALIFIER_SMOOTH)
+            barycoord_mode = BRW_WM_PERSPECTIVE_CENTROID_BARYCENTRIC;
+         else
+            barycoord_mode = BRW_WM_NONPERSPECTIVE_CENTROID_BARYCENTRIC;
+      } else {
+         if (interpolation_mode == INTERP_QUALIFIER_SMOOTH)
+            barycoord_mode = BRW_WM_PERSPECTIVE_PIXEL_BARYCENTRIC;
+         else
+            barycoord_mode = BRW_WM_NONPERSPECTIVE_PIXEL_BARYCENTRIC;
+      }
    } else {
-      if (interpolation_mode == INTERP_QUALIFIER_SMOOTH)
-         barycoord_mode = BRW_WM_PERSPECTIVE_PIXEL_BARYCENTRIC;
-      else
-         barycoord_mode = BRW_WM_NONPERSPECTIVE_PIXEL_BARYCENTRIC;
+      /* On Ironlake and below, there is only one interpolation mode.
+       * Centroid interpolation doesn't mean anything on this hardware --
+       * there is no multisampling.
+       */
+      barycoord_mode = BRW_WM_PERSPECTIVE_PIXEL_BARYCENTRIC;
    }
    return emit(FS_OPCODE_LINTERP, attr,
                this->delta_x[barycoord_mode],
@@ -1617,15 +1628,13 @@ fs_visitor::move_uniform_array_access_to_pull_constants()
          base_ir = inst->ir;
          current_annotation = inst->annotation;
 
-         fs_reg offset = fs_reg(this, glsl_type::int_type);
-         inst->insert_before(ADD(offset, *inst->src[i].reladdr,
-                                 fs_reg(pull_constant_loc[uniform] +
-                                        inst->src[i].reg_offset)));
-
          fs_reg surf_index = fs_reg((unsigned)SURF_INDEX_FRAG_CONST_BUFFER);
          fs_reg temp = fs_reg(this, glsl_type::float_type);
          exec_list list = VARYING_PULL_CONSTANT_LOAD(temp,
-                                                     surf_index, offset);
+                                                     surf_index,
+                                                     *inst->src[i].reladdr,
+                                                     pull_constant_loc[uniform] +
+                                                     inst->src[i].reg_offset);
          inst->insert_before(&list);
 
          inst->src[i].file = temp.file;
@@ -2081,6 +2090,12 @@ fs_visitor::compute_to_mrf()
 		scan_inst->force_sechalf != inst->force_sechalf) {
 	       break;
 	    }
+
+            /* Things returning more than one register would need us to
+             * understand coalescing out more than one MOV at a time.
+             */
+            if (scan_inst->regs_written() > 1)
+               break;
 
 	    /* SEND instructions can't have MRF as a destination. */
 	    if (scan_inst->mlen)

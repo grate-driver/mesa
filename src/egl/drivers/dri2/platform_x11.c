@@ -284,14 +284,15 @@ dri2_create_window_surface(_EGLDriver *drv, _EGLDisplay *disp,
 
    surf = dri2_create_surface(drv, disp, EGL_WINDOW_BIT, conf,
                               window, attrib_list);
+   if (surf != NULL) {
+      /* When we first create the DRI2 drawable, its swap interval on the
+       * server side is 1.
+       */
+      surf->SwapInterval = 1;
 
-   /* When we first create the DRI2 drawable, its swap interval on the server
-    * side is 1.
-    */
-   surf->SwapInterval = 1;
-
-   /* Override that with a driconf-set value. */
-   drv->API.SwapInterval(drv, disp, surf, dri2_dpy->default_swap_interval);
+      /* Override that with a driconf-set value. */
+      drv->API.SwapInterval(drv, disp, surf, dri2_dpy->default_swap_interval);
+   }
 
    return surf;
 }
@@ -1162,6 +1163,8 @@ dri2_initialize_x11_dri2(_EGLDriver *drv, _EGLDisplay *disp)
    if (!dri2_create_screen(disp))
       goto cleanup_fd;
 
+   dri2_setup_swap_interval(dri2_dpy);
+
    if (dri2_dpy->conn) {
       if (!dri2_add_configs_for_visuals(dri2_dpy, disp))
 	 goto cleanup_configs;
@@ -1180,8 +1183,6 @@ dri2_initialize_x11_dri2(_EGLDriver *drv, _EGLDisplay *disp)
    /* we're supporting EGL 1.4 */
    disp->VersionMajor = 1;
    disp->VersionMinor = 4;
-
-   dri2_setup_swap_interval(dri2_dpy);
 
    return EGL_TRUE;
 

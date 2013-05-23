@@ -280,6 +280,12 @@ static const int extra_EXT_texture_integer[] = {
    EXTRA_END
 };
 
+static const int extra_EXT_texture_integer_and_new_buffers[] = {
+   EXT(EXT_texture_integer),
+   EXTRA_NEW_BUFFERS,
+   EXTRA_END
+};
+
 static const int extra_GLSL_130[] = {
    EXTRA_GLSL_130,
    EXTRA_END
@@ -313,6 +319,12 @@ static const int extra_ARB_ES2_compatibility_api_es2[] = {
 static const int extra_ARB_ES3_compatibility_api_es3[] = {
    EXT(ARB_ES3_compatibility),
    EXTRA_API_ES3,
+   EXTRA_END
+};
+
+static const int extra_EXT_framebuffer_sRGB_and_new_buffers[] = {
+   EXT(EXT_framebuffer_sRGB),
+   EXTRA_NEW_BUFFERS,
    EXTRA_END
 };
 
@@ -384,6 +396,13 @@ static const int
 extra_NV_read_buffer_api_gl[] = {
    EXTRA_API_ES2,
    EXTRA_API_GL,
+   EXTRA_END
+};
+
+static const int extra_core_ARB_color_buffer_float_and_new_buffers[] = {
+   EXTRA_API_GL_CORE,
+   EXT(ARB_color_buffer_float),
+   EXTRA_NEW_BUFFERS,
    EXTRA_END
 };
 

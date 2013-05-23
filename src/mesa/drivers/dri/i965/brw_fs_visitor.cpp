@@ -626,9 +626,8 @@ fs_visitor::visit(ir_expression *ir)
          emit(SHR(base_offset, op[1], fs_reg(2)));
 
          for (int i = 0; i < ir->type->vector_elements; i++) {
-            fs_reg offset = fs_reg(this, glsl_type::int_type);
-            emit(ADD(offset, base_offset, fs_reg(i)));
-            emit(VARYING_PULL_CONSTANT_LOAD(result, surf_index, offset));
+            emit(VARYING_PULL_CONSTANT_LOAD(result, surf_index,
+                                            base_offset, i));
 
             if (ir->type->base_type == GLSL_TYPE_BOOL)
                emit(CMP(result, result, fs_reg(0), BRW_CONDITIONAL_NZ));
@@ -888,11 +887,10 @@ fs_visitor::emit_texture_gen4(ir_texture *ir, fs_reg dst, fs_reg coordinate,
        * this weirdness around to the expected layout.
        */
       orig_dst = dst;
-      const glsl_type *vec_type =
-	 glsl_type::get_instance(ir->type->base_type, 4, 1);
-      dst = fs_reg(this, glsl_type::get_array_instance(vec_type, 2));
-      dst.type = intel->is_g4x ? brw_type_for_base_type(ir->type)
-			       : BRW_REGISTER_TYPE_F;
+      dst = fs_reg(GRF, virtual_grf_alloc(8),
+                   (intel->is_g4x ?
+                    brw_type_for_base_type(ir->type) :
+                    BRW_REGISTER_TYPE_F));
    }
 
    fs_inst *inst = NULL;
