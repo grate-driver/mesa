@@ -999,6 +999,10 @@ intel_renderbuffer_move_to_temp(struct intel_context *intel,
                                  irb->mt->num_samples,
                                  false /* force_y_tiling */);
 
+   if (intel->vtbl.is_hiz_depth_format(intel, new_mt->format)) {
+      intel_miptree_alloc_hiz(intel, new_mt, irb->mt->num_samples);
+   }
+
    intel_miptree_copy_teximage(intel, intel_image, new_mt);
    intel_miptree_reference(&irb->mt, intel_image->mt);
    intel_renderbuffer_set_draw_offset(irb);

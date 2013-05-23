@@ -66,6 +66,7 @@ is_expression(const fs_inst *const inst)
    case BRW_OPCODE_LINE:
    case BRW_OPCODE_PLN:
    case BRW_OPCODE_MAD:
+   case FS_OPCODE_VARYING_PULL_CONSTANT_LOAD_GEN7:
    case FS_OPCODE_CINTERP:
    case FS_OPCODE_LINTERP:
       return true;
@@ -126,19 +127,41 @@ fs_visitor::opt_cse_local(bblock_t *block, exec_list *aeb)
 	     */
 	    bool no_existing_temp = entry->tmp.file == BAD_FILE;
 	    if (no_existing_temp) {
-	       entry->tmp = fs_reg(this, glsl_type::float_type);
-	       entry->tmp.type = inst->dst.type;
+               int written = entry->generator->regs_written();
 
-	       fs_inst *copy = new(ralloc_parent(inst))
-		  fs_inst(BRW_OPCODE_MOV, entry->generator->dst, entry->tmp);
-	       entry->generator->insert_after(copy);
-	       entry->generator->dst = entry->tmp;
+               fs_reg orig_dst = entry->generator->dst;
+               fs_reg tmp = fs_reg(GRF, virtual_grf_alloc(written),
+                                   orig_dst.type);
+               entry->tmp = tmp;
+               entry->generator->dst = tmp;
+
+               for (int i = 0; i < written; i++) {
+                  fs_inst *copy = MOV(orig_dst, tmp);
+                  copy->force_writemask_all =
+                     entry->generator->force_writemask_all;
+                  entry->generator->insert_after(copy);
+
+                  orig_dst.reg_offset++;
+                  tmp.reg_offset++;
+               }
 	    }
 
 	    /* dest <- temp */
-	    fs_inst *copy = new(ralloc_parent(inst))
-	       fs_inst(BRW_OPCODE_MOV, inst->dst, entry->tmp);
-	    inst->replace_with(copy);
+            int written = inst->regs_written();
+            assert(written == entry->generator->regs_written());
+            assert(inst->dst.type == entry->tmp.type);
+            fs_reg dst = inst->dst;
+            fs_reg tmp = entry->tmp;
+            fs_inst *copy = NULL;
+            for (int i = 0; i < written; i++) {
+               copy = MOV(dst, tmp);
+               copy->force_writemask_all = inst->force_writemask_all;
+               inst->insert_before(copy);
+
+               dst.reg_offset++;
+               tmp.reg_offset++;
+            }
+            inst->remove();
 
 	    /* Appending an instruction may have changed our bblock end. */
 	    if (inst == block->end) {

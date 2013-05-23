@@ -1080,6 +1080,7 @@ _mesa_initialize_context(struct gl_context *ctx,
    return GL_TRUE;
 
 fail:
+   _mesa_reference_shared_state(ctx, &ctx->Shared, NULL);
    free(ctx->BeginEnd);
    free(ctx->Exec);
    free(ctx->Save);
@@ -1180,6 +1181,7 @@ _mesa_free_context_data( struct gl_context *ctx )
    _mesa_reference_buffer_object(ctx, &ctx->Array.ArrayBufferObj, NULL);
 
    /* free dispatch tables */
+   free(ctx->BeginEnd);
    free(ctx->Exec);
    free(ctx->Save);
 

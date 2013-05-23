@@ -195,6 +195,7 @@ static void st_bind_ubos(struct st_context *st,
       pipe_resource_reference(&cb.buffer, st_obj->buffer);
 
       cb.buffer_size = st_obj->buffer->width0 - binding->Offset;
+      cb.buffer_offset = binding->Offset;
 
       st->pipe->set_constant_buffer(st->pipe, shader_type, 1 + i, &cb);
       pipe_resource_reference(&cb.buffer, NULL);
