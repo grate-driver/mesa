@@ -9,5 +9,3 @@
 117-static-gallium.patch
 118-dricore-gallium.patch
 120-hide-x86sse.patch
-
-revert-a64c1eb9b110.diff
