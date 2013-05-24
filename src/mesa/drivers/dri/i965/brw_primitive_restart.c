@@ -27,6 +27,7 @@
 
 #include "main/imports.h"
 #include "main/bufferobj.h"
+#include "main/varray.h"
 
 #include "brw_context.h"
 #include "brw_defines.h"
@@ -197,16 +198,29 @@ haswell_upload_cut_index(struct brw_context *brw)
    const unsigned cut_index_setting =
       ctx->Array._PrimitiveRestart ? HSW_CUT_INDEX_ENABLE : 0;
 
+   /* BRW_NEW_INDEX_BUFFER */
+   unsigned cut_index;
+   if (brw->ib.ib) {
+      cut_index = _mesa_primitive_restart_index(ctx, brw->ib.type);
+   } else {
+      /* There's no index buffer, but primitive restart may still apply
+       * to glDrawArrays and such.  FIXED_INDEX mode only applies to drawing
+       * operations that use an index buffer, so we can ignore it and use
+       * the GL restart index directly.
+       */
+      cut_index = ctx->Array.RestartIndex;
+   }
+
    BEGIN_BATCH(2);
    OUT_BATCH(_3DSTATE_VF << 16 | cut_index_setting | (2 - 2));
-   OUT_BATCH(ctx->Array._RestartIndex);
+   OUT_BATCH(cut_index);
    ADVANCE_BATCH();
 }
 
 const struct brw_tracked_state haswell_cut_index = {
    .dirty = {
       .mesa  = _NEW_TRANSFORM,
-      .brw   = 0,
+      .brw   = BRW_NEW_INDEX_BUFFER,
       .cache = 0,
    },
    .emit = haswell_upload_cut_index,
