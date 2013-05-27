@@ -64,6 +64,9 @@ mesa (9.1.3-1) UNRELEASED; urgency=low
   [ Rico Tzschichholz ]
   * Update packaging mesa packaging with xorg-edgers
 
+  [ Emilio Pozuelo Monfort ]
+  * integer overflows calculating memory needs for replies [CVE-2013-1993]
+
  -- Julien Cristau <jcristau@debian.org>  Fri, 03 Aug 2012 23:17:16 +0200
 
 mesa (8.0.5-4) unstable; urgency=low
