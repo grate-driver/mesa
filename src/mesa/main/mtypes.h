@@ -1640,15 +1640,13 @@ struct gl_array_attrib
     * \name Primitive restart controls
     *
     * Primitive restart is enabled if either \c PrimitiveRestart or
-    * \c PrimitiveRestart is set.  If \c PrimitiveRestart is set, then
-    * \c RestartIndex is used as the cut vertex.  Otherwise ~0 is used.
+    * \c PrimitiveRestartFixedIndex is set.
     */
    /*@{*/
    GLboolean PrimitiveRestart;
    GLboolean PrimitiveRestartFixedIndex;
    GLboolean _PrimitiveRestart;
    GLuint RestartIndex;
-   GLuint _RestartIndex;
    /*@}*/
 
    /* GL_ARB_vertex_buffer_object */
