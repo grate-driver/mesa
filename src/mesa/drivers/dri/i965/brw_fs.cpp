@@ -250,6 +250,7 @@ fs_visitor::import_uniforms(fs_visitor *v)
 			   import_uniforms_callback,
 			   variable_ht);
    this->params_remap = v->params_remap;
+   this->nr_params_remap = v->nr_params_remap;
 }
 
 /* Our support for uniforms is piggy-backed on the struct
@@ -847,6 +848,7 @@ fs_visitor::remove_dead_constants()
 {
    if (c->dispatch_width == 8) {
       this->params_remap = ralloc_array(mem_ctx, int, c->prog_data.nr_params);
+      this->nr_params_remap = c->prog_data.nr_params;
 
       for (unsigned int i = 0; i < c->prog_data.nr_params; i++)
 	 this->params_remap[i] = -1;
@@ -861,7 +863,14 @@ fs_visitor::remove_dead_constants()
 	    if (inst->src[i].file != UNIFORM)
 	       continue;
 
-	    assert(constant_nr < (int)c->prog_data.nr_params);
+	    /* Section 5.11 of the OpenGL 4.3 spec says:
+	     *
+	     *     "Out-of-bounds reads return undefined values, which include
+	     *     values from other variables of the active program or zero."
+	     */
+	    if (constant_nr < 0 || constant_nr >= (int)c->prog_data.nr_params) {
+	       constant_nr = 0;
+	    }
 
 	    /* For now, set this to non-negative.  We'll give it the
 	     * actual new number in a moment, in order to keep the
@@ -913,6 +922,10 @@ fs_visitor::remove_dead_constants()
 	 if (inst->src[i].file != UNIFORM)
 	    continue;
 
+	 /* as above alias to 0 */
+	 if (constant_nr < 0 || constant_nr >= (int)this->nr_params_remap) {
+	    constant_nr = 0;
+	 }
 	 assert(this->params_remap[constant_nr] != -1);
 	 inst->src[i].reg = this->params_remap[constant_nr];
 	 inst->src[i].reg_offset = 0;

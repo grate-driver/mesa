@@ -425,6 +425,7 @@ public:
       this->live_intervals_valid = false;
 
       this->params_remap = NULL;
+      this->nr_params_remap = 0;
 
       this->kill_emitted = false;
       this->force_uncompressed_stack = 0;
@@ -617,6 +618,7 @@ public:
     * uniform index.
     */
    int *params_remap;
+   int nr_params_remap;
 
    struct hash_table *variable_ht;
    ir_variable *frag_depth;
