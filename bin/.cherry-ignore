@@ -27,3 +27,6 @@ dca5fc14358a8b267b3854c39c976a822885898f i965/fs: Improve performance of varying
 
 # Reverted in master
 98dfd59a0445666060c97b0dccaf0e9f030b547a i965: fix problem with constant out of bounds access (v2)
+
+# Already cherry-picked, but squashed with the commit that broke what this fixed
+4405ff4055685841c9d9545da52c7edc8708b14b i965: Fix haswell_upload_cut_index when there's no index buffer.
