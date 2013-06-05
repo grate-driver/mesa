@@ -1,3 +1,9 @@
+mesa (8.0.5-7) sid; urgency=high
+
+  * Memory corruption (OOB read/write) in i965 driver [CVE-2013-1872]
+
+ -- Julien Cristau <jcristau@debian.org>  Wed, 05 Jun 2013 16:00:42 +0200
+
 mesa (8.0.5-6) sid; urgency=high
 
   * integer overflows calculating memory needs for replies [CVE-2013-1993]
