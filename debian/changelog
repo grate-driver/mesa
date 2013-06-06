@@ -4,6 +4,11 @@ mesa (9.1.3-3) UNRELEASED; urgency=low
     Fixes build on hurd.
   * debian: Fix build regression on !hurd.
     Fix it with libgl1-mesa-dri.install.hurd.in, where we don't install drirc.
+  * Cherry-pick commit 7de78ce5, 07f2dee and 9622049 from upstream
+    (Fixes FTBFS on kfreebsd-*)
+    - configure.ac: Remove redundant checks of enable_dri.
+    - configure.ac: Build dricommon for DRI gallium drivers
+    - configure.ac: Build dricommon for gallium swrast
 
  -- Andreas Boll <andreas.boll.dev@gmail.com>  Tue, 04 Jun 2013 11:36:30 +0200
 
