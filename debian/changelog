@@ -1,4 +1,4 @@
-mesa (9.1.3-0ubuntu2) UNRELEASED; urgency=low
+mesa (9.1.3-0ubuntu2) saucy; urgency=low
 
   * Add back a patch that reverts a change which made blur slow on i915,
     add two other reverts so the big one applies cleanly. (LP: #1187500)
