@@ -1,0 +1,79 @@
+commit e12be1a9f3d7133e74121bb05f8ce1f1881686f1
+Author: Timo Aaltonen <tjaalton@ubuntu.com>
+Date:   Fri Jun 7 14:26:36 2013 +0300
+
+    Revert "i965/fs: Move varying uniform offset compuation into the helper func."
+    
+    This reverts commit 7f2a65d896bf51811f213cd9dcd0c6ccd25a1362.
+
+diff --git a/src/mesa/drivers/dri/i965/brw_fs.cpp b/src/mesa/drivers/dri/i965/brw_fs.cpp
+index 3c3b3a1..2524125 100644
+--- a/src/mesa/drivers/dri/i965/brw_fs.cpp
++++ b/src/mesa/drivers/dri/i965/brw_fs.cpp
+@@ -221,15 +221,11 @@ fs_visitor::CMP(fs_reg dst, fs_reg src0, fs_reg src1, uint32_t condition)
+ 
+ exec_list
+ fs_visitor::VARYING_PULL_CONSTANT_LOAD(fs_reg dst, fs_reg surf_index,
+-                                       fs_reg varying_offset,
+-                                       uint32_t const_offset)
++                                       fs_reg offset)
+ {
+    exec_list instructions;
+    fs_inst *inst;
+ 
+-   fs_reg offset = fs_reg(this, glsl_type::uint_type);
+-   instructions.push_tail(ADD(offset, varying_offset, fs_reg(const_offset)));
+-
+    if (intel->gen >= 7) {
+       inst = new(mem_ctx) fs_inst(FS_OPCODE_VARYING_PULL_CONSTANT_LOAD_GEN7,
+                                   dst, surf_index, offset);
+@@ -1628,13 +1624,15 @@ fs_visitor::move_uniform_array_access_to_pull_constants()
+          base_ir = inst->ir;
+          current_annotation = inst->annotation;
+ 
++         fs_reg offset = fs_reg(this, glsl_type::int_type);
++         inst->insert_before(ADD(offset, *inst->src[i].reladdr,
++                                 fs_reg(pull_constant_loc[uniform] +
++                                        inst->src[i].reg_offset)));
++
+          fs_reg surf_index = fs_reg((unsigned)SURF_INDEX_FRAG_CONST_BUFFER);
+          fs_reg temp = fs_reg(this, glsl_type::float_type);
+          exec_list list = VARYING_PULL_CONSTANT_LOAD(temp,
+-                                                     surf_index,
+-                                                     *inst->src[i].reladdr,
+-                                                     pull_constant_loc[uniform] +
+-                                                     inst->src[i].reg_offset);
++                                                     surf_index, offset);
+          inst->insert_before(&list);
+ 
+          inst->src[i].file = temp.file;
+diff --git a/src/mesa/drivers/dri/i965/brw_fs.h b/src/mesa/drivers/dri/i965/brw_fs.h
+index c776c77..d1bb111 100644
+--- a/src/mesa/drivers/dri/i965/brw_fs.h
++++ b/src/mesa/drivers/dri/i965/brw_fs.h
+@@ -293,8 +293,7 @@ public:
+ 					   fs_reg reg);
+ 
+    exec_list VARYING_PULL_CONSTANT_LOAD(fs_reg dst, fs_reg surf_index,
+-                                        fs_reg varying_offset,
+-                                        uint32_t const_offset);
++                                        fs_reg offset);
+ 
+    bool run();
+    void setup_payload_gen4();
+diff --git a/src/mesa/drivers/dri/i965/brw_fs_visitor.cpp b/src/mesa/drivers/dri/i965/brw_fs_visitor.cpp
+index 007c8ef..0e5872b 100644
+--- a/src/mesa/drivers/dri/i965/brw_fs_visitor.cpp
++++ b/src/mesa/drivers/dri/i965/brw_fs_visitor.cpp
+@@ -626,8 +626,9 @@ fs_visitor::visit(ir_expression *ir)
+          emit(SHR(base_offset, op[1], fs_reg(2)));
+ 
+          for (int i = 0; i < ir->type->vector_elements; i++) {
+-            emit(VARYING_PULL_CONSTANT_LOAD(result, surf_index,
+-                                            base_offset, i));
++            fs_reg offset = fs_reg(this, glsl_type::int_type);
++            emit(ADD(offset, base_offset, fs_reg(i)));
++            emit(VARYING_PULL_CONSTANT_LOAD(result, surf_index, offset));
+ 
+             if (ir->type->base_type == GLSL_TYPE_BOOL)
+                emit(CMP(result, result, fs_reg(0), BRW_CONDITIONAL_NZ));

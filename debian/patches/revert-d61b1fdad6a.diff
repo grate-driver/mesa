@@ -1,0 +1,20 @@
+commit 2264ad5eb05dde2271c70cbcb52359aa1e8a7981
+Author: Timo Aaltonen <tjaalton@ubuntu.com>
+Date:   Fri Jun 7 14:56:14 2013 +0300
+
+    Revert "i965/fs: Remove creation of a MOV instruction that's never used."
+    
+    This reverts commit d61b1fdad6ad4168f55eea335a5174e3318b76aa.
+
+diff --git a/src/mesa/drivers/dri/i965/brw_fs.cpp b/src/mesa/drivers/dri/i965/brw_fs.cpp
+index 2524125..55a9bc0 100644
+--- a/src/mesa/drivers/dri/i965/brw_fs.cpp
++++ b/src/mesa/drivers/dri/i965/brw_fs.cpp
+@@ -245,6 +245,7 @@ fs_visitor::VARYING_PULL_CONSTANT_LOAD(fs_reg dst, fs_reg surf_index,
+       } else {
+          instructions.push_tail(MUL(mrf, offset, fs_reg(4)));
+       }
++      inst = MOV(mrf, offset);
+       inst = new(mem_ctx) fs_inst(FS_OPCODE_VARYING_PULL_CONSTANT_LOAD,
+                                   dst, surf_index);
+       inst->header_present = header_present;
