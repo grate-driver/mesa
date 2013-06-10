@@ -730,6 +730,7 @@ link_assign_uniform_locations(struct gl_shader_program *prog)
 
    assert(sizeof(prog->SamplerTargets) == sizeof(parcel.targets));
    memcpy(prog->SamplerTargets, parcel.targets, sizeof(prog->SamplerTargets));
+   prog->UniformLocationBaseScale = (1U<<16);
 
 #ifndef NDEBUG
    for (unsigned i = 0; i < num_user_uniforms; i++) {
