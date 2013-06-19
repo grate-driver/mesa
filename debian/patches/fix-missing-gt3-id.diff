@@ -1,0 +1,26 @@
+commit 888fc7a89197972aac614fc19d1c82ed1adbb3f2
+Author: Rodrigo Vivi <rodrigo.vivi@gmail.com>
+Date:   Mon May 13 17:53:38 2013 -0300
+
+    i965: Add missing Haswell GT3 Desktop to IS_HSW_GT3 check.
+    
+    NOTE: This is a candidate for stable branches.
+    
+    Signed-off-by: Rodrigo Vivi <rodrigo.vivi@gmail.com>
+    Reviewed-by: Kenneth Graunke <kenneth@whitecape.org>
+
+diff --git a/src/mesa/drivers/dri/intel/intel_chipset.h b/src/mesa/drivers/dri/intel/intel_chipset.h
+index df025ac..ee735bb 100644
+--- a/src/mesa/drivers/dri/intel/intel_chipset.h
++++ b/src/mesa/drivers/dri/intel/intel_chipset.h
+@@ -230,8 +230,8 @@
+ 				 devid == PCI_CHIP_HASWELL_CRW_GT2 || \
+ 				 devid == PCI_CHIP_HASWELL_CRW_M_GT2 || \
+ 				 devid == PCI_CHIP_HASWELL_CRW_S_GT2)
+-
+-#define IS_HSW_GT3(devid)	(devid == PCI_CHIP_HASWELL_M_GT3 || \
++#define IS_HSW_GT3(devid)	(devid == PCI_CHIP_HASWELL_GT3 || \
++				 devid == PCI_CHIP_HASWELL_M_GT3 || \
+ 				 devid == PCI_CHIP_HASWELL_S_GT3 || \
+ 				 devid == PCI_CHIP_HASWELL_SDV_GT3 || \
+ 				 devid == PCI_CHIP_HASWELL_SDV_M_GT3 || \

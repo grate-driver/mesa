@@ -1,0 +1,231 @@
+commit ce67fb4715e0c2fab01de33da475ef4705622020
+Author: Rodrigo Vivi <rodrigo.vivi@gmail.com>
+Date:   Mon May 13 17:53:39 2013 -0300
+
+    i965: Adding more reserved PCI IDs for Haswell.
+    
+    At DDX commit Chris mentioned the tendency we have of finding out more
+    PCI IDs only when users report. So Let's add all new reserved Haswell IDs.
+    
+    NOTE: This is a candidate for stable branches.
+    
+    Bugzilla: http://bugs.freedesktop.org/show_bug.cgi?id=63701
+    Signed-off-by: Rodrigo Vivi <rodrigo.vivi@gmail.com>
+    Acked-by: Kenneth Graunke <kenneth@whitecape.org>
+
+diff --git a/include/pci_ids/i965_pci_ids.h b/include/pci_ids/i965_pci_ids.h
+index 3e9765c..808eb4e 100644
+--- a/include/pci_ids/i965_pci_ids.h
++++ b/include/pci_ids/i965_pci_ids.h
+@@ -35,6 +35,12 @@ CHIPSET(0x0426, HASWELL_M_GT3, hsw_gt3)
+ CHIPSET(0x040A, HASWELL_S_GT1, hsw_gt1)
+ CHIPSET(0x041A, HASWELL_S_GT2, hsw_gt2)
+ CHIPSET(0x042A, HASWELL_S_GT3, hsw_gt3)
++CHIPSET(0x040B, HASWELL_B_GT1, hsw_gt1)
++CHIPSET(0x041B, HASWELL_B_GT2, hsw_gt2)
++CHIPSET(0x042B, HASWELL_B_GT3, hsw_gt3)
++CHIPSET(0x040E, HASWELL_E_GT1, hsw_gt1)
++CHIPSET(0x041E, HASWELL_E_GT2, hsw_gt2)
++CHIPSET(0x042E, HASWELL_E_GT3, hsw_gt3)
+ CHIPSET(0x0C02, HASWELL_SDV_GT1, hsw_gt1)
+ CHIPSET(0x0C12, HASWELL_SDV_GT2, hsw_gt2)
+ CHIPSET(0x0C22, HASWELL_SDV_GT3, hsw_gt3)
+@@ -44,6 +50,12 @@ CHIPSET(0x0C26, HASWELL_SDV_M_GT3, hsw_gt3)
+ CHIPSET(0x0C0A, HASWELL_SDV_S_GT1, hsw_gt1)
+ CHIPSET(0x0C1A, HASWELL_SDV_S_GT2, hsw_gt2)
+ CHIPSET(0x0C2A, HASWELL_SDV_S_GT3, hsw_gt3)
++CHIPSET(0x0C0B, HASWELL_SDV_B_GT1, hsw_gt1)
++CHIPSET(0x0C1B, HASWELL_SDV_B_GT2, hsw_gt2)
++CHIPSET(0x0C2B, HASWELL_SDV_B_GT3, hsw_gt3)
++CHIPSET(0x0C0E, HASWELL_SDV_E_GT1, hsw_gt1)
++CHIPSET(0x0C1E, HASWELL_SDV_E_GT2, hsw_gt2)
++CHIPSET(0x0C2E, HASWELL_SDV_E_GT3, hsw_gt3)
+ CHIPSET(0x0A02, HASWELL_ULT_GT1, hsw_gt1)
+ CHIPSET(0x0A12, HASWELL_ULT_GT2, hsw_gt2)
+ CHIPSET(0x0A22, HASWELL_ULT_GT3, hsw_gt3)
+@@ -53,6 +65,12 @@ CHIPSET(0x0A26, HASWELL_ULT_M_GT3, hsw_gt3)
+ CHIPSET(0x0A0A, HASWELL_ULT_S_GT1, hsw_gt1)
+ CHIPSET(0x0A1A, HASWELL_ULT_S_GT2, hsw_gt2)
+ CHIPSET(0x0A2A, HASWELL_ULT_S_GT3, hsw_gt3)
++CHIPSET(0x0A0B, HASWELL_ULT_B_GT1, hsw_gt1)
++CHIPSET(0x0A1B, HASWELL_ULT_B_GT2, hsw_gt2)
++CHIPSET(0x0A2B, HASWELL_ULT_B_GT3, hsw_gt3)
++CHIPSET(0x0A0E, HASWELL_ULT_E_GT1, hsw_gt1)
++CHIPSET(0x0A1E, HASWELL_ULT_E_GT2, hsw_gt2)
++CHIPSET(0x0A2E, HASWELL_ULT_E_GT3, hsw_gt3)
+ CHIPSET(0x0D02, HASWELL_CRW_GT1, hsw_gt1)
+ CHIPSET(0x0D12, HASWELL_CRW_GT2, hsw_gt2)
+ CHIPSET(0x0D22, HASWELL_CRW_GT3, hsw_gt3)
+@@ -62,6 +80,12 @@ CHIPSET(0x0D26, HASWELL_CRW_M_GT3, hsw_gt3)
+ CHIPSET(0x0D0A, HASWELL_CRW_S_GT1, hsw_gt1)
+ CHIPSET(0x0D1A, HASWELL_CRW_S_GT2, hsw_gt2)
+ CHIPSET(0x0D2A, HASWELL_CRW_S_GT3, hsw_gt3)
++CHIPSET(0x0D0B, HASWELL_CRW_B_GT1, hsw_gt1)
++CHIPSET(0x0D1B, HASWELL_CRW_B_GT2, hsw_gt2)
++CHIPSET(0x0D2B, HASWELL_CRW_B_GT3, hsw_gt3)
++CHIPSET(0x0D0E, HASWELL_CRW_E_GT1, hsw_gt1)
++CHIPSET(0x0D1E, HASWELL_CRW_E_GT2, hsw_gt2)
++CHIPSET(0x0D2E, HASWELL_CRW_E_GT3, hsw_gt3)
+ CHIPSET(0x0F31, BAYTRAIL_M_1, byt)
+ CHIPSET(0x0F32, BAYTRAIL_M_2, byt)
+ CHIPSET(0x0F33, BAYTRAIL_M_3, byt)
+diff --git a/src/mesa/drivers/dri/intel/intel_chipset.h b/src/mesa/drivers/dri/intel/intel_chipset.h
+index ee735bb..1e98cf4 100644
+--- a/src/mesa/drivers/dri/intel/intel_chipset.h
++++ b/src/mesa/drivers/dri/intel/intel_chipset.h
+@@ -102,6 +102,12 @@
+ #define PCI_CHIP_HASWELL_S_GT1          0x040A /* Server */
+ #define PCI_CHIP_HASWELL_S_GT2          0x041A
+ #define PCI_CHIP_HASWELL_S_GT3          0x042A
++#define PCI_CHIP_HASWELL_B_GT1          0x040B /* Reserved */
++#define PCI_CHIP_HASWELL_B_GT2          0x041B
++#define PCI_CHIP_HASWELL_B_GT3          0x042B
++#define PCI_CHIP_HASWELL_E_GT1          0x040E /* Reserved */
++#define PCI_CHIP_HASWELL_E_GT2          0x041E
++#define PCI_CHIP_HASWELL_E_GT3          0x042E
+ #define PCI_CHIP_HASWELL_SDV_GT1        0x0C02 /* Desktop */
+ #define PCI_CHIP_HASWELL_SDV_GT2        0x0C12
+ #define PCI_CHIP_HASWELL_SDV_GT3        0x0C22
+@@ -111,6 +117,12 @@
+ #define PCI_CHIP_HASWELL_SDV_S_GT1      0x0C0A /* Server */
+ #define PCI_CHIP_HASWELL_SDV_S_GT2      0x0C1A
+ #define PCI_CHIP_HASWELL_SDV_S_GT3      0x0C2A
++#define PCI_CHIP_HASWELL_SDV_B_GT1      0x0C0B /* Reserved */
++#define PCI_CHIP_HASWELL_SDV_B_GT2      0x0C1B
++#define PCI_CHIP_HASWELL_SDV_B_GT3      0x0C2B
++#define PCI_CHIP_HASWELL_SDV_E_GT1      0x0C0E /* Reserved */
++#define PCI_CHIP_HASWELL_SDV_E_GT2      0x0C1E
++#define PCI_CHIP_HASWELL_SDV_E_GT3      0x0C2E
+ #define PCI_CHIP_HASWELL_ULT_GT1        0x0A02 /* Desktop */
+ #define PCI_CHIP_HASWELL_ULT_GT2        0x0A12
+ #define PCI_CHIP_HASWELL_ULT_GT3        0x0A22
+@@ -120,6 +132,12 @@
+ #define PCI_CHIP_HASWELL_ULT_S_GT1      0x0A0A /* Server */
+ #define PCI_CHIP_HASWELL_ULT_S_GT2      0x0A1A
+ #define PCI_CHIP_HASWELL_ULT_S_GT3      0x0A2A
++#define PCI_CHIP_HASWELL_ULT_B_GT1      0x0A0B /* Reserved */
++#define PCI_CHIP_HASWELL_ULT_B_GT2      0x0A1B
++#define PCI_CHIP_HASWELL_ULT_B_GT3      0x0A2B
++#define PCI_CHIP_HASWELL_ULT_E_GT1      0x0A0E /* Reserved */
++#define PCI_CHIP_HASWELL_ULT_E_GT2      0x0A1E
++#define PCI_CHIP_HASWELL_ULT_E_GT3      0x0A2E
+ #define PCI_CHIP_HASWELL_CRW_GT1        0x0D02 /* Desktop */
+ #define PCI_CHIP_HASWELL_CRW_GT2        0x0D12
+ #define PCI_CHIP_HASWELL_CRW_GT3        0x0D22
+@@ -129,6 +147,12 @@
+ #define PCI_CHIP_HASWELL_CRW_S_GT1      0x0D0A /* Server */
+ #define PCI_CHIP_HASWELL_CRW_S_GT2      0x0D1A
+ #define PCI_CHIP_HASWELL_CRW_S_GT3      0x0D2A
++#define PCI_CHIP_HASWELL_CRW_B_GT1      0x0D0B /* Reserved */
++#define PCI_CHIP_HASWELL_CRW_B_GT2      0x0D1B
++#define PCI_CHIP_HASWELL_CRW_B_GT3      0x0D2B
++#define PCI_CHIP_HASWELL_CRW_E_GT1      0x0D0E /* Reserved */
++#define PCI_CHIP_HASWELL_CRW_E_GT2      0x0D1E
++#define PCI_CHIP_HASWELL_CRW_E_GT3      0x0D2E
+ 
+ #define IS_MOBILE(devid)	(devid == PCI_CHIP_I855_GM || \
+ 				 devid == PCI_CHIP_I915_GM || \
+@@ -209,39 +233,63 @@
+ #define IS_HSW_GT1(devid)	(devid == PCI_CHIP_HASWELL_GT1 || \
+ 				 devid == PCI_CHIP_HASWELL_M_GT1 || \
+ 				 devid == PCI_CHIP_HASWELL_S_GT1 || \
++				 devid == PCI_CHIP_HASWELL_B_GT1 || \
++				 devid == PCI_CHIP_HASWELL_E_GT1 || \
+ 				 devid == PCI_CHIP_HASWELL_SDV_GT1 || \
+ 				 devid == PCI_CHIP_HASWELL_SDV_M_GT1 || \
+ 				 devid == PCI_CHIP_HASWELL_SDV_S_GT1 || \
++				 devid == PCI_CHIP_HASWELL_SDV_B_GT1 || \
++				 devid == PCI_CHIP_HASWELL_SDV_E_GT1 || \
+ 				 devid == PCI_CHIP_HASWELL_ULT_GT1 || \
+ 				 devid == PCI_CHIP_HASWELL_ULT_M_GT1 || \
+ 				 devid == PCI_CHIP_HASWELL_ULT_S_GT1 || \
++				 devid == PCI_CHIP_HASWELL_ULT_B_GT1 || \
++				 devid == PCI_CHIP_HASWELL_ULT_E_GT1 || \
+ 				 devid == PCI_CHIP_HASWELL_CRW_GT1 || \
+ 				 devid == PCI_CHIP_HASWELL_CRW_M_GT1 || \
+-				 devid == PCI_CHIP_HASWELL_CRW_S_GT1)
++				 devid == PCI_CHIP_HASWELL_CRW_S_GT1 || \
++				 devid == PCI_CHIP_HASWELL_CRW_B_GT1 || \
++				 devid == PCI_CHIP_HASWELL_CRW_E_GT1)
+ #define IS_HSW_GT2(devid)	(devid == PCI_CHIP_HASWELL_GT2 || \
+ 				 devid == PCI_CHIP_HASWELL_M_GT2 || \
+ 				 devid == PCI_CHIP_HASWELL_S_GT2 || \
++				 devid == PCI_CHIP_HASWELL_B_GT2 || \
++				 devid == PCI_CHIP_HASWELL_E_GT2 || \
+ 				 devid == PCI_CHIP_HASWELL_SDV_GT2 || \
+ 				 devid == PCI_CHIP_HASWELL_SDV_M_GT2 || \
+ 				 devid == PCI_CHIP_HASWELL_SDV_S_GT2 || \
++				 devid == PCI_CHIP_HASWELL_SDV_B_GT2 || \
++				 devid == PCI_CHIP_HASWELL_SDV_E_GT2 || \
+ 				 devid == PCI_CHIP_HASWELL_ULT_GT2 || \
+ 				 devid == PCI_CHIP_HASWELL_ULT_M_GT2 || \
+ 				 devid == PCI_CHIP_HASWELL_ULT_S_GT2 || \
++				 devid == PCI_CHIP_HASWELL_ULT_B_GT2 || \
++				 devid == PCI_CHIP_HASWELL_ULT_E_GT2 || \
+ 				 devid == PCI_CHIP_HASWELL_CRW_GT2 || \
+ 				 devid == PCI_CHIP_HASWELL_CRW_M_GT2 || \
+-				 devid == PCI_CHIP_HASWELL_CRW_S_GT2)
++				 devid == PCI_CHIP_HASWELL_CRW_S_GT2 || \
++				 devid == PCI_CHIP_HASWELL_CRW_B_GT2 || \
++				 devid == PCI_CHIP_HASWELL_CRW_E_GT2)
+ #define IS_HSW_GT3(devid)	(devid == PCI_CHIP_HASWELL_GT3 || \
+ 				 devid == PCI_CHIP_HASWELL_M_GT3 || \
+ 				 devid == PCI_CHIP_HASWELL_S_GT3 || \
++				 devid == PCI_CHIP_HASWELL_B_GT3 || \
++				 devid == PCI_CHIP_HASWELL_E_GT3 || \
+ 				 devid == PCI_CHIP_HASWELL_SDV_GT3 || \
+ 				 devid == PCI_CHIP_HASWELL_SDV_M_GT3 || \
+ 				 devid == PCI_CHIP_HASWELL_SDV_S_GT3 || \
++				 devid == PCI_CHIP_HASWELL_SDV_B_GT3 || \
++				 devid == PCI_CHIP_HASWELL_SDV_E_GT3 || \
+ 				 devid == PCI_CHIP_HASWELL_ULT_GT3 || \
+ 				 devid == PCI_CHIP_HASWELL_ULT_M_GT3 || \
+ 				 devid == PCI_CHIP_HASWELL_ULT_S_GT3 || \
++				 devid == PCI_CHIP_HASWELL_ULT_B_GT3 || \
++				 devid == PCI_CHIP_HASWELL_ULT_E_GT3 || \
+ 				 devid == PCI_CHIP_HASWELL_CRW_GT3 || \
+ 				 devid == PCI_CHIP_HASWELL_CRW_M_GT3 || \
+-				 devid == PCI_CHIP_HASWELL_CRW_S_GT3)
++				 devid == PCI_CHIP_HASWELL_CRW_S_GT3 || \
++				 devid == PCI_CHIP_HASWELL_CRW_B_GT3 || \
++				 devid == PCI_CHIP_HASWELL_CRW_E_GT3)
+ 
+ #define IS_HASWELL(devid)       (IS_HSW_GT1(devid) || \
+ 				 IS_HSW_GT2(devid) || \
+diff --git a/src/mesa/drivers/dri/intel/intel_context.c b/src/mesa/drivers/dri/intel/intel_context.c
+index 88cc247..ab7f80b 100644
+--- a/src/mesa/drivers/dri/intel/intel_context.c
++++ b/src/mesa/drivers/dri/intel/intel_context.c
+@@ -235,6 +235,32 @@ intelGetString(struct gl_context * ctx, GLenum name)
+       case PCI_CHIP_HASWELL_CRW_S_GT3:
+ 	 chipset = "Intel(R) Haswell Server";
+ 	 break;
++      case PCI_CHIP_HASWELL_B_GT1:
++      case PCI_CHIP_HASWELL_B_GT2:
++      case PCI_CHIP_HASWELL_B_GT3:
++      case PCI_CHIP_HASWELL_SDV_B_GT1:
++      case PCI_CHIP_HASWELL_SDV_B_GT2:
++      case PCI_CHIP_HASWELL_SDV_B_GT3:
++      case PCI_CHIP_HASWELL_ULT_B_GT1:
++      case PCI_CHIP_HASWELL_ULT_B_GT2:
++      case PCI_CHIP_HASWELL_ULT_B_GT3:
++      case PCI_CHIP_HASWELL_CRW_B_GT1:
++      case PCI_CHIP_HASWELL_CRW_B_GT2:
++      case PCI_CHIP_HASWELL_CRW_B_GT3:
++      case PCI_CHIP_HASWELL_E_GT1:
++      case PCI_CHIP_HASWELL_E_GT2:
++      case PCI_CHIP_HASWELL_E_GT3:
++      case PCI_CHIP_HASWELL_SDV_E_GT1:
++      case PCI_CHIP_HASWELL_SDV_E_GT2:
++      case PCI_CHIP_HASWELL_SDV_E_GT3:
++      case PCI_CHIP_HASWELL_ULT_E_GT1:
++      case PCI_CHIP_HASWELL_ULT_E_GT2:
++      case PCI_CHIP_HASWELL_ULT_E_GT3:
++      case PCI_CHIP_HASWELL_CRW_E_GT1:
++      case PCI_CHIP_HASWELL_CRW_E_GT2:
++      case PCI_CHIP_HASWELL_CRW_E_GT3:
++         chipset = "Intel(R) Haswell";
++         break;
+       default:
+          chipset = "Unknown Intel Chipset";
+          break;
