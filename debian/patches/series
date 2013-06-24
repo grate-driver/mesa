@@ -20,3 +20,5 @@ add-vlv-ids.diff
 fix-hsw-gt3-names.diff
 fix-missing-gt3-id.diff
 add-more-reserved-hsw-ids.diff
+CVE-2013-1872.patch
+CVE-2013-1993.patch

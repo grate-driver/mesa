@@ -1,3 +1,20 @@
+mesa (9.1.3-0ubuntu4) saucy; urgency=low
+
+  * SECURITY UPDATE: denial of service and possible code execution via
+    out-of-bands access
+    - debian/patches/CVE-2013-1872.patch: check for out-of-bounds reads in
+      src/mesa/drivers/dri/i965/brw_fs.cpp,
+      src/mesa/drivers/dri/i965/brw_fs.h,
+      src/mesa/drivers/dri/i965/brw_fs_visitor.cpp.
+    - CVE-2013-1872
+  * SECURITY UPDATE: denial of service and possible code execution via
+    integer overflows
+    - debian/patches/CVE-2013-1993.patch: check lengths in
+      src/glx/XF86dri.c.
+    - CVE-2013-1993
+
+ -- Marc Deslauriers <marc.deslauriers@ubuntu.com>  Wed, 19 Jun 2013 09:33:40 -0400
+
 mesa (9.1.3-0ubuntu3) saucy; urgency=low
 
   * Added patches to add/fix Haswell pci-id's (LP: #1175533)
