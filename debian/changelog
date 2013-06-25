@@ -1,3 +1,10 @@
+mesa (9.1.3-7) UNRELEASED; urgency=low
+
+  * Don't call wayland_buffer_is_drm from libgbm, it's in libEGL
+    (closes: #712556).
+
+ -- Julien Cristau <jcristau@debian.org>  Tue, 25 Jun 2013 21:26:56 +0200
+
 mesa (9.1.3-6) unstable; urgency=low
 
   * Team upload.
