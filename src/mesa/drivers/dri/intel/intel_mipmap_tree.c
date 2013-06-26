@@ -125,6 +125,9 @@ intel_miptree_create_internal(struct intel_context *intel,
                               GLuint num_samples)
 {
    struct intel_mipmap_tree *mt = calloc(sizeof(*mt), 1);
+   if (!mt)
+      return NULL;
+
    int compress_byte = 0;
 
    DBG("%s target %s format %s level %d..%d <-- %p\n", __FUNCTION__,
