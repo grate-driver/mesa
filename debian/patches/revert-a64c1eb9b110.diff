@@ -1,6 +1,6 @@
 --- a/src/mesa/drivers/dri/i965/brw_fs.cpp
 +++ b/src/mesa/drivers/dri/i965/brw_fs.cpp
-@@ -219,45 +219,6 @@ fs_visitor::CMP(fs_reg dst, fs_reg src0,
+@@ -219,46 +219,6 @@ fs_visitor::CMP(fs_reg dst, fs_reg src0,
     return inst;
  }
  
@@ -14,6 +14,7 @@
 -   if (intel->gen >= 7) {
 -      inst = new(mem_ctx) fs_inst(FS_OPCODE_VARYING_PULL_CONSTANT_LOAD_GEN7,
 -                                  dst, surf_index, offset);
+-      inst->regs_written = 1;
 -      instructions.push_tail(inst);
 -   } else {
 -      int base_mrf = 13;

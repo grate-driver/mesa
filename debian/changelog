@@ -5,6 +5,8 @@ mesa (9.1.4-0ubuntu1) UNRELEASED; urgency=low
     - use alternatives for libEGL, libGL*, libOpenVG
     - build a common libgallium library to save disk space
     - clean up extra po files
+  * Drop patches now upstream.
+  * Update revert-a64c1eb9b110.diff.
 
  -- Timo Aaltonen <tjaalton@ubuntu.com>  Tue, 02 Jul 2013 10:06:51 +0300
 

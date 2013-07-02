@@ -15,11 +15,3 @@
 revert-7f2a65d896bf.diff
 revert-d61b1fdad6a.diff
 revert-a64c1eb9b110.diff
-
-# Add missing haswell pci ids
-add-vlv-ids.diff
-fix-hsw-gt3-names.diff
-fix-missing-gt3-id.diff
-add-more-reserved-hsw-ids.diff
-CVE-2013-1872.patch
-CVE-2013-1993.patch
