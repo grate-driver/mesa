@@ -1,4 +1,4 @@
-mesa (9.1.4-0ubuntu1) UNRELEASED; urgency=low
+mesa (9.1.4-0ubuntu1) saucy; urgency=low
 
   * Merge from unreleased debian git, remaining changes:
     - don't build libgl1-mesa-swx11*
