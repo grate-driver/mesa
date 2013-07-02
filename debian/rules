@@ -5,15 +5,6 @@
 # Uncomment this to turn on verbose mode.
 #export DH_VERBOSE=1
 
-CFLAGS = -Wall -g
-CXXFLAGS = -Wall -g
-ifneq (,$(filter noopt,$(DEB_BUILD_OPTIONS)))
-	CFLAGS += -O0
-	CXXFLAGS += -O0
-else
-	CFLAGS += -O2
-	CXXFLAGS += -O2
-endif
 ifneq (,$(filter parallel=%,$(DEB_BUILD_OPTIONS)))
 	NUMJOBS = $(patsubst parallel=%,%,$(filter parallel=%,$(DEB_BUILD_OPTIONS)))
 	MAKEFLAGS += -j$(NUMJOBS)
@@ -32,6 +23,12 @@ else
 	confflags += --build=$(DEB_BUILD_GNU_TYPE) --host=$(DEB_HOST_GNU_TYPE)
 endif
 
+buildflags = \
+	$(shell DEB_CFLAGS_MAINT_APPEND=-Wall DEB_CXXFLAGS_MAINT_APPEND=-Wall dpkg-buildflags --export=configure)
+
+buildflags-i686 = \
+	$(shell DEB_CFLAGS_MAINT_APPEND="-Wall -march=i686" DEB_CXXFLAGS_MAINT_APPEND="-Wall -march=i686" dpkg-buildflags --export=configure)
+
 # keep a list of files we don't install (yet), but since it's a bit
 # large, use an external file:
 include debian/not-installed
@@ -45,10 +42,6 @@ BUILD_STAMPS = $(addprefix $(STAMP)-build-, $(CONFIGS))
 
 QUILT_STAMPFN = $(STAMP_DIR)/patch
 include /usr/share/quilt/quilt.make
-
-confflags-common = \
-	CFLAGS="$(CFLAGS)" \
-	CXXFLAGS="$(CXXFLAGS)"
 
 DRI_DRIVERS =
 GALLIUM_DRIVERS =
@@ -75,7 +68,6 @@ else
 	DRI_DRIVERS += r200 radeon nouveau
     endif
     ifneq (,$(filter $(DEB_HOST_ARCH_CPU), amd64 i386))
-	DRI_DRIVERS += i915 i965
 	# Radeonsi needs LLVM, so only build it on the subset of archs
 	# where we have LLVM enabled.
 	GALLIUM_DRIVERS += radeonsi
@@ -85,16 +77,16 @@ else
   endif
 
 
-# Build the llvmpipe driver only on amd64, i386 and armhf until it's tested
-# elsewhere
+# Build the llvmpipe driver only on amd64, i386 until it's tested elsewhere
   ifeq (,$(filter $(DEB_HOST_ARCH_CPU), amd64 i386))
 	DRI_DRIVERS += swrast
   else
 	GALLIUM_DRIVERS += swrast
+	DRI_DRIVERS += i915 i965
   endif
 
   # LLVM is required for r300g and recommended for swrastg on x86:
-  ifneq (,$(filter $(DEB_HOST_ARCH),amd64 i386 kfreebsd-amd64 kfreebsd-i386 armhf powerpc))
+  ifneq (,$(filter $(DEB_HOST_ARCH),amd64 i386 kfreebsd-amd64 kfreebsd-i386 armhf))
 	confflags_GALLIUM += --enable-gallium-llvm
 	confflags_GALLIUM += --with-llvm-shared-libs
   endif
@@ -121,7 +113,7 @@ confflags-dri = \
 	$(confflags_GALLIUM) \
 	$(confflags_GLES) \
 	$(confflags_OPENVG) \
-	$(confflags-common)
+	$(buildflags)
 
 configure: $(QUILT_STAMPFN) configure.ac
 	autoreconf -vfi
@@ -153,7 +145,8 @@ $(STAMP)-build-%: configure
 	../../configure --prefix=/usr --mandir=\$${prefix}/share/man \
 	             --infodir=\$${prefix}/share/info --sysconfdir=/etc \
 	             --libdir=\$${prefix}/lib/$(DEB_HOST_MULTIARCH) \
-	             --localstatedir=/var $(confflags) $(confflags-$*) \
+	             --localstatedir=/var --disable-silent-rules \
+				 $(confflags) $(confflags-$*) \
 	             ac_cv_path_LLVM_CONFIG=llvm-config-3.2
 	cd $(DEB_BUILD_DIR)/$* && $(MAKE)
 
@@ -228,8 +221,8 @@ binary-arch: install
 	set -e; for file in $(NOT_INSTALLED_EITHER); do rm -f debian/tmp/$$file; done
 	# No need for these .so, they're just convenience libraries:
 	rm debian/tmp/dri/usr/lib/${DEB_HOST_MULTIARCH}/libglapi.so
-	rm debian/tmp/dri/usr/lib/${DEB_HOST_MULTIARCH}/libdricore*.so
-	rm debian/tmp/dri/usr/lib/${DEB_HOST_MULTIARCH}/libgallium*.so
+	rm -f debian/tmp/dri/usr/lib/${DEB_HOST_MULTIARCH}/libdricore*.so
+	rm -f debian/tmp/dri/usr/lib/${DEB_HOST_MULTIARCH}/libgallium*.so
 	# purge .la files
 	find debian/tmp/ -name '*.la' -exec rm '{}' ';'
 

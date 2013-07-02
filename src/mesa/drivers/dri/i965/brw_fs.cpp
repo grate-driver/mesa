@@ -60,6 +60,9 @@ fs_inst::init()
    this->src[0] = reg_undef;
    this->src[1] = reg_undef;
    this->src[2] = reg_undef;
+
+   /* This will be the case for almost all instructions. */
+   this->regs_written = 1;
 }
 
 fs_inst::fs_inst()
@@ -233,6 +236,7 @@ fs_visitor::VARYING_PULL_CONSTANT_LOAD(fs_reg dst, fs_reg surf_index,
    if (intel->gen >= 7) {
       inst = new(mem_ctx) fs_inst(FS_OPCODE_VARYING_PULL_CONSTANT_LOAD_GEN7,
                                   dst, surf_index, offset);
+      inst->regs_written = 1;
       instructions.push_tail(inst);
    } else {
       int base_mrf = 13;
@@ -302,26 +306,13 @@ fs_inst::equals(fs_inst *inst)
            offset == inst->offset);
 }
 
-int
-fs_inst::regs_written()
-{
-   if (is_tex())
-      return 4;
-
-   /* The SINCOS and INT_DIV_QUOTIENT_AND_REMAINDER math functions return 2,
-    * but we don't currently use them...nor do we have an opcode for them.
-    */
-
-   return 1;
-}
-
 bool
 fs_inst::overwrites_reg(const fs_reg &reg)
 {
    return (reg.file == dst.file &&
            reg.reg == dst.reg &&
            reg.reg_offset >= dst.reg_offset  &&
-           reg.reg_offset < dst.reg_offset + regs_written());
+           reg.reg_offset < dst.reg_offset + regs_written);
 }
 
 bool
@@ -829,6 +820,7 @@ fs_visitor::import_uniforms(fs_visitor *v)
 			   import_uniforms_callback,
 			   variable_ht);
    this->params_remap = v->params_remap;
+   this->nr_params_remap = v->nr_params_remap;
 }
 
 /* Our support for uniforms is piggy-backed on the struct
@@ -1368,7 +1360,7 @@ fs_visitor::split_virtual_grfs()
       /* If there's a SEND message that requires contiguous destination
        * registers, no splitting is allowed.
        */
-      if (inst->regs_written() > 1) {
+      if (inst->regs_written > 1) {
 	 split_grf[inst->dst.reg] = false;
       }
    }
@@ -1501,6 +1493,7 @@ fs_visitor::remove_dead_constants()
 {
    if (dispatch_width == 8) {
       this->params_remap = ralloc_array(mem_ctx, int, c->prog_data.nr_params);
+      this->nr_params_remap = c->prog_data.nr_params;
 
       for (unsigned int i = 0; i < c->prog_data.nr_params; i++)
 	 this->params_remap[i] = -1;
@@ -1515,7 +1508,14 @@ fs_visitor::remove_dead_constants()
 	    if (inst->src[i].file != UNIFORM)
 	       continue;
 
-	    assert(constant_nr < (int)c->prog_data.nr_params);
+	    /* Section 5.11 of the OpenGL 4.3 spec says:
+	     *
+	     *     "Out-of-bounds reads return undefined values, which include
+	     *     values from other variables of the active program or zero."
+	     */
+	    if (constant_nr < 0 || constant_nr >= (int)c->prog_data.nr_params) {
+	       constant_nr = 0;
+	    }
 
 	    /* For now, set this to non-negative.  We'll give it the
 	     * actual new number in a moment, in order to keep the
@@ -1563,6 +1563,10 @@ fs_visitor::remove_dead_constants()
 	 if (inst->src[i].file != UNIFORM)
 	    continue;
 
+	 /* as above alias to 0 */
+	 if (constant_nr < 0 || constant_nr >= (int)this->nr_params_remap) {
+	    constant_nr = 0;
+	 }
 	 assert(this->params_remap[constant_nr] != -1);
 	 inst->src[i].reg = this->params_remap[constant_nr];
 	 inst->src[i].reg_offset = 0;
@@ -2094,7 +2098,7 @@ fs_visitor::compute_to_mrf()
             /* Things returning more than one register would need us to
              * understand coalescing out more than one MOV at a time.
              */
-            if (scan_inst->regs_written() > 1)
+            if (scan_inst->regs_written > 1)
                break;
 
 	    /* SEND instructions can't have MRF as a destination. */
@@ -2311,7 +2315,7 @@ void
 fs_visitor::insert_gen4_pre_send_dependency_workarounds(fs_inst *inst)
 {
    int reg_size = dispatch_width / 8;
-   int write_len = inst->regs_written() * reg_size;
+   int write_len = inst->regs_written * reg_size;
    int first_write_grf = inst->dst.reg;
    bool needs_dep[BRW_MAX_MRF];
    assert(write_len < (int)sizeof(needs_dep) - 1);
@@ -2351,7 +2355,7 @@ fs_visitor::insert_gen4_pre_send_dependency_workarounds(fs_inst *inst)
        * dependency has more latency than a MOV.
        */
       if (scan_inst->dst.file == GRF) {
-         for (int i = 0; i < scan_inst->regs_written(); i++) {
+         for (int i = 0; i < scan_inst->regs_written; i++) {
             int reg = scan_inst->dst.reg + i * reg_size;
 
             if (reg >= first_write_grf &&
@@ -2390,7 +2394,7 @@ fs_visitor::insert_gen4_pre_send_dependency_workarounds(fs_inst *inst)
 void
 fs_visitor::insert_gen4_post_send_dependency_workarounds(fs_inst *inst)
 {
-   int write_len = inst->regs_written() * dispatch_width / 8;
+   int write_len = inst->regs_written * dispatch_width / 8;
    int first_write_grf = inst->dst.reg;
    bool needs_dep[BRW_MAX_MRF];
    assert(write_len < (int)sizeof(needs_dep) - 1);

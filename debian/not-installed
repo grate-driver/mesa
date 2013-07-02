@@ -2,6 +2,5 @@
 
 # Common list:
 NOT_INSTALLED := \
-	dri/etc/drirc \
 	dri/usr/include/GL/wglext.h \
 	dri/usr/include/GL/wmesa.h
