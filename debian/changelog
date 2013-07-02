@@ -1,3 +1,10 @@
+mesa (9.1.4-0ubuntu2) saucy; urgency=low
+
+  * control, rules: Again, add llvm-3.2-dev to build-depends for
+    powerpc, enable gallium llvm and shared libs (FTBFS).
+
+ -- Timo Aaltonen <tjaalton@ubuntu.com>  Tue, 02 Jul 2013 15:26:47 +0300
+
 mesa (9.1.4-0ubuntu1) saucy; urgency=low
 
   * Merge from unreleased debian git, remaining changes:
