@@ -1,3 +1,13 @@
+mesa (9.1.4-0ubuntu1) UNRELEASED; urgency=low
+
+  * Merge from unreleased debian git, remaining changes:
+    - don't build libgl1-mesa-swx11*
+    - use alternatives for libEGL, libGL*, libOpenVG
+    - build a common libgallium library to save disk space
+    - clean up extra po files
+
+ -- Timo Aaltonen <tjaalton@ubuntu.com>  Tue, 02 Jul 2013 10:06:51 +0300
+
 mesa (9.1.4-1) UNRELEASED; urgency=low
 
   [ Julien Cristau ]
