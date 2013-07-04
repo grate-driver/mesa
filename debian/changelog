@@ -14,6 +14,10 @@ mesa (9.1.4-1) UNRELEASED; urgency=low
   [ Timo Aaltonen ]
   * New upstream release.
 
+  [ Julien Cristau ]
+  * libegl1-mesa-drivers depends on libgl1-mesa-dri for libllvmradeon
+    (closes: #714828)
+
  -- Julien Cristau <jcristau@debian.org>  Tue, 25 Jun 2013 21:26:56 +0200
 
 mesa (9.1.3-6) unstable; urgency=low
