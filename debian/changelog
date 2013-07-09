@@ -1,8 +1,12 @@
 mesa (9.1.6-1) UNRELEASED; urgency=low
 
+  [ Andreas Boll ]
   * New upstream release. (Closes: #717410)
   * Cherry-pick commit 0dbbfa0 (mesa: Fix MESA_PATCH version) from
     upstream.
+
+  [ Julien Cristau ]
+  * Don't run configure for different builds in parallel.
 
  -- Andreas Boll <andreas.boll.dev@gmail.com>  Fri, 02 Aug 2013 12:04:47 +0200
 
