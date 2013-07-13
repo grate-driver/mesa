@@ -30,3 +30,6 @@ dca5fc14358a8b267b3854c39c976a822885898f i965/fs: Improve performance of varying
 
 # Already cherry-picked, but squashed with the commit that broke what this fixed
 4405ff4055685841c9d9545da52c7edc8708b14b i965: Fix haswell_upload_cut_index when there's no index buffer.
+
+# Already cherry-picked as commit bf8053a2dbac1500586d6d387cd88c30aad63a60
+6b676e66343356d5096260c2bc1601014c808cb0 i965,i915: Return early if miptree allocation fails
