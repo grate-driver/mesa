@@ -6,6 +6,7 @@
 #11-hurd-ftbfs-again.diff
 
 # Ubuntu patches.
+fix-osmesa-exports.diff
 101_ubuntu_hidden_glname.patch
 117-static-gallium.patch
 118-dricore-gallium.patch

@@ -1,3 +1,9 @@
+mesa (9.1.4-0ubuntu3) saucy; urgency=low
+
+  * Add fix-os-mesa-exports.diff from upstream. (LP: #1066599)
+
+ -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Tue, 16 Jul 2013 11:29:32 +0200
+
 mesa (9.1.4-0ubuntu2) saucy; urgency=low
 
   * control, rules: Again, add llvm-3.2-dev to build-depends for
