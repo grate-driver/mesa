@@ -30,3 +30,12 @@ dca5fc14358a8b267b3854c39c976a822885898f i965/fs: Improve performance of varying
 
 # Already cherry-picked, but squashed with the commit that broke what this fixed
 4405ff4055685841c9d9545da52c7edc8708b14b i965: Fix haswell_upload_cut_index when there's no index buffer.
+
+# Already cherry-picked as commit bf8053a2dbac1500586d6d387cd88c30aad63a60
+6b676e66343356d5096260c2bc1601014c808cb0 i965,i915: Return early if miptree allocation fails
+
+# Has potential to break previously-working (though technically incorrect) programs
+fcaa48d9cc8937e0ceb59dfd22ef5b6e6fd1a273 glsl: Disallow return with a void argument from void functions.
+
+# Rejected at author's request (attempted backport did not fix piglit test)
+4c3ed795662974a1c2ad2326fc74bef608a34f31 r600g: Workaround for a harware bug with nested loops on Cayman
