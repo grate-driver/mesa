@@ -343,6 +343,22 @@ _mesa_remove_attachment(struct gl_context *ctx,
 }
 
 /**
+ * Verify a couple error conditions that will lead to an incomplete FBO and
+ * may cause problems for the driver's RenderTexture path.
+ */
+static bool
+driver_RenderTexture_is_safe(const struct gl_renderbuffer_attachment *att)
+{
+   const struct gl_texture_image *const texImage =
+      att->Texture->Image[att->CubeMapFace][att->TextureLevel];
+
+   if (texImage->Width == 0 || texImage->Height == 0 || texImage->Depth == 0)
+      return false;
+
+   return true;
+}
+
+/**
  * Create a renderbuffer which will be set up by the driver to wrap the
  * texture image slice.
  *
@@ -383,7 +399,8 @@ _mesa_update_texture_renderbuffer(struct gl_context *ctx,
       rb->NeedsFinishRenderTexture = ctx->Driver.FinishRenderTexture != NULL;
    }
 
-   ctx->Driver.RenderTexture(ctx, fb, att);
+   if (driver_RenderTexture_is_safe(att))
+      ctx->Driver.RenderTexture(ctx, fb, att);
 }
 
 /**
@@ -1785,7 +1802,8 @@ check_begin_texture_render(struct gl_context *ctx, struct gl_framebuffer *fb)
 
    for (i = 0; i < BUFFER_COUNT; i++) {
       struct gl_renderbuffer_attachment *att = fb->Attachment + i;
-      if (att->Texture && _mesa_get_attachment_teximage(att)) {
+      if (att->Texture && _mesa_get_attachment_teximage(att)
+          && driver_RenderTexture_is_safe(att)) {
          ctx->Driver.RenderTexture(ctx, fb, att);
       }
    }
