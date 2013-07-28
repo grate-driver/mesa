@@ -385,8 +385,6 @@ _mesa_update_texture_renderbuffer(struct gl_context *ctx,
    struct gl_renderbuffer *rb;
 
    texImage = _mesa_get_attachment_teximage(att);
-   if (!texImage)
-      return;
 
    rb = att->Renderbuffer;
    if (!rb) {
@@ -404,6 +402,9 @@ _mesa_update_texture_renderbuffer(struct gl_context *ctx,
 
       rb->NeedsFinishRenderTexture = ctx->Driver.FinishRenderTexture != NULL;
    }
+
+   if (!texImage)
+      return;
 
    if (driver_RenderTexture_is_safe(att))
       ctx->Driver.RenderTexture(ctx, fb, att);
