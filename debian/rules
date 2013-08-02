@@ -6,8 +6,7 @@
 #export DH_VERBOSE=1
 
 ifneq (,$(filter parallel=%,$(DEB_BUILD_OPTIONS)))
-	NUMJOBS = $(patsubst parallel=%,%,$(filter parallel=%,$(DEB_BUILD_OPTIONS)))
-	MAKEFLAGS += -j$(NUMJOBS)
+	NUMJOBS = -j$(patsubst parallel=%,%,$(filter parallel=%,$(DEB_BUILD_OPTIONS)))
 endif
 
 DEB_HOST_MULTIARCH ?= $(shell dpkg-architecture -qDEB_HOST_MULTIARCH)
@@ -93,10 +92,17 @@ else
 
 	confflags_DIRECT_RENDERING = --enable-driglx-direct
 	confflags_EGL = --with-egl-platforms="$(EGL_DISPLAYS)"
-	confflags_GALLIUM += --with-gallium-drivers="$(GALLIUM_DRIVERS)"
 	confflags_GLES = --enable-gles1 --enable-gles2
+    ifneq (,$(filter $(DEB_HOST_ARCH),arm64))
+	confflags_GALLIUM += --disable-shared-gallium --with-gallium-drivers=""
+	confflags_OPENVG = --disable-openvg --disable-gallium-egl
+	EXTRA_SED += -e 's/^@nogbm@/\#/' -e 's/^@noegl@/\#/'
+    else
+	confflags_GALLIUM += --with-gallium-drivers="$(GALLIUM_DRIVERS)"
 	confflags_OPENVG = --enable-openvg --enable-gallium-egl
+    endif
 endif
+EXTRA_SED += $(if $(EXTRA_SED_ARCH),$(EXTRA_SED_ARCH),-e 's/^@nogbm@//' -e 's/^@noegl@//')
 
 confflags-dri = \
 	--enable-dri \
@@ -134,7 +140,7 @@ build: build-stamp
 build-stamp: $(BUILD_STAMPS)
 	>$@
 
-$(STAMP)-build-%: configure
+$(STAMP)-configure-%: configure
 	dh_testdir
 
 	mkdir -p $(DEB_BUILD_DIR)/$*
@@ -148,13 +154,18 @@ $(STAMP)-build-%: configure
 	             --localstatedir=/var --disable-silent-rules \
 				 $(confflags) $(confflags-$*) \
 	             ac_cv_path_LLVM_CONFIG=llvm-config-3.2
-	cd $(DEB_BUILD_DIR)/$* && $(MAKE)
+	touch $@
+
+$(STAMP)-build-%: $(STAMP)-configure-%
+	dh_testdir
+
+	cd $(DEB_BUILD_DIR)/$* && $(MAKE) $(NUMJOBS)
 
 	# Remove extra po files.  These confuse pkgstriptranslations
 	# and aren't shipped anyway.
-	rm $(DEB_BUILD_DIR)/$*/src/mesa/drivers/dri/common/xmlpool/*.po ; \
+	rm $(DEB_BUILD_DIR)/$*/src/mesa/drivers/dri/common/xmlpool/*.po
 
-	>$@
+	touch $@
 
 install: build
 	# Add here commands to install the package into debian/tmp
@@ -261,13 +272,22 @@ ifeq (,$(filter sparc sparc64,$(DEB_HOST_ARCH)))
 	# Resolve EGL/GLES/OpenVG symbols in the private library path.
 	# Because there's no packaging problem so onerous that accomodating
 	# proprietary alternatives can't make more difficult…
+  ifneq (,$(filter $(DEB_HOST_ARCH),arm64))
+	set -e ; for PACKAGE in \
+		libegl1-mesa libgles1-mesa libgles2-mesa ; do \
+			dh_makeshlibs -p$$PACKAGE -- -c4 \
+			-edebian/$$PACKAGE/usr/lib/$(DEB_HOST_MULTIARCH)/mesa-egl/\* \
+		; done
+	dh_makeshlibs -s -Nlibopenvg1-mesa --remaining-packages -- -c4
+  else
 	set -e ; for PACKAGE in \
 		libegl1-mesa libgles1-mesa libgles2-mesa libopenvg1-mesa ; do \
 			dh_makeshlibs -p$$PACKAGE -- -c4 \
 			-edebian/$$PACKAGE/usr/lib/$(DEB_HOST_MULTIARCH)/mesa-egl/\* \
 		; done
-
 	dh_makeshlibs -s --remaining-packages -- -c4
+  endif
+
 else
 	# Temporarily work around FTBFS on sparc, ignore new symbols:
 	dh_makeshlibs -s -- -c1

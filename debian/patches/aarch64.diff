@@ -1,0 +1,12 @@
+Index: b/src/mesa/main/compiler.h
+===================================================================
+--- a/src/mesa/main/compiler.h
++++ b/src/mesa/main/compiler.h
+@@ -314,6 +314,7 @@
+     defined(__hppa__) || defined(hpux) || \
+     defined(__mips) || defined(_MIPS_ARCH) || \
+     defined(__arm__) || \
++    defined(__aarch64__) || \
+     defined(__sh__) || defined(__m32r__) || \
+     (defined(__sun) && defined(_IEEE_754)) || \
+     defined(__alpha__)

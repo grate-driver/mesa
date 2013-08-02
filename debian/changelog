@@ -1,3 +1,18 @@
+mesa (9.1.4-0ubuntu5) saucy; urgency=low
+
+  * Fix the build on Aarch64, disabling most of the acceleration
+    packages. 
+
+ -- Matthias Klose <doko@ubuntu.com>  Mon, 22 Jul 2013 14:29:24 +0200
+
+mesa (9.1.4-0ubuntu4) saucy; urgency=low
+
+  * Fix build on Aarch64.
+  * debian/rules: Split out a configure target to be able to restart
+    builds.
+
+ -- Matthias Klose <doko@ubuntu.com>  Sun, 21 Jul 2013 13:43:45 +0200
+
 mesa (9.1.4-0ubuntu3) saucy; urgency=low
 
   * Add fix-os-mesa-exports.diff from upstream. (LP: #1066599)

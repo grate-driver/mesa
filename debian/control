@@ -39,7 +39,7 @@ Homepage: http://mesa3d.sourceforge.net/
 
 Package: libxatracker1
 Section: libs
-Architecture: linux-any 
+Architecture: amd64 armel armhf i386 powerpc
 Depends:
  ${shlibs:Depends},
  ${misc:Depends},
@@ -54,7 +54,7 @@ Description: X acceleration library -- runtime
 Package: libxatracker1-dbg
 Section: debug
 Priority: extra
-Architecture: linux-any
+Architecture: amd64 armel armhf i386 powerpc
 Depends:
  libxatracker1 (= ${binary:Version}),
  ${misc:Depends},
@@ -70,7 +70,7 @@ Description: X acceleration library -- debugging symbols
 
 Package: libxatracker-dev
 Section: libdevel
-Architecture: linux-any
+Architecture: amd64 armel armhf i386 powerpc
 Depends:
  libxatracker1 (= ${binary:Version}),
  ${misc:Depends},
@@ -229,7 +229,7 @@ Description: free implementation of the EGL API -- driver debugging symbols
 
 Package: libopenvg1-mesa
 Section: libs
-Architecture: linux-any kfreebsd-any
+Architecture: amd64 armel armhf i386 powerpc kfreebsd-any
 Depends:
  ${shlibs:Depends},
  ${misc:Depends},
@@ -248,7 +248,7 @@ Description: free implementation of the OpenVG API -- runtime
 Package: libopenvg1-mesa-dbg
 Section: debug
 Priority: extra
-Architecture: linux-any kfreebsd-any
+Architecture: amd64 armel armhf i386 powerpc kfreebsd-any
 Depends:
  libopenvg1-mesa (= ${binary:Version}),
  ${misc:Depends},
@@ -264,7 +264,7 @@ Description: free implementation of the OpenVG API -- debugging symbols
 
 Package: libopenvg1-mesa-dev
 Section: libdevel
-Architecture: linux-any kfreebsd-any
+Architecture: amd64 armel armhf i386 powerpc kfreebsd-any
 Depends:
  libopenvg1-mesa (= ${binary:Version}),
  libegl1-mesa-dev,

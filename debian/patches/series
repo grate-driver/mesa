@@ -16,3 +16,4 @@ fix-osmesa-exports.diff
 revert-7f2a65d896bf.diff
 revert-d61b1fdad6a.diff
 revert-a64c1eb9b110.diff
+aarch64.diff
