@@ -63,6 +63,7 @@ else
 	EGL_DISPLAYS += drm
 # Non-Linux ports also lack *_CLOEXEC and epoll, so wayland isn't ready yet:
 	EGL_DISPLAYS += wayland
+        EGL_DISPLAYS += mir
     ifeq (,$(filter $(DEB_HOST_ARCH), s390 s390x))
 	DRI_DRIVERS += r200 radeon nouveau
     endif

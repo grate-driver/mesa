@@ -1,3 +1,9 @@
+mesa (9.1.4-0ubuntu6) saucy; urgency=low
+
+  * Add Mir EGL platform
+
+ -- Christopher James Halse Rogers <raof@ubuntu.com>  Fri, 02 Aug 2013 13:30:23 +1000
+
 mesa (9.1.4-0ubuntu5) saucy; urgency=low
 
   * Fix the build on Aarch64, disabling most of the acceleration
