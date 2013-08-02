@@ -34,7 +34,7 @@ struct gl_context;
 /* Mesa version */
 #define MESA_MAJOR 9
 #define MESA_MINOR 1
-#define MESA_PATCH 4
+#define MESA_PATCH 6
 #define MESA_VERSION_STRING "9.1.6"
 
 /* To make version comparison easy */
