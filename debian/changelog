@@ -1,4 +1,4 @@
-mesa (9.1.6-1) UNRELEASED; urgency=low
+mesa (9.1.6-1) unstable; urgency=low
 
   [ Andreas Boll ]
   * New upstream release. (Closes: #717410)
@@ -8,7 +8,7 @@ mesa (9.1.6-1) UNRELEASED; urgency=low
   [ Julien Cristau ]
   * Don't run configure for different builds in parallel.
 
- -- Andreas Boll <andreas.boll.dev@gmail.com>  Fri, 02 Aug 2013 12:04:47 +0200
+ -- Julien Cristau <jcristau@debian.org>  Sun, 11 Aug 2013 18:15:58 +0200
 
 mesa (9.1.4-1) unstable; urgency=low
 
