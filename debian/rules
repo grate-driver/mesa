@@ -6,7 +6,7 @@
 #export DH_VERBOSE=1
 
 ifneq (,$(filter parallel=%,$(DEB_BUILD_OPTIONS)))
-	NUMJOBS = -j$(patsubst parallel=%,%,$(filter parallel=%,$(DEB_BUILD_OPTIONS)))
+	NUMJOBS = $(patsubst parallel=%,%,$(filter parallel=%,$(DEB_BUILD_OPTIONS)))
 endif
 
 DEB_HOST_MULTIARCH ?= $(shell dpkg-architecture -qDEB_HOST_MULTIARCH)
@@ -63,7 +63,7 @@ else
 	EGL_DISPLAYS += drm
 # Non-Linux ports also lack *_CLOEXEC and epoll, so wayland isn't ready yet:
 	EGL_DISPLAYS += wayland
-        EGL_DISPLAYS += mir
+	EGL_DISPLAYS += mir
     ifeq (,$(filter $(DEB_HOST_ARCH), s390 s390x))
 	DRI_DRIVERS += r200 radeon nouveau
     endif
@@ -141,7 +141,7 @@ build: build-stamp
 build-stamp: $(BUILD_STAMPS)
 	>$@
 
-$(STAMP)-configure-%: configure
+$(STAMP)-build-%: configure
 	dh_testdir
 
 	mkdir -p $(DEB_BUILD_DIR)/$*
@@ -155,18 +155,8 @@ $(STAMP)-configure-%: configure
 	             --localstatedir=/var --disable-silent-rules \
 				 $(confflags) $(confflags-$*) \
 	             ac_cv_path_LLVM_CONFIG=llvm-config-3.2
-	touch $@
-
-$(STAMP)-build-%: $(STAMP)-configure-%
-	dh_testdir
-
-	cd $(DEB_BUILD_DIR)/$* && $(MAKE) $(NUMJOBS)
-
-	# Remove extra po files.  These confuse pkgstriptranslations
-	# and aren't shipped anyway.
-	rm $(DEB_BUILD_DIR)/$*/src/mesa/drivers/dri/common/xmlpool/*.po
-
-	touch $@
+	cd $(DEB_BUILD_DIR)/$* && $(MAKE) $(if $(NUMJOBS),-j$(NUMJOBS))
+	>$@
 
 install: build
 	# Add here commands to install the package into debian/tmp

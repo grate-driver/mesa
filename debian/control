@@ -203,6 +203,8 @@ Depends:
  ${misc:Depends},
  libegl1-mesa (= ${binary:Version}),
  libglapi-mesa (= ${binary:Version}),
+# for libllvmradeon
+ libgl1-mesa-dri (= ${binary:Version}) [any-i386 any-amd64],
 Pre-Depends: ${misc:Pre-Depends}
 Multi-Arch: same
 Description: free implementation of the EGL API -- hardware drivers
