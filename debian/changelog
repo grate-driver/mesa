@@ -1,3 +1,9 @@
+mesa (9.1.6-2ubuntu2) saucy; urgency=low
+
+  * Import missing powerpc build fixes.
+
+ -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Tue, 13 Aug 2013 16:23:32 +0200
+
 mesa (9.1.6-2ubuntu1) saucy; urgency=low
 
   * New upstream release.
@@ -27,6 +33,19 @@ mesa (9.1.6-1) unstable; urgency=low
   * Don't run configure for different builds in parallel.
 
  -- Julien Cristau <jcristau@debian.org>  Sun, 11 Aug 2013 18:15:58 +0200
+
+mesa (9.1.4-0ubuntu8) saucy; urgency=low
+
+  * hide the now missing Mir symbol on powerpc.
+
+ -- Didier Roche <didrocks@ubuntu.com>  Mon, 05 Aug 2013 13:43:52 +0200
+
+mesa (9.1.4-0ubuntu7) saucy; urgency=low
+
+  * rules,control: Don't build Mir support on powerpc as it's not available
+    there.
+
+ -- Didier Roche <didrocks@ubuntu.com>  Mon, 05 Aug 2013 12:59:59 +0200
 
 mesa (9.1.4-0ubuntu6) saucy; urgency=low
 
