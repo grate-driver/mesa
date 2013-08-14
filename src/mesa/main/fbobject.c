@@ -1223,23 +1223,45 @@ _mesa_BindRenderbufferEXT(GLenum target, GLuint renderbuffer)
 
 
 /**
- * If the given renderbuffer is anywhere attached to the framebuffer, detach
- * the renderbuffer.
- * This is used when a renderbuffer object is deleted.
- * The spec calls for unbinding.
+ * Remove the specified renderbuffer or texture from any attachment point in
+ * the framebuffer.
+ *
+ * \returns
+ * \c true if the renderbuffer was detached from an attachment point.  \c
+ * false otherwise.
  */
-static void
-detach_renderbuffer(struct gl_context *ctx,
-                    struct gl_framebuffer *fb,
-                    struct gl_renderbuffer *rb)
+bool
+_mesa_detach_renderbuffer(struct gl_context *ctx,
+                          struct gl_framebuffer *fb,
+                          const void *att)
 {
-   GLuint i;
+   unsigned i;
+   bool progress = false;
+
    for (i = 0; i < BUFFER_COUNT; i++) {
-      if (fb->Attachment[i].Renderbuffer == rb) {
+      if (fb->Attachment[i].Texture == att
+          || fb->Attachment[i].Renderbuffer == att) {
          _mesa_remove_attachment(ctx, &fb->Attachment[i]);
+         progress = true;
       }
    }
-   invalidate_framebuffer(fb);
+
+   /* Section 4.4.4 (Framebuffer Completeness), subsection "Whole Framebuffer
+    * Completeness," of the OpenGL 3.1 spec says:
+    *
+    *     "Performing any of the following actions may change whether the
+    *     framebuffer is considered complete or incomplete:
+    *
+    *     ...
+    *
+    *        - Deleting, with DeleteTextures or DeleteRenderbuffers, an object
+    *          containing an image that is attached to a framebuffer object
+    *          that is bound to the framebuffer."
+    */
+   if (progress)
+      invalidate_framebuffer(fb);
+
+   return progress;
 }
 
 
@@ -1263,12 +1285,29 @@ _mesa_DeleteRenderbuffers(GLsizei n, const GLuint *renderbuffers)
                _mesa_BindRenderbuffer(GL_RENDERBUFFER_EXT, 0);
             }
 
+            /* Section 4.4.2 (Attaching Images to Framebuffer Objects),
+             * subsection "Attaching Renderbuffer Images to a Framebuffer," of
+             * the OpenGL 3.1 spec says:
+             *
+             *     "If a renderbuffer object is deleted while its image is
+             *     attached to one or more attachment points in the currently
+             *     bound framebuffer, then it is as if FramebufferRenderbuffer
+             *     had been called, with a renderbuffer of 0, for each
+             *     attachment point to which this image was attached in the
+             *     currently bound framebuffer. In other words, this
+             *     renderbuffer image is first detached from all attachment
+             *     points in the currently bound framebuffer. Note that the
+             *     renderbuffer image is specifically not detached from any
+             *     non-bound framebuffers. Detaching the image from any
+             *     non-bound framebuffers is the responsibility of the
+             *     application.
+             */
             if (_mesa_is_user_fbo(ctx->DrawBuffer)) {
-               detach_renderbuffer(ctx, ctx->DrawBuffer, rb);
+               _mesa_detach_renderbuffer(ctx, ctx->DrawBuffer, rb);
             }
             if (_mesa_is_user_fbo(ctx->ReadBuffer)
                 && ctx->ReadBuffer != ctx->DrawBuffer) {
-               detach_renderbuffer(ctx, ctx->ReadBuffer, rb);
+               _mesa_detach_renderbuffer(ctx, ctx->ReadBuffer, rb);
             }
 
 	    /* Remove from hash table immediately, to free the ID.

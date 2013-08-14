@@ -1771,12 +1771,6 @@ process_array_type(YYLTYPE *loc, const glsl_type *base, ast_node *array_size,
 	    }
 	 }
       }
-   } else if (state->es_shader) {
-      /* Section 10.17 of the GLSL ES 1.00 specification states that unsized
-       * array declarations have been removed from the language.
-       */
-      _mesa_glsl_error(loc, state, "unsized array declarations are not "
-		       "allowed in GLSL ES 1.00.");
    }
 
    const glsl_type *array_type = glsl_type::get_array_instance(base, length);
@@ -1961,6 +1955,21 @@ apply_type_qualifier_to_variable(const struct ast_type_qualifier *qual,
 		       "`attribute' variables may not be declared in the "
 		       "%s shader",
 		       _mesa_glsl_shader_target_name(state->target));
+   }
+
+   /* Section 6.1.1 (Function Calling Conventions) of the GLSL 1.10 spec says:
+    *
+    *     "However, the const qualifier cannot be used with out or inout."
+    *
+    * The same section of the GLSL 4.40 spec further clarifies this saying:
+    *
+    *     "The const qualifier cannot be used with out or inout, or a
+    *     compile-time error results."
+    */
+   if (is_parameter && qual->flags.q.constant && qual->flags.q.out) {
+      _mesa_glsl_error(loc, state,
+                       "`const' may not be applied to `out' or `inout' "
+                       "function parameters");
    }
 
    /* If there is no qualifier that changes the mode of the variable, leave
@@ -3015,6 +3024,33 @@ ast_declarator_list::hir(exec_list *instructions,
 			  decl->identifier);
       }
 
+      if (state->es_shader) {
+	 const glsl_type *const t = (earlier == NULL)
+	    ? var->type : earlier->type;
+
+         if (t->is_array() && t->length == 0)
+            /* Section 10.17 of the GLSL ES 1.00 specification states that
+             * unsized array declarations have been removed from the language.
+             * Arrays that are sized using an initializer are still explicitly
+             * sized.  However, GLSL ES 1.00 does not allow array
+             * initializers.  That is only allowed in GLSL ES 3.00.
+             *
+             * Section 4.1.9 (Arrays) of the GLSL ES 3.00 spec says:
+             *
+             *     "An array type can also be formed without specifying a size
+             *     if the definition includes an initializer:
+             *
+             *         float x[] = float[2] (1.0, 2.0);     // declares an array of size 2
+             *         float y[] = float[] (1.0, 2.0, 3.0); // declares an array of size 3
+             *
+             *         float a[5];
+             *         float b[] = a;"
+             */
+            _mesa_glsl_error(& loc, state,
+                             "unsized array declarations are not allowed in "
+                             "GLSL ES");
+      }
+
       /* If the declaration is not a redeclaration, there are a few additional
        * semantic checks that must be applied.  In addition, variable that was
        * created for the declaration should be added to the IR stream.
@@ -3321,6 +3357,18 @@ ast_function::hir(exec_list *instructions,
       YYLTYPE loc = this->get_location();
       _mesa_glsl_error(& loc, state,
 		       "function `%s' return type has qualifiers", name);
+   }
+
+   /* Section 6.1 (Function Definitions) of the GLSL 1.20 spec says:
+    *
+    *     "Arrays are allowed as arguments and as the return type. In both
+    *     cases, the array must be explicitly sized."
+    */
+   if (return_type->is_array() && return_type->length == 0) {
+      YYLTYPE loc = this->get_location();
+      _mesa_glsl_error(& loc, state,
+		       "function `%s' return type array must be explicitly "
+		       "sized", name);
    }
 
    /* From page 17 (page 23 of the PDF) of the GLSL 1.20 spec:
