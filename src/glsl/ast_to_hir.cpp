@@ -2282,13 +2282,7 @@ apply_type_qualifier_to_variable(const struct ast_type_qualifier *qual,
    }
 
    if (qual->flags.q.row_major || qual->flags.q.column_major) {
-      if (!ubo_qualifiers_allowed) {
-	 _mesa_glsl_error(loc, state,
-			  "uniform block layout qualifiers row_major and "
-			  "column_major can only be applied to uniform block "
-			  "members");
-      } else
-	 validate_matrix_layout_for_type(state, loc, var->type);
+      validate_matrix_layout_for_type(state, loc, var->type);
    }
 }
 
@@ -4349,12 +4343,7 @@ ast_process_structure_or_interface_block(exec_list *instructions,
             if (!qual->flags.q.uniform) {
                _mesa_glsl_error(&loc, state,
                                 "row_major and column_major can only be "
-                                "applied to uniform interface blocks.");
-            } else if (!field_type->is_matrix() && !field_type->is_record()) {
-               _mesa_glsl_error(&loc, state,
-                                "uniform block layout qualifiers row_major and "
-                                "column_major can only be applied to matrix and "
-                                "structure types");
+                                "applied to uniform interface blocks");
             } else
                validate_matrix_layout_for_type(state, &loc, field_type);
          }
