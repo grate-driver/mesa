@@ -3,6 +3,8 @@ mesa (9.2.0-0~git) UNRELEASED; urgency=low
   * Initial merge to 9.2 branch.
   * Refresh 06_kfreebsd-ftbfs.diff 06_kfreebsd-ftbfs.diff.
   * Require llvm-3.3-dev >= 1:3.3-4 and libelf-dev.
+  * Refresh 02_gbm_no_undefined.diff.
+  * libllvmradeon is always built statically now.
 
  -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Wed, 14 Aug 2013 13:03:27 +0200
 
