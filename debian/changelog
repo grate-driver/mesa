@@ -1,3 +1,10 @@
+mesa (9.1.6-3) UNRELEASED; urgency=low
+
+  * libgl1-mesa-glx: Add Breaks: glx-diversions (<< 0.4) because the old
+    versions were not aware of libGL.so.1.2.0.  (Closes: #720069)
+
+ -- Andreas Beckmann <anbe@debian.org>  Sun, 18 Aug 2013 10:50:28 +0200
+
 mesa (9.1.6-2) unstable; urgency=low
 
   * Don't run 'make -j' if DEB_BUILD_OPTIONS doesn't set parallel.  Oops.
