@@ -2,5 +2,4 @@ dri/etc/drirc etc
 dri/usr/lib/${DEB_HOST_MULTIARCH}/dri/*_dri.so usr/lib/${DEB_HOST_MULTIARCH}/dri
 @noegl@dri/usr/lib/${DEB_HOST_MULTIARCH}/gallium-pipe/*.so usr/lib/${DEB_HOST_MULTIARCH}/gallium-pipe
 dri/usr/lib/${DEB_HOST_MULTIARCH}/libdricore*.so* usr/lib/${DEB_HOST_MULTIARCH}/
-dri/usr/lib/${DEB_HOST_MULTIARCH}/libllvmradeon*.so usr/lib/${DEB_HOST_MULTIARCH}/
 @noegl@dri/usr/lib/${DEB_HOST_MULTIARCH}/lib*gallium*.so* usr/lib/${DEB_HOST_MULTIARCH}/
