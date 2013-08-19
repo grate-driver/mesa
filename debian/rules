@@ -113,6 +113,7 @@ confflags-dri = \
 	--enable-shared-glapi \
 	--enable-texture-float \
 	--enable-xa \
+	--disable-xvmc --disable-vdpau \
 	$(confflags_DIRECT_RENDERING) \
 	$(confflags_EGL) \
 	$(confflags_GALLIUM) \
