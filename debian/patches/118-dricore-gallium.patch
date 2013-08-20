@@ -1,6 +1,6 @@
 --- a/src/mesa/libdricore/Makefile.am
 +++ b/src/mesa/libdricore/Makefile.am
-@@ -42,6 +42,7 @@
+@@ -41,6 +41,7 @@
  libdricore@VERSION@_la_LDFLAGS = -version-number 1:0
  libdricore@VERSION@_la_LIBADD = \
          ../program/libdricore_program.la \
@@ -8,7 +8,7 @@
          $()
  
  if HAVE_X86_ASM
-@@ -65,8 +66,10 @@
+@@ -64,8 +65,10 @@
          -I$(top_srcdir)/src/mesa/sparc
  endif
  
@@ -20,7 +20,7 @@
  
  # Provide compatibility with scripts for the old Mesa build system for
  # a while by putting a link to the driver into /lib of the build tree.
-@@ -76,6 +79,17 @@
+@@ -75,6 +78,17 @@
  	ln -sf libdricore@VERSION@.so.1 $(top_builddir)/$(LIB_DIR)/libdricore@VERSION@.so
  endif
  
@@ -40,7 +40,7 @@
  	$(top_builddir)/$(LIB_DIR)/libdricore@VERSION@.so
 --- a/configure.ac
 +++ b/configure.ac
-@@ -928,6 +928,8 @@
+@@ -891,6 +891,8 @@
  AC_SUBST([GLESv2_PC_LIB_PRIV])
  
  DRI_LIB_DEPS="\$(top_builddir)/src/mesa/libdricore/libdricore${VERSION}.la"
@@ -129,7 +129,7 @@
 --- a/src/gallium/targets/egl-static/Makefile.am
 +++ b/src/gallium/targets/egl-static/Makefile.am
 @@ -104,7 +104,7 @@
- 	$(API_DEFINES)
+ 	-DFEATURE_GL=1
  
  egl_gallium_la_LIBADD += \
 -	$(top_builddir)/src/mesa/libmesagallium.la
@@ -137,9 +137,18 @@
  # make st/mesa built-in when there is a single glapi provider
  if HAVE_SHARED_GLAPI
  egl_gallium_la_LIBADD += \
+@@ -122,7 +122,7 @@
+ 
+ # st_GL, built only when shared glapi is not enabled
+ st_GL_la_LIBADD = \
+-	$(top_builddir)/src/mesa/libmesagallium.la \
++	@MESAGALLIUM_LIBS@ \
+ 	$(top_builddir)/src/gallium/auxiliary/libgallium.la \
+ 	$(top_builddir)/src/mapi/glapi/libglapi.la \
+ 	$(CLOCK_LIB) \
 --- a/src/mesa/Makefile.am
 +++ b/src/mesa/Makefile.am
-@@ -75,9 +75,6 @@
+@@ -85,9 +85,6 @@
  else
  check_LTLIBRARIES = libmesa.la
  endif
@@ -149,7 +158,7 @@
  
  SRCDIR = $(top_srcdir)/src/mesa/
  BUILDDIR = $(top_builddir)/src/mesa/
-@@ -119,15 +116,6 @@
+@@ -128,15 +125,6 @@
          $()
  libmesa_la_LDFLAGS =
  
@@ -184,3 +193,25 @@
  endif
  
  indices/u_indices_gen.c: $(srcdir)/indices/u_indices_gen.py
+--- a/src/gallium/targets/libgl-xlib/Makefile.am
++++ b/src/gallium/targets/libgl-xlib/Makefile.am
+@@ -52,7 +52,7 @@
+ 	$(top_builddir)/src/gallium/drivers/rbug/librbug.la \
+ 	$(top_builddir)/src/gallium/drivers/galahad/libgalahad.la \
+ 	$(top_builddir)/src/mapi/glapi/libglapi.la \
+-	$(top_builddir)/src/mesa/libmesagallium.la \
++	@MESAGALLIUM_LIBS@ \
+ 	$(top_builddir)/src/gallium/auxiliary/libgallium.la \
+ 	$(GL_LIB_DEPS) \
+ 	$(CLOCK_LIB)
+--- a/src/gallium/targets/osmesa/Makefile.am
++++ b/src/gallium/targets/osmesa/Makefile.am
+@@ -47,7 +47,7 @@
+ endif
+ 
+ lib@OSMESA_LIB@_la_LIBADD = \
+-	$(top_builddir)/src/mesa/libmesagallium.la \
++	@MESAGALLIUM_LIBS@ \
+ 	$(top_builddir)/src/gallium/auxiliary/libgallium.la \
+ 	$(top_builddir)/src/gallium/winsys/sw/null/libws_null.la \
+ 	$(top_builddir)/src/gallium/drivers/trace/libtrace.la \
