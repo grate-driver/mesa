@@ -1,4 +1,4 @@
-mesa (9.2.0-0~git) UNRELEASED; urgency=low
+mesa (9.2~rc1-1) UNRELEASED; urgency=low
 
   * Initial merge to 9.2 branch.
   * Refresh 06_kfreebsd-ftbfs.diff 06_kfreebsd-ftbfs.diff.
