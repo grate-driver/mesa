@@ -1,5 +1,7 @@
---- a/src/gallium/targets/osmesa/Makefile.am
-+++ b/src/gallium/targets/osmesa/Makefile.am
+Index: mesa/src/gallium/targets/osmesa/Makefile.am
+===================================================================
+--- mesa.orig/src/gallium/targets/osmesa/Makefile.am	2013-08-20 11:44:50.981036890 +0000
++++ mesa/src/gallium/targets/osmesa/Makefile.am	2013-08-20 11:44:50.978136960 +0000
 @@ -38,7 +38,7 @@
  
  lib@OSMESA_LIB@_la_SOURCES = target.c
@@ -20,8 +22,10 @@
  endif
  
  # XXX fix-up?
---- a/src/mesa/drivers/osmesa/Makefile.am
-+++ b/src/mesa/drivers/osmesa/Makefile.am
+Index: mesa/src/mesa/drivers/osmesa/Makefile.am
+===================================================================
+--- mesa.orig/src/mesa/drivers/osmesa/Makefile.am	2013-08-20 11:44:50.981036890 +0000
++++ mesa/src/mesa/drivers/osmesa/Makefile.am	2013-08-20 11:44:50.978336955 +0000
 @@ -37,7 +37,7 @@
  nodist_EXTRA_lib@OSMESA_LIB@_la_SOURCES = dummy.cpp
  lib@OSMESA_LIB@_la_SOURCES = osmesa.c
@@ -40,8 +44,10 @@
  endif
  
  pkgconfigdir = $(libdir)/pkgconfig
---- a/configure.ac
-+++ b/configure.ac
+Index: mesa/configure.ac
+===================================================================
+--- mesa.orig/configure.ac	2013-08-20 11:44:50.981036890 +0000
++++ mesa/configure.ac	2013-08-20 12:05:59.000000000 +0000
 @@ -769,11 +769,6 @@
      GALLIUM_STATE_TRACKERS_DIRS="dri $GALLIUM_STATE_TRACKERS_DIRS"
  fi
@@ -54,3 +60,33 @@
  AC_SUBST([MESA_LLVM])
  
  # Check for libdrm
+Index: mesa/src/gallium/state_trackers/Makefile.am
+===================================================================
+--- mesa.orig/src/gallium/state_trackers/Makefile.am	2013-08-20 07:05:41.097175049 +0000
++++ mesa/src/gallium/state_trackers/Makefile.am	2013-08-20 12:06:21.289668508 +0000
+@@ -25,10 +25,6 @@
+ SUBDIRS += glx
+ endif
+ 
+-if HAVE_OSMESA
+-SUBDIRS += osmesa
+-endif
+-
+ if HAVE_DRI
+ SUBDIRS += dri
+ endif
+Index: mesa/src/gallium/targets/Makefile.am
+===================================================================
+--- mesa.orig/src/gallium/targets/Makefile.am	2013-08-20 07:05:41.110674769 +0000
++++ mesa/src/gallium/targets/Makefile.am	2013-08-20 12:06:33.791167527 +0000
+@@ -26,10 +26,6 @@
+ SUBDIRS += libgl-xlib
+ endif
+ 
+-if HAVE_OSMESA
+-SUBDIRS += osmesa
+-endif
+-
+ if HAVE_GALLIUM_GBM
+ SUBDIRS += gbm
+ endif
