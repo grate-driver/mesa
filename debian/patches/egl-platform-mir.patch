@@ -1,10 +1,10 @@
-Index: mesa/configure.ac
-===================================================================
---- mesa.orig/configure.ac	2013-08-02 13:52:39.909145976 +1000
-+++ mesa/configure.ac	2013-08-02 13:52:39.893145977 +1000
-@@ -1547,7 +1547,9 @@
+diff --git a/configure.ac b/configure.ac
+index 35f6797..4e2d3c4 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -1457,7 +1457,9 @@ for plat in $egl_platforms; do
  
- 	android|gdi)
+ 	android|fbdev|gdi|null)
  		;;
 -
 +        mir)
@@ -13,7 +13,7 @@ Index: mesa/configure.ac
  	*)
  		AC_MSG_ERROR([EGL platform '$plat' does not exist])
  		;;
-@@ -1575,6 +1577,7 @@
+@@ -1488,6 +1490,7 @@ AM_CONDITIONAL(HAVE_EGL_PLATFORM_WAYLAND, echo "$egl_platforms" | grep 'wayland'
  AM_CONDITIONAL(HAVE_EGL_PLATFORM_DRM, echo "$egl_platforms" | grep 'drm' >/dev/null 2>&1)
  AM_CONDITIONAL(HAVE_EGL_PLATFORM_FBDEV, echo "$egl_platforms" | grep 'fbdev' >/dev/null 2>&1)
  AM_CONDITIONAL(HAVE_EGL_PLATFORM_NULL, echo "$egl_platforms" | grep 'null' >/dev/null 2>&1)
@@ -21,11 +21,11 @@ Index: mesa/configure.ac
  
  AM_CONDITIONAL(HAVE_EGL_DRIVER_DRI2, test "x$HAVE_EGL_DRIVER_DRI2" != "x")
  AM_CONDITIONAL(HAVE_EGL_DRIVER_GLX, test "x$HAVE_EGL_DRIVER_GLX" != "x")
-Index: mesa/include/EGL/eglplatform.h
-===================================================================
---- mesa.orig/include/EGL/eglplatform.h	2013-08-02 13:52:39.909145976 +1000
-+++ mesa/include/EGL/eglplatform.h	2013-08-02 13:52:39.893145977 +1000
-@@ -104,6 +104,13 @@
+diff --git a/include/EGL/eglplatform.h b/include/EGL/eglplatform.h
+index 21b18fe..a136a5b 100644
+--- a/include/EGL/eglplatform.h
++++ b/include/EGL/eglplatform.h
+@@ -104,6 +104,13 @@ typedef struct ANativeWindow        *EGLNativeWindowType;
  typedef struct egl_native_pixmap_t  *EGLNativePixmapType;
  typedef void                        *EGLNativeDisplayType;
  
@@ -39,11 +39,11 @@ Index: mesa/include/EGL/eglplatform.h
  #elif defined(__unix__)
  
  #ifdef MESA_EGL_NO_X11_HEADERS
-Index: mesa/include/GL/internal/dri_interface.h
-===================================================================
---- mesa.orig/include/GL/internal/dri_interface.h	2013-08-02 13:52:39.909145976 +1000
-+++ mesa/include/GL/internal/dri_interface.h	2013-08-02 13:52:39.893145977 +1000
-@@ -766,10 +766,12 @@
+diff --git a/include/GL/internal/dri_interface.h b/include/GL/internal/dri_interface.h
+index 5c99d55..18767c7 100644
+--- a/include/GL/internal/dri_interface.h
++++ b/include/GL/internal/dri_interface.h
+@@ -768,10 +768,12 @@ struct __DRIbufferRec {
      unsigned int pitch;
      unsigned int cpp;
      unsigned int flags;
@@ -57,21 +57,11 @@ Index: mesa/include/GL/internal/dri_interface.h
  struct __DRIdri2LoaderExtensionRec {
      __DRIextension base;
  
-@@ -1021,6 +1023,9 @@
- #define __DRI_IMAGE_ATTRIB_WIDTH	0x2004 /* available in versions 4+ */
- #define __DRI_IMAGE_ATTRIB_HEIGHT	0x2005
- #define __DRI_IMAGE_ATTRIB_COMPONENTS	0x2006 /* available in versions 5+ */
-+#define __DRI_IMAGE_ATTRIB_FD           0x2007 /* available in versions
-+                                                * 7+. Each query will return a
-+                                                * new fd. */
- 
- typedef struct __DRIimageRec          __DRIimage;
- typedef struct __DRIimageExtensionRec __DRIimageExtension;
-Index: mesa/src/egl/drivers/dri2/Makefile.am
-===================================================================
---- mesa.orig/src/egl/drivers/dri2/Makefile.am	2013-08-02 13:52:39.909145976 +1000
-+++ mesa/src/egl/drivers/dri2/Makefile.am	2013-08-02 13:52:39.893145977 +1000
-@@ -62,3 +62,9 @@
+diff --git a/src/egl/drivers/dri2/Makefile.am b/src/egl/drivers/dri2/Makefile.am
+index 45f7dfa..dfb0c05 100644
+--- a/src/egl/drivers/dri2/Makefile.am
++++ b/src/egl/drivers/dri2/Makefile.am
+@@ -62,3 +62,9 @@ if HAVE_EGL_PLATFORM_DRM
  libegl_dri2_la_SOURCES += platform_drm.c
  AM_CFLAGS += -DHAVE_DRM_PLATFORM
  endif
@@ -81,11 +71,11 @@ Index: mesa/src/egl/drivers/dri2/Makefile.am
 +AM_CFLAGS += -DHAVE_MIR_PLATFORM
 +AM_CFLAGS += $(MIR_CFLAGS)
 +endif
-Index: mesa/src/egl/drivers/dri2/egl_dri2.c
-===================================================================
---- mesa.orig/src/egl/drivers/dri2/egl_dri2.c	2013-08-02 13:52:39.909145976 +1000
-+++ mesa/src/egl/drivers/dri2/egl_dri2.c	2013-08-02 13:52:39.897145977 +1000
-@@ -594,6 +594,12 @@
+diff --git a/src/egl/drivers/dri2/egl_dri2.c b/src/egl/drivers/dri2/egl_dri2.c
+index 52fcb3f..8b68cc2 100644
+--- a/src/egl/drivers/dri2/egl_dri2.c
++++ b/src/egl/drivers/dri2/egl_dri2.c
+@@ -599,6 +599,12 @@ dri2_initialize(_EGLDriver *drv, _EGLDisplay *disp)
           return EGL_TRUE;
        return dri2_initialize_wayland(drv, disp);
  #endif
@@ -98,10 +88,10 @@ Index: mesa/src/egl/drivers/dri2/egl_dri2.c
  #endif
  #ifdef HAVE_ANDROID_PLATFORM
     case _EGL_PLATFORM_ANDROID:
-Index: mesa/src/egl/drivers/dri2/egl_dri2.h
-===================================================================
---- mesa.orig/src/egl/drivers/dri2/egl_dri2.h	2013-08-02 13:52:39.909145976 +1000
-+++ mesa/src/egl/drivers/dri2/egl_dri2.h	2013-08-02 13:52:39.897145977 +1000
+diff --git a/src/egl/drivers/dri2/egl_dri2.h b/src/egl/drivers/dri2/egl_dri2.h
+index 6dfdf94..668480c 100644
+--- a/src/egl/drivers/dri2/egl_dri2.h
++++ b/src/egl/drivers/dri2/egl_dri2.h
 @@ -65,6 +65,11 @@
  
  #endif /* HAVE_ANDROID_PLATFORM */
@@ -114,8 +104,8 @@ Index: mesa/src/egl/drivers/dri2/egl_dri2.h
  #include "eglconfig.h"
  #include "eglcontext.h"
  #include "egldisplay.h"
-@@ -134,6 +139,10 @@
-    int			     formats;
+@@ -135,6 +140,10 @@ struct dri2_egl_display
+    uint32_t                  capabilities;
  #endif
  
 +#ifdef HAVE_MIR_PLATFORM
@@ -125,7 +115,7 @@ Index: mesa/src/egl/drivers/dri2/egl_dri2.h
     int (*authenticate) (_EGLDisplay *disp, uint32_t id);
  };
  
-@@ -182,7 +191,9 @@
+@@ -183,7 +192,9 @@ struct dri2_egl_surface
     struct gbm_dri_surface *gbm_surf;
  #endif
  
@@ -136,7 +126,7 @@ Index: mesa/src/egl/drivers/dri2/egl_dri2.h
     __DRIbuffer           *dri_buffers[__DRI_BUFFER_COUNT];
     struct {
  #ifdef HAVE_WAYLAND_PLATFORM
-@@ -204,6 +215,10 @@
+@@ -206,6 +217,10 @@ struct dri2_egl_surface
     /* EGL-owned buffers */
     __DRIbuffer           *local_buffers[__DRI_BUFFER_COUNT];
  #endif
@@ -147,7 +137,7 @@ Index: mesa/src/egl/drivers/dri2/egl_dri2.h
  };
  
  
-@@ -265,6 +280,9 @@
+@@ -267,6 +282,9 @@ dri2_initialize_wayland(_EGLDriver *drv, _EGLDisplay *disp);
  EGLBoolean
  dri2_initialize_android(_EGLDriver *drv, _EGLDisplay *disp);
  
@@ -157,11 +147,12 @@ Index: mesa/src/egl/drivers/dri2/egl_dri2.h
  char *
  dri2_get_driver_for_fd(int fd);
  char *
-Index: mesa/src/egl/drivers/dri2/platform_mir.c
-===================================================================
---- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ mesa/src/egl/drivers/dri2/platform_mir.c	2013-08-02 13:52:39.897145977 +1000
-@@ -0,0 +1,349 @@
+diff --git a/src/egl/drivers/dri2/platform_mir.c b/src/egl/drivers/dri2/platform_mir.c
+new file mode 100644
+index 0000000..55bfa40
+--- /dev/null
++++ b/src/egl/drivers/dri2/platform_mir.c
+@@ -0,0 +1,350 @@
 +/*
 + * Copyright © 2012 Canonical, Inc
 + *
@@ -222,7 +213,7 @@ Index: mesa/src/egl/drivers/dri2/platform_mir.c
 +                  attachments[i], attachments[i+1],
 +                  dri2_surf->base.Width, dri2_surf->base.Height);
 +
-+         if (!dri2_surf->dri_buffers[attachments[i]]) 
++         if (!dri2_surf->dri_buffers[attachments[i]])
 +            continue;
 +      }
 +
@@ -296,7 +287,7 @@ Index: mesa/src/egl/drivers/dri2/platform_mir.c
 +#endif
 +}
 +
-+static EGLBoolean 
++static EGLBoolean
 +mir_advance_colour_buffer(struct dri2_egl_surface *surf)
 +{
 +   MirBufferPackage buffer_package;
@@ -345,12 +336,12 @@ Index: mesa/src/egl/drivers/dri2/platform_mir.c
 +   dri2_surf->base.Width = surf_params.width;
 +   dri2_surf->base.Height = surf_params.height;
 +
-+   dri2_surf->dri_buffers[__DRI_BUFFER_FRONT_LEFT] = 
++   dri2_surf->dri_buffers[__DRI_BUFFER_FRONT_LEFT] =
 +      calloc(sizeof(*dri2_surf->dri_buffers[0]), 1);
 +   dri2_surf->dri_buffers[__DRI_BUFFER_BACK_LEFT] =
 +      calloc(sizeof(*dri2_surf->dri_buffers[0]), 1);
-+   
-+   dri2_surf->dri_buffers[__DRI_BUFFER_BACK_LEFT]->attachment = 
++
++   dri2_surf->dri_buffers[__DRI_BUFFER_BACK_LEFT]->attachment =
 +      __DRI_BUFFER_BACK_LEFT;
 +   /* We only do ARGB 8888 for the moment */
 +   dri2_surf->dri_buffers[__DRI_BUFFER_BACK_LEFT]->cpp = 4;
@@ -358,7 +349,7 @@ Index: mesa/src/egl/drivers/dri2/platform_mir.c
 +   if(!mir_advance_colour_buffer(dri2_surf))
 +      goto cleanup_surf;
 +
-+   dri2_surf->dri_drawable = 
++   dri2_surf->dri_drawable =
 +      (*dri2_dpy->dri2->createNewDrawable) (dri2_dpy->dri_screen,
 +                                            dri2_conf->dri_double_config,
 +                                            dri2_surf);
@@ -396,6 +387,7 @@ Index: mesa/src/egl/drivers/dri2/platform_mir.c
 +      }
 +   }
 +
++   free(dri2_surf);
 +   free(surf);
 +
 +   return EGL_TRUE;
@@ -484,7 +476,7 @@ Index: mesa/src/egl/drivers/dri2/platform_mir.c
 +   dri2_dpy->dri2_loader_extension.flushFrontBuffer = dri2_flush_front_buffer;
 +   dri2_dpy->dri2_loader_extension.getBuffersWithFormat =
 +      dri2_get_buffers_with_format;
-+      
++
 +   dri2_dpy->extensions[0] = &dri2_dpy->dri2_loader_extension.base;
 +   dri2_dpy->extensions[1] = &image_lookup_extension.base;
 +   dri2_dpy->extensions[2] = &use_invalidate.base;
@@ -511,11 +503,11 @@ Index: mesa/src/egl/drivers/dri2/platform_mir.c
 +
 +   return EGL_FALSE;
 +}
-Index: mesa/src/egl/main/Makefile.am
-===================================================================
---- mesa.orig/src/egl/main/Makefile.am	2013-08-02 13:52:39.909145976 +1000
-+++ mesa/src/egl/main/Makefile.am	2013-08-02 13:52:39.897145977 +1000
-@@ -103,6 +103,11 @@
+diff --git a/src/egl/main/Makefile.am b/src/egl/main/Makefile.am
+index ca5257a..a98788a 100644
+--- a/src/egl/main/Makefile.am
++++ b/src/egl/main/Makefile.am
+@@ -103,6 +103,11 @@ if HAVE_EGL_PLATFORM_NULL
  AM_CFLAGS += -DHAVE_NULL_PLATFORM
  endif
  
@@ -527,10 +519,10 @@ Index: mesa/src/egl/main/Makefile.am
  if HAVE_EGL_DRIVER_GLX
  AM_CFLAGS += -D_EGL_BUILT_IN_DRIVER_GLX
  libEGL_la_LIBADD += ../drivers/glx/libegl_glx.la
-Index: mesa/src/egl/main/egldisplay.c
-===================================================================
---- mesa.orig/src/egl/main/egldisplay.c	2013-08-02 13:52:39.909145976 +1000
-+++ mesa/src/egl/main/egldisplay.c	2013-08-02 13:52:39.897145977 +1000
+diff --git a/src/egl/main/egldisplay.c b/src/egl/main/egldisplay.c
+index 985e781..5e6f89c 100644
+--- a/src/egl/main/egldisplay.c
++++ b/src/egl/main/egldisplay.c
 @@ -59,7 +59,10 @@
  #include <sys/types.h>
  #include <sys/stat.h>
@@ -543,7 +535,7 @@ Index: mesa/src/egl/main/egldisplay.c
  
  /**
   * Map --with-egl-platforms names to platform types.
-@@ -74,7 +77,8 @@
+@@ -74,7 +77,8 @@ static const struct {
     { _EGL_PLATFORM_DRM, "drm" },
     { _EGL_PLATFORM_FBDEV, "fbdev" },
     { _EGL_PLATFORM_NULL, "null" },
@@ -553,7 +545,7 @@ Index: mesa/src/egl/main/egldisplay.c
  };
  
  
-@@ -134,6 +138,47 @@
+@@ -134,6 +138,47 @@ _eglPointerIsDereferencable(void *p)
  #endif
  }
  
@@ -601,7 +593,7 @@ Index: mesa/src/egl/main/egldisplay.c
  
  /**
   * Try detecting native platform with the help of native display characteristcs.
-@@ -154,6 +199,11 @@
+@@ -154,6 +199,11 @@ _eglNativePlatformDetectNativeDisplay(EGLNativeDisplayType nativeDisplay)
        return _EGL_PLATFORM_FBDEV;
  #endif
  
@@ -613,7 +605,7 @@ Index: mesa/src/egl/main/egldisplay.c
     if (_eglPointerIsDereferencable(nativeDisplay)) {
        void *first_pointer = *(void **) nativeDisplay;
  
-@@ -188,7 +238,7 @@
+@@ -188,7 +238,7 @@ _eglNativePlatformDetectNativeDisplay(EGLNativeDisplayType nativeDisplay)
  _EGLPlatformType
  _eglGetNativePlatform(EGLNativeDisplayType nativeDisplay)
  {
@@ -622,11 +614,11 @@ Index: mesa/src/egl/main/egldisplay.c
     char *detection_method = NULL;
  
     if (native_platform == _EGL_INVALID_PLATFORM) {
-Index: mesa/src/egl/main/egldisplay.h
-===================================================================
---- mesa.orig/src/egl/main/egldisplay.h	2013-08-02 13:52:39.909145976 +1000
-+++ mesa/src/egl/main/egldisplay.h	2013-08-02 13:52:39.897145977 +1000
-@@ -46,6 +46,7 @@
+diff --git a/src/egl/main/egldisplay.h b/src/egl/main/egldisplay.h
+index f990300..59eb30c 100644
+--- a/src/egl/main/egldisplay.h
++++ b/src/egl/main/egldisplay.h
+@@ -46,6 +46,7 @@ enum _egl_platform_type {
     _EGL_PLATFORM_FBDEV,
     _EGL_PLATFORM_NULL,
     _EGL_PLATFORM_ANDROID,
@@ -634,11 +626,11 @@ Index: mesa/src/egl/main/egldisplay.h
  
     _EGL_NUM_PLATFORMS,
     _EGL_INVALID_PLATFORM = -1
-Index: mesa/src/egl/main/egldriver.c
-===================================================================
---- mesa.orig/src/egl/main/egldriver.c	2013-08-02 13:52:39.909145976 +1000
-+++ mesa/src/egl/main/egldriver.c	2013-08-02 13:52:39.897145977 +1000
-@@ -57,7 +57,7 @@
+diff --git a/src/egl/main/egldriver.c b/src/egl/main/egldriver.c
+index ffdd146..e4c9859 100644
+--- a/src/egl/main/egldriver.c
++++ b/src/egl/main/egldriver.c
+@@ -57,7 +57,7 @@ typedef struct _egl_module {
     char *Path;
     _EGLMain_t BuiltIn;
     void *Handle;
@@ -647,7 +639,7 @@ Index: mesa/src/egl/main/egldriver.c
  } _EGLModule;
  
  static _EGL_DECLARE_MUTEX(_eglModuleMutex);
-@@ -134,7 +134,6 @@
+@@ -134,7 +134,6 @@ library_suffix(void)
  
  #endif
  
@@ -655,7 +647,7 @@ Index: mesa/src/egl/main/egldriver.c
  /**
   * Open the named driver and find its bootstrap function: _eglMain().
   */
-@@ -147,8 +146,12 @@
+@@ -147,8 +146,12 @@ _eglOpenLibrary(const char *driverPath, lib_handle *handle)
  
     assert(driverPath);
  
@@ -670,7 +662,7 @@ Index: mesa/src/egl/main/egldriver.c
  
  #if defined(_EGL_OS_WINDOWS)
     /* XXX untested */
-@@ -194,13 +197,13 @@
+@@ -194,13 +197,13 @@ _eglOpenLibrary(const char *driverPath, lib_handle *handle)
   * Load a module and create the driver object.
   */
  static EGLBoolean
@@ -687,7 +679,7 @@ Index: mesa/src/egl/main/egldriver.c
        return EGL_TRUE;
  
     if (mod->BuiltIn) {
-@@ -226,7 +229,7 @@
+@@ -226,7 +229,7 @@ _eglLoadModule(_EGLModule *mod)
     }
  
     mod->Handle = (void *) lib;
@@ -696,7 +688,7 @@ Index: mesa/src/egl/main/egldriver.c
  
     return EGL_TRUE;
  }
-@@ -240,8 +243,10 @@
+@@ -240,8 +243,10 @@ _eglUnloadModule(_EGLModule *mod)
  {
  #if defined(_EGL_OS_UNIX)
     /* destroy the driver */
@@ -709,7 +701,7 @@ Index: mesa/src/egl/main/egldriver.c
  
     /*
      * XXX At this point (atexit), the module might be the last reference to
-@@ -255,7 +260,9 @@
+@@ -255,7 +260,9 @@ _eglUnloadModule(_EGLModule *mod)
     /* XXX Windows unloads DLLs before atexit */
  #endif
  
@@ -720,7 +712,7 @@ Index: mesa/src/egl/main/egldriver.c
     mod->Handle = NULL;
  }
  
-@@ -599,17 +606,17 @@
+@@ -599,17 +606,17 @@ _eglMatchAndInitialize(_EGLDisplay *dpy)
     while (i < _eglModules->Size) {
        _EGLModule *mod = (_EGLModule *) _eglModules->Elements[i];
  
@@ -742,7 +734,7 @@ Index: mesa/src/egl/main/egldriver.c
           i++;
        }
     }
-@@ -661,7 +668,6 @@
+@@ -661,7 +668,6 @@ __eglMustCastToProperFunctionPointerType
  _eglGetDriverProc(const char *procname)
  {
     EGLint i;
@@ -750,17 +742,18 @@ Index: mesa/src/egl/main/egldriver.c
  
     if (!_eglModules) {
        /* load the driver for the default display */
-@@ -673,15 +679,18 @@
+@@ -673,15 +679,18 @@ _eglGetDriverProc(const char *procname)
  
     for (i = 0; i < _eglModules->Size; i++) {
        _EGLModule *mod = (_EGLModule *) _eglModules->Elements[i];
-+      _EGLProc proc;
- 
+-
 -      if (!mod->Driver)
 -         break;
 -      proc = mod->Driver->API.GetProcAddress(mod->Driver, procname);
 -      if (proc)
 -         break;
++      _EGLProc proc;
++
 +      for (_EGLPlatformType plat = 0; plat < _EGL_NUM_PLATFORMS; ++plat) {
 +         if (!mod->Driver[plat])
 +            continue;
@@ -775,19 +768,27 @@ Index: mesa/src/egl/main/egldriver.c
  }
  
  
-Index: mesa/src/gallium/drivers/nouveau/nouveau_screen.c
-===================================================================
---- mesa.orig/src/gallium/drivers/nouveau/nouveau_screen.c	2013-08-02 13:52:39.909145976 +1000
-+++ mesa/src/gallium/drivers/nouveau/nouveau_screen.c	2013-08-02 13:52:39.897145977 +1000
-@@ -14,6 +14,7 @@
- #include <errno.h>
- #include <stdlib.h>
+diff --git a/src/gallium/drivers/freedreno/freedreno_screen.c b/src/gallium/drivers/freedreno/freedreno_screen.c
+index ff45b3e..b654700 100644
+--- a/src/gallium/drivers/freedreno/freedreno_screen.c
++++ b/src/gallium/drivers/freedreno/freedreno_screen.c
+@@ -345,6 +345,11 @@ fd_screen_bo_from_handle(struct pipe_screen *pscreen,
+ 	struct fd_screen *screen = fd_screen(pscreen);
+ 	struct fd_bo *bo;
  
-+#include <xf86drm.h>
- #include <libdrm/nouveau_drm.h>
- 
- #include "nouveau_winsys.h"
-@@ -86,7 +87,18 @@
++	if (whandle->type != DRM_API_HANDLE_TYPE_SHARED) {
++		DBG("Attempt to import unsupported handle type %d", whandle->type);
++		return NULL;
++	}
++
+ 	bo = fd_bo_from_name(screen->dev, whandle->handle);
+ 	if (!bo) {
+ 		DBG("ref name 0x%08x failed", whandle->handle);
+diff --git a/src/gallium/drivers/nouveau/nouveau_screen.c b/src/gallium/drivers/nouveau/nouveau_screen.c
+index d129a55..f05cb5b 100644
+--- a/src/gallium/drivers/nouveau/nouveau_screen.c
++++ b/src/gallium/drivers/nouveau/nouveau_screen.c
+@@ -86,7 +86,18 @@ nouveau_screen_bo_from_handle(struct pipe_screen *pscreen,
  	struct nouveau_bo *bo = 0;
  	int ret;
   
@@ -807,20 +808,20 @@ Index: mesa/src/gallium/drivers/nouveau/nouveau_screen.c
  	if (ret) {
  		debug_printf("%s: ref name 0x%08x failed with %d\n",
  			     __FUNCTION__, whandle->handle, ret);
-@@ -111,6 +123,8 @@
+@@ -111,6 +122,8 @@ nouveau_screen_bo_get_handle(struct pipe_screen *pscreen,
  	} else if (whandle->type == DRM_API_HANDLE_TYPE_KMS) {
  		whandle->handle = bo->handle;
  		return TRUE;
 +	} else if (whandle->type == DRM_API_HANDLE_TYPE_FD) {
-+		return nouveau_bo_set_prime(bo, (int *)&whandle->handle) == 0;
++		return nouveau_bo_set_prime(bo, &whandle->handle) == 0;
  	} else {
  		return FALSE;
  	}
-Index: mesa/src/gallium/include/state_tracker/drm_driver.h
-===================================================================
---- mesa.orig/src/gallium/include/state_tracker/drm_driver.h	2013-08-02 13:52:39.909145976 +1000
-+++ mesa/src/gallium/include/state_tracker/drm_driver.h	2013-08-02 13:52:39.897145977 +1000
-@@ -10,6 +10,8 @@
+diff --git a/src/gallium/include/state_tracker/drm_driver.h b/src/gallium/include/state_tracker/drm_driver.h
+index f9bd222..5b76d87 100644
+--- a/src/gallium/include/state_tracker/drm_driver.h
++++ b/src/gallium/include/state_tracker/drm_driver.h
+@@ -10,6 +10,8 @@ struct pipe_resource;
  
  #define DRM_API_HANDLE_TYPE_SHARED 0
  #define DRM_API_HANDLE_TYPE_KMS    1
@@ -829,7 +830,7 @@ Index: mesa/src/gallium/include/state_tracker/drm_driver.h
  
  /**
   * For use with pipe_screen::{texture_from_handle|texture_get_handle}.
-@@ -17,9 +19,10 @@
+@@ -17,9 +19,10 @@ struct pipe_resource;
  struct winsys_handle
  {
     /**
@@ -843,26 +844,26 @@ Index: mesa/src/gallium/include/state_tracker/drm_driver.h
      */
     unsigned type;
     /**
-Index: mesa/src/gallium/state_trackers/dri/drm/dri2.c
-===================================================================
---- mesa.orig/src/gallium/state_trackers/dri/drm/dri2.c	2013-08-02 13:52:39.909145976 +1000
-+++ mesa/src/gallium/state_trackers/dri/drm/dri2.c	2013-08-02 13:52:39.901145976 +1000
-@@ -231,7 +231,13 @@
+diff --git a/src/gallium/state_trackers/dri/drm/dri2.c b/src/gallium/state_trackers/dri/drm/dri2.c
+index 1dcc1f7..f5e8bec 100644
+--- a/src/gallium/state_trackers/dri/drm/dri2.c
++++ b/src/gallium/state_trackers/dri/drm/dri2.c
+@@ -263,7 +263,13 @@ dri2_drawable_process_buffers(struct dri_drawable *drawable,
  
        templ.format = format;
        templ.bind = bind;
 -      whandle.handle = buf->name;
-+      if (buf->fd != 0) {
-+         whandle.type = DRM_API_HANDLE_TYPE_FD;
-+         whandle.handle = buf->fd;
-+      } else {
++      if (buf->name != 0) {
 +         whandle.type = DRM_API_HANDLE_TYPE_SHARED;
 +         whandle.handle = buf->name;
++      } else {
++         whandle.type = DRM_API_HANDLE_TYPE_FD;
++         whandle.handle = buf->fd;
 +      }
        whandle.stride = buf->pitch;
  
        drawable->textures[statt] =
-@@ -452,14 +458,14 @@
+@@ -533,14 +539,14 @@ dri2_lookup_egl_image(struct dri_screen *screen, void *handle)
  }
  
  static __DRIimage *
@@ -881,7 +882,7 @@ Index: mesa/src/gallium/state_trackers/dri/drm/dri2.c
     unsigned tex_usage;
     enum pipe_format pf;
  
-@@ -499,12 +505,10 @@
+@@ -580,12 +586,10 @@ dri2_create_image_from_name(__DRIscreen *_screen,
     templ.depth0 = 1;
     templ.array_size = 1;
  
@@ -896,7 +897,7 @@ Index: mesa/src/gallium/state_trackers/dri/drm/dri2.c
     if (!img->texture) {
        FREE(img);
        return NULL;
-@@ -519,6 +523,39 @@
+@@ -600,6 +604,39 @@ dri2_create_image_from_name(__DRIscreen *_screen,
  }
  
  static __DRIimage *
@@ -936,7 +937,7 @@ Index: mesa/src/gallium/state_trackers/dri/drm/dri2.c
  dri2_create_image_from_renderbuffer(__DRIcontext *context,
  				    int renderbuffer, void *loaderPrivate)
  {
-@@ -610,6 +647,7 @@
+@@ -691,6 +728,7 @@ dri2_query_image(__DRIimage *image, int attrib, int *value)
  
     switch (attrib) {
     case __DRI_IMAGE_ATTRIB_STRIDE:
@@ -944,7 +945,7 @@ Index: mesa/src/gallium/state_trackers/dri/drm/dri2.c
        image->texture->screen->resource_get_handle(image->texture->screen,
              image->texture, &whandle);
        *value = whandle.stride;
-@@ -626,6 +664,11 @@
+@@ -707,6 +745,11 @@ dri2_query_image(__DRIimage *image, int attrib, int *value)
           image->texture, &whandle);
        *value = whandle.handle;
        return GL_TRUE;
@@ -956,11 +957,97 @@ Index: mesa/src/gallium/state_trackers/dri/drm/dri2.c
     case __DRI_IMAGE_ATTRIB_FORMAT:
        *value = image->dri_format;
        return GL_TRUE;
-Index: mesa/src/gallium/state_trackers/egl/common/native_helper.c
-===================================================================
---- mesa.orig/src/gallium/state_trackers/egl/common/native_helper.c	2013-08-02 13:52:39.909145976 +1000
-+++ mesa/src/gallium/state_trackers/egl/common/native_helper.c	2013-08-02 13:52:39.901145976 +1000
-@@ -428,6 +428,7 @@
+@@ -830,6 +873,67 @@ dri2_from_planar(__DRIimage *image, int plane, void *loaderPrivate)
+    return img;
+ }
+ 
++static __DRIimage *
++dri2_create_from_texture(__DRIcontext *context, int target, unsigned texture,
++                         int depth, int level, unsigned *error,
++                         void *loaderPrivate)
++{
++   /* Bad parameter seems like the least-incorrect error */
++   *error = __DRI_IMAGE_ERROR_BAD_PARAMETER;
++   return NULL;
++}
++
++static __DRIimage *
++dri2_from_fds(__DRIscreen *screen, int width, int height, int fourcc,
++              int *fds, int num_fds, int *strides, int *offsets,
++              void *loaderPrivate)
++{
++   __DRIimage *img;
++   int format, stride, dri_components;
++
++   if (num_fds != 1)
++      return NULL;
++   if (offsets[0] != 0)
++      return NULL;
++
++   switch(fourcc) {
++   case __DRI_IMAGE_FOURCC_RGB565:
++      format = __DRI_IMAGE_FORMAT_RGB565;
++      dri_components = __DRI_IMAGE_COMPONENTS_RGB;
++      break;
++   case __DRI_IMAGE_FOURCC_ARGB8888:
++      format = __DRI_IMAGE_FORMAT_ARGB8888;
++      dri_components = __DRI_IMAGE_COMPONENTS_RGBA;
++      break;
++   case __DRI_IMAGE_FOURCC_XRGB8888:
++      format = __DRI_IMAGE_FORMAT_XRGB8888;
++      dri_components = __DRI_IMAGE_COMPONENTS_RGB;
++      break;
++   case __DRI_IMAGE_FOURCC_ABGR8888:
++      format = __DRI_IMAGE_FORMAT_ABGR8888;
++      dri_components = __DRI_IMAGE_COMPONENTS_RGBA;
++      break;
++   case __DRI_IMAGE_FOURCC_XBGR8888:
++      format = __DRI_IMAGE_FORMAT_XBGR8888;
++      dri_components = __DRI_IMAGE_COMPONENTS_RGB;
++      break;
++   default:
++      return NULL;
++   }
++
++   /* Strides are in bytes not pixels. */
++   stride = strides[0] /4;
++
++   img = dri2_create_image_from_fd(screen, width, height, format,
++                                   fds[0], stride, loaderPrivate);
++   if (img == NULL)
++      return NULL;
++
++   img->dri_components = dri_components;
++   return img;
++}
++
++
+ static void
+ dri2_destroy_image(__DRIimage *img)
+ {
+@@ -838,7 +942,7 @@ dri2_destroy_image(__DRIimage *img)
+ }
+ 
+ static struct __DRIimageExtensionRec dri2ImageExtension = {
+-    { __DRI_IMAGE, 5 },
++    { __DRI_IMAGE, 7 },
+     dri2_create_image_from_name,
+     dri2_create_image_from_renderbuffer,
+     dri2_destroy_image,
+@@ -848,6 +952,8 @@ static struct __DRIimageExtensionRec dri2ImageExtension = {
+     dri2_validate_usage,
+     dri2_from_names,
+     dri2_from_planar,
++    dri2_create_from_texture,
++    dri2_from_fds,
+ };
+ 
+ /*
+diff --git a/src/gallium/state_trackers/egl/common/native_helper.c b/src/gallium/state_trackers/egl/common/native_helper.c
+index b578a8a..d1e1acd 100644
+--- a/src/gallium/state_trackers/egl/common/native_helper.c
++++ b/src/gallium/state_trackers/egl/common/native_helper.c
+@@ -427,6 +427,7 @@ drm_display_import_native_buffer(struct native_display *ndpy,
  
           memset(&wsh, 0, sizeof(wsh));
           wsh.handle = nbuf->u.drm.name;
@@ -968,11 +1055,11 @@ Index: mesa/src/gallium/state_trackers/egl/common/native_helper.c
           wsh.stride = nbuf->u.drm.stride;
  
           res = screen->resource_from_handle(screen, &nbuf->u.drm.templ, &wsh);
-Index: mesa/src/gallium/state_trackers/egl/x11/native_dri2.c
-===================================================================
---- mesa.orig/src/gallium/state_trackers/egl/x11/native_dri2.c	2013-08-02 13:52:39.909145976 +1000
-+++ mesa/src/gallium/state_trackers/egl/x11/native_dri2.c	2013-08-02 13:52:39.901145976 +1000
-@@ -177,6 +177,7 @@
+diff --git a/src/gallium/state_trackers/egl/x11/native_dri2.c b/src/gallium/state_trackers/egl/x11/native_dri2.c
+index 053044a..e1ec459 100644
+--- a/src/gallium/state_trackers/egl/x11/native_dri2.c
++++ b/src/gallium/state_trackers/egl/x11/native_dri2.c
+@@ -176,6 +176,7 @@ dri2_surface_process_drawable_buffers(struct native_surface *nsurf,
        }
  
        memset(&whandle, 0, sizeof(whandle));
@@ -980,11 +1067,11 @@ Index: mesa/src/gallium/state_trackers/egl/x11/native_dri2.c
        whandle.stride = xbuf->pitch;
        whandle.handle = xbuf->name;
        dri2surf->textures[natt] = dri2dpy->base.screen->resource_from_handle(
-Index: mesa/src/gallium/winsys/i915/drm/i915_drm_buffer.c
-===================================================================
---- mesa.orig/src/gallium/winsys/i915/drm/i915_drm_buffer.c	2013-08-02 13:52:39.909145976 +1000
-+++ mesa/src/gallium/winsys/i915/drm/i915_drm_buffer.c	2013-08-02 13:52:39.901145976 +1000
-@@ -95,9 +95,13 @@
+diff --git a/src/gallium/winsys/i915/drm/i915_drm_buffer.c b/src/gallium/winsys/i915/drm/i915_drm_buffer.c
+index ac66af3..38e0619 100644
+--- a/src/gallium/winsys/i915/drm/i915_drm_buffer.c
++++ b/src/gallium/winsys/i915/drm/i915_drm_buffer.c
+@@ -95,9 +95,13 @@ i915_drm_buffer_from_handle(struct i915_winsys *iws,
                              unsigned *stride)
  {
     struct i915_drm_winsys *idws = i915_drm_winsys(iws);
@@ -999,11 +1086,47 @@ Index: mesa/src/gallium/winsys/i915/drm/i915_drm_buffer.c
     if (!buf)
        return NULL;
  
-Index: mesa/src/gallium/winsys/radeon/drm/radeon_drm_bo.c
-===================================================================
---- mesa.orig/src/gallium/winsys/radeon/drm/radeon_drm_bo.c	2013-08-02 13:52:39.909145976 +1000
-+++ mesa/src/gallium/winsys/radeon/drm/radeon_drm_bo.c	2013-08-02 13:52:39.901145976 +1000
-@@ -39,6 +39,7 @@
+diff --git a/src/gallium/winsys/intel/drm/intel_drm_winsys.c b/src/gallium/winsys/intel/drm/intel_drm_winsys.c
+index 521762d..d9aa6a9 100644
+--- a/src/gallium/winsys/intel/drm/intel_drm_winsys.c
++++ b/src/gallium/winsys/intel/drm/intel_drm_winsys.c
+@@ -257,7 +257,6 @@ intel_winsys_import_handle(struct intel_winsys *winsys,
+                name, gem_name);
+       }
+       break;
+-#if 0
+    case DRM_API_HANDLE_TYPE_FD:
+       {
+          const int fd = (int) handle->handle;
+@@ -265,7 +264,6 @@ intel_winsys_import_handle(struct intel_winsys *winsys,
+                fd, height * handle->stride);
+       }
+       break;
+-#endif
+    default:
+       bo = NULL;
+       break;
+@@ -308,7 +306,6 @@ intel_winsys_export_handle(struct intel_winsys *winsys,
+    case DRM_API_HANDLE_TYPE_KMS:
+       handle->handle = ((drm_intel_bo *) bo)->handle;
+       break;
+-#if 0
+    case DRM_API_HANDLE_TYPE_FD:
+       {
+          int fd;
+@@ -318,7 +315,6 @@ intel_winsys_export_handle(struct intel_winsys *winsys,
+             handle->handle = fd;
+       }
+       break;
+-#endif
+    default:
+       err = -EINVAL;
+       break;
+diff --git a/src/gallium/winsys/radeon/drm/radeon_drm_bo.c b/src/gallium/winsys/radeon/drm/radeon_drm_bo.c
+index 19e2715..b296165 100644
+--- a/src/gallium/winsys/radeon/drm/radeon_drm_bo.c
++++ b/src/gallium/winsys/radeon/drm/radeon_drm_bo.c
+@@ -40,6 +40,7 @@
  #include <sys/ioctl.h>
  #include <xf86drm.h>
  #include <errno.h>
@@ -1011,7 +1134,7 @@ Index: mesa/src/gallium/winsys/radeon/drm/radeon_drm_bo.c
  
  /*
   * this are copy from radeon_drm, once an updated libdrm is released
-@@ -113,7 +114,9 @@
+@@ -114,7 +115,9 @@ struct radeon_bomgr {
      /* Winsys. */
      struct radeon_drm_winsys *rws;
  
@@ -1022,7 +1145,7 @@ Index: mesa/src/gallium/winsys/radeon/drm/radeon_drm_bo.c
      struct util_hash_table *bo_handles;
      pipe_mutex bo_handles_mutex;
      pipe_mutex bo_va_mutex;
-@@ -369,12 +372,13 @@
+@@ -370,12 +373,13 @@ static void radeon_bo_destroy(struct pb_buffer *_buf)
  
      memset(&args, 0, sizeof(args));
  
@@ -1039,7 +1162,7 @@ Index: mesa/src/gallium/winsys/radeon/drm/radeon_drm_bo.c
  
      if (bo->ptr)
          os_munmap(bo->ptr, bo->base.size);
-@@ -636,7 +640,8 @@
+@@ -660,7 +664,8 @@ static boolean radeon_bomgr_is_buffer_busy(struct pb_manager *_mgr,
  static void radeon_bomgr_destroy(struct pb_manager *_mgr)
  {
      struct radeon_bomgr *mgr = radeon_bomgr(_mgr);
@@ -1049,7 +1172,7 @@ Index: mesa/src/gallium/winsys/radeon/drm/radeon_drm_bo.c
      pipe_mutex_destroy(mgr->bo_handles_mutex);
      pipe_mutex_destroy(mgr->bo_va_mutex);
      FREE(mgr);
-@@ -668,6 +673,7 @@
+@@ -692,6 +697,7 @@ struct pb_manager *radeon_bomgr_create(struct radeon_drm_winsys *rws)
      mgr->base.is_buffer_busy = radeon_bomgr_is_buffer_busy;
  
      mgr->rws = rws;
@@ -1057,7 +1180,7 @@ Index: mesa/src/gallium/winsys/radeon/drm/radeon_drm_bo.c
      mgr->bo_handles = util_hash_table_create(handle_hash, handle_compare);
      pipe_mutex_init(mgr->bo_handles_mutex);
      pipe_mutex_init(mgr->bo_va_mutex);
-@@ -817,6 +823,7 @@
+@@ -841,6 +847,7 @@ radeon_winsys_bo_create(struct radeon_winsys *rws,
                          enum radeon_bo_domain domain)
  {
      struct radeon_drm_winsys *ws = radeon_drm_winsys(rws);
@@ -1065,7 +1188,7 @@ Index: mesa/src/gallium/winsys/radeon/drm/radeon_drm_bo.c
      struct radeon_bo_desc desc;
      struct pb_manager *provider;
      struct pb_buffer *buffer;
-@@ -838,6 +845,10 @@
+@@ -862,6 +869,10 @@ radeon_winsys_bo_create(struct radeon_winsys *rws,
      if (!buffer)
          return NULL;
  
@@ -1076,7 +1199,7 @@ Index: mesa/src/gallium/winsys/radeon/drm/radeon_drm_bo.c
      return (struct pb_buffer*)buffer;
  }
  
-@@ -850,6 +861,7 @@
+@@ -874,6 +885,7 @@ static struct pb_buffer *radeon_winsys_bo_from_handle(struct radeon_winsys *rws,
      struct radeon_bomgr *mgr = radeon_bomgr(ws->kman);
      struct drm_gem_open open_arg = {};
      int r;
@@ -1084,7 +1207,7 @@ Index: mesa/src/gallium/winsys/radeon/drm/radeon_drm_bo.c
  
      memset(&open_arg, 0, sizeof(open_arg));
  
-@@ -861,8 +873,20 @@
+@@ -885,8 +897,20 @@ static struct pb_buffer *radeon_winsys_bo_from_handle(struct radeon_winsys *rws,
       * The list of pairs is guarded by a mutex, of course. */
      pipe_mutex_lock(mgr->bo_handles_mutex);
  
@@ -1107,7 +1230,7 @@ Index: mesa/src/gallium/winsys/radeon/drm/radeon_drm_bo.c
      if (bo) {
          /* Increase the refcount. */
          struct pb_buffer *b = NULL;
-@@ -876,27 +900,38 @@
+@@ -900,27 +924,38 @@ static struct pb_buffer *radeon_winsys_bo_from_handle(struct radeon_winsys *rws,
          goto fail;
      }
  
@@ -1155,7 +1278,17 @@ Index: mesa/src/gallium/winsys/radeon/drm/radeon_drm_bo.c
  
  done:
      pipe_mutex_unlock(mgr->bo_handles_mutex);
-@@ -959,12 +994,15 @@
+@@ -958,6 +993,9 @@ done:
+     ws->allocated_vram += align(open_arg.size, 4096);
+     bo->initial_domain = RADEON_DOMAIN_VRAM;
+ 
++    if (whandle->type == DRM_API_HANDLE_TYPE_FD)
++        bo->initial_domain = RADEON_DOMAIN_GTT;
++
+     return (struct pb_buffer*)bo;
+ 
+ fail:
+@@ -986,12 +1024,15 @@ static boolean radeon_winsys_bo_get_handle(struct pb_buffer *buffer,
              bo->flink = flink.name;
  
              pipe_mutex_lock(bo->mgr->bo_handles_mutex);
@@ -1172,16 +1305,16 @@ Index: mesa/src/gallium/winsys/radeon/drm/radeon_drm_bo.c
      }
  
      whandle->stride = stride;
-Index: mesa/src/gallium/winsys/svga/drm/vmw_screen_dri.c
-===================================================================
---- mesa.orig/src/gallium/winsys/svga/drm/vmw_screen_dri.c	2013-08-02 13:52:39.909145976 +1000
-+++ mesa/src/gallium/winsys/svga/drm/vmw_screen_dri.c	2013-08-02 14:00:26.397125601 +1000
-@@ -163,6 +163,12 @@
+diff --git a/src/gallium/winsys/svga/drm/vmw_screen_dri.c b/src/gallium/winsys/svga/drm/vmw_screen_dri.c
+index 511cca7..6323a8a 100644
+--- a/src/gallium/winsys/svga/drm/vmw_screen_dri.c
++++ b/src/gallium/winsys/svga/drm/vmw_screen_dri.c
+@@ -163,6 +163,12 @@ vmw_drm_surface_from_handle(struct svga_winsys_screen *sws,
      int ret;
      int i;
  
 +    if (whandle->type != DRM_API_HANDLE_TYPE_SHARED) {
-+       fprintf(stderr, "Attempt to import unknown handle type %d\n",
++        vmw_error("Attempt to import unknown handle type %d\n",
 +                  whandle->type);
 +        return NULL;
 +    }
@@ -1189,10 +1322,10 @@ Index: mesa/src/gallium/winsys/svga/drm/vmw_screen_dri.c
      /**
       * The vmware device specific handle is the hardware SID.
       * FIXME: We probably want to move this to the ioctl implementations.
-Index: mesa/src/gbm/backends/dri/gbm_dri.c
-===================================================================
---- mesa.orig/src/gbm/backends/dri/gbm_dri.c	2013-08-02 13:52:39.909145976 +1000
-+++ mesa/src/gbm/backends/dri/gbm_dri.c	2013-08-02 13:52:39.901145976 +1000
+diff --git a/src/gbm/backends/dri/gbm_dri.c b/src/gbm/backends/dri/gbm_dri.c
+index a3a0530..39ba255 100644
+--- a/src/gbm/backends/dri/gbm_dri.c
++++ b/src/gbm/backends/dri/gbm_dri.c
 @@ -44,6 +44,8 @@
  #include "gbm_driint.h"
  
@@ -1202,7 +1335,7 @@ Index: mesa/src/gbm/backends/dri/gbm_dri.c
  
  /* For importing wl_buffer */
  #if HAVE_WAYLAND_PLATFORM
-@@ -281,9 +283,11 @@
+@@ -281,9 +283,11 @@ gbm_dri_is_format_supported(struct gbm_device *gbm,
     switch (format) {
     case GBM_BO_FORMAT_XRGB8888:
     case GBM_FORMAT_XRGB8888:
@@ -1214,7 +1347,7 @@ Index: mesa/src/gbm/backends/dri/gbm_dri.c
        if (usage & GBM_BO_USE_SCANOUT)
           return 0;
        break;
-@@ -318,9 +322,9 @@
+@@ -318,9 +322,9 @@ gbm_dri_bo_destroy(struct gbm_bo *_bo)
     struct gbm_dri_bo *bo = gbm_dri_bo(_bo);
     struct drm_mode_destroy_dumb arg;
  
@@ -1226,7 +1359,7 @@ Index: mesa/src/gbm/backends/dri/gbm_dri.c
        munmap(bo->map, bo->size);
        memset(&arg, 0, sizeof(arg));
        arg.handle = bo->handle;
-@@ -348,6 +352,9 @@
+@@ -348,6 +352,9 @@ gbm_dri_to_gbm_format(uint32_t dri_format)
     case __DRI_IMAGE_FORMAT_ABGR8888:
        ret = GBM_FORMAT_ABGR8888;
        break;
@@ -1236,7 +1369,7 @@ Index: mesa/src/gbm/backends/dri/gbm_dri.c
     default:
        ret = 0;
        break;
-@@ -356,6 +363,37 @@
+@@ -356,6 +363,37 @@ gbm_dri_to_gbm_format(uint32_t dri_format)
     return ret;
  }
  
@@ -1267,14 +1400,14 @@ Index: mesa/src/gbm/backends/dri/gbm_dri.c
 +      dri_format = __DRI_IMAGE_FORMAT_NONE;
 +      break;
 +   }
-+   
++
 +   return dri_format;
 +}
 +
  static struct gbm_bo *
  gbm_dri_bo_import(struct gbm_device *gbm,
                    uint32_t type, void *buffer, uint32_t usage)
-@@ -457,9 +495,8 @@
+@@ -460,9 +498,8 @@ create_dumb(struct gbm_device *gbm,
     struct drm_mode_destroy_dumb destroy_arg;
     int ret;
  
@@ -1286,7 +1419,7 @@ Index: mesa/src/gbm/backends/dri/gbm_dri.c
        return NULL;
  
     bo = calloc(1, sizeof *bo);
-@@ -474,6 +511,7 @@
+@@ -477,6 +514,7 @@ create_dumb(struct gbm_device *gbm,
     if (ret)
        goto free_bo;
  
@@ -1294,7 +1427,7 @@ Index: mesa/src/gbm/backends/dri/gbm_dri.c
     bo->base.base.gbm = gbm;
     bo->base.base.width = width;
     bo->base.base.height = height;
-@@ -495,6 +533,25 @@
+@@ -498,6 +536,25 @@ create_dumb(struct gbm_device *gbm,
     if (bo->map == MAP_FAILED)
        goto destroy_dumb;
  
@@ -1320,7 +1453,7 @@ Index: mesa/src/gbm/backends/dri/gbm_dri.c
     return &bo->base.base;
  
  destroy_dumb:
-@@ -529,24 +586,10 @@
+@@ -532,24 +589,7 @@ gbm_dri_bo_create(struct gbm_device *gbm,
     bo->base.base.height = height;
     bo->base.base.format = format;
  
@@ -1343,94 +1476,21 @@ Index: mesa/src/gbm/backends/dri/gbm_dri.c
 -      return NULL;
 -   }
 +   dri_format = gbm_to_dri_format(format);
-+   /* Round-trip gbm_format->dri_format->gbm_format to canonicalise
-+      GBM_BO_FORMAT_* into GBM_FORMAT_* */
-+   bo->base.base.format = gbm_dri_to_gbm_format(dri_format);
  
     if (usage & GBM_BO_USE_SCANOUT)
        dri_use |= __DRI_IMAGE_USE_SCANOUT;
-Index: mesa/src/mesa/drivers/dri/intel/intel_regions.c
-===================================================================
---- mesa.orig/src/mesa/drivers/dri/intel/intel_regions.c	2013-08-02 13:52:39.909145976 +1000
-+++ mesa/src/mesa/drivers/dri/intel/intel_regions.c	2013-08-02 13:52:39.901145976 +1000
-@@ -284,6 +284,39 @@
-    return region;
- }
- 
-+struct intel_region *
-+intel_region_alloc_for_fd(struct intel_screen *screen,
-+                          GLuint cpp,
-+                          GLuint width, GLuint height, GLuint pitch,
-+                          int fd, const char *name)
-+{
-+   struct intel_region *region;
-+   drm_intel_bo *buffer;
-+   int ret;
-+   uint32_t bit_6_swizzle, tiling;
-+
-+   buffer = drm_intel_bo_gem_create_from_prime(screen->bufmgr,
-+                                               fd, height * pitch);
-+   if (buffer == NULL)
-+      return NULL;
-+   ret = drm_intel_bo_get_tiling(buffer, &tiling, &bit_6_swizzle);
-+   if (ret != 0) {
-+      fprintf(stderr, "Couldn't get tiling of buffer (%s): %s\n",
-+	      name, strerror(-ret));
-+      drm_intel_bo_unreference(buffer);
-+      return NULL;
-+   }
-+
-+   region = intel_region_alloc_internal(screen, cpp,
-+					width, height, pitch, tiling, buffer);
-+   if (region == NULL) {
-+      drm_intel_bo_unreference(buffer);
-+      return NULL;
-+   }
-+
-+   return region;
-+}
-+
- void
- intel_region_reference(struct intel_region **dst, struct intel_region *src)
- {
-Index: mesa/src/mesa/drivers/dri/intel/intel_regions.h
-===================================================================
---- mesa.orig/src/mesa/drivers/dri/intel/intel_regions.h	2013-08-02 13:52:39.909145976 +1000
-+++ mesa/src/mesa/drivers/dri/intel/intel_regions.h	2013-08-02 13:52:39.905145976 +1000
-@@ -89,6 +89,12 @@
- 			      GLuint width, GLuint height, GLuint pitch,
- 			      unsigned int handle, const char *name);
- 
-+struct intel_region *
-+intel_region_alloc_for_fd(struct intel_screen *screen,
-+                          GLuint cpp,
-+                          GLuint width, GLuint height, GLuint pitch,
-+                          int fd, const char *name);
-+
- bool
- intel_region_flink(struct intel_region *region, uint32_t *name);
- 
-Index: mesa/src/mesa/drivers/dri/intel/intel_context.c
-===================================================================
---- mesa.orig/src/mesa/drivers/dri/intel/intel_context.c	2013-08-02 13:52:39.909145976 +1000
-+++ mesa/src/mesa/drivers/dri/intel/intel_context.c	2013-08-02 13:52:39.905145976 +1000
-@@ -1090,31 +1090,43 @@
-    if (num_samples == 0) {
-        if (rb->mt &&
-            rb->mt->region &&
--           rb->mt->region->name == buffer->name)
-+           rb->mt->region->name == buffer->name &&
-+           buffer->name != 0)
-           return;
-    } else {
-        if (rb->mt &&
-            rb->mt->singlesample_mt &&
-            rb->mt->singlesample_mt->region &&
--           rb->mt->singlesample_mt->region->name == buffer->name)
-+           rb->mt->singlesample_mt->region->name == buffer->name &&
-+           buffer->name != 0)
-           return;
-    }
+diff --git a/src/mesa/drivers/dri/i915/intel_context.c b/src/mesa/drivers/dri/i915/intel_context.c
+index f27e3d0..25a2832 100644
+--- a/src/mesa/drivers/dri/i915/intel_context.c
++++ b/src/mesa/drivers/dri/i915/intel_context.c
+@@ -804,24 +804,35 @@ intel_process_dri2_buffer(struct intel_context *intel,
+     */
+    if (rb->mt &&
+        rb->mt->region &&
+-       rb->mt->region->name == buffer->name)
++       rb->mt->region->name == buffer->name &&
++       rb->mt->region->name != 0)
+       return;
  
     if (unlikely(INTEL_DEBUG & DEBUG_DRI)) {
        fprintf(stderr,
@@ -1469,82 +1529,62 @@ Index: mesa/src/mesa/drivers/dri/intel/intel_context.c
     if (!region)
        return;
  
-Index: mesa/src/mesa/drivers/dri/intel/intel_screen.c
-===================================================================
---- mesa.orig/src/mesa/drivers/dri/intel/intel_screen.c	2013-08-02 13:52:39.909145976 +1000
-+++ mesa/src/mesa/drivers/dri/intel/intel_screen.c	2013-08-02 13:52:39.905145976 +1000
-@@ -442,6 +442,10 @@
-          return false;
-       *value = image->planar_format->components;
-       return true;
-+   case __DRI_IMAGE_ATTRIB_FD:
-+      if (drm_intel_bo_gem_export_to_prime(image->region->bo, value) == 0)
-+         return true;
-+      return false;
-   default:
-       return false;
+diff --git a/src/mesa/drivers/dri/i965/intel_context.c b/src/mesa/drivers/dri/i965/intel_context.c
+index 742bcc3..e82cb7e 100644
+--- a/src/mesa/drivers/dri/i965/intel_context.c
++++ b/src/mesa/drivers/dri/i965/intel_context.c
+@@ -857,31 +857,43 @@ intel_process_dri2_buffer(struct brw_context *brw,
+    if (num_samples == 0) {
+        if (rb->mt &&
+            rb->mt->region &&
+-           rb->mt->region->name == buffer->name)
++           rb->mt->region->name == buffer->name &&
++           rb->mt->region->name != 0)
+           return;
+    } else {
+        if (rb->mt &&
+            rb->mt->singlesample_mt &&
+            rb->mt->singlesample_mt->region &&
+-           rb->mt->singlesample_mt->region->name == buffer->name)
++           rb->mt->singlesample_mt->region->name == buffer->name &&
++           rb->mt->singlesample_mt->region->name != 0)
+           return;
     }
-@@ -514,8 +518,8 @@
-                                          names[0], strides[0],
-                                          loaderPrivate);
  
--    if (image == NULL)
--        return NULL;
-+   if (image == NULL)
-+      return NULL;
+    if (unlikely(INTEL_DEBUG & DEBUG_DRI)) {
+       fprintf(stderr,
+-	      "attaching buffer %d, at %d, cpp %d, pitch %d\n",
++	      "attaching buffer %d, at %d, cpp %d, pitch %d, fd %d\n",
+ 	      buffer->name, buffer->attachment,
+-	      buffer->cpp, buffer->pitch);
++	      buffer->cpp, buffer->pitch, buffer->fd);
+    }
  
-     image->planar_format = f;
-     for (i = 0; i < f->nplanes; i++) {
-@@ -528,6 +532,52 @@
- }
+    intel_miptree_release(&rb->mt);
+-   region = intel_region_alloc_for_handle(brw->intelScreen,
+-                                          buffer->cpp,
+-                                          drawable->w,
+-                                          drawable->h,
+-                                          buffer->pitch,
+-                                          buffer->name,
+-                                          buffer_name);
++   if (buffer->name != 0) {
++      region = intel_region_alloc_for_handle(brw->intelScreen,
++                                             buffer->cpp,
++                                             drawable->w,
++                                             drawable->h,
++                                             buffer->pitch,
++                                             buffer->name,
++                                             buffer_name);
++   } else {
++      region = intel_region_alloc_for_fd(brw->intelScreen,
++                                         buffer->cpp,
++                                         drawable->w,
++                                         drawable->h,
++                                         buffer->pitch,
++                                         buffer->fd,
++                                         buffer_name);
++   }
+    if (!region)
+       return;
  
- static __DRIimage *
-+intel_create_image_from_fds(__DRIscreen *screen,
-+                            int width, int height, int fourcc,
-+                            int *fds, int num_fds, int *strides, int *offsets,
-+                            void *loaderPrivate)
-+{
-+   struct intel_screen *intelScreen = screen->driverPrivate;
-+   struct intel_image_format *f = NULL;
-+   __DRIimage *image;
-+   int i, index;
-+
-+   if (fds == NULL || num_fds != 1)
-+      return NULL;
-+
-+   for (i = 0; i < ARRAY_SIZE(intel_image_formats); i++) {
-+      if (intel_image_formats[i].fourcc == fourcc) {
-+         f = &intel_image_formats[i];
-+      }
-+   }
-+
-+   if (f == NULL)
-+      return NULL;
-+
-+   image = intel_allocate_image(__DRI_IMAGE_FORMAT_NONE, loaderPrivate);
-+   if (image == NULL)
-+      return NULL;
-+
-+   image->region = intel_region_alloc_for_fd(intelScreen,
-+                                             1, width, height,
-+                                             strides[0], fds[0], "image");
-+   if (image->region == NULL) {
-+      free(image);
-+      return NULL;
-+   }
-+
-+   image->planar_format = f;
-+   for (i = 0; i < f->nplanes; i++) {
-+      index = f->planes[i].buffer_index;
-+      image->offsets[index] = offsets[index];
-+      image->strides[index] = strides[index];
-+   }
-+
-+   return image;
-+}
-+
-+
-+static __DRIimage *
- intel_from_planar(__DRIimage *parent, int plane, void *loaderPrivate)
- {
-     int width, height, offset, stride, dri_format, index;
