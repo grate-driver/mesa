@@ -2614,6 +2614,11 @@ ast_declarator_list::hir(exec_list *instructions,
        *   name of a known structure type.  This is both invalid and weird.
        *   Emit an error.
        *
+       * - The program text contained something like 'mediump float;'
+       *   when the programmer probably meant 'precision mediump
+       *   float;' Emit a warning with a description of what they
+       *   probably meant to do.
+       *
        * Note that if decl_type is NULL and there is a structure involved,
        * there must have been some sort of error with the structure.  In this
        * case we assume that an error was already generated on this line of
@@ -2622,20 +2627,33 @@ ast_declarator_list::hir(exec_list *instructions,
        */
       assert(this->type->specifier->structure == NULL || decl_type != NULL
 	     || state->error);
-      if (this->type->specifier->structure == NULL) {
-	 if (decl_type != NULL) {
-	    _mesa_glsl_warning(&loc, state, "empty declaration");
-	 } else {
-	    _mesa_glsl_error(&loc, state,
-			     "invalid type `%s' in empty declaration",
-			     type_name);
-	 }
-      }
 
-      if (this->type->qualifier.precision != ast_precision_none &&
-          this->type->specifier->structure != NULL) {
-         _mesa_glsl_error(&loc, state, "Precision qualifiers can't be applied "
-                          "to structures.\n");
+      if (decl_type == NULL) {
+         _mesa_glsl_error(&loc, state,
+                          "invalid type `%s' in empty declaration",
+                          type_name);
+      } else if (this->type->qualifier.precision != ast_precision_none) {
+         if (this->type->specifier->structure != NULL) {
+            _mesa_glsl_error(&loc, state,
+                             "precision qualifiers can't be applied "
+                             "to structures");
+         } else {
+            static const char *const precision_names[] = {
+               "highp",
+               "highp",
+               "mediump",
+               "lowp"
+            };
+
+            _mesa_glsl_warning(&loc, state,
+                               "empty declaration with precision qualifier, "
+                               "to set the default precision, use "
+                               "`precision %s %s;'",
+                               precision_names[this->type->qualifier.precision],
+                               type_name);
+         }
+      } else {
+         _mesa_glsl_warning(&loc, state, "empty declaration");
       }
    }
 
@@ -4311,6 +4329,34 @@ ast_struct_specifier::hir(exec_list *instructions,
 			  struct _mesa_glsl_parse_state *state)
 {
    YYLTYPE loc = this->get_location();
+
+   /* Section 4.1.8 (Structures) of the GLSL 1.10 spec says:
+    *
+    *     "Anonymous structures are not supported; so embedded structures must
+    *     have a declarator. A name given to an embedded struct is scoped at
+    *     the same level as the struct it is embedded in."
+    *
+    * The same section of the  GLSL 1.20 spec says:
+    *
+    *     "Anonymous structures are not supported. Embedded structures are not
+    *     supported.
+    *
+    *         struct S { float f; };
+    *         struct T {
+    *             S;              // Error: anonymous structures disallowed
+    *             struct { ... }; // Error: embedded structures disallowed
+    *             S s;            // Okay: nested structures with name are allowed
+    *         };"
+    *
+    * The GLSL ES 1.00 and 3.00 specs have similar langauge and examples.  So,
+    * we allow embedded structures in 1.10 only.
+    */
+   if (state->language_version != 110 && state->struct_specifier_depth != 0)
+      _mesa_glsl_error(&loc, state,
+		       "embedded structure declartions are not allowed");
+
+   state->struct_specifier_depth++;
+
    glsl_struct_field *fields;
    unsigned decl_count =
       ast_process_structure_or_interface_block(instructions,
@@ -4336,6 +4382,8 @@ ast_struct_specifier::hir(exec_list *instructions,
 	 state->num_user_structures++;
       }
    }
+
+   state->struct_specifier_depth--;
 
    /* Structure type definitions do not have r-values.
     */
