@@ -40,3 +40,17 @@
  endif
  
  pkgconfigdir = $(libdir)/pkgconfig
+--- a/configure.ac
++++ b/configure.ac
+@@ -769,11 +769,6 @@
+     GALLIUM_STATE_TRACKERS_DIRS="dri $GALLIUM_STATE_TRACKERS_DIRS"
+ fi
+ 
+-if test "x$enable_osmesa" = xyes; then
+-    GALLIUM_STATE_TRACKERS_DIRS="osmesa $GALLIUM_STATE_TRACKERS_DIRS"
+-    GALLIUM_TARGET_DIRS="$GALLIUM_TARGET_DIRS osmesa"
+-fi
+-
+ AC_SUBST([MESA_LLVM])
+ 
+ # Check for libdrm
