@@ -10,11 +10,5 @@
 117-static-gallium.patch
 118-dricore-gallium.patch
 120-hide-x86sse.patch
-
-# make unity dash blur quick on i915 again
-revert-7f2a65d896bf.diff
-revert-d61b1fdad6a.diff
-revert-a64c1eb9b110.diff
 aarch64.diff
-
 egl-platform-mir.patch
