@@ -1537,6 +1537,9 @@ setup_glsl_blit_framebuffer(struct gl_context *ctx,
          "}\n";
 
       fs_source = ralloc_asprintf(mem_ctx,
+                                  "#ifdef GL_ES\n"
+                                  "precision highp float;\n"
+                                  "#endif\n"
                                   "uniform %s texSampler;\n"
                                   "varying vec2 texCoords;\n"
                                   "void main()\n"
@@ -1561,6 +1564,9 @@ setup_glsl_blit_framebuffer(struct gl_context *ctx,
                                   _mesa_is_desktop_gl(ctx) ? "130" : "300 es");
       fs_source = ralloc_asprintf(mem_ctx,
                                   "#version %s\n"
+                                  "#ifdef GL_ES\n"
+                                  "precision highp float;\n"
+                                  "#endif\n"
                                   "uniform %s texSampler;\n"
                                   "in vec2 texCoords;\n"
                                   "out vec4 out_color;\n"
@@ -1884,19 +1890,24 @@ _mesa_meta_BlitFramebuffer(struct gl_context *ctx,
       const GLenum rb_base_format =
          _mesa_base_tex_format(ctx, colorReadRb->InternalFormat);
 
-      newTex = alloc_texture(tex, srcW, srcH, rb_base_format);
-      setup_copypix_texture(ctx, tex, newTex, srcX, srcY, srcW, srcH,
+      /* Using  the exact source rectangle to create the texture does incorrect
+       * linear filtering along the edges. So, allocate the texture extended along
+       * edges by one pixel in x, y directions.
+       */
+      newTex = alloc_texture(tex, srcW + 2, srcH + 2, rb_base_format);
+      setup_copypix_texture(ctx, tex, newTex,
+                            srcX - 1, srcY - 1, srcW + 2, srcH + 2,
                             rb_base_format, filter);
       /* texcoords (after texture allocation!) */
       {
-         verts[0].s = 0.0F;
-         verts[0].t = 0.0F;
-         verts[1].s = tex->Sright;
-         verts[1].t = 0.0F;
-         verts[2].s = tex->Sright;
-         verts[2].t = tex->Ttop;
-         verts[3].s = 0.0F;
-         verts[3].t = tex->Ttop;
+         verts[0].s = 1.0F;
+         verts[0].t = 1.0F;
+         verts[1].s = tex->Sright - 1.0F;
+         verts[1].t = 1.0F;
+         verts[2].s = tex->Sright - 1.0F;
+         verts[2].t = tex->Ttop - 1.0F;
+         verts[3].s = 1.0F;
+         verts[3].t = tex->Ttop - 1.0F;
 
          /* upload new vertex data */
          _mesa_BufferSubData(GL_ARRAY_BUFFER_ARB, 0, sizeof(verts), verts);
@@ -2134,6 +2145,9 @@ meta_glsl_clear_init(struct gl_context *ctx, struct clear_state *clear)
       "   gl_Position = position;\n"
       "}\n";
    const char *fs_source =
+      "#ifdef GL_ES\n"
+      "precision highp float;\n"
+      "#endif\n"
       "uniform vec4 color;\n"
       "void main()\n"
       "{\n"
@@ -2193,6 +2207,9 @@ meta_glsl_clear_init(struct gl_context *ctx, struct clear_state *clear)
       const char *fs_int_source =
          ralloc_asprintf(shader_source_mem_ctx,
                          "#version %s\n"
+                         "#ifdef GL_ES\n"
+                         "precision highp float;\n"
+                         "#endif\n"
                          "uniform ivec4 color;\n"
                          "out ivec4 out_color;\n"
                          "\n"
@@ -3421,6 +3438,9 @@ setup_glsl_generate_mipmap(struct gl_context *ctx,
 
       fs_source = ralloc_asprintf(mem_ctx,
                                   "#extension GL_EXT_texture_array : enable\n"
+                                  "#ifdef GL_ES\n"
+                                  "precision highp float;\n"
+                                  "#endif\n"
                                   "uniform %s texSampler;\n"
                                   "varying vec3 texCoords;\n"
                                   "void main()\n"
@@ -3444,6 +3464,9 @@ setup_glsl_generate_mipmap(struct gl_context *ctx,
                                   _mesa_is_desktop_gl(ctx) ? "130" : "300 es");
       fs_source = ralloc_asprintf(mem_ctx,
                                   "#version %s\n"
+                                  "#ifdef GL_ES\n"
+                                  "precision highp float;\n"
+                                  "#endif\n"
                                   "uniform %s texSampler;\n"
                                   "in vec3 texCoords;\n"
                                   "out vec4 out_color;\n"
