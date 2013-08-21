@@ -1,3 +1,10 @@
+mesa (9.2~rc1-2) UNRELEASED; urgency=low
+
+  [ Jon Severinsson ]
+  * control: Recommend libtxc-dxtn-s2tc0 | libtxc-dxtn0, not just the virtual libtxc-dxtn0.
+
+ -- Jon Severinsson <jon@severinsson.net>  Tue, 20 Aug 2013 18:00:00 +0200
+
 mesa (9.2~rc1-1) experimental; urgency=low
 
   * New upstream release.
