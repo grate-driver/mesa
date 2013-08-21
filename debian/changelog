@@ -4,6 +4,7 @@ mesa (9.2~rc1-2) UNRELEASED; urgency=low
   * control: Recommend libtxc-dxtn-s2tc0 | libtxc-dxtn0, not just the virtual libtxc-dxtn0.
   * control: Bump libdrm-dev build-dependency to 2.4.45.
   * control: Add versioned libglapi-mesa dependency to libosmesa6.
+  * libgl1-mesa(-swx11)-dev.install.in: Install the correct pkgconfig/gl.pc files.
 
  -- Jon Severinsson <jon@severinsson.net>  Tue, 20 Aug 2013 18:00:00 +0200
 
