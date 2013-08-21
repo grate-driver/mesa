@@ -5,6 +5,7 @@ mesa (9.2~rc1-2) UNRELEASED; urgency=low
   * control: Bump libdrm-dev build-dependency to 2.4.45.
   * control: Add versioned libglapi-mesa dependency to libosmesa6.
   * libgl1-mesa(-swx11)-dev.install.in: Install the correct pkgconfig/gl.pc files.
+  * rules: Add --disable-shared-glapi to the swx11-i386-i686 target.
 
  -- Jon Severinsson <jon@severinsson.net>  Tue, 20 Aug 2013 18:00:00 +0200
 
