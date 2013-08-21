@@ -752,6 +752,7 @@ Architecture: any
 Depends:
  ${shlibs:Depends},
  ${misc:Depends},
+ libglapi-mesa (= ${binary:Version}),
 Replaces: libgl1-mesa-swx11 (<< 6.5.2)
 Pre-Depends: ${misc:Pre-Depends}
 Multi-Arch: same
