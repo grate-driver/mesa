@@ -338,11 +338,13 @@ static boolean tegra_screen_is_format_supported(struct pipe_screen *pscreen,
 						unsigned int sample_count,
 						unsigned int bindings)
 {
-	boolean ret = TRUE;
-	fprintf(stdout, "> %s(pscreen=%p, format=%d, target=%d, sample_count=%u, bindings=%u)\n",
-		__func__, pscreen, format, target, sample_count, bindings);
-	fprintf(stdout, "< %s() = %d\n", __func__, ret);
-	return ret;
+	switch (format) {
+	case PIPE_FORMAT_B8G8R8A8_UNORM:
+	case PIPE_FORMAT_B8G8R8X8_UNORM:
+		return TRUE;
+	default:
+		return FALSE;
+	}
 }
 
 struct pipe_screen *tegra_screen_create(struct drm_tegra *drm)
