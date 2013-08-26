@@ -469,19 +469,20 @@ static void tegra_bind_vertex_state(struct pipe_context *pcontext, void *so)
 	unsigned int i;
 
 	fprintf(stdout, "> %s(pcontext=%p, so=%p)\n", __func__, pcontext, so);
-	fprintf(stdout, "  vs:\n");
-	fprintf(stdout, "    num_elements: %u\n", vs->num_elements);
+	if (vs) {
+		fprintf(stdout, "  vs:\n");
+		fprintf(stdout, "    num_elements: %u\n", vs->num_elements);
 
-	for (i = 0; i < vs->num_elements; i++) {
-		struct pipe_vertex_element *element = &vs->elements[i];
+		for (i = 0; i < vs->num_elements; i++) {
+			struct pipe_vertex_element *element = &vs->elements[i];
 
-		fprintf(stdout, "      %u:\n", i);
-		fprintf(stdout, "        src_offset: %u\n", element->src_offset);
-		fprintf(stdout, "        instance_divisor: %u\n", element->instance_divisor);
-		fprintf(stdout, "        vertex_buffer_index: %u\n", element->vertex_buffer_index);
-		fprintf(stdout, "        src_format: %d\n", element->src_format);
+			fprintf(stdout, "      %u:\n", i);
+			fprintf(stdout, "        src_offset: %u\n", element->src_offset);
+			fprintf(stdout, "        instance_divisor: %u\n", element->instance_divisor);
+			fprintf(stdout, "        vertex_buffer_index: %u\n", element->vertex_buffer_index);
+			fprintf(stdout, "        src_format: %d\n", element->src_format);
+		}
 	}
-
 	fprintf(stdout, "< %s()\n", __func__);
 }
 
