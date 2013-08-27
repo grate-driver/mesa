@@ -263,30 +263,25 @@ binary-arch: install
 	dh_strip $(foreach p,$(nodbgpkg),-p$(p))
 	dh_compress -s
 	dh_fixperms -s
-ifeq (,$(filter sparc sparc64,$(DEB_HOST_ARCH)))
 	# Resolve EGL/GLES/OpenVG symbols in the private library path.
 	# Because there's no packaging problem so onerous that accomodating
 	# proprietary alternatives can't make more difficult…
-  ifneq (,$(filter $(DEB_HOST_ARCH),arm64))
+ifneq (,$(filter $(DEB_HOST_ARCH),arm64))
 	set -e ; for PACKAGE in \
 		libegl1-mesa libgles1-mesa libgles2-mesa ; do \
 			dh_makeshlibs -p$$PACKAGE -- -c4 \
 			-edebian/$$PACKAGE/usr/lib/$(DEB_HOST_MULTIARCH)/mesa-egl/\* \
 		; done
 	dh_makeshlibs -s -Nlibopenvg1-mesa --remaining-packages -- -c4
-  else
+else
 	set -e ; for PACKAGE in \
 		libegl1-mesa libgles1-mesa libgles2-mesa libopenvg1-mesa ; do \
 			dh_makeshlibs -p$$PACKAGE -- -c4 \
 			-edebian/$$PACKAGE/usr/lib/$(DEB_HOST_MULTIARCH)/mesa-egl/\* \
 		; done
 	dh_makeshlibs -s --remaining-packages -- -c4
-  endif
-
-else
-	# Temporarily work around FTBFS on sparc, ignore new symbols:
-	dh_makeshlibs -s -- -c1
 endif
+
 	dh_installdeb -s
 	dh_shlibdeps -s -l/usr/lib/$(DEB_HOST_MULTIARCH)/mesa:\
 /usr/lib/$(DEB_HOST_MULTIARCH)/mesa-egl

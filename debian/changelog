@@ -1,4 +1,4 @@
-mesa (9.2~rc1-1ubuntu1) UNRELEASED; urgency=low
+mesa (9.2~rc2-0ubuntu1) UNRELEASED; urgency=low
 
   * Merge from debian-experimental, remaining changes:
     - Add support for aarch64.
@@ -6,6 +6,28 @@ mesa (9.2~rc1-1ubuntu1) UNRELEASED; urgency=low
     - Enable mir support.
 
  -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Tue, 20 Aug 2013 18:51:03 +0200
+
+mesa (9.2~rc2-1) UNRELEASED; urgency=low
+
+  [ Jon Severinsson ]
+  * control: Recommend libtxc-dxtn-s2tc0 | libtxc-dxtn0, not just the virtual libtxc-dxtn0.
+  * control: Bump libdrm-dev build-dependency to 2.4.45.
+  * control: Add versioned libglapi-mesa dependency to libosmesa6.
+  * libgl1-mesa(-swx11)-dev.install.in: Install the correct pkgconfig/gl.pc files.
+  * rules: Add --disable-shared-glapi to the swx11-i386-i686 target.
+
+  [ Maarten Lankhorst ]
+  * Bump libdrm-dev to 2.4.46.
+
+  [ Sven Joachim ]
+  * Remove the workaround for sparc introduced in version 7.10-2.
+
+  [ Maarten Lankhorst ]
+  * New upstream release.
+  * Refresh 02_gbm_no_undefined.diff.
+  * Drop 12_fix_glapi_gen.diff, upstreamed.
+
+ -- Jon Severinsson <jon@severinsson.net>  Tue, 20 Aug 2013 18:00:00 +0200
 
 mesa (9.2~rc1-1) experimental; urgency=low
 
