@@ -1,4 +1,4 @@
-mesa (9.2~rc2-1) UNRELEASED; urgency=low
+mesa (9.2-1) UNRELEASED; urgency=low
 
   [ Jon Severinsson ]
   * control: Recommend libtxc-dxtn-s2tc0 | libtxc-dxtn0, not just the virtual libtxc-dxtn0.
