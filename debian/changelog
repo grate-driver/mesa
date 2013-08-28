@@ -1,11 +1,11 @@
-mesa (9.2-1ubuntu1) UNRELEASED; urgency=low
+mesa (9.2-1ubuntu1) saucy; urgency=low
 
   * Merge from debian-experimental, remaining changes:
     - Add support for aarch64.
     - Build libgallium and libmesagallium shared.
     - Enable mir support.
 
- -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Tue, 20 Aug 2013 18:51:03 +0200
+ -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Wed, 28 Aug 2013 14:02:08 +0200
 
 mesa (9.2-1) experimental; urgency=low
 
