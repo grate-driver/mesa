@@ -1,0 +1,2 @@
+# Already cherry picked without -x
+d8ac987f6ab228df1a478b36c3d889992754374f glsl: Disallow uniform block layout qualifiers on non-uniform block vars.
