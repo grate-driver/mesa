@@ -1,4 +1,4 @@
-mesa (9.2-1) UNRELEASED; urgency=low
+mesa (9.2-1) experimental; urgency=low
 
   [ Jon Severinsson ]
   * control: Recommend libtxc-dxtn-s2tc0 | libtxc-dxtn0, not just the virtual libtxc-dxtn0.
@@ -18,7 +18,7 @@ mesa (9.2-1) UNRELEASED; urgency=low
   * Refresh 02_gbm_no_undefined.diff.
   * Drop 12_fix_glapi_gen.diff, upstreamed.
 
- -- Jon Severinsson <jon@severinsson.net>  Tue, 20 Aug 2013 18:00:00 +0200
+ -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Wed, 28 Aug 2013 10:28:20 +0200
 
 mesa (9.2~rc1-1) experimental; urgency=low
 
