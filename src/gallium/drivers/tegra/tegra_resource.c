@@ -139,7 +139,7 @@ tegra_screen_resource_create(struct pipe_screen *pscreen,
 {
 	struct tegra_screen *screen = tegra_screen(pscreen);
 	struct tegra_resource *resource;
-	uint32_t flags, size;
+	uint32_t flags = 0, height, size;
 	int err;
 
 	fprintf(stdout, "> %s(pscreen=%p, template=%p)\n", __func__, pscreen,
@@ -169,17 +169,23 @@ tegra_screen_resource_create(struct pipe_screen *pscreen,
 	resource->base.vtbl = &tegra_resource_vtbl;
 	resource->base.b.screen = pscreen;
 
-	resource->pitch = align(template->width0 * util_format_get_blocksize(template->format), 32);
+	resource->pitch = template->width0 * util_format_get_blocksize(template->format);
+	height = template->height0;
 
-	flags = DRM_TEGRA_GEM_CREATE_BOTTOM_UP;
+	if (template->bind & (PIPE_BIND_RENDER_TARGET | PIPE_BIND_SAMPLER_VIEW | PIPE_BIND_SCANOUT)) {
+		resource->pitch = template->width0 * util_format_get_blocksize(template->format);
+		resource->pitch = align(resource->pitch, 32);
 
-	/* use linear layout for staging and shared resources, otherwise tiled */
-	if (template->usage != PIPE_USAGE_STAGING && !(template->bind & PIPE_BIND_SHARED)) {
-		flags |= DRM_TEGRA_GEM_CREATE_TILED;
-		size = resource->pitch * align(template->height0, 16);
-	} else
-		size = resource->pitch * template->height0;
+		flags = DRM_TEGRA_GEM_CREATE_BOTTOM_UP;
 
+		/* use linear layout for staging-textures, otherwise tiled */
+		if (template->usage != PIPE_USAGE_STAGING && !(template->bind & PIPE_BIND_SHARED)) {
+			flags |= DRM_TEGRA_GEM_CREATE_TILED;
+			height = align(height, 16);
+		}
+	}
+
+	size = resource->pitch * height;
 	fprintf(stdout, "  pitch:%u size:%u flags:%x\n", resource->pitch, size, flags);
 
 	err = drm_tegra_bo_new(&resource->bo, screen->drm, flags, size);
