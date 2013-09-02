@@ -169,6 +169,8 @@ struct nvc0_context {
 
    struct nvc0_blitctx *blit;
 
+   uint32_t vport_int[2];
+
 #ifdef NVC0_WITH_DRAW_MODULE
    struct draw_context *draw;
 #endif
