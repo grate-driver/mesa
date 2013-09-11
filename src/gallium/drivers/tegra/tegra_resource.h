@@ -8,6 +8,7 @@ struct tegra_resource {
 	struct u_resource base;
 	struct drm_tegra_bo *bo;
 	unsigned int pitch;
+	unsigned int tiled : 1;
 };
 
 static inline struct tegra_resource *
