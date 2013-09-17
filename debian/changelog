@@ -1,3 +1,9 @@
+mesa (9.2-1ubuntu2) saucy; urgency=low
+
+  * Fix double-free in Mir EGL platform (LP: #1221974) 
+
+ -- Christopher James Halse Rogers <raof@ubuntu.com>  Tue, 17 Sep 2013 12:05:36 -0400
+
 mesa (9.2-1ubuntu1) saucy; urgency=low
 
   * Merge from debian-experimental, remaining changes:

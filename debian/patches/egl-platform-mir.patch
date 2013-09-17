@@ -149,10 +149,10 @@ index 6dfdf94..668480c 100644
  char *
 diff --git a/src/egl/drivers/dri2/platform_mir.c b/src/egl/drivers/dri2/platform_mir.c
 new file mode 100644
-index 0000000..55bfa40
+index 0000000..3c0d6fb
 --- /dev/null
 +++ b/src/egl/drivers/dri2/platform_mir.c
-@@ -0,0 +1,350 @@
+@@ -0,0 +1,349 @@
 +/*
 + * Copyright © 2012 Canonical, Inc
 + *
@@ -387,7 +387,6 @@ index 0000000..55bfa40
 +      }
 +   }
 +
-+   free(dri2_surf);
 +   free(surf);
 +
 +   return EGL_TRUE;
