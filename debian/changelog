@@ -1,3 +1,9 @@
+mesa (9.2-1ubuntu3) saucy; urgency=low
+
+  * Create a libglapi.so symlink. (LP: #1232000)
+
+ -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Tue, 01 Oct 2013 13:09:38 +0200
+
 mesa (9.2-1ubuntu2) saucy; urgency=low
 
   * Fix double-free in Mir EGL platform (LP: #1221974)
