@@ -1,3 +1,9 @@
+mesa (9.2.1-1) UNRELEASED; urgency=low
+
+  * Snapshot close to a new upstream release.
+
+ -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Thu, 03 Oct 2013 12:21:49 +0200
+
 mesa (9.2-1ubuntu4) UNRELEASED; urgency=low
 
   * Add i915-dont-default-to-2.1.patch: Stop defaulting to OpenGL 2.1 that is not
