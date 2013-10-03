@@ -1,3 +1,9 @@
+mesa (9.2.1-1) UNRELEASED; urgency=low
+
+  * Snapshot close to a new upstream release.
+
+ -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Thu, 03 Oct 2013 12:21:49 +0200
+
 mesa (9.2-1) experimental; urgency=low
 
   [ Jon Severinsson ]
