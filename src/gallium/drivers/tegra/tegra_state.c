@@ -111,15 +111,8 @@ static void tegra_set_vertex_buffers(struct pipe_context *pcontext,
 		fprintf(stdout, "      stride: %u\n", vb->stride);
 		fprintf(stdout, "      buffer_offset: %u\n", vb->buffer_offset);
 		fprintf(stdout, "      buffer: %p\n", vb->buffer);
-		fprintf(stdout, "      user_buffer: %p\n", vb->user_buffer);
 
-		if (vb->user_buffer) {
-			const float *ptr = vb->user_buffer;
-			unsigned int j;
-
-			for (j = 0; j < 4; j++)
-				fprintf(stdout, "        %f\n", ptr[j]);
-		}
+		assert(!vb->user_buffer);
 	}
 
 	util_set_vertex_buffers_mask(vbs->vb, &vbs->enabled, buffer, start,
@@ -151,14 +144,13 @@ static void tegra_set_index_buffer(struct pipe_context *pcontext,
 	fprintf(stdout, "    index_size: %u\n", buffer->index_size);
 	fprintf(stdout, "    offset: %u\n", buffer->offset);
 	fprintf(stdout, "    buffer: %p\n", buffer->buffer);
-	fprintf(stdout, "    user_buffer: %p\n", buffer->user_buffer);
 
 	if (buffer) {
 		pipe_resource_reference(&context->index_buffer.buffer,
 					buffer->buffer);
 		context->index_buffer.index_size = buffer->index_size;
 		context->index_buffer.offset = buffer->offset;
-		context->index_buffer.user_buffer = buffer->user_buffer;
+		assert(!buffer->user_buffer);
 	} else {
 		pipe_resource_reference(&context->index_buffer.buffer, NULL);
 	}
@@ -498,8 +490,6 @@ static void tegra_delete_vertex_state(struct pipe_context *pcontext, void *so)
 static void tegra_draw_vbo(struct pipe_context *pcontext,
 			   const struct pipe_draw_info *info)
 {
-	struct tegra_context *context = tegra_context(pcontext);
-
 	fprintf(stdout, "> %s(pcontext=%p, info=%p)\n", __func__, pcontext,
 		info);
 	fprintf(stdout, "  info:\n");
@@ -508,23 +498,7 @@ static void tegra_draw_vbo(struct pipe_context *pcontext,
 	fprintf(stdout, "    start: %u\n", info->start);
 	fprintf(stdout, "    count: %u\n", info->count);
 
-	if (info->indexed) {
-		struct pipe_index_buffer *buffer = &context->index_buffer;
-		unsigned int i;
-
-		fprintf(stdout, "    indices:\n");
-
-		for (i = info->start; i < info->start + info->count; i++) {
-			if (buffer->index_size == 2) {
-				const uint16_t *index = buffer->user_buffer;
-				fprintf(stdout, "      %u: %u\n", i, index[i]);
-			} else {
-				fprintf(stdout, "unsupported index size: %u\n",
-					buffer->index_size);
-				break;
-			}
-		}
-	}
+	/* TODO: draw */
 
 	fprintf(stdout, "< %s()\n", __func__);
 }
