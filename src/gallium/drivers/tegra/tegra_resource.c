@@ -268,8 +268,93 @@ static void tegra_resource_copy_region(struct pipe_context *pcontext,
 static void tegra_blit(struct pipe_context *pcontext,
 		       const struct pipe_blit_info *info)
 {
+	int err, value;
+	struct tegra_context *context = tegra_context(pcontext);
+	struct tegra_channel *gr2d = context->gr2d;
+	struct tegra_resource *dst, *src;
+
 	fprintf(stdout, "> %s(pcontext=%p, info=%p)\n", __func__, pcontext,
 		info);
+
+	dst = tegra_resource(info->dst.resource);
+	src = tegra_resource(info->src.resource);
+
+	printf("blit-target: %p\n", dst);
+	printf("blit-source: %p\n", tegra_resource(info->src.resource));
+
+	err = tegra_stream_begin(&gr2d->stream);
+	if (err < 0) {
+		fprintf(stderr, "tegra_stream_begin() failed: %d\n", err);
+		goto out;
+	}
+
+	tegra_stream_push_setclass(&gr2d->stream, HOST1X_CLASS_GR2D);
+
+	tegra_stream_push(&gr2d->stream, host1x_opcode_mask(0x009, 0x9));
+	tegra_stream_push(&gr2d->stream, 0x0000003a);            /* 0x009 - trigger */
+	tegra_stream_push(&gr2d->stream, 0x00000000);            /* 0x00c - cmdsel */
+
+	tegra_stream_push(&gr2d->stream, host1x_opcode_mask(0x01e, 0x7));
+	tegra_stream_push(&gr2d->stream, 0x00000000);            /* 0x01e - controlsecond */
+	/*
+	 * [20:20] source color depth (0: mono, 1: same)
+	 * [17:16] destination color depth (0: 8 bpp, 1: 16 bpp, 2: 32 bpp)
+	 */
+
+	value = 1 << 20;
+	switch (util_format_get_blocksize(dst->base.b.format)) {
+	case 1:
+		value |= 0 << 16;
+		break;
+	case 2:
+		value |= 1 << 16;
+		break;
+	case 4:
+		value |= 2 << 16;
+		break;
+	default:
+		assert(0);
+	}
+
+	tegra_stream_push(&gr2d->stream, value);                 /* 0x01f - controlmain */
+	tegra_stream_push(&gr2d->stream, 0x000000cc);            /* 0x020 - ropfade */
+
+	tegra_stream_push(&gr2d->stream, host1x_opcode_nonincr(0x046, 1));
+
+	/*
+	 * [20:20] destination write tile mode (0: linear, 1: tiled)
+	 * [ 0: 0] tile mode Y/RGB (0: linear, 1: tiled)
+	 */
+	value = 0/*(1 << 20) | 1*/;
+	tegra_stream_push(&gr2d->stream, value);                 /* 0x046 - tilemode */
+
+	tegra_stream_push(&gr2d->stream, host1x_opcode_mask(0x02b, 0xe149));
+	tegra_stream_push_reloc(&gr2d->stream, dst->bo, 0);      /* 0x02b - dstba */
+
+	tegra_stream_push(&gr2d->stream, dst->pitch);            /* 0x02e - dstst */
+
+	tegra_stream_push_reloc(&gr2d->stream, src->bo, 0);      /* 0x031 - srcba */
+
+	tegra_stream_push(&gr2d->stream, src->pitch);            /* 0x033 - srcst */
+
+	value = info->dst.box.height << 16 | info->dst.box.width;
+	tegra_stream_push(&gr2d->stream, value);                 /* 0x038 - dstsize */
+
+	value = info->src.box.y << 16 | info->src.box.x;
+	tegra_stream_push(&gr2d->stream, value);                 /* 0x039 - srcps */
+
+	value = info->dst.box.y << 16 | info->dst.box.x;
+	tegra_stream_push(&gr2d->stream, value);                 /* 0x03a - dstps */
+
+	tegra_stream_end(&gr2d->stream);
+
+	err = tegra_stream_flush(&gr2d->stream);
+	if (err < 0) {
+		fprintf(stderr, "tegra_stream_flush() failed: %d\n", err);
+		goto out;
+	}
+
+out:
 	fprintf(stdout, "< %s()\n", __func__);
 }
 
