@@ -2,11 +2,14 @@
 #define TEGRA_SCREEN_H
 
 #include "pipe/p_screen.h"
+#include "util/slab.h"
 
 #include <libdrm/tegra.h>
 
 struct tegra_screen {
 	struct pipe_screen base;
+
+	struct slab_parent_pool transfer_pool;
 
 	struct drm_tegra *drm;
 };

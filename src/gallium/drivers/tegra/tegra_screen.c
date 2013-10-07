@@ -10,6 +10,8 @@ static void tegra_screen_destroy(struct pipe_screen *pscreen)
 
 	fprintf(stdout, "> %s(pscreen=%p)\n", __func__, pscreen);
 
+	slab_destroy_parent(&screen->transfer_pool);
+
 	drm_tegra_close(screen->drm);
 	free(screen);
 
@@ -180,7 +182,7 @@ static int tegra_screen_get_param(struct pipe_screen *pscreen,
 		return 0;
 
 	case PIPE_CAP_PREFER_BLIT_BASED_TEXTURE_TRANSFER:
-		return 0;
+		return 1;
 
 	default:
 		fprintf(stdout, "  unsupported parameter: %d\n", param);
@@ -368,6 +370,7 @@ tegra_screen_fence_reference(struct pipe_screen *pscreen,
 
 static boolean
 tegra_screen_fence_finish(struct pipe_screen *screen,
+		struct pipe_context *ctx,
 		struct pipe_fence_handle *fence,
 		uint64_t timeout)
 {
@@ -408,6 +411,8 @@ struct pipe_screen *tegra_screen_create(struct drm_tegra *drm)
 	screen->base.fence_finish = tegra_screen_fence_finish;
 
 	tegra_screen_resource_init(&screen->base);
+
+	slab_create_parent(&screen->transfer_pool, sizeof(struct pipe_transfer), 16);
 
 	fprintf(stdout, "< %s() = %p\n", __func__, &screen->base);
 	return &screen->base;

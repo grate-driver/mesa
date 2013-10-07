@@ -70,6 +70,8 @@ static void tegra_context_destroy(struct pipe_context *pcontext)
 
 	fprintf(stdout, "> %s(pcontext=%p)\n", __func__, pcontext);
 
+	slab_destroy_child(&context->transfer_pool);
+
 	tegra_channel_delete(context->gr3d);
 	tegra_channel_delete(context->gr2d);
 	free(context);
@@ -108,6 +110,7 @@ out:
 struct pipe_context *tegra_screen_context_create(struct pipe_screen *pscreen,
 						 void *priv, unsigned flags)
 {
+	struct tegra_screen *screen = tegra_screen(pscreen);
 	struct tegra_context *context;
 	int err;
 
@@ -133,6 +136,8 @@ struct pipe_context *tegra_screen_context_create(struct pipe_screen *pscreen,
 		fprintf(stderr, "tegra_channel_create() failed: %d\n", err);
 		return NULL;
 	}
+
+	slab_create_child(&context->transfer_pool, &screen->transfer_pool);
 
 	context->base.destroy = tegra_context_destroy;
 	context->base.flush = tegra_context_flush;
