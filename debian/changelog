@@ -1,4 +1,4 @@
-mesa (9.1.7-1) UNRELEASED; urgency=low
+mesa (9.1.7-1) unstable; urgency=low
 
   [ Andreas Beckmann ]
   * libgl1-mesa-glx: Add Breaks: glx-diversions (<< 0.4) because the old
@@ -7,7 +7,7 @@ mesa (9.1.7-1) UNRELEASED; urgency=low
   [ Maarten Lankhorst ]
   * New upstream release.
 
- -- Andreas Beckmann <anbe@debian.org>  Sun, 18 Aug 2013 10:50:28 +0200
+ -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Mon, 07 Oct 2013 11:34:34 +0200
 
 mesa (9.1.6-2) unstable; urgency=low
 
