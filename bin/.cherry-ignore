@@ -64,3 +64,9 @@ a3dcab43c6b6fed2f35aa0e802be6398985f100c clover: Pass corresponding module::argu
 829caf410e2c2c6f79902199da5a7900abc16129 clover: Byte-swap kernel arguments when host and device endianness differ.
 f64c0ca692d3e8c78dd9ae1f015f58f1dfc1c760 clover: Extend kernel arguments for differing host and device data types.
 df530829f757a8968389427eb26f45a0d46623fa clover: Respect kernel argument alignment restrictions.
+
+# Memory leak being fixed doesn't exist in 9.1 (as far as I can tell)
+035bf2198368d3fa69387788a63039d71319f0bf i915,i965: Fix memory leak in try_pbo_upload (v2)
+
+# This commit depends on other, unspecified commits (does not compile alone)
+d38765f3c8fbd473b949177cc9698b2cd459902c mesa: Support GL_MAX_VERTEX_OUTPUT_COMPONENTS query with ES3

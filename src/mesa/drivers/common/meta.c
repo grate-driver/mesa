@@ -1876,19 +1876,24 @@ _mesa_meta_BlitFramebuffer(struct gl_context *ctx,
       const GLenum rb_base_format =
          _mesa_base_tex_format(ctx, colorReadRb->InternalFormat);
 
-      newTex = alloc_texture(tex, srcW, srcH, rb_base_format);
-      setup_copypix_texture(ctx, tex, newTex, srcX, srcY, srcW, srcH,
+      /* Using  the exact source rectangle to create the texture does incorrect
+       * linear filtering along the edges. So, allocate the texture extended along
+       * edges by one pixel in x, y directions.
+       */
+      newTex = alloc_texture(tex, srcW + 2, srcH + 2, rb_base_format);
+      setup_copypix_texture(ctx, tex, newTex,
+                            srcX - 1, srcY - 1, srcW + 2, srcH + 2,
                             rb_base_format, filter);
       /* texcoords (after texture allocation!) */
       {
-         verts[0].s = 0.0F;
-         verts[0].t = 0.0F;
-         verts[1].s = tex->Sright;
-         verts[1].t = 0.0F;
-         verts[2].s = tex->Sright;
-         verts[2].t = tex->Ttop;
-         verts[3].s = 0.0F;
-         verts[3].t = tex->Ttop;
+         verts[0].s = 1.0F;
+         verts[0].t = 1.0F;
+         verts[1].s = tex->Sright - 1.0F;
+         verts[1].t = 1.0F;
+         verts[2].s = tex->Sright - 1.0F;
+         verts[2].t = tex->Ttop - 1.0F;
+         verts[3].s = 1.0F;
+         verts[3].t = tex->Ttop - 1.0F;
 
          /* upload new vertex data */
          _mesa_BufferSubData(GL_ARRAY_BUFFER_ARB, 0, sizeof(verts), verts);
@@ -3950,6 +3955,11 @@ decompress_texture_image(struct gl_context *ctx,
    verts[2].y = height;
    verts[3].x = 0.0F;
    verts[3].y = height;
+
+   _mesa_MatrixMode(GL_PROJECTION);
+   _mesa_LoadIdentity();
+   _mesa_Ortho(0.0, width, 0.0, height, -1.0, 1.0);
+   _mesa_set_viewport(ctx, 0, 0, width, height);
 
    /* upload new vertex data */
    _mesa_BufferSubData(GL_ARRAY_BUFFER_ARB, 0, sizeof(verts), verts);

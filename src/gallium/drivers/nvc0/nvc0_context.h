@@ -75,6 +75,7 @@
 struct nvc0_blitctx;
 
 boolean nvc0_blitctx_create(struct nvc0_context *);
+void nvc0_blitctx_destroy(struct nvc0_context *);
 
 struct nvc0_context {
    struct nouveau_context base;
@@ -168,6 +169,8 @@ struct nvc0_context {
    uint cond_mode;
 
    struct nvc0_blitctx *blit;
+
+   uint32_t vport_int[2];
 
 #ifdef NVC0_WITH_DRAW_MODULE
    struct draw_context *draw;
