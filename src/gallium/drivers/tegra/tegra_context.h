@@ -5,11 +5,8 @@
 #include "pipe/p_state.h"
 
 #include "tegra_state.h"
+#include "tegra_fence.h"
 #include "tegra_stream.h"
-
-struct tegra_fence {
-	struct pipe_reference reference;
-};
 
 struct tegra_framebuffer_state {
 	struct pipe_framebuffer_state base;

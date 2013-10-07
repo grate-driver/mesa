@@ -347,6 +347,39 @@ static boolean tegra_screen_is_format_supported(struct pipe_screen *pscreen,
 	}
 }
 
+static void
+tegra_screen_fence_reference(struct pipe_screen *pscreen,
+			struct pipe_fence_handle **ptr,
+			struct pipe_fence_handle *fence)
+{
+	fprintf(stdout, "> %s\n", __func__);
+
+// 	assert(ptr && *ptr);
+// 	assert(fence);
+//
+// 	if (pipe_reference(&tegra_fence(*ptr)->reference, &tegra_fence(fence)->reference)) {
+// 		free(tegra_fence(*ptr)->fence);
+// 		free(*ptr);
+// 	}
+//
+// 	*ptr = fence;
+	fprintf(stdout, "< %s()\n", __func__);
+}
+
+static boolean
+tegra_screen_fence_finish(struct pipe_screen *screen,
+		struct pipe_fence_handle *fence,
+		uint64_t timeout)
+{
+	boolean ret = 0;
+
+	fprintf(stdout, "> %s\n", __func__);
+
+	fprintf(stdout, "< %s() = %d\n", __func__, ret);
+
+	return ret;
+}
+
 struct pipe_screen *tegra_screen_create(struct drm_tegra *drm)
 {
 	struct tegra_screen *screen;
@@ -369,6 +402,10 @@ struct pipe_screen *tegra_screen_create(struct drm_tegra *drm)
 	screen->base.get_shader_param = tegra_screen_get_shader_param;
 	screen->base.context_create = tegra_screen_context_create;
 	screen->base.is_format_supported = tegra_screen_is_format_supported;
+
+	/* fence functions */
+	screen->base.fence_reference = tegra_screen_fence_reference;
+	screen->base.fence_finish = tegra_screen_fence_finish;
 
 	tegra_screen_resource_init(&screen->base);
 
