@@ -1,16 +1,19 @@
+mesa (9.2.1-1ubuntu1) saucy; urgency=low
+
+  [ Robert Hooker ]
+  * Add i915-dont-default-to-2.1.patch: Stop defaulting to OpenGL 2.1 that is not
+    fully implemented in hardware on gen3 GPUs, the software fallbacks make Unity
+    unusably slow. (LP: #1222602)
+  [ Maarten Lankhorst ]
+  * New upstream bugfix release. (LP: #1232940)
+
+ -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Mon, 07 Oct 2013 10:39:18 +0200
+
 mesa (9.2.1-1) experimental; urgency=low
 
   * New upstream release.
 
  -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Mon, 07 Oct 2013 10:00:39 +0200
-
-mesa (9.2-1ubuntu4) UNRELEASED; urgency=low
-
-  * Add i915-dont-default-to-2.1.patch: Stop defaulting to OpenGL 2.1 that is not
-    fully implemented in hardware on gen3 GPUs, the software fallbacks make Unity
-    unusably slow. (LP: #1222602)
-
- -- Robert Hooker <sarvatt@ubuntu.com>  Tue, 01 Oct 2013 09:41:40 -0400
 
 mesa (9.2-1ubuntu3) saucy; urgency=low
 
