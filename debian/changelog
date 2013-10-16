@@ -1,3 +1,15 @@
+mesa (9.2.1-1ubuntu3) saucy; urgency=low
+
+  * libegl1-mesa-dev: Don't depend on libmirclient-dev on AArch64.
+
+ -- Matthias Klose <doko@ubuntu.com>  Thu, 10 Oct 2013 16:25:10 +0200
+
+mesa (9.2.1-1ubuntu2) saucy; urgency=low
+
+  * Build without Mir backend on AArch64.
+
+ -- Matthias Klose <doko@ubuntu.com>  Wed, 09 Oct 2013 23:11:33 +0000
+
 mesa (9.2.1-1ubuntu1) saucy; urgency=low
 
   [ Robert Hooker ]
