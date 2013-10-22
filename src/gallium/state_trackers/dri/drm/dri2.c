@@ -1,6 +1,5 @@
 /*
  * Mesa 3-D graphics library
- * Version:  7.9
  *
  * Copyright 2009, VMware, Inc.
  * All Rights Reserved.
@@ -19,14 +18,14 @@
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
  * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
- * BRIAN PAUL BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
- * AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
- * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ * THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+ * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+ * OTHER DEALINGS IN THE SOFTWARE.
  *
  * Authors:
- *    Keith Whitwell <keithw@vmware.com>
- *    Jakob Bornecrantz <wallbraker@gmail.com>
- *    Chia-I Wu <olv@lunarg.com>
+ *    Keith Whitwell <keithw@vmware.com> Jakob Bornecrantz
+ *    <wallbraker@gmail.com> Chia-I Wu <olv@lunarg.com>
  */
 
 #include "util/u_memory.h"
@@ -46,7 +45,7 @@
 static void
 dri2_flush_drawable(__DRIdrawable *dPriv)
 {
-   dri_flush(dPriv->driContextPriv, dPriv, __DRI2_FLUSH_DRAWABLE, 0);
+   dri_flush(dPriv->driContextPriv, dPriv, __DRI2_FLUSH_DRAWABLE, -1);
 }
 
 static void
@@ -170,7 +169,8 @@ dri2_drawable_get_buffers(struct dri_drawable *drawable,
  * Process __DRIbuffer and convert them into pipe_resources.
  */
 static void
-dri2_drawable_process_buffers(struct dri_drawable *drawable,
+dri2_drawable_process_buffers(struct dri_context *ctx,
+                              struct dri_drawable *drawable,
                               __DRIbuffer *buffers, unsigned buffer_count,
                               const enum st_attachment_type *atts,
                               unsigned att_count)
@@ -180,7 +180,7 @@ dri2_drawable_process_buffers(struct dri_drawable *drawable,
    struct pipe_resource templ;
    struct winsys_handle whandle;
    boolean alloc_depthstencil = FALSE;
-   unsigned i, bind;
+   unsigned i, j, bind;
 
    if (drawable->old_num == buffer_count &&
        drawable->old_w == dri_drawable->w &&
@@ -188,10 +188,41 @@ dri2_drawable_process_buffers(struct dri_drawable *drawable,
        memcmp(drawable->old, buffers, sizeof(__DRIbuffer) * buffer_count) == 0)
       return;
 
-   for (i = 0; i < ST_ATTACHMENT_COUNT; i++)
+   /* See if we need a depth-stencil buffer. */
+   for (i = 0; i < att_count; i++) {
+      if (atts[i] == ST_ATTACHMENT_DEPTH_STENCIL) {
+         alloc_depthstencil = TRUE;
+         break;
+      }
+   }
+
+   /* Delete the resources we won't need. */
+   for (i = 0; i < ST_ATTACHMENT_COUNT; i++) {
+      /* Don't delete the depth-stencil buffer, we can reuse it. */
+      if (i == ST_ATTACHMENT_DEPTH_STENCIL && alloc_depthstencil)
+         continue;
+
       pipe_resource_reference(&drawable->textures[i], NULL);
-   for (i = 0; i < ST_ATTACHMENT_COUNT; i++)
-      pipe_resource_reference(&drawable->msaa_textures[i], NULL);
+   }
+
+   if (drawable->stvis.samples > 1) {
+      for (i = 0; i < ST_ATTACHMENT_COUNT; i++) {
+         boolean del = TRUE;
+
+         /* Don't delete MSAA resources for the attachments which are enabled,
+          * we can reuse them. */
+         for (j = 0; j < att_count; j++) {
+            if (i == atts[j]) {
+               del = FALSE;
+               break;
+            }
+         }
+
+         if (del) {
+            pipe_resource_reference(&drawable->msaa_textures[i], NULL);
+         }
+      }
+   }
 
    memset(&templ, 0, sizeof(templ));
    templ.target = screen->target;
@@ -245,52 +276,87 @@ dri2_drawable_process_buffers(struct dri_drawable *drawable,
       for (i = 0; i < att_count; i++) {
          enum st_attachment_type att = atts[i];
 
+         if (att == ST_ATTACHMENT_DEPTH_STENCIL)
+            continue;
+
          if (drawable->textures[att]) {
             templ.format = drawable->textures[att]->format;
             templ.bind = drawable->textures[att]->bind;
             templ.nr_samples = drawable->stvis.samples;
 
-            drawable->msaa_textures[att] =
-               screen->base.screen->resource_create(screen->base.screen,
-                                                    &templ);
-            assert(drawable->msaa_textures[att]);
-         }
-      }
-   }
+            /* Try to reuse the resource.
+             * (the other resource parameters should be constant)
+             */
+            if (!drawable->msaa_textures[att] ||
+                drawable->msaa_textures[att]->width0 != templ.width0 ||
+                drawable->msaa_textures[att]->height0 != templ.height0) {
+               /* Allocate a new one. */
+               pipe_resource_reference(&drawable->msaa_textures[att], NULL);
 
-   /* See if we need a depth-stencil buffer. */
-   for (i = 0; i < att_count; i++) {
-      if (atts[i] == ST_ATTACHMENT_DEPTH_STENCIL) {
-         alloc_depthstencil = TRUE;
-         break;
+               drawable->msaa_textures[att] =
+                  screen->base.screen->resource_create(screen->base.screen,
+                                                       &templ);
+               assert(drawable->msaa_textures[att]);
+
+               /* If there are any MSAA resources, we should initialize them
+                * such that they contain the same data as the single-sample
+                * resources we just got from the X server.
+                *
+                * The reason for this is that the state tracker (and
+                * therefore the app) can access the MSAA resources only.
+                * The single-sample resources are not exposed
+                * to the state tracker.
+                *
+                */
+               dri_pipe_blit(ctx->st->pipe,
+                             drawable->msaa_textures[att],
+                             drawable->textures[att]);
+            }
+         }
+         else {
+            pipe_resource_reference(&drawable->msaa_textures[att], NULL);
+         }
       }
    }
 
    /* Allocate a private depth-stencil buffer. */
    if (alloc_depthstencil) {
+      enum st_attachment_type att = ST_ATTACHMENT_DEPTH_STENCIL;
+      struct pipe_resource **zsbuf;
       enum pipe_format format;
       unsigned bind;
 
-      dri_drawable_get_format(drawable, ST_ATTACHMENT_DEPTH_STENCIL,
-                              &format, &bind);
+      dri_drawable_get_format(drawable, att, &format, &bind);
+
       if (format) {
          templ.format = format;
          templ.bind = bind;
 
          if (drawable->stvis.samples > 1) {
             templ.nr_samples = drawable->stvis.samples;
-            drawable->msaa_textures[ST_ATTACHMENT_DEPTH_STENCIL] =
-               screen->base.screen->resource_create(screen->base.screen,
-                                                    &templ);
-            assert(drawable->msaa_textures[ST_ATTACHMENT_DEPTH_STENCIL]);
+            zsbuf = &drawable->msaa_textures[att];
          }
          else {
             templ.nr_samples = 0;
-            drawable->textures[ST_ATTACHMENT_DEPTH_STENCIL] =
-               screen->base.screen->resource_create(screen->base.screen,
-                                                    &templ);
-            assert(drawable->textures[ST_ATTACHMENT_DEPTH_STENCIL]);
+            zsbuf = &drawable->textures[att];
          }
+
+         /* Try to reuse the resource.
+          * (the other resource parameters should be constant)
+          */
+         if (!*zsbuf ||
+             (*zsbuf)->width0 != templ.width0 ||
+             (*zsbuf)->height0 != templ.height0) {
+            /* Allocate a new one. */
+            pipe_resource_reference(zsbuf, NULL);
+            *zsbuf = screen->base.screen->resource_create(screen->base.screen,
+                                                          &templ);
+            assert(*zsbuf);
+         }
+      }
+      else {
+         pipe_resource_reference(&drawable->msaa_textures[att], NULL);
+         pipe_resource_reference(&drawable->textures[att], NULL);
       }
    }
 
@@ -392,7 +458,8 @@ dri2_release_buffer(__DRIscreen *sPriv, __DRIbuffer *bPriv)
  */
 
 static void
-dri2_allocate_textures(struct dri_drawable *drawable,
+dri2_allocate_textures(struct dri_context *ctx,
+                       struct dri_drawable *drawable,
                        const enum st_attachment_type *statts,
                        unsigned statts_count)
 {
@@ -401,7 +468,7 @@ dri2_allocate_textures(struct dri_drawable *drawable,
 
    buffers = dri2_drawable_get_buffers(drawable, statts, &num_buffers);
    if (buffers)
-      dri2_drawable_process_buffers(drawable, buffers, num_buffers,
+      dri2_drawable_process_buffers(ctx, drawable, buffers, num_buffers,
                                     statts, statts_count);
 }
 
@@ -419,7 +486,10 @@ dri2_flush_frontbuffer(struct dri_context *ctx,
    if (drawable->stvis.samples > 1) {
       struct pipe_context *pipe = ctx->st->pipe;
 
-      dri_msaa_resolve(ctx, drawable, ST_ATTACHMENT_FRONT_LEFT);
+      /* Resolve the front buffer. */
+      dri_pipe_blit(ctx->st->pipe,
+                    drawable->textures[ST_ATTACHMENT_FRONT_LEFT],
+                    drawable->msaa_textures[ST_ATTACHMENT_FRONT_LEFT]);
       pipe->flush(pipe, NULL, 0);
    }
 

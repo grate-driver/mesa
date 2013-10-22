@@ -94,6 +94,10 @@
 #define RADEON_CS_RING_DMA          2
 #endif
 
+#ifndef RADEON_CS_RING_UVD
+#define RADEON_CS_RING_UVD          3
+#endif
+
 #ifndef RADEON_CS_END_OF_FRAME
 #define RADEON_CS_END_OF_FRAME      0x04
 #endif
@@ -163,7 +167,9 @@ static void radeon_destroy_cs_context(struct radeon_cs_context *csc)
 }
 
 
-static struct radeon_winsys_cs *radeon_drm_cs_create(struct radeon_winsys *rws, enum ring_type ring_type)
+static struct radeon_winsys_cs *radeon_drm_cs_create(struct radeon_winsys *rws,
+                                                     enum ring_type ring_type,
+                                                     struct radeon_winsys_cs_handle *trace_buf)
 {
     struct radeon_drm_winsys *ws = radeon_drm_winsys(rws);
     struct radeon_drm_cs *cs;
@@ -175,6 +181,7 @@ static struct radeon_winsys_cs *radeon_drm_cs_create(struct radeon_winsys *rws, 
     pipe_semaphore_init(&cs->flush_completed, 0);
 
     cs->ws = ws;
+    cs->trace_buf = (struct radeon_bo*)trace_buf;
 
     if (!radeon_init_cs_context(&cs->csc1, cs->ws)) {
         FREE(cs);
@@ -409,7 +416,7 @@ static void radeon_drm_cs_write_reloc(struct radeon_winsys_cs *rcs,
     OUT_CS(&cs->base, index * RELOC_DWORDS);
 }
 
-void radeon_drm_cs_emit_ioctl_oneshot(struct radeon_cs_context *csc)
+void radeon_drm_cs_emit_ioctl_oneshot(struct radeon_drm_cs *cs, struct radeon_cs_context *csc)
 {
     unsigned i;
 
@@ -426,6 +433,10 @@ void radeon_drm_cs_emit_ioctl_oneshot(struct radeon_cs_context *csc)
             fprintf(stderr, "radeon: The kernel rejected CS, "
                     "see dmesg for more information.\n");
         }
+    }
+
+    if (cs->trace_buf) {
+        radeon_dump_cs_on_lockup(cs, csc);
     }
 
     for (i = 0; i < csc->crelocs; i++)
@@ -450,10 +461,40 @@ void radeon_drm_cs_sync_flush(struct radeon_winsys_cs *rcs)
 
 DEBUG_GET_ONCE_BOOL_OPTION(noop, "RADEON_NOOP", FALSE)
 
-static void radeon_drm_cs_flush(struct radeon_winsys_cs *rcs, unsigned flags)
+static void radeon_drm_cs_flush(struct radeon_winsys_cs *rcs, unsigned flags, uint32_t cs_trace_id)
 {
     struct radeon_drm_cs *cs = radeon_drm_cs(rcs);
     struct radeon_cs_context *tmp;
+
+    switch (cs->base.ring_type) {
+    case RING_DMA:
+	    /* pad DMA ring to 8 DWs */
+	    if (cs->ws->info.chip_class <= SI) {
+		    while (rcs->cdw & 7)
+			    OUT_CS(&cs->base, 0xf0000000); /* NOP packet */
+	    } else {
+		    while (rcs->cdw & 7)
+			    OUT_CS(&cs->base, 0x00000000); /* NOP packet */
+	    }
+	    break;
+    case RING_GFX:
+	    /* pad DMA ring to 8 DWs to meet CP fetch alignment requirements
+	     * r6xx, requires at least 4 dw alignment to avoid a hw bug.
+	     */
+            if (flags & RADEON_FLUSH_COMPUTE) {
+		    if (cs->ws->info.chip_class <= SI) {
+			    while (rcs->cdw & 7)
+				    OUT_CS(&cs->base, 0x80000000); /* type2 nop packet */
+		    } else {
+			    while (rcs->cdw & 7)
+				    OUT_CS(&cs->base, 0xffff1000); /* type3 nop packet */
+		    }
+	    } else {
+		    while (rcs->cdw & 7)
+			    OUT_CS(&cs->base, 0x80000000); /* type2 nop packet */
+	    }
+	    break;
+    }
 
     if (rcs->cdw > RADEON_MAX_CMDBUF_DWORDS) {
        fprintf(stderr, "radeon: command stream overflowed\n");
@@ -465,6 +506,8 @@ static void radeon_drm_cs_flush(struct radeon_winsys_cs *rcs, unsigned flags)
     tmp = cs->csc;
     cs->csc = cs->cst;
     cs->cst = tmp;
+
+    cs->cst->cs_trace_id = cs_trace_id;
 
     /* If the CS is not empty or overflowed, emit it in a separate thread. */
     if (cs->base.cdw && cs->base.cdw <= RADEON_MAX_CMDBUF_DWORDS && !debug_get_option_noop()) {
@@ -486,6 +529,13 @@ static void radeon_drm_cs_flush(struct radeon_winsys_cs *rcs, unsigned flags)
                 cs->cst->flags[0] |= RADEON_CS_USE_VM;
             }
             break;
+
+        case RING_UVD:
+            cs->cst->flags[0] = 0;
+            cs->cst->flags[1] = RADEON_CS_RING_UVD;
+            cs->cst->cs.num_chunks = 3;
+            break;
+
         default:
         case RING_GFX:
             cs->cst->flags[0] = 0;
@@ -521,7 +571,7 @@ static void radeon_drm_cs_flush(struct radeon_winsys_cs *rcs, unsigned flags)
                 }
             }
             pipe_mutex_unlock(cs->ws->cs_stack_lock);
-            radeon_drm_cs_emit_ioctl_oneshot(cs->cst);
+            radeon_drm_cs_emit_ioctl_oneshot(cs, cs->cst);
         }
     } else {
         radeon_cs_context_cleanup(cs->cst);

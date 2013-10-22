@@ -14,10 +14,10 @@
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
- * THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
- * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF
- * OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
+ * THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+ * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+ * OTHER DEALINGS IN THE SOFTWARE.
  *
  * Authors: Ben Skeggs
  *
@@ -69,7 +69,7 @@ nv30_context_kick_notify(struct nouveau_pushbuf *push)
 
 static void
 nv30_context_flush(struct pipe_context *pipe, struct pipe_fence_handle **fence,
-                   enum pipe_flush_flags flags)
+                   unsigned flags)
 {
    struct nv30_context *nv30 = nv30_context(pipe);
    struct nouveau_pushbuf *push = nv30->base.pushbuf;
@@ -208,7 +208,7 @@ nv30_context_create(struct pipe_screen *pscreen, void *priv)
    /*XXX: *cough* per-context pushbufs */
    push = screen->base.pushbuf;
    nv30->base.pushbuf = push;
-   nv30->base.pushbuf->user_priv = push->user_priv; /* hack at validate time */
+   nv30->base.pushbuf->user_priv = &nv30->bufctx; /* hack at validate time */
    nv30->base.pushbuf->rsvd_kick = 16; /* hack in screen before first space */
    nv30->base.pushbuf->kick_notify = nv30_context_kick_notify;
 

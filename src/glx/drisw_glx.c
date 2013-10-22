@@ -380,6 +380,10 @@ drisw_create_context(struct glx_screen *base,
    if (!psc->base.driScreen)
       return NULL;
 
+   /* Check the renderType value */
+   if (!validate_renderType_against_config(config_base, renderType))
+       return NULL;
+
    if (shareList) {
       /* If the shareList context is not a DRISW context, we cannot possibly
        * create a DRISW context that shares it.
@@ -400,6 +404,8 @@ drisw_create_context(struct glx_screen *base,
       free(pcp);
       return NULL;
    }
+
+   pcp->base.renderType = renderType;
 
    pcp->driContext =
       (*psc->core->createNewContext) (psc->driScreen,
@@ -429,6 +435,7 @@ drisw_create_context_attribs(struct glx_screen *base,
 
    uint32_t minor_ver;
    uint32_t major_ver;
+   uint32_t renderType;
    uint32_t flags;
    unsigned api;
    int reset;
@@ -444,9 +451,14 @@ drisw_create_context_attribs(struct glx_screen *base,
    /* Remap the GLX tokens to DRI2 tokens.
     */
    if (!dri2_convert_glx_attribs(num_attribs, attribs,
-				 &major_ver, &minor_ver, &flags, &api, &reset,
-				 error))
+                                 &major_ver, &minor_ver, &renderType, &flags,
+                                 &api, &reset, error))
       return NULL;
+
+   /* Check the renderType value */
+   if (!validate_renderType_against_config(config_base, renderType)) {
+       return NULL;
+   }
 
    if (reset != __DRI_CTX_RESET_NO_NOTIFICATION)
       return NULL;
@@ -478,6 +490,8 @@ drisw_create_context_attribs(struct glx_screen *base,
        */
       ctx_attribs[num_ctx_attribs++] = flags;
    }
+
+   pcp->base.renderType = renderType;
 
    pcp->driContext =
       (*psc->swrast->createContextAttribs) (psc->driScreen,

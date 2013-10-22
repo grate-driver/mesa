@@ -1,6 +1,5 @@
 /*
  * Mesa 3-D graphics library
- * Version:  6.5.1
  *
  * Copyright (C) 1999-2006  Brian Paul   All Rights Reserved.
  * Copyright (c) 2008 VMware, Inc.
@@ -18,9 +17,10 @@
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
  * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
- * BRIAN PAUL BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
- * AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
- * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ * THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+ * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+ * OTHER DEALINGS IN THE SOFTWARE.
  */
 
 
@@ -35,7 +35,6 @@
 #include "colormac.h"
 #include "context.h"
 #include "formats.h"
-#include "mfeatures.h"
 #include "mtypes.h"
 #include "context.h"
 #include "texcompress.h"
@@ -265,20 +264,16 @@ _mesa_get_compressed_formats(struct gl_context *ctx, GLint *formats)
          n += 3;
       }
    }
-   if (_mesa_is_desktop_gl(ctx)
-       && ctx->Extensions.ANGLE_texture_compression_dxt) {
-      if (formats) {
-         formats[n++] = GL_RGB_S3TC;
-         formats[n++] = GL_RGB4_S3TC;
-         formats[n++] = GL_RGBA_S3TC;
-         formats[n++] = GL_RGBA4_S3TC;
-      }
-      else {
-         n += 4;
-      }
-   }
 
-   if (ctx->Extensions.OES_compressed_ETC1_RGB8_texture) {
+   /* The GL_OES_compressed_ETC1_RGB8_texture spec says:
+    *
+    *     "New State
+    *
+    *         The queries for NUM_COMPRESSED_TEXTURE_FORMATS and
+    *         COMPRESSED_TEXTURE_FORMATS include ETC1_RGB8_OES."
+    */
+   if (_mesa_is_gles(ctx)
+       && ctx->Extensions.OES_compressed_ETC1_RGB8_texture) {
       if (formats) {
          formats[n++] = GL_ETC1_RGB8_OES;
       }
@@ -588,7 +583,7 @@ _mesa_decompress_image(gl_format format, GLuint width, GLuint height,
 
    for (j = 0; j < height; j++) {
       for (i = 0; i < width; i++) {
-         fetch(src, NULL, stride, i, j, 0, dest);
+         fetch(src, stride, i, j, dest);
          dest += 4;
       }
    }

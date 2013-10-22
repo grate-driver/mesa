@@ -239,8 +239,12 @@ struct st_visual
  */
 struct st_config_options
 {
-	boolean force_glsl_extensions_warn;
-	boolean disable_glsl_line_continuations;
+   boolean disable_blend_func_extended;
+   boolean disable_glsl_line_continuations;
+   boolean disable_shader_bit_encoding;
+   boolean force_glsl_extensions_warn;
+   unsigned force_glsl_version;
+   boolean force_s3tc_enable;
 };
 
 /**
@@ -338,7 +342,8 @@ struct st_framebuffer_iface
     * the last call might be destroyed.  This behavior might change in the
     * future.
     */
-   boolean (*validate)(struct st_framebuffer_iface *stfbi,
+   boolean (*validate)(struct st_context_iface *stctx,
+                       struct st_framebuffer_iface *stfbi,
                        const enum st_attachment_type *statts,
                        unsigned count,
                        struct pipe_resource **out);
