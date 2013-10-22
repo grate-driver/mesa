@@ -1,3 +1,9 @@
+mesa (9.2.2-1ubuntu1) trusty; urgency=low
+
+  * Merge from released debian-unstable.
+
+ -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Tue, 22 Oct 2013 12:17:27 +0200
+
 mesa (9.2.2-1) unstable; urgency=low
 
   * New upstream release.
