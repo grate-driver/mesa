@@ -1,3 +1,11 @@
+mesa (9.2.2-2) UNRELEASED; urgency=low
+
+  * debian/control:
+    + Let libegl1-mesa-dev depend on libwayland-dev as wayland-egl.pc
+      requires wayland-client.pc.
+
+ -- Emilio Pozuelo Monfort <pochu@debian.org>  Sun, 27 Oct 2013 20:49:30 +0100
+
 mesa (9.2.2-1) unstable; urgency=low
 
   * New upstream release.
