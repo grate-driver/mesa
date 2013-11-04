@@ -477,10 +477,12 @@ static void tegra_clear(struct pipe_context *pcontext, unsigned int buffers,
 	fb = &context->framebuffer.base;
 
 	if (buffers & PIPE_CLEAR_COLOR) {
-		if (tegra_fill(context->gr2d, tegra_resource(fb->cbufs[0]->texture),
-		      color, 0, 0,
-		      fb->cbufs[0]->width, fb->cbufs[0]->height) < 0)
-			goto out;
+		int i;
+		for (i = 0; i < fb->nr_cbufs; ++i)
+			if (tegra_fill(context->gr2d, tegra_resource(fb->cbufs[i]->texture),
+			    color, 0, 0,
+			    fb->cbufs[i]->width, fb->cbufs[i]->height) < 0)
+				goto out;
 	}
 
 	if (buffers & PIPE_CLEAR_DEPTH) {
