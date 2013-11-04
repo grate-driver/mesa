@@ -495,6 +495,33 @@ out:
 	fprintf(stdout, "< %s()\n", __func__);
 }
 
+static void tegra_clear_render_target(struct pipe_context *pipe,
+                               struct pipe_surface *dst,
+                               const union pipe_color_union *color,
+                               unsigned dstx, unsigned dsty,
+                               unsigned width, unsigned height,
+                               bool render_condition_enabled)
+{
+	fprintf(stdout, "> %s(pipe=%p, dst=%p, color=%p, dstx=%d, dsty=%d, width=%d, height=%d)\n",
+		__func__, pipe, dst, color, dstx, dsty, width, height);
+
+	tegra_fill(tegra_context(pipe)->gr2d, tegra_resource(dst->texture), color, dstx, dsty, width, height);
+
+	fprintf(stdout, "< %s()\n", __func__);
+}
+
+static void tegra_clear_depth_stencil(struct pipe_context *pipe,
+                               struct pipe_surface *dst,
+                               unsigned clear_flags,
+                               double depth,
+                               unsigned stencil,
+                               unsigned dstx, unsigned dsty,
+                               unsigned width, unsigned height,
+                               bool render_condition_enabled)
+{
+	fprintf(stdout, "TODO: clear depth-stencil\n");
+}
+
 static void tegra_flush_resource(struct pipe_context *ctx, struct pipe_resource *resource)
 {
 }
@@ -511,4 +538,6 @@ void tegra_context_resource_init(struct pipe_context *pcontext)
 	pcontext->blit = tegra_blit;
 	pcontext->clear = tegra_clear;
 	pcontext->flush_resource = tegra_flush_resource;
+	pcontext->clear_render_target = tegra_clear_render_target;
+	pcontext->clear_depth_stencil = tegra_clear_depth_stencil;
 }
