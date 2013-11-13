@@ -865,8 +865,6 @@ __glXInitialize(Display * dpy)
     ** (e.g., those called in AllocAndFetchScreenConfigs).
     */
    if (glx_direct && glx_accel) {
-      if (!getenv("LIBGL_DRI3_DISABLE"))
-         dpyPriv->dri3Display = dri3_create_display(dpy);
       dpyPriv->dri2Display = dri2CreateDisplay(dpy);
       dpyPriv->driDisplay = driCreateDisplay(dpy);
    }
