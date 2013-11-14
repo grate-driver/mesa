@@ -745,6 +745,9 @@ unsigned r600_llvm_compile(
 		}
 	}
 
+	FREE(binary.code);
+	FREE(binary.config);
+
 	return r;
 }
 
