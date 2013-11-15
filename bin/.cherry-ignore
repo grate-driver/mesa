@@ -1,0 +1,3 @@
+# Since we've disabled DRI3 completely in 10.0, this commit is no longer
+# necessary.
+f0f202e6b764be803470e27cba9102f14361ae22 glx: conditionaly build dri3 and present loader (v3)
