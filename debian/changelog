@@ -1,8 +1,17 @@
-mesa (9.2.2-2) UNRELEASED; urgency=low
+mesa (10.0.0~rc2-1) UNRELEASED; urgency=low
 
+  [ Emilio Pozuelo Monfort ]
   * debian/control:
     + Let libegl1-mesa-dev depend on libwayland-dev as wayland-egl.pc
       requires wayland-client.pc.
+
+  [ Maarten Lankhorst ]
+  * New upstream release.
+  * Refresh patches for 10.0-rc1.
+  * Bump libdrm-dev requirement to 2.4.48 for intel.
+  * Add breaks on xserver-xorg-core without support for loading megadriver.
+  * Cherry pick commit to hide some gbm symbols.
+  * Manually install *_dri.so to preserve mega-driver hardlinks.
 
  -- Emilio Pozuelo Monfort <pochu@debian.org>  Sun, 27 Oct 2013 20:49:30 +0100
 
