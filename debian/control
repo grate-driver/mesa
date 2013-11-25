@@ -39,7 +39,7 @@ Vcs-Git: git://git.debian.org/git/pkg-xorg/lib/mesa
 Vcs-Browser: http://git.debian.org/?p=pkg-xorg/lib/mesa.git
 Homepage: http://mesa3d.sourceforge.net/
 
-Package: libxatracker1
+Package: libxatracker2
 Section: libs
 Architecture: amd64 armel armhf i386 powerpc
 Depends:
@@ -53,12 +53,12 @@ Description: X acceleration library -- runtime
  .
  XA is intended to be used by the vmware driver for virtualized X acceleration.
 
-Package: libxatracker1-dbg
+Package: libxatracker2-dbg
 Section: debug
 Priority: extra
 Architecture: amd64 armel armhf i386 powerpc
 Depends:
- libxatracker1 (= ${binary:Version}),
+ libxatracker2 (= ${binary:Version}),
  ${misc:Depends},
 Pre-Depends: ${misc:Pre-Depends}
 Multi-Arch: same
@@ -74,7 +74,7 @@ Package: libxatracker-dev
 Section: libdevel
 Architecture: amd64 armel armhf i386 powerpc
 Depends:
- libxatracker1 (= ${binary:Version}),
+ libxatracker2 (= ${binary:Version}),
  ${misc:Depends},
 Description: X acceleration library -- development files
  This package contains the XA (X acceleration) library.  It is used exclusively
@@ -515,7 +515,7 @@ Suggests: libglide3
 Conflicts: xlibmesa-dri (<< 1:7.0.0)
 Replaces: xlibmesa-dri (<< 1:7.0.0), libgl1-mesa-dri-experimental (<< 7.11.1)
 Breaks:
- xserver-xorg-core (<< 2:1.10.2-2),
+ xserver-xorg-core (<< 2:1.14.3-5),
  xserver-xorg-core-no-multiarch,
  libgl1-mesa-glx (<< 7.10.2-4),
  libgl1-mesa-glx-no-multiarch,
