@@ -1,0 +1,76 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <title>Mesa Release Notes</title>
+  <link rel="stylesheet" type="text/css" href="../mesa.css">
+</head>
+<body>
+
+<div class="header">
+  <h1>The Mesa 3D Graphics Library</h1>
+</div>
+
+<iframe src="../contents.html"></iframe>
+<div class="content">
+
+<h1>Mesa 10.0 Release Notes / TBD</h1>
+
+<p>
+Mesa 10.0 is a new development release.
+People who are concerned with stability and reliability should stick
+with a previous release or wait for Mesa 10.0.1.
+</p>
+<p>
+Mesa 10.0 implements the OpenGL 3.3 API, but the version reported by
+glGetString(GL_VERSION) or glGetIntegerv(GL_MAJOR_VERSION) /
+glGetIntegerv(GL_MINOR_VERSION) depends on the particular driver being used.
+Some drivers don't support all the features required in OpenGL 3.3.  OpenGL
+3.3 is <strong>only</strong> available if requested at context creation
+because compatibility contexts are not supported.
+</p>
+
+
+<h2>MD5 checksums</h2>
+<pre>
+TBD.
+</pre>
+
+
+<h2>New features</h2>
+
+<p>
+Note: some of the new features are only available with certain drivers.
+</p>
+
+<ul>
+<li>GL_AMD_seamless_cubemap_per_texture on i965.</li>
+<li>GL_ARB_conservative_depth on i965.</li>
+<li>GL_ARB_texture_gather on i965.</li>
+<li>GL_ARB_texture_query_levels on i965.</li>
+<li>GL_ARB_texture_mirror_clamp_to_edge.</li>
+<li>GL_ARB_transform_feedback2, GL_ARB_transform_feedback3, and GL_ARB_transform_feedback_instanced on i965/Gen7 (with appropriate kernel support).</li>
+<li>GL_ARB_sample_shading on i965.</li>
+<li>GL_ARB_shader_atomic_counters on i965.</li>
+<li>GL_ARB_vertex_attrib_binding</li>
+<li>GL_ARB_vertex_type_10f_11f_11f_rev on i965 and r600g</li>
+<li>GL_KHR_debug</li>
+<li>GLX_MESA_query_renderer</li>
+</ul>
+
+
+<h2>Bug fixes</h2>
+
+TBD.
+
+<h2>Changes</h2>
+
+<ul>
+<li>Removed X.Org state tracker (unmaintained and broken)</li>
+<li>Removed the video-accel r300 targets</li>
+<li>Removed the video-accel softpipe targets</li>
+</ul>
+
+</div>
+</body>
+</html>
