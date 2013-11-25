@@ -1,8 +1,6 @@
-diff --git a/configure.ac b/configure.ac
-index 35f6797..4e2d3c4 100644
 --- a/configure.ac
 +++ b/configure.ac
-@@ -1457,7 +1457,9 @@ for plat in $egl_platforms; do
+@@ -1428,7 +1428,9 @@
  
  	android|fbdev|gdi|null)
  		;;
@@ -13,7 +11,7 @@ index 35f6797..4e2d3c4 100644
  	*)
  		AC_MSG_ERROR([EGL platform '$plat' does not exist])
  		;;
-@@ -1488,6 +1490,7 @@ AM_CONDITIONAL(HAVE_EGL_PLATFORM_WAYLAND, echo "$egl_platforms" | grep 'wayland'
+@@ -1457,6 +1459,7 @@
  AM_CONDITIONAL(HAVE_EGL_PLATFORM_DRM, echo "$egl_platforms" | grep 'drm' >/dev/null 2>&1)
  AM_CONDITIONAL(HAVE_EGL_PLATFORM_FBDEV, echo "$egl_platforms" | grep 'fbdev' >/dev/null 2>&1)
  AM_CONDITIONAL(HAVE_EGL_PLATFORM_NULL, echo "$egl_platforms" | grep 'null' >/dev/null 2>&1)
@@ -21,11 +19,9 @@ index 35f6797..4e2d3c4 100644
  
  AM_CONDITIONAL(HAVE_EGL_DRIVER_DRI2, test "x$HAVE_EGL_DRIVER_DRI2" != "x")
  AM_CONDITIONAL(HAVE_EGL_DRIVER_GLX, test "x$HAVE_EGL_DRIVER_GLX" != "x")
-diff --git a/include/EGL/eglplatform.h b/include/EGL/eglplatform.h
-index 21b18fe..a136a5b 100644
 --- a/include/EGL/eglplatform.h
 +++ b/include/EGL/eglplatform.h
-@@ -104,6 +104,13 @@ typedef struct ANativeWindow        *EGLNativeWindowType;
+@@ -104,6 +104,13 @@
  typedef struct egl_native_pixmap_t  *EGLNativePixmapType;
  typedef void                        *EGLNativeDisplayType;
  
@@ -39,11 +35,9 @@ index 21b18fe..a136a5b 100644
  #elif defined(__unix__)
  
  #ifdef MESA_EGL_NO_X11_HEADERS
-diff --git a/include/GL/internal/dri_interface.h b/include/GL/internal/dri_interface.h
-index 5c99d55..18767c7 100644
 --- a/include/GL/internal/dri_interface.h
 +++ b/include/GL/internal/dri_interface.h
-@@ -768,10 +768,12 @@ struct __DRIbufferRec {
+@@ -819,10 +819,12 @@
      unsigned int pitch;
      unsigned int cpp;
      unsigned int flags;
@@ -57,11 +51,9 @@ index 5c99d55..18767c7 100644
  struct __DRIdri2LoaderExtensionRec {
      __DRIextension base;
  
-diff --git a/src/egl/drivers/dri2/Makefile.am b/src/egl/drivers/dri2/Makefile.am
-index 45f7dfa..dfb0c05 100644
 --- a/src/egl/drivers/dri2/Makefile.am
 +++ b/src/egl/drivers/dri2/Makefile.am
-@@ -62,3 +62,9 @@ if HAVE_EGL_PLATFORM_DRM
+@@ -63,3 +63,9 @@
  libegl_dri2_la_SOURCES += platform_drm.c
  AM_CFLAGS += -DHAVE_DRM_PLATFORM
  endif
@@ -71,11 +63,9 @@ index 45f7dfa..dfb0c05 100644
 +AM_CFLAGS += -DHAVE_MIR_PLATFORM
 +AM_CFLAGS += $(MIR_CFLAGS)
 +endif
-diff --git a/src/egl/drivers/dri2/egl_dri2.c b/src/egl/drivers/dri2/egl_dri2.c
-index 52fcb3f..8b68cc2 100644
 --- a/src/egl/drivers/dri2/egl_dri2.c
 +++ b/src/egl/drivers/dri2/egl_dri2.c
-@@ -599,6 +599,12 @@ dri2_initialize(_EGLDriver *drv, _EGLDisplay *disp)
+@@ -632,6 +632,12 @@
           return EGL_TRUE;
        return dri2_initialize_wayland(drv, disp);
  #endif
@@ -88,11 +78,9 @@ index 52fcb3f..8b68cc2 100644
  #endif
  #ifdef HAVE_ANDROID_PLATFORM
     case _EGL_PLATFORM_ANDROID:
-diff --git a/src/egl/drivers/dri2/egl_dri2.h b/src/egl/drivers/dri2/egl_dri2.h
-index 6dfdf94..668480c 100644
 --- a/src/egl/drivers/dri2/egl_dri2.h
 +++ b/src/egl/drivers/dri2/egl_dri2.h
-@@ -65,6 +65,11 @@
+@@ -64,6 +64,11 @@
  
  #endif /* HAVE_ANDROID_PLATFORM */
  
@@ -104,7 +92,7 @@ index 6dfdf94..668480c 100644
  #include "eglconfig.h"
  #include "eglcontext.h"
  #include "egldisplay.h"
-@@ -135,6 +140,10 @@ struct dri2_egl_display
+@@ -135,6 +140,10 @@
     uint32_t                  capabilities;
  #endif
  
@@ -115,7 +103,7 @@ index 6dfdf94..668480c 100644
     int (*authenticate) (_EGLDisplay *disp, uint32_t id);
  };
  
-@@ -183,7 +192,9 @@ struct dri2_egl_surface
+@@ -183,7 +192,9 @@
     struct gbm_dri_surface *gbm_surf;
  #endif
  
@@ -126,7 +114,7 @@ index 6dfdf94..668480c 100644
     __DRIbuffer           *dri_buffers[__DRI_BUFFER_COUNT];
     struct {
  #ifdef HAVE_WAYLAND_PLATFORM
-@@ -206,6 +217,10 @@ struct dri2_egl_surface
+@@ -205,6 +216,10 @@
     /* EGL-owned buffers */
     __DRIbuffer           *local_buffers[__DRI_BUFFER_COUNT];
  #endif
@@ -137,7 +125,7 @@ index 6dfdf94..668480c 100644
  };
  
  
-@@ -267,6 +282,9 @@ dri2_initialize_wayland(_EGLDriver *drv, _EGLDisplay *disp);
+@@ -266,6 +281,9 @@
  EGLBoolean
  dri2_initialize_android(_EGLDriver *drv, _EGLDisplay *disp);
  
@@ -147,9 +135,6 @@ index 6dfdf94..668480c 100644
  char *
  dri2_get_driver_for_fd(int fd);
  char *
-diff --git a/src/egl/drivers/dri2/platform_mir.c b/src/egl/drivers/dri2/platform_mir.c
-new file mode 100644
-index 0000000..3c0d6fb
 --- /dev/null
 +++ b/src/egl/drivers/dri2/platform_mir.c
 @@ -0,0 +1,349 @@
@@ -325,7 +310,7 @@ index 0000000..3c0d6fb
 +      _eglError(EGL_BAD_ALLOC, "dri2_create_surface");
 +      return NULL;
 +   }
-+   
++
 +   if (!_eglInitSurface(&dri2_surf->base, disp, EGL_WINDOW_BIT, conf, attrib_list))
 +      goto cleanup_surf;
 +
@@ -502,11 +487,9 @@ index 0000000..3c0d6fb
 +
 +   return EGL_FALSE;
 +}
-diff --git a/src/egl/main/Makefile.am b/src/egl/main/Makefile.am
-index ca5257a..a98788a 100644
 --- a/src/egl/main/Makefile.am
 +++ b/src/egl/main/Makefile.am
-@@ -103,6 +103,11 @@ if HAVE_EGL_PLATFORM_NULL
+@@ -102,6 +102,11 @@
  AM_CFLAGS += -DHAVE_NULL_PLATFORM
  endif
  
@@ -518,8 +501,6 @@ index ca5257a..a98788a 100644
  if HAVE_EGL_DRIVER_GLX
  AM_CFLAGS += -D_EGL_BUILT_IN_DRIVER_GLX
  libEGL_la_LIBADD += ../drivers/glx/libegl_glx.la
-diff --git a/src/egl/main/egldisplay.c b/src/egl/main/egldisplay.c
-index 985e781..5e6f89c 100644
 --- a/src/egl/main/egldisplay.c
 +++ b/src/egl/main/egldisplay.c
 @@ -59,7 +59,10 @@
@@ -534,7 +515,7 @@ index 985e781..5e6f89c 100644
  
  /**
   * Map --with-egl-platforms names to platform types.
-@@ -74,7 +77,8 @@ static const struct {
+@@ -74,7 +77,8 @@
     { _EGL_PLATFORM_DRM, "drm" },
     { _EGL_PLATFORM_FBDEV, "fbdev" },
     { _EGL_PLATFORM_NULL, "null" },
@@ -544,7 +525,7 @@ index 985e781..5e6f89c 100644
  };
  
  
-@@ -134,6 +138,47 @@ _eglPointerIsDereferencable(void *p)
+@@ -134,6 +138,47 @@
  #endif
  }
  
@@ -592,7 +573,7 @@ index 985e781..5e6f89c 100644
  
  /**
   * Try detecting native platform with the help of native display characteristcs.
-@@ -154,6 +199,11 @@ _eglNativePlatformDetectNativeDisplay(EGLNativeDisplayType nativeDisplay)
+@@ -154,6 +199,11 @@
        return _EGL_PLATFORM_FBDEV;
  #endif
  
@@ -604,7 +585,7 @@ index 985e781..5e6f89c 100644
     if (_eglPointerIsDereferencable(nativeDisplay)) {
        void *first_pointer = *(void **) nativeDisplay;
  
-@@ -188,7 +238,7 @@ _eglNativePlatformDetectNativeDisplay(EGLNativeDisplayType nativeDisplay)
+@@ -188,7 +238,7 @@
  _EGLPlatformType
  _eglGetNativePlatform(EGLNativeDisplayType nativeDisplay)
  {
@@ -613,11 +594,9 @@ index 985e781..5e6f89c 100644
     char *detection_method = NULL;
  
     if (native_platform == _EGL_INVALID_PLATFORM) {
-diff --git a/src/egl/main/egldisplay.h b/src/egl/main/egldisplay.h
-index f990300..59eb30c 100644
 --- a/src/egl/main/egldisplay.h
 +++ b/src/egl/main/egldisplay.h
-@@ -46,6 +46,7 @@ enum _egl_platform_type {
+@@ -46,6 +46,7 @@
     _EGL_PLATFORM_FBDEV,
     _EGL_PLATFORM_NULL,
     _EGL_PLATFORM_ANDROID,
@@ -625,11 +604,9 @@ index f990300..59eb30c 100644
  
     _EGL_NUM_PLATFORMS,
     _EGL_INVALID_PLATFORM = -1
-diff --git a/src/egl/main/egldriver.c b/src/egl/main/egldriver.c
-index ffdd146..e4c9859 100644
 --- a/src/egl/main/egldriver.c
 +++ b/src/egl/main/egldriver.c
-@@ -57,7 +57,7 @@ typedef struct _egl_module {
+@@ -57,7 +57,7 @@
     char *Path;
     _EGLMain_t BuiltIn;
     void *Handle;
@@ -638,7 +615,7 @@ index ffdd146..e4c9859 100644
  } _EGLModule;
  
  static _EGL_DECLARE_MUTEX(_eglModuleMutex);
-@@ -134,7 +134,6 @@ library_suffix(void)
+@@ -134,7 +134,6 @@
  
  #endif
  
@@ -646,7 +623,7 @@ index ffdd146..e4c9859 100644
  /**
   * Open the named driver and find its bootstrap function: _eglMain().
   */
-@@ -147,8 +146,12 @@ _eglOpenLibrary(const char *driverPath, lib_handle *handle)
+@@ -147,8 +146,12 @@
  
     assert(driverPath);
  
@@ -661,7 +638,7 @@ index ffdd146..e4c9859 100644
  
  #if defined(_EGL_OS_WINDOWS)
     /* XXX untested */
-@@ -194,13 +197,13 @@ _eglOpenLibrary(const char *driverPath, lib_handle *handle)
+@@ -194,13 +197,13 @@
   * Load a module and create the driver object.
   */
  static EGLBoolean
@@ -678,7 +655,7 @@ index ffdd146..e4c9859 100644
        return EGL_TRUE;
  
     if (mod->BuiltIn) {
-@@ -226,7 +229,7 @@ _eglLoadModule(_EGLModule *mod)
+@@ -226,7 +229,7 @@
     }
  
     mod->Handle = (void *) lib;
@@ -687,7 +664,7 @@ index ffdd146..e4c9859 100644
  
     return EGL_TRUE;
  }
-@@ -240,8 +243,10 @@ _eglUnloadModule(_EGLModule *mod)
+@@ -240,8 +243,10 @@
  {
  #if defined(_EGL_OS_UNIX)
     /* destroy the driver */
@@ -700,7 +677,7 @@ index ffdd146..e4c9859 100644
  
     /*
      * XXX At this point (atexit), the module might be the last reference to
-@@ -255,7 +260,9 @@ _eglUnloadModule(_EGLModule *mod)
+@@ -255,7 +260,9 @@
     /* XXX Windows unloads DLLs before atexit */
  #endif
  
@@ -711,7 +688,7 @@ index ffdd146..e4c9859 100644
     mod->Handle = NULL;
  }
  
-@@ -599,17 +606,17 @@ _eglMatchAndInitialize(_EGLDisplay *dpy)
+@@ -599,17 +606,17 @@
     while (i < _eglModules->Size) {
        _EGLModule *mod = (_EGLModule *) _eglModules->Elements[i];
  
@@ -733,7 +710,7 @@ index ffdd146..e4c9859 100644
           i++;
        }
     }
-@@ -661,7 +668,6 @@ __eglMustCastToProperFunctionPointerType
+@@ -661,7 +668,6 @@
  _eglGetDriverProc(const char *procname)
  {
     EGLint i;
@@ -741,18 +718,17 @@ index ffdd146..e4c9859 100644
  
     if (!_eglModules) {
        /* load the driver for the default display */
-@@ -673,15 +679,18 @@ _eglGetDriverProc(const char *procname)
+@@ -673,15 +679,18 @@
  
     for (i = 0; i < _eglModules->Size; i++) {
        _EGLModule *mod = (_EGLModule *) _eglModules->Elements[i];
--
++      _EGLProc proc;
+ 
 -      if (!mod->Driver)
 -         break;
 -      proc = mod->Driver->API.GetProcAddress(mod->Driver, procname);
 -      if (proc)
 -         break;
-+      _EGLProc proc;
-+
 +      for (_EGLPlatformType plat = 0; plat < _EGL_NUM_PLATFORMS; ++plat) {
 +         if (!mod->Driver[plat])
 +            continue;
@@ -767,11 +743,9 @@ index ffdd146..e4c9859 100644
  }
  
  
-diff --git a/src/gallium/drivers/freedreno/freedreno_screen.c b/src/gallium/drivers/freedreno/freedreno_screen.c
-index ff45b3e..b654700 100644
 --- a/src/gallium/drivers/freedreno/freedreno_screen.c
 +++ b/src/gallium/drivers/freedreno/freedreno_screen.c
-@@ -345,6 +345,11 @@ fd_screen_bo_from_handle(struct pipe_screen *pscreen,
+@@ -359,6 +359,11 @@
  	struct fd_screen *screen = fd_screen(pscreen);
  	struct fd_bo *bo;
  
@@ -783,20 +757,18 @@ index ff45b3e..b654700 100644
  	bo = fd_bo_from_name(screen->dev, whandle->handle);
  	if (!bo) {
  		DBG("ref name 0x%08x failed", whandle->handle);
-diff --git a/src/gallium/drivers/nouveau/nouveau_screen.c b/src/gallium/drivers/nouveau/nouveau_screen.c
-index d129a55..f05cb5b 100644
 --- a/src/gallium/drivers/nouveau/nouveau_screen.c
 +++ b/src/gallium/drivers/nouveau/nouveau_screen.c
-@@ -86,7 +86,18 @@ nouveau_screen_bo_from_handle(struct pipe_screen *pscreen,
+@@ -86,7 +86,18 @@
  	struct nouveau_bo *bo = 0;
  	int ret;
-  
+ 
 -	ret = nouveau_bo_name_ref(dev, whandle->handle, &bo);
 +	if (whandle->type != DRM_API_HANDLE_TYPE_SHARED &&
 +	    whandle->type != DRM_API_HANDLE_TYPE_FD) {
 +		debug_printf("%s: attempt to import unsupported handle type %d\n",
 +			     __FUNCTION__, whandle->type);
-+		return NULL;		
++		return NULL;
 +	}
 +
 +	if (whandle->type == DRM_API_HANDLE_TYPE_SHARED)
@@ -807,7 +779,7 @@ index d129a55..f05cb5b 100644
  	if (ret) {
  		debug_printf("%s: ref name 0x%08x failed with %d\n",
  			     __FUNCTION__, whandle->handle, ret);
-@@ -111,6 +122,8 @@ nouveau_screen_bo_get_handle(struct pipe_screen *pscreen,
+@@ -111,6 +122,8 @@
  	} else if (whandle->type == DRM_API_HANDLE_TYPE_KMS) {
  		whandle->handle = bo->handle;
  		return TRUE;
@@ -816,11 +788,9 @@ index d129a55..f05cb5b 100644
  	} else {
  		return FALSE;
  	}
-diff --git a/src/gallium/include/state_tracker/drm_driver.h b/src/gallium/include/state_tracker/drm_driver.h
-index f9bd222..5b76d87 100644
 --- a/src/gallium/include/state_tracker/drm_driver.h
 +++ b/src/gallium/include/state_tracker/drm_driver.h
-@@ -10,6 +10,8 @@ struct pipe_resource;
+@@ -10,6 +10,8 @@
  
  #define DRM_API_HANDLE_TYPE_SHARED 0
  #define DRM_API_HANDLE_TYPE_KMS    1
@@ -829,7 +799,7 @@ index f9bd222..5b76d87 100644
  
  /**
   * For use with pipe_screen::{texture_from_handle|texture_get_handle}.
-@@ -17,9 +19,10 @@ struct pipe_resource;
+@@ -17,9 +19,10 @@
  struct winsys_handle
  {
     /**
@@ -843,11 +813,9 @@ index f9bd222..5b76d87 100644
      */
     unsigned type;
     /**
-diff --git a/src/gallium/state_trackers/dri/drm/dri2.c b/src/gallium/state_trackers/dri/drm/dri2.c
-index 1dcc1f7..f5e8bec 100644
 --- a/src/gallium/state_trackers/dri/drm/dri2.c
 +++ b/src/gallium/state_trackers/dri/drm/dri2.c
-@@ -263,7 +263,13 @@ dri2_drawable_process_buffers(struct dri_drawable *drawable,
+@@ -262,7 +262,13 @@
  
        templ.format = format;
        templ.bind = bind;
@@ -862,7 +830,7 @@ index 1dcc1f7..f5e8bec 100644
        whandle.stride = buf->pitch;
  
        drawable->textures[statt] =
-@@ -533,14 +539,14 @@ dri2_lookup_egl_image(struct dri_screen *screen, void *handle)
+@@ -526,14 +532,14 @@
  }
  
  static __DRIimage *
@@ -881,7 +849,7 @@ index 1dcc1f7..f5e8bec 100644
     unsigned tex_usage;
     enum pipe_format pf;
  
-@@ -580,12 +586,10 @@ dri2_create_image_from_name(__DRIscreen *_screen,
+@@ -573,12 +579,10 @@
     templ.depth0 = 1;
     templ.array_size = 1;
  
@@ -896,7 +864,7 @@ index 1dcc1f7..f5e8bec 100644
     if (!img->texture) {
        FREE(img);
        return NULL;
-@@ -600,6 +604,39 @@ dri2_create_image_from_name(__DRIscreen *_screen,
+@@ -593,6 +597,39 @@
  }
  
  static __DRIimage *
@@ -936,7 +904,7 @@ index 1dcc1f7..f5e8bec 100644
  dri2_create_image_from_renderbuffer(__DRIcontext *context,
  				    int renderbuffer, void *loaderPrivate)
  {
-@@ -691,6 +728,7 @@ dri2_query_image(__DRIimage *image, int attrib, int *value)
+@@ -686,6 +723,7 @@
  
     switch (attrib) {
     case __DRI_IMAGE_ATTRIB_STRIDE:
@@ -944,7 +912,7 @@ index 1dcc1f7..f5e8bec 100644
        image->texture->screen->resource_get_handle(image->texture->screen,
              image->texture, &whandle);
        *value = whandle.stride;
-@@ -707,6 +745,11 @@ dri2_query_image(__DRIimage *image, int attrib, int *value)
+@@ -702,6 +740,11 @@
           image->texture, &whandle);
        *value = whandle.handle;
        return GL_TRUE;
@@ -956,7 +924,7 @@ index 1dcc1f7..f5e8bec 100644
     case __DRI_IMAGE_ATTRIB_FORMAT:
        *value = image->dri_format;
        return GL_TRUE;
-@@ -830,6 +873,67 @@ dri2_from_planar(__DRIimage *image, int plane, void *loaderPrivate)
+@@ -825,6 +868,67 @@
     return img;
  }
  
@@ -1024,7 +992,7 @@ index 1dcc1f7..f5e8bec 100644
  static void
  dri2_destroy_image(__DRIimage *img)
  {
-@@ -838,7 +942,7 @@ dri2_destroy_image(__DRIimage *img)
+@@ -833,7 +937,7 @@
  }
  
  static struct __DRIimageExtensionRec dri2ImageExtension = {
@@ -1033,7 +1001,7 @@ index 1dcc1f7..f5e8bec 100644
      dri2_create_image_from_name,
      dri2_create_image_from_renderbuffer,
      dri2_destroy_image,
-@@ -848,6 +952,8 @@ static struct __DRIimageExtensionRec dri2ImageExtension = {
+@@ -843,6 +947,8 @@
      dri2_validate_usage,
      dri2_from_names,
      dri2_from_planar,
@@ -1042,11 +1010,9 @@ index 1dcc1f7..f5e8bec 100644
  };
  
  /*
-diff --git a/src/gallium/state_trackers/egl/common/native_helper.c b/src/gallium/state_trackers/egl/common/native_helper.c
-index b578a8a..d1e1acd 100644
 --- a/src/gallium/state_trackers/egl/common/native_helper.c
 +++ b/src/gallium/state_trackers/egl/common/native_helper.c
-@@ -427,6 +427,7 @@ drm_display_import_native_buffer(struct native_display *ndpy,
+@@ -427,6 +427,7 @@
  
           memset(&wsh, 0, sizeof(wsh));
           wsh.handle = nbuf->u.drm.name;
@@ -1054,11 +1020,9 @@ index b578a8a..d1e1acd 100644
           wsh.stride = nbuf->u.drm.stride;
  
           res = screen->resource_from_handle(screen, &nbuf->u.drm.templ, &wsh);
-diff --git a/src/gallium/state_trackers/egl/x11/native_dri2.c b/src/gallium/state_trackers/egl/x11/native_dri2.c
-index 053044a..e1ec459 100644
 --- a/src/gallium/state_trackers/egl/x11/native_dri2.c
 +++ b/src/gallium/state_trackers/egl/x11/native_dri2.c
-@@ -176,6 +176,7 @@ dri2_surface_process_drawable_buffers(struct native_surface *nsurf,
+@@ -173,6 +173,7 @@
        }
  
        memset(&whandle, 0, sizeof(whandle));
@@ -1066,11 +1030,9 @@ index 053044a..e1ec459 100644
        whandle.stride = xbuf->pitch;
        whandle.handle = xbuf->name;
        dri2surf->textures[natt] = dri2dpy->base.screen->resource_from_handle(
-diff --git a/src/gallium/winsys/i915/drm/i915_drm_buffer.c b/src/gallium/winsys/i915/drm/i915_drm_buffer.c
-index ac66af3..38e0619 100644
 --- a/src/gallium/winsys/i915/drm/i915_drm_buffer.c
 +++ b/src/gallium/winsys/i915/drm/i915_drm_buffer.c
-@@ -95,9 +95,13 @@ i915_drm_buffer_from_handle(struct i915_winsys *iws,
+@@ -95,9 +95,13 @@
                              unsigned *stride)
  {
     struct i915_drm_winsys *idws = i915_drm_winsys(iws);
@@ -1085,11 +1047,9 @@ index ac66af3..38e0619 100644
     if (!buf)
        return NULL;
  
-diff --git a/src/gallium/winsys/intel/drm/intel_drm_winsys.c b/src/gallium/winsys/intel/drm/intel_drm_winsys.c
-index 521762d..d9aa6a9 100644
 --- a/src/gallium/winsys/intel/drm/intel_drm_winsys.c
 +++ b/src/gallium/winsys/intel/drm/intel_drm_winsys.c
-@@ -257,7 +257,6 @@ intel_winsys_import_handle(struct intel_winsys *winsys,
+@@ -257,7 +257,6 @@
                 name, gem_name);
        }
        break;
@@ -1097,7 +1057,7 @@ index 521762d..d9aa6a9 100644
     case DRM_API_HANDLE_TYPE_FD:
        {
           const int fd = (int) handle->handle;
-@@ -265,7 +264,6 @@ intel_winsys_import_handle(struct intel_winsys *winsys,
+@@ -265,7 +264,6 @@
                 fd, height * handle->stride);
        }
        break;
@@ -1105,7 +1065,7 @@ index 521762d..d9aa6a9 100644
     default:
        bo = NULL;
        break;
-@@ -308,7 +306,6 @@ intel_winsys_export_handle(struct intel_winsys *winsys,
+@@ -308,7 +306,6 @@
     case DRM_API_HANDLE_TYPE_KMS:
        handle->handle = ((drm_intel_bo *) bo)->handle;
        break;
@@ -1113,7 +1073,7 @@ index 521762d..d9aa6a9 100644
     case DRM_API_HANDLE_TYPE_FD:
        {
           int fd;
-@@ -318,7 +315,6 @@ intel_winsys_export_handle(struct intel_winsys *winsys,
+@@ -318,7 +315,6 @@
              handle->handle = fd;
        }
        break;
@@ -1121,8 +1081,6 @@ index 521762d..d9aa6a9 100644
     default:
        err = -EINVAL;
        break;
-diff --git a/src/gallium/winsys/radeon/drm/radeon_drm_bo.c b/src/gallium/winsys/radeon/drm/radeon_drm_bo.c
-index 19e2715..b296165 100644
 --- a/src/gallium/winsys/radeon/drm/radeon_drm_bo.c
 +++ b/src/gallium/winsys/radeon/drm/radeon_drm_bo.c
 @@ -40,6 +40,7 @@
@@ -1133,7 +1091,7 @@ index 19e2715..b296165 100644
  
  /*
   * this are copy from radeon_drm, once an updated libdrm is released
-@@ -114,7 +115,9 @@ struct radeon_bomgr {
+@@ -114,7 +115,9 @@
      /* Winsys. */
      struct radeon_drm_winsys *rws;
  
@@ -1144,7 +1102,7 @@ index 19e2715..b296165 100644
      struct util_hash_table *bo_handles;
      pipe_mutex bo_handles_mutex;
      pipe_mutex bo_va_mutex;
-@@ -370,12 +373,13 @@ static void radeon_bo_destroy(struct pb_buffer *_buf)
+@@ -370,12 +373,13 @@
  
      memset(&args, 0, sizeof(args));
  
@@ -1161,7 +1119,7 @@ index 19e2715..b296165 100644
  
      if (bo->ptr)
          os_munmap(bo->ptr, bo->base.size);
-@@ -660,7 +664,8 @@ static boolean radeon_bomgr_is_buffer_busy(struct pb_manager *_mgr,
+@@ -660,7 +664,8 @@
  static void radeon_bomgr_destroy(struct pb_manager *_mgr)
  {
      struct radeon_bomgr *mgr = radeon_bomgr(_mgr);
@@ -1171,7 +1129,7 @@ index 19e2715..b296165 100644
      pipe_mutex_destroy(mgr->bo_handles_mutex);
      pipe_mutex_destroy(mgr->bo_va_mutex);
      FREE(mgr);
-@@ -692,6 +697,7 @@ struct pb_manager *radeon_bomgr_create(struct radeon_drm_winsys *rws)
+@@ -692,6 +697,7 @@
      mgr->base.is_buffer_busy = radeon_bomgr_is_buffer_busy;
  
      mgr->rws = rws;
@@ -1179,7 +1137,7 @@ index 19e2715..b296165 100644
      mgr->bo_handles = util_hash_table_create(handle_hash, handle_compare);
      pipe_mutex_init(mgr->bo_handles_mutex);
      pipe_mutex_init(mgr->bo_va_mutex);
-@@ -841,6 +847,7 @@ radeon_winsys_bo_create(struct radeon_winsys *rws,
+@@ -841,6 +847,7 @@
                          enum radeon_bo_domain domain)
  {
      struct radeon_drm_winsys *ws = radeon_drm_winsys(rws);
@@ -1187,7 +1145,7 @@ index 19e2715..b296165 100644
      struct radeon_bo_desc desc;
      struct pb_manager *provider;
      struct pb_buffer *buffer;
-@@ -862,6 +869,10 @@ radeon_winsys_bo_create(struct radeon_winsys *rws,
+@@ -862,6 +869,10 @@
      if (!buffer)
          return NULL;
  
@@ -1198,7 +1156,7 @@ index 19e2715..b296165 100644
      return (struct pb_buffer*)buffer;
  }
  
-@@ -874,6 +885,7 @@ static struct pb_buffer *radeon_winsys_bo_from_handle(struct radeon_winsys *rws,
+@@ -874,6 +885,7 @@
      struct radeon_bomgr *mgr = radeon_bomgr(ws->kman);
      struct drm_gem_open open_arg = {};
      int r;
@@ -1206,7 +1164,7 @@ index 19e2715..b296165 100644
  
      memset(&open_arg, 0, sizeof(open_arg));
  
-@@ -885,8 +897,20 @@ static struct pb_buffer *radeon_winsys_bo_from_handle(struct radeon_winsys *rws,
+@@ -885,8 +897,20 @@
       * The list of pairs is guarded by a mutex, of course. */
      pipe_mutex_lock(mgr->bo_handles_mutex);
  
@@ -1229,7 +1187,7 @@ index 19e2715..b296165 100644
      if (bo) {
          /* Increase the refcount. */
          struct pb_buffer *b = NULL;
-@@ -900,27 +924,38 @@ static struct pb_buffer *radeon_winsys_bo_from_handle(struct radeon_winsys *rws,
+@@ -900,27 +924,38 @@
          goto fail;
      }
  
@@ -1277,7 +1235,7 @@ index 19e2715..b296165 100644
  
  done:
      pipe_mutex_unlock(mgr->bo_handles_mutex);
-@@ -958,6 +993,9 @@ done:
+@@ -958,6 +993,9 @@
      ws->allocated_vram += align(open_arg.size, 4096);
      bo->initial_domain = RADEON_DOMAIN_VRAM;
  
@@ -1287,7 +1245,7 @@ index 19e2715..b296165 100644
      return (struct pb_buffer*)bo;
  
  fail:
-@@ -986,12 +1024,15 @@ static boolean radeon_winsys_bo_get_handle(struct pb_buffer *buffer,
+@@ -986,12 +1024,15 @@
              bo->flink = flink.name;
  
              pipe_mutex_lock(bo->mgr->bo_handles_mutex);
@@ -1304,11 +1262,9 @@ index 19e2715..b296165 100644
      }
  
      whandle->stride = stride;
-diff --git a/src/gallium/winsys/svga/drm/vmw_screen_dri.c b/src/gallium/winsys/svga/drm/vmw_screen_dri.c
-index 511cca7..6323a8a 100644
 --- a/src/gallium/winsys/svga/drm/vmw_screen_dri.c
 +++ b/src/gallium/winsys/svga/drm/vmw_screen_dri.c
-@@ -163,6 +163,12 @@ vmw_drm_surface_from_handle(struct svga_winsys_screen *sws,
+@@ -163,6 +163,12 @@
      int ret;
      int i;
  
@@ -1321,8 +1277,6 @@ index 511cca7..6323a8a 100644
      /**
       * The vmware device specific handle is the hardware SID.
       * FIXME: We probably want to move this to the ioctl implementations.
-diff --git a/src/gbm/backends/dri/gbm_dri.c b/src/gbm/backends/dri/gbm_dri.c
-index a3a0530..39ba255 100644
 --- a/src/gbm/backends/dri/gbm_dri.c
 +++ b/src/gbm/backends/dri/gbm_dri.c
 @@ -44,6 +44,8 @@
@@ -1334,7 +1288,7 @@ index a3a0530..39ba255 100644
  
  /* For importing wl_buffer */
  #if HAVE_WAYLAND_PLATFORM
-@@ -281,9 +283,11 @@ gbm_dri_is_format_supported(struct gbm_device *gbm,
+@@ -327,9 +329,11 @@
     switch (format) {
     case GBM_BO_FORMAT_XRGB8888:
     case GBM_FORMAT_XRGB8888:
@@ -1346,7 +1300,7 @@ index a3a0530..39ba255 100644
        if (usage & GBM_BO_USE_SCANOUT)
           return 0;
        break;
-@@ -318,9 +322,9 @@ gbm_dri_bo_destroy(struct gbm_bo *_bo)
+@@ -364,9 +368,9 @@
     struct gbm_dri_bo *bo = gbm_dri_bo(_bo);
     struct drm_mode_destroy_dumb arg;
  
@@ -1358,17 +1312,23 @@ index a3a0530..39ba255 100644
        munmap(bo->map, bo->size);
        memset(&arg, 0, sizeof(arg));
        arg.handle = bo->handle;
-@@ -348,6 +352,9 @@ gbm_dri_to_gbm_format(uint32_t dri_format)
+@@ -394,6 +398,15 @@
     case __DRI_IMAGE_FORMAT_ABGR8888:
        ret = GBM_FORMAT_ABGR8888;
        break;
 +   case __DRI_IMAGE_FORMAT_XBGR8888:
 +      ret = GBM_FORMAT_XBGR8888;
 +      break;
++   case __DRI_IMAGE_FORMAT_ARGB2101010:
++      ret = GBM_FORMAT_ARGB2101010;
++      break;
++   case __DRI_IMAGE_FORMAT_XRGB2101010:
++      ret = GBM_FORMAT_XRGB2101010;
++      break;
     default:
        ret = 0;
        break;
-@@ -356,6 +363,37 @@ gbm_dri_to_gbm_format(uint32_t dri_format)
+@@ -402,6 +415,43 @@
     return ret;
  }
  
@@ -1395,6 +1355,12 @@ index a3a0530..39ba255 100644
 +   case GBM_FORMAT_XBGR8888:
 +      dri_format = __DRI_IMAGE_FORMAT_XBGR8888;
 +      break;
++   case GBM_FORMAT_ARGB2101010:
++      dri_format = __DRI_IMAGE_FORMAT_ARGB2101010;
++      break;
++   case GBM_FORMAT_XRGB2101010:
++      dri_format = __DRI_IMAGE_FORMAT_XRGB2101010;
++      break;
 +   default:
 +      dri_format = __DRI_IMAGE_FORMAT_NONE;
 +      break;
@@ -1406,7 +1372,7 @@ index a3a0530..39ba255 100644
  static struct gbm_bo *
  gbm_dri_bo_import(struct gbm_device *gbm,
                    uint32_t type, void *buffer, uint32_t usage)
-@@ -460,9 +498,8 @@ create_dumb(struct gbm_device *gbm,
+@@ -513,9 +563,8 @@
     struct drm_mode_destroy_dumb destroy_arg;
     int ret;
  
@@ -1418,7 +1384,7 @@ index a3a0530..39ba255 100644
        return NULL;
  
     bo = calloc(1, sizeof *bo);
-@@ -477,6 +514,7 @@ create_dumb(struct gbm_device *gbm,
+@@ -530,6 +579,7 @@
     if (ret)
        goto free_bo;
  
@@ -1426,7 +1392,7 @@ index a3a0530..39ba255 100644
     bo->base.base.gbm = gbm;
     bo->base.base.width = width;
     bo->base.base.height = height;
-@@ -498,6 +536,25 @@ create_dumb(struct gbm_device *gbm,
+@@ -551,6 +601,25 @@
     if (bo->map == MAP_FAILED)
        goto destroy_dumb;
  
@@ -1452,7 +1418,7 @@ index a3a0530..39ba255 100644
     return &bo->base.base;
  
  destroy_dumb:
-@@ -532,24 +589,7 @@ gbm_dri_bo_create(struct gbm_device *gbm,
+@@ -585,30 +654,7 @@
     bo->base.base.height = height;
     bo->base.base.format = format;
  
@@ -1471,6 +1437,12 @@ index a3a0530..39ba255 100644
 -   case GBM_FORMAT_ABGR8888:
 -      dri_format = __DRI_IMAGE_FORMAT_ABGR8888;
 -      break;
+-   case GBM_FORMAT_ARGB2101010:
+-      dri_format = __DRI_IMAGE_FORMAT_ARGB2101010;
+-      break;
+-   case GBM_FORMAT_XRGB2101010:
+-      dri_format = __DRI_IMAGE_FORMAT_XRGB2101010;
+-      break;
 -   default:
 -      return NULL;
 -   }
@@ -1478,11 +1450,9 @@ index a3a0530..39ba255 100644
  
     if (usage & GBM_BO_USE_SCANOUT)
        dri_use |= __DRI_IMAGE_USE_SCANOUT;
-diff --git a/src/mesa/drivers/dri/i915/intel_context.c b/src/mesa/drivers/dri/i915/intel_context.c
-index f27e3d0..25a2832 100644
 --- a/src/mesa/drivers/dri/i915/intel_context.c
 +++ b/src/mesa/drivers/dri/i915/intel_context.c
-@@ -804,24 +804,35 @@ intel_process_dri2_buffer(struct intel_context *intel,
+@@ -791,24 +791,35 @@
      */
     if (rb->mt &&
         rb->mt->region &&
@@ -1528,11 +1498,9 @@ index f27e3d0..25a2832 100644
     if (!region)
        return;
  
-diff --git a/src/mesa/drivers/dri/i965/intel_context.c b/src/mesa/drivers/dri/i965/intel_context.c
-index 742bcc3..e82cb7e 100644
---- a/src/mesa/drivers/dri/i965/intel_context.c
-+++ b/src/mesa/drivers/dri/i965/intel_context.c
-@@ -857,31 +857,43 @@ intel_process_dri2_buffer(struct brw_context *brw,
+--- a/src/mesa/drivers/dri/i965/brw_context.c
++++ b/src/mesa/drivers/dri/i965/brw_context.c
+@@ -1276,31 +1276,43 @@
     if (num_samples == 0) {
         if (rb->mt &&
             rb->mt->region &&
@@ -1552,11 +1520,11 @@ index 742bcc3..e82cb7e 100644
  
     if (unlikely(INTEL_DEBUG & DEBUG_DRI)) {
        fprintf(stderr,
--	      "attaching buffer %d, at %d, cpp %d, pitch %d\n",
-+	      "attaching buffer %d, at %d, cpp %d, pitch %d, fd %d\n",
- 	      buffer->name, buffer->attachment,
--	      buffer->cpp, buffer->pitch);
-+	      buffer->cpp, buffer->pitch, buffer->fd);
+-              "attaching buffer %d, at %d, cpp %d, pitch %d\n",
++              "attaching buffer %d, at %d, cpp %d, pitch %d, fd %d\n",
+               buffer->name, buffer->attachment,
+-              buffer->cpp, buffer->pitch);
++              buffer->cpp, buffer->pitch, buffer->fd);
     }
  
     intel_miptree_release(&rb->mt);
