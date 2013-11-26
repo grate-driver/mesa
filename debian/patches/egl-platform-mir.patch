@@ -137,7 +137,7 @@
  char *
 --- /dev/null
 +++ b/src/egl/drivers/dri2/platform_mir.c
-@@ -0,0 +1,349 @@
+@@ -0,0 +1,347 @@
 +/*
 + * Copyright © 2012 Canonical, Inc
 + *
@@ -297,7 +297,6 @@
 +                               _EGLConfig *conf, EGLNativeWindowType window,
 +                               const EGLint *attrib_list)
 +{
-+   int rc;
 +   struct dri2_egl_display *dri2_dpy = dri2_egl_display(disp);
 +   struct dri2_egl_config *dri2_conf = dri2_egl_config(conf);
 +   struct dri2_egl_surface *dri2_surf;
@@ -398,7 +397,6 @@
 +{
 +   struct dri2_egl_display *dri2_dpy = dri2_egl_display(disp);
 +   struct dri2_egl_surface *dri2_surf = dri2_egl_surface(draw);
-+   struct dri2_egl_driver *dri2_drv = dri2_egl_driver(drv);
 +
 +   (*dri2_dpy->flush->flush)(dri2_surf->dri_drawable);
 +
@@ -472,7 +470,7 @@
 +   types = EGL_WINDOW_BIT;
 +   for (i = 0; dri2_dpy->driver_configs[i]; i++) {
 +      config = dri2_dpy->driver_configs[i];
-+      dri2_add_config(disp, config, i + 1, 0, types, NULL, argb_masks);
++      dri2_add_config(disp, config, i + 1, types, NULL, argb_masks);
 +   }
 +
 +   dri2_dpy->authenticate = dri2_mir_authenticate;
@@ -1452,7 +1450,7 @@
        dri_use |= __DRI_IMAGE_USE_SCANOUT;
 --- a/src/mesa/drivers/dri/i915/intel_context.c
 +++ b/src/mesa/drivers/dri/i915/intel_context.c
-@@ -791,24 +791,35 @@
+@@ -791,24 +791,36 @@
      */
     if (rb->mt &&
         rb->mt->region &&
@@ -1492,6 +1490,7 @@
 +                                         drawable->w,
 +                                         drawable->h,
 +                                         buffer->pitch,
++                                         drawable->h * buffer->pitch,
 +                                         buffer->fd,
 +                                         buffer_name);
 +   }
@@ -1500,7 +1499,7 @@
  
 --- a/src/mesa/drivers/dri/i965/brw_context.c
 +++ b/src/mesa/drivers/dri/i965/brw_context.c
-@@ -1276,31 +1276,43 @@
+@@ -1276,31 +1276,44 @@
     if (num_samples == 0) {
         if (rb->mt &&
             rb->mt->region &&
@@ -1549,6 +1548,7 @@
 +                                         drawable->w,
 +                                         drawable->h,
 +                                         buffer->pitch,
++                                         drawable->h * buffer->pitch,
 +                                         buffer->fd,
 +                                         buffer_name);
 +   }
