@@ -1,4 +1,4 @@
-mesa (10.0.0~rc2-1) UNRELEASED; urgency=low
+mesa (10.0.0-1) UNRELEASED; urgency=low
 
   [ Emilio Pozuelo Monfort ]
   * debian/control:
