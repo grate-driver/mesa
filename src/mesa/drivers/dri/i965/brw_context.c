@@ -589,9 +589,16 @@ brwCreateContext(gl_api api,
    struct dd_function_table functions;
    struct gl_config visual;
 
-   if (flags & ~(__DRI_CTX_FLAG_DEBUG
-                 | __DRI_CTX_FLAG_FORWARD_COMPATIBLE
-                 | __DRI_CTX_FLAG_ROBUST_BUFFER_ACCESS)) {
+   /* Only allow the __DRI_CTX_FLAG_ROBUST_BUFFER_ACCESS flag if the kernel
+    * provides us with context reset notifications.
+    */
+   uint32_t allowed_flags = __DRI_CTX_FLAG_DEBUG
+      | __DRI_CTX_FLAG_FORWARD_COMPATIBLE;
+
+   if (screen->has_context_reset_notification)
+      allowed_flags |= __DRI_CTX_FLAG_ROBUST_BUFFER_ACCESS;
+
+   if (flags & ~allowed_flags) {
       *dri_ctx_error = __DRI_CTX_ERROR_UNKNOWN_FLAG;
       return false;
    }
@@ -711,21 +718,6 @@ brwCreateContext(gl_api api,
          intelDestroyContext(driContextPriv);
          return false;
       }
-   }
-
-   /* Notification of GPU resets requires hardware contexts and a kernel new
-    * enough to support DRM_IOCTL_I915_GET_RESET_STATS.
-    */
-   if (notify_reset &&
-       (brw->hw_ctx == NULL
-        || drm_intel_get_reset_stats(brw->hw_ctx, &brw->reset_count, NULL,
-                                     NULL))) {
-      /* This is the wrong error code, but the correct error code (one that
-       * will cause EGL to generate EGL_BAD_MATCH) doesn't seem to exist.
-       */
-      *dri_ctx_error = __DRI_CTX_ERROR_UNKNOWN_ATTRIBUTE;
-      intelDestroyContext(driContextPriv);
-      return false;
    }
 
    brw_init_surface_formats(brw);
