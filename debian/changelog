@@ -24,6 +24,12 @@ mesa (10.0.0-1) UNRELEASED; urgency=low
 
  -- Emilio Pozuelo Monfort <pochu@debian.org>  Sun, 27 Oct 2013 20:49:30 +0100
 
+mesa (9.2.2-1ubuntu2) trusty; urgency=medium
+
+  * Build without Mir backend on ppc64.
+
+ -- Matthias Klose <doko@ubuntu.com>  Sat, 07 Dec 2013 14:42:44 +0100
+
 mesa (9.2.2-1ubuntu1) trusty; urgency=low
 
   * Merge from released debian-unstable.

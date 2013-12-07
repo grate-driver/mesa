@@ -72,7 +72,7 @@ else
 	EGL_DISPLAYS += wayland
 
 # Mir isn't built on AArch64 and PPC
-    ifeq (,$(filter $(DEB_HOST_ARCH),arm64 powerpc))
+    ifeq (,$(filter $(DEB_HOST_ARCH),arm64 powerpc ppc64 ppc64el))
 	EGL_DISPLAYS += mir
     endif
     ifeq (,$(filter $(DEB_HOST_ARCH), s390 s390x))
@@ -105,7 +105,7 @@ else
 	confflags_DIRECT_RENDERING = --enable-driglx-direct
 	confflags_EGL = --with-egl-platforms="$(EGL_DISPLAYS)"
 	confflags_GLES = --enable-gles1 --enable-gles2
-    ifneq (,$(filter $(DEB_HOST_ARCH),arm64))
+    ifneq (,$(filter $(DEB_HOST_ARCH),arm64 ppc64 ppc64el))
 	confflags_GALLIUM += --disable-shared-gallium --with-gallium-drivers=""
 	confflags_OPENVG = --disable-openvg --disable-gallium-egl
 	EXTRA_SED += -e 's/^@nogbm@/\#/' -e 's/^@noegl@/\#/'
@@ -274,7 +274,7 @@ binary-arch: install
 	# Resolve EGL/GLES/OpenVG symbols in the private library path.
 	# Because there's no packaging problem so onerous that accomodating
 	# proprietary alternatives can't make more difficult…
-ifneq (,$(filter $(DEB_HOST_ARCH),arm64))
+ifneq (,$(filter $(DEB_HOST_ARCH),arm64 ppc64 ppc64el))
 	set -e ; for PACKAGE in \
 		libegl1-mesa libgles1-mesa libgles2-mesa ; do \
 			dh_makeshlibs -p$$PACKAGE -- -c4 \
