@@ -88,8 +88,8 @@ else
   endif
 
 
-# Build the llvmpipe driver only on amd64, i386 until it's tested elsewhere
-  ifeq (,$(filter $(DEB_HOST_ARCH_CPU), amd64 i386))
+# Build the llvmpipe driver only on amd64, i386, and arm until it's tested elsewhere
+  ifeq (,$(filter $(DEB_HOST_ARCH_CPU), amd64 i386 arm))
 	DRI_DRIVERS += swrast
   else
 	GALLIUM_DRIVERS += swrast
