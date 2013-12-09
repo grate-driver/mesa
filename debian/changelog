@@ -1,11 +1,10 @@
-mesa (10.0.0-0ubuntu1) trusty; urgency=low
+mesa (10.0.0-1ubuntu1) UNRELEASED; urgency=low
 
-  * Merge from unreleased debian-experimental.
-  * Drop upstreamed aarch64 patch.
-  * Refresh patches.
-  * Disable 118-dricore-gallium.patch for now, requires porting.
+  * Merge from released debian-experimental, changes:
+    - Reset versions on libxatracker2 symbols.
+    - Enable llvmpipe on armhf.
 
- -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Mon, 09 Dec 2013 11:11:41 +0100
+ -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Mon, 09 Dec 2013 11:55:04 +0100
 
 mesa (10.0.0-1) experimental; urgency=low
 
@@ -26,6 +25,15 @@ mesa (10.0.0-1) experimental; urgency=low
   * rules: Enable llvmpipe on armhf, should work now.
 
  -- Julien Cristau <jcristau@debian.org>  Sun, 08 Dec 2013 15:17:17 +0100
+
+mesa (10.0.0-0ubuntu1) trusty; urgency=low
+
+  * Merge from unreleased debian-experimental.
+  * Drop upstreamed aarch64 patch.
+  * Refresh patches.
+  * Disable 118-dricore-gallium.patch for now, requires porting.
+
+ -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Mon, 09 Dec 2013 11:11:41 +0100
 
 mesa (9.2.2-1ubuntu2) trusty; urgency=medium
 
