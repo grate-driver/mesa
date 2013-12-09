@@ -82,6 +82,7 @@ else
 	# Radeonsi needs LLVM, so only build it on the subset of archs
 	# where we have LLVM enabled.
 	GALLIUM_DRIVERS += radeonsi
+	DRI_DRIVERS += i915 i965
     else
 	EXTRA_SED="-e/libllvmradeon/ s/^/\#/"
     endif
@@ -93,7 +94,6 @@ else
 	DRI_DRIVERS += swrast
   else
 	GALLIUM_DRIVERS += swrast
-	DRI_DRIVERS += i915 i965
   endif
 
   # LLVM is required for r300g and recommended for swrastg on x86:
