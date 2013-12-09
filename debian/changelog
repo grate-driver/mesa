@@ -1,10 +1,10 @@
-mesa (10.0.0-1ubuntu1) UNRELEASED; urgency=low
+mesa (10.0.0-1ubuntu1) trusty; urgency=low
 
   * Merge from released debian-experimental, changes:
     - Reset versions on libxatracker2 symbols.
     - Enable llvmpipe on armhf.
 
- -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Mon, 09 Dec 2013 11:55:04 +0100
+ -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Mon, 09 Dec 2013 11:59:03 +0100
 
 mesa (10.0.0-1) experimental; urgency=low
 
