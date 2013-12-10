@@ -1,3 +1,9 @@
+mesa (10.0.0-2) UNRELEASED; urgency=low
+
+  * Do not attempt to build i915 and i965 on arm.
+
+ -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Tue, 10 Dec 2013 10:20:24 +0100
+
 mesa (10.0.0-1) experimental; urgency=low
 
   [ Emilio Pozuelo Monfort ]

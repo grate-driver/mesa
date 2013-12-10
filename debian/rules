@@ -82,19 +82,18 @@ else
     endif
   endif
 
-
-# Build the llvmpipe driver only on amd64, i386, and arm until it's tested elsewhere
-  ifeq (,$(filter $(DEB_HOST_ARCH_CPU), amd64 i386 arm))
-	DRI_DRIVERS += swrast
-  else
-	GALLIUM_DRIVERS += swrast
+  # Build intel drivers on archs where libdrm-intel is installed
+  ifneq (,$(filter $(DEB_HOST_ARCH),amd64 i386 kfreebsd-amd64 kfreebsd-i386 x32))
 	DRI_DRIVERS += i915 i965
   endif
 
-  # LLVM is required for r300g and recommended for swrastg on x86:
+  # LLVM is required for r300g and llvmpipe:
   ifneq (,$(filter $(DEB_HOST_ARCH),amd64 i386 kfreebsd-amd64 kfreebsd-i386 armhf))
 	confflags_GALLIUM += --enable-gallium-llvm
 	confflags_GALLIUM += --with-llvm-shared-libs
+	GALLIUM_DRIVERS += swrast
+  else
+	DRI_DRIVERS += swrast
   endif
 
 	confflags_DIRECT_RENDERING = --enable-driglx-direct
