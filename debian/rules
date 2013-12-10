@@ -73,12 +73,10 @@ else
     ifeq (,$(filter $(DEB_HOST_ARCH), s390 s390x))
 	DRI_DRIVERS += r200 radeon nouveau
     endif
-    ifneq (,$(filter $(DEB_HOST_ARCH_CPU), amd64 i386))
+    ifneq (,$(filter $(DEB_HOST_ARCH),amd64 i386 armhf))
 	# Radeonsi needs LLVM, so only build it on the subset of archs
 	# where we have LLVM enabled.
 	GALLIUM_DRIVERS += radeonsi
-    else
-	EXTRA_SED="-e/libllvmradeon/ s/^/\#/"
     endif
   endif
 
@@ -197,7 +195,6 @@ install: build
 	for file in debian/*.in; \
 	do \
 		sed -e"s,\$${DEB_HOST_MULTIARCH},$(DEB_HOST_MULTIARCH),g" \
-		    $(EXTRA_SED) \
 			$${file} > $${file%%.in}; \
 	done
 
