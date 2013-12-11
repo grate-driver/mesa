@@ -1,3 +1,12 @@
+mesa (10.0.0-1ubuntu3) trusty; urgency=low
+
+  * Refresh Mir EGL platform patch.
+    + Adds EGL_KHR_image support, needed for nested Mir-on-Mir support
+    + Adds resize support (LP: #1227744)
+    + Properly free()s surface front and back buffers on destroy (LP: #1211982)
+
+ -- Christopher James Halse Rogers <raof@ubuntu.com>  Wed, 11 Dec 2013 12:24:46 +0800
+
 mesa (10.0.0-1ubuntu2) trusty; urgency=low
 
   * Do not require libdrm-intel on arm, fixes FTBFS regression.

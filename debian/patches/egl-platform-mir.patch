@@ -137,7 +137,7 @@
  char *
 --- /dev/null
 +++ b/src/egl/drivers/dri2/platform_mir.c
-@@ -0,0 +1,347 @@
+@@ -0,0 +1,435 @@
 +/*
 + * Copyright © 2012 Canonical, Inc
 + *
@@ -171,6 +171,7 @@
 +
 +#include <stdlib.h>
 +#include <string.h>
++#include <unistd.h>
 +
 +static __DRIbuffer *
 +dri2_get_buffers_with_format(__DRIdrawable * driDrawable,
@@ -283,6 +284,12 @@
 +   assert(buffer_package.data_items == 0);
 +   assert(buffer_package.fd_items == 1);
 +
++   /* Mir ABIs prior to release 0.1.2 lacked width and height */
++   if (buffer_package.width && buffer_package.height) {
++      surf->base.Width = buffer_package.width;
++      surf->base.Height = buffer_package.height;
++   }
++
 +   surf->dri_buffers[__DRI_BUFFER_BACK_LEFT]->name = 0;
 +   surf->dri_buffers[__DRI_BUFFER_BACK_LEFT]->fd = buffer_package.fd[0];
 +   surf->dri_buffers[__DRI_BUFFER_BACK_LEFT]->pitch = buffer_package.stride;
@@ -333,10 +340,28 @@
 +   if(!mir_advance_colour_buffer(dri2_surf))
 +      goto cleanup_surf;
 +
-+   dri2_surf->dri_drawable =
-+      (*dri2_dpy->dri2->createNewDrawable) (dri2_dpy->dri_screen,
-+                                            dri2_conf->dri_double_config,
-+                                            dri2_surf);
++   if (dri2_dpy->gbm_dri) {
++      struct gbm_dri_surface *surf = malloc(sizeof *surf);
++
++      dri2_surf->gbm_surf = surf;
++      surf->base.gbm = &dri2_dpy->gbm_dri->base;
++      surf->base.width = dri2_surf->base.Width;
++      surf->base.height = dri2_surf->base.Height;
++      surf->base.format = GBM_FORMAT_ARGB8888;
++      surf->base.flags = GBM_BO_USE_SCANOUT | GBM_BO_USE_RENDERING;
++      surf->dri_private = dri2_surf;
++
++      dri2_surf->dri_drawable =
++          (*dri2_dpy->dri2->createNewDrawable) (dri2_dpy->dri_screen,
++                                                dri2_conf->dri_double_config,
++                                                dri2_surf->gbm_surf);
++   }
++   else {
++      dri2_surf->dri_drawable =
++          (*dri2_dpy->dri2->createNewDrawable) (dri2_dpy->dri_screen,
++                                                dri2_conf->dri_double_config,
++                                                dri2_surf);
++   }
 +
 +   if (dri2_surf->dri_drawable == NULL) {
 +      _eglError(EGL_BAD_ALLOC, "dri2->createNewDrawable");
@@ -370,7 +395,10 @@
 +                                       dri2_surf->dri_buffers[i]);
 +      }
 +   }
++   free(dri2_surf->dri_buffers[__DRI_BUFFER_FRONT_LEFT]);
++   free(dri2_surf->dri_buffers[__DRI_BUFFER_BACK_LEFT]);
 +
++   free(dri2_surf->gbm_surf);
 +   free(surf);
 +
 +   return EGL_TRUE;
@@ -413,10 +441,56 @@
 +   return 0;
 +}
 +
++static _EGLImage *
++dri2_create_image_khr_pixmap(_EGLDisplay *disp, _EGLContext *ctx,
++                             EGLClientBuffer buffer, const EGLint *attr_list)
++{
++   struct dri2_egl_display *dri2_dpy = dri2_egl_display(disp);
++   struct gbm_dri_bo *dri_bo = gbm_dri_bo((struct gbm_bo *) buffer);
++   struct dri2_egl_image *dri2_img;
++
++   dri2_img = malloc(sizeof *dri2_img);
++   if (!dri2_img) {
++      _eglError(EGL_BAD_ALLOC, "dri2_create_image_khr_pixmap");
++      return NULL;
++   }
++
++   if (!_eglInitImage(&dri2_img->base, disp)) {
++      free(dri2_img);
++      return NULL;
++   }
++
++
++   dri2_img->dri_image = dri2_dpy->image->dupImage(dri_bo->image, dri2_img);
++   if (dri2_img->dri_image == NULL) {
++      free(dri2_img);
++      _eglError(EGL_BAD_ALLOC, "dri2_create_image_khr_pixmap");
++      return NULL;
++   }
++
++   return &dri2_img->base;
++}
++
++static _EGLImage *
++dri2_mir_create_image_khr(_EGLDriver *drv, _EGLDisplay *disp,
++                          _EGLContext *ctx, EGLenum target,
++                          EGLClientBuffer buffer, const EGLint *attr_list)
++{
++   (void) drv;
++
++   switch (target) {
++   case EGL_NATIVE_PIXMAP_KHR:
++      return dri2_create_image_khr_pixmap(disp, ctx, buffer, attr_list);
++   default:
++      return dri2_create_image_khr(drv, disp, ctx, target, buffer, attr_list);
++   }
++}
++
 +EGLBoolean
 +dri2_initialize_mir(_EGLDriver *drv, _EGLDisplay *disp)
 +{
 +   struct dri2_egl_display *dri2_dpy;
++   struct gbm_device *gbm = NULL;
 +   MirPlatformPackage platform;
 +   const __DRIconfig *config;
 +   static const unsigned int argb_masks[4] =
@@ -431,8 +505,8 @@
 +/*   drv->API.CreatePixmapSurface = dri2_create_pixmap_surface;
 +   drv->API.CreatePbufferSurface = dri2_create_pbuffer_surface;
 +   drv->API.CopyBuffers = dri2_copy_buffers;
-+   drv->API.CreateImageKHR = dri2_x11_create_image_khr;
 +*/
++   drv->API.CreateImageKHR = dri2_mir_create_image_khr;
 +
 +   dri2_dpy = calloc(1, sizeof *dri2_dpy);
 +   if (!dri2_dpy)
@@ -442,30 +516,44 @@
 +   dri2_dpy->mir_disp = disp->PlatformDisplay;
 +   dri2_dpy->mir_disp->display_get_platform(dri2_dpy->mir_disp, &platform);
 +   dri2_dpy->fd = platform.fd[0];
-+   dri2_dpy->driver_name = dri2_get_driver_for_fd(dri2_dpy->fd);
 +   dri2_dpy->device_name = dri2_get_device_name_for_fd(dri2_dpy->fd);
 +
-+   if (dri2_dpy->driver_name == NULL ||
-+       dri2_dpy->device_name == NULL)
-+      goto cleanup_dpy;
++   /*
++    * At the moment, a pointer to gbm_device is the first and only
++    * information optionally contained in platform.data[].
++    */
++   if (platform.data_items == 0) {
++      dri2_dpy->own_device = 1;
++      dri2_dpy->fd = dup(dri2_dpy->fd);
++      gbm = gbm_create_device(dri2_dpy->fd);
++      if (gbm == NULL)
++         goto cleanup_dpy;
++   }
++   else {
++      gbm = *(struct gbm_device**)platform.data;
++   }
 +
-+   if (!dri2_load_driver(disp))
-+      goto cleanup_dpy;
++   if (gbm) {
++      struct gbm_dri_device *gbm_dri = gbm_dri_device(gbm);
 +
-+   dri2_dpy->dri2_loader_extension.base.name = __DRI_DRI2_LOADER;
-+   dri2_dpy->dri2_loader_extension.base.version = 4;
-+   dri2_dpy->dri2_loader_extension.getBuffers = dri2_get_buffers;
-+   dri2_dpy->dri2_loader_extension.flushFrontBuffer = dri2_flush_front_buffer;
-+   dri2_dpy->dri2_loader_extension.getBuffersWithFormat =
-+      dri2_get_buffers_with_format;
++      dri2_dpy->gbm_dri = gbm_dri;
++      dri2_dpy->driver_name = gbm_dri->base.driver_name;
++      dri2_dpy->dri_screen = gbm_dri->screen;
++      dri2_dpy->core = gbm_dri->core;
++      dri2_dpy->dri2 = gbm_dri->dri2;
++      dri2_dpy->image = gbm_dri->image;
++      dri2_dpy->flush = gbm_dri->flush;
++      dri2_dpy->driver_configs = gbm_dri->driver_configs;
 +
-+   dri2_dpy->extensions[0] = &dri2_dpy->dri2_loader_extension.base;
-+   dri2_dpy->extensions[1] = &image_lookup_extension.base;
-+   dri2_dpy->extensions[2] = &use_invalidate.base;
-+   dri2_dpy->extensions[3] = NULL;
++      gbm_dri->lookup_image = dri2_lookup_egl_image;
++      gbm_dri->lookup_user_data = disp;
 +
-+   if (!dri2_create_screen(disp))
-+      goto cleanup_dpy;
++      gbm_dri->get_buffers = dri2_get_buffers;
++      gbm_dri->flush_front_buffer = dri2_flush_front_buffer;
++      gbm_dri->get_buffers_with_format = dri2_get_buffers_with_format;
++
++      dri2_setup_screen(disp);
++   }
 +
 +   types = EGL_WINDOW_BIT;
 +   for (i = 0; dri2_dpy->driver_configs[i]; i++) {
@@ -757,23 +845,24 @@
  		DBG("ref name 0x%08x failed", whandle->handle);
 --- a/src/gallium/drivers/nouveau/nouveau_screen.c
 +++ b/src/gallium/drivers/nouveau/nouveau_screen.c
-@@ -86,7 +86,18 @@
+@@ -85,8 +85,19 @@
+ 	struct nouveau_device *dev = nouveau_screen(pscreen)->device;
  	struct nouveau_bo *bo = 0;
  	int ret;
- 
--	ret = nouveau_bo_name_ref(dev, whandle->handle, &bo);
++ 
 +	if (whandle->type != DRM_API_HANDLE_TYPE_SHARED &&
 +	    whandle->type != DRM_API_HANDLE_TYPE_FD) {
 +		debug_printf("%s: attempt to import unsupported handle type %d\n",
 +			     __FUNCTION__, whandle->type);
-+		return NULL;
++		return NULL;		
 +	}
 +
 +	if (whandle->type == DRM_API_HANDLE_TYPE_SHARED)
 +		ret = nouveau_bo_name_ref(dev, whandle->handle, &bo);
 +	else
 +		ret = nouveau_bo_prime_handle_ref(dev, whandle->handle, &bo);
-+
+ 
+-	ret = nouveau_bo_name_ref(dev, whandle->handle, &bo);
  	if (ret) {
  		debug_printf("%s: ref name 0x%08x failed with %d\n",
  			     __FUNCTION__, whandle->handle, ret);
@@ -811,9 +900,28 @@
      */
     unsigned type;
     /**
+@@ -42,6 +45,8 @@
+ enum drm_conf {
+    /* How many frames to allow before throttling. Or -1 to indicate any number */
+    DRM_CONF_THROTTLE, /* DRM_CONF_INT. */
++   /* Can this driver, running on this kernel, import and export dma-buf fds? */
++   DRM_CONF_SHARE_FD, /* DRM_CONF_BOOL. */
+    DRM_CONF_MAX
+ };
+ 
 --- a/src/gallium/state_trackers/dri/drm/dri2.c
 +++ b/src/gallium/state_trackers/dri/drm/dri2.c
-@@ -262,7 +262,13 @@
+@@ -33,6 +33,9 @@
+ #include "util/u_format.h"
+ #include "util/u_debug.h"
+ #include "state_tracker/drm_driver.h"
++#include "state_tracker/st_texture.h"
++#include "state_tracker/st_context.h"
++#include "main/texobj.h"
+ 
+ #include "dri_screen.h"
+ #include "dri_context.h"
+@@ -262,7 +265,13 @@
  
        templ.format = format;
        templ.bind = bind;
@@ -828,7 +936,7 @@
        whandle.stride = buf->pitch;
  
        drawable->textures[statt] =
-@@ -526,14 +532,14 @@
+@@ -526,14 +535,14 @@
  }
  
  static __DRIimage *
@@ -847,7 +955,7 @@
     unsigned tex_usage;
     enum pipe_format pf;
  
-@@ -573,12 +579,10 @@
+@@ -573,12 +582,10 @@
     templ.depth0 = 1;
     templ.array_size = 1;
  
@@ -862,7 +970,7 @@
     if (!img->texture) {
        FREE(img);
        return NULL;
-@@ -593,6 +597,39 @@
+@@ -593,6 +600,39 @@
  }
  
  static __DRIimage *
@@ -902,7 +1010,7 @@
  dri2_create_image_from_renderbuffer(__DRIcontext *context,
  				    int renderbuffer, void *loaderPrivate)
  {
-@@ -686,6 +723,7 @@
+@@ -686,6 +726,7 @@
  
     switch (attrib) {
     case __DRI_IMAGE_ATTRIB_STRIDE:
@@ -910,7 +1018,7 @@
        image->texture->screen->resource_get_handle(image->texture->screen,
              image->texture, &whandle);
        *value = whandle.stride;
-@@ -702,6 +740,11 @@
+@@ -702,6 +743,12 @@
           image->texture, &whandle);
        *value = whandle.handle;
        return GL_TRUE;
@@ -919,10 +1027,11 @@
 +      image->texture->screen->resource_get_handle(image->texture->screen,
 +         image->texture, &whandle);
 +      *value = whandle.handle;
++      return GL_TRUE;
     case __DRI_IMAGE_ATTRIB_FORMAT:
        *value = image->dri_format;
        return GL_TRUE;
-@@ -825,6 +868,67 @@
+@@ -825,6 +872,122 @@
     return img;
  }
  
@@ -931,9 +1040,65 @@
 +                         int depth, int level, unsigned *error,
 +                         void *loaderPrivate)
 +{
-+   /* Bad parameter seems like the least-incorrect error */
-+   *error = __DRI_IMAGE_ERROR_BAD_PARAMETER;
-+   return NULL;
++   __DRIimage *img;
++   struct gl_context *ctx = ((struct st_context *)dri_context(context)->st)->ctx;
++   struct gl_texture_object *obj;
++   struct pipe_resource *tex;
++   GLuint face = 0;
++
++   obj = _mesa_lookup_texture(ctx, texture);
++   if (!obj || obj->Target != target) {
++      *error = __DRI_IMAGE_ERROR_BAD_PARAMETER;
++      return NULL;
++   }
++
++   tex = st_get_texobj_resource(obj);
++   if (!tex) {
++      *error = __DRI_IMAGE_ERROR_BAD_PARAMETER;
++      return NULL;
++   }
++
++   if (target == GL_TEXTURE_CUBE_MAP)
++      face = depth;
++
++   _mesa_test_texobj_completeness(ctx, obj);
++   if (!obj->_BaseComplete || (level > 0 && !obj->_MipmapComplete)) {
++      *error = __DRI_IMAGE_ERROR_BAD_PARAMETER;
++      return NULL;
++   }
++
++   if (level < obj->BaseLevel || level > obj->_MaxLevel) {
++      *error = __DRI_IMAGE_ERROR_BAD_MATCH;
++      return NULL;
++   }
++
++   if (target == GL_TEXTURE_3D && obj->Image[face][level]->Depth < depth) {
++      *error = __DRI_IMAGE_ERROR_BAD_MATCH;
++      return NULL;
++   }
++
++   img = CALLOC_STRUCT(__DRIimageRec);
++   if (!img) {
++      *error = __DRI_IMAGE_ERROR_BAD_ALLOC;
++      return NULL;
++   }
++
++   img->level = level;
++   img->layer = depth;
++   img->dri_format = driGLFormatToImageFormat(obj->Image[face][level]->TexFormat);
++
++   img->loader_private = loaderPrivate;
++
++   if (img->dri_format == __DRI_IMAGE_FORMAT_NONE) {
++      *error = __DRI_IMAGE_ERROR_BAD_PARAMETER;
++      free(img);
++      return NULL;
++   }
++
++   pipe_resource_reference(&img->texture, tex);
++
++   *error = __DRI_IMAGE_ERROR_SUCCESS;
++   return img;
 +}
 +
 +static __DRIimage *
@@ -986,28 +1151,57 @@
 +   return img;
 +}
 +
-+
  static void
  dri2_destroy_image(__DRIimage *img)
  {
-@@ -833,7 +937,7 @@
+@@ -833,7 +996,7 @@
  }
  
  static struct __DRIimageExtensionRec dri2ImageExtension = {
 -    { __DRI_IMAGE, 5 },
-+    { __DRI_IMAGE, 7 },
++    { __DRI_IMAGE, 6 },
      dri2_create_image_from_name,
      dri2_create_image_from_renderbuffer,
      dri2_destroy_image,
-@@ -843,6 +947,8 @@
+@@ -843,6 +1006,7 @@
      dri2_validate_usage,
      dri2_from_names,
      dri2_from_planar,
 +    dri2_create_from_texture,
-+    dri2_from_fds,
  };
  
  /*
+@@ -870,6 +1034,7 @@
+    struct dri_screen *screen;
+    struct pipe_screen *pscreen;
+    const struct drm_conf_ret *throttle_ret = NULL;
++   const struct drm_conf_ret *dmabuf_ret = NULL;
+ 
+    screen = CALLOC_STRUCT(dri_screen);
+    if (!screen)
+@@ -881,14 +1046,21 @@
+    sPriv->driverPrivate = (void *)screen;
+ 
+    pscreen = driver_descriptor.create_screen(screen->fd);
+-   if (driver_descriptor.configuration)
++   if (driver_descriptor.configuration) {
+       throttle_ret = driver_descriptor.configuration(DRM_CONF_THROTTLE);
++      dmabuf_ret = driver_descriptor.configuration(DRM_CONF_SHARE_FD);
++   }
+ 
+    if (throttle_ret && throttle_ret->val.val_int != -1) {
+       screen->throttling_enabled = TRUE;
+       screen->default_throttle_frames = throttle_ret->val.val_int;
+    }
+ 
++   if (dmabuf_ret && dmabuf_ret->val.val_bool) {
++      dri2ImageExtension.base.version = 7;
++      dri2ImageExtension.createImageFromFds = dri2_from_fds;
++   }
++
+    sPriv->extensions = dri_screen_extensions;
+ 
+    /* dri_init_screen_helper checks pscreen for us */
 --- a/src/gallium/state_trackers/egl/common/native_helper.c
 +++ b/src/gallium/state_trackers/egl/common/native_helper.c
 @@ -427,6 +427,7 @@
@@ -1028,6 +1222,82 @@
        whandle.stride = xbuf->pitch;
        whandle.handle = xbuf->name;
        dri2surf->textures[natt] = dri2dpy->base.screen->resource_from_handle(
+--- a/src/gallium/targets/dri-ilo/target.c
++++ b/src/gallium/targets/dri-ilo/target.c
+@@ -24,4 +24,21 @@
+    return screen;
+ }
+ 
+-DRM_DRIVER_DESCRIPTOR("i965", "i915", create_screen, NULL)
++
++static const struct drm_conf_ret share_fd_ret = {
++   .type = DRM_CONF_BOOL,
++   .val.val_int = true,
++};
++
++static const struct drm_conf_ret *drm_configuration(enum drm_conf conf)
++{
++   switch (conf) {
++   case DRM_CONF_SHARE_FD:
++      return &share_fd_ret;
++   default:
++      break;
++   }
++   return NULL;
++}
++
++DRM_DRIVER_DESCRIPTOR("i965", "i915", create_screen, drm_configuration)
+--- a/src/gallium/targets/dri-nouveau/target.c
++++ b/src/gallium/targets/dri-nouveau/target.c
+@@ -17,4 +17,20 @@
+    return screen;
+ }
+ 
+-DRM_DRIVER_DESCRIPTOR("nouveau", "nouveau", create_screen, NULL)
++static const struct drm_conf_ret share_fd_ret = {
++   .type = DRM_CONF_BOOL,
++   .val.val_int = true,
++};
++
++static const struct drm_conf_ret *drm_configuration(enum drm_conf conf)
++{
++   switch (conf) {
++   case DRM_CONF_SHARE_FD:
++      return &share_fd_ret;
++   default:
++      break;
++   }
++   return NULL;
++}
++
++DRM_DRIVER_DESCRIPTOR("nouveau", "nouveau", create_screen, drm_configuration)
+--- a/src/gallium/targets/dri-vmwgfx/target.c
++++ b/src/gallium/targets/dri-vmwgfx/target.c
+@@ -31,11 +31,24 @@
+    .val.val_int = 2,
+ };
+ 
++/* Technically this requires kernel support that is not yet
++ * widespread.
++ *
++ * We could check for support in create_screen and return the correct
++ * value, but for now just return true in all cases.
++ */
++static const struct drm_conf_ret share_fd_ret = {
++   .type = DRM_CONF_BOOL,
++   .val.val_int = true,
++};
++
+ static const struct drm_conf_ret *drm_configuration(enum drm_conf conf)
+ {
+    switch (conf) {
+    case DRM_CONF_THROTTLE:
+       return &throttle_ret;
++   case DRM_CONF_SHARE_FD:
++      return &share_fd_ret;
+    default:
+       break;
+    }
 --- a/src/gallium/winsys/i915/drm/i915_drm_buffer.c
 +++ b/src/gallium/winsys/i915/drm/i915_drm_buffer.c
 @@ -95,9 +95,13 @@
@@ -1062,22 +1332,6 @@
 -#endif
     default:
        bo = NULL;
-       break;
-@@ -308,7 +306,6 @@
-    case DRM_API_HANDLE_TYPE_KMS:
-       handle->handle = ((drm_intel_bo *) bo)->handle;
-       break;
--#if 0
-    case DRM_API_HANDLE_TYPE_FD:
-       {
-          int fd;
-@@ -318,7 +315,6 @@
-             handle->handle = fd;
-       }
-       break;
--#endif
-    default:
-       err = -EINVAL;
        break;
 --- a/src/gallium/winsys/radeon/drm/radeon_drm_bo.c
 +++ b/src/gallium/winsys/radeon/drm/radeon_drm_bo.c
@@ -1117,16 +1371,14 @@
  
      if (bo->ptr)
          os_munmap(bo->ptr, bo->base.size);
-@@ -660,7 +664,8 @@
+@@ -660,6 +664,7 @@
  static void radeon_bomgr_destroy(struct pb_manager *_mgr)
  {
      struct radeon_bomgr *mgr = radeon_bomgr(_mgr);
--    util_hash_table_destroy(mgr->bo_handles);
 +    util_hash_table_destroy(mgr->bo_names);
-+    util_hash_table_destroy(mgr->bo_handles);;
+     util_hash_table_destroy(mgr->bo_handles);
      pipe_mutex_destroy(mgr->bo_handles_mutex);
      pipe_mutex_destroy(mgr->bo_va_mutex);
-     FREE(mgr);
 @@ -692,6 +697,7 @@
      mgr->base.is_buffer_busy = radeon_bomgr_is_buffer_busy;
  
@@ -1154,15 +1406,21 @@
      return (struct pb_buffer*)buffer;
  }
  
-@@ -874,6 +885,7 @@
+@@ -872,10 +883,10 @@
+     struct radeon_drm_winsys *ws = radeon_drm_winsys(rws);
+     struct radeon_bo *bo;
      struct radeon_bomgr *mgr = radeon_bomgr(ws->kman);
-     struct drm_gem_open open_arg = {};
+-    struct drm_gem_open open_arg = {};
++    struct drm_radeon_gem_busy args;
      int r;
-+    unsigned handle, size;
+-
+-    memset(&open_arg, 0, sizeof(open_arg));
++    unsigned handle;
++    uint64_t size;
  
-     memset(&open_arg, 0, sizeof(open_arg));
- 
-@@ -885,8 +897,20 @@
+     /* We must maintain a list of pairs <handle, bo>, so that we always return
+      * the same BO for one particular handle. If we didn't do that and created
+@@ -885,8 +896,20 @@
       * The list of pairs is guarded by a mutex, of course. */
      pipe_mutex_lock(mgr->bo_handles_mutex);
  
@@ -1185,7 +1443,7 @@
      if (bo) {
          /* Increase the refcount. */
          struct pb_buffer *b = NULL;
-@@ -900,27 +924,38 @@
+@@ -900,27 +923,48 @@
          goto fail;
      }
  
@@ -1195,6 +1453,8 @@
 -        FREE(bo);
 -        goto fail;
 +    if (whandle->type == DRM_API_HANDLE_TYPE_SHARED) {
++        struct drm_gem_open open_arg = {};
++        memset(&open_arg, 0, sizeof(open_arg));
 +        /* Open the BO. */
 +        open_arg.name = whandle->handle;
 +        if (drmIoctl(ws->fd, DRM_IOCTL_GEM_OPEN, &open_arg)) {
@@ -1205,8 +1465,16 @@
 +        size = open_arg.size;
 +        bo->name = whandle->handle;
 +    } else if (whandle->type == DRM_API_HANDLE_TYPE_FD) {
-+        /* Oh, oh! What to do here? */
-+        size = 0;
++        size = lseek(whandle->handle, 0, SEEK_END);
++        /* 
++         * Could check errno to determine whether the kernel is new enough, but
++         * it doesn't really matter why this failed, just that it failed.
++         */
++        if (size == (off_t)-1) {
++            FREE(bo);
++            goto fail;
++        }
++        lseek(whandle->handle, 0, SEEK_SET);
      }
 -    bo->handle = open_arg.handle;
 -    bo->name = whandle->handle;
@@ -1218,7 +1486,7 @@
      bo->base.alignment = 0;
      bo->base.usage = PB_USAGE_GPU_WRITE | PB_USAGE_GPU_READ;
 -    bo->base.size = open_arg.size;
-+    bo->base.size = size;
++    bo->base.size = (unsigned) size;
      bo->base.vtbl = &radeon_bo_vtbl;
      bo->mgr = mgr;
      bo->rws = mgr->rws;
@@ -1233,17 +1501,46 @@
  
  done:
      pipe_mutex_unlock(mgr->bo_handles_mutex);
-@@ -958,6 +993,9 @@
-     ws->allocated_vram += align(open_arg.size, 4096);
-     bo->initial_domain = RADEON_DOMAIN_VRAM;
+@@ -931,7 +975,7 @@
+     if (mgr->va && !bo->va) {
+         struct drm_radeon_gem_va va;
  
-+    if (whandle->type == DRM_API_HANDLE_TYPE_FD)
-+        bo->initial_domain = RADEON_DOMAIN_GTT;
+-        bo->va_size = ((bo->base.size + 4095) & ~4095);
++        bo->va_size = ((size + 4095) & ~4095);
+         bo->va = radeon_bomgr_find_va(mgr, bo->va_size, 1 << 20);
+ 
+         va.handle = bo->handle;
+@@ -955,8 +999,27 @@
+         }
+     }
+ 
+-    ws->allocated_vram += align(open_arg.size, 4096);
+-    bo->initial_domain = RADEON_DOMAIN_VRAM;
++    memset(&args, 0, sizeof(args));
 +
++    args.handle = bo->handle;
++    r = drmCommandWriteRead(bo->rws->fd, DRM_RADEON_GEM_BUSY, &args, sizeof(args));
++    /* We don't mind if the bo is busy; we're just after the memory domain */
++    if (r && r != -EBUSY) {
++        fprintf(stderr, "radeon: Failed to find initial domain for imported bo\n");
++        radeon_bo_destroy(&bo->base);
++        return NULL;
++    }
++    bo->initial_domain = args.domain;
++
++    switch (bo->initial_domain) {
++    case RADEON_DOMAIN_GTT:
++        ws->allocated_gtt += align(size, 4096);
++        break;
++    case RADEON_DOMAIN_VRAM:
++        ws->allocated_vram += align(size, 4096);
++        break;
++    }
++
+ 
      return (struct pb_buffer*)bo;
  
- fail:
-@@ -986,12 +1024,15 @@
+@@ -986,12 +1049,15 @@
              bo->flink = flink.name;
  
              pipe_mutex_lock(bo->mgr->bo_handles_mutex);
@@ -1262,19 +1559,144 @@
      whandle->stride = stride;
 --- a/src/gallium/winsys/svga/drm/vmw_screen_dri.c
 +++ b/src/gallium/winsys/svga/drm/vmw_screen_dri.c
-@@ -163,6 +163,12 @@
+@@ -40,6 +40,7 @@
+ #include <xf86drm.h>
+ 
+ #include <stdio.h>
++#include <fcntl.h>
+ 
+ struct dri1_api_version {
+    int major;
+@@ -160,31 +161,57 @@
+     union drm_vmw_surface_reference_arg arg;
+     struct drm_vmw_surface_arg *req = &arg.req;
+     struct drm_vmw_surface_create_req *rep = &arg.rep;
++    uint32_t handle = 0;
      int ret;
      int i;
  
-+    if (whandle->type != DRM_API_HANDLE_TYPE_SHARED) {
-+        vmw_error("Attempt to import unknown handle type %d\n",
-+                  whandle->type);
-+        return NULL;
+-    /**
+-     * The vmware device specific handle is the hardware SID.
+-     * FIXME: We probably want to move this to the ioctl implementations.
+-     */
++    switch (whandle->type) {
++    case DRM_API_HANDLE_TYPE_SHARED:
++    case DRM_API_HANDLE_TYPE_KMS:
++       handle = whandle->handle;
++       break;
++    case DRM_API_HANDLE_TYPE_FD:
++       ret = drmPrimeFDToHandle(vws->ioctl.drm_fd, whandle->handle,
++                                &handle);
++       if (ret) {
++	  vmw_error("Failed to get handle from prime fd %d.\n",
++		    (int) whandle->handle);
++	  return NULL;
++       }
++       break;
++    default:
++       vmw_error("Attempt to import unsupported handle type %d.\n",
++                 whandle->type);
++       return NULL;
++    }
+ 
+     memset(&arg, 0, sizeof(arg));
+-    req->sid = whandle->handle;
++    req->sid = handle;
+ 
+     ret = drmCommandWriteRead(vws->ioctl.drm_fd, DRM_VMW_REF_SURFACE,
+ 			      &arg, sizeof(arg));
+ 
++    /*
++     * Need to close the handle we got from prime.
++     */
++    if (whandle->type == DRM_API_HANDLE_TYPE_FD)
++       vmw_ioctl_surface_destroy(vws, handle);
++
+     if (ret) {
+-        vmw_error("Failed referencing shared surface. SID %d.\n"
+-                  "Error %d (%s).\n",
+-                  whandle->handle, ret, strerror(-ret));
+-	return NULL;
++       /*
++        * Any attempt to share something other than a surface, like a dumb
++        * kms buffer, should fail here.
++        */
++       vmw_error("Failed referencing shared surface. SID %d.\n"
++                 "Error %d (%s).\n",
++                 handle, ret, strerror(-ret));
++       return NULL;
+     }
+ 
+     if (rep->mip_levels[0] != 1) {
+         vmw_error("Incorrect number of mipmap levels on shared surface."
+                   " SID %d, levels %d\n",
+-                  whandle->handle, rep->mip_levels[0]);
++                  handle, rep->mip_levels[0]);
+ 	goto out_mip;
+     }
+ 
+@@ -192,7 +219,7 @@
+ 	if (rep->mip_levels[i] != 0) {
+             vmw_error("Incorrect number of faces levels on shared surface."
+                       " SID %d, face %d present.\n",
+-                      whandle->handle, i);
++                      handle, i);
+ 	    goto out_mip;
+ 	}
+    }
+@@ -204,14 +231,15 @@
+     pipe_reference_init(&vsrf->refcnt, 1);
+     p_atomic_set(&vsrf->validated, 0);
+     vsrf->screen = vws;
+-    vsrf->sid = whandle->handle;
++    vsrf->sid = handle;
+     ssrf = svga_winsys_surface(vsrf);
+     *format = rep->format;
+ 
+     return ssrf;
+ 
+ out_mip:
+-    vmw_ioctl_surface_destroy(vws, whandle->handle);
++    vmw_ioctl_surface_destroy(vws, handle);
++
+     return NULL;
+ }
+ 
+@@ -221,7 +249,9 @@
+ 			   unsigned stride,
+ 			   struct winsys_handle *whandle)
+ {
++    struct vmw_winsys_screen *vws = vmw_winsys_screen(sws);
+     struct vmw_svga_winsys_surface *vsrf;
++    int ret;
+ 
+     if (!surface)
+ 	return FALSE;
+@@ -230,5 +260,24 @@
+     whandle->handle = vsrf->sid;
+     whandle->stride = stride;
+ 
++    switch (whandle->type) {
++    case DRM_API_HANDLE_TYPE_SHARED:
++    case DRM_API_HANDLE_TYPE_KMS:
++       whandle->handle = vsrf->sid;
++       break;
++    case DRM_API_HANDLE_TYPE_FD:
++       ret = drmPrimeHandleToFD(vws->ioctl.drm_fd, vsrf->sid, DRM_CLOEXEC,
++				(int *)&whandle->handle);
++       if (ret) {
++	  vmw_error("Failed to get file descriptor from prime.\n");
++	  return FALSE;
++       }
++       break;
++    default:
++       vmw_error("Attempt to export unsupported handle type %d.\n",
++		 whandle->type);
++       return FALSE;
 +    }
 +
-     /**
-      * The vmware device specific handle is the hardware SID.
-      * FIXME: We probably want to move this to the ioctl implementations.
+     return TRUE;
+ }
 --- a/src/gbm/backends/dri/gbm_dri.c
 +++ b/src/gbm/backends/dri/gbm_dri.c
 @@ -44,6 +44,8 @@
@@ -1286,6 +1708,15 @@
  
  /* For importing wl_buffer */
  #if HAVE_WAYLAND_PLATFORM
+@@ -132,7 +134,7 @@
+ };
+ 
+ static const __DRIdri2LoaderExtension dri2_loader_extension = {
+-   { __DRI_DRI2_LOADER, 3 },
++   { __DRI_DRI2_LOADER, 4 },
+    dri_get_buffers,
+    dri_flush_front_buffer,
+    dri_get_buffers_with_format,
 @@ -327,9 +329,11 @@
     switch (format) {
     case GBM_BO_FORMAT_XRGB8888:
@@ -1298,35 +1729,17 @@
        if (usage & GBM_BO_USE_SCANOUT)
           return 0;
        break;
-@@ -364,9 +368,9 @@
-    struct gbm_dri_bo *bo = gbm_dri_bo(_bo);
-    struct drm_mode_destroy_dumb arg;
- 
--   if (bo->image != NULL) {
-+   if (bo->image)
-       dri->image->destroyImage(bo->image);
--   } else {
-+   if (bo->map) {
-       munmap(bo->map, bo->size);
-       memset(&arg, 0, sizeof(arg));
-       arg.handle = bo->handle;
-@@ -394,6 +398,15 @@
+@@ -394,6 +398,9 @@
     case __DRI_IMAGE_FORMAT_ABGR8888:
        ret = GBM_FORMAT_ABGR8888;
        break;
 +   case __DRI_IMAGE_FORMAT_XBGR8888:
 +      ret = GBM_FORMAT_XBGR8888;
 +      break;
-+   case __DRI_IMAGE_FORMAT_ARGB2101010:
-+      ret = GBM_FORMAT_ARGB2101010;
-+      break;
-+   case __DRI_IMAGE_FORMAT_XRGB2101010:
-+      ret = GBM_FORMAT_XRGB2101010;
-+      break;
     default:
        ret = 0;
        break;
-@@ -402,6 +415,43 @@
+@@ -402,6 +409,41 @@
     return ret;
  }
  
@@ -1350,18 +1763,16 @@
 +   case GBM_FORMAT_ABGR8888:
 +      dri_format = __DRI_IMAGE_FORMAT_ABGR8888;
 +      break;
-+   case GBM_FORMAT_XBGR8888:
-+      dri_format = __DRI_IMAGE_FORMAT_XBGR8888;
-+      break;
 +   case GBM_FORMAT_ARGB2101010:
 +      dri_format = __DRI_IMAGE_FORMAT_ARGB2101010;
 +      break;
 +   case GBM_FORMAT_XRGB2101010:
 +      dri_format = __DRI_IMAGE_FORMAT_XRGB2101010;
++   case GBM_FORMAT_XBGR8888:
++      dri_format = __DRI_IMAGE_FORMAT_XBGR8888;
 +      break;
 +   default:
 +      dri_format = __DRI_IMAGE_FORMAT_NONE;
-+      break;
 +   }
 +
 +   return dri_format;
@@ -1370,53 +1781,7 @@
  static struct gbm_bo *
  gbm_dri_bo_import(struct gbm_device *gbm,
                    uint32_t type, void *buffer, uint32_t usage)
-@@ -513,9 +563,8 @@
-    struct drm_mode_destroy_dumb destroy_arg;
-    int ret;
- 
--   if (!(usage & GBM_BO_USE_CURSOR_64X64))
--      return NULL;
--   if (format != GBM_FORMAT_ARGB8888)
-+   if ((format != GBM_FORMAT_ARGB8888) &&
-+       (format != GBM_FORMAT_XRGB8888))
-       return NULL;
- 
-    bo = calloc(1, sizeof *bo);
-@@ -530,6 +579,7 @@
-    if (ret)
-       goto free_bo;
- 
-+   bo->base.base.format = format;
-    bo->base.base.gbm = gbm;
-    bo->base.base.width = width;
-    bo->base.base.height = height;
-@@ -551,6 +601,25 @@
-    if (bo->map == MAP_FAILED)
-       goto destroy_dumb;
- 
-+   if (usage & GBM_BO_USE_RENDERING)
-+   {
-+      struct drm_gem_flink flink_arg;
-+      memset(&flink_arg, 0, sizeof(flink_arg));
-+      flink_arg.handle = bo->handle;
-+      ret = drmIoctl(dri->base.base.fd, DRM_IOCTL_GEM_FLINK, &flink_arg);
-+      if (ret)
-+         goto destroy_dumb;
-+
-+      bo->image = dri->image->createImageFromName(dri->screen,
-+                                                  width, height,
-+                                                  gbm_to_dri_format(format),
-+                                                  flink_arg.name,
-+                                                  bo->base.base.stride / 4,
-+                                                  bo);
-+
-+      if (!bo->image)
-+         goto destroy_dumb;
-+   }
-    return &bo->base.base;
- 
- destroy_dumb:
-@@ -585,30 +654,7 @@
+@@ -585,30 +627,7 @@
     bo->base.base.height = height;
     bo->base.base.format = format;
  
@@ -1490,7 +1855,7 @@
 +                                         drawable->w,
 +                                         drawable->h,
 +                                         buffer->pitch,
-+                                         drawable->h * buffer->pitch,
++                                         0, /* Can we be so silly? */
 +                                         buffer->fd,
 +                                         buffer_name);
 +   }
@@ -1499,7 +1864,28 @@
  
 --- a/src/mesa/drivers/dri/i965/brw_context.c
 +++ b/src/mesa/drivers/dri/i965/brw_context.c
-@@ -1276,31 +1276,44 @@
+@@ -1021,7 +1021,7 @@
+                           struct intel_renderbuffer *rb,
+                           const char *buffer_name);
+ 
+-static void
++static bool
+ intel_update_image_buffers(struct brw_context *brw, __DRIdrawable *drawable);
+ 
+ static void
+@@ -1094,9 +1094,8 @@
+    if (unlikely(INTEL_DEBUG & DEBUG_DRI))
+       fprintf(stderr, "enter %s, drawable %p\n", __func__, drawable);
+ 
+-   if (screen->image.loader)
+-      intel_update_image_buffers(brw, drawable);
+-   else
++   /* Try using the Image loader extension; if that fails, fall back to DRI2 */
++   if (!screen->image.loader || !intel_update_image_buffers(brw, drawable))
+       intel_update_dri2_buffers(brw, drawable);
+ 
+    driUpdateFramebufferSize(&brw->ctx, drawable);
+@@ -1268,13 +1267,15 @@
     if (num_samples == 0) {
         if (rb->mt &&
             rb->mt->region &&
@@ -1517,13 +1903,7 @@
            return;
     }
  
-    if (unlikely(INTEL_DEBUG & DEBUG_DRI)) {
-       fprintf(stderr,
--              "attaching buffer %d, at %d, cpp %d, pitch %d\n",
-+              "attaching buffer %d, at %d, cpp %d, pitch %d, fd %d\n",
-               buffer->name, buffer->attachment,
--              buffer->cpp, buffer->pitch);
-+              buffer->cpp, buffer->pitch, buffer->fd);
+@@ -1286,13 +1287,24 @@
     }
  
     intel_miptree_release(&rb->mt);
@@ -1555,3 +1935,140 @@
     if (!region)
        return;
  
+@@ -1347,7 +1359,7 @@
+                                                   region);
+ }
+ 
+-static void
++static bool
+ intel_update_image_buffers(struct brw_context *brw, __DRIdrawable *drawable)
+ {
+    struct gl_framebuffer *fb = drawable->driverPrivate;
+@@ -1366,7 +1378,7 @@
+    else if (front_rb)
+       format = intel_rb_format(front_rb);
+    else
+-      return;
++      return false;
+ 
+    if ((brw->is_front_buffer_rendering || brw->is_front_buffer_reading || !back_rb) && front_rb)
+       buffer_mask |= __DRI_IMAGE_BUFFER_FRONT;
+@@ -1374,12 +1386,13 @@
+    if (back_rb)
+       buffer_mask |= __DRI_IMAGE_BUFFER_BACK;
+ 
+-   (*screen->image.loader->getBuffers) (drawable,
+-                                        driGLFormatToImageFormat(format),
+-                                        &drawable->dri2.stamp,
+-                                        drawable->loaderPrivate,
+-                                        buffer_mask,
+-                                        &images);
++   if (!(*screen->image.loader->getBuffers) (drawable,
++                                             driGLFormatToImageFormat(format),
++                                             &drawable->dri2.stamp,
++                                             drawable->loaderPrivate,
++                                             buffer_mask,
++                                             &images))
++      return false;
+ 
+    if (images.image_mask & __DRI_IMAGE_BUFFER_FRONT) {
+       drawable->w = images.front->width;
+@@ -1399,4 +1412,5 @@
+                                 images.back,
+                                 __DRI_IMAGE_BUFFER_BACK);
+    }
++   return true;
+ }
+--- a/src/gallium/targets/r300/drm_target.c
++++ b/src/gallium/targets/r300/drm_target.c
+@@ -51,4 +51,29 @@
+    return sws->screen;
+ }
+ 
+-DRM_DRIVER_DESCRIPTOR("r300", "radeon", create_screen, NULL)
++/* Technically this is only true for kernels >= 3.12, which
++ * support lseek on dma-buf fds.
++ *
++ * We could check for this in create_screen and return the correct
++ * value, but for now just return true in all cases.
++ * 
++ * createImageFromFds fails gracefully on kernel < 3.12, so this
++ * shouldn't be a huge problem.
++ */
++static const struct drm_conf_ret share_fd_ret = {
++   .type = DRM_CONF_BOOL,
++   .val.val_int = true,
++};
++
++static const struct drm_conf_ret *drm_configuration(enum drm_conf conf)
++{
++   switch (conf) {
++   case DRM_CONF_SHARE_FD:
++      return &share_fd_ret;
++   default:
++      break;
++   }
++   return NULL;
++}
++
++DRM_DRIVER_DESCRIPTOR("r300", "radeon", create_screen, drm_configuration)
+--- a/src/gallium/targets/r600/drm_target.c
++++ b/src/gallium/targets/r600/drm_target.c
+@@ -55,11 +55,27 @@
+    .val.val_int = 2,
+ };
+ 
++/* Technically this is only true for kernels >= 3.12, which
++ * support lseek on dma-buf fds.
++ *
++ * We could check for this in create_screen and return the correct
++ * value, but for now just return true in all cases.
++ * 
++ * createImageFromFds fails gracefully on kernel < 3.12, so this
++ * shouldn't be a huge problem.
++ */
++static const struct drm_conf_ret share_fd_ret = {
++   .type = DRM_CONF_BOOL,
++   .val.val_int = true,
++};
++
+ static const struct drm_conf_ret *drm_configuration(enum drm_conf conf)
+ {
+    switch (conf) {
+    case DRM_CONF_THROTTLE:
+       return &throttle_ret;
++   case DRM_CONF_SHARE_FD:
++      return &share_fd_ret;
+    default:
+       break;
+    }
+--- a/src/gallium/targets/radeonsi/drm_target.c
++++ b/src/gallium/targets/radeonsi/drm_target.c
+@@ -55,11 +55,27 @@
+    .val.val_int = 2,
+ };
+ 
++/* Technically this is only true for kernels >= 3.12, which
++ * support lseek on dma-buf fds.
++ *
++ * We could check for this in create_screen and return the correct
++ * value, but for now just return true in all cases.
++ * 
++ * createImageFromFds fails gracefully on kernel < 3.12, so this
++ * shouldn't be a huge problem.
++ */
++static const struct drm_conf_ret share_fd_ret = {
++   .type = DRM_CONF_BOOL,
++   .val.val_int = true,
++};
++
+ static const struct drm_conf_ret *drm_configuration(enum drm_conf conf)
+ {
+    switch (conf) {
+    case DRM_CONF_THROTTLE:
+       return &throttle_ret;
++   case DRM_CONF_SHARE_FD:
++      return &share_fd_ret;
+    default:
+       break;
+    }
