@@ -1,3 +1,9 @@
+mesa (10.0.0-1ubuntu4) trusty; urgency=medium
+
+  * libegl1-mesa-dev: Don't depend on libmirclient-dev on ppc64.
+
+ -- Matthias Klose <doko@ubuntu.com>  Mon, 16 Dec 2013 10:51:02 +0100
+
 mesa (10.0.0-1ubuntu3) trusty; urgency=low
 
   * Refresh Mir EGL platform patch.

@@ -185,7 +185,7 @@ Depends:
  libxcb-glx0-dev,
  libxcb-dri2-0-dev,
  libx11-xcb-dev,
- libmirclient-dev [!arm64 !powerpc],
+ libmirclient-dev [!arm64 !powerpc !ppc64 !ppc64el],
  ${misc:Depends},
 Description: free implementation of the EGL API -- development files
  This package contains the development environment required for compiling
