@@ -1,5 +1,6 @@
-mesa (10.0.0-2) UNRELEASED; urgency=low
+mesa (10.0.1-1) UNRELEASED; urgency=low
 
+  * New upstream release.
   * Do not attempt to build i915 and i965 on arm.
   * Enable radeonsi on arm.
 
