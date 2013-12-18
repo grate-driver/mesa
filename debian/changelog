@@ -1,7 +1,10 @@
 mesa (10.0.1-2) UNRELEASED; urgency=low
 
+  [ Maarten Lankhorst ]
   * Stop building libgl1-mesa-dri-experimental.
     - It's been empty since 8.0.
+  [ Matthias Klose ]
+  * Move to llvm-3.4.
 
  -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Thu, 19 Dec 2013 12:52:05 +0100
 
