@@ -85,13 +85,17 @@ else
 	DRI_DRIVERS += i915 i965
   endif
 
+  # Do not build llvmpipe for armhf, it regresses compared to the classic swrast.
+  ifneq (,$(filter $(DEB_HOST_ARCH),amd64 i386 kfreebsd-amd64 kfreebsd-i386))
+	GALLIUM_DRIVERS += swrast
+  else
+	DRI_DRIVERS += swrast
+  endif
+
   # LLVM is required for r300g and llvmpipe:
   ifneq (,$(filter $(DEB_HOST_ARCH),amd64 i386 kfreebsd-amd64 kfreebsd-i386 armhf))
 	confflags_GALLIUM += --enable-gallium-llvm
 	confflags_GALLIUM += --with-llvm-shared-libs
-	GALLIUM_DRIVERS += swrast
-  else
-	DRI_DRIVERS += swrast
   endif
 
 	confflags_DIRECT_RENDERING = --enable-driglx-direct

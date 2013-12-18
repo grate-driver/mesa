@@ -3,6 +3,7 @@ mesa (10.0.1-1) UNRELEASED; urgency=low
   * New upstream release.
   * Do not attempt to build i915 and i965 on arm.
   * Enable radeonsi on arm.
+  * Disable llvmpipe on armhf, it regresses.
 
  -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Tue, 10 Dec 2013 10:20:24 +0100
 
