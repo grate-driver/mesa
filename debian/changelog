@@ -1,8 +1,9 @@
-mesa (10.0.1-1ubuntu2) UNRELEASED; urgency=medium
+mesa (10.0.1-1ubuntu2) trusty; urgency=medium
 
+  [ Matthias Klose ]
   * Build using llvm-3.4.
 
- -- Matthias Klose <doko@ubuntu.com>  Wed, 18 Dec 2013 15:12:29 +0100
+ -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Thu, 19 Dec 2013 19:21:03 +0100
 
 mesa (10.0.1-1ubuntu1) trusty; urgency=low
 
