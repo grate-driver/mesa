@@ -8,6 +8,7 @@ mesa (10.0.1-2) UNRELEASED; urgency=low
 
   [ Julien Cristau ]
   * Fix FTBFS on kfreebsd.
+  * ... and attempt to fix FTBFS on hurd.
 
  -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Thu, 19 Dec 2013 12:52:05 +0100
 
