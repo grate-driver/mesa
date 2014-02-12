@@ -1,10 +1,10 @@
-mesa (10.1.0~rc1-1) UNRELEASED; urgency=low
+mesa (10.1.0~rc1-1) experimental; urgency=low
 
   * New upstream release.
   * Add new build-depends for dri3.
   * Refresh libegl1-mesa and gbm symbols.
 
- -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Mon, 10 Feb 2014 14:56:57 +0100
+ -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Wed, 12 Feb 2014 11:50:39 +0100
 
 mesa (10.0.2-1) experimental; urgency=low
 
