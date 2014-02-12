@@ -22,11 +22,18 @@ Build-Depends:
  automake,
  libtool,
  x11proto-dri2-dev (>= 2.6),
+ x11proto-dri3-dev,
+ x11proto-present-dev,
  linux-libc-dev (>= 2.6.31) [linux-any],
  libx11-xcb-dev,
  libxcb-dri2-0-dev,
  libxcb-glx0-dev,
  libxcb-xfixes0-dev,
+ libxcb-dri3-dev,
+ libxcb-present-dev,
+ libxcb-randr0-dev,
+ libxcb-sync-dev,
+ libxshmfence-dev,
  python-libxml2,
  libudev-dev [linux-any],
  flex,
@@ -555,53 +562,6 @@ Description: Debugging symbols for the Mesa DRI modules
  libgl1-mesa-glx package.
  .
  This package contains debugging symbols for the DRI modules.
-
-Package: libgl1-mesa-dri-experimental
-Section: libs
-Architecture: linux-any kfreebsd-any
-Depends:
- ${shlibs:Depends},
- libgl1-mesa-dri (>= 7.11.1) [linux-any],
- ${misc:Depends},
-Breaks:
- xserver-xorg-core (<< 2:1.10.2-2),
- xserver-xorg-core-no-multiarch,
- libgl1-mesa-glx (<< 7.11.1),
- libgl1-mesa-glx-no-multiarch,
-Multi-Arch: same
-Description: free implementation of the OpenGL API -- Extra DRI modules
- This version of Mesa provides GLX and DRI capabilities: it is capable of
- both direct and indirect rendering.  For direct rendering, it can use DRI
- modules from the libgl1-mesa-dri package to accelerate drawing.
- .
- This package does not include the OpenGL library itself, only the DRI
- modules for accelerating direct and indirect rendering.  The drivers
- in this package may provide more features than the drivers in the
- libgl1-mesa-dri at the cost of less stability.
- .
- For a complete description of Mesa, please look at the
- libgl1-mesa-glx package.
-
-Package: libgl1-mesa-dri-experimental-dbg
-Section: debug
-Priority: extra
-Architecture: linux-any
-Depends:
- libgl1-mesa-dri-experimental (= ${binary:Version}),
- ${misc:Depends},
-Multi-Arch: same
-Description: Debugging symbols for the experimental Mesa DRI modules
- This version of Mesa provides GLX and DRI capabilities: it is capable of
- both direct and indirect rendering.  For direct rendering, it can use DRI
- modules from the libgl1-mesa-dri package to accelerate drawing.
- .
- This package does not include the OpenGL library itself, only the DRI
- modules for accelerating direct rendering.
- .
- For a complete description of Mesa, please look at the
- libgl1-mesa-glx package.
- .
- This package contains debugging symbols for the extra DRI modules.
 
 Package: libgl1-mesa-dev
 Section: libdevel

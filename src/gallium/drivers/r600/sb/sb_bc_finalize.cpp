@@ -63,7 +63,7 @@ int bc_finalizer::run() {
 
 	// workaround for some problems on r6xx/7xx
 	// add ALU NOP to each vertex shader
-	if (!ctx.is_egcm() && sh.target == TARGET_VS) {
+	if (!ctx.is_egcm() && (sh.target == TARGET_VS || sh.target == TARGET_ES)) {
 		cf_node *c = sh.create_clause(NST_ALU_CLAUSE);
 
 		alu_group_node *g = sh.create_alu_group();
@@ -695,7 +695,7 @@ void bc_finalizer::finalize_cf(cf_node* c) {
 		c->bc.rw_gpr = reg >= 0 ? reg : 0;
 		c->bc.comp_mask = mask;
 
-		if ((flags & CF_RAT) && (c->bc.type & 1)) {
+		if (((flags & CF_RAT) || (!(flags & CF_STRM))) && (c->bc.type & 1)) {
 
 			reg = -1;
 
@@ -770,7 +770,6 @@ void bc_finalizer::update_ngpr(unsigned gpr) {
 unsigned bc_finalizer::get_stack_depth(node *n, unsigned &loops,
                                            unsigned &ifs, unsigned add) {
 	unsigned stack_elements = add;
-	bool has_non_wqm_push_with_loops_on_stack = false;
 	bool has_non_wqm_push = (add != 0);
 	region_node *r = n->is_region() ?
 			static_cast<region_node*>(n) : n->get_parent_region();
@@ -781,8 +780,6 @@ unsigned bc_finalizer::get_stack_depth(node *n, unsigned &loops,
 	while (r) {
 		if (r->is_loop()) {
 			++loops;
-			if (has_non_wqm_push)
-				has_non_wqm_push_with_loops_on_stack = true;
 		} else {
 			++ifs;
 			has_non_wqm_push = true;
@@ -795,15 +792,26 @@ unsigned bc_finalizer::get_stack_depth(node *n, unsigned &loops,
 	switch (ctx.hw_class) {
 	case HW_CLASS_R600:
 	case HW_CLASS_R700:
+		// If any non-WQM push is invoked, 2 elements should be reserved.
 		if (has_non_wqm_push)
 			stack_elements += 2;
 		break;
 	case HW_CLASS_CAYMAN:
+		// If any stack operation is invoked, 2 elements should be reserved
 		if (stack_elements)
 			stack_elements += 2;
 		break;
 	case HW_CLASS_EVERGREEN:
-		if (has_non_wqm_push_with_loops_on_stack)
+		// According to the docs we need to reserve 1 element for each of the
+		// following cases:
+		//   1) non-WQM push is used with WQM/LOOP frames on stack
+		//   2) ALU_ELSE_AFTER is used at the point of max stack usage
+		// NOTE:
+		// It was found that the conditions above are not sufficient, there are
+		// other cases where we also need to reserve stack space, that's why
+		// we always reserve 1 stack element if we have non-WQM push on stack.
+		// Condition 2 is ignored for now because we don't use this instruction.
+		if (has_non_wqm_push)
 			++stack_elements;
 		break;
 	}

@@ -18,7 +18,7 @@
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
  * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT.
- * IN NO EVENT SHALL TUNGSTEN GRAPHICS AND/OR ITS SUPPLIERS BE LIABLE FOR
+ * IN NO EVENT SHALL VMWARE AND/OR ITS SUPPLIERS BE LIABLE FOR
  * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
@@ -72,6 +72,11 @@ vdp_imp_device_create_x11(Display *display, int screen, VdpDevice *device,
       goto no_context;
    }
 
+   if (!pscreen->get_param(pscreen, PIPE_CAP_NPOT_TEXTURES)) {
+      ret = VDP_STATUS_NO_IMPLEMENTATION;
+      goto no_context;
+   }
+
    *device = vlAddDataHTAB(dev);
    if (*device == 0) {
       ret = VDP_STATUS_ERROR;
@@ -86,6 +91,7 @@ vdp_imp_device_create_x11(Display *display, int screen, VdpDevice *device,
    return VDP_STATUS_OK;
 
 no_handle:
+   dev->context->destroy(dev->context);
    /* Destroy vscreen */
 no_context:
    vl_screen_destroy(dev->vscreen);

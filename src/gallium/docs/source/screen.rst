@@ -176,6 +176,8 @@ The integer capabilities:
 * ``PIPE_CAP_MIXED_FRAMEBUFFER_SIZES``: Whether it is allowed to have
   different sizes for fb color/zs attachments. This controls whether
   ARB_framebuffer_object is provided.
+* ``PIPE_CAP_TGSI_VS_LAYER``: Whether TGSI_SEMANTIC_LAYER is supported
+  as a vertex shader output.
 
 
 .. _pipe_capf:
@@ -247,10 +249,12 @@ to be 0.
   BGNSUB, ENDSUB, CAL, and RET, including RET in the main block.
 * ``PIPE_SHADER_CAP_INTEGERS``: Whether integer opcodes are supported.
   If unsupported, only float opcodes are supported.
-* ``PIPE_SHADER_CAP_MAX_TEXTURE_SAMPLERS``: THe maximum number of texture
+* ``PIPE_SHADER_CAP_MAX_TEXTURE_SAMPLERS``: The maximum number of texture
   samplers.
 * ``PIPE_SHADER_CAP_PREFERRED_IR``: Preferred representation of the
   program.  It should be one of the ``pipe_shader_ir`` enum values.
+* ``PIPE_SHADER_CAP_MAX_SAMPLER_VIEWS``: The maximum number of texture
+  sampler views. Must not be lower than PIPE_SHADER_CAP_MAX_TEXTURE_SAMPLERS.
 
 
 .. _pipe_compute_cap:

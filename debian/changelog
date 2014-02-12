@@ -1,3 +1,26 @@
+mesa (10.1.0~rc1-1) experimental; urgency=low
+
+  * New upstream release.
+  * Add new build-depends for dri3.
+  * Refresh libegl1-mesa and gbm symbols.
+
+ -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Wed, 12 Feb 2014 11:50:39 +0100
+
+mesa (10.0.2-1) experimental; urgency=low
+
+  [ Maarten Lankhorst ]
+  * Stop building libgl1-mesa-dri-experimental (Closes: #685104).
+    - It's been empty since 8.0.
+  [ Matthias Klose ]
+  * Move to llvm-3.4.
+
+  [ Julien Cristau ]
+  * Fix FTBFS on kfreebsd.
+  * ... and attempt to fix FTBFS on hurd.
+  * New upstream stable release.
+
+ -- Julien Cristau <jcristau@debian.org>  Sat, 25 Jan 2014 10:44:22 +0100
+
 mesa (10.0.1-1ubuntu2) trusty; urgency=medium
 
   [ Matthias Klose ]

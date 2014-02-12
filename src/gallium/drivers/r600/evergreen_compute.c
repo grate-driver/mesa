@@ -204,6 +204,8 @@ void *evergreen_create_compute_state(
 	const unsigned char * code;
 	unsigned i;
 
+	shader->llvm_ctx = LLVMContextCreate();
+
 	COMPUTE_DBG(ctx->screen, "*** evergreen_create_compute_state\n");
 
 	header = cso->prog;
@@ -216,13 +218,14 @@ void *evergreen_create_compute_state(
 	shader->input_size = cso->req_input_mem;
 
 #ifdef HAVE_OPENCL 
-	shader->num_kernels = radeon_llvm_get_num_kernels(code, header->num_bytes);
+	shader->num_kernels = radeon_llvm_get_num_kernels(shader->llvm_ctx, code,
+							header->num_bytes);
 	shader->kernels = CALLOC(sizeof(struct r600_kernel), shader->num_kernels);
 
 	for (i = 0; i < shader->num_kernels; i++) {
 		struct r600_kernel *kernel = &shader->kernels[i];
-		kernel->llvm_module = radeon_llvm_get_kernel_module(i, code,
-							header->num_bytes);
+		kernel->llvm_module = radeon_llvm_get_kernel_module(shader->llvm_ctx, i,
+							code, header->num_bytes);
 	}
 #endif
 	return shader;
@@ -232,7 +235,18 @@ void evergreen_delete_compute_state(struct pipe_context *ctx, void* state)
 {
 	struct r600_pipe_compute *shader = (struct r600_pipe_compute *)state;
 
-	free(shader);
+	if (!shader)
+		return;
+
+	FREE(shader->kernels);
+
+#ifdef HAVE_OPENCL
+	if (shader->llvm_ctx){
+		LLVMContextDispose(shader->llvm_ctx);
+	}
+#endif
+
+	FREE(shader);
 }
 
 static void evergreen_bind_compute_state(struct pipe_context *ctx_, void *state)
@@ -245,7 +259,7 @@ static void evergreen_bind_compute_state(struct pipe_context *ctx_, void *state)
 }
 
 /* The kernel parameters are stored a vtx buffer (ID=0), besides the explicit
- * kernel parameters there are inplicit parameters that need to be stored
+ * kernel parameters there are implicit parameters that need to be stored
  * in the vertex buffer as well.  Here is how these parameters are organized in
  * the buffer:
  *
@@ -475,7 +489,14 @@ static void compute_emit_cs(struct r600_context *ctx, const uint *block_layout,
 	ctx->b.flags = 0;
 
 	if (ctx->b.chip_class >= CAYMAN) {
-		ctx->skip_surface_sync_on_next_cs_flush = true;
+		cs->buf[cs->cdw++] = PKT3(PKT3_EVENT_WRITE, 0, 0);
+		cs->buf[cs->cdw++] = EVENT_TYPE(EVENT_TYPE_CS_PARTIAL_FLUSH) | EVENT_INDEX(4);
+		/* DEALLOC_STATE prevents the GPU from hanging when a
+		 * SURFACE_SYNC packet is emitted some time after a DISPATCH_DIRECT
+		 * with any of the CB*_DEST_BASE_ENA or DB_DEST_BASE_ENA bits set.
+		 */
+		cs->buf[cs->cdw++] = PKT3C(PKT3_DEALLOC_STATE, 0, 0);
+		cs->buf[cs->cdw++] = 0;
 	}
 
 #if 0
