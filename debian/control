@@ -30,6 +30,7 @@ Build-Depends:
  libxcb-xfixes0-dev,
  libxcb-dri3-dev,
  libxcb-present-dev,
+ libxcb-randr0-dev,
  libxcb-sync-dev,
  libxshmfence-dev,
  python-libxml2,
