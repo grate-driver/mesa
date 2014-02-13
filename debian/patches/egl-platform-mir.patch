@@ -394,8 +394,6 @@
 +                                       dri2_surf->dri_buffers[i]);
 +      }
 +   }
-+   free(dri2_surf->dri_buffers[__DRI_BUFFER_FRONT_LEFT]);
-+   free(dri2_surf->dri_buffers[__DRI_BUFFER_BACK_LEFT]);
 +
 +   free(dri2_surf->gbm_surf);
 +   free(surf);
@@ -497,6 +495,8 @@
 +   uint32_t types;
 +   int i;
 +
++   loader_set_logger(_eglLog);
++
 +   drv->API.CreateWindowSurface = dri2_create_mir_window_surface;
 +   drv->API.DestroySurface = dri2_destroy_mir_surface;
 +   drv->API.SwapBuffers = dri2_swap_buffers;
@@ -574,8 +574,8 @@
 +}
 --- a/src/egl/main/Makefile.am
 +++ b/src/egl/main/Makefile.am
-@@ -102,6 +102,11 @@
- AM_CFLAGS += -DHAVE_NULL_PLATFORM
+@@ -108,6 +108,11 @@
+ libEGL_la_LIBADD += $(DLOPEN_LIBS)
  endif
  
 +if HAVE_EGL_PLATFORM_MIR
@@ -583,9 +583,9 @@
 +AM_CFLAGS += $(MIR_CFLAGS)
 +endif
 +
- if HAVE_EGL_DRIVER_GLX
- AM_CFLAGS += -D_EGL_BUILT_IN_DRIVER_GLX
- libEGL_la_LIBADD += ../drivers/glx/libegl_glx.la
+ if HAVE_EGL_DRIVER_DRI2
+ AM_CFLAGS += -D_EGL_BUILT_IN_DRIVER_DRI2
+ AM_CFLAGS += -DHAVE_XCB_DRI2
 --- a/src/egl/main/egldisplay.c
 +++ b/src/egl/main/egldisplay.c
 @@ -59,7 +59,10 @@
@@ -828,6 +828,24 @@
  }
  
  
+--- a/src/gallium/state_trackers/dri/drm/dri2.c
++++ b/src/gallium/state_trackers/dri/drm/dri2.c
+@@ -266,8 +266,13 @@
+ 
+       templ.format = format;
+       templ.bind = bind;
+-      whandle.type = DRM_API_HANDLE_TYPE_SHARED;
+-      whandle.handle = buf->name;
++      if (buf->name != 0) {
++         whandle.type = DRM_API_HANDLE_TYPE_SHARED;
++         whandle.handle = buf->name;
++      } else {
++         whandle.type = DRM_API_HANDLE_TYPE_FD;
++         whandle.handle = buf->fd;
++      }
+       whandle.stride = buf->pitch;
+ 
+       drawable->textures[statt] =
 --- a/src/gbm/backends/dri/gbm_dri.c
 +++ b/src/gbm/backends/dri/gbm_dri.c
 @@ -133,7 +133,7 @@
@@ -991,23 +1009,22 @@
                            const char *buffer_name);
  
 -static void
-+static bool
++static int
  intel_update_image_buffers(struct brw_context *brw, __DRIdrawable *drawable);
  
  static void
-@@ -1082,9 +1082,8 @@
+@@ -1082,9 +1082,7 @@
     if (unlikely(INTEL_DEBUG & DEBUG_DRI))
        fprintf(stderr, "enter %s, drawable %p\n", __func__, drawable);
  
 -   if (screen->image.loader)
 -      intel_update_image_buffers(brw, drawable);
 -   else
-+   /* Try using the Image loader extension; if that fails, fall back to DRI2 */
 +   if (!screen->image.loader || !intel_update_image_buffers(brw, drawable))
        intel_update_dri2_buffers(brw, drawable);
  
     driUpdateFramebufferSize(&brw->ctx, drawable);
-@@ -1256,13 +1255,15 @@
+@@ -1256,13 +1254,15 @@
     if (num_samples == 0) {
         if (rb->mt &&
             rb->mt->region &&
@@ -1025,7 +1042,7 @@
            return;
     }
  
-@@ -1274,13 +1275,24 @@
+@@ -1274,13 +1274,23 @@
     }
  
     intel_miptree_release(&rb->mt);
@@ -1036,7 +1053,7 @@
 -                                          buffer->pitch,
 -                                          buffer->name,
 -                                          buffer_name);
-+   if (buffer->name != 0) {
++   if (buffer->name != 0)
 +      region = intel_region_alloc_for_handle(brw->intelScreen,
 +                                             buffer->cpp,
 +                                             drawable->w,
@@ -1044,38 +1061,37 @@
 +                                             buffer->pitch,
 +                                             buffer->name,
 +                                             buffer_name);
-+   } else {
++   else
 +      region = intel_region_alloc_for_fd(brw->intelScreen,
 +                                         buffer->cpp,
 +                                         drawable->w,
 +                                         drawable->h,
 +                                         buffer->pitch,
-+                                         drawable->h * buffer->pitch,
++                                         0, /* Can we be so stupid? */
 +                                         buffer->fd,
 +                                         buffer_name);
-+   }
     if (!region)
        return;
  
-@@ -1346,7 +1358,7 @@
+@@ -1346,7 +1356,7 @@
                                                    region);
  }
  
 -static void
-+static bool
++static int
  intel_update_image_buffers(struct brw_context *brw, __DRIdrawable *drawable)
  {
     struct gl_framebuffer *fb = drawable->driverPrivate;
-@@ -1365,7 +1377,7 @@
+@@ -1365,7 +1375,7 @@
     else if (front_rb)
        format = intel_rb_format(front_rb);
     else
 -      return;
-+      return false;
++      return 0;
  
     if ((brw->is_front_buffer_rendering || brw->is_front_buffer_reading || !back_rb) && front_rb)
        buffer_mask |= __DRI_IMAGE_BUFFER_FRONT;
-@@ -1373,12 +1385,13 @@
+@@ -1373,12 +1383,13 @@
     if (back_rb)
        buffer_mask |= __DRI_IMAGE_BUFFER_BACK;
  
@@ -1091,13 +1107,13 @@
 +                                             drawable->loaderPrivate,
 +                                             buffer_mask,
 +                                             &images))
-+      return false;
++      return 0;
  
     if (images.image_mask & __DRI_IMAGE_BUFFER_FRONT) {
        drawable->w = images.front->width;
-@@ -1398,4 +1411,5 @@
+@@ -1398,4 +1409,5 @@
                                  images.back,
                                  __DRI_IMAGE_BUFFER_BACK);
     }
-+   return true;
++   return 1;
  }
