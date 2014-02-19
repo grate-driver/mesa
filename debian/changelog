@@ -2,6 +2,8 @@ mesa (10.1.0~rc1-1ubuntu1) UNRELEASED; urgency=low
 
   * First mesa 10.1 release candidate.
   * Refresh egl-platform-mir.patch and drop upstreamed bits.
+  * Merge more upstream fixes post rc1.
+  * Cherry pick some fixes for GLX fbconfig. (LP: #1278168)
 
  -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Wed, 12 Feb 2014 14:42:42 +0100
 
