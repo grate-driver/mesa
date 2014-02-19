@@ -1,3 +1,9 @@
+mesa (10.1.0~rc1-1ubuntu2) trusty; urgency=low
+
+  * Add libxcb-dri3-dev to lib(e)gl1-mesa-dev depends.
+
+ -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Wed, 19 Feb 2014 19:06:29 +0100
+
 mesa (10.1.0~rc1-1ubuntu1) trusty; urgency=low
 
   * First mesa 10.1 release candidate.
