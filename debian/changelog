@@ -15,6 +15,7 @@ mesa (10.1.0~rc2-1) UNRELEASED; urgency=medium
 
   [ Andreas Boll ]
   * Attempt to fix FTBFS on hurd.
+  * Cherry pick some fixes for GLX fbconfig. (Closes: #739691)
 
  -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Thu, 20 Feb 2014 19:12:12 +0100
 
