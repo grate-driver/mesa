@@ -1,3 +1,9 @@
+mesa (10.1.0~rc1-2) UNRELEASED; urgency=medium
+
+  * Add missing depends to keep lib(e)gl1-dev usable.
+
+ -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Thu, 20 Feb 2014 19:12:12 +0100
+
 mesa (10.1.0~rc1-1) experimental; urgency=low
 
   * New upstream release.
