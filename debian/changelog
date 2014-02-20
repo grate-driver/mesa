@@ -1,3 +1,10 @@
+mesa (10.1.0~rc1-1ubuntu4) trusty; urgency=medium
+
+  * Merge from debian git
+    - Enable building drivers for libvdpau1
+
+ -- Timo Aaltonen <tjaalton@ubuntu.com>  Thu, 20 Feb 2014 21:46:24 +0200
+
 mesa (10.1.0~rc1-2) UNRELEASED; urgency=medium
 
   * Add missing depends to keep lib(e)gl1-dev usable.
