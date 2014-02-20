@@ -18,6 +18,7 @@ Build-Depends:
  libxfixes-dev,
  libxdamage-dev,
  libxext-dev,
+ libvdpau-dev [amd64 i386 kfreebsd-amd64 kfreebsd-i386 armhf],
  autoconf,
  automake,
  libtool,
@@ -649,5 +650,17 @@ Description: Mesa Off-screen rendering extension -- development files
  that use the off-screen rendering extension of Mesa.
  .
  For more information on OSmesa see the libosmesa6 package.
+
+Package: libvdpau1-drivers-mesa
+Section: libs
+Architecture: amd64 i386 kfreebsd-amd64 kfreebsd-i386 armhf
+Depends:
+ libvdpau1,
+ ${shlib:Depends},
+ ${misc:Depends},
+Multi-Arch: same
+Pre-Depends: ${misc:Pre-Depends}
+Description: Mesa acceleration support for vdpau.
+ This package enables support for VDPAU for some gallium drivers.
 
 # vim: tw=0
