@@ -73,7 +73,7 @@ static void r600_flush(struct pipe_context *ctx, unsigned flags)
 	unsigned render_cond_mode = 0;
 	boolean render_cond_cond = FALSE;
 
-	if (rctx->b.rings.gfx.cs->cdw == rctx->initial_gfx_cs_size)
+	if (rctx->b.rings.gfx.cs->cdw == rctx->b.initial_gfx_cs_size)
 		return;
 
 	rctx->b.rings.gfx.flushing = true;
@@ -94,7 +94,7 @@ static void r600_flush(struct pipe_context *ctx, unsigned flags)
 		ctx->render_condition(ctx, render_cond, render_cond_cond, render_cond_mode);
 	}
 
-	rctx->initial_gfx_cs_size = rctx->b.rings.gfx.cs->cdw;
+	rctx->b.initial_gfx_cs_size = rctx->b.rings.gfx.cs->cdw;
 }
 
 static void r600_flush_from_st(struct pipe_context *ctx,
@@ -409,6 +409,12 @@ static int r600_get_param(struct pipe_screen* pscreen, enum pipe_cap param)
 	case PIPE_CAP_MAX_STREAM_OUTPUT_INTERLEAVED_COMPONENTS:
 		return 32*4;
 
+	/* Geometry shader output. */
+	case PIPE_CAP_MAX_GEOMETRY_OUTPUT_VERTICES:
+		return 1024;
+	case PIPE_CAP_MAX_GEOMETRY_TOTAL_OUTPUT_COMPONENTS:
+		return 16384;
+
 	/* Texturing. */
 	case PIPE_CAP_MAX_TEXTURE_2D_LEVELS:
 	case PIPE_CAP_MAX_TEXTURE_3D_LEVELS:
@@ -579,8 +585,8 @@ struct pipe_screen *r600_screen_create(struct radeon_winsys *ws)
 		rscreen->b.debug_flags |= DBG_COMPUTE;
 	if (debug_get_bool_option("R600_DUMP_SHADERS", FALSE))
 		rscreen->b.debug_flags |= DBG_FS | DBG_VS | DBG_GS | DBG_PS | DBG_CS;
-	if (!debug_get_bool_option("R600_HYPERZ", TRUE))
-		rscreen->b.debug_flags |= DBG_NO_HYPERZ;
+	if (debug_get_bool_option("R600_HYPERZ", FALSE))
+		rscreen->b.debug_flags |= DBG_HYPERZ;
 	if (!debug_get_bool_option("R600_LLVM", TRUE))
 		rscreen->b.debug_flags |= DBG_NO_LLVM;
 

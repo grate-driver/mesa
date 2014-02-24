@@ -83,7 +83,7 @@
 #define DBG_PS			(1 << 11)
 #define DBG_CS			(1 << 12)
 /* features */
-#define DBG_NO_HYPERZ		(1 << 13)
+#define DBG_HYPERZ		(1 << 13)
 #define DBG_NO_DISCARD_RANGE	(1 << 14)
 /* The maximum allowed bit is 15. */
 
@@ -241,6 +241,7 @@ struct r600_common_context {
 	enum radeon_family		family;
 	enum chip_class			chip_class;
 	struct r600_rings		rings;
+	unsigned			initial_gfx_cs_size;
 
 	struct u_upload_mgr		*uploader;
 	struct u_suballocator		*allocator_so_filled_size;
