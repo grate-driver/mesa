@@ -3,6 +3,7 @@ mesa (10.1.0~rc1-2) UNRELEASED; urgency=medium
   [ Maarten Lankhorst ]
   * Add missing depends to keep lib(e)gl1-dev usable.
   * Enable building drivers for libvdpau1.
+  * Bump to rc2.
 
   [ Sjoerd Simons ]
   * Install libwayland-egl in a seperate library package (libwayland-egl1-mesa)
