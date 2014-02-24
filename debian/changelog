@@ -2,7 +2,7 @@ mesa (10.1.0~rc2-1) UNRELEASED; urgency=medium
 
   [ Maarten Lankhorst ]
   * Add missing depends to keep lib(e)gl1-dev usable.
-  * Enable building drivers for libvdpau1.
+  * Enable building drivers for libvdpau1 (Closes: #705558).
   * Bump to rc2.
 
   [ Sjoerd Simons ]
