@@ -1,16 +1,26 @@
+mesa (10.1.0~rc2-1) UNRELEASED; urgency=medium
+
+  [ Maarten Lankhorst ]
+  * Add missing depends to keep lib(e)gl1-dev usable.
+  * Enable building drivers for libvdpau1.
+  * Bump to rc2.
+
+  [ Sjoerd Simons ]
+  * Install libwayland-egl in a seperate library package (libwayland-egl1-mesa)
+    and provide a virtual libwayland-egl1 package. (Closes: #739269).
+
+  [ Emilio Pozuelo Monfort ]
+  * Update build dependencies and dependencies minimum versions. Thanks to
+    Fabio Pedretti <fabio.ped@libero.it> for the patch.
+
+ -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Thu, 20 Feb 2014 19:12:12 +0100
+
 mesa (10.1.0~rc1-1ubuntu4) trusty; urgency=medium
 
   * Merge from debian git
     - Enable building drivers for libvdpau1
 
  -- Timo Aaltonen <tjaalton@ubuntu.com>  Thu, 20 Feb 2014 21:46:24 +0200
-
-mesa (10.1.0~rc1-2) UNRELEASED; urgency=medium
-
-  * Add missing depends to keep lib(e)gl1-dev usable.
-  * Enable building drivers for libvdpau1.
-
- -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Thu, 20 Feb 2014 19:12:12 +0100
 
 mesa (10.1.0~rc1-1ubuntu3) trusty; urgency=low
 
