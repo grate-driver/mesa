@@ -1,6 +1,8 @@
 01_hurd.diff
 02_gbm_no_undefined.diff
 04_osmesa_version.diff
+05_fix-defaults-glxfbconfig.patch
+06_fix-sort-glxfbconfig.patch
 
 # Ubuntu patches.
 101_ubuntu_hidden_glname.patch
@@ -9,5 +11,3 @@
 120-hide-x86sse.patch
 egl-platform-mir.patch
 i915-dont-default-to-2.1.patch
-fix-defaults-glxfbconfig.patch
-fix-sort-glxfbconfig.patch

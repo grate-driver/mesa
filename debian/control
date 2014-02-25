@@ -705,7 +705,7 @@ Section: debug
 Priority: extra
 Architecture: amd64 i386 kfreebsd-amd64 kfreebsd-i386 armhf
 Depends:
- libvdpau1-mesa-drivers (= ${binary:Version}),
+ libvdpau1-drivers-mesa (= ${binary:Version}),
  ${misc:Depends},
 Multi-Arch: same
 Pre-Depends: ${misc:Pre-Depends}
