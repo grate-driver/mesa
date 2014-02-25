@@ -1,3 +1,10 @@
+mesa (10.1.0~rc2-0ubuntu1) trusty; urgency=medium
+
+  [ Maarten Lankhorst ]
+  * Merge from unreleased debian-experimental.
+
+ -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Tue, 25 Feb 2014 14:29:26 +0100
+
 mesa (10.1.0~rc2-1) UNRELEASED; urgency=medium
 
   [ Maarten Lankhorst ]
