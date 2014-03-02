@@ -20,6 +20,9 @@ mesa (10.1.0~rc2-1) UNRELEASED; urgency=medium
   [ Samuel Thibault ]
   * Enable egl and gles on hurd (closes: #729260)
 
+  [ Julien Cristau ]
+  * libgbm1.symbols: try to avoid listing private symbols.
+
  -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Thu, 20 Feb 2014 19:12:12 +0100
 
 mesa (10.1.0~rc1-1) experimental; urgency=low
