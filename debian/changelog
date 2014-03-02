@@ -1,4 +1,4 @@
-mesa (10.1.0~rc2-1) UNRELEASED; urgency=medium
+mesa (10.1.0~rc2-1) experimental; urgency=medium
 
   [ Maarten Lankhorst ]
   * Add missing depends to keep lib(e)gl1-dev usable.
@@ -22,7 +22,7 @@ mesa (10.1.0~rc2-1) UNRELEASED; urgency=medium
   * gallium: fix build failure on powerpcspe (closes: #695746).  Thanks, Roland
     Stigge!
 
- -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Thu, 20 Feb 2014 19:12:12 +0100
+ -- Julien Cristau <jcristau@debian.org>  Sun, 02 Mar 2014 20:22:47 +0100
 
 mesa (10.1.0~rc1-1) experimental; urgency=low
 
