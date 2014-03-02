@@ -22,6 +22,8 @@ mesa (10.1.0~rc2-1) UNRELEASED; urgency=medium
 
   [ Julien Cristau ]
   * libgbm1.symbols: try to avoid listing private symbols.
+  * Enable radeon/r200/r300/r600/radeonsi on kfreebsd (closes: #732337).
+    Thanks, Robert Millan!
 
  -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Thu, 20 Feb 2014 19:12:12 +0100
 
