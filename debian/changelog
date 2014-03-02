@@ -17,6 +17,9 @@ mesa (10.1.0~rc2-1) UNRELEASED; urgency=medium
   * Attempt to fix FTBFS on hurd.
   * Cherry pick some fixes for GLX fbconfig. (Closes: #739691)
 
+  [ Samuel Thibault ]
+  * Enable egl and gles on hurd (closes: #729260)
+
  -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Thu, 20 Feb 2014 19:12:12 +0100
 
 mesa (10.1.0~rc1-1) experimental; urgency=low

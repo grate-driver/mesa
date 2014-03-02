@@ -246,7 +246,7 @@ Description: generic buffer management API -- development files
 
 Package: libegl1-mesa
 Section: libs
-Architecture: linux-any kfreebsd-any
+Architecture: any
 Depends:
  ${shlibs:Depends},
  ${misc:Depends},
@@ -268,7 +268,7 @@ Description: free implementation of the EGL API -- runtime
 Package: libegl1-mesa-dbg
 Section: debug
 Priority: extra
-Architecture: linux-any kfreebsd-any
+Architecture: any
 Depends:
  libegl1-mesa (= ${binary:Version}),
  ${misc:Depends},
@@ -282,7 +282,7 @@ Description: free implementation of the EGL API -- debugging symbols
 
 Package: libegl1-mesa-dev
 Section: libdevel
-Architecture: linux-any kfreebsd-any
+Architecture: any
 Depends:
  libegl1-mesa (= ${binary:Version}),
  libegl1-mesa-drivers (= ${binary:Version}),
@@ -438,7 +438,7 @@ Description: free implementation of the OpenVG API -- development files
 
 Package: libgles1-mesa
 Section: libs
-Architecture: linux-any kfreebsd-any
+Architecture: any
 Depends:
  libglapi-mesa (= ${binary:Version}),
  ${shlibs:Depends},
@@ -459,7 +459,7 @@ Description: free implementation of the OpenGL|ES 1.x API -- runtime
 Package: libgles1-mesa-dbg
 Section: debug
 Priority: extra
-Architecture: linux-any kfreebsd-any
+Architecture: any
 Depends:
  libgles1-mesa (= ${binary:Version}),
  ${misc:Depends},
@@ -476,7 +476,7 @@ Description: free implementation of the OpenGL|ES 1.x API -- debugging symbols
 
 Package: libgles1-mesa-dev
 Section: libdevel
-Architecture: linux-any kfreebsd-any
+Architecture: any
 Depends:
  libgles1-mesa (= ${binary:Version}),
  libegl1-mesa-dev,
@@ -494,7 +494,7 @@ Description: free implementation of the OpenGL|ES 1.x API -- development files
 
 Package: libgles2-mesa
 Section: libs
-Architecture: linux-any kfreebsd-any
+Architecture: any
 Depends:
  libglapi-mesa (= ${binary:Version}),
  ${shlibs:Depends},
@@ -516,7 +516,7 @@ Description: free implementation of the OpenGL|ES 2.x API -- runtime
 Package: libgles2-mesa-dbg
 Section: debug
 Priority: extra
-Architecture: linux-any kfreebsd-any
+Architecture: any
 Depends:
  libgles2-mesa (= ${binary:Version}),
  ${misc:Depends},
@@ -534,7 +534,7 @@ Description: free implementation of the OpenGL|ES 2.x API -- debugging symbols
 
 Package: libgles2-mesa-dev
 Section: libdevel
-Architecture: linux-any kfreebsd-any
+Architecture: any
 Depends:
  libgles2-mesa (= ${binary:Version}),
  libegl1-mesa-dev,

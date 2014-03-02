@@ -54,9 +54,11 @@ GALLIUM_DRIVERS =
 
 # hurd doesn't do direct rendering
 ifeq ($(DEB_HOST_ARCH_OS), hurd)
+	EGL_DISPLAYS = x11
 	confflags_DIRECT_RENDERING = --disable-driglx-direct
-	confflags_EGL = --disable-egl
+	confflags_EGL = --with-egl-platforms="$(EGL_DISPLAYS)"
 	confflags_GALLIUM = --with-gallium-drivers=
+	confflags_GLES = --enable-gles-overlay --enable-gles1 --enable-gles2
 	DRI_DRIVERS += swrast
 else
 	EGL_DISPLAYS = x11
