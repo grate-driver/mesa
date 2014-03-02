@@ -4,3 +4,4 @@
 04_osmesa_version.diff
 05_fix-defaults-glxfbconfig.patch
 06_fix-sort-glxfbconfig.patch
+07_gallium-fix-build-failure-on-powerpcspe.diff
