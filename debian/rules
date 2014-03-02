@@ -98,9 +98,6 @@ else
   ifneq (,$(filter $(DEB_HOST_ARCH),amd64 i386 kfreebsd-amd64 kfreebsd-i386 armhf))
 	confflags_GALLIUM += --enable-gallium-llvm
 	confflags_GALLIUM += --with-llvm-shared-libs
-	confflags_GALLIUM += --enable-vdpau
-  else
-	confflags_GALLIUM += --disable-vdpau
   endif
 
 	confflags_DIRECT_RENDERING = --enable-driglx-direct
@@ -120,7 +117,7 @@ confflags-dri = \
 	--enable-shared-glapi \
 	--enable-texture-float \
 	--enable-xa \
-	--disable-xvmc \
+	--disable-xvmc --disable-vdpau \
 	$(confflags_DIRECT_RENDERING) \
 	$(confflags_EGL) \
 	$(confflags_GALLIUM) \
