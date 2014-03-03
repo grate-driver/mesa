@@ -51,19 +51,16 @@ include /usr/share/quilt/quilt.make
 
 DRI_DRIVERS =
 GALLIUM_DRIVERS =
+EGL_DISPLAYS = x11
 
 # hurd doesn't do direct rendering
 ifeq ($(DEB_HOST_ARCH_OS), hurd)
 	confflags_DIRECT_RENDERING = --disable-driglx-direct
-	confflags_EGL = --disable-egl
-	confflags_GALLIUM = --with-gallium-drivers=
 	DRI_DRIVERS += swrast
 else
-	EGL_DISPLAYS = x11
-
   ifeq ($(DEB_HOST_ARCH_OS), linux)
 # Gallium drivers require libdrm-{nouveau,radeon}, only available on Linux
-	GALLIUM_DRIVERS += nouveau r600 r300 svga
+	GALLIUM_DRIVERS += nouveau svga
 #
 # Although the KMS egl drivers will probably build on kfreebsd & hurd
 # only linux actually has KMS drivers implemented at this point.
@@ -76,12 +73,7 @@ else
 	EGL_DISPLAYS += mir
     endif
     ifeq (,$(filter $(DEB_HOST_ARCH), s390 s390x))
-	DRI_DRIVERS += r200 radeon nouveau
-    endif
-    ifneq (,$(filter $(DEB_HOST_ARCH),amd64 i386 armhf))
-	# Radeonsi needs LLVM, so only build it on the subset of archs
-	# where we have LLVM enabled.
-	GALLIUM_DRIVERS += radeonsi
+	DRI_DRIVERS += nouveau
     endif
   endif
 
@@ -97,28 +89,29 @@ else
 	DRI_DRIVERS += swrast
   endif
 
+  ifeq (,$(filter $(DEB_HOST_ARCH), s390 s390x))
+    DRI_DRIVERS += r200 radeon
+    GALLIUM_DRIVERS += r600 r300
+  endif
+  ifneq (,$(filter $(DEB_HOST_ARCH),amd64 i386 armhf))
+    # Radeonsi needs LLVM, so only build it on the subset of archs
+    # where we have LLVM enabled.
+    GALLIUM_DRIVERS += radeonsi
+  endif
+
   # LLVM is required for r300g and llvmpipe:
   ifneq (,$(filter $(DEB_HOST_ARCH),amd64 i386 kfreebsd-amd64 kfreebsd-i386 armhf))
 	confflags_GALLIUM += --enable-gallium-llvm
 	confflags_GALLIUM += --with-llvm-shared-libs
-	confflags_GALLIUM += --enable-vdpau
-  else
-	confflags_GALLIUM += --disable-vdpau
   endif
 
 	confflags_DIRECT_RENDERING = --enable-driglx-direct
-	confflags_EGL = --with-egl-platforms="$(EGL_DISPLAYS)"
-	confflags_GLES = --enable-gles1 --enable-gles2
-    ifneq (,$(filter $(DEB_HOST_ARCH),arm64 ppc64 ppc64el))
-	confflags_GALLIUM += --disable-shared-gallium --with-gallium-drivers=""
-	confflags_OPENVG = --disable-openvg --disable-gallium-egl
-	EXTRA_SED += -e 's/^@nogbm@/\#/' -e 's/^@noegl@/\#/'
-    else
-	confflags_GALLIUM += --with-gallium-drivers="$(GALLIUM_DRIVERS)"
 	confflags_OPENVG = --enable-openvg --enable-gallium-egl
     endif
 endif
-EXTRA_SED += $(if $(EXTRA_SED_ARCH),$(EXTRA_SED_ARCH),-e 's/^@nogbm@//' -e 's/^@noegl@//')
+confflags_EGL = --with-egl-platforms="$(EGL_DISPLAYS)"
+confflags_GLES = --enable-gles1 --enable-gles2
+confflags_GALLIUM += --with-gallium-drivers="$(GALLIUM_DRIVERS)"
 
 confflags-dri = \
 	--enable-dri \
@@ -130,7 +123,7 @@ confflags-dri = \
 	--enable-shared-glapi \
 	--enable-texture-float \
 	--enable-xa \
-	--disable-xvmc \
+	--disable-xvmc --enable-vdpau \
 	$(confflags_DIRECT_RENDERING) \
 	$(confflags_EGL) \
 	$(confflags_GALLIUM) \
@@ -185,7 +178,6 @@ install: build
 	for file in debian/*.in; \
 	do \
 		sed -e"s,\$${DEB_HOST_MULTIARCH},$(DEB_HOST_MULTIARCH),g" \
-		    ${EXTRA_SED} \
 			$${file} > $${file%%.in}; \
 	done
 

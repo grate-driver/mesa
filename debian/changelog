@@ -5,16 +5,11 @@ mesa (10.1.0~rc2-0ubuntu1) trusty; urgency=medium
 
  -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Tue, 25 Feb 2014 14:29:26 +0100
 
-mesa (10.1.0~rc2-1) UNRELEASED; urgency=medium
+mesa (10.1.0~rc2-1) experimental; urgency=medium
 
   [ Maarten Lankhorst ]
   * Add missing depends to keep lib(e)gl1-dev usable.
-  * Enable building drivers for libvdpau1 (Closes: #705558).
   * Bump to rc2.
-
-  [ Sjoerd Simons ]
-  * Install libwayland-egl in a seperate library package (libwayland-egl1-mesa)
-    and provide a virtual libwayland-egl1 package. (Closes: #739269).
 
   [ Emilio Pozuelo Monfort ]
   * Update build dependencies and dependencies minimum versions. Thanks to
@@ -24,7 +19,17 @@ mesa (10.1.0~rc2-1) UNRELEASED; urgency=medium
   * Attempt to fix FTBFS on hurd.
   * Cherry pick some fixes for GLX fbconfig. (Closes: #739691)
 
- -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Thu, 20 Feb 2014 19:12:12 +0100
+  [ Samuel Thibault ]
+  * Enable egl and gles on hurd (closes: #729260)
+
+  [ Julien Cristau ]
+  * libgbm1.symbols: try to avoid listing private symbols.
+  * Enable radeon/r200/r300/r600/radeonsi on kfreebsd (closes: #732337).
+    Thanks, Robert Millan!
+  * gallium: fix build failure on powerpcspe (closes: #695746).  Thanks, Roland
+    Stigge!
+
+ -- Julien Cristau <jcristau@debian.org>  Sun, 02 Mar 2014 20:22:47 +0100
 
 mesa (10.1.0~rc1-1ubuntu4) trusty; urgency=medium
 
