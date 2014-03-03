@@ -1,3 +1,13 @@
+mesa (10.1.0~rc3-0ubuntu1) UNRELEASED; urgency=medium
+
+  [ Maarten Lankhorst ]
+  * Merge from unreleased debian-experimental.
+  * Enable egl, libopenvg, gbm and vdpau for all archs.
+    - This simplifies the build rules considerably, and
+      is closer to debian behavior.
+
+ -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Tue, 25 Feb 2014 14:29:26 +0100
+
 mesa (10.1.0~rc3-1) UNRELEASED; urgency=medium
 
   [ Andreas Boll ]
@@ -7,16 +17,6 @@ mesa (10.1.0~rc3-1) UNRELEASED; urgency=medium
   * New upstream release.
 
  -- Andreas Boll <andreas.boll.dev@gmail.com>  Mon, 03 Mar 2014 12:39:45 +0100
-
-mesa (10.1.0~rc2-1ubuntu1) UNRELEASED; urgency=medium
-
-  [ Maarten Lankhorst ]
-  * Merge from released debian-experimental.
-  * Enable egl, libopenvg, gbm and vdpau for all archs.
-    - This simplifies the build rules considerably, and
-      is closer to debian behavior.
-
- -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Tue, 25 Feb 2014 14:29:26 +0100
 
 mesa (10.1.0~rc2-1) experimental; urgency=medium
 
