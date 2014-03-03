@@ -104,10 +104,9 @@ else
 	confflags_GALLIUM += --enable-gallium-llvm
 	confflags_GALLIUM += --with-llvm-shared-libs
   endif
-
 	confflags_DIRECT_RENDERING = --enable-driglx-direct
 	confflags_OPENVG = --enable-openvg --enable-gallium-egl
-    endif
+	confflags_GALLIUM += --enable-vdpau
 endif
 confflags_EGL = --with-egl-platforms="$(EGL_DISPLAYS)"
 confflags_GLES = --enable-gles1 --enable-gles2
@@ -123,7 +122,7 @@ confflags-dri = \
 	--enable-shared-glapi \
 	--enable-texture-float \
 	--enable-xa \
-	--disable-xvmc --enable-vdpau \
+	--disable-xvmc \
 	$(confflags_DIRECT_RENDERING) \
 	$(confflags_EGL) \
 	$(confflags_GALLIUM) \
@@ -270,21 +269,12 @@ binary-arch: install
 	# Resolve EGL/GLES/OpenVG symbols in the private library path.
 	# Because there's no packaging problem so onerous that accomodating
 	# proprietary alternatives can't make more difficult…
-ifneq (,$(filter $(DEB_HOST_ARCH),arm64 ppc64 ppc64el))
-	set -e ; for PACKAGE in \
-		libegl1-mesa libgles1-mesa libgles2-mesa ; do \
-			dh_makeshlibs -p$$PACKAGE -- -c4 \
-			-edebian/$$PACKAGE/usr/lib/$(DEB_HOST_MULTIARCH)/mesa-egl/\* \
-		; done
-	dh_makeshlibs -s -Nlibopenvg1-mesa --remaining-packages -- -c4
-else
 	set -e ; for PACKAGE in \
 		libegl1-mesa libgles1-mesa libgles2-mesa libopenvg1-mesa ; do \
 			dh_makeshlibs -p$$PACKAGE -- -c4 \
 			-edebian/$$PACKAGE/usr/lib/$(DEB_HOST_MULTIARCH)/mesa-egl/\* \
 		; done
 	dh_makeshlibs -s --remaining-packages -- -c4
-endif
 
 	dh_installdeb -s
 	dh_shlibdeps -s -l/usr/lib/$(DEB_HOST_MULTIARCH)/mesa:\

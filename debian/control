@@ -18,7 +18,7 @@ Build-Depends:
  libxfixes-dev,
  libxdamage-dev,
  libxext-dev,
- libvdpau-dev [amd64 i386 kfreebsd-amd64 kfreebsd-i386 armhf],
+ libvdpau-dev [linux-any kfreebsd-any],
  autoconf,
  automake,
  libtool,
@@ -49,7 +49,7 @@ Homepage: http://mesa3d.sourceforge.net/
 
 Package: libxatracker2
 Section: libs
-Architecture: amd64 armel armhf i386 powerpc
+Architecture: linux-any
 Depends:
  ${shlibs:Depends},
  ${misc:Depends},
@@ -64,7 +64,7 @@ Description: X acceleration library -- runtime
 Package: libxatracker2-dbg
 Section: debug
 Priority: extra
-Architecture: amd64 armel armhf i386 powerpc
+Architecture: linux-any
 Depends:
  libxatracker2 (= ${binary:Version}),
  ${misc:Depends},
@@ -80,7 +80,7 @@ Description: X acceleration library -- debugging symbols
 
 Package: libxatracker-dev
 Section: libdevel
-Architecture: amd64 armel armhf i386 powerpc
+Architecture: linux-any
 Depends:
  libxatracker2 (= ${binary:Version}),
  ${misc:Depends},
@@ -251,7 +251,7 @@ Description: free implementation of the EGL API -- driver debugging symbols
 
 Package: libopenvg1-mesa
 Section: libs
-Architecture: amd64 armel armhf i386 powerpc kfreebsd-any
+Architecture: linux-any
 Depends:
  ${shlibs:Depends},
  ${misc:Depends},
@@ -270,7 +270,7 @@ Description: free implementation of the OpenVG API -- runtime
 Package: libopenvg1-mesa-dbg
 Section: debug
 Priority: extra
-Architecture: amd64 armel armhf i386 powerpc kfreebsd-any
+Architecture: linux-any
 Depends:
  libopenvg1-mesa (= ${binary:Version}),
  ${misc:Depends},
@@ -286,7 +286,7 @@ Description: free implementation of the OpenVG API -- debugging symbols
 
 Package: libopenvg1-mesa-dev
 Section: libdevel
-Architecture: amd64 armel armhf i386 powerpc kfreebsd-any
+Architecture: linux-any
 Depends:
  libopenvg1-mesa (= ${binary:Version}),
  libegl1-mesa-dev,
@@ -658,7 +658,7 @@ Description: Mesa Off-screen rendering extension -- development files
 
 Package: libvdpau1-drivers-mesa
 Section: libs
-Architecture: amd64 i386 kfreebsd-amd64 kfreebsd-i386 armhf
+Architecture: linux-any kfreebsd-any
 Depends:
  libvdpau1,
  ${shlib:Depends},
@@ -671,7 +671,7 @@ Description: Mesa acceleration support for vdpau.
 Package: libvdpau1-drivers-mesa-dbg
 Section: debug
 Priority: extra
-Architecture: amd64 i386 kfreebsd-amd64 kfreebsd-i386 armhf
+Architecture: linux-any kfreebsd-any
 Depends:
  libvdpau1-drivers-mesa (= ${binary:Version}),
  ${misc:Depends},
