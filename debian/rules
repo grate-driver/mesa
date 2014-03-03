@@ -105,6 +105,7 @@ else
 
 	confflags_DIRECT_RENDERING = --enable-driglx-direct
 	confflags_OPENVG = --enable-openvg --enable-gallium-egl
+	confflags_GALLIUM += --enable-vdpau
 endif
 confflags_EGL = --with-egl-platforms="$(EGL_DISPLAYS)"
 confflags_GLES = --enable-gles1 --enable-gles2
@@ -120,7 +121,7 @@ confflags-dri = \
 	--enable-shared-glapi \
 	--enable-texture-float \
 	--enable-xa \
-	--disable-xvmc --disable-vdpau \
+	--disable-xvmc \
 	$(confflags_DIRECT_RENDERING) \
 	$(confflags_DRI3) \
 	$(confflags_EGL) \

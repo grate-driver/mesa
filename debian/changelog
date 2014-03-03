@@ -2,6 +2,7 @@ mesa (10.1.0~rc3-1) UNRELEASED; urgency=medium
 
   [ Andreas Boll ]
   * Disable dri3 on !linux
+  * Enable building drivers for libvdpau1 (Closes: #705558).
 
   [ Maarten Lankhorst ]
   * New upstream release.
