@@ -5,6 +5,8 @@ mesa (10.1.0~rc3-0ubuntu1) UNRELEASED; urgency=medium
   * Enable egl, libopenvg, gbm and vdpau for all archs.
     - This simplifies the build rules considerably, and
       is closer to debian behavior.
+  * Fix playback of interlaced videos.
+  * Fix crashes related to vdpau interop.
 
  -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Tue, 25 Feb 2014 14:29:26 +0100
 
