@@ -1,12 +1,12 @@
-mesa (10.1.0~rc3-0ubuntu1) UNRELEASED; urgency=medium
+mesa (10.1.0~rc3-0ubuntu1) trusty; urgency=medium
 
   [ Maarten Lankhorst ]
   * Merge from unreleased debian-experimental.
   * Enable egl, libopenvg, gbm and vdpau for all archs.
     - This simplifies the build rules considerably, and
       is closer to debian behavior.
-  * Fix playback of interlaced videos.
-  * Fix crashes related to vdpau interop.
+  * Cherry pick fixes for playback of interlaced videos. (LP: #1287326)
+  * Cherry pick fixes for crashes related to vdpau interop.
 
  -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Tue, 25 Feb 2014 14:29:26 +0100
 
