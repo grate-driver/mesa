@@ -1,0 +1,121 @@
+diff --git a/src/gallium/targets/dri-nouveau/Makefile.am b/src/gallium/targets/dri-nouveau/Makefile.am
+index 4bd4e21..f34acf8 100644
+--- a/src/gallium/targets/dri-nouveau/Makefile.am
++++ b/src/gallium/targets/dri-nouveau/Makefile.am
+@@ -35,7 +35,9 @@ dri_LTLIBRARIES = nouveau_dri.la
+ nodist_EXTRA_nouveau_dri_la_SOURCES = dummy.cpp
+ nouveau_dri_la_SOURCES = target.c
+ 
+-nouveau_dri_la_LDFLAGS = $(GALLIUM_DRI_LINKER_FLAGS)
++nouveau_dri_la_LDFLAGS = \
++	$(GALLIUM_DRI_LINKER_FLAGS) \
++	-Wl,--dynamic-list=$(srcdir)/nouveau_dri.dyn
+ 
+ nouveau_dri_la_LIBADD = \
+ 	$(top_builddir)/src/mesa/drivers/dri/common/libdricommon.la \
+diff --git a/src/gallium/targets/dri-nouveau/nouveau_dri.dyn b/src/gallium/targets/dri-nouveau/nouveau_dri.dyn
+new file mode 100644
+index 0000000..a10356b
+--- /dev/null
++++ b/src/gallium/targets/dri-nouveau/nouveau_dri.dyn
+@@ -0,0 +1,3 @@
++{
++	nouveau_drm_screen_create;
++};
+diff --git a/src/gallium/targets/r300/dri/Makefile.am b/src/gallium/targets/r300/dri/Makefile.am
+index 4bd9ea4..e2becdb 100644
+--- a/src/gallium/targets/r300/dri/Makefile.am
++++ b/src/gallium/targets/r300/dri/Makefile.am
+@@ -37,7 +37,9 @@ nodist_EXTRA_r300_dri_la_SOURCES = dummy.cpp
+ r300_dri_la_SOURCES = \
+ 	drm_target.c
+ 
+-r300_dri_la_LDFLAGS = $(GALLIUM_DRI_LINKER_FLAGS)
++r300_dri_la_LDFLAGS = \
++	$(GALLIUM_DRI_LINKER_FLAGS) \
++	-Wl,--dynamic-list=$(srcdir)/radeon.dyn
+ 
+ r300_dri_la_LIBADD = \
+ 	$(top_builddir)/src/mesa/drivers/dri/common/libdricommon.la \
+diff --git a/src/gallium/targets/r300/dri/radeon.dyn b/src/gallium/targets/r300/dri/radeon.dyn
+new file mode 100644
+index 0000000..8d243dc
+--- /dev/null
++++ b/src/gallium/targets/r300/dri/radeon.dyn
+@@ -0,0 +1,3 @@
++{
++	radeon_drm_winsys_create;
++};
+diff --git a/src/gallium/targets/r600/dri/Makefile.am b/src/gallium/targets/r600/dri/Makefile.am
+index 1f13b80..149106f 100644
+--- a/src/gallium/targets/r600/dri/Makefile.am
++++ b/src/gallium/targets/r600/dri/Makefile.am
+@@ -36,7 +36,9 @@ dri_LTLIBRARIES = r600_dri.la
+ r600_dri_la_SOURCES = \
+ 	drm_target.c
+ 
+-r600_dri_la_LDFLAGS = $(GALLIUM_DRI_LINKER_FLAGS)
++r600_dri_la_LDFLAGS = \
++	$(GALLIUM_DRI_LINKER_FLAGS) \
++	-Wl,--dynamic-list=$(srcdir)/../../r300/dri/radeon.dyn
+ 
+ r600_dri_la_LIBADD = \
+ 	$(top_builddir)/src/mesa/drivers/dri/common/libdricommon.la \
+diff --git a/src/gallium/targets/r600/vdpau/Makefile.am b/src/gallium/targets/r600/vdpau/Makefile.am
+index 509b954..d1a528d 100644
+--- a/src/gallium/targets/r600/vdpau/Makefile.am
++++ b/src/gallium/targets/r600/vdpau/Makefile.am
+@@ -35,7 +35,8 @@ libvdpau_r600_la_SOURCES = \
+ 	$(top_srcdir)/src/gallium/auxiliary/vl/vl_winsys_dri.c
+ 
+ libvdpau_r600_la_LDFLAGS = \
+-	$(GALLIUM_VDPAU_LINKER_FLAGS)
++	$(GALLIUM_VDPAU_LINKER_FLAGS) \
++	-Wl,--dynamic-list=$(srcdir)/../../r300/dri/radeon.dyn
+ 
+ libvdpau_r600_la_LIBADD = \
+ 	$(top_builddir)/src/gallium/drivers/r600/libr600.la \
+diff --git a/src/gallium/targets/radeonsi/dri/Makefile.am b/src/gallium/targets/radeonsi/dri/Makefile.am
+index eab28b5..a8db0a8 100644
+--- a/src/gallium/targets/radeonsi/dri/Makefile.am
++++ b/src/gallium/targets/radeonsi/dri/Makefile.am
+@@ -37,7 +37,9 @@ nodist_EXTRA_radeonsi_dri_la_SOURCES = dummy.cpp
+ radeonsi_dri_la_SOURCES = \
+ 	drm_target.c
+ 
+-radeonsi_dri_la_LDFLAGS = $(GALLIUM_DRI_LINKER_FLAGS)
++radeonsi_dri_la_LDFLAGS = \
++	$(GALLIUM_DRI_LINKER_FLAGS) \
++	-Wl,--dynamic-list=$(srcdir)/../../r300/dri/radeon.dyn
+ 
+ radeonsi_dri_la_LIBADD = \
+ 	$(top_builddir)/src/mesa/drivers/dri/common/libdricommon.la \
+diff --git a/src/gallium/targets/radeonsi/vdpau/Makefile.am b/src/gallium/targets/radeonsi/vdpau/Makefile.am
+index 54d65b3..0d53c18 100644
+--- a/src/gallium/targets/radeonsi/vdpau/Makefile.am
++++ b/src/gallium/targets/radeonsi/vdpau/Makefile.am
+@@ -36,7 +36,9 @@ libvdpau_radeonsi_la_SOURCES = \
+ 	$(top_srcdir)/src/gallium/auxiliary/vl/vl_winsys_dri.c
+ 
+ libvdpau_radeonsi_la_LDFLAGS = \
+-	$(GALLIUM_VDPAU_LINKER_FLAGS)
++	$(GALLIUM_VDPAU_LINKER_FLAGS) \
++	-Wl,--dynamic-list=$(srcdir)/../../r300/dri/radeon.dyn
++
+ 
+ libvdpau_radeonsi_la_LIBADD = \
+ 	$(top_builddir)/src/gallium/drivers/radeonsi/libradeonsi.la \
+diff --git a/src/gallium/targets/vdpau-nouveau/Makefile.am b/src/gallium/targets/vdpau-nouveau/Makefile.am
+index 3cdf103..66738f1 100644
+--- a/src/gallium/targets/vdpau-nouveau/Makefile.am
++++ b/src/gallium/targets/vdpau-nouveau/Makefile.am
+@@ -36,7 +36,8 @@ libvdpau_nouveau_la_SOURCES = \
+ 	$(top_srcdir)/src/gallium/auxiliary/vl/vl_winsys_dri.c
+ 
+ libvdpau_nouveau_la_LDFLAGS = \
+-	$(GALLIUM_VDPAU_LINKER_FLAGS)
++	$(GALLIUM_VDPAU_LINKER_FLAGS) \
++	-Wl,--dynamic-list=$(srcdir)/../dri-nouveau/nouveau_dri.dyn
+ 
+ libvdpau_nouveau_la_LIBADD = \
+ 	$(top_builddir)/src/gallium/winsys/nouveau/drm/libnouveaudrm.la \

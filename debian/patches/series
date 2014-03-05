@@ -11,3 +11,4 @@
 120-hide-x86sse.patch
 egl-platform-mir.patch
 i915-dont-default-to-2.1.patch
+fix-bsymbolic-madness.patch
