@@ -1,10 +1,8 @@
-mesa (10.1.0~rc3-1) UNRELEASED; urgency=medium
+mesa (10.1.0-1) UNRELEASED; urgency=low
 
   [ Andreas Boll ]
   * Disable dri3 on !linux
   * Enable building drivers for libvdpau1 (Closes: #705558).
-
-  [ Maarten Lankhorst ]
   * New upstream release.
 
  -- Andreas Boll <andreas.boll.dev@gmail.com>  Mon, 03 Mar 2014 12:39:45 +0100
