@@ -6,6 +6,9 @@ mesa (10.1.0-1) UNRELEASED; urgency=low
   * New upstream release.
   * Drop 01-hurd.diff, upstream in 10.1.0.
 
+  [ Sven Joachim ]
+  * Drop dependency of libegl1-mesa-drivers on libgl1-mesa-dri.
+
  -- Andreas Boll <andreas.boll.dev@gmail.com>  Mon, 03 Mar 2014 12:39:45 +0100
 
 mesa (10.1.0~rc2-1) experimental; urgency=medium
