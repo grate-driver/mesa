@@ -776,7 +776,7 @@ Section: debug
 Priority: extra
 Architecture: linux-any kfreebsd-any
 Depends:
- libvdpau1-mesa-drivers (= ${binary:Version}),
+ mesa-vdpau-drivers (= ${binary:Version}),
  ${misc:Depends},
 Multi-Arch: same
 Pre-Depends: ${misc:Pre-Depends}
