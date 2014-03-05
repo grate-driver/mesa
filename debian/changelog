@@ -1,7 +1,11 @@
 mesa (10.1.0-3) UNRELEASED; urgency=medium
 
+  [ Andreas Boll ]
   * Build OpenCL only on architectures where we have LLVM enabled.
   * Actually enable radeonsi on kfreebsd.
+
+  [ Sven Joachim ]
+  * Drop dependency of libegl1-mesa-drivers on libgl1-mesa-dri again.
 
  -- Andreas Boll <andreas.boll.dev@gmail.com>  Wed, 19 Mar 2014 21:23:46 +0100
 
