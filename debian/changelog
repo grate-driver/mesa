@@ -1,3 +1,10 @@
+mesa (10.1.0~rc3-0ubuntu2) UNRELEASED; urgency=low
+
+  * Install libegl-wayland in /mesa-egl again.
+    - Fixes FTBFS for g-c-c.
+
+ -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Wed, 05 Mar 2014 10:16:47 +0100
+
 mesa (10.1.0~rc3-0ubuntu1) trusty; urgency=medium
 
   [ Maarten Lankhorst ]
