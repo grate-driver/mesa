@@ -5,6 +5,7 @@ mesa (10.1.0-1) UNRELEASED; urgency=low
   * Enable building drivers for libvdpau1 (Closes: #705558).
   * New upstream release.
   * Drop 01-hurd.diff, upstream in 10.1.0.
+  * Next attempt to fix FTBFS on hurd
 
   [ Sven Joachim ]
   * Drop dependency of libegl1-mesa-drivers on libgl1-mesa-dri.
