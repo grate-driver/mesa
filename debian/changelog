@@ -1,9 +1,9 @@
-mesa (10.1.0~rc3-0ubuntu3) UNRELEASED; urgency=low
+mesa (10.1.0~rc3-0ubuntu3) trusty; urgency=medium
 
   * Add --dynamic-list to undo damage from -Bsymbolic-functions.
     - This fixes vdpau interop properly.
 
- -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Wed, 05 Mar 2014 14:19:17 +0100
+ -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Thu, 06 Mar 2014 10:28:47 +0100
 
 mesa (10.1.0~rc3-0ubuntu2) trusty; urgency=medium
 
