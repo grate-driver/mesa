@@ -70,6 +70,9 @@ else
 	EGL_DISPLAYS += drm
 # Non-Linux ports also lack *_CLOEXEC and epoll, so wayland isn't ready yet:
 	EGL_DISPLAYS += wayland
+# < aboll> opencl needs gallium-pipe-loader which needs udev
+# so no opencl for kbsd
+	confflags_GALLIUM += --enable-opencl --enable-opencl-icd
     ifeq (,$(filter $(DEB_HOST_ARCH), s390 s390x))
 	DRI_DRIVERS += nouveau
     endif
@@ -106,7 +109,6 @@ else
 	confflags_DIRECT_RENDERING = --enable-driglx-direct
 	confflags_OPENVG = --enable-openvg --enable-gallium-egl
 	confflags_GALLIUM += --enable-vdpau
-	confflags_GALLIUM += --enable-opencl --enable-opencl-icd
 endif
 confflags_EGL = --with-egl-platforms="$(EGL_DISPLAYS)"
 confflags_GLES = --enable-gles1 --enable-gles2
