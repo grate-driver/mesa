@@ -1,4 +1,4 @@
-mesa (10.1.0-1) UNRELEASED; urgency=low
+mesa (10.1.0-1) experimental; urgency=low
 
   [ Andreas Boll ]
   * Disable dri3 on !linux
@@ -10,7 +10,7 @@ mesa (10.1.0-1) UNRELEASED; urgency=low
   [ Sven Joachim ]
   * Drop dependency of libegl1-mesa-drivers on libgl1-mesa-dri.
 
- -- Andreas Boll <andreas.boll.dev@gmail.com>  Mon, 03 Mar 2014 12:39:45 +0100
+ -- Julien Cristau <jcristau@debian.org>  Fri, 07 Mar 2014 22:16:32 +0100
 
 mesa (10.1.0~rc2-1) experimental; urgency=medium
 
