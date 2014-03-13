@@ -75,6 +75,10 @@ else
     ifeq (,$(filter $(DEB_HOST_ARCH),arm64 powerpc ppc64 ppc64el))
 	EGL_DISPLAYS += mir
     endif
+
+# < aboll> opencl needs gallium-pipe-loader which needs udev
+# so no opencl for kbsd
+	confflags_GALLIUM += --enable-opencl --enable-opencl-icd
     ifeq (,$(filter $(DEB_HOST_ARCH), s390 s390x))
 	DRI_DRIVERS += nouveau
     endif
@@ -107,6 +111,7 @@ else
 	confflags_GALLIUM += --enable-gallium-llvm
 	confflags_GALLIUM += --with-llvm-shared-libs
   endif
+
 	confflags_DIRECT_RENDERING = --enable-driglx-direct
 	confflags_OPENVG = --enable-openvg --enable-gallium-egl
 	confflags_GALLIUM += --enable-vdpau
