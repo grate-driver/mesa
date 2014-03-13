@@ -76,9 +76,6 @@ else
 	EGL_DISPLAYS += mir
     endif
 
-# < aboll> opencl needs gallium-pipe-loader which needs udev
-# so no opencl for kbsd
-	confflags_GALLIUM += --enable-opencl --enable-opencl-icd
     ifeq (,$(filter $(DEB_HOST_ARCH), s390 s390x))
 	DRI_DRIVERS += nouveau
     endif
