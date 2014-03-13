@@ -1,11 +1,11 @@
-mesa (10.1.0-1ubuntu1) UNRELEASED; urgency=low
+mesa (10.1.0-1ubuntu1) trusty; urgency=medium
 
   * Merge from released debian-experimental.
   * Rename libvdpau1-drivers-mesa to mesa-vdpau-drivers.
     - This makes ubuntu package names identical to debian.
   * Disable opencl for now.
 
- -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Thu, 13 Mar 2014 13:57:56 +0100
+ -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Thu, 13 Mar 2014 16:30:35 +0100
 
 mesa (10.1.0-1) experimental; urgency=low
 
