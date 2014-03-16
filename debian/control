@@ -322,6 +322,9 @@ Depends:
  ${misc:Depends},
  libegl1-mesa (= ${binary:Version}),
  libglapi-mesa (= ${binary:Version}),
+ libwayland-egl1-mesa (= ${binary:Version}),
+# for libllvmradeon
+ libgl1-mesa-dri (= ${binary:Version}) [any-i386 any-amd64],
 Pre-Depends: ${misc:Pre-Depends}
 Multi-Arch: same
 Description: free implementation of the EGL API -- hardware drivers
@@ -347,6 +350,41 @@ Description: free implementation of the EGL API -- driver debugging symbols
  .
  This package contains the debugging symbols for the drivers required for
  hardware accelerated rendering of EGL-based graphics libraries.
+
+Package: libwayland-egl1-mesa
+Section: libs
+Architecture: linux-any
+Depends:
+ ${shlibs:Depends},
+ ${misc:Depends},
+ libegl1-mesa (= ${binary:Version})
+Recommends: libegl1-mesa-drivers
+Provides: libwayland-egl1
+Conflicts: libwayland-egl1
+Replaces: libwayland-egl1
+Pre-Depends: ${misc:Pre-Depends}
+Multi-Arch: same
+Description: free implementation of the EGL API -- runtime
+ This package contains the EGL native platform graphics interface library.
+ EGL provides a platform-agnostic mechanism for creating rendering surfaces
+ for use with other graphics libraries, such as OpenGL|ES and OpenVG.
+ .
+ This package contains wayland specific interface for use with EGL.
+
+Package: libwayland-egl1-mesa-dbg
+Section: debug
+Priority: extra
+Architecture: linux-any
+Depends:
+ libwayland-egl1-mesa (= ${binary:Version}),
+ ${misc:Depends},
+Multi-Arch: same
+Description: free implementation of the EGL API -- debugging symbols
+ This package contains the EGL native platform graphics interface library.
+ EGL provides a platform-agnostic mechanism for creating rendering surfaces
+ for use with other graphics libraries, such as OpenGL|ES and OpenVG.
+ .
+ This package contains the debugging symbols for the wayland EGL library.
 
 Package: libopenvg1-mesa
 Section: libs
