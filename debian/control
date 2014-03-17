@@ -361,15 +361,12 @@ Depends:
 Recommends: libegl1-mesa-drivers
 Provides: libwayland-egl1
 Conflicts: libwayland-egl1
-Replaces: libwayland-egl1
+Replaces: libwayland-egl1, libegl1-mesa-drivers  (<< 10.1.0-2)
+Breaks: libegl1-mesa-drivers (<< 10.1.0-2)
 Pre-Depends: ${misc:Pre-Depends}
 Multi-Arch: same
-Description: free implementation of the EGL API -- runtime
- This package contains the EGL native platform graphics interface library.
- EGL provides a platform-agnostic mechanism for creating rendering surfaces
- for use with other graphics libraries, such as OpenGL|ES and OpenVG.
- .
- This package contains wayland specific interface for use with EGL.
+Description: implementation of the Wayland EGL platform -- runtime
+ This package contains the mesa implementation of the Wayland EGL platform
 
 Package: libwayland-egl1-mesa-dbg
 Section: debug
@@ -379,12 +376,9 @@ Depends:
  libwayland-egl1-mesa (= ${binary:Version}),
  ${misc:Depends},
 Multi-Arch: same
-Description: free implementation of the EGL API -- debugging symbols
- This package contains the EGL native platform graphics interface library.
- EGL provides a platform-agnostic mechanism for creating rendering surfaces
- for use with other graphics libraries, such as OpenGL|ES and OpenVG.
- .
- This package contains the debugging symbols for the wayland EGL library.
+Description: implementation of the Wayland EGL platform -- debugging symbols
+ This package contains the debugging symbols for the mesa implementation of the
+ Wayland EGL platform
 
 Package: libopenvg1-mesa
 Section: libs
