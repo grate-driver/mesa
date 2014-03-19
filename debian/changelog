@@ -1,3 +1,11 @@
+mesa (10.2.0~git20140319-0ubuntu1) UNRELEASED; urgency=medium
+
+  * Preliminary port to 10.2.
+    - Drop upstreamed patches.
+    - Refresh mir patch.
+
+ -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Wed, 19 Mar 2014 11:31:15 +0100
+
 mesa (10.1.0-1ubuntu1) trusty; urgency=medium
 
   * Merge from released debian-experimental.
