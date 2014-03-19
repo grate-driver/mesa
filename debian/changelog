@@ -1,6 +1,7 @@
 mesa (10.1.0-3) UNRELEASED; urgency=medium
 
   * Build OpenCL only on architectures where we have LLVM enabled.
+  * Actually enable radeonsi on kfreebsd.
 
  -- Andreas Boll <andreas.boll.dev@gmail.com>  Wed, 19 Mar 2014 21:23:46 +0100
 
