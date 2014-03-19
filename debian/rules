@@ -23,8 +23,14 @@ else
 	confflags += --build=$(DEB_BUILD_GNU_TYPE) --host=$(DEB_HOST_GNU_TYPE)
 endif
 
+ifeq (,$(filter $(DEB_HOST_ARCH), armhf))
 buildflags = \
 	$(shell DEB_CFLAGS_MAINT_APPEND=-Wall DEB_CXXFLAGS_MAINT_APPEND=-Wall dpkg-buildflags --export=configure)
+else
+# Workaround for a variant of LP: #725126
+buildflags = \
+	$(shell DEB_CFLAGS_MAINT_APPEND="-Wall -fno-optimize-sibling-calls" DEB_CXXFLAGS_MAINT_APPEND="-Wall -fno-optimize-sibling-calls" dpkg-buildflags --export=configure)
+endif
 
 buildflags-i686 = \
 	$(shell DEB_CFLAGS_MAINT_APPEND="-Wall -march=i686" DEB_CXXFLAGS_MAINT_APPEND="-Wall -march=i686" dpkg-buildflags --export=configure)
