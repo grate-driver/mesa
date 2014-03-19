@@ -1,7 +1,5 @@
-Index: mesa/configure.ac
-===================================================================
---- mesa.orig/configure.ac	2014-03-19 10:26:31.671304024 +0000
-+++ mesa/configure.ac	2014-03-19 10:26:31.663603967 +0000
+--- a/configure.ac
++++ b/configure.ac
 @@ -1428,7 +1428,9 @@
  
  	android|fbdev|gdi|null)
@@ -21,10 +19,8 @@ Index: mesa/configure.ac
  
  AM_CONDITIONAL(HAVE_EGL_DRIVER_DRI2, test "x$HAVE_EGL_DRIVER_DRI2" != "x")
  
-Index: mesa/include/EGL/eglplatform.h
-===================================================================
---- mesa.orig/include/EGL/eglplatform.h	2014-03-19 10:26:31.671304024 +0000
-+++ mesa/include/EGL/eglplatform.h	2014-03-19 10:26:31.663803969 +0000
+--- a/include/EGL/eglplatform.h
++++ b/include/EGL/eglplatform.h
 @@ -104,6 +104,13 @@
  typedef struct egl_native_pixmap_t  *EGLNativePixmapType;
  typedef void                        *EGLNativeDisplayType;
@@ -39,10 +35,8 @@ Index: mesa/include/EGL/eglplatform.h
  #elif defined(__unix__)
  
  #ifdef MESA_EGL_NO_X11_HEADERS
-Index: mesa/include/GL/internal/dri_interface.h
-===================================================================
---- mesa.orig/include/GL/internal/dri_interface.h	2014-03-19 10:26:31.671304024 +0000
-+++ mesa/include/GL/internal/dri_interface.h	2014-03-19 10:26:31.664103971 +0000
+--- a/include/GL/internal/dri_interface.h
++++ b/include/GL/internal/dri_interface.h
 @@ -832,10 +832,12 @@
      unsigned int pitch;
      unsigned int cpp;
@@ -57,10 +51,8 @@ Index: mesa/include/GL/internal/dri_interface.h
  struct __DRIdri2LoaderExtensionRec {
      __DRIextension base;
  
-Index: mesa/src/egl/drivers/dri2/Makefile.am
-===================================================================
---- mesa.orig/src/egl/drivers/dri2/Makefile.am	2014-03-19 10:26:31.671304024 +0000
-+++ mesa/src/egl/drivers/dri2/Makefile.am	2014-03-19 10:26:31.664303972 +0000
+--- a/src/egl/drivers/dri2/Makefile.am
++++ b/src/egl/drivers/dri2/Makefile.am
 @@ -62,3 +62,9 @@
  libegl_dri2_la_SOURCES += platform_drm.c
  AM_CFLAGS += -DHAVE_DRM_PLATFORM
@@ -71,10 +63,8 @@ Index: mesa/src/egl/drivers/dri2/Makefile.am
 +AM_CFLAGS += -DHAVE_MIR_PLATFORM
 +AM_CFLAGS += $(MIR_CFLAGS)
 +endif
-Index: mesa/src/egl/drivers/dri2/egl_dri2.c
-===================================================================
---- mesa.orig/src/egl/drivers/dri2/egl_dri2.c	2014-03-19 10:26:31.671304024 +0000
-+++ mesa/src/egl/drivers/dri2/egl_dri2.c	2014-03-19 10:26:31.664803976 +0000
+--- a/src/egl/drivers/dri2/egl_dri2.c
++++ b/src/egl/drivers/dri2/egl_dri2.c
 @@ -643,6 +643,12 @@
           return EGL_TRUE;
        return dri2_initialize_wayland(drv, disp);
@@ -88,10 +78,8 @@ Index: mesa/src/egl/drivers/dri2/egl_dri2.c
  #endif
  #ifdef HAVE_ANDROID_PLATFORM
     case _EGL_PLATFORM_ANDROID:
-Index: mesa/src/egl/drivers/dri2/egl_dri2.h
-===================================================================
---- mesa.orig/src/egl/drivers/dri2/egl_dri2.h	2014-03-19 10:26:31.671304024 +0000
-+++ mesa/src/egl/drivers/dri2/egl_dri2.h	2014-03-19 10:26:31.665003978 +0000
+--- a/src/egl/drivers/dri2/egl_dri2.h
++++ b/src/egl/drivers/dri2/egl_dri2.h
 @@ -64,6 +64,11 @@
  
  #endif /* HAVE_ANDROID_PLATFORM */
@@ -145,10 +133,8 @@ Index: mesa/src/egl/drivers/dri2/egl_dri2.h
 +dri2_initialize_mir(_EGLDriver *drv, _EGLDisplay *disp);
 +
  #endif /* EGL_DRI2_INCLUDED */
-Index: mesa/src/egl/drivers/dri2/platform_mir.c
-===================================================================
---- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ mesa/src/egl/drivers/dri2/platform_mir.c	2014-03-19 10:29:05.292947070 +0000
+--- /dev/null
++++ b/src/egl/drivers/dri2/platform_mir.c
 @@ -0,0 +1,456 @@
 +/*
 + * Copyright © 2012 Canonical, Inc
@@ -606,10 +592,8 @@ Index: mesa/src/egl/drivers/dri2/platform_mir.c
 +
 +   return EGL_FALSE;
 +}
-Index: mesa/src/egl/main/Makefile.am
-===================================================================
---- mesa.orig/src/egl/main/Makefile.am	2014-03-19 10:26:31.671304024 +0000
-+++ mesa/src/egl/main/Makefile.am	2014-03-19 10:26:31.665503981 +0000
+--- a/src/egl/main/Makefile.am
++++ b/src/egl/main/Makefile.am
 @@ -102,6 +102,11 @@
  AM_CFLAGS += -DHAVE_NULL_PLATFORM
  endif
@@ -622,10 +606,8 @@ Index: mesa/src/egl/main/Makefile.am
  if HAVE_EGL_DRIVER_DRI2
  AM_CFLAGS += -D_EGL_BUILT_IN_DRIVER_DRI2
  AM_CFLAGS += -DHAVE_XCB_DRI2
-Index: mesa/src/egl/main/egldisplay.c
-===================================================================
---- mesa.orig/src/egl/main/egldisplay.c	2014-03-19 10:26:31.671304024 +0000
-+++ mesa/src/egl/main/egldisplay.c	2014-03-19 10:26:31.665803983 +0000
+--- a/src/egl/main/egldisplay.c
++++ b/src/egl/main/egldisplay.c
 @@ -60,7 +60,10 @@
  #include <sys/types.h>
  #include <sys/stat.h>
@@ -717,10 +699,8 @@ Index: mesa/src/egl/main/egldisplay.c
     char *detection_method = NULL;
  
     if (native_platform == _EGL_INVALID_PLATFORM) {
-Index: mesa/src/egl/main/egldisplay.h
-===================================================================
---- mesa.orig/src/egl/main/egldisplay.h	2014-03-19 10:26:31.671304024 +0000
-+++ mesa/src/egl/main/egldisplay.h	2014-03-19 10:26:31.666003985 +0000
+--- a/src/egl/main/egldisplay.h
++++ b/src/egl/main/egldisplay.h
 @@ -46,6 +46,7 @@
     _EGL_PLATFORM_FBDEV,
     _EGL_PLATFORM_NULL,
@@ -729,10 +709,8 @@ Index: mesa/src/egl/main/egldisplay.h
  
     _EGL_NUM_PLATFORMS,
     _EGL_INVALID_PLATFORM = -1
-Index: mesa/src/egl/main/egldriver.c
-===================================================================
---- mesa.orig/src/egl/main/egldriver.c	2014-03-19 10:26:31.671304024 +0000
-+++ mesa/src/egl/main/egldriver.c	2014-03-19 10:26:31.666303987 +0000
+--- a/src/egl/main/egldriver.c
++++ b/src/egl/main/egldriver.c
 @@ -57,7 +57,7 @@
     char *Path;
     _EGLMain_t BuiltIn;
@@ -870,10 +848,8 @@ Index: mesa/src/egl/main/egldriver.c
  }
  
  
-Index: mesa/src/gallium/state_trackers/dri/drm/dri2.c
-===================================================================
---- mesa.orig/src/gallium/state_trackers/dri/drm/dri2.c	2014-03-19 10:26:31.671304024 +0000
-+++ mesa/src/gallium/state_trackers/dri/drm/dri2.c	2014-03-19 10:26:31.666603990 +0000
+--- a/src/gallium/state_trackers/dri/drm/dri2.c
++++ b/src/gallium/state_trackers/dri/drm/dri2.c
 @@ -305,8 +305,13 @@
  
        templ.format = format;
@@ -890,10 +866,8 @@ Index: mesa/src/gallium/state_trackers/dri/drm/dri2.c
        whandle.stride = buf->pitch;
  
        drawable->textures[statt] =
-Index: mesa/src/gbm/backends/dri/gbm_dri.c
-===================================================================
---- mesa.orig/src/gbm/backends/dri/gbm_dri.c	2014-03-19 10:26:31.671304024 +0000
-+++ mesa/src/gbm/backends/dri/gbm_dri.c	2014-03-19 10:26:31.667003992 +0000
+--- a/src/gbm/backends/dri/gbm_dri.c
++++ b/src/gbm/backends/dri/gbm_dri.c
 @@ -133,7 +133,7 @@
  };
  
@@ -999,10 +973,8 @@ Index: mesa/src/gbm/backends/dri/gbm_dri.c
  
     if (usage & GBM_BO_USE_SCANOUT)
        dri_use |= __DRI_IMAGE_USE_SCANOUT;
-Index: mesa/src/mesa/drivers/dri/i915/intel_context.c
-===================================================================
---- mesa.orig/src/mesa/drivers/dri/i915/intel_context.c	2014-03-19 10:26:31.671304024 +0000
-+++ mesa/src/mesa/drivers/dri/i915/intel_context.c	2014-03-19 10:26:31.667403995 +0000
+--- a/src/mesa/drivers/dri/i915/intel_context.c
++++ b/src/mesa/drivers/dri/i915/intel_context.c
 @@ -775,24 +775,36 @@
      */
     if (rb->mt &&
@@ -1050,10 +1022,8 @@ Index: mesa/src/mesa/drivers/dri/i915/intel_context.c
     if (!region)
        return;
  
-Index: mesa/src/mesa/drivers/dri/i965/brw_context.c
-===================================================================
---- mesa.orig/src/mesa/drivers/dri/i965/brw_context.c	2014-03-19 10:26:31.671304024 +0000
-+++ mesa/src/mesa/drivers/dri/i965/brw_context.c	2014-03-19 10:26:31.668104001 +0000
+--- a/src/mesa/drivers/dri/i965/brw_context.c
++++ b/src/mesa/drivers/dri/i965/brw_context.c
 @@ -1018,7 +1018,7 @@
                            struct intel_renderbuffer *rb,
                            const char *buffer_name);
@@ -1102,7 +1072,7 @@ Index: mesa/src/mesa/drivers/dri/i965/brw_context.c
 -                                          buffer->pitch,
 -                                          buffer->name,
 -                                          buffer_name);
-+   if (region->name)
++   if (buffer->name)
 +      region = intel_region_alloc_for_handle(brw->intelScreen,
 +                                             buffer->cpp,
 +                                             drawable->w,
