@@ -83,18 +83,6 @@ horizontal_alignment(struct intel_mipmap_tree *mt)
    }
 }
 
-static uint32_t
-surface_num_multisamples(unsigned num_samples)
-{
-   assert(num_samples >= 0 && num_samples <= 16);
-
-   if (num_samples == 0)
-      return GEN7_SURFACE_MULTISAMPLECOUNT_1;
-
-   /* The SURFACE_MULTISAMPLECOUNT_X enums are simply log2(num_samples) << 3. */
-   return (ffs(num_samples) - 1) << 3;
-}
-
 static void
 gen8_emit_buffer_surface_state(struct brw_context *brw,
                                uint32_t *out_offset,
@@ -151,6 +139,18 @@ gen8_update_texture_surface(struct gl_context *ctx,
       return;
    }
 
+   if (tObj->StencilSampling && firstImage->_BaseFormat == GL_DEPTH_STENCIL)
+      mt = mt->stencil_mt;
+
+   unsigned tiling_mode, pitch;
+   if (mt->format == MESA_FORMAT_S_UINT8) {
+      tiling_mode = GEN8_SURFACE_TILING_W;
+      pitch = 2 * mt->region->pitch;
+   } else {
+      tiling_mode = surface_tiling_mode(mt->region->tiling);
+      pitch = mt->region->pitch;
+   }
+
    uint32_t tex_format = translate_tex_format(brw,
                                               mt->format,
                                               sampler->sRGBDecode);
@@ -162,7 +162,7 @@ gen8_update_texture_surface(struct gl_context *ctx,
              tex_format << BRW_SURFACE_FORMAT_SHIFT |
              vertical_alignment(mt) |
              horizontal_alignment(mt) |
-             surface_tiling_mode(mt->region->tiling);
+             tiling_mode;
 
    if (tObj->Target == GL_TEXTURE_CUBE_MAP ||
        tObj->Target == GL_TEXTURE_CUBE_MAP_ARRAY) {
@@ -177,10 +177,9 @@ gen8_update_texture_surface(struct gl_context *ctx,
    surf[2] = SET_FIELD(mt->logical_width0 - 1, GEN7_SURFACE_WIDTH) |
              SET_FIELD(mt->logical_height0 - 1, GEN7_SURFACE_HEIGHT);
 
-   surf[3] = SET_FIELD(mt->logical_depth0 - 1, BRW_SURFACE_DEPTH) |
-             (mt->region->pitch - 1);
+   surf[3] = SET_FIELD(mt->logical_depth0 - 1, BRW_SURFACE_DEPTH) | (pitch - 1);
 
-   surf[4] = surface_num_multisamples(mt->num_samples);
+   surf[4] = gen7_surface_msaa_bits(mt->num_samples, mt->msaa_layout);
 
    surf[5] = SET_FIELD(tObj->BaseLevel - mt->first_level, GEN7_SURFACE_MIN_LOD) |
              (intelObj->_MaxLevel - tObj->BaseLevel); /* mip count */
@@ -322,7 +321,7 @@ gen8_update_renderbuffer_surface(struct brw_context *brw,
    surf[3] = (depth - 1) << BRW_SURFACE_DEPTH_SHIFT |
              (region->pitch - 1); /* Surface Pitch */
 
-   surf[4] = surface_num_multisamples(mt->num_samples) |
+   surf[4] = gen7_surface_msaa_bits(mt->num_samples, mt->msaa_layout) |
              min_array_element << GEN7_SURFACE_MIN_ARRAY_ELEMENT_SHIFT |
              (depth - 1) << GEN7_SURFACE_RENDER_TARGET_VIEW_EXTENT_SHIFT;
 

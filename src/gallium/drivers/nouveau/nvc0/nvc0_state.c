@@ -992,6 +992,7 @@ nvc0_so_target_create(struct pipe_context *pipe,
                       struct pipe_resource *res,
                       unsigned offset, unsigned size)
 {
+   struct nv04_resource *buf = (struct nv04_resource *)res;
    struct nvc0_so_target *targ = MALLOC_STRUCT(nvc0_so_target);
    if (!targ)
       return NULL;
@@ -1010,6 +1011,9 @@ nvc0_so_target_create(struct pipe_context *pipe,
    pipe_resource_reference(&targ->pipe.buffer, res);
    pipe_reference_init(&targ->pipe.reference, 1);
 
+   assert(buf->base.target == PIPE_BUFFER);
+   util_range_add(&buf->valid_buffer_range, offset, offset + size);
+
    return &targ->pipe;
 }
 
@@ -1027,7 +1031,7 @@ static void
 nvc0_set_transform_feedback_targets(struct pipe_context *pipe,
                                     unsigned num_targets,
                                     struct pipe_stream_output_target **targets,
-                                    unsigned append_mask)
+                                    const unsigned *offsets)
 {
    struct nvc0_context *nvc0 = nvc0_context(pipe);
    unsigned i;
@@ -1036,14 +1040,16 @@ nvc0_set_transform_feedback_targets(struct pipe_context *pipe,
    assert(num_targets <= 4);
 
    for (i = 0; i < num_targets; ++i) {
-      if (nvc0->tfbbuf[i] == targets[i] && (append_mask & (1 << i)))
+      const boolean changed = nvc0->tfbbuf[i] != targets[i];
+      const boolean append = (offsets[i] == ((unsigned)-1));
+      if (!changed && append)
          continue;
       nvc0->tfbbuf_dirty |= 1 << i;
 
-      if (nvc0->tfbbuf[i] && nvc0->tfbbuf[i] != targets[i])
+      if (nvc0->tfbbuf[i] && changed)
          nvc0_so_target_save_offset(pipe, nvc0->tfbbuf[i], i, &serialize);
 
-      if (targets[i] && !(append_mask & (1 << i)))
+      if (targets[i] && !append)
          nvc0_so_target(targets[i])->clean = TRUE;
 
       pipe_so_target_reference(&nvc0->tfbbuf[i], targets[i]);

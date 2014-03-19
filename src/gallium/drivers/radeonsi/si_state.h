@@ -82,7 +82,6 @@ union si_state {
 		struct si_pm4_state		*sample_mask;
 		struct si_pm4_state		*scissor;
 		struct si_state_viewport	*viewport;
-		struct si_pm4_state		*framebuffer;
 		struct si_state_rasterizer	*rasterizer;
 		struct si_state_dsa		*dsa;
 		struct si_pm4_state		*fb_rs;
@@ -162,6 +161,7 @@ struct si_buffer_resources {
 	struct si_descriptors		desc;
 	unsigned			num_buffers;
 	enum radeon_bo_usage		shader_usage; /* READ, WRITE, or READWRITE */
+	enum radeon_bo_priority		priority;
 	struct pipe_resource		**buffers; /* this has num_buffers elements */
 	uint32_t			*desc_storage; /* this has num_buffers*4 elements */
 	uint32_t			**desc_data; /* an array of pointers pointing to desc_storage */
@@ -217,7 +217,6 @@ void si_upload_const_buffer(struct si_context *sctx, struct r600_resource **rbuf
 
 /* si_state.c */
 struct si_pipe_shader_selector;
-struct si_surface;
 
 boolean si_is_format_supported(struct pipe_screen *screen,
                                enum pipe_format format,

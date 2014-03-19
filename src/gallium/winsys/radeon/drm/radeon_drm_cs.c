@@ -99,6 +99,10 @@
 #define RADEON_CS_RING_UVD          3
 #endif
 
+#ifndef RADEON_CS_RING_VCE
+#define RADEON_CS_RING_VCE          4
+#endif
+
 #ifndef RADEON_CS_END_OF_FRAME
 #define RADEON_CS_END_OF_FRAME      0x04
 #endif
@@ -206,15 +210,17 @@ static struct radeon_winsys_cs *radeon_drm_cs_create(struct radeon_winsys *rws,
 
 #define OUT_CS(cs, value) (cs)->buf[(cs)->cdw++] = (value)
 
-static INLINE void update_reloc_domains(struct drm_radeon_cs_reloc *reloc,
-                                        enum radeon_bo_domain rd,
-                                        enum radeon_bo_domain wd,
-                                        enum radeon_bo_domain *added_domains)
+static INLINE void update_reloc(struct drm_radeon_cs_reloc *reloc,
+				enum radeon_bo_domain rd,
+				enum radeon_bo_domain wd,
+				unsigned priority,
+				enum radeon_bo_domain *added_domains)
 {
     *added_domains = (rd | wd) & ~(reloc->read_domains | reloc->write_domain);
 
     reloc->read_domains |= rd;
     reloc->write_domain |= wd;
+    reloc->flags = MAX2(reloc->flags, priority);
 }
 
 int radeon_get_reloc(struct radeon_cs_context *csc, struct radeon_bo *bo)
@@ -258,6 +264,7 @@ static unsigned radeon_add_reloc(struct radeon_drm_cs *cs,
                                  struct radeon_bo *bo,
                                  enum radeon_bo_usage usage,
                                  enum radeon_bo_domain domains,
+                                 unsigned priority,
                                  enum radeon_bo_domain *added_domains)
 {
     struct radeon_cs_context *csc = cs->csc;
@@ -268,7 +275,9 @@ static unsigned radeon_add_reloc(struct radeon_drm_cs *cs,
     bool update_hash = TRUE;
     int i;
 
+    priority = MIN2(priority, 15);
     *added_domains = 0;
+
     if (csc->is_handle_added[hash]) {
         i = csc->reloc_indices_hashlist[hash];
         reloc = &csc->relocs[i];
@@ -294,7 +303,7 @@ static unsigned radeon_add_reloc(struct radeon_drm_cs *cs,
              * update the cmd stream with proper buffer offset).
              */
             update_hash = FALSE;
-            update_reloc_domains(reloc, rd, wd, added_domains);
+            update_reloc(reloc, rd, wd, priority, added_domains);
             if (cs->base.ring_type != RING_DMA) {
                 csc->reloc_indices_hashlist[hash] = i;
                 return i;
@@ -324,7 +333,7 @@ static unsigned radeon_add_reloc(struct radeon_drm_cs *cs,
     reloc->handle = bo->handle;
     reloc->read_domains = rd;
     reloc->write_domain = wd;
-    reloc->flags = 0;
+    reloc->flags = priority;
 
     csc->is_handle_added[hash] = TRUE;
     if (update_hash) {
@@ -340,12 +349,13 @@ static unsigned radeon_add_reloc(struct radeon_drm_cs *cs,
 static unsigned radeon_drm_cs_add_reloc(struct radeon_winsys_cs *rcs,
                                         struct radeon_winsys_cs_handle *buf,
                                         enum radeon_bo_usage usage,
-                                        enum radeon_bo_domain domains)
+                                        enum radeon_bo_domain domains,
+                                        enum radeon_bo_priority priority)
 {
     struct radeon_drm_cs *cs = radeon_drm_cs(rcs);
     struct radeon_bo *bo = (struct radeon_bo*)buf;
     enum radeon_bo_domain added_domains;
-    unsigned index = radeon_add_reloc(cs, bo, usage, domains, &added_domains);
+    unsigned index = radeon_add_reloc(cs, bo, usage, domains, priority, &added_domains);
 
     if (added_domains & RADEON_DOMAIN_GTT)
         cs->csc->used_gart += bo->base.size;
@@ -538,6 +548,12 @@ static void radeon_drm_cs_flush(struct radeon_winsys_cs *rcs, unsigned flags, ui
             cs->cst->cs.num_chunks = 3;
             break;
 
+        case RING_VCE:
+            cs->cst->flags[0] = 0;
+            cs->cst->flags[1] = RADEON_CS_RING_VCE;
+            cs->cst->cs.num_chunks = 3;
+            break;
+
         default:
         case RING_GFX:
             cs->cst->flags[0] = 0;
@@ -639,7 +655,8 @@ radeon_cs_create_fence(struct radeon_winsys_cs *rcs)
                                        RADEON_DOMAIN_GTT);
     /* Add the fence as a dummy relocation. */
     cs->ws->base.cs_add_reloc(rcs, cs->ws->base.buffer_get_cs_handle(fence),
-                              RADEON_USAGE_READWRITE, RADEON_DOMAIN_GTT);
+                              RADEON_USAGE_READWRITE, RADEON_DOMAIN_GTT,
+                              RADEON_PRIO_MIN);
     return (struct pipe_fence_handle*)fence;
 }
 

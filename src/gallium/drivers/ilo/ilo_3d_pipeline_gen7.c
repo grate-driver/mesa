@@ -422,12 +422,6 @@ gen7_pipeline_sol(struct ilo_3d_pipeline *p,
          const int stride = so_info->stride[i] * 4; /* in bytes */
          int base = 0;
 
-         /* reset HW write offsets and offset buffer base */
-         if (!p->cp->render_ctx) {
-            ilo_cp_set_one_off_flags(p->cp, INTEL_EXEC_GEN7_SOL_RESET);
-            base += p->state.so_num_vertices * stride;
-         }
-
          gen7_emit_3DSTATE_SO_BUFFER(p->dev, i, base, stride,
                ilo->so.states[i], p->cp);
       }
@@ -545,24 +539,28 @@ gen7_pipeline_wm(struct ilo_3d_pipeline *p,
    /* 3DSTATE_DEPTH_BUFFER and 3DSTATE_CLEAR_PARAMS */
    if (DIRTY(FB) || session->batch_bo_changed) {
       const struct ilo_zs_surface *zs;
+      uint32_t clear_params;
 
       if (ilo->fb.state.zsbuf) {
          const struct ilo_surface_cso *surface =
             (const struct ilo_surface_cso *) ilo->fb.state.zsbuf;
+         const struct ilo_texture_slice *slice =
+            ilo_texture_get_slice(ilo_texture(surface->base.texture),
+                  surface->base.u.tex.level, surface->base.u.tex.first_layer);
 
          assert(!surface->is_rt);
          zs = &surface->u.zs;
+         clear_params = slice->clear_value;
       }
       else {
          zs = &ilo->fb.null_zs;
+         clear_params = 0;
       }
 
       gen6_emit_3DSTATE_DEPTH_BUFFER(p->dev, zs, p->cp);
       gen6_emit_3DSTATE_HIER_DEPTH_BUFFER(p->dev, zs, p->cp);
       gen6_emit_3DSTATE_STENCIL_BUFFER(p->dev, zs, p->cp);
-
-      /* TODO */
-      gen7_emit_3DSTATE_CLEAR_PARAMS(p->dev, 0, p->cp);
+      gen7_emit_3DSTATE_CLEAR_PARAMS(p->dev, clear_params, p->cp);
    }
 }
 
@@ -756,10 +754,13 @@ gen7_rectlist_wm_depth(struct ilo_3d_pipeline *p,
 {
    gen7_wa_pipe_control_wm_depth_stall(p, true);
 
-   if (blitter->uses & ILO_BLITTER_USE_FB_DEPTH) {
+   if (blitter->uses & (ILO_BLITTER_USE_FB_DEPTH |
+                        ILO_BLITTER_USE_FB_STENCIL)) {
       gen6_emit_3DSTATE_DEPTH_BUFFER(p->dev,
             &blitter->fb.dst.u.zs, p->cp);
+   }
 
+   if (blitter->uses & ILO_BLITTER_USE_FB_DEPTH) {
       gen6_emit_3DSTATE_HIER_DEPTH_BUFFER(p->dev,
             &blitter->fb.dst.u.zs, p->cp);
    }
@@ -1038,6 +1039,19 @@ ilo_3d_pipeline_estimate_size_gen7(struct ilo_3d_pipeline *p,
       size = ilo_gpe_gen7_estimate_command_size(p->dev,
             ILO_GPE_GEN7_PIPE_CONTROL, 1);
       break;
+   case ILO_3D_PIPELINE_WRITE_STATISTICS:
+      {
+         const int num_regs = 10;
+         const int num_pads = 1;
+
+         size = ilo_gpe_gen7_estimate_command_size(p->dev,
+               ILO_GPE_GEN7_PIPE_CONTROL, 1);
+         size += ilo_gpe_gen7_estimate_command_size(p->dev,
+               ILO_GPE_GEN7_MI_STORE_REGISTER_MEM, 1) * 2 * num_regs;
+         size += ilo_gpe_gen7_estimate_command_size(p->dev,
+               ILO_GPE_GEN7_MI_STORE_DATA_IMM, 1) * num_pads;
+      }
+      break;
    case ILO_3D_PIPELINE_RECTLIST:
       size = 64 + 256; /* states + commands */
       break;
@@ -1058,5 +1072,6 @@ ilo_3d_pipeline_init_gen7(struct ilo_3d_pipeline *p)
    p->emit_flush = ilo_3d_pipeline_emit_flush_gen6;
    p->emit_write_timestamp = ilo_3d_pipeline_emit_write_timestamp_gen6;
    p->emit_write_depth_count = ilo_3d_pipeline_emit_write_depth_count_gen6;
+   p->emit_write_statistics = ilo_3d_pipeline_emit_write_statistics_gen6;
    p->emit_rectlist = ilo_3d_pipeline_emit_rectlist_gen7;
 }

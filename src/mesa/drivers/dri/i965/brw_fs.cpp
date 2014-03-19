@@ -55,7 +55,6 @@ void
 fs_inst::init()
 {
    memset(this, 0, sizeof(*this));
-   this->opcode = BRW_OPCODE_NOP;
    this->conditional_mod = BRW_CONDITIONAL_NONE;
 
    this->dst = reg_undef;
@@ -70,6 +69,7 @@ fs_inst::init()
 fs_inst::fs_inst()
 {
    init();
+   this->opcode = BRW_OPCODE_NOP;
 }
 
 fs_inst::fs_inst(enum opcode opcode)
@@ -244,8 +244,9 @@ fs_visitor::CMP(fs_reg dst, fs_reg src0, fs_reg src1, uint32_t condition)
 }
 
 exec_list
-fs_visitor::VARYING_PULL_CONSTANT_LOAD(fs_reg dst, fs_reg surf_index,
-                                       fs_reg varying_offset,
+fs_visitor::VARYING_PULL_CONSTANT_LOAD(const fs_reg &dst,
+                                       const fs_reg &surf_index,
+                                       const fs_reg &varying_offset,
                                        uint32_t const_offset)
 {
    exec_list instructions;
@@ -380,7 +381,7 @@ void
 fs_reg::init()
 {
    memset(this, 0, sizeof(*this));
-   this->smear = -1;
+   stride = 1;
 }
 
 /** Generic unset register constructor. */
@@ -432,22 +433,40 @@ fs_reg::equals(const fs_reg &r) const
    return (file == r.file &&
            reg == r.reg &&
            reg_offset == r.reg_offset &&
+           subreg_offset == r.subreg_offset &&
            type == r.type &&
            negate == r.negate &&
            abs == r.abs &&
            !reladdr && !r.reladdr &&
            memcmp(&fixed_hw_reg, &r.fixed_hw_reg,
                   sizeof(fixed_hw_reg)) == 0 &&
-           smear == r.smear &&
+           stride == r.stride &&
            imm.u == r.imm.u);
 }
 
-fs_reg
-fs_reg::retype(uint32_t type)
+fs_reg &
+fs_reg::apply_stride(unsigned stride)
 {
-   fs_reg result = *this;
-   result.type = type;
-   return result;
+   assert((this->stride * stride) <= 4 &&
+          (is_power_of_two(stride) || stride == 0) &&
+          file != HW_REG && file != IMM);
+   this->stride *= stride;
+   return *this;
+}
+
+fs_reg &
+fs_reg::set_smear(unsigned subreg)
+{
+   assert(file != HW_REG && file != IMM);
+   subreg_offset = subreg * type_sz(type);
+   stride = 0;
+   return *this;
+}
+
+bool
+fs_reg::is_contiguous() const
+{
+   return stride == 1;
 }
 
 bool
@@ -508,6 +527,7 @@ fs_visitor::type_size(const struct glsl_type *type)
       return 0;
    case GLSL_TYPE_ATOMIC_UINT:
       return 0;
+   case GLSL_TYPE_IMAGE:
    case GLSL_TYPE_VOID:
    case GLSL_TYPE_ERROR:
    case GLSL_TYPE_INTERFACE:
@@ -547,7 +567,7 @@ fs_visitor::get_timestamp()
     * else that might disrupt timing) by setting smear to 2 and checking if
     * that field is != 0.
     */
-   dst.smear = 0;
+   dst.set_smear(0);
 
    return dst;
 }
@@ -582,7 +602,7 @@ fs_visitor::emit_shader_time_end()
     * were the only two timestamp reads that happened).
     */
    fs_reg reset = shader_end_time;
-   reset.smear = 2;
+   reset.set_smear(2);
    fs_inst *test = emit(AND(reg_null_d, reset, fs_reg(1u)));
    test->conditional_mod = BRW_CONDITIONAL_Z;
    emit(IF(BRW_PREDICATE_NORMAL));
@@ -622,14 +642,13 @@ fs_visitor::emit_shader_time_write(enum shader_time_shader_type type,
    else
       payload = fs_reg(this, glsl_type::uint_type);
 
-   emit(fs_inst(SHADER_OPCODE_SHADER_TIME_ADD,
-                fs_reg(), payload, offset, value));
+   emit(new(mem_ctx) fs_inst(SHADER_OPCODE_SHADER_TIME_ADD,
+                             fs_reg(), payload, offset, value));
 }
 
 void
-fs_visitor::fail(const char *format, ...)
+fs_visitor::vfail(const char *format, va_list va)
 {
-   va_list va;
    char *msg;
 
    if (failed)
@@ -637,9 +656,7 @@ fs_visitor::fail(const char *format, ...)
 
    failed = true;
 
-   va_start(va, format);
    msg = ralloc_vasprintf(mem_ctx, format, va);
-   va_end(va);
    msg = ralloc_asprintf(mem_ctx, "FS compile failed: %s\n", msg);
 
    this->fail_msg = msg;
@@ -649,35 +666,77 @@ fs_visitor::fail(const char *format, ...)
    }
 }
 
+void
+fs_visitor::fail(const char *format, ...)
+{
+   va_list va;
+
+   va_start(va, format);
+   vfail(format, va);
+   va_end(va);
+}
+
+/**
+ * Mark this program as impossible to compile in SIMD16 mode.
+ *
+ * During the SIMD8 compile (which happens first), we can detect and flag
+ * things that are unsupported in SIMD16 mode, so the compiler can skip
+ * the SIMD16 compile altogether.
+ *
+ * During a SIMD16 compile (if one happens anyway), this just calls fail().
+ */
+void
+fs_visitor::no16(const char *format, ...)
+{
+   va_list va;
+
+   va_start(va, format);
+
+   if (dispatch_width == 16) {
+      vfail(format, va);
+   } else {
+      simd16_unsupported = true;
+
+      if (INTEL_DEBUG & DEBUG_PERF) {
+         if (no16_msg)
+            ralloc_vasprintf_append(&no16_msg, format, va);
+         else
+            no16_msg = ralloc_vasprintf(mem_ctx, format, va);
+      }
+   }
+
+   va_end(va);
+}
+
 fs_inst *
 fs_visitor::emit(enum opcode opcode)
 {
-   return emit(fs_inst(opcode));
+   return emit(new(mem_ctx) fs_inst(opcode));
 }
 
 fs_inst *
 fs_visitor::emit(enum opcode opcode, fs_reg dst)
 {
-   return emit(fs_inst(opcode, dst));
+   return emit(new(mem_ctx) fs_inst(opcode, dst));
 }
 
 fs_inst *
 fs_visitor::emit(enum opcode opcode, fs_reg dst, fs_reg src0)
 {
-   return emit(fs_inst(opcode, dst, src0));
+   return emit(new(mem_ctx) fs_inst(opcode, dst, src0));
 }
 
 fs_inst *
 fs_visitor::emit(enum opcode opcode, fs_reg dst, fs_reg src0, fs_reg src1)
 {
-   return emit(fs_inst(opcode, dst, src0, src1));
+   return emit(new(mem_ctx) fs_inst(opcode, dst, src0, src1));
 }
 
 fs_inst *
 fs_visitor::emit(enum opcode opcode, fs_reg dst,
                  fs_reg src0, fs_reg src1, fs_reg src2)
 {
-   return emit(fs_inst(opcode, dst, src0, src1, src2));
+   return emit(new(mem_ctx) fs_inst(opcode, dst, src0, src1, src2));
 }
 
 void
@@ -706,7 +765,7 @@ fs_inst::is_partial_write()
 {
    return ((this->predicate && this->opcode != BRW_OPCODE_SEL) ||
            this->force_uncompressed ||
-           this->force_sechalf);
+           this->force_sechalf || !this->dst.is_contiguous());
 }
 
 int
@@ -865,8 +924,10 @@ fs_visitor::import_uniforms(fs_visitor *v)
    hash_table_call_foreach(v->variable_ht,
 			   import_uniforms_callback,
 			   variable_ht);
-   this->params_remap = v->params_remap;
-   this->nr_params_remap = v->nr_params_remap;
+   this->push_constant_loc = v->push_constant_loc;
+   this->pull_constant_loc = v->pull_constant_loc;
+   this->uniforms = v->uniforms;
+   this->param_size = v->param_size;
 }
 
 /* Our support for uniforms is piggy-backed on the struct
@@ -885,7 +946,7 @@ fs_visitor::setup_uniform_values(ir_variable *ir)
     * order we'd walk the type, so walk the list of storage and find anything
     * with our name, or the prefix of a component that starts with our name.
     */
-   unsigned params_before = c->prog_data.nr_params;
+   unsigned params_before = uniforms;
    for (unsigned u = 0; u < shader_prog->NumUserUniformStorage; u++) {
       struct gl_uniform_storage *storage = &shader_prog->UniformStorage[u];
 
@@ -901,14 +962,12 @@ fs_visitor::setup_uniform_values(ir_variable *ir)
          slots *= storage->array_elements;
 
       for (unsigned i = 0; i < slots; i++) {
-         c->prog_data.param[c->prog_data.nr_params++] =
-            &storage->storage[i].f;
+         stage_prog_data->param[uniforms++] = &storage->storage[i].f;
       }
    }
 
    /* Make sure we actually initialized the right amount of stuff here. */
-   assert(params_before + ir->type->component_slots() ==
-          c->prog_data.nr_params);
+   assert(params_before + ir->type->component_slots() == uniforms);
    (void)params_before;
 }
 
@@ -941,7 +1000,7 @@ fs_visitor::setup_builtin_uniform_values(ir_variable *ir)
 	    break;
 	 last_swiz = swiz;
 
-	 c->prog_data.param[c->prog_data.nr_params++] =
+         stage_prog_data->param[uniforms++] =
             &fp->Base.Parameters->ParameterValues[index][swiz].f;
       }
    }
@@ -1081,12 +1140,6 @@ fs_visitor::emit_general_interpolation(ir_variable *ir)
 	 } else {
 	    /* Smooth/noperspective interpolation case. */
 	    for (unsigned int k = 0; k < type->vector_elements; k++) {
-	       /* FINISHME: At some point we probably want to push
-		* this farther by giving similar treatment to the
-		* other potentially constant components of the
-		* attribute, as well as making brw_vs_constval.c
-		* handle varyings other than gl_TexCoord.
-		*/
                struct brw_reg interp = interp_reg(location, k);
                emit_linterp(attr, fs_reg(interp), interpolation_mode,
                             ir->data.centroid && !c->key.persample_shading,
@@ -1192,22 +1245,18 @@ fs_visitor::emit_samplepos_setup(ir_variable *ir)
 
    emit(MOV(int_sample_x, fs_reg(sample_pos_reg)));
    if (dispatch_width == 16) {
-      int_sample_x.sechalf = true;
-      fs_inst *inst = emit(MOV(int_sample_x,
+      fs_inst *inst = emit(MOV(half(int_sample_x, 1),
                                fs_reg(suboffset(sample_pos_reg, 16))));
       inst->force_sechalf = true;
-      int_sample_x.sechalf = false;
    }
    /* Compute gl_SamplePosition.x */
    compute_sample_position(pos, int_sample_x);
    pos.reg_offset++;
    emit(MOV(int_sample_y, fs_reg(suboffset(sample_pos_reg, 1))));
    if (dispatch_width == 16) {
-      int_sample_y.sechalf = true;
-      fs_inst *inst = emit(MOV(int_sample_y,
+      fs_inst *inst = emit(MOV(half(int_sample_y, 1),
                                fs_reg(suboffset(sample_pos_reg, 17))));
       inst->force_sechalf = true;
-      int_sample_y.sechalf = false;
    }
    /* Compute gl_SamplePosition.y */
    compute_sample_position(pos, int_sample_y);
@@ -1346,8 +1395,8 @@ fs_visitor::emit_math(enum opcode opcode, fs_reg dst, fs_reg src0, fs_reg src1)
    switch (opcode) {
    case SHADER_OPCODE_INT_QUOTIENT:
    case SHADER_OPCODE_INT_REMAINDER:
-      if (brw->gen >= 7 && dispatch_width == 16)
-	 fail("SIMD16 INTDIV unsupported\n");
+      if (brw->gen >= 7)
+	 no16("SIMD16 INTDIV unsupported\n");
       break;
    case SHADER_OPCODE_POW:
       break;
@@ -1387,12 +1436,13 @@ fs_visitor::emit_math(enum opcode opcode, fs_reg dst, fs_reg src0, fs_reg src1)
 void
 fs_visitor::assign_curb_setup()
 {
-   c->prog_data.curb_read_length = ALIGN(c->prog_data.nr_params, 8) / 8;
    if (dispatch_width == 8) {
       c->prog_data.first_curbe_grf = c->nr_payload_regs;
    } else {
       c->prog_data.first_curbe_grf_16 = c->nr_payload_regs;
    }
+
+   c->prog_data.curb_read_length = ALIGN(stage_prog_data->nr_params, 8) / 8;
 
    /* Map the offsets in the UNIFORM file to fixed HW regs. */
    foreach_list(node, &this->instructions) {
@@ -1400,13 +1450,27 @@ fs_visitor::assign_curb_setup()
 
       for (unsigned int i = 0; i < 3; i++) {
 	 if (inst->src[i].file == UNIFORM) {
-	    int constant_nr = inst->src[i].reg + inst->src[i].reg_offset;
+            int uniform_nr = inst->src[i].reg + inst->src[i].reg_offset;
+            int constant_nr;
+            if (uniform_nr >= 0 && uniform_nr < (int) uniforms) {
+               constant_nr = push_constant_loc[uniform_nr];
+            } else {
+               /* Section 5.11 of the OpenGL 4.1 spec says:
+                * "Out-of-bounds reads return undefined values, which include
+                *  values from other variables of the active program or zero."
+                * Just return the first push constant.
+                */
+               constant_nr = 0;
+            }
+
 	    struct brw_reg brw_reg = brw_vec1_grf(c->nr_payload_regs +
 						  constant_nr / 8,
 						  constant_nr % 8);
 
 	    inst->src[i].file = HW_REG;
-	    inst->src[i].fixed_hw_reg = retype(brw_reg, inst->src[i].type);
+	    inst->src[i].fixed_hw_reg = byte_offset(
+               retype(brw_reg, inst->src[i].type),
+               inst->src[i].subreg_offset);
 	 }
       }
    }
@@ -1710,94 +1774,6 @@ fs_visitor::compact_virtual_grfs()
    }
 }
 
-bool
-fs_visitor::remove_dead_constants()
-{
-   if (dispatch_width == 8) {
-      this->params_remap = ralloc_array(mem_ctx, int, c->prog_data.nr_params);
-      this->nr_params_remap = c->prog_data.nr_params;
-
-      for (unsigned int i = 0; i < c->prog_data.nr_params; i++)
-	 this->params_remap[i] = -1;
-
-      /* Find which params are still in use. */
-      foreach_list(node, &this->instructions) {
-	 fs_inst *inst = (fs_inst *)node;
-
-	 for (int i = 0; i < 3; i++) {
-	    int constant_nr = inst->src[i].reg + inst->src[i].reg_offset;
-
-	    if (inst->src[i].file != UNIFORM)
-	       continue;
-
-	    /* Section 5.11 of the OpenGL 4.3 spec says:
-	     *
-	     *     "Out-of-bounds reads return undefined values, which include
-	     *     values from other variables of the active program or zero."
-	     */
-	    if (constant_nr < 0 || constant_nr >= (int)c->prog_data.nr_params) {
-	       constant_nr = 0;
-	    }
-
-	    /* For now, set this to non-negative.  We'll give it the
-	     * actual new number in a moment, in order to keep the
-	     * register numbers nicely ordered.
-	     */
-	    this->params_remap[constant_nr] = 0;
-	 }
-      }
-
-      /* Figure out what the new numbers for the params will be.  At some
-       * point when we're doing uniform array access, we're going to want
-       * to keep the distinction between .reg and .reg_offset, but for
-       * now we don't care.
-       */
-      unsigned int new_nr_params = 0;
-      for (unsigned int i = 0; i < c->prog_data.nr_params; i++) {
-	 if (this->params_remap[i] != -1) {
-	    this->params_remap[i] = new_nr_params++;
-	 }
-      }
-
-      /* Update the list of params to be uploaded to match our new numbering. */
-      for (unsigned int i = 0; i < c->prog_data.nr_params; i++) {
-	 int remapped = this->params_remap[i];
-
-	 if (remapped == -1)
-	    continue;
-
-	 c->prog_data.param[remapped] = c->prog_data.param[i];
-      }
-
-      c->prog_data.nr_params = new_nr_params;
-   } else {
-      /* This should have been generated in the SIMD8 pass already. */
-      assert(this->params_remap);
-   }
-
-   /* Now do the renumbering of the shader to remove unused params. */
-   foreach_list(node, &this->instructions) {
-      fs_inst *inst = (fs_inst *)node;
-
-      for (int i = 0; i < 3; i++) {
-	 int constant_nr = inst->src[i].reg + inst->src[i].reg_offset;
-
-	 if (inst->src[i].file != UNIFORM)
-	    continue;
-
-	 /* as above alias to 0 */
-	 if (constant_nr < 0 || constant_nr >= (int)this->nr_params_remap) {
-	    constant_nr = 0;
-	 }
-	 assert(this->params_remap[constant_nr] != -1);
-	 inst->src[i].reg = this->params_remap[constant_nr];
-	 inst->src[i].reg_offset = 0;
-      }
-   }
-
-   return true;
-}
-
 /*
  * Implements array access of uniforms by inserting a
  * PULL_CONSTANT_LOAD instruction.
@@ -1813,9 +1789,12 @@ fs_visitor::remove_dead_constants()
 void
 fs_visitor::move_uniform_array_access_to_pull_constants()
 {
-   int pull_constant_loc[c->prog_data.nr_params];
+   if (dispatch_width != 8)
+      return;
 
-   for (unsigned int i = 0; i < c->prog_data.nr_params; i++) {
+   pull_constant_loc = ralloc_array(mem_ctx, int, uniforms);
+
+   for (unsigned int i = 0; i < uniforms; i++) {
       pull_constant_loc[i] = -1;
    }
 
@@ -1838,42 +1817,23 @@ fs_visitor::move_uniform_array_access_to_pull_constants()
           * add it.
           */
          if (pull_constant_loc[uniform] == -1) {
-            const float **values = &c->prog_data.param[uniform];
-
-            pull_constant_loc[uniform] = c->prog_data.nr_pull_params;
+            const float **values = &stage_prog_data->param[uniform];
 
             assert(param_size[uniform]);
 
             for (int j = 0; j < param_size[uniform]; j++) {
-               c->prog_data.pull_param[c->prog_data.nr_pull_params++] =
+               pull_constant_loc[uniform + j] = stage_prog_data->nr_pull_params;
+
+               stage_prog_data->pull_param[stage_prog_data->nr_pull_params++] =
                   values[j];
             }
          }
-
-         /* Set up the annotation tracking for new generated instructions. */
-         base_ir = inst->ir;
-         current_annotation = inst->annotation;
-
-         fs_reg surf_index = fs_reg(c->prog_data.base.binding_table.pull_constants_start);
-         fs_reg temp = fs_reg(this, glsl_type::float_type);
-         exec_list list = VARYING_PULL_CONSTANT_LOAD(temp,
-                                                     surf_index,
-                                                     *inst->src[i].reladdr,
-                                                     pull_constant_loc[uniform] +
-                                                     inst->src[i].reg_offset);
-         inst->insert_before(&list);
-
-         inst->src[i].file = temp.file;
-         inst->src[i].reg = temp.reg;
-         inst->src[i].reg_offset = temp.reg_offset;
-         inst->src[i].reladdr = NULL;
       }
    }
 }
 
 /**
- * Choose accesses from the UNIFORM file to demote to using the pull
- * constant buffer.
+ * Assign UNIFORM file registers to either push constants or pull constants.
  *
  * We allow a fragment shader to have more than the specified minimum
  * maximum number of fragment shader uniform components (64).  If
@@ -1882,47 +1842,89 @@ fs_visitor::move_uniform_array_access_to_pull_constants()
  * update the program to load them.
  */
 void
-fs_visitor::setup_pull_constants()
+fs_visitor::assign_constant_locations()
 {
-   /* Only allow 16 registers (128 uniform components) as push constants. */
-   unsigned int max_uniform_components = 16 * 8;
-   if (c->prog_data.nr_params <= max_uniform_components)
+   /* Only the first compile (SIMD8 mode) gets to decide on locations. */
+   if (dispatch_width != 8)
       return;
 
-   if (dispatch_width == 16) {
-      fail("Pull constants not supported in SIMD16\n");
-      return;
+   /* Find which UNIFORM registers are still in use. */
+   bool is_live[uniforms];
+   for (unsigned int i = 0; i < uniforms; i++) {
+      is_live[i] = false;
    }
 
-   /* Just demote the end of the list.  We could probably do better
-    * here, demoting things that are rarely used in the program first.
-    */
-   unsigned int pull_uniform_base = max_uniform_components;
+   foreach_list(node, &this->instructions) {
+      fs_inst *inst = (fs_inst *) node;
 
-   int pull_constant_loc[c->prog_data.nr_params];
-   for (unsigned int i = 0; i < c->prog_data.nr_params; i++) {
-      if (i < pull_uniform_base) {
-         pull_constant_loc[i] = -1;
-      } else {
-         pull_constant_loc[i] = -1;
-         /* If our constant is already being uploaded for reladdr purposes,
-          * reuse it.
-          */
-         for (unsigned int j = 0; j < c->prog_data.nr_pull_params; j++) {
-            if (c->prog_data.pull_param[j] == c->prog_data.param[i]) {
-               pull_constant_loc[i] = j;
-               break;
-            }
-         }
-         if (pull_constant_loc[i] == -1) {
-            int pull_index = c->prog_data.nr_pull_params++;
-            c->prog_data.pull_param[pull_index] = c->prog_data.param[i];
-            pull_constant_loc[i] = pull_index;;
-         }
+      for (int i = 0; i < 3; i++) {
+         if (inst->src[i].file != UNIFORM)
+            continue;
+
+         int constant_nr = inst->src[i].reg + inst->src[i].reg_offset;
+         if (constant_nr >= 0 && constant_nr < (int) uniforms)
+            is_live[constant_nr] = true;
       }
    }
-   c->prog_data.nr_params = pull_uniform_base;
 
+   /* Only allow 16 registers (128 uniform components) as push constants.
+    *
+    * Just demote the end of the list.  We could probably do better
+    * here, demoting things that are rarely used in the program first.
+    */
+   unsigned int max_push_components = 16 * 8;
+   unsigned int num_push_constants = 0;
+
+   push_constant_loc = ralloc_array(mem_ctx, int, uniforms);
+
+   for (unsigned int i = 0; i < uniforms; i++) {
+      if (!is_live[i] || pull_constant_loc[i] != -1) {
+         /* This UNIFORM register is either dead, or has already been demoted
+          * to a pull const.  Mark it as no longer living in the param[] array.
+          */
+         push_constant_loc[i] = -1;
+         continue;
+      }
+
+      if (num_push_constants < max_push_components) {
+         /* Retain as a push constant.  Record the location in the params[]
+          * array.
+          */
+         push_constant_loc[i] = num_push_constants++;
+      } else {
+         /* Demote to a pull constant. */
+         push_constant_loc[i] = -1;
+
+         int pull_index = stage_prog_data->nr_pull_params++;
+         stage_prog_data->pull_param[pull_index] = stage_prog_data->param[i];
+         pull_constant_loc[i] = pull_index;
+      }
+   }
+
+   stage_prog_data->nr_params = num_push_constants;
+
+   /* Up until now, the param[] array has been indexed by reg + reg_offset
+    * of UNIFORM registers.  Condense it to only contain the uniforms we
+    * chose to upload as push constants.
+    */
+   for (unsigned int i = 0; i < uniforms; i++) {
+      int remapped = push_constant_loc[i];
+
+      if (remapped == -1)
+         continue;
+
+      assert(remapped <= i);
+      stage_prog_data->param[remapped] = stage_prog_data->param[i];
+   }
+}
+
+/**
+ * Replace UNIFORM register file access with either UNIFORM_PULL_CONSTANT_LOAD
+ * or VARYING_PULL_CONSTANT_LOAD instructions which load values into VGRFs.
+ */
+void
+fs_visitor::demote_pull_constants()
+{
    foreach_list(node, &this->instructions) {
       fs_inst *inst = (fs_inst *)node;
 
@@ -1935,25 +1937,37 @@ fs_visitor::setup_pull_constants()
          if (pull_index == -1)
 	    continue;
 
-         assert(!inst->src[i].reladdr);
+         /* Set up the annotation tracking for new generated instructions. */
+         base_ir = inst->ir;
+         current_annotation = inst->annotation;
 
-	 fs_reg dst = fs_reg(this, glsl_type::float_type);
-	 fs_reg index = fs_reg(c->prog_data.base.binding_table.pull_constants_start);
-	 fs_reg offset = fs_reg((unsigned)(pull_index * 4) & ~15);
-	 fs_inst *pull =
-            new(mem_ctx) fs_inst(FS_OPCODE_UNIFORM_PULL_CONSTANT_LOAD,
-                                 dst, index, offset);
-	 pull->ir = inst->ir;
-	 pull->annotation = inst->annotation;
+         fs_reg surf_index(stage_prog_data->binding_table.pull_constants_start);
+         fs_reg dst = fs_reg(this, glsl_type::float_type);
 
-	 inst->insert_before(pull);
+         /* Generate a pull load into dst. */
+         if (inst->src[i].reladdr) {
+            exec_list list = VARYING_PULL_CONSTANT_LOAD(dst,
+                                                        surf_index,
+                                                        *inst->src[i].reladdr,
+                                                        pull_index);
+            inst->insert_before(&list);
+            inst->src[i].reladdr = NULL;
+         } else {
+            fs_reg offset = fs_reg((unsigned)(pull_index * 4) & ~15);
+            fs_inst *pull =
+               new(mem_ctx) fs_inst(FS_OPCODE_UNIFORM_PULL_CONSTANT_LOAD,
+                                    dst, surf_index, offset);
+            inst->insert_before(pull);
+            inst->src[i].set_smear(pull_index & 3);
+         }
 
-	 inst->src[i].file = GRF;
-	 inst->src[i].reg = dst.reg;
-	 inst->src[i].reg_offset = 0;
-	 inst->src[i].smear = pull_index & 3;
+         /* Rewrite the instruction to use the temporary VGRF. */
+         inst->src[i].file = GRF;
+         inst->src[i].reg = dst.reg;
+         inst->src[i].reg_offset = 0;
       }
    }
+   invalidate_live_intervals();
 }
 
 bool
@@ -2190,6 +2204,10 @@ fs_visitor::dead_code_eliminate_local()
 
    ht = _mesa_hash_table_create(mem_ctx, dead_code_hash_compare);
 
+   if (ht == NULL) {
+      return false;
+   }
+
    foreach_list_safe(node, &this->instructions) {
       fs_inst *inst = (fs_inst *)node;
 
@@ -2308,7 +2326,7 @@ fs_visitor::register_coalesce()
 	  inst->src[0].file != GRF ||
 	  inst->src[0].negate ||
 	  inst->src[0].abs ||
-	  inst->src[0].smear != -1 ||
+	  !inst->src[0].is_contiguous() ||
 	  inst->dst.file != GRF ||
 	  inst->dst.type != inst->src[0].type) {
 	 continue;
@@ -2468,7 +2486,9 @@ fs_visitor::compute_to_mrf()
 	  inst->is_partial_write() ||
 	  inst->dst.file != MRF || inst->src[0].file != GRF ||
 	  inst->dst.type != inst->src[0].type ||
-	  inst->src[0].abs || inst->src[0].negate || inst->src[0].smear != -1)
+	  inst->src[0].abs || inst->src[0].negate ||
+          !inst->src[0].is_contiguous() ||
+          inst->src[0].subreg_offset)
 	 continue;
 
       /* Work out which hardware MRF registers are written by this
@@ -2967,11 +2987,11 @@ fs_visitor::dump_instructions()
    foreach_list(node, &this->instructions) {
       backend_instruction *inst = (backend_instruction *)node;
       max_pressure = MAX2(max_pressure, regs_live_at_ip[ip]);
-      printf("{%3d} %4d: ", regs_live_at_ip[ip], ip);
+      fprintf(stderr, "{%3d} %4d: ", regs_live_at_ip[ip], ip);
       dump_instruction(inst);
       ++ip;
    }
-   printf("Maximum %3d registers live at once.\n", max_pressure);
+   fprintf(stderr, "Maximum %3d registers live at once.\n", max_pressure);
 }
 
 void
@@ -2980,169 +3000,178 @@ fs_visitor::dump_instruction(backend_instruction *be_inst)
    fs_inst *inst = (fs_inst *)be_inst;
 
    if (inst->predicate) {
-      printf("(%cf0.%d) ",
+      fprintf(stderr, "(%cf0.%d) ",
              inst->predicate_inverse ? '-' : '+',
              inst->flag_subreg);
    }
 
-   printf("%s", brw_instruction_name(inst->opcode));
+   fprintf(stderr, "%s", brw_instruction_name(inst->opcode));
    if (inst->saturate)
-      printf(".sat");
+      fprintf(stderr, ".sat");
    if (inst->conditional_mod) {
-      printf("%s", conditional_modifier[inst->conditional_mod]);
+      fprintf(stderr, "%s", conditional_modifier[inst->conditional_mod]);
       if (!inst->predicate &&
           (brw->gen < 5 || (inst->opcode != BRW_OPCODE_SEL &&
                               inst->opcode != BRW_OPCODE_IF &&
                               inst->opcode != BRW_OPCODE_WHILE))) {
-         printf(".f0.%d", inst->flag_subreg);
+         fprintf(stderr, ".f0.%d", inst->flag_subreg);
       }
    }
-   printf(" ");
+   fprintf(stderr, " ");
 
 
    switch (inst->dst.file) {
    case GRF:
-      printf("vgrf%d", inst->dst.reg);
-      if (virtual_grf_sizes[inst->dst.reg] != 1)
-         printf("+%d", inst->dst.reg_offset);
+      fprintf(stderr, "vgrf%d", inst->dst.reg);
+      if (virtual_grf_sizes[inst->dst.reg] != 1 ||
+          inst->dst.subreg_offset)
+         fprintf(stderr, "+%d.%d",
+                 inst->dst.reg_offset, inst->dst.subreg_offset);
       break;
    case MRF:
-      printf("m%d", inst->dst.reg);
+      fprintf(stderr, "m%d", inst->dst.reg);
       break;
    case BAD_FILE:
-      printf("(null)");
+      fprintf(stderr, "(null)");
       break;
    case UNIFORM:
-      printf("***u%d***", inst->dst.reg);
+      fprintf(stderr, "***u%d***", inst->dst.reg);
       break;
    case HW_REG:
       if (inst->dst.fixed_hw_reg.file == BRW_ARCHITECTURE_REGISTER_FILE) {
          switch (inst->dst.fixed_hw_reg.nr) {
          case BRW_ARF_NULL:
-            printf("null");
+            fprintf(stderr, "null");
             break;
          case BRW_ARF_ADDRESS:
-            printf("a0.%d", inst->dst.fixed_hw_reg.subnr);
+            fprintf(stderr, "a0.%d", inst->dst.fixed_hw_reg.subnr);
             break;
          case BRW_ARF_ACCUMULATOR:
-            printf("acc%d", inst->dst.fixed_hw_reg.subnr);
+            fprintf(stderr, "acc%d", inst->dst.fixed_hw_reg.subnr);
             break;
          case BRW_ARF_FLAG:
-            printf("f%d.%d", inst->dst.fixed_hw_reg.nr & 0xf,
+            fprintf(stderr, "f%d.%d", inst->dst.fixed_hw_reg.nr & 0xf,
                              inst->dst.fixed_hw_reg.subnr);
             break;
          default:
-            printf("arf%d.%d", inst->dst.fixed_hw_reg.nr & 0xf,
+            fprintf(stderr, "arf%d.%d", inst->dst.fixed_hw_reg.nr & 0xf,
                                inst->dst.fixed_hw_reg.subnr);
             break;
          }
       } else {
-         printf("hw_reg%d", inst->dst.fixed_hw_reg.nr);
+         fprintf(stderr, "hw_reg%d", inst->dst.fixed_hw_reg.nr);
       }
       if (inst->dst.fixed_hw_reg.subnr)
-         printf("+%d", inst->dst.fixed_hw_reg.subnr);
+         fprintf(stderr, "+%d", inst->dst.fixed_hw_reg.subnr);
       break;
    default:
-      printf("???");
+      fprintf(stderr, "???");
       break;
    }
-   printf(":%s, ", reg_encoding[inst->dst.type]);
+   fprintf(stderr, ":%s, ", brw_reg_type_letters(inst->dst.type));
 
    for (int i = 0; i < 3 && inst->src[i].file != BAD_FILE; i++) {
       if (inst->src[i].negate)
-         printf("-");
+         fprintf(stderr, "-");
       if (inst->src[i].abs)
-         printf("|");
+         fprintf(stderr, "|");
       switch (inst->src[i].file) {
       case GRF:
-         printf("vgrf%d", inst->src[i].reg);
-         if (virtual_grf_sizes[inst->src[i].reg] != 1)
-            printf("+%d", inst->src[i].reg_offset);
+         fprintf(stderr, "vgrf%d", inst->src[i].reg);
+         if (virtual_grf_sizes[inst->src[i].reg] != 1 ||
+             inst->src[i].subreg_offset)
+            fprintf(stderr, "+%d.%d", inst->src[i].reg_offset,
+                    inst->src[i].subreg_offset);
          break;
       case MRF:
-         printf("***m%d***", inst->src[i].reg);
+         fprintf(stderr, "***m%d***", inst->src[i].reg);
          break;
       case UNIFORM:
-         printf("u%d", inst->src[i].reg);
-         if (virtual_grf_sizes[inst->src[i].reg] != 1)
-            printf(".%d", inst->src[i].reg_offset);
+         fprintf(stderr, "u%d", inst->src[i].reg);
+         if (inst->src[i].reladdr) {
+            fprintf(stderr, "+reladdr");
+         } else if (virtual_grf_sizes[inst->src[i].reg] != 1 ||
+             inst->src[i].subreg_offset) {
+            fprintf(stderr, "+%d.%d", inst->src[i].reg_offset,
+                    inst->src[i].subreg_offset);
+         }
          break;
       case BAD_FILE:
-         printf("(null)");
+         fprintf(stderr, "(null)");
          break;
       case IMM:
          switch (inst->src[i].type) {
          case BRW_REGISTER_TYPE_F:
-            printf("%ff", inst->src[i].imm.f);
+            fprintf(stderr, "%ff", inst->src[i].imm.f);
             break;
          case BRW_REGISTER_TYPE_D:
-            printf("%dd", inst->src[i].imm.i);
+            fprintf(stderr, "%dd", inst->src[i].imm.i);
             break;
          case BRW_REGISTER_TYPE_UD:
-            printf("%uu", inst->src[i].imm.u);
+            fprintf(stderr, "%uu", inst->src[i].imm.u);
             break;
          default:
-            printf("???");
+            fprintf(stderr, "???");
             break;
          }
          break;
       case HW_REG:
          if (inst->src[i].fixed_hw_reg.negate)
-            printf("-");
+            fprintf(stderr, "-");
          if (inst->src[i].fixed_hw_reg.abs)
-            printf("|");
+            fprintf(stderr, "|");
          if (inst->src[i].fixed_hw_reg.file == BRW_ARCHITECTURE_REGISTER_FILE) {
             switch (inst->src[i].fixed_hw_reg.nr) {
             case BRW_ARF_NULL:
-               printf("null");
+               fprintf(stderr, "null");
                break;
             case BRW_ARF_ADDRESS:
-               printf("a0.%d", inst->src[i].fixed_hw_reg.subnr);
+               fprintf(stderr, "a0.%d", inst->src[i].fixed_hw_reg.subnr);
                break;
             case BRW_ARF_ACCUMULATOR:
-               printf("acc%d", inst->src[i].fixed_hw_reg.subnr);
+               fprintf(stderr, "acc%d", inst->src[i].fixed_hw_reg.subnr);
                break;
             case BRW_ARF_FLAG:
-               printf("f%d.%d", inst->src[i].fixed_hw_reg.nr & 0xf,
+               fprintf(stderr, "f%d.%d", inst->src[i].fixed_hw_reg.nr & 0xf,
                                 inst->src[i].fixed_hw_reg.subnr);
                break;
             default:
-               printf("arf%d.%d", inst->src[i].fixed_hw_reg.nr & 0xf,
+               fprintf(stderr, "arf%d.%d", inst->src[i].fixed_hw_reg.nr & 0xf,
                                   inst->src[i].fixed_hw_reg.subnr);
                break;
             }
          } else {
-            printf("hw_reg%d", inst->src[i].fixed_hw_reg.nr);
+            fprintf(stderr, "hw_reg%d", inst->src[i].fixed_hw_reg.nr);
          }
          if (inst->src[i].fixed_hw_reg.subnr)
-            printf("+%d", inst->src[i].fixed_hw_reg.subnr);
+            fprintf(stderr, "+%d", inst->src[i].fixed_hw_reg.subnr);
          if (inst->src[i].fixed_hw_reg.abs)
-            printf("|");
+            fprintf(stderr, "|");
          break;
       default:
-         printf("???");
+         fprintf(stderr, "???");
          break;
       }
       if (inst->src[i].abs)
-         printf("|");
+         fprintf(stderr, "|");
 
       if (inst->src[i].file != IMM) {
-         printf(":%s", reg_encoding[inst->src[i].type]);
+         fprintf(stderr, ":%s", brw_reg_type_letters(inst->src[i].type));
       }
 
       if (i < 2 && inst->src[i + 1].file != BAD_FILE)
-         printf(", ");
+         fprintf(stderr, ", ");
    }
 
-   printf(" ");
+   fprintf(stderr, " ");
 
    if (inst->force_uncompressed)
-      printf("1sthalf ");
+      fprintf(stderr, "1sthalf ");
 
    if (inst->force_sechalf)
-      printf("2ndhalf ");
+      fprintf(stderr, "2ndhalf ");
 
-   printf("\n");
+   fprintf(stderr, "\n");
 }
 
 /**
@@ -3161,7 +3190,7 @@ fs_visitor::dump_instruction(backend_instruction *be_inst)
 fs_inst *
 fs_visitor::get_instruction_generating_reg(fs_inst *start,
 					   fs_inst *end,
-					   fs_reg reg)
+					   const fs_reg &reg)
 {
    if (end == start ||
        end->is_partial_write() ||
@@ -3280,11 +3309,41 @@ fs_visitor::calculate_register_pressure()
    }
 }
 
+/**
+ * Look for repeated FS_OPCODE_MOV_DISPATCH_TO_FLAGS and drop the later ones.
+ *
+ * The needs_unlit_centroid_workaround ends up producing one of these per
+ * channel of centroid input, so it's good to clean them up.
+ *
+ * An assumption here is that nothing ever modifies the dispatched pixels
+ * value that FS_OPCODE_MOV_DISPATCH_TO_FLAGS reads from, but the hardware
+ * dictates that anyway.
+ */
+void
+fs_visitor::opt_drop_redundant_mov_to_flags()
+{
+   bool flag_mov_found[2] = {false};
+
+   foreach_list_safe(node, &this->instructions) {
+      fs_inst *inst = (fs_inst *)node;
+
+      if (inst->is_control_flow()) {
+         memset(flag_mov_found, 0, sizeof(flag_mov_found));
+      } else if (inst->opcode == FS_OPCODE_MOV_DISPATCH_TO_FLAGS) {
+         if (!flag_mov_found[inst->flag_subreg])
+            flag_mov_found[inst->flag_subreg] = true;
+         else
+            inst->remove();
+      } else if (inst->writes_flag()) {
+         flag_mov_found[inst->flag_subreg] = false;
+      }
+   }
+}
+
 bool
 fs_visitor::run()
 {
    sanity_param_count = fp->Base.Parameters->NumParameters;
-   uint32_t orig_nr_params = c->prog_data.nr_params;
    bool allocated_without_spills;
 
    assign_binding_table_offsets();
@@ -3343,8 +3402,10 @@ fs_visitor::run()
       split_virtual_grfs();
 
       move_uniform_array_access_to_pull_constants();
-      remove_dead_constants();
-      setup_pull_constants();
+      assign_constant_locations();
+      demote_pull_constants();
+
+      opt_drop_redundant_mov_to_flags();
 
       bool progress;
       do {
@@ -3428,15 +3489,10 @@ fs_visitor::run()
    if (!allocated_without_spills)
       schedule_instructions(SCHEDULE_POST);
 
-   if (dispatch_width == 8) {
+   if (dispatch_width == 8)
       c->prog_data.reg_blocks = brw_register_blocks(grf_used);
-   } else {
+   else
       c->prog_data.reg_blocks_16 = brw_register_blocks(grf_used);
-
-      /* Make sure we didn't try to sneak in an extra uniform */
-      assert(orig_nr_params == c->prog_data.nr_params);
-      (void) orig_nr_params;
-   }
 
    /* If any state parameters were appended, then ParameterValues could have
     * been realloced, in which case the driver uniform storage set up by
@@ -3455,7 +3511,7 @@ brw_wm_fs_emit(struct brw_context *brw, struct brw_wm_compile *c,
                unsigned *final_assembly_size)
 {
    bool start_busy = false;
-   float start_time = 0;
+   double start_time = 0;
 
    if (unlikely(brw->perf_debug)) {
       start_busy = (brw->batch.last_bo &&
@@ -3467,17 +3523,8 @@ brw_wm_fs_emit(struct brw_context *brw, struct brw_wm_compile *c,
    if (prog)
       shader = (brw_shader *) prog->_LinkedShaders[MESA_SHADER_FRAGMENT];
 
-   if (unlikely(INTEL_DEBUG & DEBUG_WM)) {
-      if (prog) {
-         printf("GLSL IR for native fragment shader %d:\n", prog->Name);
-         _mesa_print_ir(shader->base.ir, NULL);
-         printf("\n\n");
-      } else {
-         printf("ARB_fragment_program %d ir for native fragment shader\n",
-                fp->Base.Id);
-         _mesa_print_program(&fp->Base);
-      }
-   }
+   if (unlikely(INTEL_DEBUG & DEBUG_WM))
+      brw_dump_ir(brw, "fragment", prog, &shader->base, &fp->Base);
 
    /* Now the main event: Visit the shader IR and generate our FS IR for it.
     */
@@ -3497,7 +3544,7 @@ brw_wm_fs_emit(struct brw_context *brw, struct brw_wm_compile *c,
    exec_list *simd16_instructions = NULL;
    fs_visitor v2(brw, c, prog, fp, 16);
    if (brw->gen >= 5 && likely(!(INTEL_DEBUG & DEBUG_NO16))) {
-      if (c->prog_data.nr_pull_params == 0) {
+      if (!v.simd16_unsupported) {
          /* Try a SIMD16 compile */
          v2.import_uniforms(&v);
          if (!v2.run()) {
@@ -3507,7 +3554,8 @@ brw_wm_fs_emit(struct brw_context *brw, struct brw_wm_compile *c,
             simd16_instructions = &v2.instructions;
          }
       } else {
-         perf_debug("Skipping SIMD16 due to pull parameters.\n");
+         perf_debug("SIMD16 shader unsupported, falling back to "
+                    "SIMD8 at a 10-20%% performance cost: %s", v.no16_msg);
       }
    }
 
@@ -3586,11 +3634,14 @@ brw_fs_precompile(struct gl_context *ctx, struct gl_shader_program *prog)
       key.drawable_height = ctx->DrawBuffer->Height;
    }
 
-   if ((fp->Base.InputsRead & VARYING_BIT_POS) || program_uses_dfdy) {
-      key.render_to_fbo = _mesa_is_user_fbo(ctx->DrawBuffer);
-   }
+   key.nr_color_regions = _mesa_bitcount_64(fp->Base.OutputsWritten &
+         ~(BITFIELD64_BIT(FRAG_RESULT_DEPTH) |
+         BITFIELD64_BIT(FRAG_RESULT_SAMPLE_MASK)));
 
-   key.nr_color_regions = 1;
+   if ((fp->Base.InputsRead & VARYING_BIT_POS) || program_uses_dfdy) {
+      key.render_to_fbo = _mesa_is_user_fbo(ctx->DrawBuffer) ||
+                          key.nr_color_regions > 1;
+   }
 
    /* GL_FRAGMENT_SHADER_DERIVATIVE_HINT is almost always GL_DONT_CARE.  The
     * quality of the derivatives is likely to be determined by the driconf

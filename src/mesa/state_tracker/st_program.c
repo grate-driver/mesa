@@ -342,14 +342,14 @@ st_translate_vertex_program(struct st_context *st,
                                    stvp->glsl_to_tgsi,
                                    &stvp->Base.Base,
                                    /* inputs */
-                                   stvp->num_inputs,
+                                   vpv->num_inputs,
                                    stvp->input_to_index,
                                    NULL, /* input semantic name */
                                    NULL, /* input semantic index */
                                    NULL, /* interp mode */
                                    NULL, /* is centroid */
                                    /* outputs */
-                                   stvp->num_outputs,
+                                   num_outputs,
                                    stvp->result_to_output,
                                    stvp->output_semantic_name,
                                    stvp->output_semantic_index,
@@ -569,6 +569,11 @@ st_translate_fragment_program(struct st_context *st,
             break;
          case VARYING_SLOT_PRIMITIVE_ID:
             input_semantic_name[slot] = TGSI_SEMANTIC_PRIMID;
+            input_semantic_index[slot] = 0;
+            interpMode[slot] = TGSI_INTERPOLATE_CONSTANT;
+            break;
+         case VARYING_SLOT_VIEWPORT:
+            input_semantic_name[slot] = TGSI_SEMANTIC_VIEWPORT_INDEX;
             input_semantic_index[slot] = 0;
             interpMode[slot] = TGSI_INTERPOLATE_CONSTANT;
             break;
@@ -1027,6 +1032,10 @@ st_translate_geometry_program(struct st_context *st,
             gs_output_semantic_name[slot] = TGSI_SEMANTIC_PRIMID;
             gs_output_semantic_index[slot] = 0;
             break;
+         case VARYING_SLOT_VIEWPORT:
+            gs_output_semantic_name[slot] = TGSI_SEMANTIC_VIEWPORT_INDEX;
+            gs_output_semantic_index[slot] = 0;
+            break;
          case VARYING_SLOT_TEX0:
          case VARYING_SLOT_TEX1:
          case VARYING_SLOT_TEX2:
@@ -1087,6 +1096,7 @@ st_translate_geometry_program(struct st_context *st,
    ureg_property_gs_input_prim(ureg, stgp->Base.InputType);
    ureg_property_gs_output_prim(ureg, stgp->Base.OutputType);
    ureg_property_gs_max_vertices(ureg, stgp->Base.VerticesOut);
+   ureg_property_gs_invocations(ureg, stgp->Base.Invocations);
 
    if (stgp->glsl_to_tgsi)
       st_translate_program(st->ctx,

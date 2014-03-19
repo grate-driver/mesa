@@ -250,26 +250,26 @@ fs_copy_prop_dataflow::dump_block_data() const
 {
    for (int b = 0; b < cfg->num_blocks; b++) {
       bblock_t *block = cfg->blocks[b];
-      printf("Block %d [%d, %d] (parents ", block->block_num,
+      fprintf(stderr, "Block %d [%d, %d] (parents ", block->block_num,
              block->start_ip, block->end_ip);
       foreach_list(block_node, &block->parents) {
          bblock_t *parent = ((bblock_link *) block_node)->block;
-         printf("%d ", parent->block_num);
+         fprintf(stderr, "%d ", parent->block_num);
       }
-      printf("):\n");
-      printf("       livein = 0x");
+      fprintf(stderr, "):\n");
+      fprintf(stderr, "       livein = 0x");
       for (int i = 0; i < bitset_words; i++)
-         printf("%08x", bd[b].livein[i]);
-      printf(", liveout = 0x");
+         fprintf(stderr, "%08x", bd[b].livein[i]);
+      fprintf(stderr, ", liveout = 0x");
       for (int i = 0; i < bitset_words; i++)
-         printf("%08x", bd[b].liveout[i]);
-      printf(",\n       copy   = 0x");
+         fprintf(stderr, "%08x", bd[b].liveout[i]);
+      fprintf(stderr, ",\n       copy   = 0x");
       for (int i = 0; i < bitset_words; i++)
-         printf("%08x", bd[b].copy[i]);
-      printf(", kill    = 0x");
+         fprintf(stderr, "%08x", bd[b].copy[i]);
+      fprintf(stderr, ", kill    = 0x");
       for (int i = 0; i < bitset_words; i++)
-         printf("%08x", bd[b].kill[i]);
-      printf("\n");
+         fprintf(stderr, "%08x", bd[b].kill[i]);
+      fprintf(stderr, "\n");
    }
 }
 
@@ -279,12 +279,15 @@ fs_visitor::try_copy_propagate(fs_inst *inst, int arg, acp_entry *entry)
    if (entry->src.file == IMM)
       return false;
 
-   if (inst->regs_read(this, arg) > 1)
+   /* Bail if inst is reading more than entry is writing. */
+   if ((inst->regs_read(this, arg) * inst->src[arg].stride *
+        type_sz(inst->src[arg].type)) > type_sz(entry->dst.type))
       return false;
 
    if (inst->src[arg].file != entry->dst.file ||
        inst->src[arg].reg != entry->dst.reg ||
-       inst->src[arg].reg_offset != entry->dst.reg_offset) {
+       inst->src[arg].reg_offset != entry->dst.reg_offset ||
+       inst->src[arg].subreg_offset != entry->dst.subreg_offset) {
       return false;
    }
 
@@ -297,7 +300,32 @@ fs_visitor::try_copy_propagate(fs_inst *inst, int arg, acp_entry *entry)
    bool has_source_modifiers = entry->src.abs || entry->src.negate;
 
    if ((has_source_modifiers || entry->src.file == UNIFORM ||
-        entry->src.smear != -1) && !can_do_source_mods(inst))
+        !entry->src.is_contiguous()) &&
+       !can_do_source_mods(inst))
+      return false;
+
+   /* Bail if the result of composing both strides would exceed the
+    * hardware limit.
+    */
+   if (entry->src.stride * inst->src[arg].stride > 4)
+      return false;
+
+   /* Bail if the result of composing both strides cannot be expressed
+    * as another stride. This avoids, for example, trying to transform
+    * this:
+    *
+    *     MOV (8) rX<1>UD rY<0;1,0>UD
+    *     FOO (8) ...     rX<8;8,1>UW
+    *
+    * into this:
+    *
+    *     FOO (8) ...     rY<0;1,0>UW
+    *
+    * Which would have different semantics.
+    */
+   if (entry->src.stride != 1 &&
+       (inst->src[arg].stride *
+        type_sz(inst->src[arg].type)) % type_sz(entry->src.type) != 0)
       return false;
 
    if (has_source_modifiers && entry->dst.type != inst->src[arg].type)
@@ -306,8 +334,8 @@ fs_visitor::try_copy_propagate(fs_inst *inst, int arg, acp_entry *entry)
    inst->src[arg].file = entry->src.file;
    inst->src[arg].reg = entry->src.reg;
    inst->src[arg].reg_offset = entry->src.reg_offset;
-   if (entry->src.smear != -1)
-      inst->src[arg].smear = entry->src.smear;
+   inst->src[arg].subreg_offset = entry->src.subreg_offset;
+   inst->src[arg].stride *= entry->src.stride;
 
    if (!inst->src[arg].abs) {
       inst->src[arg].abs = entry->src.abs;
@@ -329,7 +357,10 @@ fs_visitor::try_constant_propagate(fs_inst *inst, acp_entry *entry)
    for (int i = 2; i >= 0; i--) {
       if (inst->src[i].file != entry->dst.file ||
           inst->src[i].reg != entry->dst.reg ||
-          inst->src[i].reg_offset != entry->dst.reg_offset)
+          inst->src[i].reg_offset != entry->dst.reg_offset ||
+          inst->src[i].subreg_offset != entry->dst.subreg_offset ||
+          inst->src[i].type != entry->dst.type ||
+          inst->src[i].stride > 1)
          continue;
 
       /* Don't bother with cases that should have been taken care of by the

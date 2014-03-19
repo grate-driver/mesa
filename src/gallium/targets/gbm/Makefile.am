@@ -34,7 +34,7 @@ AM_CPPFLAGS = \
 
 AM_CFLAGS = \
 	$(GALLIUM_CFLAGS) \
-	$(LIBUDEV_CFLAGS) \
+	$(VISIBILITY_CFLAGS) \
 	$(LIBDRM_CFLAGS)
 
 gbm_LTLIBRARIES = gbm_gallium_drm.la
@@ -42,14 +42,25 @@ gbm_LTLIBRARIES = gbm_gallium_drm.la
 gbm_gallium_drm_la_SOURCES = gbm.c
 
 gbm_gallium_drm_la_LIBADD = \
-	$(GALLIUM_PIPE_LOADER_LIBS) \
-	$(top_builddir)/src/gallium/auxiliary/pipe-loader/libpipe_loader.la \
+	$(GALLIUM_PIPE_LOADER_CLIENT_LIBS) \
+	$(top_builddir)/src/gallium/auxiliary/pipe-loader/libpipe_loader_client.la \
 	$(top_builddir)/src/gallium/winsys/sw/null/libws_null.la \
 	$(top_builddir)/src/gallium/state_trackers/gbm/libgbm.la \
 	$(top_builddir)/src/gallium/auxiliary/libgallium.la \
-	$(LIBUDEV_LIBS) \
 	$(LIBDRM_LIBS) \
 	-lm
+
+if HAVE_DRI
+gbm_gallium_drm_la_LIBADD += \
+	$(top_builddir)/src/gallium/winsys/sw/dri/libswdri.la
+endif
+
+if NEED_PIPE_LOADER_XLIB
+gbm_gallium_drm_la_LIBADD += \
+	$(top_builddir)/src/gallium/winsys/sw/xlib/libws_xlib.la \
+	-lX11 -lXext -lXfixes \
+	$(LIBDRM_LIBS)
+endif
 
 gbm_gallium_drm_la_LDFLAGS = -no-undefined -avoid-version -module
 
@@ -66,3 +77,5 @@ gbm_gallium_drm_la_LINK = $(CXXLINK) $(gbm_gallium_drm_la_LDFLAGS)
 # Mention a dummy pure C file to trigger generation of the $(LINK) variable
 nodist_EXTRA_gbm_gallium_drm_la_SOURCES = dummy-c.c
 endif
+
+TESTS = gallium-gbm-symbols-check

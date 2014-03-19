@@ -31,14 +31,13 @@
 
 #include "r600_llvm.h"
 #include "r600_public.h"
-#include "r600_resource.h"
 
 #include "util/u_blitter.h"
 #include "util/u_suballoc.h"
 #include "util/u_double_list.h"
 #include "util/u_transfer.h"
 
-#define R600_NUM_ATOMS 42
+#define R600_NUM_ATOMS 73
 
 /* the number of CS dwords for flushing and drawing */
 #define R600_MAX_FLUSH_CS_DWORDS	16
@@ -179,6 +178,7 @@ struct r600_stencil_ref_state {
 struct r600_viewport_state {
 	struct r600_atom atom;
 	struct pipe_viewport_state state;
+	int idx;
 };
 
 struct r600_shader_stages_state {
@@ -197,7 +197,6 @@ struct r600_gs_rings_state {
 /* features */
 #define DBG_NO_LLVM		(1 << 17)
 #define DBG_NO_CP_DMA		(1 << 18)
-#define DBG_NO_ASYNC_DMA	(1 << 19)
 /* shader backend */
 #define DBG_NO_SB		(1 << 21)
 #define DBG_SB_CS		(1 << 22)
@@ -358,6 +357,7 @@ struct r600_scissor_state
 	struct r600_atom		atom;
 	struct pipe_scissor_state	scissor;
 	bool				enable; /* r6xx only */
+	int idx;
 };
 
 struct r600_fetch_shader {
@@ -418,12 +418,12 @@ struct r600_context {
 	struct r600_poly_offset_state	poly_offset_state;
 	struct r600_cso_state		rasterizer_state;
 	struct r600_sample_mask		sample_mask;
-	struct r600_scissor_state	scissor;
+	struct r600_scissor_state	scissor[16];
 	struct r600_seamless_cube_map	seamless_cube_map;
 	struct r600_config_state	config_state;
 	struct r600_stencil_ref_state	stencil_ref;
 	struct r600_vgt_state		vgt_state;
-	struct r600_viewport_state	viewport;
+	struct r600_viewport_state	viewport[16];
 	/* Shaders and shader resources. */
 	struct r600_cso_state		vertex_fetch_shader;
 	struct r600_shader_state	vertex_shader;
@@ -511,7 +511,8 @@ struct pipe_sampler_view *
 evergreen_create_sampler_view_custom(struct pipe_context *ctx,
 				     struct pipe_resource *texture,
 				     const struct pipe_sampler_view *state,
-				     unsigned width0, unsigned height0);
+				     unsigned width0, unsigned height0,
+				     unsigned force_level);
 void evergreen_init_common_regs(struct r600_command_buffer *cb,
 				enum chip_class ctx_chip_class,
 				enum radeon_family ctx_family,
@@ -649,6 +650,8 @@ unsigned r600_get_swizzle_combined(const unsigned char *swizzle_format,
 uint32_t r600_translate_texformat(struct pipe_screen *screen, enum pipe_format format,
 				  const unsigned char *swizzle_view,
 				  uint32_t *word4_p, uint32_t *yuv_format_p);
+uint32_t r600_translate_colorformat(enum chip_class chip, enum pipe_format format);
+uint32_t r600_colorformat_endian_swap(uint32_t colorformat);
 
 /* r600_uvd.c */
 struct pipe_video_codec *r600_uvd_create_decoder(struct pipe_context *context,
@@ -839,6 +842,14 @@ static INLINE unsigned r600_pack_float_12p4(float x)
 {
 	return x <= 0    ? 0 :
 	       x >= 4096 ? 0xffff : x * 16;
+}
+
+/* Return if the depth format can be read without the DB->CB copy on r6xx-r7xx. */
+static INLINE bool r600_can_read_depth(struct r600_texture *rtex)
+{
+	return rtex->resource.b.b.nr_samples <= 1 &&
+	       (rtex->resource.b.b.format == PIPE_FORMAT_Z16_UNORM ||
+		rtex->resource.b.b.format == PIPE_FORMAT_Z32_FLOAT);
 }
 
 #endif

@@ -111,7 +111,7 @@ brw_fast_clear_depth(struct gl_context *ctx)
    struct intel_mipmap_tree *mt = depth_irb->mt;
    struct gl_renderbuffer_attachment *depth_att = &fb->Attachment[BUFFER_DEPTH];
 
-   if (brw->gen < 6 || brw->gen >= 8)
+   if (brw->gen < 6)
       return false;
 
    if (!intel_renderbuffer_has_hiz(depth_irb))
@@ -155,12 +155,17 @@ brw_fast_clear_depth(struct gl_context *ctx)
        *        width of the map (LOD0) is not multiple of 16, fast clear
        *        optimization must be disabled.
        */
-      if (brw->gen == 6 && (mt->level[depth_irb->mt_level].width % 16) != 0)
+      if (brw->gen == 6 &&
+          (minify(mt->physical_width0,
+                  depth_irb->mt_level - mt->first_level) % 16) != 0)
 	 return false;
       /* FALLTHROUGH */
 
    default:
-      depth_clear_value = fb->_DepthMax * ctx->Depth.Clear;
+      if (brw->gen >= 8)
+         depth_clear_value = float_as_int(ctx->Depth.Clear);
+      else
+         depth_clear_value = fb->_DepthMax * ctx->Depth.Clear;
       break;
    }
 

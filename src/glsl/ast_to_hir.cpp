@@ -77,6 +77,7 @@ _mesa_ast_to_hir(exec_list *instructions, struct _mesa_glsl_parse_state *state)
    state->toplevel_ir = instructions;
 
    state->gs_input_prim_type_specified = false;
+   state->cs_input_local_size_specified = false;
 
    /* Section 4.2 of the GLSL 1.20 specification states:
     * "The built-in functions are scoped in a scope outside the global scope
@@ -968,6 +969,7 @@ do_comparison(void *mem_ctx, int operation, ir_rvalue *op0, ir_rvalue *op1)
    case GLSL_TYPE_ERROR:
    case GLSL_TYPE_VOID:
    case GLSL_TYPE_SAMPLER:
+   case GLSL_TYPE_IMAGE:
    case GLSL_TYPE_INTERFACE:
    case GLSL_TYPE_ATOMIC_UINT:
       /* I assume a comparison of a struct containing a sampler just
@@ -1795,7 +1797,7 @@ ast_compound_statement::hir(exec_list *instructions,
  * Evaluate the given exec_node (which should be an ast_node representing
  * a single array dimension) and return its integer value.
  */
-static const unsigned
+static unsigned
 process_array_size(exec_node *node,
                    struct _mesa_glsl_parse_state *state)
 {
@@ -2121,11 +2123,16 @@ validate_explicit_location(const struct ast_type_qualifier *qual,
 {
    bool fail = false;
 
-   /* In the vertex shader only shader inputs can be given explicit
-    * locations.
+   /* Between GL_ARB_explicit_attrib_location an
+    * GL_ARB_separate_shader_objects, the inputs and outputs of any shader
+    * stage can be assigned explicit locations.  The checking here associates
+    * the correct extension with the correct stage's input / output:
     *
-    * In the fragment shader only shader outputs can be given explicit
-    * locations.
+    *                     input            output
+    *                     -----            ------
+    * vertex              explicit_loc     sso
+    * geometry            sso              sso
+    * fragment            sso              explicit_loc
     */
    switch (state->stage) {
    case MESA_SHADER_VERTEX:
@@ -2136,16 +2143,35 @@ validate_explicit_location(const struct ast_type_qualifier *qual,
          break;
       }
 
+      if (var->data.mode == ir_var_shader_out) {
+         if (!state->check_separate_shader_objects_allowed(loc, var))
+            return;
+
+         break;
+      }
+
       fail = true;
       break;
 
    case MESA_SHADER_GEOMETRY:
-      _mesa_glsl_error(loc, state,
-                       "geometry shader variables cannot be given "
-                       "explicit locations");
-      return;
+      if (var->data.mode == ir_var_shader_in || var->data.mode == ir_var_shader_out) {
+         if (!state->check_separate_shader_objects_allowed(loc, var))
+            return;
+
+         break;
+      }
+
+      fail = true;
+      break;
 
    case MESA_SHADER_FRAGMENT:
+      if (var->data.mode == ir_var_shader_in) {
+         if (!state->check_separate_shader_objects_allowed(loc, var))
+            return;
+
+         break;
+      }
+
       if (var->data.mode == ir_var_shader_out) {
          if (!state->check_explicit_attrib_location_allowed(loc, var))
             return;
@@ -2155,6 +2181,12 @@ validate_explicit_location(const struct ast_type_qualifier *qual,
 
       fail = true;
       break;
+
+   case MESA_SHADER_COMPUTE:
+      _mesa_glsl_error(loc, state,
+                       "compute shader variables cannot be given "
+                       "explicit locations");
+      return;
    };
 
    if (fail) {
@@ -2173,9 +2205,26 @@ validate_explicit_location(const struct ast_type_qualifier *qual,
        * ensures that negative values stay negative.
        */
       if (qual->location >= 0) {
-         var->data.location = (state->stage == MESA_SHADER_VERTEX)
-            ? (qual->location + VERT_ATTRIB_GENERIC0)
-            : (qual->location + FRAG_RESULT_DATA0);
+         switch (state->stage) {
+         case MESA_SHADER_VERTEX:
+            var->data.location = (var->data.mode == ir_var_shader_in)
+               ? (qual->location + VERT_ATTRIB_GENERIC0)
+               : (qual->location + VARYING_SLOT_VAR0);
+            break;
+
+         case MESA_SHADER_GEOMETRY:
+            var->data.location = qual->location + VARYING_SLOT_VAR0;
+            break;
+
+         case MESA_SHADER_FRAGMENT:
+            var->data.location = (var->data.mode == ir_var_shader_out)
+               ? (qual->location + FRAG_RESULT_DATA0)
+               : (qual->location + VARYING_SLOT_VAR0);
+            break;
+         case MESA_SHADER_COMPUTE:
+            assert(!"Unexpected shader type");
+            break;
+         }
       } else {
          var->data.location = qual->location;
       }
@@ -2199,8 +2248,54 @@ validate_explicit_location(const struct ast_type_qualifier *qual,
          }
       }
    }
+}
 
-   return;
+static void
+apply_image_qualifier_to_variable(const struct ast_type_qualifier *qual,
+                                  ir_variable *var,
+                                  struct _mesa_glsl_parse_state *state,
+                                  YYLTYPE *loc)
+{
+   const glsl_type *base_type =
+      (var->type->is_array() ? var->type->element_type() : var->type);
+
+   if (base_type->is_image()) {
+      if (var->data.mode != ir_var_uniform &&
+          var->data.mode != ir_var_function_in) {
+         _mesa_glsl_error(loc, state, "image variables may only be declared as "
+                          "function parameters or uniform-qualified "
+                          "global variables");
+      }
+
+      var->data.image.read_only |= qual->flags.q.read_only;
+      var->data.image.write_only |= qual->flags.q.write_only;
+      var->data.image.coherent |= qual->flags.q.coherent;
+      var->data.image._volatile |= qual->flags.q._volatile;
+      var->data.image.restrict_flag |= qual->flags.q.restrict_flag;
+      var->data.read_only = true;
+
+      if (qual->flags.q.explicit_image_format) {
+         if (var->data.mode == ir_var_function_in) {
+            _mesa_glsl_error(loc, state, "format qualifiers cannot be "
+                             "used on image function parameters");
+         }
+
+         if (qual->image_base_type != base_type->sampler_type) {
+            _mesa_glsl_error(loc, state, "format qualifier doesn't match the "
+                             "base data type of the image");
+         }
+
+         var->data.image.format = qual->image_format;
+      } else {
+         if (var->data.mode == ir_var_uniform && !qual->flags.q.write_only) {
+            _mesa_glsl_error(loc, state, "uniforms not qualified with "
+                             "`writeonly' must have a format layout "
+                             "qualifier");
+         }
+
+         var->data.image.format = GL_NONE;
+      }
+   }
 }
 
 static void
@@ -2275,6 +2370,13 @@ apply_type_qualifier_to_variable(const struct ast_type_qualifier *qual,
       var->data.mode = ir_var_uniform;
 
    if (!is_parameter && is_varying_var(var, state->stage)) {
+      /* User-defined ins/outs are not permitted in compute shaders. */
+      if (state->stage == MESA_SHADER_COMPUTE) {
+         _mesa_glsl_error(loc, state,
+                          "user-defined input and output variables are not "
+                          "permitted in compute shaders");
+      }
+
       /* This variable is being used to link data between shader stages (in
        * pre-glsl-1.30 parlance, it's a "varying").  Check that it has a type
        * that is allowed for such purposes.
@@ -2337,6 +2439,9 @@ apply_type_qualifier_to_variable(const struct ast_type_qualifier *qual,
 	 if (var->data.mode == ir_var_shader_in)
 	    var->data.invariant = true;
 	 break;
+      case MESA_SHADER_COMPUTE:
+         /* Invariance isn't meaningful in compute shaders. */
+         break;
       }
    }
 
@@ -2483,6 +2588,9 @@ apply_type_qualifier_to_variable(const struct ast_type_qualifier *qual,
    if (qual->flags.q.row_major || qual->flags.q.column_major) {
       validate_matrix_layout_for_type(state, loc, var->type, var);
    }
+
+   if (var->type->contains_image())
+      apply_image_qualifier_to_variable(qual, var, state, loc);
 }
 
 /**
@@ -2642,9 +2750,15 @@ process_initializer(ir_variable *var, ast_declaration *decl,
                            "cannot initialize uniforms");
    }
 
-   if (var->type->is_sampler()) {
+   /* From section 4.1.7 of the GLSL 4.40 spec:
+    *
+    *    "Opaque variables [...] are initialized only through the
+    *     OpenGL API; they cannot be declared with an initializer in a
+    *     shader."
+    */
+   if (var->type->contains_opaque()) {
       _mesa_glsl_error(& initializer_loc, state,
-		       "cannot initialize samplers");
+		       "cannot initialize opaque variable");
    }
 
    if ((var->data.mode == ir_var_shader_in) && (state->current_function == NULL)) {
@@ -2767,7 +2881,7 @@ handle_geometry_shader_input_decl(struct _mesa_glsl_parse_state *state,
 {
    unsigned num_vertices = 0;
    if (state->gs_input_prim_type_specified) {
-      num_vertices = vertices_per_prim(state->gs_input_prim_type);
+      num_vertices = vertices_per_prim(state->in_qualifier->prim_type);
    }
 
    /* Geometry shader input variables must be arrays.  Caller should have
@@ -3072,6 +3186,7 @@ ast_declarator_list::hir(exec_list *instructions,
        */
       if (!state->is_version(130, 300)
 	  && !state->has_explicit_attrib_location()
+	  && !state->has_separate_shader_objects()
 	  && !state->ARB_fragment_coord_conventions_enable) {
 	 if (this->type->qualifier.flags.q.out) {
 	    _mesa_glsl_error(& loc, state,
@@ -3411,15 +3526,15 @@ ast_declarator_list::hir(exec_list *instructions,
                           ", integer and sampler types");
       }
 
-      /* From page 17 (page 23 of the PDF) of the GLSL 1.20 spec:
+      /* From section 4.1.7 of the GLSL 4.40 spec:
        *
-       *    "[Sampler types] can only be declared as function
-       *    parameters or uniform variables (see Section 4.3.5
-       *    "Uniform")".
+       *    "[Opaque types] can only be declared as function
+       *     parameters or uniform-qualified variables."
        */
-      if (var_type->contains_sampler() &&
+      if (var_type->contains_opaque() &&
           !this->type->qualifier.flags.q.uniform) {
-         _mesa_glsl_error(&loc, state, "samplers must be declared uniform");
+         _mesa_glsl_error(&loc, state,
+                          "opaque variables must be declared uniform");
       }
 
       /* Process the initializer and add its instructions to a temporary
@@ -3611,15 +3726,16 @@ ast_parameter_declarator::hir(exec_list *instructions,
    apply_type_qualifier_to_variable(& this->type->qualifier, var, state, & loc,
 				    true);
 
-   /* From page 17 (page 23 of the PDF) of the GLSL 1.20 spec:
+   /* From section 4.1.7 of the GLSL 4.40 spec:
     *
-    *    "Samplers cannot be treated as l-values; hence cannot be used
-    *    as out or inout function parameters, nor can they be assigned
-    *    into."
+    *   "Opaque variables cannot be treated as l-values; hence cannot
+    *    be used as out or inout function parameters, nor can they be
+    *    assigned into."
     */
    if ((var->data.mode == ir_var_function_inout || var->data.mode == ir_var_function_out)
-       && type->contains_sampler()) {
-      _mesa_glsl_error(&loc, state, "out and inout parameters cannot contain samplers");
+       && type->contains_opaque()) {
+      _mesa_glsl_error(&loc, state, "out and inout parameters cannot "
+                       "contain opaque variables");
       type = glsl_type::error_type;
    }
 
@@ -3774,15 +3890,15 @@ ast_function::hir(exec_list *instructions,
 		       "sized", name);
    }
 
-   /* From page 17 (page 23 of the PDF) of the GLSL 1.20 spec:
+   /* From section 4.1.7 of the GLSL 4.40 spec:
     *
-    *    "[Sampler types] can only be declared as function parameters
-    *    or uniform variables (see Section 4.3.5 "Uniform")".
+    *    "[Opaque types] can only be declared as function parameters
+    *     or uniform-qualified variables."
     */
-   if (return_type->contains_sampler()) {
+   if (return_type->contains_opaque()) {
       YYLTYPE loc = this->get_location();
       _mesa_glsl_error(&loc, state,
-                       "function `%s' return type can't contain a sampler",
+                       "function `%s' return type can't contain an opaque type",
                        name);
    }
 
@@ -4683,12 +4799,9 @@ ast_process_structure_or_interface_block(exec_list *instructions,
          if (!allow_reserved_names)
             validate_identifier(decl->identifier, loc, state);
 
-         /* From the GL_ARB_uniform_buffer_object spec:
+         /* From section 4.3.9 of the GLSL 4.40 spec:
           *
-          *     "Sampler types are not allowed inside of uniform
-          *      blocks. All other types, arrays, and structures
-          *      allowed for uniforms are allowed within a uniform
-          *      block."
+          *    "[In interface blocks] opaque types are not allowed."
           *
           * It should be impossible for decl_type to be NULL here.  Cases that
           * might naturally lead to decl_type being NULL, especially for the
@@ -4698,10 +4811,11 @@ ast_process_structure_or_interface_block(exec_list *instructions,
          const struct glsl_type *field_type =
             decl_type != NULL ? decl_type : glsl_type::error_type;
 
-         if (is_interface && field_type->contains_sampler()) {
+         if (is_interface && field_type->contains_opaque()) {
             YYLTYPE loc = decl_list->get_location();
             _mesa_glsl_error(&loc, state,
-                             "uniform in non-default uniform block contains sampler");
+                             "uniform in non-default uniform block contains "
+                             "opaque variable");
          }
 
          if (field_type->contains_atomic()) {
@@ -4713,6 +4827,16 @@ ast_process_structure_or_interface_block(exec_list *instructions,
             YYLTYPE loc = decl_list->get_location();
             _mesa_glsl_error(&loc, state, "atomic counter in structure or "
                              "uniform block");
+         }
+
+         if (field_type->contains_image()) {
+            /* FINISHME: Same problem as with atomic counters.
+             * FINISHME: Request clarification from Khronos and add
+             * FINISHME: spec quotation here.
+             */
+            YYLTYPE loc = decl_list->get_location();
+            _mesa_glsl_error(&loc, state,
+                             "image in structure or uniform block");
          }
 
          const struct ast_type_qualifier *const qual =
@@ -5248,7 +5372,7 @@ ast_gs_input_layout::hir(exec_list *instructions,
     * was consistent with this one.
     */
    if (state->gs_input_prim_type_specified &&
-       state->gs_input_prim_type != this->prim_type) {
+       state->in_qualifier->prim_type != this->prim_type) {
       _mesa_glsl_error(&loc, state,
                        "geometry shader input layout does not match"
                        " previous declaration");
@@ -5269,7 +5393,6 @@ ast_gs_input_layout::hir(exec_list *instructions,
    }
 
    state->gs_input_prim_type_specified = true;
-   state->gs_input_prim_type = this->prim_type;
 
    /* If any shader inputs occurred before this declaration and did not
     * specify an array size, their size is determined now.
@@ -5296,6 +5419,84 @@ ast_gs_input_layout::hir(exec_list *instructions,
          }
       }
    }
+
+   return NULL;
+}
+
+
+ir_rvalue *
+ast_cs_input_layout::hir(exec_list *instructions,
+                         struct _mesa_glsl_parse_state *state)
+{
+   YYLTYPE loc = this->get_location();
+
+   /* If any compute input layout declaration preceded this one, make sure it
+    * was consistent with this one.
+    */
+   if (state->cs_input_local_size_specified) {
+      for (int i = 0; i < 3; i++) {
+         if (state->cs_input_local_size[i] != this->local_size[i]) {
+            _mesa_glsl_error(&loc, state,
+                             "compute shader input layout does not match"
+                             " previous declaration");
+            return NULL;
+         }
+      }
+   }
+
+   /* From the ARB_compute_shader specification:
+    *
+    *     If the local size of the shader in any dimension is greater
+    *     than the maximum size supported by the implementation for that
+    *     dimension, a compile-time error results.
+    *
+    * It is not clear from the spec how the error should be reported if
+    * the total size of the work group exceeds
+    * MAX_COMPUTE_WORK_GROUP_INVOCATIONS, but it seems reasonable to
+    * report it at compile time as well.
+    */
+   GLuint64 total_invocations = 1;
+   for (int i = 0; i < 3; i++) {
+      if (this->local_size[i] > state->ctx->Const.MaxComputeWorkGroupSize[i]) {
+         _mesa_glsl_error(&loc, state,
+                          "local_size_%c exceeds MAX_COMPUTE_WORK_GROUP_SIZE"
+                          " (%d)", 'x' + i,
+                          state->ctx->Const.MaxComputeWorkGroupSize[i]);
+         break;
+      }
+      total_invocations *= this->local_size[i];
+      if (total_invocations >
+          state->ctx->Const.MaxComputeWorkGroupInvocations) {
+         _mesa_glsl_error(&loc, state,
+                          "product of local_sizes exceeds "
+                          "MAX_COMPUTE_WORK_GROUP_INVOCATIONS (%d)",
+                          state->ctx->Const.MaxComputeWorkGroupInvocations);
+         break;
+      }
+   }
+
+   state->cs_input_local_size_specified = true;
+   for (int i = 0; i < 3; i++)
+      state->cs_input_local_size[i] = this->local_size[i];
+
+   /* We may now declare the built-in constant gl_WorkGroupSize (see
+    * builtin_variable_generator::generate_constants() for why we didn't
+    * declare it earlier).
+    */
+   ir_variable *var = new(state->symbols)
+      ir_variable(glsl_type::ivec3_type, "gl_WorkGroupSize", ir_var_auto);
+   var->data.how_declared = ir_var_declared_implicitly;
+   var->data.read_only = true;
+   instructions->push_tail(var);
+   state->symbols->add_variable(var);
+   ir_constant_data data;
+   memset(&data, 0, sizeof(data));
+   for (int i = 0; i < 3; i++)
+      data.i[i] = this->local_size[i];
+   var->constant_value = new(var) ir_constant(glsl_type::ivec3_type, &data);
+   var->constant_initializer =
+      new(var) ir_constant(glsl_type::ivec3_type, &data);
+   var->data.has_initializer = true;
 
    return NULL;
 }

@@ -176,6 +176,7 @@ static const int reg_type_size[] = {
    [BRW_HW_REG_NON_IMM_TYPE_B]   = 1,
    [GEN7_HW_REG_NON_IMM_TYPE_DF] = 8,
    [BRW_HW_REG_TYPE_F]           = 4,
+   [GEN8_HW_REG_NON_IMM_TYPE_HF] = 2,
 };
 
 static const char *const m_reg_file[4] = {
@@ -568,7 +569,10 @@ src0_3src(FILE *file, struct gen8_instruction *inst)
       return 0;
    if (gen8_src0_3src_subreg_nr(inst))
       format(file, ".%d", gen8_src0_3src_subreg_nr(inst));
-   string(file, "<4,1,1>");
+   if (gen8_src0_3src_rep_ctrl(inst))
+      string(file, "<0,1,0>");
+   else
+      string(file, "<4,4,1>");
    err |= control(file, "src da16 reg type", m_three_source_reg_encoding,
                   gen8_src_3src_type(inst), NULL);
    err |= src_swizzle(file, swz_x, swz_y, swz_z, swz_w);
@@ -594,7 +598,10 @@ src1_3src(FILE *file, struct gen8_instruction *inst)
       return 0;
    if (src1_subreg_nr)
       format(file, ".%d", src1_subreg_nr);
-   string(file, "<4,1,1>");
+   if (gen8_src1_3src_rep_ctrl(inst))
+      string(file, "<0,1,0>");
+   else
+      string(file, "<4,4,1>");
    err |= control(file, "src da16 reg type", m_three_source_reg_encoding,
                   gen8_src_3src_type(inst), NULL);
    err |= src_swizzle(file, swz_x, swz_y, swz_z, swz_w);
@@ -619,7 +626,10 @@ src2_3src(FILE *file, struct gen8_instruction *inst)
       return 0;
    if (gen8_src2_3src_subreg_nr(inst))
       format(file, ".%d", gen8_src2_3src_subreg_nr(inst));
-   string(file, "<4,1,1>");
+   if (gen8_src2_3src_rep_ctrl(inst))
+      string(file, "<0,1,0>");
+   else
+      string(file, "<4,4,1>");
    err |= control(file, "src da16 reg type", m_three_source_reg_encoding,
                   gen8_src_3src_type(inst), NULL);
    err |= src_swizzle(file, swz_x, swz_y, swz_z, swz_w);
@@ -827,27 +837,31 @@ gen8_disassemble(FILE *file, struct gen8_instruction *inst, int gen)
       pad(file, 64);
       err |= src2_3src(file, inst);
    } else {
-      if (m_opcode[opcode].ndst > 0) {
+      if (opcode == BRW_OPCODE_ENDIF || opcode == BRW_OPCODE_WHILE) {
          pad(file, 16);
-         err |= dest(file, inst);
-      } else if (opcode == BRW_OPCODE_ENDIF) {
-         format(file, " %d", gen8_jip(inst));
+         format(file, "JIP: %d", gen8_jip(inst));
       } else if (opcode == BRW_OPCODE_IF ||
                  opcode == BRW_OPCODE_ELSE ||
-                 opcode == BRW_OPCODE_WHILE ||
                  opcode == BRW_OPCODE_BREAK ||
                  opcode == BRW_OPCODE_CONTINUE ||
                  opcode == BRW_OPCODE_HALT) {
-         format(file, " %d %d", gen8_jip(inst), gen8_uip(inst));
-      }
-
-      if (m_opcode[opcode].nsrc > 0) {
+         pad(file, 16);
+         format(file, "JIP: %d", gen8_jip(inst));
          pad(file, 32);
-         err |= src0(file, inst);
-      }
-      if (m_opcode[opcode].nsrc > 1) {
-         pad(file, 48);
-         err |= src1(file, inst);
+         format(file, "UIP: %d", gen8_uip(inst));
+      } else {
+         if (m_opcode[opcode].ndst > 0) {
+            pad(file, 16);
+            err |= dest(file, inst);
+         }
+         if (m_opcode[opcode].nsrc > 0) {
+            pad(file, 32);
+            err |= src0(file, inst);
+         }
+         if (m_opcode[opcode].nsrc > 1) {
+            pad(file, 48);
+            err |= src1(file, inst);
+         }
       }
    }
 

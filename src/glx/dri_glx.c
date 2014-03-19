@@ -271,8 +271,9 @@ __glXReportDamage(__DRIdrawable * driDraw,
 }
 
 static const __DRIdamageExtension damageExtension = {
-   {__DRI_DAMAGE, __DRI_DAMAGE_VERSION},
-   __glXReportDamage,
+   .base = {__DRI_DAMAGE, 1 },
+
+   .reportDamage        = __glXReportDamage,
 };
 
 #endif
@@ -299,8 +300,9 @@ __glXDRIGetDrawableInfo(__DRIdrawable * drawable,
 }
 
 static const __DRIgetDrawableInfoExtension getDrawableInfoExtension = {
-   {__DRI_GET_DRAWABLE_INFO, __DRI_GET_DRAWABLE_INFO_VERSION},
-   __glXDRIGetDrawableInfo
+   .base = {__DRI_GET_DRAWABLE_INFO, 1 },
+
+   .getDrawableInfo     = __glXDRIGetDrawableInfo
 };
 
 static const __DRIextension *loader_extensions[] = {

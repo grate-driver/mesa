@@ -397,11 +397,6 @@ _mesa_base_tex_format( struct gl_context *ctx, GLint internalFormat )
    if (ctx->Extensions.ARB_texture_rg) {
       switch (internalFormat) {
       case GL_R16F:
-	 /* R16F depends on both ARB_half_float_pixel and ARB_texture_float.
-	  */
-	 if (!ctx->Extensions.ARB_half_float_pixel)
-	    break;
-	 /* FALLTHROUGH */
       case GL_R32F:
 	 if (!ctx->Extensions.ARB_texture_float)
 	    break;
@@ -422,11 +417,6 @@ _mesa_base_tex_format( struct gl_context *ctx, GLint internalFormat )
          return GL_RED;
 
       case GL_RG16F:
-	 /* RG16F depends on both ARB_half_float_pixel and ARB_texture_float.
-	  */
-	 if (!ctx->Extensions.ARB_half_float_pixel)
-	    break;
-	 /* FALLTHROUGH */
       case GL_RG32F:
 	 if (!ctx->Extensions.ARB_texture_float)
 	    break;
@@ -1300,16 +1290,19 @@ clear_teximage_fields(struct gl_texture_image *img)
  * \param border image border.
  * \param internalFormat internal format.
  * \param format  the actual hardware format (one of MESA_FORMAT_*)
+ * \param numSamples  number of samples per texel, or zero for non-MS.
+ * \param fixedSampleLocations  are sample locations fixed?
  *
  * Fills in the fields of \p img with the given information.
  * Note: width, height and depth include the border.
  */
-void
-_mesa_init_teximage_fields(struct gl_context *ctx,
-                           struct gl_texture_image *img,
-                           GLsizei width, GLsizei height, GLsizei depth,
-                           GLint border, GLenum internalFormat,
-                           mesa_format format)
+static void
+init_teximage_fields_ms(struct gl_context *ctx,
+                        struct gl_texture_image *img,
+                        GLsizei width, GLsizei height, GLsizei depth,
+                        GLint border, GLenum internalFormat,
+                        mesa_format format,
+                        GLuint numSamples, GLboolean fixedSampleLocations)
 {
    GLenum target;
    ASSERT(img);
@@ -1407,6 +1400,20 @@ _mesa_init_teximage_fields(struct gl_context *ctx,
       _mesa_get_tex_max_num_levels(target,
                                    img->Width2, img->Height2, img->Depth2);
    img->TexFormat = format;
+   img->NumSamples = numSamples;
+   img->FixedSampleLocations = fixedSampleLocations;
+}
+
+
+void
+_mesa_init_teximage_fields(struct gl_context *ctx,
+                           struct gl_texture_image *img,
+                           GLsizei width, GLsizei height, GLsizei depth,
+                           GLint border, GLenum internalFormat,
+                           mesa_format format)
+{
+   init_teximage_fields_ms(ctx, img, width, height, depth, border,
+                           internalFormat, format, 0, GL_TRUE);
 }
 
 
@@ -2049,6 +2056,8 @@ texture_error_check( struct gl_context *ctx,
                      GLint depth, GLint border )
 {
    GLboolean colorFormat;
+   GLboolean is_format_depth_or_depthstencil;
+   GLboolean is_internalFormat_depth_or_depthstencil;
    GLenum err;
 
    /* Even though there are no color-index textures, we still have to support
@@ -2139,11 +2148,18 @@ texture_error_check( struct gl_context *ctx,
    }
 
    /* make sure internal format and format basically agree */
+   is_internalFormat_depth_or_depthstencil =
+      _mesa_is_depth_format(internalFormat) ||
+      _mesa_is_depthstencil_format(internalFormat);
+
+   is_format_depth_or_depthstencil =
+      _mesa_is_depth_format(format) ||
+      _mesa_is_depthstencil_format(format);
+
    colorFormat = _mesa_is_color_format(format);
    if ((_mesa_is_color_format(internalFormat) && !colorFormat && !indexFormat) ||
-       (_mesa_is_depth_format(internalFormat) != _mesa_is_depth_format(format)) ||
+       (is_internalFormat_depth_or_depthstencil != is_format_depth_or_depthstencil) ||
        (_mesa_is_ycbcr_format(internalFormat) != _mesa_is_ycbcr_format(format)) ||
-       (_mesa_is_depthstencil_format(internalFormat) != _mesa_is_depthstencil_format(format)) ||
        (_mesa_is_dudv_format(internalFormat) != _mesa_is_dudv_format(format))) {
       _mesa_error(ctx, GL_INVALID_OPERATION,
                   "glTexImage%dD(incompatible internalFormat = %s, format = %s)",
@@ -2254,9 +2270,10 @@ compressed_texture_error_check(struct gl_context *ctx, GLint dimensions,
 
    /* This will detect any invalid internalFormat value */
    if (!_mesa_is_compressed_format(ctx, internalFormat)) {
-      reason = "internalFormat";
-      error = GL_INVALID_ENUM;
-      goto error;
+      _mesa_error(ctx, GL_INVALID_ENUM,
+                  "glCompressedTexImage%dD(internalFormat=%s)",
+                  dimensions, _mesa_lookup_enum_by_nr(internalFormat));
+      return GL_TRUE;
    }
 
    switch (internalFormat) {
@@ -2348,6 +2365,7 @@ compressed_texture_error_check(struct gl_context *ctx, GLint dimensions,
    return GL_FALSE;
 
 error:
+   /* Note: not all error paths exit through here. */
    _mesa_error(ctx, error, "glCompressedTexImage%dD(%s)", dimensions, reason);
    return GL_TRUE;
 }
@@ -2563,7 +2581,8 @@ copytexture_error_check( struct gl_context *ctx, GLuint dimensions,
          break;
       default:
          _mesa_error(ctx, GL_INVALID_VALUE,
-                     "glCopyTexImage%dD(internalFormat)", dimensions);
+                     "glCopyTexImage%dD(internalFormat=%s)", dimensions,
+                     _mesa_lookup_enum_by_nr(internalFormat));
          return GL_TRUE;
       }
    }
@@ -2571,7 +2590,8 @@ copytexture_error_check( struct gl_context *ctx, GLuint dimensions,
    baseFormat = _mesa_base_tex_format(ctx, internalFormat);
    if (baseFormat < 0) {
       _mesa_error(ctx, GL_INVALID_OPERATION,
-                  "glCopyTexImage%dD(internalFormat)", dimensions);
+                  "glCopyTexImage%dD(internalFormat=%s)", dimensions,
+                  _mesa_lookup_enum_by_nr(internalFormat));
       return GL_TRUE;
    }
 
@@ -2580,7 +2600,8 @@ copytexture_error_check( struct gl_context *ctx, GLuint dimensions,
    if (_mesa_is_color_format(internalFormat)) {
       if (rb_base_format < 0) {
          _mesa_error(ctx, GL_INVALID_VALUE,
-                     "glCopyTexImage%dD(internalFormat)", dimensions);
+                     "glCopyTexImage%dD(internalFormat=%s)", dimensions,
+                     _mesa_lookup_enum_by_nr(internalFormat));
          return GL_TRUE;
       }
    }
@@ -2606,7 +2627,8 @@ copytexture_error_check( struct gl_context *ctx, GLuint dimensions,
       }
       if (!valid) {
          _mesa_error(ctx, GL_INVALID_OPERATION,
-                     "glCopyTexImage%dD(internalFormat)", dimensions);
+                     "glCopyTexImage%dD(internalFormat=%s)", dimensions,
+                     _mesa_lookup_enum_by_nr(internalFormat));
          return GL_TRUE;
       }
    }
@@ -4183,10 +4205,18 @@ _mesa_validate_texbuffer_format(const struct gl_context *ctx,
       return MESA_FORMAT_NONE;
 
    datatype = _mesa_get_format_datatype(format);
-   if (datatype == GL_FLOAT && !ctx->Extensions.ARB_texture_float)
-      return MESA_FORMAT_NONE;
 
-   if (datatype == GL_HALF_FLOAT && !ctx->Extensions.ARB_half_float_pixel)
+   /* The GL_ARB_texture_buffer_object spec says:
+    *
+    *     "If ARB_texture_float is not supported, references to the
+    *     floating-point internal formats provided by that extension should be
+    *     removed, and such formats may not be passed to TexBufferARB."
+    *
+    * As a result, GL_HALF_FLOAT internal format depends on both
+    * GL_ARB_texture_float and GL_ARB_half_float_pixel.
+    */
+   if ((datatype == GL_FLOAT || datatype == GL_HALF_FLOAT) &&
+       !ctx->Extensions.ARB_texture_float)
       return MESA_FORMAT_NONE;
 
    if (!ctx->Extensions.ARB_texture_rg) {
@@ -4416,15 +4446,13 @@ teximagemultisample(GLuint dims, GLenum target, GLsizei samples,
 
    if (_mesa_is_proxy_texture(target)) {
       if (dimensionsOK && sizeOK) {
-         _mesa_init_teximage_fields(ctx, texImage,
-               width, height, depth, 0, internalformat, texFormat);
-         texImage->NumSamples = samples;
-         texImage->FixedSampleLocations = fixedsamplelocations;
+         init_teximage_fields_ms(ctx, texImage, width, height, depth, 0,
+                                 internalformat, texFormat,
+                                 samples, fixedsamplelocations);
       }
       else {
          /* clear all image fields */
-         _mesa_init_teximage_fields(ctx, texImage,
-               0, 0, 0, 0, GL_NONE, MESA_FORMAT_NONE);
+         clear_teximage_fields(texImage);
       }
    }
    else {
@@ -4448,11 +4476,9 @@ teximagemultisample(GLuint dims, GLenum target, GLsizei samples,
 
       ctx->Driver.FreeTextureImageBuffer(ctx, texImage);
 
-      _mesa_init_teximage_fields(ctx, texImage,
-            width, height, depth, 0, internalformat, texFormat);
-
-      texImage->NumSamples = samples;
-      texImage->FixedSampleLocations = fixedsamplelocations;
+      init_teximage_fields_ms(ctx, texImage, width, height, depth, 0,
+                              internalformat, texFormat,
+                              samples, fixedsamplelocations);
 
       if (width > 0 && height > 0 && depth > 0) {
          if (!ctx->Driver.AllocTextureStorage(ctx, texObj, 1,

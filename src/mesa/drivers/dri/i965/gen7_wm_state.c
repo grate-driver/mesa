@@ -143,12 +143,6 @@ upload_ps_state(struct brw_context *brw)
    const int max_threads_shift = brw->is_haswell ?
       HSW_PS_MAX_THREADS_SHIFT : IVB_PS_MAX_THREADS_SHIFT;
 
-   /* BRW_NEW_PS_BINDING_TABLE */
-   BEGIN_BATCH(2);
-   OUT_BATCH(_3DSTATE_BINDING_TABLE_POINTERS_PS << 16 | (2 - 2));
-   OUT_BATCH(brw->wm.base.bind_bo_offset);
-   ADVANCE_BATCH();
-
    /* CACHE_NEW_SAMPLER */
    BEGIN_BATCH(2);
    OUT_BATCH(_3DSTATE_SAMPLER_STATE_POINTERS_PS << 16 | (2 - 2));
@@ -186,7 +180,7 @@ upload_ps_state(struct brw_context *brw)
    dw4 |= (brw->max_wm_threads - 1) << max_threads_shift;
 
    /* CACHE_NEW_WM_PROG */
-   if (brw->wm.prog_data->nr_params > 0)
+   if (brw->wm.prog_data->base.nr_params > 0)
       dw4 |= GEN7_PS_PUSH_CONSTANT_ENABLE;
 
    /* From the IVB PRM, volume 2 part 1, page 287:

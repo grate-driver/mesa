@@ -72,13 +72,8 @@ upload_vs_state(struct brw_context *brw)
    const int max_threads_shift = brw->is_haswell ?
       HSW_VS_MAX_THREADS_SHIFT : GEN6_VS_MAX_THREADS_SHIFT;
 
-   gen7_emit_vs_workaround_flush(brw);
-
-   /* BRW_NEW_VS_BINDING_TABLE */
-   BEGIN_BATCH(2);
-   OUT_BATCH(_3DSTATE_BINDING_TABLE_POINTERS_VS << 16 | (2 - 2));
-   OUT_BATCH(stage_state->bind_bo_offset);
-   ADVANCE_BATCH();
+   if (!brw->is_haswell)
+      gen7_emit_vs_workaround_flush(brw);
 
    /* CACHE_NEW_SAMPLER */
    BEGIN_BATCH(2);

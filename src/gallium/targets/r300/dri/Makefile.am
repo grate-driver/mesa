@@ -37,7 +37,9 @@ nodist_EXTRA_r300_dri_la_SOURCES = dummy.cpp
 r300_dri_la_SOURCES = \
 	drm_target.c
 
-r300_dri_la_LDFLAGS = $(GALLIUM_DRI_LINKER_FLAGS)
+r300_dri_la_LDFLAGS = \
+	$(GALLIUM_DRI_LINKER_FLAGS) \
+	-Wl,--dynamic-list=$(srcdir)/radeon.dyn
 
 r300_dri_la_LIBADD = \
 	$(top_builddir)/src/mesa/drivers/dri/common/libdricommon.la \
@@ -57,8 +59,4 @@ r300_dri_la_LDFLAGS += $(LLVM_LDFLAGS)
 r300_dri_la_LIBADD += $(LLVM_LIBS)
 endif
 
-# Provide compatibility with scripts for the old Mesa build system for
-# a while by putting a link to the driver into /lib of the build tree.
-all-local: r300_dri.la
-	$(MKDIR_P) $(top_builddir)/$(LIB_DIR)/gallium
-	ln -f .libs/r300_dri.so $(top_builddir)/$(LIB_DIR)/gallium/r300_dri.so
+include $(top_srcdir)/install-gallium-links.mk

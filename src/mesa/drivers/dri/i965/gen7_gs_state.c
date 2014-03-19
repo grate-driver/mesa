@@ -66,12 +66,6 @@ upload_gs_state(struct brw_context *brw)
    /* CACHE_NEW_GS_PROG */
    const struct brw_vec4_prog_data *prog_data = &brw->gs.prog_data->base;
 
-   /* BRW_NEW_GS_BINDING_TABLE */
-   BEGIN_BATCH(2);
-   OUT_BATCH(_3DSTATE_BINDING_TABLE_POINTERS_GS << 16 | (2 - 2));
-   OUT_BATCH(stage_state->bind_bo_offset);
-   ADVANCE_BATCH();
-
    /* CACHE_NEW_SAMPLER */
    BEGIN_BATCH(2);
    OUT_BATCH(_3DSTATE_SAMPLER_STATE_POINTERS_GS << 16 | (2 - 2));
@@ -153,6 +147,8 @@ upload_gs_state(struct brw_context *brw)
          ((brw->max_gs_threads - 1) << max_threads_shift) |
          (brw->gs.prog_data->control_data_header_size_hwords <<
           GEN7_GS_CONTROL_DATA_HEADER_SIZE_SHIFT) |
+         ((brw->gs.prog_data->invocations - 1) <<
+          GEN7_GS_INSTANCE_CONTROL_SHIFT) |
          (brw->gs.prog_data->dual_instanced_dispatch ?
           GEN7_GS_DISPATCH_MODE_DUAL_INSTANCE :
           GEN7_GS_DISPATCH_MODE_DUAL_OBJECT) |

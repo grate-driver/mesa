@@ -133,16 +133,18 @@ static const __DRIimageLookupExtension image_lookup_extension = {
 };
 
 static const __DRIdri2LoaderExtension dri2_loader_extension = {
-   { __DRI_DRI2_LOADER, 3 },
-   dri_get_buffers,
-   dri_flush_front_buffer,
-   dri_get_buffers_with_format,
+   .base = { __DRI_DRI2_LOADER, 3 },
+
+   .getBuffers              = dri_get_buffers,
+   .flushFrontBuffer        = dri_flush_front_buffer,
+   .getBuffersWithFormat    = dri_get_buffers_with_format,
 };
 
 static const __DRIimageLoaderExtension image_loader_extension = {
-   { __DRI_IMAGE_LOADER, 1 },
-   image_get_buffers,
-   dri_flush_front_buffer,
+   .base = { __DRI_IMAGE_LOADER, 1 },
+
+   .getBuffers          = image_get_buffers,
+   .flushFrontBuffer    = dri_flush_front_buffer,
 };
 
 
@@ -609,7 +611,7 @@ gbm_dri_bo_create(struct gbm_device *gbm,
       dri_format = __DRI_IMAGE_FORMAT_XRGB2101010;
       break;
    default:
-      return NULL;
+      goto failed;
    }
 
    if (usage & GBM_BO_USE_SCANOUT)
@@ -626,7 +628,7 @@ gbm_dri_bo_create(struct gbm_device *gbm,
                               dri_format, dri_use,
                               bo);
    if (bo->image == NULL)
-      return NULL;
+      goto failed;
 
    dri->image->queryImage(bo->image, __DRI_IMAGE_ATTRIB_HANDLE,
                           &bo->base.base.handle.s32);
@@ -634,6 +636,10 @@ gbm_dri_bo_create(struct gbm_device *gbm,
                           (int *) &bo->base.base.stride);
 
    return &bo->base.base;
+
+failed:
+   free(bo);
+   return NULL;
 }
 
 static struct gbm_surface *

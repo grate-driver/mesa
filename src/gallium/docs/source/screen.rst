@@ -53,8 +53,6 @@ The integer capabilities:
   opcodes to the Shader Model 3 specification. XXX oh god this is horrible
 * ``PIPE_CAP_MAX_STREAM_OUTPUT_BUFFERS``: The maximum number of stream buffers.
 * ``PIPE_CAP_PRIMITIVE_RESTART``: Whether primitive restart is supported.
-* ``PIPE_CAP_MAX_COMBINED_SAMPLERS``: The total number of samplers accessible from
-  the vertex and fragment shader, inclusive.
 * ``PIPE_CAP_INDEP_BLEND_ENABLE``: Whether per-rendertarget blend enabling and channel
   masks are supported. If 0, then the first rendertarget's blend mask is
   replicated across all MRTs.
@@ -184,6 +182,15 @@ The integer capabilities:
   vertex components output by a single invocation of a geometry shader.
   This is the product of the number of attribute components per vertex and
   the number of output vertices.
+* ``PIPE_CAP_MAX_TEXTURE_GATHER_COMPONENTS``: Max number of components
+  in format that texture gather can operate on. 1 == RED, ALPHA etc,
+  4 == All formats.
+* ``PIPE_CAP_TEXTURE_GATHER_SM5``: Whether the texture gather
+  hardware implements the SM5 features, component selection,
+  shadow comparison, and run-time offsets.
+* ``PIPE_CAP_BUFFER_MAP_PERSISTENT_COHERENT``: Whether
+  PIPE_TRANSFER_PERSISTENT and PIPE_TRANSFER_COHERENT are supported
+  for buffers.
 
 
 .. _pipe_capf:
@@ -348,12 +355,17 @@ PIPE_USAGE_*
 ^^^^^^^^^^^^
 
 The PIPE_USAGE enums are hints about the expected usage pattern of a resource.
+Note that drivers must always support read and write CPU access at any time
+no matter which hint they got.
 
-* ``PIPE_USAGE_DEFAULT``: Expect many uploads to the resource, intermixed with draws.
-* ``PIPE_USAGE_DYNAMIC``: Expect many uploads to the resource, intermixed with draws.
-* ``PIPE_USAGE_STATIC``: Same as immutable (?)
-* ``PIPE_USAGE_IMMUTABLE``: Resource will not be changed after first upload.
-* ``PIPE_USAGE_STREAM``: Upload will be followed by draw, followed by upload, ...
+* ``PIPE_USAGE_DEFAULT``: Optimized for fast GPU access.
+* ``PIPE_USAGE_IMMUTABLE``: Optimized for fast GPU access and the resource is
+  not expected to be mapped or changed (even by the GPU) after the first upload.
+* ``PIPE_USAGE_DYNAMIC``: Expect frequent write-only CPU access. What is
+  uploaded is expected to be used at least several times by the GPU.
+* ``PIPE_USAGE_STREAM``: Expect frequent write-only CPU access. What is
+  uploaded is expected to be used only once by the GPU.
+* ``PIPE_USAGE_STAGING``: Optimized for fast CPU access.
 
 
 Methods

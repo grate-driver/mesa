@@ -182,10 +182,11 @@ discussed above.
   use pipe_so_target_reference instead.
 
 * ``set_stream_output_targets`` binds stream output targets. The parameter
-  append_bitmask is a bitmask, where the i-th bit specifies whether new
-  primitives should be appended to the i-th buffer (writing starts at
-  the internal offset), or whether writing should start at the beginning
-  (the internal offset is effectively set to 0).
+  offset is an array which specifies the internal offset of the buffer. The
+  internal offset is, besides writing, used for reading the data during the
+  draw_auto stage, i.e. it specifies how much data there is in the buffer
+  for the purposes of the draw_auto stage. -1 means the buffer should
+  be appended to, and everything else sets the internal offset.
 
 NOTE: The currently-bound vertex or geometry shader must be compiled with
 the properly-filled-in structure pipe_stream_output_info describing which
@@ -520,6 +521,16 @@ invalidates all read caches of the currently-set samplers.
 
 
 
+.. _memory_barrier:
+
+memory_barrier
+%%%%%%%%%%%%%%%
+
+This function flushes caches according to which of the PIPE_BARRIER_* flags
+are set.
+
+
+
 .. _pipe_transfer:
 
 PIPE_TRANSFER
@@ -557,6 +568,18 @@ These flags control the behavior of a transfer object.
   Written ranges will be notified later with :ref:`transfer_flush_region`.
   Cannot be used with ``PIPE_TRANSFER_READ``.
 
+``PIPE_TRANSFER_PERSISTENT``
+  Allows the resource to be used for rendering while mapped.
+  PIPE_RESOURCE_FLAG_MAP_PERSISTENT must be set when creating
+  the resource.
+  If COHERENT is not set, memory_barrier(PIPE_BARRIER_MAPPED_BUFFER)
+  must be called to ensure the device can see what the CPU has written.
+
+``PIPE_TRANSFER_COHERENT``
+  If PERSISTENT is set, this ensures any writes done by the device are
+  immediately visible to the CPU and vice versa.
+  PIPE_RESOURCE_FLAG_MAP_COHERENT must be set when creating
+  the resource.
 
 Compute kernel execution
 ^^^^^^^^^^^^^^^^^^^^^^^^

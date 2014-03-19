@@ -592,15 +592,15 @@ void brw_debug_compact_uncompact(struct brw_context *brw,
 
    uint32_t *before_bits = (uint32_t *)orig;
    uint32_t *after_bits = (uint32_t *)uncompacted;
-   printf("  changed bits:\n");
+   fprintf(stderr, "  changed bits:\n");
    for (int i = 0; i < 128; i++) {
       uint32_t before = before_bits[i / 32] & (1 << (i & 31));
       uint32_t after = after_bits[i / 32] & (1 << (i & 31));
 
       if (before != after) {
-         printf("  bit %d, %s to %s\n", i,
-                before ? "set" : "unset",
-                after ? "set" : "unset");
+         fprintf(stderr, "  bit %d, %s to %s\n", i,
+                 before ? "set" : "unset",
+                 after ? "set" : "unset");
       }
    }
 }
@@ -785,8 +785,8 @@ brw_compact_instructions(struct brw_compile *p)
    p->nr_insn = p->next_insn_offset / 16;
 
    if (0) {
-      fprintf(stdout, "dumping compacted program\n");
-      brw_dump_compile(p, stdout, 0, p->next_insn_offset);
+      fprintf(stderr, "dumping compacted program\n");
+      brw_dump_compile(p, stderr, 0, p->next_insn_offset);
 
       int cmp = 0;
       for (offset = 0; offset < p->next_insn_offset;) {

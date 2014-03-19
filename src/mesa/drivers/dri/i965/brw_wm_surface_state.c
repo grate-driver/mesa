@@ -282,38 +282,65 @@ brw_update_texture_surface(struct gl_context *ctx,
    surf = brw_state_batch(brw, AUB_TRACE_SURFACE_STATE,
 			  6 * 4, 32, surf_offset);
 
-   (void) for_gather;   /* no w/a to apply for this gen */
+   uint32_t tex_format = translate_tex_format(brw, mt->format,
+                                              sampler->sRGBDecode);
+
+   if (for_gather) {
+      /* Sandybridge's gather4 message is broken for integer formats.
+       * To work around this, we pretend the surface is UNORM for
+       * 8 or 16-bit formats, and emit shader instructions to recover
+       * the real INT/UINT value.  For 32-bit formats, we pretend
+       * the surface is FLOAT, and simply reinterpret the resulting
+       * bits.
+       */
+      switch (tex_format) {
+      case BRW_SURFACEFORMAT_R8_SINT:
+      case BRW_SURFACEFORMAT_R8_UINT:
+         tex_format = BRW_SURFACEFORMAT_R8_UNORM;
+         break;
+
+      case BRW_SURFACEFORMAT_R16_SINT:
+      case BRW_SURFACEFORMAT_R16_UINT:
+         tex_format = BRW_SURFACEFORMAT_R16_UNORM;
+         break;
+
+      case BRW_SURFACEFORMAT_R32_SINT:
+      case BRW_SURFACEFORMAT_R32_UINT:
+         tex_format = BRW_SURFACEFORMAT_R32_FLOAT;
+         break;
+
+      default:
+         break;
+      }
+   }
 
    surf[0] = (translate_tex_target(tObj->Target) << BRW_SURFACE_TYPE_SHIFT |
 	      BRW_SURFACE_MIPMAPLAYOUT_BELOW << BRW_SURFACE_MIPLAYOUT_SHIFT |
 	      BRW_SURFACE_CUBEFACE_ENABLES |
-	      (translate_tex_format(brw,
-                                    mt->format,
-				    sampler->sRGBDecode) <<
-	       BRW_SURFACE_FORMAT_SHIFT));
+	      tex_format << BRW_SURFACE_FORMAT_SHIFT);
 
-   surf[1] = intelObj->mt->region->bo->offset64 + intelObj->mt->offset; /* reloc */
+   surf[1] = mt->region->bo->offset64 + mt->offset; /* reloc */
 
    surf[2] = ((intelObj->_MaxLevel - tObj->BaseLevel) << BRW_SURFACE_LOD_SHIFT |
 	      (mt->logical_width0 - 1) << BRW_SURFACE_WIDTH_SHIFT |
 	      (mt->logical_height0 - 1) << BRW_SURFACE_HEIGHT_SHIFT);
 
-   surf[3] = (brw_get_surface_tiling_bits(intelObj->mt->region->tiling) |
+   surf[3] = (brw_get_surface_tiling_bits(mt->region->tiling) |
 	      (mt->logical_depth0 - 1) << BRW_SURFACE_DEPTH_SHIFT |
-	      (intelObj->mt->region->pitch - 1) <<
+	      (mt->region->pitch - 1) <<
 	      BRW_SURFACE_PITCH_SHIFT);
 
-   surf[4] = (brw_get_surface_num_multisamples(intelObj->mt->num_samples) |
+   surf[4] = (brw_get_surface_num_multisamples(mt->num_samples) |
               SET_FIELD(tObj->BaseLevel - mt->first_level, BRW_SURFACE_MIN_LOD));
 
    surf[5] = mt->align_h == 4 ? BRW_SURFACE_VERTICAL_ALIGN_ENABLE : 0;
 
    /* Emit relocation to surface contents */
    drm_intel_bo_emit_reloc(brw->batch.bo,
-			   *surf_offset + 4,
-			   intelObj->mt->region->bo,
-                           surf[1] - intelObj->mt->region->bo->offset64,
-			   I915_GEM_DOMAIN_SAMPLER, 0);
+                           *surf_offset + 4,
+                           mt->region->bo,
+                           surf[1] - mt->region->bo->offset64,
+                           I915_GEM_DOMAIN_SAMPLER, 0);
 }
 
 /**
@@ -437,7 +464,7 @@ brw_upload_wm_pull_constants(struct brw_context *brw)
    struct brw_fragment_program *fp =
       (struct brw_fragment_program *) brw->fragment_program;
    struct gl_program_parameter_list *params = fp->program.Base.Parameters;
-   const int size = brw->wm.prog_data->nr_pull_params * sizeof(float);
+   const int size = brw->wm.prog_data->base.nr_pull_params * sizeof(float);
    const int surf_index =
       brw->wm.prog_data->base.binding_table.pull_constants_start;
    float *constants;
@@ -446,7 +473,7 @@ brw_upload_wm_pull_constants(struct brw_context *brw)
    _mesa_load_state_parameters(ctx, params);
 
    /* CACHE_NEW_WM_PROG */
-   if (brw->wm.prog_data->nr_pull_params == 0) {
+   if (brw->wm.prog_data->base.nr_pull_params == 0) {
       if (brw->wm.base.const_bo) {
 	 drm_intel_bo_unreference(brw->wm.base.const_bo);
 	 brw->wm.base.const_bo = NULL;
@@ -463,8 +490,8 @@ brw_upload_wm_pull_constants(struct brw_context *brw)
    /* _NEW_PROGRAM_CONSTANTS */
    drm_intel_gem_bo_map_gtt(brw->wm.base.const_bo);
    constants = brw->wm.base.const_bo->virtual;
-   for (i = 0; i < brw->wm.prog_data->nr_pull_params; i++) {
-      constants[i] = *brw->wm.prog_data->pull_param[i];
+   for (i = 0; i < brw->wm.prog_data->base.nr_pull_params; i++) {
+      constants[i] = *brw->wm.prog_data->base.pull_param[i];
    }
    drm_intel_gem_bo_unmap_gtt(brw->wm.base.const_bo);
 

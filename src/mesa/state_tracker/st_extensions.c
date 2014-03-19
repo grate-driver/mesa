@@ -39,6 +39,12 @@
 #include "st_extensions.h"
 #include "st_format.h"
 
+
+/*
+ * Note: we use these function rather than the MIN2, MAX2, CLAMP macros to
+ * avoid evaluating arguments (which are often function calls) more than once.
+ */
+
 static unsigned _min(unsigned a, unsigned b)
 {
    return (a < b) ? a : b;
@@ -88,10 +94,6 @@ void st_init_limits(struct st_context *st)
 
    c->MaxArrayTextureLayers
       = screen->get_param(screen, PIPE_CAP_MAX_TEXTURE_ARRAY_LAYERS);
-
-   c->MaxCombinedTextureImageUnits
-      = _min(screen->get_param(screen, PIPE_CAP_MAX_COMBINED_SAMPLERS),
-             MAX_COMBINED_TEXTURE_IMAGE_UNITS);
 
    /* Define max viewport size and max renderbuffer size in terms of
     * max texture size (note: max tex RECT size = max tex 2D size).
@@ -243,6 +245,12 @@ void st_init_limits(struct st_context *st)
       options->LowerClipDistance = true;
    }
 
+   c->MaxCombinedTextureImageUnits =
+         _min(c->Program[MESA_SHADER_VERTEX].MaxTextureImageUnits +
+              c->Program[MESA_SHADER_GEOMETRY].MaxTextureImageUnits +
+              c->Program[MESA_SHADER_FRAGMENT].MaxTextureImageUnits,
+              MAX_COMBINED_TEXTURE_IMAGE_UNITS);
+
    /* This depends on program constants. */
    c->MaxTextureCoordUnits
       = _min(c->Program[MESA_SHADER_FRAGMENT].MaxTextureImageUnits, MAX_TEXTURE_COORD_UNITS);
@@ -266,6 +274,7 @@ void st_init_limits(struct st_context *st)
    c->MinProgramTexelOffset = screen->get_param(screen, PIPE_CAP_MIN_TEXEL_OFFSET);
    c->MaxProgramTexelOffset = screen->get_param(screen, PIPE_CAP_MAX_TEXEL_OFFSET);
 
+   c->MaxProgramTextureGatherComponents = screen->get_param(screen, PIPE_CAP_MAX_TEXTURE_GATHER_COMPONENTS);
    c->UniformBooleanTrue = ~0;
 
    c->MaxTransformFeedbackBuffers =
@@ -373,6 +382,7 @@ void st_init_extensions(struct st_context *st)
 
    static const struct st_extension_cap_mapping cap_mapping[] = {
       { o(ARB_base_instance),                PIPE_CAP_START_INSTANCE                   },
+      { o(ARB_buffer_storage),               PIPE_CAP_BUFFER_MAP_PERSISTENT_COHERENT },
       { o(ARB_depth_clamp),                  PIPE_CAP_DEPTH_CLIP_DISABLE               },
       { o(ARB_depth_texture),                PIPE_CAP_TEXTURE_SHADOW_MAP               },
       { o(ARB_draw_buffers_blend),           PIPE_CAP_INDEP_BLEND_FUNC                 },
@@ -526,7 +536,6 @@ void st_init_extensions(struct st_context *st)
    ctx->Extensions.ARB_fragment_coord_conventions = GL_TRUE;
    ctx->Extensions.ARB_fragment_program = GL_TRUE;
    ctx->Extensions.ARB_fragment_shader = GL_TRUE;
-   ctx->Extensions.ARB_half_float_pixel = GL_TRUE;
    ctx->Extensions.ARB_half_float_vertex = GL_TRUE;
    ctx->Extensions.ARB_internalformat_query = GL_TRUE;
    ctx->Extensions.ARB_map_buffer_range = GL_TRUE;
@@ -777,4 +786,15 @@ void st_init_extensions(struct st_context *st)
       if (!ctx->Extensions.EXT_transform_feedback)
          ctx->Const.DisableVaryingPacking = GL_TRUE;
    }
+
+   if (ctx->API == API_OPENGL_CORE) {
+      ctx->Const.MaxViewports = screen->get_param(screen, PIPE_CAP_MAX_VIEWPORTS);
+      if (ctx->Const.MaxViewports >= 16) {
+         ctx->Const.ViewportBounds.Min = -16384.0;
+         ctx->Const.ViewportBounds.Max = 16384.0;
+         ctx->Extensions.ARB_viewport_array = GL_TRUE;
+      }
+   }
+   if (ctx->Const.MaxProgramTextureGatherComponents > 0)
+      ctx->Extensions.ARB_texture_gather = GL_TRUE;
 }

@@ -29,7 +29,11 @@
 #include <clang/Basic/TargetInfo.h>
 #include <llvm/Bitcode/BitstreamWriter.h>
 #include <llvm/Bitcode/ReaderWriter.h>
+#if HAVE_LLVM < 0x0305
 #include <llvm/Linker.h>
+#else
+#include <llvm/Linker/Linker.h>
+#endif
 #if HAVE_LLVM < 0x0303
 #include <llvm/DerivedTypes.h>
 #include <llvm/LLVMContext.h>
@@ -297,8 +301,10 @@ namespace {
             llvm::Argument &arg = *I;
 #if HAVE_LLVM < 0x0302
             llvm::TargetData TD(kernel_func->getParent());
-#else
+#elif HAVE_LLVM < 0x0305
             llvm::DataLayout TD(kernel_func->getParent()->getDataLayout());
+#else
+            llvm::DataLayout TD(mod);
 #endif
 
             llvm::Type *arg_type = arg.getType();

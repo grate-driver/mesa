@@ -85,8 +85,6 @@ nv50_screen_get_param(struct pipe_screen *pscreen, enum pipe_cap param)
    const uint16_t class_3d = nouveau_screen(pscreen)->class_3d;
 
    switch (param) {
-   case PIPE_CAP_MAX_COMBINED_SAMPLERS:
-      return 64;
    case PIPE_CAP_MAX_TEXTURE_2D_LEVELS:
       return 14;
    case PIPE_CAP_MAX_TEXTURE_3D_LEVELS:
@@ -114,10 +112,7 @@ nv50_screen_get_param(struct pipe_screen *pscreen, enum pipe_cap param)
    case PIPE_CAP_SEAMLESS_CUBE_MAP_PER_TEXTURE:
       return 0;
    case PIPE_CAP_CUBE_MAP_ARRAY:
-      return 0;
-      /*
       return nv50_screen(pscreen)->tesla->oclass >= NVA3_3D_CLASS;
-      */
    case PIPE_CAP_TWO_SIDED_STENCIL:
    case PIPE_CAP_DEPTH_CLIP_DISABLE:
    case PIPE_CAP_POINT_SPRITE:
@@ -198,7 +193,13 @@ nv50_screen_get_param(struct pipe_screen *pscreen, enum pipe_cap param)
    case PIPE_CAP_ENDIANNESS:
       return PIPE_ENDIAN_LITTLE;
    case PIPE_CAP_TGSI_VS_LAYER:
+   case PIPE_CAP_TEXTURE_GATHER_SM5:
+   case PIPE_CAP_BUFFER_MAP_PERSISTENT_COHERENT:
       return 0;
+   case PIPE_CAP_MAX_VIEWPORTS:
+      return NV50_MAX_VIEWPORTS;
+   case PIPE_CAP_MAX_TEXTURE_GATHER_COMPONENTS:
+      return (class_3d >= NVA3_3D_CLASS) ? 4 : 0;
    default:
       NOUVEAU_ERR("unknown PIPE_CAP %d\n", param);
       return 0;
@@ -293,8 +294,15 @@ nv50_screen_destroy(struct pipe_screen *pscreen)
       return;
 
    if (screen->base.fence.current) {
-      nouveau_fence_wait(screen->base.fence.current);
-      nouveau_fence_ref (NULL, &screen->base.fence.current);
+      struct nouveau_fence *current = NULL;
+
+      /* nouveau_fence_wait will create a new current fence, so wait on the
+       * _current_ one, and remove both.
+       */
+      nouveau_fence_ref(screen->base.fence.current, &current);
+      nouveau_fence_wait(current);
+      nouveau_fence_ref(NULL, &current);
+      nouveau_fence_ref(NULL, &screen->base.fence.current);
    }
    if (screen->base.pushbuf)
       screen->base.pushbuf->user_priv = NULL;
@@ -530,9 +538,14 @@ nv50_screen_init_hwctx(struct nv50_screen *screen)
 
    BEGIN_NV04(push, NV50_3D(VIEWPORT_TRANSFORM_EN), 1);
    PUSH_DATA (push, 1);
-   BEGIN_NV04(push, NV50_3D(DEPTH_RANGE_NEAR(0)), 2);
-   PUSH_DATAf(push, 0.0f);
-   PUSH_DATAf(push, 1.0f);
+   for (i = 0; i < NV50_MAX_VIEWPORTS; i++) {
+      BEGIN_NV04(push, NV50_3D(DEPTH_RANGE_NEAR(i)), 2);
+      PUSH_DATAf(push, 0.0f);
+      PUSH_DATAf(push, 1.0f);
+      BEGIN_NV04(push, NV50_3D(VIEWPORT_HORIZ(i)), 2);
+      PUSH_DATA (push, 8192 << 16);
+      PUSH_DATA (push, 8192 << 16);
+   }
 
    BEGIN_NV04(push, NV50_3D(VIEW_VOLUME_CLIP_CTRL), 1);
 #ifdef NV50_SCISSORS_CLIPPING
@@ -547,10 +560,12 @@ nv50_screen_init_hwctx(struct nv50_screen *screen)
    /* We use scissors instead of exact view volume clipping,
     * so they're always enabled.
     */
-   BEGIN_NV04(push, NV50_3D(SCISSOR_ENABLE(0)), 3);
-   PUSH_DATA (push, 1);
-   PUSH_DATA (push, 8192 << 16);
-   PUSH_DATA (push, 8192 << 16);
+   for (i = 0; i < NV50_MAX_VIEWPORTS; i++) {
+      BEGIN_NV04(push, NV50_3D(SCISSOR_ENABLE(i)), 3);
+      PUSH_DATA (push, 1);
+      PUSH_DATA (push, 8192 << 16);
+      PUSH_DATA (push, 8192 << 16);
+   }
 
    BEGIN_NV04(push, NV50_3D(RASTERIZE_ENABLE), 1);
    PUSH_DATA (push, 1);

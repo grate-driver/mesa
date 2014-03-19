@@ -223,26 +223,26 @@ This instruction replicates its result.
 
 .. math::
 
-  dst.x = (src0.x < src1.x) ? 1 : 0
+  dst.x = (src0.x < src1.x) ? 1.0F : 0.0F
 
-  dst.y = (src0.y < src1.y) ? 1 : 0
+  dst.y = (src0.y < src1.y) ? 1.0F : 0.0F
 
-  dst.z = (src0.z < src1.z) ? 1 : 0
+  dst.z = (src0.z < src1.z) ? 1.0F : 0.0F
 
-  dst.w = (src0.w < src1.w) ? 1 : 0
+  dst.w = (src0.w < src1.w) ? 1.0F : 0.0F
 
 
 .. opcode:: SGE - Set On Greater Equal Than
 
 .. math::
 
-  dst.x = (src0.x >= src1.x) ? 1 : 0
+  dst.x = (src0.x >= src1.x) ? 1.0F : 0.0F
 
-  dst.y = (src0.y >= src1.y) ? 1 : 0
+  dst.y = (src0.y >= src1.y) ? 1.0F : 0.0F
 
-  dst.z = (src0.z >= src1.z) ? 1 : 0
+  dst.z = (src0.z >= src1.z) ? 1.0F : 0.0F
 
-  dst.w = (src0.w >= src1.w) ? 1 : 0
+  dst.w = (src0.w >= src1.w) ? 1.0F : 0.0F
 
 
 .. opcode:: MAD - Multiply And Add
@@ -424,7 +424,7 @@ XXX cleanup on aisle three
 
 .. math::
 
-  dst = (1 / src.x) > 0 ? clamp(1 / src.x, 5.42101e-020, 1.884467e+019) : clamp(1 / src.x, -1.884467e+019, -5.42101e-020)
+  dst = (1 / src.x) > 0 ? clamp(1 / src.x, 5.42101e-020, 1.84467e+019) : clamp(1 / src.x, -1.84467e+019, -5.42101e-020)
 
 
 .. opcode:: DPH - Homogeneous Dot Product
@@ -527,7 +527,7 @@ This instruction replicates its result.
 
 .. math::
 
-  dst = 0
+  dst = 0.0F
 
 .. note::
 
@@ -588,7 +588,7 @@ This instruction replicates its result.
 
 .. math::
 
-  dst = 1
+  dst = 1.0F
 
 
 .. opcode:: TEX - Texture Lookup
@@ -985,6 +985,42 @@ XXX doesn't look like most of the opcodes really belong here.
   dst.y = texture_height(unit, lod)
 
   dst.z = texture_depth(unit, lod)
+
+.. opcode:: TG4 - Texture Gather (as per ARB_texture_gather)
+               Gathers the four texels to be used in a bi-linear
+               filtering operation and packs them into a single register.
+               Only works with 2D, 2D array, cubemaps, and cubemaps arrays.
+               For 2D textures, only the addressing modes of the sampler and
+               the top level of any mip pyramid are used. Set W to zero.
+               It behaves like the TEX instruction, but a filtered
+               sample is not generated. The four samples that contribute
+               to filtering are placed into xyzw in clockwise order,
+               starting with the (u,v) texture coordinate delta at the
+               following locations (-, +), (+, +), (+, -), (-, -), where
+               the magnitude of the deltas are half a texel.
+
+               PIPE_CAP_TEXTURE_SM5 enhances this instruction to support
+               shadow per-sample depth compares, single component selection,
+               and a non-constant offset. It doesn't allow support for the
+               GL independent offset to get i0,j0. This would require another
+               CAP is hw can do it natively. For now we lower that before
+               TGSI.
+
+.. math::
+
+   coord = src0
+
+   component = src1
+
+   dst = texture_gather4 (unit, coord, component)
+
+(with SM5 - cube array shadow)
+
+   coord = src0
+   
+   compare = src1
+
+   dst = texture_gather (uint, coord, compare)
 
 
 Integer ISA

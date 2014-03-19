@@ -558,6 +558,7 @@ static nv50_ir::operation translateOpcode(uint opcode)
    NV50_IR_OPCODE_CASE(SAD, SAD);
    NV50_IR_OPCODE_CASE(TXF, TXF);
    NV50_IR_OPCODE_CASE(TXQ, TXQ);
+   NV50_IR_OPCODE_CASE(TG4, TXG);
 
    NV50_IR_OPCODE_CASE(EMIT, EMIT);
    NV50_IR_OPCODE_CASE(ENDPRIM, RESTART);
@@ -1031,6 +1032,7 @@ bool Source::scanInstruction(const struct tgsi_full_instruction *inst)
          if (info->out[dst.getIndex(0)].sn == TGSI_SEMANTIC_PSIZE ||
              info->out[dst.getIndex(0)].sn == TGSI_SEMANTIC_PRIMID ||
              info->out[dst.getIndex(0)].sn == TGSI_SEMANTIC_LAYER ||
+             info->out[dst.getIndex(0)].sn == TGSI_SEMANTIC_VIEWPORT_INDEX ||
              info->out[dst.getIndex(0)].sn == TGSI_SEMANTIC_FOG)
             info->out[dst.getIndex(0)].mask &= 1;
 
@@ -1728,6 +1730,14 @@ Converter::handleTEX(Value *dst[4], int R, int S, int L, int C, int Dx, int Dy)
    if (tgsi.getOpcode() == TGSI_OPCODE_SAMPLE_C_LZ)
       texi->tex.levelZero = true;
 
+   for (s = 0; s < tgsi.getNumTexOffsets(); ++s) {
+      for (c = 0; c < 3; ++c) {
+         texi->tex.offset[s][c] = tgsi.getTexOffset(s).getValueU32(c, info);
+         if (texi->tex.offset[s][c])
+            texi->tex.useOffsets = s + 1;
+      }
+   }
+
    bb->insertTail(texi);
 }
 
@@ -2424,6 +2434,9 @@ Converter::handleInstruction(const struct tgsi_full_instruction *insn)
       break;
    case TGSI_OPCODE_TXD:
       handleTEX(dst0, 3, 3, 0x03, 0x0f, 0x10, 0x20);
+      break;
+   case TGSI_OPCODE_TG4:
+      handleTEX(dst0, 2, 2, 0x03, 0x0f, 0x00, 0x00);
       break;
    case TGSI_OPCODE_TEX2:
       handleTEX(dst0, 2, 2, 0x03, 0x10, 0x00, 0x00);

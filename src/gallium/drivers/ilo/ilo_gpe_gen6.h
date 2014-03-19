@@ -42,6 +42,8 @@
 #define ILO_GPE_VALID_GEN(dev, min_gen, max_gen) \
    assert((dev)->gen >= ILO_GEN(min_gen) && (dev)->gen <= ILO_GEN(max_gen))
 
+#define ILO_GPE_MI(op) (0x0 << 29 | (op) << 23)
+
 #define ILO_GPE_CMD(pipeline, op, subop) \
    (0x3 << 29 | (pipeline) << 27 | (op) << 24 | (subop) << 16)
 
@@ -49,6 +51,10 @@
  * Commands that GEN6 GPE could emit.
  */
 enum ilo_gpe_gen6_command {
+   ILO_GPE_GEN6_MI_STORE_DATA_IMM,                   /* ILO_GPE_MI(0x20) */
+   ILO_GPE_GEN6_MI_LOAD_REGISTER_IMM,                /* ILO_GPE_MI(0x22) */
+   ILO_GPE_GEN6_MI_STORE_REGISTER_MEM,               /* ILO_GPE_MI(0x24) */
+   ILO_GPE_GEN6_MI_REPORT_PERF_COUNT,                /* ILO_GPE_MI(0x28) */
    ILO_GPE_GEN6_STATE_BASE_ADDRESS,                  /* (0x0, 0x1, 0x01) */
    ILO_GPE_GEN6_STATE_SIP,                           /* (0x0, 0x1, 0x02) */
    ILO_GPE_GEN6_3DSTATE_VF_STATISTICS,               /* (0x1, 0x0, 0x0b) */
@@ -334,6 +340,104 @@ ilo_gpe_gen6_fill_3dstate_sf_sbe(const struct ilo_dev_info *dev,
    /* WrapShortest enables */
    dw[11] = 0;
    dw[12] = 0;
+}
+
+static inline void
+gen6_emit_MI_STORE_DATA_IMM(const struct ilo_dev_info *dev,
+                            struct intel_bo *bo, uint32_t bo_offset,
+                            uint64_t val, bool store_qword,
+                            struct ilo_cp *cp)
+{
+   const uint32_t cmd = ILO_GPE_MI(0x20);
+   const uint8_t cmd_len = (store_qword) ? 5 : 4;
+   /* must use GGTT on GEN6 as in PIPE_CONTROL */
+   const uint32_t cmd_flags = (dev->gen == ILO_GEN(6)) ? (1 << 22) : 0;
+   const uint32_t read_domains = INTEL_DOMAIN_INSTRUCTION;
+   const uint32_t write_domain = INTEL_DOMAIN_INSTRUCTION;
+
+   ILO_GPE_VALID_GEN(dev, 6, 7.5);
+
+   assert(bo_offset % ((store_qword) ? 8 : 4) == 0);
+
+   ilo_cp_begin(cp, cmd_len);
+   ilo_cp_write(cp, cmd | cmd_flags | (cmd_len - 2));
+   ilo_cp_write(cp, 0);
+   ilo_cp_write_bo(cp, bo_offset, bo, read_domains, write_domain);
+   ilo_cp_write(cp, (uint32_t) val);
+
+   if (store_qword)
+      ilo_cp_write(cp, (uint32_t) (val >> 32));
+   else
+      assert(val == (uint64_t) ((uint32_t) val));
+
+   ilo_cp_end(cp);
+}
+
+static inline void
+gen6_emit_MI_LOAD_REGISTER_IMM(const struct ilo_dev_info *dev,
+                               uint32_t reg, uint32_t val,
+                               struct ilo_cp *cp)
+{
+   const uint32_t cmd = ILO_GPE_MI(0x22);
+   const uint8_t cmd_len = 3;
+
+   ILO_GPE_VALID_GEN(dev, 6, 7.5);
+
+   assert(reg % 4 == 0);
+
+   ilo_cp_begin(cp, cmd_len);
+   ilo_cp_write(cp, cmd | (cmd_len - 2));
+   ilo_cp_write(cp, reg);
+   ilo_cp_write(cp, val);
+   ilo_cp_end(cp);
+}
+
+static inline void
+gen6_emit_MI_STORE_REGISTER_MEM(const struct ilo_dev_info *dev,
+                                struct intel_bo *bo, uint32_t bo_offset,
+                                uint32_t reg, struct ilo_cp *cp)
+{
+   const uint32_t cmd = ILO_GPE_MI(0x24);
+   const uint8_t cmd_len = 3;
+   /* must use GGTT on GEN6 as in PIPE_CONTROL */
+   const uint32_t cmd_flags = (dev->gen == ILO_GEN(6)) ? (1 << 22) : 0;
+   const uint32_t read_domains = INTEL_DOMAIN_INSTRUCTION;
+   const uint32_t write_domain = INTEL_DOMAIN_INSTRUCTION;
+
+   ILO_GPE_VALID_GEN(dev, 6, 7.5);
+
+   assert(reg % 4 == 0 && bo_offset % 4 == 0);
+
+   ilo_cp_begin(cp, cmd_len);
+   ilo_cp_write(cp, cmd | cmd_flags | (cmd_len - 2));
+   ilo_cp_write(cp, reg);
+   ilo_cp_write_bo(cp, bo_offset, bo, read_domains, write_domain);
+   ilo_cp_end(cp);
+}
+
+static inline void
+gen6_emit_MI_REPORT_PERF_COUNT(const struct ilo_dev_info *dev,
+                               struct intel_bo *bo, uint32_t bo_offset,
+                               uint32_t report_id, struct ilo_cp *cp)
+{
+   const uint32_t cmd = ILO_GPE_MI(0x28);
+   const uint8_t cmd_len = 3;
+   const uint32_t read_domains = INTEL_DOMAIN_INSTRUCTION;
+   const uint32_t write_domain = INTEL_DOMAIN_INSTRUCTION;
+
+   ILO_GPE_VALID_GEN(dev, 6, 7.5);
+
+   assert(bo_offset % 64 == 0);
+
+   /* must use GGTT on GEN6 as in PIPE_CONTROL */
+   if (dev->gen == ILO_GEN(6))
+      bo_offset |= 0x1;
+
+   ilo_cp_begin(cp, cmd_len);
+   ilo_cp_write(cp, cmd | (cmd_len - 2));
+   ilo_cp_write_bo(cp, bo_offset, bo, read_domains, write_domain);
+   ilo_cp_write(cp, report_id);
+   ilo_cp_end(cp);
 }
 
 static inline void
@@ -731,20 +835,7 @@ gen6_emit_3DSTATE_VERTEX_BUFFERS(const struct ilo_dev_info *dev,
       if (cso->buffer && cso->stride <= 2048) {
          const struct ilo_buffer *buf = ilo_buffer(cso->buffer);
          const uint32_t start_offset = cso->buffer_offset;
-         /*
-          * As noted in ilo_translate_format(), we treat some 3-component
-          * formats as 4-component formats to work around hardware
-          * limitations.  Imagine the case where the vertex buffer holds a
-          * single PIPE_FORMAT_R16G16B16_FLOAT vertex, and buf->bo_size is 6.
-          * The hardware would not be able to fetch it because the vertex
-          * buffer is expected to hold a PIPE_FORMAT_R16G16B16A16_FLOAT vertex
-          * and that takes at least 8 bytes.
-          *
-          * For the workaround to work, we query the physical size, which is
-          * page aligned, to calculate end_offset so that the last vertex has
-          * a better chance to be fetched.
-          */
-         const uint32_t end_offset = intel_bo_get_size(buf->bo) - 1;
+         const uint32_t end_offset = buf->bo_size - 1;
 
          dw |= cso->stride << BRW_VB0_PITCH_SHIFT;
 
@@ -1782,6 +1873,8 @@ gen6_emit_PIPE_CONTROL(const struct ilo_dev_info *dev,
 
    ILO_GPE_VALID_GEN(dev, 6, 7.5);
 
+   assert(bo_offset % ((write_qword) ? 8 : 4) == 0);
+
    if (dw1 & PIPE_CONTROL_CS_STALL) {
       /*
        * From the Sandy Bridge PRM, volume 2 part 1, page 73:
@@ -1833,6 +1926,18 @@ gen6_emit_PIPE_CONTROL(const struct ilo_dev_info *dev,
       assert(!(dw1 & (PIPE_CONTROL_WRITE_FLUSH |
                       PIPE_CONTROL_DEPTH_CACHE_FLUSH)));
    }
+
+   /*
+    * From the Sandy Bridge PRM, volume 1 part 3, page 19:
+    *
+    *     "[DevSNB] PPGTT memory writes by MI_* (such as MI_STORE_DATA_IMM)
+    *      and PIPE_CONTROL are not supported."
+    *
+    * The kernel will add the mapping automatically (when write domain is
+    * INTEL_DOMAIN_INSTRUCTION).
+    */
+   if (dev->gen == ILO_GEN(6) && bo)
+      bo_offset |= PIPE_CONTROL_GLOBAL_GTT_WRITE;
 
    ilo_cp_begin(cp, cmd_len);
    ilo_cp_write(cp, cmd | (cmd_len - 2));

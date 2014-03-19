@@ -642,7 +642,8 @@ _mesa_get_teximage(struct gl_context *ctx,
        */
       GLubyte *buf = (GLubyte *)
          ctx->Driver.MapBufferRange(ctx, 0, ctx->Pack.BufferObj->Size,
-				    GL_MAP_WRITE_BIT, ctx->Pack.BufferObj);
+				    GL_MAP_WRITE_BIT, ctx->Pack.BufferObj,
+                                    MAP_INTERNAL);
       if (!buf) {
          /* out of memory or other unexpected error */
          _mesa_error(ctx, GL_OUT_OF_MEMORY, "glGetTexImage(map PBO failed)");
@@ -671,7 +672,7 @@ _mesa_get_teximage(struct gl_context *ctx,
    }
 
    if (_mesa_is_bufferobj(ctx->Pack.BufferObj)) {
-      ctx->Driver.UnmapBuffer(ctx, ctx->Pack.BufferObj);
+      ctx->Driver.UnmapBuffer(ctx, ctx->Pack.BufferObj, MAP_INTERNAL);
    }
 }
 
@@ -696,7 +697,8 @@ _mesa_get_compressed_teximage(struct gl_context *ctx,
       /* pack texture image into a PBO */
       GLubyte *buf = (GLubyte *)
          ctx->Driver.MapBufferRange(ctx, 0, ctx->Pack.BufferObj->Size,
-				    GL_MAP_WRITE_BIT, ctx->Pack.BufferObj);
+				    GL_MAP_WRITE_BIT, ctx->Pack.BufferObj,
+                                    MAP_INTERNAL);
       if (!buf) {
          /* out of memory or other unexpected error */
          _mesa_error(ctx, GL_OUT_OF_MEMORY,
@@ -738,7 +740,7 @@ _mesa_get_compressed_teximage(struct gl_context *ctx,
    }
 
    if (_mesa_is_bufferobj(ctx->Pack.BufferObj)) {
-      ctx->Driver.UnmapBuffer(ctx, ctx->Pack.BufferObj);
+      ctx->Driver.UnmapBuffer(ctx, ctx->Pack.BufferObj, MAP_INTERNAL);
    }
 }
 
@@ -868,7 +870,7 @@ getteximage_error_check(struct gl_context *ctx, GLenum target, GLint level,
 
    if (_mesa_is_bufferobj(ctx->Pack.BufferObj)) {
       /* PBO should not be mapped */
-      if (_mesa_bufferobj_mapped(ctx->Pack.BufferObj)) {
+      if (_mesa_check_disallowed_mapping(ctx->Pack.BufferObj)) {
          _mesa_error(ctx, GL_INVALID_OPERATION,
                      "glGetTexImage(PBO is mapped)");
          return GL_TRUE;
@@ -1011,7 +1013,7 @@ getcompressedteximage_error_check(struct gl_context *ctx, GLenum target,
       }
 
       /* make sure PBO is not mapped */
-      if (_mesa_bufferobj_mapped(ctx->Pack.BufferObj)) {
+      if (_mesa_check_disallowed_mapping(ctx->Pack.BufferObj)) {
          _mesa_error(ctx, GL_INVALID_OPERATION,
                      "glGetCompressedTexImage(PBO is mapped)");
          return GL_TRUE;

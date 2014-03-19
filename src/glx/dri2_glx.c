@@ -37,17 +37,14 @@
 #include <X11/Xlib-xcb.h>
 #include <xcb/xcb.h>
 #include <xcb/dri2.h>
-#include "glapi.h"
 #include "glxclient.h"
 #include <X11/extensions/dri2proto.h>
-#include "xf86dri.h"
 #include <dlfcn.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/mman.h>
 #include <sys/time.h>
-#include "xf86drm.h"
 #include "dri2.h"
 #include "dri_common.h"
 #include "dri2_priv.h"
@@ -142,6 +139,7 @@ dri2_bind_context(struct glx_context *context, struct glx_context *old,
    struct dri2_screen *psc = (struct dri2_screen *) pcp->base.psc;
    struct dri2_drawable *pdraw, *pread;
    __DRIdrawable *dri_draw = NULL, *dri_read = NULL;
+   struct glx_display *dpyPriv = psc->base.display;
    struct dri2_display *pdp;
 
    pdraw = (struct dri2_drawable *) driFetchDrawable(context, draw);
@@ -165,7 +163,7 @@ dri2_bind_context(struct glx_context *context, struct glx_context *old,
    /* If the server doesn't send invalidate events, we may miss a
     * resize before the rendering starts.  Invalidate the buffers now
     * so the driver will recheck before rendering starts. */
-   pdp = (struct dri2_display *) psc->base.display;
+   pdp = (struct dri2_display *) dpyPriv->dri2Display;
    if (!pdp->invalidateAvailable && pdraw) {
       dri2InvalidateBuffers(psc->base.dpy, pdraw->base.xDrawable);
       if (pread != pdraw && pread)
@@ -955,17 +953,19 @@ dri2GetSwapInterval(__GLXDRIdrawable *pdraw)
 }
 
 static const __DRIdri2LoaderExtension dri2LoaderExtension = {
-   {__DRI_DRI2_LOADER, __DRI_DRI2_LOADER_VERSION},
-   dri2GetBuffers,
-   dri2FlushFrontBuffer,
-   dri2GetBuffersWithFormat,
+   .base = { __DRI_DRI2_LOADER, 3 },
+
+   .getBuffers              = dri2GetBuffers,
+   .flushFrontBuffer        = dri2FlushFrontBuffer,
+   .getBuffersWithFormat    = dri2GetBuffersWithFormat,
 };
 
 static const __DRIdri2LoaderExtension dri2LoaderExtension_old = {
-   {__DRI_DRI2_LOADER, __DRI_DRI2_LOADER_VERSION},
-   dri2GetBuffers,
-   dri2FlushFrontBuffer,
-   NULL,
+   .base = { __DRI_DRI2_LOADER, 3 },
+
+   .getBuffers              = dri2GetBuffers,
+   .flushFrontBuffer        = dri2FlushFrontBuffer,
+   .getBuffersWithFormat    = NULL,
 };
 
 static const __DRIuseInvalidateExtension dri2UseInvalidate = {
@@ -1288,6 +1288,7 @@ dri2CreateScreen(int screen, struct glx_display * priv)
    psp->waitForSBC = NULL;
    psp->setSwapInterval = NULL;
    psp->getSwapInterval = NULL;
+   psp->getBufferAge = NULL;
 
    if (pdp->driMinor >= 2) {
       psp->getDrawableMSC = dri2DrawableGetMSC;

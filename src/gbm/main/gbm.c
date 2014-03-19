@@ -43,7 +43,7 @@
 
 #define ARRAY_SIZE(a) (sizeof(a)/sizeof((a)[0]))
 
-struct gbm_device *devices[16];
+static struct gbm_device *devices[16];
 
 static int device_num = 0;
 
@@ -81,7 +81,7 @@ gbm_device_get_backend_name(struct gbm_device *gbm)
  *
  * \sa enum gbm_bo_format for the list of formats
  */
-int
+GBM_EXPORT int
 gbm_device_is_format_supported(struct gbm_device *gbm,
                                uint32_t format, uint32_t usage)
 {
@@ -100,7 +100,7 @@ gbm_device_destroy(struct gbm_device *gbm)
       gbm->destroy(gbm);
 }
 
-GBM_EXPORT struct gbm_device *
+struct gbm_device *
 _gbm_mesa_get_device(int fd)
 {
    struct gbm_device *gbm = NULL;

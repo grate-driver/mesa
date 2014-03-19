@@ -106,6 +106,7 @@ static int r300_get_param(struct pipe_screen* pscreen, enum pipe_cap param)
         case PIPE_CAP_USER_INDEX_BUFFERS:
         case PIPE_CAP_USER_CONSTANT_BUFFERS:
         case PIPE_CAP_PREFER_BLIT_BASED_TEXTURE_TRANSFER:
+        case PIPE_CAP_BUFFER_MAP_PERSISTENT_COHERENT:
             return 1;
 
         case PIPE_CAP_MIN_MAP_BUFFER_ALIGNMENT:
@@ -166,6 +167,8 @@ static int r300_get_param(struct pipe_screen* pscreen, enum pipe_cap param)
         case PIPE_CAP_TEXTURE_BORDER_COLOR_QUIRK:
         case PIPE_CAP_MAX_TEXTURE_BUFFER_SIZE:
         case PIPE_CAP_TGSI_VS_LAYER:
+        case PIPE_CAP_MAX_TEXTURE_GATHER_COMPONENTS:
+        case PIPE_CAP_TEXTURE_GATHER_SM5:
             return 0;
 
         /* SWTCL-only features. */
@@ -182,8 +185,6 @@ static int r300_get_param(struct pipe_screen* pscreen, enum pipe_cap param)
             return 0;
 
         /* Texturing. */
-        case PIPE_CAP_MAX_COMBINED_SAMPLERS:
-            return r300screen->caps.num_tex_units;
         case PIPE_CAP_MAX_TEXTURE_2D_LEVELS:
         case PIPE_CAP_MAX_TEXTURE_3D_LEVELS:
         case PIPE_CAP_MAX_TEXTURE_CUBE_LEVELS:

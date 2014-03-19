@@ -1905,6 +1905,7 @@ static void si_llvm_emit_vertex(
 	LLVMValueRef soffset = LLVMGetParam(si_shader_ctx->radeon_bld.main_fn,
 					    SI_PARAM_GS2VS_OFFSET);
 	LLVMValueRef gs_next_vertex;
+	LLVMValueRef can_emit, kill;
 	LLVMValueRef t_list_ptr;
 	LLVMValueRef t_list;
 	LLVMValueRef args[2];
@@ -1934,6 +1935,21 @@ static void si_llvm_emit_vertex(
 
 	/* Write vertex attribute values to GSVS ring */
 	gs_next_vertex = LLVMBuildLoad(gallivm->builder, si_shader_ctx->gs_next_vertex, "");
+
+	/* If this thread has already emitted the declared maximum number of
+	 * vertices, kill it: excessive vertex emissions are not supposed to
+	 * have any effect, and GS threads have no externally observable
+	 * effects other than emitting vertices.
+	 */
+	can_emit = LLVMBuildICmp(gallivm->builder, LLVMIntULE, gs_next_vertex,
+				 lp_build_const_int32(gallivm,
+						      shader->gs_max_out_vertices), "");
+	kill = lp_build_select(&bld_base->base, can_emit,
+			       lp_build_const_float(gallivm, 1.0f),
+			       lp_build_const_float(gallivm, -1.0f));
+	build_intrinsic(gallivm->builder, "llvm.AMDGPU.kill",
+			LLVMVoidTypeInContext(gallivm->context), &kill, 1, 0);
+
 	for (i = 0; i < shader->noutput; i++) {
 		LLVMValueRef *out_ptr =
 			si_shader_ctx->radeon_bld.soa.outputs[shader->output[i].index];
@@ -2279,7 +2295,7 @@ int si_compile_llvm(struct si_context *sctx, struct si_pipe_shader *shader,
 {
 	unsigned i;
 	uint32_t *ptr;
-	struct radeon_llvm_binary binary;
+	struct radeon_shader_binary binary;
 	bool dump = r600_can_dump_shader(&sctx->screen->b,
 			shader->selector ? shader->selector->tokens : NULL);
 	memset(&binary, 0, sizeof(binary));
@@ -2333,9 +2349,9 @@ int si_compile_llvm(struct si_context *sctx, struct si_pipe_shader *shader,
 	}
 
 	ptr = (uint32_t*)sctx->b.ws->buffer_map(shader->bo->cs_buf, sctx->b.rings.gfx.cs, PIPE_TRANSFER_WRITE);
-	if (0 /*SI_BIG_ENDIAN*/) {
+	if (SI_BIG_ENDIAN) {
 		for (i = 0; i < binary.code_size / 4; ++i) {
-			ptr[i] = util_bswap32(*(uint32_t*)(binary.code + i*4));
+			ptr[i] = util_cpu_to_le32((*(uint32_t*)(binary.code + i*4)));
 		}
 	} else {
 		memcpy(ptr, binary.code, binary.code_size);

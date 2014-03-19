@@ -229,9 +229,9 @@ brw_get_vertex_surface_type(struct brw_context *brw,
    int size = glarray->Size;
 
    if (unlikely(INTEL_DEBUG & DEBUG_VERTS))
-      printf("type %s size %d normalized %d\n",
-             _mesa_lookup_enum_by_nr(glarray->Type),
-             glarray->Size, glarray->Normalized);
+      fprintf(stderr, "type %s size %d normalized %d\n",
+              _mesa_lookup_enum_by_nr(glarray->Type),
+              glarray->Size, glarray->Normalized);
 
    if (glarray->Integer) {
       assert(glarray->Format == GL_RGBA); /* sanity check */
@@ -428,7 +428,7 @@ brw_prepare_vertices(struct brw_context *brw)
    }
 
    if (0)
-      printf("%s %d..%d\n", __FUNCTION__, min_index, max_index);
+      fprintf(stderr, "%s %d..%d\n", __FUNCTION__, min_index, max_index);
 
    /* Accumulate the list of enabled arrays. */
    brw->vb.nr_enabled = 0;
@@ -717,12 +717,6 @@ static void brw_emit_vertices(struct brw_context *brw)
       uint32_t comp2 = BRW_VE1_COMPONENT_STORE_SRC;
       uint32_t comp3 = BRW_VE1_COMPONENT_STORE_SRC;
 
-      /* The gen4 driver expects edgeflag to come in as a float, and passes
-       * that float on to the tests in the clipper.  Mesa's current vertex
-       * attribute value for EdgeFlag is stored as a float, which works out.
-       * glEdgeFlagPointer, on the other hand, gives us an unnormalized
-       * integer ubyte.  Just rewrite that to convert to a float.
-       */
       if (input->attrib == VERT_ATTRIB_EDGEFLAG) {
          /* Gen6+ passes edgeflag as sideband along with the vertex, instead
           * of in the VUE.  We have to upload it sideband as the last vertex
@@ -732,9 +726,6 @@ static void brw_emit_vertices(struct brw_context *brw)
             gen6_edgeflag_input = input;
             continue;
          }
-
-         if (format == BRW_SURFACEFORMAT_R8_UINT)
-            format = BRW_SURFACEFORMAT_R8_SSCALED;
       }
 
       switch (input->glarray->Size) {
@@ -841,44 +832,42 @@ static void brw_upload_indices(struct brw_context *brw)
    /* Turn into a proper VBO:
     */
    if (!_mesa_is_bufferobj(bufferobj)) {
-
       /* Get new bufferobj, offset:
        */
       intel_upload_data(brw, index_buffer->ptr, ib_size, ib_type_size,
 			&bo, &offset);
-      brw->ib.start_vertex_offset = offset / ib_type_size;
    } else {
       offset = (GLuint) (unsigned long) index_buffer->ptr;
 
       /* If the index buffer isn't aligned to its element size, we have to
        * rebase it into a temporary.
        */
-       if ((ib_type_size - 1) & offset) {
-          perf_debug("copying index buffer to a temporary to work around "
-                     "misaligned offset %d\n", offset);
+      if ((ib_type_size - 1) & offset) {
+         perf_debug("copying index buffer to a temporary to work around "
+                    "misaligned offset %d\n", offset);
 
-          GLubyte *map = ctx->Driver.MapBufferRange(ctx,
-                                                    offset,
-                                                    ib_size,
-                                                    GL_MAP_READ_BIT,
-                                                    bufferobj);
+         GLubyte *map = ctx->Driver.MapBufferRange(ctx,
+                                                   offset,
+                                                   ib_size,
+                                                   GL_MAP_READ_BIT,
+                                                   bufferobj,
+                                                   MAP_INTERNAL);
 
-          intel_upload_data(brw, map, ib_size, ib_type_size, &bo, &offset);
-          brw->ib.start_vertex_offset = offset / ib_type_size;
+         intel_upload_data(brw, map, ib_size, ib_type_size, &bo, &offset);
 
-          ctx->Driver.UnmapBuffer(ctx, bufferobj);
-       } else {
-	  /* Use CMD_3D_PRIM's start_vertex_offset to avoid re-uploading
-	   * the index buffer state when we're just moving the start index
-	   * of our drawing.
-	   */
-	  brw->ib.start_vertex_offset = offset / ib_type_size;
-
-	  bo = intel_bufferobj_buffer(brw, intel_buffer_object(bufferobj),
-				      offset, ib_size);
-	  drm_intel_bo_reference(bo);
-       }
+         ctx->Driver.UnmapBuffer(ctx, bufferobj, MAP_INTERNAL);
+      } else {
+         bo = intel_bufferobj_buffer(brw, intel_buffer_object(bufferobj),
+                                     offset, ib_size);
+         drm_intel_bo_reference(bo);
+      }
    }
+
+   /* Use 3DPRIMITIVE's start_vertex_offset to avoid re-uploading
+    * the index buffer state when we're just moving the start index
+    * of our drawing.
+    */
+   brw->ib.start_vertex_offset = offset / ib_type_size;
 
    if (brw->ib.bo != bo) {
       drm_intel_bo_unreference(brw->ib.bo);

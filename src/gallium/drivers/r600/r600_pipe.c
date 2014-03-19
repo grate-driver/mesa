@@ -38,6 +38,7 @@
 #include "util/u_math.h"
 #include "vl/vl_decoder.h"
 #include "vl/vl_video_buffer.h"
+#include "radeon/radeon_video.h"
 #include "radeon/radeon_uvd.h"
 #include "os/os_time.h"
 
@@ -47,7 +48,6 @@ static const struct debug_named_value r600_debug_options[] = {
 	{ "nollvm", DBG_NO_LLVM, "Disable the LLVM shader compiler" },
 #endif
 	{ "nocpdma", DBG_NO_CP_DMA, "Disable CP DMA" },
-	{ "nodma", DBG_NO_ASYNC_DMA, "Disable asynchronous DMA" },
 
 	/* shader backend */
 	{ "nosb", DBG_NO_SB, "Disable sb backend for graphics shaders" },
@@ -120,32 +120,11 @@ static void r600_flush_gfx_ring(void *ctx, unsigned flags)
 	r600_flush((struct pipe_context*)ctx, flags);
 }
 
-static void r600_flush_dma_ring(void *ctx, unsigned flags)
-{
-	struct r600_context *rctx = (struct r600_context *)ctx;
-	struct radeon_winsys_cs *cs = rctx->b.rings.dma.cs;
-
-	if (!cs->cdw) {
-		return;
-	}
-
-	rctx->b.rings.dma.flushing = true;
-	rctx->b.ws->cs_flush(cs, flags, 0);
-	rctx->b.rings.dma.flushing = false;
-}
-
 static void r600_flush_from_winsys(void *ctx, unsigned flags)
 {
 	struct r600_context *rctx = (struct r600_context *)ctx;
 
 	rctx->b.rings.gfx.flush(rctx, flags);
-}
-
-static void r600_flush_dma_from_winsys(void *ctx, unsigned flags)
-{
-	struct r600_context *rctx = (struct r600_context *)ctx;
-
-	rctx->b.rings.dma.flush(rctx, flags);
 }
 
 static void r600_destroy_context(struct pipe_context *context)
@@ -268,16 +247,8 @@ static struct pipe_context *r600_create_context(struct pipe_screen *screen, void
 	rctx->b.ws->cs_set_flush_callback(rctx->b.rings.gfx.cs, r600_flush_from_winsys, rctx);
 	rctx->b.rings.gfx.flushing = false;
 
-	rctx->b.rings.dma.cs = NULL;
-	if (rscreen->b.info.r600_has_dma && !(rscreen->b.debug_flags & DBG_NO_ASYNC_DMA)) {
-		rctx->b.rings.dma.cs = rctx->b.ws->cs_create(rctx->b.ws, RING_DMA, NULL);
-		rctx->b.rings.dma.flush = r600_flush_dma_ring;
-		rctx->b.ws->cs_set_flush_callback(rctx->b.rings.dma.cs, r600_flush_dma_from_winsys, rctx);
-		rctx->b.rings.dma.flushing = false;
-	}
-
 	rctx->allocator_fetch_shader = u_suballocator_create(&rctx->b.b, 64 * 1024, 256,
-							     0, PIPE_USAGE_STATIC, FALSE);
+							     0, PIPE_USAGE_DEFAULT, FALSE);
 	if (!rctx->allocator_fetch_shader)
 		goto fail;
 
@@ -353,6 +324,7 @@ static int r600_get_param(struct pipe_screen* pscreen, enum pipe_cap param)
         case PIPE_CAP_PREFER_BLIT_BASED_TEXTURE_TRANSFER:
 	case PIPE_CAP_QUERY_PIPELINE_STATISTICS:
 	case PIPE_CAP_TEXTURE_MULTISAMPLE:
+        case PIPE_CAP_BUFFER_MAP_PERSISTENT_COHERENT:
 		return 1;
 
 	case PIPE_CAP_COMPUTE:
@@ -400,6 +372,8 @@ static int r600_get_param(struct pipe_screen* pscreen, enum pipe_cap param)
 	case PIPE_CAP_FRAGMENT_COLOR_CLAMPED:
 	case PIPE_CAP_VERTEX_COLOR_CLAMPED:
 	case PIPE_CAP_USER_VERTEX_BUFFERS:
+	case PIPE_CAP_MAX_TEXTURE_GATHER_COMPONENTS:
+	case PIPE_CAP_TEXTURE_GATHER_SM5:
 		return 0;
 
 	/* Stream output. */
@@ -419,17 +393,17 @@ static int r600_get_param(struct pipe_screen* pscreen, enum pipe_cap param)
 
 	/* Texturing. */
 	case PIPE_CAP_MAX_TEXTURE_2D_LEVELS:
-	case PIPE_CAP_MAX_TEXTURE_3D_LEVELS:
 	case PIPE_CAP_MAX_TEXTURE_CUBE_LEVELS:
 		if (family >= CHIP_CEDAR)
 			return 15;
 		else
 			return 14;
+	case PIPE_CAP_MAX_TEXTURE_3D_LEVELS:
+		/* textures support 8192, but layered rendering supports 2048 */
+		return 12;
 	case PIPE_CAP_MAX_TEXTURE_ARRAY_LAYERS:
-		return rscreen->b.info.drm_minor >= 9 ?
-			(family >= CHIP_CEDAR ? 16384 : 8192) : 0;
-	case PIPE_CAP_MAX_COMBINED_SAMPLERS:
-		return 48;
+		/* textures support 8192, but layered rendering supports 2048 */
+		return rscreen->b.info.drm_minor >= 9 ? 2048 : 0;
 
 	/* Render targets. */
 	case PIPE_CAP_MAX_RENDER_TARGETS:
@@ -437,7 +411,7 @@ static int r600_get_param(struct pipe_screen* pscreen, enum pipe_cap param)
 		return 8;
 
 	case PIPE_CAP_MAX_VIEWPORTS:
-		return 1;
+		return 16;
 
 	/* Timer queries, present when the clock frequency is non zero. */
 	case PIPE_CAP_QUERY_TIME_ELAPSED:
@@ -656,7 +630,7 @@ struct pipe_screen *r600_screen_create(struct radeon_winsys *ws)
 	templ.array_size = 1;
 	templ.target = PIPE_TEXTURE_2D;
 	templ.format = PIPE_FORMAT_R8G8B8A8_UNORM;
-	templ.usage = PIPE_USAGE_STATIC;
+	templ.usage = PIPE_USAGE_DEFAULT;
 
 	struct r600_resource *res = r600_resource(rscreen->screen.resource_create(&rscreen->screen, &templ));
 	unsigned char *map = ws->buffer_map(res->cs_buf, NULL, PIPE_TRANSFER_WRITE);

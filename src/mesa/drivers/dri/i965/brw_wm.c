@@ -122,26 +122,17 @@ brw_wm_prog_data_compare(const void *in_a, const void *in_b)
    const struct brw_wm_prog_data *a = in_a;
    const struct brw_wm_prog_data *b = in_b;
 
-   /* Compare all the struct (including the base) up to the pointers. */
-   if (memcmp(a, b, offsetof(struct brw_wm_prog_data, param)))
+   /* Compare the base structure. */
+   if (!brw_stage_prog_data_compare(&a->base, &b->base))
       return false;
 
-   if (memcmp(a->param, b->param, a->nr_params * sizeof(void *)))
-      return false;
-
-   if (memcmp(a->pull_param, b->pull_param, a->nr_pull_params * sizeof(void *)))
+   /* Compare the rest of the structure. */
+   const unsigned offset = sizeof(struct brw_stage_prog_data);
+   if (memcmp(((char *) a) + offset, ((char *) b) + offset,
+              sizeof(struct brw_wm_prog_data) - offset))
       return false;
 
    return true;
-}
-
-void
-brw_wm_prog_data_free(const void *in_prog_data)
-{
-   const struct brw_wm_prog_data *prog_data = in_prog_data;
-
-   ralloc_free((void *)prog_data->param);
-   ralloc_free((void *)prog_data->pull_param);
 }
 
 /**
@@ -177,8 +168,10 @@ bool do_wm_prog(struct brw_context *brw,
    }
    /* The backend also sometimes adds params for texture size. */
    param_count += 2 * ctx->Const.Program[MESA_SHADER_FRAGMENT].MaxTextureImageUnits;
-   c->prog_data.param = rzalloc_array(NULL, const float *, param_count);
-   c->prog_data.pull_param = rzalloc_array(NULL, const float *, param_count);
+   c->prog_data.base.param = rzalloc_array(NULL, const float *, param_count);
+   c->prog_data.base.pull_param =
+      rzalloc_array(NULL, const float *, param_count);
+   c->prog_data.base.nr_params = param_count;
 
    memcpy(&c->key, key, sizeof(*key));
 
@@ -317,6 +310,20 @@ brw_wm_debug_recompile(struct brw_context *brw,
    }
 }
 
+static uint8_t
+gen6_gather_workaround(GLenum internalformat)
+{
+   switch (internalformat) {
+      case GL_R8I: return WA_SIGN | WA_8BIT;
+      case GL_R8UI: return WA_8BIT;
+      case GL_R16I: return WA_SIGN | WA_16BIT;
+      case GL_R16UI: return WA_16BIT;
+      /* note that even though GL_R32I and GL_R32UI have format overrides
+       * in the surface state, there is no shader w/a required */
+      default: return 0;
+   }
+}
+
 void
 brw_populate_sampler_prog_key_data(struct gl_context *ctx,
 				   const struct gl_program *prog,
@@ -370,6 +377,13 @@ brw_populate_sampler_prog_key_data(struct gl_context *ctx,
          if (brw->gen == 7 && !brw->is_haswell && prog->UsesGather) {
             if (img->InternalFormat == GL_RG32F)
                key->gather_channel_quirk_mask |= 1 << s;
+         }
+
+         /* Gen6's gather4 is broken for UINT/SINT; we treat them as
+          * UNORM/FLOAT instead and fix it in the shader.
+          */
+         if (brw->gen == 6 && prog->UsesGather) {
+            key->gen6_gather_wa[s] = gen6_gather_workaround(img->InternalFormat);
          }
 
          /* If this is a multisample sampler, and uses the CMS MSAA layout,

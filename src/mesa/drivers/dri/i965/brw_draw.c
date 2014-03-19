@@ -48,6 +48,7 @@
 #include "brw_state.h"
 
 #include "intel_batchbuffer.h"
+#include "intel_buffers.h"
 #include "intel_fbo.h"
 #include "intel_mipmap_tree.h"
 #include "intel_regions.h"
@@ -217,42 +218,33 @@ static void brw_emit_prim(struct brw_context *brw,
 
       indirect_flag = GEN7_3DPRIM_INDIRECT_PARAMETER_ENABLE;
 
-      BEGIN_BATCH(15);
+      brw_load_register_mem(brw, GEN7_3DPRIM_VERTEX_COUNT, bo,
+                            I915_GEM_DOMAIN_VERTEX, 0,
+                            prim->indirect_offset + 0);
+      brw_load_register_mem(brw, GEN7_3DPRIM_INSTANCE_COUNT, bo,
+                            I915_GEM_DOMAIN_VERTEX, 0,
+                            prim->indirect_offset + 4);
 
-      OUT_BATCH(GEN7_MI_LOAD_REGISTER_MEM | (3 - 2));
-      OUT_BATCH(GEN7_3DPRIM_VERTEX_COUNT);
-      OUT_RELOC(bo, I915_GEM_DOMAIN_VERTEX, 0,
-            prim->indirect_offset + 0);
-      OUT_BATCH(GEN7_MI_LOAD_REGISTER_MEM | (3 - 2));
-      OUT_BATCH(GEN7_3DPRIM_INSTANCE_COUNT);
-      OUT_RELOC(bo, I915_GEM_DOMAIN_VERTEX, 0,
-            prim->indirect_offset + 4);
-      OUT_BATCH(GEN7_MI_LOAD_REGISTER_MEM | (3 - 2));
-      OUT_BATCH(GEN7_3DPRIM_START_VERTEX);
-      OUT_RELOC(bo, I915_GEM_DOMAIN_VERTEX, 0,
-            prim->indirect_offset + 8);
-
+      brw_load_register_mem(brw, GEN7_3DPRIM_START_VERTEX, bo,
+                            I915_GEM_DOMAIN_VERTEX, 0,
+                            prim->indirect_offset + 8);
       if (prim->indexed) {
-         OUT_BATCH(GEN7_MI_LOAD_REGISTER_MEM | (3 - 2));
-         OUT_BATCH(GEN7_3DPRIM_BASE_VERTEX);
-         OUT_RELOC(bo, I915_GEM_DOMAIN_VERTEX, 0,
-               prim->indirect_offset + 12);
-         OUT_BATCH(GEN7_MI_LOAD_REGISTER_MEM | (3 - 2));
-         OUT_BATCH(GEN7_3DPRIM_START_INSTANCE);
-         OUT_RELOC(bo, I915_GEM_DOMAIN_VERTEX, 0,
-               prim->indirect_offset + 16);
-      }
-      else {
-         OUT_BATCH(GEN7_MI_LOAD_REGISTER_MEM | (3 - 2));
-         OUT_BATCH(GEN7_3DPRIM_START_INSTANCE);
-         OUT_RELOC(bo, I915_GEM_DOMAIN_VERTEX, 0,
-               prim->indirect_offset + 12);
+         brw_load_register_mem(brw, GEN7_3DPRIM_BASE_VERTEX, bo,
+                               I915_GEM_DOMAIN_VERTEX, 0,
+                               prim->indirect_offset + 12);
+         brw_load_register_mem(brw, GEN7_3DPRIM_START_INSTANCE, bo,
+                               I915_GEM_DOMAIN_VERTEX, 0,
+                               prim->indirect_offset + 16);
+      } else {
+         brw_load_register_mem(brw, GEN7_3DPRIM_START_INSTANCE, bo,
+                               I915_GEM_DOMAIN_VERTEX, 0,
+                               prim->indirect_offset + 12);
+         BEGIN_BATCH(3);
          OUT_BATCH(MI_LOAD_REGISTER_IMM | (3 - 2));
          OUT_BATCH(GEN7_3DPRIM_BASE_VERTEX);
          OUT_BATCH(0);
+         ADVANCE_BATCH();
       }
-
-      ADVANCE_BATCH();
    }
    else {
       indirect_flag = 0;
@@ -306,8 +298,8 @@ static void brw_merge_inputs( struct brw_context *brw,
 /*
  * \brief Resolve buffers before drawing.
  *
- * Resolve the depth buffer's HiZ buffer and resolve the depth buffer of each
- * enabled depth texture.
+ * Resolve the depth buffer's HiZ buffer, resolve the depth buffer of each
+ * enabled depth texture, and flush the render cache for any dirty textures.
  *
  * (In the future, this will also perform MSAA resolves).
  */
@@ -323,9 +315,7 @@ brw_predraw_resolve_buffers(struct brw_context *brw)
    if (depth_irb)
       intel_renderbuffer_resolve_hiz(brw, depth_irb);
 
-   /* Resolve depth buffer of each enabled depth texture, and color buffer of
-    * each fast-clear-enabled color texture.
-    */
+   /* Resolve depth buffer and render cache of each enabled texture. */
    for (int i = 0; i < ctx->Const.MaxCombinedTextureImageUnits; i++) {
       if (!ctx->Texture.Unit[i]._ReallyEnabled)
 	 continue;
@@ -334,6 +324,7 @@ brw_predraw_resolve_buffers(struct brw_context *brw)
 	 continue;
       intel_miptree_all_slices_resolve_depth(brw, tex_obj->mt);
       intel_miptree_resolve_color(brw, tex_obj->mt);
+      brw_render_cache_set_check_flush(brw, tex_obj->mt->region->bo);
    }
 }
 
@@ -345,6 +336,9 @@ brw_predraw_resolve_buffers(struct brw_context *brw)
  *
  * If the color buffer is a multisample window system buffer, then
  * mark that it needs a downsample.
+ *
+ * Also mark any render targets which will be textured as needing a render
+ * cache flush.
  */
 static void brw_postdraw_set_buffers_need_resolve(struct brw_context *brw)
 {
@@ -354,17 +348,33 @@ static void brw_postdraw_set_buffers_need_resolve(struct brw_context *brw)
    struct intel_renderbuffer *front_irb = NULL;
    struct intel_renderbuffer *back_irb = intel_get_renderbuffer(fb, BUFFER_BACK_LEFT);
    struct intel_renderbuffer *depth_irb = intel_get_renderbuffer(fb, BUFFER_DEPTH);
+   struct intel_renderbuffer *stencil_irb = intel_get_renderbuffer(fb, BUFFER_STENCIL);
    struct gl_renderbuffer_attachment *depth_att = &fb->Attachment[BUFFER_DEPTH];
 
-   if (brw->is_front_buffer_rendering)
+   if (brw_is_front_buffer_drawing(fb))
       front_irb = intel_get_renderbuffer(fb, BUFFER_FRONT_LEFT);
 
    if (front_irb)
-      intel_renderbuffer_set_needs_downsample(front_irb);
+      front_irb->need_downsample = true;
    if (back_irb)
-      intel_renderbuffer_set_needs_downsample(back_irb);
-   if (depth_irb && ctx->Depth.Mask)
+      back_irb->need_downsample = true;
+   if (depth_irb && ctx->Depth.Mask) {
       intel_renderbuffer_att_set_needs_depth_resolve(depth_att);
+      brw_render_cache_set_add_bo(brw, depth_irb->mt->region->bo);
+   }
+
+   if (ctx->Extensions.ARB_stencil_texturing &&
+       stencil_irb && ctx->Stencil._WriteEnabled) {
+      brw_render_cache_set_add_bo(brw, stencil_irb->mt->region->bo);
+   }
+
+   for (int i = 0; i < fb->_NumColorDrawBuffers; i++) {
+      struct intel_renderbuffer *irb =
+         intel_renderbuffer(fb->_ColorDrawBuffers[i]);
+
+      if (irb)
+         brw_render_cache_set_add_bo(brw, irb->mt->region->bo);
+   }
 }
 
 /* May fail if out of video memory for texture or vbo upload, or on

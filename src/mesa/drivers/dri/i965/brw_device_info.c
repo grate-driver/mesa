@@ -201,7 +201,7 @@ static const struct brw_device_info brw_device_info_hsw_gt3 = {
    .has_pln = true,                                 \
    .max_vs_threads = 280,                           \
    .max_gs_threads = 256,                           \
-   .max_wm_threads = 64,  /* threads per PSD */     \
+   .max_wm_threads = 408,                           \
    .urb = {                                         \
       .size = 128,                                  \
       .min_vs_entries = 64,                         \
@@ -229,7 +229,7 @@ brw_get_device_info(int devid)
 #define CHIPSET(id, family, name) case id: return &brw_device_info_##family;
 #include "pci_ids/i965_pci_ids.h"
    default:
-      fprintf(stderr, "Unknown Intel device.");
-      abort();
+      fprintf(stderr, "i965_dri.so does not support the 0x%x PCI ID.\n", devid);
+      return NULL;
    }
 }

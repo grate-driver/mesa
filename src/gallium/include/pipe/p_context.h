@@ -260,7 +260,7 @@ struct pipe_context {
    void (*set_stream_output_targets)(struct pipe_context *,
                               unsigned num_targets,
                               struct pipe_stream_output_target **targets,
-                              unsigned append_bitmask);
+                              const unsigned *offsets);
 
    /*@}*/
 
@@ -406,7 +406,12 @@ struct pipe_context {
     * Flush any pending framebuffer writes and invalidate texture caches.
     */
    void (*texture_barrier)(struct pipe_context *);
-   
+
+   /**
+    * Flush caches according to flags.
+    */
+   void (*memory_barrier)(struct pipe_context *, unsigned flags);
+
    /**
     * Creates a video codec for a specific video format/profile
     */
@@ -460,11 +465,14 @@ struct pipe_context {
     *                   unless it's NULL, in which case no new
     *                   resources will be bound.
     * \param handles    array of pointers to the memory locations that
-    *                   will be filled with the respective base
-    *                   addresses each buffer will be mapped to.  It
-    *                   should contain at least \a count elements,
-    *                   unless \a resources is NULL in which case \a
-    *                   handles should be NULL as well.
+    *                   will be updated with the address each buffer
+    *                   will be mapped to.  The base memory address of
+    *                   each of the buffers will be added to the value
+    *                   pointed to by its corresponding handle to form
+    *                   the final address argument.  It should contain
+    *                   at least \a count elements, unless \a
+    *                   resources is NULL in which case \a handles
+    *                   should be NULL as well.
     *
     * Note that the driver isn't required to make any guarantees about
     * the contents of the \a handles array being valid anytime except

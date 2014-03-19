@@ -165,7 +165,7 @@ brw_link_shader(struct gl_context *ctx, struct gl_shader_program *shProg)
       do_vec_index_to_cond_assign(shader->base.ir);
       lower_vector_insert(shader->base.ir, true);
       brw_do_cubemap_normalize(shader->base.ir);
-      brw_do_lower_offset_arrays(shader->base.ir);
+      lower_offset_arrays(shader->base.ir);
       brw_do_lower_unnormalized_offset(shader->base.ir);
       lower_noise(shader->base.ir);
       lower_quadop_vector(shader->base.ir, false);
@@ -249,12 +249,12 @@ brw_link_shader(struct gl_context *ctx, struct gl_shader_program *shProg)
       _mesa_reference_program(ctx, &prog, NULL);
 
       if (ctx->Shader.Flags & GLSL_DUMP) {
-         printf("\n");
-         printf("GLSL IR for linked %s program %d:\n",
-                _mesa_shader_stage_to_string(shader->base.Stage),
-                shProg->Name);
-         _mesa_print_ir(shader->base.ir, NULL);
-         printf("\n");
+         fprintf(stderr, "\n");
+         fprintf(stderr, "GLSL IR for linked %s program %d:\n",
+                 _mesa_shader_stage_to_string(shader->base.Stage),
+                 shProg->Name);
+         _mesa_print_ir(stderr, shader->base.ir, NULL);
+         fprintf(stderr, "\n");
       }
    }
 
@@ -264,12 +264,11 @@ brw_link_shader(struct gl_context *ctx, struct gl_shader_program *shProg)
          if (!sh)
             continue;
 
-         printf("GLSL %s shader %d source for linked program %d:\n",
-                _mesa_shader_stage_to_string(sh->Stage),
-                i,
-                shProg->Name);
-         printf("%s", sh->Source);
-         printf("\n");
+         fprintf(stderr, "GLSL %s shader %d source for linked program %d:\n",
+                 _mesa_shader_stage_to_string(sh->Stage),
+                 i, shProg->Name);
+         fprintf(stderr, "%s", sh->Source);
+         fprintf(stderr, "\n");
       }
    }
 
@@ -300,6 +299,8 @@ brw_type_for_base_type(const struct glsl_type *type)
        * dereferenced into.  BRW_REGISTER_TYPE_UD seems like a likely
        * way to trip up if we don't.
        */
+      return BRW_REGISTER_TYPE_UD;
+   case GLSL_TYPE_IMAGE:
       return BRW_REGISTER_TYPE_UD;
    case GLSL_TYPE_VOID:
    case GLSL_TYPE_ERROR:
@@ -523,6 +524,8 @@ brw_instruction_name(enum opcode op)
       return "prepare_channel_masks";
    case GS_OPCODE_SET_CHANNEL_MASKS:
       return "set_channel_masks";
+   case GS_OPCODE_GET_INSTANCE_ID:
+      return "get_instance_id";
 
    default:
       /* Yes, this leaks.  It's in debug code, it should never occur, and if
@@ -531,6 +534,21 @@ brw_instruction_name(enum opcode op)
       asprintf(&fallback, "op%d", op);
       return fallback;
    }
+}
+
+backend_visitor::backend_visitor(struct brw_context *brw,
+                                 struct gl_shader_program *shader_prog,
+                                 struct gl_program *prog,
+                                 struct brw_stage_prog_data *stage_prog_data,
+                                 gl_shader_stage stage)
+   : brw(brw),
+     ctx(&brw->ctx),
+     shader(shader_prog ?
+        (struct brw_shader *)shader_prog->_LinkedShaders[stage] : NULL),
+     shader_prog(shader_prog),
+     prog(prog),
+     stage_prog_data(stage_prog_data)
+{
 }
 
 bool
@@ -662,7 +680,7 @@ backend_visitor::dump_instructions()
    int ip = 0;
    foreach_list(node, &this->instructions) {
       backend_instruction *inst = (backend_instruction *)node;
-      printf("%d: ", ip++);
+      fprintf(stderr, "%d: ", ip++);
       dump_instruction(inst);
    }
 }
@@ -718,5 +736,5 @@ backend_visitor::assign_common_binding_table_offsets(uint32_t next_binding_table
 
    assert(next_binding_table_offset <= BRW_MAX_SURFACES);
 
-   /* prog_data->base.binding_table.size will be set by mark_surface_used. */
+   /* prog_data->base.binding_table.size will be set by brw_mark_surface_used. */
 }

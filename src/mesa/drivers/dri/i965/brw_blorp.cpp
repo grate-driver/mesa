@@ -68,8 +68,8 @@ brw_blorp_mip_info::set(struct intel_mipmap_tree *mt,
    this->mt = mt;
    this->level = level;
    this->layer = layer;
-   this->width = mt->level[level].width;
-   this->height = mt->level[level].height;
+   this->width = minify(mt->physical_width0, level - mt->first_level);
+   this->height = minify(mt->physical_height0, level - mt->first_level);
 
    intel_miptree_get_image_offset(mt, level, layer, &x_offset, &y_offset);
 }
@@ -195,8 +195,12 @@ intel_hiz_exec(struct brw_context *brw, struct intel_mipmap_tree *mt,
    DBG("%s %s to mt %p level %d layer %d\n",
        __FUNCTION__, opname, mt, level, layer);
 
-   brw_hiz_op_params params(mt, level, layer, op);
-   brw_blorp_exec(brw, &params);
+   if (brw->gen >= 8) {
+      gen8_hiz_exec(brw, mt, level, layer, op);
+   } else {
+      brw_hiz_op_params params(mt, level, layer, op);
+      brw_blorp_exec(brw, &params);
+   }
 }
 
 } /* extern "C" */
@@ -275,7 +279,6 @@ retry:
    brw->state.dirty.brw = ~0;
    brw->state.dirty.cache = ~0;
    brw->ib.type = -1;
-   intel_batchbuffer_clear_cache(brw);
 
    /* Flush the sampler cache so any texturing from the destination is
     * coherent.

@@ -37,6 +37,7 @@
 #include "main/fbobject.h"
 #include "main/version.h"
 #include "swrast/s_renderbuffer.h"
+#include "glsl/ralloc.h"
 
 #include "utils.h"
 #include "xmlpool.h"
@@ -104,10 +105,6 @@ DRI_CONF_END
 #include "brw_context.h"
 
 #include "i915_drm.h"
-
-#ifdef USE_NEW_INTERFACE
-static PFNGLXCREATECONTEXTMODES create_context_modes = NULL;
-#endif /*USE_NEW_INTERFACE */
 
 /**
  * For debugging purposes, this returns a time in seconds.
@@ -333,8 +330,8 @@ intel_setup_image_from_mipmap_tree(struct brw_context *brw, __DRIimage *image,
    intel_region_get_tile_masks(mt->region, &mask_x, &mask_y, false);
    intel_miptree_get_image_offset(mt, level, zoffset, &draw_x, &draw_y);
 
-   image->width = mt->level[level].width;
-   image->height = mt->level[level].height;
+   image->width = minify(mt->physical_width0, level - mt->first_level);
+   image->height = minify(mt->physical_height0, level - mt->first_level);
    image->tile_x = draw_x & mask_x;
    image->tile_y = draw_y & mask_y;
 
@@ -950,7 +947,7 @@ intelDestroyScreen(__DRIscreen * sPriv)
    dri_bufmgr_destroy(intelScreen->bufmgr);
    driDestroyOptionInfo(&intelScreen->optionCache);
 
-   free(intelScreen);
+   ralloc_free(intelScreen);
    sPriv->driverPrivate = NULL;
 }
 
@@ -1111,11 +1108,14 @@ intel_detect_swizzling(struct intel_screen *screen)
 const int*
 intel_supported_msaa_modes(const struct intel_screen  *screen)
 {
+   static const int gen8_modes[] = {8, 4, 2, 0, -1};
    static const int gen7_modes[] = {8, 4, 0, -1};
    static const int gen6_modes[] = {4, 0, -1};
    static const int gen4_modes[] = {0, -1};
 
-   if (screen->devinfo->gen >= 7) {
+   if (screen->devinfo->gen >= 8) {
+      return gen8_modes;
+   } else if (screen->devinfo->gen >= 7) {
       return gen7_modes;
    } else if (screen->devinfo->gen == 6) {
       return gen6_modes;
@@ -1312,7 +1312,7 @@ __DRIconfig **intelInitScreen2(__DRIscreen *psp)
    }
 
    /* Allocate the private area */
-   intelScreen = calloc(1, sizeof *intelScreen);
+   intelScreen = rzalloc(NULL, struct intel_screen);
    if (!intelScreen) {
       fprintf(stderr, "\nERROR!  Allocating private area failed\n");
       return false;
@@ -1328,6 +1328,8 @@ __DRIconfig **intelInitScreen2(__DRIscreen *psp)
 
    intelScreen->deviceID = drm_intel_bufmgr_gem_get_devid(intelScreen->bufmgr);
    intelScreen->devinfo = brw_get_device_info(intelScreen->deviceID);
+   if (!intelScreen->devinfo)
+      return false;
 
    intelScreen->hw_must_use_separate_stencil = intelScreen->devinfo->gen >= 7;
 
@@ -1351,6 +1353,9 @@ __DRIconfig **intelInitScreen2(__DRIscreen *psp)
 
    psp->extensions = !intelScreen->has_context_reset_notification
       ? intelScreenExtensions : intelRobustScreenExtensions;
+
+   brw_fs_alloc_reg_sets(intelScreen);
+   brw_vec4_alloc_reg_set(intelScreen);
 
    return (const __DRIconfig**) intel_screen_make_configs(psp);
 }

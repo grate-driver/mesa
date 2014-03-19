@@ -276,7 +276,7 @@ void r600_context_flush(struct r600_context *ctx, unsigned flags)
 void r600_begin_new_cs(struct r600_context *ctx)
 {
 	unsigned shader;
-
+	int i;
 	ctx->b.flags = 0;
 	ctx->b.gtt = 0;
 	ctx->b.vram = 0;
@@ -297,7 +297,10 @@ void r600_begin_new_cs(struct r600_context *ctx)
 	ctx->poly_offset_state.atom.dirty = true;
 	ctx->vgt_state.atom.dirty = true;
 	ctx->sample_mask.atom.dirty = true;
-	ctx->scissor.atom.dirty = true;
+	for (i = 0; i < 16; i++) {
+		ctx->scissor[i].atom.dirty = true;
+		ctx->viewport[i].atom.dirty = true;
+	}
 	ctx->config_state.atom.dirty = true;
 	ctx->stencil_ref.atom.dirty = true;
 	ctx->vertex_fetch_shader.atom.dirty = true;
@@ -308,7 +311,7 @@ void r600_begin_new_cs(struct r600_context *ctx)
 		ctx->gs_rings.atom.dirty = true;
 	}
 	ctx->vertex_shader.atom.dirty = true;
-	ctx->viewport.atom.dirty = true;
+	ctx->b.streamout.enable_atom.dirty = true;
 
 	if (ctx->blend_state.cso)
 		ctx->blend_state.atom.dirty = true;
@@ -409,8 +412,10 @@ void r600_cp_dma_copy_buffer(struct r600_context *rctx,
 		}
 
 		/* This must be done after r600_need_cs_space. */
-		src_reloc = r600_context_bo_reloc(&rctx->b, &rctx->b.rings.gfx, (struct r600_resource*)src, RADEON_USAGE_READ);
-		dst_reloc = r600_context_bo_reloc(&rctx->b, &rctx->b.rings.gfx, (struct r600_resource*)dst, RADEON_USAGE_WRITE);
+		src_reloc = r600_context_bo_reloc(&rctx->b, &rctx->b.rings.gfx, (struct r600_resource*)src,
+						  RADEON_USAGE_READ, RADEON_PRIO_MIN);
+		dst_reloc = r600_context_bo_reloc(&rctx->b, &rctx->b.rings.gfx, (struct r600_resource*)dst,
+						  RADEON_USAGE_WRITE, RADEON_PRIO_MIN);
 
 		radeon_emit(cs, PKT3(PKT3_CP_DMA, 4, 0));
 		radeon_emit(cs, src_offset);	/* SRC_ADDR_LO [31:0] */
@@ -474,8 +479,10 @@ void r600_dma_copy(struct r600_context *rctx,
 	for (i = 0; i < ncopy; i++) {
 		csize = size < 0xffff ? size : 0xffff;
 		/* emit reloc before writting cs so that cs is always in consistent state */
-		r600_context_bo_reloc(&rctx->b, &rctx->b.rings.dma, rsrc, RADEON_USAGE_READ);
-		r600_context_bo_reloc(&rctx->b, &rctx->b.rings.dma, rdst, RADEON_USAGE_WRITE);
+		r600_context_bo_reloc(&rctx->b, &rctx->b.rings.dma, rsrc, RADEON_USAGE_READ,
+				      RADEON_PRIO_MIN);
+		r600_context_bo_reloc(&rctx->b, &rctx->b.rings.dma, rdst, RADEON_USAGE_WRITE,
+				      RADEON_PRIO_MIN);
 		cs->buf[cs->cdw++] = DMA_PACKET(DMA_PACKET_COPY, 0, 0, csize);
 		cs->buf[cs->cdw++] = dst_offset & 0xfffffffc;
 		cs->buf[cs->cdw++] = src_offset & 0xfffffffc;

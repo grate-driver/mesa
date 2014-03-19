@@ -65,9 +65,7 @@
 #include <xcb/dri3.h>
 #include <xcb/present.h>
 #include <GL/gl.h>
-#include "glapi.h"
 #include "glxclient.h"
-#include "xf86dri.h"
 #include <dlfcn.h>
 #include <fcntl.h>
 #include <unistd.h>
@@ -75,7 +73,6 @@
 #include <sys/mman.h>
 #include <sys/time.h>
 
-#include "xf86drm.h"
 #include "dri_common.h"
 #include "dri3_priv.h"
 #include "loader.h"
@@ -1093,13 +1090,13 @@ dri3_find_back(xcb_connection_t *c, struct dri3_drawable *priv)
 
    for (;;) {
       for (b = 0; b < priv->num_back; b++) {
-         int id = DRI3_BACK_ID(b);
+         int id = DRI3_BACK_ID((b + priv->cur_back) % priv->num_back);
          struct dri3_buffer *buffer = priv->buffers[id];
 
-         if (!buffer)
-            return b;
-         if (!buffer->busy)
-            return b;
+         if (!buffer || !buffer->busy) {
+            priv->cur_back = id;
+            return id;
+         }
       }
       xcb_flush(c);
       ev = xcb_wait_for_special_event(c, priv->special_event);
@@ -1126,13 +1123,10 @@ dri3_get_buffer(__DRIdrawable *driDrawable,
    int                  buf_id;
 
    if (buffer_type == dri3_buffer_back) {
-      int back = dri3_find_back(c, priv);
+      buf_id = dri3_find_back(c, priv);
 
-      if (back < 0)
+      if (buf_id < 0)
          return NULL;
-
-      priv->cur_back = back;
-      buf_id = DRI3_BACK_ID(priv->cur_back);
    } else {
       buf_id = DRI3_FRONT_ID;
    }
@@ -1307,9 +1301,10 @@ dri3_get_buffers(__DRIdrawable *driDrawable,
 /* The image loader extension record for DRI3
  */
 static const __DRIimageLoaderExtension imageLoaderExtension = {
-   {__DRI_IMAGE_LOADER, __DRI_IMAGE_LOADER_VERSION},
-   .getBuffers = dri3_get_buffers,
-   .flushFrontBuffer = dri3_flush_front_buffer,
+   .base = { __DRI_IMAGE_LOADER, 1 },
+
+   .getBuffers          = dri3_get_buffers,
+   .flushFrontBuffer    = dri3_flush_front_buffer,
 };
 
 /** dri3_swap_buffers
@@ -1345,6 +1340,7 @@ dri3_swap_buffers(__GLXDRIdrawable *pdraw, int64_t target_msc, int64_t divisor,
          target_msc = priv->msc + priv->swap_interval * (priv->send_sbc - priv->recv_sbc);
 
       priv->buffers[buf_id]->busy = 1;
+      priv->buffers[buf_id]->last_swap = priv->send_sbc;
       xcb_present_pixmap(c,
                          priv->base.xDrawable,
                          priv->buffers[buf_id]->pixmap,
@@ -1382,6 +1378,22 @@ dri3_swap_buffers(__GLXDRIdrawable *pdraw, int64_t target_msc, int64_t divisor,
    }
 
    return ret;
+}
+
+static int
+dri3_get_buffer_age(__GLXDRIdrawable *pdraw)
+{
+   xcb_connection_t *c = XGetXCBConnection(pdraw->psc->dpy);
+   struct dri3_drawable *priv = (struct dri3_drawable *) pdraw;
+   int back_id = DRI3_BACK_ID(dri3_find_back(c, priv));
+
+   if (back_id < 0 || !priv->buffers[back_id])
+      return 0;
+
+   if (priv->buffers[back_id]->last_swap != 0)
+      return priv->send_sbc - priv->buffers[back_id]->last_swap + 1;
+   else
+      return 0;
 }
 
 /** dri3_open
@@ -1741,6 +1753,9 @@ dri3_create_screen(int screen, struct glx_display * priv)
 
    psp->copySubBuffer = dri3_copy_sub_buffer;
    __glXEnableDirectExtension(&psc->base, "GLX_MESA_copy_sub_buffer");
+
+   psp->getBufferAge = dri3_get_buffer_age;
+   __glXEnableDirectExtension(&psc->base, "GLX_EXT_buffer_age");
 
    free(driverName);
    free(deviceName);

@@ -9,10 +9,9 @@ AM_CFLAGS = \
 	-I$(top_srcdir)/include \
 	-I$(top_srcdir)/src/loader \
 	-I$(top_srcdir)/src/gbm/main \
-	$(LIBUDEV_CFLAGS) \
-	$(LIBKMS_CFLAGS) \
 	$(DLOPEN_CFLAGS) \
-	$(DEFINES)
+	$(DEFINES) \
+	$(VISIBILITY_CFLAGS)
 
 lib_LTLIBRARIES = libgbm.la
 include_HEADERS = main/gbm.h
@@ -23,8 +22,6 @@ libgbm_la_SOURCES = \
 libgbm_la_LDFLAGS = -version-info 1:0
 libgbm_la_LIBADD = \
 	$(top_builddir)/src/loader/libloader.la \
-	$(LIBUDEV_LIBS) \
-	$(LIBKMS_LIBS) \
 	$(DLOPEN_LIBS)
 
 if HAVE_EGL_PLATFORM_WAYLAND
@@ -46,5 +43,7 @@ libgbm_dri_la_CFLAGS = \
 libgbm_la_LIBADD += \
 	libgbm_dri.la $(top_builddir)/src/mapi/shared-glapi/libglapi.la $(LIBDRM_LIBS)
 endif
+
+TESTS = gbm-symbols-check
 
 include $(top_srcdir)/install-lib-links.mk

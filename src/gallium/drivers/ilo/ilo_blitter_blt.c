@@ -336,7 +336,7 @@ ilo_blitter_blt_begin(struct ilo_blitter *blitter, int max_cmd_size,
    uint32_t swctrl;
 
    /* change ring */
-   ilo_cp_set_ring(ilo->cp, ILO_CP_RING_BLT);
+   ilo_cp_set_ring(ilo->cp, INTEL_RING_BLT);
    ilo_cp_set_owner(ilo->cp, NULL, 0);
 
    /* check aperture space */
@@ -349,7 +349,7 @@ ilo_blitter_blt_begin(struct ilo_blitter *blitter, int max_cmd_size,
       count++;
    }
 
-   if (intel_winsys_check_aperture_space(ilo->winsys, aper_check, count))
+   if (!intel_winsys_can_submit_bo(ilo->winsys, aper_check, count))
       ilo_cp_flush(ilo->cp, "out of aperture");
 
    /* set BCS_SWCTRL */

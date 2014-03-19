@@ -60,8 +60,6 @@ nv30_screen_get_param(struct pipe_screen *pscreen, enum pipe_cap param)
       return 10;
    case PIPE_CAP_MAX_TEXTURE_CUBE_LEVELS:
       return 13;
-   case PIPE_CAP_MAX_COMBINED_SAMPLERS:
-      return 16;
    case PIPE_CAP_GLSL_FEATURE_LEVEL:
       return 120;
    /* supported capabilities */
@@ -86,6 +84,8 @@ nv30_screen_get_param(struct pipe_screen *pscreen, enum pipe_cap param)
       return 0;
    case PIPE_CAP_CONSTANT_BUFFER_OFFSET_ALIGNMENT:
       return 16;
+   case PIPE_CAP_MAX_VIEWPORTS:
+      return 1;
    /* nv4x capabilities */
    case PIPE_CAP_BLEND_EQUATION_SEPARATE:
    case PIPE_CAP_NPOT_TEXTURES:
@@ -128,6 +128,9 @@ nv30_screen_get_param(struct pipe_screen *pscreen, enum pipe_cap param)
    case PIPE_CAP_MAX_TEXTURE_BUFFER_SIZE:
    case PIPE_CAP_MIXED_FRAMEBUFFER_SIZES:
    case PIPE_CAP_TGSI_VS_LAYER:
+   case PIPE_CAP_MAX_TEXTURE_GATHER_COMPONENTS:
+   case PIPE_CAP_TEXTURE_GATHER_SM5:
+   case PIPE_CAP_BUFFER_MAP_PERSISTENT_COHERENT:
       return 0;
    case PIPE_CAP_VERTEX_BUFFER_OFFSET_4BYTE_ALIGNED_ONLY:
    case PIPE_CAP_VERTEX_BUFFER_STRIDE_4BYTE_ALIGNED_ONLY:
@@ -305,10 +308,16 @@ nv30_screen_destroy(struct pipe_screen *pscreen)
    if (!nouveau_drm_screen_unref(&screen->base))
       return;
 
-   if (screen->base.fence.current &&
-       screen->base.fence.current->state >= NOUVEAU_FENCE_STATE_EMITTED) {
-      nouveau_fence_wait(screen->base.fence.current);
-      nouveau_fence_ref (NULL, &screen->base.fence.current);
+   if (screen->base.fence.current) {
+      struct nouveau_fence *current = NULL;
+
+      /* nouveau_fence_wait will create a new current fence, so wait on the
+       * _current_ one, and remove both.
+       */
+      nouveau_fence_ref(screen->base.fence.current, &current);
+      nouveau_fence_wait(current);
+      nouveau_fence_ref(NULL, &current);
+      nouveau_fence_ref(NULL, &screen->base.fence.current);
    }
 
    nouveau_object_del(&screen->query);

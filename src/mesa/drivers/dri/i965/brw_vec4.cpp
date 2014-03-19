@@ -76,7 +76,7 @@ src_reg::src_reg(register_file file, int reg, const glsl_type *type)
    if (type && (type->is_scalar() || type->is_vector() || type->is_matrix()))
       this->swizzle = swizzle_for_size(type->vector_elements);
    else
-      this->swizzle = SWIZZLE_XYZW;
+      this->swizzle = BRW_SWIZZLE_XYZW;
 }
 
 /** Generic unset register constructor. */
@@ -110,6 +110,15 @@ src_reg::src_reg(int32_t i)
    this->file = IMM;
    this->type = BRW_REGISTER_TYPE_D;
    this->imm.i = i;
+}
+
+src_reg::src_reg(struct brw_reg reg)
+{
+   init();
+
+   this->file = HW_REG;
+   this->fixed_hw_reg = reg;
+   this->type = reg.type;
 }
 
 src_reg::src_reg(dst_reg reg)
@@ -180,6 +189,7 @@ dst_reg::dst_reg(struct brw_reg reg)
 
    this->file = HW_REG;
    this->fixed_hw_reg = reg;
+   this->type = reg.type;
 }
 
 dst_reg::dst_reg(src_reg reg)
@@ -412,6 +422,7 @@ vec4_visitor::pack_uniform_registers()
     * push constants.
     */
    for (int src = 0; src < uniforms; src++) {
+      assert(src < uniform_array_size);
       int size = this->uniform_vector_size[src];
 
       if (!uniform_used[src]) {
@@ -435,8 +446,8 @@ vec4_visitor::pack_uniform_registers()
 
 	 /* Move the references to the data */
 	 for (int j = 0; j < size; j++) {
-	    prog_data->param[dst * 4 + new_chan[src] + j] =
-	       prog_data->param[src * 4 + j];
+	    stage_prog_data->param[dst * 4 + new_chan[src] + j] =
+	       stage_prog_data->param[src * 4 + j];
 	 }
 
 	 this->uniform_vector_size[dst] += size;
@@ -587,16 +598,16 @@ vec4_visitor::move_push_constants_to_pull_constants()
       pull_constant_loc[i / 4] = -1;
 
       if (i >= max_uniform_components) {
-	 const float **values = &prog_data->param[i];
+	 const float **values = &stage_prog_data->param[i];
 
 	 /* Try to find an existing copy of this uniform in the pull
 	  * constants if it was part of an array access already.
 	  */
-	 for (unsigned int j = 0; j < prog_data->nr_pull_params; j += 4) {
+	 for (unsigned int j = 0; j < stage_prog_data->nr_pull_params; j += 4) {
 	    int matches;
 
 	    for (matches = 0; matches < 4; matches++) {
-	       if (prog_data->pull_param[j + matches] != values[matches])
+	       if (stage_prog_data->pull_param[j + matches] != values[matches])
 		  break;
 	    }
 
@@ -607,11 +618,12 @@ vec4_visitor::move_push_constants_to_pull_constants()
 	 }
 
 	 if (pull_constant_loc[i / 4] == -1) {
-	    assert(prog_data->nr_pull_params % 4 == 0);
-	    pull_constant_loc[i / 4] = prog_data->nr_pull_params / 4;
+	    assert(stage_prog_data->nr_pull_params % 4 == 0);
+	    pull_constant_loc[i / 4] = stage_prog_data->nr_pull_params / 4;
 
 	    for (int j = 0; j < 4; j++) {
-	       prog_data->pull_param[prog_data->nr_pull_params++] = values[j];
+	       stage_prog_data->pull_param[stage_prog_data->nr_pull_params++] =
+                  values[j];
 	    }
 	 }
       }
@@ -1110,161 +1122,161 @@ vec4_visitor::dump_instruction(backend_instruction *be_inst)
 {
    vec4_instruction *inst = (vec4_instruction *)be_inst;
 
-   printf("%s", brw_instruction_name(inst->opcode));
+   fprintf(stderr, "%s", brw_instruction_name(inst->opcode));
    if (inst->conditional_mod) {
-      printf("%s", conditional_modifier[inst->conditional_mod]);
+      fprintf(stderr, "%s", conditional_modifier[inst->conditional_mod]);
    }
-   printf(" ");
+   fprintf(stderr, " ");
 
    switch (inst->dst.file) {
    case GRF:
-      printf("vgrf%d.%d", inst->dst.reg, inst->dst.reg_offset);
+      fprintf(stderr, "vgrf%d.%d", inst->dst.reg, inst->dst.reg_offset);
       break;
    case MRF:
-      printf("m%d", inst->dst.reg);
+      fprintf(stderr, "m%d", inst->dst.reg);
       break;
    case HW_REG:
       if (inst->dst.fixed_hw_reg.file == BRW_ARCHITECTURE_REGISTER_FILE) {
          switch (inst->dst.fixed_hw_reg.nr) {
          case BRW_ARF_NULL:
-            printf("null");
+            fprintf(stderr, "null");
             break;
          case BRW_ARF_ADDRESS:
-            printf("a0.%d", inst->dst.fixed_hw_reg.subnr);
+            fprintf(stderr, "a0.%d", inst->dst.fixed_hw_reg.subnr);
             break;
          case BRW_ARF_ACCUMULATOR:
-            printf("acc%d", inst->dst.fixed_hw_reg.subnr);
+            fprintf(stderr, "acc%d", inst->dst.fixed_hw_reg.subnr);
             break;
          case BRW_ARF_FLAG:
-            printf("f%d.%d", inst->dst.fixed_hw_reg.nr & 0xf,
+            fprintf(stderr, "f%d.%d", inst->dst.fixed_hw_reg.nr & 0xf,
                              inst->dst.fixed_hw_reg.subnr);
             break;
          default:
-            printf("arf%d.%d", inst->dst.fixed_hw_reg.nr & 0xf,
+            fprintf(stderr, "arf%d.%d", inst->dst.fixed_hw_reg.nr & 0xf,
                                inst->dst.fixed_hw_reg.subnr);
             break;
          }
       } else {
-         printf("hw_reg%d", inst->dst.fixed_hw_reg.nr);
+         fprintf(stderr, "hw_reg%d", inst->dst.fixed_hw_reg.nr);
       }
       if (inst->dst.fixed_hw_reg.subnr)
-         printf("+%d", inst->dst.fixed_hw_reg.subnr);
+         fprintf(stderr, "+%d", inst->dst.fixed_hw_reg.subnr);
       break;
    case BAD_FILE:
-      printf("(null)");
+      fprintf(stderr, "(null)");
       break;
    default:
-      printf("???");
+      fprintf(stderr, "???");
       break;
    }
    if (inst->dst.writemask != WRITEMASK_XYZW) {
-      printf(".");
+      fprintf(stderr, ".");
       if (inst->dst.writemask & 1)
-         printf("x");
+         fprintf(stderr, "x");
       if (inst->dst.writemask & 2)
-         printf("y");
+         fprintf(stderr, "y");
       if (inst->dst.writemask & 4)
-         printf("z");
+         fprintf(stderr, "z");
       if (inst->dst.writemask & 8)
-         printf("w");
+         fprintf(stderr, "w");
    }
-   printf(":%s, ", reg_encoding[inst->dst.type]);
+   fprintf(stderr, ":%s, ", brw_reg_type_letters(inst->dst.type));
 
    for (int i = 0; i < 3 && inst->src[i].file != BAD_FILE; i++) {
       if (inst->src[i].negate)
-         printf("-");
+         fprintf(stderr, "-");
       if (inst->src[i].abs)
-         printf("|");
+         fprintf(stderr, "|");
       switch (inst->src[i].file) {
       case GRF:
-         printf("vgrf%d", inst->src[i].reg);
+         fprintf(stderr, "vgrf%d", inst->src[i].reg);
          break;
       case ATTR:
-         printf("attr%d", inst->src[i].reg);
+         fprintf(stderr, "attr%d", inst->src[i].reg);
          break;
       case UNIFORM:
-         printf("u%d", inst->src[i].reg);
+         fprintf(stderr, "u%d", inst->src[i].reg);
          break;
       case IMM:
          switch (inst->src[i].type) {
          case BRW_REGISTER_TYPE_F:
-            printf("%fF", inst->src[i].imm.f);
+            fprintf(stderr, "%fF", inst->src[i].imm.f);
             break;
          case BRW_REGISTER_TYPE_D:
-            printf("%dD", inst->src[i].imm.i);
+            fprintf(stderr, "%dD", inst->src[i].imm.i);
             break;
          case BRW_REGISTER_TYPE_UD:
-            printf("%uU", inst->src[i].imm.u);
+            fprintf(stderr, "%uU", inst->src[i].imm.u);
             break;
          default:
-            printf("???");
+            fprintf(stderr, "???");
             break;
          }
          break;
       case HW_REG:
          if (inst->src[i].fixed_hw_reg.negate)
-            printf("-");
+            fprintf(stderr, "-");
          if (inst->src[i].fixed_hw_reg.abs)
-            printf("|");
+            fprintf(stderr, "|");
          if (inst->src[i].fixed_hw_reg.file == BRW_ARCHITECTURE_REGISTER_FILE) {
             switch (inst->src[i].fixed_hw_reg.nr) {
             case BRW_ARF_NULL:
-               printf("null");
+               fprintf(stderr, "null");
                break;
             case BRW_ARF_ADDRESS:
-               printf("a0.%d", inst->src[i].fixed_hw_reg.subnr);
+               fprintf(stderr, "a0.%d", inst->src[i].fixed_hw_reg.subnr);
                break;
             case BRW_ARF_ACCUMULATOR:
-               printf("acc%d", inst->src[i].fixed_hw_reg.subnr);
+               fprintf(stderr, "acc%d", inst->src[i].fixed_hw_reg.subnr);
                break;
             case BRW_ARF_FLAG:
-               printf("f%d.%d", inst->src[i].fixed_hw_reg.nr & 0xf,
+               fprintf(stderr, "f%d.%d", inst->src[i].fixed_hw_reg.nr & 0xf,
                                 inst->src[i].fixed_hw_reg.subnr);
                break;
             default:
-               printf("arf%d.%d", inst->src[i].fixed_hw_reg.nr & 0xf,
+               fprintf(stderr, "arf%d.%d", inst->src[i].fixed_hw_reg.nr & 0xf,
                                   inst->src[i].fixed_hw_reg.subnr);
                break;
             }
          } else {
-            printf("hw_reg%d", inst->src[i].fixed_hw_reg.nr);
+            fprintf(stderr, "hw_reg%d", inst->src[i].fixed_hw_reg.nr);
          }
          if (inst->src[i].fixed_hw_reg.subnr)
-            printf("+%d", inst->src[i].fixed_hw_reg.subnr);
+            fprintf(stderr, "+%d", inst->src[i].fixed_hw_reg.subnr);
          if (inst->src[i].fixed_hw_reg.abs)
-            printf("|");
+            fprintf(stderr, "|");
          break;
       case BAD_FILE:
-         printf("(null)");
+         fprintf(stderr, "(null)");
          break;
       default:
-         printf("???");
+         fprintf(stderr, "???");
          break;
       }
 
       if (virtual_grf_sizes[inst->src[i].reg] != 1)
-         printf(".%d", inst->src[i].reg_offset);
+         fprintf(stderr, ".%d", inst->src[i].reg_offset);
 
       if (inst->src[i].file != IMM) {
          static const char *chans[4] = {"x", "y", "z", "w"};
-         printf(".");
+         fprintf(stderr, ".");
          for (int c = 0; c < 4; c++) {
-            printf("%s", chans[BRW_GET_SWZ(inst->src[i].swizzle, c)]);
+            fprintf(stderr, "%s", chans[BRW_GET_SWZ(inst->src[i].swizzle, c)]);
          }
       }
 
       if (inst->src[i].abs)
-         printf("|");
+         fprintf(stderr, "|");
 
       if (inst->src[i].file != IMM) {
-         printf(":%s", reg_encoding[inst->src[i].type]);
+         fprintf(stderr, ":%s", brw_reg_type_letters(inst->src[i].type));
       }
 
       if (i < 2 && inst->src[i + 1].file != BAD_FILE)
-         printf(", ");
+         fprintf(stderr, ", ");
    }
 
-   printf("\n");
+   fprintf(stderr, "\n");
 }
 
 
@@ -1393,13 +1405,15 @@ vec4_visitor::setup_uniforms(int reg)
     * matter what, or the GPU would hang.
     */
    if (brw->gen < 6 && this->uniforms == 0) {
+      assert(this->uniforms < this->uniform_array_size);
       this->uniform_vector_size[this->uniforms] = 1;
 
-      prog_data->param = reralloc(NULL, prog_data->param, const float *, 4);
+      stage_prog_data->param =
+         reralloc(NULL, stage_prog_data->param, const float *, 4);
       for (unsigned int i = 0; i < 4; i++) {
 	 unsigned int slot = this->uniforms * 4 + i;
 	 static float zero = 0.0;
-	 prog_data->param[slot] = &zero;
+	 stage_prog_data->param[slot] = &zero;
       }
 
       this->uniforms++;
@@ -1408,7 +1422,7 @@ vec4_visitor::setup_uniforms(int reg)
       reg += ALIGN(uniforms, 2) / 2;
    }
 
-   prog_data->nr_params = this->uniforms * 4;
+   stage_prog_data->nr_params = this->uniforms * 4;
 
    prog_data->curb_read_length = reg - prog_data->dispatch_grf_start_reg;
 
@@ -1639,7 +1653,7 @@ brw_vs_emit(struct brw_context *brw,
             unsigned *final_assembly_size)
 {
    bool start_busy = false;
-   float start_time = 0;
+   double start_time = 0;
 
    if (unlikely(brw->perf_debug)) {
       start_busy = (brw->batch.last_bo &&
@@ -1651,19 +1665,10 @@ brw_vs_emit(struct brw_context *brw,
    if (prog)
       shader = (brw_shader *) prog->_LinkedShaders[MESA_SHADER_VERTEX];
 
-   if (unlikely(INTEL_DEBUG & DEBUG_VS)) {
-      if (prog) {
-         printf("GLSL IR for native vertex shader %d:\n", prog->Name);
-         _mesa_print_ir(shader->base.ir, NULL);
-         printf("\n\n");
-      } else {
-         printf("ARB_vertex_program %d for native vertex shader\n",
-                c->vp->program.Base.Id);
-         _mesa_print_program(&c->vp->program.Base);
-      }
-   }
+   if (unlikely(INTEL_DEBUG & DEBUG_VS))
+      brw_dump_ir(brw, "vertex", prog, &shader->base, &c->vp->program.Base);
 
-   vec4_vs_visitor v(brw, c, prog_data, prog, shader, mem_ctx);
+   vec4_vs_visitor v(brw, c, prog_data, prog, mem_ctx);
    if (!v.run()) {
       if (prog) {
          prog->LinkStatus = false;
@@ -1722,32 +1727,5 @@ brw_vec4_setup_prog_key_for_precompile(struct gl_context *ctx,
       }
    }
 }
-
-
-bool
-brw_vec4_prog_data_compare(const struct brw_vec4_prog_data *a,
-                           const struct brw_vec4_prog_data *b)
-{
-   /* Compare all the struct (including the base) up to the pointers. */
-   if (memcmp(a, b, offsetof(struct brw_vec4_prog_data, param)))
-      return false;
-
-   if (memcmp(a->param, b->param, a->nr_params * sizeof(void *)))
-      return false;
-
-   if (memcmp(a->pull_param, b->pull_param, a->nr_pull_params * sizeof(void *)))
-      return false;
-
-   return true;
-}
-
-
-void
-brw_vec4_prog_data_free(const struct brw_vec4_prog_data *prog_data)
-{
-   ralloc_free((void *)prog_data->param);
-   ralloc_free((void *)prog_data->pull_param);
-}
-
 
 } /* extern "C" */

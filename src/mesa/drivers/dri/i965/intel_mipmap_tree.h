@@ -38,6 +38,8 @@
 extern "C" {
 #endif
 
+struct intel_renderbuffer;
+
 /* A layer on top of the intel_regions code which adds:
  *
  * - Code to size and layout a region to hold a set of mipmaps.
@@ -91,12 +93,6 @@ struct intel_miptree_map {
    void *ptr;
    /** Stride of the mapping. */
    int stride;
-
-   /**
-    * intel_mipmap_tree::singlesample_mt is temporary storage that persists
-    * only for the duration of the map.
-    */
-   bool singlesample_mt_is_tmp;
 };
 
 /**
@@ -108,8 +104,6 @@ struct intel_mipmap_level
    GLuint level_x;
    /** Offset to this miptree level, used in computing y_offset. */
    GLuint level_y;
-   GLuint width;
-   GLuint height;
 
    /**
     * \brief Number of 2D slices in this miplevel.
@@ -121,6 +115,8 @@ struct intel_mipmap_level
     *    - For GL_TEXTURE_3D, it is the texture's depth at this miplevel. Its
     *      value, like width and height, varies with miplevel.
     *    - For other texture types, depth is 1.
+    *    - Additionally, for UMS and CMS miptrees, depth is multiplied by
+    *      sample count.
     */
    GLuint depth;
 
@@ -369,50 +365,6 @@ struct intel_mipmap_tree
    uint32_t offset;
 
    /**
-    * \brief Singlesample miptree.
-    *
-    * This is used under two cases.
-    *
-    * --- Case 1: As persistent singlesample storage for multisample window
-    *  system front and back buffers ---
-    *
-    * Suppose that the window system FBO was created with a multisample
-    * config.  Let `back_irb` be the `intel_renderbuffer` for the FBO's back
-    * buffer. Then `back_irb` contains two miptrees: a parent multisample
-    * miptree (back_irb->mt) and a child singlesample miptree
-    * (back_irb->mt->singlesample_mt).  The DRM buffer shared with DRI2
-    * belongs to `back_irb->mt->singlesample_mt` and contains singlesample
-    * data.  The singlesample miptree is created at the same time as and
-    * persists for the lifetime of its parent multisample miptree.
-    *
-    * When access to the singlesample data is needed, such as at
-    * eglSwapBuffers and glReadPixels, an automatic downsample occurs from
-    * `back_rb->mt` to `back_rb->mt->singlesample_mt` when necessary.
-    *
-    * This description of the back buffer applies analogously to the front
-    * buffer.
-    *
-    *
-    * --- Case 2: As temporary singlesample storage for mapping multisample
-    *  miptrees ---
-    *
-    * Suppose the intel_miptree_map is called on a multisample miptree, `mt`,
-    * for which case 1 does not apply (that is, `mt` does not belong to
-    * a front or back buffer).  Then `mt->singlesample_mt` is null at the
-    * start of the call. intel_miptree_map will create a temporary
-    * singlesample miptree, store it at `mt->singlesample_mt`, downsample from
-    * `mt` to `mt->singlesample_mt` if necessary, then map
-    * `mt->singlesample_mt`. The temporary miptree is later deleted during
-    * intel_miptree_unmap.
-    */
-   struct intel_mipmap_tree *singlesample_mt;
-
-   /**
-    * \brief A downsample is needed from this miptree to singlesample_mt.
-    */
-   bool need_downsample;
-
-   /**
     * \brief HiZ miptree
     *
     * The hiz miptree contains the miptree's hiz buffer. To allocate the hiz
@@ -529,19 +481,10 @@ intel_miptree_create_for_bo(struct brw_context *brw,
                             int pitch,
                             uint32_t tiling);
 
-struct intel_mipmap_tree*
-intel_miptree_create_for_dri2_buffer(struct brw_context *brw,
-                                     unsigned dri_attachment,
-                                     mesa_format format,
-                                     uint32_t num_samples,
-                                     struct intel_region *region);
-
-struct intel_mipmap_tree*
-intel_miptree_create_for_image_buffer(struct brw_context *intel,
-                                     enum __DRIimageBufferMask buffer_type,
-                                     mesa_format format,
-                                     uint32_t num_samples,
-                                     struct intel_region *region);
+void
+intel_update_winsys_renderbuffer_miptree(struct brw_context *intel,
+                                         struct intel_renderbuffer *irb,
+                                         struct intel_region *region);
 
 /**
  * Create a miptree appropriate as the storage for a non-texture renderbuffer.
@@ -579,7 +522,7 @@ bool intel_miptree_match_image(struct intel_mipmap_tree *mt,
                                     struct gl_texture_image *image);
 
 void
-intel_miptree_get_image_offset(struct intel_mipmap_tree *mt,
+intel_miptree_get_image_offset(const struct intel_mipmap_tree *mt,
 			       GLuint level, GLuint slice,
 			       GLuint *x, GLuint *y);
 
@@ -588,15 +531,14 @@ intel_miptree_get_dimensions_for_image(struct gl_texture_image *image,
                                        int *width, int *height, int *depth);
 
 uint32_t
-intel_miptree_get_tile_offsets(struct intel_mipmap_tree *mt,
+intel_miptree_get_tile_offsets(const struct intel_mipmap_tree *mt,
                                GLuint level, GLuint slice,
                                uint32_t *tile_x,
                                uint32_t *tile_y);
 
 void intel_miptree_set_level_info(struct intel_mipmap_tree *mt,
                                   GLuint level,
-                                  GLuint x, GLuint y,
-                                  GLuint w, GLuint h, GLuint d);
+                                  GLuint x, GLuint y, GLuint d);
 
 void intel_miptree_set_image_offset(struct intel_mipmap_tree *mt,
                                     GLuint level,
@@ -706,12 +648,9 @@ intel_miptree_make_shareable(struct brw_context *brw,
                              struct intel_mipmap_tree *mt);
 
 void
-intel_miptree_downsample(struct brw_context *brw,
-                         struct intel_mipmap_tree *mt);
-
-void
-intel_miptree_upsample(struct brw_context *brw,
-                       struct intel_mipmap_tree *mt);
+intel_miptree_updownsample(struct brw_context *brw,
+                           struct intel_mipmap_tree *src,
+                           struct intel_mipmap_tree *dst);
 
 void brw_miptree_layout(struct brw_context *brw, struct intel_mipmap_tree *mt);
 

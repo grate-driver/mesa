@@ -40,9 +40,9 @@
 
 
 extern "C" void GLAPIENTRY
-_mesa_GetActiveUniform(GLhandleARB program, GLuint index,
-                          GLsizei maxLength, GLsizei *length, GLint *size,
-                          GLenum *type, GLcharARB *nameOut)
+_mesa_GetActiveUniform(GLuint program, GLuint index,
+                       GLsizei maxLength, GLsizei *length, GLint *size,
+                       GLenum *type, GLcharARB *nameOut)
 {
    GET_CURRENT_CONTEXT(ctx);
    struct gl_shader_program *shProg =
@@ -246,13 +246,14 @@ validate_uniform_parameters(struct gl_context *ctx,
       return false;
    }
 
-   _mesa_uniform_split_location_offset(shProg, location, loc, array_index);
-
-   if (*loc >= shProg->NumUserUniformStorage) {
+   /* Check that the given location is in bounds of uniform remap table. */
+   if (location >= (GLint) shProg->NumUniformRemapTable) {
       _mesa_error(ctx, GL_INVALID_OPERATION, "%s(location=%d)",
 		  caller, location);
       return false;
    }
+
+   _mesa_uniform_split_location_offset(shProg, location, loc, array_index);
 
    if (shProg->UniformStorage[*loc].array_elements == 0 && count > 1) {
       _mesa_error(ctx, GL_INVALID_OPERATION,
@@ -684,6 +685,7 @@ _mesa_uniform(struct gl_context *ctx, struct gl_shader_program *shProg,
       match = true;
       break;
    case GLSL_TYPE_SAMPLER:
+   case GLSL_TYPE_IMAGE:
       match = (basicType == GLSL_TYPE_INT);
       break;
    default:
@@ -729,6 +731,22 @@ _mesa_uniform(struct gl_context *ctx, struct gl_shader_program *shProg,
             _mesa_error(ctx, GL_INVALID_VALUE,
                         "glUniform1i(invalid sampler/tex unit index for "
 			"uniform %d)",
+                        location);
+            return;
+         }
+      }
+   }
+
+   if (uni->type->is_image()) {
+      int i;
+
+      for (i = 0; i < count; i++) {
+         const int unit = ((GLint *) values)[i];
+
+         /* check that the image unit is legal */
+         if (unit < 0 || unit >= (int)ctx->Const.MaxImageUnits) {
+            _mesa_error(ctx, GL_INVALID_VALUE,
+                        "glUniform1i(invalid image unit index for uniform %d)",
                         location);
             return;
          }
@@ -829,6 +847,25 @@ _mesa_uniform(struct gl_context *ctx, struct gl_shader_program *shProg,
 	       ctx->Driver.SamplerUniformChange(ctx, prog->Target, prog);
 	 }
       }
+   }
+
+   /* If the uniform is an image, update the mapping from image
+    * uniforms to image units present in the shader data structure.
+    */
+   if (uni->type->is_image()) {
+      int i, j;
+
+      for (i = 0; i < MESA_SHADER_STAGES; i++) {
+	 if (uni->image[i].active) {
+            struct gl_shader *sh = shProg->_LinkedShaders[i];
+
+            for (j = 0; j < count; j++)
+               sh->ImageUnits[uni->image[i].index + offset + j] =
+                  ((GLint *) values)[j];
+         }
+      }
+
+      ctx->NewDriverState |= ctx->DriverFlags.NewImageUnits;
    }
 }
 

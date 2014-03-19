@@ -65,6 +65,13 @@ static void si_flush_from_st(struct pipe_context *ctx,
 			     struct pipe_fence_handle **fence,
 			     unsigned flags)
 {
+	struct si_context *sctx = (struct si_context *)ctx;
+
+	if (sctx->b.rings.dma.cs) {
+		sctx->b.rings.dma.flush(sctx,
+					flags & PIPE_FLUSH_END_OF_FRAME ? RADEON_FLUSH_END_OF_FRAME : 0);
+	}
+
 	si_flush(ctx, fence,
 		 flags & PIPE_FLUSH_END_OF_FRAME ? RADEON_FLUSH_END_OF_FRAME : 0);
 }
@@ -83,15 +90,9 @@ static void si_destroy_context(struct pipe_context *context)
 	pipe_resource_reference(&sctx->null_const_buf.buffer, NULL);
 	r600_resource_reference(&sctx->border_color_table, NULL);
 
-	if (sctx->gs_on) {
-		si_pm4_free_state(sctx, sctx->gs_on, 0);
-	}
-	if (sctx->gs_off) {
-		si_pm4_free_state(sctx, sctx->gs_off, 0);
-	}
-	if (sctx->gs_rings) {
-		si_pm4_free_state(sctx, sctx->gs_rings, 0);
-	}
+	si_pm4_delete_state(sctx, gs_rings, sctx->gs_rings);
+	si_pm4_delete_state(sctx, gs_onoff, sctx->gs_on);
+	si_pm4_delete_state(sctx, gs_onoff, sctx->gs_off);
 
 	if (sctx->dummy_pixel_shader) {
 		sctx->b.b.delete_fs_state(&sctx->b.b, sctx->dummy_pixel_shader);
@@ -104,9 +105,12 @@ static void si_destroy_context(struct pipe_context *context)
 	sctx->b.b.delete_depth_stencil_alpha_state(&sctx->b.b, sctx->custom_dsa_flush_inplace);
 	sctx->b.b.delete_blend_state(&sctx->b.b, sctx->custom_blend_resolve);
 	sctx->b.b.delete_blend_state(&sctx->b.b, sctx->custom_blend_decompress);
-	util_unreference_framebuffer_state(&sctx->framebuffer);
+	sctx->b.b.delete_blend_state(&sctx->b.b, sctx->custom_blend_fastclear);
+	util_unreference_framebuffer_state(&sctx->framebuffer.state);
 
 	util_blitter_destroy(sctx->blitter);
+
+	si_pm4_cleanup(sctx);
 
 	r600_common_context_cleanup(&sctx->b);
 	FREE(sctx);
@@ -151,6 +155,7 @@ static struct pipe_context *si_create_context(struct pipe_screen *screen, void *
 	sctx->atoms.cache_flush = &sctx->cache_flush;
 
 	sctx->atoms.streamout_begin = &sctx->b.streamout.begin_atom;
+	sctx->atoms.streamout_enable = &sctx->b.streamout.enable_atom;
 
 	switch (sctx->b.chip_class) {
 	case SI:
@@ -183,7 +188,7 @@ static struct pipe_context *si_create_context(struct pipe_screen *screen, void *
 	 * with a NULL buffer). We need to use a dummy buffer instead. */
 	if (sctx->b.chip_class == CIK) {
 		sctx->null_const_buf.buffer = pipe_buffer_create(screen, PIPE_BIND_CONSTANT_BUFFER,
-								 PIPE_USAGE_STATIC, 16);
+								 PIPE_USAGE_DEFAULT, 16);
 		sctx->null_const_buf.buffer_size = sctx->null_const_buf.buffer->width0;
 
 		for (shader = 0; shader < SI_NUM_SHADERS; shader++) {
@@ -252,6 +257,7 @@ static int si_get_param(struct pipe_screen* pscreen, enum pipe_cap param)
 	case PIPE_CAP_TEXTURE_BUFFER_OBJECTS:
         case PIPE_CAP_TGSI_VS_LAYER:
 	case PIPE_CAP_QUERY_PIPELINE_STATISTICS:
+	case PIPE_CAP_BUFFER_MAP_PERSISTENT_COHERENT:
 		return 1;
 
 	case PIPE_CAP_TEXTURE_MULTISAMPLE:
@@ -259,20 +265,16 @@ static int si_get_param(struct pipe_screen* pscreen, enum pipe_cap param)
 		return HAVE_LLVM >= 0x0304 && (sscreen->b.chip_class < CIK ||
 					       sscreen->b.info.drm_minor >= 35);
 
-	case PIPE_CAP_TGSI_TEXCOORD:
-		return 0;
-
         case PIPE_CAP_MIN_MAP_BUFFER_ALIGNMENT:
-                return 64;
+                return R600_MAP_BUFFER_ALIGNMENT;
 
 	case PIPE_CAP_CONSTANT_BUFFER_OFFSET_ALIGNMENT:
-		return 256;
+	case PIPE_CAP_TEXTURE_BUFFER_OFFSET_ALIGNMENT:
+		return 4;
 
 	case PIPE_CAP_GLSL_FEATURE_LEVEL:
 		return HAVE_LLVM >= 0x0305 ? 330 : 140;
 
-	case PIPE_CAP_TEXTURE_BUFFER_OFFSET_ALIGNMENT:
-		return 1;
 	case PIPE_CAP_MAX_TEXTURE_BUFFER_SIZE:
 		return MIN2(sscreen->b.info.vram_size, 0xFFFFFFFF);
 
@@ -285,6 +287,9 @@ static int si_get_param(struct pipe_screen* pscreen, enum pipe_cap param)
 	case PIPE_CAP_QUADS_FOLLOW_PROVOKING_VERTEX_CONVENTION:
 	case PIPE_CAP_USER_VERTEX_BUFFERS:
 	case PIPE_CAP_CUBE_MAP_ARRAY:
+	case PIPE_CAP_MAX_TEXTURE_GATHER_COMPONENTS:
+	case PIPE_CAP_TEXTURE_GATHER_SM5:
+	case PIPE_CAP_TGSI_TEXCOORD:
 		return 0;
 
 	case PIPE_CAP_TEXTURE_BORDER_COLOR_QUIRK:
@@ -307,13 +312,14 @@ static int si_get_param(struct pipe_screen* pscreen, enum pipe_cap param)
 
 	/* Texturing. */
 	case PIPE_CAP_MAX_TEXTURE_2D_LEVELS:
-	case PIPE_CAP_MAX_TEXTURE_3D_LEVELS:
 	case PIPE_CAP_MAX_TEXTURE_CUBE_LEVELS:
-			return 15;
+		return 15; /* 16384 */
+	case PIPE_CAP_MAX_TEXTURE_3D_LEVELS:
+		/* textures support 8192, but layered rendering supports 2048 */
+		return 12;
 	case PIPE_CAP_MAX_TEXTURE_ARRAY_LAYERS:
-		return 16384;
-	case PIPE_CAP_MAX_COMBINED_SAMPLERS:
-		return HAVE_LLVM >= 0x0305 ? 48 : 32;
+		/* textures support 8192, but layered rendering supports 2048 */
+		return 2048;
 
 	/* Render targets. */
 	case PIPE_CAP_MAX_RENDER_TARGETS:

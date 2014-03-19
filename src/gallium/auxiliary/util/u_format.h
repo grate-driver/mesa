@@ -1060,8 +1060,7 @@ util_format_luminance_to_red(enum pipe_format format)
       return PIPE_FORMAT_RGTC1_SNORM;
 
    case PIPE_FORMAT_L4A4_UNORM:
-      /* XXX A4R4 is defined as x00y in u_format.csv */
-      return PIPE_FORMAT_A4R4_UNORM;
+      return PIPE_FORMAT_R4A4_UNORM;
 
    case PIPE_FORMAT_L8A8_UNORM:
       return PIPE_FORMAT_R8A8_UNORM;
@@ -1190,7 +1189,7 @@ util_format_write_4i(enum pipe_format format,
 boolean
 util_format_fits_8unorm(const struct util_format_description *format_desc);
 
-void
+boolean
 util_format_translate(enum pipe_format dst_format,
                       void *dst, unsigned dst_stride,
                       unsigned dst_x, unsigned dst_y,

@@ -91,6 +91,7 @@ API_XML = \
 	ARB_base_instance.xml \
 	ARB_blend_func_extended.xml \
 	ARB_color_buffer_float.xml \
+	ARB_compute_shader.xml \
 	ARB_copy_buffer.xml \
 	ARB_debug_output.xml \
 	ARB_depth_buffer_float.xml \
@@ -112,6 +113,7 @@ API_XML = \
 	ARB_sample_shading.xml \
 	ARB_sampler_objects.xml \
 	ARB_seamless_cube_map.xml \
+	ARB_separate_shader_objects.xml \
 	ARB_shader_atomic_counters.xml \
 	ARB_shader_image_load_store.xml \
 	ARB_sync.xml \

@@ -2134,11 +2134,20 @@ _glcpp_parser_handle_version_declaration(glcpp_parser_t *parser, intmax_t versio
 	      if (extensions->ARB_texture_gather)
 	         add_builtin_define(parser, "GL_ARB_texture_gather", 1);
 
+              if (extensions->ARB_separate_shader_objects)
+                 add_builtin_define(parser, "GL_ARB_separate_shader_objects", 1);
+
 	      if (extensions->ARB_shader_atomic_counters)
 	         add_builtin_define(parser, "GL_ARB_shader_atomic_counters", 1);
 
 	      if (extensions->ARB_viewport_array)
 	         add_builtin_define(parser, "GL_ARB_viewport_array", 1);
+
+              if (extensions->ARB_compute_shader)
+                 add_builtin_define(parser, "GL_ARB_compute_shader", 1);
+
+	      if (extensions->ARB_shader_image_load_store)
+	         add_builtin_define(parser, "GL_ARB_shader_image_load_store", 1);
 	   }
 	}
 

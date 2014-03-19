@@ -24,7 +24,6 @@
  *
  */
 
-#include "radeon/radeon_uvd.h"
 #include "r600_pipe_common.h"
 #include "r600_cs.h"
 #include "tgsi/tgsi_parse.h"
@@ -33,11 +32,37 @@
 #include "util/u_upload_mgr.h"
 #include "vl/vl_decoder.h"
 #include "vl/vl_video_buffer.h"
+#include "radeon/radeon_video.h"
 #include <inttypes.h>
 
 /*
  * pipe_context
  */
+
+static void r600_memory_barrier(struct pipe_context *ctx, unsigned flags)
+{
+}
+
+static void r600_flush_dma_ring(void *ctx, unsigned flags)
+{
+	struct r600_common_context *rctx = (struct r600_common_context *)ctx;
+	struct radeon_winsys_cs *cs = rctx->rings.dma.cs;
+
+	if (!cs->cdw) {
+		return;
+	}
+
+	rctx->rings.dma.flushing = true;
+	rctx->ws->cs_flush(cs, flags, 0);
+	rctx->rings.dma.flushing = false;
+}
+
+static void r600_flush_dma_from_winsys(void *ctx, unsigned flags)
+{
+	struct r600_common_context *rctx = (struct r600_common_context *)ctx;
+
+	rctx->rings.dma.flush(rctx, flags);
+}
 
 bool r600_common_context_init(struct r600_common_context *rctx,
 			      struct r600_common_screen *rscreen)
@@ -56,12 +81,14 @@ bool r600_common_context_init(struct r600_common_context *rctx,
 	rctx->b.transfer_flush_region = u_default_transfer_flush_region;
 	rctx->b.transfer_unmap = u_transfer_unmap_vtbl;
 	rctx->b.transfer_inline_write = u_default_transfer_inline_write;
+        rctx->b.memory_barrier = r600_memory_barrier;
 
+	r600_init_context_texture_functions(rctx);
 	r600_streamout_init(rctx);
 	r600_query_init(rctx);
 
 	rctx->allocator_so_filled_size = u_suballocator_create(&rctx->b, 4096, 4,
-							       0, PIPE_USAGE_STATIC, TRUE);
+							       0, PIPE_USAGE_DEFAULT, TRUE);
 	if (!rctx->allocator_so_filled_size)
 		return false;
 
@@ -70,6 +97,12 @@ bool r600_common_context_init(struct r600_common_context *rctx,
 					PIPE_BIND_CONSTANT_BUFFER);
 	if (!rctx->uploader)
 		return false;
+
+	if (rscreen->info.r600_has_dma && !(rscreen->debug_flags & DBG_NO_ASYNC_DMA)) {
+		rctx->rings.dma.cs = rctx->ws->cs_create(rctx->ws, RING_DMA, NULL);
+		rctx->rings.dma.flush = r600_flush_dma_ring;
+		rctx->ws->cs_set_flush_callback(rctx->rings.dma.cs, r600_flush_dma_from_winsys, rctx);
+	}
 
 	return true;
 }
@@ -129,6 +162,9 @@ static const struct debug_named_value common_debug_options[] = {
 	{ "compute", DBG_COMPUTE, "Print compute info" },
 	{ "vm", DBG_VM, "Print virtual addresses when creating resources" },
 	{ "trace_cs", DBG_TRACE_CS, "Trace cs and write rlockup_<csid>.c file with faulty cs" },
+
+	/* features */
+	{ "nodma", DBG_NO_ASYNC_DMA, "Disable asynchronous DMA" },
 
 	/* shaders */
 	{ "fs", DBG_FS, "Print fetch shaders" },
@@ -601,14 +637,14 @@ bool r600_common_screen_init(struct r600_common_screen *rscreen,
 	rscreen->b.resource_destroy = u_resource_destroy_vtbl;
 
 	if (rscreen->info.has_uvd) {
-		rscreen->b.get_video_param = ruvd_get_video_param;
-		rscreen->b.is_video_format_supported = ruvd_is_format_supported;
+		rscreen->b.get_video_param = rvid_get_video_param;
+		rscreen->b.is_video_format_supported = rvid_is_format_supported;
 	} else {
 		rscreen->b.get_video_param = r600_get_video_param;
 		rscreen->b.is_video_format_supported = vl_video_buffer_is_format_supported;
 	}
 
-	r600_init_texture_functions(rscreen);
+	r600_init_screen_texture_functions(rscreen);
 
 	rscreen->ws = ws;
 	rscreen->family = rscreen->info.family;

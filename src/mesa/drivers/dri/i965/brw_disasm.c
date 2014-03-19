@@ -244,7 +244,7 @@ static const char * const access_mode[2] = {
     [1] = "align16",
 };
 
-const char * const reg_encoding[8] = {
+static const char * const reg_encoding[8] = {
     [0] = "UD",
     [1] = "D",
     [2] = "UW",
@@ -740,7 +740,10 @@ static int src0_3src (FILE *file, struct brw_instruction *inst)
 	return 0;
     if (inst->bits2.da3src.src0_subreg_nr)
 	format (file, ".%d", inst->bits2.da3src.src0_subreg_nr);
-    string (file, "<4,1,1>");
+    if (inst->bits2.da3src.src0_rep_ctrl)
+       string (file, "<0,1,0>");
+    else
+       string (file, "<4,4,1>");
     err |= control (file, "src da16 reg type", three_source_reg_encoding,
                     inst->bits1.da3src.src_type, NULL);
     /*
@@ -792,7 +795,10 @@ static int src1_3src (FILE *file, struct brw_instruction *inst)
 	return 0;
     if (src1_subreg_nr)
 	format (file, ".%d", src1_subreg_nr);
-    string (file, "<4,1,1>");
+    if (inst->bits2.da3src.src1_rep_ctrl)
+       string (file, "<0,1,0>");
+    else
+       string (file, "<4,4,1>");
     err |= control (file, "src da16 reg type", three_source_reg_encoding,
                     inst->bits1.da3src.src_type, NULL);
     /*
@@ -843,7 +849,10 @@ static int src2_3src (FILE *file, struct brw_instruction *inst)
 	return 0;
     if (inst->bits3.da3src.src2_subreg_nr)
 	format (file, ".%d", inst->bits3.da3src.src2_subreg_nr);
-    string (file, "<4,1,1>");
+    if (inst->bits3.da3src.src2_rep_ctrl)
+       string (file, "<0,1,0>");
+    else
+       string (file, "<4,4,1>");
     err |= control (file, "src da16 reg type", three_source_reg_encoding,
                     inst->bits1.da3src.src_type, NULL);
     /*

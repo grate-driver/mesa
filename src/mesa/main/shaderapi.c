@@ -65,8 +65,8 @@
 /**
  * Return mask of GLSL_x flags by examining the MESA_GLSL env var.
  */
-static GLbitfield
-get_shader_flags(void)
+GLbitfield
+_mesa_get_shader_flags(void)
 {
    GLbitfield flags = 0x0;
    const char *env = _mesa_getenv("MESA_GLSL");
@@ -120,7 +120,11 @@ _mesa_init_shader_state(struct gl_context *ctx)
    for (sh = 0; sh < MESA_SHADER_STAGES; ++sh)
       memcpy(&ctx->ShaderCompilerOptions[sh], &options, sizeof(options));
 
-   ctx->Shader.Flags = get_shader_flags();
+   ctx->Shader.Flags = _mesa_get_shader_flags();
+
+   /* Extended for ARB_separate_shader_objects */
+   ctx->Shader.RefCount = 1;
+   mtx_init(&ctx->Shader.Mutex, mtx_plain);
 }
 
 
@@ -138,6 +142,10 @@ _mesa_free_shader_state(struct gl_context *ctx)
    _mesa_reference_shader_program(ctx, &ctx->Shader._CurrentFragmentProgram,
 				  NULL);
    _mesa_reference_shader_program(ctx, &ctx->Shader.ActiveProgram, NULL);
+
+   /* Extended for ARB_separate_shader_objects */
+   assert(ctx->Shader.RefCount == 1);
+   mtx_destroy(&ctx->Shader.Mutex);
 }
 
 
@@ -188,6 +196,8 @@ _mesa_validate_shader_target(const struct gl_context *ctx, GLenum type)
       return ctx == NULL || ctx->Extensions.ARB_vertex_shader;
    case GL_GEOMETRY_SHADER_ARB:
       return ctx == NULL || _mesa_has_geometry_shaders(ctx);
+   case GL_COMPUTE_SHADER:
+      return ctx == NULL || ctx->Extensions.ARB_compute_shader;
    default:
       return false;
    }
@@ -381,31 +391,31 @@ detach_shader(struct gl_context *ctx, GLuint program, GLuint shader)
          _mesa_reference_shader(ctx, &shProg->Shaders[i], NULL);
 
          /* alloc new, smaller array */
-         newList =
-            malloc((n - 1) * sizeof(struct gl_shader *));
+         newList = malloc((n - 1) * sizeof(struct gl_shader *));
          if (!newList) {
             _mesa_error(ctx, GL_OUT_OF_MEMORY, "glDetachShader");
             return;
          }
+         /* Copy old list entries to new list, skipping removed entry at [i] */
          for (j = 0; j < i; j++) {
             newList[j] = shProg->Shaders[j];
          }
-         while (++i < n)
+         while (++i < n) {
             newList[j++] = shProg->Shaders[i];
-         free(shProg->Shaders);
+         }
 
+         /* Free old list and install new one */
+         free(shProg->Shaders);
          shProg->Shaders = newList;
          shProg->NumShaders = n - 1;
 
 #ifdef DEBUG
-         /* sanity check */
-         {
-            for (j = 0; j < shProg->NumShaders; j++) {
-               assert(shProg->Shaders[j]->Type == GL_VERTEX_SHADER ||
-                      shProg->Shaders[j]->Type == GL_GEOMETRY_SHADER ||
-                      shProg->Shaders[j]->Type == GL_FRAGMENT_SHADER);
-               assert(shProg->Shaders[j]->RefCount > 0);
-            }
+         /* sanity check - make sure the new list's entries are sensible */
+         for (j = 0; j < shProg->NumShaders; j++) {
+            assert(shProg->Shaders[j]->Type == GL_VERTEX_SHADER ||
+                   shProg->Shaders[j]->Type == GL_GEOMETRY_SHADER ||
+                   shProg->Shaders[j]->Type == GL_FRAGMENT_SHADER);
+            assert(shProg->Shaders[j]->RefCount > 0);
          }
 #endif
 
@@ -604,6 +614,12 @@ get_programiv(struct gl_context *ctx, GLuint program, GLenum pname, GLint *param
       if (check_gs_query(ctx, shProg))
          *params = shProg->Geom.VerticesOut;
       return;
+   case GL_GEOMETRY_SHADER_INVOCATIONS:
+      if (!has_core_gs || !ctx->Extensions.ARB_gpu_shader5)
+         break;
+      if (check_gs_query(ctx, shProg))
+         *params = shProg->Geom.Invocations;
+      return;
    case GL_GEOMETRY_INPUT_TYPE:
       if (!has_core_gs)
          break;
@@ -661,6 +677,30 @@ get_programiv(struct gl_context *ctx, GLuint program, GLenum pname, GLint *param
          break;
 
       *params = shProg->NumAtomicBuffers;
+      return;
+   case GL_COMPUTE_WORK_GROUP_SIZE: {
+      int i;
+      if (!_mesa_is_desktop_gl(ctx) || !ctx->Extensions.ARB_compute_shader)
+         break;
+      if (!shProg->LinkStatus) {
+         _mesa_error(ctx, GL_INVALID_OPERATION, "glGetProgramiv(program not "
+                     "linked)");
+         return;
+      }
+      if (shProg->_LinkedShaders[MESA_SHADER_COMPUTE] == NULL) {
+         _mesa_error(ctx, GL_INVALID_OPERATION, "glGetProgramiv(no compute "
+                     "shaders)");
+         return;
+      }
+      for (i = 0; i < 3; i++)
+         params[i] = shProg->Comp.LocalSize[i];
+      return;
+   }
+   case GL_PROGRAM_SEPARABLE:
+      if (!ctx->Extensions.ARB_separate_shader_objects)
+         break;
+
+      *params = shProg->SeparateShader;
       return;
    default:
       break;
@@ -798,9 +838,10 @@ compile_shader(struct gl_context *ctx, GLuint shaderObj)
       sh->CompileStatus = GL_FALSE;
    } else {
       if (ctx->Shader.Flags & GLSL_DUMP) {
-         printf("GLSL source for %s shader %d:\n",
-                _mesa_shader_stage_to_string(sh->Stage), sh->Name);
-         printf("%s\n", sh->Source);
+         fprintf(stderr, "GLSL source for %s shader %d:\n",
+                 _mesa_shader_stage_to_string(sh->Stage), sh->Name);
+         fprintf(stderr, "%s\n", sh->Source);
+         fflush(stderr);
       }
 
       /* this call will set the shader->CompileStatus field to indicate if
@@ -814,16 +855,17 @@ compile_shader(struct gl_context *ctx, GLuint shaderObj)
 
       if (ctx->Shader.Flags & GLSL_DUMP) {
          if (sh->CompileStatus) {
-            printf("GLSL IR for shader %d:\n", sh->Name);
-            _mesa_print_ir(sh->ir, NULL);
-            printf("\n\n");
+            fprintf(stderr, "GLSL IR for shader %d:\n", sh->Name);
+            _mesa_print_ir(stderr, sh->ir, NULL);
+            fprintf(stderr, "\n\n");
          } else {
-            printf("GLSL shader %d failed to compile.\n", sh->Name);
+            fprintf(stderr, "GLSL shader %d failed to compile.\n", sh->Name);
          }
          if (sh->InfoLog && sh->InfoLog[0] != 0) {
-            printf("GLSL shader %d info log:\n", sh->Name);
-            printf("%s\n", sh->InfoLog);
+            fprintf(stderr, "GLSL shader %d info log:\n", sh->Name);
+            fprintf(stderr, "%s\n", sh->InfoLog);
          }
+         fflush(stderr);
       }
 
    }
@@ -967,6 +1009,9 @@ use_shader_program(struct gl_context *ctx, GLenum type,
       case GL_GEOMETRY_SHADER_ARB:
 	 /* Empty for now. */
 	 break;
+      case GL_COMPUTE_SHADER:
+         /* Empty for now. */
+         break;
       case GL_FRAGMENT_SHADER:
 	 if (*target == ctx->Shader._CurrentFragmentProgram) {
 	    _mesa_reference_shader_program(ctx,
@@ -990,6 +1035,7 @@ _mesa_use_program(struct gl_context *ctx, struct gl_shader_program *shProg)
    use_shader_program(ctx, GL_VERTEX_SHADER, shProg);
    use_shader_program(ctx, GL_GEOMETRY_SHADER_ARB, shProg);
    use_shader_program(ctx, GL_FRAGMENT_SHADER, shProg);
+   use_shader_program(ctx, GL_COMPUTE_SHADER, shProg);
    _mesa_active_program(ctx, shProg, "glUseProgram");
 
    if (ctx->Driver.UseProgram)
@@ -1698,6 +1744,25 @@ _mesa_ProgramParameteri(GLuint program, GLenum pname, GLint value)
        */
       shProg->BinaryRetreivableHint = value;
       return;
+
+   case GL_PROGRAM_SEPARABLE:
+      if (!ctx->Extensions.ARB_separate_shader_objects)
+         break;
+
+      /* Spec imply that the behavior is the same as ARB_get_program_binary
+       * Chapter 7.3 Program Objects
+       */
+      if (value != GL_TRUE && value != GL_FALSE) {
+         _mesa_error(ctx, GL_INVALID_VALUE,
+                     "glProgramParameteri(pname=%s, value=%d): "
+                     "value must be 0 or 1.",
+                     _mesa_lookup_enum_by_nr(pname),
+                     value);
+         return;
+      }
+      shProg->SeparateShader = value;
+      return;
+
    default:
       break;
    }
@@ -1769,19 +1834,16 @@ _mesa_ActiveProgramEXT(GLuint program)
    return;
 }
 
-
-/**
- * For GL_EXT_separate_shader_objects
- */
-GLuint GLAPIENTRY
-_mesa_CreateShaderProgramEXT(GLenum type, const GLchar *string)
+static GLuint
+_mesa_create_shader_program(struct gl_context* ctx, GLboolean separate,
+                            GLenum type, GLsizei count, const GLchar* const *strings)
 {
-   GET_CURRENT_CONTEXT(ctx);
    const GLuint shader = create_shader(ctx, type);
    GLuint program = 0;
 
    if (shader) {
-      shader_source(ctx, shader, _mesa_strdup(string));
+      _mesa_ShaderSource(shader, count, strings, NULL);
+
       compile_shader(ctx, shader);
 
       program = create_shader_program(ctx);
@@ -1792,6 +1854,8 @@ _mesa_CreateShaderProgramEXT(GLenum type, const GLchar *string)
 
 	 shProg = _mesa_lookup_shader_program(ctx, program);
 	 sh = _mesa_lookup_shader(ctx, shader);
+
+	 shProg->SeparateShader = separate;
 
 	 get_shaderiv(ctx, shader, GL_COMPILE_STATUS, &compiled);
 	 if (compiled) {
@@ -1835,13 +1899,48 @@ _mesa_copy_linked_program_data(gl_shader_stage type,
       struct gl_geometry_program *dst_gp = (struct gl_geometry_program *) dst;
       dst_gp->VerticesIn = src->Geom.VerticesIn;
       dst_gp->VerticesOut = src->Geom.VerticesOut;
+      dst_gp->Invocations = src->Geom.Invocations;
       dst_gp->InputType = src->Geom.InputType;
       dst_gp->OutputType = src->Geom.OutputType;
       dst->UsesClipDistanceOut = src->Geom.UsesClipDistance;
       dst_gp->UsesEndPrimitive = src->Geom.UsesEndPrimitive;
    }
       break;
+   case MESA_SHADER_COMPUTE: {
+      struct gl_compute_program *dst_cp = (struct gl_compute_program *) dst;
+      int i;
+      for (i = 0; i < 3; i++)
+         dst_cp->LocalSize[i] = src->Comp.LocalSize[i];
+   }
+      break;
    default:
       break;
    }
+}
+
+
+/**
+ * For GL_EXT_separate_shader_objects
+ */
+GLuint GLAPIENTRY
+_mesa_CreateShaderProgramEXT(GLenum type, const GLchar *string)
+{
+   GET_CURRENT_CONTEXT(ctx);
+
+   return _mesa_create_shader_program(ctx, GL_FALSE, type, 1, &string);
+}
+
+/**
+ * ARB_separate_shader_objects: Compile & Link Program
+ *
+ * Basically the same as _mesa_CreateShaderProgramEXT but with support of
+ * multiple strings and sets the SeparateShader flag to true.
+ */
+GLuint GLAPIENTRY
+_mesa_CreateShaderProgramv(GLenum type, GLsizei count,
+                           const GLchar* const *strings)
+{
+   GET_CURRENT_CONTEXT(ctx);
+
+   return _mesa_create_shader_program(ctx, GL_TRUE, type, count, strings);
 }

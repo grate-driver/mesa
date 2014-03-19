@@ -71,8 +71,6 @@ nvc0_screen_get_param(struct pipe_screen *pscreen, enum pipe_cap param)
    const uint16_t class_3d = nouveau_screen(pscreen)->class_3d;
 
    switch (param) {
-   case PIPE_CAP_MAX_COMBINED_SAMPLERS:
-      return 16 * 5;
    case PIPE_CAP_MAX_TEXTURE_2D_LEVELS:
    case PIPE_CAP_MAX_TEXTURE_CUBE_LEVELS:
       return 15;
@@ -176,7 +174,12 @@ nvc0_screen_get_param(struct pipe_screen *pscreen, enum pipe_cap param)
    case PIPE_CAP_ENDIANNESS:
       return PIPE_ENDIAN_LITTLE;
    case PIPE_CAP_TGSI_VS_LAYER:
+   case PIPE_CAP_MAX_TEXTURE_GATHER_COMPONENTS:
+   case PIPE_CAP_TEXTURE_GATHER_SM5:
+   case PIPE_CAP_BUFFER_MAP_PERSISTENT_COHERENT:
       return 0;
+   case PIPE_CAP_MAX_VIEWPORTS:
+      return 1;
    default:
       NOUVEAU_ERR("unknown PIPE_CAP %d\n", param);
       return 0;
@@ -337,7 +340,14 @@ nvc0_screen_destroy(struct pipe_screen *pscreen)
       return;
 
    if (screen->base.fence.current) {
-      nouveau_fence_wait(screen->base.fence.current);
+      struct nouveau_fence *current = NULL;
+
+      /* nouveau_fence_wait will create a new current fence, so wait on the
+       * _current_ one, and remove both.
+       */
+      nouveau_fence_ref(screen->base.fence.current, &current);
+      nouveau_fence_wait(current);
+      nouveau_fence_ref(NULL, &current);
       nouveau_fence_ref(NULL, &screen->base.fence.current);
    }
    if (screen->base.pushbuf)
@@ -369,6 +379,7 @@ nvc0_screen_destroy(struct pipe_screen *pscreen)
    nouveau_object_del(&screen->eng2d);
    nouveau_object_del(&screen->m2mf);
    nouveau_object_del(&screen->compute);
+   nouveau_object_del(&screen->nvsw);
 
    nouveau_screen_fini(&screen->base);
 
@@ -604,6 +615,14 @@ nvc0_screen_create(struct nouveau_device *dev)
    screen->fence.map = screen->fence.bo->map;
    screen->base.fence.emit = nvc0_screen_fence_emit;
    screen->base.fence.update = nvc0_screen_fence_update;
+
+
+   ret = nouveau_object_new(chan,
+                            (dev->chipset < 0xe0) ? 0x1f906e : 0x906e, 0x906e,
+                            NULL, 0, &screen->nvsw);
+   if (ret)
+      FAIL_SCREEN_INIT("Error creating SW object: %d\n", ret);
+
 
    switch (dev->chipset & ~0xf) {
    case 0x100:

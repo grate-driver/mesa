@@ -338,8 +338,6 @@ ilo_get_param(struct pipe_screen *screen, enum pipe_cap param)
       return ILO_MAX_SO_BUFFERS;
    case PIPE_CAP_PRIMITIVE_RESTART:
       return true;
-   case PIPE_CAP_MAX_COMBINED_SAMPLERS:
-      return ILO_MAX_SAMPLERS * 2;
    case PIPE_CAP_INDEP_BLEND_ENABLE:
    case PIPE_CAP_INDEP_BLEND_FUNC:
       return true;
@@ -406,8 +404,9 @@ ilo_get_param(struct pipe_screen *screen, enum pipe_cap param)
       /* imposed by OWord (Dual) Block Read */
       return 16;
    case PIPE_CAP_START_INSTANCE:
-   case PIPE_CAP_QUERY_TIMESTAMP:
       return true;
+   case PIPE_CAP_QUERY_TIMESTAMP:
+      return is->dev.has_timestamp;
    case PIPE_CAP_TEXTURE_MULTISAMPLE:
       return false; /* TODO */
    case PIPE_CAP_MIN_MAP_BUFFER_ALIGNMENT:
@@ -420,9 +419,8 @@ ilo_get_param(struct pipe_screen *screen, enum pipe_cap param)
    case PIPE_CAP_TGSI_TEXCOORD:
       return false;
    case PIPE_CAP_PREFER_BLIT_BASED_TEXTURE_TRANSFER:
-      return true;
    case PIPE_CAP_QUERY_PIPELINE_STATISTICS:
-      return false; /* TODO */
+      return true;
    case PIPE_CAP_TEXTURE_BORDER_COLOR_QUIRK:
       return 0;
    case PIPE_CAP_MAX_TEXTURE_BUFFER_SIZE:
@@ -435,6 +433,9 @@ ilo_get_param(struct pipe_screen *screen, enum pipe_cap param)
    case PIPE_CAP_MIXED_FRAMEBUFFER_SIZES:
       return true;
    case PIPE_CAP_TGSI_VS_LAYER:
+   case PIPE_CAP_MAX_TEXTURE_GATHER_COMPONENTS:
+   case PIPE_CAP_TEXTURE_GATHER_SM5:
+   case PIPE_CAP_BUFFER_MAP_PERSISTENT_COHERENT:
       return 0;
 
    default:
@@ -646,9 +647,36 @@ static bool
 init_dev(struct ilo_dev_info *dev, const struct intel_winsys_info *info)
 {
    dev->devid = info->devid;
+   dev->max_batch_size = info->max_batch_size;
    dev->has_llc = info->has_llc;
-   dev->has_gen7_sol_reset = info->has_gen7_sol_reset;
    dev->has_address_swizzling = info->has_address_swizzling;
+   dev->has_logical_context = info->has_logical_context;
+   dev->has_ppgtt = info->has_ppgtt;
+   dev->has_timestamp = info->has_timestamp;
+   dev->has_gen7_sol_reset = info->has_gen7_sol_reset;
+
+   if (!dev->has_logical_context) {
+      ilo_err("missing hardware logical context support\n");
+      return false;
+   }
+
+   /*
+    * PIPE_CONTROL and MI_* use PPGTT writes on GEN7+ and privileged GGTT
+    * writes on GEN6.
+    *
+    * From the Sandy Bridge PRM, volume 1 part 3, page 101:
+    *
+    *     "[DevSNB] When Per-Process GTT Enable is set, it is assumed that all
+    *      code is in a secure environment, independent of address space.
+    *      Under this condition, this bit only specifies the address space
+    *      (GGTT or PPGTT). All commands are executed "as-is""
+    *
+    * We need PPGTT to be enabled on GEN6 too.
+    */
+   if (!dev->has_ppgtt) {
+      /* experiments show that it does not really matter... */
+      ilo_warn("PPGTT disabled\n");
+   }
 
    /*
     * From the Sandy Bridge PRM, volume 4 part 2, page 18:
@@ -727,8 +755,6 @@ ilo_screen_create(struct intel_winsys *ws)
       return NULL;
 
    is->winsys = ws;
-
-   intel_winsys_enable_reuse(is->winsys);
 
    info = intel_winsys_get_info(is->winsys);
    if (!init_dev(&is->dev, info)) {

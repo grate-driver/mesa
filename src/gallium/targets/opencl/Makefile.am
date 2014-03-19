@@ -4,14 +4,15 @@ lib_LTLIBRARIES = lib@OPENCL_LIBNAME@.la
 
 lib@OPENCL_LIBNAME@_la_LDFLAGS = \
 	$(LLVM_LDFLAGS) \
+	-no-undefined \
 	-version-number 1:0
 
 lib@OPENCL_LIBNAME@_la_LIBADD = \
-	$(top_builddir)/src/gallium/auxiliary/pipe-loader/libpipe_loader.la \
+	$(top_builddir)/src/gallium/auxiliary/pipe-loader/libpipe_loader_client.la \
 	$(top_builddir)/src/gallium/winsys/sw/null/libws_null.la \
 	$(top_builddir)/src/gallium/state_trackers/clover/libclover.la \
 	$(top_builddir)/src/gallium/auxiliary/libgallium.la \
-	$(GALLIUM_PIPE_LOADER_LIBS) $(LIBUDEV_LIBS) \
+	$(GALLIUM_PIPE_LOADER_CLIENT_LIBS) \
 	-ldl \
 	-lclangCodeGen \
 	-lclangFrontendTool \
@@ -28,6 +29,18 @@ lib@OPENCL_LIBNAME@_la_LIBADD = \
 	-lclangBasic \
 	$(LLVM_LIBS)
 
+if HAVE_DRI
+lib@OPENCL_LIBNAME@_la_LIBADD += \
+	$(top_builddir)/src/gallium/winsys/sw/dri/libswdri.la
+endif
+
+if NEED_PIPE_LOADER_XLIB
+lib@OPENCL_LIBNAME@_la_LIBADD += \
+	$(top_builddir)/src/gallium/winsys/sw/xlib/libws_xlib.la \
+	-lX11 -lXext -lXfixes \
+	$(LIBDRM_LIBS)
+endif
+
 lib@OPENCL_LIBNAME@_la_SOURCES =
 
 # Force usage of a C++ linker
@@ -38,8 +51,4 @@ icddir = /etc/OpenCL/vendors/
 icd_DATA = mesa.icd
 endif
 
-# Provide compatibility with scripts for the old Mesa build system for
-# a while by putting a link to the driver into /lib of the build tree.
-all-local: lib@OPENCL_LIBNAME@.la
-	$(MKDIR_P) $(top_builddir)/$(LIB_DIR)
-	ln -f .libs/lib@OPENCL_LIBNAME@.so* $(top_builddir)/$(LIB_DIR)/
+include $(top_srcdir)/install-gallium-links.mk
