@@ -70,9 +70,6 @@ else
 	EGL_DISPLAYS += drm
 # Non-Linux ports also lack *_CLOEXEC and epoll, so wayland isn't ready yet:
 	EGL_DISPLAYS += wayland
-# < aboll> opencl needs gallium-pipe-loader which needs udev
-# so no opencl for kbsd
-	confflags_GALLIUM += --enable-opencl --enable-opencl-icd
     ifeq (,$(filter $(DEB_HOST_ARCH), s390 s390x))
 	DRI_DRIVERS += nouveau
     endif
@@ -98,6 +95,11 @@ else
     # Radeonsi needs LLVM, so only build it on the subset of archs
     # where we have LLVM enabled.
     GALLIUM_DRIVERS += radeonsi
+	# opencl needs gallium-pipe-loader which needs udev,
+	# so no opencl on kfreebsd.
+	# opencl needs LLVM and Clang, so only build it on the subset
+	# of arches where we have LLVM enabled.
+	confflags_GALLIUM += --enable-opencl --enable-opencl-icd
   endif
 
   # LLVM is required for r300g and llvmpipe:
