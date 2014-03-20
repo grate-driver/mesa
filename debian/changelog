@@ -1,3 +1,10 @@
+mesa (10.1.0-4) UNRELEASED; urgency=medium
+
+  * Fix unsatisfiable libwayland-egl1-mesa and libwayland-dev dependency on
+    !linux (Closes: #742306).
+
+ -- Andreas Boll <andreas.boll.dev@gmail.com>  Thu, 20 Mar 2014 18:12:38 +0100
+
 mesa (10.1.0-3) unstable; urgency=medium
 
   [ Andreas Boll ]
