@@ -1,10 +1,11 @@
-mesa (10.1.0-4) UNRELEASED; urgency=medium
+mesa (10.1.0-4) unstable; urgency=medium
 
+  [ Andreas Boll ]
   * Fix unsatisfiable libwayland-egl1-mesa and libwayland-dev dependency on
     !linux (Closes: #742306).
   * Install /etc/drirc on hurd (Closes: #741572).
 
- -- Andreas Boll <andreas.boll.dev@gmail.com>  Thu, 20 Mar 2014 18:12:38 +0100
+ -- Julien Cristau <jcristau@debian.org>  Sat, 22 Mar 2014 10:39:12 +0100
 
 mesa (10.1.0-3) unstable; urgency=medium
 
