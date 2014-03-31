@@ -1,3 +1,10 @@
+mesa (10.1.0-5) UNRELEASED; urgency=low
+
+  * Add explicit libudev1 dependency.
+    - libudev is being dlsym'd now, but still a dependency.
+
+ -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Mon, 31 Mar 2014 11:25:48 +0200
+
 mesa (10.1.0-4) unstable; urgency=medium
 
   [ Andreas Boll ]
