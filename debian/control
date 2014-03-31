@@ -99,7 +99,7 @@ Architecture: linux-any
 Depends:
  ${shlibs:Depends},
  ${misc:Depends},
- libudev1 [linux-any],
+ libudev1 | libudev0,
 Pre-Depends: ${misc:Pre-Depends}
 Multi-Arch: same
 Description: generic buffer management API -- runtime
@@ -147,7 +147,7 @@ Architecture: any
 Depends:
  ${shlibs:Depends},
  ${misc:Depends},
- libudev1 [linux-any],
+ libudev1 | libudev0,
 Recommends: libegl1-mesa-drivers
 Provides: libegl1-x11
 Conflicts: libegl1-x11
@@ -220,7 +220,7 @@ Depends:
  libegl1-mesa (= ${binary:Version}),
  libglapi-mesa (= ${binary:Version}),
  libwayland-egl1-mesa (= ${binary:Version}) [linux-any],
- libudev1 [linux-any],
+ libudev1 | libudev0,
 Pre-Depends: ${misc:Pre-Depends}
 Multi-Arch: same
 Description: free implementation of the EGL API -- hardware drivers
@@ -478,7 +478,7 @@ Depends:
  ${shlibs:Depends},
  ${misc:Depends}
  libglapi-mesa (= ${binary:Version}),
- libudev1 [linux-any],
+ libudev1 | libudev0,
 Recommends: libgl1-mesa-dri (>= 7.2)
 Conflicts: libgl1, libgl1-mesa-dri (<< 6.4.0)
 Replaces: libgl1, libgl1-mesa-dri (<< 6.4.0)

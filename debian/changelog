@@ -1,3 +1,10 @@
+mesa (10.1.0-4ubuntu1) UNRELEASED; urgency=medium
+
+  * Merge from unreleased debian sid.
+  * Add explicit libudev1 | libudev0 dependency. (LP: #1296947)
+
+ -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Mon, 31 Mar 2014 11:25:48 +0200
+
 mesa (10.1.0-5) UNRELEASED; urgency=low
 
   * Add explicit libudev1 dependency.
