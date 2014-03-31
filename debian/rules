@@ -23,7 +23,7 @@ else
 	confflags += --build=$(DEB_BUILD_GNU_TYPE) --host=$(DEB_HOST_GNU_TYPE)
 endif
 
-ifeq (,$(filter $(DEB_HOST_ARCH), armel armhf))
+ifeq (,$(filter $(DEB_HOST_ARCH), armhf))
 buildflags = \
 	$(shell DEB_CFLAGS_MAINT_APPEND=-Wall DEB_CXXFLAGS_MAINT_APPEND=-Wall dpkg-buildflags --export=configure)
 else
@@ -97,14 +97,10 @@ else
     DRI_DRIVERS += r200 radeon
     GALLIUM_DRIVERS += r600 r300
   endif
-  ifneq (,$(filter $(DEB_HOST_ARCH),amd64 i386 armhf))
-    # Radeonsi needs LLVM, so only build it on the subset of archs
-    # where we have LLVM enabled.
-    GALLIUM_DRIVERS += radeonsi
-  endif
 
-  # LLVM is required for r300g and llvmpipe:
+  # LLVM is required for r300g, radeonsi and llvmpipe:
   ifneq (,$(filter $(DEB_HOST_ARCH),amd64 i386 kfreebsd-amd64 kfreebsd-i386 armhf))
+	GALLIUM_DRIVERS += radeonsi
 	confflags_GALLIUM += --enable-gallium-llvm
 	confflags_GALLIUM += --with-llvm-shared-libs
   endif
@@ -276,7 +272,7 @@ binary-arch: install
 	# Because there's no packaging problem so onerous that accomodating
 	# proprietary alternatives can't make more difficult…
 	set -e ; for PACKAGE in \
-		libegl1-mesa libgles1-mesa libgles2-mesa libopenvg1-mesa ; do \
+		libegl1-mesa libgles1-mesa libgles2-mesa libopenvg1-mesa; do \
 			dh_makeshlibs -p$$PACKAGE -- -c4 \
 			-edebian/$$PACKAGE/usr/lib/$(DEB_HOST_MULTIARCH)/mesa-egl/\* \
 		; done

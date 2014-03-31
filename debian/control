@@ -99,6 +99,7 @@ Architecture: linux-any
 Depends:
  ${shlibs:Depends},
  ${misc:Depends},
+ libudev1 [linux-any],
 Pre-Depends: ${misc:Pre-Depends}
 Multi-Arch: same
 Description: generic buffer management API -- runtime
@@ -146,6 +147,7 @@ Architecture: any
 Depends:
  ${shlibs:Depends},
  ${misc:Depends},
+ libudev1 [linux-any],
 Recommends: libegl1-mesa-drivers
 Provides: libegl1-x11
 Conflicts: libegl1-x11
@@ -198,7 +200,7 @@ Depends:
  libxshmfence-dev,
  libx11-xcb-dev,
  libmirclient-dev [!arm64 !powerpc !ppc64 !ppc64el],
- libwayland-dev (>= 1.2.0),
+ libwayland-dev (>= 1.2.0) [linux-any],
  ${misc:Depends},
 Description: free implementation of the EGL API -- development files
  This package contains the development environment required for compiling
@@ -217,6 +219,8 @@ Depends:
  ${misc:Depends},
  libegl1-mesa (= ${binary:Version}),
  libglapi-mesa (= ${binary:Version}),
+ libwayland-egl1-mesa (= ${binary:Version}) [linux-any],
+ libudev1 [linux-any],
 Pre-Depends: ${misc:Pre-Depends}
 Multi-Arch: same
 Description: free implementation of the EGL API -- hardware drivers
@@ -242,6 +246,35 @@ Description: free implementation of the EGL API -- driver debugging symbols
  .
  This package contains the debugging symbols for the drivers required for
  hardware accelerated rendering of EGL-based graphics libraries.
+
+Package: libwayland-egl1-mesa
+Section: libs
+Architecture: linux-any
+Depends:
+ ${shlibs:Depends},
+ ${misc:Depends},
+ libegl1-mesa (= ${binary:Version})
+Recommends: libegl1-mesa-drivers
+Provides: libwayland-egl1
+Conflicts: libwayland-egl1
+Replaces: libwayland-egl1, libegl1-mesa-drivers  (<< 10.1.0-2)
+Breaks: libegl1-mesa-drivers (<< 10.1.0-2)
+Pre-Depends: ${misc:Pre-Depends}
+Multi-Arch: same
+Description: implementation of the Wayland EGL platform -- runtime
+ This package contains the mesa implementation of the Wayland EGL platform
+
+Package: libwayland-egl1-mesa-dbg
+Section: debug
+Priority: extra
+Architecture: linux-any
+Depends:
+ libwayland-egl1-mesa (= ${binary:Version}),
+ ${misc:Depends},
+Multi-Arch: same
+Description: implementation of the Wayland EGL platform -- debugging symbols
+ This package contains the debugging symbols for the mesa implementation of the
+ Wayland EGL platform
 
 Package: libopenvg1-mesa
 Section: libs
@@ -443,8 +476,9 @@ Section: libs
 Architecture: any
 Depends:
  ${shlibs:Depends},
- libglapi-mesa (= ${binary:Version}),
  ${misc:Depends}
+ libglapi-mesa (= ${binary:Version}),
+ libudev1 [linux-any],
 Recommends: libgl1-mesa-dri (>= 7.2)
 Conflicts: libgl1, libgl1-mesa-dri (<< 6.4.0)
 Replaces: libgl1, libgl1-mesa-dri (<< 6.4.0)
