@@ -254,7 +254,7 @@ Depends:
  ${shlibs:Depends},
  ${misc:Depends},
  libudev1 [linux-any],
-Recommends: libegl1-mesa-drivers
+Recommends: libegl1-mesa-drivers [!hurd-any]
 Provides: libegl1-x11
 Conflicts: libegl1-x11
 Replaces: libegl1-x11
@@ -289,7 +289,7 @@ Section: libdevel
 Architecture: any
 Depends:
  libegl1-mesa (= ${binary:Version}),
- libegl1-mesa-drivers (= ${binary:Version}),
+ libegl1-mesa-drivers (= ${binary:Version}) [!hurd-any],
  libdrm-dev (>= 2.4.52) [!hurd-any],
  x11proto-dri2-dev (>= 2.6),
  x11proto-gl-dev (>= 1.4.14),
