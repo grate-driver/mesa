@@ -11,3 +11,4 @@
 egl-platform-mir.patch
 i915-dont-default-to-2.1.patch
 fix-bsymbolic-madness.patch
+fix-kwin.diff
