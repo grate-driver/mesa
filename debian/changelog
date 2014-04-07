@@ -6,6 +6,53 @@ mesa (10.2.0~git20140319-0ubuntu1) UNRELEASED; urgency=medium
 
  -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Wed, 19 Mar 2014 11:31:15 +0100
 
+mesa (10.1.0-4ubuntu1) trusty; urgency=medium
+
+  * Merge from unreleased debian sid.
+  * Add explicit libudev1 | libudev0 dependency. (LP: #1296947)
+
+ -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Mon, 31 Mar 2014 09:56:17 +0000
+
+mesa (10.1.0-5) UNRELEASED; urgency=low
+
+  * Add explicit libudev1 dependency.
+    - libudev is being dlsym'd now, but still a dependency.
+
+ -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Mon, 31 Mar 2014 11:25:48 +0200
+
+mesa (10.1.0-4) unstable; urgency=medium
+
+  [ Andreas Boll ]
+  * Fix unsatisfiable libwayland-egl1-mesa and libwayland-dev dependency on
+    !linux (Closes: #742306).
+  * Install /etc/drirc on hurd (Closes: #741572).
+
+ -- Julien Cristau <jcristau@debian.org>  Sat, 22 Mar 2014 10:39:12 +0100
+
+mesa (10.1.0-3) unstable; urgency=medium
+
+  [ Andreas Boll ]
+  * Build OpenCL only on architectures where we have LLVM enabled.
+  * Actually enable radeonsi on kfreebsd.
+
+  [ Sven Joachim ]
+  * Drop dependency of libegl1-mesa-drivers on libgl1-mesa-dri again.
+
+  [ Julien Cristau ]
+  * Steal Ubuntu patch to work around build failure on armhf
+    (https://bugs.freedesktop.org/show_bug.cgi?id=72064)
+  * Upload to unstable.
+
+ -- Julien Cristau <jcristau@debian.org>  Wed, 19 Mar 2014 22:48:14 +0100
+
+mesa (10.1.0-2) experimental; urgency=medium
+
+  [ Sjoerd Simons ]
+  * Install libwayland-egl in a separate library package (libwayland-egl1-mesa)
+    and provide a virtual libwayland-egl1 package. (Closes: #739269).
+
+ -- Julien Cristau <jcristau@debian.org>  Mon, 17 Mar 2014 23:11:14 +0100
+
 mesa (10.1.0-1ubuntu1) trusty; urgency=medium
 
   * Merge from released debian-experimental.
