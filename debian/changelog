@@ -1,4 +1,4 @@
-mesa (10.1.0-4ubuntu3) UNRELEASED; urgency=medium
+mesa (10.1.0-4ubuntu3) trusty; urgency=medium
 
   * i965-dont-call-abort-on-unknown-dev.diff: Allow using a fallback
     driver when the native one doesn't support the device.
