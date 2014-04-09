@@ -1,3 +1,10 @@
+mesa (10.1.0-4ubuntu3) UNRELEASED; urgency=medium
+
+  * i965-dont-call-abort-on-unknown-dev.diff: Allow using a fallback
+    driver when the native one doesn't support the device.
+
+ -- Timo Aaltonen <tjaalton@ubuntu.com>  Wed, 09 Apr 2014 12:42:49 +0300
+
 mesa (10.1.0-4ubuntu2) trusty; urgency=medium
 
   * fix-kwin.diff: i965; Don't check reset status on gen4/5. (LP: #1299499)
