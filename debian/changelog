@@ -1,3 +1,9 @@
+mesa (10.1.0-4ubuntu4) UNRELEASED; urgency=low
+
+  * Cherry-pick patches to improve stability with vmware. (LP: #1284134)
+
+ -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Thu, 10 Apr 2014 10:20:53 +0200
+
 mesa (10.1.0-4ubuntu3) trusty; urgency=medium
 
   * i965-dont-call-abort-on-unknown-dev.diff: Allow using a fallback
