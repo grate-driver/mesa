@@ -1,3 +1,9 @@
+mesa (10.2.0~git20140411-1) UNRELEASED; urgency=medium
+
+  * New upstream snapshot.
+
+ -- Timo Aaltonen <tjaalton@ubuntu.com>  Fri, 11 Apr 2014 17:48:37 +0300
+
 mesa (10.1.0-5) unstable; urgency=low
 
   [ Maarten Lankhorst ]
