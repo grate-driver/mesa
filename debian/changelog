@@ -1,6 +1,7 @@
 mesa (10.2.0~git20140411-1) UNRELEASED; urgency=medium
 
   * New upstream snapshot.
+    - 03_gbm_make_devices_static.diff dropped, upstream
 
  -- Timo Aaltonen <tjaalton@ubuntu.com>  Fri, 11 Apr 2014 17:48:37 +0300
 
