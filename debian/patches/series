@@ -16,3 +16,5 @@ i965-dont-call-abort-on-unknown-dev.diff
 cso-fix-sampler-view-count.patch
 svga-replace-sampler-assertion.patch
 svga-move-dirty-buffers.patch
+enable-bdw.diff
+fix-unity-on-bdw.diff
