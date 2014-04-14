@@ -1,9 +1,9 @@
-mesa (10.1.0-4ubuntu5) UNRELEASED; urgency=medium
+mesa (10.1.0-4ubuntu5) trusty; urgency=medium
 
   * enable-bdw.diff: Enable Broadwell support. (LP: #1300258)
   * fix-unity-on-bdw.diff: Fix rendering on unity.
 
- -- Timo Aaltonen <tjaalton@ubuntu.com>  Fri, 11 Apr 2014 11:03:36 +0300
+ -- Timo Aaltonen <tjaalton@ubuntu.com>  Mon, 14 Apr 2014 09:59:17 +0300
 
 mesa (10.1.0-4ubuntu4) trusty; urgency=medium
 
