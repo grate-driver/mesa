@@ -1,6 +1,6 @@
 --- a/configure.ac
 +++ b/configure.ac
-@@ -1468,7 +1468,9 @@
+@@ -1474,7 +1474,9 @@
  
  	android|fbdev|gdi|null)
  		;;
@@ -11,7 +11,7 @@
  	*)
  		AC_MSG_ERROR([EGL platform '$plat' does not exist])
  		;;
-@@ -1497,6 +1499,7 @@
+@@ -1503,6 +1505,7 @@
  AM_CONDITIONAL(HAVE_EGL_PLATFORM_DRM, echo "$egl_platforms" | grep 'drm' >/dev/null 2>&1)
  AM_CONDITIONAL(HAVE_EGL_PLATFORM_FBDEV, echo "$egl_platforms" | grep 'fbdev' >/dev/null 2>&1)
  AM_CONDITIONAL(HAVE_EGL_PLATFORM_NULL, echo "$egl_platforms" | grep 'null' >/dev/null 2>&1)
@@ -65,7 +65,7 @@
 +endif
 --- a/src/egl/drivers/dri2/egl_dri2.c
 +++ b/src/egl/drivers/dri2/egl_dri2.c
-@@ -639,6 +639,12 @@
+@@ -638,6 +638,12 @@
           return EGL_TRUE;
        return dri2_initialize_wayland(drv, disp);
  #endif
@@ -75,9 +75,9 @@
 +         return EGL_TRUE;
 +      return dri2_initialize_mir(drv, disp);
 +#endif
- #endif
  #ifdef HAVE_ANDROID_PLATFORM
     case _EGL_PLATFORM_ANDROID:
+       if (disp->Options.TestOnly)
 --- a/src/egl/drivers/dri2/egl_dri2.h
 +++ b/src/egl/drivers/dri2/egl_dri2.h
 @@ -64,6 +64,11 @@
