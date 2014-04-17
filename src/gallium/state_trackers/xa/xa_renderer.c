@@ -406,6 +406,9 @@ renderer_copy_prepare(struct xa_context *r,
 				       PIPE_BIND_RENDER_TARGET));
     (void)screen;
 
+    renderer_bind_destination(r, dst_surface,
+			      dst_surface->width, dst_surface->height);
+
     /* set misc state we care about */
     {
 	struct pipe_blend_state blend;
@@ -422,6 +425,7 @@ renderer_copy_prepare(struct xa_context *r,
     /* sampler */
     {
 	struct pipe_sampler_state sampler;
+        const struct pipe_sampler_state *p_sampler = &sampler;
 
 	memset(&sampler, 0, sizeof(sampler));
 	sampler.wrap_s = PIPE_TEX_WRAP_CLAMP_TO_EDGE;
@@ -431,12 +435,9 @@ renderer_copy_prepare(struct xa_context *r,
 	sampler.min_img_filter = PIPE_TEX_FILTER_NEAREST;
 	sampler.mag_img_filter = PIPE_TEX_FILTER_NEAREST;
 	sampler.normalized_coords = 1;
-	cso_single_sampler(r->cso, PIPE_SHADER_FRAGMENT, 0, &sampler);
-	cso_single_sampler_done(r->cso, PIPE_SHADER_FRAGMENT);
+        cso_set_samplers(r->cso, PIPE_SHADER_FRAGMENT, 1, &p_sampler);
+        r->num_bound_samplers = 1;
     }
-
-    renderer_bind_destination(r, dst_surface,
-			      dst_surface->width, dst_surface->height);
 
     /* texture/sampler view */
     {

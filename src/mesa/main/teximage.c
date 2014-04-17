@@ -160,6 +160,9 @@ _mesa_base_tex_format( struct gl_context *ctx, GLint internalFormat )
          case GL_DEPTH_COMPONENT24:
          case GL_DEPTH_COMPONENT32:
             return GL_DEPTH_COMPONENT;
+         case GL_DEPTH_STENCIL:
+         case GL_DEPTH24_STENCIL8:
+            return GL_DEPTH_STENCIL;
          default:
             ; /* fallthrough */
       }
@@ -299,14 +302,6 @@ _mesa_base_tex_format( struct gl_context *ctx, GLint internalFormat )
          default:
             ; /* fallthrough */
       }
-   }
-
-   switch (internalFormat) {
-   case GL_DEPTH_STENCIL:
-   case GL_DEPTH24_STENCIL8:
-      return GL_DEPTH_STENCIL;
-   default:
-      ; /* fallthrough */
    }
 
    if (ctx->Extensions.EXT_texture_sRGB) {
@@ -1655,7 +1650,10 @@ error_check_subtexture_dimensions(struct gl_context *ctx,
 
    /* check zoffset and depth */
    if (dims > 2) {
-      GLint zBorder = (target == GL_TEXTURE_2D_ARRAY) ? 0 : destImage->Border;
+      GLint zBorder = (target == GL_TEXTURE_2D_ARRAY ||
+                       target == GL_TEXTURE_CUBE_MAP_ARRAY) ?
+                         0 : destImage->Border;
+
       if (zoffset < -zBorder) {
          _mesa_error(ctx, GL_INVALID_VALUE, "%s3D(zoffset)", function);
          return GL_TRUE;
@@ -2049,6 +2047,8 @@ texture_error_check( struct gl_context *ctx,
                      GLint depth, GLint border )
 {
    GLboolean colorFormat;
+   GLboolean is_format_depth_or_depthstencil;
+   GLboolean is_internalFormat_depth_or_depthstencil;
    GLenum err;
 
    /* Even though there are no color-index textures, we still have to support
@@ -2139,11 +2139,18 @@ texture_error_check( struct gl_context *ctx,
    }
 
    /* make sure internal format and format basically agree */
+   is_internalFormat_depth_or_depthstencil =
+      _mesa_is_depth_format(internalFormat) ||
+      _mesa_is_depthstencil_format(internalFormat);
+
+   is_format_depth_or_depthstencil =
+      _mesa_is_depth_format(format) ||
+      _mesa_is_depthstencil_format(format);
+
    colorFormat = _mesa_is_color_format(format);
    if ((_mesa_is_color_format(internalFormat) && !colorFormat && !indexFormat) ||
-       (_mesa_is_depth_format(internalFormat) != _mesa_is_depth_format(format)) ||
+       (is_internalFormat_depth_or_depthstencil != is_format_depth_or_depthstencil) ||
        (_mesa_is_ycbcr_format(internalFormat) != _mesa_is_ycbcr_format(format)) ||
-       (_mesa_is_depthstencil_format(internalFormat) != _mesa_is_depthstencil_format(format)) ||
        (_mesa_is_dudv_format(internalFormat) != _mesa_is_dudv_format(format))) {
       _mesa_error(ctx, GL_INVALID_OPERATION,
                   "glTexImage%dD(incompatible internalFormat = %s, format = %s)",
