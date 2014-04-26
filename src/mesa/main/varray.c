@@ -569,8 +569,8 @@ void GLAPIENTRY
 _mesa_EdgeFlagPointer(GLsizei stride, const GLvoid *ptr)
 {
    const GLbitfield legalTypes = UNSIGNED_BYTE_BIT;
-   /* see table 2.4 edits in GL_EXT_gpu_shader4 spec: */
-   const GLboolean integer = GL_TRUE;
+   /* this is the same type that glEdgeFlag uses */
+   const GLboolean integer = GL_FALSE;
    GET_CURRENT_CONTEXT(ctx);
 
    FLUSH_VERTICES(ctx, 0);
@@ -1223,7 +1223,7 @@ _mesa_MultiDrawArrays( GLenum mode, const GLint *first,
 
    for (i = 0; i < primcount; i++) {
       if (count[i] > 0) {
-         CALL_DrawArrays(ctx->Exec, (mode, first[i], count[i]));
+         CALL_DrawArrays(ctx->CurrentDispatch, (mode, first[i], count[i]));
       }
    }
 }
@@ -1243,7 +1243,7 @@ _mesa_MultiModeDrawArraysIBM( const GLenum * mode, const GLint * first,
    for ( i = 0 ; i < primcount ; i++ ) {
       if ( count[i] > 0 ) {
          GLenum m = *((GLenum *) ((GLubyte *) mode + i * modestride));
-	 CALL_DrawArrays(ctx->Exec, ( m, first[i], count[i] ));
+	 CALL_DrawArrays(ctx->CurrentDispatch, ( m, first[i], count[i] ));
       }
    }
 }
@@ -1265,7 +1265,8 @@ _mesa_MultiModeDrawElementsIBM( const GLenum * mode, const GLsizei * count,
    for ( i = 0 ; i < primcount ; i++ ) {
       if ( count[i] > 0 ) {
          GLenum m = *((GLenum *) ((GLubyte *) mode + i * modestride));
-	 CALL_DrawElements(ctx->Exec, ( m, count[i], type, indices[i] ));
+	 CALL_DrawElements(ctx->CurrentDispatch, ( m, count[i], type,
+                                                   indices[i] ));
       }
    }
 }
