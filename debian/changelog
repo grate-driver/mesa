@@ -3,6 +3,8 @@ mesa (10.1.1-1) UNRELEASED; urgency=low
   * New upstream release.
   * Relax ocl-icd-libopencl1 dependency to allow the generic virtual
     libopencl1 as a valid alternative (Closes: #745765).
+  * Add missing separator between dependency items '${misc:Depends}'
+    and 'libglapi-mesa (= ${binary:Version})'.
 
  -- Andreas Boll <andreas.boll.dev@gmail.com>  Sat, 26 Apr 2014 16:05:08 +0200
 
