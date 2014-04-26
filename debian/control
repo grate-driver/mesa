@@ -826,7 +826,7 @@ Section: libs
 Architecture: amd64 i386 armhf
 Depends:
  libclc-r600,
- ocl-icd-libopencl1,
+ ocl-icd-libopencl1 | libopencl1,
  ${shlibs:Depends},
  ${misc:Depends},
 Provides: opencl-icd

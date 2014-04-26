@@ -14,6 +14,10 @@ mesa (10.2.0~rc1-1) UNRELEASED; urgency=medium
   * Add 01_no_undefined.diff to actually add -Wl,--no-undefined to the linker
     flags for our shared libraries.
 
+  [ Andreas Boll ]
+  * Relax ocl-icd-libopencl1 dependency to allow the generic virtual
+    libopencl1 as a valid alternative (Closes: #745765).
+
  -- Timo Aaltonen <tjaalton@ubuntu.com>  Fri, 11 Apr 2014 17:48:37 +0300
 
 mesa (10.1.0-5) unstable; urgency=low
