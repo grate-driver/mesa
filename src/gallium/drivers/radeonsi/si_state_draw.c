@@ -439,15 +439,18 @@ static bool si_update_draw_info_state(struct si_context *sctx,
 			ia_switch_on_eop = true;
 		}
 
-		si_pm4_set_reg(pm4, R_028AA8_IA_MULTI_VGT_PARAM,
+		si_pm4_set_reg(pm4, R_028B74_VGT_DISPATCH_DRAW_INDEX,
+			       ib->index_size == 4 ? 0xFC000000 : 0xFC00);
+
+		si_pm4_cmd_begin(pm4, PKT3_DRAW_PREAMBLE);
+		si_pm4_cmd_add(pm4, prim); /* VGT_PRIMITIVE_TYPE */
+		si_pm4_cmd_add(pm4, /* IA_MULTI_VGT_PARAM */
 			       S_028AA8_SWITCH_ON_EOP(ia_switch_on_eop) |
 			       S_028AA8_PARTIAL_VS_WAVE_ON(1) |
 			       S_028AA8_PRIMGROUP_SIZE(primgroup_size - 1) |
 			       S_028AA8_WD_SWITCH_ON_EOP(wd_switch_on_eop));
-		si_pm4_set_reg(pm4, R_028B74_VGT_DISPATCH_DRAW_INDEX,
-			       ib->index_size == 4 ? 0xFC000000 : 0xFC00);
-
-		si_pm4_set_reg(pm4, R_030908_VGT_PRIMITIVE_TYPE, prim);
+		si_pm4_cmd_add(pm4, 0); /* VGT_LS_HS_CONFIG */
+		si_pm4_cmd_end(pm4, false);
 	} else {
 		si_pm4_set_reg(pm4, R_008958_VGT_PRIMITIVE_TYPE, prim);
 	}
