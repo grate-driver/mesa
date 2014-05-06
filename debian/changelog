@@ -1,8 +1,10 @@
-mesa (10.1.2-1) UNRELEASED; urgency=medium
+mesa (10.1.2-1) unstable; urgency=medium
 
-  * New upstream release. (Closes: #746557)
+  [ Andreas Boll ]
+  * New upstream release.
+    + i965: Don't enable reset notification support on Gen4-5 (Closes: #746557)
 
- -- Andreas Boll <andreas.boll.dev@gmail.com>  Mon, 05 May 2014 23:07:27 +0200
+ -- Julien Cristau <jcristau@debian.org>  Tue, 06 May 2014 09:31:26 +0200
 
 mesa (10.1.1-1) unstable; urgency=low
 
