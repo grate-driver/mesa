@@ -1,6 +1,7 @@
-mesa (10.2.0~git20140411-1) UNRELEASED; urgency=medium
+mesa (10.2.0~rc1-1) UNRELEASED; urgency=medium
 
-  * New upstream snapshot.
+  * New upstream release candidate.
+    - 02_gbm_no_undefined.diff dropped, upstream
     - 03_gbm_make_devices_static.diff dropped, upstream
   * control: Bump libdrm-dev build-dependency.
   * Drop a symbol from libxatracker2.
