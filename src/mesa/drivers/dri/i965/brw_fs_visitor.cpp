@@ -221,18 +221,15 @@ fs_visitor::emit_lrp(const fs_reg &dst, const fs_reg &x, const fs_reg &y,
        !y.is_valid_3src() ||
        !a.is_valid_3src()) {
       /* We can't use the LRP instruction.  Emit x*(1-a) + y*a. */
-      fs_reg y_times_a           = fs_reg(this, glsl_type::float_type);
       fs_reg one_minus_a         = fs_reg(this, glsl_type::float_type);
-      fs_reg x_times_one_minus_a = fs_reg(this, glsl_type::float_type);
-
-      emit(MUL(y_times_a, y, a));
 
       fs_reg negative_a = a;
       negative_a.negate = !a.negate;
-      emit(ADD(one_minus_a, negative_a, fs_reg(1.0f)));
-      emit(MUL(x_times_one_minus_a, x, one_minus_a));
 
-      emit(ADD(dst, x_times_one_minus_a, y_times_a));
+      emit(ADD(one_minus_a, negative_a, fs_reg(1.0f)));
+      fs_inst *mul = emit(MUL(reg_null_f, y, a));
+      mul->writes_accumulator = true;
+      emit(MAC(dst, x, one_minus_a));
    } else {
       /* The LRP instruction actually does op1 * op0 + op2 * (1 - op0), so
        * we need to reorder the operands.
@@ -294,7 +291,7 @@ fs_visitor::try_emit_saturate(ir_expression *ir)
 }
 
 bool
-fs_visitor::try_emit_mad(ir_expression *ir, int mul_arg)
+fs_visitor::try_emit_mad(ir_expression *ir)
 {
    /* 3-src instructions were introduced in gen6. */
    if (brw->gen < 6)
@@ -304,11 +301,16 @@ fs_visitor::try_emit_mad(ir_expression *ir, int mul_arg)
    if (ir->type != glsl_type::float_type)
       return false;
 
-   ir_rvalue *nonmul = ir->operands[1 - mul_arg];
-   ir_expression *mul = ir->operands[mul_arg]->as_expression();
+   ir_rvalue *nonmul = ir->operands[1];
+   ir_expression *mul = ir->operands[0]->as_expression();
 
-   if (!mul || mul->operation != ir_binop_mul)
-      return false;
+   if (!mul || mul->operation != ir_binop_mul) {
+      nonmul = ir->operands[0];
+      mul = ir->operands[1]->as_expression();
+
+      if (!mul || mul->operation != ir_binop_mul)
+         return false;
+   }
 
    if (nonmul->as_constant() ||
        mul->operands[0]->as_constant() ||
@@ -342,7 +344,7 @@ fs_visitor::visit(ir_expression *ir)
    if (try_emit_saturate(ir))
       return;
    if (ir->operation == ir_binop_add) {
-      if (try_emit_mad(ir, 0) || try_emit_mad(ir, 1))
+      if (try_emit_mad(ir))
 	 return;
    }
 
@@ -2412,6 +2414,7 @@ fs_visitor::emit_untyped_atomic(unsigned atomic_op, unsigned surf_index,
                                         atomic_op, surf_index);
    inst->base_mrf = 0;
    inst->mlen = mlen;
+   inst->header_present = true;
    emit(inst);
 }
 
@@ -2446,6 +2449,7 @@ fs_visitor::emit_untyped_surface_read(unsigned surf_index, fs_reg dst,
       fs_inst(SHADER_OPCODE_UNTYPED_SURFACE_READ, dst, surf_index);
    inst->base_mrf = 0;
    inst->mlen = mlen;
+   inst->header_present = true;
    emit(inst);
 }
 

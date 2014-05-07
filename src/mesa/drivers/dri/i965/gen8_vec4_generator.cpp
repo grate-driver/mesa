@@ -49,15 +49,6 @@ gen8_vec4_generator::~gen8_vec4_generator()
 }
 
 void
-gen8_vec4_generator::mark_surface_used(unsigned surf_index)
-{
-   assert(surf_index < BRW_MAX_SURFACES);
-
-   prog_data->base.binding_table.size_bytes =
-      MAX2(prog_data->base.binding_table.size_bytes, (surf_index + 1) * 4);
-}
-
-void
 gen8_vec4_generator::generate_tex(vec4_instruction *ir, struct brw_reg dst)
 {
    int msg_type = 0;
@@ -157,7 +148,7 @@ gen8_vec4_generator::generate_tex(vec4_instruction *ir, struct brw_reg dst)
                             ir->header_present,
                             BRW_SAMPLER_SIMD_MODE_SIMD4X2);
 
-   mark_surface_used(surf_index);
+   brw_mark_surface_used(&prog_data->base, surf_index);
 }
 
 void
@@ -461,8 +452,65 @@ gen8_vec4_generator::generate_pull_constant_load(vec4_instruction *inst,
                        false,  /* no header */
                        false); /* EOT */
 
-   mark_surface_used(surf_index);
+   brw_mark_surface_used(&prog_data->base, surf_index);
 }
+
+void
+gen8_vec4_generator::generate_untyped_atomic(vec4_instruction *ir,
+                                             struct brw_reg dst,
+                                             struct brw_reg atomic_op,
+                                             struct brw_reg surf_index)
+{
+   assert(atomic_op.file == BRW_IMMEDIATE_VALUE &&
+          atomic_op.type == BRW_REGISTER_TYPE_UD &&
+          surf_index.file == BRW_IMMEDIATE_VALUE &&
+          surf_index.type == BRW_REGISTER_TYPE_UD);
+   assert((atomic_op.dw1.ud & ~0xf) == 0);
+
+   unsigned msg_control =
+      atomic_op.dw1.ud | /* Atomic Operation Type: BRW_AOP_* */
+      (1 << 5); /* Return data expected */
+
+   gen8_instruction *inst = next_inst(BRW_OPCODE_SEND);
+   gen8_set_dst(brw, inst, retype(dst, BRW_REGISTER_TYPE_UD));
+   gen8_set_src0(brw, inst, brw_message_reg(ir->base_mrf));
+   gen8_set_dp_message(brw, inst, HSW_SFID_DATAPORT_DATA_CACHE_1,
+                       surf_index.dw1.ud,
+                       HSW_DATAPORT_DC_PORT1_UNTYPED_ATOMIC_OP_SIMD4X2,
+                       msg_control,
+                       ir->mlen,
+                       1,
+                       ir->header_present,
+                       false);
+
+   brw_mark_surface_used(&prog_data->base, surf_index.dw1.ud);
+}
+
+
+
+void
+gen8_vec4_generator::generate_untyped_surface_read(vec4_instruction *ir,
+                                                   struct brw_reg dst,
+                                                   struct brw_reg surf_index)
+{
+   assert(surf_index.file == BRW_IMMEDIATE_VALUE &&
+          surf_index.type == BRW_REGISTER_TYPE_UD);
+
+   gen8_instruction *inst = next_inst(BRW_OPCODE_SEND);
+   gen8_set_dst(brw, inst, retype(dst, BRW_REGISTER_TYPE_UD));
+   gen8_set_src0(brw, inst, brw_message_reg(ir->base_mrf));
+   gen8_set_dp_message(brw, inst, HSW_SFID_DATAPORT_DATA_CACHE_1,
+                       surf_index.dw1.ud,
+                       HSW_DATAPORT_DC_PORT1_UNTYPED_SURFACE_READ,
+                       0xe, /* enable only the R channel */
+                       ir->mlen,
+                       1,
+                       ir->header_present,
+                       false);
+
+   brw_mark_surface_used(&prog_data->base, surf_index.dw1.ud);
+}
+
 
 void
 gen8_vec4_generator::generate_vec4_instruction(vec4_instruction *instruction,
@@ -770,11 +818,11 @@ gen8_vec4_generator::generate_vec4_instruction(vec4_instruction *instruction,
       break;
 
    case SHADER_OPCODE_UNTYPED_ATOMIC:
-      assert(!"XXX: Missing Gen8 vec4 support for UNTYPED_ATOMIC");
+      generate_untyped_atomic(ir, dst, src[0], src[1]);
       break;
 
    case SHADER_OPCODE_UNTYPED_SURFACE_READ:
-      assert(!"XXX: Missing Gen8 vec4 support for UNTYPED_SURFACE_READ");
+      generate_untyped_surface_read(ir, dst, src[0]);
       break;
 
    case VS_OPCODE_UNPACK_FLAGS_SIMD4X2:

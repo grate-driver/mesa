@@ -38,6 +38,7 @@
 #include "main/image.h"
 #include "main/hash_table.h"
 #include "main/set.h"
+#include "main/condrender.h"
 
 #include "swrast/swrast.h"
 #include "drivers/common/meta.h"
@@ -47,7 +48,7 @@
 #include "intel_blit.h"
 #include "intel_fbo.h"
 #include "intel_mipmap_tree.h"
-#include "intel_regions.h"
+#include "intel_image.h"
 #include "intel_screen.h"
 #include "intel_tex.h"
 #include "brw_context.h"
@@ -259,20 +260,10 @@ intel_quantize_num_samples(struct intel_screen *intel, unsigned num_samples)
    return quantized_samples;
 }
 
-
-/**
- * Called via glRenderbufferStorageEXT() to set the format and allocate
- * storage for a user-created renderbuffer.
- */
-static GLboolean
-intel_alloc_renderbuffer_storage(struct gl_context * ctx, struct gl_renderbuffer *rb,
-                                 GLenum internalFormat,
-                                 GLuint width, GLuint height)
+static mesa_format
+intel_renderbuffer_format(struct gl_context * ctx, GLenum internalFormat)
 {
    struct brw_context *brw = brw_context(ctx);
-   struct intel_screen *screen = brw->intelScreen;
-   struct intel_renderbuffer *irb = intel_renderbuffer(rb);
-   rb->NumSamples = intel_quantize_num_samples(screen, rb->NumSamples);
 
    switch (internalFormat) {
    default:
@@ -281,9 +272,9 @@ intel_alloc_renderbuffer_storage(struct gl_context * ctx, struct gl_renderbuffer
        * except they're less useful because you can't texture with
        * them.
        */
-      rb->Format = ctx->Driver.ChooseTextureFormat(ctx, GL_TEXTURE_2D,
-                                                   internalFormat,
-                                                   GL_NONE, GL_NONE);
+      return ctx->Driver.ChooseTextureFormat(ctx, GL_TEXTURE_2D,
+                                             internalFormat,
+                                             GL_NONE, GL_NONE);
       break;
    case GL_STENCIL_INDEX:
    case GL_STENCIL_INDEX1_EXT:
@@ -292,14 +283,26 @@ intel_alloc_renderbuffer_storage(struct gl_context * ctx, struct gl_renderbuffer
    case GL_STENCIL_INDEX16_EXT:
       /* These aren't actual texture formats, so force them here. */
       if (brw->has_separate_stencil) {
-	 rb->Format = MESA_FORMAT_S_UINT8;
+	 return MESA_FORMAT_S_UINT8;
       } else {
 	 assert(!brw->must_use_separate_stencil);
-	 rb->Format = MESA_FORMAT_Z24_UNORM_S8_UINT;
+	 return MESA_FORMAT_Z24_UNORM_S8_UINT;
       }
-      break;
    }
+}
 
+static GLboolean
+intel_alloc_private_renderbuffer_storage(struct gl_context * ctx, struct gl_renderbuffer *rb,
+                                         GLenum internalFormat,
+                                         GLuint width, GLuint height)
+{
+   struct brw_context *brw = brw_context(ctx);
+   struct intel_screen *screen = brw->intelScreen;
+   struct intel_renderbuffer *irb = intel_renderbuffer(rb);
+
+   assert(rb->Format != MESA_FORMAT_NONE);
+
+   rb->NumSamples = intel_quantize_num_samples(screen, rb->NumSamples);
    rb->Width = width;
    rb->Height = height;
    rb->_BaseFormat = _mesa_base_fbo_format(ctx, internalFormat);
@@ -324,6 +327,18 @@ intel_alloc_renderbuffer_storage(struct gl_context * ctx, struct gl_renderbuffer
    return true;
 }
 
+/**
+ * Called via glRenderbufferStorageEXT() to set the format and allocate
+ * storage for a user-created renderbuffer.
+ */
+static GLboolean
+intel_alloc_renderbuffer_storage(struct gl_context * ctx, struct gl_renderbuffer *rb,
+                                 GLenum internalFormat,
+                                 GLuint width, GLuint height)
+{
+   rb->Format = intel_renderbuffer_format(ctx, internalFormat);
+   return intel_alloc_private_renderbuffer_storage(ctx, rb, internalFormat, width, height);
+}
 
 static void
 intel_image_target_renderbuffer_storage(struct gl_context *ctx,
@@ -369,19 +384,18 @@ intel_image_target_renderbuffer_storage(struct gl_context *ctx,
    irb = intel_renderbuffer(rb);
    intel_miptree_release(&irb->mt);
    irb->mt = intel_miptree_create_for_bo(brw,
-                                         image->region->bo,
+                                         image->bo,
                                          image->format,
                                          image->offset,
-                                         image->region->width,
-                                         image->region->height,
-                                         image->region->pitch,
-                                         image->region->tiling);
+                                         image->width,
+                                         image->height,
+                                         image->pitch);
    if (!irb->mt)
       return;
 
    rb->InternalFormat = image->internal_format;
-   rb->Width = image->region->width;
-   rb->Height = image->region->height;
+   rb->Width = image->width;
+   rb->Height = image->height;
    rb->Format = image->format;
    rb->_BaseFormat = _mesa_base_fbo_format(ctx, image->internal_format);
    rb->NeedsFinishRenderTexture = true;
@@ -468,7 +482,7 @@ intel_create_private_renderbuffer(mesa_format format, unsigned num_samples)
    struct intel_renderbuffer *irb;
 
    irb = intel_create_renderbuffer(format, num_samples);
-   irb->Base.Base.AllocStorage = intel_alloc_renderbuffer_storage;
+   irb->Base.Base.AllocStorage = intel_alloc_private_renderbuffer_storage;
 
    return irb;
 }
@@ -851,6 +865,13 @@ intel_blit_framebuffer(struct gl_context *ctx,
                        GLint dstX0, GLint dstY0, GLint dstX1, GLint dstY1,
                        GLbitfield mask, GLenum filter)
 {
+   /* Page 679 of OpenGL 4.4 spec says:
+    *    "Added BlitFramebuffer to commands affected by conditional rendering in
+    *     section 10.10 (Bug 9562)."
+    */
+   if (!_mesa_check_conditional_render(ctx))
+      return;
+
    mask = brw_blorp_framebuffer(brw_context(ctx),
                                 srcX0, srcY0, srcX1, srcY1,
                                 dstX0, dstY0, dstX1, dstY1,

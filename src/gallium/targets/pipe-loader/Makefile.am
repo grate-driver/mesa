@@ -27,7 +27,8 @@ AM_CPPFLAGS = \
 	-I$(top_srcdir)/include \
 	-I$(top_srcdir)/src/gallium/drivers \
 	-I$(top_srcdir)/src/gallium/winsys \
-	 $(LIBDRM_CFLAGS) \
+	$(LIBDRM_CFLAGS) \
+	$(VISIBILITY_CFLAGS) \
 	-DGALLIUM_RBUG \
 	-DGALLIUM_TRACE \
 	-DGALLIUM_GALAHAD
@@ -46,9 +47,9 @@ AM_LDFLAGS = \
 	-module \
 	-no-undefined \
 	-avoid-version \
+	-Wl,--version-script=$(top_srcdir)/src/gallium/targets/pipe-loader/pipe.sym \
 	$(GC_SECTIONS) \
-	$(LD_NO_UNDEFINED) \
-	-Wl,--version-script=$(top_srcdir)/src/gallium/targets/pipe-loader/pipe.link
+	$(LD_NO_UNDEFINED)
 
 if HAVE_MESA_LLVM
 PIPE_LIBS += $(LLVM_LIBS)

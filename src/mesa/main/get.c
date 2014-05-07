@@ -387,7 +387,6 @@ EXTRA_EXT(ARB_texture_cube_map_array);
 EXTRA_EXT(ARB_texture_buffer_range);
 EXTRA_EXT(ARB_texture_multisample);
 EXTRA_EXT(ARB_texture_gather);
-EXTRA_EXT(ARB_separate_shader_objects);
 EXTRA_EXT(ARB_shader_atomic_counters);
 EXTRA_EXT(ARB_draw_indirect);
 EXTRA_EXT(ARB_shader_image_load_store);
@@ -395,6 +394,7 @@ EXTRA_EXT(ARB_viewport_array);
 EXTRA_EXT(ARB_compute_shader);
 EXTRA_EXT(ARB_gpu_shader5);
 EXTRA_EXT2(ARB_transform_feedback3, ARB_gpu_shader5);
+EXTRA_EXT(INTEL_performance_query);
 
 static const int
 extra_ARB_color_buffer_float_or_glcore[] = {
@@ -989,24 +989,10 @@ find_custom_value(struct gl_context *ctx, const struct value_desc *d, union valu
       break;
    /* GL_KHR_DEBUG */
    case GL_DEBUG_LOGGED_MESSAGES:
-      {
-         struct gl_debug_state *debug = _mesa_get_debug_state(ctx);
-         v->value_int = debug ? debug->NumMessages : 0;
-      }
-      break;
    case GL_DEBUG_NEXT_LOGGED_MESSAGE_LENGTH:
-      {
-         struct gl_debug_state *debug = _mesa_get_debug_state(ctx);
-         v->value_int = debug ? debug->NextMsgLength : 0;
-      }
-      break;
    case GL_DEBUG_GROUP_STACK_DEPTH:
-      {
-         struct gl_debug_state *debug = _mesa_get_debug_state(ctx);
-         v->value_int = debug ? debug->GroupStackDepth : 0;
-      }
+      v->value_int = _mesa_get_debug_state_int(ctx, d->pname);
       break;
-
    /* GL_ARB_shader_atomic_counters */
    case GL_ATOMIC_COUNTER_BUFFER_BINDING:
       v->value_int = ctx->AtomicBuffer->Name;

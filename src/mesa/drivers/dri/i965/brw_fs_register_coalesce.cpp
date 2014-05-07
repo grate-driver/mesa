@@ -44,6 +44,16 @@
 #include "brw_fs_live_variables.h"
 
 static bool
+is_nop_mov(const fs_inst *inst)
+{
+   if (inst->opcode == BRW_OPCODE_MOV) {
+      return inst->dst.equals(inst->src[0]);
+   }
+
+   return false;
+}
+
+static bool
 is_coalesce_candidate(const fs_inst *inst, const int *virtual_grf_sizes)
 {
    if (inst->opcode != BRW_OPCODE_MOV ||
@@ -67,44 +77,24 @@ is_coalesce_candidate(const fs_inst *inst, const int *virtual_grf_sizes)
 
 static bool
 can_coalesce_vars(brw::fs_live_variables *live_intervals,
-                  const exec_list *instructions, const fs_inst *inst,
+                  const exec_list *instructions, const fs_inst *inst, int ip,
                   int var_to, int var_from)
 {
-   if (live_intervals->vars_interfere(var_from, var_to) &&
-       !inst->dst.equals(inst->src[0])) {
+   if (!live_intervals->vars_interfere(var_from, var_to))
+      return true;
 
-      /* We know that the live ranges of A (var_from) and B (var_to)
-       * interfere because of the ->vars_interfere() call above. If the end
-       * of B's live range is after the end of A's range, then we know two
-       * things:
-       *  - the start of B's live range must be in A's live range (since we
-       *    already know the two ranges interfere, this is the only remaining
-       *    possibility)
-       *  - the interference isn't of the form we're looking for (where B is
-       *    entirely inside A)
-       */
-      if (live_intervals->end[var_to] > live_intervals->end[var_from])
+   assert(ip >= live_intervals->start[var_to]);
+
+   fs_inst *scan_inst;
+   for (scan_inst = (fs_inst *)inst->next;
+        !scan_inst->is_tail_sentinel() && ip <= live_intervals->end[var_to];
+        scan_inst = (fs_inst *)scan_inst->next, ip++) {
+      if (scan_inst->opcode == BRW_OPCODE_WHILE)
          return false;
 
-      int scan_ip = -1;
-
-      foreach_list(n, instructions) {
-         fs_inst *scan_inst = (fs_inst *)n;
-         scan_ip++;
-
-         if (scan_inst->is_control_flow())
-            return false;
-
-         if (scan_ip <= live_intervals->start[var_to])
-            continue;
-
-         if (scan_ip > live_intervals->end[var_to])
-            break;
-
-         if (scan_inst->dst.equals(inst->dst) ||
-             scan_inst->dst.equals(inst->src[0]))
-            return false;
-      }
+      if (scan_inst->dst.equals(inst->dst) ||
+          scan_inst->dst.equals(inst->src[0]))
+         return false;
    }
 
    return true;
@@ -124,12 +114,20 @@ fs_visitor::register_coalesce()
    fs_inst *mov[MAX_SAMPLER_MESSAGE_SIZE];
    int var_to[MAX_SAMPLER_MESSAGE_SIZE];
    int var_from[MAX_SAMPLER_MESSAGE_SIZE];
+   int ip = -1;
 
    foreach_list(node, &this->instructions) {
       fs_inst *inst = (fs_inst *)node;
+      ip++;
 
       if (!is_coalesce_candidate(inst, virtual_grf_sizes))
          continue;
+
+      if (is_nop_mov(inst)) {
+         inst->opcode = BRW_OPCODE_NOP;
+         progress = true;
+         continue;
+      }
 
       if (reg_from != inst->src[0].reg) {
          reg_from = inst->src[0].reg;
@@ -159,15 +157,18 @@ fs_visitor::register_coalesce()
          var_to[i] = live_intervals->var_from_vgrf[reg_to] + reg_to_offset[i];
          var_from[i] = live_intervals->var_from_vgrf[reg_from] + i;
 
-         if (!can_coalesce_vars(live_intervals, &instructions, inst,
+         if (!can_coalesce_vars(live_intervals, &instructions, inst, ip,
                                 var_to[i], var_from[i])) {
             can_coalesce = false;
+            reg_from = -1;
             break;
          }
       }
 
       if (!can_coalesce)
          continue;
+
+      progress = true;
 
       for (int i = 0; i < src_size; i++) {
          if (mov[i]) {
@@ -214,17 +215,17 @@ fs_visitor::register_coalesce()
       reg_from = -1;
    }
 
-   foreach_list_safe(node, &this->instructions) {
-      fs_inst *inst = (fs_inst *)node;
+   if (progress) {
+      foreach_list_safe(node, &this->instructions) {
+         fs_inst *inst = (fs_inst *)node;
 
-      if (inst->opcode == BRW_OPCODE_NOP) {
-         inst->remove();
-         progress = true;
+         if (inst->opcode == BRW_OPCODE_NOP) {
+            inst->remove();
+         }
       }
-   }
 
-   if (progress)
       invalidate_live_intervals();
+   }
 
    return progress;
 }

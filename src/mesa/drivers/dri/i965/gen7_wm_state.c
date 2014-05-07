@@ -91,7 +91,7 @@ upload_wm_state(struct brw_context *brw)
       dw1 |= GEN7_WM_KILL_ENABLE;
    }
 
-   /* _NEW_BUFFERS */
+   /* _NEW_BUFFERS | _NEW_COLOR */
    if (brw_color_buffer_write_enabled(brw) || writes_depth ||
        dw1 & GEN7_WM_KILL_ENABLE) {
       dw1 |= GEN7_WM_DISPATCH_ENABLE;
@@ -143,18 +143,8 @@ upload_ps_state(struct brw_context *brw)
    const int max_threads_shift = brw->is_haswell ?
       HSW_PS_MAX_THREADS_SHIFT : IVB_PS_MAX_THREADS_SHIFT;
 
-   /* CACHE_NEW_SAMPLER */
-   BEGIN_BATCH(2);
-   OUT_BATCH(_3DSTATE_SAMPLER_STATE_POINTERS_PS << 16 | (2 - 2));
-   OUT_BATCH(brw->wm.base.sampler_offset);
-   ADVANCE_BATCH();
-
-   /* CACHE_NEW_WM_PROG */
-   gen7_upload_constant_state(brw, &brw->wm.base, true, _3DSTATE_CONSTANT_PS);
-
    dw2 = dw4 = dw5 = 0;
 
-   /* CACHE_NEW_SAMPLER */
    dw2 |=
       (ALIGN(brw->wm.base.sampler_count, 4) / 4) << GEN7_PS_SAMPLER_COUNT_SHIFT;
 
@@ -274,16 +264,12 @@ upload_ps_state(struct brw_context *brw)
 
 const struct brw_tracked_state gen7_ps_state = {
    .dirty = {
-      .mesa  = (_NEW_PROGRAM_CONSTANTS |
-		_NEW_COLOR |
+      .mesa  = (_NEW_COLOR |
                 _NEW_BUFFERS |
                 _NEW_MULTISAMPLE),
       .brw   = (BRW_NEW_FRAGMENT_PROGRAM |
-		BRW_NEW_PS_BINDING_TABLE |
-		BRW_NEW_BATCH |
-                BRW_NEW_PUSH_CONSTANT_ALLOCATION),
-      .cache = (CACHE_NEW_SAMPLER |
-		CACHE_NEW_WM_PROG)
+                BRW_NEW_BATCH),
+      .cache = (CACHE_NEW_WM_PROG)
    },
    .emit = upload_ps_state,
 };

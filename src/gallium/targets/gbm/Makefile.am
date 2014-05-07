@@ -56,7 +56,7 @@ gbm_gallium_drm_la_LIBADD += \
 	$(top_builddir)/src/gallium/winsys/sw/dri/libswdri.la
 endif
 
-if NEED_PIPE_LOADER_XLIB
+if NEED_WINSYS_XLIB
 gbm_gallium_drm_la_LIBADD += \
 	$(top_builddir)/src/gallium/winsys/sw/xlib/libws_xlib.la \
 	-lX11 -lXext -lXfixes \
@@ -67,6 +67,7 @@ gbm_gallium_drm_la_LDFLAGS = \
 	-module \
 	-no-undefined \
 	-avoid-version \
+	-Wl,--version-script=$(top_srcdir)/src/gallium/targets/gbm/gbm.sym \
 	$(GC_SECTIONS) \
 	$(LD_NO_UNDEFINED)
 

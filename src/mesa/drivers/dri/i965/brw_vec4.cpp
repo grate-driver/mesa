@@ -151,6 +151,15 @@ src_reg::src_reg(dst_reg reg)
                                 swizzles[2], swizzles[3]);
 }
 
+bool
+src_reg::is_accumulator() const
+{
+   return file == HW_REG &&
+          fixed_hw_reg.file == BRW_ARCHITECTURE_REGISTER_FILE &&
+          fixed_hw_reg.nr == BRW_ARF_ACCUMULATOR;
+}
+
+
 void
 dst_reg::init()
 {
@@ -218,6 +227,14 @@ dst_reg::is_null() const
    return file == HW_REG &&
           fixed_hw_reg.file == BRW_ARCHITECTURE_REGISTER_FILE &&
           fixed_hw_reg.nr == BRW_ARF_NULL;
+}
+
+bool
+dst_reg::is_accumulator() const
+{
+   return file == HW_REG &&
+          fixed_hw_reg.file == BRW_ARCHITECTURE_REGISTER_FILE &&
+          fixed_hw_reg.nr == BRW_ARF_ACCUMULATOR;
 }
 
 bool
@@ -333,19 +350,12 @@ try_eliminate_instruction(vec4_instruction *inst, int new_writemask,
        * accumulator as a side-effect. Instead just set the destination
        * to the null register to free it.
        */
-      switch (inst->opcode) {
-      case BRW_OPCODE_ADDC:
-      case BRW_OPCODE_SUBB:
-      case BRW_OPCODE_MACH:
+      if (inst->writes_accumulator || inst->writes_flag()) {
          inst->dst = dst_reg(retype(brw_null_reg(), inst->dst.type));
-         break;
-      default:
-         if (inst->writes_flag()) {
-            inst->dst = dst_reg(retype(brw_null_reg(), inst->dst.type));
-         } else {
-            inst->remove();
-         }
+      } else {
+         inst->remove();
       }
+
       return true;
    } else if (inst->dst.writemask != new_writemask) {
       switch (inst->opcode) {
@@ -378,7 +388,6 @@ bool
 vec4_visitor::dead_code_eliminate()
 {
    bool progress = false;
-   bool seen_control_flow = false;
    int pc = -1;
 
    calculate_live_intervals();
@@ -387,8 +396,6 @@ vec4_visitor::dead_code_eliminate()
       vec4_instruction *inst = (vec4_instruction *)node;
 
       pc++;
-
-      seen_control_flow = inst->is_control_flow() || seen_control_flow;
 
       bool inst_writes_flag = false;
       if (inst->dst.file != GRF) {
@@ -415,7 +422,7 @@ vec4_visitor::dead_code_eliminate()
                     progress;
       }
 
-      if (seen_control_flow || inst->predicate || inst->prev == NULL)
+      if (inst->predicate || inst->prev == NULL)
          continue;
 
       int dead_channels;
@@ -442,6 +449,9 @@ vec4_visitor::dead_code_eliminate()
            prev != NULL && dead_channels != 0;
            node = prev, prev = prev->prev) {
          vec4_instruction *scan_inst = (vec4_instruction  *)node;
+
+         if (scan_inst->is_control_flow())
+            break;
 
          if (inst_writes_flag) {
             if (scan_inst->dst.is_null() && scan_inst->writes_flag()) {
@@ -844,6 +854,14 @@ vec4_visitor::opt_set_dependency_control()
           * instruction hangs the GPU.
           */
          if (inst->predicate) {
+            memset(last_grf_write, 0, sizeof(last_grf_write));
+            memset(last_mrf_write, 0, sizeof(last_mrf_write));
+            continue;
+         }
+
+         /* Dependency control does not work well over math instructions.
+          */
+         if (inst->is_math()) {
             memset(last_grf_write, 0, sizeof(last_grf_write));
             memset(last_mrf_write, 0, sizeof(last_mrf_write));
             continue;

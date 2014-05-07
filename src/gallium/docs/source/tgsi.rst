@@ -1558,6 +1558,81 @@ Support for these opcodes indicated by PIPE_SHADER_CAP_INTEGERS (all of them?)
 
   dst.w = |src.w|
 
+Bitwise ISA
+^^^^^^^^^^^
+These opcodes are used for bit-level manipulation of integers.
+
+.. opcode:: IBFE - Signed Bitfield Extract
+
+  See SM5 instruction of the same name. Extracts a set of bits from the input,
+  and sign-extends them if the high bit of the extracted window is set.
+
+  Pseudocode::
+
+    def ibfe(value, offset, bits):
+      offset = offset & 0x1f
+      bits = bits & 0x1f
+      if bits == 0: return 0
+      # Note: >> sign-extends
+      if width + offset < 32:
+        return (value << (32 - offset - bits)) >> (32 - bits)
+      else:
+        return value >> offset
+
+.. opcode:: UBFE - Unsigned Bitfield Extract
+
+  See SM5 instruction of the same name. Extracts a set of bits from the input,
+  without any sign-extension.
+
+  Pseudocode::
+
+    def ubfe(value, offset, bits):
+      offset = offset & 0x1f
+      bits = bits & 0x1f
+      if bits == 0: return 0
+      # Note: >> does not sign-extend
+      if width + offset < 32:
+        return (value << (32 - offset - bits)) >> (32 - bits)
+      else:
+        return value >> offset
+
+.. opcode:: BFI - Bitfield Insert
+
+  See SM5 instruction of the same name. Replaces a bit region of 'base' with
+  the low bits of 'insert'.
+
+  Pseudocode::
+
+    def bfi(base, insert, offset, bits):
+      offset = offset & 0x1f
+      bits = bits & 0x1f
+      mask = ((1 << bits) - 1) << offset
+      return ((insert << offset) & mask) | (base & ~mask)
+
+.. opcode:: BREV - Bitfield Reverse
+
+  See SM5 instruction BFREV. Reverses the bits of the argument.
+
+.. opcode:: POPC - Population Count
+
+  See SM5 instruction COUNTBITS. Counts the number of set bits in the argument.
+
+.. opcode:: LSB - Index of lowest set bit
+
+  See SM5 instruction FIRSTBIT_LO. Computes the 0-based index of the first set
+  bit of the argument. Returns -1 if none are set.
+
+.. opcode:: IMSB - Index of highest non-sign bit
+
+  See SM5 instruction FIRSTBIT_SHI. Computes the 0-based index of the highest
+  non-sign bit of the argument (i.e. highest 0 bit for negative numbers,
+  highest 1 bit for positive numbers). Returns -1 if all bits are the same
+  (i.e. for inputs 0 and -1).
+
+.. opcode:: UMSB - Index of highest set bit
+
+  See SM5 instruction FIRSTBIT_HI. Computes the 0-based index of the highest
+  set bit of the argument. Returns -1 if none are set.
 
 Geometry ISA
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -2621,6 +2696,32 @@ distances and by the PIPE_MAX_CLIP_OR_CULL_DISTANCE_ELEMENT_COUNT
 which specifies the maximum number of registers which can be
 annotated with those semantics.
 
+TGSI_SEMANTIC_SAMPLEID
+""""""""""""""""""""""
+
+For fragment shaders, this semantic label indicates that a system value
+contains the current sample id (i.e. gl_SampleID). Only the X value is used.
+
+TGSI_SEMANTIC_SAMPLEPOS
+"""""""""""""""""""""""
+
+For fragment shaders, this semantic label indicates that a system value
+contains the current sample's position (i.e. gl_SamplePosition). Only the X
+and Y values are used.
+
+TGSI_SEMANTIC_SAMPLEMASK
+""""""""""""""""""""""""
+
+For fragment shaders, this semantic label indicates that an output contains
+the sample mask used to disable further sample processing
+(i.e. gl_SampleMask). Only the X value is used, up to 32x MS.
+
+TGSI_SEMANTIC_INVOCATIONID
+""""""""""""""""""""""""""
+
+For geometry shaders, this semantic label indicates that a system value
+contains the current invocation id (i.e. gl_InvocationID). Only the X value is
+used.
 
 Declaration Interpolate
 ^^^^^^^^^^^^^^^^^^^^^^^
@@ -2738,6 +2839,14 @@ This property is only supported by drivers that also support shader clip
 distance outputs.
 This is useful for APIs that don't have UCPs and where clip distances written
 by a shader cannot be disabled.
+
+GS_INVOCATIONS
+""""""""""""""
+
+Specifies the number of times a geometry shader should be executed for each
+input primitive. Each invocation will have a different
+TGSI_SEMANTIC_INVOCATIONID system value set. If not specified, assumed to
+be 1.
 
 
 Texture Sampling and Texture Formats

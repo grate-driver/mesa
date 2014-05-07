@@ -94,6 +94,8 @@ private:
    void emitLogicOp(const Instruction *, uint8_t subOp);
    void emitPOPC(const Instruction *);
    void emitINSBF(const Instruction *);
+   void emitEXTBF(const Instruction *);
+   void emitBFIND(const Instruction *);
    void emitShift(const Instruction *);
 
    void emitSFnOp(const Instruction *, uint8_t subOp);
@@ -112,6 +114,8 @@ private:
    void emitTXQ(const TexInstruction *);
 
    void emitQUADOP(const Instruction *, uint8_t qOp, uint8_t laneMask);
+
+   void emitPIXLD(const Instruction *);
 
    void emitFlow(const Instruction *);
 
@@ -694,6 +698,30 @@ CodeEmitterGK110::emitINSBF(const Instruction *i)
 }
 
 void
+CodeEmitterGK110::emitEXTBF(const Instruction *i)
+{
+   emitForm_21(i, 0x600, 0xc00);
+
+   if (i->dType == TYPE_S32)
+      code[1] |= 0x80000;
+   if (i->subOp == NV50_IR_SUBOP_EXTBF_REV)
+      code[1] |= 0x800;
+}
+
+void
+CodeEmitterGK110::emitBFIND(const Instruction *i)
+{
+   emitForm_21(i, 0x618, 0xc18);
+
+   if (i->dType == TYPE_S32)
+      code[1] |= 0x80000;
+   if (i->src(0).mod == Modifier(NV50_IR_MOD_NOT))
+      code[1] |= 0x800;
+   if (i->subOp == NV50_IR_SUBOP_BFIND_SAMT)
+      code[1] |= 0x1000;
+}
+
+void
 CodeEmitterGK110::emitShift(const Instruction *i)
 {
    if (i->op == OP_SHR) {
@@ -1076,12 +1104,14 @@ CodeEmitterGK110::emitTEX(const TexInstruction *i)
       // ?
    }
 
-   if (i->tex.useOffsets) {
+   if (i->tex.useOffsets == 1) {
       switch (i->op) {
       case OP_TXF: code[1] |= 0x200; break;
       default: code[1] |= 0x800; break;
       }
    }
+   if (i->tex.useOffsets == 4)
+      code[1] |= 0x1000;
 }
 
 void
@@ -1127,6 +1157,14 @@ CodeEmitterGK110::emitQUADOP(const Instruction *i, uint8_t qOp, uint8_t laneMask
       code[1] |= 1 << 9; // dall
 
    emitPredicate(i);
+}
+
+void
+CodeEmitterGK110::emitPIXLD(const Instruction *i)
+{
+   emitForm_L(i, 0x7f4, 2, Modifier(0));
+   code[1] |= i->subOp << 2;
+   code[1] |= 0x00070000;
 }
 
 void
@@ -1684,6 +1722,9 @@ CodeEmitterGK110::emitInstruction(Instruction *insn)
    case OP_TEXBAR:
       emitTEXBAR(insn);
       break;
+   case OP_PIXLD:
+      emitPIXLD(insn);
+      break;
    case OP_BRA:
    case OP_CALL:
    case OP_PRERET:
@@ -1711,6 +1752,15 @@ CodeEmitterGK110::emitInstruction(Instruction *insn)
       break;
    case OP_POPCNT:
       emitPOPC(insn);
+      break;
+   case OP_INSBF:
+      emitINSBF(insn);
+      break;
+   case OP_EXTBF:
+      emitEXTBF(insn);
+      break;
+   case OP_BFIND:
+      emitBFIND(insn);
       break;
    case OP_JOIN:
       emitNOP(insn);

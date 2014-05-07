@@ -45,7 +45,7 @@
 static const struct debug_named_value r600_debug_options[] = {
 	/* features */
 #if defined(R600_USE_LLVM)
-	{ "nollvm", DBG_NO_LLVM, "Disable the LLVM shader compiler" },
+	{ "llvm", DBG_LLVM, "Enable the LLVM shader compiler" },
 #endif
 	{ "nocpdma", DBG_NO_CP_DMA, "Disable CP DMA" },
 
@@ -65,67 +65,6 @@ static const struct debug_named_value r600_debug_options[] = {
 /*
  * pipe_context
  */
-
-static void r600_flush(struct pipe_context *ctx, unsigned flags)
-{
-	struct r600_context *rctx = (struct r600_context *)ctx;
-	struct pipe_query *render_cond = NULL;
-	unsigned render_cond_mode = 0;
-	boolean render_cond_cond = FALSE;
-
-	if (rctx->b.rings.gfx.cs->cdw == rctx->b.initial_gfx_cs_size)
-		return;
-
-	rctx->b.rings.gfx.flushing = true;
-	/* Disable render condition. */
-	if (rctx->b.current_render_cond) {
-		render_cond = rctx->b.current_render_cond;
-		render_cond_cond = rctx->b.current_render_cond_cond;
-		render_cond_mode = rctx->b.current_render_cond_mode;
-		ctx->render_condition(ctx, NULL, FALSE, 0);
-	}
-
-	r600_context_flush(rctx, flags);
-	rctx->b.rings.gfx.flushing = false;
-	r600_begin_new_cs(rctx);
-
-	/* Re-enable render condition. */
-	if (render_cond) {
-		ctx->render_condition(ctx, render_cond, render_cond_cond, render_cond_mode);
-	}
-
-	rctx->b.initial_gfx_cs_size = rctx->b.rings.gfx.cs->cdw;
-}
-
-static void r600_flush_from_st(struct pipe_context *ctx,
-			       struct pipe_fence_handle **fence,
-			       unsigned flags)
-{
-	struct r600_context *rctx = (struct r600_context *)ctx;
-	unsigned fflags;
-
-	fflags = flags & PIPE_FLUSH_END_OF_FRAME ? RADEON_FLUSH_END_OF_FRAME : 0;
-	if (fence) {
-		*fence = rctx->b.ws->cs_create_fence(rctx->b.rings.gfx.cs);
-	}
-	/* flush gfx & dma ring, order does not matter as only one can be live */
-	if (rctx->b.rings.dma.cs) {
-		rctx->b.rings.dma.flush(rctx, fflags);
-	}
-	rctx->b.rings.gfx.flush(rctx, fflags);
-}
-
-static void r600_flush_gfx_ring(void *ctx, unsigned flags)
-{
-	r600_flush((struct pipe_context*)ctx, flags);
-}
-
-static void r600_flush_from_winsys(void *ctx, unsigned flags)
-{
-	struct r600_context *rctx = (struct r600_context *)ctx;
-
-	rctx->b.rings.gfx.flush(rctx, flags);
-}
 
 static void r600_destroy_context(struct pipe_context *context)
 {
@@ -174,6 +113,7 @@ static struct pipe_context *r600_create_context(struct pipe_screen *screen, void
 {
 	struct r600_context *rctx = CALLOC_STRUCT(r600_context);
 	struct r600_screen* rscreen = (struct r600_screen *)screen;
+	struct radeon_winsys *ws = rscreen->b.ws;
 
 	if (rctx == NULL)
 		return NULL;
@@ -181,7 +121,6 @@ static struct pipe_context *r600_create_context(struct pipe_screen *screen, void
 	rctx->b.b.screen = screen;
 	rctx->b.b.priv = priv;
 	rctx->b.b.destroy = r600_destroy_context;
-	rctx->b.b.flush = r600_flush_from_st;
 
 	if (!r600_common_context_init(&rctx->b, &rscreen->b))
 		goto fail;
@@ -238,14 +177,11 @@ static struct pipe_context *r600_create_context(struct pipe_screen *screen, void
 		goto fail;
 	}
 
-	if (rscreen->b.trace_bo) {
-		rctx->b.rings.gfx.cs = rctx->b.ws->cs_create(rctx->b.ws, RING_GFX, rscreen->b.trace_bo->cs_buf);
-	} else {
-		rctx->b.rings.gfx.cs = rctx->b.ws->cs_create(rctx->b.ws, RING_GFX, NULL);
-	}
-	rctx->b.rings.gfx.flush = r600_flush_gfx_ring;
-	rctx->b.ws->cs_set_flush_callback(rctx->b.rings.gfx.cs, r600_flush_from_winsys, rctx);
-	rctx->b.rings.gfx.flushing = false;
+	rctx->b.rings.gfx.cs = ws->cs_create(ws, RING_GFX,
+					     r600_context_gfx_flush, rctx,
+					     rscreen->b.trace_bo ?
+						     rscreen->b.trace_bo->cs_buf : NULL);
+	rctx->b.rings.gfx.flush = r600_context_gfx_flush;
 
 	rctx->allocator_fetch_shader = u_suballocator_create(&rctx->b.b, 64 * 1024, 256,
 							     0, PIPE_USAGE_DEFAULT, FALSE);
@@ -378,6 +314,7 @@ static int r600_get_param(struct pipe_screen* pscreen, enum pipe_cap param)
 	case PIPE_CAP_MAX_TEXTURE_GATHER_COMPONENTS:
 	case PIPE_CAP_TEXTURE_GATHER_SM5:
 	case PIPE_CAP_TEXTURE_QUERY_LOD:
+        case PIPE_CAP_SAMPLE_SHADING:
 		return 0;
 
 	/* Stream output. */
@@ -569,8 +506,8 @@ struct pipe_screen *r600_screen_create(struct radeon_winsys *ws)
 		rscreen->b.debug_flags |= DBG_FS | DBG_VS | DBG_GS | DBG_PS | DBG_CS;
 	if (debug_get_bool_option("R600_HYPERZ", FALSE))
 		rscreen->b.debug_flags |= DBG_HYPERZ;
-	if (!debug_get_bool_option("R600_LLVM", TRUE))
-		rscreen->b.debug_flags |= DBG_NO_LLVM;
+	if (debug_get_bool_option("R600_LLVM", FALSE))
+		rscreen->b.debug_flags |= DBG_LLVM;
 
 	if (rscreen->b.family == CHIP_UNKNOWN) {
 		fprintf(stderr, "r600: Unknown chipset 0x%04X\n", rscreen->b.info.pci_id);

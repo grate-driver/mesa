@@ -737,23 +737,46 @@ NVC0LoweringPass::handleTEX(TexInstruction *i)
    assert(chipset >= NVISA_GK104_CHIPSET ||
           !i->tex.useOffsets || !i->tex.target.isMS());
 
-   // offset is last source (lod 1st, dc 2nd)
+   // offset is between lod and dc
    if (i->tex.useOffsets) {
-      uint32_t value = 0;
       int n, c;
       int s = i->srcCount(0xff, true);
+      if (i->tex.target.isShadow())
+         s--;
       if (i->srcExists(s)) // move potential predicate out of the way
          i->moveSources(s, 1);
+      if (i->tex.useOffsets == 4 && i->srcExists(s + 1))
+         i->moveSources(s + 1, 1);
       if (i->op == OP_TXG) {
-         assert(i->tex.useOffsets == 1);
-         for (c = 0; c < 3; ++c)
-            value |= (i->tex.offset[0][c] & 0xff) << (c * 8);
+         // Either there is 1 offset, which goes into the 2 low bytes of the
+         // first source, or there are 4 offsets, which go into 2 sources (8
+         // values, 1 byte each).
+         Value *offs[2] = {NULL, NULL};
+         for (n = 0; n < i->tex.useOffsets; n++) {
+            for (c = 0; c < 2; ++c) {
+               if ((n % 2) == 0 && c == 0)
+                  offs[n / 2] = i->offset[n][c].get();
+               else
+                  bld.mkOp3(OP_INSBF, TYPE_U32,
+                            offs[n / 2],
+                            i->offset[n][c].get(),
+                            bld.mkImm(0x800 | ((n * 16 + c * 8) % 32)),
+                            offs[n / 2]);
+            }
+         }
+         i->setSrc(s, offs[0]);
+         if (offs[1])
+            i->setSrc(s + 1, offs[1]);
       } else {
-         for (n = 0; n < i->tex.useOffsets; ++n)
-            for (c = 0; c < 3; ++c)
-               value |= (i->tex.offset[n][c] & 0xf) << (n * 12 + c * 4);
+         unsigned imm = 0;
+         assert(i->tex.useOffsets == 1);
+         for (c = 0; c < 3; ++c) {
+            ImmediateValue val;
+            assert(i->offset[0][c].getImmediate(val));
+            imm |= (val.reg.data.u32 & 0xf) << (c * 4);
+         }
+         i->setSrc(s, bld.loadImm(NULL, imm));
       }
-      i->setSrc(s, bld.loadImm(NULL, value));
    }
 
    if (chipset >= NVISA_GK104_CHIPSET) {
@@ -1425,6 +1448,31 @@ NVC0LoweringPass::handleRDSV(Instruction *i)
       addr += prog->driver->prop.cp.gridInfoBase;
       bld.mkLoad(TYPE_U32, i->getDef(0),
                  bld.mkSymbol(FILE_MEMORY_CONST, 0, TYPE_U32, addr), NULL);
+      break;
+   case SV_SAMPLE_INDEX:
+      // TODO: Properly pass source as an address in the PIX address space
+      // (which can be of the form [r0+offset]). But this is currently
+      // unnecessary.
+      ld = bld.mkOp1(OP_PIXLD, TYPE_U32, i->getDef(0), bld.mkImm(0));
+      ld->subOp = NV50_IR_SUBOP_PIXLD_SAMPLEID;
+      break;
+   case SV_SAMPLE_POS: {
+      Value *off = new_LValue(func, FILE_GPR);
+      ld = bld.mkOp1(OP_PIXLD, TYPE_U32, i->getDef(0), bld.mkImm(0));
+      ld->subOp = NV50_IR_SUBOP_PIXLD_SAMPLEID;
+      bld.mkOp2(OP_SHL, TYPE_U32, off, i->getDef(0), bld.mkImm(3));
+      bld.mkLoad(TYPE_F32,
+                 i->getDef(0),
+                 bld.mkSymbol(
+                       FILE_MEMORY_CONST, prog->driver->io.resInfoCBSlot,
+                       TYPE_U32, prog->driver->io.sampleInfoBase +
+                       4 * sym->reg.data.sv.index),
+                 off);
+      break;
+   }
+   case SV_SAMPLE_MASK:
+      ld = bld.mkOp1(OP_PIXLD, TYPE_U32, i->getDef(0), bld.mkImm(0));
+      ld->subOp = NV50_IR_SUBOP_PIXLD_COVMASK;
       break;
    default:
       if (prog->getType() == Program::TYPE_TESSELLATION_EVAL)

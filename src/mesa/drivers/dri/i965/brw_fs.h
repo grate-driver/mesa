@@ -83,6 +83,7 @@ public:
    bool is_null() const;
    bool is_valid_3src() const;
    bool is_contiguous() const;
+   bool is_accumulator() const;
 
    fs_reg &apply_stride(unsigned stride);
    /** Smear a channel of the reg to all channels. */
@@ -374,7 +375,6 @@ public:
    bool register_coalesce();
    bool compute_to_mrf();
    bool dead_code_eliminate();
-   bool dead_code_eliminate_local();
    bool remove_duplicate_mrf_writes();
    bool virtual_grf_interferes(int a, int b);
    void schedule_instructions(instruction_scheduler_mode mode);
@@ -422,7 +422,7 @@ public:
    void emit_minmax(uint32_t conditionalmod, const fs_reg &dst,
                     const fs_reg &src0, const fs_reg &src1);
    bool try_emit_saturate(ir_expression *ir);
-   bool try_emit_mad(ir_expression *ir, int mul_arg);
+   bool try_emit_mad(ir_expression *ir);
    void try_replace_with_sel();
    bool opt_peephole_sel();
    bool opt_peephole_predicated_break();
@@ -750,11 +750,17 @@ private:
    void generate_unpack_half_2x16_split(fs_inst *inst,
                                         struct brw_reg dst,
                                         struct brw_reg src);
+   void generate_untyped_atomic(fs_inst *inst,
+                                struct brw_reg dst,
+                                struct brw_reg atomic_op,
+                                struct brw_reg surf_index);
+
+   void generate_untyped_surface_read(fs_inst *inst,
+                                      struct brw_reg dst,
+                                      struct brw_reg surf_index);
    void generate_discard_jump(fs_inst *ir);
 
    void patch_discard_jumps_to_fb_writes();
-
-   void mark_surface_used(unsigned surf_index);
 
    struct brw_wm_compile *c;
    const struct gl_fragment_program *fp;

@@ -64,6 +64,8 @@ fs_inst::init()
 
    /* This will be the case for almost all instructions. */
    this->regs_written = 1;
+
+   this->writes_accumulator = false;
 }
 
 fs_inst::fs_inst()
@@ -151,6 +153,15 @@ fs_inst::fs_inst(enum opcode opcode, fs_reg dst,
       return new(mem_ctx) fs_inst(BRW_OPCODE_##op, dst, src0, src1);    \
    }
 
+#define ALU2_ACC(op)                                                    \
+   fs_inst *                                                            \
+   fs_visitor::op(fs_reg dst, fs_reg src0, fs_reg src1)                 \
+   {                                                                    \
+      fs_inst *inst = new(mem_ctx) fs_inst(BRW_OPCODE_##op, dst, src0, src1);\
+      inst->writes_accumulator = true;                                  \
+      return inst;                                                      \
+   }
+
 #define ALU3(op)                                                        \
    fs_inst *                                                            \
    fs_visitor::op(fs_reg dst, fs_reg src0, fs_reg src1, fs_reg src2)    \
@@ -166,7 +177,7 @@ ALU1(RNDE)
 ALU1(RNDZ)
 ALU2(ADD)
 ALU2(MUL)
-ALU2(MACH)
+ALU2_ACC(MACH)
 ALU2(AND)
 ALU2(OR)
 ALU2(XOR)
@@ -182,9 +193,10 @@ ALU1(FBH)
 ALU1(FBL)
 ALU1(CBIT)
 ALU3(MAD)
-ALU2(ADDC)
-ALU2(SUBB)
+ALU2_ACC(ADDC)
+ALU2_ACC(SUBB)
 ALU2(SEL)
+ALU2(MAC)
 
 /** Gen4 predicated IF. */
 fs_inst *
@@ -499,6 +511,14 @@ bool
 fs_reg::is_valid_3src() const
 {
    return file == GRF || file == UNIFORM;
+}
+
+bool
+fs_reg::is_accumulator() const
+{
+   return file == HW_REG &&
+          fixed_hw_reg.file == BRW_ARCHITECTURE_REGISTER_FILE &&
+          fixed_hw_reg.nr == BRW_ARF_ACCUMULATOR;
 }
 
 int
@@ -2085,218 +2105,6 @@ fs_visitor::opt_algebraic()
    return progress;
 }
 
-/**
- * Removes any instructions writing a VGRF where that VGRF is not used by any
- * later instruction.
- */
-bool
-fs_visitor::dead_code_eliminate()
-{
-   bool progress = false;
-   int pc = 0;
-
-   calculate_live_intervals();
-
-   foreach_list_safe(node, &this->instructions) {
-      fs_inst *inst = (fs_inst *)node;
-
-      if (inst->dst.file == GRF && !inst->has_side_effects()) {
-         bool dead = true;
-
-         for (int i = 0; i < inst->regs_written; i++) {
-            int var = live_intervals->var_from_vgrf[inst->dst.reg];
-            assert(live_intervals->end[var + inst->dst.reg_offset + i] >= pc);
-            if (live_intervals->end[var + inst->dst.reg_offset + i] != pc) {
-               dead = false;
-               break;
-            }
-         }
-
-         if (dead) {
-            /* Don't dead code eliminate instructions that write to the
-             * accumulator as a side-effect. Instead just set the destination
-             * to the null register to free it.
-             */
-            switch (inst->opcode) {
-            case BRW_OPCODE_ADDC:
-            case BRW_OPCODE_SUBB:
-            case BRW_OPCODE_MACH:
-               inst->dst = fs_reg(retype(brw_null_reg(), inst->dst.type));
-               break;
-            default:
-               inst->remove();
-               progress = true;
-               break;
-            }
-         }
-      }
-
-      pc++;
-   }
-
-   if (progress)
-      invalidate_live_intervals();
-
-   return progress;
-}
-
-struct dead_code_hash_key
-{
-   int vgrf;
-   int reg_offset;
-};
-
-static bool
-dead_code_hash_compare(const void *a, const void *b)
-{
-   return memcmp(a, b, sizeof(struct dead_code_hash_key)) == 0;
-}
-
-static void
-clear_dead_code_hash(struct hash_table *ht)
-{
-   struct hash_entry *entry;
-
-   hash_table_foreach(ht, entry) {
-      _mesa_hash_table_remove(ht, entry);
-   }
-}
-
-static void
-insert_dead_code_hash(struct hash_table *ht,
-                      int vgrf, int reg_offset, fs_inst *inst)
-{
-   /* We don't bother freeing keys, because they'll be GCed with the ht. */
-   struct dead_code_hash_key *key = ralloc(ht, struct dead_code_hash_key);
-
-   key->vgrf = vgrf;
-   key->reg_offset = reg_offset;
-
-   _mesa_hash_table_insert(ht, _mesa_hash_data(key, sizeof(*key)), key, inst);
-}
-
-static struct hash_entry *
-get_dead_code_hash_entry(struct hash_table *ht, int vgrf, int reg_offset)
-{
-   struct dead_code_hash_key key;
-
-   key.vgrf = vgrf;
-   key.reg_offset = reg_offset;
-
-   return _mesa_hash_table_search(ht, _mesa_hash_data(&key, sizeof(key)), &key);
-}
-
-static void
-remove_dead_code_hash(struct hash_table *ht,
-                      int vgrf, int reg_offset)
-{
-   struct hash_entry *entry = get_dead_code_hash_entry(ht, vgrf, reg_offset);
-   if (!entry)
-      return;
-
-   _mesa_hash_table_remove(ht, entry);
-}
-
-/**
- * Walks basic blocks, removing any regs that are written but not read before
- * being redefined.
- *
- * The dead_code_eliminate() function implements a global dead code
- * elimination, but it only handles the removing the last write to a register
- * if it's never read.  This one can handle intermediate writes, but only
- * within a basic block.
- */
-bool
-fs_visitor::dead_code_eliminate_local()
-{
-   struct hash_table *ht;
-   bool progress = false;
-
-   ht = _mesa_hash_table_create(mem_ctx, dead_code_hash_compare);
-
-   if (ht == NULL) {
-      return false;
-   }
-
-   foreach_list_safe(node, &this->instructions) {
-      fs_inst *inst = (fs_inst *)node;
-
-      /* At a basic block, empty the HT since we don't understand dataflow
-       * here.
-       */
-      if (inst->is_control_flow()) {
-         clear_dead_code_hash(ht);
-         continue;
-      }
-
-      /* Clear the HT of any instructions that got read. */
-      for (int i = 0; i < 3; i++) {
-         fs_reg src = inst->src[i];
-         if (src.file != GRF)
-            continue;
-
-         int read = 1;
-         if (inst->is_send_from_grf())
-            read = virtual_grf_sizes[src.reg] - src.reg_offset;
-
-         for (int reg_offset = src.reg_offset;
-              reg_offset < src.reg_offset + read;
-              reg_offset++) {
-            remove_dead_code_hash(ht, src.reg, reg_offset);
-         }
-      }
-
-      /* Add any update of a GRF to the HT, removing a previous write if it
-       * wasn't read.
-       */
-      if (inst->dst.file == GRF) {
-         if (inst->regs_written > 1) {
-            /* We don't know how to trim channels from an instruction's
-             * writes, so we can't incrementally remove unread channels from
-             * it.  Just remove whatever it overwrites from the table
-             */
-            for (int i = 0; i < inst->regs_written; i++) {
-               remove_dead_code_hash(ht,
-                                     inst->dst.reg,
-                                     inst->dst.reg_offset + i);
-            }
-         } else {
-            struct hash_entry *entry =
-               get_dead_code_hash_entry(ht, inst->dst.reg,
-                                        inst->dst.reg_offset);
-
-            if (entry) {
-               if (inst->is_partial_write()) {
-                  /* For a partial write, we can't remove any previous dead code
-                   * candidate, since we're just modifying their result.
-                   */
-               } else {
-                  /* We're completely updating a channel, and there was a
-                   * previous write to the channel that wasn't read.  Kill it!
-                   */
-                  fs_inst *inst = (fs_inst *)entry->data;
-                  inst->remove();
-                  progress = true;
-               }
-
-               _mesa_hash_table_remove(ht, entry);
-            }
-
-            if (!inst->has_side_effects())
-               insert_dead_code_hash(ht, inst->dst.reg, inst->dst.reg_offset,
-                                     inst);
-         }
-      }
-   }
-
-   _mesa_hash_table_destroy(ht, NULL);
-
-   if (progress)
-      invalidate_live_intervals();
-
-   return progress;
-}
-
 bool
 fs_visitor::compute_to_mrf()
 {
@@ -3249,8 +3057,7 @@ fs_visitor::run()
 	 progress = opt_cse() || progress;
 	 progress = opt_copy_propagate() || progress;
          progress = opt_peephole_predicated_break() || progress;
-	 progress = dead_code_eliminate() || progress;
-	 progress = dead_code_eliminate_local() || progress;
+         progress = dead_code_eliminate() || progress;
          progress = opt_peephole_sel() || progress;
          progress = dead_control_flow_eliminate(this) || progress;
          progress = opt_saturate_propagation() || progress;

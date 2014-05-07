@@ -33,54 +33,6 @@
 /*
  * pipe_context
  */
-void si_flush(struct pipe_context *ctx, struct pipe_fence_handle **fence,
-	      unsigned flags)
-{
-	struct si_context *sctx = (struct si_context *)ctx;
-	struct pipe_query *render_cond = NULL;
-	boolean render_cond_cond = FALSE;
-	unsigned render_cond_mode = 0;
-
-	if (fence) {
-		*fence = sctx->b.ws->cs_create_fence(sctx->b.rings.gfx.cs);
-	}
-
-	/* Disable render condition. */
-	if (sctx->b.current_render_cond) {
-		render_cond = sctx->b.current_render_cond;
-		render_cond_cond = sctx->b.current_render_cond_cond;
-		render_cond_mode = sctx->b.current_render_cond_mode;
-		ctx->render_condition(ctx, NULL, FALSE, 0);
-	}
-
-	si_context_flush(sctx, flags);
-
-	/* Re-enable render condition. */
-	if (render_cond) {
-		ctx->render_condition(ctx, render_cond, render_cond_cond, render_cond_mode);
-	}
-}
-
-static void si_flush_from_st(struct pipe_context *ctx,
-			     struct pipe_fence_handle **fence,
-			     unsigned flags)
-{
-	struct si_context *sctx = (struct si_context *)ctx;
-
-	if (sctx->b.rings.dma.cs) {
-		sctx->b.rings.dma.flush(sctx,
-					flags & PIPE_FLUSH_END_OF_FRAME ? RADEON_FLUSH_END_OF_FRAME : 0);
-	}
-
-	si_flush(ctx, fence,
-		 flags & PIPE_FLUSH_END_OF_FRAME ? RADEON_FLUSH_END_OF_FRAME : 0);
-}
-
-static void si_flush_from_winsys(void *ctx, unsigned flags)
-{
-	si_flush((struct pipe_context*)ctx, NULL, flags);
-}
-
 static void si_destroy_context(struct pipe_context *context)
 {
 	struct si_context *sctx = (struct si_context *)context;
@@ -120,6 +72,7 @@ static struct pipe_context *si_create_context(struct pipe_screen *screen, void *
 {
 	struct si_context *sctx = CALLOC_STRUCT(si_context);
 	struct si_screen* sscreen = (struct si_screen *)screen;
+	struct radeon_winsys *ws = sscreen->b.ws;
 	int shader, i;
 
 	if (sctx == NULL)
@@ -128,7 +81,6 @@ static struct pipe_context *si_create_context(struct pipe_screen *screen, void *
 	sctx->b.b.screen = screen; /* this must be set first */
 	sctx->b.b.priv = priv;
 	sctx->b.b.destroy = si_destroy_context;
-	sctx->b.b.flush = si_flush_from_st;
 	sctx->screen = sscreen; /* Easy accessing of screen/winsys. */
 
 	if (!r600_common_context_init(&sctx->b, &sscreen->b))
@@ -145,8 +97,9 @@ static struct pipe_context *si_create_context(struct pipe_screen *screen, void *
 		sctx->b.b.create_video_buffer = vl_video_buffer_create;
 	}
 
-	sctx->b.rings.gfx.cs = sctx->b.ws->cs_create(sctx->b.ws, RING_GFX, NULL);
-	sctx->b.rings.gfx.flush = si_flush_from_winsys;
+	sctx->b.rings.gfx.cs = ws->cs_create(ws, RING_GFX, si_context_gfx_flush,
+					     sctx, NULL);
+	sctx->b.rings.gfx.flush = si_context_gfx_flush;
 
 	si_init_all_descriptors(sctx);
 
@@ -167,8 +120,6 @@ static struct pipe_context *si_create_context(struct pipe_screen *screen, void *
 		R600_ERR("Unsupported chip class %d.\n", sctx->b.chip_class);
 		goto fail;
 	}
-
-	sctx->b.ws->cs_set_flush_callback(sctx->b.rings.gfx.cs, si_flush_from_winsys, sctx);
 
 	sctx->blitter = util_blitter_create(&sctx->b.b);
 	if (sctx->blitter == NULL)
@@ -292,6 +243,7 @@ static int si_get_param(struct pipe_screen* pscreen, enum pipe_cap param)
 	case PIPE_CAP_TGSI_TEXCOORD:
 	case PIPE_CAP_FAKE_SW_MSAA:
 	case PIPE_CAP_TEXTURE_QUERY_LOD:
+        case PIPE_CAP_SAMPLE_SHADING:
 		return 0;
 
 	case PIPE_CAP_TEXTURE_BORDER_COLOR_QUIRK:

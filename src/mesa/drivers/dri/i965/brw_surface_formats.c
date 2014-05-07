@@ -608,7 +608,6 @@ brw_init_surface_formats(struct brw_context *brw)
    brw->format_supported_as_render_target[MESA_FORMAT_Z24_UNORM_S8_UINT] = true;
    brw->format_supported_as_render_target[MESA_FORMAT_Z24_UNORM_X8_UINT] = true;
    brw->format_supported_as_render_target[MESA_FORMAT_S_UINT8] = true;
-   brw->format_supported_as_render_target[MESA_FORMAT_Z_UNORM16] = true;
    brw->format_supported_as_render_target[MESA_FORMAT_Z_FLOAT32] = true;
    brw->format_supported_as_render_target[MESA_FORMAT_Z32_FLOAT_S8X24_UINT] = true;
 
@@ -620,19 +619,17 @@ brw_init_surface_formats(struct brw_context *brw)
    ctx->TextureFormatSupported[MESA_FORMAT_Z_FLOAT32] = true;
    ctx->TextureFormatSupported[MESA_FORMAT_Z32_FLOAT_S8X24_UINT] = true;
 
-   /* It appears that Z16 is slower than Z24 (on Intel Ivybridge and newer
-    * hardware at least), so there's no real reason to prefer it unless you're
-    * under memory (not memory bandwidth) pressure.  Our speculation is that
-    * this is due to either increased fragment shader execution from
-    * GL_LEQUAL/GL_EQUAL depth tests at the reduced precision, or due to
-    * increased depth stalls from a cacheline-based heuristic for detecting
-    * depth stalls.
+   /* Benchmarking shows that Z16 is slower than Z24, so there's no reason to
+    * use it unless you're under memory (not memory bandwidth) pressure.
     *
-    * However, desktop GL 3.0+ require that you get exactly 16 bits when
-    * asking for DEPTH_COMPONENT16, so we have to respect that.
+    * Apparently, the GPU's depth scoreboarding works on a 32-bit granularity,
+    * which corresponds to one pixel in the depth buffer for Z24 or Z32 formats.
+    * However, it corresponds to two pixels with Z16, which means both need to
+    * hit the early depth case in order for it to happen.
+    *
+    * Other speculation is that we may be hitting increased fragment shader
+    * execution from GL_LEQUAL/GL_EQUAL depth tests at reduced precision.
     */
-   if (_mesa_is_desktop_gl(ctx))
-      ctx->TextureFormatSupported[MESA_FORMAT_Z_UNORM16] = true;
 
    /* On hardware that lacks support for ETC1, we map ETC1 to RGBX
     * during glCompressedTexImage2D(). See intel_mipmap_tree::wraps_etc1.

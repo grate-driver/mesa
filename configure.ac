@@ -28,7 +28,7 @@ AC_SUBST([OSMESA_VERSION])
 
 dnl Versions for external dependencies
 LIBDRM_REQUIRED=2.4.38
-LIBDRM_RADEON_REQUIRED=2.4.53
+LIBDRM_RADEON_REQUIRED=2.4.54
 LIBDRM_INTEL_REQUIRED=2.4.52
 LIBDRM_NVVIEUX_REQUIRED=2.4.33
 LIBDRM_NOUVEAU_REQUIRED="2.4.33 libdrm >= 2.4.41"
@@ -479,6 +479,12 @@ AC_CHECK_FUNC([dlopen], [DEFINES="$DEFINES -DHAVE_DLOPEN"],
     [AC_CHECK_LIB([dl], [dlopen],
        [DEFINES="$DEFINES -DHAVE_DLOPEN"; DLOPEN_LIBS="-ldl"])])
 AC_SUBST([DLOPEN_LIBS])
+
+dnl Check if that library also has dladdr
+save_LDFLAGS="$LDFLAGS"
+LDFLAGS="$LDFLAGS $DLOPEN_LIBS"
+AC_CHECK_FUNCS([dladdr])
+LDFLAGS="$save_LDFLAGS"
 
 case "$host_os" in
 darwin*|mingw*)
@@ -1837,7 +1843,7 @@ if test -n "$with_gallium_drivers"; then
             PKG_CHECK_MODULES([NOUVEAU], [libdrm_nouveau >= $LIBDRM_NOUVEAU_REQUIRED])
             gallium_require_drm_loader
             GALLIUM_DRIVERS_DIRS="$GALLIUM_DRIVERS_DIRS nouveau"
-            gallium_check_st "nouveau/drm" "dri-nouveau" "" "xvmc-nouveau" "vdpau-nouveau"
+            gallium_check_st "nouveau/drm" "dri-nouveau" "" "xvmc-nouveau" "vdpau-nouveau" "omx-nouveau"
             DRICOMMON_NEED_LIBDRM=yes
             ;;
         xfreedreno)
@@ -1935,10 +1941,12 @@ AM_CONDITIONAL(NEED_GALLIUM_LLVMPIPE_DRIVER, test "x$HAVE_GALLIUM_I915" = xyes -
 if test "x$enable_gallium_loader" = xyes; then
     GALLIUM_WINSYS_DIRS="$GALLIUM_WINSYS_DIRS sw/null"
 
-    if test "x$enable_gallium_xlib_loader" = xyes; then
-        GALLIUM_WINSYS_DIRS="$GALLIUM_WINSYS_DIRS sw/xlib"
-        NEED_WINSYS_XLIB="yes"
+    if test "x$NEED_WINSYS_XLIB" = xyes; then
         GALLIUM_PIPE_LOADER_DEFINES="$GALLIUM_PIPE_LOADER_DEFINES -DHAVE_PIPE_LOADER_XLIB"
+    fi
+
+    if test "x$enable_dri" = xyes; then
+        GALLIUM_PIPE_LOADER_DEFINES="$GALLIUM_PIPE_LOADER_DEFINES -DHAVE_PIPE_LOADER_DRI"
     fi
 
     if test "x$enable_gallium_drm_loader" = xyes; then
@@ -1959,7 +1967,6 @@ if test "x$enable_gallium_loader" = xyes; then
     AC_SUBST([GALLIUM_PIPE_LOADER_CLIENT_DEFINES])
     AC_SUBST([GALLIUM_PIPE_LOADER_CLIENT_LIBS])
 fi
-AM_CONDITIONAL(NEED_PIPE_LOADER_XLIB, test "x$enable_gallium_xlib_loader" = xyes)
 
 AM_CONDITIONAL(HAVE_I915_DRI, test x$HAVE_I915_DRI = xyes)
 AM_CONDITIONAL(HAVE_I965_DRI, test x$HAVE_I965_DRI = xyes)
@@ -2079,6 +2086,7 @@ AC_CONFIG_FILES([Makefile
 		src/gallium/targets/opencl/Makefile
 		src/gallium/targets/xa/Makefile
 		src/gallium/targets/xa/xatracker.pc
+		src/gallium/targets/omx-nouveau/Makefile
 		src/gallium/targets/osmesa/Makefile
 		src/gallium/targets/osmesa/osmesa.pc
 		src/gallium/targets/pipe-loader/Makefile

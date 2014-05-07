@@ -81,13 +81,19 @@ gen6_upload_wm_push_constants(struct brw_context *brw)
 
       brw->wm.base.push_const_size = ALIGN(prog_data->base.nr_params, 8) / 8;
    }
+
+   if (brw->gen >= 7) {
+      gen7_upload_constant_state(brw, &brw->wm.base, true,
+                                 _3DSTATE_CONSTANT_PS);
+   }
 }
 
 const struct brw_tracked_state gen6_wm_push_constants = {
    .dirty = {
       .mesa  = _NEW_PROGRAM_CONSTANTS,
       .brw   = (BRW_NEW_BATCH |
-		BRW_NEW_FRAGMENT_PROGRAM),
+                BRW_NEW_FRAGMENT_PROGRAM |
+                BRW_NEW_PUSH_CONSTANT_ALLOCATION),
       .cache = CACHE_NEW_WM_PROG,
    },
    .emit = gen6_upload_wm_push_constants,
@@ -143,7 +149,6 @@ upload_wm_state(struct brw_context *brw)
    if (ctx->_Shader->CurrentProgram[MESA_SHADER_FRAGMENT] == NULL)
       dw2 |= GEN6_WM_FLOATING_POINT_MODE_ALT;
 
-   /* CACHE_NEW_SAMPLER */
    dw2 |= (ALIGN(brw->wm.base.sampler_count, 4) / 4) <<
            GEN6_WM_SAMPLER_COUNT_SHIFT;
 
@@ -213,6 +218,7 @@ upload_wm_state(struct brw_context *brw)
        brw->wm.prog_data->uses_omask)
       dw5 |= GEN6_WM_KILL_ENABLE;
 
+   /* _NEW_BUFFERS | _NEW_COLOR */
    if (brw_color_buffer_write_enabled(brw) ||
        dw5 & (GEN6_WM_KILL_ENABLE | GEN6_WM_COMPUTED_DEPTH)) {
       dw5 |= GEN6_WM_DISPATCH_ENABLE;
@@ -279,7 +285,6 @@ upload_wm_state(struct brw_context *brw)
       dw6 |= GEN6_WM_MSDISPMODE_PERSAMPLE;
    }
 
-   /* _NEW_BUFFERS, _NEW_MULTISAMPLE */
    /* From the SNB PRM, volume 2 part 1, page 281:
     * "If the PS kernel does not need the Position XY Offsets
     * to compute a Position XY value, then this field should be
@@ -331,8 +336,7 @@ const struct brw_tracked_state gen6_wm_state = {
       .brw   = (BRW_NEW_FRAGMENT_PROGRAM |
 		BRW_NEW_BATCH |
                 BRW_NEW_PUSH_CONSTANT_ALLOCATION),
-      .cache = (CACHE_NEW_SAMPLER |
-		CACHE_NEW_WM_PROG)
+      .cache = (CACHE_NEW_WM_PROG)
    },
    .emit = upload_wm_state,
 };

@@ -6,6 +6,7 @@ lib@OPENCL_LIBNAME@_la_LDFLAGS = \
 	$(LLVM_LDFLAGS) \
 	-no-undefined \
 	-version-number 1:0 \
+	-Wl,--version-script=$(top_srcdir)/src/gallium/targets/opencl/opencl.sym \
 	$(GC_SECTIONS) \
 	$(LD_NO_UNDEFINED)
 
@@ -37,7 +38,7 @@ lib@OPENCL_LIBNAME@_la_LIBADD += \
 	$(top_builddir)/src/gallium/winsys/sw/dri/libswdri.la
 endif
 
-if NEED_PIPE_LOADER_XLIB
+if NEED_WINSYS_XLIB
 lib@OPENCL_LIBNAME@_la_LIBADD += \
 	$(top_builddir)/src/gallium/winsys/sw/xlib/libws_xlib.la \
 	-lX11 -lXext -lXfixes \

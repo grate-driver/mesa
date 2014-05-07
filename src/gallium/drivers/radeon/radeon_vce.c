@@ -50,7 +50,7 @@
  */
 static void flush(struct rvce_encoder *enc)
 {
-	enc->ws->cs_flush(enc->cs, RADEON_FLUSH_ASYNC, 0);
+	enc->ws->cs_flush(enc->cs, RADEON_FLUSH_ASYNC, NULL, 0);
 }
 
 #if 0
@@ -267,7 +267,8 @@ static void rvce_flush(struct pipe_video_codec *encoder)
 {
 }
 
-static void rvce_cs_flush(void *ctx, unsigned flags)
+static void rvce_cs_flush(void *ctx, unsigned flags,
+			  struct pipe_fence_handle **fence)
 {
 	// just ignored
 }
@@ -308,13 +309,12 @@ struct pipe_video_codec *rvce_create_encoder(struct pipe_context *context,
 	enc->get_buffer = get_buffer;
 
 	enc->ws = ws;
-	enc->cs = ws->cs_create(ws, RING_VCE, NULL);
+	enc->cs = ws->cs_create(ws, RING_VCE, rvce_cs_flush, enc, NULL);
 	if (!enc->cs) {
 		RVID_ERR("Can't get command submission context.\n");
 		goto error;
 	}
 
-	enc->ws->cs_set_flush_callback(enc->cs, rvce_cs_flush, enc);
 	templat.buffer_format = PIPE_FORMAT_NV12;
 	templat.chroma_format = PIPE_VIDEO_CHROMA_FORMAT_420;
 	templat.width = enc->base.width;

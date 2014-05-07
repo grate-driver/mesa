@@ -695,6 +695,14 @@ NV50LoweringPreSSA::handleTEX(TexInstruction *i)
    // texel offsets are 3 immediate fields in the instruction,
    // nv50 cannot do textureGatherOffsets
    assert(i->tex.useOffsets <= 1);
+   if (i->tex.useOffsets) {
+      for (int c = 0; c < 3; ++c) {
+         ImmediateValue val;
+         assert(i->offset[0][c].getImmediate(val));
+         i->tex.offset[c] = val.reg.data.u32;
+         i->offset[0][c].set(NULL);
+      }
+   }
 
    return true;
 }
@@ -1032,6 +1040,18 @@ NV50LoweringPreSSA::handleRDSV(Instruction *i)
          bld.mkMov(def, bld.mkImm(0));
       }
       break;
+   case SV_SAMPLE_POS: {
+      Value *off = new_LValue(func, FILE_ADDRESS);
+      bld.mkOp1(OP_RDSV, TYPE_U32, def, bld.mkSysVal(SV_SAMPLE_INDEX, 0));
+      bld.mkOp2(OP_SHL, TYPE_U32, off, def, bld.mkImm(3));
+      bld.mkLoad(TYPE_F32,
+                 def,
+                 bld.mkSymbol(
+                       FILE_MEMORY_CONST, prog->driver->io.resInfoCBSlot,
+                       TYPE_U32, prog->driver->io.sampleInfoBase + 4 * idx),
+                 off);
+      break;
+   }
    default:
       bld.mkFetch(i->getDef(0), i->dType,
                   FILE_SHADER_INPUT, addr, i->getIndirect(0, 0), NULL);

@@ -65,8 +65,8 @@ upload_ps_extra(struct brw_context *brw)
    if (fp->program.Base.InputsRead & VARYING_BIT_POS)
       dw1 |= GEN8_PSX_USES_SOURCE_DEPTH | GEN8_PSX_USES_SOURCE_W;
 
-   /* _NEW_BUFFERS | _NEW_MULTISAMPLE */
-   bool multisampled_fbo = ctx->DrawBuffer->Visual.samples > 1;
+   /* BRW_NEW_NUM_SAMPLES | _NEW_MULTISAMPLE */
+   bool multisampled_fbo = brw->num_samples > 1;
    if (multisampled_fbo &&
        _mesa_get_min_invocations_per_fragment(ctx, &fp->program, false) > 1)
       dw1 |= GEN8_PSX_SHADER_IS_PER_SAMPLE;
@@ -85,8 +85,8 @@ upload_ps_extra(struct brw_context *brw)
 
 const struct brw_tracked_state gen8_ps_extra = {
    .dirty = {
-      .mesa  = _NEW_BUFFERS | _NEW_MULTISAMPLE,
-      .brw   = BRW_NEW_CONTEXT | BRW_NEW_FRAGMENT_PROGRAM,
+      .mesa  = _NEW_MULTISAMPLE,
+      .brw   = BRW_NEW_CONTEXT | BRW_NEW_FRAGMENT_PROGRAM | BRW_NEW_NUM_SAMPLES,
       .cache = 0,
    },
    .emit = upload_ps_extra,
@@ -136,22 +136,12 @@ upload_ps_state(struct brw_context *brw)
    struct gl_context *ctx = &brw->ctx;
    uint32_t dw3 = 0, dw6 = 0, dw7 = 0;
 
-   /* CACHE_NEW_SAMPLER */
-   BEGIN_BATCH(2);
-   OUT_BATCH(_3DSTATE_SAMPLER_STATE_POINTERS_PS << 16 | (2 - 2));
-   OUT_BATCH(brw->wm.base.sampler_offset);
-   ADVANCE_BATCH();
-
-   /* CACHE_NEW_WM_PROG */
-   gen8_upload_constant_state(brw, &brw->wm.base, true, _3DSTATE_CONSTANT_PS);
-
    /* Initialize the execution mask with VMask.  Otherwise, derivatives are
     * incorrect for subspans where some of the pixels are unlit.  We believe
     * the bit just didn't take effect in previous generations.
     */
    dw3 |= GEN7_PS_VECTOR_MASK_ENABLE;
 
-   /* CACHE_NEW_SAMPLER */
    dw3 |=
       (ALIGN(brw->wm.base.sampler_count, 4) / 4) << GEN7_PS_SAMPLER_COUNT_SHIFT;
 
@@ -250,12 +240,10 @@ upload_ps_state(struct brw_context *brw)
 
 const struct brw_tracked_state gen8_ps_state = {
    .dirty = {
-      .mesa  = _NEW_PROGRAM_CONSTANTS | _NEW_MULTISAMPLE,
+      .mesa  = _NEW_MULTISAMPLE,
       .brw   = BRW_NEW_FRAGMENT_PROGRAM |
-               BRW_NEW_PS_BINDING_TABLE |
-               BRW_NEW_BATCH |
-               BRW_NEW_PUSH_CONSTANT_ALLOCATION,
-      .cache = CACHE_NEW_SAMPLER | CACHE_NEW_WM_PROG
+               BRW_NEW_BATCH,
+      .cache = CACHE_NEW_WM_PROG
    },
    .emit = upload_ps_state,
 };

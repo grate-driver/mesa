@@ -130,6 +130,7 @@ enum radeon_family {
     CHIP_KAVERI,
     CHIP_KABINI,
     CHIP_HAWAII,
+    CHIP_MULLINS,
     CHIP_LAST,
 };
 
@@ -196,6 +197,7 @@ struct radeon_info {
     enum chip_class             chip_class;
     uint32_t                    gart_size;
     uint32_t                    vram_size;
+    uint32_t                    max_sclk;
 
     uint32_t                    drm_major; /* version */
     uint32_t                    drm_minor;
@@ -418,10 +420,15 @@ struct radeon_winsys {
      *
      * \param ws        The winsys this function is called from.
      * \param ring_type The ring type (GFX, DMA, UVD)
+     * \param flush     Flush callback function associated with the command stream.
+     * \param user      User pointer that will be passed to the flush callback.
      * \param trace_buf Trace buffer when tracing is enabled
      */
     struct radeon_winsys_cs *(*cs_create)(struct radeon_winsys *ws,
                                           enum ring_type ring_type,
+                                          void (*flush)(void *ctx, unsigned flags,
+							struct pipe_fence_handle **fence),
+                                          void *flush_ctx,
                                           struct radeon_winsys_cs_handle *trace_buf);
 
     /**
@@ -450,6 +457,16 @@ struct radeon_winsys {
                              enum radeon_bo_priority priority);
 
     /**
+     * Return the index of an already-added buffer.
+     *
+     * \param cs        Command stream
+     * \param buf       Buffer
+     * \return          The buffer index, or -1 if the buffer has not been added.
+     */
+    int (*cs_get_reloc)(struct radeon_winsys_cs *cs,
+                        struct radeon_winsys_cs_handle *buf);
+
+    /**
      * Return TRUE if there is enough memory in VRAM and GTT for the relocs
      * added so far. If the validation fails, all the relocations which have
      * been added since the last call of cs_validate will be removed and
@@ -470,34 +487,18 @@ struct radeon_winsys {
     boolean (*cs_memory_below_limit)(struct radeon_winsys_cs *cs, uint64_t vram, uint64_t gtt);
 
     /**
-     * Write a relocated dword to a command buffer.
-     *
-     * \param cs        A command stream the relocation is written to.
-     * \param buf       A winsys buffer to write the relocation for.
-     */
-    void (*cs_write_reloc)(struct radeon_winsys_cs *cs,
-                           struct radeon_winsys_cs_handle *buf);
-
-    /**
      * Flush a command stream.
      *
      * \param cs          A command stream to flush.
      * \param flags,      RADEON_FLUSH_ASYNC or 0.
-     * \param cs_trace_id A unique identifiant for the cs
+     * \param fence       Pointer to a fence. If non-NULL, a fence is inserted
+     *                    after the CS and is returned through this parameter.
+     * \param cs_trace_id A unique identifier of the cs, used for tracing.
      */
-    void (*cs_flush)(struct radeon_winsys_cs *cs, unsigned flags, uint32_t cs_trace_id);
-
-    /**
-     * Set a flush callback which is called from winsys when flush is
-     * required.
-     *
-     * \param cs        A command stream to set the callback for.
-     * \param flush     A flush callback function associated with the command stream.
-     * \param user      A user pointer that will be passed to the flush callback.
-     */
-    void (*cs_set_flush_callback)(struct radeon_winsys_cs *cs,
-                                  void (*flush)(void *ctx, unsigned flags),
-                                  void *ctx);
+    void (*cs_flush)(struct radeon_winsys_cs *cs,
+                     unsigned flags,
+                     struct pipe_fence_handle **fence,
+                     uint32_t cs_trace_id);
 
     /**
      * Return TRUE if a buffer is referenced by a command stream.
@@ -525,13 +526,6 @@ struct radeon_winsys {
       * \param cs        A command stream.
       */
     void (*cs_sync_flush)(struct radeon_winsys_cs *cs);
-
-    /**
-     * Return a fence associated with the CS. The fence will be signalled
-     * once the CS is flushed and all commands in the CS are completed
-     * by the GPU.
-     */
-    struct pipe_fence_handle *(*cs_create_fence)(struct radeon_winsys_cs *cs);
 
     /**
      * Wait for the fence and return true if the fence has been signalled.

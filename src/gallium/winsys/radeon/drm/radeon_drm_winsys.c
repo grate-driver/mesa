@@ -276,13 +276,15 @@ static boolean do_winsys_init(struct radeon_drm_winsys *ws)
     case CHIP_KAVERI:
     case CHIP_KABINI:
     case CHIP_HAWAII:
+    case CHIP_MULLINS:
         ws->info.chip_class = CIK;
         break;
     }
 
     /* Check for dma */
     ws->info.r600_has_dma = FALSE;
-    if (ws->info.chip_class >= R700 && ws->info.drm_minor >= 27) {
+    /* DMA is disabled on R700. There is IB corruption and hangs. */
+    if (ws->info.chip_class >= EVERGREEN && ws->info.drm_minor >= 27) {
         ws->info.r600_has_dma = TRUE;
     }
 
@@ -315,6 +317,11 @@ static boolean do_winsys_init(struct radeon_drm_winsys *ws)
     }
     ws->info.gart_size = gem_info.gart_size;
     ws->info.vram_size = gem_info.vram_size;
+
+    /* Get max clock frequency info and convert it to MHz */
+    radeon_get_drm_value(ws->fd, RADEON_INFO_MAX_SCLK, NULL,
+                         &ws->info.max_sclk);
+    ws->info.max_sclk /= 1000;
 
     ws->num_cpus = sysconf(_SC_NPROCESSORS_ONLN);
 

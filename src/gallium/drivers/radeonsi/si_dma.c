@@ -45,21 +45,6 @@ static unsigned si_array_mode(unsigned mode)
 	}
 }
 
-static uint32_t si_num_banks(uint32_t nbanks)
-{
-	switch (nbanks) {
-	case 2:
-		return V_009910_ADDR_SURF_2_BANK;
-	case 4:
-		return V_009910_ADDR_SURF_4_BANK;
-	case 8:
-	default:
-		return V_009910_ADDR_SURF_8_BANK;
-	case 16:
-		return V_009910_ADDR_SURF_16_BANK;
-	}
-}
-
 static uint32_t si_micro_tile_mode(struct si_screen *sscreen, unsigned tile_mode)
 {
 	if (sscreen->b.info.si_tile_mode_array_valid) {
@@ -161,7 +146,6 @@ static void si_dma_copy_tile(struct si_context *ctx,
 	sub_cmd = SI_DMA_COPY_TILED;
 	lbpp = util_logbase2(bpp);
 	pitch_tile_max = ((pitch / bpp) / 8) - 1;
-	nbanks = si_num_banks(ctx->screen->b.tiling_info.num_banks);
 
 	if (dst_mode == RADEON_SURF_MODE_LINEAR) {
 		/* T2L */
@@ -188,6 +172,8 @@ static void si_dma_copy_tile(struct si_context *ctx,
 		tile_split = cik_tile_split(rsrc->surface.tile_split);
 		tile_mode_index = si_tile_mode_index(rsrc, src_level,
 						     util_format_has_stencil(util_format_description(src->format)));
+		nbanks = si_num_banks(sscreen, rsrc->surface.bpe, rsrc->surface.tile_split,
+				      tile_mode_index);
 		base += r600_resource_va(&ctx->screen->b.b, src);
 		addr += r600_resource_va(&ctx->screen->b.b, dst);
 	} else {
@@ -215,6 +201,8 @@ static void si_dma_copy_tile(struct si_context *ctx,
 		tile_split = cik_tile_split(rdst->surface.tile_split);
 		tile_mode_index = si_tile_mode_index(rdst, dst_level,
 						     util_format_has_stencil(util_format_description(dst->format)));
+		nbanks = si_num_banks(sscreen, rdst->surface.bpe, rdst->surface.tile_split,
+				      tile_mode_index);
 		base += r600_resource_va(&ctx->screen->b.b, dst);
 		addr += r600_resource_va(&ctx->screen->b.b, src);
 	}

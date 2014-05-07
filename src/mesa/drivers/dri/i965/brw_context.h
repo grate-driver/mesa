@@ -181,6 +181,7 @@ enum brw_state_id {
    BRW_STATE_META_IN_PROGRESS,
    BRW_STATE_INTERPOLATION_MAP,
    BRW_STATE_PUSH_CONSTANT_ALLOCATION,
+   BRW_STATE_NUM_SAMPLES,
    BRW_NUM_STATE_BITS
 };
 
@@ -220,6 +221,7 @@ enum brw_state_id {
 #define BRW_NEW_META_IN_PROGRESS        (1 << BRW_STATE_META_IN_PROGRESS)
 #define BRW_NEW_INTERPOLATION_MAP       (1 << BRW_STATE_INTERPOLATION_MAP)
 #define BRW_NEW_PUSH_CONSTANT_ALLOCATION (1 << BRW_STATE_PUSH_CONSTANT_ALLOCATION)
+#define BRW_NEW_NUM_SAMPLES             (1 << BRW_STATE_NUM_SAMPLES)
 
 struct brw_state_flags {
    /** State update flags signalled by mesa internals */
@@ -833,8 +835,6 @@ struct brw_vertex_element {
 
    int buffer;
 
-   /** The corresponding Mesa vertex attribute */
-   gl_vert_attrib attrib;
    /** Offset of the first element within the buffer object */
    unsigned int offset;
 };
@@ -925,6 +925,7 @@ struct brw_transform_feedback_object {
  */
 struct brw_stage_state
 {
+   gl_shader_stage stage;
    struct brw_stage_prog_data *prog_data;
 
    /**
@@ -994,9 +995,7 @@ struct brw_context
       /** Upload a SAMPLER_STATE table. */
       void (*upload_sampler_state_table)(struct brw_context *brw,
                                          struct gl_program *prog,
-                                         uint32_t sampler_count,
-                                         uint32_t *sst_offset,
-                                         uint32_t *sdc_offset);
+                                         struct brw_stage_state *stage_state);
 
       /**
        * Send the appropriate state packets to configure depth, stencil, and
@@ -1119,6 +1118,9 @@ struct brw_context
    /* Whether a meta-operation is in progress. */
    bool meta_in_progress;
 
+   /* Whether the last depth/stencil packets were both NULL. */
+   bool no_depth_or_stencil;
+
    struct {
       struct brw_vertex_element inputs[VERT_ATTRIB_MAX];
       struct brw_vertex_buffer buffers[VERT_ATTRIB_MAX];
@@ -1163,10 +1165,11 @@ struct brw_context
    const struct gl_geometry_program *geometry_program;
    const struct gl_fragment_program *fragment_program;
 
-   /* hw-dependent 3DSTATE_VF_STATISTICS opcode */
-   uint32_t CMD_VF_STATISTICS;
-   /* hw-dependent 3DSTATE_PIPELINE_SELECT opcode */
-   uint32_t CMD_PIPELINE_SELECT;
+   /**
+    * Number of samples in ctx->DrawBuffer, updated by BRW_NEW_NUM_SAMPLES so
+    * that we don't have to reemit that state every time we change FBOs.
+    */
+   int num_samples;
 
    /**
     * Platform specific constants containing the maximum number of threads

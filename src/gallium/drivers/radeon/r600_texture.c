@@ -289,6 +289,12 @@ void r600_texture_get_fmask_info(struct r600_common_screen *rscreen,
 	fmask.nsamples = 1;
 	fmask.flags |= RADEON_SURF_FMASK;
 
+	/* Force 2D tiling if it wasn't set. This may occur when creating
+	 * FMASK for MSAA resolve on R6xx. On R6xx, the single-sample
+	 * destination buffer must have an FMASK too. */
+	fmask.flags = RADEON_SURF_CLR(fmask.flags, MODE);
+	fmask.flags |= RADEON_SURF_SET(RADEON_SURF_MODE_2D, MODE);
+
 	if (rscreen->chip_class >= SI) {
 		fmask.flags |= RADEON_SURF_HAS_TILE_MODE_INDEX;
 	}
@@ -536,6 +542,12 @@ static unsigned r600_texture_htile_alloc_size(struct r600_common_screen *rscreen
 		return 0;
 	}
 
+	/* HW bug on R6xx. */
+	if (rscreen->chip_class == R600 &&
+	    (rtex->surface.level[0].npix_x > 7680 ||
+	     rtex->surface.level[0].npix_y > 7680))
+		return 0;
+
 	/* this alignment and htile size only apply to linear htile buffer */
 	sw = align(sw, 16 << 3);
 	sh = align(sh, npipes << 3);
@@ -633,7 +645,7 @@ r600_texture_create_object(struct pipe_screen *screen,
 	/* Now create the backing buffer. */
 	if (!buf) {
 		if (!r600_init_resource(rscreen, resource, rtex->size,
-					rtex->surface.bo_alignment, FALSE)) {
+					rtex->surface.bo_alignment, TRUE)) {
 			FREE(rtex);
 			return NULL;
 		}
@@ -1039,6 +1051,8 @@ static void *r600_texture_transfer_map(struct pipe_context *ctx,
 
 	if (trans->staging) {
 		buf = trans->staging;
+		if (!rtex->is_depth && !(usage & PIPE_TRANSFER_READ))
+			usage |= PIPE_TRANSFER_UNSYNCHRONIZED;
 	} else {
 		buf = &rtex->resource;
 	}

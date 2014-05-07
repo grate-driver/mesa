@@ -146,10 +146,10 @@ gen8_update_texture_surface(struct gl_context *ctx,
    unsigned tiling_mode, pitch;
    if (mt->format == MESA_FORMAT_S_UINT8) {
       tiling_mode = GEN8_SURFACE_TILING_W;
-      pitch = 2 * mt->region->pitch;
+      pitch = 2 * mt->pitch;
    } else {
-      tiling_mode = surface_tiling_mode(mt->region->tiling);
-      pitch = mt->region->pitch;
+      tiling_mode = surface_tiling_mode(mt->tiling);
+      pitch = mt->pitch;
    }
 
    uint32_t tex_format = translate_tex_format(brw,
@@ -203,7 +203,7 @@ gen8_update_texture_surface(struct gl_context *ctx,
       SET_FIELD(brw_swizzle_to_scs(GET_SWZ(swizzle, 2), false), GEN7_SURFACE_SCS_B) |
       SET_FIELD(brw_swizzle_to_scs(GET_SWZ(swizzle, 3), false), GEN7_SURFACE_SCS_A);
 
-   *((uint64_t *) &surf[8]) = mt->region->bo->offset64 + mt->offset; /* reloc */
+   *((uint64_t *) &surf[8]) = mt->bo->offset64 + mt->offset; /* reloc */
 
    surf[10] = 0;
    surf[11] = 0;
@@ -212,9 +212,25 @@ gen8_update_texture_surface(struct gl_context *ctx,
    /* Emit relocation to surface contents */
    drm_intel_bo_emit_reloc(brw->batch.bo,
                            *surf_offset + 8 * 4,
-                           mt->region->bo,
+                           mt->bo,
                            mt->offset,
                            I915_GEM_DOMAIN_SAMPLER, 0);
+}
+
+static void
+gen8_create_raw_surface(struct brw_context *brw, drm_intel_bo *bo,
+                        uint32_t offset, uint32_t size,
+                        uint32_t *out_offset, bool rw)
+{
+   gen8_emit_buffer_surface_state(brw,
+                                  out_offset,
+                                  bo,
+                                  offset,
+                                  BRW_SURFACEFORMAT_RAW,
+                                  size,
+                                  1,
+                                  0 /* mocs */,
+                                  true /* rw */);
 }
 
 /**
@@ -256,7 +272,6 @@ gen8_update_renderbuffer_surface(struct brw_context *brw,
    struct gl_context *ctx = &brw->ctx;
    struct intel_renderbuffer *irb = intel_renderbuffer(rb);
    struct intel_mipmap_tree *mt = irb->mt;
-   struct intel_region *region = mt->region;
    uint32_t format = 0;
    uint32_t surf_type;
    bool is_array = false;
@@ -312,7 +327,7 @@ gen8_update_renderbuffer_surface(struct brw_context *brw,
              (format << BRW_SURFACE_FORMAT_SHIFT) |
              vertical_alignment(mt) |
              horizontal_alignment(mt) |
-             surface_tiling_mode(region->tiling);
+             surface_tiling_mode(mt->tiling);
 
    surf[1] = SET_FIELD(BDW_MOCS_WT, GEN8_SURFACE_MOCS) | mt->qpitch >> 2;
 
@@ -320,7 +335,7 @@ gen8_update_renderbuffer_surface(struct brw_context *brw,
              SET_FIELD(mt->logical_height0 - 1, GEN7_SURFACE_HEIGHT);
 
    surf[3] = (depth - 1) << BRW_SURFACE_DEPTH_SHIFT |
-             (region->pitch - 1); /* Surface Pitch */
+             (mt->pitch - 1); /* Surface Pitch */
 
    surf[4] = gen7_surface_msaa_bits(mt->num_samples, mt->msaa_layout) |
              min_array_element << GEN7_SURFACE_MIN_ARRAY_ELEMENT_SHIFT |
@@ -336,7 +351,7 @@ gen8_update_renderbuffer_surface(struct brw_context *brw,
              SET_FIELD(HSW_SCS_BLUE,  GEN7_SURFACE_SCS_B) |
              SET_FIELD(HSW_SCS_ALPHA, GEN7_SURFACE_SCS_A);
 
-   *((uint64_t *) &surf[8]) = region->bo->offset64; /* reloc */
+   *((uint64_t *) &surf[8]) = mt->bo->offset64; /* reloc */
 
    /* Nothing of relevance. */
    surf[10] = 0;
@@ -345,7 +360,7 @@ gen8_update_renderbuffer_surface(struct brw_context *brw,
 
    drm_intel_bo_emit_reloc(brw->batch.bo,
                            brw->wm.base.surf_offset[surf_index] + 8 * 4,
-                           region->bo,
+                           mt->bo,
                            0,
                            I915_GEM_DOMAIN_RENDER,
                            I915_GEM_DOMAIN_RENDER);
@@ -358,5 +373,6 @@ gen8_init_vtable_surface_functions(struct brw_context *brw)
    brw->vtbl.update_renderbuffer_surface = gen8_update_renderbuffer_surface;
    brw->vtbl.update_null_renderbuffer_surface =
       gen8_update_null_renderbuffer_surface;
+   brw->vtbl.create_raw_surface = gen8_create_raw_surface;
    brw->vtbl.emit_buffer_surface_state = gen8_emit_buffer_surface_state;
 }

@@ -13,12 +13,16 @@ AM_CPPFLAGS = \
 
 LDADD = $(GALLIUM_PIPE_LOADER_CLIENT_LIBS) \
 	$(top_builddir)/src/gallium/auxiliary/pipe-loader/libpipe_loader_client.la \
-	$(top_builddir)/src/gallium/winsys/sw/dri/libswdri.la \
 	$(top_builddir)/src/gallium/winsys/sw/null/libws_null.la \
 	$(top_builddir)/src/gallium/auxiliary/libgallium.la \
 	$(GALLIUM_COMMON_LIB_DEPS)
 
-if NEED_PIPE_LOADER_XLIB
+if HAVE_DRI
+LDADD += \
+	$(top_builddir)/src/gallium/winsys/sw/dri/libswdri.la
+endif
+
+if NEED_WINSYS_XLIB
 LDADD += \
 	$(top_builddir)/src/gallium/winsys/sw/xlib/libws_xlib.la \
 	-lX11 -lXext -lXfixes \

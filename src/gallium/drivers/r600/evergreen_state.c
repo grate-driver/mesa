@@ -474,7 +474,8 @@ static void *evergreen_create_rs_state(struct pipe_context *ctx,
 		S_028810_PS_UCP_MODE(3) |
 		S_028810_ZCLIP_NEAR_DISABLE(!state->depth_clip) |
 		S_028810_ZCLIP_FAR_DISABLE(!state->depth_clip) |
-		S_028810_DX_LINEAR_ATTR_CLIP_ENA(1);
+		S_028810_DX_LINEAR_ATTR_CLIP_ENA(1) |
+		S_028810_DX_RASTERIZATION_KILL(state->rasterizer_discard);
 	rs->multisample_enable = state->multisample;
 
 	/* offset */
@@ -543,7 +544,6 @@ static void *evergreen_create_rs_state(struct pipe_context *ctx,
 						  state->fill_back != PIPE_POLYGON_MODE_FILL) |
 			       S_028814_POLYMODE_FRONT_PTYPE(r600_translate_fill(state->fill_front)) |
 			       S_028814_POLYMODE_BACK_PTYPE(r600_translate_fill(state->fill_back)));
-	r600_store_context_reg(&rs->buffer, R_028350_SX_MISC, S_028350_MULTIPASS(state->rasterizer_discard));
 	return rs;
 }
 
@@ -1381,7 +1381,10 @@ static void evergreen_set_framebuffer_state(struct pipe_context *ctx,
 	}
 
 	log_samples = util_logbase2(rctx->framebuffer.nr_samples);
-	if (rctx->b.chip_class == CAYMAN && rctx->db_misc_state.log_samples != log_samples) {
+	/* This is for Cayman to program SAMPLE_RATE, and for RV770 to fix a hw bug. */
+	if ((rctx->b.chip_class == CAYMAN ||
+	     rctx->b.family == CHIP_RV770) &&
+	    rctx->db_misc_state.log_samples != log_samples) {
 		rctx->db_misc_state.log_samples = log_samples;
 		rctx->db_misc_state.atom.dirty = true;
 	}
@@ -2192,7 +2195,9 @@ void cayman_init_common_regs(struct r600_command_buffer *cb,
 
 	r600_store_context_reg(cb, R_028A4C_PA_SC_MODE_CNTL_1, 0);
 
-	r600_store_context_reg(cb, R_028354_SX_SURFACE_SYNC, S_028354_SURFACE_SYNC_MASK(0xf));
+	r600_store_context_reg_seq(cb, R_028350_SX_MISC, 2);
+	r600_store_value(cb, 0);
+	r600_store_value(cb, S_028354_SURFACE_SYNC_MASK(0xf));
 
 	r600_store_context_reg(cb, R_028800_DB_DEPTH_CONTROL, 0);
 }
@@ -2469,7 +2474,9 @@ void evergreen_init_common_regs(struct r600_command_buffer *cb,
 	/* The cs checker requires this register to be set. */
 	r600_store_context_reg(cb, R_028800_DB_DEPTH_CONTROL, 0);
 
-	r600_store_context_reg(cb, R_028354_SX_SURFACE_SYNC, S_028354_SURFACE_SYNC_MASK(0xf));
+	r600_store_context_reg_seq(cb, R_028350_SX_MISC, 2);
+	r600_store_value(cb, 0);
+	r600_store_value(cb, S_028354_SURFACE_SYNC_MASK(0xf));
 
 	return;
 }
@@ -2985,30 +2992,6 @@ void evergreen_update_es_state(struct pipe_context *ctx, struct r600_pipe_shader
 	r600_store_context_reg(cb, R_02888C_SQ_PGM_START_ES,
 			       r600_resource_va(ctx->screen, (void *)shader->bo) >> 8);
 	/* After that, the NOP relocation packet must be emitted (shader->bo, RADEON_USAGE_READ). */
-}
-
-static unsigned r600_conv_prim_to_gs_out(unsigned mode)
-{
-	static const int prim_conv[] = {
-		V_028A6C_OUTPRIM_TYPE_POINTLIST,
-		V_028A6C_OUTPRIM_TYPE_LINESTRIP,
-		V_028A6C_OUTPRIM_TYPE_LINESTRIP,
-		V_028A6C_OUTPRIM_TYPE_LINESTRIP,
-		V_028A6C_OUTPRIM_TYPE_TRISTRIP,
-		V_028A6C_OUTPRIM_TYPE_TRISTRIP,
-		V_028A6C_OUTPRIM_TYPE_TRISTRIP,
-		V_028A6C_OUTPRIM_TYPE_TRISTRIP,
-		V_028A6C_OUTPRIM_TYPE_TRISTRIP,
-		V_028A6C_OUTPRIM_TYPE_TRISTRIP,
-		V_028A6C_OUTPRIM_TYPE_LINESTRIP,
-		V_028A6C_OUTPRIM_TYPE_LINESTRIP,
-		V_028A6C_OUTPRIM_TYPE_TRISTRIP,
-		V_028A6C_OUTPRIM_TYPE_TRISTRIP,
-		V_028A6C_OUTPRIM_TYPE_TRISTRIP
-	};
-	assert(mode < Elements(prim_conv));
-
-	return prim_conv[mode];
 }
 
 void evergreen_update_gs_state(struct pipe_context *ctx, struct r600_pipe_shader *shader)

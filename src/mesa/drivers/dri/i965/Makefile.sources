@@ -11,7 +11,6 @@ i965_FILES = \
 	intel_extensions.c \
 	intel_fbo.c \
 	intel_mipmap_tree.c \
-	intel_regions.c \
 	intel_resolve_map.c \
 	intel_screen.c \
 	intel_pixel.c \
@@ -58,6 +57,7 @@ i965_FILES = \
 	brw_fs_channel_expressions.cpp \
 	brw_fs_copy_propagation.cpp \
 	brw_fs_cse.cpp \
+	brw_fs_dead_code_eliminate.cpp \
 	brw_fs_fp.cpp \
 	brw_fs_generator.cpp \
 	brw_fs_live_variables.cpp \

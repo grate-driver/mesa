@@ -25,14 +25,17 @@
  *
  **************************************************************************/
 
-#ifndef INTEL_REGIONS_H
-#define INTEL_REGIONS_H
+#ifndef INTEL_IMAGE_H
+#define INTEL_IMAGE_H
 
-/** @file intel_regions.h
+/** @file intel_image.h
  *
- * Structure definitions and prototypes for intel_region handling,
- * which is the basic structure for rectangular collections of pixels
- * stored in a drm_intel_bo.
+ * Structure definitions and prototypes for __DRIimage, the driver-private
+ * structure backing EGLImage or a drawable in DRI3.
+ *
+ * The __DRIimage is passed around the loader code (src/glx and src/egl), but
+ * it's opaque to that code and may only be accessed by loader extensions
+ * (mostly located in intel_screen.c).
  */
 
 #include <stdbool.h>
@@ -45,72 +48,6 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-struct brw_context;
-struct intel_screen;
-struct intel_buffer_object;
-
-/**
- * A layer on top of the bufmgr buffers that adds a few useful things:
- *
- * - Refcounting for local buffer references.
- * - Refcounting for buffer maps
- * - Buffer dimensions - pitch and height.
- * - Blitter commands for copying 2D regions between buffers. (really???)
- */
-struct intel_region
-{
-   drm_intel_bo *bo;  /**< buffer manager's buffer */
-   GLuint refcount; /**< Reference count for region */
-   GLuint cpp;      /**< bytes per pixel */
-   GLuint width;    /**< in pixels */
-   GLuint height;   /**< in pixels */
-   GLuint pitch;    /**< in bytes */
-
-   uint32_t tiling; /**< Which tiling mode the region is in */
-
-   uint32_t name; /**< Global name for the bo */
-};
-
-
-/* Allocate a refcounted region.  Pointers to regions should only be
- * copied by calling intel_reference_region().
- */
-struct intel_region *intel_region_alloc(struct intel_screen *screen,
-                                        uint32_t tiling,
-					GLuint cpp, GLuint width,
-                                        GLuint height,
-					bool expect_accelerated_upload);
-
-struct intel_region *
-intel_region_alloc_for_handle(struct intel_screen *screen,
-			      GLuint cpp,
-			      GLuint width, GLuint height, GLuint pitch,
-			      unsigned int handle, const char *name);
-
-struct intel_region *
-intel_region_alloc_for_fd(struct intel_screen *screen,
-                          GLuint cpp,
-                          GLuint width, GLuint height, GLuint pitch,
-                          GLuint size,
-                          int fd, const char *name);
-
-bool
-intel_region_flink(struct intel_region *region, uint32_t *name);
-
-void intel_region_reference(struct intel_region **dst,
-                            struct intel_region *src);
-
-void intel_region_release(struct intel_region **ib);
-
-void
-intel_region_get_tile_masks(const struct intel_region *region,
-                            uint32_t *mask_x, uint32_t *mask_y,
-                            bool map_stencil_as_y_tiled);
-
-uint32_t
-intel_region_get_aligned_offset(const struct intel_region *region, uint32_t x,
-                                uint32_t y, bool map_stencil_as_y_tiled);
 
 /**
  * Used with images created with image_from_names
@@ -130,7 +67,8 @@ struct intel_image_format {
 };
 
 struct __DRIimageRec {
-   struct intel_region *region;
+   drm_intel_bo *bo;
+   uint32_t pitch; /**< in bytes */
    GLenum internal_format;
    uint32_t dri_format;
    GLuint format;

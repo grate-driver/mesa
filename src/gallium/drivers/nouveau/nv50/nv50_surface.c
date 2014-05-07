@@ -622,6 +622,7 @@ struct nv50_blitctx
       unsigned num_samplers[3];
       struct pipe_sampler_view *texture[2];
       struct nv50_tsc_entry *sampler[2];
+      unsigned min_samples;
       uint32_t dirty;
    } saved;
    struct nv50_rasterizer_stateobj rast;
@@ -1000,6 +1001,8 @@ nv50_blitctx_pre_blit(struct nv50_blitctx *ctx)
    ctx->saved.gp = nv50->gmtyprog;
    ctx->saved.fp = nv50->fragprog;
 
+   ctx->saved.min_samples = nv50->min_samples;
+
    nv50->rast = &ctx->rast;
 
    nv50->vertprog = &blitter->vp;
@@ -1021,13 +1024,15 @@ nv50_blitctx_pre_blit(struct nv50_blitctx *ctx)
    nv50->num_samplers[0] = nv50->num_samplers[1] = 0;
    nv50->num_samplers[2] = 2;
 
+   nv50->min_samples = 1;
+
    ctx->saved.dirty = nv50->dirty;
 
    nouveau_bufctx_reset(nv50->bufctx_3d, NV50_BIND_FB);
    nouveau_bufctx_reset(nv50->bufctx_3d, NV50_BIND_TEXTURES);
 
    nv50->dirty =
-      NV50_NEW_FRAMEBUFFER |
+      NV50_NEW_FRAMEBUFFER | NV50_NEW_MIN_SAMPLES |
       NV50_NEW_VERTPROG | NV50_NEW_FRAGPROG | NV50_NEW_GMTYPROG |
       NV50_NEW_TEXTURES | NV50_NEW_SAMPLERS;
 }
@@ -1051,6 +1056,8 @@ nv50_blitctx_post_blit(struct nv50_blitctx *blit)
    nv50->vertprog = blit->saved.vp;
    nv50->gmtyprog = blit->saved.gp;
    nv50->fragprog = blit->saved.fp;
+
+   nv50->min_samples = blit->saved.min_samples;
 
    pipe_sampler_view_reference(&nv50->textures[2][0], NULL);
    pipe_sampler_view_reference(&nv50->textures[2][1], NULL);
@@ -1076,6 +1083,8 @@ nv50_blitctx_post_blit(struct nv50_blitctx *blit)
        NV50_NEW_RASTERIZER | NV50_NEW_ZSA | NV50_NEW_BLEND |
        NV50_NEW_TEXTURES | NV50_NEW_SAMPLERS |
        NV50_NEW_VERTPROG | NV50_NEW_GMTYPROG | NV50_NEW_FRAGPROG);
+
+   nv50->base.pipe.set_min_samples(&nv50->base.pipe, blit->saved.min_samples);
 }
 
 
@@ -1292,8 +1301,8 @@ nv50_blit_eng2d(struct nv50_context *nv50, const struct pipe_blit_info *info)
 
    if (src->base.base.nr_samples > dst->base.base.nr_samples) {
       /* center src coorinates for proper MS resolve filtering */
-      srcx += (int64_t)src->ms_x << 32;
-      srcy += (int64_t)src->ms_y << 32;
+      srcx += (int64_t)1 << (src->ms_x + 31);
+      srcy += (int64_t)1 << (src->ms_y + 31);
    }
 
    dstx = info->dst.box.x << dst->ms_x;
@@ -1431,8 +1440,8 @@ nv50_blit(struct pipe_context *pipe, const struct pipe_blit_info *info)
       eng3d = TRUE;
 
    /* FIXME: can't make this work with eng2d anymore */
-   if (info->src.resource->nr_samples > 1 ||
-       info->dst.resource->nr_samples > 1)
+   if ((info->src.resource->nr_samples | 1) !=
+       (info->dst.resource->nr_samples | 1))
       eng3d = TRUE;
 
    /* FIXME: find correct src coordinate adjustments */

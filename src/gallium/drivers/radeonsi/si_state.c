@@ -47,9 +47,11 @@ static void si_init_atom(struct r600_atom *atom, struct r600_atom **list_elem,
 	*list_elem = atom;
 }
 
-static uint32_t cik_num_banks(struct si_screen *sscreen, unsigned bpe, unsigned tile_split)
+uint32_t si_num_banks(struct si_screen *sscreen, unsigned bpe, unsigned tile_split,
+		      unsigned tile_mode_index)
 {
-	if (sscreen->b.info.cik_macrotile_mode_array_valid) {
+	if ((sscreen->b.chip_class == CIK) &&
+	    sscreen->b.info.cik_macrotile_mode_array_valid) {
 		unsigned index, tileb;
 
 		tileb = 8 * 8 * bpe;
@@ -58,10 +60,16 @@ static uint32_t cik_num_banks(struct si_screen *sscreen, unsigned bpe, unsigned 
 		for (index = 0; tileb > 64; index++) {
 			tileb >>= 1;
 		}
-
 		assert(index < 16);
 
 		return (sscreen->b.info.cik_macrotile_mode_array[index] >> 6) & 0x3;
+	}
+
+	if ((sscreen->b.chip_class == SI) &&
+	    sscreen->b.info.si_tile_mode_array_valid) {
+		assert(tile_mode_index < 32);
+
+		return (sscreen->b.info.si_tile_mode_array[tile_mode_index] >> 20) & 0x3;
 	}
 
 	/* The old way. */
@@ -1328,6 +1336,9 @@ static uint32_t si_translate_buffer_dataformat(struct pipe_screen *screen,
 	if (type == UTIL_FORMAT_TYPE_FIXED)
 		return V_008F0C_BUF_DATA_FORMAT_INVALID;
 
+	if (desc->format == PIPE_FORMAT_R11G11B10_FLOAT)
+		return V_008F0C_BUF_DATA_FORMAT_10_11_11;
+
 	if (desc->nr_channels == 4 &&
 	    desc->channel[0].size == 10 &&
 	    desc->channel[1].size == 10 &&
@@ -1393,6 +1404,9 @@ static uint32_t si_translate_buffer_numformat(struct pipe_screen *screen,
 					      const struct util_format_description *desc,
 					      int first_non_void)
 {
+	if (desc->format == PIPE_FORMAT_R11G11B10_FLOAT)
+		return V_008F0C_BUF_NUM_FORMAT_FLOAT;
+
 	switch (desc->channel[first_non_void].type) {
 	case UTIL_FORMAT_TYPE_SIGNED:
 		if (desc->channel[first_non_void].normalized)
@@ -1777,7 +1791,8 @@ static void si_init_depth_surface(struct si_context *sctx,
 		macro_aspect = cik_macro_tile_aspect(macro_aspect);
 		bankw = cik_bank_wh(bankw);
 		bankh = cik_bank_wh(bankh);
-		nbanks = cik_num_banks(sscreen, rtex->surface.bpe, rtex->surface.tile_split);
+		nbanks = si_num_banks(sscreen, rtex->surface.bpe, rtex->surface.tile_split,
+				      ~0);
 		tile_mode_index = si_tile_mode_index(rtex, level, false);
 		pipe_config = cik_db_pipe_config(sscreen, tile_mode_index);
 
@@ -2208,9 +2223,11 @@ static void si_bind_ps_shader(struct pipe_context *ctx, void *state)
 	struct si_context *sctx = (struct si_context *)ctx;
 	struct si_pipe_shader_selector *sel = state;
 
+	/* skip if supplied shader is one already in use */
 	if (sctx->ps_shader == sel)
 		return;
 
+	/* use dummy shader if supplied shader is corrupt */
 	if (!sel || !sel->current)
 		sel = sctx->dummy_pixel_shader;
 
@@ -3083,6 +3100,8 @@ void si_init_config(struct si_context *sctx)
 		case CHIP_KAVERI:
 			/* XXX todo */
 		case CHIP_KABINI:
+			/* XXX todo */
+		case CHIP_MULLINS:
 			/* XXX todo */
 		default:
 			si_pm4_set_reg(pm4, R_028350_PA_SC_RASTER_CONFIG, 0x00000000);

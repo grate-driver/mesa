@@ -213,7 +213,6 @@ intelInitExtensions(struct gl_context *ctx)
    ctx->Extensions.EXT_pixel_buffer_object = true;
    ctx->Extensions.EXT_point_parameters = true;
    ctx->Extensions.EXT_provoking_vertex = true;
-   ctx->Extensions.EXT_separate_shader_objects = true;
    ctx->Extensions.EXT_texture_array = true;
    ctx->Extensions.EXT_texture_env_dot3 = true;
    ctx->Extensions.EXT_texture_filter_anisotropic = true;
@@ -311,8 +310,10 @@ intelInitExtensions(struct gl_context *ctx)
       ctx->Extensions.ARB_stencil_texturing = true;
    }
 
-   if (brw->gen == 5 || can_write_oacontrol(brw))
+   if (brw->gen == 5 || can_write_oacontrol(brw)) {
       ctx->Extensions.AMD_performance_monitor = true;
+      ctx->Extensions.INTEL_performance_query = true;
+   }
 
    if (ctx->API == API_OPENGL_CORE)
       ctx->Extensions.ARB_base_instance = true;
