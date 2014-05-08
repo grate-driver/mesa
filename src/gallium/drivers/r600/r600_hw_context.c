@@ -81,7 +81,7 @@ void r600_need_cs_space(struct r600_context *ctx, unsigned num_dw,
 	}
 
 	/* SX_MISC */
-	if (ctx->b.chip_class <= R700) {
+	if (ctx->b.chip_class == R600) {
 		num_dw += 3;
 	}
 
@@ -210,6 +210,15 @@ void r600_flush_emit(struct r600_context *rctx)
 				S_0085F0_SMX_ACTION_ENA(1);
 	}
 
+	/* Workaround for buggy flushing on some R6xx chipsets. */
+	if (rctx->b.flags & R600_CONTEXT_FLUSH_AND_INV &&
+	    (rctx->b.family == CHIP_RV670 ||
+	     rctx->b.family == CHIP_RS780 ||
+	     rctx->b.family == CHIP_RS880)) {
+		cp_coher_cntl |=  S_0085F0_CB1_DEST_BASE_ENA(1) |
+				  S_0085F0_DEST_BASE_0_ENA(1);
+	}
+
 	if (cp_coher_cntl) {
 		cs->buf[cs->cdw++] = PKT3(PKT3_SURFACE_SYNC, 3, 0);
 		cs->buf[cs->cdw++] = cp_coher_cntl;   /* CP_COHER_CNTL */
@@ -260,7 +269,7 @@ void r600_context_flush(struct r600_context *ctx, unsigned flags)
 	r600_flush_emit(ctx);
 
 	/* old kernels and userspace don't set SX_MISC, so we must reset it to 0 here */
-	if (ctx->b.chip_class <= R700) {
+	if (ctx->b.chip_class == R600) {
 		r600_write_context_reg(cs, R_028350_SX_MISC, 0);
 	}
 

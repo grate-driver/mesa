@@ -1025,6 +1025,13 @@ struct brw_context
    drm_intel_context *hw_ctx;
 
    /**
+    * Set of drm_intel_bo * that have been rendered to within this batchbuffer
+    * and would need flushing before being used from another cache domain that
+    * isn't coherent with it (i.e. the sampler).
+    */
+   struct set *render_cache;
+
+   /**
     * Number of resets observed in the system at context creation.
     *
     * This is tracked in the context so that we can determine that another
@@ -1182,11 +1189,6 @@ struct brw_context
    const struct gl_vertex_program *vertex_program;
    const struct gl_geometry_program *geometry_program;
    const struct gl_fragment_program *fragment_program;
-
-   /* hw-dependent 3DSTATE_VF_STATISTICS opcode */
-   uint32_t CMD_VF_STATISTICS;
-   /* hw-dependent 3DSTATE_PIPELINE_SELECT opcode */
-   uint32_t CMD_PIPELINE_SELECT;
 
    /**
     * Platform specific constants containing the maximum number of threads

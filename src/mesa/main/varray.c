@@ -738,7 +738,7 @@ get_vertex_array_attrib(struct gl_context *ctx, GLuint index, GLenum pname,
    case GL_VERTEX_ATTRIB_ARRAY_ENABLED_ARB:
       return array->Enabled;
    case GL_VERTEX_ATTRIB_ARRAY_SIZE_ARB:
-      return array->Size;
+      return (array->Format == GL_BGRA) ? GL_BGRA : array->Size;
    case GL_VERTEX_ATTRIB_ARRAY_STRIDE_ARB:
       return array->Stride;
    case GL_VERTEX_ATTRIB_ARRAY_TYPE_ARB:
@@ -784,13 +784,7 @@ static const GLfloat *
 get_current_attrib(struct gl_context *ctx, GLuint index, const char *function)
 {
    if (index == 0) {
-      /* In OpenGL 3.1 attribute 0 becomes non-magic, just like in OpenGL ES
-       * 2.0.  Note that we cannot just check for API_OPENGL_CORE here because
-       * that will erroneously allow this usage in a 3.0 forward-compatible
-       * context too.
-       */
-      if ((ctx->API != API_OPENGL_CORE || ctx->Version < 31)
-          && ctx->API != API_OPENGLES2) {
+      if (_mesa_attr_zero_aliases_vertex(ctx)) {
 	 _mesa_error(ctx, GL_INVALID_OPERATION, "%s(index==0)", function);
 	 return NULL;
       }

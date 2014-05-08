@@ -780,6 +780,13 @@ if test "x$have_libdrm" = xyes; then
 	DEFINES="$DEFINES -DHAVE_LIBDRM"
 fi
 
+case "$host_os" in
+linux*)
+    need_libudev=yes ;;
+*)
+    need_libudev=no ;;
+esac
+
 PKG_CHECK_MODULES([LIBUDEV], [libudev >= $LIBUDEV_REQUIRED],
                   have_libudev=yes, have_libudev=no)
 
@@ -1184,8 +1191,8 @@ if test "x$enable_gbm" = xauto; then
     esac
 fi
 if test "x$enable_gbm" = xyes; then
-    if test x"$have_libudev" != xyes; then
-        AC_MSG_ERROR([gbm needs udev])
+    if test "x$need_libudev$have_libudev" = xyesno; then
+        AC_MSG_ERROR([gbm requires udev >= $LIBUDEV_REQUIRED])
     fi
 
     if test "x$enable_dri" = xyes; then
@@ -1196,7 +1203,11 @@ if test "x$enable_gbm" = xyes; then
     fi
 fi
 AM_CONDITIONAL(HAVE_GBM, test "x$enable_gbm" = xyes)
-GBM_PC_REQ_PRIV="libudev"
+if test "x$need_libudev" = xyes; then
+    GBM_PC_REQ_PRIV="libudev >= $LIBUDEV_REQUIRED"
+else
+    GBM_PC_REQ_PRIV=""
+fi
 GBM_PC_LIB_PRIV="$DLOPEN_LIBS"
 AC_SUBST([GBM_PC_REQ_PRIV])
 AC_SUBST([GBM_PC_LIB_PRIV])
@@ -1467,9 +1478,9 @@ for plat in $egl_platforms; do
 		;;
 	esac
 
-        case "$plat$have_libudev" in
-                waylandno|drmno)
-                    AC_MSG_ERROR([cannot build $plat platfrom without udev]) ;;
+        case "$plat$need_libudev$have_libudev" in
+                waylandyesno|drmyesno)
+                    AC_MSG_ERROR([cannot build $plat platform without udev >= $LIBUDEV_REQUIRED]) ;;
         esac
 done
 
@@ -1535,11 +1546,11 @@ AC_ARG_ENABLE([gallium-llvm],
     [enable_gallium_llvm="$enableval"],
     [enable_gallium_llvm=auto])
 
-AC_ARG_WITH([llvm-shared-libs],
-    [AS_HELP_STRING([--with-llvm-shared-libs],
-        [link with LLVM shared libraries @<:@default=disabled@:>@])],
+AC_ARG_ENABLE([llvm-shared-libs],
+    [AS_HELP_STRING([--enable-llvm-shared-libs],
+        [link with LLVM shared libraries @<:@default=enabled@:>@])],
     [],
-    [with_llvm_shared_libs=no])
+    [with_llvm_shared_libs=yes])
 
 AC_ARG_WITH([llvm-prefix],
     [AS_HELP_STRING([--with-llvm-prefix],
@@ -1708,8 +1719,9 @@ gallium_require_llvm() {
 
 gallium_require_drm_loader() {
     if test "x$enable_gallium_loader" = xyes; then
-        PKG_CHECK_MODULES([LIBUDEV], [libudev], [],
-                          AC_MSG_ERROR([Gallium drm loader requires libudev]))
+        if test "x$need_libudev$have_libudev" = xyesno; then
+            AC_MSG_ERROR([Gallium drm loader requires libudev >= $LIBUDEV_REQUIRED])
+        fi
         if test "x$have_libdrm" != xyes; then
             AC_MSG_ERROR([Gallium drm loader requires libdrm >= $LIBDRM_REQUIRED])
         fi

@@ -186,6 +186,12 @@ _mesa_glsl_parse_state::_mesa_glsl_parse_state(struct gl_context *_ctx,
    this->default_uniform_qualifier->flags.q.shared = 1;
    this->default_uniform_qualifier->flags.q.column_major = 1;
 
+   this->fs_uses_gl_fragcoord = false;
+   this->fs_redeclares_gl_fragcoord = false;
+   this->fs_origin_upper_left = false;
+   this->fs_pixel_center_integer = false;
+   this->fs_redeclares_gl_fragcoord_with_no_layout_qualifiers = false;
+
    this->gs_input_prim_type_specified = false;
    this->gs_input_prim_type = GL_POINTS;
    this->gs_input_size = 0;
@@ -1332,23 +1338,47 @@ set_shader_inout_layout(struct gl_shader *shader,
       /* Should have been prevented by the parser. */
       assert(!state->gs_input_prim_type_specified);
       assert(!state->out_qualifier->flags.i);
-      return;
    }
 
-   shader->Geom.VerticesOut = 0;
-   if (state->out_qualifier->flags.q.max_vertices)
-      shader->Geom.VerticesOut = state->out_qualifier->max_vertices;
-
-   if (state->gs_input_prim_type_specified) {
-      shader->Geom.InputType = state->gs_input_prim_type;
-   } else {
-      shader->Geom.InputType = PRIM_UNKNOWN;
+   if (shader->Stage != MESA_SHADER_FRAGMENT) {
+      /* Should have been prevented by the parser. */
+      assert(!state->fs_uses_gl_fragcoord);
+      assert(!state->fs_redeclares_gl_fragcoord);
+      assert(!state->fs_pixel_center_integer);
+      assert(!state->fs_origin_upper_left);
    }
 
-   if (state->out_qualifier->flags.q.prim_type) {
-      shader->Geom.OutputType = state->out_qualifier->prim_type;
-   } else {
-      shader->Geom.OutputType = PRIM_UNKNOWN;
+   switch(shader->Stage) {
+   case MESA_SHADER_GEOMETRY:
+      shader->Geom.VerticesOut = 0;
+      if (state->out_qualifier->flags.q.max_vertices)
+         shader->Geom.VerticesOut = state->out_qualifier->max_vertices;
+
+      if (state->gs_input_prim_type_specified) {
+         shader->Geom.InputType = state->gs_input_prim_type;
+      } else {
+         shader->Geom.InputType = PRIM_UNKNOWN;
+      }
+
+      if (state->out_qualifier->flags.q.prim_type) {
+         shader->Geom.OutputType = state->out_qualifier->prim_type;
+      } else {
+         shader->Geom.OutputType = PRIM_UNKNOWN;
+      }
+      break;
+
+   case MESA_SHADER_FRAGMENT:
+      shader->redeclares_gl_fragcoord = state->fs_redeclares_gl_fragcoord;
+      shader->uses_gl_fragcoord = state->fs_uses_gl_fragcoord;
+      shader->pixel_center_integer = state->fs_pixel_center_integer;
+      shader->origin_upper_left = state->fs_origin_upper_left;
+      shader->ARB_fragment_coord_conventions_enable =
+         state->ARB_fragment_coord_conventions_enable;
+      break;
+
+    default:
+      /* Nothing to do. */
+      break;
    }
 }
 

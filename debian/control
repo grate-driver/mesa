@@ -147,8 +147,8 @@ Architecture: any
 Depends:
  ${shlibs:Depends},
  ${misc:Depends},
- libudev1 | libudev0,
-Recommends: libegl1-mesa-drivers
+ libudev1 [linux-any] | libudev0 [linux-any],
+Recommends: libegl1-mesa-drivers [!hurd-any]
 Provides: libegl1-x11
 Conflicts: libegl1-x11
 Replaces: libegl1-x11
@@ -183,7 +183,7 @@ Section: libdevel
 Architecture: any
 Depends:
  libegl1-mesa (= ${binary:Version}),
- libegl1-mesa-drivers (= ${binary:Version}),
+ libegl1-mesa-drivers (= ${binary:Version}) [!hurd-any],
  libdrm-dev (>= 2.4.52) [!hurd-any],
  x11proto-dri2-dev (>= 2.6),
  x11proto-gl-dev (>= 1.4.14),
@@ -476,7 +476,7 @@ Section: libs
 Architecture: any
 Depends:
  ${shlibs:Depends},
- ${misc:Depends}
+ ${misc:Depends},
  libglapi-mesa (= ${binary:Version}),
  libudev1 | libudev0,
 Recommends: libgl1-mesa-dri (>= 7.2)
@@ -727,5 +727,3 @@ Description: Debugging symbols for the Mesa VDPAU video acceleration drivers
  post-processing for the supported graphics cards.
  .
  This package contains the debugging symbols for the VDPAU drivers.
-
-# vim: tw=0

@@ -2395,6 +2395,15 @@ struct gl_shader
    struct glsl_symbol_table *symbols;
 
    bool uses_builtin_functions;
+   bool uses_gl_fragcoord;
+   bool redeclares_gl_fragcoord;
+   bool ARB_fragment_coord_conventions_enable;
+
+   /**
+    * Fragment shader state from GLSL 1.50 layout qualifiers.
+    */
+   bool origin_upper_left;
+   bool pixel_center_integer;
 
    /**
     * Geometry shader state from GLSL 1.50 layout qualifiers.
@@ -2689,6 +2698,11 @@ struct gl_shader_program
     * \c NULL.
     */
    struct gl_shader *_LinkedShaders[MESA_SHADER_STAGES];
+
+   /* True if any of the fragment shaders attached to this program use:
+    * #extension ARB_fragment_coord_conventions: enable
+    */
+   GLboolean ARB_fragment_coord_conventions_enable;
 };   
 
 
@@ -3435,6 +3449,7 @@ struct gl_extensions
    GLboolean ARB_texture_mirror_clamp_to_edge;
    GLboolean ARB_texture_multisample;
    GLboolean ARB_texture_non_power_of_two;
+   GLboolean ARB_texture_stencil8;
    GLboolean ARB_texture_query_levels;
    GLboolean ARB_texture_query_lod;
    GLboolean ARB_texture_rg;

@@ -1,3 +1,22 @@
+mesa (10.1.2-1) unstable; urgency=medium
+
+  [ Andreas Boll ]
+  * New upstream release.
+    + i965: Don't enable reset notification support on Gen4-5 (Closes: #746557)
+
+ -- Julien Cristau <jcristau@debian.org>  Tue, 06 May 2014 09:31:26 +0200
+
+mesa (10.1.1-1) unstable; urgency=low
+
+  [ Andreas Boll ]
+  * New upstream release.
+  * Relax ocl-icd-libopencl1 dependency to allow the generic virtual
+    libopencl1 as a valid alternative (Closes: #745765).
+  * Add missing separator between dependency items '${misc:Depends}'
+    and 'libglapi-mesa (= ${binary:Version})'.
+
+ -- Julien Cristau <jcristau@debian.org>  Sun, 27 Apr 2014 19:51:45 +0200
+
 mesa (10.1.0-4ubuntu5) trusty; urgency=medium
 
   * enable-bdw.diff: Enable Broadwell support. (LP: #1300258)
@@ -31,12 +50,17 @@ mesa (10.1.0-4ubuntu1) trusty; urgency=medium
 
  -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Mon, 31 Mar 2014 09:56:17 +0000
 
-mesa (10.1.0-5) UNRELEASED; urgency=low
+mesa (10.1.0-5) unstable; urgency=low
 
-  * Add explicit libudev1 dependency.
-    - libudev is being dlsym'd now, but still a dependency.
+  [ Maarten Lankhorst ]
+  * Add explicit libudev1 dependency (LP: #1296947)
+    - libudev is being dlopened now, but still a dependency.
 
- -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Mon, 31 Mar 2014 11:25:48 +0200
+  [ Julien Cristau ]
+  * Fix libegl1-mesa-dev installability on hurd, which doesn't have
+    libegl1-mesa-drivers (closes: #742335).  Thanks, Pino Toscano!
+
+ -- Julien Cristau <jcristau@debian.org>  Mon, 31 Mar 2014 15:58:53 +0200
 
 mesa (10.1.0-4) unstable; urgency=medium
 
