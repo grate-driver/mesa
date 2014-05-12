@@ -15,3 +15,4 @@ fix-kwin.diff
 i965-dont-call-abort-on-unknown-dev.diff
 enable-bdw.diff
 fix-unity-on-bdw.diff
+fix-gpu-hangs-on-bdw.diff

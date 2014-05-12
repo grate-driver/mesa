@@ -1,6 +1,11 @@
 mesa (10.1.3-0ubuntu1) UNRELEASED; urgency=low
 
+  [ Maarten Lankhorst ]
   * Merge from released debian-unstable.
+
+  [ Timo Aaltonen ]
+  * fix-gpu-hangs-on-bdw.diff: Upstream commit to fix various GPU hangs
+    on Broadwell.
 
  -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Thu, 08 May 2014 12:32:52 +0200
 
