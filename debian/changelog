@@ -1,5 +1,6 @@
 mesa (10.2.0~rc1-1) UNRELEASED; urgency=medium
 
+  [ Timo Aaltonen ]
   * New upstream release candidate.
     - 02_gbm_no_undefined.diff dropped, upstream
     - 03_gbm_make_devices_static.diff dropped, upstream
@@ -8,6 +9,10 @@ mesa (10.2.0~rc1-1) UNRELEASED; urgency=medium
   * libosmesa6: Bump the soname to upstream default (8), drop
     04_osmesa_version.diff. Add a symlink with the old name to point to
     the new lib.
+
+  [ Julien Cristau ]
+  * Add 01_no_undefined.diff to actually add -Wl,--no-undefined to the linker
+    flags for our shared libraries.
 
  -- Timo Aaltonen <tjaalton@ubuntu.com>  Fri, 11 Apr 2014 17:48:37 +0300
 
