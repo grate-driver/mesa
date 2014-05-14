@@ -1,4 +1,4 @@
-mesa (10.2.0~rc1-1) UNRELEASED; urgency=medium
+mesa (10.2.0~rc1-1) experimental; urgency=medium
 
   [ Timo Aaltonen ]
   * New upstream release candidate.
@@ -20,7 +20,7 @@ mesa (10.2.0~rc1-1) UNRELEASED; urgency=medium
   * Add missing separator between dependency items '${misc:Depends}'
     and 'libglapi-mesa (= ${binary:Version})'.
 
- -- Timo Aaltonen <tjaalton@ubuntu.com>  Fri, 11 Apr 2014 17:48:37 +0300
+ -- Julien Cristau <jcristau@debian.org>  Wed, 14 May 2014 22:57:08 +0200
 
 mesa (10.1.0-5) unstable; urgency=low
 
