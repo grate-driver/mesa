@@ -167,6 +167,8 @@ confflags-swx11-i386-i686 = \
 	--libdir=/usr/lib/$(DEB_HOST_MULTIARCH)/i686/cmov \
 	$(buildflags-i686)
 
+confflags += --disable-omx
+
 configure: $(QUILT_STAMPFN) configure.ac
 	autoreconf -vfi
 
