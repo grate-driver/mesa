@@ -2,7 +2,6 @@ Source: mesa
 Section: graphics
 Priority: optional
 Maintainer: Debian X Strike Force <debian-x@lists.debian.org>
-Uploaders: Cyril Brulebois <kibi@debian.org>
 Standards-Version: 3.9.3
 Build-Depends:
  debhelper (>= 8.1.3),
