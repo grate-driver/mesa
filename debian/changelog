@@ -6,6 +6,7 @@ mesa (10.2.0~rc1-2) UNRELEASED; urgency=medium
 
   [ Julien Cristau ]
   * Bump libdrm-dev build-dep to 2.4.54 per configure.ac.
+  * Bump libxcb-dri2 and libxcb-glx build-deps per configure.ac.
 
  -- Julien Cristau <jcristau@debian.org>  Thu, 15 May 2014 17:19:49 +0200
 
