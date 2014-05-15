@@ -2,6 +2,7 @@ mesa (10.2.0~rc1-2) UNRELEASED; urgency=medium
 
   [ Fabio Pedretti ]
   * debian/rules: remove unused --with-llvm-shared-libs configure option
+  * debian/control: remove python-libxml2 dependency
 
  -- Julien Cristau <jcristau@debian.org>  Thu, 15 May 2014 17:19:49 +0200
 

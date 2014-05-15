@@ -34,7 +34,7 @@ Build-Depends:
  libxcb-randr0-dev,
  libxcb-sync-dev,
  libxshmfence-dev (>= 1.1),
- python-libxml2,
+ python,
  libudev-dev [linux-any],
  flex,
  bison,
