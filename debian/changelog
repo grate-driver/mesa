@@ -1,4 +1,4 @@
-mesa (10.2.0~rc3-1) UNRELEASED; urgency=medium
+mesa (10.2.0~rc4-1) UNRELEASED; urgency=medium
 
   [ Fabio Pedretti ]
   * debian/rules: remove unused --with-llvm-shared-libs configure option
@@ -11,7 +11,10 @@ mesa (10.2.0~rc3-1) UNRELEASED; urgency=medium
   * debian/rules: explicitly disable omx.
 
   [ Maarten Lankhorst ]
-  * New upstream release.
+  * New upstream release candidate.
+
+  [ Andreas Boll ]
+  * New upstream release candidate.
 
  -- Julien Cristau <jcristau@debian.org>  Thu, 15 May 2014 17:19:49 +0200
 
