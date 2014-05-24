@@ -16,6 +16,7 @@ mesa (10.2.0~rc4-1) UNRELEASED; urgency=medium
   [ Andreas Boll ]
   * New upstream release candidate.
     - 01_no_undefined.diff dropped, upstream
+  * Don't try to enable xa on !linux.
 
  -- Julien Cristau <jcristau@debian.org>  Thu, 15 May 2014 17:19:49 +0200
 
