@@ -1,4 +1,4 @@
-mesa (10.2.0~rc4-1) UNRELEASED; urgency=medium
+mesa (10.2.0~rc4-1) experimental; urgency=medium
 
   [ Fabio Pedretti ]
   * debian/rules: remove unused --with-llvm-shared-libs configure option
@@ -18,7 +18,10 @@ mesa (10.2.0~rc4-1) UNRELEASED; urgency=medium
     - 01_no_undefined.diff dropped, upstream
   * Don't try to enable xa on !linux.
 
- -- Julien Cristau <jcristau@debian.org>  Thu, 15 May 2014 17:19:49 +0200
+  [ Emilio Pozuelo Monfort ]
+  * Upload to experimental.
+
+ -- Emilio Pozuelo Monfort <pochu@debian.org>  Sat, 24 May 2014 15:16:23 +0200
 
 mesa (10.2.0~rc1-1) experimental; urgency=medium
 
