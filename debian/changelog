@@ -1,4 +1,4 @@
-mesa (10.1.4-1) UNRELEASED; urgency=medium
+mesa (10.1.4-1) unstable; urgency=medium
 
   [ Timo Aaltonen ]
   * New upstream release.
@@ -8,7 +8,10 @@ mesa (10.1.4-1) UNRELEASED; urgency=medium
   * Bump llvm-3.4-dev and libclang-3.4-dev to 1:3.4.1-3
     - Enables geometry shaders on radeonsi
 
- -- Andreas Boll <andreas.boll.dev@gmail.com>  Thu, 22 May 2014 09:34:33 +0200
+  [ Emilio Pozuelo Monfort ]
+  * Upload to unstable.
+
+ -- Emilio Pozuelo Monfort <pochu@debian.org>  Tue, 27 May 2014 12:05:35 +0200
 
 mesa (10.1.2-1) unstable; urgency=medium
 
