@@ -692,7 +692,6 @@ static bool do_hardware_msaa_resolve(struct pipe_context *ctx,
 	    !(dst->surface.flags & RADEON_SURF_SCANOUT) &&
 	    (!dst->cmask.size || !dst->dirty_level_mask) /* dst cannot be fast-cleared */) {
 		si_blitter_begin(ctx, SI_COLOR_RESOLVE);
-t-cleared
 		util_blitter_custom_resolve_color(sctx->blitter,
 						  info->dst.resource, info->dst.level,
 						  info->dst.box.z,
