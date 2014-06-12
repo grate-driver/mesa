@@ -2741,9 +2741,8 @@ _mesa_meta_blit_shader_table_cleanup(struct blit_shader_table *table)
 static GLenum
 get_temp_image_type(struct gl_context *ctx, mesa_format format)
 {
-   GLenum baseFormat;
-
-   baseFormat = _mesa_get_format_base_format(format);
+   const GLenum baseFormat = _mesa_get_format_base_format(format);
+   const GLint format_red_bits = _mesa_get_format_bits(format, GL_RED_BITS);
 
    switch (baseFormat) {
    case GL_RGBA:
@@ -2754,9 +2753,9 @@ get_temp_image_type(struct gl_context *ctx, mesa_format format)
    case GL_LUMINANCE:
    case GL_LUMINANCE_ALPHA:
    case GL_INTENSITY:
-      if (ctx->DrawBuffer->Visual.redBits <= 8) {
+      if (format_red_bits <= 8) {
          return GL_UNSIGNED_BYTE;
-      } else if (ctx->DrawBuffer->Visual.redBits <= 16) {
+      } else if (format_red_bits <= 16) {
          return GL_UNSIGNED_SHORT;
       } else {
          GLenum datatype = _mesa_get_format_datatype(format);
