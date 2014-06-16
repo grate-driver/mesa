@@ -3,6 +3,8 @@ mesa (10.2.1-1) UNRELEASED; urgency=medium
   * New upstream release.
     - 01_glapi-Duplicate-GLES1-prototypes-in-glapi_dispatch.c.diff
       dropped, upstream
+  * Add 01_targets-xa-limit-the-amount-of-exported-symbols.diff, fixes
+    FTBFS with gcc-4.9.
 
  -- Andreas Boll <andreas.boll.dev@gmail.com>  Fri, 13 Jun 2014 17:39:17 +0200
 
