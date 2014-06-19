@@ -238,10 +238,6 @@ brw_debug_recompile_sampler_key(struct brw_context *brw,
                       old_key->gl_clamp_mask[1], key->gl_clamp_mask[1]);
    found |= key_debug(brw, "GL_CLAMP enabled on any texture unit's 3rd coordinate",
                       old_key->gl_clamp_mask[2], key->gl_clamp_mask[2]);
-   found |= key_debug(brw, "GL_MESA_ycbcr texturing\n",
-                      old_key->yuvtex_mask, key->yuvtex_mask);
-   found |= key_debug(brw, "GL_MESA_ycbcr UV swapping\n",
-                      old_key->yuvtex_swap_mask, key->yuvtex_swap_mask);
    found |= key_debug(brw, "gather channel quirk on any texture unit",
                       old_key->gather_channel_quirk_mask, key->gather_channel_quirk_mask);
 
@@ -341,7 +337,7 @@ brw_populate_sampler_prog_key_data(struct gl_context *ctx,
       int unit_id = prog->SamplerUnits[s];
       const struct gl_texture_unit *unit = &ctx->Texture.Unit[unit_id];
 
-      if (unit->_ReallyEnabled && unit->_Current->Target != GL_TEXTURE_BUFFER) {
+      if (unit->_Current && unit->_Current->Target != GL_TEXTURE_BUFFER) {
 	 const struct gl_texture_object *t = unit->_Current;
 	 const struct gl_texture_image *img = t->Image[0][t->BaseLevel];
 	 struct gl_sampler_object *sampler = _mesa_get_samplerobj(ctx, unit_id);
@@ -356,13 +352,8 @@ brw_populate_sampler_prog_key_data(struct gl_context *ctx,
          if (alpha_depth || (brw->gen < 8 && !brw->is_haswell))
             key->swizzles[s] = brw_get_texture_swizzle(ctx, t);
 
-	 if (img->InternalFormat == GL_YCBCR_MESA) {
-	    key->yuvtex_mask |= 1 << s;
-	    if (img->TexFormat == MESA_FORMAT_YCBCR)
-		key->yuvtex_swap_mask |= 1 << s;
-	 }
-
-	 if (sampler->MinFilter != GL_NEAREST &&
+	 if (brw->gen < 8 &&
+             sampler->MinFilter != GL_NEAREST &&
 	     sampler->MagFilter != GL_NEAREST) {
 	    if (sampler->WrapS == GL_CLAMP)
 	       key->gl_clamp_mask[0] |= 1 << s;
@@ -579,7 +570,7 @@ brw_upload_wm_prog(struct brw_context *brw)
    if (!brw_search_cache(&brw->cache, BRW_WM_PROG,
 			 &key, sizeof(key),
 			 &brw->wm.base.prog_offset, &brw->wm.prog_data)) {
-      bool success = do_wm_prog(brw, ctx->Shader._CurrentFragmentProgram, fp,
+      bool success = do_wm_prog(brw, ctx->_Shader->_CurrentFragmentProgram, fp,
 				&key);
       (void) success;
       assert(success);

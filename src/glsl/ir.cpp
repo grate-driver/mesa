@@ -1223,6 +1223,15 @@ ir_constant::is_basis() const
    return ones == 1;
 }
 
+bool
+ir_constant::is_uint16_constant() const
+{
+   if (!type->is_integer())
+      return false;
+
+   return value.u[0] < (1 << 16);
+}
+
 ir_loop::ir_loop()
 {
    this->ir_type = ir_type_loop;
@@ -1324,7 +1333,7 @@ ir_dereference::is_lvalue() const
 }
 
 
-static const char *tex_opcode_strs[] = { "tex", "txb", "txl", "txd", "txf", "txf_ms", "txs", "lod", "tg4", "query_levels" };
+static const char * const tex_opcode_strs[] = { "tex", "txb", "txl", "txd", "txf", "txf_ms", "txs", "lod", "tg4", "query_levels" };
 
 const char *ir_texture::opcode_string()
 {

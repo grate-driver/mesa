@@ -75,6 +75,7 @@ pipe_loader_sw_probe_xlib(struct pipe_loader_device **devs, Display *display)
 }
 #endif
 
+#ifdef HAVE_PIPE_LOADER_DRI
 bool
 pipe_loader_sw_probe_dri(struct pipe_loader_device **devs, struct drisw_loader_funcs *drisw_lf)
 {
@@ -95,6 +96,7 @@ pipe_loader_sw_probe_dri(struct pipe_loader_device **devs, struct drisw_loader_f
 
    return true;
 }
+#endif
 
 bool
 pipe_loader_sw_probe_null(struct pipe_loader_device **devs)
@@ -142,9 +144,6 @@ static void
 pipe_loader_sw_release(struct pipe_loader_device **dev)
 {
    struct pipe_loader_sw_device *sdev = pipe_loader_sw_device(*dev);
-
-   if (sdev->ws && sdev->ws->destroy)
-      sdev->ws->destroy(sdev->ws);
 
    if (sdev->lib)
       util_dl_close(sdev->lib);

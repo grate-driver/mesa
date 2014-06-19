@@ -68,7 +68,7 @@ static const struct brw_device_info brw_device_info_ilk = {
 
 static const struct brw_device_info brw_device_info_snb_gt1 = {
    .gen = 6,
-   .gt = 2,
+   .gt = 1,
    .has_hiz_and_separate_stencil = true,
    .has_llc = true,
    .has_pln = true,
@@ -192,33 +192,61 @@ static const struct brw_device_info brw_device_info_hsw_gt3 = {
    },
 };
 
-/* Thread counts and URB limits are placeholders, and may not be accurate. */
 #define GEN8_FEATURES                               \
    .gen = 8,                                        \
    .has_hiz_and_separate_stencil = true,            \
    .must_use_separate_stencil = true,               \
    .has_llc = true,                                 \
    .has_pln = true,                                 \
-   .max_vs_threads = 280,                           \
-   .max_gs_threads = 256,                           \
-   .max_wm_threads = 408,                           \
-   .urb = {                                         \
-      .size = 128,                                  \
-      .min_vs_entries = 64,                         \
-      .max_vs_entries = 1664,                       \
-      .max_gs_entries = 640,                        \
-   }
+   .max_vs_threads = 504,                           \
+   .max_gs_threads = 504,                           \
+   .max_wm_threads = 384                            \
 
 static const struct brw_device_info brw_device_info_bdw_gt1 = {
    GEN8_FEATURES, .gt = 1,
+   .urb = {
+      .size = 192,
+      .min_vs_entries = 64,
+      .max_vs_entries = 2560,
+      .max_gs_entries = 960,
+   }
 };
 
 static const struct brw_device_info brw_device_info_bdw_gt2 = {
    GEN8_FEATURES, .gt = 2,
+   .urb = {
+      .size = 384,
+      .min_vs_entries = 64,
+      .max_vs_entries = 2560,
+      .max_gs_entries = 960,
+   }
 };
 
 static const struct brw_device_info brw_device_info_bdw_gt3 = {
    GEN8_FEATURES, .gt = 3,
+   .urb = {
+      .size = 384,
+      .min_vs_entries = 64,
+      .max_vs_entries = 2560,
+      .max_gs_entries = 960,
+   }
+};
+
+/* Thread counts and URB limits are placeholders, and may not be accurate.
+ * These were copied from Haswell GT1, above.
+ */
+static const struct brw_device_info brw_device_info_chv = {
+   GEN8_FEATURES, .is_cherryview = 1, .gt = 1,
+   .has_llc = false,
+   .max_vs_threads = 70,
+   .max_gs_threads = 70,
+   .max_wm_threads = 102,
+   .urb = {
+      .size = 128,
+      .min_vs_entries = 64,
+      .max_vs_entries = 640,
+      .max_gs_entries = 256,
+   }
 };
 
 const struct brw_device_info *

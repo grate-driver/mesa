@@ -28,6 +28,7 @@ AM_CFLAGS = \
 xvmcdir = $(XVMC_LIB_INSTALL_DIR)
 xvmc_LTLIBRARIES = libXvMCr600.la
 
+nodist_EXTRA_libXvMCr600_la_SOURCES = dummy.cpp
 libXvMCr600_la_SOURCES = \
 	drm_target.c \
 	$(top_srcdir)/src/gallium/auxiliary/vl/vl_winsys_dri.c
@@ -39,18 +40,4 @@ libXvMCr600_la_LIBADD = \
 	$(top_builddir)/src/gallium/drivers/r600/libr600.la \
 	$(top_builddir)/src/gallium/winsys/radeon/drm/libradeonwinsys.la \
 	$(GALLIUM_XVMC_LIB_DEPS) \
-	$(GALLIUM_DRI_LIB_DEPS) \
 	$(RADEON_LIBS)
-
-if HAVE_MESA_LLVM
-libXvMCr600_la_LINK = $(CXXLINK) $(libXvMCr600_la_LDFLAGS)
-# Mention a dummy pure C++ file to trigger generation of the $(LINK) variable
-nodist_EXTRA_libXvMCr600_la_SOURCES = dummy-cpp.cpp
-
-libXvMCr600_la_LDFLAGS += $(LLVM_LDFLAGS)
-libXvMCr600_la_LIBADD += $(LLVM_LIBS)
-else
-libXvMCr600_la_LINK = $(LINK) $(libXvMCr600_la_LDFLAGS)
-# Mention a dummy pure C file to trigger generation of the $(LINK) variable
-nodist_EXTRA_libXvMCr600_la_SOURCES = dummy-c.c
-endif

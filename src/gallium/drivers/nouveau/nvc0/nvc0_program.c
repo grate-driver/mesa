@@ -51,7 +51,6 @@ nvc0_shader_input_address(unsigned sn, unsigned si, unsigned ubase)
    case TGSI_SEMANTIC_VERTEXID:     return 0x2fc;
    case TGSI_SEMANTIC_TEXCOORD:     return 0x300 + si * 0x10;
    case TGSI_SEMANTIC_FACE:         return 0x3fc;
-   case NV50_SEMANTIC_INVOCATIONID: return ~0;
    default:
       assert(!"invalid TGSI input semantic");
       return ~0;
@@ -539,6 +538,7 @@ nvc0_program_translate(struct nvc0_program *prog, uint16_t chipset)
    info->io.genUserClip = prog->vp.num_ucps;
    info->io.ucpBase = 256;
    info->io.ucpCBSlot = 15;
+   info->io.sampleInterp = prog->fp.sample_interp;
 
    if (prog->type == PIPE_SHADER_COMPUTE) {
       if (chipset >= NVISA_GK104_CHIPSET) {
@@ -551,10 +551,11 @@ nvc0_program_translate(struct nvc0_program *prog, uint16_t chipset)
       info->io.msInfoBase = NVE4_CP_INPUT_MS_OFFSETS;
    } else {
       if (chipset >= NVISA_GK104_CHIPSET) {
-         info->io.resInfoCBSlot = 15;
          info->io.texBindBase = 0x20;
          info->io.suInfoBase = 0; /* TODO */
       }
+      info->io.resInfoCBSlot = 15;
+      info->io.sampleInfoBase = 256 + 128;
       info->io.msInfoCBSlot = 15;
       info->io.msInfoBase = 0; /* TODO */
    }

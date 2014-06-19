@@ -28,7 +28,7 @@
 #include "program/hash_table.h"
 
 ir_rvalue *
-ir_rvalue::clone(void *mem_ctx, struct hash_table *ht) const
+ir_rvalue::clone(void *mem_ctx, struct hash_table *) const
 {
    /* The only possible instantiation is the generic error value. */
    return error_value(mem_ctx);
@@ -265,10 +265,12 @@ ir_assignment::clone(void *mem_ctx, struct hash_table *ht) const
    if (this->condition)
       new_condition = this->condition->clone(mem_ctx, ht);
 
-   return new(mem_ctx) ir_assignment(this->lhs->clone(mem_ctx, ht),
-				     this->rhs->clone(mem_ctx, ht),
-				     new_condition,
-				     this->write_mask);
+   ir_assignment *cloned =
+      new(mem_ctx) ir_assignment(this->lhs->clone(mem_ctx, ht),
+                                 this->rhs->clone(mem_ctx, ht),
+                                 new_condition);
+   cloned->write_mask = this->write_mask;
+   return cloned;
 }
 
 ir_function *

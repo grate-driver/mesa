@@ -3,6 +3,7 @@ libgbm.so.1 libgbm1 #MINVER#
  gbm_bo_create@Base 7.11~1
  gbm_bo_destroy@Base 7.11~1
  gbm_bo_get_device@Base 8.1~0
+ gbm_bo_get_fd@Base 10.2~0
  gbm_bo_get_format@Base 8.1~0
  gbm_bo_get_handle@Base 7.11~1
  gbm_bo_get_height@Base 7.11~1

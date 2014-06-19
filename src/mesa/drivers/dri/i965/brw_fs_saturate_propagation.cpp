@@ -32,7 +32,7 @@ static bool
 opt_saturate_propagation_local(fs_visitor *v, bblock_t *block)
 {
    bool progress = false;
-   int ip = block->start_ip;
+   int ip = block->start_ip - 1;
 
    for (fs_inst *inst = (fs_inst *)block->start;
         inst != block->end->next;
@@ -42,6 +42,8 @@ opt_saturate_propagation_local(fs_visitor *v, bblock_t *block)
       if (inst->opcode != BRW_OPCODE_MOV ||
           inst->dst.file != GRF ||
           inst->src[0].file != GRF ||
+          inst->src[0].abs ||
+          inst->src[0].negate ||
           !inst->saturate)
          continue;
 
@@ -59,7 +61,8 @@ opt_saturate_propagation_local(fs_visitor *v, bblock_t *block)
 
          if (scan_inst->dst.file == GRF &&
              scan_inst->dst.reg == inst->src[0].reg &&
-             scan_inst->dst.reg_offset == inst->src[0].reg_offset) {
+             scan_inst->dst.reg_offset == inst->src[0].reg_offset &&
+             !scan_inst->is_partial_write()) {
             if (scan_inst->can_do_saturate()) {
                scan_inst->saturate = true;
                inst->saturate = false;

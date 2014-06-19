@@ -33,14 +33,13 @@ AM_CPPFLAGS = \
 dridir = $(DRI_DRIVER_INSTALL_DIR)
 dri_LTLIBRARIES = i915_dri.la
 
+nodist_EXTRA_i915_dri_la_SOURCES = dummy.cpp
 i915_dri_la_SOURCES = target.c
 
 i915_dri_la_LDFLAGS = $(GALLIUM_DRI_LINKER_FLAGS)
 
 i915_dri_la_LIBADD = \
 	$(top_builddir)/src/mesa/drivers/dri/common/libdricommon.la \
-	$(top_builddir)/src/mesa/libmesagallium.la \
-	$(top_builddir)/src/gallium/auxiliary/libgallium.la \
 	$(top_builddir)/src/gallium/state_trackers/dri/drm/libdridrm.la \
 	$(top_builddir)/src/gallium/winsys/i915/drm/libi915drm.la \
 	$(top_builddir)/src/gallium/winsys/sw/wrapper/libwsw.la \
@@ -52,11 +51,9 @@ i915_dri_la_LIBADD = \
 	$(GALLIUM_DRI_LIB_DEPS) \
 	$(INTEL_LIBS)
 
-nodist_EXTRA_i915_dri_la_SOURCES = dummy.cpp
-
 if HAVE_MESA_LLVM
 AM_CPPFLAGS += -DGALLIUM_LLVMPIPE
-i915_dri_la_LIBADD += $(top_builddir)/src/gallium/drivers/llvmpipe/libllvmpipe.la $(LLVM_LIBS)
+i915_dri_la_LIBADD += $(top_builddir)/src/gallium/drivers/llvmpipe/libllvmpipe.la
 endif
 
 include $(top_srcdir)/install-gallium-links.mk

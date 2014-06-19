@@ -50,6 +50,10 @@
 #define R600_QUERY_REQUESTED_VRAM	(PIPE_QUERY_DRIVER_SPECIFIC + 1)
 #define R600_QUERY_REQUESTED_GTT	(PIPE_QUERY_DRIVER_SPECIFIC + 2)
 #define R600_QUERY_BUFFER_WAIT_TIME	(PIPE_QUERY_DRIVER_SPECIFIC + 3)
+#define R600_QUERY_NUM_CS_FLUSHES	(PIPE_QUERY_DRIVER_SPECIFIC + 4)
+#define R600_QUERY_NUM_BYTES_MOVED	(PIPE_QUERY_DRIVER_SPECIFIC + 5)
+#define R600_QUERY_VRAM_USAGE		(PIPE_QUERY_DRIVER_SPECIFIC + 6)
+#define R600_QUERY_GTT_USAGE		(PIPE_QUERY_DRIVER_SPECIFIC + 7)
 
 /* read caches */
 #define R600_CONTEXT_INV_VERTEX_CACHE		(1 << 0)
@@ -293,7 +297,8 @@ struct r600_streamout {
 struct r600_ring {
 	struct radeon_winsys_cs		*cs;
 	bool				flushing;
-	void (*flush)(void *ctx, unsigned flags);
+	void (*flush)(void *ctx, unsigned flags,
+		      struct pipe_fence_handle **fence);
 };
 
 struct r600_rings {
@@ -347,6 +352,10 @@ struct r600_common_context {
 	unsigned			current_render_cond_mode;
 	boolean				current_render_cond_cond;
 	boolean				predicate_drawing;
+	/* For context flushing. */
+	struct pipe_query		*saved_render_cond;
+	boolean				saved_render_cond_cond;
+	unsigned			saved_render_cond_mode;
 
 	/* Copy one resource to another using async DMA. */
 	void (*dma_copy)(struct pipe_context *ctx,
@@ -398,6 +407,8 @@ struct pipe_resource *r600_buffer_create(struct pipe_screen *screen,
 bool r600_common_screen_init(struct r600_common_screen *rscreen,
 			     struct radeon_winsys *ws);
 void r600_destroy_common_screen(struct r600_common_screen *rscreen);
+void r600_preflush_suspend_features(struct r600_common_context *ctx);
+void r600_postflush_resume_features(struct r600_common_context *ctx);
 bool r600_common_context_init(struct r600_common_context *rctx,
 			      struct r600_common_screen *rscreen);
 void r600_common_context_cleanup(struct r600_common_context *rctx);
@@ -409,6 +420,7 @@ void r600_screen_clear_buffer(struct r600_common_screen *rscreen, struct pipe_re
 struct pipe_resource *r600_resource_create_common(struct pipe_screen *screen,
 						  const struct pipe_resource *templ);
 const char *r600_get_llvm_processor_name(enum radeon_family family);
+void r600_need_dma_space(struct r600_common_context *ctx, unsigned num_dw);
 
 /* r600_query.c */
 void r600_query_init(struct r600_common_context *rctx);
@@ -475,6 +487,15 @@ r600_resource_reference(struct r600_resource **ptr, struct r600_resource *res)
 {
 	pipe_resource_reference((struct pipe_resource **)ptr,
 				(struct pipe_resource *)res);
+}
+
+static inline unsigned r600_tex_aniso_filter(unsigned filter)
+{
+	if (filter <= 1)   return 0;
+	if (filter <= 2)   return 1;
+	if (filter <= 4)   return 2;
+	if (filter <= 8)   return 3;
+	 /* else */        return 4;
 }
 
 #define R600_ERR(fmt, args...) \

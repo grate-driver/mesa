@@ -36,7 +36,6 @@
 #include "intel_blit.h"
 #include "intel_fbo.h"
 #include "intel_mipmap_tree.h"
-#include "intel_regions.h"
 
 #include "brw_context.h"
 #include "brw_blorp.h"
@@ -187,9 +186,9 @@ brw_fast_clear_depth(struct gl_context *ctx)
    intel_batchbuffer_emit_mi_flush(brw);
 
    if (fb->MaxNumLayers > 0) {
-      unsigned num_layers = depth_irb->mt->level[depth_irb->mt_level].depth;
-      for (unsigned layer = 0; layer < num_layers; layer++) {
-         intel_hiz_exec(brw, mt, depth_irb->mt_level, layer,
+      for (unsigned layer = 0; layer < depth_irb->layer_count; layer++) {
+         intel_hiz_exec(brw, mt, depth_irb->mt_level,
+                        depth_irb->mt_layer + layer,
                         GEN6_HIZ_OP_DEPTH_CLEAR);
       }
    } else {
@@ -245,7 +244,7 @@ brw_clear(struct gl_context *ctx, GLbitfield mask)
    /* BLORP is currently only supported on Gen6+. */
    if (brw->gen >= 6 && brw->gen < 8) {
       if (mask & BUFFER_BITS_COLOR) {
-         if (brw_blorp_clear_color(brw, fb, partial_clear)) {
+         if (brw_blorp_clear_color(brw, fb, mask, partial_clear)) {
             debug_mask("blorp color", mask & BUFFER_BITS_COLOR);
             mask &= ~BUFFER_BITS_COLOR;
          }

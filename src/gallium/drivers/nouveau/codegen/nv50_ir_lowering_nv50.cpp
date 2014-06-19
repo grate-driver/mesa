@@ -37,18 +37,25 @@ namespace nv50_ir {
 //    ah*bl 00
 //
 // fffe0001 + fffe0001
+//
+// Note that this sort of splitting doesn't work for signed values, so we
+// compute the sign on those manually and then perform an unsigned multiply.
 static bool
 expandIntegerMUL(BuildUtil *bld, Instruction *mul)
 {
    const bool highResult = mul->subOp == NV50_IR_SUBOP_MUL_HIGH;
 
-   DataType fTy = mul->sType; // full type
-   DataType hTy;
+   DataType fTy; // full type
+   switch (mul->sType) {
+   case TYPE_S32: fTy = TYPE_U32; break;
+   case TYPE_S64: fTy = TYPE_U64; break;
+   default: fTy = mul->sType; break;
+   }
+
+   DataType hTy; // half type
    switch (fTy) {
-   case TYPE_S32: hTy = TYPE_S16; break;
    case TYPE_U32: hTy = TYPE_U16; break;
    case TYPE_U64: hTy = TYPE_U32; break;
-   case TYPE_S64: hTy = TYPE_S32; break;
    default:
       return false;
    }
@@ -59,15 +66,25 @@ expandIntegerMUL(BuildUtil *bld, Instruction *mul)
 
    bld->setPosition(mul, true);
 
+   Value *s[2];
    Value *a[2], *b[2];
-   Value *c[2];
    Value *t[4];
    for (int j = 0; j < 4; ++j)
       t[j] = bld->getSSA(fullSize);
 
+   s[0] = mul->getSrc(0);
+   s[1] = mul->getSrc(1);
+
+   if (isSignedType(mul->sType)) {
+      s[0] = bld->getSSA(fullSize);
+      s[1] = bld->getSSA(fullSize);
+      bld->mkOp1(OP_ABS, mul->sType, s[0], mul->getSrc(0));
+      bld->mkOp1(OP_ABS, mul->sType, s[1], mul->getSrc(1));
+   }
+
    // split sources into halves
-   i[0] = bld->mkSplit(a, halfSize, mul->getSrc(0));
-   i[1] = bld->mkSplit(b, halfSize, mul->getSrc(1));
+   i[0] = bld->mkSplit(a, halfSize, s[0]);
+   i[1] = bld->mkSplit(b, halfSize, s[1]);
 
    i[2] = bld->mkOp2(OP_MUL, fTy, t[0], a[0], b[1]);
    i[3] = bld->mkOp3(OP_MAD, fTy, t[1], a[1], b[0], t[0]);
@@ -75,23 +92,76 @@ expandIntegerMUL(BuildUtil *bld, Instruction *mul)
    i[4] = bld->mkOp3(OP_MAD, fTy, t[3], a[0], b[0], t[2]);
 
    if (highResult) {
-      Value *r[3];
+      Value *c[2];
+      Value *r[5];
       Value *imm = bld->loadImm(NULL, 1 << (halfSize * 8));
       c[0] = bld->getSSA(1, FILE_FLAGS);
       c[1] = bld->getSSA(1, FILE_FLAGS);
-      for (int j = 0; j < 3; ++j)
+      for (int j = 0; j < 5; ++j)
          r[j] = bld->getSSA(fullSize);
 
       i[8] = bld->mkOp2(OP_SHR, fTy, r[0], t[1], bld->mkImm(halfSize * 8));
       i[6] = bld->mkOp2(OP_ADD, fTy, r[1], r[0], imm);
-      bld->mkOp2(OP_UNION, TYPE_U32, r[2], r[1], r[0]);
-      i[5] = bld->mkOp3(OP_MAD, fTy, mul->getDef(0), a[1], b[1], r[2]);
+      bld->mkMov(r[3], r[0])->setPredicate(CC_NC, c[0]);
+      bld->mkOp2(OP_UNION, TYPE_U32, r[2], r[1], r[3]);
+      i[5] = bld->mkOp3(OP_MAD, fTy, r[4], a[1], b[1], r[2]);
 
       // set carry defs / sources
       i[3]->setFlagsDef(1, c[0]);
-      i[4]->setFlagsDef(0, c[1]); // actual result not required, just the carry
+      // actual result required in negative case, but ignored for
+      // unsigned. for some reason the compiler ends up dropping the whole
+      // instruction if the destination is unused but the flags are.
+      if (isSignedType(mul->sType))
+         i[4]->setFlagsDef(1, c[1]);
+      else
+         i[4]->setFlagsDef(0, c[1]);
       i[6]->setPredicate(CC_C, c[0]);
       i[5]->setFlagsSrc(3, c[1]);
+
+      if (isSignedType(mul->sType)) {
+         Value *cc[2];
+         Value *rr[7];
+         Value *one = bld->getSSA(fullSize);
+         bld->loadImm(one, 1);
+         for (int j = 0; j < 7; j++)
+            rr[j] = bld->getSSA(fullSize);
+
+         // NOTE: this logic uses predicates because splitting basic blocks is
+         // ~impossible during the SSA phase. The RA relies on a correlation
+         // between edge order and phi node sources.
+
+         // Set the sign of the result based on the inputs
+         bld->mkOp2(OP_XOR, fTy, NULL, mul->getSrc(0), mul->getSrc(1))
+            ->setFlagsDef(0, (cc[0] = bld->getSSA(1, FILE_FLAGS)));
+
+         // 1s complement of 64-bit value
+         bld->mkOp1(OP_NOT, fTy, rr[0], r[4])
+            ->setPredicate(CC_S, cc[0]);
+         bld->mkOp1(OP_NOT, fTy, rr[1], t[3])
+            ->setPredicate(CC_S, cc[0]);
+
+         // add to low 32-bits, keep track of the carry
+         Instruction *n = bld->mkOp2(OP_ADD, fTy, NULL, rr[1], one);
+         n->setPredicate(CC_S, cc[0]);
+         n->setFlagsDef(0, (cc[1] = bld->getSSA(1, FILE_FLAGS)));
+
+         // If there was a carry, add 1 to the upper 32 bits
+         // XXX: These get executed even if they shouldn't be
+         bld->mkOp2(OP_ADD, fTy, rr[2], rr[0], one)
+            ->setPredicate(CC_C, cc[1]);
+         bld->mkMov(rr[3], rr[0])
+            ->setPredicate(CC_NC, cc[1]);
+         bld->mkOp2(OP_UNION, fTy, rr[4], rr[2], rr[3]);
+
+         // Merge the results from the negative and non-negative paths
+         bld->mkMov(rr[5], rr[4])
+            ->setPredicate(CC_S, cc[0]);
+         bld->mkMov(rr[6], r[4])
+            ->setPredicate(CC_NS, cc[0]);
+         bld->mkOp2(OP_UNION, mul->sType, mul->getDef(0), rr[5], rr[6]);
+      } else {
+         bld->mkMov(mul->getDef(0), r[4]);
+      }
    } else {
       bld->mkMov(mul->getDef(0), t[3]);
    }
@@ -543,6 +613,7 @@ private:
    bool handleTXB(TexInstruction *); // I really
    bool handleTXL(TexInstruction *); // hate
    bool handleTXD(TexInstruction *); // these 3
+   bool handleTXLQ(TexInstruction *);
 
    bool handleCALL(Instruction *);
    bool handlePRECONT(Instruction *);
@@ -590,6 +661,10 @@ void NV50LoweringPreSSA::loadTexMsInfo(uint32_t off, Value **ms,
    Value *tmp = new_LValue(func, FILE_GPR);
    uint8_t b = prog->driver->io.resInfoCBSlot;
    off += prog->driver->io.suInfoBase;
+   if (prog->getType() > Program::TYPE_VERTEX)
+      off += 16 * 2 * 4;
+   if (prog->getType() > Program::TYPE_GEOMETRY)
+      off += 16 * 2 * 4;
    *ms_x = bld.mkLoadv(TYPE_U32, bld.mkSymbol(
                              FILE_MEMORY_CONST, b, TYPE_U32, off + 0), NULL);
    *ms_y = bld.mkLoadv(TYPE_U32, bld.mkSymbol(
@@ -694,6 +769,14 @@ NV50LoweringPreSSA::handleTEX(TexInstruction *i)
    // texel offsets are 3 immediate fields in the instruction,
    // nv50 cannot do textureGatherOffsets
    assert(i->tex.useOffsets <= 1);
+   if (i->tex.useOffsets) {
+      for (int c = 0; c < 3; ++c) {
+         ImmediateValue val;
+         assert(i->offset[0][c].getImmediate(val));
+         i->tex.offset[c] = val.reg.data.u32;
+         i->offset[0][c].set(NULL);
+      }
+   }
 
    return true;
 }
@@ -857,6 +940,26 @@ NV50LoweringPreSSA::handleTXD(TexInstruction *i)
 }
 
 bool
+NV50LoweringPreSSA::handleTXLQ(TexInstruction *i)
+{
+   handleTEX(i);
+   bld.setPosition(i, true);
+
+   /* The returned values are not quite what we want:
+    * (a) convert from s32 to f32
+    * (b) multiply by 1/256
+    */
+   for (int def = 0; def < 2; ++def) {
+      if (!i->defExists(def))
+         continue;
+      bld.mkCvt(OP_CVT, TYPE_F32, i->getDef(def), TYPE_S32, i->getDef(def));
+      bld.mkOp2(OP_MUL, TYPE_F32, i->getDef(def),
+                i->getDef(def), bld.loadImm(NULL, 1.0f / 256));
+   }
+   return true;
+}
+
+bool
 NV50LoweringPreSSA::handleSET(Instruction *i)
 {
    if (i->dType == TYPE_F32) {
@@ -1011,6 +1114,18 @@ NV50LoweringPreSSA::handleRDSV(Instruction *i)
          bld.mkMov(def, bld.mkImm(0));
       }
       break;
+   case SV_SAMPLE_POS: {
+      Value *off = new_LValue(func, FILE_ADDRESS);
+      bld.mkOp1(OP_RDSV, TYPE_U32, def, bld.mkSysVal(SV_SAMPLE_INDEX, 0));
+      bld.mkOp2(OP_SHL, TYPE_U32, off, def, bld.mkImm(3));
+      bld.mkLoad(TYPE_F32,
+                 def,
+                 bld.mkSymbol(
+                       FILE_MEMORY_CONST, prog->driver->io.resInfoCBSlot,
+                       TYPE_U32, prog->driver->io.sampleInfoBase + 4 * idx),
+                 off);
+      break;
+   }
    default:
       bld.mkFetch(i->getDef(0), i->dType,
                   FILE_SHADER_INPUT, addr, i->getIndirect(0, 0), NULL);
@@ -1164,8 +1279,11 @@ NV50LoweringPreSSA::checkPredicate(Instruction *insn)
    Value *pred = insn->getPredicate();
    Value *cdst;
 
-   if (!pred || pred->reg.file == FILE_FLAGS)
+   // FILE_PREDICATE will simply be changed to FLAGS on conversion to SSA
+   if (!pred ||
+       pred->reg.file == FILE_FLAGS || pred->reg.file == FILE_PREDICATE)
       return;
+
    cdst = bld.getSSA(1, FILE_FLAGS);
 
    bld.mkCmp(OP_SET, CC_NEU, insn->dType, cdst, insn->dType, bld.loadImm(NULL, 0), pred);
@@ -1197,6 +1315,8 @@ NV50LoweringPreSSA::visit(Instruction *i)
       return handleTXL(i->asTex());
    case OP_TXD:
       return handleTXD(i->asTex());
+   case OP_TXLQ:
+      return handleTXLQ(i->asTex());
    case OP_EX2:
       bld.mkOp1(OP_PREEX2, TYPE_F32, i->getDef(0), i->getSrc(0));
       i->setSrc(0, i->getDef(0));

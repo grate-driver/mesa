@@ -1324,8 +1324,11 @@ decl_in(struct fd3_compile_context *ctx, struct tgsi_full_declaration *decl)
 
 		DBG("decl in -> r%d", i + base);   // XXX
 
+		compile_assert(ctx, n < ARRAY_SIZE(so->inputs));
+
 		so->inputs[n].semantic = decl_semantic(&decl->Semantic);
 		so->inputs[n].compmask = (1 << ncomp) - 1;
+		so->inputs[n].ncomp = ncomp;
 		so->inputs[n].regid = r;
 		so->inputs[n].inloc = ctx->next_inloc;
 		so->inputs[n].bary = true;   /* all that is supported */
@@ -1409,6 +1412,7 @@ decl_out(struct fd3_compile_context *ctx, struct tgsi_full_declaration *decl)
 
 	for (i = decl->Range.First; i <= decl->Range.Last; i++) {
 		unsigned n = so->outputs_count++;
+		compile_assert(ctx, n < ARRAY_SIZE(so->outputs));
 		so->outputs[n].semantic = decl_semantic(&decl->Semantic);
 		so->outputs[n].regid = regid(i + base, comp);
 	}
@@ -1417,7 +1421,7 @@ decl_out(struct fd3_compile_context *ctx, struct tgsi_full_declaration *decl)
 static void
 decl_samp(struct fd3_compile_context *ctx, struct tgsi_full_declaration *decl)
 {
-	ctx->so->samplers_count++;
+	ctx->so->has_samp = true;
 }
 
 static void

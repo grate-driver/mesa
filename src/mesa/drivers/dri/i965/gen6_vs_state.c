@@ -98,13 +98,22 @@ gen6_upload_vs_push_constants(struct brw_context *brw)
 
    gen6_upload_vec4_push_constants(brw, &vp->program.Base, prog_data,
                                    stage_state, AUB_TRACE_VS_CONSTANTS);
+
+   if (brw->gen >= 7) {
+      if (brw->gen == 7 && !brw->is_haswell)
+         gen7_emit_vs_workaround_flush(brw);
+
+      gen7_upload_constant_state(brw, stage_state, true /* active */,
+                                 _3DSTATE_CONSTANT_VS);
+   }
 }
 
 const struct brw_tracked_state gen6_vs_push_constants = {
    .dirty = {
       .mesa  = _NEW_TRANSFORM | _NEW_PROGRAM_CONSTANTS,
       .brw   = (BRW_NEW_BATCH |
-		BRW_NEW_VERTEX_PROGRAM),
+                BRW_NEW_VERTEX_PROGRAM |
+                BRW_NEW_PUSH_CONSTANT_ALLOCATION),
       .cache = CACHE_NEW_VS_PROG,
    },
    .emit = gen6_upload_vs_push_constants,
@@ -158,7 +167,7 @@ upload_vs_state(struct brw_context *brw)
    /* Use ALT floating point mode for ARB vertex programs, because they
     * require 0^0 == 1.
     */
-   if (ctx->Shader.CurrentProgram[MESA_SHADER_VERTEX] == NULL)
+   if (ctx->_Shader->CurrentProgram[MESA_SHADER_VERTEX] == NULL)
       floating_point_mode = GEN6_VS_FLOATING_POINT_MODE_ALT;
 
    BEGIN_BATCH(6);
@@ -218,7 +227,7 @@ const struct brw_tracked_state gen6_vs_state = {
 		BRW_NEW_VERTEX_PROGRAM |
 		BRW_NEW_BATCH |
                 BRW_NEW_PUSH_CONSTANT_ALLOCATION),
-      .cache = CACHE_NEW_VS_PROG | CACHE_NEW_SAMPLER
+      .cache = CACHE_NEW_VS_PROG
    },
    .emit = upload_vs_state,
 };

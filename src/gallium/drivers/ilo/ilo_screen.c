@@ -28,8 +28,7 @@
 #include "util/u_format_s3tc.h"
 #include "vl/vl_decoder.h"
 #include "vl/vl_video_buffer.h"
-#include "intel_chipset.h"
-#include "intel_reg.h" /* for TIMESTAMP */
+#include "genhw/genhw.h" /* for GEN6_REG_TIMESTAMP */
 #include "intel_winsys.h"
 
 #include "ilo_context.h"
@@ -361,8 +360,10 @@ ilo_get_param(struct pipe_screen *screen, enum pipe_cap param)
    case PIPE_CAP_SEAMLESS_CUBE_MAP:
    case PIPE_CAP_SEAMLESS_CUBE_MAP_PER_TEXTURE:
       return true;
+   case PIPE_CAP_MIN_TEXTURE_GATHER_OFFSET:
    case PIPE_CAP_MIN_TEXEL_OFFSET:
       return -8;
+   case PIPE_CAP_MAX_TEXTURE_GATHER_OFFSET:
    case PIPE_CAP_MAX_TEXEL_OFFSET:
       return 7;
    case PIPE_CAP_CONDITIONAL_RENDER:
@@ -424,7 +425,7 @@ ilo_get_param(struct pipe_screen *screen, enum pipe_cap param)
    case PIPE_CAP_TEXTURE_BORDER_COLOR_QUIRK:
       return 0;
    case PIPE_CAP_MAX_TEXTURE_BUFFER_SIZE:
-      /* a BRW_SURFACE_BUFFER can have up to 2^27 elements */
+      /* a GEN6_SURFTYPE_BUFFER can have up to 2^27 elements */
       return 1 << 27;
    case PIPE_CAP_MAX_VIEWPORTS:
       return ILO_MAX_VIEWPORTS;
@@ -436,6 +437,9 @@ ilo_get_param(struct pipe_screen *screen, enum pipe_cap param)
    case PIPE_CAP_MAX_TEXTURE_GATHER_COMPONENTS:
    case PIPE_CAP_TEXTURE_GATHER_SM5:
    case PIPE_CAP_BUFFER_MAP_PERSISTENT_COHERENT:
+   case PIPE_CAP_FAKE_SW_MSAA:
+   case PIPE_CAP_TEXTURE_QUERY_LOD:
+   case PIPE_CAP_SAMPLE_SHADING:
       return 0;
 
    default:
@@ -453,88 +457,38 @@ static const char *
 ilo_get_name(struct pipe_screen *screen)
 {
    struct ilo_screen *is = ilo_screen(screen);
-   const char *chipset;
+   const char *chipset = NULL;
 
-   /* stolen from classic i965 */
-   switch (is->dev.devid) {
-   case PCI_CHIP_SANDYBRIDGE_GT1:
-   case PCI_CHIP_SANDYBRIDGE_GT2:
-   case PCI_CHIP_SANDYBRIDGE_GT2_PLUS:
-      chipset = "Intel(R) Sandybridge Desktop";
-      break;
-   case PCI_CHIP_SANDYBRIDGE_M_GT1:
-   case PCI_CHIP_SANDYBRIDGE_M_GT2:
-   case PCI_CHIP_SANDYBRIDGE_M_GT2_PLUS:
-      chipset = "Intel(R) Sandybridge Mobile";
-      break;
-   case PCI_CHIP_SANDYBRIDGE_S:
-      chipset = "Intel(R) Sandybridge Server";
-      break;
-   case PCI_CHIP_IVYBRIDGE_GT1:
-   case PCI_CHIP_IVYBRIDGE_GT2:
-      chipset = "Intel(R) Ivybridge Desktop";
-      break;
-   case PCI_CHIP_IVYBRIDGE_M_GT1:
-   case PCI_CHIP_IVYBRIDGE_M_GT2:
-      chipset = "Intel(R) Ivybridge Mobile";
-      break;
-   case PCI_CHIP_IVYBRIDGE_S_GT1:
-   case PCI_CHIP_IVYBRIDGE_S_GT2:
-      chipset = "Intel(R) Ivybridge Server";
-      break;
-   case PCI_CHIP_BAYTRAIL_M_1:
-   case PCI_CHIP_BAYTRAIL_M_2:
-   case PCI_CHIP_BAYTRAIL_M_3:
-   case PCI_CHIP_BAYTRAIL_M_4:
-   case PCI_CHIP_BAYTRAIL_D:
+   if (gen_is_vlv(is->dev.devid)) {
       chipset = "Intel(R) Bay Trail";
-      break;
-   case PCI_CHIP_HASWELL_GT1:
-   case PCI_CHIP_HASWELL_GT2:
-   case PCI_CHIP_HASWELL_GT3:
-   case PCI_CHIP_HASWELL_SDV_GT1:
-   case PCI_CHIP_HASWELL_SDV_GT2:
-   case PCI_CHIP_HASWELL_SDV_GT3:
-   case PCI_CHIP_HASWELL_ULT_GT1:
-   case PCI_CHIP_HASWELL_ULT_GT2:
-   case PCI_CHIP_HASWELL_ULT_GT3:
-   case PCI_CHIP_HASWELL_CRW_GT1:
-   case PCI_CHIP_HASWELL_CRW_GT2:
-   case PCI_CHIP_HASWELL_CRW_GT3:
-      chipset = "Intel(R) Haswell Desktop";
-      break;
-   case PCI_CHIP_HASWELL_M_GT1:
-   case PCI_CHIP_HASWELL_M_GT2:
-   case PCI_CHIP_HASWELL_M_GT3:
-   case PCI_CHIP_HASWELL_SDV_M_GT1:
-   case PCI_CHIP_HASWELL_SDV_M_GT2:
-   case PCI_CHIP_HASWELL_SDV_M_GT3:
-   case PCI_CHIP_HASWELL_ULT_M_GT1:
-   case PCI_CHIP_HASWELL_ULT_M_GT2:
-   case PCI_CHIP_HASWELL_ULT_M_GT3:
-   case PCI_CHIP_HASWELL_CRW_M_GT1:
-   case PCI_CHIP_HASWELL_CRW_M_GT2:
-   case PCI_CHIP_HASWELL_CRW_M_GT3:
-      chipset = "Intel(R) Haswell Mobile";
-      break;
-   case PCI_CHIP_HASWELL_S_GT1:
-   case PCI_CHIP_HASWELL_S_GT2:
-   case PCI_CHIP_HASWELL_S_GT3:
-   case PCI_CHIP_HASWELL_SDV_S_GT1:
-   case PCI_CHIP_HASWELL_SDV_S_GT2:
-   case PCI_CHIP_HASWELL_SDV_S_GT3:
-   case PCI_CHIP_HASWELL_ULT_S_GT1:
-   case PCI_CHIP_HASWELL_ULT_S_GT2:
-   case PCI_CHIP_HASWELL_ULT_S_GT3:
-   case PCI_CHIP_HASWELL_CRW_S_GT1:
-   case PCI_CHIP_HASWELL_CRW_S_GT2:
-   case PCI_CHIP_HASWELL_CRW_S_GT3:
-      chipset = "Intel(R) Haswell Server";
-      break;
-   default:
-      chipset = "Unknown Intel Chipset";
-      break;
    }
+   else if (gen_is_hsw(is->dev.devid)) {
+      if (gen_is_desktop(is->dev.devid))
+         chipset = "Intel(R) Haswell Desktop";
+      else if (gen_is_mobile(is->dev.devid))
+         chipset = "Intel(R) Haswell Mobile";
+      else if (gen_is_server(is->dev.devid))
+         chipset = "Intel(R) Haswell Server";
+   }
+   else if (gen_is_ivb(is->dev.devid)) {
+      if (gen_is_desktop(is->dev.devid))
+         chipset = "Intel(R) Ivybridge Desktop";
+      else if (gen_is_mobile(is->dev.devid))
+         chipset = "Intel(R) Ivybridge Mobile";
+      else if (gen_is_server(is->dev.devid))
+         chipset = "Intel(R) Ivybridge Server";
+   }
+   else if (gen_is_snb(is->dev.devid)) {
+      if (gen_is_desktop(is->dev.devid))
+         chipset = "Intel(R) Sandybridge Desktop";
+      else if (gen_is_mobile(is->dev.devid))
+         chipset = "Intel(R) Sandybridge Mobile";
+      else if (gen_is_server(is->dev.devid))
+         chipset = "Intel(R) Sandybridge Server";
+   }
+
+   if (!chipset)
+      chipset = "Unknown Intel Chipset";
 
    return chipset;
 }
@@ -548,7 +502,7 @@ ilo_get_timestamp(struct pipe_screen *screen)
       uint32_t dw[2];
    } timestamp;
 
-   intel_winsys_read_reg(is->winsys, TIMESTAMP, &timestamp.val);
+   intel_winsys_read_reg(is->winsys, GEN6_REG_TIMESTAMP, &timestamp.val);
 
    /*
     * From the Ivy Bridge PRM, volume 1 part 3, page 107:
@@ -694,45 +648,21 @@ init_dev(struct ilo_dev_info *dev, const struct intel_winsys_info *info)
     *      256k        8096        4096"
     */
 
-   if (IS_HASWELL(info->devid)) {
+   if (gen_is_hsw(info->devid)) {
       dev->gen = ILO_GEN(7.5);
-
-      if (IS_HSW_GT3(info->devid)) {
-         dev->gt = 3;
-         dev->urb_size = 512 * 1024;
-      }
-      else if (IS_HSW_GT2(info->devid)) {
-         dev->gt = 2;
-         dev->urb_size = 256 * 1024;
-      }
-      else {
-         dev->gt = 1;
-         dev->urb_size = 128 * 1024;
-      }
+      dev->gt = gen_get_hsw_gt(info->devid);
+      dev->urb_size = ((dev->gt == 3) ? 512 :
+                       (dev->gt == 2) ? 256 : 128) * 1024;
    }
-   else if (IS_GEN7(info->devid)) {
+   else if (gen_is_ivb(info->devid) || gen_is_vlv(info->devid)) {
       dev->gen = ILO_GEN(7);
-
-      if (IS_IVB_GT2(info->devid)) {
-         dev->gt = 2;
-         dev->urb_size = 256 * 1024;
-      }
-      else {
-         dev->gt = 1;
-         dev->urb_size = 128 * 1024;
-      }
+      dev->gt = (gen_is_ivb(info->devid)) ? gen_get_ivb_gt(info->devid) : 1;
+      dev->urb_size = ((dev->gt == 2) ? 256 : 128) * 1024;
    }
-   else if (IS_GEN6(info->devid)) {
+   else if (gen_is_snb(info->devid)) {
       dev->gen = ILO_GEN(6);
-
-      if (IS_SNB_GT2(info->devid)) {
-         dev->gt = 2;
-         dev->urb_size = 64 * 1024;
-      }
-      else {
-         dev->gt = 1;
-         dev->urb_size = 32 * 1024;
-      }
+      dev->gt = gen_get_snb_gt(info->devid);
+      dev->urb_size = ((dev->gt == 2) ? 64 : 32) * 1024;
    }
    else {
       ilo_err("unknown GPU generation\n");

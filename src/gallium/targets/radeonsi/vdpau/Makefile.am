@@ -20,8 +20,6 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
-# Note: Make sure VDPAU_EXPORTS is defined before including Automake.inc
-VDPAU_EXPORTS = '^(vdp_imp_device_create_x11|radeon_drm_winsys_create)$$'
 include $(top_srcdir)/src/gallium/Automake.inc
 
 AM_CFLAGS = \
@@ -45,10 +43,5 @@ libvdpau_radeonsi_la_LIBADD = \
 	$(top_builddir)/src/gallium/winsys/radeon/drm/libradeonwinsys.la \
 	$(GALLIUM_VDPAU_LIB_DEPS) \
 	$(RADEON_LIBS)
-
-if HAVE_MESA_LLVM
-libvdpau_radeonsi_la_LDFLAGS += $(LLVM_LDFLAGS)
-libvdpau_radeonsi_la_LIBADD += $(LLVM_LIBS)
-endif
 
 include $(top_srcdir)/install-gallium-links.mk

@@ -342,6 +342,8 @@ nouveau_buffer_should_discard(struct nv04_resource *buf, unsigned usage)
       return FALSE;
    if (unlikely(buf->base.bind & PIPE_BIND_SHARED))
       return FALSE;
+   if (unlikely(usage & PIPE_TRANSFER_PERSISTENT))
+      return FALSE;
    return buf->mm && nouveau_buffer_busy(buf, PIPE_TRANSFER_WRITE);
 }
 
@@ -401,6 +403,9 @@ nouveau_buffer_transfer_map(struct pipe_context *pipe,
    if ((usage & PIPE_TRANSFER_WRITE) &&
        !util_ranges_intersect(&buf->valid_buffer_range, box->x, box->x + box->width))
       usage |= PIPE_TRANSFER_DISCARD_RANGE | PIPE_TRANSFER_UNSYNCHRONIZED;
+
+   if (usage & PIPE_TRANSFER_PERSISTENT)
+      usage |= PIPE_TRANSFER_UNSYNCHRONIZED;
 
    if (buf->domain == NOUVEAU_BO_VRAM) {
       if (usage & NOUVEAU_TRANSFER_DISCARD) {
@@ -521,7 +526,7 @@ nouveau_buffer_transfer_flush_region(struct pipe_context *pipe,
  * was returned was not the real resource's data, this needs to transfer the
  * data back to the resource.
  *
- * Also marks vbo/cb dirty if the buffer's binding
+ * Also marks vbo dirty based on the buffer's binding
  */
 static void
 nouveau_buffer_transfer_unmap(struct pipe_context *pipe,
@@ -540,8 +545,6 @@ nouveau_buffer_transfer_unmap(struct pipe_context *pipe,
          /* make sure we invalidate dedicated caches */
          if (bind & (PIPE_BIND_VERTEX_BUFFER | PIPE_BIND_INDEX_BUFFER))
             nv->vbo_dirty = TRUE;
-         if (bind & (PIPE_BIND_CONSTANT_BUFFER))
-            nv->cb_dirty = TRUE;
       }
 
       util_range_add(&buf->valid_buffer_range,
@@ -647,8 +650,11 @@ nouveau_buffer_create(struct pipe_screen *pscreen,
    pipe_reference_init(&buffer->base.reference, 1);
    buffer->base.screen = pscreen;
 
-   if (buffer->base.bind &
-       (screen->vidmem_bindings & screen->sysmem_bindings)) {
+   if (buffer->base.flags & (PIPE_RESOURCE_FLAG_MAP_PERSISTENT |
+                             PIPE_RESOURCE_FLAG_MAP_COHERENT)) {
+      buffer->domain = NOUVEAU_BO_GART;
+   } else if (buffer->base.bind &
+              (screen->vidmem_bindings & screen->sysmem_bindings)) {
       switch (buffer->base.usage) {
       case PIPE_USAGE_DEFAULT:
       case PIPE_USAGE_IMMUTABLE:

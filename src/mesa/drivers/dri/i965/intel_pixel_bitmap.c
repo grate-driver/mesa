@@ -47,7 +47,7 @@
 #include "intel_batchbuffer.h"
 #include "intel_blit.h"
 #include "intel_fbo.h"
-#include "intel_regions.h"
+#include "intel_image.h"
 #include "intel_buffers.h"
 #include "intel_pixel.h"
 #include "intel_reg.h"
@@ -296,10 +296,10 @@ do_blit_bitmap( struct gl_context *ctx,
 						(GLubyte *)stipple,
 						sz,
 						color,
-						irb->mt->region->pitch,
-						irb->mt->region->bo,
+						irb->mt->pitch,
+						irb->mt->bo,
 						0,
-						irb->mt->region->tiling,
+						irb->mt->tiling,
 						dstx + px,
 						dsty + py,
 						w, h,

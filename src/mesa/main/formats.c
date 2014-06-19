@@ -2035,6 +2035,15 @@ _mesa_is_format_signed(mesa_format format)
    }
 }
 
+/**
+ * Is the given format an integer format?
+ */
+GLboolean
+_mesa_is_format_integer(mesa_format format)
+{
+   const struct gl_format_info *info = _mesa_get_format_info(format);
+   return (info->DataType == GL_INT || info->DataType == GL_UNSIGNED_INT);
+}
 
 /**
  * Return color encoding for given format.
@@ -2203,6 +2212,35 @@ _mesa_format_num_components(mesa_format format)
            (info->IntensityBits > 0) +
            (info->DepthBits > 0) +
            (info->StencilBits > 0));
+}
+
+
+/**
+ * Returns true if a color format has data stored in the R/G/B/A channels,
+ * given an index from 0 to 3.
+ */
+bool
+_mesa_format_has_color_component(mesa_format format, int component)
+{
+   const struct gl_format_info *info = _mesa_get_format_info(format);
+
+   assert(info->BaseFormat != GL_DEPTH_COMPONENT &&
+          info->BaseFormat != GL_DEPTH_STENCIL &&
+          info->BaseFormat != GL_STENCIL_INDEX);
+
+   switch (component) {
+   case 0:
+      return (info->RedBits + info->IntensityBits + info->LuminanceBits) > 0;
+   case 1:
+      return (info->GreenBits + info->IntensityBits + info->LuminanceBits) > 0;
+   case 2:
+      return (info->BlueBits + info->IntensityBits + info->LuminanceBits) > 0;
+   case 3:
+      return (info->AlphaBits + info->IntensityBits) > 0;
+   default:
+      assert(!"Invalid color component: must be 0..3");
+      return false;
+   }
 }
 
 
@@ -3124,9 +3162,9 @@ _mesa_format_matches_format_and_type(mesa_format mesa_format,
    case MESA_FORMAT_L_UNORM16:
       return format == GL_LUMINANCE && type == GL_UNSIGNED_SHORT && !swapBytes;
    case MESA_FORMAT_I_UNORM8:
-      return format == GL_INTENSITY && type == GL_UNSIGNED_BYTE;
+      return format == GL_RED && type == GL_UNSIGNED_BYTE;
    case MESA_FORMAT_I_UNORM16:
-      return format == GL_INTENSITY && type == GL_UNSIGNED_SHORT && !swapBytes;
+      return format == GL_RED && type == GL_UNSIGNED_SHORT && !swapBytes;
 
    case MESA_FORMAT_YCBCR:
       return format == GL_YCBCR_MESA &&
@@ -3218,9 +3256,9 @@ _mesa_format_matches_format_and_type(mesa_format mesa_format,
       return format == GL_LUMINANCE_ALPHA && type == GL_HALF_FLOAT && !swapBytes;
 
    case MESA_FORMAT_I_FLOAT32:
-      return format == GL_INTENSITY && type == GL_FLOAT && !swapBytes;
+      return format == GL_RED && type == GL_FLOAT && !swapBytes;
    case MESA_FORMAT_I_FLOAT16:
-      return format == GL_INTENSITY && type == GL_HALF_FLOAT && !swapBytes;
+      return format == GL_RED && type == GL_HALF_FLOAT && !swapBytes;
 
    case MESA_FORMAT_R_FLOAT32:
       return format == GL_RED && type == GL_FLOAT && !swapBytes;
@@ -3248,13 +3286,17 @@ _mesa_format_matches_format_and_type(mesa_format mesa_format,
       return format == GL_ALPHA_INTEGER && type == GL_INT && !swapBytes;
 
    case MESA_FORMAT_I_UINT8:
+      return format == GL_RED_INTEGER && type == GL_UNSIGNED_BYTE;
    case MESA_FORMAT_I_UINT16:
+      return format == GL_RED_INTEGER && type == GL_UNSIGNED_SHORT && !swapBytes;
    case MESA_FORMAT_I_UINT32:
+      return format == GL_RED_INTEGER && type == GL_UNSIGNED_INT && !swapBytes;
    case MESA_FORMAT_I_SINT8:
+      return format == GL_RED_INTEGER && type == GL_BYTE;
    case MESA_FORMAT_I_SINT16:
+      return format == GL_RED_INTEGER && type == GL_SHORT && !swapBytes;
    case MESA_FORMAT_I_SINT32:
-      /* GL_INTENSITY_INTEGER_EXT doesn't exist. */
-      return GL_FALSE;
+      return format == GL_RED_INTEGER && type == GL_INT && !swapBytes;
 
    case MESA_FORMAT_L_UINT8:
       return format == GL_LUMINANCE_INTEGER_EXT && type == GL_UNSIGNED_BYTE;
@@ -3421,7 +3463,7 @@ _mesa_format_matches_format_and_type(mesa_format mesa_format,
       return format == GL_LUMINANCE_ALPHA && type == GL_BYTE &&
              littleEndian && !swapBytes;
    case MESA_FORMAT_I_SNORM8:
-      return format == GL_INTENSITY && type == GL_BYTE;
+      return format == GL_RED && type == GL_BYTE;
    case MESA_FORMAT_A_SNORM16:
       return format == GL_ALPHA && type == GL_SHORT && !swapBytes;
    case MESA_FORMAT_L_SNORM16:
@@ -3430,7 +3472,7 @@ _mesa_format_matches_format_and_type(mesa_format mesa_format,
       return format == GL_LUMINANCE_ALPHA && type == GL_SHORT &&
              littleEndian && !swapBytes;
    case MESA_FORMAT_I_SNORM16:
-      return format == GL_INTENSITY && type == GL_SHORT && littleEndian &&
+      return format == GL_RED && type == GL_SHORT && littleEndian &&
              !swapBytes;
 
    case MESA_FORMAT_B10G10R10A2_UINT:

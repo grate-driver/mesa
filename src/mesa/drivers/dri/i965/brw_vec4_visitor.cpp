@@ -42,6 +42,7 @@ vec4_instruction::vec4_instruction(vec4_visitor *v,
    this->force_writemask_all = false;
    this->no_dd_clear = false;
    this->no_dd_check = false;
+   this->writes_accumulator = false;
    this->conditional_mod = BRW_CONDITIONAL_NONE;
    this->sampler = 0;
    this->texture_offset = 0;
@@ -124,6 +125,16 @@ vec4_visitor::emit(enum opcode opcode)
 					   src0, src1);			\
    }
 
+#define ALU2_ACC(op)							\
+   vec4_instruction *							\
+   vec4_visitor::op(dst_reg dst, src_reg src0, src_reg src1)		\
+   {									\
+      vec4_instruction *inst = new(mem_ctx) vec4_instruction(this,     \
+                       BRW_OPCODE_##op, dst, src0, src1);		\
+      inst->writes_accumulator = true;                                 \
+      return inst;                                                     \
+   }
+
 #define ALU3(op)							\
    vec4_instruction *							\
    vec4_visitor::op(dst_reg dst, src_reg src0, src_reg src1, src_reg src2)\
@@ -143,7 +154,7 @@ ALU1(F32TO16)
 ALU1(F16TO32)
 ALU2(ADD)
 ALU2(MUL)
-ALU2(MACH)
+ALU2_ACC(MACH)
 ALU2(AND)
 ALU2(OR)
 ALU2(XOR)
@@ -162,8 +173,9 @@ ALU1(FBH)
 ALU1(FBL)
 ALU1(CBIT)
 ALU3(MAD)
-ALU2(ADDC)
-ALU2(SUBB)
+ALU2_ACC(ADDC)
+ALU2_ACC(SUBB)
+ALU2(MAC)
 
 /** Gen4 predicated IF. */
 vec4_instruction *
@@ -1078,7 +1090,7 @@ vec4_visitor::try_emit_sat(ir_expression *ir)
 }
 
 bool
-vec4_visitor::try_emit_mad(ir_expression *ir, int mul_arg)
+vec4_visitor::try_emit_mad(ir_expression *ir)
 {
    /* 3-src instructions were introduced in gen6. */
    if (brw->gen < 6)
@@ -1088,11 +1100,16 @@ vec4_visitor::try_emit_mad(ir_expression *ir, int mul_arg)
    if (ir->type->base_type != GLSL_TYPE_FLOAT)
       return false;
 
-   ir_rvalue *nonmul = ir->operands[1 - mul_arg];
-   ir_expression *mul = ir->operands[mul_arg]->as_expression();
+   ir_rvalue *nonmul = ir->operands[1];
+   ir_expression *mul = ir->operands[0]->as_expression();
 
-   if (!mul || mul->operation != ir_binop_mul)
-      return false;
+   if (!mul || mul->operation != ir_binop_mul) {
+      nonmul = ir->operands[0];
+      mul = ir->operands[1]->as_expression();
+
+      if (!mul || mul->operation != ir_binop_mul)
+         return false;
+   }
 
    nonmul->accept(this);
    src_reg src0 = fix_3src_operand(this->result);
@@ -1153,12 +1170,6 @@ vec4_visitor::emit_lrp(const dst_reg &dst,
    } else {
       /* Earlier generations don't support three source operations, so we
        * need to emit x*(1-a) + y*a.
-       *
-       * A better way to do this would be:
-       *    ADD one_minus_a, negate(a), 1.0f
-       *    MUL null, y, a
-       *    MAC dst, x, one_minus_a
-       * but we would need to support MAC and implicit accumulator.
        */
       dst_reg y_times_a           = dst_reg(this, glsl_type::vec4_type);
       dst_reg one_minus_a         = dst_reg(this, glsl_type::vec4_type);
@@ -1174,20 +1185,6 @@ vec4_visitor::emit_lrp(const dst_reg &dst,
    }
 }
 
-static bool
-is_16bit_constant(ir_rvalue *rvalue)
-{
-   ir_constant *constant = rvalue->as_constant();
-   if (!constant)
-      return false;
-
-   if (constant->type != glsl_type::int_type &&
-       constant->type != glsl_type::uint_type)
-      return false;
-
-   return constant->value.u[0] < (1 << 16);
-}
-
 void
 vec4_visitor::visit(ir_expression *ir)
 {
@@ -1201,7 +1198,7 @@ vec4_visitor::visit(ir_expression *ir)
       return;
 
    if (ir->operation == ir_binop_add) {
-      if (try_emit_mad(ir, 0) || try_emit_mad(ir, 1))
+      if (try_emit_mad(ir))
 	 return;
    }
 
@@ -1371,12 +1368,12 @@ vec4_visitor::visit(ir_expression *ir)
 	  * operand.  If we can determine that one of the args is in the low
 	  * 16 bits, though, we can just emit a single MUL.
           */
-         if (is_16bit_constant(ir->operands[0])) {
+         if (ir->operands[0]->is_uint16_constant()) {
             if (brw->gen < 7)
                emit(MUL(result_dst, op[0], op[1]));
             else
                emit(MUL(result_dst, op[1], op[0]));
-         } else if (is_16bit_constant(ir->operands[1])) {
+         } else if (ir->operands[1]->is_uint16_constant()) {
             if (brw->gen < 7)
                emit(MUL(result_dst, op[1], op[0]));
             else

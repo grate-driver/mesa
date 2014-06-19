@@ -474,7 +474,8 @@ static void *evergreen_create_rs_state(struct pipe_context *ctx,
 		S_028810_PS_UCP_MODE(3) |
 		S_028810_ZCLIP_NEAR_DISABLE(!state->depth_clip) |
 		S_028810_ZCLIP_FAR_DISABLE(!state->depth_clip) |
-		S_028810_DX_LINEAR_ATTR_CLIP_ENA(1);
+		S_028810_DX_LINEAR_ATTR_CLIP_ENA(1) |
+		S_028810_DX_RASTERIZATION_KILL(state->rasterizer_discard);
 	rs->multisample_enable = state->multisample;
 
 	/* offset */
@@ -543,7 +544,6 @@ static void *evergreen_create_rs_state(struct pipe_context *ctx,
 						  state->fill_back != PIPE_POLYGON_MODE_FILL) |
 			       S_028814_POLYMODE_FRONT_PTYPE(r600_translate_fill(state->fill_front)) |
 			       S_028814_POLYMODE_BACK_PTYPE(r600_translate_fill(state->fill_back)));
-	r600_store_context_reg(&rs->buffer, R_028350_SX_MISC, S_028350_MULTIPASS(state->rasterizer_discard));
 	return rs;
 }
 
@@ -1381,7 +1381,10 @@ static void evergreen_set_framebuffer_state(struct pipe_context *ctx,
 	}
 
 	log_samples = util_logbase2(rctx->framebuffer.nr_samples);
-	if (rctx->b.chip_class == CAYMAN && rctx->db_misc_state.log_samples != log_samples) {
+	/* This is for Cayman to program SAMPLE_RATE, and for RV770 to fix a hw bug. */
+	if ((rctx->b.chip_class == CAYMAN ||
+	     rctx->b.family == CHIP_RV770) &&
+	    rctx->db_misc_state.log_samples != log_samples) {
 		rctx->db_misc_state.log_samples = log_samples;
 		rctx->db_misc_state.atom.dirty = true;
 	}
@@ -2192,7 +2195,9 @@ void cayman_init_common_regs(struct r600_command_buffer *cb,
 
 	r600_store_context_reg(cb, R_028A4C_PA_SC_MODE_CNTL_1, 0);
 
-	r600_store_context_reg(cb, R_028354_SX_SURFACE_SYNC, S_028354_SURFACE_SYNC_MASK(0xf));
+	r600_store_context_reg_seq(cb, R_028350_SX_MISC, 2);
+	r600_store_value(cb, 0);
+	r600_store_value(cb, S_028354_SURFACE_SYNC_MASK(0xf));
 
 	r600_store_context_reg(cb, R_028800_DB_DEPTH_CONTROL, 0);
 }
@@ -2469,7 +2474,9 @@ void evergreen_init_common_regs(struct r600_command_buffer *cb,
 	/* The cs checker requires this register to be set. */
 	r600_store_context_reg(cb, R_028800_DB_DEPTH_CONTROL, 0);
 
-	r600_store_context_reg(cb, R_028354_SX_SURFACE_SYNC, S_028354_SURFACE_SYNC_MASK(0xf));
+	r600_store_context_reg_seq(cb, R_028350_SX_MISC, 2);
+	r600_store_value(cb, 0);
+	r600_store_value(cb, S_028354_SURFACE_SYNC_MASK(0xf));
 
 	return;
 }
@@ -2987,30 +2994,6 @@ void evergreen_update_es_state(struct pipe_context *ctx, struct r600_pipe_shader
 	/* After that, the NOP relocation packet must be emitted (shader->bo, RADEON_USAGE_READ). */
 }
 
-static unsigned r600_conv_prim_to_gs_out(unsigned mode)
-{
-	static const int prim_conv[] = {
-		V_028A6C_OUTPRIM_TYPE_POINTLIST,
-		V_028A6C_OUTPRIM_TYPE_LINESTRIP,
-		V_028A6C_OUTPRIM_TYPE_LINESTRIP,
-		V_028A6C_OUTPRIM_TYPE_LINESTRIP,
-		V_028A6C_OUTPRIM_TYPE_TRISTRIP,
-		V_028A6C_OUTPRIM_TYPE_TRISTRIP,
-		V_028A6C_OUTPRIM_TYPE_TRISTRIP,
-		V_028A6C_OUTPRIM_TYPE_TRISTRIP,
-		V_028A6C_OUTPRIM_TYPE_TRISTRIP,
-		V_028A6C_OUTPRIM_TYPE_TRISTRIP,
-		V_028A6C_OUTPRIM_TYPE_LINESTRIP,
-		V_028A6C_OUTPRIM_TYPE_LINESTRIP,
-		V_028A6C_OUTPRIM_TYPE_TRISTRIP,
-		V_028A6C_OUTPRIM_TYPE_TRISTRIP,
-		V_028A6C_OUTPRIM_TYPE_TRISTRIP
-	};
-	assert(mode < Elements(prim_conv));
-
-	return prim_conv[mode];
-}
-
 void evergreen_update_gs_state(struct pipe_context *ctx, struct r600_pipe_shader *shader)
 {
 	struct r600_context *rctx = (struct r600_context *)ctx;
@@ -3221,9 +3204,6 @@ static void evergreen_dma_copy_tile(struct r600_context *rctx,
 	unsigned sub_cmd, bank_h, bank_w, mt_aspect, nbanks, tile_split, non_disp_tiling = 0;
 	uint64_t base, addr;
 
-	/* make sure that the dma ring is only one active */
-	rctx->b.rings.gfx.flush(rctx, RADEON_FLUSH_ASYNC);
-
 	dst_mode = rdst->surface.level[dst_level].mode;
 	src_mode = rsrc->surface.level[src_level].mode;
 	/* downcast linear aligned to linear to simplify test */
@@ -3236,15 +3216,15 @@ static void evergreen_dma_copy_tile(struct r600_context *rctx,
 		non_disp_tiling = 1;
 
 	y = 0;
-	sub_cmd = 0x8;
+	sub_cmd = EG_DMA_COPY_TILED;
 	lbpp = util_logbase2(bpp);
-	pitch_tile_max = ((pitch / bpp) >> 3) - 1;
+	pitch_tile_max = ((pitch / bpp) / 8) - 1;
 	nbanks = eg_num_banks(rctx->screen->b.tiling_info.num_banks);
 
 	if (dst_mode == RADEON_SURF_MODE_LINEAR) {
 		/* T2L */
 		array_mode = evergreen_array_mode(src_mode);
-		slice_tile_max = (rsrc->surface.level[src_level].nblk_x * rsrc->surface.level[src_level].nblk_y) >> 6;
+		slice_tile_max = (rsrc->surface.level[src_level].nblk_x * rsrc->surface.level[src_level].nblk_y) / (8*8);
 		slice_tile_max = slice_tile_max ? slice_tile_max - 1 : 0;
 		/* linear height must be the same as the slice tile max height, it's ok even
 		 * if the linear destination/source have smaller heigh as the size of the
@@ -3269,7 +3249,7 @@ static void evergreen_dma_copy_tile(struct r600_context *rctx,
 	} else {
 		/* L2T */
 		array_mode = evergreen_array_mode(dst_mode);
-		slice_tile_max = (rdst->surface.level[dst_level].nblk_x * rdst->surface.level[dst_level].nblk_y) >> 6;
+		slice_tile_max = (rdst->surface.level[dst_level].nblk_x * rdst->surface.level[dst_level].nblk_y) / (8*8);
 		slice_tile_max = slice_tile_max ? slice_tile_max - 1 : 0;
 		/* linear height must be the same as the slice tile max height, it's ok even
 		 * if the linear destination/source have smaller heigh as the size of the
@@ -3293,16 +3273,16 @@ static void evergreen_dma_copy_tile(struct r600_context *rctx,
 		addr += r600_resource_va(&rctx->screen->b.b, src);
 	}
 
-	size = (copy_height * pitch) >> 2;
-	ncopy = (size / 0x000fffff) + !!(size % 0x000fffff);
-	r600_need_dma_space(rctx, ncopy * 9);
+	size = (copy_height * pitch) / 4;
+	ncopy = (size / EG_DMA_COPY_MAX_SIZE) + !!(size % EG_DMA_COPY_MAX_SIZE);
+	r600_need_dma_space(&rctx->b, ncopy * 9);
 
 	for (i = 0; i < ncopy; i++) {
 		cheight = copy_height;
-		if (((cheight * pitch) >> 2) > 0x000fffff) {
-			cheight = (0x000fffff << 2) / pitch;
+		if (((cheight * pitch) / 4) > EG_DMA_COPY_MAX_SIZE) {
+			cheight = (EG_DMA_COPY_MAX_SIZE * 4) / pitch;
 		}
-		size = (cheight * pitch) >> 2;
+		size = (cheight * pitch) / 4;
 		/* emit reloc before writting cs so that cs is always in consistent state */
 		r600_context_bo_reloc(&rctx->b, &rctx->b.rings.dma, &rsrc->resource,
 				      RADEON_USAGE_READ, RADEON_PRIO_MIN);
@@ -3325,7 +3305,7 @@ static void evergreen_dma_copy_tile(struct r600_context *rctx,
 	}
 }
 
-static void evergreen_dma_blit(struct pipe_context *ctx,
+static void evergreen_dma_copy(struct pipe_context *ctx,
 			       struct pipe_resource *dst,
 			       unsigned dst_level,
 			       unsigned dstx, unsigned dsty, unsigned dstz,
@@ -3346,7 +3326,7 @@ static void evergreen_dma_blit(struct pipe_context *ctx,
 	}
 
 	if (dst->target == PIPE_BUFFER && src->target == PIPE_BUFFER) {
-		evergreen_dma_copy(rctx, dst, src, dst_x, src_box->x, src_box->width);
+		evergreen_dma_copy_buffer(rctx, dst, src, dst_x, src_box->x, src_box->width);
 		return;
 	}
 
@@ -3384,7 +3364,7 @@ static void evergreen_dma_blit(struct pipe_context *ctx,
 	/* the x test here are currently useless (because we don't support partial blit)
 	 * but keep them around so we don't forget about those
 	 */
-	if ((src_pitch & 0x7) || (src_box->x & 0x7) || (dst_x & 0x7) || (src_box->y & 0x7) || (dst_y & 0x7)) {
+	if (src_pitch % 8 || src_box->x % 8 || dst_x % 8 || src_box->y % 8 || dst_y % 8) {
 		goto fallback;
 	}
 
@@ -3412,7 +3392,7 @@ static void evergreen_dma_blit(struct pipe_context *ctx,
 		dst_offset = rdst->surface.level[dst_level].offset;
 		dst_offset += rdst->surface.level[dst_level].slice_size * dst_z;
 		dst_offset += dst_y * dst_pitch + dst_x * bpp;
-		evergreen_dma_copy(rctx, dst, src, dst_offset, src_offset,
+		evergreen_dma_copy_buffer(rctx, dst, src, dst_offset, src_offset,
 					src_box->height * src_pitch);
 	} else {
 		evergreen_dma_copy_tile(rctx, dst, dst_level, dst_x, dst_y, dst_z,
@@ -3509,7 +3489,7 @@ void evergreen_init_state_functions(struct r600_context *rctx)
                 rctx->b.b.get_sample_position = evergreen_get_sample_position;
         else
                 rctx->b.b.get_sample_position = cayman_get_sample_position;
-	rctx->b.dma_copy = evergreen_dma_blit;
+	rctx->b.dma_copy = evergreen_dma_copy;
 
 	evergreen_init_compute_state_functions(rctx);
 }

@@ -51,7 +51,6 @@
 #include "intel_buffers.h"
 #include "intel_fbo.h"
 #include "intel_mipmap_tree.h"
-#include "intel_regions.h"
 #include "intel_buffer_objects.h"
 
 #define FILE_DEBUG_FLAG DEBUG_PRIMS
@@ -291,7 +290,6 @@ static void brw_merge_inputs( struct brw_context *brw,
    for (i = 0; i < VERT_ATTRIB_MAX; i++) {
       brw->vb.inputs[i].buffer = -1;
       brw->vb.inputs[i].glarray = arrays[i];
-      brw->vb.inputs[i].attrib = (gl_vert_attrib) i;
    }
 }
 
@@ -316,15 +314,16 @@ brw_predraw_resolve_buffers(struct brw_context *brw)
       intel_renderbuffer_resolve_hiz(brw, depth_irb);
 
    /* Resolve depth buffer and render cache of each enabled texture. */
-   for (int i = 0; i < ctx->Const.MaxCombinedTextureImageUnits; i++) {
-      if (!ctx->Texture.Unit[i]._ReallyEnabled)
+   int maxEnabledUnit = ctx->Texture._MaxEnabledTexImageUnit;
+   for (int i = 0; i <= maxEnabledUnit; i++) {
+      if (!ctx->Texture.Unit[i]._Current)
 	 continue;
       tex_obj = intel_texture_object(ctx->Texture.Unit[i]._Current);
       if (!tex_obj || !tex_obj->mt)
 	 continue;
       intel_miptree_all_slices_resolve_depth(brw, tex_obj->mt);
       intel_miptree_resolve_color(brw, tex_obj->mt);
-      brw_render_cache_set_check_flush(brw, tex_obj->mt->region->bo);
+      brw_render_cache_set_check_flush(brw, tex_obj->mt->bo);
    }
 }
 
@@ -360,12 +359,12 @@ static void brw_postdraw_set_buffers_need_resolve(struct brw_context *brw)
       back_irb->need_downsample = true;
    if (depth_irb && ctx->Depth.Mask) {
       intel_renderbuffer_att_set_needs_depth_resolve(depth_att);
-      brw_render_cache_set_add_bo(brw, depth_irb->mt->region->bo);
+      brw_render_cache_set_add_bo(brw, depth_irb->mt->bo);
    }
 
    if (ctx->Extensions.ARB_stencil_texturing &&
        stencil_irb && ctx->Stencil._WriteEnabled) {
-      brw_render_cache_set_add_bo(brw, stencil_irb->mt->region->bo);
+      brw_render_cache_set_add_bo(brw, stencil_irb->mt->bo);
    }
 
    for (int i = 0; i < fb->_NumColorDrawBuffers; i++) {
@@ -373,7 +372,7 @@ static void brw_postdraw_set_buffers_need_resolve(struct brw_context *brw)
          intel_renderbuffer(fb->_ColorDrawBuffers[i]);
 
       if (irb)
-         brw_render_cache_set_add_bo(brw, irb->mt->region->bo);
+         brw_render_cache_set_add_bo(brw, irb->mt->bo);
    }
 }
 
@@ -550,16 +549,6 @@ void brw_draw_prims( struct gl_context *ctx,
       return;
    }
 
-   /* If we're going to have to upload any of the user's vertex arrays, then
-    * get the minimum and maximum of their index buffer so we know what range
-    * to upload.
-    */
-   if (!vbo_all_varyings_in_vbos(arrays) && !index_bounds_valid) {
-      perf_debug("Scanning index buffer to compute index buffer bounds.  "
-                 "Use glDrawRangeElements() to avoid this.\n");
-      vbo_get_minmax_indices(ctx, prims, ib, &min_index, &max_index, nr_prims);
-   }
-
    /* Do GL_SELECT and GL_FEEDBACK rendering using swrast, even though it
     * won't support all the extensions we support.
     */
@@ -568,8 +557,19 @@ void brw_draw_prims( struct gl_context *ctx,
                  _mesa_lookup_enum_by_nr(ctx->RenderMode));
       _swsetup_Wakeup(ctx);
       _tnl_wakeup(ctx);
-      _tnl_draw_prims(ctx, arrays, prims, nr_prims, ib, min_index, max_index);
+      _tnl_draw_prims(ctx, prims, nr_prims, ib,
+                      index_bounds_valid, min_index, max_index, NULL, NULL);
       return;
+   }
+
+   /* If we're going to have to upload any of the user's vertex arrays, then
+    * get the minimum and maximum of their index buffer so we know what range
+    * to upload.
+    */
+   if (!index_bounds_valid && !vbo_all_varyings_in_vbos(arrays)) {
+      perf_debug("Scanning index buffer to compute index buffer bounds.  "
+                 "Use glDrawRangeElements() to avoid this.\n");
+      vbo_get_minmax_indices(ctx, prims, ib, &min_index, &max_index, nr_prims);
    }
 
    /* Try drawing with the hardware, but don't do anything else if we can't

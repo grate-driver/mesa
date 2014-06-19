@@ -20,7 +20,6 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
-DRI_VERSION_SCRIPT = $(srcdir)/nouveau_dri.link
 include $(top_srcdir)/src/gallium/Automake.inc
 
 AM_CFLAGS = \
@@ -41,8 +40,6 @@ nouveau_dri_la_LDFLAGS = \
 
 nouveau_dri_la_LIBADD = \
 	$(top_builddir)/src/mesa/drivers/dri/common/libdricommon.la \
-	$(top_builddir)/src/mesa/libmesagallium.la \
-	$(top_builddir)/src/gallium/auxiliary/libgallium.la \
 	$(top_builddir)/src/gallium/state_trackers/dri/drm/libdridrm.la \
 	$(top_builddir)/src/gallium/winsys/nouveau/drm/libnouveaudrm.la \
 	$(top_builddir)/src/gallium/drivers/trace/libtrace.la \
@@ -51,10 +48,5 @@ nouveau_dri_la_LIBADD = \
 	$(GALLIUM_DRI_LIB_DEPS) \
 	$(LIBDRM_LIBS) \
 	$(NOUVEAU_LIBS)
-
-if HAVE_MESA_LLVM
-nouveau_dri_la_LDFLAGS += $(LLVM_LDFLAGS)
-nouveau_dri_la_LIBADD += $(LLVM_LIBS)
-endif
 
 include $(top_srcdir)/install-gallium-links.mk

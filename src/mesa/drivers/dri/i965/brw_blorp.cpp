@@ -139,18 +139,16 @@ uint32_t
 brw_blorp_surface_info::compute_tile_offsets(uint32_t *tile_x,
                                              uint32_t *tile_y) const
 {
-   struct intel_region *region = mt->region;
    uint32_t mask_x, mask_y;
 
-   intel_region_get_tile_masks(region, &mask_x, &mask_y,
-                               map_stencil_as_y_tiled);
+   intel_miptree_get_tile_masks(mt, &mask_x, &mask_y, map_stencil_as_y_tiled);
 
    *tile_x = x_offset & mask_x;
    *tile_y = y_offset & mask_y;
 
-   return intel_region_get_aligned_offset(region, x_offset & ~mask_x,
-                                          y_offset & ~mask_y,
-                                          map_stencil_as_y_tiled);
+   return intel_miptree_get_aligned_offset(mt, x_offset & ~mask_x,
+                                           y_offset & ~mask_y,
+                                           map_stencil_as_y_tiled);
 }
 
 
@@ -278,6 +276,7 @@ retry:
     */
    brw->state.dirty.brw = ~0;
    brw->state.dirty.cache = ~0;
+   brw->no_depth_or_stencil = false;
    brw->ib.type = -1;
 
    /* Flush the sampler cache so any texturing from the destination is

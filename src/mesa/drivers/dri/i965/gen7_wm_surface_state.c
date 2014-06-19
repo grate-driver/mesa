@@ -107,12 +107,12 @@ gen7_set_surface_mcs_info(struct brw_context *brw,
     *
     *     "The MCS surface must be stored as Tile Y."
     */
-   assert(mcs_mt->region->tiling == I915_TILING_Y);
+   assert(mcs_mt->tiling == I915_TILING_Y);
 
    /* Compute the pitch in units of tiles.  To do this we need to divide the
     * pitch in bytes by 128, since a single Y-tile is 128 bytes wide.
     */
-   unsigned pitch_tiles = mcs_mt->region->pitch / 128;
+   unsigned pitch_tiles = mcs_mt->pitch / 128;
 
    /* The upper 20 bits of surface state DWORD 6 are the upper 20 bits of the
     * GPU address of the MCS buffer; the lower 12 bits contain other control
@@ -120,15 +120,15 @@ gen7_set_surface_mcs_info(struct brw_context *brw,
     * thus have their lower 12 bits zero), we can use an ordinary reloc to do
     * the necessary address translation.
     */
-   assert ((mcs_mt->region->bo->offset64 & 0xfff) == 0);
+   assert ((mcs_mt->bo->offset64 & 0xfff) == 0);
 
    surf[6] = GEN7_SURFACE_MCS_ENABLE |
              SET_FIELD(pitch_tiles - 1, GEN7_SURFACE_MCS_PITCH) |
-             mcs_mt->region->bo->offset64;
+             mcs_mt->bo->offset64;
 
    drm_intel_bo_emit_reloc(brw->batch.bo,
                            surf_offset + 6 * 4,
-                           mcs_mt->region->bo,
+                           mcs_mt->bo,
                            surf[6] & 0xfff,
                            is_render_target ? I915_GEM_DOMAIN_RENDER
                            : I915_GEM_DOMAIN_SAMPLER,
@@ -288,7 +288,7 @@ gen7_update_texture_surface(struct gl_context *ctx,
    memset(surf, 0, 8 * 4);
 
    uint32_t tex_format = translate_tex_format(brw,
-                                              mt->format,
+                                              intelObj->_Format,
                                               sampler->sRGBDecode);
 
    if (for_gather && tex_format == BRW_SURFACEFORMAT_R32G32_FLOAT)
@@ -296,7 +296,7 @@ gen7_update_texture_surface(struct gl_context *ctx,
 
    surf[0] = translate_tex_target(tObj->Target) << BRW_SURFACE_TYPE_SHIFT |
              tex_format << BRW_SURFACE_FORMAT_SHIFT |
-             gen7_surface_tiling_mode(mt->region->tiling);
+             gen7_surface_tiling_mode(mt->tiling);
 
    /* mask of faces present in cube map; for other surfaces MBZ. */
    if (tObj->Target == GL_TEXTURE_CUBE_MAP || tObj->Target == GL_TEXTURE_CUBE_MAP_ARRAY)
@@ -310,21 +310,30 @@ gen7_update_texture_surface(struct gl_context *ctx,
    if (mt->logical_depth0 > 1 && tObj->Target != GL_TEXTURE_3D)
       surf[0] |= GEN7_SURFACE_IS_ARRAY;
 
+   /* if this is a view with restricted NumLayers, then
+    * our effective depth is not just the miptree depth.
+    */
+   uint32_t effective_depth = (tObj->Immutable && tObj->Target != GL_TEXTURE_3D)
+                              ? tObj->NumLayers : mt->logical_depth0;
+
    if (mt->array_spacing_lod0)
       surf[0] |= GEN7_SURFACE_ARYSPC_LOD0;
 
-   surf[1] = mt->region->bo->offset64 + mt->offset; /* reloc */
+   surf[1] = mt->bo->offset64 + mt->offset; /* reloc */
 
    surf[2] = SET_FIELD(mt->logical_width0 - 1, GEN7_SURFACE_WIDTH) |
              SET_FIELD(mt->logical_height0 - 1, GEN7_SURFACE_HEIGHT);
-   surf[3] = SET_FIELD(mt->logical_depth0 - 1, BRW_SURFACE_DEPTH) |
-             (mt->region->pitch - 1);
 
-   surf[4] = gen7_surface_msaa_bits(mt->num_samples, mt->msaa_layout);
+   surf[3] = SET_FIELD(effective_depth - 1, BRW_SURFACE_DEPTH) |
+             (mt->pitch - 1);
+
+   surf[4] = gen7_surface_msaa_bits(mt->num_samples, mt->msaa_layout) |
+             SET_FIELD(tObj->MinLayer, GEN7_SURFACE_MIN_ARRAY_ELEMENT) |
+             SET_FIELD((effective_depth - 1),
+                       GEN7_SURFACE_RENDER_TARGET_VIEW_EXTENT);
 
    surf[5] = (SET_FIELD(GEN7_MOCS_L3, GEN7_SURFACE_MOCS) |
-              SET_FIELD(tObj->BaseLevel - mt->first_level,
-                        GEN7_SURFACE_MIN_LOD) |
+              SET_FIELD(tObj->MinLevel + tObj->BaseLevel - mt->first_level, GEN7_SURFACE_MIN_LOD) |
               /* mip count */
               (intelObj->_MaxLevel - tObj->BaseLevel));
 
@@ -357,8 +366,8 @@ gen7_update_texture_surface(struct gl_context *ctx,
    /* Emit relocation to surface contents */
    drm_intel_bo_emit_reloc(brw->batch.bo,
                            *surf_offset + 4,
-                           mt->region->bo,
-                           surf[1] - mt->region->bo->offset64,
+                           mt->bo,
+                           surf[1] - mt->bo->offset64,
                            I915_GEM_DOMAIN_SAMPLER, 0);
 
    gen7_check_surface_setup(surf, false /* is_render_target */);
@@ -439,15 +448,17 @@ gen7_update_renderbuffer_surface(struct brw_context *brw,
 {
    struct gl_context *ctx = &brw->ctx;
    struct intel_renderbuffer *irb = intel_renderbuffer(rb);
-   struct intel_region *region = irb->mt->region;
+   struct intel_mipmap_tree *mt = irb->mt;
    uint32_t format;
    /* _NEW_BUFFERS */
    mesa_format rb_format = _mesa_get_render_format(ctx, intel_rb_format(irb));
    uint32_t surftype;
    bool is_array = false;
-   int depth = MAX2(rb->Depth, 1);
-   int min_array_element;
+   int depth = MAX2(irb->layer_count, 1);
    const uint8_t mocs = GEN7_MOCS_L3;
+
+   int min_array_element = irb->mt_layer / MAX2(mt->num_samples, 1);
+
    GLenum gl_target = rb->TexImage ?
                          rb->TexImage->TexObject->Target : GL_TEXTURE_2D;
 
@@ -477,25 +488,20 @@ gen7_update_renderbuffer_surface(struct brw_context *brw,
       is_array = true;
       depth *= 6;
       break;
+   case GL_TEXTURE_3D:
+      depth = MAX2(irb->mt->logical_depth0, 1);
+      /* fallthrough */
    default:
       surftype = translate_tex_target(gl_target);
       is_array = _mesa_tex_target_is_array(gl_target);
       break;
    }
 
-   if (layered) {
-      min_array_element = 0;
-   } else if (irb->mt->num_samples > 1) {
-      min_array_element = irb->mt_layer / irb->mt->num_samples;
-   } else {
-      min_array_element = irb->mt_layer;
-   }
-
    surf[0] = surftype << BRW_SURFACE_TYPE_SHIFT |
              format << BRW_SURFACE_FORMAT_SHIFT |
              (irb->mt->array_spacing_lod0 ? GEN7_SURFACE_ARYSPC_LOD0
                                           : GEN7_SURFACE_ARYSPC_FULL) |
-             gen7_surface_tiling_mode(region->tiling);
+             gen7_surface_tiling_mode(mt->tiling);
 
    if (irb->mt->align_h == 4)
       surf[0] |= GEN7_SURFACE_VALIGN_4;
@@ -506,7 +512,7 @@ gen7_update_renderbuffer_surface(struct brw_context *brw,
       surf[0] |= GEN7_SURFACE_IS_ARRAY;
    }
 
-   surf[1] = region->bo->offset64;
+   surf[1] = mt->bo->offset64;
 
    assert(brw->has_surface_tile_offset);
 
@@ -517,7 +523,7 @@ gen7_update_renderbuffer_surface(struct brw_context *brw,
              SET_FIELD(irb->mt->logical_height0 - 1, GEN7_SURFACE_HEIGHT);
 
    surf[3] = ((depth - 1) << BRW_SURFACE_DEPTH_SHIFT) |
-             (region->pitch - 1);
+             (mt->pitch - 1);
 
    surf[4] = gen7_surface_msaa_bits(irb->mt->num_samples, irb->mt->msaa_layout) |
              min_array_element << GEN7_SURFACE_MIN_ARRAY_ELEMENT_SHIFT |
@@ -539,8 +545,8 @@ gen7_update_renderbuffer_surface(struct brw_context *brw,
 
    drm_intel_bo_emit_reloc(brw->batch.bo,
 			   brw->wm.base.surf_offset[surf_index] + 4,
-			   region->bo,
-			   surf[1] - region->bo->offset64,
+			   mt->bo,
+			   surf[1] - mt->bo->offset64,
 			   I915_GEM_DOMAIN_RENDER,
 			   I915_GEM_DOMAIN_RENDER);
 

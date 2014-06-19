@@ -47,9 +47,11 @@ static void si_init_atom(struct r600_atom *atom, struct r600_atom **list_elem,
 	*list_elem = atom;
 }
 
-static uint32_t cik_num_banks(struct si_screen *sscreen, unsigned bpe, unsigned tile_split)
+uint32_t si_num_banks(struct si_screen *sscreen, unsigned bpe, unsigned tile_split,
+		      unsigned tile_mode_index)
 {
-	if (sscreen->b.info.cik_macrotile_mode_array_valid) {
+	if ((sscreen->b.chip_class == CIK) &&
+	    sscreen->b.info.cik_macrotile_mode_array_valid) {
 		unsigned index, tileb;
 
 		tileb = 8 * 8 * bpe;
@@ -58,10 +60,16 @@ static uint32_t cik_num_banks(struct si_screen *sscreen, unsigned bpe, unsigned 
 		for (index = 0; tileb > 64; index++) {
 			tileb >>= 1;
 		}
-
 		assert(index < 16);
 
 		return (sscreen->b.info.cik_macrotile_mode_array[index] >> 6) & 0x3;
+	}
+
+	if ((sscreen->b.chip_class == SI) &&
+	    sscreen->b.info.si_tile_mode_array_valid) {
+		assert(tile_mode_index < 32);
+
+		return (sscreen->b.info.si_tile_mode_array[tile_mode_index] >> 20) & 0x3;
 	}
 
 	/* The old way. */
@@ -78,7 +86,7 @@ static uint32_t cik_num_banks(struct si_screen *sscreen, unsigned bpe, unsigned 
 	}
 }
 
-static unsigned cik_tile_split(unsigned tile_split)
+unsigned cik_tile_split(unsigned tile_split)
 {
 	switch (tile_split) {
 	case 64:
@@ -107,7 +115,7 @@ static unsigned cik_tile_split(unsigned tile_split)
 	return tile_split;
 }
 
-static unsigned cik_macro_tile_aspect(unsigned macro_tile_aspect)
+unsigned cik_macro_tile_aspect(unsigned macro_tile_aspect)
 {
 	switch (macro_tile_aspect) {
 	default:
@@ -127,7 +135,7 @@ static unsigned cik_macro_tile_aspect(unsigned macro_tile_aspect)
 	return macro_tile_aspect;
 }
 
-static unsigned cik_bank_wh(unsigned bankwh)
+unsigned cik_bank_wh(unsigned bankwh)
 {
 	switch (bankwh) {
 	default:
@@ -147,7 +155,7 @@ static unsigned cik_bank_wh(unsigned bankwh)
 	return bankwh;
 }
 
-static unsigned cik_db_pipe_config(struct si_screen *sscreen, unsigned tile_mode)
+unsigned cik_db_pipe_config(struct si_screen *sscreen, unsigned tile_mode)
 {
 	if (sscreen->b.info.si_tile_mode_array_valid) {
 		uint32_t gb_tile_mode = sscreen->b.info.si_tile_mode_array[tile_mode];
@@ -1328,6 +1336,9 @@ static uint32_t si_translate_buffer_dataformat(struct pipe_screen *screen,
 	if (type == UTIL_FORMAT_TYPE_FIXED)
 		return V_008F0C_BUF_DATA_FORMAT_INVALID;
 
+	if (desc->format == PIPE_FORMAT_R11G11B10_FLOAT)
+		return V_008F0C_BUF_DATA_FORMAT_10_11_11;
+
 	if (desc->nr_channels == 4 &&
 	    desc->channel[0].size == 10 &&
 	    desc->channel[1].size == 10 &&
@@ -1393,6 +1404,9 @@ static uint32_t si_translate_buffer_numformat(struct pipe_screen *screen,
 					      const struct util_format_description *desc,
 					      int first_non_void)
 {
+	if (desc->format == PIPE_FORMAT_R11G11B10_FLOAT)
+		return V_008F0C_BUF_NUM_FORMAT_FLOAT;
+
 	switch (desc->channel[first_non_void].type) {
 	case UTIL_FORMAT_TYPE_SIGNED:
 		if (desc->channel[first_non_void].normalized)
@@ -1514,7 +1528,7 @@ boolean si_is_format_supported(struct pipe_screen *screen,
 	return retval == usage;
 }
 
-static unsigned si_tile_mode_index(struct r600_texture *rtex, unsigned level, bool stencil)
+unsigned si_tile_mode_index(struct r600_texture *rtex, unsigned level, bool stencil)
 {
 	unsigned tile_mode_index = 0;
 
@@ -1705,7 +1719,7 @@ static void si_init_depth_surface(struct si_context *sctx,
 	unsigned macro_aspect, tile_split, stile_split, bankh, bankw, nbanks, pipe_config;
 	uint32_t z_info, s_info, db_depth_info;
 	uint64_t z_offs, s_offs;
-	uint32_t db_htile_data_base, db_htile_surface, pa_su_poly_offset_db_fmt_cntl;
+	uint32_t db_htile_data_base, db_htile_surface, pa_su_poly_offset_db_fmt_cntl = 0;
 
 	switch (sctx->framebuffer.state.zsbuf->texture->format) {
 	case PIPE_FORMAT_S8_UINT_Z24_UNORM:
@@ -1777,7 +1791,8 @@ static void si_init_depth_surface(struct si_context *sctx,
 		macro_aspect = cik_macro_tile_aspect(macro_aspect);
 		bankw = cik_bank_wh(bankw);
 		bankh = cik_bank_wh(bankh);
-		nbanks = cik_num_banks(sscreen, rtex->surface.bpe, rtex->surface.tile_split);
+		nbanks = si_num_banks(sscreen, rtex->surface.bpe, rtex->surface.tile_split,
+				      ~0);
 		tile_mode_index = si_tile_mode_index(rtex, level, false);
 		pipe_config = cik_db_pipe_config(sscreen, tile_mode_index);
 
@@ -2158,7 +2173,7 @@ static void *si_create_fs_state(struct pipe_context *ctx,
 	return si_create_shader_state(ctx, state, PIPE_SHADER_FRAGMENT);
 }
 
-#if HAVE_LLVM >= 0x0305
+#if LLVM_SUPPORTS_GEOM_SHADERS
 
 static void *si_create_gs_state(struct pipe_context *ctx,
 				const struct pipe_shader_state *state)
@@ -2188,7 +2203,7 @@ static void si_bind_vs_shader(struct pipe_context *ctx, void *state)
 	sctx->vs_shader = sel;
 }
 
-#if HAVE_LLVM >= 0x0305
+#if LLVM_SUPPORTS_GEOM_SHADERS
 
 static void si_bind_gs_shader(struct pipe_context *ctx, void *state)
 {
@@ -2208,9 +2223,11 @@ static void si_bind_ps_shader(struct pipe_context *ctx, void *state)
 	struct si_context *sctx = (struct si_context *)ctx;
 	struct si_pipe_shader_selector *sel = state;
 
+	/* skip if supplied shader is one already in use */
 	if (sctx->ps_shader == sel)
 		return;
 
+	/* use dummy shader if supplied shader is corrupt */
 	if (!sel || !sel->current)
 		sel = sctx->dummy_pixel_shader;
 
@@ -2254,7 +2271,7 @@ static void si_delete_vs_shader(struct pipe_context *ctx, void *state)
 	si_delete_shader_selector(ctx, sel);
 }
 
-#if HAVE_LLVM >= 0x0305
+#if LLVM_SUPPORTS_GEOM_SHADERS
 
 static void si_delete_gs_shader(struct pipe_context *ctx, void *state)
 {
@@ -2582,16 +2599,15 @@ static void *si_create_sampler_state(struct pipe_context *ctx,
 	rstate->val[0] = (S_008F30_CLAMP_X(si_tex_wrap(state->wrap_s)) |
 			  S_008F30_CLAMP_Y(si_tex_wrap(state->wrap_t)) |
 			  S_008F30_CLAMP_Z(si_tex_wrap(state->wrap_r)) |
-			  (state->max_anisotropy & 0x7) << 9 | /* XXX */
+			  r600_tex_aniso_filter(state->max_anisotropy) << 9 |
 			  S_008F30_DEPTH_COMPARE_FUNC(si_tex_compare(state->compare_func)) |
 			  S_008F30_FORCE_UNNORMALIZED(!state->normalized_coords) |
-			  aniso_flag_offset << 16 | /* XXX */
 			  S_008F30_DISABLE_CUBE_WRAP(!state->seamless_cube_map));
 	rstate->val[1] = (S_008F34_MIN_LOD(S_FIXED(CLAMP(state->min_lod, 0, 15), 8)) |
 			  S_008F34_MAX_LOD(S_FIXED(CLAMP(state->max_lod, 0, 15), 8)));
 	rstate->val[2] = (S_008F38_LOD_BIAS(S_FIXED(CLAMP(state->lod_bias, -16, 16), 8)) |
-			  S_008F38_XY_MAG_FILTER(si_tex_filter(state->mag_img_filter)) |
-			  S_008F38_XY_MIN_FILTER(si_tex_filter(state->min_img_filter)) |
+			  S_008F38_XY_MAG_FILTER(si_tex_filter(state->mag_img_filter) | aniso_flag_offset) |
+			  S_008F38_XY_MIN_FILTER(si_tex_filter(state->min_img_filter) | aniso_flag_offset) |
 			  S_008F38_MIP_FILTER(si_tex_mipfilter(state->min_mip_filter)));
 	rstate->val[3] = S_008F3C_BORDER_COLOR_TYPE(border_color_type);
 
@@ -2750,7 +2766,7 @@ static void si_bind_vs_sampler_states(struct pipe_context *ctx, unsigned count, 
 	si_set_sampler_states(sctx, pm4, count, states,
 			      &sctx->samplers[PIPE_SHADER_VERTEX],
 			      R_00B130_SPI_SHADER_USER_DATA_VS_0);
-#if HAVE_LLVM >= 0x0305
+#if LLVM_SUPPORTS_GEOM_SHADERS
 	si_set_sampler_states(sctx, pm4, count, states,
 			      &sctx->samplers[PIPE_SHADER_VERTEX],
 			      R_00B330_SPI_SHADER_USER_DATA_ES_0);
@@ -2926,21 +2942,6 @@ static void *si_create_blend_custom(struct si_context *sctx, unsigned mode)
 	return si_create_blend_state_mode(&sctx->b.b, &blend, mode);
 }
 
-static void si_dma_copy(struct pipe_context *ctx,
-			struct pipe_resource *dst,
-			unsigned dst_level,
-			unsigned dst_x, unsigned dst_y, unsigned dst_z,
-			struct pipe_resource *src,
-			unsigned src_level,
-			const struct pipe_box *src_box)
-{
-	/* XXX implement this or share evergreen_dma_blit with r600g */
-
-	/* Fallback: */
-	ctx->resource_copy_region(ctx, dst, dst_level, dst_x, dst_y, dst_z,
-				  src, src_level, src_box);
-}
-
 static void si_set_occlusion_query_state(struct pipe_context *ctx, bool enable)
 {
 	/* XXX Turn this into a proper state. Right now the queries are
@@ -2997,7 +2998,7 @@ void si_init_state_functions(struct si_context *sctx)
 	sctx->b.b.bind_fs_state = si_bind_ps_shader;
 	sctx->b.b.delete_vs_state = si_delete_vs_shader;
 	sctx->b.b.delete_fs_state = si_delete_ps_shader;
-#if HAVE_LLVM >= 0x0305
+#if LLVM_SUPPORTS_GEOM_SHADERS
 	sctx->b.b.create_gs_state = si_create_gs_state;
 	sctx->b.b.bind_gs_state = si_bind_gs_shader;
 	sctx->b.b.delete_gs_state = si_delete_gs_shader;
@@ -3098,6 +3099,8 @@ void si_init_config(struct si_context *sctx)
 		case CHIP_KAVERI:
 			/* XXX todo */
 		case CHIP_KABINI:
+			/* XXX todo */
+		case CHIP_MULLINS:
 			/* XXX todo */
 		default:
 			si_pm4_set_reg(pm4, R_028350_PA_SC_RASTER_CONFIG, 0x00000000);

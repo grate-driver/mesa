@@ -241,7 +241,7 @@ public:
 
    unsigned op;
    st_dst_reg dst;
-   st_src_reg src[3];
+   st_src_reg src[4];
    /** Pointer to the ir source this tree came from for debugging */
    ir_instruction *ir;
    GLboolean cond_update;
@@ -326,6 +326,7 @@ public:
    struct gl_context *ctx;
    struct gl_program *prog;
    struct gl_shader_program *shader_program;
+   struct gl_shader *shader;
    struct gl_shader_compiler_options *options;
 
    int next_temp;
@@ -411,7 +412,12 @@ public:
    glsl_to_tgsi_instruction *emit(ir_instruction *ir, unsigned op,
         		        st_dst_reg dst,
         		        st_src_reg src0, st_src_reg src1, st_src_reg src2);
-   
+
+   glsl_to_tgsi_instruction *emit(ir_instruction *ir, unsigned op,
+                                  st_dst_reg dst,
+                                  st_src_reg src0, st_src_reg src1,
+                                  st_src_reg src2, st_src_reg src3);
+
    unsigned get_opcode(ir_instruction *ir, unsigned op,
                     st_dst_reg dst,
                     st_src_reg src0, st_src_reg src1);
@@ -524,8 +530,9 @@ num_inst_src_regs(unsigned opcode)
 
 glsl_to_tgsi_instruction *
 glsl_to_tgsi_visitor::emit(ir_instruction *ir, unsigned op,
-        		 st_dst_reg dst,
-        		 st_src_reg src0, st_src_reg src1, st_src_reg src2)
+                           st_dst_reg dst,
+                           st_src_reg src0, st_src_reg src1,
+                           st_src_reg src2, st_src_reg src3)
 {
    glsl_to_tgsi_instruction *inst = new(mem_ctx) glsl_to_tgsi_instruction();
    int num_reladdr = 0, i;
@@ -540,7 +547,9 @@ glsl_to_tgsi_visitor::emit(ir_instruction *ir, unsigned op,
    num_reladdr += src0.reladdr != NULL || src0.reladdr2 != NULL;
    num_reladdr += src1.reladdr != NULL || src1.reladdr2 != NULL;
    num_reladdr += src2.reladdr != NULL || src2.reladdr2 != NULL;
+   num_reladdr += src3.reladdr != NULL || src3.reladdr2 != NULL;
 
+   reladdr_to_temp(ir, &src3, &num_reladdr);
    reladdr_to_temp(ir, &src2, &num_reladdr);
    reladdr_to_temp(ir, &src1, &num_reladdr);
    reladdr_to_temp(ir, &src0, &num_reladdr);
@@ -556,6 +565,7 @@ glsl_to_tgsi_visitor::emit(ir_instruction *ir, unsigned op,
    inst->src[0] = src0;
    inst->src[1] = src1;
    inst->src[2] = src2;
+   inst->src[3] = src3;
    inst->ir = ir;
    inst->dead_mask = 0;
 
@@ -577,7 +587,7 @@ glsl_to_tgsi_visitor::emit(ir_instruction *ir, unsigned op,
       }
    }
    else {
-      for (i=0; i<3; i++) {
+      for (i=0; i<4; i++) {
          if(inst->src[i].reladdr) {
             switch(inst->src[i].file) {
             case PROGRAM_STATE_VAR:
@@ -600,12 +610,19 @@ glsl_to_tgsi_visitor::emit(ir_instruction *ir, unsigned op,
    return inst;
 }
 
+glsl_to_tgsi_instruction *
+glsl_to_tgsi_visitor::emit(ir_instruction *ir, unsigned op,
+                           st_dst_reg dst, st_src_reg src0,
+                           st_src_reg src1, st_src_reg src2)
+{
+   return emit(ir, op, dst, src0, src1, src2, undef_src);
+}
 
 glsl_to_tgsi_instruction *
 glsl_to_tgsi_visitor::emit(ir_instruction *ir, unsigned op,
         		 st_dst_reg dst, st_src_reg src0, st_src_reg src1)
 {
-   return emit(ir, op, dst, src0, src1, undef_src);
+   return emit(ir, op, dst, src0, src1, undef_src, undef_src);
 }
 
 glsl_to_tgsi_instruction *
@@ -613,13 +630,13 @@ glsl_to_tgsi_visitor::emit(ir_instruction *ir, unsigned op,
         		 st_dst_reg dst, st_src_reg src0)
 {
    assert(dst.writemask != 0);
-   return emit(ir, op, dst, src0, undef_src, undef_src);
+   return emit(ir, op, dst, src0, undef_src, undef_src, undef_src);
 }
 
 glsl_to_tgsi_instruction *
 glsl_to_tgsi_visitor::emit(ir_instruction *ir, unsigned op)
 {
-   return emit(ir, op, undef_dst, undef_src, undef_src, undef_src);
+   return emit(ir, op, undef_dst, undef_src, undef_src, undef_src, undef_src);
 }
 
 /**
@@ -632,7 +649,10 @@ glsl_to_tgsi_visitor::get_opcode(ir_instruction *ir, unsigned op,
         		 st_src_reg src0, st_src_reg src1)
 {
    int type = GLSL_TYPE_FLOAT;
-   
+
+   if (op == TGSI_OPCODE_MOV)
+       return op;
+
    assert(src0.type != GLSL_TYPE_ARRAY);
    assert(src0.type != GLSL_TYPE_STRUCT);
    assert(src1.type != GLSL_TYPE_ARRAY);
@@ -687,7 +707,10 @@ glsl_to_tgsi_visitor::get_opcode(ir_instruction *ir, unsigned op,
 
       case2fi(SSG, ISSG);
       case3(ABS, IABS, IABS);
-      
+
+      case2iu(IBFE, UBFE);
+      case2iu(IMSB, UMSB);
+      case2iu(IMUL_HI, UMUL_HI);
       default: break;
    }
    
@@ -1931,6 +1954,33 @@ glsl_to_tgsi_visitor::visit(ir_expression *ir)
          emit(ir, TGSI_OPCODE_CMP, result_dst, op[0], op[1], op[2]);
       }
       break;
+   case ir_triop_bitfield_extract:
+      emit(ir, TGSI_OPCODE_IBFE, result_dst, op[0], op[1], op[2]);
+      break;
+   case ir_quadop_bitfield_insert:
+      emit(ir, TGSI_OPCODE_BFI, result_dst, op[0], op[1], op[2], op[3]);
+      break;
+   case ir_unop_bitfield_reverse:
+      emit(ir, TGSI_OPCODE_BREV, result_dst, op[0]);
+      break;
+   case ir_unop_bit_count:
+      emit(ir, TGSI_OPCODE_POPC, result_dst, op[0]);
+      break;
+   case ir_unop_find_msb:
+      emit(ir, TGSI_OPCODE_IMSB, result_dst, op[0]);
+      break;
+   case ir_unop_find_lsb:
+      emit(ir, TGSI_OPCODE_LSB, result_dst, op[0]);
+      break;
+   case ir_binop_imul_high:
+      emit(ir, TGSI_OPCODE_IMUL_HI, result_dst, op[0], op[1]);
+      break;
+   case ir_triop_fma:
+      /* NOTE: Perhaps there should be a special opcode that enforces fused
+       * mul-add. Just use MAD for now.
+       */
+      emit(ir, TGSI_OPCODE_MAD, result_dst, op[0], op[1], op[2]);
+      break;
    case ir_unop_pack_snorm_2x16:
    case ir_unop_pack_unorm_2x16:
    case ir_unop_pack_half_2x16:
@@ -1944,22 +1994,14 @@ glsl_to_tgsi_visitor::visit(ir_expression *ir)
    case ir_unop_unpack_snorm_4x8:
    case ir_unop_unpack_unorm_4x8:
    case ir_binop_pack_half_2x16_split:
-   case ir_unop_bitfield_reverse:
-   case ir_unop_bit_count:
-   case ir_unop_find_msb:
-   case ir_unop_find_lsb:
    case ir_binop_bfm:
-   case ir_triop_fma:
    case ir_triop_bfi:
-   case ir_triop_bitfield_extract:
-   case ir_quadop_bitfield_insert:
    case ir_quadop_vector:
    case ir_binop_vector_extract:
    case ir_triop_vector_insert:
    case ir_binop_ldexp:
    case ir_binop_carry:
    case ir_binop_borrow:
-   case ir_binop_imul_high:
       /* This operation is not supported, or should have already been handled.
        */
       assert(!"Invalid ir opcode in glsl_to_tgsi_visitor::visit()");
@@ -2793,7 +2835,7 @@ glsl_to_tgsi_visitor::visit(ir_texture *ir)
       }
       break;
    case ir_lod:
-      assert(!"Unexpected ir_lod opcode");
+      opcode = TGSI_OPCODE_LODQ;
       break;
    case ir_query_levels:
       assert(!"Unexpected ir_query_levels opcode");
@@ -3053,6 +3095,7 @@ glsl_to_tgsi_visitor::glsl_to_tgsi_visitor()
    ctx = NULL;
    prog = NULL;
    shader_program = NULL;
+   shader = NULL;
    options = NULL;
 }
 
@@ -3924,6 +3967,7 @@ get_pixel_transfer_visitor(struct st_fragment_program *fp,
    v->ctx = original->ctx;
    v->prog = prog;
    v->shader_program = NULL;
+   v->shader = NULL;
    v->glsl_version = original->glsl_version;
    v->native_integers = original->native_integers;
    v->options = original->options;
@@ -4054,6 +4098,7 @@ get_bitmap_visitor(struct st_fragment_program *fp,
    v->ctx = original->ctx;
    v->prog = prog;
    v->shader_program = NULL;
+   v->shader = NULL;
    v->glsl_version = original->glsl_version;
    v->native_integers = original->native_integers;
    v->options = original->options;
@@ -4160,7 +4205,11 @@ struct st_translate {
 static unsigned mesa_sysval_to_semantic[SYSTEM_VALUE_MAX] = {
    TGSI_SEMANTIC_FACE,
    TGSI_SEMANTIC_VERTEXID,
-   TGSI_SEMANTIC_INSTANCEID
+   TGSI_SEMANTIC_INSTANCEID,
+   TGSI_SEMANTIC_SAMPLEID,
+   TGSI_SEMANTIC_SAMPLEPOS,
+   TGSI_SEMANTIC_SAMPLEMASK,
+   TGSI_SEMANTIC_INVOCATIONID,
 };
 
 /**
@@ -4378,7 +4427,8 @@ translate_dst(struct st_translate *t,
          break;
 
       case TGSI_PROCESSOR_FRAGMENT:
-         if (dst_reg->index >= FRAG_RESULT_COLOR) {
+         if (dst_reg->index == FRAG_RESULT_COLOR ||
+             dst_reg->index >= FRAG_RESULT_DATA0) {
             dst = ureg_saturate(dst);
          }
          break;
@@ -4513,6 +4563,7 @@ compile_tgsi_instruction(struct st_translate *t,
    case TGSI_OPCODE_TXB2:
    case TGSI_OPCODE_TXL2:
    case TGSI_OPCODE_TG4:
+   case TGSI_OPCODE_LODQ:
       src[num_src++] = t->samplers[inst->sampler];
       for (i = 0; i < inst->tex_offset_num_offset; i++) {
          texoffsets[i] = translate_tex_offset(t, &inst->tex_offsets[i], i);
@@ -4872,6 +4923,15 @@ st_translate_program(
                                              TGSI_SEMANTIC_COLOR,
                                              outputSemanticIndex[i]);
             break;
+         case TGSI_SEMANTIC_SAMPLEMASK:
+            t->outputs[i] = ureg_DECL_output(ureg,
+                                             TGSI_SEMANTIC_SAMPLEMASK,
+                                             outputSemanticIndex[i]);
+            /* TODO: If we ever support more than 32 samples, this will have
+             * to become an array.
+             */
+            t->outputs[i] = ureg_writemask(t->outputs[i], TGSI_WRITEMASK_X);
+            break;
          default:
             assert(!"fragment shader outputs must be POSITION/STENCIL/COLOR");
             ret = PIPE_ERROR_BAD_INPUT;
@@ -5002,11 +5062,11 @@ st_translate_program(
       }
    }
 
-   if (program->shader_program) {
-      unsigned num_ubos = program->shader_program->NumUniformBlocks;
+   if (program->shader) {
+      unsigned num_ubos = program->shader->NumUniformBlocks;
 
       for (i = 0; i < num_ubos; i++) {
-         ureg_DECL_constant2D(t->ureg, 0, program->shader_program->UniformBlocks[i].UniformBufferSize / 4, i + 1);
+         ureg_DECL_constant2D(t->ureg, 0, program->shader->UniformBlocks[i].UniformBufferSize / 4, i + 1);
       }
    }
    
@@ -5127,6 +5187,7 @@ get_mesa_program(struct gl_context *ctx,
    v->ctx = ctx;
    v->prog = prog;
    v->shader_program = shader_program;
+   v->shader = shader;
    v->options = options;
    v->glsl_version = ctx->Const.GLSLVersion;
    v->native_integers = ctx->Const.NativeIntegers;
@@ -5198,7 +5259,7 @@ get_mesa_program(struct gl_context *ctx,
    /* Write the END instruction. */
    v->emit(NULL, TGSI_OPCODE_END);
 
-   if (ctx->Shader.Flags & GLSL_DUMP) {
+   if (ctx->_Shader->Flags & GLSL_DUMP) {
       printf("\n");
       printf("GLSL IR for linked %s program %d:\n",
              _mesa_shader_stage_to_string(shader->Stage),
@@ -5339,6 +5400,9 @@ st_link_shader(struct gl_context *ctx, struct gl_shader_program *prog)
                          DIV_TO_MUL_RCP |
                          EXP_TO_EXP2 |
                          LOG_TO_LOG2 |
+                         LDEXP_TO_ARITH |
+                         CARRY_TO_ARITH |
+                         BORROW_TO_ARITH |
                          (options->EmitNoPow ? POW_TO_EXP2 : 0) |
                          (!ctx->Const.NativeIntegers ? INT_DIV_TO_MUL_RCP : 0));
 
@@ -5356,8 +5420,8 @@ st_link_shader(struct gl_context *ctx, struct gl_shader_program *prog)
 
          progress = do_lower_jumps(ir, true, true, options->EmitNoMainReturn, options->EmitNoCont, options->EmitNoLoops) || progress;
 
-         progress = do_common_optimization(ir, true, true,
-					   options->MaxUnrollIterations, options)
+         progress = do_common_optimization(ir, true, true, options,
+                                           ctx->Const.NativeIntegers)
 	   || progress;
 
          progress = lower_if_to_cond_assign(ir, options->MaxIfDepth) || progress;

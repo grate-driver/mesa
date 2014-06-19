@@ -39,6 +39,7 @@ AM_CFLAGS = \
 
 gbm_LTLIBRARIES = gbm_gallium_drm.la
 
+nodist_EXTRA_gbm_gallium_drm_la_SOURCES = dummy.cpp
 gbm_gallium_drm_la_SOURCES = gbm.c
 
 gbm_gallium_drm_la_LIBADD = \
@@ -48,34 +49,31 @@ gbm_gallium_drm_la_LIBADD = \
 	$(top_builddir)/src/gallium/state_trackers/gbm/libgbm.la \
 	$(top_builddir)/src/gallium/auxiliary/libgallium.la \
 	$(LIBDRM_LIBS) \
-	-lm
+	$(GALLIUM_COMMON_LIB_DEPS)
 
 if HAVE_DRI
 gbm_gallium_drm_la_LIBADD += \
 	$(top_builddir)/src/gallium/winsys/sw/dri/libswdri.la
 endif
 
-if NEED_PIPE_LOADER_XLIB
+if NEED_WINSYS_XLIB
 gbm_gallium_drm_la_LIBADD += \
 	$(top_builddir)/src/gallium/winsys/sw/xlib/libws_xlib.la \
 	-lX11 -lXext -lXfixes \
 	$(LIBDRM_LIBS)
 endif
 
-gbm_gallium_drm_la_LDFLAGS = -no-undefined -avoid-version -module
+gbm_gallium_drm_la_LDFLAGS = \
+	-module \
+	-no-undefined \
+	-avoid-version \
+	-Wl,--version-script=$(top_srcdir)/src/gallium/targets/gbm/gbm.sym \
+	$(GC_SECTIONS) \
+	$(LD_NO_UNDEFINED)
 
-# FIXME: this shouldn't be needed
 if HAVE_MESA_LLVM
-gbm_gallium_drm_la_LINK = $(CXXLINK) $(gbm_gallium_drm_la_LDFLAGS)
-# Mention a dummy pure C++ file to trigger generation of the $(LINK) variable
-nodist_EXTRA_gbm_gallium_drm_la_SOURCES = dummy-cpp.cpp
-
 gbm_gallium_drm_la_LIBADD += $(LLVM_LIBS)
 gbm_gallium_drm_la_LDFLAGS += $(LLVM_LDFLAGS)
-else
-gbm_gallium_drm_la_LINK = $(CXXLINK) $(gbm_gallium_drm_la_LDFLAGS)
-# Mention a dummy pure C file to trigger generation of the $(LINK) variable
-nodist_EXTRA_gbm_gallium_drm_la_SOURCES = dummy-c.c
 endif
 
 TESTS = gallium-gbm-symbols-check

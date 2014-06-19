@@ -106,7 +106,7 @@ struct dri3_display
 {
    __GLXDRIdisplay base;
 
-   const __DRIextension *loader_extensions[8];
+   const __DRIextension **loader_extensions;
 
    /* DRI3 bits */
    int dri3Major;
@@ -130,6 +130,7 @@ struct dri3_screen {
    const __DRI2flushExtension *f;
    const __DRI2configQueryExtension *config;
    const __DRItexBufferExtension *texBuffer;
+   const __DRI2rendererQueryExtension *rendererQuery;
    const __DRIconfig **driver_configs;
 
    void *driver;

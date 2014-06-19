@@ -998,7 +998,9 @@ GCRA::doCoalesce(ArrayList& insns, unsigned int mask)
       case OP_TXQ:
       case OP_TXD:
       case OP_TXG:
+      case OP_TXLQ:
       case OP_TEXCSAA:
+      case OP_TEXPREP:
          if (!(mask & JOIN_MASK_TEX))
             break;
          for (c = 0; insn->srcExists(c) && c != insn->predSrc; ++c)
@@ -1914,7 +1916,7 @@ RegAlloc::InsertConstraintsPass::texConstraintNVC0(TexInstruction *tex)
       s = tex->srcCount(0xff);
       n = 0;
    } else {
-      s = tex->tex.target.getArgCount();
+      s = tex->tex.target.getArgCount() - tex->tex.target.isMS();
       if (!tex->tex.target.isArray() &&
           (tex->tex.rIndirectSrc >= 0 || tex->tex.sIndirectSrc >= 0))
          ++s;

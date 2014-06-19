@@ -394,6 +394,7 @@ EXTRA_EXT(ARB_viewport_array);
 EXTRA_EXT(ARB_compute_shader);
 EXTRA_EXT(ARB_gpu_shader5);
 EXTRA_EXT2(ARB_transform_feedback3, ARB_gpu_shader5);
+EXTRA_EXT(INTEL_performance_query);
 
 static const int
 extra_ARB_color_buffer_float_or_glcore[] = {
@@ -846,6 +847,16 @@ find_custom_value(struct gl_context *ctx, const struct value_desc *d, union valu
       v->value_int = ctx->Array.VAO->IndexBufferObj->Name;
       break;
 
+   /* ARB_vertex_array_bgra */
+   case GL_COLOR_ARRAY_SIZE:
+      array = &ctx->Array.VAO->VertexAttrib[VERT_ATTRIB_COLOR0];
+      v->value_int = array->Format == GL_BGRA ? GL_BGRA : array->Size;
+      break;
+   case GL_SECONDARY_COLOR_ARRAY_SIZE:
+      array = &ctx->Array.VAO->VertexAttrib[VERT_ATTRIB_COLOR1];
+      v->value_int = array->Format == GL_BGRA ? GL_BGRA : array->Size;
+      break;
+
    /* ARB_copy_buffer */
    case GL_COPY_READ_BUFFER:
       v->value_int = ctx->CopyReadBuffer->Name;
@@ -873,6 +884,18 @@ find_custom_value(struct gl_context *ctx, const struct value_desc *d, union valu
       v->value_int = ctx->TransformFeedback.CurrentObject->Name;
       break;
    case GL_CURRENT_PROGRAM:
+      /* The Changelog of the ARB_separate_shader_objects spec says:
+       *
+       * 24 25 Jul 2011  pbrown  Remove the language erroneously deleting
+       *                         CURRENT_PROGRAM.  In the EXT extension, this
+       *                         token was aliased to ACTIVE_PROGRAM_EXT, and
+       *                         was used to indicate the last program set by
+       *                         either ActiveProgramEXT or UseProgram.  In
+       *                         the ARB extension, the SSO active programs
+       *                         are now program pipeline object state and
+       *                         CURRENT_PROGRAM should still be used to query
+       *                         the last program set by UseProgram (bug 7822).
+       */
       v->value_int =
 	 ctx->Shader.ActiveProgram ? ctx->Shader.ActiveProgram->Name : 0;
       break;
@@ -976,24 +999,10 @@ find_custom_value(struct gl_context *ctx, const struct value_desc *d, union valu
       break;
    /* GL_KHR_DEBUG */
    case GL_DEBUG_LOGGED_MESSAGES:
-      {
-         struct gl_debug_state *debug = _mesa_get_debug_state(ctx);
-         v->value_int = debug ? debug->NumMessages : 0;
-      }
-      break;
    case GL_DEBUG_NEXT_LOGGED_MESSAGE_LENGTH:
-      {
-         struct gl_debug_state *debug = _mesa_get_debug_state(ctx);
-         v->value_int = debug ? debug->NextMsgLength : 0;
-      }
-      break;
    case GL_DEBUG_GROUP_STACK_DEPTH:
-      {
-         struct gl_debug_state *debug = _mesa_get_debug_state(ctx);
-         v->value_int = debug ? debug->GroupStackDepth : 0;
-      }
+      v->value_int = _mesa_get_debug_state_int(ctx, d->pname);
       break;
-
    /* GL_ARB_shader_atomic_counters */
    case GL_ATOMIC_COUNTER_BUFFER_BINDING:
       v->value_int = ctx->AtomicBuffer->Name;
@@ -1001,6 +1010,14 @@ find_custom_value(struct gl_context *ctx, const struct value_desc *d, union valu
    /* GL_ARB_draw_indirect */
    case GL_DRAW_INDIRECT_BUFFER_BINDING:
       v->value_int = ctx->DrawIndirectBuffer->Name;
+      break;
+   /* GL_ARB_separate_shader_objects */
+   case GL_PROGRAM_PIPELINE_BINDING:
+      if (ctx->Pipeline.Current) {
+         v->value_int = ctx->Pipeline.Current->Name;
+      } else {
+         v->value_int = 0;
+      }
       break;
    }
 }

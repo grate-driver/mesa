@@ -120,6 +120,7 @@ struct cso_context {
    struct pipe_viewport_state vp, vp_saved;
    struct pipe_blend_color blend_color;
    unsigned sample_mask, sample_mask_saved;
+   unsigned min_samples, min_samples_saved;
    struct pipe_stencil_ref stencil_ref, stencil_ref_saved;
 };
 
@@ -716,6 +717,24 @@ void cso_restore_sample_mask(struct cso_context *ctx)
    cso_set_sample_mask(ctx, ctx->sample_mask_saved);
 }
 
+void cso_set_min_samples(struct cso_context *ctx, unsigned min_samples)
+{
+   if (ctx->min_samples != min_samples && ctx->pipe->set_min_samples) {
+      ctx->min_samples = min_samples;
+      ctx->pipe->set_min_samples(ctx->pipe, min_samples);
+   }
+}
+
+void cso_save_min_samples(struct cso_context *ctx)
+{
+   ctx->min_samples_saved = ctx->min_samples;
+}
+
+void cso_restore_min_samples(struct cso_context *ctx)
+{
+   cso_set_min_samples(ctx, ctx->min_samples_saved);
+}
+
 void cso_set_stencil_ref(struct cso_context *ctx,
                          const struct pipe_stencil_ref *sr)
 {
@@ -1177,21 +1196,27 @@ cso_set_sampler_views(struct cso_context *ctx,
 {
    struct sampler_info *info = &ctx->samplers[shader_stage];
    unsigned i;
+   boolean any_change = FALSE;
 
    /* reference new views */
    for (i = 0; i < count; i++) {
+      any_change |= info->views[i] != views[i];
       pipe_sampler_view_reference(&info->views[i], views[i]);
    }
    /* unref extra old views, if any */
    for (; i < info->nr_views; i++) {
+      any_change |= info->views[i] != NULL;
       pipe_sampler_view_reference(&info->views[i], NULL);
    }
 
-   info->nr_views = count;
-
    /* bind the new sampler views */
-   ctx->pipe->set_sampler_views(ctx->pipe, shader_stage, 0, count,
-                                info->views);
+   if (any_change) {
+      ctx->pipe->set_sampler_views(ctx->pipe, shader_stage, 0,
+                                   MAX2(info->nr_views, count),
+                                   info->views);
+   }
+
+   info->nr_views = count;
 }
 
 

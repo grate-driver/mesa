@@ -460,6 +460,10 @@ static void *r600_create_rs_state(struct pipe_context *ctx,
 		S_028810_ZCLIP_NEAR_DISABLE(!state->depth_clip) |
 		S_028810_ZCLIP_FAR_DISABLE(!state->depth_clip) |
 		S_028810_DX_LINEAR_ATTR_CLIP_ENA(1);
+	if (rctx->b.chip_class == R700) {
+		rs->pa_cl_clip_cntl |=
+			S_028810_DX_RASTERIZATION_KILL(state->rasterizer_discard);
+	}
 	rs->multisample_enable = state->multisample;
 
 	/* offset */
@@ -517,19 +521,25 @@ static void *r600_create_rs_state(struct pipe_context *ctx,
 			       S_028C08_PIX_CENTER_HALF(state->half_pixel_center) |
 			       S_028C08_QUANT_MODE(V_028C08_X_1_256TH));
 	r600_store_context_reg(&rs->buffer, R_028DFC_PA_SU_POLY_OFFSET_CLAMP, fui(state->offset_clamp));
-	r600_store_context_reg(&rs->buffer, R_028814_PA_SU_SC_MODE_CNTL,
-			       S_028814_PROVOKING_VTX_LAST(!state->flatshade_first) |
-			       S_028814_CULL_FRONT(state->cull_face & PIPE_FACE_FRONT ? 1 : 0) |
-			       S_028814_CULL_BACK(state->cull_face & PIPE_FACE_BACK ? 1 : 0) |
-			       S_028814_FACE(!state->front_ccw) |
-			       S_028814_POLY_OFFSET_FRONT_ENABLE(state->offset_tri) |
-			       S_028814_POLY_OFFSET_BACK_ENABLE(state->offset_tri) |
-			       S_028814_POLY_OFFSET_PARA_ENABLE(state->offset_tri) |
-			       S_028814_POLY_MODE(state->fill_front != PIPE_POLYGON_MODE_FILL ||
-						  state->fill_back != PIPE_POLYGON_MODE_FILL) |
-			       S_028814_POLYMODE_FRONT_PTYPE(r600_translate_fill(state->fill_front)) |
-			       S_028814_POLYMODE_BACK_PTYPE(r600_translate_fill(state->fill_back)));
-	r600_store_context_reg(&rs->buffer, R_028350_SX_MISC, S_028350_MULTIPASS(state->rasterizer_discard));
+
+	rs->pa_su_sc_mode_cntl = S_028814_PROVOKING_VTX_LAST(!state->flatshade_first) |
+				 S_028814_CULL_FRONT(state->cull_face & PIPE_FACE_FRONT ? 1 : 0) |
+				 S_028814_CULL_BACK(state->cull_face & PIPE_FACE_BACK ? 1 : 0) |
+				 S_028814_FACE(!state->front_ccw) |
+				 S_028814_POLY_OFFSET_FRONT_ENABLE(state->offset_tri) |
+				 S_028814_POLY_OFFSET_BACK_ENABLE(state->offset_tri) |
+				 S_028814_POLY_OFFSET_PARA_ENABLE(state->offset_tri) |
+				 S_028814_POLY_MODE(state->fill_front != PIPE_POLYGON_MODE_FILL ||
+									 state->fill_back != PIPE_POLYGON_MODE_FILL) |
+				 S_028814_POLYMODE_FRONT_PTYPE(r600_translate_fill(state->fill_front)) |
+				 S_028814_POLYMODE_BACK_PTYPE(r600_translate_fill(state->fill_back));
+	if (rctx->b.chip_class == R700) {
+		r600_store_context_reg(&rs->buffer, R_028814_PA_SU_SC_MODE_CNTL, rs->pa_su_sc_mode_cntl);
+	}
+	if (rctx->b.chip_class == R600) {
+		r600_store_context_reg(&rs->buffer, R_028350_SX_MISC,
+				       S_028350_MULTIPASS(state->rasterizer_discard));
+	}
 	return rs;
 }
 
@@ -1612,6 +1622,11 @@ static void r600_emit_db_misc_state(struct r600_context *rctx, struct r600_atom 
 		db_render_control |= S_028D0C_DEPTH_CLEAR_ENABLE(1);
 	}
 
+	/* RV770 workaround for a hang with 8x MSAA. */
+	if (rctx->b.family == CHIP_RV770 && a->log_samples == 3) {
+		db_render_override |= S_028D10_MAX_TILES_IN_DTT(6);
+	}
+
 	r600_write_context_reg_seq(cs, R_028D0C_DB_RENDER_CONTROL, 2);
 	radeon_emit(cs, db_render_control); /* R_028D0C_DB_RENDER_CONTROL */
 	radeon_emit(cs, db_render_override); /* R_028D10_DB_RENDER_OVERRIDE */
@@ -2389,8 +2404,11 @@ void r600_init_atom_start_cs(struct r600_context *rctx)
 
 	r600_store_context_reg(cb, R_0288A4_SQ_PGM_RESOURCES_FS, 0);
 
+	if (rctx->b.chip_class == R700)
+		r600_store_context_reg(cb, R_028350_SX_MISC, 0);
 	if (rctx->b.chip_class == R700 && rctx->screen->b.has_streamout)
 		r600_store_context_reg(cb, R_028354_SX_SURFACE_SYNC, S_028354_SURFACE_SYNC_MASK(0xf));
+
 	r600_store_context_reg(cb, R_028800_DB_DEPTH_CONTROL, 0);
 	if (rctx->screen->b.has_streamout) {
 		r600_store_context_reg(cb, R_028B28_VGT_STRMOUT_DRAW_OPAQUE_OFFSET, 0);
@@ -2568,32 +2586,10 @@ void r600_update_vs_state(struct pipe_context *ctx, struct r600_pipe_shader *sha
 		S_02881C_VS_OUT_CCDIST0_VEC_ENA((rshader->clip_dist_write & 0x0F) != 0) |
 		S_02881C_VS_OUT_CCDIST1_VEC_ENA((rshader->clip_dist_write & 0xF0) != 0) |
 		S_02881C_VS_OUT_MISC_VEC_ENA(rshader->vs_out_misc_write) |
-		S_02881C_USE_VTX_VIEWPORT_INDX(rshader->vs_out_viewport) |
-		S_02881C_USE_VTX_POINT_SIZE(rshader->vs_out_point_size);
-}
-
-static unsigned r600_conv_prim_to_gs_out(unsigned mode)
-{
-	static const int prim_conv[] = {
-		V_028A6C_OUTPRIM_TYPE_POINTLIST,
-		V_028A6C_OUTPRIM_TYPE_LINESTRIP,
-		V_028A6C_OUTPRIM_TYPE_LINESTRIP,
-		V_028A6C_OUTPRIM_TYPE_LINESTRIP,
-		V_028A6C_OUTPRIM_TYPE_TRISTRIP,
-		V_028A6C_OUTPRIM_TYPE_TRISTRIP,
-		V_028A6C_OUTPRIM_TYPE_TRISTRIP,
-		V_028A6C_OUTPRIM_TYPE_TRISTRIP,
-		V_028A6C_OUTPRIM_TYPE_TRISTRIP,
-		V_028A6C_OUTPRIM_TYPE_TRISTRIP,
-		V_028A6C_OUTPRIM_TYPE_LINESTRIP,
-		V_028A6C_OUTPRIM_TYPE_LINESTRIP,
-		V_028A6C_OUTPRIM_TYPE_TRISTRIP,
-		V_028A6C_OUTPRIM_TYPE_TRISTRIP,
-		V_028A6C_OUTPRIM_TYPE_TRISTRIP
-	};
-	assert(mode < Elements(prim_conv));
-
-	return prim_conv[mode];
+		S_02881C_USE_VTX_POINT_SIZE(rshader->vs_out_point_size) |
+		S_02881C_USE_VTX_EDGE_FLAG(rshader->vs_out_edgeflag) |
+		S_02881C_USE_VTX_RENDER_TARGET_INDX(rshader->vs_out_layer) |
+		S_02881C_USE_VTX_VIEWPORT_INDX(rshader->vs_out_viewport);
 }
 
 void r600_update_gs_state(struct pipe_context *ctx, struct r600_pipe_shader *shader)
@@ -2793,9 +2789,6 @@ static boolean r600_dma_copy_tile(struct r600_context *rctx,
 	unsigned ncopy, height, cheight, detile, i, x, y, z, src_mode, dst_mode;
 	uint64_t base, addr;
 
-	/* make sure that the dma ring is only one active */
-	rctx->b.rings.gfx.flush(rctx, RADEON_FLUSH_ASYNC);
-
 	dst_mode = rdst->surface.level[dst_level].mode;
 	src_mode = rsrc->surface.level[src_level].mode;
 	/* downcast linear aligned to linear to simplify test */
@@ -2805,12 +2798,12 @@ static boolean r600_dma_copy_tile(struct r600_context *rctx,
 
 	y = 0;
 	lbpp = util_logbase2(bpp);
-	pitch_tile_max = ((pitch / bpp) >> 3) - 1;
+	pitch_tile_max = ((pitch / bpp) / 8) - 1;
 
 	if (dst_mode == RADEON_SURF_MODE_LINEAR) {
 		/* T2L */
 		array_mode = r600_array_mode(src_mode);
-		slice_tile_max = (rsrc->surface.level[src_level].nblk_x * rsrc->surface.level[src_level].nblk_y) >> 6;
+		slice_tile_max = (rsrc->surface.level[src_level].nblk_x * rsrc->surface.level[src_level].nblk_y) / (8*8);
 		slice_tile_max = slice_tile_max ? slice_tile_max - 1 : 0;
 		/* linear height must be the same as the slice tile max height, it's ok even
 		 * if the linear destination/source have smaller heigh as the size of the
@@ -2829,7 +2822,7 @@ static boolean r600_dma_copy_tile(struct r600_context *rctx,
 	} else {
 		/* L2T */
 		array_mode = r600_array_mode(dst_mode);
-		slice_tile_max = (rdst->surface.level[dst_level].nblk_x * rdst->surface.level[dst_level].nblk_y) >> 6;
+		slice_tile_max = (rdst->surface.level[dst_level].nblk_x * rdst->surface.level[dst_level].nblk_y) / (8*8);
 		slice_tile_max = slice_tile_max ? slice_tile_max - 1 : 0;
 		/* linear height must be the same as the slice tile max height, it's ok even
 		 * if the linear destination/source have smaller heigh as the size of the
@@ -2847,20 +2840,20 @@ static boolean r600_dma_copy_tile(struct r600_context *rctx,
 		addr += src_y * pitch + src_x * bpp;
 	}
 	/* check that we are in dw/base alignment constraint */
-	if ((addr & 0x3) || (base & 0xff)) {
+	if (addr % 4 || base % 256) {
 		return FALSE;
 	}
 
 	/* It's a r6xx/r7xx limitation, the blit must be on 8 boundary for number
 	 * line in the blit. Compute max 8 line we can copy in the size limit
 	 */
-	cheight = ((0x0000ffff << 2) / pitch) & 0xfffffff8;
+	cheight = ((R600_DMA_COPY_MAX_SIZE_DW * 4) / pitch) & 0xfffffff8;
 	ncopy = (copy_height / cheight) + !!(copy_height % cheight);
-	r600_need_dma_space(rctx, ncopy * 7);
+	r600_need_dma_space(&rctx->b, ncopy * 7);
 
 	for (i = 0; i < ncopy; i++) {
 		cheight = cheight > copy_height ? copy_height : cheight;
-		size = (cheight * pitch) >> 2;
+		size = (cheight * pitch) / 4;
 		/* emit reloc before writting cs so that cs is always in consistent state */
 		r600_context_bo_reloc(&rctx->b, &rctx->b.rings.dma, &rsrc->resource, RADEON_USAGE_READ,
 				      RADEON_PRIO_MIN);
@@ -2882,7 +2875,7 @@ static boolean r600_dma_copy_tile(struct r600_context *rctx,
 	return TRUE;
 }
 
-static void r600_dma_blit(struct pipe_context *ctx,
+static void r600_dma_copy(struct pipe_context *ctx,
 			  struct pipe_resource *dst,
 			  unsigned dst_level,
 			  unsigned dstx, unsigned dsty, unsigned dstz,
@@ -2906,7 +2899,7 @@ static void r600_dma_blit(struct pipe_context *ctx,
 		if (dst_x % 4 || src_box->x % 4 || src_box->width % 4)
 			goto fallback;
 
-		r600_dma_copy(rctx, dst, src, dst_x, src_box->x, src_box->width);
+		r600_dma_copy_buffer(rctx, dst, src, dst_x, src_box->x, src_box->width);
 		return;
 	}
 
@@ -2933,11 +2926,11 @@ static void r600_dma_blit(struct pipe_context *ctx,
 	dst_mode = dst_mode == RADEON_SURF_MODE_LINEAR_ALIGNED ? RADEON_SURF_MODE_LINEAR : dst_mode;
 
 	if (src_pitch != dst_pitch || src_box->x || dst_x || src_w != dst_w) {
-		/* strick requirement on r6xx/r7xx */
+		/* strict requirement on r6xx/r7xx */
 		goto fallback;
 	}
 	/* lot of constraint on alignment this should capture them all */
-	if ((src_pitch & 0x7) || (src_box->y & 0x7) || (dst_y & 0x7)) {
+	if (src_pitch % 8 || src_box->y % 8 || dst_y % 8) {
 		goto fallback;
 	}
 
@@ -2957,10 +2950,10 @@ static void r600_dma_blit(struct pipe_context *ctx,
 		dst_offset += dst_y * dst_pitch + dst_x * bpp;
 		size = src_box->height * src_pitch;
 		/* must be dw aligned */
-		if ((dst_offset & 0x3) || (src_offset & 0x3) || (size & 0x3)) {
+		if (dst_offset % 4 || src_offset % 4 || size % 4) {
 			goto fallback;
 		}
-		r600_dma_copy(rctx, dst, src, dst_offset, src_offset, size);
+		r600_dma_copy_buffer(rctx, dst, src, dst_offset, src_offset, size);
 	} else {
 		if (!r600_dma_copy_tile(rctx, dst, dst_level, dst_x, dst_y, dst_z,
 					src, src_level, src_x, src_y, src_box->z,
@@ -3053,6 +3046,6 @@ void r600_init_state_functions(struct r600_context *rctx)
 	rctx->b.b.set_polygon_stipple = r600_set_polygon_stipple;
 	rctx->b.b.set_scissor_states = r600_set_scissor_states;
 	rctx->b.b.get_sample_position = r600_get_sample_position;
-	rctx->b.dma_copy = r600_dma_blit;
+	rctx->b.dma_copy = r600_dma_copy;
 }
 /* this function must be last */

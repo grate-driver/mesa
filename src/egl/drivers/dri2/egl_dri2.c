@@ -52,7 +52,7 @@
 #include "egl_dri2.h"
 
 const __DRIuseInvalidateExtension use_invalidate = {
-   { __DRI_USE_INVALIDATE, 1 }
+   .base = { __DRI_USE_INVALIDATE, 1 }
 };
 
 EGLint dri2_to_egl_attribute_map[] = {
@@ -299,8 +299,9 @@ dri2_lookup_egl_image(__DRIscreen *screen, void *image, void *data)
 }
 
 const __DRIimageLookupExtension image_lookup_extension = {
-   { __DRI_IMAGE_LOOKUP, 1 },
-   dri2_lookup_egl_image
+   .base = { __DRI_IMAGE_LOOKUP, 1 },
+
+   .lookupEGLImage       = dri2_lookup_egl_image
 };
 
 static const char dri_driver_path[] = DEFAULT_DRIVER_DIR;
@@ -630,7 +631,6 @@ dri2_initialize(_EGLDriver *drv, _EGLDisplay *disp)
       return dri2_initialize_x11(drv, disp);
 #endif
 
-#ifdef HAVE_LIBUDEV
 #ifdef HAVE_DRM_PLATFORM
    case _EGL_PLATFORM_DRM:
       if (disp->Options.TestOnly)
@@ -642,7 +642,6 @@ dri2_initialize(_EGLDriver *drv, _EGLDisplay *disp)
       if (disp->Options.TestOnly)
          return EGL_TRUE;
       return dri2_initialize_wayland(drv, disp);
-#endif
 #endif
 #ifdef HAVE_ANDROID_PLATFORM
    case _EGL_PLATFORM_ANDROID:
@@ -1191,7 +1190,6 @@ static EGLBoolean
 dri2_release_tex_image(_EGLDriver *drv,
 		       _EGLDisplay *disp, _EGLSurface *surf, EGLint buffer)
 {
-#if __DRI_TEX_BUFFER_VERSION >= 3
    struct dri2_egl_display *dri2_dpy = dri2_egl_display(disp);
    struct dri2_egl_surface *dri2_surf = dri2_egl_surface(surf);
    struct dri2_egl_context *dri2_ctx;
@@ -1211,11 +1209,13 @@ dri2_release_tex_image(_EGLDriver *drv,
    default:
       assert(0);
    }
-   if (dri2_dpy->tex_buffer->releaseTexBuffer!=NULL)
-    (*dri2_dpy->tex_buffer->releaseTexBuffer)(dri2_ctx->dri_context,
-                                             target,
-                                             dri2_surf->dri_drawable);
-#endif
+
+   if (dri2_dpy->tex_buffer->base.version >= 3 &&
+       dri2_dpy->tex_buffer->releaseTexBuffer != NULL) {
+      (*dri2_dpy->tex_buffer->releaseTexBuffer)(dri2_ctx->dri_context,
+                                                target,
+                                                dri2_surf->dri_drawable);
+   }
 
    return EGL_TRUE;
 }
@@ -2015,10 +2015,12 @@ dri2_bind_wayland_display_wl(_EGLDriver *drv, _EGLDisplay *disp,
    if (!dri2_dpy->wl_server_drm)
 	   return EGL_FALSE;
 
+#ifdef HAVE_DRM_PLATFORM
    /* We have to share the wl_drm instance with gbm, so gbm can convert
     * wl_buffers to gbm bos. */
    if (dri2_dpy->gbm_dri)
       dri2_dpy->gbm_dri->wl_drm = dri2_dpy->wl_server_drm;
+#endif
 
    return EGL_TRUE;
 }

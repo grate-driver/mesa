@@ -41,7 +41,7 @@
 
 /* the number of CS dwords for flushing and drawing */
 #define R600_MAX_FLUSH_CS_DWORDS	16
-#define R600_MAX_DRAW_CS_DWORDS		34
+#define R600_MAX_DRAW_CS_DWORDS		37
 #define R600_TRACE_CS_DWORDS		7
 
 #define R600_MAX_USER_CONST_BUFFERS 13
@@ -195,7 +195,7 @@ struct r600_gs_rings_state {
 
 /* This must start from 16. */
 /* features */
-#define DBG_NO_LLVM		(1 << 17)
+#define DBG_LLVM		(1 << 17)
 #define DBG_NO_CP_DMA		(1 << 18)
 /* shader backend */
 #define DBG_NO_SB		(1 << 21)
@@ -234,6 +234,7 @@ struct r600_rasterizer_state {
 	unsigned                        clip_plane_enable;
 	unsigned			pa_sc_line_stipple;
 	unsigned			pa_cl_clip_cntl;
+	unsigned			pa_su_sc_mode_cntl;
 	float				offset_units;
 	float				offset_scale;
 	bool				offset_enable;
@@ -582,11 +583,11 @@ boolean r600_is_format_supported(struct pipe_screen *screen,
 void r600_update_db_shader_control(struct r600_context * rctx);
 
 /* r600_hw_context.c */
-void r600_context_flush(struct r600_context *ctx, unsigned flags);
+void r600_context_gfx_flush(void *context, unsigned flags,
+			    struct pipe_fence_handle **fence);
 void r600_begin_new_cs(struct r600_context *ctx);
 void r600_flush_emit(struct r600_context *ctx);
 void r600_need_cs_space(struct r600_context *ctx, unsigned num_dw, boolean count_draw_in);
-void r600_need_dma_space(struct r600_context *ctx, unsigned num_dw);
 void r600_cp_dma_copy_buffer(struct r600_context *rctx,
 			     struct pipe_resource *dst, uint64_t dst_offset,
 			     struct pipe_resource *src, uint64_t src_offset,
@@ -594,22 +595,22 @@ void r600_cp_dma_copy_buffer(struct r600_context *rctx,
 void evergreen_cp_dma_clear_buffer(struct r600_context *rctx,
 				   struct pipe_resource *dst, uint64_t offset,
 				   unsigned size, uint32_t clear_value);
-void r600_dma_copy(struct r600_context *rctx,
-		struct pipe_resource *dst,
-		struct pipe_resource *src,
-		uint64_t dst_offset,
-		uint64_t src_offset,
-		uint64_t size);
+void r600_dma_copy_buffer(struct r600_context *rctx,
+			  struct pipe_resource *dst,
+			  struct pipe_resource *src,
+			  uint64_t dst_offset,
+			  uint64_t src_offset,
+			  uint64_t size);
 
 /*
  * evergreen_hw_context.c
  */
-void evergreen_dma_copy(struct r600_context *rctx,
-		struct pipe_resource *dst,
-		struct pipe_resource *src,
-		uint64_t dst_offset,
-		uint64_t src_offset,
-		uint64_t size);
+void evergreen_dma_copy_buffer(struct r600_context *rctx,
+			       struct pipe_resource *dst,
+			       struct pipe_resource *src,
+			       uint64_t dst_offset,
+			       uint64_t src_offset,
+			       uint64_t size);
 
 /* r600_state_common.c */
 void r600_init_common_state_functions(struct r600_context *rctx);
@@ -828,15 +829,6 @@ static INLINE uint32_t S_FIXED(float value, uint32_t frac_bits)
 }
 #define ALIGN_DIVUP(x, y) (((x) + (y) - 1) / (y))
 
-static inline unsigned r600_tex_aniso_filter(unsigned filter)
-{
-	if (filter <= 1)   return 0;
-	if (filter <= 2)   return 1;
-	if (filter <= 4)   return 2;
-	if (filter <= 8)   return 3;
-	 /* else */        return 4;
-}
-
 /* 12.4 fixed-point */
 static INLINE unsigned r600_pack_float_12p4(float x)
 {
@@ -850,6 +842,34 @@ static INLINE bool r600_can_read_depth(struct r600_texture *rtex)
 	return rtex->resource.b.b.nr_samples <= 1 &&
 	       (rtex->resource.b.b.format == PIPE_FORMAT_Z16_UNORM ||
 		rtex->resource.b.b.format == PIPE_FORMAT_Z32_FLOAT);
+}
+
+#define     V_028A6C_OUTPRIM_TYPE_POINTLIST            0
+#define     V_028A6C_OUTPRIM_TYPE_LINESTRIP            1
+#define     V_028A6C_OUTPRIM_TYPE_TRISTRIP             2
+
+static INLINE unsigned r600_conv_prim_to_gs_out(unsigned mode)
+{
+	static const int prim_conv[] = {
+		V_028A6C_OUTPRIM_TYPE_POINTLIST,
+		V_028A6C_OUTPRIM_TYPE_LINESTRIP,
+		V_028A6C_OUTPRIM_TYPE_LINESTRIP,
+		V_028A6C_OUTPRIM_TYPE_LINESTRIP,
+		V_028A6C_OUTPRIM_TYPE_TRISTRIP,
+		V_028A6C_OUTPRIM_TYPE_TRISTRIP,
+		V_028A6C_OUTPRIM_TYPE_TRISTRIP,
+		V_028A6C_OUTPRIM_TYPE_TRISTRIP,
+		V_028A6C_OUTPRIM_TYPE_TRISTRIP,
+		V_028A6C_OUTPRIM_TYPE_TRISTRIP,
+		V_028A6C_OUTPRIM_TYPE_LINESTRIP,
+		V_028A6C_OUTPRIM_TYPE_LINESTRIP,
+		V_028A6C_OUTPRIM_TYPE_TRISTRIP,
+		V_028A6C_OUTPRIM_TYPE_TRISTRIP,
+		V_028A6C_OUTPRIM_TYPE_TRISTRIP
+	};
+	assert(mode < Elements(prim_conv));
+
+	return prim_conv[mode];
 }
 
 #endif

@@ -35,7 +35,13 @@ lib_LTLIBRARIES = lib@OSMESA_LIB@.la
 nodist_EXTRA_lib@OSMESA_LIB@_la_SOURCES = dummy.cpp
 lib@OSMESA_LIB@_la_SOURCES = osmesa.c
 
-lib@OSMESA_LIB@_la_LDFLAGS = -module -version-number @OSMESA_VERSION@ -no-undefined
+lib@OSMESA_LIB@_la_LDFLAGS = \
+	-module \
+	-no-undefined \
+	-version-number @OSMESA_VERSION@ \
+	$(GC_SECTIONS) \
+	$(LD_NO_UNDEFINED)
+
 
 if HAVE_SHARED_GLAPI
 SHARED_GLAPI_LIB = $(top_builddir)/src/mapi/shared-glapi/libglapi.la

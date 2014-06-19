@@ -20,8 +20,6 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
-# Note: Make sure VDPAU_EXPORTS is defined before including Automake.inc
-VDPAU_EXPORTS = '^(vdp_imp_device_create_x11|nouveau_drm_screen_create)$$'
 include $(top_srcdir)/src/gallium/Automake.inc
 
 AM_CFLAGS = \
@@ -44,10 +42,5 @@ libvdpau_nouveau_la_LIBADD = \
 	$(top_builddir)/src/gallium/drivers/nouveau/libnouveau.la \
 	$(GALLIUM_VDPAU_LIB_DEPS) \
 	$(NOUVEAU_LIBS)
-
-if HAVE_MESA_LLVM
-libvdpau_nouveau_la_LDFLAGS += $(LLVM_LDFLAGS)
-libvdpau_nouveau_la_LIBADD += $(LLVM_LIBS)
-endif
 
 include $(top_srcdir)/install-gallium-links.mk

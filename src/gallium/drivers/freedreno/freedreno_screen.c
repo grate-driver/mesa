@@ -143,6 +143,8 @@ tables for things that differ if the delta is not too much..
 static int
 fd_screen_get_param(struct pipe_screen *pscreen, enum pipe_cap param)
 {
+	struct fd_screen *screen = fd_screen(pscreen);
+
 	/* this is probably not totally correct.. but it's a start: */
 	switch (param) {
 	/* Supported features (boolean caps). */
@@ -161,8 +163,6 @@ fd_screen_get_param(struct pipe_screen *pscreen, enum pipe_cap param)
 	case PIPE_CAP_TGSI_FS_COORD_PIXEL_CENTER_HALF_INTEGER:
 	case PIPE_CAP_SM3:
 	case PIPE_CAP_SEAMLESS_CUBE_MAP:
-	case PIPE_CAP_PRIMITIVE_RESTART:
-	case PIPE_CAP_CONDITIONAL_RENDER:
 	case PIPE_CAP_TEXTURE_BARRIER:
 	case PIPE_CAP_VERTEX_COLOR_UNCLAMPED:
 	case PIPE_CAP_QUADS_FOLLOW_PROVOKING_VERTEX_CONVENTION:
@@ -180,6 +180,8 @@ fd_screen_get_param(struct pipe_screen *pscreen, enum pipe_cap param)
 	case PIPE_CAP_SHADER_STENCIL_EXPORT:
 	case PIPE_CAP_TGSI_TEXCOORD:
 	case PIPE_CAP_PREFER_BLIT_BASED_TEXTURE_TRANSFER:
+	case PIPE_CAP_CONDITIONAL_RENDER:
+	case PIPE_CAP_PRIMITIVE_RESTART:
 		return 0;
 
 	case PIPE_CAP_CONSTANT_BUFFER_OFFSET_ALIGNMENT:
@@ -206,6 +208,9 @@ fd_screen_get_param(struct pipe_screen *pscreen, enum pipe_cap param)
 	case PIPE_CAP_MAX_TEXTURE_GATHER_COMPONENTS:
 	case PIPE_CAP_TEXTURE_GATHER_SM5:
         case PIPE_CAP_BUFFER_MAP_PERSISTENT_COHERENT:
+        case PIPE_CAP_FAKE_SW_MSAA:
+	case PIPE_CAP_TEXTURE_QUERY_LOD:
+        case PIPE_CAP_SAMPLE_SHADING:
 		return 0;
 
 	/* Stream output. */
@@ -226,28 +231,31 @@ fd_screen_get_param(struct pipe_screen *pscreen, enum pipe_cap param)
 	case PIPE_CAP_MAX_TEXTURE_CUBE_LEVELS:
 		return MAX_MIP_LEVELS;
 	case PIPE_CAP_MAX_TEXTURE_ARRAY_LAYERS:
-		return 9192;
+		return 0;  /* TODO: a3xx+ should support (required in gles3) */
 
 	/* Render targets. */
 	case PIPE_CAP_MAX_RENDER_TARGETS:
 		return 1;
 
-	/* Timer queries. */
+	/* Queries. */
 	case PIPE_CAP_QUERY_TIME_ELAPSED:
-	case PIPE_CAP_OCCLUSION_QUERY:
 	case PIPE_CAP_QUERY_TIMESTAMP:
 		return 0;
+	case PIPE_CAP_OCCLUSION_QUERY:
+		return (screen->gpu_id >= 300) ? 1: 0;
 
+	case PIPE_CAP_MIN_TEXTURE_GATHER_OFFSET:
 	case PIPE_CAP_MIN_TEXEL_OFFSET:
 		return -8;
 
+	case PIPE_CAP_MAX_TEXTURE_GATHER_OFFSET:
 	case PIPE_CAP_MAX_TEXEL_OFFSET:
 		return 7;
 
 	case PIPE_CAP_ENDIANNESS:
 		return PIPE_ENDIAN_LITTLE;
 
-        case PIPE_CAP_MIN_MAP_BUFFER_ALIGNMENT:
+	case PIPE_CAP_MIN_MAP_BUFFER_ALIGNMENT:
 		return 64;
 
 	default:
@@ -310,7 +318,7 @@ fd_screen_get_shader_param(struct pipe_screen *pscreen, unsigned shader,
 	case PIPE_SHADER_CAP_MAX_CONTROL_FLOW_DEPTH:
 		return 8; /* XXX */
 	case PIPE_SHADER_CAP_MAX_INPUTS:
-		return 32;
+		return 16;
 	case PIPE_SHADER_CAP_MAX_TEMPS:
 		return 64; /* Max native temporaries. */
 	case PIPE_SHADER_CAP_MAX_ADDRS:

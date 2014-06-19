@@ -20,7 +20,6 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
-DRI_VERSION_SCRIPT = $(srcdir)/../../r300/dri/radeon.link
 include $(top_srcdir)/src/gallium/Automake.inc
 
 AM_CFLAGS = \
@@ -43,8 +42,6 @@ radeonsi_dri_la_LDFLAGS = \
 
 radeonsi_dri_la_LIBADD = \
 	$(top_builddir)/src/mesa/drivers/dri/common/libdricommon.la \
-	$(top_builddir)/src/mesa/libmesagallium.la \
-	$(top_builddir)/src/gallium/auxiliary/libgallium.la \
 	$(top_builddir)/src/gallium/drivers/radeonsi/libradeonsi.la \
 	$(top_builddir)/src/gallium/state_trackers/dri/drm/libdridrm.la \
 	$(top_builddir)/src/gallium/winsys/radeon/drm/libradeonwinsys.la \
@@ -53,10 +50,5 @@ radeonsi_dri_la_LIBADD = \
 	$(top_builddir)/src/gallium/drivers/noop/libnoop.la \
 	$(GALLIUM_DRI_LIB_DEPS) \
 	$(RADEON_LIBS)
-
-if HAVE_MESA_LLVM
-radeonsi_dri_la_LDFLAGS += $(LLVM_LDFLAGS)
-radeonsi_dri_la_LIBADD += $(LLVM_LIBS)
-endif
 
 include $(top_srcdir)/install-gallium-links.mk

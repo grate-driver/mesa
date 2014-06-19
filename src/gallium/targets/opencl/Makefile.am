@@ -5,7 +5,11 @@ lib_LTLIBRARIES = lib@OPENCL_LIBNAME@.la
 lib@OPENCL_LIBNAME@_la_LDFLAGS = \
 	$(LLVM_LDFLAGS) \
 	-no-undefined \
-	-version-number 1:0
+	-version-number 1:0 \
+	-Wl,--version-script=$(top_srcdir)/src/gallium/targets/opencl/opencl.sym \
+	$(GC_SECTIONS) \
+	$(LD_NO_UNDEFINED)
+
 
 lib@OPENCL_LIBNAME@_la_LIBADD = \
 	$(top_builddir)/src/gallium/auxiliary/pipe-loader/libpipe_loader_client.la \
@@ -34,17 +38,16 @@ lib@OPENCL_LIBNAME@_la_LIBADD += \
 	$(top_builddir)/src/gallium/winsys/sw/dri/libswdri.la
 endif
 
-if NEED_PIPE_LOADER_XLIB
+if NEED_WINSYS_XLIB
 lib@OPENCL_LIBNAME@_la_LIBADD += \
 	$(top_builddir)/src/gallium/winsys/sw/xlib/libws_xlib.la \
 	-lX11 -lXext -lXfixes \
 	$(LIBDRM_LIBS)
 endif
 
+nodist_EXTRA_lib@OPENCL_LIBNAME@_la_SOURCES = dummy.cpp
 lib@OPENCL_LIBNAME@_la_SOURCES =
 
-# Force usage of a C++ linker
-nodist_EXTRA_lib@OPENCL_LIBNAME@_la_SOURCES = dummy.cpp
 
 if HAVE_CLOVER_ICD
 icddir = /etc/OpenCL/vendors/

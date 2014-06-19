@@ -500,6 +500,12 @@ static void r600_copy_buffer(struct pipe_context *ctx, struct pipe_resource *dst
 	} else {
 		util_resource_copy_region(ctx, dst, 0, dstx, 0, 0, src, 0, src_box);
 	}
+
+	/* The index buffer (VGT) doesn't seem to see the result of the copying.
+	 * Can we somehow flush the index buffer cache? Starting a new IB seems
+	 * to do the trick. */
+	if (rctx->b.chip_class <= R700)
+		rctx->b.rings.gfx.flush(ctx, RADEON_FLUSH_ASYNC, NULL);
 }
 
 /**
@@ -783,7 +789,8 @@ static bool do_hardware_msaa_resolve(struct pipe_context *ctx,
 	    info->src.box.width == dst_width &&
 	    info->src.box.height == dst_height &&
 	    info->src.box.depth == 1 &&
-	    dst->surface.level[info->dst.level].mode >= RADEON_SURF_MODE_1D) {
+	    dst->surface.level[info->dst.level].mode >= RADEON_SURF_MODE_1D &&
+	    (!dst->cmask.size || !dst->dirty_level_mask) /* dst cannot be fast-cleared */) {
 		r600_blitter_begin(ctx, R600_COLOR_RESOLVE);
 		util_blitter_custom_resolve_color(rctx->blitter,
 						  info->dst.resource, info->dst.level,

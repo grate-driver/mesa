@@ -120,6 +120,8 @@ brw_link_shader(struct gl_context *ctx, struct gl_shader_program *shProg)
    unsigned int stage;
 
    for (stage = 0; stage < ARRAY_SIZE(shProg->_LinkedShaders); stage++) {
+      const struct gl_shader_compiler_options *options =
+         &ctx->ShaderCompilerOptions[stage];
       struct brw_shader *shader =
 	 (struct brw_shader *)shProg->_LinkedShaders[stage];
 
@@ -170,21 +172,18 @@ brw_link_shader(struct gl_context *ctx, struct gl_shader_program *shProg)
       lower_noise(shader->base.ir);
       lower_quadop_vector(shader->base.ir, false);
 
-      bool input = true;
-      bool output = stage == MESA_SHADER_FRAGMENT;
-      bool temp = stage == MESA_SHADER_FRAGMENT;
-      bool uniform = false;
-
       bool lowered_variable_indexing =
          lower_variable_index_to_cond_assign(shader->base.ir,
-                                             input, output, temp, uniform);
+                                             options->EmitNoIndirectInput,
+                                             options->EmitNoIndirectOutput,
+                                             options->EmitNoIndirectTemp,
+                                             options->EmitNoIndirectUniform);
 
       if (unlikely(brw->perf_debug && lowered_variable_indexing)) {
          perf_debug("Unsupported form of variable indexing in FS; falling "
                     "back to very inefficient code generation\n");
       }
 
-      /* FINISHME: Do this before the variable index lowering. */
       lower_ubo_reference(&shader->base, shader->base.ir);
 
       do {
@@ -201,8 +200,8 @@ brw_link_shader(struct gl_context *ctx, struct gl_shader_program *shProg)
 				   false /* loops */
 				   ) || progress;
 
-	 progress = do_common_optimization(shader->base.ir, true, true, 32,
-                                           &ctx->ShaderCompilerOptions[stage])
+	 progress = do_common_optimization(shader->base.ir, true, true,
+                                           options, ctx->Const.NativeIntegers)
 	   || progress;
       } while (progress);
 
@@ -248,7 +247,7 @@ brw_link_shader(struct gl_context *ctx, struct gl_shader_program *shProg)
 
       _mesa_reference_program(ctx, &prog, NULL);
 
-      if (ctx->Shader.Flags & GLSL_DUMP) {
+      if (ctx->_Shader->Flags & GLSL_DUMP) {
          fprintf(stderr, "\n");
          fprintf(stderr, "GLSL IR for linked %s program %d:\n",
                  _mesa_shader_stage_to_string(shader->base.Stage),
@@ -258,7 +257,7 @@ brw_link_shader(struct gl_context *ctx, struct gl_shader_program *shProg)
       }
    }
 
-   if ((ctx->Shader.Flags & GLSL_DUMP) && shProg->Name != 0) {
+   if ((ctx->_Shader->Flags & GLSL_DUMP) && shProg->Name != 0) {
       for (unsigned i = 0; i < shProg->NumShaders; i++) {
          const struct gl_shader *sh = shProg->Shaders[i];
          if (!sh)
@@ -552,7 +551,7 @@ backend_visitor::backend_visitor(struct brw_context *brw,
 }
 
 bool
-backend_instruction::is_tex()
+backend_instruction::is_tex() const
 {
    return (opcode == SHADER_OPCODE_TEX ||
            opcode == FS_OPCODE_TXB ||
@@ -569,7 +568,7 @@ backend_instruction::is_tex()
 }
 
 bool
-backend_instruction::is_math()
+backend_instruction::is_math() const
 {
    return (opcode == SHADER_OPCODE_RCP ||
            opcode == SHADER_OPCODE_RSQ ||
@@ -584,7 +583,7 @@ backend_instruction::is_math()
 }
 
 bool
-backend_instruction::is_control_flow()
+backend_instruction::is_control_flow() const
 {
    switch (opcode) {
    case BRW_OPCODE_DO:
@@ -601,7 +600,7 @@ backend_instruction::is_control_flow()
 }
 
 bool
-backend_instruction::can_do_source_mods()
+backend_instruction::can_do_source_mods() const
 {
    switch (opcode) {
    case BRW_OPCODE_ADDC:
@@ -620,7 +619,7 @@ backend_instruction::can_do_source_mods()
 }
 
 bool
-backend_instruction::can_do_saturate()
+backend_instruction::can_do_saturate() const
 {
    switch (opcode) {
    case BRW_OPCODE_ADD:
@@ -657,6 +656,19 @@ backend_instruction::can_do_saturate()
    case SHADER_OPCODE_RSQ:
    case SHADER_OPCODE_SIN:
    case SHADER_OPCODE_SQRT:
+      return true;
+   default:
+      return false;
+   }
+}
+
+bool
+backend_instruction::reads_accumulator_implicitly() const
+{
+   switch (opcode) {
+   case BRW_OPCODE_MAC:
+   case BRW_OPCODE_MACH:
+   case BRW_OPCODE_SADA2:
       return true;
    default:
       return false;

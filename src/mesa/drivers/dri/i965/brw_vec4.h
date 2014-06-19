@@ -128,6 +128,7 @@ public:
    bool equals(src_reg *r);
    bool is_zero() const;
    bool is_one() const;
+   bool is_accumulator() const;
 
    src_reg(class vec4_visitor *v, const struct glsl_type *type);
 
@@ -193,6 +194,9 @@ public:
    dst_reg(class vec4_visitor *v, const struct glsl_type *type);
 
    explicit dst_reg(src_reg reg);
+
+   bool is_null() const;
+   bool is_accumulator() const;
 
    int writemask; /**< Bitfield of WRITEMASK_[XYZW] */
 
@@ -261,14 +265,20 @@ public:
     */
    const void *ir;
    const char *annotation;
+   /** @} */
 
    bool is_send_from_grf();
    bool can_reswizzle_dst(int dst_writemask, int swizzle, int swizzle_mask);
    void reswizzle_dst(int dst_writemask, int swizzle);
 
-   bool depends_on_flags()
+   bool reads_flag()
    {
       return predicate || opcode == VS_OPCODE_UNPACK_FLAGS_SIMD4X2;
+   }
+
+   bool writes_flag()
+   {
+      return conditional_mod && opcode != BRW_OPCODE_SEL;
    }
 };
 
@@ -581,7 +591,7 @@ public:
 				int base_offset);
 
    bool try_emit_sat(ir_expression *ir);
-   bool try_emit_mad(ir_expression *ir, int mul_arg);
+   bool try_emit_mad(ir_expression *ir);
    void resolve_ud_negate(src_reg *reg);
 
    src_reg get_timestamp();
@@ -773,8 +783,13 @@ private:
                                     struct brw_reg dst,
                                     struct brw_reg index,
                                     struct brw_reg offset);
-
-   void mark_surface_used(unsigned surf_index);
+   void generate_untyped_atomic(vec4_instruction *ir,
+                                struct brw_reg dst,
+                                struct brw_reg atomic_op,
+                                struct brw_reg surf_index);
+   void generate_untyped_surface_read(vec4_instruction *ir,
+                                      struct brw_reg dst,
+                                      struct brw_reg surf_index);
 
    struct brw_vec4_prog_data *prog_data;
 

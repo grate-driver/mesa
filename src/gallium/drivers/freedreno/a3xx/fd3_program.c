@@ -120,7 +120,7 @@ create_variant(struct fd3_shader_stateobj *so, struct fd3_shader_key key)
 			v->inputs_count = 0;
 			v->outputs_count = 0;
 			v->total_in = 0;
-			v->samplers_count = 0;
+			v->has_samp = false;
 			v->immediates_count = 0;
 		}
 	} else {
@@ -300,6 +300,8 @@ find_output(const struct fd3_shader_variant *so, fd3_semantic semantic)
 		return find_output(so, fd3_semantic_name(TGSI_SEMANTIC_COLOR, idx));
 	}
 
+	debug_assert(0);
+
 	return 0;
 }
 
@@ -395,7 +397,7 @@ fd3_program_emit(struct fd_ringbuffer *ring,
 			A3XX_SP_VS_CTRL_REG0_INOUTREGOVERLAP(0) |
 			A3XX_SP_VS_CTRL_REG0_THREADSIZE(TWO_QUADS) |
 			A3XX_SP_VS_CTRL_REG0_SUPERTHREADMODE |
-			COND(vp->samplers_count > 0, A3XX_SP_VS_CTRL_REG0_PIXLODENABLE) |
+			COND(vp->has_samp, A3XX_SP_VS_CTRL_REG0_PIXLODENABLE) |
 			A3XX_SP_VS_CTRL_REG0_LENGTH(vp->instrlen));
 	OUT_RING(ring, A3XX_SP_VS_CTRL_REG1_CONSTLENGTH(vp->constlen) |
 			A3XX_SP_VS_CTRL_REG1_INITIALOUTSTANDING(vp->total_in) |
@@ -404,7 +406,7 @@ fd3_program_emit(struct fd_ringbuffer *ring,
 			A3XX_SP_VS_PARAM_REG_PSIZEREGID(psize_regid) |
 			A3XX_SP_VS_PARAM_REG_TOTALVSOUTVAR(align(fp->total_in, 4) / 4));
 
-	for (i = 0, j = -1; j < (int)fp->inputs_count; i++) {
+	for (i = 0, j = -1; (i < 8) && (j < (int)fp->inputs_count); i++) {
 		uint32_t reg = 0;
 
 		OUT_PKT0(ring, REG_A3XX_SP_VS_OUT_REG(i), 1);
@@ -426,7 +428,7 @@ fd3_program_emit(struct fd_ringbuffer *ring,
 		OUT_RING(ring, reg);
 	}
 
-	for (i = 0, j = -1; j < (int)fp->inputs_count; i++) {
+	for (i = 0, j = -1; (i < 4) && (j < (int)fp->inputs_count); i++) {
 		uint32_t reg = 0;
 
 		OUT_PKT0(ring, REG_A3XX_SP_VS_VPC_DST_REG(i), 1);
@@ -473,7 +475,7 @@ fd3_program_emit(struct fd_ringbuffer *ring,
 				A3XX_SP_FS_CTRL_REG0_INOUTREGOVERLAP(1) |
 				A3XX_SP_FS_CTRL_REG0_THREADSIZE(FOUR_QUADS) |
 				A3XX_SP_FS_CTRL_REG0_SUPERTHREADMODE |
-				COND(fp->samplers_count > 0, A3XX_SP_FS_CTRL_REG0_PIXLODENABLE) |
+				COND(fp->has_samp > 0, A3XX_SP_FS_CTRL_REG0_PIXLODENABLE) |
 				A3XX_SP_FS_CTRL_REG0_LENGTH(fp->instrlen));
 		OUT_RING(ring, A3XX_SP_FS_CTRL_REG1_CONSTLENGTH(fp->constlen) |
 				A3XX_SP_FS_CTRL_REG1_INITIALOUTSTANDING(fp->total_in) |

@@ -17,9 +17,19 @@ lib_LTLIBRARIES = libgbm.la
 include_HEADERS = main/gbm.h
 
 libgbm_la_SOURCES = \
+	main/backend.c \
+	main/backend.h \
+	main/common_drm.h \
 	main/gbm.c \
-	main/backend.c
-libgbm_la_LDFLAGS = -version-info 1:0
+	main/gbm.h \
+	main/gbmint.h
+
+libgbm_la_LDFLAGS = \
+	-no-undefined \
+	-version-info 1:0 \
+	$(GC_SECTIONS) \
+	$(LD_NO_UNDEFINED)
+
 libgbm_la_LIBADD = \
 	$(top_builddir)/src/loader/libloader.la \
 	$(DLOPEN_LIBS)
@@ -33,7 +43,8 @@ endif
 if HAVE_DRI
 noinst_LTLIBRARIES = libgbm_dri.la
 libgbm_dri_la_SOURCES = \
-	backends/dri/gbm_dri.c
+	backends/dri/gbm_dri.c \
+	backends/dri/gbm_driint.h
 
 libgbm_dri_la_CFLAGS = \
 	$(AM_CFLAGS) \

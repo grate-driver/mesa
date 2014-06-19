@@ -34,6 +34,7 @@
 
 
 #include <GL/gl.h>
+#include <stdbool.h>
 
 
 #ifdef __cplusplus
@@ -444,6 +445,9 @@ _mesa_is_format_unsigned(mesa_format format);
 extern GLboolean
 _mesa_is_format_signed(mesa_format format);
 
+extern GLboolean
+_mesa_is_format_integer(mesa_format format);
+
 extern GLenum
 _mesa_get_format_color_encoding(mesa_format format);
 
@@ -473,6 +477,9 @@ _mesa_get_uncompressed_format(mesa_format format);
 
 extern GLuint
 _mesa_format_num_components(mesa_format format);
+
+extern bool
+_mesa_format_has_color_component(mesa_format format, int component);
 
 GLboolean
 _mesa_format_matches_format_and_type(mesa_format mesa_format,

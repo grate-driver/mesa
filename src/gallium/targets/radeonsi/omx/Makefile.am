@@ -23,45 +23,21 @@
 include $(top_srcdir)/src/gallium/Automake.inc
 
 AM_CFLAGS = \
-	$(GALLIUM_CFLAGS) \
-	$(VISIBILITY_CFLAGS) \
-	$(PTHREAD_CFLAGS) \
-	$(LIBDRM_CFLAGS)
-AM_CPPFLAGS = \
-	-I$(top_srcdir)/src/gallium/drivers \
-	-I$(top_srcdir)/src/gallium/winsys
+	$(GALLIUM_VIDEO_CFLAGS)
 
 omxdir = $(OMX_LIB_INSTALL_DIR)
 omx_LTLIBRARIES = libomx_radeonsi.la
 
-EXPORTS = '^(omx_component_library_Setup|radeon_drm_winsys_create)$$'
-
+nodist_EXTRA_libomx_radeonsi_la_SOURCES = dummy.cpp
 libomx_radeonsi_la_SOURCES = \
 	drm_target.c \
 	$(top_srcdir)/src/gallium/auxiliary/vl/vl_winsys_dri.c
 
-libomx_radeonsi_la_LDFLAGS = \
-	-module \
-	-export-symbols-regex $(EXPORTS) \
-	-shared \
-	-no-undefined
+libomx_radeonsi_la_LDFLAGS = $(GALLIUM_OMX_LINKER_FLAGS)
 
 libomx_radeonsi_la_LIBADD = \
-	$(top_builddir)/src/gallium/auxiliary/libgallium.la \
 	$(top_builddir)/src/gallium/drivers/radeonsi/libradeonsi.la \
-	$(top_builddir)/src/gallium/state_trackers/omx/libomxtracker.la \
 	$(top_builddir)/src/gallium/winsys/radeon/drm/libradeonwinsys.la \
-	$(top_builddir)/src/gallium/drivers/trace/libtrace.la \
-	$(GALLIUM_DRI_LIB_DEPS) \
-	$(OMX_LIBS) \
+	$(GALLIUM_OMX_LIB_DEPS) \
 	$(LIBDRM_LIBS) \
 	$(RADEON_LIBS)
-
-if HAVE_MESA_LLVM
-libomx_radeonsi_la_LINK = $(CXXLINK) $(libomx_radeonsi_la_LDFLAGS)
-# Mention a dummy pure C++ file to trigger generation of the $(LINK) variable
-nodist_EXTRA_libomx_radeonsi_la_SOURCES = dummy-cpp.cpp
-
-libomx_radeonsi_la_LDFLAGS += $(LLVM_LDFLAGS)
-libomx_radeonsi_la_LIBADD += $(LLVM_LIBS)
-endif

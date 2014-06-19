@@ -275,6 +275,9 @@ void st_init_limits(struct st_context *st)
    c->MaxProgramTexelOffset = screen->get_param(screen, PIPE_CAP_MAX_TEXEL_OFFSET);
 
    c->MaxProgramTextureGatherComponents = screen->get_param(screen, PIPE_CAP_MAX_TEXTURE_GATHER_COMPONENTS);
+   c->MinProgramTextureGatherOffset = screen->get_param(screen, PIPE_CAP_MIN_TEXTURE_GATHER_OFFSET);
+   c->MaxProgramTextureGatherOffset = screen->get_param(screen, PIPE_CAP_MAX_TEXTURE_GATHER_OFFSET);
+
    c->UniformBooleanTrue = ~0;
 
    c->MaxTransformFeedbackBuffers =
@@ -421,7 +424,9 @@ void st_init_extensions(struct st_context *st)
 
       { o(OES_standard_derivatives),         PIPE_CAP_SM3                              },
       { o(ARB_texture_cube_map_array),       PIPE_CAP_CUBE_MAP_ARRAY                   },
-      { o(ARB_texture_multisample),          PIPE_CAP_TEXTURE_MULTISAMPLE              }
+      { o(ARB_texture_multisample),          PIPE_CAP_TEXTURE_MULTISAMPLE              },
+      { o(ARB_texture_query_lod),            PIPE_CAP_TEXTURE_QUERY_LOD                },
+      { o(ARB_sample_shading),               PIPE_CAP_SAMPLE_SHADING                   },
    };
 
    /* Required: render target and sampler support */
@@ -555,13 +560,6 @@ void st_init_extensions(struct st_context *st)
    ctx->Extensions.EXT_point_parameters = GL_TRUE;
    ctx->Extensions.EXT_provoking_vertex = GL_TRUE;
 
-   /* IMPORTANT:
-    *    Don't enable EXT_separate_shader_objects. It disallows a certain
-    *    optimization in the GLSL compiler and therefore is considered
-    *    harmful.
-    */
-   ctx->Extensions.EXT_separate_shader_objects = GL_FALSE;
-
    ctx->Extensions.EXT_texture_env_dot3 = GL_TRUE;
    ctx->Extensions.EXT_vertex_array_bgra = GL_TRUE;
 
@@ -631,6 +629,8 @@ void st_init_extensions(struct st_context *st)
       if (!st->options.disable_shader_bit_encoding) {
          ctx->Extensions.ARB_shader_bit_encoding = GL_TRUE;
       }
+
+      ctx->Extensions.EXT_shader_integer_mix = GL_TRUE;
    } else {
       /* Optional integer support for GLSL 1.2. */
       if (screen->get_shader_param(screen, PIPE_SHADER_VERTEX,
@@ -638,6 +638,8 @@ void st_init_extensions(struct st_context *st)
           screen->get_shader_param(screen, PIPE_SHADER_FRAGMENT,
                                    PIPE_SHADER_CAP_INTEGERS)) {
          ctx->Const.NativeIntegers = GL_TRUE;
+
+         ctx->Extensions.EXT_shader_integer_mix = GL_TRUE;
       }
    }
 
@@ -726,6 +728,13 @@ void st_init_extensions(struct st_context *st)
    else if (ctx->Const.MaxSamples >= 2) {
       ctx->Extensions.EXT_framebuffer_multisample = GL_TRUE;
       ctx->Extensions.EXT_framebuffer_multisample_blit_scaled = GL_TRUE;
+   }
+
+   if (ctx->Const.MaxSamples == 0 && screen->get_param(screen, PIPE_CAP_FAKE_SW_MSAA)) {
+	ctx->Const.FakeSWMSAA = GL_TRUE;
+        ctx->Extensions.EXT_framebuffer_multisample = GL_TRUE;
+        ctx->Extensions.EXT_framebuffer_multisample_blit_scaled = GL_TRUE;
+        ctx->Extensions.ARB_texture_multisample = GL_TRUE;
    }
 
    if (ctx->Const.MaxDualSourceDrawBuffers > 0 &&

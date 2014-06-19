@@ -31,10 +31,10 @@ CSO objects handled by the context object:
   the CSO module will always replace all samplers at once (no sub-ranges).
   This may change in the future.
 * :ref:`Rasterizer`: ``*_rasterizer_state``
-* :ref:`Depth, Stencil, & Alpha`: ``*_depth_stencil_alpha_state``
+* :ref:`depth-stencil-alpha`: ``*_depth_stencil_alpha_state``
 * :ref:`Shader`: These are create, bind and destroy methods for vertex,
   fragment and geometry shaders.
-* :ref:`Vertex Elements`: ``*_vertex_elements_state``
+* :ref:`vertexelements`: ``*_vertex_elements_state``
 
 
 Resource Binding State
@@ -67,6 +67,7 @@ objects. They all follow simple, one-method binding calls, e.g.
   which are used as comparison values in stencil test.
 * ``set_blend_color``
 * ``set_sample_mask``
+* ``set_min_samples`` sets the minimum number of samples that must be run.
 * ``set_clip_state``
 * ``set_polygon_stipple``
 * ``set_scissor_states`` sets the bounds for the scissor test, which culls
@@ -218,6 +219,11 @@ is is also possible to only clear one or the other part). While it is only
 possible to clear one surface at a time (which can include several layers),
 this surface need not be bound to the framebuffer.
 
+``clear_buffer`` clears a PIPE_BUFFER resource with the specified clear value
+(which may be multiple bytes in length). Logically this is a memset with a
+multi-byte element value starting at offset bytes from resource start, going
+for size bytes. It is guaranteed that size % clear_value_size == 0.
+
 
 Drawing
 ^^^^^^^
@@ -305,7 +311,7 @@ The interface currently includes the following types of queries:
 
 ``PIPE_QUERY_OCCLUSION_COUNTER`` counts the number of fragments which
 are written to the framebuffer without being culled by
-:ref:`Depth, Stencil, & Alpha` testing or shader KILL instructions.
+:ref:`depth-stencil-alpha` testing or shader KILL instructions.
 The result is an unsigned 64-bit integer.
 This query can be used with ``render_condition``.
 

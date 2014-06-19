@@ -190,6 +190,9 @@ struct pipe_context {
    void (*set_sample_mask)( struct pipe_context *,
                             unsigned sample_mask );
 
+   void (*set_min_samples)( struct pipe_context *,
+                            unsigned min_samples );
+
    void (*set_clip_state)( struct pipe_context *,
                             const struct pipe_clip_state * );
 
@@ -331,6 +334,17 @@ struct pipe_context {
                                unsigned stencil,
                                unsigned dstx, unsigned dsty,
                                unsigned width, unsigned height);
+
+   /**
+    * Clear a buffer. Runs a memset over the specified region with the element
+    * value passed in through clear_value of size clear_value_size.
+    */
+   void (*clear_buffer)(struct pipe_context *pipe,
+                        struct pipe_resource *res,
+                        unsigned offset,
+                        unsigned size,
+                        const void *clear_value,
+                        int clear_value_size);
 
    /** Flush draw commands
     *

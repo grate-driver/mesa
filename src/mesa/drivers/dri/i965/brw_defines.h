@@ -521,6 +521,10 @@
 #define GEN7_SURFACE_ARYSPC_FULL	(0 << 10)
 #define GEN7_SURFACE_ARYSPC_LOD0	(1 << 10)
 
+/* Surface state DW0 */
+#define GEN8_SURFACE_MOCS_SHIFT         24
+#define GEN8_SURFACE_MOCS_MASK          INTEL_MASK(30, 24)
+
 /* Surface state DW2 */
 #define BRW_SURFACE_HEIGHT_SHIFT	19
 #define BRW_SURFACE_HEIGHT_MASK		INTEL_MASK(31, 19)
@@ -602,6 +606,7 @@
 #define BRW_TEXCOORDMODE_CUBE            3
 #define BRW_TEXCOORDMODE_CLAMP_BORDER    4
 #define BRW_TEXCOORDMODE_MIRROR_ONCE     5
+#define GEN8_TEXCOORDMODE_HALF_BORDER    6
 
 #define BRW_THREAD_PRIORITY_NORMAL   0
 #define BRW_THREAD_PRIORITY_HIGH     1
@@ -1690,7 +1695,7 @@ enum brw_message_target {
 /* GEN7/DW1: */
 # define GEN7_SF_DEPTH_BUFFER_SURFACE_FORMAT_SHIFT	12
 /* GEN7/DW2: */
-# define HSW_SF_LINE_STIPPLE_ENABLE			14
+# define HSW_SF_LINE_STIPPLE_ENABLE			(1 << 14)
 
 # define GEN8_SF_SMOOTH_POINT_ENABLE                    (1 << 13)
 
@@ -2192,6 +2197,10 @@ enum brw_wm_barycentric_interp_mode {
 #define HSW_MOCS_UC_LLC_UC_ELLC         (1 << 1)
 #define HSW_MOCS_WB_LLC_WB_ELLC         (2 << 1)
 #define HSW_MOCS_UC_LLC_WB_ELLC         (3 << 1)
+
+/* Broadwell: write-back or write-through; always use all the caches. */
+#define BDW_MOCS_WB 0x78
+#define BDW_MOCS_WT 0x58
 
 #include "intel_chipset.h"
 

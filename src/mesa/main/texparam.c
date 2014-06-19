@@ -352,7 +352,8 @@ set_tex_parameteri(struct gl_context *ctx,
       if (texObj->MaxLevel == params[0])
          return GL_FALSE;
 
-      if (params[0] < 0 || texObj->Target == GL_TEXTURE_RECTANGLE_ARB) {
+      if (params[0] < 0 ||
+          (texObj->Target == GL_TEXTURE_RECTANGLE_ARB && params[0] > 0)) {
          _mesa_error(ctx, GL_INVALID_VALUE,
                      "glTexParameter(param=%d)", params[0]);
          return GL_FALSE;
@@ -484,7 +485,7 @@ set_tex_parameteri(struct gl_context *ctx,
          const GLuint comp = pname - GL_TEXTURE_SWIZZLE_R_EXT;
          const GLint swz = comp_to_swizzle(params[0]);
          if (swz < 0) {
-            _mesa_error(ctx, GL_INVALID_OPERATION,
+            _mesa_error(ctx, GL_INVALID_ENUM,
                         "glTexParameter(swizzle 0x%x)", params[0]);
             return GL_FALSE;
          }
@@ -509,7 +510,7 @@ set_tex_parameteri(struct gl_context *ctx,
                set_swizzle_component(&texObj->_Swizzle, comp, swz);
             }
             else {
-               _mesa_error(ctx, GL_INVALID_OPERATION,
+               _mesa_error(ctx, GL_INVALID_ENUM,
                            "glTexParameter(swizzle 0x%x)", params[comp]);
                return GL_FALSE;
             }

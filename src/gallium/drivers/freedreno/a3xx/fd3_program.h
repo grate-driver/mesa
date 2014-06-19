@@ -91,7 +91,7 @@ struct fd3_shader_variant {
 	struct {
 		fd3_semantic semantic;
 		uint8_t regid;
-	} outputs[16];
+	} outputs[16 + 2];  /* +POSITION +PSIZE */
 	bool writes_pos, writes_psize;
 
 	/* vertices/inputs: */
@@ -100,15 +100,16 @@ struct fd3_shader_variant {
 		fd3_semantic semantic;
 		uint8_t regid;
 		uint8_t compmask;
+		uint8_t ncomp;
 		/* in theory inloc of fs should match outloc of vs: */
 		uint8_t inloc;
 		uint8_t bary;
-	} inputs[16];
+	} inputs[16 + 2];  /* +POSITION +FACE */
 
 	unsigned total_in;       /* sum of inputs (scalar) */
 
-	/* samplers: */
-	unsigned samplers_count;
+	/* do we have one or more texture sample instructions: */
+	bool has_samp;
 
 	/* const reg # of first immediate, ie. 1 == c1
 	 * (not regid, because TGSI thinks in terms of vec4 registers,

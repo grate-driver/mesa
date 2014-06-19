@@ -76,6 +76,7 @@
 #include "dri_common.h"
 #include "dri3_priv.h"
 #include "loader.h"
+#include "dri2.h"
 
 static const struct glx_context_vtable dri3_context_vtable;
 
@@ -1307,6 +1308,12 @@ static const __DRIimageLoaderExtension imageLoaderExtension = {
    .flushFrontBuffer    = dri3_flush_front_buffer,
 };
 
+static const __DRIextension *loader_extensions[] = {
+   &imageLoaderExtension.base,
+   &systemTimeExtension.base,
+   NULL
+};
+
 /** dri3_swap_buffers
  *
  * Make the current back buffer visible using the present extension
@@ -1527,7 +1534,8 @@ dri3_release_tex_image(Display * dpy, GLXDrawable drawable, int buffer)
    if (pdraw != NULL) {
       psc = (struct dri3_screen *) base->psc;
 
-      if (psc->texBuffer->releaseTexBuffer)
+      if (psc->texBuffer->base.version >= 3 &&
+          psc->texBuffer->releaseTexBuffer != NULL)
          (*psc->texBuffer->releaseTexBuffer) (pcp->driContext,
                                               pdraw->base.textureTarget,
                                               pdraw->driDrawable);
@@ -1535,15 +1543,15 @@ dri3_release_tex_image(Display * dpy, GLXDrawable drawable, int buffer)
 }
 
 static const struct glx_context_vtable dri3_context_vtable = {
-   dri3_destroy_context,
-   dri3_bind_context,
-   dri3_unbind_context,
-   dri3_wait_gl,
-   dri3_wait_x,
-   DRI_glXUseXFont,
-   dri3_bind_tex_image,
-   dri3_release_tex_image,
-   NULL, /* get_proc_address */
+   .destroy             = dri3_destroy_context,
+   .bind                = dri3_bind_context,
+   .unbind              = dri3_unbind_context,
+   .wait_gl             = dri3_wait_gl,
+   .wait_x              = dri3_wait_x,
+   .use_x_font          = DRI_glXUseXFont,
+   .bind_tex_image      = dri3_bind_tex_image,
+   .release_tex_image   = dri3_release_tex_image,
+   .get_proc_address    = NULL,
 };
 
 /** dri3_bind_extensions
@@ -1592,12 +1600,19 @@ dri3_bind_extensions(struct dri3_screen *psc, struct glx_display * priv,
       if (strcmp(extensions[i]->name, __DRI2_ROBUSTNESS) == 0)
          __glXEnableDirectExtension(&psc->base,
                                     "GLX_ARB_create_context_robustness");
+
+      if (strcmp(extensions[i]->name, __DRI2_RENDERER_QUERY) == 0) {
+         psc->rendererQuery = (__DRI2rendererQueryExtension *) extensions[i];
+         __glXEnableDirectExtension(&psc->base, "GLX_MESA_query_renderer");
+      }
    }
 }
 
 static const struct glx_screen_vtable dri3_screen_vtable = {
-   dri3_create_context,
-   dri3_create_context_attribs
+   .create_context         = dri3_create_context,
+   .create_context_attribs = dri3_create_context_attribs,
+   .query_renderer_integer = dri3_query_renderer_integer,
+   .query_renderer_string  = dri3_query_renderer_string,
 };
 
 /** dri3_create_screen
@@ -1688,8 +1703,7 @@ dri3_create_screen(int screen, struct glx_display * priv)
 
    psc->driScreen =
       psc->image_driver->createNewScreen2(screen, psc->fd,
-                                          (const __DRIextension **)
-                                          &pdp->loader_extensions[0],
+                                          pdp->loader_extensions,
                                           extensions,
                                           &driver_configs, psc);
 
@@ -1806,7 +1820,6 @@ _X_HIDDEN __GLXDRIdisplay *
 dri3_create_display(Display * dpy)
 {
    struct dri3_display                  *pdp;
-   int                                  i;
    xcb_connection_t                     *c = XGetXCBConnection(dpy);
    xcb_dri3_query_version_cookie_t      dri3_cookie;
    xcb_dri3_query_version_reply_t       *dri3_reply;
@@ -1862,13 +1875,8 @@ dri3_create_display(Display * dpy)
    pdp->base.createScreen = dri3_create_screen;
 
    loader_set_logger(dri_message);
-   i = 0;
 
-   pdp->loader_extensions[i++] = &imageLoaderExtension.base;
-
-   pdp->loader_extensions[i++] = &systemTimeExtension.base;
-
-   pdp->loader_extensions[i++] = NULL;
+   pdp->loader_extensions = loader_extensions;
 
    return &pdp->base;
 no_extension:

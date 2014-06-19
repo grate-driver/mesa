@@ -149,6 +149,8 @@ static int r300_get_param(struct pipe_screen* pscreen, enum pipe_cap param)
         case PIPE_CAP_SEAMLESS_CUBE_MAP_PER_TEXTURE:
         case PIPE_CAP_MIN_TEXEL_OFFSET:
         case PIPE_CAP_MAX_TEXEL_OFFSET:
+        case PIPE_CAP_MIN_TEXTURE_GATHER_OFFSET:
+        case PIPE_CAP_MAX_TEXTURE_GATHER_OFFSET:
         case PIPE_CAP_MAX_STREAM_OUTPUT_BUFFERS:
         case PIPE_CAP_MAX_STREAM_OUTPUT_SEPARATE_COMPONENTS:
         case PIPE_CAP_MAX_STREAM_OUTPUT_INTERLEAVED_COMPONENTS:
@@ -169,6 +171,9 @@ static int r300_get_param(struct pipe_screen* pscreen, enum pipe_cap param)
         case PIPE_CAP_TGSI_VS_LAYER:
         case PIPE_CAP_MAX_TEXTURE_GATHER_COMPONENTS:
         case PIPE_CAP_TEXTURE_GATHER_SM5:
+        case PIPE_CAP_TEXTURE_QUERY_LOD:
+        case PIPE_CAP_FAKE_SW_MSAA:
+        case PIPE_CAP_SAMPLE_SHADING:
             return 0;
 
         /* SWTCL-only features. */
@@ -550,7 +555,7 @@ static void r300_destroy_screen(struct pipe_screen* pscreen)
     struct r300_screen* r300screen = r300_screen(pscreen);
     struct radeon_winsys *rws = radeon_winsys(pscreen);
 
-    if (rws && !radeon_winsys_unref(rws))
+    if (rws && !rws->unref(rws))
       return;
 
     pipe_mutex_destroy(r300screen->cmask_mutex);

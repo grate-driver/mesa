@@ -381,21 +381,17 @@ copy_array_to_vbo_array(struct brw_context *brw,
    const unsigned char *src = element->glarray->Ptr + min * src_stride;
    int count = max - min + 1;
    GLuint size = count * dst_stride;
+   uint8_t *dst = intel_upload_space(brw, size, dst_stride,
+                                     &buffer->bo, &buffer->offset);
 
    if (dst_stride == src_stride) {
-      intel_upload_data(brw, src, size, dst_stride,
-			&buffer->bo, &buffer->offset);
+      memcpy(dst, src, size);
    } else {
-      char * const map = intel_upload_map(brw, size, dst_stride);
-      char *dst = map;
-
       while (count--) {
 	 memcpy(dst, src, dst_stride);
 	 src += src_stride;
 	 dst += dst_stride;
       }
-      intel_upload_unmap(brw, map, size, dst_stride,
-			 &buffer->bo, &buffer->offset);
    }
    buffer->stride = dst_stride;
 }
@@ -717,7 +713,7 @@ static void brw_emit_vertices(struct brw_context *brw)
       uint32_t comp2 = BRW_VE1_COMPONENT_STORE_SRC;
       uint32_t comp3 = BRW_VE1_COMPONENT_STORE_SRC;
 
-      if (input->attrib == VERT_ATTRIB_EDGEFLAG) {
+      if (input == &brw->vb.inputs[VERT_ATTRIB_EDGEFLAG]) {
          /* Gen6+ passes edgeflag as sideband along with the vertex, instead
           * of in the VUE.  We have to upload it sideband as the last vertex
           * element according to the B-Spec.
@@ -817,7 +813,7 @@ static void brw_upload_indices(struct brw_context *brw)
    struct gl_context *ctx = &brw->ctx;
    const struct _mesa_index_buffer *index_buffer = brw->ib.ib;
    GLuint ib_size;
-   drm_intel_bo *bo = NULL;
+   drm_intel_bo *old_bo = brw->ib.bo;
    struct gl_buffer_object *bufferobj;
    GLuint offset;
    GLuint ib_type_size;
@@ -835,7 +831,7 @@ static void brw_upload_indices(struct brw_context *brw)
       /* Get new bufferobj, offset:
        */
       intel_upload_data(brw, index_buffer->ptr, ib_size, ib_type_size,
-			&bo, &offset);
+			&brw->ib.bo, &offset);
    } else {
       offset = (GLuint) (unsigned long) index_buffer->ptr;
 
@@ -853,13 +849,19 @@ static void brw_upload_indices(struct brw_context *brw)
                                                    bufferobj,
                                                    MAP_INTERNAL);
 
-         intel_upload_data(brw, map, ib_size, ib_type_size, &bo, &offset);
+         intel_upload_data(brw, map, ib_size, ib_type_size,
+                           &brw->ib.bo, &offset);
 
          ctx->Driver.UnmapBuffer(ctx, bufferobj, MAP_INTERNAL);
       } else {
-         bo = intel_bufferobj_buffer(brw, intel_buffer_object(bufferobj),
-                                     offset, ib_size);
-         drm_intel_bo_reference(bo);
+         drm_intel_bo *bo =
+            intel_bufferobj_buffer(brw, intel_buffer_object(bufferobj),
+                                   offset, ib_size);
+         if (bo != brw->ib.bo) {
+            drm_intel_bo_unreference(brw->ib.bo);
+            brw->ib.bo = bo;
+            drm_intel_bo_reference(bo);
+         }
       }
    }
 
@@ -869,14 +871,8 @@ static void brw_upload_indices(struct brw_context *brw)
     */
    brw->ib.start_vertex_offset = offset / ib_type_size;
 
-   if (brw->ib.bo != bo) {
-      drm_intel_bo_unreference(brw->ib.bo);
-      brw->ib.bo = bo;
-
+   if (brw->ib.bo != old_bo)
       brw->state.dirty.brw |= BRW_NEW_INDEX_BUFFER;
-   } else {
-      drm_intel_bo_unreference(bo);
-   }
 
    if (index_buffer->type != brw->ib.type) {
       brw->ib.type = index_buffer->type;

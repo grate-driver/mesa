@@ -50,15 +50,6 @@ gen8_fs_generator::~gen8_fs_generator()
 }
 
 void
-gen8_fs_generator::mark_surface_used(unsigned surf_index)
-{
-   assert(surf_index < BRW_MAX_SURFACES);
-
-   c->prog_data.base.binding_table.size_bytes =
-      MAX2(c->prog_data.base.binding_table.size_bytes, (surf_index + 1) * 4);
-}
-
-void
 gen8_fs_generator::generate_fb_write(fs_inst *ir)
 {
    /* Disable the discard condition while setting up the header. */
@@ -82,16 +73,17 @@ gen8_fs_generator::generate_fb_write(fs_inst *ir)
 
       if (ir->target > 0 && c->key.replicate_alpha) {
          /* Set "Source0 Alpha Present to RenderTarget" bit in the header. */
-         OR(vec1(retype(brw_message_reg(ir->base_mrf), BRW_REGISTER_TYPE_UD)),
-            vec1(retype(brw_vec8_grf(0, 0), BRW_REGISTER_TYPE_UD)),
-            brw_imm_ud(1 << 11));
+         gen8_instruction *inst =
+            OR(get_element_ud(brw_message_reg(ir->base_mrf), 0),
+               vec1(retype(brw_vec8_grf(0, 0), BRW_REGISTER_TYPE_UD)),
+               brw_imm_ud(1 << 11));
+         gen8_set_mask_control(inst, BRW_MASK_DISABLE);
       }
 
       if (ir->target > 0) {
          /* Set the render target index for choosing BLEND_STATE. */
-         MOV(retype(brw_vec1_reg(BRW_MESSAGE_REGISTER_FILE, ir->base_mrf, 2),
-                    BRW_REGISTER_TYPE_UD),
-             brw_imm_ud(ir->target));
+         MOV_RAW(brw_vec1_reg(BRW_MESSAGE_REGISTER_FILE, ir->base_mrf, 2),
+                 brw_imm_ud(ir->target));
       }
    }
 
@@ -140,7 +132,7 @@ gen8_fs_generator::generate_fb_write(fs_inst *ir)
                        ir->header_present,
                        ir->eot);
 
-   mark_surface_used(surf_index);
+   brw_mark_surface_used(&c->prog_data.base, surf_index);
 }
 
 void
@@ -301,7 +293,7 @@ gen8_fs_generator::generate_tex(fs_inst *ir,
                             ir->header_present,
                             simd_mode);
 
-   mark_surface_used(surf_index);
+   brw_mark_surface_used(&c->prog_data.base, surf_index);
 }
 
 
@@ -573,7 +565,7 @@ gen8_fs_generator::generate_uniform_pull_constant_load(fs_inst *inst,
                             false, /* no header */
                             BRW_SAMPLER_SIMD_MODE_SIMD4X2);
 
-   mark_surface_used(surf_index);
+   brw_mark_surface_used(&c->prog_data.base, surf_index);
 }
 
 void
@@ -615,7 +607,7 @@ gen8_fs_generator::generate_varying_pull_constant_load(fs_inst *ir,
                             false, /* no header */
                             simd_mode);
 
-   mark_surface_used(surf_index);
+   brw_mark_surface_used(&c->prog_data.base, surf_index);
 }
 
 /**
@@ -830,6 +822,64 @@ gen8_fs_generator::generate_unpack_half_2x16_split(fs_inst *inst,
 }
 
 void
+gen8_fs_generator::generate_untyped_atomic(fs_inst *ir,
+                                           struct brw_reg dst,
+                                           struct brw_reg atomic_op,
+                                           struct brw_reg surf_index)
+{
+   assert(atomic_op.file == BRW_IMMEDIATE_VALUE &&
+          atomic_op.type == BRW_REGISTER_TYPE_UD &&
+          surf_index.file == BRW_IMMEDIATE_VALUE &&
+          surf_index.type == BRW_REGISTER_TYPE_UD);
+   assert((atomic_op.dw1.ud & ~0xf) == 0);
+
+   unsigned msg_control =
+      atomic_op.dw1.ud | /* Atomic Operation Type: BRW_AOP_* */
+      ((dispatch_width == 16 ? 0 : 1) << 4) | /* SIMD Mode */
+      (1 << 5); /* Return data expected */
+
+   gen8_instruction *inst = next_inst(BRW_OPCODE_SEND);
+   gen8_set_dst(brw, inst, retype(dst, BRW_REGISTER_TYPE_UD));
+   gen8_set_src0(brw, inst, brw_message_reg(ir->base_mrf));
+   gen8_set_dp_message(brw, inst, HSW_SFID_DATAPORT_DATA_CACHE_1,
+                       surf_index.dw1.ud,
+                       HSW_DATAPORT_DC_PORT1_UNTYPED_ATOMIC_OP,
+                       msg_control,
+                       ir->mlen,
+                       dispatch_width / 8,
+                       ir->header_present,
+                       false);
+
+   brw_mark_surface_used(&c->prog_data.base, surf_index.dw1.ud);
+}
+
+void
+gen8_fs_generator::generate_untyped_surface_read(fs_inst *ir,
+                                                 struct brw_reg dst,
+                                                 struct brw_reg surf_index)
+{
+   assert(surf_index.file == BRW_IMMEDIATE_VALUE &&
+          surf_index.type == BRW_REGISTER_TYPE_UD);
+
+   unsigned msg_control = 0xe | /* Enable only the R channel */
+     ((dispatch_width == 16 ? 1 : 2) << 4); /* SIMD Mode */
+
+   gen8_instruction *inst = next_inst(BRW_OPCODE_SEND);
+   gen8_set_dst(brw, inst, retype(dst, BRW_REGISTER_TYPE_UD));
+   gen8_set_src0(brw, inst, brw_message_reg(ir->base_mrf));
+   gen8_set_dp_message(brw, inst, HSW_SFID_DATAPORT_DATA_CACHE_1,
+                       surf_index.dw1.ud,
+                       HSW_DATAPORT_DC_PORT1_UNTYPED_SURFACE_READ,
+                       msg_control,
+                       ir->mlen,
+                       dispatch_width / 8,
+                       ir->header_present,
+                       false);
+
+   brw_mark_surface_used(&c->prog_data.base, surf_index.dw1.ud);
+}
+
+void
 gen8_fs_generator::generate_code(exec_list *instructions)
 {
    int last_native_inst_offset = next_inst_offset;
@@ -920,6 +970,7 @@ gen8_fs_generator::generate_code(exec_list *instructions)
       default_state.predicate = ir->predicate;
       default_state.predicate_inverse = ir->predicate_inverse;
       default_state.saturate = ir->saturate;
+      default_state.mask_control = ir->force_writemask_all;
       default_state.flag_subreg_nr = ir->flag_subreg;
 
       if (dispatch_width == 16 && !ir->force_uncompressed)
@@ -927,10 +978,12 @@ gen8_fs_generator::generate_code(exec_list *instructions)
       else
          default_state.exec_size = BRW_EXECUTE_8;
 
-      /* fs_inst::force_sechalf is only used for original Gen4 code, so we
-       * don't handle it.  Add qtr_control to default_state if that changes.
-       */
-      assert(!ir->force_sechalf);
+      if (ir->force_uncompressed || dispatch_width == 8)
+         default_state.qtr_control = GEN6_COMPRESSION_1Q;
+      else if (ir->force_sechalf)
+         default_state.qtr_control = GEN6_COMPRESSION_2Q;
+      else
+         default_state.qtr_control = GEN6_COMPRESSION_1H;
 
       switch (ir->opcode) {
       case BRW_OPCODE_MOV:
@@ -1195,11 +1248,11 @@ gen8_fs_generator::generate_code(exec_list *instructions)
          break;
 
       case SHADER_OPCODE_UNTYPED_ATOMIC:
-         assert(!"XXX: Missing Gen8 scalar support for untyped atomics");
+         generate_untyped_atomic(ir, dst, src[0], src[1]);
          break;
 
       case SHADER_OPCODE_UNTYPED_SURFACE_READ:
-         assert(!"XXX: Missing Gen8 scalar support for untyped surface reads");
+         generate_untyped_surface_read(ir, dst, src[0]);
          break;
 
       case FS_OPCODE_SET_SIMD4X2_OFFSET:
@@ -1268,6 +1321,15 @@ gen8_fs_generator::generate_code(exec_list *instructions)
    }
 
    patch_jump_targets();
+
+   /* OK, while the INTEL_DEBUG=fs above is very nice for debugging FS
+    * emit issues, it doesn't get the jump distances into the output,
+    * which is often something we want to debug.  So this is here in
+    * case you're doing that.
+    */
+   if (0 && unlikely(INTEL_DEBUG & DEBUG_WM)) {
+      disassemble(stderr, 0, next_inst_offset);
+   }
 }
 
 const unsigned *

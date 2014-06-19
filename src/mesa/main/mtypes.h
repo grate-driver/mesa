@@ -76,6 +76,7 @@ struct gl_list_extensions;
 struct gl_meta_state;
 struct gl_program_cache;
 struct gl_texture_object;
+struct gl_debug_state;
 struct gl_context;
 struct st_context;
 struct gl_uniform_storage;
@@ -1085,7 +1086,6 @@ typedef enum
 
 /**
  * Bit flags for each type of texture object
- * Used for Texture.Unit[]._ReallyEnabled flags.
  */
 /*@{*/
 #define TEXTURE_2D_MULTISAMPLE_BIT (1 << TEXTURE_2D_MULTISAMPLE_INDEX)
@@ -1195,6 +1195,8 @@ struct gl_texture_object
    GLuint Name;                /**< the user-visible texture object ID */
    GLchar *Label;               /**< GL_KHR_debug */
    GLenum Target;              /**< GL_TEXTURE_1D, GL_TEXTURE_2D, etc. */
+   gl_texture_index TargetIndex; /**< The gl_texture_unit::CurrentTex index.
+                                      Only valid when Target is valid. */
 
    struct gl_sampler_object Sampler;
 
@@ -1327,7 +1329,6 @@ struct gl_texgen
 struct gl_texture_unit
 {
    GLbitfield Enabled;          /**< bitmask of TEXTURE_*_BIT flags */
-   GLbitfield _ReallyEnabled;   /**< 0 or exactly one of TEXTURE_*_BIT flags */
 
    GLenum EnvMode;              /**< GL_MODULATE, GL_DECAL, GL_BLEND, etc. */
    GLclampf EnvColor[4];
@@ -1369,6 +1370,9 @@ struct gl_texture_unit
 
    /** Points to highest priority, complete and enabled texture object */
    struct gl_texture_object *_Current;
+
+   /** Texture targets that have a non-default texture bound */
+   GLbitfield _BoundTextures;
 };
 
 
@@ -1388,9 +1392,6 @@ struct gl_texture_attrib
    /** GL_ARB_seamless_cubemap */
    GLboolean CubeMapSeamless;
 
-   /** Texture units/samplers used by vertex or fragment texturing */
-   GLbitfield _EnabledUnits;
-
    /** Texture coord units/sets used for fragment texturing */
    GLbitfield _EnabledCoordUnits;
 
@@ -1402,6 +1403,12 @@ struct gl_texture_attrib
 
    /** Bitwise-OR of all Texture.Unit[i]._GenFlags */
    GLbitfield _GenFlags;
+
+   /** Largest index of a texture unit with _Current != NULL. */
+   GLint _MaxEnabledTexImageUnit;
+
+   /** Largest index + 1 of texture units that have had any CurrentTex set. */
+   GLint NumCurrentTexUsed;
 };
 
 
@@ -2421,8 +2428,7 @@ struct gl_shader
    /**
     * This shader's uniform block information.
     *
-    * The offsets of the variables are assigned only for shaders in a program's
-    * _LinkedShaders[].
+    * These fields are only set post-linking.
     */
    struct gl_uniform_block *UniformBlocks;
    unsigned NumUniformBlocks;
@@ -2431,6 +2437,15 @@ struct gl_shader
    struct glsl_symbol_table *symbols;
 
    bool uses_builtin_functions;
+   bool uses_gl_fragcoord;
+   bool redeclares_gl_fragcoord;
+   bool ARB_fragment_coord_conventions_enable;
+
+   /**
+    * Fragment shader state from GLSL 1.50 layout qualifiers.
+    */
+   bool origin_upper_left;
+   bool pixel_center_integer;
 
    /**
     * Geometry shader state from GLSL 1.50 layout qualifiers.
@@ -2593,17 +2608,6 @@ struct gl_shader_program
    GLboolean BinaryRetreivableHint;
 
    /**
-    * Flags that the linker should not reject the program if it lacks
-    * a vertex or fragment shader.  GLES2 doesn't allow separate
-    * shader objects, and would reject them.  However, we internally
-    * build separate shader objects for fixed function programs, which
-    * we use for drivers/common/meta.c and for handling
-    * _mesa_update_state with no program bound (for example in
-    * glClear()).
-    */
-   GLboolean InternalSeparateShader;
-
-   /**
     * Indicates whether program can be bound for individual pipeline stages
     * using UseProgramStages after it is next linked.
     */
@@ -2756,6 +2760,11 @@ struct gl_shader_program
     * \c NULL.
     */
    struct gl_shader *_LinkedShaders[MESA_SHADER_STAGES];
+
+   /* True if any of the fragment shaders attached to this program use:
+    * #extension ARB_fragment_coord_conventions: enable
+    */
+   GLboolean ARB_fragment_coord_conventions_enable;
 };   
 
 
@@ -2789,9 +2798,7 @@ struct gl_pipeline_object
    /**
     * Programs used for rendering
     *
-    * There is a separate program set for each shader stage.  If
-    * GL_EXT_separate_shader_objects is not supported, each of these must point
-    * to \c NULL or to the same program.
+    * There is a separate program set for each shader stage.
     */
    struct gl_shader_program *CurrentProgram[MESA_SHADER_STAGES];
 
@@ -2807,6 +2814,10 @@ struct gl_pipeline_object
    GLbitfield Flags;                    /**< Mask of GLSL_x flags */
 
    GLboolean EverBound;                 /**< Has the pipeline object been created */
+
+   GLboolean Validated;                 /**< Pipeline Validation status */
+
+   GLchar *InfoLog;
 };
 
 /**
@@ -2816,6 +2827,9 @@ struct gl_pipeline_shader_state
 {
    /** Currently bound pipeline object. See _mesa_BindProgramPipeline() */
    struct gl_pipeline_object *Current;
+
+   /* Default Object to ensure that _Shader is never NULL */
+   struct gl_pipeline_object *Default;
 
    /** Pipeline objects */
    struct _mesa_HashTable *Objects;
@@ -3465,6 +3479,8 @@ struct gl_constants
    /** GL_ARB_gpu_shader5 */
    GLfloat MinFragmentInterpolationOffset;
    GLfloat MaxFragmentInterpolationOffset;
+
+   GLboolean FakeSWMSAA;
 };
 
 
@@ -3511,7 +3527,6 @@ struct gl_extensions
    GLboolean ARB_point_sprite;
    GLboolean ARB_sample_shading;
    GLboolean ARB_seamless_cube_map;
-   GLboolean ARB_separate_shader_objects;
    GLboolean ARB_shader_atomic_counters;
    GLboolean ARB_shader_bit_encoding;
    GLboolean ARB_shader_image_load_store;
@@ -3537,6 +3552,7 @@ struct gl_extensions
    GLboolean ARB_texture_mirror_clamp_to_edge;
    GLboolean ARB_texture_multisample;
    GLboolean ARB_texture_non_power_of_two;
+   GLboolean ARB_texture_stencil8;
    GLboolean ARB_texture_query_levels;
    GLboolean ARB_texture_query_lod;
    GLboolean ARB_texture_rg;
@@ -3567,7 +3583,6 @@ struct gl_extensions
    GLboolean EXT_pixel_buffer_object;
    GLboolean EXT_point_parameters;
    GLboolean EXT_provoking_vertex;
-   GLboolean EXT_separate_shader_objects;
    GLboolean EXT_shader_integer_mix;
    GLboolean EXT_stencil_two_side;
    GLboolean EXT_texture3D;
@@ -3598,6 +3613,7 @@ struct gl_extensions
    GLboolean ATI_texture_env_combine3;
    GLboolean ATI_fragment_shader;
    GLboolean ATI_separate_stencil;
+   GLboolean INTEL_performance_query;
    GLboolean MESA_pack_invert;
    GLboolean MESA_ycbcr_texture;
    GLboolean NV_conditional_render;
@@ -3809,45 +3825,6 @@ enum mesa_debug_severity {
 };
 
 /** @} */
-
-/**
- * An error, warning, or other piece of debug information for an application
- * to consume via GL_ARB_debug_output/GL_KHR_debug.
- */
-struct gl_debug_msg
-{
-   enum mesa_debug_source source;
-   enum mesa_debug_type type;
-   GLuint id;
-   enum mesa_debug_severity severity;
-   GLsizei length;
-   GLcharARB *message;
-};
-
-struct gl_debug_namespace
-{
-   struct _mesa_HashTable *IDs;
-   unsigned ZeroID; /* a HashTable won't take zero, so store its state here */
-   /** lists of IDs in the hash table at each severity */
-   struct simple_node Severity[MESA_DEBUG_SEVERITY_COUNT];
-};
-
-struct gl_debug_state
-{
-   GLDEBUGPROC Callback;
-   const void *CallbackData;
-   GLboolean SyncOutput;
-   GLboolean DebugOutput;
-   GLboolean Defaults[MAX_DEBUG_GROUP_STACK_DEPTH][MESA_DEBUG_SEVERITY_COUNT][MESA_DEBUG_SOURCE_COUNT][MESA_DEBUG_TYPE_COUNT];
-   struct gl_debug_namespace Namespaces[MAX_DEBUG_GROUP_STACK_DEPTH][MESA_DEBUG_SOURCE_COUNT][MESA_DEBUG_TYPE_COUNT];
-   struct gl_debug_msg Log[MAX_DEBUG_LOGGED_MESSAGES];
-   struct gl_debug_msg DebugGroupMsgs[MAX_DEBUG_GROUP_STACK_DEPTH];
-   GLint GroupStackDepth;
-   GLint NumMessages;
-   GLint NextMsg;
-   GLint NextMsgLength; /* redundant, but copied here from Log[NextMsg].length
-                           for the sake of the offsetof() code in get.c */
-};
 
 /**
  * Enum for the OpenGL APIs we know about and may support.
@@ -4123,6 +4100,26 @@ struct gl_context
 
    struct gl_pipeline_shader_state Pipeline; /**< GLSL pipeline shader object state */
    struct gl_pipeline_object Shader; /**< GLSL shader object state */
+
+   /**
+    * Current active shader pipeline state
+    *
+    * Almost all internal users want ::_Shader instead of ::Shader.  The
+    * exceptions are bits of legacy GLSL API that do not know about separate
+    * shader objects.
+    *
+    * If a program is active via \c glUseProgram, this will point to
+    * \c ::Shader.
+    *
+    * If a program pipeline is active via \c glBindProgramPipeline, this will
+    * point to \c ::Pipeline.Current.
+    *
+    * If neither a program nor a program pipeline is active, this will point to
+    * \c ::Pipeline.Default.  This ensures that \c ::_Shader will never be
+    * \c NULL.
+    */
+   struct gl_pipeline_object *_Shader;
+
    struct gl_shader_compiler_options ShaderCompilerOptions[MESA_SHADER_STAGES];
 
    struct gl_query_state Query;  /**< occlusion, timer queries */

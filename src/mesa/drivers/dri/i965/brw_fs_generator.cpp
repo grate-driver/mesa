@@ -912,7 +912,7 @@ fs_generator::generate_varying_pull_constant_load(fs_inst *inst,
 
    struct brw_instruction *send = brw_next_insn(p, BRW_OPCODE_SEND);
    send->header.compression_control = BRW_COMPRESSION_NONE;
-   brw_set_dest(p, send, dst);
+   brw_set_dest(p, send, retype(dst, BRW_REGISTER_TYPE_UW));
    brw_set_src0(p, send, header);
    if (brw->gen < 6)
       send->header.destreg__conditionalmod = inst->base_mrf;
@@ -1411,6 +1411,7 @@ fs_generator::generate_code(exec_list *instructions, FILE *dump_file)
       brw_set_flag_reg(p, 0, inst->flag_subreg);
       brw_set_saturate(p, inst->saturate);
       brw_set_mask_control(p, inst->force_writemask_all);
+      brw_set_acc_write_control(p, inst->writes_accumulator);
 
       if (inst->force_uncompressed || dispatch_width == 8) {
 	 brw_set_compression_control(p, BRW_COMPRESSION_NONE);
@@ -1434,9 +1435,7 @@ fs_generator::generate_code(exec_list *instructions, FILE *dump_file)
 	 brw_AVG(p, dst, src[0], src[1]);
 	 break;
       case BRW_OPCODE_MACH:
-	 brw_set_acc_write_control(p, 1);
 	 brw_MACH(p, dst, src[0], src[1]);
-	 brw_set_acc_write_control(p, 0);
 	 break;
 
       case BRW_OPCODE_MAD:
@@ -1540,15 +1539,14 @@ fs_generator::generate_code(exec_list *instructions, FILE *dump_file)
          break;
       case BRW_OPCODE_ADDC:
          assert(brw->gen >= 7);
-         brw_set_acc_write_control(p, 1);
          brw_ADDC(p, dst, src[0], src[1]);
-         brw_set_acc_write_control(p, 0);
          break;
       case BRW_OPCODE_SUBB:
          assert(brw->gen >= 7);
-         brw_set_acc_write_control(p, 1);
          brw_SUBB(p, dst, src[0], src[1]);
-         brw_set_acc_write_control(p, 0);
+         break;
+      case BRW_OPCODE_MAC:
+         brw_MAC(p, dst, src[0], src[1]);
          break;
 
       case BRW_OPCODE_BFE:

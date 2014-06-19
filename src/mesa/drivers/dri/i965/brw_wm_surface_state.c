@@ -101,6 +101,30 @@ brw_get_surface_num_multisamples(unsigned num_samples)
       return BRW_SURFACE_MULTISAMPLECOUNT_1;
 }
 
+void
+brw_configure_w_tiled(const struct intel_mipmap_tree *mt,
+                      bool is_render_target,
+                      unsigned *width, unsigned *height,
+                      unsigned *pitch, uint32_t *tiling, unsigned *format)
+{
+   static const unsigned halign_stencil = 8;
+
+   /* In Y-tiling row is twice as wide as in W-tiling, and subsequently
+    * there are half as many rows.
+    * In addition, mip-levels are accessed manually by the program and
+    * therefore the surface is setup to cover all the mip-levels for one slice.
+    * (Hardware is still used to access individual slices).
+    */
+   *tiling = I915_TILING_Y;
+   *pitch = mt->pitch * 2;
+   *width = ALIGN(mt->total_width, halign_stencil) * 2;
+   *height = (mt->total_height / mt->physical_depth0) / 2;
+
+   if (is_render_target) {
+      *format = BRW_SURFACEFORMAT_R8_UINT;
+   }
+}
+
 
 /**
  * Compute the combination of DEPTH_TEXTURE_MODE and EXT_texture_swizzle
@@ -319,16 +343,15 @@ brw_update_texture_surface(struct gl_context *ctx,
 	      BRW_SURFACE_CUBEFACE_ENABLES |
 	      tex_format << BRW_SURFACE_FORMAT_SHIFT);
 
-   surf[1] = mt->region->bo->offset64 + mt->offset; /* reloc */
+   surf[1] = mt->bo->offset64 + mt->offset; /* reloc */
 
    surf[2] = ((intelObj->_MaxLevel - tObj->BaseLevel) << BRW_SURFACE_LOD_SHIFT |
 	      (mt->logical_width0 - 1) << BRW_SURFACE_WIDTH_SHIFT |
 	      (mt->logical_height0 - 1) << BRW_SURFACE_HEIGHT_SHIFT);
 
-   surf[3] = (brw_get_surface_tiling_bits(mt->region->tiling) |
+   surf[3] = (brw_get_surface_tiling_bits(mt->tiling) |
 	      (mt->logical_depth0 - 1) << BRW_SURFACE_DEPTH_SHIFT |
-	      (mt->region->pitch - 1) <<
-	      BRW_SURFACE_PITCH_SHIFT);
+	      (mt->pitch - 1) << BRW_SURFACE_PITCH_SHIFT);
 
    surf[4] = (brw_get_surface_num_multisamples(mt->num_samples) |
               SET_FIELD(tObj->BaseLevel - mt->first_level, BRW_SURFACE_MIN_LOD));
@@ -338,8 +361,8 @@ brw_update_texture_surface(struct gl_context *ctx,
    /* Emit relocation to surface contents */
    drm_intel_bo_emit_reloc(brw->batch.bo,
                            *surf_offset + 4,
-                           mt->region->bo,
-                           surf[1] - mt->region->bo->offset64,
+                           mt->bo,
+                           surf[1] - mt->bo->offset64,
                            I915_GEM_DOMAIN_SAMPLER, 0);
 }
 
@@ -467,37 +490,32 @@ brw_upload_wm_pull_constants(struct brw_context *brw)
    const int size = brw->wm.prog_data->base.nr_pull_params * sizeof(float);
    const int surf_index =
       brw->wm.prog_data->base.binding_table.pull_constants_start;
-   float *constants;
    unsigned int i;
 
    _mesa_load_state_parameters(ctx, params);
 
    /* CACHE_NEW_WM_PROG */
    if (brw->wm.prog_data->base.nr_pull_params == 0) {
-      if (brw->wm.base.const_bo) {
-	 drm_intel_bo_unreference(brw->wm.base.const_bo);
-	 brw->wm.base.const_bo = NULL;
+      if (brw->wm.base.surf_offset[surf_index]) {
 	 brw->wm.base.surf_offset[surf_index] = 0;
 	 brw->state.dirty.brw |= BRW_NEW_SURFACES;
       }
       return;
    }
 
-   drm_intel_bo_unreference(brw->wm.base.const_bo);
-   brw->wm.base.const_bo = drm_intel_bo_alloc(brw->bufmgr, "WM const bo",
-					 size, 64);
-
    /* _NEW_PROGRAM_CONSTANTS */
-   drm_intel_gem_bo_map_gtt(brw->wm.base.const_bo);
-   constants = brw->wm.base.const_bo->virtual;
+   drm_intel_bo *const_bo = NULL;
+   uint32_t const_offset;
+   float *constants = intel_upload_space(brw, size, 64,
+                                         &const_bo, &const_offset);
    for (i = 0; i < brw->wm.prog_data->base.nr_pull_params; i++) {
       constants[i] = *brw->wm.prog_data->base.pull_param[i];
    }
-   drm_intel_gem_bo_unmap_gtt(brw->wm.base.const_bo);
 
-   brw_create_constant_surface(brw, brw->wm.base.const_bo, 0, size,
+   brw_create_constant_surface(brw, const_bo, const_offset, size,
                                &brw->wm.base.surf_offset[surf_index],
                                true);
+   drm_intel_bo_unreference(const_bo);
 
    brw->state.dirty.brw |= BRW_NEW_SURFACES;
 }
@@ -618,7 +636,6 @@ brw_update_renderbuffer_surface(struct brw_context *brw,
    struct gl_context *ctx = &brw->ctx;
    struct intel_renderbuffer *irb = intel_renderbuffer(rb);
    struct intel_mipmap_tree *mt = irb->mt;
-   struct intel_region *region;
    uint32_t *surf;
    uint32_t tile_x, tile_y;
    uint32_t format = 0;
@@ -646,8 +663,6 @@ brw_update_renderbuffer_surface(struct brw_context *brw,
 
    intel_miptree_used_for_rendering(irb->mt);
 
-   region = irb->mt->region;
-
    surf = brw_state_batch(brw, AUB_TRACE_SURFACE_STATE, 6 * 4, 32,
                           &brw->wm.base.surf_offset[surf_index]);
 
@@ -662,13 +677,13 @@ brw_update_renderbuffer_surface(struct brw_context *brw,
 
    /* reloc */
    surf[1] = (intel_renderbuffer_get_tile_offsets(irb, &tile_x, &tile_y) +
-	      region->bo->offset64);
+	      mt->bo->offset64);
 
    surf[2] = ((rb->Width - 1) << BRW_SURFACE_WIDTH_SHIFT |
 	      (rb->Height - 1) << BRW_SURFACE_HEIGHT_SHIFT);
 
-   surf[3] = (brw_get_surface_tiling_bits(region->tiling) |
-	      (region->pitch - 1) << BRW_SURFACE_PITCH_SHIFT);
+   surf[3] = (brw_get_surface_tiling_bits(mt->tiling) |
+	      (mt->pitch - 1) << BRW_SURFACE_PITCH_SHIFT);
 
    surf[4] = brw_get_surface_num_multisamples(mt->num_samples);
 
@@ -706,8 +721,8 @@ brw_update_renderbuffer_surface(struct brw_context *brw,
 
    drm_intel_bo_emit_reloc(brw->batch.bo,
 			   brw->wm.base.surf_offset[surf_index] + 4,
-			   region->bo,
-			   surf[1] - region->bo->offset64,
+			   mt->bo,
+			   surf[1] - mt->bo->offset64,
 			   I915_GEM_DOMAIN_RENDER,
 			   I915_GEM_DOMAIN_RENDER);
 }
@@ -783,7 +798,7 @@ update_stage_texture_surfaces(struct brw_context *brw,
          const unsigned unit = prog->SamplerUnits[s];
 
          /* _NEW_TEXTURE */
-         if (ctx->Texture.Unit[unit]._ReallyEnabled) {
+         if (ctx->Texture.Unit[unit]._Current) {
             brw->vtbl.update_texture_surface(ctx, unit, surf_offset + s, for_gather);
          }
       }
@@ -881,7 +896,7 @@ brw_upload_wm_ubo_surfaces(struct brw_context *brw)
 {
    struct gl_context *ctx = &brw->ctx;
    /* _NEW_PROGRAM */
-   struct gl_shader_program *prog = ctx->Shader._CurrentFragmentProgram;
+   struct gl_shader_program *prog = ctx->_Shader->_CurrentFragmentProgram;
 
    if (!prog)
       return;

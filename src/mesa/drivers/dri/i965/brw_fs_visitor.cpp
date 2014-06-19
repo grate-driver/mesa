@@ -74,6 +74,7 @@ fs_visitor::visit(ir_variable *ir)
 	 assert(ir->data.location == FRAG_RESULT_DATA0);
 	 assert(ir->data.index == 1);
 	 this->dual_src_output = *reg;
+         this->do_dual_src = true;
       } else if (ir->data.location == FRAG_RESULT_COLOR) {
 	 /* Writing gl_FragColor outputs to all color regions. */
 	 for (unsigned int i = 0; i < MAX2(c->key.nr_color_regions, 1); i++) {
@@ -293,7 +294,7 @@ fs_visitor::try_emit_saturate(ir_expression *ir)
 }
 
 bool
-fs_visitor::try_emit_mad(ir_expression *ir, int mul_arg)
+fs_visitor::try_emit_mad(ir_expression *ir)
 {
    /* 3-src instructions were introduced in gen6. */
    if (brw->gen < 6)
@@ -303,11 +304,16 @@ fs_visitor::try_emit_mad(ir_expression *ir, int mul_arg)
    if (ir->type != glsl_type::float_type)
       return false;
 
-   ir_rvalue *nonmul = ir->operands[1 - mul_arg];
-   ir_expression *mul = ir->operands[mul_arg]->as_expression();
+   ir_rvalue *nonmul = ir->operands[1];
+   ir_expression *mul = ir->operands[0]->as_expression();
 
-   if (!mul || mul->operation != ir_binop_mul)
-      return false;
+   if (!mul || mul->operation != ir_binop_mul) {
+      nonmul = ir->operands[0];
+      mul = ir->operands[1]->as_expression();
+
+      if (!mul || mul->operation != ir_binop_mul)
+         return false;
+   }
 
    if (nonmul->as_constant() ||
        mul->operands[0]->as_constant() ||
@@ -341,7 +347,7 @@ fs_visitor::visit(ir_expression *ir)
    if (try_emit_saturate(ir))
       return;
    if (ir->operation == ir_binop_add) {
-      if (try_emit_mad(ir, 0) || try_emit_mad(ir, 1))
+      if (try_emit_mad(ir))
 	 return;
    }
 
@@ -458,18 +464,27 @@ fs_visitor::visit(ir_expression *ir)
 	  * of one of the operands (src0 on gen6, src1 on gen7).  The
 	  * MACH accumulates in the contribution of the upper 16 bits
 	  * of that operand.
-	  *
-	  * FINISHME: Emit just the MUL if we know an operand is small
-	  * enough.
-	  */
-	 if (brw->gen >= 7)
-	    no16("SIMD16 explicit accumulator operands unsupported\n");
+          */
+         if (ir->operands[0]->is_uint16_constant()) {
+            if (brw->gen < 7)
+               emit(MUL(this->result, op[0], op[1]));
+            else
+               emit(MUL(this->result, op[1], op[0]));
+         } else if (ir->operands[1]->is_uint16_constant()) {
+            if (brw->gen < 7)
+               emit(MUL(this->result, op[1], op[0]));
+            else
+               emit(MUL(this->result, op[0], op[1]));
+         } else {
+            if (brw->gen >= 7)
+               no16("SIMD16 explicit accumulator operands unsupported\n");
 
-	 struct brw_reg acc = retype(brw_acc_reg(), this->result.type);
+            struct brw_reg acc = retype(brw_acc_reg(), this->result.type);
 
-	 emit(MUL(acc, op[0], op[1]));
-	 emit(MACH(reg_null_d, op[0], op[1]));
-	 emit(MOV(this->result, fs_reg(acc)));
+            emit(MUL(acc, op[0], op[1]));
+            emit(MACH(reg_null_d, op[0], op[1]));
+            emit(MOV(this->result, fs_reg(acc)));
+         }
       } else {
 	 emit(MUL(this->result, op[0], op[1]));
       }
@@ -1468,15 +1483,28 @@ fs_visitor::rescale_texcoord(ir_texture *ir, fs_reg coordinate,
 	 return coordinate;
       }
 
-      scale_x = fs_reg(UNIFORM, uniforms);
-      scale_y = fs_reg(UNIFORM, uniforms + 1);
-
       GLuint index = _mesa_add_state_reference(params,
 					       (gl_state_index *)tokens);
-      stage_prog_data->param[uniforms++] =
-         &prog->Parameters->ParameterValues[index][0].f;
-      stage_prog_data->param[uniforms++] =
-         &prog->Parameters->ParameterValues[index][1].f;
+      /* Try to find existing copies of the texrect scale uniforms. */
+      for (unsigned i = 0; i < uniforms; i++) {
+         if (stage_prog_data->param[i] ==
+             &prog->Parameters->ParameterValues[index][0].f) {
+            scale_x = fs_reg(UNIFORM, i);
+            scale_y = fs_reg(UNIFORM, i + 1);
+            break;
+         }
+      }
+
+      /* If we didn't already set them up, do so now. */
+      if (scale_x.file == BAD_FILE) {
+         scale_x = fs_reg(UNIFORM, uniforms);
+         scale_y = fs_reg(UNIFORM, uniforms + 1);
+
+         stage_prog_data->param[uniforms++] =
+            &prog->Parameters->ParameterValues[index][0].f;
+         stage_prog_data->param[uniforms++] =
+            &prog->Parameters->ParameterValues[index][1].f;
+      }
    }
 
    /* The 965 requires the EU to do the normalization of GL rectangle
@@ -2402,6 +2430,7 @@ fs_visitor::emit_untyped_atomic(unsigned atomic_op, unsigned surf_index,
                                         atomic_op, surf_index);
    inst->base_mrf = 0;
    inst->mlen = mlen;
+   inst->header_present = true;
    emit(inst);
 }
 
@@ -2436,6 +2465,7 @@ fs_visitor::emit_untyped_surface_read(unsigned surf_index, fs_reg dst,
       fs_inst(SHADER_OPCODE_UNTYPED_SURFACE_READ, dst, surf_index);
    inst->base_mrf = 0;
    inst->mlen = mlen;
+   inst->header_present = true;
    emit(inst);
 }
 
@@ -2721,7 +2751,6 @@ fs_visitor::emit_fb_writes()
    int base_mrf = 1;
    int nr = base_mrf;
    int reg_width = dispatch_width / 8;
-   bool do_dual_src = this->dual_src_output.file != BAD_FILE;
    bool src0_alpha_to_render_target = false;
 
    if (do_dual_src) {
@@ -2979,6 +3008,7 @@ fs_visitor::fs_visitor(struct brw_context *brw,
    this->force_uncompressed_stack = 0;
 
    this->spilled_any_registers = false;
+   this->do_dual_src = false;
 
    if (dispatch_width == 8)
       this->param_size = rzalloc_array(mem_ctx, int, stage_prog_data->nr_params);

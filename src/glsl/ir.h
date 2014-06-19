@@ -265,6 +265,13 @@ public:
     */
    virtual bool is_basis() const;
 
+   /**
+    * Determine if an r-value is an unsigned integer constant which can be
+    * stored in 16 bits.
+    *
+    * \sa ir_constant::is_uint16_constant.
+    */
+   virtual bool is_uint16_constant() const { return false; }
 
    /**
     * Return a generic value of error_type.
@@ -1914,15 +1921,6 @@ public:
     * Get the variable that is ultimately referenced by an r-value
     */
    virtual ir_variable *variable_referenced() const = 0;
-
-   /**
-    * Get the constant that is ultimately referenced by an r-value,
-    * in a constant expression evaluation context.
-    *
-    * The offset is used when the reference is to a specific column of
-    * a matrix.
-    */
-  virtual void constant_referenced(struct hash_table *variable_context, ir_constant *&store, int &offset) const = 0;
 };
 
 
@@ -1949,15 +1947,6 @@ public:
    {
       return this->var;
    }
-
-   /**
-    * Get the constant that is ultimately referenced by an r-value,
-    * in a constant expression evaluation context.
-    *
-    * The offset is used when the reference is to a specific column of
-    * a matrix.
-    */
-   virtual void constant_referenced(struct hash_table *variable_context, ir_constant *&store, int &offset) const;
 
    virtual ir_variable *whole_variable_referenced()
    {
@@ -2010,15 +1999,6 @@ public:
       return this->array->variable_referenced();
    }
 
-   /**
-    * Get the constant that is ultimately referenced by an r-value,
-    * in a constant expression evaluation context.
-    *
-    * The offset is used when the reference is to a specific column of
-    * a matrix.
-    */
-   virtual void constant_referenced(struct hash_table *variable_context, ir_constant *&store, int &offset) const;
-
    virtual void accept(ir_visitor *v)
    {
       v->visit(this);
@@ -2057,15 +2037,6 @@ public:
    {
       return this->record->variable_referenced();
    }
-
-   /**
-    * Get the constant that is ultimately referenced by an r-value,
-    * in a constant expression evaluation context.
-    *
-    * The offset is used when the reference is to a specific column of
-    * a matrix.
-    */
-   virtual void constant_referenced(struct hash_table *variable_context, ir_constant *&store, int &offset) const;
 
    virtual void accept(ir_visitor *v)
    {
@@ -2201,6 +2172,14 @@ public:
    virtual bool is_basis() const;
 
    /**
+    * Return true for constants that could be stored as 16-bit unsigned values.
+    *
+    * Note that this will return true even for signed integer ir_constants, as
+    * long as the value is non-negative and fits in 16-bits.
+    */
+   virtual bool is_uint16_constant() const;
+
+   /**
     * Value of the constant.
     *
     * The field used to back the values supplied by the constant is determined
@@ -2221,8 +2200,6 @@ private:
     */
    ir_constant(void);
 };
-
-/*@}*/
 
 /**
  * IR instruction to emit a vertex in a geometry shader.
@@ -2270,6 +2247,8 @@ public:
 
    virtual ir_visitor_status accept(ir_hierarchical_visitor *);
 };
+
+/*@}*/
 
 /**
  * Apply a visitor to each IR node in a list
