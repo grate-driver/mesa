@@ -4202,6 +4202,7 @@ const unsigned _mesa_sysval_to_semantic[SYSTEM_VALUE_MAX] = {
     */
    TGSI_SEMANTIC_VERTEXID,
    TGSI_SEMANTIC_INSTANCEID,
+   0,
 
    /* Geometry shader
     */
