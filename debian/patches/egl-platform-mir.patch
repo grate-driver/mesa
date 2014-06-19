@@ -1,6 +1,6 @@
 --- a/configure.ac
 +++ b/configure.ac
-@@ -1428,7 +1428,9 @@
+@@ -1499,7 +1499,9 @@
  
  	android|fbdev|gdi|null)
  		;;
@@ -11,11 +11,11 @@
  	*)
  		AC_MSG_ERROR([EGL platform '$plat' does not exist])
  		;;
-@@ -1458,6 +1460,7 @@
- AM_CONDITIONAL(HAVE_EGL_PLATFORM_DRM, echo "$egl_platforms" | grep 'drm' >/dev/null 2>&1)
- AM_CONDITIONAL(HAVE_EGL_PLATFORM_FBDEV, echo "$egl_platforms" | grep 'fbdev' >/dev/null 2>&1)
- AM_CONDITIONAL(HAVE_EGL_PLATFORM_NULL, echo "$egl_platforms" | grep 'null' >/dev/null 2>&1)
-+AM_CONDITIONAL(HAVE_EGL_PLATFORM_MIR, echo "$egl_platforms" | grep 'mir' >/dev/null 2>&1)
+@@ -1529,6 +1531,7 @@
+ AM_CONDITIONAL(HAVE_EGL_PLATFORM_DRM, echo "$egl_platforms" | grep -q 'drm')
+ AM_CONDITIONAL(HAVE_EGL_PLATFORM_FBDEV, echo "$egl_platforms" | grep -q 'fbdev')
+ AM_CONDITIONAL(HAVE_EGL_PLATFORM_NULL, echo "$egl_platforms" | grep -q 'null')
++AM_CONDITIONAL(HAVE_EGL_PLATFORM_MIR, echo "$egl_platforms" | grep -q 'mir')
  
  AM_CONDITIONAL(HAVE_EGL_DRIVER_DRI2, test "x$HAVE_EGL_DRIVER_DRI2" != "x")
  
@@ -53,7 +53,7 @@
  
 --- a/src/egl/drivers/dri2/Makefile.am
 +++ b/src/egl/drivers/dri2/Makefile.am
-@@ -62,3 +62,9 @@
+@@ -63,3 +63,9 @@
  libegl_dri2_la_SOURCES += platform_drm.c
  AM_CFLAGS += -DHAVE_DRM_PLATFORM
  endif
@@ -75,9 +75,9 @@
 +         return EGL_TRUE;
 +      return dri2_initialize_mir(drv, disp);
 +#endif
- #endif
  #ifdef HAVE_ANDROID_PLATFORM
     case _EGL_PLATFORM_ANDROID:
+       if (disp->Options.TestOnly)
 --- a/src/egl/drivers/dri2/egl_dri2.h
 +++ b/src/egl/drivers/dri2/egl_dri2.h
 @@ -64,6 +64,11 @@
@@ -594,7 +594,7 @@
 +}
 --- a/src/egl/main/Makefile.am
 +++ b/src/egl/main/Makefile.am
-@@ -102,6 +102,11 @@
+@@ -106,6 +106,11 @@
  AM_CFLAGS += -DHAVE_NULL_PLATFORM
  endif
  
@@ -850,7 +850,7 @@
  
 --- a/src/gallium/state_trackers/dri/drm/dri2.c
 +++ b/src/gallium/state_trackers/dri/drm/dri2.c
-@@ -305,8 +305,13 @@
+@@ -306,8 +306,13 @@
  
        templ.format = format;
        templ.bind = bind;
@@ -868,7 +868,7 @@
        drawable->textures[statt] =
 --- a/src/gbm/backends/dri/gbm_dri.c
 +++ b/src/gbm/backends/dri/gbm_dri.c
-@@ -133,7 +133,7 @@
+@@ -135,7 +135,7 @@
  };
  
  static const __DRIdri2LoaderExtension dri2_loader_extension = {
@@ -877,7 +877,7 @@
  
     .getBuffers              = dri_get_buffers,
     .flushFrontBuffer        = dri_flush_front_buffer,
-@@ -331,9 +331,11 @@
+@@ -336,9 +336,11 @@
     switch (format) {
     case GBM_BO_FORMAT_XRGB8888:
     case GBM_FORMAT_XRGB8888:
@@ -889,7 +889,7 @@
        if (usage & GBM_BO_USE_SCANOUT)
           return 0;
        break;
-@@ -398,6 +400,9 @@
+@@ -420,6 +422,9 @@
     case __DRI_IMAGE_FORMAT_ABGR8888:
        ret = GBM_FORMAT_ABGR8888;
        break;
@@ -899,7 +899,7 @@
     default:
        ret = 0;
        break;
-@@ -406,6 +411,41 @@
+@@ -428,6 +433,41 @@
     return ret;
  }
  
@@ -941,7 +941,7 @@
  static struct gbm_bo *
  gbm_dri_bo_import(struct gbm_device *gbm,
                    uint32_t type, void *buffer, uint32_t usage)
-@@ -589,30 +629,7 @@
+@@ -644,31 +684,7 @@
     bo->base.base.height = height;
     bo->base.base.format = format;
  
@@ -967,6 +967,7 @@
 -      dri_format = __DRI_IMAGE_FORMAT_XRGB2101010;
 -      break;
 -   default:
+-      errno = EINVAL;
 -      goto failed;
 -   }
 +   dri_format = gbm_to_dri_format(format);
@@ -1024,7 +1025,7 @@
  
 --- a/src/mesa/drivers/dri/i965/brw_context.c
 +++ b/src/mesa/drivers/dri/i965/brw_context.c
-@@ -1018,7 +1018,7 @@
+@@ -1010,7 +1010,7 @@
                            struct intel_renderbuffer *rb,
                            const char *buffer_name);
  
@@ -1033,7 +1034,7 @@
  intel_update_image_buffers(struct brw_context *brw, __DRIdrawable *drawable);
  
  static void
-@@ -1091,9 +1091,7 @@
+@@ -1083,9 +1083,7 @@
     if (unlikely(INTEL_DEBUG & DEBUG_DRI))
        fprintf(stderr, "enter %s, drawable %p\n", __func__, drawable);
  
@@ -1044,56 +1045,23 @@
        intel_update_dri2_buffers(brw, drawable);
  
     driUpdateFramebufferSize(&brw->ctx, drawable);
-@@ -1267,12 +1265,14 @@
-    if (num_samples == 0) {
-        if (rb->mt &&
-            rb->mt->region &&
--           rb->mt->region->name == buffer->name)
-+           rb->mt->region->name == buffer->name &&
-+           rb->mt->region->name != 0)
-           return;
-    } else {
-        if (rb->singlesample_mt &&
-            rb->singlesample_mt->region &&
--           rb->singlesample_mt->region->name == buffer->name)
-+           rb->singlesample_mt->region->name == buffer->name &&
-+           rb->singlesample_mt->region->name != 0)
-           return;
-    }
- 
-@@ -1284,13 +1284,24 @@
+@@ -1282,8 +1280,13 @@
     }
  
     intel_miptree_release(&rb->mt);
--   region = intel_region_alloc_for_handle(brw->intelScreen,
--                                          buffer->cpp,
--                                          drawable->w,
--                                          drawable->h,
--                                          buffer->pitch,
--                                          buffer->name,
--                                          buffer_name);
+-   bo = drm_intel_bo_gem_create_from_name(brw->bufmgr, buffer_name,
+-                                          buffer->name);
 +   if (buffer->name)
-+      region = intel_region_alloc_for_handle(brw->intelScreen,
-+                                             buffer->cpp,
-+                                             drawable->w,
-+                                             drawable->h,
-+                                             buffer->pitch,
-+                                             buffer->name,
-+                                             buffer_name);
++      bo = drm_intel_bo_gem_create_from_name(brw->bufmgr, buffer_name,
++                                             buffer->name);
 +   else
-+      region = intel_region_alloc_for_fd(brw->intelScreen,
-+                                         buffer->cpp,
-+                                         drawable->w,
-+                                         drawable->h,
-+                                         buffer->pitch,
-+                                         0, /* Can we be so stupid? */
-+                                         buffer->fd,
-+                                         buffer_name);
++      bo = drm_intel_bo_gem_create_from_prime(brw->bufmgr, buffer->fd,
++                                             buffer->pitch * drawable->h);
 +
-    if (!region) {
+    if (!bo) {
        fprintf(stderr,
-               "Failed to make region for returned DRI2 buffer "
-@@ -1370,7 +1381,7 @@
+               "Failed to open BO for returned DRI2 buffer "
+@@ -1363,7 +1366,7 @@
     }
  }
  
@@ -1102,7 +1070,7 @@
  intel_update_image_buffers(struct brw_context *brw, __DRIdrawable *drawable)
  {
     struct gl_framebuffer *fb = drawable->driverPrivate;
-@@ -1389,7 +1400,7 @@
+@@ -1382,7 +1385,7 @@
     else if (front_rb)
        format = intel_rb_format(front_rb);
     else
@@ -1111,7 +1079,7 @@
  
     if (front_rb && (brw_is_front_buffer_drawing(fb) ||
                      brw_is_front_buffer_reading(fb) || !back_rb)) {
-@@ -1399,12 +1410,13 @@
+@@ -1392,12 +1395,13 @@
     if (back_rb)
        buffer_mask |= __DRI_IMAGE_BUFFER_BACK;
  
@@ -1131,7 +1099,7 @@
  
     if (images.image_mask & __DRI_IMAGE_BUFFER_FRONT) {
        drawable->w = images.front->width;
-@@ -1424,4 +1436,5 @@
+@@ -1417,4 +1421,5 @@
                                  images.back,
                                  __DRI_IMAGE_BUFFER_BACK);
     }
