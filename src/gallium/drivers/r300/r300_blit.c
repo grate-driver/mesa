@@ -118,7 +118,7 @@ static uint32_t r300_depth_clear_cb_value(enum pipe_format format,
     util_pack_color(rgba, format, &uc);
 
     if (util_format_get_blocksizebits(format) == 32)
-        return uc.ui;
+        return uc.ui[0];
     else
         return uc.us | (uc.us << 16);
 }
@@ -193,7 +193,7 @@ static void r300_set_clear_color(struct r300_context *r300,
         r300->color_clear_value_gb = uc.h[0] | ((uint32_t)uc.h[1] << 16);
         r300->color_clear_value_ar = uc.h[2] | ((uint32_t)uc.h[3] << 16);
     } else {
-        r300->color_clear_value = uc.ui;
+        r300->color_clear_value = uc.ui[0];
     }
 }
 
@@ -772,7 +772,7 @@ static void r300_msaa_resolve(struct pipe_context *pipe,
     templ.height0 = info->src.resource->height0;
     templ.depth0 = 1;
     templ.array_size = 1;
-    templ.usage = PIPE_USAGE_STATIC;
+    templ.usage = PIPE_USAGE_DEFAULT;
     templ.flags = R300_RESOURCE_FORCE_MICROTILING;
 
     tmp = screen->resource_create(screen, &templ);

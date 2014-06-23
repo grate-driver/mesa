@@ -572,6 +572,11 @@ st_translate_fragment_program(struct st_context *st,
             input_semantic_index[slot] = 0;
             interpMode[slot] = TGSI_INTERPOLATE_CONSTANT;
             break;
+         case VARYING_SLOT_VIEWPORT:
+            input_semantic_name[slot] = TGSI_SEMANTIC_VIEWPORT_INDEX;
+            input_semantic_index[slot] = 0;
+            interpMode[slot] = TGSI_INTERPOLATE_CONSTANT;
+            break;
          case VARYING_SLOT_CLIP_DIST0:
             input_semantic_name[slot] = TGSI_SEMANTIC_CLIPDIST;
             input_semantic_index[slot] = 0;
@@ -674,12 +679,21 @@ st_translate_fragment_program(struct st_context *st,
          outputsWritten &= ~(1 << FRAG_RESULT_STENCIL);
       }
 
+      if (outputsWritten & BITFIELD64_BIT(FRAG_RESULT_SAMPLE_MASK)) {
+         fs_output_semantic_name[fs_num_outputs] = TGSI_SEMANTIC_SAMPLEMASK;
+         fs_output_semantic_index[fs_num_outputs] = 0;
+         outputMapping[FRAG_RESULT_SAMPLE_MASK] = fs_num_outputs;
+         fs_num_outputs++;
+         outputsWritten &= ~(1 << FRAG_RESULT_SAMPLE_MASK);
+      }
+
       /* handle remaining outputs (color) */
       for (attr = 0; attr < FRAG_RESULT_MAX; attr++) {
          if (outputsWritten & BITFIELD64_BIT(attr)) {
             switch (attr) {
             case FRAG_RESULT_DEPTH:
             case FRAG_RESULT_STENCIL:
+            case FRAG_RESULT_SAMPLE_MASK:
                /* handled above */
                assert(0);
                break;
@@ -1027,6 +1041,10 @@ st_translate_geometry_program(struct st_context *st,
             gs_output_semantic_name[slot] = TGSI_SEMANTIC_PRIMID;
             gs_output_semantic_index[slot] = 0;
             break;
+         case VARYING_SLOT_VIEWPORT:
+            gs_output_semantic_name[slot] = TGSI_SEMANTIC_VIEWPORT_INDEX;
+            gs_output_semantic_index[slot] = 0;
+            break;
          case VARYING_SLOT_TEX0:
          case VARYING_SLOT_TEX1:
          case VARYING_SLOT_TEX2:
@@ -1087,6 +1105,7 @@ st_translate_geometry_program(struct st_context *st,
    ureg_property_gs_input_prim(ureg, stgp->Base.InputType);
    ureg_property_gs_output_prim(ureg, stgp->Base.OutputType);
    ureg_property_gs_max_vertices(ureg, stgp->Base.VerticesOut);
+   ureg_property_gs_invocations(ureg, stgp->Base.Invocations);
 
    if (stgp->glsl_to_tgsi)
       st_translate_program(st->ctx,
@@ -1194,7 +1213,7 @@ st_get_gp_variant(struct st_context *st,
 void
 st_print_shaders(struct gl_context *ctx)
 {
-   struct gl_shader_program **shProg = ctx->Shader.CurrentProgram;
+   struct gl_shader_program **shProg = ctx->_Shader->CurrentProgram;
    unsigned j;
 
    for (j = 0; j < 3; j++) {

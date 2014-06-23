@@ -429,8 +429,7 @@ etc2_rgb8_parse_block(struct etc2_block *block,
       block->is_planar_mode = true;
 
       /* opaque bit must be set in planar mode */
-      if (!block->opaque)
-         block->opaque = true;
+      block->opaque = true;
 
       for (i = 0; i < 3; i++) {
          block->base_colors[0][i] = etc2_base_color_o_planar(src, i);
@@ -686,14 +685,14 @@ etc2_unpack_rgb8(uint8_t *dst_row,
       const unsigned h = MIN2(bh, height - y);
 
       for (x = 0; x < width; x+= bw) {
-         etc2_rgb8_parse_block(&block, src,
-                               false /* punchthrough_alpha */);
-
          /*
           * Destination texture may not be a multiple of four texels in
           * width. Compute a safe width to avoid writing outside the texture.
           */
          const unsigned w = MIN2(bw, width - x);
+
+         etc2_rgb8_parse_block(&block, src,
+                               false /* punchthrough_alpha */);
 
          for (j = 0; j < h; j++) {
             uint8_t *dst = dst_row + (y + j) * dst_stride + x * comps;

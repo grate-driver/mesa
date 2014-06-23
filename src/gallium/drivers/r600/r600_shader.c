@@ -119,7 +119,7 @@ static int store_shader(struct pipe_context *ctx,
 		ptr = r600_buffer_map_sync_with_rings(&rctx->b, shader->bo, PIPE_TRANSFER_WRITE);
 		if (R600_BIG_ENDIAN) {
 			for (i = 0; i < shader->shader.bc.ndw; ++i) {
-				ptr[i] = util_bswap32(shader->shader.bc.bytecode[i]);
+				ptr[i] = util_cpu_to_le32(shader->shader.bc.bytecode[i]);
 			}
 		} else {
 			memcpy(ptr, shader->shader.bc.bytecode, shader->shader.bc.ndw * sizeof(*ptr));
@@ -499,6 +499,7 @@ static int r600_spi_sid(struct r600_shader_io * io)
 	    name == TGSI_SEMANTIC_PSIZE ||
 	    name == TGSI_SEMANTIC_EDGEFLAG ||
 	    name == TGSI_SEMANTIC_LAYER ||
+	    name == TGSI_SEMANTIC_VIEWPORT_INDEX ||
 	    name == TGSI_SEMANTIC_FACE)
 		index = 0;
 	else {
@@ -634,6 +635,10 @@ static int tgsi_declaration(struct r600_shader_ctx *ctx)
 				ctx->shader->vs_out_misc_write = 1;
 				ctx->shader->vs_out_edgeflag = 1;
 				ctx->edgeflag_output = i;
+				break;
+			case TGSI_SEMANTIC_VIEWPORT_INDEX:
+				ctx->shader->vs_out_misc_write = 1;
+				ctx->shader->vs_out_viewport = 1;
 				break;
 			case TGSI_SEMANTIC_LAYER:
 				ctx->shader->vs_out_misc_write = 1;
@@ -1336,6 +1341,18 @@ static int generate_gs_copy_shader(struct r600_context *rctx,
 			output.swizzle_w = 7;
 			ctx.shader->vs_out_misc_write = 1;
 			ctx.shader->vs_out_layer = 1;
+			break;
+		case TGSI_SEMANTIC_VIEWPORT_INDEX:
+			output.array_base = 61;
+			if (next_clip_pos == 61)
+				next_clip_pos = 62;
+			output.type = V_SQ_CF_ALLOC_EXPORT_WORD0_SQ_EXPORT_POS;
+			ctx.shader->vs_out_misc_write = 1;
+			ctx.shader->vs_out_viewport = 1;
+			output.swizzle_x = 7;
+			output.swizzle_y = 7;
+			output.swizzle_z = 7;
+			output.swizzle_w = 0;
 			break;
 		case TGSI_SEMANTIC_CLIPDIST:
 			/* spi_sid is 0 for clipdistance outputs that were generated
@@ -4788,8 +4805,9 @@ static int tgsi_tex(struct r600_shader_ctx *ctx)
 	if (inst->Texture.NumOffsets) {
 		assert(inst->Texture.NumOffsets == 1);
 
+		/* The texture offset feature doesn't work with the TXF instruction
+		 * and must be emulated by adding the offset to the texture coordinates. */
 		if (txf_add_offsets) {
-			/* Add the offsets for texelFetch manually. */
 			const struct tgsi_texture_offset *off = inst->TexOffsets;
 
 			switch (inst->Texture.Texture) {

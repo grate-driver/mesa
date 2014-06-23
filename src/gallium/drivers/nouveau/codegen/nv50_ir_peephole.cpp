@@ -242,6 +242,7 @@ private:
    virtual bool visit(BasicBlock *);
 
    void expr(Instruction *, ImmediateValue&, ImmediateValue&);
+   void expr(Instruction *, ImmediateValue&, ImmediateValue&, ImmediateValue&);
    void opnd(Instruction *, ImmediateValue&, int s);
 
    void unary(Instruction *, const ImmediateValue&);
@@ -279,8 +280,14 @@ ConstantFolding::visit(BasicBlock *bb)
       if (i->op == OP_MOV || i->op == OP_CALL)
          continue;
 
-      ImmediateValue src0, src1;
+      ImmediateValue src0, src1, src2;
 
+      if (i->srcExists(2) &&
+          i->src(0).getImmediate(src0) &&
+          i->src(1).getImmediate(src1) &&
+          i->src(2).getImmediate(src2))
+         expr(i, src0, src1, src2);
+      else
       if (i->srcExists(1) &&
           i->src(0).getImmediate(src0) && i->src(1).getImmediate(src1))
          expr(i, src0, src1);
@@ -418,7 +425,17 @@ ConstantFolding::expr(Instruction *i,
       case TYPE_F32: res.data.f32 = a->data.f32 * b->data.f32; break;
       case TYPE_F64: res.data.f64 = a->data.f64 * b->data.f64; break;
       case TYPE_S32:
-      case TYPE_U32: res.data.u32 = a->data.u32 * b->data.u32; break;
+         if (i->subOp == NV50_IR_SUBOP_MUL_HIGH) {
+            res.data.s32 = ((int64_t)a->data.s32 * b->data.s32) >> 32;
+            break;
+         }
+         /* fallthrough */
+      case TYPE_U32:
+         if (i->subOp == NV50_IR_SUBOP_MUL_HIGH) {
+            res.data.u32 = ((uint64_t)a->data.u32 * b->data.u32) >> 32;
+            break;
+         }
+         res.data.u32 = a->data.u32 * b->data.u32; break;
       default:
          return;
       }
@@ -498,6 +515,27 @@ ConstantFolding::expr(Instruction *i,
          return;
       res.data.u32 = a->data.u32;
       break;
+   case OP_EXTBF: {
+      int offset = b->data.u32 & 0xff;
+      int width = (b->data.u32 >> 8) & 0xff;
+      int rshift = offset;
+      int lshift = 0;
+      if (width == 0) {
+         res.data.u32 = 0;
+         break;
+      }
+      if (width + offset < 32) {
+         rshift = 32 - width;
+         lshift = 32 - width - offset;
+      }
+      switch (i->dType) {
+      case TYPE_S32: res.data.s32 = (a->data.s32 << lshift) >> rshift; break;
+      case TYPE_U32: res.data.u32 = (a->data.u32 << lshift) >> rshift; break;
+      default:
+         return;
+      }
+      break;
+   }
    default:
       return;
    }
@@ -523,8 +561,46 @@ ConstantFolding::expr(Instruction *i,
       if (i->src(0).getImmediate(src0))
          expr(i, src0, *i->getSrc(1)->asImm());
    } else {
-      i->op = OP_MOV;
+      i->op = i->saturate ? OP_SAT : OP_MOV; /* SAT handled by unary() */
    }
+   i->subOp = 0;
+}
+
+void
+ConstantFolding::expr(Instruction *i,
+                      ImmediateValue &imm0,
+                      ImmediateValue &imm1,
+                      ImmediateValue &imm2)
+{
+   struct Storage *const a = &imm0.reg, *const b = &imm1.reg, *const c = &imm2.reg;
+   struct Storage res;
+
+   memset(&res.data, 0, sizeof(res.data));
+
+   switch (i->op) {
+   case OP_INSBF: {
+      int offset = b->data.u32 & 0xff;
+      int width = (b->data.u32 >> 8) & 0xff;
+      unsigned bitmask = ((1 << width) - 1) << offset;
+      res.data.u32 = ((a->data.u32 << offset) & bitmask) | (c->data.u32 & ~bitmask);
+      break;
+   }
+   default:
+      return;
+   }
+
+   ++foldCount;
+   i->src(0).mod = Modifier(0);
+   i->src(1).mod = Modifier(0);
+   i->src(2).mod = Modifier(0);
+
+   i->setSrc(0, new_ImmediateValue(i->bb->getProgram(), res.data.u32));
+   i->setSrc(1, NULL);
+   i->setSrc(2, NULL);
+
+   i->getSrc(0)->reg.data = res.data;
+
+   i->op = OP_MOV;
 }
 
 void
@@ -537,6 +613,7 @@ ConstantFolding::unary(Instruction *i, const ImmediateValue &imm)
    switch (i->op) {
    case OP_NEG: res.data.f32 = -imm.reg.data.f32; break;
    case OP_ABS: res.data.f32 = fabsf(imm.reg.data.f32); break;
+   case OP_SAT: res.data.f32 = CLAMP(imm.reg.data.f32, 0.0f, 1.0f); break;
    case OP_RCP: res.data.f32 = 1.0f / imm.reg.data.f32; break;
    case OP_RSQ: res.data.f32 = 1.0f / sqrtf(imm.reg.data.f32); break;
    case OP_LG2: res.data.f32 = log2f(imm.reg.data.f32); break;
@@ -626,12 +703,41 @@ ConstantFolding::opnd(Instruction *i, ImmediateValue &imm0, int s)
 {
    const int t = !s;
    const operation op = i->op;
+   Instruction *newi = i;
 
    switch (i->op) {
    case OP_MUL:
       if (i->dType == TYPE_F32)
          tryCollapseChainedMULs(i, s, imm0);
 
+      if (i->subOp == NV50_IR_SUBOP_MUL_HIGH) {
+         assert(!isFloatType(i->sType));
+         if (imm0.isInteger(1) && i->dType == TYPE_S32) {
+            bld.setPosition(i, false);
+            // Need to set to the sign value, which is a compare.
+            newi = bld.mkCmp(OP_SET, CC_LT, TYPE_S32, i->getDef(0),
+                             TYPE_S32, i->getSrc(t), bld.mkImm(0));
+            delete_Instruction(prog, i);
+         } else if (imm0.isInteger(0) || imm0.isInteger(1)) {
+            // The high bits can't be set in this case (either mul by 0 or
+            // unsigned by 1)
+            i->op = OP_MOV;
+            i->subOp = 0;
+            i->setSrc(0, new_ImmediateValue(prog, 0u));
+            i->src(0).mod = Modifier(0);
+            i->setSrc(1, NULL);
+         } else if (!imm0.isNegative() && imm0.isPow2()) {
+            // Translate into a shift
+            imm0.applyLog2();
+            i->op = OP_SHR;
+            i->subOp = 0;
+            imm0.reg.data.u32 = 32 - imm0.reg.data.u32;
+            i->setSrc(0, i->getSrc(t));
+            i->src(0).mod = i->src(t).mod;
+            i->setSrc(1, new_ImmediateValue(prog, imm0.reg.data.u32));
+            i->src(1).mod = 0;
+         }
+      } else
       if (imm0.isInteger(0)) {
          i->op = OP_MOV;
          i->setSrc(0, new_ImmediateValue(prog, 0u));
@@ -722,7 +828,7 @@ ConstantFolding::opnd(Instruction *i, ImmediateValue &imm0, int s)
          else
             tA = tB;
          tB = s ? bld.getSSA() : i->getDef(0);
-         bld.mkOp2(OP_ADD, TYPE_U32, tB, mul->getDef(0), tA);
+         newi = bld.mkOp2(OP_ADD, TYPE_U32, tB, mul->getDef(0), tA);
          if (s)
             bld.mkOp2(OP_SHR, TYPE_U32, i->getDef(0), tB, bld.mkImm(s));
 
@@ -754,7 +860,7 @@ ConstantFolding::opnd(Instruction *i, ImmediateValue &imm0, int s)
          tA = bld.getSSA();
          bld.mkCmp(OP_SET, CC_LT, TYPE_S32, tA, TYPE_S32, i->getSrc(0), bld.mkImm(0));
          tD = (d < 0) ? bld.getSSA() : i->getDef(0)->asLValue();
-         bld.mkOp2(OP_SUB, TYPE_U32, tD, tB, tA);
+         newi = bld.mkOp2(OP_SUB, TYPE_U32, tD, tB, tA);
          if (d < 0)
             bld.mkOp1(OP_NEG, TYPE_S32, i->getDef(0), tB);
 
@@ -818,6 +924,7 @@ ConstantFolding::opnd(Instruction *i, ImmediateValue &imm0, int s)
 
    case OP_ABS:
    case OP_NEG:
+   case OP_SAT:
    case OP_LG2:
    case OP_RCP:
    case OP_SQRT:
@@ -832,7 +939,7 @@ ConstantFolding::opnd(Instruction *i, ImmediateValue &imm0, int s)
    default:
       return;
    }
-   if (i->op != op)
+   if (newi->op != op)
       foldCount++;
 }
 

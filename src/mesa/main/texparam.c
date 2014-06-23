@@ -352,7 +352,8 @@ set_tex_parameteri(struct gl_context *ctx,
       if (texObj->MaxLevel == params[0])
          return GL_FALSE;
 
-      if (params[0] < 0 || texObj->Target == GL_TEXTURE_RECTANGLE_ARB) {
+      if (params[0] < 0 ||
+          (texObj->Target == GL_TEXTURE_RECTANGLE_ARB && params[0] > 0)) {
          _mesa_error(ctx, GL_INVALID_VALUE,
                      "glTexParameter(param=%d)", params[0]);
          return GL_FALSE;
@@ -451,6 +452,20 @@ set_tex_parameteri(struct gl_context *ctx,
       }
       goto invalid_pname;
 
+   case GL_DEPTH_STENCIL_TEXTURE_MODE:
+      if (_mesa_is_desktop_gl(ctx) && ctx->Extensions.ARB_stencil_texturing) {
+         bool stencil = params[0] == GL_STENCIL_INDEX;
+         if (!stencil && params[0] != GL_DEPTH_COMPONENT)
+            goto invalid_param;
+
+         if (texObj->StencilSampling == stencil)
+            return GL_FALSE;
+
+         texObj->StencilSampling = stencil;
+         return GL_TRUE;
+      }
+      goto invalid_pname;
+
    case GL_TEXTURE_CROP_RECT_OES:
       if (ctx->API != API_OPENGLES || !ctx->Extensions.OES_draw_texture)
          goto invalid_pname;
@@ -470,7 +485,7 @@ set_tex_parameteri(struct gl_context *ctx,
          const GLuint comp = pname - GL_TEXTURE_SWIZZLE_R_EXT;
          const GLint swz = comp_to_swizzle(params[0]);
          if (swz < 0) {
-            _mesa_error(ctx, GL_INVALID_OPERATION,
+            _mesa_error(ctx, GL_INVALID_ENUM,
                         "glTexParameter(swizzle 0x%x)", params[0]);
             return GL_FALSE;
          }
@@ -495,7 +510,7 @@ set_tex_parameteri(struct gl_context *ctx,
                set_swizzle_component(&texObj->_Swizzle, comp, swz);
             }
             else {
-               _mesa_error(ctx, GL_INVALID_OPERATION,
+               _mesa_error(ctx, GL_INVALID_ENUM,
                            "glTexParameter(swizzle 0x%x)", params[comp]);
                return GL_FALSE;
             }
@@ -707,6 +722,7 @@ _mesa_TexParameterf(GLenum target, GLenum pname, GLfloat param)
    case GL_TEXTURE_COMPARE_MODE_ARB:
    case GL_TEXTURE_COMPARE_FUNC_ARB:
    case GL_DEPTH_TEXTURE_MODE_ARB:
+   case GL_DEPTH_STENCIL_TEXTURE_MODE:
    case GL_TEXTURE_SRGB_DECODE_EXT:
    case GL_TEXTURE_CUBE_MAP_SEAMLESS:
    case GL_TEXTURE_SWIZZLE_R_EXT:
@@ -762,6 +778,7 @@ _mesa_TexParameterfv(GLenum target, GLenum pname, const GLfloat *params)
    case GL_TEXTURE_COMPARE_MODE_ARB:
    case GL_TEXTURE_COMPARE_FUNC_ARB:
    case GL_DEPTH_TEXTURE_MODE_ARB:
+   case GL_DEPTH_STENCIL_TEXTURE_MODE:
    case GL_TEXTURE_SRGB_DECODE_EXT:
    case GL_TEXTURE_CUBE_MAP_SEAMLESS:
       {
@@ -1459,6 +1476,12 @@ _mesa_GetTexParameterfv( GLenum target, GLenum pname, GLfloat *params )
             goto invalid_pname;
          *params = (GLfloat) obj->DepthMode;
          break;
+      case GL_DEPTH_STENCIL_TEXTURE_MODE:
+         if (!_mesa_is_desktop_gl(ctx) || !ctx->Extensions.ARB_stencil_texturing)
+            goto invalid_pname;
+         *params = (GLfloat)
+            (obj->StencilSampling ? GL_STENCIL_INDEX : GL_DEPTH_COMPONENT);
+         break;
       case GL_TEXTURE_LOD_BIAS:
          if (_mesa_is_gles(ctx))
             goto invalid_pname;
@@ -1672,6 +1695,12 @@ _mesa_GetTexParameteriv( GLenum target, GLenum pname, GLint *params )
          if (ctx->API != API_OPENGL_COMPAT || !ctx->Extensions.ARB_depth_texture)
             goto invalid_pname;
          *params = (GLint) obj->DepthMode;
+         break;
+      case GL_DEPTH_STENCIL_TEXTURE_MODE:
+         if (!_mesa_is_desktop_gl(ctx) || !ctx->Extensions.ARB_stencil_texturing)
+            goto invalid_pname;
+         *params = (GLint)
+            (obj->StencilSampling ? GL_STENCIL_INDEX : GL_DEPTH_COMPONENT);
          break;
       case GL_TEXTURE_LOD_BIAS:
          if (_mesa_is_gles(ctx))

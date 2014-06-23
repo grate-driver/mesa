@@ -61,8 +61,10 @@ enum adreno_stencil_op fd_stencil_op(unsigned op);
 #define FD_DBG_DIRECT   0x0020
 #define FD_DBG_DBYPASS  0x0040
 #define FD_DBG_FRAGHALF 0x0080
-#define FD_DBG_BINNING  0x0100
-#define FD_DBG_DBINNING 0x0200
+#define FD_DBG_NOBIN    0x0100
+#define FD_DBG_NOOPT    0x0200
+#define FD_DBG_OPTMSGS  0x0400
+#define FD_DBG_OPTDUMP  0x0800
 
 extern int fd_mesa_debug;
 extern bool fd_binning_enabled;
@@ -221,11 +223,18 @@ OUT_IB(struct fd_ringbuffer *ring, struct fd_ringmarker *start,
 	emit_marker(ring, 6);
 }
 
+/* CP_SCRATCH_REG4 is used to hold base address for query results: */
+#define HW_QUERY_BASE_REG REG_AXXX_CP_SCRATCH_REG4
+
 static inline void
 emit_marker(struct fd_ringbuffer *ring, int scratch_idx)
 {
 	extern unsigned marker_cnt;
-	OUT_PKT0(ring, REG_AXXX_CP_SCRATCH_REG0 + scratch_idx, 1);
+	unsigned reg = REG_AXXX_CP_SCRATCH_REG0 + scratch_idx;
+	assert(reg != HW_QUERY_BASE_REG);
+	if (reg == HW_QUERY_BASE_REG)
+		return;
+	OUT_PKT0(ring, reg, 1);
 	OUT_RING(ring, ++marker_cnt);
 }
 

@@ -1,3 +1,76 @@
+mesa (10.2.1-1) experimental; urgency=medium
+
+  [ Andreas Boll ]
+  * New upstream release.
+    - 01_glapi-Duplicate-GLES1-prototypes-in-glapi_dispatch.c.diff
+      dropped, upstream
+  * Add 01_targets-xa-limit-the-amount-of-exported-symbols.diff, fixes
+    FTBFS with gcc-4.9.
+  [ Maarten Lankhorst ]
+  * Attempt to fix a FTBFS on hurd.
+
+ -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Mon, 16 Jun 2014 15:41:59 +0200
+
+mesa (10.2.0~rc4-2) experimental; urgency=medium
+
+  [ Andreas Boll ]
+  * Add 01_glapi-Duplicate-GLES1-prototypes-in-glapi_dispatch.c.diff,
+    should fix FTBFS on non-i386 and non-amd64.
+
+  [ Emilio Pozuelo Monfort ]
+  * Upload to experimental.
+
+ -- Emilio Pozuelo Monfort <pochu@debian.org>  Sat, 31 May 2014 00:44:19 +0200
+
+mesa (10.2.0~rc4-1) experimental; urgency=medium
+
+  [ Fabio Pedretti ]
+  * debian/rules: remove unused --with-llvm-shared-libs configure option
+  * debian/control: remove python-libxml2 dependency
+
+  [ Julien Cristau ]
+  * Bump libdrm-dev build-dep to 2.4.54 per configure.ac.
+  * Bump libxcb-dri2 and libxcb-glx build-deps per configure.ac.
+  * Remove Cyril Brulebois from Uploaders.
+  * debian/rules: explicitly disable omx.
+
+  [ Maarten Lankhorst ]
+  * New upstream release candidate.
+
+  [ Andreas Boll ]
+  * New upstream release candidate.
+    - 01_no_undefined.diff dropped, upstream
+  * Don't try to enable xa on !linux.
+
+  [ Emilio Pozuelo Monfort ]
+  * Upload to experimental.
+
+ -- Emilio Pozuelo Monfort <pochu@debian.org>  Sat, 24 May 2014 15:16:23 +0200
+
+mesa (10.2.0~rc1-1) experimental; urgency=medium
+
+  [ Timo Aaltonen ]
+  * New upstream release candidate.
+    - 02_gbm_no_undefined.diff dropped, upstream
+    - 03_gbm_make_devices_static.diff dropped, upstream
+  * control: Bump libdrm-dev build-dependency.
+  * Drop a symbol from libxatracker2.
+  * libosmesa6: Bump the soname to upstream default (8), drop
+    04_osmesa_version.diff. Add a symlink with the old name to point to
+    the new lib.
+
+  [ Julien Cristau ]
+  * Add 01_no_undefined.diff to actually add -Wl,--no-undefined to the linker
+    flags for our shared libraries.
+
+  [ Andreas Boll ]
+  * Relax ocl-icd-libopencl1 dependency to allow the generic virtual
+    libopencl1 as a valid alternative (Closes: #745765).
+  * Add missing separator between dependency items '${misc:Depends}'
+    and 'libglapi-mesa (= ${binary:Version})'.
+
+ -- Julien Cristau <jcristau@debian.org>  Wed, 14 May 2014 22:57:08 +0200
+
 mesa (10.1.4-1) unstable; urgency=medium
 
   [ Timo Aaltonen ]
