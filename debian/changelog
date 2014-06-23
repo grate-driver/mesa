@@ -1,3 +1,9 @@
+mesa (10.2.1-2) unstable; urgency=medium
+
+  * Upload to unstable.
+
+ -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Mon, 23 Jun 2014 12:00:09 +0200
+
 mesa (10.2.1-1ubuntu1) UNRELEASED; urgency=medium
 
   * Preliminary port to 10.2.
@@ -79,6 +85,21 @@ mesa (10.2.0~rc1-1) experimental; urgency=medium
 
  -- Julien Cristau <jcristau@debian.org>  Wed, 14 May 2014 22:57:08 +0200
 
+mesa (10.1.4-1) unstable; urgency=medium
+
+  [ Timo Aaltonen ]
+  * New upstream release.
+
+  [ Andreas Boll ]
+  * New upstream release.
+  * Bump llvm-3.4-dev and libclang-3.4-dev to 1:3.4.1-3
+    - Enables geometry shaders on radeonsi
+
+  [ Emilio Pozuelo Monfort ]
+  * Upload to unstable.
+
+ -- Emilio Pozuelo Monfort <pochu@debian.org>  Tue, 27 May 2014 12:05:35 +0200
+
 mesa (10.1.3-0ubuntu1) utopic; urgency=medium
 
   [ Maarten Lankhorst ]
@@ -89,12 +110,6 @@ mesa (10.1.3-0ubuntu1) utopic; urgency=medium
     on Broadwell. (LP: #1318589)
 
  -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Mon, 12 May 2014 09:51:08 +0000
-
-mesa (10.1.3-1) UNRELEASED; urgency=medium
-
-  * New upstream release.
-
- -- Timo Aaltonen <tjaalton@ubuntu.com>  Sat, 10 May 2014 01:20:18 +0300
 
 mesa (10.1.2-1) unstable; urgency=medium
 
