@@ -162,6 +162,7 @@ intelInitExtensions(struct gl_context *ctx)
 
    assert(brw->gen >= 4);
 
+   ctx->Extensions.ARB_buffer_storage = true;
    ctx->Extensions.ARB_depth_buffer_float = true;
    ctx->Extensions.ARB_depth_clamp = true;
    ctx->Extensions.ARB_depth_texture = true;
@@ -174,7 +175,6 @@ intelInitExtensions(struct gl_context *ctx)
    ctx->Extensions.ARB_fragment_program_shadow = true;
    ctx->Extensions.ARB_fragment_shader = true;
    ctx->Extensions.ARB_framebuffer_object = true;
-   ctx->Extensions.ARB_half_float_pixel = true;
    ctx->Extensions.ARB_half_float_vertex = true;
    ctx->Extensions.ARB_instanced_arrays = true;
    ctx->Extensions.ARB_internalformat_query = true;
@@ -201,6 +201,7 @@ intelInitExtensions(struct gl_context *ctx)
    ctx->Extensions.ARB_vertex_program = true;
    ctx->Extensions.ARB_vertex_shader = true;
    ctx->Extensions.ARB_vertex_type_2_10_10_10_rev = true;
+   ctx->Extensions.ARB_vertex_type_10f_11f_11f_rev = true;
    ctx->Extensions.EXT_blend_color = true;
    ctx->Extensions.EXT_blend_equation_separate = true;
    ctx->Extensions.EXT_blend_func_separate = true;
@@ -212,7 +213,6 @@ intelInitExtensions(struct gl_context *ctx)
    ctx->Extensions.EXT_pixel_buffer_object = true;
    ctx->Extensions.EXT_point_parameters = true;
    ctx->Extensions.EXT_provoking_vertex = true;
-   ctx->Extensions.EXT_separate_shader_objects = true;
    ctx->Extensions.EXT_texture_array = true;
    ctx->Extensions.EXT_texture_env_dot3 = true;
    ctx->Extensions.EXT_texture_filter_anisotropic = true;
@@ -254,7 +254,8 @@ intelInitExtensions(struct gl_context *ctx)
 
       ctx->Extensions.EXT_framebuffer_multisample = true;
       ctx->Extensions.EXT_transform_feedback = true;
-      ctx->Extensions.EXT_framebuffer_multisample_blit_scaled = true;
+      if (brw->gen < 8)
+         ctx->Extensions.EXT_framebuffer_multisample_blit_scaled = true;
       ctx->Extensions.ARB_blend_func_extended = !driQueryOptionb(&brw->optionCache, "disable_blend_func_extended");
       ctx->Extensions.ARB_draw_buffers_blend = true;
       ctx->Extensions.ARB_ES3_compatibility = true;
@@ -268,7 +269,7 @@ intelInitExtensions(struct gl_context *ctx)
       ctx->Extensions.ARB_shading_language_packing = true;
       ctx->Extensions.ARB_texture_multisample = true;
       ctx->Extensions.ARB_sample_shading = true;
-      ctx->Extensions.ARB_vertex_type_10f_11f_11f_rev = true;
+      ctx->Extensions.ARB_texture_gather = true;
 
       /* Test if the kernel has the ioctl. */
       if (drm_intel_reg_read(brw->bufmgr, TIMESTAMP, &dummy) == 0)
@@ -283,8 +284,8 @@ intelInitExtensions(struct gl_context *ctx)
    }
 
    if (brw->gen >= 7) {
-      ctx->Extensions.ARB_texture_gather = true;
       ctx->Extensions.ARB_conservative_depth = true;
+      ctx->Extensions.ARB_texture_view = true;
       ctx->Extensions.AMD_vertex_shader_layer = true;
       if (can_do_pipelined_register_writes(brw)) {
          ctx->Extensions.ARB_transform_feedback2 = true;
@@ -298,10 +299,19 @@ intelInitExtensions(struct gl_context *ctx)
        */
       if (ctx->API == API_OPENGL_CORE)
          ctx->Extensions.ARB_viewport_array = true;
+
+      if (getenv("INTEL_COMPUTE_SHADER"))
+         ctx->Extensions.ARB_compute_shader = true;
    }
 
-   if (brw->gen == 5 || can_write_oacontrol(brw))
+   if (brw->gen >= 8) {
+      ctx->Extensions.ARB_stencil_texturing = true;
+   }
+
+   if (brw->gen == 5 || can_write_oacontrol(brw)) {
       ctx->Extensions.AMD_performance_monitor = true;
+      ctx->Extensions.INTEL_performance_query = true;
+   }
 
    if (ctx->API == API_OPENGL_CORE)
       ctx->Extensions.ARB_base_instance = true;

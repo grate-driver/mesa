@@ -65,15 +65,17 @@ static const struct debug_named_value debug_options[] = {
 		{"direct",    FD_DBG_DIRECT, "Force inline (SS_DIRECT) state loads"},
 		{"dbypass",   FD_DBG_DBYPASS,"Disable GMEM bypass"},
 		{"fraghalf",  FD_DBG_FRAGHALF, "Use half-precision in fragment shader"},
-		{"binning",   FD_DBG_BINNING,  "Enable hw binning"},
-		{"dbinning",  FD_DBG_DBINNING, "Disable hw binning"},
+		{"nobin",     FD_DBG_NOBIN,  "Disable hw binning"},
+		{"noopt",     FD_DBG_NOOPT , "Disable optimization passes in compiler"},
+		{"optmsgs",   FD_DBG_OPTMSGS,"Enable optimizater debug messages"},
+		{"optdump",   FD_DBG_OPTDUMP,"Dump shader DAG to .dot files"},
 		DEBUG_NAMED_VALUE_END
 };
 
 DEBUG_GET_ONCE_FLAGS_OPTION(fd_mesa_debug, "FD_MESA_DEBUG", debug_options, 0)
 
 int fd_mesa_debug = 0;
-bool fd_binning_enabled = false; /* default to off for now */
+bool fd_binning_enabled = true;
 
 static const char *
 fd_screen_get_name(struct pipe_screen *pscreen)
@@ -141,6 +143,8 @@ tables for things that differ if the delta is not too much..
 static int
 fd_screen_get_param(struct pipe_screen *pscreen, enum pipe_cap param)
 {
+	struct fd_screen *screen = fd_screen(pscreen);
+
 	/* this is probably not totally correct.. but it's a start: */
 	switch (param) {
 	/* Supported features (boolean caps). */
@@ -159,8 +163,6 @@ fd_screen_get_param(struct pipe_screen *pscreen, enum pipe_cap param)
 	case PIPE_CAP_TGSI_FS_COORD_PIXEL_CENTER_HALF_INTEGER:
 	case PIPE_CAP_SM3:
 	case PIPE_CAP_SEAMLESS_CUBE_MAP:
-	case PIPE_CAP_PRIMITIVE_RESTART:
-	case PIPE_CAP_CONDITIONAL_RENDER:
 	case PIPE_CAP_TEXTURE_BARRIER:
 	case PIPE_CAP_VERTEX_COLOR_UNCLAMPED:
 	case PIPE_CAP_QUADS_FOLLOW_PROVOKING_VERTEX_CONVENTION:
@@ -178,6 +180,8 @@ fd_screen_get_param(struct pipe_screen *pscreen, enum pipe_cap param)
 	case PIPE_CAP_SHADER_STENCIL_EXPORT:
 	case PIPE_CAP_TGSI_TEXCOORD:
 	case PIPE_CAP_PREFER_BLIT_BASED_TEXTURE_TRANSFER:
+	case PIPE_CAP_CONDITIONAL_RENDER:
+	case PIPE_CAP_PRIMITIVE_RESTART:
 		return 0;
 
 	case PIPE_CAP_CONSTANT_BUFFER_OFFSET_ALIGNMENT:
@@ -201,6 +205,12 @@ fd_screen_get_param(struct pipe_screen *pscreen, enum pipe_cap param)
 	case PIPE_CAP_QUERY_PIPELINE_STATISTICS:
 	case PIPE_CAP_TEXTURE_BORDER_COLOR_QUIRK:
         case PIPE_CAP_TGSI_VS_LAYER:
+	case PIPE_CAP_MAX_TEXTURE_GATHER_COMPONENTS:
+	case PIPE_CAP_TEXTURE_GATHER_SM5:
+        case PIPE_CAP_BUFFER_MAP_PERSISTENT_COHERENT:
+        case PIPE_CAP_FAKE_SW_MSAA:
+	case PIPE_CAP_TEXTURE_QUERY_LOD:
+        case PIPE_CAP_SAMPLE_SHADING:
 		return 0;
 
 	/* Stream output. */
@@ -221,30 +231,31 @@ fd_screen_get_param(struct pipe_screen *pscreen, enum pipe_cap param)
 	case PIPE_CAP_MAX_TEXTURE_CUBE_LEVELS:
 		return MAX_MIP_LEVELS;
 	case PIPE_CAP_MAX_TEXTURE_ARRAY_LAYERS:
-		return 9192;
-	case PIPE_CAP_MAX_COMBINED_SAMPLERS:
-		return 20;
+		return 0;  /* TODO: a3xx+ should support (required in gles3) */
 
 	/* Render targets. */
 	case PIPE_CAP_MAX_RENDER_TARGETS:
 		return 1;
 
-	/* Timer queries. */
+	/* Queries. */
 	case PIPE_CAP_QUERY_TIME_ELAPSED:
-	case PIPE_CAP_OCCLUSION_QUERY:
 	case PIPE_CAP_QUERY_TIMESTAMP:
 		return 0;
+	case PIPE_CAP_OCCLUSION_QUERY:
+		return (screen->gpu_id >= 300) ? 1: 0;
 
+	case PIPE_CAP_MIN_TEXTURE_GATHER_OFFSET:
 	case PIPE_CAP_MIN_TEXEL_OFFSET:
 		return -8;
 
+	case PIPE_CAP_MAX_TEXTURE_GATHER_OFFSET:
 	case PIPE_CAP_MAX_TEXEL_OFFSET:
 		return 7;
 
 	case PIPE_CAP_ENDIANNESS:
 		return PIPE_ENDIAN_LITTLE;
 
-        case PIPE_CAP_MIN_MAP_BUFFER_ALIGNMENT:
+	case PIPE_CAP_MIN_MAP_BUFFER_ALIGNMENT:
 		return 64;
 
 	default:
@@ -307,7 +318,7 @@ fd_screen_get_shader_param(struct pipe_screen *pscreen, unsigned shader,
 	case PIPE_SHADER_CAP_MAX_CONTROL_FLOW_DEPTH:
 		return 8; /* XXX */
 	case PIPE_SHADER_CAP_MAX_INPUTS:
-		return 32;
+		return 16;
 	case PIPE_SHADER_CAP_MAX_TEMPS:
 		return 64; /* Max native temporaries. */
 	case PIPE_SHADER_CAP_MAX_ADDRS:
@@ -397,10 +408,7 @@ fd_screen_create(struct fd_device *dev)
 
 	fd_mesa_debug = debug_get_option_fd_mesa_debug();
 
-	if (fd_mesa_debug & FD_DBG_BINNING)
-		fd_binning_enabled = true;
-
-	if (fd_mesa_debug & FD_DBG_DBINNING)
+	if (fd_mesa_debug & FD_DBG_NOBIN)
 		fd_binning_enabled = false;
 
 	if (!screen)

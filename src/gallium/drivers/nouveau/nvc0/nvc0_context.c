@@ -57,6 +57,26 @@ nvc0_texture_barrier(struct pipe_context *pipe)
 }
 
 static void
+nvc0_memory_barrier(struct pipe_context *pipe, unsigned flags)
+{
+   struct nvc0_context *nvc0 = nvc0_context(pipe);
+   int i;
+
+   if (flags & PIPE_BARRIER_MAPPED_BUFFER) {
+      for (i = 0; i < nvc0->num_vtxbufs; ++i) {
+         if (!nvc0->vtxbuf[i].buffer)
+            continue;
+         if (nvc0->vtxbuf[i].buffer->flags & PIPE_RESOURCE_FLAG_MAP_PERSISTENT)
+            nvc0->base.vbo_dirty = TRUE;
+      }
+
+      if (nvc0->idxbuf.buffer &&
+          nvc0->idxbuf.buffer->flags & PIPE_RESOURCE_FLAG_MAP_PERSISTENT)
+         nvc0->base.vbo_dirty = TRUE;
+   }
+}
+
+static void
 nvc0_context_unreference_resources(struct nvc0_context *nvc0)
 {
    unsigned s, i;
@@ -103,11 +123,12 @@ nvc0_destroy(struct pipe_context *pipe)
 {
    struct nvc0_context *nvc0 = nvc0_context(pipe);
 
-   if (nvc0->screen->cur_ctx == nvc0) {
-      nvc0->base.pushbuf->kick_notify = NULL;
+   if (nvc0->screen->cur_ctx == nvc0)
       nvc0->screen->cur_ctx = NULL;
-      nouveau_pushbuf_bufctx(nvc0->base.pushbuf, NULL);
-   }
+   /* Unset bufctx, we don't want to revalidate any resources after the flush.
+    * Other contexts will always set their bufctx again on action calls.
+    */
+   nouveau_pushbuf_bufctx(nvc0->base.pushbuf, NULL);
    nouveau_pushbuf_kick(nvc0->base.pushbuf, nvc0->base.pushbuf->channel);
 
    nvc0_context_unreference_resources(nvc0);
@@ -264,6 +285,7 @@ nvc0_create(struct pipe_screen *pscreen, void *priv)
 
    pipe->flush = nvc0_flush;
    pipe->texture_barrier = nvc0_texture_barrier;
+   pipe->memory_barrier = nvc0_memory_barrier;
    pipe->get_sample_position = nvc0_context_get_sample_position;
 
    if (!screen->cur_ctx) {

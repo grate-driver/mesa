@@ -21,6 +21,7 @@
 //
 
 #include "core/device.hpp"
+#include "core/platform.hpp"
 #include "pipe/p_screen.h"
 #include "pipe/p_state.h"
 
@@ -41,8 +42,11 @@ namespace {
 device::device(clover::platform &platform, pipe_loader_device *ldev) :
    platform(platform), ldev(ldev) {
    pipe = pipe_loader_create_screen(ldev, PIPE_SEARCH_DIR);
-   if (!pipe || !pipe->get_param(pipe, PIPE_CAP_COMPUTE))
+   if (!pipe || !pipe->get_param(pipe, PIPE_CAP_COMPUTE)) {
+      if (pipe)
+         pipe->destroy(pipe);
       throw error(CL_INVALID_DEVICE);
+   }
 }
 
 device::~device() {
@@ -151,6 +155,12 @@ cl_ulong
 device::max_mem_alloc_size() const {
    return get_compute_param<uint64_t>(pipe,
                                       PIPE_COMPUTE_CAP_MAX_MEM_ALLOC_SIZE)[0];
+}
+
+cl_uint
+device::max_clock_frequency() const {
+   return get_compute_param<uint32_t>(pipe,
+                                      PIPE_COMPUTE_CAP_MAX_CLOCK_FREQUENCY)[0];
 }
 
 std::vector<size_t>

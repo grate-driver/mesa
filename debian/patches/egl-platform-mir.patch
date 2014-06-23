@@ -1,6 +1,6 @@
 --- a/configure.ac
 +++ b/configure.ac
-@@ -1474,7 +1474,9 @@
+@@ -1499,7 +1499,9 @@
  
  	android|fbdev|gdi|null)
  		;;
@@ -11,14 +11,14 @@
  	*)
  		AC_MSG_ERROR([EGL platform '$plat' does not exist])
  		;;
-@@ -1503,6 +1505,7 @@
- AM_CONDITIONAL(HAVE_EGL_PLATFORM_DRM, echo "$egl_platforms" | grep 'drm' >/dev/null 2>&1)
- AM_CONDITIONAL(HAVE_EGL_PLATFORM_FBDEV, echo "$egl_platforms" | grep 'fbdev' >/dev/null 2>&1)
- AM_CONDITIONAL(HAVE_EGL_PLATFORM_NULL, echo "$egl_platforms" | grep 'null' >/dev/null 2>&1)
-+AM_CONDITIONAL(HAVE_EGL_PLATFORM_MIR, echo "$egl_platforms" | grep 'mir' >/dev/null 2>&1)
+@@ -1529,6 +1531,7 @@
+ AM_CONDITIONAL(HAVE_EGL_PLATFORM_DRM, echo "$egl_platforms" | grep -q 'drm')
+ AM_CONDITIONAL(HAVE_EGL_PLATFORM_FBDEV, echo "$egl_platforms" | grep -q 'fbdev')
+ AM_CONDITIONAL(HAVE_EGL_PLATFORM_NULL, echo "$egl_platforms" | grep -q 'null')
++AM_CONDITIONAL(HAVE_EGL_PLATFORM_MIR, echo "$egl_platforms" | grep -q 'mir')
  
  AM_CONDITIONAL(HAVE_EGL_DRIVER_DRI2, test "x$HAVE_EGL_DRIVER_DRI2" != "x")
- AM_CONDITIONAL(HAVE_EGL_DRIVER_GLX, test "x$HAVE_EGL_DRIVER_GLX" != "x")
+ 
 --- a/include/EGL/eglplatform.h
 +++ b/include/EGL/eglplatform.h
 @@ -104,6 +104,13 @@
@@ -37,7 +37,7 @@
  #ifdef MESA_EGL_NO_X11_HEADERS
 --- a/include/GL/internal/dri_interface.h
 +++ b/include/GL/internal/dri_interface.h
-@@ -826,10 +826,12 @@
+@@ -832,10 +832,12 @@
      unsigned int pitch;
      unsigned int cpp;
      unsigned int flags;
@@ -53,7 +53,7 @@
  
 --- a/src/egl/drivers/dri2/Makefile.am
 +++ b/src/egl/drivers/dri2/Makefile.am
-@@ -64,3 +64,9 @@
+@@ -63,3 +63,9 @@
  libegl_dri2_la_SOURCES += platform_drm.c
  AM_CFLAGS += -DHAVE_DRM_PLATFORM
  endif
@@ -65,7 +65,7 @@
 +endif
 --- a/src/egl/drivers/dri2/egl_dri2.c
 +++ b/src/egl/drivers/dri2/egl_dri2.c
-@@ -638,6 +638,12 @@
+@@ -643,6 +643,12 @@
           return EGL_TRUE;
        return dri2_initialize_wayland(drv, disp);
  #endif
@@ -92,18 +92,18 @@
  #include "eglconfig.h"
  #include "eglcontext.h"
  #include "egldisplay.h"
-@@ -135,6 +140,10 @@
+@@ -192,6 +197,10 @@
+    int			     formats;
     uint32_t                  capabilities;
  #endif
- 
++
 +#ifdef HAVE_MIR_PLATFORM
 +  MirMesaEGLNativeDisplay *mir_disp;
 +#endif
-+
-    int (*authenticate) (_EGLDisplay *disp, uint32_t id);
  };
  
-@@ -182,7 +191,9 @@
+ struct dri2_egl_context
+@@ -238,7 +247,9 @@
     struct gbm_dri_surface *gbm_surf;
  #endif
  
@@ -114,7 +114,7 @@
     __DRIbuffer           *dri_buffers[__DRI_BUFFER_COUNT];
     struct {
  #ifdef HAVE_WAYLAND_PLATFORM
-@@ -204,6 +215,10 @@
+@@ -260,6 +271,10 @@
     /* EGL-owned buffers */
     __DRIbuffer           *local_buffers[__DRI_BUFFER_COUNT];
  #endif
@@ -125,7 +125,7 @@
  };
  
  
-@@ -271,4 +286,7 @@
+@@ -327,4 +342,7 @@
  EGLBoolean
  dri2_initialize_android(_EGLDriver *drv, _EGLDisplay *disp);
  
@@ -135,7 +135,7 @@
  #endif /* EGL_DRI2_INCLUDED */
 --- /dev/null
 +++ b/src/egl/drivers/dri2/platform_mir.c
-@@ -0,0 +1,436 @@
+@@ -0,0 +1,456 @@
 +/*
 + * Copyright © 2012 Canonical, Inc
 + *
@@ -166,6 +166,7 @@
 +#include <mir_toolkit/mesa/native_display.h>
 +
 +#include "egl_dri2.h"
++#include "egl_dri2_fallbacks.h"
 +#include "loader.h"
 +
 +#include <stdlib.h>
@@ -373,6 +374,16 @@
 +   return NULL;
 +}
 +
++static _EGLSurface *
++dri2_mir_create_pixmap_surface(_EGLDriver *drv, _EGLDisplay *disp,
++                              _EGLConfig *conf, void *native_window,
++                              const EGLint *attrib_list)
++{
++   _eglError(EGL_BAD_PARAMETER, "cannot create EGL pixmap surfaces on mir");
++   return NULL;
++}
++
++
 +static EGLBoolean
 +dri2_destroy_mir_surface(_EGLDriver *drv, _EGLDisplay *disp, _EGLSurface *surf)
 +{
@@ -483,6 +494,23 @@
 +   }
 +}
 +
++static struct dri2_egl_display_vtbl dri2_mir_display_vtbl = {
++   .authenticate = dri2_mir_authenticate,
++   .create_window_surface = dri2_create_mir_window_surface,
++   .create_pixmap_surface = dri2_mir_create_pixmap_surface,
++   .create_pbuffer_surface = dri2_fallback_create_pbuffer_surface,
++   .destroy_surface = dri2_destroy_mir_surface,
++   .create_image = dri2_mir_create_image_khr,
++   .swap_interval = dri2_set_swap_interval,
++   .swap_buffers = dri2_swap_buffers,
++   .swap_buffers_with_damage = dri2_fallback_swap_buffers_with_damage,
++   .swap_buffers_region = dri2_fallback_swap_buffers_region,
++   .post_sub_buffer = dri2_fallback_post_sub_buffer,
++   .copy_buffers = dri2_fallback_copy_buffers,
++   .query_buffer_age = dri2_fallback_query_buffer_age,
++   .create_wayland_buffer_from_image = NULL,
++};
++
 +EGLBoolean
 +dri2_initialize_mir(_EGLDriver *drv, _EGLDisplay *disp)
 +{
@@ -496,16 +524,6 @@
 +   int i;
 +
 +   loader_set_logger(_eglLog);
-+
-+   drv->API.CreateWindowSurface = dri2_create_mir_window_surface;
-+   drv->API.DestroySurface = dri2_destroy_mir_surface;
-+   drv->API.SwapBuffers = dri2_swap_buffers;
-+   drv->API.SwapInterval = dri2_set_swap_interval;
-+/*   drv->API.CreatePixmapSurface = dri2_create_pixmap_surface;
-+   drv->API.CreatePbufferSurface = dri2_create_pbuffer_surface;
-+   drv->API.CopyBuffers = dri2_copy_buffers;
-+*/
-+   drv->API.CreateImageKHR = dri2_mir_create_image_khr;
 +
 +   dri2_dpy = calloc(1, sizeof *dri2_dpy);
 +   if (!dri2_dpy)
@@ -560,10 +578,12 @@
 +      dri2_add_config(disp, config, i + 1, types, NULL, argb_masks);
 +   }
 +
-+   dri2_dpy->authenticate = dri2_mir_authenticate;
++   disp->Extensions.EXT_buffer_age = EGL_TRUE;
++   disp->Extensions.EXT_swap_buffers_with_damage = EGL_TRUE;
 +
 +   disp->VersionMajor = 1;
 +   disp->VersionMinor = 4;
++   dri2_dpy->vtbl = &dri2_mir_display_vtbl;
 +
 +   return EGL_TRUE;
 +
@@ -574,8 +594,8 @@
 +}
 --- a/src/egl/main/Makefile.am
 +++ b/src/egl/main/Makefile.am
-@@ -108,6 +108,11 @@
- libEGL_la_LIBADD += $(DLOPEN_LIBS)
+@@ -106,6 +106,11 @@
+ AM_CFLAGS += -DHAVE_NULL_PLATFORM
  endif
  
 +if HAVE_EGL_PLATFORM_MIR
@@ -588,7 +608,7 @@
  AM_CFLAGS += -DHAVE_XCB_DRI2
 --- a/src/egl/main/egldisplay.c
 +++ b/src/egl/main/egldisplay.c
-@@ -59,7 +59,10 @@
+@@ -60,7 +60,10 @@
  #include <sys/types.h>
  #include <sys/stat.h>
  #endif
@@ -600,7 +620,7 @@
  
  /**
   * Map --with-egl-platforms names to platform types.
-@@ -74,7 +77,8 @@
+@@ -75,7 +78,8 @@
     { _EGL_PLATFORM_DRM, "drm" },
     { _EGL_PLATFORM_FBDEV, "fbdev" },
     { _EGL_PLATFORM_NULL, "null" },
@@ -610,7 +630,7 @@
  };
  
  
-@@ -134,6 +138,47 @@
+@@ -135,6 +139,47 @@
  #endif
  }
  
@@ -658,7 +678,7 @@
  
  /**
   * Try detecting native platform with the help of native display characteristcs.
-@@ -154,6 +199,11 @@
+@@ -155,6 +200,11 @@
        return _EGL_PLATFORM_FBDEV;
  #endif
  
@@ -670,9 +690,9 @@
     if (_eglPointerIsDereferencable(nativeDisplay)) {
        void *first_pointer = *(void **) nativeDisplay;
  
-@@ -188,7 +238,7 @@
+@@ -189,7 +239,7 @@
  _EGLPlatformType
- _eglGetNativePlatform(EGLNativeDisplayType nativeDisplay)
+ _eglGetNativePlatform(void *nativeDisplay)
  {
 -   static _EGLPlatformType native_platform = _EGL_INVALID_PLATFORM;
 +   _EGLPlatformType native_platform = _EGL_INVALID_PLATFORM;
@@ -700,7 +720,7 @@
  } _EGLModule;
  
  static _EGLMutex _eglModuleMutex = _EGL_MUTEX_INITIALIZER;
-@@ -134,7 +134,6 @@
+@@ -131,7 +131,6 @@
  
  #endif
  
@@ -708,7 +728,7 @@
  /**
   * Open the named driver and find its bootstrap function: _eglMain().
   */
-@@ -147,8 +146,12 @@
+@@ -144,8 +143,12 @@
  
     assert(driverPath);
  
@@ -723,7 +743,7 @@
  
  #if defined(_EGL_OS_WINDOWS)
     /* XXX untested */
-@@ -194,13 +197,13 @@
+@@ -191,13 +194,13 @@
   * Load a module and create the driver object.
   */
  static EGLBoolean
@@ -740,7 +760,7 @@
        return EGL_TRUE;
  
     if (mod->BuiltIn) {
-@@ -226,7 +229,7 @@
+@@ -223,7 +226,7 @@
     }
  
     mod->Handle = (void *) lib;
@@ -749,7 +769,7 @@
  
     return EGL_TRUE;
  }
-@@ -240,8 +243,10 @@
+@@ -237,8 +240,10 @@
  {
  #if defined(_EGL_OS_UNIX)
     /* destroy the driver */
@@ -762,7 +782,7 @@
  
     /*
      * XXX At this point (atexit), the module might be the last reference to
-@@ -255,7 +260,9 @@
+@@ -252,7 +257,9 @@
     /* XXX Windows unloads DLLs before atexit */
  #endif
  
@@ -773,7 +793,7 @@
     mod->Handle = NULL;
  }
  
-@@ -599,17 +606,17 @@
+@@ -596,17 +603,17 @@
     while (i < _eglModules->Size) {
        _EGLModule *mod = (_EGLModule *) _eglModules->Elements[i];
  
@@ -795,7 +815,7 @@
           i++;
        }
     }
-@@ -661,7 +668,6 @@
+@@ -658,7 +665,6 @@
  _eglGetDriverProc(const char *procname)
  {
     EGLint i;
@@ -803,7 +823,7 @@
  
     if (!_eglModules) {
        /* load the driver for the default display */
-@@ -673,15 +679,18 @@
+@@ -670,15 +676,18 @@
  
     for (i = 0; i < _eglModules->Size; i++) {
        _EGLModule *mod = (_EGLModule *) _eglModules->Elements[i];
@@ -830,7 +850,7 @@
  
 --- a/src/gallium/state_trackers/dri/drm/dri2.c
 +++ b/src/gallium/state_trackers/dri/drm/dri2.c
-@@ -266,8 +266,13 @@
+@@ -306,8 +306,13 @@
  
        templ.format = format;
        templ.bind = bind;
@@ -848,16 +868,16 @@
        drawable->textures[statt] =
 --- a/src/gbm/backends/dri/gbm_dri.c
 +++ b/src/gbm/backends/dri/gbm_dri.c
-@@ -133,7 +133,7 @@
+@@ -135,7 +135,7 @@
  };
  
  static const __DRIdri2LoaderExtension dri2_loader_extension = {
--   { __DRI_DRI2_LOADER, 3 },
-+   { __DRI_DRI2_LOADER, 4 },
-    dri_get_buffers,
-    dri_flush_front_buffer,
-    dri_get_buffers_with_format,
-@@ -329,9 +329,11 @@
+-   .base = { __DRI_DRI2_LOADER, 3 },
++   .base = { __DRI_DRI2_LOADER, 4 },
+ 
+    .getBuffers              = dri_get_buffers,
+    .flushFrontBuffer        = dri_flush_front_buffer,
+@@ -336,9 +336,11 @@
     switch (format) {
     case GBM_BO_FORMAT_XRGB8888:
     case GBM_FORMAT_XRGB8888:
@@ -869,7 +889,7 @@
        if (usage & GBM_BO_USE_SCANOUT)
           return 0;
        break;
-@@ -396,6 +398,9 @@
+@@ -420,6 +422,9 @@
     case __DRI_IMAGE_FORMAT_ABGR8888:
        ret = GBM_FORMAT_ABGR8888;
        break;
@@ -879,7 +899,7 @@
     default:
        ret = 0;
        break;
-@@ -404,6 +409,41 @@
+@@ -428,6 +433,41 @@
     return ret;
  }
  
@@ -921,7 +941,7 @@
  static struct gbm_bo *
  gbm_dri_bo_import(struct gbm_device *gbm,
                    uint32_t type, void *buffer, uint32_t usage)
-@@ -587,30 +627,7 @@
+@@ -644,31 +684,7 @@
     bo->base.base.height = height;
     bo->base.base.format = format;
  
@@ -947,7 +967,8 @@
 -      dri_format = __DRI_IMAGE_FORMAT_XRGB2101010;
 -      break;
 -   default:
--      return NULL;
+-      errno = EINVAL;
+-      goto failed;
 -   }
 +   dri_format = gbm_to_dri_format(format);
  
@@ -955,7 +976,7 @@
        dri_use |= __DRI_IMAGE_USE_SCANOUT;
 --- a/src/mesa/drivers/dri/i915/intel_context.c
 +++ b/src/mesa/drivers/dri/i915/intel_context.c
-@@ -781,24 +781,36 @@
+@@ -775,24 +775,36 @@
      */
     if (rb->mt &&
         rb->mt->region &&
@@ -1004,7 +1025,7 @@
  
 --- a/src/mesa/drivers/dri/i965/brw_context.c
 +++ b/src/mesa/drivers/dri/i965/brw_context.c
-@@ -1009,7 +1009,7 @@
+@@ -1010,7 +1010,7 @@
                            struct intel_renderbuffer *rb,
                            const char *buffer_name);
  
@@ -1013,7 +1034,7 @@
  intel_update_image_buffers(struct brw_context *brw, __DRIdrawable *drawable);
  
  static void
-@@ -1082,9 +1082,7 @@
+@@ -1083,9 +1083,7 @@
     if (unlikely(INTEL_DEBUG & DEBUG_DRI))
        fprintf(stderr, "enter %s, drawable %p\n", __func__, drawable);
  
@@ -1024,57 +1045,24 @@
        intel_update_dri2_buffers(brw, drawable);
  
     driUpdateFramebufferSize(&brw->ctx, drawable);
-@@ -1256,13 +1254,15 @@
-    if (num_samples == 0) {
-        if (rb->mt &&
-            rb->mt->region &&
--           rb->mt->region->name == buffer->name)
-+           rb->mt->region->name == buffer->name &&
-+           rb->mt->region->name != 0)
-           return;
-    } else {
-        if (rb->mt &&
-            rb->mt->singlesample_mt &&
-            rb->mt->singlesample_mt->region &&
--           rb->mt->singlesample_mt->region->name == buffer->name)
-+           rb->mt->singlesample_mt->region->name == buffer->name &&
-+           rb->mt->singlesample_mt->region->name != 0)
-           return;
-    }
- 
-@@ -1274,13 +1274,23 @@
+@@ -1282,8 +1280,13 @@
     }
  
     intel_miptree_release(&rb->mt);
--   region = intel_region_alloc_for_handle(brw->intelScreen,
--                                          buffer->cpp,
--                                          drawable->w,
--                                          drawable->h,
--                                          buffer->pitch,
--                                          buffer->name,
--                                          buffer_name);
-+   if (buffer->name != 0)
-+      region = intel_region_alloc_for_handle(brw->intelScreen,
-+                                             buffer->cpp,
-+                                             drawable->w,
-+                                             drawable->h,
-+                                             buffer->pitch,
-+                                             buffer->name,
-+                                             buffer_name);
+-   bo = drm_intel_bo_gem_create_from_name(brw->bufmgr, buffer_name,
+-                                          buffer->name);
++   if (buffer->name)
++      bo = drm_intel_bo_gem_create_from_name(brw->bufmgr, buffer_name,
++                                             buffer->name);
 +   else
-+      region = intel_region_alloc_for_fd(brw->intelScreen,
-+                                         buffer->cpp,
-+                                         drawable->w,
-+                                         drawable->h,
-+                                         buffer->pitch,
-+                                         0, /* Can we be so stupid? */
-+                                         buffer->fd,
-+                                         buffer_name);
-    if (!region)
-       return;
- 
-@@ -1346,7 +1356,7 @@
-                                                   region);
++      bo = drm_intel_bo_gem_create_from_prime(brw->bufmgr, buffer->fd,
++                                             buffer->pitch * drawable->h);
++
+    if (!bo) {
+       fprintf(stderr,
+               "Failed to open BO for returned DRI2 buffer "
+@@ -1363,7 +1366,7 @@
+    }
  }
  
 -static void
@@ -1082,16 +1070,16 @@
  intel_update_image_buffers(struct brw_context *brw, __DRIdrawable *drawable)
  {
     struct gl_framebuffer *fb = drawable->driverPrivate;
-@@ -1365,7 +1375,7 @@
+@@ -1382,7 +1385,7 @@
     else if (front_rb)
        format = intel_rb_format(front_rb);
     else
 -      return;
 +      return 0;
  
-    if ((brw->is_front_buffer_rendering || brw->is_front_buffer_reading || !back_rb) && front_rb)
-       buffer_mask |= __DRI_IMAGE_BUFFER_FRONT;
-@@ -1373,12 +1383,13 @@
+    if (front_rb && (brw_is_front_buffer_drawing(fb) ||
+                     brw_is_front_buffer_reading(fb) || !back_rb)) {
+@@ -1392,12 +1395,13 @@
     if (back_rb)
        buffer_mask |= __DRI_IMAGE_BUFFER_BACK;
  
@@ -1111,7 +1099,7 @@
  
     if (images.image_mask & __DRI_IMAGE_BUFFER_FRONT) {
        drawable->w = images.front->width;
-@@ -1398,4 +1409,5 @@
+@@ -1417,4 +1421,5 @@
                                  images.back,
                                  __DRI_IMAGE_BUFFER_BACK);
     }

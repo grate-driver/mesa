@@ -249,6 +249,8 @@ TargetNV50::getSVAddress(DataFile shaderFile, const Symbol *sym) const
       return 0x2 + 2 * sym->reg.data.sv.index;
    case SV_TID:
       return 0;
+   case SV_SAMPLE_POS:
+      return 0; /* sample position is handled differently */
    default:
       return sysvalLocation[sym->reg.data.sv.sv];
    }
@@ -328,6 +330,8 @@ TargetNV50::insnCanLoad(const Instruction *i, int s,
       if (ld->src(0).isIndirect(0))
          return false;
       if (sf == FILE_IMMEDIATE)
+         return false;
+      if (i->subOp == NV50_IR_SUBOP_MUL_HIGH && sf == FILE_MEMORY_CONST)
          return false;
       ldSize = 2;
    } else {

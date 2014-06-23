@@ -1,6 +1,0 @@
-VERSION {
-	global:
-		__driDriverExtensions;
-		nouveau_drm_screen_create;
-	local: *;
-};

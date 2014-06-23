@@ -503,6 +503,7 @@ struct nvc0_blitctx
    uint8_t mode;
    uint16_t color_mask;
    uint8_t filter;
+   uint8_t render_condition_enable;
    enum pipe_texture_target target;
    struct {
       struct pipe_framebuffer_state fb;
@@ -516,6 +517,7 @@ struct nvc0_blitctx
       unsigned num_samplers[5];
       struct pipe_sampler_view *texture[2];
       struct nv50_tsc_entry *sampler[2];
+      unsigned min_samples;
       uint32_t dirty;
    } saved;
    struct nvc0_rasterizer_stateobj rast;
@@ -541,9 +543,22 @@ nvc0_blitter_make_vp(struct nvc0_blitter *blit)
       0x03f01c46, 0x0a7e0080, /* export b96 o[0x80] $r0:$r1:$r2 */
       0x00001de7, 0x80000000, /* exit */
    };
+   static const uint32_t code_gk110[] =
+   {
+      0x00000000, 0x08000000, /* sched */
+      0x401ffc12, 0x7ec7fc00, /* ld b64 $r4d a[0x80] 0x0 0x0 */
+      0x481ffc02, 0x7ecbfc00, /* ld b96 $r0t a[0x90] 0x0 0x0 */
+      0x381ffc12, 0x7f07fc00, /* st b64 a[0x70] $r4d 0x0 0x0 */
+      0x401ffc02, 0x7f0bfc00, /* st b96 a[0x80] $r0t 0x0 0x0 */
+      0x001c003c, 0x18000000, /* exit */
+   };
 
    blit->vp.type = PIPE_SHADER_VERTEX;
    blit->vp.translated = TRUE;
+   if (blit->screen->base.class_3d >= NVF0_3D_CLASS) {
+      blit->vp.code = (uint32_t *)code_gk110; /* const_cast */
+      blit->vp.code_size = sizeof(code_gk110);
+   } else
    if (blit->screen->base.class_3d >= NVE4_3D_CLASS) {
       blit->vp.code = (uint32_t *)code_nve4; /* const_cast */
       blit->vp.code_size = sizeof(code_nve4);
@@ -690,7 +705,7 @@ nvc0_blitctx_prepare_state(struct nvc0_blitctx *blit)
 
    /* TODO: maybe make this a MACRO (if we need more logic) ? */
 
-   if (blit->nvc0->cond_query)
+   if (blit->nvc0->cond_query && !blit->render_condition_enable)
       IMMED_NVC0(push, NVC0_3D(COND_MODE), NVC0_3D_COND_MODE_ALWAYS);
 
    /* blend state */
@@ -746,6 +761,8 @@ nvc0_blitctx_pre_blit(struct nvc0_blitctx *ctx)
    ctx->saved.gp = nvc0->gmtyprog;
    ctx->saved.fp = nvc0->fragprog;
 
+   ctx->saved.min_samples = nvc0->min_samples;
+
    nvc0->rast = &ctx->rast;
 
    nvc0->vertprog = &blitter->vp;
@@ -772,6 +789,8 @@ nvc0_blitctx_pre_blit(struct nvc0_blitctx *ctx)
       nvc0->num_samplers[s] = 0;
    nvc0->num_samplers[4] = 2;
 
+   nvc0->min_samples = 1;
+
    ctx->saved.dirty = nvc0->dirty;
 
    nvc0->textures_dirty[4] |= 3;
@@ -781,7 +800,7 @@ nvc0_blitctx_pre_blit(struct nvc0_blitctx *ctx)
    nouveau_bufctx_reset(nvc0->bufctx_3d, NVC0_BIND_TEX(4, 0));
    nouveau_bufctx_reset(nvc0->bufctx_3d, NVC0_BIND_TEX(4, 1));
 
-   nvc0->dirty = NVC0_NEW_FRAMEBUFFER |
+   nvc0->dirty = NVC0_NEW_FRAMEBUFFER | NVC0_NEW_MIN_SAMPLES |
       NVC0_NEW_VERTPROG | NVC0_NEW_FRAGPROG |
       NVC0_NEW_TCTLPROG | NVC0_NEW_TEVLPROG | NVC0_NEW_GMTYPROG |
       NVC0_NEW_TEXTURES | NVC0_NEW_SAMPLERS;
@@ -809,6 +828,8 @@ nvc0_blitctx_post_blit(struct nvc0_blitctx *blit)
    nvc0->gmtyprog = blit->saved.gp;
    nvc0->fragprog = blit->saved.fp;
 
+   nvc0->min_samples = blit->saved.min_samples;
+
    pipe_sampler_view_reference(&nvc0->textures[4][0], NULL);
    pipe_sampler_view_reference(&nvc0->textures[4][1], NULL);
 
@@ -826,7 +847,7 @@ nvc0_blitctx_post_blit(struct nvc0_blitctx *blit)
    nvc0->textures_dirty[4] |= 3;
    nvc0->samplers_dirty[4] |= 3;
 
-   if (nvc0->cond_query)
+   if (nvc0->cond_query && !blit->render_condition_enable)
       nvc0->base.pipe.render_condition(&nvc0->base.pipe, nvc0->cond_query,
                                        nvc0->cond_cond, nvc0->cond_mode);
 
@@ -841,6 +862,8 @@ nvc0_blitctx_post_blit(struct nvc0_blitctx *blit)
        NVC0_NEW_VERTPROG | NVC0_NEW_FRAGPROG |
        NVC0_NEW_TCTLPROG | NVC0_NEW_TEVLPROG | NVC0_NEW_GMTYPROG |
        NVC0_NEW_TFB_TARGETS);
+
+   nvc0->base.pipe.set_min_samples(&nvc0->base.pipe, blit->saved.min_samples);
 }
 
 static void
@@ -859,6 +882,7 @@ nvc0_blit_3d(struct nvc0_context *nvc0, const struct pipe_blit_info *info)
    blit->mode = nv50_blit_select_mode(info);
    blit->color_mask = nv50_blit_derive_color_mask(info);
    blit->filter = nv50_blit_get_filter(info);
+   blit->render_condition_enable = info->render_condition_enable;
 
    nvc0_blit_select_fp(blit, info);
    nvc0_blitctx_pre_blit(blit);
@@ -885,6 +909,11 @@ nvc0_blit_3d(struct nvc0_context *nvc0, const struct pipe_blit_info *info)
    y0 *= (float)(1 << nv50_miptree(src)->ms_y);
    y1 *= (float)(1 << nv50_miptree(src)->ms_y);
 
+   dz = (float)info->src.box.depth / (float)info->dst.box.depth;
+   z = (float)info->src.box.z;
+   if (nv50_miptree(src)->layout_3d)
+      z += 0.5f * dz;
+
    if (src->last_level > 0) {
       /* If there are mip maps, GPU always assumes normalized coordinates. */
       const unsigned l = info->src.level;
@@ -894,12 +923,11 @@ nvc0_blit_3d(struct nvc0_context *nvc0, const struct pipe_blit_info *info)
       x1 /= fh;
       y0 /= fv;
       y1 /= fv;
+      if (nv50_miptree(src)->layout_3d) {
+         z /= u_minify(src->depth0, l);
+         dz /= u_minify(src->depth0, l);
+      }
    }
-
-   dz = (float)info->src.box.depth / (float)info->dst.box.depth;
-   z = (float)info->src.box.z;
-   if (nv50_miptree(src)->layout_3d)
-      z += 0.5f * dz;
 
    IMMED_NVC0(push, NVC0_3D(VIEWPORT_TRANSFORM_EN), 0);
    IMMED_NVC0(push, NVC0_3D(VIEW_VOLUME_CLIP_CTRL), 0x2 |
@@ -1021,6 +1049,9 @@ nvc0_blit_eng2d(struct nvc0_context *nvc0, const struct pipe_blit_info *info)
       PUSH_DATA (push, 1); /* enable */
    }
 
+   if (nvc0->cond_query && info->render_condition_enable)
+      IMMED_NVC0(push, NVC0_2D(COND_MODE), NVC0_2D_COND_MODE_RES_NON_ZERO);
+
    if (mask != 0xffffffff) {
       IMMED_NVC0(push, NVC0_2D(ROP), 0xca); /* DPSDxax */
       IMMED_NVC0(push, NVC0_2D(PATTERN_COLOR_FORMAT),
@@ -1066,8 +1097,8 @@ nvc0_blit_eng2d(struct nvc0_context *nvc0, const struct pipe_blit_info *info)
 
    if (src->base.base.nr_samples > dst->base.base.nr_samples) {
       /* center src coorinates for proper MS resolve filtering */
-      srcx += (int64_t)(src->ms_x + 0) << 32;
-      srcy += (int64_t)(src->ms_y + 1) << 31;
+      srcx += (int64_t)1 << (src->ms_x + 31);
+      srcy += (int64_t)1 << (src->ms_y + 31);
    }
 
    dstx = info->dst.box.x << dst->ms_x;
@@ -1145,6 +1176,8 @@ nvc0_blit_eng2d(struct nvc0_context *nvc0, const struct pipe_blit_info *info)
       IMMED_NVC0(push, NVC0_2D(CLIP_ENABLE), 0);
    if (mask != 0xffffffff)
       IMMED_NVC0(push, NVC0_2D(OPERATION), NVC0_2D_OPERATION_SRCCOPY);
+   if (nvc0->cond_query && info->render_condition_enable)
+      IMMED_NVC0(push, NVC0_2D(COND_MODE), NVC0_2D_COND_MODE_ALWAYS);
 }
 
 static void

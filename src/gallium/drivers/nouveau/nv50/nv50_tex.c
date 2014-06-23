@@ -115,12 +115,12 @@ nv50_create_texture_view(struct pipe_context *pipe,
 
    addr = mt->base.address;
 
-   if (mt->base.base.target == PIPE_TEXTURE_1D_ARRAY ||
-       mt->base.base.target == PIPE_TEXTURE_2D_ARRAY) {
+   depth = MAX2(mt->base.base.array_size, mt->base.base.depth0);
+
+   if (mt->base.base.array_size > 1) {
+      /* there doesn't seem to be a base layer field in TIC */
       addr += view->pipe.u.tex.first_layer * mt->layer_stride;
       depth = view->pipe.u.tex.last_layer - view->pipe.u.tex.first_layer + 1;
-   } else {
-      depth = mt->base.base.depth0;
    }
 
    tic[2] = 0x10001000 | NV50_TIC_2_NO_BORDER;
@@ -286,7 +286,7 @@ nv50_validate_tic(struct nv50_context *nv50, int s)
    }
    if (nv50->num_textures[s]) {
       BEGIN_NV04(push, NV50_3D(CB_ADDR), 1);
-      PUSH_DATA (push, (NV50_CB_AUX_TEX_MS_OFFSET << (8 - 2)) | NV50_CB_AUX);
+      PUSH_DATA (push, ((NV50_CB_AUX_TEX_MS_OFFSET + 16 * s * 2 * 4) << (8 - 2)) | NV50_CB_AUX);
       BEGIN_NI04(push, NV50_3D(CB_DATA(0)), nv50->num_textures[s] * 2);
       for (i = 0; i < nv50->num_textures[s]; i++) {
          struct nv50_tic_entry *tic = nv50_tic_entry(nv50->textures[s][i]);

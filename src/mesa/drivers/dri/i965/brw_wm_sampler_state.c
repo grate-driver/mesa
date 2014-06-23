@@ -46,7 +46,7 @@
 
 
 uint32_t
-translate_wrap_mode(GLenum wrap, bool using_nearest)
+translate_wrap_mode(struct brw_context *brw, GLenum wrap, bool using_nearest)
 {
    switch( wrap ) {
    case GL_REPEAT:
@@ -55,9 +55,16 @@ translate_wrap_mode(GLenum wrap, bool using_nearest)
       /* GL_CLAMP is the weird mode where coordinates are clamped to
        * [0.0, 1.0], so linear filtering of coordinates outside of
        * [0.0, 1.0] give you half edge texel value and half border
-       * color.  The fragment shader will clamp the coordinates, and
-       * we set clamp_border here, which gets the result desired.  We
-       * just use clamp(_to_edge) for nearest, because for nearest
+       * color.
+       *
+       * Gen8+ supports this natively.
+       */
+      if (brw->gen >= 8)
+         return GEN8_TEXCOORDMODE_HALF_BORDER;
+
+      /* On Gen4-7.5, we clamp the coordinates in the fragment shader
+       * and set clamp_border here, which gets the result desired.
+       * We just use clamp(_to_edge) for nearest, because for nearest
        * clamping to 1.0 gives border color instead of the desired
        * edge texels.
        */
@@ -276,11 +283,11 @@ static void brw_update_sampler_state(struct brw_context *brw,
       }
    }
 
-   sampler->ss1.r_wrap_mode = translate_wrap_mode(gl_sampler->WrapR,
+   sampler->ss1.r_wrap_mode = translate_wrap_mode(brw, gl_sampler->WrapR,
 						  using_nearest);
-   sampler->ss1.s_wrap_mode = translate_wrap_mode(gl_sampler->WrapS,
+   sampler->ss1.s_wrap_mode = translate_wrap_mode(brw, gl_sampler->WrapS,
 						  using_nearest);
-   sampler->ss1.t_wrap_mode = translate_wrap_mode(gl_sampler->WrapT,
+   sampler->ss1.t_wrap_mode = translate_wrap_mode(brw, gl_sampler->WrapT,
 						  using_nearest);
 
    if (brw->gen >= 6 &&
@@ -375,12 +382,11 @@ static void brw_update_sampler_state(struct brw_context *brw,
 static void
 brw_upload_sampler_state_table(struct brw_context *brw,
                                struct gl_program *prog,
-                               uint32_t sampler_count,
-                               uint32_t *sst_offset,
-                               uint32_t *sdc_offset)
+                               struct brw_stage_state *stage_state)
 {
    struct gl_context *ctx = &brw->ctx;
    struct brw_sampler_state *samplers;
+   uint32_t sampler_count = stage_state->sampler_count;
 
    GLbitfield SamplersUsed = prog->SamplersUsed;
 
@@ -389,15 +395,16 @@ brw_upload_sampler_state_table(struct brw_context *brw,
 
    samplers = brw_state_batch(brw, AUB_TRACE_SAMPLER_STATE,
 			      sampler_count * sizeof(*samplers),
-			      32, sst_offset);
+			      32, &stage_state->sampler_offset);
    memset(samplers, 0, sampler_count * sizeof(*samplers));
 
    for (unsigned s = 0; s < sampler_count; s++) {
       if (SamplersUsed & (1 << s)) {
          const unsigned unit = prog->SamplerUnits[s];
-         if (ctx->Texture.Unit[unit]._ReallyEnabled)
+         if (ctx->Texture.Unit[unit]._Current)
             brw_update_sampler_state(brw, unit, s, &samplers[s],
-                                     *sst_offset, &sdc_offset[s]);
+                                     stage_state->sampler_offset,
+                                     &stage_state->sdc_offset[s]);
       }
    }
 
@@ -409,10 +416,7 @@ brw_upload_fs_samplers(struct brw_context *brw)
 {
    /* BRW_NEW_FRAGMENT_PROGRAM */
    struct gl_program *fs = (struct gl_program *) brw->fragment_program;
-   brw->vtbl.upload_sampler_state_table(brw, fs,
-                                        brw->wm.base.sampler_count,
-                                        &brw->wm.base.sampler_offset,
-                                        brw->wm.base.sdc_offset);
+   brw->vtbl.upload_sampler_state_table(brw, fs, &brw->wm.base);
 }
 
 const struct brw_tracked_state brw_fs_samplers = {
@@ -428,14 +432,9 @@ const struct brw_tracked_state brw_fs_samplers = {
 static void
 brw_upload_vs_samplers(struct brw_context *brw)
 {
-   struct brw_stage_state *stage_state = &brw->vs.base;
-
    /* BRW_NEW_VERTEX_PROGRAM */
    struct gl_program *vs = (struct gl_program *) brw->vertex_program;
-   brw->vtbl.upload_sampler_state_table(brw, vs,
-                                        stage_state->sampler_count,
-                                        &stage_state->sampler_offset,
-                                        stage_state->sdc_offset);
+   brw->vtbl.upload_sampler_state_table(brw, vs, &brw->vs.base);
 }
 
 
@@ -453,17 +452,12 @@ const struct brw_tracked_state brw_vs_samplers = {
 static void
 brw_upload_gs_samplers(struct brw_context *brw)
 {
-   struct brw_stage_state *stage_state = &brw->gs.base;
-
    /* BRW_NEW_GEOMETRY_PROGRAM */
    struct gl_program *gs = (struct gl_program *) brw->geometry_program;
    if (!gs)
       return;
 
-   brw->vtbl.upload_sampler_state_table(brw, gs,
-                                        stage_state->sampler_count,
-                                        &stage_state->sampler_offset,
-                                        stage_state->sdc_offset);
+   brw->vtbl.upload_sampler_state_table(brw, gs, &brw->gs.base);
 }
 
 

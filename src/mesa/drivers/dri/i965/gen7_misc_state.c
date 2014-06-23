@@ -24,7 +24,6 @@
 #include "main/mtypes.h"
 #include "intel_batchbuffer.h"
 #include "intel_mipmap_tree.h"
-#include "intel_regions.h"
 #include "intel_fbo.h"
 #include "brw_context.h"
 #include "brw_state.h"
@@ -52,6 +51,12 @@ gen7_emit_depth_stencil_hiz(struct brw_context *brw,
    const struct intel_renderbuffer *irb = NULL;
    const struct gl_renderbuffer *rb = NULL;
 
+   /* Skip repeated NULL depth/stencil emits (think 2D rendering). */
+   if (!mt && brw->no_depth_or_stencil) {
+      assert(brw->hw_ctx);
+      return;
+   }
+
    intel_emit_depth_stall_flushes(brw);
 
    irb = intel_get_renderbuffer(fb, BUFFER_DEPTH);
@@ -60,7 +65,7 @@ gen7_emit_depth_stencil_hiz(struct brw_context *brw,
    rb = (struct gl_renderbuffer*) irb;
 
    if (rb) {
-      depth = MAX2(rb->Depth, 1);
+      depth = MAX2(irb->layer_count, 1);
       if (rb->TexImage)
          gl_target = rb->TexImage->TexObject->Target;
    }
@@ -76,19 +81,16 @@ gen7_emit_depth_stencil_hiz(struct brw_context *brw,
       surftype = BRW_SURFACE_2D;
       depth *= 6;
       break;
+   case GL_TEXTURE_3D:
+      assert(mt);
+      depth = MAX2(mt->logical_depth0, 1);
+      /* fallthrough */
    default:
       surftype = translate_tex_target(gl_target);
       break;
    }
 
-   if (fb->MaxNumLayers > 0 || !irb) {
-      min_array_element = 0;
-   } else if (irb->mt->num_samples > 1) {
-      /* Convert physical layer to logical layer. */
-      min_array_element = irb->mt_layer / irb->mt->num_samples;
-   } else {
-      min_array_element = irb->mt_layer;
-   }
+   min_array_element = irb ? irb->mt_layer : 0;
 
    lod = irb ? irb->mt_level - irb->mt->first_level : 0;
 
@@ -103,7 +105,7 @@ gen7_emit_depth_stencil_hiz(struct brw_context *brw,
    OUT_BATCH(GEN7_3DSTATE_DEPTH_BUFFER << 16 | (7 - 2));
 
    /* 3DSTATE_DEPTH_BUFFER dw1 */
-   OUT_BATCH((depth_mt ? depth_mt->region->pitch - 1 : 0) |
+   OUT_BATCH((depth_mt ? depth_mt->pitch - 1 : 0) |
              (depthbuffer_format << 18) |
              ((hiz ? 1 : 0) << 22) |
              ((stencil_mt != NULL && ctx->Stencil._WriteEnabled) << 27) |
@@ -112,7 +114,7 @@ gen7_emit_depth_stencil_hiz(struct brw_context *brw,
 
    /* 3DSTATE_DEPTH_BUFFER dw2 */
    if (depth_mt) {
-      OUT_RELOC(depth_mt->region->bo,
+      OUT_RELOC(depth_mt->bo,
 	        I915_GEM_DOMAIN_RENDER, I915_GEM_DOMAIN_RENDER,
 	        0);
    } else {
@@ -147,8 +149,8 @@ gen7_emit_depth_stencil_hiz(struct brw_context *brw,
       BEGIN_BATCH(3);
       OUT_BATCH(GEN7_3DSTATE_HIER_DEPTH_BUFFER << 16 | (3 - 2));
       OUT_BATCH((mocs << 25) |
-                (hiz_mt->region->pitch - 1));
-      OUT_RELOC(hiz_mt->region->bo,
+                (hiz_mt->pitch - 1));
+      OUT_RELOC(hiz_mt->bo,
                 I915_GEM_DOMAIN_RENDER,
                 I915_GEM_DOMAIN_RENDER,
                 0);
@@ -178,8 +180,8 @@ gen7_emit_depth_stencil_hiz(struct brw_context *brw,
        */
       OUT_BATCH(enabled |
                 mocs << 25 |
-	        (2 * stencil_mt->region->pitch - 1));
-      OUT_RELOC(stencil_mt->region->bo,
+	        (2 * stencil_mt->pitch - 1));
+      OUT_RELOC(stencil_mt->bo,
 	        I915_GEM_DOMAIN_RENDER, I915_GEM_DOMAIN_RENDER,
 		0);
       ADVANCE_BATCH();
@@ -190,6 +192,8 @@ gen7_emit_depth_stencil_hiz(struct brw_context *brw,
    OUT_BATCH(depth_mt ? depth_mt->depth_clear_value : 0);
    OUT_BATCH(1);
    ADVANCE_BATCH();
+
+   brw->no_depth_or_stencil = !mt;
 }
 
 /**

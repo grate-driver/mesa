@@ -58,12 +58,14 @@ confflags_DRI3 = --disable-dri3
 # hurd doesn't do direct rendering
 ifeq ($(DEB_HOST_ARCH_OS), hurd)
 	confflags_DIRECT_RENDERING = --disable-driglx-direct
-	DRI_DRIVERS += swrast
+	DRI_DRIVERS = swrast
 else
   ifeq ($(DEB_HOST_ARCH_OS), linux)
 	confflags_DRI3 = --enable-dri3
 # Gallium drivers require libdrm-{nouveau,radeon}, only available on Linux
 	GALLIUM_DRIVERS += nouveau svga
+	# svga needs xa state tracker
+	confflags_GALLIUM += --enable-xa
 #
 # Although the KMS egl drivers will probably build on kfreebsd & hurd
 # only linux actually has KMS drivers implemented at this point.
@@ -102,7 +104,6 @@ else
   ifneq (,$(filter $(DEB_HOST_ARCH),amd64 i386 kfreebsd-amd64 kfreebsd-i386 armhf))
 	GALLIUM_DRIVERS += radeonsi
 	confflags_GALLIUM += --enable-gallium-llvm
-	confflags_GALLIUM += --with-llvm-shared-libs
   endif
 
 	confflags_DIRECT_RENDERING = --enable-driglx-direct
@@ -122,7 +123,6 @@ confflags-dri = \
 	--enable-glx-tls \
 	--enable-shared-glapi \
 	--enable-texture-float \
-	--enable-xa \
 	--disable-xvmc \
 	$(confflags_DIRECT_RENDERING) \
 	$(confflags_DRI3) \
@@ -131,6 +131,8 @@ confflags-dri = \
 	$(confflags_GLES) \
 	$(confflags_OPENVG) \
 	$(buildflags)
+
+confflags += --disable-omx
 
 configure: $(QUILT_STAMPFN) configure.ac
 	autoreconf -vfi

@@ -249,6 +249,10 @@ glx_display_free(struct glx_display *priv)
    if (priv->dri2Display)
       (*priv->dri2Display->destroyDisplay) (priv->dri2Display);
    priv->dri2Display = NULL;
+
+   if (priv->dri3Display)
+      (*priv->dri3Display->destroyDisplay) (priv->dri3Display);
+   priv->dri3Display = NULL;
 #endif
 
    free((char *) priv);
@@ -269,7 +273,8 @@ __glXCloseDisplay(Display * dpy, XExtCodes * codes)
    }
    _XUnlockMutex(_Xglobal_lock);
 
-   glx_display_free(priv);
+   if (priv != NULL)
+      glx_display_free(priv);
 
    return 1;
 }
@@ -675,6 +680,10 @@ static GLboolean
 
    psc->serverGLXexts =
       __glXQueryServerString(dpy, priv->majorOpcode, screen, GLX_EXTENSIONS);
+
+   if (psc->serverGLXexts == NULL) {
+      return GL_FALSE;
+   }
 
    LockDisplay(dpy);
 
