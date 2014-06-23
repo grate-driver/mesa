@@ -1,16 +1,17 @@
+mesa (10.2.1-2ubuntu1) UNRELEASED; urgency=medium
+
+  * Merge with released debian unstable.
+    - New upstream release.
+    - Drop upstreamed patches.
+    - Refresh mir patch.
+
+ -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Wed, 19 Mar 2014 11:31:15 +0100
+
 mesa (10.2.1-2) unstable; urgency=medium
 
   * Upload to unstable.
 
  -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Mon, 23 Jun 2014 12:00:09 +0200
-
-mesa (10.2.1-1ubuntu1) UNRELEASED; urgency=medium
-
-  * Preliminary port to 10.2.
-    - Drop upstreamed patches.
-    - Refresh mir patch.
-
- -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Wed, 19 Mar 2014 11:31:15 +0100
 
 mesa (10.2.1-1) experimental; urgency=medium
 
