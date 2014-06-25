@@ -1,3 +1,9 @@
+mesa (10.2.1-2ubuntu2) UNRELEASED; urgency=low
+
+  * Fix FTBFS by fixing 117-static-gallium.patch
+
+ -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Wed, 25 Jun 2014 11:40:45 +0200
+
 mesa (10.2.1-2ubuntu1) utopic; urgency=medium
 
   * Merge with released debian unstable.

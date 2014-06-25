@@ -55,7 +55,7 @@ index f14279b..3cdec83 100644
  
  AM_CXXFLAGS += -fno-rtti
  
-+libgallium_la_LIBADD = $(LLVM_LIBS) $(PTHREAD_LIBS)
++libgallium_la_LIBADD = $(LLVM_LIBS) $(PTHREAD_LIBS) $(LLVM_LDFLAGS)
 +
  endif
  
