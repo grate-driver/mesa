@@ -1,11 +1,11 @@
-mesa (10.2.1-2ubuntu1) UNRELEASED; urgency=medium
+mesa (10.2.1-2ubuntu1) utopic; urgency=medium
 
   * Merge with released debian unstable.
     - New upstream release.
     - Drop upstreamed patches.
     - Refresh mir patch.
 
- -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Wed, 19 Mar 2014 11:31:15 +0100
+ -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Mon, 23 Jun 2014 15:52:33 +0200
 
 mesa (10.2.1-2) unstable; urgency=medium
 
