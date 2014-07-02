@@ -1,3 +1,9 @@
+mesa (10.2.2-1) UNRELEASED; urgency=medium
+
+  * New upstream release.
+
+ -- Andreas Boll <andreas.boll.dev@gmail.com>  Wed, 02 Jul 2014 18:00:52 +0200
+
 mesa (10.2.1-2) unstable; urgency=medium
 
   * Upload to unstable.
