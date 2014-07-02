@@ -1,6 +1,8 @@
 mesa (10.2.2-1) UNRELEASED; urgency=medium
 
   * New upstream release.
+    - 01_targets-xa-limit-the-amount-of-exported-symbols.diff dropped,
+      upstream
 
  -- Andreas Boll <andreas.boll.dev@gmail.com>  Wed, 02 Jul 2014 18:00:52 +0200
 
