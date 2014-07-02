@@ -1,6 +1,8 @@
 mesa (10.2.2-1) UNRELEASED; urgency=medium
 
   * New upstream release.
+    - glx: Don't crash on swap event for a Window (non-GLXWindow)
+      (Closes: #685328).
     - 01_targets-xa-limit-the-amount-of-exported-symbols.diff dropped,
       upstream
 
