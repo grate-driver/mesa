@@ -1,4 +1,3 @@
-01_targets-xa-limit-the-amount-of-exported-symbols.diff
 07_gallium-fix-build-failure-on-powerpcspe.diff
 
 # Ubuntu patches.
