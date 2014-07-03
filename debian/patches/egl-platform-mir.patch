@@ -1045,6 +1045,15 @@
        intel_update_dri2_buffers(brw, drawable);
  
     driUpdateFramebufferSize(&brw->ctx, drawable);
+@@ -1271,7 +1269,7 @@
+       drm_intel_bo_flink(last_mt->bo, &old_name);
+    }
+ 
+-   if (old_name == buffer->name)
++   if ((old_name != 0) && (old_name == buffer->name))
+       return;
+ 
+    if (unlikely(INTEL_DEBUG & DEBUG_DRI)) {
 @@ -1282,8 +1280,13 @@
     }
  

@@ -1,3 +1,9 @@
+mesa (10.2.1-2ubuntu3) utopic; urgency=low
+
+  * Fix segfault in Mir EGL platform on i965 (LP: #1336854)
+
+ -- Christopher James Halse Rogers <raof@ubuntu.com>  Thu, 03 Jul 2014 11:52:41 +1000
+
 mesa (10.2.1-2ubuntu2) utopic; urgency=medium
 
   * Fix FTBFS by fixing 117-static-gallium.patch
