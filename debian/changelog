@@ -5,6 +5,8 @@ mesa (10.2.2-1) UNRELEASED; urgency=medium
       (Closes: #685328).
     - 01_targets-xa-limit-the-amount-of-exported-symbols.diff dropped,
       upstream
+  * Cherry-pick commit b4dcf87 (glxext: Send the Drawable's ID in the
+    GLX_BufferSwapComplete event) from upstream, fixes intel + dri3.
 
  -- Andreas Boll <andreas.boll.dev@gmail.com>  Wed, 02 Jul 2014 18:00:52 +0200
 
