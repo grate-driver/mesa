@@ -1540,9 +1540,6 @@ static void tex_fetch_args(
 	if (opcode == TGSI_OPCODE_TXB)
 		address[count++] = coords[3];
 
-	if (target == TGSI_TEXTURE_CUBE || target == TGSI_TEXTURE_SHADOWCUBE)
-		radeon_llvm_emit_prepare_cube_coords(bld_base, emit_data, coords);
-
 	/* Pack depth comparison value */
 	switch (target) {
 	case TGSI_TEXTURE_SHADOW1D:
@@ -1557,6 +1554,9 @@ static void tex_fetch_args(
 	case TGSI_TEXTURE_SHADOWCUBE_ARRAY:
 		address[count++] = lp_build_emit_fetch(bld_base, inst, 1, 0);
 	}
+
+	if (target == TGSI_TEXTURE_CUBE || target == TGSI_TEXTURE_SHADOWCUBE)
+		radeon_llvm_emit_prepare_cube_coords(bld_base, emit_data, coords);
 
 	/* Pack user derivatives */
 	if (opcode == TGSI_OPCODE_TXD) {
