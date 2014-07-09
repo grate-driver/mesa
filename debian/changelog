@@ -1,3 +1,9 @@
+mesa (10.2.3-0ubuntu1) utopic; urgency=low
+
+  * Merge from unreleased unstable to fix vmwgfx.
+
+ -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Wed, 09 Jul 2014 11:57:29 +0200
+
 mesa (10.2.3-1) UNRELEASED; urgency=low
 
   * New upstream release.
