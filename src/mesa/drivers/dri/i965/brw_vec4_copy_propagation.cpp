@@ -242,12 +242,9 @@ vec4_visitor::try_copy_propagation(vec4_instruction *inst, int arg,
        value.file != ATTR)
       return false;
 
-   if (brw->gen >= 8) {
-      if (value.negate) {
-         if (is_logic_op(inst->opcode)) {
-            return false;
-         }
-      }
+   if (brw->gen >= 8 && (value.negate || value.abs) &&
+       is_logic_op(inst->opcode)) {
+      return false;
    }
 
    if (inst->src[arg].abs) {
