@@ -1539,6 +1539,8 @@ static void tex_fetch_args(
 	/* Pack LOD bias value */
 	if (opcode == TGSI_OPCODE_TXB)
 		address[count++] = coords[3];
+	if (opcode == TGSI_OPCODE_TXB2)
+		address[count++] = lp_build_emit_fetch(bld_base, inst, 1, 0);
 
 	/* Pack depth comparison value */
 	switch (target) {
@@ -2497,6 +2499,7 @@ int si_pipe_shader_create(
 
 	bld_base->op_actions[TGSI_OPCODE_TEX] = tex_action;
 	bld_base->op_actions[TGSI_OPCODE_TXB] = txb_action;
+	bld_base->op_actions[TGSI_OPCODE_TXB2] = txb_action;
 #if HAVE_LLVM >= 0x0304
 	bld_base->op_actions[TGSI_OPCODE_TXD] = txd_action;
 #endif
