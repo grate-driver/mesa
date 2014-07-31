@@ -433,8 +433,7 @@ static bool si_update_draw_info_state(struct si_context *sctx,
 		 * We don't know that for indirect drawing, so treat it as
 		 * always problematic. */
 		if (sctx->b.family == CHIP_HAWAII &&
-		    (info->indirect ||
-		     (info->instance_count > 1 &&
+		    ((info->instance_count > 1 &&
 		      u_prims_for_vertices(info->mode, info->count) < primgroup_size))) {
 			wd_switch_on_eop = true;
 			ia_switch_on_eop = true;
