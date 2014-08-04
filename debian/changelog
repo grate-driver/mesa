@@ -3,6 +3,7 @@ mesa (10.2.5-1) UNRELEASED; urgency=medium
   * New upstream release.
     - nv50: fix build failure on m68k due to invalid struct alignment
       assumptions (Closes: #728053).
+    - i915: Fix up intelInitScreen2 for DRI3 (Closes: #754297).
 
  -- Andreas Boll <andreas.boll.dev@gmail.com>  Mon, 04 Aug 2014 10:30:18 +0200
 
