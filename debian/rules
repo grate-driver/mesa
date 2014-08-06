@@ -70,6 +70,12 @@ else
 	confflags_DRI3 = --enable-dri3
 # Gallium drivers require libdrm-{nouveau,radeon}, only available on Linux
 	GALLIUM_DRIVERS += nouveau svga
+
+	# Freedreno requires arm in addition
+	ifneq (,$(filter arm,$(DEB_HOST_ARCH_CPU)))
+		GALLIUM_DRIVERS += freedreno
+	endif
+
 	# svga needs xa state tracker
 	confflags_GALLIUM += --enable-xa
 #
