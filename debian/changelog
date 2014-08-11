@@ -6,6 +6,10 @@ mesa (10.2.5-1) UNRELEASED; urgency=medium
       assumptions (Closes: #728053).
     - i915: Fix up intelInitScreen2 for DRI3 (Closes: #754297).
 
+  [ Matthias Klose ]
+  * Add patch to fix FTBFS on x32. (Closes: #757703)
+    - x32-updates.patch
+
   [ Maarten Lankhorst ]
   * Enable support for freedreno.
 
