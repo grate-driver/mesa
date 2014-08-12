@@ -8,5 +8,4 @@ x32-updates.diff
 120-hide-x86sse.patch
 egl-platform-mir.patch
 i915-dont-default-to-2.1.patch
-fix-kwin.diff
 llvm-3.5.diff
