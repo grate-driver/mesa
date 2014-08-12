@@ -1,14 +1,42 @@
+mesa (10.2.5-1) unstable; urgency=medium
+
+  [ Andreas Boll ]
+  * New upstream release.
+    - nv50: fix build failure on m68k due to invalid struct alignment
+      assumptions (Closes: #728053).
+    - i915: Fix up intelInitScreen2 for DRI3 (Closes: #754297).
+
+  [ Matthias Klose ]
+  * Add patch to fix FTBFS on x32. (Closes: #757703)
+    - x32-updates.patch
+
+  [ Maarten Lankhorst ]
+  * Enable support for freedreno.
+
+ -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Mon, 11 Aug 2014 13:34:58 +0200
+
+mesa (10.2.4-1) unstable; urgency=medium
+
+  * New upstream release.
+
+ -- Julien Cristau <jcristau@debian.org>  Sun, 20 Jul 2014 10:20:05 +0200
+
 mesa (10.2.3-0ubuntu1) utopic; urgency=low
 
   * Merge from unreleased unstable to fix vmwgfx.
 
  -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Wed, 09 Jul 2014 11:57:29 +0200
 
-mesa (10.2.3-1) UNRELEASED; urgency=low
+mesa (10.2.3-1) unstable; urgency=low
 
+  [ Maarten Lankhorst ]
   * New upstream release.
 
- -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Wed, 09 Jul 2014 11:57:29 +0200
+  [ Julien Cristau ]
+  * Add debian/upstream/signing-key.asc, and add pgpsigurlmangle option to
+    debian/watch so uscan can check signatures on release tarballs.
+
+ -- Julien Cristau <jcristau@debian.org>  Wed, 09 Jul 2014 19:39:06 +0200
 
 mesa (10.2.2-1ubuntu1) utopic; urgency=medium
 
