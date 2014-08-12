@@ -4,4 +4,3 @@
 101_ubuntu_hidden_glname.patch
 egl-platform-mir.patch
 i915-dont-default-to-2.1.patch
-fix-kwin.diff
