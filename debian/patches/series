@@ -2,7 +2,6 @@
 x32-updates.diff
 
 # Ubuntu patches.
-101_ubuntu_hidden_glname.patch
 117-static-gallium.patch
 #118-dricore-gallium.patch
 120-hide-x86sse.patch
