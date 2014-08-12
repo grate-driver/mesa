@@ -1,8 +1,8 @@
-mesa (10.2.5-1ubuntu1) UNRELEASED; urgency=low
+mesa (10.2.5-1ubuntu1) utopic; urgency=low
 
   * Rebuild with llvm 3.5.
 
- -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Tue, 12 Aug 2014 09:38:49 +0200
+ -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Tue, 12 Aug 2014 13:05:29 +0200
 
 mesa (10.2.5-1) unstable; urgency=medium
 
