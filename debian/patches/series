@@ -2,9 +2,6 @@
 
 # Ubuntu patches.
 101_ubuntu_hidden_glname.patch
-117-static-gallium.patch
-#118-dricore-gallium.patch
-120-hide-x86sse.patch
 egl-platform-mir.patch
 i915-dont-default-to-2.1.patch
 fix-kwin.diff
