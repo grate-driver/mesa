@@ -32,7 +32,7 @@ extern "C" {
 #include "brw_context.h"
 } /* extern "C" */
 
-#include "glsl/ralloc.h"
+#include "util/ralloc.h"
 #include "brw_eu.h"
 #include "brw_reg.h"
 #include "gen8_generator.h"
@@ -506,8 +506,7 @@ gen8_generator::find_loop_end(unsigned start) const
             return ip;
       }
    }
-   assert(!"not reached");
-   return start;
+   unreachable("not reached");
 }
 
 /* After program generation, go back and update the UIP and JIP of
@@ -618,25 +617,4 @@ gen8_generator::HALT()
    gen8_set_exec_size(inst, default_state.exec_size);
    gen8_set_mask_control(inst, BRW_MASK_DISABLE);
    return inst;
-}
-
-void
-gen8_generator::disassemble(FILE *out, int start, int end)
-{
-   bool dump_hex = false;
-
-   for (int offset = start; offset < end; offset += 16) {
-      gen8_instruction *inst = &store[offset / 16];
-      fprintf(stderr, "0x%08x: ", offset);
-
-      if (dump_hex) {
-         fprintf(stderr, "0x%08x 0x%08x 0x%08x 0x%08x ",
-                 ((uint32_t *) inst)[3],
-                 ((uint32_t *) inst)[2],
-                 ((uint32_t *) inst)[1],
-                 ((uint32_t *) inst)[0]);
-      }
-
-      gen8_disassemble(stderr, inst, brw->gen);
-   }
 }

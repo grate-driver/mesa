@@ -26,6 +26,7 @@
 #include <stdint.h>
 
 #include "brw_context.h"
+#include "brw_reg.h"
 #include "intel_mipmap_tree.h"
 
 struct brw_context;
@@ -299,7 +300,7 @@ struct brw_blorp_blit_prog_key
    /* Type of the data to be read from the texture (one of
     * BRW_REGISTER_TYPE_{UD,D,F}).
     */
-   unsigned texture_data_type;
+   enum brw_reg_type texture_data_type;
 
    /* True if the source image is W tiled.  If true, the surface state for the
     * source image must be configured as Y tiled, and tex_samples must be 0.
@@ -419,6 +420,10 @@ gen6_blorp_emit_clip_disable(struct brw_context *brw,
 void
 gen6_blorp_emit_drawing_rectangle(struct brw_context *brw,
                                   const brw_blorp_params *params);
+
+uint32_t
+gen6_blorp_emit_sampler_state(struct brw_context *brw,
+                              const brw_blorp_params *params);
 /** \} */
 
 #endif /* __cplusplus */

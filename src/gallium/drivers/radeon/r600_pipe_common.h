@@ -81,17 +81,19 @@
 #define DBG_COMPUTE		(1 << 2)
 #define DBG_VM			(1 << 3)
 #define DBG_TRACE_CS		(1 << 4)
+/* shader logging */
+#define DBG_FS			(1 << 5)
+#define DBG_VS			(1 << 6)
+#define DBG_GS			(1 << 7)
+#define DBG_PS			(1 << 8)
+#define DBG_CS			(1 << 9)
 /* features */
-#define DBG_NO_ASYNC_DMA	(1 << 5)
-/* shaders */
-#define DBG_FS			(1 << 8)
-#define DBG_VS			(1 << 9)
-#define DBG_GS			(1 << 10)
-#define DBG_PS			(1 << 11)
-#define DBG_CS			(1 << 12)
-/* features */
-#define DBG_HYPERZ		(1 << 13)
-#define DBG_NO_DISCARD_RANGE	(1 << 14)
+#define DBG_NO_ASYNC_DMA	(1 << 10)
+#define DBG_HYPERZ		(1 << 11)
+#define DBG_NO_DISCARD_RANGE	(1 << 12)
+#define DBG_NO_2D_TILING	(1 << 13)
+#define DBG_NO_TILING		(1 << 14)
+#define DBG_SWITCH_ON_EOP	(1 << 15)
 /* The maximum allowed bit is 15. */
 
 #define R600_MAP_BUFFER_ALIGNMENT 64
@@ -109,6 +111,11 @@ struct radeon_shader_binary {
 	unsigned char *config;
 	unsigned config_size;
 
+	/** Constant data accessed by the shader.  This will be uploaded
+	 * into a constant buffer. */
+	unsigned char *rodata;
+	unsigned rodata_size;
+
 	/** Set to 1 if the disassembly for this binary has been dumped to
 	 *  stderr. */
 	int disassembled;
@@ -120,6 +127,7 @@ struct r600_resource {
 	/* Winsys objects. */
 	struct pb_buffer		*buf;
 	struct radeon_winsys_cs_handle	*cs_buf;
+	uint64_t			gpu_address;
 
 	/* Resource state. */
 	enum radeon_bo_domain		domains;
@@ -358,6 +366,15 @@ struct r600_common_context {
 	boolean				saved_render_cond_cond;
 	unsigned			saved_render_cond_mode;
 
+	/* MSAA sample locations.
+	 * The first index is the sample index.
+	 * The second index is the coordinate: X, Y. */
+	float				sample_locations_1x[1][2];
+	float				sample_locations_2x[2][2];
+	float				sample_locations_4x[4][2];
+	float				sample_locations_8x[8][2];
+	float				sample_locations_16x[16][2];
+
 	/* Copy one resource to another using async DMA. */
 	void (*dma_copy)(struct pipe_context *ctx,
 			 struct pipe_resource *dst,
@@ -473,7 +490,10 @@ extern const uint32_t eg_sample_locs_4x[4];
 extern const unsigned eg_max_dist_4x;
 void cayman_get_sample_position(struct pipe_context *ctx, unsigned sample_count,
 				unsigned sample_index, float *out_value);
-void cayman_emit_msaa_state(struct radeon_winsys_cs *cs, int nr_samples);
+void cayman_init_msaa(struct pipe_context *ctx);
+void cayman_emit_msaa_sample_locs(struct radeon_winsys_cs *cs, int nr_samples);
+void cayman_emit_msaa_config(struct radeon_winsys_cs *cs, int nr_samples,
+			     int ps_iter_samples);
 
 
 /* Inline helpers. */
@@ -498,6 +518,11 @@ static inline unsigned r600_tex_aniso_filter(unsigned filter)
 	if (filter <= 8)   return 3;
 	 /* else */        return 4;
 }
+
+#define COMPUTE_DBG(rscreen, fmt, args...) \
+	do { \
+		if ((rscreen->b.debug_flags & DBG_COMPUTE)) fprintf(stderr, fmt, ##args); \
+	} while (0);
 
 #define R600_ERR(fmt, args...) \
 	fprintf(stderr, "EE %s:%d %s - "fmt, __FILE__, __LINE__, __func__, ##args)

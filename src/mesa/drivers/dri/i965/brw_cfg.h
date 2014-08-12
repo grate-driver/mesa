@@ -25,37 +25,50 @@
  *
  */
 
+#pragma once
+#ifndef BRW_CFG_H
+#define BRW_CFG_H
+
 #include "brw_shader.h"
 
-class bblock_t;
+struct bblock_t;
 
-class bblock_link : public exec_node {
-public:
+struct bblock_link {
+#ifdef __cplusplus
+   DECLARE_RALLOC_CXX_OPERATORS(bblock_link)
+
    bblock_link(bblock_t *block)
       : block(block)
    {
    }
+#endif
 
-   bblock_t *block;
+   struct exec_node link;
+   struct bblock_t *block;
 };
 
-class bblock_t {
-public:
+#ifndef __cplusplus
+struct backend_instruction;
+#endif
+
+struct bblock_t {
+#ifdef __cplusplus
    DECLARE_RALLOC_CXX_OPERATORS(bblock_t)
 
    bblock_t();
 
    void add_successor(void *mem_ctx, bblock_t *successor);
    void dump(backend_visitor *v);
+#endif
 
-   backend_instruction *start;
-   backend_instruction *end;
+   struct backend_instruction *start;
+   struct backend_instruction *end;
 
    int start_ip;
    int end_ip;
 
-   exec_list parents;
-   exec_list children;
+   struct exec_list parents;
+   struct exec_list children;
    int block_num;
 
    /* If the current basic block ends in an IF, ELSE, or ENDIF instruction,
@@ -64,13 +77,13 @@ public:
     *
     * Otherwise they are NULL.
     */
-   backend_instruction *if_inst;
-   backend_instruction *else_inst;
-   backend_instruction *endif_inst;
+   struct backend_instruction *if_inst;
+   struct backend_instruction *else_inst;
+   struct backend_instruction *endif_inst;
 };
 
-class cfg_t {
-public:
+struct cfg_t {
+#ifdef __cplusplus
    DECLARE_RALLOC_CXX_OPERATORS(cfg_t)
 
    cfg_t(exec_list *instructions);
@@ -81,11 +94,27 @@ public:
    void make_block_array();
 
    void dump(backend_visitor *v);
-
+#endif
    void *mem_ctx;
 
    /** Ordered list (by ip) of basic blocks */
-   exec_list block_list;
-   bblock_t **blocks;
+   struct exec_list block_list;
+   struct bblock_t **blocks;
    int num_blocks;
 };
+
+#define foreach_block_and_inst(__block, __type, __inst, __cfg) \
+   foreach_block (__block, __cfg)                              \
+      foreach_inst_in_block (__type, __inst, __block)
+
+#define foreach_inst_in_block(__type, __inst, __block)         \
+   for (__type *__inst = (__type *)__block->start;             \
+        __inst != __block->end->next;                          \
+        __inst = (__type *)__inst->next)
+
+#define foreach_inst_in_block_reverse(__type, __inst, __block) \
+   for (__type *__inst = (__type *)__block->end;               \
+        __inst != __block->start->prev;                        \
+        __inst = (__type *)__inst->prev)
+
+#endif /* BRW_CFG_H */

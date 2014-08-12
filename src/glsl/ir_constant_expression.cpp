@@ -36,7 +36,6 @@
 #include <math.h>
 #include "main/core.h" /* for MAX2, MIN2, CLAMP */
 #include "ir.h"
-#include "ir_visitor.h"
 #include "glsl_types.h"
 #include "program/hash_table.h"
 
@@ -511,6 +510,8 @@ ir_expression::constant_expression_value(struct hash_table *variable_context)
       case ir_binop_lshift:
       case ir_binop_rshift:
       case ir_binop_ldexp:
+      case ir_binop_interpolate_at_offset:
+      case ir_binop_interpolate_at_sample:
       case ir_binop_vector_extract:
       case ir_triop_csel:
       case ir_triop_bitfield_extract:
@@ -1783,8 +1784,7 @@ bool ir_function_signature::constant_expression_evaluate_expression_list(const s
 									 struct hash_table *variable_context,
 									 ir_constant **result)
 {
-   foreach_list(n, &body) {
-      ir_instruction *inst = (ir_instruction *)n;
+   foreach_in_list(ir_instruction, inst, &body) {
       switch(inst->ir_type) {
 
 	 /* (declare () type symbol) */
@@ -1923,8 +1923,8 @@ ir_function_signature::constant_expression_value(exec_list *actual_parameters, s
     */
    const exec_node *parameter_info = origin ? origin->parameters.head : parameters.head;
 
-   foreach_list(n, actual_parameters) {
-      ir_constant *constant = ((ir_rvalue *) n)->constant_expression_value(variable_context);
+   foreach_in_list(ir_rvalue, n, actual_parameters) {
+      ir_constant *constant = n->constant_expression_value(variable_context);
       if (constant == NULL) {
          hash_table_dtor(deref_hash);
          return NULL;

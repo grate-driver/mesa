@@ -1178,9 +1178,11 @@ static bool r600_update_derived_state(struct r600_context *rctx)
 			update_shader_atom(ctx, &rctx->vertex_shader, rctx->gs_shader->current->gs_copy_shader);
 			/* Update clip misc state. */
 			if (rctx->gs_shader->current->gs_copy_shader->pa_cl_vs_out_cntl != rctx->clip_misc_state.pa_cl_vs_out_cntl ||
-					rctx->gs_shader->current->gs_copy_shader->shader.clip_dist_write != rctx->clip_misc_state.clip_dist_write) {
+					rctx->gs_shader->current->gs_copy_shader->shader.clip_dist_write != rctx->clip_misc_state.clip_dist_write ||
+					rctx->clip_misc_state.clip_disable != rctx->gs_shader->current->shader.vs_position_window_space) {
 				rctx->clip_misc_state.pa_cl_vs_out_cntl = rctx->gs_shader->current->gs_copy_shader->pa_cl_vs_out_cntl;
 				rctx->clip_misc_state.clip_dist_write = rctx->gs_shader->current->gs_copy_shader->shader.clip_dist_write;
+				rctx->clip_misc_state.clip_disable = rctx->gs_shader->current->shader.vs_position_window_space;
 				rctx->clip_misc_state.atom.dirty = true;
 			}
 		}
@@ -1210,9 +1212,11 @@ static bool r600_update_derived_state(struct r600_context *rctx)
 
 			/* Update clip misc state. */
 			if (rctx->vs_shader->current->pa_cl_vs_out_cntl != rctx->clip_misc_state.pa_cl_vs_out_cntl ||
-					rctx->vs_shader->current->shader.clip_dist_write != rctx->clip_misc_state.clip_dist_write) {
+					rctx->vs_shader->current->shader.clip_dist_write != rctx->clip_misc_state.clip_dist_write ||
+					rctx->clip_misc_state.clip_disable != rctx->vs_shader->current->shader.vs_position_window_space) {
 				rctx->clip_misc_state.pa_cl_vs_out_cntl = rctx->vs_shader->current->pa_cl_vs_out_cntl;
 				rctx->clip_misc_state.clip_dist_write = rctx->vs_shader->current->shader.clip_dist_write;
+				rctx->clip_misc_state.clip_disable = rctx->vs_shader->current->shader.vs_position_window_space;
 				rctx->clip_misc_state.atom.dirty = true;
 			}
 		}
@@ -1310,7 +1314,8 @@ void r600_emit_clip_misc_state(struct r600_context *rctx, struct r600_atom *atom
 
 	r600_write_context_reg(cs, R_028810_PA_CL_CLIP_CNTL,
 			       state->pa_cl_clip_cntl |
-			       (state->clip_dist_write ? 0 : state->clip_plane_enable & 0x3F));
+			       (state->clip_dist_write ? 0 : state->clip_plane_enable & 0x3F) |
+                               S_028810_CLIP_DISABLE(state->clip_disable));
 	r600_write_context_reg(cs, R_02881C_PA_CL_VS_OUT_CNTL,
 			       state->pa_cl_vs_out_cntl |
 			       (state->clip_plane_enable & state->clip_dist_write));
@@ -1325,7 +1330,6 @@ static void r600_draw_vbo(struct pipe_context *ctx, const struct pipe_draw_info 
 	struct radeon_winsys_cs *cs = rctx->b.rings.gfx.cs;
 
 	if (!info.count && (info.indexed || !info.count_from_stream_output)) {
-		assert(0);
 		return;
 	}
 
@@ -1475,7 +1479,7 @@ static void r600_draw_vbo(struct pipe_context *ctx, const struct pipe_draw_info 
 			memcpy(cs->buf+cs->cdw, ib.user_buffer, size_bytes);
 			cs->cdw += size_dw;
 		} else {
-			uint64_t va = r600_resource_va(ctx->screen, ib.buffer) + ib.offset;
+			uint64_t va = r600_resource(ib.buffer)->gpu_address + ib.offset;
 			cs->buf[cs->cdw++] = PKT3(PKT3_DRAW_INDEX, 3, rctx->b.predicate_drawing);
 			cs->buf[cs->cdw++] = va;
 			cs->buf[cs->cdw++] = (va >> 32UL) & 0xFF;
@@ -1489,7 +1493,7 @@ static void r600_draw_vbo(struct pipe_context *ctx, const struct pipe_draw_info 
 	} else {
 		if (info.count_from_stream_output) {
 			struct r600_so_target *t = (struct r600_so_target*)info.count_from_stream_output;
-			uint64_t va = r600_resource_va(&rctx->screen->b.b, (void*)t->buf_filled_size) + t->buf_filled_size_offset;
+			uint64_t va = t->buf_filled_size->gpu_address + t->buf_filled_size_offset;
 
 			r600_write_context_reg(cs, R_028B30_VGT_STRMOUT_DRAW_OPAQUE_VERTEX_STRIDE, t->stride_in_dw);
 
@@ -2421,7 +2425,7 @@ void r600_trace_emit(struct r600_context *rctx)
 	uint64_t va;
 	uint32_t reloc;
 
-	va = r600_resource_va(&rscreen->b.b, (void*)rscreen->b.trace_bo);
+	va = rscreen->b.trace_bo->gpu_address;
 	reloc = r600_context_bo_reloc(&rctx->b, &rctx->b.rings.gfx, rscreen->b.trace_bo,
 				      RADEON_USAGE_READWRITE, RADEON_PRIO_MIN);
 	radeon_emit(cs, PKT3(PKT3_MEM_WRITE, 3, 0));

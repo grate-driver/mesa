@@ -36,9 +36,9 @@
 #include "main/context.h"
 #include "main/teximage.h"
 #include "main/image.h"
-#include "main/hash_table.h"
 #include "main/set.h"
 #include "main/condrender.h"
+#include "util/hash_table.h"
 
 #include "swrast/swrast.h"
 #include "drivers/common/meta.h"
@@ -427,7 +427,7 @@ static GLboolean
 intel_nop_alloc_storage(struct gl_context * ctx, struct gl_renderbuffer *rb,
                         GLenum internalFormat, GLuint width, GLuint height)
 {
-   _mesa_problem(ctx, "intel_op_alloc_storage should never be called.");
+   _mesa_problem(ctx, "intel_nop_alloc_storage should never be called.");
    return false;
 }
 
@@ -917,7 +917,7 @@ intel_blit_framebuffer(struct gl_context *ctx,
 bool
 intel_renderbuffer_has_hiz(struct intel_renderbuffer *irb)
 {
-   return intel_miptree_slice_has_hiz(irb->mt, irb->mt_level, irb->mt_layer);
+   return intel_miptree_level_has_hiz(irb->mt, irb->mt_level);
 }
 
 bool

@@ -112,20 +112,13 @@ struct ilo_texture {
    enum pipe_format bo_format;
    struct intel_bo *bo;
 
-   /*
-    * These are the values passed to or returned from winsys for bo
-    * allocation.  As such,
-    *
-    *  - width and height are in blocks,
-    *  - cpp is the block size in bytes, and
-    *  - stride is the distance in bytes between two block rows.
-    */
-   int bo_width, bo_height, bo_cpp, bo_stride;
    enum intel_tiling_mode tiling;
+   unsigned long bo_stride; /* distance between two block rows in bytes */
+   unsigned long bo_height;
 
-   bool compressed;
    unsigned block_width;
    unsigned block_height;
+   unsigned block_size;
 
    /* true if the mip level alignments are stricter */
    bool halign_8, valign_4;
@@ -140,7 +133,7 @@ struct ilo_texture {
 
    struct {
       struct intel_bo *bo;
-      int bo_stride;
+      unsigned long bo_stride;
    } hiz;
 };
 
@@ -162,10 +155,20 @@ void
 ilo_init_resource_functions(struct ilo_screen *is);
 
 bool
-ilo_buffer_alloc_bo(struct ilo_buffer *buf);
+ilo_buffer_rename_bo(struct ilo_buffer *buf);
 
 bool
-ilo_texture_alloc_bo(struct ilo_texture *tex);
+ilo_texture_rename_bo(struct ilo_texture *tex);
+
+/**
+ * Return the bo of the resource.
+ */
+static inline struct intel_bo *
+ilo_resource_get_bo(struct pipe_resource *res)
+{
+   return (res->target == PIPE_BUFFER) ?
+      ilo_buffer(res)->bo : ilo_texture(res)->bo;
+}
 
 static inline struct ilo_texture_slice *
 ilo_texture_get_slice(const struct ilo_texture *tex,

@@ -72,10 +72,7 @@ vec4_live_variables::setup_def_use()
       if (b > 0)
 	 assert(cfg->blocks[b - 1]->end_ip == ip - 1);
 
-      for (vec4_instruction *inst = (vec4_instruction *)block->start;
-	   inst != block->end->next;
-	   inst = (vec4_instruction *)inst->next) {
-
+      foreach_inst_in_block(vec4_instruction, inst, block) {
 	 /* Set use[] for this instruction */
 	 for (unsigned int i = 0; i < 3; i++) {
 	    if (inst->src[i].file == GRF) {
@@ -136,8 +133,7 @@ vec4_live_variables::compute_live_variables()
 	 }
 
 	 /* Update liveout */
-	 foreach_list(block_node, &cfg->blocks[b]->children) {
-	    bblock_link *link = (bblock_link *)block_node;
+	 foreach_list_typed(bblock_link, link, link, &cfg->blocks[b]->children) {
 	    bblock_t *block = link->block;
 
 	    for (int i = 0; i < bitset_words; i++) {
@@ -219,9 +215,7 @@ vec4_visitor::calculate_live_intervals()
     * flow.
     */
    int ip = 0;
-   foreach_list(node, &this->instructions) {
-      vec4_instruction *inst = (vec4_instruction *)node;
-
+   foreach_in_list(vec4_instruction, inst, &instructions) {
       for (unsigned int i = 0; i < 3; i++) {
 	 if (inst->src[i].file == GRF) {
 	    int reg = inst->src[i].reg;
@@ -254,19 +248,19 @@ vec4_visitor::calculate_live_intervals()
     * The control flow-aware analysis was done at a channel level, while at
     * this point we're distilling it down to vgrfs.
     */
-   cfg_t cfg(&instructions);
-   vec4_live_variables livevars(this, &cfg);
+   calculate_cfg();
+   vec4_live_variables livevars(this, cfg);
 
-   for (int b = 0; b < cfg.num_blocks; b++) {
+   for (int b = 0; b < cfg->num_blocks; b++) {
       for (int i = 0; i < livevars.num_vars; i++) {
 	 if (BITSET_TEST(livevars.bd[b].livein, i)) {
-	    start[i] = MIN2(start[i], cfg.blocks[b]->start_ip);
-	    end[i] = MAX2(end[i], cfg.blocks[b]->start_ip);
+	    start[i] = MIN2(start[i], cfg->blocks[b]->start_ip);
+	    end[i] = MAX2(end[i], cfg->blocks[b]->start_ip);
 	 }
 
 	 if (BITSET_TEST(livevars.bd[b].liveout, i)) {
-	    start[i] = MIN2(start[i], cfg.blocks[b]->end_ip);
-	    end[i] = MAX2(end[i], cfg.blocks[b]->end_ip);
+	    start[i] = MIN2(start[i], cfg->blocks[b]->end_ip);
+	    end[i] = MAX2(end[i], cfg->blocks[b]->end_ip);
 	 }
       }
    }
@@ -278,6 +272,8 @@ void
 vec4_visitor::invalidate_live_intervals()
 {
    live_intervals_valid = false;
+
+   invalidate_cfg();
 }
 
 bool

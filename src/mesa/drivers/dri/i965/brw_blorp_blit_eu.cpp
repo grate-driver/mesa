@@ -21,13 +21,17 @@
  * IN THE SOFTWARE.
  */
 
-#include "glsl/ralloc.h"
+#include "util/ralloc.h"
 #include "brw_blorp_blit_eu.h"
 #include "brw_blorp.h"
 
-brw_blorp_eu_emitter::brw_blorp_eu_emitter(struct brw_context *brw)
-   : mem_ctx(ralloc_context(NULL)), c(rzalloc(mem_ctx, struct brw_wm_compile)),
-     generator(brw, c, NULL, NULL, false)
+brw_blorp_eu_emitter::brw_blorp_eu_emitter(struct brw_context *brw,
+                                           bool debug_flag)
+   : mem_ctx(ralloc_context(NULL)),
+     generator(brw, mem_ctx,
+               rzalloc(mem_ctx, struct brw_wm_prog_key),
+               rzalloc(mem_ctx, struct brw_wm_prog_data),
+               NULL, NULL, false, false, debug_flag)
 {
 }
 
@@ -37,19 +41,9 @@ brw_blorp_eu_emitter::~brw_blorp_eu_emitter()
 }
 
 const unsigned *
-brw_blorp_eu_emitter::get_program(unsigned *program_size, FILE *dump_file)
+brw_blorp_eu_emitter::get_program(unsigned *program_size)
 {
-   const unsigned *res;
-
-   if (unlikely(INTEL_DEBUG & DEBUG_BLORP)) {
-      fprintf(stderr, "Native code for BLORP blit:\n");
-      res = generator.generate_assembly(NULL, &insts, program_size, dump_file);
-      fprintf(stderr, "\n");
-   } else {
-      res = generator.generate_assembly(NULL, &insts, program_size);
-   }
-
-   return res;
+   return generator.generate_assembly(NULL, &insts, program_size);
 }
 
 /**
@@ -84,11 +78,11 @@ brw_blorp_eu_emitter::emit_texture_lookup(const struct brw_reg &dst,
                                           unsigned base_mrf,
                                           unsigned msg_length)
 {
-   fs_inst *inst = new (mem_ctx) fs_inst(op, dst, brw_message_reg(base_mrf));
+   fs_inst *inst = new (mem_ctx) fs_inst(op, dst, brw_message_reg(base_mrf),
+                                         fs_reg(0u));
 
    inst->base_mrf = base_mrf;
    inst->mlen = msg_length;
-   inst->sampler = 0;
    inst->header_present = false;
 
    insts.push_tail(inst);
@@ -123,7 +117,7 @@ brw_blorp_eu_emitter::emit_combine(enum opcode combine_opcode,
 }
 
 fs_inst *
-brw_blorp_eu_emitter::emit_cmp(int op,
+brw_blorp_eu_emitter::emit_cmp(enum brw_conditional_mod op,
                                const struct brw_reg &x,
                                const struct brw_reg &y)
 {

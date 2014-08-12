@@ -25,8 +25,6 @@
 #include "ir.h"
 #include "linker.h"
 #include "ir_uniform.h"
-#include "glsl_symbol_table.h"
-#include "program/hash_table.h"
 
 /* These functions are put in a "private" namespace instead of being marked
  * static so that the unit tests can access them.  See
@@ -244,8 +242,8 @@ link_set_uniform_initializers(struct gl_shader_program *prog)
       if (shader == NULL)
 	 continue;
 
-      foreach_list(node, shader->ir) {
-	 ir_variable *const var = ((ir_instruction *) node)->as_variable();
+      foreach_in_list(ir_instruction, node, shader->ir) {
+	 ir_variable *const var = node->as_variable();
 
 	 if (!var || var->data.mode != ir_var_uniform)
 	    continue;

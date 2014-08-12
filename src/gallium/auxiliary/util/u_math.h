@@ -579,7 +579,7 @@ static INLINE unsigned util_last_bit(unsigned u)
  */
 static INLINE unsigned util_last_bit_signed(int i)
 {
-#if defined(__GNUC__) && ((__GNUC__ * 100 + __GNUC_MINOR__) >= 407)
+#if defined(__GNUC__) && ((__GNUC__ * 100 + __GNUC_MINOR__) >= 407) && !defined(__INTEL_COMPILER)
    return 31 - __builtin_clrsb(i);
 #else
    if (i >= 0)
@@ -614,6 +614,14 @@ fui( float f )
    union fi fi;
    fi.f = f;
    return fi.ui;
+}
+
+static INLINE float
+uif(uint32_t ui)
+{
+        union fi fi;
+        fi.ui = ui;
+        return fi.f;
 }
 
 
@@ -812,6 +820,23 @@ util_bswap16(uint16_t n)
           (n << 8);
 }
 
+static INLINE void*
+util_memcpy_cpu_to_le32(void * restrict dest, const void * restrict src, size_t n)
+{
+#ifdef PIPE_ARCH_BIG_ENDIAN
+   size_t i, e;
+   assert(n % 4 == 0);
+
+   for (i = 0, e = n / 4; i < e; i++) {
+      uint32_t * restrict d = (uint32_t* restrict)dest;
+      const uint32_t * restrict s = (const uint32_t* restrict)src;
+      d[i] = util_bswap32(s[i]);
+   }
+   return dest;
+#else
+   return memcpy(dest, src, n);
+#endif
+}
 
 /**
  * Clamp X to [MIN, MAX].
