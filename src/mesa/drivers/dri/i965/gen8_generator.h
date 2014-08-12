@@ -117,8 +117,6 @@ public:
    gen8_instruction *NOP();
    /** @} */
 
-   void disassemble(FILE *out, int start, int end);
-
 protected:
    gen8_instruction *alu3(unsigned opcode,
                           struct brw_reg dst,

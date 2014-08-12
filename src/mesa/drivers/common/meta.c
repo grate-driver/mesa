@@ -40,6 +40,7 @@
 #include "main/blit.h"
 #include "main/bufferobj.h"
 #include "main/buffers.h"
+#include "main/clear.h"
 #include "main/colortab.h"
 #include "main/condrender.h"
 #include "main/depth.h"
@@ -47,6 +48,7 @@
 #include "main/fbobject.h"
 #include "main/feedback.h"
 #include "main/formats.h"
+#include "main/format_unpack.h"
 #include "main/glformats.h"
 #include "main/image.h"
 #include "main/macros.h"
@@ -71,6 +73,7 @@
 #include "main/teximage.h"
 #include "main/texparam.h"
 #include "main/texstate.h"
+#include "main/texstore.h"
 #include "main/transformfeedback.h"
 #include "main/uniforms.h"
 #include "main/varray.h"
@@ -81,7 +84,7 @@
 #include "drivers/common/meta.h"
 #include "main/enums.h"
 #include "main/glformats.h"
-#include "../glsl/ralloc.h"
+#include "util/ralloc.h"
 
 /** Return offset in bytes of the field within a vertex struct */
 #define OFFSET(FIELD) ((void *) offsetof(struct vertex, FIELD))
@@ -98,18 +101,18 @@ static void meta_decompress_cleanup(struct decompress_state *decompress);
 static void meta_drawpix_cleanup(struct drawpix_state *drawpix);
 
 void
-_mesa_meta_bind_fbo_image(GLenum attachment,
+_mesa_meta_bind_fbo_image(GLenum fboTarget, GLenum attachment,
                           struct gl_texture_image *texImage, GLuint layer)
 {
    struct gl_texture_object *texObj = texImage->TexObject;
    int level = texImage->Level;
-   GLenum target = texObj->Target;
+   GLenum texTarget = texObj->Target;
 
-   switch (target) {
+   switch (texTarget) {
    case GL_TEXTURE_1D:
-      _mesa_FramebufferTexture1D(GL_FRAMEBUFFER,
+      _mesa_FramebufferTexture1D(fboTarget,
                                  attachment,
-                                 target,
+                                 texTarget,
                                  texObj->Name,
                                  level);
       break;
@@ -118,19 +121,19 @@ _mesa_meta_bind_fbo_image(GLenum attachment,
    case GL_TEXTURE_2D_MULTISAMPLE_ARRAY:
    case GL_TEXTURE_CUBE_MAP_ARRAY:
    case GL_TEXTURE_3D:
-      _mesa_FramebufferTextureLayer(GL_FRAMEBUFFER,
+      _mesa_FramebufferTextureLayer(fboTarget,
                                     attachment,
                                     texObj->Name,
                                     level,
                                     layer);
       break;
    default: /* 2D / cube */
-      if (target == GL_TEXTURE_CUBE_MAP)
-         target = GL_TEXTURE_CUBE_MAP_POSITIVE_X + texImage->Face;
+      if (texTarget == GL_TEXTURE_CUBE_MAP)
+         texTarget = GL_TEXTURE_CUBE_MAP_POSITIVE_X + texImage->Face;
 
-      _mesa_FramebufferTexture2D(GL_FRAMEBUFFER,
+      _mesa_FramebufferTexture2D(fboTarget,
                                  attachment,
-                                 target,
+                                 texTarget,
                                  texObj->Name,
                                  level);
    }
@@ -217,6 +220,7 @@ _mesa_meta_compile_and_link_program(struct gl_context *ctx,
                                                     fs_source);
 
    *program = _mesa_CreateProgram();
+   _mesa_ObjectLabel(GL_PROGRAM, *program, -1, name);
    _mesa_AttachShader(*program, fs);
    _mesa_DeleteShader(fs);
    _mesa_AttachShader(*program, vs);
@@ -224,7 +228,6 @@ _mesa_meta_compile_and_link_program(struct gl_context *ctx,
    _mesa_BindAttribLocation(*program, 0, "position");
    _mesa_BindAttribLocation(*program, 1, "texcoords");
    _mesa_meta_link_program_with_debug(ctx, *program);
-   _mesa_ObjectLabel(GL_PROGRAM, *program, -1, name);
 
    _mesa_UseProgram(*program);
 }
@@ -503,6 +506,11 @@ _mesa_meta_begin(struct gl_context *ctx, GLbitfield state)
       save->ColorLogicOpEnabled = ctx->Color.ColorLogicOpEnabled;
       if (ctx->Color.ColorLogicOpEnabled)
          _mesa_set_enable(ctx, GL_COLOR_LOGIC_OP, GL_FALSE);
+   }
+
+   if (state & MESA_META_DITHER) {
+      save->DitherFlag = ctx->Color.DitherFlag;
+      _mesa_set_enable(ctx, GL_DITHER, GL_TRUE);
    }
 
    if (state & MESA_META_COLOR_MASK) {
@@ -874,6 +882,9 @@ _mesa_meta_end(struct gl_context *ctx)
       if (ctx->Color.ColorLogicOpEnabled != save->ColorLogicOpEnabled)
          _mesa_set_enable(ctx, GL_COLOR_LOGIC_OP, save->ColorLogicOpEnabled);
    }
+
+   if (state & MESA_META_DITHER)
+      _mesa_set_enable(ctx, GL_DITHER, save->DitherFlag);
 
    if (state & MESA_META_COLOR_MASK) {
       GLuint i;
@@ -1515,23 +1526,15 @@ static void
 meta_glsl_clear_init(struct gl_context *ctx, struct clear_state *clear)
 {
    const char *vs_source =
+      "#extension GL_AMD_vertex_shader_layer : enable\n"
       "attribute vec4 position;\n"
-      "void main()\n"
-      "{\n"
-      "   gl_Position = position;\n"
-      "}\n";
-   const char *gs_source =
-      "#version 150\n"
-      "layout(triangles) in;\n"
-      "layout(triangle_strip, max_vertices = 4) out;\n"
       "uniform int layer;\n"
       "void main()\n"
       "{\n"
-      "  for (int i = 0; i < 3; i++) {\n"
-      "    gl_Layer = layer;\n"
-      "    gl_Position = gl_in[i].gl_Position;\n"
-      "    EmitVertex();\n"
-      "  }\n"
+      "#ifdef GL_AMD_vertex_shader_layer\n"
+      "   gl_Layer = layer;\n"
+      "#endif\n"
+      "   gl_Position = position;\n"
       "}\n";
    const char *fs_source =
       "uniform vec4 color;\n"
@@ -1539,7 +1542,7 @@ meta_glsl_clear_init(struct gl_context *ctx, struct clear_state *clear)
       "{\n"
       "   gl_FragColor = color;\n"
       "}\n";
-   GLuint vs, gs = 0, fs;
+   GLuint vs, fs;
    bool has_integer_textures;
 
    _mesa_meta_setup_vertex_objects(&clear->VAO, &clear->VBO, true, 3, 0, 0);
@@ -1551,12 +1554,6 @@ meta_glsl_clear_init(struct gl_context *ctx, struct clear_state *clear)
    _mesa_ShaderSource(vs, 1, &vs_source, NULL);
    _mesa_CompileShader(vs);
 
-   if (_mesa_has_geometry_shaders(ctx)) {
-      gs = _mesa_CreateShader(GL_GEOMETRY_SHADER);
-      _mesa_ShaderSource(gs, 1, &gs_source, NULL);
-      _mesa_CompileShader(gs);
-   }
-
    fs = _mesa_CreateShader(GL_FRAGMENT_SHADER);
    _mesa_ShaderSource(fs, 1, &fs_source, NULL);
    _mesa_CompileShader(fs);
@@ -1564,19 +1561,14 @@ meta_glsl_clear_init(struct gl_context *ctx, struct clear_state *clear)
    clear->ShaderProg = _mesa_CreateProgram();
    _mesa_AttachShader(clear->ShaderProg, fs);
    _mesa_DeleteShader(fs);
-   if (gs != 0)
-      _mesa_AttachShader(clear->ShaderProg, gs);
    _mesa_AttachShader(clear->ShaderProg, vs);
    _mesa_DeleteShader(vs);
    _mesa_BindAttribLocation(clear->ShaderProg, 0, "position");
+   _mesa_ObjectLabel(GL_PROGRAM, clear->ShaderProg, -1, "meta clear");
    _mesa_LinkProgram(clear->ShaderProg);
 
-   clear->ColorLocation = _mesa_GetUniformLocation(clear->ShaderProg,
-						      "color");
-   if (gs != 0) {
-      clear->LayerLocation = _mesa_GetUniformLocation(clear->ShaderProg,
-						      "layer");
-   }
+   clear->ColorLocation = _mesa_GetUniformLocation(clear->ShaderProg, "color");
+   clear->LayerLocation = _mesa_GetUniformLocation(clear->ShaderProg, "layer");
 
    has_integer_textures = _mesa_is_gles3(ctx) ||
       (_mesa_is_desktop_gl(ctx) && ctx->Const.GLSLVersion >= 130);
@@ -1586,9 +1578,14 @@ meta_glsl_clear_init(struct gl_context *ctx, struct clear_state *clear)
       const char *vs_int_source =
          ralloc_asprintf(shader_source_mem_ctx,
                          "#version 130\n"
+                         "#extension GL_AMD_vertex_shader_layer : enable\n"
                          "in vec4 position;\n"
+                         "uniform int layer;\n"
                          "void main()\n"
                          "{\n"
+                         "#ifdef GL_AMD_vertex_shader_layer\n"
+                         "   gl_Layer = layer;\n"
+                         "#endif\n"
                          "   gl_Position = position;\n"
                          "}\n");
       const char *fs_int_source =
@@ -1611,8 +1608,6 @@ meta_glsl_clear_init(struct gl_context *ctx, struct clear_state *clear)
       clear->IntegerShaderProg = _mesa_CreateProgram();
       _mesa_AttachShader(clear->IntegerShaderProg, fs);
       _mesa_DeleteShader(fs);
-      if (gs != 0)
-         _mesa_AttachShader(clear->IntegerShaderProg, gs);
       _mesa_AttachShader(clear->IntegerShaderProg, vs);
       _mesa_DeleteShader(vs);
       _mesa_BindAttribLocation(clear->IntegerShaderProg, 0, "position");
@@ -1628,13 +1623,9 @@ meta_glsl_clear_init(struct gl_context *ctx, struct clear_state *clear)
 
       clear->IntegerColorLocation =
 	 _mesa_GetUniformLocation(clear->IntegerShaderProg, "color");
-      if (gs != 0) {
-         clear->IntegerLayerLocation =
-            _mesa_GetUniformLocation(clear->IntegerShaderProg, "layer");
-      }
+      clear->IntegerLayerLocation =
+         _mesa_GetUniformLocation(clear->IntegerShaderProg, "layer");
    }
-   if (gs != 0)
-      _mesa_DeleteShader(gs);
 }
 
 static void
@@ -1842,7 +1833,7 @@ meta_clear(struct gl_context *ctx, GLbitfield buffers, bool glsl)
    /* draw quad(s) */
    if (fb->MaxNumLayers > 0) {
       unsigned layer;
-      assert(glsl);
+      assert(glsl && clear->LayerLocation != -1);
       for (layer = 0; layer < fb->MaxNumLayers; layer++) {
          if (fb->_IntegerColor)
             _mesa_Uniform1i(clear->IntegerLayerLocation, layer);
@@ -2612,7 +2603,7 @@ _mesa_meta_setup_texture_coords(GLenum faceTarget,
             coord = coords3;
             break;
          default:
-            assert(0);
+            unreachable("not reached");
          }
 
          coord[3] = (float) (slice / 6);
@@ -2741,9 +2732,9 @@ _mesa_meta_blit_shader_table_cleanup(struct blit_shader_table *table)
 static GLenum
 get_temp_image_type(struct gl_context *ctx, mesa_format format)
 {
-   GLenum baseFormat;
-
-   baseFormat = _mesa_get_format_base_format(format);
+   const GLenum baseFormat = _mesa_get_format_base_format(format);
+   const GLenum datatype = _mesa_get_format_datatype(format);
+   const GLint format_red_bits = _mesa_get_format_bits(format, GL_RED_BITS);
 
    switch (baseFormat) {
    case GL_RGBA:
@@ -2754,30 +2745,24 @@ get_temp_image_type(struct gl_context *ctx, mesa_format format)
    case GL_LUMINANCE:
    case GL_LUMINANCE_ALPHA:
    case GL_INTENSITY:
-      if (ctx->DrawBuffer->Visual.redBits <= 8) {
+      if (datatype == GL_INT || datatype == GL_UNSIGNED_INT) {
+         return datatype;
+      } else if (format_red_bits <= 8) {
          return GL_UNSIGNED_BYTE;
-      } else if (ctx->DrawBuffer->Visual.redBits <= 16) {
+      } else if (format_red_bits <= 16) {
          return GL_UNSIGNED_SHORT;
-      } else {
-         GLenum datatype = _mesa_get_format_datatype(format);
-         if (datatype == GL_INT || datatype == GL_UNSIGNED_INT)
-            return datatype;
-         return GL_FLOAT;
       }
-   case GL_DEPTH_COMPONENT: {
-      GLenum datatype = _mesa_get_format_datatype(format);
+      return GL_FLOAT;
+   case GL_DEPTH_COMPONENT:
       if (datatype == GL_FLOAT)
          return GL_FLOAT;
       else
          return GL_UNSIGNED_INT;
-   }
-   case GL_DEPTH_STENCIL: {
-      GLenum datatype = _mesa_get_format_datatype(format);
+   case GL_DEPTH_STENCIL:
       if (datatype == GL_FLOAT)
          return GL_FLOAT_32_UNSIGNED_INT_24_8_REV;
       else
          return GL_UNSIGNED_INT_24_8;
-   }
    default:
       _mesa_problem(ctx, "Unexpected format %d in get_temp_image_type()",
 		    baseFormat);
@@ -2817,17 +2802,20 @@ copytexsubimage_using_blit_framebuffer(struct gl_context *ctx, GLuint dims,
 
    if (rb->_BaseFormat == GL_DEPTH_STENCIL ||
        rb->_BaseFormat == GL_DEPTH_COMPONENT) {
-      _mesa_meta_bind_fbo_image(GL_DEPTH_ATTACHMENT, texImage, zoffset);
+      _mesa_meta_bind_fbo_image(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
+                                texImage, zoffset);
       mask = GL_DEPTH_BUFFER_BIT;
 
       if (rb->_BaseFormat == GL_DEPTH_STENCIL &&
           texImage->_BaseFormat == GL_DEPTH_STENCIL) {
-         _mesa_meta_bind_fbo_image(GL_STENCIL_ATTACHMENT, texImage, zoffset);
+         _mesa_meta_bind_fbo_image(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT,
+                                   texImage, zoffset);
          mask |= GL_STENCIL_BUFFER_BIT;
       }
       _mesa_DrawBuffer(GL_NONE);
    } else {
-      _mesa_meta_bind_fbo_image(GL_COLOR_ATTACHMENT0, texImage, zoffset);
+      _mesa_meta_bind_fbo_image(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+                                texImage, zoffset);
       mask = GL_COLOR_BUFFER_BIT;
       _mesa_DrawBuffer(GL_COLOR_ATTACHMENT0);
    }
@@ -3358,4 +3346,193 @@ _mesa_meta_DrawTex(struct gl_context *ctx, GLfloat x, GLfloat y, GLfloat z,
    _mesa_DrawArrays(GL_TRIANGLE_FAN, 0, 4);
 
    _mesa_meta_end(ctx);
+}
+
+static bool
+cleartexsubimage_color(struct gl_context *ctx,
+                       struct gl_texture_image *texImage,
+                       const GLvoid *clearValue,
+                       GLint zoffset)
+{
+   mesa_format format;
+   union gl_color_union colorValue;
+   GLenum datatype;
+   GLenum status;
+
+   _mesa_meta_bind_fbo_image(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+                             texImage, zoffset);
+
+   status = _mesa_CheckFramebufferStatus(GL_DRAW_FRAMEBUFFER);
+   if (status != GL_FRAMEBUFFER_COMPLETE)
+      return false;
+
+   /* We don't want to apply an sRGB conversion so override the format */
+   format = _mesa_get_srgb_format_linear(texImage->TexFormat);
+   datatype = _mesa_get_format_datatype(format);
+
+   switch (datatype) {
+   case GL_UNSIGNED_INT:
+   case GL_INT:
+      if (clearValue)
+         _mesa_unpack_uint_rgba_row(format, 1, clearValue,
+                                    (GLuint (*)[4]) colorValue.ui);
+      else
+         memset(&colorValue, 0, sizeof colorValue);
+      if (datatype == GL_INT)
+         _mesa_ClearBufferiv(GL_COLOR, 0, colorValue.i);
+      else
+         _mesa_ClearBufferuiv(GL_COLOR, 0, colorValue.ui);
+      break;
+   default:
+      if (clearValue)
+         _mesa_unpack_rgba_row(format, 1, clearValue,
+                               (GLfloat (*)[4]) colorValue.f);
+      else
+         memset(&colorValue, 0, sizeof colorValue);
+      _mesa_ClearBufferfv(GL_COLOR, 0, colorValue.f);
+      break;
+   }
+
+   return true;
+}
+
+static bool
+cleartexsubimage_depth_stencil(struct gl_context *ctx,
+                               struct gl_texture_image *texImage,
+                               const GLvoid *clearValue,
+                               GLint zoffset)
+{
+   GLint stencilValue;
+   GLfloat depthValue;
+   GLenum status;
+
+   _mesa_meta_bind_fbo_image(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
+                             texImage, zoffset);
+
+   if (texImage->_BaseFormat == GL_DEPTH_STENCIL)
+      _mesa_meta_bind_fbo_image(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT,
+                                texImage, zoffset);
+
+   status = _mesa_CheckFramebufferStatus(GL_DRAW_FRAMEBUFFER);
+   if (status != GL_FRAMEBUFFER_COMPLETE)
+      return false;
+
+   if (clearValue) {
+      GLuint depthStencilValue[2];
+
+      /* Convert the clearValue from whatever format it's in to a floating
+       * point value for the depth and an integer value for the stencil index
+       */
+      _mesa_unpack_float_32_uint_24_8_depth_stencil_row(texImage->TexFormat,
+                                                        1, /* n */
+                                                        clearValue,
+                                                        depthStencilValue);
+      /* We need a memcpy here instead of a cast because we need to
+       * reinterpret the bytes as a float rather than converting it
+       */
+      memcpy(&depthValue, depthStencilValue, sizeof depthValue);
+      stencilValue = depthStencilValue[1] & 0xff;
+   } else {
+      depthValue = 0.0f;
+      stencilValue = 0;
+   }
+
+   if (texImage->_BaseFormat == GL_DEPTH_STENCIL)
+      _mesa_ClearBufferfi(GL_DEPTH_STENCIL, 0, depthValue, stencilValue);
+   else
+      _mesa_ClearBufferfv(GL_DEPTH, 0, &depthValue);
+
+   return true;
+}
+
+static bool
+cleartexsubimage_for_zoffset(struct gl_context *ctx,
+                             struct gl_texture_image *texImage,
+                             GLint zoffset,
+                             const GLvoid *clearValue)
+{
+   GLuint fbo;
+   bool success;
+
+   _mesa_GenFramebuffers(1, &fbo);
+   _mesa_BindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
+
+   switch(texImage->_BaseFormat) {
+   case GL_DEPTH_STENCIL:
+   case GL_DEPTH_COMPONENT:
+      success = cleartexsubimage_depth_stencil(ctx, texImage,
+                                               clearValue, zoffset);
+      break;
+   default:
+      success = cleartexsubimage_color(ctx, texImage, clearValue, zoffset);
+      break;
+   }
+
+   _mesa_DeleteFramebuffers(1, &fbo);
+
+   return success;
+}
+
+static bool
+cleartexsubimage_using_fbo(struct gl_context *ctx,
+                           struct gl_texture_image *texImage,
+                           GLint xoffset, GLint yoffset, GLint zoffset,
+                           GLsizei width, GLsizei height, GLsizei depth,
+                           const GLvoid *clearValue)
+{
+   bool success = true;
+   GLint z;
+
+   _mesa_meta_begin(ctx,
+                    MESA_META_SCISSOR |
+                    MESA_META_COLOR_MASK |
+                    MESA_META_DITHER |
+                    MESA_META_FRAMEBUFFER_SRGB);
+
+   _mesa_set_enable(ctx, GL_DITHER, GL_FALSE);
+
+   _mesa_set_enable(ctx, GL_SCISSOR_TEST, GL_TRUE);
+   _mesa_Scissor(xoffset, yoffset, width, height);
+
+   for (z = zoffset; z < zoffset + depth; z++) {
+      if (!cleartexsubimage_for_zoffset(ctx, texImage, z, clearValue)) {
+         success = false;
+         break;
+      }
+   }
+
+   _mesa_meta_end(ctx);
+
+   return success;
+}
+
+extern void
+_mesa_meta_ClearTexSubImage(struct gl_context *ctx,
+                            struct gl_texture_image *texImage,
+                            GLint xoffset, GLint yoffset, GLint zoffset,
+                            GLsizei width, GLsizei height, GLsizei depth,
+                            const GLvoid *clearValue)
+{
+   bool res;
+
+   _mesa_unlock_texture(ctx, texImage->TexObject);
+
+   res = cleartexsubimage_using_fbo(ctx, texImage,
+                                    xoffset, yoffset, zoffset,
+                                    width, height, depth,
+                                    clearValue);
+
+   _mesa_lock_texture(ctx, texImage->TexObject);
+
+   if (res)
+      return;
+
+   _mesa_warning(ctx,
+                 "Falling back to mapping the texture in "
+                 "glClearTexSubImage\n");
+
+   _mesa_store_cleartexsubimage(ctx, texImage,
+                                xoffset, yoffset, zoffset,
+                                width, height, depth,
+                                clearValue);
 }

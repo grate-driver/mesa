@@ -87,7 +87,7 @@ static void
 emit_constants(struct fd_ringbuffer *ring,
 		enum adreno_state_block sb,
 		struct fd_constbuf_stateobj *constbuf,
-		struct fd3_shader_variant *shader)
+		struct ir3_shader_variant *shader)
 {
 	uint32_t enabled_mask = constbuf->enabled_mask;
 	uint32_t first_immediate;
@@ -234,26 +234,6 @@ emit_textures(struct fd_ringbuffer *ring,
 	}
 }
 
-static void
-emit_cache_flush(struct fd_ringbuffer *ring)
-{
-	OUT_PKT3(ring, CP_EVENT_WRITE, 1);
-	OUT_RING(ring, CACHE_FLUSH);
-
-	/* probably only really needed on a320: */
-	OUT_PKT3(ring, CP_DRAW_INDX, 3);
-	OUT_RING(ring, 0x00000000);
-	OUT_RING(ring, DRAW(1, DI_SRC_SEL_AUTO_INDEX,
-			INDEX_SIZE_IGN, IGNORE_VISIBILITY));
-	OUT_RING(ring, 0);					/* NumIndices */
-
-	OUT_PKT3(ring, CP_NOP, 4);
-	OUT_RING(ring, 0x00000000);
-	OUT_RING(ring, 0x00000000);
-	OUT_RING(ring, 0x00000000);
-	OUT_RING(ring, 0x00000000);
-}
-
 /* emit texture state for mem->gmem restore operation.. eventually it would
  * be good to get rid of this and use normal CSO/etc state for more of these
  * special cases, but for now the compiler is not sufficient..
@@ -311,7 +291,7 @@ fd3_emit_gmem_restore_tex(struct fd_ringbuffer *ring, struct pipe_surface *psurf
 
 void
 fd3_emit_vertex_bufs(struct fd_ringbuffer *ring,
-		struct fd3_shader_variant *vp,
+		struct ir3_shader_variant *vp,
 		struct fd3_vertex_buf *vbufs, uint32_t n)
 {
 	uint32_t i, j, last = 0;
@@ -370,10 +350,10 @@ fd3_emit_vertex_bufs(struct fd_ringbuffer *ring,
 void
 fd3_emit_state(struct fd_context *ctx, struct fd_ringbuffer *ring,
 		struct fd_program_stateobj *prog, uint32_t dirty,
-		struct fd3_shader_key key)
+		struct ir3_shader_key key)
 {
-	struct fd3_shader_variant *vp;
-	struct fd3_shader_variant *fp;
+	struct ir3_shader_variant *vp;
+	struct ir3_shader_variant *fp;
 
 	fp = fd3_shader_variant(prog->fp, key);
 	vp = fd3_shader_variant(prog->vp, key);
@@ -492,6 +472,7 @@ fd3_emit_state(struct fd_context *ctx, struct fd_ringbuffer *ring,
 	}
 
 	if (dirty & FD_DIRTY_VIEWPORT) {
+		fd_wfi(ctx, ring);
 		OUT_PKT0(ring, REG_A3XX_GRAS_CL_VPORT_XOFFSET, 6);
 		OUT_RING(ring, A3XX_GRAS_CL_VPORT_XOFFSET(ctx->viewport.translate[0] - 0.5));
 		OUT_RING(ring, A3XX_GRAS_CL_VPORT_XSCALE(ctx->viewport.scale[0]));
@@ -502,10 +483,11 @@ fd3_emit_state(struct fd_context *ctx, struct fd_ringbuffer *ring,
 	}
 
 	if (dirty & FD_DIRTY_PROG) {
-		fd_wfi(ctx, ring);
 		fd3_program_emit(ring, prog, key);
 	}
 
+	/* TODO we should not need this or fd_wfi() before emit_constants():
+	 */
 	OUT_PKT3(ring, CP_EVENT_WRITE, 1);
 	OUT_RING(ring, HLSQ_FLUSH);
 
@@ -586,6 +568,7 @@ fd3_emit_restore(struct fd_context *ctx)
 		OUT_RING(ring, 0x00000000);
 	}
 
+	fd_wfi(ctx, ring);
 	OUT_PKT3(ring, CP_INVALIDATE_STATE, 1);
 	OUT_RING(ring, 0x00007fff);
 
@@ -696,7 +679,22 @@ fd3_emit_restore(struct fd_context *ctx)
 	OUT_PKT0(ring, REG_A3XX_PC_VSTREAM_CONTROL, 1);
 	OUT_RING(ring, 0x00000000);
 
-	emit_cache_flush(ring);
+	fd_event_write(ctx, ring, CACHE_FLUSH);
+
+	if (is_a3xx_p0(ctx->screen)) {
+		OUT_PKT3(ring, CP_DRAW_INDX, 3);
+		OUT_RING(ring, 0x00000000);
+		OUT_RING(ring, DRAW(1, DI_SRC_SEL_AUTO_INDEX,
+				INDEX_SIZE_IGN, IGNORE_VISIBILITY));
+		OUT_RING(ring, 0);					/* NumIndices */
+	}
+
+	OUT_PKT3(ring, CP_NOP, 4);
+	OUT_RING(ring, 0x00000000);
+	OUT_RING(ring, 0x00000000);
+	OUT_RING(ring, 0x00000000);
+	OUT_RING(ring, 0x00000000);
+
 	fd_wfi(ctx, ring);
 
 	ctx->needs_rb_fbd = true;

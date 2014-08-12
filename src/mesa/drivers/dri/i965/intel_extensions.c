@@ -163,6 +163,8 @@ intelInitExtensions(struct gl_context *ctx)
    assert(brw->gen >= 4);
 
    ctx->Extensions.ARB_buffer_storage = true;
+   ctx->Extensions.ARB_clear_texture = true;
+   ctx->Extensions.ARB_copy_image = true;
    ctx->Extensions.ARB_depth_buffer_float = true;
    ctx->Extensions.ARB_depth_clamp = true;
    ctx->Extensions.ARB_depth_texture = true;
@@ -170,6 +172,7 @@ intelInitExtensions(struct gl_context *ctx)
    ctx->Extensions.ARB_draw_instanced = true;
    ctx->Extensions.ARB_ES2_compatibility = true;
    ctx->Extensions.ARB_explicit_attrib_location = true;
+   ctx->Extensions.ARB_explicit_uniform_location = true;
    ctx->Extensions.ARB_fragment_coord_conventions = true;
    ctx->Extensions.ARB_fragment_program = true;
    ctx->Extensions.ARB_fragment_program_shadow = true;
@@ -226,7 +229,6 @@ intelInitExtensions(struct gl_context *ctx)
    ctx->Extensions.EXT_vertex_array_bgra = true;
    ctx->Extensions.AMD_seamless_cubemap_per_texture = true;
    ctx->Extensions.APPLE_object_purgeable = true;
-   ctx->Extensions.ATI_envmap_bumpmap = true;
    ctx->Extensions.ATI_separate_stencil = true;
    ctx->Extensions.ATI_texture_env_combine3 = true;
    ctx->Extensions.MESA_pack_invert = true;
@@ -247,7 +249,7 @@ intelInitExtensions(struct gl_context *ctx)
       ctx->Const.GLSLVersion = 140;
    else
       ctx->Const.GLSLVersion = 120;
-   _mesa_override_glsl_version(ctx);
+   _mesa_override_glsl_version(&ctx->Const);
 
    if (brw->gen >= 6) {
       uint64_t dummy;
@@ -297,11 +299,10 @@ intelInitExtensions(struct gl_context *ctx)
       /* Only enable this in core profile because other parts of Mesa behave
        * slightly differently when the extension is enabled.
        */
-      if (ctx->API == API_OPENGL_CORE)
+      if (ctx->API == API_OPENGL_CORE) {
          ctx->Extensions.ARB_viewport_array = true;
-
-      if (getenv("INTEL_COMPUTE_SHADER"))
-         ctx->Extensions.ARB_compute_shader = true;
+         ctx->Extensions.AMD_vertex_shader_viewport_index = true;
+      }
    }
 
    if (brw->gen >= 8) {

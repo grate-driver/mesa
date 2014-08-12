@@ -454,7 +454,6 @@ brw_format_for_mesa_format(mesa_format mesa_format)
       [MESA_FORMAT_RGB_UINT32] = BRW_SURFACEFORMAT_R32G32B32_UINT,
       [MESA_FORMAT_RGBA_UINT32] = BRW_SURFACEFORMAT_R32G32B32A32_UINT,
 
-      [MESA_FORMAT_DUDV8] = BRW_SURFACEFORMAT_R8G8_SNORM,
       [MESA_FORMAT_R_SNORM8] = BRW_SURFACEFORMAT_R8_SNORM,
       [MESA_FORMAT_R8G8_SNORM] = BRW_SURFACEFORMAT_R8G8_SNORM,
       [MESA_FORMAT_X8B8G8R8_SNORM] = 0,
@@ -768,8 +767,7 @@ brw_depth_format(struct brw_context *brw, mesa_format format)
    case MESA_FORMAT_Z32_FLOAT_S8X24_UINT:
       return BRW_DEPTHFORMAT_D32_FLOAT_S8X24_UINT;
    default:
-      assert(!"Unexpected depth format.");
-      return BRW_DEPTHFORMAT_D32_FLOAT;
+      unreachable("Unexpected depth format.");
    }
 }
 

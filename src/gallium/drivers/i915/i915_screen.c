@@ -129,14 +129,12 @@ i915_get_shader_param(struct pipe_screen *screen, unsigned shader, enum pipe_sha
          return 0;
       case PIPE_SHADER_CAP_MAX_INPUTS:
          return 10;
-      case PIPE_SHADER_CAP_MAX_CONSTS:
-         return 32;
+      case PIPE_SHADER_CAP_MAX_CONST_BUFFER_SIZE:
+         return 32 * sizeof(float[4]);
       case PIPE_SHADER_CAP_MAX_CONST_BUFFERS:
          return 1;
       case PIPE_SHADER_CAP_MAX_TEMPS:
          return 12; /* XXX: 12 -> 32 ? */
-      case PIPE_SHADER_CAP_MAX_ADDRS:
-         return 0;
       case PIPE_SHADER_CAP_MAX_PREDS:
          return 0;
       case PIPE_SHADER_CAP_TGSI_CONT_SUPPORTED:
@@ -221,6 +219,8 @@ i915_get_param(struct pipe_screen *screen, enum pipe_cap cap)
    case PIPE_CAP_FAKE_SW_MSAA:
    case PIPE_CAP_TEXTURE_QUERY_LOD:
    case PIPE_CAP_SAMPLE_SHADING:
+   case PIPE_CAP_TEXTURE_GATHER_OFFSETS:
+   case PIPE_CAP_TGSI_VS_WINDOW_SPACE_POSITION:
       return 0;
 
    case PIPE_CAP_MAX_DUAL_SOURCE_RENDER_TARGETS:
@@ -228,8 +228,9 @@ i915_get_param(struct pipe_screen *screen, enum pipe_cap cap)
    case PIPE_CAP_VERTEX_BUFFER_OFFSET_4BYTE_ALIGNED_ONLY:
    case PIPE_CAP_VERTEX_BUFFER_STRIDE_4BYTE_ALIGNED_ONLY:
    case PIPE_CAP_VERTEX_ELEMENT_SRC_OFFSET_4BYTE_ALIGNED_ONLY:
-   case PIPE_CAP_TGSI_VS_LAYER:
+   case PIPE_CAP_TGSI_VS_LAYER_VIEWPORT:
    case PIPE_CAP_BUFFER_MAP_PERSISTENT_COHERENT:
+   case PIPE_CAP_DRAW_INDIRECT:
       return 0;
 
    case PIPE_CAP_MIN_MAP_BUFFER_ALIGNMENT:
@@ -268,6 +269,7 @@ i915_get_param(struct pipe_screen *screen, enum pipe_cap cap)
    /* Geometry shader output, unsupported. */
    case PIPE_CAP_MAX_GEOMETRY_OUTPUT_VERTICES:
    case PIPE_CAP_MAX_GEOMETRY_TOTAL_OUTPUT_COMPONENTS:
+   case PIPE_CAP_MAX_VERTEX_STREAMS:
       return 0;
 
    /* Fragment coordinate conventions. */

@@ -34,6 +34,7 @@
 #include "main/api_exec.h"
 #include "main/context.h"
 #include "main/fbobject.h"
+#include "main/extensions.h"
 #include "main/imports.h"
 #include "main/macros.h"
 #include "main/points.h"
@@ -64,7 +65,7 @@
 #include "swrast_setup/swrast_setup.h"
 #include "tnl/tnl.h"
 #include "tnl/t_pipeline.h"
-#include "glsl/ralloc.h"
+#include "util/ralloc.h"
 
 /***************************************
  * Mesa's Driver Functions
@@ -244,6 +245,7 @@ brw_init_driver_functions(struct brw_context *brw,
    intelInitTextureImageFuncs(functions);
    intelInitTextureSubImageFuncs(functions);
    intelInitTextureCopyImageFuncs(functions);
+   intelInitCopyImageFuncs(functions);
    intelInitClearFuncs(functions);
    intelInitBufferFuncs(functions);
    intelInitPixelFuncs(functions);
@@ -302,7 +304,7 @@ brw_initialize_context_constants(struct brw_context *brw)
       ctx->Const.Program[MESA_SHADER_GEOMETRY].MaxTextureImageUnits = max_samplers;
    else
       ctx->Const.Program[MESA_SHADER_GEOMETRY].MaxTextureImageUnits = 0;
-   if (getenv("INTEL_COMPUTE_SHADER")) {
+   if (_mesa_extension_override_enables.ARB_compute_shader) {
       ctx->Const.Program[MESA_SHADER_COMPUTE].MaxTextureImageUnits = BRW_MAX_TEX_UNIT;
       ctx->Const.MaxUniformBufferBindings += 12;
    } else {
@@ -480,21 +482,21 @@ brw_initialize_context_constants(struct brw_context *brw)
 
    /* We want the GLSL compiler to emit code that uses condition codes */
    for (int i = 0; i < MESA_SHADER_STAGES; i++) {
-      ctx->ShaderCompilerOptions[i].MaxIfDepth = brw->gen < 6 ? 16 : UINT_MAX;
-      ctx->ShaderCompilerOptions[i].EmitCondCodes = true;
-      ctx->ShaderCompilerOptions[i].EmitNoNoise = true;
-      ctx->ShaderCompilerOptions[i].EmitNoMainReturn = true;
-      ctx->ShaderCompilerOptions[i].EmitNoIndirectInput = true;
-      ctx->ShaderCompilerOptions[i].EmitNoIndirectOutput =
+      ctx->Const.ShaderCompilerOptions[i].MaxIfDepth = brw->gen < 6 ? 16 : UINT_MAX;
+      ctx->Const.ShaderCompilerOptions[i].EmitCondCodes = true;
+      ctx->Const.ShaderCompilerOptions[i].EmitNoNoise = true;
+      ctx->Const.ShaderCompilerOptions[i].EmitNoMainReturn = true;
+      ctx->Const.ShaderCompilerOptions[i].EmitNoIndirectInput = true;
+      ctx->Const.ShaderCompilerOptions[i].EmitNoIndirectOutput =
 	 (i == MESA_SHADER_FRAGMENT);
-      ctx->ShaderCompilerOptions[i].EmitNoIndirectTemp =
+      ctx->Const.ShaderCompilerOptions[i].EmitNoIndirectTemp =
 	 (i == MESA_SHADER_FRAGMENT);
-      ctx->ShaderCompilerOptions[i].EmitNoIndirectUniform = false;
-      ctx->ShaderCompilerOptions[i].LowerClipDistance = true;
+      ctx->Const.ShaderCompilerOptions[i].EmitNoIndirectUniform = false;
+      ctx->Const.ShaderCompilerOptions[i].LowerClipDistance = true;
    }
 
-   ctx->ShaderCompilerOptions[MESA_SHADER_VERTEX].OptimizeForAOS = true;
-   ctx->ShaderCompilerOptions[MESA_SHADER_GEOMETRY].OptimizeForAOS = true;
+   ctx->Const.ShaderCompilerOptions[MESA_SHADER_VERTEX].OptimizeForAOS = true;
+   ctx->Const.ShaderCompilerOptions[MESA_SHADER_GEOMETRY].OptimizeForAOS = true;
 
    /* ARB_viewport_array */
    if (brw->gen >= 7 && ctx->API == API_OPENGL_CORE) {
@@ -506,6 +508,10 @@ brw_initialize_context_constants(struct brw_context *brw)
       ctx->Const.ViewportBounds.Min = -(float)ctx->Const.MaxViewportWidth;
       ctx->Const.ViewportBounds.Max = ctx->Const.MaxViewportWidth;
    }
+
+   /* ARB_gpu_shader5 */
+   if (brw->gen >= 7)
+      ctx->Const.MaxVertexStreams = MIN2(4, MAX_VERTEX_STREAMS);
 }
 
 /**
@@ -565,6 +571,9 @@ brw_process_driconf_options(struct brw_context *brw)
 
    ctx->Const.DisableGLSLLineContinuations =
       driQueryOptionb(options, "disable_glsl_line_continuations");
+
+   ctx->Const.AllowGLSLExtensionDirectiveMidShader =
+      driQueryOptionb(options, "allow_glsl_extension_directive_midshader");
 }
 
 GLboolean
@@ -615,6 +624,7 @@ brwCreateContext(gl_api api,
    brw->is_g4x = devinfo->is_g4x;
    brw->is_baytrail = devinfo->is_baytrail;
    brw->is_haswell = devinfo->is_haswell;
+   brw->is_cherryview = devinfo->is_cherryview;
    brw->has_llc = devinfo->has_llc;
    brw->has_hiz = devinfo->has_hiz_and_separate_stencil;
    brw->has_separate_stencil = devinfo->has_hiz_and_separate_stencil;
@@ -633,15 +643,12 @@ brwCreateContext(gl_api api,
    brw->wm.base.stage = MESA_SHADER_FRAGMENT;
    if (brw->gen >= 8) {
       gen8_init_vtable_surface_functions(brw);
-      gen7_init_vtable_sampler_functions(brw);
       brw->vtbl.emit_depth_stencil_hiz = gen8_emit_depth_stencil_hiz;
    } else if (brw->gen >= 7) {
       gen7_init_vtable_surface_functions(brw);
-      gen7_init_vtable_sampler_functions(brw);
       brw->vtbl.emit_depth_stencil_hiz = gen7_emit_depth_stencil_hiz;
    } else {
       gen4_init_vtable_surface_functions(brw);
-      gen4_init_vtable_sampler_functions(brw);
       brw->vtbl.emit_depth_stencil_hiz = brw_emit_depth_stencil_hiz;
    }
 
@@ -751,11 +758,6 @@ brwCreateContext(gl_api api,
    brw->prim_restart.enable_cut_index = false;
    brw->gs.enabled = false;
 
-   if (brw->gen < 6) {
-      brw->curbe.last_buf = calloc(1, 4096);
-      brw->curbe.next_buf = calloc(1, 4096);
-   }
-
    ctx->VertexProgram._MaintainTnlProgram = true;
    ctx->FragmentProgram._MaintainTexEnvProgram = true;
 
@@ -780,6 +782,9 @@ brwCreateContext(gl_api api,
    if (ctx->Extensions.AMD_performance_monitor) {
       brw_init_performance_monitors(brw);
    }
+
+   vbo_use_buffer_objects(ctx);
+   vbo_always_unmap_buffers(ctx);
 
    return true;
 }
@@ -815,9 +820,6 @@ intelDestroyContext(__DRIcontext * driContextPriv)
    brw_draw_destroy(brw);
 
    drm_intel_bo_unreference(brw->curbe.curbe_bo);
-
-   free(brw->curbe.last_buf);
-   free(brw->curbe.next_buf);
 
    drm_intel_gem_context_destroy(brw->hw_ctx);
 

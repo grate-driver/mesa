@@ -75,7 +75,7 @@ libEGL_la_LIBADD = \
 libEGL_la_LDFLAGS = \
 	-no-undefined \
 	-version-number 1:0 \
-	-Wl,-Bsymbolic \
+	$(BSYMBOLIC) \
 	$(GC_SECTIONS) \
 	$(LD_NO_UNDEFINED)
 
@@ -126,5 +126,6 @@ egldir = $(includedir)/EGL
 egl_HEADERS = \
 	$(top_srcdir)/include/EGL/eglext.h \
 	$(top_srcdir)/include/EGL/egl.h \
+	$(top_srcdir)/include/EGL/eglextchromium.h \
 	$(top_srcdir)/include/EGL/eglmesaext.h \
 	$(top_srcdir)/include/EGL/eglplatform.h

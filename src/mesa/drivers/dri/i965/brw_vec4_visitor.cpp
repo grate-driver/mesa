@@ -30,8 +30,9 @@ extern "C" {
 namespace brw {
 
 vec4_instruction::vec4_instruction(vec4_visitor *v,
-				   enum opcode opcode, dst_reg dst,
-				   src_reg src0, src_reg src1, src_reg src2)
+                                   enum opcode opcode, const dst_reg &dst,
+                                   const src_reg &src0, const src_reg &src1,
+                                   const src_reg &src2)
 {
    this->opcode = opcode;
    this->dst = dst;
@@ -44,7 +45,6 @@ vec4_instruction::vec4_instruction(vec4_visitor *v,
    this->no_dd_check = false;
    this->writes_accumulator = false;
    this->conditional_mod = BRW_CONDITIONAL_NONE;
-   this->sampler = 0;
    this->texture_offset = 0;
    this->target = 0;
    this->shadow_compare = false;
@@ -111,7 +111,7 @@ vec4_visitor::emit(enum opcode opcode)
 
 #define ALU1(op)							\
    vec4_instruction *							\
-   vec4_visitor::op(dst_reg dst, src_reg src0)				\
+   vec4_visitor::op(const dst_reg &dst, const src_reg &src0)		\
    {									\
       return new(mem_ctx) vec4_instruction(this, BRW_OPCODE_##op, dst,	\
 					   src0);			\
@@ -119,7 +119,8 @@ vec4_visitor::emit(enum opcode opcode)
 
 #define ALU2(op)							\
    vec4_instruction *							\
-   vec4_visitor::op(dst_reg dst, src_reg src0, src_reg src1)		\
+   vec4_visitor::op(const dst_reg &dst, const src_reg &src0,		\
+                    const src_reg &src1)				\
    {									\
       return new(mem_ctx) vec4_instruction(this, BRW_OPCODE_##op, dst,	\
 					   src0, src1);			\
@@ -127,7 +128,8 @@ vec4_visitor::emit(enum opcode opcode)
 
 #define ALU2_ACC(op)							\
    vec4_instruction *							\
-   vec4_visitor::op(dst_reg dst, src_reg src0, src_reg src1)		\
+   vec4_visitor::op(const dst_reg &dst, const src_reg &src0,		\
+                    const src_reg &src1)				\
    {									\
       vec4_instruction *inst = new(mem_ctx) vec4_instruction(this,     \
                        BRW_OPCODE_##op, dst, src0, src1);		\
@@ -137,7 +139,8 @@ vec4_visitor::emit(enum opcode opcode)
 
 #define ALU3(op)							\
    vec4_instruction *							\
-   vec4_visitor::op(dst_reg dst, src_reg src0, src_reg src1, src_reg src2)\
+   vec4_visitor::op(const dst_reg &dst, const src_reg &src0,		\
+                    const src_reg &src1, const src_reg &src2)		\
    {									\
       assert(brw->gen >= 6);						\
       return new(mem_ctx) vec4_instruction(this, BRW_OPCODE_##op, dst,	\
@@ -179,7 +182,7 @@ ALU2(MAC)
 
 /** Gen4 predicated IF. */
 vec4_instruction *
-vec4_visitor::IF(uint32_t predicate)
+vec4_visitor::IF(enum brw_predicate predicate)
 {
    vec4_instruction *inst;
 
@@ -191,7 +194,8 @@ vec4_visitor::IF(uint32_t predicate)
 
 /** Gen6 IF with embedded comparison. */
 vec4_instruction *
-vec4_visitor::IF(src_reg src0, src_reg src1, uint32_t condition)
+vec4_visitor::IF(src_reg src0, src_reg src1,
+                 enum brw_conditional_mod condition)
 {
    assert(brw->gen == 6);
 
@@ -213,7 +217,8 @@ vec4_visitor::IF(src_reg src0, src_reg src1, uint32_t condition)
  * the flag register with the packed 16 bits of the result.
  */
 vec4_instruction *
-vec4_visitor::CMP(dst_reg dst, src_reg src0, src_reg src1, uint32_t condition)
+vec4_visitor::CMP(dst_reg dst, src_reg src0, src_reg src1,
+                  enum brw_conditional_mod condition)
 {
    vec4_instruction *inst;
 
@@ -237,7 +242,7 @@ vec4_visitor::CMP(dst_reg dst, src_reg src0, src_reg src1, uint32_t condition)
 }
 
 vec4_instruction *
-vec4_visitor::SCRATCH_READ(dst_reg dst, src_reg index)
+vec4_visitor::SCRATCH_READ(const dst_reg &dst, const src_reg &index)
 {
    vec4_instruction *inst;
 
@@ -250,7 +255,8 @@ vec4_visitor::SCRATCH_READ(dst_reg dst, src_reg index)
 }
 
 vec4_instruction *
-vec4_visitor::SCRATCH_WRITE(dst_reg dst, src_reg src, src_reg index)
+vec4_visitor::SCRATCH_WRITE(const dst_reg &dst, const src_reg &src,
+                            const src_reg &index)
 {
    vec4_instruction *inst;
 
@@ -326,7 +332,7 @@ vec4_visitor::emit_math1_gen6(enum opcode opcode, dst_reg dst, src_reg src)
 {
    src = fix_math_operand(src);
 
-   if (dst.writemask != WRITEMASK_XYZW) {
+   if (brw->gen == 6 && dst.writemask != WRITEMASK_XYZW) {
       /* The gen6 math instruction must be align1, so we can't do
        * writemasks.
        */
@@ -361,8 +367,7 @@ vec4_visitor::emit_math(opcode opcode, dst_reg dst, src_reg src)
    case SHADER_OPCODE_COS:
       break;
    default:
-      assert(!"not reached: bad math opcode");
-      return;
+      unreachable("not reached: bad math opcode");
    }
 
    if (brw->gen >= 8) {
@@ -381,7 +386,7 @@ vec4_visitor::emit_math2_gen6(enum opcode opcode,
    src0 = fix_math_operand(src0);
    src1 = fix_math_operand(src1);
 
-   if (dst.writemask != WRITEMASK_XYZW) {
+   if (brw->gen == 6 && dst.writemask != WRITEMASK_XYZW) {
       /* The gen6 math instruction must be align1, so we can't do
        * writemasks.
        */
@@ -415,8 +420,7 @@ vec4_visitor::emit_math(enum opcode opcode,
    case SHADER_OPCODE_INT_REMAINDER:
       break;
    default:
-      assert(!"not reached: unsupported binary math opcode");
-      return;
+      unreachable("not reached: unsupported binary math opcode");
    }
 
    if (brw->gen >= 8) {
@@ -431,8 +435,9 @@ vec4_visitor::emit_math(enum opcode opcode,
 void
 vec4_visitor::emit_pack_half_2x16(dst_reg dst, src_reg src0)
 {
-   if (brw->gen < 7)
-      assert(!"ir_unop_pack_half_2x16 should be lowered");
+   if (brw->gen < 7) {
+      unreachable("ir_unop_pack_half_2x16 should be lowered");
+   }
 
    assert(dst.type == BRW_REGISTER_TYPE_UD);
    assert(src0.type == BRW_REGISTER_TYPE_F);
@@ -507,8 +512,9 @@ vec4_visitor::emit_pack_half_2x16(dst_reg dst, src_reg src0)
 void
 vec4_visitor::emit_unpack_half_2x16(dst_reg dst, src_reg src0)
 {
-   if (brw->gen < 7)
-      assert(!"ir_unop_unpack_half_2x16 should be lowered");
+   if (brw->gen < 7) {
+      unreachable("ir_unop_unpack_half_2x16 should be lowered");
+   }
 
    assert(dst.type == BRW_REGISTER_TYPE_F);
    assert(src0.type == BRW_REGISTER_TYPE_UD);
@@ -544,9 +550,7 @@ vec4_visitor::emit_unpack_half_2x16(dst_reg dst, src_reg src0)
 void
 vec4_visitor::visit_instructions(const exec_list *list)
 {
-   foreach_list(node, list) {
-      ir_instruction *ir = (ir_instruction *)node;
-
+   foreach_in_list(ir_instruction, ir, list) {
       base_ir = ir;
       ir->accept(this);
    }
@@ -594,8 +598,7 @@ type_size(const struct glsl_type *type)
    case GLSL_TYPE_VOID:
    case GLSL_TYPE_ERROR:
    case GLSL_TYPE_INTERFACE:
-      assert(0);
-      break;
+      unreachable("not reached");
    }
 
    return 0;
@@ -764,7 +767,8 @@ vec4_visitor::variable_storage(ir_variable *var)
 }
 
 void
-vec4_visitor::emit_bool_to_cond_code(ir_rvalue *ir, uint32_t *predicate)
+vec4_visitor::emit_bool_to_cond_code(ir_rvalue *ir,
+                                     enum brw_predicate *predicate)
 {
    ir_expression *expr = ir->as_expression();
 
@@ -847,8 +851,7 @@ vec4_visitor::emit_bool_to_cond_code(ir_rvalue *ir, uint32_t *predicate)
 	 break;
 
       default:
-	 assert(!"not reached");
-	 break;
+	 unreachable("not reached");
       }
       return;
    }
@@ -941,9 +944,7 @@ vec4_visitor::emit_if_gen6(ir_if *ir)
 	 return;
 
       default:
-	 assert(!"not reached");
-	 emit(IF(op[0], src_reg(0), BRW_CONDITIONAL_NZ));
-	 return;
+	 unreachable("not reached");
       }
       return;
    }
@@ -1014,7 +1015,7 @@ vec4_visitor::visit(ir_variable *ir)
       break;
 
    default:
-      assert(!"not reached");
+      unreachable("not reached");
    }
 
    reg->type = brw_type_for_base_type(ir->type);
@@ -1051,10 +1052,9 @@ vec4_visitor::visit(ir_loop_jump *ir)
 
 
 void
-vec4_visitor::visit(ir_function_signature *ir)
+vec4_visitor::visit(ir_function_signature *)
 {
-   assert(0);
-   (void)ir;
+   unreachable("not reached");
 }
 
 void
@@ -1067,7 +1067,7 @@ vec4_visitor::visit(ir_function *ir)
       const ir_function_signature *sig;
       exec_list empty;
 
-      sig = ir->matching_signature(NULL, &empty);
+      sig = ir->matching_signature(NULL, &empty, false);
 
       assert(sig);
 
@@ -1130,22 +1130,50 @@ vec4_visitor::try_emit_mad(ir_expression *ir)
    return true;
 }
 
-void
-vec4_visitor::emit_bool_comparison(unsigned int op,
-				 dst_reg dst, src_reg src0, src_reg src1)
+bool
+vec4_visitor::try_emit_b2f_of_compare(ir_expression *ir)
 {
-   /* original gen4 does destination conversion before comparison. */
-   if (brw->gen < 5)
-      dst.type = src0.type;
+   ir_expression *const cmp = ir->operands[0]->as_expression();
 
-   emit(CMP(dst, src0, src1, brw_conditional_for_comparison(op)));
+   if (cmp == NULL)
+      return false;
 
-   dst.type = BRW_REGISTER_TYPE_D;
-   emit(AND(dst, src_reg(dst), src_reg(0x1)));
+   switch (cmp->operation) {
+   case ir_binop_less:
+   case ir_binop_greater:
+   case ir_binop_lequal:
+   case ir_binop_gequal:
+   case ir_binop_equal:
+   case ir_binop_nequal:
+      break;
+
+   default:
+      return false;
+   }
+
+   cmp->operands[0]->accept(this);
+   const src_reg cmp_src0 = this->result;
+
+   cmp->operands[1]->accept(this);
+   const src_reg cmp_src1 = this->result;
+
+   this->result = src_reg(this, ir->type);
+
+   emit(CMP(dst_reg(this->result), cmp_src0, cmp_src1,
+            brw_conditional_for_comparison(cmp->operation)));
+
+   /* If the comparison is false, this->result will just happen to be zero.
+    */
+   vec4_instruction *const inst = emit(BRW_OPCODE_SEL, dst_reg(this->result),
+                                       this->result, src_reg(1.0f));
+   inst->predicate = BRW_PREDICATE_NORMAL;
+   inst->predicate_inverse = true;
+
+   return true;
 }
 
 void
-vec4_visitor::emit_minmax(uint32_t conditionalmod, dst_reg dst,
+vec4_visitor::emit_minmax(enum brw_conditional_mod conditionalmod, dst_reg dst,
                           src_reg src0, src_reg src1)
 {
    vec4_instruction *inst;
@@ -1203,6 +1231,11 @@ vec4_visitor::visit(ir_expression *ir)
 
    if (ir->operation == ir_binop_add) {
       if (try_emit_mad(ir))
+	 return;
+   }
+
+   if (ir->operation == ir_unop_b2f) {
+      if (try_emit_b2f_of_compare(ir))
 	 return;
    }
 
@@ -1304,8 +1337,7 @@ vec4_visitor::visit(ir_expression *ir)
       break;
    case ir_unop_exp:
    case ir_unop_log:
-      assert(!"not reached: should be handled by ir_explog_to_explog2");
-      break;
+      unreachable("not reached: should be handled by ir_explog_to_explog2");
    case ir_unop_sin:
    case ir_unop_sin_reduced:
       emit_math(SHADER_OPCODE_SIN, result_dst, op[0]);
@@ -1317,8 +1349,7 @@ vec4_visitor::visit(ir_expression *ir)
 
    case ir_unop_dFdx:
    case ir_unop_dFdy:
-      assert(!"derivatives not valid in vertex shader");
-      break;
+      unreachable("derivatives not valid in vertex shader");
 
    case ir_unop_bitfield_reverse:
       emit(BFREV(result_dst, op[0]));
@@ -1354,15 +1385,13 @@ vec4_visitor::visit(ir_expression *ir)
       break;
 
    case ir_unop_noise:
-      assert(!"not reached: should be handled by lower_noise");
-      break;
+      unreachable("not reached: should be handled by lower_noise");
 
    case ir_binop_add:
       emit(ADD(result_dst, op[0], op[1]));
       break;
    case ir_binop_sub:
-      assert(!"not reached: should be handled by ir_sub_to_add_neg");
-      break;
+      unreachable("not reached: should be handled by ir_sub_to_add_neg");
 
    case ir_binop_mul:
       if (brw->gen < 8 && ir->type->is_integer()) {
@@ -1657,8 +1686,7 @@ vec4_visitor::visit(ir_expression *ir)
    }
 
    case ir_binop_vector_extract:
-      assert(!"should have been lowered by vec_index_to_cond_assign");
-      break;
+      unreachable("should have been lowered by vec_index_to_cond_assign");
 
    case ir_triop_fma:
       op[0] = fix_3src_operand(op[0]);
@@ -1698,17 +1726,14 @@ vec4_visitor::visit(ir_expression *ir)
       break;
 
    case ir_triop_vector_insert:
-      assert(!"should have been lowered by lower_vector_insert");
-      break;
+      unreachable("should have been lowered by lower_vector_insert");
 
    case ir_quadop_bitfield_insert:
-      assert(!"not reached: should be handled by "
+      unreachable("not reached: should be handled by "
               "bitfield_insert_to_bfm_bfi\n");
-      break;
 
    case ir_quadop_vector:
-      assert(!"not reached: should be handled by lower_quadop_vector");
-      break;
+      unreachable("not reached: should be handled by lower_quadop_vector");
 
    case ir_unop_pack_half_2x16:
       emit_pack_half_2x16(result_dst, op[0]);
@@ -1724,16 +1749,16 @@ vec4_visitor::visit(ir_expression *ir)
    case ir_unop_unpack_snorm_4x8:
    case ir_unop_unpack_unorm_2x16:
    case ir_unop_unpack_unorm_4x8:
-      assert(!"not reached: should be handled by lower_packing_builtins");
-      break;
+      unreachable("not reached: should be handled by lower_packing_builtins");
    case ir_unop_unpack_half_2x16_split_x:
    case ir_unop_unpack_half_2x16_split_y:
    case ir_binop_pack_half_2x16_split:
-      assert(!"not reached: should not occur in vertex shader");
-      break;
+   case ir_unop_interpolate_at_centroid:
+   case ir_binop_interpolate_at_sample:
+   case ir_binop_interpolate_at_offset:
+      unreachable("not reached: should not occur in vertex shader");
    case ir_binop_ldexp:
-      assert(!"not reached: should be handled by ldexp_to_arith()");
-      break;
+      unreachable("not reached: should be handled by ldexp_to_arith()");
    }
 }
 
@@ -1918,7 +1943,8 @@ get_assignment_lhs(ir_dereference *ir, vec4_visitor *v)
 
 void
 vec4_visitor::emit_block_move(dst_reg *dst, src_reg *src,
-			      const struct glsl_type *type, uint32_t predicate)
+                              const struct glsl_type *type,
+                              enum brw_predicate predicate)
 {
    if (type->base_type == GLSL_TYPE_STRUCT) {
       for (unsigned int i = 0; i < type->length; i++) {
@@ -2024,7 +2050,7 @@ void
 vec4_visitor::visit(ir_assignment *ir)
 {
    dst_reg dst = get_assignment_lhs(ir->lhs, this);
-   uint32_t predicate = BRW_PREDICATE_NONE;
+   enum brw_predicate predicate = BRW_PREDICATE_NONE;
 
    if (!ir->lhs->type->is_scalar() &&
        !ir->lhs->type->is_vector()) {
@@ -2111,9 +2137,7 @@ void
 vec4_visitor::emit_constant_values(dst_reg *dst, ir_constant *ir)
 {
    if (ir->type->base_type == GLSL_TYPE_STRUCT) {
-      foreach_list(node, &ir->components) {
-	 ir_constant *field_value = (ir_constant *)node;
-
+      foreach_in_list(ir_constant, field_value, &ir->components) {
 	 emit_constant_values(dst, field_value);
       }
       return;
@@ -2181,8 +2205,7 @@ vec4_visitor::emit_constant_values(dst_reg *dst, ir_constant *ir)
 	 emit(MOV(*dst, src_reg(ir->value.b[i])));
 	 break;
       default:
-	 assert(!"Non-float/uint/int/bool constant");
-	 break;
+	 unreachable("Non-float/uint/int/bool constant");
       }
 
       remaining_writemask &= ~dst->writemask;
@@ -2248,19 +2271,20 @@ vec4_visitor::visit(ir_call *ir)
        !strcmp("__intrinsic_atomic_predecrement", callee)) {
       visit_atomic_counter_intrinsic(ir);
    } else {
-      assert(!"Unsupported intrinsic.");
+      unreachable("Unsupported intrinsic.");
    }
 }
 
 src_reg
-vec4_visitor::emit_mcs_fetch(ir_texture *ir, src_reg coordinate, int sampler)
+vec4_visitor::emit_mcs_fetch(ir_texture *ir, src_reg coordinate, uint32_t sampler)
 {
    vec4_instruction *inst = new(mem_ctx) vec4_instruction(this, SHADER_OPCODE_TXF_MCS);
    inst->base_mrf = 2;
    inst->mlen = 1;
-   inst->sampler = sampler;
    inst->dst = dst_reg(this, glsl_type::uvec4_type);
    inst->dst.writemask = WRITEMASK_XYZW;
+
+   inst->src[1] = src_reg(sampler);
 
    /* parameters are: u, v, r, lod; lod will always be zero due to api restrictions */
    int param_base = inst->base_mrf;
@@ -2280,7 +2304,7 @@ vec4_visitor::emit_mcs_fetch(ir_texture *ir, src_reg coordinate, int sampler)
 void
 vec4_visitor::visit(ir_texture *ir)
 {
-   int sampler =
+   uint32_t sampler =
       _mesa_get_sampler_uniform_value(ir->sampler, shader_prog, prog);
 
    /* When tg4 is used with the degenerate ZERO/ONE swizzles, don't bother
@@ -2369,42 +2393,26 @@ vec4_visitor::visit(ir_texture *ir)
       break;
    }
 
-   vec4_instruction *inst = NULL;
+   enum opcode opcode;
    switch (ir->op) {
-   case ir_tex:
-   case ir_txl:
-      inst = new(mem_ctx) vec4_instruction(this, SHADER_OPCODE_TXL);
-      break;
-   case ir_txd:
-      inst = new(mem_ctx) vec4_instruction(this, SHADER_OPCODE_TXD);
-      break;
-   case ir_txf:
-      inst = new(mem_ctx) vec4_instruction(this, SHADER_OPCODE_TXF);
-      break;
-   case ir_txf_ms:
-      inst = new(mem_ctx) vec4_instruction(this, SHADER_OPCODE_TXF_CMS);
-      break;
-   case ir_txs:
-      inst = new(mem_ctx) vec4_instruction(this, SHADER_OPCODE_TXS);
-      break;
-   case ir_tg4:
-      if (has_nonconstant_offset)
-         inst = new(mem_ctx) vec4_instruction(this, SHADER_OPCODE_TG4_OFFSET);
-      else
-         inst = new(mem_ctx) vec4_instruction(this, SHADER_OPCODE_TG4);
-      break;
-   case ir_query_levels:
-      inst = new(mem_ctx) vec4_instruction(this, SHADER_OPCODE_TXS);
-      break;
+   case ir_tex: opcode = SHADER_OPCODE_TXL; break;
+   case ir_txl: opcode = SHADER_OPCODE_TXL; break;
+   case ir_txd: opcode = SHADER_OPCODE_TXD; break;
+   case ir_txf: opcode = SHADER_OPCODE_TXF; break;
+   case ir_txf_ms: opcode = SHADER_OPCODE_TXF_CMS; break;
+   case ir_txs: opcode = SHADER_OPCODE_TXS; break;
+   case ir_tg4: opcode = has_nonconstant_offset
+                         ? SHADER_OPCODE_TG4_OFFSET : SHADER_OPCODE_TG4; break;
+   case ir_query_levels: opcode = SHADER_OPCODE_TXS; break;
    case ir_txb:
-      assert(!"TXB is not valid for vertex shaders.");
-      break;
+      unreachable("TXB is not valid for vertex shaders.");
    case ir_lod:
-      assert(!"LOD is not valid for vertex shaders.");
-      break;
+      unreachable("LOD is not valid for vertex shaders.");
    default:
-      assert(!"Unrecognized tex op");
+      unreachable("Unrecognized tex op");
    }
+
+   vec4_instruction *inst = new(mem_ctx) vec4_instruction(this, opcode);
 
    if (ir->offset != NULL && ir->op != ir_txf)
       inst->texture_offset = brw_texture_offset(ctx, ir->offset->as_constant());
@@ -2424,10 +2432,11 @@ vec4_visitor::visit(ir_texture *ir)
       sampler >= 16;
    inst->base_mrf = 2;
    inst->mlen = inst->header_present + 1; /* always at least one */
-   inst->sampler = sampler;
    inst->dst = dst_reg(this, ir->type);
    inst->dst.writemask = WRITEMASK_XYZW;
    inst->shadow_compare = ir->shadow_comparitor != NULL;
+
+   inst->src[1] = src_reg(sampler);
 
    /* MRF for the first parameter */
    int param_base = inst->base_mrf + inst->header_present;
@@ -2580,7 +2589,7 @@ vec4_visitor::emit_gen6_gather_wa(uint8_t wa, dst_reg dst)
  * Set up the gather channel based on the swizzle, for gather4.
  */
 uint32_t
-vec4_visitor::gather_channel(ir_texture *ir, int sampler)
+vec4_visitor::gather_channel(ir_texture *ir, uint32_t sampler)
 {
    ir_constant *chan = ir->lod_info.component->as_constant();
    int swiz = GET_SWZ(key->tex.swizzles[sampler], chan->value.i[0]);
@@ -2596,13 +2605,12 @@ vec4_visitor::gather_channel(ir_texture *ir, int sampler)
       case SWIZZLE_Z: return 2;
       case SWIZZLE_W: return 3;
       default:
-         assert(!"Not reached"); /* zero, one swizzles handled already */
-         return 0;
+         unreachable("Not reached"); /* zero, one swizzles handled already */
    }
 }
 
 void
-vec4_visitor::swizzle_result(ir_texture *ir, src_reg orig_val, int sampler)
+vec4_visitor::swizzle_result(ir_texture *ir, src_reg orig_val, uint32_t sampler)
 {
    int s = key->tex.swizzles[sampler];
 
@@ -2659,15 +2667,15 @@ vec4_visitor::swizzle_result(ir_texture *ir, src_reg orig_val, int sampler)
 }
 
 void
-vec4_visitor::visit(ir_return *ir)
+vec4_visitor::visit(ir_return *)
 {
-   assert(!"not reached");
+   unreachable("not reached");
 }
 
 void
-vec4_visitor::visit(ir_discard *ir)
+vec4_visitor::visit(ir_discard *)
 {
-   assert(!"not reached");
+   unreachable("not reached");
 }
 
 void
@@ -2681,7 +2689,7 @@ vec4_visitor::visit(ir_if *ir)
    if (brw->gen == 6) {
       emit_if_gen6(ir);
    } else {
-      uint32_t predicate;
+      enum brw_predicate predicate;
       emit_bool_to_cond_code(ir->condition, &predicate);
       emit(IF(predicate));
    }
@@ -2702,13 +2710,13 @@ vec4_visitor::visit(ir_if *ir)
 void
 vec4_visitor::visit(ir_emit_vertex *)
 {
-   assert(!"not reached");
+   unreachable("not reached");
 }
 
 void
 vec4_visitor::visit(ir_end_primitive *)
 {
-   assert(!"not reached");
+   unreachable("not reached");
 }
 
 void
@@ -3183,9 +3191,7 @@ vec4_visitor::move_grf_array_access_to_scratch()
     * to scratch due to having any array access on them, and where in
     * scratch.
     */
-   foreach_list(node, &this->instructions) {
-      vec4_instruction *inst = (vec4_instruction *)node;
-
+   foreach_in_list(vec4_instruction, inst, &instructions) {
       if (inst->dst.file == GRF && inst->dst.reladdr &&
 	  scratch_loc[inst->dst.reg] == -1) {
 	 scratch_loc[inst->dst.reg] = c->last_scratch;
@@ -3208,9 +3214,7 @@ vec4_visitor::move_grf_array_access_to_scratch()
     * we may generate a new scratch_write instruction after the one
     * we're processing.
     */
-   foreach_list_safe(node, &this->instructions) {
-      vec4_instruction *inst = (vec4_instruction *)node;
-
+   foreach_in_list_safe(vec4_instruction, inst, &instructions) {
       /* Set up the annotation tracking for new generated instructions. */
       base_ir = inst->ir;
       current_annotation = inst->annotation;
@@ -3294,9 +3298,7 @@ vec4_visitor::move_uniform_array_access_to_pull_constants()
     * Note that we don't move constant-indexed accesses to arrays.  No
     * testing has been done of the performance impact of this choice.
     */
-   foreach_list_safe(node, &this->instructions) {
-      vec4_instruction *inst = (vec4_instruction *)node;
-
+   foreach_in_list_safe(vec4_instruction, inst, &instructions) {
       for (int i = 0 ; i < 3; i++) {
 	 if (inst->src[i].file != UNIFORM || !inst->src[i].reladdr)
 	    continue;

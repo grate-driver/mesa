@@ -107,25 +107,41 @@ bool r600_init_resource(struct r600_common_screen *rscreen,
 {
 	struct r600_texture *rtex = (struct r600_texture*)res;
 	struct pb_buffer *old_buf, *new_buf;
+	enum radeon_bo_flag flags = 0;
 
 	switch (res->b.b.usage) {
 	case PIPE_USAGE_STAGING:
-	case PIPE_USAGE_DYNAMIC:
-	case PIPE_USAGE_STREAM:
 		/* Transfers are likely to occur more often with these resources. */
 		res->domains = RADEON_DOMAIN_GTT;
 		break;
+	case PIPE_USAGE_STREAM:
+	case PIPE_USAGE_DYNAMIC:
+		/* Older kernels didn't always flush the HDP cache before
+		 * CS execution
+		 */
+		if (rscreen->info.drm_minor < 40) {
+			res->domains = RADEON_DOMAIN_GTT;
+			flags = RADEON_FLAG_GTT_WC;
+			break;
+		}
+		/* fall through */
 	case PIPE_USAGE_DEFAULT:
 	case PIPE_USAGE_IMMUTABLE:
 	default:
 		/* Not listing GTT here improves performance in some apps. */
 		res->domains = RADEON_DOMAIN_VRAM;
+		flags = RADEON_FLAG_GTT_WC;
 		break;
 	}
 
-	/* Use GTT for all persistent mappings, because they are
-	 * always cached and coherent. */
-	if (res->b.b.target == PIPE_BUFFER &&
+	/* Use GTT for all persistent mappings with older kernels, because they
+	 * didn't always flush the HDP cache before CS execution.
+	 *
+	 * Write-combined CPU mappings are fine, the kernel ensures all CPU
+	 * writes finish before the GPU executes a command stream.
+	 */
+	if (rscreen->info.drm_minor < 40 &&
+	    res->b.b.target == PIPE_BUFFER &&
 	    res->b.b.flags & (PIPE_RESOURCE_FLAG_MAP_PERSISTENT |
 			      PIPE_RESOURCE_FLAG_MAP_COHERENT)) {
 		res->domains = RADEON_DOMAIN_GTT;
@@ -140,7 +156,7 @@ bool r600_init_resource(struct r600_common_screen *rscreen,
 	/* Allocate a new resource. */
 	new_buf = rscreen->ws->buffer_create(rscreen->ws, size, alignment,
 					     use_reusable_pool,
-					     res->domains);
+					     res->domains, flags);
 	if (!new_buf) {
 		return false;
 	}
@@ -152,14 +168,19 @@ bool r600_init_resource(struct r600_common_screen *rscreen,
 	old_buf = res->buf;
 	res->cs_buf = rscreen->ws->buffer_get_cs_handle(new_buf); /* should be atomic */
 	res->buf = new_buf; /* should be atomic */
+
+	if (rscreen->info.r600_virtual_address)
+		res->gpu_address = rscreen->ws->buffer_get_virtual_address(res->cs_buf);
+	else
+		res->gpu_address = 0;
+
 	pb_reference(&old_buf, NULL);
 
 	util_range_set_empty(&res->valid_buffer_range);
 
 	if (rscreen->debug_flags & DBG_VM && res->b.b.target == PIPE_BUFFER) {
-		fprintf(stderr, "VM start=0x%"PRIu64"  end=0x%"PRIu64" | Buffer %u bytes\n",
-			r600_resource_va(&rscreen->b, &res->b.b),
-			r600_resource_va(&rscreen->b, &res->b.b) + res->buf->size,
+		fprintf(stderr, "VM start=0x%"PRIX64"  end=0x%"PRIX64" | Buffer %u bytes\n",
+			res->gpu_address, res->gpu_address + res->buf->size,
 			res->buf->size);
 	}
 	return true;

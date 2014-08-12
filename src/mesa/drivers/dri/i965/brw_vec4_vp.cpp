@@ -37,7 +37,7 @@ extern "C" {
 using namespace brw;
 
 void
-vec4_visitor::emit_vp_sop(uint32_t conditional_mod,
+vec4_visitor::emit_vp_sop(enum brw_conditional_mod conditional_mod,
                           dst_reg dst, src_reg src0, src_reg src1,
                           src_reg one)
 {
@@ -478,8 +478,7 @@ vec4_vs_visitor::get_vp_dst_reg(const prog_dst_register &dst)
       return dst_null_f();
 
    default:
-      assert(!"vec4_vp: bad destination register file");
-      return dst_reg(this, glsl_type::vec4_type);
+      unreachable("vec4_vp: bad destination register file");
    }
 
    result.writemask = dst.WriteMask;

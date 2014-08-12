@@ -26,8 +26,12 @@ if NEED_WINSYS_XLIB
 SUBDIRS += sw/xlib
 endif
 
-if HAVE_DRI
+if HAVE_DRISW
 SUBDIRS += sw/dri
+endif
+
+if HAVE_DRI2
+SUBDIRS += sw/kms-dri
 endif
 
 if HAVE_EGL_PLATFORM_FBDEV
@@ -48,7 +52,7 @@ SUBDIRS += freedreno/drm
 endif
 
 if HAVE_GALLIUM_I915
-SUBDIRS += i915/sw i915/drm
+SUBDIRS += i915/drm
 endif
 
 if HAVE_GALLIUM_ILO
@@ -65,5 +69,9 @@ endif
 
 if HAVE_GALLIUM_SVGA
 SUBDIRS += svga/drm
+endif
+
+if HAVE_GALLIUM_VC4
+SUBDIRS += vc4/drm
 endif
 endif

@@ -59,6 +59,7 @@
 #define MESA_META_FRAMEBUFFER_SRGB     0x200000
 #define MESA_META_OCCLUSION_QUERY      0x400000
 #define MESA_META_DRAW_BUFFERS         0x800000
+#define MESA_META_DITHER              0x1000000
 /**\}*/
 
 /**
@@ -83,6 +84,9 @@ struct save_state
    /** MESA_META_BLEND */
    GLbitfield BlendEnabled;
    GLboolean ColorLogicOpEnabled;
+
+   /** MESA_META_DITHER */
+   GLboolean DitherFlag;
 
    /** MESA_META_COLOR_MASK */
    GLubyte ColorMask[MAX_DRAW_BUFFERS][4];
@@ -436,6 +440,14 @@ _mesa_meta_and_swrast_BlitFramebuffer(struct gl_context *ctx,
                                       GLint dstX1, GLint dstY1,
                                       GLbitfield mask, GLenum filter);
 
+bool
+_mesa_meta_CopyImageSubData_uncompressed(struct gl_context *ctx,
+                                         struct gl_texture_image *src_tex_image,
+                                         int src_x, int src_y, int src_z,
+                                         struct gl_texture_image *dst_tex_image,
+                                         int dst_x, int dst_y, int dst_z,
+                                         int src_width, int src_height);
+
 extern void
 _mesa_meta_Clear(struct gl_context *ctx, GLbitfield buffers);
 
@@ -471,6 +483,13 @@ _mesa_meta_CopyTexSubImage(struct gl_context *ctx, GLuint dims,
                            struct gl_renderbuffer *rb,
                            GLint x, GLint y,
                            GLsizei width, GLsizei height);
+
+extern void
+_mesa_meta_ClearTexSubImage(struct gl_context *ctx,
+                            struct gl_texture_image *texImage,
+                            GLint xoffset, GLint yoffset, GLint zoffset,
+                            GLsizei width, GLsizei height, GLsizei depth,
+                            const GLvoid *clearValue);
 
 extern void
 _mesa_meta_GetTexImage(struct gl_context *ctx,
@@ -559,7 +578,7 @@ void
 _mesa_meta_glsl_generate_mipmap_cleanup(struct gen_mipmap_state *mipmap);
 
 void
-_mesa_meta_bind_fbo_image(GLenum attachment,
+_mesa_meta_bind_fbo_image(GLenum target, GLenum attachment,
                           struct gl_texture_image *texImage, GLuint layer);
 
 #endif /* META_H */

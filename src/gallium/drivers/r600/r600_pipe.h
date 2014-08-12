@@ -54,7 +54,7 @@
 #define R600_BUFFER_INFO_CONST_BUFFER (R600_MAX_USER_CONST_BUFFERS + 2)
 #define R600_GS_RING_CONST_BUFFER (R600_MAX_USER_CONST_BUFFERS + 3)
 
-#define R600_MAX_CONST_BUFFER_SIZE 4096
+#define R600_MAX_CONST_BUFFER_SIZE (4096 * sizeof(float[4]))
 
 #ifdef PIPE_ARCH_BIG_ENDIAN
 #define R600_BIG_ENDIAN 1
@@ -108,6 +108,7 @@ struct r600_clip_misc_state {
 	unsigned pa_cl_vs_out_cntl; /* from vertex shader */
 	unsigned clip_plane_enable; /* from rasterizer    */
 	unsigned clip_dist_write;   /* from vertex shader */
+	boolean clip_disable;       /* from vertex shader */
 };
 
 struct r600_alphatest_state {

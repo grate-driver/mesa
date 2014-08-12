@@ -106,6 +106,28 @@ clCreateProgramWithBinary(cl_context d_ctx, cl_uint n,
    return NULL;
 }
 
+CLOVER_API cl_program
+clCreateProgramWithBuiltInKernels(cl_context d_ctx, cl_uint n,
+                                  const cl_device_id *d_devs,
+                                  const char *kernel_names,
+                                  cl_int *r_errcode) try {
+   auto &ctx = obj(d_ctx);
+   auto devs = objs(d_devs, n);
+
+   if (any_of([&](const device &dev) {
+            return !count(dev, ctx.devices());
+         }, devs))
+      throw error(CL_INVALID_DEVICE);
+
+   // No currently supported built-in kernels.
+   throw error(CL_INVALID_VALUE);
+
+} catch (error &e) {
+   ret_error(r_errcode, e);
+   return NULL;
+}
+
+
 CLOVER_API cl_int
 clRetainProgram(cl_program d_prog) try {
    obj(d_prog).retain();
@@ -158,6 +180,11 @@ clUnloadCompiler() {
 }
 
 CLOVER_API cl_int
+clUnloadPlatformCompiler(cl_platform_id d_platform) {
+   return CL_SUCCESS;
+}
+
+CLOVER_API cl_int
 clGetProgramInfo(cl_program d_prog, cl_program_info param,
                  size_t size, void *r_buf, size_t *r_size) try {
    property_buffer buf { r_buf, size, r_size };
@@ -190,10 +217,7 @@ clGetProgramInfo(cl_program d_prog, cl_program_info param,
 
    case CL_PROGRAM_BINARY_SIZES:
       buf.as_vector<size_t>() = map([&](const device &dev) {
-            compat::ostream::buffer_t bin;
-            compat::ostream s(bin);
-            prog.binary(dev).serialize(s);
-            return bin.size();
+            return prog.binary(dev).size();
          },
          prog.devices());
       break;

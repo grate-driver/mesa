@@ -442,11 +442,11 @@ static bool brw_try_draw_prims( struct gl_context *ctx,
 
    for (i = 0; i < nr_prims; i++) {
       int estimated_max_prim_size;
+      const int sampler_state_size = 16;
 
       estimated_max_prim_size = 512; /* batchbuffer commands */
-      estimated_max_prim_size += (BRW_MAX_TEX_UNIT *
-				  (sizeof(struct brw_sampler_state) +
-				   sizeof(struct gen5_sampler_default_color)));
+      estimated_max_prim_size += BRW_MAX_TEX_UNIT *
+         (sampler_state_size + sizeof(struct gen5_sampler_default_color));
       estimated_max_prim_size += 1024; /* gen6 VS push constants */
       estimated_max_prim_size += 1024; /* gen6 WM push constants */
       estimated_max_prim_size += 512; /* misc. pad */
@@ -458,15 +458,14 @@ static bool brw_try_draw_prims( struct gl_context *ctx,
       intel_batchbuffer_require_space(brw, estimated_max_prim_size, RENDER_RING);
       intel_batchbuffer_save_state(brw);
 
-      if (brw->num_instances != prims[i].num_instances) {
+      if (brw->num_instances != prims[i].num_instances ||
+          brw->basevertex != prims[i].basevertex) {
          brw->num_instances = prims[i].num_instances;
-         brw->state.dirty.brw |= BRW_NEW_VERTICES;
-         brw_merge_inputs(brw, arrays);
-      }
-      if (brw->basevertex != prims[i].basevertex) {
          brw->basevertex = prims[i].basevertex;
-         brw->state.dirty.brw |= BRW_NEW_VERTICES;
-         brw_merge_inputs(brw, arrays);
+         if (i > 0) { /* For i == 0 we just did this before the loop */
+            brw->state.dirty.brw |= BRW_NEW_VERTICES;
+            brw_merge_inputs(brw, arrays);
+         }
       }
       if (brw->gen < 6)
 	 brw_set_prim(brw, &prims[i]);
@@ -539,6 +538,11 @@ void brw_draw_prims( struct gl_context *ctx,
    const struct gl_client_array **arrays = ctx->Array._DrawArrays;
 
    assert(unused_tfb_object == NULL);
+
+   if (ctx->Query.CondRenderQuery) {
+      perf_debug("Conditional rendering is implemented in software and may "
+                 "stall.  This should be fixed in the driver.\n");
+   }
 
    if (!_mesa_check_conditional_render(ctx))
       return;
