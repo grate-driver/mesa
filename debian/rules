@@ -236,8 +236,6 @@ binary-arch: install
 	set -e; for file in $(NOT_INSTALLED); do rm debian/tmp/$$file; done
 	# Files only in git, not in tarballs, OK to use rm -f here:
 	set -e; for file in $(NOT_INSTALLED_EITHER); do rm -f debian/tmp/$$file; done
-	# No need for these .so, they're just convenience libraries:
-	rm -f debian/tmp/dri/usr/lib/${DEB_HOST_MULTIARCH}/libgallium*.so
 	# purge .la files
 	find debian/tmp/ -name '*.la' -exec rm '{}' ';'
 
@@ -245,6 +243,12 @@ binary-arch: install
 	install -m755 -d debian/libgl1-mesa-dri/usr/lib/${DEB_HOST_MULTIARCH}/dri/
 	mv debian/tmp/dri/usr/lib/${DEB_HOST_MULTIARCH}/dri/*_dri.so \
 	   debian/libgl1-mesa-dri/usr/lib/${DEB_HOST_MULTIARCH}/dri/
+
+	# Copy the hardlinked vdpau drivers correctly.
+	install -m755 -d debian/mesa-vdpau-drivers/usr/lib/${DEB_HOST_MULTIARCH}/vdpau/
+	mv debian/tmp/dri/usr/lib/${DEB_HOST_MULTIARCH}/vdpau/libvdpau*.so* \
+	   debian/mesa-vdpau-drivers/usr/lib/${DEB_HOST_MULTIARCH}/vdpau/
+
 	dh_install -s --fail-missing
 
 	# Create an ld.so.conf which says where to find libGL from Mesa
