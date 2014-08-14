@@ -3,6 +3,7 @@ mesa (10.3~rc2-1) UNRELEASED; urgency=low
   [ Maarten Lankhorst ]
   * Build with llvm 3.5.
   * New upstream release.
+  * Remove mention of tdfx.
 
   [ Timo Aaltonen ]
   * mesa-common-dev: Add glcorearb.h.

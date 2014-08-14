@@ -676,8 +676,6 @@ Description: free implementation of the OpenGL API -- DRI modules
  .
  For a complete description of Mesa, please look at the
  libgl1-mesa-swx11 package.
- .
- The tdfx DRI module needs libglide3 to enable direct rendering.
 
 Package: libgl1-mesa-dri-dbg
 Section: debug
