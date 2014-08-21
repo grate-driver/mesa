@@ -1,6 +1,5 @@
 07_gallium-fix-build-failure-on-powerpcspe.diff
 
 # Ubuntu patches.
-101_ubuntu_hidden_glname.patch
 egl-platform-mir.patch
 i915-dont-default-to-2.1.patch
