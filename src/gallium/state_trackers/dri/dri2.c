@@ -42,6 +42,7 @@
 #include "dri_screen.h"
 #include "dri_context.h"
 #include "dri_drawable.h"
+#include "dri_query_renderer.h"
 #include "dri2_buffer.h"
 
 static int convert_fourcc(int format, int *dri_components_p)
@@ -1228,6 +1229,7 @@ static const __DRIextension *dri_screen_extensions[] = {
    &driTexBufferExtension.base,
    &dri2FlushExtension.base,
    &dri2ImageExtension.base,
+   &dri2RendererQueryExtension.base,
    &dri2ConfigQueryExtension.base,
    &dri2ThrottleExtension.base,
    NULL
@@ -1323,7 +1325,6 @@ dri_kms_init_screen(__DRIscreen * sPriv)
 {
 #if GALLIUM_STATIC_TARGETS
 #if defined(GALLIUM_SOFTPIPE)
-#if defined(DRI_TARGET)
    const __DRIconfig **configs;
    struct dri_screen *screen;
    struct pipe_screen *pscreen = NULL;
@@ -1354,7 +1355,6 @@ dri_kms_init_screen(__DRIscreen * sPriv)
 fail:
    dri_destroy_screen_helper(screen);
    FREE(screen);
-#endif // DRI_TARGET
 #endif // GALLIUM_SOFTPIPE
 #endif // GALLIUM_STATIC_TARGETS
    return NULL;

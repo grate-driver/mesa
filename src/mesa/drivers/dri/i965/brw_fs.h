@@ -48,7 +48,6 @@ extern "C" {
 #include "brw_shader.h"
 #include "intel_asm_annotation.h"
 }
-#include "gen8_generator.h"
 #include "glsl/glsl_types.h"
 #include "glsl/ir.h"
 
@@ -340,6 +339,7 @@ public:
    bool opt_copy_propagate_local(void *mem_ctx, bblock_t *block,
                                  exec_list *acp);
    void opt_drop_redundant_mov_to_flags();
+   bool opt_register_renaming();
    bool register_coalesce();
    bool compute_to_mrf();
    bool dead_code_eliminate();
@@ -354,6 +354,8 @@ public:
    void no16(const char *msg, ...);
    void lower_uniform_pull_constant_loads();
    bool lower_load_payload();
+
+   void try_rep_send();
 
    void push_force_uncompressed();
    void pop_force_uncompressed();
@@ -380,8 +382,8 @@ public:
                               fs_reg sample_index, uint32_t sampler);
    fs_inst *emit_texture_gen7(ir_texture *ir, fs_reg dst, fs_reg coordinate,
                               fs_reg shadow_comp, fs_reg lod, fs_reg lod2,
-                              fs_reg sample_index, fs_reg mcs, uint32_t sampler);
-   fs_reg emit_mcs_fetch(ir_texture *ir, fs_reg coordinate, uint32_t sampler);
+                              fs_reg sample_index, fs_reg mcs, fs_reg sampler);
+   fs_reg emit_mcs_fetch(ir_texture *ir, fs_reg coordinate, fs_reg sampler);
    void emit_gen6_gather_wa(uint8_t wa, fs_reg dst);
    fs_reg fix_math_operand(fs_reg src);
    fs_inst *emit_math(enum opcode op, fs_reg dst, fs_reg src0);
@@ -574,23 +576,23 @@ public:
                 struct brw_wm_prog_data *prog_data,
                 struct gl_shader_program *prog,
                 struct gl_fragment_program *fp,
-                bool dual_source_output,
                 bool runtime_check_aads_emit,
                 bool debug_flag);
    ~fs_generator();
 
-   const unsigned *generate_assembly(exec_list *simd8_instructions,
-                                     exec_list *simd16_instructions,
+   const unsigned *generate_assembly(const cfg_t *simd8_cfg,
+                                     const cfg_t *simd16_cfg,
                                      unsigned *assembly_size);
 
 private:
-   void generate_code(exec_list *instructions);
+   void generate_code(const cfg_t *cfg);
    void fire_fb_write(fs_inst *inst,
                       GLuint base_reg,
                       struct brw_reg implied_header,
                       GLuint nr);
    void generate_fb_write(fs_inst *inst);
    void generate_blorp_fb_write(fs_inst *inst);
+   void generate_rep_fb_write(fs_inst *inst);
    void generate_pixel_xy(struct brw_reg dst, bool is_x);
    void generate_linterp(fs_inst *inst, struct brw_reg dst,
 			 struct brw_reg *src);
@@ -606,9 +608,9 @@ private:
    void generate_math_g45(fs_inst *inst,
 			  struct brw_reg dst,
 			  struct brw_reg src);
-   void generate_ddx(fs_inst *inst, struct brw_reg dst, struct brw_reg src);
+   void generate_ddx(fs_inst *inst, struct brw_reg dst, struct brw_reg src, struct brw_reg quality);
    void generate_ddy(fs_inst *inst, struct brw_reg dst, struct brw_reg src,
-                     bool negate_value);
+                     struct brw_reg quality, bool negate_value);
    void generate_scratch_write(fs_inst *inst, struct brw_reg src);
    void generate_scratch_read(fs_inst *inst, struct brw_reg dst);
    void generate_scratch_read_gen7(fs_inst *inst, struct brw_reg dst);
@@ -685,96 +687,9 @@ private:
    unsigned dispatch_width; /**< 8 or 16 */
 
    exec_list discard_halt_patches;
-   bool dual_source_output;
    bool runtime_check_aads_emit;
    const bool debug_flag;
    void *mem_ctx;
-};
-
-/**
- * The fragment shader code generator.
- *
- * Translates FS IR to actual i965 assembly code.
- */
-class gen8_fs_generator : public gen8_generator
-{
-public:
-   gen8_fs_generator(struct brw_context *brw,
-                     void *mem_ctx,
-                     const struct brw_wm_prog_key *key,
-                     struct brw_wm_prog_data *prog_data,
-                     struct gl_shader_program *prog,
-                     struct gl_fragment_program *fp,
-                     bool dual_source_output);
-   ~gen8_fs_generator();
-
-   const unsigned *generate_assembly(exec_list *simd8_instructions,
-                                     exec_list *simd16_instructions,
-                                     unsigned *assembly_size);
-
-private:
-   void generate_code(exec_list *instructions);
-   void generate_fb_write(fs_inst *inst);
-   void generate_linterp(fs_inst *inst, struct brw_reg dst,
-                         struct brw_reg *src);
-   void generate_tex(fs_inst *inst, struct brw_reg dst, struct brw_reg src,
-                     struct brw_reg sampler_index);
-   void generate_math1(fs_inst *inst, struct brw_reg dst, struct brw_reg src);
-   void generate_math2(fs_inst *inst, struct brw_reg dst,
-                       struct brw_reg src0, struct brw_reg src1);
-   void generate_ddx(fs_inst *inst, struct brw_reg dst, struct brw_reg src);
-   void generate_ddy(fs_inst *inst, struct brw_reg dst, struct brw_reg src,
-                     bool negate_value);
-   void generate_scratch_write(fs_inst *inst, struct brw_reg src);
-   void generate_scratch_read(fs_inst *inst, struct brw_reg dst);
-   void generate_scratch_read_gen7(fs_inst *inst, struct brw_reg dst);
-   void generate_uniform_pull_constant_load(fs_inst *inst,
-                                            struct brw_reg dst,
-                                            struct brw_reg index,
-                                            struct brw_reg offset);
-   void generate_varying_pull_constant_load(fs_inst *inst,
-                                            struct brw_reg dst,
-                                            struct brw_reg index,
-                                            struct brw_reg offset);
-   void generate_mov_dispatch_to_flags(fs_inst *ir);
-   void generate_set_omask(fs_inst *ir,
-                           struct brw_reg dst,
-                           struct brw_reg sample_mask);
-   void generate_set_sample_id(fs_inst *ir,
-                               struct brw_reg dst,
-                               struct brw_reg src0,
-                               struct brw_reg src1);
-   void generate_set_simd4x2_offset(fs_inst *ir,
-                                    struct brw_reg dst,
-                                    struct brw_reg offset);
-   void generate_pack_half_2x16_split(fs_inst *inst,
-                                      struct brw_reg dst,
-                                      struct brw_reg x,
-                                      struct brw_reg y);
-   void generate_unpack_half_2x16_split(fs_inst *inst,
-                                        struct brw_reg dst,
-                                        struct brw_reg src);
-   void generate_untyped_atomic(fs_inst *inst,
-                                struct brw_reg dst,
-                                struct brw_reg atomic_op,
-                                struct brw_reg surf_index);
-
-   void generate_untyped_surface_read(fs_inst *inst,
-                                      struct brw_reg dst,
-                                      struct brw_reg surf_index);
-   void generate_discard_jump(fs_inst *ir);
-
-   bool patch_discard_jumps_to_fb_writes();
-
-   const struct brw_wm_prog_key *const key;
-   struct brw_wm_prog_data *prog_data;
-   const struct gl_fragment_program *fp;
-
-   unsigned dispatch_width; /** 8 or 16 */
-
-   bool dual_source_output;
-
-   exec_list discard_halt_patches;
 };
 
 bool brw_do_channel_expressions(struct exec_list *instructions);

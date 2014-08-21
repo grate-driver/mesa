@@ -328,6 +328,15 @@ st_mesa_format_to_pipe_format(struct st_context *st, mesa_format mesaFormat)
    case MESA_FORMAT_ETC1_RGB8:
       return st->has_etc1 ? PIPE_FORMAT_ETC1_RGB8 : PIPE_FORMAT_R8G8B8A8_UNORM;
 
+   case MESA_FORMAT_BPTC_RGBA_UNORM:
+      return PIPE_FORMAT_BPTC_RGBA_UNORM;
+   case MESA_FORMAT_BPTC_SRGB_ALPHA_UNORM:
+      return PIPE_FORMAT_BPTC_SRGBA;
+   case MESA_FORMAT_BPTC_RGB_SIGNED_FLOAT:
+      return PIPE_FORMAT_BPTC_RGB_FLOAT;
+   case MESA_FORMAT_BPTC_RGB_UNSIGNED_FLOAT:
+      return PIPE_FORMAT_BPTC_RGB_UFLOAT;
+
    /* signed normalized formats */
    case MESA_FORMAT_R_SNORM8:
       return PIPE_FORMAT_R8_SNORM;
@@ -707,6 +716,15 @@ st_pipe_format_to_mesa_format(enum pipe_format format)
    case PIPE_FORMAT_ETC1_RGB8:
       return MESA_FORMAT_ETC1_RGB8;
 
+   case PIPE_FORMAT_BPTC_RGBA_UNORM:
+      return MESA_FORMAT_BPTC_RGBA_UNORM;
+   case PIPE_FORMAT_BPTC_SRGBA:
+      return MESA_FORMAT_BPTC_SRGB_ALPHA_UNORM;
+   case PIPE_FORMAT_BPTC_RGB_FLOAT:
+      return MESA_FORMAT_BPTC_RGB_SIGNED_FLOAT;
+   case PIPE_FORMAT_BPTC_RGB_UFLOAT:
+      return MESA_FORMAT_BPTC_RGB_UNSIGNED_FLOAT;
+
    /* signed normalized formats */
    case PIPE_FORMAT_R8_SNORM:
       return MESA_FORMAT_R_SNORM8;
@@ -803,13 +821,15 @@ test_format_conversion(struct st_context *st)
 
    /* test all Mesa formats */
    for (i = 1; i < MESA_FORMAT_COUNT; i++) {
+      enum pipe_format pf;
+
       /* ETC formats are translated differently, skip them. */
       if (_mesa_is_format_etc2(i))
          continue;
       if (i == MESA_FORMAT_ETC1_RGB8 && !st->has_etc1)
          continue;
 
-      enum pipe_format pf = st_mesa_format_to_pipe_format(st, i);
+      pf = st_mesa_format_to_pipe_format(st, i);
       if (pf != PIPE_FORMAT_NONE) {
          mesa_format mf = st_pipe_format_to_mesa_format(pf);
          assert(mf == i);
@@ -1269,6 +1289,24 @@ static const struct format_mapping format_map[] = {
    {
       { GL_ETC1_RGB8_OES, 0 },
       { PIPE_FORMAT_ETC1_RGB8, 0 }
+   },
+
+   /* BPTC */
+   {
+      { GL_COMPRESSED_RGBA_BPTC_UNORM, 0 },
+      { PIPE_FORMAT_BPTC_RGBA_UNORM, 0 },
+   },
+   {
+      { GL_COMPRESSED_SRGB_ALPHA_BPTC_UNORM, 0 },
+      { PIPE_FORMAT_BPTC_SRGBA, 0 },
+   },
+   {
+      { GL_COMPRESSED_RGB_BPTC_SIGNED_FLOAT, 0 },
+      { PIPE_FORMAT_BPTC_RGB_FLOAT, 0 },
+   },
+   {
+      { GL_COMPRESSED_RGB_BPTC_UNSIGNED_FLOAT, 0 },
+      { PIPE_FORMAT_BPTC_RGB_UFLOAT, 0 },
    },
 
    /* signed/unsigned integer formats.

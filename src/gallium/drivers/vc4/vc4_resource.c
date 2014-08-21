@@ -147,7 +147,17 @@ vc4_setup_slices(struct vc4_resource *rsc)
                  */
                 offset += slice->size0 * depth;
         }
-        /* XXX: align level 0 offset? */
+
+        /* The texture base pointer that has to point to level 0 doesn't have
+         * intra-page bits, so we have to align it, and thus shift up all the
+         * smaller slices.
+         */
+        uint32_t page_align_offset = (align(rsc->slices[0].offset, 4096) -
+                                      rsc->slices[0].offset);
+        if (page_align_offset) {
+                for (int i = 0; i <= prsc->last_level; i++)
+                        rsc->slices[i].offset += page_align_offset;
+        }
 }
 
 static struct vc4_resource *
@@ -229,6 +239,7 @@ vc4_create_surface(struct pipe_context *pctx,
                    const struct pipe_surface *surf_tmpl)
 {
         struct vc4_surface *surface = CALLOC_STRUCT(vc4_surface);
+        struct vc4_resource *rsc = vc4_resource(ptex);
 
         if (!surface)
                 return NULL;
@@ -248,6 +259,7 @@ vc4_create_surface(struct pipe_context *pctx,
         psurf->u.tex.level = level;
         psurf->u.tex.first_layer = surf_tmpl->u.tex.first_layer;
         psurf->u.tex.last_layer = surf_tmpl->u.tex.last_layer;
+        surface->offset = rsc->slices[level].offset;
 
         return &surface->base;
 }

@@ -165,7 +165,7 @@ try_constant_propagate(struct brw_context *brw, vec4_instruction *inst,
 	 enum brw_conditional_mod new_cmod;
 
 	 new_cmod = brw_swap_cmod(inst->conditional_mod);
-	 if (new_cmod != ~0u) {
+	 if (new_cmod != BRW_CONDITIONAL_NONE) {
 	    /* Fit this constant in by swapping the operands and
 	     * flipping the test.
 	     */
@@ -271,6 +271,10 @@ try_copy_propagate(struct brw_context *brw, vec4_instruction *inst,
       return false;
 
    if (has_source_modifiers && value.type != inst->src[arg].type)
+      return false;
+
+   if (has_source_modifiers &&
+       inst->opcode == SHADER_OPCODE_GEN4_SCRATCH_WRITE)
       return false;
 
    bool is_3src_inst = (inst->opcode == BRW_OPCODE_LRP ||

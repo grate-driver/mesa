@@ -27,6 +27,7 @@
 #include "r600_pipe_common.h"
 #include "r600_cs.h"
 #include "tgsi/tgsi_parse.h"
+#include "util/u_draw_quad.h"
 #include "util/u_memory.h"
 #include "util/u_format_s3tc.h"
 #include "util/u_upload_mgr.h"
@@ -38,6 +39,69 @@
 /*
  * pipe_context
  */
+
+void r600_draw_rectangle(struct blitter_context *blitter,
+			 int x1, int y1, int x2, int y2, float depth,
+			 enum blitter_attrib_type type,
+			 const union pipe_color_union *attrib)
+{
+	struct r600_common_context *rctx =
+		(struct r600_common_context*)util_blitter_get_pipe(blitter);
+	struct pipe_viewport_state viewport;
+	struct pipe_resource *buf = NULL;
+	unsigned offset = 0;
+	float *vb;
+
+	if (type == UTIL_BLITTER_ATTRIB_TEXCOORD) {
+		util_blitter_draw_rectangle(blitter, x1, y1, x2, y2, depth, type, attrib);
+		return;
+	}
+
+	/* Some operations (like color resolve on r6xx) don't work
+	 * with the conventional primitive types.
+	 * One that works is PT_RECTLIST, which we use here. */
+
+	/* setup viewport */
+	viewport.scale[0] = 1.0f;
+	viewport.scale[1] = 1.0f;
+	viewport.scale[2] = 1.0f;
+	viewport.scale[3] = 1.0f;
+	viewport.translate[0] = 0.0f;
+	viewport.translate[1] = 0.0f;
+	viewport.translate[2] = 0.0f;
+	viewport.translate[3] = 0.0f;
+	rctx->b.set_viewport_states(&rctx->b, 0, 1, &viewport);
+
+	/* Upload vertices. The hw rectangle has only 3 vertices,
+	 * I guess the 4th one is derived from the first 3.
+	 * The vertex specification should match u_blitter's vertex element state. */
+	u_upload_alloc(rctx->uploader, 0, sizeof(float) * 24, &offset, &buf, (void**)&vb);
+	vb[0] = x1;
+	vb[1] = y1;
+	vb[2] = depth;
+	vb[3] = 1;
+
+	vb[8] = x1;
+	vb[9] = y2;
+	vb[10] = depth;
+	vb[11] = 1;
+
+	vb[16] = x2;
+	vb[17] = y1;
+	vb[18] = depth;
+	vb[19] = 1;
+
+	if (attrib) {
+		memcpy(vb+4, attrib->f, sizeof(float)*4);
+		memcpy(vb+12, attrib->f, sizeof(float)*4);
+		memcpy(vb+20, attrib->f, sizeof(float)*4);
+	}
+
+	/* draw */
+	util_draw_vertex_buffer(&rctx->b, NULL, buf, blitter->vb_slot, offset,
+				R600_PRIM_RECTANGLE_LIST, 3, 2);
+	pipe_resource_reference(&buf, NULL);
+}
 
 void r600_need_dma_space(struct r600_common_context *ctx, unsigned num_dw)
 {
@@ -156,6 +220,8 @@ bool r600_common_context_init(struct r600_common_context *rctx,
 	rctx->b.transfer_inline_write = u_default_transfer_inline_write;
         rctx->b.memory_barrier = r600_memory_barrier;
 	rctx->b.flush = r600_flush_from_st;
+
+	LIST_INITHEAD(&rctx->texture_buffers);
 
 	r600_init_context_texture_functions(rctx);
 	r600_streamout_init(rctx);
@@ -474,13 +540,21 @@ static int r600_get_compute_param(struct pipe_screen *screen,
 	case PIPE_COMPUTE_CAP_MAX_GLOBAL_SIZE:
 		if (ret) {
 			uint64_t *max_global_size = ret;
-			/* XXX: This is what the proprietary driver reports, we
-			 * may want to use a different value. */
-			/* XXX: Not sure what to put here for SI. */
-			if (rscreen->chip_class >= SI)
-				*max_global_size = 2000000000;
-			else
-				*max_global_size = 201326592;
+			uint64_t max_mem_alloc_size;
+
+			r600_get_compute_param(screen,
+				PIPE_COMPUTE_CAP_MAX_MEM_ALLOC_SIZE,
+				&max_mem_alloc_size);
+
+			/* In OpenCL, the MAX_MEM_ALLOC_SIZE must be at least
+			 * 1/4 of the MAX_GLOBAL_SIZE.  Since the
+			 * MAX_MEM_ALLOC_SIZE is fixed for older kernels,
+			 * make sure we never report more than
+			 * 4 * MAX_MEM_ALLOC_SIZE.
+			 */
+			*max_global_size = MIN2(4 * max_mem_alloc_size,
+				rscreen->info.gart_size +
+				rscreen->info.vram_size);
 		}
 		return sizeof(uint64_t);
 
@@ -504,13 +578,11 @@ static int r600_get_compute_param(struct pipe_screen *screen,
 		if (ret) {
 			uint64_t max_global_size;
 			uint64_t *max_mem_alloc_size = ret;
-			r600_get_compute_param(screen, PIPE_COMPUTE_CAP_MAX_GLOBAL_SIZE, &max_global_size);
-			/* OpenCL requres this value be at least
-			 * max(MAX_GLOBAL_SIZE / 4, 128 * 1024 *1024)
-			 * I'm really not sure what value to report here, but
-			 * MAX_GLOBAL_SIZE / 4 seems resonable.
+
+			/* XXX: The limit in older kernels is 256 MB.  We
+			 * should add a query here for newer kernels.
 			 */
-			*max_mem_alloc_size = max_global_size / 4;
+			*max_mem_alloc_size = 256 * 1024 * 1024;
 		}
 		return sizeof(uint64_t);
 

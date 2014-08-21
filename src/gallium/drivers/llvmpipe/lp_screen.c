@@ -37,6 +37,7 @@
 #include "draw/draw_context.h"
 #include "gallivm/lp_bld_type.h"
 
+#include "os/os_misc.h"
 #include "os/os_time.h"
 #include "lp_texture.h"
 #include "lp_fence.h"
@@ -248,9 +249,30 @@ llvmpipe_get_param(struct pipe_screen *screen, enum pipe_cap param)
    case PIPE_CAP_SAMPLE_SHADING:
    case PIPE_CAP_TEXTURE_GATHER_OFFSETS:
    case PIPE_CAP_TGSI_VS_WINDOW_SPACE_POSITION:
+   case PIPE_CAP_TGSI_FS_FINE_DERIVATIVE:
       return 0;
    case PIPE_CAP_FAKE_SW_MSAA:
       return 1;
+   case PIPE_CAP_CONDITIONAL_RENDER_INVERTED:
+      return 1;
+
+   case PIPE_CAP_VENDOR_ID:
+      return 0xFFFFFFFF;
+   case PIPE_CAP_DEVICE_ID:
+      return 0xFFFFFFFF;
+   case PIPE_CAP_ACCELERATED:
+      return 0;
+   case PIPE_CAP_VIDEO_MEMORY: {
+      /* XXX: Do we want to return the full amount fo system memory ? */
+      uint64_t system_memory;
+
+      if (!os_get_total_physical_memory(&system_memory))
+         return 0;
+
+      return (int)(system_memory >> 20);
+   }
+   case PIPE_CAP_UMA:
+      return 0;
    }
    /* should only get here on unhandled cases */
    debug_printf("Unexpected PIPE_CAP %d query\n", param);
@@ -407,6 +429,11 @@ llvmpipe_is_format_supported( struct pipe_screen *_screen,
       if (format_desc->swizzle[0] == UTIL_FORMAT_SWIZZLE_NONE) {
          return FALSE;
       }
+   }
+
+   if (format_desc->layout == UTIL_FORMAT_LAYOUT_BPTC) {
+      /* Software decoding is not hooked up. */
+      return FALSE;
    }
 
    if (format_desc->layout == UTIL_FORMAT_LAYOUT_S3TC) {

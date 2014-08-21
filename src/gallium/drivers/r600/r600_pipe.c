@@ -30,7 +30,6 @@
 
 #include <errno.h>
 #include "pipe/p_shader_tokens.h"
-#include "util/u_blitter.h"
 #include "util/u_debug.h"
 #include "util/u_memory.h"
 #include "util/u_simple_shaders.h"
@@ -305,6 +304,7 @@ static int r600_get_param(struct pipe_screen* pscreen, enum pipe_cap param)
 	case PIPE_CAP_TGSI_VS_LAYER_VIEWPORT:
 	case PIPE_CAP_TEXTURE_GATHER_SM5:
 	case PIPE_CAP_TEXTURE_QUERY_LOD:
+	case PIPE_CAP_TGSI_FS_FINE_DERIVATIVE:
 		return family >= CHIP_CEDAR ? 1 : 0;
 	case PIPE_CAP_MAX_TEXTURE_GATHER_COMPONENTS:
 		return family >= CHIP_CEDAR ? 4 : 0;
@@ -319,6 +319,7 @@ static int r600_get_param(struct pipe_screen* pscreen, enum pipe_cap param)
 	case PIPE_CAP_SAMPLE_SHADING:
 	case PIPE_CAP_TEXTURE_GATHER_OFFSETS:
 	case PIPE_CAP_DRAW_INDIRECT:
+	case PIPE_CAP_CONDITIONAL_RENDER_INVERTED:
 		return 0;
 
 	/* Stream output. */
@@ -379,6 +380,17 @@ static int r600_get_param(struct pipe_screen* pscreen, enum pipe_cap param)
 		return PIPE_QUIRK_TEXTURE_BORDER_COLOR_SWIZZLE_R600;
 	case PIPE_CAP_ENDIANNESS:
 		return PIPE_ENDIAN_LITTLE;
+
+	case PIPE_CAP_VENDOR_ID:
+		return 0x1002;
+	case PIPE_CAP_DEVICE_ID:
+		return rscreen->b.info.pci_id;
+	case PIPE_CAP_ACCELERATED:
+		return 1;
+	case PIPE_CAP_VIDEO_MEMORY:
+		return rscreen->b.info.vram_size >> 20;
+	case PIPE_CAP_UMA:
+		return 0;
 	}
 	return 0;
 }
@@ -418,7 +430,16 @@ static int r600_get_shader_param(struct pipe_screen* pscreen, unsigned shader, e
 	case PIPE_SHADER_CAP_MAX_TEMPS:
 		return 256; /* Max native temporaries. */
 	case PIPE_SHADER_CAP_MAX_CONST_BUFFER_SIZE:
-		return R600_MAX_CONST_BUFFER_SIZE;
+		if (shader == PIPE_SHADER_COMPUTE) {
+			uint64_t max_const_buffer_size;
+			pscreen->get_compute_param(pscreen,
+				PIPE_COMPUTE_CAP_MAX_MEM_ALLOC_SIZE,
+				&max_const_buffer_size);
+			return max_const_buffer_size;
+
+		} else {
+			return R600_MAX_CONST_BUFFER_SIZE;
+		}
 	case PIPE_SHADER_CAP_MAX_CONST_BUFFERS:
 		return R600_MAX_USER_CONST_BUFFERS;
 	case PIPE_SHADER_CAP_MAX_PREDS:

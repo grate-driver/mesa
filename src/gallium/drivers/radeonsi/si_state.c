@@ -47,15 +47,14 @@ static void si_init_atom(struct r600_atom *atom, struct r600_atom **list_elem,
 	*list_elem = atom;
 }
 
-uint32_t si_num_banks(struct si_screen *sscreen, unsigned bpe, unsigned tile_split,
-		      unsigned tile_mode_index)
+uint32_t si_num_banks(struct si_screen *sscreen, struct r600_texture *tex)
 {
-	if ((sscreen->b.chip_class == CIK) &&
+	if (sscreen->b.chip_class == CIK &&
 	    sscreen->b.info.cik_macrotile_mode_array_valid) {
 		unsigned index, tileb;
 
-		tileb = 8 * 8 * bpe;
-		tileb = MIN2(tile_split, tileb);
+		tileb = 8 * 8 * tex->surface.bpe;
+		tileb = MIN2(tex->surface.tile_split, tileb);
 
 		for (index = 0; tileb > 64; index++) {
 			tileb >>= 1;
@@ -65,11 +64,14 @@ uint32_t si_num_banks(struct si_screen *sscreen, unsigned bpe, unsigned tile_spl
 		return (sscreen->b.info.cik_macrotile_mode_array[index] >> 6) & 0x3;
 	}
 
-	if ((sscreen->b.chip_class == SI) &&
+	if (sscreen->b.chip_class == SI &&
 	    sscreen->b.info.si_tile_mode_array_valid) {
+		/* Don't use stencil_tiling_index, because num_banks is always
+		 * read from the depth mode. */
+		unsigned tile_mode_index = tex->surface.tiling_index[0];
 		assert(tile_mode_index < 32);
 
-		return (sscreen->b.info.si_tile_mode_array[tile_mode_index] >> 20) & 0x3;
+		return G_009910_NUM_BANKS(sscreen->b.info.si_tile_mode_array[tile_mode_index]);
 	}
 
 	/* The old way. */
@@ -458,18 +460,20 @@ static void si_set_scissor_states(struct pipe_context *ctx,
                                   const struct pipe_scissor_state *state)
 {
 	struct si_context *sctx = (struct si_context *)ctx;
-	struct si_pm4_state *pm4 = si_pm4_alloc_state(sctx);
+	struct si_state_scissor *scissor = CALLOC_STRUCT(si_state_scissor);
+	struct si_pm4_state *pm4 = &scissor->pm4;
 
-	if (pm4 == NULL)
+	if (scissor == NULL)
 		return;
 
+	scissor->scissor = *state;
 	si_pm4_set_reg(pm4, R_028250_PA_SC_VPORT_SCISSOR_0_TL,
 		       S_028250_TL_X(state->minx) | S_028250_TL_Y(state->miny) |
 		       S_028250_WINDOW_OFFSET_DISABLE(1));
 	si_pm4_set_reg(pm4, R_028254_PA_SC_VPORT_SCISSOR_0_BR,
 		       S_028254_BR_X(state->maxx) | S_028254_BR_Y(state->maxy));
 
-	si_pm4_set_state(sctx, scissor, pm4);
+	si_pm4_set_state(sctx, scissor, scissor);
 }
 
 static void si_set_viewport_states(struct pipe_context *ctx,
@@ -1097,6 +1101,22 @@ static uint32_t si_translate_texformat(struct pipe_screen *screen,
 		case PIPE_FORMAT_RGTC2_UNORM:
 		case PIPE_FORMAT_LATC2_UNORM:
 			return V_008F14_IMG_DATA_FORMAT_BC5;
+		default:
+			goto out_unknown;
+		}
+	}
+
+	if (desc->layout == UTIL_FORMAT_LAYOUT_BPTC) {
+		if (!enable_s3tc)
+			goto out_unknown;
+
+		switch (format) {
+		case PIPE_FORMAT_BPTC_RGBA_UNORM:
+		case PIPE_FORMAT_BPTC_SRGBA:
+			return V_008F14_IMG_DATA_FORMAT_BC7;
+		case PIPE_FORMAT_BPTC_RGB_FLOAT:
+		case PIPE_FORMAT_BPTC_RGB_UFLOAT:
+			return V_008F14_IMG_DATA_FORMAT_BC6;
 		default:
 			goto out_unknown;
 		}
@@ -1802,8 +1822,7 @@ static void si_init_depth_surface(struct si_context *sctx,
 		macro_aspect = cik_macro_tile_aspect(macro_aspect);
 		bankw = cik_bank_wh(bankw);
 		bankh = cik_bank_wh(bankh);
-		nbanks = si_num_banks(sscreen, rtex->surface.bpe, rtex->surface.tile_split,
-				      ~0);
+		nbanks = si_num_banks(sscreen, rtex);
 		tile_mode_index = si_tile_mode_index(rtex, level, false);
 		pipe_config = cik_db_pipe_config(sscreen, tile_mode_index);
 
@@ -2358,6 +2377,7 @@ static struct pipe_sampler_view *si_create_sampler_view(struct pipe_context *ctx
 							struct pipe_resource *texture,
 							const struct pipe_sampler_view *state)
 {
+	struct si_context *sctx = (struct si_context*)ctx;
 	struct si_pipe_sampler_view *view = CALLOC_STRUCT(si_pipe_sampler_view);
 	struct r600_texture *tmp = (struct r600_texture*)texture;
 	const struct util_format_description *desc;
@@ -2402,6 +2422,8 @@ static struct pipe_sampler_view *si_create_sampler_view(struct pipe_context *ctx
 				 S_008F0C_DST_SEL_W(si_map_swizzle(desc->swizzle[3])) |
 				 S_008F0C_NUM_FORMAT(num_format) |
 				 S_008F0C_DATA_FORMAT(format);
+
+		LIST_ADDTAIL(&view->list, &sctx->b.texture_buffers);
 		return &view->base;
 	}
 
@@ -2467,12 +2489,16 @@ static struct pipe_sampler_view *si_create_sampler_view(struct pipe_context *ctx
 				case PIPE_FORMAT_DXT1_SRGBA:
 				case PIPE_FORMAT_DXT3_SRGBA:
 				case PIPE_FORMAT_DXT5_SRGBA:
+				case PIPE_FORMAT_BPTC_SRGBA:
 					num_format = V_008F14_IMG_NUM_FORMAT_SRGB;
 					break;
 				case PIPE_FORMAT_RGTC1_SNORM:
 				case PIPE_FORMAT_LATC1_SNORM:
 				case PIPE_FORMAT_RGTC2_SNORM:
 				case PIPE_FORMAT_LATC2_SNORM:
+				/* implies float, so use SNORM/UNORM to determine
+				   whether data is signed or not */
+				case PIPE_FORMAT_BPTC_RGB_FLOAT:
 					num_format = V_008F14_IMG_NUM_FORMAT_SNORM;
 					break;
 				default:
@@ -2606,10 +2632,13 @@ static struct pipe_sampler_view *si_create_sampler_view(struct pipe_context *ctx
 static void si_sampler_view_destroy(struct pipe_context *ctx,
 				    struct pipe_sampler_view *state)
 {
-	struct r600_pipe_sampler_view *resource = (struct r600_pipe_sampler_view *)state;
+	struct si_pipe_sampler_view *view = (struct si_pipe_sampler_view *)state;
+
+	if (view->resource->b.b.target == PIPE_BUFFER)
+		LIST_DELINIT(&view->list);
 
 	pipe_resource_reference(&state->texture, NULL);
-	FREE(resource);
+	FREE(view);
 }
 
 static bool wrap_mode_uses_border_color(unsigned wrap, bool linear_filter)
@@ -2748,16 +2777,18 @@ static void si_bind_sampler_states(struct pipe_context *ctx, unsigned shader,
 static void si_set_sample_mask(struct pipe_context *ctx, unsigned sample_mask)
 {
 	struct si_context *sctx = (struct si_context *)ctx;
-	struct si_pm4_state *pm4 = si_pm4_alloc_state(sctx);
+	struct si_state_sample_mask *state = CALLOC_STRUCT(si_state_sample_mask);
+	struct si_pm4_state *pm4 = &state->pm4;
 	uint16_t mask = sample_mask;
 
-        if (pm4 == NULL)
+        if (state == NULL)
                 return;
 
+	state->sample_mask = mask;
 	si_pm4_set_reg(pm4, R_028C38_PA_SC_AA_MASK_X0Y0_X1Y0, mask | (mask << 16));
 	si_pm4_set_reg(pm4, R_028C3C_PA_SC_AA_MASK_X0Y1_X1Y1, mask | (mask << 16));
 
-	si_pm4_set_state(sctx, sample_mask, pm4);
+	si_pm4_set_state(sctx, sample_mask, state);
 }
 
 static void si_delete_sampler_state(struct pipe_context *ctx, void *state)
@@ -3013,12 +3044,6 @@ void si_init_config(struct si_context *sctx)
 	si_pm4_set_reg(pm4, R_028B90_VGT_GS_INSTANCE_CNT, 0);
 
 	si_pm4_set_reg(pm4, R_028B98_VGT_STRMOUT_BUFFER_CONFIG, 0x0);
-	if (sctx->b.chip_class == SI) {
-		si_pm4_set_reg(pm4, R_028AA8_IA_MULTI_VGT_PARAM,
-			       S_028AA8_SWITCH_ON_EOP(1) |
-			       S_028AA8_PARTIAL_VS_WAVE_ON(1) |
-			       S_028AA8_PRIMGROUP_SIZE(63));
-	}
 	si_pm4_set_reg(pm4, R_028AB4_VGT_REUSE_OFF, 0x00000000);
 	si_pm4_set_reg(pm4, R_028AB8_VGT_VTX_CNT_EN, 0x0);
 	if (sctx->b.chip_class < CIK)

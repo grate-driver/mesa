@@ -205,6 +205,11 @@ void brw_set_sampler_message(struct brw_compile *p,
                              unsigned simd_mode,
                              unsigned return_format);
 
+void brw_set_indirect_send_descriptor(struct brw_compile *p,
+                                      brw_inst *insn,
+                                      unsigned sfid,
+                                      struct brw_reg descriptor);
+
 void brw_set_dp_read_message(struct brw_compile *p,
 			     brw_inst *insn,
 			     unsigned binding_table_index,
@@ -275,6 +280,11 @@ void brw_SAMPLE(struct brw_compile *p,
 		unsigned header_present,
 		unsigned simd_mode,
 		unsigned return_format);
+
+void brw_adjust_sampler_state_pointer(struct brw_compile *p,
+                                      struct brw_reg header,
+                                      struct brw_reg sampler_index,
+                                      struct brw_reg scratch);
 
 void gen4_math(struct brw_compile *p,
 	       struct brw_reg dest,

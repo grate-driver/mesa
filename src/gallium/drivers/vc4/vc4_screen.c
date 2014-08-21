@@ -24,6 +24,7 @@
 
 #include <stdio.h>
 
+#include "os/os_misc.h"
 #include "pipe/p_defines.h"
 #include "pipe/p_screen.h"
 #include "pipe/p_state.h"
@@ -157,6 +158,8 @@ vc4_screen_get_param(struct pipe_screen *pscreen, enum pipe_cap param)
         case PIPE_CAP_MAX_TEXEL_OFFSET:
         case PIPE_CAP_MAX_VERTEX_STREAMS:
         case PIPE_CAP_DRAW_INDIRECT:
+        case PIPE_CAP_TGSI_FS_FINE_DERIVATIVE:
+        case PIPE_CAP_CONDITIONAL_RENDER_INVERTED:
                 return 0;
 
                 /* Stream output. */
@@ -176,7 +179,8 @@ vc4_screen_get_param(struct pipe_screen *pscreen, enum pipe_cap param)
         case PIPE_CAP_MAX_TEXTURE_CUBE_LEVELS:
                 return VC4_MAX_MIP_LEVELS;
         case PIPE_CAP_MAX_TEXTURE_3D_LEVELS:
-                return 1;
+                /* Note: Not supported in hardware, just faking it. */
+                return 5;
         case PIPE_CAP_MAX_TEXTURE_ARRAY_LAYERS:
                 return 0;
 
@@ -198,6 +202,23 @@ vc4_screen_get_param(struct pipe_screen *pscreen, enum pipe_cap param)
 
         case PIPE_CAP_MIN_MAP_BUFFER_ALIGNMENT:
                 return 64;
+
+        case PIPE_CAP_VENDOR_ID:
+                return 0x14E4;
+        case PIPE_CAP_DEVICE_ID:
+                return 0xFFFFFFFF;
+        case PIPE_CAP_ACCELERATED:
+                return 1;
+        case PIPE_CAP_VIDEO_MEMORY: {
+                uint64_t system_memory;
+
+                if (!os_get_total_physical_memory(&system_memory))
+                        return 0;
+
+                return (int)(system_memory >> 20);
+        }
+        case PIPE_CAP_UMA:
+                return 1;
 
         default:
                 fprintf(stderr, "unknown param %d\n", param);
@@ -273,7 +294,7 @@ vc4_screen_get_shader_param(struct pipe_screen *pscreen, unsigned shader,
                 return 0;
         case PIPE_SHADER_CAP_MAX_TEXTURE_SAMPLERS:
         case PIPE_SHADER_CAP_MAX_SAMPLER_VIEWS:
-                return 16;
+                return VC4_MAX_TEXTURE_SAMPLERS;
         case PIPE_SHADER_CAP_PREFERRED_IR:
                 return PIPE_SHADER_IR_TGSI;
         default:
@@ -338,8 +359,13 @@ vc4_screen_is_format_supported(struct pipe_screen *pscreen,
                 return FALSE;
         }
 
-        if (usage & PIPE_BIND_VERTEX_BUFFER)
-                retval |= PIPE_BIND_VERTEX_BUFFER; /* XXX */
+        if (usage & PIPE_BIND_VERTEX_BUFFER &&
+            (format == PIPE_FORMAT_R32G32B32A32_FLOAT ||
+             format == PIPE_FORMAT_R32G32B32_FLOAT ||
+             format == PIPE_FORMAT_R32G32_FLOAT ||
+             format == PIPE_FORMAT_R32_FLOAT)) {
+                retval |= PIPE_BIND_VERTEX_BUFFER;
+        }
 
         if ((usage & PIPE_BIND_RENDER_TARGET) &&
             (format == PIPE_FORMAT_B8G8R8A8_UNORM ||
@@ -356,8 +382,7 @@ vc4_screen_is_format_supported(struct pipe_screen *pscreen,
 
         if ((usage & PIPE_BIND_SAMPLER_VIEW) &&
             (vc4_get_texture_format(format) != ~0)) {
-                retval |= usage & (PIPE_BIND_SAMPLER_VIEW |
-                                   PIPE_BIND_VERTEX_BUFFER);
+                retval |= PIPE_BIND_SAMPLER_VIEW;
         }
 
         if ((usage & PIPE_BIND_DEPTH_STENCIL) &&
@@ -376,6 +401,15 @@ vc4_screen_is_format_supported(struct pipe_screen *pscreen,
                 retval |= PIPE_BIND_TRANSFER_READ;
         if (usage & PIPE_BIND_TRANSFER_WRITE)
                 retval |= PIPE_BIND_TRANSFER_WRITE;
+
+#if 0
+	if (retval != usage) {
+		fprintf(stderr,
+                        "not supported: format=%s, target=%d, sample_count=%d, "
+                        "usage=0x%x, retval=0x%x\n", util_format_name(format),
+                        target, sample_count, usage, retval);
+	}
+#endif
 
         return retval == usage;
 }

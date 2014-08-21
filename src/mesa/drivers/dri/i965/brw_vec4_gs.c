@@ -65,9 +65,9 @@ do_gs_prog(struct brw_context *brw,
    param_count += MAX_CLIP_PLANES * 4;
 
    c.prog_data.base.base.param =
-      rzalloc_array(NULL, const float *, param_count);
+      rzalloc_array(NULL, const gl_constant_value *, param_count);
    c.prog_data.base.base.pull_param =
-      rzalloc_array(NULL, const float *, param_count);
+      rzalloc_array(NULL, const gl_constant_value *, param_count);
    /* Setting nr_params here NOT to the size of the param and pull_param
     * arrays, but to the number of uniform components vec4_visitor
     * needs. vec4_visitor::setup_uniforms() will set it back to a proper value.
@@ -217,7 +217,8 @@ do_gs_prog(struct brw_context *brw,
    /* URB entry sizes are stored as a multiple of 64 bytes. */
    c.prog_data.base.urb_entry_size = ALIGN(output_size_bytes, 64) / 64;
 
-   c.prog_data.output_topology = prim_to_hw_prim[gp->program.OutputType];
+   c.prog_data.output_topology =
+      get_hw_prim_for_gl_prim(gp->program.OutputType);
 
    brw_compute_vue_map(brw, &c.input_vue_map, c.key.input_varyings);
 

@@ -401,7 +401,7 @@ vec4_vs_visitor::emit_program_code()
       unsigned i;
       for (i = 0; i < params->NumParameters * 4; i++) {
          stage_prog_data->pull_param[i] =
-            &params->ParameterValues[i / 4][i % 4].f;
+            &params->ParameterValues[i / 4][i % 4];
       }
       stage_prog_data->nr_pull_params = i;
    }
@@ -432,7 +432,7 @@ vec4_vs_visitor::setup_vp_regs()
       this->uniform_vector_size[this->uniforms] = components;
       for (unsigned i = 0; i < 4; i++) {
          stage_prog_data->param[this->uniforms * 4 + i] = i >= components
-            ? 0 : &plist->ParameterValues[p][i].f;
+            ? 0 : &plist->ParameterValues[p][i];
       }
       this->uniforms++; /* counted in vec4 units */
    }
@@ -545,11 +545,18 @@ vec4_vs_visitor::get_vp_src_reg(const prog_src_register &src)
 
          result = src_reg(this, glsl_type::vec4_type);
          src_reg surf_index = src_reg(unsigned(prog_data->base.binding_table.pull_constants_start));
-         vec4_instruction *load =
-            new(mem_ctx) vec4_instruction(this, VS_OPCODE_PULL_CONSTANT_LOAD,
-                                          dst_reg(result), surf_index, reladdr);
-         load->base_mrf = 14;
-         load->mlen = 1;
+         vec4_instruction *load;
+         if (brw->gen >= 7) {
+            load = new(mem_ctx)
+               vec4_instruction(this, VS_OPCODE_PULL_CONSTANT_LOAD_GEN7,
+                                dst_reg(result), surf_index, reladdr);
+         } else {
+            load = new(mem_ctx)
+               vec4_instruction(this, VS_OPCODE_PULL_CONSTANT_LOAD,
+                                dst_reg(result), surf_index, reladdr);
+            load->base_mrf = 14;
+            load->mlen = 1;
+         }
          emit(load);
          break;
       }

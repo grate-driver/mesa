@@ -72,6 +72,7 @@ enum qop {
         QOP_VPM_READ,
         QOP_TLB_PASSTHROUGH_Z_WRITE,
         QOP_TLB_COLOR_WRITE,
+        QOP_TLB_COLOR_READ,
         QOP_VARY_ADD_C,
 
         QOP_FRAG_X,
@@ -169,6 +170,8 @@ enum quniform_contents {
 
         QUNIFORM_TEXRECT_SCALE_X,
         QUNIFORM_TEXRECT_SCALE_Y,
+
+        QUNIFORM_BLEND_CONST_COLOR,
 };
 
 struct qcompile {
@@ -281,6 +284,14 @@ qir_CMP(struct qcompile *c, struct qreg cmp, struct qreg a, struct qreg b)
 {
         struct qreg t = qir_get_temp(c);
         qir_emit(c, qir_inst4(QOP_CMP, t, cmp, a, b, c->undef));
+        return t;
+}
+
+static inline struct qreg
+qir_R4_UNPACK(struct qcompile *c, int i)
+{
+        struct qreg t = qir_get_temp(c);
+        qir_emit(c, qir_inst(QOP_R4_UNPACK_A + i, t, c->undef, c->undef));
         return t;
 }
 

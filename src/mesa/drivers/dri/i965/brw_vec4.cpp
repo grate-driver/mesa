@@ -311,6 +311,103 @@ src_reg::equals(const src_reg &r) const
 		  sizeof(fixed_hw_reg)) == 0);
 }
 
+/* Replaces unused channels of a swizzle with channels that are used.
+ *
+ * For instance, this pass transforms
+ *
+ *    mov vgrf4.yz, vgrf5.wxzy
+ *
+ * into
+ *
+ *    mov vgrf4.yz, vgrf5.xxzx
+ *
+ * This eliminates false uses of some channels, letting dead code elimination
+ * remove the instructions that wrote them.
+ */
+bool
+vec4_visitor::opt_reduce_swizzle()
+{
+   bool progress = false;
+
+   foreach_in_list_safe(vec4_instruction, inst, &instructions) {
+      if (inst->dst.file == BAD_FILE || inst->dst.file == HW_REG)
+         continue;
+
+      int swizzle[4];
+
+      /* Determine which channels of the sources are read. */
+      switch (inst->opcode) {
+      case BRW_OPCODE_DP4:
+      case BRW_OPCODE_DPH: /* FINISHME: DPH reads only three channels of src0,
+                            *           but all four of src1.
+                            */
+         swizzle[0] = 0;
+         swizzle[1] = 1;
+         swizzle[2] = 2;
+         swizzle[3] = 3;
+         break;
+      case BRW_OPCODE_DP3:
+         swizzle[0] = 0;
+         swizzle[1] = 1;
+         swizzle[2] = 2;
+         swizzle[3] = -1;
+         break;
+      case BRW_OPCODE_DP2:
+         swizzle[0] = 0;
+         swizzle[1] = 1;
+         swizzle[2] = -1;
+         swizzle[3] = -1;
+         break;
+      default:
+         swizzle[0] = inst->dst.writemask & WRITEMASK_X ? 0 : -1;
+         swizzle[1] = inst->dst.writemask & WRITEMASK_Y ? 1 : -1;
+         swizzle[2] = inst->dst.writemask & WRITEMASK_Z ? 2 : -1;
+         swizzle[3] = inst->dst.writemask & WRITEMASK_W ? 3 : -1;
+         break;
+      }
+
+      /* Resolve unread channels (-1) by assigning them the swizzle of the
+       * first channel that is used.
+       */
+      int first_used_channel = 0;
+      for (int i = 0; i < 4; i++) {
+         if (swizzle[i] != -1) {
+            first_used_channel = swizzle[i];
+            break;
+         }
+      }
+      for (int i = 0; i < 4; i++) {
+         if (swizzle[i] == -1) {
+            swizzle[i] = first_used_channel;
+         }
+      }
+
+      /* Update sources' swizzles. */
+      for (int i = 0; i < 3; i++) {
+         if (inst->src[i].file != GRF &&
+             inst->src[i].file != ATTR &&
+             inst->src[i].file != UNIFORM)
+            continue;
+
+         int swiz[4];
+         for (int j = 0; j < 4; j++) {
+            swiz[j] = BRW_GET_SWZ(inst->src[i].swizzle, swizzle[j]);
+         }
+
+         unsigned new_swizzle = BRW_SWIZZLE4(swiz[0], swiz[1], swiz[2], swiz[3]);
+         if (inst->src[i].swizzle != new_swizzle) {
+            inst->src[i].swizzle = new_swizzle;
+            progress = true;
+         }
+      }
+   }
+
+   if (progress)
+      invalidate_live_intervals();
+
+   return progress;
+}
+
 static bool
 try_eliminate_instruction(vec4_instruction *inst, int new_writemask,
                           const struct brw_context *brw)
@@ -667,7 +764,7 @@ vec4_visitor::move_push_constants_to_pull_constants()
       pull_constant_loc[i / 4] = -1;
 
       if (i >= max_uniform_components) {
-	 const float **values = &stage_prog_data->param[i];
+	 const gl_constant_value **values = &stage_prog_data->param[i];
 
 	 /* Try to find an existing copy of this uniform in the pull
 	  * constants if it was part of an array access already.
@@ -753,13 +850,11 @@ vec4_visitor::opt_set_dependency_control()
    assert(prog_data->total_grf ||
           !"Must be called after register allocation");
 
-   for (int i = 0; i < cfg->num_blocks; i++) {
-      bblock_t *bblock = cfg->blocks[i];
-
+   foreach_block (block, cfg) {
       memset(last_grf_write, 0, sizeof(last_grf_write));
       memset(last_mrf_write, 0, sizeof(last_mrf_write));
 
-      foreach_inst_in_block (vec4_instruction, inst, bblock) {
+      foreach_inst_in_block (vec4_instruction, inst, block) {
          /* If we read from a register that we were doing dependency control
           * on, don't do dependency control across the read.
           */
@@ -849,24 +944,27 @@ vec4_instruction::can_reswizzle_dst(int dst_writemask,
       return false;
 
    switch (opcode) {
+   default:
+      if (!brw_is_single_value_swizzle(swizzle)) {
+         /* Check if there happens to be no reswizzling required. */
+         for (int c = 0; c < 4; c++) {
+            int bit = 1 << BRW_GET_SWZ(swizzle, c);
+            /* Skip components of the swizzle not used by the dst. */
+            if (!(dst_writemask & (1 << c)))
+               continue;
+
+            /* We don't do the reswizzling yet, so just sanity check that we
+             * don't have to.
+             */
+            if (bit != (1 << c))
+               return false;
+         }
+         return true;
+      }
+      /* fallthrough */
    case BRW_OPCODE_DP4:
    case BRW_OPCODE_DP3:
    case BRW_OPCODE_DP2:
-      return true;
-   default:
-      /* Check if there happens to be no reswizzling required. */
-      for (int c = 0; c < 4; c++) {
-         int bit = 1 << BRW_GET_SWZ(swizzle, c);
-         /* Skip components of the swizzle not used by the dst. */
-         if (!(dst_writemask & (1 << c)))
-            continue;
-
-         /* We don't do the reswizzling yet, so just sanity check that we
-          * don't have to.
-          */
-         if (bit != (1 << c))
-            return false;
-      }
       return true;
    }
 }
@@ -884,6 +982,21 @@ vec4_instruction::reswizzle_dst(int dst_writemask, int swizzle)
    int new_writemask = 0;
 
    switch (opcode) {
+   default:
+      if (!brw_is_single_value_swizzle(swizzle)) {
+         for (int c = 0; c < 4; c++) {
+            /* Skip components of the swizzle not used by the dst. */
+            if (!(dst_writemask & (1 << c)))
+               continue;
+
+            /* We don't do the reswizzling yet, so just sanity check that we
+             * don't have to.
+             */
+            assert((1 << BRW_GET_SWZ(swizzle, c)) == (1 << c));
+         }
+         break;
+      }
+      /* fallthrough */
    case BRW_OPCODE_DP4:
    case BRW_OPCODE_DP3:
    case BRW_OPCODE_DP2:
@@ -899,18 +1012,6 @@ vec4_instruction::reswizzle_dst(int dst_writemask, int swizzle)
             new_writemask |= (1 << c);
       }
       dst.writemask = new_writemask;
-      break;
-   default:
-      for (int c = 0; c < 4; c++) {
-         /* Skip components of the swizzle not used by the dst. */
-         if (!(dst_writemask & (1 << c)))
-            continue;
-
-         /* We don't do the reswizzling yet, so just sanity check that we
-          * don't have to.
-          */
-         assert((1 << BRW_GET_SWZ(swizzle, c)) == (1 << c));
-      }
       break;
    }
 }
@@ -1490,10 +1591,10 @@ vec4_visitor::setup_uniforms(int reg)
       this->uniform_vector_size[this->uniforms] = 1;
 
       stage_prog_data->param =
-         reralloc(NULL, stage_prog_data->param, const float *, 4);
+         reralloc(NULL, stage_prog_data->param, const gl_constant_value *, 4);
       for (unsigned int i = 0; i < 4; i++) {
 	 unsigned int slot = this->uniforms * 4 + i;
-	 static float zero = 0.0;
+	 static gl_constant_value zero = { 0.0 };
 	 stage_prog_data->param[slot] = &zero;
       }
 
@@ -1701,6 +1802,7 @@ vec4_visitor::run()
       iteration++;
       int pass_num = 0;
 
+      OPT(opt_reduce_swizzle);
       OPT(dead_code_eliminate);
       OPT(dead_control_flow_eliminate, this);
       OPT(opt_copy_propagation);
@@ -1743,6 +1845,8 @@ vec4_visitor::run()
     * sure that didn't happen.
     */
    assert(sanity_param_count == prog->Parameters->NumParameters);
+
+   calculate_cfg();
 
    return !failed;
 }
@@ -1794,15 +1898,9 @@ brw_vs_emit(struct brw_context *brw,
    }
 
    const unsigned *assembly = NULL;
-   if (brw->gen >= 8) {
-      gen8_vec4_generator g(brw, prog, &c->vp->program.Base, &prog_data->base,
-                            mem_ctx, INTEL_DEBUG & DEBUG_VS);
-      assembly = g.generate_assembly(&v.instructions, final_assembly_size);
-   } else {
-      vec4_generator g(brw, prog, &c->vp->program.Base, &prog_data->base,
-                       mem_ctx, INTEL_DEBUG & DEBUG_VS);
-      assembly = g.generate_assembly(&v.instructions, final_assembly_size);
-   }
+   vec4_generator g(brw, prog, &c->vp->program.Base, &prog_data->base,
+                    mem_ctx, INTEL_DEBUG & DEBUG_VS);
+   assembly = g.generate_assembly(v.cfg, final_assembly_size);
 
    if (unlikely(brw->perf_debug) && shader) {
       if (shader->compiled_once) {

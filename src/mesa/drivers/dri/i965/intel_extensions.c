@@ -272,6 +272,7 @@ intelInitExtensions(struct gl_context *ctx)
       ctx->Extensions.ARB_texture_multisample = true;
       ctx->Extensions.ARB_sample_shading = true;
       ctx->Extensions.ARB_texture_gather = true;
+      ctx->Extensions.ARB_conditional_render_inverted = true;
 
       /* Test if the kernel has the ioctl. */
       if (drm_intel_reg_read(brw->bufmgr, TIMESTAMP, &dummy) == 0)
@@ -303,6 +304,9 @@ intelInitExtensions(struct gl_context *ctx)
          ctx->Extensions.ARB_viewport_array = true;
          ctx->Extensions.AMD_vertex_shader_viewport_index = true;
       }
+
+      ctx->Extensions.ARB_texture_compression_bptc = true;
+      ctx->Extensions.ARB_derivative_control = true;
    }
 
    if (brw->gen >= 8) {
@@ -326,4 +330,7 @@ intelInitExtensions(struct gl_context *ctx)
 
    if (brw->gen >= 7)
       ctx->Extensions.ARB_shader_atomic_counters = true;
+
+   if (brw->gen == 7)
+      ctx->Extensions.ARB_gpu_shader5 = true;
 }

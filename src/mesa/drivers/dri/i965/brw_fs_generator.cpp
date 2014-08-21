@@ -42,12 +42,10 @@ fs_generator::fs_generator(struct brw_context *brw,
                            struct brw_wm_prog_data *prog_data,
                            struct gl_shader_program *prog,
                            struct gl_fragment_program *fp,
-                           bool dual_source_output,
                            bool runtime_check_aads_emit,
                            bool debug_flag)
 
    : brw(brw), key(key), prog_data(prog_data), prog(prog), fp(fp),
-     dual_source_output(dual_source_output),
      runtime_check_aads_emit(runtime_check_aads_emit), debug_flag(debug_flag),
      mem_ctx(mem_ctx)
 {
@@ -117,7 +115,9 @@ fs_generator::fire_fb_write(fs_inst *inst,
       brw_pop_insn_state(p);
    }
 
-   if (this->dual_source_output)
+   if (inst->opcode == FS_OPCODE_REP_FB_WRITE)
+      msg_control = BRW_DATAPORT_RENDER_TARGET_WRITE_SIMD16_SINGLE_SOURCE_REPLICATED;
+   else if (prog_data->dual_src_blend)
       msg_control = BRW_DATAPORT_RENDER_TARGET_WRITE_SIMD8_DUAL_SOURCE_SUBSPAN01;
    else if (dispatch_width == 16)
       msg_control = BRW_DATAPORT_RENDER_TARGET_WRITE_SIMD16_SINGLE_SOURCE;
@@ -154,6 +154,7 @@ fs_generator::generate_fb_write(fs_inst *inst)
       brw_set_default_mask_control(p, BRW_MASK_DISABLE);
       brw_set_default_predicate_control(p, BRW_PREDICATE_NONE);
       brw_set_default_compression_control(p, BRW_COMPRESSION_NONE);
+      brw_set_default_flag_reg(p, 0, 0);
 
       /* On HSW, the GPU will use the predicate on SENDC, unless the header is
        * present.
@@ -305,7 +306,7 @@ fs_generator::generate_math_gen6(fs_inst *inst,
                                  struct brw_reg src1)
 {
    int op = brw_math_function(inst->opcode);
-   bool binop = src1.file == BRW_GENERAL_REGISTER_FILE;
+   bool binop = src1.file != BRW_ARCHITECTURE_REGISTER_FILE;
 
    brw_set_default_compression_control(p, BRW_COMPRESSION_NONE);
    gen6_math(p, dst, op, src0, src1);
@@ -539,10 +540,7 @@ fs_generator::generate_tex(fs_inst *inst, struct brw_reg dst, struct brw_reg src
       src.nr++;
    }
 
-   assert(sampler_index.file == BRW_IMMEDIATE_VALUE);
    assert(sampler_index.type == BRW_REGISTER_TYPE_UD);
-
-   uint32_t sampler = sampler_index.dw1.ud;
 
    /* Load the message header if present.  If there's a texture offset,
     * we need to set it up explicitly and load the offset bitfield.
@@ -574,45 +572,86 @@ fs_generator::generate_tex(fs_inst *inst, struct brw_reg dst, struct brw_reg src
                        brw_imm_ud(inst->texture_offset));
          }
 
-         if (sampler >= 16) {
-            /* The "Sampler Index" field can only store values between 0 and 15.
-             * However, we can add an offset to the "Sampler State Pointer"
-             * field, effectively selecting a different set of 16 samplers.
-             *
-             * The "Sampler State Pointer" needs to be aligned to a 32-byte
-             * offset, and each sampler state is only 16-bytes, so we can't
-             * exclusively use the offset - we have to use both.
-             */
-            assert(brw->gen >= 8 || brw->is_haswell);
-            const int sampler_state_size = 16; /* 16 bytes */
-            brw_ADD(p,
-                    get_element_ud(header_reg, 3),
-                    get_element_ud(brw_vec8_grf(0, 0), 3),
-                    brw_imm_ud(16 * (sampler / 16) * sampler_state_size));
-         }
+         brw_adjust_sampler_state_pointer(p, header_reg, sampler_index, dst);
          brw_pop_insn_state(p);
       }
    }
 
-   uint32_t surface_index = ((inst->opcode == SHADER_OPCODE_TG4 ||
-      inst->opcode == SHADER_OPCODE_TG4_OFFSET)
-      ? prog_data->base.binding_table.gather_texture_start
-      : prog_data->base.binding_table.texture_start) + sampler;
+   uint32_t base_binding_table_index = (inst->opcode == SHADER_OPCODE_TG4 ||
+         inst->opcode == SHADER_OPCODE_TG4_OFFSET)
+         ? prog_data->base.binding_table.gather_texture_start
+         : prog_data->base.binding_table.texture_start;
 
-   brw_SAMPLE(p,
-	      retype(dst, BRW_REGISTER_TYPE_UW),
-	      inst->base_mrf,
-	      src,
-              surface_index,
-	      sampler % 16,
-	      msg_type,
-	      rlen,
-	      inst->mlen,
-	      inst->header_present,
-	      simd_mode,
-	      return_format);
+   if (sampler_index.file == BRW_IMMEDIATE_VALUE) {
+      uint32_t sampler = sampler_index.dw1.ud;
 
-   brw_mark_surface_used(&prog_data->base, surface_index);
+      brw_SAMPLE(p,
+                 retype(dst, BRW_REGISTER_TYPE_UW),
+                 inst->base_mrf,
+                 src,
+                 sampler + base_binding_table_index,
+                 sampler % 16,
+                 msg_type,
+                 rlen,
+                 inst->mlen,
+                 inst->header_present,
+                 simd_mode,
+                 return_format);
+
+      brw_mark_surface_used(&prog_data->base, sampler + base_binding_table_index);
+   } else {
+      /* Non-const sampler index */
+      /* Note: this clobbers `dst` as a temporary before emitting the send */
+
+      struct brw_reg addr = vec1(retype(brw_address_reg(0), BRW_REGISTER_TYPE_UD));
+      struct brw_reg temp = vec1(retype(dst, BRW_REGISTER_TYPE_UD));
+
+      struct brw_reg sampler_reg = vec1(retype(sampler_index, BRW_REGISTER_TYPE_UD));
+
+      brw_push_insn_state(p);
+      brw_set_default_mask_control(p, BRW_MASK_DISABLE);
+      brw_set_default_access_mode(p, BRW_ALIGN_1);
+
+      /* Some care required: `sampler` and `temp` may alias:
+       *    addr = sampler & 0xff
+       *    temp = (sampler << 8) & 0xf00
+       *    addr = addr | temp
+       */
+      brw_ADD(p, addr, sampler_reg, brw_imm_ud(base_binding_table_index));
+      brw_SHL(p, temp, sampler_reg, brw_imm_ud(8u));
+      brw_AND(p, temp, temp, brw_imm_ud(0x0f00));
+      brw_AND(p, addr, addr, brw_imm_ud(0x0ff));
+      brw_OR(p, addr, addr, temp);
+
+      /* a0.0 |= <descriptor> */
+      brw_inst *insn_or = brw_next_insn(p, BRW_OPCODE_OR);
+      brw_set_sampler_message(p, insn_or,
+                              0 /* surface */,
+                              0 /* sampler */,
+                              msg_type,
+                              rlen,
+                              inst->mlen /* mlen */,
+                              inst->header_present /* header */,
+                              simd_mode,
+                              return_format);
+      brw_inst_set_exec_size(p->brw, insn_or, BRW_EXECUTE_1);
+      brw_inst_set_src1_reg_type(p->brw, insn_or, BRW_REGISTER_TYPE_UD);
+      brw_set_src0(p, insn_or, addr);
+      brw_set_dest(p, insn_or, addr);
+
+
+      /* dst = send(offset, a0.0) */
+      brw_inst *insn_send = brw_next_insn(p, BRW_OPCODE_SEND);
+      brw_set_dest(p, insn_send, dst);
+      brw_set_src0(p, insn_send, src);
+      brw_set_indirect_send_descriptor(p, insn_send, BRW_SFID_SAMPLER, addr);
+
+      brw_pop_insn_state(p);
+
+      /* visitor knows more than we do about the surface limit required,
+       * so has already done marking.
+       */
+   }
 }
 
 
@@ -645,11 +684,17 @@ fs_generator::generate_tex(fs_inst *inst, struct brw_reg dst, struct brw_reg src
  * appropriate swizzling.
  */
 void
-fs_generator::generate_ddx(fs_inst *inst, struct brw_reg dst, struct brw_reg src)
+fs_generator::generate_ddx(fs_inst *inst, struct brw_reg dst, struct brw_reg src,
+                           struct brw_reg quality)
 {
    unsigned vstride, width;
+   assert(quality.file == BRW_IMMEDIATE_VALUE);
+   assert(quality.type == BRW_REGISTER_TYPE_D);
 
-   if (key->high_quality_derivatives) {
+   int quality_value = quality.dw1.d;
+
+   if (quality_value == BRW_DERIVATIVE_FINE ||
+      (key->high_quality_derivatives && quality_value != BRW_DERIVATIVE_COARSE)) {
       /* produce accurate derivatives */
       vstride = BRW_VERTICAL_STRIDE_2;
       width = BRW_WIDTH_2;
@@ -681,9 +726,15 @@ fs_generator::generate_ddx(fs_inst *inst, struct brw_reg dst, struct brw_reg src
  */
 void
 fs_generator::generate_ddy(fs_inst *inst, struct brw_reg dst, struct brw_reg src,
-                         bool negate_value)
+                         struct brw_reg quality, bool negate_value)
 {
-   if (key->high_quality_derivatives) {
+   assert(quality.file == BRW_IMMEDIATE_VALUE);
+   assert(quality.type == BRW_REGISTER_TYPE_D);
+
+   int quality_value = quality.dw1.d;
+
+   if (quality_value == BRW_DERIVATIVE_FINE ||
+      (key->high_quality_derivatives && quality_value != BRW_DERIVATIVE_COARSE)) {
       /* From the Ivy Bridge PRM, volume 4 part 3, section 3.3.9 (Register
        * Region Restrictions):
        *
@@ -834,39 +885,88 @@ fs_generator::generate_uniform_pull_constant_load_gen7(fs_inst *inst,
                                                        struct brw_reg offset)
 {
    assert(inst->mlen == 0);
-
-   assert(index.file == BRW_IMMEDIATE_VALUE &&
-	  index.type == BRW_REGISTER_TYPE_UD);
-   uint32_t surf_index = index.dw1.ud;
+   assert(index.type == BRW_REGISTER_TYPE_UD);
 
    assert(offset.file == BRW_GENERAL_REGISTER_FILE);
    /* Reference just the dword we need, to avoid angering validate_reg(). */
    offset = brw_vec1_grf(offset.nr, 0);
-
-   brw_push_insn_state(p);
-   brw_set_default_compression_control(p, BRW_COMPRESSION_NONE);
-   brw_set_default_mask_control(p, BRW_MASK_DISABLE);
-   brw_inst *send = brw_next_insn(p, BRW_OPCODE_SEND);
-   brw_pop_insn_state(p);
 
    /* We use the SIMD4x2 mode because we want to end up with 4 components in
     * the destination loaded consecutively from the same offset (which appears
     * in the first component, and the rest are ignored).
     */
    dst.width = BRW_WIDTH_4;
-   brw_set_dest(p, send, dst);
-   brw_set_src0(p, send, offset);
-   brw_set_sampler_message(p, send,
-                           surf_index,
-                           0, /* LD message ignores sampler unit */
-                           GEN5_SAMPLER_MESSAGE_SAMPLE_LD,
-                           1, /* rlen */
-                           1, /* mlen */
-                           false, /* no header */
-                           BRW_SAMPLER_SIMD_MODE_SIMD4X2,
-                           0);
 
-   brw_mark_surface_used(&prog_data->base, surf_index);
+   if (index.file == BRW_IMMEDIATE_VALUE) {
+
+      uint32_t surf_index = index.dw1.ud;
+
+      brw_push_insn_state(p);
+      brw_set_default_compression_control(p, BRW_COMPRESSION_NONE);
+      brw_set_default_mask_control(p, BRW_MASK_DISABLE);
+      brw_inst *send = brw_next_insn(p, BRW_OPCODE_SEND);
+      brw_pop_insn_state(p);
+
+      brw_set_dest(p, send, dst);
+      brw_set_src0(p, send, offset);
+      brw_set_sampler_message(p, send,
+                              surf_index,
+                              0, /* LD message ignores sampler unit */
+                              GEN5_SAMPLER_MESSAGE_SAMPLE_LD,
+                              1, /* rlen */
+                              1, /* mlen */
+                              false, /* no header */
+                              BRW_SAMPLER_SIMD_MODE_SIMD4X2,
+                              0);
+
+      brw_mark_surface_used(&prog_data->base, surf_index);
+
+   } else {
+
+      struct brw_reg addr = vec1(retype(brw_address_reg(0), BRW_REGISTER_TYPE_UD));
+
+      brw_push_insn_state(p);
+      brw_set_default_mask_control(p, BRW_MASK_DISABLE);
+      brw_set_default_access_mode(p, BRW_ALIGN_1);
+
+      /* a0.0 = surf_index & 0xff */
+      brw_inst *insn_and = brw_next_insn(p, BRW_OPCODE_AND);
+      brw_inst_set_exec_size(p->brw, insn_and, BRW_EXECUTE_1);
+      brw_set_dest(p, insn_and, addr);
+      brw_set_src0(p, insn_and, vec1(retype(index, BRW_REGISTER_TYPE_UD)));
+      brw_set_src1(p, insn_and, brw_imm_ud(0x0ff));
+
+
+      /* a0.0 |= <descriptor> */
+      brw_inst *insn_or = brw_next_insn(p, BRW_OPCODE_OR);
+      brw_set_sampler_message(p, insn_or,
+                              0 /* surface */,
+                              0 /* sampler */,
+                              GEN5_SAMPLER_MESSAGE_SAMPLE_LD,
+                              1 /* rlen */,
+                              1 /* mlen */,
+                              false /* header */,
+                              BRW_SAMPLER_SIMD_MODE_SIMD4X2,
+                              0);
+      brw_inst_set_exec_size(p->brw, insn_or, BRW_EXECUTE_1);
+      brw_inst_set_src1_reg_type(p->brw, insn_or, BRW_REGISTER_TYPE_UD);
+      brw_set_src0(p, insn_or, addr);
+      brw_set_dest(p, insn_or, addr);
+
+
+      /* dst = send(offset, a0.0) */
+      brw_inst *insn_send = brw_next_insn(p, BRW_OPCODE_SEND);
+      brw_set_dest(p, insn_send, dst);
+      brw_set_src0(p, insn_send, offset);
+      brw_set_indirect_send_descriptor(p, insn_send, BRW_SFID_SAMPLER, addr);
+
+      brw_pop_insn_state(p);
+
+      /* visitor knows more than we do about the surface limit required,
+       * so has already done marking.
+       */
+
+   }
 }
 
 void
@@ -948,10 +1048,7 @@ fs_generator::generate_varying_pull_constant_load_gen7(fs_inst *inst,
     */
    assert(!inst->header_present);
    assert(!inst->mlen);
-
-   assert(index.file == BRW_IMMEDIATE_VALUE &&
-	  index.type == BRW_REGISTER_TYPE_UD);
-   uint32_t surf_index = index.dw1.ud;
+   assert(index.type == BRW_REGISTER_TYPE_UD);
 
    uint32_t simd_mode, rlen, mlen;
    if (dispatch_width == 16) {
@@ -964,20 +1061,70 @@ fs_generator::generate_varying_pull_constant_load_gen7(fs_inst *inst,
       simd_mode = BRW_SAMPLER_SIMD_MODE_SIMD8;
    }
 
-   brw_inst *send = brw_next_insn(p, BRW_OPCODE_SEND);
-   brw_set_dest(p, send, dst);
-   brw_set_src0(p, send, offset);
-   brw_set_sampler_message(p, send,
-                           surf_index,
-                           0, /* LD message ignores sampler unit */
-                           GEN5_SAMPLER_MESSAGE_SAMPLE_LD,
-                           rlen,
-                           mlen,
-                           false, /* no header */
-                           simd_mode,
-                           0);
+   if (index.file == BRW_IMMEDIATE_VALUE) {
 
-   brw_mark_surface_used(&prog_data->base, surf_index);
+      uint32_t surf_index = index.dw1.ud;
+
+      brw_inst *send = brw_next_insn(p, BRW_OPCODE_SEND);
+      brw_set_dest(p, send, dst);
+      brw_set_src0(p, send, offset);
+      brw_set_sampler_message(p, send,
+                              surf_index,
+                              0, /* LD message ignores sampler unit */
+                              GEN5_SAMPLER_MESSAGE_SAMPLE_LD,
+                              rlen,
+                              mlen,
+                              false, /* no header */
+                              simd_mode,
+                              0);
+
+      brw_mark_surface_used(&prog_data->base, surf_index);
+
+   } else {
+
+      struct brw_reg addr = vec1(retype(brw_address_reg(0), BRW_REGISTER_TYPE_UD));
+
+      brw_push_insn_state(p);
+      brw_set_default_mask_control(p, BRW_MASK_DISABLE);
+      brw_set_default_access_mode(p, BRW_ALIGN_1);
+
+      /* a0.0 = surf_index & 0xff */
+      brw_inst *insn_and = brw_next_insn(p, BRW_OPCODE_AND);
+      brw_inst_set_exec_size(p->brw, insn_and, BRW_EXECUTE_1);
+      brw_set_dest(p, insn_and, addr);
+      brw_set_src0(p, insn_and, vec1(retype(index, BRW_REGISTER_TYPE_UD)));
+      brw_set_src1(p, insn_and, brw_imm_ud(0x0ff));
+
+
+      /* a0.0 |= <descriptor> */
+      brw_inst *insn_or = brw_next_insn(p, BRW_OPCODE_OR);
+      brw_set_sampler_message(p, insn_or,
+                              0 /* surface */,
+                              0 /* sampler */,
+                              GEN5_SAMPLER_MESSAGE_SAMPLE_LD,
+                              rlen /* rlen */,
+                              mlen /* mlen */,
+                              false /* header */,
+                              simd_mode,
+                              0);
+      brw_inst_set_exec_size(p->brw, insn_or, BRW_EXECUTE_1);
+      brw_inst_set_src1_reg_type(p->brw, insn_or, BRW_REGISTER_TYPE_UD);
+      brw_set_src0(p, insn_or, addr);
+      brw_set_dest(p, insn_or, addr);
+
+
+      /* dst = send(offset, a0.0) */
+      brw_inst *insn_send = brw_next_insn(p, BRW_OPCODE_SEND);
+      brw_set_dest(p, insn_send, dst);
+      brw_set_src0(p, insn_send, offset);
+      brw_set_indirect_send_descriptor(p, insn_send, BRW_SFID_SAMPLER, addr);
+
+      brw_pop_insn_state(p);
+
+      /* visitor knows more than we do about the surface limit required,
+       * so has already done marking.
+       */
+   }
 }
 
 /**
@@ -1333,18 +1480,14 @@ fs_generator::generate_untyped_surface_read(fs_inst *inst, struct brw_reg dst,
 }
 
 void
-fs_generator::generate_code(exec_list *instructions)
+fs_generator::generate_code(const cfg_t *cfg)
 {
    int start_offset = p->next_insn_offset;
 
    struct annotation_info annotation;
    memset(&annotation, 0, sizeof(annotation));
 
-   cfg_t *cfg = NULL;
-   if (unlikely(debug_flag))
-      cfg = new(mem_ctx) cfg_t(instructions);
-
-   foreach_in_list(fs_inst, inst, instructions) {
+   foreach_block_and_inst (block, fs_inst, inst, cfg) {
       struct brw_reg src[3], dst;
       unsigned int last_insn_offset = p->next_insn_offset;
 
@@ -1621,9 +1764,9 @@ fs_generator::generate_code(exec_list *instructions)
       case SHADER_OPCODE_INT_REMAINDER:
       case SHADER_OPCODE_POW:
          assert(brw->gen < 6 || inst->mlen == 0);
-	 if (brw->gen >= 7) {
+	 if (brw->gen >= 7 && inst->opcode == SHADER_OPCODE_POW) {
             gen6_math(p, dst, brw_math_function(inst->opcode), src[0], src[1]);
-	 } else if (brw->gen == 6) {
+	 } else if (brw->gen >= 6) {
 	    generate_math_gen6(inst, dst, src[0], src[1]);
 	 } else {
 	    generate_math_gen4(inst, dst, src[0]);
@@ -1656,14 +1799,14 @@ fs_generator::generate_code(exec_list *instructions)
 	 generate_tex(inst, dst, src[0], src[1]);
 	 break;
       case FS_OPCODE_DDX:
-	 generate_ddx(inst, dst, src[0]);
+	 generate_ddx(inst, dst, src[0], src[1]);
 	 break;
       case FS_OPCODE_DDY:
          /* Make sure fp->UsesDFdy flag got set (otherwise there's no
           * guarantee that key->render_to_fbo is set).
           */
          assert(fp->UsesDFdy);
-	 generate_ddy(inst, dst, src[0], key->render_to_fbo);
+	 generate_ddy(inst, dst, src[0], src[1], key->render_to_fbo);
 	 break;
 
       case SHADER_OPCODE_GEN4_SCRATCH_WRITE:
@@ -1694,6 +1837,7 @@ fs_generator::generate_code(exec_list *instructions)
 	 generate_varying_pull_constant_load_gen7(inst, dst, src[0], src[1]);
 	 break;
 
+      case FS_OPCODE_REP_FB_WRITE:
       case FS_OPCODE_FB_WRITE:
 	 generate_fb_write(inst);
 	 break;
@@ -1835,18 +1979,18 @@ fs_generator::generate_code(exec_list *instructions)
 }
 
 const unsigned *
-fs_generator::generate_assembly(exec_list *simd8_instructions,
-                                exec_list *simd16_instructions,
+fs_generator::generate_assembly(const cfg_t *simd8_cfg,
+                                const cfg_t *simd16_cfg,
                                 unsigned *assembly_size)
 {
-   assert(simd8_instructions || simd16_instructions);
+   assert(simd8_cfg || simd16_cfg);
 
-   if (simd8_instructions) {
+   if (simd8_cfg) {
       dispatch_width = 8;
-      generate_code(simd8_instructions);
+      generate_code(simd8_cfg);
    }
 
-   if (simd16_instructions) {
+   if (simd16_cfg) {
       /* align to 64 byte boundary. */
       while (p->next_insn_offset % 64) {
          brw_NOP(p);
@@ -1858,7 +2002,7 @@ fs_generator::generate_assembly(exec_list *simd8_instructions,
       brw_set_default_compression_control(p, BRW_COMPRESSION_COMPRESSED);
 
       dispatch_width = 16;
-      generate_code(simd16_instructions);
+      generate_code(simd16_cfg);
    }
 
    return brw_get_program(p, assembly_size);

@@ -321,6 +321,173 @@ static const uint16_t gen7_src_index_table[32] = {
    0b010110001000
 };
 
+static const uint32_t gen8_control_index_table[32] = {
+   0b0000000000000000010,
+   0b0000100000000000000,
+   0b0000100000000000001,
+   0b0000100000000000010,
+   0b0000100000000000011,
+   0b0000100000000000100,
+   0b0000100000000000101,
+   0b0000100000000000111,
+   0b0000100000000001000,
+   0b0000100000000001001,
+   0b0000100000000001101,
+   0b0000110000000000000,
+   0b0000110000000000001,
+   0b0000110000000000010,
+   0b0000110000000000011,
+   0b0000110000000000100,
+   0b0000110000000000101,
+   0b0000110000000000111,
+   0b0000110000000001001,
+   0b0000110000000001101,
+   0b0000110000000010000,
+   0b0000110000100000000,
+   0b0001000000000000000,
+   0b0001000000000000010,
+   0b0001000000000000100,
+   0b0001000000100000000,
+   0b0010110000000000000,
+   0b0010110000000010000,
+   0b0011000000000000000,
+   0b0011000000100000000,
+   0b0101000000000000000,
+   0b0101000000100000000
+};
+
+static const uint32_t gen8_datatype_table[32] = {
+   0b001000000000000000001,
+   0b001000000000001000000,
+   0b001000000000001000001,
+   0b001000000000011000001,
+   0b001000000000101011101,
+   0b001000000010111011101,
+   0b001000000011101000001,
+   0b001000000011101000101,
+   0b001000000011101011101,
+   0b001000001000001000001,
+   0b001000011000001000000,
+   0b001000011000001000001,
+   0b001000101000101000101,
+   0b001000111000101000100,
+   0b001000111000101000101,
+   0b001011100011101011101,
+   0b001011101011100011101,
+   0b001011101011101011100,
+   0b001011101011101011101,
+   0b001011111011101011100,
+   0b000000000010000001100,
+   0b001000000000001011101,
+   0b001000000000101000101,
+   0b001000001000001000000,
+   0b001000101000101000100,
+   0b001000111000100000100,
+   0b001001001001000001001,
+   0b001010111011101011101,
+   0b001011111011101011101,
+   0b001001111001101001100,
+   0b001001001001001001000,
+   0b001001011001001001000
+};
+
+static const uint16_t gen8_subreg_table[32] = {
+   0b000000000000000,
+   0b000000000000001,
+   0b000000000001000,
+   0b000000000001111,
+   0b000000000010000,
+   0b000000010000000,
+   0b000000100000000,
+   0b000000110000000,
+   0b000001000000000,
+   0b000001000010000,
+   0b000001010000000,
+   0b001000000000000,
+   0b001000000000001,
+   0b001000010000001,
+   0b001000010000010,
+   0b001000010000011,
+   0b001000010000100,
+   0b001000010000111,
+   0b001000010001000,
+   0b001000010001110,
+   0b001000010001111,
+   0b001000110000000,
+   0b001000111101000,
+   0b010000000000000,
+   0b010000110000000,
+   0b011000000000000,
+   0b011110010000111,
+   0b100000000000000,
+   0b101000000000000,
+   0b110000000000000,
+   0b111000000000000,
+   0b111000000011100
+};
+
+static const uint16_t gen8_src_index_table[32] = {
+   0b000000000000,
+   0b000000000010,
+   0b000000010000,
+   0b000000010010,
+   0b000000011000,
+   0b000000100000,
+   0b000000101000,
+   0b000001001000,
+   0b000001010000,
+   0b000001110000,
+   0b000001111000,
+   0b001100000000,
+   0b001100000010,
+   0b001100001000,
+   0b001100010000,
+   0b001100010010,
+   0b001100100000,
+   0b001100101000,
+   0b001100111000,
+   0b001101000000,
+   0b001101000010,
+   0b001101001000,
+   0b001101010000,
+   0b001101100000,
+   0b001101101000,
+   0b001101110000,
+   0b001101110001,
+   0b001101111000,
+   0b010001101000,
+   0b010001101001,
+   0b010001101010,
+   0b010110001000
+};
+
+/* This is actually the control index table for Cherryview (26 bits), but the
+ * only difference from Broadwell (24 bits) is that it has two extra 0-bits at
+ * the start.
+ *
+ * The low 24 bits have the same mappings on both hardware.
+ */
+static const uint32_t gen8_3src_control_index_table[4] = {
+   0b00100000000110000000000001,
+   0b00000000000110000000000001,
+   0b00000000001000000000000001,
+   0b00000000001000000000100001
+};
+
+/* This is actually the control index table for Cherryview (49 bits), but the
+ * only difference from Broadwell (46 bits) is that it has three extra 0-bits
+ * at the start.
+ *
+ * The low 44 bits have the same mappings on both hardware, and since the high
+ * three bits on Broadwell are zero, we can reuse Cherryview's table.
+ */
+static const uint64_t gen8_3src_source_index_table[4] = {
+   0b0000001110010011100100111001000001111000000000000,
+   0b0000001110010011100100111001000001111000000000010,
+   0b0000001110010011100100111001000001111000000001000,
+   0b0000001110010011100100111001000001111000000100000
+};
+
 static const uint32_t *control_index_table;
 static const uint32_t *datatype_table;
 static const uint16_t *subreg_table;
@@ -329,14 +496,19 @@ static const uint16_t *src_index_table;
 static bool
 set_control_index(struct brw_context *brw, brw_compact_inst *dst, brw_inst *src)
 {
-   uint32_t uncompacted =                  /* 17b/SNB; 19b/IVB+ */
-      (brw_inst_bits(src, 31, 31) << 16) | /* 1b */
-      (brw_inst_bits(src, 23,  8));        /* 16b */
+   uint32_t uncompacted = brw->gen >= 8      /* 17b/SNB; 19b/IVB+ */
+      ? (brw_inst_bits(src, 33, 31) << 16) | /*  3b */
+        (brw_inst_bits(src, 23, 12) <<  4) | /* 12b */
+        (brw_inst_bits(src, 10,  9) <<  2) | /*  2b */
+        (brw_inst_bits(src, 34, 34) <<  1) | /*  1b */
+        (brw_inst_bits(src,  8,  8))         /*  1b */
+      : (brw_inst_bits(src, 31, 31) << 16) | /*  1b */
+        (brw_inst_bits(src, 23,  8));        /* 16b */
 
    /* On gen7, the flag register and subregister numbers are integrated into
     * the control index.
     */
-   if (brw->gen >= 7)
+   if (brw->gen == 7)
       uncompacted |= brw_inst_bits(src, 90, 89) << 17; /* 2b */
 
    for (int i = 0; i < 32; i++) {
@@ -353,9 +525,12 @@ static bool
 set_datatype_index(struct brw_context *brw, brw_compact_inst *dst,
                    brw_inst *src)
 {
-   uint32_t uncompacted =                  /* 18b */
-      (brw_inst_bits(src, 63, 61) << 15) | /* 3b */
-      (brw_inst_bits(src, 46, 32));        /* 15b */
+   uint32_t uncompacted = brw->gen >= 8      /* 18b/SNB+; 21b/BDW+ */
+      ? (brw_inst_bits(src, 63, 61) << 18) | /*  3b */
+        (brw_inst_bits(src, 94, 89) << 12) | /*  6b */
+        (brw_inst_bits(src, 46, 35))         /* 12b */
+      : (brw_inst_bits(src, 63, 61) << 15) | /*  3b */
+        (brw_inst_bits(src, 46, 32));        /* 15b */
 
    for (int i = 0; i < 32; i++) {
       if (datatype_table[i] == uncompacted) {
@@ -436,6 +611,97 @@ set_src1_index(struct brw_context *brw, brw_compact_inst *dst, brw_inst *src,
    return true;
 }
 
+static bool
+set_3src_control_index(struct brw_context *brw, brw_compact_inst *dst, brw_inst *src)
+{
+   assert(brw->gen >= 8);
+
+   uint32_t uncompacted =                  /* 24b/BDW; 26b/CHV */
+      (brw_inst_bits(src, 34, 32) << 21) | /*  3b */
+      (brw_inst_bits(src, 28,  8));        /* 21b */
+
+   if (brw->is_cherryview)
+      uncompacted |= brw_inst_bits(src, 36, 35) << 24; /* 2b */
+
+   for (int i = 0; i < ARRAY_SIZE(gen8_3src_control_index_table); i++) {
+      if (gen8_3src_control_index_table[i] == uncompacted) {
+         brw_compact_inst_set_3src_control_index(dst, i);
+	 return true;
+      }
+   }
+
+   return false;
+}
+
+static bool
+set_3src_source_index(struct brw_context *brw, brw_compact_inst *dst, brw_inst *src)
+{
+   assert(brw->gen >= 8);
+
+   uint64_t uncompacted =                    /* 46b/BDW; 49b/CHV */
+      (brw_inst_bits(src,  83,  83) << 43) | /*  1b */
+      (brw_inst_bits(src, 114, 107) << 35) | /*  8b */
+      (brw_inst_bits(src,  93,  86) << 27) | /*  8b */
+      (brw_inst_bits(src,  72,  65) << 19) | /*  8b */
+      (brw_inst_bits(src,  55,  37));        /* 19b */
+
+   if (brw->is_cherryview) {
+      uncompacted |=
+         (brw_inst_bits(src, 126, 125) << 47) | /* 2b */
+         (brw_inst_bits(src, 105, 104) << 45) | /* 2b */
+         (brw_inst_bits(src,  84,  84) << 44);  /* 1b */
+   } else {
+      uncompacted |=
+         (brw_inst_bits(src, 125, 125) << 45) | /* 1b */
+         (brw_inst_bits(src, 104, 104) << 44);  /* 1b */
+   }
+
+   for (int i = 0; i < ARRAY_SIZE(gen8_3src_source_index_table); i++) {
+      if (gen8_3src_source_index_table[i] == uncompacted) {
+         brw_compact_inst_set_3src_source_index(dst, i);
+	 return true;
+      }
+   }
+
+   return false;
+}
+
+static bool
+brw_try_compact_3src_instruction(struct brw_context *brw, brw_compact_inst *dst,
+                                 brw_inst *src)
+{
+   assert(brw->gen >= 8);
+
+#define compact(field) \
+   brw_compact_inst_set_3src_##field(dst, brw_inst_3src_##field(brw, src))
+
+   compact(opcode);
+
+   if (!set_3src_control_index(brw, dst, src))
+      return false;
+
+   if (!set_3src_source_index(brw, dst, src))
+      return false;
+
+   compact(dst_reg_nr);
+   compact(src0_rep_ctrl);
+   brw_compact_inst_set_3src_cmpt_control(dst, true);
+   compact(debug_control);
+   compact(saturate);
+   compact(src1_rep_ctrl);
+   compact(src2_rep_ctrl);
+   compact(src0_reg_nr);
+   compact(src1_reg_nr);
+   compact(src2_reg_nr);
+   compact(src0_subreg_nr);
+   compact(src1_subreg_nr);
+   compact(src2_subreg_nr);
+
+#undef compact
+
+   return true;
+}
+
 /* Compacted instructions have 12-bits for immediate sources, and a 13th bit
  * that's replicated through the high 20 bits.
  *
@@ -450,6 +716,13 @@ is_compactable_immediate(unsigned imm)
 
    /* We get one bit replicated through the top 20 bits. */
    return imm == 0 || imm == 0xfffff000;
+}
+
+/* Returns whether an opcode takes three sources. */
+static bool
+is_3src(uint32_t op)
+{
+   return opcode_descs[op].nsrc == 3;
 }
 
 /**
@@ -474,6 +747,16 @@ brw_try_compact_instruction(struct brw_context *brw, brw_compact_inst *dst,
        * to be able to handle compacted flow control instructions..
        */
       return false;
+   }
+
+   if (brw->gen >= 8 && is_3src(brw_inst_opcode(brw, src))) {
+      memset(&temp, 0, sizeof(temp));
+      if (brw_try_compact_3src_instruction(brw, &temp, src)) {
+         *dst = temp;
+         return true;
+      } else {
+         return false;
+      }
    }
 
    bool is_immediate =
@@ -525,11 +808,19 @@ set_uncompacted_control(struct brw_context *brw, brw_inst *dst,
    uint32_t uncompacted =
       control_index_table[brw_compact_inst_control_index(src)];
 
-   brw_inst_set_bits(dst, 31, 31, (uncompacted >> 16) & 0x1);
-   brw_inst_set_bits(dst, 23,  8, (uncompacted & 0xffff));
+   if (brw->gen >= 8) {
+      brw_inst_set_bits(dst, 33, 31, (uncompacted >> 16));
+      brw_inst_set_bits(dst, 23, 12, (uncompacted >>  4) & 0xfff);
+      brw_inst_set_bits(dst, 10,  9, (uncompacted >>  2) & 0x3);
+      brw_inst_set_bits(dst, 34, 34, (uncompacted >>  1) & 0x1);
+      brw_inst_set_bits(dst,  8,  8, (uncompacted >>  0) & 0x1);
+   } else {
+      brw_inst_set_bits(dst, 31, 31, (uncompacted >> 16) & 0x1);
+      brw_inst_set_bits(dst, 23,  8, (uncompacted & 0xffff));
 
-   if (brw->gen >= 7)
-      brw_inst_set_bits(dst, 90, 89, uncompacted >> 17);
+      if (brw->gen == 7)
+         brw_inst_set_bits(dst, 90, 89, uncompacted >> 17);
+   }
 }
 
 static void
@@ -538,8 +829,14 @@ set_uncompacted_datatype(struct brw_context *brw, brw_inst *dst,
 {
    uint32_t uncompacted = datatype_table[brw_compact_inst_datatype_index(src)];
 
-   brw_inst_set_bits(dst, 63, 61, (uncompacted >> 15));
-   brw_inst_set_bits(dst, 46, 32, (uncompacted & 0x7fff));
+   if (brw->gen >= 8) {
+      brw_inst_set_bits(dst, 63, 61, (uncompacted >> 18));
+      brw_inst_set_bits(dst, 94, 89, (uncompacted >> 12) & 0x3f);
+      brw_inst_set_bits(dst, 46, 35, (uncompacted >>  0) & 0xfff);
+   } else {
+      brw_inst_set_bits(dst, 63, 61, (uncompacted >> 15));
+      brw_inst_set_bits(dst, 46, 32, (uncompacted & 0x7fff));
+   }
 }
 
 static void
@@ -578,11 +875,88 @@ set_uncompacted_src1(struct brw_context *brw, brw_inst *dst,
    }
 }
 
+static void
+set_uncompacted_3src_control_index(struct brw_context *brw, brw_inst *dst,
+                                   brw_compact_inst *src)
+{
+   assert(brw->gen >= 8);
+
+   uint32_t compacted = brw_compact_inst_3src_control_index(src);
+   uint32_t uncompacted = gen8_3src_control_index_table[compacted];
+
+   brw_inst_set_bits(dst, 34, 32, (uncompacted >> 21) & 0x7);
+   brw_inst_set_bits(dst, 28,  8, (uncompacted >>  0) & 0x1fffff);
+
+   if (brw->is_cherryview)
+      brw_inst_set_bits(dst, 36, 35, (uncompacted >> 24) & 0x3);
+}
+
+static void
+set_uncompacted_3src_source_index(struct brw_context *brw, brw_inst *dst,
+                                  brw_compact_inst *src)
+{
+   assert(brw->gen >= 8);
+
+   uint32_t compacted = brw_compact_inst_3src_source_index(src);
+   uint64_t uncompacted = gen8_3src_source_index_table[compacted];
+
+   brw_inst_set_bits(dst,  83,  83, (uncompacted >> 43) & 0x1);
+   brw_inst_set_bits(dst, 114, 107, (uncompacted >> 35) & 0xff);
+   brw_inst_set_bits(dst,  93,  86, (uncompacted >> 27) & 0xff);
+   brw_inst_set_bits(dst,  72,  65, (uncompacted >> 19) & 0xff);
+   brw_inst_set_bits(dst,  55,  37, (uncompacted >>  0) & 0x7ffff);
+
+   if (brw->is_cherryview) {
+      brw_inst_set_bits(dst, 126, 125, (uncompacted >> 47) & 0x3);
+      brw_inst_set_bits(dst, 105, 104, (uncompacted >> 45) & 0x3);
+      brw_inst_set_bits(dst,  84,  84, (uncompacted >> 44) & 0x1);
+   } else {
+      brw_inst_set_bits(dst, 125, 125, (uncompacted >> 45) & 0x1);
+      brw_inst_set_bits(dst, 104, 104, (uncompacted >> 44) & 0x1);
+   }
+}
+
+static void
+brw_uncompact_3src_instruction(struct brw_context *brw, brw_inst *dst,
+                               brw_compact_inst *src)
+{
+   assert(brw->gen >= 8);
+
+#define uncompact(field) \
+   brw_inst_set_3src_##field(brw, dst, brw_compact_inst_3src_##field(src))
+
+   uncompact(opcode);
+
+   set_uncompacted_3src_control_index(brw, dst, src);
+   set_uncompacted_3src_source_index(brw, dst, src);
+
+   uncompact(dst_reg_nr);
+   uncompact(src0_rep_ctrl);
+   brw_inst_set_3src_cmpt_control(brw, dst, false);
+   uncompact(debug_control);
+   uncompact(saturate);
+   uncompact(src1_rep_ctrl);
+   uncompact(src2_rep_ctrl);
+   uncompact(src0_reg_nr);
+   uncompact(src1_reg_nr);
+   uncompact(src2_reg_nr);
+   uncompact(src0_subreg_nr);
+   uncompact(src1_subreg_nr);
+   uncompact(src2_subreg_nr);
+
+#undef uncompact
+}
+
 void
 brw_uncompact_instruction(struct brw_context *brw, brw_inst *dst,
                           brw_compact_inst *src)
 {
    memset(dst, 0, sizeof(*dst));
+
+   if (brw->gen >= 8 && is_3src(brw_compact_inst_3src_opcode(src))) {
+      brw_uncompact_3src_instruction(brw, dst, src);
+      return;
+   }
 
    brw_inst_set_opcode(brw, dst, brw_compact_inst_opcode(src));
    brw_inst_set_debug_control(brw, dst, brw_compact_inst_debug_control(src));
@@ -653,16 +1027,20 @@ static void
 update_uip_jip(struct brw_context *brw, brw_inst *insn,
                int this_old_ip, int *compacted_counts)
 {
-   int jip = brw_inst_jip(brw, insn);
-   jip -= compacted_between(this_old_ip, this_old_ip + jip, compacted_counts);
+   int scale = brw->gen >= 8 ? sizeof(brw_compact_inst) : 1;
+
+   int32_t jip = brw_inst_jip(brw, insn);
+   jip -= scale *
+      compacted_between(this_old_ip, this_old_ip + jip, compacted_counts);
    brw_inst_set_jip(brw, insn, jip);
 
    if (brw_inst_opcode(brw, insn) == BRW_OPCODE_ENDIF ||
        brw_inst_opcode(brw, insn) == BRW_OPCODE_WHILE)
       return;
 
-   int uip = brw_inst_uip(brw, insn);
-   uip -= compacted_between(this_old_ip, this_old_ip + uip, compacted_counts);
+   int32_t uip = brw_inst_uip(brw, insn);
+   uip -= scale *
+      compacted_between(this_old_ip, this_old_ip + uip, compacted_counts);
    brw_inst_set_uip(brw, insn, uip);
 }
 
@@ -677,8 +1055,18 @@ brw_init_compaction_tables(struct brw_context *brw)
    assert(gen7_datatype_table[ARRAY_SIZE(gen7_datatype_table) - 1] != 0);
    assert(gen7_subreg_table[ARRAY_SIZE(gen7_subreg_table) - 1] != 0);
    assert(gen7_src_index_table[ARRAY_SIZE(gen7_src_index_table) - 1] != 0);
+   assert(gen8_control_index_table[ARRAY_SIZE(gen8_control_index_table) - 1] != 0);
+   assert(gen8_datatype_table[ARRAY_SIZE(gen8_datatype_table) - 1] != 0);
+   assert(gen8_subreg_table[ARRAY_SIZE(gen8_subreg_table) - 1] != 0);
+   assert(gen8_src_index_table[ARRAY_SIZE(gen8_src_index_table) - 1] != 0);
 
    switch (brw->gen) {
+   case 8:
+      control_index_table = gen8_control_index_table;
+      datatype_table = gen8_datatype_table;
+      subreg_table = gen8_subreg_table;
+      src_index_table = gen8_src_index_table;
+      break;
    case 7:
       control_index_table = gen7_control_index_table;
       datatype_table = gen7_datatype_table;
@@ -711,7 +1099,7 @@ brw_compact_instructions(struct brw_compile *p, int start_offset,
     */
    int old_ip[(p->next_insn_offset - start_offset) / 8];
 
-   if (brw->gen < 6 || brw->gen >= 8)
+   if (brw->gen < 6)
       return;
 
    int src_offset;
@@ -789,14 +1177,14 @@ brw_compact_instructions(struct brw_compile *p, int start_offset,
       case BRW_OPCODE_ELSE:
       case BRW_OPCODE_ENDIF:
       case BRW_OPCODE_WHILE:
-         if (brw->gen == 6) {
+         if (brw->gen >= 7) {
+            update_uip_jip(brw, insn, this_old_ip, compacted_counts);
+         } else if (brw->gen == 6) {
             int gen6_jump_count = brw_inst_gen6_jump_count(brw, insn);
             target_old_ip = this_old_ip + gen6_jump_count;
             target_compacted_count = compacted_counts[target_old_ip];
             gen6_jump_count -= (target_compacted_count - this_compacted_count);
             brw_inst_set_gen6_jump_count(brw, insn, gen6_jump_count);
-         } else {
-            update_uip_jip(brw, insn, this_old_ip, compacted_counts);
          }
          break;
       }

@@ -314,10 +314,7 @@ vec4_generator::generate_tex(vec4_instruction *inst,
 
    assert(msg_type != -1);
 
-   assert(sampler_index.file == BRW_IMMEDIATE_VALUE);
    assert(sampler_index.type == BRW_REGISTER_TYPE_UD);
-
-   uint32_t sampler = sampler_index.dw1.ud;
 
    /* Load the message header if present.  If there's a texture offset, we need
     * to set it up explicitly and load the offset bitfield.  Otherwise, we can
@@ -344,22 +341,7 @@ vec4_generator::generate_tex(vec4_instruction *inst,
                     brw_imm_ud(inst->texture_offset));
          }
 
-         if (sampler >= 16) {
-            /* The "Sampler Index" field can only store values between 0 and 15.
-             * However, we can add an offset to the "Sampler State Pointer"
-             * field, effectively selecting a different set of 16 samplers.
-             *
-             * The "Sampler State Pointer" needs to be aligned to a 32-byte
-             * offset, and each sampler state is only 16-bytes, so we can't
-             * exclusively use the offset - we have to use both.
-             */
-            const int sampler_state_size = 16; /* 16 bytes */
-            assert(brw->gen >= 8 || brw->is_haswell);
-            brw_ADD(p,
-                    get_element_ud(header, 3),
-                    get_element_ud(brw_vec8_grf(0, 0), 3),
-                    brw_imm_ud(16 * (sampler / 16) * sampler_state_size));
-         }
+         brw_adjust_sampler_state_pointer(p, header, sampler_index, dst);
          brw_pop_insn_state(p);
       }
    }
@@ -378,25 +360,81 @@ vec4_generator::generate_tex(vec4_instruction *inst,
       break;
    }
 
-   uint32_t surface_index = ((inst->opcode == SHADER_OPCODE_TG4 ||
-      inst->opcode == SHADER_OPCODE_TG4_OFFSET)
-      ? prog_data->base.binding_table.gather_texture_start
-      : prog_data->base.binding_table.texture_start) + sampler;
+   uint32_t base_binding_table_index = (inst->opcode == SHADER_OPCODE_TG4 ||
+         inst->opcode == SHADER_OPCODE_TG4_OFFSET)
+         ? prog_data->base.binding_table.gather_texture_start
+         : prog_data->base.binding_table.texture_start;
 
-   brw_SAMPLE(p,
-	      dst,
-	      inst->base_mrf,
-	      src,
-              surface_index,
-	      sampler % 16,
-	      msg_type,
-	      1, /* response length */
-	      inst->mlen,
-	      inst->header_present,
-	      BRW_SAMPLER_SIMD_MODE_SIMD4X2,
-	      return_format);
+   if (sampler_index.file == BRW_IMMEDIATE_VALUE) {
+      uint32_t sampler = sampler_index.dw1.ud;
 
-   brw_mark_surface_used(&prog_data->base, surface_index);
+      brw_SAMPLE(p,
+                 dst,
+                 inst->base_mrf,
+                 src,
+                 sampler + base_binding_table_index,
+                 sampler % 16,
+                 msg_type,
+                 1, /* response length */
+                 inst->mlen,
+                 inst->header_present,
+                 BRW_SAMPLER_SIMD_MODE_SIMD4X2,
+                 return_format);
+
+      brw_mark_surface_used(&prog_data->base, sampler + base_binding_table_index);
+   } else {
+      /* Non-constant sampler index. */
+      /* Note: this clobbers `dst` as a temporary before emitting the send */
+
+      struct brw_reg addr = vec1(retype(brw_address_reg(0), BRW_REGISTER_TYPE_UD));
+      struct brw_reg temp = vec1(retype(dst, BRW_REGISTER_TYPE_UD));
+
+      struct brw_reg sampler_reg = vec1(retype(sampler_index, BRW_REGISTER_TYPE_UD));
+
+      brw_push_insn_state(p);
+      brw_set_default_mask_control(p, BRW_MASK_DISABLE);
+      brw_set_default_access_mode(p, BRW_ALIGN_1);
+
+      /* Some care required: `sampler` and `temp` may alias:
+       *    addr = sampler & 0xff
+       *    temp = (sampler << 8) & 0xf00
+       *    addr = addr | temp
+       */
+      brw_ADD(p, addr, sampler_reg, brw_imm_ud(base_binding_table_index));
+      brw_SHL(p, temp, sampler_reg, brw_imm_ud(8u));
+      brw_AND(p, temp, temp, brw_imm_ud(0x0f00));
+      brw_AND(p, addr, addr, brw_imm_ud(0x0ff));
+      brw_OR(p, addr, addr, temp);
+
+      /* a0.0 |= <descriptor> */
+      brw_inst *insn_or = brw_next_insn(p, BRW_OPCODE_OR);
+      brw_set_sampler_message(p, insn_or,
+                              0 /* surface */,
+                              0 /* sampler */,
+                              msg_type,
+                              1 /* rlen */,
+                              inst->mlen /* mlen */,
+                              inst->header_present /* header */,
+                              BRW_SAMPLER_SIMD_MODE_SIMD4X2,
+                              return_format);
+      brw_inst_set_exec_size(p->brw, insn_or, BRW_EXECUTE_1);
+      brw_inst_set_src1_reg_type(p->brw, insn_or, BRW_REGISTER_TYPE_UD);
+      brw_set_src0(p, insn_or, addr);
+      brw_set_dest(p, insn_or, addr);
+
+
+      /* dst = send(offset, a0.0) */
+      brw_inst *insn_send = brw_next_insn(p, BRW_OPCODE_SEND);
+      brw_set_dest(p, insn_send, dst);
+      brw_set_src0(p, insn_send, src);
+      brw_set_indirect_send_descriptor(p, insn_send, BRW_SFID_SAMPLER, addr);
+
+      brw_pop_insn_state(p);
+
+      /* visitor knows more than we do about the surface limit required,
+       * so has already done marking.
+       */
+   }
 }
 
 void
@@ -437,7 +475,7 @@ vec4_generator::generate_gs_thread_end(vec4_instruction *inst)
                  inst->base_mrf, /* starting mrf reg nr */
                  src,
                  BRW_URB_WRITE_EOT,
-                 1,              /* message len */
+                 brw->gen >= 8 ? 2 : 1,/* message len */
                  0,              /* response len */
                  0,              /* urb destination offset */
                  BRW_URB_SWIZZLE_INTERLEAVE);
@@ -480,25 +518,32 @@ vec4_generator::generate_gs_set_vertex_count(struct brw_reg dst,
                                              struct brw_reg src)
 {
    brw_push_insn_state(p);
-   brw_set_default_access_mode(p, BRW_ALIGN_1);
    brw_set_default_mask_control(p, BRW_MASK_DISABLE);
 
-   /* If we think of the src and dst registers as composed of 8 DWORDs each,
-    * we want to pick up the contents of DWORDs 0 and 4 from src, truncate
-    * them to WORDs, and then pack them into DWORD 2 of dst.
-    *
-    * It's easier to get the EU to do this if we think of the src and dst
-    * registers as composed of 16 WORDS each; then, we want to pick up the
-    * contents of WORDs 0 and 8 from src, and pack them into WORDs 4 and 5 of
-    * dst.
-    *
-    * We can do that by the following EU instruction:
-    *
-    *     mov (2) dst.4<1>:uw src<8;1,0>:uw   { Align1, Q1, NoMask }
-    */
-   brw_MOV(p, suboffset(stride(retype(dst, BRW_REGISTER_TYPE_UW), 2, 2, 1), 4),
-           stride(retype(src, BRW_REGISTER_TYPE_UW), 8, 1, 0));
-   brw_set_default_access_mode(p, BRW_ALIGN_16);
+   if (brw->gen >= 8) {
+      /* Move the vertex count into the second MRF for the EOT write. */
+      brw_MOV(p, retype(brw_message_reg(dst.nr + 1), BRW_REGISTER_TYPE_UD),
+              src);
+   } else {
+      /* If we think of the src and dst registers as composed of 8 DWORDs each,
+       * we want to pick up the contents of DWORDs 0 and 4 from src, truncate
+       * them to WORDs, and then pack them into DWORD 2 of dst.
+       *
+       * It's easier to get the EU to do this if we think of the src and dst
+       * registers as composed of 16 WORDS each; then, we want to pick up the
+       * contents of WORDs 0 and 8 from src, and pack them into WORDs 4 and 5
+       * of dst.
+       *
+       * We can do that by the following EU instruction:
+       *
+       *     mov (2) dst.4<1>:uw src<8;1,0>:uw   { Align1, Q1, NoMask }
+       */
+      brw_set_default_access_mode(p, BRW_ALIGN_1);
+      brw_MOV(p,
+              suboffset(stride(retype(dst, BRW_REGISTER_TYPE_UW), 2, 2, 1), 4),
+              stride(retype(src, BRW_REGISTER_TYPE_UW), 8, 1, 0));
+      brw_set_default_access_mode(p, BRW_ALIGN_16);
+   }
    brw_pop_insn_state(p);
 }
 
@@ -787,7 +832,6 @@ vec4_generator::generate_pull_constant_load(vec4_instruction *inst,
                                             struct brw_reg index,
                                             struct brw_reg offset)
 {
-   assert(brw->gen <= 7);
    assert(index.file == BRW_IMMEDIATE_VALUE &&
 	  index.type == BRW_REGISTER_TYPE_UD);
    uint32_t surf_index = index.dw1.ud;
@@ -834,23 +878,70 @@ vec4_generator::generate_pull_constant_load_gen7(vec4_instruction *inst,
                                                  struct brw_reg surf_index,
                                                  struct brw_reg offset)
 {
-   assert(surf_index.file == BRW_IMMEDIATE_VALUE &&
-	  surf_index.type == BRW_REGISTER_TYPE_UD);
+   assert(surf_index.type == BRW_REGISTER_TYPE_UD);
 
-   brw_inst *insn = brw_next_insn(p, BRW_OPCODE_SEND);
-   brw_set_dest(p, insn, dst);
-   brw_set_src0(p, insn, offset);
-   brw_set_sampler_message(p, insn,
-                           surf_index.dw1.ud,
-                           0, /* LD message ignores sampler unit */
-                           GEN5_SAMPLER_MESSAGE_SAMPLE_LD,
-                           1, /* rlen */
-                           1, /* mlen */
-                           false, /* no header */
-                           BRW_SAMPLER_SIMD_MODE_SIMD4X2,
-                           0);
+   if (surf_index.file == BRW_IMMEDIATE_VALUE) {
 
-   brw_mark_surface_used(&prog_data->base, surf_index.dw1.ud);
+      brw_inst *insn = brw_next_insn(p, BRW_OPCODE_SEND);
+      brw_set_dest(p, insn, dst);
+      brw_set_src0(p, insn, offset);
+      brw_set_sampler_message(p, insn,
+                              surf_index.dw1.ud,
+                              0, /* LD message ignores sampler unit */
+                              GEN5_SAMPLER_MESSAGE_SAMPLE_LD,
+                              1, /* rlen */
+                              1, /* mlen */
+                              false, /* no header */
+                              BRW_SAMPLER_SIMD_MODE_SIMD4X2,
+                              0);
+
+      brw_mark_surface_used(&prog_data->base, surf_index.dw1.ud);
+
+   } else {
+
+      struct brw_reg addr = vec1(retype(brw_address_reg(0), BRW_REGISTER_TYPE_UD));
+
+      brw_push_insn_state(p);
+      brw_set_default_mask_control(p, BRW_MASK_DISABLE);
+      brw_set_default_access_mode(p, BRW_ALIGN_1);
+
+      /* a0.0 = surf_index & 0xff */
+      brw_inst *insn_and = brw_next_insn(p, BRW_OPCODE_AND);
+      brw_inst_set_exec_size(p->brw, insn_and, BRW_EXECUTE_1);
+      brw_set_dest(p, insn_and, addr);
+      brw_set_src0(p, insn_and, vec1(retype(surf_index, BRW_REGISTER_TYPE_UD)));
+      brw_set_src1(p, insn_and, brw_imm_ud(0x0ff));
+
+
+      /* a0.0 |= <descriptor> */
+      brw_inst *insn_or = brw_next_insn(p, BRW_OPCODE_OR);
+      brw_set_sampler_message(p, insn_or,
+                              0 /* surface */,
+                              0 /* sampler */,
+                              GEN5_SAMPLER_MESSAGE_SAMPLE_LD,
+                              1 /* rlen */,
+                              1 /* mlen */,
+                              false /* header */,
+                              BRW_SAMPLER_SIMD_MODE_SIMD4X2,
+                              0);
+      brw_inst_set_exec_size(p->brw, insn_or, BRW_EXECUTE_1);
+      brw_inst_set_src1_reg_type(p->brw, insn_or, BRW_REGISTER_TYPE_UD);
+      brw_set_src0(p, insn_or, addr);
+      brw_set_dest(p, insn_or, addr);
+
+
+      /* dst = send(offset, a0.0) */
+      brw_inst *insn_send = brw_next_insn(p, BRW_OPCODE_SEND);
+      brw_set_dest(p, insn_send, dst);
+      brw_set_src0(p, insn_send, offset);
+      brw_set_indirect_send_descriptor(p, insn_send, BRW_SFID_SAMPLER, addr);
+
+      brw_pop_insn_state(p);
+
+      /* visitor knows more than we do about the surface limit required,
+       * so has already done marking.
+       */
+   }
 }
 
 void
@@ -1223,16 +1314,12 @@ vec4_generator::generate_vec4_instruction(vec4_instruction *instruction,
 }
 
 void
-vec4_generator::generate_code(exec_list *instructions)
+vec4_generator::generate_code(const cfg_t *cfg)
 {
    struct annotation_info annotation;
    memset(&annotation, 0, sizeof(annotation));
 
-   cfg_t *cfg = NULL;
-   if (unlikely(debug_flag))
-      cfg = new(mem_ctx) cfg_t(instructions);
-
-   foreach_in_list(vec4_instruction, inst, instructions) {
+   foreach_block_and_inst (block, vec4_instruction, inst, cfg) {
       struct brw_reg src[3], dst;
 
       if (unlikely(debug_flag))
@@ -1292,11 +1379,11 @@ vec4_generator::generate_code(exec_list *instructions)
 }
 
 const unsigned *
-vec4_generator::generate_assembly(exec_list *instructions,
+vec4_generator::generate_assembly(const cfg_t *cfg,
                                   unsigned *assembly_size)
 {
    brw_set_default_access_mode(p, BRW_ALIGN_16);
-   generate_code(instructions);
+   generate_code(cfg);
 
    return brw_get_program(p, assembly_size);
 }

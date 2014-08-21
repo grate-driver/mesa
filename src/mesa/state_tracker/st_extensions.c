@@ -458,7 +458,9 @@ void st_init_extensions(struct pipe_screen *screen,
       { o(ARB_texture_multisample),          PIPE_CAP_TEXTURE_MULTISAMPLE              },
       { o(ARB_texture_query_lod),            PIPE_CAP_TEXTURE_QUERY_LOD                },
       { o(ARB_sample_shading),               PIPE_CAP_SAMPLE_SHADING                   },
-      { o(ARB_draw_indirect),                PIPE_CAP_DRAW_INDIRECT                    }
+      { o(ARB_draw_indirect),                PIPE_CAP_DRAW_INDIRECT                    },
+      { o(ARB_derivative_control),           PIPE_CAP_TGSI_FS_FINE_DERIVATIVE          },
+      { o(ARB_conditional_render_inverted),  PIPE_CAP_CONDITIONAL_RENDER_INVERTED      },
    };
 
    /* Required: render target and sampler support */
@@ -516,6 +518,12 @@ void st_init_extensions(struct pipe_screen *screen,
           PIPE_FORMAT_DXT1_RGBA,
           PIPE_FORMAT_DXT3_RGBA,
           PIPE_FORMAT_DXT5_RGBA } },
+
+      { { o(ARB_texture_compression_bptc) },
+        { PIPE_FORMAT_BPTC_RGBA_UNORM,
+          PIPE_FORMAT_BPTC_SRGBA,
+          PIPE_FORMAT_BPTC_RGB_FLOAT,
+          PIPE_FORMAT_BPTC_RGB_UFLOAT } },
 
       { { o(EXT_texture_shared_exponent) },
         { PIPE_FORMAT_R9G9B9E5_FLOAT } },
@@ -650,6 +658,9 @@ void st_init_extensions(struct pipe_screen *screen,
        options->force_glsl_version <= consts->GLSLVersion) {
       consts->ForceGLSLVersion = options->force_glsl_version;
    }
+
+   if (glsl_feature_level >= 400)
+      extensions->ARB_gpu_shader5 = GL_TRUE;
 
    /* This extension needs full OpenGL 3.2, but we don't know if that's
     * supported at this point. Only check the GLSL version. */

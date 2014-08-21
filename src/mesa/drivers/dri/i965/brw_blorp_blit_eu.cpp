@@ -24,6 +24,7 @@
 #include "util/ralloc.h"
 #include "brw_blorp_blit_eu.h"
 #include "brw_blorp.h"
+#include "brw_cfg.h"
 
 brw_blorp_eu_emitter::brw_blorp_eu_emitter(struct brw_context *brw,
                                            bool debug_flag)
@@ -31,7 +32,7 @@ brw_blorp_eu_emitter::brw_blorp_eu_emitter(struct brw_context *brw,
      generator(brw, mem_ctx,
                rzalloc(mem_ctx, struct brw_wm_prog_key),
                rzalloc(mem_ctx, struct brw_wm_prog_data),
-               NULL, NULL, false, false, debug_flag)
+               NULL, NULL, false, debug_flag)
 {
 }
 
@@ -43,7 +44,8 @@ brw_blorp_eu_emitter::~brw_blorp_eu_emitter()
 const unsigned *
 brw_blorp_eu_emitter::get_program(unsigned *program_size)
 {
-   return generator.generate_assembly(NULL, &insts, program_size);
+   cfg_t cfg(&insts);
+   return generator.generate_assembly(NULL, &cfg, program_size);
 }
 
 /**

@@ -1459,6 +1459,10 @@ ir_to_mesa_visitor::visit(ir_expression *ir)
    case ir_unop_interpolate_at_centroid:
    case ir_binop_interpolate_at_offset:
    case ir_binop_interpolate_at_sample:
+   case ir_unop_dFdx_coarse:
+   case ir_unop_dFdx_fine:
+   case ir_unop_dFdy_coarse:
+   case ir_unop_dFdy_fine:
       assert(!"not supported");
       break;
 
@@ -2428,8 +2432,7 @@ add_uniform_to_shader::visit_field(const glsl_type *type, const char *name,
    }
 
    gl_register_file file;
-   if (type->is_sampler() ||
-       (type->is_array() && type->fields.array->is_sampler())) {
+   if (type->without_array()->is_sampler()) {
       file = PROGRAM_SAMPLER;
    } else {
       file = PROGRAM_UNIFORM;

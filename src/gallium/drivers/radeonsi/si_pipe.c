@@ -26,7 +26,6 @@
 #include "sid.h"
 
 #include "radeon/radeon_uvd.h"
-#include "util/u_blitter.h"
 #include "util/u_memory.h"
 #include "util/u_simple_shaders.h"
 #include "vl/vl_decoder.h"
@@ -128,6 +127,7 @@ static struct pipe_context *si_create_context(struct pipe_screen *screen, void *
 	sctx->blitter = util_blitter_create(&sctx->b.b);
 	if (sctx->blitter == NULL)
 		goto fail;
+	sctx->blitter->draw_rectangle = r600_draw_rectangle;
 
 	sctx->dummy_pixel_shader =
 		util_make_fragment_cloneinput_shader(&sctx->b.b, 0,
@@ -254,6 +254,8 @@ static int si_get_param(struct pipe_screen* pscreen, enum pipe_cap param)
 	case PIPE_CAP_FAKE_SW_MSAA:
 	case PIPE_CAP_TEXTURE_GATHER_OFFSETS:
 	case PIPE_CAP_TGSI_VS_WINDOW_SPACE_POSITION:
+	case PIPE_CAP_TGSI_FS_FINE_DERIVATIVE:
+	case PIPE_CAP_CONDITIONAL_RENDER_INVERTED:
 		return 0;
 
 	case PIPE_CAP_TEXTURE_BORDER_COLOR_QUIRK:
@@ -309,6 +311,17 @@ static int si_get_param(struct pipe_screen* pscreen, enum pipe_cap param)
 
 	case PIPE_CAP_ENDIANNESS:
 		return PIPE_ENDIAN_LITTLE;
+
+	case PIPE_CAP_VENDOR_ID:
+		return 0x1002;
+	case PIPE_CAP_DEVICE_ID:
+		return sscreen->b.info.pci_id;
+	case PIPE_CAP_ACCELERATED:
+		return 1;
+	case PIPE_CAP_VIDEO_MEMORY:
+		return sscreen->b.info.vram_size >> 20;
+	case PIPE_CAP_UMA:
+		return 0;
 	}
 	return 0;
 }
@@ -328,6 +341,13 @@ static int si_get_shader_param(struct pipe_screen* pscreen, unsigned shader, enu
 		case PIPE_SHADER_CAP_DOUBLES:
 			return 0; /* XXX: Enable doubles once the compiler can
 			             handle them. */
+		case PIPE_SHADER_CAP_MAX_CONST_BUFFER_SIZE: {
+			uint64_t max_const_buffer_size;
+			pscreen->get_compute_param(pscreen,
+				PIPE_COMPUTE_CAP_MAX_MEM_ALLOC_SIZE,
+				&max_const_buffer_size);
+			return max_const_buffer_size;
+		}
 		default:
 			return 0;
 		}
