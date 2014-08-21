@@ -38,7 +38,7 @@ Build-Depends:
  libudev-dev [linux-any],
  flex,
  bison,
- llvm-3.5-dev [amd64 i386 kfreebsd-amd64 kfreebsd-i386 armhf],
+ llvm-3.4-dev [amd64 i386 kfreebsd-amd64 kfreebsd-i386 armhf],
  libelf-dev [amd64 i386 kfreebsd-amd64 kfreebsd-i386 armhf],
  libwayland-dev (>= 1.2.0) [linux-any],
  libmirclient-dev [!arm64 !powerpc !ppc64 !ppc64el],
