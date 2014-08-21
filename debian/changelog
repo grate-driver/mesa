@@ -1,9 +1,9 @@
-mesa (10.2.6-1) UNRELEASED; urgency=low
+mesa (10.2.6-1) unstable; urgency=medium
 
   * New upstream release.
   * Drop x32-updates.diff, upstream.
 
- -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Thu, 21 Aug 2014 15:04:25 +0200
+ -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Thu, 21 Aug 2014 15:06:36 +0200
 
 mesa (10.2.5-1) unstable; urgency=medium
 
