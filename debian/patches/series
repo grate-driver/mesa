@@ -1,5 +1,4 @@
 07_gallium-fix-build-failure-on-powerpcspe.diff
-x32-updates.diff
 
 # Ubuntu patches.
 117-static-gallium.patch
