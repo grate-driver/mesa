@@ -1,4 +1,4 @@
-mesa (10.2.6-1ubuntu1) UNRELEASED; urgency=low
+mesa (10.2.6-1ubuntu1) utopic; urgency=medium
 
   * Drop 101_ubuntu_hidden_glname.patch.
     - 8 years old patch supposedly to fix glx-tls, but if it was
@@ -6,7 +6,7 @@ mesa (10.2.6-1ubuntu1) UNRELEASED; urgency=low
   * Rebuild against llvm 3.5-rc3.
   * Add explicit depends on llvm 3.5-rc3 for libgl1-mesa-dri.
 
- -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Tue, 12 Aug 2014 15:00:21 +0200
+ -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Thu, 21 Aug 2014 15:27:00 +0200
 
 mesa (10.2.6-1) unstable; urgency=medium
 
