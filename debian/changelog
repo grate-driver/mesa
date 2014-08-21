@@ -1,3 +1,9 @@
+mesa (10.2.6-1ubuntu2) utopic; urgency=medium
+
+  * Fixup typo.
+
+ -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Thu, 21 Aug 2014 18:39:52 +0200
+
 mesa (10.2.6-1ubuntu1) utopic; urgency=medium
 
   * Drop 101_ubuntu_hidden_glname.patch.

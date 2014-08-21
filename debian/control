@@ -552,7 +552,7 @@ Priority: optional
 Architecture: any
 Pre-Depends: ${misc:Pre-Depends}
 Depends:
- libllvm-3.5 (>= 1:3.5~+rc3) [amd64 i386],
+ libllvm3.5 (>= 1:3.5~+rc3) [amd64 i386],
  ${shlibs:Depends},
  ${misc:Depends}
 Recommends: libtxc-dxtn-s2tc0 | libtxc-dxtn0
