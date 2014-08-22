@@ -1,4 +1,4 @@
-mesa (10.3~git20140812-1) UNRELEASED; urgency=low
+mesa (10.3~rc1-1) UNRELEASED; urgency=low
 
   * Build with llvm 3.5.
 
