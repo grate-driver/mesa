@@ -5,6 +5,7 @@ mesa (10.3~rc1-1) UNRELEASED; urgency=low
 
   [ Timo Aaltonen ]
   * mesa-common-dev: Add glcorearb.h.
+  * not-installed: Skip libglapi.so.
 
  -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Tue, 12 Aug 2014 09:38:49 +0200
 
