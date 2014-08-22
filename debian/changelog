@@ -1,3 +1,9 @@
+mesa (10.2.6-1ubuntu3) utopic; urgency=medium
+
+  * And revert again for now.. (LP: #1360241)
+
+ -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Fri, 22 Aug 2014 15:02:30 +0200
+
 mesa (10.2.6-1ubuntu2) utopic; urgency=medium
 
   * Fixup typo.
