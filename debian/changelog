@@ -1,6 +1,10 @@
 mesa (10.3~rc1-1) UNRELEASED; urgency=low
 
+  [ Maarten Lankhorst ]
   * Build with llvm 3.5.
+
+  [ Timo Aaltonen ]
+  * mesa-common-dev: Add glcorearb.h.
 
  -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Tue, 12 Aug 2014 09:38:49 +0200
 
