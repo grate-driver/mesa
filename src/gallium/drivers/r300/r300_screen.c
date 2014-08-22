@@ -178,6 +178,8 @@ static int r300_get_param(struct pipe_screen* pscreen, enum pipe_cap param)
         case PIPE_CAP_TEXTURE_GATHER_OFFSETS:
         case PIPE_CAP_TGSI_VS_WINDOW_SPACE_POSITION:
         case PIPE_CAP_DRAW_INDIRECT:
+        case PIPE_CAP_TGSI_FS_FINE_DERIVATIVE:
+        case PIPE_CAP_CONDITIONAL_RENDER_INVERTED:
             return 0;
 
         /* SWTCL-only features. */
@@ -208,6 +210,17 @@ static int r300_get_param(struct pipe_screen* pscreen, enum pipe_cap param)
 
         case PIPE_CAP_MAX_VIEWPORTS:
             return 1;
+
+        case PIPE_CAP_VENDOR_ID:
+                return 0x1002;
+        case PIPE_CAP_DEVICE_ID:
+                return r300screen->info.pci_id;
+        case PIPE_CAP_ACCELERATED:
+                return 1;
+        case PIPE_CAP_VIDEO_MEMORY:
+                return r300screen->info.vram_size >> 20;
+        case PIPE_CAP_UMA:
+                return 0;
     }
     return 0;
 }

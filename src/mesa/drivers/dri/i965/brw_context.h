@@ -41,6 +41,7 @@
 #include "main/mtypes.h"
 #include "brw_structs.h"
 #include "intel_aub.h"
+#include "program/prog_parameter.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -309,8 +310,8 @@ struct brw_stage_prog_data {
     * These must be the last fields of the struct (see
     * brw_stage_prog_data_compare()).
     */
-   const float **param;
-   const float **pull_param;
+   const gl_constant_value **param;
+   const gl_constant_value **pull_param;
 };
 
 /* Data about a particular attempt to compile a program.  Note that
@@ -340,6 +341,7 @@ struct brw_wm_prog_data {
       /** @} */
    } binding_table;
 
+   bool no_8;
    bool dual_src_blend;
    bool uses_pos_offset;
    bool uses_omask;
@@ -1031,6 +1033,8 @@ struct brw_context
    bool has_compr4;
    bool has_negative_rhw_bug;
    bool has_pln;
+   bool no_simd8;
+   bool use_rep_send;
 
    /**
     * Some versions of Gen hardware don't do centroid interpolation correctly
@@ -1235,6 +1239,7 @@ struct brw_context
       uint32_t prog_offset;
       uint32_t state_offset;
       uint32_t vp_offset;
+      bool viewport_transform_enable;
    } sf;
 
    struct {
@@ -1248,6 +1253,7 @@ struct brw_context
        * Gen6.  See brw_update_null_renderbuffer_surface().
        */
       drm_intel_bo *multisampled_null_render_target_bo;
+      uint32_t fast_clear_op;
    } wm;
 
 
@@ -1353,6 +1359,8 @@ struct brw_context
       double report_time;
    } shader_time;
 
+   struct brw_fast_clear_state *fast_clear_state;
+
    __DRIcontext *driContext;
    struct intel_screen *intelScreen;
 };
@@ -1371,8 +1379,6 @@ extern void intelInitClearFuncs(struct dd_function_table *functions);
 extern const char *const brw_vendor_string;
 
 extern const char *brw_get_renderer_string(unsigned deviceID);
-
-extern void intelFinish(struct gl_context * ctx);
 
 enum {
    DRI_CONF_BO_REUSE_DISABLED,
@@ -1416,6 +1422,19 @@ void brw_meta_fbo_stencil_blit(struct brw_context *brw,
 void brw_meta_stencil_updownsample(struct brw_context *brw,
                                    struct intel_mipmap_tree *src,
                                    struct intel_mipmap_tree *dst);
+
+bool brw_meta_fast_clear(struct brw_context *brw,
+                         struct gl_framebuffer *fb,
+                         GLbitfield mask,
+                         bool partial_clear);
+
+void
+brw_meta_resolve_color(struct brw_context *brw,
+                       struct intel_mipmap_tree *mt);
+void
+brw_meta_fast_clear_free(struct brw_context *brw);
+
+
 /*======================================================================
  * brw_misc_state.c
  */
@@ -1743,6 +1762,16 @@ brw_emit_depth_stencil_hiz(struct brw_context *brw,
                            uint32_t tile_x, uint32_t tile_y);
 
 void
+gen6_emit_depth_stencil_hiz(struct brw_context *brw,
+                            struct intel_mipmap_tree *depth_mt,
+                            uint32_t depth_offset, uint32_t depthbuffer_format,
+                            uint32_t depth_surface_type,
+                            struct intel_mipmap_tree *stencil_mt,
+                            bool hiz, bool separate_stencil,
+                            uint32_t width, uint32_t height,
+                            uint32_t tile_x, uint32_t tile_y);
+
+void
 gen7_emit_depth_stencil_hiz(struct brw_context *brw,
                             struct intel_mipmap_tree *depth_mt,
                             uint32_t depth_offset, uint32_t depthbuffer_format,
@@ -1764,7 +1793,7 @@ gen8_emit_depth_stencil_hiz(struct brw_context *brw,
 void gen8_hiz_exec(struct brw_context *brw, struct intel_mipmap_tree *mt,
                    unsigned int level, unsigned int layer, enum gen6_hiz_op op);
 
-extern const GLuint prim_to_hw_prim[GL_TRIANGLE_STRIP_ADJACENCY+1];
+uint32_t get_hw_prim_for_gl_prim(int mode);
 
 void
 brw_setup_vec4_key_clip_info(struct brw_context *brw,

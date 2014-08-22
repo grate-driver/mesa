@@ -47,9 +47,12 @@ struct tgsi_to_qir {
         struct qreg *outputs;
         struct qreg *uniforms;
         struct qreg *consts;
+        struct qreg line_x, point_x, point_y;
+
         uint32_t num_consts;
 
         struct pipe_shader_state *shader_state;
+        struct vc4_key *key;
         struct vc4_fs_key *fs_key;
         struct vc4_vs_key *vs_key;
 
@@ -62,12 +65,17 @@ struct tgsi_to_qir {
 
 struct vc4_key {
         struct pipe_shader_state *shader_state;
+        enum pipe_format tex_format[VC4_MAX_TEXTURE_SAMPLERS];
 };
 
 struct vc4_fs_key {
         struct vc4_key base;
         enum pipe_format color_format;
         bool depth_enabled;
+        bool is_points;
+        bool is_lines;
+
+        struct pipe_rt_blend_state blend;
 };
 
 struct vc4_vs_key {
@@ -205,6 +213,27 @@ update_dst(struct tgsi_to_qir *trans, struct tgsi_full_instruction *tgsi_inst,
 };
 
 static struct qreg
+get_swizzled_channel(struct tgsi_to_qir *trans,
+                     struct qreg *srcs, int swiz)
+{
+        switch (swiz) {
+        default:
+        case UTIL_FORMAT_SWIZZLE_NONE:
+                fprintf(stderr, "warning: unknown swizzle\n");
+                /* FALLTHROUGH */
+        case UTIL_FORMAT_SWIZZLE_0:
+                return qir_uniform_f(trans, 0.0);
+        case UTIL_FORMAT_SWIZZLE_1:
+                return qir_uniform_f(trans, 1.0);
+        case UTIL_FORMAT_SWIZZLE_X:
+        case UTIL_FORMAT_SWIZZLE_Y:
+        case UTIL_FORMAT_SWIZZLE_Z:
+        case UTIL_FORMAT_SWIZZLE_W:
+                return srcs[swiz];
+        }
+}
+
+static struct qreg
 tgsi_to_qir_alu(struct tgsi_to_qir *trans,
                 struct tgsi_full_instruction *tgsi_inst,
                 enum qop op, struct qreg *src, int i)
@@ -298,6 +327,7 @@ tgsi_to_qir_tex(struct tgsi_to_qir *trans,
 
         struct qreg s = src[0 * 4 + 0];
         struct qreg t = src[0 * 4 + 1];
+        uint32_t unit = tgsi_inst->Src[1].Register.Index;
 
         if (tgsi_inst->Instruction.Opcode == TGSI_OPCODE_TXP) {
                 struct qreg proj = qir_RCP(c, src[0 * 4 + 3]);
@@ -310,23 +340,21 @@ tgsi_to_qir_tex(struct tgsi_to_qir *trans,
          * 1]).
          */
         if (tgsi_inst->Texture.Texture == TGSI_TEXTURE_RECT) {
-                uint32_t sampler = 0; /* XXX */
                 s = qir_FMUL(c, s,
                              get_temp_for_uniform(trans,
                                                   QUNIFORM_TEXRECT_SCALE_X,
-                                                  sampler));
+                                                  unit));
                 t = qir_FMUL(c, t,
                              get_temp_for_uniform(trans,
                                                   QUNIFORM_TEXRECT_SCALE_Y,
-                                                  sampler));
+                                                  unit));
         }
 
-        uint32_t tex_and_sampler = 0; /* XXX */
         qir_TEX_T(c, t, add_uniform(trans, QUNIFORM_TEXTURE_CONFIG_P0,
-                                    tex_and_sampler));
+                                    unit));
 
         struct qreg sampler_p1 = add_uniform(trans, QUNIFORM_TEXTURE_CONFIG_P1,
-                                             tex_and_sampler);
+                                             unit);
         if (tgsi_inst->Instruction.Opcode == TGSI_OPCODE_TXB) {
                 qir_TEX_B(c, src[0 * 4 + 3], sampler_p1);
                 qir_TEX_S(c, s, add_uniform(trans, QUNIFORM_CONSTANT, 0));
@@ -337,15 +365,32 @@ tgsi_to_qir_tex(struct tgsi_to_qir *trans,
         trans->num_texture_samples++;
         qir_emit(c, qir_inst(QOP_TEX_RESULT, c->undef, c->undef, c->undef));
 
+        struct qreg unpacked[4];
+        for (int i = 0; i < 4; i++)
+                unpacked[i] = qir_R4_UNPACK(c, i);
+
+        bool format_warned = false;
         for (int i = 0; i < 4; i++) {
                 if (!(tgsi_inst->Dst[0].Register.WriteMask & (1 << i)))
                         continue;
 
-                struct qreg dst = qir_get_temp(c);
-                qir_emit(c, qir_inst(QOP_R4_UNPACK_A + i,
-                                     dst,
-                                     c->undef, c->undef));
-                update_dst(trans, tgsi_inst, i, dst);
+                enum pipe_format format = trans->key->tex_format[unit];
+                const struct util_format_description *desc =
+                        util_format_description(format);
+
+                uint8_t swiz = desc->swizzle[i];
+                if (!format_warned &&
+                    swiz <= UTIL_FORMAT_SWIZZLE_W &&
+                    (desc->channel[swiz].type != UTIL_FORMAT_TYPE_UNSIGNED ||
+                     desc->channel[swiz].size != 8)) {
+                        fprintf(stderr,
+                                "tex channel %d unsupported type: %s\n",
+                                i, util_format_name(format));
+                        format_warned = true;
+                }
+
+                update_dst(trans, tgsi_inst, i,
+                           get_swizzled_channel(trans, unpacked, swiz));
         }
 }
 
@@ -388,6 +433,23 @@ tgsi_to_qir_frc(struct tgsi_to_qir *trans,
                        diff,
                        qir_FADD(c, diff, qir_uniform_f(trans, 1.0)),
                        diff);
+}
+
+/**
+ * Computes floor(x), which is tricky because our FTOI truncates (rounds to
+ * zero).
+ */
+static struct qreg
+tgsi_to_qir_flr(struct tgsi_to_qir *trans,
+                struct tgsi_full_instruction *tgsi_inst,
+                enum qop op, struct qreg *src, int i)
+{
+        struct qcompile *c = trans->c;
+        struct qreg trunc = qir_ITOF(c, qir_FTOI(c, src[0 * 4 + i]));
+        return qir_CMP(c,
+                       src[0 * 4 + i],
+                       qir_FSUB(c, trunc, qir_uniform_f(trans, 1.0)),
+                       trunc);
 }
 
 static struct qreg
@@ -537,35 +599,18 @@ emit_vertex_input(struct tgsi_to_qir *trans, int attr)
         for (int i = 0; i < 4; i++) {
                 uint8_t swiz = desc->swizzle[i];
 
-                switch (swiz) {
-                case UTIL_FORMAT_SWIZZLE_NONE:
-                        if (!format_warned) {
-                                fprintf(stderr,
-                                        "vtx element %d NONE swizzle: %s\n",
-                                        attr, util_format_name(format));
-                                format_warned = true;
-                        }
-                        /* FALLTHROUGH */
-                case UTIL_FORMAT_SWIZZLE_0:
-                        trans->inputs[attr * 4 + i] = qir_uniform_ui(trans, 0);
-                        break;
-                case UTIL_FORMAT_SWIZZLE_1:
-                        trans->inputs[attr * 4 + i] = qir_uniform_ui(trans,
-                                                                     fui(1.0));
-                        break;
-                default:
-                        if (!format_warned &&
-                            (desc->channel[swiz].type != UTIL_FORMAT_TYPE_FLOAT ||
-                             desc->channel[swiz].size != 32)) {
-                                fprintf(stderr,
-                                        "vtx element %d unsupported type: %s\n",
-                                        attr, util_format_name(format));
-                                format_warned = true;
-                        }
-
-                        trans->inputs[attr * 4 + i] = vpm_reads[swiz];
-                        break;
+                if (swiz <= UTIL_FORMAT_SWIZZLE_W &&
+                    !format_warned &&
+                    (desc->channel[swiz].type != UTIL_FORMAT_TYPE_FLOAT ||
+                     desc->channel[swiz].size != 32)) {
+                        fprintf(stderr,
+                                "vtx element %d unsupported type: %s\n",
+                                attr, util_format_name(format));
+                        format_warned = true;
                 }
+
+                trans->inputs[attr * 4 + i] =
+                        get_swizzled_channel(trans, vpm_reads, swiz);
         }
 }
 
@@ -583,20 +628,28 @@ emit_fragcoord_input(struct tgsi_to_qir *trans, int attr)
         trans->inputs[attr * 4 + 3] = qir_FRAG_RCP_W(c);
 }
 
+static struct qreg
+emit_fragment_varying(struct tgsi_to_qir *trans, int index)
+{
+        struct qcompile *c = trans->c;
+
+        struct qreg vary = {
+                QFILE_VARY,
+                index
+        };
+
+        /* XXX: multiply by W */
+        return qir_VARY_ADD_C(c, qir_MOV(c, vary));
+}
+
 static void
 emit_fragment_input(struct tgsi_to_qir *trans, int attr)
 {
         struct qcompile *c = trans->c;
 
         for (int i = 0; i < 4; i++) {
-                struct qreg vary = {
-                        QFILE_VARY,
-                        attr * 4 + i
-                };
-
-                /* XXX: multiply by W */
                 trans->inputs[attr * 4 + i] =
-                        qir_VARY_ADD_C(c, qir_MOV(c, vary));
+                        emit_fragment_varying(trans, attr * 4 + i);
                 c->num_inputs++;
         }
 }
@@ -665,6 +718,7 @@ emit_tgsi_instruction(struct tgsi_to_qir *trans,
                 [TGSI_OPCODE_POW] = { 0, tgsi_to_qir_pow },
                 [TGSI_OPCODE_TRUNC] = { 0, tgsi_to_qir_trunc },
                 [TGSI_OPCODE_FRC] = { 0, tgsi_to_qir_frc },
+                [TGSI_OPCODE_FLR] = { 0, tgsi_to_qir_flr },
                 [TGSI_OPCODE_SIN] = { 0, tgsi_to_qir_sin },
                 [TGSI_OPCODE_COS] = { 0, tgsi_to_qir_cos },
         };
@@ -733,6 +787,157 @@ parse_tgsi_immediate(struct tgsi_to_qir *trans, struct tgsi_full_immediate *imm)
         }
 }
 
+static struct qreg
+vc4_blend_channel(struct tgsi_to_qir *trans,
+                  struct qreg *dst,
+                  struct qreg *src,
+                  struct qreg val,
+                  unsigned factor,
+                  int channel)
+{
+        struct qcompile *c = trans->c;
+
+        switch(factor) {
+        case PIPE_BLENDFACTOR_ONE:
+                return val;
+        case PIPE_BLENDFACTOR_SRC_COLOR:
+                return qir_FMUL(c, val, src[channel]);
+        case PIPE_BLENDFACTOR_SRC_ALPHA:
+                return qir_FMUL(c, val, src[3]);
+        case PIPE_BLENDFACTOR_DST_ALPHA:
+                return qir_FMUL(c, val, dst[3]);
+        case PIPE_BLENDFACTOR_DST_COLOR:
+                return qir_FMUL(c, val, dst[channel]);
+        case PIPE_BLENDFACTOR_SRC_ALPHA_SATURATE:
+                return qir_FMIN(c, src[3], qir_FSUB(c,
+                                                    qir_uniform_f(trans, 1.0),
+                                                    dst[3]));
+        case PIPE_BLENDFACTOR_CONST_COLOR:
+                return qir_FMUL(c, val,
+                                get_temp_for_uniform(trans,
+                                                     QUNIFORM_BLEND_CONST_COLOR,
+                                                     channel));
+        case PIPE_BLENDFACTOR_CONST_ALPHA:
+                return qir_FMUL(c, val,
+                                get_temp_for_uniform(trans,
+                                                     QUNIFORM_BLEND_CONST_COLOR,
+                                                     3));
+        case PIPE_BLENDFACTOR_ZERO:
+                return qir_uniform_f(trans, 0.0);
+        case PIPE_BLENDFACTOR_INV_SRC_COLOR:
+                return qir_FMUL(c, val, qir_FSUB(c, qir_uniform_f(trans, 1.0),
+                                                 src[channel]));
+        case PIPE_BLENDFACTOR_INV_SRC_ALPHA:
+                return qir_FMUL(c, val, qir_FSUB(c, qir_uniform_f(trans, 1.0),
+                                                 src[3]));
+        case PIPE_BLENDFACTOR_INV_DST_ALPHA:
+                return qir_FMUL(c, val, qir_FSUB(c, qir_uniform_f(trans, 1.0),
+                                                 dst[3]));
+        case PIPE_BLENDFACTOR_INV_DST_COLOR:
+                return qir_FMUL(c, val, qir_FSUB(c, qir_uniform_f(trans, 1.0),
+                                                 dst[channel]));
+        case PIPE_BLENDFACTOR_INV_CONST_COLOR:
+                return qir_FMUL(c, val,
+                                qir_FSUB(c, qir_uniform_f(trans, 1.0),
+                                         get_temp_for_uniform(trans,
+                                                              QUNIFORM_BLEND_CONST_COLOR,
+                                                              channel)));
+        case PIPE_BLENDFACTOR_INV_CONST_ALPHA:
+                return qir_FMUL(c, val,
+                                qir_FSUB(c, qir_uniform_f(trans, 1.0),
+                                         get_temp_for_uniform(trans,
+                                                              QUNIFORM_BLEND_CONST_COLOR,
+                                                              3)));
+
+        default:
+        case PIPE_BLENDFACTOR_SRC1_COLOR:
+        case PIPE_BLENDFACTOR_SRC1_ALPHA:
+        case PIPE_BLENDFACTOR_INV_SRC1_COLOR:
+        case PIPE_BLENDFACTOR_INV_SRC1_ALPHA:
+                /* Unsupported. */
+                fprintf(stderr, "Unknown blend factor %d\n", factor);
+                return val;
+        }
+}
+
+static struct qreg
+vc4_blend_func(struct tgsi_to_qir *trans,
+               struct qreg src, struct qreg dst,
+               unsigned func)
+{
+        struct qcompile *c = trans->c;
+
+        switch (func) {
+        case PIPE_BLEND_ADD:
+                return qir_FADD(c, src, dst);
+        case PIPE_BLEND_SUBTRACT:
+                return qir_FSUB(c, src, dst);
+        case PIPE_BLEND_REVERSE_SUBTRACT:
+                return qir_FSUB(c, dst, src);
+        case PIPE_BLEND_MIN:
+                return qir_FMIN(c, src, dst);
+        case PIPE_BLEND_MAX:
+                return qir_FMAX(c, src, dst);
+
+        default:
+                /* Unsupported. */
+                fprintf(stderr, "Unknown blend func %d\n", func);
+                return src;
+
+        }
+}
+
+/**
+ * Implements fixed function blending in shader code.
+ *
+ * VC4 doesn't have any hardware support for blending.  Instead, you read the
+ * current contents of the destination from the tile buffer after having
+ * waited for the scoreboard (which is handled by vc4_qpu_emit.c), then do
+ * math using your output color and that destination value, and update the
+ * output color appropriately.
+ */
+static void
+vc4_blend(struct tgsi_to_qir *trans, struct qreg *result,
+          struct qreg *dst_color, struct qreg *src_color)
+{
+        struct pipe_rt_blend_state *blend = &trans->fs_key->blend;
+
+        if (!blend->blend_enable) {
+                for (int i = 0; i < 4; i++)
+                        result[i] = src_color[i];
+                return;
+        }
+
+        struct qreg src_blend[4], dst_blend[4];
+        for (int i = 0; i < 3; i++) {
+                src_blend[i] = vc4_blend_channel(trans,
+                                                 dst_color, src_color,
+                                                 src_color[i],
+                                                 blend->rgb_src_factor, i);
+                dst_blend[i] = vc4_blend_channel(trans,
+                                                 dst_color, src_color,
+                                                 dst_color[i],
+                                                 blend->rgb_dst_factor, i);
+        }
+        src_blend[3] = vc4_blend_channel(trans,
+                                         dst_color, src_color,
+                                         src_color[3],
+                                         blend->alpha_src_factor, 3);
+        dst_blend[3] = vc4_blend_channel(trans,
+                                         dst_color, src_color,
+                                         dst_color[3],
+                                         blend->alpha_dst_factor, 3);
+
+        for (int i = 0; i < 3; i++) {
+                result[i] = vc4_blend_func(trans,
+                                           src_blend[i], dst_blend[i],
+                                           blend->rgb_func);
+        }
+        result[3] = vc4_blend_func(trans,
+                                   src_blend[3], dst_blend[3],
+                                   blend->alpha_func);
+}
+
 static void
 emit_frag_end(struct tgsi_to_qir *trans)
 {
@@ -743,27 +948,52 @@ emit_frag_end(struct tgsi_to_qir *trans)
         const struct util_format_description *format_desc =
                 util_format_description(trans->fs_key->color_format);
 
+        struct qreg src_color[4] = {
+                trans->outputs[0], trans->outputs[1],
+                trans->outputs[2], trans->outputs[3],
+        };
+
+        struct qreg dst_color[4] = { c->undef, c->undef, c->undef, c->undef };
+        if (trans->fs_key->blend.blend_enable ||
+            trans->fs_key->blend.colormask != 0xf) {
+                qir_emit(c, qir_inst(QOP_TLB_COLOR_READ, c->undef,
+                                     c->undef, c->undef));
+                for (int i = 0; i < 4; i++) {
+                        dst_color[i] = qir_R4_UNPACK(c, i);
+
+                        /* XXX: Swizzles? */
+                }
+        }
+
+        struct qreg blend_color[4];
+        vc4_blend(trans, blend_color, dst_color, src_color);
+
+        /* If the bit isn't set in the color mask, then just return the
+         * original dst color, instead.
+         */
+        for (int i = 0; i < 4; i++) {
+                if (!(trans->fs_key->blend.colormask & (1 << i))) {
+                        blend_color[i] = dst_color[i];
+                }
+        }
+
         /* Debug: Sometimes you're getting a black output and just want to see
          * if the FS is getting executed at all.  Spam magenta into the color
          * output.
          */
         if (0) {
-                trans->outputs[format_desc->swizzle[0]] =
-                        qir_uniform_ui(trans, fui(1.0));
-                trans->outputs[format_desc->swizzle[1]] =
-                        qir_uniform_ui(trans, fui(0.0));
-                trans->outputs[format_desc->swizzle[2]] =
-                        qir_uniform_ui(trans, fui(1.0));
-                trans->outputs[format_desc->swizzle[3]] =
-                        qir_uniform_ui(trans, fui(0.5));
+                blend_color[0] = qir_uniform_f(trans, 1.0);
+                blend_color[1] = qir_uniform_f(trans, 0.0);
+                blend_color[2] = qir_uniform_f(trans, 1.0);
+                blend_color[3] = qir_uniform_f(trans, 0.5);
         }
 
-        struct qreg swizzled_outputs[4] = {
-                trans->outputs[format_desc->swizzle[0]],
-                trans->outputs[format_desc->swizzle[1]],
-                trans->outputs[format_desc->swizzle[2]],
-                trans->outputs[format_desc->swizzle[3]],
-        };
+        struct qreg swizzled_outputs[4];
+        for (int i = 0; i < 4; i++) {
+                swizzled_outputs[i] =
+                        get_swizzled_channel(trans, blend_color,
+                                             format_desc->swizzle[i]);
+        }
 
         if (trans->fs_key->depth_enabled) {
                 qir_emit(c, qir_inst(QOP_TLB_PASSTHROUGH_Z_WRITE, c->undef,
@@ -885,9 +1115,16 @@ vc4_shader_tgsi_to_qir(struct vc4_compiled_shader *shader, enum qstage stage,
                 tgsi_dump(trans->shader_state->tokens, 0);
         }
 
+        trans->key = key;
         switch (stage) {
         case QSTAGE_FRAG:
                 trans->fs_key = (struct vc4_fs_key *)key;
+                if (trans->fs_key->is_points) {
+                        trans->point_x = emit_fragment_varying(trans, 0);
+                        trans->point_y = emit_fragment_varying(trans, 0);
+                } else if (trans->fs_key->is_lines) {
+                        trans->line_x = emit_fragment_varying(trans, 0);
+                }
                 break;
         case QSTAGE_VERT:
                 trans->vs_key = (struct vc4_vs_key *)key;
@@ -1029,13 +1266,30 @@ vc4_vs_compile(struct vc4_context *vc4, struct vc4_compiled_shader *shader,
 }
 
 static void
-vc4_update_compiled_fs(struct vc4_context *vc4)
+vc4_setup_shared_key(struct vc4_key *key, struct vc4_texture_stateobj *texstate)
+{
+        for (int i = 0; i < texstate->num_textures; i++) {
+                struct pipe_sampler_view *sampler = texstate->textures[i];
+                if (sampler) {
+                        struct pipe_resource *prsc = sampler->texture;
+                        key->tex_format[i] = prsc->format;
+                }
+        }
+}
+
+static void
+vc4_update_compiled_fs(struct vc4_context *vc4, uint8_t prim_mode)
 {
         struct vc4_fs_key local_key;
         struct vc4_fs_key *key = &local_key;
 
         memset(key, 0, sizeof(*key));
+        vc4_setup_shared_key(&key->base, &vc4->fragtex);
         key->base.shader_state = vc4->prog.bind_fs;
+        key->is_points = (prim_mode == PIPE_PRIM_POINTS);
+        key->is_lines = (prim_mode >= PIPE_PRIM_LINES &&
+                         prim_mode <= PIPE_PRIM_LINE_STRIP);
+        key->blend = vc4->blend->rt[0];
 
         if (vc4->framebuffer.cbufs[0])
                 key->color_format = vc4->framebuffer.cbufs[0]->format;
@@ -1063,6 +1317,7 @@ vc4_update_compiled_vs(struct vc4_context *vc4)
         struct vc4_vs_key *key = &local_key;
 
         memset(key, 0, sizeof(*key));
+        vc4_setup_shared_key(&key->base, &vc4->verttex);
         key->base.shader_state = vc4->prog.bind_vs;
 
         for (int i = 0; i < ARRAY_SIZE(key->attr_formats); i++)
@@ -1083,9 +1338,9 @@ vc4_update_compiled_vs(struct vc4_context *vc4)
 }
 
 void
-vc4_update_compiled_shaders(struct vc4_context *vc4)
+vc4_update_compiled_shaders(struct vc4_context *vc4, uint8_t prim_mode)
 {
-        vc4_update_compiled_fs(vc4);
+        vc4_update_compiled_fs(vc4, prim_mode);
         vc4_update_compiled_vs(vc4);
 }
 
@@ -1188,25 +1443,22 @@ static uint32_t translate_wrap(uint32_t p_wrap)
 static void
 write_texture_p0(struct vc4_context *vc4,
                  struct vc4_texture_stateobj *texstate,
-                 uint32_t tex_and_sampler)
+                 uint32_t unit)
 {
-        uint32_t texi = (tex_and_sampler >> 0) & 0xff;
-        struct pipe_sampler_view *texture = texstate->textures[texi];
+        struct pipe_sampler_view *texture = texstate->textures[unit];
         struct vc4_resource *rsc = vc4_resource(texture->texture);
 
         cl_reloc(vc4, &vc4->uniforms, rsc->bo,
-                 texture->u.tex.last_level);
+                 rsc->slices[0].offset | texture->u.tex.last_level);
 }
 
 static void
 write_texture_p1(struct vc4_context *vc4,
                  struct vc4_texture_stateobj *texstate,
-                 uint32_t tex_and_sampler)
+                 uint32_t unit)
 {
-        uint32_t texi = (tex_and_sampler >> 0) & 0xff;
-        uint32_t sampi = (tex_and_sampler >> 8) & 0xff;
-        struct pipe_sampler_view *texture = texstate->textures[texi];
-        struct pipe_sampler_state *sampler = texstate->samplers[sampi];
+        struct pipe_sampler_view *texture = texstate->textures[unit];
+        struct pipe_sampler_state *sampler = texstate->samplers[unit];
         static const uint32_t mipfilter_map[] = {
                 [PIPE_TEX_MIPFILTER_NEAREST] = 2,
                 [PIPE_TEX_MIPFILTER_LINEAR] = 4,
@@ -1266,19 +1518,17 @@ vc4_write_uniforms(struct vc4_context *vc4, struct vc4_compiled_shader *shader,
                                gallium_uniforms[uinfo->data[i]]);
                         break;
                 case QUNIFORM_VIEWPORT_X_SCALE:
-                        cl_u32(&vc4->uniforms, fui(vc4->framebuffer.width *
-                                                   16.0f / 2.0f));
+                        cl_f(&vc4->uniforms, vc4->viewport.scale[0] * 16.0f);
                         break;
                 case QUNIFORM_VIEWPORT_Y_SCALE:
-                        cl_u32(&vc4->uniforms, fui(vc4->framebuffer.height *
-                                                   -16.0f / 2.0f));
+                        cl_f(&vc4->uniforms, vc4->viewport.scale[1] * 16.0f);
                         break;
 
                 case QUNIFORM_VIEWPORT_Z_OFFSET:
-                        cl_u32(&vc4->uniforms, fui(vc4->viewport.translate[2]));
+                        cl_f(&vc4->uniforms, vc4->viewport.translate[2]);
                         break;
                 case QUNIFORM_VIEWPORT_Z_SCALE:
-                        cl_u32(&vc4->uniforms, fui(vc4->viewport.scale[2]));
+                        cl_f(&vc4->uniforms, vc4->viewport.scale[2]);
                         break;
 
                 case QUNIFORM_TEXTURE_CONFIG_P0:
@@ -1295,6 +1545,11 @@ vc4_write_uniforms(struct vc4_context *vc4, struct vc4_compiled_shader *shader,
                                get_texrect_scale(texstate,
                                                  uinfo->contents[i],
                                                  uinfo->data[i]));
+                        break;
+
+                case QUNIFORM_BLEND_CONST_COLOR:
+                        cl_f(&vc4->uniforms,
+                             vc4->blend_color.color[uinfo->data[i]]);
                         break;
                 }
 #if 0

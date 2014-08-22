@@ -596,7 +596,8 @@ static void *evergreen_create_sampler_state(struct pipe_context *ctx,
 }
 
 static struct pipe_sampler_view *
-texture_buffer_sampler_view(struct r600_pipe_sampler_view *view,
+texture_buffer_sampler_view(struct r600_context *rctx,
+			    struct r600_pipe_sampler_view *view,
 			    unsigned width0, unsigned height0)
 			    
 {
@@ -644,6 +645,9 @@ texture_buffer_sampler_view(struct r600_pipe_sampler_view *view,
 	view->tex_resource_words[4] = 0;
 	view->tex_resource_words[5] = view->tex_resource_words[6] = 0;
 	view->tex_resource_words[7] = S_03001C_TYPE(V_03001C_SQ_TEX_VTX_VALID_BUFFER);
+
+	if (tmp->resource.gpu_address)
+		LIST_ADDTAIL(&view->list, &rctx->b.texture_buffers);
 	return &view->base;
 }
 
@@ -654,6 +658,7 @@ evergreen_create_sampler_view_custom(struct pipe_context *ctx,
 				     unsigned width0, unsigned height0,
 				     unsigned force_level)
 {
+	struct r600_context *rctx = (struct r600_context*)ctx;
 	struct r600_screen *rscreen = (struct r600_screen*)ctx->screen;
 	struct r600_pipe_sampler_view *view = CALLOC_STRUCT(r600_pipe_sampler_view);
 	struct r600_texture *tmp = (struct r600_texture*)texture;
@@ -679,7 +684,7 @@ evergreen_create_sampler_view_custom(struct pipe_context *ctx,
 	view->base.context = ctx;
 
 	if (texture->target == PIPE_BUFFER)
-		return texture_buffer_sampler_view(view, width0, height0);
+		return texture_buffer_sampler_view(rctx, view, width0, height0);
 
 	swizzle[0] = state->swizzle_r;
 	swizzle[1] = state->swizzle_g;
@@ -2182,9 +2187,9 @@ void cayman_init_common_regs(struct r600_command_buffer *cb,
 static void cayman_init_atom_start_cs(struct r600_context *rctx)
 {
 	struct r600_command_buffer *cb = &rctx->start_cs_cmd;
-	int tmp;
+	int tmp, i;
 
-	r600_init_command_buffer(cb, 256);
+	r600_init_command_buffer(cb, 320);
 
 	/* This must be first. */
 	r600_store_value(cb, PKT3(PKT3_CONTEXT_CONTROL, 1, 0));
@@ -2237,8 +2242,6 @@ static void cayman_init_atom_start_cs(struct r600_context *rctx)
 	r600_store_value(cb, 0); /* R_028AB8_VGT_VTX_CNT_EN */
 
 	r600_store_config_reg(cb, R_008A14_PA_CL_ENHANCE, (3 << 1) | 1);
-
-	r600_store_context_reg(cb, CM_R_028AA8_IA_MULTI_VGT_PARAM, S_028AA8_SWITCH_ON_EOP(1) | S_028AA8_PARTIAL_VS_WAVE_ON(1) | S_028AA8_PRIMGROUP_SIZE(63));
 
 	r600_store_context_reg_seq(cb, CM_R_028BD4_PA_SC_CENTROID_PRIORITY_0, 2);
 	r600_store_value(cb, 0x76543210); /* CM_R_028BD4_PA_SC_CENTROID_PRIORITY_0 */
@@ -2297,40 +2300,24 @@ static void cayman_init_atom_start_cs(struct r600_context *rctx)
 
 	/* to avoid GPU doing any preloading of constant from random address */
 	r600_store_context_reg_seq(cb, R_028140_ALU_CONST_BUFFER_SIZE_PS_0, 16);
-	r600_store_value(cb, 0); /* R_028140_ALU_CONST_BUFFER_SIZE_PS_0 */
-	r600_store_value(cb, 0);
-	r600_store_value(cb, 0);
-	r600_store_value(cb, 0);
-	r600_store_value(cb, 0);
-	r600_store_value(cb, 0);
-	r600_store_value(cb, 0);
-	r600_store_value(cb, 0);
-	r600_store_value(cb, 0);
-	r600_store_value(cb, 0);
-	r600_store_value(cb, 0);
-	r600_store_value(cb, 0);
-	r600_store_value(cb, 0);
-	r600_store_value(cb, 0);
-	r600_store_value(cb, 0);
-	r600_store_value(cb, 0);
+	for (i = 0; i < 16; i++)
+		r600_store_value(cb, 0);
 
 	r600_store_context_reg_seq(cb, R_028180_ALU_CONST_BUFFER_SIZE_VS_0, 16);
-	r600_store_value(cb, 0); /* R_028180_ALU_CONST_BUFFER_SIZE_VS_0 */
-	r600_store_value(cb, 0);
-	r600_store_value(cb, 0);
-	r600_store_value(cb, 0);
-	r600_store_value(cb, 0);
-	r600_store_value(cb, 0);
-	r600_store_value(cb, 0);
-	r600_store_value(cb, 0);
-	r600_store_value(cb, 0);
-	r600_store_value(cb, 0);
-	r600_store_value(cb, 0);
-	r600_store_value(cb, 0);
-	r600_store_value(cb, 0);
-	r600_store_value(cb, 0);
-	r600_store_value(cb, 0);
-	r600_store_value(cb, 0);
+	for (i = 0; i < 16; i++)
+		r600_store_value(cb, 0);
+
+	r600_store_context_reg_seq(cb, R_0281C0_ALU_CONST_BUFFER_SIZE_GS_0, 16);
+	for (i = 0; i < 16; i++)
+		r600_store_value(cb, 0);
+
+	r600_store_context_reg_seq(cb, R_028FC0_ALU_CONST_BUFFER_SIZE_LS_0, 16);
+	for (i = 0; i < 16; i++)
+		r600_store_value(cb, 0);
+
+	r600_store_context_reg_seq(cb, R_028F80_ALU_CONST_BUFFER_SIZE_HS_0, 16);
+	for (i = 0; i < 16; i++)
+		r600_store_value(cb, 0);
 
 	if (rctx->screen->b.has_streamout) {
 		r600_store_context_reg(cb, R_028B28_VGT_STRMOUT_DRAW_OPAQUE_OFFSET, 0);
@@ -2474,14 +2461,14 @@ void evergreen_init_atom_start_cs(struct r600_context *rctx)
 	int num_hs_stack_entries;
 	int num_ls_stack_entries;
 	enum radeon_family family;
-	unsigned tmp;
+	unsigned tmp, i;
 
 	if (rctx->b.chip_class == CAYMAN) {
 		cayman_init_atom_start_cs(rctx);
 		return;
 	}
 
-	r600_init_command_buffer(cb, 256);
+	r600_init_command_buffer(cb, 320);
 
 	/* This must be first. */
 	r600_store_value(cb, PKT3(PKT3_CONTEXT_CONTROL, 1, 0));
@@ -2754,40 +2741,24 @@ void evergreen_init_atom_start_cs(struct r600_context *rctx)
 
 	/* to avoid GPU doing any preloading of constant from random address */
 	r600_store_context_reg_seq(cb, R_028140_ALU_CONST_BUFFER_SIZE_PS_0, 16);
-	r600_store_value(cb, 0); /* R_028140_ALU_CONST_BUFFER_SIZE_PS_0 */
-	r600_store_value(cb, 0);
-	r600_store_value(cb, 0);
-	r600_store_value(cb, 0);
-	r600_store_value(cb, 0);
-	r600_store_value(cb, 0);
-	r600_store_value(cb, 0);
-	r600_store_value(cb, 0);
-	r600_store_value(cb, 0);
-	r600_store_value(cb, 0);
-	r600_store_value(cb, 0);
-	r600_store_value(cb, 0);
-	r600_store_value(cb, 0);
-	r600_store_value(cb, 0);
-	r600_store_value(cb, 0);
-	r600_store_value(cb, 0);
+	for (i = 0; i < 16; i++)
+		r600_store_value(cb, 0);
 
 	r600_store_context_reg_seq(cb, R_028180_ALU_CONST_BUFFER_SIZE_VS_0, 16);
-	r600_store_value(cb, 0); /* R_028180_ALU_CONST_BUFFER_SIZE_VS_0 */
-	r600_store_value(cb, 0);
-	r600_store_value(cb, 0);
-	r600_store_value(cb, 0);
-	r600_store_value(cb, 0);
-	r600_store_value(cb, 0);
-	r600_store_value(cb, 0);
-	r600_store_value(cb, 0);
-	r600_store_value(cb, 0);
-	r600_store_value(cb, 0);
-	r600_store_value(cb, 0);
-	r600_store_value(cb, 0);
-	r600_store_value(cb, 0);
-	r600_store_value(cb, 0);
-	r600_store_value(cb, 0);
-	r600_store_value(cb, 0);
+	for (i = 0; i < 16; i++)
+		r600_store_value(cb, 0);
+
+	r600_store_context_reg_seq(cb, R_0281C0_ALU_CONST_BUFFER_SIZE_GS_0, 16);
+	for (i = 0; i < 16; i++)
+		r600_store_value(cb, 0);
+
+	r600_store_context_reg_seq(cb, R_028FC0_ALU_CONST_BUFFER_SIZE_LS_0, 16);
+	for (i = 0; i < 16; i++)
+		r600_store_value(cb, 0);
+
+	r600_store_context_reg_seq(cb, R_028F80_ALU_CONST_BUFFER_SIZE_HS_0, 16);
+	for (i = 0; i < 16; i++)
+		r600_store_value(cb, 0);
 
 	r600_store_context_reg(cb, R_028B98_VGT_STRMOUT_BUFFER_CONFIG, 0);
 

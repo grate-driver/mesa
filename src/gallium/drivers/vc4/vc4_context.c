@@ -37,54 +37,6 @@
 #include "vc4_resource.h"
 
 static void
-dump_fbo(struct vc4_context *vc4, struct vc4_bo *fbo)
-{
-#ifndef USE_VC4_SIMULATOR
-        uint32_t *map = vc4_bo_map(fbo);
-        uint32_t width = vc4->framebuffer.width;
-        uint32_t height = vc4->framebuffer.height;
-        uint32_t chunk_w = width / 79;
-        uint32_t chunk_h = height / 40;
-        uint32_t found_colors[10];
-        uint32_t num_found_colors = 0;
-
-        for (int by = 0; by < height; by += chunk_h) {
-                for (int bx = 0; bx < width; bx += chunk_w) {
-                        bool on = false, black = false;
-
-                        for (int y = by; y < MIN2(height, by + chunk_h); y++) {
-                                for (int x = bx; x < MIN2(width, bx + chunk_w); x++) {
-                                        uint32_t pix = map[y * width + x];
-                                        on |= pix != 0;
-                                        black |= pix == 0xff000000;
-
-                                        int i;
-                                        for (i = 0; i < num_found_colors; i++) {
-                                                if (pix == found_colors[i])
-                                                        break;
-                                        }
-                                        if (i == num_found_colors &&
-                                            num_found_colors < Elements(found_colors))
-                                                found_colors[num_found_colors++] = pix;
-                                }
-                        }
-                        if (black)
-                                fprintf(stderr, "O");
-                        else if (on)
-                                fprintf(stderr, "X");
-                        else
-                                fprintf(stderr, ".");
-                }
-                fprintf(stderr, "\n");
-        }
-
-        for (int i = 0; i < num_found_colors; i++) {
-                fprintf(stderr, "color %d: 0x%08x\n", i, found_colors[i]);
-        }
-#endif
-}
-
-static void
 vc4_setup_rcl(struct vc4_context *vc4)
 {
         struct vc4_surface *csurf = vc4_surface(vc4->framebuffer.cbufs[0]);
@@ -192,9 +144,6 @@ vc4_flush(struct pipe_context *pctx)
 
         vc4_setup_rcl(vc4);
 
-        struct vc4_surface *csurf = vc4_surface(vc4->framebuffer.cbufs[0]);
-        struct vc4_resource *ctex = vc4_resource(csurf->base.texture);
-
         struct drm_vc4_submit_cl submit;
         memset(&submit, 0, sizeof(submit));
 
@@ -217,7 +166,7 @@ vc4_flush(struct pipe_context *pctx)
 #ifndef USE_VC4_SIMULATOR
                 ret = drmIoctl(vc4->fd, DRM_IOCTL_VC4_SUBMIT_CL, &submit);
 #else
-                ret = vc4_simulator_flush(vc4, &submit, csurf);
+                ret = vc4_simulator_flush(vc4, &submit);
 #endif
                 if (ret)
                         errx(1, "VC4 submit failed\n");
@@ -239,8 +188,6 @@ vc4_flush(struct pipe_context *pctx)
         vc4->dirty = ~0;
         vc4->resolve = 0;
         vc4->cleared = 0;
-
-        dump_fbo(vc4, ctex->bo);
 }
 
 static void
@@ -356,7 +303,7 @@ vc4_context_create(struct pipe_screen *pscreen, void *priv)
                 goto fail;
 
         vc4->primconvert = util_primconvert_create(pctx,
-                                                   !((1 << PIPE_PRIM_QUADS) - 1));
+                                                   (1 << PIPE_PRIM_QUADS) - 1);
         if (!vc4->primconvert)
                 goto fail;
 

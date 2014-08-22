@@ -20,6 +20,8 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
+#include <xf86drm.h>
+#include <nouveau_drm.h>
 #include "util/u_format.h"
 #include "util/u_format_s3tc.h"
 #include "pipe/p_screen.h"
@@ -33,10 +35,6 @@
 #include "nvc0/nvc0_screen.h"
 
 #include "nvc0/mme/com9097.mme.h"
-
-#ifndef NOUVEAU_GETPARAM_GRAPH_UNITS
-# define NOUVEAU_GETPARAM_GRAPH_UNITS 13
-#endif
 
 static boolean
 nvc0_screen_is_format_supported(struct pipe_screen *pscreen,
@@ -69,6 +67,7 @@ static int
 nvc0_screen_get_param(struct pipe_screen *pscreen, enum pipe_cap param)
 {
    const uint16_t class_3d = nouveau_screen(pscreen)->class_3d;
+   struct nouveau_device *dev = nouveau_screen(pscreen)->device;
 
    switch (param) {
    /* non-boolean caps */
@@ -90,7 +89,7 @@ nvc0_screen_get_param(struct pipe_screen *pscreen, enum pipe_cap param)
    case PIPE_CAP_MAX_TEXTURE_BUFFER_SIZE:
       return 65536;
    case PIPE_CAP_GLSL_FEATURE_LEVEL:
-      return 330;
+      return 400;
    case PIPE_CAP_MAX_RENDER_TARGETS:
       return 8;
    case PIPE_CAP_MAX_DUAL_SOURCE_RENDER_TARGETS:
@@ -167,6 +166,8 @@ nvc0_screen_get_param(struct pipe_screen *pscreen, enum pipe_cap param)
    case PIPE_CAP_SAMPLE_SHADING:
    case PIPE_CAP_TEXTURE_GATHER_OFFSETS:
    case PIPE_CAP_TEXTURE_GATHER_SM5:
+   case PIPE_CAP_TGSI_FS_FINE_DERIVATIVE:
+   case PIPE_CAP_CONDITIONAL_RENDER_INVERTED:
       return 1;
    case PIPE_CAP_SEAMLESS_CUBE_MAP_PER_TEXTURE:
       return (class_3d >= NVE4_3D_CLASS) ? 1 : 0;
@@ -184,6 +185,23 @@ nvc0_screen_get_param(struct pipe_screen *pscreen, enum pipe_cap param)
    case PIPE_CAP_TGSI_VS_LAYER_VIEWPORT:
    case PIPE_CAP_FAKE_SW_MSAA:
    case PIPE_CAP_TGSI_VS_WINDOW_SPACE_POSITION:
+      return 0;
+
+   case PIPE_CAP_VENDOR_ID:
+      return 0x10de;
+   case PIPE_CAP_DEVICE_ID: {
+      uint64_t device_id;
+      if (nouveau_getparam(dev, NOUVEAU_GETPARAM_PCI_DEVICE, &device_id)) {
+         NOUVEAU_ERR("NOUVEAU_GETPARAM_PCI_DEVICE failed.\n");
+         return -1;
+      }
+      return device_id;
+   }
+   case PIPE_CAP_ACCELERATED:
+      return 1;
+   case PIPE_CAP_VIDEO_MEMORY:
+      return dev->vram_size >> 20;
+   case PIPE_CAP_UMA:
       return 0;
    }
 

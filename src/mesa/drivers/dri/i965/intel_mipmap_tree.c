@@ -169,7 +169,7 @@ intel_is_non_msrt_mcs_buffer_supported(struct brw_context *brw,
                                        struct intel_mipmap_tree *mt)
 {
    /* MCS support does not exist prior to Gen7 */
-   if (brw->gen < 7 || brw->gen >= 8)
+   if (brw->gen < 7)
       return false;
 
    /* MCS is only supported for color buffers */
@@ -232,7 +232,8 @@ intel_miptree_create_layout(struct brw_context *brw,
                             GLuint height0,
                             GLuint depth0,
                             bool for_bo,
-                            GLuint num_samples)
+                            GLuint num_samples,
+                            bool force_all_slices_at_each_lod)
 {
    struct intel_mipmap_tree *mt = calloc(sizeof(*mt), 1);
    if (!mt)
@@ -350,17 +351,18 @@ intel_miptree_create_layout(struct brw_context *brw,
       }
    }
 
-   /* array_spacing_lod0 is only used for non-IMS MSAA surfaces.  TODO: can we
-    * use it elsewhere?
+   /* Set array_layout to ALL_SLICES_AT_EACH_LOD when gen7+ array_spacing_lod0
+    * can be used. array_spacing_lod0 is only used for non-IMS MSAA surfaces.
+    * TODO: can we use it elsewhere?
     */
    switch (mt->msaa_layout) {
    case INTEL_MSAA_LAYOUT_NONE:
    case INTEL_MSAA_LAYOUT_IMS:
-      mt->array_spacing_lod0 = false;
+      mt->array_layout = ALL_LOD_IN_EACH_SLICE;
       break;
    case INTEL_MSAA_LAYOUT_UMS:
    case INTEL_MSAA_LAYOUT_CMS:
-      mt->array_spacing_lod0 = true;
+      mt->array_layout = ALL_SLICES_AT_EACH_LOD;
       break;
    }
 
@@ -377,6 +379,7 @@ intel_miptree_create_layout(struct brw_context *brw,
        _mesa_get_format_base_format(format) == GL_DEPTH_STENCIL &&
        (brw->must_use_separate_stencil ||
 	(brw->has_separate_stencil && brw_is_hiz_depth_format(brw, format)))) {
+      const bool force_all_slices_at_each_lod = brw->gen == 6;
       mt->stencil_mt = intel_miptree_create(brw,
                                             mt->target,
                                             MESA_FORMAT_S_UINT8,
@@ -387,7 +390,8 @@ intel_miptree_create_layout(struct brw_context *brw,
                                             mt->logical_depth0,
                                             true,
                                             num_samples,
-                                            INTEL_MIPTREE_TILING_ANY);
+                                            INTEL_MIPTREE_TILING_ANY,
+                                            force_all_slices_at_each_lod);
       if (!mt->stencil_mt) {
 	 intel_miptree_release(&mt);
 	 return NULL;
@@ -404,6 +408,9 @@ intel_miptree_create_layout(struct brw_context *brw,
                        _mesa_get_format_name(mt->format));
       }
    }
+
+   if (force_all_slices_at_each_lod)
+      mt->array_layout = ALL_SLICES_AT_EACH_LOD;
 
    brw_miptree_layout(brw, mt);
 
@@ -559,7 +566,8 @@ intel_miptree_create(struct brw_context *brw,
 		     GLuint depth0,
 		     bool expect_accelerated_upload,
                      GLuint num_samples,
-                     enum intel_miptree_tiling_mode requested_tiling)
+                     enum intel_miptree_tiling_mode requested_tiling,
+                     bool force_all_slices_at_each_lod)
 {
    struct intel_mipmap_tree *mt;
    mesa_format tex_format = format;
@@ -573,7 +581,8 @@ intel_miptree_create(struct brw_context *brw,
    mt = intel_miptree_create_layout(brw, target, format,
 				      first_level, last_level, width0,
 				      height0, depth0,
-				      false, num_samples);
+                                    false, num_samples,
+                                    force_all_slices_at_each_lod);
    /*
     * pitch == 0 || height == 0  indicates the null texture
     */
@@ -684,7 +693,7 @@ intel_miptree_create_for_bo(struct brw_context *brw,
    mt = intel_miptree_create_layout(brw, GL_TEXTURE_2D, format,
                                     0, 0,
                                     width, height, 1,
-                                    true, 0 /* num_samples */);
+                                    true, 0, false);
    if (!mt) {
       free(mt);
       return mt;
@@ -793,7 +802,7 @@ intel_miptree_create_for_renderbuffer(struct brw_context *brw,
 
    mt = intel_miptree_create(brw, target, format, 0, 0,
 			     width, height, depth, true, num_samples,
-                             INTEL_MIPTREE_TILING_ANY);
+                             INTEL_MIPTREE_TILING_ANY, false);
    if (!mt)
       goto fail;
 
@@ -1294,7 +1303,8 @@ intel_miptree_alloc_mcs(struct brw_context *brw,
                                      mt->logical_depth0,
                                      true,
                                      0 /* num_samples */,
-                                     INTEL_MIPTREE_TILING_Y);
+                                     INTEL_MIPTREE_TILING_Y,
+                                     false);
 
    /* From the Ivy Bridge PRM, Vol 2 Part 1 p326:
     *
@@ -1351,7 +1361,8 @@ intel_miptree_alloc_non_msrt_mcs(struct brw_context *brw,
                                      mt->logical_depth0,
                                      true,
                                      0 /* num_samples */,
-                                     INTEL_MIPTREE_TILING_Y);
+                                     INTEL_MIPTREE_TILING_Y,
+                                     false);
 
    return mt->mcs_mt;
 }
@@ -1397,6 +1408,7 @@ intel_miptree_alloc_hiz(struct brw_context *brw,
 			struct intel_mipmap_tree *mt)
 {
    assert(mt->hiz_mt == NULL);
+   const bool force_all_slices_at_each_lod = brw->gen == 6;
    mt->hiz_mt = intel_miptree_create(brw,
                                      mt->target,
                                      mt->format,
@@ -1407,7 +1419,8 @@ intel_miptree_alloc_hiz(struct brw_context *brw,
                                      mt->logical_depth0,
                                      true,
                                      mt->num_samples,
-                                     INTEL_MIPTREE_TILING_ANY);
+                                     INTEL_MIPTREE_TILING_ANY,
+                                     force_all_slices_at_each_lod);
 
    if (!mt->hiz_mt)
       return false;
@@ -1567,7 +1580,7 @@ intel_miptree_resolve_color(struct brw_context *brw,
    case INTEL_FAST_CLEAR_STATE_CLEAR:
       /* Fast color clear resolves only make sense for non-MSAA buffers. */
       if (mt->msaa_layout == INTEL_MSAA_LAYOUT_NONE)
-         brw_blorp_resolve_color(brw, mt);
+         brw_meta_resolve_color(brw, mt);
       break;
    }
 }
@@ -1784,7 +1797,8 @@ intel_miptree_map_blit(struct brw_context *brw,
                                   0, 0,
                                   map->w, map->h, 1,
                                   false, 0,
-                                  INTEL_MIPTREE_TILING_NONE);
+                                  INTEL_MIPTREE_TILING_NONE,
+                                  false);
    if (!map->mt) {
       fprintf(stderr, "Failed to allocate blit temporary\n");
       goto fail;
@@ -1843,6 +1857,7 @@ intel_miptree_unmap_blit(struct brw_context *brw,
 /**
  * "Map" a buffer by copying it to an untiled temporary using MOVNTDQA.
  */
+#if defined(USE_SSE41)
 static void
 intel_miptree_map_movntdqa(struct brw_context *brw,
                            struct intel_mipmap_tree *mt,
@@ -1910,6 +1925,7 @@ intel_miptree_unmap_movntdqa(struct brw_context *brw,
    map->buffer = NULL;
    map->ptr = NULL;
 }
+#endif
 
 static void
 intel_miptree_map_s8(struct brw_context *brw,
@@ -2290,8 +2306,10 @@ intel_miptree_map(struct brw_context *brw,
               mt->bo->size >= brw->max_gtt_map_object_size) {
       assert(can_blit_slice(mt, level, slice));
       intel_miptree_map_blit(brw, mt, map, level, slice);
+#if defined(USE_SSE41)
    } else if (!(mode & GL_MAP_WRITE_BIT) && !mt->compressed && cpu_has_sse4_1) {
       intel_miptree_map_movntdqa(brw, mt, map, level, slice);
+#endif
    } else {
       intel_miptree_map_gtt(brw, mt, map, level, slice);
    }
@@ -2328,8 +2346,10 @@ intel_miptree_unmap(struct brw_context *brw,
       intel_miptree_unmap_depthstencil(brw, mt, map, level, slice);
    } else if (map->mt) {
       intel_miptree_unmap_blit(brw, mt, map, level, slice);
+#if defined(USE_SSE41)
    } else if (map->buffer && cpu_has_sse4_1) {
       intel_miptree_unmap_movntdqa(brw, mt, map, level, slice);
+#endif
    } else {
       intel_miptree_unmap_gtt(brw, mt, map, level, slice);
    }

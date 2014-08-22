@@ -1,7 +1,3 @@
-i965_INCLUDES = \
-	$(MESA_TOP)/src \
-	$(MESA_TOP)/src/mesa/drivers/dri/intel
-
 i965_FILES = \
 	intel_asm_annotation.c \
 	intel_batchbuffer.c \
@@ -32,7 +28,6 @@ i965_FILES = \
 	brw_blorp.cpp \
 	brw_blorp_blit.cpp \
 	brw_blorp_blit_eu.cpp \
-	brw_blorp_clear.cpp \
 	brw_cc.c \
 	brw_cfg.cpp \
 	brw_clear.c \
@@ -80,6 +75,7 @@ i965_FILES = \
 	brw_meta_updownsample.c \
 	brw_meta_stencil_blit.c \
 	brw_meta_util.c \
+	brw_meta_fast_clear.c \
 	brw_misc_state.c \
 	brw_object_purgeable.c \
 	brw_performance_monitor.c \
@@ -123,6 +119,7 @@ i965_FILES = \
 	gen6_blorp.cpp \
 	gen6_cc.c \
 	gen6_clip_state.c \
+	gen6_depth_state.c \
 	gen6_depthstencil.c \
 	gen6_gs_state.c \
         gen6_multisample_state.c \
@@ -131,6 +128,7 @@ i965_FILES = \
 	gen6_scissor_state.c \
 	gen6_sf_state.c \
         gen6_sol.c \
+	gen6_surface_state.c \
 	gen6_urb.c \
 	gen6_viewport_state.c \
 	gen6_vs_state.c \
@@ -150,18 +148,13 @@ i965_FILES = \
 	gen8_depth_state.c \
 	gen8_disable.c \
 	gen8_draw_upload.c \
-	gen8_fs_generator.cpp \
-	gen8_generator.cpp \
-	gen8_instruction.c \
 	gen8_gs_state.c \
 	gen8_misc_state.c \
 	gen8_multisample_state.c \
 	gen8_sf_state.c \
 	gen8_sol_state.c \
 	gen8_surface_state.c \
-	gen8_vec4_generator.cpp \
 	gen8_viewport_state.c \
 	gen8_vs_state.c \
 	gen8_wm_depth_stencil.c \
-	gen8_ps_state.c \
-        $()
+	gen8_ps_state.c

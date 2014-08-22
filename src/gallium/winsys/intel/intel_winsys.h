@@ -69,6 +69,10 @@ struct intel_bo;
 struct intel_winsys_info {
    int devid;
 
+   /* the sizes of the aperture in bytes */
+   size_t aperture_total;
+   size_t aperture_mappable;
+
    int max_batch_size;
    bool has_llc;
    bool has_address_swizzling;

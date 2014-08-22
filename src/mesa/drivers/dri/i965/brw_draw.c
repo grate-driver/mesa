@@ -55,7 +55,7 @@
 
 #define FILE_DEBUG_FLAG DEBUG_PRIMS
 
-const GLuint prim_to_hw_prim[GL_TRIANGLE_STRIP_ADJACENCY+1] = {
+static const GLuint prim_to_hw_prim[GL_TRIANGLE_STRIP_ADJACENCY+1] = {
    _3DPRIM_POINTLIST,
    _3DPRIM_LINELIST,
    _3DPRIM_LINELOOP,
@@ -86,6 +86,15 @@ static const GLenum reduced_prim[GL_POLYGON+1] = {
    GL_TRIANGLES
 };
 
+uint32_t
+get_hw_prim_for_gl_prim(int mode)
+{
+   if (mode >= BRW_PRIM_OFFSET)
+      return mode - BRW_PRIM_OFFSET;
+   else
+      return prim_to_hw_prim[mode];
+}
+
 
 /* When the primitive changes, set a state bit and re-validate.  Not
  * the nicest and would rather deal with this by having all the
@@ -96,7 +105,7 @@ static void brw_set_prim(struct brw_context *brw,
                          const struct _mesa_prim *prim)
 {
    struct gl_context *ctx = &brw->ctx;
-   uint32_t hw_prim = prim_to_hw_prim[prim->mode];
+   uint32_t hw_prim = get_hw_prim_for_gl_prim(prim->mode);
 
    DBG("PRIM: %s\n", _mesa_lookup_enum_by_nr(prim->mode));
 
@@ -133,7 +142,7 @@ static void gen6_set_prim(struct brw_context *brw,
 
    DBG("PRIM: %s\n", _mesa_lookup_enum_by_nr(prim->mode));
 
-   hw_prim = prim_to_hw_prim[prim->mode];
+   hw_prim = get_hw_prim_for_gl_prim(prim->mode);
 
    if (hw_prim != brw->primitive) {
       brw->primitive = hw_prim;
@@ -293,40 +302,6 @@ static void brw_merge_inputs( struct brw_context *brw,
    }
 }
 
-/*
- * \brief Resolve buffers before drawing.
- *
- * Resolve the depth buffer's HiZ buffer, resolve the depth buffer of each
- * enabled depth texture, and flush the render cache for any dirty textures.
- *
- * (In the future, this will also perform MSAA resolves).
- */
-static void
-brw_predraw_resolve_buffers(struct brw_context *brw)
-{
-   struct gl_context *ctx = &brw->ctx;
-   struct intel_renderbuffer *depth_irb;
-   struct intel_texture_object *tex_obj;
-
-   /* Resolve the depth buffer's HiZ buffer. */
-   depth_irb = intel_get_renderbuffer(ctx->DrawBuffer, BUFFER_DEPTH);
-   if (depth_irb)
-      intel_renderbuffer_resolve_hiz(brw, depth_irb);
-
-   /* Resolve depth buffer and render cache of each enabled texture. */
-   int maxEnabledUnit = ctx->Texture._MaxEnabledTexImageUnit;
-   for (int i = 0; i <= maxEnabledUnit; i++) {
-      if (!ctx->Texture.Unit[i]._Current)
-	 continue;
-      tex_obj = intel_texture_object(ctx->Texture.Unit[i]._Current);
-      if (!tex_obj || !tex_obj->mt)
-	 continue;
-      intel_miptree_all_slices_resolve_depth(brw, tex_obj->mt);
-      intel_miptree_resolve_color(brw, tex_obj->mt);
-      brw_render_cache_set_check_flush(brw, tex_obj->mt->bo);
-   }
-}
-
 /**
  * \brief Call this after drawing to mark which buffers need resolving
  *
@@ -422,12 +397,6 @@ static bool brw_try_draw_prims( struct gl_context *ctx,
     * may flush the batchbuffer for a blit, affecting the state flags.
     */
    brw_workaround_depthstencil_alignment(brw, 0);
-
-   /* Resolves must occur after updating renderbuffers, updating context state,
-    * and finalizing textures but before setting up any hardware state for
-    * this draw call.
-    */
-   brw_predraw_resolve_buffers(brw);
 
    /* Bind all inputs, derive varying and size information:
     */

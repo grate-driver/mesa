@@ -47,14 +47,6 @@ brw_blorp_blit_miptrees(struct brw_context *brw,
                         float dst_x1, float dst_y1,
                         GLenum filter, bool mirror_x, bool mirror_y);
 
-bool
-brw_blorp_clear_color(struct brw_context *brw, struct gl_framebuffer *fb,
-                      GLbitfield mask, bool partial_clear);
-
-void
-brw_blorp_resolve_color(struct brw_context *brw,
-                        struct intel_mipmap_tree *mt);
-
 #ifdef __cplusplus
 } /* end extern "C" */
 
@@ -150,10 +142,14 @@ public:
 
    unsigned num_samples;
 
-   /* Setting this flag indicates that the surface should be set up in
-    * ARYSPC_LOD0 mode.  Ignored prior to Gen7.
+   /**
+    * Indicates if we use the standard miptree layout (ALL_LOD_IN_EACH_SLICE),
+    * or if we tightly pack array slices at each LOD (ALL_SLICES_AT_EACH_LOD).
+    *
+    * If ALL_SLICES_AT_EACH_LOD is set, then ARYSPC_LOD0 can be used. Ignored
+    * prior to Gen7.
     */
-   bool array_spacing_lod0;
+   enum miptree_array_layout array_layout;
 
    /**
     * Format that should be used when setting up the surface state for this

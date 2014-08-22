@@ -540,7 +540,19 @@ brw_set_message_descriptor(struct brw_compile *p,
    struct brw_context *brw = p->brw;
 
    brw_set_src1(p, inst, brw_imm_d(0));
-   brw_inst_set_sfid(brw, inst, sfid);
+
+   /* For indirect sends, `inst` will not be the SEND/SENDC instruction
+    * itself; instead, it will be a MOV/OR into the address register.
+    *
+    * In this case, we avoid setting the extended message descriptor bits,
+    * since they go on the later SEND/SENDC instead and if set here would
+    * instead clobber the conditionalmod bits.
+    */
+   unsigned opcode = brw_inst_opcode(brw, inst);
+   if (opcode == BRW_OPCODE_SEND || opcode == BRW_OPCODE_SENDC) {
+      brw_inst_set_sfid(brw, inst, sfid);
+   }
+
    brw_inst_set_mlen(brw, inst, msg_length);
    brw_inst_set_rlen(brw, inst, response_length);
    brw_inst_set_eot(brw, inst, end_of_thread);
@@ -758,6 +770,21 @@ brw_set_sampler_message(struct brw_compile *p,
    } else if (brw->gen == 4 && !brw->is_g4x) {
       brw_inst_set_sampler_return_format(brw, inst, return_format);
    }
+}
+
+void brw_set_indirect_send_descriptor(struct brw_compile *p,
+                                      brw_inst *insn,
+                                      unsigned sfid,
+                                      struct brw_reg descriptor)
+{
+   /* Only a0.0 may be used as SEND's descriptor operand. */
+   assert(descriptor.file == BRW_ARCHITECTURE_REGISTER_FILE);
+   assert(descriptor.type == BRW_REGISTER_TYPE_UD);
+   assert(descriptor.nr == BRW_ARF_ADDRESS);
+   assert(descriptor.subnr == 0);
+
+   brw_set_message_descriptor(p, insn, sfid, 0, 0, false, false);
+   brw_set_src1(p, insn, descriptor);
 }
 
 static void
@@ -1004,8 +1031,6 @@ ALU2(XOR)
 ALU2(SHR)
 ALU2(SHL)
 ALU2(ASR)
-ALU1(F32TO16)
-ALU1(F16TO32)
 ALU1(FRC)
 ALU1(RNDD)
 ALU2(MAC)
@@ -1108,6 +1133,56 @@ brw_MUL(struct brw_compile *p, struct brw_reg dest,
 	  src1.nr != BRW_ARF_ACCUMULATOR);
 
    return brw_alu2(p, BRW_OPCODE_MUL, dest, src0, src1);
+}
+
+brw_inst *
+brw_F32TO16(struct brw_compile *p, struct brw_reg dst, struct brw_reg src)
+{
+   const struct brw_context *brw = p->brw;
+   bool align16 = brw_inst_access_mode(brw, p->current) == BRW_ALIGN_16;
+
+   if (align16) {
+      assert(dst.type == BRW_REGISTER_TYPE_UD);
+   } else {
+      assert(dst.type == BRW_REGISTER_TYPE_W ||
+             dst.type == BRW_REGISTER_TYPE_UW ||
+             dst.type == BRW_REGISTER_TYPE_HF);
+   }
+
+   if (brw->gen >= 8) {
+      if (align16) {
+         /* Emulate the Gen7 zeroing bug (see comments in vec4_visitor's
+          * emit_pack_half_2x16 method.)
+          */
+         brw_MOV(p, retype(dst, BRW_REGISTER_TYPE_UD), brw_imm_ud(0u));
+      }
+      return brw_MOV(p, retype(dst, BRW_REGISTER_TYPE_HF), src);
+   } else {
+      assert(brw->gen == 7);
+      return brw_alu1(p, BRW_OPCODE_F32TO16, dst, src);
+   }
+}
+
+brw_inst *
+brw_F16TO32(struct brw_compile *p, struct brw_reg dst, struct brw_reg src)
+{
+   const struct brw_context *brw = p->brw;
+   bool align16 = brw_inst_access_mode(brw, p->current) == BRW_ALIGN_16;
+
+   if (align16) {
+      assert(src.type == BRW_REGISTER_TYPE_UD);
+   } else {
+      assert(src.type == BRW_REGISTER_TYPE_W ||
+             src.type == BRW_REGISTER_TYPE_UW ||
+             src.type == BRW_REGISTER_TYPE_HF);
+   }
+
+   if (brw->gen >= 8) {
+      return brw_MOV(p, dst, retype(src, BRW_REGISTER_TYPE_HF));
+   } else {
+      assert(brw->gen == 7);
+      return brw_alu1(p, BRW_OPCODE_F16TO32, dst, src);
+   }
 }
 
 
@@ -1217,10 +1292,15 @@ brw_IF(struct brw_compile *p, unsigned execute_size)
       brw_inst_set_gen6_jump_count(brw, insn, 0);
       brw_set_src0(p, insn, vec1(retype(brw_null_reg(), BRW_REGISTER_TYPE_D)));
       brw_set_src1(p, insn, vec1(retype(brw_null_reg(), BRW_REGISTER_TYPE_D)));
-   } else {
+   } else if (brw->gen == 7) {
       brw_set_dest(p, insn, vec1(retype(brw_null_reg(), BRW_REGISTER_TYPE_D)));
       brw_set_src0(p, insn, vec1(retype(brw_null_reg(), BRW_REGISTER_TYPE_D)));
       brw_set_src1(p, insn, brw_imm_ud(0));
+      brw_inst_set_jip(brw, insn, 0);
+      brw_inst_set_uip(brw, insn, 0);
+   } else {
+      brw_set_dest(p, insn, vec1(retype(brw_null_reg(), BRW_REGISTER_TYPE_D)));
+      brw_set_src0(p, insn, brw_imm_d(0));
       brw_inst_set_jip(brw, insn, 0);
       brw_inst_set_uip(brw, insn, 0);
    }
@@ -1413,10 +1493,15 @@ brw_ELSE(struct brw_compile *p)
       brw_inst_set_gen6_jump_count(brw, insn, 0);
       brw_set_src0(p, insn, retype(brw_null_reg(), BRW_REGISTER_TYPE_D));
       brw_set_src1(p, insn, retype(brw_null_reg(), BRW_REGISTER_TYPE_D));
-   } else {
+   } else if (brw->gen == 7) {
       brw_set_dest(p, insn, retype(brw_null_reg(), BRW_REGISTER_TYPE_D));
       brw_set_src0(p, insn, retype(brw_null_reg(), BRW_REGISTER_TYPE_D));
       brw_set_src1(p, insn, brw_imm_ud(0));
+      brw_inst_set_jip(brw, insn, 0);
+      brw_inst_set_uip(brw, insn, 0);
+   } else {
+      brw_set_dest(p, insn, retype(brw_null_reg(), BRW_REGISTER_TYPE_D));
+      brw_set_src0(p, insn, brw_imm_d(0));
       brw_inst_set_jip(brw, insn, 0);
       brw_inst_set_uip(brw, insn, 0);
    }
@@ -1485,10 +1570,12 @@ brw_ENDIF(struct brw_compile *p)
       brw_set_dest(p, insn, brw_imm_w(0));
       brw_set_src0(p, insn, retype(brw_null_reg(), BRW_REGISTER_TYPE_D));
       brw_set_src1(p, insn, retype(brw_null_reg(), BRW_REGISTER_TYPE_D));
-   } else {
+   } else if (brw->gen == 7) {
       brw_set_dest(p, insn, retype(brw_null_reg(), BRW_REGISTER_TYPE_D));
       brw_set_src0(p, insn, retype(brw_null_reg(), BRW_REGISTER_TYPE_D));
       brw_set_src1(p, insn, brw_imm_ud(0));
+   } else {
+      brw_set_src0(p, insn, brw_imm_d(0));
    }
 
    brw_inst_set_qtr_control(brw, insn, BRW_COMPRESSION_NONE);
@@ -1515,7 +1602,10 @@ brw_BREAK(struct brw_compile *p)
    brw_inst *insn;
 
    insn = next_insn(p, BRW_OPCODE_BREAK);
-   if (brw->gen >= 6) {
+   if (brw->gen >= 8) {
+      brw_set_dest(p, insn, retype(brw_null_reg(), BRW_REGISTER_TYPE_D));
+      brw_set_src0(p, insn, brw_imm_d(0x0));
+   } else if (brw->gen >= 6) {
       brw_set_dest(p, insn, retype(brw_null_reg(), BRW_REGISTER_TYPE_D));
       brw_set_src0(p, insn, retype(brw_null_reg(), BRW_REGISTER_TYPE_D));
       brw_set_src1(p, insn, brw_imm_d(0x0));
@@ -1541,8 +1631,12 @@ brw_CONT(struct brw_compile *p)
 
    insn = next_insn(p, BRW_OPCODE_CONTINUE);
    brw_set_dest(p, insn, brw_ip_reg());
-   brw_set_src0(p, insn, brw_ip_reg());
-   brw_set_src1(p, insn, brw_imm_d(0x0));
+   if (brw->gen >= 8) {
+      brw_set_src0(p, insn, brw_imm_d(0x0));
+   } else {
+      brw_set_src0(p, insn, brw_ip_reg());
+      brw_set_src1(p, insn, brw_imm_d(0x0));
+   }
 
    if (brw->gen < 6) {
       brw_inst_set_gen4_pop_count(brw, insn,
@@ -1562,8 +1656,12 @@ gen6_HALT(struct brw_compile *p)
 
    insn = next_insn(p, BRW_OPCODE_HALT);
    brw_set_dest(p, insn, retype(brw_null_reg(), BRW_REGISTER_TYPE_D));
-   brw_set_src0(p, insn, retype(brw_null_reg(), BRW_REGISTER_TYPE_D));
-   brw_set_src1(p, insn, brw_imm_d(0x0)); /* UIP and JIP, updated later. */
+   if (brw->gen >= 8) {
+      brw_set_src0(p, insn, brw_imm_d(0x0));
+   } else {
+      brw_set_src0(p, insn, retype(brw_null_reg(), BRW_REGISTER_TYPE_D));
+      brw_set_src1(p, insn, brw_imm_d(0x0)); /* UIP and JIP, updated later. */
+   }
 
    if (p->compressed) {
       brw_inst_set_exec_size(brw, insn, BRW_EXECUTE_16);
@@ -1656,25 +1754,25 @@ brw_WHILE(struct brw_compile *p)
    brw_inst *insn, *do_insn;
    unsigned br = brw_jump_scale(brw);
 
-   if (brw->gen >= 7) {
+   if (brw->gen >= 6) {
       insn = next_insn(p, BRW_OPCODE_WHILE);
       do_insn = get_inner_do_insn(p);
 
-      brw_set_dest(p, insn, retype(brw_null_reg(), BRW_REGISTER_TYPE_D));
-      brw_set_src0(p, insn, retype(brw_null_reg(), BRW_REGISTER_TYPE_D));
-      brw_set_src1(p, insn, brw_imm_ud(0));
-      brw_inst_set_jip(brw, insn, br * (do_insn - insn));
-
-      brw_inst_set_exec_size(brw, insn, p->compressed ? BRW_EXECUTE_16
-                                                      : BRW_EXECUTE_8);
-   } else if (brw->gen == 6) {
-      insn = next_insn(p, BRW_OPCODE_WHILE);
-      do_insn = get_inner_do_insn(p);
-
-      brw_set_dest(p, insn, brw_imm_w(0));
-      brw_inst_set_gen6_jump_count(brw, insn, br * (do_insn - insn));
-      brw_set_src0(p, insn, retype(brw_null_reg(), BRW_REGISTER_TYPE_D));
-      brw_set_src1(p, insn, retype(brw_null_reg(), BRW_REGISTER_TYPE_D));
+      if (brw->gen >= 8) {
+         brw_set_dest(p, insn, retype(brw_null_reg(), BRW_REGISTER_TYPE_D));
+         brw_set_src0(p, insn, brw_imm_d(0));
+         brw_inst_set_jip(brw, insn, br * (do_insn - insn));
+      } else if (brw->gen == 7) {
+         brw_set_dest(p, insn, retype(brw_null_reg(), BRW_REGISTER_TYPE_D));
+         brw_set_src0(p, insn, retype(brw_null_reg(), BRW_REGISTER_TYPE_D));
+         brw_set_src1(p, insn, brw_imm_ud(0));
+         brw_inst_set_jip(brw, insn, br * (do_insn - insn));
+      } else {
+         brw_set_dest(p, insn, brw_imm_w(0));
+         brw_inst_set_gen6_jump_count(brw, insn, br * (do_insn - insn));
+         brw_set_src0(p, insn, retype(brw_null_reg(), BRW_REGISTER_TYPE_D));
+         brw_set_src1(p, insn, retype(brw_null_reg(), BRW_REGISTER_TYPE_D));
+      }
 
       brw_inst_set_exec_size(brw, insn, p->compressed ? BRW_EXECUTE_16
                                                       : BRW_EXECUTE_8);
@@ -2255,6 +2353,53 @@ void brw_SAMPLE(struct brw_compile *p,
                            header_present,
                            simd_mode,
                            return_format);
+}
+
+/* Adjust the message header's sampler state pointer to
+ * select the correct group of 16 samplers.
+ */
+void brw_adjust_sampler_state_pointer(struct brw_compile *p,
+                                      struct brw_reg header,
+                                      struct brw_reg sampler_index,
+                                      struct brw_reg scratch)
+{
+   /* The "Sampler Index" field can only store values between 0 and 15.
+    * However, we can add an offset to the "Sampler State Pointer"
+    * field, effectively selecting a different set of 16 samplers.
+    *
+    * The "Sampler State Pointer" needs to be aligned to a 32-byte
+    * offset, and each sampler state is only 16-bytes, so we can't
+    * exclusively use the offset - we have to use both.
+    */
+
+   struct brw_context *brw = p->brw;
+
+   if (sampler_index.file == BRW_IMMEDIATE_VALUE) {
+      const int sampler_state_size = 16; /* 16 bytes */
+      uint32_t sampler = sampler_index.dw1.ud;
+
+      if (sampler >= 16) {
+         assert(brw->is_haswell || brw->gen >= 8);
+         brw_ADD(p,
+                 get_element_ud(header, 3),
+                 get_element_ud(brw_vec8_grf(0, 0), 3),
+                 brw_imm_ud(16 * (sampler / 16) * sampler_state_size));
+      }
+   } else {
+      /* Non-const sampler array indexing case */
+      if (brw->gen < 8 && !brw->is_haswell) {
+         return;
+      }
+
+      struct brw_reg temp = vec1(retype(scratch, BRW_REGISTER_TYPE_UD));
+
+      brw_AND(p, temp, sampler_index, brw_imm_ud(0x0f0));
+      brw_SHL(p, temp, temp, brw_imm_ud(4));
+      brw_ADD(p,
+              get_element_ud(header, 3),
+              get_element_ud(brw_vec8_grf(0, 0), 3),
+              temp);
+   }
 }
 
 /* All these variables are pretty confusing - we might be better off

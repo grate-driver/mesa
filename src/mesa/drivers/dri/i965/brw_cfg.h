@@ -61,6 +61,8 @@ struct bblock_t {
    void dump(backend_visitor *v);
 #endif
 
+   struct exec_node link;
+
    struct backend_instruction *start;
    struct backend_instruction *end;
 
@@ -69,7 +71,7 @@ struct bblock_t {
 
    struct exec_list parents;
    struct exec_list children;
-   int block_num;
+   int num;
 
    /* If the current basic block ends in an IF, ELSE, or ENDIF instruction,
     * these pointers will hold the locations of the other associated control
@@ -107,10 +109,28 @@ struct cfg_t {
    foreach_block (__block, __cfg)                              \
       foreach_inst_in_block (__type, __inst, __block)
 
+#define foreach_block_and_inst_safe(__block, __type, __inst, __cfg) \
+   foreach_block_safe (__block, __cfg)                              \
+      foreach_inst_in_block_safe (__type, __inst, __block)
+
+#define foreach_block(__block, __cfg)                          \
+   foreach_list_typed (bblock_t, __block, link, &(__cfg)->block_list)
+
+#define foreach_block_safe(__block, __cfg)                     \
+   foreach_list_typed_safe (bblock_t, __block, link, &(__cfg)->block_list)
+
 #define foreach_inst_in_block(__type, __inst, __block)         \
    for (__type *__inst = (__type *)__block->start;             \
         __inst != __block->end->next;                          \
         __inst = (__type *)__inst->next)
+
+#define foreach_inst_in_block_safe(__type, __inst, __block)    \
+   for (__type *__inst = (__type *)__block->start,             \
+               *__next = (__type *)__inst->next,               \
+               *__end = (__type *)__block->end->next->next;    \
+        __next != __end;                                       \
+        __inst = __next,                                       \
+        __next = (__type *)__next->next)
 
 #define foreach_inst_in_block_reverse(__type, __inst, __block) \
    for (__type *__inst = (__type *)__block->end;               \

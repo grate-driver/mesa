@@ -215,8 +215,7 @@ void vc4_state_init(struct pipe_context *pctx);
 void vc4_program_init(struct pipe_context *pctx);
 void vc4_simulator_init(struct vc4_screen *screen);
 int vc4_simulator_flush(struct vc4_context *vc4,
-                        struct drm_vc4_submit_cl *args,
-                        struct vc4_surface *color_surf);
+                        struct drm_vc4_submit_cl *args);
 
 void vc4_write_uniforms(struct vc4_context *vc4,
                         struct vc4_compiled_shader *shader,
@@ -228,6 +227,6 @@ void vc4_flush(struct pipe_context *pctx);
 void vc4_flush_for_bo(struct pipe_context *pctx, struct vc4_bo *bo);
 void vc4_emit_state(struct pipe_context *pctx);
 void vc4_generate_code(struct qcompile *c);
-void vc4_update_compiled_shaders(struct vc4_context *vc4);
+void vc4_update_compiled_shaders(struct vc4_context *vc4, uint8_t prim_mode);
 
 #endif /* VC4_CONTEXT_H */

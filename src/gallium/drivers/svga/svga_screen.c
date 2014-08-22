@@ -278,6 +278,8 @@ svga_get_param(struct pipe_screen *screen, enum pipe_cap param)
    case PIPE_CAP_TEXTURE_GATHER_OFFSETS:
    case PIPE_CAP_TGSI_VS_WINDOW_SPACE_POSITION:
    case PIPE_CAP_DRAW_INDIRECT:
+   case PIPE_CAP_TGSI_FS_FINE_DERIVATIVE:
+   case PIPE_CAP_CONDITIONAL_RENDER_INVERTED:
       return 0;
    case PIPE_CAP_MIN_MAP_BUFFER_ALIGNMENT:
       return 64;
@@ -287,6 +289,18 @@ svga_get_param(struct pipe_screen *screen, enum pipe_cap param)
       return 1;
    case PIPE_CAP_ENDIANNESS:
       return PIPE_ENDIAN_LITTLE;
+
+   case PIPE_CAP_VENDOR_ID:
+      return 0x15ad; /* VMware Inc. */
+   case PIPE_CAP_DEVICE_ID:
+      return 0x0405; /* assume SVGA II */
+   case PIPE_CAP_ACCELERATED:
+      return 0; /* XXX: */
+   case PIPE_CAP_VIDEO_MEMORY:
+      /* XXX: Query the host ? */
+      return 1;
+   case PIPE_CAP_UMA:
+      return 0;
    }
 
    debug_printf("Unexpected PIPE_CAP_ query %u\n", param);

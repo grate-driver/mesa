@@ -691,11 +691,11 @@ vec4_visitor::setup_uniform_values(ir_variable *ir)
 
          int i;
          for (i = 0; i < uniform_vector_size[uniforms]; i++) {
-            stage_prog_data->param[uniforms * 4 + i] = &components->f;
+            stage_prog_data->param[uniforms * 4 + i] = components;
             components++;
          }
          for (; i < 4; i++) {
-            static float zero = 0;
+            static gl_constant_value zero = { 0.0 };
             stage_prog_data->param[uniforms * 4 + i] = &zero;
          }
 
@@ -715,7 +715,8 @@ vec4_visitor::setup_uniform_clipplane_values()
       this->userplane[i] = dst_reg(UNIFORM, this->uniforms);
       this->userplane[i].type = BRW_REGISTER_TYPE_F;
       for (int j = 0; j < 4; ++j) {
-         stage_prog_data->param[this->uniforms * 4 + j] = &clip_planes[i][j];
+         stage_prog_data->param[this->uniforms * 4 + j] =
+            (gl_constant_value *) &clip_planes[i][j];
       }
       ++this->uniforms;
    }
@@ -739,7 +740,8 @@ vec4_visitor::setup_builtin_uniform_values(ir_variable *ir)
        */
       int index = _mesa_add_state_reference(this->prog->Parameters,
 					    (gl_state_index *)slots[i].tokens);
-      float *values = &this->prog->Parameters->ParameterValues[index][0].f;
+      gl_constant_value *values =
+         &this->prog->Parameters->ParameterValues[index][0];
 
       assert(this->uniforms < uniform_array_size);
       this->uniform_vector_size[this->uniforms] = 0;
@@ -1279,10 +1281,11 @@ vec4_visitor::visit(ir_expression *ir)
 
    switch (ir->operation) {
    case ir_unop_logic_not:
-      /* Note that BRW_OPCODE_NOT is not appropriate here, since it is
-       * ones complement of the whole register, not just bit 0.
-       */
-      emit(XOR(result_dst, op[0], src_reg(1)));
+      if (ctx->Const.UniformBooleanTrue != 1) {
+         emit(NOT(result_dst, op[0]));
+      } else {
+         emit(XOR(result_dst, op[0], src_reg(1)));
+      }
       break;
    case ir_unop_neg:
       op[0].negate = !op[0].negate;
@@ -1348,7 +1351,11 @@ vec4_visitor::visit(ir_expression *ir)
       break;
 
    case ir_unop_dFdx:
+   case ir_unop_dFdx_coarse:
+   case ir_unop_dFdx_fine:
    case ir_unop_dFdy:
+   case ir_unop_dFdy_coarse:
+   case ir_unop_dFdy_fine:
       unreachable("derivatives not valid in vertex shader");
 
    case ir_unop_bitfield_reverse:
@@ -1462,7 +1469,9 @@ vec4_visitor::visit(ir_expression *ir)
    case ir_binop_nequal: {
       emit(CMP(result_dst, op[0], op[1],
 	       brw_conditional_for_comparison(ir->operation)));
-      emit(AND(result_dst, result_src, src_reg(0x1)));
+      if (ctx->Const.UniformBooleanTrue == 1) {
+         emit(AND(result_dst, result_src, src_reg(1)));
+      }
       break;
    }
 
@@ -1472,11 +1481,13 @@ vec4_visitor::visit(ir_expression *ir)
 	  ir->operands[1]->type->is_vector()) {
 	 emit(CMP(dst_null_d(), op[0], op[1], BRW_CONDITIONAL_Z));
 	 emit(MOV(result_dst, src_reg(0)));
-	 inst = emit(MOV(result_dst, src_reg(1)));
+         inst = emit(MOV(result_dst, src_reg(ctx->Const.UniformBooleanTrue)));
 	 inst->predicate = BRW_PREDICATE_ALIGN16_ALL4H;
       } else {
 	 emit(CMP(result_dst, op[0], op[1], BRW_CONDITIONAL_Z));
-	 emit(AND(result_dst, result_src, src_reg(0x1)));
+         if (ctx->Const.UniformBooleanTrue == 1) {
+            emit(AND(result_dst, result_src, src_reg(1)));
+         }
       }
       break;
    case ir_binop_any_nequal:
@@ -1486,11 +1497,13 @@ vec4_visitor::visit(ir_expression *ir)
 	 emit(CMP(dst_null_d(), op[0], op[1], BRW_CONDITIONAL_NZ));
 
 	 emit(MOV(result_dst, src_reg(0)));
-	 inst = emit(MOV(result_dst, src_reg(1)));
+         inst = emit(MOV(result_dst, src_reg(ctx->Const.UniformBooleanTrue)));
 	 inst->predicate = BRW_PREDICATE_ALIGN16_ANY4H;
       } else {
 	 emit(CMP(result_dst, op[0], op[1], BRW_CONDITIONAL_NZ));
-	 emit(AND(result_dst, result_src, src_reg(0x1)));
+         if (ctx->Const.UniformBooleanTrue == 1) {
+            emit(AND(result_dst, result_src, src_reg(1)));
+         }
       }
       break;
 
@@ -1498,7 +1511,7 @@ vec4_visitor::visit(ir_expression *ir)
       emit(CMP(dst_null_d(), op[0], src_reg(0), BRW_CONDITIONAL_NZ));
       emit(MOV(result_dst, src_reg(0)));
 
-      inst = emit(MOV(result_dst, src_reg(1)));
+      inst = emit(MOV(result_dst, src_reg(ctx->Const.UniformBooleanTrue)));
       inst->predicate = BRW_PREDICATE_ALIGN16_ANY4H;
       break;
 
@@ -1547,18 +1560,34 @@ vec4_visitor::visit(ir_expression *ir)
    case ir_unop_i2u:
    case ir_unop_u2i:
    case ir_unop_u2f:
-   case ir_unop_b2f:
-   case ir_unop_b2i:
    case ir_unop_f2i:
    case ir_unop_f2u:
       emit(MOV(result_dst, op[0]));
       break;
-   case ir_unop_f2b:
-   case ir_unop_i2b: {
-      emit(CMP(result_dst, op[0], src_reg(0.0f), BRW_CONDITIONAL_NZ));
-      emit(AND(result_dst, result_src, src_reg(1)));
+   case ir_unop_b2i:
+      if (ctx->Const.UniformBooleanTrue != 1) {
+         emit(AND(result_dst, op[0], src_reg(1)));
+      } else {
+         emit(MOV(result_dst, op[0]));
+      }
       break;
-   }
+   case ir_unop_b2f:
+      if (ctx->Const.UniformBooleanTrue != 1) {
+         op[0].type = BRW_REGISTER_TYPE_UD;
+         result_dst.type = BRW_REGISTER_TYPE_UD;
+         emit(AND(result_dst, op[0], src_reg(0x3f800000u)));
+         result_dst.type = BRW_REGISTER_TYPE_F;
+      } else {
+         emit(MOV(result_dst, op[0]));
+      }
+      break;
+   case ir_unop_f2b:
+   case ir_unop_i2b:
+      emit(CMP(result_dst, op[0], src_reg(0.0f), BRW_CONDITIONAL_NZ));
+      if (ctx->Const.UniformBooleanTrue == 1) {
+         emit(AND(result_dst, result_src, src_reg(1)));
+      }
+      break;
 
    case ir_unop_trunc:
       emit(RNDZ(result_dst, op[0]));
@@ -1618,7 +1647,7 @@ vec4_visitor::visit(ir_expression *ir)
       break;
 
    case ir_binop_ubo_load: {
-      ir_constant *uniform_block = ir->operands[0]->as_constant();
+      ir_constant *const_uniform_block = ir->operands[0]->as_constant();
       ir_constant *const_offset_ir = ir->operands[1]->as_constant();
       unsigned const_offset = const_offset_ir ? const_offset_ir->value.u[0] : 0;
       src_reg offset;
@@ -1628,8 +1657,31 @@ vec4_visitor::visit(ir_expression *ir)
 
       src_reg packed_consts = src_reg(this, glsl_type::vec4_type);
       packed_consts.type = result.type;
-      src_reg surf_index =
-         src_reg(prog_data->base.binding_table.ubo_start + uniform_block->value.u[0]);
+      src_reg surf_index;
+
+      if (const_uniform_block) {
+         /* The block index is a constant, so just emit the binding table entry
+          * as an immediate.
+          */
+         surf_index = src_reg(prog_data->base.binding_table.ubo_start +
+                              const_uniform_block->value.u[0]);
+      } else {
+         /* The block index is not a constant. Evaluate the index expression
+          * per-channel and add the base UBO index; the generator will select
+          * a value from any live channel.
+          */
+         surf_index = src_reg(this, glsl_type::uint_type);
+         emit(ADD(dst_reg(surf_index), op[0],
+                  src_reg(prog_data->base.binding_table.ubo_start)));
+
+         /* Assume this may touch any UBO. It would be nice to provide
+          * a tighter bound, but the array information is already lowered away.
+          */
+         brw_mark_surface_used(&prog_data->base,
+                               prog_data->base.binding_table.ubo_start +
+                               shader_prog->NumUniformBlocks - 1);
+      }
+
       if (const_offset_ir) {
          if (brw->gen >= 8) {
             /* Store the offset in a GRF so we can send-from-GRF. */
@@ -1674,11 +1726,15 @@ vec4_visitor::visit(ir_expression *ir)
                                             const_offset % 16 / 4,
                                             const_offset % 16 / 4);
 
-      /* UBO bools are any nonzero int.  We store bools as either 0 or 1. */
+      /* UBO bools are any nonzero int.  We need to convert them to use the
+       * value of true stored in ctx->Const.UniformBooleanTrue.
+       */
       if (ir->type->base_type == GLSL_TYPE_BOOL) {
          emit(CMP(result_dst, packed_consts, src_reg(0u),
                   BRW_CONDITIONAL_NZ));
-         emit(AND(result_dst, result, src_reg(0x1)));
+         if (ctx->Const.UniformBooleanTrue == 1) {
+            emit(AND(result_dst, result, src_reg(1)));
+         }
       } else {
          emit(MOV(result_dst, packed_consts));
       }
@@ -2202,7 +2258,9 @@ vec4_visitor::emit_constant_values(dst_reg *dst, ir_constant *ir)
 	 emit(MOV(*dst, src_reg(ir->value.u[i])));
 	 break;
       case GLSL_TYPE_BOOL:
-	 emit(MOV(*dst, src_reg(ir->value.b[i])));
+         emit(MOV(*dst,
+                  src_reg(ir->value.b[i] != 0 ? ctx->Const.UniformBooleanTrue
+                                              : 0)));
 	 break;
       default:
 	 unreachable("Non-float/uint/int/bool constant");
@@ -2276,7 +2334,7 @@ vec4_visitor::visit(ir_call *ir)
 }
 
 src_reg
-vec4_visitor::emit_mcs_fetch(ir_texture *ir, src_reg coordinate, uint32_t sampler)
+vec4_visitor::emit_mcs_fetch(ir_texture *ir, src_reg coordinate, src_reg sampler)
 {
    vec4_instruction *inst = new(mem_ctx) vec4_instruction(this, SHADER_OPCODE_TXF_MCS);
    inst->base_mrf = 2;
@@ -2284,7 +2342,7 @@ vec4_visitor::emit_mcs_fetch(ir_texture *ir, src_reg coordinate, uint32_t sample
    inst->dst = dst_reg(this, glsl_type::uvec4_type);
    inst->dst.writemask = WRITEMASK_XYZW;
 
-   inst->src[1] = src_reg(sampler);
+   inst->src[1] = sampler;
 
    /* parameters are: u, v, r, lod; lod will always be zero due to api restrictions */
    int param_base = inst->base_mrf;
@@ -2301,11 +2359,55 @@ vec4_visitor::emit_mcs_fetch(ir_texture *ir, src_reg coordinate, uint32_t sample
    return src_reg(inst->dst);
 }
 
+static bool
+is_high_sampler(struct brw_context *brw, src_reg sampler)
+{
+   if (brw->gen < 8 && !brw->is_haswell)
+      return false;
+
+   return sampler.file != IMM || sampler.fixed_hw_reg.dw1.ud >= 16;
+}
+
 void
 vec4_visitor::visit(ir_texture *ir)
 {
    uint32_t sampler =
       _mesa_get_sampler_uniform_value(ir->sampler, shader_prog, prog);
+
+   ir_rvalue *nonconst_sampler_index =
+      _mesa_get_sampler_array_nonconst_index(ir->sampler);
+
+   /* Handle non-constant sampler array indexing */
+   src_reg sampler_reg;
+   if (nonconst_sampler_index) {
+      /* The highest sampler which may be used by this operation is
+       * the last element of the array. Mark it here, because the generator
+       * doesn't have enough information to determine the bound.
+       */
+      uint32_t array_size = ir->sampler->as_dereference_array()
+         ->array->type->array_size();
+
+      uint32_t max_used = sampler + array_size - 1;
+      if (ir->op == ir_tg4 && brw->gen < 8) {
+         max_used += prog_data->base.binding_table.gather_texture_start;
+      } else {
+         max_used += prog_data->base.binding_table.texture_start;
+      }
+
+      brw_mark_surface_used(&prog_data->base, max_used);
+
+      /* Emit code to evaluate the actual indexing expression */
+      nonconst_sampler_index->accept(this);
+      dst_reg temp(this, glsl_type::uint_type);
+      emit(ADD(temp, this->result, src_reg(sampler)))
+         ->force_writemask_all = true;
+      sampler_reg = src_reg(temp);
+   } else {
+      /* Single sampler, or constant array index; the indexing expression
+       * is just an immediate.
+       */
+      sampler_reg = src_reg(sampler);
+   }
 
    /* When tg4 is used with the degenerate ZERO/ONE swizzles, don't bother
     * emitting anything other than setting up the constant result.
@@ -2374,7 +2476,7 @@ vec4_visitor::visit(ir_texture *ir)
       sample_index_type = ir->lod_info.sample_index->type;
 
       if (brw->gen >= 7 && key->tex.compressed_multisample_layout_mask & (1<<sampler))
-         mcs = emit_mcs_fetch(ir, coordinate, sampler);
+         mcs = emit_mcs_fetch(ir, coordinate, sampler_reg);
       else
          mcs = src_reg(0u);
       break;
@@ -2429,14 +2531,14 @@ vec4_visitor::visit(ir_texture *ir)
     */
    inst->header_present =
       brw->gen < 5 || inst->texture_offset != 0 || ir->op == ir_tg4 ||
-      sampler >= 16;
+      is_high_sampler(brw, sampler_reg);
    inst->base_mrf = 2;
    inst->mlen = inst->header_present + 1; /* always at least one */
    inst->dst = dst_reg(this, ir->type);
    inst->dst.writemask = WRITEMASK_XYZW;
    inst->shadow_compare = ir->shadow_comparitor != NULL;
 
-   inst->src[1] = src_reg(sampler);
+   inst->src[1] = sampler_reg;
 
    /* MRF for the first parameter */
    int param_base = inst->base_mrf + inst->header_present;
@@ -3309,7 +3411,8 @@ vec4_visitor::move_uniform_array_access_to_pull_constants()
 	  * add it.
 	  */
 	 if (pull_constant_loc[uniform] == -1) {
-	    const float **values = &stage_prog_data->param[uniform * 4];
+	    const gl_constant_value **values =
+               &stage_prog_data->param[uniform * 4];
 
 	    pull_constant_loc[uniform] = stage_prog_data->nr_pull_params / 4;
 

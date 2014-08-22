@@ -77,6 +77,13 @@
 #define _3DPRIM_LINESTRIP_CONT_BF 0x14
 #define _3DPRIM_TRIFAN_NOSTIPPLE  0x15
 
+/* We use this offset to be able to pass native primitive types in struct
+ * _mesa_prim::mode.  Native primitive types are BRW_PRIM_OFFSET +
+ * native_type, which should be different from all GL types and still fit in
+ * the 8 bits avialable. */
+
+#define BRW_PRIM_OFFSET           0x80
+
 #define BRW_ANISORATIO_2     0
 #define BRW_ANISORATIO_4     1
 #define BRW_ANISORATIO_6     2
@@ -548,6 +555,10 @@
 /* Surface state DW4 */
 #define BRW_SURFACE_MIN_LOD_SHIFT	28
 #define BRW_SURFACE_MIN_LOD_MASK	INTEL_MASK(31, 28)
+#define BRW_SURFACE_MIN_ARRAY_ELEMENT_SHIFT	17
+#define BRW_SURFACE_MIN_ARRAY_ELEMENT_MASK	INTEL_MASK(27, 17)
+#define BRW_SURFACE_RENDER_TARGET_VIEW_EXTENT_SHIFT	8
+#define BRW_SURFACE_RENDER_TARGET_VIEW_EXTENT_MASK	INTEL_MASK(16, 8)
 #define BRW_SURFACE_MULTISAMPLECOUNT_1  (0 << 4)
 #define BRW_SURFACE_MULTISAMPLECOUNT_4  (2 << 4)
 #define GEN7_SURFACE_MULTISAMPLECOUNT_1         (0 << 3)
@@ -843,6 +854,7 @@ enum opcode {
     */
    FS_OPCODE_FB_WRITE = 128,
    FS_OPCODE_BLORP_FB_WRITE,
+   FS_OPCODE_REP_FB_WRITE,
    SHADER_OPCODE_RCP,
    SHADER_OPCODE_RSQ,
    SHADER_OPCODE_SQRT,
@@ -1002,6 +1014,12 @@ enum opcode {
     * - dst is the GRF for gl_InvocationID.
     */
    GS_OPCODE_GET_INSTANCE_ID,
+};
+
+enum brw_derivative_quality {
+   BRW_DERIVATIVE_BY_HINT = 0,
+   BRW_DERIVATIVE_FINE = 1,
+   BRW_DERIVATIVE_COARSE = 2,
 };
 
 enum brw_urb_write_flags {
