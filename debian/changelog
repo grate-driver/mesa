@@ -1,7 +1,8 @@
-mesa (10.3~rc1-1) UNRELEASED; urgency=low
+mesa (10.3~rc2-1) UNRELEASED; urgency=low
 
   [ Maarten Lankhorst ]
   * Build with llvm 3.5.
+  * New upstream release.
 
   [ Timo Aaltonen ]
   * mesa-common-dev: Add glcorearb.h.
