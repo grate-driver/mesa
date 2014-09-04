@@ -1,6 +1,9 @@
 mesa (10.3~rc2-0ubuntu1) UNRELEASED; urgency=low
 
   * Merge from unreleased debian-experimental.
+  * Add patch to fix ftbfs.
+    - Revert build failure causer.
+    - Add fixup-ppc-ftbfs.patch
 
  -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Tue, 12 Aug 2014 09:38:49 +0200
 
