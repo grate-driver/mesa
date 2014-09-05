@@ -1655,6 +1655,7 @@ strip_unwanted_llvm_flags() {
     # Use \> (marks the end of the word)
     echo `$1` | sed \
 	-e 's/-DNDEBUG\>//g' \
+	-e 's/-D_GNU_SOURCE\>//g' \
 	-e 's/-pedantic\>//g' \
 	-e 's/-Wcovered-switch-default\>//g' \
 	-e 's/-O.\>//g' \
