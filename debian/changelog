@@ -1,4 +1,4 @@
-mesa (10.3~rc2-1) UNRELEASED; urgency=low
+mesa (10.3.0~rc3-1) UNRELEASED; urgency=low
 
   [ Maarten Lankhorst ]
   * Build with llvm 3.5.
