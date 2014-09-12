@@ -279,10 +279,12 @@ binary-arch: install
 	mv debian/tmp/dri/usr/lib/${DEB_HOST_MULTIARCH}/dri/*_dri.so \
 	   debian/libgl1-mesa-dri/usr/lib/${DEB_HOST_MULTIARCH}/dri/
 
+  ifneq ($(DEB_HOST_ARCH_OS), hurd)
 	# Copy the hardlinked vdpau drivers correctly.
 	install -m755 -d debian/mesa-vdpau-drivers/usr/lib/${DEB_HOST_MULTIARCH}/vdpau/
 	mv debian/tmp/dri/usr/lib/${DEB_HOST_MULTIARCH}/vdpau/libvdpau*.so* \
 	   debian/mesa-vdpau-drivers/usr/lib/${DEB_HOST_MULTIARCH}/vdpau/
+  endif
 
 	dh_install -s --fail-missing
 	dh_installman -s
