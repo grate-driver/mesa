@@ -138,6 +138,7 @@ confflags-dri = \
 	--enable-shared-glapi \
 	--enable-texture-float \
 	--disable-xvmc \
+	--disable-omx \
 	$(confflags_DIRECT_RENDERING) \
 	$(confflags_DRI3) \
 	$(confflags_EGL) \
@@ -174,8 +175,6 @@ confflags-swx11-i386-i686 = \
 	--disable-shared-glapi \
 	--libdir=/usr/lib/$(DEB_HOST_MULTIARCH)/i686/cmov \
 	$(buildflags-i686)
-
-confflags += --disable-omx
 
 configure: $(QUILT_STAMPFN) configure.ac
 	autoreconf -vfi
