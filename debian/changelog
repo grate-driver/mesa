@@ -1,3 +1,9 @@
+mesa (10.3~rc3-2ubuntu1) UNRELEASED; urgency=low
+
+  * Merge from unreleased debian-experimental.
+
+ -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Tue, 12 Aug 2014 09:38:49 +0200
+
 mesa (10.3.0~rc3-2) experimental; urgency=medium
 
   [ Andreas Boll ]
@@ -23,15 +29,6 @@ mesa (10.3.0~rc3-1) experimental; urgency=medium
   * not-installed: Skip libglapi.so.
 
  -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Mon, 08 Sep 2014 15:50:42 +0200
-
-mesa (10.3~rc2-0ubuntu1) UNRELEASED; urgency=low
-
-  * Merge from unreleased debian-experimental.
-  * Add patch to fix ftbfs.
-    - Revert build failure causer.
-    - Add fixup-ppc-ftbfs.patch
-
- -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Tue, 12 Aug 2014 09:38:49 +0200
 
 mesa (10.2.6-1ubuntu1) utopic; urgency=medium
 
