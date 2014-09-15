@@ -6,6 +6,7 @@ mesa (10.3.0~rc3-3) UNRELEASED; urgency=medium
   * Bump compat to v9 for changed dh_strip behavior:
     - dh_strip puts separated debug symbols in a location based on their
       build-id (Closes: #755921).
+  * Drop redundant libegl1-mesa-drivers.install.linux.in.
 
   [ Dima Kogan ]
   * All -dev packages are now Multi-Arch: same (Closes: #689088, #678040).
