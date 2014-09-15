@@ -40,6 +40,7 @@ copy_image_with_blitter(struct brw_context *brw,
                         int src_width, int src_height)
 {
    GLuint bw, bh;
+   uint32_t src_image_x, src_image_y, dst_image_x, dst_image_y;
    int cpp;
 
    /* The blitter doesn't understand multisampling at all. */
@@ -70,43 +71,53 @@ copy_image_with_blitter(struct brw_context *brw,
       return false;
    }
 
+   intel_miptree_get_image_offset(src_mt, src_level, src_z,
+                                  &src_image_x, &src_image_y);
+
    if (_mesa_is_format_compressed(src_mt->format)) {
       _mesa_get_format_block_size(src_mt->format, &bw, &bh);
 
       assert(src_x % bw == 0);
-      assert(src_y % bw == 0);
+      assert(src_y % bh == 0);
       assert(src_width % bw == 0);
-      assert(src_height % bw == 0);
+      assert(src_height % bh == 0);
 
       src_x /= (int)bw;
-      src_y /= (int)bw;
+      src_y /= (int)bh;
       src_width /= (int)bw;
-      src_height /= (int)bw;
+      src_height /= (int)bh;
+
+      /* Inside of the miptree, the x offsets are stored in pixels while
+       * the y offsets are stored in blocks.  We need to scale just the x
+       * offset.
+       */
+      src_image_x /= bw;
 
       cpp = _mesa_get_format_bytes(src_mt->format);
    } else {
       cpp = src_mt->cpp;
    }
+   src_x += src_image_x;
+   src_y += src_image_y;
+
+   intel_miptree_get_image_offset(dst_mt, dst_level, dst_z,
+                                  &dst_image_x, &dst_image_y);
 
    if (_mesa_is_format_compressed(dst_mt->format)) {
       _mesa_get_format_block_size(dst_mt->format, &bw, &bh);
 
       assert(dst_x % bw == 0);
-      assert(dst_y % bw == 0);
+      assert(dst_y % bh == 0);
 
       dst_x /= (int)bw;
-      dst_y /= (int)bw;
+      dst_y /= (int)bh;
+
+      /* Inside of the miptree, the x offsets are stored in pixels while
+       * the y offsets are stored in blocks.  We need to scale just the x
+       * offset.
+       */
+      dst_image_x /= bw;
    }
-
-   uint32_t src_image_x, src_image_y;
-   intel_miptree_get_image_offset(src_mt, src_level, src_z,
-                                  &src_image_x, &src_image_y);
-   src_x += src_image_x;
-   src_y += src_image_y;
-
-   uint32_t dst_image_x, dst_image_y;
-   intel_miptree_get_image_offset(dst_mt, dst_level, dst_z,
-                                  &dst_image_x, &dst_image_y);
    dst_x += dst_image_x;
    dst_y += dst_image_y;
 
@@ -243,9 +254,11 @@ intel_copy_image_sub_data(struct gl_context *ctx,
    intel_miptree_all_slices_resolve_depth(brw, intel_dst_image->mt);
    intel_miptree_resolve_color(brw, intel_dst_image->mt);
 
-   if (copy_image_with_blitter(brw, intel_src_image->mt, src_image->Level,
+   unsigned src_level = src_image->Level + src_image->TexObject->MinLevel;
+   unsigned dst_level = dst_image->Level + dst_image->TexObject->MinLevel;
+   if (copy_image_with_blitter(brw, intel_src_image->mt, src_level,
                                src_x, src_y, src_z,
-                               intel_dst_image->mt, src_image->Level,
+                               intel_dst_image->mt, dst_level,
                                dst_x, dst_y, dst_z,
                                src_width, src_height))
       return;
@@ -253,9 +266,9 @@ intel_copy_image_sub_data(struct gl_context *ctx,
    /* This is a worst-case scenario software fallback that maps the two
     * textures and does a memcpy between them.
     */
-   copy_image_with_memcpy(brw, intel_src_image->mt, src_image->Level,
+   copy_image_with_memcpy(brw, intel_src_image->mt, src_level,
                           src_x, src_y, src_z,
-                          intel_dst_image->mt, src_image->Level,
+                          intel_dst_image->mt, dst_level,
                           dst_x, dst_y, dst_z,
                           src_width, src_height);
 }

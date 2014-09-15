@@ -1,13 +1,17 @@
-mesa (10.3~rc2-0ubuntu1) UNRELEASED; urgency=low
+mesa (10.3.0~rc3-2) experimental; urgency=medium
 
-  * Merge from unreleased debian-experimental.
-  * Add patch to fix ftbfs.
-    - Revert build failure causer.
-    - Add fixup-ppc-ftbfs.patch
+  [ Andreas Boll ]
+  * Add 01_gallium-util-add-missing-u_debug-include.patch, fixes FTBFS on
+    big endian archs.
+  * Enable --with-egl-platforms=drm on kfreebsd-any, should fix FTBFS.
+  * Don't try to install vdpau hardlinks on hurd, should fix FTBFS.
 
- -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Tue, 12 Aug 2014 09:38:49 +0200
+  [ Fabio Pedretti ]
+  * debian/rules: minor cleanup.
 
-mesa (10.3~rc2-1) UNRELEASED; urgency=low
+ -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Mon, 15 Sep 2014 11:01:55 +0200
+
+mesa (10.3.0~rc3-1) experimental; urgency=medium
 
   [ Maarten Lankhorst ]
   * Build with llvm 3.5.
@@ -17,6 +21,15 @@ mesa (10.3~rc2-1) UNRELEASED; urgency=low
   [ Timo Aaltonen ]
   * mesa-common-dev: Add glcorearb.h.
   * not-installed: Skip libglapi.so.
+
+ -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Mon, 08 Sep 2014 15:50:42 +0200
+
+mesa (10.3~rc2-0ubuntu1) UNRELEASED; urgency=low
+
+  * Merge from unreleased debian-experimental.
+  * Add patch to fix ftbfs.
+    - Revert build failure causer.
+    - Add fixup-ppc-ftbfs.patch
 
  -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Tue, 12 Aug 2014 09:38:49 +0200
 
