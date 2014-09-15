@@ -1,3 +1,10 @@
+mesa (10.3.0~rc3-3) UNRELEASED; urgency=medium
+
+  * Bump llvm-3.5-dev and libclang-3.5-dev to 1:3.5-1, should fix FTBFS on
+    kfreebsd-*.
+
+ -- Andreas Boll <andreas.boll.dev@gmail.com>  Mon, 15 Sep 2014 14:19:30 +0200
+
 mesa (10.3.0~rc3-2) experimental; urgency=medium
 
   [ Andreas Boll ]
