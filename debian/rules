@@ -91,7 +91,6 @@ else
   # Build intel drivers on archs where libdrm-intel is installed
   ifneq (,$(filter $(DEB_HOST_ARCH),amd64 i386 kfreebsd-amd64 kfreebsd-i386 x32))
 	DRI_DRIVERS += i915 i965
-	GALLIUM_DRIVERS += ilo
   endif
 
   # Do not build llvmpipe for armhf, it regresses compared to the classic swrast.
