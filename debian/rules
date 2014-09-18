@@ -288,7 +288,7 @@ binary-arch: install
 			dh_makeshlibs -p$$PACKAGE -- -c4 \
 			-edebian/$$PACKAGE/usr/lib/$(DEB_HOST_MULTIARCH)/mesa-egl/\* \
 		; done
-	dh_makeshlibs -s --remaining-packages -- -c4
+	dh_makeshlibs -s -Xgbm_gallium_drm.so --remaining-packages -- -c4
 
 	dh_installdeb -s
 	dh_shlibdeps -s -l/usr/lib/$(DEB_HOST_MULTIARCH)/mesa:\
