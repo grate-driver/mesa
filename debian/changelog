@@ -49,6 +49,18 @@ mesa (10.3.0~rc3-1) experimental; urgency=medium
 
  -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Mon, 08 Sep 2014 15:50:42 +0200
 
+mesa (10.2.6-1ubuntu3) utopic; urgency=medium
+
+  * And revert again for now.. (LP: #1360241)
+
+ -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Fri, 22 Aug 2014 15:02:30 +0200
+
+mesa (10.2.6-1ubuntu2) utopic; urgency=medium
+
+  * Fixup typo.
+
+ -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Thu, 21 Aug 2014 18:39:52 +0200
+
 mesa (10.2.6-1ubuntu1) utopic; urgency=medium
 
   * Drop 101_ubuntu_hidden_glname.patch.
