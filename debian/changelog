@@ -1,5 +1,6 @@
 mesa (10.3.0~rc3-3ubuntu1) UNRELEASED; urgency=low
 
+  * New upstream release candidate. (LP: #1364003)
   * Merge from released debian-experimental.
   * Import upstream fix for altivec little endian instructions.
 
