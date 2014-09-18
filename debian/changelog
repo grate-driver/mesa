@@ -1,6 +1,7 @@
 mesa (10.3.0~rc3-2ubuntu1) UNRELEASED; urgency=low
 
   * Merge from released debian-experimental.
+  * Import upstream fix for altivec little endian instructions.
 
  -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Tue, 12 Aug 2014 09:38:49 +0200
 

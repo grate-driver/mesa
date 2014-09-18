@@ -4,3 +4,4 @@
 # Ubuntu patches.
 egl-platform-mir.patch
 i915-dont-default-to-2.1.patch
+fix-altivec-intrinsics.patch
