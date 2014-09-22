@@ -1,6 +1,6 @@
 mesa (10.3.0-0ubuntu1) utopic; urgency=medium
 
-  * New upstream release candidate. (LP: #1364003)
+  * New upstream release. (LP: #1364003)
   * Merge from released debian-experimental.
 
  -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Mon, 22 Sep 2014 15:42:27 +0200
