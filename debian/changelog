@@ -1,3 +1,9 @@
+mesa (10.3.0-1) UNRELEASED; urgency=medium
+
+  * New upstream release.
+
+ -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Mon, 22 Sep 2014 11:31:45 +0200
+
 mesa (10.3.0~rc3-3) experimental; urgency=medium
 
   [ Andreas Boll ]
