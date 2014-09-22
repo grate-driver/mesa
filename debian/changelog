@@ -1,6 +1,8 @@
 mesa (10.3.0-1) UNRELEASED; urgency=medium
 
   * New upstream release.
+  * Remove upstreamed patch.
+    - 01_gallium-util-add-missing-u_debug-include.patch
 
  -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Mon, 22 Sep 2014 11:31:45 +0200
 
