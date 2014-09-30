@@ -1,10 +1,10 @@
-mesa (10.3.0-0ubuntu2) UNRELEASED; urgency=low
+mesa (10.3.0-0ubuntu2) utopic; urgency=medium
 
   * Add depends on libgl1-mesa-dri to some packages.
     - libgl1-mesa-glx, libegl1-mesa and libgbm1 depend on the dri
       files to be installed, even for swrast support. (LP: #1374131)
 
- -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Mon, 29 Sep 2014 13:02:56 +0200
+ -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Mon, 29 Sep 2014 14:33:23 +0200
 
 mesa (10.3.0-0ubuntu1) utopic; urgency=medium
 
