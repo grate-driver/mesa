@@ -6,7 +6,6 @@ mesa (10.3.0-1) UNRELEASED; urgency=medium
     - 01_gallium-util-add-missing-u_debug-include.patch
 
   [ Andreas Boll ]
-  * Downgrade llvm to 3.4 for now, fixes FTBFS with newer binutils.
   * Move gallium-pipe installation from libgl1-mesa-dri.install.linux.in
     to mesa-opencl-icd.install.in, because it's only needed for opencl.
 
