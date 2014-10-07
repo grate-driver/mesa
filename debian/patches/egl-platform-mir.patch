@@ -1,6 +1,6 @@
 --- a/configure.ac
 +++ b/configure.ac
-@@ -1583,7 +1583,9 @@
+@@ -1562,7 +1562,9 @@
  
  	android|fbdev|gdi|null)
  		;;
@@ -11,7 +11,7 @@
  	*)
  		AC_MSG_ERROR([EGL platform '$plat' does not exist])
  		;;
-@@ -1613,6 +1615,7 @@
+@@ -1592,6 +1594,7 @@
  AM_CONDITIONAL(HAVE_EGL_PLATFORM_DRM, echo "$egl_platforms" | grep -q 'drm')
  AM_CONDITIONAL(HAVE_EGL_PLATFORM_FBDEV, echo "$egl_platforms" | grep -q 'fbdev')
  AM_CONDITIONAL(HAVE_EGL_PLATFORM_NULL, echo "$egl_platforms" | grep -q 'null')
@@ -135,7 +135,7 @@
  #endif /* EGL_DRI2_INCLUDED */
 --- /dev/null
 +++ b/src/egl/drivers/dri2/platform_mir.c
-@@ -0,0 +1,457 @@
+@@ -0,0 +1,498 @@
 +/*
 + * Copyright © 2012 Canonical, Inc
 + *
@@ -257,6 +257,45 @@
 +   return buffer;
 +}
 +
++static int
++dri2_image_get_buffers(__DRIdrawable *driDrawable,
++                       unsigned int format,
++                       uint32_t *stamp,
++                       void *loaderPrivate,
++                       uint32_t buffer_mask,
++                       struct __DRIimageList *buffers)
++{
++   struct dri2_egl_surface *dri2_surf = loaderPrivate;
++   struct dri2_egl_display *dri2_dpy =
++      dri2_egl_display(dri2_surf->base.Resource.Display);
++   struct gbm_dri_surface *surf = dri2_surf->gbm_surf;
++   struct gbm_dri_bo *bo = NULL;
++
++   if (buffer_mask & __DRI_IMAGE_BUFFER_BACK) {
++      if (!dri2_surf->dri_buffers[__DRI_BUFFER_BACK_LEFT])
++         return 0;
++
++      if (dri2_surf->dri_buffers[__DRI_BUFFER_BACK_LEFT]->name == 0) {
++         struct gbm_import_fd_data data;
++
++         data.fd = dri2_surf->dri_buffers[__DRI_BUFFER_BACK_LEFT]->fd;
++         data.width = dri2_surf->base.Width;
++         data.height = dri2_surf->base.Height;
++         data.format = GBM_FORMAT_ARGB8888;
++         data.stride = dri2_surf->dri_buffers[__DRI_BUFFER_BACK_LEFT]->pitch;
++
++         bo = (struct gbm_dri_bo *)gbm_bo_import(&dri2_dpy->gbm_dri->base.base, GBM_BO_IMPORT_FD, &data, GBM_BO_USE_RENDERING);
++      }
++   }
++
++   if (bo) {
++      buffers->back = bo->image;
++      buffers->image_mask = __DRI_IMAGE_BUFFER_BACK;
++      return 1;
++   }
++
++   return 0;
++}
 +
 +static void
 +dri2_flush_front_buffer(__DRIdrawable * driDrawable, void *loaderPrivate)
@@ -555,7 +594,7 @@
 +      struct gbm_dri_device *gbm_dri = gbm_dri_device(gbm);
 +
 +      dri2_dpy->gbm_dri = gbm_dri;
-+      dri2_dpy->driver_name = gbm_dri->base.driver_name;
++      dri2_dpy->driver_name = strdup(gbm_dri->base.driver_name);
 +      dri2_dpy->dri_screen = gbm_dri->screen;
 +      dri2_dpy->core = gbm_dri->core;
 +      dri2_dpy->dri2 = gbm_dri->dri2;
@@ -569,6 +608,7 @@
 +      gbm_dri->get_buffers = dri2_get_buffers;
 +      gbm_dri->flush_front_buffer = dri2_flush_front_buffer;
 +      gbm_dri->get_buffers_with_format = dri2_get_buffers_with_format;
++      gbm_dri->image_get_buffers = dri2_image_get_buffers;
 +
 +      dri2_setup_screen(disp);
 +   }
@@ -581,6 +621,7 @@
 +
 +   disp->Extensions.EXT_buffer_age = EGL_TRUE;
 +   disp->Extensions.EXT_swap_buffers_with_damage = EGL_TRUE;
++   disp->Extensions.KHR_image_pixmap = EGL_TRUE;
 +
 +   disp->VersionMajor = 1;
 +   disp->VersionMinor = 4;
@@ -595,7 +636,7 @@
 +}
 --- a/src/egl/main/Makefile.am
 +++ b/src/egl/main/Makefile.am
-@@ -106,6 +106,11 @@
+@@ -72,6 +72,11 @@
  AM_CFLAGS += -DHAVE_NULL_PLATFORM
  endif
  
@@ -828,13 +869,14 @@
  
     for (i = 0; i < _eglModules->Size; i++) {
        _EGLModule *mod = (_EGLModule *) _eglModules->Elements[i];
-+      _EGLProc proc;
- 
+-
 -      if (!mod->Driver)
 -         break;
 -      proc = mod->Driver->API.GetProcAddress(mod->Driver, procname);
 -      if (proc)
 -         break;
++      _EGLProc proc;
++
 +      for (_EGLPlatformType plat = 0; plat < _EGL_NUM_PLATFORMS; ++plat) {
 +         if (!mod->Driver[plat])
 +            continue;
@@ -851,7 +893,7 @@
  
 --- a/src/gallium/state_trackers/dri/dri2.c
 +++ b/src/gallium/state_trackers/dri/dri2.c
-@@ -505,12 +505,20 @@
+@@ -506,12 +506,20 @@
           templ.height0 = dri_drawable->h;
           templ.format = format;
           templ.bind = bind;
@@ -984,143 +1026,3 @@
  
     if (usage & GBM_BO_USE_SCANOUT)
        dri_use |= __DRI_IMAGE_USE_SCANOUT;
---- a/src/mesa/drivers/dri/i915/intel_context.c
-+++ b/src/mesa/drivers/dri/i915/intel_context.c
-@@ -775,24 +775,36 @@
-     */
-    if (rb->mt &&
-        rb->mt->region &&
--       rb->mt->region->name == buffer->name)
-+       rb->mt->region->name == buffer->name &&
-+       rb->mt->region->name != 0)
-       return;
- 
-    if (unlikely(INTEL_DEBUG & DEBUG_DRI)) {
-       fprintf(stderr,
--	      "attaching buffer %d, at %d, cpp %d, pitch %d\n",
-+	      "attaching buffer %d, at %d, cpp %d, pitch %d, fd %d\n",
- 	      buffer->name, buffer->attachment,
--	      buffer->cpp, buffer->pitch);
-+	      buffer->cpp, buffer->pitch, buffer->fd);
-    }
- 
-    intel_miptree_release(&rb->mt);
--   region = intel_region_alloc_for_handle(intel->intelScreen,
--                                          buffer->cpp,
--                                          drawable->w,
--                                          drawable->h,
--                                          buffer->pitch,
--                                          buffer->name,
--                                          buffer_name);
-+   if (buffer->name != 0) {
-+      region = intel_region_alloc_for_handle(intel->intelScreen,
-+                                             buffer->cpp,
-+                                             drawable->w,
-+                                             drawable->h,
-+                                             buffer->pitch,
-+                                             buffer->name,
-+                                             buffer_name);
-+   } else {
-+      region = intel_region_alloc_for_fd(intel->intelScreen,
-+                                         buffer->cpp,
-+                                         drawable->w,
-+                                         drawable->h,
-+                                         buffer->pitch,
-+                                         0, /* Can we be so silly? */
-+                                         buffer->fd,
-+                                         buffer_name);
-+   }
-    if (!region)
-       return;
- 
---- a/src/mesa/drivers/dri/i965/brw_context.c
-+++ b/src/mesa/drivers/dri/i965/brw_context.c
-@@ -1012,7 +1012,7 @@
-                           struct intel_renderbuffer *rb,
-                           const char *buffer_name);
- 
--static void
-+static int
- intel_update_image_buffers(struct brw_context *brw, __DRIdrawable *drawable);
- 
- static void
-@@ -1085,9 +1085,7 @@
-    if (unlikely(INTEL_DEBUG & DEBUG_DRI))
-       fprintf(stderr, "enter %s, drawable %p\n", __func__, drawable);
- 
--   if (screen->image.loader)
--      intel_update_image_buffers(brw, drawable);
--   else
-+   if (!screen->image.loader || !intel_update_image_buffers(brw, drawable))
-       intel_update_dri2_buffers(brw, drawable);
- 
-    driUpdateFramebufferSize(&brw->ctx, drawable);
-@@ -1273,7 +1271,7 @@
-       drm_intel_bo_flink(last_mt->bo, &old_name);
-    }
- 
--   if (old_name == buffer->name)
-+   if ((old_name != 0) && (old_name == buffer->name))
-       return;
- 
-    if (unlikely(INTEL_DEBUG & DEBUG_DRI)) {
-@@ -1284,8 +1282,13 @@
-    }
- 
-    intel_miptree_release(&rb->mt);
--   bo = drm_intel_bo_gem_create_from_name(brw->bufmgr, buffer_name,
--                                          buffer->name);
-+   if (buffer->name)
-+      bo = drm_intel_bo_gem_create_from_name(brw->bufmgr, buffer_name,
-+                                             buffer->name);
-+   else
-+      bo = drm_intel_bo_gem_create_from_prime(brw->bufmgr, buffer->fd,
-+                                             buffer->pitch * drawable->h);
-+
-    if (!bo) {
-       fprintf(stderr,
-               "Failed to open BO for returned DRI2 buffer "
-@@ -1365,7 +1368,7 @@
-    }
- }
- 
--static void
-+static int
- intel_update_image_buffers(struct brw_context *brw, __DRIdrawable *drawable)
- {
-    struct gl_framebuffer *fb = drawable->driverPrivate;
-@@ -1384,7 +1387,7 @@
-    else if (front_rb)
-       format = intel_rb_format(front_rb);
-    else
--      return;
-+      return 0;
- 
-    if (front_rb && (brw_is_front_buffer_drawing(fb) ||
-                     brw_is_front_buffer_reading(fb) || !back_rb)) {
-@@ -1394,12 +1397,13 @@
-    if (back_rb)
-       buffer_mask |= __DRI_IMAGE_BUFFER_BACK;
- 
--   (*screen->image.loader->getBuffers) (drawable,
--                                        driGLFormatToImageFormat(format),
--                                        &drawable->dri2.stamp,
--                                        drawable->loaderPrivate,
--                                        buffer_mask,
--                                        &images);
-+   if (!(*screen->image.loader->getBuffers) (drawable,
-+                                             driGLFormatToImageFormat(format),
-+                                             &drawable->dri2.stamp,
-+                                             drawable->loaderPrivate,
-+                                             buffer_mask,
-+                                             &images))
-+      return 0;
- 
-    if (images.image_mask & __DRI_IMAGE_BUFFER_FRONT) {
-       drawable->w = images.front->width;
-@@ -1419,4 +1423,5 @@
-                                 images.back,
-                                 __DRI_IMAGE_BUFFER_BACK);
-    }
-+   return 1;
- }

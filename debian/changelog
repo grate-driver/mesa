@@ -1,3 +1,15 @@
+mesa (10.3.0-0ubuntu3) utopic; urgency=medium
+
+  [ Andreas Pokorny ]
+  * debian/patches/egl-platform-mir.patch:
+    - Add support for get_image_buffers and KHR_image_pixmap.
+
+  [ Alexandros Frantzis ]
+  * debian/patches/egl-platform-mir.patch:
+    - Update for Mesa 10.3 (LP: #1377853).
+
+ -- Alexandros Frantzis <alexandros.frantzis@canonical.com>  Tue, 07 Oct 2014 13:06:26 +0300
+
 mesa (10.3.0-0ubuntu2) utopic; urgency=medium
 
   * Add depends on libgl1-mesa-dri to some packages.
