@@ -1,4 +1,4 @@
-mesa (10.3.0-1) UNRELEASED; urgency=medium
+mesa (10.3.0-1) experimental; urgency=medium
 
   [ Maarten Lankhorst ]
   * New upstream release.
@@ -9,7 +9,7 @@ mesa (10.3.0-1) UNRELEASED; urgency=medium
   * Move gallium-pipe installation from libgl1-mesa-dri.install.linux.in
     to mesa-opencl-icd.install.in, because it's only needed for opencl.
 
- -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Mon, 22 Sep 2014 11:31:45 +0200
+ -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Wed, 08 Oct 2014 10:30:05 +0200
 
 mesa (10.3.0~rc3-3) experimental; urgency=medium
 
