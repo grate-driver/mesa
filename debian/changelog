@@ -1,3 +1,9 @@
+mesa (10.3.0-2) experimental; urgency=medium
+
+  * Add missing Replaces/Breaks for the gallium-pipe move.
+
+ -- Julien Cristau <jcristau@debian.org>  Fri, 10 Oct 2014 00:09:47 +0200
+
 mesa (10.3.0-1) experimental; urgency=medium
 
   [ Maarten Lankhorst ]
