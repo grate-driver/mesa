@@ -1,6 +1,7 @@
-mesa (10.3.0-3) UNRELEASED; urgency=medium
+mesa (10.3.1-1) UNRELEASED; urgency=medium
 
-  * Build libgbm on kfreebsd.
+  * Build libgbm on kfreebsd (fixes FTBFS).
+  * New upstream stable release.
 
  -- Julien Cristau <jcristau@debian.org>  Mon, 13 Oct 2014 15:53:02 +0200
 
