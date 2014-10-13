@@ -1,3 +1,9 @@
+mesa (10.3.0-3) UNRELEASED; urgency=medium
+
+  * Build libgbm on kfreebsd.
+
+ -- Julien Cristau <jcristau@debian.org>  Mon, 13 Oct 2014 15:53:02 +0200
+
 mesa (10.3.0-2) experimental; urgency=medium
 
   * Add missing Replaces/Breaks for the gallium-pipe move.
