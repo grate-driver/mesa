@@ -1,9 +1,9 @@
-mesa (10.3.1-1ubuntu1) UNRELEASED; urgency=medium
+mesa (10.3.1-1ubuntu1) utopic; urgency=medium
 
   * Merge with released debian unstable, no changes in packaging.
     - New upstream release.
 
- -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Thu, 23 Oct 2014 12:02:16 +0200
+ -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Thu, 23 Oct 2014 12:50:53 +0200
 
 mesa (10.3.1-1) unstable; urgency=medium
 
