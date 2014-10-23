@@ -1,7 +1,7 @@
 mesa (10.3.1-1ubuntu1) utopic; urgency=medium
 
   * Merge with released debian unstable, no changes in packaging.
-    - New upstream release.
+    - New upstream release. (LP: #1384289)
 
  -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Thu, 23 Oct 2014 12:50:53 +0200
 
