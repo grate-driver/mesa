@@ -1,3 +1,9 @@
+mesa (10.3.2-1) UNRELEASED; urgency=medium
+
+  * New upstream stable release.
+
+ -- Sven Joachim <svenjoac@gmx.de>  Sun, 26 Oct 2014 08:25:29 +0100
+
 mesa (10.3.1-1) unstable; urgency=medium
 
   * Build libgbm on kfreebsd (fixes FTBFS).
