@@ -1,3 +1,9 @@
+mesa (10.3.2-0ubuntu1) vivid; urgency=medium
+
+  * Merge from unreleased debian-unstable.
+
+ -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Mon, 27 Oct 2014 08:43:19 +0100
+
 mesa (10.3.2-1) UNRELEASED; urgency=medium
 
   * New upstream stable release.
