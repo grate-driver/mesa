@@ -318,23 +318,11 @@ Description: free implementation of the EGL API -- development files
 
 Package: libegl1-mesa-drivers
 Section: libs
-Architecture: linux-any kfreebsd-any
+Architecture: linux-all, kfreebsd-all
 Depends:
- ${shlibs:Depends},
  ${misc:Depends},
- libegl1-mesa (= ${binary:Version}),
- libglapi-mesa (= ${binary:Version}),
- libwayland-egl1-mesa (= ${binary:Version}) [linux-any],
- libudev1 [linux-any],
-Pre-Depends: ${misc:Pre-Depends}
-Multi-Arch: same
-Description: free implementation of the EGL API -- hardware drivers
- This package contains the EGL native platform graphics interface library.
- EGL provides a platform-agnostic mechanism for creating rendering surfaces
- for use with other graphics libraries, such as OpenGL|ES.
- .
- This package contains the drivers required for hardware accelerated rendering
- of EGL-based graphics libraries, such as OpenGL|ES.
+Description: transitional dummy package
+ This is a transitional dummy package, it can be safely removed.
 
 Package: libwayland-egl1-mesa
 Section: libs

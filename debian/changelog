@@ -3,6 +3,7 @@ mesa (10.4.1-1) UNRELEASED; urgency=medium
   * New upstream release.
   * control, rules, libopenvg*, libgbm1, libegl1-mesa-drivers:
     Drop EGL/GBM state trackers and OpenVG.
+  * control: Make libegl1-mesa-drivers transitional.
 
  -- Timo Aaltonen <tjaalton@debian.org>  Thu, 08 Jan 2015 14:47:42 +0200
 
