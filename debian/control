@@ -318,7 +318,7 @@ Description: free implementation of the EGL API -- development files
 
 Package: libegl1-mesa-drivers
 Section: libs
-Architecture: linux-all, kfreebsd-all
+Architecture: linux-any kfreebsd-any
 Depends:
  ${misc:Depends},
 Description: transitional dummy package
