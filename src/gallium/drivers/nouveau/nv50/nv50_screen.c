@@ -461,8 +461,6 @@ nv50_screen_init_hwctx(struct nv50_screen *screen)
    PUSH_DATA (push, 0);
    BEGIN_NV04(push, NV50_3D(PRIM_RESTART_WITH_DRAW_ARRAYS), 1);
    PUSH_DATA (push, 1);
-   BEGIN_NV04(push, NV50_3D(LINE_LAST_PIXEL), 1);
-   PUSH_DATA (push, 0);
    BEGIN_NV04(push, NV50_3D(BLEND_SEPARATE_ALPHA), 1);
    PUSH_DATA (push, 1);
 
@@ -608,6 +606,13 @@ nv50_screen_init_hwctx(struct nv50_screen *screen)
    PUSH_DATA (push, 0x11111111);
    BEGIN_NV04(push, NV50_3D(EDGEFLAG), 1);
    PUSH_DATA (push, 1);
+
+   BEGIN_NV04(push, NV50_3D(VB_ELEMENT_BASE), 1);
+   PUSH_DATA (push, 0);
+   if (screen->base.class_3d >= NV84_3D_CLASS) {
+      BEGIN_NV04(push, SUBC_3D(NV84_3D_VERTEX_ID_BASE), 1);
+      PUSH_DATA (push, 0);
+   }
 
    PUSH_KICK (push);
 }
