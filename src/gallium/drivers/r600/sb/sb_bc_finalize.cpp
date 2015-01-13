@@ -38,6 +38,18 @@
 
 namespace r600_sb {
 
+void bc_finalizer::insert_rv6xx_load_ar_workaround(alu_group_node *b4) {
+
+	alu_group_node *g = sh.create_alu_group();
+	alu_node *a = sh.create_alu();
+
+	a->bc.set_op(ALU_OP0_NOP);
+	a->bc.last = 1;
+
+	g->push_back(a);
+	b4->insert_before(g);
+}
+
 int bc_finalizer::run() {
 
 	run_on(sh.root);
@@ -46,22 +58,15 @@ int bc_finalizer::run() {
 	for (regions_vec::reverse_iterator I = rv.rbegin(), E = rv.rend(); I != E;
 			++I) {
 		region_node *r = *I;
-		bool is_if = false;
+
 		assert(r);
 
-		assert(r->first);
-		if (r->first->is_container()) {
-			container_node *repdep1 = static_cast<container_node*>(r->first);
-			assert(repdep1->is_depart() || repdep1->is_repeat());
-			if_node *n_if = static_cast<if_node*>(repdep1->first);
-			if (n_if && n_if->is_if())
-				is_if = true;
-		}
+		bool loop = r->is_loop();
 
-		if (is_if)
-			finalize_if(r);
-		else
+		if (loop)
 			finalize_loop(r);
+		else
+			finalize_if(r);
 
 		r->expand();
 	}
@@ -117,35 +122,20 @@ int bc_finalizer::run() {
 
 void bc_finalizer::finalize_loop(region_node* r) {
 
+	update_nstack(r);
+
 	cf_node *loop_start = sh.create_cf(CF_OP_LOOP_START_DX10);
 	cf_node *loop_end = sh.create_cf(CF_OP_LOOP_END);
-	bool has_instr = false;
 
-	if (!r->is_loop()) {
-		for (depart_vec::iterator I = r->departs.begin(), E = r->departs.end();
-		     I != E; ++I) {
-			depart_node *dep = *I;
-			if (!dep->empty()) {
-				has_instr = true;
-				break;
-			}
-		}
-	} else
-		has_instr = true;
-
-	if (has_instr) {
-		loop_start->jump_after(loop_end);
-		loop_end->jump_after(loop_start);
-	}
+	loop_start->jump_after(loop_end);
+	loop_end->jump_after(loop_start);
 
 	for (depart_vec::iterator I = r->departs.begin(), E = r->departs.end();
 			I != E; ++I) {
 		depart_node *dep = *I;
-		if (has_instr) {
-			cf_node *loop_break = sh.create_cf(CF_OP_LOOP_BREAK);
-			loop_break->jump(loop_end);
-			dep->push_back(loop_break);
-		}
+		cf_node *loop_break = sh.create_cf(CF_OP_LOOP_BREAK);
+		loop_break->jump(loop_end);
+		dep->push_back(loop_break);
 		dep->expand();
 	}
 
@@ -161,10 +151,8 @@ void bc_finalizer::finalize_loop(region_node* r) {
 		rep->expand();
 	}
 
-	if (has_instr) {
-		r->push_front(loop_start);
-		r->push_back(loop_end);
-	}
+	r->push_front(loop_start);
+	r->push_back(loop_end);
 }
 
 void bc_finalizer::finalize_if(region_node* r) {
@@ -235,12 +223,12 @@ void bc_finalizer::finalize_if(region_node* r) {
 }
 
 void bc_finalizer::run_on(container_node* c) {
-
+	node *prev_node = NULL;
 	for (node_iterator I = c->begin(), E = c->end(); I != E; ++I) {
 		node *n = *I;
 
 		if (n->is_alu_group()) {
-			finalize_alu_group(static_cast<alu_group_node*>(n));
+			finalize_alu_group(static_cast<alu_group_node*>(n), prev_node);
 		} else {
 			if (n->is_alu_clause()) {
 				cf_node *c = static_cast<cf_node*>(n);
@@ -275,17 +263,22 @@ void bc_finalizer::run_on(container_node* c) {
 			if (n->is_container())
 				run_on(static_cast<container_node*>(n));
 		}
+		prev_node = n;
 	}
 }
 
-void bc_finalizer::finalize_alu_group(alu_group_node* g) {
+void bc_finalizer::finalize_alu_group(alu_group_node* g, node *prev_node) {
 
 	alu_node *last = NULL;
+	alu_group_node *prev_g = NULL;
+	bool add_nop = false;
+	if (prev_node && prev_node->is_alu_group()) {
+		prev_g = static_cast<alu_group_node*>(prev_node);
+	}
 
 	for (node_iterator I = g->begin(), E = g->end(); I != E; ++I) {
 		alu_node *n = static_cast<alu_node*>(*I);
 		unsigned slot = n->bc.slot;
-
 		value *d = n->dst.empty() ? NULL : n->dst[0];
 
 		if (d && d->is_special_reg()) {
@@ -323,17 +316,22 @@ void bc_finalizer::finalize_alu_group(alu_group_node* g) {
 
 		update_ngpr(n->bc.dst_gpr);
 
-		finalize_alu_src(g, n);
+		add_nop |= finalize_alu_src(g, n, prev_g);
 
 		last = n;
 	}
 
+	if (add_nop) {
+		if (sh.get_ctx().r6xx_gpr_index_workaround) {
+			insert_rv6xx_load_ar_workaround(g);
+		}
+	}
 	last->bc.last = 1;
 }
 
-void bc_finalizer::finalize_alu_src(alu_group_node* g, alu_node* a) {
+bool bc_finalizer::finalize_alu_src(alu_group_node* g, alu_node* a, alu_group_node *prev) {
 	vvec &sv = a->src;
-
+	bool add_nop = false;
 	FBC_DUMP(
 		sblog << "finalize_alu_src: ";
 		dump::dump_op(a);
@@ -360,6 +358,15 @@ void bc_finalizer::finalize_alu_src(alu_group_node* g, alu_node* a) {
 			if (!v->rel->is_const()) {
 				src.rel = 1;
 				update_ngpr(v->array->gpr.sel() + v->array->array_size -1);
+				if (prev && !add_nop) {
+					for (node_iterator pI = prev->begin(), pE = prev->end(); pI != pE; ++pI) {
+						alu_node *pn = static_cast<alu_node*>(*pI);
+						if (pn->bc.dst_gpr == src.sel) {
+							add_nop = true;
+							break;
+						}
+					}
+				}
 			} else
 				src.rel = 0;
 
@@ -417,11 +424,23 @@ void bc_finalizer::finalize_alu_src(alu_group_node* g, alu_node* a) {
 			assert(!"unknown value kind");
 			break;
 		}
+		if (prev && !add_nop) {
+			for (node_iterator pI = prev->begin(), pE = prev->end(); pI != pE; ++pI) {
+				alu_node *pn = static_cast<alu_node*>(*pI);
+				if (pn->bc.dst_rel) {
+					if (pn->bc.dst_gpr == src.sel) {
+						add_nop = true;
+						break;
+					}
+				}
+			}
+		}
 	}
 
 	while (si < 3) {
 		a->bc.src[si++].sel = 0;
 	}
+	return add_nop;
 }
 
 void bc_finalizer::copy_fetch_src(fetch_node &dst, fetch_node &src, unsigned arg_start)
