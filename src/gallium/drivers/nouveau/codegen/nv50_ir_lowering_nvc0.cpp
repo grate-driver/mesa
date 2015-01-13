@@ -150,7 +150,7 @@ NVC0LegalizePostRA::findOverwritingDefs(const Instruction *texi,
    while (insn->op == OP_MOV && insn->getDef(0)->equals(insn->getSrc(0)))
       insn = insn->getSrc(0)->getUniqueInsn();
 
-   if (!insn || !insn->bb->reachableBy(texi->bb, term))
+   if (!insn->bb->reachableBy(texi->bb, term))
       return;
 
    switch (insn->op) {
@@ -309,7 +309,6 @@ NVC0LegalizePostRA::insertTextureBarriers(Function *fn)
       }
    }
    delete[] uses;
-   uses = NULL;
 
    // insert the barriers
    for (size_t i = 0; i < useVec.size(); ++i) {
@@ -330,11 +329,8 @@ NVC0LegalizePostRA::insertTextureBarriers(Function *fn)
       }
    }
 
-   if (fn->getProgram()->optLevel < 3) {
-      if (uses)
-         delete[] uses;
+   if (fn->getProgram()->optLevel < 3)
       return true;
-   }
 
    std::vector<Limits> limitT, limitB, limitS; // entry, exit, single
 
@@ -419,8 +415,6 @@ NVC0LegalizePostRA::insertTextureBarriers(Function *fn)
             prev = i;
       }
    }
-   if (uses)
-      delete[] uses;
    return true;
 }
 

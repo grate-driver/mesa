@@ -296,7 +296,7 @@ brw_update_texture_surface(struct gl_context *ctx,
    struct gl_sampler_object *sampler = _mesa_get_samplerobj(ctx, unit);
    uint32_t *surf;
 
-   /* BRW_NEW_UNIFORM_BUFFER */
+   /* BRW_NEW_TEXTURE_BUFFER */
    if (tObj->Target == GL_TEXTURE_BUFFER) {
       brw_update_buffer_texture_surface(ctx, unit, surf_offset);
       return;
@@ -389,7 +389,7 @@ brw_create_constant_surface(struct brw_context *brw,
  * Set up a binding table entry for use by stream output logic (transform
  * feedback).
  *
- * buffer_size_minus_1 must me less than BRW_MAX_NUM_BUFFER_ENTRIES.
+ * buffer_size_minus_1 must be less than BRW_MAX_NUM_BUFFER_ENTRIES.
  */
 void
 brw_update_sol_surface(struct brw_context *brw,
@@ -824,7 +824,7 @@ const struct brw_tracked_state brw_texture_surfaces = {
    .dirty = {
       .mesa = _NEW_TEXTURE,
       .brw = BRW_NEW_BATCH |
-             BRW_NEW_UNIFORM_BUFFER |
+             BRW_NEW_TEXTURE_BUFFER |
              BRW_NEW_VERTEX_PROGRAM |
              BRW_NEW_GEOMETRY_PROGRAM |
              BRW_NEW_FRAGMENT_PROGRAM,
@@ -919,7 +919,7 @@ brw_upload_abo_surfaces(struct brw_context *brw,
                                    &surf_offsets[i], true);
    }
 
-   if (prog->NumUniformBlocks)
+   if (prog->NumAtomicBuffers)
       brw->state.dirty.brw |= BRW_NEW_SURFACES;
 }
 
