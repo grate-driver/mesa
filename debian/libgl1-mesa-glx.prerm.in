@@ -1,0 +1,23 @@
+#!/bin/sh
+
+set -e
+
+THIS_PACKAGE=libgl1-mesa-glx
+THIS_SCRIPT=prerm
+
+case "$1" in
+  remove)
+  # Use alternatives to make it easier to switch between Mesa and 3rd party modules
+  update-alternatives --remove ${DEB_HOST_MULTIARCH}_gl_conf /usr/lib/${DEB_HOST_MULTIARCH}/mesa/ld.so.conf
+
+  # explicit ldconfig due to alternatives
+  ldconfig
+
+esac
+
+#DEBHELPER#
+
+exit 0
+
+# vim:set ai et sw=2 ts=2 tw=80:
+
