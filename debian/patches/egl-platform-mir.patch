@@ -1,6 +1,6 @@
 --- a/configure.ac
 +++ b/configure.ac
-@@ -1562,7 +1562,9 @@
+@@ -1569,7 +1569,9 @@ for plat in $egl_platforms; do
  
  	android|fbdev|gdi|null)
  		;;
@@ -11,7 +11,7 @@
  	*)
  		AC_MSG_ERROR([EGL platform '$plat' does not exist])
  		;;
-@@ -1592,6 +1594,7 @@
+@@ -1598,6 +1600,7 @@ AM_CONDITIONAL(HAVE_EGL_PLATFORM_WAYLAND
  AM_CONDITIONAL(HAVE_EGL_PLATFORM_DRM, echo "$egl_platforms" | grep -q 'drm')
  AM_CONDITIONAL(HAVE_EGL_PLATFORM_FBDEV, echo "$egl_platforms" | grep -q 'fbdev')
  AM_CONDITIONAL(HAVE_EGL_PLATFORM_NULL, echo "$egl_platforms" | grep -q 'null')
@@ -21,7 +21,7 @@
  
 --- a/include/EGL/eglplatform.h
 +++ b/include/EGL/eglplatform.h
-@@ -104,6 +104,13 @@
+@@ -104,6 +104,13 @@ typedef struct ANativeWindow        *EGL
  typedef struct egl_native_pixmap_t  *EGLNativePixmapType;
  typedef void                        *EGLNativeDisplayType;
  
@@ -34,10 +34,10 @@
 +
  #elif defined(__unix__)
  
- #ifdef MESA_EGL_NO_X11_HEADERS
+ #if defined(MESA_EGL_NO_X11_HEADERS)
 --- a/include/GL/internal/dri_interface.h
 +++ b/include/GL/internal/dri_interface.h
-@@ -832,10 +832,12 @@
+@@ -833,10 +833,12 @@ struct __DRIbufferRec {
      unsigned int pitch;
      unsigned int cpp;
      unsigned int flags;
@@ -53,7 +53,7 @@
  
 --- a/src/egl/drivers/dri2/Makefile.am
 +++ b/src/egl/drivers/dri2/Makefile.am
-@@ -63,3 +63,9 @@
+@@ -64,3 +64,9 @@ if HAVE_EGL_PLATFORM_DRM
  libegl_dri2_la_SOURCES += platform_drm.c
  AM_CFLAGS += -DHAVE_DRM_PLATFORM
  endif
@@ -65,7 +65,7 @@
 +endif
 --- a/src/egl/drivers/dri2/egl_dri2.c
 +++ b/src/egl/drivers/dri2/egl_dri2.c
-@@ -647,6 +647,12 @@
+@@ -651,6 +651,12 @@ dri2_initialize(_EGLDriver *drv, _EGLDis
           return EGL_TRUE;
        return dri2_initialize_wayland(drv, disp);
  #endif
@@ -92,7 +92,7 @@
  #include "eglconfig.h"
  #include "eglcontext.h"
  #include "egldisplay.h"
-@@ -196,6 +201,10 @@
+@@ -197,6 +202,10 @@ struct dri2_egl_display
     int			     formats;
     uint32_t                  capabilities;
  #endif
@@ -103,7 +103,7 @@
  };
  
  struct dri2_egl_context
-@@ -242,7 +251,9 @@
+@@ -243,7 +252,9 @@ struct dri2_egl_surface
     struct gbm_dri_surface *gbm_surf;
  #endif
  
@@ -114,7 +114,7 @@
     __DRIbuffer           *dri_buffers[__DRI_BUFFER_COUNT];
     struct {
  #ifdef HAVE_WAYLAND_PLATFORM
-@@ -264,6 +275,10 @@
+@@ -265,6 +276,10 @@ struct dri2_egl_surface
     /* EGL-owned buffers */
     __DRIbuffer           *local_buffers[__DRI_BUFFER_COUNT];
  #endif
@@ -125,9 +125,9 @@
  };
  
  
-@@ -331,4 +346,7 @@
- EGLBoolean
- dri2_initialize_android(_EGLDriver *drv, _EGLDisplay *disp);
+@@ -335,4 +350,7 @@ dri2_initialize_android(_EGLDriver *drv,
+ void
+ dri2_flush_drawable_for_swapbuffers(_EGLDisplay *disp, _EGLSurface *draw);
  
 +EGLBoolean
 +dri2_initialize_mir(_EGLDriver *drv, _EGLDisplay *disp);
@@ -636,7 +636,7 @@
 +}
 --- a/src/egl/main/Makefile.am
 +++ b/src/egl/main/Makefile.am
-@@ -72,6 +72,11 @@
+@@ -72,6 +72,11 @@ if HAVE_EGL_PLATFORM_NULL
  AM_CFLAGS += -DHAVE_NULL_PLATFORM
  endif
  
@@ -662,17 +662,17 @@
  
  /**
   * Map --with-egl-platforms names to platform types.
-@@ -75,7 +78,8 @@
-    { _EGL_PLATFORM_DRM, "drm" },
+@@ -76,7 +79,8 @@ static const struct {
     { _EGL_PLATFORM_FBDEV, "fbdev" },
     { _EGL_PLATFORM_NULL, "null" },
--   { _EGL_PLATFORM_ANDROID, "android" }
-+   { _EGL_PLATFORM_ANDROID, "android" },
+    { _EGL_PLATFORM_ANDROID, "android" },
+-   { _EGL_PLATFORM_HAIKU, "haiku" }
++   { _EGL_PLATFORM_HAIKU, "haiku" },
 +   { _EGL_PLATFORM_MIR, "mir" },
  };
  
  
-@@ -135,6 +139,47 @@
+@@ -136,6 +140,47 @@ _eglPointerIsDereferencable(void *p)
  #endif
  }
  
@@ -720,7 +720,7 @@
  
  /**
   * Try detecting native platform with the help of native display characteristcs.
-@@ -155,6 +200,11 @@
+@@ -156,6 +201,11 @@ _eglNativePlatformDetectNativeDisplay(vo
        return _EGL_PLATFORM_FBDEV;
  #endif
  
@@ -732,7 +732,7 @@
     if (_eglPointerIsDereferencable(nativeDisplay)) {
        void *first_pointer = *(void **) nativeDisplay;
  
-@@ -189,7 +239,7 @@
+@@ -194,7 +244,7 @@ _eglNativePlatformDetectNativeDisplay(vo
  _EGLPlatformType
  _eglGetNativePlatform(void *nativeDisplay)
  {
@@ -743,17 +743,17 @@
     if (native_platform == _EGL_INVALID_PLATFORM) {
 --- a/src/egl/main/egldisplay.h
 +++ b/src/egl/main/egldisplay.h
-@@ -46,6 +46,7 @@
-    _EGL_PLATFORM_FBDEV,
+@@ -47,6 +47,7 @@ enum _egl_platform_type {
     _EGL_PLATFORM_NULL,
     _EGL_PLATFORM_ANDROID,
+    _EGL_PLATFORM_HAIKU,
 +   _EGL_PLATFORM_MIR,
  
     _EGL_NUM_PLATFORMS,
     _EGL_INVALID_PLATFORM = -1
 --- a/src/egl/main/egldriver.c
 +++ b/src/egl/main/egldriver.c
-@@ -57,7 +57,7 @@
+@@ -60,7 +60,7 @@ typedef struct _egl_module {
     char *Path;
     _EGLMain_t BuiltIn;
     void *Handle;
@@ -762,7 +762,7 @@
  } _EGLModule;
  
  static _EGLMutex _eglModuleMutex = _EGL_MUTEX_INITIALIZER;
-@@ -131,7 +131,6 @@
+@@ -137,7 +137,6 @@ library_suffix(void)
  
  #endif
  
@@ -770,7 +770,7 @@
  /**
   * Open the named driver and find its bootstrap function: _eglMain().
   */
-@@ -144,8 +143,12 @@
+@@ -150,8 +149,12 @@ _eglOpenLibrary(const char *driverPath,
  
     assert(driverPath);
  
@@ -785,7 +785,7 @@
  
  #if defined(_EGL_OS_WINDOWS)
     /* XXX untested */
-@@ -191,13 +194,13 @@
+@@ -197,13 +200,13 @@ _eglOpenLibrary(const char *driverPath,
   * Load a module and create the driver object.
   */
  static EGLBoolean
@@ -802,7 +802,7 @@
        return EGL_TRUE;
  
     if (mod->BuiltIn) {
-@@ -223,7 +226,7 @@
+@@ -229,7 +232,7 @@ _eglLoadModule(_EGLModule *mod)
     }
  
     mod->Handle = (void *) lib;
@@ -811,7 +811,7 @@
  
     return EGL_TRUE;
  }
-@@ -237,8 +240,10 @@
+@@ -243,8 +246,10 @@ _eglUnloadModule(_EGLModule *mod)
  {
  #if defined(_EGL_OS_UNIX)
     /* destroy the driver */
@@ -824,7 +824,7 @@
  
     /*
      * XXX At this point (atexit), the module might be the last reference to
-@@ -252,7 +257,9 @@
+@@ -258,7 +263,9 @@ _eglUnloadModule(_EGLModule *mod)
     /* XXX Windows unloads DLLs before atexit */
  #endif
  
@@ -835,7 +835,7 @@
     mod->Handle = NULL;
  }
  
-@@ -596,17 +603,17 @@
+@@ -588,17 +595,17 @@ _eglMatchAndInitialize(_EGLDisplay *dpy)
     while (i < _eglModules->Size) {
        _EGLModule *mod = (_EGLModule *) _eglModules->Elements[i];
  
@@ -857,7 +857,7 @@
           i++;
        }
     }
-@@ -658,7 +665,6 @@
+@@ -650,7 +657,6 @@ __eglMustCastToProperFunctionPointerType
  _eglGetDriverProc(const char *procname)
  {
     EGLint i;
@@ -865,18 +865,17 @@
  
     if (!_eglModules) {
        /* load the driver for the default display */
-@@ -670,15 +676,18 @@
+@@ -662,15 +668,18 @@ _eglGetDriverProc(const char *procname)
  
     for (i = 0; i < _eglModules->Size; i++) {
        _EGLModule *mod = (_EGLModule *) _eglModules->Elements[i];
--
++      _EGLProc proc;
+ 
 -      if (!mod->Driver)
 -         break;
 -      proc = mod->Driver->API.GetProcAddress(mod->Driver, procname);
 -      if (proc)
 -         break;
-+      _EGLProc proc;
-+
 +      for (_EGLPlatformType plat = 0; plat < _EGL_NUM_PLATFORMS; ++plat) {
 +         if (!mod->Driver[plat])
 +            continue;
@@ -893,7 +892,7 @@
  
 --- a/src/gallium/state_trackers/dri/dri2.c
 +++ b/src/gallium/state_trackers/dri/dri2.c
-@@ -506,12 +506,20 @@
+@@ -506,12 +506,20 @@ dri2_allocate_textures(struct dri_contex
           templ.height0 = dri_drawable->h;
           templ.format = format;
           templ.bind = bind;
@@ -920,7 +919,7 @@
                    &templ, &whandle);
 --- a/src/gbm/backends/dri/gbm_dri.c
 +++ b/src/gbm/backends/dri/gbm_dri.c
-@@ -202,7 +202,7 @@
+@@ -202,7 +202,7 @@ static const __DRIimageLookupExtension i
  };
  
  static const __DRIdri2LoaderExtension dri2_loader_extension = {
@@ -929,7 +928,7 @@
  
     .getBuffers              = dri_get_buffers,
     .flushFrontBuffer        = dri_flush_front_buffer,
-@@ -529,9 +529,11 @@
+@@ -529,9 +529,11 @@ gbm_dri_is_format_supported(struct gbm_d
     switch (format) {
     case GBM_BO_FORMAT_XRGB8888:
     case GBM_FORMAT_XRGB8888:
@@ -941,7 +940,7 @@
        if (usage & GBM_BO_USE_SCANOUT)
           return 0;
        break;
-@@ -613,6 +615,9 @@
+@@ -613,6 +615,9 @@ gbm_dri_to_gbm_format(uint32_t dri_forma
     case __DRI_IMAGE_FORMAT_ABGR8888:
        ret = GBM_FORMAT_ABGR8888;
        break;
@@ -951,7 +950,7 @@
     default:
        ret = 0;
        break;
-@@ -621,6 +626,41 @@
+@@ -621,6 +626,41 @@ gbm_dri_to_gbm_format(uint32_t dri_forma
     return ret;
  }
  
@@ -993,7 +992,7 @@
  static struct gbm_bo *
  gbm_dri_bo_import(struct gbm_device *gbm,
                    uint32_t type, void *buffer, uint32_t usage)
-@@ -828,31 +868,7 @@
+@@ -829,31 +869,7 @@ gbm_dri_bo_create(struct gbm_device *gbm
     bo->base.base.height = height;
     bo->base.base.format = format;
  
