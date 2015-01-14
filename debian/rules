@@ -104,6 +104,13 @@ else
     DRI_DRIVERS += r200 radeon
     GALLIUM_DRIVERS += r600 r300
   endif
+  ifneq (,$(filter $(DEB_HOST_ARCH),amd64 i386 armhf))
+	# opencl needs gallium-pipe-loader which needs udev,
+	# so no opencl on kfreebsd.
+	# opencl needs LLVM and Clang, so only build it on the subset
+	# of arches where we have LLVM enabled.
+	confflags_GALLIUM += --enable-opencl --enable-opencl-icd
+  endif
 
   # LLVM is required for r300g, radeonsi and llvmpipe:
   ifneq (,$(filter $(DEB_HOST_ARCH),amd64 i386 kfreebsd-amd64 kfreebsd-i386 armhf))
@@ -257,7 +264,7 @@ binary-arch: install
 	mkdir -p $(CURDIR)/debian/libgl1-mesa-glx/usr/lib/$(DEB_HOST_MULTIARCH)/xorg/x11-extra-modules
 
 	# Create an ld.so.conf which says where to find libEGL, libGLES{1,2}
-	# and libOpenVG from Mesa.
+	# from Mesa.
 	echo "/usr/lib/$(DEB_HOST_MULTIARCH)/mesa-egl" \
 	> $(CURDIR)/debian/libegl1-mesa/usr/lib/$(DEB_HOST_MULTIARCH)/mesa-egl/ld.so.conf
 
@@ -278,15 +285,15 @@ binary-arch: install
 	dh_strip $(foreach p,$(nodbgpkg),-p$(p))
 	dh_compress -s
 	dh_fixperms -s
-	# Resolve EGL/GLES/OpenVG symbols in the private library path.
+	# Resolve EGL/GLES symbols in the private library path.
 	# Because there's no packaging problem so onerous that accomodating
 	# proprietary alternatives can't make more difficult…
 	set -e ; for PACKAGE in \
-		libegl1-mesa libgles1-mesa libgles2-mesa libopenvg1-mesa; do \
+		libegl1-mesa libgles1-mesa libgles2-mesa; do \
 			dh_makeshlibs -p$$PACKAGE -- -c4 \
 			-edebian/$$PACKAGE/usr/lib/$(DEB_HOST_MULTIARCH)/mesa-egl/\* \
 		; done
-	dh_makeshlibs -s -Xgbm_gallium_drm.so --remaining-packages -- -c4
+	dh_makeshlibs -s --remaining-packages -- -c4
 
 	dh_installdeb -s
 	dh_shlibdeps -s -l/usr/lib/$(DEB_HOST_MULTIARCH)/mesa:\
