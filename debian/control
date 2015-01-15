@@ -322,6 +322,7 @@ Section: libs
 Architecture: linux-any kfreebsd-any
 Depends:
  ${misc:Depends},
+Multi-Arch: same
 Description: transitional dummy package
  This is a transitional dummy package, it can be safely removed.
 

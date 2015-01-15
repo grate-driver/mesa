@@ -4,6 +4,8 @@ mesa (10.4.2-2) UNRELEASED; urgency=medium
     gone now.
   * control: Add depends on libwayland-egl1-mesa to libegl1-mesa-dev,
     since it ships libwayland-egl.so on Linux.
+  * control: Mark libegl1-mesa-drivers M-A: same again. (Closes:
+    #775370)
 
  -- Timo Aaltonen <tjaalton@debian.org>  Wed, 14 Jan 2015 15:12:07 +0200
 
