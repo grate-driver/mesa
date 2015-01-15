@@ -2,6 +2,8 @@ mesa (10.4.2-2) UNRELEASED; urgency=medium
 
   * rules: Drop dh_makeshlibs exception on gbm_gallium_drm.so as it's
     gone now.
+  * control: Add depends on libwayland-egl1-mesa to libegl1-mesa-dev,
+    since it ships libwayland-egl.so on Linux.
 
  -- Timo Aaltonen <tjaalton@debian.org>  Wed, 14 Jan 2015 15:12:07 +0200
 
