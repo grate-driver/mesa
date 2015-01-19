@@ -104,13 +104,6 @@ else
     DRI_DRIVERS += r200 radeon
     GALLIUM_DRIVERS += r600 r300
   endif
-  ifneq (,$(filter $(DEB_HOST_ARCH),amd64 i386 armhf))
-	# opencl needs gallium-pipe-loader which needs udev,
-	# so no opencl on kfreebsd.
-	# opencl needs LLVM and Clang, so only build it on the subset
-	# of arches where we have LLVM enabled.
-	confflags_GALLIUM += --enable-opencl --enable-opencl-icd
-  endif
 
   # LLVM is required for r300g, radeonsi and llvmpipe:
   ifneq (,$(filter $(DEB_HOST_ARCH),amd64 i386 kfreebsd-amd64 kfreebsd-i386 armhf))
