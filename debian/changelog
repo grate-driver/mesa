@@ -1,4 +1,4 @@
-mesa (10.4.2-1ubuntu1) UNRELEASED; urgency=medium
+mesa (10.4.2-2ubuntu1) UNRELEASED; urgency=medium
 
   [ Timo Aaltonen ]
   * Merge from Debian experimental.
