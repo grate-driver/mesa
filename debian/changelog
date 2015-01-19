@@ -1,6 +1,10 @@
 mesa (10.4.2-1ubuntu1) UNRELEASED; urgency=medium
 
+  [ Timo Aaltonen ]
   * Merge from Debian experimental.
+
+  [ Maarten Lankhorst ]
+  * Disable opencl after it was re-enabled accidentally in the merge.
 
  -- Timo Aaltonen <tjaalton@debian.org>  Tue, 13 Jan 2015 15:33:54 +0200
 
