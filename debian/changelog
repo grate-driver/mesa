@@ -1,4 +1,4 @@
-mesa (10.4.2-2ubuntu1) UNRELEASED; urgency=medium
+mesa (10.4.2-2ubuntu1) vivid; urgency=medium
 
   [ Timo Aaltonen ]
   * Merge from Debian experimental.
@@ -6,7 +6,7 @@ mesa (10.4.2-2ubuntu1) UNRELEASED; urgency=medium
   [ Maarten Lankhorst ]
   * Disable opencl after it was re-enabled accidentally in the merge.
 
- -- Timo Aaltonen <tjaalton@debian.org>  Tue, 13 Jan 2015 15:33:54 +0200
+ -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Tue, 20 Jan 2015 10:30:20 +0100
 
 mesa (10.4.2-2) unstable; urgency=medium
 
