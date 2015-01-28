@@ -1,6 +1,7 @@
 mesa (10.4.2-2ubuntu2) UNRELEASED; urgency=medium
 
   * Flip the switch to llvm 3.6 with patches backported from upstream.
+  * Add upstream workaround for hangs on gen4.
 
  -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Wed, 28 Jan 2015 14:08:49 +0100
 
