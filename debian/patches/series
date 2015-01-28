@@ -3,3 +3,4 @@
 # Ubuntu patches.
 egl-platform-mir.patch
 i915-dont-default-to-2.1.patch
+llvm-3.6-fixes.patch
