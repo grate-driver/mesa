@@ -36,9 +36,9 @@
 #include "main/context.h"
 #include "main/teximage.h"
 #include "main/image.h"
-#include "main/set.h"
 #include "main/condrender.h"
 #include "util/hash_table.h"
+#include "util/set.h"
 
 #include "swrast/swrast.h"
 #include "drivers/common/meta.h"
@@ -389,6 +389,7 @@ intel_image_target_renderbuffer_storage(struct gl_context *ctx,
                                          image->offset,
                                          image->width,
                                          image->height,
+                                         1,
                                          image->pitch);
    if (!irb->mt)
       return;
@@ -1008,7 +1009,7 @@ brw_render_cache_set_clear(struct brw_context *brw)
 void
 brw_render_cache_set_add_bo(struct brw_context *brw, drm_intel_bo *bo)
 {
-   _mesa_set_add(brw->render_cache, _mesa_hash_pointer(bo), bo);
+   _mesa_set_add(brw->render_cache, bo);
 }
 
 /**
@@ -1026,7 +1027,7 @@ brw_render_cache_set_add_bo(struct brw_context *brw, drm_intel_bo *bo)
 void
 brw_render_cache_set_check_flush(struct brw_context *brw, drm_intel_bo *bo)
 {
-   if (!_mesa_set_search(brw->render_cache, _mesa_hash_pointer(bo), bo))
+   if (!_mesa_set_search(brw->render_cache, bo))
       return;
 
    intel_batchbuffer_emit_mi_flush(brw);
@@ -1050,5 +1051,6 @@ intel_fbo_init(struct brw_context *brw)
    dd->EGLImageTargetRenderbufferStorage =
       intel_image_target_renderbuffer_storage;
 
-   brw->render_cache = _mesa_set_create(brw, _mesa_key_pointer_equal);
+   brw->render_cache = _mesa_set_create(brw, _mesa_hash_pointer,
+                                        _mesa_key_pointer_equal);
 }

@@ -38,6 +38,8 @@
 
 #define DBG_CHANNEL DBG_SURFACE
 
+#define is_ATI1_ATI2(format) (format == PIPE_FORMAT_RGTC1_UNORM || format == PIPE_FORMAT_RGTC2_UNORM)
+
 HRESULT
 NineSurface9_ctor( struct NineSurface9 *This,
                    struct NineUnknownParams *pParams,
@@ -150,14 +152,22 @@ struct pipe_surface *
 NineSurface9_CreatePipeSurface( struct NineSurface9 *This, const int sRGB )
 {
     struct pipe_context *pipe = This->pipe;
+    struct pipe_screen *screen = pipe->screen;
     struct pipe_resource *resource = This->base.resource;
     struct pipe_surface templ;
+    enum pipe_format srgb_format;
 
     assert(This->desc.Pool == D3DPOOL_DEFAULT ||
            This->desc.Pool == D3DPOOL_MANAGED);
     assert(resource);
 
-    templ.format = sRGB ? util_format_srgb(resource->format) : resource->format;
+    srgb_format = util_format_srgb(resource->format);
+    if (sRGB && srgb_format != PIPE_FORMAT_NONE &&
+        screen->is_format_supported(screen, srgb_format,
+                                    resource->target, 0, resource->bind))
+        templ.format = srgb_format;
+    else
+        templ.format = resource->format;
     templ.u.tex.level = This->level;
     templ.u.tex.first_layer = This->layer;
     templ.u.tex.last_layer = This->layer;
@@ -374,10 +384,19 @@ NineSurface9_LockRect( struct NineSurface9 *This,
 
     if (This->data) {
         DBG("returning system memory\n");
-
-        pLockedRect->Pitch = This->stride;
-        pLockedRect->pBits = NineSurface9_GetSystemMemPointer(This,
-                                                              box.x, box.y);
+        /* ATI1 and ATI2 need special handling, because of d3d9 bug.
+         * We must advertise to the application as if it is uncompressed
+         * and bpp 8, and the app has a workaround to work with the fact
+         * that it is actually compressed. */
+        if (is_ATI1_ATI2(This->base.info.format)) {
+            pLockedRect->Pitch = This->desc.Height;
+            pLockedRect->pBits = This->data + box.y * This->desc.Height + box.x;
+        } else {
+            pLockedRect->Pitch = This->stride;
+            pLockedRect->pBits = NineSurface9_GetSystemMemPointer(This,
+                                                                  box.x,
+                                                                  box.y);
+        }
     } else {
         DBG("mapping pipe_resource %p (level=%u usage=%x)\n",
             resource, This->level, usage);

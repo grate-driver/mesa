@@ -49,6 +49,7 @@ extern "C" {
 }
 #include "glsl/glsl_types.h"
 #include "glsl/ir.h"
+#include "glsl/nir/nir.h"
 #include "program/sampler.h"
 
 #define MAX_SAMPLER_MESSAGE_SIZE 11
@@ -82,7 +83,6 @@ public:
    fs_reg(enum register_file file, int reg);
    fs_reg(enum register_file file, int reg, enum brw_reg_type type);
    fs_reg(enum register_file file, int reg, enum brw_reg_type type, uint8_t width);
-   fs_reg(fs_visitor *v, const struct glsl_type *type);
 
    bool equals(const fs_reg &r) const;
    bool is_contiguous() const;
@@ -322,6 +322,8 @@ public:
 
    fs_reg *variable_storage(ir_variable *var);
    int virtual_grf_alloc(int size);
+   fs_reg vgrf(const glsl_type *const type);
+   fs_reg vgrf(int num_components);
    void import_uniforms(fs_visitor *v);
    void setup_uniform_clipplane_values();
    void compute_clip_distance();
@@ -422,6 +424,7 @@ public:
    void setup_payload_gen4();
    void setup_payload_gen6();
    void setup_vs_payload();
+   void fixup_3src_null_dest();
    void assign_curb_setup();
    void calculate_urb_setup();
    void assign_urb_setup();
@@ -471,19 +474,24 @@ public:
 
    void emit_dummy_fs();
    void emit_repclear_shader();
-   fs_reg *emit_fragcoord_interpolation(ir_variable *ir);
+   fs_reg *emit_fragcoord_interpolation(bool pixel_center_integer,
+                                        bool origin_upper_left);
    fs_inst *emit_linterp(const fs_reg &attr, const fs_reg &interp,
                          glsl_interp_qualifier interpolation_mode,
                          bool is_centroid, bool is_sample);
    fs_reg *emit_frontfacing_interpolation();
    fs_reg *emit_samplepos_setup();
    fs_reg *emit_sampleid_setup();
-   fs_reg *emit_general_interpolation(ir_variable *ir);
+   void emit_general_interpolation(fs_reg attr, const char *name,
+                                   const glsl_type *type,
+                                   glsl_interp_qualifier interpolation_mode,
+                                   int location, bool mod_centroid,
+                                   bool mod_sample);
    fs_reg *emit_vs_system_value(enum brw_reg_type type, int location);
    void emit_interpolation_setup_gen4();
    void emit_interpolation_setup_gen6();
    void compute_sample_position(fs_reg dst, fs_reg int_sample_pos);
-   fs_reg rescale_texcoord(fs_reg coordinate, const glsl_type *coord_type,
+   fs_reg rescale_texcoord(fs_reg coordinate, int coord_components,
                            bool is_rect, uint32_t sampler, int texunit);
    fs_inst *emit_texture_gen4(ir_texture_opcode op, fs_reg dst,
                               fs_reg coordinate, int coord_components,
@@ -504,7 +512,7 @@ public:
                               fs_reg offset_value);
    void emit_texture(ir_texture_opcode op,
                      const glsl_type *dest_type,
-                     fs_reg coordinate, const struct glsl_type *coord_type,
+                     fs_reg coordinate, int components,
                      fs_reg shadow_c,
                      fs_reg lod, fs_reg dpdy, int grad_components,
                      fs_reg sample_index,
@@ -528,10 +536,11 @@ public:
    bool try_emit_saturate(ir_expression *ir);
    bool try_emit_line(ir_expression *ir);
    bool try_emit_mad(ir_expression *ir);
-   void try_replace_with_sel();
+   bool try_replace_with_sel();
    bool opt_peephole_sel();
    bool opt_peephole_predicated_break();
    bool opt_saturate_propagation();
+   bool opt_cmod_propagation();
    void emit_bool_to_cond_code(ir_rvalue *condition);
    void emit_if_gen6(ir_if *ir);
    void emit_unspill(bblock_t *block, fs_inst *inst, fs_reg reg,
@@ -561,6 +570,43 @@ public:
    void emit_fp_sop(enum brw_conditional_mod conditional_mod,
                     const struct prog_instruction *fpi,
                     fs_reg dst, fs_reg src0, fs_reg src1, fs_reg one);
+
+   void emit_nir_code();
+   void nir_setup_inputs(nir_shader *shader);
+   void nir_setup_outputs(nir_shader *shader);
+   void nir_setup_uniforms(nir_shader *shader);
+   void nir_setup_uniform(nir_variable *var);
+   void nir_setup_builtin_uniform(nir_variable *var);
+   void nir_emit_system_values(nir_shader *shader);
+   void nir_emit_impl(nir_function_impl *impl);
+   void nir_emit_cf_list(exec_list *list);
+   void nir_emit_if(nir_if *if_stmt);
+   void nir_emit_loop(nir_loop *loop);
+   void nir_emit_block(nir_block *block);
+   void nir_emit_instr(nir_instr *instr);
+   void nir_emit_alu(nir_alu_instr *instr);
+   void nir_emit_intrinsic(nir_intrinsic_instr *instr);
+   void nir_emit_texture(nir_tex_instr *instr);
+   void nir_emit_jump(nir_jump_instr *instr);
+   fs_reg get_nir_src(nir_src src);
+   fs_reg get_nir_alu_src(nir_alu_instr *instr, unsigned src);
+   fs_reg get_nir_dest(nir_dest dest);
+   void emit_percomp(fs_inst *inst, unsigned wr_mask);
+   void emit_percomp(enum opcode op, fs_reg dest, fs_reg src0,
+                     unsigned wr_mask, bool saturate = false,
+                     enum brw_predicate predicate = BRW_PREDICATE_NONE,
+                     enum brw_conditional_mod mod = BRW_CONDITIONAL_NONE);
+   void emit_percomp(enum opcode op, fs_reg dest, fs_reg src0, fs_reg src1,
+                     unsigned wr_mask, bool saturate = false,
+                     enum brw_predicate predicate = BRW_PREDICATE_NONE,
+                     enum brw_conditional_mod mod = BRW_CONDITIONAL_NONE);
+   void emit_math_percomp(enum opcode op, fs_reg dest, fs_reg src0,
+                          unsigned wr_mask, bool saturate = false);
+   void emit_math_percomp(enum opcode op, fs_reg dest, fs_reg src0,
+                          fs_reg src1, unsigned wr_mask,
+                          bool saturate = false);
+   void emit_reduction(enum opcode op, fs_reg dest, fs_reg src,
+                       unsigned num_components);
 
    int setup_color_payload(fs_reg *dst, fs_reg color, unsigned components);
    void emit_alpha_test();
@@ -654,6 +700,13 @@ public:
    fs_reg *fp_temp_regs;
    fs_reg *fp_input_regs;
 
+   fs_reg *nir_locals;
+   fs_reg *nir_globals;
+   fs_reg nir_inputs;
+   fs_reg nir_outputs;
+   fs_reg nir_uniforms;
+   fs_reg *nir_system_values;
+
    /** @{ debug annotation info */
    const char *current_annotation;
    const void *base_ir;
@@ -712,7 +765,8 @@ public:
                 const void *key,
                 struct brw_stage_prog_data *prog_data,
                 struct gl_program *fp,
-                bool runtime_check_aads_emit);
+                bool runtime_check_aads_emit,
+                const char *stage_abbrev);
    ~fs_generator();
 
    void enable_debug(const char *shader_name);
@@ -825,6 +879,7 @@ private:
    bool runtime_check_aads_emit;
    bool debug_flag;
    const char *shader_name;
+   const char *stage_abbrev;
    void *mem_ctx;
 };
 

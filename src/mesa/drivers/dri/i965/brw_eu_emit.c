@@ -453,12 +453,12 @@ void
 brw_set_src1(struct brw_compile *p, brw_inst *inst, struct brw_reg reg)
 {
    const struct brw_context *brw = p->brw;
-   assert(reg.file != BRW_MESSAGE_REGISTER_FILE);
 
    if (reg.file != BRW_ARCHITECTURE_REGISTER_FILE)
       assert(reg.nr < 128);
 
    gen7_convert_mrf_to_grf(p, &reg);
+   assert(reg.file != BRW_MESSAGE_REGISTER_FILE);
 
    validate_reg(brw, inst, reg);
 
@@ -1893,9 +1893,7 @@ void gen4_math(struct brw_compile *p,
    struct brw_context *brw = p->brw;
    brw_inst *insn = next_insn(p, BRW_OPCODE_SEND);
    unsigned data_type;
-   if (src.vstride == BRW_VERTICAL_STRIDE_0 &&
-       src.width == BRW_WIDTH_1 &&
-       src.hstride == BRW_HORIZONTAL_STRIDE_0) {
+   if (has_scalar_region(src)) {
       data_type = BRW_MATH_DATA_SCALAR;
    } else {
       data_type = BRW_MATH_DATA_VECTOR;
@@ -2385,8 +2383,7 @@ void brw_SAMPLE(struct brw_compile *p,
  */
 void brw_adjust_sampler_state_pointer(struct brw_compile *p,
                                       struct brw_reg header,
-                                      struct brw_reg sampler_index,
-                                      struct brw_reg scratch)
+                                      struct brw_reg sampler_index)
 {
    /* The "Sampler Index" field can only store values between 0 and 15.
     * However, we can add an offset to the "Sampler State Pointer"
@@ -2416,7 +2413,7 @@ void brw_adjust_sampler_state_pointer(struct brw_compile *p,
          return;
       }
 
-      struct brw_reg temp = vec1(retype(scratch, BRW_REGISTER_TYPE_UD));
+      struct brw_reg temp = get_element_ud(header, 3);
 
       brw_AND(p, temp, get_element_ud(sampler_index, 0), brw_imm_ud(0x0f0));
       brw_SHL(p, temp, temp, brw_imm_ud(4));

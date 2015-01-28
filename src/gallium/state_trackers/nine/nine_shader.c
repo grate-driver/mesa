@@ -35,11 +35,6 @@
 
 #define DBG_CHANNEL DBG_SHADER
 
-#if 1
-#define NINE_TGSI_LAZY_DEVS /* don't use TGSI_OPCODE_BREAKC */
-#endif
-#define NINE_TGSI_LAZY_R600 /* don't use TGSI_OPCODE_DP2A */
-
 #define DUMP(args...) _nine_debug_printf(DBG_CHANNEL, NULL, args)
 
 
@@ -471,14 +466,14 @@ struct shader_translator
         struct ureg_src vFace;
         struct ureg_src s;
         struct ureg_dst p;
-        struct ureg_dst a;
+        struct ureg_dst address;
+        struct ureg_dst a0;
         struct ureg_dst tS[8]; /* texture stage registers */
         struct ureg_dst tdst; /* scratch dst if we need extra modifiers */
         struct ureg_dst t[5]; /* scratch TEMPs */
         struct ureg_src vC[2]; /* PS color in */
         struct ureg_src vT[8]; /* PS texcoord in */
         struct ureg_dst rL[NINE_MAX_LOOP_DEPTH]; /* loop ctr */
-        struct ureg_dst aL[NINE_MAX_LOOP_DEPTH]; /* loop ctr ADDR register */
     } regs;
     unsigned num_temp; /* Elements(regs.r) */
     unsigned num_scratch;
@@ -487,6 +482,7 @@ struct shader_translator
     unsigned cond_depth;
     unsigned loop_labels[NINE_MAX_LOOP_DEPTH];
     unsigned cond_labels[NINE_MAX_COND_DEPTH];
+    boolean loop_or_rep[NINE_MAX_LOOP_DEPTH]; /* true: loop, false: rep */
 
     unsigned *inst_labels; /* LABEL op */
     unsigned num_inst_labels;
@@ -664,8 +660,10 @@ static INLINE void
 tx_addr_alloc(struct shader_translator *tx, INT idx)
 {
     assert(idx == 0);
-    if (ureg_dst_is_undef(tx->regs.a))
-        tx->regs.a = ureg_DECL_address(tx->ureg);
+    if (ureg_dst_is_undef(tx->regs.address))
+        tx->regs.address = ureg_DECL_address(tx->ureg);
+    if (ureg_dst_is_undef(tx->regs.a0))
+        tx->regs.a0 = ureg_DECL_temporary(tx->ureg);
 }
 
 static INLINE void
@@ -707,7 +705,7 @@ tx_endloop(struct shader_translator *tx)
 }
 
 static struct ureg_dst
-tx_get_loopctr(struct shader_translator *tx)
+tx_get_loopctr(struct shader_translator *tx, boolean loop_or_rep)
 {
     const unsigned l = tx->loop_depth - 1;
 
@@ -717,26 +715,32 @@ tx_get_loopctr(struct shader_translator *tx)
         return ureg_dst_undef();
     }
 
-    if (ureg_dst_is_undef(tx->regs.aL[l]))
-    {
-        struct ureg_dst rreg = ureg_DECL_local_temporary(tx->ureg);
-        struct ureg_dst areg = ureg_DECL_address(tx->ureg);
-        unsigned c;
-
-        assert(l % 4 == 0);
-        for (c = l; c < (l + 4) && c < Elements(tx->regs.aL); ++c) {
-            tx->regs.rL[c] = ureg_writemask(rreg, 1 << (c & 3));
-            tx->regs.aL[c] = ureg_writemask(areg, 1 << (c & 3));
-        }
+    if (ureg_dst_is_undef(tx->regs.rL[l])) {
+        /* loop or rep ctr creation */
+        tx->regs.rL[l] = ureg_DECL_local_temporary(tx->ureg);
+        tx->loop_or_rep[l] = loop_or_rep;
     }
+    /* loop - rep - endloop - endrep not allowed */
+    assert(tx->loop_or_rep[l] == loop_or_rep);
+
     return tx->regs.rL[l];
 }
-static struct ureg_dst
-tx_get_aL(struct shader_translator *tx)
+
+static struct ureg_src
+tx_get_loopal(struct shader_translator *tx)
 {
-    if (!ureg_dst_is_undef(tx_get_loopctr(tx)))
-        return tx->regs.aL[tx->loop_depth - 1];
-    return ureg_dst_undef();
+    int loop_level = tx->loop_depth - 1;
+
+    while (loop_level >= 0) {
+        /* handle loop - rep - endrep - endloop case */
+        if (tx->loop_or_rep[loop_level])
+            /* the value is in the loop counter y component (nine implementation) */
+            return ureg_scalar(ureg_src(tx->regs.rL[loop_level]), TGSI_SWIZZLE_Y);
+        loop_level--;
+    }
+
+    DBG("aL counter requested outside of loop\n");
+    return ureg_src_undef();
 }
 
 static INLINE unsigned *
@@ -787,8 +791,12 @@ tx_src_param(struct shader_translator *tx, const struct sm1_src_param *param)
     case D3DSPR_ADDR:
         assert(!param->rel);
         if (IS_VS) {
-            tx_addr_alloc(tx, param->idx);
-            src = ureg_src(tx->regs.a);
+            assert(param->idx == 0);
+            /* the address register (vs only) must be
+             * assigned before use */
+            assert(!ureg_dst_is_undef(tx->regs.a0));
+            ureg_ARR(ureg, tx->regs.address, ureg_src(tx->regs.a0));
+            src = ureg_src(tx->regs.address);
         } else {
             if (tx->version.major < 2 && tx->version.minor < 4) {
                 /* no subroutines, so should be defined */
@@ -827,12 +835,20 @@ tx_src_param(struct shader_translator *tx, const struct sm1_src_param *param)
         src = ureg_src_register(TGSI_FILE_SAMPLER, param->idx);
         break;
     case D3DSPR_CONST:
+        assert(!param->rel || IS_VS);
         if (param->rel)
             tx->indirect_const_access = TRUE;
         if (param->rel || !tx_lconstf(tx, &src, param->idx)) {
             if (!param->rel)
                 nine_info_mark_const_f_used(tx->info, param->idx);
             src = ureg_src_register(TGSI_FILE_CONSTANT, param->idx);
+        }
+        if (!IS_VS && tx->version.major < 2) {
+            /* ps 1.X clamps constants */
+            tmp = tx_scratch(tx);
+            ureg_MIN(ureg, tmp, src, ureg_imm1f(ureg, 1.0f));
+            ureg_MAX(ureg, tmp, ureg_src(tmp), ureg_imm1f(ureg, -1.0f));
+            src = ureg_src(tmp);
         }
         break;
     case D3DSPR_CONST2:
@@ -843,26 +859,33 @@ tx_src_param(struct shader_translator *tx, const struct sm1_src_param *param)
         src = ureg_imm1f(ureg, 0.0f);
         break;
     case D3DSPR_CONSTINT:
-        if (param->rel || !tx_lconsti(tx, &src, param->idx)) {
-            if (!param->rel)
-                nine_info_mark_const_i_used(tx->info, param->idx);
+        /* relative adressing only possible for float constants in vs */
+        assert(!param->rel);
+        if (!tx_lconsti(tx, &src, param->idx)) {
+            nine_info_mark_const_i_used(tx->info, param->idx);
             src = ureg_src_register(TGSI_FILE_CONSTANT,
                                     tx->info->const_i_base + param->idx);
         }
         break;
     case D3DSPR_CONSTBOOL:
-        if (param->rel || !tx_lconstb(tx, &src, param->idx)) {
+        assert(!param->rel);
+        if (!tx_lconstb(tx, &src, param->idx)) {
            char r = param->idx / 4;
            char s = param->idx & 3;
-           if (!param->rel)
-               nine_info_mark_const_b_used(tx->info, param->idx);
+           nine_info_mark_const_b_used(tx->info, param->idx);
            src = ureg_src_register(TGSI_FILE_CONSTANT,
                                    tx->info->const_b_base + r);
            src = ureg_swizzle(src, s, s, s, s);
         }
         break;
     case D3DSPR_LOOP:
-        src = tx_src_scalar(tx_get_aL(tx));
+        if (ureg_dst_is_undef(tx->regs.address))
+            tx->regs.address = ureg_DECL_address(ureg);
+        if (!tx->native_integers)
+            ureg_ARR(ureg, tx->regs.address, tx_get_loopal(tx));
+        else
+            ureg_UARL(ureg, tx->regs.address, tx_get_loopal(tx));
+        src = ureg_src(tx->regs.address);
         break;
     case D3DSPR_MISCTYPE:
         switch (param->idx) {
@@ -903,6 +926,25 @@ tx_src_param(struct shader_translator *tx, const struct sm1_src_param *param)
     }
     if (param->rel)
         src = ureg_src_indirect(src, tx_src_param(tx, param->rel));
+
+    switch (param->mod) {
+    case NINED3DSPSM_DW:
+        tmp = tx_scratch(tx);
+        /* NOTE: app is not allowed to read w with this modifier */
+        ureg_RCP(ureg, ureg_writemask(tmp, NINED3DSP_WRITEMASK_3), src);
+        ureg_MUL(ureg, tmp, src, ureg_swizzle(ureg_src(tmp), NINE_SWIZZLE4(W,W,W,W)));
+        src = ureg_src(tmp);
+        break;
+    case NINED3DSPSM_DZ:
+        tmp = tx_scratch(tx);
+        /* NOTE: app is not allowed to read z with this modifier */
+        ureg_RCP(ureg, ureg_writemask(tmp, NINED3DSP_WRITEMASK_2), src);
+        ureg_MUL(ureg, tmp, src, ureg_swizzle(ureg_src(tmp), NINE_SWIZZLE4(Z,Z,Z,Z)));
+        src = ureg_src(tmp);
+        break;
+    default:
+        break;
+    }
 
     if (param->swizzle != NINED3DSP_NOSWIZZLE)
         src = ureg_swizzle(src,
@@ -946,7 +988,7 @@ tx_src_param(struct shader_translator *tx, const struct sm1_src_param *param)
         break;
     case NINED3DSPSM_DZ:
     case NINED3DSPSM_DW:
-        /* handled in instruction */
+        /* Already handled*/
         break;
     case NINED3DSPSM_SIGN:
         tmp = tx_scratch(tx);
@@ -1001,7 +1043,7 @@ _tx_dst_param(struct shader_translator *tx, const struct sm1_dst_param *param)
             dst = ureg_dst(tx->regs.vT[param->idx]);
         } else {
             tx_addr_alloc(tx, param->idx);
-            dst = tx->regs.a;
+            dst = tx->regs.a0;
         }
         break;
     case D3DSPR_RASTOUT:
@@ -1016,13 +1058,13 @@ _tx_dst_param(struct shader_translator *tx, const struct sm1_dst_param *param)
         case 1:
             if (ureg_dst_is_undef(tx->regs.oFog))
                 tx->regs.oFog =
-                    ureg_DECL_output(tx->ureg, TGSI_SEMANTIC_FOG, 0);
+                    ureg_saturate(ureg_DECL_output(tx->ureg, TGSI_SEMANTIC_FOG, 0));
             dst = tx->regs.oFog;
             break;
         case 2:
             if (ureg_dst_is_undef(tx->regs.oPts))
                 tx->regs.oPts =
-                    ureg_DECL_output(tx->ureg, TGSI_SEMANTIC_PSIZE, 0);
+                    ureg_saturate(ureg_DECL_output(tx->ureg, TGSI_SEMANTIC_PSIZE, 0));
             dst = tx->regs.oPts;
             break;
         default:
@@ -1163,15 +1205,18 @@ NineTranslateInstruction_Mkxn(struct shader_translator *tx, const unsigned k, co
     struct ureg_program *ureg = tx->ureg;
     struct ureg_dst dst;
     struct ureg_src src[2];
+    struct sm1_src_param *src_mat = &tx->insn.src[1];
     unsigned i;
 
     dst = tx_dst_param(tx, &tx->insn.dst[0]);
     src[0] = tx_src_param(tx, &tx->insn.src[0]);
-    src[1] = tx_src_param(tx, &tx->insn.src[1]);
 
-    for (i = 0; i < n; i++, src[1].Index++)
+    for (i = 0; i < n; i++)
     {
         const unsigned m = (1 << i);
+
+        src[1] = tx_src_param(tx, src_mat);
+        src_mat->idx++;
 
         if (!(dst.WriteMask & m))
             continue;
@@ -1329,7 +1374,7 @@ NineTranslateInstruction_Generic(struct shader_translator *);
 
 DECL_SPECIAL(M4x4)
 {
-    return NineTranslateInstruction_Mkxn(tx, 4, 3);
+    return NineTranslateInstruction_Mkxn(tx, 4, 4);
 }
 
 DECL_SPECIAL(M4x3)
@@ -1367,7 +1412,13 @@ DECL_SPECIAL(CND)
     struct ureg_dst cgt;
     struct ureg_src cnd;
 
-    if (tx->insn.coissue && tx->version.major == 1 && tx->version.minor < 4) {
+    /* the coissue flag was a tip for compilers to advise to
+     * execute two operations at the same time, in cases
+     * the two executions had same dst with different channels.
+     * It has no effect on current hw. However it seems CND
+     * is affected. The handling of this very specific case
+     * handled below mimick wine behaviour */
+    if (tx->insn.coissue && tx->version.major == 1 && tx->version.minor < 4 && tx->insn.dst[0].mask != NINED3DSP_WRITEMASK_3) {
         ureg_MOV(tx->ureg,
                  dst, tx_src_param(tx, &tx->insn.src[1]));
         return D3D_OK;
@@ -1376,16 +1427,14 @@ DECL_SPECIAL(CND)
     cnd = tx_src_param(tx, &tx->insn.src[0]);
     cgt = tx_scratch(tx);
 
-    if (tx->version.major == 1 && tx->version.minor < 4) {
-        cgt.WriteMask = TGSI_WRITEMASK_W;
-        ureg_SGT(tx->ureg, cgt, cnd, ureg_imm1f(tx->ureg, 0.5f));
+    if (tx->version.major == 1 && tx->version.minor < 4)
         cnd = ureg_scalar(cnd, TGSI_SWIZZLE_W);
-    } else {
-        ureg_SGT(tx->ureg, cgt, cnd, ureg_imm1f(tx->ureg, 0.5f));
-    }
-    ureg_CMP(tx->ureg, dst,
+
+    ureg_SGT(tx->ureg, cgt, cnd, ureg_imm1f(tx->ureg, 0.5f));
+
+    ureg_CMP(tx->ureg, dst, ureg_negate(ureg_src(cgt)),
              tx_src_param(tx, &tx->insn.src[1]),
-             tx_src_param(tx, &tx->insn.src[2]), ureg_negate(cnd));
+             tx_src_param(tx, &tx->insn.src[2]));
     return D3D_OK;
 }
 
@@ -1399,17 +1448,12 @@ DECL_SPECIAL(CALL)
 DECL_SPECIAL(CALLNZ)
 {
     struct ureg_program *ureg = tx->ureg;
-    struct ureg_dst tmp = tx_scratch_scalar(tx);
     struct ureg_src src = tx_src_param(tx, &tx->insn.src[1]);
 
-    /* NOTE: source should be const bool, so we can use NOT/SUB instead of [U]SNE 0 */
-    if (!tx->insn.flags) {
-        if (tx->native_integers)
-            ureg_NOT(ureg, tmp, src);
-        else
-            ureg_SUB(ureg, tmp, ureg_imm1f(ureg, 1.0f), src);
-    }
-    ureg_IF(ureg, tx->insn.flags ? src : tx_src_scalar(tmp), tx_cond(tx));
+    if (!tx->native_integers)
+        ureg_IF(ureg, src, tx_cond(tx));
+    else
+        ureg_UIF(ureg, src, tx_cond(tx));
     ureg_CAL(ureg, &tx->inst_labels[tx->insn.src[0].idx]);
     tx_endcond(tx);
     ureg_ENDIF(ureg);
@@ -1419,9 +1463,17 @@ DECL_SPECIAL(CALLNZ)
 DECL_SPECIAL(MOV_vs1x)
 {
     if (tx->insn.dst[0].file == D3DSPR_ADDR) {
-        ureg_ARL(tx->ureg,
+        /* Implementation note: We don't write directly
+         * to the addr register, but to an intermediate
+         * float register.
+         * Contrary to the doc, when writing to ADDR here,
+         * the rounding is not to nearest, but to lowest
+         * (wine test).
+         * Since we use ARR next, substract 0.5. */
+        ureg_SUB(tx->ureg,
                  tx_dst_param(tx, &tx->insn.dst[0]),
-                 tx_src_param(tx, &tx->insn.src[0]));
+                 tx_src_param(tx, &tx->insn.src[0]),
+                 ureg_imm1f(tx->ureg, 0.5f));
         return D3D_OK;
     }
     return NineTranslateInstruction_Generic(tx);
@@ -1432,46 +1484,36 @@ DECL_SPECIAL(LOOP)
     struct ureg_program *ureg = tx->ureg;
     unsigned *label;
     struct ureg_src src = tx_src_param(tx, &tx->insn.src[1]);
-    struct ureg_src iter = ureg_scalar(src, TGSI_SWIZZLE_X);
-    struct ureg_src init = ureg_scalar(src, TGSI_SWIZZLE_Y);
-    struct ureg_src step = ureg_scalar(src, TGSI_SWIZZLE_Z);
     struct ureg_dst ctr;
-    struct ureg_dst tmp = tx_scratch_scalar(tx);
+    struct ureg_dst tmp;
+    struct ureg_src ctrx;
 
     label = tx_bgnloop(tx);
-    ctr = tx_get_loopctr(tx);
+    ctr = tx_get_loopctr(tx, TRUE);
+    ctrx = ureg_scalar(ureg_src(ctr), TGSI_SWIZZLE_X);
 
-    ureg_MOV(tx->ureg, ctr, init);
+    /* src: num_iterations - start_value of al - step for al - 0 */
+    ureg_MOV(ureg, ctr, src);
     ureg_BGNLOOP(tx->ureg, label);
-    if (tx->native_integers) {
-        /* we'll let the backend pull up that MAD ... */
-        ureg_UMAD(ureg, tmp, iter, step, init);
-        ureg_USEQ(ureg, tmp, ureg_src(ctr), tx_src_scalar(tmp));
-#ifdef NINE_TGSI_LAZY_DEVS
-        ureg_UIF(ureg, tx_src_scalar(tmp), tx_cond(tx));
-#endif
-    } else {
-        /* can't simply use SGE for precision because step might be negative */
-        ureg_MAD(ureg, tmp, iter, step, init);
-        ureg_SEQ(ureg, tmp, ureg_src(ctr), tx_src_scalar(tmp));
-#ifdef NINE_TGSI_LAZY_DEVS
+    tmp = tx_scratch_scalar(tx);
+    /* Initially ctr.x contains the number of iterations.
+     * ctr.y will contain the updated value of al.
+     * We decrease ctr.x at the end of every iteration,
+     * and stop when it reaches 0. */
+
+    if (!tx->native_integers) {
+        /* case src and ctr contain floats */
+        /* to avoid precision issue, we stop when ctr <= 0.5 */
+        ureg_SGE(ureg, tmp, ureg_imm1f(ureg, 0.5f), ctrx);
         ureg_IF(ureg, tx_src_scalar(tmp), tx_cond(tx));
-#endif
+    } else {
+        /* case src and ctr contain integers */
+        ureg_ISGE(ureg, tmp, ureg_imm1i(ureg, 0), ctrx);
+        ureg_UIF(ureg, tx_src_scalar(tmp), tx_cond(tx));
     }
-#ifdef NINE_TGSI_LAZY_DEVS
     ureg_BRK(ureg);
     tx_endcond(tx);
     ureg_ENDIF(ureg);
-#else
-    ureg_BREAKC(ureg, tx_src_scalar(tmp));
-#endif
-    if (tx->native_integers) {
-        ureg_UARL(ureg, tx_get_aL(tx), tx_src_scalar(ctr));
-        ureg_UADD(ureg, ctr, tx_src_scalar(ctr), step);
-    } else {
-        ureg_ARL(ureg, tx_get_aL(tx), tx_src_scalar(ctr));
-        ureg_ADD(ureg, ctr, tx_src_scalar(ctr), step);
-    }
     return D3D_OK;
 }
 
@@ -1483,6 +1525,25 @@ DECL_SPECIAL(RET)
 
 DECL_SPECIAL(ENDLOOP)
 {
+    struct ureg_program *ureg = tx->ureg;
+    struct ureg_dst ctr = tx_get_loopctr(tx, TRUE);
+    struct ureg_dst dst_ctrx, dst_al;
+    struct ureg_src src_ctr, al_counter;
+
+    dst_ctrx = ureg_writemask(ctr, NINED3DSP_WRITEMASK_0);
+    dst_al = ureg_writemask(ctr, NINED3DSP_WRITEMASK_1);
+    src_ctr = ureg_src(ctr);
+    al_counter = ureg_scalar(src_ctr, TGSI_SWIZZLE_Z);
+
+    /* ctr.x -= 1
+     * ctr.y (aL) += step */
+    if (!tx->native_integers) {
+        ureg_ADD(ureg, dst_ctrx, src_ctr, ureg_imm1f(ureg, -1.0f));
+        ureg_ADD(ureg, dst_al, src_ctr, al_counter);
+    } else {
+        ureg_UADD(ureg, dst_ctrx, src_ctr, ureg_imm1i(ureg, -1));
+        ureg_UADD(ureg, dst_al, src_ctr, al_counter);
+    }
     ureg_ENDLOOP(tx->ureg, tx_endloop(tx));
     return D3D_OK;
 }
@@ -1527,51 +1588,54 @@ DECL_SPECIAL(REP)
     unsigned *label;
     struct ureg_src rep = tx_src_param(tx, &tx->insn.src[0]);
     struct ureg_dst ctr;
-    struct ureg_dst tmp = tx_scratch_scalar(tx);
-    struct ureg_src imm =
-        tx->native_integers ? ureg_imm1u(ureg, 0) : ureg_imm1f(ureg, 0.0f);
+    struct ureg_dst tmp;
+    struct ureg_src ctrx;
 
     label = tx_bgnloop(tx);
-    ctr = tx_get_loopctr(tx);
+    ctr = ureg_writemask(tx_get_loopctr(tx, FALSE), NINED3DSP_WRITEMASK_0);
+    ctrx = ureg_scalar(ureg_src(ctr), TGSI_SWIZZLE_X);
 
     /* NOTE: rep must be constant, so we don't have to save the count */
     assert(rep.File == TGSI_FILE_CONSTANT || rep.File == TGSI_FILE_IMMEDIATE);
 
-    ureg_MOV(ureg, ctr, imm);
+    /* rep: num_iterations - 0 - 0 - 0 */
+    ureg_MOV(ureg, ctr, rep);
     ureg_BGNLOOP(ureg, label);
-    if (tx->native_integers)
-    {
-        ureg_USGE(ureg, tmp, tx_src_scalar(ctr), rep);
-#ifdef NINE_TGSI_LAZY_DEVS
-        ureg_UIF(ureg, tx_src_scalar(tmp), tx_cond(tx));
-#endif
-    }
-    else
-    {
-        ureg_SGE(ureg, tmp, tx_src_scalar(ctr), rep);
-#ifdef NINE_TGSI_LAZY_DEVS
+    tmp = tx_scratch_scalar(tx);
+    /* Initially ctr.x contains the number of iterations.
+     * We decrease ctr.x at the end of every iteration,
+     * and stop when it reaches 0. */
+
+    if (!tx->native_integers) {
+        /* case src and ctr contain floats */
+        /* to avoid precision issue, we stop when ctr <= 0.5 */
+        ureg_SGE(ureg, tmp, ureg_imm1f(ureg, 0.5f), ctrx);
         ureg_IF(ureg, tx_src_scalar(tmp), tx_cond(tx));
-#endif
+    } else {
+        /* case src and ctr contain integers */
+        ureg_ISGE(ureg, tmp, ureg_imm1i(ureg, 0), ctrx);
+        ureg_UIF(ureg, tx_src_scalar(tmp), tx_cond(tx));
     }
-#ifdef NINE_TGSI_LAZY_DEVS
     ureg_BRK(ureg);
     tx_endcond(tx);
     ureg_ENDIF(ureg);
-#else
-    ureg_BREAKC(ureg, tx_src_scalar(tmp));
-#endif
-
-    if (tx->native_integers) {
-        ureg_UADD(ureg, ctr, tx_src_scalar(ctr), ureg_imm1u(ureg, 1));
-    } else {
-        ureg_ADD(ureg, ctr, tx_src_scalar(ctr), ureg_imm1f(ureg, 1.0f));
-    }
 
     return D3D_OK;
 }
 
 DECL_SPECIAL(ENDREP)
 {
+    struct ureg_program *ureg = tx->ureg;
+    struct ureg_dst ctr = tx_get_loopctr(tx, FALSE);
+    struct ureg_dst dst_ctrx = ureg_writemask(ctr, NINED3DSP_WRITEMASK_0);
+    struct ureg_src src_ctr = ureg_src(ctr);
+
+    /* ctr.x -= 1 */
+    if (!tx->native_integers)
+        ureg_ADD(ureg, dst_ctrx, src_ctr, ureg_imm1f(ureg, -1.0f));
+    else
+        ureg_UADD(ureg, dst_ctrx, src_ctr, ureg_imm1i(ureg, -1));
+
     ureg_ENDLOOP(tx->ureg, tx_endloop(tx));
     return D3D_OK;
 }
@@ -1637,14 +1701,10 @@ DECL_SPECIAL(BREAKC)
     src[0] = tx_src_param(tx, &tx->insn.src[0]);
     src[1] = tx_src_param(tx, &tx->insn.src[1]);
     ureg_insn(tx->ureg, cmp_op, &tmp, 1, src, 2);
-#ifdef NINE_TGSI_LAZY_DEVS
     ureg_IF(tx->ureg, ureg_scalar(ureg_src(tmp), TGSI_SWIZZLE_X), tx_cond(tx));
     ureg_BRK(tx->ureg);
     tx_endcond(tx);
     ureg_ENDIF(tx->ureg);
-#else
-    ureg_BREAKC(tx->ureg, ureg_scalar(ureg_src(tmp), TGSI_SWIZZLE_X));
-#endif
     return D3D_OK;
 }
 
@@ -1950,21 +2010,55 @@ DECL_SPECIAL(DEFI)
     return D3D_OK;
 }
 
+DECL_SPECIAL(POW)
+{
+    struct ureg_dst dst = tx_dst_param(tx, &tx->insn.dst[0]);
+    struct ureg_src src[2] = {
+        tx_src_param(tx, &tx->insn.src[0]),
+        tx_src_param(tx, &tx->insn.src[1])
+    };
+    ureg_POW(tx->ureg, dst, ureg_abs(src[0]), src[1]);
+    return D3D_OK;
+}
+
+DECL_SPECIAL(RSQ)
+{
+    struct ureg_program *ureg = tx->ureg;
+    struct ureg_dst dst = tx_dst_param(tx, &tx->insn.dst[0]);
+    struct ureg_src src = tx_src_param(tx, &tx->insn.src[0]);
+    struct ureg_dst tmp = tx_scratch(tx);
+    ureg_RSQ(ureg, tmp, ureg_abs(src));
+    ureg_MIN(ureg, dst, ureg_imm1f(ureg, FLT_MAX), ureg_src(tmp));
+    return D3D_OK;
+}
+
+DECL_SPECIAL(LOG)
+{
+    struct ureg_program *ureg = tx->ureg;
+    struct ureg_dst tmp = tx_scratch_scalar(tx);
+    struct ureg_dst dst = tx_dst_param(tx, &tx->insn.dst[0]);
+    struct ureg_src src = tx_src_param(tx, &tx->insn.src[0]);
+    ureg_LG2(ureg, tmp, ureg_abs(src));
+    ureg_MAX(ureg, dst, ureg_imm1f(ureg, -FLT_MAX), tx_src_scalar(tmp));
+    return D3D_OK;
+}
+
 DECL_SPECIAL(NRM)
 {
     struct ureg_program *ureg = tx->ureg;
     struct ureg_dst tmp = tx_scratch_scalar(tx);
     struct ureg_src nrm = tx_src_scalar(tmp);
+    struct ureg_dst dst = tx_dst_param(tx, &tx->insn.dst[0]);
     struct ureg_src src = tx_src_param(tx, &tx->insn.src[0]);
     ureg_DP3(ureg, tmp, src, src);
     ureg_RSQ(ureg, tmp, nrm);
-    ureg_MUL(ureg, tx_dst_param(tx, &tx->insn.dst[0]), src, nrm);
+    ureg_MIN(ureg, tmp, ureg_imm1f(ureg, FLT_MAX), nrm);
+    ureg_MUL(ureg, dst, src, nrm);
     return D3D_OK;
 }
 
 DECL_SPECIAL(DP2ADD)
 {
-#ifdef NINE_TGSI_LAZY_R600
     struct ureg_dst tmp = tx_scratch_scalar(tx);
     struct ureg_src dp2 = tx_src_scalar(tmp);
     struct ureg_dst dst = tx_dst_param(tx, &tx->insn.dst[0]);
@@ -1978,9 +2072,6 @@ DECL_SPECIAL(DP2ADD)
     ureg_ADD(tx->ureg, dst, src[2], dp2);
 
     return D3D_OK;
-#else
-    return NineTranslateInstruction_Generic(tx);
-#endif
 }
 
 DECL_SPECIAL(TEXCOORD)
@@ -1989,9 +2080,9 @@ DECL_SPECIAL(TEXCOORD)
     const unsigned s = tx->insn.dst[0].idx;
     struct ureg_dst dst = tx_dst_param(tx, &tx->insn.dst[0]);
 
-    if (ureg_src_is_undef(tx->regs.vT[s]))
-        tx->regs.vT[s] = ureg_DECL_fs_input(ureg, tx->texcoord_sn, s, TGSI_INTERPOLATE_PERSPECTIVE);
-    ureg_MOV(ureg, dst, tx->regs.vT[s]); /* XXX is this sufficient ? */
+    tx_texcoord_alloc(tx, s);
+    ureg_MOV(ureg, ureg_writemask(ureg_saturate(dst), TGSI_WRITEMASK_XYZ), tx->regs.vT[s]);
+    ureg_MOV(ureg, ureg_writemask(dst, TGSI_WRITEMASK_W), ureg_imm1f(tx->ureg, 1.0f));
 
     return D3D_OK;
 }
@@ -1999,12 +2090,12 @@ DECL_SPECIAL(TEXCOORD)
 DECL_SPECIAL(TEXCOORD_ps14)
 {
     struct ureg_program *ureg = tx->ureg;
-    const unsigned s = tx->insn.src[0].idx;
+    struct ureg_src src = tx_src_param(tx, &tx->insn.src[0]);
     struct ureg_dst dst = tx_dst_param(tx, &tx->insn.dst[0]);
 
-    if (ureg_src_is_undef(tx->regs.vT[s]))
-        tx->regs.vT[s] = ureg_DECL_fs_input(ureg, tx->texcoord_sn, s, TGSI_INTERPOLATE_PERSPECTIVE);
-    ureg_MOV(ureg, dst, tx->regs.vT[s]); /* XXX is this sufficient ? */
+    assert(tx->insn.src[0].file == D3DSPR_TEXTURE);
+
+    ureg_MOV(ureg, dst, src);
 
     return D3D_OK;
 }
@@ -2038,22 +2129,62 @@ DECL_SPECIAL(TEXBEML)
 
 DECL_SPECIAL(TEXREG2AR)
 {
-    STUB(D3DERR_INVALIDCALL);
+    struct ureg_program *ureg = tx->ureg;
+    struct ureg_dst dst = tx_dst_param(tx, &tx->insn.dst[0]);
+    struct ureg_src sample;
+    const int m = tx->insn.dst[0].idx;
+    const int n = tx->insn.src[0].idx;
+    assert(m >= 0 && m > n);
+
+    sample = ureg_DECL_sampler(ureg, m);
+    tx->info->sampler_mask |= 1 << m;
+    ureg_TEX(ureg, dst, ps1x_sampler_type(tx->info, m), ureg_swizzle(ureg_src(tx->regs.tS[n]), NINE_SWIZZLE4(W,X,X,X)), sample);
+
+    return D3D_OK;
 }
 
 DECL_SPECIAL(TEXREG2GB)
 {
-    STUB(D3DERR_INVALIDCALL);
+    struct ureg_program *ureg = tx->ureg;
+    struct ureg_dst dst = tx_dst_param(tx, &tx->insn.dst[0]);
+    struct ureg_src sample;
+    const int m = tx->insn.dst[0].idx;
+    const int n = tx->insn.src[0].idx;
+    assert(m >= 0 && m > n);
+
+    sample = ureg_DECL_sampler(ureg, m);
+    tx->info->sampler_mask |= 1 << m;
+    ureg_TEX(ureg, dst, ps1x_sampler_type(tx->info, m), ureg_swizzle(ureg_src(tx->regs.tS[n]), NINE_SWIZZLE4(Y,Z,Z,Z)), sample);
+
+    return D3D_OK;
 }
 
 DECL_SPECIAL(TEXM3x2PAD)
 {
-    STUB(D3DERR_INVALIDCALL);
+    return D3D_OK; /* this is just padding */
 }
 
 DECL_SPECIAL(TEXM3x2TEX)
 {
-    STUB(D3DERR_INVALIDCALL);
+    struct ureg_program *ureg = tx->ureg;
+    struct ureg_dst dst = tx_dst_param(tx, &tx->insn.dst[0]);
+    struct ureg_src sample;
+    const int m = tx->insn.dst[0].idx - 1;
+    const int n = tx->insn.src[0].idx;
+    assert(m >= 0 && m > n);
+
+    tx_texcoord_alloc(tx, m);
+    tx_texcoord_alloc(tx, m+1);
+
+    /* performs the matrix multiplication */
+    ureg_DP3(ureg, ureg_writemask(dst, TGSI_WRITEMASK_X), tx->regs.vT[m], ureg_src(tx->regs.tS[n]));
+    ureg_DP3(ureg, ureg_writemask(dst, TGSI_WRITEMASK_Y), tx->regs.vT[m+1], ureg_src(tx->regs.tS[n]));
+
+    sample = ureg_DECL_sampler(ureg, m + 1);
+    tx->info->sampler_mask |= 1 << (m + 1);
+    ureg_TEX(ureg, dst, ps1x_sampler_type(tx->info, m + 1), ureg_src(dst), sample);
+
+    return D3D_OK;
 }
 
 DECL_SPECIAL(TEXM3x3PAD)
@@ -2063,61 +2194,180 @@ DECL_SPECIAL(TEXM3x3PAD)
 
 DECL_SPECIAL(TEXM3x3SPEC)
 {
-    STUB(D3DERR_INVALIDCALL);
-}
+    struct ureg_program *ureg = tx->ureg;
+    struct ureg_dst dst = tx_dst_param(tx, &tx->insn.dst[0]);
+    struct ureg_src E = tx_src_param(tx, &tx->insn.src[1]);
+    struct ureg_src sample;
+    struct ureg_dst tmp;
+    const int m = tx->insn.dst[0].idx - 2;
+    const int n = tx->insn.src[0].idx;
+    assert(m >= 0 && m > n);
 
-DECL_SPECIAL(TEXM3x3VSPEC)
-{
-    STUB(D3DERR_INVALIDCALL);
+    tx_texcoord_alloc(tx, m);
+    tx_texcoord_alloc(tx, m+1);
+    tx_texcoord_alloc(tx, m+2);
+
+    ureg_DP3(ureg, ureg_writemask(dst, TGSI_WRITEMASK_X), tx->regs.vT[m], ureg_src(tx->regs.tS[n]));
+    ureg_DP3(ureg, ureg_writemask(dst, TGSI_WRITEMASK_Y), tx->regs.vT[m+1], ureg_src(tx->regs.tS[n]));
+    ureg_DP3(ureg, ureg_writemask(dst, TGSI_WRITEMASK_Z), tx->regs.vT[m+2], ureg_src(tx->regs.tS[n]));
+
+    sample = ureg_DECL_sampler(ureg, m + 2);
+    tx->info->sampler_mask |= 1 << (m + 2);
+    tmp = ureg_writemask(tx_scratch(tx), TGSI_WRITEMASK_XYZ);
+
+    /* At this step, dst = N = (u', w', z').
+     * We want dst to be the texture sampled at (u'', w'', z''), with
+     * (u'', w'', z'') = 2 * (N.E / N.N) * N - E */
+    ureg_DP3(ureg, ureg_writemask(tmp, TGSI_WRITEMASK_X), ureg_src(dst), ureg_src(dst));
+    ureg_RCP(ureg, ureg_writemask(tmp, TGSI_WRITEMASK_X), ureg_scalar(ureg_src(tmp), TGSI_SWIZZLE_X));
+    /* at this step tmp.x = 1/N.N */
+    ureg_DP3(ureg, ureg_writemask(tmp, TGSI_WRITEMASK_Y), ureg_src(dst), E);
+    /* at this step tmp.y = N.E */
+    ureg_MUL(ureg, ureg_writemask(tmp, TGSI_WRITEMASK_X), ureg_scalar(ureg_src(tmp), TGSI_SWIZZLE_X), ureg_scalar(ureg_src(tmp), TGSI_SWIZZLE_Y));
+    /* at this step tmp.x = N.E/N.N */
+    ureg_MUL(ureg, ureg_writemask(tmp, TGSI_WRITEMASK_X), ureg_scalar(ureg_src(tmp), TGSI_SWIZZLE_X), ureg_imm1f(ureg, 2.0f));
+    ureg_MUL(ureg, tmp, ureg_scalar(ureg_src(tmp), TGSI_SWIZZLE_X), ureg_src(dst));
+    /* at this step tmp.xyz = 2 * (N.E / N.N) * N */
+    ureg_SUB(ureg, tmp, ureg_src(tmp), E);
+    ureg_TEX(ureg, dst, ps1x_sampler_type(tx->info, m + 2), ureg_src(tmp), sample);
+
+    return D3D_OK;
 }
 
 DECL_SPECIAL(TEXREG2RGB)
 {
-    STUB(D3DERR_INVALIDCALL);
+    struct ureg_program *ureg = tx->ureg;
+    struct ureg_dst dst = tx_dst_param(tx, &tx->insn.dst[0]);
+    struct ureg_src sample;
+    const int m = tx->insn.dst[0].idx;
+    const int n = tx->insn.src[0].idx;
+    assert(m >= 0 && m > n);
+
+    sample = ureg_DECL_sampler(ureg, m);
+    tx->info->sampler_mask |= 1 << m;
+    ureg_TEX(ureg, dst, ps1x_sampler_type(tx->info, m), ureg_src(tx->regs.tS[n]), sample);
+
+    return D3D_OK;
 }
 
 DECL_SPECIAL(TEXDP3TEX)
 {
-    STUB(D3DERR_INVALIDCALL);
+    struct ureg_program *ureg = tx->ureg;
+    struct ureg_dst dst = tx_dst_param(tx, &tx->insn.dst[0]);
+    struct ureg_dst tmp;
+    struct ureg_src sample;
+    const int m = tx->insn.dst[0].idx;
+    const int n = tx->insn.src[0].idx;
+    assert(m >= 0 && m > n);
+
+    tx_texcoord_alloc(tx, m);
+
+    tmp = tx_scratch(tx);
+    ureg_DP3(ureg, ureg_writemask(tmp, TGSI_WRITEMASK_X), tx->regs.vT[m], ureg_src(tx->regs.tS[n]));
+    ureg_MOV(ureg, ureg_writemask(tmp, TGSI_WRITEMASK_YZ), ureg_imm1f(ureg, 0.0f));
+
+    sample = ureg_DECL_sampler(ureg, m);
+    tx->info->sampler_mask |= 1 << m;
+    ureg_TEX(ureg, dst, ps1x_sampler_type(tx->info, m), ureg_src(tmp), sample);
+
+    return D3D_OK;
 }
 
 DECL_SPECIAL(TEXM3x2DEPTH)
 {
-    STUB(D3DERR_INVALIDCALL);
+    struct ureg_program *ureg = tx->ureg;
+    struct ureg_dst tmp;
+    const int m = tx->insn.dst[0].idx - 1;
+    const int n = tx->insn.src[0].idx;
+    assert(m >= 0 && m > n);
+
+    tx_texcoord_alloc(tx, m);
+    tx_texcoord_alloc(tx, m+1);
+
+    tmp = tx_scratch(tx);
+
+    /* performs the matrix multiplication */
+    ureg_DP3(ureg, ureg_writemask(tmp, TGSI_WRITEMASK_X), tx->regs.vT[m], ureg_src(tx->regs.tS[n]));
+    ureg_DP3(ureg, ureg_writemask(tmp, TGSI_WRITEMASK_Y), tx->regs.vT[m+1], ureg_src(tx->regs.tS[n]));
+
+    ureg_RCP(ureg, ureg_writemask(tmp, TGSI_WRITEMASK_Z), ureg_scalar(ureg_src(tmp), TGSI_SWIZZLE_Y));
+    /* tmp.x = 'z', tmp.y = 'w', tmp.z = 1/'w'. */
+    ureg_MUL(ureg, ureg_writemask(tmp, TGSI_WRITEMASK_X), ureg_scalar(ureg_src(tmp), TGSI_SWIZZLE_X), ureg_scalar(ureg_src(tmp), TGSI_SWIZZLE_Z));
+    /* res = 'w' == 0 ? 1.0 : z/w */
+    ureg_CMP(ureg, ureg_writemask(tmp, TGSI_WRITEMASK_X), ureg_negate(ureg_abs(ureg_scalar(ureg_src(tmp), TGSI_SWIZZLE_Y))),
+             ureg_scalar(ureg_src(tmp), TGSI_SWIZZLE_X), ureg_imm1f(ureg, 1.0f));
+    /* replace the depth for depth testing with the result */
+    tx->regs.oDepth = ureg_DECL_output_masked(ureg, TGSI_SEMANTIC_POSITION, 0, TGSI_WRITEMASK_Z);
+    ureg_MOV(ureg, tx->regs.oDepth, ureg_scalar(ureg_src(tmp), TGSI_SWIZZLE_X));
+    /* note that we write nothing to the destination, since it's disallowed to use it afterward */
+    return D3D_OK;
 }
 
 DECL_SPECIAL(TEXDP3)
 {
-    STUB(D3DERR_INVALIDCALL);
+    struct ureg_program *ureg = tx->ureg;
+    struct ureg_dst dst = tx_dst_param(tx, &tx->insn.dst[0]);
+    const int m = tx->insn.dst[0].idx;
+    const int n = tx->insn.src[0].idx;
+    assert(m >= 0 && m > n);
+
+    tx_texcoord_alloc(tx, m);
+
+    ureg_DP3(ureg, dst, tx->regs.vT[m], ureg_src(tx->regs.tS[n]));
+
+    return D3D_OK;
 }
 
 DECL_SPECIAL(TEXM3x3)
 {
     struct ureg_program *ureg = tx->ureg;
     struct ureg_dst dst = tx_dst_param(tx, &tx->insn.dst[0]);
-    struct ureg_src src[4];
-    int s;
+    struct ureg_src sample;
+    struct ureg_dst E, tmp;
     const int m = tx->insn.dst[0].idx - 2;
     const int n = tx->insn.src[0].idx;
     assert(m >= 0 && m > n);
 
-    for (s = m; s <= (m + 2); ++s) {
-        if (ureg_src_is_undef(tx->regs.vT[s]))
-            tx->regs.vT[s] = ureg_DECL_fs_input(ureg, tx->texcoord_sn, s, TGSI_INTERPOLATE_PERSPECTIVE);
-        src[s] = tx->regs.vT[s];
-    }
-    ureg_DP3(ureg, ureg_writemask(dst, TGSI_WRITEMASK_X), src[0], ureg_src(tx->regs.tS[n]));
-    ureg_DP3(ureg, ureg_writemask(dst, TGSI_WRITEMASK_Y), src[1], ureg_src(tx->regs.tS[n]));
-    ureg_DP3(ureg, ureg_writemask(dst, TGSI_WRITEMASK_Z), src[2], ureg_src(tx->regs.tS[n]));
+    tx_texcoord_alloc(tx, m);
+    tx_texcoord_alloc(tx, m+1);
+    tx_texcoord_alloc(tx, m+2);
+
+    ureg_DP3(ureg, ureg_writemask(dst, TGSI_WRITEMASK_X), tx->regs.vT[m], ureg_src(tx->regs.tS[n]));
+    ureg_DP3(ureg, ureg_writemask(dst, TGSI_WRITEMASK_Y), tx->regs.vT[m+1], ureg_src(tx->regs.tS[n]));
+    ureg_DP3(ureg, ureg_writemask(dst, TGSI_WRITEMASK_Z), tx->regs.vT[m+2], ureg_src(tx->regs.tS[n]));
 
     switch (tx->insn.opcode) {
     case D3DSIO_TEXM3x3:
         ureg_MOV(ureg, ureg_writemask(dst, TGSI_WRITEMASK_W), ureg_imm1f(ureg, 1.0f));
         break;
     case D3DSIO_TEXM3x3TEX:
-        src[3] = ureg_DECL_sampler(ureg, m + 2);
+        sample = ureg_DECL_sampler(ureg, m + 2);
         tx->info->sampler_mask |= 1 << (m + 2);
-        ureg_TEX(ureg, dst, ps1x_sampler_type(tx->info, m + 2), ureg_src(dst), src[3]);
+        ureg_TEX(ureg, dst, ps1x_sampler_type(tx->info, m + 2), ureg_src(dst), sample);
+        break;
+    case D3DSIO_TEXM3x3VSPEC:
+        sample = ureg_DECL_sampler(ureg, m + 2);
+        tx->info->sampler_mask |= 1 << (m + 2);
+        E = tx_scratch(tx);
+        tmp = ureg_writemask(tx_scratch(tx), TGSI_WRITEMASK_XYZ);
+        ureg_MOV(ureg, ureg_writemask(E, TGSI_WRITEMASK_X), ureg_scalar(tx->regs.vT[m], TGSI_SWIZZLE_W));
+        ureg_MOV(ureg, ureg_writemask(E, TGSI_WRITEMASK_Y), ureg_scalar(tx->regs.vT[m+1], TGSI_SWIZZLE_W));
+        ureg_MOV(ureg, ureg_writemask(E, TGSI_WRITEMASK_Z), ureg_scalar(tx->regs.vT[m+2], TGSI_SWIZZLE_W));
+        /* At this step, dst = N = (u', w', z').
+         * We want dst to be the texture sampled at (u'', w'', z''), with
+         * (u'', w'', z'') = 2 * (N.E / N.N) * N - E */
+        ureg_DP3(ureg, ureg_writemask(tmp, TGSI_WRITEMASK_X), ureg_src(dst), ureg_src(dst));
+        ureg_RCP(ureg, ureg_writemask(tmp, TGSI_WRITEMASK_X), ureg_scalar(ureg_src(tmp), TGSI_SWIZZLE_X));
+        /* at this step tmp.x = 1/N.N */
+        ureg_DP3(ureg, ureg_writemask(tmp, TGSI_WRITEMASK_Y), ureg_src(dst), ureg_src(E));
+        /* at this step tmp.y = N.E */
+        ureg_MUL(ureg, ureg_writemask(tmp, TGSI_WRITEMASK_X), ureg_scalar(ureg_src(tmp), TGSI_SWIZZLE_X), ureg_scalar(ureg_src(tmp), TGSI_SWIZZLE_Y));
+        /* at this step tmp.x = N.E/N.N */
+        ureg_MUL(ureg, ureg_writemask(tmp, TGSI_WRITEMASK_X), ureg_scalar(ureg_src(tmp), TGSI_SWIZZLE_X), ureg_imm1f(ureg, 2.0f));
+        ureg_MUL(ureg, tmp, ureg_scalar(ureg_src(tmp), TGSI_SWIZZLE_X), ureg_src(dst));
+        /* at this step tmp.xyz = 2 * (N.E / N.N) * N */
+        ureg_SUB(ureg, tmp, ureg_src(tmp), ureg_src(E));
+        ureg_TEX(ureg, dst, ps1x_sampler_type(tx->info, m + 2), ureg_src(tmp), sample);
         break;
     default:
         return D3DERR_INVALIDCALL;
@@ -2127,7 +2377,28 @@ DECL_SPECIAL(TEXM3x3)
 
 DECL_SPECIAL(TEXDEPTH)
 {
-    STUB(D3DERR_INVALIDCALL);
+    struct ureg_program *ureg = tx->ureg;
+    struct ureg_dst r5;
+    struct ureg_src r5r, r5g;
+
+    assert(tx->insn.dst[0].idx == 5); /* instruction must get r5 here */
+
+    /* we must replace the depth by r5.g == 0 ? 1.0f : r5.r/r5.g.
+     * r5 won't be used afterward, thus we can use r5.ba */
+    r5 = tx->regs.r[5];
+    r5r = ureg_scalar(ureg_src(r5), TGSI_SWIZZLE_X);
+    r5g = ureg_scalar(ureg_src(r5), TGSI_SWIZZLE_Y);
+
+    ureg_RCP(ureg, ureg_writemask(r5, TGSI_WRITEMASK_Z), r5g);
+    ureg_MUL(ureg, ureg_writemask(r5, TGSI_WRITEMASK_X), r5r, ureg_scalar(ureg_src(r5), TGSI_SWIZZLE_Z));
+    /* r5.r = r/g */
+    ureg_CMP(ureg, ureg_writemask(r5, TGSI_WRITEMASK_X), ureg_negate(ureg_abs(r5g)),
+             r5r, ureg_imm1f(ureg, 1.0f));
+    /* replace the depth for depth testing with the result */
+    tx->regs.oDepth = ureg_DECL_output_masked(ureg, TGSI_SEMANTIC_POSITION, 0, TGSI_WRITEMASK_Z);
+    ureg_MOV(ureg, tx->regs.oDepth, r5r);
+
+    return D3D_OK;
 }
 
 DECL_SPECIAL(BEM)
@@ -2187,8 +2458,7 @@ DECL_SPECIAL(TEX)
     struct ureg_dst dst = tx_dst_param(tx, &tx->insn.dst[0]);
     struct ureg_src src[2];
 
-    if (ureg_src_is_undef(tx->regs.vT[s]))
-        tx->regs.vT[s] = ureg_DECL_fs_input(ureg, tx->texcoord_sn, s, TGSI_INTERPOLATE_PERSPECTIVE);
+    tx_texcoord_alloc(tx, s);
 
     src[0] = tx->regs.vT[s];
     src[1] = ureg_DECL_sampler(ureg, s);
@@ -2267,7 +2537,7 @@ struct sm1_op_info inst_table[] =
     _OPI(MAD, MAD, V(0,0), V(3,0), V(0,0), V(3,0), 1, 3, NULL), /* 4 */
     _OPI(MUL, MUL, V(0,0), V(3,0), V(0,0), V(3,0), 1, 2, NULL), /* 5 */
     _OPI(RCP, RCP, V(0,0), V(3,0), V(0,0), V(3,0), 1, 1, NULL), /* 6 */
-    _OPI(RSQ, RSQ, V(0,0), V(3,0), V(0,0), V(3,0), 1, 1, NULL), /* 7 */
+    _OPI(RSQ, RSQ, V(0,0), V(3,0), V(0,0), V(3,0), 1, 1, SPECIAL(RSQ)), /* 7 */
     _OPI(DP3, DP3, V(0,0), V(3,0), V(0,0), V(3,0), 1, 2, NULL), /* 8 */
     _OPI(DP4, DP4, V(0,0), V(3,0), V(0,0), V(3,0), 1, 2, NULL), /* 9 */
     _OPI(MIN, MIN, V(0,0), V(3,0), V(0,0), V(3,0), 1, 2, NULL), /* 10 */
@@ -2275,7 +2545,7 @@ struct sm1_op_info inst_table[] =
     _OPI(SLT, SLT, V(0,0), V(3,0), V(0,0), V(3,0), 1, 2, NULL), /* 12 */
     _OPI(SGE, SGE, V(0,0), V(3,0), V(0,0), V(3,0), 1, 2, NULL), /* 13 */
     _OPI(EXP, EX2, V(0,0), V(3,0), V(0,0), V(3,0), 1, 1, NULL), /* 14 */
-    _OPI(LOG, LG2, V(0,0), V(3,0), V(0,0), V(3,0), 1, 1, NULL), /* 15 */
+    _OPI(LOG, LG2, V(0,0), V(3,0), V(0,0), V(3,0), 1, 1, SPECIAL(LOG)), /* 15 */
     _OPI(LIT, LIT, V(0,0), V(3,0), V(0,0), V(0,0), 1, 1, NULL), /* 16 */
     _OPI(DST, DST, V(0,0), V(3,0), V(0,0), V(3,0), 1, 2, NULL), /* 17 */
     _OPI(LRP, LRP, V(0,0), V(3,0), V(0,0), V(3,0), 1, 3, NULL), /* 18 */
@@ -2287,16 +2557,16 @@ struct sm1_op_info inst_table[] =
     _OPI(M3x3, NOP, V(0,0), V(3,0), V(0,0), V(3,0), 1, 2, SPECIAL(M3x3)),
     _OPI(M3x2, NOP, V(0,0), V(3,0), V(0,0), V(3,0), 1, 2, SPECIAL(M3x2)),
 
-    _OPI(CALL,    CAL,     V(2,0), V(3,0), V(2,1), V(3,0), 0, 0, SPECIAL(CALL)),
-    _OPI(CALLNZ,  CAL,     V(2,0), V(3,0), V(2,1), V(3,0), 0, 0, SPECIAL(CALLNZ)),
+    _OPI(CALL,    CAL,     V(2,0), V(3,0), V(2,1), V(3,0), 0, 1, SPECIAL(CALL)),
+    _OPI(CALLNZ,  CAL,     V(2,0), V(3,0), V(2,1), V(3,0), 0, 2, SPECIAL(CALLNZ)),
     _OPI(LOOP,    BGNLOOP, V(2,0), V(3,0), V(3,0), V(3,0), 0, 2, SPECIAL(LOOP)),
     _OPI(RET,     RET,     V(2,0), V(3,0), V(2,1), V(3,0), 0, 0, SPECIAL(RET)),
     _OPI(ENDLOOP, ENDLOOP, V(2,0), V(3,0), V(3,0), V(3,0), 0, 0, SPECIAL(ENDLOOP)),
-    _OPI(LABEL,   NOP,     V(2,0), V(3,0), V(2,1), V(3,0), 0, 0, SPECIAL(LABEL)),
+    _OPI(LABEL,   NOP,     V(2,0), V(3,0), V(2,1), V(3,0), 0, 1, SPECIAL(LABEL)),
 
     _OPI(DCL, NOP, V(0,0), V(3,0), V(0,0), V(3,0), 0, 0, SPECIAL(DCL)),
 
-    _OPI(POW, POW, V(0,0), V(3,0), V(0,0), V(3,0), 1, 2, NULL),
+    _OPI(POW, POW, V(0,0), V(3,0), V(0,0), V(3,0), 1, 2, SPECIAL(POW)),
     _OPI(CRS, XPD, V(0,0), V(3,0), V(0,0), V(3,0), 1, 2, NULL), /* XXX: .w */
     _OPI(SGN, SSG, V(2,0), V(3,0), V(0,0), V(0,0), 1, 3, SPECIAL(SGN)), /* ignore src1,2 */
     _OPI(ABS, ABS, V(0,0), V(3,0), V(0,0), V(3,0), 1, 1, NULL),
@@ -2314,8 +2584,9 @@ struct sm1_op_info inst_table[] =
     _OPI(ENDIF,  ENDIF,  V(2,0), V(3,0), V(2,1), V(3,0), 0, 0, SPECIAL(ENDIF)),
     _OPI(BREAK,  BRK,    V(2,1), V(3,0), V(2,1), V(3,0), 0, 0, NULL),
     _OPI(BREAKC, BREAKC, V(2,1), V(3,0), V(2,1), V(3,0), 0, 2, SPECIAL(BREAKC)),
-
-    _OPI(MOVA, ARR, V(2,0), V(3,0), V(0,0), V(0,0), 1, 1, NULL),
+    /* we don't write to the address register, but a normal register (copied
+     * when needed to the address register), thus we don't use ARR */
+    _OPI(MOVA, MOV, V(2,0), V(3,0), V(0,0), V(0,0), 1, 1, NULL),
 
     _OPI(DEFB, NOP, V(0,0), V(3,0) , V(0,0), V(3,0) , 1, 0, SPECIAL(DEFB)),
     _OPI(DEFI, NOP, V(0,0), V(3,0) , V(0,0), V(3,0) , 1, 0, SPECIAL(DEFI)),
@@ -2326,42 +2597,42 @@ struct sm1_op_info inst_table[] =
     _OPI(TEX,          TEX, V(0,0), V(0,0), V(0,0), V(1,3), 1, 0, SPECIAL(TEX)),
     _OPI(TEX,          TEX, V(0,0), V(0,0), V(1,4), V(1,4), 1, 1, SPECIAL(TEXLD_14)),
     _OPI(TEX,          TEX, V(0,0), V(0,0), V(2,0), V(3,0), 1, 2, SPECIAL(TEXLD)),
-    _OPI(TEXBEM,       TEX, V(0,0), V(0,0), V(0,0), V(1,3), 0, 0, SPECIAL(TEXBEM)),
-    _OPI(TEXBEML,      TEX, V(0,0), V(0,0), V(0,0), V(1,3), 0, 0, SPECIAL(TEXBEML)),
-    _OPI(TEXREG2AR,    TEX, V(0,0), V(0,0), V(0,0), V(1,3), 0, 0, SPECIAL(TEXREG2AR)),
-    _OPI(TEXREG2GB,    TEX, V(0,0), V(0,0), V(0,0), V(1,3), 0, 0, SPECIAL(TEXREG2GB)),
-    _OPI(TEXM3x2PAD,   TEX, V(0,0), V(0,0), V(0,0), V(1,3), 0, 0, SPECIAL(TEXM3x2PAD)),
-    _OPI(TEXM3x2TEX,   TEX, V(0,0), V(0,0), V(0,0), V(1,3), 0, 0, SPECIAL(TEXM3x2TEX)),
-    _OPI(TEXM3x3PAD,   TEX, V(0,0), V(0,0), V(0,0), V(1,3), 0, 0, SPECIAL(TEXM3x3PAD)),
-    _OPI(TEXM3x3TEX,   TEX, V(0,0), V(0,0), V(0,0), V(1,3), 0, 0, SPECIAL(TEXM3x3)),
-    _OPI(TEXM3x3SPEC,  TEX, V(0,0), V(0,0), V(0,0), V(1,3), 0, 0, SPECIAL(TEXM3x3SPEC)),
-    _OPI(TEXM3x3VSPEC, TEX, V(0,0), V(0,0), V(0,0), V(1,3), 0, 0, SPECIAL(TEXM3x3VSPEC)),
+    _OPI(TEXBEM,       TEX, V(0,0), V(0,0), V(0,0), V(1,3), 1, 1, SPECIAL(TEXBEM)),
+    _OPI(TEXBEML,      TEX, V(0,0), V(0,0), V(0,0), V(1,3), 1, 1, SPECIAL(TEXBEML)),
+    _OPI(TEXREG2AR,    TEX, V(0,0), V(0,0), V(0,0), V(1,3), 1, 1, SPECIAL(TEXREG2AR)),
+    _OPI(TEXREG2GB,    TEX, V(0,0), V(0,0), V(0,0), V(1,3), 1, 1, SPECIAL(TEXREG2GB)),
+    _OPI(TEXM3x2PAD,   TEX, V(0,0), V(0,0), V(0,0), V(1,3), 1, 1, SPECIAL(TEXM3x2PAD)),
+    _OPI(TEXM3x2TEX,   TEX, V(0,0), V(0,0), V(0,0), V(1,3), 1, 1, SPECIAL(TEXM3x2TEX)),
+    _OPI(TEXM3x3PAD,   TEX, V(0,0), V(0,0), V(0,0), V(1,3), 1, 1, SPECIAL(TEXM3x3PAD)),
+    _OPI(TEXM3x3TEX,   TEX, V(0,0), V(0,0), V(0,0), V(1,3), 1, 1, SPECIAL(TEXM3x3)),
+    _OPI(TEXM3x3SPEC,  TEX, V(0,0), V(0,0), V(0,0), V(1,3), 1, 2, SPECIAL(TEXM3x3SPEC)),
+    _OPI(TEXM3x3VSPEC, TEX, V(0,0), V(0,0), V(0,0), V(1,3), 1, 1, SPECIAL(TEXM3x3)),
 
     _OPI(EXPP, EXP, V(0,0), V(1,1), V(0,0), V(0,0), 1, 1, NULL),
     _OPI(EXPP, EX2, V(2,0), V(3,0), V(0,0), V(0,0), 1, 1, NULL),
-    _OPI(LOGP, LG2, V(0,0), V(3,0), V(0,0), V(0,0), 1, 1, NULL),
+    _OPI(LOGP, LG2, V(0,0), V(3,0), V(0,0), V(0,0), 1, 1, SPECIAL(LOG)),
     _OPI(CND,  NOP, V(0,0), V(0,0), V(0,0), V(1,4), 1, 3, SPECIAL(CND)),
 
     _OPI(DEF, NOP, V(0,0), V(3,0), V(0,0), V(3,0), 1, 0, SPECIAL(DEF)),
 
     /* More tex stuff */
-    _OPI(TEXREG2RGB,   TEX, V(0,0), V(0,0), V(1,2), V(1,3), 0, 0, SPECIAL(TEXREG2RGB)),
-    _OPI(TEXDP3TEX,    TEX, V(0,0), V(0,0), V(1,2), V(1,3), 0, 0, SPECIAL(TEXDP3TEX)),
-    _OPI(TEXM3x2DEPTH, TEX, V(0,0), V(0,0), V(1,3), V(1,3), 0, 0, SPECIAL(TEXM3x2DEPTH)),
-    _OPI(TEXDP3,       TEX, V(0,0), V(0,0), V(1,2), V(1,3), 0, 0, SPECIAL(TEXDP3)),
-    _OPI(TEXM3x3,      TEX, V(0,0), V(0,0), V(1,2), V(1,3), 0, 0, SPECIAL(TEXM3x3)),
-    _OPI(TEXDEPTH,     TEX, V(0,0), V(0,0), V(1,4), V(1,4), 0, 0, SPECIAL(TEXDEPTH)),
+    _OPI(TEXREG2RGB,   TEX, V(0,0), V(0,0), V(1,2), V(1,3), 1, 1, SPECIAL(TEXREG2RGB)),
+    _OPI(TEXDP3TEX,    TEX, V(0,0), V(0,0), V(1,2), V(1,3), 1, 1, SPECIAL(TEXDP3TEX)),
+    _OPI(TEXM3x2DEPTH, TEX, V(0,0), V(0,0), V(1,3), V(1,3), 1, 1, SPECIAL(TEXM3x2DEPTH)),
+    _OPI(TEXDP3,       TEX, V(0,0), V(0,0), V(1,2), V(1,3), 1, 1, SPECIAL(TEXDP3)),
+    _OPI(TEXM3x3,      TEX, V(0,0), V(0,0), V(1,2), V(1,3), 1, 1, SPECIAL(TEXM3x3)),
+    _OPI(TEXDEPTH,     TEX, V(0,0), V(0,0), V(1,4), V(1,4), 1, 0, SPECIAL(TEXDEPTH)),
 
     /* Misc */
     _OPI(CMP,    CMP,  V(0,0), V(0,0), V(1,2), V(3,0), 1, 3, SPECIAL(CMP)), /* reversed */
-    _OPI(BEM,    NOP,  V(0,0), V(0,0), V(1,4), V(1,4), 0, 0, SPECIAL(BEM)),
-    _OPI(DP2ADD, DP2A, V(0,0), V(0,0), V(2,0), V(3,0), 1, 3, SPECIAL(DP2ADD)), /* for radeons */
+    _OPI(BEM,    NOP,  V(0,0), V(0,0), V(1,4), V(1,4), 1, 2, SPECIAL(BEM)),
+    _OPI(DP2ADD, NOP,  V(0,0), V(0,0), V(2,0), V(3,0), 1, 3, SPECIAL(DP2ADD)),
     _OPI(DSX,    DDX,  V(0,0), V(0,0), V(2,1), V(3,0), 1, 1, NULL),
     _OPI(DSY,    DDY,  V(0,0), V(0,0), V(2,1), V(3,0), 1, 1, NULL),
     _OPI(TEXLDD, TXD,  V(0,0), V(0,0), V(2,1), V(3,0), 1, 4, SPECIAL(TEXLDD)),
-    _OPI(SETP,   NOP,  V(0,0), V(3,0), V(2,1), V(3,0), 0, 0, SPECIAL(SETP)),
+    _OPI(SETP,   NOP,  V(0,0), V(3,0), V(2,1), V(3,0), 1, 2, SPECIAL(SETP)),
     _OPI(TEXLDL, TXL,  V(3,0), V(3,0), V(3,0), V(3,0), 1, 2, SPECIAL(TEXLDL)),
-    _OPI(BREAKP, BRK,  V(0,0), V(3,0), V(2,1), V(3,0), 0, 0, SPECIAL(BREAKP))
+    _OPI(BREAKP, BRK,  V(0,0), V(3,0), V(2,1), V(3,0), 0, 1, SPECIAL(BREAKP))
 };
 
 struct sm1_op_info inst_phase =
@@ -2732,11 +3003,11 @@ tx_ctor(struct shader_translator *tx, struct nine_shader_info *info)
     info->lconstf.data = NULL;
     info->lconstf.ranges = NULL;
 
-    for (i = 0; i < Elements(tx->regs.aL); ++i) {
-        tx->regs.aL[i] = ureg_dst_undef();
+    for (i = 0; i < Elements(tx->regs.rL); ++i) {
         tx->regs.rL[i] = ureg_dst_undef();
     }
-    tx->regs.a = ureg_dst_undef();
+    tx->regs.address = ureg_dst_undef();
+    tx->regs.a0 = ureg_dst_undef();
     tx->regs.p = ureg_dst_undef();
     tx->regs.oDepth = ureg_dst_undef();
     tx->regs.vPos = ureg_src_undef();
@@ -2842,9 +3113,6 @@ nine_translate_shader(struct NineDevice9 *device, struct nine_shader_info *info)
             ureg_property(tx->ureg, TGSI_PROPERTY_FS_COORD_PIXEL_CENTER, TGSI_FS_COORD_PIXEL_CENTER_INTEGER);
     }
 
-    if (!ureg_dst_is_undef(tx->regs.oPts))
-        info->point_size = TRUE;
-
     while (!sm1_parse_eof(tx))
         sm1_parse_instruction(tx);
     tx->parse++; /* for byte_size */
@@ -2859,6 +3127,9 @@ nine_translate_shader(struct NineDevice9 *device, struct nine_shader_info *info)
         ureg_property(tx->ureg, TGSI_PROPERTY_VS_WINDOW_SPACE_POSITION, TRUE);
 
     ureg_END(tx->ureg);
+
+    if (IS_VS && !ureg_dst_is_undef(tx->regs.oPts))
+        info->point_size = TRUE;
 
     if (debug_get_bool_option("NINE_TGSI_DUMP", FALSE)) {
         unsigned count;

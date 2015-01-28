@@ -185,6 +185,8 @@ d3d9_to_pipe_format(D3DFORMAT format)
     case D3DFMT_DXT3: return PIPE_FORMAT_DXT3_RGBA;
     case D3DFMT_DXT4: return PIPE_FORMAT_DXT5_RGBA; /* XXX */
     case D3DFMT_DXT5: return PIPE_FORMAT_DXT5_RGBA;
+    case D3DFMT_ATI1: return PIPE_FORMAT_RGTC1_UNORM;
+    case D3DFMT_ATI2: return PIPE_FORMAT_RGTC2_UNORM;
     case D3DFMT_UYVY: return PIPE_FORMAT_UYVY;
     case D3DFMT_YUY2: return PIPE_FORMAT_YUYV; /* XXX check */
     case D3DFMT_NV12: return PIPE_FORMAT_NV12;
@@ -249,6 +251,8 @@ d3dformat_to_string(D3DFORMAT fmt)
     case D3DFMT_DXT3: return "D3DFMT_DXT3";
     case D3DFMT_DXT4: return "D3DFMT_DXT4";
     case D3DFMT_DXT5: return "D3DFMT_DXT5";
+    case D3DFMT_ATI1: return "D3DFMT_ATI1";
+    case D3DFMT_ATI2: return "D3DFMT_ATI2";
     case D3DFMT_D16_LOCKABLE: return "D3DFMT_D16_LOCKABLE";
     case D3DFMT_D32: return "D3DFMT_D32";
     case D3DFMT_D15S1: return "D3DFMT_D15S1";
@@ -279,6 +283,7 @@ d3dformat_to_string(D3DFORMAT fmt)
     case D3DFMT_DF16: return "D3DFMT_DF16";
     case D3DFMT_DF24: return "D3DFMT_DF24";
     case D3DFMT_INTZ: return "D3DFMT_INTZ";
+    case D3DFMT_NVDB: return "D3DFMT_NVDB";
     case D3DFMT_NULL: return "D3DFMT_NULL";
     default:
         break;

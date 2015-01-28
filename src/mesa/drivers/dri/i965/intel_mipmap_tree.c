@@ -671,10 +671,12 @@ intel_miptree_create_for_bo(struct brw_context *brw,
                             uint32_t offset,
                             uint32_t width,
                             uint32_t height,
+                            uint32_t depth,
                             int pitch)
 {
    struct intel_mipmap_tree *mt;
    uint32_t tiling, swizzle;
+   GLenum target;
 
    drm_intel_bo_get_tiling(bo, &tiling, &swizzle);
 
@@ -689,9 +691,11 @@ intel_miptree_create_for_bo(struct brw_context *brw,
     */
    assert(pitch >= 0);
 
-   mt = intel_miptree_create_layout(brw, GL_TEXTURE_2D, format,
+   target = depth > 1 ? GL_TEXTURE_2D_ARRAY : GL_TEXTURE_2D;
+
+   mt = intel_miptree_create_layout(brw, target, format,
                                     0, 0,
-                                    width, height, 1,
+                                    width, height, depth,
                                     true, 0, false);
    if (!mt) {
       free(mt);
@@ -742,6 +746,7 @@ intel_update_winsys_renderbuffer_miptree(struct brw_context *intel,
                                                  0,
                                                  width,
                                                  height,
+                                                 1,
                                                  pitch);
    if (!singlesample_mt)
       goto fail;
@@ -1807,14 +1812,21 @@ intel_miptree_map_blit(struct brw_context *brw,
    }
    map->stride = map->mt->pitch;
 
-   if (!intel_miptree_blit(brw,
-                           mt, level, slice,
-                           map->x, map->y, false,
-                           map->mt, 0, 0,
-                           0, 0, false,
-                           map->w, map->h, GL_COPY)) {
-      fprintf(stderr, "Failed to blit\n");
-      goto fail;
+   /* One of either READ_BIT or WRITE_BIT or both is set.  READ_BIT implies no
+    * INVALIDATE_RANGE_BIT.  WRITE_BIT needs the original values read in unless
+    * invalidate is set, since we'll be writing the whole rectangle from our
+    * temporary buffer back out.
+    */
+   if (!(map->mode & GL_MAP_INVALIDATE_RANGE_BIT)) {
+      if (!intel_miptree_blit(brw,
+                              mt, level, slice,
+                              map->x, map->y, false,
+                              map->mt, 0, 0,
+                              0, 0, false,
+                              map->w, map->h, GL_COPY)) {
+         fprintf(stderr, "Failed to blit\n");
+         goto fail;
+      }
    }
 
    map->ptr = intel_miptree_map_raw(brw, map->mt);

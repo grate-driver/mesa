@@ -214,11 +214,12 @@ update_vertex_elements(struct NineDevice9 *device)
             if (state->stream_freq[b] & D3DSTREAMSOURCE_INSTANCEDATA)
                 ve[n].instance_divisor = state->stream_freq[b] & 0x7FFFFF;
         } else {
-            /* TODO:
-             * If drivers don't want to handle this, insert a dummy buffer.
-             * But on which stream ?
-             */
-            /* no data, disable */
+            /* TODO: msdn doesn't specify what should happen when the vertex
+             * declaration doesn't match the vertex shader inputs.
+             * Some websites say the code will pass but nothing will get rendered.
+             * We should check and implement the correct behaviour. */
+            /* Put PIPE_FORMAT_NONE.
+             * Some drivers (r300) are very unhappy with that */
             ve[n].src_format = PIPE_FORMAT_NONE;
             ve[n].src_offset = 0;
             ve[n].instance_divisor = 0;
@@ -347,14 +348,13 @@ update_constants(struct NineDevice9 *device, unsigned shader_type)
     const int *const_i;
     const BOOL *const_b;
     uint32_t data_b[NINE_MAX_CONST_B];
-    uint32_t b_true;
     uint16_t dirty_i;
     uint16_t dirty_b;
     const unsigned usage = PIPE_TRANSFER_WRITE | PIPE_TRANSFER_DISCARD_RANGE;
     unsigned x = 0; /* silence warning */
-    unsigned i, c, n;
-    const struct nine_lconstf *lconstf;
-    struct nine_range *r, *p;
+    unsigned i, c;
+    struct nine_range *r, *p, *lconstf_ranges;
+    float *lconstf_data;
 
     box.y = 0;
     box.z = 0;
@@ -381,9 +381,10 @@ update_constants(struct NineDevice9 *device, unsigned shader_type)
         dirty_b = device->state.changed.vs_const_b;
         device->state.changed.vs_const_b = 0;
         const_b = device->state.vs_const_b;
-        b_true = device->vs_bool_true;
 
-        lconstf = &device->state.vs->lconstf;
+        lconstf_ranges = device->state.vs->lconstf.ranges;
+        lconstf_data = device->state.vs->lconstf.data;
+
         device->state.ff.clobber.vs_const = TRUE;
         device->state.changed.group &= ~NINE_STATE_VS_CONST;
     } else {
@@ -406,9 +407,10 @@ update_constants(struct NineDevice9 *device, unsigned shader_type)
         dirty_b = device->state.changed.ps_const_b;
         device->state.changed.ps_const_b = 0;
         const_b = device->state.ps_const_b;
-        b_true = device->ps_bool_true;
 
-        lconstf = &device->state.ps->lconstf;
+        lconstf_ranges = NULL;
+        lconstf_data = NULL;
+
         device->state.ff.clobber.ps_const = TRUE;
         device->state.changed.group &= ~NINE_STATE_PS_CONST;
     }
@@ -420,11 +422,10 @@ update_constants(struct NineDevice9 *device, unsigned shader_type)
        i = ffs(dirty_b) - 1;
        x = buf->width0 - (NINE_MAX_CONST_B - i) * 4;
        c -= i;
-       for (n = 0; n < c; ++n, ++i)
-          data_b[n] = const_b[i] ? b_true : 0;
+       memcpy(data_b, &(const_b[i]), c * sizeof(uint32_t));
        box.x = x;
-       box.width = n * 4;
-       DBG("upload ConstantB [%u .. %u]\n", x, x + n - 1);
+       box.width = c * 4;
+       DBG("upload ConstantB [%u .. %u]\n", x, x + c - 1);
        pipe->transfer_inline_write(pipe, buf, 0, usage, &box, data_b, 0, 0);
     }
 
@@ -455,14 +456,14 @@ update_constants(struct NineDevice9 *device, unsigned shader_type)
     }
 
     /* TODO: only upload these when shader itself changes */
-    if (lconstf->ranges) {
+    if (lconstf_ranges) {
         unsigned n = 0;
-        struct nine_range *r = lconstf->ranges;
+        struct nine_range *r = lconstf_ranges;
         while (r) {
             box.x = r->bgn * 4 * sizeof(float);
             n += r->end - r->bgn;
             box.width = (r->end - r->bgn) * 4 * sizeof(float);
-            data = &lconstf->data[4 * n];
+            data = &lconstf_data[4 * n];
             pipe->transfer_inline_write(pipe, buf, 0, usage, &box, data, 0, 0);
             r = r->next;
         }
@@ -491,19 +492,16 @@ update_vs_constants_userbuf(struct NineDevice9 *device)
     if (state->changed.vs_const_b) {
         int *idst = (int *)&state->vs_const_f[4 * device->max_vs_const_f];
         uint32_t *bdst = (uint32_t *)&idst[4 * NINE_MAX_CONST_I];
-        int i;
-        for (i = 0; i < NINE_MAX_CONST_B; ++i)
-            bdst[i] = state->vs_const_b[i] ? device->vs_bool_true : 0;
+        memcpy(bdst, state->vs_const_b, sizeof(state->vs_const_b));
         state->changed.vs_const_b = 0;
     }
 
-#ifdef DEBUG
     if (device->state.vs->lconstf.ranges) {
         /* TODO: Can we make it so that we don't have to copy everything ? */
         const struct nine_lconstf *lconstf =  &device->state.vs->lconstf;
         const struct nine_range *r = lconstf->ranges;
         unsigned n = 0;
-        float *dst = (float *)MALLOC(cb.buffer_size);
+        float *dst = device->state.vs_lconstf_temp;
         float *src = (float *)cb.user_buffer;
         memcpy(dst, src, cb.buffer_size);
         while (r) {
@@ -515,14 +513,8 @@ update_vs_constants_userbuf(struct NineDevice9 *device)
         }
         cb.user_buffer = dst;
     }
-#endif
 
     pipe->set_constant_buffer(pipe, PIPE_SHADER_VERTEX, 0, &cb);
-
-#ifdef DEBUG
-    if (device->state.vs->lconstf.ranges)
-        FREE((void *)cb.user_buffer);
-#endif
 
     if (device->state.changed.vs_const_f) {
         struct nine_range *r = device->state.changed.vs_const_f;
@@ -557,38 +549,11 @@ update_ps_constants_userbuf(struct NineDevice9 *device)
     if (state->changed.ps_const_b) {
         int *idst = (int *)&state->ps_const_f[4 * device->max_ps_const_f];
         uint32_t *bdst = (uint32_t *)&idst[4 * NINE_MAX_CONST_I];
-        int i;
-        for (i = 0; i < NINE_MAX_CONST_B; ++i)
-            bdst[i] = state->ps_const_b[i] ? device->ps_bool_true : 0;
+        memcpy(bdst, state->ps_const_b, sizeof(state->ps_const_b));
         state->changed.ps_const_b = 0;
     }
 
-#ifdef DEBUG
-    if (device->state.ps->lconstf.ranges) {
-        /* TODO: Can we make it so that we don't have to copy everything ? */
-        const struct nine_lconstf *lconstf =  &device->state.ps->lconstf;
-        const struct nine_range *r = lconstf->ranges;
-        unsigned n = 0;
-        float *dst = (float *)MALLOC(cb.buffer_size);
-        float *src = (float *)cb.user_buffer;
-        memcpy(dst, src, cb.buffer_size);
-        while (r) {
-            unsigned p = r->bgn;
-            unsigned c = r->end - r->bgn;
-            memcpy(&dst[p * 4], &lconstf->data[n * 4], c * 4 * sizeof(float));
-            n += c;
-            r = r->next;
-        }
-        cb.user_buffer = dst;
-    }
-#endif
-
     pipe->set_constant_buffer(pipe, PIPE_SHADER_FRAGMENT, 0, &cb);
-
-#ifdef DEBUG
-    if (device->state.ps->lconstf.ranges)
-        FREE((void *)cb.user_buffer);
-#endif
 
     if (device->state.changed.ps_const_f) {
         struct nine_range *r = device->state.changed.ps_const_f;
@@ -839,8 +804,10 @@ nine_update_state(struct NineDevice9 *device, uint32_t mask)
         }
     }
 
-    if (state->changed.ucp)
+    if (state->changed.ucp) {
         pipe->set_clip_state(pipe, &state->clip);
+        state->changed.ucp = 0;
+    }
 
     if (group & (NINE_STATE_FREQ_GROUP_1 | NINE_STATE_VS)) {
         if (group & (NINE_STATE_TEXTURE | NINE_STATE_SAMPLER))
@@ -1030,9 +997,10 @@ static const DWORD nine_samp_state_defaults[NINED3DSAMP_LAST + 1] =
     [NINED3DSAMP_SHADOW] = 0
 };
 void
-nine_state_set_defaults(struct nine_state *state, const D3DCAPS9 *caps,
+nine_state_set_defaults(struct NineDevice9 *device, const D3DCAPS9 *caps,
                         boolean is_reset)
 {
+    struct nine_state *state = &device->state;
     unsigned s;
 
     /* Initialize defaults.
@@ -1053,9 +1021,9 @@ nine_state_set_defaults(struct nine_state *state, const D3DCAPS9 *caps,
     }
 
     if (state->vs_const_f)
-        memset(state->vs_const_f, 0, NINE_MAX_CONST_F * 4 * sizeof(float));
+        memset(state->vs_const_f, 0, device->vs_const_size);
     if (state->ps_const_f)
-        memset(state->ps_const_f, 0, NINE_MAX_CONST_F * 4 * sizeof(float));
+        memset(state->ps_const_f, 0, device->ps_const_size);
 
     /* Cap dependent initial state:
      */

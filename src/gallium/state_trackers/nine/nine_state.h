@@ -144,6 +144,7 @@ struct nine_state
     float *vs_const_f;
     int    vs_const_i[NINE_MAX_CONST_I][4];
     BOOL   vs_const_b[NINE_MAX_CONST_B];
+    float *vs_lconstf_temp;
     uint32_t vs_key;
 
     struct NinePixelShader9 *ps;
@@ -218,7 +219,7 @@ struct NineDevice9;
 
 boolean nine_update_state(struct NineDevice9 *, uint32_t group_mask);
 
-void nine_state_set_defaults(struct nine_state *, const D3DCAPS9 *,
+void nine_state_set_defaults(struct NineDevice9 *, const D3DCAPS9 *,
                              boolean is_reset);
 void nine_state_clear(struct nine_state *, const boolean device);
 

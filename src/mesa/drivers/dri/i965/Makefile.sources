@@ -39,6 +39,7 @@ i965_FILES = \
 	brw_ff_gs_emit.c \
 	brw_ff_gs.h \
 	brw_fs_channel_expressions.cpp \
+	brw_fs_cmod_propagation.cpp \
 	brw_fs_copy_propagation.cpp \
 	brw_fs.cpp \
 	brw_fs_cse.cpp \
@@ -48,6 +49,7 @@ i965_FILES = \
 	brw_fs.h \
 	brw_fs_live_variables.cpp \
 	brw_fs_live_variables.h \
+	brw_fs_nir.cpp \
 	brw_fs_peephole_predicated_break.cpp \
 	brw_fs_reg_allocate.cpp \
 	brw_fs_register_coalesce.cpp \
@@ -207,4 +209,6 @@ i965_FILES = \
 	intel_tex_obj.h \
 	intel_tex_subimage.c \
 	intel_tex_validate.c \
+	intel_tiled_memcpy.c \
+	intel_tiled_memcpy.h \
 	intel_upload.c

@@ -2051,6 +2051,7 @@ glsl_to_tgsi_visitor::visit(ir_swizzle *ir)
    ir->val->accept(this);
    src = this->result;
    assert(src.file != PROGRAM_UNDEFINED);
+   assert(ir->type->vector_elements > 0);
 
    for (i = 0; i < 4; i++) {
       if (i < ir->type->vector_elements) {
@@ -4412,8 +4413,8 @@ translate_dst(struct st_translate *t,
       /* Clamp colors for ARB_color_buffer_float. */
       switch (t->procType) {
       case TGSI_PROCESSOR_VERTEX:
-         /* XXX if the geometry shader is present, this must be done there
-          * instead of here. */
+         /* This can only occur with a compatibility profile, which doesn't
+          * support geometry shaders. */
          if (dst_reg->index == VARYING_SLOT_COL0 ||
              dst_reg->index == VARYING_SLOT_COL1 ||
              dst_reg->index == VARYING_SLOT_BFC0 ||

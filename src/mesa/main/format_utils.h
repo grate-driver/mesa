@@ -34,10 +34,10 @@
 #include "imports.h"
 #include "macros.h"
 
-extern const mesa_array_format RGBA8888_FLOAT;
-extern const mesa_array_format RGBA8888_UBYTE;
-extern const mesa_array_format RGBA8888_UINT;
-extern const mesa_array_format RGBA8888_INT;
+extern const mesa_array_format RGBA32_FLOAT;
+extern const mesa_array_format RGBA8_UBYTE;
+extern const mesa_array_format RGBA32_UINT;
+extern const mesa_array_format RGBA32_INT;
 
 /* Only guaranteed to work for BITS <= 32 */
 #define MAX_UINT(BITS) ((BITS) == 32 ? UINT32_MAX : ((1u << (BITS)) - 1))
@@ -96,10 +96,19 @@ _mesa_half_to_unorm(uint16_t x, unsigned dst_bits)
 static inline unsigned
 _mesa_unorm_to_unorm(unsigned x, unsigned src_bits, unsigned dst_bits)
 {
-   if (src_bits < dst_bits)
+   if (src_bits < dst_bits) {
       return EXTEND_NORMALIZED_INT(x, src_bits, dst_bits);
-   else
-      return x >> (src_bits - dst_bits);
+   } else {
+      unsigned src_half = (1 << (src_bits - 1)) - 1;
+
+      if (src_bits + dst_bits > sizeof(x) * 8) {
+         assert(src_bits + dst_bits <= sizeof(uint64_t) * 8);
+         return (((uint64_t) x * MAX_UINT(dst_bits) + src_half) /
+                 MAX_UINT(src_bits));
+      } else {
+         return (x * MAX_UINT(dst_bits) + src_half) / MAX_UINT(src_bits);
+      }
+   }
 }
 
 static inline unsigned
@@ -154,7 +163,7 @@ _mesa_unsigned_to_unsigned(unsigned src, unsigned dst_size)
 static inline int
 _mesa_unsigned_to_signed(unsigned src, unsigned dst_size)
 {
-   return MIN2(src, MAX_INT(dst_size));
+   return MIN2(src, (unsigned)MAX_INT(dst_size));
 }
 
 static inline int

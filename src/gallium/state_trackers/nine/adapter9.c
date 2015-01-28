@@ -302,6 +302,9 @@ NineAdapter9_CheckDeviceFormat( struct NineAdapter9 *This,
         return D3DERR_NOTAVAILABLE;
     }
 
+    /* we support ATI1 and ATI2 hack only for 2D textures */
+    if (RType != D3DRTYPE_TEXTURE && (CheckFormat == D3DFMT_ATI1 || CheckFormat == D3DFMT_ATI2))
+        return D3DERR_NOTAVAILABLE;
     /* if (Usage & D3DUSAGE_NONSECURE) { don't know the implications of this } */
     /* if (Usage & D3DUSAGE_SOFTWAREPROCESSING) { we can always support this } */
 
@@ -549,7 +552,7 @@ NineAdapter9_GetDeviceCaps( struct NineAdapter9 *This,
                                D3DPMISCCAPS_CULLCCW |
                                D3DPMISCCAPS_COLORWRITEENABLE |
                                D3DPMISCCAPS_CLIPPLANESCALEDPOINTS |
-                               D3DPMISCCAPS_CLIPTLVERTS |
+                               /*D3DPMISCCAPS_CLIPTLVERTS |*/
                                D3DPMISCCAPS_TSSARGTEMP |
                                D3DPMISCCAPS_BLENDOP |
                                D3DPIPECAP(INDEP_BLEND_ENABLE, D3DPMISCCAPS_INDEPENDENTWRITEMASKS) |
@@ -560,6 +563,8 @@ NineAdapter9_GetDeviceCaps( struct NineAdapter9 *This,
                                D3DPIPECAP(MIXED_COLORBUFFER_FORMATS, D3DPMISCCAPS_MRTINDEPENDENTBITDEPTHS) |
                                D3DPMISCCAPS_MRTPOSTPIXELSHADERBLENDING |
                                /*D3DPMISCCAPS_FOGVERTEXCLAMPED*/0;
+    if (!screen->get_param(screen, PIPE_CAP_TGSI_VS_WINDOW_SPACE_POSITION))
+        pCaps->PrimitiveMiscCaps |= D3DPMISCCAPS_CLIPTLVERTS;
 
     pCaps->RasterCaps =
         D3DPIPECAP(ANISOTROPIC_FILTER, D3DPRASTERCAPS_ANISOTROPY) |

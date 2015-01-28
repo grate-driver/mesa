@@ -151,8 +151,7 @@ vc4_setup_rcl(struct vc4_context *vc4)
                             VC4_RENDER_CONFIG_MEMORY_FORMAT_SHIFT) |
                            (vc4_rt_format_is_565(render_surf->base.format) ?
                             VC4_RENDER_CONFIG_FORMAT_BGR565 :
-                            VC4_RENDER_CONFIG_FORMAT_RGBA8888) |
-                           VC4_RENDER_CONFIG_EARLY_Z_COVERAGE_DISABLE));
+                            VC4_RENDER_CONFIG_FORMAT_RGBA8888)));
 
         /* The tile buffer normally gets cleared when the previous tile is
          * stored.  If the clear values changed between frames, then the tile
@@ -356,9 +355,9 @@ vc4_flush(struct pipe_context *pctx)
 
         if (vc4_debug & VC4_DEBUG_CL) {
                 fprintf(stderr, "BCL:\n");
-                vc4_dump_cl(vc4->bcl.base, vc4->bcl.size, false);
+                vc4_dump_cl(vc4->bcl.base, vc4->bcl.next - vc4->bcl.base, false);
                 fprintf(stderr, "RCL:\n");
-                vc4_dump_cl(vc4->rcl.base, vc4->rcl.size, true);
+                vc4_dump_cl(vc4->rcl.base, vc4->rcl.next - vc4->rcl.base, true);
         }
 
         struct drm_vc4_submit_cl submit;

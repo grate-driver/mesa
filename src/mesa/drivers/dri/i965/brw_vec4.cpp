@@ -341,15 +341,21 @@ vec4_visitor::opt_vector_float()
 {
    bool progress = false;
 
-   int last_reg = -1;
+   int last_reg = -1, last_reg_offset = -1;
+   enum register_file last_reg_file = BAD_FILE;
+
    int remaining_channels;
    uint8_t imm[4];
    int inst_count;
    vec4_instruction *imm_inst[4];
 
    foreach_block_and_inst_safe(block, vec4_instruction, inst, cfg) {
-      if (last_reg != inst->dst.reg) {
+      if (last_reg != inst->dst.reg ||
+          last_reg_offset != inst->dst.reg_offset ||
+          last_reg_file != inst->dst.file) {
          last_reg = inst->dst.reg;
+         last_reg_offset = inst->dst.reg_offset;
+         last_reg_file = inst->dst.file;
          remaining_channels = WRITEMASK_XYZW;
 
          inst_count = 0;
@@ -687,6 +693,18 @@ vec4_visitor::opt_algebraic()
 	    progress = true;
 	 }
 	 break;
+      case BRW_OPCODE_CMP:
+         if (inst->conditional_mod == BRW_CONDITIONAL_GE &&
+             inst->src[0].abs &&
+             inst->src[0].negate &&
+             inst->src[1].is_zero()) {
+            inst->src[0].abs = false;
+            inst->src[0].negate = false;
+            inst->conditional_mod = BRW_CONDITIONAL_Z;
+            progress = true;
+            break;
+         }
+         break;
       case SHADER_OPCODE_RCP: {
          vec4_instruction *prev = (vec4_instruction *)inst->prev;
          if (prev->opcode == SHADER_OPCODE_SQRT) {
@@ -1895,7 +1913,7 @@ brw_vs_emit(struct brw_context *brw,
       }
 
       fs_generator g(brw, mem_ctx, (void *) &c->key, &prog_data->base.base,
-                     &c->vp->program.Base, v.runtime_check_aads_emit);
+                     &c->vp->program.Base, v.runtime_check_aads_emit, "VS");
       if (INTEL_DEBUG & DEBUG_VS) {
          char *name = ralloc_asprintf(mem_ctx, "%s vertex shader %d",
                                       prog->Label ? prog->Label : "unnamed",
@@ -1925,7 +1943,7 @@ brw_vs_emit(struct brw_context *brw,
       }
 
       vec4_generator g(brw, prog, &c->vp->program.Base, &prog_data->base,
-                       mem_ctx, INTEL_DEBUG & DEBUG_VS);
+                       mem_ctx, INTEL_DEBUG & DEBUG_VS, "vertex", "VS");
       assembly = g.generate_assembly(v.cfg, final_assembly_size);
    }
 
