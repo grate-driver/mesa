@@ -1,6 +1,6 @@
 --- a/configure.ac
 +++ b/configure.ac
-@@ -1562,7 +1562,9 @@
+@@ -1559,7 +1559,9 @@ for plat in $egl_platforms; do
  
  	android|fbdev|gdi|null)
  		;;
@@ -11,7 +11,7 @@
  	*)
  		AC_MSG_ERROR([EGL platform '$plat' does not exist])
  		;;
-@@ -1592,6 +1594,7 @@
+@@ -1588,6 +1590,7 @@ AM_CONDITIONAL(HAVE_EGL_PLATFORM_WAYLAND
  AM_CONDITIONAL(HAVE_EGL_PLATFORM_DRM, echo "$egl_platforms" | grep -q 'drm')
  AM_CONDITIONAL(HAVE_EGL_PLATFORM_FBDEV, echo "$egl_platforms" | grep -q 'fbdev')
  AM_CONDITIONAL(HAVE_EGL_PLATFORM_NULL, echo "$egl_platforms" | grep -q 'null')
@@ -21,7 +21,7 @@
  
 --- a/include/EGL/eglplatform.h
 +++ b/include/EGL/eglplatform.h
-@@ -104,6 +104,13 @@
+@@ -104,6 +104,13 @@ typedef struct ANativeWindow        *EGL
  typedef struct egl_native_pixmap_t  *EGLNativePixmapType;
  typedef void                        *EGLNativeDisplayType;
  
@@ -37,7 +37,7 @@
  #ifdef MESA_EGL_NO_X11_HEADERS
 --- a/include/GL/internal/dri_interface.h
 +++ b/include/GL/internal/dri_interface.h
-@@ -832,10 +832,12 @@
+@@ -832,10 +832,12 @@ struct __DRIbufferRec {
      unsigned int pitch;
      unsigned int cpp;
      unsigned int flags;
@@ -53,7 +53,7 @@
  
 --- a/src/egl/drivers/dri2/Makefile.am
 +++ b/src/egl/drivers/dri2/Makefile.am
-@@ -63,3 +63,9 @@
+@@ -63,3 +63,9 @@ if HAVE_EGL_PLATFORM_DRM
  libegl_dri2_la_SOURCES += platform_drm.c
  AM_CFLAGS += -DHAVE_DRM_PLATFORM
  endif
@@ -65,7 +65,7 @@
 +endif
 --- a/src/egl/drivers/dri2/egl_dri2.c
 +++ b/src/egl/drivers/dri2/egl_dri2.c
-@@ -647,6 +647,12 @@
+@@ -651,6 +651,12 @@ dri2_initialize(_EGLDriver *drv, _EGLDis
           return EGL_TRUE;
        return dri2_initialize_wayland(drv, disp);
  #endif
@@ -92,7 +92,7 @@
  #include "eglconfig.h"
  #include "eglcontext.h"
  #include "egldisplay.h"
-@@ -196,6 +201,10 @@
+@@ -197,6 +202,10 @@ struct dri2_egl_display
     int			     formats;
     uint32_t                  capabilities;
  #endif
@@ -103,7 +103,7 @@
  };
  
  struct dri2_egl_context
-@@ -242,7 +251,9 @@
+@@ -243,16 +252,21 @@ struct dri2_egl_surface
     struct gbm_dri_surface *gbm_surf;
  #endif
  
@@ -114,7 +114,20 @@
     __DRIbuffer           *dri_buffers[__DRI_BUFFER_COUNT];
     struct {
  #ifdef HAVE_WAYLAND_PLATFORM
-@@ -264,6 +275,10 @@
+       struct wl_buffer   *wl_buffer;
+       __DRIimage         *dri_image;
+ #endif
+-#ifdef HAVE_DRM_PLATFORM
++#if defined(HAVE_DRM_PLATFORM) || defined(HAVE_MIR_PLATFORM)
+       struct gbm_bo       *bo;
+ #endif
++#ifdef HAVE_MIR_PLATFORM
++      int                 fd;
++#endif
+       int                 locked;
+       int                 age;
+    } color_buffers[4], *back, *current;
+@@ -265,6 +279,10 @@ struct dri2_egl_surface
     /* EGL-owned buffers */
     __DRIbuffer           *local_buffers[__DRI_BUFFER_COUNT];
  #endif
@@ -125,7 +138,7 @@
  };
  
  
-@@ -331,4 +346,7 @@
+@@ -332,4 +350,7 @@ dri2_initialize_wayland(_EGLDriver *drv,
  EGLBoolean
  dri2_initialize_android(_EGLDriver *drv, _EGLDisplay *disp);
  
@@ -135,7 +148,7 @@
  #endif /* EGL_DRI2_INCLUDED */
 --- /dev/null
 +++ b/src/egl/drivers/dri2/platform_mir.c
-@@ -0,0 +1,498 @@
+@@ -0,0 +1,613 @@
 +/*
 + * Copyright © 2012 Canonical, Inc
 + *
@@ -266,31 +279,14 @@
 +                       struct __DRIimageList *buffers)
 +{
 +   struct dri2_egl_surface *dri2_surf = loaderPrivate;
-+   struct dri2_egl_display *dri2_dpy =
-+      dri2_egl_display(dri2_surf->base.Resource.Display);
-+   struct gbm_dri_surface *surf = dri2_surf->gbm_surf;
-+   struct gbm_dri_bo *bo = NULL;
 +
 +   if (buffer_mask & __DRI_IMAGE_BUFFER_BACK) {
-+      if (!dri2_surf->dri_buffers[__DRI_BUFFER_BACK_LEFT])
++      if (!dri2_surf->back)
 +         return 0;
 +
-+      if (dri2_surf->dri_buffers[__DRI_BUFFER_BACK_LEFT]->name == 0) {
-+         struct gbm_import_fd_data data;
-+
-+         data.fd = dri2_surf->dri_buffers[__DRI_BUFFER_BACK_LEFT]->fd;
-+         data.width = dri2_surf->base.Width;
-+         data.height = dri2_surf->base.Height;
-+         data.format = GBM_FORMAT_ARGB8888;
-+         data.stride = dri2_surf->dri_buffers[__DRI_BUFFER_BACK_LEFT]->pitch;
-+
-+         bo = (struct gbm_dri_bo *)gbm_bo_import(&dri2_dpy->gbm_dri->base.base, GBM_BO_IMPORT_FD, &data, GBM_BO_USE_RENDERING);
-+      }
-+   }
-+
-+   if (bo) {
-+      buffers->back = bo->image;
++      buffers->back = ((struct gbm_dri_bo *)dri2_surf->back->bo)->image;
 +      buffers->image_mask = __DRI_IMAGE_BUFFER_BACK;
++
 +      return 1;
 +   }
 +
@@ -313,11 +309,120 @@
 +#endif
 +}
 +
++static struct gbm_bo *create_gbm_bo_from_buffer(struct gbm_device* gbm_dev,
++                                                MirBufferPackage *package)
++{
++   struct gbm_import_fd_data data;
++
++   data.fd = package->fd[0];
++   data.width = package->width;
++   data.height = package->height;
++   data.format = GBM_FORMAT_ARGB8888; /* TODO: Use mir surface format */
++   data.stride = package->stride;
++
++   return gbm_bo_import(gbm_dev, GBM_BO_IMPORT_FD, &data, GBM_BO_USE_RENDERING);
++}
++
++static ssize_t find_cached_buffer_with_fd(struct dri2_egl_surface *dri2_surf,
++                                          int fd)
++{
++   ssize_t i;
++
++   for (i = 0; i < ARRAY_SIZE(dri2_surf->color_buffers); i++) {
++      if (dri2_surf->color_buffers[i].fd == fd)
++         return i;
++   }
++
++   return -1;
++}
++
++static void cache_buffer(struct dri2_egl_surface *dri2_surf, size_t slot,
++                         MirBufferPackage *buffer_package)
++{
++   struct dri2_egl_display *dri2_dpy =
++      dri2_egl_display(dri2_surf->base.Resource.Display);
++
++   if (dri2_surf->color_buffers[slot].bo != NULL)
++      gbm_bo_destroy(dri2_surf->color_buffers[slot].bo);
++
++   dri2_surf->color_buffers[slot].bo = create_gbm_bo_from_buffer(
++      &dri2_dpy->gbm_dri->base.base,
++      buffer_package);
++
++   dri2_surf->color_buffers[slot].fd = buffer_package->fd[0];
++}
++
++static size_t find_best_cache_slot(struct dri2_egl_surface *dri2_surf)
++{
++   size_t i;
++   size_t start_slot = 0;
++
++   /*
++    * If we have a back buffer, start searching after it to ensure
++    * we don't reuse the slot too soon.
++    */
++   if (dri2_surf->back != NULL) {
++      start_slot = dri2_surf->back - dri2_surf->color_buffers;
++      start_slot = (start_slot + 1) % ARRAY_SIZE(dri2_surf->color_buffers);
++   }
++
++   /* Try to find an empty slot */
++   for (i = 0; i < ARRAY_SIZE(dri2_surf->color_buffers); i++) {
++      size_t slot = (start_slot + i) % ARRAY_SIZE(dri2_surf->color_buffers);
++      if (dri2_surf->color_buffers[slot].bo == NULL)
++         return slot;
++   }
++
++   /* If we don't have an empty slot, use the start slot */
++   return start_slot;
++}
++
++static void update_cached_buffer_ages(struct dri2_egl_surface *dri2_surf,
++                                      size_t used_slot)
++{
++   /*
++    * If 3 (Mir surfaces are triple buffered at most) other buffers have been
++    * used since a buffer was used, we probably won't need this buffer again.
++    */
++   static const int destruction_age = 3;
++   size_t i;
++
++   for (i = 0; i < ARRAY_SIZE(dri2_surf->color_buffers); i++) {
++      if (dri2_surf->color_buffers[i].bo != NULL) {
++         if (i == used_slot) {
++            dri2_surf->color_buffers[i].age = 0;
++         }
++         else {
++            ++dri2_surf->color_buffers[i].age;
++            if (dri2_surf->color_buffers[i].age == destruction_age) {
++               gbm_bo_destroy(dri2_surf->color_buffers[i].bo);
++               dri2_surf->color_buffers[i].bo = NULL;
++               dri2_surf->color_buffers[i].fd = -1;
++            }
++         }
++      }
++   }
++}
++
++static void clear_cached_buffers(struct dri2_egl_surface *dri2_surf)
++{
++   size_t i;
++   for (i = 0; i < ARRAY_SIZE(dri2_surf->color_buffers); i++) {
++      if (dri2_surf->color_buffers[i].bo != NULL)
++         gbm_bo_destroy(dri2_surf->color_buffers[i].bo);
++      dri2_surf->color_buffers[i].bo = NULL;
++      dri2_surf->color_buffers[i].fd = -1;
++      dri2_surf->color_buffers[i].age = 0;
++   }
++}
++
 +static EGLBoolean
-+mir_advance_colour_buffer(struct dri2_egl_surface *surf)
++mir_advance_colour_buffer(struct dri2_egl_surface *dri2_surf)
 +{
 +   MirBufferPackage buffer_package;
-+   if(!surf->mir_surf->surface_advance_buffer(surf->mir_surf, &buffer_package))
++   ssize_t buf_slot = -1;
++
++   if(!dri2_surf->mir_surf->surface_advance_buffer(dri2_surf->mir_surf, &buffer_package))
 +      return EGL_FALSE;
 +
 +   /* We expect no data items, and (for the moment) one PRIME fd */
@@ -326,13 +431,32 @@
 +
 +   /* Mir ABIs prior to release 0.1.2 lacked width and height */
 +   if (buffer_package.width && buffer_package.height) {
-+      surf->base.Width = buffer_package.width;
-+      surf->base.Height = buffer_package.height;
++      dri2_surf->base.Width = buffer_package.width;
++      dri2_surf->base.Height = buffer_package.height;
 +   }
 +
-+   surf->dri_buffers[__DRI_BUFFER_BACK_LEFT]->name = 0;
-+   surf->dri_buffers[__DRI_BUFFER_BACK_LEFT]->fd = buffer_package.fd[0];
-+   surf->dri_buffers[__DRI_BUFFER_BACK_LEFT]->pitch = buffer_package.stride;
++   buf_slot = find_cached_buffer_with_fd(dri2_surf, buffer_package.fd[0]);
++   if (buf_slot != -1) {
++      /*
++       * If we get a new buffer with an fd of a previously cached buffer,
++       * replace the old buffer in the cache...
++       */
++      if (buffer_package.age == 0)
++         cache_buffer(dri2_surf, buf_slot, &buffer_package);
++      /* ... otherwise just reuse the existing cached buffer */
++   }
++   else {
++      /* We got a new buffer with an fd that's not in the cache, so add it */
++      buf_slot = find_best_cache_slot(dri2_surf);
++      cache_buffer(dri2_surf, buf_slot, &buffer_package);
++   }
++
++   update_cached_buffer_ages(dri2_surf, buf_slot);
++
++   dri2_surf->back = &dri2_surf->color_buffers[buf_slot];
++   dri2_surf->dri_buffers[__DRI_BUFFER_BACK_LEFT]->name = 0;
++   dri2_surf->dri_buffers[__DRI_BUFFER_BACK_LEFT]->fd = buffer_package.fd[0];
++   dri2_surf->dri_buffers[__DRI_BUFFER_BACK_LEFT]->pitch = buffer_package.stride;
 +   return EGL_TRUE;
 +}
 +
@@ -376,6 +500,8 @@
 +      __DRI_BUFFER_BACK_LEFT;
 +   /* We only do ARGB 8888 for the moment */
 +   dri2_surf->dri_buffers[__DRI_BUFFER_BACK_LEFT]->cpp = 4;
++
++   clear_cached_buffers(dri2_surf);
 +
 +   if(!mir_advance_colour_buffer(dri2_surf))
 +      goto cleanup_surf;
@@ -435,6 +561,8 @@
 +
 +   if (!_eglPutSurface(surf))
 +      return EGL_TRUE;
++
++   clear_cached_buffers(dri2_surf);
 +
 +   (*dri2_dpy->core->destroyDrawable)(dri2_surf->dri_drawable);
 +
@@ -636,7 +764,7 @@
 +}
 --- a/src/egl/main/Makefile.am
 +++ b/src/egl/main/Makefile.am
-@@ -72,6 +72,11 @@
+@@ -72,6 +72,11 @@ if HAVE_EGL_PLATFORM_NULL
  AM_CFLAGS += -DHAVE_NULL_PLATFORM
  endif
  
@@ -662,7 +790,7 @@
  
  /**
   * Map --with-egl-platforms names to platform types.
-@@ -75,7 +78,8 @@
+@@ -75,7 +78,8 @@ static const struct {
     { _EGL_PLATFORM_DRM, "drm" },
     { _EGL_PLATFORM_FBDEV, "fbdev" },
     { _EGL_PLATFORM_NULL, "null" },
@@ -672,7 +800,7 @@
  };
  
  
-@@ -135,6 +139,47 @@
+@@ -135,6 +139,47 @@ _eglPointerIsDereferencable(void *p)
  #endif
  }
  
@@ -720,7 +848,7 @@
  
  /**
   * Try detecting native platform with the help of native display characteristcs.
-@@ -155,6 +200,11 @@
+@@ -155,6 +200,11 @@ _eglNativePlatformDetectNativeDisplay(vo
        return _EGL_PLATFORM_FBDEV;
  #endif
  
@@ -732,7 +860,7 @@
     if (_eglPointerIsDereferencable(nativeDisplay)) {
        void *first_pointer = *(void **) nativeDisplay;
  
-@@ -189,7 +239,7 @@
+@@ -189,7 +239,7 @@ _eglNativePlatformDetectNativeDisplay(vo
  _EGLPlatformType
  _eglGetNativePlatform(void *nativeDisplay)
  {
@@ -743,7 +871,7 @@
     if (native_platform == _EGL_INVALID_PLATFORM) {
 --- a/src/egl/main/egldisplay.h
 +++ b/src/egl/main/egldisplay.h
-@@ -46,6 +46,7 @@
+@@ -46,6 +46,7 @@ enum _egl_platform_type {
     _EGL_PLATFORM_FBDEV,
     _EGL_PLATFORM_NULL,
     _EGL_PLATFORM_ANDROID,
@@ -753,7 +881,7 @@
     _EGL_INVALID_PLATFORM = -1
 --- a/src/egl/main/egldriver.c
 +++ b/src/egl/main/egldriver.c
-@@ -57,7 +57,7 @@
+@@ -57,7 +57,7 @@ typedef struct _egl_module {
     char *Path;
     _EGLMain_t BuiltIn;
     void *Handle;
@@ -762,7 +890,7 @@
  } _EGLModule;
  
  static _EGLMutex _eglModuleMutex = _EGL_MUTEX_INITIALIZER;
-@@ -131,7 +131,6 @@
+@@ -131,7 +131,6 @@ library_suffix(void)
  
  #endif
  
@@ -770,7 +898,7 @@
  /**
   * Open the named driver and find its bootstrap function: _eglMain().
   */
-@@ -144,8 +143,12 @@
+@@ -144,8 +143,12 @@ _eglOpenLibrary(const char *driverPath,
  
     assert(driverPath);
  
@@ -785,7 +913,7 @@
  
  #if defined(_EGL_OS_WINDOWS)
     /* XXX untested */
-@@ -191,13 +194,13 @@
+@@ -191,13 +194,13 @@ _eglOpenLibrary(const char *driverPath,
   * Load a module and create the driver object.
   */
  static EGLBoolean
@@ -802,7 +930,7 @@
        return EGL_TRUE;
  
     if (mod->BuiltIn) {
-@@ -223,7 +226,7 @@
+@@ -223,7 +226,7 @@ _eglLoadModule(_EGLModule *mod)
     }
  
     mod->Handle = (void *) lib;
@@ -811,7 +939,7 @@
  
     return EGL_TRUE;
  }
-@@ -237,8 +240,10 @@
+@@ -237,8 +240,10 @@ _eglUnloadModule(_EGLModule *mod)
  {
  #if defined(_EGL_OS_UNIX)
     /* destroy the driver */
@@ -824,7 +952,7 @@
  
     /*
      * XXX At this point (atexit), the module might be the last reference to
-@@ -252,7 +257,9 @@
+@@ -252,7 +257,9 @@ _eglUnloadModule(_EGLModule *mod)
     /* XXX Windows unloads DLLs before atexit */
  #endif
  
@@ -835,7 +963,7 @@
     mod->Handle = NULL;
  }
  
-@@ -596,17 +603,17 @@
+@@ -582,17 +589,17 @@ _eglMatchAndInitialize(_EGLDisplay *dpy)
     while (i < _eglModules->Size) {
        _EGLModule *mod = (_EGLModule *) _eglModules->Elements[i];
  
@@ -857,7 +985,7 @@
           i++;
        }
     }
-@@ -658,7 +665,6 @@
+@@ -644,7 +651,6 @@ __eglMustCastToProperFunctionPointerType
  _eglGetDriverProc(const char *procname)
  {
     EGLint i;
@@ -865,18 +993,17 @@
  
     if (!_eglModules) {
        /* load the driver for the default display */
-@@ -670,15 +676,18 @@
+@@ -656,15 +662,18 @@ _eglGetDriverProc(const char *procname)
  
     for (i = 0; i < _eglModules->Size; i++) {
        _EGLModule *mod = (_EGLModule *) _eglModules->Elements[i];
--
++      _EGLProc proc;
+ 
 -      if (!mod->Driver)
 -         break;
 -      proc = mod->Driver->API.GetProcAddress(mod->Driver, procname);
 -      if (proc)
 -         break;
-+      _EGLProc proc;
-+
 +      for (_EGLPlatformType plat = 0; plat < _EGL_NUM_PLATFORMS; ++plat) {
 +         if (!mod->Driver[plat])
 +            continue;
@@ -893,7 +1020,7 @@
  
 --- a/src/gallium/state_trackers/dri/dri2.c
 +++ b/src/gallium/state_trackers/dri/dri2.c
-@@ -506,12 +506,20 @@
+@@ -506,12 +506,20 @@ dri2_allocate_textures(struct dri_contex
           templ.height0 = dri_drawable->h;
           templ.format = format;
           templ.bind = bind;
@@ -920,7 +1047,7 @@
                    &templ, &whandle);
 --- a/src/gbm/backends/dri/gbm_dri.c
 +++ b/src/gbm/backends/dri/gbm_dri.c
-@@ -202,7 +202,7 @@
+@@ -202,7 +202,7 @@ static const __DRIimageLookupExtension i
  };
  
  static const __DRIdri2LoaderExtension dri2_loader_extension = {
@@ -929,7 +1056,7 @@
  
     .getBuffers              = dri_get_buffers,
     .flushFrontBuffer        = dri_flush_front_buffer,
-@@ -529,9 +529,11 @@
+@@ -529,9 +529,11 @@ gbm_dri_is_format_supported(struct gbm_d
     switch (format) {
     case GBM_BO_FORMAT_XRGB8888:
     case GBM_FORMAT_XRGB8888:
@@ -941,7 +1068,7 @@
        if (usage & GBM_BO_USE_SCANOUT)
           return 0;
        break;
-@@ -613,6 +615,9 @@
+@@ -613,6 +615,9 @@ gbm_dri_to_gbm_format(uint32_t dri_forma
     case __DRI_IMAGE_FORMAT_ABGR8888:
        ret = GBM_FORMAT_ABGR8888;
        break;
@@ -951,7 +1078,7 @@
     default:
        ret = 0;
        break;
-@@ -621,6 +626,41 @@
+@@ -621,6 +626,41 @@ gbm_dri_to_gbm_format(uint32_t dri_forma
     return ret;
  }
  
@@ -993,7 +1120,7 @@
  static struct gbm_bo *
  gbm_dri_bo_import(struct gbm_device *gbm,
                    uint32_t type, void *buffer, uint32_t usage)
-@@ -828,31 +868,7 @@
+@@ -828,31 +868,7 @@ gbm_dri_bo_create(struct gbm_device *gbm
     bo->base.base.height = height;
     bo->base.base.format = format;
  

@@ -1,3 +1,9 @@
+mesa (10.4.2-2ubuntu3) UNRELEASED; urgency=medium
+
+  * egl-platform-mir.patch: Fix memory leak. (LP:#1418486)
+
+ -- Timo Aaltonen <tjaalton@debian.org>  Fri, 06 Feb 2015 12:12:01 +0200
+
 mesa (10.4.2-2ubuntu2) vivid; urgency=medium
 
   * Flip the switch to llvm 3.6 with patches backported from upstream.
