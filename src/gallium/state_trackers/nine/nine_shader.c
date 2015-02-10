@@ -495,6 +495,7 @@ struct shader_translator
     struct sm1_local_const lconstb[NINE_MAX_CONST_B];
 
     boolean indirect_const_access;
+    boolean failure;
 
     struct nine_shader_info *info;
 
@@ -503,6 +504,9 @@ struct shader_translator
 
 #define IS_VS (tx->processor == TGSI_PROCESSOR_VERTEX)
 #define IS_PS (tx->processor == TGSI_PROCESSOR_FRAGMENT)
+#define NINE_MAX_CONST_F_SHADER (tx->processor == TGSI_PROCESSOR_VERTEX ? NINE_MAX_CONST_F : NINE_MAX_CONST_F_PS3)
+
+#define FAILURE_VOID(cond) if ((cond)) {tx->failure=1;return;}
 
 static void
 sm1_read_semantic(struct shader_translator *, struct sm1_semantic *);
@@ -523,7 +527,10 @@ static boolean
 tx_lconstf(struct shader_translator *tx, struct ureg_src *src, INT index)
 {
    INT i;
-   assert(index >= 0 && index < (NINE_MAX_CONST_F * 2));
+   if (index < 0 || index >= NINE_MAX_CONST_F_SHADER) {
+       tx->failure = TRUE;
+       return FALSE;
+   }
    for (i = 0; i < tx->num_lconstf; ++i) {
       if (tx->lconstf[i].idx == index) {
          *src = tx->lconstf[i].reg;
@@ -535,7 +542,10 @@ tx_lconstf(struct shader_translator *tx, struct ureg_src *src, INT index)
 static boolean
 tx_lconsti(struct shader_translator *tx, struct ureg_src *src, INT index)
 {
-   assert(index >= 0 && index < NINE_MAX_CONST_I);
+   if (index < 0 || index >= NINE_MAX_CONST_I) {
+       tx->failure = TRUE;
+       return FALSE;
+   }
    if (tx->lconsti[index].idx == index)
       *src = tx->lconsti[index].reg;
    return tx->lconsti[index].idx == index;
@@ -543,7 +553,10 @@ tx_lconsti(struct shader_translator *tx, struct ureg_src *src, INT index)
 static boolean
 tx_lconstb(struct shader_translator *tx, struct ureg_src *src, INT index)
 {
-   assert(index >= 0 && index < NINE_MAX_CONST_B);
+   if (index < 0 || index >= NINE_MAX_CONST_B) {
+       tx->failure = TRUE;
+       return FALSE;
+   }
    if (tx->lconstb[index].idx == index)
       *src = tx->lconstb[index].reg;
    return tx->lconstb[index].idx == index;
@@ -554,9 +567,8 @@ tx_set_lconstf(struct shader_translator *tx, INT index, float f[4])
 {
     unsigned n;
 
-    /* Anno1404 sets out of range constants. */
-    assert(index >= 0 && index < (NINE_MAX_CONST_F * 2));
-    if (index >= NINE_MAX_CONST_F)
+    FAILURE_VOID(index < 0 || index >= NINE_MAX_CONST_F_SHADER)
+    if (IS_VS && index >= NINE_MAX_CONST_F_SHADER)
         WARN("lconstf index %i too high, indirect access won't work\n", index);
 
     for (n = 0; n < tx->num_lconstf; ++n)
@@ -579,7 +591,7 @@ tx_set_lconstf(struct shader_translator *tx, INT index, float f[4])
 static void
 tx_set_lconsti(struct shader_translator *tx, INT index, int i[4])
 {
-    assert(index >= 0 && index < NINE_MAX_CONST_I);
+    FAILURE_VOID(index < 0 || index >= NINE_MAX_CONST_I)
     tx->lconsti[index].idx = index;
     tx->lconsti[index].reg = tx->native_integers ?
        ureg_imm4i(tx->ureg, i[0], i[1], i[2], i[3]) :
@@ -588,7 +600,7 @@ tx_set_lconsti(struct shader_translator *tx, INT index, int i[4])
 static void
 tx_set_lconstb(struct shader_translator *tx, INT index, BOOL b)
 {
-    assert(index >= 0 && index < NINE_MAX_CONST_B);
+    FAILURE_VOID(index < 0 || index >= NINE_MAX_CONST_B)
     tx->lconstb[index].idx = index;
     tx->lconstb[index].reg = tx->native_integers ?
        ureg_imm1u(tx->ureg, b ? 0xffffffff : 0) :
@@ -598,7 +610,10 @@ tx_set_lconstb(struct shader_translator *tx, INT index, BOOL b)
 static INLINE struct ureg_dst
 tx_scratch(struct shader_translator *tx)
 {
-    assert(tx->num_scratch < Elements(tx->regs.t));
+    if (tx->num_scratch >= Elements(tx->regs.t)) {
+        tx->failure = TRUE;
+        return tx->regs.t[0];
+    }
     if (ureg_dst_is_undef(tx->regs.t[tx->num_scratch]))
         tx->regs.t[tx->num_scratch] = ureg_DECL_local_temporary(tx->ureg);
     return tx->regs.t[tx->num_scratch++];
@@ -618,24 +633,6 @@ tx_src_scalar(struct ureg_dst dst)
     if (dst.WriteMask == (1 << c))
         src = ureg_scalar(src, c);
     return src;
-}
-
-/* Need to declare all constants if indirect addressing is used,
- * otherwise we could scan the shader to determine the maximum.
- * TODO: It doesn't really matter for nv50 so I won't do the scan,
- * but radeon drivers might care, if they don't infer it from TGSI.
- */
-static void
-tx_decl_constants(struct shader_translator *tx)
-{
-    unsigned i, n = 0;
-
-    for (i = 0; i < NINE_MAX_CONST_F; ++i)
-        ureg_DECL_constant(tx->ureg, n++);
-    for (i = 0; i < NINE_MAX_CONST_I; ++i)
-        ureg_DECL_constant(tx->ureg, n++);
-    for (i = 0; i < (NINE_MAX_CONST_B / 4); ++i)
-        ureg_DECL_constant(tx->ureg, n++);
 }
 
 static INLINE void
@@ -2781,7 +2778,7 @@ sm1_parse_get_param(struct shader_translator *tx, DWORD *reg, DWORD *rel)
             *rel = (1 << 31) |
                 ((D3DSPR_ADDR << D3DSP_REGTYPE_SHIFT2) & D3DSP_REGTYPE_MASK2) |
                 ((D3DSPR_ADDR << D3DSP_REGTYPE_SHIFT)  & D3DSP_REGTYPE_MASK) |
-                (D3DSP_NOSWIZZLE << D3DSP_SWIZZLE_SHIFT);
+                D3DSP_NOSWIZZLE;
         else
             *rel = TOKEN_NEXT(tx);
     }
@@ -2995,7 +2992,9 @@ tx_ctor(struct shader_translator *tx, struct nine_shader_info *info)
     info->position_t = FALSE;
     info->point_size = FALSE;
 
-    tx->info->const_used_size = 0;
+    tx->info->const_float_slots = 0;
+    tx->info->const_int_slots = 0;
+    tx->info->const_bool_slots = 0;
 
     info->sampler_mask = 0x0;
     info->rt_mask = 0x0;
@@ -3065,6 +3064,7 @@ nine_translate_shader(struct NineDevice9 *device, struct nine_shader_info *info)
     struct shader_translator *tx;
     HRESULT hr = D3D_OK;
     const unsigned processor = tgsi_processor_from_type(info->type);
+    unsigned s, slot_max;
 
     user_assert(processor != ~0, D3DERR_INVALIDCALL);
 
@@ -3092,7 +3092,6 @@ nine_translate_shader(struct NineDevice9 *device, struct nine_shader_info *info)
         hr = E_OUTOFMEMORY;
         goto out;
     }
-    tx_decl_constants(tx);
 
     tx->native_integers = GET_SHADER_CAP(INTEGERS);
     tx->inline_subroutines = !GET_SHADER_CAP(SUBROUTINES);
@@ -3113,9 +3112,16 @@ nine_translate_shader(struct NineDevice9 *device, struct nine_shader_info *info)
             ureg_property(tx->ureg, TGSI_PROPERTY_FS_COORD_PIXEL_CENTER, TGSI_FS_COORD_PIXEL_CENTER_INTEGER);
     }
 
-    while (!sm1_parse_eof(tx))
+    while (!sm1_parse_eof(tx) && !tx->failure)
         sm1_parse_instruction(tx);
     tx->parse++; /* for byte_size */
+
+    if (tx->failure) {
+        ERR("Encountered buggy shader\n");
+        ureg_destroy(tx->ureg);
+        hr = D3DERR_INVALIDCALL;
+        goto out;
+    }
 
     if (IS_PS && (tx->version.major < 2) && tx->num_temp) {
         ureg_MOV(tx->ureg, ureg_DECL_output(tx->ureg, TGSI_SEMANTIC_COLOR, 0),
@@ -3130,13 +3136,6 @@ nine_translate_shader(struct NineDevice9 *device, struct nine_shader_info *info)
 
     if (IS_VS && !ureg_dst_is_undef(tx->regs.oPts))
         info->point_size = TRUE;
-
-    if (debug_get_bool_option("NINE_TGSI_DUMP", FALSE)) {
-        unsigned count;
-        const struct tgsi_token *toks = ureg_get_tokens(tx->ureg, &count);
-        tgsi_dump(toks, 0);
-        ureg_free_tokens(toks);
-    }
 
     /* record local constants */
     if (tx->num_lconstf && tx->indirect_const_access) {
@@ -3196,8 +3195,32 @@ nine_translate_shader(struct NineDevice9 *device, struct nine_shader_info *info)
         hr = D3D_OK;
     }
 
-    if (tx->indirect_const_access)
-        info->const_used_size = ~0;
+    /* r500 */
+    if (info->const_float_slots > device->max_vs_const_f &&
+        (info->const_int_slots || info->const_bool_slots))
+        ERR("Overlapping constant slots. The shader is likely to be buggy\n");
+
+
+    if (tx->indirect_const_access) /* vs only */
+        info->const_float_slots = device->max_vs_const_f;
+
+    slot_max = info->const_bool_slots > 0 ?
+                   device->max_vs_const_f + NINE_MAX_CONST_I
+                   + info->const_bool_slots :
+                       info->const_int_slots > 0 ?
+                           device->max_vs_const_f + info->const_int_slots :
+                               info->const_float_slots;
+    info->const_used_size = sizeof(float[4]) * slot_max; /* slots start from 1 */
+
+    for (s = 0; s < slot_max; s++)
+        ureg_DECL_constant(tx->ureg, s);
+
+    if (debug_get_bool_option("NINE_TGSI_DUMP", FALSE)) {
+        unsigned count;
+        const struct tgsi_token *toks = ureg_get_tokens(tx->ureg, &count);
+        tgsi_dump(toks, 0);
+        ureg_free_tokens(toks);
+    }
 
     info->cso = ureg_create_shader_and_destroy(tx->ureg, device->pipe);
     if (!info->cso) {

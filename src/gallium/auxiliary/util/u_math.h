@@ -530,6 +530,7 @@ unsigned ffs( unsigned u )
 }
 #elif defined(__MINGW32__) || defined(PIPE_OS_ANDROID)
 #define ffs __builtin_ffs
+#define ffsll __builtin_ffsll
 #endif
 
 #endif /* FFS_DEFINED */
@@ -561,14 +562,10 @@ util_last_bit(unsigned u)
 static INLINE unsigned
 util_last_bit_signed(int i)
 {
-#if defined(__GNUC__) && ((__GNUC__ * 100 + __GNUC_MINOR__) >= 407) && !defined(__INTEL_COMPILER)
-   return 31 - __builtin_clrsb(i);
-#else
    if (i >= 0)
       return util_last_bit(i);
    else
       return util_last_bit(~(unsigned)i);
-#endif
 }
 
 /* Destructively loop over all of the bits in a mask as in:
@@ -587,6 +584,15 @@ u_bit_scan(unsigned *mask)
    return i;
 }
 
+#ifndef _MSC_VER
+static INLINE int
+u_bit_scan64(uint64_t *mask)
+{
+   int i = ffsll(*mask) - 1;
+   *mask &= ~(1llu << i);
+   return i;
+}
+#endif
 
 /**
  * Return float bits.

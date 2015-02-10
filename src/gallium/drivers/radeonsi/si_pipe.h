@@ -90,6 +90,8 @@ struct si_sampler_view {
 	struct pipe_sampler_view	base;
 	struct list_head		list;
 	struct r600_resource		*resource;
+        /* [0..7] = image descriptor
+         * [4..7] = buffer descriptor */
 	uint32_t			state[8];
 	uint32_t			fmask_state[8];
 };
@@ -131,6 +133,7 @@ struct si_context {
 	void				*custom_blend_resolve;
 	void				*custom_blend_decompress;
 	void				*custom_blend_fastclear;
+	void				*pstipple_sampler_state;
 	struct si_screen		*screen;
 	struct si_pm4_state		*init_config;
 
@@ -173,6 +176,7 @@ struct si_context {
 	struct si_buffer_resources	const_buffers[SI_NUM_SHADERS];
 	struct si_buffer_resources	rw_buffers[SI_NUM_SHADERS];
 	struct si_textures_info		samplers[SI_NUM_SHADERS];
+	struct r600_resource		*scratch_buffer;
 	struct r600_resource		*border_color_table;
 	unsigned			border_color_offset;
 
@@ -220,6 +224,12 @@ struct si_context {
 	int			last_prim;
 	int			last_multi_vgt_param;
 	int			last_rast_prim;
+	int			current_rast_prim; /* primitive type after TES, GS */
+
+	/* Scratch buffer */
+	boolean                 emit_scratch_reloc;
+	unsigned		scratch_waves;
+	unsigned		spi_tmpring_size;
 };
 
 /* si_blit.c */

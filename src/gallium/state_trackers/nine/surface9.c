@@ -69,7 +69,6 @@ NineSurface9_ctor( struct NineSurface9 *This,
 
     This->base.info.screen = pParams->device->screen;
     This->base.info.target = PIPE_TEXTURE_2D;
-    This->base.info.format = d3d9_to_pipe_format(pDesc->Format);
     This->base.info.width0 = pDesc->Width;
     This->base.info.height0 = pDesc->Height;
     This->base.info.depth0 = 1;
@@ -79,6 +78,12 @@ NineSurface9_ctor( struct NineSurface9 *This,
     This->base.info.usage = PIPE_USAGE_DEFAULT;
     This->base.info.bind = PIPE_BIND_SAMPLER_VIEW;
     This->base.info.flags = 0;
+    This->base.info.format = d3d9_to_pipe_format_checked(This->base.info.screen,
+                                                         pDesc->Format,
+                                                         This->base.info.target,
+                                                         This->base.info.nr_samples,
+                                                         This->base.info.bind,
+                                                         FALSE);
 
     if (pDesc->Usage & D3DUSAGE_RENDERTARGET)
         This->base.info.bind |= PIPE_BIND_RENDER_TARGET;
@@ -549,6 +554,30 @@ NineSurface9_CopySurface( struct NineSurface9 *This,
             r_src = NULL;
     }
 
+    /* check source block align for compressed textures */
+    if (util_format_is_compressed(From->base.info.format) &&
+        ((src_box.width != From->desc.Width) ||
+         (src_box.height != From->desc.Height))) {
+        const unsigned w = util_format_get_blockwidth(From->base.info.format);
+        const unsigned h = util_format_get_blockheight(From->base.info.format);
+        user_assert(!(src_box.width % w) &&
+                    !(src_box.height % h),
+                    D3DERR_INVALIDCALL);
+    }
+
+    /* check destination block align for compressed textures */
+    if (util_format_is_compressed(This->base.info.format) &&
+        ((dst_box.width != This->desc.Width) ||
+         (dst_box.height != This->desc.Height) ||
+         dst_box.x != 0 ||
+         dst_box.y != 0)) {
+        const unsigned w = util_format_get_blockwidth(This->base.info.format);
+        const unsigned h = util_format_get_blockheight(This->base.info.format);
+        user_assert(!(dst_box.x % w) && !(dst_box.width % w) &&
+                    !(dst_box.y % h) && !(dst_box.height % h),
+                    D3DERR_INVALIDCALL);
+    }
+
     if (r_dst && r_src) {
         pipe->resource_copy_region(pipe,
                                    r_dst, This->level,
@@ -647,6 +676,7 @@ NineSurface9_SetResourceResize( struct NineSurface9 *This,
 
     This->desc.Width = This->base.info.width0 = resource->width0;
     This->desc.Height = This->base.info.height0 = resource->height0;
+    This->desc.MultiSampleType = This->base.info.nr_samples = resource->nr_samples;
 
     This->stride = util_format_get_stride(This->base.info.format,
                                           This->desc.Width);

@@ -50,6 +50,7 @@
 #define E_OUTOFMEMORY MAKE_HRESULT(1, 0x007, 14)
 #define E_NOINTERFACE MAKE_HRESULT(1, 0x000, 0x4002)
 #define E_POINTER     MAKE_HRESULT(1, 0x000, 0x4003)
+#define E_FAIL        MAKE_HRESULT(1, 0x000, 0x4005)
 
 #define S_OK          ((HRESULT)0)
 #define S_FALSE       ((HRESULT)1)
@@ -471,6 +472,7 @@ typedef enum _D3DBUSTYPE {
 } D3DBUSTYPE;
 
 typedef enum _D3DCMPFUNC {
+    D3DCMP_NEVER_ZERO = 0, //Needed to avoid warnings
     D3DCMP_NEVER = 1,
     D3DCMP_LESS = 2,
     D3DCMP_EQUAL = 3,
@@ -571,6 +573,7 @@ typedef enum _D3DDEVTYPE {
 } D3DDEVTYPE;
 
 typedef enum _D3DFILLMODE {
+    D3DFILL_SOLID_ZERO = 0,
     D3DFILL_POINT = 1,
     D3DFILL_WIREFRAME = 2,
     D3DFILL_SOLID = 3
@@ -651,6 +654,7 @@ typedef enum _D3DFORMAT {
     D3DFMT_BINARYBUFFER = 199,
     D3DFMT_ATI1 = MAKEFOURCC('A', 'T', 'I', '1'),
     D3DFMT_ATI2 = MAKEFOURCC('A', 'T', 'I', '2'),
+    D3DFMT_ATOC = MAKEFOURCC('A', 'T', 'O', 'C'),
     D3DFMT_DF16 = MAKEFOURCC('D', 'F', '1', '6'),
     D3DFMT_DF24 = MAKEFOURCC('D', 'F', '2', '4'),
     D3DFMT_INTZ = MAKEFOURCC('I', 'N', 'T', 'Z'),
@@ -658,6 +662,7 @@ typedef enum _D3DFORMAT {
     D3DFMT_NVDB = MAKEFOURCC('N', 'V', 'D', 'B'),
     D3DFMT_NV11 = MAKEFOURCC('N', 'V', '1', '1'),
     D3DFMT_NV12 = MAKEFOURCC('N', 'V', '1', '2'),
+    D3DFMT_RESZ = MAKEFOURCC('R', 'E', 'S', 'Z'),
     D3DFMT_Y210 = MAKEFOURCC('Y', '2', '1', '0'),
     D3DFMT_Y216 = MAKEFOURCC('Y', '2', '1', '6'),
     D3DFMT_Y410 = MAKEFOURCC('Y', '4', '1', '0')

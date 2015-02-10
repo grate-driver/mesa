@@ -243,6 +243,7 @@ _mesa_meta_compile_and_link_program(struct gl_context *ctx,
 void
 _mesa_meta_setup_blit_shader(struct gl_context *ctx,
                              GLenum target,
+                             bool do_depth,
                              struct blit_shader_table *table)
 {
    char *vs_source, *fs_source;
@@ -292,10 +293,11 @@ _mesa_meta_setup_blit_shader(struct gl_context *ctx,
                 "void main()\n"
                 "{\n"
                 "   gl_FragColor = %s(texSampler, %s);\n"
-                "   gl_FragDepth = gl_FragColor.x;\n"
+                "%s"
                 "}\n",
                 fs_preprocess, shader->type, fs_input,
-                shader->func, shader->texcoords);
+                shader->func, shader->texcoords,
+                do_depth ?  "   gl_FragDepth = gl_FragColor.x;\n" : "");
 
    _mesa_meta_compile_and_link_program(ctx, vs_source, fs_source,
                                        ralloc_asprintf(mem_ctx, "%s blit",
@@ -2791,7 +2793,8 @@ copytexsubimage_using_blit_framebuffer(struct gl_context *ctx, GLuint dims,
     * are too strict for CopyTexImage.  We know meta will be fine with format
     * changes.
     */
-   mask = _mesa_meta_BlitFramebuffer(ctx, x, y,
+   mask = _mesa_meta_BlitFramebuffer(ctx, ctx->ReadBuffer, ctx->DrawBuffer,
+                                     x, y,
                                      x + width, y + height,
                                      xoffset, yoffset,
                                      xoffset + width, yoffset + height,
@@ -3035,7 +3038,7 @@ decompress_texture_image(struct gl_context *ctx,
       _mesa_meta_setup_vertex_objects(&decompress->VAO, &decompress->VBO, true,
                                       2, 4, 0);
 
-      _mesa_meta_setup_blit_shader(ctx, target, &decompress->shaders);
+      _mesa_meta_setup_blit_shader(ctx, target, false, &decompress->shaders);
    } else {
       _mesa_meta_setup_ff_tnl_for_blit(&decompress->VAO, &decompress->VBO, 3);
    }

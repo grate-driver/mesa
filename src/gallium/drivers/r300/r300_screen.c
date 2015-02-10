@@ -182,6 +182,8 @@ static int r300_get_param(struct pipe_screen* pscreen, enum pipe_cap param)
         case PIPE_CAP_CONDITIONAL_RENDER_INVERTED:
         case PIPE_CAP_SAMPLER_VIEW_TARGET:
         case PIPE_CAP_VERTEXID_NOBASE:
+        case PIPE_CAP_POLYGON_OFFSET_CLAMP:
+        case PIPE_CAP_MULTISAMPLE_Z_RESOLVE:
             return 0;
 
         /* SWTCL-only features. */
@@ -269,7 +271,7 @@ static int r300_get_shader_param(struct pipe_screen *pscreen, unsigned shader, e
         case PIPE_SHADER_CAP_MAX_TEMPS:
             return is_r500 ? 128 : is_r400 ? 64 : 32;
         case PIPE_SHADER_CAP_MAX_PREDS:
-            return is_r500 ? 1 : 0;
+            return 0; /* unused */
         case PIPE_SHADER_CAP_MAX_TEXTURE_SAMPLERS:
         case PIPE_SHADER_CAP_MAX_SAMPLER_VIEWS:
            return r300screen->caps.num_tex_units;
@@ -319,7 +321,7 @@ static int r300_get_shader_param(struct pipe_screen *pscreen, unsigned shader, e
         case PIPE_SHADER_CAP_MAX_TEMPS:
             return 32;
         case PIPE_SHADER_CAP_MAX_PREDS:
-            return is_r500 ? 4 : 0; /* XXX guessed. */
+            return 0; /* unused */
         case PIPE_SHADER_CAP_INDIRECT_CONST_ADDR:
             return 1;
         case PIPE_SHADER_CAP_MAX_TEX_INSTRUCTIONS:
@@ -370,8 +372,6 @@ static float r300_get_paramf(struct pipe_screen* pscreen,
         case PIPE_CAPF_GUARD_BAND_TOP:
         case PIPE_CAPF_GUARD_BAND_RIGHT:
         case PIPE_CAPF_GUARD_BAND_BOTTOM:
-            /* XXX I don't know what these should be but the least we can do is
-             * silence the potential error message */
             return 0.0f;
         default:
             debug_printf("r300: Warning: Unknown CAP %d in get_paramf.\n",

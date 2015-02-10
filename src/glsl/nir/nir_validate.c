@@ -239,6 +239,14 @@ validate_alu_dest(nir_alu_dest *dest, validate_state *state)
     * register/SSA value
     */
    assert(is_packed || !(dest->write_mask & ~((1 << dest_size) - 1)));
+
+   /* validate that saturate is only ever used on instructions with
+    * destinations of type float
+    */
+   nir_alu_instr *alu = nir_instr_as_alu(state->instr);
+   assert(nir_op_infos[alu->op].output_type == nir_type_float ||
+          !dest->saturate);
+
    validate_dest(&dest->dest, state);
 }
 
@@ -488,16 +496,9 @@ validate_phi_src(nir_phi_instr *instr, nir_block *pred, validate_state *state)
    exec_list_validate(&instr->srcs);
    nir_foreach_phi_src(instr, src) {
       if (src->pred == pred) {
-         unsigned num_components;
-         if (src->src.is_ssa)
-            num_components = src->src.ssa->num_components;
-         else {
-            if (src->src.reg.reg->is_packed)
-               num_components = 4; /* can't check anything */
-            else
-               num_components = src->src.reg.reg->num_components;
-         }
-         assert(num_components == instr->dest.ssa.num_components);
+         assert(src->src.is_ssa);
+         assert(src->src.ssa->num_components ==
+                instr->dest.ssa.num_components);
 
          validate_src(&src->src, state);
          return;

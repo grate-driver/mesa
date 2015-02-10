@@ -285,6 +285,7 @@ intelInitExtensions(struct gl_context *ctx)
       ctx->Extensions.ARB_texture_gather = true;
       ctx->Extensions.ARB_conditional_render_inverted = true;
       ctx->Extensions.AMD_vertex_shader_layer = true;
+      ctx->Extensions.EXT_polygon_offset_clamp = true;
 
       /* Test if the kernel has the ioctl. */
       if (drm_intel_reg_read(brw->bufmgr, TIMESTAMP, &dummy) == 0)
@@ -344,4 +345,9 @@ intelInitExtensions(struct gl_context *ctx)
 
    if (brw->gen == 7)
       ctx->Extensions.ARB_gpu_shader5 = true;
+
+   ctx->Extensions.OES_texture_float = true;
+   ctx->Extensions.OES_texture_float_linear = true;
+   ctx->Extensions.OES_texture_half_float = true;
+   ctx->Extensions.OES_texture_half_float_linear = true;
 }

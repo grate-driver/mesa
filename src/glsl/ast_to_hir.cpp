@@ -1597,13 +1597,11 @@ ast_expression::do_hir(exec_list *instructions,
       }
 
       ir_constant *cond_val = op[0]->constant_expression_value();
-      ir_constant *then_val = op[1]->constant_expression_value();
-      ir_constant *else_val = op[2]->constant_expression_value();
 
       if (then_instructions.is_empty()
           && else_instructions.is_empty()
-          && (cond_val != NULL) && (then_val != NULL) && (else_val != NULL)) {
-         result = (cond_val->value.b[0]) ? then_val : else_val;
+          && cond_val != NULL) {
+         result = cond_val->value.b[0] ? op[1] : op[2];
       } else {
          ir_variable *const tmp =
             new(ctx) ir_variable(type, "conditional_tmp", ir_var_temporary);
@@ -5203,6 +5201,13 @@ ast_process_structure_or_interface_block(exec_list *instructions,
                              "members");
          }
 
+         if (qual->flags.q.constant) {
+            YYLTYPE loc = decl_list->get_location();
+            _mesa_glsl_error(&loc, state,
+                             "const storage qualifier cannot be applied "
+                             "to struct or interface block members");
+         }
+
          field_type = process_array_type(&loc, decl_type,
                                          decl->array_specifier, state);
          fields[i].type = field_type;
@@ -5382,6 +5387,14 @@ ast_interface_block::hir(exec_list *instructions,
                          struct _mesa_glsl_parse_state *state)
 {
    YYLTYPE loc = this->get_location();
+
+   /* Interface blocks must be declared at global scope */
+   if (state->current_function != NULL) {
+      _mesa_glsl_error(&loc, state,
+                       "Interface block `%s' must be declared "
+                       "at global scope",
+                       this->block_name);
+   }
 
    /* The ast_interface_block has a list of ast_declarator_lists.  We
     * need to turn those into ir_variables with an association

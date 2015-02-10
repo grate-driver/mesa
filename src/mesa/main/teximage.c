@@ -62,7 +62,58 @@
  */
 #define NEW_COPY_TEX_STATE (_NEW_BUFFERS | _NEW_PIXEL)
 
+/**
+ * Returns a corresponding internal floating point format for a given base
+ * format as specifed by OES_texture_float. In case of GL_FLOAT, the internal
+ * format needs to be a 32 bit component and in case of GL_HALF_FLOAT_OES it
+ * needs to be a 16 bit component.
+ *
+ * For example, given base format GL_RGBA, type GL_Float return GL_RGBA32F_ARB.
+ */
+static GLenum
+adjust_for_oes_float_texture(GLenum format, GLenum type)
+{
+   switch (type) {
+   case GL_FLOAT:
+      switch (format) {
+      case GL_RGBA:
+         return GL_RGBA32F;
+      case GL_RGB:
+         return GL_RGB32F;
+      case GL_ALPHA:
+         return GL_ALPHA32F_ARB;
+      case GL_LUMINANCE:
+         return GL_LUMINANCE32F_ARB;
+      case GL_LUMINANCE_ALPHA:
+         return GL_LUMINANCE_ALPHA32F_ARB;
+      default:
+         break;
+      }
+      break;
 
+   case GL_HALF_FLOAT_OES:
+      switch (format) {
+      case GL_RGBA:
+         return GL_RGBA16F;
+      case GL_RGB:
+         return GL_RGB16F;
+      case GL_ALPHA:
+         return GL_ALPHA16F_ARB;
+      case GL_LUMINANCE:
+         return GL_LUMINANCE16F_ARB;
+      case GL_LUMINANCE_ALPHA:
+         return GL_LUMINANCE_ALPHA16F_ARB;
+      default:
+         break;
+      }
+      break;
+
+   default:
+      break;
+   }
+
+   return format;
+}
 
 /**
  * Return the simple base format for a given internal texture format.
@@ -81,92 +132,102 @@ GLint
 _mesa_base_tex_format( struct gl_context *ctx, GLint internalFormat )
 {
    switch (internalFormat) {
-      case GL_ALPHA:
-      case GL_ALPHA4:
-      case GL_ALPHA8:
-      case GL_ALPHA12:
-      case GL_ALPHA16:
-         return (ctx->API != API_OPENGL_CORE) ? GL_ALPHA : -1;
-      case 1:
-      case GL_LUMINANCE:
-      case GL_LUMINANCE4:
-      case GL_LUMINANCE8:
-      case GL_LUMINANCE12:
-      case GL_LUMINANCE16:
-         return (ctx->API != API_OPENGL_CORE) ? GL_LUMINANCE : -1;
-      case 2:
-      case GL_LUMINANCE_ALPHA:
-      case GL_LUMINANCE4_ALPHA4:
-      case GL_LUMINANCE6_ALPHA2:
-      case GL_LUMINANCE8_ALPHA8:
-      case GL_LUMINANCE12_ALPHA4:
-      case GL_LUMINANCE12_ALPHA12:
-      case GL_LUMINANCE16_ALPHA16:
-         return (ctx->API != API_OPENGL_CORE) ? GL_LUMINANCE_ALPHA : -1;
-      case GL_INTENSITY:
-      case GL_INTENSITY4:
-      case GL_INTENSITY8:
-      case GL_INTENSITY12:
-      case GL_INTENSITY16:
-         return (ctx->API != API_OPENGL_CORE) ? GL_INTENSITY : -1;
-      case 3:
-         return (ctx->API != API_OPENGL_CORE) ? GL_RGB : -1;
-      case GL_RGB:
-      case GL_R3_G3_B2:
-      case GL_RGB4:
-      case GL_RGB5:
-      case GL_RGB8:
-      case GL_RGB10:
-      case GL_RGB12:
-      case GL_RGB16:
-         return GL_RGB;
-      case 4:
-         return (ctx->API != API_OPENGL_CORE) ? GL_RGBA : -1;
-      case GL_RGBA:
-      case GL_RGBA2:
-      case GL_RGBA4:
-      case GL_RGB5_A1:
-      case GL_RGBA8:
-      case GL_RGB10_A2:
-      case GL_RGBA12:
-      case GL_RGBA16:
-         return GL_RGBA;
-      default:
-         ; /* fallthrough */
+   case GL_ALPHA:
+   case GL_ALPHA4:
+   case GL_ALPHA8:
+   case GL_ALPHA12:
+   case GL_ALPHA16:
+      return (ctx->API != API_OPENGL_CORE) ? GL_ALPHA : -1;
+   case 1:
+   case GL_LUMINANCE:
+   case GL_LUMINANCE4:
+   case GL_LUMINANCE8:
+   case GL_LUMINANCE12:
+   case GL_LUMINANCE16:
+      return (ctx->API != API_OPENGL_CORE) ? GL_LUMINANCE : -1;
+   case 2:
+   case GL_LUMINANCE_ALPHA:
+   case GL_LUMINANCE4_ALPHA4:
+   case GL_LUMINANCE6_ALPHA2:
+   case GL_LUMINANCE8_ALPHA8:
+   case GL_LUMINANCE12_ALPHA4:
+   case GL_LUMINANCE12_ALPHA12:
+   case GL_LUMINANCE16_ALPHA16:
+      return (ctx->API != API_OPENGL_CORE) ? GL_LUMINANCE_ALPHA : -1;
+   case GL_INTENSITY:
+   case GL_INTENSITY4:
+   case GL_INTENSITY8:
+   case GL_INTENSITY12:
+   case GL_INTENSITY16:
+      return (ctx->API != API_OPENGL_CORE) ? GL_INTENSITY : -1;
+   case 3:
+      return (ctx->API != API_OPENGL_CORE) ? GL_RGB : -1;
+   case GL_RGB:
+   case GL_R3_G3_B2:
+   case GL_RGB4:
+   case GL_RGB5:
+   case GL_RGB8:
+   case GL_RGB10:
+   case GL_RGB12:
+   case GL_RGB16:
+      return GL_RGB;
+   case 4:
+      return (ctx->API != API_OPENGL_CORE) ? GL_RGBA : -1;
+   case GL_RGBA:
+   case GL_RGBA2:
+   case GL_RGBA4:
+   case GL_RGB5_A1:
+   case GL_RGBA8:
+   case GL_RGB10_A2:
+   case GL_RGBA12:
+   case GL_RGBA16:
+      return GL_RGBA;
+   default:
+      ; /* fallthrough */
    }
 
    /* GL_BGRA can be an internal format *only* in OpenGL ES (1.x or 2.0).
     */
    if (_mesa_is_gles(ctx)) {
       switch (internalFormat) {
-         case GL_BGRA:
-            return GL_RGBA;
-         default:
-            ; /* fallthrough */
+      case GL_BGRA:
+         return GL_RGBA;
+      default:
+         ; /* fallthrough */
       }
    }
 
    if (ctx->Extensions.ARB_ES2_compatibility) {
       switch (internalFormat) {
-         case GL_RGB565:
-            return GL_RGB;
-         default:
-            ; /* fallthrough */
+      case GL_RGB565:
+         return GL_RGB;
+      default:
+         ; /* fallthrough */
       }
    }
 
    if (ctx->Extensions.ARB_depth_texture) {
       switch (internalFormat) {
-         case GL_DEPTH_COMPONENT:
-         case GL_DEPTH_COMPONENT16:
-         case GL_DEPTH_COMPONENT24:
-         case GL_DEPTH_COMPONENT32:
-            return GL_DEPTH_COMPONENT;
-         case GL_DEPTH_STENCIL:
-         case GL_DEPTH24_STENCIL8:
-            return GL_DEPTH_STENCIL;
-         default:
-            ; /* fallthrough */
+      case GL_DEPTH_COMPONENT:
+      case GL_DEPTH_COMPONENT16:
+      case GL_DEPTH_COMPONENT24:
+      case GL_DEPTH_COMPONENT32:
+         return GL_DEPTH_COMPONENT;
+      case GL_DEPTH_STENCIL:
+      case GL_DEPTH24_STENCIL8:
+         return GL_DEPTH_STENCIL;
+      default:
+         ; /* fallthrough */
+      }
+   }
+
+   if (ctx->Extensions.ARB_stencil_texturing) {
+      switch (internalFormat) {
+      case GL_STENCIL_INDEX:
+      case GL_STENCIL_INDEX8:
+         return GL_STENCIL_INDEX;
+      default:
+         ; /* fallthrough */
       }
    }
 
@@ -189,12 +250,12 @@ _mesa_base_tex_format( struct gl_context *ctx, GLint internalFormat )
 
    if (ctx->Extensions.TDFX_texture_compression_FXT1) {
       switch (internalFormat) {
-         case GL_COMPRESSED_RGB_FXT1_3DFX:
-            return GL_RGB;
-         case GL_COMPRESSED_RGBA_FXT1_3DFX:
-            return GL_RGBA;
-         default:
-            ; /* fallthrough */
+      case GL_COMPRESSED_RGB_FXT1_3DFX:
+         return GL_RGB;
+      case GL_COMPRESSED_RGBA_FXT1_3DFX:
+         return GL_RGBA;
+      default:
+         ; /* fallthrough */
       }
    }
 
@@ -202,28 +263,28 @@ _mesa_base_tex_format( struct gl_context *ctx, GLint internalFormat )
     */
    if (ctx->Extensions.ANGLE_texture_compression_dxt) {
       switch (internalFormat) {
-         case GL_COMPRESSED_RGB_S3TC_DXT1_EXT:
-            return GL_RGB;
-         case GL_COMPRESSED_RGBA_S3TC_DXT1_EXT:
-         case GL_COMPRESSED_RGBA_S3TC_DXT3_EXT:
-         case GL_COMPRESSED_RGBA_S3TC_DXT5_EXT:
-            return GL_RGBA;
-         default:
-            ; /* fallthrough */
+      case GL_COMPRESSED_RGB_S3TC_DXT1_EXT:
+         return GL_RGB;
+      case GL_COMPRESSED_RGBA_S3TC_DXT1_EXT:
+      case GL_COMPRESSED_RGBA_S3TC_DXT3_EXT:
+      case GL_COMPRESSED_RGBA_S3TC_DXT5_EXT:
+         return GL_RGBA;
+      default:
+         ; /* fallthrough */
       }
    }
 
    if (_mesa_is_desktop_gl(ctx)
        && ctx->Extensions.ANGLE_texture_compression_dxt) {
       switch (internalFormat) {
-         case GL_RGB_S3TC:
-         case GL_RGB4_S3TC:
-            return GL_RGB;
-         case GL_RGBA_S3TC:
-         case GL_RGBA4_S3TC:
-            return GL_RGBA;
-         default:
-            ; /* fallthrough */
+      case GL_RGB_S3TC:
+      case GL_RGB4_S3TC:
+         return GL_RGB;
+      case GL_RGBA_S3TC:
+      case GL_RGBA4_S3TC:
+         return GL_RGBA;
+      default:
+         ; /* fallthrough */
       }
    }
 
@@ -234,65 +295,65 @@ _mesa_base_tex_format( struct gl_context *ctx, GLint internalFormat )
 
    if (ctx->Extensions.ARB_texture_float) {
       switch (internalFormat) {
-         case GL_ALPHA16F_ARB:
-         case GL_ALPHA32F_ARB:
-            return GL_ALPHA;
-         case GL_RGBA16F_ARB:
-         case GL_RGBA32F_ARB:
-            return GL_RGBA;
-         case GL_RGB16F_ARB:
-         case GL_RGB32F_ARB:
-            return GL_RGB;
-         case GL_INTENSITY16F_ARB:
-         case GL_INTENSITY32F_ARB:
-            return GL_INTENSITY;
-         case GL_LUMINANCE16F_ARB:
-         case GL_LUMINANCE32F_ARB:
-            return GL_LUMINANCE;
-         case GL_LUMINANCE_ALPHA16F_ARB:
-         case GL_LUMINANCE_ALPHA32F_ARB:
-            return GL_LUMINANCE_ALPHA;
-         default:
-            ; /* fallthrough */
+      case GL_ALPHA16F_ARB:
+      case GL_ALPHA32F_ARB:
+         return GL_ALPHA;
+      case GL_RGBA16F_ARB:
+      case GL_RGBA32F_ARB:
+         return GL_RGBA;
+      case GL_RGB16F_ARB:
+      case GL_RGB32F_ARB:
+         return GL_RGB;
+      case GL_INTENSITY16F_ARB:
+      case GL_INTENSITY32F_ARB:
+         return GL_INTENSITY;
+      case GL_LUMINANCE16F_ARB:
+      case GL_LUMINANCE32F_ARB:
+         return GL_LUMINANCE;
+      case GL_LUMINANCE_ALPHA16F_ARB:
+      case GL_LUMINANCE_ALPHA32F_ARB:
+         return GL_LUMINANCE_ALPHA;
+      default:
+         ; /* fallthrough */
       }
    }
 
    if (ctx->Extensions.EXT_texture_snorm) {
       switch (internalFormat) {
-         case GL_RED_SNORM:
-         case GL_R8_SNORM:
-         case GL_R16_SNORM:
-            return GL_RED;
-         case GL_RG_SNORM:
-         case GL_RG8_SNORM:
-         case GL_RG16_SNORM:
-            return GL_RG;
-         case GL_RGB_SNORM:
-         case GL_RGB8_SNORM:
-         case GL_RGB16_SNORM:
-            return GL_RGB;
-         case GL_RGBA_SNORM:
-         case GL_RGBA8_SNORM:
-         case GL_RGBA16_SNORM:
-            return GL_RGBA;
-         case GL_ALPHA_SNORM:
-         case GL_ALPHA8_SNORM:
-         case GL_ALPHA16_SNORM:
-            return GL_ALPHA;
-         case GL_LUMINANCE_SNORM:
-         case GL_LUMINANCE8_SNORM:
-         case GL_LUMINANCE16_SNORM:
-            return GL_LUMINANCE;
-         case GL_LUMINANCE_ALPHA_SNORM:
-         case GL_LUMINANCE8_ALPHA8_SNORM:
-         case GL_LUMINANCE16_ALPHA16_SNORM:
-            return GL_LUMINANCE_ALPHA;
-         case GL_INTENSITY_SNORM:
-         case GL_INTENSITY8_SNORM:
-         case GL_INTENSITY16_SNORM:
-            return GL_INTENSITY;
-         default:
-            ; /* fallthrough */
+      case GL_RED_SNORM:
+      case GL_R8_SNORM:
+      case GL_R16_SNORM:
+         return GL_RED;
+      case GL_RG_SNORM:
+      case GL_RG8_SNORM:
+      case GL_RG16_SNORM:
+         return GL_RG;
+      case GL_RGB_SNORM:
+      case GL_RGB8_SNORM:
+      case GL_RGB16_SNORM:
+         return GL_RGB;
+      case GL_RGBA_SNORM:
+      case GL_RGBA8_SNORM:
+      case GL_RGBA16_SNORM:
+         return GL_RGBA;
+      case GL_ALPHA_SNORM:
+      case GL_ALPHA8_SNORM:
+      case GL_ALPHA16_SNORM:
+         return GL_ALPHA;
+      case GL_LUMINANCE_SNORM:
+      case GL_LUMINANCE8_SNORM:
+      case GL_LUMINANCE16_SNORM:
+         return GL_LUMINANCE;
+      case GL_LUMINANCE_ALPHA_SNORM:
+      case GL_LUMINANCE8_ALPHA8_SNORM:
+      case GL_LUMINANCE16_ALPHA16_SNORM:
+         return GL_LUMINANCE_ALPHA;
+      case GL_INTENSITY_SNORM:
+      case GL_INTENSITY8_SNORM:
+      case GL_INTENSITY16_SNORM:
+         return GL_INTENSITY;
+      default:
+         ; /* fallthrough */
       }
    }
 
@@ -2069,7 +2130,7 @@ texture_error_check( struct gl_context *ctx,
 
    if (_mesa_is_gles(ctx)) {
       if (_mesa_is_gles3(ctx)) {
-         err = _mesa_es3_error_check_format_and_type(format, type,
+         err = _mesa_es3_error_check_format_and_type(ctx, format, type,
                                                      internalFormat);
       } else {
          if (format != internalFormat) {
@@ -3182,6 +3243,19 @@ teximage(struct gl_context *ctx, GLboolean compressed, GLuint dims,
       texFormat = _mesa_glenum_to_compressed_format(internalFormat);
    }
    else {
+      /* In case of HALF_FLOAT_OES or FLOAT_OES, find corresponding sized
+       * internal floating point format for the given base format.
+       */
+      if (_mesa_is_gles(ctx) && format == internalFormat) {
+         if (type == GL_FLOAT) {
+            texObj->_IsFloat = GL_TRUE;
+         } else if (type == GL_HALF_FLOAT_OES || type == GL_HALF_FLOAT) {
+            texObj->_IsHalfFloat = GL_TRUE;
+         }
+
+         internalFormat = adjust_for_oes_float_texture(format, type);
+      }
+
       texFormat = _mesa_choose_texture_format(ctx, texObj, target, level,
                                               internalFormat, format, type);
    }

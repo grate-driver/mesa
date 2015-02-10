@@ -339,17 +339,13 @@ fs_visitor::CMP(fs_reg dst, fs_reg src0, fs_reg src1,
     *
     * Original gen4 does type conversion to the destination type before
     * comparison, producing garbage results for floating point comparisons.
-    * gen5 does the comparison on the execution type (resolved source types),
-    * so dst type doesn't matter.  gen6 does comparison and then uses the
-    * result as if it was the dst type with no conversion, which happens to
-    * mostly work out for float-interpreted-as-int since our comparisons are
-    * for >0, =0, <0.
+    *
+    * The destination type doesn't matter on newer generations, so we set the
+    * type to match src0 so we can compact the instruction.
     */
-   if (brw->gen == 4) {
-      dst.type = src0.type;
-      if (dst.file == HW_REG)
-	 dst.fixed_hw_reg.type = dst.type;
-   }
+   dst.type = src0.type;
+   if (dst.file == HW_REG)
+      dst.fixed_hw_reg.type = dst.type;
 
    resolve_ud_negate(&src0);
    resolve_ud_negate(&src1);
@@ -728,15 +724,31 @@ fs_visitor::emit_shader_time_end()
    current_annotation = "shader time end";
 
    enum shader_time_shader_type type, written_type, reset_type;
-   if (dispatch_width == 8) {
-      type = ST_FS8;
-      written_type = ST_FS8_WRITTEN;
-      reset_type = ST_FS8_RESET;
-   } else {
-      assert(dispatch_width == 16);
-      type = ST_FS16;
-      written_type = ST_FS16_WRITTEN;
-      reset_type = ST_FS16_RESET;
+   switch (stage) {
+   case MESA_SHADER_VERTEX:
+      type = ST_VS;
+      written_type = ST_VS_WRITTEN;
+      reset_type = ST_VS_RESET;
+      break;
+   case MESA_SHADER_GEOMETRY:
+      type = ST_GS;
+      written_type = ST_GS_WRITTEN;
+      reset_type = ST_GS_RESET;
+      break;
+   case MESA_SHADER_FRAGMENT:
+      if (dispatch_width == 8) {
+         type = ST_FS8;
+         written_type = ST_FS8_WRITTEN;
+         reset_type = ST_FS8_RESET;
+      } else {
+         assert(dispatch_width == 16);
+         type = ST_FS16;
+         written_type = ST_FS16_WRITTEN;
+         reset_type = ST_FS16_RESET;
+      }
+      break;
+   default:
+      unreachable("fs_visitor::emit_shader_time_end missing code");
    }
 
    fs_reg shader_end_time = get_timestamp();

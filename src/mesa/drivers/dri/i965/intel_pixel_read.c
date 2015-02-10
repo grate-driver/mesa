@@ -125,6 +125,20 @@ intel_readpixels_tiled_memcpy(struct gl_context * ctx,
       yoffset += irb->mt->level[level].level_y;
    }
 
+   /* It is possible that the renderbuffer (or underlying texture) is
+    * multisampled.  Since ReadPixels from a multisampled buffer requires a
+    * multisample resolve, we can't handle this here
+    */
+   if (rb->NumSamples > 1)
+      return false;
+
+   /* We can't handle copying from RGBX or BGRX because the tiled_memcpy
+    * function doesn't set the last channel to 1.
+    */
+   if (rb->Format == MESA_FORMAT_B8G8R8X8_UNORM ||
+       rb->Format == MESA_FORMAT_R8G8B8X8_UNORM)
+      return false;
+
    if (!intel_get_memcpy(rb->Format, format, type, &mem_copy, &cpp))
       return false;
 
@@ -154,6 +168,21 @@ intel_readpixels_tiled_memcpy(struct gl_context * ctx,
    }
 
    dst_pitch = _mesa_image_row_stride(pack, width, format, type);
+
+   /* For a window-system renderbuffer, the buffer is actually flipped
+    * vertically, so we need to handle that.  Since the detiling function
+    * can only really work in the forwards direction, we have to be a
+    * little creative.  First, we compute the Y-offset of the first row of
+    * the renderbuffer (in renderbuffer coordinates).  We then match that
+    * with the last row of the client's data.  Finally, we give
+    * tiled_to_linear a negative pitch so that it walks through the
+    * client's data backwards as it walks through the renderbufer forwards.
+    */
+   if (rb->Name == 0) {
+      yoffset = rb->Height - yoffset - height;
+      pixels += (ptrdiff_t) (height - 1) * dst_pitch;
+      dst_pitch = -dst_pitch;
+   }
 
    /* We postponed printing this message until having committed to executing
     * the function.

@@ -589,24 +589,8 @@ public:
    void nir_emit_texture(nir_tex_instr *instr);
    void nir_emit_jump(nir_jump_instr *instr);
    fs_reg get_nir_src(nir_src src);
-   fs_reg get_nir_alu_src(nir_alu_instr *instr, unsigned src);
    fs_reg get_nir_dest(nir_dest dest);
    void emit_percomp(fs_inst *inst, unsigned wr_mask);
-   void emit_percomp(enum opcode op, fs_reg dest, fs_reg src0,
-                     unsigned wr_mask, bool saturate = false,
-                     enum brw_predicate predicate = BRW_PREDICATE_NONE,
-                     enum brw_conditional_mod mod = BRW_CONDITIONAL_NONE);
-   void emit_percomp(enum opcode op, fs_reg dest, fs_reg src0, fs_reg src1,
-                     unsigned wr_mask, bool saturate = false,
-                     enum brw_predicate predicate = BRW_PREDICATE_NONE,
-                     enum brw_conditional_mod mod = BRW_CONDITIONAL_NONE);
-   void emit_math_percomp(enum opcode op, fs_reg dest, fs_reg src0,
-                          unsigned wr_mask, bool saturate = false);
-   void emit_math_percomp(enum opcode op, fs_reg dest, fs_reg src0,
-                          fs_reg src1, unsigned wr_mask,
-                          bool saturate = false);
-   void emit_reduction(enum opcode op, fs_reg dest, fs_reg src,
-                       unsigned num_components);
 
    int setup_color_payload(fs_reg *dst, fs_reg color, unsigned components);
    void emit_alpha_test();

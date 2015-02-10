@@ -28,18 +28,24 @@ import itertools
 import struct
 import sys
 import mako.template
+import re
 
 # Represents a set of variables, each with a unique id
 class VarSet(object):
    def __init__(self):
       self.names = {}
       self.ids = itertools.count()
+      self.immutable = False;
 
    def __getitem__(self, name):
       if name not in self.names:
+         assert not self.immutable, "Unknown replacement variable: " + name
          self.names[name] = self.ids.next()
 
       return self.names[name]
+
+   def lock(self):
+      self.immutable = True
 
 class Value(object):
    @staticmethod
@@ -60,6 +66,8 @@ static const ${val.c_type} ${val.name} = {
    { ${hex(val)} /* ${val.value} */ },
 % elif isinstance(val, Variable):
    ${val.index}, /* ${val.var_name} */
+   ${'true' if val.is_constant else 'false'},
+   nir_type_${ val.required_type or 'invalid' },
 % elif isinstance(val, Expression):
    nir_op_${val.opcode},
    { ${', '.join(src.c_ptr for src in val.sources)} },
@@ -106,12 +114,23 @@ class Constant(Value):
       else:
          assert False
 
+_var_name_re = re.compile(r"(?P<const>#)?(?P<name>\w+)(?:@(?P<type>\w+))?")
+
 class Variable(Value):
    def __init__(self, val, name, varset):
       Value.__init__(self, name, "variable")
-      self.var_name = val
-      self.index = varset[val]
-      self.name = name
+
+      m = _var_name_re.match(val)
+      assert m and m.group('name') is not None
+
+      self.var_name = m.group('name')
+      self.is_constant = m.group('const') is not None
+      self.required_type = m.group('type')
+
+      if self.required_type is not None:
+         assert self.required_type in ('float', 'bool', 'int', 'unsigned')
+
+      self.index = varset[self.var_name]
 
 class Expression(Value):
    def __init__(self, expr, name_base, varset):
@@ -138,6 +157,8 @@ class SearchAndReplace(object):
       else:
          self.search = Expression(search, "search{0}".format(self.id), varset)
 
+      varset.lock()
+
       if isinstance(replace, Value):
          self.replace = replace
       else:
@@ -158,10 +179,7 @@ struct transform {
    ${xform.replace.render()}
 % endfor
 
-static const struct {
-   const nir_search_expression *search;
-   const nir_search_value *replace;
-} ${pass_name}_${opcode}_xforms[] = {
+static const struct transform ${pass_name}_${opcode}_xforms[] = {
 % for xform in xform_list:
    { &${xform.search.name}, ${xform.replace.c_ptr} },
 % endfor
@@ -190,8 +208,8 @@ ${pass_name}_block(nir_block *block, void *void_state)
       % for opcode in xform_dict.keys():
       case nir_op_${opcode}:
          for (unsigned i = 0; i < ARRAY_SIZE(${pass_name}_${opcode}_xforms); i++) {
-            if (nir_replace_instr(alu, ${pass_name}_${opcode}_xforms[i].search,
-                                  ${pass_name}_${opcode}_xforms[i].replace,
+            const struct transform *xform = &${pass_name}_${opcode}_xforms[i];
+            if (nir_replace_instr(alu, xform->search, xform->replace,
                                   state->mem_ctx)) {
                state->progress = true;
                break;

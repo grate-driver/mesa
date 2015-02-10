@@ -298,7 +298,8 @@ struct blit_state
 {
    GLuint VAO;
    GLuint VBO;
-   struct blit_shader_table shaders;
+   struct blit_shader_table shaders_with_depth;
+   struct blit_shader_table shaders_without_depth;
    GLuint msaa_shaders[BLIT_MSAA_SHADER_COUNT];
    struct temp_texture depthTex;
    bool no_ctsi_fallback;
@@ -474,12 +475,16 @@ _mesa_meta_setup_sampler(struct gl_context *ctx,
 
 extern GLbitfield
 _mesa_meta_BlitFramebuffer(struct gl_context *ctx,
+                           const struct gl_framebuffer *readFb,
+                           const struct gl_framebuffer *drawFb,
                            GLint srcX0, GLint srcY0, GLint srcX1, GLint srcY1,
                            GLint dstX0, GLint dstY0, GLint dstX1, GLint dstY1,
                            GLbitfield mask, GLenum filter);
 
 extern void
 _mesa_meta_and_swrast_BlitFramebuffer(struct gl_context *ctx,
+                                      struct gl_framebuffer *readFb,
+                                      struct gl_framebuffer *drawFb,
                                       GLint srcX0, GLint srcY0,
                                       GLint srcX1, GLint srcY1,
                                       GLint dstX0, GLint dstY0,
@@ -632,6 +637,7 @@ _mesa_meta_setup_copypix_texture(struct gl_context *ctx,
 void
 _mesa_meta_setup_blit_shader(struct gl_context *ctx,
                              GLenum target,
+                             bool do_depth,
                              struct blit_shader_table *table);
 
 void

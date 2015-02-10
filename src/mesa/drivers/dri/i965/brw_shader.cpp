@@ -157,7 +157,7 @@ brw_link_shader(struct gl_context *ctx, struct gl_shader_program *shProg)
                                   ? BITFIELD_INSERT_TO_BFM_BFI
                                   : 0;
       lower_instructions(shader->base.ir,
-			 MOD_TO_FRACT |
+			 MOD_TO_FLOOR |
 			 DIV_TO_MUL_RCP |
 			 SUB_TO_ADD_NEG |
 			 EXP_TO_EXP2 |
@@ -602,11 +602,8 @@ brw_saturate_immediate(enum brw_reg_type type, struct brw_reg *reg)
       sat_imm.f = CLAMP(imm.f, 0.0f, 1.0f);
       break;
    case BRW_REGISTER_TYPE_UB:
-      sat_imm.ud = CLAMP(imm.ud, 0, UCHAR_MAX);
-      break;
    case BRW_REGISTER_TYPE_B:
-      sat_imm.d = CLAMP(imm.d, CHAR_MIN, CHAR_MAX);
-      break;
+      unreachable("no UB/B immediates");
    case BRW_REGISTER_TYPE_V:
    case BRW_REGISTER_TYPE_UV:
    case BRW_REGISTER_TYPE_VF:
@@ -620,6 +617,84 @@ brw_saturate_immediate(enum brw_reg_type type, struct brw_reg *reg)
       reg->dw1.ud = sat_imm.ud;
       return true;
    }
+   return false;
+}
+
+bool
+brw_negate_immediate(enum brw_reg_type type, struct brw_reg *reg)
+{
+   switch (type) {
+   case BRW_REGISTER_TYPE_D:
+      reg->dw1.d = -reg->dw1.d;
+      return true;
+   case BRW_REGISTER_TYPE_W:
+      reg->dw1.d = -(int16_t)reg->dw1.ud;
+      return true;
+   case BRW_REGISTER_TYPE_F:
+      reg->dw1.f = -reg->dw1.f;
+      return true;
+   case BRW_REGISTER_TYPE_VF:
+      reg->dw1.ud ^= 0x80808080;
+      return true;
+   case BRW_REGISTER_TYPE_UB:
+   case BRW_REGISTER_TYPE_B:
+      unreachable("no UB/B immediates");
+   case BRW_REGISTER_TYPE_UD:
+   case BRW_REGISTER_TYPE_UW:
+      /* Presumably the negate modifier on an unsigned source is the same as
+       * on a signed source but it would be nice to confirm.
+       */
+      assert(!"unimplemented: negate UD/UW immediate");
+   case BRW_REGISTER_TYPE_UV:
+   case BRW_REGISTER_TYPE_V:
+      assert(!"unimplemented: negate UV/V immediate");
+   case BRW_REGISTER_TYPE_UQ:
+   case BRW_REGISTER_TYPE_Q:
+      assert(!"unimplemented: negate UQ/Q immediate");
+   case BRW_REGISTER_TYPE_DF:
+   case BRW_REGISTER_TYPE_HF:
+      assert(!"unimplemented: negate DF/HF immediate");
+   }
+
+   return false;
+}
+
+bool
+brw_abs_immediate(enum brw_reg_type type, struct brw_reg *reg)
+{
+   switch (type) {
+   case BRW_REGISTER_TYPE_D:
+      reg->dw1.d = abs(reg->dw1.d);
+      return true;
+   case BRW_REGISTER_TYPE_W:
+      reg->dw1.d = abs((int16_t)reg->dw1.ud);
+      return true;
+   case BRW_REGISTER_TYPE_F:
+      reg->dw1.f = fabsf(reg->dw1.f);
+      return true;
+   case BRW_REGISTER_TYPE_VF:
+      reg->dw1.ud &= ~0x80808080;
+      return true;
+   case BRW_REGISTER_TYPE_UB:
+   case BRW_REGISTER_TYPE_B:
+      unreachable("no UB/B immediates");
+   case BRW_REGISTER_TYPE_UQ:
+   case BRW_REGISTER_TYPE_UD:
+   case BRW_REGISTER_TYPE_UW:
+   case BRW_REGISTER_TYPE_UV:
+      /* Presumably the absolute value modifier on an unsigned source is a
+       * nop, but it would be nice to confirm.
+       */
+      assert(!"unimplemented: abs unsigned immediate");
+   case BRW_REGISTER_TYPE_V:
+      assert(!"unimplemented: abs V immediate");
+   case BRW_REGISTER_TYPE_Q:
+      assert(!"unimplemented: abs Q immediate");
+   case BRW_REGISTER_TYPE_DF:
+   case BRW_REGISTER_TYPE_HF:
+      assert(!"unimplemented: abs DF/HF immediate");
+   }
+
    return false;
 }
 

@@ -486,7 +486,7 @@ fail_link(struct gl_shader_program *prog, const char *fmt, ...)
 static int
 swizzle_for_size(int size)
 {
-   int size_swizzles[4] = {
+   static const int size_swizzles[4] = {
       MAKE_SWIZZLE4(SWIZZLE_X, SWIZZLE_X, SWIZZLE_X, SWIZZLE_X),
       MAKE_SWIZZLE4(SWIZZLE_X, SWIZZLE_Y, SWIZZLE_Y, SWIZZLE_Y),
       MAKE_SWIZZLE4(SWIZZLE_X, SWIZZLE_Y, SWIZZLE_Z, SWIZZLE_Z),
@@ -5419,7 +5419,7 @@ st_link_shader(struct gl_context *ctx, struct gl_shader_program *prog)
          lower_offset_arrays(ir);
       do_mat_op_to_vec(ir);
       lower_instructions(ir,
-                         MOD_TO_FRACT |
+                         MOD_TO_FLOOR |
                          DIV_TO_MUL_RCP |
                          EXP_TO_EXP2 |
                          LOG_TO_LOG2 |

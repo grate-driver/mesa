@@ -114,23 +114,15 @@ try_constant_propagate(struct brw_context *brw, vec4_instruction *inst,
       return false;
 
    if (inst->src[arg].abs) {
-      if (value.type == BRW_REGISTER_TYPE_F) {
-	 value.fixed_hw_reg.dw1.f = fabs(value.fixed_hw_reg.dw1.f);
-      } else if (value.type == BRW_REGISTER_TYPE_VF) {
-         value.fixed_hw_reg.dw1.ud &= ~0x80808080;
-      } else if (value.type == BRW_REGISTER_TYPE_D) {
-	 if (value.fixed_hw_reg.dw1.d < 0)
-	    value.fixed_hw_reg.dw1.d = -value.fixed_hw_reg.dw1.d;
+      if (!brw_abs_immediate(value.type, &value.fixed_hw_reg)) {
+         return false;
       }
    }
 
    if (inst->src[arg].negate) {
-      if (value.type == BRW_REGISTER_TYPE_F)
-	 value.fixed_hw_reg.dw1.f = -value.fixed_hw_reg.dw1.f;
-      else if (value.type == BRW_REGISTER_TYPE_VF)
-         value.fixed_hw_reg.dw1.ud ^= 0x80808080;
-      else
-	 value.fixed_hw_reg.dw1.ud = -value.fixed_hw_reg.dw1.ud;
+      if (!brw_negate_immediate(value.type, &value.fixed_hw_reg)) {
+         return false;
+      }
    }
 
    if (value.type == BRW_REGISTER_TYPE_VF)
@@ -314,12 +306,11 @@ try_copy_propagate(struct brw_context *brw, vec4_instruction *inst,
    if (inst->is_send_from_grf())
       return false;
 
-   /* We can't copy-propagate a UD negation into a condmod
-    * instruction, because the condmod ends up looking at the 33-bit
-    * signed accumulator value instead of the 32-bit value we wanted
+   /* we can't generally copy-propagate UD negations becuse we
+    * end up accessing the resulting values as signed integers
+    * instead. See also resolve_ud_negate().
     */
-   if (inst->conditional_mod &&
-       value.negate &&
+   if (value.negate &&
        value.type == BRW_REGISTER_TYPE_UD)
       return false;
 

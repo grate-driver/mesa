@@ -221,6 +221,42 @@ NineDevice9_ctor( struct NineDevice9 *This,
         NineUnknown_ConvertRefToBind(NineUnknown(This->state.rt[i]));
     }
 
+    /* Initialize a dummy VBO to be used when a a vertex declaration does not
+     * specify all the inputs needed by vertex shader, on win default behavior
+     * is to pass 0,0,0,0 to the shader */
+    {
+        struct pipe_transfer *transfer;
+        struct pipe_resource tmpl;
+        struct pipe_box box;
+        unsigned char *data;
+
+        tmpl.target = PIPE_BUFFER;
+        tmpl.format = PIPE_FORMAT_R8_UNORM;
+        tmpl.width0 = 16; /* 4 floats */
+        tmpl.height0 = 1;
+        tmpl.depth0 = 1;
+        tmpl.array_size = 1;
+        tmpl.last_level = 0;
+        tmpl.nr_samples = 0;
+        tmpl.usage = PIPE_USAGE_DEFAULT;
+        tmpl.bind = PIPE_BIND_VERTEX_BUFFER | PIPE_BIND_TRANSFER_WRITE;
+        tmpl.flags = 0;
+        This->dummy_vbo = pScreen->resource_create(pScreen, &tmpl);
+
+        if (!This->dummy_vbo)
+            return D3DERR_OUTOFVIDEOMEMORY;
+
+        u_box_1d(0, 16, &box);
+        data = This->pipe->transfer_map(This->pipe, This->dummy_vbo, 0,
+                                        PIPE_TRANSFER_WRITE |
+                                        PIPE_TRANSFER_DISCARD_WHOLE_RESOURCE,
+                                        &box, &transfer);
+        assert(data);
+        assert(transfer);
+        memset(data, 0, 16);
+        This->pipe->transfer_unmap(This->pipe, transfer);
+    }
+
     This->cursor.software = FALSE;
     This->cursor.hotspot.x = -1;
     This->cursor.hotspot.y = -1;
@@ -248,14 +284,15 @@ NineDevice9_ctor( struct NineDevice9 *This,
         struct pipe_resource tmpl;
         unsigned max_const_vs, max_const_ps;
 
+        /* vs 3.0: >= 256 float constants, but for cards with exactly 256 slots,
+         * we have to take in some more slots for int and bool*/
         max_const_vs = _min(pScreen->get_shader_param(pScreen, PIPE_SHADER_VERTEX,
                                 PIPE_SHADER_CAP_MAX_CONST_BUFFER_SIZE) /
                                 sizeof(float[4]),
-			    NINE_MAX_CONST_ALL);
-        max_const_ps = _min(pScreen->get_shader_param(pScreen, PIPE_SHADER_FRAGMENT,
-                                PIPE_SHADER_CAP_MAX_CONST_BUFFER_SIZE) /
-                                sizeof(float[4]),
                             NINE_MAX_CONST_ALL);
+        /* ps 3.0: 224 float constants. All cards supported support at least
+         * 256 constants for ps */
+        max_const_ps = NINE_MAX_CONST_F_PS3 + (NINE_MAX_CONST_I + NINE_MAX_CONST_B / 4);
 
         This->max_vs_const_f = max_const_vs -
                                (NINE_MAX_CONST_I + NINE_MAX_CONST_B / 4);
@@ -295,6 +332,43 @@ NineDevice9_ctor( struct NineDevice9 *This,
 
         if (!This->constbuf_vs || !This->constbuf_ps)
             return E_OUTOFMEMORY;
+    }
+
+    /* allocate dummy texture/sampler for when there are missing ones bound */
+    {
+        struct pipe_resource tmplt;
+        struct pipe_sampler_view templ;
+
+        tmplt.target = PIPE_TEXTURE_2D;
+        tmplt.width0 = 1;
+        tmplt.height0 = 1;
+        tmplt.depth0 = 1;
+        tmplt.last_level = 0;
+        tmplt.array_size = 1;
+        tmplt.usage = PIPE_USAGE_DEFAULT;
+        tmplt.flags = 0;
+        tmplt.format = PIPE_FORMAT_B8G8R8A8_UNORM;
+        tmplt.bind = PIPE_BIND_SAMPLER_VIEW;
+        tmplt.nr_samples = 0;
+
+        This->dummy_texture = This->screen->resource_create(This->screen, &tmplt);
+        if (!This->dummy_texture)
+            return D3DERR_DRIVERINTERNALERROR;
+
+        templ.format = PIPE_FORMAT_B8G8R8A8_UNORM;
+        templ.u.tex.first_layer = 0;
+        templ.u.tex.last_layer = 0;
+        templ.u.tex.first_level = 0;
+        templ.u.tex.last_level = 0;
+        templ.swizzle_r = PIPE_SWIZZLE_ZERO;
+        templ.swizzle_g = PIPE_SWIZZLE_ZERO;
+        templ.swizzle_b = PIPE_SWIZZLE_ZERO;
+        templ.swizzle_a = PIPE_SWIZZLE_ONE;
+        templ.target = This->dummy_texture->target;
+
+        This->dummy_sampler = This->pipe->create_sampler_view(This->pipe, This->dummy_texture, &templ);
+        if (!This->dummy_sampler)
+            return D3DERR_DRIVERINTERNALERROR;
     }
 
     /* Allocate upload helper for drivers that suck (from st pov ;). */
@@ -345,8 +419,11 @@ NineDevice9_dtor( struct NineDevice9 *This )
 
     nine_bind(&This->record, NULL);
 
+    pipe_sampler_view_reference(&This->dummy_sampler, NULL);
+    pipe_resource_reference(&This->dummy_texture, NULL);
     pipe_resource_reference(&This->constbuf_vs, NULL);
     pipe_resource_reference(&This->constbuf_ps, NULL);
+    pipe_resource_reference(&This->dummy_vbo, NULL);
     FREE(This->state.vs_const_f);
     FREE(This->state.ps_const_f);
     FREE(This->state.vs_lconstf_temp);
@@ -764,6 +841,7 @@ NineDevice9_CreateTexture( struct NineDevice9 *This,
              D3DUSAGE_DYNAMIC | D3DUSAGE_NONSECURE | D3DUSAGE_RENDERTARGET |
              D3DUSAGE_SOFTWAREPROCESSING | D3DUSAGE_TEXTAPI;
 
+    *ppTexture = NULL;
     user_assert(Width && Height, D3DERR_INVALIDCALL);
     user_assert(!pSharedHandle || This->ex, D3DERR_INVALIDCALL);
     /* When is used shared handle, Pool must be
@@ -805,6 +883,7 @@ NineDevice9_CreateVolumeTexture( struct NineDevice9 *This,
     Usage &= D3DUSAGE_DYNAMIC | D3DUSAGE_NONSECURE |
              D3DUSAGE_SOFTWAREPROCESSING;
 
+    *ppVolumeTexture = NULL;
     user_assert(Width && Height && Depth, D3DERR_INVALIDCALL);
     user_assert(!pSharedHandle || Pool == D3DPOOL_DEFAULT, D3DERR_INVALIDCALL);
 
@@ -838,6 +917,7 @@ NineDevice9_CreateCubeTexture( struct NineDevice9 *This,
              D3DUSAGE_NONSECURE | D3DUSAGE_RENDERTARGET |
              D3DUSAGE_SOFTWAREPROCESSING;
 
+    *ppCubeTexture = NULL;
     user_assert(EdgeLength, D3DERR_INVALIDCALL);
     user_assert(!pSharedHandle || Pool == D3DPOOL_DEFAULT, D3DERR_INVALIDCALL);
 
@@ -956,7 +1036,6 @@ create_zs_or_rt_surface(struct NineDevice9 *This,
     user_assert(Pool != D3DPOOL_MANAGED, D3DERR_INVALIDCALL);
 
     templ.target = PIPE_TEXTURE_2D;
-    templ.format = d3d9_to_pipe_format(Format);
     templ.width0 = Width;
     templ.height0 = Height;
     templ.depth0 = 1;
@@ -968,11 +1047,14 @@ create_zs_or_rt_surface(struct NineDevice9 *This,
     templ.bind = PIPE_BIND_SAMPLER_VIEW; /* StretchRect */
     switch (type) {
     case 0: templ.bind |= PIPE_BIND_RENDER_TARGET; break;
-    case 1: templ.bind |= PIPE_BIND_DEPTH_STENCIL; break;
+    case 1: templ.bind = d3d9_get_pipe_depth_format_bindings(Format); break;
     default:
         assert(type == 2);
         break;
     }
+    templ.format = d3d9_to_pipe_format_checked(screen, Format, templ.target,
+                                               templ.nr_samples, templ.bind,
+                                               FALSE);
 
     desc.Format = Format;
     desc.Type = D3DRTYPE_SURFACE;
@@ -990,7 +1072,7 @@ create_zs_or_rt_surface(struct NineDevice9 *This,
 
     if (Pool == D3DPOOL_DEFAULT && Format != D3DFMT_NULL) {
         /* resource_create doesn't return an error code, so check format here */
-        user_assert(CHECK_PIPE_RESOURCE_TEMPLATE(templ), D3DERR_INVALIDCALL);
+        user_assert(templ.format != PIPE_FORMAT_NONE, D3DERR_INVALIDCALL);
         resource = screen->resource_create(screen, &templ);
         user_assert(resource, D3DERR_OUTOFVIDEOMEMORY);
         if (Discard_or_Lockable && (desc.Usage & D3DUSAGE_RENDERTARGET))
@@ -1017,6 +1099,7 @@ NineDevice9_CreateRenderTarget( struct NineDevice9 *This,
                                 IDirect3DSurface9 **ppSurface,
                                 HANDLE *pSharedHandle )
 {
+    *ppSurface = NULL;
     return create_zs_or_rt_surface(This, 0, D3DPOOL_DEFAULT,
                                    Width, Height, Format,
                                    MultiSample, MultisampleQuality,
@@ -1034,6 +1117,9 @@ NineDevice9_CreateDepthStencilSurface( struct NineDevice9 *This,
                                        IDirect3DSurface9 **ppSurface,
                                        HANDLE *pSharedHandle )
 {
+    *ppSurface = NULL;
+    if (!depth_stencil_format(Format))
+        return D3DERR_NOTAVAILABLE;
     return create_zs_or_rt_surface(This, 1, D3DPOOL_DEFAULT,
                                    Width, Height, Format,
                                    MultiSample, MultisampleQuality,
@@ -1471,6 +1557,7 @@ NineDevice9_CreateOffscreenPlainSurface( struct NineDevice9 *This,
         Width, Height, d3dformat_to_string(Format), Format, Pool,
         ppSurface, pSharedHandle);
 
+    *ppSurface = NULL;
     user_assert(!pSharedHandle || Pool == D3DPOOL_DEFAULT
                                || Pool == D3DPOOL_SYSTEMMEM, D3DERR_INVALIDCALL);
     user_assert(Pool != D3DPOOL_MANAGED, D3DERR_INVALIDCALL);
@@ -1599,11 +1686,15 @@ NineDevice9_Clear( struct NineDevice9 *This,
                    float Z,
                    DWORD Stencil )
 {
+    const int sRGB = This->state.rs[D3DRS_SRGBWRITEENABLE] ? 1 : 0;
+    struct pipe_surface *cbuf, *zsbuf;
     struct pipe_context *pipe = This->pipe;
-    struct NineSurface9 *zsbuf = This->state.ds;
+    struct NineSurface9 *zsbuf_surf = This->state.ds;
+    struct NineSurface9 *rt;
     unsigned bufs = 0;
     unsigned r, i;
     union pipe_color_union rgba;
+    unsigned rt_mask = 0;
     D3DRECT rect;
 
     DBG("This=%p Count=%u pRects=%p Flags=%x Color=%08x Z=%f Stencil=%x\n",
@@ -1612,8 +1703,8 @@ NineDevice9_Clear( struct NineDevice9 *This,
     user_assert(This->state.ds || !(Flags & NINED3DCLEAR_DEPTHSTENCIL),
                 D3DERR_INVALIDCALL);
     user_assert(!(Flags & D3DCLEAR_STENCIL) ||
-                (zsbuf &&
-                 util_format_is_depth_and_stencil(zsbuf->base.info.format)),
+                (zsbuf_surf &&
+                 util_format_is_depth_and_stencil(zsbuf_surf->base.info.format)),
                 D3DERR_INVALIDCALL);
 #ifdef NINE_STRICT
     user_assert((Count && pRects) || (!Count && !pRects), D3DERR_INVALIDCALL);
@@ -1659,7 +1750,14 @@ NineDevice9_Clear( struct NineDevice9 *This,
 
     if (rect.x1 >= This->state.fb.width || rect.y1 >= This->state.fb.height)
         return D3D_OK;
+
+    for (i = 0; i < This->caps.NumSimultaneousRTs; ++i) {
+        if (This->state.rt[i] && This->state.rt[i]->desc.Format != D3DFMT_NULL)
+            rt_mask |= 1 << i;
+    }
+
     if (!Count &&
+        (!(bufs & PIPE_CLEAR_COLOR) || (rt_mask == This->state.rt_mask)) &&
         rect.x1 == 0 && rect.x2 >= This->state.fb.width &&
         rect.y1 == 0 && rect.y2 >= This->state.fb.height) {
         /* fast path, clears everything at once */
@@ -1667,17 +1765,18 @@ NineDevice9_Clear( struct NineDevice9 *This,
         pipe->clear(pipe, bufs, &rgba, Z, Stencil);
         return D3D_OK;
     }
-    rect.x2 = MIN2(rect.x2, This->state.fb.width);
-    rect.y2 = MIN2(rect.y2, This->state.fb.height);
 
     if (!Count) {
         Count = 1;
         pRects = &rect;
     }
 
-    for (i = 0; (i < This->state.fb.nr_cbufs); ++i) {
-        if (!This->state.fb.cbufs[i] || !(Flags & D3DCLEAR_TARGET))
+    for (i = 0; i < This->caps.NumSimultaneousRTs; ++i) {
+        rt = This->state.rt[i];
+        if (!rt || rt->desc.Format == D3DFMT_NULL ||
+            !(Flags & D3DCLEAR_TARGET))
             continue; /* save space, compiler should hoist this */
+        cbuf = NineSurface9_GetSurface(rt, sRGB);
         for (r = 0; r < Count; ++r) {
             /* Don't trust users to pass these in the right order. */
             unsigned x1 = MIN2(pRects[r].x1, pRects[r].x2);
@@ -1692,11 +1791,11 @@ NineDevice9_Clear( struct NineDevice9 *This,
 
             x1 = MAX2(x1, rect.x1);
             y1 = MAX2(y1, rect.y1);
-            x2 = MIN2(x2, rect.x2);
-            y2 = MIN2(y2, rect.y2);
+            x2 = MIN3(x2, rect.x2, rt->desc.Width);
+            y2 = MIN3(y2, rect.y2, rt->desc.Height);
 
             DBG("Clearing (%u..%u)x(%u..%u)\n", x1, x2, y1, y2);
-            pipe->clear_render_target(pipe, This->state.fb.cbufs[i], &rgba,
+            pipe->clear_render_target(pipe, cbuf, &rgba,
                                       x1, y1, x2 - x1, y2 - y1);
         }
     }
@@ -1718,10 +1817,12 @@ NineDevice9_Clear( struct NineDevice9 *This,
 
         x1 = MIN2(x1, rect.x1);
         y1 = MIN2(y1, rect.y1);
-        x2 = MIN2(x2, rect.x2);
-        y2 = MIN2(y2, rect.y2);
+        x2 = MIN3(x2, rect.x2, zsbuf_surf->desc.Width);
+        y2 = MIN3(y2, rect.y2, zsbuf_surf->desc.Height);
 
-        pipe->clear_depth_stencil(pipe, This->state.fb.zsbuf, bufs, Z, Stencil,
+        zsbuf = NineSurface9_GetSurface(zsbuf_surf, 0);
+        assert(zsbuf);
+        pipe->clear_depth_stencil(pipe, zsbuf, bufs, Z, Stencil,
                                   x1, y1, x2 - x1, y2 - y1);
     }
     return D3D_OK;
@@ -1954,7 +2055,9 @@ NineDevice9_GetLightEnable( struct NineDevice9 *This,
     for (i = 0; i < state->ff.num_lights_active; ++i)
         if (state->ff.active_light[i] == Index)
             break;
-    *pEnable = i != state->ff.num_lights_active;
+
+    *pEnable = i != state->ff.num_lights_active ? 128 : 0; // Taken from wine
+
     return D3D_OK;
 }
 
@@ -1965,9 +2068,11 @@ NineDevice9_SetClipPlane( struct NineDevice9 *This,
 {
     struct nine_state *state = This->update;
 
-    DBG("This=%p Index=%u pPlane=%p(%f %f %f %f)\n", This, Index, pPlane,
-        pPlane ? pPlane[0] : 0.0f, pPlane ? pPlane[1] : 0.0f,
-        pPlane ? pPlane[2] : 0.0f, pPlane ? pPlane[3] : 0.0f);
+    user_assert(pPlane, D3DERR_INVALIDCALL);
+
+    DBG("This=%p Index=%u pPlane=%f %f %f %f\n", This, Index,
+        pPlane[0], pPlane[1],
+        pPlane[2], pPlane[3]);
 
     user_assert(Index < PIPE_MAX_CLIP_PLANES, D3DERR_INVALIDCALL);
 
@@ -1990,6 +2095,63 @@ NineDevice9_GetClipPlane( struct NineDevice9 *This,
     return D3D_OK;
 }
 
+#define RESZ_CODE 0x7fa05000
+
+static HRESULT
+NineDevice9_ResolveZ( struct NineDevice9 *This )
+{
+    struct nine_state *state = &This->state;
+    const struct util_format_description *desc;
+    struct NineSurface9 *source = state->ds;
+    struct NineBaseTexture9 *destination = state->texture[0];
+    struct pipe_resource *src, *dst;
+    struct pipe_blit_info blit;
+
+    DBG("RESZ resolve\n");
+
+    user_assert(source && destination &&
+                destination->base.type == D3DRTYPE_TEXTURE, D3DERR_INVALIDCALL);
+
+    src = source->base.resource;
+    dst = destination->base.resource;
+
+    user_assert(src && dst, D3DERR_INVALIDCALL);
+
+    /* check dst is depth format. we know already for src */
+    desc = util_format_description(dst->format);
+    user_assert(desc->colorspace == UTIL_FORMAT_COLORSPACE_ZS, D3DERR_INVALIDCALL);
+
+    blit.src.resource = src;
+    blit.src.level = 0;
+    blit.src.format = src->format;
+    blit.src.box.z = 0;
+    blit.src.box.depth = 1;
+    blit.src.box.x = 0;
+    blit.src.box.y = 0;
+    blit.src.box.width = src->width0;
+    blit.src.box.height = src->height0;
+
+    blit.dst.resource = dst;
+    blit.dst.level = 0;
+    blit.dst.format = dst->format;
+    blit.dst.box.z = 0;
+    blit.dst.box.depth = 1;
+    blit.dst.box.x = 0;
+    blit.dst.box.y = 0;
+    blit.dst.box.width = dst->width0;
+    blit.dst.box.height = dst->height0;
+
+    blit.mask = PIPE_MASK_ZS;
+    blit.filter = PIPE_TEX_FILTER_NEAREST;
+    blit.scissor_enable = FALSE;
+
+    This->pipe->blit(This->pipe, &blit);
+    return D3D_OK;
+}
+
+#define ALPHA_TO_COVERAGE_ENABLE   MAKEFOURCC('A', '2', 'M', '1')
+#define ALPHA_TO_COVERAGE_DISABLE  MAKEFOURCC('A', '2', 'M', '0')
+
 HRESULT WINAPI
 NineDevice9_SetRenderState( struct NineDevice9 *This,
                             D3DRENDERSTATETYPE State,
@@ -1999,6 +2161,27 @@ NineDevice9_SetRenderState( struct NineDevice9 *This,
 
     DBG("This=%p State=%u(%s) Value=%08x\n", This,
         State, nine_d3drs_to_string(State), Value);
+
+    /* Amd hacks (equivalent to GL extensions) */
+    if (State == D3DRS_POINTSIZE) {
+        if (Value == RESZ_CODE)
+            return NineDevice9_ResolveZ(This);
+
+        if (Value == ALPHA_TO_COVERAGE_ENABLE ||
+            Value == ALPHA_TO_COVERAGE_DISABLE) {
+            state->rs[NINED3DRS_ALPHACOVERAGE] = (Value == ALPHA_TO_COVERAGE_ENABLE);
+            state->changed.group |= NINE_STATE_BLEND;
+            return D3D_OK;
+        }
+    }
+
+    /* NV hack */
+    if (State == D3DRS_ADAPTIVETESS_Y &&
+        (Value == D3DFMT_ATOC || (Value == D3DFMT_UNKNOWN && state->rs[NINED3DRS_ALPHACOVERAGE]))) {
+            state->rs[NINED3DRS_ALPHACOVERAGE] = (Value == D3DFMT_ATOC);
+            state->changed.group |= NINE_STATE_BLEND;
+            return D3D_OK;
+    }
 
     user_assert(State < Elements(state->rs), D3DERR_INVALIDCALL);
 
@@ -2325,6 +2508,9 @@ NineDevice9_SetSamplerState( struct NineDevice9 *This,
     state->samp[Sampler][Type] = Value;
     state->changed.group |= NINE_STATE_SAMPLER;
     state->changed.sampler[Sampler] |= 1 << Type;
+
+    if (Type == D3DSAMP_SRGBTEXTURE)
+        state->changed.srgb = TRUE;
 
     return D3D_OK;
 }
@@ -3187,12 +3373,20 @@ NineDevice9_SetPixelShader( struct NineDevice9 *This,
                             IDirect3DPixelShader9 *pShader )
 {
     struct nine_state *state = This->update;
+    unsigned old_mask = state->ps ? state->ps->rt_mask : 1;
+    unsigned mask;
 
     DBG("This=%p pShader=%p\n", This, pShader);
 
     nine_bind(&state->ps, pShader);
 
     state->changed.group |= NINE_STATE_PS;
+
+    mask = state->ps ? state->ps->rt_mask : 1;
+    /* We need to update cbufs if the pixel shader would
+     * write to different render targets */
+    if (mask != old_mask)
+        state->changed.group |= NINE_STATE_FB;
 
     return D3D_OK;
 }
@@ -3217,8 +3411,8 @@ NineDevice9_SetPixelShaderConstantF( struct NineDevice9 *This,
     DBG("This=%p StartRegister=%u pConstantData=%p Vector4fCount=%u\n",
         This, StartRegister, pConstantData, Vector4fCount);
 
-    user_assert(StartRegister                  < NINE_MAX_CONST_F, D3DERR_INVALIDCALL);
-    user_assert(StartRegister + Vector4fCount <= NINE_MAX_CONST_F, D3DERR_INVALIDCALL);
+    user_assert(StartRegister                  < NINE_MAX_CONST_F_PS3, D3DERR_INVALIDCALL);
+    user_assert(StartRegister + Vector4fCount <= NINE_MAX_CONST_F_PS3, D3DERR_INVALIDCALL);
 
     if (!Vector4fCount)
        return D3D_OK;
@@ -3245,8 +3439,8 @@ NineDevice9_GetPixelShaderConstantF( struct NineDevice9 *This,
 {
     const struct nine_state *state = &This->state;
 
-    user_assert(StartRegister                  < NINE_MAX_CONST_F, D3DERR_INVALIDCALL);
-    user_assert(StartRegister + Vector4fCount <= NINE_MAX_CONST_F, D3DERR_INVALIDCALL);
+    user_assert(StartRegister                  < NINE_MAX_CONST_F_PS3, D3DERR_INVALIDCALL);
+    user_assert(StartRegister + Vector4fCount <= NINE_MAX_CONST_F_PS3, D3DERR_INVALIDCALL);
     user_assert(pConstantData, D3DERR_INVALIDCALL);
 
     memcpy(pConstantData,
