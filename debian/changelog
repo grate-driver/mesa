@@ -1,7 +1,11 @@
-mesa (10.5.0~git20150113-0ubuntu1) UNRELEASED; urgency=medium
+mesa (10.5.0~git20150210-0ubuntu1) UNRELEASED; urgency=medium
 
+  [ Timo Aaltonen ]
   * New upstream snapshot
   * Update Mir patch.
+
+  [ Maarten Lankhorst ]
+  * New upstream snapshot.
 
  -- Timo Aaltonen <tjaalton@debian.org>  Tue, 13 Jan 2015 15:56:02 +0200
 
