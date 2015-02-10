@@ -1,0 +1,59 @@
+commit 882f702441c6601589bdef805a9157cb113b91dd
+Author: Kenneth Graunke <kenneth@whitecape.org>
+Date:   Sat Jan 17 23:21:15 2015 -0800
+
+    i965: Work around mysterious Gen4 GPU hangs with minimal state changes.
+    
+    Gen4 hardware appears to GPU hang frequently when using Chromium, and
+    also when running 'glmark2 -b ideas'.  Most of the error states contain
+    3DPRIMITIVE commands in quick succession, with very few state packets
+    between them - usually VERTEX_BUFFERS/ELEMENTS and CONSTANT_BUFFER.
+    
+    I trimmed an apitrace of the glmark2 hang down to two draw calls with a
+    glUniformMatrix4fv call between the two.  Either draw by itself works
+    fine, but together, they hang the GPU.  Removing the glUniform call
+    makes the hangs disappear.  In the hardware state, this translates to
+    removing the CONSTANT_BUFFER packet between the two 3DPRIMITIVE packets.
+    
+    Flushing before emitting CONSTANT_BUFFER packets also appears to make
+    the hangs disappear.  I observed a slowdown in glxgears by doing it all
+    the time, so I've chosen to only do it when BRW_NEW_BATCH and
+    BRW_NEW_PSP are unset (i.e. we haven't done a CS_URB_STATE change or
+    already flushed the whole pipeline).
+    
+    I'd much rather understand the problem, but at this point, I don't see
+    how we'd ever be able to track it down further.  We have no real tools,
+    and the hardware people moved on years ago.  I've analyzed 20+ error
+    states and read every scrap of documentation I could find.
+    
+    Bugzilla: https://bugs.freedesktop.org/show_bug.cgi?id=80568
+    Bugzilla: https://bugs.freedesktop.org/show_bug.cgi?id=85367
+    Signed-off-by: Kenneth Graunke <kenneth@whitecape.org>
+    Acked-by: Matt Turner <mattst88@gmail.com>
+    Cc: "10.4 10.3" <mesa-stable@lists.freedesktop.org>
+    (cherry picked from commit c4fd0c9052dd391d6f2e9bb8e6da209dfc7ef35b)
+
+diff --git a/src/mesa/drivers/dri/i965/brw_curbe.c b/src/mesa/drivers/dri/i965/brw_curbe.c
+index 1a828ed..718d87c 100644
+--- a/src/mesa/drivers/dri/i965/brw_curbe.c
++++ b/src/mesa/drivers/dri/i965/brw_curbe.c
+@@ -280,6 +280,19 @@ brw_upload_constant_buffer(struct brw_context *brw)
+     */
+ 
+ emit:
++   /* Work around mysterious 965 hangs that appear to happen if you do
++    * two 3DPRIMITIVEs with only a CONSTANT_BUFFER inbetween.  If we
++    * haven't already flushed for some other reason, explicitly do so.
++    *
++    * We've found no documented reason why this should be necessary.
++    */
++   if (brw->gen == 4 && !brw->is_g4x &&
++       (brw->state.dirty.brw & (BRW_NEW_BATCH | BRW_NEW_PSP)) == 0) {
++      BEGIN_BATCH(1);
++      OUT_BATCH(MI_FLUSH);
++      ADVANCE_BATCH();
++   }
++
+    /* BRW_NEW_URB_FENCE: From the gen4 PRM, volume 1, section 3.9.8
+     * (CONSTANT_BUFFER (CURBE Load)):
+     *

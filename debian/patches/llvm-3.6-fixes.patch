@@ -1,0 +1,616 @@
+diff --git a/src/gallium/auxiliary/draw/draw_llvm.c b/src/gallium/auxiliary/draw/draw_llvm.c
+index 14c802b..869abb0 100644
+--- a/src/gallium/auxiliary/draw/draw_llvm.c
++++ b/src/gallium/auxiliary/draw/draw_llvm.c
+@@ -742,6 +742,7 @@ generate_fetch(struct gallivm_state *gallivm,
+       val = lp_build_fetch_rgba_aos(gallivm,
+                                     format_desc,
+                                     lp_float32_vec4_type(),
++                                    FALSE,
+                                     map_ptr,
+                                     zero, zero, zero);
+       LLVMBuildStore(builder, val, temp_ptr);
+diff --git a/src/gallium/auxiliary/gallivm/lp_bld_format.h b/src/gallium/auxiliary/gallivm/lp_bld_format.h
+index 1177fb2..969f1f6 100644
+--- a/src/gallium/auxiliary/gallivm/lp_bld_format.h
++++ b/src/gallium/auxiliary/gallivm/lp_bld_format.h
+@@ -62,6 +62,7 @@ LLVMValueRef
+ lp_build_fetch_rgba_aos(struct gallivm_state *gallivm,
+                         const struct util_format_description *format_desc,
+                         struct lp_type type,
++                        boolean aligned,
+                         LLVMValueRef base_ptr,
+                         LLVMValueRef offset,
+                         LLVMValueRef i,
+diff --git a/src/gallium/auxiliary/gallivm/lp_bld_format_aos.c b/src/gallium/auxiliary/gallivm/lp_bld_format_aos.c
+index af755d4..3c25c32 100644
+--- a/src/gallium/auxiliary/gallivm/lp_bld_format_aos.c
++++ b/src/gallium/auxiliary/gallivm/lp_bld_format_aos.c
+@@ -356,6 +356,7 @@ lp_build_pack_rgba_aos(struct gallivm_state *gallivm,
+  * Fetch a pixel into a 4 float AoS.
+  *
+  * \param format_desc  describes format of the image we're fetching from
++ * \param aligned  whether the data is guaranteed to be aligned
+  * \param ptr  address of the pixel block (or the texel if uncompressed)
+  * \param i, j  the sub-block pixel coordinates.  For non-compressed formats
+  *              these will always be (0, 0).
+@@ -365,6 +366,7 @@ LLVMValueRef
+ lp_build_fetch_rgba_aos(struct gallivm_state *gallivm,
+                         const struct util_format_description *format_desc,
+                         struct lp_type type,
++                        boolean aligned,
+                         LLVMValueRef base_ptr,
+                         LLVMValueRef offset,
+                         LLVMValueRef i,
+@@ -400,7 +402,7 @@ lp_build_fetch_rgba_aos(struct gallivm_state *gallivm,
+ 
+       packed = lp_build_gather(gallivm, type.length/4,
+                                format_desc->block.bits, type.width*4,
+-                               base_ptr, offset, TRUE);
++                               aligned, base_ptr, offset, TRUE);
+ 
+       assert(format_desc->block.bits <= vec_len);
+ 
+@@ -437,7 +439,7 @@ lp_build_fetch_rgba_aos(struct gallivm_state *gallivm,
+          LLVMValueRef packed;
+ 
+          packed = lp_build_gather_elem(gallivm, num_pixels,
+-                                       format_desc->block.bits, 32,
++                                       format_desc->block.bits, 32, aligned,
+                                        base_ptr, offset, k, FALSE);
+ 
+          tmps[k] = lp_build_unpack_arith_rgba_aos(gallivm,
+diff --git a/src/gallium/auxiliary/gallivm/lp_bld_format_soa.c b/src/gallium/auxiliary/gallivm/lp_bld_format_soa.c
+index ff2887e..afaabc0 100644
+--- a/src/gallium/auxiliary/gallivm/lp_bld_format_soa.c
++++ b/src/gallium/auxiliary/gallivm/lp_bld_format_soa.c
+@@ -386,6 +386,7 @@ lp_build_fetch_rgba_soa(struct gallivm_state *gallivm,
+                                type.length,
+                                format_desc->block.bits,
+                                type.width,
++                               TRUE,
+                                base_ptr, offset, FALSE);
+ 
+       /*
+@@ -411,8 +412,8 @@ lp_build_fetch_rgba_soa(struct gallivm_state *gallivm,
+ 
+       packed = lp_build_gather(gallivm, type.length,
+                                format_desc->block.bits,
+-                               type.width, base_ptr, offset,
+-                               FALSE);
++                               type.width, TRUE,
++                               base_ptr, offset, FALSE);
+       if (format_desc->format == PIPE_FORMAT_R11G11B10_FLOAT) {
+          lp_build_r11g11b10_to_float(gallivm, packed, rgba_out);
+       }
+@@ -438,15 +439,15 @@ lp_build_fetch_rgba_soa(struct gallivm_state *gallivm,
+          unsigned mask = (1 << 8) - 1;
+          LLVMValueRef s_offset = lp_build_const_int_vec(gallivm, type, 4);
+          offset = LLVMBuildAdd(builder, offset, s_offset, "");
+-         packed = lp_build_gather(gallivm, type.length,
+-                                  32, type.width, base_ptr, offset, FALSE);
++         packed = lp_build_gather(gallivm, type.length, 32, type.width,
++                                  TRUE, base_ptr, offset, FALSE);
+          packed = LLVMBuildAnd(builder, packed,
+                                lp_build_const_int_vec(gallivm, type, mask), "");
+       }
+       else {
+          assert (format_desc->format == PIPE_FORMAT_Z32_FLOAT_S8X24_UINT);
+-         packed = lp_build_gather(gallivm, type.length,
+-                                  32, type.width, base_ptr, offset, TRUE);
++         packed = lp_build_gather(gallivm, type.length, 32, type.width,
++                                  TRUE, base_ptr, offset, TRUE);
+          packed = LLVMBuildBitCast(builder, packed,
+                                    lp_build_vec_type(gallivm, type), "");
+       }
+@@ -472,7 +473,7 @@ lp_build_fetch_rgba_soa(struct gallivm_state *gallivm,
+       tmp_type.norm = TRUE;
+ 
+       tmp = lp_build_fetch_rgba_aos(gallivm, format_desc, tmp_type,
+-                                    base_ptr, offset, i, j);
++                                    TRUE, base_ptr, offset, i, j);
+ 
+       lp_build_rgba8_to_fi32_soa(gallivm,
+                                 type,
+@@ -522,7 +523,7 @@ lp_build_fetch_rgba_soa(struct gallivm_state *gallivm,
+ 
+          /* Get a single float[4]={R,G,B,A} pixel */
+          tmp = lp_build_fetch_rgba_aos(gallivm, format_desc, tmp_type,
+-                                       base_ptr, offset_elem,
++                                       TRUE, base_ptr, offset_elem,
+                                        i_elem, j_elem);
+ 
+          /*
+diff --git a/src/gallium/auxiliary/gallivm/lp_bld_format_yuv.c b/src/gallium/auxiliary/gallivm/lp_bld_format_yuv.c
+index 873f354..4f5a45c 100644
+--- a/src/gallium/auxiliary/gallivm/lp_bld_format_yuv.c
++++ b/src/gallium/auxiliary/gallivm/lp_bld_format_yuv.c
+@@ -497,7 +497,7 @@ lp_build_fetch_subsampled_rgba_aos(struct gallivm_state *gallivm,
+    assert(format_desc->block.width == 2);
+    assert(format_desc->block.height == 1);
+ 
+-   packed = lp_build_gather(gallivm, n, 32, 32, base_ptr, offset, FALSE);
++   packed = lp_build_gather(gallivm, n, 32, 32, TRUE, base_ptr, offset, FALSE);
+ 
+    (void)j;
+ 
+diff --git a/src/gallium/auxiliary/gallivm/lp_bld_gather.c b/src/gallium/auxiliary/gallivm/lp_bld_gather.c
+index 9155d81..d026020 100644
+--- a/src/gallium/auxiliary/gallivm/lp_bld_gather.c
++++ b/src/gallium/auxiliary/gallivm/lp_bld_gather.c
+@@ -76,6 +76,7 @@ lp_build_gather_elem(struct gallivm_state *gallivm,
+                      unsigned length,
+                      unsigned src_width,
+                      unsigned dst_width,
++                     boolean aligned,
+                      LLVMValueRef base_ptr,
+                      LLVMValueRef offsets,
+                      unsigned i,
+@@ -93,6 +94,27 @@ lp_build_gather_elem(struct gallivm_state *gallivm,
+    ptr = LLVMBuildBitCast(gallivm->builder, ptr, src_ptr_type, "");
+    res = LLVMBuildLoad(gallivm->builder, ptr, "");
+ 
++   /* XXX
++    * On some archs we probably really want to avoid having to deal
++    * with alignments lower than 4 bytes (if fetch size is a power of
++    * two >= 32). On x86 it doesn't matter, however.
++    * We should be able to guarantee full alignment for any kind of texture
++    * fetch (except ARB_texture_buffer_range, oops), but not vertex fetch
++    * (there's PIPE_CAP_VERTEX_BUFFER_OFFSET_4BYTE_ALIGNED_ONLY and friends
++    * but I don't think that's quite what we wanted).
++    * For ARB_texture_buffer_range, PIPE_CAP_TEXTURE_BUFFER_OFFSET_ALIGNMENT
++    * looks like a good fit, but it seems this cap bit (and OpenGL) aren't
++    * enforcing what we want (which is what d3d10 does, the offset needs to
++    * be aligned to element size, but GL has bytes regardless of element
++    * size which would only leave us with minimum alignment restriction of 16
++    * which doesn't make much sense if the type isn't 4x32bit). Due to
++    * translation of offsets to first_elem in sampler_views it actually seems
++    * gallium could not do anything else except 16 no matter what...
++    */
++  if (!aligned) {
++      lp_set_load_alignment(res, 1);
++   }
++
+    assert(src_width <= dst_width);
+    if (src_width > dst_width) {
+       res = LLVMBuildTrunc(gallivm->builder, res, dst_elem_type, "");
+@@ -126,6 +148,7 @@ lp_build_gather_elem(struct gallivm_state *gallivm,
+  * @param length length of the offsets
+  * @param src_width src element width in bits
+  * @param dst_width result element width in bits (src will be expanded to fit)
++ * @param aligned whether the data is guaranteed to be aligned (to src_width)
+  * @param base_ptr base pointer, should be a i8 pointer type.
+  * @param offsets vector with offsets
+  * @param vector_justify select vector rather than integer justification
+@@ -135,6 +158,7 @@ lp_build_gather(struct gallivm_state *gallivm,
+                 unsigned length,
+                 unsigned src_width,
+                 unsigned dst_width,
++                boolean aligned,
+                 LLVMValueRef base_ptr,
+                 LLVMValueRef offsets,
+                 boolean vector_justify)
+@@ -144,7 +168,7 @@ lp_build_gather(struct gallivm_state *gallivm,
+    if (length == 1) {
+       /* Scalar */
+       return lp_build_gather_elem(gallivm, length,
+-                                  src_width, dst_width,
++                                  src_width, dst_width, aligned,
+                                   base_ptr, offsets, 0, vector_justify);
+    } else {
+       /* Vector */
+@@ -158,7 +182,7 @@ lp_build_gather(struct gallivm_state *gallivm,
+          LLVMValueRef index = lp_build_const_int32(gallivm, i);
+          LLVMValueRef elem;
+          elem = lp_build_gather_elem(gallivm, length,
+-                                     src_width, dst_width,
++                                     src_width, dst_width, aligned,
+                                      base_ptr, offsets, i, vector_justify);
+          res = LLVMBuildInsertElement(gallivm->builder, res, elem, index, "");
+       }
+diff --git a/src/gallium/auxiliary/gallivm/lp_bld_gather.h b/src/gallium/auxiliary/gallivm/lp_bld_gather.h
+index ee69473..3ede476 100644
+--- a/src/gallium/auxiliary/gallivm/lp_bld_gather.h
++++ b/src/gallium/auxiliary/gallivm/lp_bld_gather.h
+@@ -45,6 +45,7 @@ lp_build_gather_elem(struct gallivm_state *gallivm,
+                      unsigned length,
+                      unsigned src_width,
+                      unsigned dst_width,
++                     boolean aligned,
+                      LLVMValueRef base_ptr,
+                      LLVMValueRef offsets,
+                      unsigned i,
+@@ -55,6 +56,7 @@ lp_build_gather(struct gallivm_state *gallivm,
+                 unsigned length,
+                 unsigned src_width,
+                 unsigned dst_width,
++                boolean aligned,
+                 LLVMValueRef base_ptr,
+                 LLVMValueRef offsets,
+                 boolean vector_justify);
+diff --git a/src/gallium/auxiliary/gallivm/lp_bld_misc.cpp b/src/gallium/auxiliary/gallivm/lp_bld_misc.cpp
+index fe3c754..5210acc 100644
+--- a/src/gallium/auxiliary/gallivm/lp_bld_misc.cpp
++++ b/src/gallium/auxiliary/gallivm/lp_bld_misc.cpp
+@@ -500,8 +500,12 @@ lp_build_create_jit_compiler_for_module(LLVMExecutionEngineRef *OutJIT,
+        MM = new ShaderMemoryManager(JMM);
+        *OutCode = MM->getGeneratedCode();
+ 
++#if HAVE_LLVM >= 0x0306
++       builder.setMCJITMemoryManager(std::unique_ptr<RTDyldMemoryManager>(MM));
++#else
+        builder.setMCJITMemoryManager(MM);
+ #endif
++#endif
+    } else {
+ #if HAVE_LLVM < 0x0306
+        BaseMemoryManager* JMM = reinterpret_cast<BaseMemoryManager*>(CMM);
+diff --git a/src/gallium/auxiliary/gallivm/lp_bld_sample_aos.c b/src/gallium/auxiliary/gallivm/lp_bld_sample_aos.c
+index 394521d..d7fde81 100644
+--- a/src/gallium/auxiliary/gallivm/lp_bld_sample_aos.c
++++ b/src/gallium/auxiliary/gallivm/lp_bld_sample_aos.c
+@@ -581,6 +581,7 @@ lp_build_sample_fetch_image_nearest(struct lp_build_sample_context *bld,
+                               bld->texel_type.length,
+                               bld->format_desc->block.bits,
+                               bld->texel_type.width,
++                              TRUE,
+                               data_ptr, offset, TRUE);
+ 
+       rgba8 = LLVMBuildBitCast(builder, rgba8, u8n_vec_type, "");
+@@ -589,6 +590,7 @@ lp_build_sample_fetch_image_nearest(struct lp_build_sample_context *bld,
+       rgba8 = lp_build_fetch_rgba_aos(bld->gallivm,
+                                       bld->format_desc,
+                                       u8n.type,
++                                      TRUE,
+                                       data_ptr, offset,
+                                       x_subcoord,
+                                       y_subcoord);
+@@ -919,6 +921,7 @@ lp_build_sample_fetch_image_linear(struct lp_build_sample_context *bld,
+                                        bld->texel_type.length,
+                                        bld->format_desc->block.bits,
+                                        bld->texel_type.width,
++                                       TRUE,
+                                        data_ptr, offset[k][j][i], TRUE);
+ 
+                rgba8 = LLVMBuildBitCast(builder, rgba8, u8n_vec_type, "");
+@@ -927,6 +930,7 @@ lp_build_sample_fetch_image_linear(struct lp_build_sample_context *bld,
+                rgba8 = lp_build_fetch_rgba_aos(bld->gallivm,
+                                                bld->format_desc,
+                                                u8n.type,
++                                               TRUE,
+                                                data_ptr, offset[k][j][i],
+                                                x_subcoord[i],
+                                                y_subcoord[j]);
+diff --git a/src/gallium/drivers/llvmpipe/lp_test_format.c b/src/gallium/drivers/llvmpipe/lp_test_format.c
+index 48bf06e..d9abd1a 100644
+--- a/src/gallium/drivers/llvmpipe/lp_test_format.c
++++ b/src/gallium/drivers/llvmpipe/lp_test_format.c
+@@ -112,7 +112,7 @@ add_fetch_rgba_test(struct gallivm_state *gallivm, unsigned verbose,
+    block = LLVMAppendBasicBlockInContext(context, func, "entry");
+    LLVMPositionBuilderAtEnd(builder, block);
+ 
+-   rgba = lp_build_fetch_rgba_aos(gallivm, desc, type,
++   rgba = lp_build_fetch_rgba_aos(gallivm, desc, type, TRUE,
+                                   packed_ptr, offset, i, j);
+ 
+    LLVMBuildStore(builder, rgba, rgba_ptr);
+@@ -252,6 +252,7 @@ test_format_unorm8(unsigned verbose, FILE *fp,
+          }
+ 
+          /* To ensure it's 16-byte aligned */
++         /* Could skip this and use unaligned lp_build_fetch_rgba_aos */
+          memcpy(packed, test->packed, sizeof packed);
+ 
+          for (i = 0; i < desc->block.height; ++i) {
+diff --git a/src/gallium/drivers/r600/r600_llvm.c b/src/gallium/drivers/r600/r600_llvm.c
+index e8cae00..bca934e 100644
+--- a/src/gallium/drivers/r600/r600_llvm.c
++++ b/src/gallium/drivers/r600/r600_llvm.c
+@@ -881,7 +881,7 @@ unsigned r600_llvm_compile(
+ 	const char * gpu_family = r600_get_llvm_processor_name(family);
+ 
+ 	memset(&binary, 0, sizeof(struct radeon_shader_binary));
+-	r = radeon_llvm_compile(mod, &binary, gpu_family, dump);
++	r = radeon_llvm_compile(mod, &binary, gpu_family, dump, NULL);
+ 
+ 	r = r600_create_shader(bc, &binary, use_kill);
+ 
+diff --git a/src/gallium/drivers/radeon/r600_pipe_common.c b/src/gallium/drivers/radeon/r600_pipe_common.c
+index f9393e6..b349123 100644
+--- a/src/gallium/drivers/radeon/r600_pipe_common.c
++++ b/src/gallium/drivers/radeon/r600_pipe_common.c
+@@ -36,6 +36,10 @@
+ #include "radeon/radeon_video.h"
+ #include <inttypes.h>
+ 
++#ifndef HAVE_LLVM
++#define HAVE_LLVM 0
++#endif
++
+ /*
+  * pipe_context
+  */
+@@ -501,6 +505,12 @@ static int r600_get_compute_param(struct pipe_screen *screen,
+ 	switch (param) {
+ 	case PIPE_COMPUTE_CAP_IR_TARGET: {
+ 		const char *gpu;
++		const char *triple;
++		if (rscreen->family <= CHIP_ARUBA || HAVE_LLVM < 0x0306) {
++			triple = "r600--";
++		} else {
++			triple = "amdgcn--";
++		}
+ 		switch(rscreen->family) {
+ 		/* Clang < 3.6 is missing Hainan in its list of
+ 		 * GPUs, so we need to use the name of a similar GPU.
+@@ -515,9 +525,10 @@ static int r600_get_compute_param(struct pipe_screen *screen,
+ 			break;
+ 		}
+ 		if (ret) {
+-			sprintf(ret, "%s-r600--", gpu);
++			sprintf(ret, "%s-%s", gpu, triple);
++
+ 		}
+-		return (8 + strlen(gpu)) * sizeof(char);
++		return (strlen(triple) + strlen(gpu)) * sizeof(char);
+ 	}
+ 	case PIPE_COMPUTE_CAP_GRID_DIMENSION:
+ 		if (ret) {
+diff --git a/src/gallium/drivers/radeon/radeon_llvm_emit.c b/src/gallium/drivers/radeon/radeon_llvm_emit.c
+index dc871d7..b98afb2 100644
+--- a/src/gallium/drivers/radeon/radeon_llvm_emit.c
++++ b/src/gallium/drivers/radeon/radeon_llvm_emit.c
+@@ -98,19 +98,19 @@ static void init_r600_target()
+ 	}
+ }
+ 
+-static LLVMTargetRef get_r600_target()
++LLVMTargetRef radeon_llvm_get_r600_target(const char *triple)
+ {
+ 	LLVMTargetRef target = NULL;
++	char *err_message = NULL;
+ 
+-	for (target = LLVMGetFirstTarget(); target;
+-					target = LLVMGetNextTarget(target)) {
+-		if (!strncmp(LLVMGetTargetName(target), "r600", 4)) {
+-			break;
+-		}
+-	}
++	init_r600_target();
+ 
+-	if (!target) {
+-		fprintf(stderr, "Can't find target r600\n");
++	if (LLVMGetTargetFromTriple(triple, &target, &err_message)) {
++		fprintf(stderr, "Cannot find target for triple %s ", triple);
++		if (err_message) {
++			fprintf(stderr, "%s\n", err_message);
++		}
++		LLVMDisposeMessage(err_message);
+ 		return NULL;
+ 	}
+ 	return target;
+@@ -138,14 +138,13 @@ static void radeonDiagnosticHandler(LLVMDiagnosticInfoRef di, void *context)
+  * @returns 0 for success, 1 for failure
+  */
+ unsigned radeon_llvm_compile(LLVMModuleRef M, struct radeon_shader_binary *binary,
+-					  const char *gpu_family, unsigned dump)
++			  const char *gpu_family, unsigned dump, LLVMTargetMachineRef tm)
+ {
+ 
+-	LLVMTargetRef target;
+-	LLVMTargetMachineRef tm;
+ 	char cpu[CPU_STRING_LEN];
+ 	char fs[FS_STRING_LEN];
+ 	char *err;
++	bool dispose_tm = false;
+ 	LLVMContextRef llvm_ctx;
+ 	unsigned rval = 0;
+ 	LLVMMemoryBufferRef out_buffer;
+@@ -154,22 +153,23 @@ unsigned radeon_llvm_compile(LLVMModuleRef M, struct radeon_shader_binary *binar
+ 	char triple[TRIPLE_STRING_LEN];
+ 	LLVMBool mem_err;
+ 
+-	/* initialise */
+-	init_r600_target();
+-
+-	target = get_r600_target();
+-	if (!target) {
+-		return 1;
+-	}
+-
+-	strncpy(cpu, gpu_family, CPU_STRING_LEN);
+-	memset(fs, 0, sizeof(fs));
+-	if (dump) {
+-		LLVMDumpModule(M);
+-		strncpy(fs, "+DumpCode", FS_STRING_LEN);
++	if (!tm) {
++		strncpy(triple, "r600--", TRIPLE_STRING_LEN);
++		LLVMTargetRef target = radeon_llvm_get_r600_target(triple);
++		if (!target) {
++			return 1;
++		}
++		strncpy(cpu, gpu_family, CPU_STRING_LEN);
++		memset(fs, 0, sizeof(fs));
++		if (dump) {
++			LLVMDumpModule(M);
++			strncpy(fs, "+DumpCode", FS_STRING_LEN);
++		}
++		tm = LLVMCreateTargetMachine(target, triple, cpu, fs,
++				  LLVMCodeGenLevelDefault, LLVMRelocDefault,
++						  LLVMCodeModelDefault);
++		dispose_tm = true;
+ 	}
+-	strncpy(triple, "r600--", TRIPLE_STRING_LEN);
+-
+ 	/* Setup Diagnostic Handler*/
+ 	llvm_ctx = LLVMGetModuleContext(M);
+ 
+@@ -179,9 +179,6 @@ unsigned radeon_llvm_compile(LLVMModuleRef M, struct radeon_shader_binary *binar
+ 	rval = 0;
+ 
+ 	/* Compile IR*/
+-	tm = LLVMCreateTargetMachine(target, triple, cpu, fs,
+-				  LLVMCodeGenLevelDefault, LLVMRelocDefault,
+-						  LLVMCodeModelDefault);
+ 	mem_err = LLVMTargetMachineEmitToMemoryBuffer(tm, M, LLVMObjectFile, &err,
+ 								 &out_buffer);
+ 
+@@ -205,6 +202,9 @@ unsigned radeon_llvm_compile(LLVMModuleRef M, struct radeon_shader_binary *binar
+ 
+ 	/* Clean up */
+ 	LLVMDisposeMemoryBuffer(out_buffer);
+-	LLVMDisposeTargetMachine(tm);
++
++	if (dispose_tm) {
++		LLVMDisposeTargetMachine(tm);
++	}
+ 	return rval;
+ }
+diff --git a/src/gallium/drivers/radeon/radeon_llvm_emit.h b/src/gallium/drivers/radeon/radeon_llvm_emit.h
+index 780ff5f..3ccef78 100644
+--- a/src/gallium/drivers/radeon/radeon_llvm_emit.h
++++ b/src/gallium/drivers/radeon/radeon_llvm_emit.h
+@@ -28,15 +28,19 @@
+ #define RADEON_LLVM_EMIT_H
+ 
+ #include <llvm-c/Core.h>
++#include <llvm-c/TargetMachine.h>
+ 
+ struct radeon_shader_binary;
+ 
+ void radeon_llvm_shader_type(LLVMValueRef F, unsigned type);
+ 
++LLVMTargetRef radeon_llvm_get_r600_target(const char *triple);
++
+ unsigned  radeon_llvm_compile(
+ 	LLVMModuleRef M,
+ 	struct radeon_shader_binary *binary,
+ 	const char * gpu_family,
+-	unsigned dump);
++	unsigned dump,
++	LLVMTargetMachineRef tm);
+ 
+ #endif /* RADEON_LLVM_EMIT_H */
+diff --git a/src/gallium/drivers/radeonsi/si_pipe.c b/src/gallium/drivers/radeonsi/si_pipe.c
+index 53c83ba..f99bf76 100644
+--- a/src/gallium/drivers/radeonsi/si_pipe.c
++++ b/src/gallium/drivers/radeonsi/si_pipe.c
+@@ -25,10 +25,14 @@
+ #include "si_public.h"
+ #include "sid.h"
+ 
++#include "radeon/radeon_llvm_emit.h"
+ #include "radeon/radeon_uvd.h"
+ #include "util/u_memory.h"
+ #include "vl/vl_decoder.h"
+ 
++#include <llvm-c/Target.h>
++#include <llvm-c/TargetMachine.h>
++
+ /*
+  * pipe_context
+  */
+@@ -417,6 +421,12 @@ static void si_destroy_screen(struct pipe_screen* pscreen)
+ 	if (!sscreen->b.ws->unref(sscreen->b.ws))
+ 		return;
+ 
++#if HAVE_LLVM >= 0x0306
++	// r600_destroy_common_screen() frees sscreen, so we need to make
++	// sure to dispose the TargetMachine before we call it.
++	LLVMDisposeTargetMachine(sscreen->tm);
++#endif
++
+ 	r600_destroy_common_screen(&sscreen->b);
+ }
+ 
+@@ -474,6 +484,12 @@ static bool si_initialize_pipe_config(struct si_screen *sscreen)
+ struct pipe_screen *radeonsi_screen_create(struct radeon_winsys *ws)
+ {
+ 	struct si_screen *sscreen = CALLOC_STRUCT(si_screen);
++	LLVMTargetRef r600_target;
++#if HAVE_LLVM >= 0x0306
++	const char *triple = "amdgcn--";
++#else
++	const char *triple = "r600--";
++#endif
+ 	if (sscreen == NULL) {
+ 		return NULL;
+ 	}
+@@ -501,5 +517,13 @@ struct pipe_screen *radeonsi_screen_create(struct radeon_winsys *ws)
+ 	/* Create the auxiliary context. This must be done last. */
+ 	sscreen->b.aux_context = sscreen->b.b.context_create(&sscreen->b.b, NULL);
+ 
++#if HAVE_LLVM >= 0x0306
++	/* Initialize LLVM TargetMachine */
++	r600_target = radeon_llvm_get_r600_target(triple);
++	sscreen->tm = LLVMCreateTargetMachine(r600_target, triple,
++				r600_get_llvm_processor_name(sscreen->b.family),
++				"+DumpCode", LLVMCodeGenLevelDefault, LLVMRelocDefault,
++				LLVMCodeModelDefault);
++#endif
+ 	return &sscreen->b.b;
+ }
+diff --git a/src/gallium/drivers/radeonsi/si_pipe.h b/src/gallium/drivers/radeonsi/si_pipe.h
+index 5f5404d..597949d 100644
+--- a/src/gallium/drivers/radeonsi/si_pipe.h
++++ b/src/gallium/drivers/radeonsi/si_pipe.h
+@@ -28,6 +28,8 @@
+ 
+ #include "si_state.h"
+ 
++#include <llvm-c/TargetMachine.h>
++
+ #ifdef PIPE_ARCH_BIG_ENDIAN
+ #define SI_BIG_ENDIAN 1
+ #else
+@@ -43,6 +45,7 @@ struct si_compute;
+ 
+ struct si_screen {
+ 	struct r600_common_screen	b;
++	LLVMTargetMachineRef		tm;
+ };
+ 
+ struct si_sampler_view {
+diff --git a/src/gallium/drivers/radeonsi/si_shader.c b/src/gallium/drivers/radeonsi/si_shader.c
+index 541e733..afc6aad 100644
+--- a/src/gallium/drivers/radeonsi/si_shader.c
++++ b/src/gallium/drivers/radeonsi/si_shader.c
+@@ -2602,7 +2602,7 @@ int si_compile_llvm(struct si_screen *sscreen, struct si_shader *shader,
+ 			shader->selector ? shader->selector->tokens : NULL);
+ 	memset(&binary, 0, sizeof(binary));
+ 	r = radeon_llvm_compile(mod, &binary,
+-		r600_get_llvm_processor_name(sscreen->b.family), dump);
++		r600_get_llvm_processor_name(sscreen->b.family), dump, sscreen->tm);
+ 
+ 	if (r) {
+ 		return r;
+@@ -2740,6 +2740,13 @@ int si_shader_create(struct si_screen *sscreen, struct si_shader *shader)
+ 	bld_base->op_actions[TGSI_OPCODE_EMIT].emit = si_llvm_emit_vertex;
+ 	bld_base->op_actions[TGSI_OPCODE_ENDPRIM].emit = si_llvm_emit_primitive;
+ 
++	if (HAVE_LLVM >= 0x0306) {
++		bld_base->op_actions[TGSI_OPCODE_MAX].emit = build_tgsi_intrinsic_nomem;
++		bld_base->op_actions[TGSI_OPCODE_MAX].intr_name = "llvm.maxnum.f32";
++		bld_base->op_actions[TGSI_OPCODE_MIN].emit = build_tgsi_intrinsic_nomem;
++		bld_base->op_actions[TGSI_OPCODE_MIN].intr_name = "llvm.minnum.f32";
++	}
++
+ 	si_shader_ctx.radeon_bld.load_system_value = declare_system_value;
+ 	si_shader_ctx.tokens = sel->tokens;
+ 	tgsi_parse_init(&si_shader_ctx.parse, si_shader_ctx.tokens);
+diff --git a/src/gallium/state_trackers/clover/llvm/invocation.cpp b/src/gallium/state_trackers/clover/llvm/invocation.cpp
+index e953822..f2b6f59 100644
+--- a/src/gallium/state_trackers/clover/llvm/invocation.cpp
++++ b/src/gallium/state_trackers/clover/llvm/invocation.cpp
+@@ -281,7 +281,11 @@ namespace {
+       }
+ 
+       for (unsigned i = 0; i < kernel_node->getNumOperands(); ++i) {
++#if HAVE_LLVM >= 0x0306
++         kernels.push_back(llvm::mdconst::dyn_extract<llvm::Function>(
++#else
+          kernels.push_back(llvm::dyn_cast<llvm::Function>(
++#endif
+                                     kernel_node->getOperand(i)->getOperand(0)));
+       }
+    }

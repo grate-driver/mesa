@@ -5,11 +5,39 @@ mesa (10.5.0~git20150113-0ubuntu1) UNRELEASED; urgency=medium
 
  -- Timo Aaltonen <tjaalton@debian.org>  Tue, 13 Jan 2015 15:56:02 +0200
 
-mesa (10.4.2-1ubuntu1) UNRELEASED; urgency=medium
+mesa (10.4.2-2ubuntu3) vivid; urgency=medium
 
+  * egl-platform-mir.patch: Fix memory leak. (LP:#1418486)
+
+ -- Timo Aaltonen <tjaalton@debian.org>  Fri, 06 Feb 2015 12:12:01 +0200
+
+mesa (10.4.2-2ubuntu2) vivid; urgency=medium
+
+  * Flip the switch to llvm 3.6 with patches backported from upstream.
+  * Add upstream workaround for hangs on gen4. (LP: #1388612)
+
+ -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Thu, 29 Jan 2015 13:27:10 +0100
+
+mesa (10.4.2-2ubuntu1) vivid; urgency=medium
+
+  [ Timo Aaltonen ]
   * Merge from Debian experimental.
 
- -- Timo Aaltonen <tjaalton@debian.org>  Tue, 13 Jan 2015 15:33:54 +0200
+  [ Maarten Lankhorst ]
+  * Disable opencl after it was re-enabled accidentally in the merge.
+
+ -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Tue, 20 Jan 2015 10:30:20 +0100
+
+mesa (10.4.2-2) unstable; urgency=medium
+
+  * rules: Drop dh_makeshlibs exception on gbm_gallium_drm.so as it's
+    gone now.
+  * control: Add depends on libwayland-egl1-mesa to libegl1-mesa-dev,
+    since it ships libwayland-egl.so on Linux.
+  * control: Mark libegl1-mesa-drivers M-A: same again. (Closes:
+    #775370)
+
+ -- Timo Aaltonen <tjaalton@debian.org>  Thu, 15 Jan 2015 15:28:40 +0200
 
 mesa (10.4.2-1) experimental; urgency=medium
 
