@@ -6,7 +6,7 @@
  		;;
 -
 +        mir)
-+                PKG_CHECK_MODULES([MIR], [mirclient])
++                PKG_CHECK_MODULES([MIR], [mir-client-platform-mesa-dev])
 +                ;;
  	*)
  		AC_MSG_ERROR([EGL platform '$plat' does not exist])
@@ -78,6 +78,30 @@
  #ifdef HAVE_ANDROID_PLATFORM
     case _EGL_PLATFORM_ANDROID:
        if (disp->Options.TestOnly)
+@@ -699,6 +705,13 @@ dri2_terminate(_EGLDriver *drv, _EGLDisp
+       }
+       break;
+ #endif
++#ifdef HAVE_MIR_PLATFORM
++   case _EGL_PLATFORM_MIR:
++      if (dri2_dpy->own_device) {
++         gbm_device_destroy(&dri2_dpy->gbm_dri->base.base);
++      }
++      break;
++#endif
+ #ifdef HAVE_WAYLAND_PLATFORM
+    case _EGL_PLATFORM_WAYLAND:
+       wl_drm_destroy(dri2_dpy->wl_drm);
+@@ -715,7 +728,8 @@ dri2_terminate(_EGLDriver *drv, _EGLDisp
+     * the ones from the gbm device. As such the gbm itself is responsible
+     * for the cleanup.
+     */
+-   if (disp->Platform != _EGL_PLATFORM_DRM) {
++   if (disp->Platform != _EGL_PLATFORM_DRM &&
++       disp->Platform != _EGL_PLATFORM_MIR) {
+       for (i = 0; dri2_dpy->driver_configs[i]; i++)
+          free((__DRIconfig *) dri2_dpy->driver_configs[i]);
+       free(dri2_dpy->driver_configs);
 --- a/src/egl/drivers/dri2/egl_dri2.h
 +++ b/src/egl/drivers/dri2/egl_dri2.h
 @@ -64,6 +64,11 @@
@@ -148,7 +172,7 @@
  #endif /* EGL_DRI2_INCLUDED */
 --- /dev/null
 +++ b/src/egl/drivers/dri2/platform_mir.c
-@@ -0,0 +1,613 @@
+@@ -0,0 +1,619 @@
 +/*
 + * Copyright © 2012 Canonical, Inc
 + *
@@ -174,6 +198,7 @@
 + *
 + * Authors:
 + *    Christopher James Halse Rogers <christopher.halse.rogers@canonical.com>
++ *    Alexandros Frantzis <alexandros.frantzis@canonical.com>
 + */
 +
 +#include <mir_toolkit/mesa/native_display.h>
@@ -567,10 +592,15 @@
 +   (*dri2_dpy->core->destroyDrawable)(dri2_surf->dri_drawable);
 +
 +   for (i = 0; i < __DRI_BUFFER_COUNT; ++i) {
-+      if (dri2_surf->dri_buffers[i] && !((i == __DRI_BUFFER_FRONT_LEFT) ||
-+                                         (i == __DRI_BUFFER_BACK_LEFT))) {
-+         dri2_dpy->dri2->releaseBuffer(dri2_dpy->dri_screen,
-+                                       dri2_surf->dri_buffers[i]);
++      if (dri2_surf->dri_buffers[i]) {
++         if ((i == __DRI_BUFFER_FRONT_LEFT) ||
++             (i == __DRI_BUFFER_BACK_LEFT)) {
++            free(dri2_surf->dri_buffers[i]);
++         }
++         else {
++            dri2_dpy->dri2->releaseBuffer(dri2_dpy->dri_screen,
++                                          dri2_surf->dri_buffers[i]);
++         }
 +      }
 +   }
 +

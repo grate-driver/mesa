@@ -1,3 +1,15 @@
+mesa (10.4.2-2ubuntu4) vivid; urgency=medium
+
+  * debian/control:
+    - Change build-dep for mir to mir-client-platform-mesa-dev.
+  * debian/patches/egl-platform-mir.patch:
+    - Fix potential double free (LP: #1414999).
+    - Fix gbm_device leak (LP: #1419704).
+    - Fix dri_buffers[front/back] leak (LP: #1419710).
+    - Use mir-client-platform-mesa-dev to get Mir build flags.
+
+ -- Alexandros Frantzis <alexandros.frantzis@canonical.com>  Mon, 09 Feb 2015 12:35:56 +0200
+
 mesa (10.4.2-2ubuntu3) vivid; urgency=medium
 
   * egl-platform-mir.patch: Fix memory leak. (LP:#1418486)
