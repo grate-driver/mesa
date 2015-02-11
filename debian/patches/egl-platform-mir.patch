@@ -104,12 +104,11 @@
        free(dri2_dpy->driver_configs);
 --- a/src/egl/drivers/dri2/egl_dri2.h
 +++ b/src/egl/drivers/dri2/egl_dri2.h
-@@ -64,6 +64,11 @@
+@@ -64,6 +64,10 @@
  
  #endif /* HAVE_ANDROID_PLATFORM */
  
 +#ifdef HAVE_MIR_PLATFORM
-+#include <mir_toolkit/mir_client_library.h>
 +#include <mir_toolkit/mesa/native_display.h>
 +#endif
 +
