@@ -66,6 +66,20 @@ format_info = env.CodeGenerate(
       command = python_cmd + ' $SCRIPT ' + ' $SOURCE > $TARGET'
 )
 
+format_pack = env.CodeGenerate(
+      target = 'main/format_pack.c',
+      script = 'main/format_pack.py',
+      source = 'main/formats.csv',
+      command = python_cmd + ' $SCRIPT ' + ' $SOURCE > $TARGET'
+)
+
+format_unpack = env.CodeGenerate(
+      target = 'main/format_unpack.c',
+      script = 'main/format_unpack.py',
+      source = 'main/formats.csv',
+      command = python_cmd + ' $SCRIPT ' + ' $SOURCE > $TARGET'
+)
+
 #
 # Assembly sources
 #

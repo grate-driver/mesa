@@ -101,6 +101,7 @@ fd_resource_transfer_map(struct pipe_context *pctx,
 	struct pipe_transfer *ptrans;
 	enum pipe_format format = prsc->format;
 	uint32_t op = 0;
+	uint32_t offset;
 	char *buf;
 	int ret = 0;
 
@@ -146,10 +147,19 @@ fd_resource_transfer_map(struct pipe_context *pctx,
 
 	*pptrans = ptrans;
 
-	return buf + slice->offset +
-		box->y / util_format_get_blockheight(format) * ptrans->stride +
-		box->x / util_format_get_blockwidth(format) * rsc->cpp +
-		box->z * slice->size0;
+	if (rsc->layer_first) {
+		offset = slice->offset +
+			box->y / util_format_get_blockheight(format) * ptrans->stride +
+			box->x / util_format_get_blockwidth(format) * rsc->cpp +
+			box->z * rsc->layer_size;
+	} else {
+		offset = slice->offset +
+			box->y / util_format_get_blockheight(format) * ptrans->stride +
+			box->x / util_format_get_blockwidth(format) * rsc->cpp +
+			box->z * slice->size0;
+	}
+
+	return buf + offset;
 
 fail:
 	fd_resource_transfer_unmap(pctx, ptrans);
@@ -188,22 +198,26 @@ static const struct u_resource_vtbl fd_resource_vtbl = {
 };
 
 static uint32_t
-setup_slices(struct fd_resource *rsc)
+setup_slices(struct fd_resource *rsc, uint32_t alignment)
 {
 	struct pipe_resource *prsc = &rsc->base.b;
 	uint32_t level, size = 0;
 	uint32_t width = prsc->width0;
 	uint32_t height = prsc->height0;
 	uint32_t depth = prsc->depth0;
+	/* in layer_first layout, the level (slice) contains just one
+	 * layer (since in fact the layer contains the slices)
+	 */
+	uint32_t layers_in_level = rsc->layer_first ? 1 : prsc->array_size;
 
 	for (level = 0; level <= prsc->last_level; level++) {
 		struct fd_resource_slice *slice = fd_resource_slice(rsc, level);
 
 		slice->pitch = align(width, 32);
 		slice->offset = size;
-		slice->size0 = slice->pitch * height * rsc->cpp;
+		slice->size0 = align(slice->pitch * height * rsc->cpp, alignment);
 
-		size += slice->size0 * depth * prsc->array_size;
+		size += slice->size0 * depth * layers_in_level;
 
 		width = u_minify(width, 1);
 		height = u_minify(height, 1);
@@ -213,33 +227,20 @@ setup_slices(struct fd_resource *rsc)
 	return size;
 }
 
-/* 2d array and 3d textures seem to want their layers aligned to
- * page boundaries
- */
 static uint32_t
-setup_slices_array(struct fd_resource *rsc)
+slice_alignment(struct pipe_screen *pscreen, const struct pipe_resource *tmpl)
 {
-	struct pipe_resource *prsc = &rsc->base.b;
-	uint32_t level, size = 0;
-	uint32_t width = prsc->width0;
-	uint32_t height = prsc->height0;
-	uint32_t depth = prsc->depth0;
-
-	for (level = 0; level <= prsc->last_level; level++) {
-		struct fd_resource_slice *slice = fd_resource_slice(rsc, level);
-
-		slice->pitch = align(width, 32);
-		slice->offset = size;
-		slice->size0 = align(slice->pitch * height * rsc->cpp, 4096);
-
-		size += slice->size0 * depth * prsc->array_size;
-
-		width = u_minify(width, 1);
-		height = u_minify(height, 1);
-		depth = u_minify(depth, 1);
+	/* on a3xx, 2d array and 3d textures seem to want their
+	 * layers aligned to page boundaries:
+	 */
+	switch (tmpl->target) {
+	case PIPE_TEXTURE_3D:
+	case PIPE_TEXTURE_1D_ARRAY:
+	case PIPE_TEXTURE_2D_ARRAY:
+		return 4096;
+	default:
+		return 1;
 	}
-
-	return size;
 }
 
 /**
@@ -273,15 +274,23 @@ fd_resource_create(struct pipe_screen *pscreen,
 
 	assert(rsc->cpp);
 
-	switch (tmpl->target) {
-	case PIPE_TEXTURE_3D:
-	case PIPE_TEXTURE_1D_ARRAY:
-	case PIPE_TEXTURE_2D_ARRAY:
-		size = setup_slices_array(rsc);
-		break;
-	default:
-		size = setup_slices(rsc);
-		break;
+	if (is_a4xx(fd_screen(pscreen))) {
+		switch (tmpl->target) {
+		case PIPE_TEXTURE_3D:
+			/* TODO 3D_ARRAY? */
+			rsc->layer_first = false;
+			break;
+		default:
+			rsc->layer_first = true;
+			break;
+		}
+	}
+
+	size = setup_slices(rsc, slice_alignment(pscreen, tmpl));
+
+	if (rsc->layer_first) {
+		rsc->layer_size = align(size, 4096);
+		size = rsc->layer_size * prsc->array_size;
 	}
 
 	realloc_bo(rsc, size);

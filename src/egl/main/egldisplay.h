@@ -46,6 +46,7 @@ enum _egl_platform_type {
    _EGL_PLATFORM_FBDEV,
    _EGL_PLATFORM_NULL,
    _EGL_PLATFORM_ANDROID,
+   _EGL_PLATFORM_HAIKU,
 
    _EGL_NUM_PLATFORMS,
    _EGL_INVALID_PLATFORM = -1
@@ -97,6 +98,7 @@ struct _egl_extensions
    EGLBoolean KHR_image_base;
    EGLBoolean KHR_image_pixmap;
    EGLBoolean KHR_vg_parent_image;
+   EGLBoolean KHR_get_all_proc_addresses;
    EGLBoolean KHR_gl_texture_2D_image;
    EGLBoolean KHR_gl_texture_cubemap_image;
    EGLBoolean KHR_gl_texture_3D_image;

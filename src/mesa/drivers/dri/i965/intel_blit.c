@@ -226,35 +226,23 @@ intel_miptree_blit(struct brw_context *brw,
    if (src_flip != dst_flip)
       src_pitch = -src_pitch;
 
-   uint32_t src_image_x, src_image_y;
+   uint32_t src_image_x, src_image_y, dst_image_x, dst_image_y;
    intel_miptree_get_image_offset(src_mt, src_level, src_slice,
                                   &src_image_x, &src_image_y);
-   src_x += src_image_x;
-   src_y += src_image_y;
-
-   /* The blitter interprets the 16-bit src x/y as a signed 16-bit value,
-    * where negative values are invalid.  The values we're working with are
-    * unsigned, so make sure we don't overflow.
-    */
-   if (src_x >= 32768 || src_y >= 32768) {
-      perf_debug("Falling back due to >=32k src offset (%d, %d)\n",
-                 src_x, src_y);
-      return false;
-   }
-
-   uint32_t dst_image_x, dst_image_y;
    intel_miptree_get_image_offset(dst_mt, dst_level, dst_slice,
                                   &dst_image_x, &dst_image_y);
+   src_x += src_image_x;
+   src_y += src_image_y;
    dst_x += dst_image_x;
    dst_y += dst_image_y;
 
    /* The blitter interprets the 16-bit destination x/y as a signed 16-bit
-    * value.  The values we're working with are unsigned, so make sure we
-    * don't overflow.
+    * value. The values we're working with are unsigned, so make sure we don't
+    * overflow.
     */
-   if (dst_x >= 32768 || dst_y >= 32768) {
-      perf_debug("Falling back due to >=32k dst offset (%d, %d)\n",
-                 dst_x, dst_y);
+   if (src_x >= 32768 || src_y >= 32768 || dst_x >= 32768 || dst_y >= 32768) {
+      perf_debug("Falling back due to >=32k offset [src(%d, %d) dst(%d, %d)]\n",
+                 src_x, src_y, dst_x, dst_y);
       return false;
    }
 
@@ -319,6 +307,9 @@ intelEmitCopyBlit(struct brw_context *brw,
    if ((dst_y_tiled || src_y_tiled) && brw->gen < 6)
       return false;
 
+   assert(!dst_y_tiled || (dst_pitch % 128) == 0);
+   assert(!src_y_tiled || (src_pitch % 128) == 0);
+
    /* do space check before going any further */
    do {
        aper_array[0] = brw->batch.bo;
@@ -335,7 +326,9 @@ intelEmitCopyBlit(struct brw_context *brw,
    if (pass >= 2)
       return false;
 
-   intel_batchbuffer_require_space(brw, 8 * 4, BLT_RING);
+   unsigned length = brw->gen >= 8 ? 10 : 8;
+
+   intel_batchbuffer_require_space(brw, length * 4, BLT_RING);
    DBG("%s src:buf(%p)/%d+%d %d,%d dst:buf(%p)/%d+%d %d,%d sz:%dx%d\n",
        __FUNCTION__,
        src_buffer, src_pitch, src_offset, src_x, src_y,
@@ -399,8 +392,6 @@ intelEmitCopyBlit(struct brw_context *brw,
           (w * cpp) <= src_buffer->size);
    assert(dst_offset + (dst_y + h - 1) * abs(dst_pitch) +
           (w * cpp) <= dst_buffer->size);
-
-   unsigned length = brw->gen >= 8 ? 10 : 8;
 
    BEGIN_BATCH_BLT_TILED(length, dst_y_tiled, src_y_tiled);
    OUT_BATCH(CMD | (length - 2));
@@ -468,7 +459,9 @@ intelEmitImmediateColorExpandBlit(struct brw_context *brw,
        __FUNCTION__,
        dst_buffer, dst_pitch, dst_offset, x, y, w, h, src_size, dwords);
 
-   intel_batchbuffer_require_space(brw, (8 * 4) + (3 * 4) + dwords * 4, BLT_RING);
+   unsigned xy_setup_blt_length = brw->gen >= 8 ? 10 : 8;
+   intel_batchbuffer_require_space(brw, (xy_setup_blt_length * 4) +
+                                        (3 * 4) + dwords * 4, BLT_RING);
 
    opcode = XY_SETUP_BLT_CMD;
    if (cpp == 4)
@@ -484,8 +477,6 @@ intelEmitImmediateColorExpandBlit(struct brw_context *brw,
    blit_cmd = XY_TEXT_IMMEDIATE_BLIT_CMD | XY_TEXT_BYTE_PACKED; /* packing? */
    if (dst_tiling != I915_TILING_NONE)
       blit_cmd |= XY_DST_TILED;
-
-   unsigned xy_setup_blt_length = brw->gen >= 8 ? 10 : 8;
 
    BEGIN_BATCH_BLT(xy_setup_blt_length + 3);
    OUT_BATCH(opcode | (xy_setup_blt_length - 2));
