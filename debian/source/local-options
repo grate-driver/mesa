@@ -1,0 +1,1 @@
+--extend-diff-ignore=src/mesa/drivers/dri/r200/.*radeon_.*|src/gallium/state_trackers/egl/x11/dri2.c

@@ -1,3 +1,10 @@
+mesa (10.5.0~rc1-1) UNRELEASED; urgency=medium
+
+  * New upstream release.
+  * Update watch file.
+
+ -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Mon, 16 Feb 2015 09:35:43 +0100
+
 mesa (10.4.2-2) unstable; urgency=medium
 
   * rules: Drop dh_makeshlibs exception on gbm_gallium_drm.so as it's
