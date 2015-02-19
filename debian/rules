@@ -247,7 +247,7 @@ binary-arch: install
 	   debian/mesa-vdpau-drivers/usr/lib/${DEB_HOST_MULTIARCH}/vdpau/
   endif
 
-	dh_install -s --fail-missing
+	dh_install -s --list-missing
 
 	# Create an ld.so.conf which says where to find libGL from Mesa
 	echo "/usr/lib/$(DEB_HOST_MULTIARCH)/mesa" \
