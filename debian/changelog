@@ -1,4 +1,4 @@
-mesa (10.5.0~rc1-0ubuntu1) UNRELEASED; urgency=medium
+mesa (10.5.0~rc1-0ubuntu1) vivid; urgency=medium
 
   [ Timo Aaltonen ]
   * Update Mir patch.
@@ -6,7 +6,7 @@ mesa (10.5.0~rc1-0ubuntu1) UNRELEASED; urgency=medium
   [ Maarten Lankhorst ]
   * Merge from unreleased debian-experimental.
 
- -- Timo Aaltonen <tjaalton@debian.org>  Tue, 13 Jan 2015 15:56:02 +0200
+ -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Thu, 19 Feb 2015 11:28:53 +0100
 
 mesa (10.5.0~rc1-1) UNRELEASED; urgency=medium
 
