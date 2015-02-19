@@ -1,8 +1,12 @@
 mesa (10.5.0~rc1-0ubuntu1) UNRELEASED; urgency=medium
 
+  [ Timo Aaltonen ]
+  * Update Mir patch.
+
+  [ Maarten Lankhorst ]
   * Merge from unreleased debian-experimental.
 
- -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Mon, 16 Feb 2015 09:35:43 +0100
+ -- Timo Aaltonen <tjaalton@debian.org>  Tue, 13 Jan 2015 15:56:02 +0200
 
 mesa (10.5.0~rc1-1) UNRELEASED; urgency=medium
 
@@ -10,17 +14,6 @@ mesa (10.5.0~rc1-1) UNRELEASED; urgency=medium
   * Update watch file.
 
  -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Mon, 16 Feb 2015 09:35:43 +0100
-
-mesa (10.5.0~git20150210-0ubuntu1) UNRELEASED; urgency=medium
-
-  [ Timo Aaltonen ]
-  * New upstream snapshot
-  * Update Mir patch.
-
-  [ Maarten Lankhorst ]
-  * New upstream snapshot.
-
- -- Timo Aaltonen <tjaalton@debian.org>  Tue, 13 Jan 2015 15:56:02 +0200
 
 mesa (10.4.2-2ubuntu5) vivid; urgency=medium
 
