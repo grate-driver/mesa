@@ -512,7 +512,7 @@ brw_upload_sampler_state_table(struct brw_context *brw,
       /* Flag that the sampler state table pointer has changed; later atoms
        * will handle it.
        */
-      brw->state.dirty.cache |= CACHE_NEW_SAMPLER;
+      brw->state.dirty.brw |= BRW_NEW_SAMPLER_STATE_TABLE;
    }
 }
 
@@ -529,7 +529,6 @@ const struct brw_tracked_state brw_fs_samplers = {
       .mesa = _NEW_TEXTURE,
       .brw = BRW_NEW_BATCH |
              BRW_NEW_FRAGMENT_PROGRAM,
-      .cache = 0
    },
    .emit = brw_upload_fs_samplers,
 };
@@ -548,7 +547,6 @@ const struct brw_tracked_state brw_vs_samplers = {
       .mesa = _NEW_TEXTURE,
       .brw = BRW_NEW_BATCH |
              BRW_NEW_VERTEX_PROGRAM,
-      .cache = 0
    },
    .emit = brw_upload_vs_samplers,
 };
@@ -571,7 +569,6 @@ const struct brw_tracked_state brw_gs_samplers = {
       .mesa = _NEW_TEXTURE,
       .brw = BRW_NEW_BATCH |
              BRW_NEW_GEOMETRY_PROGRAM,
-      .cache = 0
    },
    .emit = brw_upload_gs_samplers,
 };

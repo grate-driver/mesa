@@ -26,6 +26,20 @@
 #include "brw_cfg.h"
 
 /** @file brw_fs_saturate_propagation.cpp
+ *
+ * Implements a pass that propagates the SAT modifier from a MOV.SAT into the
+ * instruction that produced the source of the MOV.SAT, thereby allowing the
+ * MOV's src and dst to be coalesced and the MOV removed.
+ *
+ * For instance,
+ *
+ *    ADD     tmp, src0, src1
+ *    MOV.SAT dst, tmp
+ *
+ * would be transformed into
+ *
+ *    ADD.SAT tmp, src0, src1
+ *    MOV     dst, tmp
  */
 
 static bool
@@ -45,7 +59,7 @@ opt_saturate_propagation_local(fs_visitor *v, bblock_t *block)
           !inst->saturate)
          continue;
 
-      int src_var = v->live_intervals->var_from_reg(&inst->src[0]);
+      int src_var = v->live_intervals->var_from_reg(inst->src[0]);
       int src_end_ip = v->live_intervals->end[src_var];
 
       bool interfered = false;
