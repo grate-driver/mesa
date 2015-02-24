@@ -1,3 +1,12 @@
+mesa (10.5.0~rc1-0ubuntu2) vivid; urgency=medium
+
+  * Add a couple of backported fixes for Skylake:
+    skl-use-1-register-for-uniform-pull.diff
+    skl-use-vec4-datatypes-for-message-header.diff
+    skl-implement-wadisable1ddepthstencil.diff
+
+ -- Timo Aaltonen <tjaalton@debian.org>  Fri, 20 Feb 2015 08:54:44 +0200
+
 mesa (10.5.0~rc1-0ubuntu1) vivid; urgency=medium
 
   [ Timo Aaltonen ]
