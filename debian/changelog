@@ -17,7 +17,7 @@ mesa (10.5.0~rc1-0ubuntu1) vivid; urgency=medium
 
  -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Thu, 19 Feb 2015 11:28:53 +0100
 
-mesa (10.5.0~rc1-1) UNRELEASED; urgency=medium
+mesa (10.5.0~rc2-1) UNRELEASED; urgency=medium
 
   * New upstream release.
   * Update watch file.

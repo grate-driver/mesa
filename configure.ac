@@ -1577,10 +1577,18 @@ if test "x$enable_dri" = xyes -o \
         "x$enable_vdpau" = xyes -o \
         "x$enable_omx" = xyes -o \
         "x$enable_va" = xyes; then
-    PKG_CHECK_MODULES([VL], [x11-xcb xcb xcb-dri2 >= $XCBDRI2_REQUIRED])
     need_gallium_vl=yes
 fi
 AM_CONDITIONAL(NEED_GALLIUM_VL, test "x$need_gallium_vl" = xyes)
+
+if test "x$enable_xvmc" = xyes -o \
+        "x$enable_vdpau" = xyes -o \
+        "x$enable_omx" = xyes -o \
+        "x$enable_va" = xyes; then
+    PKG_CHECK_MODULES([VL], [x11-xcb xcb xcb-dri2 >= $XCBDRI2_REQUIRED])
+    need_gallium_vl_winsys=yes
+fi
+AM_CONDITIONAL(NEED_GALLIUM_VL_WINSYS, test "x$need_gallium_vl_winsys" = xyes)
 
 if test "x$enable_xvmc" = xyes; then
     PKG_CHECK_MODULES([XVMC], [xvmc >= $XVMC_REQUIRED])
@@ -1778,7 +1786,7 @@ done
 # libEGL wants to default to the first platform specified in
 # ./configure.  parse that here.
 if test "x$egl_platforms" != "x"; then
-    FIRST_PLATFORM_CAPS=`echo $egl_platforms | sed 's| .*||' | tr 'a-z' 'A-Z'`
+    FIRST_PLATFORM_CAPS=`echo $egl_platforms | sed 's| .*||' | tr '[[a-z]]' '[[A-Z]]'`
     EGL_NATIVE_PLATFORM="_EGL_PLATFORM_$FIRST_PLATFORM_CAPS"
 else
     EGL_NATIVE_PLATFORM="_EGL_INVALID_PLATFORM"

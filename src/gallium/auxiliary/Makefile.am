@@ -56,6 +56,7 @@ if NEED_GALLIUM_VL
 COMMON_VL_CFLAGS = \
 	$(AM_CFLAGS) \
 	$(VL_CFLAGS) \
+	$(DRI2PROTO_CFLAGS) \
 	$(LIBDRM_CFLAGS) \
 	$(GALLIUM_PIPE_LOADER_DEFINES) \
 	-DPIPE_SEARCH_DIR=\"$(libdir)/gallium-pipe\"
@@ -74,6 +75,8 @@ libgalliumvl_la_CFLAGS = \
 libgalliumvl_la_SOURCES = \
 	$(VL_SOURCES)
 
+if NEED_GALLIUM_VL_WINSYS
+
 noinst_LTLIBRARIES += libgalliumvlwinsys.la
 
 libgalliumvlwinsys_la_CFLAGS = \
@@ -81,6 +84,8 @@ libgalliumvlwinsys_la_CFLAGS = \
 
 libgalliumvlwinsys_la_SOURCES = \
 	$(VL_WINSYS_SOURCES)
+
+endif
 
 endif
 

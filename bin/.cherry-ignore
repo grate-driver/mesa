@@ -1,0 +1,12 @@
+# Cherry-picked without -x
+# nir: resolve nir.h dependency list (fix make distcheck)
+556fc4b84df99a1cd4b18c11fb16f7854a948b2a 
+
+# nir: add missing header to the sources list
+72e602905dd9d86450a936d5a22bf21758844b38
+
+# configure: rework wayland_scanner handling(fix make distcheck)
+153539bd9d4445b504110958306f00632222f840
+
+# auxiliary/vl: bring back the VL code for the dri targets
+c39dbfdd0f764b1aaa7319b4694e7335692993dd
