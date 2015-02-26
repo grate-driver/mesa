@@ -420,6 +420,11 @@ static inline bool is_tex(struct ir3_instruction *instr)
 	return (instr->category == 5);
 }
 
+static inline bool is_mem(struct ir3_instruction *instr)
+{
+	return (instr->category == 6);
+}
+
 static inline bool is_input(struct ir3_instruction *instr)
 {
 	return (instr->category == 2) && (instr->opc == OPC_BARY_F);
