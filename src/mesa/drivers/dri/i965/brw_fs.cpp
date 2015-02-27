@@ -678,8 +678,14 @@ fs_visitor::type_size(const struct glsl_type *type)
    return 0;
 }
 
+/**
+ * Create a MOV to read the timestamp register.
+ *
+ * The caller is responsible for emitting the MOV.  The return value is
+ * the destination of the MOV, with extra parameters set.
+ */
 fs_reg
-fs_visitor::get_timestamp()
+fs_visitor::get_timestamp(fs_inst **out_mov)
 {
    assert(brw->gen >= 7);
 
@@ -690,7 +696,7 @@ fs_visitor::get_timestamp()
 
    fs_reg dst = fs_reg(GRF, virtual_grf_alloc(1), BRW_REGISTER_TYPE_UD, 4);
 
-   fs_inst *mov = emit(MOV(dst, ts));
+   fs_inst *mov = MOV(dst, ts);
    /* We want to read the 3 fields we care about even if it's not enabled in
     * the dispatch.
     */
@@ -708,6 +714,7 @@ fs_visitor::get_timestamp()
     */
    dst.set_smear(0);
 
+   *out_mov = mov;
    return dst;
 }
 
@@ -715,7 +722,9 @@ void
 fs_visitor::emit_shader_time_begin()
 {
    current_annotation = "shader time start";
-   shader_start_time = get_timestamp();
+   fs_inst *mov;
+   shader_start_time = get_timestamp(&mov);
+   emit(mov);
 }
 
 void
@@ -751,7 +760,9 @@ fs_visitor::emit_shader_time_end()
       unreachable("fs_visitor::emit_shader_time_end missing code");
    }
 
-   fs_reg shader_end_time = get_timestamp();
+   fs_inst *tm_read;
+   fs_reg shader_end_time = get_timestamp(&tm_read);
+   emit(tm_read);
 
    /* Check that there weren't any timestamp reset events (assuming these
     * were the only two timestamp reads that happened).
