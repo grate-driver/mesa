@@ -44,7 +44,7 @@
 
 static struct gl_texture_image *
 create_texture_for_pbo(struct gl_context *ctx, bool create_pbo,
-                       GLenum pbo_target, int width, int height, int depth,
+                       GLenum pbo_target, int width, int height,
                        GLenum format, GLenum type, const void *pixels,
                        const struct gl_pixelstore_attrib *packing,
                        GLuint *tmp_pbo, GLuint *tmp_tex)
@@ -57,8 +57,7 @@ create_texture_for_pbo(struct gl_context *ctx, bool create_pbo,
    struct gl_texture_image *tex_image;
    bool read_only;
 
-   if ((packing->ImageHeight != 0 && packing->ImageHeight != height) ||
-       packing->SwapBytes ||
+   if (packing->SwapBytes ||
        packing->LsbFirst ||
        packing->Invert)
       return NULL;
@@ -99,14 +98,16 @@ create_texture_for_pbo(struct gl_context *ctx, bool create_pbo,
 
    _mesa_GenTextures(1, tmp_tex);
    tex_obj = _mesa_lookup_texture(ctx, *tmp_tex);
-   tex_obj->Target = depth > 1 ? GL_TEXTURE_2D_ARRAY : GL_TEXTURE_2D;
-   tex_obj->Immutable = GL_TRUE;
    _mesa_initialize_texture_object(ctx, tex_obj, *tmp_tex, GL_TEXTURE_2D);
+   /* This must be set after _mesa_initialize_texture_object, not before. */
+   tex_obj->Immutable = GL_TRUE;
+   /* This is required for interactions with ARB_texture_view. */
+   tex_obj->NumLayers = 1;
 
    internal_format = _mesa_get_format_base_format(pbo_format);
 
    tex_image = _mesa_get_tex_image(ctx, tex_obj, tex_obj->Target, 0);
-   _mesa_init_teximage_fields(ctx, tex_image, width, height, depth,
+   _mesa_init_teximage_fields(ctx, tex_image, width, height, 1,
                               0, internal_format, pbo_format);
 
    read_only = pbo_target == GL_PIXEL_UNPACK_BUFFER;
@@ -136,7 +137,7 @@ _mesa_meta_pbo_TexSubImage(struct gl_context *ctx, GLuint dims,
    struct gl_texture_image *pbo_tex_image;
    GLenum status;
    bool success = false;
-   int z;
+   int z, iters;
 
    /* XXX: This should probably be passed in from somewhere */
    const char *where = "_mesa_meta_pbo_TexSubImage";
@@ -166,9 +167,14 @@ _mesa_meta_pbo_TexSubImage(struct gl_context *ctx, GLuint dims,
       return true;
    }
 
+   /* Only accept tightly packed pixels from the user. */
+   if (packing->ImageHeight != 0 && packing->ImageHeight != height)
+      return false;
+
+   /* For arrays, use a tall (height * depth) 2D texture. */
    pbo_tex_image = create_texture_for_pbo(ctx, create_pbo,
                                           GL_PIXEL_UNPACK_BUFFER,
-                                          width, height, depth,
+                                          width, height * depth,
                                           format, type, pixels, packing,
                                           &pbo, &pbo_tex);
    if (!pbo_tex_image)
@@ -183,12 +189,6 @@ _mesa_meta_pbo_TexSubImage(struct gl_context *ctx, GLuint dims,
    _mesa_GenFramebuffers(2, fbos);
    _mesa_BindFramebuffer(GL_READ_FRAMEBUFFER, fbos[0]);
    _mesa_BindFramebuffer(GL_DRAW_FRAMEBUFFER, fbos[1]);
-
-   if (tex_image->TexObject->Target == GL_TEXTURE_1D_ARRAY) {
-      assert(depth == 1);
-      depth = height;
-      height = 1;
-   }
 
    _mesa_meta_bind_fbo_image(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
                              pbo_tex_image, 0);
@@ -213,7 +213,10 @@ _mesa_meta_pbo_TexSubImage(struct gl_context *ctx, GLuint dims,
                                   GL_COLOR_BUFFER_BIT, GL_NEAREST))
       goto fail;
 
-   for (z = 1; z < depth; z++) {
+   iters = tex_image->TexObject->Target == GL_TEXTURE_1D_ARRAY ?
+           height : depth;
+
+   for (z = 1; z < iters; z++) {
       _mesa_meta_bind_fbo_image(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
                                 pbo_tex_image, z);
       _mesa_meta_bind_fbo_image(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
@@ -221,11 +224,18 @@ _mesa_meta_pbo_TexSubImage(struct gl_context *ctx, GLuint dims,
 
       _mesa_update_state(ctx);
 
-      _mesa_meta_BlitFramebuffer(ctx, ctx->ReadBuffer, ctx->DrawBuffer,
-                                 0, 0, width, height,
-                                 xoffset, yoffset,
-                                 xoffset + width, yoffset + height,
-                                 GL_COLOR_BUFFER_BIT, GL_NEAREST);
+      if (tex_image->TexObject->Target == GL_TEXTURE_1D_ARRAY)
+         _mesa_meta_BlitFramebuffer(ctx, ctx->ReadBuffer, ctx->DrawBuffer,
+                                    0, z, width, z + 1,
+                                    xoffset, yoffset,
+                                    xoffset + width, yoffset + 1,
+                                    GL_COLOR_BUFFER_BIT, GL_NEAREST);
+      else
+         _mesa_meta_BlitFramebuffer(ctx, ctx->ReadBuffer, ctx->DrawBuffer,
+                                    0, z * height, width, (z + 1) * height,
+                                    xoffset, yoffset,
+                                    xoffset + width, yoffset + height,
+                                    GL_COLOR_BUFFER_BIT, GL_NEAREST);
    }
 
    success = true;
@@ -252,7 +262,7 @@ _mesa_meta_pbo_GetTexSubImage(struct gl_context *ctx, GLuint dims,
    struct gl_texture_image *pbo_tex_image;
    GLenum status;
    bool success = false;
-   int z;
+   int z, iters;
 
    /* XXX: This should probably be passed in from somewhere */
    const char *where = "_mesa_meta_pbo_GetTexSubImage";
@@ -282,8 +292,13 @@ _mesa_meta_pbo_GetTexSubImage(struct gl_context *ctx, GLuint dims,
       return true;
    }
 
+   /* Only accept tightly packed pixels from the user. */
+   if (packing->ImageHeight != 0 && packing->ImageHeight != height)
+      return false;
+
+   /* For arrays, use a tall (height * depth) 2D texture. */
    pbo_tex_image = create_texture_for_pbo(ctx, false, GL_PIXEL_PACK_BUFFER,
-                                          width, height, depth,
+                                          width, height * depth,
                                           format, type, pixels, packing,
                                           &pbo, &pbo_tex);
    if (!pbo_tex_image)
@@ -293,12 +308,6 @@ _mesa_meta_pbo_GetTexSubImage(struct gl_context *ctx, GLuint dims,
    _mesa_meta_begin(ctx, 0);
 
    _mesa_GenFramebuffers(2, fbos);
-
-   if (tex_image && tex_image->TexObject->Target == GL_TEXTURE_1D_ARRAY) {
-      assert(depth == 1);
-      depth = height;
-      height = 1;
-   }
 
    /* If we were given a texture, bind it to the read framebuffer.  If not,
     * we're doing a ReadPixels and we should just use whatever framebuffer
@@ -333,7 +342,12 @@ _mesa_meta_pbo_GetTexSubImage(struct gl_context *ctx, GLuint dims,
                                   GL_COLOR_BUFFER_BIT, GL_NEAREST))
       goto fail;
 
-   for (z = 1; z < depth; z++) {
+   if (tex_image && tex_image->TexObject->Target == GL_TEXTURE_1D_ARRAY)
+      iters = height;
+   else
+      iters = depth;
+
+   for (z = 1; z < iters; z++) {
       _mesa_meta_bind_fbo_image(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
                                 tex_image, zoffset + z);
       _mesa_meta_bind_fbo_image(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
@@ -341,11 +355,18 @@ _mesa_meta_pbo_GetTexSubImage(struct gl_context *ctx, GLuint dims,
 
       _mesa_update_state(ctx);
 
-      _mesa_meta_BlitFramebuffer(ctx, ctx->ReadBuffer, ctx->DrawBuffer,
-                                 xoffset, yoffset,
-                                 xoffset + width, yoffset + height,
-                                 0, 0, width, height,
-                                 GL_COLOR_BUFFER_BIT, GL_NEAREST);
+      if (tex_image->TexObject->Target == GL_TEXTURE_1D_ARRAY)
+         _mesa_meta_BlitFramebuffer(ctx, ctx->ReadBuffer, ctx->DrawBuffer,
+                                    xoffset, yoffset,
+                                    xoffset + width, yoffset + 1,
+                                    0, z, width, z + 1,
+                                    GL_COLOR_BUFFER_BIT, GL_NEAREST);
+      else
+         _mesa_meta_BlitFramebuffer(ctx, ctx->ReadBuffer, ctx->DrawBuffer,
+                                    xoffset, yoffset,
+                                    xoffset + width, yoffset + height,
+                                    0, z * height, width, (z + 1) * height,
+                                    GL_COLOR_BUFFER_BIT, GL_NEAREST);
    }
 
    success = true;
