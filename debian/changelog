@@ -1,16 +1,16 @@
+mesa (10.5.0-1) UNRELEASED; urgency=medium
+
+  * New upstream release.
+  * Update watch file.
+
+ -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Mon, 16 Feb 2015 09:35:43 +0100
+
 mesa (10.5.0~rc3-0ubuntu1) vivid; urgency=medium
   
   * Merge with unreleased debian-experimental.
   * Drop skl-implement-wadisable1ddepthstencil.diff, upstreamed.
 
  -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Mon, 02 Mar 2015 11:45:53 +0100
-
-mesa (10.5.0~rc3-1) UNRELEASED; urgency=medium
-
-  * New upstream release.
-  * Update watch file.
-
- -- Maarten Lankhorst <maarten.lankhorst@ubuntu.com>  Mon, 16 Feb 2015 09:35:43 +0100
 
 mesa (10.5.0~rc2-0ubuntu1) vivid; urgency=medium
   
