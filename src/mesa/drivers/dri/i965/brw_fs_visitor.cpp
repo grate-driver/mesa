@@ -428,21 +428,16 @@ fs_visitor::try_emit_mad(ir_expression *ir)
    if (ir->type != glsl_type::float_type)
       return false;
 
-   ir_rvalue *nonmul = ir->operands[1];
-   ir_expression *mul = ir->operands[0]->as_expression();
+   ir_rvalue *nonmul;
+   ir_expression *mul;
+   bool mul_negate, mul_abs;
 
-   bool mul_negate = false, mul_abs = false;
-   if (mul && mul->operation == ir_unop_abs) {
-      mul = mul->operands[0]->as_expression();
-      mul_abs = true;
-   } else if (mul && mul->operation == ir_unop_neg) {
-      mul = mul->operands[0]->as_expression();
-      mul_negate = true;
-   }
+   for (int i = 0; i < 2; i++) {
+      mul_negate = false;
+      mul_abs = false;
 
-   if (!mul || mul->operation != ir_binop_mul) {
-      nonmul = ir->operands[0];
-      mul = ir->operands[1]->as_expression();
+      mul = ir->operands[i]->as_expression();
+      nonmul = ir->operands[1 - i];
 
       if (mul && mul->operation == ir_unop_abs) {
          mul = mul->operands[0]->as_expression();
@@ -452,9 +447,12 @@ fs_visitor::try_emit_mad(ir_expression *ir)
          mul_negate = true;
       }
 
-      if (!mul || mul->operation != ir_binop_mul)
-         return false;
+      if (mul && mul->operation == ir_binop_mul)
+         break;
    }
+
+   if (!mul || mul->operation != ir_binop_mul)
+      return false;
 
    if (nonmul->as_constant() ||
        mul->operands[0]->as_constant() ||
@@ -3522,19 +3520,20 @@ fs_visitor::emit_fb_writes()
          do_dual_src = false;
    }
 
-   fs_inst *inst;
+   fs_inst *inst = NULL;
    if (do_dual_src) {
-      if (INTEL_DEBUG & DEBUG_SHADER_TIME)
-         emit_shader_time_end();
-
       this->current_annotation = ralloc_asprintf(this->mem_ctx,
 						 "FB dual-source write");
       inst = emit_single_fb_write(this->outputs[0], this->dual_src_output,
                                   reg_undef, 4);
       inst->target = 0;
       prog_data->dual_src_blend = true;
-   } else if (key->nr_color_regions > 0) {
+   } else {
       for (int target = 0; target < key->nr_color_regions; target++) {
+         /* Skip over outputs that weren't written. */
+         if (this->outputs[target].file == BAD_FILE)
+            continue;
+
          this->current_annotation = ralloc_asprintf(this->mem_ctx,
                                                     "FB write target %d",
                                                     target);
@@ -3542,19 +3541,14 @@ fs_visitor::emit_fb_writes()
          if (brw->gen >= 6 && key->replicate_alpha && target != 0)
             src0_alpha = offset(outputs[0], 3);
 
-         if (target == key->nr_color_regions - 1 &&
-             (INTEL_DEBUG & DEBUG_SHADER_TIME))
-            emit_shader_time_end();
-
          inst = emit_single_fb_write(this->outputs[target], reg_undef,
                                      src0_alpha,
                                      this->output_components[target]);
          inst->target = target;
       }
-   } else {
-      if (INTEL_DEBUG & DEBUG_SHADER_TIME)
-         emit_shader_time_end();
+   }
 
+   if (inst == NULL) {
       /* Even if there's no color buffers enabled, we still need to send
        * alpha out the pipeline to our null renderbuffer to support
        * alpha-testing, alpha-to-coverage, and so on.
@@ -3765,9 +3759,6 @@ fs_visitor::emit_urb_writes()
       if (length == 8 || last)
          flush = true;
       if (flush) {
-         if (last && (INTEL_DEBUG & DEBUG_SHADER_TIME))
-            emit_shader_time_end();
-
          fs_reg *payload_sources = ralloc_array(mem_ctx, fs_reg, length + 1);
          fs_reg payload = fs_reg(GRF, virtual_grf_alloc(length + 1),
                                  BRW_REGISTER_TYPE_F);

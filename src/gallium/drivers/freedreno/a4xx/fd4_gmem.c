@@ -375,7 +375,7 @@ fd4_emit_tile_mem2gmem(struct fd_context *ctx, struct fd_tile *tile)
 
 	OUT_PKT0(ring, REG_A4XX_PC_PRIM_VTX_CNTL, 1);
 	OUT_RING(ring, A4XX_PC_PRIM_VTX_CNTL_PROVOKING_VTX_LAST |
-			A4XX_PC_PRIM_VTX_CNTL_VAROUT);
+			A4XX_PC_PRIM_VTX_CNTL_VAROUT(1));
 
 	OUT_PKT0(ring, REG_A4XX_VFD_INDEX_OFFSET, 2);
 	OUT_RING(ring, 0);            /* VFD_INDEX_OFFSET */
@@ -436,13 +436,6 @@ fd4_emit_sysmem_prep(struct fd_context *ctx)
 {
 	struct pipe_framebuffer_state *pfb = &ctx->framebuffer;
 	struct fd_ringbuffer *ring = ctx->ring;
-	uint32_t pitch = 0;
-
-	if (pfb->cbufs[0]) {
-		struct pipe_surface *psurf = pfb->cbufs[0];
-		unsigned lvl = psurf->u.tex.level;
-		pitch = fd_resource(psurf->texture)->slices[lvl].pitch;
-	}
 
 	fd4_emit_restore(ctx);
 

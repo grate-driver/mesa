@@ -115,7 +115,7 @@ glapi_libglapi_la_CPPFLAGS = \
 	-I$(top_srcdir)/src/mesa
 
 if HAVE_SHARED_GLAPI
-glapi_libglapi_la_SOURCES += $(MAPI_BRIDGE_FILES)
+glapi_libglapi_la_SOURCES += $(MAPI_BRIDGE_FILES) glapi/glapi_mapi_tmp.h
 glapi_libglapi_la_CPPFLAGS += \
 	-DMAPI_MODE_BRIDGE \
 	-DMAPI_ABI_HEADER=\"glapi/glapi_mapi_tmp.h\"
