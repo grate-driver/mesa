@@ -678,8 +678,14 @@ fs_visitor::type_size(const struct glsl_type *type)
    return 0;
 }
 
+/**
+ * Create a MOV to read the timestamp register.
+ *
+ * The caller is responsible for emitting the MOV.  The return value is
+ * the destination of the MOV, with extra parameters set.
+ */
 fs_reg
-fs_visitor::get_timestamp()
+fs_visitor::get_timestamp(fs_inst **out_mov)
 {
    assert(brw->gen >= 7);
 
@@ -690,7 +696,7 @@ fs_visitor::get_timestamp()
 
    fs_reg dst = fs_reg(GRF, virtual_grf_alloc(1), BRW_REGISTER_TYPE_UD, 4);
 
-   fs_inst *mov = emit(MOV(dst, ts));
+   fs_inst *mov = MOV(dst, ts);
    /* We want to read the 3 fields we care about even if it's not enabled in
     * the dispatch.
     */
@@ -708,6 +714,7 @@ fs_visitor::get_timestamp()
     */
    dst.set_smear(0);
 
+   *out_mov = mov;
    return dst;
 }
 
@@ -715,7 +722,9 @@ void
 fs_visitor::emit_shader_time_begin()
 {
    current_annotation = "shader time start";
-   shader_start_time = get_timestamp();
+   fs_inst *mov;
+   shader_start_time = get_timestamp(&mov);
+   emit(mov);
 }
 
 void
@@ -751,38 +760,50 @@ fs_visitor::emit_shader_time_end()
       unreachable("fs_visitor::emit_shader_time_end missing code");
    }
 
-   fs_reg shader_end_time = get_timestamp();
+   /* Insert our code just before the final SEND with EOT. */
+   exec_node *end = this->instructions.get_tail();
+   assert(end && ((fs_inst *) end)->eot);
+
+   fs_inst *tm_read;
+   fs_reg shader_end_time = get_timestamp(&tm_read);
+   end->insert_before(tm_read);
 
    /* Check that there weren't any timestamp reset events (assuming these
     * were the only two timestamp reads that happened).
     */
    fs_reg reset = shader_end_time;
    reset.set_smear(2);
-   fs_inst *test = emit(AND(reg_null_d, reset, fs_reg(1u)));
+   fs_inst *test = AND(reg_null_d, reset, fs_reg(1u));
    test->conditional_mod = BRW_CONDITIONAL_Z;
-   emit(IF(BRW_PREDICATE_NORMAL));
+   test->force_writemask_all = true;
+   end->insert_before(test);
+   end->insert_before(IF(BRW_PREDICATE_NORMAL));
 
    fs_reg start = shader_start_time;
    start.negate = true;
    fs_reg diff = fs_reg(GRF, virtual_grf_alloc(1), BRW_REGISTER_TYPE_UD, 1);
-   emit(ADD(diff, start, shader_end_time));
+   diff.set_smear(0);
+   fs_inst *add = ADD(diff, start, shader_end_time);
+   add->force_writemask_all = true;
+   end->insert_before(add);
 
    /* If there were no instructions between the two timestamp gets, the diff
     * is 2 cycles.  Remove that overhead, so I can forget about that when
     * trying to determine the time taken for single instructions.
     */
-   emit(ADD(diff, diff, fs_reg(-2u)));
+   add = ADD(diff, diff, fs_reg(-2u));
+   add->force_writemask_all = true;
+   end->insert_before(add);
 
-   emit_shader_time_write(type, diff);
-   emit_shader_time_write(written_type, fs_reg(1u));
-   emit(BRW_OPCODE_ELSE);
-   emit_shader_time_write(reset_type, fs_reg(1u));
-   emit(BRW_OPCODE_ENDIF);
+   end->insert_before(SHADER_TIME_ADD(type, diff));
+   end->insert_before(SHADER_TIME_ADD(written_type, fs_reg(1u)));
+   end->insert_before(new(mem_ctx) fs_inst(BRW_OPCODE_ELSE, dispatch_width));
+   end->insert_before(SHADER_TIME_ADD(reset_type, fs_reg(1u)));
+   end->insert_before(new(mem_ctx) fs_inst(BRW_OPCODE_ENDIF, dispatch_width));
 }
 
-void
-fs_visitor::emit_shader_time_write(enum shader_time_shader_type type,
-                                   fs_reg value)
+fs_inst *
+fs_visitor::SHADER_TIME_ADD(enum shader_time_shader_type type, fs_reg value)
 {
    int shader_time_index =
       brw_get_shader_time_index(brw, shader_prog, prog, type);
@@ -794,8 +815,8 @@ fs_visitor::emit_shader_time_write(enum shader_time_shader_type type,
    else
       payload = vgrf(glsl_type::uint_type);
 
-   emit(new(mem_ctx) fs_inst(SHADER_OPCODE_SHADER_TIME_ADD,
-                             fs_reg(), payload, offset, value));
+   return new(mem_ctx) fs_inst(SHADER_OPCODE_SHADER_TIME_ADD,
+                               fs_reg(), payload, offset, value);
 }
 
 void
@@ -2265,8 +2286,13 @@ fs_visitor::demote_pull_constants()
 	 if (inst->src[i].file != UNIFORM)
 	    continue;
 
-         int pull_index = pull_constant_loc[inst->src[i].reg +
-                                            inst->src[i].reg_offset];
+         int pull_index;
+         unsigned location = inst->src[i].reg + inst->src[i].reg_offset;
+         if (location >= uniforms) /* Out of bounds access */
+            pull_index = -1;
+         else
+            pull_index = pull_constant_loc[location];
+
          if (pull_index == -1)
 	    continue;
 
@@ -2955,16 +2981,6 @@ fs_visitor::insert_gen4_post_send_dependency_workarounds(bblock_t *block, fs_ins
       }
       if (i == write_len)
          return;
-   }
-
-   /* If we hit the end of the program, resolve all remaining dependencies out
-    * of paranoia.
-    */
-   fs_inst *last_inst = (fs_inst *)this->instructions.get_tail();
-   assert(last_inst->eot);
-   for (int i = 0; i < write_len; i++) {
-      if (needs_dep[i])
-         last_inst->insert_before(block, DEP_RESOLVE_MOV(first_write_grf + i));
    }
 }
 
@@ -3816,6 +3832,9 @@ fs_visitor::run_fs()
          emit_alpha_test();
 
       emit_fb_writes();
+
+      if (INTEL_DEBUG & DEBUG_SHADER_TIME)
+         emit_shader_time_end();
 
       optimize();
 

@@ -134,10 +134,11 @@ _mesa_meta_pbo_TexSubImage(struct gl_context *ctx, GLuint dims,
                            const struct gl_pixelstore_attrib *packing)
 {
    GLuint pbo = 0, pbo_tex = 0, fbos[2] = { 0, 0 };
+   int full_height, image_height;
    struct gl_texture_image *pbo_tex_image;
    GLenum status;
    bool success = false;
-   int z, iters;
+   int z;
 
    /* XXX: This should probably be passed in from somewhere */
    const char *where = "_mesa_meta_pbo_TexSubImage";
@@ -167,14 +168,16 @@ _mesa_meta_pbo_TexSubImage(struct gl_context *ctx, GLuint dims,
       return true;
    }
 
-   /* Only accept tightly packed pixels from the user. */
-   if (packing->ImageHeight != 0 && packing->ImageHeight != height)
-      return false;
+   /* For arrays, use a tall (height * depth) 2D texture but taking into
+    * account the inter-image padding specified with the image height packing
+    * property.
+    */
+   image_height = packing->ImageHeight == 0 ? height : packing->ImageHeight;
+   full_height = image_height * (depth - 1) + height;
 
-   /* For arrays, use a tall (height * depth) 2D texture. */
    pbo_tex_image = create_texture_for_pbo(ctx, create_pbo,
                                           GL_PIXEL_UNPACK_BUFFER,
-                                          width, height * depth,
+                                          width, full_height,
                                           format, type, pixels, packing,
                                           &pbo, &pbo_tex);
    if (!pbo_tex_image)
@@ -183,12 +186,22 @@ _mesa_meta_pbo_TexSubImage(struct gl_context *ctx, GLuint dims,
    if (allocate_storage)
       ctx->Driver.AllocTextureImageBuffer(ctx, tex_image);
 
-   /* Only stash the current FBO */
-   _mesa_meta_begin(ctx, 0);
+   _mesa_meta_begin(ctx, ~(MESA_META_PIXEL_TRANSFER |
+                           MESA_META_PIXEL_STORE));
 
    _mesa_GenFramebuffers(2, fbos);
    _mesa_BindFramebuffer(GL_READ_FRAMEBUFFER, fbos[0]);
    _mesa_BindFramebuffer(GL_DRAW_FRAMEBUFFER, fbos[1]);
+
+   if (tex_image->TexObject->Target == GL_TEXTURE_1D_ARRAY) {
+      assert(depth == 1);
+      assert(zoffset == 0);
+      depth = height;
+      height = 1;
+      image_height = 1;
+      zoffset = yoffset;
+      yoffset = 0;
+   }
 
    _mesa_meta_bind_fbo_image(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
                              pbo_tex_image, 0);
@@ -213,29 +226,18 @@ _mesa_meta_pbo_TexSubImage(struct gl_context *ctx, GLuint dims,
                                   GL_COLOR_BUFFER_BIT, GL_NEAREST))
       goto fail;
 
-   iters = tex_image->TexObject->Target == GL_TEXTURE_1D_ARRAY ?
-           height : depth;
-
-   for (z = 1; z < iters; z++) {
-      _mesa_meta_bind_fbo_image(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
-                                pbo_tex_image, z);
+   for (z = 1; z < depth; z++) {
       _mesa_meta_bind_fbo_image(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
                                 tex_image, zoffset + z);
 
       _mesa_update_state(ctx);
 
-      if (tex_image->TexObject->Target == GL_TEXTURE_1D_ARRAY)
-         _mesa_meta_BlitFramebuffer(ctx, ctx->ReadBuffer, ctx->DrawBuffer,
-                                    0, z, width, z + 1,
-                                    xoffset, yoffset,
-                                    xoffset + width, yoffset + 1,
-                                    GL_COLOR_BUFFER_BIT, GL_NEAREST);
-      else
-         _mesa_meta_BlitFramebuffer(ctx, ctx->ReadBuffer, ctx->DrawBuffer,
-                                    0, z * height, width, (z + 1) * height,
-                                    xoffset, yoffset,
-                                    xoffset + width, yoffset + height,
-                                    GL_COLOR_BUFFER_BIT, GL_NEAREST);
+      _mesa_meta_BlitFramebuffer(ctx, ctx->ReadBuffer, ctx->DrawBuffer,
+                                 0, z * image_height,
+                                 width, z * image_height + height,
+                                 xoffset, yoffset,
+                                 xoffset + width, yoffset + height,
+                                 GL_COLOR_BUFFER_BIT, GL_NEAREST);
    }
 
    success = true;
@@ -259,10 +261,11 @@ _mesa_meta_pbo_GetTexSubImage(struct gl_context *ctx, GLuint dims,
                               const struct gl_pixelstore_attrib *packing)
 {
    GLuint pbo = 0, pbo_tex = 0, fbos[2] = { 0, 0 };
+   int full_height, image_height;
    struct gl_texture_image *pbo_tex_image;
    GLenum status;
    bool success = false;
-   int z, iters;
+   int z;
 
    /* XXX: This should probably be passed in from somewhere */
    const char *where = "_mesa_meta_pbo_GetTexSubImage";
@@ -292,22 +295,34 @@ _mesa_meta_pbo_GetTexSubImage(struct gl_context *ctx, GLuint dims,
       return true;
    }
 
-   /* Only accept tightly packed pixels from the user. */
-   if (packing->ImageHeight != 0 && packing->ImageHeight != height)
-      return false;
+   /* For arrays, use a tall (height * depth) 2D texture but taking into
+    * account the inter-image padding specified with the image height packing
+    * property.
+    */
+   image_height = packing->ImageHeight == 0 ? height : packing->ImageHeight;
+   full_height = image_height * (depth - 1) + height;
 
-   /* For arrays, use a tall (height * depth) 2D texture. */
    pbo_tex_image = create_texture_for_pbo(ctx, false, GL_PIXEL_PACK_BUFFER,
-                                          width, height * depth,
+                                          width, full_height * depth,
                                           format, type, pixels, packing,
                                           &pbo, &pbo_tex);
    if (!pbo_tex_image)
       return false;
 
-   /* Only stash the current FBO */
-   _mesa_meta_begin(ctx, 0);
+   _mesa_meta_begin(ctx, ~(MESA_META_PIXEL_TRANSFER |
+                           MESA_META_PIXEL_STORE));
 
    _mesa_GenFramebuffers(2, fbos);
+
+   if (tex_image && tex_image->TexObject->Target == GL_TEXTURE_1D_ARRAY) {
+      assert(depth == 1);
+      assert(zoffset == 0);
+      depth = height;
+      height = 1;
+      image_height = 1;
+      zoffset = yoffset;
+      yoffset = 0;
+   }
 
    /* If we were given a texture, bind it to the read framebuffer.  If not,
     * we're doing a ReadPixels and we should just use whatever framebuffer
@@ -342,31 +357,18 @@ _mesa_meta_pbo_GetTexSubImage(struct gl_context *ctx, GLuint dims,
                                   GL_COLOR_BUFFER_BIT, GL_NEAREST))
       goto fail;
 
-   if (tex_image && tex_image->TexObject->Target == GL_TEXTURE_1D_ARRAY)
-      iters = height;
-   else
-      iters = depth;
-
-   for (z = 1; z < iters; z++) {
+   for (z = 1; z < depth; z++) {
       _mesa_meta_bind_fbo_image(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
                                 tex_image, zoffset + z);
-      _mesa_meta_bind_fbo_image(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
-                                pbo_tex_image, z);
 
       _mesa_update_state(ctx);
 
-      if (tex_image->TexObject->Target == GL_TEXTURE_1D_ARRAY)
-         _mesa_meta_BlitFramebuffer(ctx, ctx->ReadBuffer, ctx->DrawBuffer,
-                                    xoffset, yoffset,
-                                    xoffset + width, yoffset + 1,
-                                    0, z, width, z + 1,
-                                    GL_COLOR_BUFFER_BIT, GL_NEAREST);
-      else
-         _mesa_meta_BlitFramebuffer(ctx, ctx->ReadBuffer, ctx->DrawBuffer,
-                                    xoffset, yoffset,
-                                    xoffset + width, yoffset + height,
-                                    0, z * height, width, (z + 1) * height,
-                                    GL_COLOR_BUFFER_BIT, GL_NEAREST);
+      _mesa_meta_BlitFramebuffer(ctx, ctx->ReadBuffer, ctx->DrawBuffer,
+                                 xoffset, yoffset,
+                                 xoffset + width, yoffset + height,
+                                 0, z * image_height,
+                                 width, z * image_height + height,
+                                 GL_COLOR_BUFFER_BIT, GL_NEAREST);
    }
 
    success = true;

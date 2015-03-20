@@ -420,8 +420,19 @@ static inline bool is_tex(struct ir3_instruction *instr)
 	return (instr->category == 5);
 }
 
+static inline bool is_mem(struct ir3_instruction *instr)
+{
+	return (instr->category == 6);
+}
+
 static inline bool is_input(struct ir3_instruction *instr)
 {
+	/* in some cases, ldlv is used to fetch varying without
+	 * interpolation.. fortunately inloc is the first src
+	 * register in either case
+	 */
+	if (is_mem(instr) && (instr->opc == OPC_LDLV))
+		return true;
 	return (instr->category == 2) && (instr->opc == OPC_BARY_F);
 }
 

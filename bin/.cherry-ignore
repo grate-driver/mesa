@@ -10,3 +10,14 @@
 
 # auxiliary/vl: bring back the VL code for the dri targets
 c39dbfdd0f764b1aaa7319b4694e7335692993dd
+
+# mesa: rename format_info.c to format_info.h
+3f6c28f2a976e35128b7a4a513cfa60af00301e1
+# mesa: fix dependency tracking of generated sources
+d22391cb165af4ed2f9a9e5d6233072a432cc969
+# mesa: drop Makefile from get_hash.h dependency list
+2c0f72d5389a9838cc4fbf4cc4f4291aa56c7845
+# mapi: fix *glapi dependency tracking
+fe5fddd7e2df74233a2a02ae021418485f39d11c
+# xmlpool: make sure we ship options.h
+8d8ca64c28170ec7e9ffa01638bcf8fd30a96088
