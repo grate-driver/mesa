@@ -81,6 +81,36 @@ Description: X acceleration library -- development files
  This package provides the development environment for compiling programs
  against the xatracker library.
 
+Package: libd3dadapter9-mesa
+Section: libs
+Architecture: linux-any kfreebsd-any
+Depends:
+ ${shlibs:Depends},
+ ${misc:Depends},
+ libudev1 [linux-any],
+Pre-Depends: ${misc:Pre-Depends}
+Multi-Arch: same
+Description: state-tracker for Direct3D9
+ This package contains a Gallium3D state tracker that implements the Direct3D9
+ API.  Combined with the gallium-nine branch of Wine, programs using D3D9 can
+ achieve native (or better) graphics performance.
+
+Package: libd3dadapter9-mesa-dev
+Section: libs
+Architecture: linux-any kfreebsd-any
+Depends:
+ ${shlibs:Depends},
+ ${misc:Depends},
+ libudev1 [linux-any],
+Pre-Depends: ${misc:Pre-Depends}
+Multi-Arch: same
+Description: state-tracker for Direct3D9 -- development files
+ This package contains a Gallium3D state tracker that implements the Direct3D9
+ API.  Combined with the gallium-nine branch of Wine, programs using D3D9 can
+ achieve native (or better) graphics performance.
+ .
+ Development files
+
 Package: libgbm1
 Section: libs
 Architecture: linux-any kfreebsd-any

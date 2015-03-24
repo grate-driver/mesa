@@ -139,6 +139,7 @@ confflags += \
 	--with-vulkan-drivers="$(VULKAN_DRIVERS)" \
 	--enable-libglvnd \
 	--enable-osmesa \
+	--enable-nine \
 	--enable-glx-tls \
 	--enable-shared-glapi \
 	--enable-texture-float \
