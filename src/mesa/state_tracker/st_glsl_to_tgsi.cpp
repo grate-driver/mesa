@@ -3668,6 +3668,7 @@ glsl_to_tgsi_visitor::copy_propagate(void)
              inst->dst.index == inst->src[0].index) &&
           !inst->dst.reladdr &&
           !inst->saturate &&
+          inst->src[0].file != PROGRAM_ARRAY &&
           !inst->src[0].reladdr &&
           !inst->src[0].reladdr2 &&
           !inst->src[0].negate) {
