@@ -49,6 +49,7 @@ noinst_HEADERS =					\
 	include/c99					\
 	include/c11					\
 	include/D3D9					\
+	include/VG					\
 	include/HaikuGL					\
 	include/pci_ids
 
