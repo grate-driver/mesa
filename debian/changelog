@@ -2,6 +2,7 @@ mesa (10.6.0~git20150427-1) UNRELEASED; urgency=medium
 
   * New upstream snapshot
   * libegl1-mesa.symbols: Added new symbols.
+  * not-installed: Dropped wmesa.h which is gone.
 
  -- Timo Aaltonen <tjaalton@debian.org>  Mon, 27 Apr 2015 10:43:45 +0300
 
