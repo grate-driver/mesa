@@ -68,14 +68,6 @@ public:
     */
    uint8_t width;
 
-   /**
-    * Returns the effective register width when used as a source in the
-    * given instruction.  Registers such as uniforms and immediates
-    * effectively take on the width of the instruction in which they are
-    * used.
-    */
-   uint8_t effective_width;
-
    /** Register region horizontal stride */
    uint8_t stride;
 };
@@ -166,6 +158,13 @@ component(fs_reg reg, unsigned idx)
    return reg;
 }
 
+static inline bool
+is_uniform(const fs_reg &reg)
+{
+   return (reg.width == 1 || reg.stride == 0 || reg.is_null()) &&
+          (!reg.reladdr || is_uniform(*reg.reladdr));
+}
+
 /**
  * Get either of the 8-component halves of a 16-component register.
  *
@@ -176,13 +175,24 @@ half(fs_reg reg, unsigned idx)
 {
    assert(idx < 2);
 
-   if (reg.file == UNIFORM)
+   switch (reg.file) {
+   case BAD_FILE:
+   case UNIFORM:
+   case IMM:
       return reg;
 
-   assert(idx == 0 || (reg.file != HW_REG && reg.file != IMM));
-   assert(reg.width == 16);
-   reg.width = 8;
-   return horiz_offset(reg, 8 * idx);
+   case GRF:
+   case MRF:
+      assert(reg.width == 16);
+      reg.width = 8;
+      return horiz_offset(reg, 8 * idx);
+
+   case ATTR:
+   case HW_REG:
+   default:
+      unreachable("Cannot take half of this register type");
+   }
+   return reg;
 }
 
 static const fs_reg reg_undef;
@@ -223,6 +233,7 @@ public:
    bool overwrites_reg(const fs_reg &reg) const;
    bool is_send_from_grf() const;
    bool is_partial_write() const;
+   bool is_copy_payload(const brw::simple_allocator &grf_alloc) const;
    int regs_read(int arg) const;
    bool can_do_source_mods(const struct brw_device_info *devinfo);
    bool has_side_effects() const;

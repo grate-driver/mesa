@@ -26,13 +26,13 @@
  */
 
 #include "genhw/genhw.h" /* for SBE setup */
-#include "tgsi/tgsi_parse.h"
-#include "intel_winsys.h"
-
+#include "core/ilo_builder.h"
+#include "core/ilo_state_3d.h"
+#include "core/intel_winsys.h"
 #include "shader/ilo_shader_internal.h"
-#include "ilo_builder.h"
+#include "tgsi/tgsi_parse.h"
+
 #include "ilo_state.h"
-#include "ilo_state_3d.h"
 #include "ilo_shader.h"
 
 struct ilo_shader_cache {
@@ -442,7 +442,7 @@ ilo_shader_info_parse_tokens(struct ilo_shader_info *info)
  * Create a shader state.
  */
 static struct ilo_shader_state *
-ilo_shader_state_create(const struct ilo_dev_info *dev,
+ilo_shader_state_create(const struct ilo_dev *dev,
                         const struct ilo_state_vector *vec,
                         int type, const void *templ)
 {
@@ -682,7 +682,7 @@ ilo_shader_state_use_variant(struct ilo_shader_state *state,
 }
 
 struct ilo_shader_state *
-ilo_shader_create_vs(const struct ilo_dev_info *dev,
+ilo_shader_create_vs(const struct ilo_dev *dev,
                      const struct pipe_shader_state *state,
                      const struct ilo_state_vector *precompile)
 {
@@ -700,7 +700,7 @@ ilo_shader_create_vs(const struct ilo_dev_info *dev,
 }
 
 struct ilo_shader_state *
-ilo_shader_create_gs(const struct ilo_dev_info *dev,
+ilo_shader_create_gs(const struct ilo_dev *dev,
                      const struct pipe_shader_state *state,
                      const struct ilo_state_vector *precompile)
 {
@@ -719,7 +719,7 @@ ilo_shader_create_gs(const struct ilo_dev_info *dev,
 }
 
 struct ilo_shader_state *
-ilo_shader_create_fs(const struct ilo_dev_info *dev,
+ilo_shader_create_fs(const struct ilo_dev *dev,
                      const struct pipe_shader_state *state,
                      const struct ilo_state_vector *precompile)
 {
@@ -738,7 +738,7 @@ ilo_shader_create_fs(const struct ilo_dev_info *dev,
 }
 
 struct ilo_shader_state *
-ilo_shader_create_cs(const struct ilo_dev_info *dev,
+ilo_shader_create_cs(const struct ilo_dev *dev,
                      const struct pipe_compute_state *state,
                      const struct ilo_state_vector *precompile)
 {

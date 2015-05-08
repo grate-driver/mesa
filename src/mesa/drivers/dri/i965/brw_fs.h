@@ -89,6 +89,14 @@ public:
               struct gl_vertex_program *cp,
               unsigned dispatch_width);
 
+   fs_visitor(struct brw_context *brw,
+              void *mem_ctx,
+              const struct brw_cs_prog_key *key,
+              struct brw_cs_prog_data *prog_data,
+              struct gl_shader_program *shader_prog,
+              struct gl_compute_program *cp,
+              unsigned dispatch_width);
+
    ~fs_visitor();
    void init();
 
@@ -180,7 +188,8 @@ public:
 					   fs_inst *end,
 					   const fs_reg &reg);
 
-   fs_inst *LOAD_PAYLOAD(const fs_reg &dst, fs_reg *src, int sources);
+   fs_inst *LOAD_PAYLOAD(const fs_reg &dst, fs_reg *src, int sources,
+                         int header_size);
 
    exec_list VARYING_PULL_CONSTANT_LOAD(const fs_reg &dst,
                                         const fs_reg &surf_index,
@@ -189,12 +198,14 @@ public:
 
    bool run_fs();
    bool run_vs();
+   bool run_cs();
    void optimize();
    void allocate_registers();
    void assign_binding_table_offsets();
    void setup_payload_gen4();
    void setup_payload_gen6();
    void setup_vs_payload();
+   void setup_cs_payload();
    void fixup_3src_null_dest();
    void assign_curb_setup();
    void calculate_urb_setup();
@@ -229,6 +240,7 @@ public:
    bool opt_register_renaming();
    bool register_coalesce();
    bool compute_to_mrf();
+   bool eliminate_find_live_channel();
    bool dead_code_eliminate();
    bool remove_duplicate_mrf_writes();
 
@@ -314,6 +326,8 @@ public:
    void emit_minmax(enum brw_conditional_mod conditionalmod, const fs_reg &dst,
                     const fs_reg &src0, const fs_reg &src1);
    void emit_discard_jump();
+   /** Copy any live channel from \p src to the first channel of \p dst. */
+   void emit_uniformize(const fs_reg &dst, const fs_reg &src);
    bool try_emit_b2f_of_comparison(ir_expression *ir);
    bool try_emit_saturate(ir_expression *ir);
    bool try_emit_line(ir_expression *ir);
@@ -324,6 +338,7 @@ public:
    bool opt_peephole_predicated_break();
    bool opt_saturate_propagation();
    bool opt_cmod_propagation();
+   bool opt_zero_samples();
    void emit_bool_to_cond_code(ir_rvalue *condition);
    void emit_bool_to_cond_code_of_reg(ir_expression *expr, fs_reg op[3]);
    void emit_if_gen6(ir_if *ir);
@@ -379,14 +394,15 @@ public:
    bool optimize_frontfacing_ternary(nir_alu_instr *instr,
                                      const fs_reg &result);
 
-   int setup_color_payload(fs_reg *dst, fs_reg color, unsigned components,
-                           bool use_2nd_half);
+   void setup_color_payload(fs_reg *dst, fs_reg color, unsigned components,
+                            unsigned exec_size, bool use_2nd_half);
    void emit_alpha_test();
    fs_inst *emit_single_fb_write(fs_reg color1, fs_reg color2,
                                  fs_reg src0_alpha, unsigned components,
-                                 bool use_2nd_half = false);
+                                 unsigned exec_size, bool use_2nd_half = false);
    void emit_fb_writes();
    void emit_urb_writes();
+   void emit_cs_terminate();
 
    void emit_shader_time_begin();
    void emit_shader_time_end();
@@ -555,6 +571,7 @@ private:
                       GLuint nr);
    void generate_fb_write(fs_inst *inst, struct brw_reg payload);
    void generate_urb_write(fs_inst *inst, struct brw_reg payload);
+   void generate_cs_terminate(fs_inst *inst, struct brw_reg payload);
    void generate_blorp_fb_write(fs_inst *inst);
    void generate_linterp(fs_inst *inst, struct brw_reg dst,
 			 struct brw_reg *src);
@@ -625,17 +642,6 @@ private:
                                  struct brw_reg offset,
                                  struct brw_reg value);
 
-   void generate_untyped_atomic(fs_inst *inst,
-                                struct brw_reg dst,
-                                struct brw_reg payload,
-                                struct brw_reg atomic_op,
-                                struct brw_reg surf_index);
-
-   void generate_untyped_surface_read(fs_inst *inst,
-                                      struct brw_reg dst,
-                                      struct brw_reg payload,
-                                      struct brw_reg surf_index);
-
    bool patch_discard_jumps_to_fb_writes();
 
    struct brw_context *brw;
@@ -660,3 +666,6 @@ private:
 
 bool brw_do_channel_expressions(struct exec_list *instructions);
 bool brw_do_vector_splitting(struct exec_list *instructions);
+void brw_setup_tex_for_precompile(struct brw_context *brw,
+                                  struct brw_sampler_prog_key_data *tex,
+                                  struct gl_program *prog);

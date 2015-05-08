@@ -695,7 +695,8 @@ struct gl_current_attrib
     * \note Index and Edgeflag current values are stored as floats in the 
     * SIX and SEVEN attribute slots.
     */
-   GLfloat Attrib[VERT_ATTRIB_MAX][4];	/**< Position, color, texcoords, etc */
+   /* we need double storage for this for vertex attrib 64bit */
+   GLfloat Attrib[VERT_ATTRIB_MAX][4*2];	/**< Position, color, texcoords, etc */
 
    /**
     * \name Current raster position attributes (always valid).
@@ -1523,6 +1524,7 @@ struct gl_client_array
    GLboolean Enabled;		/**< Enabled flag is a boolean */
    GLboolean Normalized;        /**< GL_ARB_vertex_program */
    GLboolean Integer;           /**< Integer-valued? */
+   GLboolean Doubles;       /**< double precision values are not converted to floats */
    GLuint InstanceDivisor;      /**< GL_ARB_instanced_arrays */
 
    struct gl_buffer_object *BufferObj;/**< GL_ARB_vertex_buffer_object */
@@ -1553,6 +1555,7 @@ struct gl_vertex_attrib_array
    GLboolean Enabled;       /**< Whether the array is enabled */
    GLboolean Normalized;    /**< Fixed-point values are normalized when converted to floats */
    GLboolean Integer;       /**< Fixed-point values are not converted to floats */
+   GLboolean Doubles;       /**< double precision values are not converted to floats */
    GLuint _ElementSize;     /**< Size of each element in bytes */
    GLuint VertexBinding;    /**< Vertex buffer binding */
 };
@@ -2090,6 +2093,7 @@ struct gl_program
    struct nir_shader *nir;
 
    GLbitfield64 InputsRead;     /**< Bitmask of which input regs are read */
+   GLbitfield64 DoubleInputsRead;     /**< Bitmask of which input regs are read  and are doubles */
    GLbitfield64 OutputsWritten; /**< Bitmask of which output regs are written */
    GLbitfield SystemValuesRead;   /**< Bitmask of SYSTEM_VALUE_x inputs used */
    GLbitfield InputFlags[MAX_PROGRAM_INPUTS];   /**< PROG_PARAM_BIT_x flags */
@@ -2497,6 +2501,12 @@ struct gl_shader
     * ImageAccess arrays above.
     */
    GLuint NumImages;
+
+   /**
+    * Whether early fragment tests are enabled as defined by
+    * ARB_shader_image_load_store.
+    */
+   bool EarlyFragmentTests;
 
    /**
     * Compute shader state from ARB_compute_shader layout qualifiers.
@@ -3672,6 +3682,7 @@ struct gl_extensions
    GLboolean ARB_transform_feedback3;
    GLboolean ARB_transform_feedback_instanced;
    GLboolean ARB_uniform_buffer_object;
+   GLboolean ARB_vertex_attrib_64bit;
    GLboolean ARB_vertex_program;
    GLboolean ARB_vertex_shader;
    GLboolean ARB_vertex_type_10f_11f_11f_rev;

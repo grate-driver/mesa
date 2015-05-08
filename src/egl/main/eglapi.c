@@ -406,6 +406,8 @@ _eglCreateExtensionsString(_EGLDisplay *dpy)
 
    _EGL_CHECK_EXTENSION(KHR_reusable_sync);
    _EGL_CHECK_EXTENSION(KHR_fence_sync);
+   _EGL_CHECK_EXTENSION(KHR_wait_sync);
+   _EGL_CHECK_EXTENSION(KHR_cl_event2);
 
    _EGL_CHECK_EXTENSION(KHR_surfaceless_context);
    _EGL_CHECK_EXTENSION(KHR_create_context);
@@ -1214,8 +1216,10 @@ eglGetProcAddress(const char *procname)
       { "eglCreateImageKHR", (_EGLProc) eglCreateImageKHR },
       { "eglDestroyImageKHR", (_EGLProc) eglDestroyImageKHR },
       { "eglCreateSyncKHR", (_EGLProc) eglCreateSyncKHR },
+      { "eglCreateSync64KHR", (_EGLProc) eglCreateSync64KHR },
       { "eglDestroySyncKHR", (_EGLProc) eglDestroySyncKHR },
       { "eglClientWaitSyncKHR", (_EGLProc) eglClientWaitSyncKHR },
+      { "eglWaitSyncKHR", (_EGLProc) eglWaitSyncKHR },
       { "eglSignalSyncKHR", (_EGLProc) eglSignalSyncKHR },
       { "eglGetSyncAttribKHR", (_EGLProc) eglGetSyncAttribKHR },
 #ifdef EGL_NOK_swap_region
@@ -1241,7 +1245,7 @@ eglGetProcAddress(const char *procname)
       { "eglCreatePlatformWindowSurfaceEXT", (_EGLProc) eglCreatePlatformWindowSurfaceEXT },
       { "eglCreatePlatformPixmapSurfaceEXT", (_EGLProc) eglCreatePlatformPixmapSurfaceEXT },
       { "eglGetSyncValuesCHROMIUM", (_EGLProc) eglGetSyncValuesCHROMIUM },
-#ifdef EGL_MESA_drm_buf_image_export
+#ifdef EGL_MESA_dma_buf_image_export
       { "eglExportDMABUFImageQueryMESA", (_EGLProc) eglExportDMABUFImageQueryMESA },
       { "eglExportDMABUFImageMESA", (_EGLProc) eglExportDMABUFImageMESA },
 #endif
@@ -1653,22 +1657,61 @@ eglDestroyImageKHR(EGLDisplay dpy, EGLImageKHR image)
 }
 
 
-EGLSyncKHR EGLAPIENTRY
-eglCreateSyncKHR(EGLDisplay dpy, EGLenum type, const EGLint *attrib_list)
+static EGLSyncKHR
+_eglCreateSync(EGLDisplay dpy, EGLenum type, const EGLint *attrib_list,
+               const EGLAttribKHR *attrib_list64, EGLBoolean is64)
 {
    _EGLDisplay *disp = _eglLockDisplay(dpy);
+   _EGLContext *ctx = _eglGetCurrentContext();
    _EGLDriver *drv;
    _EGLSync *sync;
    EGLSyncKHR ret;
 
    _EGL_CHECK_DISPLAY(disp, EGL_NO_SYNC_KHR, drv);
-   if (!disp->Extensions.KHR_reusable_sync)
+
+   if (!disp->Extensions.KHR_cl_event2 && is64)
       RETURN_EGL_EVAL(disp, EGL_NO_SYNC_KHR);
 
-   sync = drv->API.CreateSyncKHR(drv, disp, type, attrib_list);
+   /* return an error if the client API doesn't support GL_OES_EGL_sync */
+   if (!ctx || ctx->Resource.Display != dpy ||
+       ctx->ClientAPI != EGL_OPENGL_ES_API)
+      RETURN_EGL_ERROR(disp, EGL_BAD_MATCH, EGL_NO_SYNC_KHR);
+
+   switch (type) {
+   case EGL_SYNC_FENCE_KHR:
+      if (!disp->Extensions.KHR_fence_sync)
+         RETURN_EGL_ERROR(disp, EGL_BAD_ATTRIBUTE, EGL_NO_SYNC_KHR);
+      break;
+   case EGL_SYNC_REUSABLE_KHR:
+      if (!disp->Extensions.KHR_reusable_sync)
+         RETURN_EGL_ERROR(disp, EGL_BAD_ATTRIBUTE, EGL_NO_SYNC_KHR);
+      break;
+   case EGL_SYNC_CL_EVENT_KHR:
+      if (!disp->Extensions.KHR_cl_event2)
+         RETURN_EGL_ERROR(disp, EGL_BAD_ATTRIBUTE, EGL_NO_SYNC_KHR);
+      break;
+   default:
+      RETURN_EGL_ERROR(disp, EGL_BAD_ATTRIBUTE, EGL_NO_SYNC_KHR);
+   }
+
+   sync = drv->API.CreateSyncKHR(drv, disp, type, attrib_list, attrib_list64);
    ret = (sync) ? _eglLinkSync(sync) : EGL_NO_SYNC_KHR;
 
    RETURN_EGL_EVAL(disp, ret);
+}
+
+
+EGLSyncKHR EGLAPIENTRY
+eglCreateSyncKHR(EGLDisplay dpy, EGLenum type, const EGLint *attrib_list)
+{
+   return _eglCreateSync(dpy, type, attrib_list, NULL, EGL_FALSE);
+}
+
+
+EGLSyncKHR EGLAPIENTRY
+eglCreateSync64KHR(EGLDisplay dpy, EGLenum type, const EGLAttribKHR *attrib_list)
+{
+   return _eglCreateSync(dpy, type, NULL, attrib_list, EGL_TRUE);
 }
 
 
@@ -1681,7 +1724,8 @@ eglDestroySyncKHR(EGLDisplay dpy, EGLSyncKHR sync)
    EGLBoolean ret;
 
    _EGL_CHECK_SYNC(disp, s, EGL_FALSE, drv);
-   assert(disp->Extensions.KHR_reusable_sync);
+   assert(disp->Extensions.KHR_reusable_sync ||
+          disp->Extensions.KHR_fence_sync);
 
    _eglUnlinkSync(s);
    ret = drv->API.DestroySyncKHR(drv, disp, s);
@@ -1699,8 +1743,39 @@ eglClientWaitSyncKHR(EGLDisplay dpy, EGLSyncKHR sync, EGLint flags, EGLTimeKHR t
    EGLint ret;
 
    _EGL_CHECK_SYNC(disp, s, EGL_FALSE, drv);
-   assert(disp->Extensions.KHR_reusable_sync);
+   assert(disp->Extensions.KHR_reusable_sync ||
+          disp->Extensions.KHR_fence_sync);
+
+   if (s->SyncStatus == EGL_SIGNALED_KHR)
+      RETURN_EGL_EVAL(disp, EGL_CONDITION_SATISFIED_KHR);
+
    ret = drv->API.ClientWaitSyncKHR(drv, disp, s, flags, timeout);
+
+   RETURN_EGL_EVAL(disp, ret);
+}
+
+
+EGLint EGLAPIENTRY
+eglWaitSyncKHR(EGLDisplay dpy, EGLSyncKHR sync, EGLint flags)
+{
+   _EGLDisplay *disp = _eglLockDisplay(dpy);
+   _EGLSync *s = _eglLookupSync(sync, disp);
+   _EGLContext *ctx = _eglGetCurrentContext();
+   _EGLDriver *drv;
+   EGLint ret;
+
+   _EGL_CHECK_SYNC(disp, s, EGL_FALSE, drv);
+   assert(disp->Extensions.KHR_wait_sync);
+
+   /* return an error if the client API doesn't support GL_OES_EGL_sync */
+   if (ctx == EGL_NO_CONTEXT || ctx->ClientAPI != EGL_OPENGL_ES_API)
+      RETURN_EGL_ERROR(disp, EGL_BAD_MATCH, EGL_FALSE);
+
+   /* the API doesn't allow any flags yet */
+   if (flags != 0)
+      RETURN_EGL_ERROR(disp, EGL_BAD_PARAMETER, EGL_FALSE);
+
+   ret = drv->API.WaitSyncKHR(drv, disp, s);
 
    RETURN_EGL_EVAL(disp, ret);
 }
@@ -1731,7 +1806,8 @@ eglGetSyncAttribKHR(EGLDisplay dpy, EGLSyncKHR sync, EGLint attribute, EGLint *v
    EGLBoolean ret;
 
    _EGL_CHECK_SYNC(disp, s, EGL_FALSE, drv);
-   assert(disp->Extensions.KHR_reusable_sync);
+   assert(disp->Extensions.KHR_reusable_sync ||
+          disp->Extensions.KHR_fence_sync);
    ret = drv->API.GetSyncAttribKHR(drv, disp, s, attribute, value);
 
    RETURN_EGL_EVAL(disp, ret);
@@ -1937,7 +2013,7 @@ eglGetSyncValuesCHROMIUM(EGLDisplay display, EGLSurface surface,
 EGLBoolean EGLAPIENTRY
 eglExportDMABUFImageQueryMESA(EGLDisplay dpy, EGLImageKHR image,
                               EGLint *fourcc, EGLint *nplanes,
-                              EGLuint64MESA *modifiers)
+                              EGLuint64KHR *modifiers)
 {
    _EGLDisplay *disp = _eglLockDisplay(dpy);
    _EGLImage *img = _eglLookupImage(image, disp);

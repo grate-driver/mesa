@@ -827,8 +827,30 @@ fs_visitor::nir_emit_alu(nir_alu_instr *instr)
 
       struct brw_reg acc = retype(brw_acc_reg(dispatch_width), result.type);
 
-      emit(MUL(acc, op[0], op[1]));
+      fs_inst *mul = emit(MUL(acc, op[0], op[1]));
       emit(MACH(result, op[0], op[1]));
+
+      /* Until Gen8, integer multiplies read 32-bits from one source, and
+       * 16-bits from the other, and relying on the MACH instruction to
+       * generate the high bits of the result.
+       *
+       * On Gen8, the multiply instruction does a full 32x32-bit multiply,
+       * but in order to do a 64x64-bit multiply we have to simulate the
+       * previous behavior and then use a MACH instruction.
+       *
+       * FINISHME: Don't use source modifiers on src1.
+       */
+      if (devinfo->gen >= 8) {
+         assert(mul->src[1].type == BRW_REGISTER_TYPE_D ||
+                mul->src[1].type == BRW_REGISTER_TYPE_UD);
+         if (mul->src[1].type == BRW_REGISTER_TYPE_D) {
+            mul->src[1].type = BRW_REGISTER_TYPE_W;
+            mul->src[1].stride = 2;
+         } else {
+            mul->src[1].type = BRW_REGISTER_TYPE_UW;
+            mul->src[1].stride = 2;
+         }
+      }
       break;
    }
 
@@ -1385,13 +1407,13 @@ fs_visitor::nir_emit_intrinsic(nir_intrinsic_instr *instr)
                              const_index->u[0]);
       } else {
          /* The block index is not a constant. Evaluate the index expression
-          * per-channel and add the base UBO index; the generator will select
-          * a value from any live channel.
+          * per-channel and add the base UBO index; we have to select a value
+          * from any live channel.
           */
          surf_index = vgrf(glsl_type::uint_type);
          emit(ADD(surf_index, get_nir_src(instr->src[0]),
-                  fs_reg(stage_prog_data->binding_table.ubo_start)))
-            ->force_writemask_all = true;
+                  fs_reg(stage_prog_data->binding_table.ubo_start)));
+         emit_uniformize(surf_index, surf_index);
 
          /* Assume this may touch any UBO. It would be nice to provide
           * a tighter bound, but the array information is already lowered away.
@@ -1685,8 +1707,8 @@ fs_visitor::nir_emit_texture(nir_tex_instr *instr)
 
          /* Emit code to evaluate the actual indexing expression */
          sampler_reg = vgrf(glsl_type::uint_type);
-         emit(ADD(sampler_reg, src, fs_reg(sampler)))
-             ->force_writemask_all = true;
+         emit(ADD(sampler_reg, src, fs_reg(sampler)));
+         emit_uniformize(sampler_reg, sampler_reg);
          break;
       }
 

@@ -192,12 +192,14 @@ struct backend_instruction {
    bool no_dd_check:1;
    bool saturate:1;
    bool shadow_compare:1;
-   bool header_present:1;
 
    /* Chooses which flag subregister (f0.0 or f0.1) is used for conditional
     * mod and predication.
     */
    unsigned flag_subreg:1;
+
+   /** The number of hardware registers used for a message header. */
+   uint8_t header_size;
 };
 
 #ifdef __cplusplus
@@ -285,6 +287,9 @@ bool brw_gs_precompile(struct gl_context *ctx,
                        struct gl_shader_program *shader_prog,
                        struct gl_program *prog);
 bool brw_fs_precompile(struct gl_context *ctx,
+                       struct gl_shader_program *shader_prog,
+                       struct gl_program *prog);
+bool brw_cs_precompile(struct gl_context *ctx,
                        struct gl_shader_program *shader_prog,
                        struct gl_program *prog);
 

@@ -293,7 +293,8 @@ fs_visitor::try_copy_propagate(fs_inst *inst, int arg, acp_entry *entry)
 
    if (entry->src.file == IMM)
       return false;
-   assert(entry->src.file == GRF || entry->src.file == UNIFORM);
+   assert(entry->src.file == GRF || entry->src.file == UNIFORM ||
+          entry->src.file == ATTR);
 
    if (entry->opcode == SHADER_OPCODE_LOAD_PAYLOAD &&
        inst->opcode == SHADER_OPCODE_LOAD_PAYLOAD)
@@ -394,6 +395,7 @@ fs_visitor::try_copy_propagate(fs_inst *inst, int arg, acp_entry *entry)
       inst->src[arg].reg_offset = entry->src.reg_offset;
       inst->src[arg].subreg_offset = entry->src.subreg_offset;
       break;
+   case ATTR:
    case GRF:
       {
          assert(entry->src.width % inst->src[arg].width == 0);
@@ -475,7 +477,6 @@ fs_visitor::try_constant_propagate(fs_inst *inst, acp_entry *entry)
          continue;
 
       fs_reg val = entry->src;
-      val.effective_width = inst->src[i].effective_width;
       val.type = inst->src[i].type;
 
       if (inst->src[i].abs) {
@@ -608,6 +609,7 @@ fs_visitor::try_constant_propagate(fs_inst *inst, acp_entry *entry)
          break;
 
       case FS_OPCODE_UNIFORM_PULL_CONSTANT_LOAD:
+      case SHADER_OPCODE_BROADCAST:
          inst->src[i] = val;
          progress = true;
          break;
@@ -634,6 +636,7 @@ can_propagate_from(fs_inst *inst)
            ((inst->src[0].file == GRF &&
              (inst->src[0].reg != inst->dst.reg ||
               inst->src[0].reg_offset != inst->dst.reg_offset)) ||
+            inst->src[0].file == ATTR ||
             inst->src[0].file == UNIFORM ||
             inst->src[0].file == IMM) &&
            inst->src[0].type == inst->dst.type &&
@@ -698,13 +701,13 @@ fs_visitor::opt_copy_propagate_local(void *copy_prop_ctx, bblock_t *block,
                  inst->dst.file == GRF) {
          int offset = 0;
          for (int i = 0; i < inst->sources; i++) {
-            int regs_written = ((inst->src[i].effective_width *
-                                 type_sz(inst->src[i].type)) + 31) / 32;
+            int effective_width = i < inst->header_size ? 8 : inst->exec_size;
+            int regs_written = effective_width / 8;
             if (inst->src[i].file == GRF) {
                acp_entry *entry = ralloc(copy_prop_ctx, acp_entry);
                entry->dst = inst->dst;
                entry->dst.reg_offset = offset;
-               entry->dst.width = inst->src[i].effective_width;
+               entry->dst.width = effective_width;
                entry->src = inst->src[i];
                entry->regs_written = regs_written;
                entry->opcode = inst->opcode;

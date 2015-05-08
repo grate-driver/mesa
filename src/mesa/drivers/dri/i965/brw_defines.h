@@ -904,12 +904,33 @@ enum opcode {
 
    SHADER_OPCODE_UNTYPED_ATOMIC,
    SHADER_OPCODE_UNTYPED_SURFACE_READ,
+   SHADER_OPCODE_UNTYPED_SURFACE_WRITE,
+
+   SHADER_OPCODE_TYPED_ATOMIC,
+   SHADER_OPCODE_TYPED_SURFACE_READ,
+   SHADER_OPCODE_TYPED_SURFACE_WRITE,
+
+   SHADER_OPCODE_MEMORY_FENCE,
 
    SHADER_OPCODE_GEN4_SCRATCH_READ,
    SHADER_OPCODE_GEN4_SCRATCH_WRITE,
    SHADER_OPCODE_GEN7_SCRATCH_READ,
 
    SHADER_OPCODE_URB_WRITE_SIMD8,
+
+   /**
+    * Return the index of an arbitrary live channel (i.e. one of the channels
+    * enabled in the current execution mask) and assign it to the first
+    * component of the destination.  Expected to be used as input for the
+    * BROADCAST pseudo-opcode.
+    */
+   SHADER_OPCODE_FIND_LIVE_CHANNEL,
+
+   /**
+    * Pick the channel from its first source register given by the index
+    * specified as second source.  Useful for variable indexing of surfaces.
+    */
+   SHADER_OPCODE_BROADCAST,
 
    VEC4_OPCODE_MOV_BYTES,
    VEC4_OPCODE_PACK_BYTES,
@@ -1103,6 +1124,11 @@ enum opcode {
     *   and number of SO primitives needed.
     */
    GS_OPCODE_FF_SYNC_SET_PRIMITIVES,
+
+   /**
+    * Terminate the compute shader.
+    */
+   CS_OPCODE_CS_TERMINATE,
 };
 
 enum brw_urb_write_flags {
@@ -1686,7 +1712,7 @@ enum brw_message_target {
 # define GEN6_CC_VIEWPORT_MODIFY			(1 << 12)
 # define GEN6_SF_VIEWPORT_MODIFY			(1 << 11)
 # define GEN6_CLIP_VIEWPORT_MODIFY			(1 << 10)
-# define GEN7_NUM_VIEWPORTS				16
+# define GEN6_NUM_VIEWPORTS				16
 
 #define _3DSTATE_VIEWPORT_STATE_POINTERS_CC	0x7823 /* GEN7+ */
 #define _3DSTATE_VIEWPORT_STATE_POINTERS_SF_CL	0x7821 /* GEN7+ */
@@ -2259,6 +2285,7 @@ enum brw_wm_barycentric_interp_mode {
 # define GEN7_PS_SPF_MODE				(1 << 31)
 # define GEN7_PS_VECTOR_MASK_ENABLE			(1 << 30)
 # define GEN7_PS_SAMPLER_COUNT_SHIFT			27
+# define GEN7_PS_SAMPLER_COUNT_MASK                     INTEL_MASK(29, 27)
 # define GEN7_PS_BINDING_TABLE_ENTRY_COUNT_SHIFT	18
 # define GEN7_PS_FLOATING_POINT_MODE_IEEE_754		(0 << 16)
 # define GEN7_PS_FLOATING_POINT_MODE_ALT		(1 << 16)
@@ -2443,5 +2470,39 @@ enum brw_wm_barycentric_interp_mode {
  */
 #define SKL_MOCS_WB 9
 #define SKL_MOCS_WT 5
+
+#define MEDIA_VFE_STATE                         0x7000
+/* GEN7 DW2, GEN8+ DW3 */
+# define MEDIA_VFE_STATE_MAX_THREADS_SHIFT      16
+# define MEDIA_VFE_STATE_MAX_THREADS_MASK       INTEL_MASK(31, 16)
+# define MEDIA_VFE_STATE_URB_ENTRIES_SHIFT      8
+# define MEDIA_VFE_STATE_URB_ENTRIES_MASK       INTEL_MASK(15, 8)
+# define MEDIA_VFE_STATE_RESET_GTW_TIMER_SHIFT  7
+# define MEDIA_VFE_STATE_RESET_GTW_TIMER_MASK   INTEL_MASK(7, 7)
+# define MEDIA_VFE_STATE_BYPASS_GTW_SHIFT       6
+# define MEDIA_VFE_STATE_BYPASS_GTW_MASK        INTEL_MASK(6, 6)
+# define GEN7_MEDIA_VFE_STATE_GPGPU_MODE_SHIFT  2
+# define GEN7_MEDIA_VFE_STATE_GPGPU_MODE_MASK   INTEL_MASK(2, 2)
+/* GEN7 DW4, GEN8+ DW5 */
+# define MEDIA_VFE_STATE_URB_ALLOC_SHIFT        16
+# define MEDIA_VFE_STATE_URB_ALLOC_MASK         INTEL_MASK(31, 16)
+# define MEDIA_VFE_STATE_CURBE_ALLOC_SHIFT      0
+# define MEDIA_VFE_STATE_CURBE_ALLOC_MASK       INTEL_MASK(15, 0)
+
+#define MEDIA_INTERFACE_DESCRIPTOR_LOAD         0x7002
+#define MEDIA_STATE_FLUSH                       0x7004
+#define GPGPU_WALKER                            0x7105
+/* GEN8+ DW2 */
+# define GPGPU_WALKER_INDIRECT_LENGTH_SHIFT     0
+# define GPGPU_WALKER_INDIRECT_LENGTH_MASK      INTEL_MASK(15, 0)
+/* GEN7 DW2, GEN8+ DW4 */
+# define GPGPU_WALKER_SIMD_SIZE_SHIFT           30
+# define GPGPU_WALKER_SIMD_SIZE_MASK            INTEL_MASK(31, 30)
+# define GPGPU_WALKER_THREAD_DEPTH_MAX_SHIFT    16
+# define GPGPU_WALKER_THREAD_DEPTH_MAX_MASK     INTEL_MASK(21, 16)
+# define GPGPU_WALKER_THREAD_HEIGHT_MAX_SHIFT   8
+# define GPGPU_WALKER_THREAD_HEIGHT_MAX_MASK    INTEL_MASK(31, 8)
+# define GPGPU_WALKER_THREAD_WIDTH_MAX_SHIFT    0
+# define GPGPU_WALKER_THREAD_WIDTH_MAX_MASK     INTEL_MASK(5, 0)
 
 #endif

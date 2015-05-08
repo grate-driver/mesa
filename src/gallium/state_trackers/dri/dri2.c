@@ -29,6 +29,7 @@
  */
 
 #include <xf86drm.h>
+#include <dlfcn.h>
 #include "util/u_memory.h"
 #include "util/u_inlines.h"
 #include "util/u_format.h"
@@ -1251,6 +1252,153 @@ static __DRIimageExtension dri2ImageExtension = {
     .getCapabilities              = dri2_get_capabilities,
 };
 
+
+static bool
+dri2_is_opencl_interop_loaded_locked(struct dri_screen *screen)
+{
+   return screen->opencl_dri_event_add_ref &&
+          screen->opencl_dri_event_release &&
+          screen->opencl_dri_event_wait &&
+          screen->opencl_dri_event_get_fence;
+}
+
+static bool
+dri2_load_opencl_interop(struct dri_screen *screen)
+{
+#if defined(RTLD_DEFAULT)
+   bool success;
+
+   pipe_mutex_lock(screen->opencl_func_mutex);
+
+   if (dri2_is_opencl_interop_loaded_locked(screen)) {
+      pipe_mutex_unlock(screen->opencl_func_mutex);
+      return true;
+   }
+
+   screen->opencl_dri_event_add_ref =
+      dlsym(RTLD_DEFAULT, "opencl_dri_event_add_ref");
+   screen->opencl_dri_event_release =
+      dlsym(RTLD_DEFAULT, "opencl_dri_event_release");
+   screen->opencl_dri_event_wait =
+      dlsym(RTLD_DEFAULT, "opencl_dri_event_wait");
+   screen->opencl_dri_event_get_fence =
+      dlsym(RTLD_DEFAULT, "opencl_dri_event_get_fence");
+
+   success = dri2_is_opencl_interop_loaded_locked(screen);
+   pipe_mutex_unlock(screen->opencl_func_mutex);
+   return success;
+#else
+   return false;
+#endif
+}
+
+struct dri2_fence {
+   struct pipe_fence_handle *pipe_fence;
+   void *cl_event;
+};
+
+static void *
+dri2_create_fence(__DRIcontext *_ctx)
+{
+   struct pipe_context *ctx = dri_context(_ctx)->st->pipe;
+   struct dri2_fence *fence = CALLOC_STRUCT(dri2_fence);
+
+   if (!fence)
+      return NULL;
+
+   ctx->flush(ctx, &fence->pipe_fence, 0);
+
+   if (!fence->pipe_fence) {
+      FREE(fence);
+      return NULL;
+   }
+
+   return fence;
+}
+
+static void *
+dri2_get_fence_from_cl_event(__DRIscreen *_screen, intptr_t cl_event)
+{
+   struct dri_screen *driscreen = dri_screen(_screen);
+   struct dri2_fence *fence;
+
+   if (!dri2_load_opencl_interop(driscreen))
+      return NULL;
+
+   fence = CALLOC_STRUCT(dri2_fence);
+   if (!fence)
+      return NULL;
+
+   fence->cl_event = (void*)cl_event;
+
+   if (!driscreen->opencl_dri_event_add_ref(fence->cl_event)) {
+      free(fence);
+      return NULL;
+   }
+
+   return fence;
+}
+
+static void
+dri2_destroy_fence(__DRIscreen *_screen, void *_fence)
+{
+   struct dri_screen *driscreen = dri_screen(_screen);
+   struct pipe_screen *screen = driscreen->base.screen;
+   struct dri2_fence *fence = (struct dri2_fence*)_fence;
+
+   if (fence->pipe_fence)
+      screen->fence_reference(screen, &fence->pipe_fence, NULL);
+   else if (fence->cl_event)
+      driscreen->opencl_dri_event_release(fence->cl_event);
+   else
+      assert(0);
+
+   FREE(fence);
+}
+
+static GLboolean
+dri2_client_wait_sync(__DRIcontext *_ctx, void *_fence, unsigned flags,
+                      uint64_t timeout)
+{
+   struct dri_screen *driscreen = dri_screen(_ctx->driScreenPriv);
+   struct pipe_screen *screen = driscreen->base.screen;
+   struct dri2_fence *fence = (struct dri2_fence*)_fence;
+
+   /* No need to flush. The context was flushed when the fence was created. */
+
+   if (fence->pipe_fence)
+      return screen->fence_finish(screen, fence->pipe_fence, timeout);
+   else if (fence->cl_event) {
+      struct pipe_fence_handle *pipe_fence =
+         driscreen->opencl_dri_event_get_fence(fence->cl_event);
+
+      if (pipe_fence)
+         return screen->fence_finish(screen, pipe_fence, timeout);
+      else
+         return driscreen->opencl_dri_event_wait(fence->cl_event, timeout);
+   }
+   else {
+      assert(0);
+      return false;
+   }
+}
+
+static void
+dri2_server_wait_sync(__DRIcontext *_ctx, void *_fence, unsigned flags)
+{
+   /* AFAIK, no driver currently supports parallel context execution. */
+}
+
+static __DRI2fenceExtension dri2FenceExtension = {
+   .base = { __DRI2_FENCE, 1 },
+
+   .create_fence = dri2_create_fence,
+   .get_fence_from_cl_event = dri2_get_fence_from_cl_event,
+   .destroy_fence = dri2_destroy_fence,
+   .client_wait_sync = dri2_client_wait_sync,
+   .server_wait_sync = dri2_server_wait_sync
+};
+
 /*
  * Backend function init_screen.
  */
@@ -1262,6 +1410,7 @@ static const __DRIextension *dri_screen_extensions[] = {
    &dri2RendererQueryExtension.base,
    &dri2ConfigQueryExtension.base,
    &dri2ThrottleExtension.base,
+   &dri2FenceExtension.base,
    NULL
 };
 
@@ -1285,6 +1434,7 @@ dri2_init_screen(__DRIscreen * sPriv)
 
    screen->sPriv = sPriv;
    screen->fd = sPriv->fd;
+   pipe_mutex_init(screen->opencl_func_mutex);
 
    sPriv->driverPrivate = (void *)screen;
 

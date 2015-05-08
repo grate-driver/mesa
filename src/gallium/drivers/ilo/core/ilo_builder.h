@@ -29,7 +29,10 @@
 #define ILO_BUILDER_H
 
 #include "intel_winsys.h"
-#include "ilo_common.h"
+
+#include "ilo_core.h"
+#include "ilo_debug.h"
+#include "ilo_dev.h"
 
 enum ilo_builder_writer_type {
    ILO_BUILDER_WRITER_BATCH,
@@ -98,7 +101,7 @@ struct ilo_builder_snapshot {
 };
 
 struct ilo_builder {
-   const struct ilo_dev_info *dev;
+   const struct ilo_dev *dev;
    struct intel_winsys *winsys;
    uint32_t mocs;
 
@@ -114,7 +117,7 @@ struct ilo_builder {
 
 void
 ilo_builder_init(struct ilo_builder *builder,
-                 const struct ilo_dev_info *dev,
+                 const struct ilo_dev *dev,
                  struct intel_winsys *winsys);
 
 void

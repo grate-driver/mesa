@@ -214,6 +214,12 @@ vec4_instruction::is_send_from_grf()
    switch (opcode) {
    case SHADER_OPCODE_SHADER_TIME_ADD:
    case VS_OPCODE_PULL_CONSTANT_LOAD_GEN7:
+   case SHADER_OPCODE_UNTYPED_ATOMIC:
+   case SHADER_OPCODE_UNTYPED_SURFACE_READ:
+   case SHADER_OPCODE_UNTYPED_SURFACE_WRITE:
+   case SHADER_OPCODE_TYPED_ATOMIC:
+   case SHADER_OPCODE_TYPED_SURFACE_READ:
+   case SHADER_OPCODE_TYPED_SURFACE_WRITE:
       return true;
    default:
       return false;
@@ -228,6 +234,12 @@ vec4_instruction::regs_read(unsigned arg) const
 
    switch (opcode) {
    case SHADER_OPCODE_SHADER_TIME_ADD:
+   case SHADER_OPCODE_UNTYPED_ATOMIC:
+   case SHADER_OPCODE_UNTYPED_SURFACE_READ:
+   case SHADER_OPCODE_UNTYPED_SURFACE_WRITE:
+   case SHADER_OPCODE_TYPED_ATOMIC:
+   case SHADER_OPCODE_TYPED_SURFACE_READ:
+   case SHADER_OPCODE_TYPED_SURFACE_WRITE:
       return arg == 0 ? mlen : 1;
 
    case VS_OPCODE_PULL_CONSTANT_LOAD_GEN7:
@@ -304,10 +316,7 @@ vec4_visitor::implied_mrf_writes(vec4_instruction *inst)
    case SHADER_OPCODE_TXS:
    case SHADER_OPCODE_TG4:
    case SHADER_OPCODE_TG4_OFFSET:
-      return inst->header_present ? 1 : 0;
-   case SHADER_OPCODE_UNTYPED_ATOMIC:
-   case SHADER_OPCODE_UNTYPED_SURFACE_READ:
-      return 0;
+      return inst->header_size;
    default:
       unreachable("not reached");
    }
@@ -673,6 +682,16 @@ vec4_visitor::opt_algebraic()
          }
          break;
       }
+      case SHADER_OPCODE_BROADCAST:
+         if (is_uniform(inst->src[0]) ||
+             inst->src[1].is_zero()) {
+            inst->opcode = BRW_OPCODE_MOV;
+            inst->src[1] = src_reg();
+            inst->force_writemask_all = true;
+            progress = true;
+         }
+         break;
+
       default:
 	 break;
       }
@@ -1108,6 +1127,46 @@ vec4_visitor::opt_register_coalesce()
 
    if (progress)
       invalidate_live_intervals();
+
+   return progress;
+}
+
+/**
+ * Eliminate FIND_LIVE_CHANNEL instructions occurring outside any control
+ * flow.  We could probably do better here with some form of divergence
+ * analysis.
+ */
+bool
+vec4_visitor::eliminate_find_live_channel()
+{
+   bool progress = false;
+   unsigned depth = 0;
+
+   foreach_block_and_inst_safe(block, vec4_instruction, inst, cfg) {
+      switch (inst->opcode) {
+      case BRW_OPCODE_IF:
+      case BRW_OPCODE_DO:
+         depth++;
+         break;
+
+      case BRW_OPCODE_ENDIF:
+      case BRW_OPCODE_WHILE:
+         depth--;
+         break;
+
+      case SHADER_OPCODE_FIND_LIVE_CHANNEL:
+         if (depth == 0) {
+            inst->opcode = BRW_OPCODE_MOV;
+            inst->src[0] = src_reg(0);
+            inst->force_writemask_all = true;
+            progress = true;
+         }
+         break;
+
+      default:
+         break;
+      }
+   }
 
    return progress;
 }
@@ -1700,8 +1759,6 @@ vec4_visitor::run()
    move_push_constants_to_pull_constants();
    split_virtual_grfs();
 
-   const char *stage_name = stage == MESA_SHADER_GEOMETRY ? "gs" : "vs";
-
 #define OPT(pass, args...) ({                                          \
       pass_num++;                                                      \
       bool this_progress = pass(args);                                 \
@@ -1709,7 +1766,7 @@ vec4_visitor::run()
       if (unlikely(INTEL_DEBUG & DEBUG_OPTIMIZER) && this_progress) {  \
          char filename[64];                                            \
          snprintf(filename, 64, "%s-%04d-%02d-%02d-" #pass,            \
-                  stage_name, shader_prog ? shader_prog->Name : 0, iteration, pass_num); \
+                  stage_abbrev, shader_prog ? shader_prog->Name : 0, iteration, pass_num); \
                                                                        \
          backend_visitor::dump_instructions(filename);                 \
       }                                                                \
@@ -1722,7 +1779,7 @@ vec4_visitor::run()
    if (unlikely(INTEL_DEBUG & DEBUG_OPTIMIZER)) {
       char filename[64];
       snprintf(filename, 64, "%s-%04d-00-start",
-               stage_name, shader_prog ? shader_prog->Name : 0);
+               stage_abbrev, shader_prog ? shader_prog->Name : 0);
 
       backend_visitor::dump_instructions(filename);
    }
@@ -1742,6 +1799,7 @@ vec4_visitor::run()
       OPT(opt_cse);
       OPT(opt_algebraic);
       OPT(opt_register_coalesce);
+      OPT(eliminate_find_live_channel);
    } while (progress);
 
    pass_num = 0;
@@ -1868,8 +1926,7 @@ brw_vs_emit(struct brw_context *brw,
       g.generate_code(v.cfg, 8);
       assembly = g.get_assembly(final_assembly_size);
 
-      if (assembly)
-         prog_data->base.simd8 = true;
+      prog_data->base.simd8 = true;
       c->base.last_scratch = v.last_scratch;
    }
 
@@ -1915,18 +1972,7 @@ brw_vue_setup_prog_key_for_precompile(struct gl_context *ctx,
    struct brw_context *brw = brw_context(ctx);
    key->program_string_id = id;
 
-   const bool has_shader_channel_select = brw->is_haswell || brw->gen >= 8;
-   unsigned sampler_count = _mesa_fls(prog->SamplersUsed);
-   for (unsigned i = 0; i < sampler_count; i++) {
-      if (!has_shader_channel_select && (prog->ShadowSamplers & (1 << i))) {
-         /* Assume DEPTH_TEXTURE_MODE is the default: X, X, X, 1 */
-         key->tex.swizzles[i] =
-            MAKE_SWIZZLE4(SWIZZLE_X, SWIZZLE_X, SWIZZLE_X, SWIZZLE_ONE);
-      } else {
-         /* Color sampler: assume no swizzling. */
-         key->tex.swizzles[i] = SWIZZLE_XYZW;
-      }
-   }
+   brw_setup_tex_for_precompile(brw, &key->tex, prog);
 }
 
 } /* extern "C" */

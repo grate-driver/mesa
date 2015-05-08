@@ -90,31 +90,6 @@ fs_inst::init(enum opcode opcode, uint8_t exec_size, const fs_reg &dst,
    }
    assert(this->exec_size != 0);
 
-   for (unsigned i = 0; i < sources; ++i) {
-      switch (this->src[i].file) {
-      case BAD_FILE:
-         this->src[i].effective_width = 8;
-         break;
-      case GRF:
-      case HW_REG:
-      case ATTR:
-         assert(this->src[i].width > 0);
-         if (this->src[i].width == 1) {
-            this->src[i].effective_width = this->exec_size;
-         } else {
-            this->src[i].effective_width = this->src[i].width;
-         }
-         break;
-      case IMM:
-      case UNIFORM:
-         this->src[i].effective_width = this->exec_size;
-         break;
-      default:
-         unreachable("Invalid source register file");
-      }
-   }
-   this->dst.effective_width = this->exec_size;
-
    this->conditional_mod = BRW_CONDITIONAL_NONE;
 
    /* This will be the case for almost all instructions. */
@@ -355,27 +330,21 @@ fs_visitor::CMP(fs_reg dst, fs_reg src0, fs_reg src1,
 }
 
 fs_inst *
-fs_visitor::LOAD_PAYLOAD(const fs_reg &dst, fs_reg *src, int sources)
+fs_visitor::LOAD_PAYLOAD(const fs_reg &dst, fs_reg *src, int sources,
+                         int header_size)
 {
-   uint8_t exec_size = dst.width;
-   for (int i = 0; i < sources; ++i) {
-      assert(src[i].width % dst.width == 0);
-      if (src[i].width > exec_size)
-         exec_size = src[i].width;
-   }
-
-   fs_inst *inst = new(mem_ctx) fs_inst(SHADER_OPCODE_LOAD_PAYLOAD, exec_size,
+   assert(dst.width % 8 == 0);
+   fs_inst *inst = new(mem_ctx) fs_inst(SHADER_OPCODE_LOAD_PAYLOAD, dst.width,
                                         dst, src, sources);
-   inst->regs_written = 0;
-   for (int i = 0; i < sources; ++i) {
-      /* The LOAD_PAYLOAD instruction only really makes sense if we are
-       * dealing with whole registers.  If this ever changes, we can deal
-       * with it later.
-       */
-      int size = inst->src[i].effective_width * type_sz(src[i].type);
-      assert(size % 32 == 0);
-      inst->regs_written += (size + 31) / 32;
-   }
+   inst->header_size = header_size;
+
+   for (int i = 0; i < header_size; i++)
+      assert(src[i].file != GRF || src[i].width * type_sz(src[i].type) == 32);
+   inst->regs_written = header_size;
+
+   for (int i = header_size; i < sources; ++i)
+      assert(src[i].file != GRF || src[i].width == dst.width);
+   inst->regs_written += (sources - header_size) * (dst.width / 8);
 
    return inst;
 }
@@ -430,7 +399,7 @@ fs_visitor::VARYING_PULL_CONSTANT_LOAD(const fs_reg &dst,
 
    if (devinfo->gen < 7) {
       inst->base_mrf = 13;
-      inst->header_present = true;
+      inst->header_size = 1;
       if (devinfo->gen == 4)
          inst->mlen = 3;
       else
@@ -478,7 +447,7 @@ fs_inst::equals(fs_inst *inst) const
            base_mrf == inst->base_mrf &&
            target == inst->target &&
            eot == inst->eot &&
-           header_present == inst->header_present &&
+           header_size == inst->header_size &&
            shadow_compare == inst->shadow_compare &&
            exec_size == inst->exec_size &&
            offset == inst->offset);
@@ -502,6 +471,10 @@ fs_inst::is_send_from_grf() const
    case FS_OPCODE_INTERPOLATE_AT_PER_SLOT_OFFSET:
    case SHADER_OPCODE_UNTYPED_ATOMIC:
    case SHADER_OPCODE_UNTYPED_SURFACE_READ:
+   case SHADER_OPCODE_UNTYPED_SURFACE_WRITE:
+   case SHADER_OPCODE_TYPED_ATOMIC:
+   case SHADER_OPCODE_TYPED_SURFACE_READ:
+   case SHADER_OPCODE_TYPED_SURFACE_WRITE:
    case SHADER_OPCODE_URB_WRITE_SIMD8:
       return true;
    case FS_OPCODE_UNIFORM_PULL_CONSTANT_LOAD:
@@ -514,6 +487,30 @@ fs_inst::is_send_from_grf() const
 
       return false;
    }
+}
+
+bool
+fs_inst::is_copy_payload(const brw::simple_allocator &grf_alloc) const
+{
+   if (this->opcode != SHADER_OPCODE_LOAD_PAYLOAD)
+      return false;
+
+   fs_reg reg = this->src[0];
+   if (reg.file != GRF || reg.reg_offset != 0 || reg.stride == 0)
+      return false;
+
+   if (grf_alloc.sizes[reg.reg] != this->regs_written)
+      return false;
+
+   for (int i = 0; i < this->sources; i++) {
+      reg.type = this->src[i].type;
+      reg.width = this->src[i].width;
+      if (!this->src[i].equals(reg))
+         return false;
+      reg = ::offset(reg, 1);
+   }
+
+   return true;
 }
 
 bool
@@ -758,6 +755,11 @@ fs_visitor::emit_shader_time_end()
          reset_type = ST_FS16_RESET;
       }
       break;
+   case MESA_SHADER_COMPUTE:
+      type = ST_CS;
+      written_type = ST_CS_WRITTEN;
+      reset_type = ST_CS_RESET;
+      break;
    default:
       unreachable("fs_visitor::emit_shader_time_end missing code");
    }
@@ -951,6 +953,14 @@ fs_inst::regs_read(int arg) const
       return mlen;
    } else if (opcode == SHADER_OPCODE_UNTYPED_SURFACE_READ && arg == 0) {
       return mlen;
+   } else if (opcode == SHADER_OPCODE_UNTYPED_SURFACE_WRITE && arg == 0) {
+      return mlen;
+   } else if (opcode == SHADER_OPCODE_TYPED_ATOMIC && arg == 0) {
+      return mlen;
+   } else if (opcode == SHADER_OPCODE_TYPED_SURFACE_READ && arg == 0) {
+      return mlen;
+   } else if (opcode == SHADER_OPCODE_TYPED_SURFACE_WRITE && arg == 0) {
+      return mlen;
    } else if (opcode == FS_OPCODE_INTERPOLATE_AT_PER_SLOT_OFFSET && arg == 0) {
       return mlen;
    } else if (opcode == FS_OPCODE_LINTERP && arg == 0) {
@@ -1043,6 +1053,10 @@ fs_visitor::implied_mrf_writes(fs_inst *inst)
       return 2;
    case SHADER_OPCODE_UNTYPED_ATOMIC:
    case SHADER_OPCODE_UNTYPED_SURFACE_READ:
+   case SHADER_OPCODE_UNTYPED_SURFACE_WRITE:
+   case SHADER_OPCODE_TYPED_ATOMIC:
+   case SHADER_OPCODE_TYPED_SURFACE_READ:
+   case SHADER_OPCODE_TYPED_SURFACE_WRITE:
    case SHADER_OPCODE_URB_WRITE_SIMD8:
    case FS_OPCODE_INTERPOLATE_AT_CENTROID:
    case FS_OPCODE_INTERPOLATE_AT_SAMPLE:
@@ -1719,9 +1733,15 @@ fs_visitor::assign_curb_setup()
    if (dispatch_width == 8) {
       prog_data->dispatch_grf_start_reg = payload.num_regs;
    } else {
-      assert(stage == MESA_SHADER_FRAGMENT);
-      brw_wm_prog_data *prog_data = (brw_wm_prog_data*) this->prog_data;
-      prog_data->dispatch_grf_start_reg_16 = payload.num_regs;
+      if (stage == MESA_SHADER_FRAGMENT) {
+         brw_wm_prog_data *prog_data = (brw_wm_prog_data*) this->prog_data;
+         prog_data->dispatch_grf_start_reg_16 = payload.num_regs;
+      } else if (stage == MESA_SHADER_COMPUTE) {
+         brw_cs_prog_data *prog_data = (brw_cs_prog_data*) this->prog_data;
+         prog_data->dispatch_grf_start_reg_16 = payload.num_regs;
+      } else {
+         unreachable("Unsupported shader type!");
+      }
    }
 
    prog_data->curb_read_length = ALIGN(stage_prog_data->nr_params, 8) / 8;
@@ -2519,6 +2539,22 @@ fs_visitor::opt_algebraic()
          }
          break;
       }
+      case SHADER_OPCODE_BROADCAST:
+         if (is_uniform(inst->src[0])) {
+            inst->opcode = BRW_OPCODE_MOV;
+            inst->sources = 1;
+            inst->force_writemask_all = true;
+            progress = true;
+         } else if (inst->src[1].file == IMM) {
+            inst->opcode = BRW_OPCODE_MOV;
+            inst->src[0] = component(inst->src[0],
+                                     inst->src[1].fixed_hw_reg.dw1.ud);
+            inst->sources = 1;
+            inst->force_writemask_all = true;
+            progress = true;
+         }
+         break;
+
       default:
 	 break;
       }
@@ -2536,6 +2572,54 @@ fs_visitor::opt_algebraic()
 }
 
 /**
+ * Optimize sample messages that have constant zero values for the trailing
+ * texture coordinates. We can just reduce the message length for these
+ * instructions instead of reserving a register for it. Trailing parameters
+ * that aren't sent default to zero anyway. This will cause the dead code
+ * eliminator to remove the MOV instruction that would otherwise be emitted to
+ * set up the zero value.
+ */
+bool
+fs_visitor::opt_zero_samples()
+{
+   /* Gen4 infers the texturing opcode based on the message length so we can't
+    * change it.
+    */
+   if (devinfo->gen < 5)
+      return false;
+
+   bool progress = false;
+
+   foreach_block_and_inst(block, fs_inst, inst, cfg) {
+      if (!inst->is_tex())
+         continue;
+
+      fs_inst *load_payload = (fs_inst *) inst->prev;
+
+      if (load_payload->is_head_sentinel() ||
+          load_payload->opcode != SHADER_OPCODE_LOAD_PAYLOAD)
+         continue;
+
+      /* We don't want to remove the message header. Removing all of the
+       * parameters is avoided because it seems to cause a GPU hang but I
+       * can't find any documentation indicating that this is expected.
+       */
+      while (inst->mlen > inst->header_size + dispatch_width / 8 &&
+             load_payload->src[(inst->mlen - inst->header_size) /
+                               (dispatch_width / 8) +
+                               inst->header_size - 1].is_zero()) {
+         inst->mlen -= dispatch_width / 8;
+         progress = true;
+      }
+   }
+
+   if (progress)
+      invalidate_live_intervals();
+
+   return progress;
+}
+
+/**
  * Optimize sample messages which are followed by the final RT write.
  *
  * CHV, and GEN9+ can mark a texturing SEND instruction with EOT to have its
@@ -2547,6 +2631,9 @@ bool
 fs_visitor::opt_sampler_eot()
 {
    brw_wm_prog_key *key = (brw_wm_prog_key*) this->key;
+
+   if (stage != MESA_SHADER_FRAGMENT)
+      return false;
 
    if (devinfo->gen < 9 && !devinfo->is_cherryview)
       return false;
@@ -2589,7 +2676,7 @@ fs_visitor::opt_sampler_eot()
     * we have enough space, but it will make sure the dead code eliminator kills
     * the instruction that this will replace.
     */
-   if (tex_inst->header_present)
+   if (tex_inst->header_size != 0)
       return true;
 
    fs_reg send_header = vgrf(load_payload->sources + 1);
@@ -2615,7 +2702,7 @@ fs_visitor::opt_sampler_eot()
 
    new_load_payload->regs_written = load_payload->regs_written + 1;
    tex_inst->mlen++;
-   tex_inst->header_present = true;
+   tex_inst->header_size = 1;
    tex_inst->insert_before(cfg->blocks[cfg->num_blocks - 1], new_load_payload);
    tex_inst->src[0] = send_header;
    tex_inst->dst = reg_null_ud;
@@ -2886,6 +2973,53 @@ fs_visitor::compute_to_mrf()
 }
 
 /**
+ * Eliminate FIND_LIVE_CHANNEL instructions occurring outside any control
+ * flow.  We could probably do better here with some form of divergence
+ * analysis.
+ */
+bool
+fs_visitor::eliminate_find_live_channel()
+{
+   bool progress = false;
+   unsigned depth = 0;
+
+   foreach_block_and_inst_safe(block, fs_inst, inst, cfg) {
+      switch (inst->opcode) {
+      case BRW_OPCODE_IF:
+      case BRW_OPCODE_DO:
+         depth++;
+         break;
+
+      case BRW_OPCODE_ENDIF:
+      case BRW_OPCODE_WHILE:
+         depth--;
+         break;
+
+      case FS_OPCODE_DISCARD_JUMP:
+         /* This can potentially make control flow non-uniform until the end
+          * of the program.
+          */
+         return progress;
+
+      case SHADER_OPCODE_FIND_LIVE_CHANNEL:
+         if (depth == 0) {
+            inst->opcode = BRW_OPCODE_MOV;
+            inst->src[0] = fs_reg(0);
+            inst->sources = 1;
+            inst->force_writemask_all = true;
+            progress = true;
+         }
+         break;
+
+      default:
+         break;
+      }
+   }
+
+   return progress;
+}
+
+/**
  * Once we've generated code, try to convert normal FS_OPCODE_FB_WRITE
  * instructions to FS_OPCODE_REP_FB_WRITE.
  */
@@ -2906,7 +3040,7 @@ fs_visitor::emit_repclear_shader()
       write->saturate = key->clamp_fragment_color;
       write->base_mrf = color_mrf;
       write->target = 0;
-      write->header_present = false;
+      write->header_size = 0;
       write->mlen = 1;
    } else {
       assume(key->nr_color_regions > 0);
@@ -2915,7 +3049,7 @@ fs_visitor::emit_repclear_shader()
          write->saturate = key->clamp_fragment_color;
          write->base_mrf = base_mrf;
          write->target = i;
-         write->header_present = true;
+         write->header_size = 2;
          write->mlen = 3;
       }
    }
@@ -3264,99 +3398,108 @@ fs_visitor::lower_load_payload()
 {
    bool progress = false;
 
-   int vgrf_to_reg[alloc.count];
-   int reg_count = 0;
-   for (unsigned i = 0; i < alloc.count; ++i) {
-      vgrf_to_reg[i] = reg_count;
-      reg_count += alloc.sizes[i];
-   }
-
-   struct {
-      bool written:1; /* Whether this register has ever been written */
-      bool force_writemask_all:1;
-      bool force_sechalf:1;
-   } metadata[reg_count];
-   memset(metadata, 0, sizeof(metadata));
-
    foreach_block_and_inst_safe (block, fs_inst, inst, cfg) {
-      if (inst->dst.file == GRF) {
-         const int dst_reg = vgrf_to_reg[inst->dst.reg] + inst->dst.reg_offset;
-         bool force_sechalf = inst->force_sechalf &&
-                              !inst->force_writemask_all;
-         bool toggle_sechalf = inst->dst.width == 16 &&
-                               type_sz(inst->dst.type) == 4 &&
-                               !inst->force_writemask_all;
-         for (int i = 0; i < inst->regs_written; ++i) {
-            metadata[dst_reg + i].written = true;
-            metadata[dst_reg + i].force_sechalf = force_sechalf;
-            metadata[dst_reg + i].force_writemask_all = inst->force_writemask_all;
-            force_sechalf = (toggle_sechalf != force_sechalf);
+      if (inst->opcode != SHADER_OPCODE_LOAD_PAYLOAD)
+         continue;
+
+      assert(inst->dst.file == MRF || inst->dst.file == GRF);
+      assert(inst->saturate == false);
+
+      fs_reg dst = inst->dst;
+
+      /* Get rid of COMPR4.  We'll add it back in if we need it */
+      if (dst.file == MRF)
+         dst.reg = dst.reg & ~BRW_MRF_COMPR4;
+
+      dst.width = 8;
+      for (uint8_t i = 0; i < inst->header_size; i++) {
+         if (inst->src[i].file != BAD_FILE) {
+            fs_reg mov_dst = retype(dst, BRW_REGISTER_TYPE_UD);
+            fs_reg mov_src = retype(inst->src[i], BRW_REGISTER_TYPE_UD);
+            mov_src.width = 8;
+            fs_inst *mov = MOV(mov_dst, mov_src);
+            mov->force_writemask_all = true;
+            inst->insert_before(block, mov);
          }
+         dst = offset(dst, 1);
       }
 
-      if (inst->opcode == SHADER_OPCODE_LOAD_PAYLOAD) {
-         assert(inst->dst.file == MRF || inst->dst.file == GRF);
-         fs_reg dst = inst->dst;
+      dst.width = inst->exec_size;
+      if (inst->dst.file == MRF && (inst->dst.reg & BRW_MRF_COMPR4) &&
+          inst->exec_size > 8) {
+         /* In this case, the payload portion of the LOAD_PAYLOAD isn't
+          * a straightforward copy.  Instead, the result of the
+          * LOAD_PAYLOAD is treated as interleaved and the first four
+          * non-header sources are unpacked as:
+          *
+          * m + 0: r0
+          * m + 1: g0
+          * m + 2: b0
+          * m + 3: a0
+          * m + 4: r1
+          * m + 5: g1
+          * m + 6: b1
+          * m + 7: a1
+          *
+          * This is used for gen <= 5 fb writes.
+          */
+         assert(inst->exec_size == 16);
+         assert(inst->header_size + 4 <= inst->sources);
+         for (uint8_t i = inst->header_size; i < inst->header_size + 4; i++) {
+            if (inst->src[i].file != BAD_FILE) {
+               if (devinfo->has_compr4) {
+                  fs_reg compr4_dst = retype(dst, inst->src[i].type);
+                  compr4_dst.reg |= BRW_MRF_COMPR4;
 
-         for (int i = 0; i < inst->sources; i++) {
-            dst.width = inst->src[i].effective_width;
-            dst.type = inst->src[i].type;
-
-            if (inst->src[i].file == BAD_FILE) {
-               /* Do nothing but otherwise increment as normal */
-            } else if (dst.file == MRF &&
-                       dst.width == 8 &&
-                       devinfo->has_compr4 &&
-                       i + 4 < inst->sources &&
-                       inst->src[i + 4].equals(horiz_offset(inst->src[i], 8))) {
-               fs_reg compr4_dst = dst;
-               compr4_dst.reg += BRW_MRF_COMPR4;
-               compr4_dst.width = 16;
-               fs_reg compr4_src = inst->src[i];
-               compr4_src.width = 16;
-               fs_inst *mov = MOV(compr4_dst, compr4_src);
-               mov->force_writemask_all = true;
-               inst->insert_before(block, mov);
-               /* Mark i+4 as BAD_FILE so we don't emit a MOV for it */
-               inst->src[i + 4].file = BAD_FILE;
-            } else {
-               fs_inst *mov = MOV(dst, inst->src[i]);
-               if (inst->src[i].file == GRF) {
-                  int src_reg = vgrf_to_reg[inst->src[i].reg] +
-                                inst->src[i].reg_offset;
-                  mov->force_sechalf = metadata[src_reg].force_sechalf;
-                  mov->force_writemask_all = metadata[src_reg].force_writemask_all;
+                  fs_inst *mov = MOV(compr4_dst, inst->src[i]);
+                  mov->force_writemask_all = inst->force_writemask_all;
+                  inst->insert_before(block, mov);
                } else {
-                  /* We don't have any useful metadata for immediates or
-                   * uniforms.  Assume that any of the channels of the
-                   * destination may be used.
-                   */
-                  assert(inst->src[i].file == IMM ||
-                         inst->src[i].file == UNIFORM);
-                  mov->force_writemask_all = true;
-               }
+                  /* Platform doesn't have COMPR4.  We have to fake it */
+                  fs_reg mov_dst = retype(dst, inst->src[i].type);
+                  mov_dst.width = 8;
 
-               if (dst.file == GRF) {
-                  const int dst_reg = vgrf_to_reg[dst.reg] + dst.reg_offset;
-                  const bool force_writemask = mov->force_writemask_all;
-                  metadata[dst_reg].force_writemask_all = force_writemask;
-                  metadata[dst_reg].force_sechalf = mov->force_sechalf;
-                  if (dst.width * type_sz(dst.type) > 32) {
-                     assert(!mov->force_sechalf);
-                     metadata[dst_reg + 1].force_writemask_all = force_writemask;
-                     metadata[dst_reg + 1].force_sechalf = !force_writemask;
-                  }
-               }
+                  fs_inst *mov = MOV(mov_dst, half(inst->src[i], 0));
+                  mov->force_writemask_all = inst->force_writemask_all;
+                  inst->insert_before(block, mov);
 
-               inst->insert_before(block, mov);
+                  mov = MOV(offset(mov_dst, 4), half(inst->src[i], 1));
+                  mov->force_writemask_all = inst->force_writemask_all;
+                  mov->force_sechalf = true;
+                  inst->insert_before(block, mov);
+               }
             }
 
-            dst = offset(dst, 1);
+            dst.reg++;
          }
 
-         inst->remove(block);
-         progress = true;
+         /* The loop above only ever incremented us through the first set
+          * of 4 registers.  However, thanks to the magic of COMPR4, we
+          * actually wrote to the first 8 registers, so we need to take
+          * that into account now.
+          */
+         dst.reg += 4;
+
+         /* The COMPR4 code took care of the first 4 sources.  We'll let
+          * the regular path handle any remaining sources.  Yes, we are
+          * modifying the instruction but we're about to delete it so
+          * this really doesn't hurt anything.
+          */
+         inst->header_size += 4;
       }
+
+      for (uint8_t i = inst->header_size; i < inst->sources; i++) {
+         if (inst->src[i].file != BAD_FILE) {
+            fs_inst *mov = MOV(retype(dst, inst->src[i].type),
+                               inst->src[i]);
+            mov->force_writemask_all = inst->force_writemask_all;
+            inst->insert_before(block, mov);
+         }
+         dst = offset(dst, 1);
+      }
+
+      inst->remove(block);
+      progress = true;
    }
 
    if (progress)
@@ -3726,6 +3869,14 @@ fs_visitor::setup_vs_payload()
 }
 
 void
+fs_visitor::setup_cs_payload()
+{
+   assert(brw->gen >= 7);
+
+   payload.num_regs = 1;
+}
+
+void
 fs_visitor::assign_binding_table_offsets()
 {
    assert(stage == MESA_SHADER_FRAGMENT);
@@ -3763,8 +3914,6 @@ fs_visitor::calculate_register_pressure()
 void
 fs_visitor::optimize()
 {
-   const char *stage_name = stage == MESA_SHADER_VERTEX ? "vs" : "fs";
-
    split_virtual_grfs();
 
    move_uniform_array_access_to_pull_constants();
@@ -3778,7 +3927,7 @@ fs_visitor::optimize()
       if (unlikely(INTEL_DEBUG & DEBUG_OPTIMIZER) && this_progress) {   \
          char filename[64];                                             \
          snprintf(filename, 64, "%s%d-%04d-%02d-%02d-" #pass,              \
-                  stage_name, dispatch_width, shader_prog ? shader_prog->Name : 0, iteration, pass_num); \
+                  stage_abbrev, dispatch_width, shader_prog ? shader_prog->Name : 0, iteration, pass_num); \
                                                                         \
          backend_visitor::dump_instructions(filename);                  \
       }                                                                 \
@@ -3790,7 +3939,8 @@ fs_visitor::optimize()
    if (unlikely(INTEL_DEBUG & DEBUG_OPTIMIZER)) {
       char filename[64];
       snprintf(filename, 64, "%s%d-%04d-00-start",
-               stage_name, dispatch_width, shader_prog ? shader_prog->Name : 0);
+               stage_abbrev, dispatch_width,
+               shader_prog ? shader_prog->Name : 0);
 
       backend_visitor::dump_instructions(filename);
    }
@@ -3816,8 +3966,10 @@ fs_visitor::optimize()
       OPT(opt_register_renaming);
       OPT(opt_redundant_discard_jumps);
       OPT(opt_saturate_propagation);
+      OPT(opt_zero_samples);
       OPT(register_coalesce);
       OPT(compute_to_mrf);
+      OPT(eliminate_find_live_channel);
 
       OPT(compact_virtual_grfs);
    } while (progress);
@@ -3882,9 +4034,6 @@ fs_visitor::allocate_registers()
    }
 
    if (!allocated_without_spills) {
-      const char *stage_name = stage == MESA_SHADER_VERTEX ?
-         "Vertex" : "Fragment";
-
       /* We assume that any spilling is worse than just dropping back to
        * SIMD8.  There's probably actually some intermediate point where
        * SIMD16 with a couple of spills is still better.
@@ -4065,6 +4214,53 @@ fs_visitor::run_fs()
    return !failed;
 }
 
+bool
+fs_visitor::run_cs()
+{
+   assert(stage == MESA_SHADER_COMPUTE);
+   assert(shader);
+
+   sanity_param_count = prog->Parameters->NumParameters;
+
+   assign_common_binding_table_offsets(0);
+
+   setup_cs_payload();
+
+   if (INTEL_DEBUG & DEBUG_SHADER_TIME)
+      emit_shader_time_begin();
+
+   emit_nir_code();
+
+   if (failed)
+      return false;
+
+   emit_cs_terminate();
+
+   if (INTEL_DEBUG & DEBUG_SHADER_TIME)
+      emit_shader_time_end();
+
+   calculate_cfg();
+
+   optimize();
+
+   assign_curb_setup();
+
+   fixup_3src_null_dest();
+   allocate_registers();
+
+   if (failed)
+      return false;
+
+   /* If any state parameters were appended, then ParameterValues could have
+    * been realloced, in which case the driver uniform storage set up by
+    * _mesa_associate_uniform_storage() would point to freed memory.  Make
+    * sure that didn't happen.
+    */
+   assert(sanity_param_count == prog->Parameters->NumParameters);
+
+   return !failed;
+}
+
 const unsigned *
 brw_wm_fs_emit(struct brw_context *brw,
                void *mem_ctx,
@@ -4197,18 +4393,7 @@ brw_fs_precompile(struct gl_context *ctx,
                                          BRW_FS_VARYING_INPUT_MASK) > 16)
       key.input_slots_valid = fp->Base.InputsRead | VARYING_BIT_POS;
 
-   const bool has_shader_channel_select = brw->is_haswell || brw->gen >= 8;
-   unsigned sampler_count = _mesa_fls(fp->Base.SamplersUsed);
-   for (unsigned i = 0; i < sampler_count; i++) {
-      if (!has_shader_channel_select && (fp->Base.ShadowSamplers & (1 << i))) {
-         /* Assume DEPTH_TEXTURE_MODE is the default: X, X, X, 1 */
-         key.tex.swizzles[i] =
-            MAKE_SWIZZLE4(SWIZZLE_X, SWIZZLE_X, SWIZZLE_X, SWIZZLE_ONE);
-      } else {
-         /* Color sampler: assume no swizzling. */
-         key.tex.swizzles[i] = SWIZZLE_XYZW;
-      }
-   }
+   brw_setup_tex_for_precompile(brw, &key.tex, &fp->Base);
 
    if (fp->Base.InputsRead & VARYING_BIT_POS) {
       key.drawable_height = ctx->DrawBuffer->Height;
@@ -4234,4 +4419,23 @@ brw_fs_precompile(struct gl_context *ctx,
    brw->wm.prog_data = old_prog_data;
 
    return success;
+}
+
+void
+brw_setup_tex_for_precompile(struct brw_context *brw,
+                             struct brw_sampler_prog_key_data *tex,
+                             struct gl_program *prog)
+{
+   const bool has_shader_channel_select = brw->is_haswell || brw->gen >= 8;
+   unsigned sampler_count = _mesa_fls(prog->SamplersUsed);
+   for (unsigned i = 0; i < sampler_count; i++) {
+      if (!has_shader_channel_select && (prog->ShadowSamplers & (1 << i))) {
+         /* Assume DEPTH_TEXTURE_MODE is the default: X, X, X, 1 */
+         tex->swizzles[i] =
+            MAKE_SWIZZLE4(SWIZZLE_X, SWIZZLE_X, SWIZZLE_X, SWIZZLE_ONE);
+      } else {
+         /* Color sampler: assume no swizzling. */
+         tex->swizzles[i] = SWIZZLE_XYZW;
+      }
+   }
 }

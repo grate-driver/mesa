@@ -135,7 +135,7 @@ static GLboolean check_active_shininess( struct gl_context *ctx,
        (key->light_color_material_mask & (1 << attr)))
       return GL_TRUE;
 
-   if (key->varying_vp_inputs & VERT_ATTRIB_GENERIC(attr))
+   if (key->varying_vp_inputs & VERT_BIT_GENERIC(attr))
       return GL_TRUE;
 
    if (ctx->Light.Material.Attrib[attr][0] != 0.0F)
@@ -1657,7 +1657,7 @@ _mesa_get_fixed_func_vertex_program(struct gl_context *ctx)
    struct gl_vertex_program *prog;
    struct state_key key;
 
-   /* Grab all the relevent state and put it in a single structure:
+   /* Grab all the relevant state and put it in a single structure:
     */
    make_state_key(ctx, &key);
 

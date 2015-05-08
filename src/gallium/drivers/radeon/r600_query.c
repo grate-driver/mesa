@@ -86,6 +86,10 @@ static struct r600_resource *r600_new_query_buffer(struct r600_common_context *c
 	case R600_QUERY_NUM_BYTES_MOVED:
 	case R600_QUERY_VRAM_USAGE:
 	case R600_QUERY_GTT_USAGE:
+	case R600_QUERY_GPU_TEMPERATURE:
+	case R600_QUERY_CURRENT_GPU_SCLK:
+	case R600_QUERY_CURRENT_GPU_MCLK:
+	case R600_QUERY_GPU_LOAD:
 		return NULL;
 	}
 
@@ -382,6 +386,10 @@ static struct pipe_query *r600_create_query(struct pipe_context *ctx, unsigned q
 	case R600_QUERY_NUM_BYTES_MOVED:
 	case R600_QUERY_VRAM_USAGE:
 	case R600_QUERY_GTT_USAGE:
+	case R600_QUERY_GPU_TEMPERATURE:
+	case R600_QUERY_CURRENT_GPU_SCLK:
+	case R600_QUERY_CURRENT_GPU_MCLK:
+	case R600_QUERY_GPU_LOAD:
 		skip_allocation = true;
 		break;
 	default:
@@ -417,7 +425,8 @@ static void r600_destroy_query(struct pipe_context *ctx, struct pipe_query *quer
 	FREE(query);
 }
 
-static void r600_begin_query(struct pipe_context *ctx, struct pipe_query *query)
+static boolean r600_begin_query(struct pipe_context *ctx,
+                                struct pipe_query *query)
 {
 	struct r600_common_context *rctx = (struct r600_common_context *)ctx;
 	struct r600_query *rquery = (struct r600_query *)query;
@@ -425,31 +434,37 @@ static void r600_begin_query(struct pipe_context *ctx, struct pipe_query *query)
 
 	if (!r600_query_needs_begin(rquery->type)) {
 		assert(0);
-		return;
+		return false;
 	}
 
 	/* Non-GPU queries. */
 	switch (rquery->type) {
 	case PIPE_QUERY_TIMESTAMP_DISJOINT:
-		return;
+		return true;
 	case R600_QUERY_DRAW_CALLS:
 		rquery->begin_result = rctx->num_draw_calls;
-		return;
+		return true;
 	case R600_QUERY_REQUESTED_VRAM:
 	case R600_QUERY_REQUESTED_GTT:
 	case R600_QUERY_VRAM_USAGE:
 	case R600_QUERY_GTT_USAGE:
+	case R600_QUERY_GPU_TEMPERATURE:
+	case R600_QUERY_CURRENT_GPU_SCLK:
+	case R600_QUERY_CURRENT_GPU_MCLK:
 		rquery->begin_result = 0;
-		return;
+		return true;
 	case R600_QUERY_BUFFER_WAIT_TIME:
 		rquery->begin_result = rctx->ws->query_value(rctx->ws, RADEON_BUFFER_WAIT_TIME_NS);
-		return;
+		return true;
 	case R600_QUERY_NUM_CS_FLUSHES:
 		rquery->begin_result = rctx->ws->query_value(rctx->ws, RADEON_NUM_CS_FLUSHES);
-		return;
+		return true;
 	case R600_QUERY_NUM_BYTES_MOVED:
 		rquery->begin_result = rctx->ws->query_value(rctx->ws, RADEON_NUM_BYTES_MOVED);
-		return;
+		return true;
+	case R600_QUERY_GPU_LOAD:
+		rquery->begin_result = r600_gpu_load_begin(rctx->screen);
+		return true;
 	}
 
 	/* Discard the old query buffers. */
@@ -475,6 +490,7 @@ static void r600_begin_query(struct pipe_context *ctx, struct pipe_query *query)
 	if (!r600_is_timer_query(rquery->type)) {
 		LIST_ADDTAIL(&rquery->list, &rctx->active_nontimer_queries);
 	}
+   return true;
 }
 
 static void r600_end_query(struct pipe_context *ctx, struct pipe_query *query)
@@ -512,6 +528,18 @@ static void r600_end_query(struct pipe_context *ctx, struct pipe_query *query)
 		return;
 	case R600_QUERY_GTT_USAGE:
 		rquery->end_result = rctx->ws->query_value(rctx->ws, RADEON_GTT_USAGE);
+		return;
+	case R600_QUERY_GPU_TEMPERATURE:
+		rquery->end_result = rctx->ws->query_value(rctx->ws, RADEON_GPU_TEMPERATURE) / 1000;
+		return;
+	case R600_QUERY_CURRENT_GPU_SCLK:
+		rquery->end_result = rctx->ws->query_value(rctx->ws, RADEON_CURRENT_SCLK) * 1000000;
+		return;
+	case R600_QUERY_CURRENT_GPU_MCLK:
+		rquery->end_result = rctx->ws->query_value(rctx->ws, RADEON_CURRENT_MCLK) * 1000000;
+		return;
+	case R600_QUERY_GPU_LOAD:
+		rquery->end_result = r600_gpu_load_end(rctx->screen, rquery->begin_result);
 		return;
 	}
 
@@ -570,7 +598,13 @@ static boolean r600_get_query_buffer_result(struct r600_common_context *ctx,
 	case R600_QUERY_NUM_BYTES_MOVED:
 	case R600_QUERY_VRAM_USAGE:
 	case R600_QUERY_GTT_USAGE:
+	case R600_QUERY_GPU_TEMPERATURE:
+	case R600_QUERY_CURRENT_GPU_SCLK:
+	case R600_QUERY_CURRENT_GPU_MCLK:
 		result->u64 = query->end_result - query->begin_result;
+		return TRUE;
+	case R600_QUERY_GPU_LOAD:
+		result->u64 = query->end_result;
 		return TRUE;
 	}
 

@@ -121,8 +121,12 @@ fd_context_render(struct pipe_context *pctx)
 	for (i = 0; i < pfb->nr_cbufs; i++)
 		if (pfb->cbufs[i])
 			fd_resource(pfb->cbufs[i]->texture)->dirty = false;
-	if (pfb->zsbuf)
-		fd_resource(pfb->zsbuf->texture)->dirty = false;
+	if (pfb->zsbuf) {
+		rsc = fd_resource(pfb->zsbuf->texture);
+		rsc->dirty = false;
+		if (rsc->stencil)
+			rsc->stencil->dirty = false;
+	}
 
 	/* go through all the used resources and clear their reading flag */
 	LIST_FOR_EACH_ENTRY_SAFE(rsc, rsc_tmp, &ctx->used_resources, list) {
@@ -222,7 +226,7 @@ fd_context_init(struct fd_context *ctx, struct pipe_screen *pscreen,
 
 	util_dynarray_init(&ctx->draw_patches);
 
-	util_slab_create(&ctx->transfer_pool, sizeof(struct pipe_transfer),
+	util_slab_create(&ctx->transfer_pool, sizeof(struct fd_transfer),
 			16, UTIL_SLAB_SINGLETHREADED);
 
 	fd_draw_init(pctx);

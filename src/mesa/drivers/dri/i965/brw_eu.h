@@ -401,20 +401,55 @@ void brw_CMP(struct brw_codegen *p,
 
 void
 brw_untyped_atomic(struct brw_codegen *p,
-                   struct brw_reg dest,
+                   struct brw_reg dst,
                    struct brw_reg payload,
+                   struct brw_reg surface,
                    unsigned atomic_op,
-                   unsigned bind_table_index,
                    unsigned msg_length,
                    bool response_expected);
 
 void
 brw_untyped_surface_read(struct brw_codegen *p,
-                         struct brw_reg dest,
-                         struct brw_reg mrf,
-                         unsigned bind_table_index,
+                         struct brw_reg dst,
+                         struct brw_reg payload,
+                         struct brw_reg surface,
                          unsigned msg_length,
                          unsigned num_channels);
+
+void
+brw_untyped_surface_write(struct brw_codegen *p,
+                          struct brw_reg payload,
+                          struct brw_reg surface,
+                          unsigned msg_length,
+                          unsigned num_channels);
+
+void
+brw_typed_atomic(struct brw_codegen *p,
+                 struct brw_reg dst,
+                 struct brw_reg payload,
+                 struct brw_reg surface,
+                 unsigned atomic_op,
+                 unsigned msg_length,
+                 bool response_expected);
+
+void
+brw_typed_surface_read(struct brw_codegen *p,
+                       struct brw_reg dst,
+                       struct brw_reg payload,
+                       struct brw_reg surface,
+                       unsigned msg_length,
+                       unsigned num_channels);
+
+void
+brw_typed_surface_write(struct brw_codegen *p,
+                        struct brw_reg payload,
+                        struct brw_reg surface,
+                        unsigned msg_length,
+                        unsigned num_channels);
+
+void
+brw_memory_fence(struct brw_codegen *p,
+                 struct brw_reg dst);
 
 void
 brw_pixel_interpolator_query(struct brw_codegen *p,
@@ -425,6 +460,16 @@ brw_pixel_interpolator_query(struct brw_codegen *p,
                              unsigned data,
                              unsigned msg_length,
                              unsigned response_length);
+
+void
+brw_find_live_channel(struct brw_codegen *p,
+                      struct brw_reg dst);
+
+void
+brw_broadcast(struct brw_codegen *p,
+              struct brw_reg dst,
+              struct brw_reg src,
+              struct brw_reg idx);
 
 /***********************************************************************
  * brw_eu_util.c:

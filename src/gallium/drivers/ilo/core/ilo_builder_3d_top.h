@@ -29,12 +29,12 @@
 #define ILO_BUILDER_3D_TOP_H
 
 #include "genhw/genhw.h"
+#include "../ilo_resource.h"
+#include "../ilo_shader.h"
 #include "intel_winsys.h"
 
-#include "ilo_common.h"
-#include "ilo_resource.h"
-#include "ilo_shader.h"
-#include "ilo_state.h"
+#include "ilo_core.h"
+#include "ilo_dev.h"
 #include "ilo_state_3d.h"
 #include "ilo_builder.h"
 

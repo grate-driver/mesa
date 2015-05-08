@@ -203,6 +203,7 @@ static const struct extension extension_table[] = {
    { "GL_ARB_vertex_buffer_object",                o(dummy_true),                              GLL,            2003 },
    { "GL_ARB_vertex_program",                      o(ARB_vertex_program),                      GLL,            2002 },
    { "GL_ARB_vertex_shader",                       o(ARB_vertex_shader),                       GL,             2002 },
+   { "GL_ARB_vertex_attrib_64bit",                 o(ARB_vertex_attrib_64bit),                 GLC,            2010 },
    { "GL_ARB_vertex_type_10f_11f_11f_rev",         o(ARB_vertex_type_10f_11f_11f_rev),         GL,             2013 },
    { "GL_ARB_vertex_type_2_10_10_10_rev",          o(ARB_vertex_type_2_10_10_10_rev),          GL,             2009 },
    { "GL_ARB_viewport_array",                      o(ARB_viewport_array),                      GLC,            2010 },
@@ -298,6 +299,7 @@ static const struct extension extension_table[] = {
    { "GL_OES_depth_texture",                       o(ARB_depth_texture),                                  ES2, 2006 },
    { "GL_OES_depth_texture_cube_map",              o(OES_depth_texture_cube_map),                         ES2, 2012 },
    { "GL_OES_draw_texture",                        o(OES_draw_texture),                             ES1,       2004 },
+   { "GL_OES_EGL_sync",                            o(dummy_true),                                   ES1 | ES2, 2010 },
    /*  FIXME: Mesa expects GL_OES_EGL_image to be available in OpenGL contexts. */
    { "GL_OES_EGL_image",                           o(OES_EGL_image),                           GL | ES1 | ES2, 2006 },
    { "GL_OES_EGL_image_external",                  o(OES_EGL_image_external),                       ES1 | ES2, 2010 },

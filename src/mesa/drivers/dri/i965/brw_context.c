@@ -288,6 +288,7 @@ brw_init_driver_functions(struct brw_context *brw,
       gen6_init_queryobj_functions(functions);
    else
       gen4_init_queryobj_functions(functions);
+   brw_init_compute_functions(functions);
 
    functions->QuerySamplesForFormat = brw_query_samples_for_format;
 
@@ -594,12 +595,14 @@ brw_initialize_context_constants(struct brw_context *brw)
    if (brw_env_var_as_boolean("INTEL_USE_NIR", true))
       ctx->Const.ShaderCompilerOptions[MESA_SHADER_FRAGMENT].NirOptions = &nir_options;
 
+   ctx->Const.ShaderCompilerOptions[MESA_SHADER_COMPUTE].NirOptions = &nir_options;
+
    /* ARB_viewport_array */
-   if (brw->gen >= 7 && ctx->API == API_OPENGL_CORE) {
-      ctx->Const.MaxViewports = GEN7_NUM_VIEWPORTS;
+   if (brw->gen >= 6 && ctx->API == API_OPENGL_CORE) {
+      ctx->Const.MaxViewports = GEN6_NUM_VIEWPORTS;
       ctx->Const.ViewportSubpixelBits = 0;
 
-      /* Cast to float before negating becuase MaxViewportWidth is unsigned.
+      /* Cast to float before negating because MaxViewportWidth is unsigned.
        */
       ctx->Const.ViewportBounds.Min = -(float)ctx->Const.MaxViewportWidth;
       ctx->Const.ViewportBounds.Max = ctx->Const.MaxViewportWidth;
@@ -608,6 +611,28 @@ brw_initialize_context_constants(struct brw_context *brw)
    /* ARB_gpu_shader5 */
    if (brw->gen >= 7)
       ctx->Const.MaxVertexStreams = MIN2(4, MAX_VERTEX_STREAMS);
+}
+
+static void
+brw_adjust_cs_context_constants(struct brw_context *brw)
+{
+   struct gl_context *ctx = &brw->ctx;
+
+   /* For ES, we set these constants based on SIMD8.
+    *
+    * TODO: Once we can always generate SIMD16, we should update this.
+    *
+    * For GL, we assume we can generate a SIMD16 program, but this currently
+    * is not always true. This allows us to run more test cases, and will be
+    * required based on desktop GL compute shader requirements.
+    */
+   const int simd_size = ctx->API == API_OPENGL_CORE ? 16 : 8;
+
+   const uint32_t max_invocations = simd_size * brw->max_cs_threads;
+   ctx->Const.MaxComputeWorkGroupSize[0] = max_invocations;
+   ctx->Const.MaxComputeWorkGroupSize[1] = max_invocations;
+   ctx->Const.MaxComputeWorkGroupSize[2] = max_invocations;
+   ctx->Const.MaxComputeWorkGroupInvocations = max_invocations;
 }
 
 /**
@@ -833,12 +858,15 @@ brwCreateContext(gl_api api,
    brw->max_ds_threads = devinfo->max_ds_threads;
    brw->max_gs_threads = devinfo->max_gs_threads;
    brw->max_wm_threads = devinfo->max_wm_threads;
+   brw->max_cs_threads = devinfo->max_cs_threads;
    brw->urb.size = devinfo->urb.size;
    brw->urb.min_vs_entries = devinfo->urb.min_vs_entries;
    brw->urb.max_vs_entries = devinfo->urb.max_vs_entries;
    brw->urb.max_hs_entries = devinfo->urb.max_hs_entries;
    brw->urb.max_ds_entries = devinfo->urb.max_ds_entries;
    brw->urb.max_gs_entries = devinfo->urb.max_gs_entries;
+
+   brw_adjust_cs_context_constants(brw);
 
    /* Estimate the size of the mappable aperture into the GTT.  There's an
     * ioctl to get the whole GTT size, but not one to get the mappable subset.
@@ -974,7 +1002,7 @@ intelUnbindContext(__DRIcontext * driContextPriv)
  * sRGB encode if the renderbuffer can handle it.  You can ask specifically
  * for a visual where you're guaranteed to be capable, but it turns out that
  * everyone just makes all their ARGB8888 visuals capable and doesn't offer
- * incapable ones, becuase there's no difference between the two in resources
+ * incapable ones, because there's no difference between the two in resources
  * used.  Applications thus get built that accidentally rely on the default
  * visual choice being sRGB, so we make ours sRGB capable.  Everything sounds
  * great...

@@ -44,9 +44,17 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <radeon_surface.h>
 
 #ifndef RADEON_INFO_ACTIVE_CU_COUNT
 #define RADEON_INFO_ACTIVE_CU_COUNT 0x20
+#endif
+
+#ifndef RADEON_INFO_CURRENT_GPU_TEMP
+#define RADEON_INFO_CURRENT_GPU_TEMP	0x21
+#define RADEON_INFO_CURRENT_GPU_SCLK	0x22
+#define RADEON_INFO_CURRENT_GPU_MCLK	0x23
+#define RADEON_INFO_READ_REG		0x24
 #endif
 
 static struct util_hash_table *fd_tab = NULL;
@@ -507,22 +515,6 @@ static boolean radeon_cs_request_feature(struct radeon_winsys_cs *rcs,
     return FALSE;
 }
 
-static int radeon_drm_winsys_surface_init(struct radeon_winsys *rws,
-                                          struct radeon_surface *surf)
-{
-    struct radeon_drm_winsys *ws = (struct radeon_drm_winsys*)rws;
-
-    return radeon_surface_init(ws->surf_man, surf);
-}
-
-static int radeon_drm_winsys_surface_best(struct radeon_winsys *rws,
-                                          struct radeon_surface *surf)
-{
-    struct radeon_drm_winsys *ws = (struct radeon_drm_winsys*)rws;
-
-    return radeon_surface_best(ws->surf_man, surf);
-}
-
 static uint64_t radeon_query_value(struct radeon_winsys *rws,
                                    enum radeon_value_id value)
 {
@@ -559,8 +551,35 @@ static uint64_t radeon_query_value(struct radeon_winsys *rws,
         radeon_get_drm_value(ws->fd, RADEON_INFO_GTT_USAGE,
                              "gtt-usage", (uint32_t*)&retval);
         return retval;
+    case RADEON_GPU_TEMPERATURE:
+        radeon_get_drm_value(ws->fd, RADEON_INFO_CURRENT_GPU_TEMP,
+                             "gpu-temp", (uint32_t*)&retval);
+        return retval;
+    case RADEON_CURRENT_SCLK:
+        radeon_get_drm_value(ws->fd, RADEON_INFO_CURRENT_GPU_SCLK,
+                             "current-gpu-sclk", (uint32_t*)&retval);
+        return retval;
+    case RADEON_CURRENT_MCLK:
+        radeon_get_drm_value(ws->fd, RADEON_INFO_CURRENT_GPU_MCLK,
+                             "current-gpu-mclk", (uint32_t*)&retval);
+        return retval;
     }
     return 0;
+}
+
+static void radeon_read_registers(struct radeon_winsys *rws,
+                                  unsigned reg_offset,
+                                  unsigned num_registers, uint32_t *out)
+{
+    struct radeon_drm_winsys *ws = (struct radeon_drm_winsys*)rws;
+    unsigned i;
+
+    for (i = 0; i < num_registers; i++) {
+        uint32_t reg = reg_offset + i*4;
+
+        radeon_get_drm_value(ws->fd, RADEON_INFO_READ_REG, "read-reg", &reg);
+        out[i] = reg;
+    }
 }
 
 static unsigned hash_fd(void *key)
@@ -706,12 +725,12 @@ radeon_drm_winsys_create(int fd, radeon_screen_create_t screen_create)
     ws->base.destroy = radeon_winsys_destroy;
     ws->base.query_info = radeon_query_info;
     ws->base.cs_request_feature = radeon_cs_request_feature;
-    ws->base.surface_init = radeon_drm_winsys_surface_init;
-    ws->base.surface_best = radeon_drm_winsys_surface_best;
     ws->base.query_value = radeon_query_value;
+    ws->base.read_registers = radeon_read_registers;
 
     radeon_bomgr_init_functions(ws);
     radeon_drm_cs_init_functions(ws);
+    radeon_surface_init_functions(ws);
 
     pipe_mutex_init(ws->hyperz_owner_mutex);
     pipe_mutex_init(ws->cmask_owner_mutex);

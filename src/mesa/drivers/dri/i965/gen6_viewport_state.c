@@ -42,27 +42,29 @@ gen6_upload_clip_vp(struct brw_context *brw)
    struct brw_clipper_viewport *vp;
 
    vp = brw_state_batch(brw, AUB_TRACE_CLIP_VP_STATE,
-			sizeof(*vp), 32, &brw->clip.vp_offset);
+                        sizeof(*vp) * ctx->Const.MaxViewports, 32, &brw->clip.vp_offset);
 
-   /* According to the "Vertex X,Y Clamping and Quantization" section of the
-    * Strips and Fans documentation, objects must not have a screen-space
-    * extents of over 8192 pixels, or they may be mis-rasterized.  The maximum
-    * screen space coordinates of a small object may larger, but we have no
-    * way to enforce the object size other than through clipping.
-    *
-    * If you're surprised that we set clip to -gbx to +gbx and it seems like
-    * we'll end up with 16384 wide, note that for a 8192-wide render target,
-    * we'll end up with a normal (-1, 1) clip volume that just covers the
-    * drawable.
-    */
-   const float maximum_post_clamp_delta = 8192;
-   float gbx = maximum_post_clamp_delta / ctx->ViewportArray[0].Width;
-   float gby = maximum_post_clamp_delta / ctx->ViewportArray[0].Height;
+   for (unsigned i = 0; i < ctx->Const.MaxViewports; i++) {
+      /* According to the "Vertex X,Y Clamping and Quantization" section of the
+       * Strips and Fans documentation, objects must not have a screen-space
+       * extents of over 8192 pixels, or they may be mis-rasterized.  The maximum
+       * screen space coordinates of a small object may larger, but we have no
+       * way to enforce the object size other than through clipping.
+       *
+       * If you're surprised that we set clip to -gbx to +gbx and it seems like
+       * we'll end up with 16384 wide, note that for a 8192-wide render target,
+       * we'll end up with a normal (-1, 1) clip volume that just covers the
+       * drawable.
+       */
+      const float maximum_post_clamp_delta = 8192;
+      float gbx = maximum_post_clamp_delta / ctx->ViewportArray[i].Width;
+      float gby = maximum_post_clamp_delta / ctx->ViewportArray[i].Height;
 
-   vp->xmin = -gbx;
-   vp->xmax = gbx;
-   vp->ymin = -gby;
-   vp->ymax = gby;
+      vp[i].xmin = -gbx;
+      vp[i].xmax = gbx;
+      vp[i].ymin = -gby;
+      vp[i].ymax = gby;
+   }
 
    brw->ctx.NewDriverState |= BRW_NEW_CLIP_VP;
 }
@@ -79,14 +81,14 @@ static void
 gen6_upload_sf_vp(struct brw_context *brw)
 {
    struct gl_context *ctx = &brw->ctx;
-   struct brw_sf_viewport *sfv;
+   struct gen6_sf_viewport *sfv;
    GLfloat y_scale, y_bias;
-   double scale[3], translate[3];
    const bool render_to_fbo = _mesa_is_user_fbo(ctx->DrawBuffer);
 
    sfv = brw_state_batch(brw, AUB_TRACE_SF_VP_STATE,
-			 sizeof(*sfv), 32, &brw->sf.vp_offset);
-   memset(sfv, 0, sizeof(*sfv));
+                         sizeof(*sfv) * ctx->Const.MaxViewports,
+                         32, &brw->sf.vp_offset);
+   memset(sfv, 0, sizeof(*sfv) * ctx->Const.MaxViewports);
 
    /* _NEW_BUFFERS */
    if (render_to_fbo) {
@@ -97,14 +99,19 @@ gen6_upload_sf_vp(struct brw_context *brw)
       y_bias = ctx->DrawBuffer->Height;
    }
 
-   /* _NEW_VIEWPORT */
-   _mesa_get_viewport_xform(ctx, 0, scale, translate);
-   sfv->viewport.m00 = scale[0];
-   sfv->viewport.m11 = scale[1] * y_scale;
-   sfv->viewport.m22 = scale[2];
-   sfv->viewport.m30 = translate[0];
-   sfv->viewport.m31 = translate[1] * y_scale + y_bias;
-   sfv->viewport.m32 = translate[2];
+   for (unsigned i = 0; i < ctx->Const.MaxViewports; i++) {
+      double scale[3], translate[3];
+
+      /* _NEW_VIEWPORT */
+      _mesa_get_viewport_xform(ctx, i, scale, translate);
+      sfv[i].m00 = scale[0];
+      sfv[i].m11 = scale[1] * y_scale;
+      sfv[i].m22 = scale[2];
+      sfv[i].m30 = translate[0];
+      sfv[i].m31 = translate[1] * y_scale + y_bias;
+      sfv[i].m32 = translate[2];
+
+   }
 
    brw->ctx.NewDriverState |= BRW_NEW_SF_VP;
 }

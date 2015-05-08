@@ -25,7 +25,7 @@
  *    Chia-I Wu <olv@lunarg.com>
  */
 
-#include "intel_winsys.h"
+#include "core/intel_winsys.h"
 
 #include "ilo_context.h"
 #include "ilo_cp.h"
@@ -111,19 +111,20 @@ ilo_destroy_query(struct pipe_context *pipe, struct pipe_query *query)
    FREE(q);
 }
 
-static void
+static boolean
 ilo_begin_query(struct pipe_context *pipe, struct pipe_query *query)
 {
    struct ilo_query *q = ilo_query(query);
 
    if (q->active)
-      return;
+      return false;
 
    util_query_clear_result(&q->result, q->type);
    q->used = 0;
    q->active = true;
 
    ilo_query_table[q->type].begin(ilo_context(pipe), q);
+   return true;
 }
 
 static void

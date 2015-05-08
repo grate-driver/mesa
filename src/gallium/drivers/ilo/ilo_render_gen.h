@@ -28,10 +28,11 @@
 #ifndef ILO_RENDER_GEN_H
 #define ILO_RENDER_GEN_H
 
+#include "core/ilo_builder.h"
+#include "core/ilo_builder_3d.h"
+#include "core/ilo_builder_render.h"
+
 #include "ilo_common.h"
-#include "ilo_builder.h"
-#include "ilo_builder_3d.h"
-#include "ilo_builder_render.h"
 #include "ilo_state.h"
 #include "ilo_render.h"
 
@@ -44,7 +45,7 @@ struct ilo_state_vector;
  * Render Engine.
  */
 struct ilo_render {
-   const struct ilo_dev_info *dev;
+   const struct ilo_dev *dev;
    struct ilo_builder *builder;
 
    struct intel_bo *workaround_bo;

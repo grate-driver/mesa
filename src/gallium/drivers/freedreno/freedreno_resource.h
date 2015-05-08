@@ -72,6 +72,9 @@ struct fd_resource {
 	/* buffer range that has been initialized */
 	struct util_range valid_buffer_range;
 
+	/* reference to the resource holding stencil data for a z32_s8 texture */
+	struct fd_resource *stencil;
+
 	struct list_head list;
 };
 
@@ -79,6 +82,17 @@ static INLINE struct fd_resource *
 fd_resource(struct pipe_resource *ptex)
 {
 	return (struct fd_resource *)ptex;
+}
+
+struct fd_transfer {
+	struct pipe_transfer base;
+	void *staging;
+};
+
+static INLINE struct fd_transfer *
+fd_transfer(struct pipe_transfer *ptrans)
+{
+	return (struct fd_transfer *)ptrans;
 }
 
 static INLINE struct fd_resource_slice *

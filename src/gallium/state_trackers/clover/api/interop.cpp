@@ -1,5 +1,6 @@
 //
-// Copyright 2013 Francisco Jerez
+// Copyright 2015 Advanced Micro Devices, Inc.
+// All Rights Reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software"),
@@ -20,19 +21,44 @@
 // OTHER DEALINGS IN THE SOFTWARE.
 //
 
-#include "util/compat.hpp"
+#include "core/event.hpp"
+#include "api/util.hpp"
 
-using namespace clover::compat;
+using namespace clover;
 
-exception::~exception() {
+extern "C" {
+
+PUBLIC bool
+opencl_dri_event_add_ref(cl_event event)
+{
+   return clRetainEvent(event) == CL_SUCCESS;
 }
 
-const char *
-exception::what() const {
-   return "";
+PUBLIC bool
+opencl_dri_event_release(cl_event event)
+{
+   return clReleaseEvent(event) == CL_SUCCESS;
 }
 
-const char *
-runtime_error::what() const {
-   return _what.c_str();
+PUBLIC bool
+opencl_dri_event_wait(cl_event event, uint64_t timeout) try {
+   if (!timeout) {
+      return obj(event).status() == CL_COMPLETE;
+   }
+
+   obj(event).wait();
+   return true;
+
+} catch (error &) {
+   return false;
+}
+
+PUBLIC struct pipe_fence_handle *
+opencl_dri_event_get_fence(cl_event event) try {
+   return obj(event).fence();
+
+} catch (error &) {
+   return NULL;
+}
+
 }

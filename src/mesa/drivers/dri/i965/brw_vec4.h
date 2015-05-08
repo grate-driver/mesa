@@ -209,6 +209,7 @@ public:
    bool opt_cse();
    bool opt_algebraic();
    bool opt_register_coalesce();
+   bool eliminate_find_live_channel();
    bool is_dep_ctrl_unsafe(const vec4_instruction *inst);
    void opt_set_dependency_control();
    void opt_schedule_instructions();
@@ -297,6 +298,9 @@ public:
 
    void emit_lrp(const dst_reg &dst,
                  const src_reg &x, const src_reg &y, const src_reg &a);
+
+   /** Copy any live channel from \p src to the first channel of \p dst. */
+   void emit_uniformize(const dst_reg &dst, const src_reg &src);
 
    void emit_block_move(dst_reg *dst, src_reg *src,
                         const struct glsl_type *type, brw_predicate predicate);
@@ -503,15 +507,6 @@ private:
    void generate_set_simd4x2_header_gen9(vec4_instruction *inst,
                                          struct brw_reg dst);
    void generate_unpack_flags(struct brw_reg dst);
-
-   void generate_untyped_atomic(vec4_instruction *inst,
-                                struct brw_reg dst,
-                                struct brw_reg atomic_op,
-                                struct brw_reg surf_index);
-
-   void generate_untyped_surface_read(vec4_instruction *inst,
-                                      struct brw_reg dst,
-                                      struct brw_reg surf_index);
 
    struct brw_context *brw;
    const struct brw_device_info *devinfo;

@@ -28,7 +28,8 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include "genhw/genhw.h"
-#include "shader/toy_compiler.h"
+#include "../shader/toy_compiler.h"
+
 #include "intel_winsys.h"
 #include "ilo_builder.h"
 

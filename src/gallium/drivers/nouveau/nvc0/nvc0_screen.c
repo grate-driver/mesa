@@ -89,7 +89,7 @@ nvc0_screen_get_param(struct pipe_screen *pscreen, enum pipe_cap param)
    case PIPE_CAP_MAX_TEXTURE_BUFFER_SIZE:
       return 65536;
    case PIPE_CAP_GLSL_FEATURE_LEVEL:
-      return 400;
+      return 410;
    case PIPE_CAP_MAX_RENDER_TARGETS:
       return 8;
    case PIPE_CAP_MAX_DUAL_SOURCE_RENDER_TARGETS:
@@ -651,6 +651,7 @@ nvc0_screen_create(struct nouveau_device *dev)
    pscreen->get_shader_param = nvc0_screen_get_shader_param;
    pscreen->get_paramf = nvc0_screen_get_paramf;
    pscreen->get_driver_query_info = nvc0_screen_get_driver_query_info;
+   pscreen->get_driver_query_group_info = nvc0_screen_get_driver_query_group_info;
 
    nvc0_screen_init_resource_functions(pscreen);
 

@@ -73,7 +73,16 @@ intel_horizontal_texture_alignment_unit(struct brw_context *brw,
         */
       unsigned int i, j;
       _mesa_get_format_block_size(mt->format, &i, &j);
-      return i;
+
+      /* On Gen9+ we can pick our own alignment for compressed textures but it
+       * has to be a multiple of the block size. The minimum alignment we can
+       * pick is 4 so we effectively have to align to 4 times the block
+       * size
+       */
+      if (brw->gen >= 9)
+         return i * 4;
+      else
+         return i;
     }
 
    if (mt->format == MESA_FORMAT_S_UINT8)
@@ -116,7 +125,8 @@ intel_vertical_texture_alignment_unit(struct brw_context *brw,
     * the SURFACE_STATE "Surface Vertical Alignment" field.
     */
    if (_mesa_is_format_compressed(format))
-      return 4;
+      /* See comment above for the horizontal alignment */
+      return brw->gen >= 9 ? 16 : 4;
 
    if (format == MESA_FORMAT_S_UINT8)
       return brw->gen >= 7 ? 8 : 4;
@@ -198,6 +208,9 @@ brw_miptree_layout_2d(struct intel_mipmap_tree *mt)
    unsigned width = mt->physical_width0;
    unsigned height = mt->physical_height0;
    unsigned depth = mt->physical_depth0; /* number of array layers. */
+   unsigned int bw, bh;
+
+   _mesa_get_format_block_size(mt->format, &bw, &bh);
 
    mt->total_width = mt->physical_width0;
 
@@ -205,7 +218,7 @@ brw_miptree_layout_2d(struct intel_mipmap_tree *mt)
        mt->total_width = ALIGN(mt->physical_width0, mt->align_w);
    }
 
-   /* May need to adjust width to accomodate the placement of
+   /* May need to adjust width to accommodate the placement of
     * the 2nd mipmap.  This occurs when the alignment
     * constraints of mipmap placement push the right edge of the
     * 2nd mipmap out past the width of its parent.
@@ -215,7 +228,7 @@ brw_miptree_layout_2d(struct intel_mipmap_tree *mt)
 
        if (mt->compressed) {
           mip1_width = ALIGN(minify(mt->physical_width0, 1), mt->align_w) +
-             ALIGN(minify(mt->physical_width0, 2), mt->align_w);
+             ALIGN(minify(mt->physical_width0, 2), bw);
        } else {
           mip1_width = ALIGN(minify(mt->physical_width0, 1), mt->align_w) +
              minify(mt->physical_width0, 2);
@@ -235,7 +248,7 @@ brw_miptree_layout_2d(struct intel_mipmap_tree *mt)
 
       img_height = ALIGN(height, mt->align_h);
       if (mt->compressed)
-	 img_height /= mt->align_h;
+	 img_height /= bh;
 
       if (mt->array_layout == ALL_SLICES_AT_EACH_LOD) {
          /* Compact arrays with separated miplevels */
@@ -260,6 +273,66 @@ brw_miptree_layout_2d(struct intel_mipmap_tree *mt)
 
       if (mt->target == GL_TEXTURE_3D)
          depth = minify(depth, 1);
+   }
+}
+
+unsigned
+brw_miptree_get_horizontal_slice_pitch(const struct brw_context *brw,
+                                       const struct intel_mipmap_tree *mt,
+                                       unsigned level)
+{
+   assert(brw->gen < 9);
+
+   if (mt->target == GL_TEXTURE_3D ||
+       (brw->gen == 4 && mt->target == GL_TEXTURE_CUBE_MAP)) {
+      return ALIGN(minify(mt->physical_width0, level), mt->align_w);
+   } else {
+      return 0;
+   }
+}
+
+unsigned
+brw_miptree_get_vertical_slice_pitch(const struct brw_context *brw,
+                                     const struct intel_mipmap_tree *mt,
+                                     unsigned level)
+{
+   if (brw->gen >= 9) {
+      /* ALL_SLICES_AT_EACH_LOD isn't supported on Gen8+ but this code will
+       * effectively end up with a packed qpitch anyway whenever
+       * mt->first_level == mt->last_level.
+       */
+      assert(mt->array_layout != ALL_SLICES_AT_EACH_LOD);
+
+      /* On Gen9 we can pick whatever qpitch we like as long as it's aligned
+       * to the vertical alignment so we don't need to add any extra rows.
+       */
+      unsigned qpitch = mt->total_height;
+
+      /* If the surface might be used as a stencil buffer or HiZ buffer then
+       * it needs to be a multiple of 8.
+       */
+      const GLenum base_format = _mesa_get_format_base_format(mt->format);
+      if (_mesa_is_depth_or_stencil_format(base_format))
+         qpitch = ALIGN(qpitch, 8);
+
+      /* 3D textures need to be aligned to the tile height. At this point we
+       * don't know which tiling will be used so let's just align it to 32
+       */
+      if (mt->target == GL_TEXTURE_3D)
+         qpitch = ALIGN(qpitch, 32);
+
+      return qpitch;
+
+   } else if (mt->target == GL_TEXTURE_3D ||
+              (brw->gen == 4 && mt->target == GL_TEXTURE_CUBE_MAP) ||
+              mt->array_layout == ALL_SLICES_AT_EACH_LOD) {
+      return ALIGN(minify(mt->physical_height0, level), mt->align_h);
+
+   } else {
+      const unsigned h0 = ALIGN(mt->physical_height0, mt->align_h);
+      const unsigned h1 = ALIGN(minify(mt->physical_height0, 1), mt->align_h);
+
+      return h0 + h1 + (brw->gen >= 7 ? 12 : 11) * mt->align_h;
    }
 }
 
@@ -318,47 +391,13 @@ brw_miptree_layout_texture_array(struct brw_context *brw,
        * this case it's always 64). The vertical alignment is ignored.
        */
       mt->qpitch = mt->total_width;
-   } else if (brw->gen >= 9) {
-      GLenum base_format;
-
-      /* ALL_SLICES_AT_EACH_LOD isn't supported on Gen8+ but this code will
-       * effectively end up with a packed qpitch anyway whenever
-       * mt->first_level == mt->last_level.
-       */
-      assert(mt->array_layout != ALL_SLICES_AT_EACH_LOD);
-
-      /* On Gen9 we can pick whatever qpitch we like as long as it's aligned
-       * to the vertical alignment so we don't need to add any extra rows.
-       */
-      mt->qpitch = mt->total_height;
-
-      /* If the surface might be used as a stencil buffer or HiZ buffer then
-       * it needs to be a multiple of 8.
-       */
-      base_format = _mesa_get_format_base_format(mt->format);
-      if (_mesa_is_depth_or_stencil_format(base_format))
-         mt->qpitch = ALIGN(mt->qpitch, 8);
-
-      /* 3D textures need to be aligned to the tile height. At this point we
-       * don't know which tiling will be used so let's just align it to 32
-       */
-      if (mt->target == GL_TEXTURE_3D)
-         mt->qpitch = ALIGN(mt->qpitch, 32);
-
-      /* Unlike previous generations the qpitch is now a multiple of the
-       * compressed block size so physical_qpitch matches mt->qpitch.
-       */
-      physical_qpitch = mt->qpitch;
    } else {
-      int h0 = ALIGN(mt->physical_height0, mt->align_h);
-      int h1 = ALIGN(minify(mt->physical_height0, 1), mt->align_h);
-
-      if (mt->array_layout == ALL_SLICES_AT_EACH_LOD)
-         mt->qpitch = h0;
-      else
-         mt->qpitch = (h0 + h1 + (brw->gen >= 7 ? 12 : 11) * mt->align_h);
-
-      physical_qpitch = mt->compressed ? mt->qpitch / 4 : mt->qpitch;
+      mt->qpitch = brw_miptree_get_vertical_slice_pitch(brw, mt, 0);
+      /* Unlike previous generations the qpitch is a multiple of the
+       * compressed block size on Gen9 so physical_qpitch matches mt->qpitch.
+       */
+      physical_qpitch = (mt->compressed && brw->gen < 9 ? mt->qpitch / 4 :
+                         mt->qpitch);
    }
 
    for (unsigned level = mt->first_level; level <= mt->last_level; level++) {
@@ -503,5 +542,15 @@ brw_miptree_layout(struct brw_context *brw, struct intel_mipmap_tree *mt)
    }
    DBG("%s: %dx%dx%d\n", __func__,
        mt->total_width, mt->total_height, mt->cpp);
+
+   /* On Gen9+ the alignment values are expressed in multiples of the block
+    * size
+    */
+   if (brw->gen >= 9) {
+      unsigned int i, j;
+      _mesa_get_format_block_size(mt->format, &i, &j);
+      mt->align_w /= i;
+      mt->align_h /= j;
+   }
 }
 

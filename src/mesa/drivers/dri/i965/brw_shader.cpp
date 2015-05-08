@@ -73,6 +73,7 @@ brw_shader_precompile(struct gl_context *ctx,
    struct gl_shader *vs = sh_prog->_LinkedShaders[MESA_SHADER_VERTEX];
    struct gl_shader *gs = sh_prog->_LinkedShaders[MESA_SHADER_GEOMETRY];
    struct gl_shader *fs = sh_prog->_LinkedShaders[MESA_SHADER_FRAGMENT];
+   struct gl_shader *cs = sh_prog->_LinkedShaders[MESA_SHADER_COMPUTE];
 
    if (fs && !brw_fs_precompile(ctx, sh_prog, fs->Program))
       return false;
@@ -81,6 +82,9 @@ brw_shader_precompile(struct gl_context *ctx,
       return false;
 
    if (vs && !brw_vs_precompile(ctx, sh_prog, vs->Program))
+      return false;
+
+   if (cs && !brw_cs_precompile(ctx, sh_prog, cs->Program))
       return false;
 
    return true;
@@ -490,6 +494,16 @@ brw_instruction_name(enum opcode op)
       return "untyped_atomic";
    case SHADER_OPCODE_UNTYPED_SURFACE_READ:
       return "untyped_surface_read";
+   case SHADER_OPCODE_UNTYPED_SURFACE_WRITE:
+      return "untyped_surface_write";
+   case SHADER_OPCODE_TYPED_ATOMIC:
+      return "typed_atomic";
+   case SHADER_OPCODE_TYPED_SURFACE_READ:
+      return "typed_surface_read";
+   case SHADER_OPCODE_TYPED_SURFACE_WRITE:
+      return "typed_surface_write";
+   case SHADER_OPCODE_MEMORY_FENCE:
+      return "memory_fence";
 
    case SHADER_OPCODE_LOAD_PAYLOAD:
       return "load_payload";
@@ -502,6 +516,11 @@ brw_instruction_name(enum opcode op)
       return "gen7_scratch_read";
    case SHADER_OPCODE_URB_WRITE_SIMD8:
       return "gen8_urb_write_simd8";
+
+   case SHADER_OPCODE_FIND_LIVE_CHANNEL:
+      return "find_live_channel";
+   case SHADER_OPCODE_BROADCAST:
+      return "broadcast";
 
    case VEC4_OPCODE_MOV_BYTES:
       return "mov_bytes";
@@ -610,6 +629,8 @@ brw_instruction_name(enum opcode op)
       return "gs_svb_set_dst_index";
    case GS_OPCODE_FF_SYNC_SET_PRIMITIVES:
       return "gs_ff_sync_set_primitives";
+   case CS_OPCODE_CS_TERMINATE:
+      return "cs_terminate";
    }
 
    unreachable("not reached");
@@ -1032,6 +1053,10 @@ backend_instruction::has_side_effects() const
    switch (opcode) {
    case SHADER_OPCODE_UNTYPED_ATOMIC:
    case SHADER_OPCODE_GEN4_SCRATCH_WRITE:
+   case SHADER_OPCODE_UNTYPED_SURFACE_WRITE:
+   case SHADER_OPCODE_TYPED_ATOMIC:
+   case SHADER_OPCODE_TYPED_SURFACE_WRITE:
+   case SHADER_OPCODE_MEMORY_FENCE:
    case SHADER_OPCODE_URB_WRITE_SIMD8:
    case FS_OPCODE_FB_WRITE:
       return true;

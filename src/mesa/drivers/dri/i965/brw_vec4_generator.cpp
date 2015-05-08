@@ -326,7 +326,7 @@ vec4_generator::generate_tex(vec4_instruction *inst,
     * to set it up explicitly and load the offset bitfield.  Otherwise, we can
     * use an implied move from g0 to the first message register.
     */
-   if (inst->header_present) {
+   if (inst->header_size != 0) {
       if (devinfo->gen < 6 && !inst->offset) {
          /* Set up an implied move from g0 to the MRF. */
          src = brw_vec8_grf(0, 0);
@@ -391,7 +391,7 @@ vec4_generator::generate_tex(vec4_instruction *inst,
                  msg_type,
                  1, /* response length */
                  inst->mlen,
-                 inst->header_present,
+                 inst->header_size != 0,
                  BRW_SAMPLER_SIMD_MODE_SIMD4X2,
                  return_format);
 
@@ -431,7 +431,7 @@ vec4_generator::generate_tex(vec4_instruction *inst,
                               msg_type,
                               1 /* rlen */,
                               inst->mlen /* mlen */,
-                              inst->header_present /* header */,
+                              inst->header_size != 0 /* header */,
                               BRW_SAMPLER_SIMD_MODE_SIMD4X2,
                               return_format);
 
@@ -1051,7 +1051,7 @@ vec4_generator::generate_pull_constant_load_gen7(vec4_instruction *inst,
                               GEN5_SAMPLER_MESSAGE_SAMPLE_LD,
                               1, /* rlen */
                               inst->mlen,
-                              inst->header_present,
+                              inst->header_size != 0,
                               BRW_SAMPLER_SIMD_MODE_SIMD4X2,
                               0);
 
@@ -1083,7 +1083,7 @@ vec4_generator::generate_pull_constant_load_gen7(vec4_instruction *inst,
                               GEN5_SAMPLER_MESSAGE_SAMPLE_LD,
                               1 /* rlen */,
                               inst->mlen,
-                              inst->header_present,
+                              inst->header_size != 0,
                               BRW_SAMPLER_SIMD_MODE_SIMD4X2,
                               0);
 
@@ -1100,6 +1100,7 @@ vec4_generator::generate_set_simd4x2_header_gen9(vec4_instruction *inst,
    brw_push_insn_state(p);
    brw_set_default_mask_control(p, BRW_MASK_DISABLE);
 
+   brw_set_default_exec_size(p, BRW_EXECUTE_8);
    brw_MOV(p, vec8(dst), retype(brw_vec8_grf(0, 0), BRW_REGISTER_TYPE_UD));
 
    brw_set_default_access_mode(p, BRW_ALIGN_1);
@@ -1107,38 +1108,6 @@ vec4_generator::generate_set_simd4x2_header_gen9(vec4_instruction *inst,
            brw_imm_ud(GEN9_SAMPLER_SIMD_MODE_EXTENSION_SIMD4X2));
 
    brw_pop_insn_state(p);
-}
-
-void
-vec4_generator::generate_untyped_atomic(vec4_instruction *inst,
-                                        struct brw_reg dst,
-                                        struct brw_reg atomic_op,
-                                        struct brw_reg surf_index)
-{
-   assert(atomic_op.file == BRW_IMMEDIATE_VALUE &&
-          atomic_op.type == BRW_REGISTER_TYPE_UD &&
-          surf_index.file == BRW_IMMEDIATE_VALUE &&
-	  surf_index.type == BRW_REGISTER_TYPE_UD);
-
-   brw_untyped_atomic(p, dst, brw_message_reg(inst->base_mrf),
-                      atomic_op.dw1.ud, surf_index.dw1.ud,
-                      inst->mlen, true);
-
-   brw_mark_surface_used(&prog_data->base, surf_index.dw1.ud);
-}
-
-void
-vec4_generator::generate_untyped_surface_read(vec4_instruction *inst,
-                                              struct brw_reg dst,
-                                              struct brw_reg surf_index)
-{
-   assert(surf_index.file == BRW_IMMEDIATE_VALUE &&
-	  surf_index.type == BRW_REGISTER_TYPE_UD);
-
-   brw_untyped_surface_read(p, dst, brw_message_reg(inst->base_mrf),
-                            surf_index.dw1.ud, inst->mlen, 1);
-
-   brw_mark_surface_used(&prog_data->base, surf_index.dw1.ud);
 }
 
 void
@@ -1500,11 +1469,55 @@ vec4_generator::generate_code(const cfg_t *cfg)
          break;
 
       case SHADER_OPCODE_UNTYPED_ATOMIC:
-         generate_untyped_atomic(inst, dst, src[0], src[1]);
+         assert(src[1].file == BRW_IMMEDIATE_VALUE &&
+                src[2].file == BRW_IMMEDIATE_VALUE);
+         brw_untyped_atomic(p, dst, src[0], src[1], src[2].dw1.ud, inst->mlen,
+                            !inst->dst.is_null());
+         brw_mark_surface_used(&prog_data->base, src[1].dw1.ud);
          break;
 
       case SHADER_OPCODE_UNTYPED_SURFACE_READ:
-         generate_untyped_surface_read(inst, dst, src[0]);
+         assert(src[1].file == BRW_IMMEDIATE_VALUE &&
+                src[2].file == BRW_IMMEDIATE_VALUE);
+         brw_untyped_surface_read(p, dst, src[0], src[1], inst->mlen,
+                                  src[2].dw1.ud);
+         brw_mark_surface_used(&prog_data->base, src[1].dw1.ud);
+         break;
+
+      case SHADER_OPCODE_UNTYPED_SURFACE_WRITE:
+         assert(src[2].file == BRW_IMMEDIATE_VALUE);
+         brw_untyped_surface_write(p, src[0], src[1], inst->mlen,
+                                   src[2].dw1.ud);
+         break;
+
+      case SHADER_OPCODE_TYPED_ATOMIC:
+         assert(src[2].file == BRW_IMMEDIATE_VALUE);
+         brw_typed_atomic(p, dst, src[0], src[1], src[2].dw1.ud, inst->mlen,
+                          !inst->dst.is_null());
+         break;
+
+      case SHADER_OPCODE_TYPED_SURFACE_READ:
+         assert(src[2].file == BRW_IMMEDIATE_VALUE);
+         brw_typed_surface_read(p, dst, src[0], src[1], inst->mlen,
+                                src[2].dw1.ud);
+         break;
+
+      case SHADER_OPCODE_TYPED_SURFACE_WRITE:
+         assert(src[2].file == BRW_IMMEDIATE_VALUE);
+         brw_typed_surface_write(p, src[0], src[1], inst->mlen,
+                                 src[2].dw1.ud);
+         break;
+
+      case SHADER_OPCODE_MEMORY_FENCE:
+         brw_memory_fence(p, dst);
+         break;
+
+      case SHADER_OPCODE_FIND_LIVE_CHANNEL:
+         brw_find_live_channel(p, dst);
+         break;
+
+      case SHADER_OPCODE_BROADCAST:
+         brw_broadcast(p, dst, src[0], src[1]);
          break;
 
       case VS_OPCODE_UNPACK_FLAGS_SIMD4X2:

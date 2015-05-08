@@ -383,9 +383,17 @@ fd3_emit_gmem_restore_tex(struct fd_ringbuffer *ring,
 		}
 
 		struct fd_resource *rsc = fd_resource(psurf[i]->texture);
+		enum pipe_format format = fd3_gmem_restore_format(psurf[i]->format);
+		/* The restore blit_zs shader expects stencil in sampler 0, and depth
+		 * in sampler 1
+		 */
+		if (rsc->stencil && i == 0) {
+			rsc = rsc->stencil;
+			format = fd3_gmem_restore_format(rsc->base.b.format);
+		}
+
 		unsigned lvl = psurf[i]->u.tex.level;
 		struct fd_resource_slice *slice = fd_resource_slice(rsc, lvl);
-		enum pipe_format format = fd3_gmem_restore_format(psurf[i]->format);
 
 		debug_assert(psurf[i]->u.tex.first_layer == psurf[i]->u.tex.last_layer);
 
@@ -412,6 +420,9 @@ fd3_emit_gmem_restore_tex(struct fd_ringbuffer *ring,
 	for (i = 0; i < bufs; i++) {
 		if (psurf[i]) {
 			struct fd_resource *rsc = fd_resource(psurf[i]->texture);
+			/* Matches above logic for blit_zs shader */
+			if (rsc->stencil && i == 0)
+				rsc = rsc->stencil;
 			unsigned lvl = psurf[i]->u.tex.level;
 			uint32_t offset = fd_resource_offset(rsc, lvl, psurf[i]->u.tex.first_layer);
 			OUT_RELOC(ring, rsc->bo, offset, 0, 0);
@@ -693,6 +704,8 @@ fd3_emit_state(struct fd_context *ctx, struct fd_ringbuffer *ring,
 
 		for (i = 0; i < ARRAY_SIZE(blend->rb_mrt); i++) {
 			enum pipe_format format = pipe_surface_format(ctx->framebuffer.cbufs[i]);
+			const struct util_format_description *desc =
+				util_format_description(format);
 			bool is_float = util_format_is_float(format);
 			bool is_int = util_format_is_pure_integer(format);
 			bool has_alpha = util_format_has_alpha(format);
@@ -713,6 +726,18 @@ fd3_emit_state(struct fd_context *ctx, struct fd_ringbuffer *ring,
 			} else {
 				blend_control |= blend->rb_mrt[i].blend_control_no_alpha_rgb;
 				control &= ~A3XX_RB_MRT_CONTROL_BLEND2;
+			}
+
+			if (format && util_format_get_component_bits(
+						format, UTIL_FORMAT_COLORSPACE_RGB, 0) < 8) {
+				const struct pipe_rt_blend_state *rt;
+				if (ctx->blend->independent_blend_enable)
+					rt = &ctx->blend->rt[i];
+				else
+					rt = &ctx->blend->rt[0];
+
+				if (!util_format_colormask_full(desc, rt->colormask))
+					control |= A3XX_RB_MRT_CONTROL_READ_DEST_ENABLE;
 			}
 
 			OUT_PKT0(ring, REG_A3XX_RB_MRT_CONTROL(i), 1);

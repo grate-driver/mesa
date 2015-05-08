@@ -68,6 +68,7 @@ _mesa_update_client_array(struct gl_context *ctx,
    dst->Enabled = src->Enabled;
    dst->Normalized = src->Normalized;
    dst->Integer = src->Integer;
+   dst->Doubles = src->Doubles;
    dst->InstanceDivisor = binding->InstanceDivisor;
    dst->_ElementSize = src->_ElementSize;
    _mesa_reference_buffer_object(ctx, &dst->BufferObj, binding->BufferObj);
@@ -166,6 +167,9 @@ void GLAPIENTRY
 _mesa_VertexAttribIPointer(GLuint index, GLint size, GLenum type,
                            GLsizei stride, const GLvoid *ptr);
 
+extern void GLAPIENTRY
+_mesa_VertexAttribLPointer(GLuint index, GLint size, GLenum type,
+                           GLsizei stride, const GLvoid *pointer);
 
 extern void GLAPIENTRY
 _mesa_EnableVertexAttribArray(GLuint index);
@@ -178,10 +182,11 @@ _mesa_DisableVertexAttribArray(GLuint index);
 extern void GLAPIENTRY
 _mesa_GetVertexAttribdv(GLuint index, GLenum pname, GLdouble *params);
 
-
 extern void GLAPIENTRY
 _mesa_GetVertexAttribfv(GLuint index, GLenum pname, GLfloat *params);
 
+extern void GLAPIENTRY
+_mesa_GetVertexAttribLdv(GLuint index, GLenum pname, GLdouble *params);
 
 extern void GLAPIENTRY
 _mesa_GetVertexAttribiv(GLuint index, GLenum pname, GLint *params);

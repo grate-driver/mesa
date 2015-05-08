@@ -30,15 +30,13 @@
 #include "util/u_framebuffer.h"
 #include "util/u_half.h"
 
-#include "ilo_context.h"
 #include "ilo_format.h"
-#include "ilo_resource.h"
-#include "ilo_shader.h"
-#include "ilo_state.h"
+#include "ilo_image.h"
 #include "ilo_state_3d.h"
+#include "../ilo_shader.h"
 
 static void
-rasterizer_init_clip(const struct ilo_dev_info *dev,
+rasterizer_init_clip(const struct ilo_dev *dev,
                      const struct pipe_rasterizer_state *state,
                      struct ilo_rasterizer_clip *clip)
 {
@@ -128,7 +126,7 @@ rasterizer_init_clip(const struct ilo_dev_info *dev,
 }
 
 static void
-rasterizer_init_sf_depth_offset_gen6(const struct ilo_dev_info *dev,
+rasterizer_init_sf_depth_offset_gen6(const struct ilo_dev *dev,
                                      const struct pipe_rasterizer_state *state,
                                      struct ilo_rasterizer_sf *sf)
 {
@@ -144,7 +142,7 @@ rasterizer_init_sf_depth_offset_gen6(const struct ilo_dev_info *dev,
 }
 
 static void
-rasterizer_init_sf_gen6(const struct ilo_dev_info *dev,
+rasterizer_init_sf_gen6(const struct ilo_dev *dev,
                         const struct pipe_rasterizer_state *state,
                         struct ilo_rasterizer_sf *sf)
 {
@@ -333,7 +331,7 @@ rasterizer_init_sf_gen6(const struct ilo_dev_info *dev,
 }
 
 static uint32_t
-rasterizer_get_sf_raster_gen8(const struct ilo_dev_info *dev,
+rasterizer_get_sf_raster_gen8(const struct ilo_dev *dev,
                               const struct pipe_rasterizer_state *state)
 {
    uint32_t dw = 0;
@@ -408,7 +406,7 @@ rasterizer_get_sf_raster_gen8(const struct ilo_dev_info *dev,
 }
 
 static void
-rasterizer_init_sf_gen8(const struct ilo_dev_info *dev,
+rasterizer_init_sf_gen8(const struct ilo_dev *dev,
                         const struct pipe_rasterizer_state *state,
                         struct ilo_rasterizer_sf *sf)
 {
@@ -471,7 +469,7 @@ rasterizer_init_sf_gen8(const struct ilo_dev_info *dev,
 }
 
 static void
-rasterizer_init_wm_gen6(const struct ilo_dev_info *dev,
+rasterizer_init_wm_gen6(const struct ilo_dev *dev,
                         const struct pipe_rasterizer_state *state,
                         struct ilo_rasterizer_wm *wm)
 {
@@ -516,7 +514,7 @@ rasterizer_init_wm_gen6(const struct ilo_dev_info *dev,
 }
 
 static void
-rasterizer_init_wm_gen7(const struct ilo_dev_info *dev,
+rasterizer_init_wm_gen7(const struct ilo_dev *dev,
                         const struct pipe_rasterizer_state *state,
                         struct ilo_rasterizer_wm *wm)
 {
@@ -560,7 +558,7 @@ rasterizer_init_wm_gen7(const struct ilo_dev_info *dev,
 }
 
 static uint32_t
-rasterizer_get_wm_gen8(const struct ilo_dev_info *dev,
+rasterizer_get_wm_gen8(const struct ilo_dev *dev,
                        const struct pipe_rasterizer_state *state)
 {
    uint32_t dw;
@@ -586,7 +584,7 @@ rasterizer_get_wm_gen8(const struct ilo_dev_info *dev,
 }
 
 void
-ilo_gpe_init_rasterizer(const struct ilo_dev_info *dev,
+ilo_gpe_init_rasterizer(const struct ilo_dev *dev,
                         const struct pipe_rasterizer_state *state,
                         struct ilo_rasterizer_state *rasterizer)
 {
@@ -607,7 +605,7 @@ ilo_gpe_init_rasterizer(const struct ilo_dev_info *dev,
 }
 
 static void
-fs_init_cso_gen6(const struct ilo_dev_info *dev,
+fs_init_cso_gen6(const struct ilo_dev *dev,
                  const struct ilo_shader_state *fs,
                  struct ilo_shader_cso *cso)
 {
@@ -704,7 +702,7 @@ fs_init_cso_gen6(const struct ilo_dev_info *dev,
 }
 
 static uint32_t
-fs_get_wm_gen7(const struct ilo_dev_info *dev,
+fs_get_wm_gen7(const struct ilo_dev *dev,
                const struct ilo_shader_state *fs)
 {
    uint32_t dw;
@@ -766,7 +764,7 @@ fs_get_wm_gen7(const struct ilo_dev_info *dev,
 }
 
 static void
-fs_init_cso_gen7(const struct ilo_dev_info *dev,
+fs_init_cso_gen7(const struct ilo_dev *dev,
                  const struct ilo_shader_state *fs,
                  struct ilo_shader_cso *cso)
 {
@@ -818,7 +816,7 @@ fs_init_cso_gen7(const struct ilo_dev_info *dev,
 }
 
 static uint32_t
-fs_get_psx_gen8(const struct ilo_dev_info *dev,
+fs_get_psx_gen8(const struct ilo_dev *dev,
                 const struct ilo_shader_state *fs)
 {
    uint32_t dw;
@@ -842,7 +840,7 @@ fs_get_psx_gen8(const struct ilo_dev_info *dev,
 }
 
 static uint32_t
-fs_get_wm_gen8(const struct ilo_dev_info *dev,
+fs_get_wm_gen8(const struct ilo_dev *dev,
                const struct ilo_shader_state *fs)
 {
    ILO_DEV_ASSERT(dev, 8, 8);
@@ -853,7 +851,7 @@ fs_get_wm_gen8(const struct ilo_dev_info *dev,
 }
 
 static void
-fs_init_cso_gen8(const struct ilo_dev_info *dev,
+fs_init_cso_gen8(const struct ilo_dev *dev,
                  const struct ilo_shader_state *fs,
                  struct ilo_shader_cso *cso)
 {
@@ -890,7 +888,7 @@ fs_init_cso_gen8(const struct ilo_dev_info *dev,
 }
 
 void
-ilo_gpe_init_fs_cso(const struct ilo_dev_info *dev,
+ilo_gpe_init_fs_cso(const struct ilo_dev *dev,
                     const struct ilo_shader_state *fs,
                     struct ilo_shader_cso *cso)
 {
@@ -919,7 +917,7 @@ struct ilo_zs_surface_info {
 };
 
 static void
-zs_init_info_null(const struct ilo_dev_info *dev,
+zs_init_info_null(const struct ilo_dev *dev,
                   struct ilo_zs_surface_info *info)
 {
    ILO_DEV_ASSERT(dev, 6, 8);
@@ -935,8 +933,10 @@ zs_init_info_null(const struct ilo_dev_info *dev,
 }
 
 static void
-zs_init_info(const struct ilo_dev_info *dev,
-             const struct ilo_texture *tex,
+zs_init_info(const struct ilo_dev *dev,
+             const struct ilo_image *img,
+             const struct ilo_image *s8_img,
+             enum pipe_texture_target target,
              enum pipe_format format, unsigned level,
              unsigned first_layer, unsigned num_layers,
              struct ilo_zs_surface_info *info)
@@ -947,7 +947,7 @@ zs_init_info(const struct ilo_dev_info *dev,
 
    memset(info, 0, sizeof(*info));
 
-   info->surface_type = ilo_gpe_gen6_translate_texture(tex->base.target);
+   info->surface_type = ilo_gpe_gen6_translate_texture(target);
 
    if (info->surface_type == GEN6_SURFTYPE_CUBE) {
       /*
@@ -967,8 +967,7 @@ zs_init_info(const struct ilo_dev_info *dev,
 
    if (ilo_dev_gen(dev) >= ILO_GEN(7)) {
       separate_stencil = true;
-   }
-   else {
+   } else {
       /*
        * From the Sandy Bridge PRM, volume 2 part 1, page 317:
        *
@@ -976,8 +975,7 @@ zs_init_info(const struct ilo_dev_info *dev,
        *      same value (enabled or disabled) as Hierarchical Depth Buffer
        *      Enable."
        */
-      separate_stencil =
-         ilo_texture_can_enable_hiz(tex, level, first_layer, num_layers);
+      separate_stencil = ilo_image_can_enable_aux(img, level);
    }
 
    /*
@@ -1031,21 +1029,18 @@ zs_init_info(const struct ilo_dev_info *dev,
    }
 
    if (format != PIPE_FORMAT_S8_UINT) {
-      info->zs.bo = tex->bo;
-      info->zs.stride = tex->layout.bo_stride;
+      info->zs.bo = img->bo;
+      info->zs.stride = img->bo_stride;
 
-      assert(tex->layout.layer_height % 4 == 0);
-      info->zs.qpitch = tex->layout.layer_height / 4;
+      assert(img->walk_layer_height % 4 == 0);
+      info->zs.qpitch = img->walk_layer_height / 4;
 
-      info->zs.tiling = tex->layout.tiling;
+      info->zs.tiling = img->tiling;
       info->zs.offset = 0;
    }
 
-   if (tex->separate_s8 || format == PIPE_FORMAT_S8_UINT) {
-      const struct ilo_texture *s8_tex =
-         (tex->separate_s8) ? tex->separate_s8 : tex;
-
-      info->stencil.bo = s8_tex->bo;
+   if (s8_img || format == PIPE_FORMAT_S8_UINT) {
+      info->stencil.bo = s8_img->bo;
 
       /*
        * From the Sandy Bridge PRM, volume 2 part 1, page 329:
@@ -1056,43 +1051,42 @@ zs_init_info(const struct ilo_dev_info *dev,
        * For GEN7, we still dobule the stride because we did not double the
        * slice widths when initializing the layout.
        */
-      info->stencil.stride = s8_tex->layout.bo_stride * 2;
+      info->stencil.stride = s8_img->bo_stride * 2;
 
-      assert(s8_tex->layout.layer_height % 4 == 0);
-      info->stencil.qpitch = s8_tex->layout.layer_height / 4;
+      assert(s8_img->walk_layer_height % 4 == 0);
+      info->stencil.qpitch = s8_img->walk_layer_height / 4;
 
-      info->stencil.tiling = s8_tex->layout.tiling;
+      info->stencil.tiling = s8_img->tiling;
 
       if (ilo_dev_gen(dev) == ILO_GEN(6)) {
          unsigned x, y;
 
-         assert(s8_tex->layout.walk == ILO_LAYOUT_WALK_LOD);
+         assert(s8_img->walk == ILO_IMAGE_WALK_LOD);
 
          /* offset to the level */
-         ilo_layout_get_slice_pos(&s8_tex->layout, level, 0, &x, &y);
-         ilo_layout_pos_to_mem(&s8_tex->layout, x, y, &x, &y);
-         info->stencil.offset = ilo_layout_mem_to_raw(&s8_tex->layout, x, y);
+         ilo_image_get_slice_pos(s8_img, level, 0, &x, &y);
+         ilo_image_pos_to_mem(s8_img, x, y, &x, &y);
+         info->stencil.offset = ilo_image_mem_to_raw(s8_img, x, y);
       }
    }
 
-   if (ilo_texture_can_enable_hiz(tex, level, first_layer, num_layers)) {
-      info->hiz.bo = tex->aux_bo;
-      info->hiz.stride = tex->layout.aux_stride;
+   if (ilo_image_can_enable_aux(img, level)) {
+      info->hiz.bo = img->aux.bo;
+      info->hiz.stride = img->aux.bo_stride;
 
-      assert(tex->layout.aux_layer_height % 4 == 0);
-      info->hiz.qpitch = tex->layout.aux_layer_height / 4;
+      assert(img->aux.walk_layer_height % 4 == 0);
+      info->hiz.qpitch = img->aux.walk_layer_height / 4;
 
       info->hiz.tiling = GEN6_TILING_Y;
 
       /* offset to the level */
       if (ilo_dev_gen(dev) == ILO_GEN(6))
-         info->hiz.offset = tex->layout.aux_offsets[level];
+         info->hiz.offset = img->aux.walk_lod_offsets[level];
    }
 
-   info->width = tex->layout.width0;
-   info->height = tex->layout.height0;
-   info->depth = (tex->base.target == PIPE_TEXTURE_3D) ?
-      tex->base.depth0 : num_layers;
+   info->width = img->width0;
+   info->height = img->height0;
+   info->depth = (target == PIPE_TEXTURE_3D) ? img->depth0 : num_layers;
 
    info->lod = level;
    info->first_layer = first_layer;
@@ -1100,8 +1094,10 @@ zs_init_info(const struct ilo_dev_info *dev,
 }
 
 void
-ilo_gpe_init_zs_surface(const struct ilo_dev_info *dev,
-                        const struct ilo_texture *tex,
+ilo_gpe_init_zs_surface(const struct ilo_dev *dev,
+                        const struct ilo_image *img,
+                        const struct ilo_image *s8_img,
+                        enum pipe_texture_target target,
                         enum pipe_format format, unsigned level,
                         unsigned first_layer, unsigned num_layers,
                         struct ilo_zs_surface *zs)
@@ -1114,10 +1110,11 @@ ilo_gpe_init_zs_surface(const struct ilo_dev_info *dev,
 
    ILO_DEV_ASSERT(dev, 6, 8);
 
-   if (tex) {
-      zs_init_info(dev, tex, format, level, first_layer, num_layers, &info);
+   if (img) {
+      zs_init_info(dev, img, s8_img, target, format,
+            level, first_layer, num_layers, &info);
 
-      switch (tex->base.nr_samples) {
+      switch (img->sample_count) {
       case 2:
          align_w /= 2;
          break;
@@ -1297,7 +1294,7 @@ ilo_gpe_init_zs_surface(const struct ilo_dev_info *dev,
 }
 
 static void
-viewport_get_guardband(const struct ilo_dev_info *dev,
+viewport_get_guardband(const struct ilo_dev *dev,
                        int center_x, int center_y,
                        int *min_gbx, int *max_gbx,
                        int *min_gby, int *max_gby)
@@ -1356,7 +1353,7 @@ viewport_get_guardband(const struct ilo_dev_info *dev,
 }
 
 void
-ilo_gpe_set_viewport_cso(const struct ilo_dev_info *dev,
+ilo_gpe_set_viewport_cso(const struct ilo_dev *dev,
                          const struct pipe_viewport_state *state,
                          struct ilo_viewport_cso *vp)
 {
@@ -1510,7 +1507,7 @@ gen6_blend_factor_dst_alpha_forced_one(int factor)
 }
 
 static uint32_t
-blend_get_rt_blend_enable_gen6(const struct ilo_dev_info *dev,
+blend_get_rt_blend_enable_gen6(const struct ilo_dev *dev,
                                const struct pipe_rt_blend_state *rt,
                                bool dst_alpha_forced_one)
 {
@@ -1550,7 +1547,7 @@ blend_get_rt_blend_enable_gen6(const struct ilo_dev_info *dev,
 }
 
 static uint32_t
-blend_get_rt_blend_enable_gen8(const struct ilo_dev_info *dev,
+blend_get_rt_blend_enable_gen8(const struct ilo_dev *dev,
                                const struct pipe_rt_blend_state *rt,
                                bool dst_alpha_forced_one,
                                bool *independent_alpha)
@@ -1593,7 +1590,7 @@ blend_get_rt_blend_enable_gen8(const struct ilo_dev_info *dev,
 }
 
 static void
-blend_init_cso_gen6(const struct ilo_dev_info *dev,
+blend_init_cso_gen6(const struct ilo_dev *dev,
                     const struct pipe_blend_state *state,
                     struct ilo_blend_state *blend,
                     unsigned index)
@@ -1637,7 +1634,7 @@ blend_init_cso_gen6(const struct ilo_dev_info *dev,
 }
 
 static bool
-blend_init_cso_gen8(const struct ilo_dev_info *dev,
+blend_init_cso_gen8(const struct ilo_dev *dev,
                     const struct pipe_blend_state *state,
                     struct ilo_blend_state *blend,
                     unsigned index)
@@ -1680,7 +1677,7 @@ blend_init_cso_gen8(const struct ilo_dev_info *dev,
 }
 
 static uint32_t
-blend_get_logicop_enable_gen6(const struct ilo_dev_info *dev,
+blend_get_logicop_enable_gen6(const struct ilo_dev *dev,
                               const struct pipe_blend_state *state)
 {
    ILO_DEV_ASSERT(dev, 6, 7.5);
@@ -1693,7 +1690,7 @@ blend_get_logicop_enable_gen6(const struct ilo_dev_info *dev,
 }
 
 static uint32_t
-blend_get_logicop_enable_gen8(const struct ilo_dev_info *dev,
+blend_get_logicop_enable_gen8(const struct ilo_dev *dev,
                               const struct pipe_blend_state *state)
 {
    ILO_DEV_ASSERT(dev, 8, 8);
@@ -1706,7 +1703,7 @@ blend_get_logicop_enable_gen8(const struct ilo_dev_info *dev,
 }
 
 static uint32_t
-blend_get_alpha_mod_gen6(const struct ilo_dev_info *dev,
+blend_get_alpha_mod_gen6(const struct ilo_dev *dev,
                          const struct pipe_blend_state *state,
                          bool dual_blend)
 {
@@ -1732,7 +1729,7 @@ blend_get_alpha_mod_gen6(const struct ilo_dev_info *dev,
 }
 
 static uint32_t
-blend_get_alpha_mod_gen8(const struct ilo_dev_info *dev,
+blend_get_alpha_mod_gen8(const struct ilo_dev *dev,
                          const struct pipe_blend_state *state,
                          bool dual_blend)
 {
@@ -1752,7 +1749,7 @@ blend_get_alpha_mod_gen8(const struct ilo_dev_info *dev,
 }
 
 static uint32_t
-blend_get_ps_blend_gen8(const struct ilo_dev_info *dev, uint32_t rt_dw0)
+blend_get_ps_blend_gen8(const struct ilo_dev *dev, uint32_t rt_dw0)
 {
    int rgb_src, rgb_dst, a_src, a_dst;
    uint32_t dw;
@@ -1780,7 +1777,7 @@ blend_get_ps_blend_gen8(const struct ilo_dev_info *dev, uint32_t rt_dw0)
 }
 
 void
-ilo_gpe_init_blend(const struct ilo_dev_info *dev,
+ilo_gpe_init_blend(const struct ilo_dev *dev,
                    const struct pipe_blend_state *state,
                    struct ilo_blend_state *blend)
 {
@@ -1863,7 +1860,7 @@ gen6_translate_dsa_func(unsigned func)
 }
 
 static uint32_t
-dsa_get_stencil_enable_gen6(const struct ilo_dev_info *dev,
+dsa_get_stencil_enable_gen6(const struct ilo_dev *dev,
                             const struct pipe_stencil_state *stencil0,
                             const struct pipe_stencil_state *stencil1)
 {
@@ -1910,7 +1907,7 @@ dsa_get_stencil_enable_gen6(const struct ilo_dev_info *dev,
 }
 
 static uint32_t
-dsa_get_stencil_enable_gen8(const struct ilo_dev_info *dev,
+dsa_get_stencil_enable_gen8(const struct ilo_dev *dev,
                             const struct pipe_stencil_state *stencil0,
                             const struct pipe_stencil_state *stencil1)
 {
@@ -1943,7 +1940,7 @@ dsa_get_stencil_enable_gen8(const struct ilo_dev_info *dev,
 }
 
 static uint32_t
-dsa_get_depth_enable_gen6(const struct ilo_dev_info *dev,
+dsa_get_depth_enable_gen6(const struct ilo_dev *dev,
                           const struct pipe_depth_state *state)
 {
    uint32_t dw;
@@ -1977,7 +1974,7 @@ dsa_get_depth_enable_gen6(const struct ilo_dev_info *dev,
 }
 
 static uint32_t
-dsa_get_depth_enable_gen8(const struct ilo_dev_info *dev,
+dsa_get_depth_enable_gen8(const struct ilo_dev *dev,
                           const struct pipe_depth_state *state)
 {
    uint32_t dw;
@@ -1998,7 +1995,7 @@ dsa_get_depth_enable_gen8(const struct ilo_dev_info *dev,
 }
 
 static uint32_t
-dsa_get_alpha_enable_gen6(const struct ilo_dev_info *dev,
+dsa_get_alpha_enable_gen6(const struct ilo_dev *dev,
                           const struct pipe_alpha_state *state)
 {
    uint32_t dw;
@@ -2016,7 +2013,7 @@ dsa_get_alpha_enable_gen6(const struct ilo_dev_info *dev,
 }
 
 static uint32_t
-dsa_get_alpha_enable_gen8(const struct ilo_dev_info *dev,
+dsa_get_alpha_enable_gen8(const struct ilo_dev *dev,
                           const struct pipe_alpha_state *state)
 {
    uint32_t dw;
@@ -2034,7 +2031,7 @@ dsa_get_alpha_enable_gen8(const struct ilo_dev_info *dev,
 }
 
 void
-ilo_gpe_init_dsa(const struct ilo_dev_info *dev,
+ilo_gpe_init_dsa(const struct ilo_dev *dev,
                  const struct pipe_depth_stencil_alpha_state *state,
                  struct ilo_dsa_state *dsa)
 {
@@ -2071,7 +2068,7 @@ ilo_gpe_init_dsa(const struct ilo_dev_info *dev,
 }
 
 void
-ilo_gpe_set_scissor(const struct ilo_dev_info *dev,
+ilo_gpe_set_scissor(const struct ilo_dev *dev,
                     unsigned start_slot,
                     unsigned num_states,
                     const struct pipe_scissor_state *states,
@@ -2109,7 +2106,7 @@ ilo_gpe_set_scissor(const struct ilo_dev_info *dev,
 }
 
 void
-ilo_gpe_set_scissor_null(const struct ilo_dev_info *dev,
+ilo_gpe_set_scissor_null(const struct ilo_dev *dev,
                          struct ilo_scissor_state *scissor)
 {
    unsigned i;
@@ -2121,7 +2118,7 @@ ilo_gpe_set_scissor_null(const struct ilo_dev_info *dev,
 }
 
 static void
-fb_set_blend_caps(const struct ilo_dev_info *dev,
+fb_set_blend_caps(const struct ilo_dev *dev,
                   enum pipe_format format,
                   struct ilo_fb_blend_caps *caps)
 {
@@ -2162,8 +2159,8 @@ fb_set_blend_caps(const struct ilo_dev_info *dev,
    caps->can_alpha_test = !util_format_is_pure_integer(format);
 
    caps->dst_alpha_forced_one =
-      (ilo_translate_render_format(dev, format) !=
-       ilo_translate_color_format(dev, format));
+      (ilo_format_translate_render(dev, format) !=
+       ilo_format_translate_color(dev, format));
 
    /* sanity check */
    if (caps->dst_alpha_forced_one) {
@@ -2178,13 +2175,13 @@ fb_set_blend_caps(const struct ilo_dev_info *dev,
          break;
       }
 
-      assert(ilo_translate_render_format(dev, format) ==
-             ilo_translate_color_format(dev, render_format));
+      assert(ilo_format_translate_render(dev, format) ==
+             ilo_format_translate_color(dev, render_format));
    }
 }
 
 void
-ilo_gpe_set_fb(const struct ilo_dev_info *dev,
+ilo_gpe_set_fb(const struct ilo_dev *dev,
                const struct pipe_framebuffer_state *state,
                struct ilo_fb_state *fb)
 {

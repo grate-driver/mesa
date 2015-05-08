@@ -1852,7 +1852,7 @@ static void si_init_depth_surface(struct si_context *sctx,
 	struct si_screen *sscreen = sctx->screen;
 	struct r600_texture *rtex = (struct r600_texture*)surf->base.texture;
 	unsigned level = surf->base.u.tex.level;
-	struct radeon_surface_level *levelinfo = &rtex->surface.level[level];
+	struct radeon_surf_level *levelinfo = &rtex->surface.level[level];
 	unsigned format, tile_mode_index, array_mode;
 	unsigned macro_aspect, tile_split, stile_split, bankh, bankw, nbanks, pipe_config;
 	uint32_t z_info, s_info, db_depth_info;
@@ -1947,12 +1947,6 @@ static void si_init_depth_surface(struct si_context *sctx,
 	if (rtex->htile_buffer && !level) {
 		z_info |= S_028040_TILE_SURFACE_ENABLE(1) |
 			  S_028040_ALLOW_EXPCLEAR(1);
-
-		/* This is optimal for the clear value of 1.0 and using
-		 * the LESS and LEQUAL test functions. Set this to 0
-		 * for the opposite case. This can only be changed when
-		 * clearing. */
-		z_info |= S_028040_ZRANGE_PRECISION(1);
 
 		/* Use all of the htile_buffer for depth, because we don't
 		 * use HTILE for stencil because of FAST_STENCIL_DISABLE. */
@@ -2183,7 +2177,8 @@ static void si_emit_framebuffer_state(struct si_context *sctx, struct r600_atom 
 
 		r600_write_context_reg_seq(cs, R_02803C_DB_DEPTH_INFO, 9);
 		radeon_emit(cs, zb->db_depth_info);	/* R_02803C_DB_DEPTH_INFO */
-		radeon_emit(cs, zb->db_z_info);		/* R_028040_DB_Z_INFO */
+		radeon_emit(cs, zb->db_z_info |		/* R_028040_DB_Z_INFO */
+			    S_028040_ZRANGE_PRECISION(rtex->depth_clear_value != 0));
 		radeon_emit(cs, zb->db_stencil_info);	/* R_028044_DB_STENCIL_INFO */
 		radeon_emit(cs, zb->db_depth_base);	/* R_028048_DB_Z_READ_BASE */
 		radeon_emit(cs, zb->db_stencil_base);	/* R_02804C_DB_STENCIL_READ_BASE */
@@ -2263,7 +2258,7 @@ static struct pipe_sampler_view *si_create_sampler_view(struct pipe_context *ctx
 	unsigned char state_swizzle[4], swizzle[4];
 	unsigned height, depth, width;
 	enum pipe_format pipe_format = state->format;
-	struct radeon_surface_level *surflevel;
+	struct radeon_surf_level *surflevel;
 	int first_non_void;
 	uint64_t va;
 
@@ -3035,18 +3030,8 @@ void si_init_config(struct si_context *sctx)
 
 	si_cmd_context_control(pm4);
 
-	si_pm4_set_reg(pm4, R_028A10_VGT_OUTPUT_PATH_CNTL, 0x0);
-	si_pm4_set_reg(pm4, R_028A14_VGT_HOS_CNTL, 0x0);
 	si_pm4_set_reg(pm4, R_028A18_VGT_HOS_MAX_TESS_LEVEL, 0x0);
 	si_pm4_set_reg(pm4, R_028A1C_VGT_HOS_MIN_TESS_LEVEL, 0x0);
-	si_pm4_set_reg(pm4, R_028A20_VGT_HOS_REUSE_DEPTH, 0x0);
-	si_pm4_set_reg(pm4, R_028A24_VGT_GROUP_PRIM_TYPE, 0x0);
-	si_pm4_set_reg(pm4, R_028A28_VGT_GROUP_FIRST_DECR, 0x0);
-	si_pm4_set_reg(pm4, R_028A2C_VGT_GROUP_DECR, 0x0);
-	si_pm4_set_reg(pm4, R_028A30_VGT_GROUP_VECT_0_CNTL, 0x0);
-	si_pm4_set_reg(pm4, R_028A34_VGT_GROUP_VECT_1_CNTL, 0x0);
-	si_pm4_set_reg(pm4, R_028A38_VGT_GROUP_VECT_0_FMT_CNTL, 0x0);
-	si_pm4_set_reg(pm4, R_028A3C_VGT_GROUP_VECT_1_FMT_CNTL, 0x0);
 
 	/* FIXME calculate these values somehow ??? */
 	si_pm4_set_reg(pm4, R_028A54_VGT_GS_PER_ES, 0x80);

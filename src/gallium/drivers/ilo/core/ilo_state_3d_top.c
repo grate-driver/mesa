@@ -31,15 +31,14 @@
 #include "util/u_half.h"
 #include "util/u_resource.h"
 
-#include "ilo_context.h"
+#include "ilo_buffer.h"
 #include "ilo_format.h"
-#include "ilo_resource.h"
-#include "ilo_shader.h"
-#include "ilo_state.h"
+#include "ilo_image.h"
 #include "ilo_state_3d.h"
+#include "../ilo_shader.h"
 
 static void
-ve_init_cso(const struct ilo_dev_info *dev,
+ve_init_cso(const struct ilo_dev *dev,
             const struct pipe_vertex_element *state,
             unsigned vb_index,
             struct ilo_ve_cso *cso)
@@ -62,7 +61,7 @@ ve_init_cso(const struct ilo_dev_info *dev,
                      GEN6_VFCOMP_STORE_1_FP;
    }
 
-   format = ilo_translate_vertex_format(dev, state->src_format);
+   format = ilo_format_translate_vertex(dev, state->src_format);
 
    STATIC_ASSERT(Elements(cso->payload) >= 2);
    cso->payload[0] =
@@ -79,7 +78,7 @@ ve_init_cso(const struct ilo_dev_info *dev,
 }
 
 void
-ilo_gpe_init_ve(const struct ilo_dev_info *dev,
+ilo_gpe_init_ve(const struct ilo_dev *dev,
                 unsigned num_states,
                 const struct pipe_vertex_element *states,
                 struct ilo_ve_state *ve)
@@ -119,7 +118,7 @@ ilo_gpe_init_ve(const struct ilo_dev_info *dev,
 }
 
 void
-ilo_gpe_set_ve_edgeflag(const struct ilo_dev_info *dev,
+ilo_gpe_set_ve_edgeflag(const struct ilo_dev *dev,
                         struct ilo_ve_cso *cso)
 {
    int format;
@@ -176,7 +175,7 @@ ilo_gpe_set_ve_edgeflag(const struct ilo_dev_info *dev,
 }
 
 void
-ilo_gpe_init_ve_nosrc(const struct ilo_dev_info *dev,
+ilo_gpe_init_ve_nosrc(const struct ilo_dev *dev,
                           int comp0, int comp1, int comp2, int comp3,
                           struct ilo_ve_cso *cso)
 {
@@ -198,7 +197,7 @@ ilo_gpe_init_ve_nosrc(const struct ilo_dev_info *dev,
 }
 
 void
-ilo_gpe_init_vs_cso(const struct ilo_dev_info *dev,
+ilo_gpe_init_vs_cso(const struct ilo_dev *dev,
                     const struct ilo_shader_state *vs,
                     struct ilo_shader_cso *cso)
 {
@@ -251,7 +250,7 @@ ilo_gpe_init_vs_cso(const struct ilo_dev_info *dev,
 }
 
 static void
-gs_init_cso_gen6(const struct ilo_dev_info *dev,
+gs_init_cso_gen6(const struct ilo_dev *dev,
                  const struct ilo_shader_state *gs,
                  struct ilo_shader_cso *cso)
 {
@@ -353,7 +352,7 @@ gs_init_cso_gen6(const struct ilo_dev_info *dev,
 }
 
 static void
-gs_init_cso_gen7(const struct ilo_dev_info *dev,
+gs_init_cso_gen7(const struct ilo_dev *dev,
                  const struct ilo_shader_state *gs,
                  struct ilo_shader_cso *cso)
 {
@@ -400,7 +399,7 @@ gs_init_cso_gen7(const struct ilo_dev_info *dev,
 }
 
 void
-ilo_gpe_init_gs_cso(const struct ilo_dev_info *dev,
+ilo_gpe_init_gs_cso(const struct ilo_dev *dev,
                     const struct ilo_shader_state *gs,
                     struct ilo_shader_cso *cso)
 {
@@ -411,7 +410,7 @@ ilo_gpe_init_gs_cso(const struct ilo_dev_info *dev,
 }
 
 static void
-view_init_null_gen6(const struct ilo_dev_info *dev,
+view_init_null_gen6(const struct ilo_dev *dev,
                     unsigned width, unsigned height,
                     unsigned depth, unsigned level,
                     struct ilo_view_surface *surf)
@@ -465,7 +464,7 @@ view_init_null_gen6(const struct ilo_dev_info *dev,
 }
 
 static void
-view_init_for_buffer_gen6(const struct ilo_dev_info *dev,
+view_init_for_buffer_gen6(const struct ilo_dev *dev,
                           const struct ilo_buffer *buf,
                           unsigned offset, unsigned size,
                           unsigned struct_size,
@@ -485,7 +484,7 @@ view_init_for_buffer_gen6(const struct ilo_dev_info *dev,
     * structure in a buffer.
     */
 
-   surface_format = ilo_translate_color_format(dev, elem_format);
+   surface_format = ilo_format_translate_color(dev, elem_format);
 
    num_entries = size / struct_size;
    /* see if there is enough space to fit another element */
@@ -556,15 +555,16 @@ view_init_for_buffer_gen6(const struct ilo_dev_info *dev,
 }
 
 static void
-view_init_for_texture_gen6(const struct ilo_dev_info *dev,
-                           const struct ilo_texture *tex,
-                           enum pipe_format format,
-                           unsigned first_level,
-                           unsigned num_levels,
-                           unsigned first_layer,
-                           unsigned num_layers,
-                           bool is_rt,
-                           struct ilo_view_surface *surf)
+view_init_for_image_gen6(const struct ilo_dev *dev,
+                         const struct ilo_image *img,
+                         enum pipe_texture_target target,
+                         enum pipe_format format,
+                         unsigned first_level,
+                         unsigned num_levels,
+                         unsigned first_layer,
+                         unsigned num_layers,
+                         bool is_rt,
+                         struct ilo_view_surface *surf)
 {
    int surface_type, surface_format;
    int width, height, depth, pitch, lod;
@@ -572,23 +572,22 @@ view_init_for_texture_gen6(const struct ilo_dev_info *dev,
 
    ILO_DEV_ASSERT(dev, 6, 6);
 
-   surface_type = ilo_gpe_gen6_translate_texture(tex->base.target);
+   surface_type = ilo_gpe_gen6_translate_texture(target);
    assert(surface_type != GEN6_SURFTYPE_BUFFER);
 
-   if (format == PIPE_FORMAT_Z32_FLOAT_S8X24_UINT && tex->separate_s8)
+   if (format == PIPE_FORMAT_Z32_FLOAT_S8X24_UINT && img->separate_stencil)
       format = PIPE_FORMAT_Z32_FLOAT;
 
    if (is_rt)
-      surface_format = ilo_translate_render_format(dev, format);
+      surface_format = ilo_format_translate_render(dev, format);
    else
-      surface_format = ilo_translate_texture_format(dev, format);
+      surface_format = ilo_format_translate_texture(dev, format);
    assert(surface_format >= 0);
 
-   width = tex->layout.width0;
-   height = tex->layout.height0;
-   depth = (tex->base.target == PIPE_TEXTURE_3D) ?
-      tex->base.depth0 : num_layers;
-   pitch = tex->layout.bo_stride;
+   width = img->width0;
+   height = img->height0;
+   depth = (target == PIPE_TEXTURE_3D) ? img->depth0 : num_layers;
+   pitch = img->bo_stride;
 
    if (surface_type == GEN6_SURFTYPE_CUBE) {
       /*
@@ -642,10 +641,10 @@ view_init_for_texture_gen6(const struct ilo_dev_info *dev,
    }
 
    /* non-full array spacing is supported only on GEN7+ */
-   assert(tex->layout.walk != ILO_LAYOUT_WALK_LOD);
+   assert(img->walk != ILO_IMAGE_WALK_LOD);
    /* non-interleaved samples are supported only on GEN7+ */
-   if (tex->base.nr_samples > 1)
-      assert(tex->layout.interleaved_samples);
+   if (img->sample_count > 1)
+      assert(img->interleaved_samples);
 
    if (is_rt) {
       assert(num_levels == 1);
@@ -673,7 +672,7 @@ view_init_for_texture_gen6(const struct ilo_dev_info *dev,
     *
     *     "For linear surfaces, this field (X Offset) must be zero"
     */
-   if (tex->layout.tiling == GEN6_TILING_NONE) {
+   if (img->tiling == GEN6_TILING_NONE) {
       if (is_rt) {
          const int elem_size = util_format_get_blocksize(format);
          assert(pitch % elem_size == 0);
@@ -701,26 +700,26 @@ view_init_for_texture_gen6(const struct ilo_dev_info *dev,
            (width - 1) << GEN6_SURFACE_DW2_WIDTH__SHIFT |
            lod << GEN6_SURFACE_DW2_MIP_COUNT_LOD__SHIFT;
 
-   assert(tex->layout.tiling != GEN8_TILING_W);
+   assert(img->tiling != GEN8_TILING_W);
    dw[3] = (depth - 1) << GEN6_SURFACE_DW3_DEPTH__SHIFT |
            (pitch - 1) << GEN6_SURFACE_DW3_PITCH__SHIFT |
-           tex->layout.tiling;
+           img->tiling;
 
    dw[4] = first_level << GEN6_SURFACE_DW4_MIN_LOD__SHIFT |
            first_layer << 17 |
            (num_layers - 1) << 8 |
-           ((tex->base.nr_samples > 1) ? GEN6_SURFACE_DW4_MULTISAMPLECOUNT_4 :
-                                         GEN6_SURFACE_DW4_MULTISAMPLECOUNT_1);
+           ((img->sample_count > 1) ? GEN6_SURFACE_DW4_MULTISAMPLECOUNT_4 :
+                                      GEN6_SURFACE_DW4_MULTISAMPLECOUNT_1);
 
    dw[5] = 0;
 
-   assert(tex->layout.align_j == 2 || tex->layout.align_j == 4);
-   if (tex->layout.align_j == 4)
+   assert(img->align_j == 2 || img->align_j == 4);
+   if (img->align_j == 4)
       dw[5] |= GEN6_SURFACE_DW5_VALIGN_4;
 }
 
 static void
-view_init_null_gen7(const struct ilo_dev_info *dev,
+view_init_null_gen7(const struct ilo_dev *dev,
                     unsigned width, unsigned height,
                     unsigned depth, unsigned level,
                     struct ilo_view_surface *surf)
@@ -791,7 +790,7 @@ view_init_null_gen7(const struct ilo_dev_info *dev,
 }
 
 static void
-view_init_for_buffer_gen7(const struct ilo_dev_info *dev,
+view_init_for_buffer_gen7(const struct ilo_dev *dev,
                           const struct ilo_buffer *buf,
                           unsigned offset, unsigned size,
                           unsigned struct_size,
@@ -812,7 +811,7 @@ view_init_for_buffer_gen7(const struct ilo_dev_info *dev,
    surface_type = (structured) ? GEN7_SURFTYPE_STRBUF : GEN6_SURFTYPE_BUFFER;
 
    surface_format = (typed) ?
-      ilo_translate_color_format(dev, elem_format) : GEN6_FORMAT_RAW;
+      ilo_format_translate_color(dev, elem_format) : GEN6_FORMAT_RAW;
 
    num_entries = size / struct_size;
    /* see if there is enough space to fit another element */
@@ -918,15 +917,16 @@ view_init_for_buffer_gen7(const struct ilo_dev_info *dev,
 }
 
 static void
-view_init_for_texture_gen7(const struct ilo_dev_info *dev,
-                           const struct ilo_texture *tex,
-                           enum pipe_format format,
-                           unsigned first_level,
-                           unsigned num_levels,
-                           unsigned first_layer,
-                           unsigned num_layers,
-                           bool is_rt,
-                           struct ilo_view_surface *surf)
+view_init_for_image_gen7(const struct ilo_dev *dev,
+                         const struct ilo_image *img,
+                         enum pipe_texture_target target,
+                         enum pipe_format format,
+                         unsigned first_level,
+                         unsigned num_levels,
+                         unsigned first_layer,
+                         unsigned num_layers,
+                         bool is_rt,
+                         struct ilo_view_surface *surf)
 {
    int surface_type, surface_format;
    int width, height, depth, pitch, lod;
@@ -934,23 +934,22 @@ view_init_for_texture_gen7(const struct ilo_dev_info *dev,
 
    ILO_DEV_ASSERT(dev, 7, 8);
 
-   surface_type = ilo_gpe_gen6_translate_texture(tex->base.target);
+   surface_type = ilo_gpe_gen6_translate_texture(target);
    assert(surface_type != GEN6_SURFTYPE_BUFFER);
 
-   if (format == PIPE_FORMAT_Z32_FLOAT_S8X24_UINT && tex->separate_s8)
+   if (format == PIPE_FORMAT_Z32_FLOAT_S8X24_UINT && img->separate_stencil)
       format = PIPE_FORMAT_Z32_FLOAT;
 
    if (is_rt)
-      surface_format = ilo_translate_render_format(dev, format);
+      surface_format = ilo_format_translate_render(dev, format);
    else
-      surface_format = ilo_translate_texture_format(dev, format);
+      surface_format = ilo_format_translate_texture(dev, format);
    assert(surface_format >= 0);
 
-   width = tex->layout.width0;
-   height = tex->layout.height0;
-   depth = (tex->base.target == PIPE_TEXTURE_3D) ?
-      tex->base.depth0 : num_layers;
-   pitch = tex->layout.bo_stride;
+   width = img->width0;
+   height = img->height0;
+   depth = (target == PIPE_TEXTURE_3D) ? img->depth0 : num_layers;
+   pitch = img->bo_stride;
 
    if (surface_type == GEN6_SURFTYPE_CUBE) {
       /*
@@ -1030,7 +1029,7 @@ view_init_for_texture_gen7(const struct ilo_dev_info *dev,
     *
     *     "For linear surfaces, this field (X Offset) must be zero."
     */
-   if (tex->layout.tiling == GEN6_TILING_NONE) {
+   if (img->tiling == GEN6_TILING_NONE) {
       if (is_rt) {
          const int elem_size = util_format_get_blocksize(format);
          assert(pitch % elem_size == 0);
@@ -1055,14 +1054,20 @@ view_init_for_texture_gen7(const struct ilo_dev_info *dev,
     * returns zero for the number of layers when this field is not set.
     */
    if (surface_type != GEN6_SURFTYPE_3D) {
-      if (util_resource_is_array_texture(&tex->base))
+      switch (target) {
+      case PIPE_TEXTURE_1D_ARRAY:
+      case PIPE_TEXTURE_2D_ARRAY:
+      case PIPE_TEXTURE_CUBE_ARRAY:
          dw[0] |= GEN7_SURFACE_DW0_IS_ARRAY;
-      else
+         break;
+      default:
          assert(depth == 1);
+         break;
+      }
    }
 
    if (ilo_dev_gen(dev) >= ILO_GEN(8)) {
-      switch (tex->layout.align_j) {
+      switch (img->align_j) {
       case 4:
          dw[0] |= GEN7_SURFACE_DW0_VALIGN_4;
          break;
@@ -1077,7 +1082,7 @@ view_init_for_texture_gen7(const struct ilo_dev_info *dev,
          break;
       }
 
-      switch (tex->layout.align_i) {
+      switch (img->align_i) {
       case 4:
          dw[0] |= GEN8_SURFACE_DW0_HALIGN_4;
          break;
@@ -1092,21 +1097,21 @@ view_init_for_texture_gen7(const struct ilo_dev_info *dev,
          break;
       }
 
-      dw[0] |= tex->layout.tiling << GEN8_SURFACE_DW0_TILING__SHIFT;
+      dw[0] |= img->tiling << GEN8_SURFACE_DW0_TILING__SHIFT;
    } else {
-      assert(tex->layout.align_i == 4 || tex->layout.align_i == 8);
-      assert(tex->layout.align_j == 2 || tex->layout.align_j == 4);
+      assert(img->align_i == 4 || img->align_i == 8);
+      assert(img->align_j == 2 || img->align_j == 4);
 
-      if (tex->layout.align_j == 4)
+      if (img->align_j == 4)
          dw[0] |= GEN7_SURFACE_DW0_VALIGN_4;
 
-      if (tex->layout.align_i == 8)
+      if (img->align_i == 8)
          dw[0] |= GEN7_SURFACE_DW0_HALIGN_8;
 
-      assert(tex->layout.tiling != GEN8_TILING_W);
-      dw[0] |= tex->layout.tiling << GEN7_SURFACE_DW0_TILING__SHIFT;
+      assert(img->tiling != GEN8_TILING_W);
+      dw[0] |= img->tiling << GEN7_SURFACE_DW0_TILING__SHIFT;
 
-      if (tex->layout.walk == ILO_LAYOUT_WALK_LOD)
+      if (img->walk == ILO_IMAGE_WALK_LOD)
          dw[0] |= GEN7_SURFACE_DW0_ARYSPC_LOD0;
       else
          dw[0] |= GEN7_SURFACE_DW0_ARYSPC_FULL;
@@ -1119,8 +1124,8 @@ view_init_for_texture_gen7(const struct ilo_dev_info *dev,
       dw[0] |= GEN7_SURFACE_DW0_CUBE_FACE_ENABLES__MASK;
 
    if (ilo_dev_gen(dev) >= ILO_GEN(8)) {
-      assert(tex->layout.layer_height % 4 == 0);
-      dw[1] = tex->layout.layer_height / 4;
+      assert(img->walk_layer_height % 4 == 0);
+      dw[1] = img->walk_layer_height / 4;
    } else {
       dw[1] = 0;
    }
@@ -1139,7 +1144,7 @@ view_init_for_texture_gen7(const struct ilo_dev_info *dev,
     * means the samples are interleaved.  The layouts are the same when the
     * number of samples is 1.
     */
-   if (tex->layout.interleaved_samples && tex->base.nr_samples > 1) {
+   if (img->interleaved_samples && img->sample_count > 1) {
       assert(!is_rt);
       dw[4] |= GEN7_SURFACE_DW4_MSFMT_DEPTH_STENCIL;
    }
@@ -1147,7 +1152,7 @@ view_init_for_texture_gen7(const struct ilo_dev_info *dev,
       dw[4] |= GEN7_SURFACE_DW4_MSFMT_MSS;
    }
 
-   switch (tex->base.nr_samples) {
+   switch (img->sample_count) {
    case 0:
    case 1:
    default:
@@ -1185,7 +1190,7 @@ view_init_for_texture_gen7(const struct ilo_dev_info *dev,
 }
 
 void
-ilo_gpe_init_view_surface_null(const struct ilo_dev_info *dev,
+ilo_gpe_init_view_surface_null(const struct ilo_dev *dev,
                                unsigned width, unsigned height,
                                unsigned depth, unsigned level,
                                struct ilo_view_surface *surf)
@@ -1203,7 +1208,7 @@ ilo_gpe_init_view_surface_null(const struct ilo_dev_info *dev,
 }
 
 void
-ilo_gpe_init_view_surface_for_buffer(const struct ilo_dev_info *dev,
+ilo_gpe_init_view_surface_for_buffer(const struct ilo_dev *dev,
                                      const struct ilo_buffer *buf,
                                      unsigned offset, unsigned size,
                                      unsigned struct_size,
@@ -1225,36 +1230,34 @@ ilo_gpe_init_view_surface_for_buffer(const struct ilo_dev_info *dev,
 }
 
 void
-ilo_gpe_init_view_surface_for_texture(const struct ilo_dev_info *dev,
-                                      const struct ilo_texture *tex,
-                                      enum pipe_format format,
-                                      unsigned first_level,
-                                      unsigned num_levels,
-                                      unsigned first_layer,
-                                      unsigned num_layers,
-                                      bool is_rt,
-                                      struct ilo_view_surface *surf)
+ilo_gpe_init_view_surface_for_image(const struct ilo_dev *dev,
+                                    const struct ilo_image *img,
+                                    enum pipe_texture_target target,
+                                    enum pipe_format format,
+                                    unsigned first_level,
+                                    unsigned num_levels,
+                                    unsigned first_layer,
+                                    unsigned num_layers,
+                                    bool is_rt,
+                                    struct ilo_view_surface *surf)
 {
    if (ilo_dev_gen(dev) >= ILO_GEN(7)) {
-      view_init_for_texture_gen7(dev, tex, format,
+      view_init_for_image_gen7(dev, img, target, format,
             first_level, num_levels, first_layer, num_layers,
             is_rt, surf);
    } else {
-      view_init_for_texture_gen6(dev, tex, format,
+      view_init_for_image_gen6(dev, img, target, format,
             first_level, num_levels, first_layer, num_layers,
             is_rt, surf);
    }
 
+   surf->scanout = img->scanout;
    /* do not increment reference count */
-   surf->bo = tex->bo;
-
-   /* assume imported RTs are scanouts */
-   surf->scanout = ((tex->base.bind & PIPE_BIND_SCANOUT) ||
-         (tex->imported && (tex->base.bind &  PIPE_BIND_RENDER_TARGET)));
+   surf->bo = img->bo;
 }
 
 static void
-sampler_init_border_color_gen6(const struct ilo_dev_info *dev,
+sampler_init_border_color_gen6(const struct ilo_dev *dev,
                                const union pipe_color_union *color,
                                uint32_t *dw, int num_dwords)
 {
@@ -1403,7 +1406,7 @@ gen6_translate_shadow_func(unsigned func)
 }
 
 void
-ilo_gpe_init_sampler_cso(const struct ilo_dev_info *dev,
+ilo_gpe_init_sampler_cso(const struct ilo_dev *dev,
                          const struct pipe_sampler_state *state,
                          struct ilo_sampler_cso *sampler)
 {

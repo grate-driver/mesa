@@ -102,9 +102,10 @@ typedef _EGLImage *(*CreateImageKHR_t)(_EGLDriver *drv, _EGLDisplay *dpy, _EGLCo
 typedef EGLBoolean (*DestroyImageKHR_t)(_EGLDriver *drv, _EGLDisplay *dpy, _EGLImage *image);
 
 
-typedef _EGLSync *(*CreateSyncKHR_t)(_EGLDriver *drv, _EGLDisplay *dpy, EGLenum type, const EGLint *attrib_list);
+typedef _EGLSync *(*CreateSyncKHR_t)(_EGLDriver *drv, _EGLDisplay *dpy, EGLenum type, const EGLint *attrib_list, const EGLAttribKHR *attrib_list64);
 typedef EGLBoolean (*DestroySyncKHR_t)(_EGLDriver *drv, _EGLDisplay *dpy, _EGLSync *sync);
 typedef EGLint (*ClientWaitSyncKHR_t)(_EGLDriver *drv, _EGLDisplay *dpy, _EGLSync *sync, EGLint flags, EGLTimeKHR timeout);
+typedef EGLint (*WaitSyncKHR_t)(_EGLDriver *drv, _EGLDisplay *dpy, _EGLSync *sync);
 typedef EGLBoolean (*SignalSyncKHR_t)(_EGLDriver *drv, _EGLDisplay *dpy, _EGLSync *sync, EGLenum mode);
 typedef EGLBoolean (*GetSyncAttribKHR_t)(_EGLDriver *drv, _EGLDisplay *dpy, _EGLSync *sync, EGLint attribute, EGLint *value);
 
@@ -141,7 +142,7 @@ typedef EGLBoolean (*SwapBuffersWithDamageEXT_t) (_EGLDriver *drv, _EGLDisplay *
 typedef EGLBoolean (*GetSyncValuesCHROMIUM_t) (_EGLDisplay *dpy, _EGLSurface *surface, EGLuint64KHR *ust, EGLuint64KHR *msc, EGLuint64KHR *sbc);
 
 #ifdef EGL_MESA_image_dma_buf_export
-typedef EGLBoolean (*ExportDMABUFImageQueryMESA_t)(_EGLDriver *drv, _EGLDisplay *disp, _EGLImage *img, EGLint *fourcc, EGLint *stride, EGLuint64MESA *modifiers);
+typedef EGLBoolean (*ExportDMABUFImageQueryMESA_t)(_EGLDriver *drv, _EGLDisplay *disp, _EGLImage *img, EGLint *fourcc, EGLint *nplanes, EGLuint64KHR *modifiers);
 typedef EGLBoolean (*ExportDMABUFImageMESA_t)(_EGLDriver *drv, _EGLDisplay *disp, _EGLImage *img, EGLint *fds, EGLint *strides, EGLint *offsets);
 #endif
 
@@ -201,6 +202,7 @@ struct _egl_api
    CreateSyncKHR_t CreateSyncKHR;
    DestroySyncKHR_t DestroySyncKHR;
    ClientWaitSyncKHR_t ClientWaitSyncKHR;
+   WaitSyncKHR_t WaitSyncKHR;
    SignalSyncKHR_t SignalSyncKHR;
    GetSyncAttribKHR_t GetSyncAttribKHR;
 

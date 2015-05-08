@@ -40,7 +40,6 @@
 
 #include "vl/vl_video_buffer.h"
 
-#include "radeon/drm/radeon_winsys.h"
 #include "r600_pipe_common.h"
 #include "radeon_video.h"
 #include "radeon_vce.h"
@@ -338,7 +337,7 @@ struct pipe_video_codec *rvce_create_encoder(struct pipe_context *context,
 	struct r600_common_screen *rscreen = (struct r600_common_screen *)context->screen;
 	struct rvce_encoder *enc;
 	struct pipe_video_buffer *tmp_buf, templat = {};
-	struct radeon_surface *tmp_surf;
+	struct radeon_surf *tmp_surf;
 	unsigned cpb_size;
 
 	if (!rscreen->info.vce_fw_version) {
