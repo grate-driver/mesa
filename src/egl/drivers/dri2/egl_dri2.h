@@ -196,10 +196,13 @@ struct dri2_egl_display
    struct wl_registry       *wl_registry;
    struct wl_drm            *wl_server_drm;
    struct wl_drm            *wl_drm;
+   struct wl_shm            *wl_shm;
    struct wl_event_queue    *wl_queue;
    int			     authenticated;
    int			     formats;
    uint32_t                  capabilities;
+   int			     is_render_node;
+   int			     is_different_gpu;
 #endif
 };
 
@@ -253,6 +256,11 @@ struct dri2_egl_surface
 #ifdef HAVE_WAYLAND_PLATFORM
       struct wl_buffer   *wl_buffer;
       __DRIimage         *dri_image;
+      /* for is_different_gpu case. NULL else */
+      __DRIimage         *linear_copy;
+      /* for swrast */
+      void *data;
+      int data_size;
 #endif
 #ifdef HAVE_DRM_PLATFORM
       struct gbm_bo       *bo;

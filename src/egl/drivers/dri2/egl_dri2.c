@@ -576,6 +576,7 @@ dri2_create_screen(_EGLDisplay *disp)
 {
    const __DRIextension **extensions;
    struct dri2_egl_display *dri2_dpy;
+   unsigned i;
 
    dri2_dpy = disp->DriverData;
 
@@ -616,26 +617,24 @@ dri2_create_screen(_EGLDisplay *disp)
    extensions = dri2_dpy->core->getExtensions(dri2_dpy->dri_screen);
    
    if (dri2_dpy->dri2) {
-      unsigned i;
-
       if (!dri2_bind_extensions(dri2_dpy, dri2_core_extensions, extensions))
          goto cleanup_dri_screen;
-
-      for (i = 0; extensions[i]; i++) {
-	 if (strcmp(extensions[i]->name, __DRI2_ROBUSTNESS) == 0) {
-            dri2_dpy->robustness = (__DRIrobustnessExtension *) extensions[i];
-	 }
-	 if (strcmp(extensions[i]->name, __DRI2_CONFIG_QUERY) == 0) {
-	    dri2_dpy->config = (__DRI2configQueryExtension *) extensions[i];
-	 }
-         if (strcmp(extensions[i]->name, __DRI2_FENCE) == 0) {
-            dri2_dpy->fence = (__DRI2fenceExtension *) extensions[i];
-         }
-      }
    } else {
       assert(dri2_dpy->swrast);
       if (!dri2_bind_extensions(dri2_dpy, swrast_core_extensions, extensions))
          goto cleanup_dri_screen;
+   }
+
+   for (i = 0; extensions[i]; i++) {
+      if (strcmp(extensions[i]->name, __DRI2_ROBUSTNESS) == 0) {
+         dri2_dpy->robustness = (__DRIrobustnessExtension *) extensions[i];
+      }
+      if (strcmp(extensions[i]->name, __DRI2_CONFIG_QUERY) == 0) {
+         dri2_dpy->config = (__DRI2configQueryExtension *) extensions[i];
+      }
+      if (strcmp(extensions[i]->name, __DRI2_FENCE) == 0) {
+         dri2_dpy->fence = (__DRI2fenceExtension *) extensions[i];
+      }
    }
 
    dri2_setup_screen(disp);
@@ -729,7 +728,12 @@ dri2_terminate(_EGLDriver *drv, _EGLDisplay *disp)
 #endif
 #ifdef HAVE_WAYLAND_PLATFORM
    case _EGL_PLATFORM_WAYLAND:
-      wl_drm_destroy(dri2_dpy->wl_drm);
+      if (dri2_dpy->wl_drm)
+          wl_drm_destroy(dri2_dpy->wl_drm);
+      if (dri2_dpy->wl_shm)
+          wl_shm_destroy(dri2_dpy->wl_shm);
+      wl_registry_destroy(dri2_dpy->wl_registry);
+      wl_event_queue_destroy(dri2_dpy->wl_queue);
       if (dri2_dpy->own_device) {
          wl_display_disconnect(dri2_dpy->wl_dpy);
       }

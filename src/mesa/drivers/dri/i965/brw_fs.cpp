@@ -2600,9 +2600,12 @@ fs_visitor::opt_zero_samples()
           load_payload->opcode != SHADER_OPCODE_LOAD_PAYLOAD)
          continue;
 
-      /* We don't want to remove the message header. Removing all of the
-       * parameters is avoided because it seems to cause a GPU hang but I
-       * can't find any documentation indicating that this is expected.
+      /* We don't want to remove the message header or the first parameter.
+       * Removing the first parameter is not allowed, see the Haswell PRM
+       * volume 7, page 149:
+       *
+       *     "Parameter 0 is required except for the sampleinfo message, which
+       *      has no parameter 0"
        */
       while (inst->mlen > inst->header_size + dispatch_width / 8 &&
              load_payload->src[(inst->mlen - inst->header_size) /
@@ -2655,6 +2658,16 @@ fs_visitor::opt_sampler_eot()
    if (unlikely(tex_inst->is_head_sentinel()) || !tex_inst->is_tex())
       return false;
 
+   /* This optimisation doesn't seem to work for textureGather for some
+    * reason. I can't find any documentation or known workarounds to indicate
+    * that this is expected, but considering that it is probably pretty
+    * unlikely that a shader would directly write out the results from
+    * textureGather we might as well just disable it.
+    */
+   if (tex_inst->opcode == SHADER_OPCODE_TG4 ||
+       tex_inst->opcode == SHADER_OPCODE_TG4_OFFSET)
+      return false;
+
    /* If there's no header present, we need to munge the LOAD_PAYLOAD as well.
     * It's very likely to be the previous instruction.
     */
@@ -2668,6 +2681,7 @@ fs_visitor::opt_sampler_eot()
 
    tex_inst->offset |= fb_write->target << 24;
    tex_inst->eot = true;
+   tex_inst->dst = reg_null_ud;
    fb_write->remove(cfg->blocks[cfg->num_blocks - 1]);
 
    /* If a header is present, marking the eot is sufficient. Otherwise, we need
@@ -2701,11 +2715,11 @@ fs_visitor::opt_sampler_eot()
                                                     load_payload->sources + 1);
 
    new_load_payload->regs_written = load_payload->regs_written + 1;
+   new_load_payload->header_size = 1;
    tex_inst->mlen++;
    tex_inst->header_size = 1;
    tex_inst->insert_before(cfg->blocks[cfg->num_blocks - 1], new_load_payload);
    tex_inst->src[0] = send_header;
-   tex_inst->dst = reg_null_ud;
 
    return true;
 }
