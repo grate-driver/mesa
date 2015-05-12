@@ -6,10 +6,10 @@ libEGL.so.1 libegl1-mesa #MINVER# | libegl1-x11
  eglBindTexImage@Base 7.8.1
  eglBindWaylandDisplayWL@Base 7.11~0
  eglChooseConfig@Base 7.8.1
- eglChooseModeMESA@Base 7.8.1
+# eglChooseModeMESA@Base 7.8.1
  eglClientWaitSyncKHR@Base 7.9
  eglCopyBuffers@Base 7.8.1
- eglCopyContextMESA@Base 7.8.1
+# eglCopyContextMESA@Base 7.8.1
  eglCreateContext@Base 7.8.1
  eglCreateDRMImageMESA@Base 7.9
  eglCreateImageKHR@Base 7.8.1
@@ -18,7 +18,8 @@ libEGL.so.1 libegl1-mesa #MINVER# | libegl1-x11
  eglCreatePixmapSurface@Base 7.8.1
  eglCreatePlatformPixmapSurfaceEXT@Base 10.2
  eglCreatePlatformWindowSurfaceEXT@Base 10.2
- eglCreateScreenSurfaceMESA@Base 7.8.1
+# eglCreateScreenSurfaceMESA@Base 7.8.1
+ eglCreateSync64KHR@Base 10.6.0~
  eglCreateSyncKHR@Base 7.9
  eglCreateWaylandBufferFromImageWL@Base 10.0.1
  eglCreateWindowSurface@Base 7.8.1
@@ -37,29 +38,29 @@ libEGL.so.1 libegl1-mesa #MINVER# | libegl1-x11
  eglGetDRMDisplayMESA@Base 7.9
  eglGetDisplay@Base 7.8.1
  eglGetError@Base 7.8.1
- eglGetModeAttribMESA@Base 7.8.1
+# eglGetModeAttribMESA@Base 7.8.1
  eglGetSyncAttribKHR@Base 7.9
- eglGetModesMESA@Base 7.8.1
+# eglGetModesMESA@Base 7.8.1
  eglGetPlatformDisplayEXT@Base 10.2
  eglGetProcAddress@Base 7.8.1
- eglGetScreensMESA@Base 7.8.1
+# eglGetScreensMESA@Base 7.8.1
  eglGetSyncValuesCHROMIUM@Base 10.3~git
  eglInitialize@Base 7.8.1
  eglMakeCurrent@Base 7.8.1
  eglPostSubBufferNV@Base 8.0~rc1
  eglQueryAPI@Base 7.8.1
  eglQueryContext@Base 7.8.1
- eglQueryModeStringMESA@Base 7.8.1
- eglQueryScreenMESA@Base 7.8.1
- eglQueryScreenModeMESA@Base 7.8.1
- eglQueryScreenSurfaceMESA@Base 7.8.1
+# eglQueryModeStringMESA@Base 7.8.1
+# eglQueryScreenMESA@Base 7.8.1
+# eglQueryScreenModeMESA@Base 7.8.1
+# eglQueryScreenSurfaceMESA@Base 7.8.1
  eglQueryString@Base 7.8.1
  eglQuerySurface@Base 7.8.1
  eglQueryWaylandBufferWL@Base 8.1~0
  eglReleaseTexImage@Base 7.8.1
  eglReleaseThread@Base 7.8.1
- eglScreenPositionMESA@Base 7.8.1
- eglShowScreenSurfaceMESA@Base 7.8.1
+# eglScreenPositionMESA@Base 7.8.1
+# eglShowScreenSurfaceMESA@Base 7.8.1
  eglSignalSyncKHR@Base 7.9
  eglSurfaceAttrib@Base 7.8.1
  eglSwapBuffers@Base 7.8.1
@@ -71,4 +72,5 @@ libEGL.so.1 libegl1-mesa #MINVER# | libegl1-x11
  eglWaitClient@Base 7.8.1
  eglWaitGL@Base 7.8.1
  eglWaitNative@Base 7.8.1
+ eglWaitSyncKHR@Base 10.6.0~
  (arch=linux-any)wl_drm_interface@Base 8.0-2~
