@@ -43,7 +43,9 @@ struct tgsi_header
 #define TGSI_PROCESSOR_FRAGMENT  0
 #define TGSI_PROCESSOR_VERTEX    1
 #define TGSI_PROCESSOR_GEOMETRY  2
-#define TGSI_PROCESSOR_COMPUTE   3
+#define TGSI_PROCESSOR_TESSCTRL  3
+#define TGSI_PROCESSOR_TESSEVAL  4
+#define TGSI_PROCESSOR_COMPUTE   5
 
 struct tgsi_processor
 {
@@ -178,7 +180,12 @@ struct tgsi_declaration_interp
 #define TGSI_SEMANTIC_INVOCATIONID 27
 #define TGSI_SEMANTIC_VERTEXID_NOBASE 28
 #define TGSI_SEMANTIC_BASEVERTEX 29
-#define TGSI_SEMANTIC_COUNT      30 /**< number of semantic values */
+#define TGSI_SEMANTIC_PATCH      30 /**< generic per-patch semantic */
+#define TGSI_SEMANTIC_TESSCOORD  31 /**< coordinate being processed by tess */
+#define TGSI_SEMANTIC_TESSOUTER  32 /**< outer tessellation levels */
+#define TGSI_SEMANTIC_TESSINNER  33 /**< inner tessellation levels */
+#define TGSI_SEMANTIC_VERTICESIN 34 /**< number of input vertices */
+#define TGSI_SEMANTIC_COUNT      35 /**< number of semantic values */
 
 struct tgsi_declaration_semantic
 {
@@ -255,7 +262,12 @@ union tgsi_immediate_data
 #define TGSI_PROPERTY_VS_PROHIBIT_UCPS       7
 #define TGSI_PROPERTY_GS_INVOCATIONS         8
 #define TGSI_PROPERTY_VS_WINDOW_SPACE_POSITION 9
-#define TGSI_PROPERTY_COUNT                  10
+#define TGSI_PROPERTY_TCS_VERTICES_OUT       10
+#define TGSI_PROPERTY_TES_PRIM_MODE          11
+#define TGSI_PROPERTY_TES_SPACING            12
+#define TGSI_PROPERTY_TES_VERTEX_ORDER_CW    13
+#define TGSI_PROPERTY_TES_POINT_MODE         14
+#define TGSI_PROPERTY_COUNT                  15
 
 struct tgsi_property {
    unsigned Type         : 4;  /**< TGSI_TOKEN_TYPE_PROPERTY */

@@ -220,6 +220,7 @@ fd_screen_get_param(struct pipe_screen *pscreen, enum pipe_cap param)
 	case PIPE_CAP_POLYGON_OFFSET_CLAMP:
 	case PIPE_CAP_MULTISAMPLE_Z_RESOLVE:
 	case PIPE_CAP_RESOURCE_FROM_USER_MEMORY:
+	case PIPE_CAP_DEVICE_RESET_STATUS_QUERY:
 		return 0;
 
 	case PIPE_CAP_MAX_VIEWPORTS:
@@ -519,6 +520,7 @@ fd_screen_create(struct fd_device *dev)
 	case 220:
 		fd2_screen_init(pscreen);
 		break;
+	case 307:
 	case 320:
 	case 330:
 		fd3_screen_init(pscreen);

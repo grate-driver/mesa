@@ -3507,10 +3507,156 @@ fs_visitor::lower_load_payload()
             fs_inst *mov = MOV(retype(dst, inst->src[i].type),
                                inst->src[i]);
             mov->force_writemask_all = inst->force_writemask_all;
+            mov->force_sechalf = inst->force_sechalf;
             inst->insert_before(block, mov);
          }
          dst = offset(dst, 1);
       }
+
+      inst->remove(block);
+      progress = true;
+   }
+
+   if (progress)
+      invalidate_live_intervals();
+
+   return progress;
+}
+
+bool
+fs_visitor::lower_integer_multiplication()
+{
+   bool progress = false;
+
+   /* Gen8's MUL instruction can do a 32-bit x 32-bit -> 32-bit operation
+    * directly, but Cherryview cannot.
+    */
+   if (devinfo->gen >= 8 && !devinfo->is_cherryview)
+      return false;
+
+   foreach_block_and_inst_safe(block, fs_inst, inst, cfg) {
+      if (inst->opcode != BRW_OPCODE_MUL ||
+          inst->dst.is_accumulator() ||
+          (inst->dst.type != BRW_REGISTER_TYPE_D &&
+           inst->dst.type != BRW_REGISTER_TYPE_UD))
+         continue;
+
+#define insert(instr) inst->insert_before(block, instr)
+
+      /* The MUL instruction isn't commutative. On Gen <= 6, only the low
+       * 16-bits of src0 are read, and on Gen >= 7 only the low 16-bits of
+       * src1 are used.
+       *
+       * If multiplying by an immediate value that fits in 16-bits, do a
+       * single MUL instruction with that value in the proper location.
+       */
+      if (inst->src[1].file == IMM &&
+          inst->src[1].fixed_hw_reg.dw1.ud < (1 << 16)) {
+         if (devinfo->gen < 7) {
+            fs_reg imm(GRF, alloc.allocate(dispatch_width / 8),
+                       inst->dst.type, dispatch_width);
+            insert(MOV(imm, inst->src[1]));
+            insert(MUL(inst->dst, imm, inst->src[0]));
+         } else {
+            insert(MUL(inst->dst, inst->src[0], inst->src[1]));
+         }
+      } else {
+         /* Gen < 8 (and some Gen8+ low-power parts like Cherryview) cannot
+          * do 32-bit integer multiplication in one instruction, but instead
+          * must do a sequence (which actually calculates a 64-bit result):
+          *
+          *    mul(8)  acc0<1>D   g3<8,8,1>D      g4<8,8,1>D
+          *    mach(8) null       g3<8,8,1>D      g4<8,8,1>D
+          *    mov(8)  g2<1>D     acc0<8,8,1>D
+          *
+          * But on Gen > 6, the ability to use second accumulator register
+          * (acc1) for non-float data types was removed, preventing a simple
+          * implementation in SIMD16. A 16-channel result can be calculated by
+          * executing the three instructions twice in SIMD8, once with quarter
+          * control of 1Q for the first eight channels and again with 2Q for
+          * the second eight channels.
+          *
+          * Which accumulator register is implicitly accessed (by AccWrEnable
+          * for instance) is determined by the quarter control. Unfortunately
+          * Ivybridge (and presumably Baytrail) has a hardware bug in which an
+          * implicit accumulator access by an instruction with 2Q will access
+          * acc1 regardless of whether the data type is usable in acc1.
+          *
+          * Specifically, the 2Q mach(8) writes acc1 which does not exist for
+          * integer data types.
+          *
+          * Since we only want the low 32-bits of the result, we can do two
+          * 32-bit x 16-bit multiplies (like the mul and mach are doing), and
+          * adjust the high result and add them (like the mach is doing):
+          *
+          *    mul(8)  g7<1>D     g3<8,8,1>D      g4.0<8,8,1>UW
+          *    mul(8)  g8<1>D     g3<8,8,1>D      g4.1<8,8,1>UW
+          *    shl(8)  g9<1>D     g8<8,8,1>D      16D
+          *    add(8)  g2<1>D     g7<8,8,1>D      g8<8,8,1>D
+          *
+          * We avoid the shl instruction by realizing that we only want to add
+          * the low 16-bits of the "high" result to the high 16-bits of the
+          * "low" result and using proper regioning on the add:
+          *
+          *    mul(8)  g7<1>D     g3<8,8,1>D      g4.0<16,8,2>UW
+          *    mul(8)  g8<1>D     g3<8,8,1>D      g4.1<16,8,2>UW
+          *    add(8)  g7.1<2>UW  g7.1<16,8,2>UW  g8<16,8,2>UW
+          *
+          * Since it does not use the (single) accumulator register, we can
+          * schedule multi-component multiplications much better.
+          */
+
+         fs_reg low = inst->dst;
+         fs_reg high(GRF, alloc.allocate(dispatch_width / 8),
+                     inst->dst.type, dispatch_width);
+
+         if (brw->gen >= 7) {
+            fs_reg src1_0_w = inst->src[1];
+            fs_reg src1_1_w = inst->src[1];
+
+            if (inst->src[1].file == IMM) {
+               src1_0_w.fixed_hw_reg.dw1.ud &= 0xffff;
+               src1_1_w.fixed_hw_reg.dw1.ud >>= 16;
+            } else {
+               src1_0_w.type = BRW_REGISTER_TYPE_UW;
+               src1_0_w.stride = 2;
+
+               src1_1_w.type = BRW_REGISTER_TYPE_UW;
+               src1_1_w.stride = 2;
+               src1_1_w.subreg_offset += type_sz(BRW_REGISTER_TYPE_UW);
+            }
+            insert(MUL(low, inst->src[0], src1_0_w));
+            insert(MUL(high, inst->src[0], src1_1_w));
+         } else {
+            fs_reg src0_0_w = inst->src[0];
+            fs_reg src0_1_w = inst->src[0];
+
+            src0_0_w.type = BRW_REGISTER_TYPE_UW;
+            src0_0_w.stride = 2;
+
+            src0_1_w.type = BRW_REGISTER_TYPE_UW;
+            src0_1_w.stride = 2;
+            src0_1_w.subreg_offset += type_sz(BRW_REGISTER_TYPE_UW);
+
+            insert(MUL(low, src0_0_w, inst->src[1]));
+            insert(MUL(high, src0_1_w, inst->src[1]));
+         }
+
+         fs_reg dst = inst->dst;
+         dst.type = BRW_REGISTER_TYPE_UW;
+         dst.subreg_offset = 2;
+         dst.stride = 2;
+
+         high.type = BRW_REGISTER_TYPE_UW;
+         high.stride = 2;
+
+         low.type = BRW_REGISTER_TYPE_UW;
+         low.subreg_offset = 2;
+         low.stride = 2;
+
+         insert(ADD(dst, low, high));
+      }
+#undef insert
 
       inst->remove(block);
       progress = true;
@@ -4000,6 +4146,7 @@ fs_visitor::optimize()
    }
 
    OPT(opt_combine_constants);
+   OPT(lower_integer_multiplication);
 
    lower_uniform_pull_constant_loads();
 }
@@ -4302,7 +4449,8 @@ brw_wm_fs_emit(struct brw_context *brw,
 
    /* Now the main event: Visit the shader IR and generate our FS IR for it.
     */
-   fs_visitor v(brw, mem_ctx, key, prog_data, prog, fp, 8);
+   fs_visitor v(brw, mem_ctx, MESA_SHADER_FRAGMENT, key, &prog_data->base,
+                prog, &fp->Base, 8);
    if (!v.run_fs()) {
       if (prog) {
          prog->LinkStatus = false;
@@ -4316,7 +4464,8 @@ brw_wm_fs_emit(struct brw_context *brw,
    }
 
    cfg_t *simd16_cfg = NULL;
-   fs_visitor v2(brw, mem_ctx, key, prog_data, prog, fp, 16);
+   fs_visitor v2(brw, mem_ctx, MESA_SHADER_FRAGMENT, key, &prog_data->base,
+                 prog, &fp->Base, 16);
    if (likely(!(INTEL_DEBUG & DEBUG_NO16) || brw->use_rep_send)) {
       if (!v.simd16_unsupported) {
          /* Try a SIMD16 compile */

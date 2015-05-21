@@ -38,6 +38,7 @@
       fieldval & field ## _MASK;                                        \
    })
 
+#define GET_BITS(data, high, low) ((data & INTEL_MASK((high), (low))) >> (low))
 #define GET_FIELD(word, field) (((word)  & field ## _MASK) >> field ## _SHIFT)
 
 #ifndef BRW_DEFINES_H
@@ -529,9 +530,11 @@
 #define GEN7_SURFACE_ARYSPC_FULL	(0 << 10)
 #define GEN7_SURFACE_ARYSPC_LOD0	(1 << 10)
 
-/* Surface state DW0 */
+/* Surface state DW1 */
 #define GEN8_SURFACE_MOCS_SHIFT         24
 #define GEN8_SURFACE_MOCS_MASK          INTEL_MASK(30, 24)
+#define GEN8_SURFACE_QPITCH_SHIFT       0
+#define GEN8_SURFACE_QPITCH_MASK        INTEL_MASK(14, 0)
 
 /* Surface state DW2 */
 #define BRW_SURFACE_HEIGHT_SHIFT	19
@@ -605,6 +608,8 @@
 #define GEN8_SURFACE_AUX_MODE_HIZ               3
 
 /* Surface state DW7 */
+#define GEN9_SURFACE_RT_COMPRESSION_SHIFT       30
+#define GEN9_SURFACE_RT_COMPRESSION_MASK        INTEL_MASK(30, 30)
 #define GEN7_SURFACE_CLEAR_COLOR_SHIFT		28
 #define GEN7_SURFACE_SCS_R_SHIFT                25
 #define GEN7_SURFACE_SCS_R_MASK                 INTEL_MASK(27, 25)

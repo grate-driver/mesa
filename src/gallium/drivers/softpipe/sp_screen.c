@@ -200,8 +200,9 @@ softpipe_get_param(struct pipe_screen *screen, enum pipe_cap param)
    case PIPE_CAP_TGSI_VS_WINDOW_SPACE_POSITION:
       return 1;
    case PIPE_CAP_TGSI_FS_FINE_DERIVATIVE:
-   case PIPE_CAP_SAMPLER_VIEW_TARGET:
       return 0;
+   case PIPE_CAP_SAMPLER_VIEW_TARGET:
+      return 1;
    case PIPE_CAP_FAKE_SW_MSAA:
       return 1;
    case PIPE_CAP_MIN_TEXTURE_GATHER_OFFSET:
@@ -237,6 +238,7 @@ softpipe_get_param(struct pipe_screen *screen, enum pipe_cap param)
       return 0;
    case PIPE_CAP_MULTISAMPLE_Z_RESOLVE:
    case PIPE_CAP_RESOURCE_FROM_USER_MEMORY:
+   case PIPE_CAP_DEVICE_RESET_STATUS_QUERY:
       return 0;
    }
    /* should only get here on unhandled cases */

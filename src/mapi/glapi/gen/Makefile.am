@@ -75,6 +75,7 @@ EXTRA_DIST= \
 	glX_proto_size.py \
 	glX_server_table.py \
 	remap_helper.py \
+	static_data.py \
 	SConscript \
 	gl_API.dtd
 
@@ -140,6 +141,7 @@ API_XML = \
 	ARB_map_buffer_range.xml \
 	ARB_multi_bind.xml \
 	ARB_pipeline_statistics_query.xml \
+	ARB_program_interface_query.xml \
 	ARB_robustness.xml \
 	ARB_sample_shading.xml \
 	ARB_sampler_objects.xml \
@@ -197,6 +199,7 @@ COMMON = $(API_XML) \
 	gl_XML.py \
 	glX_XML.py \
 	license.py \
+	static_data.py \
 	typeexpr.py
 
 COMMON_GLX = $(COMMON) glX_API.xml glX_XML.py glX_proto_common.py

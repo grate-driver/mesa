@@ -941,6 +941,7 @@ fs_generator::generate_ddy(enum opcode opcode,
       brw_push_insn_state(p);
       brw_set_default_access_mode(p, BRW_ALIGN_16);
       if (unroll_to_simd8) {
+         brw_set_default_exec_size(p, BRW_EXECUTE_8);
          brw_set_default_compression_control(p, BRW_COMPRESSION_NONE);
          if (negate_value) {
             brw_ADD(p, firsthalf(dst), firsthalf(src1), negate(firsthalf(src0)));
@@ -1600,10 +1601,13 @@ fs_generator::generate_code(const cfg_t *cfg, int dispatch_width)
          break;
       case 16:
       case 32:
-         if (type_sz(inst->dst.type) < sizeof(float))
-            brw_set_default_compression_control(p, BRW_COMPRESSION_NONE);
-         else
+         /* If the instruction writes to more than one register, it needs to
+          * be a "compressed" instruction on Gen <= 5.
+          */
+         if (inst->exec_size * inst->dst.stride * type_sz(inst->dst.type) > 32)
             brw_set_default_compression_control(p, BRW_COMPRESSION_COMPRESSED);
+         else
+            brw_set_default_compression_control(p, BRW_COMPRESSION_NONE);
          break;
       default:
          unreachable("Invalid instruction width");

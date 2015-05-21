@@ -39,6 +39,10 @@
 #include "eglarray.h"
 
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 enum _egl_platform_type {
    _EGL_PLATFORM_WINDOWS,
    _EGL_PLATFORM_X11,
@@ -86,7 +90,6 @@ struct _egl_resource
  */
 struct _egl_extensions
 {
-   EGLBoolean MESA_copy_context;
    EGLBoolean MESA_drm_display;
    EGLBoolean MESA_drm_image;
    EGLBoolean MESA_configless_context;
@@ -268,6 +271,11 @@ struct wl_display;
 _EGLDisplay*
 _eglGetWaylandDisplay(struct wl_display *native_display,
                       const EGLint *attrib_list);
+#endif
+
+
+#ifdef __cplusplus
+}
 #endif
 
 #endif /* EGLDISPLAY_INCLUDED */

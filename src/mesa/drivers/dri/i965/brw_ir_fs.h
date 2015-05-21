@@ -131,14 +131,15 @@ horiz_offset(fs_reg reg, unsigned delta)
 static inline fs_reg
 offset(fs_reg reg, unsigned delta)
 {
-   assert(reg.stride > 0);
    switch (reg.file) {
    case BAD_FILE:
       break;
    case GRF:
    case MRF:
    case ATTR:
-      return byte_offset(reg, delta * reg.width * reg.stride * type_sz(reg.type));
+      return byte_offset(reg,
+                         delta * MAX2(reg.width * reg.stride, 1) *
+                         type_sz(reg.type));
    case UNIFORM:
       reg.reg_offset += delta;
       break;
@@ -155,6 +156,7 @@ component(fs_reg reg, unsigned idx)
    assert(idx < reg.width);
    reg.subreg_offset = idx * type_sz(reg.type);
    reg.width = 1;
+   reg.stride = 0;
    return reg;
 }
 
@@ -258,5 +260,15 @@ public:
    bool force_sechalf:1;
    bool pi_noperspective:1;   /**< Pixel interpolator noperspective flag */
 };
+
+/**
+ * Set second-half quarter control on \p inst.
+ */
+static inline fs_inst *
+set_sechalf(fs_inst *inst)
+{
+   inst->force_sechalf = true;
+   return inst;
+}
 
 #endif

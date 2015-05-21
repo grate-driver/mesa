@@ -404,8 +404,10 @@ enum pipe_flush_flags
 #define PIPE_SHADER_VERTEX   0
 #define PIPE_SHADER_FRAGMENT 1
 #define PIPE_SHADER_GEOMETRY 2
-#define PIPE_SHADER_COMPUTE  3
-#define PIPE_SHADER_TYPES    4
+#define PIPE_SHADER_TESS_CTRL 3
+#define PIPE_SHADER_TESS_EVAL 4
+#define PIPE_SHADER_COMPUTE  5
+#define PIPE_SHADER_TYPES    6
 
 
 /**
@@ -425,8 +427,16 @@ enum pipe_flush_flags
 #define PIPE_PRIM_LINE_STRIP_ADJACENCY     11
 #define PIPE_PRIM_TRIANGLES_ADJACENCY      12
 #define PIPE_PRIM_TRIANGLE_STRIP_ADJACENCY 13
-#define PIPE_PRIM_MAX                      14
+#define PIPE_PRIM_PATCHES                  14
+#define PIPE_PRIM_MAX                      15
 
+
+/**
+ * Tessellator spacing types
+ */
+#define PIPE_TESS_SPACING_FRACTIONAL_ODD    0
+#define PIPE_TESS_SPACING_FRACTIONAL_EVEN   1
+#define PIPE_TESS_SPACING_EQUAL             2
 
 /**
  * Query object types
@@ -475,6 +485,19 @@ enum pipe_flush_flags
 
 
 #define PIPE_TIMEOUT_INFINITE 0xffffffffffffffffull
+
+
+/**
+ * Device reset status.
+ */
+enum pipe_reset_status
+{
+   PIPE_NO_RESET = 0,
+   PIPE_GUILTY_CONTEXT_RESET = 1,
+   PIPE_INNOCENT_CONTEXT_RESET = 2,
+   PIPE_UNKNOWN_CONTEXT_RESET = 3
+};
+
 
 /**
  * Implementation capabilities/limits which are queried through
@@ -581,6 +604,7 @@ enum pipe_cap
    PIPE_CAP_POLYGON_OFFSET_CLAMP = 113,
    PIPE_CAP_MULTISAMPLE_Z_RESOLVE = 114,
    PIPE_CAP_RESOURCE_FROM_USER_MEMORY = 115,
+   PIPE_CAP_DEVICE_RESET_STATUS_QUERY = 116,
 };
 
 #define PIPE_QUIRK_TEXTURE_BORDER_COLOR_SWIZZLE_NV50 (1 << 0)

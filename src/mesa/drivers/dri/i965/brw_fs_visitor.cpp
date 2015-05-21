@@ -873,36 +873,7 @@ fs_visitor::visit(ir_expression *ir)
       unreachable("not reached: should be handled by ir_sub_to_add_neg");
 
    case ir_binop_mul:
-      if (devinfo->gen < 8 && ir->type->is_integer()) {
-	 /* For integer multiplication, the MUL uses the low 16 bits
-	  * of one of the operands (src0 on gen6, src1 on gen7).  The
-	  * MACH accumulates in the contribution of the upper 16 bits
-	  * of that operand.
-          */
-         if (ir->operands[0]->is_uint16_constant()) {
-            if (devinfo->gen < 7)
-               emit(MUL(this->result, op[0], op[1]));
-            else
-               emit(MUL(this->result, op[1], op[0]));
-         } else if (ir->operands[1]->is_uint16_constant()) {
-            if (devinfo->gen < 7)
-               emit(MUL(this->result, op[1], op[0]));
-            else
-               emit(MUL(this->result, op[0], op[1]));
-         } else {
-            if (devinfo->gen >= 7)
-               no16("SIMD16 explicit accumulator operands unsupported\n");
-
-            struct brw_reg acc = retype(brw_acc_reg(dispatch_width),
-                                        this->result.type);
-
-            emit(MUL(acc, op[0], op[1]));
-            emit(MACH(reg_null_d, op[0], op[1]));
-            emit(MOV(this->result, fs_reg(acc)));
-         }
-      } else {
-	 emit(MUL(this->result, op[0], op[1]));
-      }
+      emit(MUL(this->result, op[0], op[1]));
       break;
    case ir_binop_imul_high: {
       if (devinfo->gen >= 7)
@@ -4144,64 +4115,21 @@ fs_visitor::resolve_bool_comparison(ir_rvalue *rvalue, fs_reg *reg)
 
 fs_visitor::fs_visitor(struct brw_context *brw,
                        void *mem_ctx,
-                       const struct brw_wm_prog_key *key,
-                       struct brw_wm_prog_data *prog_data,
+                       gl_shader_stage stage,
+                       const void *key,
+                       struct brw_stage_prog_data *prog_data,
                        struct gl_shader_program *shader_prog,
-                       struct gl_fragment_program *fp,
+                       struct gl_program *prog,
                        unsigned dispatch_width)
-   : backend_visitor(brw, shader_prog, &fp->Base, &prog_data->base,
-                     MESA_SHADER_FRAGMENT),
+   : backend_visitor(brw, shader_prog, prog, prog_data, stage),
      reg_null_f(retype(brw_null_vec(dispatch_width), BRW_REGISTER_TYPE_F)),
      reg_null_d(retype(brw_null_vec(dispatch_width), BRW_REGISTER_TYPE_D)),
      reg_null_ud(retype(brw_null_vec(dispatch_width), BRW_REGISTER_TYPE_UD)),
-     key(key), prog_data(&prog_data->base),
+     key(key), prog_data(prog_data),
      dispatch_width(dispatch_width), promoted_constants(0)
 {
    this->mem_ctx = mem_ctx;
-   init();
-}
 
-fs_visitor::fs_visitor(struct brw_context *brw,
-                       void *mem_ctx,
-                       const struct brw_vs_prog_key *key,
-                       struct brw_vs_prog_data *prog_data,
-                       struct gl_shader_program *shader_prog,
-                       struct gl_vertex_program *cp,
-                       unsigned dispatch_width)
-   : backend_visitor(brw, shader_prog, &cp->Base, &prog_data->base.base,
-                     MESA_SHADER_VERTEX),
-     reg_null_f(retype(brw_null_vec(dispatch_width), BRW_REGISTER_TYPE_F)),
-     reg_null_d(retype(brw_null_vec(dispatch_width), BRW_REGISTER_TYPE_D)),
-     reg_null_ud(retype(brw_null_vec(dispatch_width), BRW_REGISTER_TYPE_UD)),
-     key(key), prog_data(&prog_data->base.base),
-     dispatch_width(dispatch_width), promoted_constants(0)
-{
-   this->mem_ctx = mem_ctx;
-   init();
-}
-
-fs_visitor::fs_visitor(struct brw_context *brw,
-                       void *mem_ctx,
-                       const struct brw_cs_prog_key *key,
-                       struct brw_cs_prog_data *prog_data,
-                       struct gl_shader_program *shader_prog,
-                       struct gl_compute_program *cp,
-                       unsigned dispatch_width)
-   : backend_visitor(brw, shader_prog, &cp->Base, &prog_data->base,
-                     MESA_SHADER_COMPUTE),
-     reg_null_f(retype(brw_null_vec(dispatch_width), BRW_REGISTER_TYPE_F)),
-     reg_null_d(retype(brw_null_vec(dispatch_width), BRW_REGISTER_TYPE_D)),
-     reg_null_ud(retype(brw_null_vec(dispatch_width), BRW_REGISTER_TYPE_UD)),
-     key(key), prog_data(&prog_data->base),
-     dispatch_width(dispatch_width), promoted_constants(0)
-{
-   this->mem_ctx = mem_ctx;
-   init();
-}
-
-void
-fs_visitor::init()
-{
    switch (stage) {
    case MESA_SHADER_FRAGMENT:
       key_tex = &((const brw_wm_prog_key *) key)->tex;
