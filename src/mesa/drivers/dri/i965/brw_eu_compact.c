@@ -845,6 +845,12 @@ set_3src_source_index(struct brw_context *brw, brw_compact_inst *dst, brw_inst *
 static bool
 has_unmapped_bits(struct brw_context *brw, brw_inst *src)
 {
+   /* EOT can only be mapped on a send if the src1 is an immediate */
+   if ((brw_inst_opcode(brw, src) == BRW_OPCODE_SENDC ||
+        brw_inst_opcode(brw, src) == BRW_OPCODE_SEND) &&
+       brw_inst_eot(brw, src))
+      return true;
+
    /* Check for instruction bits that don't map to any of the fields of the
     * compacted instruction.  The instruction cannot be compacted if any of
     * them are set.  They overlap with:
