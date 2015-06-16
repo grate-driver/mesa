@@ -1,3 +1,19 @@
+mesa (10.5.7-1ubuntu1) UNRELEASED; urgency=medium
+
+  * Merge from Debian unstable, remaining changes
+    - libclc/clang is not in main, drop building mesa-opencl-icd
+    - drop building the software rasterizer
+    - llvm-3.6 is the default on Ubuntu, use it
+    - install GL/EGL libs under a separate dir to not conflict with
+      blobs, use alternatives for ldconfig
+    - patches:
+      egl-platform-mir.patch: Mir EGL platform
+      i915-dont-default-to-2.1.patch: revert of i915 forced OpenGL
+        2.1 commit
+      skl-*: backports for Skylake
+
+ -- Timo Aaltonen <tjaalton@debian.org>  Tue, 16 Jun 2015 13:33:43 +0300
+
 mesa (10.5.7-1) unstable; urgency=medium
 
   * New upstream release.
