@@ -1,6 +1,7 @@
 mesa (10.5.7-1) UNRELEASED; urgency=medium
 
   * New upstream release.
+  * control: Bump policy to 3.9.6, no changes.
 
  -- Timo Aaltonen <tjaalton@debian.org>  Wed, 27 May 2015 12:30:01 +0300
 
