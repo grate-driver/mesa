@@ -3,7 +3,7 @@ Section: graphics
 Priority: optional
 Maintainer: Ubuntu X-SWAT <ubuntu-x@lists.ubuntu.com>
 XSBC-Original-Maintainer: Debian X Strike Force <debian-x@lists.debian.org>
-Standards-Version: 3.9.3
+Standards-Version: 3.9.6
 Build-Depends:
  debhelper (>= 9),
  quilt (>= 0.40),
