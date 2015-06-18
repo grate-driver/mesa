@@ -83,7 +83,7 @@ get_readpixels_transfer_ops(const struct gl_context *ctx, mesa_format texFormat,
    if (uses_blit) {
       /* For blit-based ReadPixels packing, the clamping is done automatically
        * unless the type is float. */
-      if (_mesa_get_clamp_read_color(ctx) &&
+      if (_mesa_get_clamp_read_color(ctx, ctx->ReadBuffer) &&
           (type == GL_FLOAT || type == GL_HALF_FLOAT)) {
          transferOps |= IMAGE_CLAMP_BIT;
       }
@@ -91,7 +91,7 @@ get_readpixels_transfer_ops(const struct gl_context *ctx, mesa_format texFormat,
    else {
       /* For CPU-based ReadPixels packing, the clamping must always be done
        * for non-float types, */
-      if (_mesa_get_clamp_read_color(ctx) ||
+      if (_mesa_get_clamp_read_color(ctx, ctx->ReadBuffer) ||
           (type != GL_FLOAT && type != GL_HALF_FLOAT)) {
          transferOps |= IMAGE_CLAMP_BIT;
       }
@@ -127,7 +127,7 @@ _mesa_readpixels_needs_slow_path(const struct gl_context *ctx, GLenum format,
          _mesa_get_read_renderbuffer_for_format(ctx, format);
    GLenum srcType;
 
-   ASSERT(rb);
+   assert(rb);
 
    /* There are different rules depending on the base format. */
    switch (format) {
@@ -180,7 +180,7 @@ readpixels_can_use_memcpy(const struct gl_context *ctx, GLenum format, GLenum ty
    struct gl_renderbuffer *rb =
          _mesa_get_read_renderbuffer_for_format(ctx, format);
 
-   ASSERT(rb);
+   assert(rb);
 
    if (_mesa_readpixels_needs_slow_path(ctx, format, type, GL_FALSE)) {
       return GL_FALSE;
@@ -313,10 +313,10 @@ read_depth_pixels( struct gl_context *ctx,
       return;
 
    /* clipping should have been done already */
-   ASSERT(x >= 0);
-   ASSERT(y >= 0);
-   ASSERT(x + width <= (GLint) rb->Width);
-   ASSERT(y + height <= (GLint) rb->Height);
+   assert(x >= 0);
+   assert(y >= 0);
+   assert(x + width <= (GLint) rb->Width);
+   assert(y + height <= (GLint) rb->Height);
 
    if (type == GL_UNSIGNED_INT &&
        read_uint_depth_pixels(ctx, x, y, width, height, type, pixels, packing)) {

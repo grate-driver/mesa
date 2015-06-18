@@ -11,7 +11,6 @@ AM_CFLAGS = \
 AM_CPPFLAGS = \
 	$(DEFINES) \
 	-DDRI_TARGET \
-	-DGALLIUM_GALAHAD \
 	-DGALLIUM_NOOP \
 	-DGALLIUM_RBUG \
 	-DGALLIUM_TRACE
@@ -46,7 +45,6 @@ gallium_dri_la_LIBADD = \
 	$(top_builddir)/src/gallium/state_trackers/dri/libdri.la \
 	$(top_builddir)/src/gallium/auxiliary/libgalliumvl.la \
 	$(top_builddir)/src/gallium/auxiliary/libgallium.la \
-	$(top_builddir)/src/gallium/drivers/galahad/libgalahad.la \
 	$(top_builddir)/src/gallium/drivers/noop/libnoop.la \
 	$(top_builddir)/src/gallium/drivers/rbug/librbug.la \
 	$(top_builddir)/src/gallium/drivers/trace/libtrace.la \
@@ -54,12 +52,6 @@ gallium_dri_la_LIBADD = \
 	$(EXPAT_LIBS) \
 	$(LIBDRM_LIBS) \
 	$(GALLIUM_COMMON_LIB_DEPS)
-
-# XXX: Temporary allow duplicated symbols, as the loader pulls in xmlconfig.c
-# which already provides driParse* and driQuery* amongst others.
-# Remove this hack as we come up with a cleaner solution.
-gallium_dri_la_LDFLAGS += \
-	-Wl,--allow-multiple-definition
 
 EXTRA_gallium_dri_la_DEPENDENCIES = \
 	dri.sym \

@@ -1,3 +1,12 @@
+mesa (10.6.0-1) UNRELEASED; urgency=medium
+
+  * New upstream release candidate.
+  * libegl1-mesa.symbols: Updated.
+  * not-installed: Dropped wmesa.h which is gone.
+  * libgles{1,2}-mesa.symbols: Updated.
+
+ -- Timo Aaltonen <tjaalton@debian.org>  Mon, 27 Apr 2015 10:43:45 +0300
+
 mesa (10.5.7-1ubuntu1) wily; urgency=medium
 
   * Merge from Debian unstable, remaining changes

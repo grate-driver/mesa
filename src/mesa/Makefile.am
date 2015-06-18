@@ -60,9 +60,7 @@ main/git_sha1.h: main/git_sha1.h.tmp
 include Makefile.sources
 
 EXTRA_DIST = \
-	drivers/haiku \
 	drivers/SConscript \
-	drivers/windows \
 	main/format_info.py \
 	main/format_pack.py \
 	main/format_parser.py \
@@ -136,8 +134,14 @@ noinst_LTLIBRARIES += libmesagallium.la
 endif
 
 AM_CPPFLAGS = $(DEFINES) $(INCLUDE_DIRS)
-AM_CFLAGS = $(LLVM_CFLAGS) $(VISIBILITY_CFLAGS)
-AM_CXXFLAGS = $(LLVM_CFLAGS) $(VISIBILITY_CXXFLAGS)
+AM_CFLAGS = \
+	$(LLVM_CFLAGS) \
+	$(VISIBILITY_CFLAGS) \
+	$(MSVC2013_COMPAT_CFLAGS)
+AM_CXXFLAGS = \
+	$(LLVM_CFLAGS) \
+	$(VISIBILITY_CXXFLAGS) \
+	$(MSVC2013_COMPAT_CXXFLAGS)
 
 ARCH_LIBS =
 
@@ -169,6 +173,7 @@ endif
 libmesa_la_SOURCES = \
 	$(MESA_FILES) \
 	$(PROGRAM_FILES) \
+	$(PROGRAM_NIR_FILES) \
 	$(MESA_ASM_FILES_FOR_ARCH)
 
 libmesa_la_LIBADD = \
@@ -178,6 +183,7 @@ libmesa_la_LIBADD = \
 libmesagallium_la_SOURCES = \
 	$(MESA_GALLIUM_FILES) \
 	$(PROGRAM_FILES) \
+	$(PROGRAM_NIR_FILES) \
 	$(MESA_ASM_FILES_FOR_ARCH)
 
 libmesagallium_la_LIBADD = \

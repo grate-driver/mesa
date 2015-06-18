@@ -3,4 +3,3 @@
 # Common list:
 NOT_INSTALLED := \
 	dri/usr/include/GL/wglext.h \
-	dri/usr/include/GL/wmesa.h

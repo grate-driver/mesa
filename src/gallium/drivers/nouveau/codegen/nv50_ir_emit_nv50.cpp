@@ -939,9 +939,20 @@ CodeEmitterNV50::emitFMAD(const Instruction *i)
 
    code[0] = 0xe0000000;
 
+   if (i->src(1).getFile() == FILE_IMMEDIATE) {
+      code[1] = 0;
+      emitForm_IMM(i);
+      code[0] |= neg_mul << 15;
+      code[0] |= neg_add << 22;
+      if (i->saturate)
+         code[0] |= 1 << 8;
+   } else
    if (i->encSize == 4) {
       emitForm_MUL(i);
-      assert(!neg_mul && !neg_add);
+      code[0] |= neg_mul << 15;
+      code[0] |= neg_add << 22;
+      if (i->saturate)
+         code[0] |= 1 << 8;
    } else {
       code[1]  = neg_mul << 26;
       code[1] |= neg_add << 27;
@@ -1931,12 +1942,7 @@ CodeEmitterNV50::getMinEncodingSize(const Instruction *i) const
 
    // check constraints on short MAD
    if (info.srcNr >= 2 && i->srcExists(2)) {
-      if (i->saturate || i->src(2).mod)
-         return 8;
-      if ((i->src(0).mod ^ i->src(1).mod) ||
-          (i->src(0).mod | i->src(1).mod).abs())
-         return 8;
-      if (!i->defExists(0) ||
+      if (!i->defExists(0) || !isFloatType(i->dType) ||
           i->def(0).rep()->reg.data.id != i->src(2).rep()->reg.data.id)
          return 8;
    }

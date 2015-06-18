@@ -28,6 +28,8 @@ AM_CFLAGS = \
 	-I$(top_srcdir)/src/ \
 	-I$(top_srcdir)/src/mapi \
 	-I$(top_srcdir)/src/mesa/ \
+	-I$(top_srcdir)/src/gallium/include \
+	-I$(top_srcdir)/src/gallium/auxiliary \
 	-I$(top_srcdir)/src/mesa/drivers/dri/common \
 	-I$(top_srcdir)/src/mesa/drivers/dri/intel/server \
 	-I$(top_srcdir)/src/gtest/include \
@@ -46,6 +48,7 @@ libi965_dri_la_LIBADD = $(INTEL_LIBS)
 TEST_LIBS = \
 	libi965_dri.la \
 	../common/libdricommon.la \
+	../common/libxmlconfig.la \
 	../common/libmegadriver_stub.la \
         ../../../libmesa.la \
 	$(DRI_LIB_DEPS) \
