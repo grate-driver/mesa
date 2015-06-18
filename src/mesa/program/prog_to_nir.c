@@ -767,7 +767,8 @@ ptn_emit_instruction(struct ptn_compile *c, struct prog_instruction *prog_inst)
 
    switch (op) {
    case OPCODE_RSQ:
-      ptn_move_dest(b, dest, nir_frsq(b, ptn_channel(b, src[0], X)));
+      ptn_move_dest(b, dest,
+                    nir_frsq(b, nir_fabs(b, ptn_channel(b, src[0], X))));
       break;
 
    case OPCODE_RCP:
@@ -926,10 +927,23 @@ ptn_add_output_stores(struct ptn_compile *c)
    foreach_list_typed(nir_variable, var, node, &b->shader->outputs) {
       nir_intrinsic_instr *store =
          nir_intrinsic_instr_create(b->shader, nir_intrinsic_store_var);
-      store->num_components = 4;
+      store->num_components = glsl_get_vector_elements(var->type);
       store->variables[0] =
          nir_deref_var_create(store, c->output_vars[var->data.location]);
-      store->src[0].reg.reg = c->output_regs[var->data.location];
+
+      if (c->prog->Target == GL_FRAGMENT_PROGRAM_ARB &&
+          var->data.location == FRAG_RESULT_DEPTH) {
+         /* result.depth has this strange convention of being the .z component of
+          * a vec4 with undefined .xyw components.  We resolve it to a scalar, to
+          * match GLSL's gl_FragDepth and the expectations of most backends.
+          */
+         nir_alu_src alu_src = { NIR_SRC_INIT };
+         alu_src.src = nir_src_for_reg(c->output_regs[FRAG_RESULT_DEPTH]);
+         alu_src.swizzle[0] = SWIZZLE_Z;
+         store->src[0] = nir_src_for_ssa(nir_fmov_alu(b, alu_src, 1));
+      } else {
+         store->src[0].reg.reg = c->output_regs[var->data.location];
+      }
       nir_instr_insert_after_cf_list(c->build.cf_node_list, &store->instr);
    }
 }
@@ -1022,7 +1036,10 @@ setup_registers_and_variables(struct ptn_compile *c)
       reg->num_components = 4;
 
       nir_variable *var = rzalloc(shader, nir_variable);
-      var->type = glsl_vec4_type();
+      if (c->prog->Target == GL_FRAGMENT_PROGRAM_ARB && i == FRAG_RESULT_DEPTH)
+         var->type = glsl_float_type();
+      else
+         var->type = glsl_vec4_type();
       var->data.mode = nir_var_shader_out;
       var->name = ralloc_asprintf(var, "out_%d", i);
 
