@@ -2,6 +2,7 @@ mesa (10.6.0-0ubuntu1) UNRELEASED; urgency=medium
 
   * Merge from debian-experimental git.
   * Drop skl-* patches, upstream.
+  * egl-platform-mir.patch: Updated.
 
  -- Timo Aaltonen <tjaalton@debian.org>  Thu, 18 Jun 2015 15:31:27 +0300
 

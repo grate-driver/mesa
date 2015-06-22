@@ -78,7 +78,7 @@ else
 
 # Mir isn't built on AArch64 and PPC
     ifeq (,$(filter $(DEB_HOST_ARCH),arm64 powerpc ppc64 ppc64el))
-	EGL_DISPLAYS += mir
+#	EGL_DISPLAYS += mir
     endif
 
     ifeq (,$(filter $(DEB_HOST_ARCH), s390 s390x))
