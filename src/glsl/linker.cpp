@@ -3235,10 +3235,6 @@ link_shaders(struct gl_context *ctx, struct gl_shader_program *prog)
       }
    }
 
-   build_program_resource_list(ctx, prog);
-   if (!prog->LinkStatus)
-      goto done;
-
    /* FINISHME: Assign fragment shader output locations. */
 
 done:
