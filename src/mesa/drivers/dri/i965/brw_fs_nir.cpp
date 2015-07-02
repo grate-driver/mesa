@@ -89,12 +89,19 @@ fs_visitor::nir_setup_inputs(nir_shader *shader)
           * So, we need to copy from fs_reg(ATTR, var->location) to
           * offset(nir_inputs, var->data.driver_location).
           */
-         unsigned components = var->type->without_array()->components();
+         const glsl_type *const t = var->type->without_array();
+         const unsigned components = t->components();
+         const unsigned cols = t->matrix_columns;
+         const unsigned elts = t->vector_elements;
          unsigned array_length = var->type->is_array() ? var->type->length : 1;
          for (unsigned i = 0; i < array_length; i++) {
-            for (unsigned j = 0; j < components; j++) {
-               emit(MOV(retype(offset(input, components * i + j), type),
-                        offset(fs_reg(ATTR, var->data.location + i, type), j)));
+            for (unsigned j = 0; j < cols; j++) {
+               for (unsigned k = 0; k < elts; k++) {
+                  emit(MOV(offset(retype(input, type),
+                                  components * i + elts * j + k),
+                           offset(fs_reg(ATTR, var->data.location + i, type),
+                                  4 * j + k)));
+               }
             }
          }
          break;
