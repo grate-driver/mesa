@@ -1,0 +1,34 @@
+commit 706b916960c898cfc24110f14fa4def84caaba93
+Author: Kenneth Graunke <kenneth@whitecape.org>
+Date:   Wed Mar 4 12:53:45 2015 -0800
+
+    i965/skl: Break down SIMD16 3-source instructions when required.
+    
+    Several steppings of Skylake fail when using SIMD16 with 3-source
+    instructions (such as MAD).
+    
+    This implements WaDisableSIMD16On3SrcInstr and fixes ~190 Piglit
+    tests.
+    
+    Based on a patch by Neil Roberts.
+    
+    Signed-off-by: Kenneth Graunke <kenneth@whitecape.org>
+    Reviewed-by: Neil Roberts <neil@linux.intel.com>
+
+diff --git a/src/mesa/drivers/dri/i965/brw_fs_generator.cpp b/src/mesa/drivers/dri/i965/brw_fs_generator.cpp
+index 6eebee1..3aa5c3c 100644
+--- a/src/mesa/drivers/dri/i965/brw_fs_generator.cpp
++++ b/src/mesa/drivers/dri/i965/brw_fs_generator.cpp
+@@ -1559,6 +1559,12 @@ fs_generator::enable_debug(const char *shader_name)
+ static bool
+ brw_supports_simd16_3src(const struct brw_context *brw)
+ {
++   /* WaDisableSIMD16On3SrcInstr: 3-source instructions don't work in SIMD16
++    * on a few steppings of Skylake.
++    */
++   if (brw->gen == 9)
++      return brw->revision != 2 && brw->revision != 3 && brw->revision != -1;
++
+    return brw->is_haswell || brw->gen >= 8;
+ }
+ 
