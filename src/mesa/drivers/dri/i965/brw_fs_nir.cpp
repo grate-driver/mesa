@@ -1462,6 +1462,10 @@ fs_visitor::nir_emit_intrinsic(nir_intrinsic_instr *instr)
    case nir_intrinsic_interp_var_at_centroid:
    case nir_intrinsic_interp_var_at_sample:
    case nir_intrinsic_interp_var_at_offset: {
+      assert(stage == MESA_SHADER_FRAGMENT);
+
+      ((struct brw_wm_prog_data *) prog_data)->pulls_bary = true;
+
       /* in SIMD16 mode, the pixel interpolator returns coords interleaved
        * 8 channels at a time, same as the barycentric coords presented in
        * the FS payload. this requires a bit of extra work to support.
