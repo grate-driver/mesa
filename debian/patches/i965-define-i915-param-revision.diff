@@ -1,0 +1,27 @@
+commit 484f9f4fcd53fcaa768e63934a5f74346bfb46a9
+Author: Dave Airlie <airlied@redhat.com>
+Date:   Mon Mar 23 09:54:52 2015 +1000
+
+    i965: define I915_PARAM_REVISION
+    
+    we are broken against the libdrm 2.4.60 minimum specified,
+    so fix it for now.
+    
+    Signed-off-by: Dave Airlie <airlied@redhat.com>
+
+diff --git a/src/mesa/drivers/dri/i965/brw_context.c b/src/mesa/drivers/dri/i965/brw_context.c
+index 0d3af2c..a39443a 100644
+--- a/src/mesa/drivers/dri/i965/brw_context.c
++++ b/src/mesa/drivers/dri/i965/brw_context.c
+@@ -658,6 +658,11 @@ brw_process_driconf_options(struct brw_context *brw)
+       driQueryOptionb(options, "allow_glsl_extension_directive_midshader");
+ }
+ 
++/* drop when libdrm 2.4.61 is released */
++#ifndef I915_PARAM_REVISION
++#define I915_PARAM_REVISION 32
++#endif
++
+ static int
+ brw_get_revision(int fd)
+ {

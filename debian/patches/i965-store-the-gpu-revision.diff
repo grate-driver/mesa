@@ -1,0 +1,80 @@
+commit c02c4b567ce001f6605c46e71e089692b837bf26
+Author: Neil Roberts <neil@linux.intel.com>
+Date:   Wed Mar 4 14:13:40 2015 +0000
+
+    i965: Store the GPU revision number in brw_context
+    
+    brwContextInit now queries the GPU revision number via a new parameter
+    for DRM_I915_GETPARAM. This new parameter requires a kernel patch and
+    a patch to libdrm. If the kernel doesn't support it then it will
+    continue but set the revision number to -1. The intention is to use
+    this to implement workarounds that are only needed on certain
+    steppings of the GPU.
+    
+    Reviewed-by: Kristian Høgsberg <krh@bitplanet.net>
+
+diff --git a/configure.ac b/configure.ac
+index 8c90b41..d864350 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -61,7 +61,7 @@ AC_SUBST([OSMESA_VERSION])
+ dnl Versions for external dependencies
+ LIBDRM_REQUIRED=2.4.38
+ LIBDRM_RADEON_REQUIRED=2.4.56
+-LIBDRM_INTEL_REQUIRED=2.4.52
++LIBDRM_INTEL_REQUIRED=2.4.60
+ LIBDRM_NVVIEUX_REQUIRED=2.4.33
+ LIBDRM_NOUVEAU_REQUIRED="2.4.33 libdrm >= 2.4.41"
+ LIBDRM_FREEDRENO_REQUIRED=2.4.57
+diff --git a/src/mesa/drivers/dri/i965/brw_context.c b/src/mesa/drivers/dri/i965/brw_context.c
+index 88685cd..0d3af2c 100644
+--- a/src/mesa/drivers/dri/i965/brw_context.c
++++ b/src/mesa/drivers/dri/i965/brw_context.c
+@@ -658,6 +658,24 @@ brw_process_driconf_options(struct brw_context *brw)
+       driQueryOptionb(options, "allow_glsl_extension_directive_midshader");
+ }
+ 
++static int
++brw_get_revision(int fd)
++{
++   struct drm_i915_getparam gp;
++   int revision;
++   int ret;
++
++   memset(&gp, 0, sizeof(gp));
++   gp.param = I915_PARAM_REVISION;
++   gp.value = &revision;
++
++   ret = drmCommandWriteRead(fd, DRM_I915_GETPARAM, &gp, sizeof(gp));
++   if (ret)
++      revision = -1;
++
++   return revision;
++}
++
+ GLboolean
+ brwCreateContext(gl_api api,
+ 	         const struct gl_config *mesaVis,
+@@ -716,6 +734,7 @@ brwCreateContext(gl_api api,
+    brw->has_negative_rhw_bug = devinfo->has_negative_rhw_bug;
+    brw->needs_unlit_centroid_workaround =
+       devinfo->needs_unlit_centroid_workaround;
++   brw->revision = brw_get_revision(sPriv->fd);
+ 
+    brw->must_use_separate_stencil = screen->hw_must_use_separate_stencil;
+    brw->has_swizzling = screen->hw_has_swizzling;
+diff --git a/src/mesa/drivers/dri/i965/brw_context.h b/src/mesa/drivers/dri/i965/brw_context.h
+index 8b29e2a..e025011 100644
+--- a/src/mesa/drivers/dri/i965/brw_context.h
++++ b/src/mesa/drivers/dri/i965/brw_context.h
+@@ -1076,6 +1076,10 @@ struct brw_context
+ 
+    int gen;
+    int gt;
++   /* GT revision. This will be -1 if the revision couldn't be determined (eg,
++    * if the kernel doesn't support the query).
++    */
++   int revision;
+ 
+    bool is_g4x;
+    bool is_baytrail;

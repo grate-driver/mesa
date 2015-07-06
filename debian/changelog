@@ -15,11 +15,34 @@ mesa (10.6.0-0ubuntu1) UNRELEASED; urgency=medium
 
  -- Timo Aaltonen <tjaalton@debian.org>  Thu, 18 Jun 2015 15:31:27 +0300
 
+mesa (10.5.9-1ubuntu1) wily; urgency=medium
+
+  * Merge from Debian unstable.
+  * skl-use-1-register-for-uniform-pull.diff dropped, upstream.
+
+ -- Timo Aaltonen <tjaalton@debian.org>  Mon, 06 Jul 2015 10:03:58 +0300
+
 mesa (10.5.9-1) unstable; urgency=medium
 
   * New upstream release.
 
  -- Timo Aaltonen <tjaalton@debian.org>  Mon, 06 Jul 2015 08:56:26 +0300
+
+mesa (10.5.8-1ubuntu2) wily; urgency=medium
+
+  * i965-store-the-gpu-revision.diff,
+    i965-refactor-simd16-to-2xsimd8-checks.diff,
+    i965-define-i915-param-revision.diff,
+    skl-break-down-simd16-3-source-instructions.diff:
+    Fix noise in Unity, torcs et al. (LP: #1471213)
+
+ -- Timo Aaltonen <tjaalton@debian.org>  Fri, 03 Jul 2015 15:08:26 +0300
+
+mesa (10.5.8-1ubuntu1) wily; urgency=medium
+
+  * Merge from Debian unstable.
+
+ -- Timo Aaltonen <tjaalton@debian.org>  Thu, 25 Jun 2015 21:34:12 +0300
 
 mesa (10.5.8-1) unstable; urgency=medium
 
