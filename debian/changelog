@@ -1,6 +1,6 @@
-mesa (10.6.0-1) UNRELEASED; urgency=medium
+mesa (10.6.1-1) UNRELEASED; urgency=medium
 
-  * New upstream release candidate.
+  * New upstream release.
   * libegl1-mesa.symbols: Updated.
   * not-installed: Dropped wmesa.h which is gone.
   * libgles{1,2}-mesa.symbols: Updated.
