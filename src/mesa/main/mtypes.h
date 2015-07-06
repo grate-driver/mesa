@@ -2827,6 +2827,8 @@ struct gl_pipeline_object
 
    mtx_t Mutex;
 
+   GLchar *Label;   /**< GL_KHR_debug */
+
    /**
     * Programs used for rendering
     *
