@@ -1112,7 +1112,7 @@ dri2_initialize_x11_swrast(_EGLDriver *drv, _EGLDisplay *disp)
       goto cleanup_conn;
 
    dri2_dpy->swrast_loader_extension.base.name = __DRI_SWRAST_LOADER;
-   dri2_dpy->swrast_loader_extension.base.version = __DRI_SWRAST_LOADER_VERSION;
+   dri2_dpy->swrast_loader_extension.base.version = 2;
    dri2_dpy->swrast_loader_extension.getDrawableInfo = swrastGetDrawableInfo;
    dri2_dpy->swrast_loader_extension.putImage = swrastPutImage;
    dri2_dpy->swrast_loader_extension.getImage = swrastGetImage;
@@ -1282,11 +1282,6 @@ dri2_initialize_x11_dri2(_EGLDriver *drv, _EGLDisplay *disp)
       goto cleanup_fd;
 
    dri2_x11_setup_swap_interval(dri2_dpy);
-
-   if (dri2_dpy->conn) {
-      if (!dri2_x11_add_configs_for_visuals(dri2_dpy, disp))
-	 goto cleanup_configs;
-   }
 
    disp->Extensions.KHR_image_pixmap = EGL_TRUE;
    disp->Extensions.NOK_swap_region = EGL_TRUE;
