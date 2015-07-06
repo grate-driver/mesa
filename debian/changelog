@@ -1,3 +1,11 @@
+mesa (10.6.1-0ubuntu1) UNRELEASED; urgency=medium
+
+  * Merge from debian-experimental git.
+  * Drop skl-*, i965-* patches, upstream.
+  * egl-platform-mir.patch: Updated.
+
+ -- Timo Aaltonen <tjaalton@debian.org>  Thu, 18 Jun 2015 15:31:27 +0300
+
 mesa (10.6.1-1) UNRELEASED; urgency=medium
 
   * New upstream release.
@@ -6,14 +14,6 @@ mesa (10.6.1-1) UNRELEASED; urgency=medium
   * libgles{1,2}-mesa.symbols: Updated.
 
  -- Timo Aaltonen <tjaalton@debian.org>  Mon, 27 Apr 2015 10:43:45 +0300
-
-mesa (10.6.0-0ubuntu1) UNRELEASED; urgency=medium
-
-  * Merge from debian-experimental git.
-  * Drop skl-* patches, upstream.
-  * egl-platform-mir.patch: Updated.
-
- -- Timo Aaltonen <tjaalton@debian.org>  Thu, 18 Jun 2015 15:31:27 +0300
 
 mesa (10.5.9-1ubuntu1) wily; urgency=medium
 
