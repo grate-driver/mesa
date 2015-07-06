@@ -6,6 +6,7 @@ mesa (10.6.1-1) UNRELEASED; urgency=medium
   * libgles{1,2}-mesa.symbols: Updated.
   * libegl1-mesa.symbols: Drop a spurious comment.
   * source/local-options: Updated extend-diff-ignore.
+  * mesa-common-dev.docs: Updated.
 
  -- Timo Aaltonen <tjaalton@debian.org>  Mon, 27 Apr 2015 10:43:45 +0300
 
