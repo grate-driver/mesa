@@ -1,4 +1,5 @@
 07_gallium-fix-build-failure-on-powerpcspe.diff
+i965-do_blit_drawpixels-decode-array-formats.patch
 
 # Ubuntu patches.
 egl-platform-mir.patch
