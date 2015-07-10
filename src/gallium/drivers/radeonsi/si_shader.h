@@ -189,6 +189,7 @@ int si_compile_llvm(struct si_screen *sscreen, struct si_shader *shader,
 		    LLVMTargetMachineRef tm, LLVMModuleRef mod);
 void si_shader_destroy(struct pipe_context *ctx, struct si_shader *shader);
 unsigned si_shader_io_get_unique_index(unsigned semantic_name, unsigned index);
+int si_shader_binary_upload(struct si_screen *sscreen, struct si_shader *shader);
 int si_shader_binary_read(struct si_screen *sscreen, struct si_shader *shader,
 		const struct radeon_shader_binary *binary);
 void si_shader_apply_scratch_relocs(struct si_context *sctx,
