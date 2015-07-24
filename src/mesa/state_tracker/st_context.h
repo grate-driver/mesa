@@ -58,6 +58,8 @@ struct u_upload_mgr;
 #define ST_NEW_VERTEX_ARRAYS           (1 << 6)
 #define ST_NEW_RASTERIZER              (1 << 7)
 #define ST_NEW_UNIFORM_BUFFER          (1 << 8)
+/* gap for TESSCTRL/TESSEVAL that's in master only */
+#define ST_NEW_SAMPLER_VIEWS           (1 << 11)
 
 
 struct st_state_flags {
