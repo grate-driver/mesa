@@ -1,0 +1,1 @@
+--extend-diff-ignore=src/mesa/drivers/dri/r200/.*radeon_.*
