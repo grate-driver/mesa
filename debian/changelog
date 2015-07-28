@@ -1,4 +1,4 @@
-mesa (10.6.3-1) UNRELEASED; urgency=medium
+mesa (10.6.3-1) unstable; urgency=medium
 
   * New upstream release.
   * libegl1-mesa.symbols: Updated.
@@ -9,7 +9,7 @@ mesa (10.6.3-1) UNRELEASED; urgency=medium
   * mesa-common-dev.docs: Updated.
   * Delete i965-do_blit...patch, upstream.
 
- -- Timo Aaltonen <tjaalton@debian.org>  Mon, 27 Apr 2015 10:43:45 +0300
+ -- Timo Aaltonen <tjaalton@debian.org>  Tue, 28 Jul 2015 11:12:44 +0300
 
 mesa (10.5.9-2) unstable; urgency=medium
 
