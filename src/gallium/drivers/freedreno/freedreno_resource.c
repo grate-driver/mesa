@@ -72,11 +72,11 @@ fd_invalidate_resource(struct fd_context *ctx, struct pipe_resource *prsc)
 
 	/* Textures */
 	for (i = 0; i < ctx->verttex.num_textures && !(ctx->dirty & FD_DIRTY_VERTTEX); i++) {
-		if (ctx->verttex.textures[i]->texture == prsc)
+		if (ctx->verttex.textures[i] && (ctx->verttex.textures[i]->texture == prsc))
 			ctx->dirty |= FD_DIRTY_VERTTEX;
 	}
 	for (i = 0; i < ctx->fragtex.num_textures && !(ctx->dirty & FD_DIRTY_FRAGTEX); i++) {
-		if (ctx->fragtex.textures[i]->texture == prsc)
+		if (ctx->fragtex.textures[i] && (ctx->fragtex.textures[i]->texture == prsc))
 			ctx->dirty |= FD_DIRTY_FRAGTEX;
 	}
 }
@@ -97,7 +97,7 @@ realloc_bo(struct fd_resource *rsc, uint32_t size)
 
 	rsc->bo = fd_bo_new(screen->dev, size, flags);
 	rsc->timestamp = 0;
-	rsc->dirty = rsc->reading = false;
+	rsc->dirty = rsc->reading = rsc->writing = false;
 	list_delinit(&rsc->list);
 	util_range_set_empty(&rsc->valid_buffer_range);
 }
@@ -239,7 +239,8 @@ fd_resource_transfer_map(struct pipe_context *pctx,
 		 * resource and we're trying to write to it, flush the renders.
 		 */
 		if (rsc->dirty || (rsc->stencil && rsc->stencil->dirty) ||
-			((ptrans->usage & PIPE_TRANSFER_WRITE) && rsc->reading))
+			((ptrans->usage & PIPE_TRANSFER_WRITE) && rsc->reading) ||
+			((ptrans->usage & PIPE_TRANSFER_READ) && rsc->writing))
 			fd_context_render(pctx);
 
 		/* The GPU keeps track of how the various bo's are being used, and
@@ -646,6 +647,8 @@ fd_blitter_pipe_begin(struct fd_context *ctx)
 	util_blitter_save_vertex_buffer_slot(ctx->blitter, ctx->vtx.vertexbuf.vb);
 	util_blitter_save_vertex_elements(ctx->blitter, ctx->vtx.vtx);
 	util_blitter_save_vertex_shader(ctx->blitter, ctx->prog.vp);
+	util_blitter_save_so_targets(ctx->blitter, ctx->streamout.num_targets,
+			ctx->streamout.targets);
 	util_blitter_save_rasterizer(ctx->blitter, ctx->rasterizer);
 	util_blitter_save_viewport(ctx->blitter, &ctx->viewport);
 	util_blitter_save_scissor(ctx->blitter, &ctx->scissor);

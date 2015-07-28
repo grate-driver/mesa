@@ -28,10 +28,11 @@
 #include "main/mtypes.h"
 #include "main/shaderapi.h"
 #include "main/shaderobj.h"
+#include "main/context.h"
 #include "program_resource.h"
-
+#include "ir_uniform.h"
 static bool
-supported_interface_enum(GLenum iface)
+supported_interface_enum(struct gl_context *ctx, GLenum iface)
 {
    switch (iface) {
    case GL_UNIFORM:
@@ -42,17 +43,21 @@ supported_interface_enum(GLenum iface)
    case GL_ATOMIC_COUNTER_BUFFER:
       return true;
    case GL_VERTEX_SUBROUTINE:
+   case GL_FRAGMENT_SUBROUTINE:
+   case GL_VERTEX_SUBROUTINE_UNIFORM:
+   case GL_FRAGMENT_SUBROUTINE_UNIFORM:
+      return _mesa_has_shader_subroutine(ctx);
+   case GL_GEOMETRY_SUBROUTINE:
+   case GL_GEOMETRY_SUBROUTINE_UNIFORM:
+      return _mesa_has_geometry_shaders(ctx) && _mesa_has_shader_subroutine(ctx);
+   case GL_COMPUTE_SUBROUTINE:
+   case GL_COMPUTE_SUBROUTINE_UNIFORM:
+      return _mesa_has_compute_shaders(ctx) && _mesa_has_shader_subroutine(ctx);
    case GL_TESS_CONTROL_SUBROUTINE:
    case GL_TESS_EVALUATION_SUBROUTINE:
-   case GL_GEOMETRY_SUBROUTINE:
-   case GL_FRAGMENT_SUBROUTINE:
-   case GL_COMPUTE_SUBROUTINE:
-   case GL_VERTEX_SUBROUTINE_UNIFORM:
    case GL_TESS_CONTROL_SUBROUTINE_UNIFORM:
    case GL_TESS_EVALUATION_SUBROUTINE_UNIFORM:
-   case GL_GEOMETRY_SUBROUTINE_UNIFORM:
-   case GL_FRAGMENT_SUBROUTINE_UNIFORM:
-   case GL_COMPUTE_SUBROUTINE_UNIFORM:
+      return _mesa_has_tessellation(ctx) && _mesa_has_shader_subroutine(ctx);
    case GL_BUFFER_VARIABLE:
    case GL_SHADER_STORAGE_BLOCK:
    default:
@@ -79,9 +84,9 @@ _mesa_GetProgramInterfaceiv(GLuint program, GLenum programInterface,
    }
 
    /* Validate interface. */
-   if (!supported_interface_enum(programInterface)) {
+   if (!supported_interface_enum(ctx, programInterface)) {
       _mesa_error(ctx, GL_INVALID_OPERATION, "glGetProgramInterfaceiv(%s)",
-                  _mesa_lookup_enum_by_nr(programInterface));
+                  _mesa_enum_to_string(programInterface));
       return;
    }
 
@@ -96,8 +101,8 @@ _mesa_GetProgramInterfaceiv(GLuint program, GLenum programInterface,
       if (programInterface == GL_ATOMIC_COUNTER_BUFFER) {
          _mesa_error(ctx, GL_INVALID_OPERATION,
                      "glGetProgramInterfaceiv(%s pname %s)",
-                     _mesa_lookup_enum_by_nr(programInterface),
-                     _mesa_lookup_enum_by_nr(pname));
+                     _mesa_enum_to_string(programInterface),
+                     _mesa_enum_to_string(pname));
          return;
       }
       /* Name length consists of base name, 3 additional chars '[0]' if
@@ -138,15 +143,40 @@ _mesa_GetProgramInterfaceiv(GLuint program, GLenum programInterface,
       default:
         _mesa_error(ctx, GL_INVALID_OPERATION,
                     "glGetProgramInterfaceiv(%s pname %s)",
-                    _mesa_lookup_enum_by_nr(programInterface),
-                    _mesa_lookup_enum_by_nr(pname));
+                    _mesa_enum_to_string(programInterface),
+                    _mesa_enum_to_string(pname));
       };
       break;
    case GL_MAX_NUM_COMPATIBLE_SUBROUTINES:
+      switch (programInterface) {
+      case GL_VERTEX_SUBROUTINE_UNIFORM:
+      case GL_FRAGMENT_SUBROUTINE_UNIFORM:
+      case GL_GEOMETRY_SUBROUTINE_UNIFORM:
+      case GL_COMPUTE_SUBROUTINE_UNIFORM:
+      case GL_TESS_CONTROL_SUBROUTINE_UNIFORM:
+      case GL_TESS_EVALUATION_SUBROUTINE_UNIFORM: {
+         for (i = 0, *params = 0; i < shProg->NumProgramResourceList; i++) {
+            if (shProg->ProgramResourceList[i].Type == programInterface) {
+               struct gl_uniform_storage *uni =
+                  (struct gl_uniform_storage *)
+                  shProg->ProgramResourceList[i].Data;
+               *params = MAX2(*params, uni->num_compatible_subroutines);
+            }
+         }
+         break;
+      }
+
+      default:
+         _mesa_error(ctx, GL_INVALID_OPERATION,
+                     "glGetProgramInterfaceiv(%s pname %s)",
+                     _mesa_enum_to_string(programInterface),
+                     _mesa_enum_to_string(pname));
+      }
+      break;
    default:
       _mesa_error(ctx, GL_INVALID_OPERATION,
                   "glGetProgramInterfaceiv(pname %s)",
-                  _mesa_lookup_enum_by_nr(pname));
+                  _mesa_enum_to_string(pname));
    }
 }
 
@@ -206,6 +236,11 @@ _mesa_GetProgramResourceIndex(GLuint program, GLenum programInterface,
    if (!shProg || !name)
       return GL_INVALID_INDEX;
 
+   if (!supported_interface_enum(ctx, programInterface)) {
+      _mesa_error(ctx, GL_INVALID_ENUM, "glGetProgramResourceIndex(%s)",
+                  _mesa_enum_to_string(programInterface));
+      return GL_INVALID_INDEX;
+   }
    /*
     * For the interface TRANSFORM_FEEDBACK_VARYING, the value INVALID_INDEX
     * should be returned when querying the index assigned to the special names
@@ -217,6 +252,18 @@ _mesa_GetProgramResourceIndex(GLuint program, GLenum programInterface,
       return GL_INVALID_INDEX;
 
    switch (programInterface) {
+   case GL_TESS_CONTROL_SUBROUTINE:
+   case GL_TESS_CONTROL_SUBROUTINE_UNIFORM:
+   case GL_TESS_EVALUATION_SUBROUTINE:
+   case GL_TESS_EVALUATION_SUBROUTINE_UNIFORM:
+   case GL_COMPUTE_SUBROUTINE:
+   case GL_COMPUTE_SUBROUTINE_UNIFORM:
+   case GL_GEOMETRY_SUBROUTINE:
+   case GL_GEOMETRY_SUBROUTINE_UNIFORM:
+   case GL_VERTEX_SUBROUTINE:
+   case GL_FRAGMENT_SUBROUTINE:
+   case GL_VERTEX_SUBROUTINE_UNIFORM:
+   case GL_FRAGMENT_SUBROUTINE_UNIFORM:
    case GL_PROGRAM_INPUT:
    case GL_PROGRAM_OUTPUT:
    case GL_UNIFORM:
@@ -234,7 +281,7 @@ _mesa_GetProgramResourceIndex(GLuint program, GLenum programInterface,
    case GL_ATOMIC_COUNTER_BUFFER:
    default:
       _mesa_error(ctx, GL_INVALID_ENUM, "glGetProgramResourceIndex(%s)",
-                  _mesa_lookup_enum_by_nr(programInterface));
+                  _mesa_enum_to_string(programInterface));
    }
 
    return GL_INVALID_INDEX;
@@ -260,9 +307,9 @@ _mesa_GetProgramResourceName(GLuint program, GLenum programInterface,
       return;
 
    if (programInterface == GL_ATOMIC_COUNTER_BUFFER ||
-       !supported_interface_enum(programInterface)) {
+       !supported_interface_enum(ctx, programInterface)) {
       _mesa_error(ctx, GL_INVALID_ENUM, "glGetProgramResourceName(%s)",
-                  _mesa_lookup_enum_by_nr(programInterface));
+                  _mesa_enum_to_string(programInterface));
       return;
    }
 
@@ -366,24 +413,33 @@ _mesa_GetProgramResourceLocation(GLuint program, GLenum programInterface,
    case GL_PROGRAM_OUTPUT:
       break;
 
-   /* For reference valid cases requiring additional extension support:
-    * GL_ARB_shader_subroutine
-    * GL_ARB_tessellation_shader
-    * GL_ARB_compute_shader
-    */
    case GL_VERTEX_SUBROUTINE_UNIFORM:
+   case GL_FRAGMENT_SUBROUTINE_UNIFORM:
+      if (!_mesa_has_shader_subroutine(ctx))
+         goto fail;
+      break;
+   case GL_GEOMETRY_SUBROUTINE_UNIFORM:
+      if (!_mesa_has_geometry_shaders(ctx) || !_mesa_has_shader_subroutine(ctx))
+         goto fail;
+      break;
+   case GL_COMPUTE_SUBROUTINE_UNIFORM:
+      if (!_mesa_has_compute_shaders(ctx) || !_mesa_has_shader_subroutine(ctx))
+         goto fail;
+      break;
    case GL_TESS_CONTROL_SUBROUTINE_UNIFORM:
    case GL_TESS_EVALUATION_SUBROUTINE_UNIFORM:
-   case GL_GEOMETRY_SUBROUTINE_UNIFORM:
-   case GL_FRAGMENT_SUBROUTINE_UNIFORM:
-   case GL_COMPUTE_SUBROUTINE_UNIFORM:
-
+      if (!_mesa_has_tessellation(ctx) || !_mesa_has_shader_subroutine(ctx))
+         goto fail;
+      break;
    default:
-      _mesa_error(ctx, GL_INVALID_ENUM, "glGetProgramResourceLocation(%s %s)",
-                  _mesa_lookup_enum_by_nr(programInterface), name);
+         goto fail;
    }
 
    return _mesa_program_resource_location(shProg, programInterface, name);
+fail:
+   _mesa_error(ctx, GL_INVALID_ENUM, "glGetProgramResourceLocation(%s %s)",
+               _mesa_enum_to_string(programInterface), name);
+   return -1;
 }
 
 /**
@@ -408,7 +464,7 @@ _mesa_GetProgramResourceLocationIndex(GLuint program, GLenum programInterface,
    if (programInterface != GL_PROGRAM_OUTPUT) {
       _mesa_error(ctx, GL_INVALID_ENUM,
                   "glGetProgramResourceLocationIndex(%s)",
-                  _mesa_lookup_enum_by_nr(programInterface));
+                  _mesa_enum_to_string(programInterface));
       return -1;
    }
 

@@ -48,6 +48,9 @@ draw_impl(struct fd_context *ctx, struct fd_ringbuffer *ring,
 {
 	const struct pipe_draw_info *info = emit->info;
 
+	if (!(fd4_emit_get_vp(emit) && fd4_emit_get_fp(emit)))
+		return;
+
 	fd4_emit_state(ctx, ring, emit);
 
 	if (emit->dirty & (FD_DIRTY_VTXBUF | FD_DIRTY_VTXSTATE))
@@ -82,8 +85,7 @@ fixup_shader_state(struct fd_context *ctx, struct ir3_shader_key *key)
 		if (last_key->has_per_samp || key->has_per_samp) {
 			if ((last_key->vsaturate_s != key->vsaturate_s) ||
 					(last_key->vsaturate_t != key->vsaturate_t) ||
-					(last_key->vsaturate_r != key->vsaturate_r) ||
-					(last_key->vinteger_s != key->vinteger_s))
+					(last_key->vsaturate_r != key->vsaturate_r))
 				ctx->prog.dirty |= FD_SHADER_DIRTY_VP;
 
 			if ((last_key->fsaturate_s != key->fsaturate_s) ||
@@ -122,16 +124,13 @@ fd4_draw_vbo(struct fd_context *ctx, const struct pipe_draw_info *info)
 			// TODO set .half_precision based on render target format,
 			// ie. float16 and smaller use half, float32 use full..
 			.half_precision = !!(fd_mesa_debug & FD_DBG_FRAGHALF),
-			.has_per_samp = (fd4_ctx->fsaturate || fd4_ctx->vsaturate ||
-					fd4_ctx->vinteger_s || fd4_ctx->finteger_s),
+			.has_per_samp = (fd4_ctx->fsaturate || fd4_ctx->vsaturate),
 			.vsaturate_s = fd4_ctx->vsaturate_s,
 			.vsaturate_t = fd4_ctx->vsaturate_t,
 			.vsaturate_r = fd4_ctx->vsaturate_r,
 			.fsaturate_s = fd4_ctx->fsaturate_s,
 			.fsaturate_t = fd4_ctx->fsaturate_t,
 			.fsaturate_r = fd4_ctx->fsaturate_r,
-			.vinteger_s = fd4_ctx->vinteger_s,
-			.finteger_s = fd4_ctx->finteger_s,
 		},
 		.format = fd4_emit_format(pfb->cbufs[0]),
 		.pformat = pipe_surface_format(pfb->cbufs[0]),
@@ -296,7 +295,7 @@ fd4_clear(struct fd_context *ctx, unsigned buffers,
 	OUT_RING(ring, colr);         /* RB_CLEAR_COLOR_DW3 */
 
 	/* until fastclear works: */
-	fd4_emit_constant(ring, SB_FRAG_SHADER, 0, 0, 4, color->ui, NULL);
+	fd4_emit_const(ring, SHADER_FRAGMENT, 0, 0, 4, color->ui, NULL);
 
 	OUT_PKT0(ring, REG_A4XX_VFD_INDEX_OFFSET, 2);
 	OUT_RING(ring, 0);            /* VFD_INDEX_OFFSET */

@@ -59,6 +59,10 @@
 
 #define RADEON_INFO_VA_UNMAP_WORKING	0x25
 
+#ifndef RADEON_INFO_GPU_RESET_COUNTER
+#define RADEON_INFO_GPU_RESET_COUNTER   0x26
+#endif
+
 static struct util_hash_table *fd_tab = NULL;
 pipe_static_mutex(fd_tab_mutex);
 
@@ -571,6 +575,10 @@ static uint64_t radeon_query_value(struct radeon_winsys *rws,
         radeon_get_drm_value(ws->fd, RADEON_INFO_CURRENT_GPU_MCLK,
                              "current-gpu-mclk", (uint32_t*)&retval);
         return retval;
+    case RADEON_GPU_RESET_COUNTER:
+        radeon_get_drm_value(ws->fd, RADEON_INFO_GPU_RESET_COUNTER,
+                             "gpu-reset-counter", (uint32_t*)&retval);
+        return retval;
     }
     return 0;
 }
@@ -714,7 +722,7 @@ radeon_drm_winsys_create(int fd, radeon_screen_create_t screen_create)
     if (!ws->kman)
         goto fail;
 
-    ws->cman = pb_cache_manager_create(ws->kman, 1000000, 2.0f, 0,
+    ws->cman = pb_cache_manager_create(ws->kman, 500000, 2.0f, 0,
                                        MIN2(ws->info.vram_size, ws->info.gart_size));
     if (!ws->cman)
         goto fail;

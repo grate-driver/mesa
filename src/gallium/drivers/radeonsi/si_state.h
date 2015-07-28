@@ -30,6 +30,8 @@
 #include "si_pm4.h"
 #include "radeon/r600_pipe_common.h"
 
+#define SI_NUM_SHADERS (PIPE_SHADER_TESS_EVAL+1)
+
 struct si_screen;
 struct si_shader;
 
@@ -92,23 +94,31 @@ union si_state {
 		struct si_pm4_state		*blend_color;
 		struct si_pm4_state		*clip;
 		struct si_state_sample_mask	*sample_mask;
-		struct si_state_scissor		*scissor;
-		struct si_state_viewport	*viewport;
+		struct si_state_scissor		*scissor[16];
+		struct si_state_viewport	*viewport[16];
 		struct si_state_rasterizer	*rasterizer;
 		struct si_state_dsa		*dsa;
 		struct si_pm4_state		*fb_rs;
 		struct si_pm4_state		*fb_blend;
 		struct si_pm4_state		*dsa_stencil_ref;
 		struct si_pm4_state		*ta_bordercolor_base;
+		struct si_pm4_state		*ls;
+		struct si_pm4_state		*hs;
 		struct si_pm4_state		*es;
 		struct si_pm4_state		*gs;
 		struct si_pm4_state		*gs_rings;
-		struct si_pm4_state		*gs_onoff;
+		struct si_pm4_state		*tf_ring;
+		struct si_pm4_state		*vgt_shader_config;
 		struct si_pm4_state		*vs;
 		struct si_pm4_state		*ps;
 		struct si_pm4_state		*spi;
 	} named;
 	struct si_pm4_state	*array[0];
+};
+
+struct si_shader_data {
+	struct r600_atom	atom;
+	uint32_t		sh_base[SI_NUM_SHADERS];
 };
 
 #define SI_NUM_USER_SAMPLERS            16 /* AKA OpenGL textures units per shader */
@@ -135,8 +145,9 @@ union si_state {
  * Ring buffers:        0..1
  * Streamout buffers:   2..5
  */
-#define SI_RING_ESGS		0
-#define SI_RING_GSVS		1
+#define SI_RING_TESS_FACTOR	0 /* for HS (TCS)  */
+#define SI_RING_ESGS		0 /* for ES, GS */
+#define SI_RING_GSVS		1 /* for GS, VS */
 #define SI_NUM_RING_BUFFERS	2
 #define SI_SO_BUF_OFFSET	SI_NUM_RING_BUFFERS
 #define SI_NUM_RW_BUFFERS	(SI_SO_BUF_OFFSET + 4)
@@ -172,9 +183,10 @@ struct si_descriptors {
 	/* The size of a context, should be equal to 4*element_dw_size*num_elements. */
 	unsigned context_size;
 
-	/* The shader userdata register where the 64-bit pointer to the descriptor
+	/* The shader userdata offset within a shader where the 64-bit pointer to the descriptor
 	 * array will be stored. */
-	unsigned shader_userdata_reg;
+	unsigned shader_userdata_offset;
+	bool pointer_dirty;
 };
 
 struct si_sampler_views {
@@ -246,6 +258,7 @@ void si_copy_buffer(struct si_context *sctx,
 		    uint64_t dst_offset, uint64_t src_offset, unsigned size, bool is_framebuffer);
 void si_upload_const_buffer(struct si_context *sctx, struct r600_resource **rbuffer,
 			    const uint8_t *ptr, unsigned size, uint32_t *const_offset);
+void si_shader_change_notify(struct si_context *sctx);
 
 /* si_state.c */
 struct si_shader_selector;
@@ -256,13 +269,19 @@ boolean si_is_format_supported(struct pipe_screen *screen,
                                unsigned sample_count,
                                unsigned usage);
 void si_init_state_functions(struct si_context *sctx);
-void si_init_config(struct si_context *sctx);
 unsigned cik_bank_wh(unsigned bankwh);
 unsigned cik_db_pipe_config(struct si_screen *sscreen, unsigned tile_mode);
 unsigned cik_macro_tile_aspect(unsigned macro_tile_aspect);
 unsigned cik_tile_split(unsigned tile_split);
+unsigned si_array_mode(unsigned mode);
 uint32_t si_num_banks(struct si_screen *sscreen, struct r600_texture *tex);
 unsigned si_tile_mode_index(struct r600_texture *rtex, unsigned level, bool stencil);
+struct pipe_sampler_view *
+si_create_sampler_view_custom(struct pipe_context *ctx,
+			      struct pipe_resource *texture,
+			      const struct pipe_sampler_view *state,
+			      unsigned width0, unsigned height0,
+			      unsigned force_level);
 
 /* si_state_shader.c */
 void si_update_shaders(struct si_context *sctx);

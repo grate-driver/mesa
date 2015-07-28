@@ -62,6 +62,8 @@ void radeon_llvm_shader_type(LLVMValueRef F, unsigned type)
 
 	switch (type) {
 	case TGSI_PROCESSOR_VERTEX:
+	case TGSI_PROCESSOR_TESS_CTRL:
+	case TGSI_PROCESSOR_TESS_EVAL:
 		llvm_type = RADEON_LLVM_SHADER_VS;
 		break;
 	case TGSI_PROCESSOR_GEOMETRY:
@@ -86,10 +88,18 @@ static void init_r600_target()
 {
 	static unsigned initialized = 0;
 	if (!initialized) {
+#if HAVE_LLVM < 0x0307
 		LLVMInitializeR600TargetInfo();
 		LLVMInitializeR600Target();
 		LLVMInitializeR600TargetMC();
 		LLVMInitializeR600AsmPrinter();
+#else
+		LLVMInitializeAMDGPUTargetInfo();
+		LLVMInitializeAMDGPUTarget();
+		LLVMInitializeAMDGPUTargetMC();
+		LLVMInitializeAMDGPUAsmPrinter();
+
+#endif
 		initialized = 1;
 	}
 }

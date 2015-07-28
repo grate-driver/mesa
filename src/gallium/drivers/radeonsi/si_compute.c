@@ -144,7 +144,7 @@ static void *si_create_compute_state(
 	 * the shader code to the GPU.
 	 */
 	init_scratch_buffer(sctx, program);
-	si_shader_binary_read(sctx->screen, &program->shader, &program->shader.binary);
+	si_shader_binary_read(sctx->screen, &program->shader);
 
 #endif
 	program->input_buffer =	si_resource_create_custom(sctx->b.b.screen,
@@ -308,8 +308,6 @@ static void si_launch_grid(
 		COMPUTE_DBG(sctx->screen, "input %u : %u\n", i,
 			kernel_args[i]);
 	}
-
-	sctx->b.ws->buffer_unmap(input_buffer->cs_buf);
 
 	kernel_args_va = input_buffer->gpu_address;
 	kernel_args_va += kernel_args_offset;

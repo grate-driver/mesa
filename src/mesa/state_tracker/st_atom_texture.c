@@ -232,7 +232,6 @@ static unsigned last_layer(struct st_texture_object *stObj)
 static struct pipe_sampler_view *
 st_create_texture_sampler_view_from_stobj(struct pipe_context *pipe,
 					  struct st_texture_object *stObj,
-                                          const struct gl_sampler_object *samp,
 					  enum pipe_format format)
 {
    struct pipe_sampler_view templ;
@@ -283,7 +282,6 @@ st_create_texture_sampler_view_from_stobj(struct pipe_context *pipe,
 static struct pipe_sampler_view *
 st_get_texture_sampler_view_from_stobj(struct st_context *st,
                                        struct st_texture_object *stObj,
-                                       const struct gl_sampler_object *samp,
 				       enum pipe_format format)
 {
    struct pipe_sampler_view **sv;
@@ -318,7 +316,7 @@ st_get_texture_sampler_view_from_stobj(struct st_context *st,
    }
 
    if (!*sv) {
-      *sv = st_create_texture_sampler_view_from_stobj(st->pipe, stObj, samp, format);
+      *sv = st_create_texture_sampler_view_from_stobj(st->pipe, stObj, format);
 
    } else if ((*sv)->context != st->pipe) {
       /* Recreate view in correct context, use existing view as template */
@@ -374,8 +372,8 @@ update_single_texture(struct st_context *st,
       }
    }
 
-   *sampler_view = st_get_texture_sampler_view_from_stobj(st, stObj, samp,
-							  view_format);
+   *sampler_view = st_get_texture_sampler_view_from_stobj(st, stObj,
+                                                          view_format);
    return GL_TRUE;
 }
 
@@ -474,11 +472,43 @@ update_geometry_textures(struct st_context *st)
 }
 
 
+static void
+update_tessctrl_textures(struct st_context *st)
+{
+   const struct gl_context *ctx = st->ctx;
+
+   if (ctx->TessCtrlProgram._Current) {
+      update_textures(st,
+                      PIPE_SHADER_TESS_CTRL,
+                      &ctx->TessCtrlProgram._Current->Base,
+                      ctx->Const.Program[MESA_SHADER_TESS_CTRL].MaxTextureImageUnits,
+                      st->state.sampler_views[PIPE_SHADER_TESS_CTRL],
+                      &st->state.num_sampler_views[PIPE_SHADER_TESS_CTRL]);
+   }
+}
+
+
+static void
+update_tesseval_textures(struct st_context *st)
+{
+   const struct gl_context *ctx = st->ctx;
+
+   if (ctx->TessEvalProgram._Current) {
+      update_textures(st,
+                      PIPE_SHADER_TESS_EVAL,
+                      &ctx->TessEvalProgram._Current->Base,
+                      ctx->Const.Program[MESA_SHADER_TESS_EVAL].MaxTextureImageUnits,
+                      st->state.sampler_views[PIPE_SHADER_TESS_EVAL],
+                      &st->state.num_sampler_views[PIPE_SHADER_TESS_EVAL]);
+   }
+}
+
+
 const struct st_tracked_state st_update_fragment_texture = {
    "st_update_texture",					/* name */
    {							/* dirty */
       _NEW_TEXTURE,					/* mesa */
-      ST_NEW_FRAGMENT_PROGRAM,				/* st */
+      ST_NEW_FRAGMENT_PROGRAM | ST_NEW_SAMPLER_VIEWS,	/* st */
    },
    update_fragment_textures				/* update */
 };
@@ -488,7 +518,7 @@ const struct st_tracked_state st_update_vertex_texture = {
    "st_update_vertex_texture",				/* name */
    {							/* dirty */
       _NEW_TEXTURE,					/* mesa */
-      ST_NEW_VERTEX_PROGRAM,				/* st */
+      ST_NEW_VERTEX_PROGRAM | ST_NEW_SAMPLER_VIEWS,	/* st */
    },
    update_vertex_textures				/* update */
 };
@@ -498,9 +528,29 @@ const struct st_tracked_state st_update_geometry_texture = {
    "st_update_geometry_texture",			/* name */
    {							/* dirty */
       _NEW_TEXTURE,					/* mesa */
-      ST_NEW_GEOMETRY_PROGRAM,				/* st */
+      ST_NEW_GEOMETRY_PROGRAM | ST_NEW_SAMPLER_VIEWS,	/* st */
    },
    update_geometry_textures				/* update */
+};
+
+
+const struct st_tracked_state st_update_tessctrl_texture = {
+   "st_update_tessctrl_texture",			/* name */
+   {							/* dirty */
+      _NEW_TEXTURE,					/* mesa */
+      ST_NEW_TESSCTRL_PROGRAM | ST_NEW_SAMPLER_VIEWS,	/* st */
+   },
+   update_tessctrl_textures				/* update */
+};
+
+
+const struct st_tracked_state st_update_tesseval_texture = {
+   "st_update_tesseval_texture",			/* name */
+   {							/* dirty */
+      _NEW_TEXTURE,					/* mesa */
+      ST_NEW_TESSEVAL_PROGRAM | ST_NEW_SAMPLER_VIEWS,	/* st */
+   },
+   update_tesseval_textures				/* update */
 };
 
 

@@ -141,7 +141,7 @@ check_uniforms(struct gl_context *ctx)
       if (shProg[j] == NULL || !shProg[j]->LinkStatus)
 	 continue;
 
-      for (i = 0; i < shProg[j]->NumUserUniformStorage; i++) {
+      for (i = 0; i < shProg[j]->NumUniformStorage; i++) {
          const struct gl_uniform_storage *u = &shProg[j]->UniformStorage[i];
          if (!u->initialized) {
             _mesa_warning(ctx,
@@ -164,6 +164,7 @@ translate_prim(const struct gl_context *ctx, unsigned prim)
    STATIC_ASSERT(GL_POINTS == PIPE_PRIM_POINTS);
    STATIC_ASSERT(GL_QUADS == PIPE_PRIM_QUADS);
    STATIC_ASSERT(GL_TRIANGLE_STRIP_ADJACENCY == PIPE_PRIM_TRIANGLE_STRIP_ADJACENCY);
+   STATIC_ASSERT(GL_PATCHES == PIPE_PRIM_PATCHES);
 
    return prim;
 }
@@ -260,6 +261,7 @@ st_draw_vbo(struct gl_context *ctx,
       info.count = prims[i].count;
       info.start_instance = prims[i].base_instance;
       info.instance_count = prims[i].num_instances;
+      info.vertices_per_patch = ctx->TessCtrlProgram.patch_vertices;
       info.index_bias = prims[i].basevertex;
       if (!ib) {
          info.min_index = info.start;

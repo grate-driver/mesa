@@ -603,6 +603,9 @@ type_size(const struct glsl_type *type)
 	 size += type_size(type->fields.structure[i].type);
       }
       return size;
+   case GLSL_TYPE_SUBROUTINE:
+      return 1;
+
    case GLSL_TYPE_SAMPLER:
       /* Samplers take up no register space, since they're baked in at
        * link time.
@@ -683,8 +686,11 @@ vec4_visitor::setup_uniform_values(ir_variable *ir)
     * order we'd walk the type, so walk the list of storage and find anything
     * with our name, or the prefix of a component that starts with our name.
     */
-   for (unsigned u = 0; u < shader_prog->NumUserUniformStorage; u++) {
+   for (unsigned u = 0; u < shader_prog->NumUniformStorage; u++) {
       struct gl_uniform_storage *storage = &shader_prog->UniformStorage[u];
+
+      if (storage->builtin)
+         continue;
 
       if (strncmp(ir->name, storage->name, namelen) != 0 ||
           (storage->name[namelen] != 0 &&
@@ -717,10 +723,8 @@ vec4_visitor::setup_uniform_values(ir_variable *ir)
 }
 
 void
-vec4_visitor::setup_uniform_clipplane_values()
+vec4_visitor::setup_uniform_clipplane_values(gl_clip_plane *clip_planes)
 {
-   gl_clip_plane *clip_planes = brw_select_clip_planes(ctx);
-
    for (int i = 0; i < key->nr_userclip_plane_consts; ++i) {
       assert(this->uniforms < uniform_array_size);
       this->uniform_vector_size[this->uniforms] = 4;
@@ -1062,7 +1066,7 @@ vec4_visitor::visit(ir_variable *ir)
        * Some uniforms, such as samplers and atomic counters, have no actual
        * storage, so we should ignore them.
        */
-      if (ir->is_in_uniform_block() || type_size(ir->type) == 0)
+      if (ir->is_in_buffer_block() || type_size(ir->type) == 0)
          return;
 
       /* Track how big the whole uniform variable is, in case we need to put a
@@ -1373,15 +1377,19 @@ vec4_visitor::emit_pull_constant_load_reg(dst_reg dst,
       emit(pull);
 }
 
-void
-vec4_visitor::emit_uniformize(const dst_reg &dst, const src_reg &src)
+src_reg
+vec4_visitor::emit_uniformize(const src_reg &src)
 {
    const src_reg chan_index(this, glsl_type::uint_type);
+   const dst_reg dst = retype(dst_reg(this, glsl_type::uint_type),
+                              src.type);
 
    emit(SHADER_OPCODE_FIND_LIVE_CHANNEL, dst_reg(chan_index))
       ->force_writemask_all = true;
    emit(SHADER_OPCODE_BROADCAST, dst, src, chan_index)
       ->force_writemask_all = true;
+
+   return src_reg(dst);
 }
 
 void
@@ -1553,6 +1561,10 @@ vec4_visitor::visit(ir_expression *ir)
    case ir_unop_noise:
       unreachable("not reached: should be handled by lower_noise");
 
+   case ir_unop_subroutine_to_int:
+      emit(MOV(result_dst, op[0]));
+      break;
+
    case ir_binop_add:
       emit(ADD(result_dst, op[0], op[1]));
       break;
@@ -1600,20 +1612,13 @@ vec4_visitor::visit(ir_expression *ir)
       assert(ir->type->is_integer());
       emit_math(SHADER_OPCODE_INT_QUOTIENT, result_dst, op[0], op[1]);
       break;
-   case ir_binop_carry: {
-      struct brw_reg acc = retype(brw_acc_reg(8), BRW_REGISTER_TYPE_UD);
 
-      emit(ADDC(dst_null_ud(), op[0], op[1]));
-      emit(MOV(result_dst, src_reg(acc)));
-      break;
-   }
-   case ir_binop_borrow: {
-      struct brw_reg acc = retype(brw_acc_reg(8), BRW_REGISTER_TYPE_UD);
+   case ir_binop_carry:
+      unreachable("Should have been lowered by carry_to_arith().");
 
-      emit(SUBB(dst_null_ud(), op[0], op[1]));
-      emit(MOV(result_dst, src_reg(acc)));
-      break;
-   }
+   case ir_binop_borrow:
+      unreachable("Should have been lowered by borrow_to_arith().");
+
    case ir_binop_mod:
       /* Floating point should be lowered by MOD_TO_FLOOR in the compiler. */
       assert(ir->type->is_integer());
@@ -1732,16 +1737,11 @@ vec4_visitor::visit(ir_expression *ir)
       emit(MOV(result_dst, op[0]));
       break;
    case ir_unop_b2i:
-      emit(AND(result_dst, op[0], src_reg(1)));
-      break;
    case ir_unop_b2f:
       if (devinfo->gen <= 5) {
          resolve_bool_comparison(ir->operands[0], &op[0]);
       }
-      op[0].type = BRW_REGISTER_TYPE_D;
-      result_dst.type = BRW_REGISTER_TYPE_D;
-      emit(AND(result_dst, op[0], src_reg(0x3f800000u)));
-      result_dst.type = BRW_REGISTER_TYPE_F;
+      emit(MOV(result_dst, negate(op[0])));
       break;
    case ir_unop_f2b:
       emit(CMP(result_dst, op[0], src_reg(0.0f), BRW_CONDITIONAL_NZ));
@@ -1837,7 +1837,7 @@ vec4_visitor::visit(ir_expression *ir)
          surf_index = src_reg(this, glsl_type::uint_type);
          emit(ADD(dst_reg(surf_index), op[0],
                   src_reg(prog_data->base.binding_table.ubo_start)));
-         emit_uniformize(dst_reg(surf_index), surf_index);
+         surf_index = emit_uniformize(surf_index);
 
          /* Assume this may touch any UBO. It would be nice to provide
           * a tighter bound, but the array information is already lowered away.
@@ -2533,11 +2533,9 @@ vec4_visitor::visit(ir_texture *ir)
 
       /* Emit code to evaluate the actual indexing expression */
       nonconst_sampler_index->accept(this);
-      dst_reg temp(this, glsl_type::uint_type);
-      emit(ADD(temp, this->result, src_reg(sampler)));
-      emit_uniformize(temp, src_reg(temp));
-
-      sampler_reg = src_reg(temp);
+      src_reg temp(this, glsl_type::uint_type);
+      emit(ADD(dst_reg(temp), this->result, src_reg(sampler)));
+      sampler_reg = emit_uniformize(temp);
    } else {
       /* Single sampler, or constant array index; the indexing expression
        * is just an immediate.
@@ -2959,6 +2957,12 @@ vec4_visitor::visit(ir_emit_vertex *)
 
 void
 vec4_visitor::visit(ir_end_primitive *)
+{
+   unreachable("not reached");
+}
+
+void
+vec4_visitor::visit(ir_barrier *)
 {
    unreachable("not reached");
 }
@@ -3477,16 +3481,16 @@ vec4_visitor::move_grf_array_access_to_scratch()
    foreach_block_and_inst(block, vec4_instruction, inst, cfg) {
       if (inst->dst.file == GRF && inst->dst.reladdr) {
          if (scratch_loc[inst->dst.reg] == -1) {
-            scratch_loc[inst->dst.reg] = c->last_scratch;
-            c->last_scratch += this->alloc.sizes[inst->dst.reg];
+            scratch_loc[inst->dst.reg] = last_scratch;
+            last_scratch += this->alloc.sizes[inst->dst.reg];
          }
 
          for (src_reg *iter = inst->dst.reladdr;
               iter->reladdr;
               iter = iter->reladdr) {
             if (iter->file == GRF && scratch_loc[iter->reg] == -1) {
-               scratch_loc[iter->reg] = c->last_scratch;
-               c->last_scratch += this->alloc.sizes[iter->reg];
+               scratch_loc[iter->reg] = last_scratch;
+               last_scratch += this->alloc.sizes[iter->reg];
             }
          }
       }
@@ -3496,8 +3500,8 @@ vec4_visitor::move_grf_array_access_to_scratch()
               iter->reladdr;
               iter = iter->reladdr) {
             if (iter->file == GRF && scratch_loc[iter->reg] == -1) {
-               scratch_loc[iter->reg] = c->last_scratch;
-               c->last_scratch += this->alloc.sizes[iter->reg];
+               scratch_loc[iter->reg] = last_scratch;
+               last_scratch += this->alloc.sizes[iter->reg];
             }
          }
       }
@@ -3670,8 +3674,8 @@ vec4_visitor::resolve_bool_comparison(ir_rvalue *rvalue, src_reg *reg)
    *reg = neg_result;
 }
 
-vec4_visitor::vec4_visitor(struct brw_context *brw,
-                           struct brw_vec4_compile *c,
+vec4_visitor::vec4_visitor(const struct brw_compiler *compiler,
+                           void *log_data,
                            struct gl_program *prog,
                            const struct brw_vue_prog_key *key,
                            struct brw_vue_prog_data *prog_data,
@@ -3679,11 +3683,9 @@ vec4_visitor::vec4_visitor(struct brw_context *brw,
                            gl_shader_stage stage,
 			   void *mem_ctx,
                            bool no_spills,
-                           shader_time_shader_type st_base,
-                           shader_time_shader_type st_written,
-                           shader_time_shader_type st_reset)
-   : backend_visitor(brw, shader_prog, prog, &prog_data->base, stage),
-     c(c),
+                           int shader_time_index)
+   : backend_shader(compiler, log_data, mem_ctx,
+                    shader_prog, prog, &prog_data->base, stage),
      key(key),
      prog_data(prog_data),
      sanity_param_count(0),
@@ -3691,11 +3693,9 @@ vec4_visitor::vec4_visitor(struct brw_context *brw,
      first_non_payload_grf(0),
      need_all_constants_in_pull_buffer(false),
      no_spills(no_spills),
-     st_base(st_base),
-     st_written(st_written),
-     st_reset(st_reset)
+     shader_time_index(shader_time_index),
+     last_scratch(0)
 {
-   this->mem_ctx = mem_ctx;
    this->failed = false;
 
    this->base_ir = NULL;

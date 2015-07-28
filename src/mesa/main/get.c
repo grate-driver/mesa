@@ -138,6 +138,7 @@ enum value_extra {
    EXTRA_API_GL_CORE,
    EXTRA_API_ES2,
    EXTRA_API_ES3,
+   EXTRA_API_ES31,
    EXTRA_NEW_BUFFERS, 
    EXTRA_NEW_FRAG_CLAMP,
    EXTRA_VALID_DRAW_BUFFER,
@@ -148,6 +149,8 @@ enum value_extra {
    EXTRA_EXT_UBO_GS4,
    EXTRA_EXT_ATOMICS_GS4,
    EXTRA_EXT_SHADER_IMAGE_GS4,
+   EXTRA_EXT_ATOMICS_TESS,
+   EXTRA_EXT_SHADER_IMAGE_TESS,
 };
 
 #define NO_EXTRA NULL
@@ -348,6 +351,22 @@ static const int extra_ARB_shader_image_load_store_and_geometry_shader[] = {
    EXTRA_END
 };
 
+static const int extra_ARB_shader_atomic_counters_and_tessellation[] = {
+   EXTRA_EXT_ATOMICS_TESS,
+   EXTRA_END
+};
+
+static const int extra_ARB_shader_image_load_store_and_tessellation[] = {
+   EXTRA_EXT_SHADER_IMAGE_TESS,
+   EXTRA_END
+};
+
+static const int extra_ARB_draw_indirect_es31[] = {
+   EXT(ARB_draw_indirect),
+   EXTRA_API_ES31,
+   EXTRA_END
+};
+
 EXTRA_EXT(ARB_texture_cube_map);
 EXTRA_EXT(EXT_texture_array);
 EXTRA_EXT(NV_fog_distance);
@@ -393,6 +412,9 @@ EXTRA_EXT(INTEL_performance_query);
 EXTRA_EXT(ARB_explicit_uniform_location);
 EXTRA_EXT(ARB_clip_control);
 EXTRA_EXT(EXT_polygon_offset_clamp);
+EXTRA_EXT(ARB_framebuffer_no_attachments);
+EXTRA_EXT(ARB_tessellation_shader);
+EXTRA_EXT(ARB_shader_subroutine);
 
 static const int
 extra_ARB_color_buffer_float_or_glcore[] = {
@@ -1078,6 +1100,11 @@ check_extra(struct gl_context *ctx, const char *func, const struct value_desc *d
          if (_mesa_is_gles3(ctx))
             api_found = GL_TRUE;
 	 break;
+      case EXTRA_API_ES31:
+         api_check = GL_TRUE;
+         if (_mesa_is_gles31(ctx))
+            api_found = GL_TRUE;
+	 break;
       case EXTRA_API_GL:
          api_check = GL_TRUE;
          if (_mesa_is_desktop_gl(ctx))
@@ -1136,6 +1163,16 @@ check_extra(struct gl_context *ctx, const char *func, const struct value_desc *d
          api_found = (ctx->Extensions.ARB_shader_image_load_store &&
                       _mesa_has_geometry_shaders(ctx));
          break;
+      case EXTRA_EXT_ATOMICS_TESS:
+         api_check = GL_TRUE;
+         api_found = ctx->Extensions.ARB_shader_atomic_counters &&
+                     _mesa_has_tessellation(ctx);
+         break;
+      case EXTRA_EXT_SHADER_IMAGE_TESS:
+         api_check = GL_TRUE;
+         api_found = ctx->Extensions.ARB_shader_image_load_store &&
+                     _mesa_has_tessellation(ctx);
+         break;
       case EXTRA_END:
 	 break;
       default: /* *e is a offset into the extension struct */
@@ -1148,7 +1185,7 @@ check_extra(struct gl_context *ctx, const char *func, const struct value_desc *d
 
    if (api_check && !api_found) {
       _mesa_error(ctx, GL_INVALID_ENUM, "%s(pname=%s)", func,
-                  _mesa_lookup_enum_by_nr(d->pname));
+                  _mesa_enum_to_string(d->pname));
       return GL_FALSE;
    }
 
@@ -1209,7 +1246,7 @@ find_value(const char *func, GLenum pname, void **p, union value *v)
        * any valid enum. */
       if (unlikely(idx == 0)) {
          _mesa_error(ctx, GL_INVALID_ENUM, "%s(pname=%s)", func,
-               _mesa_lookup_enum_by_nr(pname));
+               _mesa_enum_to_string(pname));
          return &error_value;
       }
 
@@ -1991,11 +2028,11 @@ find_value_indexed(const char *func, GLenum pname, GLuint index, union value *v)
 
  invalid_enum:
    _mesa_error(ctx, GL_INVALID_ENUM, "%s(pname=%s)", func,
-               _mesa_lookup_enum_by_nr(pname));
+               _mesa_enum_to_string(pname));
    return TYPE_INVALID;
  invalid_value:
    _mesa_error(ctx, GL_INVALID_VALUE, "%s(pname=%s)", func,
-               _mesa_lookup_enum_by_nr(pname));
+               _mesa_enum_to_string(pname));
    return TYPE_INVALID;
 }
 

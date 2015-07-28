@@ -167,7 +167,6 @@ fs_visitor::register_coalesce()
          src_size = alloc.sizes[inst->src[0].reg];
          assert(src_size <= MAX_VGRF_SIZE);
 
-         assert(inst->src[0].width % 8 == 0);
          channels_remaining = src_size;
          memset(mov, 0, sizeof(mov));
 
@@ -196,7 +195,7 @@ fs_visitor::register_coalesce()
             continue;
          }
          reg_to_offset[offset] = inst->dst.reg_offset;
-         if (inst->src[0].width == 16)
+         if (inst->exec_size == 16)
             reg_to_offset[offset + 1] = inst->dst.reg_offset + 1;
          mov[offset] = inst;
          channels_remaining -= inst->regs_written;

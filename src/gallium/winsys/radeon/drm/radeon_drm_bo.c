@@ -44,7 +44,7 @@
 
 static const struct pb_vtbl radeon_bo_vtbl;
 
-static INLINE struct radeon_bo *radeon_bo(struct pb_buffer *bo)
+static inline struct radeon_bo *radeon_bo(struct pb_buffer *bo)
 {
     assert(bo->vtbl == &radeon_bo_vtbl);
     return (struct radeon_bo *)bo;
@@ -78,7 +78,7 @@ struct radeon_bomgr {
     struct list_head va_holes;
 };
 
-static INLINE struct radeon_bomgr *radeon_bomgr(struct pb_manager *mgr)
+static inline struct radeon_bomgr *radeon_bomgr(struct pb_manager *mgr)
 {
     return (struct radeon_bomgr *)mgr;
 }
@@ -351,14 +351,11 @@ void *radeon_bo_do_map(struct radeon_bo *bo)
     if (bo->user_ptr)
         return bo->user_ptr;
 
-    /* Return the pointer if it's already mapped. */
-    if (bo->ptr)
-        return bo->ptr;
-
     /* Map the buffer. */
     pipe_mutex_lock(bo->map_mutex);
-    /* Return the pointer if it's already mapped (in case of a race). */
+    /* Return the pointer if it's already mapped. */
     if (bo->ptr) {
+        bo->map_count++;
         pipe_mutex_unlock(bo->map_mutex);
         return bo->ptr;
     }
@@ -383,6 +380,7 @@ void *radeon_bo_do_map(struct radeon_bo *bo)
         return NULL;
     }
     bo->ptr = ptr;
+    bo->map_count = 1;
     pipe_mutex_unlock(bo->map_mutex);
 
     return bo->ptr;
@@ -467,7 +465,26 @@ static void *radeon_bo_map(struct radeon_winsys_cs_handle *buf,
 
 static void radeon_bo_unmap(struct radeon_winsys_cs_handle *_buf)
 {
-    /* NOP */
+    struct radeon_bo *bo = (struct radeon_bo*)_buf;
+
+    if (bo->user_ptr)
+        return;
+
+    pipe_mutex_lock(bo->map_mutex);
+    if (!bo->ptr) {
+        pipe_mutex_unlock(bo->map_mutex);
+        return; /* it's not been mapped */
+    }
+
+    assert(bo->map_count);
+    if (--bo->map_count) {
+        pipe_mutex_unlock(bo->map_mutex);
+        return; /* it's been mapped multiple times */
+    }
+
+    os_munmap(bo->ptr, bo->base.size);
+    bo->ptr = NULL;
+    pipe_mutex_unlock(bo->map_mutex);
 }
 
 static void radeon_bo_get_base_buffer(struct pb_buffer *buf,
@@ -778,9 +795,7 @@ static void radeon_bo_set_tiling(struct pb_buffer *_buf,
         cs->flush_cs(cs->flush_data, 0, NULL);
     }
 
-    while (p_atomic_read(&bo->num_active_ioctls)) {
-        sched_yield();
-    }
+    os_wait_until_zero(&bo->num_active_ioctls, PIPE_TIMEOUT_INFINITE);
 
     if (microtiled == RADEON_LAYOUT_TILED)
         args.tiling_flags |= RADEON_TILING_MICRO;
@@ -839,6 +854,12 @@ radeon_winsys_bo_create(struct radeon_winsys *rws,
 
     memset(&desc, 0, sizeof(desc));
     desc.base.alignment = alignment;
+
+    /* Align size to page size. This is the minimum alignment for normal
+     * BOs. Aligning this here helps the cached bufmgr. Especially small BOs,
+     * like constant/uniform buffers, can benefit from better and more reuse.
+     */
+    size = align(size, 4096);
 
     /* Only set one usage bit each for domains and flags, or the cache manager
      * might consider different sets of domains / flags compatible

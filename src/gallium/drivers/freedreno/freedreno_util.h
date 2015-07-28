@@ -40,6 +40,7 @@
 #include "util/u_dynarray.h"
 #include "util/u_pack_color.h"
 
+#include "disasm.h"
 #include "adreno_common.xml.h"
 #include "adreno_pm4.xml.h"
 
@@ -62,11 +63,9 @@ enum adreno_stencil_op fd_stencil_op(unsigned op);
 #define FD_DBG_NOBYPASS 0x0040
 #define FD_DBG_FRAGHALF 0x0080
 #define FD_DBG_NOBIN    0x0100
-#define FD_DBG_OPTMSGS  0x0400
-#define FD_DBG_OPTDUMP  0x0800
-#define FD_DBG_GLSL120  0x1000
-#define FD_DBG_NOCP     0x2000
-#define FD_DBG_NIR      0x4000
+#define FD_DBG_OPTMSGS  0x0200
+#define FD_DBG_GLSL120  0x0400
+#define FD_DBG_SHADERDB 0x0800
 
 extern int fd_mesa_debug;
 extern bool fd_binning_enabled;

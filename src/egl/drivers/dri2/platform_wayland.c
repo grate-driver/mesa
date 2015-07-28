@@ -130,6 +130,7 @@ dri2_wl_create_surface(_EGLDriver *drv, _EGLDisplay *disp,
    struct dri2_egl_config *dri2_conf = dri2_egl_config(conf);
    struct wl_egl_window *window = native_window;
    struct dri2_egl_surface *dri2_surf;
+   const __DRIconfig *config;
 
    (void) drv;
 
@@ -138,7 +139,7 @@ dri2_wl_create_surface(_EGLDriver *drv, _EGLDisplay *disp,
       _eglError(EGL_BAD_ALLOC, "dri2_create_surface");
       return NULL;
    }
-   
+
    if (!_eglInitSurface(&dri2_surf->base, disp, EGL_WINDOW_BIT, conf, attrib_list))
       goto cleanup_surf;
 
@@ -149,6 +150,11 @@ dri2_wl_create_surface(_EGLDriver *drv, _EGLDisplay *disp,
    else
       dri2_surf->format = WL_DRM_FORMAT_ARGB8888;
 
+   if (!window) {
+      _eglError(EGL_BAD_NATIVE_WINDOW, "dri2_create_surface");
+      goto cleanup_surf;
+   }
+
    dri2_surf->wl_win = window;
 
    dri2_surf->wl_win->private = dri2_surf;
@@ -157,19 +163,19 @@ dri2_wl_create_surface(_EGLDriver *drv, _EGLDisplay *disp,
    dri2_surf->base.Width =  -1;
    dri2_surf->base.Height = -1;
 
+   config = dri2_get_dri_config(dri2_conf, EGL_WINDOW_BIT,
+                                dri2_surf->base.GLColorspace);
+
    dri2_surf->dri_drawable = 
-      (*dri2_dpy->dri2->createNewDrawable) (dri2_dpy->dri_screen,
-					    dri2_conf->dri_double_config,
-					    dri2_surf);
+      (*dri2_dpy->dri2->createNewDrawable)(dri2_dpy->dri_screen, config,
+                                           dri2_surf);
    if (dri2_surf->dri_drawable == NULL) {
       _eglError(EGL_BAD_ALLOC, "dri2->createNewDrawable");
-      goto cleanup_dri_drawable;
+      goto cleanup_surf;
    }
 
    return &dri2_surf->base;
 
- cleanup_dri_drawable:
-   dri2_dpy->core->destroyDrawable(dri2_surf->dri_drawable);
  cleanup_surf:
    free(dri2_surf);
 
@@ -361,7 +367,7 @@ get_back_bo(struct dri2_egl_surface *dri2_surf)
    }
 
    if (dri2_surf->back->dri_image == NULL) {
-      dri2_surf->back->dri_image = 
+      dri2_surf->back->dri_image =
          dri2_dpy->image->createImage(dri2_dpy->dri_screen,
                                       dri2_surf->base.Width,
                                       dri2_surf->base.Height,
@@ -891,16 +897,7 @@ drm_handle_device(void *data, struct wl_drm *drm, const char *device)
    if (!dri2_dpy->device_name)
       return;
 
-#ifdef O_CLOEXEC
-   dri2_dpy->fd = open(dri2_dpy->device_name, O_RDWR | O_CLOEXEC);
-   if (dri2_dpy->fd == -1 && errno == EINVAL)
-#endif
-   {
-      dri2_dpy->fd = open(dri2_dpy->device_name, O_RDWR);
-      if (dri2_dpy->fd != -1)
-         fcntl(dri2_dpy->fd, F_SETFD, fcntl(dri2_dpy->fd, F_GETFD) |
-            FD_CLOEXEC);
-   }
+   dri2_dpy->fd = loader_open_device(dri2_dpy->device_name);
    if (dri2_dpy->fd == -1) {
       _eglLog(_EGL_WARNING, "wayland-egl: could not open %s (%s)",
 	      dri2_dpy->device_name, strerror(errno));
@@ -1206,10 +1203,6 @@ dri2_initialize_wayland_drm(_EGLDriver *drv, _EGLDisplay *disp)
 
    disp->Extensions.EXT_swap_buffers_with_damage = EGL_TRUE;
 
-   /* we're supporting EGL 1.4 */
-   disp->VersionMajor = 1;
-   disp->VersionMinor = 4;
-
    /* Fill vtbl last to prevent accidentally calling virtual function during
     * initialization.
     */
@@ -1233,7 +1226,7 @@ dri2_initialize_wayland_drm(_EGLDriver *drv, _EGLDisplay *disp)
    wl_event_queue_destroy(dri2_dpy->wl_queue);
  cleanup_dpy:
    free(dri2_dpy);
-   
+
    return EGL_FALSE;
 }
 
@@ -1852,10 +1845,6 @@ dri2_initialize_wayland_swrast(_EGLDriver *drv, _EGLDisplay *disp)
       if (dri2_dpy->formats & HAS_RGB565)
         dri2_add_config(disp, config, i + 1, types, NULL, rgb565_masks);
    }
-
-   /* we're supporting EGL 1.4 */
-   disp->VersionMajor = 1;
-   disp->VersionMinor = 4;
 
    /* Fill vtbl last to prevent accidentally calling virtual function during
     * initialization.

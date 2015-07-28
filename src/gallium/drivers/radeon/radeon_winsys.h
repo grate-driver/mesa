@@ -169,9 +169,10 @@ enum radeon_value_id {
     RADEON_NUM_BYTES_MOVED,
     RADEON_VRAM_USAGE,
     RADEON_GTT_USAGE,
-    RADEON_GPU_TEMPERATURE,
+    RADEON_GPU_TEMPERATURE, /* DRM 2.42.0 */
     RADEON_CURRENT_SCLK,
-    RADEON_CURRENT_MCLK
+    RADEON_CURRENT_MCLK,
+    RADEON_GPU_RESET_COUNTER, /* DRM 2.43.0 */
 };
 
 enum radeon_bo_priority {
@@ -668,12 +669,12 @@ struct radeon_winsys {
 };
 
 
-static INLINE void radeon_emit(struct radeon_winsys_cs *cs, uint32_t value)
+static inline void radeon_emit(struct radeon_winsys_cs *cs, uint32_t value)
 {
     cs->buf[cs->cdw++] = value;
 }
 
-static INLINE void radeon_emit_array(struct radeon_winsys_cs *cs,
+static inline void radeon_emit_array(struct radeon_winsys_cs *cs,
 				     const uint32_t *values, unsigned count)
 {
     memcpy(cs->buf+cs->cdw, values, count * 4);

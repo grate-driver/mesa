@@ -191,7 +191,6 @@ vec4_visitor::setup_payload_interference(struct ra_graph *g,
 bool
 vec4_visitor::reg_allocate()
 {
-   struct brw_compiler *compiler = brw->intelScreen->compiler;
    unsigned int hw_reg_mapping[alloc.count];
    int payload_reg_count = this->first_non_payload_grf;
 
@@ -340,7 +339,7 @@ void
 vec4_visitor::spill_reg(int spill_reg_nr)
 {
    assert(alloc.sizes[spill_reg_nr] == 1);
-   unsigned int spill_offset = c->last_scratch++;
+   unsigned int spill_offset = last_scratch++;
 
    /* Generate spill/unspill instructions for the objects being spilled. */
    foreach_block_and_inst(block, vec4_instruction, inst, cfg) {

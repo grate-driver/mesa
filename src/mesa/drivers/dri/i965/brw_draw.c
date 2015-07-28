@@ -92,8 +92,10 @@ get_hw_prim_for_gl_prim(int mode)
 {
    if (mode >= BRW_PRIM_OFFSET)
       return mode - BRW_PRIM_OFFSET;
-   else
+   else {
+      assert(mode < ARRAY_SIZE(prim_to_hw_prim));
       return prim_to_hw_prim[mode];
+   }
 }
 
 
@@ -108,7 +110,7 @@ static void brw_set_prim(struct brw_context *brw,
    struct gl_context *ctx = &brw->ctx;
    uint32_t hw_prim = get_hw_prim_for_gl_prim(prim->mode);
 
-   DBG("PRIM: %s\n", _mesa_lookup_enum_by_nr(prim->mode));
+   DBG("PRIM: %s\n", _mesa_enum_to_string(prim->mode));
 
    /* Slight optimization to avoid the GS program when not needed:
     */
@@ -141,7 +143,7 @@ static void gen6_set_prim(struct brw_context *brw,
 {
    uint32_t hw_prim;
 
-   DBG("PRIM: %s\n", _mesa_lookup_enum_by_nr(prim->mode));
+   DBG("PRIM: %s\n", _mesa_enum_to_string(prim->mode));
 
    hw_prim = get_hw_prim_for_gl_prim(prim->mode);
 
@@ -180,7 +182,7 @@ static void brw_emit_prim(struct brw_context *brw,
    int indirect_flag;
    int predicate_enable;
 
-   DBG("PRIM: %s %d %d\n", _mesa_lookup_enum_by_nr(prim->mode),
+   DBG("PRIM: %s %d %d\n", _mesa_enum_to_string(prim->mode),
        prim->start, prim->count);
 
    int start_vertex_location = prim->start;
@@ -215,7 +217,7 @@ static void brw_emit_prim(struct brw_context *brw,
     * the besides the draw code.
     */
    if (brw->always_flush_cache) {
-      intel_batchbuffer_emit_mi_flush(brw);
+      brw_emit_mi_flush(brw);
    }
 
    /* If indirect, emit a bunch of loads from the indirect BO. */
@@ -259,17 +261,17 @@ static void brw_emit_prim(struct brw_context *brw,
       indirect_flag = 0;
    }
 
+   BEGIN_BATCH(brw->gen >= 7 ? 7 : 6);
+
    if (brw->gen >= 7) {
       if (brw->predicate.state == BRW_PREDICATE_STATE_USE_BIT)
          predicate_enable = GEN7_3DPRIM_PREDICATE_ENABLE;
       else
          predicate_enable = 0;
 
-      BEGIN_BATCH(7);
       OUT_BATCH(CMD_3D_PRIM << 16 | (7 - 2) | indirect_flag | predicate_enable);
       OUT_BATCH(hw_prim | vertex_access_type);
    } else {
-      BEGIN_BATCH(6);
       OUT_BATCH(CMD_3D_PRIM << 16 | (6 - 2) |
                 hw_prim << GEN4_3DPRIM_TOPOLOGY_TYPE_SHIFT |
                 vertex_access_type);
@@ -282,7 +284,7 @@ static void brw_emit_prim(struct brw_context *brw,
    ADVANCE_BATCH();
 
    if (brw->always_flush_cache) {
-      intel_batchbuffer_emit_mi_flush(brw);
+      brw_emit_mi_flush(brw);
    }
 }
 
@@ -580,7 +582,7 @@ void brw_draw_prims( struct gl_context *ctx,
     */
    if (ctx->RenderMode != GL_RENDER) {
       perf_debug("%s render mode not supported in hardware\n",
-                 _mesa_lookup_enum_by_nr(ctx->RenderMode));
+                 _mesa_enum_to_string(ctx->RenderMode));
       _swsetup_Wakeup(ctx);
       _tnl_wakeup(ctx);
       _tnl_draw_prims(ctx, prims, nr_prims, ib,

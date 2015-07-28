@@ -130,8 +130,9 @@ fd_context_render(struct pipe_context *pctx)
 
 	/* go through all the used resources and clear their reading flag */
 	LIST_FOR_EACH_ENTRY_SAFE(rsc, rsc_tmp, &ctx->used_resources, list) {
-		assert(rsc->reading);
+		assert(rsc->reading || rsc->writing);
 		rsc->reading = false;
+		rsc->writing = false;
 		list_delinit(&rsc->list);
 	}
 
@@ -144,8 +145,10 @@ fd_context_flush(struct pipe_context *pctx, struct pipe_fence_handle **fence,
 {
 	fd_context_render(pctx);
 
-	if (fence)
+	if (fence) {
+		fd_screen_fence_ref(pctx->screen, fence, NULL);
 		*fence = fd_fence_create(pctx);
+	}
 }
 
 void

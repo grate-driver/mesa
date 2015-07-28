@@ -36,25 +36,31 @@
 static void si_destroy_context(struct pipe_context *context)
 {
 	struct si_context *sctx = (struct si_context *)context;
+	int i;
 
 	si_release_all_descriptors(sctx);
 
 	pipe_resource_reference(&sctx->esgs_ring, NULL);
 	pipe_resource_reference(&sctx->gsvs_ring, NULL);
+	pipe_resource_reference(&sctx->tf_ring, NULL);
 	pipe_resource_reference(&sctx->null_const_buf.buffer, NULL);
 	r600_resource_reference(&sctx->border_color_table, NULL);
 	r600_resource_reference(&sctx->scratch_buffer, NULL);
+	sctx->b.ws->fence_reference(&sctx->last_gfx_fence, NULL);
 
 	si_pm4_free_state(sctx, sctx->init_config, ~0);
 	si_pm4_delete_state(sctx, gs_rings, sctx->gs_rings);
-	si_pm4_delete_state(sctx, gs_onoff, sctx->gs_on);
-	si_pm4_delete_state(sctx, gs_onoff, sctx->gs_off);
+	si_pm4_delete_state(sctx, tf_ring, sctx->tf_state);
+	for (i = 0; i < Elements(sctx->vgt_shader_config); i++)
+		si_pm4_delete_state(sctx, vgt_shader_config, sctx->vgt_shader_config[i]);
 
 	if (sctx->pstipple_sampler_state)
 		sctx->b.b.delete_sampler_state(&sctx->b.b, sctx->pstipple_sampler_state);
 	if (sctx->dummy_pixel_shader) {
 		sctx->b.b.delete_fs_state(&sctx->b.b, sctx->dummy_pixel_shader);
 	}
+	if (sctx->fixed_func_tcs_shader)
+		sctx->b.b.delete_tcs_state(&sctx->b.b, sctx->fixed_func_tcs_shader);
 	sctx->b.b.delete_depth_stencil_alpha_state(&sctx->b.b, sctx->custom_dsa_flush);
 	sctx->b.b.delete_blend_state(&sctx->b.b, sctx->custom_blend_resolve);
 	sctx->b.b.delete_blend_state(&sctx->b.b, sctx->custom_blend_decompress);
@@ -127,17 +133,8 @@ static struct pipe_context *si_create_context(struct pipe_screen *screen, void *
 	sctx->atoms.s.streamout_begin = &sctx->b.streamout.begin_atom;
 	sctx->atoms.s.streamout_enable = &sctx->b.streamout.enable_atom;
 
-	switch (sctx->b.chip_class) {
-	case SI:
-	case CIK:
-		si_init_state_functions(sctx);
-		si_init_shader_functions(sctx);
-		si_init_config(sctx);
-		break;
-	default:
-		R600_ERR("Unsupported chip class %d.\n", sctx->b.chip_class);
-		goto fail;
-	}
+	si_init_state_functions(sctx);
+	si_init_shader_functions(sctx);
 
 	if (sscreen->b.debug_flags & DBG_FORCE_DMA)
 		sctx->b.b.resource_copy_region = sctx->b.dma_copy;
@@ -251,10 +248,15 @@ static int si_get_param(struct pipe_screen* pscreen, enum pipe_cap param)
 	case PIPE_CAP_POLYGON_OFFSET_CLAMP:
 	case PIPE_CAP_MULTISAMPLE_Z_RESOLVE:
 	case PIPE_CAP_QUADS_FOLLOW_PROVOKING_VERTEX_CONVENTION:
+	case PIPE_CAP_TGSI_TEXCOORD:
+	case PIPE_CAP_TGSI_FS_FINE_DERIVATIVE:
 		return 1;
 
 	case PIPE_CAP_RESOURCE_FROM_USER_MEMORY:
 		return !SI_BIG_ENDIAN && sscreen->b.info.has_userptr;
+
+	case PIPE_CAP_DEVICE_RESET_STATUS_QUERY:
+		return sscreen->b.info.drm_major == 2 && sscreen->b.info.drm_minor >= 43;
 
 	case PIPE_CAP_TEXTURE_MULTISAMPLE:
 		/* 2D tiling on CIK is supported since DRM 2.35.0 */
@@ -286,15 +288,15 @@ static int si_get_param(struct pipe_screen* pscreen, enum pipe_cap param)
 	case PIPE_CAP_FRAGMENT_COLOR_CLAMPED:
 	case PIPE_CAP_VERTEX_COLOR_CLAMPED:
 	case PIPE_CAP_USER_VERTEX_BUFFERS:
-	case PIPE_CAP_TGSI_TEXCOORD:
 	case PIPE_CAP_FAKE_SW_MSAA:
 	case PIPE_CAP_TEXTURE_GATHER_OFFSETS:
-	case PIPE_CAP_TGSI_FS_FINE_DERIVATIVE:
 	case PIPE_CAP_CONDITIONAL_RENDER_INVERTED:
 	case PIPE_CAP_SAMPLER_VIEW_TARGET:
 	case PIPE_CAP_VERTEXID_NOBASE:
-	case PIPE_CAP_DEVICE_RESET_STATUS_QUERY:
 		return 0;
+
+	case PIPE_CAP_MAX_SHADER_PATCH_VARYINGS:
+		return 30;
 
 	case PIPE_CAP_TEXTURE_BORDER_COLOR_QUIRK:
 		return PIPE_QUIRK_TEXTURE_BORDER_COLOR_SWIZZLE_R600;
@@ -335,7 +337,7 @@ static int si_get_param(struct pipe_screen* pscreen, enum pipe_cap param)
 		return 8;
 
 	case PIPE_CAP_MAX_VIEWPORTS:
-		return 1;
+		return 16;
 
 	/* Timer queries, present when the clock frequency is non zero. */
 	case PIPE_CAP_QUERY_TIMESTAMP:
@@ -375,6 +377,13 @@ static int si_get_shader_param(struct pipe_screen* pscreen, unsigned shader, enu
 	case PIPE_SHADER_VERTEX:
 	case PIPE_SHADER_GEOMETRY:
 		break;
+	case PIPE_SHADER_TESS_CTRL:
+	case PIPE_SHADER_TESS_EVAL:
+		/* LLVM 3.6.2 is required for tessellation because of bug fixes there */
+		if (HAVE_LLVM < 0x0306 ||
+		    (HAVE_LLVM == 0x0306 && MESA_LLVM_VERSION_PATCH < 2))
+			return 0;
+		break;
 	case PIPE_SHADER_COMPUTE:
 		switch (param) {
 		case PIPE_SHADER_CAP_PREFERRED_IR:
@@ -401,7 +410,6 @@ static int si_get_shader_param(struct pipe_screen* pscreen, unsigned shader, enu
 		}
 		break;
 	default:
-		/* TODO: support tessellation */
 		return 0;
 	}
 
@@ -433,7 +441,7 @@ static int si_get_shader_param(struct pipe_screen* pscreen, unsigned shader, enu
 		/* Indirection of geometry shader input dimension is not
 		 * handled yet
 		 */
-		return shader < PIPE_SHADER_GEOMETRY;
+		return shader != PIPE_SHADER_GEOMETRY;
 	case PIPE_SHADER_CAP_INDIRECT_OUTPUT_ADDR:
 	case PIPE_SHADER_CAP_INDIRECT_TEMP_ADDR:
 	case PIPE_SHADER_CAP_INDIRECT_CONST_ADDR:
@@ -448,10 +456,12 @@ static int si_get_shader_param(struct pipe_screen* pscreen, unsigned shader, enu
 	case PIPE_SHADER_CAP_PREFERRED_IR:
 		return PIPE_SHADER_IR_TGSI;
 	case PIPE_SHADER_CAP_DOUBLES:
+		return HAVE_LLVM >= 0x0307;
 	case PIPE_SHADER_CAP_TGSI_DROUND_SUPPORTED:
 	case PIPE_SHADER_CAP_TGSI_DFRACEXP_DLDEXP_SUPPORTED:
 		return 0;
 	case PIPE_SHADER_CAP_TGSI_FMA_SUPPORTED:
+	case PIPE_SHADER_CAP_TGSI_ANY_INOUT_DECL_RANGE:
 		return 1;
 	}
 	return 0;

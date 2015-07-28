@@ -57,28 +57,6 @@ nir_optimize(nir_shader *nir)
    } while (progress);
 }
 
-static bool
-count_nir_instrs_in_block(nir_block *block, void *state)
-{
-   int *count = (int *) state;
-   nir_foreach_instr(block, instr) {
-      *count = *count + 1;
-   }
-   return true;
-}
-
-static int
-count_nir_instrs(nir_shader *nir)
-{
-   int count = 0;
-   nir_foreach_overload(nir, overload) {
-      if (!overload->impl)
-         continue;
-      nir_foreach_block(overload->impl, count_nir_instrs_in_block, &count);
-   }
-   return count;
-}
-
 nir_shader *
 brw_create_nir(struct brw_context *brw,
                const struct gl_shader_program *shader_prog,
@@ -122,18 +100,9 @@ brw_create_nir(struct brw_context *brw,
    /* Get rid of split copies */
    nir_optimize(nir);
 
-   if (shader_prog) {
-      nir_assign_var_locations_scalar_direct_first(nir, &nir->uniforms,
-                                                   &nir->num_direct_uniforms,
-                                                   &nir->num_uniforms);
-   } else {
-      /* ARB programs generally create a giant array of "uniform" data, and allow
-       * indirect addressing without any boundaries.  In the absence of bounds
-       * analysis, it's all or nothing.  num_direct_uniforms is only useful when
-       * we have some direct and some indirect access; it doesn't matter here.
-       */
-      nir->num_direct_uniforms = 0;
-   }
+   nir_assign_var_locations_scalar_direct_first(nir, &nir->uniforms,
+                                                &nir->num_direct_uniforms,
+                                                &nir->num_uniforms);
    nir_assign_var_locations_scalar(&nir->inputs, &nir->num_inputs);
    nir_assign_var_locations_scalar(&nir->outputs, &nir->num_outputs);
 
@@ -176,21 +145,18 @@ brw_create_nir(struct brw_context *brw,
    nir_validate_shader(nir);
 
    if (unlikely(debug_enabled)) {
+      /* Re-index SSA defs so we print more sensible numbers. */
+      nir_foreach_overload(nir, overload) {
+         if (overload->impl)
+            nir_index_ssa_defs(overload->impl);
+      }
+
       fprintf(stderr, "NIR (SSA form) for %s shader:\n",
               _mesa_shader_stage_to_string(stage));
       nir_print_shader(nir, stderr);
    }
 
-   static GLuint msg_id = 0;
-   _mesa_gl_debug(&brw->ctx, &msg_id,
-                  MESA_DEBUG_SOURCE_SHADER_COMPILER,
-                  MESA_DEBUG_TYPE_OTHER,
-                  MESA_DEBUG_SEVERITY_NOTIFICATION,
-                  "%s NIR shader: %d inst\n",
-                  _mesa_shader_stage_to_abbrev(stage),
-                  count_nir_instrs(nir));
-
-   nir_convert_from_ssa(nir);
+   nir_convert_from_ssa(nir, true);
    nir_validate_shader(nir);
 
    /* This is the last pass we run before we start emitting stuff.  It

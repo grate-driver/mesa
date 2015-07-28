@@ -79,16 +79,18 @@
 #define DBG_GS			(1 << 7)
 #define DBG_PS			(1 << 8)
 #define DBG_CS			(1 << 9)
+#define DBG_TCS			(1 << 10)
+#define DBG_TES			(1 << 11)
 /* features */
-#define DBG_NO_ASYNC_DMA	(1 << 10)
-#define DBG_NO_HYPERZ		(1 << 11)
-#define DBG_NO_DISCARD_RANGE	(1 << 12)
-#define DBG_NO_2D_TILING	(1 << 13)
-#define DBG_NO_TILING		(1 << 14)
-#define DBG_SWITCH_ON_EOP	(1 << 15)
-#define DBG_FORCE_DMA		(1 << 16)
-#define DBG_PRECOMPILE		(1 << 17)
-#define DBG_INFO		(1 << 18)
+#define DBG_NO_ASYNC_DMA	(1 << 12)
+#define DBG_NO_HYPERZ		(1 << 13)
+#define DBG_NO_DISCARD_RANGE	(1 << 14)
+#define DBG_NO_2D_TILING	(1 << 15)
+#define DBG_NO_TILING		(1 << 16)
+#define DBG_SWITCH_ON_EOP	(1 << 17)
+#define DBG_FORCE_DMA		(1 << 18)
+#define DBG_PRECOMPILE		(1 << 19)
+#define DBG_INFO		(1 << 20)
 /* The maximum allowed bit is 20. */
 
 #define R600_MAP_BUFFER_ALIGNMENT 64
@@ -214,7 +216,6 @@ struct r600_texture {
 	float				depth_clear_value;
 
 	bool				non_disp_tiling; /* R600-Cayman only */
-	unsigned			mipmap_shift;
 };
 
 struct r600_surface {
@@ -290,7 +291,7 @@ struct r600_common_screen {
 	pipe_thread			gpu_load_thread;
 	unsigned			gpu_load_counter_busy;
 	unsigned			gpu_load_counter_idle;
-	unsigned			gpu_load_stop_thread; /* bool */
+	volatile unsigned		gpu_load_stop_thread; /* bool */
 };
 
 /* This encapsulates a state or an operation which can emitted into the GPU
@@ -356,6 +357,7 @@ struct r600_common_context {
 	enum chip_class			chip_class;
 	struct r600_rings		rings;
 	unsigned			initial_gfx_cs_size;
+	unsigned			gpu_reset_counter;
 
 	struct u_upload_mgr		*uploader;
 	struct u_suballocator		*allocator_so_filled_size;
@@ -549,12 +551,12 @@ void cayman_emit_msaa_config(struct radeon_winsys_cs *cs, int nr_samples,
 
 /* Inline helpers. */
 
-static INLINE struct r600_resource *r600_resource(struct pipe_resource *r)
+static inline struct r600_resource *r600_resource(struct pipe_resource *r)
 {
 	return (struct r600_resource*)r;
 }
 
-static INLINE void
+static inline void
 r600_resource_reference(struct r600_resource **ptr, struct r600_resource *res)
 {
 	pipe_resource_reference((struct pipe_resource **)ptr,
@@ -568,6 +570,26 @@ static inline unsigned r600_tex_aniso_filter(unsigned filter)
 	if (filter <= 4)   return 2;
 	if (filter <= 8)   return 3;
 	 /* else */        return 4;
+}
+
+static inline unsigned r600_wavefront_size(enum radeon_family family)
+{
+	switch (family) {
+	case CHIP_RV610:
+	case CHIP_RS780:
+	case CHIP_RV620:
+	case CHIP_RS880:
+		return 16;
+	case CHIP_RV630:
+	case CHIP_RV635:
+	case CHIP_RV730:
+	case CHIP_RV710:
+	case CHIP_PALM:
+	case CHIP_CEDAR:
+		return 32;
+	default:
+		return 64;
+	}
 }
 
 #define COMPUTE_DBG(rscreen, fmt, args...) \

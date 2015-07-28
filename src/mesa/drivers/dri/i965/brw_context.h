@@ -606,6 +606,12 @@ struct brw_ff_gs_prog_data {
    unsigned svbi_postincrement_value;
 };
 
+enum shader_dispatch_mode {
+   DISPATCH_MODE_4X1_SINGLE = 0,
+   DISPATCH_MODE_4X2_DUAL_INSTANCE = 1,
+   DISPATCH_MODE_4X2_DUAL_OBJECT = 2,
+   DISPATCH_MODE_SIMD8 = 3,
+};
 
 /* Note: brw_vue_prog_data_compare() must be updated when adding fields to
  * this struct!
@@ -623,7 +629,7 @@ struct brw_vue_prog_data {
     */
    GLuint urb_entry_size;
 
-   bool simd8;
+   enum shader_dispatch_mode dispatch_mode;
 };
 
 
@@ -721,14 +727,6 @@ struct brw_gs_prog_data
    int invocations;
 
    /**
-    * Dispatch mode, can be any of:
-    * GEN7_GS_DISPATCH_MODE_DUAL_OBJECT
-    * GEN7_GS_DISPATCH_MODE_DUAL_INSTANCE
-    * GEN7_GS_DISPATCH_MODE_SINGLE
-    */
-   int dispatch_mode;
-
-   /**
     * Gen6 transform feedback enabled flag.
     */
    bool gen6_xfb_enabled;
@@ -824,20 +822,10 @@ struct brw_tracked_state {
 enum shader_time_shader_type {
    ST_NONE,
    ST_VS,
-   ST_VS_WRITTEN,
-   ST_VS_RESET,
    ST_GS,
-   ST_GS_WRITTEN,
-   ST_GS_RESET,
    ST_FS8,
-   ST_FS8_WRITTEN,
-   ST_FS8_RESET,
    ST_FS16,
-   ST_FS16_WRITTEN,
-   ST_FS16_RESET,
    ST_CS,
-   ST_CS_WRITTEN,
-   ST_CS_RESET,
 };
 
 struct brw_vertex_buffer {
@@ -881,11 +869,12 @@ struct intel_batchbuffer {
    drm_intel_bo *bo;
    /** Last BO submitted to the hardware.  Used for glFinish(). */
    drm_intel_bo *last_bo;
-   /** BO for post-sync nonzero writes for gen6 workaround. */
-   drm_intel_bo *workaround_bo;
 
+#ifdef DEBUG
    uint16_t emit, total;
-   uint16_t used, reserved_space;
+#endif
+   uint16_t reserved_space;
+   uint32_t *map_next;
    uint32_t *map;
    uint32_t *cpu_map;
 #define BATCH_SZ (8192*sizeof(uint32_t))
@@ -894,10 +883,8 @@ struct intel_batchbuffer {
    enum brw_gpu_ring ring;
    bool needs_sol_reset;
 
-   uint8_t pipe_controls_since_last_cs_stall;
-
    struct {
-      uint16_t used;
+      uint32_t *map_next;
       int reloc_count;
    } saved;
 };
@@ -982,6 +969,8 @@ enum brw_predicate_state {
    BRW_PREDICATE_STATE_USE_BIT
 };
 
+struct shader_times;
+
 /**
  * brw_context is derived from gl_context.
  */
@@ -1044,6 +1033,10 @@ struct brw_context
    dri_bufmgr *bufmgr;
 
    drm_intel_context *hw_ctx;
+
+   /** BO for post-sync nonzero writes for gen6 workaround. */
+   drm_intel_bo *workaround_bo;
+   uint8_t pipe_controls_since_last_cs_stall;
 
    /**
     * Set of drm_intel_bo * that have been rendered to within this batchbuffer
@@ -1128,6 +1121,7 @@ struct brw_context
    bool is_baytrail;
    bool is_haswell;
    bool is_cherryview;
+   bool is_broxton;
 
    bool has_hiz;
    bool has_separate_stencil;
@@ -1140,7 +1134,7 @@ struct brw_context
    bool has_pln;
    bool no_simd8;
    bool use_rep_send;
-   bool scalar_vs;
+   bool use_resource_streamer;
 
    /**
     * Some versions of Gen hardware don't do centroid interpolation correctly
@@ -1404,6 +1398,12 @@ struct brw_context
       struct brw_cs_prog_data *prog_data;
    } cs;
 
+   /* RS hardware binding table */
+   struct {
+      drm_intel_bo *bo;
+      uint32_t next_offset;
+   } hw_bt_pool;
+
    struct {
       uint32_t state_offset;
       uint32_t blend_state_offset;
@@ -1507,7 +1507,7 @@ struct brw_context
       const char **names;
       int *ids;
       enum shader_time_shader_type *types;
-      uint64_t *cumulative;
+      struct shader_times *cumulative;
       int num_entries;
       int max_entries;
       double report_time;
@@ -2005,6 +2005,25 @@ gen6_upload_push_constants(struct brw_context *brw,
                            const struct brw_stage_prog_data *prog_data,
                            struct brw_stage_state *stage_state,
                            enum aub_state_struct_type type);
+
+bool
+gen9_use_linear_1d_layout(const struct brw_context *brw,
+                          const struct intel_mipmap_tree *mt);
+
+/* brw_pipe_control.c */
+int brw_init_pipe_control(struct brw_context *brw,
+			  const struct brw_device_info *info);
+void brw_fini_pipe_control(struct brw_context *brw);
+
+void brw_emit_pipe_control_flush(struct brw_context *brw, uint32_t flags);
+void brw_emit_pipe_control_write(struct brw_context *brw, uint32_t flags,
+                                 drm_intel_bo *bo, uint32_t offset,
+                                 uint32_t imm_lower, uint32_t imm_upper);
+void brw_emit_mi_flush(struct brw_context *brw);
+void brw_emit_post_sync_nonzero_flush(struct brw_context *brw);
+void brw_emit_depth_stall_flushes(struct brw_context *brw);
+void gen7_emit_vs_workaround_flush(struct brw_context *brw);
+void gen7_emit_cs_stall_flush(struct brw_context *brw);
 
 #ifdef __cplusplus
 }

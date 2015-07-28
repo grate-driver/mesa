@@ -46,7 +46,9 @@ struct fd_screen {
 	uint32_t device_id;
 	uint32_t gpu_id;         /* 220, 305, etc */
 	uint32_t chip_id;        /* coreid:8 majorrev:8 minorrev:8 patch:8 */
-	uint32_t max_rts;
+	uint32_t max_rts;        /* max # of render targets */
+
+	void *compiler;          /* currently unused for a2xx */
 
 	struct fd_device *dev;
 	struct fd_pipe *pipe;
@@ -54,7 +56,7 @@ struct fd_screen {
 	int64_t cpu_gpu_time_delta;
 };
 
-static INLINE struct fd_screen *
+static inline struct fd_screen *
 fd_screen(struct pipe_screen *pscreen)
 {
 	return (struct fd_screen *)pscreen;

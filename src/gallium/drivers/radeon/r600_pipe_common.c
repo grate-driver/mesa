@@ -107,11 +107,10 @@ void r600_draw_rectangle(struct blitter_context *blitter,
 
 void r600_need_dma_space(struct r600_common_context *ctx, unsigned num_dw)
 {
-	/* The number of dwords we already used in the DMA so far. */
-	num_dw += ctx->rings.dma.cs->cdw;
 	/* Flush if there's not enough space. */
-	if (num_dw > RADEON_MAX_CMDBUF_DWORDS) {
+	if ((num_dw + ctx->rings.dma.cs->cdw) > RADEON_MAX_CMDBUF_DWORDS) {
 		ctx->rings.dma.flush(ctx, RADEON_FLUSH_ASYNC, NULL);
+		assert((num_dw + ctx->rings.dma.cs->cdw) <= RADEON_MAX_CMDBUF_DWORDS);
 	}
 }
 
@@ -197,6 +196,19 @@ static void r600_flush_dma_ring(void *ctx, unsigned flags,
 	rctx->rings.dma.flushing = false;
 }
 
+static enum pipe_reset_status r600_get_reset_status(struct pipe_context *ctx)
+{
+	struct r600_common_context *rctx = (struct r600_common_context *)ctx;
+	unsigned latest = rctx->ws->query_value(rctx->ws,
+						RADEON_GPU_RESET_COUNTER);
+
+	if (rctx->gpu_reset_counter == latest)
+		return PIPE_NO_RESET;
+
+	rctx->gpu_reset_counter = latest;
+	return PIPE_UNKNOWN_CONTEXT_RESET;
+}
+
 bool r600_common_context_init(struct r600_common_context *rctx,
 			      struct r600_common_screen *rscreen)
 {
@@ -222,6 +234,13 @@ bool r600_common_context_init(struct r600_common_context *rctx,
 	rctx->b.transfer_inline_write = u_default_transfer_inline_write;
         rctx->b.memory_barrier = r600_memory_barrier;
 	rctx->b.flush = r600_flush_from_st;
+
+	if (rscreen->info.drm_major == 2 && rscreen->info.drm_minor >= 43) {
+		rctx->b.get_device_reset_status = r600_get_reset_status;
+		rctx->gpu_reset_counter =
+			rctx->ws->query_value(rctx->ws,
+					      RADEON_GPU_RESET_COUNTER);
+	}
 
 	LIST_INITHEAD(&rctx->texture_buffers);
 
@@ -314,6 +333,8 @@ static const struct debug_named_value common_debug_options[] = {
 	{ "gs", DBG_GS, "Print geometry shaders" },
 	{ "ps", DBG_PS, "Print pixel shaders" },
 	{ "cs", DBG_CS, "Print compute shaders" },
+	{ "tcs", DBG_TCS, "Print tessellation control shaders" },
+	{ "tes", DBG_TES, "Print tessellation evaluation shaders" },
 
 	/* features */
 	{ "nodma", DBG_NO_ASYNC_DMA, "Disable asynchronous DMA" },
@@ -637,6 +658,12 @@ static int r600_get_compute_param(struct pipe_screen *screen,
 		return sizeof(uint32_t);
 	case PIPE_COMPUTE_CAP_MAX_PRIVATE_SIZE:
 		break; /* unused */
+	case PIPE_COMPUTE_CAP_SUBGROUP_SIZE:
+		if (ret) {
+			uint32_t *subgroup_size = ret;
+			*subgroup_size = r600_wavefront_size(rscreen->family);
+		}
+		return sizeof(uint32_t);
 	}
 
         fprintf(stderr, "unknown PIPE_COMPUTE_CAP %d\n", param);
@@ -694,14 +721,6 @@ static void r600_fence_reference(struct pipe_screen *screen,
 	struct radeon_winsys *rws = ((struct r600_common_screen*)screen)->ws;
 
 	rws->fence_reference(ptr, fence);
-}
-
-static boolean r600_fence_signalled(struct pipe_screen *screen,
-				    struct pipe_fence_handle *fence)
-{
-	struct radeon_winsys *rws = ((struct r600_common_screen*)screen)->ws;
-
-	return rws->fence_wait(rws, fence, 0);
 }
 
 static boolean r600_fence_finish(struct pipe_screen *screen,
@@ -849,7 +868,6 @@ bool r600_common_screen_init(struct r600_common_screen *rscreen,
 	rscreen->b.get_timestamp = r600_get_timestamp;
 	rscreen->b.fence_finish = r600_fence_finish;
 	rscreen->b.fence_reference = r600_fence_reference;
-	rscreen->b.fence_signalled = r600_fence_signalled;
 	rscreen->b.resource_destroy = u_resource_destroy_vtbl;
 	rscreen->b.resource_from_user_memory = r600_buffer_from_user_memory;
 
@@ -923,10 +941,8 @@ void r600_destroy_common_screen(struct r600_common_screen *rscreen)
 	pipe_mutex_destroy(rscreen->aux_context_lock);
 	rscreen->aux_context->destroy(rscreen->aux_context);
 
-	if (rscreen->trace_bo) {
-		rscreen->ws->buffer_unmap(rscreen->trace_bo->cs_buf);
+	if (rscreen->trace_bo)
 		pipe_resource_reference((struct pipe_resource**)&rscreen->trace_bo, NULL);
-	}
 
 	rscreen->ws->destroy(rscreen->ws);
 	FREE(rscreen);
@@ -942,6 +958,10 @@ bool r600_can_dump_shader(struct r600_common_screen *rscreen,
 	switch (tgsi_get_processor_type(tokens)) {
 	case TGSI_PROCESSOR_VERTEX:
 		return (rscreen->debug_flags & DBG_VS) != 0;
+	case TGSI_PROCESSOR_TESS_CTRL:
+		return (rscreen->debug_flags & DBG_TCS) != 0;
+	case TGSI_PROCESSOR_TESS_EVAL:
+		return (rscreen->debug_flags & DBG_TES) != 0;
 	case TGSI_PROCESSOR_GEOMETRY:
 		return (rscreen->debug_flags & DBG_GS) != 0;
 	case TGSI_PROCESSOR_FRAGMENT:

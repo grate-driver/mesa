@@ -69,6 +69,17 @@
 #define VC4_DIRTY_UNCOMPILED_FS (1 << 22)
 #define VC4_DIRTY_COMPILED_FS   (1 << 24)
 
+struct vc4_sampler_view {
+        struct pipe_sampler_view base;
+        uint32_t texture_p0;
+        uint32_t texture_p1;
+};
+
+struct vc4_sampler_state {
+        struct pipe_sampler_state base;
+        uint32_t texture_p1;
+};
+
 struct vc4_texture_stateobj {
         struct pipe_sampler_view *textures[PIPE_MAX_SAMPLERS];
         unsigned num_textures;
@@ -178,12 +189,18 @@ struct vc4_context {
         struct vc4_screen *screen;
 
         struct vc4_cl bcl;
-        struct vc4_cl rcl;
         struct vc4_cl shader_rec;
         struct vc4_cl uniforms;
         struct vc4_cl bo_handles;
         struct vc4_cl bo_pointers;
         uint32_t shader_rec_count;
+
+        /** @{ Surfaces to submit rendering for. */
+        struct pipe_surface *color_read;
+        struct pipe_surface *color_write;
+        struct pipe_surface *zs_read;
+        struct pipe_surface *zs_write;
+        /** @} */
         /** @{
          * Bounding box of the scissor across all queued drawing.
          *
@@ -194,9 +211,13 @@ struct vc4_context {
         uint32_t draw_max_x;
         uint32_t draw_max_y;
         /** @} */
-
-        struct vc4_bo *tile_alloc;
-        struct vc4_bo *tile_state;
+        /** @{
+         * Width/height of the color framebuffer being rendered to,
+         * for VC4_TILE_RENDERING_MODE_CONFIG.
+        */
+        uint32_t draw_width;
+        uint32_t draw_height;
+        /** @} */
 
         struct util_slab_mempool transfer_pool;
         struct blitter_context *blitter;
@@ -242,6 +263,8 @@ struct vc4_context {
 
         /** Seqno of the last CL flush's job. */
         uint64_t last_emit_seqno;
+
+        struct u_upload_mgr *uploader;
 
         /** @{ Current pipeline state objects */
         struct pipe_scissor_state scissor;
@@ -312,6 +335,18 @@ static inline struct vc4_context *
 vc4_context(struct pipe_context *pcontext)
 {
         return (struct vc4_context *)pcontext;
+}
+
+static inline struct vc4_sampler_view *
+vc4_sampler_view(struct pipe_sampler_view *psview)
+{
+        return (struct vc4_sampler_view *)psview;
+}
+
+static inline struct vc4_sampler_state *
+vc4_sampler_state(struct pipe_sampler_state *psampler)
+{
+        return (struct vc4_sampler_state *)psampler;
 }
 
 struct pipe_context *vc4_context_create(struct pipe_screen *pscreen,

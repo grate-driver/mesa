@@ -61,6 +61,7 @@ DECL_RESOURCE_FUNC(UBO, gl_uniform_block);
 DECL_RESOURCE_FUNC(UNI, gl_uniform_storage);
 DECL_RESOURCE_FUNC(ATC, gl_active_atomic_buffer);
 DECL_RESOURCE_FUNC(XFB, gl_transform_feedback_varying_info);
+DECL_RESOURCE_FUNC(SUB, gl_subroutine_function);
 
 void GLAPIENTRY
 _mesa_BindAttribLocation(GLhandleARB program, GLuint index,
@@ -479,16 +480,38 @@ _mesa_GetFragDataLocation(GLuint program, const GLchar *name)
 const char*
 _mesa_program_resource_name(struct gl_program_resource *res)
 {
+   const ir_variable *var;
    switch (res->Type) {
    case GL_UNIFORM_BLOCK:
       return RESOURCE_UBO(res)->Name;
    case GL_TRANSFORM_FEEDBACK_VARYING:
       return RESOURCE_XFB(res)->Name;
    case GL_PROGRAM_INPUT:
+      var = RESOURCE_VAR(res);
+      /* Special case gl_VertexIDMESA -> gl_VertexID. */
+      if (var->data.mode == ir_var_system_value &&
+          var->data.location == SYSTEM_VALUE_VERTEX_ID_ZERO_BASE) {
+         return "gl_VertexID";
+      }
+   /* fallthrough */
    case GL_PROGRAM_OUTPUT:
       return RESOURCE_VAR(res)->name;
    case GL_UNIFORM:
       return RESOURCE_UNI(res)->name;
+   case GL_VERTEX_SUBROUTINE_UNIFORM:
+   case GL_GEOMETRY_SUBROUTINE_UNIFORM:
+   case GL_FRAGMENT_SUBROUTINE_UNIFORM:
+   case GL_COMPUTE_SUBROUTINE_UNIFORM:
+   case GL_TESS_CONTROL_SUBROUTINE_UNIFORM:
+   case GL_TESS_EVALUATION_SUBROUTINE_UNIFORM:
+      return RESOURCE_UNI(res)->name + MESA_SUBROUTINE_PREFIX_LEN;
+   case GL_VERTEX_SUBROUTINE:
+   case GL_GEOMETRY_SUBROUTINE:
+   case GL_FRAGMENT_SUBROUTINE:
+   case GL_COMPUTE_SUBROUTINE:
+   case GL_TESS_CONTROL_SUBROUTINE:
+   case GL_TESS_EVALUATION_SUBROUTINE:
+      return RESOURCE_SUB(res)->name;
    default:
       assert(!"support for resource type not implemented");
    }
@@ -507,7 +530,19 @@ _mesa_program_resource_array_size(struct gl_program_resource *res)
    case GL_PROGRAM_OUTPUT:
       return RESOURCE_VAR(res)->data.max_array_access;
    case GL_UNIFORM:
+   case GL_VERTEX_SUBROUTINE_UNIFORM:
+   case GL_GEOMETRY_SUBROUTINE_UNIFORM:
+   case GL_FRAGMENT_SUBROUTINE_UNIFORM:
+   case GL_COMPUTE_SUBROUTINE_UNIFORM:
+   case GL_TESS_CONTROL_SUBROUTINE_UNIFORM:
+   case GL_TESS_EVALUATION_SUBROUTINE_UNIFORM:
       return RESOURCE_UNI(res)->array_elements;
+   case GL_VERTEX_SUBROUTINE:
+   case GL_GEOMETRY_SUBROUTINE:
+   case GL_FRAGMENT_SUBROUTINE:
+   case GL_COMPUTE_SUBROUTINE:
+   case GL_TESS_CONTROL_SUBROUTINE:
+   case GL_TESS_EVALUATION_SUBROUTINE:
    case GL_ATOMIC_COUNTER_BUFFER:
    case GL_UNIFORM_BLOCK:
       return 0;
@@ -539,6 +574,17 @@ struct gl_program_resource *
 _mesa_program_resource_find_name(struct gl_shader_program *shProg,
                                  GLenum programInterface, const char *name)
 {
+   GET_CURRENT_CONTEXT(ctx);
+   const char *full_name = name;
+
+   /* When context has 'VertexID_is_zero_based' set, gl_VertexID has been
+    * lowered to gl_VertexIDMESA.
+    */
+   if (name && ctx->Const.VertexID_is_zero_based) {
+      if (strcmp(name, "gl_VertexID") == 0)
+         full_name = "gl_VertexIDMESA";
+   }
+
    struct gl_program_resource *res = shProg->ProgramResourceList;
    for (unsigned i = 0; i < shProg->NumProgramResourceList; i++, res++) {
       if (res->Type != programInterface)
@@ -552,6 +598,18 @@ _mesa_program_resource_find_name(struct gl_shader_program *shProg,
       case GL_TRANSFORM_FEEDBACK_VARYING:
       case GL_UNIFORM_BLOCK:
       case GL_UNIFORM:
+      case GL_VERTEX_SUBROUTINE_UNIFORM:
+      case GL_GEOMETRY_SUBROUTINE_UNIFORM:
+      case GL_FRAGMENT_SUBROUTINE_UNIFORM:
+      case GL_COMPUTE_SUBROUTINE_UNIFORM:
+      case GL_TESS_CONTROL_SUBROUTINE_UNIFORM:
+      case GL_TESS_EVALUATION_SUBROUTINE_UNIFORM:
+      case GL_VERTEX_SUBROUTINE:
+      case GL_GEOMETRY_SUBROUTINE:
+      case GL_FRAGMENT_SUBROUTINE:
+      case GL_COMPUTE_SUBROUTINE:
+      case GL_TESS_CONTROL_SUBROUTINE:
+      case GL_TESS_EVALUATION_SUBROUTINE:
          if (strncmp(rname, name, baselen) == 0) {
             /* Basename match, check if array or struct. */
             if (name[baselen] == '\0' ||
@@ -563,7 +621,7 @@ _mesa_program_resource_find_name(struct gl_shader_program *shProg,
          break;
       case GL_PROGRAM_INPUT:
       case GL_PROGRAM_OUTPUT:
-         if (array_index_of_resource(res, name) >= 0)
+         if (array_index_of_resource(res, full_name) >= 0)
             return res;
          break;
       default:
@@ -632,6 +690,18 @@ _mesa_program_resource_find_index(struct gl_shader_program *shProg,
       case GL_PROGRAM_INPUT:
       case GL_PROGRAM_OUTPUT:
       case GL_UNIFORM:
+      case GL_VERTEX_SUBROUTINE_UNIFORM:
+      case GL_GEOMETRY_SUBROUTINE_UNIFORM:
+      case GL_FRAGMENT_SUBROUTINE_UNIFORM:
+      case GL_COMPUTE_SUBROUTINE_UNIFORM:
+      case GL_TESS_CONTROL_SUBROUTINE_UNIFORM:
+      case GL_TESS_EVALUATION_SUBROUTINE_UNIFORM:
+      case GL_VERTEX_SUBROUTINE:
+      case GL_GEOMETRY_SUBROUTINE:
+      case GL_FRAGMENT_SUBROUTINE:
+      case GL_COMPUTE_SUBROUTINE:
+      case GL_TESS_CONTROL_SUBROUTINE:
+      case GL_TESS_EVALUATION_SUBROUTINE:
          if (++idx == (int) index)
             return res;
          break;
@@ -721,12 +791,18 @@ program_resource_location(struct gl_shader_program *shProg,
 {
    unsigned index, offset;
    int array_index = -1;
+   long offset_ret;
+   const GLchar *base_name_end;
 
    if (res->Type == GL_PROGRAM_INPUT || res->Type == GL_PROGRAM_OUTPUT) {
       array_index = array_index_of_resource(res, name);
       if (array_index < 0)
          return -1;
    }
+
+   /* Built-in locations should report GL_INVALID_INDEX. */
+   if (is_gl_identifier(name))
+      return GL_INVALID_INDEX;
 
    /* VERT_ATTRIB_GENERIC0 and FRAG_RESULT_DATA0 are decremented as these
     * offsets are used internally to differentiate between built-in attributes
@@ -757,6 +833,14 @@ program_resource_location(struct gl_shader_program *shProg,
       /* location in remap table + array element offset */
       return RESOURCE_UNI(res)->remap_location + offset;
 
+   case GL_VERTEX_SUBROUTINE_UNIFORM:
+   case GL_GEOMETRY_SUBROUTINE_UNIFORM:
+   case GL_FRAGMENT_SUBROUTINE_UNIFORM:
+   case GL_COMPUTE_SUBROUTINE_UNIFORM:
+   case GL_TESS_CONTROL_SUBROUTINE_UNIFORM:
+   case GL_TESS_EVALUATION_SUBROUTINE_UNIFORM:
+      offset_ret = parse_program_resource_name(name, &base_name_end);
+      return RESOURCE_UNI(res)->remap_location + ((offset_ret != -1) ? offset_ret : 0);
    default:
       return -1;
    }
@@ -764,8 +848,6 @@ program_resource_location(struct gl_shader_program *shProg,
 
 /**
  * Function implements following location queries:
- *    glGetAttribLocation
- *    glGetFragDataLocation
  *    glGetUniformLocation
  */
 GLint
@@ -806,6 +888,10 @@ stage_from_enum(GLenum ref)
    switch (ref) {
    case GL_REFERENCED_BY_VERTEX_SHADER:
       return MESA_SHADER_VERTEX;
+   case GL_REFERENCED_BY_TESS_CONTROL_SHADER:
+      return MESA_SHADER_TESS_CTRL;
+   case GL_REFERENCED_BY_TESS_EVALUATION_SHADER:
+      return MESA_SHADER_TESS_EVAL;
    case GL_REFERENCED_BY_GEOMETRY_SHADER:
       return MESA_SHADER_GEOMETRY;
    case GL_REFERENCED_BY_FRAGMENT_SHADER:
@@ -902,8 +988,8 @@ get_buffer_property(struct gl_shader_program *shProg,
 
 invalid_operation:
    _mesa_error(ctx, GL_INVALID_OPERATION, "%s(%s prop %s)", caller,
-               _mesa_lookup_enum_by_nr(res->Type),
-               _mesa_lookup_enum_by_nr(prop));
+               _mesa_enum_to_string(res->Type),
+               _mesa_enum_to_string(prop));
 
    return 0;
 }
@@ -991,6 +1077,8 @@ _mesa_program_resource_prop(struct gl_shader_program *shProg,
          goto invalid_enum;
       /* fallthrough */
    case GL_REFERENCED_BY_VERTEX_SHADER:
+   case GL_REFERENCED_BY_TESS_CONTROL_SHADER:
+   case GL_REFERENCED_BY_TESS_EVALUATION_SHADER:
    case GL_REFERENCED_BY_GEOMETRY_SHADER:
    case GL_REFERENCED_BY_FRAGMENT_SHADER:
       switch (res->Type) {
@@ -1022,10 +1110,54 @@ _mesa_program_resource_prop(struct gl_shader_program *shProg,
       *val = RESOURCE_VAR(res)->data.index;
       return 1;
 
+   case GL_NUM_COMPATIBLE_SUBROUTINES:
+      if (res->Type != GL_VERTEX_SUBROUTINE_UNIFORM &&
+          res->Type != GL_FRAGMENT_SUBROUTINE_UNIFORM &&
+          res->Type != GL_GEOMETRY_SUBROUTINE_UNIFORM &&
+          res->Type != GL_COMPUTE_SUBROUTINE_UNIFORM &&
+          res->Type != GL_TESS_CONTROL_SUBROUTINE_UNIFORM &&
+          res->Type != GL_TESS_EVALUATION_SUBROUTINE_UNIFORM)
+         goto invalid_operation;
+      *val = RESOURCE_UNI(res)->num_compatible_subroutines;
+      return 1;
+   case GL_COMPATIBLE_SUBROUTINES: {
+      const struct gl_uniform_storage *uni;
+      struct gl_shader *sh;
+      unsigned count, i;
+      int j;
+
+      if (res->Type != GL_VERTEX_SUBROUTINE_UNIFORM &&
+          res->Type != GL_FRAGMENT_SUBROUTINE_UNIFORM &&
+          res->Type != GL_GEOMETRY_SUBROUTINE_UNIFORM &&
+          res->Type != GL_COMPUTE_SUBROUTINE_UNIFORM &&
+          res->Type != GL_TESS_CONTROL_SUBROUTINE_UNIFORM &&
+          res->Type != GL_TESS_EVALUATION_SUBROUTINE_UNIFORM)
+         goto invalid_operation;
+      uni = RESOURCE_UNI(res);
+
+      sh = shProg->_LinkedShaders[_mesa_shader_stage_from_subroutine_uniform(res->Type)];
+      count = 0;
+      for (i = 0; i < sh->NumSubroutineFunctions; i++) {
+         struct gl_subroutine_function *fn = &sh->SubroutineFunctions[i];
+         for (j = 0; j < fn->num_compat_types; j++) {
+            if (fn->types[j] == uni->type) {
+               val[count++] = i;
+               break;
+            }
+         }
+      }
+      return count;
+   }
    /* GL_ARB_tessellation_shader */
    case GL_IS_PER_PATCH:
-   case GL_REFERENCED_BY_TESS_CONTROL_SHADER:
-   case GL_REFERENCED_BY_TESS_EVALUATION_SHADER:
+      switch (res->Type) {
+      case GL_PROGRAM_INPUT:
+      case GL_PROGRAM_OUTPUT:
+         *val = RESOURCE_VAR(res)->data.patch;
+         return 1;
+      default:
+         goto invalid_operation;
+      }
    default:
       goto invalid_enum;
    }
@@ -1034,14 +1166,14 @@ _mesa_program_resource_prop(struct gl_shader_program *shProg,
 
 invalid_enum:
    _mesa_error(ctx, GL_INVALID_ENUM, "%s(%s prop %s)", caller,
-               _mesa_lookup_enum_by_nr(res->Type),
-               _mesa_lookup_enum_by_nr(prop));
+               _mesa_enum_to_string(res->Type),
+               _mesa_enum_to_string(prop));
    return 0;
 
 invalid_operation:
    _mesa_error(ctx, GL_INVALID_OPERATION, "%s(%s prop %s)", caller,
-               _mesa_lookup_enum_by_nr(res->Type),
-               _mesa_lookup_enum_by_nr(prop));
+               _mesa_enum_to_string(res->Type),
+               _mesa_enum_to_string(prop));
    return 0;
 }
 
@@ -1063,7 +1195,7 @@ _mesa_get_program_resourceiv(struct gl_shader_program *shProg,
    if (!res || bufSize < 0) {
       _mesa_error(ctx, GL_INVALID_VALUE,
                   "glGetProgramResourceiv(%s index %d bufSize %d)",
-                  _mesa_lookup_enum_by_nr(programInterface), index, bufSize);
+                  _mesa_enum_to_string(programInterface), index, bufSize);
       return;
    }
 

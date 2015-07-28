@@ -44,6 +44,21 @@ static void si_init_atom(struct r600_atom *atom, struct r600_atom **list_elem,
 	*list_elem = atom;
 }
 
+unsigned si_array_mode(unsigned mode)
+{
+	switch (mode) {
+	case RADEON_SURF_MODE_LINEAR_ALIGNED:
+		return V_009910_ARRAY_LINEAR_ALIGNED;
+	case RADEON_SURF_MODE_1D:
+		return V_009910_ARRAY_1D_TILED_THIN1;
+	case RADEON_SURF_MODE_2D:
+		return V_009910_ARRAY_2D_TILED_THIN1;
+	default:
+	case RADEON_SURF_MODE_LINEAR:
+		return V_009910_ARRAY_LINEAR_GENERAL;
+	}
+}
+
 uint32_t si_num_banks(struct si_screen *sscreen, struct r600_texture *tex)
 {
 	if (sscreen->b.chip_class == CIK &&
@@ -474,11 +489,13 @@ static void si_emit_clip_regs(struct si_context *sctx, struct r600_atom *atom)
 		S_02881C_USE_VTX_POINT_SIZE(info->writes_psize) |
 		S_02881C_USE_VTX_EDGE_FLAG(info->writes_edgeflag) |
 		S_02881C_USE_VTX_RENDER_TARGET_INDX(info->writes_layer) |
+	        S_02881C_USE_VTX_VIEWPORT_INDX(info->writes_viewport_index) |
 		S_02881C_VS_OUT_CCDIST0_VEC_ENA((clipdist_mask & 0x0F) != 0) |
 		S_02881C_VS_OUT_CCDIST1_VEC_ENA((clipdist_mask & 0xF0) != 0) |
 		S_02881C_VS_OUT_MISC_VEC_ENA(info->writes_psize ||
 					    info->writes_edgeflag ||
-					    info->writes_layer) |
+					    info->writes_layer ||
+					     info->writes_viewport_index) |
 		(sctx->queued.named.rasterizer->clip_plane_enable &
 		 clipdist_mask));
 	r600_write_context_reg(cs, R_028810_PA_CL_CLIP_CNTL,
@@ -494,20 +511,26 @@ static void si_set_scissor_states(struct pipe_context *ctx,
                                   const struct pipe_scissor_state *state)
 {
 	struct si_context *sctx = (struct si_context *)ctx;
-	struct si_state_scissor *scissor = CALLOC_STRUCT(si_state_scissor);
-	struct si_pm4_state *pm4 = &scissor->pm4;
+	struct si_state_scissor *scissor;
+	struct si_pm4_state *pm4;
+	int i;
 
-	if (scissor == NULL)
-		return;
+	for (i = start_slot; i < start_slot + num_scissors; i++) {
+		int idx = i - start_slot;
+		int offset = i * 4 * 2;
 
-	scissor->scissor = *state;
-	si_pm4_set_reg(pm4, R_028250_PA_SC_VPORT_SCISSOR_0_TL,
-		       S_028250_TL_X(state->minx) | S_028250_TL_Y(state->miny) |
-		       S_028250_WINDOW_OFFSET_DISABLE(1));
-	si_pm4_set_reg(pm4, R_028254_PA_SC_VPORT_SCISSOR_0_BR,
-		       S_028254_BR_X(state->maxx) | S_028254_BR_Y(state->maxy));
-
-	si_pm4_set_state(sctx, scissor, scissor);
+		scissor = CALLOC_STRUCT(si_state_scissor);
+		if (scissor == NULL)
+			return;
+		pm4 = &scissor->pm4;
+		scissor->scissor = state[idx];
+		si_pm4_set_reg(pm4, R_028250_PA_SC_VPORT_SCISSOR_0_TL + offset,
+			       S_028250_TL_X(state[idx].minx) | S_028250_TL_Y(state[idx].miny) |
+			       S_028250_WINDOW_OFFSET_DISABLE(1));
+		si_pm4_set_reg(pm4, R_028254_PA_SC_VPORT_SCISSOR_0_BR + offset,
+			       S_028254_BR_X(state[idx].maxx) | S_028254_BR_Y(state[idx].maxy));
+		si_pm4_set_state(sctx, scissor[i], scissor);
+	}
 }
 
 static void si_set_viewport_states(struct pipe_context *ctx,
@@ -516,21 +539,29 @@ static void si_set_viewport_states(struct pipe_context *ctx,
                                    const struct pipe_viewport_state *state)
 {
 	struct si_context *sctx = (struct si_context *)ctx;
-	struct si_state_viewport *viewport = CALLOC_STRUCT(si_state_viewport);
-	struct si_pm4_state *pm4 = &viewport->pm4;
+	struct si_state_viewport *viewport;
+	struct si_pm4_state *pm4;
+	int i;
 
-	if (viewport == NULL)
-		return;
+	for (i = start_slot; i < start_slot + num_viewports; i++) {
+		int idx = i - start_slot;
+		int offset = i * 4 * 6;
 
-	viewport->viewport = *state;
-	si_pm4_set_reg(pm4, R_02843C_PA_CL_VPORT_XSCALE_0, fui(state->scale[0]));
-	si_pm4_set_reg(pm4, R_028440_PA_CL_VPORT_XOFFSET_0, fui(state->translate[0]));
-	si_pm4_set_reg(pm4, R_028444_PA_CL_VPORT_YSCALE_0, fui(state->scale[1]));
-	si_pm4_set_reg(pm4, R_028448_PA_CL_VPORT_YOFFSET_0, fui(state->translate[1]));
-	si_pm4_set_reg(pm4, R_02844C_PA_CL_VPORT_ZSCALE_0, fui(state->scale[2]));
-	si_pm4_set_reg(pm4, R_028450_PA_CL_VPORT_ZOFFSET_0, fui(state->translate[2]));
+		viewport = CALLOC_STRUCT(si_state_viewport);
+		if (!viewport)
+			return;
+		pm4 = &viewport->pm4;
 
-	si_pm4_set_state(sctx, viewport, viewport);
+		viewport->viewport = state[idx];
+		si_pm4_set_reg(pm4, R_02843C_PA_CL_VPORT_XSCALE_0 + offset, fui(state[idx].scale[0]));
+		si_pm4_set_reg(pm4, R_028440_PA_CL_VPORT_XOFFSET_0 + offset, fui(state[idx].translate[0]));
+		si_pm4_set_reg(pm4, R_028444_PA_CL_VPORT_YSCALE_0 + offset, fui(state[idx].scale[1]));
+		si_pm4_set_reg(pm4, R_028448_PA_CL_VPORT_YOFFSET_0 + offset, fui(state[idx].translate[1]));
+		si_pm4_set_reg(pm4, R_02844C_PA_CL_VPORT_ZSCALE_0 + offset, fui(state[idx].scale[2]));
+		si_pm4_set_reg(pm4, R_028450_PA_CL_VPORT_ZOFFSET_0 + offset, fui(state[idx].translate[2]));
+
+		si_pm4_set_state(sctx, viewport[i], viewport);
+	}
 }
 
 /*
@@ -636,18 +667,14 @@ static void *si_create_rs_state(struct pipe_context *ctx,
 	rs->offset_units = state->offset_units;
 	rs->offset_scale = state->offset_scale * 12.0f;
 
-	tmp = S_0286D4_FLAT_SHADE_ENA(1);
-	if (state->sprite_coord_enable) {
-		tmp |= S_0286D4_PNT_SPRITE_ENA(1) |
-			S_0286D4_PNT_SPRITE_OVRD_X(V_0286D4_SPI_PNT_SPRITE_SEL_S) |
-			S_0286D4_PNT_SPRITE_OVRD_Y(V_0286D4_SPI_PNT_SPRITE_SEL_T) |
-			S_0286D4_PNT_SPRITE_OVRD_Z(V_0286D4_SPI_PNT_SPRITE_SEL_0) |
-			S_0286D4_PNT_SPRITE_OVRD_W(V_0286D4_SPI_PNT_SPRITE_SEL_1);
-		if (state->sprite_coord_mode != PIPE_SPRITE_COORD_UPPER_LEFT) {
-			tmp |= S_0286D4_PNT_SPRITE_TOP_1(1);
-		}
-	}
-	si_pm4_set_reg(pm4, R_0286D4_SPI_INTERP_CONTROL_0, tmp);
+	si_pm4_set_reg(pm4, R_0286D4_SPI_INTERP_CONTROL_0,
+		S_0286D4_FLAT_SHADE_ENA(1) |
+		S_0286D4_PNT_SPRITE_ENA(1) |
+		S_0286D4_PNT_SPRITE_OVRD_X(V_0286D4_SPI_PNT_SPRITE_SEL_S) |
+		S_0286D4_PNT_SPRITE_OVRD_Y(V_0286D4_SPI_PNT_SPRITE_SEL_T) |
+		S_0286D4_PNT_SPRITE_OVRD_Z(V_0286D4_SPI_PNT_SPRITE_SEL_0) |
+		S_0286D4_PNT_SPRITE_OVRD_W(V_0286D4_SPI_PNT_SPRITE_SEL_1) |
+		S_0286D4_PNT_SPRITE_TOP_1(state->sprite_coord_mode != PIPE_SPRITE_COORD_UPPER_LEFT));
 
 	/* point size 12.4 fixed point */
 	tmp = (unsigned)(state->point_size * 8.0);
@@ -2245,15 +2272,28 @@ static void si_set_min_samples(struct pipe_context *ctx, unsigned min_samples)
  * Samplers
  */
 
-static struct pipe_sampler_view *si_create_sampler_view(struct pipe_context *ctx,
-							struct pipe_resource *texture,
-							const struct pipe_sampler_view *state)
+/**
+ * Create a sampler view.
+ *
+ * @param ctx		context
+ * @param texture	texture
+ * @param state		sampler view template
+ * @param width0	width0 override (for compressed textures as int)
+ * @param height0	height0 override (for compressed textures as int)
+ * @param force_level   set the base address to the level (for compressed textures)
+ */
+struct pipe_sampler_view *
+si_create_sampler_view_custom(struct pipe_context *ctx,
+			      struct pipe_resource *texture,
+			      const struct pipe_sampler_view *state,
+			      unsigned width0, unsigned height0,
+			      unsigned force_level)
 {
 	struct si_context *sctx = (struct si_context*)ctx;
 	struct si_sampler_view *view = CALLOC_STRUCT(si_sampler_view);
 	struct r600_texture *tmp = (struct r600_texture*)texture;
 	const struct util_format_description *desc;
-	unsigned format, num_format;
+	unsigned format, num_format, base_level, first_level, last_level;
 	uint32_t pitch = 0;
 	unsigned char state_swizzle[4], swizzle[4];
 	unsigned height, depth, width;
@@ -2426,13 +2466,25 @@ static struct pipe_sampler_view *si_create_sampler_view(struct pipe_context *ctx
 		format = 0;
 	}
 
-	/* not supported any more */
-	//endian = si_colorformat_endian_swap(format);
+	base_level = 0;
+	first_level = state->u.tex.first_level;
+	last_level = state->u.tex.last_level;
+	width = width0;
+	height = height0;
+	depth = texture->depth0;
 
-	width = surflevel[0].npix_x;
-	height = surflevel[0].npix_y;
-	depth = surflevel[0].npix_z;
-	pitch = surflevel[0].nblk_x * util_format_get_blockwidth(pipe_format);
+	if (force_level) {
+		assert(force_level == first_level &&
+		       force_level == last_level);
+		base_level = force_level;
+		first_level = 0;
+		last_level = 0;
+		width = u_minify(width, force_level);
+		height = u_minify(height, force_level);
+		depth = u_minify(depth, force_level);
+	}
+
+	pitch = surflevel[base_level].nblk_x * util_format_get_blockwidth(pipe_format);
 
 	if (texture->target == PIPE_TEXTURE_1D_ARRAY) {
 	        height = 1;
@@ -2442,8 +2494,7 @@ static struct pipe_sampler_view *si_create_sampler_view(struct pipe_context *ctx
 	} else if (texture->target == PIPE_TEXTURE_CUBE_ARRAY)
 		depth = texture->array_size / 6;
 
-	va = tmp->resource.gpu_address + surflevel[0].offset;
-	va += tmp->mipmap_shift * surflevel[texture->last_level].slice_size * tmp->surface.array_size;
+	va = tmp->resource.gpu_address + surflevel[base_level].offset;
 
 	view->state[0] = va >> 8;
 	view->state[1] = (S_008F14_BASE_ADDRESS_HI(va >> 40) |
@@ -2456,10 +2507,10 @@ static struct pipe_sampler_view *si_create_sampler_view(struct pipe_context *ctx
 			  S_008F1C_DST_SEL_Z(si_map_swizzle(swizzle[2])) |
 			  S_008F1C_DST_SEL_W(si_map_swizzle(swizzle[3])) |
 			  S_008F1C_BASE_LEVEL(texture->nr_samples > 1 ?
-						      0 : state->u.tex.first_level - tmp->mipmap_shift) |
+						      0 : first_level) |
 			  S_008F1C_LAST_LEVEL(texture->nr_samples > 1 ?
 						      util_logbase2(texture->nr_samples) :
-						      state->u.tex.last_level - tmp->mipmap_shift) |
+						      last_level) |
 			  S_008F1C_TILING_INDEX(si_tile_mode_index(tmp, 0, false)) |
 			  S_008F1C_POW2_PAD(texture->last_level > 0) |
 			  S_008F1C_TYPE(si_tex_dim(texture->target, texture->nr_samples)));
@@ -2510,6 +2561,16 @@ static struct pipe_sampler_view *si_create_sampler_view(struct pipe_context *ctx
 	}
 
 	return &view->base;
+}
+
+static struct pipe_sampler_view *
+si_create_sampler_view(struct pipe_context *ctx,
+		       struct pipe_resource *texture,
+		       const struct pipe_sampler_view *state)
+{
+	return si_create_sampler_view_custom(ctx, texture, state,
+					     texture ? texture->width0 : 0,
+					     texture ? texture->height0 : 0, 0);
 }
 
 static void si_sampler_view_destroy(struct pipe_context *ctx,
@@ -2834,6 +2895,30 @@ static void si_set_polygon_stipple(struct pipe_context *ctx,
 	}
 }
 
+static void si_set_tess_state(struct pipe_context *ctx,
+			      const float default_outer_level[4],
+			      const float default_inner_level[2])
+{
+	struct si_context *sctx = (struct si_context *)ctx;
+	struct pipe_constant_buffer cb;
+	float array[8];
+
+	memcpy(array, default_outer_level, sizeof(float) * 4);
+	memcpy(array+4, default_inner_level, sizeof(float) * 2);
+
+	cb.buffer = NULL;
+	cb.user_buffer = NULL;
+	cb.buffer_size = sizeof(array);
+
+	si_upload_const_buffer(sctx, (struct r600_resource**)&cb.buffer,
+			       (void*)array, sizeof(array),
+			       &cb.buffer_offset);
+
+	ctx->set_constant_buffer(ctx, PIPE_SHADER_TESS_CTRL,
+				 SI_DRIVER_STATE_CONST_BUF, &cb);
+	pipe_resource_reference(&cb.buffer, NULL);
+}
+
 static void si_texture_barrier(struct pipe_context *ctx)
 {
 	struct si_context *sctx = (struct si_context *)ctx;
@@ -2858,6 +2943,8 @@ static void si_need_gfx_cs_space(struct pipe_context *ctx, unsigned num_dw,
 {
 	si_need_cs_space((struct si_context*)ctx, num_dw, include_draw_vbo);
 }
+
+static void si_init_config(struct si_context *sctx);
 
 void si_init_state_functions(struct si_context *sctx)
 {
@@ -2909,12 +2996,20 @@ void si_init_state_functions(struct si_context *sctx)
 	sctx->b.b.texture_barrier = si_texture_barrier;
 	sctx->b.b.set_polygon_stipple = si_set_polygon_stipple;
 	sctx->b.b.set_min_samples = si_set_min_samples;
+	sctx->b.b.set_tess_state = si_set_tess_state;
 
-	sctx->b.dma_copy = si_dma_copy;
 	sctx->b.set_occlusion_query_state = si_set_occlusion_query_state;
 	sctx->b.need_gfx_cs_space = si_need_gfx_cs_space;
 
 	sctx->b.b.draw_vbo = si_draw_vbo;
+
+	if (sctx->b.chip_class >= CIK) {
+		sctx->b.dma_copy = cik_sdma_copy;
+	} else {
+		sctx->b.dma_copy = si_dma_copy;
+	}
+
+	si_init_config(sctx);
 }
 
 static void
@@ -3021,7 +3116,7 @@ si_write_harvested_raster_configs(struct si_context *sctx,
 		       INSTANCE_BROADCAST_WRITES);
 }
 
-void si_init_config(struct si_context *sctx)
+static void si_init_config(struct si_context *sctx)
 {
 	struct si_pm4_state *pm4 = CALLOC_STRUCT(si_pm4_state);
 
@@ -3030,8 +3125,8 @@ void si_init_config(struct si_context *sctx)
 
 	si_cmd_context_control(pm4);
 
-	si_pm4_set_reg(pm4, R_028A18_VGT_HOS_MAX_TESS_LEVEL, 0x0);
-	si_pm4_set_reg(pm4, R_028A1C_VGT_HOS_MIN_TESS_LEVEL, 0x0);
+	si_pm4_set_reg(pm4, R_028A18_VGT_HOS_MAX_TESS_LEVEL, fui(64));
+	si_pm4_set_reg(pm4, R_028A1C_VGT_HOS_MIN_TESS_LEVEL, fui(0));
 
 	/* FIXME calculate these values somehow ??? */
 	si_pm4_set_reg(pm4, R_028A54_VGT_GS_PER_ES, 0x80);
@@ -3046,7 +3141,6 @@ void si_init_config(struct si_context *sctx)
 	si_pm4_set_reg(pm4, R_028B60_VGT_GS_VERT_ITEMSIZE_1, 0);
 	si_pm4_set_reg(pm4, R_028B64_VGT_GS_VERT_ITEMSIZE_2, 0);
 	si_pm4_set_reg(pm4, R_028B68_VGT_GS_VERT_ITEMSIZE_3, 0);
-	si_pm4_set_reg(pm4, R_028B90_VGT_GS_INSTANCE_CNT, 0);
 
 	si_pm4_set_reg(pm4, R_028B98_VGT_STRMOUT_BUFFER_CONFIG, 0x0);
 	si_pm4_set_reg(pm4, R_028AB4_VGT_REUSE_OFF, 0);
@@ -3157,6 +3251,10 @@ void si_init_config(struct si_context *sctx)
 	si_pm4_set_reg(pm4, R_028408_VGT_INDX_OFFSET, 0);
 
 	if (sctx->b.chip_class >= CIK) {
+		si_pm4_set_reg(pm4, R_00B51C_SPI_SHADER_PGM_RSRC3_LS, S_00B51C_CU_EN(0xfffc));
+		si_pm4_set_reg(pm4, R_00B41C_SPI_SHADER_PGM_RSRC3_HS, 0);
+		si_pm4_set_reg(pm4, R_00B31C_SPI_SHADER_PGM_RSRC3_ES, S_00B31C_CU_EN(0xfffe));
+		si_pm4_set_reg(pm4, R_00B21C_SPI_SHADER_PGM_RSRC3_GS, S_00B21C_CU_EN(0xffff));
 		si_pm4_set_reg(pm4, R_00B118_SPI_SHADER_PGM_RSRC3_VS, S_00B118_CU_EN(0xffff));
 		si_pm4_set_reg(pm4, R_00B11C_SPI_SHADER_LATE_ALLOC_VS, S_00B11C_LIMIT(0));
 		si_pm4_set_reg(pm4, R_00B01C_SPI_SHADER_PGM_RSRC3_PS, S_00B01C_CU_EN(0xffff));

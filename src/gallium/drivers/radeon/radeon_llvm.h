@@ -33,7 +33,6 @@
 
 #define RADEON_LLVM_MAX_INPUTS 32 * 4
 #define RADEON_LLVM_MAX_OUTPUTS 32 * 4
-#define RADEON_LLVM_MAX_ARRAYS 16
 
 #define RADEON_LLVM_INITIAL_CF_DEPTH 4
 
@@ -130,8 +129,7 @@ struct radeon_llvm_context {
 	unsigned loop_depth;
 	unsigned loop_depth_max;
 
-	struct tgsi_declaration_range arrays[RADEON_LLVM_MAX_ARRAYS];
-	unsigned num_arrays;
+	struct tgsi_declaration_range *arrays;
 
 	LLVMValueRef main_fn;
 
@@ -148,6 +146,8 @@ static inline LLVMTypeRef tgsi2llvmtype(
 	case TGSI_TYPE_UNSIGNED:
 	case TGSI_TYPE_SIGNED:
 		return LLVMInt32TypeInContext(ctx);
+	case TGSI_TYPE_DOUBLE:
+		return LLVMDoubleTypeInContext(ctx);
 	case TGSI_TYPE_UNTYPED:
 	case TGSI_TYPE_FLOAT:
 		return LLVMFloatTypeInContext(ctx);
@@ -173,8 +173,9 @@ static inline LLVMValueRef bitcast(
 
 
 void radeon_llvm_emit_prepare_cube_coords(struct lp_build_tgsi_context * bld_base,
-                                          struct lp_build_emit_data * emit_data,
-                                          LLVMValueRef *coords_arg);
+					  struct lp_build_emit_data * emit_data,
+					  LLVMValueRef *coords_arg,
+					  LLVMValueRef *derivs_arg);
 
 void radeon_llvm_context_init(struct radeon_llvm_context * ctx);
 
@@ -207,6 +208,23 @@ build_tgsi_intrinsic_nomem(
 		struct lp_build_tgsi_context * bld_base,
 		struct lp_build_emit_data * emit_data);
 
+LLVMValueRef
+radeon_llvm_emit_fetch_double(struct lp_build_tgsi_context *bld_base,
+			      LLVMValueRef ptr,
+			      LLVMValueRef ptr2);
 
+LLVMValueRef radeon_llvm_saturate(struct lp_build_tgsi_context *bld_base,
+                                  LLVMValueRef value);
+
+LLVMValueRef radeon_llvm_emit_fetch(struct lp_build_tgsi_context *bld_base,
+				    const struct tgsi_full_src_register *reg,
+				    enum tgsi_opcode_type type,
+				    unsigned swizzle);
+
+void radeon_llvm_emit_store(
+	struct lp_build_tgsi_context * bld_base,
+	const struct tgsi_full_instruction * inst,
+	const struct tgsi_opcode_info * info,
+	LLVMValueRef dst[4]);
 
 #endif /* RADEON_LLVM_H */

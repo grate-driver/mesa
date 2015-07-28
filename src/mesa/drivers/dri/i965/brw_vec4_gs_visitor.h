@@ -37,7 +37,6 @@
  */
 struct brw_gs_compile
 {
-   struct brw_vec4_compile base;
    struct brw_gs_prog_key key;
    struct brw_gs_prog_data prog_data;
    struct brw_vue_map input_vue_map;
@@ -68,11 +67,13 @@ namespace brw {
 class vec4_gs_visitor : public vec4_visitor
 {
 public:
-   vec4_gs_visitor(struct brw_context *brw,
+   vec4_gs_visitor(const struct brw_compiler *compiler,
+                   void *log_data,
                    struct brw_gs_compile *c,
                    struct gl_shader_program *prog,
                    void *mem_ctx,
-                   bool no_spills);
+                   bool no_spills,
+                   int shader_time_index);
 
 protected:
    virtual dst_reg *make_reg_for_system_value(ir_variable *ir);

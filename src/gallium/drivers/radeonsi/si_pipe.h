@@ -48,7 +48,8 @@
 
 #define SI_MAX_DRAW_CS_DWORDS \
 	(/*scratch:*/ 3 + /*derived prim state:*/ 3 + \
-	 /*draw regs:*/ 16 + /*draw packets:*/ 31)
+	 /*draw regs:*/ 18 + /*draw packets:*/ 31 +\
+	 /*derived tess state:*/ 19)
 
 /* Instruction cache. */
 #define SI_CONTEXT_INV_ICACHE		(R600_CONTEXT_PRIVATE_FLAG << 0)
@@ -125,8 +126,6 @@ struct si_framebuffer {
 
 #define SI_NUM_ATOMS(sctx) (sizeof((sctx)->atoms)/sizeof((sctx)->atoms.array[0]))
 
-#define SI_NUM_SHADERS (PIPE_SHADER_GEOMETRY+1)
-
 struct si_context {
 	struct r600_common_context	b;
 	struct blitter_context		*blitter;
@@ -137,11 +136,12 @@ struct si_context {
 	void				*pstipple_sampler_state;
 	struct si_screen		*screen;
 	struct si_pm4_state		*init_config;
+	struct pipe_fence_handle	*last_gfx_fence;
+	struct si_shader_selector	*fixed_func_tcs_shader;
 
 	union {
 		struct {
 			/* The order matters. */
-			struct r600_atom *vertex_buffers;
 			struct r600_atom *const_buffers[SI_NUM_SHADERS];
 			struct r600_atom *rw_buffers[SI_NUM_SHADERS];
 			struct r600_atom *sampler_views[SI_NUM_SHADERS];
@@ -156,6 +156,7 @@ struct si_context {
 			struct r600_atom *db_render_state;
 			struct r600_atom *msaa_config;
 			struct r600_atom *clip_regs;
+			struct r600_atom *shader_userdata;
 		} s;
 		struct r600_atom *array[0];
 	} atoms;
@@ -168,7 +169,10 @@ struct si_context {
 	struct si_shader_selector	*ps_shader;
 	struct si_shader_selector	*gs_shader;
 	struct si_shader_selector	*vs_shader;
+	struct si_shader_selector	*tcs_shader;
+	struct si_shader_selector	*tes_shader;
 	struct si_cs_shader_state	cs_shader_state;
+	struct si_shader_data		shader_userdata;
 	/* shader information */
 	unsigned			sprite_coord_enable;
 	bool				flatshade;
@@ -194,13 +198,16 @@ struct si_context {
 	/* With rasterizer discard, there doesn't have to be a pixel shader.
 	 * In that case, we bind this one: */
 	void			*dummy_pixel_shader;
-	struct si_pm4_state	*gs_on;
-	struct si_pm4_state	*gs_off;
-	struct si_pm4_state	*gs_rings;
 	struct r600_atom	cache_flush;
 	struct pipe_constant_buffer null_const_buf; /* used for set_constant_buffer(NULL) on CIK */
+
+	/* VGT states. */
+	struct si_pm4_state	*vgt_shader_config[4];
+	struct si_pm4_state	*gs_rings;
 	struct pipe_resource	*esgs_ring;
 	struct pipe_resource	*gsvs_ring;
+	struct si_pm4_state	*tf_state;
+	struct pipe_resource	*tf_ring;
 
 	LLVMTargetMachineRef		tm;
 
@@ -218,7 +225,7 @@ struct si_context {
 	bool			db_depth_disable_expclear;
 	unsigned		ps_db_shader_control;
 
-	/* Draw state. */
+	/* Emitted draw state. */
 	int			last_base_vertex;
 	int			last_start_instance;
 	int			last_sh_base_reg;
@@ -227,6 +234,7 @@ struct si_context {
 	int			last_gs_out_prim;
 	int			last_prim;
 	int			last_multi_vgt_param;
+	int			last_ls_hs_config;
 	int			last_rast_prim;
 	unsigned		last_sc_line_stipple;
 	int			current_rast_prim; /* primitive type after TES, GS */
@@ -235,7 +243,22 @@ struct si_context {
 	boolean                 emit_scratch_reloc;
 	unsigned		scratch_waves;
 	unsigned		spi_tmpring_size;
+
+	/* Emitted derived tessellation state. */
+	struct si_shader	*last_ls; /* local shader (VS) */
+	struct si_shader_selector *last_tcs;
+	int			last_num_tcs_input_cp;
+	int			last_tes_sh_base;
 };
+
+/* cik_sdma.c */
+void cik_sdma_copy(struct pipe_context *ctx,
+		   struct pipe_resource *dst,
+		   unsigned dst_level,
+		   unsigned dstx, unsigned dsty, unsigned dstz,
+		   struct pipe_resource *src,
+		   unsigned src_level,
+		   const struct pipe_box *src_box);
 
 /* si_blit.c */
 void si_init_blit_functions(struct si_context *sctx);
@@ -284,7 +307,7 @@ struct pipe_video_buffer *si_video_buffer_create(struct pipe_context *pipe,
  * common helpers
  */
 
-static INLINE struct r600_resource *
+static inline struct r600_resource *
 si_resource_create_custom(struct pipe_screen *screen,
 			  unsigned usage, unsigned size)
 {
@@ -293,7 +316,7 @@ si_resource_create_custom(struct pipe_screen *screen,
 		PIPE_BIND_CUSTOM, usage, size));
 }
 
-static INLINE void
+static inline void
 si_invalidate_draw_sh_constants(struct si_context *sctx)
 {
 	sctx->last_base_vertex = SI_BASE_VERTEX_UNKNOWN;

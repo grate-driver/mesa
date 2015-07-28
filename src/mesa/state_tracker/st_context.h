@@ -53,11 +53,14 @@ struct u_upload_mgr;
 #define ST_NEW_FRAGMENT_PROGRAM        (1 << 1)
 #define ST_NEW_VERTEX_PROGRAM          (1 << 2)
 #define ST_NEW_FRAMEBUFFER             (1 << 3)
-/* gap, re-use it */
+#define ST_NEW_TESS_STATE              (1 << 4)
 #define ST_NEW_GEOMETRY_PROGRAM        (1 << 5)
 #define ST_NEW_VERTEX_ARRAYS           (1 << 6)
 #define ST_NEW_RASTERIZER              (1 << 7)
 #define ST_NEW_UNIFORM_BUFFER          (1 << 8)
+#define ST_NEW_TESSCTRL_PROGRAM        (1 << 9)
+#define ST_NEW_TESSEVAL_PROGRAM        (1 << 10)
+#define ST_NEW_SAMPLER_VIEWS           (1 << 11)
 
 
 struct st_state_flags {
@@ -147,10 +150,14 @@ struct st_context
    struct st_vertex_program *vp;    /**< Currently bound vertex program */
    struct st_fragment_program *fp;  /**< Currently bound fragment program */
    struct st_geometry_program *gp;  /**< Currently bound geometry program */
+   struct st_tessctrl_program *tcp; /**< Currently bound tess control program */
+   struct st_tesseval_program *tep; /**< Currently bound tess eval program */
 
    struct st_vp_variant *vp_variant;
    struct st_fp_variant *fp_variant;
    struct st_gp_variant *gp_variant;
+   struct st_tcp_variant *tcp_variant;
+   struct st_tep_variant *tep_variant;
 
    struct gl_texture_object *default_texture;
 
