@@ -4,6 +4,7 @@ mesa (10.7.0~git20150728-1) UNRELEASED; urgency=medium
   * control: Bump libdrm build-dep to 2.4.62.
   * control: Add libomxil-bellagio-dev to build-deps.
   * rules: Disable gles1 & 2 for swx11 builds.
+  * libegl1-mesa.symbols, libgles2-mesa.symbols: Updated
 
  -- Timo Aaltonen <tjaalton@debian.org>  Tue, 28 Jul 2015 13:48:58 +0300
 
