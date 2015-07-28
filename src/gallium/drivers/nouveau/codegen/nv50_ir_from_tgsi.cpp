@@ -434,7 +434,6 @@ nv50_ir::DataType Instruction::inferSrcType() const
    case TGSI_OPCODE_USLT:
    case TGSI_OPCODE_USNE:
    case TGSI_OPCODE_USHR:
-   case TGSI_OPCODE_UCMP:
    case TGSI_OPCODE_ATOMUADD:
    case TGSI_OPCODE_ATOMXCHG:
    case TGSI_OPCODE_ATOMCAS:
@@ -1698,6 +1697,7 @@ Converter::insertConvergenceOps(BasicBlock *conv, BasicBlock *fork)
    join->fixed = 1;
    conv->insertHead(join);
 
+   assert(!fork->joinAt);
    fork->joinAt = new_FlowInstruction(func, OP_JOINAT, conv);
    fork->insertBefore(fork->getExit(), fork->joinAt);
 }
@@ -1739,7 +1739,7 @@ Converter::handleTXQ(Value *dst0[4], enum TexQuery query)
    }
    tex->setSrc((c = 0), fetchSrc(0, 0)); // mip level
 
-   setTexRS(tex, c, 1, -1);
+   setTexRS(tex, ++c, 1, -1);
 
    bb->insertTail(tex);
 }
@@ -2580,6 +2580,8 @@ Converter::handleInstruction(const struct tgsi_full_instruction *insn)
       }
       break;
    case TGSI_OPCODE_UCMP:
+      srcTy = TYPE_U32;
+      /* fallthrough */
    case TGSI_OPCODE_CMP:
       FOR_EACH_DST_ENABLED_CHANNEL(0, c, tgsi) {
          src0 = fetchSrc(0, c);

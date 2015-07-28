@@ -1,3 +1,16 @@
+mesa (10.6.3-1) unstable; urgency=medium
+
+  * New upstream release.
+  * libegl1-mesa.symbols: Updated.
+  * not-installed: Dropped wmesa.h which is gone.
+  * libgles{1,2}-mesa.symbols: Updated.
+  * libegl1-mesa.symbols: Drop a spurious comment.
+  * source/local-options: Updated extend-diff-ignore.
+  * mesa-common-dev.docs: Updated.
+  * Delete i965-do_blit...patch, upstream.
+
+ -- Timo Aaltonen <tjaalton@debian.org>  Tue, 28 Jul 2015 11:12:44 +0300
+
 mesa (10.6.1-0ubuntu1) UNRELEASED; urgency=medium
 
   * Merge from debian-experimental git.
@@ -6,14 +19,12 @@ mesa (10.6.1-0ubuntu1) UNRELEASED; urgency=medium
 
  -- Timo Aaltonen <tjaalton@debian.org>  Thu, 18 Jun 2015 15:31:27 +0300
 
-mesa (10.6.1-1) UNRELEASED; urgency=medium
+mesa (10.5.9-2) unstable; urgency=medium
 
-  * New upstream release.
-  * libegl1-mesa.symbols: Updated.
-  * not-installed: Dropped wmesa.h which is gone.
-  * libgles{1,2}-mesa.symbols: Updated.
+  * i965-do_blit_drawpixels-decode-array-formats.patch: Fix a regression
+    since 10.5.5, allow using blit fastpath again.
 
- -- Timo Aaltonen <tjaalton@debian.org>  Mon, 27 Apr 2015 10:43:45 +0300
+ -- Timo Aaltonen <tjaalton@debian.org>  Fri, 10 Jul 2015 13:01:40 +0300
 
 mesa (10.5.9-1ubuntu1) wily; urgency=medium
 

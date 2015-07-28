@@ -2124,6 +2124,7 @@ enum brw_pixel_shader_computed_depth_mode {
 # define GEN8_PSX_SHADER_DISABLES_ALPHA_TO_COVERAGE     (1 << 7)
 # define GEN8_PSX_SHADER_IS_PER_SAMPLE                  (1 << 6)
 # define GEN8_PSX_SHADER_COMPUTES_STENCIL               (1 << 5)
+# define GEN9_PSX_SHADER_PULLS_BARY                     (1 << 3)
 # define GEN8_PSX_SHADER_HAS_UAV                        (1 << 2)
 # define GEN8_PSX_SHADER_USES_INPUT_COVERAGE_MASK       (1 << 1)
 
@@ -2470,12 +2471,13 @@ enum brw_wm_barycentric_interp_mode {
 #define BDW_MOCS_WT  0x58
 #define BDW_MOCS_PTE 0x18
 
-/* Skylake: MOCS is now an index into an array of 64 different configurable
- * cache settings.  We still use only either write-back or write-through; and
- * rely on the documented default values.
+/* Skylake: MOCS is now an index into an array of 62 different caching
+ * configurations programmed by the kernel.
  */
-#define SKL_MOCS_WB 9
-#define SKL_MOCS_WT 5
+/* TC=LLC/eLLC, LeCC=WB, LRUM=3, L3CC=WB */
+#define SKL_MOCS_WB  (2 << 1)
+/* TC=LLC/eLLC, LeCC=PTE, LRUM=3, L3CC=WB */
+#define SKL_MOCS_PTE (1 << 1)
 
 #define MEDIA_VFE_STATE                         0x7000
 /* GEN7 DW2, GEN8+ DW3 */
