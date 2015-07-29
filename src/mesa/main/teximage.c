@@ -2622,13 +2622,6 @@ copytexture_error_check( struct gl_context *ctx, GLuint dimensions,
       return GL_TRUE;
    }
 
-   rb = _mesa_get_read_renderbuffer_for_format(ctx, internalFormat);
-   if (rb == NULL) {
-      _mesa_error(ctx, GL_INVALID_OPERATION,
-                  "glCopyTexImage%dD(read buffer)", dimensions);
-      return GL_TRUE;
-   }
-
    /* OpenGL ES 1.x and OpenGL ES 2.0 impose additional restrictions on the
     * internalFormat.
     */
@@ -2641,7 +2634,7 @@ copytexture_error_check( struct gl_context *ctx, GLuint dimensions,
       case GL_LUMINANCE_ALPHA:
          break;
       default:
-         _mesa_error(ctx, GL_INVALID_VALUE,
+         _mesa_error(ctx, GL_INVALID_ENUM,
                      "glCopyTexImage%dD(internalFormat=%s)", dimensions,
                      _mesa_lookup_enum_by_nr(internalFormat));
          return GL_TRUE;
@@ -2650,9 +2643,16 @@ copytexture_error_check( struct gl_context *ctx, GLuint dimensions,
 
    baseFormat = _mesa_base_tex_format(ctx, internalFormat);
    if (baseFormat < 0) {
-      _mesa_error(ctx, GL_INVALID_OPERATION,
+      _mesa_error(ctx, GL_INVALID_ENUM,
                   "glCopyTexImage%dD(internalFormat=%s)", dimensions,
                   _mesa_lookup_enum_by_nr(internalFormat));
+      return GL_TRUE;
+   }
+
+   rb = _mesa_get_read_renderbuffer_for_format(ctx, internalFormat);
+   if (rb == NULL) {
+      _mesa_error(ctx, GL_INVALID_OPERATION,
+                  "glCopyTexImage%dD(read buffer)", dimensions);
       return GL_TRUE;
    }
 
