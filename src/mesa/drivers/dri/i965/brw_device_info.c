@@ -304,13 +304,13 @@ static const struct brw_device_info brw_device_info_chv = {
    .must_use_separate_stencil = true,               \
    .has_llc = true,                                 \
    .has_pln = true,                                 \
-   .max_vs_threads = 280,                           \
-   .max_gs_threads = 256,                           \
-   .max_wm_threads = 408,                           \
+   .max_vs_threads = 336,                           \
+   .max_gs_threads = 336,                           \
+   .max_wm_threads = 64 * 6,                        \
    .urb = {                                         \
-      .size = 128,                                  \
+      .size = 192,                                  \
       .min_vs_entries = 64,                         \
-      .max_vs_entries = 1664,                       \
+      .max_vs_entries = 1856,                       \
       .max_gs_entries = 640,                        \
    }
 
