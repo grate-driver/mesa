@@ -973,6 +973,7 @@ fs_inst::regs_read(int arg) const
    case IMM:
       return 1;
    case GRF:
+   case ATTR:
    case HW_REG:
       if (src[arg].stride == 0) {
          return 1;
