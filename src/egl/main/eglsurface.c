@@ -309,7 +309,8 @@ _eglQuerySurface(_EGLDriver *drv, _EGLDisplay *dpy, _EGLSurface *surface,
       *value = surface->Config->ConfigID;
       break;
    case EGL_LARGEST_PBUFFER:
-      *value = surface->LargestPbuffer;
+      if (surface->Type == EGL_PBUFFER_BIT)
+         *value = surface->LargestPbuffer;
       break;
    case EGL_TEXTURE_FORMAT:
       /* texture attributes: only for pbuffers, no error otherwise */

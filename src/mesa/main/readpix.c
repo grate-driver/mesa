@@ -60,13 +60,33 @@ _mesa_need_rgb_to_luminance_conversion(mesa_format texFormat, GLenum format)
            format == GL_LUMINANCE_ALPHA_INTEGER_EXT);
 }
 
+/**
+ * Return true if the conversion L,I to RGB conversion is needed.
+ */
+GLboolean
+_mesa_need_luminance_to_rgb_conversion(GLenum srcBaseFormat,
+                                       GLenum dstBaseFormat)
+{
+   return (srcBaseFormat == GL_LUMINANCE ||
+           srcBaseFormat == GL_LUMINANCE_ALPHA ||
+           srcBaseFormat == GL_INTENSITY) &&
+          (dstBaseFormat == GL_GREEN ||
+           dstBaseFormat == GL_BLUE ||
+           dstBaseFormat == GL_RG ||
+           dstBaseFormat == GL_RGB ||
+           dstBaseFormat == GL_BGR ||
+           dstBaseFormat == GL_RGBA ||
+           dstBaseFormat == GL_BGRA);
+}
 
 /**
  * Return transfer op flags for this ReadPixels operation.
  */
-static GLbitfield
-get_readpixels_transfer_ops(const struct gl_context *ctx, mesa_format texFormat,
-                            GLenum format, GLenum type, GLboolean uses_blit)
+GLbitfield
+_mesa_get_readpixels_transfer_ops(const struct gl_context *ctx,
+                                  mesa_format texFormat,
+                                  GLenum format, GLenum type,
+                                  GLboolean uses_blit)
 {
    GLbitfield transferOps = ctx->_ImageTransferState;
 
@@ -169,8 +189,8 @@ _mesa_readpixels_needs_slow_path(const struct gl_context *ctx, GLenum format,
       }
 
       /* And finally, see if there are any transfer ops. */
-      return get_readpixels_transfer_ops(ctx, rb->Format, format, type,
-                                         uses_blit) != 0;
+      return _mesa_get_readpixels_transfer_ops(ctx, rb->Format, format, type,
+                                               uses_blit) != 0;
    }
    return GL_FALSE;
 }
@@ -436,8 +456,8 @@ read_rgba_pixels( struct gl_context *ctx,
    if (!rb)
       return;
 
-   transferOps = get_readpixels_transfer_ops(ctx, rb->Format, format, type,
-                                             GL_FALSE);
+   transferOps = _mesa_get_readpixels_transfer_ops(ctx, rb->Format, format,
+                                                   type, GL_FALSE);
    /* Describe the dst format */
    dst_is_integer = _mesa_is_enum_format_integer(format);
    dst_stride = _mesa_image_row_stride(packing, width, format, type);

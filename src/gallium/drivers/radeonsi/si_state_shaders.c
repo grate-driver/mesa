@@ -535,6 +535,7 @@ static void si_bind_gs_shader(struct pipe_context *ctx, void *state)
 {
 	struct si_context *sctx = (struct si_context *)ctx;
 	struct si_shader_selector *sel = state;
+	bool enable_changed = !!sctx->gs_shader != !!sel;
 
 	if (sctx->gs_shader == sel)
 		return;
@@ -542,6 +543,9 @@ static void si_bind_gs_shader(struct pipe_context *ctx, void *state)
 	sctx->gs_shader = sel;
 	sctx->clip_regs.dirty = true;
 	sctx->last_rast_prim = -1; /* reset this so that it gets updated */
+
+	if (enable_changed)
+		si_shader_change_notify(sctx);
 }
 
 static void si_make_dummy_ps(struct si_context *sctx)
@@ -743,7 +747,6 @@ static unsigned si_update_scratch_buffer(struct si_context *sctx,
 {
 	struct si_shader *shader;
 	uint64_t scratch_va = sctx->scratch_buffer->gpu_address;
-	unsigned char *ptr;
 
 	if (!sel)
 		return 0;
@@ -764,12 +767,7 @@ static unsigned si_update_scratch_buffer(struct si_context *sctx,
 	si_shader_apply_scratch_relocs(sctx, shader, scratch_va);
 
 	/* Replace the shader bo with a new bo that has the relocs applied. */
-	r600_resource_reference(&shader->bo, NULL);
-	shader->bo = si_resource_create_custom(&sctx->screen->b.b, PIPE_USAGE_IMMUTABLE,
-					       shader->binary.code_size);
-	ptr = sctx->screen->b.ws->buffer_map(shader->bo->cs_buf, NULL, PIPE_TRANSFER_WRITE);
-	util_memcpy_cpu_to_le32(ptr, shader->binary.code, shader->binary.code_size);
-	sctx->screen->b.ws->buffer_unmap(shader->bo->cs_buf);
+	si_shader_binary_upload(sctx->screen, shader);
 
 	/* Update the shader state to use the new shader bo. */
 	si_shader_init_pm4_state(shader);
