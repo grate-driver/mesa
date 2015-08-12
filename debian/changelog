@@ -1,3 +1,9 @@
+mesa (10.6.4-1) UNRELEASED; urgency=medium
+
+  * New upstream release.
+
+ -- Timo Aaltonen <tjaalton@debian.org>  Wed, 12 Aug 2015 13:09:40 +0300
+
 mesa (10.6.3-1) unstable; urgency=medium
 
   * New upstream release.
