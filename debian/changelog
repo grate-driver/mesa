@@ -5,6 +5,7 @@ mesa (11.0.0~git20150817-1) UNRELEASED; urgency=medium
   * control: Add libomxil-bellagio-dev to build-deps.
   * rules: Disable gles1 & 2 for swx11 builds.
   * libegl1-mesa.symbols, libgles2-mesa.symbols: Updated
+  * control, rules: Migrate to llvm 3.7.
 
  -- Timo Aaltonen <tjaalton@debian.org>  Tue, 28 Jul 2015 13:48:58 +0300
 
