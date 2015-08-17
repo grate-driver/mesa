@@ -65,7 +65,7 @@ sync_callback(void *data, struct wl_callback *callback, uint32_t serial)
 }
 
 static const struct wl_callback_listener sync_listener = {
-   sync_callback
+   .done = sync_callback
 };
 
 static int
@@ -104,8 +104,8 @@ wl_buffer_release(void *data, struct wl_buffer *buffer)
    dri2_surf->color_buffers[i].locked = 0;
 }
 
-static struct wl_buffer_listener wl_buffer_listener = {
-   wl_buffer_release
+static const struct wl_buffer_listener wl_buffer_listener = {
+   .release = wl_buffer_release
 };
 
 static void
@@ -601,7 +601,7 @@ wayland_throttle_callback(void *data,
 }
 
 static const struct wl_callback_listener throttle_listener = {
-   wayland_throttle_callback
+   .done = wayland_throttle_callback
 };
 
 static void
@@ -845,22 +845,6 @@ bad_format:
    return NULL;
 }
 
-static char
-is_fd_render_node(int fd)
-{
-   struct stat render;
-
-   if (fstat(fd, &render))
-      return 0;
-
-   if (!S_ISCHR(render.st_mode))
-      return 0;
-
-   if (render.st_rdev & 0x80)
-      return 1;
-   return 0;
-}
-
 static int
 dri2_wl_authenticate(_EGLDisplay *disp, uint32_t id)
 {
@@ -904,7 +888,7 @@ drm_handle_device(void *data, struct wl_drm *drm, const char *device)
       return;
    }
 
-   if (is_fd_render_node(dri2_dpy->fd)) {
+   if (drmGetNodeTypeFromFd(dri2_dpy->fd) == DRM_NODE_RENDER) {
       dri2_dpy->authenticated = 1;
    } else {
       drmGetMagic(dri2_dpy->fd, &magic);
@@ -947,10 +931,10 @@ drm_handle_authenticated(void *data, struct wl_drm *drm)
 }
 
 static const struct wl_drm_listener drm_listener = {
-	drm_handle_device,
-	drm_handle_format,
-	drm_handle_authenticated,
-	drm_handle_capabilities
+   .device = drm_handle_device,
+   .format = drm_handle_format,
+   .authenticated = drm_handle_authenticated,
+   .capabilities = drm_handle_capabilities
 };
 
 static void
@@ -975,8 +959,8 @@ registry_handle_global_remove(void *data, struct wl_registry *registry,
 }
 
 static const struct wl_registry_listener registry_listener_drm = {
-   registry_handle_global_drm,
-   registry_handle_global_remove
+   .global = registry_handle_global_drm,
+   .global_remove = registry_handle_global_remove
 };
 
 static EGLBoolean
@@ -1114,7 +1098,7 @@ dri2_initialize_wayland_drm(_EGLDriver *drv, _EGLDisplay *disp)
     * will return a render-node when the requested gpu is different
     * to the server, but also if the client asks for the same gpu than
     * the server by requesting its pci-id */
-   dri2_dpy->is_render_node = is_fd_render_node(dri2_dpy->fd);
+   dri2_dpy->is_render_node = drmGetNodeTypeFromFd(dri2_dpy->fd) == DRM_NODE_RENDER;
 
    dri2_dpy->driver_name = loader_get_driver_for_fd(dri2_dpy->fd, 0);
    if (dri2_dpy->driver_name == NULL) {
@@ -1732,7 +1716,7 @@ shm_handle_format(void *data, struct wl_shm *shm, uint32_t format)
 }
 
 static const struct wl_shm_listener shm_listener = {
-   shm_handle_format
+   .format = shm_handle_format
 };
 
 static void
@@ -1749,8 +1733,8 @@ registry_handle_global_swrast(void *data, struct wl_registry *registry, uint32_t
 }
 
 static const struct wl_registry_listener registry_listener_swrast = {
-   registry_handle_global_swrast,
-   registry_handle_global_remove
+   .global = registry_handle_global_swrast,
+   .global_remove = registry_handle_global_remove
 };
 
 static struct dri2_egl_display_vtbl dri2_wl_swrast_display_vtbl = {

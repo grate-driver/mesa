@@ -143,7 +143,7 @@ brwProgramStringNotify(struct gl_context *ctx,
       brw_add_texrect_params(prog);
 
       if (ctx->Const.ShaderCompilerOptions[MESA_SHADER_FRAGMENT].NirOptions) {
-         prog->nir = brw_create_nir(brw, NULL, prog, MESA_SHADER_FRAGMENT);
+         prog->nir = brw_create_nir(brw, NULL, prog, MESA_SHADER_FRAGMENT, true);
       }
 
       brw_fs_precompile(ctx, NULL, prog);
@@ -169,7 +169,8 @@ brwProgramStringNotify(struct gl_context *ctx,
       brw_add_texrect_params(prog);
 
       if (ctx->Const.ShaderCompilerOptions[MESA_SHADER_VERTEX].NirOptions) {
-         prog->nir = brw_create_nir(brw, NULL, prog, MESA_SHADER_VERTEX);
+         prog->nir = brw_create_nir(brw, NULL, prog, MESA_SHADER_VERTEX,
+                                    brw->intelScreen->compiler->scalar_vs);
       }
 
       brw_vs_precompile(ctx, NULL, prog);
@@ -196,7 +197,7 @@ brw_memory_barrier(struct gl_context *ctx, GLbitfield barriers)
    unsigned bits = (PIPE_CONTROL_DATA_CACHE_INVALIDATE |
                     PIPE_CONTROL_NO_WRITE |
                     PIPE_CONTROL_CS_STALL);
-   assert(brw->gen >= 7 && brw->gen <= 8);
+   assert(brw->gen >= 7 && brw->gen <= 9);
 
    if (barriers & (GL_VERTEX_ATTRIB_ARRAY_BARRIER_BIT |
                    GL_ELEMENT_ARRAY_BARRIER_BIT |

@@ -51,11 +51,12 @@ vec4_gs_visitor::vec4_gs_visitor(const struct brw_compiler *compiler,
 
 
 dst_reg *
-vec4_gs_visitor::make_reg_for_system_value(ir_variable *ir)
+vec4_gs_visitor::make_reg_for_system_value(int location,
+                                           const glsl_type *type)
 {
-   dst_reg *reg = new(mem_ctx) dst_reg(this, ir->type);
+   dst_reg *reg = new(mem_ctx) dst_reg(this, type);
 
-   switch (ir->data.location) {
+   switch (location) {
    case SYSTEM_VALUE_INVOCATION_ID:
       this->current_annotation = "initialize gl_InvocationID";
       emit(GS_OPCODE_GET_INSTANCE_ID, *reg);
@@ -466,7 +467,7 @@ vec4_gs_visitor::set_stream_control_data_bits(unsigned stream_id)
 }
 
 void
-vec4_gs_visitor::visit(ir_emit_vertex *ir)
+vec4_gs_visitor::gs_emit_vertex(int stream_id)
 {
    this->current_annotation = "emit vertex: safety check";
 
@@ -480,7 +481,7 @@ vec4_gs_visitor::visit(ir_emit_vertex *ir)
     * be recorded by transform feedback, we can simply discard all geometry
     * bound to these streams when transform feedback is disabled.
     */
-   if (ir->stream_id() > 0 && shader_prog->TransformFeedback.NumVarying == 0)
+   if (stream_id > 0 && shader_prog->TransformFeedback.NumVarying == 0)
       return;
 
    /* To ensure that we don't output more vertices than the shader specified
@@ -559,7 +560,7 @@ vec4_gs_visitor::visit(ir_emit_vertex *ir)
           c->prog_data.control_data_format ==
              GEN7_GS_CONTROL_DATA_FORMAT_GSCTL_SID) {
           this->current_annotation = "emit vertex: Stream control data bits";
-          set_stream_control_data_bits(ir->stream_id());
+          set_stream_control_data_bits(stream_id);
       }
 
       this->current_annotation = "emit vertex: increment vertex count";
@@ -572,7 +573,13 @@ vec4_gs_visitor::visit(ir_emit_vertex *ir)
 }
 
 void
-vec4_gs_visitor::visit(ir_end_primitive *)
+vec4_gs_visitor::visit(ir_emit_vertex *ir)
+{
+   gs_emit_vertex(ir->stream_id());
+}
+
+void
+vec4_gs_visitor::gs_end_primitive()
 {
    /* We can only do EndPrimitive() functionality when the control data
     * consists of cut bits.  Fortunately, the only time it isn't is when the
@@ -620,6 +627,12 @@ vec4_gs_visitor::visit(ir_end_primitive *)
     */
    emit(SHL(dst_reg(mask), one, prev_count));
    emit(OR(dst_reg(this->control_data_bits), this->control_data_bits, mask));
+}
+
+void
+vec4_gs_visitor::visit(ir_end_primitive *)
+{
+   gs_end_primitive();
 }
 
 static const unsigned *

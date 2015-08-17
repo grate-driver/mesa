@@ -91,8 +91,9 @@ get_buffer_target(struct gl_context *ctx, GLenum target)
    case GL_COPY_WRITE_BUFFER:
       return &ctx->CopyWriteBuffer;
    case GL_DRAW_INDIRECT_BUFFER:
-      if (ctx->API == API_OPENGL_CORE &&
-          ctx->Extensions.ARB_draw_indirect) {
+      if ((ctx->API == API_OPENGL_CORE &&
+           ctx->Extensions.ARB_draw_indirect) ||
+           _mesa_is_gles31(ctx)) {
          return &ctx->DrawIndirectBuffer;
       }
       break;
@@ -865,8 +866,8 @@ _mesa_init_buffer_objects( struct gl_context *ctx )
       _mesa_reference_buffer_object(ctx,
 				    &ctx->AtomicBufferBindings[i].BufferObject,
 				    ctx->Shared->NullBufferObj);
-      ctx->AtomicBufferBindings[i].Offset = -1;
-      ctx->AtomicBufferBindings[i].Size = -1;
+      ctx->AtomicBufferBindings[i].Offset = 0;
+      ctx->AtomicBufferBindings[i].Size = 0;
    }
 }
 
@@ -2372,7 +2373,7 @@ _mesa_map_buffer_range(struct gl_context *ctx,
 
    if (offset + length > bufObj->Size) {
       _mesa_error(ctx, GL_INVALID_VALUE,
-                  "%s(offset %ld + length %ld > buffer_size %ld)", func,
+                  "%s(offset %td + length %td > buffer_size %td)", func,
                   offset, length, bufObj->Size);
       return NULL;
    }

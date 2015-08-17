@@ -90,7 +90,6 @@ nvc0_blend_state_create(struct pipe_context *pipe,
    struct nvc0_blend_stateobj *so = CALLOC_STRUCT(nvc0_blend_stateobj);
    int i;
    int r; /* reference */
-   uint32_t ms;
    uint8_t blend_en = 0;
    bool indep_masks = false;
    bool indep_funcs = false;
@@ -176,15 +175,6 @@ nvc0_blend_state_create(struct pipe_context *pipe,
       }
    }
 
-   ms = 0;
-   if (cso->alpha_to_coverage)
-      ms |= NVC0_3D_MULTISAMPLE_CTRL_ALPHA_TO_COVERAGE;
-   if (cso->alpha_to_one)
-      ms |= NVC0_3D_MULTISAMPLE_CTRL_ALPHA_TO_ONE;
-
-   SB_BEGIN_3D(so, MULTISAMPLE_CTRL, 1);
-   SB_DATA    (so, ms);
-
    assert(so->size <= (sizeof(so->state) / sizeof(so->state[0])));
    return so;
 }
@@ -234,7 +224,7 @@ nvc0_rasterizer_state_create(struct pipe_context *pipe,
     SB_IMMED_3D(so, MULTISAMPLE_ENABLE, cso->multisample);
 
     SB_IMMED_3D(so, LINE_SMOOTH_ENABLE, cso->line_smooth);
-    if (cso->line_smooth)
+    if (cso->line_smooth || cso->multisample)
        SB_BEGIN_3D(so, LINE_WIDTH_SMOOTH, 1);
     else
        SB_BEGIN_3D(so, LINE_WIDTH_ALIASED, 1);
@@ -349,6 +339,13 @@ nvc0_zsa_state_create(struct pipe_context *pipe,
       SB_IMMED_3D(so, DEPTH_WRITE_ENABLE, cso->depth.writemask);
       SB_BEGIN_3D(so, DEPTH_TEST_FUNC, 1);
       SB_DATA    (so, nvgl_comparison_op(cso->depth.func));
+   }
+
+   SB_IMMED_3D(so, DEPTH_BOUNDS_EN, cso->depth.bounds_test);
+   if (cso->depth.bounds_test) {
+      SB_BEGIN_3D(so, DEPTH_BOUNDS(0), 2);
+      SB_DATA    (so, fui(cso->depth.bounds_min));
+      SB_DATA    (so, fui(cso->depth.bounds_max));
    }
 
    if (cso->stencil[0].enabled) {

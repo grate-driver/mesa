@@ -2313,12 +2313,10 @@ find_available_slots(unsigned used_mask, unsigned needed_count)
  * Assign locations for either VS inputs or FS outputs
  *
  * \param prog          Shader program whose variables need locations assigned
+ * \param constants     Driver specific constant values for the program.
  * \param target_index  Selector for the program target to receive location
  *                      assignmnets.  Must be either \c MESA_SHADER_VERTEX or
  *                      \c MESA_SHADER_FRAGMENT.
- * \param max_index     Maximum number of generic locations.  This corresponds
- *                      to either the maximum number of draw buffers or the
- *                      maximum number of generic attributes.
  *
  * \return
  * If locations are successfully assigned, true is returned.  Otherwise an
@@ -2326,9 +2324,17 @@ find_available_slots(unsigned used_mask, unsigned needed_count)
  */
 bool
 assign_attribute_or_color_locations(gl_shader_program *prog,
-				    unsigned target_index,
-				    unsigned max_index)
+                                    struct gl_constants *constants,
+                                    unsigned target_index)
 {
+   /* Maximum number of generic locations.  This corresponds to either the
+    * maximum number of draw buffers or the maximum number of generic
+    * attributes.
+    */
+   unsigned max_index = (target_index == MESA_SHADER_VERTEX) ?
+      constants->Program[target_index].MaxAttribs :
+      MAX2(constants->MaxDrawBuffers, constants->MaxDualSourceDrawBuffers);
+
    /* Mark invalid locations as being used.
     */
    unsigned used_locations = (max_index >= 32)
@@ -2423,6 +2429,25 @@ assign_attribute_or_color_locations(gl_shader_program *prog,
 	       var->data.index = index;
 	    }
 	 }
+      }
+
+      /* From GL4.5 core spec, section 15.2 (Shader Execution):
+       *
+       *     "Output binding assignments will cause LinkProgram to fail:
+       *     ...
+       *     If the program has an active output assigned to a location greater
+       *     than or equal to the value of MAX_DUAL_SOURCE_DRAW_BUFFERS and has
+       *     an active output assigned an index greater than or equal to one;"
+       */
+      if (target_index == MESA_SHADER_FRAGMENT && var->data.index >= 1 &&
+          var->data.location - generic_base >=
+          (int) constants->MaxDualSourceDrawBuffers) {
+         linker_error(prog,
+                      "output location %d >= GL_MAX_DUAL_SOURCE_DRAW_BUFFERS "
+                      "with index %u for %s\n",
+                      var->data.location - generic_base, var->data.index,
+                      var->name);
+         return false;
       }
 
       const unsigned slots = var->type->count_attribute_slots();
@@ -2855,8 +2880,9 @@ check_image_resources(struct gl_context *ctx, struct gl_shader_program *prog)
 
       if (sh) {
          if (sh->NumImages > ctx->Const.Program[i].MaxImageUniforms)
-            linker_error(prog, "Too many %s shader image uniforms\n",
-                         _mesa_shader_stage_to_string(i));
+            linker_error(prog, "Too many %s shader image uniforms (%u > %u)\n",
+                         _mesa_shader_stage_to_string(i), sh->NumImages,
+                         ctx->Const.Program[i].MaxImageUniforms);
 
          total_image_units += sh->NumImages;
 
@@ -3085,7 +3111,8 @@ add_program_resource(struct gl_shader_program *prog, GLenum type,
  * Function builds a stage reference bitmask from variable name.
  */
 static uint8_t
-build_stageref(struct gl_shader_program *shProg, const char *name)
+build_stageref(struct gl_shader_program *shProg, const char *name,
+               unsigned mode)
 {
    uint8_t stages = 0;
 
@@ -3104,9 +3131,26 @@ build_stageref(struct gl_shader_program *shProg, const char *name)
        */
       foreach_in_list(ir_instruction, node, sh->ir) {
          ir_variable *var = node->as_variable();
-         if (var && strcmp(var->name, name) == 0) {
-            stages |= (1 << i);
-            break;
+         if (var) {
+            unsigned baselen = strlen(var->name);
+
+            /* Type needs to match if specified, otherwise we might
+             * pick a variable with same name but different interface.
+             */
+            if (var->data.mode != mode)
+               continue;
+
+            if (strncmp(var->name, name, baselen) == 0) {
+               /* Check for exact name matches but also check for arrays and
+                * structs.
+                */
+               if (name[baselen] == '\0' ||
+                   name[baselen] == '[' ||
+                   name[baselen] == '.') {
+                  stages |= (1 << i);
+                  break;
+               }
+            }
          }
       }
    }
@@ -3153,7 +3197,8 @@ add_interface_variables(struct gl_shader_program *shProg,
       };
 
       if (!add_program_resource(shProg, programInterface, var,
-                                build_stageref(shProg, var->name) | mask))
+                                build_stageref(shProg, var->name,
+                                               var->data.mode) | mask))
          return false;
    }
    return true;
@@ -3204,12 +3249,9 @@ build_program_resource_list(struct gl_context *ctx,
    /* Add transform feedback varyings. */
    if (shProg->LinkedTransformFeedback.NumVarying > 0) {
       for (int i = 0; i < shProg->LinkedTransformFeedback.NumVarying; i++) {
-         uint8_t stageref =
-            build_stageref(shProg,
-                           shProg->LinkedTransformFeedback.Varyings[i].Name);
          if (!add_program_resource(shProg, GL_TRANSFORM_FEEDBACK_VARYING,
                                    &shProg->LinkedTransformFeedback.Varyings[i],
-                                   stageref))
+                                   0))
          return;
       }
    }
@@ -3221,7 +3263,8 @@ build_program_resource_list(struct gl_context *ctx,
          continue;
 
       uint8_t stageref =
-         build_stageref(shProg, shProg->UniformStorage[i].name);
+         build_stageref(shProg, shProg->UniformStorage[i].name,
+                        ir_var_uniform);
 
       /* Add stagereferences for uniforms in a uniform block. */
       int block_index = shProg->UniformStorage[i].block_index;
@@ -3648,12 +3691,13 @@ link_shaders(struct gl_context *ctx, struct gl_shader_program *prog)
       }
    }
 
-   if (!assign_attribute_or_color_locations(prog, MESA_SHADER_VERTEX,
-                                            ctx->Const.Program[MESA_SHADER_VERTEX].MaxAttribs)) {
+   if (!assign_attribute_or_color_locations(prog, &ctx->Const,
+                                            MESA_SHADER_VERTEX)) {
       goto done;
    }
 
-   if (!assign_attribute_or_color_locations(prog, MESA_SHADER_FRAGMENT, MAX2(ctx->Const.MaxDrawBuffers, ctx->Const.MaxDualSourceDrawBuffers))) {
+   if (!assign_attribute_or_color_locations(prog, &ctx->Const,
+                                            MESA_SHADER_FRAGMENT)) {
       goto done;
    }
 

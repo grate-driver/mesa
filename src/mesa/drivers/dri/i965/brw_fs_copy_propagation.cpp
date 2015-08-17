@@ -339,6 +339,14 @@ fs_visitor::try_copy_propagate(fs_inst *inst, int arg, acp_entry *entry)
    if (entry->src.stride * inst->src[arg].stride > 4)
       return false;
 
+   /* Bail if the instruction type is larger than the execution type of the
+    * copy, what implies that each channel is reading multiple channels of the
+    * destination of the copy, and simply replacing the sources would give a
+    * program with different semantics.
+    */
+   if (type_sz(entry->dst.type) < type_sz(inst->src[arg].type))
+      return false;
+
    /* Bail if the result of composing both strides cannot be expressed
     * as another stride. This avoids, for example, trying to transform
     * this:
@@ -526,6 +534,7 @@ fs_visitor::try_constant_propagate(fs_inst *inst, acp_entry *entry)
 
       case BRW_OPCODE_MACH:
       case BRW_OPCODE_MUL:
+      case SHADER_OPCODE_MULH:
       case BRW_OPCODE_ADD:
       case BRW_OPCODE_OR:
       case BRW_OPCODE_AND:

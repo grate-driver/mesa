@@ -1793,12 +1793,23 @@ _mesa_ShaderBinary(GLint n, const GLuint* shaders, GLenum binaryformat,
                    const void* binary, GLint length)
 {
    GET_CURRENT_CONTEXT(ctx);
-   (void) n;
    (void) shaders;
    (void) binaryformat;
    (void) binary;
-   (void) length;
-   _mesa_error(ctx, GL_INVALID_OPERATION, "glShaderBinary");
+
+   /* Page 68, section 7.2 'Shader Binaries" of the of the OpenGL ES 3.1, and
+    * page 88 of the OpenGL 4.5 specs state:
+    *
+    *     "An INVALID_VALUE error is generated if count or length is negative.
+    *      An INVALID_ENUM error is generated if binaryformat is not a supported
+    *      format returned in SHADER_BINARY_FORMATS."
+    */
+   if (n < 0 || length < 0) {
+      _mesa_error(ctx, GL_INVALID_VALUE, "glShaderBinary(count or length < 0)");
+      return;
+   }
+
+   _mesa_error(ctx, GL_INVALID_ENUM, "glShaderBinary(format)");
 }
 
 
@@ -1992,6 +2003,15 @@ _mesa_create_shader_program(struct gl_context* ctx, GLboolean separate,
    const GLuint shader = create_shader(ctx, type);
    GLuint program = 0;
 
+   /*
+    * According to OpenGL 4.5 and OpenGL ES 3.1 standards, section 7.3:
+    * GL_INVALID_VALUE should be generated if count < 0
+    */
+   if (count < 0) {
+      _mesa_error(ctx, GL_INVALID_VALUE, "glCreateShaderProgram (count < 0)");
+      return program;
+   }
+
    if (shader) {
       _mesa_ShaderSource(shader, count, strings, NULL);
 
@@ -2022,8 +2042,8 @@ _mesa_create_shader_program(struct gl_context* ctx, GLboolean separate,
 	    }
 #endif
 	 }
-
-	 ralloc_strcat(&shProg->InfoLog, sh->InfoLog);
+         if (sh->InfoLog)
+            ralloc_strcat(&shProg->InfoLog, sh->InfoLog);
       }
 
       delete_shader(ctx, shader);
@@ -2229,7 +2249,7 @@ _mesa_GetSubroutineIndex(GLuint program, GLenum shadertype,
    }
 
    resource_type = _mesa_shader_stage_to_subroutine(stage);
-   res = _mesa_program_resource_find_name(shProg, resource_type, name);
+   res = _mesa_program_resource_find_name(shProg, resource_type, name, NULL);
    if (!res) {
       _mesa_error(ctx, GL_INVALID_OPERATION, "%s", api_name);
      return -1;

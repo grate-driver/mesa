@@ -142,12 +142,6 @@ struct si_context {
 	union {
 		struct {
 			/* The order matters. */
-			struct r600_atom *const_buffers[SI_NUM_SHADERS];
-			struct r600_atom *rw_buffers[SI_NUM_SHADERS];
-			struct r600_atom *sampler_views[SI_NUM_SHADERS];
-			struct r600_atom *sampler_states[SI_NUM_SHADERS];
-			/* Caches must be flushed after resource descriptors are
-			 * updated in memory. */
 			struct r600_atom *cache_flush;
 			struct r600_atom *streamout_begin;
 			struct r600_atom *streamout_enable; /* must be after streamout_begin */
@@ -274,6 +268,13 @@ void si_resource_copy_region(struct pipe_context *ctx,
 			     unsigned src_level,
 			     const struct pipe_box *src_box);
 
+/* si_cp_dma.c */
+void si_copy_buffer(struct si_context *sctx,
+		    struct pipe_resource *dst, struct pipe_resource *src,
+		    uint64_t dst_offset, uint64_t src_offset, unsigned size,
+		    bool is_framebuffer);
+void si_init_cp_dma_functions(struct si_context *sctx);
+
 /* si_dma.c */
 void si_dma_copy(struct pipe_context *ctx,
 		 struct pipe_resource *dst,
@@ -322,6 +323,20 @@ si_invalidate_draw_sh_constants(struct si_context *sctx)
 	sctx->last_base_vertex = SI_BASE_VERTEX_UNKNOWN;
 	sctx->last_start_instance = -1; /* reset to an unknown value */
 	sctx->last_sh_base_reg = -1; /* reset to an unknown value */
+}
+
+static inline void
+si_set_atom_dirty(struct si_context *sctx,
+		  struct r600_atom *atom, bool dirty)
+{
+	atom->dirty = dirty;
+}
+
+static inline void
+si_mark_atom_dirty(struct si_context *sctx,
+		   struct r600_atom *atom)
+{
+	si_set_atom_dirty(sctx, atom, true);
 }
 
 #endif

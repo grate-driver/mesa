@@ -206,16 +206,32 @@ static void si_shader_es(struct si_shader *shader)
 		si_set_tesseval_regs(shader, pm4);
 }
 
+static unsigned si_gs_get_max_stream(struct si_shader *shader)
+{
+	struct pipe_stream_output_info *so = &shader->selector->so;
+	unsigned max_stream = 0, i;
+
+	if (so->num_outputs == 0)
+		return 0;
+
+	for (i = 0; i < so->num_outputs; i++) {
+		if (so->output[i].stream > max_stream)
+			max_stream = so->output[i].stream;
+	}
+	return max_stream;
+}
+
 static void si_shader_gs(struct si_shader *shader)
 {
-	unsigned gs_vert_itemsize = shader->selector->info.num_outputs * (16 >> 2);
+	unsigned gs_vert_itemsize = shader->selector->info.num_outputs * 16;
 	unsigned gs_max_vert_out = shader->selector->gs_max_out_vertices;
-	unsigned gsvs_itemsize = gs_vert_itemsize * gs_max_vert_out;
+	unsigned gsvs_itemsize = (gs_vert_itemsize * gs_max_vert_out) >> 2;
 	unsigned gs_num_invocations = shader->selector->gs_num_invocations;
 	unsigned cut_mode;
 	struct si_pm4_state *pm4;
 	unsigned num_sgprs, num_user_sgprs;
 	uint64_t va;
+	unsigned max_stream = si_gs_get_max_stream(shader);
 
 	/* The GSVS_RING_ITEMSIZE register takes 15 bits */
 	assert(gsvs_itemsize < (1 << 15));
@@ -243,16 +259,19 @@ static void si_shader_gs(struct si_shader *shader)
 		       S_028A40_GS_WRITE_OPTIMIZE(1));
 
 	si_pm4_set_reg(pm4, R_028A60_VGT_GSVS_RING_OFFSET_1, gsvs_itemsize);
-	si_pm4_set_reg(pm4, R_028A64_VGT_GSVS_RING_OFFSET_2, gsvs_itemsize);
-	si_pm4_set_reg(pm4, R_028A68_VGT_GSVS_RING_OFFSET_3, gsvs_itemsize);
+	si_pm4_set_reg(pm4, R_028A64_VGT_GSVS_RING_OFFSET_2, gsvs_itemsize * ((max_stream >= 2) ? 2 : 1));
+	si_pm4_set_reg(pm4, R_028A68_VGT_GSVS_RING_OFFSET_3, gsvs_itemsize * ((max_stream >= 3) ? 3 : 1));
 
 	si_pm4_set_reg(pm4, R_028AAC_VGT_ESGS_RING_ITEMSIZE,
 		       util_bitcount64(shader->selector->inputs_read) * (16 >> 2));
-	si_pm4_set_reg(pm4, R_028AB0_VGT_GSVS_RING_ITEMSIZE, gsvs_itemsize);
+	si_pm4_set_reg(pm4, R_028AB0_VGT_GSVS_RING_ITEMSIZE, gsvs_itemsize * (max_stream + 1));
 
 	si_pm4_set_reg(pm4, R_028B38_VGT_GS_MAX_VERT_OUT, gs_max_vert_out);
 
-	si_pm4_set_reg(pm4, R_028B5C_VGT_GS_VERT_ITEMSIZE, gs_vert_itemsize);
+	si_pm4_set_reg(pm4, R_028B5C_VGT_GS_VERT_ITEMSIZE, gs_vert_itemsize >> 2);
+	si_pm4_set_reg(pm4, R_028B60_VGT_GS_VERT_ITEMSIZE_1, (max_stream >= 1) ? gs_vert_itemsize >> 2 : 0);
+	si_pm4_set_reg(pm4, R_028B64_VGT_GS_VERT_ITEMSIZE_2, (max_stream >= 2) ? gs_vert_itemsize >> 2 : 0);
+	si_pm4_set_reg(pm4, R_028B68_VGT_GS_VERT_ITEMSIZE_3, (max_stream >= 3) ? gs_vert_itemsize >> 2 : 0);
 
 	si_pm4_set_reg(pm4, R_028B90_VGT_GS_INSTANCE_CNT,
 		       S_028B90_CNT(MIN2(gs_num_invocations, 127)) |
@@ -289,11 +308,22 @@ static void si_shader_vs(struct si_shader *shader)
 	uint64_t va;
 	unsigned window_space =
 	   shader->selector->info.properties[TGSI_PROPERTY_VS_WINDOW_SPACE_POSITION];
+	bool enable_prim_id = si_vs_exports_prim_id(shader);
 
 	pm4 = shader->pm4 = CALLOC_STRUCT(si_pm4_state);
 
 	if (pm4 == NULL)
 		return;
+
+	/* If this is the GS copy shader, the GS state writes this register.
+	 * Otherwise, the VS state writes it.
+	 */
+	if (!shader->is_gs_copy_shader) {
+		si_pm4_set_reg(pm4, R_028A40_VGT_GS_MODE,
+			       S_028A40_MODE(enable_prim_id ? V_028A40_GS_SCENARIO_A : 0));
+		si_pm4_set_reg(pm4, R_028A84_VGT_PRIMITIVEID_EN, enable_prim_id);
+	} else
+		si_pm4_set_reg(pm4, R_028A84_VGT_PRIMITIVEID_EN, 0);
 
 	va = shader->bo->gpu_address;
 	si_pm4_add_bo(pm4, shader->bo, RADEON_USAGE_READ, RADEON_PRIO_SHADER_DATA);
@@ -302,7 +332,7 @@ static void si_shader_vs(struct si_shader *shader)
 		vgpr_comp_cnt = 0; /* only VertexID is needed for GS-COPY. */
 		num_user_sgprs = SI_GSCOPY_NUM_USER_SGPR;
 	} else if (shader->selector->type == PIPE_SHADER_VERTEX) {
-		vgpr_comp_cnt = shader->uses_instanceid ? 3 : 0;
+		vgpr_comp_cnt = shader->uses_instanceid ? 3 : (enable_prim_id ? 2 : 0);
 		num_user_sgprs = SI_VS_NUM_USER_SGPR;
 	} else if (shader->selector->type == PIPE_SHADER_TESS_EVAL) {
 		vgpr_comp_cnt = 3; /* all components are needed for TES */
@@ -509,6 +539,10 @@ static inline void si_shader_selector_key(struct pipe_context *ctx,
 			key->vs.as_es = 1;
 			key->vs.es_enabled_outputs = sctx->gs_shader->inputs_read;
 		}
+
+		if (!sctx->gs_shader && sctx->ps_shader &&
+		    sctx->ps_shader->info.uses_primid)
+			key->vs.export_prim_id = 1;
 		break;
 	case PIPE_SHADER_TESS_CTRL:
 		key->tcs.prim_mode =
@@ -518,7 +552,8 @@ static inline void si_shader_selector_key(struct pipe_context *ctx,
 		if (sctx->gs_shader) {
 			key->tes.as_es = 1;
 			key->tes.es_enabled_outputs = sctx->gs_shader->inputs_read;
-		}
+		} else if (sctx->ps_shader && sctx->ps_shader->info.uses_primid)
+			key->tes.export_prim_id = 1;
 		break;
 	case PIPE_SHADER_GEOMETRY:
 		break;
@@ -616,6 +651,7 @@ static int si_shader_select(struct pipe_context *ctx,
 		}
 		si_shader_init_pm4_state(shader);
 		sel->num_shaders++;
+		p_atomic_inc(&sctx->screen->b.num_compilations);
 	}
 
 	return 0;
@@ -633,6 +669,7 @@ static void *si_create_shader_state(struct pipe_context *ctx,
 	sel->tokens = tgsi_dup_tokens(state->tokens);
 	sel->so = state->stream_output;
 	tgsi_scan_shader(state->tokens, &sel->info);
+	p_atomic_inc(&sscreen->b.num_shaders_created);
 
 	switch (pipe_shader_type) {
 	case PIPE_SHADER_GEOMETRY:
@@ -723,7 +760,7 @@ static void si_bind_vs_shader(struct pipe_context *ctx, void *state)
 		return;
 
 	sctx->vs_shader = sel;
-	sctx->clip_regs.dirty = true;
+	si_mark_atom_dirty(sctx, &sctx->clip_regs);
 }
 
 static void si_bind_gs_shader(struct pipe_context *ctx, void *state)
@@ -736,7 +773,7 @@ static void si_bind_gs_shader(struct pipe_context *ctx, void *state)
 		return;
 
 	sctx->gs_shader = sel;
-	sctx->clip_regs.dirty = true;
+	si_mark_atom_dirty(sctx, &sctx->clip_regs);
 	sctx->last_rast_prim = -1; /* reset this so that it gets updated */
 
 	if (enable_changed)
@@ -768,7 +805,7 @@ static void si_bind_tes_shader(struct pipe_context *ctx, void *state)
 		return;
 
 	sctx->tes_shader = sel;
-	sctx->clip_regs.dirty = true;
+	si_mark_atom_dirty(sctx, &sctx->clip_regs);
 	sctx->last_rast_prim = -1; /* reset this so that it gets updated */
 
 	if (enable_changed) {
@@ -950,7 +987,10 @@ bcolor:
 			}
 		}
 
-		if (j == vsinfo->num_outputs && !G_028644_PT_SPRITE_TEX(tmp)) {
+		if (name == TGSI_SEMANTIC_PRIMID)
+			/* PrimID is written after the last output. */
+			tmp |= S_028644_OFFSET(vs->vs_output_param_offset[vsinfo->num_outputs]);
+		else if (j == vsinfo->num_outputs && !G_028644_PT_SPRITE_TEX(tmp)) {
 			/* No corresponding output found, load defaults into input.
 			 * Don't set any other bits.
 			 * (FLAT_SHADE=1 completely changes behavior) */
@@ -976,7 +1016,7 @@ bcolor:
 static void si_init_gs_rings(struct si_context *sctx)
 {
 	unsigned esgs_ring_size = 128 * 1024;
-	unsigned gsvs_ring_size = 64 * 1024 * 1024;
+	unsigned gsvs_ring_size = 60 * 1024 * 1024;
 
 	assert(!sctx->gs_rings);
 	sctx->gs_rings = CALLOC_STRUCT(si_pm4_state);
@@ -988,6 +1028,12 @@ static void si_init_gs_rings(struct si_context *sctx)
 					     PIPE_USAGE_DEFAULT, gsvs_ring_size);
 
 	if (sctx->b.chip_class >= CIK) {
+		if (sctx->b.chip_class >= VI) {
+			/* The maximum sizes are 63.999 MB on VI, because
+			 * the register fields only have 18 bits. */
+			assert(esgs_ring_size / 256 < (1 << 18));
+			assert(gsvs_ring_size / 256 < (1 << 18));
+		}
 		si_pm4_set_reg(sctx->gs_rings, R_030900_VGT_ESGS_RING_SIZE,
 			       esgs_ring_size / 256);
 		si_pm4_set_reg(sctx->gs_rings, R_030904_VGT_GSVS_RING_SIZE,
@@ -1001,15 +1047,42 @@ static void si_init_gs_rings(struct si_context *sctx)
 
 	si_set_ring_buffer(&sctx->b.b, PIPE_SHADER_VERTEX, SI_RING_ESGS,
 			   sctx->esgs_ring, 0, esgs_ring_size,
-			   true, true, 4, 64);
+			   true, true, 4, 64, 0);
 	si_set_ring_buffer(&sctx->b.b, PIPE_SHADER_GEOMETRY, SI_RING_ESGS,
 			   sctx->esgs_ring, 0, esgs_ring_size,
-			   false, false, 0, 0);
+			   false, false, 0, 0, 0);
 	si_set_ring_buffer(&sctx->b.b, PIPE_SHADER_VERTEX, SI_RING_GSVS,
 			   sctx->gsvs_ring, 0, gsvs_ring_size,
-			   false, false, 0, 0);
+			   false, false, 0, 0, 0);
 }
 
+static void si_update_gs_rings(struct si_context *sctx)
+{
+	unsigned gs_vert_itemsize = sctx->gs_shader->info.num_outputs * 16;
+	unsigned gs_max_vert_out = sctx->gs_shader->gs_max_out_vertices;
+	unsigned gsvs_itemsize = gs_vert_itemsize * gs_max_vert_out;
+	uint64_t offset;
+
+	si_set_ring_buffer(&sctx->b.b, PIPE_SHADER_GEOMETRY, SI_RING_GSVS,
+			   sctx->gsvs_ring, gsvs_itemsize,
+			   64, true, true, 4, 16, 0);
+
+	offset = gsvs_itemsize * 64;
+	si_set_ring_buffer(&sctx->b.b, PIPE_SHADER_GEOMETRY, SI_RING_GSVS_1,
+			   sctx->gsvs_ring, gsvs_itemsize,
+			   64, true, true, 4, 16, offset);
+
+	offset = (gsvs_itemsize * 2) * 64;
+	si_set_ring_buffer(&sctx->b.b, PIPE_SHADER_GEOMETRY, SI_RING_GSVS_2,
+			   sctx->gsvs_ring, gsvs_itemsize,
+			   64, true, true, 4, 16, offset);
+
+	offset = (gsvs_itemsize * 3) * 64;
+	si_set_ring_buffer(&sctx->b.b, PIPE_SHADER_GEOMETRY, SI_RING_GSVS_3,
+			   sctx->gsvs_ring, gsvs_itemsize,
+			   64, true, true, 4, 16, offset);
+
+}
 /**
  * @returns 1 if \p sel has been updated to use a new scratch buffer and 0
  *          otherwise.
@@ -1171,7 +1244,7 @@ static void si_init_tess_factor_ring(struct si_context *sctx)
 
 	si_set_ring_buffer(&sctx->b.b, PIPE_SHADER_TESS_CTRL,
 			   SI_RING_TESS_FACTOR, sctx->tf_ring, 0,
-			   sctx->tf_ring->width0, false, false, 0, 0);
+			   sctx->tf_ring->width0, false, false, 0, 0, 0);
 
 	sctx->b.flags |= SI_CONTEXT_VGT_FLUSH;
 }
@@ -1239,10 +1312,20 @@ static void si_update_vgt_shader_config(struct si_context *sctx)
 		}
 
 		si_pm4_set_reg(*pm4, R_028B54_VGT_SHADER_STAGES_EN, stages);
-		if (!sctx->gs_shader)
-			si_pm4_set_reg(*pm4, R_028A40_VGT_GS_MODE, 0);
 	}
 	si_pm4_bind_state(sctx, vgt_shader_config, *pm4);
+}
+
+static void si_update_so(struct si_context *sctx, struct si_shader_selector *shader)
+{
+	struct pipe_stream_output_info *so = &shader->so;
+	uint32_t enabled_stream_buffers_mask = 0;
+	int i;
+
+	for (i = 0; i < so->num_outputs; i++)
+		enabled_stream_buffers_mask |= (1 << so->output[i].output_buffer) << (so->output[i].stream * 4);
+	sctx->b.streamout.enabled_stream_buffers_mask = enabled_stream_buffers_mask;
+	sctx->b.streamout.stride_in_dw = shader->so.stride;
 }
 
 void si_update_shaders(struct si_context *sctx)
@@ -1277,7 +1360,7 @@ void si_update_shaders(struct si_context *sctx)
 		} else {
 			/* TES as VS */
 			si_pm4_bind_state(sctx, vs, sctx->tes_shader->current->pm4);
-			sctx->b.streamout.stride_in_dw = sctx->tes_shader->so.stride;
+			si_update_so(sctx, sctx->tes_shader);
 		}
 	} else if (sctx->gs_shader) {
 		/* VS as ES */
@@ -1287,7 +1370,7 @@ void si_update_shaders(struct si_context *sctx)
 		/* VS as VS */
 		si_shader_select(ctx, sctx->vs_shader);
 		si_pm4_bind_state(sctx, vs, sctx->vs_shader->current->pm4);
-		sctx->b.streamout.stride_in_dw = sctx->vs_shader->so.stride;
+		si_update_so(sctx, sctx->vs_shader);
 	}
 
 	/* Update GS. */
@@ -1295,19 +1378,16 @@ void si_update_shaders(struct si_context *sctx)
 		si_shader_select(ctx, sctx->gs_shader);
 		si_pm4_bind_state(sctx, gs, sctx->gs_shader->current->pm4);
 		si_pm4_bind_state(sctx, vs, sctx->gs_shader->current->gs_copy_shader->pm4);
-		sctx->b.streamout.stride_in_dw = sctx->gs_shader->so.stride;
+		si_update_so(sctx, sctx->gs_shader);
 
 		if (!sctx->gs_rings)
 			si_init_gs_rings(sctx);
+
 		if (sctx->emitted.named.gs_rings != sctx->gs_rings)
 			sctx->b.flags |= SI_CONTEXT_VGT_FLUSH;
 		si_pm4_bind_state(sctx, gs_rings, sctx->gs_rings);
 
-		si_set_ring_buffer(ctx, PIPE_SHADER_GEOMETRY, SI_RING_GSVS,
-				   sctx->gsvs_ring,
-				   sctx->gs_shader->gs_max_out_vertices *
-				   sctx->gs_shader->info.num_outputs * 16,
-				   64, true, true, 4, 16);
+		si_update_gs_rings(sctx);
 	} else {
 		si_pm4_bind_state(sctx, gs_rings, NULL);
 		si_pm4_bind_state(sctx, gs, NULL);
@@ -1345,15 +1425,15 @@ void si_update_shaders(struct si_context *sctx)
 
 	if (sctx->ps_db_shader_control != sctx->ps_shader->current->db_shader_control) {
 		sctx->ps_db_shader_control = sctx->ps_shader->current->db_shader_control;
-		sctx->db_render_state.dirty = true;
+		si_mark_atom_dirty(sctx, &sctx->db_render_state);
 	}
 
 	if (sctx->smoothing_enabled != sctx->ps_shader->current->key.ps.poly_line_smoothing) {
 		sctx->smoothing_enabled = sctx->ps_shader->current->key.ps.poly_line_smoothing;
-		sctx->msaa_config.dirty = true;
+		si_mark_atom_dirty(sctx, &sctx->msaa_config);
 
 		if (sctx->b.chip_class == SI)
-			sctx->db_render_state.dirty = true;
+			si_mark_atom_dirty(sctx, &sctx->db_render_state);
 	}
 }
 

@@ -28,10 +28,10 @@ SIM_LDFLAGS = -lsimpenrose
 endif
 
 AM_CFLAGS = \
+	-I$(top_builddir)/src/glsl/nir \
 	$(LIBDRM_CFLAGS) \
 	$(GALLIUM_DRIVER_CFLAGS) \
 	$(SIM_CFLAGS) \
-	-I$(top_srcdir)/src/mesa/ \
 	$()
 
 noinst_LTLIBRARIES = libvc4.la

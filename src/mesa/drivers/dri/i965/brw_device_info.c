@@ -299,7 +299,6 @@ static const struct brw_device_info brw_device_info_chv = {
    }
 };
 
-/* Thread counts and URB limits are placeholders, and may not be accurate. */
 #define GEN9_FEATURES                               \
    .gen = 9,                                        \
    .has_hiz_and_separate_stencil = true,            \
@@ -307,34 +306,32 @@ static const struct brw_device_info brw_device_info_chv = {
    .must_use_separate_stencil = true,               \
    .has_llc = true,                                 \
    .has_pln = true,                                 \
-   .max_vs_threads = 280,                           \
-   .max_gs_threads = 256,                           \
-   .max_wm_threads = 408,                           \
+   .supports_simd16_3src = true,                    \
+   .max_vs_threads = 336,                           \
+   .max_gs_threads = 336,                           \
+   .max_hs_threads = 336,                           \
+   .max_ds_threads = 336,                           \
+   .max_wm_threads = 64 * 6,                        \
+   .max_cs_threads = 56,                            \
    .urb = {                                         \
-      .size = 128,                                  \
+      .size = 192,                                  \
       .min_vs_entries = 64,                         \
-      .max_vs_entries = 1664,                       \
+      .max_vs_entries = 1856,                       \
+      .max_hs_entries = 672,                        \
+      .max_ds_entries = 1120,                       \
       .max_gs_entries = 640,                        \
    }
 
-static const struct brw_device_info brw_device_info_skl_early = {
-   GEN9_FEATURES, .gt = 1,
-   .supports_simd16_3src = false,
-};
-
 static const struct brw_device_info brw_device_info_skl_gt1 = {
    GEN9_FEATURES, .gt = 1,
-   .supports_simd16_3src = true,
 };
 
 static const struct brw_device_info brw_device_info_skl_gt2 = {
    GEN9_FEATURES, .gt = 2,
-   .supports_simd16_3src = true,
 };
 
 static const struct brw_device_info brw_device_info_skl_gt3 = {
    GEN9_FEATURES, .gt = 3,
-   .supports_simd16_3src = true,
 };
 
 static const struct brw_device_info brw_device_info_bxt = {
@@ -342,13 +339,20 @@ static const struct brw_device_info brw_device_info_bxt = {
    .is_broxton = 1,
    .gt = 1,
    .has_llc = false,
-   .max_vs_threads = 112,
-   .max_gs_threads = 112,
+
+   /* XXX: These are preliminary thread counts and URB sizes. */
+   .max_vs_threads = 56,
+   .max_hs_threads = 56,
+   .max_ds_threads = 56,
+   .max_gs_threads = 56,
    .max_wm_threads = 32,
+   .max_cs_threads = 28,
    .urb = {
       .size = 64,
       .min_vs_entries = 34,
       .max_vs_entries = 640,
+      .max_hs_entries = 80,
+      .max_ds_entries = 80,
       .max_gs_entries = 256,
    }
 };
@@ -366,9 +370,6 @@ brw_get_device_info(int devid, int revision)
       fprintf(stderr, "i965_dri.so does not support the 0x%x PCI ID.\n", devid);
       return NULL;
    }
-
-   if (devinfo->gen == 9 && (revision == 2 || revision == 3 || revision == -1))
-      return &brw_device_info_skl_early;
 
    return devinfo;
 }

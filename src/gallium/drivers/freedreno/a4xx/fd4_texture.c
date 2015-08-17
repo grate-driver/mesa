@@ -150,8 +150,8 @@ fd4_sampler_view_create(struct pipe_context *pctx, struct pipe_resource *prsc,
 {
 	struct fd4_pipe_sampler_view *so = CALLOC_STRUCT(fd4_pipe_sampler_view);
 	struct fd_resource *rsc = fd_resource(prsc);
-	unsigned lvl = cso->u.tex.first_level;
-	unsigned miplevels = cso->u.tex.last_level - lvl;
+	unsigned lvl = fd_sampler_first_level(cso);
+	unsigned miplevels = fd_sampler_last_level(cso) - lvl;
 
 	if (!so)
 		return NULL;
@@ -187,9 +187,9 @@ fd4_sampler_view_create(struct pipe_context *pctx, struct pipe_resource *prsc,
 			A4XX_TEX_CONST_3_LAYERSZ(rsc->layer_size);
 		break;
 	case PIPE_TEXTURE_CUBE:
-	case PIPE_TEXTURE_CUBE_ARRAY:  /* ?? not sure about _CUBE_ARRAY */
+	case PIPE_TEXTURE_CUBE_ARRAY:
 		so->texconst3 =
-			A4XX_TEX_CONST_3_DEPTH(1) |
+			A4XX_TEX_CONST_3_DEPTH(prsc->array_size / 6) |
 			A4XX_TEX_CONST_3_LAYERSZ(rsc->layer_size);
 		break;
 	case PIPE_TEXTURE_3D:

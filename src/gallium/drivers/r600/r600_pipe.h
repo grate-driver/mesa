@@ -36,7 +36,7 @@
 #include "util/list.h"
 #include "util/u_transfer.h"
 
-#define R600_NUM_ATOMS 73
+#define R600_NUM_ATOMS 75
 
 #define R600_MAX_VIEWPORTS 16
 
@@ -84,6 +84,9 @@
 #else
 #define R600_BIG_ENDIAN 0
 #endif
+
+#define R600_DIRTY_ATOM_WORD_BITS (sizeof(unsigned long) * 8)
+#define R600_DIRTY_ATOM_ARRAY_LEN DIV_ROUND_UP(R600_NUM_ATOMS, R600_DIRTY_ATOM_WORD_BITS)
 
 struct r600_context;
 struct r600_bytecode;
@@ -426,6 +429,8 @@ struct r600_context {
 
 	/* State binding slots are here. */
 	struct r600_atom		*atoms[R600_NUM_ATOMS];
+	/* Dirty atom bitmask for fast tests */
+	unsigned long			dirty_atoms[R600_DIRTY_ATOM_ARRAY_LEN];
 	/* States for CS initialization. */
 	struct r600_command_buffer	start_cs_cmd; /* invariant state mostly */
 	/** Compute specific registers initializations.  The start_cs_cmd atom
@@ -493,9 +498,62 @@ struct r600_context {
 static inline void r600_emit_command_buffer(struct radeon_winsys_cs *cs,
 					    struct r600_command_buffer *cb)
 {
-	assert(cs->cdw + cb->num_dw <= RADEON_MAX_CMDBUF_DWORDS);
+	assert(cs->cdw + cb->num_dw <= cs->max_dw);
 	memcpy(cs->buf + cs->cdw, cb->buf, 4 * cb->num_dw);
 	cs->cdw += cb->num_dw;
+}
+
+static inline void r600_set_atom_dirty(struct r600_context *rctx,
+				       struct r600_atom *atom,
+				       bool dirty)
+{
+	unsigned long mask;
+	unsigned int w;
+
+	atom->dirty = dirty;
+
+	assert(atom->id != 0);
+	w = atom->id / R600_DIRTY_ATOM_WORD_BITS;
+	mask = 1ul << (atom->id % R600_DIRTY_ATOM_WORD_BITS);
+	if (dirty)
+		rctx->dirty_atoms[w] |= mask;
+	else
+		rctx->dirty_atoms[w] &= ~mask;
+}
+
+static inline void r600_mark_atom_dirty(struct r600_context *rctx,
+					struct r600_atom *atom)
+{
+	r600_set_atom_dirty(rctx, atom, true);
+}
+
+static inline unsigned int r600_next_dirty_atom(struct r600_context *rctx,
+						unsigned int id)
+{
+#if !defined(DEBUG) && defined(HAVE___BUILTIN_CTZ)
+	unsigned int w = id / R600_DIRTY_ATOM_WORD_BITS;
+	unsigned int bit = id % R600_DIRTY_ATOM_WORD_BITS;
+	unsigned long bits, mask = (1ul << bit) - 1;
+
+	for (; w < R600_DIRTY_ATOM_ARRAY_LEN; w++, mask = 0ul) {
+		bits = rctx->dirty_atoms[w] & ~mask;
+		if (bits == 0)
+			continue;
+		return w * R600_DIRTY_ATOM_WORD_BITS + __builtin_ctzl(bits);
+	}
+
+	return R600_NUM_ATOMS;
+#else
+	for (; id < R600_NUM_ATOMS; id++) {
+		bool dirty = !!(rctx->dirty_atoms[id / R600_DIRTY_ATOM_WORD_BITS] &
+			(1ul << (id % R600_DIRTY_ATOM_WORD_BITS)));
+		assert(dirty == (rctx->atoms[id] && rctx->atoms[id]->dirty));
+		if (dirty)
+			break;
+	}
+
+	return id;
+#endif
 }
 
 void r600_trace_emit(struct r600_context *rctx);
@@ -503,24 +561,26 @@ void r600_trace_emit(struct r600_context *rctx);
 static inline void r600_emit_atom(struct r600_context *rctx, struct r600_atom *atom)
 {
 	atom->emit(&rctx->b, atom);
-	atom->dirty = false;
+	r600_set_atom_dirty(rctx, atom, false);
 	if (rctx->screen->b.trace_bo) {
 		r600_trace_emit(rctx);
 	}
 }
 
-static inline void r600_set_cso_state(struct r600_cso_state *state, void *cso)
+static inline void r600_set_cso_state(struct r600_context *rctx,
+				      struct r600_cso_state *state, void *cso)
 {
 	state->cso = cso;
-	state->atom.dirty = cso != NULL;
+	r600_set_atom_dirty(rctx, &state->atom, cso != NULL);
 }
 
-static inline void r600_set_cso_state_with_cb(struct r600_cso_state *state, void *cso,
+static inline void r600_set_cso_state_with_cb(struct r600_context *rctx,
+					      struct r600_cso_state *state, void *cso,
 					      struct r600_command_buffer *cb)
 {
 	state->cb = cb;
 	state->atom.num_dw = cb ? cb->num_dw : 0;
-	r600_set_cso_state(state, cso);
+	r600_set_cso_state(rctx, state, cso);
 }
 
 /* compute_memory_pool.c */
@@ -528,11 +588,6 @@ struct compute_memory_pool;
 void compute_memory_pool_delete(struct compute_memory_pool* pool);
 struct compute_memory_pool* compute_memory_pool_new(
 	struct r600_screen *rscreen);
-
-/* evergreen_compute.c */
-void evergreen_set_cs_sampler_view(struct pipe_context *ctx_,
-                                   unsigned start_slot, unsigned count,
-                                   struct pipe_sampler_view **views);
 
 /* evergreen_state.c */
 struct pipe_sampler_view *
@@ -656,6 +711,7 @@ void r600_emit_clip_misc_state(struct r600_context *rctx, struct r600_atom *atom
 void r600_emit_stencil_ref(struct r600_context *rctx, struct r600_atom *atom);
 void r600_emit_viewport_state(struct r600_context *rctx, struct r600_atom *atom);
 void r600_emit_shader(struct r600_context *rctx, struct r600_atom *a);
+void r600_add_atom(struct r600_context *rctx, struct r600_atom *atom, unsigned id);
 void r600_init_atom(struct r600_context *rctx, struct r600_atom *atom, unsigned id,
 		    void (*emit)(struct r600_context *ctx, struct r600_atom *state),
 		    unsigned num_dw);
@@ -826,7 +882,7 @@ static inline void r600_write_compute_context_reg_seq(struct radeon_winsys_cs *c
 static inline void r600_write_ctl_const_seq(struct radeon_winsys_cs *cs, unsigned reg, unsigned num)
 {
 	assert(reg >= R600_CTL_CONST_OFFSET);
-	assert(cs->cdw+2+num <= RADEON_MAX_CMDBUF_DWORDS);
+	assert(cs->cdw+2+num <= cs->max_dw);
 	cs->buf[cs->cdw++] = PKT3(PKT3_SET_CTL_CONST, num, 0);
 	cs->buf[cs->cdw++] = (reg - R600_CTL_CONST_OFFSET) >> 2;
 }

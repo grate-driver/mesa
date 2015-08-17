@@ -175,6 +175,9 @@ nvc0_screen_get_param(struct pipe_screen *pscreen, enum pipe_cap param)
    case PIPE_CAP_CLIP_HALFZ:
    case PIPE_CAP_POLYGON_OFFSET_CLAMP:
    case PIPE_CAP_MULTISAMPLE_Z_RESOLVE:
+   case PIPE_CAP_TEXTURE_FLOAT_LINEAR:
+   case PIPE_CAP_TEXTURE_HALF_FLOAT_LINEAR:
+   case PIPE_CAP_DEPTH_BOUNDS_TEST:
       return 1;
    case PIPE_CAP_SEAMLESS_CUBE_MAP_PER_TEXTURE:
       return (class_3d >= NVE4_3D_CLASS) ? 1 : 0;
@@ -229,10 +232,13 @@ nvc0_screen_get_shader_param(struct pipe_screen *pscreen, unsigned shader,
 
    switch (shader) {
    case PIPE_SHADER_VERTEX:
-   case PIPE_SHADER_TESS_CTRL:
-   case PIPE_SHADER_TESS_EVAL:
    case PIPE_SHADER_GEOMETRY:
    case PIPE_SHADER_FRAGMENT:
+      break;
+   case PIPE_SHADER_TESS_CTRL:
+   case PIPE_SHADER_TESS_EVAL:
+      if (class_3d >= GM107_3D_CLASS)
+         return 0;
       break;
    case PIPE_SHADER_COMPUTE:
       if (class_3d != NVE4_3D_CLASS)

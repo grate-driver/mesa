@@ -536,13 +536,11 @@ enum {
    MIPTREE_LAYOUT_DISABLE_AUX              = 1 << 3,
    MIPTREE_LAYOUT_FORCE_HALIGN16           = 1 << 4,
 
-   MIPTREE_LAYOUT_ALLOC_YTILED             = 1 << 5,
-   MIPTREE_LAYOUT_ALLOC_XTILED             = 1 << 6,
-   MIPTREE_LAYOUT_ALLOC_LINEAR             = 1 << 7,
+   MIPTREE_LAYOUT_TILING_Y                 = 1 << 5,
+   MIPTREE_LAYOUT_TILING_NONE              = 1 << 6,
+   MIPTREE_LAYOUT_TILING_ANY               = MIPTREE_LAYOUT_TILING_Y |
+                                             MIPTREE_LAYOUT_TILING_NONE,
 };
-
-#define MIPTREE_LAYOUT_ALLOC_ANY_TILED (MIPTREE_LAYOUT_ALLOC_YTILED | \
-                                        MIPTREE_LAYOUT_ALLOC_XTILED)
 
 struct intel_mipmap_tree *intel_miptree_create(struct brw_context *brw,
                                                GLenum target,

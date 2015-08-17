@@ -607,6 +607,9 @@ enum pipe_cap
    PIPE_CAP_RESOURCE_FROM_USER_MEMORY,
    PIPE_CAP_DEVICE_RESET_STATUS_QUERY,
    PIPE_CAP_MAX_SHADER_PATCH_VARYINGS,
+   PIPE_CAP_TEXTURE_FLOAT_LINEAR,
+   PIPE_CAP_TEXTURE_HALF_FLOAT_LINEAR,
+   PIPE_CAP_DEPTH_BOUNDS_TEST,
 };
 
 #define PIPE_QUIRK_TEXTURE_BORDER_COLOR_SWIZZLE_NV50 (1 << 0)
@@ -762,6 +765,7 @@ union pipe_query_result
    /* PIPE_QUERY_PRIMITIVES_GENERATED */
    /* PIPE_QUERY_PRIMITIVES_EMITTED */
    /* PIPE_DRIVER_QUERY_TYPE_UINT64 */
+   /* PIPE_DRIVER_QUERY_TYPE_HZ */
    uint64_t u64;
 
    /* PIPE_DRIVER_QUERY_TYPE_UINT */
@@ -796,12 +800,22 @@ enum pipe_driver_query_type
    PIPE_DRIVER_QUERY_TYPE_PERCENTAGE   = 3,
    PIPE_DRIVER_QUERY_TYPE_BYTES        = 4,
    PIPE_DRIVER_QUERY_TYPE_MICROSECONDS = 5,
+   PIPE_DRIVER_QUERY_TYPE_HZ           = 6,
 };
 
 enum pipe_driver_query_group_type
 {
    PIPE_DRIVER_QUERY_GROUP_TYPE_CPU = 0,
    PIPE_DRIVER_QUERY_GROUP_TYPE_GPU = 1,
+};
+
+/* Whether an average value per frame or a cumulative value should be
+ * displayed.
+ */
+enum pipe_driver_query_result_type
+{
+   PIPE_DRIVER_QUERY_RESULT_TYPE_AVERAGE = 0,
+   PIPE_DRIVER_QUERY_RESULT_TYPE_CUMULATIVE = 1,
 };
 
 union pipe_numeric_type_union
@@ -817,6 +831,7 @@ struct pipe_driver_query_info
    unsigned query_type; /* PIPE_QUERY_DRIVER_SPECIFIC + i */
    union pipe_numeric_type_union max_value; /* max value that can be returned */
    enum pipe_driver_query_type type;
+   enum pipe_driver_query_result_type result_type;
    unsigned group_id;
 };
 

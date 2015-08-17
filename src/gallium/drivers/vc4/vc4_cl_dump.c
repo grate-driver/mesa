@@ -34,7 +34,7 @@ dump_float(void *cl, uint32_t offset, uint32_t hw_offset)
         void *f = cl + offset;
 
         fprintf(stderr, "0x%08x 0x%08x:      %f (0x%08x)\n",
-                offset, hw_offset, *(float *)f, *(uint32_t *)f);
+                offset, hw_offset, uif(*(uint32_t *)f), *(uint32_t *)f);
 }
 
 static void
@@ -397,7 +397,7 @@ vc4_dump_cl(void *cl, uint32_t size, bool is_render)
         while (offset < size) {
                 uint8_t header = cmds[offset];
 
-                if (header > ARRAY_SIZE(packet_info) ||
+                if (header >= ARRAY_SIZE(packet_info) ||
                     !packet_info[header].name) {
                         fprintf(stderr, "0x%08x 0x%08x: Unknown packet 0x%02x (%d)!\n",
                                 offset, hw_offset, header, header);

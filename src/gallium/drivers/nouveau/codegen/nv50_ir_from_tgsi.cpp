@@ -1296,6 +1296,7 @@ private:
 
    Value *shiftAddress(Value *);
    Value *getVertexBase(int s);
+   Value *getOutputBase(int s);
    DataArray *getArrayForFile(unsigned file, int idx);
    Value *fetchSrc(int s, int c);
    Value *acquireDst(int d, int c);
@@ -1392,6 +1393,8 @@ private:
 
    Value *vtxBase[5]; // base address of vertex in primitive (for TP/GP)
    uint8_t vtxBaseValid;
+
+   Value *outBase; // base address of vertex out patch (for TCP)
 
    Stack condBBs;  // fork BB, then else clause BB
    Stack joinBBs;  // fork BB, for inserting join ops on ENDIF
@@ -1526,6 +1529,22 @@ Converter::getVertexBase(int s)
 }
 
 Value *
+Converter::getOutputBase(int s)
+{
+   assert(s < 5);
+   if (!(vtxBaseValid & (1 << s))) {
+      Value *offset = loadImm(NULL, tgsi.getSrc(s).getIndex(1));
+      if (tgsi.getSrc(s).isIndirect(1))
+         offset = mkOp2v(OP_ADD, TYPE_U32, getSSA(),
+                         fetchSrc(tgsi.getSrc(s).getIndirect(1), 0, NULL),
+                         offset);
+      vtxBaseValid |= 1 << s;
+      vtxBase[s] = mkOp2v(OP_ADD, TYPE_U32, getSSA(), outBase, offset);
+   }
+   return vtxBase[s];
+}
+
+Value *
 Converter::fetchSrc(int s, int c)
 {
    Value *res;
@@ -1539,6 +1558,8 @@ Converter::fetchSrc(int s, int c)
    if (src.is2D()) {
       switch (src.getFile()) {
       case TGSI_FILE_OUTPUT:
+         dimRel = getOutputBase(s);
+         break;
       case TGSI_FILE_INPUT:
          dimRel = getVertexBase(s);
          break;
@@ -3344,10 +3365,21 @@ Converter::run()
          clipVtx[c] = getScratch();
    }
 
-   if (prog->getType() == Program::TYPE_FRAGMENT) {
+   switch (prog->getType()) {
+   case Program::TYPE_TESSELLATION_CONTROL:
+      outBase = mkOp2v(
+         OP_SUB, TYPE_U32, getSSA(),
+         mkOp1v(OP_RDSV, TYPE_U32, getSSA(), mkSysVal(SV_LANEID, 0)),
+         mkOp1v(OP_RDSV, TYPE_U32, getSSA(), mkSysVal(SV_INVOCATION_ID, 0)));
+      break;
+   case Program::TYPE_FRAGMENT: {
       Symbol *sv = mkSysVal(SV_POSITION, 3);
       fragCoord[3] = mkOp1v(OP_RDSV, TYPE_F32, getSSA(), sv);
       mkOp1(OP_RCP, TYPE_F32, fragCoord[3], fragCoord[3]);
+      break;
+   }
+   default:
+      break;
    }
 
    if (info->io.viewportId >= 0)

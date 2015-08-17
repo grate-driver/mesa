@@ -171,6 +171,17 @@ dst_reg::dst_reg(register_file file, int reg, const glsl_type *type,
    this->writemask = writemask;
 }
 
+dst_reg::dst_reg(register_file file, int reg, brw_reg_type type,
+                 unsigned writemask)
+{
+   init();
+
+   this->file = file;
+   this->reg = reg;
+   this->type = type;
+   this->writemask = writemask;
+}
+
 dst_reg::dst_reg(struct brw_reg reg)
 {
    init();
@@ -1709,6 +1720,9 @@ vec4_visitor::emit_shader_time_write(int shader_time_subindex, src_reg value)
 bool
 vec4_visitor::run(gl_clip_plane *clip_planes)
 {
+   bool use_vec4_nir =
+      compiler->glsl_compiler_options[stage].NirOptions != NULL;
+
    sanity_param_count = prog->Parameters->NumParameters;
 
    if (shader_time_index >= 0)
@@ -1718,10 +1732,15 @@ vec4_visitor::run(gl_clip_plane *clip_planes)
 
    emit_prolog();
 
-   /* Generate VS IR for main().  (the visitor only descends into
-    * functions called "main").
-    */
-   if (shader) {
+   if (use_vec4_nir) {
+      assert(prog->nir != NULL);
+      emit_nir_code();
+      if (failed)
+         return false;
+   } else if (shader) {
+      /* Generate VS IR for main().  (the visitor only descends into
+       * functions called "main").
+       */
       visit_instructions(shader->base.ir);
    } else {
       emit_program_code();
@@ -1741,7 +1760,7 @@ vec4_visitor::run(gl_clip_plane *clip_planes)
     * that we have reladdr computations available for CSE, since we'll
     * often do repeated subexpressions for those.
     */
-   if (shader) {
+   if (shader || use_vec4_nir) {
       move_grf_array_access_to_scratch();
       move_uniform_array_access_to_pull_constants();
    } else {
@@ -1900,18 +1919,21 @@ brw_vs_emit(struct brw_context *brw,
    if (unlikely(INTEL_DEBUG & DEBUG_VS))
       brw_dump_ir("vertex", prog, &shader->base, &vp->Base);
 
-   if (brw->intelScreen->compiler->scalar_vs) {
-      if (!vp->Base.nir) {
-         /* Normally we generate NIR in LinkShader() or
-          * ProgramStringNotify(), but Mesa's fixed-function vertex program
-          * handling doesn't notify the driver at all.  Just do it here, at
-          * the last minute, even though it's lame.
-          */
-         assert(vp->Base.Id == 0 && prog == NULL);
-         vp->Base.nir =
-            brw_create_nir(brw, NULL, &vp->Base, MESA_SHADER_VERTEX);
-      }
+   if (!vp->Base.nir &&
+       (brw->intelScreen->compiler->scalar_vs ||
+        brw->intelScreen->compiler->glsl_compiler_options[MESA_SHADER_VERTEX].NirOptions != NULL)) {
+      /* Normally we generate NIR in LinkShader() or
+       * ProgramStringNotify(), but Mesa's fixed-function vertex program
+       * handling doesn't notify the driver at all.  Just do it here, at
+       * the last minute, even though it's lame.
+       */
+      assert(vp->Base.Id == 0 && prog == NULL);
+      vp->Base.nir =
+         brw_create_nir(brw, NULL, &vp->Base, MESA_SHADER_VERTEX,
+                        brw->intelScreen->compiler->scalar_vs);
+   }
 
+   if (brw->intelScreen->compiler->scalar_vs) {
       prog_data->base.dispatch_mode = DISPATCH_MODE_SIMD8;
 
       fs_visitor v(brw->intelScreen->compiler, brw,
