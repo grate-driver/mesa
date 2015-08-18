@@ -149,6 +149,7 @@ confflags-swx11 = \
 	--disable-shared-glapi \
 	--disable-gles1 \
 	--disable-gles2 \
+	--disable-omx \
 	$(buildflags)
 
 confflags-swx11-static = \
@@ -161,6 +162,7 @@ confflags-swx11-static = \
 	--disable-shared-glapi \
 	--disable-gles1 \
 	--disable-gles2 \
+	--disable-omx \
 	$(buildflags)
 
 confflags-swx11-i386-i686 = \
@@ -172,6 +174,7 @@ confflags-swx11-i386-i686 = \
 	--disable-shared-glapi \
 	--disable-gles1 \
 	--disable-gles2 \
+	--disable-omx \
 	--libdir=/usr/lib/$(DEB_HOST_MULTIARCH)/i686/cmov \
 	$(buildflags-i686)
 
