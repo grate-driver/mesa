@@ -1,4 +1,4 @@
-mesa (11.0.0~git20150817-1) UNRELEASED; urgency=medium
+mesa (11.0.0~git20150817-1) experimental; urgency=medium
 
   * New upstream snapshot
   * control: Bump libdrm build-dep to 2.4.63.
@@ -8,7 +8,7 @@ mesa (11.0.0~git20150817-1) UNRELEASED; urgency=medium
   * control, rules: Migrate to llvm 3.7.
   * rules: Enable llvmpipe on armhf again.
 
- -- Timo Aaltonen <tjaalton@debian.org>  Tue, 28 Jul 2015 13:48:58 +0300
+ -- Timo Aaltonen <tjaalton@debian.org>  Tue, 18 Aug 2015 07:53:45 +0300
 
 mesa (10.6.3-1) unstable; urgency=medium
 
