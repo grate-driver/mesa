@@ -132,6 +132,7 @@ confflags-dri = \
 	--enable-shared-glapi \
 	--enable-texture-float \
 	--disable-xvmc \
+	--disable-va \
 	--disable-omx \
 	$(confflags_DIRECT_RENDERING) \
 	$(confflags_DRI3) \
@@ -149,6 +150,7 @@ confflags-swx11 = \
 	--disable-shared-glapi \
 	--disable-gles1 \
 	--disable-gles2 \
+	--disable-va \
 	--disable-omx \
 	$(buildflags)
 
@@ -162,6 +164,7 @@ confflags-swx11-static = \
 	--disable-shared-glapi \
 	--disable-gles1 \
 	--disable-gles2 \
+	--disable-va \
 	--disable-omx \
 	$(buildflags)
 
@@ -174,6 +177,7 @@ confflags-swx11-i386-i686 = \
 	--disable-shared-glapi \
 	--disable-gles1 \
 	--disable-gles2 \
+	--disable-va \
 	--disable-omx \
 	--libdir=/usr/lib/$(DEB_HOST_MULTIARCH)/i686/cmov \
 	$(buildflags-i686)
