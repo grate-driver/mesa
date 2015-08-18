@@ -7,7 +7,7 @@ Build-Depends:
  debhelper (>= 9),
  quilt (>= 0.40),
  pkg-config,
- libdrm-dev (>= 2.4.62) [!hurd-any],
+ libdrm-dev (>= 2.4.63) [!hurd-any],
  libx11-dev,
  x11proto-gl-dev (>= 1.4.14),
  libxxf86vm-dev,

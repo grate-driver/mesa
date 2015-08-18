@@ -1,7 +1,7 @@
 mesa (11.0.0~git20150817-1) UNRELEASED; urgency=medium
 
   * New upstream snapshot
-  * control: Bump libdrm build-dep to 2.4.62.
+  * control: Bump libdrm build-dep to 2.4.63.
   * control: Add libomxil-bellagio-dev to build-deps.
   * rules: Disable gles1 & 2 for swx11 builds.
   * libegl1-mesa.symbols, libgles2-mesa.symbols: Updated
