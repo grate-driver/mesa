@@ -1,8 +1,12 @@
 mesa (11.0.0~git20150817-2) UNRELEASED; urgency=medium
 
+  [ Andreas Boll ]
   * rules: Disable omx for swx11 builds.
   * control: Drop unneeded libomxil-bellagio-dev build-dep.
   * rules: Explicitly disable vaapi (Closes: #789100).
+
+  [ Timo Aaltonen ]
+  * control: Delete commented out libgl1-mesa-glx-i686 from the file.
 
  -- Andreas Boll <andreas.boll.dev@gmail.com>  Tue, 18 Aug 2015 16:25:44 +0200
 
