@@ -24,7 +24,6 @@ Build-Depends:
  x11proto-dri3-dev (>= 1.0),
  x11proto-present-dev (>= 1.0),
  linux-libc-dev (>= 2.6.31) [linux-any],
- libomxil-bellagio-dev,
  libx11-xcb-dev,
  libxcb-dri2-0-dev (>= 1.8),
  libxcb-glx0-dev (>= 1.8.1),
