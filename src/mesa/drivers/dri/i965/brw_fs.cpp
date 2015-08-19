@@ -4098,11 +4098,11 @@ fs_visitor::calculate_register_pressure()
 void
 fs_visitor::optimize()
 {
-   split_virtual_grfs();
-
    move_uniform_array_access_to_pull_constants();
    assign_constant_locations();
    demote_pull_constants();
+
+   split_virtual_grfs();
 
 #define OPT(pass, args...) ({                                           \
       pass_num++;                                                       \
