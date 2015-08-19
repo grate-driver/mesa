@@ -75,8 +75,12 @@ public:
                    bool no_spills,
                    int shader_time_index);
 
+   virtual void nir_setup_inputs(nir_shader *shader);
+   virtual void nir_setup_system_value_intrinsic(nir_intrinsic_instr *instr);
+
 protected:
-   virtual dst_reg *make_reg_for_system_value(ir_variable *ir);
+   virtual dst_reg *make_reg_for_system_value(int location,
+                                              const glsl_type *type);
    virtual void setup_payload();
    virtual void emit_prolog();
    virtual void emit_program_code();
@@ -86,6 +90,9 @@ protected:
    virtual int compute_array_stride(ir_dereference_array *ir);
    virtual void visit(ir_emit_vertex *);
    virtual void visit(ir_end_primitive *);
+   virtual void gs_emit_vertex(int stream_id);
+   virtual void gs_end_primitive();
+   virtual void nir_emit_intrinsic(nir_intrinsic_instr *instr);
 
 protected:
    int setup_varying_inputs(int payload_reg, int *attribute_map,

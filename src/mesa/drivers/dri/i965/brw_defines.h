@@ -875,6 +875,21 @@ enum opcode {
     * instructions.
     */
    FS_OPCODE_FB_WRITE = 128,
+
+   /**
+    * Same as FS_OPCODE_FB_WRITE but expects its arguments separately as
+    * individual sources instead of as a single payload blob:
+    *
+    * Source 0: [required] Color 0.
+    * Source 1: [optional] Color 1 (for dual source blend messages).
+    * Source 2: [optional] Src0 Alpha.
+    * Source 3: [optional] Source Depth (passthrough from the thread payload).
+    * Source 4: [optional] Destination Depth (gl_FragDepth).
+    * Source 5: [optional] Sample Mask (gl_SampleMask).
+    * Source 6: [required] Number of color components (as a UD immediate).
+    */
+   FS_OPCODE_FB_WRITE_LOGICAL,
+
    FS_OPCODE_BLORP_FB_WRITE,
    FS_OPCODE_REP_FB_WRITE,
    SHADER_OPCODE_RCP,
@@ -888,18 +903,49 @@ enum opcode {
    SHADER_OPCODE_SIN,
    SHADER_OPCODE_COS,
 
+   /**
+    * Texture sampling opcodes.
+    *
+    * LOGICAL opcodes are eventually translated to the matching non-LOGICAL
+    * opcode but instead of taking a single payload blob they expect their
+    * arguments separately as individual sources:
+    *
+    * Source 0: [optional] Texture coordinates.
+    * Source 1: [optional] Shadow comparitor.
+    * Source 2: [optional] dPdx if the operation takes explicit derivatives,
+    *                      otherwise LOD value.
+    * Source 3: [optional] dPdy if the operation takes explicit derivatives.
+    * Source 4: [optional] Sample index.
+    * Source 5: [optional] MCS data.
+    * Source 6: [required] Texture sampler.
+    * Source 7: [optional] Texel offset.
+    * Source 8: [required] Number of coordinate components (as UD immediate).
+    * Source 9: [required] Number derivative components (as UD immediate).
+    */
    SHADER_OPCODE_TEX,
+   SHADER_OPCODE_TEX_LOGICAL,
    SHADER_OPCODE_TXD,
+   SHADER_OPCODE_TXD_LOGICAL,
    SHADER_OPCODE_TXF,
+   SHADER_OPCODE_TXF_LOGICAL,
    SHADER_OPCODE_TXL,
+   SHADER_OPCODE_TXL_LOGICAL,
    SHADER_OPCODE_TXS,
+   SHADER_OPCODE_TXS_LOGICAL,
    FS_OPCODE_TXB,
+   FS_OPCODE_TXB_LOGICAL,
    SHADER_OPCODE_TXF_CMS,
+   SHADER_OPCODE_TXF_CMS_LOGICAL,
    SHADER_OPCODE_TXF_UMS,
+   SHADER_OPCODE_TXF_UMS_LOGICAL,
    SHADER_OPCODE_TXF_MCS,
+   SHADER_OPCODE_TXF_MCS_LOGICAL,
    SHADER_OPCODE_LOD,
+   SHADER_OPCODE_LOD_LOGICAL,
    SHADER_OPCODE_TG4,
+   SHADER_OPCODE_TG4_LOGICAL,
    SHADER_OPCODE_TG4_OFFSET,
+   SHADER_OPCODE_TG4_OFFSET_LOGICAL,
 
    /**
     * Combines multiple sources of size 1 into a larger virtual GRF.
@@ -917,13 +963,33 @@ enum opcode {
 
    SHADER_OPCODE_SHADER_TIME_ADD,
 
+   /**
+    * Typed and untyped surface access opcodes.
+    *
+    * LOGICAL opcodes are eventually translated to the matching non-LOGICAL
+    * opcode but instead of taking a single payload blob they expect their
+    * arguments separately as individual sources:
+    *
+    * Source 0: [required] Surface coordinates.
+    * Source 1: [optional] Operation source.
+    * Source 2: [required] Surface index.
+    * Source 3: [required] Number of coordinate components (as UD immediate).
+    * Source 4: [required] Opcode-specific control immediate, same as source 2
+    *                      of the matching non-LOGICAL opcode.
+    */
    SHADER_OPCODE_UNTYPED_ATOMIC,
+   SHADER_OPCODE_UNTYPED_ATOMIC_LOGICAL,
    SHADER_OPCODE_UNTYPED_SURFACE_READ,
+   SHADER_OPCODE_UNTYPED_SURFACE_READ_LOGICAL,
    SHADER_OPCODE_UNTYPED_SURFACE_WRITE,
+   SHADER_OPCODE_UNTYPED_SURFACE_WRITE_LOGICAL,
 
    SHADER_OPCODE_TYPED_ATOMIC,
+   SHADER_OPCODE_TYPED_ATOMIC_LOGICAL,
    SHADER_OPCODE_TYPED_SURFACE_READ,
+   SHADER_OPCODE_TYPED_SURFACE_READ_LOGICAL,
    SHADER_OPCODE_TYPED_SURFACE_WRITE,
+   SHADER_OPCODE_TYPED_SURFACE_WRITE_LOGICAL,
 
    SHADER_OPCODE_MEMORY_FENCE,
 
@@ -969,7 +1035,6 @@ enum opcode {
    FS_OPCODE_VARYING_PULL_CONSTANT_LOAD_GEN7,
    FS_OPCODE_MOV_DISPATCH_TO_FLAGS,
    FS_OPCODE_DISCARD_JUMP,
-   FS_OPCODE_SET_OMASK,
    FS_OPCODE_SET_SAMPLE_ID,
    FS_OPCODE_SET_SIMD4X2_OFFSET,
    FS_OPCODE_PACK_HALF_2x16_SPLIT,
@@ -1149,6 +1214,11 @@ enum opcode {
     * GLSL barrier()
     */
    SHADER_OPCODE_BARRIER,
+
+   /**
+    * Calculate the high 32-bits of a 32x32 multiply.
+    */
+   SHADER_OPCODE_MULH,
 };
 
 enum brw_urb_write_flags {
@@ -1785,6 +1855,7 @@ enum brw_message_target {
 # define GEN6_VS_BINDING_TABLE_ENTRY_COUNT_SHIFT	18
 # define GEN6_VS_FLOATING_POINT_MODE_IEEE_754		(0 << 16)
 # define GEN6_VS_FLOATING_POINT_MODE_ALT		(1 << 16)
+# define HSW_VS_UAV_ACCESS_ENABLE                       (1 << 12)
 /* DW4 */
 # define GEN6_VS_DISPATCH_START_GRF_SHIFT		20
 # define GEN6_VS_URB_READ_LENGTH_SHIFT			11
@@ -1810,6 +1881,7 @@ enum brw_message_target {
 # define GEN6_GS_BINDING_TABLE_ENTRY_COUNT_SHIFT	18
 # define GEN6_GS_FLOATING_POINT_MODE_IEEE_754		(0 << 16)
 # define GEN6_GS_FLOATING_POINT_MODE_ALT		(1 << 16)
+# define HSW_GS_UAV_ACCESS_ENABLE       		(1 << 12)
 /* DW4 */
 # define GEN7_GS_OUTPUT_VERTEX_SIZE_SHIFT		23
 # define GEN7_GS_OUTPUT_TOPOLOGY_SHIFT			17
@@ -2312,6 +2384,9 @@ enum brw_wm_barycentric_interp_mode {
 # define GEN7_WM_KILL_ENABLE				(1 << 25)
 # define GEN7_WM_COMPUTED_DEPTH_MODE_SHIFT              23
 # define GEN7_WM_USES_SOURCE_DEPTH			(1 << 20)
+# define GEN7_WM_EARLY_DS_CONTROL_NORMAL                (0 << 21)
+# define GEN7_WM_EARLY_DS_CONTROL_PSEXEC                (1 << 21)
+# define GEN7_WM_EARLY_DS_CONTROL_PREPS                 (2 << 21)
 # define GEN7_WM_USES_SOURCE_W			        (1 << 19)
 # define GEN7_WM_POSITION_ZW_PIXEL			(0 << 17)
 # define GEN7_WM_POSITION_ZW_CENTROID			(2 << 17)
@@ -2336,6 +2411,7 @@ enum brw_wm_barycentric_interp_mode {
 /* DW2 */
 # define GEN7_WM_MSDISPMODE_PERSAMPLE			(0 << 31)
 # define GEN7_WM_MSDISPMODE_PERPIXEL			(1 << 31)
+# define HSW_WM_UAV_ONLY                                (1 << 30)
 
 #define _3DSTATE_PS				0x7820 /* GEN7+ */
 /* DW1: kernel pointer */
@@ -2359,6 +2435,7 @@ enum brw_wm_barycentric_interp_mode {
 # define GEN7_PS_RENDER_TARGET_FAST_CLEAR_ENABLE	(1 << 8)
 # define GEN7_PS_DUAL_SOURCE_BLEND_ENABLE		(1 << 7)
 # define GEN7_PS_RENDER_TARGET_RESOLVE_ENABLE		(1 << 6)
+# define HSW_PS_UAV_ACCESS_ENABLE			(1 << 5)
 # define GEN7_PS_POSOFFSET_NONE				(0 << 3)
 # define GEN7_PS_POSOFFSET_CENTROID			(2 << 3)
 # define GEN7_PS_POSOFFSET_SAMPLE			(3 << 3)

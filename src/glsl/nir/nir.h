@@ -1637,14 +1637,16 @@ void nir_lower_global_vars_to_local(nir_shader *shader);
 
 void nir_lower_locals_to_regs(nir_shader *shader);
 
-void nir_assign_var_locations_scalar(struct exec_list *var_list,
-                                     unsigned *size);
-void nir_assign_var_locations_scalar_direct_first(nir_shader *shader,
-                                                  struct exec_list *var_list,
-                                                  unsigned *direct_size,
-                                                  unsigned *size);
+void nir_assign_var_locations(struct exec_list *var_list,
+                              unsigned *size,
+                              bool is_scalar);
+void nir_assign_var_locations_direct_first(nir_shader *shader,
+                                           struct exec_list *var_list,
+                                           unsigned *direct_size,
+                                           unsigned *size,
+                                           bool is_scalar);
 
-void nir_lower_io(nir_shader *shader);
+void nir_lower_io(nir_shader *shader, bool is_scalar);
 
 void nir_lower_vars_to_ssa(nir_shader *shader);
 
@@ -1652,6 +1654,7 @@ void nir_remove_dead_variables(nir_shader *shader);
 
 void nir_lower_vec_to_movs(nir_shader *shader);
 void nir_lower_alu_to_scalar(nir_shader *shader);
+void nir_lower_load_const_to_scalar(nir_shader *shader);
 
 void nir_lower_phis_to_scalar(nir_shader *shader);
 
@@ -1700,6 +1703,8 @@ bool nir_opt_peephole_select(nir_shader *shader);
 bool nir_opt_peephole_ffma(nir_shader *shader);
 
 bool nir_opt_remove_phis(nir_shader *shader);
+
+bool nir_opt_undef(nir_shader *shader);
 
 void nir_sweep(nir_shader *shader);
 

@@ -82,7 +82,7 @@ brw_cs_emit(struct brw_context *brw,
    prog_data->local_size[0] = cp->LocalSize[0];
    prog_data->local_size[1] = cp->LocalSize[1];
    prog_data->local_size[2] = cp->LocalSize[2];
-   int local_workgroup_size =
+   unsigned local_workgroup_size =
       cp->LocalSize[0] * cp->LocalSize[1] * cp->LocalSize[2];
 
    cfg_t *cfg = NULL;
@@ -182,7 +182,8 @@ brw_codegen_cs_prog(struct brw_context *brw,
     * prog_data associated with the compiled program, and which will be freed
     * by the state cache.
     */
-   int param_count = cs->num_uniform_components;
+   int param_count = cs->num_uniform_components +
+                     cs->NumImages * BRW_IMAGE_PARAM_SIZE;
 
    /* The backend also sometimes adds params for texture size. */
    param_count += 2 * ctx->Const.Program[MESA_SHADER_COMPUTE].MaxTextureImageUnits;
@@ -190,7 +191,10 @@ brw_codegen_cs_prog(struct brw_context *brw,
       rzalloc_array(NULL, const gl_constant_value *, param_count);
    prog_data.base.pull_param =
       rzalloc_array(NULL, const gl_constant_value *, param_count);
+   prog_data.base.image_param =
+      rzalloc_array(NULL, struct brw_image_param, cs->NumImages);
    prog_data.base.nr_params = param_count;
+   prog_data.base.nr_image_params = cs->NumImages;
 
    program = brw_cs_emit(brw, mem_ctx, key, &prog_data,
                          &cp->program, prog, &program_size);

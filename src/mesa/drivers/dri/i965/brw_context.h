@@ -201,6 +201,7 @@ enum brw_state_id {
    BRW_STATE_STATS_WM,
    BRW_STATE_UNIFORM_BUFFER,
    BRW_STATE_ATOMIC_BUFFER,
+   BRW_STATE_IMAGE_UNITS,
    BRW_STATE_META_IN_PROGRESS,
    BRW_STATE_INTERPOLATION_MAP,
    BRW_STATE_PUSH_CONSTANT_ALLOCATION,
@@ -282,6 +283,7 @@ enum brw_state_id {
 #define BRW_NEW_STATS_WM                (1ull << BRW_STATE_STATS_WM)
 #define BRW_NEW_UNIFORM_BUFFER          (1ull << BRW_STATE_UNIFORM_BUFFER)
 #define BRW_NEW_ATOMIC_BUFFER           (1ull << BRW_STATE_ATOMIC_BUFFER)
+#define BRW_NEW_IMAGE_UNITS             (1ull << BRW_STATE_IMAGE_UNITS)
 #define BRW_NEW_META_IN_PROGRESS        (1ull << BRW_STATE_META_IN_PROGRESS)
 #define BRW_NEW_INTERPOLATION_MAP       (1ull << BRW_STATE_INTERPOLATION_MAP)
 #define BRW_NEW_PUSH_CONSTANT_ALLOCATION (1ull << BRW_STATE_PUSH_CONSTANT_ALLOCATION)
@@ -361,6 +363,7 @@ struct brw_stage_prog_data {
 
    GLuint nr_params;       /**< number of float params/constants */
    GLuint nr_pull_params;
+   unsigned nr_image_params;
 
    unsigned curb_read_length;
    unsigned total_scratch;
@@ -381,6 +384,59 @@ struct brw_stage_prog_data {
     */
    const gl_constant_value **param;
    const gl_constant_value **pull_param;
+
+   /**
+    * Image metadata passed to the shader as uniforms.  This is deliberately
+    * ignored by brw_stage_prog_data_compare() because its contents don't have
+    * any influence on program compilation.
+    */
+   struct brw_image_param *image_param;
+};
+
+/*
+ * Image metadata structure as laid out in the shader parameter
+ * buffer.  Entries have to be 16B-aligned for the vec4 back-end to be
+ * able to use them.  That's okay because the padding and any unused
+ * entries [most of them except when we're doing untyped surface
+ * access] will be removed by the uniform packing pass.
+ */
+#define BRW_IMAGE_PARAM_SURFACE_IDX_OFFSET      0
+#define BRW_IMAGE_PARAM_OFFSET_OFFSET           4
+#define BRW_IMAGE_PARAM_SIZE_OFFSET             8
+#define BRW_IMAGE_PARAM_STRIDE_OFFSET           12
+#define BRW_IMAGE_PARAM_TILING_OFFSET           16
+#define BRW_IMAGE_PARAM_SWIZZLING_OFFSET        20
+#define BRW_IMAGE_PARAM_SIZE                    24
+
+struct brw_image_param {
+   /** Surface binding table index. */
+   uint32_t surface_idx;
+
+   /** Offset applied to the X and Y surface coordinates. */
+   uint32_t offset[2];
+
+   /** Surface X, Y and Z dimensions. */
+   uint32_t size[3];
+
+   /** X-stride in bytes, Y-stride in pixels, horizontal slice stride in
+    * pixels, vertical slice stride in pixels.
+    */
+   uint32_t stride[4];
+
+   /** Log2 of the tiling modulus in the X, Y and Z dimension. */
+   uint32_t tiling[3];
+
+   /**
+    * Right shift to apply for bit 6 address swizzling.  Two different
+    * swizzles can be specified and will be applied one after the other.  The
+    * resulting address will be:
+    *
+    *  addr' = addr ^ ((1 << 6) & ((addr >> swizzling[0]) ^
+    *                              (addr >> swizzling[1])))
+    *
+    * Use \c 0xff if any of the swizzles is not required.
+    */
+   uint32_t swizzling[2];
 };
 
 /* Data about a particular attempt to compile a program.  Note that
@@ -410,6 +466,7 @@ struct brw_wm_prog_data {
 
    uint8_t computed_depth_mode;
 
+   bool early_fragment_tests;
    bool no_8;
    bool dual_src_blend;
    bool uses_pos_offset;
@@ -1241,12 +1298,12 @@ struct brw_context
     * Platform specific constants containing the maximum number of threads
     * for each pipeline stage.
     */
-   int max_vs_threads;
-   int max_hs_threads;
-   int max_ds_threads;
-   int max_gs_threads;
-   int max_wm_threads;
-   int max_cs_threads;
+   unsigned max_vs_threads;
+   unsigned max_hs_threads;
+   unsigned max_ds_threads;
+   unsigned max_gs_threads;
+   unsigned max_wm_threads;
+   unsigned max_cs_threads;
 
    /* BRW_NEW_URB_ALLOCATIONS:
     */
@@ -1459,8 +1516,8 @@ struct brw_context
    } perfmon;
 
    int num_atoms[BRW_NUM_PIPELINES];
-   const struct brw_tracked_state render_atoms[57];
-   const struct brw_tracked_state compute_atoms[3];
+   const struct brw_tracked_state render_atoms[60];
+   const struct brw_tracked_state compute_atoms[4];
 
    /* If (INTEL_DEBUG & DEBUG_BATCH) */
    struct {
@@ -1738,11 +1795,17 @@ void brw_upload_abo_surfaces(struct brw_context *brw,
                              struct gl_shader_program *prog,
                              struct brw_stage_state *stage_state,
                              struct brw_stage_prog_data *prog_data);
+void brw_upload_image_surfaces(struct brw_context *brw,
+                               struct gl_shader *shader,
+                               struct brw_stage_state *stage_state,
+                               struct brw_stage_prog_data *prog_data);
 
 /* brw_surface_formats.c */
 bool brw_render_target_supported(struct brw_context *brw,
                                  struct gl_renderbuffer *rb);
 uint32_t brw_depth_format(struct brw_context *brw, mesa_format format);
+mesa_format brw_lower_mesa_image_format(const struct brw_device_info *devinfo,
+                                        mesa_format format);
 
 /* brw_performance_monitor.c */
 void brw_init_performance_monitors(struct brw_context *brw);

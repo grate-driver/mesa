@@ -203,32 +203,12 @@ is_xfb_marker(const char *str)
    return false;
 }
 
-/**
- * Checks if given name index is legal for GetProgramResourceIndex,
- * check is written to be compatible with GL_ARB_array_of_arrays.
- */
-static bool
-valid_program_resource_index_name(const GLchar *name)
-{
-   const char *array = strstr(name, "[");
-   const char *close = strrchr(name, ']');
-
-   /* Not array, no need for the check. */
-   if (!array)
-      return true;
-
-   /* Last array index has to be zero. */
-   if (!close || *--close != '0')
-      return false;
-
-   return true;
-}
-
 GLuint GLAPIENTRY
 _mesa_GetProgramResourceIndex(GLuint program, GLenum programInterface,
                               const GLchar *name)
 {
    GET_CURRENT_CONTEXT(ctx);
+   unsigned array_index = 0;
    struct gl_program_resource *res;
    struct gl_shader_program *shProg =
       _mesa_lookup_shader_program_err(ctx, program,
@@ -268,13 +248,10 @@ _mesa_GetProgramResourceIndex(GLuint program, GLenum programInterface,
    case GL_PROGRAM_OUTPUT:
    case GL_UNIFORM:
    case GL_TRANSFORM_FEEDBACK_VARYING:
-      /* Validate name syntax for array variables */
-      if (!valid_program_resource_index_name(name))
-         return GL_INVALID_INDEX;
-      /* fall-through */
    case GL_UNIFORM_BLOCK:
-      res = _mesa_program_resource_find_name(shProg, programInterface, name);
-      if (!res)
+      res = _mesa_program_resource_find_name(shProg, programInterface, name,
+                                             &array_index);
+      if (!res || array_index > 0)
          return GL_INVALID_INDEX;
 
       return _mesa_program_resource_index(shProg, res);
@@ -296,12 +273,6 @@ _mesa_GetProgramResourceName(GLuint program, GLenum programInterface,
    struct gl_shader_program *shProg =
       _mesa_lookup_shader_program_err(ctx, program,
                                       "glGetProgramResourceName");
-
-   /* Set user friendly return values in case of errors. */
-   if (name)
-      *name = '\0';
-   if (length)
-      *length = 0;
 
    if (!shProg || !name)
       return;
@@ -347,36 +318,6 @@ _mesa_GetProgramResourceiv(GLuint program, GLenum programInterface,
                                 propCount, props, bufSize, length, params);
 }
 
-/**
- * Function verifies syntax of given name for GetProgramResourceLocation
- * and GetProgramResourceLocationIndex for the following cases:
- *
- * "array element portion of a string passed to GetProgramResourceLocation
- * or GetProgramResourceLocationIndex must not have, a "+" sign, extra
- * leading zeroes, or whitespace".
- *
- * Check is written to be compatible with GL_ARB_array_of_arrays.
- */
-static bool
-invalid_array_element_syntax(const GLchar *name)
-{
-   char *first = strchr(name, '[');
-   char *last = strrchr(name, '[');
-
-   if (!first)
-      return false;
-
-   /* No '+' or ' ' allowed anywhere. */
-   if (strchr(first, '+') || strchr(first, ' '))
-      return true;
-
-   /* Check that last array index is 0. */
-   if (last[1] == '0' && last[2] != ']')
-      return true;
-
-   return false;
-}
-
 static struct gl_shader_program *
 lookup_linked_program(GLuint program, const char *caller)
 {
@@ -403,7 +344,7 @@ _mesa_GetProgramResourceLocation(GLuint program, GLenum programInterface,
    struct gl_shader_program *shProg =
       lookup_linked_program(program, "glGetProgramResourceLocation");
 
-   if (!shProg || !name || invalid_array_element_syntax(name))
+   if (!shProg || !name)
       return -1;
 
    /* Validate programInterface. */
@@ -453,7 +394,7 @@ _mesa_GetProgramResourceLocationIndex(GLuint program, GLenum programInterface,
    struct gl_shader_program *shProg =
       lookup_linked_program(program, "glGetProgramResourceLocationIndex");
 
-   if (!shProg || !name || invalid_array_element_syntax(name))
+   if (!shProg || !name)
       return -1;
 
    /* From the GL_ARB_program_interface_query spec:

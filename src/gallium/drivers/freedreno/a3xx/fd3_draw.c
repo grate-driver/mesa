@@ -243,10 +243,7 @@ fd3_clear(struct fd_context *ctx, unsigned buffers,
 		.vtx  = &fd3_ctx->solid_vbuf_state,
 		.prog = &ctx->solid_prog,
 		.key = {
-			.half_precision = (fd3_half_precision(pfb->cbufs[0]) &&
-							   fd3_half_precision(pfb->cbufs[1]) &&
-							   fd3_half_precision(pfb->cbufs[2]) &&
-							   fd3_half_precision(pfb->cbufs[3])),
+			.half_precision = fd_half_precision(pfb),
 		},
 	};
 
@@ -324,7 +321,7 @@ fd3_clear(struct fd_context *ctx, unsigned buffers,
 				A3XX_RB_STENCIL_CONTROL_ZFAIL_BF(STENCIL_KEEP));
 	}
 
-	for (i = 0; i < 4; i++) {
+	for (i = 0; i < A3XX_MAX_RENDER_TARGETS; i++) {
 		OUT_PKT0(ring, REG_A3XX_RB_MRT_CONTROL(i), 1);
 		OUT_RING(ring, A3XX_RB_MRT_CONTROL_ROP_CODE(ROP_COPY) |
 				A3XX_RB_MRT_CONTROL_DITHER_MODE(DITHER_ALWAYS) |

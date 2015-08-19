@@ -148,67 +148,58 @@ struct si_shader_data {
 #define SI_RING_TESS_FACTOR	0 /* for HS (TCS)  */
 #define SI_RING_ESGS		0 /* for ES, GS */
 #define SI_RING_GSVS		1 /* for GS, VS */
-#define SI_NUM_RING_BUFFERS	2
+#define SI_RING_GSVS_1		2 /* 1, 2, 3 for GS */
+#define SI_RING_GSVS_2		3
+#define SI_RING_GSVS_3		4
+#define SI_NUM_RING_BUFFERS	5
 #define SI_SO_BUF_OFFSET	SI_NUM_RING_BUFFERS
 #define SI_NUM_RW_BUFFERS	(SI_SO_BUF_OFFSET + 4)
 
 #define SI_NUM_VERTEX_BUFFERS	16
 
 
-/* This represents resource descriptors in memory, such as buffer resources,
+/* This represents descriptors in memory, such as buffer resources,
  * image resources, and sampler states.
  */
 struct si_descriptors {
-	struct r600_atom atom;
-
-	/* The size of one resource descriptor. */
+	/* The list of descriptors in malloc'd memory. */
+	uint32_t *list;
+	/* The size of one descriptor. */
 	unsigned element_dw_size;
-	/* The maximum number of resource descriptors. */
+	/* The maximum number of descriptors. */
 	unsigned num_elements;
+	/* Whether the list has been changed and should be re-uploaded. */
+	bool list_dirty;
 
-	/* The buffer where resource descriptors are stored. */
+	/* The buffer where the descriptors have been uploaded. */
 	struct r600_resource *buffer;
 	unsigned buffer_offset;
 
-	/* The i-th bit is set if that element is dirty (changed but not emitted). */
-	uint64_t dirty_mask;
 	/* The i-th bit is set if that element is enabled (non-NULL resource). */
 	uint64_t enabled_mask;
-
-	/* We can't update descriptors directly because the GPU might be
-	 * reading them at the same time, so we have to update them
-	 * in a copy-on-write manner. Each such copy is called a context,
-	 * which is just another array descriptors in the same buffer. */
-	unsigned current_context_id;
-	/* The size of a context, should be equal to 4*element_dw_size*num_elements. */
-	unsigned context_size;
 
 	/* The shader userdata offset within a shader where the 64-bit pointer to the descriptor
 	 * array will be stored. */
 	unsigned shader_userdata_offset;
+	/* Whether the pointer should be re-emitted. */
 	bool pointer_dirty;
 };
 
 struct si_sampler_views {
 	struct si_descriptors		desc;
 	struct pipe_sampler_view	*views[SI_NUM_SAMPLER_VIEWS];
-	uint32_t			*desc_data[SI_NUM_SAMPLER_VIEWS];
 };
 
 struct si_sampler_states {
 	struct si_descriptors		desc;
-	uint32_t			*desc_data[SI_NUM_SAMPLER_STATES];
 	void				*saved_states[2]; /* saved for u_blitter */
 };
 
 struct si_buffer_resources {
 	struct si_descriptors		desc;
-	unsigned			num_buffers;
 	enum radeon_bo_usage		shader_usage; /* READ, WRITE, or READWRITE */
 	enum radeon_bo_priority		priority;
 	struct pipe_resource		**buffers; /* this has num_buffers elements */
-	uint32_t			*desc_storage; /* this has num_buffers*4 elements */
-	uint32_t			**desc_data; /* an array of pointers pointing to desc_storage */
 };
 
 #define si_pm4_block_idx(member) \
@@ -244,18 +235,15 @@ struct si_buffer_resources {
 /* si_descriptors.c */
 void si_set_sampler_descriptors(struct si_context *sctx, unsigned shader,
 				unsigned start, unsigned count, void **states);
-void si_update_vertex_buffers(struct si_context *sctx);
 void si_set_ring_buffer(struct pipe_context *ctx, uint shader, uint slot,
 			struct pipe_resource *buffer,
 			unsigned stride, unsigned num_records,
 			bool add_tid, bool swizzle,
-			unsigned element_size, unsigned index_stride);
+			unsigned element_size, unsigned index_stride, uint64_t offset);
 void si_init_all_descriptors(struct si_context *sctx);
+bool si_upload_shader_descriptors(struct si_context *sctx);
 void si_release_all_descriptors(struct si_context *sctx);
 void si_all_descriptors_begin_new_cs(struct si_context *sctx);
-void si_copy_buffer(struct si_context *sctx,
-		    struct pipe_resource *dst, struct pipe_resource *src,
-		    uint64_t dst_offset, uint64_t src_offset, unsigned size, bool is_framebuffer);
 void si_upload_const_buffer(struct si_context *sctx, struct r600_resource **rbuffer,
 			    const uint8_t *ptr, unsigned size, uint32_t *const_offset);
 void si_shader_change_notify(struct si_context *sctx);

@@ -5693,29 +5693,6 @@ out:
 /* ----------------------------- End TGSI code ------------------------------ */
 
 
-static unsigned
-shader_stage_to_ptarget(gl_shader_stage stage)
-{
-   switch (stage) {
-   case MESA_SHADER_VERTEX:
-      return PIPE_SHADER_VERTEX;
-   case MESA_SHADER_FRAGMENT:
-      return PIPE_SHADER_FRAGMENT;
-   case MESA_SHADER_GEOMETRY:
-      return PIPE_SHADER_GEOMETRY;
-   case MESA_SHADER_TESS_CTRL:
-      return PIPE_SHADER_TESS_CTRL;
-   case MESA_SHADER_TESS_EVAL:
-      return PIPE_SHADER_TESS_EVAL;
-   case MESA_SHADER_COMPUTE:
-      return PIPE_SHADER_COMPUTE;
-   }
-
-   assert(!"should not be reached");
-   return PIPE_SHADER_VERTEX;
-}
-
-
 /**
  * Convert a shader's GLSL IR into a Mesa gl_program, although without
  * generating Mesa IR.
@@ -5732,7 +5709,7 @@ get_mesa_program(struct gl_context *ctx,
    struct gl_shader_compiler_options *options =
          &ctx->Const.ShaderCompilerOptions[_mesa_shader_enum_to_shader_stage(shader->Type)];
    struct pipe_screen *pscreen = ctx->st->pipe->screen;
-   unsigned ptarget = shader_stage_to_ptarget(shader->Stage);
+   unsigned ptarget = st_shader_stage_to_ptarget(shader->Stage);
 
    validate_ir_tree(shader->ir);
 
@@ -5900,6 +5877,71 @@ get_mesa_program(struct gl_context *ctx,
 
 extern "C" {
 
+static void
+st_dump_program_for_shader_db(struct gl_context *ctx,
+                              struct gl_shader_program *prog)
+{
+   /* Dump only successfully compiled and linked shaders to the specified
+    * file. This is for shader-db.
+    *
+    * These options allow some pre-processing of shaders while dumping,
+    * because some apps have ill-formed shaders.
+    */
+   const char *dump_filename = os_get_option("ST_DUMP_SHADERS");
+   const char *insert_directives = os_get_option("ST_DUMP_INSERT");
+
+   if (dump_filename && prog->Name != 0) {
+      FILE *f = fopen(dump_filename, "a");
+
+      if (f) {
+         for (unsigned i = 0; i < prog->NumShaders; i++) {
+            const struct gl_shader *sh = prog->Shaders[i];
+            const char *source;
+            bool skip_version = false;
+
+            if (!sh)
+               continue;
+
+            source = sh->Source;
+
+            /* This string mustn't be changed. shader-db uses it to find
+             * where the shader begins.
+             */
+            fprintf(f, "GLSL %s shader %d source for linked program %d:\n",
+                    _mesa_shader_stage_to_string(sh->Stage),
+                    i, prog->Name);
+
+            /* Dump the forced version if set. */
+            if (ctx->Const.ForceGLSLVersion) {
+               fprintf(f, "#version %i\n", ctx->Const.ForceGLSLVersion);
+               skip_version = true;
+            }
+
+            /* Insert directives (optional). */
+            if (insert_directives) {
+               if (!ctx->Const.ForceGLSLVersion && prog->Version)
+                  fprintf(f, "#version %i\n", prog->Version);
+               fprintf(f, "%s\n", insert_directives);
+               skip_version = true;
+            }
+
+            if (skip_version && strncmp(source, "#version ", 9) == 0) {
+               const char *next_line = strstr(source, "\n");
+
+               if (next_line)
+                  source = next_line + 1;
+               else
+                  continue;
+            }
+
+            fprintf(f, "%s", source);
+            fprintf(f, "\n");
+         }
+         fclose(f);
+      }
+   }
+}
+
 /**
  * Link a shader.
  * Called via ctx->Driver.LinkShader()
@@ -5921,7 +5963,7 @@ st_link_shader(struct gl_context *ctx, struct gl_shader_program *prog)
       gl_shader_stage stage = _mesa_shader_enum_to_shader_stage(prog->_LinkedShaders[i]->Type);
       const struct gl_shader_compiler_options *options =
             &ctx->Const.ShaderCompilerOptions[stage];
-      unsigned ptarget = shader_stage_to_ptarget(stage);
+      unsigned ptarget = st_shader_stage_to_ptarget(stage);
       bool have_dround = pscreen->get_shader_param(pscreen, ptarget,
                                                    PIPE_SHADER_CAP_TGSI_DROUND_SUPPORTED);
       bool have_dfrexp = pscreen->get_shader_param(pscreen, ptarget,
@@ -6020,6 +6062,7 @@ st_link_shader(struct gl_context *ctx, struct gl_shader_program *prog)
       _mesa_reference_program(ctx, &linked_prog, NULL);
    }
 
+   st_dump_program_for_shader_db(ctx, prog);
    return GL_TRUE;
 }
 

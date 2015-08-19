@@ -367,6 +367,42 @@ static const int extra_ARB_draw_indirect_es31[] = {
    EXTRA_END
 };
 
+static const int extra_ARB_shader_image_load_store_es31[] = {
+   EXT(ARB_shader_image_load_store),
+   EXTRA_API_ES31,
+   EXTRA_END
+};
+
+static const int extra_ARB_shader_atomic_counters_es31[] = {
+   EXT(ARB_shader_atomic_counters),
+   EXTRA_API_ES31,
+   EXTRA_END
+};
+
+static const int extra_ARB_texture_multisample_es31[] = {
+   EXT(ARB_texture_multisample),
+   EXTRA_API_ES31,
+   EXTRA_END
+};
+
+static const int extra_ARB_texture_gather_es31[] = {
+   EXT(ARB_texture_gather),
+   EXTRA_API_ES31,
+   EXTRA_END
+};
+
+static const int extra_ARB_compute_shader_es31[] = {
+   EXT(ARB_compute_shader),
+   EXTRA_API_ES31,
+   EXTRA_END
+};
+
+static const int extra_ARB_explicit_uniform_location_es31[] = {
+   EXT(ARB_explicit_uniform_location),
+   EXTRA_API_ES31,
+   EXTRA_END
+};
+
 EXTRA_EXT(ARB_texture_cube_map);
 EXTRA_EXT(EXT_texture_array);
 EXTRA_EXT(NV_fog_distance);
@@ -640,7 +676,7 @@ find_custom_value(struct gl_context *ctx, const struct value_desc *d, union valu
       break;
 
    case GL_EDGE_FLAG:
-      v->value_bool = ctx->Current.Attrib[VERT_ATTRIB_EDGEFLAG][0] == 1.0;
+      v->value_bool = ctx->Current.Attrib[VERT_ATTRIB_EDGEFLAG][0] == 1.0F;
       break;
 
    case GL_READ_BUFFER:
@@ -1232,9 +1268,12 @@ find_value(const char *func, GLenum pname, void **p, union value *v)
     * value since it's compatible with GLES2 its entry in table_set[] is at the
     * end.
     */
-   STATIC_ASSERT(ARRAY_SIZE(table_set) == API_OPENGL_LAST + 2);
+   STATIC_ASSERT(ARRAY_SIZE(table_set) == API_OPENGL_LAST + 3);
    if (_mesa_is_gles3(ctx)) {
       api = API_OPENGL_LAST + 1;
+   }
+   if (_mesa_is_gles31(ctx)) {
+      api = API_OPENGL_LAST + 2;
    }
    mask = ARRAY_SIZE(table(api)) - 1;
    hash = (pname * prime_factor);

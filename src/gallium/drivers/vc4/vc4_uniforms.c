@@ -257,9 +257,14 @@ vc4_write_uniforms(struct vc4_context *vc4, struct vc4_compiled_shader *shader,
                                                          uinfo->data[i]));
                         break;
 
-                case QUNIFORM_BLEND_CONST_COLOR:
+                case QUNIFORM_BLEND_CONST_COLOR_X:
+                case QUNIFORM_BLEND_CONST_COLOR_Y:
+                case QUNIFORM_BLEND_CONST_COLOR_Z:
+                case QUNIFORM_BLEND_CONST_COLOR_W:
                         cl_aligned_f(&uniforms,
-                                     CLAMP(vc4->blend_color.color[uinfo->data[i]], 0, 1));
+                                     CLAMP(vc4->blend_color.color[uinfo->contents[i] -
+                                                                  QUNIFORM_BLEND_CONST_COLOR_X],
+                                           0, 1));
                         break;
 
                 case QUNIFORM_STENCIL:
@@ -283,4 +288,57 @@ vc4_write_uniforms(struct vc4_context *vc4, struct vc4_compiled_shader *shader,
         }
 
         cl_end(&vc4->uniforms, uniforms);
+
+        vc4_bo_unreference(&ubo);
+}
+
+void
+vc4_set_shader_uniform_dirty_flags(struct vc4_compiled_shader *shader)
+{
+        uint32_t dirty = 0;
+
+        for (int i = 0; i < shader->uniforms.count; i++) {
+                switch (shader->uniforms.contents[i]) {
+                case QUNIFORM_CONSTANT:
+                        break;
+                case QUNIFORM_UNIFORM:
+                case QUNIFORM_UBO_ADDR:
+                        dirty |= VC4_DIRTY_CONSTBUF;
+                        break;
+
+                case QUNIFORM_VIEWPORT_X_SCALE:
+                case QUNIFORM_VIEWPORT_Y_SCALE:
+                case QUNIFORM_VIEWPORT_Z_OFFSET:
+                case QUNIFORM_VIEWPORT_Z_SCALE:
+                        dirty |= VC4_DIRTY_VIEWPORT;
+                        break;
+
+                case QUNIFORM_USER_CLIP_PLANE:
+                        dirty |= VC4_DIRTY_CLIP;
+                        break;
+
+                case QUNIFORM_TEXTURE_CONFIG_P0:
+                case QUNIFORM_TEXTURE_CONFIG_P1:
+                case QUNIFORM_TEXTURE_CONFIG_P2:
+                case QUNIFORM_TEXTURE_BORDER_COLOR:
+                case QUNIFORM_TEXRECT_SCALE_X:
+                case QUNIFORM_TEXRECT_SCALE_Y:
+                        dirty |= VC4_DIRTY_TEXSTATE;
+                        break;
+
+                case QUNIFORM_BLEND_CONST_COLOR_X:
+                case QUNIFORM_BLEND_CONST_COLOR_Y:
+                case QUNIFORM_BLEND_CONST_COLOR_Z:
+                case QUNIFORM_BLEND_CONST_COLOR_W:
+                        dirty |= VC4_DIRTY_BLEND_COLOR;
+                        break;
+
+                case QUNIFORM_STENCIL:
+                case QUNIFORM_ALPHA_REF:
+                        dirty |= VC4_DIRTY_ZSA;
+                        break;
+                }
+        }
+
+        shader->uniform_dirty_bits = dirty;
 }

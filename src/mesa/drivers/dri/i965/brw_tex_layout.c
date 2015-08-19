@@ -63,7 +63,7 @@ tr_mode_horizontal_texture_alignment(const struct brw_context *brw,
    int i = 0;
 
    /* Alignment computations below assume bpp >= 8 and a power of 2. */
-   assert (bpp >= 8 && bpp <= 128 && is_power_of_two(bpp));
+   assert (bpp >= 8 && bpp <= 128 && _mesa_is_pow_two(bpp));
 
    switch(mt->target) {
    case GL_TEXTURE_1D:
@@ -95,7 +95,7 @@ tr_mode_horizontal_texture_alignment(const struct brw_context *brw,
    ret_align = mt->tr_mode == INTEL_MIPTREE_TRMODE_YF ?
                align_yf[i] : align_ys[i];
 
-   assert(is_power_of_two(mt->num_samples));
+   assert(_mesa_is_pow_two(mt->num_samples));
 
    switch (mt->num_samples) {
    case 2:
@@ -199,7 +199,7 @@ tr_mode_vertical_texture_alignment(const struct brw_context *brw,
           mt->target != GL_TEXTURE_1D_ARRAY);
 
    /* Alignment computations below assume bpp >= 8 and a power of 2. */
-   assert (bpp >= 8 && bpp <= 128 && is_power_of_two(bpp)) ;
+   assert (bpp >= 8 && bpp <= 128 && _mesa_is_pow_two(bpp)) ;
 
    switch(mt->target) {
    case GL_TEXTURE_2D:
@@ -226,7 +226,7 @@ tr_mode_vertical_texture_alignment(const struct brw_context *brw,
    ret_align = mt->tr_mode == INTEL_MIPTREE_TRMODE_YF ?
                align_yf[i] : align_ys[i];
 
-   assert(is_power_of_two(mt->num_samples));
+   assert(_mesa_is_pow_two(mt->num_samples));
 
    switch (mt->num_samples) {
    case 4:
@@ -432,9 +432,7 @@ brw_miptree_get_horizontal_slice_pitch(const struct brw_context *brw,
                                        const struct intel_mipmap_tree *mt,
                                        unsigned level)
 {
-   assert(brw->gen < 9);
-
-   if (mt->target == GL_TEXTURE_3D ||
+   if ((brw->gen < 9 && mt->target == GL_TEXTURE_3D) ||
        (brw->gen == 4 && mt->target == GL_TEXTURE_CUBE_MAP)) {
       return ALIGN(minify(mt->physical_width0, level), mt->align_w);
    } else {
@@ -630,12 +628,12 @@ brw_miptree_choose_tiling(struct brw_context *brw,
    /* Some usages may want only one type of tiling, like depth miptrees (Y
     * tiled), or temporary BOs for uploading data once (linear).
     */
-   switch (layout_flags & MIPTREE_LAYOUT_ALLOC_ANY_TILED) {
-   case MIPTREE_LAYOUT_ALLOC_ANY_TILED:
+   switch (layout_flags & MIPTREE_LAYOUT_TILING_ANY) {
+   case MIPTREE_LAYOUT_TILING_ANY:
       break;
-   case MIPTREE_LAYOUT_ALLOC_YTILED:
+   case MIPTREE_LAYOUT_TILING_Y:
       return I915_TILING_Y;
-   case MIPTREE_LAYOUT_ALLOC_LINEAR:
+   case MIPTREE_LAYOUT_TILING_NONE:
       return I915_TILING_NONE;
    }
 

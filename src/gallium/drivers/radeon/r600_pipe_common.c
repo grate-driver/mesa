@@ -108,9 +108,9 @@ void r600_draw_rectangle(struct blitter_context *blitter,
 void r600_need_dma_space(struct r600_common_context *ctx, unsigned num_dw)
 {
 	/* Flush if there's not enough space. */
-	if ((num_dw + ctx->rings.dma.cs->cdw) > RADEON_MAX_CMDBUF_DWORDS) {
+	if ((num_dw + ctx->rings.dma.cs->cdw) > ctx->rings.dma.cs->max_dw) {
 		ctx->rings.dma.flush(ctx, RADEON_FLUSH_ASYNC, NULL);
-		assert((num_dw + ctx->rings.dma.cs->cdw) <= RADEON_MAX_CMDBUF_DWORDS);
+		assert((num_dw + ctx->rings.dma.cs->cdw) <= ctx->rings.dma.cs->max_dw);
 	}
 }
 
@@ -132,10 +132,11 @@ void r600_preflush_suspend_features(struct r600_common_context *ctx)
 	}
 
 	/* suspend queries */
-	ctx->nontimer_queries_suspended = false;
+	ctx->queries_suspended_for_flush = false;
 	if (ctx->num_cs_dw_nontimer_queries_suspend) {
 		r600_suspend_nontimer_queries(ctx);
-		ctx->nontimer_queries_suspended = true;
+		r600_suspend_timer_queries(ctx);
+		ctx->queries_suspended_for_flush = true;
 	}
 
 	ctx->streamout.suspended = false;
@@ -153,8 +154,9 @@ void r600_postflush_resume_features(struct r600_common_context *ctx)
 	}
 
 	/* resume queries */
-	if (ctx->nontimer_queries_suspended) {
+	if (ctx->queries_suspended_for_flush) {
 		r600_resume_nontimer_queries(ctx);
+		r600_resume_timer_queries(ctx);
 	}
 
 	/* Re-enable render condition. */
@@ -260,8 +262,12 @@ bool r600_common_context_init(struct r600_common_context *rctx,
 	if (!rctx->uploader)
 		return false;
 
+	rctx->ctx = rctx->ws->ctx_create(rctx->ws);
+	if (!rctx->ctx)
+		return false;
+
 	if (rscreen->info.r600_has_dma && !(rscreen->debug_flags & DBG_NO_ASYNC_DMA)) {
-		rctx->rings.dma.cs = rctx->ws->cs_create(rctx->ws, RING_DMA,
+		rctx->rings.dma.cs = rctx->ws->cs_create(rctx->ctx, RING_DMA,
 							 r600_flush_dma_ring,
 							 rctx, NULL);
 		rctx->rings.dma.flush = r600_flush_dma_ring;
@@ -272,12 +278,12 @@ bool r600_common_context_init(struct r600_common_context *rctx,
 
 void r600_common_context_cleanup(struct r600_common_context *rctx)
 {
-	if (rctx->rings.gfx.cs) {
+	if (rctx->rings.gfx.cs)
 		rctx->ws->cs_destroy(rctx->rings.gfx.cs);
-	}
-	if (rctx->rings.dma.cs) {
+	if (rctx->rings.dma.cs)
 		rctx->ws->cs_destroy(rctx->rings.dma.cs);
-	}
+	if (rctx->ctx)
+		rctx->ws->ctx_destroy(rctx->ctx);
 
 	if (rctx->uploader) {
 		u_upload_destroy(rctx->uploader);
@@ -335,6 +341,9 @@ static const struct debug_named_value common_debug_options[] = {
 	{ "cs", DBG_CS, "Print compute shaders" },
 	{ "tcs", DBG_TCS, "Print tessellation control shaders" },
 	{ "tes", DBG_TES, "Print tessellation evaluation shaders" },
+	{ "noir", DBG_NO_IR, "Don't print the LLVM IR"},
+	{ "notgsi", DBG_NO_TGSI, "Don't print the TGSI"},
+	{ "noasm", DBG_NO_ASM, "Don't print disassembled shaders"},
 
 	/* features */
 	{ "nodma", DBG_NO_ASYNC_DMA, "Disable asynchronous DMA" },
@@ -346,6 +355,7 @@ static const struct debug_named_value common_debug_options[] = {
 	{ "switch_on_eop", DBG_SWITCH_ON_EOP, "Program WD/IA to switch on end-of-packet." },
 	{ "forcedma", DBG_FORCE_DMA, "Use asynchronous DMA for all operations when possible." },
 	{ "precompile", DBG_PRECOMPILE, "Compile one shader variant at shader creation." },
+	{ "nowc", DBG_NO_WC, "Disable GTT write combining" },
 
 	DEBUG_NAMED_VALUE_END /* must be last */
 };
@@ -360,11 +370,9 @@ static const char* r600_get_device_vendor(struct pipe_screen* pscreen)
 	return "AMD";
 }
 
-static const char* r600_get_name(struct pipe_screen* pscreen)
+static const char* r600_get_chip_name(struct r600_common_screen *rscreen)
 {
-	struct r600_common_screen *rscreen = (struct r600_common_screen*)pscreen;
-
-	switch (rscreen->family) {
+	switch (rscreen->info.family) {
 	case CHIP_R600: return "AMD R600";
 	case CHIP_RV610: return "AMD RV610";
 	case CHIP_RV630: return "AMD RV630";
@@ -400,8 +408,19 @@ static const char* r600_get_name(struct pipe_screen* pscreen)
 	case CHIP_KABINI: return "AMD KABINI";
 	case CHIP_HAWAII: return "AMD HAWAII";
 	case CHIP_MULLINS: return "AMD MULLINS";
+	case CHIP_TONGA: return "AMD TONGA";
+	case CHIP_ICELAND: return "AMD ICELAND";
+	case CHIP_CARRIZO: return "AMD CARRIZO";
+	case CHIP_FIJI: return "AMD FIJI";
 	default: return "AMD unknown";
 	}
+}
+
+static const char* r600_get_name(struct pipe_screen* pscreen)
+{
+	struct r600_common_screen *rscreen = (struct r600_common_screen*)pscreen;
+
+	return rscreen->renderer_string;
 }
 
 static float r600_get_paramf(struct pipe_screen* pscreen,
@@ -517,6 +536,10 @@ const char *r600_get_llvm_processor_name(enum radeon_family family)
 #else
 		return "kabini";
 #endif
+	case CHIP_TONGA: return "tonga";
+	case CHIP_ICELAND: return "iceland";
+	case CHIP_CARRIZO: return "carrizo";
+	case CHIP_FIJI: return "fiji";
 	default: return "";
 	}
 }
@@ -684,25 +707,33 @@ static int r600_get_driver_query_info(struct pipe_screen *screen,
 {
 	struct r600_common_screen *rscreen = (struct r600_common_screen*)screen;
 	struct pipe_driver_query_info list[] = {
+		{"num-compilations", R600_QUERY_NUM_COMPILATIONS, {0}, PIPE_DRIVER_QUERY_TYPE_UINT64,
+		 PIPE_DRIVER_QUERY_RESULT_TYPE_CUMULATIVE},
+		{"num-shaders-created", R600_QUERY_NUM_SHADERS_CREATED, {0}, PIPE_DRIVER_QUERY_TYPE_UINT64,
+		 PIPE_DRIVER_QUERY_RESULT_TYPE_CUMULATIVE},
 		{"draw-calls", R600_QUERY_DRAW_CALLS, {0}},
 		{"requested-VRAM", R600_QUERY_REQUESTED_VRAM, {rscreen->info.vram_size}, PIPE_DRIVER_QUERY_TYPE_BYTES},
 		{"requested-GTT", R600_QUERY_REQUESTED_GTT, {rscreen->info.gart_size}, PIPE_DRIVER_QUERY_TYPE_BYTES},
-		{"buffer-wait-time", R600_QUERY_BUFFER_WAIT_TIME, {0}},
+		{"buffer-wait-time", R600_QUERY_BUFFER_WAIT_TIME, {0}, PIPE_DRIVER_QUERY_TYPE_MICROSECONDS,
+		 PIPE_DRIVER_QUERY_RESULT_TYPE_CUMULATIVE},
 		{"num-cs-flushes", R600_QUERY_NUM_CS_FLUSHES, {0}},
-		{"num-bytes-moved", R600_QUERY_NUM_BYTES_MOVED, {0}, PIPE_DRIVER_QUERY_TYPE_BYTES},
+		{"num-bytes-moved", R600_QUERY_NUM_BYTES_MOVED, {0}, PIPE_DRIVER_QUERY_TYPE_BYTES,
+		 PIPE_DRIVER_QUERY_RESULT_TYPE_CUMULATIVE},
 		{"VRAM-usage", R600_QUERY_VRAM_USAGE, {rscreen->info.vram_size}, PIPE_DRIVER_QUERY_TYPE_BYTES},
 		{"GTT-usage", R600_QUERY_GTT_USAGE, {rscreen->info.gart_size}, PIPE_DRIVER_QUERY_TYPE_BYTES},
+		{"GPU-load", R600_QUERY_GPU_LOAD, {100}},
 		{"temperature", R600_QUERY_GPU_TEMPERATURE, {100}},
-		{"shader-clock", R600_QUERY_CURRENT_GPU_SCLK, {0}},
-		{"memory-clock", R600_QUERY_CURRENT_GPU_MCLK, {0}},
-		{"GPU-load", R600_QUERY_GPU_LOAD, {100}}
+		{"shader-clock", R600_QUERY_CURRENT_GPU_SCLK, {0}, PIPE_DRIVER_QUERY_TYPE_HZ},
+		{"memory-clock", R600_QUERY_CURRENT_GPU_MCLK, {0}, PIPE_DRIVER_QUERY_TYPE_HZ},
 	};
 	unsigned num_queries;
 
 	if (rscreen->info.drm_major == 2 && rscreen->info.drm_minor >= 42)
 		num_queries = Elements(list);
+	else if (rscreen->info.drm_major == 3)
+		num_queries = Elements(list) - 3;
 	else
-		num_queries = 8;
+		num_queries = Elements(list) - 4;
 
 	if (!info)
 		return num_queries;
@@ -857,7 +888,21 @@ struct pipe_resource *r600_resource_create_common(struct pipe_screen *screen,
 bool r600_common_screen_init(struct r600_common_screen *rscreen,
 			     struct radeon_winsys *ws)
 {
+	char llvm_string[32] = {};
+
 	ws->query_info(ws, &rscreen->info);
+
+#if HAVE_LLVM
+	snprintf(llvm_string, sizeof(llvm_string),
+		 ", LLVM %i.%i.%i", (HAVE_LLVM >> 8) & 0xff,
+		 HAVE_LLVM & 0xff, MESA_LLVM_VERSION_PATCH);
+#endif
+
+	snprintf(rscreen->renderer_string, sizeof(rscreen->renderer_string),
+		 "%s (DRM %i.%i.%i%s)",
+		 r600_get_chip_name(rscreen), rscreen->info.drm_major,
+		 rscreen->info.drm_minor, rscreen->info.drm_patchlevel,
+		 llvm_string);
 
 	rscreen->b.get_name = r600_get_name;
 	rscreen->b.get_vendor = r600_get_vendor;
@@ -893,7 +938,9 @@ bool r600_common_screen_init(struct r600_common_screen *rscreen,
 	pipe_mutex_init(rscreen->aux_context_lock);
 	pipe_mutex_init(rscreen->gpu_load_mutex);
 
-	if (rscreen->info.drm_minor >= 28 && (rscreen->debug_flags & DBG_TRACE_CS)) {
+	if (((rscreen->info.drm_major == 2 && rscreen->info.drm_minor >= 28) ||
+	     rscreen->info.drm_major == 3) &&
+	    (rscreen->debug_flags & DBG_TRACE_CS)) {
 		rscreen->trace_bo = (struct r600_resource*)pipe_buffer_create(&rscreen->b,
 										PIPE_BIND_CUSTOM,
 										PIPE_USAGE_STAGING,

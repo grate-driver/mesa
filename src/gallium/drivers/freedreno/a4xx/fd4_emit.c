@@ -172,7 +172,7 @@ emit_textures(struct fd_context *ctx, struct fd_ringbuffer *ring,
 			const struct fd4_pipe_sampler_view *view = tex->textures[i] ?
 					fd4_pipe_sampler_view(tex->textures[i]) :
 					&dummy_view;
-			unsigned start = view->base.u.tex.first_level;
+			unsigned start = fd_sampler_first_level(&view->base);
 
 			OUT_RING(ring, view->texconst0);
 			OUT_RING(ring, view->texconst1);
@@ -197,51 +197,110 @@ emit_textures(struct fd_context *ctx, struct fd_ringbuffer *ring,
  * special cases..
  */
 void
-fd4_emit_gmem_restore_tex(struct fd_ringbuffer *ring, struct pipe_surface *psurf)
+fd4_emit_gmem_restore_tex(struct fd_ringbuffer *ring, unsigned nr_bufs,
+		struct pipe_surface **bufs)
 {
-	struct fd_resource *rsc = fd_resource(psurf->texture);
-	unsigned lvl = psurf->u.tex.level;
-	struct fd_resource_slice *slice = fd_resource_slice(rsc, lvl);
-	uint32_t offset = fd_resource_offset(rsc, lvl, psurf->u.tex.first_layer);
-	enum pipe_format format = fd4_gmem_restore_format(psurf->format);
+	unsigned char mrt_comp[A4XX_MAX_RENDER_TARGETS];
+	int i;
 
-	debug_assert(psurf->u.tex.first_layer == psurf->u.tex.last_layer);
+	for (i = 0; i < A4XX_MAX_RENDER_TARGETS; i++) {
+		mrt_comp[i] = (i < nr_bufs) ? 0xf : 0;
+	}
 
 	/* output sampler state: */
-	OUT_PKT3(ring, CP_LOAD_STATE, 4);
+	OUT_PKT3(ring, CP_LOAD_STATE, 2 + (2 * nr_bufs));
 	OUT_RING(ring, CP_LOAD_STATE_0_DST_OFF(0) |
 			CP_LOAD_STATE_0_STATE_SRC(SS_DIRECT) |
 			CP_LOAD_STATE_0_STATE_BLOCK(SB_FRAG_TEX) |
-			CP_LOAD_STATE_0_NUM_UNIT(1));
+			CP_LOAD_STATE_0_NUM_UNIT(nr_bufs));
 	OUT_RING(ring, CP_LOAD_STATE_1_STATE_TYPE(ST_SHADER) |
 			CP_LOAD_STATE_1_EXT_SRC_ADDR(0));
-	OUT_RING(ring, A4XX_TEX_SAMP_0_XY_MAG(A4XX_TEX_NEAREST) |
-			A4XX_TEX_SAMP_0_XY_MIN(A4XX_TEX_NEAREST) |
-			A4XX_TEX_SAMP_0_WRAP_S(A4XX_TEX_CLAMP_TO_EDGE) |
-			A4XX_TEX_SAMP_0_WRAP_T(A4XX_TEX_CLAMP_TO_EDGE) |
-			A4XX_TEX_SAMP_0_WRAP_R(A4XX_TEX_REPEAT));
-	OUT_RING(ring, 0x00000000);
+	for (i = 0; i < nr_bufs; i++) {
+		OUT_RING(ring, A4XX_TEX_SAMP_0_XY_MAG(A4XX_TEX_NEAREST) |
+				A4XX_TEX_SAMP_0_XY_MIN(A4XX_TEX_NEAREST) |
+				A4XX_TEX_SAMP_0_WRAP_S(A4XX_TEX_CLAMP_TO_EDGE) |
+				A4XX_TEX_SAMP_0_WRAP_T(A4XX_TEX_CLAMP_TO_EDGE) |
+				A4XX_TEX_SAMP_0_WRAP_R(A4XX_TEX_REPEAT));
+		OUT_RING(ring, 0x00000000);
+	}
 
 	/* emit texture state: */
-	OUT_PKT3(ring, CP_LOAD_STATE, 10);
+	OUT_PKT3(ring, CP_LOAD_STATE, 2 + (8 * nr_bufs));
 	OUT_RING(ring, CP_LOAD_STATE_0_DST_OFF(0) |
 			CP_LOAD_STATE_0_STATE_SRC(SS_DIRECT) |
 			CP_LOAD_STATE_0_STATE_BLOCK(SB_FRAG_TEX) |
-			CP_LOAD_STATE_0_NUM_UNIT(1));
+			CP_LOAD_STATE_0_NUM_UNIT(nr_bufs));
 	OUT_RING(ring, CP_LOAD_STATE_1_STATE_TYPE(ST_CONSTANTS) |
 			CP_LOAD_STATE_1_EXT_SRC_ADDR(0));
-	OUT_RING(ring, A4XX_TEX_CONST_0_FMT(fd4_pipe2tex(format)) |
-			A4XX_TEX_CONST_0_TYPE(A4XX_TEX_2D) |
-			fd4_tex_swiz(format,  PIPE_SWIZZLE_RED, PIPE_SWIZZLE_GREEN,
-					PIPE_SWIZZLE_BLUE, PIPE_SWIZZLE_ALPHA));
-	OUT_RING(ring, A4XX_TEX_CONST_1_WIDTH(psurf->width) |
-			A4XX_TEX_CONST_1_HEIGHT(psurf->height));
-	OUT_RING(ring, A4XX_TEX_CONST_2_PITCH(slice->pitch * rsc->cpp));
-	OUT_RING(ring, 0x00000000);
-	OUT_RELOC(ring, rsc->bo, offset, 0, 0);
-	OUT_RING(ring, 0x00000000);
-	OUT_RING(ring, 0x00000000);
-	OUT_RING(ring, 0x00000000);
+	for (i = 0; i < nr_bufs; i++) {
+		if (bufs[i]) {
+			struct fd_resource *rsc = fd_resource(bufs[i]->texture);
+			/* note: PIPE_BUFFER disallowed for surfaces */
+			unsigned lvl = bufs[i]->u.tex.level;
+			struct fd_resource_slice *slice = fd_resource_slice(rsc, lvl);
+			uint32_t offset = fd_resource_offset(rsc, lvl, bufs[i]->u.tex.first_layer);
+			enum pipe_format format = fd4_gmem_restore_format(bufs[i]->format);
+
+			/* The restore blit_zs shader expects stencil in sampler 0,
+			 * and depth in sampler 1
+			 */
+			if (rsc->stencil && (i == 0)) {
+				rsc = rsc->stencil;
+				format = fd4_gmem_restore_format(rsc->base.b.format);
+			}
+
+			/* z32 restore is accomplished using depth write.  If there is
+			 * no stencil component (ie. PIPE_FORMAT_Z32_FLOAT_S8X24_UINT)
+			 * then no render target:
+			 *
+			 * (The same applies for z32_s8x24, since for stencil sampler
+			 * state the above 'if' will replace 'format' with s8)
+			 */
+			if ((format == PIPE_FORMAT_Z32_FLOAT) ||
+					(format == PIPE_FORMAT_Z32_FLOAT_S8X24_UINT))
+				mrt_comp[i] = 0;
+
+			debug_assert(bufs[i]->u.tex.first_layer == bufs[i]->u.tex.last_layer);
+
+			OUT_RING(ring, A4XX_TEX_CONST_0_FMT(fd4_pipe2tex(format)) |
+					A4XX_TEX_CONST_0_TYPE(A4XX_TEX_2D) |
+					fd4_tex_swiz(format,  PIPE_SWIZZLE_RED, PIPE_SWIZZLE_GREEN,
+							PIPE_SWIZZLE_BLUE, PIPE_SWIZZLE_ALPHA));
+			OUT_RING(ring, A4XX_TEX_CONST_1_WIDTH(bufs[i]->width) |
+					A4XX_TEX_CONST_1_HEIGHT(bufs[i]->height));
+			OUT_RING(ring, A4XX_TEX_CONST_2_PITCH(slice->pitch * rsc->cpp));
+			OUT_RING(ring, 0x00000000);
+			OUT_RELOC(ring, rsc->bo, offset, 0, 0);
+			OUT_RING(ring, 0x00000000);
+			OUT_RING(ring, 0x00000000);
+			OUT_RING(ring, 0x00000000);
+		} else {
+			OUT_RING(ring, A4XX_TEX_CONST_0_FMT(0) |
+					A4XX_TEX_CONST_0_TYPE(A4XX_TEX_2D) |
+					A4XX_TEX_CONST_0_SWIZ_X(A4XX_TEX_ONE) |
+					A4XX_TEX_CONST_0_SWIZ_Y(A4XX_TEX_ONE) |
+					A4XX_TEX_CONST_0_SWIZ_Z(A4XX_TEX_ONE) |
+					A4XX_TEX_CONST_0_SWIZ_W(A4XX_TEX_ONE));
+			OUT_RING(ring, A4XX_TEX_CONST_1_WIDTH(0) |
+					A4XX_TEX_CONST_1_HEIGHT(0));
+			OUT_RING(ring, A4XX_TEX_CONST_2_PITCH(0));
+			OUT_RING(ring, 0x00000000);
+			OUT_RING(ring, 0x00000000);
+			OUT_RING(ring, 0x00000000);
+			OUT_RING(ring, 0x00000000);
+			OUT_RING(ring, 0x00000000);
+		}
+	}
+
+	OUT_PKT0(ring, REG_A4XX_RB_RENDER_COMPONENTS, 1);
+	OUT_RING(ring, A4XX_RB_RENDER_COMPONENTS_RT0(mrt_comp[0]) |
+			A4XX_RB_RENDER_COMPONENTS_RT1(mrt_comp[1]) |
+			A4XX_RB_RENDER_COMPONENTS_RT2(mrt_comp[2]) |
+			A4XX_RB_RENDER_COMPONENTS_RT3(mrt_comp[3]) |
+			A4XX_RB_RENDER_COMPONENTS_RT4(mrt_comp[4]) |
+			A4XX_RB_RENDER_COMPONENTS_RT5(mrt_comp[5]) |
+			A4XX_RB_RENDER_COMPONENTS_RT6(mrt_comp[6]) |
+			A4XX_RB_RENDER_COMPONENTS_RT7(mrt_comp[7]));
 }
 
 void
@@ -347,6 +406,25 @@ fd4_emit_state(struct fd_context *ctx, struct fd_ringbuffer *ring,
 	uint32_t dirty = emit->dirty;
 
 	emit_marker(ring, 5);
+
+	if ((dirty & FD_DIRTY_FRAMEBUFFER) && !emit->key.binning_pass) {
+		struct pipe_framebuffer_state *pfb = &ctx->framebuffer;
+		unsigned char mrt_comp[A4XX_MAX_RENDER_TARGETS] = {0};
+
+		for (unsigned i = 0; i < A4XX_MAX_RENDER_TARGETS; i++) {
+			mrt_comp[i] = ((i < pfb->nr_cbufs) && pfb->cbufs[i]) ? 0xf : 0;
+		}
+
+		OUT_PKT0(ring, REG_A4XX_RB_RENDER_COMPONENTS, 1);
+		OUT_RING(ring, A4XX_RB_RENDER_COMPONENTS_RT0(mrt_comp[0]) |
+				A4XX_RB_RENDER_COMPONENTS_RT1(mrt_comp[1]) |
+				A4XX_RB_RENDER_COMPONENTS_RT2(mrt_comp[2]) |
+				A4XX_RB_RENDER_COMPONENTS_RT3(mrt_comp[3]) |
+				A4XX_RB_RENDER_COMPONENTS_RT4(mrt_comp[4]) |
+				A4XX_RB_RENDER_COMPONENTS_RT5(mrt_comp[5]) |
+				A4XX_RB_RENDER_COMPONENTS_RT6(mrt_comp[6]) |
+				A4XX_RB_RENDER_COMPONENTS_RT7(mrt_comp[7]));
+	}
 
 	if ((dirty & (FD_DIRTY_ZSA | FD_DIRTY_PROG)) && !emit->key.binning_pass) {
 		uint32_t val = fd4_zsa_stateobj(ctx->zsa)->rb_render_control;
@@ -472,8 +550,10 @@ fd4_emit_state(struct fd_context *ctx, struct fd_ringbuffer *ring,
 		OUT_RING(ring, A4XX_GRAS_CL_VPORT_ZSCALE_0(ctx->viewport.scale[2]));
 	}
 
-	if (dirty & FD_DIRTY_PROG)
-		fd4_program_emit(ring, emit);
+	if (dirty & FD_DIRTY_PROG) {
+		struct pipe_framebuffer_state *pfb = &ctx->framebuffer;
+		fd4_program_emit(ring, emit, pfb->nr_cbufs, pfb->cbufs);
+	}
 
 	if (emit->prog == &ctx->prog) { /* evil hack to deal sanely with clear path */
 		ir3_emit_consts(vp, ring, emit->info, dirty);
@@ -487,7 +567,7 @@ fd4_emit_state(struct fd_context *ctx, struct fd_ringbuffer *ring,
 		struct fd4_blend_stateobj *blend = fd4_blend_stateobj(ctx->blend);
 		uint32_t i;
 
-		for (i = 0; i < 8; i++) {
+		for (i = 0; i < A4XX_MAX_RENDER_TARGETS; i++) {
 			OUT_PKT0(ring, REG_A4XX_RB_MRT_CONTROL(i), 1);
 			OUT_RING(ring, blend->rb_mrt[i].control);
 
@@ -689,9 +769,6 @@ fd4_emit_restore(struct fd_context *ctx)
 
 	OUT_PKT0(ring, REG_A4XX_RB_FS_OUTPUT, 1);
 	OUT_RING(ring, A4XX_RB_FS_OUTPUT_SAMPLE_MASK(0xffff));
-
-	OUT_PKT0(ring, REG_A4XX_RB_RENDER_COMPONENTS, 1);
-	OUT_RING(ring, A4XX_RB_RENDER_COMPONENTS_RT0(0xf));
 
 	OUT_PKT0(ring, REG_A4XX_GRAS_CLEAR_CNTL, 1);
 	OUT_RING(ring, A4XX_GRAS_CLEAR_CNTL_NOT_FASTCLEAR);

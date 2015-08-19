@@ -121,8 +121,9 @@ brw_codegen_vs_prog(struct brw_context *brw,
        * case being a float value that gets blown up to a vec4, so be
        * conservative here.
        */
-      param_count = vs->num_uniform_components * 4;
-
+      param_count = vs->num_uniform_components * 4 +
+                    vs->NumImages * BRW_IMAGE_PARAM_SIZE;
+      stage_prog_data->nr_image_params = vs->NumImages;
    } else {
       param_count = vp->program.Base.Parameters->NumParameters * 4;
    }
@@ -135,6 +136,9 @@ brw_codegen_vs_prog(struct brw_context *brw,
       rzalloc_array(NULL, const gl_constant_value *, param_count);
    stage_prog_data->pull_param =
       rzalloc_array(NULL, const gl_constant_value *, param_count);
+   stage_prog_data->image_param =
+      rzalloc_array(NULL, struct brw_image_param,
+                    stage_prog_data->nr_image_params);
    stage_prog_data->nr_params = param_count;
 
    GLbitfield64 outputs_written = vp->program.Base.OutputsWritten;
