@@ -1,8 +1,8 @@
 --- a/configure.ac
 +++ b/configure.ac
-@@ -1779,7 +1779,9 @@ for plat in $egl_platforms; do
- 
- 	android|gdi|null)
+@@ -1772,7 +1772,9 @@ for plat in $egl_platforms; do
+ 		test "x$have_libdrm" != xyes &&
+ 			AC_MSG_ERROR([EGL platform surfaceless requires libdrm >= $LIBDRM_REQUIRED])
  		;;
 -
 +        mir)
@@ -11,9 +11,9 @@
  	*)
  		AC_MSG_ERROR([EGL platform '$plat' does not exist])
  		;;
-@@ -1807,6 +1809,7 @@ AM_CONDITIONAL(HAVE_EGL_PLATFORM_X11, ec
- AM_CONDITIONAL(HAVE_EGL_PLATFORM_WAYLAND, echo "$egl_platforms" | grep -q 'wayland')
+@@ -1798,6 +1800,7 @@ AM_CONDITIONAL(HAVE_EGL_PLATFORM_WAYLAND
  AM_CONDITIONAL(HAVE_EGL_PLATFORM_DRM, echo "$egl_platforms" | grep -q 'drm')
+ AM_CONDITIONAL(HAVE_EGL_PLATFORM_SURFACELESS, echo "$egl_platforms" | grep -q 'surfaceless')
  AM_CONDITIONAL(HAVE_EGL_PLATFORM_NULL, echo "$egl_platforms" | grep -q 'null')
 +AM_CONDITIONAL(HAVE_EGL_PLATFORM_MIR, echo "$egl_platforms" | grep -q 'mir')
  
@@ -21,9 +21,9 @@
  
 --- a/include/EGL/eglplatform.h
 +++ b/include/EGL/eglplatform.h
-@@ -104,6 +104,13 @@ typedef struct ANativeWindow        *EGL
- typedef struct egl_native_pixmap_t  *EGLNativePixmapType;
- typedef void                        *EGLNativeDisplayType;
+@@ -105,6 +105,13 @@ typedef struct ANativeWindow*
+ typedef struct egl_native_pixmap_t*     EGLNativePixmapType;
+ typedef void*                           EGLNativeDisplayType;
  
 +#elif defined(MIR_EGL_PLATFORM)
 +
@@ -32,12 +32,12 @@
 +typedef void                   *EGLNativePixmapType;
 +typedef MirEGLNativeWindowType  EGLNativeWindowType;
 +
- #elif defined(__unix__)
+ #elif defined(__unix__) || defined(__APPLE__)
  
  #if defined(MESA_EGL_NO_X11_HEADERS)
 --- a/include/GL/internal/dri_interface.h
 +++ b/include/GL/internal/dri_interface.h
-@@ -893,10 +893,12 @@ struct __DRIbufferRec {
+@@ -886,10 +886,12 @@ struct __DRIbufferRec {
      unsigned int pitch;
      unsigned int cpp;
      unsigned int flags;
@@ -51,22 +51,9 @@
  struct __DRIdri2LoaderExtensionRec {
      __DRIextension base;
  
---- a/src/egl/drivers/dri2/Makefile.am
-+++ b/src/egl/drivers/dri2/Makefile.am
-@@ -65,4 +65,10 @@ libegl_dri2_la_SOURCES += platform_drm.c
- AM_CFLAGS += -DHAVE_DRM_PLATFORM
- endif
- 
-+if HAVE_EGL_PLATFORM_MIR
-+libegl_dri2_la_SOURCES += platform_mir.c
-+AM_CFLAGS += -DHAVE_MIR_PLATFORM
-+AM_CFLAGS += $(MIR_CFLAGS)
-+endif
-+
- EXTRA_DIST = SConscript
 --- a/src/egl/drivers/dri2/egl_dri2.c
 +++ b/src/egl/drivers/dri2/egl_dri2.c
-@@ -677,6 +677,12 @@ dri2_initialize(_EGLDriver *drv, _EGLDis
+@@ -757,6 +757,12 @@ dri2_initialize(_EGLDriver *drv, _EGLDis
           return EGL_TRUE;
        return dri2_initialize_wayland(drv, disp);
  #endif
@@ -79,7 +66,7 @@
  #ifdef HAVE_ANDROID_PLATFORM
     case _EGL_PLATFORM_ANDROID:
        if (disp->Options.TestOnly)
-@@ -726,6 +732,13 @@ dri2_terminate(_EGLDriver *drv, _EGLDisp
+@@ -806,6 +812,13 @@ dri2_terminate(_EGLDriver *drv, _EGLDisp
        }
        break;
  #endif
@@ -93,7 +80,7 @@
  #ifdef HAVE_WAYLAND_PLATFORM
     case _EGL_PLATFORM_WAYLAND:
        if (dri2_dpy->wl_drm)
-@@ -747,7 +760,8 @@ dri2_terminate(_EGLDriver *drv, _EGLDisp
+@@ -827,7 +840,8 @@ dri2_terminate(_EGLDriver *drv, _EGLDisp
      * the ones from the gbm device. As such the gbm itself is responsible
      * for the cleanup.
      */
@@ -116,7 +103,7 @@
  #include "eglconfig.h"
  #include "eglcontext.h"
  #include "egldisplay.h"
-@@ -204,6 +208,10 @@ struct dri2_egl_display
+@@ -205,6 +209,10 @@ struct dri2_egl_display
     int			     is_render_node;
     int			     is_different_gpu;
  #endif
@@ -127,7 +114,7 @@
  };
  
  struct dri2_egl_context
-@@ -250,7 +258,7 @@ struct dri2_egl_surface
+@@ -251,7 +259,7 @@ struct dri2_egl_surface
     struct gbm_dri_surface *gbm_surf;
  #endif
  
@@ -136,7 +123,7 @@
     __DRIbuffer           *dri_buffers[__DRI_BUFFER_COUNT];
     struct {
  #ifdef HAVE_WAYLAND_PLATFORM
-@@ -262,9 +270,12 @@ struct dri2_egl_surface
+@@ -263,9 +271,12 @@ struct dri2_egl_surface
        void *data;
        int data_size;
  #endif
@@ -150,7 +137,7 @@
        int                 locked;
        int                 age;
     } color_buffers[4], *back, *current;
-@@ -277,6 +288,10 @@ struct dri2_egl_surface
+@@ -278,6 +289,10 @@ struct dri2_egl_surface
     /* EGL-owned buffers */
     __DRIbuffer           *local_buffers[__DRI_BUFFER_COUNT];
  #endif
@@ -161,9 +148,9 @@
  };
  
  
-@@ -354,4 +369,7 @@ dri2_initialize_android(_EGLDriver *drv,
- void
- dri2_flush_drawable_for_swapbuffers(_EGLDisplay *disp, _EGLSurface *draw);
+@@ -364,4 +379,7 @@ const __DRIconfig *
+ dri2_get_dri_config(struct dri2_egl_config *conf, EGLint surface_type,
+                     EGLenum colorspace);
  
 +EGLBoolean
 +dri2_initialize_mir(_EGLDriver *drv, _EGLDisplay *disp);
@@ -171,7 +158,7 @@
  #endif /* EGL_DRI2_INCLUDED */
 --- /dev/null
 +++ b/src/egl/drivers/dri2/platform_mir.c
-@@ -0,0 +1,619 @@
+@@ -0,0 +1,617 @@
 +/*
 + * Copyright © 2012 Canonical, Inc
 + *
@@ -780,8 +767,6 @@
 +   disp->Extensions.EXT_swap_buffers_with_damage = EGL_TRUE;
 +   disp->Extensions.KHR_image_pixmap = EGL_TRUE;
 +
-+   disp->VersionMajor = 1;
-+   disp->VersionMinor = 4;
 +   dri2_dpy->vtbl = &dri2_mir_display_vtbl;
 +
 +   return EGL_TRUE;
@@ -791,20 +776,6 @@
 +
 +   return EGL_FALSE;
 +}
---- a/src/egl/main/Makefile.am
-+++ b/src/egl/main/Makefile.am
-@@ -68,6 +68,11 @@ if HAVE_EGL_PLATFORM_NULL
- AM_CFLAGS += -DHAVE_NULL_PLATFORM
- endif
- 
-+if HAVE_EGL_PLATFORM_MIR
-+AM_CFLAGS += -DHAVE_MIR_PLATFORM
-+AM_CFLAGS += $(MIR_CFLAGS)
-+endif
-+
- if HAVE_EGL_DRIVER_DRI2
- AM_CFLAGS += -D_EGL_BUILT_IN_DRIVER_DRI2
- AM_CFLAGS += -DHAVE_XCB_DRI2
 --- a/src/egl/main/egldisplay.c
 +++ b/src/egl/main/egldisplay.c
 @@ -56,7 +56,10 @@
@@ -819,17 +790,15 @@
  
  /**
   * Map --with-egl-platforms names to platform types.
-@@ -71,7 +74,8 @@ static const struct {
-    { _EGL_PLATFORM_DRM, "drm" },
-    { _EGL_PLATFORM_NULL, "null" },
+@@ -71,6 +74,7 @@ static const struct {
     { _EGL_PLATFORM_ANDROID, "android" },
--   { _EGL_PLATFORM_HAIKU, "haiku" }
-+   { _EGL_PLATFORM_HAIKU, "haiku" },
+    { _EGL_PLATFORM_HAIKU, "haiku" },
+    { _EGL_PLATFORM_SURFACELESS, "surfaceless" },
 +   { _EGL_PLATFORM_MIR, "mir" }
  };
  
  
-@@ -131,6 +135,47 @@ _eglPointerIsDereferencable(void *p)
+@@ -130,6 +134,47 @@ _eglPointerIsDereferencable(void *p)
  #endif
  }
  
@@ -877,7 +846,7 @@
  
  /**
   * Try detecting native platform with the help of native display characteristcs.
-@@ -141,6 +186,11 @@ _eglNativePlatformDetectNativeDisplay(vo
+@@ -140,6 +185,11 @@ _eglNativePlatformDetectNativeDisplay(vo
     if (nativeDisplay == EGL_DEFAULT_DISPLAY)
        return _EGL_INVALID_PLATFORM;
  
@@ -889,7 +858,7 @@
     if (_eglPointerIsDereferencable(nativeDisplay)) {
        void *first_pointer = *(void **) nativeDisplay;
  
-@@ -179,7 +229,7 @@ _eglNativePlatformDetectNativeDisplay(vo
+@@ -178,7 +228,7 @@ _eglNativePlatformDetectNativeDisplay(vo
  _EGLPlatformType
  _eglGetNativePlatform(void *nativeDisplay)
  {
@@ -900,10 +869,10 @@
     if (native_platform == _EGL_INVALID_PLATFORM) {
 --- a/src/egl/main/egldisplay.h
 +++ b/src/egl/main/egldisplay.h
-@@ -51,6 +51,7 @@ enum _egl_platform_type {
-    _EGL_PLATFORM_NULL,
+@@ -50,6 +50,7 @@ enum _egl_platform_type {
     _EGL_PLATFORM_ANDROID,
     _EGL_PLATFORM_HAIKU,
+    _EGL_PLATFORM_SURFACELESS,
 +   _EGL_PLATFORM_MIR,
  
     _EGL_NUM_PLATFORMS,
@@ -946,7 +915,7 @@
  
     .getBuffers              = dri_get_buffers,
     .flushFrontBuffer        = dri_flush_front_buffer,
-@@ -528,9 +528,11 @@ gbm_dri_is_format_supported(struct gbm_d
+@@ -536,9 +536,11 @@ gbm_dri_is_format_supported(struct gbm_d
     switch (format) {
     case GBM_BO_FORMAT_XRGB8888:
     case GBM_FORMAT_XRGB8888:
@@ -958,7 +927,7 @@
        if (usage & GBM_BO_USE_SCANOUT)
           return 0;
        break;
-@@ -612,6 +614,9 @@ gbm_dri_to_gbm_format(uint32_t dri_forma
+@@ -620,6 +622,9 @@ gbm_dri_to_gbm_format(uint32_t dri_forma
     case __DRI_IMAGE_FORMAT_ABGR8888:
        ret = GBM_FORMAT_ABGR8888;
        break;
@@ -968,7 +937,7 @@
     default:
        ret = 0;
        break;
-@@ -620,6 +625,41 @@ gbm_dri_to_gbm_format(uint32_t dri_forma
+@@ -628,6 +633,41 @@ gbm_dri_to_gbm_format(uint32_t dri_forma
     return ret;
  }
  
@@ -1010,7 +979,7 @@
  static struct gbm_bo *
  gbm_dri_bo_import(struct gbm_device *gbm,
                    uint32_t type, void *buffer, uint32_t usage)
-@@ -828,31 +868,7 @@ gbm_dri_bo_create(struct gbm_device *gbm
+@@ -836,31 +876,7 @@ gbm_dri_bo_create(struct gbm_device *gbm
     bo->base.base.height = height;
     bo->base.base.format = format;
  
@@ -1043,3 +1012,18 @@
  
     if (usage & GBM_BO_USE_SCANOUT)
        dri_use |= __DRI_IMAGE_USE_SCANOUT;
+--- a/src/egl/Makefile.am
++++ b/src/egl/Makefile.am
+@@ -75,6 +75,12 @@ AM_CFLAGS += -DHAVE_SURFACELESS_PLATFORM
+ dri2_backend_FILES += drivers/dri2/platform_surfaceless.c
+ endif
+ 
++if HAVE_EGL_PLATFORM_MIR
++AM_CFLAGS += -DHAVE_MIR_PLATFORM
++AM_CFLAGS += $(MIR_CFLAGS)
++dri2_backend_FILES += drivers/dri2/platform_mir.c
++endif
++
+ if HAVE_EGL_DRIVER_DRI2
+ AM_CFLAGS += \
+ 	-I$(top_srcdir)/src/loader \
