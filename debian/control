@@ -45,7 +45,7 @@ Build-Depends:
  libclc-dev [amd64 i386 armhf],
 Vcs-Git: git://git.debian.org/git/pkg-xorg/lib/mesa
 Vcs-Browser: http://git.debian.org/?p=pkg-xorg/lib/mesa.git
-Homepage: http://mesa3d.sourceforge.net/
+Homepage: http://mesa3d.org/
 
 Package: libgl1-mesa-swx11
 Section: libs
