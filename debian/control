@@ -102,35 +102,6 @@ Description: free implementation of the OpenGL API -- debugging symbols
  This package contains debugging symbols for the software rasterization GL
  library.
 
-Package: libgl1-mesa-swx11-i686
-Section: libs
-Priority: extra
-Architecture: any-i386
-Depends:
- libgl1-mesa-swx11 (= ${binary:Version}),
- ${shlibs:Depends},
- ${misc:Depends},
-Pre-Depends: ${misc:Pre-Depends}
-Multi-Arch: same
-Description: Mesa OpenGL runtime [i686 optimized]
- Mesa is a 3-D graphics library with an API which is very similar to
- that of OpenGL.  To the extent that Mesa utilizes the OpenGL command
- syntax or state machine, it is being used with authorization from
- Silicon Graphics, Inc.  However, the author makes no claim that Mesa
- is in any way a compatible replacement for OpenGL or associated with
- Silicon Graphics, Inc.
- .
- This library provides a pure software rasteriser; it does not provide
- a direct rendering-capable library, or one which uses GLX.  For that,
- please see libgl1-mesa-glx.
- .
- On Linux, this library is also known as libGL or libGL.so.1.
- .
- This set of libraries is optimized for i686 machines and will only be used if
- you are running a 2.6 kernel on an i686 class CPU. This includes Pentium Pro,
- Pentium II/II/IV, Celeron CPU's and similar class CPU's (including clones
- such as AMD Athlon/Opteron, VIA C3 Nehemiah, but not VIA C3 Ezla).
-
 Package: libgl1-mesa-swx11-dev
 Section: libdevel
 Priority: extra

@@ -32,9 +32,6 @@ buildflags = \
 	$(shell DEB_CFLAGS_MAINT_APPEND="-Wall -fno-optimize-sibling-calls" DEB_CXXFLAGS_MAINT_APPEND="-Wall -fno-optimize-sibling-calls" dpkg-buildflags --export=configure)
 endif
 
-buildflags-i686 = \
-	$(shell DEB_CFLAGS_MAINT_APPEND="-Wall -march=i686" DEB_CXXFLAGS_MAINT_APPEND="-Wall -march=i686" dpkg-buildflags --export=configure)
-
 # keep a list of files we don't install (yet), but since it's a bit
 # large, use an external file:
 include debian/not-installed
@@ -43,10 +40,6 @@ include debian/not-installed
 CONFIGS = swx11 \
 	  swx11-static \
 	  dri
-
-ifeq ($(DEB_HOST_ARCH_CPU), i386)
-	CONFIGS += swx11-i386-i686
-endif
 
 STAMP_DIR = debian/stamp
 STAMP = $(STAMP_DIR)/$(DEB_BUILD_GNU_TYPE)
@@ -167,20 +160,6 @@ confflags-swx11-static = \
 	--disable-va \
 	--disable-omx \
 	$(buildflags)
-
-confflags-swx11-i386-i686 = \
-	--disable-dri \
-	--disable-egl \
-	--with-gallium-drivers= \
-	--enable-xlib-glx \
-	--disable-egl \
-	--disable-shared-glapi \
-	--disable-gles1 \
-	--disable-gles2 \
-	--disable-va \
-	--disable-omx \
-	--libdir=/usr/lib/$(DEB_HOST_MULTIARCH)/i686/cmov \
-	$(buildflags-i686)
 
 configure: $(QUILT_STAMPFN) configure.ac
 	autoreconf -vfi
