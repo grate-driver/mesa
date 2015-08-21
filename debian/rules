@@ -37,9 +37,7 @@ endif
 include debian/not-installed
 
 # build the following configurations by default
-CONFIGS = swx11 \
-	  swx11-static \
-	  dri
+CONFIGS = dri
 
 STAMP_DIR = debian/stamp
 STAMP = $(STAMP_DIR)/$(DEB_BUILD_GNU_TYPE)
@@ -132,33 +130,6 @@ confflags-dri = \
 	$(confflags_EGL) \
 	$(confflags_GALLIUM) \
 	$(confflags_GLES) \
-	$(buildflags)
-
-confflags-swx11 = \
-	--disable-dri \
-	--disable-egl \
-	--with-gallium-drivers= \
-	--enable-xlib-glx \
-	--disable-egl \
-	--disable-shared-glapi \
-	--disable-gles1 \
-	--disable-gles2 \
-	--disable-va \
-	--disable-omx \
-	$(buildflags)
-
-confflags-swx11-static = \
-	--disable-dri \
-	--disable-egl \
-	--with-gallium-drivers= \
-	--enable-xlib-glx \
-	--enable-static \
-	--disable-egl \
-	--disable-shared-glapi \
-	--disable-gles1 \
-	--disable-gles2 \
-	--disable-va \
-	--disable-omx \
 	$(buildflags)
 
 configure: $(QUILT_STAMPFN) configure.ac
