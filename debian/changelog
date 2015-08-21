@@ -7,6 +7,7 @@ mesa (11.0.0~git20150817-2) UNRELEASED; urgency=medium
   * control: Update upstream url.
   * control: Update Vcs-* fields.
   * Drop libgl1-mesa-swx11* packages.
+  * control: Update package description.
 
   [ Timo Aaltonen ]
   * control: Delete commented out libgl1-mesa-glx-i686 from the file.

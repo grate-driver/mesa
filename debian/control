@@ -412,15 +412,19 @@ Breaks:
 Pre-Depends: ${misc:Pre-Depends}
 Multi-Arch: same
 Description: free implementation of the OpenGL API -- GLX runtime
+ Mesa is a 3-D graphics library with an API which is very similar to
+ that of OpenGL.  To the extent that Mesa utilizes the OpenGL command
+ syntax or state machine, it is being used with authorization from
+ Silicon Graphics, Inc.  However, the authors make no claim that Mesa
+ is in any way a compatible replacement for OpenGL or associated with
+ Silicon Graphics, Inc.
+ .
  This version of Mesa provides GLX and DRI capabilities: it is capable of
  both direct and indirect rendering.  For direct rendering, it can use DRI
  modules from the libgl1-mesa-dri package to accelerate drawing.
  .
  This package does not include the modules themselves: these can be found
  in the libgl1-mesa-dri package.
- .
- For a complete description of Mesa, please look at the
- libgl1-mesa-swx11 package.
 
 Package: libgl1-mesa-glx-dbg
 Section: debug
@@ -439,7 +443,7 @@ Description: Debugging symbols for the Mesa GLX runtime
  in the libgl1-mesa-dri package.
  .
  For a complete description of Mesa, please look at the
- libgl1-mesa-swx11 package.
+ libgl1-mesa-glx package.
  .
  This package contains debugging symbols for the GL library with GLX and DRI
  capabilities.
@@ -471,7 +475,7 @@ Description: free implementation of the OpenGL API -- DRI modules
  modules for accelerating direct rendering.
  .
  For a complete description of Mesa, please look at the
- libgl1-mesa-swx11 package.
+ libgl1-mesa-glx package.
 
 Package: libgl1-mesa-dri-dbg
 Section: debug
@@ -491,7 +495,7 @@ Description: Debugging symbols for the Mesa DRI modules
  modules for accelerating direct rendering.
  .
  For a complete description of Mesa, please look at the
- libgl1-mesa-swx11 package.
+ libgl1-mesa-glx package.
  .
  This package contains debugging symbols for the DRI modules.
 
@@ -529,7 +533,7 @@ Description: free implementation of the OpenGL API -- GLX development files
  This package includes headers and static libraries for compiling
  programs with Mesa.
  .
- For a complete description of Mesa, please look at the libgl1-mesa-swx11
+ For a complete description of Mesa, please look at the libgl1-mesa-glx
  package.
 
 Package: mesa-common-dev
