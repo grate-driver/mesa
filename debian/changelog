@@ -2,7 +2,6 @@ mesa (11.0.0~rc1-1) UNRELEASED; urgency=medium
 
   [ Andreas Boll ]
   * New upstream release candidate.
-  * rules: Disable omx for swx11 builds.
   * control: Drop unneeded libomxil-bellagio-dev build-dep.
   * rules: Explicitly disable vaapi (Closes: #789100).
   * control: Update upstream url.
