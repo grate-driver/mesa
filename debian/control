@@ -39,14 +39,16 @@ Build-Depends:
  libudev-dev [linux-any],
  flex,
  bison,
- llvm-3.7-dev (>= 1:3.7~) [amd64 i386 kfreebsd-amd64 kfreebsd-i386 armhf],
+ llvm-3.7-dev (>= 1:3.7~+rc2) [amd64 i386 kfreebsd-amd64 kfreebsd-i386 armhf],
  libelf-dev [amd64 i386 kfreebsd-amd64 kfreebsd-i386 armhf],
  libwayland-dev (>= 1.2.0) [linux-any],
+# libclang-3.7-dev (>= 1:3.7~+rc2) [amd64 i386 armhf],
+# libclc-dev [amd64 i386 armhf],
  mir-client-platform-mesa-dev [!arm64 !powerpc !ppc64 !ppc64el],
  libmirclient-dev [!arm64 !powerpc !ppc64 !ppc64el],
-Vcs-Git: git://git.debian.org/git/pkg-xorg/lib/mesa
-Vcs-Browser: http://git.debian.org/?p=pkg-xorg/lib/mesa.git
-Homepage: http://mesa3d.sourceforge.net/
+Vcs-Git: git://anonscm.debian.org/pkg-xorg/lib/mesa
+Vcs-Browser: http://anonscm.debian.org/cgit/pkg-xorg/lib/mesa.git
+Homepage: http://mesa3d.org/
 
 Package: libxatracker2
 Section: libs
@@ -419,7 +421,7 @@ Description: free implementation of the OpenGL API -- GLX runtime
  Mesa is a 3-D graphics library with an API which is very similar to
  that of OpenGL.  To the extent that Mesa utilizes the OpenGL command
  syntax or state machine, it is being used with authorization from
- Silicon Graphics, Inc.  However, the author makes no claim that Mesa
+ Silicon Graphics, Inc.  However, the authors make no claim that Mesa
  is in any way a compatible replacement for OpenGL or associated with
  Silicon Graphics, Inc.
  .
