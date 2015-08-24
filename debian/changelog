@@ -1,6 +1,6 @@
-mesa (11.0.0~git20150817-1ubuntu1) UNRELEASED; urgency=medium
+mesa (11.0.0~rc1-1ubuntu1) UNRELEASED; urgency=medium
 
-  * Merge from unreleased debian git.
+  * Merge from Debian.
   * egl-platform-mir.patch: Updated.
 
  -- Timo Aaltonen <tjaalton@debian.org>  Wed, 19 Aug 2015 11:11:45 +0300
