@@ -1,6 +1,11 @@
 mesa (10.6.5-1) UNRELEASED; urgency=medium
 
+  [ Andreas Boll ]
   * New upstream release.
+
+  [ Julien Cristau ]
+  * Break libopengl-perl (<< 0.6704+dfsg-2), thanks to Niko Tyni
+    (closes: #796918)
 
  -- Andreas Boll <andreas.boll.dev@gmail.com>  Sat, 22 Aug 2015 13:50:29 +0200
 
