@@ -864,7 +864,7 @@ _mesa_uniform_matrix(struct gl_context *ctx, struct gl_shader_program *shProg,
 		     GLuint cols, GLuint rows,
                      GLint location, GLsizei count,
                      GLboolean transpose,
-                     const GLvoid *values, GLenum type)
+                     const GLvoid *values, enum glsl_base_type basicType)
 {
    unsigned offset;
    unsigned vectors;
@@ -883,8 +883,8 @@ _mesa_uniform_matrix(struct gl_context *ctx, struct gl_shader_program *shProg,
       return;
    }
 
-   assert(type == GL_FLOAT || type == GL_DOUBLE);
-   size_mul = type == GL_DOUBLE ? 2 : 1;
+   assert(basicType == GLSL_TYPE_FLOAT || basicType == GLSL_TYPE_DOUBLE);
+   size_mul = basicType == GLSL_TYPE_DOUBLE ? 2 : 1;
 
    assert(!uni->type->is_sampler());
    vectors = uni->type->matrix_columns;
@@ -939,7 +939,7 @@ _mesa_uniform_matrix(struct gl_context *ctx, struct gl_shader_program *shProg,
    if (!transpose) {
       memcpy(&uni->storage[elements * offset], values,
 	     sizeof(uni->storage[0]) * elements * count * size_mul);
-   } else if (type == GL_FLOAT) {
+   } else if (basicType == GLSL_TYPE_FLOAT) {
       /* Copy and transpose the matrix.
        */
       const float *src = (const float *)values;
@@ -956,7 +956,7 @@ _mesa_uniform_matrix(struct gl_context *ctx, struct gl_shader_program *shProg,
 	 src += elements;
       }
    } else {
-      assert(type == GL_DOUBLE);
+      assert(basicType == GLSL_TYPE_DOUBLE);
       const double *src = (const double *)values;
       double *dst = (double *)&uni->storage[elements * offset].f;
 
