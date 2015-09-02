@@ -1,3 +1,9 @@
+mesa (11.0.0~rc2-2) UNRELEASED; urgency=medium
+
+  * Use https for Vcs-* fields.
+
+ -- Andreas Boll <andreas.boll.dev@gmail.com>  Wed, 02 Sep 2015 14:20:06 +0200
+
 mesa (11.0.0~rc2-1) experimental; urgency=medium
 
   * New upstream release candidate.
