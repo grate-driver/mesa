@@ -100,6 +100,9 @@ else
 	GALLIUM_DRIVERS += radeonsi
 	confflags_GALLIUM += --enable-gallium-llvm
 	confflags_GALLIUM += ac_cv_path_LLVM_CONFIG=llvm-config-3.7
+	GALLIUM_DRIVERS += swrast
+  else
+	DRI_DRIVERS += swrast
   endif
 
 	confflags_DIRECT_RENDERING = --enable-driglx-direct
