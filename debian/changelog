@@ -1,4 +1,4 @@
-mesa (11.0.0~rc3-1) UNRELEASED; urgency=medium
+mesa (11.0.0~rc3-1) experimental; urgency=medium
 
   [ Andreas Boll ]
   * Use https for Vcs-* fields.
@@ -6,7 +6,7 @@ mesa (11.0.0~rc3-1) UNRELEASED; urgency=medium
   [ Timo Aaltonen ]
   * New upstream release candidate.
 
- -- Andreas Boll <andreas.boll.dev@gmail.com>  Wed, 02 Sep 2015 14:20:06 +0200
+ -- Timo Aaltonen <tjaalton@debian.org>  Mon, 07 Sep 2015 15:04:32 +0300
 
 mesa (11.0.0~rc2-1) experimental; urgency=medium
 
