@@ -1,9 +1,19 @@
-mesa (11.0.0~rc2-1ubuntu1) UNRELEASED; urgency=medium
+mesa (11.0.0~rc3-1ubuntu1) UNRELEASED; urgency=medium
 
   * Merge from Debian.
   * egl-platform-mir.patch: Updated.
 
- -- Timo Aaltonen <tjaalton@debian.org>  Wed, 19 Aug 2015 11:11:45 +0300
+ -- Timo Aaltonen <tjaalton@debian.org>  Mon, 07 Sep 2015 16:27:37 +0300
+
+mesa (11.0.0~rc3-1) experimental; urgency=medium
+
+  [ Andreas Boll ]
+  * Use https for Vcs-* fields.
+
+  [ Timo Aaltonen ]
+  * New upstream release candidate.
+
+ -- Timo Aaltonen <tjaalton@debian.org>  Mon, 07 Sep 2015 15:04:32 +0300
 
 mesa (11.0.0~rc2-1) experimental; urgency=medium
 
