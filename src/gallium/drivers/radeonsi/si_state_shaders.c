@@ -1039,11 +1039,23 @@ static void si_init_gs_rings(struct si_context *sctx)
 	assert(!sctx->gs_rings);
 	sctx->gs_rings = CALLOC_STRUCT(si_pm4_state);
 
+	if (!sctx->gs_rings)
+		return;
+
 	sctx->esgs_ring = pipe_buffer_create(sctx->b.b.screen, PIPE_BIND_CUSTOM,
 				       PIPE_USAGE_DEFAULT, esgs_ring_size);
+	if (!sctx->esgs_ring) {
+		FREE(sctx->gs_rings);
+		return;
+	}
 
 	sctx->gsvs_ring = pipe_buffer_create(sctx->b.b.screen, PIPE_BIND_CUSTOM,
 					     PIPE_USAGE_DEFAULT, gsvs_ring_size);
+	if (!sctx->gsvs_ring) {
+		pipe_resource_reference(&sctx->esgs_ring, NULL);
+		FREE(sctx->gs_rings);
+		return;
+	}
 
 	if (sctx->b.chip_class >= CIK) {
 		if (sctx->b.chip_class >= VI) {
@@ -1410,8 +1422,11 @@ bool si_update_shaders(struct si_context *sctx)
 		si_pm4_bind_state(sctx, vs, sctx->gs_shader->current->gs_copy_shader->pm4);
 		si_update_so(sctx, sctx->gs_shader);
 
-		if (!sctx->gs_rings)
+		if (!sctx->gs_rings) {
 			si_init_gs_rings(sctx);
+			if (!sctx->gs_rings)
+				return false;
+		}
 
 		if (sctx->emitted.named.gs_rings != sctx->gs_rings)
 			sctx->b.flags |= SI_CONTEXT_VGT_FLUSH;
