@@ -1,3 +1,9 @@
+mesa (11.0.0-1) UNRELEASED; urgency=medium
+
+  * New upstream release.
+
+ -- Timo Aaltonen <tjaalton@debian.org>  Mon, 14 Sep 2015 14:14:24 +0300
+
 mesa (11.0.0~rc3-1) experimental; urgency=medium
 
   [ Andreas Boll ]
