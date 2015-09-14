@@ -184,7 +184,7 @@ static void r600_emit_query_begin(struct r600_common_context *ctx, struct r600_q
 		radeon_emit(cs, PKT3(PKT3_EVENT_WRITE, 2, 0));
 		radeon_emit(cs, EVENT_TYPE(EVENT_TYPE_ZPASS_DONE) | EVENT_INDEX(1));
 		radeon_emit(cs, va);
-		radeon_emit(cs, (va >> 32UL) & 0xFF);
+		radeon_emit(cs, (va >> 32) & 0xFFFF);
 		break;
 	case PIPE_QUERY_PRIMITIVES_EMITTED:
 	case PIPE_QUERY_PRIMITIVES_GENERATED:
@@ -193,13 +193,13 @@ static void r600_emit_query_begin(struct r600_common_context *ctx, struct r600_q
 		radeon_emit(cs, PKT3(PKT3_EVENT_WRITE, 2, 0));
 		radeon_emit(cs, EVENT_TYPE(EVENT_TYPE_SAMPLE_STREAMOUTSTATS) | EVENT_INDEX(3));
 		radeon_emit(cs, va);
-		radeon_emit(cs, (va >> 32UL) & 0xFF);
+		radeon_emit(cs, (va >> 32) & 0xFFFF);
 		break;
 	case PIPE_QUERY_TIME_ELAPSED:
 		radeon_emit(cs, PKT3(PKT3_EVENT_WRITE_EOP, 4, 0));
 		radeon_emit(cs, EVENT_TYPE(EVENT_TYPE_CACHE_FLUSH_AND_INV_TS_EVENT) | EVENT_INDEX(5));
 		radeon_emit(cs, va);
-		radeon_emit(cs, (3 << 29) | ((va >> 32UL) & 0xFF));
+		radeon_emit(cs, (3 << 29) | ((va >> 32) & 0xFFFF));
 		radeon_emit(cs, 0);
 		radeon_emit(cs, 0);
 		break;
@@ -207,7 +207,7 @@ static void r600_emit_query_begin(struct r600_common_context *ctx, struct r600_q
 		radeon_emit(cs, PKT3(PKT3_EVENT_WRITE, 2, 0));
 		radeon_emit(cs, EVENT_TYPE(EVENT_TYPE_SAMPLE_PIPELINESTAT) | EVENT_INDEX(2));
 		radeon_emit(cs, va);
-		radeon_emit(cs, (va >> 32UL) & 0xFF);
+		radeon_emit(cs, (va >> 32) & 0xFFFF);
 		break;
 	default:
 		assert(0);
@@ -240,7 +240,7 @@ static void r600_emit_query_end(struct r600_common_context *ctx, struct r600_que
 		radeon_emit(cs, PKT3(PKT3_EVENT_WRITE, 2, 0));
 		radeon_emit(cs, EVENT_TYPE(EVENT_TYPE_ZPASS_DONE) | EVENT_INDEX(1));
 		radeon_emit(cs, va);
-		radeon_emit(cs, (va >> 32UL) & 0xFF);
+		radeon_emit(cs, (va >> 32) & 0xFFFF);
 		break;
 	case PIPE_QUERY_PRIMITIVES_EMITTED:
 	case PIPE_QUERY_PRIMITIVES_GENERATED:
@@ -250,7 +250,7 @@ static void r600_emit_query_end(struct r600_common_context *ctx, struct r600_que
 		radeon_emit(cs, PKT3(PKT3_EVENT_WRITE, 2, 0));
 		radeon_emit(cs, EVENT_TYPE(EVENT_TYPE_SAMPLE_STREAMOUTSTATS) | EVENT_INDEX(3));
 		radeon_emit(cs, va);
-		radeon_emit(cs, (va >> 32UL) & 0xFF);
+		radeon_emit(cs, (va >> 32) & 0xFFFF);
 		break;
 	case PIPE_QUERY_TIME_ELAPSED:
 		va += query->buffer.results_end + query->result_size/2;
@@ -259,7 +259,7 @@ static void r600_emit_query_end(struct r600_common_context *ctx, struct r600_que
 		radeon_emit(cs, PKT3(PKT3_EVENT_WRITE_EOP, 4, 0));
 		radeon_emit(cs, EVENT_TYPE(EVENT_TYPE_CACHE_FLUSH_AND_INV_TS_EVENT) | EVENT_INDEX(5));
 		radeon_emit(cs, va);
-		radeon_emit(cs, (3 << 29) | ((va >> 32UL) & 0xFF));
+		radeon_emit(cs, (3 << 29) | ((va >> 32) & 0xFFFF));
 		radeon_emit(cs, 0);
 		radeon_emit(cs, 0);
 		break;
@@ -268,7 +268,7 @@ static void r600_emit_query_end(struct r600_common_context *ctx, struct r600_que
 		radeon_emit(cs, PKT3(PKT3_EVENT_WRITE, 2, 0));
 		radeon_emit(cs, EVENT_TYPE(EVENT_TYPE_SAMPLE_PIPELINESTAT) | EVENT_INDEX(2));
 		radeon_emit(cs, va);
-		radeon_emit(cs, (va >> 32UL) & 0xFF);
+		radeon_emit(cs, (va >> 32) & 0xFFFF);
 		break;
 	default:
 		assert(0);

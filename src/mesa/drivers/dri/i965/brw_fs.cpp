@@ -3607,7 +3607,8 @@ fs_visitor::lower_integer_multiplication()
           * schedule multi-component multiplications much better.
           */
 
-         if (inst->conditional_mod && inst->dst.is_null()) {
+         fs_reg orig_dst = inst->dst;
+         if (orig_dst.is_null() || orig_dst.file == MRF) {
             inst->dst = fs_reg(GRF, alloc.allocate(dispatch_width / 8),
                                inst->dst.type, dispatch_width);
          }
@@ -3673,9 +3674,8 @@ fs_visitor::lower_integer_multiplication()
 
          insert(ADD(dst, low, high));
 
-         if (inst->conditional_mod) {
-            fs_reg null(retype(brw_null_reg(), inst->dst.type));
-            fs_inst *mov = MOV(null, inst->dst);
+         if (inst->conditional_mod || orig_dst.file == MRF) {
+            fs_inst *mov = MOV(orig_dst, inst->dst);
             mov->conditional_mod = inst->conditional_mod;
             insert(mov);
          }
@@ -4098,11 +4098,11 @@ fs_visitor::calculate_register_pressure()
 void
 fs_visitor::optimize()
 {
-   split_virtual_grfs();
-
    move_uniform_array_access_to_pull_constants();
    assign_constant_locations();
    demote_pull_constants();
+
+   split_virtual_grfs();
 
 #define OPT(pass, args...) ({                                           \
       pass_num++;                                                       \
