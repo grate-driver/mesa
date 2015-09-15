@@ -1,15 +1,15 @@
-mesa (11.0.0-1) experimental; urgency=medium
-
-  * New upstream release.
-
- -- Timo Aaltonen <tjaalton@debian.org>  Mon, 14 Sep 2015 14:23:13 +0300
-
-mesa (11.0.0~rc3-1ubuntu1) UNRELEASED; urgency=medium
+mesa (11.0.0-1ubuntu1) UNRELEASED; urgency=medium
 
   * Merge from Debian.
   * egl-platform-mir.patch: Updated.
 
  -- Timo Aaltonen <tjaalton@debian.org>  Mon, 07 Sep 2015 16:27:37 +0300
+
+mesa (11.0.0-1) experimental; urgency=medium
+
+  * New upstream release.
+
+ -- Timo Aaltonen <tjaalton@debian.org>  Mon, 14 Sep 2015 14:23:13 +0300
 
 mesa (11.0.0~rc3-1) experimental; urgency=medium
 
