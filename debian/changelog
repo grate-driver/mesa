@@ -2,6 +2,8 @@ mesa (11.0.0-1ubuntu1) UNRELEASED; urgency=medium
 
   * Merge from Debian.
   * egl-platform-mir.patch: Updated.
+  * i965-remove-early-release-of-dri2-miptree.patch: Add a workaround to
+    fix crashes in brw_meta_fast_clear. (LP: #1492037)
 
  -- Timo Aaltonen <tjaalton@debian.org>  Mon, 07 Sep 2015 16:27:37 +0300
 

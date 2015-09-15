@@ -3,3 +3,4 @@
 # Ubuntu patches.
 egl-platform-mir.patch
 i915-dont-default-to-2.1.patch
+i965-remove-early-release-of-dri2-miptree.patch
