@@ -1,0 +1,2 @@
+# The vec4 nir i965 work landed after the 10.6 branchpoint
+b8d2263c83d29f4626ac0fe0316978aa6262aefb i965/vec4_nir: Load constants as integers
