@@ -1,4 +1,4 @@
-mesa (11.0.0-1ubuntu1) UNRELEASED; urgency=medium
+mesa (11.0.0-1ubuntu1) wily; urgency=medium
 
   * Merge from Debian. (LP: #1484279)
   * egl-platform-mir.patch: Updated.
@@ -7,7 +7,7 @@ mesa (11.0.0-1ubuntu1) UNRELEASED; urgency=medium
   * control, rules: Default to llvm-3.6 again, because 3.7 won't be in
     main for wily.
 
- -- Timo Aaltonen <tjaalton@debian.org>  Mon, 07 Sep 2015 16:27:37 +0300
+ -- Timo Aaltonen <tjaalton@debian.org>  Tue, 22 Sep 2015 19:20:17 +0300
 
 mesa (11.0.0-1) experimental; urgency=medium
 
