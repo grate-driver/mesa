@@ -5,6 +5,7 @@ mesa (11.0.2-1) UNRELEASED; urgency=medium
 
   [ Timo Aaltonen ]
   * New upstream release.
+  * rules, control: Enable llvmpipe on ppc64el. (LP: #1489483)
 
  -- Andreas Boll <andreas.boll.dev@gmail.com>  Mon, 14 Sep 2015 17:30:51 +0200
 
