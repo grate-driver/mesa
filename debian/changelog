@@ -1,3 +1,10 @@
+mesa (11.0.2-1ubuntu1) wily; urgency=medium
+
+  * Merge from debian.
+    - new upstream bugfix release
+
+ -- Timo Aaltonen <tjaalton@debian.org>  Wed, 30 Sep 2015 15:19:09 +0300
+
 mesa (11.0.2-1) experimental; urgency=medium
 
   [ Andreas Boll ]
