@@ -1,3 +1,10 @@
+mesa (11.0.2-1ubuntu2) wily; urgency=medium
+
+  * control, rules: Disable LLVM on ppc64el again, until unity tests
+    pass with it.
+
+ -- Timo Aaltonen <tjaalton@debian.org>  Fri, 02 Oct 2015 15:45:56 +0300
+
 mesa (11.0.2-1ubuntu1) wily; urgency=medium
 
   * Merge from debian.
