@@ -1,3 +1,11 @@
+mesa (11.0.2-1ubuntu3) wily; urgency=medium
+
+  * core-fix-EXT_texture_format_BGRA8888.patch: Cherry pick upstream commit
+    fixing incorrectly-strict error handling in format code. Fixes black
+    windows in Weston and Mir (LP: #1504387)
+
+ -- Christopher James Halse Rogers <raof@ubuntu.com>  Fri, 09 Oct 2015 14:45:54 +1100
+
 mesa (11.0.2-1ubuntu2) wily; urgency=medium
 
   * control, rules: Disable LLVM on ppc64el again, until unity tests
