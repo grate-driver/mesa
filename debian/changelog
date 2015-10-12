@@ -1,6 +1,8 @@
 mesa (11.0.3-1) UNRELEASED; urgency=medium
 
   * New upstream release.
+  * Cherry-pick commit 70e91d6 (i965: Remove early release of DRI2
+    miptree) from upstream (Closes: #769518).
 
  -- Andreas Boll <andreas.boll.dev@gmail.com>  Mon, 12 Oct 2015 14:52:29 +0200
 
