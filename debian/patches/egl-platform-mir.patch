@@ -8,7 +8,7 @@ Index: mesa-11.0.2/configure.ac
  		;;
 -
 +        mir)
-+                PKG_CHECK_MODULES([MIR], [mirclient mir-client-platform-mesa-dev])
++                PKG_CHECK_MODULES([MIR], [mirclient mir-client-platform-mesa])
 +                ;;
  	*)
  		AC_MSG_ERROR([EGL platform '$plat' does not exist])
