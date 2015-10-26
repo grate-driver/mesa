@@ -1,4 +1,4 @@
-mesa (11.0.3-1) UNRELEASED; urgency=medium
+mesa (11.0.4-1) UNRELEASED; urgency=medium
 
   * New upstream release.
   * Cherry-pick commit 70e91d6 (i965: Remove early release of DRI2
