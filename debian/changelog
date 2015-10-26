@@ -70,6 +70,12 @@ mesa (11.0.0~git20150817-1) experimental; urgency=medium
 
  -- Timo Aaltonen <tjaalton@debian.org>  Tue, 18 Aug 2015 07:53:45 +0300
 
+mesa (10.6.8-1) unstable; urgency=medium
+
+  * New upstream release.
+
+ -- Timo Aaltonen <tjaalton@debian.org>  Tue, 22 Sep 2015 17:21:49 +0300
+
 mesa (10.6.7-1) unstable; urgency=medium
 
   * New upstream release.
