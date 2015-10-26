@@ -1,11 +1,12 @@
-mesa (11.0.4-1) UNRELEASED; urgency=medium
+mesa (11.0.4-1) unstable; urgency=medium
 
+  [ Andreas Boll ]
   * New upstream release.
   * Cherry-pick commit 70e91d6 (i965: Remove early release of DRI2
     miptree) from upstream (Closes: #769518).
   * control: Add libclc-amdgcn to mesa-opencl-icd depends.
 
- -- Andreas Boll <andreas.boll.dev@gmail.com>  Mon, 12 Oct 2015 14:52:29 +0200
+ -- Timo Aaltonen <tjaalton@debian.org>  Mon, 26 Oct 2015 10:30:04 +0200
 
 mesa (11.0.2-1) experimental; urgency=medium
 
