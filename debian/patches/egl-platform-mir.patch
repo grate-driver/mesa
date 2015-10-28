@@ -170,7 +170,7 @@ Index: mesa-11.0.2/src/egl/drivers/dri2/platform_mir.c
 ===================================================================
 --- /dev/null
 +++ mesa-11.0.2/src/egl/drivers/dri2/platform_mir.c
-@@ -0,0 +1,617 @@
+@@ -0,0 +1,618 @@
 +/*
 + * Copyright © 2012 Canonical, Inc
 + *
@@ -200,6 +200,7 @@ Index: mesa-11.0.2/src/egl/drivers/dri2/platform_mir.c
 + */
 +
 +#include <mir_toolkit/mesa/native_display.h>
++#include <mir_toolkit/mir_native_buffer.h>
 +
 +#include <stdlib.h>
 +#include <string.h>
