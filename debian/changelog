@@ -1,4 +1,4 @@
-mesa (11.0.4-1ubuntu1) UNRELEASED; urgency=medium
+mesa (11.0.4-1ubuntu1) xenial; urgency=medium
 
   [ Timo Aaltonen ]
   * Merge from Debian.
@@ -8,7 +8,7 @@ mesa (11.0.4-1ubuntu1) UNRELEASED; urgency=medium
   [ Christopher James Halse Rogers ]
   * patches: Fix Mir patch harder.
 
- -- Christopher James Halse Rogers <raof@ubuntu.com>  Wed, 28 Oct 2015 11:10:12 +1100
+ -- Timo Aaltonen <tjaalton@debian.org>  Wed, 28 Oct 2015 07:58:56 +0200
 
 mesa (11.0.4-1) unstable; urgency=medium
 
