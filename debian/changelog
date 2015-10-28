@@ -1,10 +1,14 @@
 mesa (11.0.4-1ubuntu1) UNRELEASED; urgency=medium
 
+  [ Timo Aaltonen ]
   * Merge from Debian.
   * patches: Dropped patches included in this release, fix Mir patch
     FTBFS. (LP: #1509005)
 
- -- Timo Aaltonen <tjaalton@debian.org>  Mon, 26 Oct 2015 14:06:15 +0200
+  [ Christopher James Halse Rogers ]
+  * patches: Fix Mir patch harder.
+
+ -- Christopher James Halse Rogers <raof@ubuntu.com>  Wed, 28 Oct 2015 11:10:12 +1100
 
 mesa (11.0.4-1) unstable; urgency=medium
 
