@@ -1,6 +1,7 @@
 mesa (11.0.5-1) UNRELEASED; urgency=medium
 
   * New upstream release.
+  * Add myself to Uploaders.
 
  -- Andreas Boll <andreas.boll.dev@gmail.com>  Thu, 12 Nov 2015 09:36:33 +0100
 
