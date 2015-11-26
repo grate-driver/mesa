@@ -4,6 +4,7 @@ mesa (11.0.6-1) UNRELEASED; urgency=medium
   * Bump libvdpau-dev build-dep.
   * Add docs-Replace-sourceforge-logo-with-a-text-link.patch (Fixes
     Lintian error privacy-breach-logo).
+  * Add some Lintian overrides for package-name-doesnt-match-sonames.
 
  -- Andreas Boll <andreas.boll.dev@gmail.com>  Thu, 26 Nov 2015 19:52:36 +0100
 
