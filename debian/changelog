@@ -1,4 +1,4 @@
-mesa (11.0.6-1) UNRELEASED; urgency=medium
+mesa (11.0.6-1) unstable; urgency=medium
 
   * New upstream release.
   * Bump libvdpau-dev build-dep.
@@ -6,7 +6,7 @@ mesa (11.0.6-1) UNRELEASED; urgency=medium
     Lintian error privacy-breach-logo).
   * Add some Lintian overrides for package-name-doesnt-match-sonames.
 
- -- Andreas Boll <andreas.boll.dev@gmail.com>  Thu, 26 Nov 2015 19:52:36 +0100
+ -- Andreas Boll <andreas.boll.dev@gmail.com>  Fri, 27 Nov 2015 08:59:30 +0100
 
 mesa (11.0.5-1) unstable; urgency=medium
 
