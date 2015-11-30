@@ -1,6 +1,7 @@
 mesa (11.1.0~rc2-1) UNRELEASED; urgency=medium
 
   * New upstream release candidate.
+  * Bump libdrm-dev build-dep to 2.4.65.
 
  -- Andreas Boll <andreas.boll.dev@gmail.com>  Mon, 30 Nov 2015 15:06:57 +0100
 
