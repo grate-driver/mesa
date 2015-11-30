@@ -1,3 +1,10 @@
+mesa (11.0.6-1ubuntu1) xenial; urgency=medium
+
+  * Merge from Debian.
+    - new bugfix release
+
+ -- Timo Aaltonen <tjaalton@debian.org>  Mon, 30 Nov 2015 16:24:08 +0200
+
 mesa (11.0.6-1) unstable; urgency=medium
 
   * New upstream release.
