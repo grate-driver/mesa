@@ -1,3 +1,9 @@
+mesa (11.1.0~rc2-1) UNRELEASED; urgency=medium
+
+  * New upstream release candidate.
+
+ -- Andreas Boll <andreas.boll.dev@gmail.com>  Mon, 30 Nov 2015 15:06:57 +0100
+
 mesa (11.0.6-1) unstable; urgency=medium
 
   * New upstream release.
