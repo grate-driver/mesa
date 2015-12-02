@@ -180,9 +180,10 @@ nvc0_invalidate_resource_storage(struct nouveau_context *ctx,
                                  int ref)
 {
    struct nvc0_context *nvc0 = nvc0_context(&ctx->pipe);
+   unsigned bind = res->bind ? res->bind : PIPE_BIND_VERTEX_BUFFER;
    unsigned s, i;
 
-   if (res->bind & PIPE_BIND_RENDER_TARGET) {
+   if (bind & PIPE_BIND_RENDER_TARGET) {
       for (i = 0; i < nvc0->framebuffer.nr_cbufs; ++i) {
          if (nvc0->framebuffer.cbufs[i] &&
              nvc0->framebuffer.cbufs[i]->texture == res) {
@@ -193,7 +194,7 @@ nvc0_invalidate_resource_storage(struct nouveau_context *ctx,
          }
       }
    }
-   if (res->bind & PIPE_BIND_DEPTH_STENCIL) {
+   if (bind & PIPE_BIND_DEPTH_STENCIL) {
       if (nvc0->framebuffer.zsbuf &&
           nvc0->framebuffer.zsbuf->texture == res) {
          nvc0->dirty |= NVC0_NEW_FRAMEBUFFER;
@@ -203,12 +204,12 @@ nvc0_invalidate_resource_storage(struct nouveau_context *ctx,
       }
    }
 
-   if (res->bind & (PIPE_BIND_VERTEX_BUFFER |
-                    PIPE_BIND_INDEX_BUFFER |
-                    PIPE_BIND_CONSTANT_BUFFER |
-                    PIPE_BIND_STREAM_OUTPUT |
-                    PIPE_BIND_COMMAND_ARGS_BUFFER |
-                    PIPE_BIND_SAMPLER_VIEW)) {
+   if (bind & (PIPE_BIND_VERTEX_BUFFER |
+               PIPE_BIND_INDEX_BUFFER |
+               PIPE_BIND_CONSTANT_BUFFER |
+               PIPE_BIND_STREAM_OUTPUT |
+               PIPE_BIND_COMMAND_ARGS_BUFFER |
+               PIPE_BIND_SAMPLER_VIEW)) {
       for (i = 0; i < nvc0->num_vtxbufs; ++i) {
          if (nvc0->vtxbuf[i].buffer == res) {
             nvc0->dirty |= NVC0_NEW_ARRAYS;
@@ -262,7 +263,7 @@ nvc0_context_get_sample_position(struct pipe_context *, unsigned, unsigned,
                                  float *);
 
 struct pipe_context *
-nvc0_create(struct pipe_screen *pscreen, void *priv)
+nvc0_create(struct pipe_screen *pscreen, void *priv, unsigned ctxflags)
 {
    struct nvc0_screen *screen = nvc0_screen(pscreen);
    struct nvc0_context *nvc0;
@@ -309,6 +310,7 @@ nvc0_create(struct pipe_screen *pscreen, void *priv)
    pipe->memory_barrier = nvc0_memory_barrier;
    pipe->get_sample_position = nvc0_context_get_sample_position;
 
+   nouveau_context_init(&nvc0->base);
    nvc0_init_query_functions(nvc0);
    nvc0_init_surface_functions(nvc0);
    nvc0_init_state_functions(nvc0);

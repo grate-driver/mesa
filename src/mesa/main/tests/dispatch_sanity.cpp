@@ -844,7 +844,7 @@ const struct function common_desktop_functions_possible[] = {
    { "glGetProgramResourceiv", 43, -1 },
    { "glGetProgramResourceLocation", 43, -1 },
    { "glGetProgramResourceLocationIndex", 43, -1 },
-// { "glShaderStorageBlockBinding", 43, -1 },           // XXX: Add to xml
+   { "glShaderStorageBlockBinding", 43, -1 },
 // { "glTextureBufferRangeEXT", 43, -1 },               // XXX: Add to xml
    { "glTexStorage2DMultisample", 43, -1 },
    { "glTexStorage3DMultisample", 43, -1 },
@@ -2039,6 +2039,19 @@ const struct function gles11_functions_possible[] = {
    { "glUnmapBufferOES", 11, -1 },
    { "glVertexPointer", 11, _gloffset_VertexPointer },
    { "glViewport", 11, _gloffset_Viewport },
+
+   /* GL_KHR_debug */
+   { "glPushDebugGroupKHR", 11, -1 },
+   { "glPopDebugGroupKHR", 11, -1 },
+   { "glDebugMessageCallbackKHR", 11, -1 },
+   { "glDebugMessageControlKHR", 11, -1 },
+   { "glDebugMessageInsertKHR", 11, -1 },
+   { "glGetDebugMessageLogKHR", 11, -1 },
+   { "glGetObjectLabelKHR", 11, -1 },
+   { "glGetObjectPtrLabelKHR", 11, -1 },
+   { "glObjectLabelKHR", 11, -1 },
+   { "glObjectPtrLabelKHR", 11, -1 },
+
    { NULL, 0, -1 }
 };
 
@@ -2262,6 +2275,18 @@ const struct function gles2_functions_possible[] = {
    { "glEndPerfQueryINTEL", 20, -1 },
    { "glGetPerfQueryDataINTEL", 20, -1 },
 
+   /* GL_KHR_debug */
+   { "glPushDebugGroupKHR", 20, -1 },
+   { "glPopDebugGroupKHR", 20, -1 },
+   { "glDebugMessageCallbackKHR", 20, -1 },
+   { "glDebugMessageControlKHR", 20, -1 },
+   { "glDebugMessageInsertKHR", 20, -1 },
+   { "glGetDebugMessageLogKHR", 20, -1 },
+   { "glGetObjectLabelKHR", 20, -1 },
+   { "glGetObjectPtrLabelKHR", 20, -1 },
+   { "glObjectLabelKHR", 20, -1 },
+   { "glObjectPtrLabelKHR", 20, -1 },
+
    { NULL, 0, -1 }
 };
 
@@ -2396,6 +2421,11 @@ const struct function gles3_functions_possible[] = {
    { "glProgramUniform4uiEXT", 30, -1 },
    { "glProgramUniform4uivEXT", 30, -1 },
 
+   /* GL_EXT_blend_func_extended */
+   { "glBindFragDataLocationIndexedEXT", 30, -1 },
+   { "glGetFragDataIndexEXT", 30, -1 },
+   { "glBindFragDataLocationEXT", 30, -1 },
+
    { NULL, 0, -1 }
 };
 
@@ -2405,10 +2435,8 @@ const struct function gles31_functions_possible[] = {
    { "glDrawArraysIndirect", 31, -1 },
    { "glDrawElementsIndirect", 31, -1 },
 
-   // FINISHME: These two functions have not been implemented yet.  They come
-   // FINISHME: from the ARB_framebuffer_no_attachments extension.
-   // { "glFramebufferParameteri", 31, -1 },
-   // { "glGetFramebufferParameteriv", 31, -1 },
+   { "glFramebufferParameteri", 31, -1 },
+   { "glGetFramebufferParameteriv", 31, -1 },
 
    { "glGetProgramInterfaceiv", 31, -1 },
    { "glGetProgramResourceIndex", 31, -1 },
@@ -2479,6 +2507,15 @@ const struct function gles31_functions_possible[] = {
    { "glVertexAttribIFormat", 31, -1 },
    { "glVertexAttribBinding", 31, -1 },
    { "glVertexBindingDivisor", 31, -1 },
+
+   /* GL_OES_texture_storage_multisample_2d_array */
+   { "glTexStorage3DMultisampleOES", 31, -1 },
+
+   /* GL_EXT_buffer_storage */
+   { "glBufferStorageEXT", 31, -1 },
+
+   /* GL_EXT_blend_func_extended */
+   { "glGetProgramResourceLocationIndexEXT", 31, -1 },
 
    { NULL, 0, -1 },
  };

@@ -163,6 +163,13 @@ static const char *fs_tmpl =
    "      txl_coords.x = ((X & int(0xfff8)) >> 2) | (X & int(0x1));\n"
    "      txl_coords.y = ((Y & int(0xfffc)) >> 1) | (Y & int(0x1));\n"
    "      sample_index = (X & 0x4) | (Y & 0x2) | ((X & 0x2) >> 1);\n"
+   "      break;\n"
+   "   case 16:\n"
+   "      txl_coords.x = ((X & int(0xfff8)) >> 2) | (X & int(0x1));\n"
+   "      txl_coords.y = ((Y & int(0xfff8)) >> 2) | (Y & int(0x1));\n"
+   "      sample_index = (((Y & 0x4) << 1) | (X & 0x4) | (Y & 0x2) |\n"
+   "                      ((X & 0x2) >> 1));\n"
+   "      break;\n"
    "   }\n"
    "}\n"
    "\n"
@@ -202,7 +209,7 @@ setup_bounding_rect(GLuint prog, const struct blit_dims *dims)
 
 /**
  * Setup uniforms telling the destination width, height and the offset. These
- * are needed to unnoormalize the input coordinates and to correctly translate
+ * are needed to unnormalize the input coordinates and to correctly translate
  * between destination and source that may have differing offsets.
  */
 static void
@@ -279,7 +286,8 @@ setup_program(struct brw_context *brw, bool msaa_tex)
    char *fs_source;
    const struct sampler_and_fetch *sampler = &samplers[msaa_tex];
 
-   _mesa_meta_setup_vertex_objects(&blit->VAO, &blit->VBO, true, 2, 2, 0);
+   _mesa_meta_setup_vertex_objects(&brw->ctx, &blit->VAO, &blit->buf_obj, true,
+                                   2, 2, 0);
 
    GLuint *prog_id = &brw->meta_stencil_blit_programs[msaa_tex];
 
@@ -313,11 +321,16 @@ adjust_msaa(struct blit_dims *dims, int num_samples)
       dims->dst_x0 *= 2;
       dims->dst_x1 *= 2;
    } else if (num_samples) {
-      const int x_num_samples = num_samples / 2;
-      dims->dst_x0 = ROUND_DOWN_TO(dims->dst_x0 * x_num_samples, num_samples);
-      dims->dst_y0 = ROUND_DOWN_TO(dims->dst_y0 * 2, 4);
-      dims->dst_x1 = ALIGN(dims->dst_x1 * x_num_samples, num_samples);
-      dims->dst_y1 = ALIGN(dims->dst_y1 * 2, 4);
+      const int y_num_samples = num_samples >= 16 ? 4 : 2;
+      const int x_num_samples = num_samples / y_num_samples;
+      dims->dst_x0 = ROUND_DOWN_TO(dims->dst_x0 * x_num_samples,
+                                   x_num_samples * 2);
+      dims->dst_y0 = ROUND_DOWN_TO(dims->dst_y0 * y_num_samples,
+                                   y_num_samples * 2);
+      dims->dst_x1 = ALIGN(dims->dst_x1 * x_num_samples,
+                           x_num_samples * 2);
+      dims->dst_y1 = ALIGN(dims->dst_y1 * y_num_samples,
+                           y_num_samples * 2);
    }
 }
 
@@ -360,7 +373,7 @@ adjust_mip_level(const struct intel_mipmap_tree *mt,
 }
 
 static void
-prepare_vertex_data(void)
+prepare_vertex_data(struct gl_context *ctx, struct gl_buffer_object *buf_obj)
 {
    static const struct vertex verts[] = {
       { .x = -1.0f, .y = -1.0f },
@@ -368,7 +381,7 @@ prepare_vertex_data(void)
       { .x =  1.0f, .y =  1.0f },
       { .x = -1.0f, .y =  1.0f } };
 
-   _mesa_BufferSubData(GL_ARRAY_BUFFER_ARB, 0, sizeof(verts), verts);
+   _mesa_buffer_sub_data(ctx, buf_obj, 0, sizeof(verts), verts, __func__);
 }
 
 static bool
@@ -448,7 +461,7 @@ brw_meta_stencil_blit(struct brw_context *brw,
    _mesa_Uniform1i(_mesa_GetUniformLocation(prog, "dst_num_samples"),
                    dst_mt->num_samples);
 
-   prepare_vertex_data();
+   prepare_vertex_data(ctx, ctx->Meta->Blit.buf_obj);
    _mesa_set_viewport(ctx, 0, dims.dst_x0, dims.dst_y0,
                       dims.dst_x1 - dims.dst_x0, dims.dst_y1 - dims.dst_y0);
    _mesa_ColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);

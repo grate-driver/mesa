@@ -57,6 +57,9 @@ extern GLint
 _mesa_bytes_per_vertex_attrib(GLint comps, GLenum type);
 
 extern GLboolean
+_mesa_is_astc_format(GLenum internalFormat);
+
+extern GLboolean
 _mesa_is_type_unsigned(GLenum type);
 
 extern GLboolean
@@ -124,7 +127,8 @@ _mesa_error_check_format_and_type(const struct gl_context *ctx,
                                   GLenum format, GLenum type);
 
 extern GLenum
-_mesa_es_error_check_format_and_type(GLenum format, GLenum type,
+_mesa_es_error_check_format_and_type(const struct gl_context *ctx,
+                                     GLenum format, GLenum type,
                                      unsigned dimensions);
 
 extern GLenum

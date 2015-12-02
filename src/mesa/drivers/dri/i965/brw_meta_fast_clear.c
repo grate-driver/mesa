@@ -54,8 +54,9 @@
 #include "brw_blorp.h"
 
 struct brw_fast_clear_state {
+   struct gl_buffer_object *buf_obj;
+   struct gl_vertex_array_object *array_obj;
    GLuint vao;
-   GLuint vbo;
    GLuint shader_prog;
    GLint color_location;
 };
@@ -64,11 +65,11 @@ static bool
 brw_fast_clear_init(struct brw_context *brw)
 {
    struct brw_fast_clear_state *clear;
+   struct gl_context *ctx = &brw->ctx;
 
    if (brw->fast_clear_state) {
       clear = brw->fast_clear_state;
       _mesa_BindVertexArray(clear->vao);
-      _mesa_BindBuffer(GL_ARRAY_BUFFER, clear->vbo);
       return true;
    }
 
@@ -79,10 +80,21 @@ brw_fast_clear_init(struct brw_context *brw)
    memset(clear, 0, sizeof *clear);
    _mesa_GenVertexArrays(1, &clear->vao);
    _mesa_BindVertexArray(clear->vao);
-   _mesa_GenBuffers(1, &clear->vbo);
-   _mesa_BindBuffer(GL_ARRAY_BUFFER, clear->vbo);
-   _mesa_VertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0);
-   _mesa_EnableVertexAttribArray(0);
+
+   clear->buf_obj = ctx->Driver.NewBufferObject(ctx, 0xDEADBEEF);
+   if (clear->buf_obj == NULL)
+      return false;
+
+   clear->array_obj = _mesa_lookup_vao(ctx, clear->vao);
+   assert(clear->array_obj != NULL);
+
+   _mesa_update_array_format(ctx, clear->array_obj, VERT_ATTRIB_GENERIC(0),
+                             2, GL_FLOAT, GL_RGBA, GL_FALSE, GL_FALSE, GL_FALSE,
+                             0, true);
+   _mesa_bind_vertex_buffer(ctx, clear->array_obj, VERT_ATTRIB_GENERIC(0),
+                            clear->buf_obj, 0, sizeof(float) * 2);
+   _mesa_enable_vertex_array_attrib(ctx, clear->array_obj,
+                                    VERT_ATTRIB_GENERIC(0));
 
    return true;
 }
@@ -150,7 +162,7 @@ brw_meta_fast_clear_free(struct brw_context *brw)
    _mesa_make_current(&brw->ctx, NULL, NULL);
 
    _mesa_DeleteVertexArrays(1, &clear->vao);
-   _mesa_DeleteBuffers(1, &clear->vbo);
+   _mesa_reference_buffer_object(&brw->ctx, &clear->buf_obj, NULL);
    _mesa_DeleteProgram(clear->shader_prog);
    free(clear);
 
@@ -165,8 +177,10 @@ struct rect {
 };
 
 static void
-brw_draw_rectlist(struct gl_context *ctx, struct rect *rect, int num_instances)
+brw_draw_rectlist(struct brw_context *brw, struct rect *rect, int num_instances)
 {
+   struct gl_context *ctx = &brw->ctx;
+   struct brw_fast_clear_state *clear = brw->fast_clear_state;
    int start = 0, count = 3;
    struct _mesa_prim prim;
    float verts[6];
@@ -179,8 +193,8 @@ brw_draw_rectlist(struct gl_context *ctx, struct rect *rect, int num_instances)
    verts[5] = rect->y0;
 
    /* upload new vertex data */
-   _mesa_BufferData(GL_ARRAY_BUFFER_ARB, sizeof(verts), verts,
-                    GL_DYNAMIC_DRAW_ARB);
+   _mesa_buffer_data(ctx, clear->buf_obj, GL_NONE, sizeof(verts), verts,
+                     GL_DYNAMIC_DRAW, __func__);
 
    if (ctx->NewState)
       _mesa_update_state(ctx);
@@ -226,9 +240,16 @@ get_fast_clear_rect(struct brw_context *brw, struct gl_framebuffer *fb,
        * alignment size returned by intel_get_non_msrt_mcs_alignment(), but
        * with X alignment multiplied by 16 and Y alignment multiplied by 32.
        */
-      intel_get_non_msrt_mcs_alignment(brw, irb->mt, &x_align, &y_align);
+      intel_get_non_msrt_mcs_alignment(irb->mt, &x_align, &y_align);
       x_align *= 16;
-      y_align *= 32;
+
+      /* SKL+ line alignment requirement for Y-tiled are half those of the prior
+       * generations.
+       */
+      if (brw->gen >= 9)
+         y_align *= 16;
+      else
+         y_align *= 32;
 
       /* From the Ivy Bridge PRM, Vol2 Part1 11.7 "MCS Buffer for Render
        * Target(s)", beneath the "Fast Color Clear" bullet (p327):
@@ -265,8 +286,10 @@ get_fast_clear_rect(struct brw_context *brw, struct gl_framebuffer *fb,
        *     terms of (width,height) of the RT.
        *
        *     MSAA  Width of Clear Rect  Height of Clear Rect
+       *      2X     Ceil(1/8*width)      Ceil(1/2*height)
        *      4X     Ceil(1/8*width)      Ceil(1/2*height)
        *      8X     Ceil(1/2*width)      Ceil(1/2*height)
+       *     16X         width            Ceil(1/2*height)
        *
        * The text "with upper left co-ordinate to coincide with actual
        * rectangle being cleared" is a little confusing--it seems to imply
@@ -288,6 +311,9 @@ get_fast_clear_rect(struct brw_context *brw, struct gl_framebuffer *fb,
          break;
       case 8:
          x_scaledown = 2;
+         break;
+      case 16:
+         x_scaledown = 1;
          break;
       default:
          unreachable("Unexpected sample count for fast clear");
@@ -314,8 +340,7 @@ get_fast_clear_rect(struct brw_context *brw, struct gl_framebuffer *fb,
 }
 
 static void
-get_buffer_rect(struct brw_context *brw, struct gl_framebuffer *fb,
-                struct intel_renderbuffer *irb, struct rect *rect)
+get_buffer_rect(const struct gl_framebuffer *fb, struct rect *rect)
 {
    rect->x0 = fb->_Xmin;
    rect->x1 = fb->_Xmax;
@@ -348,8 +373,12 @@ is_color_fast_clear_compatible(struct brw_context *brw,
    }
 
    for (int i = 0; i < 4; i++) {
-      if (color->f[i] != 0.0f && color->f[i] != 1.0f &&
-          _mesa_format_has_color_component(format, i)) {
+      if (!_mesa_format_has_color_component(format, i)) {
+         continue;
+      }
+
+      if (brw->gen < 9 &&
+          color->f[i] != 0.0f && color->f[i] != 1.0f) {
          return false;
       }
    }
@@ -358,18 +387,55 @@ is_color_fast_clear_compatible(struct brw_context *brw,
 
 /**
  * Convert the given color to a bitfield suitable for ORing into DWORD 7 of
- * SURFACE_STATE.
+ * SURFACE_STATE (DWORD 12-15 on SKL+).
  */
-static uint32_t
-compute_fast_clear_color_bits(const union gl_color_union *color)
+static void
+set_fast_clear_color(struct brw_context *brw,
+                     struct intel_mipmap_tree *mt,
+                     const union gl_color_union *color)
 {
-   uint32_t bits = 0;
-   for (int i = 0; i < 4; i++) {
-      /* Testing for non-0 works for integer and float colors */
-      if (color->f[i] != 0.0f)
-         bits |= 1 << (GEN7_SURFACE_CLEAR_COLOR_SHIFT + (3 - i));
+   union gl_color_union override_color = *color;
+
+   /* The sampler doesn't look at the format of the surface when the fast
+    * clear color is used so we need to implement luminance, intensity and
+    * missing components manually.
+    */
+   switch (_mesa_get_format_base_format(mt->format)) {
+   case GL_INTENSITY:
+      override_color.ui[3] = override_color.ui[0];
+      /* flow through */
+   case GL_LUMINANCE:
+   case GL_LUMINANCE_ALPHA:
+      override_color.ui[1] = override_color.ui[0];
+      override_color.ui[2] = override_color.ui[0];
+      break;
+   default:
+      for (int i = 0; i < 3; i++) {
+         if (!_mesa_format_has_color_component(mt->format, i))
+            override_color.ui[i] = 0;
+      }
+      break;
    }
-   return bits;
+
+   if (!_mesa_format_has_color_component(mt->format, 3)) {
+      if (_mesa_is_format_integer_color(mt->format))
+         override_color.ui[3] = 1;
+      else
+         override_color.f[3] = 1.0f;
+   }
+
+   if (brw->gen >= 9) {
+      mt->gen9_fast_clear_color = override_color;
+   } else {
+      mt->fast_clear_color_value = 0;
+      for (int i = 0; i < 4; i++) {
+         /* Testing for non-0 works for integer and float colors */
+         if (override_color.f[i] != 0.0f) {
+             mt->fast_clear_color_value |=
+                1 << (GEN7_SURFACE_CLEAR_COLOR_SHIFT + (3 - i));
+         }
+      }
+   }
 }
 
 static const uint32_t fast_clear_color[4] = { ~0, ~0, ~0, ~0 };
@@ -409,6 +475,55 @@ use_rectlist(struct brw_context *brw, bool enable)
    brw->ctx.NewDriverState |= BRW_NEW_FRAGMENT_PROGRAM;
 }
 
+/**
+ * Individually fast clear each color buffer attachment. On previous gens this
+ * isn't required. The motivation for this comes from one line (which seems to
+ * be specific to SKL+). The list item is in section titled _MCS Buffer for
+ * Render Target(s)_
+ *
+ *   "Since only one RT is bound with a clear pass, only one RT can be cleared
+ *   at a time. To clear multiple RTs, multiple clear passes are required."
+ *
+ * The code follows the same idea as the resolve code which creates a fake FBO
+ * to avoid interfering with too much of the GL state.
+ */
+static void
+fast_clear_attachments(struct brw_context *brw,
+                       struct gl_framebuffer *fb,
+                       uint32_t fast_clear_buffers,
+                       struct rect fast_clear_rect)
+{
+   assert(brw->gen >= 9);
+   struct gl_context *ctx = &brw->ctx;
+
+   brw_bind_rep_write_shader(brw, (float *) fast_clear_color);
+
+   /* SKL+ also has a resolve mode for compressed render targets and thus more
+    * bits to let us select the type of resolve.  For fast clear resolves, it
+    * turns out we can use the same value as pre-SKL though.
+    */
+   set_fast_clear_op(brw, GEN7_PS_RENDER_TARGET_FAST_CLEAR_ENABLE);
+
+   while (fast_clear_buffers) {
+      int index = ffs(fast_clear_buffers) - 1;
+
+      fast_clear_buffers &= ~(1 << index);
+
+      _mesa_meta_drawbuffers_from_bitfield(1 << index);
+
+      brw_draw_rectlist(ctx, &fast_clear_rect, MAX2(1, fb->MaxNumLayers));
+
+      /* Now set the mcs we cleared to INTEL_FAST_CLEAR_STATE_CLEAR so we'll
+       * resolve them eventually.
+       */
+      struct gl_renderbuffer *rb = fb->_ColorDrawBuffers[0];
+      struct intel_renderbuffer *irb = intel_renderbuffer(rb);
+      irb->mt->fast_clear_state = INTEL_FAST_CLEAR_STATE_CLEAR;
+   }
+
+   set_fast_clear_op(brw, 0);
+}
+
 bool
 brw_meta_fast_clear(struct brw_context *brw, struct gl_framebuffer *fb,
                     GLbitfield buffers, bool partial_clear)
@@ -446,6 +561,13 @@ brw_meta_fast_clear(struct brw_context *brw, struct gl_framebuffer *fb,
 
       /* We don't have fast clear until gen7. */
       if (brw->gen < 7)
+         clear_type = REP_CLEAR;
+
+      /* Certain formats have unresolved issues with sampling from the MCS
+       * buffer on Gen9. This disables fast clears altogether for MSRTs until
+       * we can figure out what's going on.
+       */
+      if (brw->gen >= 9 && irb->mt->num_samples > 1)
          clear_type = REP_CLEAR;
 
       if (irb->mt->fast_clear_state == INTEL_FAST_CLEAR_STATE_NO_MCS)
@@ -499,8 +621,7 @@ brw_meta_fast_clear(struct brw_context *brw, struct gl_framebuffer *fb,
 
       switch (clear_type) {
       case FAST_CLEAR:
-         irb->mt->fast_clear_color_value =
-            compute_fast_clear_color_bits(&ctx->Color.ClearColor);
+         set_fast_clear_color(brw, irb->mt, &ctx->Color.ClearColor);
          irb->need_downsample = true;
 
          /* If the buffer is already in INTEL_FAST_CLEAR_STATE_CLEAR, the
@@ -521,15 +642,17 @@ brw_meta_fast_clear(struct brw_context *brw, struct gl_framebuffer *fb,
 
       case REP_CLEAR:
          rep_clear_buffers |= 1 << index;
-         get_buffer_rect(brw, fb, irb, &clear_rect);
+         get_buffer_rect(fb, &clear_rect);
          break;
 
       case PLAIN_CLEAR:
          plain_clear_buffers |= 1 << index;
-         get_buffer_rect(brw, fb, irb, &clear_rect);
+         get_buffer_rect(fb, &clear_rect);
          continue;
       }
    }
+
+   assert((fast_clear_buffers & rep_clear_buffers) == 0);
 
    if (!(fast_clear_buffers | rep_clear_buffers)) {
       if (plain_clear_buffers)
@@ -578,30 +701,33 @@ brw_meta_fast_clear(struct brw_context *brw, struct gl_framebuffer *fb,
    use_rectlist(brw, true);
 
    layers = MAX2(1, fb->MaxNumLayers);
-   if (fast_clear_buffers) {
+
+   if (brw->gen >= 9 && fast_clear_buffers) {
+      fast_clear_attachments(brw, fb, fast_clear_buffers, fast_clear_rect);
+   } else if (fast_clear_buffers) {
       _mesa_meta_drawbuffers_from_bitfield(fast_clear_buffers);
       brw_bind_rep_write_shader(brw, (float *) fast_clear_color);
       set_fast_clear_op(brw, GEN7_PS_RENDER_TARGET_FAST_CLEAR_ENABLE);
-      brw_draw_rectlist(ctx, &fast_clear_rect, layers);
+      brw_draw_rectlist(brw, &fast_clear_rect, layers);
       set_fast_clear_op(brw, 0);
+
+      /* Now set the mcs we cleared to INTEL_FAST_CLEAR_STATE_CLEAR so we'll
+       * resolve them eventually.
+       */
+      for (unsigned buf = 0; buf < fb->_NumColorDrawBuffers; buf++) {
+         struct gl_renderbuffer *rb = fb->_ColorDrawBuffers[buf];
+         struct intel_renderbuffer *irb = intel_renderbuffer(rb);
+         int index = fb->_ColorDrawBufferIndexes[buf];
+
+         if ((1 << index) & fast_clear_buffers)
+            irb->mt->fast_clear_state = INTEL_FAST_CLEAR_STATE_CLEAR;
+      }
    }
 
    if (rep_clear_buffers) {
       _mesa_meta_drawbuffers_from_bitfield(rep_clear_buffers);
       brw_bind_rep_write_shader(brw, ctx->Color.ClearColor.f);
-      brw_draw_rectlist(ctx, &clear_rect, layers);
-   }
-
-   /* Now set the mts we cleared to INTEL_FAST_CLEAR_STATE_CLEAR so we'll
-    * resolve them eventually.
-    */
-   for (unsigned buf = 0; buf < fb->_NumColorDrawBuffers; buf++) {
-      struct gl_renderbuffer *rb = fb->_ColorDrawBuffers[buf];
-      struct intel_renderbuffer *irb = intel_renderbuffer(rb);
-      int index = fb->_ColorDrawBufferIndexes[buf];
-
-      if ((1 << index) & fast_clear_buffers)
-         irb->mt->fast_clear_state = INTEL_FAST_CLEAR_STATE_CLEAR;
+      brw_draw_rectlist(brw, &clear_rect, layers);
    }
 
  bail_to_meta:
@@ -649,11 +775,12 @@ get_resolve_rect(struct brw_context *brw,
     *
     * The scaledown factors in the table that follows are related to the
     * alignment size returned by intel_get_non_msrt_mcs_alignment() by a
-    * multiplier.  For IVB and HSW, we divide by two, for BDW we multiply
-    * by 8 and 16 and 8 and 8 for SKL.
+    * multiplier. For IVB and HSW, we divide by two, for BDW we multiply
+    * by 8 and 16. Similar to the fast clear, SKL eases the BDW vertical scaling
+    * by a factor of 2.
     */
 
-   intel_get_non_msrt_mcs_alignment(brw, mt, &x_align, &y_align);
+   intel_get_non_msrt_mcs_alignment(mt, &x_align, &y_align);
    if (brw->gen >= 9) {
       x_scaledown = x_align * 8;
       y_scaledown = y_align * 8;
@@ -696,12 +823,16 @@ brw_meta_resolve_color(struct brw_context *brw,
 
    brw_bind_rep_write_shader(brw, (float *) fast_clear_color);
 
+   /* SKL+ also has a resolve mode for compressed render targets and thus more
+    * bits to let us select the type of resolve.  For fast clear resolves, it
+    * turns out we can use the same value as pre-SKL though.
+    */
    set_fast_clear_op(brw, GEN7_PS_RENDER_TARGET_RESOLVE_ENABLE);
 
    mt->fast_clear_state = INTEL_FAST_CLEAR_STATE_RESOLVED;
    get_resolve_rect(brw, mt, &rect);
 
-   brw_draw_rectlist(ctx, &rect, 1);
+   brw_draw_rectlist(brw, &rect, 1);
 
    set_fast_clear_op(brw, 0);
    use_rectlist(brw, false);

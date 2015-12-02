@@ -703,18 +703,10 @@ dri2_wl_swap_buffers_with_damage(_EGLDriver *drv,
    dri2_surf->dx = 0;
    dri2_surf->dy = 0;
 
-   if (n_rects == 0) {
-      wl_surface_damage(dri2_surf->wl_win->surface,
-                        0, 0, INT32_MAX, INT32_MAX);
-   } else {
-      for (i = 0; i < n_rects; i++) {
-         const int *rect = &rects[i * 4];
-         wl_surface_damage(dri2_surf->wl_win->surface,
-                           rect[0],
-                           dri2_surf->base.Height - rect[1] - rect[3],
-                           rect[2], rect[3]);
-      }
-   }
+   /* We deliberately ignore the damage region and post maximum damage, due to
+    * https://bugs.freedesktop.org/78190 */
+   wl_surface_damage(dri2_surf->wl_win->surface,
+                     0, 0, INT32_MAX, INT32_MAX);
 
    if (dri2_dpy->is_different_gpu) {
       _EGLContext *ctx = _eglGetCurrentContext();
@@ -1033,6 +1025,7 @@ static struct dri2_egl_display_vtbl dri2_wl_display_vtbl = {
    .query_buffer_age = dri2_wl_query_buffer_age,
    .create_wayland_buffer_from_image = dri2_wl_create_wayland_buffer_from_image,
    .get_sync_values = dri2_fallback_get_sync_values,
+   .get_dri_drawable = dri2_surface_get_dri_drawable,
 };
 
 static EGLBoolean
@@ -1645,6 +1638,7 @@ dri2_wl_swrast_create_window_surface(_EGLDriver *drv, _EGLDisplay *disp,
    struct dri2_egl_config *dri2_conf = dri2_egl_config(conf);
    struct wl_egl_window *window = native_window;
    struct dri2_egl_surface *dri2_surf;
+   const __DRIconfig *config;
 
    (void) drv;
 
@@ -1669,10 +1663,12 @@ dri2_wl_swrast_create_window_surface(_EGLDriver *drv, _EGLDisplay *disp,
    dri2_surf->base.Width = -1;
    dri2_surf->base.Height = -1;
 
+   config = dri2_get_dri_config(dri2_conf, EGL_WINDOW_BIT,
+                                dri2_surf->base.GLColorspace);
+
    dri2_surf->dri_drawable =
-      (*dri2_dpy->swrast->createNewDrawable) (dri2_dpy->dri_screen,
-                                              dri2_conf->dri_double_config,
-                                              dri2_surf);
+      (*dri2_dpy->swrast->createNewDrawable)(dri2_dpy->dri_screen,
+                                             config, dri2_surf);
    if (dri2_surf->dri_drawable == NULL) {
       _eglError(EGL_BAD_ALLOC, "swrast->createNewDrawable");
       goto cleanup_dri_drawable;
@@ -1757,6 +1753,7 @@ static struct dri2_egl_display_vtbl dri2_wl_swrast_display_vtbl = {
    .query_buffer_age = dri2_fallback_query_buffer_age,
    .create_wayland_buffer_from_image = dri2_fallback_create_wayland_buffer_from_image,
    .get_sync_values = dri2_fallback_get_sync_values,
+   .get_dri_drawable = dri2_surface_get_dri_drawable,
 };
 
 static EGLBoolean
@@ -1804,6 +1801,7 @@ dri2_initialize_wayland_swrast(_EGLDriver *drv, _EGLDisplay *disp)
    if (roundtrip(dri2_dpy) < 0 || dri2_dpy->formats == 0)
       goto cleanup_shm;
 
+   dri2_dpy->fd = -1;
    dri2_dpy->driver_name = strdup("swrast");
    if (!dri2_load_driver_swrast(disp))
       goto cleanup_shm;

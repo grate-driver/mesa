@@ -201,7 +201,7 @@ readpixels_can_use_memcpy(const struct gl_context *ctx, GLenum format, GLenum ty
 
    /* The Mesa format must match the input format and type. */
    if (!_mesa_format_matches_format_and_type(rb->Format, format, type,
-                                             packing->SwapBytes)) {
+                                             packing->SwapBytes, NULL)) {
       return GL_FALSE;
    }
 
@@ -1043,7 +1043,7 @@ _mesa_ReadnPixelsARB( GLint x, GLint y, GLsizei width, GLsizei height,
           _mesa_get_color_read_type(ctx) == type) {
          err = GL_NO_ERROR;
       } else if (ctx->Version < 30) {
-         err = _mesa_es_error_check_format_and_type(format, type, 2);
+         err = _mesa_es_error_check_format_and_type(ctx, format, type, 2);
          if (err == GL_NO_ERROR) {
             if (type == GL_FLOAT || type == GL_HALF_FLOAT_OES) {
                err = GL_INVALID_OPERATION;

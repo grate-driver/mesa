@@ -9,7 +9,7 @@ Build-Depends:
  debhelper (>= 9),
  quilt (>= 0.40),
  pkg-config,
- libdrm-dev (>= 2.4.63) [!hurd-any],
+ libdrm-dev (>= 2.4.65) [!hurd-any],
  libx11-dev,
  x11proto-gl-dev (>= 1.4.14),
  libxxf86vm-dev,
@@ -513,7 +513,7 @@ Architecture: any
 Depends:
  mesa-common-dev (= ${binary:Version}),
  libgl1-mesa-glx (= ${binary:Version}),
- libdrm-dev (>= 2.4.52) [!hurd-any],
+ libdrm-dev (>= 2.4.65) [!hurd-any],
  libx11-dev,
  libx11-xcb-dev,
  libxcb-dri3-dev,
@@ -550,7 +550,7 @@ Architecture: any
 Replaces: xlibmesa-gl-dev (<< 1:7), xlibosmesa-dev, libgl1-mesa-swx11-dev (<< 6.5.2), libgl1-mesa-dev (<< 7.5~rc4-2)
 Depends:
  libx11-dev,
- libdrm-dev (>= 2.4.52) [!hurd-any],
+ libdrm-dev (>= 2.4.65) [!hurd-any],
  ${misc:Depends},
 Multi-Arch: same
 Description: Developer documentation for Mesa
