@@ -1,3 +1,10 @@
+mesa (11.1.0~rc2-1ubuntu1) UNRELEASED; urgency=medium
+
+  * Merge from Debian.
+  * patches: Refreshed.
+
+ -- Timo Aaltonen <tjaalton@debian.org>  Fri, 04 Dec 2015 12:40:46 +0200
+
 mesa (11.1.0~rc2-1) UNRELEASED; urgency=medium
 
   * New upstream release candidate.

@@ -7,7 +7,7 @@ From upstream mesa.
 
 --- a/src/mesa/drivers/dri/i915/intel_extensions.c
 +++ b/src/mesa/drivers/dri/i915/intel_extensions.c
-@@ -95,8 +95,12 @@
+@@ -92,8 +92,12 @@ intelInitExtensions(struct gl_context *c
        ctx->Extensions.ATI_separate_stencil = true;
        ctx->Extensions.ATI_texture_env_combine3 = true;
        ctx->Extensions.NV_texture_env_combine4 = true;
@@ -24,7 +24,7 @@ From upstream mesa.
     if (intel->ctx.Mesa_DXTn
 --- a/src/mesa/drivers/dri/i915/intel_screen.c
 +++ b/src/mesa/drivers/dri/i915/intel_screen.c
-@@ -62,6 +62,10 @@
+@@ -62,6 +62,10 @@ DRI_CONF_BEGIN
  	 DRI_CONF_DESC(en, "Enable early Z in classic mode (unstable, 945-only).")
        DRI_CONF_OPT_END
  
@@ -35,7 +35,7 @@ From upstream mesa.
     DRI_CONF_SECTION_END
     DRI_CONF_SECTION_QUALITY
        DRI_CONF_FORCE_S3TC_ENABLE("false")
-@@ -75,6 +79,10 @@
+@@ -75,6 +79,10 @@ DRI_CONF_BEGIN
        DRI_CONF_DISABLE_GLSL_LINE_CONTINUATIONS("false")
        DRI_CONF_DISABLE_BLEND_FUNC_EXTENDED("false")
  
@@ -46,7 +46,7 @@ From upstream mesa.
        DRI_CONF_OPT_BEGIN_B(shader_precompile, "true")
  	 DRI_CONF_DESC(en, "Perform code generation at shader link time.")
        DRI_CONF_OPT_END
-@@ -1121,12 +1129,26 @@
+@@ -1122,12 +1130,26 @@ set_max_gl_versions(struct intel_screen
     __DRIscreen *psp = screen->driScrnPriv;
  
     switch (screen->gen) {
