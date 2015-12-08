@@ -614,6 +614,7 @@ Description: Debugging symbols for the Mesa VDPAU video acceleration drivers
 Package: mesa-opencl-icd
 Section: libs
 Architecture: amd64 i386 armhf
+Pre-Depends: ${misc:Pre-Depends}
 Depends:
  libclc-r600 (>= 0.2.0+git20150813),
  libclc-amdgcn,
@@ -625,6 +626,7 @@ Replaces:
 Breaks:
  libgl1-mesa-dri (<< 10.3.0-1),
 Provides: opencl-icd
+Multi-Arch: same
 Description: free implementation of the OpenCL API -- ICD runtime
  This package contains the mesa implementation of the OpenCL (Open Compute
  Language) library, which is intended for use with an ICD loader. OpenCL
@@ -638,6 +640,7 @@ Architecture: amd64 i386 armhf
 Depends:
  mesa-opencl-icd (= ${binary:Version}),
  ${misc:Depends},
+Multi-Arch: same
 Description: free implementation of the OpenCL API -- debugging symbols
  This package contains the mesa implementation of the OpenCL (Open Compute
  Language) library, which is intended for use with an ICD loader. OpenCL
