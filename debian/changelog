@@ -4,6 +4,7 @@ mesa (11.1.0~rc3-1) UNRELEASED; urgency=medium
   * Bump libdrm-dev build-dep to 2.4.65.
   * Update symbols for libgles2-mesa and libxatracker2.
   * Remove Breaks/Conflicts/Provides/Replaces from pre-wheezy.
+  * Remove duplicated field "Priority" from package libgl1-mesa-dri.
 
  -- Andreas Boll <andreas.boll.dev@gmail.com>  Mon, 30 Nov 2015 15:06:57 +0100
 

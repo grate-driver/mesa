@@ -450,7 +450,6 @@ Description: Debugging symbols for the Mesa GLX runtime
 
 Package: libgl1-mesa-dri
 Section: libs
-Priority: optional
 Architecture: any
 Pre-Depends: ${misc:Pre-Depends}
 Depends:
