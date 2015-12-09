@@ -9,6 +9,7 @@ mesa (11.1.0~rc3-1) UNRELEASED; urgency=medium
     #804919).
   * Add a Lintian override for symbols-declares-dependency-on-other-
     package libgbm1-private.
+  * Remove obsolete libgl1-mesa-dri.lintian-overrides.
 
  -- Andreas Boll <andreas.boll.dev@gmail.com>  Mon, 30 Nov 2015 15:06:57 +0100
 
