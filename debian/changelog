@@ -1,6 +1,8 @@
 mesa (11.1.0-1) UNRELEASED; urgency=medium
 
   * New upstream release.
+  * Add a patch to remove the unused symbol
+    _glapi_create_table_from_handle from libGL.so.1.
 
  -- Andreas Boll <andreas.boll.dev@gmail.com>  Tue, 15 Dec 2015 16:38:14 +0100
 
