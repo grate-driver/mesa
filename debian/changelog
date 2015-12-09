@@ -7,6 +7,8 @@ mesa (11.1.0~rc3-1) UNRELEASED; urgency=medium
   * Remove duplicated field "Priority" from package libgl1-mesa-dri.
   * Declare Multi-Arch: same for mesa-opencl-icd{,-dbg} (Closes:
     #804919).
+  * Add a Lintian override for symbols-declares-dependency-on-other-
+    package libgbm1-private.
 
  -- Andreas Boll <andreas.boll.dev@gmail.com>  Mon, 30 Nov 2015 15:06:57 +0100
 
