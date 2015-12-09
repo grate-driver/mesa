@@ -1,4 +1,4 @@
-mesa (11.0.7-1) UNRELEASED; urgency=medium
+mesa (11.0.7-1) unstable; urgency=medium
 
   [ Julien Cristau ]
   * Update debian/copyright from docs/license.html (closes: #806805).  Thanks,
@@ -7,7 +7,7 @@ mesa (11.0.7-1) UNRELEASED; urgency=medium
   [ Andreas Boll ]
   * New upstream release.
 
- -- Julien Cristau <jcristau@debian.org>  Tue, 01 Dec 2015 20:43:58 +0100
+ -- Andreas Boll <andreas.boll.dev@gmail.com>  Wed, 09 Dec 2015 21:18:17 +0100
 
 mesa (11.0.6-1) unstable; urgency=medium
 
