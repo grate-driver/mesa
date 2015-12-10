@@ -1,4 +1,4 @@
-mesa (11.1.0~rc3-1) UNRELEASED; urgency=medium
+mesa (11.1.0~rc3-1) experimental; urgency=medium
 
   * New upstream release candidate.
   * Bump libdrm-dev build-dep to 2.4.65.
@@ -11,7 +11,7 @@ mesa (11.1.0~rc3-1) UNRELEASED; urgency=medium
     package libgbm1-private.
   * Remove obsolete libgl1-mesa-dri.lintian-overrides.
 
- -- Andreas Boll <andreas.boll.dev@gmail.com>  Mon, 30 Nov 2015 15:06:57 +0100
+ -- Andreas Boll <andreas.boll.dev@gmail.com>  Thu, 10 Dec 2015 12:22:54 +0100
 
 mesa (11.0.7-1) unstable; urgency=medium
 
