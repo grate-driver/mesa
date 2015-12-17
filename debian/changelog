@@ -1,17 +1,44 @@
-mesa (11.1.0~rc2-1ubuntu1) UNRELEASED; urgency=medium
+mesa (11.1.0-1ubuntu1) UNRELEASED; urgency=medium
 
   * Merge from Debian.
   * patches: Refreshed.
 
  -- Timo Aaltonen <tjaalton@debian.org>  Fri, 04 Dec 2015 12:40:46 +0200
 
-mesa (11.1.0~rc2-1) UNRELEASED; urgency=medium
+mesa (11.1.0-1) experimental; urgency=medium
+
+  * New upstream release.
+  * Add a patch to remove the unused symbol
+    _glapi_create_table_from_handle from libGL.so.1.
+  * Replace shlibs file with a symbols file for libgl1-mesa-glx.
+
+ -- Andreas Boll <andreas.boll.dev@gmail.com>  Tue, 15 Dec 2015 20:24:10 +0100
+
+mesa (11.1.0~rc3-1) experimental; urgency=medium
 
   * New upstream release candidate.
   * Bump libdrm-dev build-dep to 2.4.65.
   * Update symbols for libgles2-mesa and libxatracker2.
+  * Remove Breaks/Conflicts/Provides/Replaces from pre-wheezy.
+  * Remove duplicated field "Priority" from package libgl1-mesa-dri.
+  * Declare Multi-Arch: same for mesa-opencl-icd{,-dbg} (Closes:
+    #804919).
+  * Add a Lintian override for symbols-declares-dependency-on-other-
+    package libgbm1-private.
+  * Remove obsolete libgl1-mesa-dri.lintian-overrides.
 
- -- Andreas Boll <andreas.boll.dev@gmail.com>  Mon, 30 Nov 2015 15:06:57 +0100
+ -- Andreas Boll <andreas.boll.dev@gmail.com>  Thu, 10 Dec 2015 12:22:54 +0100
+
+mesa (11.0.7-1) unstable; urgency=medium
+
+  [ Julien Cristau ]
+  * Update debian/copyright from docs/license.html (closes: #806805).  Thanks,
+    Steinar H. Gunderson!
+
+  [ Andreas Boll ]
+  * New upstream release.
+
+ -- Andreas Boll <andreas.boll.dev@gmail.com>  Wed, 09 Dec 2015 21:18:17 +0100
 
 mesa (11.0.6-1ubuntu1) xenial; urgency=medium
 
