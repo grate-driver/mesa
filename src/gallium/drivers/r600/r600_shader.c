@@ -2109,7 +2109,9 @@ static int r600_shader_from_tgsi(struct r600_context *rctx,
 
 	ctx.nliterals = 0;
 	ctx.literals = NULL;
-	shader->fs_write_all = FALSE;
+
+	shader->fs_write_all = ctx.info.properties[TGSI_PROPERTY_FS_COLOR0_WRITES_ALL_CBUFS] &&
+			       ctx.info.colors_written == 1;
 
 	if (shader->vs_as_gs_a)
 		vs_add_primid_output(&ctx, key.vs.prim_id_out);
@@ -2140,10 +2142,6 @@ static int r600_shader_from_tgsi(struct r600_context *rctx,
 		case TGSI_TOKEN_TYPE_PROPERTY:
 			property = &ctx.parse.FullToken.FullProperty;
 			switch (property->Property.PropertyName) {
-			case TGSI_PROPERTY_FS_COLOR0_WRITES_ALL_CBUFS:
-				if (property->u[0].Data == 1)
-					shader->fs_write_all = TRUE;
-				break;
 			case TGSI_PROPERTY_VS_WINDOW_SPACE_POSITION:
 				if (property->u[0].Data == 1)
 					shader->vs_position_window_space = TRUE;
