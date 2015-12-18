@@ -240,6 +240,8 @@ public:
 
    void emit_nir_code();
    void nir_setup_inputs(nir_shader *shader);
+   void nir_setup_single_output_varying(fs_reg &reg, const glsl_type *type,
+                                        unsigned &location);
    void nir_setup_outputs(nir_shader *shader);
    void nir_setup_uniforms(nir_shader *shader);
    void nir_setup_uniform(nir_variable *var);
