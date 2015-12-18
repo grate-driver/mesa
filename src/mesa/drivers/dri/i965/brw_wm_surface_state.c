@@ -400,8 +400,7 @@ brw_create_constant_surface(struct brw_context *brw,
 			    drm_intel_bo *bo,
 			    uint32_t offset,
 			    uint32_t size,
-			    uint32_t *out_offset,
-                            bool dword_pitch)
+			    uint32_t *out_offset)
 {
    brw->vtbl.emit_buffer_surface_state(brw, out_offset, bo, offset,
                                        BRW_SURFACEFORMAT_R32G32B32A32_FLOAT,
@@ -511,7 +510,7 @@ brw_upload_wm_pull_constants(struct brw_context *brw)
 
    /* _NEW_PROGRAM_CONSTANTS */
    brw_upload_pull_constants(brw, BRW_NEW_SURFACES, &fp->program.Base,
-                             stage_state, prog_data, true);
+                             stage_state, prog_data);
 }
 
 const struct brw_tracked_state brw_wm_pull_constants = {
@@ -885,8 +884,7 @@ void
 brw_upload_ubo_surfaces(struct brw_context *brw,
 			struct gl_shader *shader,
                         struct brw_stage_state *stage_state,
-                        struct brw_stage_prog_data *prog_data,
-                        bool dword_pitch)
+                        struct brw_stage_prog_data *prog_data)
 {
    struct gl_context *ctx = &brw->ctx;
 
@@ -913,8 +911,7 @@ brw_upload_ubo_surfaces(struct brw_context *brw,
        */
       brw_create_constant_surface(brw, bo, binding->Offset,
                                   bo->size - binding->Offset,
-                                  &surf_offsets[i],
-                                  dword_pitch);
+                                  &surf_offsets[i]);
    }
 
    if (shader->NumUniformBlocks)
@@ -933,7 +930,7 @@ brw_upload_wm_ubo_surfaces(struct brw_context *brw)
 
    /* BRW_NEW_FS_PROG_DATA */
    brw_upload_ubo_surfaces(brw, prog->_LinkedShaders[MESA_SHADER_FRAGMENT],
-                           &brw->wm.base, &brw->wm.prog_data->base, true);
+                           &brw->wm.base, &brw->wm.prog_data->base);
 }
 
 const struct brw_tracked_state brw_wm_ubo_surfaces = {
