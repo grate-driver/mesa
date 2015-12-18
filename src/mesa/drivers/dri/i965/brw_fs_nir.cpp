@@ -105,9 +105,10 @@ fs_visitor::nir_setup_inputs(nir_shader *shader)
             emit_percomp(bld, fs_inst(BRW_OPCODE_MOV, bld.dispatch_width(),
                                       input, reg), 0xF);
          } else {
-            emit_general_interpolation(input, var->name, var->type,
+            int location = var->data.location;
+            emit_general_interpolation(&input, var->name, var->type,
                                        (glsl_interp_qualifier) var->data.interpolation,
-                                       var->data.location, var->data.centroid,
+                                       &location, var->data.centroid,
                                        var->data.sample);
          }
          break;
