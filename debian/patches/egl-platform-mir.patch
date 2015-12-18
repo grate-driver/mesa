@@ -133,7 +133,7 @@ Index: mesa/src/egl/drivers/dri2/egl_dri2.h
     __DRIbuffer           *dri_buffers[__DRI_BUFFER_COUNT];
     struct {
  #ifdef HAVE_WAYLAND_PLATFORM
-@@ -274,9 +282,12 @@ struct dri2_egl_surface
+@@ -274,9 +282,13 @@ struct dri2_egl_surface
        void *data;
        int data_size;
  #endif
@@ -143,11 +143,12 @@ Index: mesa/src/egl/drivers/dri2/egl_dri2.h
  #endif
 +#ifdef HAVE_MIR_PLATFORM
 +      int                 fd;
++      int                 buffer_age;
 +#endif
        int                 locked;
        int                 age;
     } color_buffers[4], *back, *current;
-@@ -289,6 +300,10 @@ struct dri2_egl_surface
+@@ -289,6 +301,10 @@ struct dri2_egl_surface
     /* EGL-owned buffers */
     __DRIbuffer           *local_buffers[__DRI_BUFFER_COUNT];
  #endif
@@ -158,7 +159,7 @@ Index: mesa/src/egl/drivers/dri2/egl_dri2.h
  };
  
  
-@@ -379,4 +394,7 @@ const __DRIconfig *
+@@ -379,4 +395,7 @@ const __DRIconfig *
  dri2_get_dri_config(struct dri2_egl_config *conf, EGLint surface_type,
                      EGLenum colorspace);
  
@@ -170,7 +171,7 @@ Index: mesa/src/egl/drivers/dri2/platform_mir.c
 ===================================================================
 --- /dev/null
 +++ mesa/src/egl/drivers/dri2/platform_mir.c
-@@ -0,0 +1,620 @@
+@@ -0,0 +1,633 @@
 +/*
 + * Copyright © 2012 Canonical, Inc
 + *
@@ -478,6 +479,7 @@ Index: mesa/src/egl/drivers/dri2/platform_mir.c
 +   update_cached_buffer_ages(dri2_surf, buf_slot);
 +
 +   dri2_surf->back = &dri2_surf->color_buffers[buf_slot];
++   dri2_surf->back->buffer_age = buffer_package.age;
 +   dri2_surf->dri_buffers[__DRI_BUFFER_BACK_LEFT]->name = 0;
 +   dri2_surf->dri_buffers[__DRI_BUFFER_BACK_LEFT]->fd = buffer_package.fd[0];
 +   dri2_surf->dri_buffers[__DRI_BUFFER_BACK_LEFT]->pitch = buffer_package.stride;
@@ -691,6 +693,18 @@ Index: mesa/src/egl/drivers/dri2/platform_mir.c
 +   }
 +}
 +
++static EGLint
++dri2_mir_query_buffer_age(_EGLDriver *drv, _EGLDisplay *dpy,
++                               _EGLSurface *surf)
++{
++   struct dri2_egl_surface *dri2_surf = dri2_egl_surface(surf);
++   if (dri2_surf->back)
++   {
++      return dri2_surf->back->buffer_age;
++   }
++   return 0;
++}
++
 +static struct dri2_egl_display_vtbl dri2_mir_display_vtbl = {
 +   .authenticate = dri2_mir_authenticate,
 +   .create_window_surface = dri2_create_mir_window_surface,
@@ -704,8 +718,8 @@ Index: mesa/src/egl/drivers/dri2/platform_mir.c
 +   .swap_buffers_region = dri2_fallback_swap_buffers_region,
 +   .post_sub_buffer = dri2_fallback_post_sub_buffer,
 +   .copy_buffers = dri2_fallback_copy_buffers,
-+   .query_buffer_age = dri2_fallback_query_buffer_age,
-+   .create_wayland_buffer_from_image = NULL,
++   .query_buffer_age = dri2_mir_query_buffer_age,
++   .create_wayland_buffer_from_image = dri2_fallback_create_wayland_buffer_from_image,
 +   .get_sync_values = dri2_fallback_get_sync_values,
 +   .get_dri_drawable = dri2_surface_get_dri_drawable,
 +};
@@ -779,7 +793,7 @@ Index: mesa/src/egl/drivers/dri2/platform_mir.c
 +   }
 +
 +   disp->Extensions.EXT_buffer_age = EGL_TRUE;
-+   disp->Extensions.EXT_swap_buffers_with_damage = EGL_TRUE;
++   disp->Extensions.EXT_swap_buffers_with_damage = EGL_FALSE;
 +   disp->Extensions.KHR_image_pixmap = EGL_TRUE;
 +
 +   dri2_dpy->vtbl = &dri2_mir_display_vtbl;
