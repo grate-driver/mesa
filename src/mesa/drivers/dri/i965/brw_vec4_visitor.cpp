@@ -3432,10 +3432,10 @@ vec4_visitor::get_pull_constant_offset(bblock_t * block, vec4_instruction *inst,
       emit_before(block, inst, ADD(dst_reg(index), *reladdr,
                                    src_reg(reg_offset)));
 
-      /* Pre-gen7, the message header uses byte offsets instead of vec4
+      /* Pre-gen6, the message header uses byte offsets instead of vec4
        * (16-byte) offset units.
        */
-      if (devinfo->gen < 7) {
+      if (devinfo->gen < 6) {
          emit_before(block, inst, MUL(dst_reg(index), index, src_reg(16)));
       }
 
@@ -3446,7 +3446,7 @@ vec4_visitor::get_pull_constant_offset(bblock_t * block, vec4_instruction *inst,
       emit_before(block, inst, MOV(dst_reg(offset), src_reg(reg_offset)));
       return offset;
    } else {
-      int message_header_scale = devinfo->gen < 7 ? 16 : 1;
+      int message_header_scale = devinfo->gen < 6 ? 16 : 1;
       return src_reg(reg_offset * message_header_scale);
    }
 }
