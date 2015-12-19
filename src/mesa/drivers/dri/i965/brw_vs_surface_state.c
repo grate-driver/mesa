@@ -53,7 +53,8 @@ brw_upload_pull_constants(struct brw_context *brw,
                           GLbitfield brw_new_constbuf,
                           const struct gl_program *prog,
                           struct brw_stage_state *stage_state,
-                          const struct brw_stage_prog_data *prog_data)
+                          const struct brw_stage_prog_data *prog_data,
+                          bool dword_pitch)
 {
    unsigned i;
    uint32_t surf_index = prog_data->binding_table.pull_constants_start;
@@ -93,7 +94,8 @@ brw_upload_pull_constants(struct brw_context *brw,
    }
 
    brw_create_constant_surface(brw, const_bo, const_offset, size,
-                               &stage_state->surf_offset[surf_index]);
+                               &stage_state->surf_offset[surf_index],
+                               dword_pitch);
    drm_intel_bo_unreference(const_bo);
 
    brw->ctx.NewDriverState |= brw_new_constbuf;
@@ -110,6 +112,7 @@ static void
 brw_upload_vs_pull_constants(struct brw_context *brw)
 {
    struct brw_stage_state *stage_state = &brw->vs.base;
+   bool dword_pitch;
 
    /* BRW_NEW_VERTEX_PROGRAM */
    struct brw_vertex_program *vp =
@@ -118,9 +121,11 @@ brw_upload_vs_pull_constants(struct brw_context *brw)
    /* BRW_NEW_VS_PROG_DATA */
    const struct brw_stage_prog_data *prog_data = &brw->vs.prog_data->base.base;
 
+   dword_pitch = brw->vs.prog_data->base.dispatch_mode == DISPATCH_MODE_SIMD8;
+
    /* _NEW_PROGRAM_CONSTANTS */
    brw_upload_pull_constants(brw, BRW_NEW_VS_CONSTBUF, &vp->program.Base,
-                             stage_state, prog_data);
+                             stage_state, prog_data, dword_pitch);
 }
 
 const struct brw_tracked_state brw_vs_pull_constants = {
@@ -140,13 +145,16 @@ brw_upload_vs_ubo_surfaces(struct brw_context *brw)
    /* _NEW_PROGRAM */
    struct gl_shader_program *prog =
       ctx->_Shader->CurrentProgram[MESA_SHADER_VERTEX];
+   bool dword_pitch;
 
    if (!prog)
       return;
 
    /* BRW_NEW_VS_PROG_DATA */
+   dword_pitch = brw->vs.prog_data->base.dispatch_mode == DISPATCH_MODE_SIMD8;
    brw_upload_ubo_surfaces(brw, prog->_LinkedShaders[MESA_SHADER_VERTEX],
-                           &brw->vs.base, &brw->vs.prog_data->base.base);
+                           &brw->vs.base, &brw->vs.prog_data->base.base,
+                           dword_pitch);
 }
 
 const struct brw_tracked_state brw_vs_ubo_surfaces = {
