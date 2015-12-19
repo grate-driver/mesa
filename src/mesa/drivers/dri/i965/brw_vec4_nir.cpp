@@ -660,10 +660,20 @@ vec4_visitor::nir_emit_intrinsic(nir_intrinsic_instr *instr)
       unsigned const_offset = instr->const_index[0];
       src_reg offset;
 
-      if (!has_indirect)  {
-         offset = src_reg(const_offset & ~15);
+      if (devinfo->gen <= 6) {
+         if (!has_indirect)  {
+            offset = src_reg(const_offset & ~15);
+         } else {
+            offset = get_nir_src(instr->src[1], nir_type_int, 1);
+         }
       } else {
-         offset = get_nir_src(instr->src[1], nir_type_int, 1);
+         if (!has_indirect)  {
+            offset = src_reg(const_offset & ~15);
+         } else {
+            offset = src_reg(this, glsl_type::uint_type);
+            emit(SHR(dst_reg(offset), get_nir_src(instr->src[1], nir_type_int, 1),
+                     src_reg(4u)));
+         }
       }
 
       src_reg packed_consts = src_reg(this, glsl_type::vec4_type);
