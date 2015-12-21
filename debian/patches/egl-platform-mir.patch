@@ -171,7 +171,7 @@ Index: mesa/src/egl/drivers/dri2/platform_mir.c
 ===================================================================
 --- /dev/null
 +++ mesa/src/egl/drivers/dri2/platform_mir.c
-@@ -0,0 +1,633 @@
+@@ -0,0 +1,637 @@
 +/*
 + * Copyright © 2012 Canonical, Inc
 + *
@@ -497,6 +497,7 @@ Index: mesa/src/egl/drivers/dri2/platform_mir.c
 +   struct dri2_egl_display *dri2_dpy = dri2_egl_display(disp);
 +   struct dri2_egl_config *dri2_conf = dri2_egl_config(conf);
 +   struct dri2_egl_surface *dri2_surf;
++   const __DRIconfig *config;
 +   MirSurfaceParameters surf_params;
 +
 +   (void) drv;
@@ -532,6 +533,9 @@ Index: mesa/src/egl/drivers/dri2/platform_mir.c
 +   if(!mir_advance_colour_buffer(dri2_surf))
 +      goto cleanup_surf;
 +
++   config = dri2_get_dri_config(dri2_conf, EGL_WINDOW_BIT,
++                                dri2_surf->base.GLColorspace);
++
 +   if (dri2_dpy->gbm_dri) {
 +      struct gbm_dri_surface *surf = malloc(sizeof *surf);
 +
@@ -545,13 +549,13 @@ Index: mesa/src/egl/drivers/dri2/platform_mir.c
 +
 +      dri2_surf->dri_drawable =
 +          (*dri2_dpy->dri2->createNewDrawable) (dri2_dpy->dri_screen,
-+                                                dri2_conf->dri_double_config,
++                                                config,
 +                                                dri2_surf->gbm_surf);
 +   }
 +   else {
 +      dri2_surf->dri_drawable =
 +          (*dri2_dpy->dri2->createNewDrawable) (dri2_dpy->dri_screen,
-+                                                dri2_conf->dri_double_config,
++                                                config,
 +                                                dri2_surf);
 +   }
 +
