@@ -1,3 +1,9 @@
+mesa (11.0.8-1) unstable; urgency=medium
+
+  * New upstream release.
+
+ -- Timo Aaltonen <tjaalton@debian.org>  Tue, 22 Dec 2015 16:12:35 +0200
+
 mesa (11.0.7-1) unstable; urgency=medium
 
   [ Julien Cristau ]
