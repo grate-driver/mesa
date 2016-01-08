@@ -1,0 +1,2 @@
+# As per Marek http://lists.freedesktop.org/archives/mesa-stable/2015-December/003600.html
+37208c4fd7b1ec679d10992b42a2811cab8245a5 Revert "radeonsi: disable DCC on Stoney"
