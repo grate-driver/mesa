@@ -59,7 +59,7 @@ ifeq ($(DEB_HOST_ARCH_OS), hurd)
 else
   ifeq ($(DEB_HOST_ARCH_OS), linux)
 	confflags_DRI3 = --enable-dri3
-# Gallium drivers require libdrm-{nouveau,radeon}, only available on Linux
+	# Gallium drivers which require kernel support, not yet ported to non-Linux
 	GALLIUM_DRIVERS += nouveau svga virgl
 
 	# Freedreno requires arm in addition
