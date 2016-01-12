@@ -60,7 +60,7 @@ else
   ifeq ($(DEB_HOST_ARCH_OS), linux)
 	confflags_DRI3 = --enable-dri3
 # Gallium drivers require libdrm-{nouveau,radeon}, only available on Linux
-	GALLIUM_DRIVERS += nouveau svga
+	GALLIUM_DRIVERS += nouveau svga virgl
 
 	# Freedreno requires arm in addition
 	ifneq (,$(filter arm,$(DEB_HOST_ARCH_CPU)))

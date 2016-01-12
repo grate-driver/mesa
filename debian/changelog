@@ -1,3 +1,9 @@
+mesa (11.1.0-2) UNRELEASED; urgency=medium
+
+  * Enable support for virgl (Closes: #807774).
+
+ -- Andreas Boll <andreas.boll.dev@gmail.com>  Tue, 12 Jan 2016 16:12:46 +0100
+
 mesa (11.1.0-1) experimental; urgency=medium
 
   * New upstream release.
