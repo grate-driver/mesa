@@ -63,7 +63,7 @@ else
 	GALLIUM_DRIVERS += nouveau svga virgl
 
 	# Freedreno requires arm in addition
-	ifneq (,$(filter arm,$(DEB_HOST_ARCH_CPU)))
+	ifneq (,$(filter arm arm64,$(DEB_HOST_ARCH_CPU)))
 		GALLIUM_DRIVERS += freedreno
 	endif
 
