@@ -67,6 +67,11 @@ else
 		GALLIUM_DRIVERS += freedreno
 	endif
 
+	# vc4 kernel support is only available on armhf
+	ifneq (,$(filter $(DEB_HOST_ARCH),armhf))
+		GALLIUM_DRIVERS += vc4
+	endif
+
 	# svga needs xa state tracker
 	confflags_GALLIUM += --enable-xa
 
