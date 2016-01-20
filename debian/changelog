@@ -1,4 +1,4 @@
-mesa (11.1.1-1ubuntu1) UNRELEASED; urgency=medium
+mesa (11.1.1-1ubuntu1) xenial; urgency=medium
 
   * Merge from Debian.
   * patches: Refreshed.
