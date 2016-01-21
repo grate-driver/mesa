@@ -77,11 +77,8 @@ else
 
 # Non-Linux ports also lack *_CLOEXEC and epoll, so wayland isn't ready yet:
 	EGL_DISPLAYS += wayland
-
-# Mir isn't built on AArch64 and PPC
-    ifeq (,$(filter $(DEB_HOST_ARCH),arm64 powerpc ppc64 ppc64el s390x))
+# Likewise, Mir makes no attempt to be portable to random kernels.
 	EGL_DISPLAYS += mir
-    endif
 
     ifeq (,$(filter $(DEB_HOST_ARCH), s390 s390x))
 	DRI_DRIVERS += nouveau

@@ -1,3 +1,10 @@
+mesa (11.1.1-1ubuntu2) xenial; urgency=medium
+
+  * Remove architecture restrictions on Mir EGL platform;
+    Mir is now built everywhere.
+
+ -- Christopher James Halse Rogers <raof@ubuntu.com>  Thu, 21 Jan 2016 17:07:05 -0600
+
 mesa (11.1.1-1ubuntu1) xenial; urgency=medium
 
   * Merge from Debian.
