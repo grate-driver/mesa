@@ -20,54 +20,25 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
-# ----------------------------------------------------------------------
-# libmesa_dricore.a
-# ----------------------------------------------------------------------
-
-ifeq ($(strip $(MESA_BUILD_CLASSIC)),true)
+ifeq ($(ARCH_X86_HAVE_SSE4_1),true)
 
 LOCAL_PATH := $(call my-dir)
 
-# Import the following variables:
-#     MESA_FILES
-#     X86_FILES
 include $(LOCAL_PATH)/Makefile.sources
 
 include $(CLEAR_VARS)
 
-LOCAL_MODULE := libmesa_dricore
-LOCAL_MODULE_CLASS := STATIC_LIBRARIES
+LOCAL_MODULE := libmesa_sse41
 
-LOCAL_SRC_FILES := \
-	$(MESA_FILES)
-
-ifeq ($(strip $(MESA_ENABLE_ASM)),true)
-ifeq ($(TARGET_ARCH),x86)
-	LOCAL_SRC_FILES += $(X86_FILES)
-endif # x86
-endif # MESA_ENABLE_ASM
-
-ifeq ($(ARCH_X86_HAVE_SSE4_1),true)
-LOCAL_WHOLE_STATIC_LIBRARIES := \
-	libmesa_sse41
-LOCAL_CFLAGS := \
-	-msse4.1 \
-       -DUSE_SSE41
-endif
+LOCAL_SRC_FILES += \
+	$(X86_SSE41_FILES)
 
 LOCAL_C_INCLUDES := \
 	$(MESA_TOP)/src/mapi \
-	$(MESA_TOP)/src/mesa/main \
-	$(MESA_TOP)/src/glsl \
-	$(MESA_TOP)/src/glsl/nir \
 	$(MESA_TOP)/src/gallium/include \
 	$(MESA_TOP)/src/gallium/auxiliary
 
-LOCAL_WHOLE_STATIC_LIBRARIES += \
-	libmesa_program
-
-include $(LOCAL_PATH)/Android.gen.mk
 include $(MESA_COMMON_MK)
 include $(BUILD_STATIC_LIBRARY)
 
-endif # MESA_BUILD_CLASSIC
+endif
