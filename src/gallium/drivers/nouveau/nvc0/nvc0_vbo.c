@@ -379,7 +379,7 @@ nvc0_validate_vertex_buffers_shared(struct nvc0_context *nvc0)
    unsigned b;
    const uint32_t mask = nvc0->vbo_user;
 
-   PUSH_SPACE(push, nvc0->num_vtxbufs * 8);
+   PUSH_SPACE(push, nvc0->num_vtxbufs * 8 + nvc0->vertex->num_elements);
    for (b = 0; b < nvc0->num_vtxbufs; ++b) {
       struct pipe_vertex_buffer *vb = &nvc0->vtxbuf[b];
       struct nv04_resource *buf;
