@@ -1,3 +1,16 @@
+mesa (11.1.2-1) unstable; urgency=medium
+
+  * New upstream release.
+
+ -- Timo Aaltonen <tjaalton@debian.org>  Thu, 11 Feb 2016 13:14:08 +0200
+
+mesa (11.1.1-2) unstable; urgency=medium
+
+  * Limit the symbols glXGetDriverConfig and glXGetScreenDriver to
+    arch=!hurd-any (Fixes FTBFS on hurd).
+
+ -- Andreas Boll <andreas.boll.dev@gmail.com>  Fri, 15 Jan 2016 18:44:52 +0100
+
 mesa (11.1.1-1ubuntu3) xenial; urgency=medium
 
   * control, rules: Use llvm-3.8 for OpenGL 4.1 support. (LP: #1535500)
