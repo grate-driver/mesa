@@ -2,6 +2,7 @@ mesa (11.2~rc1-1) UNRELEASED; urgency=medium
 
   * New upstream release candidate.
   * Drop upstreamed patches.
+  * libgl1-mesa-glx.symbols: Remove dropped symbols.
 
  -- Timo Aaltonen <tjaalton@debian.org>  Tue, 23 Feb 2016 09:48:38 +0200
 
