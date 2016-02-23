@@ -213,10 +213,6 @@ clean: unpatch
 binary-indep: install
 
 allpkg = $(shell dh_listpackages -s)
-dbgpkg = $(filter %-dbg, $(allpkg))
-otherpkg = $(filter-out %-dbg, $(allpkg))
-havedbgpkg = $(patsubst %-dbg,%,$(dbgpkg))
-nodbgpkg = $(filter-out $(havedbgpkg),$(otherpkg))
 
 # Build architecture-dependent files here.
 binary-arch: install
@@ -257,12 +253,7 @@ binary-arch: install
 		install -m 644 debian/local/control debian/$$p/usr/share/bug/$$p && \
 		install -m 755 debian/local/script  debian/$$p/usr/share/bug/$$p; \
 	done
-	set -e; for p in $(havedbgpkg); do \
-		dh_strip -p$${p} --dbg-package=$${p}-dbg; \
-	done
-	# dh_strip -s --remaining-packages doesn't work with resumed
-	# builds (see changelog for mesa 7.10-1):
-	dh_strip $(foreach p,$(nodbgpkg),-p$(p))
+	dh_strip
 	dh_compress -s
 	dh_fixperms -s
 	dh_makeshlibs -s -- -c4
