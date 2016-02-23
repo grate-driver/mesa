@@ -1,3 +1,9 @@
+mesa (11.2~rc1-1) UNRELEASED; urgency=medium
+
+  * New upstream release candidate.
+
+ -- Timo Aaltonen <tjaalton@debian.org>  Tue, 23 Feb 2016 09:48:38 +0200
+
 mesa (11.1.2-1) unstable; urgency=medium
 
   * New upstream release.
