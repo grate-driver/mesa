@@ -4,6 +4,8 @@ mesa (11.2.0~rc1-1) UNRELEASED; urgency=medium
   * Drop upstreamed patches.
   * libgl1-mesa-glx.symbols: Remove dropped symbols.
   * rules,control: Drop -dbg packages, we have -dbgsym now.
+  * rules, *.install.in, not-installed: Drop dri/-build prefix, we build
+    everything in one pass nowadays.
 
  -- Timo Aaltonen <tjaalton@debian.org>  Tue, 23 Feb 2016 09:48:38 +0200
 
