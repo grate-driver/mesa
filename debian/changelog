@@ -6,6 +6,7 @@ mesa (11.2.0~rc1-1) UNRELEASED; urgency=medium
   * rules,control: Drop -dbg packages, we have -dbgsym now.
   * rules, *.install.in, not-installed: Drop dri/-build prefix, we build
     everything in one pass nowadays.
+  * control: Bump libdrm-dev build-dep to 2.4.67 for freedreno.
 
  -- Timo Aaltonen <tjaalton@debian.org>  Tue, 23 Feb 2016 09:48:38 +0200
 
