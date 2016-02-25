@@ -36,13 +36,6 @@ endif
 # large, use an external file:
 include debian/not-installed
 
-STAMP_DIR = debian/stamp
-STAMP = $(STAMP_DIR)/$(DEB_BUILD_GNU_TYPE)
-BUILD_STAMPS = $(STAMP)-build
-
-QUILT_STAMPFN = $(STAMP_DIR)/patch
-include /usr/share/quilt/quilt.make
-
 DRI_DRIVERS =
 GALLIUM_DRIVERS =
 EGL_DISPLAYS = x11
