@@ -8,6 +8,7 @@ mesa (11.2.0~rc1-1) UNRELEASED; urgency=medium
     everything in one pass nowadays.
   * control: Bump libdrm-dev build-dep to 2.4.67 for freedreno.
   * rules: Migrate to dh.
+  * control: Add dh-autoreconf to build-depends.
 
  -- Timo Aaltonen <tjaalton@debian.org>  Tue, 23 Feb 2016 09:48:38 +0200
 
