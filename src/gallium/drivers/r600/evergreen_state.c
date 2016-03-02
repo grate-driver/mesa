@@ -962,13 +962,6 @@ void evergreen_init_color_surface_rat(struct r600_context *rctx,
 		MAX2(64, rctx->screen->b.tiling_info.group_bytes / block_size);
 	unsigned pitch = align(pipe_buffer->width0, pitch_alignment);
 
-	/* XXX: This is copied from evergreen_init_color_surface().  I don't
-	 * know why this is necessary.
-	 */
-	if (pipe_buffer->usage == PIPE_USAGE_STAGING) {
-		endian = ENDIAN_NONE;
-	}
-
 	surf->cb_color_base = r600_resource(pipe_buffer)->gpu_address >> 8;
 
 	surf->cb_color_pitch = (pitch / 8) - 1;
@@ -1119,11 +1112,7 @@ void evergreen_init_color_surface(struct r600_context *rctx,
 	swap = r600_translate_colorswap(surf->base.format);
 	assert(swap != ~0);
 
-	if (rtex->resource.b.b.usage == PIPE_USAGE_STAGING) {
-		endian = ENDIAN_NONE;
-	} else {
-		endian = r600_colorformat_endian_swap(format);
-	}
+	endian = r600_colorformat_endian_swap(format);
 
 	/* blend clamp should be set for all NORM/SRGB types */
 	if (ntype == V_028C70_NUMBER_UNORM || ntype == V_028C70_NUMBER_SNORM ||
