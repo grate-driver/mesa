@@ -1299,8 +1299,8 @@ unsigned r600_translate_colorswap(enum pipe_format format)
 			return V_0280A0_SWAP_STD_REV; /* WZYX */
 		else if (HAS_SWIZZLE(1,Y) && HAS_SWIZZLE(2,X))
 			return V_0280A0_SWAP_ALT; /* ZYXW */
-		else if (HAS_SWIZZLE(1,X) && HAS_SWIZZLE(2,Y))
-			return V_0280A0_SWAP_ALT_REV; /* WXYZ */
+		else if (HAS_SWIZZLE(1,Z) && HAS_SWIZZLE(2,W))
+			return V_0280A0_SWAP_ALT_REV; /* YZWX */
 		break;
 	}
 	return ~0U;
@@ -1407,6 +1407,11 @@ void evergreen_do_fast_color_clear(struct r600_common_context *rctx,
 				   const union pipe_color_union *color)
 {
 	int i;
+
+	/* This function is broken in BE, so just disable this path for now */
+#ifdef PIPE_ARCH_BIG_ENDIAN
+	return;
+#endif
 
 	if (rctx->render_cond)
 		return;
