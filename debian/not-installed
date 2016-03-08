@@ -2,4 +2,4 @@
 
 # Common list:
 NOT_INSTALLED := \
-	dri/usr/include/GL/wglext.h
+	usr/include/GL/wglext.h
