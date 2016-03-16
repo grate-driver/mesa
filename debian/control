@@ -18,6 +18,7 @@ Build-Depends:
  libxfixes-dev,
  libxdamage-dev,
  libxext-dev,
+ libva-dev (>= 1.6.0) [linux-any kfreebsd-any],
  libvdpau-dev (>= 1.1.1) [linux-any kfreebsd-any],
  autoconf,
  automake,

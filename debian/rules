@@ -96,6 +96,7 @@ else
   endif
 	confflags_DIRECT_RENDERING = --enable-driglx-direct
 	confflags_GALLIUM += --enable-vdpau
+	confflags_GALLIUM += --enable-va
 endif
 
 confflags_EGL = --with-egl-platforms="$(EGL_DISPLAYS)"
@@ -112,7 +113,6 @@ confflags += \
 	--enable-shared-glapi \
 	--enable-texture-float \
 	--disable-xvmc \
-	--disable-va \
 	--disable-omx \
 	$(confflags_DIRECT_RENDERING) \
 	$(confflags_DRI3) \
