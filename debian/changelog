@@ -2,6 +2,7 @@ mesa (11.2.0~rc3-2) UNRELEASED; urgency=medium
 
   * mesa-va-drivers: Build gallium VA driver, and add symlinks for
     nouveau, r600 and radeonsi.
+  * control: Add vdpau-va-driver Breaks/Replaces for mesa-va-drivers.
 
  -- Timo Aaltonen <tjaalton@debian.org>  Tue, 22 Mar 2016 10:59:01 +0200
 
