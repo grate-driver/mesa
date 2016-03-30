@@ -1,4 +1,18 @@
-mesa (11.2.0~rc3-1) UNRELEASED; urgency=medium
+mesa (11.2.0~rc4-1) experimental; urgency=medium
+
+  * New upstream release candidate.
+
+ -- Timo Aaltonen <tjaalton@debian.org>  Wed, 30 Mar 2016 09:35:05 +0300
+
+mesa (11.2.0~rc3-2) experimental; urgency=medium
+
+  * mesa-va-drivers: Build gallium VA driver, and add symlinks for
+    nouveau, r600 and radeonsi.
+  * control: Add vdpau-va-driver Breaks/Replaces for mesa-va-drivers.
+
+ -- Timo Aaltonen <tjaalton@debian.org>  Thu, 24 Mar 2016 14:01:20 +0200
+
+mesa (11.2.0~rc3-1) experimental; urgency=medium
 
   * New upstream release candidate.
   * Drop upstreamed patches.
@@ -10,7 +24,7 @@ mesa (11.2.0~rc3-1) UNRELEASED; urgency=medium
   * rules: Migrate to dh.
   * control: Add dh-autoreconf to build-depends.
 
- -- Timo Aaltonen <tjaalton@debian.org>  Tue, 23 Feb 2016 09:48:38 +0200
+ -- Timo Aaltonen <tjaalton@debian.org>  Wed, 09 Mar 2016 01:01:55 +0200
 
 mesa (11.1.2-1ubuntu1) xenial; urgency=medium
 
