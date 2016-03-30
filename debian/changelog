@@ -1,3 +1,10 @@
+mesa (11.1.2-1ubuntu2) xenial; urgency=medium
+
+  * debian/patches/glibc2.23-pthreads-compat.patch: fix misuse of
+    pthread_barrier API.  Closes LP: #1559842.
+
+ -- Steve Langasek <steve.langasek@ubuntu.com>  Mon, 21 Mar 2016 05:59:56 +0000
+
 mesa (11.1.2-1ubuntu1) xenial; urgency=medium
 
   * Merge from Debian.
