@@ -432,8 +432,8 @@ Enhances:
  libva1,
 Provides:
  va-driver,
-Breaks: vdpau-va-drivers (<< 0.7.4-5)
-Replaces: vdpau-va-drivers (<< 0.7.4-5)
+Breaks: vdpau-va-driver (<< 0.7.4-5)
+Replaces: vdpau-va-driver (<< 0.7.4-5)
 Multi-Arch: same
 Pre-Depends: ${misc:Pre-Depends}
 Description: Mesa VA-API video acceleration drivers
