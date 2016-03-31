@@ -2,6 +2,7 @@ mesa (11.2.0~rc4-2) UNRELEASED; urgency=medium
 
   * control: Fix vdpau-va-driver Breaks/Replaces for mesa-va-drivers
     (Closes: #819655).
+  * control: Bump Standards-Version to 3.9.7 (no changes).
 
  -- Andreas Boll <andreas.boll.dev@gmail.com>  Thu, 31 Mar 2016 16:52:51 +0200
 
