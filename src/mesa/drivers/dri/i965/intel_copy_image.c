@@ -140,9 +140,9 @@ copy_image_with_memcpy(struct brw_context *brw,
    _mesa_get_format_block_size(src_mt->format, &src_bw, &src_bh);
 
    assert(src_width % src_bw == 0);
-   assert(src_height % src_bw == 0);
+   assert(src_height % src_bh == 0);
    assert(src_x % src_bw == 0);
-   assert(src_y % src_bw == 0);
+   assert(src_y % src_bh == 0);
 
    /* If we are on the same miptree, same level, and same slice, then
     * intel_miptree_map won't let us map it twice.  We have to do things a
@@ -153,7 +153,7 @@ copy_image_with_memcpy(struct brw_context *brw,
 
    if (same_slice) {
       assert(dst_x % src_bw == 0);
-      assert(dst_y % src_bw == 0);
+      assert(dst_y % src_bh == 0);
 
       map_x1 = MIN2(src_x, dst_x);
       map_y1 = MIN2(src_y, dst_y);
@@ -212,6 +212,7 @@ intel_copy_image_sub_data(struct gl_context *ctx,
    struct brw_context *brw = brw_context(ctx);
    struct intel_mipmap_tree *src_mt, *dst_mt;
    unsigned src_level, dst_level;
+   GLuint bw, bh;
 
    if (_mesa_meta_CopyImageSubData_uncompressed(ctx,
                                                 src_image, src_renderbuffer,
@@ -269,11 +270,24 @@ intel_copy_image_sub_data(struct gl_context *ctx,
     */
    intel_miptree_all_slices_resolve_hiz(brw, src_mt);
    intel_miptree_all_slices_resolve_depth(brw, src_mt);
-   intel_miptree_resolve_color(brw, src_mt);
+   intel_miptree_resolve_color(brw, src_mt, 0);
 
    intel_miptree_all_slices_resolve_hiz(brw, dst_mt);
    intel_miptree_all_slices_resolve_depth(brw, dst_mt);
-   intel_miptree_resolve_color(brw, dst_mt);
+   intel_miptree_resolve_color(brw, dst_mt, 0);
+
+   _mesa_get_format_block_size(src_mt->format, &bw, &bh);
+
+   /* It's legal to have a WxH that's smaller than a compressed block. This
+    * happens for example when you are using a higher level LOD. For this case,
+    * we still want to copy the entire block, or else the decompression will be
+    * incorrect.
+    */
+   if (src_width < bw)
+      src_width = ALIGN_NPOT(src_width, bw);
+
+   if (src_height < bh)
+      src_height = ALIGN_NPOT(src_height, bh);
 
    if (copy_image_with_blitter(brw, src_mt, src_level,
                                src_x, src_y, src_z,
