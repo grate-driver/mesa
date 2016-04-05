@@ -1,4 +1,4 @@
-mesa (11.2.0-1) UNRELEASED; urgency=medium
+mesa (11.2.0-1) experimental; urgency=medium
 
   [ Andreas Boll ]
   * control: Fix vdpau-va-driver Breaks/Replaces for mesa-va-drivers
@@ -7,6 +7,7 @@ mesa (11.2.0-1) UNRELEASED; urgency=medium
   * watch: Update url to use https instead of ftp.
 
   [ Timo Aaltonen ]
+  * New upstream release.
   * rules: Disable tests for now, most of them weren't run before anyway
     and they cause unnecessary ftbfs on some archs.
 
