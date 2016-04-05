@@ -1,9 +1,14 @@
 mesa (11.2.0-1) UNRELEASED; urgency=medium
 
+  [ Andreas Boll ]
   * control: Fix vdpau-va-driver Breaks/Replaces for mesa-va-drivers
     (Closes: #819655).
   * control: Bump Standards-Version to 3.9.7 (no changes).
   * watch: Update url to use https instead of ftp.
+
+  [ Timo Aaltonen ]
+  * rules: Disable tests for now, most of them weren't run before anyway
+    and they cause unnecessary ftbfs on some archs.
 
  -- Andreas Boll <andreas.boll.dev@gmail.com>  Thu, 31 Mar 2016 16:52:51 +0200
 
