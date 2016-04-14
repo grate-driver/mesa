@@ -85,7 +85,7 @@ else
 	# so no opencl on kfreebsd.
 	# opencl needs LLVM and Clang, so only build it on the subset
 	# of arches where we have LLVM enabled.
-#	confflags_GALLIUM += --enable-opencl --enable-opencl-icd
+	confflags_GALLIUM += --enable-opencl --enable-opencl-icd
   endif
 
   # LLVM is required for r300g, radeonsi and llvmpipe:
