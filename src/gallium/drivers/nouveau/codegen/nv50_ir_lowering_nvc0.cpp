@@ -850,7 +850,6 @@ NVC0LoweringPass::handleManualTXD(TexInstruction *i)
    Value *zero = bld.loadImm(bld.getSSA(), 0);
    int l, c;
    const int dim = i->tex.target.getDim();
-   const int array = i->tex.target.isArray();
 
    // This function is invoked after handleTEX lowering, so we have to expect
    // the arguments in the order that the hw wants them. For Fermi, array and
