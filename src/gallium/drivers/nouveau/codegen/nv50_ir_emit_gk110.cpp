@@ -1232,7 +1232,7 @@ CodeEmitterGK110::emitQUADOP(const Instruction *i, uint8_t qOp, uint8_t laneMask
 
    defId(i->def(0), 2);
    srcId(i->src(0), 10);
-   srcId(i->srcExists(1) ? i->src(1) : i->src(0), 23);
+   srcId((i->srcExists(1) && i->predSrc != 1) ? i->src(1) : i->src(0), 23);
 
    if (i->op == OP_QUADOP && progType != Program::TYPE_FRAGMENT)
       code[1] |= 1 << 9; // dall
@@ -1825,9 +1825,15 @@ CodeEmitterGK110::emitInstruction(Instruction *insn)
    case OP_CEIL:
    case OP_FLOOR:
    case OP_TRUNC:
-   case OP_CVT:
    case OP_SAT:
       emitCVT(insn);
+      break;
+   case OP_CVT:
+      if (insn->def(0).getFile() == FILE_PREDICATE ||
+          insn->src(0).getFile() == FILE_PREDICATE)
+         emitMOV(insn);
+      else
+         emitCVT(insn);
       break;
    case OP_RSQ:
       emitSFnOp(insn, 5 + 2 * insn->subOp);

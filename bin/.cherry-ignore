@@ -7,3 +7,6 @@
 # .num_slices isn't available in 11.1
 f2c891353609b48459f27f205407d42823dd7d03 Add missing platform information for KBL
 
+# As requested by Ilia at https://lists.freedesktop.org/archives/mesa-stable/2016-April/003939.html
+6eeb284e4f74a2fe5ae6cba90f97f219935e24df nv50/ir: normalize cube coordinates after derivatives have been computed
+

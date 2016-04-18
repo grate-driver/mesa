@@ -643,21 +643,21 @@ static void r600_set_sampler_views(struct pipe_context *pipe, unsigned shader,
 		if (rviews[i]) {
 			struct r600_texture *rtex =
 				(struct r600_texture*)rviews[i]->base.texture;
+			bool is_buffer = rviews[i]->base.texture->target == PIPE_BUFFER;
 
-			if (rviews[i]->base.texture->target != PIPE_BUFFER) {
-				if (rtex->is_depth && !rtex->is_flushing_texture) {
-					dst->views.compressed_depthtex_mask |= 1 << i;
-				} else {
-					dst->views.compressed_depthtex_mask &= ~(1 << i);
-				}
-
-				/* Track compressed colorbuffers. */
-				if (rtex->cmask.size) {
-					dst->views.compressed_colortex_mask |= 1 << i;
-				} else {
-					dst->views.compressed_colortex_mask &= ~(1 << i);
-				}
+			if (!is_buffer && rtex->is_depth && !rtex->is_flushing_texture) {
+				dst->views.compressed_depthtex_mask |= 1 << i;
+			} else {
+				dst->views.compressed_depthtex_mask &= ~(1 << i);
 			}
+
+			/* Track compressed colorbuffers. */
+			if (!is_buffer && rtex->cmask.size) {
+				dst->views.compressed_colortex_mask |= 1 << i;
+			} else {
+				dst->views.compressed_colortex_mask &= ~(1 << i);
+			}
+
 			/* Changing from array to non-arrays textures and vice versa requires
 			 * updating TEX_ARRAY_OVERRIDE in sampler states on R6xx-R7xx. */
 			if (rctx->b.chip_class <= R700 &&
@@ -2517,6 +2517,13 @@ uint32_t r600_colorformat_endian_swap(uint32_t colorformat)
 
 		/* 32-bit buffers. */
 		case V_0280A0_COLOR_8_8_8_8:
+			/*
+			 * No need to do endian swaps on four 8-bits components,
+			 * as mesa<-->pipe formats conversion take into account
+			 * the endianess
+			 */
+			return ENDIAN_NONE;
+
 		case V_0280A0_COLOR_2_10_10_10:
 		case V_0280A0_COLOR_8_24:
 		case V_0280A0_COLOR_24_8:

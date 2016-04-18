@@ -1,5 +1,6 @@
-#
-# Copyright (C) 2011 Intel Corporation
+# Copyright 2012 Intel Corporation
+# Copyright (C) 2010-2011 Chia-I Wu <olvaffe@gmail.com>
+# Copyright (C) 2010-2011 LunarG Inc.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -18,51 +19,26 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
-#
+
+ifeq ($(ARCH_X86_HAVE_SSE4_1),true)
 
 LOCAL_PATH := $(call my-dir)
 
-# Import mesa_dri_common_INCLUDES.
-include $(LOCAL_PATH)/common/Makefile.sources
+include $(LOCAL_PATH)/Makefile.sources
 
-#-----------------------------------------------
-# Variables common to all DRI drivers
+include $(CLEAR_VARS)
 
-MESA_DRI_CFLAGS := \
-	-DHAVE_ANDROID_PLATFORM
+LOCAL_MODULE := libmesa_sse41
 
-MESA_DRI_C_INCLUDES := \
-	$(addprefix $(MESA_TOP)/, $(mesa_dri_common_INCLUDES)) \
+LOCAL_SRC_FILES += \
+	$(X86_SSE41_FILES)
+
+LOCAL_C_INCLUDES := \
+	$(MESA_TOP)/src/mapi \
 	$(MESA_TOP)/src/gallium/include \
-	$(MESA_TOP)/src/gallium/auxiliary \
-	external/expat/lib
+	$(MESA_TOP)/src/gallium/auxiliary
 
-MESA_DRI_WHOLE_STATIC_LIBRARIES := \
-	libmesa_glsl \
-	libmesa_megadriver_stub \
-	libmesa_dri_common \
-	libmesa_dricore \
-	libmesa_util
+include $(MESA_COMMON_MK)
+include $(BUILD_STATIC_LIBRARY)
 
-MESA_DRI_SHARED_LIBRARIES := \
-	libcutils \
-	libdl \
-	libdrm \
-	libexpat \
-	libglapi \
-	liblog
-
-#-----------------------------------------------
-# Build drivers and libmesa_dri_common
-
-SUBDIRS := common
-
-ifneq ($(filter i915, $(MESA_GPU_DRIVERS)),)
-	SUBDIRS += i915
 endif
-
-ifneq ($(filter i965, $(MESA_GPU_DRIVERS)),)
-	SUBDIRS += i965
-endif
-
-include $(foreach d, $(SUBDIRS), $(LOCAL_PATH)/$(d)/Android.mk)

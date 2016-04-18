@@ -529,6 +529,16 @@ static unsigned r600_texture_get_htile_size(struct r600_common_screen *rscreen,
 	    rscreen->info.drm_major == 2 && rscreen->info.drm_minor < 38)
 		return 0;
 
+	/* Overalign HTILE on P2 configs to work around GPU hangs in
+	 * piglit/depthstencil-render-miplevels 585.
+	 *
+	 * This has been confirmed to help Kabini & Stoney, where the hangs
+	 * are always reproducible. I think I have seen the test hang
+	 * on Carrizo too, though it was very rare there.
+	 */
+	if (rscreen->chip_class >= CIK && num_pipes < 4)
+		num_pipes = 4;
+
 	switch (num_pipes) {
 	case 1:
 		cl_width = 32;
@@ -1219,8 +1229,8 @@ unsigned r600_translate_colorswap(enum pipe_format format)
 			return V_0280A0_SWAP_STD_REV; /* WZYX */
 		else if (HAS_SWIZZLE(1,Y) && HAS_SWIZZLE(2,X))
 			return V_0280A0_SWAP_ALT; /* ZYXW */
-		else if (HAS_SWIZZLE(1,X) && HAS_SWIZZLE(2,Y))
-			return V_0280A0_SWAP_ALT_REV; /* WXYZ */
+		else if (HAS_SWIZZLE(1,Z) && HAS_SWIZZLE(2,W))
+			return V_0280A0_SWAP_ALT_REV; /* YZWX */
 		break;
 	}
 	return ~0U;
@@ -1327,6 +1337,11 @@ void evergreen_do_fast_color_clear(struct r600_common_context *rctx,
 				   const union pipe_color_union *color)
 {
 	int i;
+
+	/* This function is broken in BE, so just disable this path for now */
+#ifdef PIPE_ARCH_BIG_ENDIAN
+	return;
+#endif
 
 	if (rctx->render_cond)
 		return;
