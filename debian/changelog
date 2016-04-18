@@ -1,6 +1,7 @@
 mesa (11.2.1-1) UNRELEASED; urgency=medium
 
   * New upstream release.
+  * control, rules: Use llvm/clang 3.8.
 
  -- Timo Aaltonen <tjaalton@debian.org>  Mon, 18 Apr 2016 11:20:48 +0300
 
