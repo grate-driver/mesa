@@ -1,0 +1,2 @@
+# Remove duplicate commit due to vulkan branch merge
+9e64a2a8e4821dd637daac54ba83895a490d4790 mesa: Fix generation of git_sha1.h.tmp for gitlinks
