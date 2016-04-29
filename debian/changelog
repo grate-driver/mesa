@@ -1,3 +1,9 @@
+mesa (11.2.1-1ubuntu1) yakkety; urgency=medium
+
+  * Merge from Debian.
+
+ -- Timo Aaltonen <tjaalton@debian.org>  Thu, 21 Apr 2016 00:13:44 +0300
+
 mesa (11.2.1-1) experimental; urgency=medium
 
   * New upstream release.
