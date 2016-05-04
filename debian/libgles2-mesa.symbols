@@ -137,6 +137,8 @@ libGLESv2.so.2 libgles2-mesa #MINVER# | libgles2
  glGetSynciv@Base 9.1~
  glGetTexLevelParameterfv@Base 10.7.0~
  glGetTexLevelParameteriv@Base 10.7.0~
+ glGetTexParameterIivEXT@Base 11.3.0~
+ glGetTexParameterIuivEXT@Base 11.3.0~
  glGetTexParameterfv@Base 7.8.1
  glGetTexParameteriv@Base 7.8.1
  glGetTransformFeedbackVarying@Base 9.1~
@@ -200,6 +202,8 @@ libGLESv2.so.2 libgles2-mesa #MINVER# | libgles2
  glStencilOpSeparate@Base 7.8.1
  glTexImage2D@Base 7.8.1
  glTexImage3D@Base 9.1~
+ glTexParameterIivEXT@Base 11.3.0~
+ glTexParameterIuivEXT@Base 11.3.0~
  glTexParameterf@Base 7.8.1
  glTexParameterfv@Base 7.8.1
  glTexParameteri@Base 7.8.1
