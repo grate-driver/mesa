@@ -176,6 +176,8 @@ private:
    void emitISBERD();
    void emitAL2P();
    void emitIPA();
+   void emitATOM();
+   void emitCCTL();
 
    void emitPIXLD();
 
@@ -191,6 +193,8 @@ private:
    void emitNOP();
    void emitKIL();
    void emitOUT();
+
+   void emitMEMBAR();
 };
 
 /*******************************************************************************
@@ -246,6 +250,8 @@ CodeEmitterGM107::emitSYS(int pos, const Value *val)
    case SV_INVOCATION_ID  : id = 0x11; break;
    case SV_THREAD_KILL    : id = 0x13; break;
    case SV_INVOCATION_INFO: id = 0x1d; break;
+   case SV_TID            : id = 0x21 + val->reg.data.sv.index; break;
+   case SV_CTAID          : id = 0x25 + val->reg.data.sv.index; break;
    default:
       assert(!"invalid system value");
       id = 0;
@@ -759,6 +765,7 @@ CodeEmitterGM107::emitF2F()
    emitCC   (0x2f);
    emitField(0x2d, 1, (insn->op == OP_NEG) || insn->src(0).mod.neg());
    emitFMZ  (0x2c, 1);
+   emitField(0x29, 1, insn->subOp);
    emitRND  (0x27, rnd, 0x2a);
    emitField(0x0a, 2, util_logbase2(typeSizeof(insn->sType)));
    emitField(0x08, 2, util_logbase2(typeSizeof(insn->dType)));
@@ -1573,11 +1580,13 @@ CodeEmitterGM107::emitLOP()
          break;
       }
       emitPRED (0x30);
+      emitX    (0x2b);
       emitField(0x29, 2, lop);
       emitINV  (0x28, insn->src(1));
       emitINV  (0x27, insn->src(0));
    } else {
       emitInsn (0x04000000);
+      emitX    (0x39);
       emitINV  (0x38, insn->src(1));
       emitINV  (0x37, insn->src(0));
       emitField(0x35, 2, lop);
@@ -1645,9 +1654,11 @@ CodeEmitterGM107::emitIADD()
       emitNEG(0x31, insn->src(0));
       emitNEG(0x30, insn->src(1));
       emitCC (0x2f);
+      emitX  (0x2b);
    } else {
       emitInsn(0x1c000000);
       emitSAT (0x36);
+      emitX   (0x35);
       emitCC  (0x34);
       emitIMMD(0x14, 32, insn->src(1));
    }
@@ -2167,6 +2178,7 @@ CodeEmitterGM107::emitLD()
    emitPRED (0x3a);
    emitLDSTc(0x38);
    emitLDSTs(0x35, insn->dType);
+   emitField(0x34, 1, insn->src(0).getIndirect(0)->getSize() == 8);
    emitADDR (0x08, 0x14, 32, 0, insn->src(0));
    emitGPR  (0x00, insn->def(0));
 }
@@ -2197,6 +2209,7 @@ CodeEmitterGM107::emitST()
    emitPRED (0x3a);
    emitLDSTc(0x38);
    emitLDSTs(0x35, insn->dType);
+   emitField(0x34, 1, insn->src(0).getIndirect(0)->getSize() == 8);
    emitADDR (0x08, 0x14, 32, 0, insn->src(0));
    emitGPR  (0x00, insn->src(1));
 }
@@ -2315,6 +2328,62 @@ CodeEmitterGM107::emitIPA()
 
    if (insn->getSampleMode() != NV50_IR_INTERP_OFFSET)
       emitGPR(0x27);
+}
+
+void
+CodeEmitterGM107::emitATOM()
+{
+   unsigned dType, subOp;
+
+   if (insn->subOp == NV50_IR_SUBOP_ATOM_CAS) {
+      switch (insn->dType) {
+      case TYPE_U32: dType = 0; break;
+      case TYPE_U64: dType = 1; break;
+      default: assert(!"unexpected dType"); dType = 0; break;
+      }
+      subOp = 15;
+
+      emitInsn (0xee000000);
+   } else {
+      switch (insn->dType) {
+      case TYPE_U32: dType = 0; break;
+      case TYPE_S32: dType = 1; break;
+      case TYPE_U64: dType = 2; break;
+      case TYPE_F32: dType = 3; break;
+      case TYPE_B128: dType = 4; break;
+      case TYPE_S64: dType = 5; break;
+      default: assert(!"unexpected dType"); dType = 0; break;
+      }
+      if (insn->subOp == NV50_IR_SUBOP_ATOM_EXCH)
+         subOp = 8;
+      else
+         subOp = insn->subOp;
+
+      emitInsn (0xed000000);
+   }
+
+   emitField(0x34, 4, subOp);
+   emitField(0x31, 3, dType);
+   emitField(0x30, 1, insn->src(0).getIndirect(0)->getSize() == 8);
+   emitGPR  (0x14, insn->src(1));
+   emitADDR (0x08, 0x1c, 20, 0, insn->src(0));
+   emitGPR  (0x00, insn->def(0));
+}
+
+void
+CodeEmitterGM107::emitCCTL()
+{
+   unsigned width;
+   if (insn->src(0).getFile() == FILE_MEMORY_GLOBAL) {
+      emitInsn(0xef600000);
+      width = 30;
+   } else {
+      emitInsn(0xef800000);
+      width = 22;
+   }
+   emitField(0x34, 1, insn->src(0).getIndirect(0)->getSize() == 8);
+   emitADDR (0x08, 0x16, width, 2, insn->src(0));
+   emitField(0x00, 4, insn->subOp);
 }
 
 /*******************************************************************************
@@ -2577,6 +2646,13 @@ CodeEmitterGM107::emitOUT()
    emitGPR  (0x00, insn->def(0));
 }
 
+void
+CodeEmitterGM107::emitMEMBAR()
+{
+   emitInsn (0xef980000);
+   emitField(0x08, 2, insn->subOp >> 2);
+}
+
 /*******************************************************************************
  * assembler front-end
  ******************************************************************************/
@@ -2815,6 +2891,12 @@ CodeEmitterGM107::emitInstruction(Instruction *i)
          break;
       }
       break;
+   case OP_ATOM:
+      emitATOM();
+      break;
+   case OP_CCTL:
+      emitCCTL();
+      break;
    case OP_VFETCH:
       emitALD();
       break;
@@ -2869,6 +2951,9 @@ CodeEmitterGM107::emitInstruction(Instruction *i)
    case OP_EMIT:
    case OP_RESTART:
       emitOUT();
+      break;
+   case OP_MEMBAR:
+      emitMEMBAR();
       break;
    default:
       assert(!"invalid opcode");

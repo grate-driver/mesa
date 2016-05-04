@@ -1,3 +1,53 @@
+mesa (11.2.1-1) experimental; urgency=medium
+
+  * New upstream release.
+  * control, rules: Use llvm/clang 3.8.
+
+ -- Timo Aaltonen <tjaalton@debian.org>  Mon, 18 Apr 2016 11:25:00 +0300
+
+mesa (11.2.0-1) experimental; urgency=medium
+
+  [ Andreas Boll ]
+  * control: Fix vdpau-va-driver Breaks/Replaces for mesa-va-drivers
+    (Closes: #819655).
+  * control: Bump Standards-Version to 3.9.7 (no changes).
+  * watch: Update url to use https instead of ftp.
+
+  [ Timo Aaltonen ]
+  * New upstream release.
+  * rules: Disable tests for now, most of them weren't run before anyway
+    and they cause unnecessary ftbfs on some archs.
+
+ -- Andreas Boll <andreas.boll.dev@gmail.com>  Thu, 31 Mar 2016 16:52:51 +0200
+
+mesa (11.2.0~rc4-1) experimental; urgency=medium
+
+  * New upstream release candidate.
+
+ -- Timo Aaltonen <tjaalton@debian.org>  Wed, 30 Mar 2016 09:35:05 +0300
+
+mesa (11.2.0~rc3-2) experimental; urgency=medium
+
+  * mesa-va-drivers: Build gallium VA driver, and add symlinks for
+    nouveau, r600 and radeonsi.
+  * control: Add vdpau-va-driver Breaks/Replaces for mesa-va-drivers.
+
+ -- Timo Aaltonen <tjaalton@debian.org>  Thu, 24 Mar 2016 14:01:20 +0200
+
+mesa (11.2.0~rc3-1) experimental; urgency=medium
+
+  * New upstream release candidate.
+  * Drop upstreamed patches.
+  * libgl1-mesa-glx.symbols: Remove dropped symbols.
+  * rules,control: Drop -dbg packages, we have -dbgsym now.
+  * rules, *.install.in, not-installed: Drop dri/-build prefix, we build
+    everything in one pass nowadays.
+  * control: Bump libdrm-dev build-dep to 2.4.67 for freedreno.
+  * rules: Migrate to dh.
+  * control: Add dh-autoreconf to build-depends.
+
+ -- Timo Aaltonen <tjaalton@debian.org>  Wed, 09 Mar 2016 01:01:55 +0200
+
 mesa (11.1.3-1) unstable; urgency=medium
 
   * New upstream release.
