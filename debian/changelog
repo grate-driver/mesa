@@ -1,6 +1,7 @@
 mesa (11.3.0~git20160504-1) UNRELEASED; urgency=medium
 
   * New upstream snapshot.
+  * control: Add python3 to build-depends.
 
  -- Timo Aaltonen <tjaalton@debian.org>  Wed, 04 May 2016 15:41:31 +0300
 
