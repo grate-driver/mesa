@@ -1,3 +1,11 @@
+mesa (11.2.1-2) UNRELEASED; urgency=medium
+
+  * gallivm-disable-avx512-features.diff: LLVM 3.8 enables AVX512 on all
+    Skylake CPU's when it's a server-CPU feature. Disable it from the
+    llvmpipe driver so that it doesn't crash on non-server Skylake.
+
+ -- Timo Aaltonen <tjaalton@debian.org>  Mon, 09 May 2016 15:17:24 +0300
+
 mesa (11.2.1-1) experimental; urgency=medium
 
   * New upstream release.
