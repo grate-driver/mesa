@@ -1,3 +1,9 @@
+mesa (11.2.2-1) UNRELEASED; urgency=medium
+
+  * New upstream release.
+
+ -- Andreas Boll <andreas.boll.dev@gmail.com>  Wed, 11 May 2016 09:55:41 +0200
+
 mesa (11.2.1-2) unstable; urgency=medium
 
   * gallivm-disable-avx512-features.diff: LLVM 3.8 enables AVX512 on all
