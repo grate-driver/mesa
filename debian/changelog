@@ -1,6 +1,7 @@
 mesa (11.2.2-1) UNRELEASED; urgency=medium
 
   * New upstream release.
+  * control: Bump Standards-Version to 3.9.8 (no changes).
 
  -- Andreas Boll <andreas.boll.dev@gmail.com>  Wed, 11 May 2016 09:55:41 +0200
 
