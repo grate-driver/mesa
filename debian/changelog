@@ -1,3 +1,9 @@
+mesa (11.2.2-1ubuntu1) yakkety; urgency=medium
+
+  * Merge from debian. (LP: #1549849)
+
+ -- Timo Aaltonen <tjaalton@debian.org>  Fri, 13 May 2016 07:34:30 +0300
+
 mesa (11.2.2-1) unstable; urgency=medium
 
   * New upstream release.
