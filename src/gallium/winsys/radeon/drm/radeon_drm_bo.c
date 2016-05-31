@@ -144,7 +144,7 @@ static uint64_t radeon_bomgr_find_va(struct radeon_drm_winsys *rws,
     /* All VM address space holes will implicitly start aligned to the
      * size alignment, so we don't need to sanitize the alignment here
      */
-    size = align(size, rws->size_align);
+    size = align(size, rws->info.gart_page_size);
 
     pipe_mutex_lock(rws->bo_va_mutex);
     /* first look for a hole */
@@ -202,7 +202,7 @@ static void radeon_bomgr_free_va(struct radeon_drm_winsys *rws,
 {
     struct radeon_bo_va_hole *hole;
 
-    size = align(size, rws->size_align);
+    size = align(size, rws->info.gart_page_size);
 
     pipe_mutex_lock(rws->bo_va_mutex);
     if ((va + size) == rws->va_offset) {
@@ -313,9 +313,9 @@ void radeon_bo_destroy(struct pb_buffer *_buf)
     pipe_mutex_destroy(bo->map_mutex);
 
     if (bo->initial_domain & RADEON_DOMAIN_VRAM)
-        rws->allocated_vram -= align(bo->base.size, rws->size_align);
+        rws->allocated_vram -= align(bo->base.size, rws->info.gart_page_size);
     else if (bo->initial_domain & RADEON_DOMAIN_GTT)
-        rws->allocated_gtt -= align(bo->base.size, rws->size_align);
+        rws->allocated_gtt -= align(bo->base.size, rws->info.gart_page_size);
     FREE(bo);
 }
 
@@ -591,9 +591,9 @@ static struct radeon_bo *radeon_create_bo(struct radeon_drm_winsys *rws,
     }
 
     if (initial_domains & RADEON_DOMAIN_VRAM)
-        rws->allocated_vram += align(size, rws->size_align);
+        rws->allocated_vram += align(size, rws->info.gart_page_size);
     else if (initial_domains & RADEON_DOMAIN_GTT)
-        rws->allocated_gtt += align(size, rws->size_align);
+        rws->allocated_gtt += align(size, rws->info.gart_page_size);
 
     return bo;
 }
@@ -731,7 +731,8 @@ radeon_winsys_bo_create(struct radeon_winsys *rws,
      * BOs. Aligning this here helps the cached bufmgr. Especially small BOs,
      * like constant/uniform buffers, can benefit from better and more reuse.
      */
-    size = align(size, ws->size_align);
+    size = align(size, ws->info.gart_page_size);
+    alignment = align(alignment, ws->info.gart_page_size);
 
     /* Only set one usage bit each for domains and flags, or the cache manager
      * might consider different sets of domains / flags compatible
@@ -779,7 +780,7 @@ static struct pb_buffer *radeon_winsys_bo_from_ptr(struct radeon_winsys *rws,
 
     memset(&args, 0, sizeof(args));
     args.addr = (uintptr_t)pointer;
-    args.size = align(size, sysconf(_SC_PAGE_SIZE));
+    args.size = align(size, ws->info.gart_page_size);
     args.flags = RADEON_GEM_USERPTR_ANONONLY |
         RADEON_GEM_USERPTR_VALIDATE |
         RADEON_GEM_USERPTR_REGISTER;
@@ -795,7 +796,6 @@ static struct pb_buffer *radeon_winsys_bo_from_ptr(struct radeon_winsys *rws,
     pipe_reference_init(&bo->base.reference, 1);
     bo->handle = args.handle;
     bo->base.alignment = 0;
-    bo->base.usage = PB_USAGE_GPU_WRITE | PB_USAGE_GPU_READ;
     bo->base.size = size;
     bo->base.vtbl = &radeon_bo_vtbl;
     bo->rws = ws;
@@ -842,7 +842,7 @@ static struct pb_buffer *radeon_winsys_bo_from_ptr(struct radeon_winsys *rws,
         pipe_mutex_unlock(ws->bo_handles_mutex);
     }
 
-    ws->allocated_gtt += align(bo->base.size, ws->size_align);
+    ws->allocated_gtt += align(bo->base.size, ws->info.gart_page_size);
 
     return (struct pb_buffer*)bo;
 }
@@ -857,6 +857,12 @@ static struct pb_buffer *radeon_winsys_bo_from_handle(struct radeon_winsys *rws,
     int r;
     unsigned handle;
     uint64_t size = 0;
+
+    if (!offset && whandle->offset != 0) {
+        fprintf(stderr, "attempt to import unsupported winsys offset %u\n",
+                whandle->offset);
+        return NULL;
+    }
 
     /* We must maintain a list of pairs <handle, bo>, so that we always return
      * the same BO for one particular handle. If we didn't do that and created
@@ -923,7 +929,6 @@ static struct pb_buffer *radeon_winsys_bo_from_handle(struct radeon_winsys *rws,
     /* Initialize it. */
     pipe_reference_init(&bo->base.reference, 1);
     bo->base.alignment = 0;
-    bo->base.usage = PB_USAGE_GPU_WRITE | PB_USAGE_GPU_READ;
     bo->base.size = (unsigned) size;
     bo->base.vtbl = &radeon_bo_vtbl;
     bo->rws = ws;
@@ -980,9 +985,9 @@ done:
     bo->initial_domain = radeon_bo_get_initial_domain((void*)bo);
 
     if (bo->initial_domain & RADEON_DOMAIN_VRAM)
-        ws->allocated_vram += align(bo->base.size, ws->size_align);
+        ws->allocated_vram += align(bo->base.size, ws->info.gart_page_size);
     else if (bo->initial_domain & RADEON_DOMAIN_GTT)
-        ws->allocated_gtt += align(bo->base.size, ws->size_align);
+        ws->allocated_gtt += align(bo->base.size, ws->info.gart_page_size);
 
     return (struct pb_buffer*)bo;
 

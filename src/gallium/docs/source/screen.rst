@@ -336,6 +336,10 @@ The integer capabilities:
   PIPE_CONTEXT_ROBUST_BUFFER_ACCESS. See the ARB_robust_buffer_access_behavior
   extension for information on the required behavior for out of bounds accesses
   and accesses to unbound resources.
+* ``PIPE_CAP_CULL_DISTANCE``: Whether the driver supports the arb_cull_distance
+  extension and thus implements proper support for culling planes.
+* ``PIPE_CAP_PRIMITIVE_RESTART_FOR_PATCHES``: Whether primitive restart is
+  supported for patch primitives.
 
 
 .. _pipe_capf:

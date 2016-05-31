@@ -352,6 +352,7 @@ VL_SOURCES := \
 # XXX: Nuke this as our dri targets no longer depend on VL.
 VL_WINSYS_SOURCES := \
 	vl/vl_winsys_dri.c \
+	vl/vl_winsys_dri3.c \
 	vl/vl_winsys_drm.c
 
 VL_STUB_SOURCES := \

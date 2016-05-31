@@ -576,6 +576,7 @@ static const _mesa_glsl_extension _mesa_glsl_supported_extensions[] = {
    EXT(ARB_arrays_of_arrays,             true,  false,     ARB_arrays_of_arrays),
    EXT(ARB_compute_shader,               true,  false,     ARB_compute_shader),
    EXT(ARB_conservative_depth,           true,  false,     ARB_conservative_depth),
+   EXT(ARB_cull_distance,                true,  false,     ARB_cull_distance),
    EXT(ARB_derivative_control,           true,  false,     ARB_derivative_control),
    EXT(ARB_draw_buffers,                 true,  false,     dummy_true),
    EXT(ARB_draw_instanced,               true,  false,     ARB_draw_instanced),
@@ -625,6 +626,7 @@ static const _mesa_glsl_extension _mesa_glsl_supported_extensions[] = {
    EXT(OES_gpu_shader5,                false, true,      ARB_gpu_shader5),
    EXT(OES_sample_variables,           false, true,      OES_sample_variables),
    EXT(OES_shader_image_atomic,        false, true,      ARB_shader_image_load_store),
+   EXT(OES_shader_io_blocks,           false, true,      OES_shader_io_blocks),
    EXT(OES_shader_multisample_interpolation, false, true, OES_sample_variables),
    EXT(OES_standard_derivatives,       false, true,      OES_standard_derivatives),
    EXT(OES_texture_3D,                 false, true,      dummy_true),
@@ -640,9 +642,11 @@ static const _mesa_glsl_extension _mesa_glsl_supported_extensions[] = {
    EXT(AMD_vertex_shader_viewport_index, true,  false,   AMD_vertex_shader_viewport_index),
    EXT(EXT_blend_func_extended,        false,  true,     ARB_blend_func_extended),
    EXT(EXT_draw_buffers,               false,  true,     dummy_true),
+   EXT(EXT_clip_cull_distance,         false, true,      ARB_cull_distance),
    EXT(EXT_gpu_shader5,                false, true,      ARB_gpu_shader5),
    EXT(EXT_separate_shader_objects,    false, true,      dummy_true),
    EXT(EXT_shader_integer_mix,         true,  true,      EXT_shader_integer_mix),
+   EXT(EXT_shader_io_blocks,           false, true,      OES_shader_io_blocks),
    EXT(EXT_shader_samples_identical,   true,  true,      EXT_shader_samples_identical),
    EXT(EXT_texture_array,              true,  false,     EXT_texture_array),
    EXT(EXT_texture_buffer,             false, true,      OES_texture_buffer),
@@ -891,10 +895,16 @@ _mesa_ast_process_interface_block(YYLTYPE *locp,
                             "required for defining uniform blocks");
       }
    } else {
-      if (state->es_shader || state->language_version < 150) {
-         _mesa_glsl_error(locp, state,
-                          "#version 150 required for using "
-                          "interface blocks");
+      if (!state->has_shader_io_blocks()) {
+         if (state->es_shader) {
+            _mesa_glsl_error(locp, state,
+                             "GL_OES_shader_io_blocks or #version 320 "
+                             "required for using interface blocks");
+         } else {
+            _mesa_glsl_error(locp, state,
+                             "#version 150 required for using "
+                             "interface blocks");
+         }
       }
    }
 
@@ -1683,6 +1693,14 @@ set_shader_inout_layout(struct gl_shader *shader,
          if (state->out_qualifier->max_vertices->
                process_qualifier_constant(state, "max_vertices",
                                           &qual_max_vertices, true)) {
+
+            if (qual_max_vertices > state->Const.MaxGeometryOutputVertices) {
+               YYLTYPE loc = state->out_qualifier->max_vertices->get_location();
+               _mesa_glsl_error(&loc, state,
+                                "maximum output vertices (%d) exceeds "
+                                "GL_MAX_GEOMETRY_OUTPUT_VERTICES",
+                                qual_max_vertices);
+            }
             shader->Geom.VerticesOut = qual_max_vertices;
          }
       }
@@ -1746,6 +1764,27 @@ set_shader_inout_layout(struct gl_shader *shader,
 
 extern "C" {
 
+static void
+assign_subroutine_indexes(struct gl_shader *sh,
+			  struct _mesa_glsl_parse_state *state)
+{
+   int j, k;
+   int index = 0;
+
+   for (j = 0; j < state->num_subroutines; j++) {
+      while (state->subroutines[j]->subroutine_index == -1) {
+         for (k = 0; k < state->num_subroutines; k++) {
+            if (state->subroutines[k]->subroutine_index == index)
+               break;
+            else if (k == state->num_subroutines - 1) {
+               state->subroutines[j]->subroutine_index = index;
+            }
+         }
+         index++;
+      }
+   }
+}
+
 void
 _mesa_glsl_compile_shader(struct gl_context *ctx, struct gl_shader *shader,
                           bool dump_ast, bool dump_hir)
@@ -1793,6 +1832,7 @@ _mesa_glsl_compile_shader(struct gl_context *ctx, struct gl_shader *shader,
       struct gl_shader_compiler_options *options =
          &ctx->Const.ShaderCompilerOptions[shader->Stage];
 
+      assign_subroutine_indexes(shader, state);
       lower_subroutine(shader->ir, state);
       /* Do some optimization at compile time to reduce shader IR size
        * and reduce later work if the same shader is linked multiple times

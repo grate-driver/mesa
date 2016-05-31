@@ -33,21 +33,6 @@
 #include "common/simdintrin.h"
 #include "common/swr_assert.h"
 
-#if defined(_WIN32)
-void SaveImageToPNGFile(
-    const WCHAR *pFilename,
-    void *pBuffer,
-    uint32_t width,
-    uint32_t height,
-    bool broadcastRed);
-
-void OpenBitmapFromFile(
-    const WCHAR *pFilename,
-    void **pBuffer,
-    uint32_t *width,
-    uint32_t *height);
-#endif
-
 #if defined(_WIN64) || defined(__x86_64__)
 #define _MM_INSERT_EPI64 _mm_insert_epi64
 #define _MM_EXTRACT_EPI64 _mm_extract_epi64
@@ -174,7 +159,7 @@ void vTranspose(__m128i &row0, __m128i &row1, __m128i &row2, __m128i &row3)
                      + __GNUC_MINOR__ * 100 \
                      + __GNUC_PATCHLEVEL__)
 
-#if defined(__GNUC__) && (GCC_VERSION < 40900)
+#if defined(__clang__) || (defined(__GNUC__) && (GCC_VERSION < 40900))
 #define _mm_undefined_ps _mm_setzero_ps
 #define _mm_undefined_si128 _mm_setzero_si128
 #if KNOB_SIMD_WIDTH == 8
@@ -865,4 +850,5 @@ struct TemplateArgUnroller
         return TemplateArgUnroller<TermT, ArgsB..., std::false_type>::GetFunc(remainingArgs...);
     }
 };
+
 

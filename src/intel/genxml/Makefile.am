@@ -19,16 +19,17 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
 
-BUILT_SOURCES =                                         \
-	gen6_pack.h					\
-	gen7_pack.h					\
-	gen75_pack.h					\
-	gen8_pack.h					\
-	gen9_pack.h
+include Makefile.sources
+
+BUILT_SOURCES = $(GENXML_GENERATED_FILES)
 
 PYTHON3_GEN = $(AM_V_GEN)$(PYTHON3) $(PYTHON_FLAGS)
 
-%_pack.h : %.xml gen_pack_header.py
+SUFFIXES = _pack.h .xml
+
+$(BUILT_SOURCES): gen_pack_header.py
+
+.xml_pack.h:
 	$(PYTHON3_GEN) $(srcdir)/gen_pack_header.py $< > $@
 
 CLEANFILES = $(BUILT_SOURCES)

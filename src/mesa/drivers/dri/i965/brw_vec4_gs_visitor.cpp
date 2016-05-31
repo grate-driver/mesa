@@ -52,10 +52,9 @@ vec4_gs_visitor::vec4_gs_visitor(const struct brw_compiler *compiler,
 
 
 dst_reg *
-vec4_gs_visitor::make_reg_for_system_value(int location,
-                                           const glsl_type *type)
+vec4_gs_visitor::make_reg_for_system_value(int location)
 {
-   dst_reg *reg = new(mem_ctx) dst_reg(this, type);
+   dst_reg *reg = new(mem_ctx) dst_reg(this, glsl_type::int_type);
 
    switch (location) {
    case SYSTEM_VALUE_INVOCATION_ID:
@@ -811,13 +810,11 @@ brw_compile_gs(const struct brw_compiler *compiler, void *log_data,
    }
 
    if (is_scalar) {
-      /* TODO: Support instanced GS.  We have basically no tests... */
-      assert(prog_data->invocations == 1);
-
       fs_visitor v(compiler, log_data, mem_ctx, &c, prog_data, shader,
                    shader_time_index);
       if (v.run_gs()) {
          prog_data->base.dispatch_mode = DISPATCH_MODE_SIMD8;
+         prog_data->base.base.dispatch_grf_start_reg = v.payload.num_regs;
 
          fs_generator g(compiler, log_data, mem_ctx, &c.key,
                         &prog_data->base.base, v.promoted_constants,

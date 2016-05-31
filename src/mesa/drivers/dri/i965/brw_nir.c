@@ -23,9 +23,8 @@
 
 #include "brw_nir.h"
 #include "brw_shader.h"
-#include "compiler/nir/glsl_to_nir.h"
+#include "compiler/glsl_types.h"
 #include "compiler/nir/nir_builder.h"
-#include "program/prog_to_nir.h"
 
 static bool
 is_input(nir_intrinsic_instr *intrin)
@@ -96,7 +95,7 @@ add_const_offset_to_base(nir_shader *nir, nir_variable_mode mode)
 }
 
 static bool
-remap_vs_attrs(nir_block *block, GLbitfield64 inputs_read)
+remap_vs_attrs(nir_block *block, struct nir_shader_info *nir_info)
 {
    nir_foreach_instr(instr, block) {
       if (instr->type != nir_instr_type_intrinsic)
@@ -111,9 +110,11 @@ remap_vs_attrs(nir_block *block, GLbitfield64 inputs_read)
           * before it and counting the bits.
           */
          int attr = intrin->const_index[0];
-         int slot = _mesa_bitcount_64(inputs_read & BITFIELD64_MASK(attr));
-
-         intrin->const_index[0] = 4 * slot;
+         int slot = _mesa_bitcount_64(nir_info->inputs_read &
+                                      BITFIELD64_MASK(attr));
+         int dslot = _mesa_bitcount_64(nir_info->double_inputs_read &
+                                       BITFIELD64_MASK(attr));
+         intrin->const_index[0] = 4 * (slot + dslot);
       }
    }
    return true;
@@ -199,11 +200,11 @@ brw_nir_lower_vs_inputs(nir_shader *nir,
       var->data.driver_location = var->data.location;
    }
 
-   /* Now use nir_lower_io to walk dereference chains.  Attribute arrays
-    * are loaded as one vec4 per element (or matrix column), so we use
-    * type_size_vec4 here.
+   /* Now use nir_lower_io to walk dereference chains.  Attribute arrays are
+    * loaded as one vec4 or dvec4 per element (or matrix column), depending on
+    * whether it is a double-precision type or not.
     */
-   nir_lower_io(nir, nir_var_shader_in, type_size_vec4);
+   nir_lower_io(nir, nir_var_shader_in, type_size_vs_input);
 
    /* This pass needs actual constants */
    nir_opt_constant_folding(nir);
@@ -214,18 +215,12 @@ brw_nir_lower_vs_inputs(nir_shader *nir,
                                        vs_attrib_wa_flags);
 
    if (is_scalar) {
-      /* Finally, translate VERT_ATTRIB_* values into the actual registers.
-       *
-       * Note that we can use nir->info.inputs_read instead of
-       * key->inputs_read since the two are identical aside from Gen4-5
-       * edge flag differences.
-       */
-      GLbitfield64 inputs_read = nir->info.inputs_read;
+      /* Finally, translate VERT_ATTRIB_* values into the actual registers. */
 
       nir_foreach_function(function, nir) {
          if (function->impl) {
             nir_foreach_block(block, function->impl) {
-               remap_vs_attrs(block, inputs_read);
+               remap_vs_attrs(block, &nir->info);
             }
          }
       }
@@ -339,32 +334,6 @@ brw_nir_lower_fs_outputs(nir_shader *nir)
    nir_lower_io(nir, nir_var_shader_out, type_size_scalar);
 }
 
-static int
-type_size_scalar_bytes(const struct glsl_type *type)
-{
-   return type_size_scalar(type) * 4;
-}
-
-static int
-type_size_vec4_bytes(const struct glsl_type *type)
-{
-   return type_size_vec4(type) * 16;
-}
-
-static void
-brw_nir_lower_uniforms(nir_shader *nir, bool is_scalar)
-{
-   if (is_scalar) {
-      nir_assign_var_locations(&nir->uniforms, &nir->num_uniforms,
-                               type_size_scalar_bytes);
-      nir_lower_io(nir, nir_var_uniform, type_size_scalar_bytes);
-   } else {
-      nir_assign_var_locations(&nir->uniforms, &nir->num_uniforms,
-                               type_size_vec4_bytes);
-      nir_lower_io(nir, nir_var_uniform, type_size_vec4_bytes);
-   }
-}
-
 void
 brw_nir_lower_cs_shared(nir_shader *nir)
 {
@@ -410,6 +379,16 @@ nir_optimize(nir_shader *nir, bool is_scalar)
       OPT(nir_opt_dead_cf);
       OPT(nir_opt_remove_phis);
       OPT(nir_opt_undef);
+      OPT_V(nir_lower_doubles, nir_lower_drcp |
+                               nir_lower_dsqrt |
+                               nir_lower_drsq |
+                               nir_lower_dtrunc |
+                               nir_lower_dfloor |
+                               nir_lower_dceil |
+                               nir_lower_dfract |
+                               nir_lower_dround_even |
+                               nir_lower_dmod);
+      OPT_V(nir_lower_double_pack);
    } while (progress);
 
    return nir;
@@ -538,43 +517,6 @@ brw_postprocess_nir(nir_shader *nir,
 }
 
 nir_shader *
-brw_create_nir(struct brw_context *brw,
-               const struct gl_shader_program *shader_prog,
-               const struct gl_program *prog,
-               gl_shader_stage stage,
-               bool is_scalar)
-{
-   struct gl_context *ctx = &brw->ctx;
-   const nir_shader_compiler_options *options =
-      ctx->Const.ShaderCompilerOptions[stage].NirOptions;
-   bool progress;
-   nir_shader *nir;
-
-   /* First, lower the GLSL IR or Mesa IR to NIR */
-   if (shader_prog) {
-      nir = glsl_to_nir(shader_prog, stage, options);
-   } else {
-      nir = prog_to_nir(prog, options);
-      OPT_V(nir_convert_to_ssa); /* turn registers into SSA */
-   }
-   nir_validate_shader(nir);
-
-   (void)progress;
-
-   nir = brw_preprocess_nir(brw->intelScreen->compiler, nir);
-
-   OPT(nir_lower_system_values);
-   OPT_V(brw_nir_lower_uniforms, is_scalar);
-
-   if (shader_prog) {
-      OPT_V(nir_lower_samplers, shader_prog);
-      OPT_V(nir_lower_atomics, shader_prog);
-   }
-
-   return nir;
-}
-
-nir_shader *
 brw_nir_apply_sampler_key(nir_shader *nir,
                           const struct brw_device_info *devinfo,
                           const struct brw_sampler_prog_key_data *key_tex,
@@ -602,6 +544,10 @@ brw_nir_apply_sampler_key(nir_shader *nir,
       for (unsigned c = 0; c < 4; c++)
          tex_options.swizzles[s][c] = GET_SWZ(key_tex->swizzles[s], c);
    }
+
+   tex_options.lower_y_uv_external = key_tex->y_uv_image_mask;
+   tex_options.lower_y_u_v_external = key_tex->y_u_v_image_mask;
+   tex_options.lower_yx_xuxv_external = key_tex->yx_xuxv_image_mask;
 
    if (nir_lower_tex(nir, &tex_options)) {
       nir_validate_shader(nir);

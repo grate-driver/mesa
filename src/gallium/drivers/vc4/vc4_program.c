@@ -1387,10 +1387,6 @@ ntq_setup_inputs(struct vc4_compile *c)
                 if (c->stage == QSTAGE_FRAG) {
                         if (var->data.location == VARYING_SLOT_POS) {
                                 emit_fragcoord_input(c, loc);
-                        } else if (var->data.location == VARYING_SLOT_FACE) {
-                                c->inputs[loc * 4 + 0] =
-                                        qir_ITOF(c, qir_reg(QFILE_FRAG_REV_FLAG,
-                                                            0));
                         } else if (var->data.location >= VARYING_SLOT_VAR0 &&
                                    (c->fs_key->point_sprite_mask &
                                     (1 << (var->data.location -
@@ -1544,6 +1540,15 @@ ntq_emit_intrinsic(struct vc4_compile *c, nir_intrinsic_instr *instr)
 
         case nir_intrinsic_load_sample_mask_in:
                 *dest = qir_uniform(c, QUNIFORM_SAMPLE_MASK, 0);
+                break;
+
+        case nir_intrinsic_load_front_face:
+                /* The register contains 0 (front) or 1 (back), and we need to
+                 * turn it into a NIR bool where true means front.
+                 */
+                *dest = qir_ADD(c,
+                                qir_uniform_ui(c, -1),
+                                qir_reg(QFILE_FRAG_REV_FLAG, 0));
                 break;
 
         case nir_intrinsic_load_input:
@@ -1737,16 +1742,6 @@ static const nir_shader_compiler_options nir_options = {
         .lower_negate = true,
 };
 
-static bool
-count_nir_instrs_in_block(nir_block *block, void *state)
-{
-        int *count = (int *) state;
-        nir_foreach_instr(instr, block) {
-                *count = *count + 1;
-        }
-        return true;
-}
-
 static int
 count_nir_instrs(nir_shader *nir)
 {
@@ -1754,7 +1749,10 @@ count_nir_instrs(nir_shader *nir)
         nir_foreach_function(function, nir) {
                 if (!function->impl)
                         continue;
-                nir_foreach_block_call(function->impl, count_nir_instrs_in_block, &count);
+                nir_foreach_block(block, function->impl) {
+                        nir_foreach_instr(instr, block)
+                                count++;
+                }
         }
         return count;
 }
@@ -1768,7 +1766,8 @@ vc4_shader_ntq(struct vc4_context *vc4, enum qstage stage,
         c->stage = stage;
         c->shader_state = &key->shader_state->base;
         c->program_id = key->shader_state->program_id;
-        c->variant_id = key->shader_state->compiled_variant_count++;
+        c->variant_id =
+                p_atomic_inc_return(&key->shader_state->compiled_variant_count);
 
         c->key = key;
         switch (stage) {
@@ -1789,16 +1788,7 @@ vc4_shader_ntq(struct vc4_context *vc4, enum qstage stage,
                 break;
         }
 
-        const struct tgsi_token *tokens = key->shader_state->base.tokens;
-
-        if (vc4_debug & VC4_DEBUG_TGSI) {
-                fprintf(stderr, "%s prog %d/%d TGSI:\n",
-                        qir_get_stage_name(c->stage),
-                        c->program_id, c->variant_id);
-                tgsi_dump(tokens, 0);
-        }
-
-        c->s = tgsi_to_nir(tokens, &nir_options);
+        c->s = nir_shader_clone(c, key->shader_state->base.ir.nir);
         NIR_PASS_V(c->s, nir_opt_global_to_local);
         NIR_PASS_V(c->s, nir_convert_to_ssa);
 
@@ -1849,6 +1839,9 @@ vc4_shader_ntq(struct vc4_context *vc4, enum qstage stage,
 
         if (c->fs_key && c->fs_key->light_twoside)
                 NIR_PASS_V(c->s, nir_lower_two_sided_color);
+
+        if (c->vs_key && c->vs_key->clamp_color)
+                NIR_PASS_V(c->s, nir_lower_clamp_color_outputs);
 
         if (stage == QSTAGE_FRAG)
                 NIR_PASS_V(c->s, nir_lower_clip_fs, c->key->ucp_enables);
@@ -1944,8 +1937,20 @@ vc4_shader_state_create(struct pipe_context *pctx,
         if (!so)
                 return NULL;
 
-        so->base.tokens = tgsi_dup_tokens(cso->tokens);
         so->program_id = vc4->next_uncompiled_program_id++;
+
+        nir_shader *s = tgsi_to_nir(cso->tokens, &nir_options);
+
+        if (vc4_debug & VC4_DEBUG_TGSI) {
+                fprintf(stderr, "%s prog %d TGSI:\n",
+                        gl_shader_stage_name(s->stage),
+                        so->program_id);
+                tgsi_dump(cso->tokens, 0);
+                fprintf(stderr, "\n");
+        }
+
+        so->base.type = PIPE_SHADER_IR_NIR;
+        so->base.ir.nir = s;
 
         return so;
 }
@@ -2212,6 +2217,7 @@ vc4_update_compiled_vs(struct vc4_context *vc4, uint8_t prim_mode)
         vc4_setup_shared_key(vc4, &key->base, &vc4->verttex);
         key->base.shader_state = vc4->prog.bind_vs;
         key->compiled_fs_id = vc4->prog.fs->program_id;
+        key->clamp_color = vc4->rasterizer->base.clamp_vertex_color;
 
         for (int i = 0; i < ARRAY_SIZE(key->attr_formats); i++)
                 key->attr_formats[i] = vc4->vtx->pipe[i].src_format;
@@ -2294,7 +2300,7 @@ vc4_shader_state_delete(struct pipe_context *pctx, void *hwcso)
         hash_table_foreach(vc4->vs_cache, entry)
                 delete_from_cache_if_matches(vc4->vs_cache, entry, so);
 
-        free((void *)so->base.tokens);
+        ralloc_free(so->base.ir.nir);
         free(so);
 }
 

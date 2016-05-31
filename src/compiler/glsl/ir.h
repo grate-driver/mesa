@@ -484,7 +484,10 @@ public:
       this->interface_type = type;
       if (this->is_interface_instance()) {
          this->u.max_ifc_array_access =
-            rzalloc_array(this, unsigned, type->length);
+            ralloc_array(this, int, type->length);
+         for (unsigned i = 0; i < type->length; i++) {
+            this->u.max_ifc_array_access[i] = -1;
+         }
       }
    }
 
@@ -520,7 +523,7 @@ public:
           * zero.
           */
          for (unsigned i = 0; i < this->interface_type->length; i++)
-            assert(this->u.max_ifc_array_access[i] == 0);
+            assert(this->u.max_ifc_array_access[i] == -1);
 #endif
          ralloc_free(this->u.max_ifc_array_access);
          this->u.max_ifc_array_access = NULL;
@@ -540,7 +543,7 @@ public:
     * A "set" function is not needed because the array is dynmically allocated
     * as necessary.
     */
-   inline unsigned *get_max_ifc_array_access()
+   inline int *get_max_ifc_array_access()
    {
       assert(this->data._num_state_slots == 0);
       return this->u.max_ifc_array_access;
@@ -816,6 +819,7 @@ public:
        */
       unsigned from_ssbo_unsized_array:1; /**< unsized array buffer variable. */
 
+      unsigned implicit_sized_array:1;
       /**
        * Emit a warning if this variable is accessed.
        */
@@ -888,9 +892,9 @@ public:
       /**
        * Highest element accessed with a constant expression array index
        *
-       * Not used for non-array variables.
+       * Not used for non-array variables. -1 is never accessed.
        */
-      unsigned max_array_access;
+      int max_array_access;
 
       /**
        * Transform feedback buffer.
@@ -938,7 +942,7 @@ private:
        * For variables whose type is not an interface block, this pointer is
        * NULL.
        */
-      unsigned *max_ifc_array_access;
+      int *max_ifc_array_access;
 
       /**
        * Built-in state that backs this uniform
@@ -2617,6 +2621,9 @@ is_gl_identifier(const char *s)
    return s && s[0] == 'g' && s[1] == 'l' && s[2] == '_';
 }
 
+const glsl_type *
+get_varying_type(const ir_variable *var, gl_shader_stage stage);
+
 extern "C" {
 #endif /* __cplusplus */
 
@@ -2625,6 +2632,9 @@ extern void _mesa_print_ir(FILE *f, struct exec_list *instructions,
 
 extern void
 fprint_ir(FILE *f, const void *instruction);
+
+extern const struct gl_builtin_uniform_desc *
+_mesa_glsl_get_builtin_uniform_desc(const char *name);
 
 #ifdef __cplusplus
 } /* extern "C" */

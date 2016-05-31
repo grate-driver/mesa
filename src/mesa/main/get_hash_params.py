@@ -878,6 +878,10 @@ descriptor=[
   [ "GPU_MEMORY_INFO_CURRENT_AVAILABLE_VIDMEM_NVX", "LOC_CUSTOM, TYPE_INT, NO_OFFSET, extra_NVX_gpu_memory_info" ],
   [ "GPU_MEMORY_INFO_EVICTION_COUNT_NVX", "LOC_CUSTOM, TYPE_INT, NO_OFFSET, extra_NVX_gpu_memory_info" ],
   [ "GPU_MEMORY_INFO_EVICTED_MEMORY_NVX", "LOC_CUSTOM, TYPE_INT, NO_OFFSET, extra_NVX_gpu_memory_info" ],
+
+# GL_ARB_cull_distance
+  [ "MAX_CULL_DISTANCES", "CONTEXT_INT(Const.MaxClipPlanes), extra_ARB_cull_distance" ],
+  [ "MAX_COMBINED_CLIP_AND_CULL_DISTANCES", "CONTEXT_INT(Const.MaxClipPlanes), extra_ARB_cull_distance" ],
 ]},
 
 # Enums restricted to OpenGL Core profile
@@ -908,6 +912,7 @@ descriptor=[
   [ "MAX_TESS_EVALUATION_UNIFORM_BLOCKS", "CONTEXT_INT(Const.Program[MESA_SHADER_TESS_EVAL].MaxUniformBlocks), extra_ARB_tessellation_shader" ],
   [ "MAX_COMBINED_TESS_CONTROL_UNIFORM_COMPONENTS", "CONTEXT_INT(Const.Program[MESA_SHADER_TESS_CTRL].MaxCombinedUniformComponents), extra_ARB_tessellation_shader" ],
   [ "MAX_COMBINED_TESS_EVALUATION_UNIFORM_COMPONENTS", "CONTEXT_INT(Const.Program[MESA_SHADER_TESS_EVAL].MaxCombinedUniformComponents), extra_ARB_tessellation_shader" ],
+  [ "PRIMITIVE_RESTART_FOR_PATCHES_SUPPORTED", "CONTEXT_BOOL(Const.PrimitiveRestartForPatches), extra_ARB_tessellation_shader" ],
 # Dependencies on GL_ARB_tessellation_shader
   [ "MAX_TESS_CONTROL_ATOMIC_COUNTER_BUFFERS", "CONTEXT_INT(Const.Program[MESA_SHADER_TESS_CTRL].MaxAtomicBuffers), extra_ARB_shader_atomic_counters_and_tessellation" ],
   [ "MAX_TESS_CONTROL_ATOMIC_COUNTERS", "CONTEXT_INT(Const.Program[MESA_SHADER_TESS_CTRL].MaxAtomicCounters), extra_ARB_shader_atomic_counters_and_tessellation" ],

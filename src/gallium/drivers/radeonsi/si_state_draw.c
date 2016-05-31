@@ -54,7 +54,7 @@ static unsigned si_conv_pipe_prim(unsigned mode)
 		[PIPE_PRIM_PATCHES]			= V_008958_DI_PT_PATCH,
 		[R600_PRIM_RECTANGLE_LIST]		= V_008958_DI_PT_RECTLIST
         };
-	assert(mode < Elements(prim_conv));
+	assert(mode < ARRAY_SIZE(prim_conv));
 	return prim_conv[mode];
 }
 
@@ -78,7 +78,7 @@ static unsigned si_conv_prim_to_gs_out(unsigned mode)
 		[PIPE_PRIM_PATCHES]			= V_028A6C_OUTPRIM_TYPE_POINTLIST,
 		[R600_PRIM_RECTANGLE_LIST]		= V_028A6C_OUTPRIM_TYPE_TRISTRIP
 	};
-	assert(mode < Elements(prim_conv));
+	assert(mode < ARRAY_SIZE(prim_conv));
 
 	return prim_conv[mode];
 }
@@ -108,19 +108,7 @@ static void si_emit_derived_tess_state(struct si_context *sctx,
 	unsigned input_patch_size, output_patch_size, output_patch0_offset;
 	unsigned perpatch_output_offset, lds_size, ls_rsrc2;
 	unsigned tcs_in_layout, tcs_out_layout, tcs_out_offsets;
-
-	*num_patches = 1; /* TODO: calculate this */
-
-	if (sctx->last_ls == ls->current &&
-	    sctx->last_tcs == tcs &&
-	    sctx->last_tes_sh_base == tes_sh_base &&
-	    sctx->last_num_tcs_input_cp == num_tcs_input_cp)
-		return;
-
-	sctx->last_ls = ls->current;
-	sctx->last_tcs = tcs;
-	sctx->last_tes_sh_base = tes_sh_base;
-	sctx->last_num_tcs_input_cp = num_tcs_input_cp;
+	unsigned offchip_layout, hardware_lds_size;
 
 	/* This calculates how shader inputs and outputs among VS, TCS, and TES
 	 * are laid out in LDS. */
@@ -145,7 +133,29 @@ static void si_emit_derived_tess_state(struct si_context *sctx,
 	pervertex_output_patch_size = num_tcs_output_cp * output_vertex_size;
 	output_patch_size = pervertex_output_patch_size + num_tcs_patch_outputs * 16;
 
-	output_patch0_offset = sctx->tcs_shader.cso ? input_patch_size * *num_patches : 0;
+	/* Ensure that we only need one wave per SIMD so we don't need to check
+	 * resource usage. Also ensures that the number of tcs in and out
+	 * vertices per threadgroup are at most 256.
+	 */
+	*num_patches = 64 / MAX2(num_tcs_input_cp, num_tcs_output_cp) * 4;
+
+	/* Make sure that the data fits in LDS. This assumes the shaders only
+	 * use LDS for the inputs and outputs.
+	 */
+	hardware_lds_size = sctx->b.chip_class >= CIK ? 65536 : 32768;
+	*num_patches = MIN2(*num_patches, hardware_lds_size / (input_patch_size +
+	                                                       output_patch_size));
+
+	/* Make sure the output data fits in the offchip buffer */
+	*num_patches = MIN2(*num_patches, SI_TESS_OFFCHIP_BLOCK_SIZE /
+	                                  output_patch_size);
+
+	/* Not necessary for correctness, but improves performance. The
+	 * specific value is taken from the proprietary driver.
+	 */
+	*num_patches = MIN2(*num_patches, 40);
+
+	output_patch0_offset = input_patch_size * *num_patches;
 	perpatch_output_offset = output_patch0_offset + pervertex_output_patch_size;
 
 	lds_size = output_patch0_offset + output_patch_size * *num_patches;
@@ -158,6 +168,17 @@ static void si_emit_derived_tess_state(struct si_context *sctx,
 		assert(lds_size <= 32768);
 		ls_rsrc2 |= S_00B52C_LDS_SIZE(align(lds_size, 256) / 256);
 	}
+
+	if (sctx->last_ls == ls->current &&
+	    sctx->last_tcs == tcs &&
+	    sctx->last_tes_sh_base == tes_sh_base &&
+	    sctx->last_num_tcs_input_cp == num_tcs_input_cp)
+		return;
+
+	sctx->last_ls = ls->current;
+	sctx->last_tcs = tcs;
+	sctx->last_tes_sh_base = tes_sh_base;
+	sctx->last_num_tcs_input_cp = num_tcs_input_cp;
 
 	/* Due to a hw bug, RSRC2_LS must be written twice with another
 	 * LS register written in between. */
@@ -183,6 +204,8 @@ static void si_emit_derived_tess_state(struct si_context *sctx,
 			 ((output_vertex_size / 4) << 13);
 	tcs_out_offsets = (output_patch0_offset / 16) |
 			  ((perpatch_output_offset / 16) << 16);
+	offchip_layout = (pervertex_output_patch_size * *num_patches << 16) |
+			 (num_tcs_output_cp << 9) | *num_patches;
 
 	/* Set them for LS. */
 	radeon_set_sh_reg(cs,
@@ -191,15 +214,15 @@ static void si_emit_derived_tess_state(struct si_context *sctx,
 
 	/* Set them for TCS. */
 	radeon_set_sh_reg_seq(cs,
-		R_00B430_SPI_SHADER_USER_DATA_HS_0 + SI_SGPR_TCS_OUT_OFFSETS * 4, 3);
+		R_00B430_SPI_SHADER_USER_DATA_HS_0 + SI_SGPR_TCS_OFFCHIP_LAYOUT * 4, 4);
+	radeon_emit(cs, offchip_layout);
 	radeon_emit(cs, tcs_out_offsets);
 	radeon_emit(cs, tcs_out_layout | (num_tcs_input_cp << 26));
 	radeon_emit(cs, tcs_in_layout);
 
 	/* Set them for TES. */
-	radeon_set_sh_reg_seq(cs, tes_sh_base + SI_SGPR_TCS_OUT_OFFSETS * 4, 2);
-	radeon_emit(cs, tcs_out_offsets);
-	radeon_emit(cs, tcs_out_layout | (num_tcs_output_cp << 26));
+	radeon_set_sh_reg_seq(cs, tes_sh_base + SI_SGPR_TCS_OFFCHIP_LAYOUT * 4, 1);
+	radeon_emit(cs, offchip_layout);
 }
 
 static unsigned si_num_prims_for_vertices(const struct pipe_draw_info *info)
@@ -256,6 +279,14 @@ static unsigned si_get_ia_multi_vgt_param(struct si_context *sctx,
 		     sctx->b.family == CHIP_BONAIRE) &&
 		    sctx->gs_shader.cso)
 			partial_vs_wave = true;
+
+		/* Needed for 028B6C_DISTRIBUTION_MODE != 0 */
+		if (sctx->b.chip_class >= VI) {
+			if (sctx->gs_shader.cso)
+				partial_es_wave = true;
+			else
+				partial_vs_wave = true;
+		}
 	}
 
 	/* This is a hardware requirement. */

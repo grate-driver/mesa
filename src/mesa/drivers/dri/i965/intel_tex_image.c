@@ -135,48 +135,105 @@ intelTexImage(struct gl_context * ctx,
 }
 
 
+static void
+intel_set_texture_image_mt(struct brw_context *brw,
+                           struct gl_texture_image *image,
+                           struct intel_mipmap_tree *mt)
+
+{
+   const uint32_t internal_format = _mesa_get_format_base_format(mt->format);
+   struct gl_texture_object *texobj = image->TexObject;
+   struct intel_texture_object *intel_texobj = intel_texture_object(texobj);
+   struct intel_texture_image *intel_image = intel_texture_image(image);
+
+   _mesa_init_teximage_fields(&brw->ctx, image,
+			      mt->logical_width0, mt->logical_height0, 1,
+			      0, internal_format, mt->format);
+
+   brw->ctx.Driver.FreeTextureImageBuffer(&brw->ctx, image);
+
+   intel_texobj->needs_validate = true;
+   intel_image->base.RowStride = mt->pitch / mt->cpp;
+   assert(mt->pitch % mt->cpp == 0);
+
+   intel_miptree_reference(&intel_image->mt, mt);
+
+   /* Immediately validate the image to the object. */
+   intel_miptree_reference(&intel_texobj->mt, mt);
+}
+
+static struct intel_mipmap_tree *
+create_mt_for_planar_dri_image(struct brw_context *brw,
+                               GLenum target, __DRIimage *image)
+{
+   struct intel_image_format *f = image->planar_format;
+   struct intel_mipmap_tree *planar_mt;
+
+   for (int i = 0; i < f->nplanes; i++) {
+      const int index = f->planes[i].buffer_index;
+      const uint32_t dri_format = f->planes[i].dri_format;
+      const mesa_format format = driImageFormatToGLFormat(dri_format);
+      const uint32_t width = image->width >> f->planes[i].width_shift;
+      const uint32_t height = image->height >> f->planes[i].height_shift;
+
+      /* Disable creation of the texture's aux buffers because the driver
+       * exposes no EGL API to manage them. That is, there is no API for
+       * resolving the aux buffer's content to the main buffer nor for
+       * invalidating the aux buffer's content.
+       */
+      struct intel_mipmap_tree *mt =
+         intel_miptree_create_for_bo(brw, image->bo, format,
+                                     image->offsets[index],
+                                     width, height, 1,
+                                     image->strides[index],
+                                     MIPTREE_LAYOUT_DISABLE_AUX);
+      if (mt == NULL)
+         return NULL;
+
+      mt->target = target;
+      mt->total_width = width;
+      mt->total_height = height;
+
+      if (i == 0)
+         planar_mt = mt;
+      else
+         planar_mt->plane[i - 1] = mt;
+   }
+
+   return planar_mt;
+}
+
 /**
  * Binds a BO to a texture image, as if it was uploaded by glTexImage2D().
  *
  * Used for GLX_EXT_texture_from_pixmap and EGL image extensions,
  */
-static void
-intel_set_texture_image_bo(struct gl_context *ctx,
-                           struct gl_texture_image *image,
-                           drm_intel_bo *bo,
-                           GLenum target,
-                           GLenum internalFormat,
-                           mesa_format format,
-                           uint32_t offset,
-                           GLuint width, GLuint height,
-                           GLuint pitch,
-                           GLuint tile_x, GLuint tile_y,
-                           uint32_t layout_flags)
+static struct intel_mipmap_tree *
+create_mt_for_dri_image(struct brw_context *brw,
+                        GLenum target, __DRIimage *image)
 {
-   struct brw_context *brw = brw_context(ctx);
-   struct intel_texture_image *intel_image = intel_texture_image(image);
-   struct gl_texture_object *texobj = image->TexObject;
-   struct intel_texture_object *intel_texobj = intel_texture_object(texobj);
+   struct intel_mipmap_tree *mt;
    uint32_t draw_x, draw_y;
 
-   _mesa_init_teximage_fields(&brw->ctx, image,
-			      width, height, 1,
-			      0, internalFormat, format);
+   /* Disable creation of the texture's aux buffers because the driver exposes
+    * no EGL API to manage them. That is, there is no API for resolving the aux
+    * buffer's content to the main buffer nor for invalidating the aux buffer's
+    * content.
+    */
+   mt = intel_miptree_create_for_bo(brw, image->bo, image->format,
+                                    0, image->width, image->height, 1,
+                                    image->pitch,
+                                    MIPTREE_LAYOUT_DISABLE_AUX);
+   if (mt == NULL)
+      return NULL;
 
-   ctx->Driver.FreeTextureImageBuffer(ctx, image);
+   mt->target = target;
+   mt->total_width = image->width;
+   mt->total_height = image->height;
+   mt->level[0].slice[0].x_offset = image->tile_x;
+   mt->level[0].slice[0].y_offset = image->tile_y;
 
-   intel_image->mt = intel_miptree_create_for_bo(brw, bo, image->TexFormat,
-                                                 0, width, height, 1, pitch,
-                                                 layout_flags);
-   if (intel_image->mt == NULL)
-       return;
-   intel_image->mt->target = target;
-   intel_image->mt->total_width = width;
-   intel_image->mt->total_height = height;
-   intel_image->mt->level[0].slice[0].x_offset = tile_x;
-   intel_image->mt->level[0].slice[0].y_offset = tile_y;
-
-   intel_miptree_get_tile_offsets(intel_image->mt, 0, 0, &draw_x, &draw_y);
+   intel_miptree_get_tile_offsets(mt, 0, 0, &draw_x, &draw_y);
 
    /* From "OES_EGL_image" error reporting. We report GL_INVALID_OPERATION
     * for EGL images from non-tile aligned sufaces in gen4 hw and earlier which has
@@ -184,19 +241,14 @@ intel_set_texture_image_bo(struct gl_context *ctx,
     */
    if (!brw->has_surface_tile_offset &&
        (draw_x != 0 || draw_y != 0)) {
-      _mesa_error(ctx, GL_INVALID_OPERATION, __func__);
-      intel_miptree_release(&intel_image->mt);
-      return;
+      _mesa_error(&brw->ctx, GL_INVALID_OPERATION, __func__);
+      intel_miptree_release(&mt);
+      return NULL;
    }
 
-   intel_texobj->needs_validate = true;
+   mt->offset = image->offset;
 
-   intel_image->mt->offset = offset;
-   assert(pitch % intel_image->mt->cpp == 0);
-   intel_image->base.RowStride = pitch / intel_image->mt->cpp;
-
-   /* Immediately validate the image to the object. */
-   intel_miptree_reference(&intel_texobj->mt, intel_image->mt);
+   return mt;
 }
 
 void
@@ -210,8 +262,8 @@ intelSetTexBuffer2(__DRIcontext *pDRICtx, GLint target,
    struct intel_renderbuffer *rb;
    struct gl_texture_object *texObj;
    struct gl_texture_image *texImage;
-   int level = 0, internalFormat = 0;
    mesa_format texFormat = MESA_FORMAT_NONE;
+   struct intel_mipmap_tree *mt;
 
    texObj = _mesa_get_current_tex_object(ctx, target);
 
@@ -231,27 +283,30 @@ intelSetTexBuffer2(__DRIcontext *pDRICtx, GLint target,
 
    if (rb->mt->cpp == 4) {
       if (texture_format == __DRI_TEXTURE_FORMAT_RGB) {
-         internalFormat = GL_RGB;
          texFormat = MESA_FORMAT_B8G8R8X8_UNORM;
       }
       else {
-         internalFormat = GL_RGBA;
          texFormat = MESA_FORMAT_B8G8R8A8_UNORM;
       }
    } else if (rb->mt->cpp == 2) {
-      internalFormat = GL_RGB;
       texFormat = MESA_FORMAT_B5G6R5_UNORM;
    }
 
-   _mesa_lock_texture(&brw->ctx, texObj);
-   texImage = _mesa_get_tex_image(ctx, texObj, target, level);
    intel_miptree_make_shareable(brw, rb->mt);
-   intel_set_texture_image_bo(ctx, texImage, rb->mt->bo, target,
-                              internalFormat, texFormat, 0,
-                              rb->Base.Base.Width,
-                              rb->Base.Base.Height,
-                              rb->mt->pitch,
-                              0, 0, 0);
+   mt = intel_miptree_create_for_bo(brw, rb->mt->bo, texFormat, 0,
+                                    rb->Base.Base.Width,
+                                    rb->Base.Base.Height,
+                                    1, rb->mt->pitch, 0);
+   if (mt == NULL)
+       return;
+   mt->target = target;
+   mt->total_width = rb->Base.Base.Width;
+   mt->total_height = rb->Base.Base.Height;
+
+   _mesa_lock_texture(&brw->ctx, texObj);
+   texImage = _mesa_get_tex_image(ctx, texObj, target, 0);
+   intel_set_texture_image_mt(brw, texImage, mt);
+   intel_miptree_release(&mt);
    _mesa_unlock_texture(&brw->ctx, texObj);
 }
 
@@ -306,6 +361,7 @@ intel_image_target_texture_2d(struct gl_context *ctx, GLenum target,
 			      GLeglImageOES image_handle)
 {
    struct brw_context *brw = brw_context(ctx);
+   struct intel_mipmap_tree *mt;
    __DRIscreen *screen;
    __DRIimage *image;
 
@@ -333,18 +389,18 @@ intel_image_target_texture_2d(struct gl_context *ctx, GLenum target,
       return;
    }
 
-   /* Disable creation of the texture's aux buffers because the driver exposes
-    * no EGL API to manage them. That is, there is no API for resolving the aux
-    * buffer's content to the main buffer nor for invalidating the aux buffer's
-    * content.
-    */
-   intel_set_texture_image_bo(ctx, texImage, image->bo,
-                              target, image->internal_format,
-                              image->format, image->offset,
-                              image->width,  image->height,
-                              image->pitch,
-                              image->tile_x, image->tile_y,
-                              MIPTREE_LAYOUT_DISABLE_AUX);
+   if (image->planar_format && image->planar_format->nplanes > 0)
+      mt = create_mt_for_planar_dri_image(brw, target, image);
+   else
+      mt = create_mt_for_dri_image(brw, target, image);
+   if (mt == NULL)
+      return;
+
+   struct intel_texture_object *intel_texobj = intel_texture_object(texObj);
+   intel_texobj->planar_format = image->planar_format;
+
+   intel_set_texture_image_mt(brw, texImage, mt);
+   intel_miptree_release(&mt);
 }
 
 /**

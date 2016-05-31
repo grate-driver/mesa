@@ -191,7 +191,7 @@ _vtn_local_load_store(struct vtn_builder *b, bool load, nir_deref_var *deref,
       if (load) {
          nir_ssa_dest_init(&intrin->instr, &intrin->dest,
                            intrin->num_components,
-                           glsl_get_bit_size(glsl_get_base_type(tail->type)),
+                           glsl_get_bit_size(tail->type),
                            NULL);
          inout->def = &intrin->dest.ssa;
       } else {
@@ -414,7 +414,7 @@ _vtn_load_store_tail(struct vtn_builder *b, nir_intrinsic_op op, bool load,
    if (load) {
       nir_ssa_dest_init(&instr->instr, &instr->dest,
                         instr->num_components,
-                        glsl_get_bit_size(glsl_get_base_type(type)), NULL);
+                        glsl_get_bit_size(type), NULL);
       (*inout)->def = &instr->dest.ssa;
    }
 
@@ -895,17 +895,33 @@ var_decoration_cb(struct vtn_builder *b, struct vtn_value *val, int member,
 
    /* Handle decorations that apply to a vtn_variable as a whole */
    switch (dec->decoration) {
-   case SpvDecorationNonWritable:
-      /* Do nothing with this for now */
-      return;
    case SpvDecorationBinding:
       vtn_var->binding = dec->literals[0];
       return;
    case SpvDecorationDescriptorSet:
       vtn_var->descriptor_set = dec->literals[0];
       return;
+   default:
+      break;
+   }
 
-   case SpvDecorationLocation: {
+   /* Now we handle decorations that apply to a particular nir_variable */
+   nir_variable *nir_var = vtn_var->var;
+   if (val->value_type == vtn_value_type_access_chain) {
+      assert(val->access_chain->length == 0);
+      assert(val->access_chain->var == void_var);
+      assert(member == -1);
+   } else {
+      assert(val->value_type == vtn_value_type_type);
+      if (member != -1)
+         nir_var = vtn_var->members[member];
+   }
+
+   /* Location is odd in that it can apply in three different cases: To a
+    * non-split variable, to a whole split variable, or to one structure
+    * member of a split variable.
+    */
+   if (dec->decoration == SpvDecorationLocation) {
       unsigned location = dec->literals[0];
       bool is_vertex_input;
       if (b->shader->stage == MESA_SHADER_FRAGMENT &&
@@ -924,12 +940,15 @@ var_decoration_cb(struct vtn_builder *b, struct vtn_value *val, int member,
          assert(!"Location must be on input or output variable");
       }
 
-      if (vtn_var->var) {
-         vtn_var->var->data.location = location;
-         vtn_var->var->data.explicit_location = true;
+      if (nir_var) {
+         /* This handles the member and lone variable cases */
+         nir_var->data.location = location;
+         nir_var->data.explicit_location = true;
       } else {
+         /* This handles the structure member case */
          assert(vtn_var->members);
-         unsigned length = glsl_get_length(vtn_var->type->type);
+         unsigned length =
+            glsl_get_length(glsl_without_array(vtn_var->type->type));
          for (unsigned i = 0; i < length; i++) {
             vtn_var->members[i]->data.location = location;
             vtn_var->members[i]->data.explicit_location = true;
@@ -939,22 +958,6 @@ var_decoration_cb(struct vtn_builder *b, struct vtn_value *val, int member,
          }
       }
       return;
-   }
-
-   default:
-      break;
-   }
-
-   /* Now we handle decorations that apply to a particular nir_variable */
-   nir_variable *nir_var = vtn_var->var;
-   if (val->value_type == vtn_value_type_access_chain) {
-      assert(val->access_chain->length == 0);
-      assert(val->access_chain->var == void_var);
-      assert(member == -1);
-   } else {
-      assert(val->value_type == vtn_value_type_type);
-      if (member != -1)
-         nir_var = vtn_var->members[member];
    }
 
    if (nir_var == NULL)
@@ -1015,32 +1018,57 @@ var_decoration_cb(struct vtn_builder *b, struct vtn_value *val, int member,
 
       if (builtin == SpvBuiltInFragCoord || builtin == SpvBuiltInSamplePosition)
          nir_var->data.origin_upper_left = b->origin_upper_left;
+
+      if (builtin == SpvBuiltInFragCoord)
+         nir_var->data.pixel_center_integer = b->pixel_center_integer;
       break;
    }
+
+   case SpvDecorationSpecId:
    case SpvDecorationRowMajor:
    case SpvDecorationColMajor:
-   case SpvDecorationGLSLShared:
-   case SpvDecorationPatch:
+   case SpvDecorationMatrixStride:
    case SpvDecorationRestrict:
    case SpvDecorationAliased:
    case SpvDecorationVolatile:
    case SpvDecorationCoherent:
    case SpvDecorationNonReadable:
    case SpvDecorationUniform:
-      /* This is really nice but we have no use for it right now. */
-   case SpvDecorationCPacked:
-   case SpvDecorationSaturatedConversion:
    case SpvDecorationStream:
    case SpvDecorationOffset:
+   case SpvDecorationLinkageAttributes:
+      break; /* Do nothing with these here */
+
+   case SpvDecorationPatch:
+      unreachable("Tessellation not yet supported");
+
+   case SpvDecorationLocation:
+      unreachable("Handled above");
+
+   case SpvDecorationBlock:
+   case SpvDecorationBufferBlock:
+   case SpvDecorationArrayStride:
+   case SpvDecorationGLSLShared:
+   case SpvDecorationGLSLPacked:
+      break; /* These can apply to a type but we don't care about them */
+
+   case SpvDecorationBinding:
+   case SpvDecorationDescriptorSet:
+   case SpvDecorationNoContraction:
+   case SpvDecorationInputAttachmentIndex:
+      unreachable("Decoration not allowed for variable or structure member");
+
    case SpvDecorationXfbBuffer:
+   case SpvDecorationXfbStride:
+      unreachable("Vulkan does not have transform feedback");
+
+   case SpvDecorationCPacked:
+   case SpvDecorationSaturatedConversion:
    case SpvDecorationFuncParamAttr:
    case SpvDecorationFPRoundingMode:
    case SpvDecorationFPFastMathMode:
-   case SpvDecorationLinkageAttributes:
-   case SpvDecorationSpecId:
-      break;
-   default:
-      unreachable("Unhandled variable decoration");
+   case SpvDecorationAlignment:
+      unreachable("Decoraiton only allowed for CL-style kernels");
    }
 }
 

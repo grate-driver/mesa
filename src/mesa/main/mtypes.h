@@ -1922,6 +1922,7 @@ struct gl_program
     * gl_ClipDistance output.  Ignored for fragment shaders.
     */
    unsigned ClipDistanceArraySize;
+   unsigned CullDistanceArraySize;
 
 
    /** Named parameters, constants, etc. from program text */
@@ -2435,6 +2436,7 @@ struct gl_shader
      * Subroutine uniform remap table
      * based on the program level uniform remap table.
      */
+   GLuint NumSubroutineUniforms; /* non-sparse total */
    GLuint NumSubroutineUniformRemapTable;
    struct gl_uniform_storage **SubroutineUniformRemapTable;
 
@@ -2443,6 +2445,7 @@ struct gl_shader
     * and storage for them.
     */
    GLuint NumSubroutineFunctions;
+   GLuint MaxSubroutineFunctionIndex;
    struct gl_subroutine_function *SubroutineFunctions;
 };
 
@@ -2544,6 +2547,17 @@ struct gl_shader_variable
    const struct glsl_type *type;
 
    /**
+    * If the variable is in an interface block, this is the type of the block.
+    */
+   const struct glsl_type *interface_type;
+
+   /**
+    * For variables inside structs (possibly recursively), this is the
+    * outermost struct type.
+    */
+   const struct glsl_type *outermost_struct_type;
+
+   /**
     * Declared name of the variable
     */
    char *name;
@@ -2597,6 +2611,27 @@ struct gl_shader_variable
     * \sa (n)ir_variable_mode
     */
    unsigned mode:4;
+
+   /**
+    * Interpolation mode for shader inputs / outputs
+    *
+    * \sa ir_variable_interpolation
+    */
+   unsigned interpolation:2;
+
+   /**
+    * Was the location explicitly set in the shader?
+    *
+    * If the location is explicitly set in the shader, it \b cannot be changed
+    * by the linker or by the API (e.g., calls to \c glBindAttribLocation have
+    * no effect).
+    */
+   unsigned explicit_location:1;
+
+   /**
+    * Precision qualifier.
+    */
+   unsigned precision:2;
 };
 
 /**
@@ -2703,6 +2738,8 @@ struct gl_shader_program
        */
       GLuint ClipDistanceArraySize; /**< Size of the gl_ClipDistance array, or
                                          0 if not present. */
+      GLuint CullDistanceArraySize; /**< Size of the gl_CullDistance array, or
+                                         0 if not present. */
    } TessEval;
 
    /**
@@ -2725,6 +2762,8 @@ struct gl_shader_program
        */
       GLuint ClipDistanceArraySize; /**< Size of the gl_ClipDistance array, or
                                          0 if not present. */
+      GLuint CullDistanceArraySize; /**< Size of the gl_CullDistance array, or
+                                         0 if not present. */
       bool UsesEndPrimitive;
       bool UsesStreams;
    } Geom;
@@ -2736,6 +2775,8 @@ struct gl_shader_program
        * by _mesa_copy_linked_program_data().
        */
       GLuint ClipDistanceArraySize; /**< Size of the gl_ClipDistance array, or
+                                         0 if not present. */
+      GLuint CullDistanceArraySize; /**< Size of the gl_CullDistance array, or
                                          0 if not present. */
    } Vert;
 
@@ -2780,6 +2821,7 @@ struct gl_shader_program
     * stage before the fragment shader.
     */
    unsigned LastClipDistanceArraySize;
+   unsigned LastCullDistanceArraySize;
 
    unsigned NumUniformBlocks;
    struct gl_uniform_block *UniformBlocks;
@@ -2911,7 +2953,10 @@ struct gl_shader_compiler_options
    GLboolean EmitNoNoise;                 /**< Emit NOISE opcodes? */
    GLboolean EmitNoPow;                   /**< Emit POW opcodes? */
    GLboolean EmitNoSat;                   /**< Emit SAT opcodes? */
-   GLboolean LowerClipDistance; /**< Lower gl_ClipDistance from float[8] to vec4[2]? */
+   GLboolean LowerCombinedClipCullDistance; /** Lower gl_ClipDistance and
+                                              * gl_CullDistance together from
+                                              * float[8] to vec4[2]
+                                              **/
 
    /**
     * \name Forms of indirect addressing the driver cannot do.
@@ -2937,6 +2982,9 @@ struct gl_shader_compiler_options
    GLboolean OptimizeForAOS;
 
    GLboolean LowerBufferInterfaceBlocks; /**< Lower UBO and SSBO access to intrinsics. */
+
+   /** Clamp UBO and SSBO block indices so they don't go out-of-bounds. */
+   GLboolean ClampBlockIndicesToArrayBounds;
 
    GLboolean LowerShaderSharedVariables; /**< Lower compute shader shared
                                           *   variable access to intrinsics. */
@@ -3714,6 +3762,7 @@ struct gl_constants
    GLuint MaxTessPatchComponents;
    GLuint MaxTessControlTotalOutputComponents;
    bool LowerTessLevel; /**< Lower gl_TessLevel* from float[n] to vecn? */
+   bool PrimitiveRestartForPatches;
 };
 
 
@@ -3742,6 +3791,7 @@ struct gl_extensions
    GLboolean ARB_conditional_render_inverted;
    GLboolean ARB_conservative_depth;
    GLboolean ARB_copy_image;
+   GLboolean ARB_cull_distance;
    GLboolean ARB_depth_buffer_float;
    GLboolean ARB_depth_clamp;
    GLboolean ARB_depth_texture;
@@ -3864,6 +3914,7 @@ struct gl_extensions
    GLboolean EXT_vertex_array_bgra;
    GLboolean OES_copy_image;
    GLboolean OES_sample_variables;
+   GLboolean OES_shader_io_blocks;
    GLboolean OES_standard_derivatives;
    GLboolean OES_texture_buffer;
    /* vendor extensions */
@@ -3881,6 +3932,7 @@ struct gl_extensions
    GLboolean ATI_separate_stencil;
    GLboolean GREMEDY_string_marker;
    GLboolean INTEL_performance_query;
+   GLboolean KHR_robustness;
    GLboolean KHR_texture_compression_astc_hdr;
    GLboolean KHR_texture_compression_astc_ldr;
    GLboolean MESA_pack_invert;
@@ -3953,38 +4005,38 @@ struct gl_matrix_stack
  * \name Bits to indicate what state has changed.  
  */
 /*@{*/
-#define _NEW_MODELVIEW         (1 << 0)   /**< gl_context::ModelView */
-#define _NEW_PROJECTION        (1 << 1)   /**< gl_context::Projection */
-#define _NEW_TEXTURE_MATRIX    (1 << 2)   /**< gl_context::TextureMatrix */
-#define _NEW_COLOR             (1 << 3)   /**< gl_context::Color */
-#define _NEW_DEPTH             (1 << 4)   /**< gl_context::Depth */
-#define _NEW_EVAL              (1 << 5)   /**< gl_context::Eval, EvalMap */
-#define _NEW_FOG               (1 << 6)   /**< gl_context::Fog */
-#define _NEW_HINT              (1 << 7)   /**< gl_context::Hint */
-#define _NEW_LIGHT             (1 << 8)   /**< gl_context::Light */
-#define _NEW_LINE              (1 << 9)   /**< gl_context::Line */
-#define _NEW_PIXEL             (1 << 10)  /**< gl_context::Pixel */
-#define _NEW_POINT             (1 << 11)  /**< gl_context::Point */
-#define _NEW_POLYGON           (1 << 12)  /**< gl_context::Polygon */
-#define _NEW_POLYGONSTIPPLE    (1 << 13)  /**< gl_context::PolygonStipple */
-#define _NEW_SCISSOR           (1 << 14)  /**< gl_context::Scissor */
-#define _NEW_STENCIL           (1 << 15)  /**< gl_context::Stencil */
-#define _NEW_TEXTURE           (1 << 16)  /**< gl_context::Texture */
-#define _NEW_TRANSFORM         (1 << 17)  /**< gl_context::Transform */
-#define _NEW_VIEWPORT          (1 << 18)  /**< gl_context::Viewport */
+#define _NEW_MODELVIEW         (1u << 0)   /**< gl_context::ModelView */
+#define _NEW_PROJECTION        (1u << 1)   /**< gl_context::Projection */
+#define _NEW_TEXTURE_MATRIX    (1u << 2)   /**< gl_context::TextureMatrix */
+#define _NEW_COLOR             (1u << 3)   /**< gl_context::Color */
+#define _NEW_DEPTH             (1u << 4)   /**< gl_context::Depth */
+#define _NEW_EVAL              (1u << 5)   /**< gl_context::Eval, EvalMap */
+#define _NEW_FOG               (1u << 6)   /**< gl_context::Fog */
+#define _NEW_HINT              (1u << 7)   /**< gl_context::Hint */
+#define _NEW_LIGHT             (1u << 8)   /**< gl_context::Light */
+#define _NEW_LINE              (1u << 9)   /**< gl_context::Line */
+#define _NEW_PIXEL             (1u << 10)  /**< gl_context::Pixel */
+#define _NEW_POINT             (1u << 11)  /**< gl_context::Point */
+#define _NEW_POLYGON           (1u << 12)  /**< gl_context::Polygon */
+#define _NEW_POLYGONSTIPPLE    (1u << 13)  /**< gl_context::PolygonStipple */
+#define _NEW_SCISSOR           (1u << 14)  /**< gl_context::Scissor */
+#define _NEW_STENCIL           (1u << 15)  /**< gl_context::Stencil */
+#define _NEW_TEXTURE           (1u << 16)  /**< gl_context::Texture */
+#define _NEW_TRANSFORM         (1u << 17)  /**< gl_context::Transform */
+#define _NEW_VIEWPORT          (1u << 18)  /**< gl_context::Viewport */
 /* gap, re-use for core Mesa state only; use ctx->DriverFlags otherwise */
-#define _NEW_ARRAY             (1 << 20)  /**< gl_context::Array */
-#define _NEW_RENDERMODE        (1 << 21)  /**< gl_context::RenderMode, etc */
-#define _NEW_BUFFERS           (1 << 22)  /**< gl_context::Visual, DrawBuffer, */
-#define _NEW_CURRENT_ATTRIB    (1 << 23)  /**< gl_context::Current */
-#define _NEW_MULTISAMPLE       (1 << 24)  /**< gl_context::Multisample */
-#define _NEW_TRACK_MATRIX      (1 << 25)  /**< gl_context::VertexProgram */
-#define _NEW_PROGRAM           (1 << 26)  /**< New program/shader state */
-#define _NEW_PROGRAM_CONSTANTS (1 << 27)
-#define _NEW_BUFFER_OBJECT     (1 << 28)
-#define _NEW_FRAG_CLAMP        (1 << 29)
+#define _NEW_ARRAY             (1u << 20)  /**< gl_context::Array */
+#define _NEW_RENDERMODE        (1u << 21)  /**< gl_context::RenderMode, etc */
+#define _NEW_BUFFERS           (1u << 22)  /**< gl_context::Visual, DrawBuffer, */
+#define _NEW_CURRENT_ATTRIB    (1u << 23)  /**< gl_context::Current */
+#define _NEW_MULTISAMPLE       (1u << 24)  /**< gl_context::Multisample */
+#define _NEW_TRACK_MATRIX      (1u << 25)  /**< gl_context::VertexProgram */
+#define _NEW_PROGRAM           (1u << 26)  /**< New program/shader state */
+#define _NEW_PROGRAM_CONSTANTS (1u << 27)
+#define _NEW_BUFFER_OBJECT     (1u << 28)
+#define _NEW_FRAG_CLAMP        (1u << 29)
 /* gap, re-use for core Mesa state only; use ctx->DriverFlags otherwise */
-#define _NEW_VARYING_VP_INPUTS (1 << 31) /**< gl_context::varying_vp_inputs */
+#define _NEW_VARYING_VP_INPUTS (1u << 31) /**< gl_context::varying_vp_inputs */
 #define _NEW_ALL ~0
 /*@}*/
 
@@ -4284,7 +4336,11 @@ struct gl_context
     */
    struct _glapi_table *BeginEnd;
    /**
-    * Tracks the current dispatch table out of the 3 above, so that it can be
+    * Dispatch table for when a graphics reset has happened.
+    */
+   struct _glapi_table *ContextLost;
+   /**
+    * Tracks the current dispatch table out of the 4 above, so that it can be
     * re-set on glXMakeCurrent().
     */
    struct _glapi_table *CurrentDispatch;

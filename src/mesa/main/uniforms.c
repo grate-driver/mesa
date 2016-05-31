@@ -78,7 +78,7 @@ _mesa_update_shader_textures_used(struct gl_shader_program *shProg,
    shProg->SamplersValidated = GL_TRUE;
 
    for (s = 0; s < MAX_SAMPLERS; s++) {
-      if (prog->SamplersUsed & (1 << s)) {
+      if (prog->SamplersUsed & (1u << s)) {
          GLuint unit = shader->SamplerUnits[s];
          GLuint tgt = shader->SamplerTargets[s];
          assert(unit < ARRAY_SIZE(prog->TexturesUsed));
@@ -1142,6 +1142,12 @@ mesa_bufferiv(struct gl_shader_program *shProg, GLenum type,
    case GL_ATOMIC_COUNTER_BUFFER_REFERENCED_BY_FRAGMENT_SHADER:
       _mesa_program_resource_prop(shProg, res, index,
                                   GL_REFERENCED_BY_FRAGMENT_SHADER, params,
+                                  caller);
+      return;
+   case GL_UNIFORM_BLOCK_REFERENCED_BY_COMPUTE_SHADER:
+   case GL_ATOMIC_COUNTER_BUFFER_REFERENCED_BY_COMPUTE_SHADER:
+      _mesa_program_resource_prop(shProg, res, index,
+                                  GL_REFERENCED_BY_COMPUTE_SHADER, params,
                                   caller);
       return;
    default:

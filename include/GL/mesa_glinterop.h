@@ -50,12 +50,20 @@
 #ifndef MESA_GLINTEROP_H
 #define MESA_GLINTEROP_H
 
-#include <GL/glx.h>
-#include <EGL/egl.h>
+#include <stddef.h>
+#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+/* Forward declarations to avoid inclusion of GL/glx.h */
+typedef struct _XDisplay Display;
+typedef struct __GLXcontextRec *GLXContext;
+
+/* Forward declarations to avoid inclusion of EGL/egl.h */
+typedef void *EGLDisplay;
+typedef void *EGLContext;
 
 /** Returned error codes. */
 enum {
@@ -63,7 +71,7 @@ enum {
    MESA_GLINTEROP_OUT_OF_RESOURCES,
    MESA_GLINTEROP_OUT_OF_HOST_MEMORY,
    MESA_GLINTEROP_INVALID_OPERATION,
-   MESA_GLINTEROP_INVALID_VALUE,
+   MESA_GLINTEROP_INVALID_VERSION,
    MESA_GLINTEROP_INVALID_DISPLAY,
    MESA_GLINTEROP_INVALID_CONTEXT,
    MESA_GLINTEROP_INVALID_TARGET,
@@ -84,9 +92,15 @@ enum {
 /**
  * Device information returned by Mesa.
  */
-typedef struct _mesa_glinterop_device_info {
-   /* The caller should set this to: MESA_GLINTEROP_DEVICE_INFO_VERSION */
-   uint32_t struct_version;
+struct mesa_glinterop_device_info {
+   /* The caller should set this to the version of the struct they support */
+   /* The callee will overwrite it if it supports a lower version.
+    *
+    * The caller should check the value and access up-to the version supported
+    * by the the callee.
+    */
+   /* NOTE: Do not use the MESA_GLINTEROP_DEVICE_INFO_VERSION macro */
+   uint32_t version;
 
    /* PCI location */
    uint32_t pci_segment_group;
@@ -98,26 +112,23 @@ typedef struct _mesa_glinterop_device_info {
    uint32_t vendor_id;
    uint32_t device_id;
 
-   /* The interop version determines what behavior the caller should expect
-    * out of all functions.
-    *
-    * Interop version 1:
-    * - mesa_glinterop_export_in is not read beyond "out_driver_data"
-    * - mesa_glinterop_export_out is not written beyond "out_driver_data_written"
-    * - mesa_glinterop_device_info is not written beyond "interop_version"
-    */
-   uint32_t interop_version;
    /* Structure version 1 ends here. */
-} mesa_glinterop_device_info;
+};
 
 #define MESA_GLINTEROP_EXPORT_IN_VERSION 1
 
 /**
  * Input parameters to Mesa interop export functions.
  */
-typedef struct _mesa_glinterop_export_in {
-   /* The caller should set this to: MESA_GLINTEROP_EXPORT_IN_VERSION */
-   uint32_t struct_version;
+struct mesa_glinterop_export_in {
+   /* The caller should set this to the version of the struct they support */
+   /* The callee will overwrite it if it supports a lower version.
+    *
+    * The caller should check the value and access up-to the version supported
+    * by the the callee.
+    */
+   /* NOTE: Do not use the MESA_GLINTEROP_EXPORT_IN_VERSION macro */
+   uint32_t version;
 
    /* One of the following:
     * - GL_TEXTURE_BUFFER
@@ -141,16 +152,16 @@ typedef struct _mesa_glinterop_export_in {
     * - GL_RENDERBUFFER
     * - GL_ARRAY_BUFFER
     */
-   GLenum target;
+   unsigned target;
 
    /* If target is GL_ARRAY_BUFFER, it's a buffer object.
     * If target is GL_RENDERBUFFER, it's a renderbuffer object.
     * If target is GL_TEXTURE_*, it's a texture object.
     */
-   GLuint obj;
+   unsigned obj;
 
    /* Mipmap level. Ignored for non-texture objects. */
-   GLuint miplevel;
+   unsigned miplevel;
 
    /* One of MESA_GLINTEROP_ACCESS_* flags. This describes how the exported
     * object is going to be used.
@@ -167,16 +178,22 @@ typedef struct _mesa_glinterop_export_in {
     */
    void *out_driver_data;
    /* Structure version 1 ends here. */
-} mesa_glinterop_export_in;
+};
 
 #define MESA_GLINTEROP_EXPORT_OUT_VERSION 1
 
 /**
  * Outputs of Mesa interop export functions.
  */
-typedef struct _mesa_glinterop_export_out {
-   /* The caller should set this to: MESA_GLINTEROP_EXPORT_OUT_VERSION */
-   uint32_t struct_version;
+struct mesa_glinterop_export_out {
+   /* The caller should set this to the version of the struct they support */
+   /* The callee will overwrite it if it supports a lower version.
+    *
+    * The caller should check the value and access up-to the version supported
+    * by the the callee.
+    */
+   /* NOTE: Do not use the MESA_GLINTEROP_EXPORT_OUT_VERSION macro */
+   uint32_t version;
 
    /* The DMABUF handle. It must be closed by the caller using the POSIX
     * close() function when it's not needed anymore. Mesa is not responsible
@@ -193,7 +210,7 @@ typedef struct _mesa_glinterop_export_out {
     * format specified by glTexStorage, glTexImage, or glRenderbufferStorage
     * will be returned.
     */
-   GLenum internalformat;
+   unsigned internal_format;
 
    /* Buffer offset and size for GL_ARRAY_BUFFER and GL_TEXTURE_BUFFER.
     * This allows interop with suballocations (a buffer allocated within
@@ -202,21 +219,21 @@ typedef struct _mesa_glinterop_export_out {
     * Parameters specified by glTexBufferRange for GL_TEXTURE_BUFFER are
     * applied to these and can shrink the range further.
     */
-   GLintptr buf_offset;
-   GLsizeiptr buf_size;
+   ptrdiff_t buf_offset;
+   ptrdiff_t buf_size;
 
    /* Parameters specified by glTextureView. If the object is not a texture
     * view, default parameters covering the whole texture will be returned.
     */
-   GLuint view_minlevel;
-   GLuint view_numlevels;
-   GLuint view_minlayer;
-   GLuint view_numlayers;
+   unsigned view_minlevel;
+   unsigned view_numlevels;
+   unsigned view_minlayer;
+   unsigned view_numlayers;
 
    /* The number of bytes written to out_driver_data. */
    uint32_t out_driver_data_written;
    /* Structure version 1 ends here. */
-} mesa_glinterop_export_out;
+};
 
 
 /**
@@ -228,18 +245,18 @@ typedef struct _mesa_glinterop_export_out {
  *
  * \return MESA_GLINTEROP_SUCCESS or MESA_GLINTEROP_* != 0 on error
  */
-GLAPI int GLAPIENTRY
+int
 MesaGLInteropGLXQueryDeviceInfo(Display *dpy, GLXContext context,
-                                mesa_glinterop_device_info *out);
+                                struct mesa_glinterop_device_info *out);
 
 
 /**
  * Same as MesaGLInteropGLXQueryDeviceInfo except that it accepts EGLDisplay
  * and EGLContext.
  */
-GLAPI int GLAPIENTRY
+int
 MesaGLInteropEGLQueryDeviceInfo(EGLDisplay dpy, EGLContext context,
-                                mesa_glinterop_device_info *out);
+                                struct mesa_glinterop_device_info *out);
 
 
 /**
@@ -253,32 +270,32 @@ MesaGLInteropEGLQueryDeviceInfo(EGLDisplay dpy, EGLContext context,
  *
  * \return MESA_GLINTEROP_SUCCESS or MESA_GLINTEROP_* != 0 on error
  */
-GLAPI int GLAPIENTRY
+int
 MesaGLInteropGLXExportObject(Display *dpy, GLXContext context,
-                             const mesa_glinterop_export_in *in,
-                             mesa_glinterop_export_out *out);
+                             struct mesa_glinterop_export_in *in,
+                             struct mesa_glinterop_export_out *out);
 
 
 /**
  * Same as MesaGLInteropGLXExportObject except that it accepts
  * EGLDisplay and EGLContext.
  */
-GLAPI int GLAPIENTRY
+int
 MesaGLInteropEGLExportObject(EGLDisplay dpy, EGLContext context,
-                             const mesa_glinterop_export_in *in,
-                             mesa_glinterop_export_out *out);
+                             struct mesa_glinterop_export_in *in,
+                             struct mesa_glinterop_export_out *out);
 
 
-typedef int (APIENTRYP PFNMESAGLINTEROPGLXQUERYDEVICEINFOPROC)(Display *dpy, GLXContext context,
-                                                               mesa_glinterop_device_info *out);
-typedef int (APIENTRYP PFNMESAGLINTEROPEGLQUERYDEVICEINFOPROC)(EGLDisplay dpy, EGLContext context,
-                                                               mesa_glinterop_device_info *out);
-typedef int (APIENTRYP PFNMESAGLINTEROPGLXEXPORTOBJECTPROC)(Display *dpy, GLXContext context,
-                                                            const mesa_glinterop_export_in *in,
-                                                            mesa_glinterop_export_out *out);
-typedef int (APIENTRYP PFNMESAGLINTEROPEGLEXPORTOBJECTPROC)(EGLDisplay dpy, EGLContext context,
-                                                            const mesa_glinterop_export_in *in,
-                                                            mesa_glinterop_export_out *out);
+typedef int (PFNMESAGLINTEROPGLXQUERYDEVICEINFOPROC)(Display *dpy, GLXContext context,
+                                                     struct mesa_glinterop_device_info *out);
+typedef int (PFNMESAGLINTEROPEGLQUERYDEVICEINFOPROC)(EGLDisplay dpy, EGLContext context,
+                                                     struct mesa_glinterop_device_info *out);
+typedef int (PFNMESAGLINTEROPGLXEXPORTOBJECTPROC)(Display *dpy, GLXContext context,
+                                                  struct mesa_glinterop_export_in *in,
+                                                  struct mesa_glinterop_export_out *out);
+typedef int (PFNMESAGLINTEROPEGLEXPORTOBJECTPROC)(EGLDisplay dpy, EGLContext context,
+                                                  struct mesa_glinterop_export_in *in,
+                                                  struct mesa_glinterop_export_out *out);
 
 #ifdef __cplusplus
 }

@@ -508,7 +508,10 @@ struct PA_STATE_CUT : public PA_STATE
                 (this->*pfnPa)(this->curVertex, false);
             }
 
-            this->curVertex = (this->curVertex + 1) % this->numVerts;
+            this->curVertex++;
+            if (this->curVertex >= this->numVerts) {
+               this->curVertex = 0;
+            }
             this->numRemainingVerts--;
         }
 
@@ -1146,14 +1149,14 @@ private:
 
 // Primitive Assembler factory class, responsible for creating and initializing the correct assembler
 // based on state.
-template <typename IsIndexedT>
+template <typename IsIndexedT, typename IsCutIndexEnabledT>
 struct PA_FACTORY
 {
     PA_FACTORY(DRAW_CONTEXT* pDC, PRIMITIVE_TOPOLOGY in_topo, uint32_t numVerts) : topo(in_topo)
     {
 #if KNOB_ENABLE_CUT_AWARE_PA == TRUE
         const API_STATE& state = GetApiState(pDC);
-        if ((IsIndexedT::value && (
+        if ((IsIndexedT::value && IsCutIndexEnabledT::value && (
             topo == TOP_TRIANGLE_STRIP || topo == TOP_POINT_LIST ||
             topo == TOP_LINE_LIST || topo == TOP_LINE_STRIP ||
             topo == TOP_TRIANGLE_LIST || topo == TOP_LINE_LIST_ADJ ||

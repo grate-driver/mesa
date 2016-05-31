@@ -37,6 +37,7 @@
 #include "vl/vl_video_buffer.h"
 #include "radeon/radeon_video.h"
 #include <inttypes.h>
+#include <sys/utsname.h>
 
 #ifndef HAVE_LLVM
 #define HAVE_LLVM 0
@@ -136,16 +137,93 @@ void r600_draw_rectangle(struct blitter_context *blitter,
 	pipe_resource_reference(&buf, NULL);
 }
 
-void r600_need_dma_space(struct r600_common_context *ctx, unsigned num_dw)
+void r600_need_dma_space(struct r600_common_context *ctx, unsigned num_dw,
+                         struct r600_resource *dst, struct r600_resource *src)
 {
-	/* Flush the GFX IB if it's not empty. */
-	if (ctx->gfx.cs->cdw > ctx->initial_gfx_cs_size)
+	uint64_t vram = 0, gtt = 0;
+
+	if (dst) {
+		if (dst->domains & RADEON_DOMAIN_VRAM)
+			vram += dst->buf->size;
+		else if (dst->domains & RADEON_DOMAIN_GTT)
+			gtt += dst->buf->size;
+	}
+	if (src) {
+		if (src->domains & RADEON_DOMAIN_VRAM)
+			vram += src->buf->size;
+		else if (src->domains & RADEON_DOMAIN_GTT)
+			gtt += src->buf->size;
+	}
+
+	/* Flush the GFX IB if DMA depends on it. */
+	if (radeon_emitted(ctx->gfx.cs, ctx->initial_gfx_cs_size) &&
+	    ((dst &&
+	      ctx->ws->cs_is_buffer_referenced(ctx->gfx.cs, dst->buf,
+					       RADEON_USAGE_READWRITE)) ||
+	     (src &&
+	      ctx->ws->cs_is_buffer_referenced(ctx->gfx.cs, src->buf,
+					       RADEON_USAGE_WRITE))))
 		ctx->gfx.flush(ctx, RADEON_FLUSH_ASYNC, NULL);
 
-	/* Flush if there's not enough space. */
-	if ((num_dw + ctx->dma.cs->cdw) > ctx->dma.cs->max_dw) {
+	/* Flush if there's not enough space, or if the memory usage per IB
+	 * is too large.
+	 */
+	if ((num_dw + ctx->dma.cs->cdw) > ctx->dma.cs->max_dw ||
+	    !ctx->ws->cs_memory_below_limit(ctx->dma.cs, vram, gtt)) {
 		ctx->dma.flush(ctx, RADEON_FLUSH_ASYNC, NULL);
 		assert((num_dw + ctx->dma.cs->cdw) <= ctx->dma.cs->max_dw);
+	}
+
+	/* If GPUVM is not supported, the CS checker needs 2 entries
+	 * in the buffer list per packet, which has to be done manually.
+	 */
+	if (ctx->screen->info.has_virtual_memory) {
+		if (dst)
+			radeon_add_to_buffer_list(ctx, &ctx->dma, dst,
+						  RADEON_USAGE_WRITE,
+						  RADEON_PRIO_SDMA_BUFFER);
+		if (src)
+			radeon_add_to_buffer_list(ctx, &ctx->dma, src,
+						  RADEON_USAGE_READ,
+						  RADEON_PRIO_SDMA_BUFFER);
+	}
+}
+
+/* This is required to prevent read-after-write hazards. */
+void r600_dma_emit_wait_idle(struct r600_common_context *rctx)
+{
+	struct radeon_winsys_cs *cs = rctx->dma.cs;
+
+	/* done at the end of DMA calls, so increment this. */
+	rctx->num_dma_calls++;
+
+	/* IBs using too little memory are limited by the IB submission overhead.
+	 * IBs using too much memory are limited by the kernel/TTM overhead.
+	 * Too long IBs create CPU-GPU pipeline bubbles and add latency.
+	 *
+	 * This heuristic makes sure that DMA requests are executed
+	 * very soon after the call is made and lowers memory usage.
+	 * It improves texture upload performance by keeping the DMA
+	 * engine busy while uploads are being submitted.
+	 */
+	if (rctx->ws->cs_query_memory_usage(rctx->dma.cs) > 64 * 1024 * 1024) {
+		rctx->dma.flush(rctx, RADEON_FLUSH_ASYNC, NULL);
+		return;
+	}
+
+	r600_need_dma_space(rctx, 1, NULL, NULL);
+
+	if (!radeon_emitted(cs, 0)) /* empty queue */
+		return;
+
+	/* NOP waits for idle on Evergreen and later. */
+	if (rctx->chip_class >= CIK)
+		radeon_emit(cs, 0x00000000); /* NOP */
+	else if (rctx->chip_class >= EVERGREEN)
+		radeon_emit(cs, 0xf0000000); /* NOP */
+	else {
+		/* TODO: R600-R700 should use the FENCE packet.
+		 * CS checker support is required. */
 	}
 }
 
@@ -218,7 +296,7 @@ static void r600_flush_dma_ring(void *ctx, unsigned flags,
 	struct r600_common_context *rctx = (struct r600_common_context *)ctx;
 	struct radeon_winsys_cs *cs = rctx->dma.cs;
 
-	if (cs->cdw)
+	if (radeon_emitted(cs, 0))
 		rctx->ws->cs_flush(cs, flags, &rctx->last_sdma_fence);
 	if (fence)
 		rctx->ws->fence_reference(fence, rctx->last_sdma_fence);
@@ -291,8 +369,9 @@ bool r600_common_context_init(struct r600_common_context *rctx,
 	r600_query_init(rctx);
 	cayman_init_msaa(&rctx->b);
 
-	rctx->allocator_so_filled_size = u_suballocator_create(&rctx->b, 4096, 4,
-							       0, PIPE_USAGE_DEFAULT, TRUE);
+	rctx->allocator_so_filled_size =
+		u_suballocator_create(&rctx->b, rscreen->info.gart_page_size,
+				      4, 0, PIPE_USAGE_DEFAULT, TRUE);
 	if (!rctx->allocator_so_filled_size)
 		return false;
 
@@ -382,6 +461,8 @@ static const struct debug_named_value common_debug_options[] = {
 	{ "notgsi", DBG_NO_TGSI, "Don't print the TGSI"},
 	{ "noasm", DBG_NO_ASM, "Don't print disassembled shaders"},
 	{ "preoptir", DBG_PREOPT_IR, "Print the LLVM IR before initial optimizations" },
+
+	{ "testdma", DBG_TEST_DMA, "Invoke SDMA tests and exit." },
 
 	/* features */
 	{ "nodma", DBG_NO_ASYNC_DMA, "Disable asynchronous DMA" },
@@ -845,8 +926,11 @@ static void r600_query_memory_info(struct pipe_screen *screen,
 struct pipe_resource *r600_resource_create_common(struct pipe_screen *screen,
 						  const struct pipe_resource *templ)
 {
+	struct r600_common_screen *rscreen = (struct r600_common_screen*)screen;
+
 	if (templ->target == PIPE_BUFFER) {
-		return r600_buffer_create(screen, templ, 4096);
+		return r600_buffer_create(screen, templ,
+					  rscreen->info.gart_page_size);
 	} else {
 		return r600_texture_create(screen, templ);
 	}
@@ -855,9 +939,14 @@ struct pipe_resource *r600_resource_create_common(struct pipe_screen *screen,
 bool r600_common_screen_init(struct r600_common_screen *rscreen,
 			     struct radeon_winsys *ws)
 {
-	char llvm_string[32] = {};
+	char llvm_string[32] = {}, kernel_version[128] = {};
+	struct utsname uname_data;
 
 	ws->query_info(ws, &rscreen->info);
+
+	if (uname(&uname_data) == 0)
+		snprintf(kernel_version, sizeof(kernel_version),
+			 " / %s", uname_data.release);
 
 #if HAVE_LLVM
 	snprintf(llvm_string, sizeof(llvm_string),
@@ -866,10 +955,10 @@ bool r600_common_screen_init(struct r600_common_screen *rscreen,
 #endif
 
 	snprintf(rscreen->renderer_string, sizeof(rscreen->renderer_string),
-		 "%s (DRM %i.%i.%i%s)",
+		 "%s (DRM %i.%i.%i%s%s)",
 		 r600_get_chip_name(rscreen), rscreen->info.drm_major,
 		 rscreen->info.drm_minor, rscreen->info.drm_patchlevel,
-		 llvm_string);
+		 kernel_version, llvm_string);
 
 	rscreen->b.get_name = r600_get_name;
 	rscreen->b.get_vendor = r600_get_vendor;

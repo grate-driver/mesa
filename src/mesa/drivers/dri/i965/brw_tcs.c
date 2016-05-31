@@ -168,6 +168,7 @@ brw_codegen_tcs_prog(struct brw_context *brw,
 {
    struct gl_context *ctx = &brw->ctx;
    const struct brw_compiler *compiler = brw->intelScreen->compiler;
+   const struct brw_device_info *devinfo = compiler->devinfo;
    struct brw_stage_state *stage_state = &brw->tcs.base;
    nir_shader *nir;
    struct brw_tcs_prog_data prog_data;
@@ -198,9 +199,7 @@ brw_codegen_tcs_prog(struct brw_context *brw,
     */
    struct gl_shader *tcs = shader_prog ?
       shader_prog->_LinkedShaders[MESA_SHADER_TESS_CTRL] : NULL;
-   int param_count = nir->num_uniforms;
-   if (!compiler->scalar_stage[MESA_SHADER_TESS_CTRL])
-      param_count *= 4;
+   int param_count = nir->num_uniforms / 4;
 
    prog_data.base.base.param =
       rzalloc_array(NULL, const gl_constant_value *, param_count);
@@ -209,6 +208,10 @@ brw_codegen_tcs_prog(struct brw_context *brw,
    prog_data.base.base.nr_params = param_count;
 
    if (tcs) {
+      brw_assign_common_binding_table_offsets(MESA_SHADER_TESS_CTRL, devinfo,
+                                              shader_prog, &tcp->program.Base,
+                                              &prog_data.base.base, 0);
+
       prog_data.base.base.image_param =
          rzalloc_array(NULL, struct brw_image_param, tcs->NumImages);
       prog_data.base.base.nr_image_params = tcs->NumImages;
@@ -273,14 +276,16 @@ brw_codegen_tcs_prog(struct brw_context *brw,
 
    if (unlikely(brw->perf_debug)) {
       struct brw_shader *btcs = (struct brw_shader *) tcs;
-      if (btcs->compiled_once) {
-         brw_tcs_debug_recompile(brw, shader_prog, key);
+      if (btcs) {
+         if (btcs->compiled_once) {
+            brw_tcs_debug_recompile(brw, shader_prog, key);
+         }
+         btcs->compiled_once = true;
       }
       if (start_busy && !drm_intel_bo_busy(brw->batch.last_bo)) {
          perf_debug("TCS compile took %.03f ms and stalled the GPU\n",
                     (get_time() - start_time) * 1000);
       }
-      btcs->compiled_once = true;
    }
 
    /* Scratch space is used for register spilling */

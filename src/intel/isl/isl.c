@@ -59,8 +59,8 @@ isl_device_init(struct isl_device *dev,
     * device properties at buildtime. Verify that the macros with the device
     * properties chosen during runtime.
     */
-   assert(ISL_DEV_GEN(dev) == dev->info->gen);
-   assert(ISL_DEV_USE_SEPARATE_STENCIL(dev) == dev->use_separate_stencil);
+   ISL_DEV_GEN_SANITIZE(dev);
+   ISL_DEV_USE_SEPARATE_STENCIL_SANITIZE(dev);
 
    /* Did we break hiz or stencil? */
    if (ISL_DEV_USE_SEPARATE_STENCIL(dev))
@@ -151,6 +151,9 @@ isl_tiling_get_info(const struct isl_device *dev,
       height = 1 << (6 - (ffs(bs) / 2) + (2 * is_Ys));
       break;
    }
+
+   default:
+      unreachable("not reached");
    } /* end switch */
 
    *tile_info = (struct isl_tile_info) {
@@ -478,8 +481,8 @@ isl_calc_phys_level0_extent_sa(const struct isl_device *dev,
          assert(info->samples == 1);
 
          *phys_level0_sa = (struct isl_extent4d) {
-            .w = isl_align(info->width, fmtl->bw),
-            .h = isl_align(info->height, fmtl->bh),
+            .w = isl_align_npot(info->width, fmtl->bw),
+            .h = isl_align_npot(info->height, fmtl->bh),
             .d = 1,
             .a = info->array_len,
          };
@@ -534,8 +537,8 @@ isl_calc_phys_level0_extent_sa(const struct isl_device *dev,
          assert(ISL_DEV_GEN(dev) >= 9);
 
          *phys_level0_sa = (struct isl_extent4d) {
-            .w = isl_align(info->width, fmtl->bw),
-            .h = isl_align(info->height, fmtl->bh),
+            .w = isl_align_npot(info->width, fmtl->bw),
+            .h = isl_align_npot(info->height, fmtl->bh),
             .d = 1,
             .a = info->depth,
          };
@@ -1387,6 +1390,9 @@ get_image_offset_sa(const struct isl_surf *surf,
       get_image_offset_sa_gen4_3d(surf, level, logical_z_offset_px,
                                   x_offset_sa, y_offset_sa);
       break;
+
+   default:
+      unreachable("not reached");
    }
 }
 

@@ -642,6 +642,9 @@ copy_deref_struct(void *mem_ctx, nir_deref_struct *deref)
 nir_deref *
 nir_copy_deref(void *mem_ctx, nir_deref *deref)
 {
+   if (deref == NULL)
+      return NULL;
+
    switch (deref->deref_type) {
    case nir_deref_type_var:
       return &copy_deref_var(mem_ctx, nir_deref_as_var(deref))->deref;
@@ -694,7 +697,7 @@ nir_deref_get_const_initializer_load(nir_shader *shader, nir_deref_var *deref)
       tail = tail->child;
    }
 
-   unsigned bit_size = glsl_get_bit_size(glsl_get_base_type(tail->type));
+   unsigned bit_size = glsl_get_bit_size(tail->type);
    nir_load_const_instr *load =
       nir_load_const_instr_create(shader, glsl_get_vector_elements(tail->type),
                                   bit_size);
@@ -893,6 +896,8 @@ src_is_valid(const nir_src *src)
 static bool
 remove_use_cb(nir_src *src, void *state)
 {
+   (void) state;
+
    if (src_is_valid(src))
       list_del(&src->use_link);
 
@@ -902,6 +907,8 @@ remove_use_cb(nir_src *src, void *state)
 static bool
 remove_def_cb(nir_dest *dest, void *state)
 {
+   (void) state;
+
    if (!dest->is_ssa)
       list_del(&dest->reg.def_link);
 
@@ -1147,19 +1154,6 @@ visit_intrinsic_src(nir_intrinsic_instr *instr, nir_foreach_src_cb cb,
 }
 
 static bool
-visit_call_src(nir_call_instr *instr, nir_foreach_src_cb cb, void *state)
-{
-   return true;
-}
-
-static bool
-visit_load_const_src(nir_load_const_instr *instr, nir_foreach_src_cb cb,
-                     void *state)
-{
-   return true;
-}
-
-static bool
 visit_phi_src(nir_phi_instr *instr, nir_foreach_src_cb cb, void *state)
 {
    nir_foreach_phi_src(src, instr) {
@@ -1215,12 +1209,10 @@ nir_foreach_src(nir_instr *instr, nir_foreach_src_cb cb, void *state)
          return false;
       break;
    case nir_instr_type_call:
-      if (!visit_call_src(nir_instr_as_call(instr), cb, state))
-         return false;
+      /* Call instructions have no regular sources */
       break;
    case nir_instr_type_load_const:
-      if (!visit_load_const_src(nir_instr_as_load_const(instr), cb, state))
-         return false;
+      /* Constant load instructions have no regular sources */
       break;
    case nir_instr_type_phi:
       if (!visit_phi_src(nir_instr_as_phi(instr), cb, state))

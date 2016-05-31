@@ -100,10 +100,10 @@ emit_vertex_input(struct anv_pipeline *pipeline,
    for (uint32_t i = 0; i < info->vertexAttributeDescriptionCount; i++) {
       const VkVertexInputAttributeDescription *desc =
          &info->pVertexAttributeDescriptions[i];
-      enum isl_format format = anv_get_isl_format(desc->format,
+      enum isl_format format = anv_get_isl_format(&pipeline->device->info,
+                                                  desc->format,
                                                   VK_IMAGE_ASPECT_COLOR_BIT,
-                                                  VK_IMAGE_TILING_LINEAR,
-                                                  NULL);
+                                                  VK_IMAGE_TILING_LINEAR);
 
       assert(desc->binding < 32);
 
@@ -204,18 +204,6 @@ emit_urb_setup(struct anv_pipeline *pipeline)
       pc.Address           = (struct anv_address) { &device->workaround_bo, 0 };
    }
 #endif
-
-   unsigned push_start = 0;
-   for (int i = MESA_SHADER_VERTEX; i <= MESA_SHADER_FRAGMENT; i++) {
-      unsigned push_size = pipeline->urb.push_size[i];
-      anv_batch_emit(&pipeline->batch,
-                     GENX(3DSTATE_PUSH_CONSTANT_ALLOC_VS), alloc) {
-         alloc._3DCommandSubOpcode  = 18 + i;
-         alloc.ConstantBufferOffset = (push_size > 0) ? push_start : 0;
-         alloc.ConstantBufferSize   = push_size;
-      }
-      push_start += pipeline->urb.push_size[i];
-   }
 
    for (int i = MESA_SHADER_VERTEX; i <= MESA_SHADER_GEOMETRY; i++) {
       anv_batch_emit(&pipeline->batch, GENX(3DSTATE_URB_VS), urb) {

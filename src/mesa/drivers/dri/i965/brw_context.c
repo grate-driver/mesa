@@ -358,7 +358,9 @@ brw_init_driver_functions(struct brw_context *brw,
 
    brwInitFragProgFuncs( functions );
    brw_init_common_queryobj_functions(functions);
-   if (brw->gen >= 6)
+   if (brw->gen >= 8 || brw->is_haswell)
+      hsw_init_queryobj_functions(functions);
+   else if (brw->gen >= 6)
       gen6_init_queryobj_functions(functions);
    else
       gen4_init_queryobj_functions(functions);
@@ -370,13 +372,18 @@ brw_init_driver_functions(struct brw_context *brw,
 
    functions->NewTransformFeedback = brw_new_transform_feedback;
    functions->DeleteTransformFeedback = brw_delete_transform_feedback;
-   functions->GetTransformFeedbackVertexCount =
-      brw_get_transform_feedback_vertex_count;
-   if (brw->gen >= 7) {
+   if (brw->intelScreen->has_mi_math_and_lrr) {
+      functions->BeginTransformFeedback = hsw_begin_transform_feedback;
+      functions->EndTransformFeedback = hsw_end_transform_feedback;
+      functions->PauseTransformFeedback = hsw_pause_transform_feedback;
+      functions->ResumeTransformFeedback = hsw_resume_transform_feedback;
+   } else if (brw->gen >= 7) {
       functions->BeginTransformFeedback = gen7_begin_transform_feedback;
       functions->EndTransformFeedback = gen7_end_transform_feedback;
       functions->PauseTransformFeedback = gen7_pause_transform_feedback;
       functions->ResumeTransformFeedback = gen7_resume_transform_feedback;
+      functions->GetTransformFeedbackVertexCount =
+         brw_get_transform_feedback_vertex_count;
    } else {
       functions->BeginTransformFeedback = brw_begin_transform_feedback;
       functions->EndTransformFeedback = brw_end_transform_feedback;
@@ -492,7 +499,8 @@ brw_initialize_context_constants(struct brw_context *brw)
    ctx->Const.MaxTransformFeedbackSeparateComponents =
       BRW_MAX_SOL_BINDINGS / BRW_MAX_SOL_BUFFERS;
 
-   ctx->Const.AlwaysUseGetTransformFeedbackVertexCount = true;
+   ctx->Const.AlwaysUseGetTransformFeedbackVertexCount =
+      !brw->intelScreen->has_mi_math_and_lrr;
 
    int max_samples;
    const int *msaa_modes = intel_supported_msaa_modes(brw->intelScreen);
@@ -557,6 +565,7 @@ brw_initialize_context_constants(struct brw_context *brw)
       ctx->Const.MaxClipPlanes = 8;
 
    ctx->Const.LowerTessLevel = true;
+   ctx->Const.PrimitiveRestartForPatches = true;
 
    ctx->Const.Program[MESA_SHADER_VERTEX].MaxNativeInstructions = 16 * 1024;
    ctx->Const.Program[MESA_SHADER_VERTEX].MaxAluInstructions = 0;
@@ -700,18 +709,10 @@ static void
 brw_initialize_cs_context_constants(struct brw_context *brw, unsigned max_threads)
 {
    struct gl_context *ctx = &brw->ctx;
-
-   /* For ES, we set these constants based on SIMD8.
-    *
-    * TODO: Once we can always generate SIMD16, we should update this.
-    *
-    * For GL, we assume we can generate a SIMD16 program, but this currently
-    * is not always true. This allows us to run more test cases, and will be
-    * required based on desktop GL compute shader requirements.
+   /* Maximum number of scalar compute shader invocations that can be run in
+    * parallel in the same subslice assuming SIMD32 dispatch.
     */
-   const int simd_size = ctx->API == API_OPENGL_CORE ? 16 : 8;
-
-   const uint32_t max_invocations = simd_size * max_threads;
+   const uint32_t max_invocations = 32 * max_threads;
    ctx->Const.MaxComputeWorkGroupSize[0] = max_invocations;
    ctx->Const.MaxComputeWorkGroupSize[1] = max_invocations;
    ctx->Const.MaxComputeWorkGroupSize[2] = max_invocations;
@@ -1047,7 +1048,6 @@ intelDestroyContext(__DRIcontext * driContextPriv)
    }
 
    _mesa_meta_free(&brw->ctx);
-   brw_meta_fast_clear_free(brw);
 
    if (INTEL_DEBUG & DEBUG_SHADER_TIME) {
       /* Force a report. */

@@ -1568,8 +1568,8 @@ static void r600_emit_db_state(struct r600_context *rctx, struct r600_atom *atom
 		radeon_set_context_reg(cs, R_028014_DB_HTILE_DATA_BASE, a->rsurf->db_htile_data_base);
 		reloc_idx = radeon_add_to_buffer_list(&rctx->b, &rctx->b.gfx, rtex->htile_buffer,
 						  RADEON_USAGE_READWRITE, RADEON_PRIO_HTILE);
-		cs->buf[cs->cdw++] = PKT3(PKT3_NOP, 0, 0);
-		cs->buf[cs->cdw++] = reloc_idx;
+		radeon_emit(cs, PKT3(PKT3_NOP, 0, 0));
+		radeon_emit(cs, reloc_idx);
 	} else {
 		radeon_set_context_reg(cs, R_028D24_DB_HTILE_SURFACE, 0);
 	}
@@ -2477,6 +2477,10 @@ void r600_update_ps_state(struct pipe_context *ctx, struct r600_pipe_shader *sha
 
 		tmp = S_028644_SEMANTIC(sid);
 
+		/* D3D 9 behaviour. GL is undefined */
+		if (rshader->input[i].name == TGSI_SEMANTIC_COLOR && rshader->input[i].sid == 0)
+			tmp |= S_028644_DEFAULT_VAL(3);
+
 		if (rshader->input[i].name == TGSI_SEMANTIC_POSITION ||
 			rshader->input[i].interpolate == TGSI_INTERPOLATE_CONSTANT ||
 			(rshader->input[i].interpolate == TGSI_INTERPOLATE_COLOR &&
@@ -2918,7 +2922,7 @@ static boolean r600_dma_copy_tile(struct r600_context *rctx,
 	 */
 	cheight = ((R600_DMA_COPY_MAX_SIZE_DW * 4) / pitch) & 0xfffffff8;
 	ncopy = (copy_height / cheight) + !!(copy_height % cheight);
-	r600_need_dma_space(&rctx->b, ncopy * 7);
+	r600_need_dma_space(&rctx->b, ncopy * 7, &rdst->resource, &rsrc->resource);
 
 	for (i = 0; i < ncopy; i++) {
 		cheight = cheight > copy_height ? copy_height : cheight;
@@ -2928,19 +2932,20 @@ static boolean r600_dma_copy_tile(struct r600_context *rctx,
 				      RADEON_PRIO_SDMA_TEXTURE);
 		radeon_add_to_buffer_list(&rctx->b, &rctx->b.dma, &rdst->resource, RADEON_USAGE_WRITE,
 				      RADEON_PRIO_SDMA_TEXTURE);
-		cs->buf[cs->cdw++] = DMA_PACKET(DMA_PACKET_COPY, 1, 0, size);
-		cs->buf[cs->cdw++] = base >> 8;
-		cs->buf[cs->cdw++] = (detile << 31) | (array_mode << 27) |
-					(lbpp << 24) | ((height - 1) << 10) |
-					pitch_tile_max;
-		cs->buf[cs->cdw++] = (slice_tile_max << 12) | (z << 0);
-		cs->buf[cs->cdw++] = (x << 3) | (y << 17);
-		cs->buf[cs->cdw++] = addr & 0xfffffffc;
-		cs->buf[cs->cdw++] = (addr >> 32UL) & 0xff;
+		radeon_emit(cs, DMA_PACKET(DMA_PACKET_COPY, 1, 0, size));
+		radeon_emit(cs, base >> 8);
+		radeon_emit(cs, (detile << 31) | (array_mode << 27) |
+				(lbpp << 24) | ((height - 1) << 10) |
+				pitch_tile_max);
+		radeon_emit(cs, (slice_tile_max << 12) | (z << 0));
+		radeon_emit(cs, (x << 3) | (y << 17));
+		radeon_emit(cs, addr & 0xfffffffc);
+		radeon_emit(cs, (addr >> 32UL) & 0xff);
 		copy_height -= cheight;
 		addr += cheight * pitch;
 		y += cheight;
 	}
+	r600_dma_emit_wait_idle(&rctx->b);
 	return TRUE;
 }
 
@@ -2972,9 +2977,10 @@ static void r600_dma_copy(struct pipe_context *ctx,
 		return;
 	}
 
-	if (src->format != dst->format || src_box->depth > 1) {
+	if (src_box->depth > 1 ||
+	    !r600_prepare_for_dma_blit(&rctx->b, rdst, dst_level, dstx, dsty,
+					dstz, rsrc, src_level, src_box))
 		goto fallback;
-	}
 
 	src_x = util_format_get_nblocksx(src->format, src_box->x);
 	dst_x = util_format_get_nblocksx(src->format, dst_x);

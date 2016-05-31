@@ -569,6 +569,7 @@ struct brw_vertex_buffer {
    /** Buffer object containing the uploaded vertex data */
    drm_intel_bo *bo;
    uint32_t offset;
+   uint32_t size;
    /** Byte stride between elements in the uploaded array */
    GLuint stride;
    GLuint step_rate;
@@ -619,6 +620,7 @@ struct intel_batchbuffer {
    uint32_t state_batch_offset;
    enum brw_gpu_ring ring;
    bool needs_sol_reset;
+   bool state_base_address_emitted;
 
    struct {
       uint32_t *map_next;
@@ -724,7 +726,7 @@ struct brw_context
       void (*update_texture_surface)(struct gl_context *ctx,
                                      unsigned unit,
                                      uint32_t *surf_offset,
-                                     bool for_gather);
+                                     bool for_gather, uint32_t plane);
       uint32_t (*update_renderbuffer_surface)(struct brw_context *brw,
                                               struct gl_renderbuffer *rb,
                                               bool layered, unsigned unit,
@@ -962,6 +964,7 @@ struct brw_context
       /* Summary of size and varying of active arrays, so we can check
        * for changes to this state:
        */
+      bool index_bounds_valid;
       unsigned int min_index, max_index;
 
       /* Offset from start of vertex buffer so we can avoid redefining
@@ -988,6 +991,7 @@ struct brw_context
 
       /* Updates are signaled by BRW_NEW_INDEX_BUFFER. */
       drm_intel_bo *bo;
+      uint32_t size;
       GLuint type;
 
       /* Offset to index buffer index to use in CMD_3D_PRIM so that we can
@@ -1309,6 +1313,7 @@ struct brw_context
 
    uint32_t num_instances;
    int basevertex;
+   int baseinstance;
 
    struct {
       const struct brw_l3_config *config;
@@ -1372,38 +1377,9 @@ GLboolean brwCreateContext(gl_api api,
 /*======================================================================
  * brw_misc_state.c
  */
-struct gl_renderbuffer *brw_get_rb_for_slice(struct brw_context *brw,
-                                             struct intel_mipmap_tree *mt,
-                                             unsigned level, unsigned layer,
-                                             bool flat);
-
-void brw_meta_updownsample(struct brw_context *brw,
-                           struct intel_mipmap_tree *src,
-                           struct intel_mipmap_tree *dst);
-
-void brw_meta_fbo_stencil_blit(struct brw_context *brw,
-                               struct gl_framebuffer *read_fb,
-                               struct gl_framebuffer *draw_fb,
-                               GLfloat srcX0, GLfloat srcY0,
-                               GLfloat srcX1, GLfloat srcY1,
-                               GLfloat dstX0, GLfloat dstY0,
-                               GLfloat dstX1, GLfloat dstY1);
-
-void brw_meta_stencil_updownsample(struct brw_context *brw,
-                                   struct intel_mipmap_tree *src,
-                                   struct intel_mipmap_tree *dst);
-
-bool brw_meta_fast_clear(struct brw_context *brw,
-                         struct gl_framebuffer *fb,
-                         GLbitfield mask,
-                         bool partial_clear);
-
 void
 brw_meta_resolve_color(struct brw_context *brw,
                        struct intel_mipmap_tree *mt);
-void
-brw_meta_fast_clear_free(struct brw_context *brw);
-
 
 /*======================================================================
  * brw_misc_state.c
@@ -1427,13 +1403,16 @@ void brw_init_common_queryobj_functions(struct dd_function_table *functions);
 void gen4_init_queryobj_functions(struct dd_function_table *functions);
 void brw_emit_query_begin(struct brw_context *brw);
 void brw_emit_query_end(struct brw_context *brw);
+void brw_query_counter(struct gl_context *ctx, struct gl_query_object *q);
+bool brw_is_query_pipelined(struct brw_query_object *query);
 
 /** gen6_queryobj.c */
 void gen6_init_queryobj_functions(struct dd_function_table *functions);
 void brw_write_timestamp(struct brw_context *brw, drm_intel_bo *bo, int idx);
 void brw_write_depth_count(struct brw_context *brw, drm_intel_bo *bo, int idx);
-void brw_store_register_mem64(struct brw_context *brw,
-                              drm_intel_bo *bo, uint32_t reg, int idx);
+
+/** hsw_queryobj.c */
+void hsw_init_queryobj_functions(struct dd_function_table *functions);
 
 /** brw_conditional_render.c */
 void brw_init_conditional_render_functions(struct dd_function_table *functions);
@@ -1450,6 +1429,22 @@ void brw_load_register_mem64(struct brw_context *brw,
                              drm_intel_bo *bo,
                              uint32_t read_domains, uint32_t write_domain,
                              uint32_t offset);
+void brw_store_register_mem32(struct brw_context *brw,
+                              drm_intel_bo *bo, uint32_t reg, uint32_t offset);
+void brw_store_register_mem64(struct brw_context *brw,
+                              drm_intel_bo *bo, uint32_t reg, uint32_t offset);
+void brw_load_register_imm32(struct brw_context *brw,
+                             uint32_t reg, uint32_t imm);
+void brw_load_register_imm64(struct brw_context *brw,
+                             uint32_t reg, uint64_t imm);
+void brw_load_register_reg(struct brw_context *brw, uint32_t src,
+                           uint32_t dest);
+void brw_load_register_reg64(struct brw_context *brw, uint32_t src,
+                             uint32_t dest);
+void brw_store_data_imm32(struct brw_context *brw, drm_intel_bo *bo,
+                          uint32_t offset, uint32_t imm);
+void brw_store_data_imm64(struct brw_context *brw, drm_intel_bo *bo,
+                          uint32_t offset, uint64_t imm);
 
 /*======================================================================
  * brw_state_dump.c
@@ -1578,8 +1573,6 @@ void brw_upload_image_surfaces(struct brw_context *brw,
 /* brw_surface_formats.c */
 bool brw_render_target_supported(struct brw_context *brw,
                                  struct gl_renderbuffer *rb);
-bool brw_losslessly_compressible_format(const struct brw_context *brw,
-                                        uint32_t brw_format);
 uint32_t brw_depth_format(struct brw_context *brw, mesa_format format);
 
 /* brw_performance_monitor.c */
@@ -1636,6 +1629,20 @@ gen7_pause_transform_feedback(struct gl_context *ctx,
 void
 gen7_resume_transform_feedback(struct gl_context *ctx,
                                struct gl_transform_feedback_object *obj);
+
+/* hsw_sol.c */
+void
+hsw_begin_transform_feedback(struct gl_context *ctx, GLenum mode,
+                             struct gl_transform_feedback_object *obj);
+void
+hsw_end_transform_feedback(struct gl_context *ctx,
+                           struct gl_transform_feedback_object *obj);
+void
+hsw_pause_transform_feedback(struct gl_context *ctx,
+                             struct gl_transform_feedback_object *obj);
+void
+hsw_resume_transform_feedback(struct gl_context *ctx,
+                              struct gl_transform_feedback_object *obj);
 
 /* brw_blorp_blit.cpp */
 GLbitfield
@@ -1697,6 +1704,8 @@ gen7_emit_urb_state(struct brw_context *brw,
 /* brw_reset.c */
 extern GLenum
 brw_get_graphics_reset_status(struct gl_context *ctx);
+void
+brw_check_for_reset(struct brw_context *brw);
 
 /* brw_compute.c */
 extern void

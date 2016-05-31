@@ -305,9 +305,11 @@ create_shader(struct gl_context *ctx, GLenum type)
       return 0;
    }
 
+   _mesa_HashLockMutex(ctx->Shared->ShaderObjects);
    name = _mesa_HashFindFreeKeyBlock(ctx->Shared->ShaderObjects, 1);
    sh = ctx->Driver.NewShader(ctx, name, type);
-   _mesa_HashInsert(ctx->Shared->ShaderObjects, name, sh);
+   _mesa_HashInsertLocked(ctx->Shared->ShaderObjects, name, sh);
+   _mesa_HashUnlockMutex(ctx->Shared->ShaderObjects);
 
    return name;
 }
@@ -319,13 +321,17 @@ create_shader_program(struct gl_context *ctx)
    GLuint name;
    struct gl_shader_program *shProg;
 
+   _mesa_HashLockMutex(ctx->Shared->ShaderObjects);
+
    name = _mesa_HashFindFreeKeyBlock(ctx->Shared->ShaderObjects, 1);
 
    shProg = _mesa_new_shader_program(name);
 
-   _mesa_HashInsert(ctx->Shared->ShaderObjects, name, shProg);
+   _mesa_HashInsertLocked(ctx->Shared->ShaderObjects, name, shProg);
 
    assert(shProg->RefCount == 1);
+
+   _mesa_HashUnlockMutex(ctx->Shared->ShaderObjects);
 
    return name;
 }
@@ -1126,6 +1132,9 @@ use_shader_program(struct gl_context *ctx, gl_shader_stage stage,
    if ((shProg != NULL) && (shProg->_LinkedShaders[stage] == NULL))
       shProg = NULL;
 
+   if (shProg)
+      _mesa_shader_program_init_subroutine_defaults(shProg);
+
    if (*target != shProg) {
       /* Program is current, flush it */
       if (shTarget == ctx->_Shader) {
@@ -1170,7 +1179,6 @@ _mesa_use_program(struct gl_context *ctx, struct gl_shader_program *shProg)
       use_shader_program(ctx, i, shProg, &ctx->Shader);
    _mesa_active_program(ctx, shProg, "glUseProgram");
 
-   _mesa_shader_program_init_subroutine_defaults(shProg);
    if (ctx->Driver.UseProgram)
       ctx->Driver.UseProgram(ctx, shProg);
 }
@@ -2080,6 +2088,7 @@ _mesa_copy_linked_program_data(gl_shader_stage type,
    switch (type) {
    case MESA_SHADER_VERTEX:
       dst->ClipDistanceArraySize = src->Vert.ClipDistanceArraySize;
+      dst->CullDistanceArraySize = src->Vert.CullDistanceArraySize;
       break;
    case MESA_SHADER_TESS_CTRL: {
       struct gl_tess_ctrl_program *dst_tcp =
@@ -2095,6 +2104,7 @@ _mesa_copy_linked_program_data(gl_shader_stage type,
       dst_tep->VertexOrder = src->TessEval.VertexOrder;
       dst_tep->PointMode = src->TessEval.PointMode;
       dst->ClipDistanceArraySize = src->TessEval.ClipDistanceArraySize;
+      dst->CullDistanceArraySize = src->TessEval.CullDistanceArraySize;
       break;
    }
    case MESA_SHADER_GEOMETRY: {
@@ -2105,6 +2115,7 @@ _mesa_copy_linked_program_data(gl_shader_stage type,
       dst_gp->InputType = src->Geom.InputType;
       dst_gp->OutputType = src->Geom.OutputType;
       dst->ClipDistanceArraySize = src->Geom.ClipDistanceArraySize;
+      dst->CullDistanceArraySize = src->Geom.CullDistanceArraySize;
       dst_gp->UsesEndPrimitive = src->Geom.UsesEndPrimitive;
       dst_gp->UsesStreams = src->Geom.UsesStreams;
       break;
@@ -2315,7 +2326,6 @@ _mesa_GetSubroutineIndex(GLuint program, GLenum shadertype,
    resource_type = _mesa_shader_stage_to_subroutine(stage);
    res = _mesa_program_resource_find_name(shProg, resource_type, name, NULL);
    if (!res) {
-      _mesa_error(ctx, GL_INVALID_OPERATION, "%s", api_name);
      return -1;
    }
 
@@ -2357,6 +2367,11 @@ _mesa_GetActiveSubroutineUniformiv(GLuint program, GLenum shadertype,
    sh = shProg->_LinkedShaders[stage];
    if (!sh) {
       _mesa_error(ctx, GL_INVALID_OPERATION, "%s", api_name);
+      return;
+   }
+
+   if (index >= sh->NumSubroutineUniforms) {
+      _mesa_error(ctx, GL_INVALID_VALUE, "%s: invalid index greater than GL_ACTIVE_SUBROUTINE_UNIFORMS", api_name);
       return;
    }
 
@@ -2531,16 +2546,24 @@ _mesa_UniformSubroutinesuiv(GLenum shadertype, GLsizei count,
       }
 
       int uni_count = uni->array_elements ? uni->array_elements : 1;
-      int j, k;
+      int j, k, f;
 
       for (j = i; j < i + uni_count; j++) {
-         struct gl_subroutine_function *subfn;
-         if (indices[j] >= sh->NumSubroutineFunctions) {
+         struct gl_subroutine_function *subfn = NULL;
+         if (indices[j] > sh->MaxSubroutineFunctionIndex) {
             _mesa_error(ctx, GL_INVALID_VALUE, "%s", api_name);
             return;
          }
 
-         subfn = &sh->SubroutineFunctions[indices[j]];
+         for (f = 0; f < sh->NumSubroutineFunctions; f++) {
+            if (sh->SubroutineFunctions[f].index == indices[j])
+               subfn = &sh->SubroutineFunctions[f];
+         }
+
+         if (!subfn) {
+            continue;
+         }
+
          for (k = 0; k < subfn->num_compat_types; k++) {
             if (subfn->types[k] == uni->type)
                break;
@@ -2659,7 +2682,7 @@ _mesa_GetProgramStageiv(GLuint program, GLenum shadertype,
       values[0] = sh->NumSubroutineUniformRemapTable;
       break;
    case GL_ACTIVE_SUBROUTINE_UNIFORMS:
-      values[0] = sh->NumSubroutineUniformTypes;
+      values[0] = sh->NumSubroutineUniforms;
       break;
    case GL_ACTIVE_SUBROUTINE_MAX_LENGTH:
    {

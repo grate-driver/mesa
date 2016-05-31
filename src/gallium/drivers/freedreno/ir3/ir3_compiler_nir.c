@@ -1448,6 +1448,7 @@ emit_tex(struct ir3_compile *ctx, nir_tex_instr *tex)
 	case nir_texop_query_levels:
 	case nir_texop_texture_samples:
 	case nir_texop_samples_identical:
+	case nir_texop_txf_ms_mcs:
 		compile_error(ctx, "Unhandled NIR tex type: %d\n", tex->op);
 		return;
 	}
@@ -2013,6 +2014,10 @@ setup_input(struct ir3_compile *ctx, nir_variable *in)
 	DBG("; in: slot=%u, len=%ux%u, drvloc=%u",
 			slot, array_len, ncomp, n);
 
+	/* let's pretend things other than vec4 don't exist: */
+	ncomp = MAX2(ncomp, 4);
+	compile_assert(ctx, ncomp == 4);
+
 	so->inputs[n].slot = slot;
 	so->inputs[n].compmask = (1 << ncomp) - 1;
 	so->inputs_count = MAX2(so->inputs_count, n + 1);
@@ -2027,6 +2032,18 @@ setup_input(struct ir3_compile *ctx, nir_variable *in)
 				so->inputs[n].bary = false;
 				so->frag_coord = true;
 				instr = create_frag_coord(ctx, i);
+			} else if (slot == VARYING_SLOT_PNTC) {
+				/* see for example st_get_generic_varying_index().. this is
+				 * maybe a bit mesa/st specific.  But we need things to line
+				 * up for this in fdN_program:
+				 *    unsigned texmask = 1 << (slot - VARYING_SLOT_VAR0);
+				 *    if (emit->sprite_coord_enable & texmask) {
+				 *       ...
+				 *    }
+				 */
+				so->inputs[n].slot = VARYING_SLOT_VAR8;
+				so->inputs[n].bary = true;
+				instr = create_frag_input(ctx, false);
 			} else if (slot == VARYING_SLOT_FACE) {
 				so->inputs[n].bary = false;
 				so->frag_face = true;
@@ -2062,11 +2079,14 @@ setup_input(struct ir3_compile *ctx, nir_variable *in)
 				instr = create_frag_input(ctx, use_ldlv);
 			}
 
+			compile_assert(ctx, idx < ctx->ir->ninputs);
+
 			ctx->ir->inputs[idx] = instr;
 		}
 	} else if (ctx->so->type == SHADER_VERTEX) {
 		for (int i = 0; i < ncomp; i++) {
 			unsigned idx = (n * 4) + i;
+			compile_assert(ctx, idx < ctx->ir->ninputs);
 			ctx->ir->inputs[idx] = create_input(ctx->block, idx);
 		}
 	} else {
@@ -2090,6 +2110,10 @@ setup_output(struct ir3_compile *ctx, nir_variable *out)
 
 	DBG("; out: slot=%u, len=%ux%u, drvloc=%u",
 			slot, array_len, ncomp, n);
+
+	/* let's pretend things other than vec4 don't exist: */
+	ncomp = MAX2(ncomp, 4);
+	compile_assert(ctx, ncomp == 4);
 
 	if (ctx->so->type == SHADER_FRAGMENT) {
 		switch (slot) {
@@ -2145,9 +2169,19 @@ setup_output(struct ir3_compile *ctx, nir_variable *out)
 
 	for (int i = 0; i < ncomp; i++) {
 		unsigned idx = (n * 4) + i;
-
+		compile_assert(ctx, idx < ctx->ir->noutputs);
 		ctx->ir->outputs[idx] = create_immed(ctx->block, fui(0.0));
 	}
+}
+
+static int
+max_drvloc(struct exec_list *vars)
+{
+	int drvloc = -1;
+	nir_foreach_variable(var, vars) {
+		drvloc = MAX2(drvloc, (int)var->data.driver_location);
+	}
+	return drvloc;
 }
 
 static void
@@ -2164,13 +2198,14 @@ emit_instructions(struct ir3_compile *ctx)
 		break;
 	}
 
-	ninputs  = exec_list_length(&ctx->s->inputs) * 4;
-	noutputs = exec_list_length(&ctx->s->outputs) * 4;
+
+	ninputs  = (max_drvloc(&ctx->s->inputs) + 1) * 4;
+	noutputs = (max_drvloc(&ctx->s->outputs) + 1) * 4;
 
 	/* or vtx shaders, we need to leave room for sysvals:
 	 */
 	if (ctx->so->type == SHADER_VERTEX) {
-		ninputs += 8;
+		ninputs += 16;
 	}
 
 	ctx->ir = ir3_create(ctx->compiler, ninputs, noutputs);
@@ -2181,7 +2216,7 @@ emit_instructions(struct ir3_compile *ctx)
 	list_addtail(&ctx->block->node, &ctx->ir->block_list);
 
 	if (ctx->so->type == SHADER_VERTEX) {
-		ctx->ir->ninputs -= 8;
+		ctx->ir->ninputs -= 16;
 	}
 
 	/* for fragment shader, we have a single input register (usually
@@ -2419,7 +2454,7 @@ ir3_compile_shader_nir(struct ir3_compiler *compiler,
 		ir3_print(ir);
 	}
 
-	ir3_cp(ir);
+	ir3_cp(ir, so);
 
 	if (fd_mesa_debug & FD_DBG_OPTMSGS) {
 		printf("BEFORE GROUPING:\n");
@@ -2466,8 +2501,8 @@ ir3_compile_shader_nir(struct ir3_compiler *compiler,
 		/* preserve hack for depth output.. tgsi writes depth to .z,
 		 * but what we give the hw is the scalar register:
 		 */
-		if ((so->type == SHADER_FRAGMENT) &&
-			(so->outputs[i].slot == FRAG_RESULT_DEPTH))
+		if (so->shader->from_tgsi && (so->type == SHADER_FRAGMENT) &&
+				(so->outputs[i].slot == FRAG_RESULT_DEPTH))
 			so->outputs[i].regid += 2;
 	}
 

@@ -306,7 +306,7 @@ void st_init_limits(struct pipe_screen *screen,
             screen->get_shader_param(screen, sh,
                                   PIPE_SHADER_CAP_MAX_UNROLL_ITERATIONS_HINT);
 
-      options->LowerClipDistance = true;
+      options->LowerCombinedClipCullDistance = true;
       options->LowerBufferInterfaceBlocks = true;
 
       if (sh == PIPE_SHADER_COMPUTE)
@@ -314,6 +314,8 @@ void st_init_limits(struct pipe_screen *screen,
    }
 
    c->LowerTessLevel = true;
+   c->PrimitiveRestartForPatches =
+      screen->get_param(screen, PIPE_CAP_PRIMITIVE_RESTART_FOR_PATCHES);
 
    c->MaxCombinedTextureImageUnits =
          _min(c->Program[MESA_SHADER_VERTEX].MaxTextureImageUnits +
@@ -574,6 +576,7 @@ void st_init_extensions(struct pipe_screen *screen,
       { o(ARB_color_buffer_float),           PIPE_CAP_VERTEX_COLOR_UNCLAMPED           },
       { o(ARB_conditional_render_inverted),  PIPE_CAP_CONDITIONAL_RENDER_INVERTED      },
       { o(ARB_copy_image),                   PIPE_CAP_COPY_BETWEEN_COMPRESSED_AND_PLAIN_FORMATS },
+      { o(ARB_cull_distance),                PIPE_CAP_CULL_DISTANCE                    },
       { o(ARB_depth_clamp),                  PIPE_CAP_DEPTH_CLIP_DISABLE               },
       { o(ARB_depth_texture),                PIPE_CAP_TEXTURE_SHADOW_MAP               },
       { o(ARB_derivative_control),           PIPE_CAP_TGSI_FS_FINE_DERIVATIVE          },
@@ -1178,4 +1181,32 @@ void st_init_extensions(struct pipe_screen *screen,
                                       extensions->ARB_shader_atomic_counters;
       }
    }
+
+   /* If we support ES 3.1, we support the ES3_1_compatibility ext. However
+    * there's no clean way of telling whether we would support ES 3.1 from
+    * here, so copy the condition from compute_version_es2 here. A lot of
+    * these are redunant, but simpler to just have a (near-)exact copy here.
+    */
+   extensions->ARB_ES3_1_compatibility =
+      extensions->ARB_ES3_compatibility &&
+      extensions->ARB_arrays_of_arrays &&
+      extensions->ARB_compute_shader &&
+      extensions->ARB_draw_indirect &&
+      extensions->ARB_explicit_uniform_location &&
+      extensions->ARB_framebuffer_no_attachments &&
+      extensions->ARB_shader_atomic_counters &&
+      extensions->ARB_shader_image_load_store &&
+      extensions->ARB_shader_image_size &&
+      extensions->ARB_shader_storage_buffer_object &&
+      extensions->ARB_shading_language_packing &&
+      extensions->ARB_stencil_texturing &&
+      extensions->ARB_texture_multisample &&
+      extensions->ARB_gpu_shader5 &&
+      extensions->EXT_shader_integer_mix;
+
+   /* And if we have enough for ES 3.1, we can also expose
+    * OES_shader_io_blocks, which is only hidden due to the compiler not being
+    * able to version-restrict things.
+    */
+   extensions->OES_shader_io_blocks = extensions->ARB_ES3_1_compatibility;
 }

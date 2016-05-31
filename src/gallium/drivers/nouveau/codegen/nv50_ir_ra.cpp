@@ -2073,14 +2073,9 @@ RegAlloc::InsertConstraintsPass::condenseSrcs(Instruction *insn,
    merge->setDef(0, lval);
    for (int s = a, i = 0; s <= b; ++s, ++i) {
       merge->setSrc(i, insn->getSrc(s));
-      insn->setSrc(s, NULL);
    }
+   insn->moveSources(b + 1, a - b);
    insn->setSrc(a, lval);
-
-   for (int k = a + 1, s = b + 1; insn->srcExists(s); ++s, ++k) {
-      insn->setSrc(k, insn->getSrc(s));
-      insn->setSrc(s, NULL);
-   }
    insn->bb->insertBefore(insn, merge);
 
    insn->putExtraSources(0, save);
@@ -2131,9 +2126,7 @@ RegAlloc::InsertConstraintsPass::texConstraintNVE0(TexInstruction *tex)
    condenseDefs(tex);
 
    if (tex->op == OP_SUSTB || tex->op == OP_SUSTP) {
-      int n = tex->srcCount(0xff);
-      if (n > 4)
-         condenseSrcs(tex, 3, n - 1);
+      condenseSrcs(tex, 3, 6);
    } else
    if (isTextureOp(tex->op)) {
       int n = tex->srcCount(0xff, true);
@@ -2159,6 +2152,12 @@ RegAlloc::InsertConstraintsPass::texConstraintNVC0(TexInstruction *tex)
    if (tex->op == OP_TXQ) {
       s = tex->srcCount(0xff);
       n = 0;
+   } else if (isSurfaceOp(tex->op)) {
+      s = tex->tex.target.getDim() + (tex->tex.target.isArray() || tex->tex.target.isCube());
+      if (tex->op == OP_SUSTB || tex->op == OP_SUSTP)
+         n = 4;
+      else
+         n = 0;
    } else {
       s = tex->tex.target.getArgCount() - tex->tex.target.isMS();
       if (!tex->tex.target.isArray() &&

@@ -370,9 +370,10 @@ gen7_save_primitives_written_counters(struct brw_context *brw,
 
    /* Emit MI_STORE_REGISTER_MEM commands to write the values. */
    for (int i = 0; i < streams; i++) {
+      int offset = (obj->prim_count_buffer_index + i) * sizeof(uint64_t);
       brw_store_register_mem64(brw, obj->prim_count_bo,
                                GEN7_SO_NUM_PRIMS_WRITTEN(i),
-                               obj->prim_count_buffer_index + i);
+                               offset);
    }
 
    /* Update where to write data to. */
@@ -484,7 +485,8 @@ gen7_end_transform_feedback(struct gl_context *ctx,
       (struct brw_transform_feedback_object *) obj;
 
    /* Store the ending value of the SO_NUM_PRIMS_WRITTEN counters. */
-   gen7_save_primitives_written_counters(brw, brw_obj);
+   if (!obj->Paused)
+      gen7_save_primitives_written_counters(brw, brw_obj);
 
    /* EndTransformFeedback() means that we need to update the number of
     * vertices written.  Since it's only necessary if DrawTransformFeedback()

@@ -68,6 +68,8 @@ void CalculateProcessorTopology(CPUNumaNodes& out_nodes, uint32_t& out_numThread
 
 #if defined(_WIN32)
 
+    std::vector<KAFFINITY> threadMaskPerProcGroup;
+
     static std::mutex m;
     std::lock_guard<std::mutex> l(m);
 
@@ -96,14 +98,33 @@ void CalculateProcessorTopology(CPUNumaNodes& out_nodes, uint32_t& out_numThread
             while (BitScanForwardSizeT((unsigned long*)&threadId, gmask.Mask))
             {
                 // clear mask
-                gmask.Mask &= ~(KAFFINITY(1) << threadId);
+                KAFFINITY threadMask = KAFFINITY(1) << threadId;
+                gmask.Mask &= ~threadMask;
+
+                if (procGroup >= threadMaskPerProcGroup.size())
+                {
+                    threadMaskPerProcGroup.resize(procGroup + 1);
+                }
+
+                if (threadMaskPerProcGroup[procGroup] & threadMask)
+                {
+                    // Already seen this mask.  This means that we are in 32-bit mode and
+                    // have seen more than 32 HW threads for this procGroup
+                    // Don't use it
+#if defined(_WIN64)
+                    SWR_ASSERT(false, "Shouldn't get here in 64-bit mode");
+#endif
+                    continue;
+                }
+
+                threadMaskPerProcGroup[procGroup] |= (KAFFINITY(1) << threadId);
 
                 // Find Numa Node
+                uint32_t numaId = 0;
                 PROCESSOR_NUMBER procNum = {};
                 procNum.Group = WORD(procGroup);
                 procNum.Number = UCHAR(threadId);
 
-                uint32_t numaId = 0;
                 ret = GetNumaProcessorNodeEx(&procNum, (PUSHORT)&numaId);
                 SWR_ASSERT(ret);
 
@@ -118,16 +139,6 @@ void CalculateProcessorTopology(CPUNumaNodes& out_nodes, uint32_t& out_numThread
                     numaNode.cores.push_back(Core());
                     pCore = &numaNode.cores.back();
                     pCore->procGroup = procGroup;
-#if !defined(_WIN64)
-                    coreId = (uint32_t)numaNode.cores.size();
-                    if ((coreId * numThreads) > 32)
-                    {
-                        // Windows doesn't return threadIds >= 32 for a processor group correctly
-                        // when running a 32-bit application.
-                        // Just save -1 as the threadId
-                        threadId = uint32_t(-1);
-                    }
-#endif
                 }
                 pCore->threadIds.push_back(threadId);
                 if (procGroup == 0)
@@ -210,6 +221,16 @@ void CalculateProcessorTopology(CPUNumaNodes& out_nodes, uint32_t& out_numThread
         }
     }
 
+#elif defined(__CYGWIN__)
+
+    // Dummy data just to compile
+    NumaNode node;
+    Core core;
+    core.threadIds.push_back(0);
+    node.cores.push_back(core);
+    out_nodes.push_back(node);
+    out_numThreadsPerProcGroup = 1;
+
 #else
 
 #error Unsupported platform
@@ -227,42 +248,48 @@ void bindThread(uint32_t threadId, uint32_t procGroupId = 0, bool bindProcGroup=
     }
 
 #if defined(_WIN32)
-    {
-        GROUP_AFFINITY affinity = {};
-        affinity.Group = procGroupId;
+
+    GROUP_AFFINITY affinity = {};
+    affinity.Group = procGroupId;
 
 #if !defined(_WIN64)
-        if (threadId >= 32)
-        {
-            // Hopefully we don't get here.  Logic in CreateThreadPool should prevent this.
-            SWR_REL_ASSERT(false, "Shouldn't get here");
+    if (threadId >= 32)
+    {
+        // Hopefully we don't get here.  Logic in CreateThreadPool should prevent this.
+        SWR_REL_ASSERT(false, "Shouldn't get here");
 
-            // In a 32-bit process on Windows it is impossible to bind
-            // to logical processors 32-63 within a processor group.
-            // In this case set the mask to 0 and let the system assign
-            // the processor.  Hopefully it will make smart choices.
-            affinity.Mask = 0;
-        }
-        else
-#endif
-        {
-            // If KNOB_MAX_WORKER_THREADS is set, only bind to the proc group,
-            // Not the individual HW thread.
-            if (!KNOB_MAX_WORKER_THREADS)
-            {
-                affinity.Mask = KAFFINITY(1) << threadId;
-            }
-        }
-
-        SetThreadGroupAffinity(GetCurrentThread(), &affinity, nullptr);
+        // In a 32-bit process on Windows it is impossible to bind
+        // to logical processors 32-63 within a processor group.
+        // In this case set the mask to 0 and let the system assign
+        // the processor.  Hopefully it will make smart choices.
+        affinity.Mask = 0;
     }
+    else
+#endif
+    {
+        // If KNOB_MAX_WORKER_THREADS is set, only bind to the proc group,
+        // Not the individual HW thread.
+        if (!KNOB_MAX_WORKER_THREADS)
+        {
+            affinity.Mask = KAFFINITY(1) << threadId;
+        }
+    }
+
+    SetThreadGroupAffinity(GetCurrentThread(), &affinity, nullptr);
+
+#elif defined(__CYGWIN__)
+
+    // do nothing
+
 #else
+
     cpu_set_t cpuset;
     pthread_t thread = pthread_self();
     CPU_ZERO(&cpuset);
     CPU_SET(threadId, &cpuset);
 
     pthread_setaffinity_np(thread, sizeof(cpu_set_t), &cpuset);
+
 #endif
 }
 
@@ -712,6 +739,17 @@ void CreateThreadPool(SWR_CONTEXT *pContext, THREAD_POOL *pPool)
     uint32_t numHWCoresPerNode  = (uint32_t)nodes[0].cores.size();
     uint32_t numHWHyperThreads  = (uint32_t)nodes[0].cores[0].threadIds.size();
 
+    // Calculate num HW threads.  Due to asymmetric topologies, this is not
+    // a trivial multiplication.
+    uint32_t numHWThreads = 0;
+    for (auto& node : nodes)
+    {
+        for (auto& core : node.cores)
+        {
+            numHWThreads += (uint32_t)core.threadIds.size();
+        }
+    }
+
     uint32_t numNodes           = numHWNodes;
     uint32_t numCoresPerNode    = numHWCoresPerNode;
     uint32_t numHyperThreads    = numHWHyperThreads;
@@ -759,6 +797,7 @@ void CreateThreadPool(SWR_CONTEXT *pContext, THREAD_POOL *pPool)
 
     // Calculate numThreads
     uint32_t numThreads = numNodes * numCoresPerNode * numHyperThreads;
+    numThreads = std::min(numThreads, numHWThreads);
 
     if (KNOB_MAX_WORKER_THREADS)
     {
@@ -849,22 +888,29 @@ void CreateThreadPool(SWR_CONTEXT *pContext, THREAD_POOL *pPool)
         for (uint32_t n = 0; n < numNodes; ++n)
         {
             auto& node = nodes[n];
-            if (node.cores.size() == 0)
-            {
-               continue;
-            }
-
             uint32_t numCores = numCoresPerNode;
             for (uint32_t c = 0; c < numCores; ++c)
             {
+                if (c >= node.cores.size())
+                {
+                    break;
+                }
+
                 auto& core = node.cores[c];
                 for (uint32_t t = 0; t < numHyperThreads; ++t)
                 {
+                    if (t >= core.threadIds.size())
+                    {
+                        break;
+                    }
+
                     if (numAPIReservedThreads)
                     {
                         --numAPIReservedThreads;
                         continue;
                     }
+
+                    SWR_ASSERT(workerId < numThreads);
 
                     pPool->pThreadData[workerId].workerId = workerId;
                     pPool->pThreadData[workerId].procGroupId = core.procGroup;

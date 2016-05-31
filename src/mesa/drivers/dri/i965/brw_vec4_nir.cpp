@@ -60,36 +60,31 @@ vec4_visitor::nir_setup_system_value_intrinsic(nir_intrinsic_instr *instr)
    case nir_intrinsic_load_vertex_id_zero_base:
       reg = &nir_system_values[SYSTEM_VALUE_VERTEX_ID_ZERO_BASE];
       if (reg->file == BAD_FILE)
-         *reg = *make_reg_for_system_value(SYSTEM_VALUE_VERTEX_ID_ZERO_BASE,
-                                           glsl_type::int_type);
+         *reg = *make_reg_for_system_value(SYSTEM_VALUE_VERTEX_ID_ZERO_BASE);
       break;
 
    case nir_intrinsic_load_base_vertex:
       reg = &nir_system_values[SYSTEM_VALUE_BASE_VERTEX];
       if (reg->file == BAD_FILE)
-         *reg = *make_reg_for_system_value(SYSTEM_VALUE_BASE_VERTEX,
-                                           glsl_type::int_type);
+         *reg = *make_reg_for_system_value(SYSTEM_VALUE_BASE_VERTEX);
       break;
 
    case nir_intrinsic_load_instance_id:
       reg = &nir_system_values[SYSTEM_VALUE_INSTANCE_ID];
       if (reg->file == BAD_FILE)
-         *reg = *make_reg_for_system_value(SYSTEM_VALUE_INSTANCE_ID,
-                                           glsl_type::int_type);
+         *reg = *make_reg_for_system_value(SYSTEM_VALUE_INSTANCE_ID);
       break;
 
    case nir_intrinsic_load_base_instance:
       reg = &nir_system_values[SYSTEM_VALUE_BASE_INSTANCE];
       if (reg->file == BAD_FILE)
-         *reg = *make_reg_for_system_value(SYSTEM_VALUE_BASE_INSTANCE,
-                                           glsl_type::int_type);
+         *reg = *make_reg_for_system_value(SYSTEM_VALUE_BASE_INSTANCE);
       break;
 
    case nir_intrinsic_load_draw_id:
       reg = &nir_system_values[SYSTEM_VALUE_DRAW_ID];
       if (reg->file == BAD_FILE)
-         *reg = *make_reg_for_system_value(SYSTEM_VALUE_DRAW_ID,
-                                           glsl_type::int_type);
+         *reg = *make_reg_for_system_value(SYSTEM_VALUE_DRAW_ID);
       break;
 
    default:
@@ -272,7 +267,7 @@ dst_reg_for_nir_reg(vec4_visitor *v, nir_register *nir_reg,
 }
 
 dst_reg
-vec4_visitor::get_nir_dest(nir_dest dest)
+vec4_visitor::get_nir_dest(const nir_dest &dest)
 {
    if (dest.is_ssa) {
       dst_reg dst = dst_reg(VGRF, alloc.allocate(1));
@@ -285,19 +280,19 @@ vec4_visitor::get_nir_dest(nir_dest dest)
 }
 
 dst_reg
-vec4_visitor::get_nir_dest(nir_dest dest, enum brw_reg_type type)
+vec4_visitor::get_nir_dest(const nir_dest &dest, enum brw_reg_type type)
 {
    return retype(get_nir_dest(dest), type);
 }
 
 dst_reg
-vec4_visitor::get_nir_dest(nir_dest dest, nir_alu_type type)
+vec4_visitor::get_nir_dest(const nir_dest &dest, nir_alu_type type)
 {
    return get_nir_dest(dest, brw_type_for_nir_type(type));
 }
 
 src_reg
-vec4_visitor::get_nir_src(nir_src src, enum brw_reg_type type,
+vec4_visitor::get_nir_src(const nir_src &src, enum brw_reg_type type,
                           unsigned num_components)
 {
    dst_reg reg;
@@ -319,14 +314,14 @@ vec4_visitor::get_nir_src(nir_src src, enum brw_reg_type type,
 }
 
 src_reg
-vec4_visitor::get_nir_src(nir_src src, nir_alu_type type,
+vec4_visitor::get_nir_src(const nir_src &src, nir_alu_type type,
                           unsigned num_components)
 {
    return get_nir_src(src, brw_type_for_nir_type(type), num_components);
 }
 
 src_reg
-vec4_visitor::get_nir_src(nir_src src, unsigned num_components)
+vec4_visitor::get_nir_src(const nir_src &src, unsigned num_components)
 {
    /* if type is not specified, default to signed int */
    return get_nir_src(src, nir_type_int, num_components);

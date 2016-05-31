@@ -946,7 +946,7 @@ static void AllocateTessellationData(SWR_CONTEXT* pContext)
     if (gt_pTessellationThreadData == nullptr)
     {
         gt_pTessellationThreadData = (TessellationThreadLocalData*)
-            _aligned_malloc(sizeof(TessellationThreadLocalData), 64);
+            AlignedMalloc(sizeof(TessellationThreadLocalData), 64);
         memset(gt_pTessellationThreadData, 0, sizeof(*gt_pTessellationThreadData));
     }
 }
@@ -985,7 +985,7 @@ static void TessellationStages(
         gt_pTessellationThreadData->tsCtxSize);
     if (tsCtx == nullptr)
     {
-        gt_pTessellationThreadData->pTxCtx = _aligned_malloc(gt_pTessellationThreadData->tsCtxSize, 64);
+        gt_pTessellationThreadData->pTxCtx = AlignedMalloc(gt_pTessellationThreadData->tsCtxSize, 64);
         tsCtx = TSInitCtx(
             tsState.domain,
             tsState.partitioning,
@@ -1063,8 +1063,8 @@ static void TessellationStages(
         size_t requiredAllocSize = sizeof(simdvector) * requiredDSOutputVectors;
         if (requiredDSOutputVectors > gt_pTessellationThreadData->numDSOutputVectors)
         {
-            _aligned_free(gt_pTessellationThreadData->pDSOutput);
-            gt_pTessellationThreadData->pDSOutput = (simdscalar*)_aligned_malloc(requiredAllocSize, 64);
+            AlignedFree(gt_pTessellationThreadData->pDSOutput);
+            gt_pTessellationThreadData->pDSOutput = (simdscalar*)AlignedMalloc(requiredAllocSize, 64);
             gt_pTessellationThreadData->numDSOutputVectors = requiredDSOutputVectors;
         }
         SWR_ASSERT(gt_pTessellationThreadData->pDSOutput);
@@ -1125,7 +1125,10 @@ static void TessellationStages(
                 {
                     simdvector prim[3]; // Only deal with triangles, lines, or points
                     RDTSC_START(FEPAAssemble);
-                    bool assemble = tessPa.Assemble(VERTEX_POSITION_SLOT, prim);
+#if SWR_ENABLE_ASSERTS
+                    bool assemble =
+#endif
+                        tessPa.Assemble(VERTEX_POSITION_SLOT, prim);
                     RDTSC_STOP(FEPAAssemble, 1, 0);
                     SWR_ASSERT(assemble);
 
@@ -1156,6 +1159,7 @@ static void TessellationStages(
 /// @param pUserData - Pointer to DRAW_WORK
 template <
     typename IsIndexedT,
+    typename IsCutIndexEnabledT,
     typename HasTessellationT,
     typename HasGeometryShaderT,
     typename HasStreamOutT,
@@ -1280,7 +1284,7 @@ void ProcessDraw(
     }
 
     // choose primitive assembler
-    PA_FACTORY<IsIndexedT> paFactory(pDC, state.topology, work.numVerts);
+    PA_FACTORY<IsIndexedT, IsCutIndexEnabledT> paFactory(pDC, state.topology, work.numVerts);
     PA_STATE& pa = paFactory.GetPA();
 
     /// @todo: temporarily move instance loop in the FE to ensure SO ordering
@@ -1431,12 +1435,13 @@ struct FEDrawChooser
 // Selector for correct templated Draw front-end function
 PFN_FE_WORK_FUNC GetProcessDrawFunc(
     bool IsIndexed,
+    bool IsCutIndexEnabled,
     bool HasTessellation,
     bool HasGeometryShader,
     bool HasStreamOut,
     bool HasRasterization)
 {
-    return TemplateArgUnroller<FEDrawChooser>::GetFunc(IsIndexed, HasTessellation, HasGeometryShader, HasStreamOut, HasRasterization);
+    return TemplateArgUnroller<FEDrawChooser>::GetFunc(IsIndexed, IsCutIndexEnabled, HasTessellation, HasGeometryShader, HasStreamOut, HasRasterization);
 }
 
 
@@ -1572,6 +1577,7 @@ void BinTriangles(
     const SWR_RASTSTATE& rastState = state.rastState;
     const SWR_FRONTEND_STATE& feState = state.frontendState;
     const SWR_GS_STATE& gsState = state.gsState;
+    MacroTileMgr *pTileMgr = pDC->pTileMgr;
 
     // Simple wireframe mode for debugging purposes only
 
@@ -1634,7 +1640,7 @@ void BinTriangles(
     int maskLo = _simd_movemask_pd(_simd_castsi_pd(_simd_cmpeq_epi64(vDet[0], _simd_setzero_si())));
     int maskHi = _simd_movemask_pd(_simd_castsi_pd(_simd_cmpeq_epi64(vDet[1], _simd_setzero_si())));
 
-    int cullZeroAreaMask = maskLo | ((maskHi << KNOB_SIMD_WIDTH / 2));
+    int cullZeroAreaMask = maskLo | (maskHi << (KNOB_SIMD_WIDTH / 2));
 
     uint32_t origTriMask = triMask;
     triMask &= ~cullZeroAreaMask;
@@ -1780,6 +1786,7 @@ void BinTriangles(
         _simd_store_si((simdscalari*)aRTAI, _simd_setzero_si());
     }
 
+
     // scan remaining valid triangles and bin each separately
     while (_BitScanForward(&triIndex, triMask))
     {
@@ -1832,7 +1839,6 @@ void BinTriangles(
             ProcessUserClipDist<3>(pa, triIndex, rastState.clipDistanceMask, desc.pUserClipBuffer);
         }
 
-        MacroTileMgr *pTileMgr = pDC->pTileMgr;
         for (uint32_t y = aMTTop[triIndex]; y <= aMTBottom[triIndex]; ++y)
         {
             for (uint32_t x = aMTLeft[triIndex]; x <= aMTRight[triIndex]; ++x)

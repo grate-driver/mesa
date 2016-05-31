@@ -22,23 +22,27 @@
  */
 
 #include "anv_private.h"
-#include "brw_surface_formats.h"
+#include "vk_format_info.h"
 
-#define RGBA { 0, 1, 2, 3 }
-#define BGRA { 2, 1, 0, 3 }
+#define ISL_SWIZZLE(r, g, b, a) { \
+   ISL_CHANNEL_SELECT_##r, \
+   ISL_CHANNEL_SELECT_##g, \
+   ISL_CHANNEL_SELECT_##b, \
+   ISL_CHANNEL_SELECT_##a, \
+}
 
-#define swiz_fmt(__vk_fmt, __hw_fmt, __swizzle, ...)     \
+#define RGBA ISL_SWIZZLE(RED, GREEN, BLUE, ALPHA)
+#define BGRA ISL_SWIZZLE(BLUE, GREEN, RED, ALPHA)
+#define RGB1 ISL_SWIZZLE(RED, GREEN, BLUE, ONE)
+
+#define swiz_fmt(__vk_fmt, __hw_fmt, __swizzle)     \
    [__vk_fmt] = { \
-      .vk_format = __vk_fmt, \
-      .name = #__vk_fmt, \
       .isl_format = __hw_fmt, \
-      .isl_layout = &isl_format_layouts[__hw_fmt], \
       .swizzle = __swizzle, \
-      __VA_ARGS__ \
    }
 
-#define fmt(__vk_fmt, __hw_fmt, ...) \
-   swiz_fmt(__vk_fmt, __hw_fmt, RGBA, __VA_ARGS__)
+#define fmt(__vk_fmt, __hw_fmt) \
+   swiz_fmt(__vk_fmt, __hw_fmt, RGBA)
 
 /* HINT: For array formats, the ISL name should match the VK name.  For
  * packed formats, they should have the channels in reverse order from each
@@ -46,7 +50,7 @@
  * bspec) names are in LSB -> MSB order while VK formats are MSB -> LSB.
  */
 static const struct anv_format anv_formats[] = {
-   fmt(VK_FORMAT_UNDEFINED,               ISL_FORMAT_RAW),
+   fmt(VK_FORMAT_UNDEFINED,               ISL_FORMAT_UNSUPPORTED),
    fmt(VK_FORMAT_R4G4_UNORM_PACK8,        ISL_FORMAT_UNSUPPORTED),
    fmt(VK_FORMAT_R4G4B4A4_UNORM_PACK16,   ISL_FORMAT_A4B4G4R4_UNORM),
    swiz_fmt(VK_FORMAT_B4G4R4A4_UNORM_PACK16,   ISL_FORMAT_A4B4G4R4_UNORM,  BGRA),
@@ -130,18 +134,18 @@ static const struct anv_format anv_formats[] = {
    fmt(VK_FORMAT_R16G16B16A16_UINT,       ISL_FORMAT_R16G16B16A16_UINT),
    fmt(VK_FORMAT_R16G16B16A16_SINT,       ISL_FORMAT_R16G16B16A16_SINT),
    fmt(VK_FORMAT_R16G16B16A16_SFLOAT,     ISL_FORMAT_R16G16B16A16_FLOAT),
-   fmt(VK_FORMAT_R32_UINT,                ISL_FORMAT_R32_UINT,),
-   fmt(VK_FORMAT_R32_SINT,                ISL_FORMAT_R32_SINT,),
-   fmt(VK_FORMAT_R32_SFLOAT,              ISL_FORMAT_R32_FLOAT,),
-   fmt(VK_FORMAT_R32G32_UINT,             ISL_FORMAT_R32G32_UINT,),
-   fmt(VK_FORMAT_R32G32_SINT,             ISL_FORMAT_R32G32_SINT,),
-   fmt(VK_FORMAT_R32G32_SFLOAT,           ISL_FORMAT_R32G32_FLOAT,),
-   fmt(VK_FORMAT_R32G32B32_UINT,          ISL_FORMAT_R32G32B32_UINT,),
-   fmt(VK_FORMAT_R32G32B32_SINT,          ISL_FORMAT_R32G32B32_SINT,),
-   fmt(VK_FORMAT_R32G32B32_SFLOAT,        ISL_FORMAT_R32G32B32_FLOAT,),
-   fmt(VK_FORMAT_R32G32B32A32_UINT,       ISL_FORMAT_R32G32B32A32_UINT,),
-   fmt(VK_FORMAT_R32G32B32A32_SINT,       ISL_FORMAT_R32G32B32A32_SINT,),
-   fmt(VK_FORMAT_R32G32B32A32_SFLOAT,     ISL_FORMAT_R32G32B32A32_FLOAT,),
+   fmt(VK_FORMAT_R32_UINT,                ISL_FORMAT_R32_UINT),
+   fmt(VK_FORMAT_R32_SINT,                ISL_FORMAT_R32_SINT),
+   fmt(VK_FORMAT_R32_SFLOAT,              ISL_FORMAT_R32_FLOAT),
+   fmt(VK_FORMAT_R32G32_UINT,             ISL_FORMAT_R32G32_UINT),
+   fmt(VK_FORMAT_R32G32_SINT,             ISL_FORMAT_R32G32_SINT),
+   fmt(VK_FORMAT_R32G32_SFLOAT,           ISL_FORMAT_R32G32_FLOAT),
+   fmt(VK_FORMAT_R32G32B32_UINT,          ISL_FORMAT_R32G32B32_UINT),
+   fmt(VK_FORMAT_R32G32B32_SINT,          ISL_FORMAT_R32G32B32_SINT),
+   fmt(VK_FORMAT_R32G32B32_SFLOAT,        ISL_FORMAT_R32G32B32_FLOAT),
+   fmt(VK_FORMAT_R32G32B32A32_UINT,       ISL_FORMAT_R32G32B32A32_UINT),
+   fmt(VK_FORMAT_R32G32B32A32_SINT,       ISL_FORMAT_R32G32B32A32_SINT),
+   fmt(VK_FORMAT_R32G32B32A32_SFLOAT,     ISL_FORMAT_R32G32B32A32_FLOAT),
    fmt(VK_FORMAT_R64_UINT,                ISL_FORMAT_R64_PASSTHRU),
    fmt(VK_FORMAT_R64_SINT,                ISL_FORMAT_R64_PASSTHRU),
    fmt(VK_FORMAT_R64_SFLOAT,              ISL_FORMAT_R64_FLOAT),
@@ -157,13 +161,13 @@ static const struct anv_format anv_formats[] = {
    fmt(VK_FORMAT_B10G11R11_UFLOAT_PACK32, ISL_FORMAT_R11G11B10_FLOAT),
    fmt(VK_FORMAT_E5B9G9R9_UFLOAT_PACK32,  ISL_FORMAT_R9G9B9E5_SHAREDEXP),
 
-   fmt(VK_FORMAT_D16_UNORM,               ISL_FORMAT_R16_UNORM,               .has_depth = true),
-   fmt(VK_FORMAT_X8_D24_UNORM_PACK32,     ISL_FORMAT_R24_UNORM_X8_TYPELESS,   .has_depth = true),
-   fmt(VK_FORMAT_D32_SFLOAT,              ISL_FORMAT_R32_FLOAT,               .has_depth = true),
-   fmt(VK_FORMAT_S8_UINT,                 ISL_FORMAT_R8_UINT,                                      .has_stencil = true),
+   fmt(VK_FORMAT_D16_UNORM,               ISL_FORMAT_R16_UNORM),
+   fmt(VK_FORMAT_X8_D24_UNORM_PACK32,     ISL_FORMAT_R24_UNORM_X8_TYPELESS),
+   fmt(VK_FORMAT_D32_SFLOAT,              ISL_FORMAT_R32_FLOAT),
+   fmt(VK_FORMAT_S8_UINT,                 ISL_FORMAT_R8_UINT),
    fmt(VK_FORMAT_D16_UNORM_S8_UINT,       ISL_FORMAT_UNSUPPORTED),
-   fmt(VK_FORMAT_D24_UNORM_S8_UINT,       ISL_FORMAT_R24_UNORM_X8_TYPELESS,   .has_depth = true,   .has_stencil = true),
-   fmt(VK_FORMAT_D32_SFLOAT_S8_UINT,      ISL_FORMAT_R32_FLOAT,               .has_depth = true,   .has_stencil = true),
+   fmt(VK_FORMAT_D24_UNORM_S8_UINT,       ISL_FORMAT_R24_UNORM_X8_TYPELESS),
+   fmt(VK_FORMAT_D32_SFLOAT_S8_UINT,      ISL_FORMAT_R32_FLOAT),
 
    fmt(VK_FORMAT_BC1_RGB_UNORM_BLOCK,     ISL_FORMAT_DXT1_RGB),
    fmt(VK_FORMAT_BC1_RGB_SRGB_BLOCK,      ISL_FORMAT_DXT1_RGB_SRGB),
@@ -191,34 +195,34 @@ static const struct anv_format anv_formats[] = {
    fmt(VK_FORMAT_EAC_R11_SNORM_BLOCK,     ISL_FORMAT_EAC_SIGNED_R11),
    fmt(VK_FORMAT_EAC_R11G11_UNORM_BLOCK,  ISL_FORMAT_EAC_RG11),
    fmt(VK_FORMAT_EAC_R11G11_SNORM_BLOCK,  ISL_FORMAT_EAC_SIGNED_RG11),
-   fmt(VK_FORMAT_ASTC_4x4_UNORM_BLOCK,    ISL_FORMAT_UNSUPPORTED),
-   fmt(VK_FORMAT_ASTC_4x4_SRGB_BLOCK,     ISL_FORMAT_UNSUPPORTED),
-   fmt(VK_FORMAT_ASTC_5x4_UNORM_BLOCK,    ISL_FORMAT_UNSUPPORTED),
-   fmt(VK_FORMAT_ASTC_5x4_SRGB_BLOCK,     ISL_FORMAT_UNSUPPORTED),
-   fmt(VK_FORMAT_ASTC_5x5_UNORM_BLOCK,    ISL_FORMAT_UNSUPPORTED),
-   fmt(VK_FORMAT_ASTC_5x5_SRGB_BLOCK,     ISL_FORMAT_UNSUPPORTED),
-   fmt(VK_FORMAT_ASTC_6x5_UNORM_BLOCK,    ISL_FORMAT_UNSUPPORTED),
-   fmt(VK_FORMAT_ASTC_6x5_SRGB_BLOCK,     ISL_FORMAT_UNSUPPORTED),
-   fmt(VK_FORMAT_ASTC_6x6_UNORM_BLOCK,    ISL_FORMAT_UNSUPPORTED),
-   fmt(VK_FORMAT_ASTC_6x6_SRGB_BLOCK,     ISL_FORMAT_UNSUPPORTED),
-   fmt(VK_FORMAT_ASTC_8x5_UNORM_BLOCK,    ISL_FORMAT_UNSUPPORTED),
-   fmt(VK_FORMAT_ASTC_8x5_SRGB_BLOCK,     ISL_FORMAT_UNSUPPORTED),
-   fmt(VK_FORMAT_ASTC_8x6_UNORM_BLOCK,    ISL_FORMAT_UNSUPPORTED),
-   fmt(VK_FORMAT_ASTC_8x6_SRGB_BLOCK,     ISL_FORMAT_UNSUPPORTED),
-   fmt(VK_FORMAT_ASTC_8x8_UNORM_BLOCK,    ISL_FORMAT_UNSUPPORTED),
-   fmt(VK_FORMAT_ASTC_8x8_SRGB_BLOCK,     ISL_FORMAT_UNSUPPORTED),
-   fmt(VK_FORMAT_ASTC_10x5_UNORM_BLOCK,   ISL_FORMAT_UNSUPPORTED),
-   fmt(VK_FORMAT_ASTC_10x5_SRGB_BLOCK,    ISL_FORMAT_UNSUPPORTED),
-   fmt(VK_FORMAT_ASTC_10x6_UNORM_BLOCK,   ISL_FORMAT_UNSUPPORTED),
-   fmt(VK_FORMAT_ASTC_10x6_SRGB_BLOCK,    ISL_FORMAT_UNSUPPORTED),
-   fmt(VK_FORMAT_ASTC_10x8_UNORM_BLOCK,   ISL_FORMAT_UNSUPPORTED),
-   fmt(VK_FORMAT_ASTC_10x8_SRGB_BLOCK,    ISL_FORMAT_UNSUPPORTED),
-   fmt(VK_FORMAT_ASTC_10x10_UNORM_BLOCK,  ISL_FORMAT_UNSUPPORTED),
-   fmt(VK_FORMAT_ASTC_10x10_SRGB_BLOCK,   ISL_FORMAT_UNSUPPORTED),
-   fmt(VK_FORMAT_ASTC_12x10_UNORM_BLOCK,  ISL_FORMAT_UNSUPPORTED),
-   fmt(VK_FORMAT_ASTC_12x10_SRGB_BLOCK,   ISL_FORMAT_UNSUPPORTED),
-   fmt(VK_FORMAT_ASTC_12x12_UNORM_BLOCK,  ISL_FORMAT_UNSUPPORTED),
-   fmt(VK_FORMAT_ASTC_12x12_SRGB_BLOCK,   ISL_FORMAT_UNSUPPORTED),
+   fmt(VK_FORMAT_ASTC_4x4_SRGB_BLOCK,     ISL_FORMAT_ASTC_LDR_2D_4X4_U8SRGB),
+   fmt(VK_FORMAT_ASTC_5x4_SRGB_BLOCK,     ISL_FORMAT_ASTC_LDR_2D_5X4_U8SRGB),
+   fmt(VK_FORMAT_ASTC_5x5_SRGB_BLOCK,     ISL_FORMAT_ASTC_LDR_2D_5X5_U8SRGB),
+   fmt(VK_FORMAT_ASTC_6x5_SRGB_BLOCK,     ISL_FORMAT_ASTC_LDR_2D_6X5_U8SRGB),
+   fmt(VK_FORMAT_ASTC_6x6_SRGB_BLOCK,     ISL_FORMAT_ASTC_LDR_2D_6X6_U8SRGB),
+   fmt(VK_FORMAT_ASTC_8x5_SRGB_BLOCK,     ISL_FORMAT_ASTC_LDR_2D_8X5_U8SRGB),
+   fmt(VK_FORMAT_ASTC_8x6_SRGB_BLOCK,     ISL_FORMAT_ASTC_LDR_2D_8X6_U8SRGB),
+   fmt(VK_FORMAT_ASTC_8x8_SRGB_BLOCK,     ISL_FORMAT_ASTC_LDR_2D_8X8_U8SRGB),
+   fmt(VK_FORMAT_ASTC_10x5_SRGB_BLOCK,    ISL_FORMAT_ASTC_LDR_2D_10X5_U8SRGB),
+   fmt(VK_FORMAT_ASTC_10x6_SRGB_BLOCK,    ISL_FORMAT_ASTC_LDR_2D_10X6_U8SRGB),
+   fmt(VK_FORMAT_ASTC_10x8_SRGB_BLOCK,    ISL_FORMAT_ASTC_LDR_2D_10X8_U8SRGB),
+   fmt(VK_FORMAT_ASTC_10x10_SRGB_BLOCK,   ISL_FORMAT_ASTC_LDR_2D_10X10_U8SRGB),
+   fmt(VK_FORMAT_ASTC_12x10_SRGB_BLOCK,   ISL_FORMAT_ASTC_LDR_2D_12X10_U8SRGB),
+   fmt(VK_FORMAT_ASTC_12x12_SRGB_BLOCK,   ISL_FORMAT_ASTC_LDR_2D_12X12_U8SRGB),
+   fmt(VK_FORMAT_ASTC_4x4_UNORM_BLOCK,    ISL_FORMAT_ASTC_LDR_2D_4X4_FLT16),
+   fmt(VK_FORMAT_ASTC_5x4_UNORM_BLOCK,    ISL_FORMAT_ASTC_LDR_2D_5X4_FLT16),
+   fmt(VK_FORMAT_ASTC_5x5_UNORM_BLOCK,    ISL_FORMAT_ASTC_LDR_2D_5X5_FLT16),
+   fmt(VK_FORMAT_ASTC_6x5_UNORM_BLOCK,    ISL_FORMAT_ASTC_LDR_2D_6X5_FLT16),
+   fmt(VK_FORMAT_ASTC_6x6_UNORM_BLOCK,    ISL_FORMAT_ASTC_LDR_2D_6X6_FLT16),
+   fmt(VK_FORMAT_ASTC_8x5_UNORM_BLOCK,    ISL_FORMAT_ASTC_LDR_2D_8X5_FLT16),
+   fmt(VK_FORMAT_ASTC_8x6_UNORM_BLOCK,    ISL_FORMAT_ASTC_LDR_2D_8X6_FLT16),
+   fmt(VK_FORMAT_ASTC_8x8_UNORM_BLOCK,    ISL_FORMAT_ASTC_LDR_2D_8X8_FLT16),
+   fmt(VK_FORMAT_ASTC_10x5_UNORM_BLOCK,   ISL_FORMAT_ASTC_LDR_2D_10X5_FLT16),
+   fmt(VK_FORMAT_ASTC_10x6_UNORM_BLOCK,   ISL_FORMAT_ASTC_LDR_2D_10X6_FLT16),
+   fmt(VK_FORMAT_ASTC_10x8_UNORM_BLOCK,   ISL_FORMAT_ASTC_LDR_2D_10X8_FLT16),
+   fmt(VK_FORMAT_ASTC_10x10_UNORM_BLOCK,  ISL_FORMAT_ASTC_LDR_2D_10X10_FLT16),
+   fmt(VK_FORMAT_ASTC_12x10_UNORM_BLOCK,  ISL_FORMAT_ASTC_LDR_2D_12X10_FLT16),
+   fmt(VK_FORMAT_ASTC_12x12_UNORM_BLOCK,  ISL_FORMAT_ASTC_LDR_2D_12X12_FLT16),
    fmt(VK_FORMAT_B8G8R8_UNORM,            ISL_FORMAT_UNSUPPORTED),
    fmt(VK_FORMAT_B8G8R8_SNORM,            ISL_FORMAT_UNSUPPORTED),
    fmt(VK_FORMAT_B8G8R8_USCALED,          ISL_FORMAT_UNSUPPORTED),
@@ -237,87 +241,79 @@ static const struct anv_format anv_formats[] = {
 
 #undef fmt
 
-const struct anv_format *
-anv_format_for_vk_format(VkFormat format)
-{
-   return &anv_formats[format];
-}
-
 /**
  * Exactly one bit must be set in \a aspect.
  */
-enum isl_format
-anv_get_isl_format(VkFormat format, VkImageAspectFlags aspect,
-                   VkImageTiling tiling, struct anv_format_swizzle *swizzle)
+struct anv_format
+anv_get_format(const struct brw_device_info *devinfo, VkFormat vk_format,
+               VkImageAspectFlags aspect, VkImageTiling tiling)
 {
-   const struct anv_format *anv_fmt = &anv_formats[format];
+   struct anv_format format = anv_formats[vk_format];
 
-   if (swizzle)
-      *swizzle = anv_fmt->swizzle;
+   if (format.isl_format == ISL_FORMAT_UNSUPPORTED)
+      return format;
 
-   switch (aspect) {
-   case VK_IMAGE_ASPECT_COLOR_BIT:
-      if (anv_fmt->isl_format == ISL_FORMAT_UNSUPPORTED) {
-         return ISL_FORMAT_UNSUPPORTED;
-      } else if (tiling == VK_IMAGE_TILING_OPTIMAL &&
-                 !util_is_power_of_two(anv_fmt->isl_layout->bs)) {
-         /* Tiled formats *must* be power-of-two because we need up upload
-          * them with the render pipeline.  For 3-channel formats, we fix
-          * this by switching them over to RGBX or RGBA formats under the
-          * hood.
-          */
-         enum isl_format rgbx = isl_format_rgb_to_rgbx(anv_fmt->isl_format);
-         if (rgbx != ISL_FORMAT_UNSUPPORTED)
-            return rgbx;
-         else
-            return isl_format_rgb_to_rgba(anv_fmt->isl_format);
-      } else {
-         return anv_fmt->isl_format;
-      }
-
-   case VK_IMAGE_ASPECT_DEPTH_BIT:
-   case (VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT):
-      assert(anv_fmt->has_depth);
-      return anv_fmt->isl_format;
-
-   case VK_IMAGE_ASPECT_STENCIL_BIT:
-      assert(anv_fmt->has_stencil);
-      return ISL_FORMAT_R8_UINT;
-
-   default:
-      unreachable("bad VkImageAspect");
-      return ISL_FORMAT_UNSUPPORTED;
+   if (aspect == VK_IMAGE_ASPECT_STENCIL_BIT) {
+      assert(vk_format_aspects(vk_format) & VK_IMAGE_ASPECT_STENCIL_BIT);
+      format.isl_format = ISL_FORMAT_R8_UINT;
+      return format;
    }
+
+   if (aspect & VK_IMAGE_ASPECT_DEPTH_BIT) {
+      assert(vk_format_aspects(vk_format) & VK_IMAGE_ASPECT_DEPTH_BIT);
+      return format;
+   }
+
+   assert(aspect == VK_IMAGE_ASPECT_COLOR_BIT);
+   assert(vk_format_aspects(vk_format) == VK_IMAGE_ASPECT_COLOR_BIT);
+
+   const struct isl_format_layout *isl_layout =
+      isl_format_get_layout(format.isl_format);
+
+   if (tiling == VK_IMAGE_TILING_OPTIMAL &&
+       !util_is_power_of_two(isl_layout->bs)) {
+      /* Tiled formats *must* be power-of-two because we need up upload
+       * them with the render pipeline.  For 3-channel formats, we fix
+       * this by switching them over to RGBX or RGBA formats under the
+       * hood.
+       */
+      enum isl_format rgbx = isl_format_rgb_to_rgbx(format.isl_format);
+      if (rgbx != ISL_FORMAT_UNSUPPORTED) {
+         format.isl_format = rgbx;
+      } else {
+         format.isl_format = isl_format_rgb_to_rgba(format.isl_format);
+         format.swizzle = (struct anv_format_swizzle) RGB1;
+      }
+   }
+
+   /* The B4G4R4A4 format isn't available prior to Sky Lake so we have to fall
+    * back to a format with a more complex swizzle.
+    */
+   if (vk_format == VK_FORMAT_B4G4R4A4_UNORM_PACK16 && devinfo->gen < 9) {
+      return (struct anv_format) {
+         .isl_format = ISL_FORMAT_B4G4R4A4_UNORM,
+         .swizzle = ISL_SWIZZLE(GREEN, RED, ALPHA, BLUE),
+      };
+   }
+
+   return format;
 }
 
 // Format capabilities
 
-void anv_validate_GetPhysicalDeviceFormatProperties(
-    VkPhysicalDevice                            physicalDevice,
-    VkFormat                                    _format,
-    VkFormatProperties*                         pFormatProperties)
-{
-   const struct anv_format *format = anv_format_for_vk_format(_format);
-   fprintf(stderr, "vkGetFormatProperties(%s)\n", format->name);
-   anv_GetPhysicalDeviceFormatProperties(physicalDevice, _format, pFormatProperties);
-}
-
 static VkFormatFeatureFlags
-get_image_format_properties(int gen, enum isl_format base,
-                            enum isl_format actual,
-                            struct anv_format_swizzle swizzle)
+get_image_format_properties(const struct brw_device_info *devinfo,
+                            enum isl_format base, struct anv_format format)
 {
-   const struct brw_surface_format_info *info = &surface_formats[actual];
-
-   if (actual == ISL_FORMAT_UNSUPPORTED || !info->exists)
+   if (format.isl_format == ISL_FORMAT_UNSUPPORTED)
       return 0;
 
    VkFormatFeatureFlags flags = 0;
-   if (info->sampling <= gen) {
+   if (isl_format_supports_sampling(devinfo, format.isl_format)) {
       flags |= VK_FORMAT_FEATURE_SAMPLED_IMAGE_BIT |
                VK_FORMAT_FEATURE_BLIT_SRC_BIT;
 
-      if (info->filtering <= gen)
+      if (isl_format_supports_filtering(devinfo, format.isl_format))
          flags |= VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_LINEAR_BIT;
    }
 
@@ -325,13 +321,14 @@ get_image_format_properties(int gen, enum isl_format base,
     * moved, then blending won't work correctly.  The PRM tells us
     * straight-up not to render to such a surface.
     */
-   if (info->render_target <= gen && swizzle.a == 3) {
+   if (isl_format_supports_rendering(devinfo, format.isl_format) &&
+       format.swizzle.a == ISL_CHANNEL_SELECT_ALPHA) {
       flags |= VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BIT |
                VK_FORMAT_FEATURE_BLIT_DST_BIT;
-   }
 
-   if (info->alpha_blend <= gen && swizzle.a == 3)
-      flags |= VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BLEND_BIT;
+      if (isl_format_supports_alpha_blending(devinfo, format.isl_format))
+         flags |= VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BLEND_BIT;
+   }
 
    /* Load/store is determined based on base format.  This prevents RGB
     * formats from showing up as load/store capable.
@@ -346,18 +343,18 @@ get_image_format_properties(int gen, enum isl_format base,
 }
 
 static VkFormatFeatureFlags
-get_buffer_format_properties(int gen, enum isl_format format)
+get_buffer_format_properties(const struct brw_device_info *devinfo,
+                             enum isl_format format)
 {
-   const struct brw_surface_format_info *info = &surface_formats[format];
-
-   if (format == ISL_FORMAT_UNSUPPORTED || !info->exists)
+   if (format == ISL_FORMAT_UNSUPPORTED)
       return 0;
 
    VkFormatFeatureFlags flags = 0;
-   if (info->sampling <= gen && !isl_format_is_compressed(format))
+   if (isl_format_supports_sampling(devinfo, format) &&
+       !isl_format_is_compressed(format))
       flags |= VK_FORMAT_FEATURE_UNIFORM_TEXEL_BUFFER_BIT;
 
-   if (info->input_vb <= gen)
+   if (isl_format_supports_vertex_fetch(devinfo, format))
       flags |= VK_FORMAT_FEATURE_VERTEX_BUFFER_BIT;
 
    if (isl_is_storage_image_format(format))
@@ -379,7 +376,9 @@ anv_physical_device_get_format_properties(struct anv_physical_device *physical_d
       gen += 5;
 
    VkFormatFeatureFlags linear = 0, tiled = 0, buffer = 0;
-   if (anv_format_is_depth_or_stencil(&anv_formats[format])) {
+   if (anv_formats[format].isl_format == ISL_FORMAT_UNSUPPORTED) {
+      /* Nothing to do here */
+   } else if (vk_format_is_depth_or_stencil(format)) {
       tiled |= VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT;
       if (physical_device->info->gen >= 8)
          tiled |= VK_FORMAT_FEATURE_SAMPLED_IMAGE_BIT;
@@ -387,18 +386,20 @@ anv_physical_device_get_format_properties(struct anv_physical_device *physical_d
       tiled |= VK_FORMAT_FEATURE_BLIT_SRC_BIT |
                VK_FORMAT_FEATURE_BLIT_DST_BIT;
    } else {
-      enum isl_format linear_fmt, tiled_fmt;
-      struct anv_format_swizzle linear_swizzle, tiled_swizzle;
-      linear_fmt = anv_get_isl_format(format, VK_IMAGE_ASPECT_COLOR_BIT,
-                                      VK_IMAGE_TILING_LINEAR, &linear_swizzle);
-      tiled_fmt = anv_get_isl_format(format, VK_IMAGE_ASPECT_COLOR_BIT,
-                                     VK_IMAGE_TILING_OPTIMAL, &tiled_swizzle);
+      struct anv_format linear_fmt, tiled_fmt;
+      linear_fmt = anv_get_format(physical_device->info, format,
+                                  VK_IMAGE_ASPECT_COLOR_BIT,
+                                  VK_IMAGE_TILING_LINEAR);
+      tiled_fmt = anv_get_format(physical_device->info, format,
+                                 VK_IMAGE_ASPECT_COLOR_BIT,
+                                 VK_IMAGE_TILING_OPTIMAL);
 
-      linear = get_image_format_properties(gen, linear_fmt, linear_fmt,
-                                           linear_swizzle);
-      tiled = get_image_format_properties(gen, linear_fmt, tiled_fmt,
-                                          tiled_swizzle);
-      buffer = get_buffer_format_properties(gen, linear_fmt);
+      linear = get_image_format_properties(physical_device->info,
+                                           linear_fmt.isl_format, linear_fmt);
+      tiled = get_image_format_properties(physical_device->info,
+                                          linear_fmt.isl_format, tiled_fmt);
+      buffer = get_buffer_format_properties(physical_device->info,
+                                            linear_fmt.isl_format);
 
       /* XXX: We handle 3-channel formats by switching them out for RGBX or
        * RGBA formats behind-the-scenes.  This works fine for textures
@@ -407,9 +408,9 @@ anv_physical_device_get_format_properties(struct anv_physical_device *physical_d
        * substantially more work and we have enough RGBX formats to handle
        * what most clients will want.
        */
-      if (linear_fmt != ISL_FORMAT_UNSUPPORTED &&
-          !util_is_power_of_two(isl_format_layouts[linear_fmt].bs) &&
-          isl_format_rgb_to_rgbx(linear_fmt) == ISL_FORMAT_UNSUPPORTED) {
+      if (linear_fmt.isl_format != ISL_FORMAT_UNSUPPORTED &&
+          !util_is_power_of_two(isl_format_layouts[linear_fmt.isl_format].bs) &&
+          isl_format_rgb_to_rgbx(linear_fmt.isl_format) == ISL_FORMAT_UNSUPPORTED) {
          tiled &= ~VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BIT &
                   ~VK_FORMAT_FEATURE_BLIT_DST_BIT;
       }

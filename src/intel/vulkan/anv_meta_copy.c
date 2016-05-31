@@ -23,6 +23,18 @@
 
 #include "anv_meta.h"
 
+static VkExtent3D
+meta_image_block_size(const struct anv_image *image)
+{
+   if (image->aspects == VK_IMAGE_ASPECT_COLOR_BIT) {
+      const struct isl_format_layout *isl_layout =
+         isl_format_get_layout(image->color_surface.isl.format);
+      return (VkExtent3D) { isl_layout->bw, isl_layout->bh, isl_layout->bd };
+   } else {
+      return (VkExtent3D) { 1, 1, 1 };
+   }
+}
+
 /* Returns the user-provided VkBufferImageCopy::imageExtent in units of
  * elements rather than texels. One element equals one texel or one block
  * if Image is uncompressed or compressed, respectively.
@@ -31,12 +43,11 @@ static struct VkExtent3D
 meta_region_extent_el(const struct anv_image *image,
                       const struct VkExtent3D *extent)
 {
-   const struct isl_format_layout *isl_layout =
-      anv_format_for_vk_format(image->vk_format)->isl_layout;
+   const VkExtent3D block = meta_image_block_size(image);
    return anv_sanitize_image_extent(image->type, (VkExtent3D) {
-      .width  = DIV_ROUND_UP(extent->width , isl_layout->bw),
-      .height = DIV_ROUND_UP(extent->height, isl_layout->bh),
-      .depth  = DIV_ROUND_UP(extent->depth , isl_layout->bd),
+      .width  = DIV_ROUND_UP(extent->width , block.width),
+      .height = DIV_ROUND_UP(extent->height, block.height),
+      .depth  = DIV_ROUND_UP(extent->depth , block.depth),
    });
 }
 
@@ -48,11 +59,11 @@ static struct VkOffset3D
 meta_region_offset_el(const struct anv_image *image,
                       const struct VkOffset3D *offset)
 {
-   const struct isl_format_layout *isl_layout = image->format->isl_layout;
+   const VkExtent3D block = meta_image_block_size(image);
    return anv_sanitize_image_offset(image->type, (VkOffset3D) {
-      .x = offset->x / isl_layout->bw,
-      .y = offset->y / isl_layout->bh,
-      .z = offset->z / isl_layout->bd,
+      .x = offset->x / block.width,
+      .y = offset->y / block.height,
+      .z = offset->z / block.depth,
    });
 }
 
@@ -128,18 +139,20 @@ meta_copy_buffer_to_image(struct anv_cmd_buffer *cmd_buffer,
       const VkOffset3D img_offset_el =
          meta_region_offset_el(image, &pRegions[r].imageOffset);
       const VkExtent3D bufferExtent = {
-         .width = pRegions[r].bufferRowLength,
-         .height = pRegions[r].bufferImageHeight,
+         .width  = pRegions[r].bufferRowLength ?
+                   pRegions[r].bufferRowLength : pRegions[r].imageExtent.width,
+         .height = pRegions[r].bufferImageHeight ?
+                   pRegions[r].bufferImageHeight : pRegions[r].imageExtent.height,
       };
-
-      /* Start creating blit rect */
       const VkExtent3D buf_extent_el =
          meta_region_extent_el(image, &bufferExtent);
+
+      /* Start creating blit rect */
       const VkExtent3D img_extent_el =
          meta_region_extent_el(image, &pRegions[r].imageExtent);
       struct anv_meta_blit2d_rect rect = {
-         .width = MAX2(buf_extent_el.width, img_extent_el.width),
-         .height = MAX2(buf_extent_el.height, img_extent_el.height),
+         .width = img_extent_el.width,
+         .height =  img_extent_el.height,
       };
 
       /* Create blit surfaces */
@@ -148,12 +161,15 @@ meta_copy_buffer_to_image(struct anv_cmd_buffer *cmd_buffer,
          &anv_image_get_surface_for_aspect_mask(image, aspect)->isl;
       struct anv_meta_blit2d_surf img_bsurf =
          blit_surf_for_image(image, img_isl_surf);
+      enum isl_format buf_format = anv_get_isl_format(&cmd_buffer->device->info,
+                                                      image->vk_format, aspect,
+                                                      VK_IMAGE_TILING_LINEAR);
       struct anv_meta_blit2d_surf buf_bsurf = {
          .bo = buffer->bo,
          .tiling = ISL_TILING_LINEAR,
          .base_offset = buffer->offset + pRegions[r].bufferOffset,
-         .bs = forward ? image->format->isl_layout->bs : img_bsurf.bs,
-         .pitch = rect.width * buf_bsurf.bs,
+         .bs = isl_format_get_layout(buf_format)->bs,
+         .pitch = buf_extent_el.width * buf_bsurf.bs,
       };
 
       /* Set direction-dependent variables */
@@ -188,7 +204,8 @@ meta_copy_buffer_to_image(struct anv_cmd_buffer *cmd_buffer,
           * increment the offset directly in the image effectively
           * re-binding it to different backing memory.
           */
-         buf_bsurf.base_offset += rect.width * rect.height * buf_bsurf.bs;
+         buf_bsurf.base_offset += buf_extent_el.width *
+                                  buf_extent_el.height * buf_bsurf.bs;
 
          if (image->type == VK_IMAGE_TYPE_3D)
             slice_3d++;

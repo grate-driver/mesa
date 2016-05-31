@@ -19,6 +19,17 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
 
+git_sha1.h:
+	@if test -e $(top_srcdir)/.git; then \
+		if which git > /dev/null; then \
+		    git --git-dir=$(top_srcdir)/.git log -n 1 --oneline | \
+			sed 's/^\([^ ]*\) .*/#define MESA_GIT_SHA1 "git-\1"/' \
+			> git_sha1.h ; \
+		fi \
+	fi
+
+BUILT_SOURCES = git_sha1.h
+
 SUBDIRS = . gtest util mapi/glapi/gen mapi
 
 # include only conditionally ?
@@ -67,7 +78,7 @@ SUBDIRS += gallium
 endif
 
 EXTRA_DIST = \
-	getopt hgl SConscript
+	getopt hgl SConscript git_sha1.h
 
 AM_CFLAGS = $(VISIBILITY_CFLAGS)
 AM_CXXFLAGS = $(VISIBILITY_CXXFLAGS)

@@ -142,6 +142,11 @@ anv_shader_compile_to_nir(struct anv_device *device,
 
       free(spec_entries);
 
+      if (stage == MESA_SHADER_FRAGMENT) {
+         nir_lower_wpos_center(nir);
+         nir_validate_shader(nir);
+      }
+
       nir_lower_returns(nir);
       nir_validate_shader(nir);
 
@@ -161,7 +166,7 @@ anv_shader_compile_to_nir(struct anv_device *device,
       nir_remove_dead_variables(nir, nir_var_system_value);
       nir_validate_shader(nir);
 
-      nir_lower_outputs_to_temporaries(entry_point->shader, entry_point);
+      nir_lower_io_to_temporaries(entry_point->shader, entry_point, true, false);
 
       nir_lower_system_values(nir);
       nir_validate_shader(nir);
@@ -267,10 +272,6 @@ populate_wm_prog_key(const struct brw_device_info *devinfo,
    /* XXX Vulkan doesn't appear to specify */
    key->clamp_fragment_color = false;
 
-   /* Vulkan always specifies upper-left coordinates */
-   key->drawable_height = 0;
-   key->render_to_fbo = false;
-
    if (extra && extra->color_attachment_count >= 0) {
       key->nr_color_regions = extra->color_attachment_count;
    } else {
@@ -286,8 +287,9 @@ populate_wm_prog_key(const struct brw_device_info *devinfo,
       /* We should probably pull this out of the shader, but it's fairly
        * harmless to compute it and then let dead-code take care of it.
        */
-      key->persample_shading = info->pMultisampleState->sampleShadingEnable;
-      key->compute_pos_offset = info->pMultisampleState->sampleShadingEnable;
+      key->persample_interp =
+         (info->pMultisampleState->minSampleShading *
+          info->pMultisampleState->rasterizationSamples) > 1;
       key->multisample_fbo = true;
    }
 }
@@ -331,8 +333,13 @@ anv_pipeline_compile(struct anv_pipeline *pipeline,
    if (pipeline->layout && pipeline->layout->stage[stage].has_dynamic_offsets)
       prog_data->nr_params += MAX_DYNAMIC_BUFFERS * 2;
 
-   if (nir->info.num_images > 0)
+   if (nir->info.num_images > 0) {
       prog_data->nr_params += nir->info.num_images * BRW_IMAGE_PARAM_SIZE;
+      pipeline->needs_data_cache = true;
+   }
+
+   if (nir->info.num_ssbos > 0)
+      pipeline->needs_data_cache = true;
 
    if (prog_data->nr_params > 0) {
       /* XXX: I think we're leaking this */
@@ -584,17 +591,17 @@ anv_pipeline_compile_fs(struct anv_pipeline *pipeline,
    const struct brw_stage_prog_data *stage_prog_data;
    struct anv_pipeline_bind_map map;
    struct brw_wm_prog_key key;
-   uint32_t kernel = NO_KERNEL;
    unsigned char sha1[20];
 
    populate_wm_prog_key(&pipeline->device->info, info, extra, &key);
 
    if (module->size > 0) {
       anv_hash_shader(sha1, &key, sizeof(key), module, entrypoint, spec_info);
-      kernel = anv_pipeline_cache_search(cache, sha1, &stage_prog_data, &map);
+      pipeline->ps_ksp0 =
+         anv_pipeline_cache_search(cache, sha1, &stage_prog_data, &map);
    }
 
-   if (kernel == NO_KERNEL) {
+   if (pipeline->ps_ksp0 == NO_KERNEL) {
       struct brw_wm_prog_data prog_data = { 0, };
       struct anv_pipeline_binding surface_to_descriptor[256];
       struct anv_pipeline_binding sampler_to_descriptor[256];
@@ -674,48 +681,22 @@ anv_pipeline_compile_fs(struct anv_pipeline *pipeline,
       unsigned code_size;
       const unsigned *shader_code =
          brw_compile_fs(compiler, NULL, mem_ctx, &key, &prog_data, nir,
-                        NULL, -1, -1, pipeline->use_repclear, &code_size, NULL);
+                        NULL, -1, -1, true, pipeline->use_repclear,
+                        &code_size, NULL);
       if (shader_code == NULL) {
          ralloc_free(mem_ctx);
          return vk_error(VK_ERROR_OUT_OF_HOST_MEMORY);
       }
 
       stage_prog_data = &prog_data.base;
-      kernel = anv_pipeline_cache_upload_kernel(cache,
-                                                module->size > 0 ? sha1 : NULL,
-                                                shader_code, code_size,
+      pipeline->ps_ksp0 =
+         anv_pipeline_cache_upload_kernel(cache,
+                                          module->size > 0 ? sha1 : NULL,
+                                          shader_code, code_size,
                                                 &stage_prog_data, sizeof(prog_data),
                                                 &map);
 
       ralloc_free(mem_ctx);
-   }
-
-   const struct brw_wm_prog_data *wm_prog_data =
-      (const struct brw_wm_prog_data *) stage_prog_data;
-
-   if (wm_prog_data->no_8)
-      pipeline->ps_simd8 = NO_KERNEL;
-   else
-      pipeline->ps_simd8 = kernel;
-
-   if (wm_prog_data->no_8 || wm_prog_data->prog_offset_16) {
-      pipeline->ps_simd16 = kernel + wm_prog_data->prog_offset_16;
-   } else {
-      pipeline->ps_simd16 = NO_KERNEL;
-   }
-
-   pipeline->ps_ksp2 = 0;
-   pipeline->ps_grf_start2 = 0;
-   if (pipeline->ps_simd8 != NO_KERNEL) {
-      pipeline->ps_ksp0 = pipeline->ps_simd8;
-      pipeline->ps_grf_start0 = wm_prog_data->base.dispatch_grf_start_reg;
-      if (pipeline->ps_simd16 != NO_KERNEL) {
-         pipeline->ps_ksp2 = pipeline->ps_simd16;
-         pipeline->ps_grf_start2 = wm_prog_data->dispatch_grf_start_reg_16;
-      }
-   } else if (pipeline->ps_simd16 != NO_KERNEL) {
-      pipeline->ps_ksp0 = pipeline->ps_simd16;
-      pipeline->ps_grf_start0 = wm_prog_data->dispatch_grf_start_reg_16;
    }
 
    anv_pipeline_add_compiled_stage(pipeline, MESA_SHADER_FRAGMENT,
@@ -797,10 +778,34 @@ anv_pipeline_compile_cs(struct anv_pipeline *pipeline,
    return VK_SUCCESS;
 }
 
-static void
-gen7_compute_urb_partition(struct anv_pipeline *pipeline)
+
+void
+anv_setup_pipeline_l3_config(struct anv_pipeline *pipeline)
 {
    const struct brw_device_info *devinfo = &pipeline->device->info;
+   switch (devinfo->gen) {
+   case 7:
+      if (devinfo->is_haswell)
+         gen75_setup_pipeline_l3_config(pipeline);
+      else
+         gen7_setup_pipeline_l3_config(pipeline);
+      break;
+   case 8:
+      gen8_setup_pipeline_l3_config(pipeline);
+      break;
+   case 9:
+      gen9_setup_pipeline_l3_config(pipeline);
+      break;
+   default:
+      unreachable("unsupported gen\n");
+   }
+}
+
+void
+anv_compute_urb_partition(struct anv_pipeline *pipeline)
+{
+   const struct brw_device_info *devinfo = &pipeline->device->info;
+
    bool vs_present = pipeline->active_stages & VK_SHADER_STAGE_VERTEX_BIT;
    unsigned vs_size = vs_present ?
       get_vs_prog_data(pipeline)->base.urb_entry_size : 1;
@@ -824,7 +829,7 @@ gen7_compute_urb_partition(struct anv_pipeline *pipeline)
    unsigned chunk_size_bytes = 8192;
 
    /* Determine the size of the URB in chunks. */
-   unsigned urb_chunks = devinfo->urb.size * 1024 / chunk_size_bytes;
+   unsigned urb_chunks = pipeline->urb.total_size * 1024 / chunk_size_bytes;
 
    /* Reserve space for push constants */
    unsigned push_constant_kb;
@@ -935,28 +940,6 @@ gen7_compute_urb_partition(struct anv_pipeline *pipeline)
    pipeline->urb.start[MESA_SHADER_TESS_EVAL] = push_constant_chunks;
    pipeline->urb.size[MESA_SHADER_TESS_EVAL] = 1;
    pipeline->urb.entries[MESA_SHADER_TESS_EVAL] = 0;
-
-   const unsigned stages =
-      _mesa_bitcount(pipeline->active_stages & VK_SHADER_STAGE_ALL_GRAPHICS);
-   unsigned size_per_stage = stages ? (push_constant_kb / stages) : 0;
-   unsigned used_kb = 0;
-
-   /* Broadwell+ and Haswell gt3 require that the push constant sizes be in
-    * units of 2KB.  Incidentally, these are the same platforms that have
-    * 32KB worth of push constant space.
-    */
-   if (push_constant_kb == 32)
-      size_per_stage &= ~1u;
-
-   for (int i = MESA_SHADER_VERTEX; i < MESA_SHADER_FRAGMENT; i++) {
-      pipeline->urb.push_size[i] =
-         (pipeline->active_stages & (1 << i)) ? size_per_stage : 0;
-      used_kb += pipeline->urb.push_size[i];
-      assert(used_kb <= push_constant_kb);
-   }
-
-   pipeline->urb.push_size[MESA_SHADER_FRAGMENT] =
-      push_constant_kb - used_kb;
 }
 
 static void
@@ -1138,6 +1121,8 @@ anv_pipeline_init(struct anv_pipeline *pipeline,
 
    pipeline->use_repclear = extra && extra->use_repclear;
 
+   pipeline->needs_data_cache = false;
+
    /* When we free the pipeline, we detect stages based on the NULL status
     * of various prog_data pointers.  Make them NULL by default.
     */
@@ -1190,7 +1175,8 @@ anv_pipeline_init(struct anv_pipeline *pipeline,
       assert(extra->disable_vs);
    }
 
-   gen7_compute_urb_partition(pipeline);
+   anv_setup_pipeline_l3_config(pipeline);
+   anv_compute_urb_partition(pipeline);
 
    const VkPipelineVertexInputStateCreateInfo *vi_info =
       pCreateInfo->pVertexInputState;

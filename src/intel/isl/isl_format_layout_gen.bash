@@ -85,7 +85,7 @@ s/\<(linear|srgb|yuv)\>/ISL_COLORSPACE_\1/
 s/\<alpha\>//
 
 # Translate texture compression
-s/\<(dxt|fxt|rgtc|bptc|etc)([0-9]*)\>/ISL_TXC_\1\2/
+s/\<(dxt|fxt|rgtc|bptc|etc|astc)([0-9]*)\>/ISL_TXC_\1\2/
 ' |
 tr 'a-z' 'A-Z' | # Convert to uppersace
 while IFS=, read -r format bpb bw bh bd \
@@ -98,7 +98,8 @@ do
 
     cat <<EOF
    [$format] = {
-      $format,
+      .format = $format,
+      .name = "$format",
       .bs = $((bpb/8)),
       .bw = $bw, .bh = $bh, .bd = $bd,
       .channels = {

@@ -2815,7 +2815,7 @@
       <value name="MMIO Write Immediate Data" value="1"/>
     </field>
     <field name="Store Data Index" start="53" end="53" type="uint"/>
-    <field name="Command Streamer Stall Enable" start="52" end="52" type="uint"/>
+    <field name="Command Streamer Stall Enable" start="52" end="52" type="bool"/>
     <field name="Global Snapshot Count Reset" start="51" end="51" type="uint">
       <value name="Don't Reset" value="0"/>
       <value name="Reset" value="1"/>
@@ -2930,6 +2930,14 @@
     <field name="C Low Bandwidth" start="14" end="14" type="uint"/>
     <field name="T Allocation" start="15" end="20" type="uint"/>
     <field name="T Low Bandwidth" start="21" end="21" type="uint"/>
+  </register>
+
+  <register name="SCRATCH1" length="1" num="0xb038">
+    <field name="L3 Atomic Disable" start="27" end="27" type="uint"/>
+  </register>
+
+  <register name="CHICKEN3" length="1" num="0xe49c">
+    <field name="L3 Atomic Disable" start="6" end="6" type="uint"/>
   </register>
 
 </genxml>

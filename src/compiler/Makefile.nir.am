@@ -23,11 +23,6 @@
 
 noinst_LTLIBRARIES += nir/libnir.la
 
-nir_libnir_la_CPPFLAGS = \
-	$(AM_CPPFLAGS) \
-	-I$(top_builddir)/src/compiler/nir \
-	-I$(top_srcdir)/src/compiler/nir
-
 nir_libnir_la_LIBADD = \
 	libcompiler.la
 
@@ -91,4 +86,5 @@ EXTRA_DIST += \
 	nir/nir_opcodes_c.py				\
 	nir/nir_opcodes_h.py				\
 	nir/nir_opt_algebraic.py			\
-	nir/tests
+	nir/tests \
+	SConscript.nir

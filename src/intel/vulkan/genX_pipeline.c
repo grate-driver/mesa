@@ -74,6 +74,8 @@ genX(compute_pipeline_create)(
    pipeline->active_stages = 0;
    pipeline->total_scratch = 0;
 
+   pipeline->needs_data_cache = false;
+
    assert(pCreateInfo->stage.stage == VK_SHADER_STAGE_COMPUTE_BIT);
    ANV_FROM_HANDLE(anv_shader_module, module,  pCreateInfo->stage.module);
    anv_pipeline_compile_cs(pipeline, cache, pCreateInfo, module,
@@ -81,6 +83,8 @@ genX(compute_pipeline_create)(
                            pCreateInfo->stage.pSpecializationInfo);
 
    pipeline->use_repclear = false;
+
+   anv_setup_pipeline_l3_config(pipeline);
 
    const struct brw_cs_prog_data *cs_prog_data = get_cs_prog_data(pipeline);
    const struct brw_stage_prog_data *prog_data = &cs_prog_data->base;

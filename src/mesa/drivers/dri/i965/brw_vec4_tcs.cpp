@@ -54,7 +54,7 @@ vec4_tcs_visitor::nir_setup_system_value_intrinsic(nir_intrinsic_instr *instr)
 }
 
 dst_reg *
-vec4_tcs_visitor::make_reg_for_system_value(int location, const glsl_type *type)
+vec4_tcs_visitor::make_reg_for_system_value(int location)
 {
    return NULL;
 }
@@ -349,7 +349,7 @@ vec4_tcs_visitor::nir_emit_intrinsic(nir_intrinsic_instr *instr)
       /* The passthrough shader writes the whole patch header as two vec4s;
        * skip all the gl_TessLevelInner/Outer swizzling.
        */
-      if (indirect_offset.file == BAD_FILE && key->program_string_id != 0) {
+      if (indirect_offset.file == BAD_FILE && !is_passthrough_shader) {
          if (imm_offset == 0) {
             value.type = BRW_REGISTER_TYPE_F;
 
@@ -507,6 +507,7 @@ brw_compile_tcs(const struct brw_compiler *compiler,
          return NULL;
       }
 
+      prog_data->base.base.dispatch_grf_start_reg = v.payload.num_regs;
       prog_data->base.dispatch_mode = DISPATCH_MODE_SIMD8;
 
       fs_generator g(compiler, log_data, mem_ctx, (void *) key,

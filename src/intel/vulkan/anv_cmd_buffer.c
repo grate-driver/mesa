@@ -29,6 +29,8 @@
 
 #include "anv_private.h"
 
+#include "vk_format_info.h"
+
 /** \file anv_cmd_buffer.c
  *
  * This file contains all of the stuff for emitting commands into a command
@@ -125,9 +127,11 @@ anv_cmd_state_reset(struct anv_cmd_buffer *cmd_buffer)
 
    state->dirty = 0;
    state->vb_dirty = 0;
+   state->pending_pipe_bits = 0;
    state->descriptors_dirty = 0;
    state->push_constants_dirty = 0;
    state->pipeline = NULL;
+   state->push_constant_stages = 0;
    state->restart_index = UINT32_MAX;
    state->dynamic = default_dynamic_state;
    state->need_query_wa = true;
@@ -168,20 +172,21 @@ anv_cmd_state_setup_attachments(struct anv_cmd_buffer *cmd_buffer,
 
    for (uint32_t i = 0; i < pass->attachment_count; ++i) {
       struct anv_render_pass_attachment *att = &pass->attachments[i];
+      VkImageAspectFlags att_aspects = vk_format_aspects(att->format);
       VkImageAspectFlags clear_aspects = 0;
 
-      if (anv_format_is_color(att->format)) {
+      if (att_aspects == VK_IMAGE_ASPECT_COLOR_BIT) {
          /* color attachment */
          if (att->load_op == VK_ATTACHMENT_LOAD_OP_CLEAR) {
             clear_aspects |= VK_IMAGE_ASPECT_COLOR_BIT;
          }
       } else {
          /* depthstencil attachment */
-         if (att->format->has_depth &&
+         if ((att_aspects & VK_IMAGE_ASPECT_DEPTH_BIT) &&
              att->load_op == VK_ATTACHMENT_LOAD_OP_CLEAR) {
             clear_aspects |= VK_IMAGE_ASPECT_DEPTH_BIT;
          }
-         if (att->format->has_stencil &&
+         if ((att_aspects & VK_IMAGE_ASPECT_STENCIL_BIT) &&
              att->stencil_load_op == VK_ATTACHMENT_LOAD_OP_CLEAR) {
             clear_aspects |= VK_IMAGE_ASPECT_STENCIL_BIT;
          }
@@ -322,12 +327,9 @@ void anv_FreeCommandBuffers(
    }
 }
 
-VkResult anv_ResetCommandBuffer(
-    VkCommandBuffer                             commandBuffer,
-    VkCommandBufferResetFlags                   flags)
+static VkResult
+anv_cmd_buffer_reset(struct anv_cmd_buffer *cmd_buffer)
 {
-   ANV_FROM_HANDLE(anv_cmd_buffer, cmd_buffer, commandBuffer);
-
    cmd_buffer->usage_flags = 0;
    cmd_buffer->state.current_pipeline = UINT32_MAX;
    anv_cmd_buffer_reset_batch_bo_chain(cmd_buffer);
@@ -340,8 +342,15 @@ VkResult anv_ResetCommandBuffer(
    anv_state_stream_finish(&cmd_buffer->dynamic_state_stream);
    anv_state_stream_init(&cmd_buffer->dynamic_state_stream,
                          &cmd_buffer->device->dynamic_state_block_pool);
-
    return VK_SUCCESS;
+}
+
+VkResult anv_ResetCommandBuffer(
+    VkCommandBuffer                             commandBuffer,
+    VkCommandBufferResetFlags                   flags)
+{
+   ANV_FROM_HANDLE(anv_cmd_buffer, cmd_buffer, commandBuffer);
+   return anv_cmd_buffer_reset(cmd_buffer);
 }
 
 void
@@ -382,7 +391,7 @@ VkResult anv_BeginCommandBuffer(
     *    VK_COMMAND_BUFFER_RESET_RELEASE_RESOURCES_BIT not set. It then puts
     *    the command buffer in the recording state.
     */
-   anv_ResetCommandBuffer(commandBuffer, /*flags*/ 0);
+   anv_cmd_buffer_reset(cmd_buffer);
 
    cmd_buffer->usage_flags = pBeginInfo->flags;
 
@@ -688,17 +697,17 @@ add_surface_state_reloc(struct anv_cmd_buffer *cmd_buffer,
                       state.offset + dword * 4, bo, offset);
 }
 
-const struct anv_format *
-anv_format_for_descriptor_type(VkDescriptorType type)
+enum isl_format
+anv_isl_format_for_descriptor_type(VkDescriptorType type)
 {
    switch (type) {
    case VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER:
    case VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC:
-      return anv_format_for_vk_format(VK_FORMAT_R32G32B32A32_SFLOAT);
+      return ISL_FORMAT_R32G32B32A32_FLOAT;
 
    case VK_DESCRIPTOR_TYPE_STORAGE_BUFFER:
    case VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC:
-      return anv_format_for_vk_format(VK_FORMAT_UNDEFINED);
+      return ISL_FORMAT_RAW;
 
    default:
       unreachable("Invalid descriptor type");
@@ -768,10 +777,10 @@ anv_cmd_buffer_emit_binding_table(struct anv_cmd_buffer *cmd_buffer,
       surface_state =
          anv_cmd_buffer_alloc_surface_state(cmd_buffer);
 
-      const struct anv_format *format =
-         anv_format_for_descriptor_type(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER);
+      const enum isl_format format =
+         anv_isl_format_for_descriptor_type(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER);
       anv_fill_buffer_surface_state(cmd_buffer->device, surface_state,
-                                    format->isl_format, bo_offset, 12, 1);
+                                    format, bo_offset, 12, 1);
 
       bt_map[0] = surface_state.offset + state_offset;
       add_surface_state_reloc(cmd_buffer, surface_state, bo, bo_offset);
@@ -1177,7 +1186,10 @@ void anv_DestroyCommandPool(
    ANV_FROM_HANDLE(anv_device, device, _device);
    ANV_FROM_HANDLE(anv_cmd_pool, pool, commandPool);
 
-   anv_ResetCommandPool(_device, commandPool, 0);
+   list_for_each_entry_safe(struct anv_cmd_buffer, cmd_buffer,
+                            &pool->cmd_buffers, pool_link) {
+      anv_cmd_buffer_destroy(cmd_buffer);
+   }
 
    anv_free2(&device->alloc, pAllocator, pool);
 }
@@ -1189,17 +1201,9 @@ VkResult anv_ResetCommandPool(
 {
    ANV_FROM_HANDLE(anv_cmd_pool, pool, commandPool);
 
-   /* FIXME: vkResetCommandPool must not destroy its command buffers. The
-    * Vulkan 1.0 spec requires that it only reset them:
-    *
-    *    Resetting a command pool recycles all of the resources from all of
-    *    the command buffers allocated from the command pool back to the
-    *    command pool. All command buffers that have been allocated from the
-    *    command pool are put in the initial state.
-    */
-   list_for_each_entry_safe(struct anv_cmd_buffer, cmd_buffer,
-                            &pool->cmd_buffers, pool_link) {
-      anv_cmd_buffer_destroy(cmd_buffer);
+   list_for_each_entry(struct anv_cmd_buffer, cmd_buffer,
+                       &pool->cmd_buffers, pool_link) {
+      anv_cmd_buffer_reset(cmd_buffer);
    }
 
    return VK_SUCCESS;

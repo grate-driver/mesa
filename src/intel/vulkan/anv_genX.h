@@ -39,11 +39,15 @@ genX(cmd_buffer_alloc_null_surface_state)(struct anv_cmd_buffer *cmd_buffer,
 void genX(cmd_buffer_set_subpass)(struct anv_cmd_buffer *cmd_buffer,
                                   struct anv_subpass *subpass);
 
+void genX(cmd_buffer_apply_pipe_flushes)(struct anv_cmd_buffer *cmd_buffer);
+
 void genX(flush_pipeline_select_3d)(struct anv_cmd_buffer *cmd_buffer);
 void genX(flush_pipeline_select_gpgpu)(struct anv_cmd_buffer *cmd_buffer);
 
+void genX(setup_pipeline_l3_config)(struct anv_pipeline *pipeline);
+
 void genX(cmd_buffer_config_l3)(struct anv_cmd_buffer *cmd_buffer,
-                                bool enable_slm);
+                                const struct anv_pipeline *pipeline);
 
 void genX(cmd_buffer_flush_state)(struct anv_cmd_buffer *cmd_buffer);
 void genX(cmd_buffer_flush_dynamic_state)(struct anv_cmd_buffer *cmd_buffer);

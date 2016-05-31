@@ -254,6 +254,7 @@ static const char *const three_source_reg_encoding[] = {
    [BRW_3SRC_TYPE_F]  = "F",
    [BRW_3SRC_TYPE_D]  = "D",
    [BRW_3SRC_TYPE_UD] = "UD",
+   [BRW_3SRC_TYPE_DF] = "DF",
 };
 
 const int reg_type_size[] = {
@@ -550,6 +551,9 @@ static const char *const gen5_sampler_msg_type[] = {
    [GEN7_SAMPLER_MESSAGE_SAMPLE_GATHER4_PO]   = "gather4_po",
    [GEN7_SAMPLER_MESSAGE_SAMPLE_GATHER4_PO_C] = "gather4_po_c",
    [HSW_SAMPLER_MESSAGE_SAMPLE_DERIV_COMPARE] = "sample_d_c",
+   [GEN9_SAMPLER_MESSAGE_SAMPLE_LZ]           = "sample_lz",
+   [GEN9_SAMPLER_MESSAGE_SAMPLE_C_LZ]         = "sample_c_lz",
+   [GEN9_SAMPLER_MESSAGE_SAMPLE_LD_LZ]        = "ld_lz",
    [GEN9_SAMPLER_MESSAGE_SAMPLE_LD2DMS_W]     = "ld2dms_w",
    [GEN7_SAMPLER_MESSAGE_SAMPLE_LD_MCS]       = "ld_mcs",
    [GEN7_SAMPLER_MESSAGE_SAMPLE_LD2DMS]       = "ld2dms",
@@ -1035,7 +1039,7 @@ imm(FILE *file, const struct brw_device_info *devinfo, unsigned type, brw_inst *
       format(file, "%-gF", brw_inst_imm_f(devinfo, inst));
       break;
    case GEN8_HW_REG_IMM_TYPE_DF:
-      string(file, "Double IMM");
+      format(file, "%-gDF", brw_inst_imm_df(devinfo, inst));
       break;
    case GEN8_HW_REG_IMM_TYPE_HF:
       string(file, "Half Float IMM");

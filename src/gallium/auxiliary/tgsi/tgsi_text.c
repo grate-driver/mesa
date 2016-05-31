@@ -1081,6 +1081,9 @@ parse_instruction(
       inst.Memory.Qualifier = 0;
    }
 
+   assume(info->num_dst <= TGSI_FULL_MAX_DST_REGISTERS);
+   assume(info->num_src <= TGSI_FULL_MAX_SRC_REGISTERS);
+
    /* Parse instruction operands.
     */
    for (i = 0; i < info->num_dst + info->num_src + info->is_tex; i++) {
@@ -1663,6 +1666,22 @@ parse_fs_coord_pixel_center( const char **pcur, uint *fs_coord_pixel_center )
    return FALSE;
 }
 
+static boolean
+parse_property_next_shader( const char **pcur, uint *next_shader )
+{
+   uint i;
+
+   for (i = 0; i < ARRAY_SIZE(tgsi_processor_type_names); i++) {
+      const char *cur = *pcur;
+
+      if (str_match_nocase_whole( &cur, tgsi_processor_type_names[i])) {
+         *next_shader = i;
+         *pcur = cur;
+         return TRUE;
+      }
+   }
+   return FALSE;
+}
 
 static boolean parse_property( struct translate_ctx *ctx )
 {
@@ -1713,6 +1732,12 @@ static boolean parse_property( struct translate_ctx *ctx )
    case TGSI_PROPERTY_FS_COORD_PIXEL_CENTER:
       if (!parse_fs_coord_pixel_center(&ctx->cur, &values[0] )) {
          report_error( ctx, "Unknown coord pixel center as property: must be HALF_INTEGER or INTEGER!" );
+         return FALSE;
+      }
+      break;
+   case TGSI_PROPERTY_NEXT_SHADER:
+      if (!parse_property_next_shader(&ctx->cur, &values[0] )) {
+         report_error( ctx, "Unknown next shader property value." );
          return FALSE;
       }
       break;

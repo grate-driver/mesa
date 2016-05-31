@@ -47,22 +47,23 @@ extern THREAD UINT tlsThreadId;
 class BucketManager
 {
 public:
-    BucketManager(bool enableThreadViz) : mThreadViz(enableThreadViz)
-    {
-        if (mThreadViz)
-        {
-            uint32_t pid = GetCurrentProcessId();
-            std::stringstream str;
-            str << "threadviz." << pid;
-            mThreadVizDir = str.str();
-            CreateDirectory(mThreadVizDir.c_str(), NULL);
-        }
-    }
+    BucketManager() { }
 
     // removes all registered thread data
     void ClearThreads()
     {
         mThreadMutex.lock();
+        // close out the threadviz files if threadviz is enabled
+        if (KNOB_BUCKETS_ENABLE_THREADVIZ)
+        {
+            for (auto& thread : mThreads)
+            {
+                if (thread.vizFile != nullptr)
+                {
+                    fclose(thread.vizFile);
+                }
+            }
+        }
         mThreads.clear();
         mThreadMutex.unlock();
     }
@@ -109,7 +110,7 @@ public:
             stillCapturing = false;
             for (const BUCKET_THREAD& t : mThreads)
             {
-                if (t.pCurrent != &t.root)
+                if (t.level > 0)
                 {
                     stillCapturing = true;
                     continue;

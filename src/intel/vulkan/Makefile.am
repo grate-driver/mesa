@@ -112,10 +112,10 @@ libvulkan_common_la_SOURCES = $(VULKAN_SOURCES)
 
 VULKAN_LIB_DEPS += \
 	libvulkan_common.la \
-	$(top_builddir)/src/intel/isl/libisl.la \
 	$(top_builddir)/src/mesa/drivers/dri/i965/libi965_compiler.la \
-	$(top_builddir)/src/mesa/libmesa.la \
-	$(top_builddir)/src/mesa/drivers/dri/common/libdri_test_stubs.la \
+	$(top_builddir)/src/compiler/nir/libnir.la \
+	$(top_builddir)/src/util/libmesautil.la \
+	$(top_builddir)/src/intel/isl/libisl.la \
 	$(PER_GEN_LIBS) \
 	$(PTHREAD_LIBS) \
 	$(DLOPEN_LIBS) \
@@ -124,19 +124,25 @@ VULKAN_LIB_DEPS += \
 nodist_EXTRA_libvulkan_intel_la_SOURCES = dummy.cpp
 libvulkan_intel_la_SOURCES = $(VULKAN_GEM_FILES)
 
+VULKAN_ENTRYPOINT_CPPFLAGS = \
+	-DVK_USE_PLATFORM_XCB_KHR \
+	-DVK_USE_PLATFORM_WAYLAND_KHR
+
 anv_entrypoints.h : anv_entrypoints_gen.py $(vulkan_include_HEADERS)
-	$(AM_V_GEN)$(CPP) $(AM_CPPFLAGS) $(top_srcdir)/include/vulkan/vulkan_intel.h |\
+	$(AM_V_GEN)$(CPP) $(VULKAN_ENTRYPOINT_CPPFLAGS) $(top_srcdir)/include/vulkan/vulkan_intel.h |\
 	$(PYTHON2) $(srcdir)/anv_entrypoints_gen.py header > $@
 
 anv_entrypoints.c : anv_entrypoints_gen.py $(vulkan_include_HEADERS)
-	$(AM_V_GEN)$(CPP) $(AM_CPPFLAGS) $(top_srcdir)/include/vulkan/vulkan_intel.h |\
+	$(AM_V_GEN)$(CPP) $(VULKAN_ENTRYPOINT_CPPFLAGS) $(top_srcdir)/include/vulkan/vulkan_intel.h |\
 	$(PYTHON2) $(srcdir)/anv_entrypoints_gen.py code > $@
 
 BUILT_SOURCES = $(VULKAN_GENERATED_FILES)
-CLEANFILES = $(BUILT_SOURCES)
+CLEANFILES = $(BUILT_SOURCES) dev_icd.json
 EXTRA_DIST = \
 	$(top_srcdir)/include/vulkan/vk_icd.h \
-	anv_entrypoints_gen.py
+	anv_entrypoints_gen.py \
+	dev_icd.json.in \
+	intel_icd.json
 
 libvulkan_intel_la_LIBADD = $(VULKAN_LIB_DEPS)
 

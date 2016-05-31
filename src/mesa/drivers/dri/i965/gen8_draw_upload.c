@@ -34,6 +34,20 @@
 #include "intel_batchbuffer.h"
 #include "intel_buffer_objects.h"
 
+static bool
+is_passthru_format(uint32_t format)
+{
+   switch (format) {
+   case BRW_SURFACEFORMAT_R64_PASSTHRU:
+   case BRW_SURFACEFORMAT_R64G64_PASSTHRU:
+   case BRW_SURFACEFORMAT_R64G64B64_PASSTHRU:
+   case BRW_SURFACEFORMAT_R64G64B64A64_PASSTHRU:
+      return true;
+   default:
+      return false;
+   }
+}
+
 static void
 gen8_emit_vertices(struct brw_context *brw)
 {
@@ -137,7 +151,7 @@ gen8_emit_vertices(struct brw_context *brw)
 
          OUT_BATCH(dw0);
          OUT_RELOC64(buffer->bo, I915_GEM_DOMAIN_VERTEX, 0, buffer->offset);
-         OUT_BATCH(buffer->bo->size);
+         OUT_BATCH(buffer->size);
       }
 
       if (uses_draw_params) {
@@ -193,6 +207,12 @@ gen8_emit_vertices(struct brw_context *brw)
       uint32_t comp2 = BRW_VE1_COMPONENT_STORE_SRC;
       uint32_t comp3 = BRW_VE1_COMPONENT_STORE_SRC;
 
+      /* From the BDW PRM, Volume 2d, page 588 (VERTEX_ELEMENT_STATE):
+       * "Any SourceElementFormat of *64*_PASSTHRU cannot be used with an
+       * element which has edge flag enabled."
+       */
+      assert(!(is_passthru_format(format) && uses_edge_flag));
+
       /* The gen4 driver expects edgeflag to come in as a float, and passes
        * that float on to the tests in the clipper.  Mesa's current vertex
        * attribute value for EdgeFlag is stored as a float, which works out.
@@ -215,6 +235,41 @@ gen8_emit_vertices(struct brw_context *brw)
       case 3: comp3 = input->glarray->Integer ? BRW_VE1_COMPONENT_STORE_1_INT
                                               : BRW_VE1_COMPONENT_STORE_1_FLT;
          break;
+      }
+
+      /* From the BDW PRM, Volume 2d, page 586 (VERTEX_ELEMENT_STATE):
+       *
+       *     "When SourceElementFormat is set to one of the *64*_PASSTHRU
+       *     formats, 64-bit components are stored in the URB without any
+       *     conversion. In this case, vertex elements must be written as 128
+       *     or 256 bits, with VFCOMP_STORE_0 being used to pad the output
+       *     as required. E.g., if R64_PASSTHRU is used to copy a 64-bit Red
+       *     component into the URB, Component 1 must be specified as
+       *     VFCOMP_STORE_0 (with Components 2,3 set to VFCOMP_NOSTORE)
+       *     in order to output a 128-bit vertex element, or Components 1-3 must
+       *     be specified as VFCOMP_STORE_0 in order to output a 256-bit vertex
+       *     element. Likewise, use of R64G64B64_PASSTHRU requires Component 3
+       *     to be specified as VFCOMP_STORE_0 in order to output a 256-bit vertex
+       *     element."
+       */
+      if (input->glarray->Doubles) {
+         switch (input->glarray->Size) {
+         case 0:
+         case 1:
+         case 2:
+            /*  Use 128-bits instead of 256-bits to write double and dvec2
+             *  vertex elements.
+             */
+            comp2 = BRW_VE1_COMPONENT_NOSTORE;
+            comp3 = BRW_VE1_COMPONENT_NOSTORE;
+            break;
+         case 3:
+            /* Pad the output using VFCOMP_STORE_0 as suggested
+             * by the BDW PRM.
+             */
+            comp3 = BRW_VE1_COMPONENT_STORE_0;
+            break;
+         }
       }
 
       OUT_BATCH((input->buffer << GEN6_VE0_INDEX_SHIFT) |
@@ -329,7 +384,7 @@ gen8_emit_index_buffer(struct brw_context *brw)
    OUT_BATCH(CMD_INDEX_BUFFER << 16 | (5 - 2));
    OUT_BATCH(brw_get_index_type(index_buffer->type) | mocs_wb);
    OUT_RELOC64(brw->ib.bo, I915_GEM_DOMAIN_VERTEX, 0, 0);
-   OUT_BATCH(brw->ib.bo->size);
+   OUT_BATCH(brw->ib.size);
    ADVANCE_BATCH();
 }
 

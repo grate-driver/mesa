@@ -34,6 +34,7 @@
 #include "intel_tex.h"
 #include "intel_fbo.h"
 #include "intel_buffer_objects.h"
+#include "intel_image.h"
 
 #include "brw_context.h"
 #include "brw_state.h"
@@ -198,10 +199,9 @@ gen8_emit_fast_clear_color(const struct brw_context *brw,
       surf[7] |= mt->fast_clear_color_value;
 }
 
-static uint32_t
+uint32_t
 gen8_get_aux_mode(const struct brw_context *brw,
-                  const struct intel_mipmap_tree *mt,
-                  uint32_t surf_type)
+                  const struct intel_mipmap_tree *mt)
 {
    if (mt->mcs_mt == NULL)
       return GEN8_SURFACE_AUX_MODE_NONE;
@@ -216,6 +216,9 @@ gen8_get_aux_mode(const struct brw_context *brw,
     */
    if (brw->gen >= 9 || mt->num_samples == 1)
       assert(mt->halign == 16);
+
+   if (intel_miptree_is_lossless_compressed(brw, mt))
+      return GEN9_SURFACE_AUX_MODE_CCS_E;
 
    return GEN8_SURFACE_AUX_MODE_MCS;
 }
@@ -237,7 +240,7 @@ gen8_emit_texture_surface_state(struct brw_context *brw,
    unsigned tiling_mode, pitch;
    const unsigned tr_mode = surface_tiling_resource_mode(mt->tr_mode);
    const uint32_t surf_type = translate_tex_target(target);
-   uint32_t aux_mode = gen8_get_aux_mode(brw, mt, surf_type);
+   uint32_t aux_mode = gen8_get_aux_mode(brw, mt);
 
    if (mt->format == MESA_FORMAT_S_UINT8) {
       tiling_mode = GEN8_SURFACE_TILING_W;
@@ -247,11 +250,12 @@ gen8_emit_texture_surface_state(struct brw_context *brw,
       pitch = mt->pitch;
    }
 
-   /* The MCS is not uploaded for single-sampled surfaces because the color
-    * buffer should always have been resolved before it is used as a texture
-    * so there is no need for it.
+   /* Prior to Gen9, MCS is not uploaded for single-sampled surfaces because
+    * the color buffer should always have been resolved before it is used as
+    * a texture so there is no need for it. On Gen9 it will be uploaded when
+    * the surface is losslessly compressed (CCS_E).
     */
-   if (mt->num_samples <= 1) {
+   if (mt->num_samples <= 1 && aux_mode != GEN9_SURFACE_AUX_MODE_CCS_E) {
       aux_mt = NULL;
       aux_mode = GEN8_SURFACE_AUX_MODE_NONE;
    }
@@ -346,7 +350,8 @@ static void
 gen8_update_texture_surface(struct gl_context *ctx,
                             unsigned unit,
                             uint32_t *surf_offset,
-                            bool for_gather)
+                            bool for_gather,
+                            uint32_t plane)
 {
    struct brw_context *brw = brw_context(ctx);
    struct gl_texture_object *obj = ctx->Texture.Unit[unit]._Current;
@@ -380,6 +385,14 @@ gen8_update_texture_surface(struct gl_context *ctx,
       if (obj->StencilSampling && firstImage->_BaseFormat == GL_DEPTH_STENCIL) {
          mt = mt->stencil_mt;
          format = BRW_SURFACEFORMAT_R8_UINT;
+      } else if (obj->Target == GL_TEXTURE_EXTERNAL_OES) {
+         if (plane > 0)
+            mt = mt->plane[plane - 1];
+         if (mt == NULL)
+            return;
+
+         format = translate_tex_format(brw, mt->format, sampler->sRGBDecode);
+
       }
 
       const int surf_index = surf_offset - &brw->wm.base.surf_offset[0];
@@ -484,7 +497,7 @@ gen8_update_renderbuffer_surface(struct brw_context *brw,
    }
 
    struct intel_mipmap_tree *aux_mt = mt->mcs_mt;
-   const uint32_t aux_mode = gen8_get_aux_mode(brw, mt, surf_type);
+   const uint32_t aux_mode = gen8_get_aux_mode(brw, mt);
 
    uint32_t *surf = gen8_allocate_surface_state(brw, &offset, surf_index);
 

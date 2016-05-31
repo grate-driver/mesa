@@ -258,6 +258,31 @@ static struct intel_image_format intel_image_formats[] = {
        { 1, 0, 0, __DRI_IMAGE_FORMAT_R8, 1 },
        { 2, 0, 0, __DRI_IMAGE_FORMAT_R8, 1 } } },
 
+   { __DRI_IMAGE_FOURCC_YVU410, __DRI_IMAGE_COMPONENTS_Y_U_V, 3,
+     { { 0, 0, 0, __DRI_IMAGE_FORMAT_R8, 1 },
+       { 2, 2, 2, __DRI_IMAGE_FORMAT_R8, 1 },
+       { 1, 2, 2, __DRI_IMAGE_FORMAT_R8, 1 } } },
+
+   { __DRI_IMAGE_FOURCC_YVU411, __DRI_IMAGE_COMPONENTS_Y_U_V, 3,
+     { { 0, 0, 0, __DRI_IMAGE_FORMAT_R8, 1 },
+       { 2, 2, 0, __DRI_IMAGE_FORMAT_R8, 1 },
+       { 1, 2, 0, __DRI_IMAGE_FORMAT_R8, 1 } } },
+
+   { __DRI_IMAGE_FOURCC_YVU420, __DRI_IMAGE_COMPONENTS_Y_U_V, 3,
+     { { 0, 0, 0, __DRI_IMAGE_FORMAT_R8, 1 },
+       { 2, 1, 1, __DRI_IMAGE_FORMAT_R8, 1 },
+       { 1, 1, 1, __DRI_IMAGE_FORMAT_R8, 1 } } },
+
+   { __DRI_IMAGE_FOURCC_YVU422, __DRI_IMAGE_COMPONENTS_Y_U_V, 3,
+     { { 0, 0, 0, __DRI_IMAGE_FORMAT_R8, 1 },
+       { 2, 1, 0, __DRI_IMAGE_FORMAT_R8, 1 },
+       { 1, 1, 0, __DRI_IMAGE_FORMAT_R8, 1 } } },
+
+   { __DRI_IMAGE_FOURCC_YVU444, __DRI_IMAGE_COMPONENTS_Y_U_V, 3,
+     { { 0, 0, 0, __DRI_IMAGE_FORMAT_R8, 1 },
+       { 2, 0, 0, __DRI_IMAGE_FORMAT_R8, 1 },
+       { 1, 0, 0, __DRI_IMAGE_FORMAT_R8, 1 } } },
+
    { __DRI_IMAGE_FOURCC_NV12, __DRI_IMAGE_COMPONENTS_Y_UV, 2,
      { { 0, 0, 0, __DRI_IMAGE_FORMAT_R8, 1 },
        { 1, 1, 1, __DRI_IMAGE_FORMAT_GR88, 2 } } },
@@ -516,11 +541,7 @@ intel_create_image(__DRIscreen *screen,
    int cpp;
    unsigned long pitch;
 
-   if (intelScreen->devinfo->gen >= 9) {
-      tiling = I915_TILING_Y;
-   } else {
-      tiling = I915_TILING_X;
-   }
+   tiling = I915_TILING_X;
    if (use & __DRI_IMAGE_USE_CURSOR) {
       if (width != 64 || height != 64)
 	 return NULL;
@@ -680,8 +701,13 @@ intel_create_image_from_fds(__DRIscreen *screen,
    __DRIimage *image;
    int i, index;
 
-   if (fds == NULL || num_fds != 1)
+   if (fds == NULL || num_fds < 1)
       return NULL;
+
+   /* We only support all planes from the same bo */
+   for (i = 0; i < num_fds; i++)
+      if (fds[0] != fds[i])
+         return NULL;
 
    f = intel_image_format_lookup(fourcc);
    if (f == NULL)
@@ -695,22 +721,28 @@ intel_create_image_from_fds(__DRIscreen *screen,
    if (image == NULL)
       return NULL;
 
-   image->bo = drm_intel_bo_gem_create_from_prime(intelScreen->bufmgr,
-                                                  fds[0],
-                                                  height * strides[0]);
-   if (image->bo == NULL) {
-      free(image);
-      return NULL;
-   }
    image->width = width;
    image->height = height;
    image->pitch = strides[0];
 
    image->planar_format = f;
+   int size = 0;
    for (i = 0; i < f->nplanes; i++) {
       index = f->planes[i].buffer_index;
       image->offsets[index] = offsets[index];
       image->strides[index] = strides[index];
+
+      const int plane_height = height >> f->planes[i].height_shift;
+      const int end = offsets[index] + plane_height * strides[index];
+      if (size < end)
+         size = end;
+   }
+
+   image->bo = drm_intel_bo_gem_create_from_prime(intelScreen->bufmgr,
+                                                  fds[0], size);
+   if (image->bo == NULL) {
+      free(image);
+      return NULL;
    }
 
    if (f->nplanes == 1) {
@@ -736,8 +768,7 @@ intel_create_image_from_dma_bufs(__DRIscreen *screen,
    __DRIimage *image;
    struct intel_image_format *f = intel_image_format_lookup(fourcc);
 
-   /* For now only packed formats that have native sampling are supported. */
-   if (!f || f->nplanes != 1) {
+   if (!f) {
       *error = __DRI_IMAGE_ERROR_BAD_MATCH;
       return NULL;
    }
@@ -1115,7 +1146,7 @@ intel_detect_sseu(struct intel_screen *intelScreen)
 err_out:
    intelScreen->subslice_total = -1;
    intelScreen->eu_total = -1;
-   _mesa_warning(NULL, "Failed to query GPU properties (%s).\n", strerror(ret));
+   _mesa_warning(NULL, "Failed to query GPU properties (%s).\n", strerror(-ret));
 }
 
 static bool
@@ -1148,14 +1179,8 @@ intel_detect_swizzling(struct intel_screen *screen)
    drm_intel_bo *buffer;
    unsigned long flags = 0;
    unsigned long aligned_pitch;
+   uint32_t tiling = I915_TILING_X;
    uint32_t swizzle_mode = 0;
-   uint32_t tiling;
-
-   if (screen->devinfo->gen >= 9) {
-      tiling = I915_TILING_Y;
-   } else {
-      tiling = I915_TILING_X;
-   }
 
    buffer = drm_intel_bo_alloc_tiled(screen->bufmgr, "swizzle test",
 				     64, 64, 4,
@@ -1386,7 +1411,7 @@ set_max_gl_versions(struct intel_screen *screen)
    switch (screen->devinfo->gen) {
    case 9:
    case 8:
-      psp->max_gl_core_version = 33;
+      psp->max_gl_core_version = 43;
       psp->max_gl_compat_version = 30;
       psp->max_gl_es1_version = 11;
       psp->max_gl_es2_version = 31;
@@ -1441,6 +1466,46 @@ brw_get_revision(int fd)
 #ifndef I915_PARAM_HAS_RESOURCE_STREAMER
 #define I915_PARAM_HAS_RESOURCE_STREAMER 36
 #endif
+
+static void
+shader_debug_log_mesa(void *data, const char *fmt, ...)
+{
+   struct brw_context *brw = (struct brw_context *)data;
+   va_list args;
+
+   va_start(args, fmt);
+   GLuint msg_id = 0;
+   _mesa_gl_vdebug(&brw->ctx, &msg_id,
+                   MESA_DEBUG_SOURCE_SHADER_COMPILER,
+                   MESA_DEBUG_TYPE_OTHER,
+                   MESA_DEBUG_SEVERITY_NOTIFICATION, fmt, args);
+   va_end(args);
+}
+
+static void
+shader_perf_log_mesa(void *data, const char *fmt, ...)
+{
+   struct brw_context *brw = (struct brw_context *)data;
+
+   va_list args;
+   va_start(args, fmt);
+
+   if (unlikely(INTEL_DEBUG & DEBUG_PERF)) {
+      va_list args_copy;
+      va_copy(args_copy, args);
+      vfprintf(stderr, fmt, args_copy);
+      va_end(args_copy);
+   }
+
+   if (brw->perf_debug) {
+      GLuint msg_id = 0;
+      _mesa_gl_vdebug(&brw->ctx, &msg_id,
+                      MESA_DEBUG_SOURCE_SHADER_COMPILER,
+                      MESA_DEBUG_TYPE_PERFORMANCE,
+                      MESA_DEBUG_SEVERITY_MEDIUM, fmt, args);
+   }
+   va_end(args);
+}
 
 /**
  * This is the driver specific part of the createNewScreen entry point.
@@ -1541,11 +1606,21 @@ __DRIconfig **intelInitScreen2(__DRIscreen *psp)
    if (ret == -1)
       intelScreen->cmd_parser_version = 0;
 
+   /* Haswell requires command parser version 6 in order to write to the
+    * MI_MATH GPR registers, and version 7 in order to use
+    * MI_LOAD_REGISTER_REG (which all users of MI_MATH use).
+    */
+   intelScreen->has_mi_math_and_lrr = intelScreen->devinfo->gen >= 8 ||
+                                      (intelScreen->devinfo->is_haswell &&
+                                       intelScreen->cmd_parser_version >= 7);
+
    psp->extensions = !intelScreen->has_context_reset_notification
       ? intelScreenExtensions : intelRobustScreenExtensions;
 
    intelScreen->compiler = brw_compiler_create(intelScreen,
                                                intelScreen->devinfo);
+   intelScreen->compiler->shader_debug_log = shader_debug_log_mesa;
+   intelScreen->compiler->shader_perf_log = shader_perf_log_mesa;
    intelScreen->program_id = 1;
 
    if (intelScreen->devinfo->has_resource_streamer) {
@@ -1581,12 +1656,7 @@ intelAllocateBuffer(__DRIscreen *screen,
       return NULL;
 
    /* The front and back buffers are color buffers, which are X tiled. */
-   uint32_t tiling;
-   if (intelScreen->devinfo->gen >= 9) {
-      tiling = I915_TILING_Y;
-   } else {
-      tiling = I915_TILING_X;
-   }
+   uint32_t tiling = I915_TILING_X;
    unsigned long pitch;
    int cpp = format / 8;
    intelBuffer->bo = drm_intel_bo_alloc_tiled(intelScreen->bufmgr,

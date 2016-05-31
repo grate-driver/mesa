@@ -822,7 +822,7 @@ validate_assignment(struct _mesa_glsl_parse_state *state,
     */
    if (state->stage == MESA_SHADER_TESS_CTRL && !lhs->type->is_error()) {
       ir_variable *var = lhs->variable_referenced();
-      if (var->data.mode == ir_var_shader_out && !var->data.patch) {
+      if (var && var->data.mode == ir_var_shader_out && !var->data.patch) {
          ir_rvalue *index = find_innermost_array_index(lhs);
          ir_variable *index_var = index ? index->variable_referenced() : NULL;
          if (!index_var || strcmp(index_var->name, "gl_InvocationID") != 0) {
@@ -976,7 +976,7 @@ do_assignment(exec_list *instructions, struct _mesa_glsl_parse_state *state,
 
          assert(var != NULL);
 
-         if (var->data.max_array_access >= unsigned(rhs->type->array_size())) {
+         if (var->data.max_array_access >= rhs->type->array_size()) {
             /* FINISHME: This should actually log the location of the RHS. */
             _mesa_glsl_error(& lhs_loc, state, "array size must be > %u due to "
                              "previous access",
@@ -1051,6 +1051,11 @@ bool
 ast_node::has_sequence_subexpression() const
 {
    return false;
+}
+
+void
+ast_node::set_is_lhs(bool /* new_value */)
+{
 }
 
 void
@@ -1196,20 +1201,38 @@ check_builtin_array_max_size(const char *name, unsigned size,
       _mesa_glsl_error(&loc, state, "`gl_TexCoord' array size cannot "
                        "be larger than gl_MaxTextureCoords (%u)",
                        state->Const.MaxTextureCoords);
-   } else if (strcmp("gl_ClipDistance", name) == 0
-              && size > state->Const.MaxClipPlanes) {
-      /* From section 7.1 (Vertex Shader Special Variables) of the
-       * GLSL 1.30 spec:
-       *
-       *   "The gl_ClipDistance array is predeclared as unsized and
-       *   must be sized by the shader either redeclaring it with a
-       *   size or indexing it only with integral constant
-       *   expressions. ... The size can be at most
-       *   gl_MaxClipDistances."
-       */
-      _mesa_glsl_error(&loc, state, "`gl_ClipDistance' array size cannot "
-                       "be larger than gl_MaxClipDistances (%u)",
-                       state->Const.MaxClipPlanes);
+   } else if (strcmp("gl_ClipDistance", name) == 0) {
+      state->clip_dist_size = size;
+      if (size + state->cull_dist_size > state->Const.MaxClipPlanes) {
+         /* From section 7.1 (Vertex Shader Special Variables) of the
+          * GLSL 1.30 spec:
+          *
+          *   "The gl_ClipDistance array is predeclared as unsized and
+          *   must be sized by the shader either redeclaring it with a
+          *   size or indexing it only with integral constant
+          *   expressions. ... The size can be at most
+          *   gl_MaxClipDistances."
+          */
+         _mesa_glsl_error(&loc, state, "`gl_ClipDistance' array size cannot "
+                          "be larger than gl_MaxClipDistances (%u)",
+                          state->Const.MaxClipPlanes);
+      }
+   } else if (strcmp("gl_CullDistance", name) == 0) {
+      state->cull_dist_size = size;
+      if (size + state->clip_dist_size > state->Const.MaxClipPlanes) {
+         /* From the ARB_cull_distance spec:
+          *
+          *   "The gl_CullDistance array is predeclared as unsized and
+          *    must be sized by the shader either redeclaring it with
+          *    a size or indexing it only with integral constant
+          *    expressions. The size determines the number and set of
+          *    enabled cull distances and can be at most
+          *    gl_MaxCullDistances."
+          */
+         _mesa_glsl_error(&loc, state, "`gl_CullDistance' array size cannot "
+                          "be larger than gl_MaxCullDistances (%u)",
+                          state->Const.MaxClipPlanes);
+      }
    }
 }
 
@@ -1898,6 +1921,14 @@ ast_expression::do_hir(exec_list *instructions,
        */
       ir_variable *var =
          state->symbols->get_variable(this->primary_expression.identifier);
+
+      if (var == NULL) {
+         /* the identifier might be a subroutine name */
+         char *sub_name;
+         sub_name = ralloc_asprintf(ctx, "%s_%s", _mesa_shader_stage_to_subroutine_prefix(state->stage), this->primary_expression.identifier);
+         var = state->symbols->get_variable(sub_name);
+         ralloc_free(sub_name);
+      }
 
       if (var != NULL) {
          var->data.used = true;
@@ -2936,8 +2967,7 @@ validate_interpolation_qualifier(struct _mesa_glsl_parse_state *state,
     *
     * The 'double' type does not exist in GLSL ES so far.
     */
-   if ((state->ARB_gpu_shader_fp64_enable
-        || state->is_version(400, 0))
+   if (state->has_double()
        && var_type->contains_double()
        && interpolation != INTERP_QUALIFIER_FLAT
        && state->stage == MESA_SHADER_FRAGMENT
@@ -3412,11 +3442,11 @@ apply_layout_qualifier_to_variable(const struct ast_type_qualifier *qual,
    if (qual->flags.q.explicit_xfb_offset) {
       unsigned qual_xfb_offset;
       unsigned component_size = var->type->contains_double() ? 8 : 4;
-
+      const glsl_type *t = get_varying_type(var, state->stage);
       if (process_qualifier_constant(state, loc, "xfb_offset",
                                      qual->offset, &qual_xfb_offset) &&
           validate_xfb_offset_qualifier(loc, state, (int) qual_xfb_offset,
-                                        var->type, component_size)) {
+                                        t, component_size)) {
          var->data.offset = qual_xfb_offset;
          var->data.explicit_xfb_offset = true;
       }
@@ -3840,7 +3870,7 @@ get_variable_being_redeclared(ir_variable *var, YYLTYPE loc,
        * FINISHME: required or not.
        */
 
-      const unsigned size = unsigned(var->type->array_size());
+      const int size = var->type->array_size();
       check_builtin_array_max_size(var->name, size, loc, state);
       if ((size > 0) && (size <= earlier->data.max_array_access)) {
          _mesa_glsl_error(& loc, state, "array size must be > %u due to "
@@ -5370,6 +5400,15 @@ ast_function::hir(exec_list *instructions,
                        name);
    }
 
+   /**/
+   if (return_type->is_subroutine()) {
+      YYLTYPE loc = this->get_location();
+      _mesa_glsl_error(&loc, state,
+                       "function `%s' return type can't be a subroutine type",
+                       name);
+   }
+
+
    /* Create an ir_function if one doesn't already exist. */
    f = state->symbols->get_function(name);
    if (f == NULL) {
@@ -5503,6 +5542,24 @@ ast_function::hir(exec_list *instructions,
          type = state->symbols->get_type(decl->identifier);
          if (!type) {
             _mesa_glsl_error(& loc, state, "unknown type '%s' in subroutine function definition", decl->identifier);
+         }
+
+         for (int i = 0; i < state->num_subroutine_types; i++) {
+            ir_function *fn = state->subroutine_types[i];
+            ir_function_signature *tsig = NULL;
+
+            if (strcmp(fn->name, decl->identifier))
+               continue;
+
+            tsig = fn->matching_signature(state, &sig->parameters,
+                                          false);
+            if (!tsig) {
+               _mesa_glsl_error(& loc, state, "subroutine type mismatch '%s' - signatures do not match\n", decl->identifier);
+            } else {
+               if (tsig->return_type != sig->return_type) {
+                  _mesa_glsl_error(& loc, state, "subroutine type mismatch '%s' - return types do not match\n", decl->identifier);
+               }
+            }
          }
          f->subroutine_types[idx++] = type;
       }
@@ -6612,7 +6669,7 @@ ast_process_struct_or_iface_block_members(exec_list *instructions,
          xfb_buffer = (int) qual_xfb_buffer;
       } else {
          if (layout)
-            explicit_xfb_buffer = layout->flags.q.xfb_buffer;
+            explicit_xfb_buffer = layout->flags.q.explicit_xfb_buffer;
          xfb_buffer = (int) block_xfb_buffer;
       }
 
@@ -6762,9 +6819,7 @@ ast_process_struct_or_iface_block_members(exec_list *instructions,
                fields[i].offset = glsl_align(offset, expl_align);
                next_offset = glsl_align(fields[i].offset + size, align);
             }
-         }
-
-         if (!qual->flags.q.explicit_offset) {
+         } else if (!qual->flags.q.explicit_offset) {
             if (align != 0 && size != 0)
                next_offset = glsl_align(next_offset + size, align);
          }
@@ -6800,7 +6855,7 @@ ast_process_struct_or_iface_block_members(exec_list *instructions,
           * the structure may contain a structure that contains ... a matrix
           * that need the proper layout.
           */
-         if (is_interface &&
+         if (is_interface && layout &&
              (layout->flags.q.uniform || layout->flags.q.buffer) &&
              (field_type->without_array()->is_matrix()
               || field_type->without_array()->is_record())) {
@@ -6900,7 +6955,12 @@ ast_struct_specifier::hir(exec_list *instructions,
       glsl_type::get_record_instance(fields, decl_count, this->name);
 
    if (!state->symbols->add_type(name, t)) {
-      _mesa_glsl_error(& loc, state, "struct `%s' previously defined", name);
+      const glsl_type *match = state->symbols->get_type(name);
+      /* allow struct matching for desktop GL - older UE4 does this */
+      if (match != NULL && state->is_version(130, 0) && match->record_compare(t, false))
+         _mesa_glsl_warning(& loc, state, "struct `%s' previously defined", name);
+      else
+         _mesa_glsl_error(& loc, state, "struct `%s' previously defined", name);
    } else {
       const glsl_type **s = reralloc(state, state->user_structures,
                                      const glsl_type *,
@@ -6961,6 +7021,16 @@ is_unsized_array_last_element(ir_variable *v)
    if (strcmp(interface_type->fields.structure[length-1].name, v->name) == 0)
       return true;
    return false;
+}
+
+static void
+apply_memory_qualifiers(ir_variable *var, glsl_struct_field field)
+{
+   var->data.image_read_only = field.image_read_only;
+   var->data.image_write_only = field.image_write_only;
+   var->data.image_coherent = field.image_coherent;
+   var->data.image_volatile = field.image_volatile;
+   var->data.image_restrict = field.image_restrict;
 }
 
 ir_rvalue *
@@ -7266,12 +7336,6 @@ ast_interface_block::hir(exec_list *instructions,
                                         packing,
                                         this->block_name);
 
-   unsigned component_size = block_type->contains_double() ? 8 : 4;
-   int xfb_offset =
-      layout.flags.q.explicit_xfb_offset ? (int) qual_xfb_offset : -1;
-   validate_xfb_offset_qualifier(&loc, state, xfb_offset, block_type,
-                                 component_size);
-
    if (!state->symbols->add_interface(block_type->name, block_type, var_mode)) {
       YYLTYPE loc = this->get_location();
       _mesa_glsl_error(&loc, state, "interface block `%s' with type `%s' "
@@ -7410,6 +7474,13 @@ ast_interface_block::hir(exec_list *instructions,
                                       var_mode);
       }
 
+      unsigned component_size = block_type->contains_double() ? 8 : 4;
+      int xfb_offset =
+         layout.flags.q.explicit_xfb_offset ? (int) qual_xfb_offset : -1;
+      const glsl_type *t = get_varying_type(var, state->stage);
+      validate_xfb_offset_qualifier(&loc, state, xfb_offset, t,
+                                    component_size);
+
       var->data.matrix_layout = matrix_layout == GLSL_MATRIX_LAYOUT_INHERITED
          ? GLSL_MATRIX_LAYOUT_COLUMN_MAJOR : matrix_layout;
 
@@ -7425,30 +7496,8 @@ ast_interface_block::hir(exec_list *instructions,
          handle_tess_ctrl_shader_output_decl(state, loc, var);
 
       for (unsigned i = 0; i < num_variables; i++) {
-         if (fields[i].type->is_unsized_array()) {
-            if (var_mode == ir_var_shader_storage) {
-               if (i != (num_variables - 1)) {
-                  _mesa_glsl_error(&loc, state, "unsized array `%s' definition: "
-                                   "only last member of a shader storage block "
-                                   "can be defined as unsized array",
-                                   fields[i].name);
-               }
-            } else {
-               /* From GLSL ES 3.10 spec, section 4.1.9 "Arrays":
-               *
-               * "If an array is declared as the last member of a shader storage
-               * block and the size is not specified at compile-time, it is
-               * sized at run-time. In all other cases, arrays are sized only
-               * at compile-time."
-               */
-               if (state->es_shader) {
-                  _mesa_glsl_error(&loc, state, "unsized array `%s' definition: "
-                                 "only last member of a shader storage block "
-                                 "can be defined as unsized array",
-                                 fields[i].name);
-               }
-            }
-         }
+         if (var->data.mode == ir_var_shader_storage)
+            apply_memory_qualifiers(var, fields[i]);
       }
 
       if (ir_variable *earlier =
@@ -7481,6 +7530,12 @@ ast_interface_block::hir(exec_list *instructions,
        * an instance name.
        */
       assert(this->array_specifier == NULL);
+
+      unsigned component_size = block_type->contains_double() ? 8 : 4;
+      int xfb_offset =
+         layout.flags.q.explicit_xfb_offset ? (int) qual_xfb_offset : -1;
+      validate_xfb_offset_qualifier(&loc, state, xfb_offset, block_type,
+                                    component_size);
 
       for (unsigned i = 0; i < num_variables; i++) {
          ir_variable *var =
@@ -7523,13 +7578,8 @@ ast_interface_block::hir(exec_list *instructions,
             var->data.matrix_layout = fields[i].matrix_layout;
          }
 
-         if (var->data.mode == ir_var_shader_storage) {
-            var->data.image_read_only = fields[i].image_read_only;
-            var->data.image_write_only = fields[i].image_write_only;
-            var->data.image_coherent = fields[i].image_coherent;
-            var->data.image_volatile = fields[i].image_volatile;
-            var->data.image_restrict = fields[i].image_restrict;
-         }
+         if (var->data.mode == ir_var_shader_storage)
+            apply_memory_qualifiers(var, fields[i]);
 
          /* Examine var name here since var may get deleted in the next call */
          bool var_is_gl_id = is_gl_identifier(var->name);
@@ -7567,26 +7617,8 @@ ast_interface_block::hir(exec_list *instructions,
 
          if (var->type->is_unsized_array()) {
             if (var->is_in_shader_storage_block()) {
-               if (!is_unsized_array_last_element(var)) {
-                  _mesa_glsl_error(&loc, state, "unsized array `%s' definition: "
-                                   "only last member of a shader storage block "
-                                   "can be defined as unsized array",
-                                   var->name);
-               }
-               var->data.from_ssbo_unsized_array = true;
-            } else {
-               /* From GLSL ES 3.10 spec, section 4.1.9 "Arrays":
-               *
-               * "If an array is declared as the last member of a shader storage
-               * block and the size is not specified at compile-time, it is
-               * sized at run-time. In all other cases, arrays are sized only
-               * at compile-time."
-               */
-               if (state->es_shader) {
-                  _mesa_glsl_error(&loc, state, "unsized array `%s' definition: "
-                                 "only last member of a shader storage block "
-                                 "can be defined as unsized array",
-                                 var->name);
+               if (is_unsized_array_last_element(var)) {
+                  var->data.from_ssbo_unsized_array = true;
                }
             }
          }
@@ -7680,7 +7712,7 @@ ast_tcs_output_layout::hir(exec_list *instructions,
       if (!var->type->is_unsized_array() || var->data.patch)
          continue;
 
-      if (var->data.max_array_access >= num_vertices) {
+      if (var->data.max_array_access >= (int)num_vertices) {
 	 _mesa_glsl_error(&loc, state,
 			  "this tessellation control shader output layout "
 			  "specifies %u vertices, but an access to element "
@@ -7741,7 +7773,7 @@ ast_gs_input_layout::hir(exec_list *instructions,
        */
 
       if (var->type->is_unsized_array()) {
-         if (var->data.max_array_access >= num_vertices) {
+         if (var->data.max_array_access >= (int)num_vertices) {
             _mesa_glsl_error(&loc, state,
                              "this geometry shader input layout implies %u"
                              " vertices, but an access to element %u of input"

@@ -34,6 +34,7 @@
 #include "util/ralloc.h"
 #include "util/set.h"
 #include "util/bitset.h"
+#include "util/macros.h"
 #include "compiler/nir_types.h"
 #include "compiler/shader_enums.h"
 #include <stdio.h>
@@ -1068,10 +1069,12 @@ typedef enum {
    nir_tex_src_bias,
    nir_tex_src_lod,
    nir_tex_src_ms_index, /* MSAA sample index */
+   nir_tex_src_ms_mcs, /* MSAA compression value */
    nir_tex_src_ddx,
    nir_tex_src_ddy,
    nir_tex_src_texture_offset, /* < dynamically uniform indirect offset */
    nir_tex_src_sampler_offset, /* < dynamically uniform indirect offset */
+   nir_tex_src_plane,          /* < selects plane for planar textures */
    nir_num_tex_src_types
 } nir_tex_src_type;
 
@@ -1087,6 +1090,7 @@ typedef enum {
    nir_texop_txd,                /**< Texture look-up with partial derivatvies */
    nir_texop_txf,                /**< Texel fetch with explicit LOD */
    nir_texop_txf_ms,                /**< Multisample texture fetch */
+   nir_texop_txf_ms_mcs,         /**< Multisample compression value fetch */
    nir_texop_txs,                /**< Texture size */
    nir_texop_lod,                /**< Texture lod query */
    nir_texop_tg4,                /**< Texture gather */
@@ -1215,6 +1219,7 @@ nir_tex_instr_is_query(nir_tex_instr *instr)
    case nir_texop_lod:
    case nir_texop_texture_samples:
    case nir_texop_query_levels:
+   case nir_texop_txf_ms_mcs:
       return true;
    case nir_texop_tex:
    case nir_texop_txb:
@@ -1235,6 +1240,9 @@ nir_tex_instr_src_size(nir_tex_instr *instr, unsigned src)
    if (instr->src[src].src_type == nir_tex_src_coord)
       return instr->coord_components;
 
+   /* The MCS value is expected to be a vec4 returned by a txf_ms_mcs */
+   if (instr->src[src].src_type == nir_tex_src_ms_mcs)
+      return 4;
 
    if (instr->src[src].src_type == nir_tex_src_offset ||
        instr->src[src].src_type == nir_tex_src_ddx ||
@@ -1258,15 +1266,13 @@ nir_tex_instr_src_index(nir_tex_instr *instr, nir_tex_src_type type)
    return -1;
 }
 
-typedef struct {
-   union {
-      float f32[4];
-      double f64[4];
-      int32_t i32[4];
-      uint32_t u32[4];
-      int64_t i64[4];
-      uint64_t u64[4];
-   };
+typedef union {
+   float f32[4];
+   double f64[4];
+   int32_t i32[4];
+   uint32_t u32[4];
+   int64_t i64[4];
+   uint64_t u64[4];
 } nir_const_value;
 
 typedef struct {
@@ -1544,16 +1550,16 @@ typedef struct {
    nir_metadata valid_metadata;
 } nir_function_impl;
 
-static inline nir_block *
+ATTRIBUTE_RETURNS_NONNULL static inline nir_block *
 nir_start_block(nir_function_impl *impl)
 {
-   return (nir_block *) exec_list_get_head(&impl->body);
+   return (nir_block *) impl->body.head;
 }
 
-static inline nir_block *
+ATTRIBUTE_RETURNS_NONNULL static inline nir_block *
 nir_impl_last_block(nir_function_impl *impl)
 {
-   return (nir_block *) exec_list_get_tail(&impl->body);
+   return (nir_block *) impl->body.tail_pred;
 }
 
 static inline nir_cf_node *
@@ -1624,6 +1630,7 @@ typedef struct nir_function {
 typedef struct nir_shader_compiler_options {
    bool lower_fdiv;
    bool lower_ffma;
+   bool fuse_ffma;
    bool lower_flrp32;
    /** Lowers flrp when it does not support doubles */
    bool lower_flrp64;
@@ -1696,6 +1703,8 @@ typedef struct nir_shader_info {
 
    /* Which inputs are actually read */
    uint64_t inputs_read;
+   /* Which inputs are actually read and are double */
+   uint64_t double_inputs_read;
    /* Which outputs are actually written */
    uint64_t outputs_written;
    /* Which system values are actually read */
@@ -1708,6 +1717,9 @@ typedef struct nir_shader_info {
 
    /* Whether or not this shader ever uses textureGather() */
    bool uses_texture_gather;
+
+   /** Whether or not this shader uses nir_intrinsic_interp_var_at_offset */
+   bool uses_interp_var_at_offset;
 
    /* Whether or not this shader uses the gl_ClipDistance output */
    bool uses_clip_distance_out;
@@ -1741,6 +1753,11 @@ typedef struct nir_shader_info {
 
       struct {
          bool uses_discard;
+
+         /**
+          * Whether any inputs are declared with the "sample" qualifier.
+          */
+         bool uses_sample_qualifier;
 
          /**
           * Whether early fragment tests are enabled as defined by
@@ -2180,44 +2197,6 @@ nir_block *nir_cf_node_cf_tree_next(nir_cf_node *node);
         block != nir_cf_node_cf_tree_next(node); \
         block = nir_block_cf_tree_next(block))
 
-typedef bool (*nir_foreach_block_cb)(nir_block *block, void *state);
-
-static inline bool
-nir_foreach_block_call(nir_function_impl *impl, nir_foreach_block_cb cb,
-                       void *state)
-{
-   nir_foreach_block_safe(block, impl) {
-      if (!cb(block, state))
-         return false;
-   }
-
-   return true;
-}
-
-static inline bool
-nir_foreach_block_reverse_call(nir_function_impl *impl, nir_foreach_block_cb cb,
-                               void *state)
-{
-   nir_foreach_block_reverse_safe(block, impl) {
-      if (!cb(block, state))
-         return false;
-   }
-
-   return true;
-}
-
-static inline bool
-nir_foreach_block_in_cf_node_call(nir_cf_node *node, nir_foreach_block_cb cb,
-                                  void *state)
-{
-   nir_foreach_block_in_cf_node(block, node) {
-      if (!cb(block, state))
-         return false;
-   }
-
-   return true;
-}
-
 /* If the following CF node is an if, this function returns that if.
  * Otherwise, it returns NULL.
  */
@@ -2233,6 +2212,7 @@ unsigned nir_index_instrs(nir_function_impl *impl);
 void nir_index_blocks(nir_function_impl *impl);
 
 void nir_print_shader(nir_shader *shader, FILE *fp);
+void nir_print_shader_annotated(nir_shader *shader, FILE *fp, struct hash_table *errors);
 void nir_print_instr(const nir_instr *instr, FILE *fp);
 
 nir_shader *nir_shader_clone(void *mem_ctx, const nir_shader *s);
@@ -2317,8 +2297,9 @@ bool nir_lower_indirect_derefs(nir_shader *shader, nir_variable_mode modes);
 
 bool nir_lower_locals_to_regs(nir_shader *shader);
 
-void nir_lower_outputs_to_temporaries(nir_shader *shader,
-                                      nir_function *entrypoint);
+void nir_lower_io_to_temporaries(nir_shader *shader, nir_function *entrypoint,
+                                 bool outputs, bool inputs);
+
 void nir_shader_gather_info(nir_shader *shader, nir_function_impl *entrypoint);
 
 void nir_assign_var_locations(struct exec_list *var_list,
@@ -2331,6 +2312,7 @@ void nir_lower_io(nir_shader *shader,
 nir_src *nir_get_io_offset_src(nir_intrinsic_instr *instr);
 nir_src *nir_get_io_vertex_index_src(nir_intrinsic_instr *instr);
 
+void nir_lower_io_types(nir_shader *shader);
 void nir_lower_vars_to_ssa(nir_shader *shader);
 
 bool nir_remove_dead_variables(nir_shader *shader, nir_variable_mode modes);
@@ -2360,6 +2342,13 @@ typedef struct nir_lower_tex_options {
     * texture dims to normalize.
     */
    bool lower_rect;
+
+   /**
+    * If true, convert yuv to rgb.
+    */
+   unsigned lower_y_uv_external;
+   unsigned lower_y_u_v_external;
+   unsigned lower_yx_xuxv_external;
 
    /**
     * To emulate certain texture wrap modes, this can be used
@@ -2403,7 +2392,7 @@ typedef struct nir_lower_tex_options {
 bool nir_lower_tex(nir_shader *shader,
                    const nir_lower_tex_options *options);
 
-void nir_lower_idiv(nir_shader *shader);
+bool nir_lower_idiv(nir_shader *shader);
 
 void nir_lower_clip_vs(nir_shader *shader, unsigned ucp_enables);
 void nir_lower_clip_fs(nir_shader *shader, unsigned ucp_enables);
@@ -2411,6 +2400,40 @@ void nir_lower_clip_fs(nir_shader *shader, unsigned ucp_enables);
 void nir_lower_two_sided_color(nir_shader *shader);
 
 void nir_lower_clamp_color_outputs(nir_shader *shader);
+
+void nir_lower_passthrough_edgeflags(nir_shader *shader);
+
+typedef struct nir_lower_wpos_ytransform_options {
+   int state_tokens[5];
+   bool fs_coord_origin_upper_left :1;
+   bool fs_coord_origin_lower_left :1;
+   bool fs_coord_pixel_center_integer :1;
+   bool fs_coord_pixel_center_half_integer :1;
+} nir_lower_wpos_ytransform_options;
+
+bool nir_lower_wpos_ytransform(nir_shader *shader,
+                               const nir_lower_wpos_ytransform_options *options);
+bool nir_lower_wpos_center(nir_shader *shader);
+
+typedef struct nir_lower_drawpixels_options {
+   int texcoord_state_tokens[5];
+   int scale_state_tokens[5];
+   int bias_state_tokens[5];
+   unsigned drawpix_sampler;
+   unsigned pixelmap_sampler;
+   bool pixel_maps :1;
+   bool scale_and_bias :1;
+} nir_lower_drawpixels_options;
+
+void nir_lower_drawpixels(nir_shader *shader,
+                          const nir_lower_drawpixels_options *options);
+
+typedef struct nir_lower_bitmap_options {
+   unsigned sampler;
+   bool swizzle_xxxx;
+} nir_lower_bitmap_options;
+
+void nir_lower_bitmap(nir_shader *shader, const nir_lower_bitmap_options *options);
 
 void nir_lower_atomics(nir_shader *shader,
                        const struct gl_shader_program *shader_program);

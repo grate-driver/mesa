@@ -66,7 +66,6 @@ struct brw_codegen {
    brw_inst *current;
 
    bool single_program_flow;
-   bool compressed;
    const struct brw_device_info *devinfo;
 
    /* Control flow stacks:
@@ -101,6 +100,12 @@ void brw_set_default_exec_size(struct brw_codegen *p, unsigned value);
 void brw_set_default_mask_control( struct brw_codegen *p, unsigned value );
 void brw_set_default_saturate( struct brw_codegen *p, bool enable );
 void brw_set_default_access_mode( struct brw_codegen *p, unsigned access_mode );
+void brw_inst_set_compression(const struct brw_device_info *devinfo,
+                              brw_inst *inst, bool on);
+void brw_set_default_compression(struct brw_codegen *p, bool on);
+void brw_inst_set_group(const struct brw_device_info *devinfo,
+                        brw_inst *inst, unsigned group);
+void brw_set_default_group(struct brw_codegen *p, unsigned group);
 void brw_set_default_compression_control(struct brw_codegen *p, enum brw_compression c);
 void brw_set_default_predicate_control( struct brw_codegen *p, unsigned pc );
 void brw_set_default_predicate_inverse(struct brw_codegen *p, bool predicate_inverse);
@@ -276,7 +281,6 @@ void brw_svb_write(struct brw_codegen *p,
                    bool   send_commit_msg);
 
 void brw_fb_WRITE(struct brw_codegen *p,
-		  int dispatch_width,
 		   struct brw_reg payload,
 		   struct brw_reg implied_header,
 		   unsigned msg_control,

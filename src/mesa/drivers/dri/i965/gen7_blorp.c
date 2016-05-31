@@ -491,16 +491,16 @@ gen7_blorp_emit_wm_config(struct brw_context *brw,
    if (params->src.mt)
       dw1 |= GEN7_WM_KILL_ENABLE; /* TODO: temporarily smash on */
 
-      if (params->dst.num_samples > 1) {
-         dw1 |= GEN7_WM_MSRAST_ON_PATTERN;
-         if (prog_data && prog_data->persample_msaa_dispatch)
-            dw2 |= GEN7_WM_MSDISPMODE_PERSAMPLE;
-         else
-            dw2 |= GEN7_WM_MSDISPMODE_PERPIXEL;
-      } else {
-         dw1 |= GEN7_WM_MSRAST_OFF_PIXEL;
+   if (params->dst.num_samples > 1) {
+      dw1 |= GEN7_WM_MSRAST_ON_PATTERN;
+      if (prog_data && prog_data->persample_msaa_dispatch)
          dw2 |= GEN7_WM_MSDISPMODE_PERSAMPLE;
-      }
+      else
+         dw2 |= GEN7_WM_MSDISPMODE_PERPIXEL;
+   } else {
+      dw1 |= GEN7_WM_MSRAST_OFF_PIXEL;
+      dw2 |= GEN7_WM_MSDISPMODE_PERSAMPLE;
+   }
 
    BEGIN_BATCH(3);
    OUT_BATCH(_3DSTATE_WM << 16 | (3 - 2));
@@ -526,26 +526,33 @@ gen7_blorp_emit_ps_config(struct brw_context *brw,
                           const struct brw_blorp_params *params)
 {
    const struct brw_blorp_prog_data *prog_data = params->wm_prog_data;
-   uint32_t dw2, dw4, dw5;
+   uint32_t dw2, dw4, dw5, ksp0, ksp2;
    const int max_threads_shift = brw->is_haswell ?
       HSW_PS_MAX_THREADS_SHIFT : IVB_PS_MAX_THREADS_SHIFT;
 
-   dw2 = dw4 = dw5 = 0;
+   dw2 = dw4 = dw5 = ksp0 = ksp2 = 0;
    dw4 |= (brw->max_wm_threads - 1) << max_threads_shift;
-
-   /* If there's a WM program, we need to do 16-pixel dispatch since that's
-    * what the program is compiled for.  If there isn't, then it shouldn't
-    * matter because no program is actually being run.  However, the hardware
-    * gets angry if we don't enable at least one dispatch mode, so just enable
-    * 16-pixel dispatch unconditionally.
-    */
-   dw4 |= GEN7_PS_16_DISPATCH_ENABLE;
 
    if (brw->is_haswell)
       dw4 |= SET_FIELD(1, HSW_PS_SAMPLE_MASK); /* 1 sample for now */
    if (params->wm_prog_data) {
       dw4 |= GEN7_PS_PUSH_CONSTANT_ENABLE;
-      dw5 |= prog_data->first_curbe_grf << GEN7_PS_DISPATCH_START_GRF_SHIFT_0;
+
+      dw5 |= prog_data->first_curbe_grf_0 << GEN7_PS_DISPATCH_START_GRF_SHIFT_0;
+      dw5 |= prog_data->first_curbe_grf_2 << GEN7_PS_DISPATCH_START_GRF_SHIFT_2;
+
+      ksp0 = params->wm_prog_kernel;
+      ksp2 = params->wm_prog_kernel + params->wm_prog_data->ksp_offset_2;
+
+      if (params->wm_prog_data->dispatch_8)
+         dw4 |= GEN7_PS_8_DISPATCH_ENABLE;
+      if (params->wm_prog_data->dispatch_16)
+         dw4 |= GEN7_PS_16_DISPATCH_ENABLE;
+   } else {
+      /* The hardware gets angry if we don't enable at least one dispatch
+       * mode, so just enable 16-pixel dispatch if we don't have a program.
+       */
+      dw4 |= GEN7_PS_16_DISPATCH_ENABLE;
    }
 
    if (params->src.mt)
@@ -555,13 +562,13 @@ gen7_blorp_emit_ps_config(struct brw_context *brw,
 
    BEGIN_BATCH(8);
    OUT_BATCH(_3DSTATE_PS << 16 | (8 - 2));
-   OUT_BATCH(params->wm_prog_kernel);
+   OUT_BATCH(ksp0);
    OUT_BATCH(dw2);
    OUT_BATCH(0);
    OUT_BATCH(dw4);
    OUT_BATCH(dw5);
-   OUT_BATCH(0);
-   OUT_BATCH(0);
+   OUT_BATCH(0); /* kernel 1 pointer */
+   OUT_BATCH(ksp2);
    ADVANCE_BATCH();
 }
 
@@ -810,8 +817,7 @@ gen7_blorp_exec(struct brw_context *brw,
    uint32_t wm_push_const_offset = 0;
    uint32_t wm_bind_bo_offset = 0;
 
-   if (brw_state_base_address.dirty.brw & brw->ctx.NewDriverState)
-      brw_state_base_address.emit(brw);
+   brw_upload_state_base_address(brw);
 
    gen6_emit_3dstate_multisample(brw, params->dst.num_samples);
    gen6_emit_3dstate_sample_mask(brw,

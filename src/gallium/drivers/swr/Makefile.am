@@ -56,45 +56,53 @@ BUILT_SOURCES = \
 	rasterizer/jitter/builder_x86.h \
 	rasterizer/jitter/builder_x86.cpp
 
+MKDIR_GEN = $(AM_V_at)$(MKDIR_P) $(@D)
+PYTHON_GEN = $(AM_V_GEN)$(PYTHON2) $(PYTHON_FLAGS)
 swr_context_llvm.h: rasterizer/jitter/scripts/gen_llvm_types.py swr_context.h
-	$(PYTHON2) $(PYTHON_FLAGS) \
+	$(PYTHON_GEN) \
 		$(srcdir)/rasterizer/jitter/scripts/gen_llvm_types.py \
 		--input $(srcdir)/swr_context.h \
 		--output swr_context_llvm.h
 
 rasterizer/scripts/gen_knobs.cpp rasterizer/scripts/gen_knobs.h: rasterizer/scripts/gen_knobs.py rasterizer/scripts/knob_defs.py rasterizer/scripts/templates/knobs.template
-	$(PYTHON2) $(PYTHON_FLAGS) \
+	$(MKDIR_GEN)
+	$(PYTHON_GEN) \
 		$(srcdir)/rasterizer/scripts/gen_knobs.py \
 		rasterizer/scripts
 
 rasterizer/jitter/state_llvm.h: rasterizer/jitter/scripts/gen_llvm_types.py rasterizer/core/state.h
-	$(PYTHON2) $(PYTHON_FLAGS) \
+	$(MKDIR_GEN)
+	$(PYTHON_GEN) \
 		$(srcdir)/rasterizer/jitter/scripts/gen_llvm_types.py \
 		--input $(srcdir)/rasterizer/core/state.h \
 		--output rasterizer/jitter/state_llvm.h
 
-rasterizer/jitter/builder_gen.h: rasterizer/jitter/scripts/gen_llvm_ir_macros.py $(LLVM_INCLUDEDIR)/llvm/IR/IRBuilder.h
-	$(PYTHON2) $(PYTHON_FLAGS) \
+rasterizer/jitter/builder_gen.h: rasterizer/jitter/scripts/gen_llvm_ir_macros.py
+	$(MKDIR_GEN)
+	$(PYTHON_GEN) \
 		$(srcdir)/rasterizer/jitter/scripts/gen_llvm_ir_macros.py \
 		--input $(LLVM_INCLUDEDIR)/llvm/IR/IRBuilder.h \
 		--output rasterizer/jitter/builder_gen.h \
 		--gen_h
 
-rasterizer/jitter/builder_gen.cpp: rasterizer/jitter/scripts/gen_llvm_ir_macros.py $(LLVM_INCLUDEDIR)/llvm/IR/IRBuilder.h
-	$(PYTHON2) $(PYTHON_FLAGS) \
+rasterizer/jitter/builder_gen.cpp: rasterizer/jitter/scripts/gen_llvm_ir_macros.py
+	$(MKDIR_GEN)
+	$(PYTHON_GEN) \
 		$(srcdir)/rasterizer/jitter/scripts/gen_llvm_ir_macros.py \
 		--input $(LLVM_INCLUDEDIR)/llvm/IR/IRBuilder.h \
 		--output rasterizer/jitter/builder_gen.cpp \
 		--gen_cpp
 
 rasterizer/jitter/builder_x86.h: rasterizer/jitter/scripts/gen_llvm_ir_macros.py
-	$(PYTHON2) $(PYTHON_FLAGS) \
+	$(MKDIR_GEN)
+	$(PYTHON_GEN) \
 		$(srcdir)/rasterizer/jitter/scripts/gen_llvm_ir_macros.py \
 		--output rasterizer/jitter/builder_x86.h \
 		--gen_x86_h
 
 rasterizer/jitter/builder_x86.cpp: rasterizer/jitter/scripts/gen_llvm_ir_macros.py
-	$(PYTHON2) $(PYTHON_FLAGS) \
+	$(MKDIR_GEN)
+	$(PYTHON_GEN) \
 		$(srcdir)/rasterizer/jitter/scripts/gen_llvm_ir_macros.py \
 		--output rasterizer/jitter/builder_x86.cpp \
 		--gen_x86_cpp
@@ -102,7 +110,16 @@ rasterizer/jitter/builder_x86.cpp: rasterizer/jitter/scripts/gen_llvm_ir_macros.
 
 COMMON_LIBADD = \
 	$(top_builddir)/src/gallium/auxiliary/libgallium.la \
-	$(top_builddir)/src/mesa/libmesagallium.la
+	$(top_builddir)/src/mesa/libmesagallium.la \
+	$(LLVM_LIBS)
+
+COMMON_LDFLAGS = \
+	-shared \
+	-module \
+	-no-undefined \
+	$(GC_SECTIONS) \
+	$(NO_UNDEFINED) \
+	$(LLVM_LDFLAGS)
 
 lib_LTLIBRARIES = libswrAVX.la libswrAVX2.la
 
@@ -117,6 +134,9 @@ libswrAVX_la_SOURCES = \
 libswrAVX_la_LIBADD = \
 	$(COMMON_LIBADD)
 
+libswrAVX_la_LDFLAGS = \
+	$(COMMON_LDFLAGS)
+
 libswrAVX2_la_CXXFLAGS = \
 	-march=core-avx2 \
 	-DKNOB_ARCH=KNOB_ARCH_AVX2 \
@@ -128,4 +148,31 @@ libswrAVX2_la_SOURCES = \
 libswrAVX2_la_LIBADD = \
 	$(COMMON_LIBADD)
 
+libswrAVX2_la_LDFLAGS = \
+	$(COMMON_LDFLAGS)
+
 include $(top_srcdir)/install-gallium-links.mk
+
+EXTRA_DIST = \
+	rasterizer/jitter/scripts/gen_llvm_ir_macros.py \
+	rasterizer/jitter/scripts/gen_llvm_types.py \
+	rasterizer/scripts/gen_knobs.py \
+	rasterizer/scripts/knob_defs.py \
+	rasterizer/scripts/mako/ast.py \
+	rasterizer/scripts/mako/_ast_util.py \
+	rasterizer/scripts/mako/cache.py \
+	rasterizer/scripts/mako/cmd.py \
+	rasterizer/scripts/mako/codegen.py \
+	rasterizer/scripts/mako/compat.py \
+	rasterizer/scripts/mako/exceptions.py \
+	rasterizer/scripts/mako/filters.py \
+	rasterizer/scripts/mako/__init__.py \
+	rasterizer/scripts/mako/lexer.py \
+	rasterizer/scripts/mako/lookup.py \
+	rasterizer/scripts/mako/parsetree.py \
+	rasterizer/scripts/mako/pygen.py \
+	rasterizer/scripts/mako/pyparser.py \
+	rasterizer/scripts/mako/runtime.py \
+	rasterizer/scripts/mako/template.py \
+	rasterizer/scripts/mako/util.py \
+	rasterizer/scripts/templates/knobs.template

@@ -66,8 +66,8 @@ static const struct qir_op_info qir_op_info[] = {
 
         [QOP_RCP] = { "rcp", 1, 1 },
         [QOP_RSQ] = { "rsq", 1, 1 },
-        [QOP_EXP2] = { "exp2", 1, 2 },
-        [QOP_LOG2] = { "log2", 1, 2 },
+        [QOP_EXP2] = { "exp2", 1, 1 },
+        [QOP_LOG2] = { "log2", 1, 1 },
         [QOP_TLB_COLOR_READ] = { "tlb_color_read", 1, 0 },
         [QOP_MS_MASK] = { "ms_mask", 0, 1, true },
         [QOP_VARY_ADD_C] = { "vary_add_c", 1, 1 },
@@ -81,6 +81,8 @@ static const struct qir_op_info qir_op_info[] = {
         [QOP_TEX_B] = { "tex_b", 0, 2 },
         [QOP_TEX_DIRECT] = { "tex_direct", 0, 2 },
         [QOP_TEX_RESULT] = { "tex_result", 1, 0, true },
+
+        [QOP_LOAD_IMM] = { "load_imm", 0, 1 },
 };
 
 static const char *
@@ -244,6 +246,10 @@ qir_print_reg(struct vc4_compile *c, struct qreg reg, bool write)
                 fprintf(stderr, "null");
                 break;
 
+        case QFILE_LOAD_IMM:
+                fprintf(stderr, "0x%08x (%f)", reg.index, uif(reg.index));
+                break;
+
         case QFILE_SMALL_IMM:
                 if ((int)reg.index >= -16 && (int)reg.index <= 15)
                         fprintf(stderr, "%d", reg.index);
@@ -283,20 +289,11 @@ qir_print_reg(struct vc4_compile *c, struct qreg reg, bool write)
 void
 qir_dump_inst(struct vc4_compile *c, struct qinst *inst)
 {
-        static const char *conditions[] = {
-                [QPU_COND_ALWAYS] = "",
-                [QPU_COND_NEVER] = ".never",
-                [QPU_COND_ZS] = ".zs",
-                [QPU_COND_ZC] = ".zc",
-                [QPU_COND_NS] = ".ns",
-                [QPU_COND_NC] = ".nc",
-                [QPU_COND_CS] = ".cs",
-                [QPU_COND_CC] = ".cc",
-        };
-        fprintf(stderr, "%s%s%s ",
-                qir_get_op_name(inst->op),
-                conditions[inst->cond],
-                inst->sf ? ".sf" : "");
+        fprintf(stderr, "%s", qir_get_op_name(inst->op));
+        vc4_qpu_disasm_cond(stderr, inst->cond);
+        if (inst->sf)
+                fprintf(stderr, ".sf");
+        fprintf(stderr, " ");
 
         qir_print_reg(c, inst->dst, true);
         if (inst->dst.pack) {
@@ -527,6 +524,7 @@ qir_SF(struct vc4_compile *c, struct qreg src)
                                         "QIR opt pass %2d: %s progress\n", \
                                         pass, #func);                   \
                         }                                               \
+                        qir_validate(c);                                \
                 }                                                       \
         } while (0)
 

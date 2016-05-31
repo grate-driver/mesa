@@ -265,9 +265,28 @@ struct _mesa_glsl_parse_state {
       return ARB_compute_shader_enable || is_version(430, 310);
    }
 
+   bool has_shader_io_blocks() const
+   {
+      return OES_shader_io_blocks_enable ||
+             EXT_shader_io_blocks_enable ||
+             is_version(150, 320);
+   }
+
    bool has_geometry_shader() const
    {
       return OES_geometry_shader_enable || is_version(150, 320);
+   }
+
+   bool has_clip_distance() const
+   {
+      return EXT_clip_cull_distance_enable || is_version(130, 0);
+   }
+
+   bool has_cull_distance() const
+   {
+      return EXT_clip_cull_distance_enable ||
+             ARB_cull_distance_enable ||
+             is_version(450, 0);
    }
 
    void process_version_directive(YYLTYPE *locp, int version,
@@ -520,6 +539,8 @@ struct _mesa_glsl_parse_state {
    bool ARB_compute_shader_warn;
    bool ARB_conservative_depth_enable;
    bool ARB_conservative_depth_warn;
+   bool ARB_cull_distance_enable;
+   bool ARB_cull_distance_warn;
    bool ARB_derivative_control_enable;
    bool ARB_derivative_control_warn;
    bool ARB_draw_buffers_enable;
@@ -612,6 +633,8 @@ struct _mesa_glsl_parse_state {
    bool OES_sample_variables_warn;
    bool OES_shader_image_atomic_enable;
    bool OES_shader_image_atomic_warn;
+   bool OES_shader_io_blocks_enable;
+   bool OES_shader_io_blocks_warn;
    bool OES_shader_multisample_interpolation_enable;
    bool OES_shader_multisample_interpolation_warn;
    bool OES_standard_derivatives_enable;
@@ -637,6 +660,8 @@ struct _mesa_glsl_parse_state {
    bool AMD_vertex_shader_viewport_index_warn;
    bool EXT_blend_func_extended_enable;
    bool EXT_blend_func_extended_warn;
+   bool EXT_clip_cull_distance_enable;
+   bool EXT_clip_cull_distance_warn;
    bool EXT_draw_buffers_enable;
    bool EXT_draw_buffers_warn;
    bool EXT_gpu_shader5_enable;
@@ -645,6 +670,8 @@ struct _mesa_glsl_parse_state {
    bool EXT_separate_shader_objects_warn;
    bool EXT_shader_integer_mix_enable;
    bool EXT_shader_integer_mix_warn;
+   bool EXT_shader_io_blocks_enable;
+   bool EXT_shader_io_blocks_warn;
    bool EXT_shader_samples_identical_enable;
    bool EXT_shader_samples_identical_warn;
    bool EXT_texture_array_enable;
@@ -702,6 +729,12 @@ struct _mesa_glsl_parse_state {
     * did the parser just parse a dot.
     */
    bool is_field;
+
+   /**
+    * seen values for clip/cull distance sizes
+    * so we can check totals aren't too large.
+    */
+   unsigned clip_dist_size, cull_dist_size;
 };
 
 # define YYLLOC_DEFAULT(Current, Rhs, N)			\

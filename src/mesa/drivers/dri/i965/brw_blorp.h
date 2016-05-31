@@ -29,6 +29,7 @@
 #include "intel_mipmap_tree.h"
 
 struct brw_context;
+struct brw_wm_prog_key;
 
 #ifdef __cplusplus
 extern "C" {
@@ -199,19 +200,36 @@ struct brw_blorp_wm_push_constants
    uint32_t pad[5];
 };
 
+#define BRW_BLORP_NUM_PUSH_CONSTANT_DWORDS \
+   (sizeof(struct brw_blorp_wm_push_constants) / 4)
+
 /* Every 32 bytes of push constant data constitutes one GEN register. */
 static const unsigned int BRW_BLORP_NUM_PUSH_CONST_REGS =
    sizeof(struct brw_blorp_wm_push_constants) / 32;
 
 struct brw_blorp_prog_data
 {
-   unsigned int first_curbe_grf;
+   bool dispatch_8;
+   bool dispatch_16;
+
+   uint8_t first_curbe_grf_0;
+   uint8_t first_curbe_grf_2;
+
+   uint32_t ksp_offset_2;
 
    /**
     * True if the WM program should be run in MSDISPMODE_PERSAMPLE with more
     * than one sample per pixel.
     */
    bool persample_msaa_dispatch;
+
+   /* The compiler will re-arrange push constants and store the upload order
+    * here. Given an index 'i' in the final upload buffer, param[i] gives the
+    * index in the uniform store. In other words, the value to be uploaded can
+    * be found by brw_blorp_params::wm_push_consts[param[i]].
+    */
+   uint8_t nr_params;
+   uint8_t param[BRW_BLORP_NUM_PUSH_CONSTANT_DWORDS];
 };
 
 struct brw_blorp_params
@@ -225,7 +243,10 @@ struct brw_blorp_params
    struct brw_blorp_surface_info src;
    struct brw_blorp_surface_info dst;
    enum gen6_hiz_op hiz_op;
-   unsigned fast_clear_op;
+   union {
+      unsigned fast_clear_op;
+      unsigned resolve_type;
+   };
    bool color_write_disable[4];
    struct brw_blorp_wm_push_constants wm_push_consts;
    unsigned num_varyings;
@@ -341,6 +362,15 @@ struct brw_blorp_blit_prog_key
  *
  * Used internally by gen6_blorp_exec() and gen7_blorp_exec().
  */
+
+void brw_blorp_init_wm_prog_key(struct brw_wm_prog_key *wm_key);
+
+const unsigned *
+brw_blorp_compile_nir_shader(struct brw_context *brw, struct nir_shader *nir,
+                             const struct brw_wm_prog_key *wm_key,
+                             bool use_repclear,
+                             struct brw_blorp_prog_data *prog_data,
+                             unsigned *program_size);
 
 void
 gen6_blorp_init(struct brw_context *brw);

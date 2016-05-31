@@ -233,36 +233,6 @@ nir_build_alu(nir_builder *build, nir_op op, nir_ssa_def *src0,
    return &instr->dest.dest.ssa;
 }
 
-#define ALU1(op)                                                          \
-static inline nir_ssa_def *                                               \
-nir_##op(nir_builder *build, nir_ssa_def *src0)                           \
-{                                                                         \
-   return nir_build_alu(build, nir_op_##op, src0, NULL, NULL, NULL);      \
-}
-
-#define ALU2(op)                                                          \
-static inline nir_ssa_def *                                               \
-nir_##op(nir_builder *build, nir_ssa_def *src0, nir_ssa_def *src1)        \
-{                                                                         \
-   return nir_build_alu(build, nir_op_##op, src0, src1, NULL, NULL);      \
-}
-
-#define ALU3(op)                                                          \
-static inline nir_ssa_def *                                               \
-nir_##op(nir_builder *build, nir_ssa_def *src0,                           \
-         nir_ssa_def *src1, nir_ssa_def *src2)                            \
-{                                                                         \
-   return nir_build_alu(build, nir_op_##op, src0, src1, src2, NULL);      \
-}
-
-#define ALU4(op)                                                          \
-static inline nir_ssa_def *                                               \
-nir_##op(nir_builder *build, nir_ssa_def *src0,                           \
-         nir_ssa_def *src1, nir_ssa_def *src2, nir_ssa_def *src3)         \
-{                                                                         \
-   return nir_build_alu(build, nir_op_##op, src0, src1, src2, src3);      \
-}
-
 #include "nir_builder_opcodes.h"
 
 static inline nir_ssa_def *
@@ -354,6 +324,20 @@ nir_channel(nir_builder *b, nir_ssa_def *def, unsigned c)
    return nir_swizzle(b, def, swizzle, 1, false);
 }
 
+static inline nir_ssa_def *
+nir_channels(nir_builder *b, nir_ssa_def *def, unsigned mask)
+{
+   unsigned num_channels = 0, swizzle[4] = { 0, 0, 0, 0 };
+
+   for (unsigned i = 0; i < 4; i++) {
+      if ((mask & (1 << i)) == 0)
+         continue;
+      swizzle[num_channels++] = i;
+   }
+
+   return nir_swizzle(b, def, swizzle, num_channels, false);
+}
+
 /**
  * Turns a nir_src into a nir_ssa_def * so it can be passed to
  * nir_build_alu()-based builder calls.
@@ -403,7 +387,7 @@ nir_load_var(nir_builder *build, nir_variable *var)
    load->num_components = num_components;
    load->variables[0] = nir_deref_var_create(load, var);
    nir_ssa_dest_init(&load->instr, &load->dest, num_components,
-                     glsl_get_bit_size(glsl_get_base_type(var->type)), NULL);
+                     glsl_get_bit_size(var->type), NULL);
    nir_builder_instr_insert(build, &load->instr);
    return &load->dest.ssa;
 }

@@ -242,6 +242,7 @@ struct radeon_info {
     uint32_t                    pci_id;
     enum radeon_family          family;
     enum chip_class             chip_class;
+    uint32_t                    gart_page_size;
     uint64_t                    gart_size;
     uint64_t                    vram_size;
     bool                        has_dedicated_vram;
@@ -682,6 +683,8 @@ struct radeon_winsys {
      */
     boolean (*cs_memory_below_limit)(struct radeon_winsys_cs *cs, uint64_t vram, uint64_t gtt);
 
+    uint64_t (*cs_query_memory_usage)(struct radeon_winsys_cs *cs);
+
     /**
      * Return the buffer list.
      *
@@ -772,6 +775,10 @@ struct radeon_winsys {
                            unsigned num_registers, uint32_t *out);
 };
 
+static inline bool radeon_emitted(struct radeon_winsys_cs *cs, unsigned num_dw)
+{
+    return cs && cs->cdw > num_dw;
+}
 
 static inline void radeon_emit(struct radeon_winsys_cs *cs, uint32_t value)
 {

@@ -27,6 +27,7 @@
 #include "util/u_format.h"
 #include "util/u_inlines.h"
 #include "util/u_cpu_detect.h"
+#include "util/u_format_s3tc.h"
 
 #include "state_tracker/sw_winsys.h"
 
@@ -126,6 +127,20 @@ swr_is_format_supported(struct pipe_screen *screen,
 
       if (mesa_to_swr_format(format) == (SWR_FORMAT)-1)
          return FALSE;
+   }
+
+   if (format_desc->layout == UTIL_FORMAT_LAYOUT_BPTC ||
+       format_desc->layout == UTIL_FORMAT_LAYOUT_ASTC) {
+      return FALSE;
+   }
+
+   if (format_desc->layout == UTIL_FORMAT_LAYOUT_ETC &&
+       format != PIPE_FORMAT_ETC1_RGB8) {
+      return FALSE;
+   }
+
+   if (format_desc->layout == UTIL_FORMAT_LAYOUT_S3TC) {
+      return util_format_s3tc_enabled;
    }
 
    return TRUE;
@@ -343,6 +358,8 @@ swr_get_param(struct pipe_screen *screen, enum pipe_cap param)
    case PIPE_CAP_PCI_DEVICE:
    case PIPE_CAP_PCI_FUNCTION:
    case PIPE_CAP_FRAMEBUFFER_NO_ATTACHMENT:
+   case PIPE_CAP_CULL_DISTANCE:
+   case PIPE_CAP_PRIMITIVE_RESTART_FOR_PATCHES:
       return 0;
    }
 
@@ -543,7 +560,7 @@ swr_texture_layout(struct swr_screen *screen,
    res->swr.pitch = res->row_stride[0];
 
    if (allocate) {
-      res->swr.pBaseAddress = (uint8_t *)_aligned_malloc(total_size, 64);
+      res->swr.pBaseAddress = (uint8_t *)AlignedMalloc(total_size, 64);
 
       if (res->has_depth && res->has_stencil) {
          SWR_FORMAT_INFO finfo = GetFormatInfo(res->secondary.format);
@@ -556,7 +573,7 @@ swr_texture_layout(struct swr_screen *screen,
          res->secondary.numSamples = (1 << pt->nr_samples);
          res->secondary.pitch = res->alignedWidth * finfo.Bpp;
 
-         res->secondary.pBaseAddress = (uint8_t *)_aligned_malloc(
+         res->secondary.pBaseAddress = (uint8_t *)AlignedMalloc(
             res->alignedHeight * res->secondary.pitch, 64);
       }
    }
@@ -648,9 +665,9 @@ swr_resource_destroy(struct pipe_screen *p_screen, struct pipe_resource *pt)
       struct sw_winsys *winsys = screen->winsys;
       winsys->displaytarget_destroy(winsys, spr->display_target);
    } else
-      _aligned_free(spr->swr.pBaseAddress);
+      AlignedFree(spr->swr.pBaseAddress);
 
-   _aligned_free(spr->secondary.pBaseAddress);
+   AlignedFree(spr->secondary.pBaseAddress);
 
    FREE(spr);
 }
@@ -734,6 +751,8 @@ swr_create_screen(struct sw_winsys *winsys)
    screen->hJitMgr = JitCreateContext(KNOB_SIMD_WIDTH, KNOB_ARCH_STR);
 
    swr_fence_init(&screen->base);
+
+   util_format_s3tc_init();
 
    return &screen->base;
 }

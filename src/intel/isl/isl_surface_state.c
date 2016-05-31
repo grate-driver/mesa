@@ -90,7 +90,7 @@ static const uint32_t isl_to_gen_multisample_layout[] = {
 };
 #endif
 
-static const uint8_t
+static uint8_t
 get_surftype(enum isl_surf_dim dim, isl_surf_usage_flags_t usage)
 {
    switch (dim) {
@@ -166,7 +166,7 @@ get_qpitch(const struct isl_surf *surf)
 {
    switch (surf->dim) {
    default:
-      assert(!"Bad isl_surf_dim");
+      unreachable("Bad isl_surf_dim");
    case ISL_SURF_DIM_1D:
       if (GEN_GEN >= 9) {
          /* QPitch is usually expressed as rows of surface elements (where
@@ -363,7 +363,7 @@ isl_genX(surf_fill_state_s)(const struct isl_device *dev, void *state,
                                             info->view->base_level) - 1;
       break;
    default:
-      unreachable(!"bad SurfaceType");
+      unreachable("bad SurfaceType");
    }
 
    if (info->view->usage & ISL_SURF_USAGE_RENDER_TARGET_BIT) {

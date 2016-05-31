@@ -366,6 +366,8 @@ static int r600_get_param(struct pipe_screen* pscreen, enum pipe_cap param)
 	case PIPE_CAP_STRING_MARKER:
 	case PIPE_CAP_QUERY_BUFFER_OBJECT:
 	case PIPE_CAP_ROBUST_BUFFER_ACCESS_BEHAVIOR:
+	case PIPE_CAP_CULL_DISTANCE:
+	case PIPE_CAP_PRIMITIVE_RESTART_FOR_PATCHES:
 		return 0;
 
 	case PIPE_CAP_MAX_SHADER_PATCH_VARYINGS:
@@ -706,6 +708,9 @@ struct pipe_screen *r600_screen_create(struct radeon_winsys *ws)
 			printf("\n");
 	}
 #endif
+
+	if (rscreen->b.debug_flags & DBG_TEST_DMA)
+		r600_test_dma(&rscreen->b);
 
 	return &rscreen->b.b;
 }

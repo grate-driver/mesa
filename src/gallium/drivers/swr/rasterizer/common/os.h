@@ -24,6 +24,7 @@
 #ifndef __SWR_OS_H__
 #define __SWR_OS_H__
 
+#include <cstddef>
 #include "core/knobs.h"
 
 #if (defined(FORCE_WINDOWS) || defined(_WIN32)) && !defined(FORCE_LINUX)
@@ -48,6 +49,16 @@
 
 #define PRAGMA_WARNING_POP() __pragma(warning(pop))
 
+static inline void *AlignedMalloc(size_t _Size, size_t _Alignment)
+{
+    return _aligned_malloc(_Size, _Alignment);
+}
+
+static inline void AlignedFree(void* p)
+{
+    return _aligned_free(p);
+}
+
 #if defined(_WIN64)
 #define BitScanReverseSizeT BitScanReverse64
 #define BitScanForwardSizeT BitScanForward64
@@ -58,7 +69,7 @@
 #define _mm_popcount_sizeT _mm_popcnt_u32
 #endif
 
-#elif defined(FORCE_LINUX) || defined(__linux__) || defined(__gnu_linux__)
+#elif defined(__APPLE__) || defined(FORCE_LINUX) || defined(__linux__) || defined(__gnu_linux__)
 
 #define SWR_API
 
@@ -70,6 +81,7 @@
 #include <unistd.h>
 #include <sys/stat.h>
 #include <stdio.h>
+#include <limits.h>
 
 typedef void            VOID;
 typedef void*           LPVOID;
@@ -85,6 +97,8 @@ typedef unsigned int    DWORD;
 #undef TRUE
 #define TRUE 1
 
+#define MAX_PATH PATH_MAX
+
 #define OSALIGN(RWORD, WIDTH) RWORD __attribute__((aligned(WIDTH)))
 #define THREAD __thread
 #ifndef INLINE
@@ -92,8 +106,12 @@ typedef unsigned int    DWORD;
 #endif
 #define DEBUGBREAK asm ("int $3")
 #if !defined(__CYGWIN__)
+#ifndef __cdecl
 #define __cdecl
+#endif
+#ifndef __stdcall
 #define __stdcall
+#endif
 #define __declspec(X)
 #endif
 
@@ -111,7 +129,7 @@ uint64_t __rdtsc()
 }
 #endif
 
-#ifndef __clang__
+#if !defined( __clang__) && !defined(__INTEL_COMPILER)
 // Intrinsic not defined in gcc
 static INLINE
 void _mm256_storeu2_m128i(__m128i *hi, __m128i *lo, __m256i a)
@@ -150,7 +168,7 @@ unsigned char _BitScanReverse(unsigned int *Index, unsigned int Mask)
 }
 
 inline
-void *_aligned_malloc(unsigned int size, unsigned int alignment)
+void *AlignedMalloc(unsigned int size, unsigned int alignment)
 {
     void *ret;
     if (posix_memalign(&ret, alignment, size))
@@ -166,11 +184,21 @@ unsigned char _bittest(const LONG *a, LONG b)
     return ((*(unsigned *)(a) & (1 << b)) != 0);
 }
 
+static inline
+void AlignedFree(void* p)
+{
+    free(p);
+}
+
+#define _countof(a) (sizeof(a)/sizeof(*(a)))
+
+#define sprintf_s sprintf
+#define strcpy_s(dst,size,src) strncpy(dst,src,size)
 #define GetCurrentProcessId getpid
+#define GetCurrentThreadId gettid
 
 #define CreateDirectory(name, pSecurity) mkdir(name, 0777)
 
-#define _aligned_free free
 #define InterlockedCompareExchange(Dest, Exchange, Comparand) __sync_val_compare_and_swap(Dest, Comparand, Exchange)
 #define InterlockedExchangeAdd(Addend, Value) __sync_fetch_and_add(Addend, Value)
 #define InterlockedDecrement(Append) __sync_sub_and_fetch(Append, 1)

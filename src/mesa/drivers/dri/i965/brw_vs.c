@@ -80,9 +80,7 @@ brw_codegen_vs_prog(struct brw_context *brw,
     * prog_data associated with the compiled program, and which will be freed
     * by the state cache.
     */
-   int param_count = vp->program.Base.nir->num_uniforms;
-   if (!compiler->scalar_stage[MESA_SHADER_VERTEX])
-      param_count *= 4;
+   int param_count = vp->program.Base.nir->num_uniforms / 4;
 
    if (vs)
       prog_data.base.base.nr_image_params = vs->base.NumImages;
@@ -117,6 +115,10 @@ brw_codegen_vs_prog(struct brw_context *brw,
       outputs_written |= BITFIELD64_BIT(VARYING_SLOT_EDGE);
       prog_data.inputs_read |= VERT_BIT_EDGEFLAG;
    }
+
+   prog_data.base.cull_distance_mask =
+      ((1 << vp->program.Base.CullDistanceArraySize) - 1) <<
+      vp->program.Base.ClipDistanceArraySize;
 
    if (brw->gen < 6) {
       /* Put dummy slots into the VUE for the SF to put the replaced
@@ -277,7 +279,7 @@ brw_vs_debug_recompile(struct brw_context *brw,
 }
 
 static bool
-brw_vs_state_dirty(struct brw_context *brw)
+brw_vs_state_dirty(const struct brw_context *brw)
 {
    return brw_state_dirty(brw,
                           _NEW_BUFFERS |

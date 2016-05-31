@@ -142,6 +142,12 @@ else
     fi
 fi
 
+if test -z "$PYTHON3"; then
+    if test ! -f "$srcdir/src/intel/genxml/gen9_pack.h"; then
+        AC_MSG_ERROR([Python3 not found - unable to generate sources])
+    fi
+fi
+
 AC_PROG_INSTALL
 
 dnl We need a POSIX shell for parts of the build. Assume we have one
@@ -224,8 +230,10 @@ AX_GCC_FUNC_ATTRIBUTE([format])
 AX_GCC_FUNC_ATTRIBUTE([malloc])
 AX_GCC_FUNC_ATTRIBUTE([packed])
 AX_GCC_FUNC_ATTRIBUTE([pure])
+AX_GCC_FUNC_ATTRIBUTE([returns_nonnull])
 AX_GCC_FUNC_ATTRIBUTE([unused])
 AX_GCC_FUNC_ATTRIBUTE([warn_unused_result])
+AX_GCC_FUNC_ATTRIBUTE([weak])
 
 AM_CONDITIONAL([GEN_ASM_OFFSETS], test "x$GEN_ASM_OFFSETS" = xyes)
 
@@ -248,7 +256,11 @@ _SAVE_CPPFLAGS="$CPPFLAGS"
 dnl Compiler macros
 DEFINES="-D__STDC_LIMIT_MACROS -D__STDC_CONSTANT_MACROS"
 AC_SUBST([DEFINES])
+android=no
 case "$host_os" in
+*-android)
+    android=yes
+    ;;
 linux*|*-gnu*|gnu*)
     DEFINES="$DEFINES -D_GNU_SOURCE"
     ;;
@@ -259,6 +271,8 @@ cygwin*)
     DEFINES="$DEFINES -D_XOPEN_SOURCE=700"
     ;;
 esac
+
+AM_CONDITIONAL(HAVE_ANDROID, test "x$android" = xyes)
 
 dnl Add flags for gcc and g++
 if test "x$GCC" = xyes; then
@@ -514,6 +528,8 @@ else
    DEFINES="$DEFINES -DNDEBUG"
 fi
 
+DEFAULT_GL_LIB_NAME=GL
+
 dnl
 dnl Check if linker supports -Bsymbolic
 dnl
@@ -611,6 +627,23 @@ esac
 
 AM_CONDITIONAL(HAVE_COMPAT_SYMLINKS, test "x$HAVE_COMPAT_SYMLINKS" = xyes)
 
+DEFAULT_GL_LIB_NAME=GL
+
+dnl
+dnl Libglvnd configuration
+dnl
+AC_ARG_ENABLE([libglvnd],
+    [AS_HELP_STRING([--enable-libglvnd],
+        [Build for libglvnd @<:@default=disabled@:>@])],
+    [enable_libglvnd="$enableval"],
+    [enable_libglvnd=no])
+AM_CONDITIONAL(USE_LIBGLVND_GLX, test "x$enable_libglvnd" = xyes)
+#AM_COND_IF([USE_LIBGLVND_GLX], [DEFINES="${DEFINES} -DUSE_LIBGLVND_GLX=1"])
+if test "x$enable_libglvnd" = xyes ; then
+    DEFINES="${DEFINES} -DUSE_LIBGLVND_GLX=1"
+    DEFAULT_GL_LIB_NAME=GLX_mesa
+fi
+
 dnl
 dnl library names
 dnl
@@ -648,13 +681,13 @@ AC_ARG_WITH([gl-lib-name],
   [AS_HELP_STRING([--with-gl-lib-name@<:@=NAME@:>@],
     [specify GL library name @<:@default=GL@:>@])],
   [GL_LIB=$withval],
-  [GL_LIB=GL])
+  [GL_LIB="$DEFAULT_GL_LIB_NAME"])
 AC_ARG_WITH([osmesa-lib-name],
   [AS_HELP_STRING([--with-osmesa-lib-name@<:@=NAME@:>@],
     [specify OSMesa library name @<:@default=OSMesa@:>@])],
   [OSMESA_LIB=$withval],
   [OSMESA_LIB=OSMesa])
-AS_IF([test "x$GL_LIB" = xyes], [GL_LIB=GL])
+AS_IF([test "x$GL_LIB" = xyes], [GL_LIB="$DEFAULT_GL_LIB_NAME"])
 AS_IF([test "x$OSMESA_LIB" = xyes], [OSMESA_LIB=OSMesa])
 
 dnl
@@ -798,6 +831,10 @@ dnl AX_PTHREADS leaves PTHREAD_LIBS empty for gcc and sets PTHREAD_CFLAGS
 dnl to -pthread, which causes problems if we need -lpthread to appear in
 dnl pkgconfig files.
 test -z "$PTHREAD_LIBS" && PTHREAD_LIBS="-lpthread"
+
+PKG_CHECK_MODULES(PTHREADSTUBS, pthread-stubs)
+AC_SUBST(PTHREADSTUBS_CFLAGS)
+AC_SUBST(PTHREADSTUBS_LIBS)
 
 dnl SELinux awareness.
 AC_ARG_ENABLE([selinux],
@@ -1033,6 +1070,35 @@ esac
 AM_CONDITIONAL(HAVE_DRI_GLX, test "x$enable_glx" = xdri)
 AM_CONDITIONAL(HAVE_XLIB_GLX, test "x$enable_glx" = xxlib)
 AM_CONDITIONAL(HAVE_GALLIUM_XLIB_GLX, test "x$enable_glx" = xgallium-xlib)
+
+dnl
+dnl Libglvnd configuration
+dnl
+AC_ARG_ENABLE([libglvnd],
+    [AS_HELP_STRING([--enable-libglvnd],
+        [Build for libglvnd @<:@default=disabled@:>@])],
+    [enable_libglvnd="$enableval"],
+    [enable_libglvnd=no])
+AM_CONDITIONAL(USE_LIBGLVND_GLX, test "x$enable_libglvnd" = xyes)
+if test "x$enable_libglvnd" = xyes ; then
+    dnl XXX: update once we can handle more than libGL/glx.
+    dnl Namely: we should error out if neither of the glvnd enabled libraries
+    dnl are built
+    case "x$enable_glx" in
+    xno)
+        AC_MSG_ERROR([cannot build libglvnd without GLX])
+        ;;
+    xxlib | xgallium-xlib )
+        AC_MSG_ERROR([cannot build libgvnd when Xlib-GLX or Gallium-Xlib-GLX is enabled])
+        ;;
+    xdri)
+        ;;
+    esac
+
+    PKG_CHECK_MODULES([GLVND], libglvnd >= 0.1.0)
+    DEFINES="${DEFINES} -DUSE_LIBGLVND_GLX=1"
+    DEFAULT_GL_LIB_NAME=GLX_mesa
+fi
 
 # Check for libdrm
 PKG_CHECK_MODULES([LIBDRM], [libdrm >= $LIBDRM_REQUIRED],
@@ -1318,7 +1384,7 @@ xdri)
 
             if test x"$enable_dri3" = xyes; then
                PKG_CHECK_EXISTS([xcb >= $XCB_REQUIRED], [], AC_MSG_ERROR([DRI3 requires xcb >= $XCB_REQUIRED]))
-               dri3_modules="xcb-dri3 xcb-present xcb-sync xshmfence >= $XSHMFENCE_REQUIRED"
+               dri3_modules="xcb xcb-dri3 xcb-present xcb-sync xshmfence >= $XSHMFENCE_REQUIRED"
                PKG_CHECK_MODULES([XCB_DRI3], [$dri3_modules])
             fi
         fi
@@ -1779,7 +1845,12 @@ if test "x$enable_xvmc" = xyes -o \
         "x$enable_vdpau" = xyes -o \
         "x$enable_omx" = xyes -o \
         "x$enable_va" = xyes; then
-    PKG_CHECK_MODULES([VL], [x11-xcb xcb xcb-dri2 >= $XCBDRI2_REQUIRED])
+    if test x"$enable_dri3" = xyes; then
+        PKG_CHECK_MODULES([VL], [xcb-dri3 xcb-present xcb-sync xshmfence >= $XSHMFENCE_REQUIRED
+                                 x11-xcb xcb xcb-dri2 >= $XCBDRI2_REQUIRED])
+    else
+        PKG_CHECK_MODULES([VL], [x11-xcb xcb xcb-dri2 >= $XCBDRI2_REQUIRED])
+    fi
     need_gallium_vl_winsys=yes
 fi
 AM_CONDITIONAL(NEED_GALLIUM_VL_WINSYS, test "x$need_gallium_vl_winsys" = xyes)
@@ -1970,6 +2041,9 @@ for plat in $egl_platforms; do
 			AC_MSG_ERROR([EGL platform surfaceless requires libdrm >= $LIBDRM_REQUIRED])
 		;;
 
+	android)
+		;;
+
 	*)
 		AC_MSG_ERROR([EGL platform '$plat' does not exist])
 		;;
@@ -1994,6 +2068,7 @@ AM_CONDITIONAL(HAVE_PLATFORM_X11, echo "$egl_platforms" | grep -q 'x11')
 AM_CONDITIONAL(HAVE_PLATFORM_WAYLAND, echo "$egl_platforms" | grep -q 'wayland')
 AM_CONDITIONAL(HAVE_EGL_PLATFORM_DRM, echo "$egl_platforms" | grep -q 'drm')
 AM_CONDITIONAL(HAVE_EGL_PLATFORM_SURFACELESS, echo "$egl_platforms" | grep -q 'surfaceless')
+AM_CONDITIONAL(HAVE_EGL_PLATFORM_ANDROID, echo "$egl_platforms" | grep -q 'android')
 
 AM_CONDITIONAL(HAVE_EGL_DRIVER_DRI2, test "x$HAVE_EGL_DRIVER_DRI2" != "x")
 

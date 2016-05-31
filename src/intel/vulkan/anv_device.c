@@ -28,7 +28,7 @@
 #include <fcntl.h>
 
 #include "anv_private.h"
-#include "mesa/main/git_sha1.h"
+#include "git_sha1.h"
 #include "util/strtod.h"
 #include "util/debug.h"
 
@@ -67,12 +67,13 @@ anv_physical_device_init(struct anv_physical_device *device,
 
    device->_loader_data.loaderMagic = ICD_LOADER_MAGIC;
    device->instance = instance;
-   device->path = path;
+
+   assert(strlen(path) < ARRAY_SIZE(device->path));
+   strncpy(device->path, path, ARRAY_SIZE(device->path));
 
    device->chipset_id = anv_gem_get_param(fd, I915_PARAM_CHIPSET_ID);
    if (!device->chipset_id) {
-      result = vk_errorf(VK_ERROR_INITIALIZATION_FAILED,
-                         "failed to get chipset id: %m");
+      result = VK_ERROR_INITIALIZATION_FAILED;
       goto fail;
    }
 
@@ -149,6 +150,10 @@ anv_physical_device_init(struct anv_physical_device *device,
    device->compiler->shader_debug_log = compiler_debug_log;
    device->compiler->shader_perf_log = compiler_perf_log;
 
+   result = anv_init_wsi(device);
+   if (result != VK_SUCCESS)
+       goto fail;
+
    /* XXX: Actually detect bit6 swizzling */
    isl_device_init(&device->isl_dev, device->info, swizzled);
 
@@ -162,6 +167,7 @@ fail:
 static void
 anv_physical_device_finish(struct anv_physical_device *device)
 {
+   anv_finish_wsi(device);
    ralloc_free(device->compiler);
 }
 
@@ -272,13 +278,9 @@ VkResult anv_CreateInstance(
    instance->apiVersion = client_version;
    instance->physicalDeviceCount = -1;
 
-   memset(instance->wsi, 0, sizeof(instance->wsi));
-
    _mesa_locale_init();
 
    VG(VALGRIND_CREATE_MEMPOOL(instance, 0, false));
-
-   anv_init_wsi(instance);
 
    *pInstance = anv_instance_to_handle(instance);
 
@@ -297,8 +299,6 @@ void anv_DestroyInstance(
       anv_physical_device_finish(&instance->physicalDevice);
    }
 
-   anv_finish_wsi(instance);
-
    VG(VALGRIND_DESTROY_MEMPOOL(instance));
 
    _mesa_locale_fini();
@@ -315,8 +315,15 @@ VkResult anv_EnumeratePhysicalDevices(
    VkResult result;
 
    if (instance->physicalDeviceCount < 0) {
-      result = anv_physical_device_init(&instance->physicalDevice,
-                                        instance, "/dev/dri/renderD128");
+      char path[20];
+      for (unsigned i = 0; i < 8; i++) {
+         snprintf(path, sizeof(path), "/dev/dri/renderD%d", 128 + i);
+         result = anv_physical_device_init(&instance->physicalDevice,
+                                           instance, path);
+         if (result == VK_SUCCESS)
+            break;
+      }
+
       if (result == VK_ERROR_INCOMPATIBLE_DRIVER) {
          instance->physicalDeviceCount = 0;
       } else if (result == VK_SUCCESS) {
@@ -384,13 +391,13 @@ void anv_GetPhysicalDeviceFeatures(
       .samplerAnisotropy                        = false, /* FINISHME */
       .textureCompressionETC2                   = pdevice->info->gen >= 8 ||
                                                   pdevice->info->is_baytrail,
-      .textureCompressionASTC_LDR               = false, /* FINISHME */
+      .textureCompressionASTC_LDR               = pdevice->info->gen >= 9, /* FINISHME CHV */
       .textureCompressionBC                     = true,
       .occlusionQueryPrecise                    = true,
       .pipelineStatisticsQuery                  = false,
       .fragmentStoresAndAtomics                 = true,
       .shaderTessellationAndGeometryPointSize   = true,
-      .shaderImageGatherExtended                = true,
+      .shaderImageGatherExtended                = false,
       .shaderStorageImageExtendedFormats        = false,
       .shaderStorageImageMultisample            = false,
       .shaderUniformBufferArrayDynamicIndexing  = true,
@@ -505,7 +512,7 @@ void anv_GetPhysicalDeviceProperties(
       .maxSamplerAnisotropy                     = 16,
       .maxViewports                             = MAX_VIEWPORTS,
       .maxViewportDimensions                    = { (1 << 14), (1 << 14) },
-      .viewportBoundsRange                      = { -16384.0, 16384.0 },
+      .viewportBoundsRange                      = { INT16_MIN, INT16_MAX },
       .viewportSubPixelBits                     = 13, /* We take a float? */
       .minMemoryMapAlignment                    = 4096, /* A page */
       .minTexelBufferOffsetAlignment            = 1,
@@ -850,6 +857,9 @@ VkResult anv_CreateDevice(
     * the batch.
     */
    device->can_chain_batches = device->info.gen >= 8;
+
+   device->robust_buffer_access = pCreateInfo->pEnabledFeatures &&
+      pCreateInfo->pEnabledFeatures->robustBufferAccess;
 
    pthread_mutex_init(&device->mutex, NULL);
 

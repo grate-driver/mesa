@@ -432,12 +432,6 @@ droid_swap_buffers(_EGLDriver *drv, _EGLDisplay *disp, _EGLSurface *draw)
    if (dri2_surf->base.Type != EGL_WINDOW_BIT)
       return EGL_TRUE;
 
-   if (dri2_drv->glFlush) {
-      ctx = _eglGetCurrentContext();
-      if (ctx && ctx->DrawSurface == &dri2_surf->base)
-         dri2_drv->glFlush();
-   }
-
    dri2_flush_drawable_for_swapbuffers(disp, draw);
 
    if (dri2_surf->buffer)
@@ -449,7 +443,7 @@ droid_swap_buffers(_EGLDriver *drv, _EGLDisplay *disp, _EGLSurface *draw)
 }
 
 static _EGLImage *
-dri2_create_image_android_native_buffer(_EGLDriver *drv, _EGLDisplay *disp,
+dri2_create_image_android_native_buffer(_EGLDisplay *disp,
                                         _EGLContext *ctx,
                                         struct ANativeWindowBuffer *buf)
 {
@@ -494,8 +488,7 @@ dri2_create_image_android_native_buffer(_EGLDriver *drv, _EGLDisplay *disp,
       if (fourcc == -1 || pitch == 0)
          return NULL;
 
-      return dri2_create_image_khr(drv, disp, ctx, EGL_LINUX_DMA_BUF_EXT,
-         NULL, attr_list);
+      return dri2_create_image_dma_buf(disp, ctx, NULL, attr_list);
    }
 
    name = get_native_buffer_name(buf);
@@ -543,7 +536,7 @@ droid_create_image_khr(_EGLDriver *drv, _EGLDisplay *disp,
 {
    switch (target) {
    case EGL_NATIVE_BUFFER_ANDROID:
-      return dri2_create_image_android_native_buffer(drv, disp, ctx,
+      return dri2_create_image_android_native_buffer(disp, ctx,
             (struct ANativeWindowBuffer *) buffer);
    default:
       return dri2_create_image_khr(drv, disp, ctx, target, buffer, attr_list);

@@ -708,7 +708,8 @@ _mesa_init_constants(struct gl_constants *consts, gl_api api)
    consts->MaxComputeWorkGroupSize[0] = 1024;
    consts->MaxComputeWorkGroupSize[1] = 1024;
    consts->MaxComputeWorkGroupSize[2] = 64;
-   consts->MaxComputeWorkGroupInvocations = 1024;
+   /* Enables compute support for GLES 3.1 if >= 128 */
+   consts->MaxComputeWorkGroupInvocations = 0;
 
    /** GL_ARB_gpu_shader5 */
    consts->MinFragmentInterpolationOffset = MIN_FRAGMENT_INTERPOLATION_OFFSET;
@@ -724,6 +725,7 @@ _mesa_init_constants(struct gl_constants *consts, gl_api api)
    consts->Program[MESA_SHADER_TESS_EVAL].MaxTextureImageUnits = MAX_TEXTURE_IMAGE_UNITS;
    consts->MaxTessPatchComponents = MAX_TESS_PATCH_COMPONENTS;
    consts->MaxTessControlTotalOutputComponents = MAX_TESS_CONTROL_TOTAL_OUTPUT_COMPONENTS;
+   consts->PrimitiveRestartForPatches = false;
 }
 
 
@@ -1365,6 +1367,7 @@ _mesa_free_context_data( struct gl_context *ctx )
    free(ctx->BeginEnd);
    free(ctx->OutsideBeginEnd);
    free(ctx->Save);
+   free(ctx->ContextLost);
 
    /* Shared context state (display lists, textures, etc) */
    _mesa_reference_shared_state(ctx, &ctx->Shared, NULL);

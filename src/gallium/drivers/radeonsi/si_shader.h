@@ -107,12 +107,13 @@ enum {
 	SI_LS_NUM_USER_SGPR,
 
 	/* both TCS and TES */
-	SI_SGPR_TCS_OUT_OFFSETS	= SI_NUM_RESOURCE_SGPRS,
-	SI_SGPR_TCS_OUT_LAYOUT,
+	SI_SGPR_TCS_OFFCHIP_LAYOUT = SI_NUM_RESOURCE_SGPRS,
 	SI_TES_NUM_USER_SGPR,
 
 	/* TCS only */
-	SI_SGPR_TCS_IN_LAYOUT = SI_TES_NUM_USER_SGPR,
+	SI_SGPR_TCS_OUT_OFFSETS = SI_TES_NUM_USER_SGPR,
+	SI_SGPR_TCS_OUT_LAYOUT,
+	SI_SGPR_TCS_IN_LAYOUT,
 	SI_TCS_NUM_USER_SGPR,
 
 	/* GS limits */
@@ -141,32 +142,42 @@ enum {
 	SI_PARAM_VERTEX_BUFFERS	= SI_NUM_RESOURCE_PARAMS,
 	SI_PARAM_BASE_VERTEX,
 	SI_PARAM_START_INSTANCE,
-	/* [0] = clamp vertex color */
+	/* [0] = clamp vertex color, VS as VS only */
 	SI_PARAM_VS_STATE_BITS,
+	/* same value as TCS_IN_LAYOUT, VS as LS only */
+	SI_PARAM_LS_OUT_LAYOUT = SI_PARAM_START_INSTANCE + 1,
 	/* the other VS parameters are assigned dynamically */
+
+	/* Layout of TCS outputs in the offchip buffer
+	 *   [0:8] = the number of patches per threadgroup.
+	 *   [9:15] = the number of output vertices per patch.
+	 *   [16:31] = the offset of per patch attributes in the buffer in bytes.
+	 */
+	SI_PARAM_TCS_OFFCHIP_LAYOUT = SI_NUM_RESOURCE_PARAMS, /* for TCS & TES */
+
+	/* TCS only parameters. */
 
 	/* Offsets where TCS outputs and TCS patch outputs live in LDS:
 	 *   [0:15] = TCS output patch0 offset / 16, max = NUM_PATCHES * 32 * 32
 	 *   [16:31] = TCS output patch0 offset for per-patch / 16, max = NUM_PATCHES*32*32* + 32*32
 	 */
-	SI_PARAM_TCS_OUT_OFFSETS = SI_NUM_RESOURCE_PARAMS, /* for TCS & TES */
+	SI_PARAM_TCS_OUT_OFFSETS,
 
 	/* Layout of TCS outputs / TES inputs:
 	 *   [0:12] = stride between output patches in dwords, num_outputs * num_vertices * 4, max = 32*32*4
 	 *   [13:20] = stride between output vertices in dwords = num_inputs * 4, max = 32*4
 	 *   [26:31] = gl_PatchVerticesIn, max = 32
 	 */
-	SI_PARAM_TCS_OUT_LAYOUT, /* for TCS & TES */
+	SI_PARAM_TCS_OUT_LAYOUT,
 
 	/* Layout of LS outputs / TCS inputs
 	 *   [0:12] = stride between patches in dwords = num_inputs * num_vertices * 4, max = 32*32*4
 	 *   [13:20] = stride between vertices in dwords = num_inputs * 4, max = 32*4
 	 */
-	SI_PARAM_TCS_IN_LAYOUT,	 /* TCS only */
-	SI_PARAM_LS_OUT_LAYOUT,	 /* same value as TCS_IN_LAYOUT, LS only */
+	SI_PARAM_TCS_IN_LAYOUT,
 
-	/* TCS only parameters. */
-	SI_PARAM_TESS_FACTOR_OFFSET = SI_PARAM_TCS_IN_LAYOUT + 1,
+	SI_PARAM_TCS_OC_LDS,
+	SI_PARAM_TESS_FACTOR_OFFSET,
 	SI_PARAM_PATCH_ID,
 	SI_PARAM_REL_IDS,
 
@@ -294,6 +305,7 @@ struct si_vs_epilog_bits {
 /* Common TCS bits between the shader key and the epilog key. */
 struct si_tcs_epilog_bits {
 	unsigned	prim_mode:3;
+	uint64_t	inputs_to_copy;
 };
 
 /* Common PS bits between the shader key and the prolog key. */

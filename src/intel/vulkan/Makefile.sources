@@ -49,7 +49,8 @@ VULKAN_FILES := \
 	anv_util.c \
 	anv_wsi.c \
 	anv_wsi.h \
-	genX_pipeline_util.h
+	genX_pipeline_util.h \
+	vk_format_info.h
 
 VULKAN_WSI_WAYLAND_FILES := \
 	anv_wsi_wayland.c
@@ -70,6 +71,7 @@ VULKAN_GENERATED_FILES := \
 
 GEN7_FILES := \
 	genX_cmd_buffer.c \
+	genX_l3.c \
 	genX_pipeline.c \
 	gen7_cmd_buffer.c \
 	gen7_pipeline.c \
@@ -77,6 +79,7 @@ GEN7_FILES := \
 
 GEN75_FILES := \
 	genX_cmd_buffer.c \
+	genX_l3.c \
 	genX_pipeline.c \
 	gen7_cmd_buffer.c \
 	gen7_pipeline.c \
@@ -84,6 +87,7 @@ GEN75_FILES := \
 
 GEN8_FILES := \
 	genX_cmd_buffer.c \
+	genX_l3.c \
 	genX_pipeline.c \
 	gen8_cmd_buffer.c \
 	gen8_pipeline.c \
@@ -91,6 +95,7 @@ GEN8_FILES := \
 
 GEN9_FILES := \
 	genX_cmd_buffer.c \
+	genX_l3.c \
 	genX_pipeline.c \
 	gen8_cmd_buffer.c \
 	gen8_pipeline.c \

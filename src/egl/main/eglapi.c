@@ -431,14 +431,11 @@ _eglCreateAPIsString(_EGLDisplay *dpy)
    if (dpy->ClientAPIs & EGL_OPENGL_BIT)
       strcat(dpy->ClientAPIsString, "OpenGL ");
 
-   if (dpy->ClientAPIs & EGL_OPENGL_ES_BIT)
+   if (dpy->ClientAPIs & EGL_OPENGL_ES_BIT ||
+       dpy->ClientAPIs & EGL_OPENGL_ES2_BIT ||
+       dpy->ClientAPIs & EGL_OPENGL_ES3_BIT_KHR) {
       strcat(dpy->ClientAPIsString, "OpenGL_ES ");
-
-   if (dpy->ClientAPIs & EGL_OPENGL_ES2_BIT)
-      strcat(dpy->ClientAPIsString, "OpenGL_ES2 ");
-
-   if (dpy->ClientAPIs & EGL_OPENGL_ES3_BIT_KHR)
-      strcat(dpy->ClientAPIsString, "OpenGL_ES3 ");
+   }
 
    if (dpy->ClientAPIs & EGL_OPENVG_BIT)
       strcat(dpy->ClientAPIsString, "OpenVG ");
@@ -1940,9 +1937,9 @@ _eglLockDisplayInterop(EGLDisplay dpy, EGLContext context,
    return MESA_GLINTEROP_SUCCESS;
 }
 
-GLAPI int GLAPIENTRY
+int
 MesaGLInteropEGLQueryDeviceInfo(EGLDisplay dpy, EGLContext context,
-                                mesa_glinterop_device_info *out)
+                                struct mesa_glinterop_device_info *out)
 {
    _EGLDisplay *disp;
    _EGLDriver *drv;
@@ -1962,10 +1959,10 @@ MesaGLInteropEGLQueryDeviceInfo(EGLDisplay dpy, EGLContext context,
    return ret;
 }
 
-GLAPI int GLAPIENTRY
+int
 MesaGLInteropEGLExportObject(EGLDisplay dpy, EGLContext context,
-                             const mesa_glinterop_export_in *in,
-                             mesa_glinterop_export_out *out)
+                             struct mesa_glinterop_export_in *in,
+                             struct mesa_glinterop_export_out *out)
 {
    _EGLDisplay *disp;
    _EGLDriver *drv;

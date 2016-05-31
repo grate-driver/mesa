@@ -52,6 +52,8 @@
 #include "st_program.h"
 #include "st_mesa_to_tgsi.h"
 #include "st_format.h"
+#include "st_glsl_types.h"
+#include "st_nir.h"
 
 
 #define PROGRAM_ANY_CONST ((1 << PROGRAM_STATE_VAR) |    \
@@ -1165,72 +1167,13 @@ glsl_to_tgsi_visitor::st_src_reg_for_type(int type, int val)
 static int
 attrib_type_size(const struct glsl_type *type, bool is_vs_input)
 {
-   unsigned int i;
-   int size;
-
-   switch (type->base_type) {
-   case GLSL_TYPE_UINT:
-   case GLSL_TYPE_INT:
-   case GLSL_TYPE_FLOAT:
-   case GLSL_TYPE_BOOL:
-      if (type->is_matrix()) {
-         return type->matrix_columns;
-      } else {
-         /* Regardless of size of vector, it gets a vec4. This is bad
-          * packing for things like floats, but otherwise arrays become a
-          * mess.  Hopefully a later pass over the code can pack scalars
-          * down if appropriate.
-          */
-         return 1;
-      }
-      break;
-   case GLSL_TYPE_DOUBLE:
-      if (type->is_matrix()) {
-         if (type->vector_elements <= 2 || is_vs_input)
-            return type->matrix_columns;
-         else
-            return type->matrix_columns * 2;
-      } else {
-         /* For doubles if we have a double or dvec2 they fit in one
-          * vec4, else they need 2 vec4s.
-          */
-         if (type->vector_elements <= 2 || is_vs_input)
-            return 1;
-         else
-            return 2;
-      }
-      break;
-   case GLSL_TYPE_ARRAY:
-      assert(type->length > 0);
-      return attrib_type_size(type->fields.array, is_vs_input) * type->length;
-   case GLSL_TYPE_STRUCT:
-      size = 0;
-      for (i = 0; i < type->length; i++) {
-         size += attrib_type_size(type->fields.structure[i].type, is_vs_input);
-      }
-      return size;
-   case GLSL_TYPE_SAMPLER:
-   case GLSL_TYPE_IMAGE:
-   case GLSL_TYPE_SUBROUTINE:
-      /* Samplers take up one slot in UNIFORMS[], but they're baked in
-       * at link time.
-       */
-      return 1;
-   case GLSL_TYPE_ATOMIC_UINT:
-   case GLSL_TYPE_INTERFACE:
-   case GLSL_TYPE_VOID:
-   case GLSL_TYPE_ERROR:
-   case GLSL_TYPE_FUNCTION:
-      assert(!"Invalid type in type_size");
-      break;
-   }
-   return 0;
+   return st_glsl_attrib_type_size(type, is_vs_input);
 }
 
 static int
 type_size(const struct glsl_type *type)
 {
-  return attrib_type_size(type, false);
+   return st_glsl_type_size(type);
 }
 
 /**
@@ -2209,9 +2152,29 @@ glsl_to_tgsi_visitor::visit_expression(ir_expression* ir, st_src_reg *op)
    case ir_unop_interpolate_at_centroid:
       emit_asm(ir, TGSI_OPCODE_INTERP_CENTROID, result_dst, op[0]);
       break;
-   case ir_binop_interpolate_at_offset:
-      emit_asm(ir, TGSI_OPCODE_INTERP_OFFSET, result_dst, op[0], op[1]);
+   case ir_binop_interpolate_at_offset: {
+      /* The y coordinate needs to be flipped for the default fb */
+      static const gl_state_index transform_y_state[STATE_LENGTH]
+         = { STATE_INTERNAL, STATE_FB_WPOS_Y_TRANSFORM };
+
+      unsigned transform_y_index =
+         _mesa_add_state_reference(this->prog->Parameters,
+                                   transform_y_state);
+
+      st_src_reg transform_y = st_src_reg(PROGRAM_STATE_VAR,
+                                          transform_y_index,
+                                          glsl_type::vec4_type);
+      transform_y.swizzle = SWIZZLE_XXXX;
+
+      st_src_reg temp = get_temp(glsl_type::vec2_type);
+      st_dst_reg temp_dst = st_dst_reg(temp);
+
+      emit_asm(ir, TGSI_OPCODE_MOV, temp_dst, op[1]);
+      temp_dst.writemask = WRITEMASK_Y;
+      emit_asm(ir, TGSI_OPCODE_MUL, temp_dst, transform_y, op[1]);
+      emit_asm(ir, TGSI_OPCODE_INTERP_OFFSET, result_dst, op[0], temp);
       break;
+   }
    case ir_binop_interpolate_at_sample:
       emit_asm(ir, TGSI_OPCODE_INTERP_SAMPLE, result_dst, op[0], op[1]);
       break;
@@ -3511,9 +3474,9 @@ glsl_to_tgsi_visitor::visit_image_intrinsic(ir_call *ir)
       st_src_reg res = get_temp(glsl_type::ivec4_type);
       st_dst_reg dstres = st_dst_reg(res);
       dstres.writemask = WRITEMASK_W;
-      emit_asm(ir, TGSI_OPCODE_RESQ, dstres);
+      inst = emit_asm(ir, TGSI_OPCODE_RESQ, dstres);
       res.swizzle = SWIZZLE_WWWW;
-      inst = emit_asm(ir, TGSI_OPCODE_MOV, dst, res);
+      emit_asm(ir, TGSI_OPCODE_MOV, dst, res);
    } else {
       st_src_reg arg1 = undef_src, arg2 = undef_src;
       st_src_reg coord;
@@ -4496,6 +4459,7 @@ glsl_to_tgsi_visitor::simplify_cmp(void)
           && inst->dst[0].writemask == get_src_arg_mask(inst->dst[0], inst->src[2])) {
 
          inst->op = TGSI_OPCODE_MOV;
+         inst->info = tgsi_get_opcode_info(inst->op);
          inst->src[0] = inst->src[1];
       }
    }
@@ -5581,6 +5545,15 @@ translate_tex_offset(struct st_translate *t,
       offset.SwizzleZ = imm_src.SwizzleZ;
       offset.Padding = 0;
       break;
+   case PROGRAM_INPUT:
+      imm_src = t->inputs[t->inputMapping[in_offset->index]];
+      offset.File = imm_src.File;
+      offset.Index = imm_src.Index;
+      offset.SwizzleX = GET_SWZ(in_offset->swizzle, 0);
+      offset.SwizzleY = GET_SWZ(in_offset->swizzle, 1);
+      offset.SwizzleZ = GET_SWZ(in_offset->swizzle, 2);
+      offset.Padding = 0;
+      break;
    case PROGRAM_TEMPORARY:
       imm_src = ureg_src(t->temps[in_offset->index]);
       offset.File = imm_src.File;
@@ -6466,9 +6439,9 @@ out:
  * generating Mesa IR.
  */
 static struct gl_program *
-get_mesa_program(struct gl_context *ctx,
-                 struct gl_shader_program *shader_program,
-                 struct gl_shader *shader)
+get_mesa_program_tgsi(struct gl_context *ctx,
+                      struct gl_shader_program *shader_program,
+                      struct gl_shader *shader)
 {
    glsl_to_tgsi_visitor* v;
    struct gl_program *prog;
@@ -6676,6 +6649,29 @@ get_mesa_program(struct gl_context *ctx,
    return prog;
 }
 
+static struct gl_program *
+get_mesa_program(struct gl_context *ctx,
+                 struct gl_shader_program *shader_program,
+                 struct gl_shader *shader)
+{
+   struct pipe_screen *pscreen = ctx->st->pipe->screen;
+   unsigned ptarget = st_shader_stage_to_ptarget(shader->Stage);
+   enum pipe_shader_ir preferred_ir = (enum pipe_shader_ir)
+      pscreen->get_shader_param(pscreen, ptarget, PIPE_SHADER_CAP_PREFERRED_IR);
+   if (preferred_ir == PIPE_SHADER_IR_NIR) {
+      /* TODO only for GLSL VS/FS for now: */
+      switch (shader->Type) {
+      case GL_VERTEX_SHADER:
+      case GL_FRAGMENT_SHADER:
+         return st_nir_get_mesa_program(ctx, shader_program, shader);
+      default:
+         break;
+      }
+   }
+   return get_mesa_program_tgsi(ctx, shader_program, shader);
+}
+
+
 extern "C" {
 
 static void
@@ -6878,9 +6874,17 @@ st_translate_stream_output_info(glsl_to_tgsi_visitor *glsl_to_tgsi,
                                 const GLuint outputMapping[],
                                 struct pipe_stream_output_info *so)
 {
-   unsigned i;
    struct gl_transform_feedback_info *info =
       &glsl_to_tgsi->shader_program->LinkedTransformFeedback;
+   st_translate_stream_output_info2(info, outputMapping, so);
+}
+
+void
+st_translate_stream_output_info2(struct gl_transform_feedback_info *info,
+                                const GLuint outputMapping[],
+                                struct pipe_stream_output_info *so)
+{
+   unsigned i;
 
    for (i = 0; i < info->NumOutputs; i++) {
       so->output[i].register_index =

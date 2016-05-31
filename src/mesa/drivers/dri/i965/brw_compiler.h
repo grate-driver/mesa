@@ -85,7 +85,7 @@ struct brw_compiler {
        * appear in *classes.
        */
       int aligned_pairs_class;
-   } fs_reg_sets[2];
+   } fs_reg_sets[3];
 
    void (*shader_debug_log)(void *, const char *str, ...) PRINTFLIKE(2, 3);
    void (*shader_perf_log)(void *, const char *str, ...) PRINTFLIKE(2, 3);
@@ -159,6 +159,13 @@ struct brw_sampler_prog_key_data {
     * For Sandybridge, which shader w/a we need for gather quirks.
     */
    enum gen6_gather_sampler_wa gen6_gather_wa[MAX_SAMPLERS];
+
+   /**
+    * Texture units that have a YUV image bound.
+    */
+   uint32_t y_u_v_image_mask;
+   uint32_t y_uv_image_mask;
+   uint32_t yx_xuxv_image_mask;
 };
 
 
@@ -242,12 +249,10 @@ struct brw_wm_prog_key {
    uint8_t iz_lookup;
    bool stats_wm:1;
    bool flat_shade:1;
-   bool persample_shading:1;
    unsigned nr_color_regions:5;
    bool replicate_alpha:1;
-   bool render_to_fbo:1;
    bool clamp_fragment_color:1;
-   bool compute_pos_offset:1;
+   bool persample_interp:1;
    bool multisample_fbo:1;
    unsigned line_aa:2;
    bool high_quality_derivatives:1;
@@ -329,6 +334,7 @@ struct brw_stage_prog_data {
       uint32_t abo_start;
       uint32_t image_start;
       uint32_t shader_time_start;
+      uint32_t plane_start[3];
       /** @} */
    } binding_table;
 
@@ -368,9 +374,11 @@ struct brw_wm_prog_data {
 
    GLuint num_varying_inputs;
 
-   GLuint dispatch_grf_start_reg_16;
-   GLuint reg_blocks;
-   GLuint reg_blocks_16;
+   uint8_t reg_blocks_0;
+   uint8_t reg_blocks_2;
+
+   uint8_t dispatch_grf_start_reg_2;
+   uint32_t prog_offset_2;
 
    struct {
       /** @{
@@ -384,8 +392,10 @@ struct brw_wm_prog_data {
    bool computed_stencil;
 
    bool early_fragment_tests;
-   bool no_8;
+   bool dispatch_8;
+   bool dispatch_16;
    bool dual_src_blend;
+   bool persample_dispatch;
    bool uses_pos_offset;
    bool uses_omask;
    bool uses_kill;
@@ -393,7 +403,6 @@ struct brw_wm_prog_data {
    bool uses_src_w;
    bool uses_sample_mask;
    bool pulls_bary;
-   uint32_t prog_offset_16;
 
    /**
     * Mask of which interpolation modes are required by the fragment shader.
@@ -592,6 +601,8 @@ struct brw_vue_prog_data {
    GLuint urb_read_length;
    GLuint total_grf;
 
+   uint32_t cull_distance_mask;
+
    /* Used for calculating urb partitions.  In the VS, this is the size of the
     * URB entry used for both input and output to the thread.  In the GS, this
     * is the size of the URB entry used for output.
@@ -607,6 +618,7 @@ struct brw_vs_prog_data {
    GLbitfield64 inputs_read;
 
    unsigned nr_attributes;
+   unsigned nr_attribute_slots;
 
    bool uses_vertexid;
    bool uses_instanceid;
@@ -785,6 +797,7 @@ brw_compile_fs(const struct brw_compiler *compiler, void *log_data,
                struct gl_program *prog,
                int shader_time_index8,
                int shader_time_index16,
+               bool allow_spilling,
                bool use_rep_send,
                unsigned *final_assembly_size,
                char **error_str);

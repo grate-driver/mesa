@@ -234,14 +234,19 @@ uint32_t brw_swizzle_immediate(enum brw_reg_type type, uint32_t x, unsigned swz)
  * or "structure of array" form:
  */
 struct brw_reg {
-   enum brw_reg_type type:4;
-   enum brw_reg_file file:3;      /* :2 hardware format */
-   unsigned negate:1;             /* source only */
-   unsigned abs:1;                /* source only */
-   unsigned address_mode:1;       /* relative addressing, hopefully! */
-   unsigned pad0:1;
-   unsigned subnr:5;              /* :1 in align16 */
-   unsigned nr:16;
+   union {
+      struct {
+         enum brw_reg_type type:4;
+         enum brw_reg_file file:3;      /* :2 hardware format */
+         unsigned negate:1;             /* source only */
+         unsigned abs:1;                /* source only */
+         unsigned address_mode:1;       /* relative addressing, hopefully! */
+         unsigned pad0:1;
+         unsigned subnr:5;              /* :1 in align16 */
+         unsigned nr:16;
+      };
+      uint32_t bits;
+   };
 
    union {
       struct {
@@ -254,12 +259,20 @@ struct brw_reg {
          unsigned pad1:1;
       };
 
+      double df;
+      uint64_t u64;
       float f;
       int   d;
       unsigned ud;
    };
 };
 
+static inline bool
+brw_regs_equal(const struct brw_reg *a, const struct brw_reg *b)
+{
+   const bool df = a->type == BRW_REGISTER_TYPE_DF && a->file == IMM;
+   return a->bits == b->bits && (df ? a->u64 == b->u64 : a->ud == b->ud);
+}
 
 struct brw_indirect {
    unsigned addr_subnr:4;
@@ -274,6 +287,7 @@ type_sz(unsigned type)
    switch(type) {
    case BRW_REGISTER_TYPE_UQ:
    case BRW_REGISTER_TYPE_Q:
+   case BRW_REGISTER_TYPE_DF:
       return 8;
    case BRW_REGISTER_TYPE_UD:
    case BRW_REGISTER_TYPE_D:
@@ -287,6 +301,26 @@ type_sz(unsigned type)
       return 1;
    default:
       return 0;
+   }
+}
+
+/**
+ * Return an integer type of the requested size and signedness.
+ */
+static inline enum brw_reg_type
+brw_int_type(unsigned sz, bool is_signed)
+{
+   switch (sz) {
+   case 1:
+      return (is_signed ? BRW_REGISTER_TYPE_B : BRW_REGISTER_TYPE_UB);
+   case 2:
+      return (is_signed ? BRW_REGISTER_TYPE_W : BRW_REGISTER_TYPE_UW);
+   case 4:
+      return (is_signed ? BRW_REGISTER_TYPE_D : BRW_REGISTER_TYPE_UD);
+   case 8:
+      return (is_signed ? BRW_REGISTER_TYPE_Q : BRW_REGISTER_TYPE_UQ);
+   default:
+      unreachable("Not reached.");
    }
 }
 
@@ -542,6 +576,14 @@ brw_imm_reg(enum brw_reg_type type)
 }
 
 /** Construct float immediate register */
+static inline struct brw_reg
+brw_imm_df(double df)
+{
+   struct brw_reg imm = brw_imm_reg(BRW_REGISTER_TYPE_DF);
+   imm.df = df;
+   return imm;
+}
+
 static inline struct brw_reg
 brw_imm_f(float f)
 {

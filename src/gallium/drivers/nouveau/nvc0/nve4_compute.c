@@ -223,76 +223,6 @@ nve4_compute_validate_surfaces(struct nvc0_context *nvc0)
    }
 }
 
-/* Will be removed once images are completely done. */
-#if 0
-static void
-nve4_compute_validate_surfaces(struct nvc0_context *nvc0)
-{
-   struct nvc0_screen *screen = nvc0->screen;
-   struct nouveau_pushbuf *push = nvc0->base.pushbuf;
-   struct nv50_surface *sf;
-   struct nv04_resource *res;
-   uint32_t mask;
-   unsigned i;
-   const unsigned t = 1;
-   uint64_t address;
-
-   address = screen->uniform_bo->offset + NVC0_CB_AUX_INFO(5);
-
-   mask = nvc0->surfaces_dirty[t];
-   while (mask) {
-      i = ffs(mask) - 1;
-      mask &= ~(1 << i);
-
-      /*
-       * NVE4's surface load/store instructions receive all the information
-       * directly instead of via binding points, so we have to supply them.
-       */
-      BEGIN_NVC0(push, NVE4_CP(UPLOAD_DST_ADDRESS_HIGH), 2);
-      PUSH_DATAh(push, address + NVC0_CB_AUX_BUF_INFO(i));
-      PUSH_DATA (push, address + NVC0_CB_AUX_BUF_INFO(i));
-      BEGIN_NVC0(push, NVE4_CP(UPLOAD_LINE_LENGTH_IN), 2);
-      PUSH_DATA (push, 64);
-      PUSH_DATA (push, 1);
-      BEGIN_1IC0(push, NVE4_CP(UPLOAD_EXEC), 17);
-      PUSH_DATA (push, NVE4_COMPUTE_UPLOAD_EXEC_LINEAR | (0x20 << 1));
-
-      nve4_set_surface_info(push, nvc0->surfaces[t][i], screen);
-
-      sf = nv50_surface(nvc0->surfaces[t][i]);
-      if (sf) {
-         res = nv04_resource(sf->base.texture);
-
-         if (sf->base.writable)
-            BCTX_REFN(nvc0->bufctx_cp, CP_SUF, res, RDWR);
-         else
-            BCTX_REFN(nvc0->bufctx_cp, CP_SUF, res, RD);
-      }
-   }
-   if (nvc0->surfaces_dirty[t]) {
-      BEGIN_NVC0(push, NVE4_CP(FLUSH), 1);
-      PUSH_DATA (push, NVE4_COMPUTE_FLUSH_CB);
-   }
-
-   /* re-reference non-dirty surfaces */
-   mask = nvc0->surfaces_valid[t] & ~nvc0->surfaces_dirty[t];
-   while (mask) {
-      i = ffs(mask) - 1;
-      mask &= ~(1 << i);
-
-      sf = nv50_surface(nvc0->surfaces[t][i]);
-      res = nv04_resource(sf->base.texture);
-
-      if (sf->base.writable)
-         BCTX_REFN(nvc0->bufctx_cp, CP_SUF, res, RDWR);
-      else
-         BCTX_REFN(nvc0->bufctx_cp, CP_SUF, res, RD);
-   }
-
-   nvc0->surfaces_dirty[t] = 0;
-}
-#endif
-
 /* Thankfully, textures with samplers follow the normal rules. */
 static void
 nve4_compute_validate_samplers(struct nvc0_context *nvc0)
@@ -553,7 +483,7 @@ nve4_compute_setup_launch_desc(struct nvc0_context *nvc0,
    desc->blockdim_z = info->block[2];
 
    desc->shared_size = align(cp->cp.smem_size, 0x100);
-   desc->local_size_p = align(cp->cp.lmem_size, 0x10);
+   desc->local_size_p = (cp->hdr[1] & 0xfffff0) + align(cp->cp.lmem_size, 0x10);
    desc->local_size_n = 0;
    desc->cstack_size = 0x800;
    desc->cache_split = nve4_compute_derive_cache_split(nvc0, cp->cp.smem_size);
@@ -702,6 +632,7 @@ nve4_compute_validate_textures(struct nvc0_context *nvc0)
          continue;
       }
       res = nv04_resource(tic->pipe.texture);
+      nvc0_update_tic(nvc0, tic, res);
 
       if (tic->id < 0) {
          tic->id = nvc0_screen_tic_alloc(nvc0->screen, tic);
@@ -732,8 +663,10 @@ nve4_compute_validate_textures(struct nvc0_context *nvc0)
       if (dirty)
          BCTX_REFN(nvc0->bufctx_cp, CP_TEX(i), res, RD);
    }
-   for (; i < nvc0->state.num_textures[s]; ++i)
+   for (; i < nvc0->state.num_textures[s]; ++i) {
       nvc0->tex_handles[s][i] |= NVE4_TIC_ENTRY_INVALID;
+      nvc0->textures_dirty[s] |= 1 << i;
+   }
 
    if (n[0]) {
       BEGIN_NIC0(push, NVE4_CP(TIC_FLUSH), n[0]);

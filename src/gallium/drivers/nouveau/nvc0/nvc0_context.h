@@ -133,6 +133,9 @@
 /* 8 surfaces, at 16 32-bits integers each */
 #define NVC0_CB_AUX_SU_INFO(i)      0x400 + (i) * 16 * 4
 #define NVC0_CB_AUX_SU_SIZE         (NVC0_MAX_IMAGES * 16 * 4)
+/* 1 64-bits address and 1 32-bits sequence */
+#define NVC0_CB_AUX_MP_INFO         0x600
+#define NVC0_CB_AUX_MP_SIZE         3 * 4
 /* 4 32-bits floats for the vertex runout, put at the end */
 #define NVC0_CB_AUX_RUNOUT_INFO     NVC0_CB_USR_SIZE + NVC0_CB_AUX_SIZE
 
@@ -197,7 +200,7 @@ struct nvc0_context {
    uint32_t textures_coherent[6];
    struct nv50_tsc_entry *samplers[6][PIPE_MAX_SAMPLERS];
    unsigned num_samplers[6];
-   uint16_t samplers_dirty[6];
+   uint32_t samplers_dirty[6];
    bool seamless_cube_map;
 
    uint32_t tex_handles[6][PIPE_MAX_SAMPLERS]; /* for nve4 */
@@ -323,12 +326,15 @@ extern void nvc0_init_surface_functions(struct nvc0_context *);
 bool nvc0_validate_tic(struct nvc0_context *nvc0, int s);
 bool nvc0_validate_tsc(struct nvc0_context *nvc0, int s);
 bool nve4_validate_tsc(struct nvc0_context *nvc0, int s);
+void nvc0_validate_suf(struct nvc0_context *nvc0, int s);
 void nvc0_validate_textures(struct nvc0_context *);
 void nvc0_validate_samplers(struct nvc0_context *);
 void nve4_set_tex_handles(struct nvc0_context *);
 void nvc0_validate_surfaces(struct nvc0_context *);
 void nve4_set_surface_info(struct nouveau_pushbuf *, struct pipe_image_view *,
                            struct nvc0_context *);
+void nvc0_update_tic(struct nvc0_context *, struct nv50_tic_entry *,
+                     struct nv04_resource *);
 
 struct pipe_sampler_view *
 nvc0_create_texture_view(struct pipe_context *,

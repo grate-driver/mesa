@@ -45,7 +45,6 @@ CXX_SOURCES := \
 	swr_query.cpp
 
 COMMON_CXX_SOURCES := \
-	rasterizer/common/containers.hpp \
 	rasterizer/common/formats.cpp \
 	rasterizer/common/formats.h \
 	rasterizer/common/isa.hpp \
@@ -90,7 +89,6 @@ CORE_CXX_SOURCES := \
 	rasterizer/core/threads.h \
 	rasterizer/core/tilemgr.cpp \
 	rasterizer/core/tilemgr.h \
-	rasterizer/core/utils.cpp \
 	rasterizer/core/utils.h
 
 JITTER_CXX_SOURCES := \

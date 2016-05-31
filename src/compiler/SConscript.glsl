@@ -17,12 +17,15 @@ env.Prepend(CPPPATH = [
     '#src/gallium/auxiliary',
     '#src/compiler/glsl',
     '#src/compiler/glsl/glcpp',
+    '#src/compiler/nir',
 ])
 
 env.Prepend(LIBS = [mesautil])
 
 # Make glcpp-parse.h and glsl_parser.h reachable from the include path.
 env.Prepend(CPPPATH = [Dir('.').abspath, Dir('glsl').abspath])
+# Make NIR headers reachable from the include path.
+env.Prepend(CPPPATH = [Dir('.').abspath, Dir('nir').abspath])
 
 glcpp_env = env.Clone()
 glcpp_env.Append(YACCFLAGS = [
@@ -51,7 +54,7 @@ glsl_sources = [
     glcpp_parser[0],
     glsl_lexer,
     glsl_parser[0],
-] 
+]
 
 # parse Makefile.sources
 source_lists = env.ParseSourceList('Makefile.sources')
@@ -108,6 +111,8 @@ if env['platform'] == 'windows':
     ])
 
 env.Prepend(LIBS = [compiler, glsl])
+
+compiler_objs += env.StaticObject("glsl/main.cpp")
 
 glsl_compiler = env.Program(
     target = 'glsl_compiler',

@@ -464,7 +464,7 @@ static void *si_create_blend_state_mode(struct pipe_context *ctx,
 			continue;
 
 		/* cb_render_state will disable unused ones */
-		blend->cb_target_mask |= state->rt[j].colormask << (4 * i);
+		blend->cb_target_mask |= (unsigned)state->rt[j].colormask << (4 * i);
 
 		if (!state->rt[j].blend_enable) {
 			si_pm4_set_reg(pm4, R_028780_CB_BLEND0_CONTROL + i * 4, blend_cntl);
@@ -528,7 +528,7 @@ static void *si_create_blend_state_mode(struct pipe_context *ctx,
 		}
 		si_pm4_set_reg(pm4, R_028780_CB_BLEND0_CONTROL + i * 4, blend_cntl);
 
-		blend->blend_enable_4bit |= 0xf << (i * 4);
+		blend->blend_enable_4bit |= 0xfu << (i * 4);
 
 		/* This is only important for formats without alpha. */
 		if (srcRGB == PIPE_BLENDFACTOR_SRC_ALPHA ||
@@ -537,7 +537,7 @@ static void *si_create_blend_state_mode(struct pipe_context *ctx,
 		    dstRGB == PIPE_BLENDFACTOR_SRC_ALPHA_SATURATE ||
 		    srcRGB == PIPE_BLENDFACTOR_INV_SRC_ALPHA ||
 		    dstRGB == PIPE_BLENDFACTOR_INV_SRC_ALPHA)
-			blend->need_src_alpha_4bit |= 0xf << (i * 4);
+			blend->need_src_alpha_4bit |= 0xfu << (i * 4);
 	}
 
 	if (blend->cb_target_mask) {
@@ -1104,7 +1104,8 @@ static void si_emit_db_render_state(struct si_context *sctx, struct r600_atom *s
 	/* DB_RENDER_OVERRIDE2 */
 	radeon_set_context_reg(cs, R_028010_DB_RENDER_OVERRIDE2,
 		S_028010_DISABLE_ZMASK_EXPCLEAR_OPTIMIZATION(sctx->db_depth_disable_expclear) |
-		S_028010_DISABLE_SMEM_EXPCLEAR_OPTIMIZATION(sctx->db_stencil_disable_expclear));
+		S_028010_DISABLE_SMEM_EXPCLEAR_OPTIMIZATION(sctx->db_stencil_disable_expclear) |
+		S_028010_DECOMPRESS_Z_ON_FLUSH(sctx->framebuffer.nr_samples >= 4));
 
 	db_shader_control = S_02880C_ALPHA_TO_MASK_DISABLE(sctx->framebuffer.cb0_is_integer) |
 		            sctx->ps_db_shader_control;
@@ -1142,6 +1143,11 @@ static uint32_t si_translate_colorformat(enum pipe_format format)
 		return V_028C70_COLOR_10_11_11;
 
 	if (desc->layout != UTIL_FORMAT_LAYOUT_PLAIN)
+		return V_028C70_COLOR_INVALID;
+
+	/* hw cannot support mixed formats (except depth/stencil, since
+	 * stencil is not written to). */
+	if (desc->is_mixed && desc->colorspace != UTIL_FORMAT_COLORSPACE_ZS)
 		return V_028C70_COLOR_INVALID;
 
 	switch (desc->nr_channels) {
@@ -1421,6 +1427,11 @@ static uint32_t si_translate_texformat(struct pipe_screen *screen,
 	}
 
 	/* R8G8Bx_SNORM - TODO CxV8U8 */
+
+	/* hw cannot support mixed formats (except depth/stencil, since only
+	 * depth is read).*/
+	if (desc->is_mixed && desc->colorspace != UTIL_FORMAT_COLORSPACE_ZS)
+		goto out_unknown;
 
 	/* See whether the components are of the same size. */
 	for (i = 1; i < desc->nr_channels; i++) {
@@ -3178,7 +3189,7 @@ static void si_set_vertex_buffers(struct pipe_context *ctx,
 	struct pipe_vertex_buffer *dst = sctx->vertex_buffer + start_slot;
 	int i;
 
-	assert(start_slot + count <= Elements(sctx->vertex_buffer));
+	assert(start_slot + count <= ARRAY_SIZE(sctx->vertex_buffer));
 
 	if (buffers) {
 		for (i = 0; i < count; i++) {
@@ -3385,12 +3396,6 @@ void si_init_state_functions(struct si_context *sctx)
 	sctx->b.need_gfx_cs_space = si_need_gfx_cs_space;
 
 	sctx->b.b.draw_vbo = si_draw_vbo;
-
-	if (sctx->b.chip_class >= CIK) {
-		sctx->b.dma_copy = cik_sdma_copy;
-	} else {
-		sctx->b.dma_copy = si_dma_copy;
-	}
 
 	si_init_config(sctx);
 }
@@ -3786,6 +3791,11 @@ static void si_init_config(struct si_context *sctx)
 			       S_028424_OVERWRITE_COMBINER_WATERMARK(4));
 		si_pm4_set_reg(pm4, R_028C58_VGT_VERTEX_REUSE_BLOCK_CNTL, 30);
 		si_pm4_set_reg(pm4, R_028C5C_VGT_OUT_DEALLOC_CNTL, 32);
+		si_pm4_set_reg(pm4, R_028B50_VGT_TESS_DISTRIBUTION,
+		               S_028B50_ACCUM_ISOLINE(32) |
+		               S_028B50_ACCUM_TRI(11) |
+		               S_028B50_ACCUM_QUAD(11) |
+		               S_028B50_DONUT_SPLIT(16));
 	}
 
 	if (sctx->b.family == CHIP_STONEY)

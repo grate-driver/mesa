@@ -120,8 +120,8 @@ nvc0_screen_get_param(struct pipe_screen *pscreen, enum pipe_cap param)
    case PIPE_CAP_MAX_TEXTURE_BUFFER_SIZE:
       return 128 * 1024 * 1024;
    case PIPE_CAP_GLSL_FEATURE_LEVEL:
-      if (class_3d == NVE4_3D_CLASS || class_3d == NVF0_3D_CLASS)
-         return 420;
+      if (class_3d <= NVF0_3D_CLASS)
+         return 430;
       return 410;
    case PIPE_CAP_MAX_RENDER_TARGETS:
       return 8;
@@ -227,13 +227,14 @@ nvc0_screen_get_param(struct pipe_screen *pscreen, enum pipe_cap param)
    case PIPE_CAP_INVALIDATE_BUFFER:
    case PIPE_CAP_STRING_MARKER:
    case PIPE_CAP_FRAMEBUFFER_NO_ATTACHMENT:
+   case PIPE_CAP_CULL_DISTANCE:
+   case PIPE_CAP_PRIMITIVE_RESTART_FOR_PATCHES:
+   case PIPE_CAP_ROBUST_BUFFER_ACCESS_BEHAVIOR:
       return 1;
    case PIPE_CAP_SEAMLESS_CUBE_MAP_PER_TEXTURE:
       return (class_3d >= NVE4_3D_CLASS) ? 1 : 0;
    case PIPE_CAP_COMPUTE:
-      if (debug_get_bool_option("NVF0_COMPUTE", false))
-         return 1;
-      return (class_3d <= NVE4_3D_CLASS) ? 1 : 0;
+      return 1;
    case PIPE_CAP_PREFER_BLIT_BASED_TEXTURE_TRANSFER:
       return nouveau_screen(pscreen)->vram_domain & NOUVEAU_BO_VRAM ? 1 : 0;
 
@@ -260,7 +261,6 @@ nvc0_screen_get_param(struct pipe_screen *pscreen, enum pipe_cap param)
    case PIPE_CAP_PCI_BUS:
    case PIPE_CAP_PCI_DEVICE:
    case PIPE_CAP_PCI_FUNCTION:
-   case PIPE_CAP_ROBUST_BUFFER_ACCESS_BEHAVIOR:
       return 0;
 
    case PIPE_CAP_VENDOR_ID:
@@ -295,16 +295,12 @@ nvc0_screen_get_shader_param(struct pipe_screen *pscreen, unsigned shader,
    case PIPE_SHADER_VERTEX:
    case PIPE_SHADER_GEOMETRY:
    case PIPE_SHADER_FRAGMENT:
+   case PIPE_SHADER_COMPUTE:
       break;
    case PIPE_SHADER_TESS_CTRL:
    case PIPE_SHADER_TESS_EVAL:
       if (class_3d >= GM107_3D_CLASS)
          return 0;
-      break;
-   case PIPE_SHADER_COMPUTE:
-      if (!debug_get_bool_option("NVF0_COMPUTE", false))
-         if (class_3d > NVE4_3D_CLASS)
-            return 0;
       break;
    default:
       return 0;
@@ -314,9 +310,6 @@ nvc0_screen_get_shader_param(struct pipe_screen *pscreen, unsigned shader,
    case PIPE_SHADER_CAP_PREFERRED_IR:
       return PIPE_SHADER_IR_TGSI;
    case PIPE_SHADER_CAP_SUPPORTED_IRS:
-      if (class_3d == NVF0_3D_CLASS &&
-          !debug_get_bool_option("NVF0_COMPUTE", false))
-         return 0;
       return 1 << PIPE_SHADER_IR_TGSI;
    case PIPE_SHADER_CAP_MAX_INSTRUCTIONS:
    case PIPE_SHADER_CAP_MAX_ALU_INSTRUCTIONS:
@@ -376,14 +369,17 @@ nvc0_screen_get_shader_param(struct pipe_screen *pscreen, unsigned shader,
    case PIPE_SHADER_CAP_MAX_SHADER_BUFFERS:
       return NVC0_MAX_BUFFERS;
    case PIPE_SHADER_CAP_MAX_TEXTURE_SAMPLERS:
-      return 16; /* would be 32 in linked (OpenGL-style) mode */
+      return (class_3d >= NVE4_3D_CLASS) ? 32 : 16;
    case PIPE_SHADER_CAP_MAX_SAMPLER_VIEWS:
-      return 16; /* XXX not sure if more are really safe */
+      return (class_3d >= NVE4_3D_CLASS) ? 32 : 16;
    case PIPE_SHADER_CAP_MAX_UNROLL_ITERATIONS_HINT:
       return 32;
    case PIPE_SHADER_CAP_MAX_SHADER_IMAGES:
       if (class_3d == NVE4_3D_CLASS || class_3d == NVF0_3D_CLASS)
          return NVC0_MAX_IMAGES;
+      if (class_3d < NVE4_3D_CLASS)
+         if (shader == PIPE_SHADER_FRAGMENT || shader == PIPE_SHADER_COMPUTE)
+            return NVC0_MAX_IMAGES;
       return 0;
    default:
       NOUVEAU_ERR("unknown PIPE_SHADER_CAP %d\n", param);
@@ -653,14 +649,11 @@ nvc0_screen_init_compute(struct nvc0_screen *screen)
    case 0xd0:
       return nvc0_screen_compute_setup(screen, screen->base.pushbuf);
    case 0xe0:
-      return nve4_screen_compute_setup(screen, screen->base.pushbuf);
    case 0xf0:
    case 0x100:
    case 0x110:
    case 0x120:
-      if (debug_get_bool_option("NVF0_COMPUTE", false))
-         return nve4_screen_compute_setup(screen, screen->base.pushbuf);
-      return 0;
+      return nve4_screen_compute_setup(screen, screen->base.pushbuf);
    default:
       return -1;
    }

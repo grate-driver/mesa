@@ -77,6 +77,8 @@
 #define DBG_NO_TGSI		(1 << 13)
 #define DBG_NO_ASM		(1 << 14)
 #define DBG_PREOPT_IR		(1 << 15)
+/* gaps */
+#define DBG_TEST_DMA		(1 << 20)
 /* Bits 21-31 are reserved for the r600g driver. */
 /* features */
 #define DBG_NO_ASYNC_DMA	(1llu << 32)
@@ -484,6 +486,7 @@ struct r600_common_context {
 	unsigned			max_db; /* for OQ */
 	/* Misc stats. */
 	unsigned			num_draw_calls;
+	unsigned			num_dma_calls;
 
 	/* Render condition. */
 	struct r600_atom		render_cond_atom;
@@ -594,7 +597,9 @@ void r600_screen_clear_buffer(struct r600_common_screen *rscreen, struct pipe_re
 struct pipe_resource *r600_resource_create_common(struct pipe_screen *screen,
 						  const struct pipe_resource *templ);
 const char *r600_get_llvm_processor_name(enum radeon_family family);
-void r600_need_dma_space(struct r600_common_context *ctx, unsigned num_dw);
+void r600_need_dma_space(struct r600_common_context *ctx, unsigned num_dw,
+			 struct r600_resource *dst, struct r600_resource *src);
+void r600_dma_emit_wait_idle(struct r600_common_context *rctx);
 
 /* r600_gpu_load.c */
 void r600_gpu_load_kill_thread(struct r600_common_screen *rscreen);
@@ -622,7 +627,17 @@ void r600_update_prims_generated_query_state(struct r600_common_context *rctx,
 					     unsigned type, int diff);
 void r600_streamout_init(struct r600_common_context *rctx);
 
+/* r600_test_dma.c */
+void r600_test_dma(struct r600_common_screen *rscreen);
+
 /* r600_texture.c */
+bool r600_prepare_for_dma_blit(struct r600_common_context *rctx,
+				struct r600_texture *rdst,
+				unsigned dst_level, unsigned dstx,
+				unsigned dsty, unsigned dstz,
+				struct r600_texture *rsrc,
+				unsigned src_level,
+				const struct pipe_box *src_box);
 void r600_texture_get_fmask_info(struct r600_common_screen *rscreen,
 				 struct r600_texture *rtex,
 				 unsigned nr_samples,
@@ -762,9 +777,9 @@ r600_get_sampler_view_priority(struct r600_resource *res)
 
 /* For MSAA sample positions. */
 #define FILL_SREG(s0x, s0y, s1x, s1y, s2x, s2y, s3x, s3y)  \
-	(((s0x) & 0xf) | (((s0y) & 0xf) << 4) |		   \
-	(((s1x) & 0xf) << 8) | (((s1y) & 0xf) << 12) |	   \
-	(((s2x) & 0xf) << 16) | (((s2y) & 0xf) << 20) |	   \
-	 (((s3x) & 0xf) << 24) | (((s3y) & 0xf) << 28))
+	(((s0x) & 0xf) | (((unsigned)(s0y) & 0xf) << 4) |		   \
+	(((unsigned)(s1x) & 0xf) << 8) | (((unsigned)(s1y) & 0xf) << 12) |	   \
+	(((unsigned)(s2x) & 0xf) << 16) | (((unsigned)(s2y) & 0xf) << 20) |	   \
+	 (((unsigned)(s3x) & 0xf) << 24) | (((unsigned)(s3y) & 0xf) << 28))
 
 #endif

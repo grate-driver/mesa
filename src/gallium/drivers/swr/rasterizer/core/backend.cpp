@@ -703,7 +703,16 @@ void BackendSampleRate(DRAW_CONTEXT *pDC, uint32_t workerId, uint32_t x, uint32_
             {
                 ///@ todo: don't need to genererate input coverage 2x if input coverage and centroid
                 RDTSC_START(BEBarycentric);
-                CalcCentroidBarycentrics<T>(coeffs, psContext, &work.coverageMask[0], pBlendState->sampleMask, psContext.vX.UL, psContext.vY.UL);
+                if(T::bIsStandardPattern)
+                {
+                    CalcCentroidPos<T>(psContext, &work.coverageMask[0], pBlendState->sampleMask, psContext.vX.UL, psContext.vY.UL);
+                }
+                else
+                {
+                    psContext.vX.centroid = _simd_add_ps(psContext.vX.UL, _simd_set1_ps(0.5f));
+                    psContext.vY.centroid = _simd_add_ps(psContext.vY.UL, _simd_set1_ps(0.5f));
+                }
+                CalcCentroidBarycentrics(coeffs, psContext, psContext.vX.UL, psContext.vY.UL);
                 RDTSC_STOP(BEBarycentric, 0, 0);
             }
 
@@ -886,7 +895,9 @@ void BackendPixelRate(DRAW_CONTEXT *pDC, uint32_t workerId, uint32_t x, uint32_t
         psContext.vY.center = _simd_add_ps(vCenterOffsetsY, _simd_set1_ps((float)yy));
         for(uint32_t xx = x; xx < x + KNOB_TILE_X_DIM; xx += SIMD_TILE_X_DIM)
         {
+            simdscalar activeLanes;
             if(!(work.anyCoveredSamples & MASK)) {goto Endtile;};
+            activeLanes = vMask(work.anyCoveredSamples & MASK);
 
             psContext.vX.UL = _simd_add_ps(vULOffsetsX, _simd_set1_ps((float)xx));
             // set pixel center positions
@@ -905,36 +916,35 @@ void BackendPixelRate(DRAW_CONTEXT *pDC, uint32_t workerId, uint32_t x, uint32_t
             {
                 ///@ todo: don't need to genererate input coverage 2x if input coverage and centroid
                 RDTSC_START(BEBarycentric);
-                CalcCentroidBarycentrics<T>(coeffs, psContext, &work.coverageMask[0], pBlendState->sampleMask, psContext.vX.UL, psContext.vY.UL);
+                if(T::bIsStandardPattern)
+                {
+                    CalcCentroidPos<T>(psContext, &work.coverageMask[0], pBlendState->sampleMask, psContext.vX.UL, psContext.vY.UL);
+                }
+                else
+                {
+                    psContext.vX.centroid = _simd_add_ps(psContext.vX.UL, _simd_set1_ps(0.5f));
+                    psContext.vY.centroid = _simd_add_ps(psContext.vY.UL, _simd_set1_ps(0.5f));
+                }
+                CalcCentroidBarycentrics(coeffs, psContext, psContext.vX.UL, psContext.vY.UL);
                 RDTSC_STOP(BEBarycentric, 0, 0);
             }
 
-			simdscalar activeLanes;
             if(T::bForcedSampleCount)
             {
                 // candidate pixels (that passed coverage) will cause shader invocation if any bits in the samplemask are set
                 const simdscalar vSampleMask = _simd_castsi_ps(_simd_cmpgt_epi32(_simd_set1_epi32(pBlendState->sampleMask), _simd_setzero_si()));
-                activeLanes = _simd_and_ps(vMask(work.anyCoveredSamples & MASK), vSampleMask);
+                activeLanes = _simd_and_ps(activeLanes, vSampleMask);
             }
 
             // Early-Z?
             if(T::bCanEarlyZ && !T::bForcedSampleCount)
             {
-                activeLanes = _simd_setzero_ps();
                 uint32_t depthPassCount = PixelRateZTest(activeLanes, psContext, BEEarlyDepthTest);
                 UPDATE_STAT(DepthPassCount, depthPassCount);
             }
-            // if we can't do early z, set the active mask to any samples covered in the current simd
-            else if(!T::bCanEarlyZ && !T::bForcedSampleCount)
-            {
-                activeLanes = vMask(work.anyCoveredSamples & MASK);
-            }
 
             // if we have no covered samples that passed depth at this point, go to next tile
-            if(!_simd_movemask_ps(activeLanes))
-            {
-                goto Endtile;
-            }
+            if(!_simd_movemask_ps(activeLanes)) { goto Endtile; };
 
             if(pPSState->usesSourceDepth)
             {
@@ -957,10 +967,7 @@ void BackendPixelRate(DRAW_CONTEXT *pDC, uint32_t workerId, uint32_t x, uint32_t
 
             // update active lanes to remove any discarded or oMask'd pixels
             activeLanes = _simd_castsi_ps(_simd_and_si(psContext.activeMask, _simd_cmpgt_epi32(psContext.oMask, _simd_setzero_si())));
-            if(!_simd_movemask_ps(activeLanes))
-            {
-                goto Endtile;
-            }
+            if(!_simd_movemask_ps(activeLanes)) { goto Endtile; };
 
             // late-Z
             if(!T::bCanEarlyZ && !T::bForcedSampleCount)
@@ -970,10 +977,7 @@ void BackendPixelRate(DRAW_CONTEXT *pDC, uint32_t workerId, uint32_t x, uint32_t
             }
 
             // if we have no covered samples that passed depth at this point, skip OM and go to next tile
-            if(!_simd_movemask_ps(activeLanes))
-            {
-                goto Endtile;
-            }
+            if(!_simd_movemask_ps(activeLanes)) { goto Endtile; };
 
             // output merger
             // loop over all samples, broadcasting the results of the PS to all passing pixels

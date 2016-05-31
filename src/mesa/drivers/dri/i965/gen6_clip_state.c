@@ -50,6 +50,8 @@ upload_clip_state(struct brw_context *brw)
       dw2 |= GEN6_CLIP_NON_PERSPECTIVE_BARYCENTRIC_ENABLE;
    }
 
+   dw1 |= brw->vs.prog_data->base.cull_distance_mask;
+
    if (brw->gen >= 7)
       dw1 |= GEN7_CLIP_EARLY_CULL;
 
@@ -177,6 +179,11 @@ upload_clip_state(struct brw_context *brw)
    if (!is_drawing_points(brw) && !is_drawing_lines(brw))
       dw2 |= GEN6_CLIP_XY_TEST;
 
+   /* BRW_NEW_VUE_MAP_GEOM_OUT */
+   const int max_vp_index =
+      (brw->vue_map_geom_out.slots_valid & VARYING_BIT_VIEWPORT) != 0 ?
+      ctx->Const.MaxViewports : 1;
+
    BEGIN_BATCH(4);
    OUT_BATCH(_3DSTATE_CLIP << 16 | (4 - 2));
    OUT_BATCH(dw1);
@@ -186,7 +193,7 @@ upload_clip_state(struct brw_context *brw)
    OUT_BATCH(U_FIXED(0.125, 3) << GEN6_CLIP_MIN_POINT_WIDTH_SHIFT |
              U_FIXED(255.875, 3) << GEN6_CLIP_MAX_POINT_WIDTH_SHIFT |
              (_mesa_geometric_layers(fb) > 0 ? 0 : GEN6_CLIP_FORCE_ZERO_RTAINDEX) |
-             ((ctx->Const.MaxViewports - 1) & GEN6_CLIP_MAX_VP_INDEX_MASK));
+             ((max_vp_index - 1) & GEN6_CLIP_MAX_VP_INDEX_MASK));
    ADVANCE_BATCH();
 }
 
@@ -201,7 +208,8 @@ const struct brw_tracked_state gen6_clip_state = {
                BRW_NEW_GEOMETRY_PROGRAM |
                BRW_NEW_META_IN_PROGRESS |
                BRW_NEW_PRIMITIVE |
-               BRW_NEW_RASTERIZER_DISCARD,
+               BRW_NEW_RASTERIZER_DISCARD |
+               BRW_NEW_VUE_MAP_GEOM_OUT,
    },
    .emit = upload_clip_state,
 };
@@ -218,7 +226,8 @@ const struct brw_tracked_state gen7_clip_state = {
                BRW_NEW_GEOMETRY_PROGRAM |
                BRW_NEW_META_IN_PROGRESS |
                BRW_NEW_PRIMITIVE |
-               BRW_NEW_RASTERIZER_DISCARD,
+               BRW_NEW_RASTERIZER_DISCARD |
+               BRW_NEW_VUE_MAP_GEOM_OUT,
    },
    .emit = upload_clip_state,
 };

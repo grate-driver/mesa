@@ -267,6 +267,7 @@ vc4_generate_code(struct vc4_context *vc4, struct vc4_compile *c)
                         int index = qinst->src[i].index;
                         switch (qinst->src[i].file) {
                         case QFILE_NULL:
+                        case QFILE_LOAD_IMM:
                                 src[i] = qpu_rn(0);
                                 break;
                         case QFILE_TEMP:
@@ -351,6 +352,7 @@ vc4_generate_code(struct vc4_context *vc4, struct vc4_compile *c)
                 case QFILE_VARY:
                 case QFILE_UNIF:
                 case QFILE_SMALL_IMM:
+                case QFILE_LOAD_IMM:
                 case QFILE_FRAG_X:
                 case QFILE_FRAG_Y:
                 case QFILE_FRAG_REV_FLAG:
@@ -388,6 +390,11 @@ vc4_generate_code(struct vc4_context *vc4, struct vc4_compile *c)
 
                         handle_r4_qpu_write(c, qinst, dst);
 
+                        break;
+
+                case QOP_LOAD_IMM:
+                        assert(qinst->src[0].file == QFILE_LOAD_IMM);
+                        queue(c, qpu_load_imm_ui(dst, qinst->src[0].index));
                         break;
 
                 case QOP_MS_MASK:
@@ -509,6 +516,14 @@ vc4_generate_code(struct vc4_context *vc4, struct vc4_compile *c)
         /* thread end can't have TLB operations */
         if (qpu_inst_is_tlb(c->qpu_insts[c->qpu_inst_count - 1]))
                 qpu_serialize_one_inst(c, qpu_NOP());
+
+        /* Make sure there's no existing signal set (like for a small
+         * immediate)
+         */
+        if (QPU_GET_FIELD(c->qpu_insts[c->qpu_inst_count - 1],
+                          QPU_SIG) != QPU_SIG_NONE) {
+                qpu_serialize_one_inst(c, qpu_NOP());
+        }
 
         c->qpu_insts[c->qpu_inst_count - 1] =
                 qpu_set_sig(c->qpu_insts[c->qpu_inst_count - 1],

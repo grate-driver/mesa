@@ -43,6 +43,12 @@ process_parameters(exec_list *instructions, exec_list *actual_parameters,
    unsigned count = 0;
 
    foreach_list_typed(ast_node, ast, link, parameters) {
+      /* We need to process the parameters first in order to know if we can
+       * raise or not a unitialized warning. Calling set_is_lhs silence the
+       * warning for now. Raising the warning or not will be checked at
+       * verify_parameter_modes.
+       */
+      ast->set_is_lhs(true);
       ir_rvalue *result = ast->hir(instructions, state);
 
       ir_constant *const constant = result->constant_expression_value();
@@ -208,17 +214,27 @@ verify_parameter_modes(_mesa_glsl_parse_state *state,
 
       /* Verify that shader_in parameters are shader inputs */
       if (formal->data.must_be_shader_input) {
-         ir_variable *var = actual->variable_referenced();
-         if (var && var->data.mode != ir_var_shader_in) {
-            _mesa_glsl_error(&loc, state,
-                             "parameter `%s` must be a shader input",
-                             formal->name);
-            return false;
+         const ir_rvalue *val = actual;
+
+         // GLSL 4.40 allows swizzles, while earlier GLSL versions do not.
+         if (val->ir_type == ir_type_swizzle) {
+            if (!state->is_version(440, 0)) {
+               _mesa_glsl_error(&loc, state,
+                                "parameter `%s` must not be swizzled",
+                                formal->name);
+               return false;
+            }
+            val = ((ir_swizzle *)val)->val;
          }
 
-         if (actual->ir_type == ir_type_swizzle) {
+         while (val->ir_type == ir_type_dereference_array) {
+            val = ((ir_dereference_array *)val)->array;
+         }
+
+         if (!val->as_dereference_variable() ||
+             val->variable_referenced()->data.mode != ir_var_shader_in) {
             _mesa_glsl_error(&loc, state,
-                             "parameter `%s` must not be swizzled",
+                             "parameter `%s` must be a shader input",
                              formal->name);
             return false;
          }
@@ -247,6 +263,16 @@ verify_parameter_modes(_mesa_glsl_parse_state *state,
 	 }
 
 	 ir_variable *var = actual->variable_referenced();
+
+         if (var && formal->data.mode == ir_var_function_inout) {
+            if ((var->data.mode == ir_var_auto || var->data.mode == ir_var_shader_out) &&
+                !var->data.assigned &&
+                !is_gl_identifier(var->name)) {
+               _mesa_glsl_warning(&loc, state, "`%s' used uninitialized",
+                                  var->name);
+            }
+         }
+
 	 if (var)
 	    var->data.assigned = true;
 
@@ -263,6 +289,18 @@ verify_parameter_modes(_mesa_glsl_parse_state *state,
                              mode, formal->name);
             return false;
 	 }
+      } else {
+         assert(formal->data.mode == ir_var_function_in ||
+                formal->data.mode == ir_var_const_in);
+         ir_variable *var = actual->variable_referenced();
+         if (var) {
+            if ((var->data.mode == ir_var_auto || var->data.mode == ir_var_shader_out) &&
+                !var->data.assigned &&
+                !is_gl_identifier(var->name)) {
+               _mesa_glsl_warning(&loc, state, "`%s' used uninitialized",
+                                  var->name);
+            }
+         }
       }
 
       if (formal->type->is_image() &&
@@ -1533,7 +1571,7 @@ emit_inline_matrix_constructor(const glsl_type *type,
       for (unsigned i = 1; i < last_row; i++)
          swiz[i] = i;
 
-         const unsigned write_mask = (1U << last_row) - 1;
+      const unsigned write_mask = (1U << last_row) - 1;
 
       for (unsigned i = 0; i < last_col; i++) {
          ir_dereference *const lhs =

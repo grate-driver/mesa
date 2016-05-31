@@ -406,6 +406,8 @@ svga_get_param(struct pipe_screen *screen, enum pipe_cap param)
    case PIPE_CAP_BUFFER_SAMPLER_VIEW_RGBA_ONLY:
    case PIPE_CAP_QUERY_BUFFER_OBJECT:
    case PIPE_CAP_FRAMEBUFFER_NO_ATTACHMENT:
+   case PIPE_CAP_CULL_DISTANCE:
+   case PIPE_CAP_PRIMITIVE_RESTART_FOR_PATCHES:
       return 0;
    }
 
@@ -1067,6 +1069,7 @@ svga_screen_create(struct svga_winsys_screen *sws)
                    svgascreen->haveLineStipple, svgascreen->haveLineSmooth,
                    svgascreen->maxLineWidth);
       debug_printf("svga: maxPointSize %g\n", svgascreen->maxPointSize);
+      debug_printf("svga: msaa samples mask: 0x%x\n", svgascreen->ms_samples);
    }
 
    pipe_mutex_init(svgascreen->tex_mutex);

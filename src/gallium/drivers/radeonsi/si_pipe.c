@@ -48,6 +48,7 @@ static void si_destroy_context(struct pipe_context *context)
 	pipe_resource_reference(&sctx->esgs_ring, NULL);
 	pipe_resource_reference(&sctx->gsvs_ring, NULL);
 	pipe_resource_reference(&sctx->tf_ring, NULL);
+	pipe_resource_reference(&sctx->tess_offchip_ring, NULL);
 	pipe_resource_reference(&sctx->null_const_buf.buffer, NULL);
 	r600_resource_reference(&sctx->border_color_buffer, NULL);
 	free(sctx->border_color_table);
@@ -58,7 +59,7 @@ static void si_destroy_context(struct pipe_context *context)
 	si_pm4_free_state(sctx, sctx->init_config, ~0);
 	if (sctx->init_config_gs_rings)
 		si_pm4_free_state(sctx, sctx->init_config_gs_rings, ~0);
-	for (i = 0; i < Elements(sctx->vgt_shader_config); i++)
+	for (i = 0; i < ARRAY_SIZE(sctx->vgt_shader_config); i++)
 		si_pm4_delete_state(sctx, vgt_shader_config, sctx->vgt_shader_config[i]);
 
 	if (sctx->fixed_func_tcs_shader.cso)
@@ -191,6 +192,11 @@ static struct pipe_context *si_create_context(struct pipe_screen *screen,
 	si_init_all_descriptors(sctx);
 	si_init_state_functions(sctx);
 	si_init_shader_functions(sctx);
+
+	if (sctx->b.chip_class >= CIK)
+		cik_init_sdma_functions(sctx);
+	else
+		si_init_dma_functions(sctx);
 
 	if (sscreen->b.debug_flags & DBG_FORCE_DMA)
 		sctx->b.b.resource_copy_region = sctx->b.dma_copy;
@@ -363,6 +369,10 @@ static int si_get_param(struct pipe_screen* pscreen, enum pipe_cap param)
 		return HAVE_LLVM >= 0x0309 ? 4 : 0;
 
 	case PIPE_CAP_GLSL_FEATURE_LEVEL:
+		if (pscreen->get_shader_param(pscreen, PIPE_SHADER_COMPUTE,
+		                              PIPE_SHADER_CAP_SUPPORTED_IRS) &
+		    (1 << PIPE_SHADER_IR_TGSI))
+			return 430;
 		return HAVE_LLVM >= 0x0309 ? 420 :
 		       HAVE_LLVM >= 0x0307 ? 410 : 330;
 
@@ -386,6 +396,8 @@ static int si_get_param(struct pipe_screen* pscreen, enum pipe_cap param)
 	case PIPE_CAP_GENERATE_MIPMAP:
 	case PIPE_CAP_STRING_MARKER:
 	case PIPE_CAP_QUERY_BUFFER_OBJECT:
+	case PIPE_CAP_CULL_DISTANCE:
+	case PIPE_CAP_PRIMITIVE_RESTART_FOR_PATCHES:
 		return 0;
 
 	case PIPE_CAP_MAX_SHADER_PATCH_VARYINGS:
@@ -689,6 +701,9 @@ struct pipe_screen *radeonsi_screen_create(struct radeon_winsys *ws)
 
 	/* Create the auxiliary context. This must be done last. */
 	sscreen->b.aux_context = sscreen->b.b.context_create(&sscreen->b.b, NULL, 0);
+
+	if (sscreen->b.debug_flags & DBG_TEST_DMA)
+		r600_test_dma(&sscreen->b);
 
 	return &sscreen->b.b;
 }

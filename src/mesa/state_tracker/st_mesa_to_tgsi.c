@@ -583,20 +583,12 @@ translate_opcode( unsigned op )
       return TGSI_OPCODE_RET;
    case OPCODE_SCS:
       return TGSI_OPCODE_SCS;
-   case OPCODE_SEQ:
-      return TGSI_OPCODE_SEQ;
    case OPCODE_SGE:
       return TGSI_OPCODE_SGE;
-   case OPCODE_SGT:
-      return TGSI_OPCODE_SGT;
    case OPCODE_SIN:
       return TGSI_OPCODE_SIN;
-   case OPCODE_SLE:
-      return TGSI_OPCODE_SLE;
    case OPCODE_SLT:
       return TGSI_OPCODE_SLT;
-   case OPCODE_SNE:
-      return TGSI_OPCODE_SNE;
    case OPCODE_SSG:
       return TGSI_OPCODE_SSG;
    case OPCODE_SUB:
@@ -1159,7 +1151,7 @@ st_translate_mesa_program(
 
    /* texture samplers */
    for (i = 0; i < ctx->Const.Program[MESA_SHADER_FRAGMENT].MaxTextureImageUnits; i++) {
-      if (program->SamplersUsed & (1 << i)) {
+      if (program->SamplersUsed & (1u << i)) {
          unsigned target =
             translate_texture_index(program->TexturesUsed[i],
                                     !!(program->ShadowSamplers & (1 << i)));

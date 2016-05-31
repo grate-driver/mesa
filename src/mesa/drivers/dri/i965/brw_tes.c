@@ -151,9 +151,7 @@ brw_codegen_tes_prog(struct brw_context *brw,
     * every uniform is a float which gets padded to the size of a vec4.
     */
    struct gl_shader *tes = shader_prog->_LinkedShaders[MESA_SHADER_TESS_EVAL];
-   int param_count = nir->num_uniforms;
-   if (!compiler->scalar_stage[MESA_SHADER_TESS_EVAL])
-      param_count *= 4;
+   int param_count = nir->num_uniforms / 4;
 
    prog_data.base.base.param =
       rzalloc_array(NULL, const gl_constant_value *, param_count);
@@ -163,6 +161,10 @@ brw_codegen_tes_prog(struct brw_context *brw,
       rzalloc_array(NULL, struct brw_image_param, tes->NumImages);
    prog_data.base.base.nr_params = param_count;
    prog_data.base.base.nr_image_params = tes->NumImages;
+
+   prog_data.base.cull_distance_mask =
+      ((1 << tep->program.Base.CullDistanceArraySize) - 1) <<
+      tep->program.Base.ClipDistanceArraySize;
 
    brw_nir_setup_glsl_uniforms(nir, shader_prog, &tep->program.Base,
                                &prog_data.base.base,

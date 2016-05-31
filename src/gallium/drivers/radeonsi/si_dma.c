@@ -64,24 +64,20 @@ static void si_dma_copy_buffer(struct si_context *ctx,
 	}
 	ncopy = (size / max_csize) + !!(size % max_csize);
 
-	r600_need_dma_space(&ctx->b, ncopy * 5);
-
-	radeon_add_to_buffer_list(&ctx->b, &ctx->b.dma, rsrc, RADEON_USAGE_READ,
-			      RADEON_PRIO_SDMA_BUFFER);
-	radeon_add_to_buffer_list(&ctx->b, &ctx->b.dma, rdst, RADEON_USAGE_WRITE,
-			      RADEON_PRIO_SDMA_BUFFER);
+	r600_need_dma_space(&ctx->b, ncopy * 5, rdst, rsrc);
 
 	for (i = 0; i < ncopy; i++) {
 		csize = size < max_csize ? size : max_csize;
-		cs->buf[cs->cdw++] = SI_DMA_PACKET(SI_DMA_PACKET_COPY, sub_cmd, csize);
-		cs->buf[cs->cdw++] = dst_offset;
-		cs->buf[cs->cdw++] = src_offset;
-		cs->buf[cs->cdw++] = (dst_offset >> 32UL) & 0xff;
-		cs->buf[cs->cdw++] = (src_offset >> 32UL) & 0xff;
+		radeon_emit(cs, SI_DMA_PACKET(SI_DMA_PACKET_COPY, sub_cmd, csize));
+		radeon_emit(cs, dst_offset);
+		radeon_emit(cs, src_offset);
+		radeon_emit(cs, (dst_offset >> 32UL) & 0xff);
+		radeon_emit(cs, (src_offset >> 32UL) & 0xff);
 		dst_offset += csize << shift;
 		src_offset += csize << shift;
 		size -= csize;
 	}
+	r600_dma_emit_wait_idle(&ctx->b);
 }
 
 static void si_dma_copy_tile(struct si_context *ctx,
@@ -160,12 +156,7 @@ static void si_dma_copy_tile(struct si_context *ctx,
 	mt = G_009910_MICRO_TILE_MODE(tile_mode);
 	size = (copy_height * pitch) / 4;
 	ncopy = (size / SI_DMA_COPY_MAX_SIZE_DW) + !!(size % SI_DMA_COPY_MAX_SIZE_DW);
-	r600_need_dma_space(&ctx->b, ncopy * 9);
-
-	radeon_add_to_buffer_list(&ctx->b, &ctx->b.dma, &rsrc->resource,
-			      RADEON_USAGE_READ, RADEON_PRIO_SDMA_TEXTURE);
-	radeon_add_to_buffer_list(&ctx->b, &ctx->b.dma, &rdst->resource,
-			      RADEON_USAGE_WRITE, RADEON_PRIO_SDMA_TEXTURE);
+	r600_need_dma_space(&ctx->b, ncopy * 9, &rdst->resource, &rsrc->resource);
 
 	for (i = 0; i < ncopy; i++) {
 		cheight = copy_height;
@@ -173,30 +164,31 @@ static void si_dma_copy_tile(struct si_context *ctx,
 			cheight = (SI_DMA_COPY_MAX_SIZE_DW * 4) / pitch;
 		}
 		size = (cheight * pitch) / 4;
-		cs->buf[cs->cdw++] = SI_DMA_PACKET(SI_DMA_PACKET_COPY, sub_cmd, size);
-		cs->buf[cs->cdw++] = base >> 8;
-		cs->buf[cs->cdw++] = (detile << 31) | (array_mode << 27) |
-					(lbpp << 24) | (bank_h << 21) |
-					(bank_w << 18) | (mt_aspect << 16);
-		cs->buf[cs->cdw++] = (pitch_tile_max << 0) | ((height - 1) << 16);
-		cs->buf[cs->cdw++] = (slice_tile_max << 0) | (pipe_config << 26);
-		cs->buf[cs->cdw++] = (tiled_x << 0) | (tiled_z << 18);
-		cs->buf[cs->cdw++] = (tiled_y << 0) | (tile_split << 21) | (nbanks << 25) | (mt << 27);
-		cs->buf[cs->cdw++] = addr & 0xfffffffc;
-		cs->buf[cs->cdw++] = (addr >> 32UL) & 0xff;
+		radeon_emit(cs, SI_DMA_PACKET(SI_DMA_PACKET_COPY, sub_cmd, size));
+		radeon_emit(cs, base >> 8);
+		radeon_emit(cs, (detile << 31) | (array_mode << 27) |
+				(lbpp << 24) | (bank_h << 21) |
+				(bank_w << 18) | (mt_aspect << 16));
+		radeon_emit(cs, (pitch_tile_max << 0) | ((height - 1) << 16));
+		radeon_emit(cs, (slice_tile_max << 0) | (pipe_config << 26));
+		radeon_emit(cs, (tiled_x << 0) | (tiled_z << 18));
+		radeon_emit(cs, (tiled_y << 0) | (tile_split << 21) | (nbanks << 25) | (mt << 27));
+		radeon_emit(cs, addr & 0xfffffffc);
+		radeon_emit(cs, (addr >> 32UL) & 0xff);
 		copy_height -= cheight;
 		addr += cheight * pitch;
 		tiled_y += cheight;
 	}
+	r600_dma_emit_wait_idle(&ctx->b);
 }
 
-void si_dma_copy(struct pipe_context *ctx,
-		 struct pipe_resource *dst,
-		 unsigned dst_level,
-		 unsigned dstx, unsigned dsty, unsigned dstz,
-		 struct pipe_resource *src,
-		 unsigned src_level,
-		 const struct pipe_box *src_box)
+static void si_dma_copy(struct pipe_context *ctx,
+			struct pipe_resource *dst,
+			unsigned dst_level,
+			unsigned dstx, unsigned dsty, unsigned dstz,
+			struct pipe_resource *src,
+			unsigned src_level,
+			const struct pipe_box *src_box)
 {
 	struct si_context *sctx = (struct si_context *)ctx;
 	struct r600_texture *rsrc = (struct r600_texture*)src;
@@ -230,17 +222,10 @@ void si_dma_copy(struct pipe_context *ctx,
 	 */
 	goto fallback;
 
-	if (src->format != dst->format || src_box->depth > 1 ||
-	    (rdst->dirty_level_mask | rdst->stencil_dirty_level_mask) & (1 << dst_level) ||
-	    rdst->cmask.size || rdst->fmask.size ||
-	    rsrc->cmask.size || rsrc->fmask.size ||
-	    rdst->dcc_offset || rsrc->dcc_offset) {
+	if (src_box->depth > 1 ||
+	    !r600_prepare_for_dma_blit(&sctx->b, rdst, dst_level, dstx, dsty,
+					dstz, rsrc, src_level, src_box))
 		goto fallback;
-	}
-
-	if (rsrc->dirty_level_mask & (1 << src_level)) {
-		ctx->flush_resource(ctx, src);
-	}
 
 	src_x = util_format_get_nblocksx(src->format, src_box->x);
 	dst_x = util_format_get_nblocksx(src->format, dst_x);
@@ -299,4 +284,9 @@ void si_dma_copy(struct pipe_context *ctx,
 fallback:
 	si_resource_copy_region(ctx, dst, dst_level, dstx, dsty, dstz,
 				src, src_level, src_box);
+}
+
+void si_init_dma_functions(struct si_context *sctx)
+{
+	sctx->b.dma_copy = si_dma_copy;
 }

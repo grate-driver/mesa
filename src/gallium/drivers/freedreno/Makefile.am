@@ -25,6 +25,7 @@ libfreedreno_la_SOURCES = \
 
 BUILT_SOURCES := $(ir3_GENERATED_FILES)
 CLEANFILES := $(BUILT_SOURCES)
+EXTRA_DIST = ir3/ir3_nir_trig.py
 
 noinst_PROGRAMS = ir3_compiler
 
@@ -37,6 +38,8 @@ ir3_compiler_LDADD = \
 	libfreedreno.la \
 	$(top_builddir)/src/gallium/auxiliary/libgallium.la \
 	$(top_builddir)/src/compiler/nir/libnir.la \
+	$(top_builddir)/src/compiler/glsl/libstandalone.la \
 	$(top_builddir)/src/util/libmesautil.la \
+	$(top_builddir)/src/mesa/libmesagallium.la \
 	$(GALLIUM_COMMON_LIB_DEPS) \
 	$(FREEDRENO_LIBS)

@@ -149,15 +149,20 @@ unop("imov", tint, "src0")
 unop("ineg", tint, "-src0")
 unop("fneg", tfloat, "-src0")
 unop("inot", tint, "~src0") # invert every bit of the integer
-unop("fnot", tfloat, "(src0 == 0.0f) ? 1.0f : 0.0f")
-unop("fsign", tfloat, "(src0 == 0.0f) ? 0.0f : ((src0 > 0.0f) ? 1.0f : -1.0f)")
+unop("fnot", tfloat, ("bit_size == 64 ? ((src0 == 0.0) ? 1.0 : 0.0f) : " +
+                      "((src0 == 0.0f) ? 1.0f : 0.0f)"))
+unop("fsign", tfloat, ("bit_size == 64 ? " +
+                       "((src0 == 0.0) ? 0.0 : ((src0 > 0.0) ? 1.0 : -1.0)) : " +
+                       "((src0 == 0.0f) ? 0.0f : ((src0 > 0.0f) ? 1.0f : -1.0f))"))
 unop("isign", tint, "(src0 == 0) ? 0 : ((src0 > 0) ? 1 : -1)")
 unop("iabs", tint, "(src0 < 0) ? -src0 : src0")
-unop("fabs", tfloat, "fabsf(src0)")
-unop("fsat", tfloat, "(src0 > 1.0f) ? 1.0f : ((src0 <= 0.0f) ? 0.0f : src0)")
-unop("frcp", tfloat, "1.0f / src0")
-unop("frsq", tfloat, "1.0f / sqrtf(src0)")
-unop("fsqrt", tfloat, "sqrtf(src0)")
+unop("fabs", tfloat, "bit_size == 64 ? fabs(src0) : fabsf(src0)")
+unop("fsat", tfloat, ("bit_size == 64 ? " +
+                      "((src0 > 1.0) ? 1.0 : ((src0 <= 0.0) ? 0.0 : src0)) : " +
+                      "((src0 > 1.0f) ? 1.0f : ((src0 <= 0.0f) ? 0.0f : src0))"))
+unop("frcp", tfloat, "bit_size == 64 ? 1.0 / src0 : 1.0f / src0")
+unop("frsq", tfloat, "bit_size == 64 ? 1.0 / sqrt(src0) : 1.0f / sqrtf(src0)")
+unop("fsqrt", tfloat, "bit_size == 64 ? sqrt(src0) : sqrtf(src0)")
 unop("fexp2", tfloat, "exp2f(src0)")
 unop("flog2", tfloat, "log2f(src0)")
 unop_convert("f2i", tint32, tfloat32, "src0") # Float-to-integer conversion.
@@ -177,8 +182,8 @@ unop_convert("b2i", tint32, tbool, "src0 ? 1 : 0") # Boolean-to-int conversion
 unop_convert("u2f", tfloat32, tuint32, "src0") # Unsigned-to-float conversion.
 unop_convert("u2d", tfloat64, tuint32, "src0") # Unsigned-to-double conversion.
 # double-to-float conversion
-unop_convert("d2f", tfloat32, tfloat64, "src0") # Single to double precision
-unop_convert("f2d", tfloat64, tfloat32, "src0") # Double to single precision
+unop_convert("d2f", tfloat32, tfloat64, "src0") # Double to single precision
+unop_convert("f2d", tfloat64, tfloat32, "src0") # Single to double precision
 
 # Unary floating-point rounding operations.
 

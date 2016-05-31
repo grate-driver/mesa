@@ -26,6 +26,8 @@
 #include <GL/gl.h>
 #include <GL/internal/dri_interface.h>
 
+#include "isl/isl.h"
+
 #include "intel_batchbuffer.h"
 #include "intel_mipmap_tree.h"
 #include "intel_resolve_map.h"
@@ -144,8 +146,7 @@ compute_msaa_layout(struct brw_context *brw, mesa_format format,
  *   by half the block width, and Y coordinates by half the block height.
  */
 void
-intel_get_non_msrt_mcs_alignment(const struct brw_context *brw,
-                                 const struct intel_mipmap_tree *mt,
+intel_get_non_msrt_mcs_alignment(const struct intel_mipmap_tree *mt,
                                  unsigned *width_px, unsigned *height)
 {
    switch (mt->tiling) {
@@ -157,11 +158,6 @@ intel_get_non_msrt_mcs_alignment(const struct brw_context *brw,
       *height = 4;
       break;
    case I915_TILING_X:
-      /* The docs are somewhat confusing with the way the tables are displayed.
-       * However, it does clearly state: "MCS and Lossless compression is
-       * supported for TiledY/TileYs/TileYf non-MSRTs only."
-       */
-      assert(brw->gen < 9);
       *width_px = 64 / mt->cpp;
       *height = 2;
    }
@@ -268,7 +264,8 @@ intel_miptree_supports_non_msrt_fast_clear(struct brw_context *brw,
    if (brw->gen >= 9) {
       mesa_format linear_format = _mesa_get_srgb_format_linear(mt->format);
       const uint32_t brw_format = brw_format_for_mesa_format(linear_format);
-      return brw_losslessly_compressible_format(brw, brw_format);
+      return isl_format_supports_lossless_compression(brw->intelScreen->devinfo,
+                                                      brw_format);
    } else
       return true;
 }
@@ -298,6 +295,32 @@ intel_miptree_is_lossless_compressed(const struct brw_context *brw,
 
    /* And finally distinguish between msaa and single sample case. */
    return mt->num_samples <= 1;
+}
+
+bool
+intel_miptree_supports_lossless_compressed(struct brw_context *brw,
+                                           const struct intel_mipmap_tree *mt)
+{
+   /* For now compression is only enabled for integer formats even though
+    * there exist supported floating point formats also. This is a heuristic
+    * decision based on current public benchmarks. In none of the cases these
+    * formats provided any improvement but a few cases were seen to regress.
+    * Hence these are left to to be enabled in the future when they are known
+    * to improve things.
+    */
+   if (_mesa_get_format_datatype(mt->format) == GL_FLOAT)
+      return false;
+
+   /* Fast clear mechanism and lossless compression go hand in hand. */
+   if (!intel_miptree_supports_non_msrt_fast_clear(brw, mt))
+      return false;
+
+   /* Fast clear can be also used to clear srgb surfaces by using equivalent
+    * linear format. This trick, however, can't be extended to be used with
+    * lossless compression and therefore a check is needed to see if the format
+    * really is linear.
+    */
+   return _mesa_get_srgb_format_linear(mt->format) == mt->format;
 }
 
 /**
@@ -372,6 +395,7 @@ intel_miptree_create_layout(struct brw_context *brw,
    mt->logical_depth0 = depth0;
    mt->fast_clear_state = INTEL_FAST_CLEAR_STATE_NO_MCS;
    mt->disable_aux_buffers = (layout_flags & MIPTREE_LAYOUT_DISABLE_AUX) != 0;
+   mt->is_scanout = (layout_flags & MIPTREE_LAYOUT_FOR_SCANOUT) != 0;
    exec_list_make_empty(&mt->hiz_map);
    mt->cpp = _mesa_get_format_bytes(format);
    mt->num_samples = num_samples;
@@ -562,8 +586,13 @@ intel_miptree_create_layout(struct brw_context *brw,
    } else if (brw->gen >= 9 && num_samples > 1) {
       layout_flags |= MIPTREE_LAYOUT_FORCE_HALIGN16;
    } else {
+      const UNUSED bool is_lossless_compressed_aux =
+         brw->gen >= 9 && num_samples == 1 &&
+         mt->format == MESA_FORMAT_R_UINT32;
+
       /* For now, nothing else has this requirement */
-      assert((layout_flags & MIPTREE_LAYOUT_FORCE_HALIGN16) == 0);
+      assert(is_lossless_compressed_aux ||
+             (layout_flags & MIPTREE_LAYOUT_FORCE_HALIGN16) == 0);
    }
 
    brw_miptree_layout(brw, mt, layout_flags);
@@ -772,7 +801,8 @@ intel_miptree_create(struct brw_context *brw,
    /* If this miptree is capable of supporting fast color clears, set
     * fast_clear_state appropriately to ensure that fast clears will occur.
     * Allocation of the MCS miptree will be deferred until the first fast
-    * clear actually occurs.
+    * clear actually occurs or when compressed single sampled buffer is
+    * written by the GPU for the first time.
     */
    if (intel_tiling_supports_non_msrt_mcs(brw, mt->tiling) &&
        intel_miptree_supports_non_msrt_fast_clear(brw, mt)) {
@@ -873,7 +903,7 @@ intel_update_winsys_renderbuffer_miptree(struct brw_context *intel,
                                                  height,
                                                  1,
                                                  pitch,
-                                                 0);
+                                                 MIPTREE_LAYOUT_FOR_SCANOUT);
    if (!singlesample_mt)
       goto fail;
 
@@ -932,8 +962,8 @@ intel_miptree_create_for_renderbuffer(struct brw_context *brw,
    bool ok;
    GLenum target = num_samples > 1 ? GL_TEXTURE_2D_MULTISAMPLE : GL_TEXTURE_2D;
    const uint32_t layout_flags = MIPTREE_LAYOUT_ACCELERATED_UPLOAD |
-                                 MIPTREE_LAYOUT_TILING_ANY;
-
+                                 MIPTREE_LAYOUT_TILING_ANY |
+                                 MIPTREE_LAYOUT_FOR_SCANOUT;
 
    mt = intel_miptree_create(brw, target, format, 0, 0,
                              width, height, depth, num_samples,
@@ -995,6 +1025,9 @@ intel_miptree_release(struct intel_mipmap_tree **mt)
       }
       intel_miptree_release(&(*mt)->mcs_mt);
       intel_resolve_map_clear(&(*mt)->hiz_map);
+
+      intel_miptree_release(&(*mt)->plane[0]);
+      intel_miptree_release(&(*mt)->plane[1]);
 
       for (i = 0; i < MAX_TEXTURE_LEVELS; i++) {
 	 free((*mt)->level[i].slice);
@@ -1558,7 +1591,7 @@ intel_miptree_alloc_non_msrt_mcs(struct brw_context *brw,
    const mesa_format format = MESA_FORMAT_R_UINT32;
    unsigned block_width_px;
    unsigned block_height;
-   intel_get_non_msrt_mcs_alignment(brw, mt, &block_width_px, &block_height);
+   intel_get_non_msrt_mcs_alignment(mt, &block_width_px, &block_height);
    unsigned width_divisor = block_width_px * 4;
    unsigned height_divisor = block_height * 8;
 
@@ -1577,11 +1610,28 @@ intel_miptree_alloc_non_msrt_mcs(struct brw_context *brw,
    unsigned mcs_height =
       ALIGN(mt->logical_height0, height_divisor) / height_divisor;
    assert(mt->logical_depth0 == 1);
-   uint32_t layout_flags = MIPTREE_LAYOUT_ACCELERATED_UPLOAD |
-                           MIPTREE_LAYOUT_TILING_Y;
+   uint32_t layout_flags = MIPTREE_LAYOUT_TILING_Y;
+
    if (brw->gen >= 8) {
       layout_flags |= MIPTREE_LAYOUT_FORCE_HALIGN16;
    }
+
+   /* On Gen9+ clients are not currently capable of consuming compressed
+    * single-sampled buffers. Disabling compression allows us to skip
+    * resolves.
+    */
+   const bool is_lossless_compressed =
+      brw->gen >= 9 && !mt->is_scanout &&
+      intel_miptree_supports_lossless_compressed(brw, mt);
+
+   /* In case of compression mcs buffer needs to be initialised requiring the
+    * buffer to be immediately mapped to cpu space for writing. Therefore do
+    * not use the gpu access flag which can cause an unnecessary delay if the
+    * backing pages happened to be just used by the GPU.
+    */
+   if (!is_lossless_compressed)
+      layout_flags |= MIPTREE_LAYOUT_ACCELERATED_UPLOAD;
+
    mt->mcs_mt = miptree_create(brw,
                                mt->target,
                                format,
@@ -1593,9 +1643,68 @@ intel_miptree_alloc_non_msrt_mcs(struct brw_context *brw,
                                0 /* num_samples */,
                                layout_flags);
 
+   /* From Gen9 onwards single-sampled (non-msrt) auxiliary buffers are
+    * used for lossless compression which requires similar initialisation
+    * as multi-sample compression.
+    */
+   if (is_lossless_compressed) {
+      /* Hardware sets the auxiliary buffer to all zeroes when it does full
+       * resolve. Initialize it accordingly in case the first renderer is
+       * cpu (or other none compression aware party).
+       *
+       * This is also explicitly stated in the spec (MCS Buffer for Render
+       * Target(s)):
+       *   "If Software wants to enable Color Compression without Fast clear,
+       *    Software needs to initialize MCS with zeros."
+       */
+      intel_miptree_init_mcs(brw, mt, 0);
+      mt->fast_clear_state = INTEL_FAST_CLEAR_STATE_RESOLVED;
+      mt->msaa_layout = INTEL_MSAA_LAYOUT_CMS;
+   }
+
    return mt->mcs_mt;
 }
 
+void
+intel_miptree_prepare_mcs(struct brw_context *brw,
+                          struct intel_mipmap_tree *mt)
+{
+   if (mt->mcs_mt)
+      return;
+
+   if (brw->gen < 9)
+      return;
+
+   /* Single sample compression is represented re-using msaa compression
+    * layout type: "Compressed Multisampled Surfaces".
+    */
+   if (mt->msaa_layout != INTEL_MSAA_LAYOUT_CMS || mt->num_samples > 1)
+      return;
+
+   /* Clients are not currently capable of consuming compressed
+    * single-sampled buffers.
+    */
+   if (mt->is_scanout)
+      return;
+
+   assert(intel_tiling_supports_non_msrt_mcs(brw, mt->tiling) ||
+          intel_miptree_supports_lossless_compressed(brw, mt));
+
+   /* Consider if lossless compression is supported but the needed
+    * auxiliary buffer doesn't exist yet.
+    *
+    * Failing to allocate the auxiliary buffer means running out of
+    * memory. The pointer to the aux miptree is left NULL which should
+    * signal non-compressed behavior.
+    */
+   if (!intel_miptree_alloc_non_msrt_mcs(brw, mt)) {
+      _mesa_warning(NULL,
+                    "Failed to allocated aux buffer for lossless"
+                    " compressed %p %u:%u %s\n",
+                    mt, mt->logical_width0, mt->logical_height0,
+                    _mesa_get_format_name(mt->format));
+   }
+}
 
 /**
  * Helper for intel_miptree_alloc_hiz() that sets
@@ -2170,32 +2279,18 @@ intel_miptree_updownsample(struct brw_context *brw,
                            struct intel_mipmap_tree *src,
                            struct intel_mipmap_tree *dst)
 {
-   /* There is support for only up to eight samples. */
-   const bool use_blorp = src->num_samples <= 8 && dst->num_samples <= 8;
-
-   if (use_blorp) {
-      brw_blorp_blit_miptrees(brw,
-                              src, 0 /* level */, 0 /* layer */,
-                              src->format, SWIZZLE_XYZW,
-                              dst, 0 /* level */, 0 /* layer */, dst->format,
-                              0, 0,
-                              src->logical_width0, src->logical_height0,
-                              0, 0,
-                              dst->logical_width0, dst->logical_height0,
-                              GL_NEAREST, false, false /*mirror x, y*/,
-                              false, false);
-   } else if (src->format == MESA_FORMAT_S_UINT8) {
-      brw_meta_stencil_updownsample(brw, src, dst);
-   } else {
-      brw_meta_updownsample(brw, src, dst);
-   }
+   brw_blorp_blit_miptrees(brw,
+                           src, 0 /* level */, 0 /* layer */,
+                           src->format, SWIZZLE_XYZW,
+                           dst, 0 /* level */, 0 /* layer */, dst->format,
+                           0, 0,
+                           src->logical_width0, src->logical_height0,
+                           0, 0,
+                           dst->logical_width0, dst->logical_height0,
+                           GL_NEAREST, false, false /*mirror x, y*/,
+                           false, false);
 
    if (src->stencil_mt) {
-      if (!use_blorp) {
-         brw_meta_stencil_updownsample(brw, src->stencil_mt, dst);
-         return;
-      }
-
       brw_blorp_blit_miptrees(brw,
                               src->stencil_mt, 0 /* level */, 0 /* layer */,
                               src->stencil_mt->format, SWIZZLE_XYZW,

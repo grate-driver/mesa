@@ -27,6 +27,7 @@
 static void
 apply_dynamic_offsets_block(nir_block *block, nir_builder *b,
                             const struct anv_pipeline_layout *layout,
+                            bool add_bounds_checks,
                             uint32_t indices_start)
 {
    struct anv_descriptor_set_layout *set_layout;
@@ -81,18 +82,22 @@ apply_dynamic_offsets_block(nir_block *block, nir_builder *b,
       nir_builder_instr_insert(b, &offset_load->instr);
 
       nir_src *offset_src = nir_get_io_offset_src(intrin);
-      nir_ssa_def *new_offset = nir_iadd(b, offset_src->ssa,
-                                         &offset_load->dest.ssa);
+      nir_ssa_def *old_offset = nir_ssa_for_src(b, *offset_src, 1);
+      nir_ssa_def *new_offset = nir_iadd(b, old_offset, &offset_load->dest.ssa);
+      nir_instr_rewrite_src(&intrin->instr, offset_src,
+                            nir_src_for_ssa(new_offset));
+
+      if (!add_bounds_checks)
+         continue;
 
       /* In order to avoid out-of-bounds access, we predicate */
       nir_ssa_def *pred = nir_uge(b, nir_channel(b, &offset_load->dest.ssa, 1),
-                                  offset_src->ssa);
+                                  old_offset);
       nir_if *if_stmt = nir_if_create(b->shader);
       if_stmt->condition = nir_src_for_ssa(pred);
       nir_cf_node_insert(b->cursor, &if_stmt->cf_node);
 
       nir_instr_remove(&intrin->instr);
-      *offset_src = nir_src_for_ssa(new_offset);
       nir_instr_insert_after_cf_list(&if_stmt->then_list, &intrin->instr);
 
       if (intrin->intrinsic != nir_intrinsic_store_ssbo) {
@@ -137,6 +142,8 @@ anv_nir_apply_dynamic_offsets(struct anv_pipeline *pipeline,
    if (!layout || !layout->stage[shader->stage].has_dynamic_offsets)
       return;
 
+   const bool add_bounds_checks = pipeline->device->robust_buffer_access;
+
    nir_foreach_function(function, shader) {
       if (!function->impl)
          continue;
@@ -146,7 +153,7 @@ anv_nir_apply_dynamic_offsets(struct anv_pipeline *pipeline,
 
       nir_foreach_block(block, function->impl) {
          apply_dynamic_offsets_block(block, &builder, pipeline->layout,
-                                     shader->num_uniforms);
+                                     add_bounds_checks, shader->num_uniforms);
       }
 
       nir_metadata_preserve(function->impl, nir_metadata_block_index |

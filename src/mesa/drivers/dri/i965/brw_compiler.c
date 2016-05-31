@@ -27,61 +27,18 @@
 #include "main/errors.h"
 #include "util/debug.h"
 
-static void
-shader_debug_log_mesa(void *data, const char *fmt, ...)
-{
-   struct brw_context *brw = (struct brw_context *)data;
-   va_list args;
-
-   va_start(args, fmt);
-   GLuint msg_id = 0;
-   _mesa_gl_vdebug(&brw->ctx, &msg_id,
-                   MESA_DEBUG_SOURCE_SHADER_COMPILER,
-                   MESA_DEBUG_TYPE_OTHER,
-                   MESA_DEBUG_SEVERITY_NOTIFICATION, fmt, args);
-   va_end(args);
-}
-
-static void
-shader_perf_log_mesa(void *data, const char *fmt, ...)
-{
-   struct brw_context *brw = (struct brw_context *)data;
-
-   va_list args;
-   va_start(args, fmt);
-
-   if (unlikely(INTEL_DEBUG & DEBUG_PERF)) {
-      va_list args_copy;
-      va_copy(args_copy, args);
-      vfprintf(stderr, fmt, args_copy);
-      va_end(args_copy);
-   }
-
-   if (brw->perf_debug) {
-      GLuint msg_id = 0;
-      _mesa_gl_vdebug(&brw->ctx, &msg_id,
-                      MESA_DEBUG_SOURCE_SHADER_COMPILER,
-                      MESA_DEBUG_TYPE_PERFORMANCE,
-                      MESA_DEBUG_SEVERITY_MEDIUM, fmt, args);
-   }
-   va_end(args);
-}
-
 #define COMMON_OPTIONS                                                        \
-   /* In order to help allow for better CSE at the NIR level we tell NIR to   \
-    * split all ffma instructions during opt_algebraic and we then re-combine \
-    * them as a later step.                                                   \
-    */                                                                        \
-   .lower_ffma = true,                                                        \
    .lower_sub = true,                                                         \
    .lower_fdiv = true,                                                        \
    .lower_scmp = true,                                                        \
    .lower_fmod32 = true,                                                      \
+   .lower_fmod64 = false,                                                     \
    .lower_bitfield_extract = true,                                            \
    .lower_bitfield_insert = true,                                             \
    .lower_uadd_carry = true,                                                  \
    .lower_usub_borrow = true,                                                 \
    .lower_fdiv = true,                                                        \
+   .lower_flrp64 = true,                                                      \
    .native_integers = true,                                                   \
    .vertex_id_zero_based = true
 
@@ -142,8 +99,6 @@ brw_compiler_create(void *mem_ctx, const struct brw_device_info *devinfo)
    struct brw_compiler *compiler = rzalloc(mem_ctx, struct brw_compiler);
 
    compiler->devinfo = devinfo;
-   compiler->shader_debug_log = shader_debug_log_mesa;
-   compiler->shader_perf_log = shader_perf_log_mesa;
 
    brw_fs_alloc_reg_sets(compiler);
    brw_vec4_alloc_reg_set(compiler);
@@ -153,11 +108,11 @@ brw_compiler_create(void *mem_ctx, const struct brw_device_info *devinfo)
    compiler->scalar_stage[MESA_SHADER_VERTEX] =
       devinfo->gen >= 8 && !(INTEL_DEBUG & DEBUG_VEC4VS);
    compiler->scalar_stage[MESA_SHADER_TESS_CTRL] =
-      devinfo->gen >= 8 && env_var_as_boolean("INTEL_SCALAR_TCS", false);
+      devinfo->gen >= 8 && env_var_as_boolean("INTEL_SCALAR_TCS", true);
    compiler->scalar_stage[MESA_SHADER_TESS_EVAL] =
       devinfo->gen >= 8 && env_var_as_boolean("INTEL_SCALAR_TES", true);
    compiler->scalar_stage[MESA_SHADER_GEOMETRY] =
-      devinfo->gen >= 8 && env_var_as_boolean("INTEL_SCALAR_GS", false);
+      devinfo->gen >= 8 && env_var_as_boolean("INTEL_SCALAR_GS", true);
    compiler->scalar_stage[MESA_SHADER_FRAGMENT] = true;
    compiler->scalar_stage[MESA_SHADER_COMPUTE] = true;
 
@@ -171,7 +126,7 @@ brw_compiler_create(void *mem_ctx, const struct brw_device_info *devinfo)
       compiler->glsl_compiler_options[i].EmitNoMainReturn = true;
       compiler->glsl_compiler_options[i].EmitNoIndirectInput = true;
       compiler->glsl_compiler_options[i].EmitNoIndirectUniform = false;
-      compiler->glsl_compiler_options[i].LowerClipDistance = true;
+      compiler->glsl_compiler_options[i].LowerCombinedClipCullDistance = true;
 
       bool is_scalar = compiler->scalar_stage[i];
 
@@ -191,6 +146,7 @@ brw_compiler_create(void *mem_ctx, const struct brw_device_info *devinfo)
       }
 
       compiler->glsl_compiler_options[i].LowerBufferInterfaceBlocks = true;
+      compiler->glsl_compiler_options[i].ClampBlockIndicesToArrayBounds = true;
    }
 
    compiler->glsl_compiler_options[MESA_SHADER_TESS_CTRL].EmitNoIndirectInput = false;

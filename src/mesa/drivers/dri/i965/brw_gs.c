@@ -119,9 +119,7 @@ brw_codegen_gs_prog(struct brw_context *brw,
     */
    struct gl_shader *gs = prog->_LinkedShaders[MESA_SHADER_GEOMETRY];
    struct brw_shader *bgs = (struct brw_shader *) gs;
-   int param_count = gp->program.Base.nir->num_uniforms;
-   if (!compiler->scalar_stage[MESA_SHADER_GEOMETRY])
-      param_count *= 4;
+   int param_count = gp->program.Base.nir->num_uniforms / 4;
 
    prog_data.base.base.param =
       rzalloc_array(NULL, const gl_constant_value *, param_count);
@@ -138,9 +136,13 @@ brw_codegen_gs_prog(struct brw_context *brw,
 
    GLbitfield64 outputs_written = gp->program.Base.OutputsWritten;
 
+   prog_data.base.cull_distance_mask =
+      ((1 << gp->program.Base.CullDistanceArraySize) - 1) <<
+      gp->program.Base.ClipDistanceArraySize;
+
    brw_compute_vue_map(brw->intelScreen->devinfo,
                        &prog_data.base.vue_map, outputs_written,
-                       prog ? prog->SeparateShader : false);
+                       prog->SeparateShader);
 
    if (unlikely(INTEL_DEBUG & DEBUG_GS))
       brw_dump_ir("geometry", prog, gs, NULL);
@@ -195,7 +197,7 @@ brw_codegen_gs_prog(struct brw_context *brw,
 }
 
 static bool
-brw_gs_state_dirty(struct brw_context *brw)
+brw_gs_state_dirty(const struct brw_context *brw)
 {
    return brw_state_dirty(brw,
                           _NEW_TEXTURE,

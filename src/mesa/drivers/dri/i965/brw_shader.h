@@ -90,6 +90,7 @@ struct backend_reg : private brw_reg
    using brw_reg::width;
    using brw_reg::hstride;
 
+   using brw_reg::df;
    using brw_reg::f;
    using brw_reg::d;
    using brw_reg::ud;
@@ -208,6 +209,7 @@ public:
    bool debug_enabled;
    const char *stage_name;
    const char *stage_abbrev;
+   bool is_passthrough_shader;
 
    brw::simple_allocator alloc;
 
@@ -291,7 +293,9 @@ struct gl_shader *brw_new_shader(struct gl_context *ctx, GLuint name, GLuint typ
 
 int type_size_scalar(const struct glsl_type *type);
 int type_size_vec4(const struct glsl_type *type);
+int type_size_dvec4(const struct glsl_type *type);
 int type_size_vec4_times_4(const struct glsl_type *type);
+int type_size_vs_input(const struct glsl_type *type);
 
 unsigned tesslevel_outer_components(GLenum tes_primitive_mode);
 unsigned tesslevel_inner_components(GLenum tes_primitive_mode);

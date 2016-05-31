@@ -136,6 +136,82 @@ genX(cmd_buffer_emit_state_base_address)(struct anv_cmd_buffer *cmd_buffer)
    }
 }
 
+void
+genX(cmd_buffer_apply_pipe_flushes)(struct anv_cmd_buffer *cmd_buffer)
+{
+   enum anv_pipe_bits bits = cmd_buffer->state.pending_pipe_bits;
+
+   /* Flushes are pipelined while invalidations are handled immediately.
+    * Therefore, if we're flushing anything then we need to schedule a stall
+    * before any invalidations can happen.
+    */
+   if (bits & ANV_PIPE_FLUSH_BITS)
+      bits |= ANV_PIPE_NEEDS_CS_STALL_BIT;
+
+   /* If we're going to do an invalidate and we have a pending CS stall that
+    * has yet to be resolved, we do the CS stall now.
+    */
+   if ((bits & ANV_PIPE_INVALIDATE_BITS) &&
+       (bits & ANV_PIPE_NEEDS_CS_STALL_BIT)) {
+      bits |= ANV_PIPE_CS_STALL_BIT;
+      bits &= ~ANV_PIPE_NEEDS_CS_STALL_BIT;
+   }
+
+   if (bits & (ANV_PIPE_FLUSH_BITS | ANV_PIPE_CS_STALL_BIT)) {
+      anv_batch_emit(&cmd_buffer->batch, GENX(PIPE_CONTROL), pipe) {
+         pipe.DepthCacheFlushEnable = bits & ANV_PIPE_DEPTH_CACHE_FLUSH_BIT;
+         pipe.DCFlushEnable = bits & ANV_PIPE_DATA_CACHE_FLUSH_BIT;
+         pipe.RenderTargetCacheFlushEnable =
+            bits & ANV_PIPE_RENDER_TARGET_CACHE_FLUSH_BIT;
+
+         pipe.DepthStallEnable = bits & ANV_PIPE_DEPTH_STALL_BIT;
+         pipe.CommandStreamerStallEnable = bits & ANV_PIPE_CS_STALL_BIT;
+         pipe.StallAtPixelScoreboard = bits & ANV_PIPE_STALL_AT_SCOREBOARD_BIT;
+
+         /*
+          * According to the Broadwell documentation, any PIPE_CONTROL with the
+          * "Command Streamer Stall" bit set must also have another bit set,
+          * with five different options:
+          *
+          *  - Render Target Cache Flush
+          *  - Depth Cache Flush
+          *  - Stall at Pixel Scoreboard
+          *  - Post-Sync Operation
+          *  - Depth Stall
+          *  - DC Flush Enable
+          *
+          * I chose "Stall at Pixel Scoreboard" since that's what we use in
+          * mesa and it seems to work fine. The choice is fairly arbitrary.
+          */
+         if ((bits & ANV_PIPE_CS_STALL_BIT) &&
+             !(bits & (ANV_PIPE_FLUSH_BITS | ANV_PIPE_DEPTH_STALL_BIT |
+                       ANV_PIPE_STALL_AT_SCOREBOARD_BIT)))
+            pipe.StallAtPixelScoreboard = true;
+      }
+
+      bits &= ~(ANV_PIPE_FLUSH_BITS | ANV_PIPE_CS_STALL_BIT);
+   }
+
+   if (bits & ANV_PIPE_INVALIDATE_BITS) {
+      anv_batch_emit(&cmd_buffer->batch, GENX(PIPE_CONTROL), pipe) {
+         pipe.StateCacheInvalidationEnable =
+            bits & ANV_PIPE_STATE_CACHE_INVALIDATE_BIT;
+         pipe.ConstantCacheInvalidationEnable =
+            bits & ANV_PIPE_CONSTANT_CACHE_INVALIDATE_BIT;
+         pipe.VFCacheInvalidationEnable =
+            bits & ANV_PIPE_VF_CACHE_INVALIDATE_BIT;
+         pipe.TextureCacheInvalidationEnable =
+            bits & ANV_PIPE_TEXTURE_CACHE_INVALIDATE_BIT;
+         pipe.InstructionCacheInvalidateEnable =
+            bits & ANV_PIPE_INSTRUCTION_CACHE_INVALIDATE_BIT;
+      }
+
+      bits &= ~ANV_PIPE_INVALIDATE_BITS;
+   }
+
+   cmd_buffer->state.pending_pipe_bits = bits;
+}
+
 void genX(CmdPipelineBarrier)(
     VkCommandBuffer                             commandBuffer,
     VkPipelineStageFlags                        srcStageMask,
@@ -149,7 +225,7 @@ void genX(CmdPipelineBarrier)(
     const VkImageMemoryBarrier*                 pImageMemoryBarriers)
 {
    ANV_FROM_HANDLE(anv_cmd_buffer, cmd_buffer, commandBuffer);
-   uint32_t b, *dw;
+   uint32_t b;
 
    /* XXX: Right now, we're really dumb and just flush whatever categories
     * the app asks for.  One of these days we may make this a bit better
@@ -173,105 +249,116 @@ void genX(CmdPipelineBarrier)(
       dst_flags |= pImageMemoryBarriers[i].dstAccessMask;
    }
 
-   /* Mask out the Source access flags we care about */
-   const uint32_t src_mask =
-      VK_ACCESS_SHADER_WRITE_BIT |
-      VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT |
-      VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT |
-      VK_ACCESS_TRANSFER_WRITE_BIT;
-
-   src_flags = src_flags & src_mask;
-
-   /* Mask out the destination access flags we care about */
-   const uint32_t dst_mask =
-      VK_ACCESS_INDIRECT_COMMAND_READ_BIT |
-      VK_ACCESS_INDEX_READ_BIT |
-      VK_ACCESS_VERTEX_ATTRIBUTE_READ_BIT |
-      VK_ACCESS_UNIFORM_READ_BIT |
-      VK_ACCESS_SHADER_READ_BIT |
-      VK_ACCESS_COLOR_ATTACHMENT_READ_BIT |
-      VK_ACCESS_TRANSFER_READ_BIT;
-
-   dst_flags = dst_flags & dst_mask;
-
-   /* The src flags represent how things were used previously.  This is
-    * what we use for doing flushes.
-    */
-   struct GENX(PIPE_CONTROL) flush_cmd = {
-      GENX(PIPE_CONTROL_header),
-      .PostSyncOperation = NoWrite,
-   };
+   enum anv_pipe_bits pipe_bits = 0;
 
    for_each_bit(b, src_flags) {
       switch ((VkAccessFlagBits)(1 << b)) {
       case VK_ACCESS_SHADER_WRITE_BIT:
-         flush_cmd.DCFlushEnable = true;
+         pipe_bits |= ANV_PIPE_DATA_CACHE_FLUSH_BIT;
          break;
       case VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT:
-         flush_cmd.RenderTargetCacheFlushEnable = true;
+         pipe_bits |= ANV_PIPE_RENDER_TARGET_CACHE_FLUSH_BIT;
          break;
       case VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT:
-         flush_cmd.DepthCacheFlushEnable = true;
+         pipe_bits |= ANV_PIPE_DEPTH_CACHE_FLUSH_BIT;
          break;
       case VK_ACCESS_TRANSFER_WRITE_BIT:
-         flush_cmd.RenderTargetCacheFlushEnable = true;
-         flush_cmd.DepthCacheFlushEnable = true;
+         pipe_bits |= ANV_PIPE_RENDER_TARGET_CACHE_FLUSH_BIT;
+         pipe_bits |= ANV_PIPE_DEPTH_CACHE_FLUSH_BIT;
          break;
       default:
-         unreachable("should've masked this out by now");
+         break; /* Nothing to do */
       }
    }
-
-   /* If we end up doing two PIPE_CONTROLs, the first, flusing one also has to
-    * stall and wait for the flushing to finish, so we don't re-dirty the
-    * caches with in-flight rendering after the second PIPE_CONTROL
-    * invalidates.
-    */
-
-   if (dst_flags)
-      flush_cmd.CommandStreamerStallEnable = true;
-
-   if (src_flags && dst_flags) {
-      dw = anv_batch_emit_dwords(&cmd_buffer->batch, GENX(PIPE_CONTROL_length));
-      GENX(PIPE_CONTROL_pack)(&cmd_buffer->batch, dw, &flush_cmd);
-   }
-
-   /* The dst flags represent how things will be used in the future.  This
-    * is what we use for doing cache invalidations.
-    */
-   struct GENX(PIPE_CONTROL) invalidate_cmd = {
-      GENX(PIPE_CONTROL_header),
-      .PostSyncOperation = NoWrite,
-   };
 
    for_each_bit(b, dst_flags) {
       switch ((VkAccessFlagBits)(1 << b)) {
       case VK_ACCESS_INDIRECT_COMMAND_READ_BIT:
       case VK_ACCESS_INDEX_READ_BIT:
       case VK_ACCESS_VERTEX_ATTRIBUTE_READ_BIT:
-         invalidate_cmd.VFCacheInvalidationEnable = true;
+         pipe_bits |= ANV_PIPE_VF_CACHE_INVALIDATE_BIT;
          break;
       case VK_ACCESS_UNIFORM_READ_BIT:
-         invalidate_cmd.ConstantCacheInvalidationEnable = true;
-         /* fallthrough */
+         pipe_bits |= ANV_PIPE_CONSTANT_CACHE_INVALIDATE_BIT;
+         pipe_bits |= ANV_PIPE_TEXTURE_CACHE_INVALIDATE_BIT;
+         break;
       case VK_ACCESS_SHADER_READ_BIT:
-         invalidate_cmd.TextureCacheInvalidationEnable = true;
-         break;
       case VK_ACCESS_COLOR_ATTACHMENT_READ_BIT:
-         invalidate_cmd.TextureCacheInvalidationEnable = true;
-         break;
       case VK_ACCESS_TRANSFER_READ_BIT:
-         invalidate_cmd.TextureCacheInvalidationEnable = true;
+         pipe_bits |= ANV_PIPE_TEXTURE_CACHE_INVALIDATE_BIT;
          break;
       default:
-         unreachable("should've masked this out by now");
+         break; /* Nothing to do */
       }
    }
 
-   if (dst_flags) {
-      dw = anv_batch_emit_dwords(&cmd_buffer->batch, GENX(PIPE_CONTROL_length));
-      GENX(PIPE_CONTROL_pack)(&cmd_buffer->batch, dw, &invalidate_cmd);
+   cmd_buffer->state.pending_pipe_bits |= pipe_bits;
+}
+
+static void
+cmd_buffer_alloc_push_constants(struct anv_cmd_buffer *cmd_buffer)
+{
+   VkShaderStageFlags stages = cmd_buffer->state.pipeline->active_stages;
+
+   /* In order to avoid thrash, we assume that vertex and fragment stages
+    * always exist.  In the rare case where one is missing *and* the other
+    * uses push concstants, this may be suboptimal.  However, avoiding stalls
+    * seems more important.
+    */
+   stages |= VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_VERTEX_BIT;
+
+   if (stages == cmd_buffer->state.push_constant_stages)
+      return;
+
+#if GEN_GEN >= 8
+   const unsigned push_constant_kb = 32;
+#elif GEN_IS_HASWELL
+   const unsigned push_constant_kb = cmd_buffer->device->info.gt == 3 ? 32 : 16;
+#else
+   const unsigned push_constant_kb = 16;
+#endif
+
+   const unsigned num_stages =
+      _mesa_bitcount(stages & VK_SHADER_STAGE_ALL_GRAPHICS);
+   unsigned size_per_stage = push_constant_kb / num_stages;
+
+   /* Broadwell+ and Haswell gt3 require that the push constant sizes be in
+    * units of 2KB.  Incidentally, these are the same platforms that have
+    * 32KB worth of push constant space.
+    */
+   if (push_constant_kb == 32)
+      size_per_stage &= ~1u;
+
+   uint32_t kb_used = 0;
+   for (int i = MESA_SHADER_VERTEX; i < MESA_SHADER_FRAGMENT; i++) {
+      unsigned push_size = (stages & (1 << i)) ? size_per_stage : 0;
+      anv_batch_emit(&cmd_buffer->batch,
+                     GENX(3DSTATE_PUSH_CONSTANT_ALLOC_VS), alloc) {
+         alloc._3DCommandSubOpcode  = 18 + i;
+         alloc.ConstantBufferOffset = (push_size > 0) ? kb_used : 0;
+         alloc.ConstantBufferSize   = push_size;
+      }
+      kb_used += push_size;
    }
+
+   anv_batch_emit(&cmd_buffer->batch,
+                  GENX(3DSTATE_PUSH_CONSTANT_ALLOC_PS), alloc) {
+      alloc.ConstantBufferOffset = kb_used;
+      alloc.ConstantBufferSize = push_constant_kb - kb_used;
+   }
+
+   cmd_buffer->state.push_constant_stages = stages;
+
+   /* From the BDW PRM for 3DSTATE_PUSH_CONSTANT_ALLOC_VS:
+    *
+    *    "The 3DSTATE_CONSTANT_VS must be reprogrammed prior to
+    *    the next 3DPRIMITIVE command after programming the
+    *    3DSTATE_PUSH_CONSTANT_ALLOC_VS"
+    *
+    * Since 3DSTATE_PUSH_CONSTANT_ALLOC_VS is programmed as part of
+    * pipeline setup, we need to dirty push constants.
+    */
+   cmd_buffer->state.push_constants_dirty |= VK_SHADER_STAGE_ALL_GRAPHICS;
 }
 
 static uint32_t
@@ -330,18 +417,7 @@ genX(cmd_buffer_flush_state)(struct anv_cmd_buffer *cmd_buffer)
 
    assert((pipeline->active_stages & VK_SHADER_STAGE_COMPUTE_BIT) == 0);
 
-#if GEN_GEN >= 8
-   /* FIXME (jason): Currently, the config_l3 function causes problems on
-    * Haswell and prior if you have a kernel older than 4.4.  In order to
-    * work, it requires a couple of registers be white-listed in the
-    * command parser and they weren't added until 4.4.  What we should do
-    * is check the command parser version and make it a no-op if your
-    * command parser is either off or too old.  Compute won't work 100%,
-    * but at least 3-D will.  In the mean time, I'm going to make this
-    * gen8+ only so that we can get Haswell working again.
-    */
-   genX(cmd_buffer_config_l3)(cmd_buffer, false);
-#endif
+   genX(cmd_buffer_config_l3)(cmd_buffer, pipeline);
 
    genX(flush_pipeline_select_3d)(cmd_buffer);
 
@@ -395,16 +471,10 @@ genX(cmd_buffer_flush_state)(struct anv_cmd_buffer *cmd_buffer)
 
       anv_batch_emit_batch(&cmd_buffer->batch, &pipeline->batch);
 
-      /* From the BDW PRM for 3DSTATE_PUSH_CONSTANT_ALLOC_VS:
-       *
-       *    "The 3DSTATE_CONSTANT_VS must be reprogrammed prior to
-       *    the next 3DPRIMITIVE command after programming the
-       *    3DSTATE_PUSH_CONSTANT_ALLOC_VS"
-       *
-       * Since 3DSTATE_PUSH_CONSTANT_ALLOC_VS is programmed as part of
-       * pipeline setup, we need to dirty push constants.
+      /* If the pipeline changed, we may need to re-allocate push constant
+       * space in the URB.
        */
-      cmd_buffer->state.push_constants_dirty |= VK_SHADER_STAGE_ALL_GRAPHICS;
+      cmd_buffer_alloc_push_constants(cmd_buffer);
    }
 
 #if GEN_GEN <= 7
@@ -462,6 +532,8 @@ genX(cmd_buffer_flush_state)(struct anv_cmd_buffer *cmd_buffer)
       gen7_cmd_buffer_emit_scissor(cmd_buffer);
 
    genX(cmd_buffer_flush_dynamic_state)(cmd_buffer);
+
+   genX(cmd_buffer_apply_pipe_flushes)(cmd_buffer);
 }
 
 static void
@@ -927,10 +999,9 @@ cmd_buffer_emit_depth_stencil(struct anv_cmd_buffer *cmd_buffer)
    const struct anv_image_view *iview =
       anv_cmd_buffer_get_depth_stencil_view(cmd_buffer);
    const struct anv_image *image = iview ? iview->image : NULL;
-   const struct anv_format *anv_format =
-      iview ? anv_format_for_vk_format(iview->vk_format) : NULL;
-   const bool has_depth = iview && anv_format->has_depth;
-   const bool has_stencil = iview && anv_format->has_stencil;
+   const bool has_depth = image && (image->aspects & VK_IMAGE_ASPECT_DEPTH_BIT);
+   const bool has_stencil =
+      image && (image->aspects & VK_IMAGE_ASPECT_STENCIL_BIT);
 
    /* FIXME: Implement the PMA stall W/A */
    /* FIXME: Width and Height are wrong */
@@ -1052,22 +1123,10 @@ void genX(CmdBeginRenderPass)(
 
    cmd_buffer->state.framebuffer = framebuffer;
    cmd_buffer->state.pass = pass;
+   cmd_buffer->state.render_area = pRenderPassBegin->renderArea;
    anv_cmd_state_setup_attachments(cmd_buffer, pRenderPassBegin);
 
    genX(flush_pipeline_select_3d)(cmd_buffer);
-
-   const VkRect2D *render_area = &pRenderPassBegin->renderArea;
-
-   anv_batch_emit(&cmd_buffer->batch, GENX(3DSTATE_DRAWING_RECTANGLE), r) {
-      r.ClippedDrawingRectangleYMin = MAX2(render_area->offset.y, 0);
-      r.ClippedDrawingRectangleXMin = MAX2(render_area->offset.x, 0);
-      r.ClippedDrawingRectangleYMax =
-         render_area->offset.y + render_area->extent.height - 1;
-      r.ClippedDrawingRectangleXMax =
-         render_area->offset.x + render_area->extent.width - 1;
-      r.DrawingRectangleOriginY     = 0;
-      r.DrawingRectangleOriginX     = 0;
-   }
 
    genX(cmd_buffer_set_subpass)(cmd_buffer, pass->subpasses);
    anv_cmd_buffer_clear_subpass(cmd_buffer);

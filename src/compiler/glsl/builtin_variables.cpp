@@ -302,7 +302,7 @@ public:
    const glsl_type *construct_interface_instance() const;
 
 private:
-   glsl_struct_field fields[10];
+   glsl_struct_field fields[11];
    unsigned num_fields;
 };
 
@@ -527,6 +527,16 @@ builtin_variable_generator::add_variable(const char *name,
    return var;
 }
 
+extern "C" const struct gl_builtin_uniform_desc *
+_mesa_glsl_get_builtin_uniform_desc(const char *name)
+{
+   for (unsigned i = 0; _mesa_builtin_uniform_desc[i].name != NULL; i++) {
+      if (strcmp(_mesa_builtin_uniform_desc[i].name, name) == 0) {
+         return &_mesa_builtin_uniform_desc[i];
+      }
+   }
+   return NULL;
+}
 
 ir_variable *
 builtin_variable_generator::add_uniform(const glsl_type *type,
@@ -534,16 +544,9 @@ builtin_variable_generator::add_uniform(const glsl_type *type,
 {
    ir_variable *const uni = add_variable(name, type, ir_var_uniform, -1);
 
-   unsigned i;
-   for (i = 0; _mesa_builtin_uniform_desc[i].name != NULL; i++) {
-      if (strcmp(_mesa_builtin_uniform_desc[i].name, name) == 0) {
-	 break;
-      }
-   }
-
-   assert(_mesa_builtin_uniform_desc[i].name != NULL);
    const struct gl_builtin_uniform_desc* const statevar =
-      &_mesa_builtin_uniform_desc[i];
+      _mesa_glsl_get_builtin_uniform_desc(name);
+   assert(statevar != NULL);
 
    const unsigned array_count = type->is_array() ? type->length : 1;
 
@@ -671,9 +674,16 @@ builtin_variable_generator::generate_constants()
                 state->Const.MaxProgramTexelOffset);
    }
 
-   if (state->is_version(130, 0)) {
+   if (state->has_clip_distance()) {
       add_const("gl_MaxClipDistances", state->Const.MaxClipPlanes);
+   }
+   if (state->is_version(130, 0)) {
       add_const("gl_MaxVaryingComponents", state->ctx->Const.MaxVarying * 4);
+   }
+   if (state->has_cull_distance()) {
+      add_const("gl_MaxCullDistances", state->Const.MaxClipPlanes);
+      add_const("gl_MaxCombinedClipAndCullDistances",
+                state->Const.MaxClipPlanes);
    }
 
    if (state->has_geometry_shader()) {
@@ -1242,9 +1252,13 @@ builtin_variable_generator::generate_varyings()
       }
    }
 
-   if (state->is_version(130, 0)) {
+   if (state->has_clip_distance()) {
        add_varying(VARYING_SLOT_CLIP_DIST0, array(float_t, 0),
                    "gl_ClipDistance");
+   }
+   if (state->has_cull_distance()) {
+      add_varying(VARYING_SLOT_CULL_DIST0, array(float_t, 0),
+                   "gl_CullDistance");
    }
 
    if (compatibility) {
