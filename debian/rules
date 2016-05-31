@@ -32,6 +32,7 @@ include debian/not-installed
 
 DRI_DRIVERS =
 GALLIUM_DRIVERS =
+VULKAN_DRIVERS =
 EGL_DISPLAYS = x11
 
 confflags_DRI3 = --disable-dri3
@@ -71,6 +72,7 @@ else
   # Build intel drivers on archs where libdrm-intel is installed
   ifneq (,$(filter $(DEB_HOST_ARCH),amd64 i386 kfreebsd-amd64 kfreebsd-i386 x32))
 	DRI_DRIVERS += i915 i965
+	VULKAN_DRIVERS += intel
   endif
 
   ifeq (,$(filter $(DEB_HOST_ARCH), s390 s390x))
@@ -108,6 +110,7 @@ confflags += \
 	--with-dri-drivers="$(DRI_DRIVERS)" \
 	--with-dri-driverdir=/usr/lib/$(DEB_HOST_MULTIARCH)/dri \
 	--with-dri-searchpath='/usr/lib/$(DEB_HOST_MULTIARCH)/dri:\$$$${ORIGIN}/dri:/usr/lib/dri' \
+	--with-vulkan-drivers="$(VULKAN_DRIVERS)" \
 	--enable-osmesa \
 	--enable-glx-tls \
 	--enable-shared-glapi \

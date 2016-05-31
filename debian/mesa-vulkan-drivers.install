@@ -1,0 +1,2 @@
+etc/vulkan/icd.d/intel_icd.json	usr/share/vulkan/icd.d
+usr/lib/*/libvulkan_intel.so
