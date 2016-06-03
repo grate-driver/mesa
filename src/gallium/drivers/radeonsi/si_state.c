@@ -624,8 +624,7 @@ static void si_set_clip_state(struct pipe_context *ctx,
 	cb.user_buffer = state->ucp;
 	cb.buffer_offset = 0;
 	cb.buffer_size = 4*4*8;
-	si_set_constant_buffer(sctx, &sctx->rw_buffers,
-			       SI_VS_CONST_CLIP_PLANES, &cb);
+	si_set_rw_buffer(sctx, SI_VS_CONST_CLIP_PLANES, &cb);
 	pipe_resource_reference(&cb.buffer, NULL);
 }
 
@@ -2403,8 +2402,7 @@ static void si_set_framebuffer_state(struct pipe_context *ctx,
 			assert(0);
 		}
 		constbuf.buffer_size = sctx->framebuffer.nr_samples * 2 * 4;
-		si_set_constant_buffer(sctx, &sctx->rw_buffers,
-				       SI_PS_CONST_SAMPLE_POSITIONS, &constbuf);
+		si_set_rw_buffer(sctx, SI_PS_CONST_SAMPLE_POSITIONS, &constbuf);
 
 		si_mark_atom_dirty(sctx, &sctx->msaa_sample_locs.atom);
 	}
@@ -3272,8 +3270,7 @@ static void si_set_tess_state(struct pipe_context *ctx,
 			       (void*)array, sizeof(array),
 			       &cb.buffer_offset);
 
-	si_set_constant_buffer(sctx, &sctx->rw_buffers,
-			       SI_HS_CONST_DEFAULT_TESS_LEVELS, &cb);
+	si_set_rw_buffer(sctx, SI_HS_CONST_DEFAULT_TESS_LEVELS, &cb);
 	pipe_resource_reference(&cb.buffer, NULL);
 }
 
