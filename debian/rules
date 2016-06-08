@@ -126,21 +126,8 @@ confflags += \
 
 override_dh_clean:
 	rm -rf .pc
-	rm -f config.cache config.log config.status
-	rm -f */config.cache */config.log */config.status
-	rm -f conftest* */conftest*
-	rm -rf autom4te.cache */autom4te.cache
 	rm -rf build
-	rm -rf configure bin/config.guess bin/config.sub config.h.in
-	rm -rf $$(find -name Makefile.in)
-	rm -rf aclocal.m4 bin/missing bin/depcomp install-sh bin/ltmain.sh
-	rm -f bin/ar-lib bin/compile bin/ylwrap bin/install-sh
 	for file in debian/*.in; do rm -f $${file%%.in}; done
-	rm -f src/glsl/builtins/tools/texture_builtins.pyc
-	rm -f src/mapi/glapi/gen/*.pyc
-	rm -f src/mesa/main/*.pyc
-	rm -f src/gallium/auxiliary/util/*.pyc
-	rm -f m4/libtool.m4 m4/ltoptions.m4 m4/ltsugar.m4 m4/ltversion.m4 m4/lt~obsolete.m4
 
 	dh_clean
 
