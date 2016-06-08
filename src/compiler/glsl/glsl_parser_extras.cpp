@@ -1687,7 +1687,7 @@ set_shader_inout_layout(struct gl_shader *shader,
          shader->TessEval.PointMode = state->in_qualifier->point_mode;
       break;
    case MESA_SHADER_GEOMETRY:
-      shader->Geom.VerticesOut = 0;
+      shader->Geom.VerticesOut = -1;
       if (state->out_qualifier->flags.q.max_vertices) {
          unsigned qual_max_vertices;
          if (state->out_qualifier->max_vertices->
@@ -1907,7 +1907,7 @@ _mesa_glsl_compile_shader(struct gl_context *ctx, struct gl_shader *shader,
       }
    }
 
-   _mesa_glsl_initialize_derived_variables(shader);
+   _mesa_glsl_initialize_derived_variables(ctx, shader);
 
    delete state->symbols;
    ralloc_free(state);

@@ -40,6 +40,29 @@
 #include "program.h"
 
 
+/**
+ * Get the varying type stripped of the outermost array if we're processing
+ * a stage whose varyings are arrays indexed by a vertex number (such as
+ * geometry shader inputs).
+ */
+static const glsl_type *
+get_varying_type(const ir_variable *var, gl_shader_stage stage)
+{
+   const glsl_type *type = var->type;
+
+   if (!var->data.patch &&
+       ((var->data.mode == ir_var_shader_out &&
+         stage == MESA_SHADER_TESS_CTRL) ||
+        (var->data.mode == ir_var_shader_in &&
+         (stage == MESA_SHADER_TESS_CTRL || stage == MESA_SHADER_TESS_EVAL ||
+          stage == MESA_SHADER_GEOMETRY)))) {
+      assert(type->is_array());
+      type = type->fields.array;
+   }
+
+   return type;
+}
+
 static void
 create_xfb_varying_names(void *mem_ctx, const glsl_type *t, char **name,
                          size_t name_length, unsigned *count,
@@ -1094,21 +1117,23 @@ store_tfeedback_info(struct gl_context *ctx, struct gl_shader_program *prog,
             num_buffers++;
             buffer_stream_id = -1;
             continue;
-         } else if (buffer_stream_id == -1)  {
-            /* First varying writing to this buffer: remember its stream */
-            buffer_stream_id = (int) tfeedback_decls[i].get_stream_id();
-         } else if (buffer_stream_id !=
-                    (int) tfeedback_decls[i].get_stream_id()) {
-            /* Varying writes to the same buffer from a different stream */
-            linker_error(prog,
-                         "Transform feedback can't capture varyings belonging "
-                         "to different vertex streams in a single buffer. "
-                         "Varying %s writes to buffer from stream %u, other "
-                         "varyings in the same buffer write from stream %u.",
-                         tfeedback_decls[i].name(),
-                         tfeedback_decls[i].get_stream_id(),
-                         buffer_stream_id);
-            return false;
+         } else if (tfeedback_decls[i].is_varying()) {
+            if (buffer_stream_id == -1)  {
+               /* First varying writing to this buffer: remember its stream */
+               buffer_stream_id = (int) tfeedback_decls[i].get_stream_id();
+            } else if (buffer_stream_id !=
+                       (int) tfeedback_decls[i].get_stream_id()) {
+               /* Varying writes to the same buffer from a different stream */
+               linker_error(prog,
+                            "Transform feedback can't capture varyings belonging "
+                            "to different vertex streams in a single buffer. "
+                            "Varying %s writes to buffer from stream %u, other "
+                            "varyings in the same buffer write from stream %u.",
+                            tfeedback_decls[i].name(),
+                            tfeedback_decls[i].get_stream_id(),
+                            buffer_stream_id);
+               return false;
+            }
          }
 
          if (has_xfb_qualifiers) {

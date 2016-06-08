@@ -2562,7 +2562,8 @@ _mesa_glsl_initialize_variables(exec_list *instructions,
 				struct _mesa_glsl_parse_state *state);
 
 extern void
-_mesa_glsl_initialize_derived_variables(gl_shader *shader);
+_mesa_glsl_initialize_derived_variables(struct gl_context *ctx,
+                                        gl_shader *shader);
 
 extern void
 _mesa_glsl_initialize_functions(_mesa_glsl_parse_state *state);
@@ -2620,9 +2621,6 @@ is_gl_identifier(const char *s)
 {
    return s && s[0] == 'g' && s[1] == 'l' && s[2] == '_';
 }
-
-const glsl_type *
-get_varying_type(const ir_variable *var, gl_shader_stage stage);
 
 extern "C" {
 #endif /* __cplusplus */

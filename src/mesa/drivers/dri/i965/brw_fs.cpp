@@ -2097,6 +2097,10 @@ fs_visitor::assign_constant_locations()
    bool contiguous[uniforms];
    memset(contiguous, 0, sizeof(contiguous));
 
+   int thread_local_id_index =
+      (stage == MESA_SHADER_COMPUTE) ?
+      ((brw_cs_prog_data*)stage_prog_data)->thread_local_id_index : -1;
+
    /* First, we walk through the instructions and do two things:
     *
     *  1) Figure out which uniforms are live.
@@ -2141,6 +2145,9 @@ fs_visitor::assign_constant_locations()
       }
    }
 
+   if (thread_local_id_index >= 0 && !is_live[thread_local_id_index])
+      thread_local_id_index = -1;
+
    /* Only allow 16 registers (128 uniform components) as push constants.
     *
     * Just demote the end of the list.  We could probably do better
@@ -2149,7 +2156,9 @@ fs_visitor::assign_constant_locations()
     * If changing this value, note the limitation about total_regs in
     * brw_curbe.c.
     */
-   const unsigned int max_push_components = 16 * 8;
+   unsigned int max_push_components = 16 * 8;
+   if (thread_local_id_index >= 0)
+      max_push_components--; /* Save a slot for the thread ID */
 
    /* We push small arrays, but no bigger than 16 floats.  This is big enough
     * for a vec4 but hopefully not large enough to push out other stuff.  We
@@ -2187,12 +2196,20 @@ fs_visitor::assign_constant_locations()
       if (!is_live[u] || is_live_64bit[u])
          continue;
 
+      /* Skip thread_local_id_index to put it in the last push register. */
+      if (thread_local_id_index == (int)u)
+         continue;
+
       set_push_pull_constant_loc(u, &chunk_start, contiguous[u],
                                  push_constant_loc, pull_constant_loc,
                                  &num_push_constants, &num_pull_constants,
                                  max_push_components, max_chunk_size,
                                  stage_prog_data);
    }
+
+   /* Add the CS local thread ID uniform at the end of the push constants */
+   if (thread_local_id_index >= 0)
+      push_constant_loc[thread_local_id_index] = num_push_constants++;
 
    /* As the uniforms are going to be reordered, take the data from a temporary
     * copy of the original param[].
@@ -2212,6 +2229,7 @@ fs_visitor::assign_constant_locations()
     * push_constant_loc[i] <= i and we can do it in one smooth loop without
     * having to make a copy.
     */
+   int new_thread_local_id_index = -1;
    for (unsigned int i = 0; i < uniforms; i++) {
       const gl_constant_value *value = param[i];
 
@@ -2219,9 +2237,15 @@ fs_visitor::assign_constant_locations()
          stage_prog_data->pull_param[pull_constant_loc[i]] = value;
       } else if (push_constant_loc[i] != -1) {
          stage_prog_data->param[push_constant_loc[i]] = value;
+         if (thread_local_id_index == (int)i)
+            new_thread_local_id_index = push_constant_loc[i];
       }
    }
    ralloc_free(param);
+
+   if (stage == MESA_SHADER_COMPUTE)
+      ((brw_cs_prog_data*)stage_prog_data)->thread_local_id_index =
+         new_thread_local_id_index;
 }
 
 /**
@@ -2767,6 +2791,20 @@ fs_visitor::opt_redundant_discard_jumps()
    return progress;
 }
 
+/**
+ * Compute a bitmask with GRF granularity with a bit set for each GRF starting
+ * from \p r which overlaps the region starting at \p r and spanning \p n GRF
+ * units.
+ */
+static inline unsigned
+mask_relative_to(const fs_reg &r, const fs_reg &s, unsigned n)
+{
+   const int rel_offset = (reg_offset(s) - reg_offset(r)) / REG_SIZE;
+   assert(reg_space(r) == reg_space(s) &&
+          rel_offset >= 0 && rel_offset < int(8 * sizeof(unsigned)));
+   return ((1 << n) - 1) << rel_offset;
+}
+
 bool
 fs_visitor::compute_to_mrf()
 {
@@ -2792,31 +2830,22 @@ fs_visitor::compute_to_mrf()
           inst->src[0].subreg_offset)
 	 continue;
 
-      /* Work out which hardware MRF registers are written by this
-       * instruction.
-       */
-      int mrf_low = inst->dst.nr & ~BRW_MRF_COMPR4;
-      int mrf_high;
-      if (inst->dst.nr & BRW_MRF_COMPR4) {
-	 mrf_high = mrf_low + 4;
-      } else if (inst->exec_size == 16) {
-	 mrf_high = mrf_low + 1;
-      } else {
-	 mrf_high = mrf_low;
-      }
-
       /* Can't compute-to-MRF this GRF if someone else was going to
        * read it later.
        */
       if (this->virtual_grf_end[inst->src[0].nr] > ip)
 	 continue;
 
-      /* Found a move of a GRF to a MRF.  Let's see if we can go
-       * rewrite the thing that made this GRF to write into the MRF.
+      /* Found a move of a GRF to a MRF.  Let's see if we can go rewrite the
+       * things that computed the value of all GRFs of the source region.  The
+       * regs_left bitset keeps track of the registers we haven't yet found a
+       * generating instruction for.
        */
+      unsigned regs_left = (1 << inst->regs_read(0)) - 1;
+
       foreach_inst_in_block_reverse_starting_from(fs_inst, scan_inst, inst) {
-	 if (scan_inst->dst.file == VGRF &&
-            scan_inst->dst.nr == inst->src[0].nr) {
+         if (regions_overlap(scan_inst->dst, scan_inst->regs_written * REG_SIZE,
+                             inst->src[0], inst->regs_read(0) * REG_SIZE)) {
 	    /* Found the last thing to write our reg we want to turn
 	     * into a compute-to-MRF.
 	     */
@@ -2824,15 +2853,18 @@ fs_visitor::compute_to_mrf()
 	    /* If this one instruction didn't populate all the
 	     * channels, bail.  We might be able to rewrite everything
 	     * that writes that reg, but it would require smarter
-	     * tracking to delay the rewriting until complete success.
+	     * tracking.
 	     */
 	    if (scan_inst->is_partial_write())
 	       break;
 
-            /* Things returning more than one register would need us to
-             * understand coalescing out more than one MOV at a time.
+            /* Handling things not fully contained in the source of the copy
+             * would need us to understand coalescing out more than one MOV at
+             * a time.
              */
-            if (scan_inst->regs_written > scan_inst->exec_size / 8)
+            if (scan_inst->dst.reg_offset < inst->src[0].reg_offset ||
+                scan_inst->dst.reg_offset + scan_inst->regs_written >
+                inst->src[0].reg_offset + inst->regs_read(0))
                break;
 
 	    /* SEND instructions can't have MRF as a destination. */
@@ -2848,16 +2880,11 @@ fs_visitor::compute_to_mrf()
 	       }
 	    }
 
-	    if (scan_inst->dst.reg_offset == inst->src[0].reg_offset) {
-	       /* Found the creator of our MRF's source value. */
-	       scan_inst->dst.file = MRF;
-               scan_inst->dst.nr = inst->dst.nr;
-               scan_inst->dst.reg_offset = 0;
-	       scan_inst->saturate |= inst->saturate;
-	       inst->remove(block);
-	       progress = true;
-	    }
-	    break;
+            /* Clear the bits for any registers this instruction overwrites. */
+            regs_left &= ~mask_relative_to(
+               inst->src[0], scan_inst->dst, scan_inst->regs_written);
+            if (!regs_left)
+               break;
 	 }
 
 	 /* We don't handle control flow here.  Most computation of
@@ -2872,54 +2899,83 @@ fs_visitor::compute_to_mrf()
 	  */
 	 bool interfered = false;
 	 for (int i = 0; i < scan_inst->sources; i++) {
-	    if (scan_inst->src[i].file == VGRF &&
-                scan_inst->src[i].nr == inst->src[0].nr &&
-		scan_inst->src[i].reg_offset == inst->src[0].reg_offset) {
+            if (regions_overlap(scan_inst->src[i], scan_inst->regs_read(i) * REG_SIZE,
+                                inst->src[0], inst->regs_read(0) * REG_SIZE)) {
 	       interfered = true;
 	    }
 	 }
 	 if (interfered)
 	    break;
 
-	 if (scan_inst->dst.file == MRF) {
+         if (regions_overlap(scan_inst->dst, scan_inst->regs_written * REG_SIZE,
+                             inst->dst, inst->regs_written * REG_SIZE)) {
 	    /* If somebody else writes our MRF here, we can't
 	     * compute-to-MRF before that.
 	     */
-            int scan_mrf_low = scan_inst->dst.nr & ~BRW_MRF_COMPR4;
-	    int scan_mrf_high;
+            break;
+         }
 
-            if (scan_inst->dst.nr & BRW_MRF_COMPR4) {
-	       scan_mrf_high = scan_mrf_low + 4;
-	    } else if (scan_inst->exec_size == 16) {
-	       scan_mrf_high = scan_mrf_low + 1;
-	    } else {
-	       scan_mrf_high = scan_mrf_low;
-	    }
-
-	    if (mrf_low == scan_mrf_low ||
-		mrf_low == scan_mrf_high ||
-		mrf_high == scan_mrf_low ||
-		mrf_high == scan_mrf_high) {
-	       break;
-	    }
-	 }
-
-	 if (scan_inst->mlen > 0 && scan_inst->base_mrf != -1) {
+         if (scan_inst->mlen > 0 && scan_inst->base_mrf != -1 &&
+             regions_overlap(fs_reg(MRF, scan_inst->base_mrf), scan_inst->mlen * REG_SIZE,
+                             inst->dst, inst->regs_written * REG_SIZE)) {
 	    /* Found a SEND instruction, which means that there are
 	     * live values in MRFs from base_mrf to base_mrf +
 	     * scan_inst->mlen - 1.  Don't go pushing our MRF write up
 	     * above it.
 	     */
-	    if (mrf_low >= scan_inst->base_mrf &&
-		mrf_low < scan_inst->base_mrf + scan_inst->mlen) {
-	       break;
-	    }
-	    if (mrf_high >= scan_inst->base_mrf &&
-		mrf_high < scan_inst->base_mrf + scan_inst->mlen) {
-	       break;
-	    }
-	 }
+            break;
+         }
       }
+
+      if (regs_left)
+         continue;
+
+      /* Found all generating instructions of our MRF's source value, so it
+       * should be safe to rewrite them to point to the MRF directly.
+       */
+      regs_left = (1 << inst->regs_read(0)) - 1;
+
+      foreach_inst_in_block_reverse_starting_from(fs_inst, scan_inst, inst) {
+         if (regions_overlap(scan_inst->dst, scan_inst->regs_written * REG_SIZE,
+                             inst->src[0], inst->regs_read(0) * REG_SIZE)) {
+            /* Clear the bits for any registers this instruction overwrites. */
+            regs_left &= ~mask_relative_to(
+               inst->src[0], scan_inst->dst, scan_inst->regs_written);
+
+            const unsigned rel_offset = (reg_offset(scan_inst->dst) -
+                                         reg_offset(inst->src[0])) / REG_SIZE;
+
+            if (inst->dst.nr & BRW_MRF_COMPR4) {
+               /* Apply the same address transformation done by the hardware
+                * for COMPR4 MRF writes.
+                */
+               assert(rel_offset < 2);
+               scan_inst->dst.nr = inst->dst.nr + rel_offset * 4;
+
+               /* Clear the COMPR4 bit if the generating instruction is not
+                * compressed.
+                */
+               if (scan_inst->regs_written < 2)
+                  scan_inst->dst.nr &= ~BRW_MRF_COMPR4;
+
+            } else {
+               /* Calculate the MRF number the result of this instruction is
+                * ultimately written to.
+                */
+               scan_inst->dst.nr = inst->dst.nr + rel_offset;
+            }
+
+            scan_inst->dst.file = MRF;
+            scan_inst->dst.reg_offset = 0;
+            scan_inst->saturate |= inst->saturate;
+            if (!regs_left)
+               break;
+         }
+      }
+
+      assert(!regs_left);
+      inst->remove(block);
+      progress = true;
    }
 
    if (progress)
@@ -3080,18 +3136,18 @@ fs_visitor::remove_duplicate_mrf_writes()
       }
 
       /* Clear out any MRF move records whose sources got overwritten. */
-      if (inst->dst.file == VGRF) {
-	 for (unsigned int i = 0; i < ARRAY_SIZE(last_mrf_move); i++) {
-	    if (last_mrf_move[i] &&
-                last_mrf_move[i]->src[0].nr == inst->dst.nr) {
-	       last_mrf_move[i] = NULL;
-	    }
-	 }
+      for (unsigned i = 0; i < ARRAY_SIZE(last_mrf_move); i++) {
+         if (last_mrf_move[i] &&
+             regions_overlap(inst->dst, inst->regs_written * REG_SIZE,
+                             last_mrf_move[i]->src[0],
+                             last_mrf_move[i]->regs_read(0) * REG_SIZE)) {
+            last_mrf_move[i] = NULL;
+         }
       }
 
       if (inst->opcode == BRW_OPCODE_MOV &&
 	  inst->dst.file == MRF &&
-	  inst->src[0].file == VGRF &&
+	  inst->src[0].file != ARF &&
 	  !inst->is_partial_write()) {
          last_mrf_move[inst->dst.nr] = inst;
       }
@@ -4416,6 +4472,14 @@ lower_varying_pull_constant_logical_send(const fs_builder &bld, fs_inst *inst)
    const brw_device_info *devinfo = bld.shader->devinfo;
 
    if (devinfo->gen >= 7) {
+      /* We are switching the instruction from an ALU-like instruction to a
+       * send-from-grf instruction.  Since sends can't handle strides or
+       * source modifiers, we have to make a copy of the offset source.
+       */
+      fs_reg tmp = bld.vgrf(BRW_REGISTER_TYPE_UD);
+      bld.MOV(tmp, inst->src[1]);
+      inst->src[1] = tmp;
+
       inst->opcode = FS_OPCODE_VARYING_PULL_CONSTANT_LOAD_GEN7;
 
    } else {
@@ -5517,31 +5581,6 @@ fs_visitor::setup_vs_payload()
    payload.num_regs = 2;
 }
 
-/**
- * We are building the local ID push constant data using the simplest possible
- * method. We simply push the local IDs directly as they should appear in the
- * registers for the uvec3 gl_LocalInvocationID variable.
- *
- * Therefore, for SIMD8, we use 3 full registers, and for SIMD16 we use 6
- * registers worth of push constant space.
- *
- * Note: Any updates to brw_cs_prog_local_id_payload_dwords,
- * fill_local_id_payload or fs_visitor::emit_cs_local_invocation_id_setup need
- * to coordinated.
- *
- * FINISHME: There are a few easy optimizations to consider.
- *
- * 1. If gl_WorkGroupSize x, y or z is 1, we can just use zero, and there is
- *    no need for using push constant space for that dimension.
- *
- * 2. Since GL_MAX_COMPUTE_WORK_GROUP_SIZE is currently 1024 or less, we can
- *    easily use 16-bit words rather than 32-bit dwords in the push constant
- *    data.
- *
- * 3. If gl_WorkGroupSize x, y or z is small, then we can use bytes for
- *    conveying the data, and thereby reduce push constant usage.
- *
- */
 void
 fs_visitor::setup_gs_payload()
 {
@@ -5585,15 +5624,7 @@ void
 fs_visitor::setup_cs_payload()
 {
    assert(devinfo->gen >= 7);
-   brw_cs_prog_data *prog_data = (brw_cs_prog_data*) this->prog_data;
-
    payload.num_regs = 1;
-
-   if (nir->info.system_values_read & SYSTEM_BIT_LOCAL_INVOCATION_ID) {
-      prog_data->local_invocation_id_regs = dispatch_width * 3 / 8;
-      payload.local_invocation_id_reg = payload.num_regs;
-      payload.num_regs += prog_data->local_invocation_id_regs;
-   }
 }
 
 void
@@ -6468,25 +6499,6 @@ brw_compile_fs(const struct brw_compiler *compiler, void *log_data,
 }
 
 fs_reg *
-fs_visitor::emit_cs_local_invocation_id_setup()
-{
-   assert(stage == MESA_SHADER_COMPUTE);
-
-   fs_reg *reg = new(this->mem_ctx) fs_reg(vgrf(glsl_type::uvec3_type));
-
-   struct brw_reg src =
-      brw_vec8_grf(payload.local_invocation_id_reg, 0);
-   src = retype(src, BRW_REGISTER_TYPE_UD);
-   bld.MOV(*reg, src);
-   src.nr += dispatch_width / 8;
-   bld.MOV(offset(*reg, bld, 1), src);
-   src.nr += dispatch_width / 8;
-   bld.MOV(offset(*reg, bld, 2), src);
-
-   return reg;
-}
-
-fs_reg *
 fs_visitor::emit_cs_work_group_id_setup()
 {
    assert(stage == MESA_SHADER_COMPUTE);
@@ -6504,6 +6516,70 @@ fs_visitor::emit_cs_work_group_id_setup()
    return reg;
 }
 
+static void
+fill_push_const_block_info(struct brw_push_const_block *block, unsigned dwords)
+{
+   block->dwords = dwords;
+   block->regs = DIV_ROUND_UP(dwords, 8);
+   block->size = block->regs * 32;
+}
+
+static void
+cs_fill_push_const_info(const struct brw_device_info *devinfo,
+                        struct brw_cs_prog_data *cs_prog_data)
+{
+   const struct brw_stage_prog_data *prog_data =
+      (struct brw_stage_prog_data*) cs_prog_data;
+   bool fill_thread_id =
+      cs_prog_data->thread_local_id_index >= 0 &&
+      cs_prog_data->thread_local_id_index < (int)prog_data->nr_params;
+   bool cross_thread_supported = devinfo->gen > 7 || devinfo->is_haswell;
+
+   /* The thread ID should be stored in the last param dword */
+   assert(prog_data->nr_params > 0 || !fill_thread_id);
+   assert(!fill_thread_id ||
+          cs_prog_data->thread_local_id_index ==
+             (int)prog_data->nr_params - 1);
+
+   unsigned cross_thread_dwords, per_thread_dwords;
+   if (!cross_thread_supported) {
+      cross_thread_dwords = 0u;
+      per_thread_dwords = prog_data->nr_params;
+   } else if (fill_thread_id) {
+      /* Fill all but the last register with cross-thread payload */
+      cross_thread_dwords = 8 * (cs_prog_data->thread_local_id_index / 8);
+      per_thread_dwords = prog_data->nr_params - cross_thread_dwords;
+      assert(per_thread_dwords > 0 && per_thread_dwords <= 8);
+   } else {
+      /* Fill all data using cross-thread payload */
+      cross_thread_dwords = prog_data->nr_params;
+      per_thread_dwords = 0u;
+   }
+
+   fill_push_const_block_info(&cs_prog_data->push.cross_thread, cross_thread_dwords);
+   fill_push_const_block_info(&cs_prog_data->push.per_thread, per_thread_dwords);
+
+   unsigned total_dwords =
+      (cs_prog_data->push.per_thread.size * cs_prog_data->threads +
+       cs_prog_data->push.cross_thread.size) / 4;
+   fill_push_const_block_info(&cs_prog_data->push.total, total_dwords);
+
+   assert(cs_prog_data->push.cross_thread.dwords % 8 == 0 ||
+          cs_prog_data->push.per_thread.size == 0);
+   assert(cs_prog_data->push.cross_thread.dwords +
+          cs_prog_data->push.per_thread.dwords ==
+             prog_data->nr_params);
+}
+
+static void
+cs_set_simd_size(struct brw_cs_prog_data *cs_prog_data, unsigned size)
+{
+   cs_prog_data->simd_size = size;
+   unsigned group_size = cs_prog_data->local_size[0] *
+      cs_prog_data->local_size[1] * cs_prog_data->local_size[2];
+   cs_prog_data->threads = (group_size + size - 1) / size;
+}
+
 const unsigned *
 brw_compile_cs(const struct brw_compiler *compiler, void *log_data,
                void *mem_ctx,
@@ -6519,6 +6595,16 @@ brw_compile_cs(const struct brw_compiler *compiler, void *log_data,
                                       true);
    brw_nir_lower_cs_shared(shader);
    prog_data->base.total_shared += shader->num_shared;
+
+   /* Now that we cloned the nir_shader, we can update num_uniforms based on
+    * the thread_local_id_index.
+    */
+   assert(prog_data->thread_local_id_index >= 0);
+   shader->num_uniforms =
+      MAX2(shader->num_uniforms,
+           (unsigned)4 * (prog_data->thread_local_id_index + 1));
+
+   brw_nir_lower_intrinsics(shader, &prog_data->base);
    shader = brw_postprocess_nir(shader, compiler->devinfo, true);
 
    prog_data->local_size[0] = shader->info.cs.local_size[0];
@@ -6544,7 +6630,8 @@ brw_compile_cs(const struct brw_compiler *compiler, void *log_data,
          fail_msg = v8.fail_msg;
       } else {
          cfg = v8.cfg;
-         prog_data->simd_size = 8;
+         cs_set_simd_size(prog_data, 8);
+         cs_fill_push_const_info(compiler->devinfo, prog_data);
          prog_data->base.dispatch_grf_start_reg = v8.payload.num_regs;
       }
    }
@@ -6569,7 +6656,8 @@ brw_compile_cs(const struct brw_compiler *compiler, void *log_data,
          }
       } else {
          cfg = v16.cfg;
-         prog_data->simd_size = 16;
+         cs_set_simd_size(prog_data, 16);
+         cs_fill_push_const_info(compiler->devinfo, prog_data);
          prog_data->dispatch_grf_start_reg_16 = v16.payload.num_regs;
       }
    }
@@ -6596,7 +6684,8 @@ brw_compile_cs(const struct brw_compiler *compiler, void *log_data,
          }
       } else {
          cfg = v32.cfg;
-         prog_data->simd_size = 32;
+         cs_set_simd_size(prog_data, 32);
+         cs_fill_push_const_info(compiler->devinfo, prog_data);
       }
    }
 
@@ -6622,40 +6711,4 @@ brw_compile_cs(const struct brw_compiler *compiler, void *log_data,
    g.generate_code(cfg, prog_data->simd_size);
 
    return g.get_assembly(final_assembly_size);
-}
-
-void
-brw_cs_fill_local_id_payload(const struct brw_cs_prog_data *prog_data,
-                             void *buffer, uint32_t threads, uint32_t stride)
-{
-   if (prog_data->local_invocation_id_regs == 0)
-      return;
-
-   /* 'stride' should be an integer number of registers, that is, a multiple
-    * of 32 bytes.
-    */
-   assert(stride % 32 == 0);
-
-   unsigned x = 0, y = 0, z = 0;
-   for (unsigned t = 0; t < threads; t++) {
-      uint32_t *param = (uint32_t *) buffer + stride * t / 4;
-
-      for (unsigned i = 0; i < prog_data->simd_size; i++) {
-         param[0 * prog_data->simd_size + i] = x;
-         param[1 * prog_data->simd_size + i] = y;
-         param[2 * prog_data->simd_size + i] = z;
-
-         x++;
-         if (x == prog_data->local_size[0]) {
-            x = 0;
-            y++;
-            if (y == prog_data->local_size[1]) {
-               y = 0;
-               z++;
-               if (z == prog_data->local_size[2])
-                  z = 0;
-            }
-         }
-      }
-   }
 }

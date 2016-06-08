@@ -272,13 +272,6 @@ emit_system_values_block(nir_block *block, fs_visitor *v)
             *reg = *v->emit_samplemaskin_setup();
          break;
 
-      case nir_intrinsic_load_local_invocation_id:
-         assert(v->stage == MESA_SHADER_COMPUTE);
-         reg = &v->nir_system_values[SYSTEM_VALUE_LOCAL_INVOCATION_ID];
-         if (reg->file == BAD_FILE)
-            *reg = *v->emit_cs_local_invocation_id_setup();
-         break;
-
       case nir_intrinsic_load_work_group_id:
          assert(v->stage == MESA_SHADER_COMPUTE);
          reg = &v->nir_system_values[SYSTEM_VALUE_WORK_GROUP_ID];
@@ -1668,6 +1661,9 @@ fs_visitor::emit_gs_end_primitive(const nir_src &vertex_count_nir_src)
    struct brw_gs_prog_data *gs_prog_data =
       (struct brw_gs_prog_data *) prog_data;
 
+   if (gs_compile->control_data_header_size_bits == 0)
+      return;
+
    /* We can only do EndPrimitive() functionality when the control data
     * consists of cut bits.  Fortunately, the only time it isn't is when the
     * output type is points, in which case EndPrimitive() is a no-op.
@@ -2746,7 +2742,7 @@ fs_visitor::nir_emit_tes_intrinsic(const fs_builder &bld,
          break;
       case BRW_TESS_DOMAIN_ISOLINE:
          for (unsigned i = 0; i < 2; i++)
-            bld.MOV(offset(dest, bld, i), component(fs_reg(ATTR, 0), 7 - i));
+            bld.MOV(offset(dest, bld, i), component(fs_reg(ATTR, 0), 6 + i));
          break;
       }
       break;
@@ -3870,6 +3866,21 @@ fs_visitor::nir_emit_intrinsic(const fs_builder &bld, nir_intrinsic_instr *instr
 
       bld.MOV(retype(dest, ret_payload.type), component(ret_payload, 0));
       brw_mark_surface_used(prog_data, index);
+      break;
+   }
+
+   case nir_intrinsic_load_channel_num: {
+      fs_reg tmp = bld.vgrf(BRW_REGISTER_TYPE_UW);
+      dest = retype(dest, BRW_REGISTER_TYPE_UD);
+      const fs_builder allbld8 = bld.group(8, 0).exec_all();
+      allbld8.MOV(tmp, brw_imm_v(0x76543210));
+      if (dispatch_width > 8)
+         allbld8.ADD(byte_offset(tmp, 16), tmp, brw_imm_uw(8u));
+      if (dispatch_width > 16) {
+         const fs_builder allbld16 = bld.group(16, 0).exec_all();
+         allbld16.ADD(byte_offset(tmp, 32), tmp, brw_imm_uw(16u));
+      }
+      bld.MOV(dest, tmp);
       break;
    }
 

@@ -424,15 +424,28 @@ struct brw_wm_prog_data {
    int urb_setup[VARYING_SLOT_MAX];
 };
 
+struct brw_push_const_block {
+   unsigned dwords;     /* Dword count, not reg aligned */
+   unsigned regs;
+   unsigned size;       /* Bytes, register aligned */
+};
+
 struct brw_cs_prog_data {
    struct brw_stage_prog_data base;
 
    GLuint dispatch_grf_start_reg_16;
    unsigned local_size[3];
    unsigned simd_size;
+   unsigned threads;
    bool uses_barrier;
    bool uses_num_work_groups;
-   unsigned local_invocation_id_regs;
+   int thread_local_id_index;
+
+   struct {
+      struct brw_push_const_block cross_thread;
+      struct brw_push_const_block per_thread;
+      struct brw_push_const_block total;
+   } push;
 
    struct {
       /** @{
@@ -816,13 +829,6 @@ brw_compile_cs(const struct brw_compiler *compiler, void *log_data,
                int shader_time_index,
                unsigned *final_assembly_size,
                char **error_str);
-
-/**
- * Fill out local id payload for compute shader according to cs_prog_data.
- */
-void
-brw_cs_fill_local_id_payload(const struct brw_cs_prog_data *cs_prog_data,
-                             void *buffer, uint32_t threads, uint32_t stride);
 
 #ifdef __cplusplus
 } /* extern "C" */
