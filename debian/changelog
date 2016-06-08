@@ -1,7 +1,6 @@
 mesa (12.0.0~rc1-1) UNRELEASED; urgency=medium
 
   * New upstream release candidate.
-  * control: Add python3 to build-depends.
   * symbols: Updated.
   * mesa-common-dev: Add mesa_glinterop.h.
   * Enable building intel vulkan driver on linux & kfreebsd, add
