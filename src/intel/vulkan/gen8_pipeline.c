@@ -137,11 +137,12 @@ emit_cb_state(struct anv_pipeline *pipeline,
       /* We can have at most 8 attachments */
       assert(i < 8);
 
-      if (binding->offset >= info->attachmentCount)
+      if (binding->index >= info->attachmentCount)
          continue;
 
+      assert(binding->binding == 0);
       const VkPipelineColorBlendAttachmentState *a =
-         &info->pAttachments[binding->offset];
+         &info->pAttachments[binding->index];
 
       if (a->srcColorBlendFactor != a->srcAlphaBlendFactor ||
           a->dstColorBlendFactor != a->dstAlphaBlendFactor ||
@@ -216,55 +217,6 @@ emit_cb_state(struct anv_pipeline *pipeline,
 }
 
 static void
-emit_ds_state(struct anv_pipeline *pipeline,
-              const VkPipelineDepthStencilStateCreateInfo *info)
-{
-   uint32_t *dw = GEN_GEN == 8 ?
-      pipeline->gen8.wm_depth_stencil : pipeline->gen9.wm_depth_stencil;
-
-   if (info == NULL) {
-      /* We're going to OR this together with the dynamic state.  We need
-       * to make sure it's initialized to something useful.
-       */
-      memset(pipeline->gen8.wm_depth_stencil, 0,
-             sizeof(pipeline->gen8.wm_depth_stencil));
-      memset(pipeline->gen9.wm_depth_stencil, 0,
-             sizeof(pipeline->gen9.wm_depth_stencil));
-      return;
-   }
-
-   /* VkBool32 depthBoundsTestEnable; // optional (depth_bounds_test) */
-
-   struct GENX(3DSTATE_WM_DEPTH_STENCIL) wm_depth_stencil = {
-      .DepthTestEnable = info->depthTestEnable,
-      .DepthBufferWriteEnable = info->depthWriteEnable,
-      .DepthTestFunction = vk_to_gen_compare_op[info->depthCompareOp],
-      .DoubleSidedStencilEnable = true,
-
-      .StencilTestEnable = info->stencilTestEnable,
-      .StencilBufferWriteEnable = info->stencilTestEnable,
-      .StencilFailOp = vk_to_gen_stencil_op[info->front.failOp],
-      .StencilPassDepthPassOp = vk_to_gen_stencil_op[info->front.passOp],
-      .StencilPassDepthFailOp = vk_to_gen_stencil_op[info->front.depthFailOp],
-      .StencilTestFunction = vk_to_gen_compare_op[info->front.compareOp],
-      .BackfaceStencilFailOp = vk_to_gen_stencil_op[info->back.failOp],
-      .BackfaceStencilPassDepthPassOp = vk_to_gen_stencil_op[info->back.passOp],
-      .BackfaceStencilPassDepthFailOp =vk_to_gen_stencil_op[info->back.depthFailOp],
-      .BackfaceStencilTestFunction = vk_to_gen_compare_op[info->back.compareOp],
-   };
-
-   /* From the Broadwell PRM:
-    *
-    *    "If Depth_Test_Enable = 1 AND Depth_Test_func = EQUAL, the
-    *    Depth_Write_Enable must be set to 0."
-    */
-   if (info->depthTestEnable && info->depthCompareOp == VK_COMPARE_OP_EQUAL)
-      wm_depth_stencil.DepthBufferWriteEnable = false;
-
-   GENX(3DSTATE_WM_DEPTH_STENCIL_pack)(NULL, dw, &wm_depth_stencil);
-}
-
-static void
 emit_ms_state(struct anv_pipeline *pipeline,
               const VkPipelineMultisampleStateCreateInfo *info)
 {
@@ -317,6 +269,8 @@ genX(graphics_pipeline_create)(
     VkPipeline*                                 pPipeline)
 {
    ANV_FROM_HANDLE(anv_device, device, _device);
+   ANV_FROM_HANDLE(anv_render_pass, pass, pCreateInfo->renderPass);
+   struct anv_subpass *subpass = &pass->subpasses[pCreateInfo->subpass];
    struct anv_pipeline *pipeline;
    VkResult result;
    uint32_t offset, length;
@@ -343,7 +297,7 @@ genX(graphics_pipeline_create)(
    emit_rs_state(pipeline, pCreateInfo->pRasterizationState,
                  pCreateInfo->pMultisampleState, extra);
    emit_ms_state(pipeline, pCreateInfo->pMultisampleState);
-   emit_ds_state(pipeline, pCreateInfo->pDepthStencilState);
+   emit_ds_state(pipeline, pCreateInfo->pDepthStencilState, pass, subpass);
    emit_cb_state(pipeline, pCreateInfo->pColorBlendState,
                            pCreateInfo->pMultisampleState);
 
@@ -376,9 +330,16 @@ genX(graphics_pipeline_create)(
       wm.StatisticsEnable                    = true;
       wm.LineEndCapAntialiasingRegionWidth   = _05pixels;
       wm.LineAntialiasingRegionWidth         = _10pixels;
-      wm.EarlyDepthStencilControl            = NORMAL;
       wm.ForceThreadDispatchEnable           = NORMAL;
       wm.PointRasterizationRule              = RASTRULE_UPPER_RIGHT;
+
+      if (wm_prog_data && wm_prog_data->early_fragment_tests) {
+         wm.EarlyDepthStencilControl         = PREPS;
+      } else if (wm_prog_data && wm_prog_data->has_side_effects) {
+         wm.EarlyDepthStencilControl         = PSEXEC;
+      } else {
+         wm.EarlyDepthStencilControl         = NORMAL;
+      }
 
       wm.BarycentricInterpolationMode = pipeline->ps_ksp0 == NO_KERNEL ?
          0 : wm_prog_data->barycentric_interp_modes;

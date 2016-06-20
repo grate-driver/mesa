@@ -1002,6 +1002,7 @@ bool Source::scanSource()
    }
 
    info->io.viewportId = -1;
+   info->prop.cp.numThreads = 1;
 
    info->immd.data = (uint32_t *)MALLOC(scan.immediate_count * 16);
    info->immd.type = (ubyte *)MALLOC(scan.immediate_count * sizeof(ubyte));
@@ -1105,7 +1106,7 @@ void Source::scanProperty(const struct tgsi_full_property *prop)
    case TGSI_PROPERTY_CS_FIXED_BLOCK_WIDTH:
    case TGSI_PROPERTY_CS_FIXED_BLOCK_HEIGHT:
    case TGSI_PROPERTY_CS_FIXED_BLOCK_DEPTH:
-      // we don't care
+      info->prop.cp.numThreads *= prop->u[0].Data;
       break;
    case TGSI_PROPERTY_NUM_CLIPDIST_ENABLED:
       info->io.clipDistances = prop->u[0].Data;
@@ -3597,7 +3598,9 @@ Converter::handleInstruction(const struct tgsi_full_instruction *insn)
          src0 = fetchSrc(0, pos);
          src1 = fetchSrc(0, pos + 1);
          mkOp2(OP_MERGE, TYPE_U64, dreg, src0, src1);
-         mkCvt(OP_CVT, dstTy, dst0[c], srcTy, dreg);
+         Instruction *cvt = mkCvt(OP_CVT, dstTy, dst0[c], srcTy, dreg);
+         if (!isFloatType(dstTy))
+            cvt->rnd = ROUND_Z;
          pos += 2;
       }
       break;

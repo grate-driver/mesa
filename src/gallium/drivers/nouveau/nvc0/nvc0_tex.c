@@ -794,6 +794,23 @@ nvc0_get_surface_dims(struct pipe_image_view *view, int *width, int *height,
 }
 
 void
+nvc0_mark_image_range_valid(const struct pipe_image_view *view)
+{
+   struct nv04_resource *res = (struct nv04_resource *)view->resource;
+   const struct util_format_description *desc;
+   unsigned stride;
+
+   assert(view->resource->target == PIPE_BUFFER);
+
+   desc = util_format_description(view->format);
+   stride = desc->block.bits / 8;
+
+   util_range_add(&res->valid_buffer_range,
+                  stride * (view->u.buf.first_element),
+                  stride * (view->u.buf.last_element + 1));
+}
+
+void
 nve4_set_surface_info(struct nouveau_pushbuf *push,
                       struct pipe_image_view *view,
                       struct nvc0_context *nvc0)
@@ -977,11 +994,6 @@ nvc0_validate_suf(struct nvc0_context *nvc0, int s)
    struct nouveau_pushbuf *push = nvc0->base.pushbuf;
    struct nvc0_screen *screen = nvc0->screen;
 
-   if (s == 5)
-      nouveau_bufctx_reset(nvc0->bufctx_cp, NVC0_BIND_CP_SUF);
-   else
-      nouveau_bufctx_reset(nvc0->bufctx_3d, NVC0_BIND_3D_SUF);
-
    for (int i = 0; i < NVC0_MAX_IMAGES; ++i) {
       struct pipe_image_view *view = &nvc0->images[s][i];
       int width, height, depth;
@@ -1010,6 +1022,9 @@ nvc0_validate_suf(struct nvc0_context *nvc0, int s)
 
             address += view->u.buf.first_element * blocksize;
             assert(!(address & 0xff));
+
+            if (view->access & PIPE_IMAGE_ACCESS_WRITE)
+               nvc0_mark_image_range_valid(view);
 
             PUSH_DATAh(push, address);
             PUSH_DATA (push, address);
@@ -1079,6 +1094,7 @@ nvc0_update_surface_bindings(struct nvc0_context *nvc0)
    nvc0_validate_suf(nvc0, 4);
 
    /* Invalidate all COMPUTE images because they are aliased with FRAGMENT. */
+   nouveau_bufctx_reset(nvc0->bufctx_cp, NVC0_BIND_CP_SUF);
    nvc0->dirty_cp |= NVC0_NEW_CP_SURFACES;
    nvc0->images_dirty[5] |= nvc0->images_valid[5];
 }
@@ -1105,6 +1121,11 @@ nve4_update_surface_bindings(struct nvc0_context *nvc0)
          struct pipe_image_view *view = &nvc0->images[s][i];
          if (view->resource) {
             struct nv04_resource *res = nv04_resource(view->resource);
+
+            if (res->base.target == PIPE_BUFFER) {
+               if (view->access & PIPE_IMAGE_ACCESS_WRITE)
+                  nvc0_mark_image_range_valid(view);
+            }
 
             nve4_set_surface_info(push, view, nvc0);
             BCTX_REFN(nvc0->bufctx_3d, 3D_SUF, res, RDWR);

@@ -21,6 +21,8 @@
  * IN THE SOFTWARE.
  */
 
+#include "vk_format_info.h"
+
 static uint32_t
 vertex_element_comp_control(enum isl_format format, unsigned comp)
 {
@@ -425,3 +427,88 @@ static const uint32_t vk_to_gen_stencil_op[] = {
    [VK_STENCIL_OP_INCREMENT_AND_WRAP]           = STENCILOP_INCR,
    [VK_STENCIL_OP_DECREMENT_AND_WRAP]           = STENCILOP_DECR,
 };
+
+static void
+emit_ds_state(struct anv_pipeline *pipeline,
+              const VkPipelineDepthStencilStateCreateInfo *info,
+              const struct anv_render_pass *pass,
+              const struct anv_subpass *subpass)
+{
+#if GEN_GEN == 7
+#  define depth_stencil_dw pipeline->gen7.depth_stencil_state
+#elif GEN_GEN == 8
+#  define depth_stencil_dw pipeline->gen8.wm_depth_stencil
+#else
+#  define depth_stencil_dw pipeline->gen9.wm_depth_stencil
+#endif
+
+   if (info == NULL) {
+      /* We're going to OR this together with the dynamic state.  We need
+       * to make sure it's initialized to something useful.
+       */
+      memset(depth_stencil_dw, 0, sizeof(depth_stencil_dw));
+      return;
+   }
+
+   /* VkBool32 depthBoundsTestEnable; // optional (depth_bounds_test) */
+
+#if GEN_GEN <= 7
+   struct GENX(DEPTH_STENCIL_STATE) depth_stencil = {
+#else
+   struct GENX(3DSTATE_WM_DEPTH_STENCIL) depth_stencil = {
+#endif
+      .DepthTestEnable = info->depthTestEnable,
+      .DepthBufferWriteEnable = info->depthWriteEnable,
+      .DepthTestFunction = vk_to_gen_compare_op[info->depthCompareOp],
+      .DoubleSidedStencilEnable = true,
+
+      .StencilTestEnable = info->stencilTestEnable,
+      .StencilBufferWriteEnable = info->stencilTestEnable,
+      .StencilFailOp = vk_to_gen_stencil_op[info->front.failOp],
+      .StencilPassDepthPassOp = vk_to_gen_stencil_op[info->front.passOp],
+      .StencilPassDepthFailOp = vk_to_gen_stencil_op[info->front.depthFailOp],
+      .StencilTestFunction = vk_to_gen_compare_op[info->front.compareOp],
+      .BackfaceStencilFailOp = vk_to_gen_stencil_op[info->back.failOp],
+      .BackfaceStencilPassDepthPassOp = vk_to_gen_stencil_op[info->back.passOp],
+      .BackfaceStencilPassDepthFailOp =vk_to_gen_stencil_op[info->back.depthFailOp],
+      .BackfaceStencilTestFunction = vk_to_gen_compare_op[info->back.compareOp],
+   };
+
+   VkImageAspectFlags aspects = 0;
+   if (pass->attachments == NULL) {
+      /* This comes from meta.  Assume we have verything. */
+      aspects = VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT;
+   } else if (subpass->depth_stencil_attachment != VK_ATTACHMENT_UNUSED) {
+      VkFormat depth_stencil_format =
+         pass->attachments[subpass->depth_stencil_attachment].format;
+      aspects = vk_format_aspects(depth_stencil_format);
+   }
+
+   /* The Vulkan spec requires that if either depth or stencil is not present,
+    * the pipeline is to act as if the test silently passes.
+    */
+   if (!(aspects & VK_IMAGE_ASPECT_DEPTH_BIT)) {
+      depth_stencil.DepthBufferWriteEnable = false;
+      depth_stencil.DepthTestFunction = PREFILTEROPALWAYS;
+   }
+
+   if (!(aspects & VK_IMAGE_ASPECT_STENCIL_BIT)) {
+      depth_stencil.StencilBufferWriteEnable = false;
+      depth_stencil.StencilTestFunction = PREFILTEROPALWAYS;
+      depth_stencil.BackfaceStencilTestFunction = PREFILTEROPALWAYS;
+   }
+
+   /* From the Broadwell PRM:
+    *
+    *    "If Depth_Test_Enable = 1 AND Depth_Test_func = EQUAL, the
+    *    Depth_Write_Enable must be set to 0."
+    */
+   if (info->depthTestEnable && info->depthCompareOp == VK_COMPARE_OP_EQUAL)
+      depth_stencil.DepthBufferWriteEnable = false;
+
+#if GEN_GEN <= 7
+   GENX(DEPTH_STENCIL_STATE_pack)(NULL, depth_stencil_dw, &depth_stencil);
+#else
+   GENX(3DSTATE_WM_DEPTH_STENCIL_pack)(NULL, depth_stencil_dw, &depth_stencil);
+#endif
+}

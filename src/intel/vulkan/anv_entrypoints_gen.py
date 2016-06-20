@@ -51,19 +51,31 @@ def hash(name):
 
     return h
 
+def get_platform_guard_macro(name):
+    if "Xlib" in name:
+        return "VK_USE_PLATFORM_XLIB_KHR"
+    elif "Xcb" in name:
+        return "VK_USE_PLATFORM_XCB_KHR"
+    elif "Wayland" in name:
+        return "VK_USE_PLATFORM_WAYLAND_KHR"
+    elif "Mir" in name:
+        return "VK_USE_PLATFORM_MIR_KHR"
+    elif "Android" in name:
+        return "VK_USE_PLATFORM_ANDROID_KHR"
+    elif "Win32" in name:
+        return "VK_USE_PLATFORM_WIN32_KHR"
+    else:
+        return None
+
 def print_guard_start(name):
-    if "Wayland" in name:
-        print "#ifdef VK_USE_PLATFORM_WAYLAND_KHR"
-    if "Xcb" in name:
-        print "#ifdef VK_USE_PLATFORM_XCB_KHR"
-    return
+    guard = get_platform_guard_macro(name)
+    if guard is not None:
+        print "#ifdef {0}".format(guard)
 
 def print_guard_end(name):
-    if "Wayland" in name:
-        print "#endif // VK_USE_PLATFORM_WAYLAND_KHR"
-    if "Xcb" in name:
-        print "#endif // VK_USE_PLATFORM_XCB_KHR"
-    return
+    guard = get_platform_guard_macro(name)
+    if guard is not None:
+        print "#endif // {0}".format(guard)
 
 opt_header = False
 opt_code = False
@@ -100,9 +112,15 @@ if opt_header:
     print "      struct {"
 
     for type, name, args, num, h in entrypoints:
-        print_guard_start(name)
-        print "         %s (*%s)%s;" % (type, name, args)
-        print_guard_end(name)
+        guard = get_platform_guard_macro(name)
+        if guard is not None:
+            print "#ifdef {0}".format(guard)
+            print "         PFN_vk{0} {0};".format(name)
+            print "#else"
+            print "         void *{0};".format(name)
+            print "#endif"
+        else:
+            print "         PFN_vk{0} {0};".format(name)
     print "      };\n"
     print "   };\n"
     print "};\n"
@@ -164,11 +182,9 @@ static const char strings[] ="""
 offsets = []
 i = 0;
 for type, name, args, num, h in entrypoints:
-    print_guard_start(name)
     print "   \"vk%s\\0\"" % name
     offsets.append(i)
     i += 2 + len(name) + 1
-    print_guard_end(name)
 print """   ;
 
 /* Weak aliases for all potential validate functions. These will resolve to
@@ -182,9 +198,7 @@ print """   ;
 
 print "\nstatic const struct anv_entrypoint entrypoints[] = {"
 for type, name, args, num, h in entrypoints:
-    print_guard_start(name)
     print "   { %5d, 0x%08x }," % (offsets[num], h)
-    print_guard_end(name)
 print "};\n"
 
 for layer in [ "anv", "validate", "gen7", "gen75", "gen8", "gen9" ]:

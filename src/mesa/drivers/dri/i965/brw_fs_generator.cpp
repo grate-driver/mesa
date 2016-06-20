@@ -440,7 +440,7 @@ fs_generator::generate_urb_read(fs_inst *inst,
    assert(header.type == BRW_REGISTER_TYPE_UD);
 
    brw_inst *send = brw_next_insn(p, BRW_OPCODE_SEND);
-   brw_set_dest(p, send, dst);
+   brw_set_dest(p, send, retype(dst, BRW_REGISTER_TYPE_UD));
    brw_set_src0(p, send, header);
    brw_set_src1(p, send, brw_imm_ud(0u));
 
@@ -1177,7 +1177,7 @@ fs_generator::generate_uniform_pull_constant_load_gen7(fs_inst *inst,
       brw_inst_set_exec_size(devinfo, send, BRW_EXECUTE_4);
       brw_pop_insn_state(p);
 
-      brw_set_dest(p, send, dst);
+      brw_set_dest(p, send, retype(dst, BRW_REGISTER_TYPE_UD));
       brw_set_src0(p, send, src);
       brw_set_sampler_message(p, send,
                               surf_index,

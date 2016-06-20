@@ -45,6 +45,7 @@ brw_upload_cs_state(struct brw_context *brw)
    struct brw_stage_state *stage_state = &brw->cs.base;
    struct brw_cs_prog_data *cs_prog_data = brw->cs.prog_data;
    struct brw_stage_prog_data *prog_data = &cs_prog_data->base;
+   const struct brw_device_info *devinfo = brw->intelScreen->devinfo;
 
    if (INTEL_DEBUG & DEBUG_SHADER_TIME) {
       brw->vtbl.emit_buffer_surface_state(
@@ -63,14 +64,28 @@ brw_upload_cs_state(struct brw_context *brw)
    OUT_BATCH(MEDIA_VFE_STATE << 16 | (dwords - 2));
 
    if (prog_data->total_scratch) {
-      if (brw->gen >= 8)
+      if (brw->gen >= 8) {
+         /* Broadwell's Per Thread Scratch Space is in the range [0, 11]
+          * where 0 = 1k, 1 = 4k, 2 = 8k, ..., 11 = 2M.
+          */
          OUT_RELOC64(stage_state->scratch_bo,
                      I915_GEM_DOMAIN_RENDER, I915_GEM_DOMAIN_RENDER,
-                     ffs(prog_data->total_scratch) - 11);
-      else
+                     ffs(stage_state->per_thread_scratch) - 11);
+      } else if (brw->is_haswell) {
+         /* Haswell's Per Thread Scratch Space is in the range [0, 10]
+          * where 0 = 2k, 1 = 4k, 2 = 8k, ..., 10 = 2M.
+          */
          OUT_RELOC(stage_state->scratch_bo,
                    I915_GEM_DOMAIN_RENDER, I915_GEM_DOMAIN_RENDER,
-                   ffs(prog_data->total_scratch) - 11);
+                   ffs(stage_state->per_thread_scratch) - 12);
+      } else {
+         /* Earlier platforms use the range [0, 11] to mean [1kB, 12kB]
+          * where 0 = 1kB, 1 = 2kB, 2 = 3kB, ..., 11 = 12kB.
+          */
+         OUT_RELOC(stage_state->scratch_bo,
+                   I915_GEM_DOMAIN_RENDER, I915_GEM_DOMAIN_RENDER,
+                   stage_state->per_thread_scratch / 1024 - 1);
+      }
    } else {
       OUT_BATCH(0);
       if (brw->gen >= 8)
@@ -80,7 +95,9 @@ brw_upload_cs_state(struct brw_context *brw)
    const uint32_t vfe_num_urb_entries = brw->gen >= 8 ? 2 : 0;
    const uint32_t vfe_gpgpu_mode =
       brw->gen == 7 ? SET_FIELD(1, GEN7_MEDIA_VFE_STATE_GPGPU_MODE) : 0;
-   OUT_BATCH(SET_FIELD(brw->max_cs_threads - 1, MEDIA_VFE_STATE_MAX_THREADS) |
+   const uint32_t subslices = MAX2(brw->intelScreen->subslice_total, 1);
+   OUT_BATCH(SET_FIELD(brw->max_cs_threads * subslices - 1,
+                       MEDIA_VFE_STATE_MAX_THREADS) |
              SET_FIELD(vfe_num_urb_entries, MEDIA_VFE_STATE_URB_ENTRIES) |
              SET_FIELD(1, MEDIA_VFE_STATE_RESET_GTW_TIMER) |
              SET_FIELD(1, MEDIA_VFE_STATE_BYPASS_GTW) |
@@ -147,15 +164,8 @@ brw_upload_cs_state(struct brw_context *brw)
       SET_FIELD(cs_prog_data->threads, MEDIA_GPGPU_THREAD_COUNT);
    assert(cs_prog_data->threads <= brw->max_cs_threads);
 
-   assert(prog_data->total_shared <= 64 * 1024);
-   uint32_t slm_size = 0;
-   if (prog_data->total_shared > 0) {
-      /* slm_size is in 4k increments, but must be a power of 2. */
-      slm_size = 4 * 1024;
-      while (slm_size < prog_data->total_shared)
-         slm_size <<= 1;
-      slm_size /= 4 * 1024;
-   }
+   const uint32_t slm_size =
+      encode_slm_size(devinfo->gen, prog_data->total_shared);
 
    desc[dw++] =
       SET_FIELD(cs_prog_data->uses_barrier, MEDIA_BARRIER_ENABLE) |

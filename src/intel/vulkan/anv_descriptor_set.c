@@ -73,6 +73,7 @@ VkResult anv_CreateDescriptorSetLayout(
       /* Initialize all binding_layout entries to -1 */
       memset(&set_layout->binding[b], -1, sizeof(set_layout->binding[b]));
 
+      set_layout->binding[b].array_size = 0;
       set_layout->binding[b].immutable_samplers = NULL;
    }
 
@@ -88,8 +89,24 @@ VkResult anv_CreateDescriptorSetLayout(
    for (uint32_t j = 0; j < pCreateInfo->bindingCount; j++) {
       const VkDescriptorSetLayoutBinding *binding = &pCreateInfo->pBindings[j];
       uint32_t b = binding->binding;
+      /* We temporarily store the pointer to the binding in the
+       * immutable_samplers pointer.  This provides us with a quick-and-dirty
+       * way to sort the bindings by binding number.
+       */
+      set_layout->binding[b].immutable_samplers = (void *)binding;
+   }
+
+   for (uint32_t b = 0; b <= max_binding; b++) {
+      const VkDescriptorSetLayoutBinding *binding =
+         (void *)set_layout->binding[b].immutable_samplers;
+
+      if (binding == NULL)
+         continue;
 
       assert(binding->descriptorCount > 0);
+#ifndef NDEBUG
+      set_layout->binding[b].type = binding->descriptorType;
+#endif
       set_layout->binding[b].array_size = binding->descriptorCount;
       set_layout->binding[b].descriptor_index = set_layout->size;
       set_layout->size += binding->descriptorCount;
@@ -524,6 +541,8 @@ void anv_UpdateDescriptorSets(
       struct anv_descriptor *desc =
          &set->descriptors[bind_layout->descriptor_index];
       desc += write->dstArrayElement;
+
+      assert(write->descriptorType == bind_layout->type);
 
       switch (write->descriptorType) {
       case VK_DESCRIPTOR_TYPE_SAMPLER:

@@ -25,8 +25,6 @@
  *
  **************************************************************************/
 
-#if defined(HAVE_DRI3)
-
 #include <fcntl.h>
 
 #include <X11/Xlib-xcb.h>
@@ -360,8 +358,13 @@ dri3_set_drawable(struct vl_dri3_screen *scrn, Drawable drawable)
    if (error) {
       if (error->error_code != BadWindow)
          ret = false;
-      else
+      else {
          scrn->is_pixmap = true;
+         if (scrn->front_buffer) {
+            dri3_free_front_buffer(scrn, scrn->front_buffer);
+            scrn->front_buffer = NULL;
+         }
+      }
       free(error);
    } else
       scrn->special_event =
@@ -706,5 +709,3 @@ free_screen:
    FREE(scrn);
    return NULL;
 }
-
-#endif // defined(HAVE_DRI3)

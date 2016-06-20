@@ -241,15 +241,7 @@ flush_compute_descriptor_set(struct anv_cmd_buffer *cmd_buffer)
       }
    }
 
-   assert(prog_data->total_shared <= 64 * 1024);
-   uint32_t slm_size = 0;
-   if (prog_data->total_shared > 0) {
-      /* slm_size is in 4k increments, but must be a power of 2. */
-      slm_size = 4 * 1024;
-      while (slm_size < prog_data->total_shared)
-         slm_size <<= 1;
-      slm_size /= 4 * 1024;
-   }
+   const uint32_t slm_size = encode_slm_size(GEN_GEN, prog_data->total_shared);
 
    struct anv_state state =
       anv_state_pool_emit(&device->dynamic_state_pool,
@@ -354,7 +346,7 @@ genX(cmd_buffer_flush_dynamic_state)(struct anv_cmd_buffer *cmd_buffer)
          .BlendConstantColorBlue = cmd_buffer->state.dynamic.blend_constants[2],
          .BlendConstantColorAlpha = cmd_buffer->state.dynamic.blend_constants[3],
          .StencilReferenceValue = d->stencil_reference.front & 0xff,
-         .BackFaceStencilReferenceValue = d->stencil_reference.back & 0xff,
+         .BackfaceStencilReferenceValue = d->stencil_reference.back & 0xff,
       };
       GENX(COLOR_CALC_STATE_pack)(NULL, cc_state.map, &cc);
       if (!cmd_buffer->device->info.has_llc)

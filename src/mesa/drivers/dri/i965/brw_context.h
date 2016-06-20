@@ -674,8 +674,27 @@ struct brw_stage_state
    /**
     * Optional scratch buffer used to store spilled register values and
     * variably-indexed GRF arrays.
+    *
+    * The contents of this buffer are short-lived so the same memory can be
+    * re-used at will for multiple shader programs (executed by the same fixed
+    * function).  However reusing a scratch BO for which shader invocations
+    * are still in flight with a per-thread scratch slot size other than the
+    * original can cause threads with different scratch slot size and FFTID
+    * (which may be executed in parallel depending on the shader stage and
+    * hardware generation) to map to an overlapping region of the scratch
+    * space, which can potentially lead to mutual scratch space corruption.
+    * For that reason if you borrow this scratch buffer you should only be
+    * using the slot size given by the \c per_thread_scratch member below,
+    * unless you're taking additional measures to synchronize thread execution
+    * across slot size changes.
     */
    drm_intel_bo *scratch_bo;
+
+   /**
+    * Scratch slot size allocated for each thread in the buffer object given
+    * by \c scratch_bo.
+    */
+   uint32_t per_thread_scratch;
 
    /** Offset in the program cache to the program */
    uint32_t prog_offset;
@@ -1477,10 +1496,14 @@ void brwInitFragProgFuncs( struct dd_function_table *functions );
 static inline int
 brw_get_scratch_size(int size)
 {
-   return util_next_power_of_two(size | 1023);
+   return MAX2(1024, util_next_power_of_two(size));
 }
 void brw_get_scratch_bo(struct brw_context *brw,
 			drm_intel_bo **scratch_bo, int size);
+void brw_alloc_stage_scratch(struct brw_context *brw,
+                             struct brw_stage_state *stage_state,
+                             unsigned per_thread_size,
+                             unsigned thread_count);
 void brw_init_shader_time(struct brw_context *brw);
 int brw_get_shader_time_index(struct brw_context *brw,
                               struct gl_shader_program *shader_prog,

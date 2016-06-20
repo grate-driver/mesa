@@ -1097,6 +1097,10 @@ intelDestroyContext(__DRIcontext * driContextPriv)
    drm_intel_bo_unreference(brw->curbe.curbe_bo);
    if (brw->vs.base.scratch_bo)
       drm_intel_bo_unreference(brw->vs.base.scratch_bo);
+   if (brw->tcs.base.scratch_bo)
+      drm_intel_bo_unreference(brw->tcs.base.scratch_bo);
+   if (brw->tes.base.scratch_bo)
+      drm_intel_bo_unreference(brw->tes.base.scratch_bo);
    if (brw->gs.base.scratch_bo)
       drm_intel_bo_unreference(brw->gs.base.scratch_bo);
    if (brw->wm.base.scratch_bo)
@@ -1642,6 +1646,7 @@ intel_update_image_buffers(struct brw_context *brw, __DRIdrawable *drawable)
    struct __DRIimageList images;
    unsigned int format;
    uint32_t buffer_mask = 0;
+   int ret;
 
    front_rb = intel_get_renderbuffer(fb, BUFFER_FRONT_LEFT);
    back_rb = intel_get_renderbuffer(fb, BUFFER_BACK_LEFT);
@@ -1661,12 +1666,14 @@ intel_update_image_buffers(struct brw_context *brw, __DRIdrawable *drawable)
    if (back_rb)
       buffer_mask |= __DRI_IMAGE_BUFFER_BACK;
 
-   (*screen->image.loader->getBuffers) (drawable,
-                                        driGLFormatToImageFormat(format),
-                                        &drawable->dri2.stamp,
-                                        drawable->loaderPrivate,
-                                        buffer_mask,
-                                        &images);
+   ret = screen->image.loader->getBuffers(drawable,
+                                          driGLFormatToImageFormat(format),
+                                          &drawable->dri2.stamp,
+                                          drawable->loaderPrivate,
+                                          buffer_mask,
+                                          &images);
+   if (!ret)
+      return;
 
    if (images.image_mask & __DRI_IMAGE_BUFFER_FRONT) {
       drawable->w = images.front->width;

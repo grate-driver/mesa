@@ -262,6 +262,9 @@ nvc0_compute_validate_buffers(struct nvc0_context *nvc0)
          PUSH_DATA (push, nvc0->buffers[s][i].buffer_size);
          PUSH_DATA (push, 0);
          BCTX_REFN(nvc0->bufctx_cp, CP_BUF, res, RDWR);
+         util_range_add(&res->valid_buffer_range,
+                        nvc0->buffers[s][i].buffer_offset,
+                        nvc0->buffers[s][i].buffer_size);
       } else {
          PUSH_DATA (push, 0);
          PUSH_DATA (push, 0);
@@ -321,6 +324,7 @@ nvc0_compute_validate_surfaces(struct nvc0_context *nvc0)
    nvc0_validate_suf(nvc0, 5);
 
    /* Invalidate all FRAGMENT images because they are aliased with COMPUTE. */
+   nouveau_bufctx_reset(nvc0->bufctx_3d, NVC0_BIND_3D_SUF);
    nvc0->dirty_3d |= NVC0_NEW_3D_SURFACES;
    nvc0->images_dirty[4] |= nvc0->images_valid[4];
 }
@@ -455,4 +459,7 @@ nvc0_launch_grid(struct pipe_context *pipe, const struct pipe_grid_info *info)
 
    /* TODO: Not sure if this is really necessary. */
    nvc0_compute_invalidate_surfaces(nvc0, 5);
+   nouveau_bufctx_reset(nvc0->bufctx_cp, NVC0_BIND_CP_SUF);
+   nvc0->dirty_cp |= NVC0_NEW_CP_SURFACES;
+   nvc0->images_dirty[5] |= nvc0->images_valid[5];
 }

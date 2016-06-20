@@ -455,23 +455,43 @@ guess_and_alloc_texture(struct st_context *st,
 			struct st_texture_object *stObj,
 			const struct st_texture_image *stImage)
 {
+   const struct gl_texture_image *firstImage;
    GLuint lastLevel, width, height, depth;
    GLuint bindings;
    GLuint ptWidth, ptHeight, ptDepth, ptLayers;
    enum pipe_format fmt;
+   bool guessed_box = false;
 
    DBG("%s\n", __func__);
 
    assert(!stObj->pt);
 
-   if (!guess_base_level_size(stObj->base.Target,
-                              stImage->base.Width2,
-                              stImage->base.Height2,
-                              stImage->base.Depth2,
-                              stImage->base.Level,
-                              &width, &height, &depth)) {
+   /* If a base level image with compatible size exists, use that as our guess.
+    */
+   firstImage = _mesa_base_tex_image(&stObj->base);
+   if (firstImage &&
+       guess_base_level_size(stObj->base.Target,
+                             firstImage->Width2,
+                             firstImage->Height2,
+                             firstImage->Depth2,
+                             firstImage->Level,
+                             &width, &height, &depth)) {
+      if (stImage->base.Width2 == u_minify(width, stImage->base.Level) &&
+          stImage->base.Height2 == u_minify(height, stImage->base.Level) &&
+          stImage->base.Depth2 == u_minify(depth, stImage->base.Level))
+         guessed_box = true;
+   }
+
+   if (!guessed_box)
+      guessed_box = guess_base_level_size(stObj->base.Target,
+                                          stImage->base.Width2,
+                                          stImage->base.Height2,
+                                          stImage->base.Depth2,
+                                          stImage->base.Level,
+                                          &width, &height, &depth);
+
+   if (!guessed_box) {
       /* we can't determine the image size at level=0 */
-      stObj->width0 = stObj->height0 = stObj->depth0 = 0;
       /* this is not an out of memory error */
       return GL_TRUE;
    }
@@ -495,11 +515,6 @@ guess_and_alloc_texture(struct st_context *st,
       /* only alloc space for a single mipmap level */
       lastLevel = 0;
    }
-
-   /* Save the level=0 dimensions */
-   stObj->width0 = width;
-   stObj->height0 = height;
-   stObj->depth0 = depth;
 
    fmt = st_mesa_format_to_pipe_format(st, stImage->base.TexFormat);
 
@@ -2812,9 +2827,6 @@ st_finalize_texture(struct gl_context *ctx,
       if (st_obj->buffer != stObj->pt) {
          pipe_resource_reference(&stObj->pt, st_obj->buffer);
          st_texture_release_all_sampler_views(st, stObj);
-         stObj->width0 = stObj->pt->width0 / _mesa_get_format_bytes(tObj->_BufferObjectFormat);
-         stObj->height0 = 1;
-         stObj->depth0 = 1;
       }
       return GL_TRUE;
 
@@ -2847,25 +2859,44 @@ st_finalize_texture(struct gl_context *ctx,
    /* Find size of level=0 Gallium mipmap image, plus number of texture layers */
    {
       GLuint width, height, depth;
-      if (!guess_base_level_size(stObj->base.Target,
-                                 firstImage->base.Width2,
-                                 firstImage->base.Height2,
-                                 firstImage->base.Depth2,
-                                 firstImage->base.Level,
-                                 &width, &height, &depth)) {
-         width = stObj->width0;
-         height = stObj->height0;
-         depth = stObj->depth0;
+
+      st_gl_texture_dims_to_pipe_dims(stObj->base.Target,
+                                      firstImage->base.Width2,
+                                      firstImage->base.Height2,
+                                      firstImage->base.Depth2,
+                                      &width, &height, &depth, &ptLayers);
+
+      /* If we previously allocated a pipe texture and its sizes are
+       * compatible, use them.
+       */
+      if (stObj->pt &&
+          u_minify(stObj->pt->width0, firstImage->base.Level) == width &&
+          u_minify(stObj->pt->height0, firstImage->base.Level) == height &&
+          u_minify(stObj->pt->depth0, firstImage->base.Level) == depth) {
+         ptWidth = stObj->pt->width0;
+         ptHeight = stObj->pt->height0;
+         ptDepth = stObj->pt->depth0;
       } else {
-         /* The width/height/depth may have been previously reset in
-          * guess_and_alloc_texture. */
-         stObj->width0 = width;
-         stObj->height0 = height;
-         stObj->depth0 = depth;
+         /* Otherwise, compute a new level=0 size that is compatible with the
+          * base level image.
+          */
+         ptWidth = width > 1 ? width << firstImage->base.Level : 1;
+         ptHeight = height > 1 ? height << firstImage->base.Level : 1;
+         ptDepth = depth > 1 ? depth << firstImage->base.Level : 1;
+
+         /* If the base level image is 1x1x1, we still need to ensure that the
+          * resulting pipe texture ends up with the required number of levels
+          * in total.
+          */
+         if (ptWidth == 1 && ptHeight == 1 && ptDepth == 1) {
+            ptWidth <<= firstImage->base.Level;
+
+            if (stObj->base.Target == GL_TEXTURE_CUBE_MAP ||
+                stObj->base.Target == GL_TEXTURE_CUBE_MAP_ARRAY)
+               ptHeight = ptWidth;
+         }
       }
-      /* convert GL dims to Gallium dims */
-      st_gl_texture_dims_to_pipe_dims(stObj->base.Target, width, height, depth,
-                                      &ptWidth, &ptHeight, &ptDepth, &ptLayers);
+
       ptNumSamples = firstImage->base.NumSamples;
    }
 
@@ -2923,16 +2954,23 @@ st_finalize_texture(struct gl_context *ctx,
          /* Need to import images in main memory or held in other textures.
           */
          if (stImage && stObj->pt != stImage->pt) {
-            GLuint height = stObj->height0;
-            GLuint depth = stObj->depth0;
+            GLuint height;
+            GLuint depth;
 
             if (stObj->base.Target != GL_TEXTURE_1D_ARRAY)
-               height = u_minify(height, level);
+               height = u_minify(ptHeight, level);
+            else
+               height = ptLayers;
+
             if (stObj->base.Target == GL_TEXTURE_3D)
-               depth = u_minify(depth, level);
+               depth = u_minify(ptDepth, level);
+            else if (stObj->base.Target == GL_TEXTURE_CUBE_MAP)
+               depth = 1;
+            else
+               depth = ptLayers;
 
             if (level == 0 ||
-                (stImage->base.Width == u_minify(stObj->width0, level) &&
+                (stImage->base.Width == u_minify(ptWidth, level) &&
                  stImage->base.Height == height &&
                  stImage->base.Depth == depth)) {
                /* src image fits expected dest mipmap level size */
@@ -2968,10 +3006,6 @@ st_AllocTextureStorage(struct gl_context *ctx,
 
    assert(levels > 0);
 
-   /* Save the level=0 dimensions */
-   stObj->width0 = width;
-   stObj->height0 = height;
-   stObj->depth0 = depth;
    stObj->lastLevel = levels - 1;
 
    fmt = st_mesa_format_to_pipe_format(st, texImage->TexFormat);
@@ -3109,9 +3143,6 @@ st_TextureView(struct gl_context *ctx,
    tex->surface_format =
       st_mesa_format_to_pipe_format(st_context(ctx), image->TexFormat);
 
-   tex->width0 = image->Width;
-   tex->height0 = image->Height;
-   tex->depth0 = image->Depth;
    tex->lastLevel = numLevels - 1;
 
    return GL_TRUE;

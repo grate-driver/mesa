@@ -214,6 +214,11 @@ nve4_compute_validate_surfaces(struct nvc0_context *nvc0)
       if (view->resource) {
          struct nv04_resource *res = nv04_resource(view->resource);
 
+         if (res->base.target == PIPE_BUFFER) {
+            if (view->access & PIPE_IMAGE_ACCESS_WRITE)
+               nvc0_mark_image_range_valid(view);
+         }
+
          nve4_set_surface_info(push, view, nvc0);
          BCTX_REFN(nvc0->bufctx_cp, CP_SUF, res, RDWR);
       } else {
@@ -364,6 +369,9 @@ nve4_compute_validate_buffers(struct nvc0_context *nvc0)
          PUSH_DATA (push, nvc0->buffers[s][i].buffer_size);
          PUSH_DATA (push, 0);
          BCTX_REFN(nvc0->bufctx_cp, CP_BUF, res, RDWR);
+         util_range_add(&res->valid_buffer_range,
+                        nvc0->buffers[s][i].buffer_offset,
+                        nvc0->buffers[s][i].buffer_size);
       } else {
          PUSH_DATA (push, 0);
          PUSH_DATA (push, 0);

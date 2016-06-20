@@ -1189,7 +1189,18 @@ fs_visitor::emit_general_interpolation(fs_reg *attr, const char *name,
           * handed us defined values in only the constant offset
           * field of the setup reg.
           */
-         for (unsigned int i = 0; i < type->vector_elements; i++) {
+         unsigned vector_elements = type->vector_elements;
+
+         /* Data starts at suboffet 3 in 32-bit units (12 bytes), so it is not
+          * 64-bit aligned and the current implementation fails to read the
+          * data properly. Instead, when there is is a double input varying,
+          * read it as vector of floats with twice the number of components.
+          */
+         if (attr->type == BRW_REGISTER_TYPE_DF) {
+            vector_elements *= 2;
+            attr->type = BRW_REGISTER_TYPE_F;
+         }
+         for (unsigned int i = 0; i < vector_elements; i++) {
             struct brw_reg interp = interp_reg(*location, i);
             interp = suboffset(interp, 3);
             interp.type = attr->type;
@@ -5110,6 +5121,52 @@ emit_unzip(const fs_builder &lbld, bblock_t *block, fs_inst *inst,
 }
 
 /**
+ * Return true if splitting out the group of channels of instruction \p inst
+ * given by lbld.group() requires allocating a temporary for the destination
+ * of the lowered instruction and copying the data back to the original
+ * destination region.
+ */
+static inline bool
+needs_dst_copy(const fs_builder &lbld, const fs_inst *inst)
+{
+   /* If the instruction writes more than one component we'll have to shuffle
+    * the results of multiple lowered instructions in order to make sure that
+    * they end up arranged correctly in the original destination region.
+    */
+   if (inst->regs_written * REG_SIZE >
+       inst->dst.component_size(inst->exec_size))
+      return true;
+
+   /* If the lowered execution size is larger than the original the result of
+    * the instruction won't fit in the original destination, so we'll have to
+    * allocate a temporary in any case.
+    */
+   if (lbld.dispatch_width() > inst->exec_size)
+      return true;
+
+   for (unsigned i = 0; i < inst->sources; i++) {
+      /* If we already made a copy of the source for other reasons there won't
+       * be any overlap with the destination.
+       */
+      if (needs_src_copy(lbld, inst, i))
+         continue;
+
+      /* In order to keep the logic simple we emit a copy whenever the
+       * destination region doesn't exactly match an overlapping source, which
+       * may point at the source and destination not being aligned group by
+       * group which could cause one of the lowered instructions to overwrite
+       * the data read from the same source by other lowered instructions.
+       */
+      if (regions_overlap(inst->dst, inst->regs_written * REG_SIZE,
+                          inst->src[i], inst->regs_read(i) * REG_SIZE) &&
+          !inst->dst.equals(inst->src[i]))
+        return true;
+   }
+
+   return false;
+}
+
+/**
  * Insert data from a packed temporary into the channel group given by
  * lbld.group() of the destination region of instruction \p inst and return
  * the temporary as result.  If any copy instructions are required they will
@@ -5129,23 +5186,32 @@ emit_zip(const fs_builder &lbld, bblock_t *block, fs_inst *inst)
    const fs_reg dst = horiz_offset(inst->dst, lbld.group());
    const unsigned dst_size = inst->regs_written * REG_SIZE /
             inst->dst.component_size(inst->exec_size);
-   const fs_reg tmp = lbld.vgrf(inst->dst.type, dst_size);
 
-   if (inst->predicate) {
-      /* Handle predication by copying the original contents of the
-       * destination into the temporary before emitting the lowered
-       * instruction.
-       */
+   if (needs_dst_copy(lbld, inst)) {
+      const fs_reg tmp = lbld.vgrf(inst->dst.type, dst_size);
+
+      if (inst->predicate) {
+         /* Handle predication by copying the original contents of
+          * the destination into the temporary before emitting the
+          * lowered instruction.
+          */
+         for (unsigned k = 0; k < dst_size; ++k)
+            cbld.at(block, inst)
+                .MOV(offset(tmp, lbld, k), offset(dst, inst->exec_size, k));
+      }
+
       for (unsigned k = 0; k < dst_size; ++k)
-         cbld.at(block, inst)
-             .MOV(offset(tmp, lbld, k), offset(dst, inst->exec_size, k));
+         cbld.at(block, inst->next)
+             .MOV(offset(dst, inst->exec_size, k), offset(tmp, lbld, k));
+
+      return tmp;
+
+   } else {
+      /* No need to allocate a temporary for the lowered instruction, just
+       * take the right group of channels from the original region.
+       */
+      return dst;
    }
-
-   for (unsigned k = 0; k < dst_size; ++k)
-      cbld.at(block, inst->next)
-          .MOV(offset(dst, inst->exec_size, k), offset(tmp, lbld, k));
-
-   return tmp;
 }
 
 bool
@@ -5195,9 +5261,9 @@ fs_visitor::lower_simd_width()
                split_inst.src[j] = emit_unzip(lbld, block, inst, j);
 
             split_inst.dst = emit_zip(lbld, block, inst);
-            split_inst.regs_written =
-               DIV_ROUND_UP(type_sz(inst->dst.type) * dst_size * lower_width,
-                            REG_SIZE);
+            split_inst.regs_written = DIV_ROUND_UP(
+               split_inst.dst.component_size(lower_width) * dst_size,
+               REG_SIZE);
 
             lbld.emit(split_inst);
          }
@@ -5919,8 +5985,38 @@ fs_visitor::allocate_registers(bool allow_spilling)
 
    schedule_instructions(SCHEDULE_POST);
 
-   if (last_scratch > 0)
+   if (last_scratch > 0) {
       prog_data->total_scratch = brw_get_scratch_size(last_scratch);
+
+      if (devinfo->is_haswell && stage == MESA_SHADER_COMPUTE) {
+         /* According to the MEDIA_VFE_STATE's "Per Thread Scratch Space"
+          * field documentation, Haswell supports a minimum of 2kB of
+          * scratch space for compute shaders, unlike every other stage
+          * and platform.
+          */
+         prog_data->total_scratch = MAX2(prog_data->total_scratch, 2048);
+      } else if (devinfo->gen <= 7 && stage == MESA_SHADER_COMPUTE) {
+         /* According to the MEDIAVFE_STATE's "Per Thread Scratch Space"
+          * field documentation, platforms prior to Haswell measure scratch
+          * size linearly with a range of [1kB, 12kB] and 1kB granularity.
+          */
+         prog_data->total_scratch = ALIGN(last_scratch, 1024);
+
+         assert(prog_data->total_scratch < 12 * 1024);
+      }
+
+      /* We currently only support up to 2MB of scratch space.  If we
+       * need to support more eventually, the documentation suggests
+       * that we could allocate a larger buffer, and partition it out
+       * ourselves.  We'd just have to undo the hardware's address
+       * calculation by subtracting (FFTID * Per Thread Scratch Space)
+       * and then add FFTID * (Larger Per Thread Scratch Space).
+       *
+       * See 3D-Media-GPGPU Engine > Media GPGPU Pipeline >
+       * Thread Group Tracking > Local Memory/Scratch Space.
+       */
+      assert(prog_data->total_scratch < 2 * 1024 * 1024);
+   }
 }
 
 bool

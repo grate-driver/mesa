@@ -60,6 +60,7 @@
 #include "si_shader.h"
 #include "sid.h"
 
+#include "util/u_format.h"
 #include "util/u_math.h"
 #include "util/u_memory.h"
 #include "util/u_suballoc.h"
@@ -159,7 +160,7 @@ static bool si_ce_upload(struct si_context *sctx, unsigned ce_offset, unsigned s
 	return true;
 }
 
-static void si_reinitialize_ce_ram(struct si_context *sctx,
+static void si_ce_reinitialize_descriptors(struct si_context *sctx,
                             struct si_descriptors *desc)
 {
 	if (desc->buffer) {
@@ -185,6 +186,17 @@ static void si_reinitialize_ce_ram(struct si_context *sctx,
 	desc->ce_ram_dirty = false;
 }
 
+void si_ce_reinitialize_all_descriptors(struct si_context *sctx)
+{
+	for (int i = 0; i < SI_NUM_SHADERS; i++) {
+		 si_ce_reinitialize_descriptors(sctx, &sctx->const_buffers[i].desc);
+		 si_ce_reinitialize_descriptors(sctx, &sctx->shader_buffers[i].desc);
+		 si_ce_reinitialize_descriptors(sctx, &sctx->samplers[i].views.desc);
+		 si_ce_reinitialize_descriptors(sctx, &sctx->images[i].desc);
+	}
+	 si_ce_reinitialize_descriptors(sctx, &sctx->rw_buffers.desc);
+}
+
 void si_ce_enable_loads(struct radeon_winsys_cs *ib)
 {
 	radeon_emit(ib, PKT3(PKT3_CONTEXT_CONTROL, 1, 0));
@@ -206,7 +218,7 @@ static bool si_upload_descriptors(struct si_context *sctx,
 		uint32_t const* list = (uint32_t const*)desc->list;
 
 		if (desc->ce_ram_dirty)
-			si_reinitialize_ce_ram(sctx, desc);
+			si_ce_reinitialize_descriptors(sctx, desc);
 
 		while(desc->dirty_mask) {
 			int begin, count;
@@ -471,6 +483,23 @@ si_disable_shader_image(struct si_images_info *images, unsigned slot)
 }
 
 static void
+si_mark_image_range_valid(struct pipe_image_view *view)
+{
+	struct r600_resource *res = (struct r600_resource *)view->resource;
+	const struct util_format_description *desc;
+	unsigned stride;
+
+	assert(res && res->b.b.target == PIPE_BUFFER);
+
+	desc = util_format_description(view->format);
+	stride = desc->block.bits / 8;
+
+	util_range_add(&res->valid_buffer_range,
+		       stride * (view->u.buf.first_element),
+		       stride * (view->u.buf.last_element + 1));
+}
+
+static void
 si_set_shader_images(struct pipe_context *pipe, unsigned shader,
 		     unsigned start_slot, unsigned count,
 		     struct pipe_image_view *views)
@@ -502,6 +531,9 @@ si_set_shader_images(struct pipe_context *pipe, unsigned shader,
 					   RADEON_USAGE_READWRITE);
 
 		if (res->b.b.target == PIPE_BUFFER) {
+			if (views[i].access & PIPE_IMAGE_ACCESS_WRITE)
+				si_mark_image_range_valid(&views[i]);
+
 			si_make_buffer_descriptor(screen, res,
 						  views[i].format,
 						  views[i].u.buf.first_element,
@@ -884,6 +916,7 @@ static void si_set_shader_buffers(struct pipe_context *ctx, unsigned shader,
 			pipe_resource_reference(&buffers->buffers[slot], NULL);
 			memset(desc, 0, sizeof(uint32_t) * 4);
 			buffers->desc.enabled_mask &= ~(1u << slot);
+			buffers->desc.dirty_mask |= 1u << slot;
 			continue;
 		}
 
@@ -1297,6 +1330,9 @@ static void si_invalidate_buffer(struct pipe_context *ctx, struct pipe_resource 
 			unsigned i = u_bit_scan(&mask);
 
 			if (images->views[i].resource == buf) {
+				if (images->views[i].access & PIPE_IMAGE_ACCESS_WRITE)
+					si_mark_image_range_valid(&images->views[i]);
+
 				si_desc_reset_buffer_offset(
 					ctx, images->desc.list + i * 8 + 4,
 					old_va, buf);

@@ -922,6 +922,11 @@ struct anv_vue_header {
 };
 
 struct anv_descriptor_set_binding_layout {
+#ifndef NDEBUG
+   /* The type of the descriptors in this binding */
+   VkDescriptorType type;
+#endif
+
    /* Number of array elements in this binding */
    uint16_t array_size;
 
@@ -1012,17 +1017,20 @@ anv_descriptor_set_destroy(struct anv_device *device,
                            struct anv_descriptor_pool *pool,
                            struct anv_descriptor_set *set);
 
-#define ANV_DESCRIPTOR_SET_COLOR_ATTACHMENTS UINT16_MAX
+#define ANV_DESCRIPTOR_SET_COLOR_ATTACHMENTS UINT8_MAX
 
 struct anv_pipeline_binding {
    /* The descriptor set this surface corresponds to.  The special value of
     * ANV_DESCRIPTOR_SET_COLOR_ATTACHMENTS indicates that the offset refers
     * to a color attachment and not a regular descriptor.
     */
-   uint16_t set;
+   uint8_t set;
 
-   /* Offset into the descriptor set or attachment list. */
-   uint16_t offset;
+   /* Binding in the descriptor set */
+   uint8_t binding;
+
+   /* Index in the binding */
+   uint8_t index;
 };
 
 struct anv_pipeline_layout {
