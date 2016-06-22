@@ -165,6 +165,9 @@ anv_shader_compile_to_nir(struct anv_device *device,
       nir_remove_dead_variables(nir, nir_var_system_value);
       nir_validate_shader(nir);
 
+      nir_propagate_invariant(nir);
+      nir_validate_shader(nir);
+
       nir_lower_io_to_temporaries(entry_point->shader, entry_point, true, false);
 
       nir_lower_system_values(nir);
@@ -1162,6 +1165,8 @@ anv_pipeline_init(struct anv_pipeline *pipeline,
    pipeline->batch.relocs = &pipeline->batch_relocs;
 
    copy_non_dynamic_state(pipeline, pCreateInfo);
+   pipeline->depth_clamp_enable = pCreateInfo->pRasterizationState &&
+                                  pCreateInfo->pRasterizationState->depthClampEnable;
 
    pipeline->use_repclear = extra && extra->use_repclear;
 

@@ -715,10 +715,35 @@ fs_visitor::nir_emit_alu(const fs_builder &bld, nir_alu_instr *instr)
    case nir_op_u2f:
       if (optimize_extract_to_float(instr, result))
          return;
+      inst = bld.MOV(result, op[0]);
+      inst->saturate = instr->dest.saturate;
+      break;
 
    case nir_op_f2d:
    case nir_op_i2d:
    case nir_op_u2d:
+      /* CHV PRM, vol07, 3D Media GPGPU Engine, Register Region Restrictions:
+       *
+       *    "When source or destination is 64b (...), regioning in Align1
+       *     must follow these rules:
+       *
+       *     1. Source and destination horizontal stride must be aligned to
+       *        the same qword.
+       *     (...)"
+       *
+       * This means that 32-bit to 64-bit conversions need to have the 32-bit
+       * data elements aligned to 64-bit. This restriction does not apply to
+       * BDW and later.
+       */
+      if (devinfo->is_cherryview || devinfo->is_broxton) {
+         fs_reg tmp = bld.vgrf(result.type, 1);
+         tmp = subscript(tmp, op[0].type, 0);
+         inst = bld.MOV(tmp, op[0]);
+         inst = bld.MOV(result, tmp);
+         inst->saturate = instr->dest.saturate;
+         break;
+      }
+      /* fallthrough */
    case nir_op_d2f:
    case nir_op_d2i:
    case nir_op_d2u:
@@ -3586,10 +3611,32 @@ fs_visitor::nir_emit_intrinsic(const fs_builder &bld, nir_intrinsic_instr *instr
          unsigned read_size = instr->const_index[1] -
             (instr->num_components - 1) * type_sz(dest.type);
 
+         fs_reg indirect_chv_high_32bit;
+         bool is_chv_bxt_64bit =
+            (devinfo->is_cherryview || devinfo->is_broxton) &&
+            type_sz(dest.type) == 8;
+         if (is_chv_bxt_64bit) {
+            indirect_chv_high_32bit = vgrf(glsl_type::uint_type);
+            /* Calculate indirect address to read high 32 bits */
+            bld.ADD(indirect_chv_high_32bit, indirect, brw_imm_ud(4));
+         }
+
          for (unsigned j = 0; j < instr->num_components; j++) {
-            bld.emit(SHADER_OPCODE_MOV_INDIRECT,
-                     offset(dest, bld, j), offset(src, bld, j),
-                     indirect, brw_imm_ud(read_size));
+            if (!is_chv_bxt_64bit) {
+               bld.emit(SHADER_OPCODE_MOV_INDIRECT,
+                        offset(dest, bld, j), offset(src, bld, j),
+                        indirect, brw_imm_ud(read_size));
+            } else {
+               bld.emit(SHADER_OPCODE_MOV_INDIRECT,
+                        subscript(offset(dest, bld, j), BRW_REGISTER_TYPE_UD, 0),
+                        offset(src, bld, j),
+                        indirect, brw_imm_ud(read_size));
+
+               bld.emit(SHADER_OPCODE_MOV_INDIRECT,
+                        subscript(offset(dest, bld, j), BRW_REGISTER_TYPE_UD, 1),
+                        offset(src, bld, j),
+                        indirect_chv_high_32bit, brw_imm_ud(read_size));
+            }
          }
       }
       break;
