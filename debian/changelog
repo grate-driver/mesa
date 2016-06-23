@@ -7,6 +7,7 @@ mesa (12.0.0~rc4-1) UNRELEASED; urgency=medium
     libgcrypt20-dev and libvulkan-dev to build-depends.
   * rules: Tidy up override_dh_clean.
   * rules: Use package version for MESA_GIT_SHA1.
+  * rules: Fix install of va drivers.
 
  -- Timo Aaltonen <tjaalton@debian.org>  Wed, 04 May 2016 15:41:31 +0300
 
