@@ -8,6 +8,7 @@ mesa (12.0.0~rc4-1) UNRELEASED; urgency=medium
   * rules: Tidy up override_dh_clean.
   * rules: Use package version for MESA_GIT_SHA1.
   * rules: Fix install of va drivers.
+  * gallivm-disable-avx512-features.diff: Removed, included upstream.
 
  -- Timo Aaltonen <tjaalton@debian.org>  Wed, 04 May 2016 15:41:31 +0300
 
