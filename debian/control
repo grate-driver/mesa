@@ -474,7 +474,8 @@ Depends:
  ${shlibs:Depends},
  ${misc:Depends}
 Description: Mesa Vulkan drivers
-
+ Vulkan is a low-overhead 3D graphics and compute API. This package
+ includes Vulkan drivers provided by the Mesa project.
 
 Package: mesa-opencl-icd
 Section: libs
