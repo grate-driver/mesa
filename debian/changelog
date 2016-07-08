@@ -9,6 +9,7 @@ mesa (12.0.0~rc4-1) UNRELEASED; urgency=medium
   * rules: Use package version for MESA_GIT_SHA1.
   * rules: Fix install of va drivers.
   * gallivm-disable-avx512-features.diff: Removed, included upstream.
+  * control, rules: Enable llvm/opencl on arm64. (LP: #1585942)
 
  -- Timo Aaltonen <tjaalton@debian.org>  Wed, 04 May 2016 15:41:31 +0300
 
