@@ -420,7 +420,7 @@ CodeEmitterGM107::emitSAT(int pos)
 void
 CodeEmitterGM107::emitCC(int pos)
 {
-   emitField(pos, 1, insn->defExists(1));
+   emitField(pos, 1, insn->flagsDef >= 0);
 }
 
 void
@@ -678,8 +678,7 @@ CodeEmitterGM107::emitRAM()
 void
 CodeEmitterGM107::emitMOV()
 {
-   if ( insn->src(0).getFile() != FILE_IMMEDIATE ||
-       (insn->sType != TYPE_F32 && !longIMMD(insn->src(0)))) {
+   if (insn->src(0).getFile() != FILE_IMMEDIATE) {
       switch (insn->src(0).getFile()) {
       case FILE_GPR:
          if (insn->def(0).getFile() == FILE_PREDICATE) {
@@ -1235,6 +1234,9 @@ CodeEmitterGM107::emitFADD()
       emitABS(0x2e, insn->src(0));
       emitNEG(0x2d, insn->src(1));
       emitFMZ(0x2c, 1);
+
+      if (insn->op == OP_SUB)
+         code[1] ^= 0x00002000;
    } else {
       emitInsn(0x08000000);
       emitABS(0x39, insn->src(1));
@@ -1244,10 +1246,10 @@ CodeEmitterGM107::emitFADD()
       emitNEG(0x35, insn->src(1));
       emitCC  (0x34);
       emitIMMD(0x14, 32, insn->src(1));
-   }
 
-   if (insn->op == OP_SUB)
-      code[1] ^= 0x00002000;
+      if (insn->op == OP_SUB)
+         code[1] ^= 0x00080000;
+   }
 
    emitGPR(0x08, insn->src(0));
    emitGPR(0x00, insn->def(0));
@@ -1607,7 +1609,7 @@ CodeEmitterGM107::emitLOP()
       break;
    }
 
-   if (!longIMMD(insn->src(1))) {
+   if (insn->src(1).getFile() != FILE_IMMEDIATE) {
       switch (insn->src(1).getFile()) {
       case FILE_GPR:
          emitInsn(0x5c400000);
@@ -1626,6 +1628,7 @@ CodeEmitterGM107::emitLOP()
          break;
       }
       emitPRED (0x30);
+      emitCC   (0x2f);
       emitX    (0x2b);
       emitField(0x29, 2, lop);
       emitINV  (0x28, insn->src(1));
@@ -1636,6 +1639,7 @@ CodeEmitterGM107::emitLOP()
       emitINV  (0x38, insn->src(1));
       emitINV  (0x37, insn->src(0));
       emitField(0x35, 2, lop);
+      emitCC   (0x34);
       emitIMMD (0x14, 32, insn->src(1));
    }
 
@@ -1719,7 +1723,7 @@ CodeEmitterGM107::emitIADD()
 void
 CodeEmitterGM107::emitIMUL()
 {
-   if (!longIMMD(insn->src(1))) {
+   if (insn->src(1).getFile() != FILE_IMMEDIATE) {
       switch (insn->src(1).getFile()) {
       case FILE_GPR:
          emitInsn(0x5c380000);

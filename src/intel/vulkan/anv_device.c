@@ -28,7 +28,7 @@
 #include <fcntl.h>
 
 #include "anv_private.h"
-#include "git_sha1.h"
+#include "anv_timestamp.h"
 #include "util/strtod.h"
 #include "util/debug.h"
 
@@ -426,7 +426,7 @@ void
 anv_device_get_cache_uuid(void *uuid)
 {
    memset(uuid, 0, VK_UUID_SIZE);
-   snprintf(uuid, VK_UUID_SIZE, "anv-%s", MESA_GIT_SHA1 + 4);
+   snprintf(uuid, VK_UUID_SIZE, "anv-%s", ANV_TIMESTAMP);
 }
 
 void anv_GetPhysicalDeviceProperties(
@@ -878,7 +878,7 @@ VkResult anv_CreateDevice(
 
    anv_bo_init_new(&device->workaround_bo, device, 1024);
 
-   anv_block_pool_init(&device->scratch_block_pool, device, 0x10000);
+   anv_scratch_pool_init(device, &device->scratch_pool);
 
    anv_queue_init(device, &device->queue);
 
@@ -947,7 +947,7 @@ void anv_DestroyDevice(
    anv_block_pool_finish(&device->instruction_block_pool);
    anv_state_pool_finish(&device->surface_state_pool);
    anv_block_pool_finish(&device->surface_state_block_pool);
-   anv_block_pool_finish(&device->scratch_block_pool);
+   anv_scratch_pool_finish(device, &device->scratch_pool);
 
    close(device->fd);
 

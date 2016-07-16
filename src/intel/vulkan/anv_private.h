@@ -475,6 +475,19 @@ VkResult anv_bo_pool_alloc(struct anv_bo_pool *pool, struct anv_bo *bo,
                            uint32_t size);
 void anv_bo_pool_free(struct anv_bo_pool *pool, const struct anv_bo *bo);
 
+struct anv_scratch_pool {
+   /* Indexed by Per-Thread Scratch Space number (the hardware value) and stage */
+   struct anv_bo bos[16][MESA_SHADER_STAGES];
+};
+
+void anv_scratch_pool_init(struct anv_device *device,
+                           struct anv_scratch_pool *pool);
+void anv_scratch_pool_finish(struct anv_device *device,
+                             struct anv_scratch_pool *pool);
+struct anv_bo *anv_scratch_pool_alloc(struct anv_device *device,
+                                      struct anv_scratch_pool *pool,
+                                      gl_shader_stage stage,
+                                      unsigned per_thread_scratch);
 
 void *anv_resolve_entrypoint(uint32_t index);
 
@@ -698,7 +711,7 @@ struct anv_device {
 
     struct anv_queue                            queue;
 
-    struct anv_block_pool                       scratch_block_pool;
+    struct anv_scratch_pool                     scratch_pool;
 
     uint32_t                                    default_mocs;
 
@@ -1335,9 +1348,7 @@ VkResult anv_cmd_buffer_emit_binding_table(struct anv_cmd_buffer *cmd_buffer,
                                            unsigned stage, struct anv_state *bt_state);
 VkResult anv_cmd_buffer_emit_samplers(struct anv_cmd_buffer *cmd_buffer,
                                       unsigned stage, struct anv_state *state);
-uint32_t gen7_cmd_buffer_flush_descriptor_sets(struct anv_cmd_buffer *cmd_buffer);
-void gen7_cmd_buffer_emit_descriptor_pointers(struct anv_cmd_buffer *cmd_buffer,
-                                              uint32_t stages);
+uint32_t anv_cmd_buffer_flush_descriptor_sets(struct anv_cmd_buffer *cmd_buffer);
 
 struct anv_state anv_cmd_buffer_emit_dynamic(struct anv_cmd_buffer *cmd_buffer,
                                              const void *data, uint32_t size, uint32_t alignment);
@@ -1460,8 +1471,6 @@ struct anv_pipeline {
    bool                                         needs_data_cache;
 
    const struct brw_stage_prog_data *           prog_data[MESA_SHADER_STAGES];
-   uint32_t                                     scratch_start[MESA_SHADER_STAGES];
-   uint32_t                                     total_scratch;
    struct {
       uint32_t                                  start[MESA_SHADER_GEOMETRY + 1];
       uint32_t                                  size[MESA_SHADER_GEOMETRY + 1];

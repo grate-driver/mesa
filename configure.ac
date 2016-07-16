@@ -1060,6 +1060,7 @@ xno)
     ;;
 esac
 
+AM_CONDITIONAL(HAVE_GLX, test "x$enable_glx" != xno)
 AM_CONDITIONAL(HAVE_DRI_GLX, test "x$enable_glx" = xdri)
 AM_CONDITIONAL(HAVE_XLIB_GLX, test "x$enable_glx" = xxlib)
 AM_CONDITIONAL(HAVE_GALLIUM_XLIB_GLX, test "x$enable_glx" = xgallium-xlib)
@@ -1640,7 +1641,7 @@ AC_ARG_WITH([vulkan-icddir],
     [AS_HELP_STRING([--with-vulkan-icddir=DIR],
         [directory for the Vulkan driver icd files @<:@${sysconfdir}/vulkan/icd.d@:>@])],
     [VULKAN_ICD_INSTALL_DIR="$withval"],
-    [VULKAN_ICD_INSTALL_DIR='${sysconfdir}/vulkan/icd.d'])
+    [VULKAN_ICD_INSTALL_DIR='${datarootdir}/vulkan/icd.d'])
 AC_SUBST([VULKAN_ICD_INSTALL_DIR])
 
 if test -n "$with_vulkan_drivers"; then
@@ -2589,6 +2590,8 @@ AC_SUBST([XA_MAJOR], $XA_MAJOR)
 AC_SUBST([XA_MINOR], $XA_MINOR)
 AC_SUBST([XA_TINY], $XA_TINY)
 AC_SUBST([XA_VERSION], "$XA_MAJOR.$XA_MINOR.$XA_TINY")
+
+AC_SUBST([TIMESTAMP_CMD], '`test $(SOURCE_DATE_EPOCH) && echo $(SOURCE_DATE_EPOCH) || date +%s`')
 
 AC_ARG_ENABLE(valgrind,
               [AS_HELP_STRING([--enable-valgrind],

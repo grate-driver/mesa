@@ -262,9 +262,9 @@ gen4_emit_buffer_surface_state(struct brw_context *brw,
              surface_format << BRW_SURFACE_FORMAT_SHIFT |
              (brw->gen >= 6 ? BRW_SURFACE_RC_READ_WRITE : 0);
    surf[1] = (bo ? bo->offset64 : 0) + buffer_offset; /* reloc */
-   surf[2] = (buffer_size & 0x7f) << BRW_SURFACE_WIDTH_SHIFT |
-             ((buffer_size >> 7) & 0x1fff) << BRW_SURFACE_HEIGHT_SHIFT;
-   surf[3] = ((buffer_size >> 20) & 0x7f) << BRW_SURFACE_DEPTH_SHIFT |
+   surf[2] = ((buffer_size - 1) & 0x7f) << BRW_SURFACE_WIDTH_SHIFT |
+             (((buffer_size - 1) >> 7) & 0x1fff) << BRW_SURFACE_HEIGHT_SHIFT;
+   surf[3] = (((buffer_size - 1) >> 20) & 0x7f) << BRW_SURFACE_DEPTH_SHIFT |
              (pitch - 1) << BRW_SURFACE_PITCH_SHIFT;
 
    /* Emit relocation to surface contents.  The 965 PRM, Volume 4, section
@@ -332,20 +332,18 @@ brw_update_texture_surface(struct gl_context *ctx,
       return;
    }
 
+   if (plane > 0) {
+      if (mt->plane[plane - 1] == NULL)
+         return;
+      mt = mt->plane[plane - 1];
+   }
+
    surf = brw_state_batch(brw, AUB_TRACE_SURFACE_STATE,
 			  6 * 4, 32, surf_offset);
 
-   uint32_t tex_format = translate_tex_format(brw, mt->format,
+   mesa_format mesa_fmt = plane == 0 ? intelObj->_Format : mt->format;
+   uint32_t tex_format = translate_tex_format(brw, mesa_fmt,
                                               sampler->sRGBDecode);
-
-   if (tObj->Target == GL_TEXTURE_EXTERNAL_OES) {
-      if (plane > 0)
-         mt = mt->plane[plane - 1];
-      if (mt == NULL)
-         return;
-
-      tex_format = translate_tex_format(brw, mt->format, sampler->sRGBDecode);
-   }
 
    if (for_gather) {
       /* Sandybridge's gather4 message is broken for integer formats.
@@ -391,8 +389,10 @@ brw_update_texture_surface(struct gl_context *ctx,
 	      (mt->logical_depth0 - 1) << BRW_SURFACE_DEPTH_SHIFT |
 	      (mt->pitch - 1) << BRW_SURFACE_PITCH_SHIFT);
 
+   const unsigned min_lod = tObj->MinLevel + tObj->BaseLevel - mt->first_level;
    surf[4] = (brw_get_surface_num_multisamples(mt->num_samples) |
-              SET_FIELD(tObj->BaseLevel - mt->first_level, BRW_SURFACE_MIN_LOD));
+              SET_FIELD(min_lod, BRW_SURFACE_MIN_LOD) |
+              SET_FIELD(tObj->MinLayer, BRW_SURFACE_MIN_ARRAY_ELEMENT));
 
    surf[5] = mt->valign == 4 ? BRW_SURFACE_VERTICAL_ALIGN_ENABLE : 0;
 

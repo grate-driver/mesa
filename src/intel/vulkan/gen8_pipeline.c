@@ -360,7 +360,12 @@ genX(graphics_pipeline_create)(
          gs.BindingTableEntryCount  = 0;
          gs.ExpectedVertexCount     = gs_prog_data->vertices_in;
 
-         gs.ScratchSpaceBasePointer = pipeline->scratch_start[MESA_SHADER_GEOMETRY];
+         gs.ScratchSpaceBasePointer = (struct anv_address) {
+            .bo = anv_scratch_pool_alloc(device, &device->scratch_pool,
+                                         MESA_SHADER_GEOMETRY,
+                                         gs_prog_data->base.base.total_scratch),
+            .offset = 0,
+         };
          gs.PerThreadScratchSpace   = scratch_space(&gs_prog_data->base.base);
          gs.OutputVertexSize        = gs_prog_data->output_vertex_size_hwords * 2 - 1;
          gs.OutputTopology          = gs_prog_data->output_topology;
@@ -427,7 +432,12 @@ genX(graphics_pipeline_create)(
          vs.AccessesUAV                   = false;
          vs.SoftwareExceptionEnable       = false;
 
-         vs.ScratchSpaceBasePointer = pipeline->scratch_start[MESA_SHADER_VERTEX],
+         vs.ScratchSpaceBasePointer = (struct anv_address) {
+            .bo = anv_scratch_pool_alloc(device, &device->scratch_pool,
+                                         MESA_SHADER_VERTEX,
+                                         vs_prog_data->base.base.total_scratch),
+            .offset = 0,
+         };
          vs.PerThreadScratchSpace   = scratch_space(&vs_prog_data->base.base);
 
          vs.DispatchGRFStartRegisterForURBData =
@@ -476,7 +486,12 @@ genX(graphics_pipeline_create)(
 
          ps.MaximumNumberofThreadsPerPSD = 64 - num_thread_bias;
 
-         ps.ScratchSpaceBasePointer = pipeline->scratch_start[MESA_SHADER_FRAGMENT];
+         ps.ScratchSpaceBasePointer = (struct anv_address) {
+            .bo = anv_scratch_pool_alloc(device, &device->scratch_pool,
+                                         MESA_SHADER_FRAGMENT,
+                                         wm_prog_data->base.total_scratch),
+            .offset = 0,
+         };
          ps.PerThreadScratchSpace   = scratch_space(&wm_prog_data->base);
 
          ps.DispatchGRFStartRegisterForConstantSetupData0 =

@@ -325,7 +325,7 @@ gen8_emit_texture_surface_state(struct brw_context *brw,
       assert(aux_mt->tiling == I915_TILING_Y);
       intel_get_tile_dims(aux_mt->tiling, aux_mt->tr_mode,
                           aux_mt->cpp, &tile_w, &tile_h);
-      surf[6] = SET_FIELD(mt->qpitch / 4, GEN8_SURFACE_AUX_QPITCH) |
+      surf[6] = SET_FIELD(aux_mt->qpitch / 4, GEN8_SURFACE_AUX_QPITCH) |
                 SET_FIELD((aux_mt->pitch / tile_w) - 1,
                           GEN8_SURFACE_AUX_PITCH) |
                 aux_mode;
@@ -374,6 +374,13 @@ gen8_update_texture_surface(struct gl_context *ctx,
       struct gl_texture_image *firstImage = obj->Image[0][obj->BaseLevel];
       struct intel_texture_object *intel_obj = intel_texture_object(obj);
       struct intel_mipmap_tree *mt = intel_obj->mt;
+
+      if (plane > 0) {
+         if (mt->plane[plane - 1] == NULL)
+            return;
+         mt = mt->plane[plane - 1];
+      }
+
       struct gl_sampler_object *sampler = _mesa_get_samplerobj(ctx, unit);
       /* If this is a view with restricted NumLayers, then our effective depth
        * is not just the miptree depth.
@@ -391,19 +398,13 @@ gen8_update_texture_surface(struct gl_context *ctx,
       const unsigned swizzle = (unlikely(alpha_depth) ? SWIZZLE_XYZW :
                                 brw_get_texture_swizzle(&brw->ctx, obj));
 
-      unsigned format = translate_tex_format(brw, intel_obj->_Format,
+      mesa_format mesa_fmt = plane == 0 ? intel_obj->_Format : mt->format;
+      unsigned format = translate_tex_format(brw, mesa_fmt,
                                              sampler->sRGBDecode);
+
       if (obj->StencilSampling && firstImage->_BaseFormat == GL_DEPTH_STENCIL) {
          mt = mt->stencil_mt;
          format = BRW_SURFACEFORMAT_R8_UINT;
-      } else if (obj->Target == GL_TEXTURE_EXTERNAL_OES) {
-         if (plane > 0)
-            mt = mt->plane[plane - 1];
-         if (mt == NULL)
-            return;
-
-         format = translate_tex_format(brw, mt->format, sampler->sRGBDecode);
-
       }
 
       const int surf_index = surf_offset - &brw->wm.base.surf_offset[0];
@@ -546,7 +547,7 @@ gen8_update_renderbuffer_surface(struct brw_context *brw,
       assert(aux_mt->tiling == I915_TILING_Y);
       intel_get_tile_dims(aux_mt->tiling, aux_mt->tr_mode,
                           aux_mt->cpp, &tile_w, &tile_h);
-      surf[6] = SET_FIELD(mt->qpitch / 4, GEN8_SURFACE_AUX_QPITCH) |
+      surf[6] = SET_FIELD(aux_mt->qpitch / 4, GEN8_SURFACE_AUX_QPITCH) |
                 SET_FIELD((aux_mt->pitch / tile_w) - 1,
                           GEN8_SURFACE_AUX_PITCH) |
                 aux_mode;

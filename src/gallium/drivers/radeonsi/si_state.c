@@ -3797,7 +3797,8 @@ static void si_init_config(struct si_context *sctx)
 		si_pm4_set_reg(pm4, R_028424_CB_DCC_CONTROL,
 			       S_028424_OVERWRITE_COMBINER_MRT_SHARING_DISABLE(1) |
 			       S_028424_OVERWRITE_COMBINER_WATERMARK(4));
-		si_pm4_set_reg(pm4, R_028C58_VGT_VERTEX_REUSE_BLOCK_CNTL, 30);
+		if (sctx->b.family < CHIP_POLARIS10)
+			si_pm4_set_reg(pm4, R_028C58_VGT_VERTEX_REUSE_BLOCK_CNTL, 30);
 		si_pm4_set_reg(pm4, R_028C5C_VGT_OUT_DEALLOC_CNTL, 32);
 		si_pm4_set_reg(pm4, R_028B50_VGT_TESS_DISTRIBUTION,
 		               S_028B50_ACCUM_ISOLINE(32) |
@@ -3808,6 +3809,11 @@ static void si_init_config(struct si_context *sctx)
 
 	if (sctx->b.family == CHIP_STONEY)
 		si_pm4_set_reg(pm4, R_028C40_PA_SC_SHADER_CONTROL, 0);
+
+	if (sctx->b.family >= CHIP_POLARIS10)
+		si_pm4_set_reg(pm4, R_028830_PA_SU_SMALL_PRIM_FILTER_CNTL,
+			       S_028830_SMALL_PRIM_FILTER_ENABLE(1) |
+			       S_028830_LINE_FILTER_DISABLE(1)); /* line bug */
 
 	si_pm4_set_reg(pm4, R_028080_TA_BC_BASE_ADDR, border_color_va >> 8);
 	if (sctx->b.chip_class >= CIK)

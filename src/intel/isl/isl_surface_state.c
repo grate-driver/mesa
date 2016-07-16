@@ -47,18 +47,20 @@ static const uint8_t isl_to_gen_halign[] = {
     [8] = HALIGN8,
     [16] = HALIGN16,
 };
+#elif GEN_GEN >= 7
+static const uint8_t isl_to_gen_halign[] = {
+    [4] = HALIGN_4,
+    [8] = HALIGN_8,
+};
+#endif
 
+#if GEN_GEN >= 8
 static const uint8_t isl_to_gen_valign[] = {
     [4] = VALIGN4,
     [8] = VALIGN8,
     [16] = VALIGN16,
 };
-#else
-static const uint8_t isl_to_gen_halign[] = {
-    [4] = HALIGN_4,
-    [8] = HALIGN_8,
-};
-
+#elif GEN_GEN >= 6
 static const uint8_t isl_to_gen_valign[] = {
     [2] = VALIGN_2,
     [4] = VALIGN_4,
@@ -76,19 +78,11 @@ static const uint8_t isl_to_gen_tiling[] = {
 };
 #endif
 
-#if GEN_GEN >= 8
-static const uint32_t isl_to_gen_multisample_layout[] = {
-   [ISL_MSAA_LAYOUT_NONE]           = MSS,
-   [ISL_MSAA_LAYOUT_INTERLEAVED]    = DEPTH_STENCIL,
-   [ISL_MSAA_LAYOUT_ARRAY]          = MSS,
-};
-#else
 static const uint32_t isl_to_gen_multisample_layout[] = {
    [ISL_MSAA_LAYOUT_NONE]           = MSFMT_MSS,
    [ISL_MSAA_LAYOUT_INTERLEAVED]    = MSFMT_DEPTH_STENCIL,
    [ISL_MSAA_LAYOUT_ARRAY]          = MSFMT_MSS,
 };
-#endif
 
 static uint8_t
 get_surftype(enum isl_surf_dim dim, isl_surf_usage_flags_t usage)
@@ -115,12 +109,12 @@ get_surftype(enum isl_surf_dim dim, isl_surf_usage_flags_t usage)
 }
 
 /**
- * Get the values to pack into RENDER_SUFFACE_STATE.SurfaceHorizontalAlignment
- * and SurfaceVerticalAlignment.
+ * Get the horizontal and vertical alignment in the units expected by the
+ * hardware.  Note that this does NOT give you the actual hardware enum values
+ * but an index into the isl_to_gen_[hv]align arrays above.
  */
-static void
-get_halign_valign(const struct isl_surf *surf,
-                  uint32_t *halign, uint32_t *valign)
+static struct isl_extent3d
+get_image_alignment(const struct isl_surf *surf)
 {
    if (GEN_GEN >= 9) {
       if (isl_tiling_is_std_y(surf->tiling) ||
@@ -129,8 +123,7 @@ get_halign_valign(const struct isl_surf *surf,
           * true alignment is likely outside the enum range of HALIGN* and
           * VALIGN*.
           */
-         *halign = 0;
-         *valign = 0;
+         return isl_extent3d(0, 0, 0);
       } else {
          /* In Skylake, RENDER_SUFFACE_STATE.SurfaceVerticalAlignment is in units
           * of surface elements (not pixels nor samples). For compressed formats,
@@ -139,11 +132,7 @@ get_halign_valign(const struct isl_surf *surf,
           * format (ETC2 has a block height of 4), then the vertical alignment is
           * 4 compression blocks or, equivalently, 16 pixels.
           */
-         struct isl_extent3d image_align_el
-            = isl_surf_get_image_alignment_el(surf);
-
-         *halign = isl_to_gen_halign[image_align_el.width];
-         *valign = isl_to_gen_valign[image_align_el.height];
+         return isl_surf_get_image_alignment_el(surf);
       }
    } else {
       /* Pre-Skylake, RENDER_SUFFACE_STATE.SurfaceVerticalAlignment is in
@@ -152,11 +141,7 @@ get_halign_valign(const struct isl_surf *surf,
        * format (compressed or not) the vertical alignment is
        * 4 pixels.
        */
-      struct isl_extent3d image_align_sa
-         = isl_surf_get_image_alignment_sa(surf);
-
-      *halign = isl_to_gen_halign[image_align_sa.width];
-      *valign = isl_to_gen_valign[image_align_sa.height];
+      return isl_surf_get_image_alignment_sa(surf);
    }
 }
 
@@ -164,27 +149,11 @@ get_halign_valign(const struct isl_surf *surf,
 static uint32_t
 get_qpitch(const struct isl_surf *surf)
 {
-   switch (surf->dim) {
+   switch (surf->dim_layout) {
    default:
       unreachable("Bad isl_surf_dim");
-   case ISL_SURF_DIM_1D:
-      if (GEN_GEN >= 9) {
-         /* QPitch is usually expressed as rows of surface elements (where
-          * a surface element is an compression block or a single surface
-          * sample). Skylake 1D is an outlier.
-          *
-          * From the Skylake BSpec >> Memory Views >> Common Surface
-          * Formats >> Surface Layout and Tiling >> 1D Surfaces:
-          *
-          *    Surface QPitch specifies the distance in pixels between array
-          *    slices.
-          */
-         return isl_surf_get_array_pitch_el(surf);
-      } else {
-         return isl_surf_get_array_pitch_el_rows(surf);
-      }
-   case ISL_SURF_DIM_2D:
-   case ISL_SURF_DIM_3D:
+   case ISL_DIM_LAYOUT_GEN4_2D:
+   case ISL_DIM_LAYOUT_GEN4_3D:
       if (GEN_GEN >= 9) {
          return isl_surf_get_array_pitch_el_rows(surf);
       } else {
@@ -199,6 +168,18 @@ get_qpitch(const struct isl_surf *surf)
           */
          return isl_surf_get_array_pitch_sa_rows(surf);
       }
+   case ISL_DIM_LAYOUT_GEN9_1D:
+      /* QPitch is usually expressed as rows of surface elements (where
+       * a surface element is an compression block or a single surface
+       * sample). Skylake 1D is an outlier.
+       *
+       * From the Skylake BSpec >> Memory Views >> Common Surface
+       * Formats >> Surface Layout and Tiling >> 1D Surfaces:
+       *
+       *    Surface QPitch specifies the distance in pixels between array
+       *    slices.
+       */
+      return isl_surf_get_array_pitch_el(surf);
    }
 }
 #endif /* GEN_GEN >= 8 */
@@ -207,112 +188,17 @@ void
 isl_genX(surf_fill_state_s)(const struct isl_device *dev, void *state,
                             const struct isl_surf_fill_state_info *restrict info)
 {
-   uint32_t halign, valign;
-   get_halign_valign(info->surf, &halign, &valign);
+   struct GENX(RENDER_SURFACE_STATE) s = { 0 };
 
-   struct GENX(RENDER_SURFACE_STATE) s = {
-      .SurfaceType = get_surftype(info->surf->dim, info->view->usage),
-      .SurfaceArray = info->surf->phys_level0_sa.array_len > 1,
-      .SurfaceVerticalAlignment = valign,
-      .SurfaceHorizontalAlignment = halign,
+   s.SurfaceType = get_surftype(info->surf->dim, info->view->usage);
+   s.SurfaceFormat = info->view->format;
 
-#if GEN_GEN >= 8
-      .TileMode = isl_to_gen_tiling[info->surf->tiling],
-#else
-      .TiledSurface = info->surf->tiling != ISL_TILING_LINEAR,
-      .TileWalk = info->surf->tiling == ISL_TILING_X ? TILEWALK_XMAJOR :
-                                                       TILEWALK_YMAJOR,
+#if GEN_IS_HASWELL
+   s.IntegerSurfaceFormat = isl_format_has_int_channel(s.SurfaceFormat);
 #endif
 
-      .VerticalLineStride = 0,
-      .VerticalLineStrideOffset = 0,
-
-#if (GEN_GEN == 7)
-      .SurfaceArraySpacing = info->surf->array_pitch_span ==
-                             ISL_ARRAY_PITCH_SPAN_COMPACT,
-#endif
-
-#if GEN_GEN >= 8
-      .SamplerL2BypassModeDisable = true,
-#endif
-
-#if GEN_GEN >= 8
-      .RenderCacheReadWriteMode = WriteOnlyCache,
-#else
-      .RenderCacheReadWriteMode = 0,
-#endif
-
-#if GEN_GEN >= 8
-      .CubeFaceEnablePositiveZ = 1,
-      .CubeFaceEnableNegativeZ = 1,
-      .CubeFaceEnablePositiveY = 1,
-      .CubeFaceEnableNegativeY = 1,
-      .CubeFaceEnablePositiveX = 1,
-      .CubeFaceEnableNegativeX = 1,
-#else
-      .CubeFaceEnables = 0x3f,
-#endif
-
-#if GEN_GEN >= 8
-      .SurfaceQPitch = get_qpitch(info->surf) >> 2,
-#endif
-
-      .Width = info->surf->logical_level0_px.width - 1,
-      .Height = info->surf->logical_level0_px.height - 1,
-      .Depth = 0, /* TEMPLATE */
-
-      .RenderTargetViewExtent = 0, /* TEMPLATE */
-      .MinimumArrayElement = 0, /* TEMPLATE */
-
-      .MultisampledSurfaceStorageFormat =
-         isl_to_gen_multisample_layout[info->surf->msaa_layout],
-      .NumberofMultisamples = ffs(info->surf->samples) - 1,
-      .MultisamplePositionPaletteIndex = 0, /* UNUSED */
-
-      .XOffset = 0,
-      .YOffset = 0,
-
-      .ResourceMinLOD = 0.0,
-
-      .MIPCountLOD = 0, /* TEMPLATE */
-      .SurfaceMinLOD = 0, /* TEMPLATE */
-
-#if (GEN_GEN >= 8 || GEN_IS_HASWELL)
-      .ShaderChannelSelectRed = info->view->channel_select[0],
-      .ShaderChannelSelectGreen = info->view->channel_select[1],
-      .ShaderChannelSelectBlue = info->view->channel_select[2],
-      .ShaderChannelSelectAlpha = info->view->channel_select[3],
-#endif
-
-      .SurfaceBaseAddress = info->address,
-      .MOCS = info->mocs,
-
-#if GEN_GEN >= 8
-      .AuxiliarySurfaceMode = AUX_NONE,
-#else
-      .MCSEnable = false,
-#endif
-   };
-
-   if (info->surf->tiling == ISL_TILING_W) {
-      /* From the Broadwell PRM documentation for this field:
-       *
-       *    "If the surface is a stencil buffer (and thus has Tile Mode set
-       *    to TILEMODE_WMAJOR), the pitch must be set to 2x the value
-       *    computed based on width, as the stencil buffer is stored with
-       *    two rows interleaved."
-       */
-      s.SurfacePitch = info->surf->row_pitch * 2 - 1;
-   } else {
-      s.SurfacePitch = info->surf->row_pitch - 1;
-   }
-
-   if (info->view->usage & ISL_SURF_USAGE_STORAGE_BIT) {
-      s.SurfaceFormat =
-         isl_lower_storage_image_format(dev->info, info->view->format);
-   } else {
-      s.SurfaceFormat = info->view->format;
-   }
+   s.Width = info->surf->logical_level0_px.width - 1;
+   s.Height = info->surf->logical_level0_px.height - 1;
 
    switch (s.SurfaceType) {
    case SURFTYPE_1D:
@@ -335,13 +221,17 @@ isl_genX(surf_fill_state_s)(const struct isl_device *dev, void *state,
        *    For Render Target and Typed Dataport 1D and 2D Surfaces:
        *    This field must be set to the same value as the Depth field.
        */
-      s.RenderTargetViewExtent = s.Depth;
+      if (info->view->usage & (ISL_SURF_USAGE_RENDER_TARGET_BIT |
+                               ISL_SURF_USAGE_STORAGE_BIT))
+         s.RenderTargetViewExtent = s.Depth;
       break;
    case SURFTYPE_CUBE:
       s.MinimumArrayElement = info->view->base_array_layer;
       /* Same as SURFTYPE_2D, but divided by 6 */
       s.Depth = info->view->array_len / 6 - 1;
-      s.RenderTargetViewExtent = s.Depth;
+      if (info->view->usage & (ISL_SURF_USAGE_RENDER_TARGET_BIT |
+                               ISL_SURF_USAGE_STORAGE_BIT))
+         s.RenderTargetViewExtent = s.Depth;
       break;
    case SURFTYPE_3D:
       s.MinimumArrayElement = info->view->base_array_layer;
@@ -358,13 +248,25 @@ isl_genX(surf_fill_state_s)(const struct isl_device *dev, void *state,
        *    For Render Target and Typed Dataport 3D Surfaces: This field
        *    indicates the extent of the accessible 'R' coordinates minus 1 on
        *    the LOD currently being rendered to.
+       *
+       * The docs specify that this only matters for render targets and
+       * surfaces used with typed dataport messages.  Prior to Ivy Bridge, the
+       * Depth field has more bits than RenderTargetViewExtent so we can have
+       * textures with more levels than we can render to.  In order to prevent
+       * assert-failures in the packing function below, we only set the field
+       * when it's actually going to be used by the hardware.
        */
-      s.RenderTargetViewExtent = isl_minify(info->surf->logical_level0_px.depth,
-                                            info->view->base_level) - 1;
+      if (info->view->usage & (ISL_SURF_USAGE_RENDER_TARGET_BIT |
+                               ISL_SURF_USAGE_STORAGE_BIT)) {
+         s.RenderTargetViewExtent = isl_minify(info->surf->logical_level0_px.depth,
+                                               info->view->base_level) - 1;
+      }
       break;
    default:
       unreachable("bad SurfaceType");
    }
+
+   s.SurfaceArray = info->surf->dim != ISL_SURF_DIM_3D;
 
    if (info->view->usage & ISL_SURF_USAGE_RENDER_TARGET_BIT) {
       /* For render target surfaces, the hardware interprets field
@@ -383,6 +285,88 @@ isl_genX(surf_fill_state_s)(const struct isl_device *dev, void *state,
       s.SurfaceMinLOD = info->view->base_level;
       s.MIPCountLOD = MAX(info->view->levels, 1) - 1;
    }
+
+#if GEN_GEN >= 9
+   /* We don't use miptails yet.  The PRM recommends that you set "Mip Tail
+    * Start LOD" to 15 to prevent the hardware from trying to use them.
+    */
+   s.TiledResourceMode = NONE;
+   s.MipTailStartLOD = 15;
+#endif
+
+   const struct isl_extent3d image_align = get_image_alignment(info->surf);
+   s.SurfaceVerticalAlignment = isl_to_gen_valign[image_align.height];
+   s.SurfaceHorizontalAlignment = isl_to_gen_halign[image_align.width];
+
+   if (info->surf->tiling == ISL_TILING_W) {
+      /* From the Broadwell PRM documentation for this field:
+       *
+       *    "If the surface is a stencil buffer (and thus has Tile Mode set
+       *    to TILEMODE_WMAJOR), the pitch must be set to 2x the value
+       *    computed based on width, as the stencil buffer is stored with
+       *    two rows interleaved."
+       */
+      s.SurfacePitch = info->surf->row_pitch * 2 - 1;
+   } else if (info->surf->dim_layout == ISL_DIM_LAYOUT_GEN9_1D) {
+      /* For gen9 1-D textures, surface pitch is ignored */
+      s.SurfacePitch = 0;
+   } else {
+      s.SurfacePitch = info->surf->row_pitch - 1;
+   }
+
+#if GEN_GEN >= 8
+   s.SurfaceQPitch = get_qpitch(info->surf) >> 2;
+#elif GEN_GEN == 7
+   s.SurfaceArraySpacing = info->surf->array_pitch_span ==
+                           ISL_ARRAY_PITCH_SPAN_COMPACT;
+#endif
+
+#if GEN_GEN >= 8
+   s.TileMode = isl_to_gen_tiling[info->surf->tiling];
+#else
+   s.TiledSurface = info->surf->tiling != ISL_TILING_LINEAR,
+   s.TileWalk = info->surf->tiling == ISL_TILING_Y0 ? TILEWALK_YMAJOR :
+                                                      TILEWALK_XMAJOR,
+#endif
+
+#if GEN_GEN >= 8
+   s.RenderCacheReadWriteMode = WriteOnlyCache;
+#else
+   s.RenderCacheReadWriteMode = 0;
+#endif
+
+   if (info->view->usage & ISL_SURF_USAGE_CUBE_BIT) {
+#if GEN_GEN >= 8
+      s.CubeFaceEnablePositiveZ = 1;
+      s.CubeFaceEnableNegativeZ = 1;
+      s.CubeFaceEnablePositiveY = 1;
+      s.CubeFaceEnableNegativeY = 1;
+      s.CubeFaceEnablePositiveX = 1;
+      s.CubeFaceEnableNegativeX = 1;
+#else
+      s.CubeFaceEnables = 0x3f;
+#endif
+   }
+
+   s.MultisampledSurfaceStorageFormat =
+      isl_to_gen_multisample_layout[info->surf->msaa_layout];
+   s.NumberofMultisamples = ffs(info->surf->samples) - 1;
+
+#if (GEN_GEN >= 8 || GEN_IS_HASWELL)
+   s.ShaderChannelSelectRed = info->view->channel_select[0];
+   s.ShaderChannelSelectGreen = info->view->channel_select[1];
+   s.ShaderChannelSelectBlue = info->view->channel_select[2];
+   s.ShaderChannelSelectAlpha = info->view->channel_select[3];
+#endif
+
+   s.SurfaceBaseAddress = info->address;
+   s.MOCS = info->mocs;
+
+#if GEN_GEN >= 8
+   s.AuxiliarySurfaceMode = AUX_NONE;
+#else
+   s.MCSEnable = false;
+#endif
 
 #if GEN_GEN >= 8
    /* From the CHV PRM, Volume 2d, page 321 (RENDER_SURFACE_STATE dword 0
@@ -406,31 +390,35 @@ isl_genX(surf_fill_state_s)(const struct isl_device *dev, void *state,
    }
 #endif
 
-   if (GEN_GEN <= 8) {
-      /* Prior to Sky Lake, we only have one bit for the clear color which
-       * gives us 0 or 1 in whatever the surface's format happens to be.
-       */
-      if (isl_format_has_int_channel(info->view->format)) {
-         for (unsigned i = 0; i < 4; i++) {
-            assert(info->clear_color.u32[i] == 0 ||
-                   info->clear_color.u32[i] == 1);
-         }
-      } else {
-         for (unsigned i = 0; i < 4; i++) {
-            assert(info->clear_color.f32[i] == 0.0f ||
-                   info->clear_color.f32[i] == 1.0f);
-         }
+#if GEN_GEN >= 9
+   s.RedClearColor = info->clear_color.u32[0];
+   s.GreenClearColor = info->clear_color.u32[1];
+   s.BlueClearColor = info->clear_color.u32[2];
+   s.AlphaClearColor = info->clear_color.u32[3];
+#elif GEN_GEN >= 7
+   /* Prior to Sky Lake, we only have one bit for the clear color which
+    * gives us 0 or 1 in whatever the surface's format happens to be.
+    */
+   if (isl_format_has_int_channel(info->view->format)) {
+      for (unsigned i = 0; i < 4; i++) {
+         assert(info->clear_color.u32[i] == 0 ||
+                info->clear_color.u32[i] == 1);
       }
       s.RedClearColor = info->clear_color.u32[0] != 0;
       s.GreenClearColor = info->clear_color.u32[1] != 0;
       s.BlueClearColor = info->clear_color.u32[2] != 0;
       s.AlphaClearColor = info->clear_color.u32[3] != 0;
    } else {
-      s.RedClearColor = info->clear_color.u32[0];
-      s.GreenClearColor = info->clear_color.u32[1];
-      s.BlueClearColor = info->clear_color.u32[2];
-      s.AlphaClearColor = info->clear_color.u32[3];
+      for (unsigned i = 0; i < 4; i++) {
+         assert(info->clear_color.f32[i] == 0.0f ||
+                info->clear_color.f32[i] == 1.0f);
+      }
+      s.RedClearColor = info->clear_color.f32[0] != 0.0f;
+      s.GreenClearColor = info->clear_color.f32[1] != 0.0f;
+      s.BlueClearColor = info->clear_color.f32[2] != 0.0f;
+      s.AlphaClearColor = info->clear_color.f32[3] != 0.0f;
    }
+#endif
 
    GENX(RENDER_SURFACE_STATE_pack)(NULL, state, &s);
 }
@@ -441,41 +429,51 @@ isl_genX(buffer_fill_state_s)(void *state,
 {
    uint32_t num_elements = info->size / info->stride;
 
-   struct GENX(RENDER_SURFACE_STATE) surface_state = {
-      .SurfaceType = SURFTYPE_BUFFER,
-      .SurfaceArray = false,
-      .SurfaceFormat = info->format,
-      .SurfaceVerticalAlignment = isl_to_gen_valign[4],
-      .SurfaceHorizontalAlignment = isl_to_gen_halign[4],
-      .Height = ((num_elements - 1) >> 7) & 0x3fff,
-      .Width = (num_elements - 1) & 0x7f,
-      .Depth = ((num_elements - 1) >> 21) & 0x3f,
-      .SurfacePitch = info->stride - 1,
-      .NumberofMultisamples = MULTISAMPLECOUNT_1,
+   if (GEN_GEN >= 7) {
+      if (info->format == ISL_FORMAT_RAW) {
+         assert(num_elements <= (1ull << 31));
+         assert((num_elements & 3) == 0);
+      } else {
+         assert(num_elements <= (1ull << 27));
+      }
+   } else {
+      assert(num_elements <= (1ull << 27));
+   }
+
+   struct GENX(RENDER_SURFACE_STATE) s = { 0, };
+
+   s.SurfaceType = SURFTYPE_BUFFER;
+   s.SurfaceArray = false;
+   s.SurfaceFormat = info->format;
+   s.SurfaceVerticalAlignment = isl_to_gen_valign[4];
+   s.SurfaceHorizontalAlignment = isl_to_gen_halign[4];
+   s.Height = ((num_elements - 1) >> 7) & 0x3fff;
+   s.Width = (num_elements - 1) & 0x7f;
+   s.Depth = ((num_elements - 1) >> 21) & 0x3ff;
+   s.SurfacePitch = info->stride - 1;
+   s.NumberofMultisamples = MULTISAMPLECOUNT_1;
 
 #if (GEN_GEN >= 8)
-      .TileMode = LINEAR,
+   s.TileMode = LINEAR;
 #else
-      .TiledSurface = false,
+   s.TiledSurface = false;
 #endif
 
 #if (GEN_GEN >= 8)
-      .SamplerL2BypassModeDisable = true,
-      .RenderCacheReadWriteMode = WriteOnlyCache,
+   s.RenderCacheReadWriteMode = WriteOnlyCache;
 #else
-      .RenderCacheReadWriteMode = 0,
+   s.RenderCacheReadWriteMode = 0;
 #endif
 
-      .MOCS = info->mocs,
+   s.SurfaceBaseAddress = info->address;
+   s.MOCS = info->mocs;
 
 #if (GEN_GEN >= 8 || GEN_IS_HASWELL)
-      .ShaderChannelSelectRed = SCS_RED,
-      .ShaderChannelSelectGreen = SCS_GREEN,
-      .ShaderChannelSelectBlue = SCS_BLUE,
-      .ShaderChannelSelectAlpha = SCS_ALPHA,
+   s.ShaderChannelSelectRed = SCS_RED;
+   s.ShaderChannelSelectGreen = SCS_GREEN;
+   s.ShaderChannelSelectBlue = SCS_BLUE;
+   s.ShaderChannelSelectAlpha = SCS_ALPHA;
 #endif
-      .SurfaceBaseAddress = info->address,
-   };
 
-   GENX(RENDER_SURFACE_STATE_pack)(NULL, state, &surface_state);
+   GENX(RENDER_SURFACE_STATE_pack)(NULL, state, &s);
 }
