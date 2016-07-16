@@ -1,4 +1,5 @@
 libGLESv2.so.2 libgles2-mesa #MINVER# | libgles2
+ glActiveShaderProgram@Base 12.0.1
  glActiveTexture@Base 7.8.1
  glAttachShader@Base 7.8.1
  glBeginQuery@Base 9.1~
@@ -10,6 +11,7 @@ libGLESv2.so.2 libgles2-mesa #MINVER# | libgles2
  glBindFragDataLocationEXT@Base 11.1.0~
  glBindFramebuffer@Base 7.8.1
  glBindImageTexture@Base 10.7.0~
+ glBindProgramPipeline@Base 12.0.1
  glBindRenderbuffer@Base 7.8.1
  glBindSampler@Base 9.1~
  glBindTexture@Base 7.8.1
@@ -48,6 +50,7 @@ libGLESv2.so.2 libgles2-mesa #MINVER# | libgles2
  glCopyTexSubImage3D@Base 9.1~
  glCreateProgram@Base 7.8.1
  glCreateShader@Base 7.8.1
+ glCreateShaderProgramv@Base 12.0.1
  glCullFace@Base 7.8.1
  glDebugMessageCallback@Base 12.0.0~
  glDebugMessageControl@Base 12.0.0~
@@ -55,6 +58,7 @@ libGLESv2.so.2 libgles2-mesa #MINVER# | libgles2
  glDeleteBuffers@Base 7.8.1
  glDeleteFramebuffers@Base 7.8.1
  glDeleteProgram@Base 7.8.1
+ glDeleteProgramPipelines@Base 12.0.1
  glDeleteQueries@Base 9.1~
  glDeleteRenderbuffers@Base 7.8.1
  glDeleteSamplers@Base 9.1~
@@ -92,6 +96,7 @@ libGLESv2.so.2 libgles2-mesa #MINVER# | libgles2
  glFinish@Base 7.8.1
  glFlush@Base 7.8.1
  glFlushMappedBufferRange@Base 9.1~
+ glFramebufferParameteri@Base 12.0.1
  glFramebufferRenderbuffer@Base 7.8.1
  glFramebufferTexture2D@Base 7.8.1
  glFramebufferTexture@Base 12.0.0~
@@ -99,6 +104,7 @@ libGLESv2.so.2 libgles2-mesa #MINVER# | libgles2
  glFrontFace@Base 7.8.1
  glGenBuffers@Base 7.8.1
  glGenFramebuffers@Base 7.8.1
+ glGenProgramPipelines@Base 12.0.1
  glGenQueries@Base 9.1~
  glGenRenderbuffers@Base 7.8.1
  glGenSamplers@Base 9.1~
@@ -123,6 +129,7 @@ libGLESv2.so.2 libgles2-mesa #MINVER# | libgles2
  glGetFloatv@Base 7.8.1
  glGetFragDataLocation@Base 9.1~
  glGetFramebufferAttachmentParameteriv@Base 7.8.1
+ glGetFramebufferParameteriv@Base 12.0.1
  glGetInteger64i_v@Base 9.1~
  glGetInteger64v@Base 9.1~
  glGetIntegeri_v@Base 9.1~
@@ -133,6 +140,13 @@ libGLESv2.so.2 libgles2-mesa #MINVER# | libgles2
  glGetObjectPtrLabel@Base 12.0.0~
  glGetProgramBinary@Base 9.1~
  glGetProgramInfoLog@Base 7.8.1
+ glGetProgramInterfaceiv@Base 12.0.1
+ glGetProgramPipelineInfoLog@Base 12.0.1
+ glGetProgramPipelineiv@Base 12.0.1
+ glGetProgramResourceIndex@Base 12.0.1
+ glGetProgramResourceLocation@Base 12.0.1
+ glGetProgramResourceName@Base 12.0.1
+ glGetProgramResourceiv@Base 12.0.1
  glGetProgramiv@Base 7.8.1
  glGetQueryObjectuiv@Base 9.1~
  glGetQueryiv@Base 9.1~
@@ -176,6 +190,7 @@ libGLESv2.so.2 libgles2-mesa #MINVER# | libgles2
  glIsEnabledi@Base 12.0.0~
  glIsFramebuffer@Base 7.8.1
  glIsProgram@Base 7.8.1
+ glIsProgramPipeline@Base 12.0.1
  glIsQuery@Base 9.1~
  glIsRenderbuffer@Base 7.8.1
  glIsSampler@Base 9.1~
@@ -188,6 +203,7 @@ libGLESv2.so.2 libgles2-mesa #MINVER# | libgles2
  glLinkProgram@Base 7.8.1
  glMapBufferRange@Base 9.1~
  glMemoryBarrier@Base 10.7.0~
+ glMemoryBarrierByRegion@Base 12.0.1
  glMinSampleShading@Base 12.0.0~
  glMultiDrawArraysEXT@Base 7.8.1
  glMultiDrawElementsEXT@Base 7.8.1
@@ -199,6 +215,39 @@ libGLESv2.so.2 libgles2-mesa #MINVER# | libgles2
  glPopDebugGroup@Base 12.0.0~
  glProgramBinary@Base 9.1~
  glProgramParameteri@Base 9.1~
+ glProgramUniform1f@Base 12.0.1
+ glProgramUniform1fv@Base 12.0.1
+ glProgramUniform1i@Base 12.0.1
+ glProgramUniform1iv@Base 12.0.1
+ glProgramUniform1ui@Base 12.0.1
+ glProgramUniform1uiv@Base 12.0.1
+ glProgramUniform2f@Base 12.0.1
+ glProgramUniform2fv@Base 12.0.1
+ glProgramUniform2i@Base 12.0.1
+ glProgramUniform2iv@Base 12.0.1
+ glProgramUniform2ui@Base 12.0.1
+ glProgramUniform2uiv@Base 12.0.1
+ glProgramUniform3f@Base 12.0.1
+ glProgramUniform3fv@Base 12.0.1
+ glProgramUniform3i@Base 12.0.1
+ glProgramUniform3iv@Base 12.0.1
+ glProgramUniform3ui@Base 12.0.1
+ glProgramUniform3uiv@Base 12.0.1
+ glProgramUniform4f@Base 12.0.1
+ glProgramUniform4fv@Base 12.0.1
+ glProgramUniform4i@Base 12.0.1
+ glProgramUniform4iv@Base 12.0.1
+ glProgramUniform4ui@Base 12.0.1
+ glProgramUniform4uiv@Base 12.0.1
+ glProgramUniformMatrix2fv@Base 12.0.1
+ glProgramUniformMatrix2x3fv@Base 12.0.1
+ glProgramUniformMatrix2x4fv@Base 12.0.1
+ glProgramUniformMatrix3fv@Base 12.0.1
+ glProgramUniformMatrix3x2fv@Base 12.0.1
+ glProgramUniformMatrix3x4fv@Base 12.0.1
+ glProgramUniformMatrix4fv@Base 12.0.1
+ glProgramUniformMatrix4x2fv@Base 12.0.1
+ glProgramUniformMatrix4x3fv@Base 12.0.1
  glPushDebugGroup@Base 12.0.0~
  glReadBuffer@Base 9.1~
  glReadPixels@Base 7.8.1
@@ -278,7 +327,9 @@ libGLESv2.so.2 libgles2-mesa #MINVER# | libgles2
  glUniformMatrix4x3fv@Base 9.1~
  glUnmapBuffer@Base 9.1~
  glUseProgram@Base 7.8.1
+ glUseProgramStages@Base 12.0.1
  glValidateProgram@Base 7.8.1
+ glValidateProgramPipeline@Base 12.0.1
  glVertexAttrib1f@Base 7.8.1
  glVertexAttrib1fv@Base 7.8.1
  glVertexAttrib2f@Base 7.8.1
