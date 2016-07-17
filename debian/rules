@@ -5,8 +5,6 @@
 # Uncomment this to turn on verbose mode.
 #export DH_VERBOSE=1
 
-PKG_VERSION = $(shell dpkg-parsechangelog | awk '/^Version:/ {print $$2}')
-
 DEB_HOST_MULTIARCH ?= $(shell dpkg-architecture -qDEB_HOST_MULTIARCH)
 DEB_HOST_ARCH      ?= $(shell dpkg-architecture -qDEB_HOST_ARCH)
 DEB_HOST_ARCH_OS   ?= $(shell dpkg-architecture -qDEB_HOST_ARCH_OS)
@@ -144,8 +142,6 @@ override_dh_auto_configure:
 	dh_auto_configure -- \
 		--disable-silent-rules \
 		$(confflags)
-
-	echo "#define MESA_GIT_SHA1 \"$(PKG_VERSION)\"" > build/src/git_sha1.h.tmp
 
 override_dh_auto_install:
 	dh_auto_install
