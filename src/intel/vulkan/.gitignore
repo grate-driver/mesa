@@ -1,0 +1,4 @@
+# Generated source files
+/anv_entrypoints.c
+/anv_entrypoints.h
+/dev_icd.json
