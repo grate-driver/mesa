@@ -1,9 +1,10 @@
-mesa (12.0.1-1ubuntu1) UNRELEASED; urgency=medium
+mesa (12.0.1-1ubuntu1) yakkety; urgency=medium
 
   * Merge from debian experimental.
   * Rebase Mir egl platform patch.
+  * Re-enable llvm on ppc64el to see if unity tests work.
 
- -- Timo Aaltonen <tjaalton@debian.org>  Mon, 18 Jul 2016 08:07:33 +0300
+ -- Timo Aaltonen <tjaalton@debian.org>  Mon, 18 Jul 2016 08:37:54 +0300
 
 mesa (12.0.1-1) experimental; urgency=medium
 
