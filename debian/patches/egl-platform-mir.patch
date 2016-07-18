@@ -937,15 +937,7 @@
  
     .getBuffers              = dri_get_buffers,
     .flushFrontBuffer        = dri_flush_front_buffer,
-@@ -550,6 +550,7 @@ gbm_dri_is_format_supported(struct gbm_d
-       break;
-    case GBM_BO_FORMAT_ARGB8888:
-    case GBM_FORMAT_ARGB8888:
-+   case GBM_FORMAT_ABGR8888:
-       if (usage & GBM_BO_USE_SCANOUT)
-          return 0;
-       break;
-@@ -642,6 +643,43 @@ gbm_dri_to_gbm_format(uint32_t dri_forma
+@@ -642,6 +642,43 @@ gbm_dri_to_gbm_format(uint32_t dri_forma
     return ret;
  }
  
@@ -989,7 +981,7 @@
  static struct gbm_bo *
  gbm_dri_bo_import(struct gbm_device *gbm,
                    uint32_t type, void *buffer, uint32_t usage)
-@@ -866,34 +904,7 @@ gbm_dri_bo_create(struct gbm_device *gbm
+@@ -866,34 +903,7 @@ gbm_dri_bo_create(struct gbm_device *gbm
     bo->base.base.height = height;
     bo->base.base.format = format;
  

@@ -1,3 +1,10 @@
+mesa (12.0.1-1ubuntu2) UNRELEASED; urgency=medium
+
+  * egl-platform-mir.patch: Don't enable support for ABGR8888. (LP:
+    #1473901)
+
+ -- Timo Aaltonen <tjaalton@debian.org>  Mon, 18 Jul 2016 11:36:21 +0300
+
 mesa (12.0.1-1ubuntu1) yakkety; urgency=medium
 
   * Merge from debian experimental.
