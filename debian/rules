@@ -204,6 +204,9 @@ override_dh_install:
 		install -m 755 debian/local/script  debian/$$p/usr/share/bug/$$p; \
 	done
 
+override_dh_makeshlibs:
+	dh_makeshlibs -a -- -c4
+
 override_dh_builddeb:
 	dh_builddeb -s -- -Zxz
 
