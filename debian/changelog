@@ -2,6 +2,7 @@ mesa (12.0.1-4) UNRELEASED; urgency=medium
 
   * rules: Pass -c4 to dpkg-gensymbols through dh_makeshlibs, got
     dropped with the migration to dh.
+  * rules: Replace deprecated debhelper option -s with -a.
 
  -- Andreas Boll <andreas.boll.dev@gmail.com>  Tue, 19 Jul 2016 11:04:19 +0200
 
