@@ -5,6 +5,8 @@ mesa (12.0.1-4) UNRELEASED; urgency=medium
   * rules: Replace deprecated debhelper option -s with -a.
   * copyright: Sync with docs/license.html.
   * Replace almost all dynamic debhelper config files with static files.
+  * rules: Drop unneeded override_dh_builddeb, xz is the default
+    compression type for dpkg-deb nowadays.
 
  -- Andreas Boll <andreas.boll.dev@gmail.com>  Tue, 19 Jul 2016 11:04:19 +0200
 
