@@ -9,6 +9,8 @@ mesa (12.0.1-4) UNRELEASED; urgency=medium
     compression type for dpkg-deb nowadays.
   * Replace mesa-vulkan-drivers.post{inst,rm} with mesa-vulkan-
     drivers.triggers.
+  * control: Only build-dep on libgcrypt20-dev on architectures where we
+    build mesa-vulkan-drivers.
 
  -- Andreas Boll <andreas.boll.dev@gmail.com>  Tue, 19 Jul 2016 11:04:19 +0200
 
