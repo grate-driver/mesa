@@ -1,3 +1,10 @@
+mesa (12.0.1-3ubuntu2) UNRELEASED; urgency=medium
+
+  * control, rules: Disable llvm on ppc64el again, FTBFS with gcc-5 this
+    time.
+
+ -- Timo Aaltonen <tjaalton@debian.org>  Wed, 20 Jul 2016 10:59:57 +0300
+
 mesa (12.0.1-3ubuntu1) yakkety; urgency=medium
 
   * egl-platform-mir.patch: Don't enable support for ABGR8888. (LP:
