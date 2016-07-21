@@ -2184,6 +2184,10 @@ if test "x$enable_gallium_llvm" = xyes; then
 
         LLVM_COMPONENTS="engine bitwriter mcjit mcdisassembler"
 
+        if $LLVM_CONFIG --components | grep -q inteljitevents ; then
+            LLVM_COMPONENTS="${LLVM_COMPONENTS} inteljitevents"
+        fi
+
         if test "x$enable_opencl" = xyes; then
             llvm_check_version_for "3" "5" "0" "opencl"
 
