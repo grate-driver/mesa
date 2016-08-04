@@ -882,6 +882,7 @@ cleanup_device:
    close(dri2_dpy->fd);
 cleanup_display:
    free(dri2_dpy);
+   dpy->DriverData = NULL;
 
    return _eglError(EGL_NOT_INITIALIZED, err);
 }
