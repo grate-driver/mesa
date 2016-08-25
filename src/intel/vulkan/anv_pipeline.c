@@ -421,7 +421,8 @@ anv_pipeline_compile_vs(struct anv_pipeline *pipeline,
    populate_vs_prog_key(&pipeline->device->info, &key);
 
    if (module->size > 0) {
-      anv_hash_shader(sha1, &key, sizeof(key), module, entrypoint, spec_info);
+      anv_hash_shader(sha1, &key, sizeof(key), module, entrypoint,
+                      pipeline->layout, spec_info);
       kernel = anv_pipeline_cache_search(cache, sha1, &stage_prog_data, &map);
    }
 
@@ -509,7 +510,8 @@ anv_pipeline_compile_gs(struct anv_pipeline *pipeline,
    populate_gs_prog_key(&pipeline->device->info, &key);
 
    if (module->size > 0) {
-      anv_hash_shader(sha1, &key, sizeof(key), module, entrypoint, spec_info);
+      anv_hash_shader(sha1, &key, sizeof(key), module, entrypoint,
+                      pipeline->layout, spec_info);
       kernel = anv_pipeline_cache_search(cache, sha1, &stage_prog_data, &map);
    }
 
@@ -588,7 +590,8 @@ anv_pipeline_compile_fs(struct anv_pipeline *pipeline,
    populate_wm_prog_key(&pipeline->device->info, info, extra, &key);
 
    if (module->size > 0) {
-      anv_hash_shader(sha1, &key, sizeof(key), module, entrypoint, spec_info);
+      anv_hash_shader(sha1, &key, sizeof(key), module, entrypoint,
+                      pipeline->layout, spec_info);
       pipeline->ps_ksp0 =
          anv_pipeline_cache_search(cache, sha1, &stage_prog_data, &map);
    }
@@ -718,7 +721,8 @@ anv_pipeline_compile_cs(struct anv_pipeline *pipeline,
    populate_cs_prog_key(&pipeline->device->info, &key);
 
    if (module->size > 0) {
-      anv_hash_shader(sha1, &key, sizeof(key), module, entrypoint, spec_info);
+      anv_hash_shader(sha1, &key, sizeof(key), module, entrypoint,
+                      pipeline->layout, spec_info);
       kernel = anv_pipeline_cache_search(cache, sha1, &stage_prog_data, &map);
    }
 
