@@ -1,6 +1,7 @@
 mesa (12.0.2-1ubuntu1) UNRELEASED; urgency=medium
 
   * Merge from debian.
+  * install.in: Modify a bit to be more in line with Debian.
 
  -- Timo Aaltonen <tjaalton@debian.org>  Tue, 06 Sep 2016 14:11:19 +0300
 

@@ -1,3 +1,3 @@
 usr/lib/${DEB_HOST_MULTIARCH}/libGL.so usr/lib/${DEB_HOST_MULTIARCH}/mesa
-usr/lib/${DEB_HOST_MULTIARCH}/libglapi.so usr/lib/${DEB_HOST_MULTIARCH}
-usr/lib/${DEB_HOST_MULTIARCH}/pkgconfig/gl.pc usr/lib/${DEB_HOST_MULTIARCH}/pkgconfig
+usr/lib/*/libglapi.so
+usr/lib/*/pkgconfig/gl.pc
