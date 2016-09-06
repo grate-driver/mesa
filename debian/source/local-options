@@ -1,1 +1,16 @@
---extend-diff-ignore=src/mesa/drivers/dri/r200/.*radeon_.*
+# ignore symlinks from git, use source files from the tarball
+extend-diff-ignore = src/mesa/drivers/dri/r200/.*radeon_.*
+
+## The following files aren't shipped in the upstream tarball
+
+# Android Makefiles
+extend-diff-ignore = Android.*mk|CleanSpec\.mk
+
+# coding-style and other config files
+extend-diff-ignore = \.clang-format|\.dir-locals\.el|\.mailmap|\.travis\.yml|appveyor\.yml
+
+# misc. files and scripts used by Mesa developers but not required for the build
+extend-diff-ignore = src/compiler/nir/README|src/gallium/drivers/vc4/kernel/README|REVIEWERS|scripts/get_reviewer\.pl|bin/\.cherry-ignore|bin/bugzilla_mesa\.sh|bin/get-extra-pick-list\.sh|bin/get-pick-list\.sh|bin/perf-annotate-jit|bin/shortlog_mesa\.sh|src/mapi/glapi/gen/next_available_offset\.sh|src/mesa/drivers/dri/gen-symbol-redefs\.py|src/mesa/drivers/dri/r200/Doxyfile
+
+# dead code
+extend-diff-ignore = m4/ax_check_compile_flag.m4|src/gallium/auxiliary/gallivm/f.cpp|src/mapi/mapi.c|src/mapi/mapi.h
