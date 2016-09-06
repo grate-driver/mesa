@@ -1,9 +1,15 @@
-mesa (12.0.1-3ubuntu2) UNRELEASED; urgency=medium
+mesa (12.0.1-3ubuntu3) UNRELEASED; urgency=medium
 
   * control, rules: Disable llvm on ppc64el again, FTBFS with gcc-5 this
     time.
 
  -- Timo Aaltonen <tjaalton@debian.org>  Wed, 20 Jul 2016 10:59:57 +0300
+
+mesa (12.0.1-3ubuntu2) yakkety; urgency=medium
+
+  * debian/rules: Work around gcc ICE on ppc64el by forcing -O2.
+
+ -- Adam Conrad <adconrad@ubuntu.com>  Fri, 22 Jul 2016 16:46:48 -0600
 
 mesa (12.0.1-3ubuntu1) yakkety; urgency=medium
 
