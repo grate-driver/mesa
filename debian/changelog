@@ -4,6 +4,7 @@ mesa (12.0.2-2) UNRELEASED; urgency=medium
     against llvm-3.9.
   * control, rules: Use llvm/clang 3.9 (Closes: #836913).
   * control: Bump libclc dependencies.
+  * Enable vc4 on arm64.
 
  -- Andreas Boll <andreas.boll.dev@gmail.com>  Wed, 07 Sep 2016 18:23:39 +0200
 
