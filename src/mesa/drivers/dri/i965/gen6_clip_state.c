@@ -50,6 +50,7 @@ upload_clip_state(struct brw_context *brw)
       dw2 |= GEN6_CLIP_NON_PERSPECTIVE_BARYCENTRIC_ENABLE;
    }
 
+   /* BRW_NEW_VS_PROG_DATA */
    dw1 |= brw->vs.prog_data->base.cull_distance_mask;
 
    if (brw->gen >= 7)
@@ -224,6 +225,7 @@ const struct brw_tracked_state gen7_clip_state = {
                BRW_NEW_CONTEXT |
                BRW_NEW_FS_PROG_DATA |
                BRW_NEW_GEOMETRY_PROGRAM |
+               BRW_NEW_VS_PROG_DATA |
                BRW_NEW_META_IN_PROGRESS |
                BRW_NEW_PRIMITIVE |
                BRW_NEW_RASTERIZER_DISCARD |
