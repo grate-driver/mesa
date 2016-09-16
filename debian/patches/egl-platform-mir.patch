@@ -51,22 +51,23 @@
  struct __DRIdri2LoaderExtensionRec {
      __DRIextension base;
  
---- a/src/egl/drivers/dri2/egl_dri2.c
-+++ b/src/egl/drivers/dri2/egl_dri2.c
-@@ -792,6 +792,12 @@ dri2_initialize(_EGLDriver *drv, _EGLDis
-          return EGL_TRUE;
-       return dri2_initialize_wayland(drv, disp);
+Index: mesa-12.0.2/src/egl/drivers/dri2/egl_dri2.c
+===================================================================
+--- mesa-12.0.2.orig/src/egl/drivers/dri2/egl_dri2.c	2016-09-16 12:11:30.975350268 +1000
++++ mesa-12.0.2/src/egl/drivers/dri2/egl_dri2.c	2016-09-16 13:57:41.750324740 +1000
+@@ -813,6 +813,11 @@
+       ret = dri2_initialize_wayland(drv, disp);
+       break;
  #endif
 +#ifdef HAVE_MIR_PLATFORM
 +   case _EGL_PLATFORM_MIR:
-+      if (disp->Options.TestOnly)
-+         return EGL_TRUE;
-+      return dri2_initialize_mir(drv, disp);
++      ret = dri2_initialize_mir(drv, disp);
++      break;
 +#endif
  #ifdef HAVE_ANDROID_PLATFORM
     case _EGL_PLATFORM_ANDROID:
-       if (disp->Options.TestOnly)
-@@ -841,6 +847,13 @@ dri2_terminate(_EGLDriver *drv, _EGLDisp
+       ret = dri2_initialize_android(drv, disp);
+@@ -876,6 +881,13 @@
        }
        break;
  #endif
