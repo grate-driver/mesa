@@ -1,3 +1,13 @@
+mesa (12.0.3-1ubuntu1) UNRELEASED; urgency=medium
+
+  * Merge from Debian.
+
+  [ Christopher James Halse Rogers ]
+  * egl-platform-mir.patch: Updated for upstream changes to dri2_initialize
+    in egl_dri2.c. (LP: #1620934, #1620994)
+
+ -- Timo Aaltonen <tjaalton@debian.org>  Fri, 16 Sep 2016 10:07:05 +0300
+
 mesa (12.0.3-1) unstable; urgency=medium
 
   * New upstream release.
