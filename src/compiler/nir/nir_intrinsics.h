@@ -41,6 +41,8 @@
 
 #define ARR(...) { __VA_ARGS__ }
 
+INTRINSIC(nop, 0, ARR(0), false, 0, 0, 0, xx, xx, xx,
+          NIR_INTRINSIC_CAN_ELIMINATE)
 
 INTRINSIC(load_var, 0, ARR(0), true, 0, 1, 0, xx, xx, xx, NIR_INTRINSIC_CAN_ELIMINATE)
 INTRINSIC(store_var, 1, ARR(0), false, 0, 1, 1, WRMASK, xx, xx, 0)
