@@ -3,3 +3,7 @@ be32a2132785fbc119f17e62070e007ee7d17af7 i965/compiler: Bring back the INTEL_PRE
 
 # The patch depends on the batch_cache work at least.
 89f00f749fda4c1beca38f362c7f86bdc6e32785 a4xx: make sure to actually clamp depth as requested
+
+# The patch depends on the 'generic' interoplation and location
+# implementation introduced with 2d6dd30a9b30
+114874b22beafb2d07006b197c62d717fc7f80cc i965/fs: Use sample interpolation for interpolateAtCentroid in persample mode
