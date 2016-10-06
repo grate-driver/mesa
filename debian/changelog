@@ -2,6 +2,8 @@ mesa (12.0.3-2) UNRELEASED; urgency=medium
 
   * control: Add libtxc-dxtn-s2tc as an alternative in libgl1-mesa-dri's
     Recommends (Closes: #839658).
+  * control: Add strictly versioned dependency on libgbm1 to libegl1-
+    mesa.
 
  -- Andreas Boll <andreas.boll.dev@gmail.com>  Thu, 06 Oct 2016 17:00:31 +0200
 

@@ -120,6 +120,7 @@ Architecture: any
 Depends:
  ${shlibs:Depends},
  ${misc:Depends},
+ libgbm1 (= ${binary:Version}),
  libudev1 [linux-any],
 Provides: libegl1-x11
 Conflicts: libegl1-x11
