@@ -1014,7 +1014,7 @@ static LLVMValueRef lds_load(struct lp_build_tgsi_context *bld_base,
 	if (type == TGSI_TYPE_DOUBLE) {
 		LLVMValueRef value2;
 		dw_addr = lp_build_add(&bld_base->uint_bld, dw_addr,
-				       lp_build_const_int32(gallivm, swizzle + 1));
+				       lp_build_const_int32(gallivm, 1));
 		value2 = build_indexed_load(ctx, ctx->lds, dw_addr, false);
 		return radeon_llvm_emit_fetch_double(bld_base, value, value2);
 	}
