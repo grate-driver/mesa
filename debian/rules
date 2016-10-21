@@ -97,6 +97,13 @@ else
   else
 	DRI_DRIVERS += swrast
   endif
+
+  # radv needs LLVM and the Vulkan loader, so only build on the subset of
+  # arches where we have LLVM enabled and where the Vulkan loader is built.
+  ifneq (,$(filter $(DEB_HOST_ARCH), amd64 i386 arm64 armhf ppc64el))
+	VULKAN_DRIVERS += radeon
+  endif
+
 	confflags_DIRECT_RENDERING = --enable-driglx-direct
 	confflags_GALLIUM += --enable-vdpau
 	confflags_GALLIUM += --enable-va
@@ -177,7 +184,7 @@ override_dh_install:
   # Remove vulkan headers only where they get installed in tmp
   # We ship those headers via src:vulkan / libvulkan-dev
   ifeq ($(DEB_HOST_ARCH_OS), linux)
-    ifneq (,$(filter $(DEB_HOST_ARCH),amd64 i386 x32))
+    ifneq (,$(filter $(DEB_HOST_ARCH),amd64 i386 arm64 armhf ppc64el x32))
 	set -e; for file in vk_platform.h vulkan.h vulkan_intel.h; do rm debian/tmp/usr/include/vulkan/$$file; done
 	rmdir debian/tmp/usr/include/vulkan
     endif

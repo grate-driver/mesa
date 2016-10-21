@@ -6,6 +6,7 @@ mesa (13.0.0~rc1-1) UNRELEASED; urgency=medium
   * Bump libdrm-dev build-dep to 2.4.69 per configure.ac.
   * Remove libudev-dev and libudev1 dependencies per configure.ac.
   * Enable OpenCL on kfreebsd-* since we don't need udev anymore.
+  * Enable radv vulkan driver.
 
  -- Andreas Boll <andreas.boll.dev@gmail.com>  Fri, 21 Oct 2016 10:06:56 +0200
 

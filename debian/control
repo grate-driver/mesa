@@ -15,13 +15,13 @@ Build-Depends:
  libxxf86vm-dev,
  libexpat1-dev,
  dpkg-dev (>= 1.16.1),
- libgcrypt20-dev [linux-amd64 linux-i386 linux-x32],
+ libgcrypt20-dev [linux-amd64 linux-i386 arm64 armhf ppc64el linux-x32],
  libxfixes-dev,
  libxdamage-dev,
  libxext-dev,
  libva-dev (>= 1.6.0) [linux-any kfreebsd-any],
  libvdpau-dev (>= 1.1.1) [linux-any kfreebsd-any],
- libvulkan-dev [linux-amd64 linux-i386 linux-x32],
+ libvulkan-dev [linux-amd64 linux-i386 arm64 armhf ppc64el linux-x32],
  autoconf,
  automake,
  libtool,
@@ -463,7 +463,7 @@ Description: Mesa VDPAU video acceleration drivers
 
 Package: mesa-vulkan-drivers
 Section: libs
-Architecture: linux-amd64 linux-i386 linux-x32
+Architecture: linux-amd64 linux-i386 arm64 armhf ppc64el linux-x32
 Pre-Depends: ${misc:Pre-Depends}
 Depends:
  libvulkan1,
