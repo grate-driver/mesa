@@ -1,11 +1,12 @@
-mesa (12.0.3-3) UNRELEASED; urgency=medium
+mesa (13.0.0~rc1-1) UNRELEASED; urgency=medium
 
+  * New upstream release candidate.
   * Add clover-Fix-build-against-clang-SVN-r273191.diff to fix build
     against llvm-3.9.
   * control, rules: Use llvm/clang 3.9 (Closes: #836913).
   * control: Bump libclc dependencies.
 
- -- Andreas Boll <andreas.boll.dev@gmail.com>  Wed, 07 Sep 2016 18:23:39 +0200
+ -- Andreas Boll <andreas.boll.dev@gmail.com>  Fri, 21 Oct 2016 10:06:56 +0200
 
 mesa (12.0.3-2) unstable; urgency=medium
 
