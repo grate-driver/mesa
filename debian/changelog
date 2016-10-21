@@ -8,6 +8,7 @@ mesa (13.0.0~rc1-1) UNRELEASED; urgency=medium
   * Enable OpenCL on kfreebsd-* since we don't need udev anymore.
   * Enable radv vulkan driver.
   * control: Remove superfluous linux- prefix.
+  * not-installed: wglext.h got dropped from the tarball.
 
  -- Andreas Boll <andreas.boll.dev@gmail.com>  Fri, 21 Oct 2016 10:06:56 +0200
 
