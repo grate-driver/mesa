@@ -138,6 +138,7 @@ libGLESv2.so.2 libgles2-mesa #MINVER# | libgles2
  glGetMultisamplefv@Base 10.7.0~
  glGetObjectLabel@Base 12.0.0~
  glGetObjectPtrLabel@Base 12.0.0~
+ glGetPointerv@Base 13.0.0~
  glGetProgramBinary@Base 9.1~
  glGetProgramInfoLog@Base 7.8.1
  glGetProgramInterfaceiv@Base 12.0.1
