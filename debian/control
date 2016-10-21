@@ -40,7 +40,6 @@ Build-Depends:
  libxshmfence-dev (>= 1.1),
  python,
  python-mako,
- libudev-dev [linux-any],
  flex,
  bison,
  llvm-3.9-dev (>= 1:3.9) [amd64 i386 kfreebsd-amd64 kfreebsd-i386 arm64 armhf ppc64el],
@@ -88,7 +87,6 @@ Architecture: linux-any kfreebsd-any
 Depends:
  ${shlibs:Depends},
  ${misc:Depends},
- libudev1 [linux-any],
 Pre-Depends: ${misc:Pre-Depends}
 Multi-Arch: same
 Description: generic buffer management API -- runtime
@@ -102,7 +100,6 @@ Section: libdevel
 Architecture: linux-any kfreebsd-any
 Depends:
  libgbm1 (= ${binary:Version}),
- libudev-dev [linux-any],
  ${misc:Depends},
 Multi-Arch: same
 Description: generic buffer management API -- development files
@@ -121,7 +118,6 @@ Depends:
  ${shlibs:Depends},
  ${misc:Depends},
  libgbm1 (= ${binary:Version}),
- libudev1 [linux-any],
 Provides: libegl1-x11
 Conflicts: libegl1-x11
 Replaces: libegl1-x11
@@ -293,7 +289,6 @@ Depends:
  ${shlibs:Depends},
  ${misc:Depends},
  libglapi-mesa (= ${binary:Version}),
- libudev1 [linux-any],
 Recommends: libgl1-mesa-dri
 Conflicts: libgl1
 Replaces: libgl1
