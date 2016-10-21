@@ -64,7 +64,7 @@ brw_blorp_params_get_clear_kernel(struct brw_context *brw,
    void *mem_ctx = ralloc_context(NULL);
 
    nir_builder b;
-   nir_builder_init_simple_shader(&b, NULL, MESA_SHADER_FRAGMENT, NULL);
+   nir_builder_init_simple_shader(&b, mem_ctx, MESA_SHADER_FRAGMENT, NULL);
    b.shader->info.name = ralloc_strdup(b.shader, "BLORP-clear");
 
    nir_variable *u_color = nir_variable_create(b.shader, nir_var_uniform,
@@ -84,7 +84,8 @@ brw_blorp_params_get_clear_kernel(struct brw_context *brw,
    struct brw_blorp_prog_data prog_data;
    unsigned program_size;
    const unsigned *program =
-      brw_blorp_compile_nir_shader(brw, b.shader, &wm_key, use_replicated_data,
+      brw_blorp_compile_nir_shader(brw, mem_ctx,
+                                   b.shader, &wm_key, use_replicated_data,
                                    &prog_data, &program_size);
 
    brw_upload_cache(&brw->cache, BRW_CACHE_BLORP_PROG,
