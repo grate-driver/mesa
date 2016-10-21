@@ -84,6 +84,7 @@ else
   ifneq (,$(filter $(DEB_HOST_ARCH),amd64 i386 kfreebsd-amd64 kfreebsd-i386 arm64 armhf))
 	# opencl needs LLVM and Clang, so only build it on the subset
 	# of arches where we have LLVM enabled.
+	# opencl on ppc64el is currently disabled (see #810913).
 	confflags_GALLIUM += --enable-opencl --enable-opencl-icd
   endif
 
