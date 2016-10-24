@@ -117,7 +117,7 @@ Architecture: any
 Depends:
  ${shlibs:Depends},
  ${misc:Depends},
- libgbm1 (= ${binary:Version}),
+ libgbm1 (= ${binary:Version}) [!hurd-any],
 Provides: libegl1-x11
 Conflicts: libegl1-x11
 Replaces: libegl1-x11
