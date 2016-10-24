@@ -55,6 +55,7 @@
 #include "st_glsl_types.h"
 #include "st_nir.h"
 
+#include <algorithm>
 
 #define PROGRAM_ANY_CONST ((1 << PROGRAM_STATE_VAR) |    \
                            (1 << PROGRAM_CONSTANT) |     \
@@ -2880,6 +2881,7 @@ glsl_to_tgsi_visitor::emit_block_mov(ir_assignment *ir, const struct glsl_type *
 
    assert(type->is_scalar() || type->is_vector());
 
+   l->type = type->base_type;
    r->type = type->base_type;
    if (cond) {
       st_src_reg l_src = st_src_reg(*l);
@@ -2940,10 +2942,12 @@ glsl_to_tgsi_visitor::visit(ir_assignment *ir)
       } else if (ir->write_mask == 0) {
          assert(!ir->lhs->type->is_scalar() && !ir->lhs->type->is_vector());
 
-         if (ir->lhs->type->is_array() || ir->lhs->type->is_matrix()) {
-            unsigned num_elements = ir->lhs->type->without_array()->vector_elements;
+         unsigned num_elements = ir->lhs->type->without_array()->vector_elements;
+
+         if (num_elements) {
             l.writemask = u_bit_consecutive(0, num_elements);
          } else {
+            /* The type is a struct or an array of (array of) structs. */
             l.writemask = WRITEMASK_XYZW;
          }
       } else {
@@ -5870,6 +5874,29 @@ emit_compute_block_size(const struct gl_program *program,
                        cp->LocalSize[2]);
 }
 
+struct sort_inout_decls {
+   bool operator()(const struct inout_decl &a, const struct inout_decl &b) const {
+      return mapping[a.mesa_index] < mapping[b.mesa_index];
+   }
+
+   const GLuint *mapping;
+};
+
+/* Sort the given array of decls by the corresponding slot (TGSI file index).
+ *
+ * This is for the benefit of older drivers which are broken when the
+ * declarations aren't sorted in this way.
+ */
+static void
+sort_inout_decls_by_slot(struct inout_decl *decls,
+                         unsigned count,
+                         const GLuint mapping[])
+{
+   sort_inout_decls sorter;
+   sorter.mapping = mapping;
+   std::sort(decls, decls + count, sorter);
+}
+
 /**
  * Translate intermediate IR (glsl_to_tgsi_instruction) to TGSI format.
  * \param program  the program to translate
@@ -5942,6 +5969,8 @@ st_translate_program(
    case PIPE_SHADER_GEOMETRY:
    case PIPE_SHADER_TESS_EVAL:
    case PIPE_SHADER_TESS_CTRL:
+      sort_inout_decls_by_slot(program->inputs, program->num_inputs, inputMapping);
+
       for (i = 0; i < program->num_inputs; ++i) {
          struct inout_decl *decl = &program->inputs[i];
          unsigned slot = inputMapping[decl->mesa_index];
@@ -5994,6 +6023,8 @@ st_translate_program(
    case PIPE_SHADER_TESS_EVAL:
    case PIPE_SHADER_TESS_CTRL:
    case PIPE_SHADER_VERTEX:
+      sort_inout_decls_by_slot(program->outputs, program->num_outputs, outputMapping);
+
       for (i = 0; i < program->num_outputs; ++i) {
          struct inout_decl *decl = &program->outputs[i];
          unsigned slot = outputMapping[decl->mesa_index];
