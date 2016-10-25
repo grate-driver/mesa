@@ -41,6 +41,10 @@ static void tegra_surface_destroy(struct pipe_context *context,
 {
 	fprintf(stdout, "> %s(context=%p, surface=%p)\n", __func__, context,
 		surface);
+
+	pipe_resource_reference(&surface->texture, NULL);
+	free(surface);
+
 	fprintf(stdout, "< %s()\n", __func__);
 }
 
