@@ -77,6 +77,7 @@ static void tegra_resource_destroy(struct pipe_screen *pscreen,
 	fprintf(stdout, "> %s(pscreen=%p, presource=%p)\n", __func__, pscreen,
 		presource);
 
+	drm_tegra_bo_unref(resource->bo);
 	free(resource);
 
 	fprintf(stdout, "< %s()\n", __func__);
