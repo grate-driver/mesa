@@ -1,3 +1,10 @@
+mesa (13.0.0~rc2-2) UNRELEASED; urgency=medium
+
+  * Make mesa-vulkan-drivers.install more generic. Should fix FTBFS on
+    some arches.
+
+ -- Andreas Boll <andreas.boll.dev@gmail.com>  Tue, 25 Oct 2016 16:53:57 +0200
+
 mesa (13.0.0~rc2-1) experimental; urgency=medium
 
   * New upstream release candidate.
