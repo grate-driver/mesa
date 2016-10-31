@@ -16,3 +16,7 @@ a5993022275c20061ac025d9adc26c5f9d02afee st/va Avoid VBR bitrate calculation ove
 
 # Depends on update_renderbuffer_read_surfaces at least
 f2b9b0c730e345bcffa9eadabb25af3ab02642f2 i965: Add missing BRW_NEW_FS_PROG_DATA to render target reads.
+
+# The commit in question hasn't landed in branch
+1ef787339774bc7f1cc9c1615722f944005e070c Revert "egl/android: Set EGL_MAX_PBUFFER_WIDTH and EGL_MAX_PBUFFER_HEIGHT"
+
