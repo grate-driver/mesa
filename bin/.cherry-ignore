@@ -10,3 +10,6 @@ be32a2132785fbc119f17e62070e007ee7d17af7 i965/compiler: Bring back the INTEL_PRE
 
 # VAAPI encode landed after the branch point.
 a5993022275c20061ac025d9adc26c5f9d02afee st/va Avoid VBR bitrate calculation overflow v2
+
+# EGL_KHR_debug landed after the branch point.
+17084b6f9340f798111e53e08f5d35c7630cee48 egl: Fix missing unlock in eglGetSyncAttribKHR
