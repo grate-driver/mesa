@@ -13,3 +13,6 @@ a5993022275c20061ac025d9adc26c5f9d02afee st/va Avoid VBR bitrate calculation ove
 
 # EGL_KHR_debug landed after the branch point.
 17084b6f9340f798111e53e08f5d35c7630cee48 egl: Fix missing unlock in eglGetSyncAttribKHR
+
+# Depends on update_renderbuffer_read_surfaces at least
+f2b9b0c730e345bcffa9eadabb25af3ab02642f2 i965: Add missing BRW_NEW_FS_PROG_DATA to render target reads.
