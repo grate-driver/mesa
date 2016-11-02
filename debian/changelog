@@ -1,4 +1,4 @@
-mesa (13.0.0-1) UNRELEASED; urgency=medium
+mesa (13.0.0-1) experimental; urgency=medium
 
   * New upstream release.
   * Make mesa-vulkan-drivers.install more generic. Should fix FTBFS on
@@ -8,7 +8,7 @@ mesa (13.0.0-1) UNRELEASED; urgency=medium
     Should fix FTBFS on some more arches.
   * source/local-options: Update extend-diff-ignore.
 
- -- Andreas Boll <andreas.boll.dev@gmail.com>  Tue, 25 Oct 2016 16:53:57 +0200
+ -- Andreas Boll <andreas.boll.dev@gmail.com>  Wed, 02 Nov 2016 11:49:13 +0100
 
 mesa (13.0.0~rc2-1) experimental; urgency=medium
 
