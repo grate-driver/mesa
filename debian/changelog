@@ -1,5 +1,6 @@
-mesa (13.0.0~rc2-2) UNRELEASED; urgency=medium
+mesa (13.0.0-1) UNRELEASED; urgency=medium
 
+  * New upstream release.
   * Make mesa-vulkan-drivers.install more generic. Should fix FTBFS on
     some arches.
   * rules: Remove superfluous linux check.
