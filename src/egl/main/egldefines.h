@@ -34,6 +34,8 @@
 #ifndef EGLDEFINES_INCLUDED
 #define EGLDEFINES_INCLUDED
 
+#include "util/macros.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -48,7 +50,6 @@ extern "C" {
 
 #define _EGL_VENDOR_STRING "Mesa Project"
 
-#define ARRAY_SIZE(a) (sizeof(a) / sizeof((a)[0]))
 #define MIN2(A, B)  (((A) < (B)) ? (A) : (B))
 
 #ifdef __cplusplus
