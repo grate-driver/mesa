@@ -6,6 +6,7 @@ mesa (13.0.0-1) UNRELEASED; urgency=medium
   * rules: Remove superfluous linux check.
   * rules: Remove vulkan_intel.h only where it get installed in tmp.
     Should fix FTBFS on some more arches.
+  * source/local-options: Update extend-diff-ignore.
 
  -- Andreas Boll <andreas.boll.dev@gmail.com>  Tue, 25 Oct 2016 16:53:57 +0200
 
