@@ -23,6 +23,138 @@
 #
 
 LOCAL_PATH := $(call my-dir)
+
+# Import variables i965_FILES.
+include $(LOCAL_PATH)/Makefile.sources
+
+I965_PERGEN_COMMON_INCLUDES := \
+	$(MESA_DRI_C_INCLUDES) \
+	$(MESA_TOP)/src/intel
+
+I965_PERGEN_SHARED_LIBRARIES := \
+	$(MESA_DRI_SHARED_LIBRARIES) \
+	libdrm_intel
+
+I965_PERGEN_STATIC_LIBRARIES := \
+	libmesa_genxml \
+	libmesa_nir
+
+I965_PERGEN_LIBS := \
+	libmesa_i965_gen6 \
+	libmesa_i965_gen7 \
+	libmesa_i965_gen75 \
+	libmesa_i965_gen8 \
+	libmesa_i965_gen9
+
+# ---------------------------------------
+# Build libmesa_i965_gen6
+# ---------------------------------------
+
+include $(CLEAR_VARS)
+
+LOCAL_MODULE := libmesa_i965_gen6
+
+LOCAL_C_INCLUDES := $(I965_PERGEN_COMMON_INCLUDES)
+
+LOCAL_SRC_FILES := $(i965_gen6_FILES)
+
+LOCAL_SHARED_LIBRARIES := $(I965_PERGEN_SHARED_LIBRARIES)
+
+LOCAL_STATIC_LIBRARIES := $(I965_PERGEN_STATIC_LIBRARIES)
+
+LOCAL_CFLAGS := -DGEN_VERSIONx10=60
+
+include $(MESA_COMMON_MK)
+include $(BUILD_STATIC_LIBRARY)
+
+# ---------------------------------------
+# Build libmesa_i965_gen7
+# ---------------------------------------
+
+include $(CLEAR_VARS)
+
+LOCAL_MODULE := libmesa_i965_gen7
+
+LOCAL_C_INCLUDES := $(I965_PERGEN_COMMON_INCLUDES)
+
+LOCAL_SRC_FILES := $(i965_gen7_FILES)
+
+LOCAL_SHARED_LIBRARIES := $(I965_PERGEN_SHARED_LIBRARIES)
+
+LOCAL_STATIC_LIBRARIES := $(I965_PERGEN_STATIC_LIBRARIES)
+
+LOCAL_CFLAGS := -DGEN_VERSIONx10=70
+
+include $(MESA_COMMON_MK)
+include $(BUILD_STATIC_LIBRARY)
+
+# ---------------------------------------
+# Build libmesa_i965_gen75
+# ---------------------------------------
+
+include $(CLEAR_VARS)
+
+LOCAL_MODULE := libmesa_i965_gen75
+
+LOCAL_C_INCLUDES := $(I965_PERGEN_COMMON_INCLUDES)
+
+LOCAL_SRC_FILES := $(i965_gen75_FILES)
+
+LOCAL_SHARED_LIBRARIES := $(I965_PERGEN_SHARED_LIBRARIES)
+
+LOCAL_STATIC_LIBRARIES := $(I965_PERGEN_STATIC_LIBRARIES)
+
+LOCAL_CFLAGS := -DGEN_VERSIONx10=75
+
+include $(MESA_COMMON_MK)
+include $(BUILD_STATIC_LIBRARY)
+
+# ---------------------------------------
+# Build libmesa_i965_gen8
+# ---------------------------------------
+
+include $(CLEAR_VARS)
+
+LOCAL_MODULE := libmesa_i965_gen8
+
+LOCAL_C_INCLUDES := $(I965_PERGEN_COMMON_INCLUDES)
+
+LOCAL_SRC_FILES := $(i965_gen8_FILES)
+
+LOCAL_SHARED_LIBRARIES := $(I965_PERGEN_SHARED_LIBRARIES)
+
+LOCAL_STATIC_LIBRARIES := $(I965_PERGEN_STATIC_LIBRARIES)
+
+LOCAL_CFLAGS := -DGEN_VERSIONx10=80
+
+include $(MESA_COMMON_MK)
+include $(BUILD_STATIC_LIBRARY)
+
+# ---------------------------------------
+# Build libmesa_i965_gen9
+# ---------------------------------------
+
+include $(CLEAR_VARS)
+
+LOCAL_MODULE := libmesa_i965_gen9
+
+LOCAL_C_INCLUDES := $(I965_PERGEN_COMMON_INCLUDES)
+
+LOCAL_SRC_FILES := $(i965_gen9_FILES)
+
+LOCAL_SHARED_LIBRARIES := $(I965_PERGEN_SHARED_LIBRARIES)
+
+LOCAL_STATIC_LIBRARIES := $(I965_PERGEN_STATIC_LIBRARIES)
+
+LOCAL_CFLAGS := -DGEN_VERSIONx10=90
+
+include $(MESA_COMMON_MK)
+include $(BUILD_STATIC_LIBRARY)
+
+# ---------------------------------------
+# Build i965_dri
+# ---------------------------------------
+
 include $(CLEAR_VARS)
 
 LOCAL_MODULE := i965_dri
@@ -32,9 +164,6 @@ else
 LOCAL_MODULE_PATH := $(MESA_DRI_MODULE_PATH)
 LOCAL_UNSTRIPPED_PATH := $(MESA_DRI_MODULE_UNSTRIPPED_PATH)
 endif
-
-# Import variables i965_FILES.
-include $(LOCAL_PATH)/Makefile.sources
 
 LOCAL_CFLAGS := \
 	$(MESA_DRI_CFLAGS)
@@ -53,6 +182,9 @@ LOCAL_SRC_FILES := \
 
 LOCAL_WHOLE_STATIC_LIBRARIES := \
 	$(MESA_DRI_WHOLE_STATIC_LIBRARIES) \
+	$(I965_PERGEN_LIBS) \
+	libmesa_intel_common \
+	libmesa_blorp \
 	libmesa_isl
 
 LOCAL_SHARED_LIBRARIES := \

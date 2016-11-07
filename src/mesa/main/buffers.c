@@ -36,6 +36,7 @@
 #include "enums.h"
 #include "fbobject.h"
 #include "mtypes.h"
+#include "util/bitscan.h"
 
 
 #define BAD_MASK ~0u
@@ -172,12 +173,22 @@ draw_buffer_enum_to_bitmask(const struct gl_context *ctx, GLenum buffer)
  * return -1 for an invalid buffer.
  */
 static gl_buffer_index
-read_buffer_enum_to_index(GLenum buffer)
+read_buffer_enum_to_index(const struct gl_context *ctx, GLenum buffer)
 {
    switch (buffer) {
       case GL_FRONT:
          return BUFFER_FRONT_LEFT;
       case GL_BACK:
+         if (_mesa_is_gles(ctx)) {
+            /* In draw_buffer_enum_to_bitmask, when GLES contexts draw to
+             * GL_BACK with a single-buffered configuration, we actually end
+             * up drawing to the sole front buffer in our internal
+             * representation.  For consistency, we must read from that
+             * front left buffer too.
+             */
+            if (!ctx->DrawBuffer->Visual.doubleBufferMode)
+               return BUFFER_FRONT_LEFT;
+         }
          return BUFFER_BACK_LEFT;
       case GL_RIGHT:
          return BUFFER_FRONT_RIGHT;
@@ -378,17 +389,48 @@ draw_buffers(struct gl_context *ctx, struct gl_framebuffer *fb,
 
    /* complicated error checking... */
    for (output = 0; output < n; output++) {
-      /* Section 4.2 (Whole Framebuffer Operations) of the OpenGL 3.0
+      destMask[output] = draw_buffer_enum_to_bitmask(ctx, buffers[output]);
+
+      /* From the OpenGL 3.0 specification, page 258:
+       * "Each buffer listed in bufs must be one of the values from tables
+       *  4.5 or 4.6.  Otherwise, an INVALID_ENUM error is generated.
+       */
+      if (destMask[output] == BAD_MASK) {
+         _mesa_error(ctx, GL_INVALID_ENUM, "%s(invalid buffer %s)",
+                     caller, _mesa_enum_to_string(buffers[output]));
+         return;
+      }
+
+      /* From the OpenGL 4.0 specification, page 256:
+       * "For both the default framebuffer and framebuffer objects, the
+       *  constants FRONT, BACK, LEFT, RIGHT, and FRONT_AND_BACK are not
+       *  valid in the bufs array passed to DrawBuffers, and will result in
+       *  the error INVALID_ENUM. This restriction is because these
+       *  constants may themselves refer to multiple buffers, as shown in
+       *  table 4.4."
+       *  Previous versions of the OpenGL specification say INVALID_OPERATION,
+       *  but the Khronos conformance tests expect INVALID_ENUM.
+       */
+      if (_mesa_bitcount(destMask[output]) > 1) {
+         _mesa_error(ctx, GL_INVALID_ENUM, "%s(invalid buffer %s)",
+                     caller, _mesa_enum_to_string(buffers[output]));
+         return;
+      }
+
+      /* Section 4.2 (Whole Framebuffer Operations) of the OpenGL ES 3.0
        * specification says:
        *
-       *     "Each buffer listed in bufs must be BACK, NONE, or one of the values
-       *      from table 4.3 (NONE, COLOR_ATTACHMENTi)"
+       *     "If the GL is bound to a draw framebuffer object, the ith buffer
+       *     listed in bufs must be COLOR_ATTACHMENTi or NONE . Specifying a
+       *     buffer out of order, BACK , or COLOR_ATTACHMENTm where m is greater
+       *     than or equal to the value of MAX_- COLOR_ATTACHMENTS , will
+       *     generate the error INVALID_OPERATION .
        */
-      if (_mesa_is_gles3(ctx) && buffers[output] != GL_NONE &&
-          buffers[output] != GL_BACK &&
+      if (_mesa_is_gles3(ctx) && _mesa_is_user_fbo(fb) &&
+          buffers[output] != GL_NONE &&
           (buffers[output] < GL_COLOR_ATTACHMENT0 ||
            buffers[output] >= GL_COLOR_ATTACHMENT0 + ctx->Const.MaxColorAttachments)) {
-         _mesa_error(ctx, GL_INVALID_ENUM, "glDrawBuffers(buffer)");
+         _mesa_error(ctx, GL_INVALID_OPERATION, "glDrawBuffers(buffer)");
          return;
       }
 
@@ -409,34 +451,6 @@ draw_buffers(struct gl_context *ctx, struct gl_framebuffer *fb,
             _mesa_error(ctx, GL_INVALID_OPERATION,
                         "%s(buffers[%d] >= maximum number of draw buffers)",
                         caller, output);
-            return;
-         }
-
-         destMask[output] = draw_buffer_enum_to_bitmask(ctx, buffers[output]);
-
-         /* From the OpenGL 3.0 specification, page 258:
-          * "Each buffer listed in bufs must be one of the values from tables
-          *  4.5 or 4.6.  Otherwise, an INVALID_ENUM error is generated.
-          */
-         if (destMask[output] == BAD_MASK) {
-            _mesa_error(ctx, GL_INVALID_ENUM, "%s(invalid buffer %s)",
-                        caller, _mesa_enum_to_string(buffers[output]));
-            return;
-         }
-
-         /* From the OpenGL 4.0 specification, page 256:
-          * "For both the default framebuffer and framebuffer objects, the
-          *  constants FRONT, BACK, LEFT, RIGHT, and FRONT_AND_BACK are not
-          *  valid in the bufs array passed to DrawBuffers, and will result in
-          *  the error INVALID_ENUM. This restriction is because these
-          *  constants may themselves refer to multiple buffers, as shown in
-          *  table 4.4."
-          *  Previous versions of the OpenGL specification say INVALID_OPERATION,
-          *  but the Khronos conformance tests expect INVALID_ENUM.
-          */
-         if (_mesa_bitcount(destMask[output]) > 1) {
-            _mesa_error(ctx, GL_INVALID_ENUM, "%s(invalid buffer %s)",
-                        caller, _mesa_enum_to_string(buffers[output]));
             return;
          }
 
@@ -595,13 +609,12 @@ _mesa_drawbuffers(struct gl_context *ctx, struct gl_framebuffer *fb,
    if (n > 0 && _mesa_bitcount(destMask[0]) > 1) {
       GLuint count = 0, destMask0 = destMask[0];
       while (destMask0) {
-         GLint bufIndex = ffs(destMask0) - 1;
+         const int bufIndex = u_bit_scan(&destMask0);
          if (fb->_ColorDrawBufferIndexes[count] != bufIndex) {
             updated_drawbuffers(ctx, fb);
             fb->_ColorDrawBufferIndexes[count] = bufIndex;
          }
          count++;
-         destMask0 &= ~(1 << bufIndex);
       }
       fb->ColorDrawBuffer[0] = buffers[0];
       fb->_NumColorDrawBuffers = count;
@@ -724,7 +737,7 @@ read_buffer(struct gl_context *ctx, struct gl_framebuffer *fb,
       if (_mesa_is_gles3(ctx) && !is_legal_es3_readbuffer_enum(buffer))
          srcBuffer = -1;
       else
-         srcBuffer = read_buffer_enum_to_index(buffer);
+         srcBuffer = read_buffer_enum_to_index(ctx, buffer);
 
       if (srcBuffer == -1) {
          _mesa_error(ctx, GL_INVALID_ENUM,

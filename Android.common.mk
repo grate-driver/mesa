@@ -34,6 +34,10 @@ MESA_VERSION := $(shell cat $(MESA_TOP)/VERSION)
 LOCAL_CFLAGS += \
 	-Wno-unused-parameter \
 	-Wno-date-time \
+	-Wno-pointer-arith \
+	-Wno-missing-field-initializers \
+	-Wno-initializer-overrides \
+	-Wno-mismatched-tags \
 	-DPACKAGE_VERSION=\"$(MESA_VERSION)\" \
 	-DPACKAGE_BUGREPORT=\"https://bugs.freedesktop.org/enter_bug.cgi?product=Mesa\" \
 	-DANDROID_VERSION=0x0$(MESA_ANDROID_MAJOR_VERSION)0$(MESA_ANDROID_MINOR_VERSION)
@@ -76,6 +80,12 @@ LOCAL_CFLAGS += \
 	-D__STDC_CONSTANT_MACROS \
 	-D__STDC_FORMAT_MACROS \
 	-D__STDC_LIMIT_MACROS
+endif
+
+# add libdrm if there are hardware drivers
+ifneq ($(filter-out swrast,$(MESA_GPU_DRIVERS)),)
+LOCAL_CFLAGS += -DHAVE_LIBDRM
+LOCAL_SHARED_LIBRARIES += libdrm
 endif
 
 LOCAL_CPPFLAGS += \

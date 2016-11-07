@@ -35,12 +35,13 @@ LOCAL_CFLAGS := \
 	-DBRAHMA_BUILD=1
 
 LOCAL_C_INCLUDES := \
-	$(LOCAL_PATH)/addrlib \
-	$(LOCAL_PATH)/addrlib/core \
-	$(LOCAL_PATH)/addrlib/inc/chip/r800 \
-	$(LOCAL_PATH)/addrlib/r800/chip
+	$(MESA_TOP)/src \
+	$(MESA_TOP)/src/amd \
+	$(MESA_TOP)/src/amd/addrlib/core \
+	$(MESA_TOP)/src/amd/addrlib/inc/chip/r800 \
+	$(MESA_TOP)/src/amd/addrlib/r800/chip
 
-LOCAL_SHARED_LIBRARIES := libdrm libdrm_amdgpu
+LOCAL_SHARED_LIBRARIES := libdrm_amdgpu
 LOCAL_MODULE := libmesa_winsys_amdgpu
 
 include $(GALLIUM_COMMON_MK)
