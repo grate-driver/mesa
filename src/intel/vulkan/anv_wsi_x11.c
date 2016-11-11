@@ -516,6 +516,7 @@ x11_acquire_next_image(struct anv_swapchain *anv_chain,
             /* We found a non-busy image */
             xshmfence_await(chain->images[i].shm_fence);
             *image_index = i;
+            chain->images[i].busy = true;
             return VK_SUCCESS;
          }
       }
@@ -553,6 +554,7 @@ x11_queue_present(struct anv_swapchain *anv_chain,
 
    xshmfence_reset(image->shm_fence);
 
+   ++chain->send_sbc;
    xcb_void_cookie_t cookie =
       xcb_present_pixmap(chain->conn,
                          chain->window,
@@ -786,6 +788,7 @@ x11_surface_create_swapchain(VkIcdSurfaceBase *icd_surface,
    chain->window = surface->window;
    chain->extent = pCreateInfo->imageExtent;
    chain->image_count = num_images;
+   chain->send_sbc = 0;
 
    chain->event_id = xcb_generate_id(chain->conn);
    xcb_present_select_input(chain->conn, chain->event_id, chain->window,

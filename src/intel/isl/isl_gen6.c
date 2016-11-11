@@ -37,7 +37,7 @@ gen6_choose_msaa_layout(const struct isl_device *dev,
 
    if (info->samples == 1) {
       *msaa_layout = ISL_MSAA_LAYOUT_NONE;
-      return false;
+      return true;
    }
 
    /* From the Sandybridge PRM, Volume 4 Part 1 p72, SURFACE_STATE, Surface

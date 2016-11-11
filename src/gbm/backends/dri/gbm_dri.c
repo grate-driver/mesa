@@ -589,7 +589,8 @@ gbm_dri_bo_get_fd(struct gbm_bo *_bo)
    if (bo->image == NULL)
       return -1;
 
-   dri->image->queryImage(bo->image, __DRI_IMAGE_ATTRIB_FD, &fd);
+   if (!dri->image->queryImage(bo->image, __DRI_IMAGE_ATTRIB_FD, &fd))
+      return -1;
 
    return fd;
 }
@@ -941,7 +942,7 @@ gbm_dri_bo_map(struct gbm_bo *_bo,
       return *map_data;
    }
 
-   if (!dri->image || dri->image->base.version < 12) {
+   if (!dri->image || dri->image->base.version < 12 || !dri->image->mapImage) {
       errno = ENOSYS;
       return NULL;
    }
@@ -972,7 +973,8 @@ gbm_dri_bo_unmap(struct gbm_bo *_bo, void *map_data)
       return;
    }
 
-   if (!dri->context || !dri->image || dri->image->base.version < 12)
+   if (!dri->context || !dri->image ||
+       dri->image->base.version < 12 || !dri->image->unmapImage)
       return;
 
    dri->image->unmapImage(dri->context, bo->image, map_data);

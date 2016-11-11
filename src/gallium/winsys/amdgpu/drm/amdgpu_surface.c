@@ -253,6 +253,20 @@ static int compute_level(struct amdgpu_winsys *ws,
    return 0;
 }
 
+static unsigned cik_get_macro_tile_index(struct radeon_surf *surf)
+{
+	unsigned index, tileb;
+
+	tileb = 8 * 8 * surf->bpe;
+	tileb = MIN2(surf->tile_split, tileb);
+
+	for (index = 0; tileb > 64; index++)
+		tileb >>= 1;
+
+	assert(index < 16);
+	return index;
+}
+
 static int amdgpu_surface_init(struct radeon_winsys *rws,
                                struct radeon_surf *surf)
 {
@@ -381,6 +395,9 @@ static int amdgpu_surface_init(struct radeon_winsys *rws,
          AddrSurfInfoIn.tileIndex = 10; /* 2D displayable */
       else
          AddrSurfInfoIn.tileIndex = 14; /* 2D non-displayable */
+
+      /* Addrlib doesn't set this if tileIndex is forced like above. */
+      AddrSurfInfoOut.macroModeIndex = cik_get_macro_tile_index(surf);
    }
 
    surf->bo_size = 0;

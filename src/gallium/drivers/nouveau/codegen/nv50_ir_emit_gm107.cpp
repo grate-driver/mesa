@@ -2301,6 +2301,7 @@ CodeEmitterGM107::emitAL2P()
 {
    emitInsn (0xefa00000);
    emitField(0x2f, 2, (insn->getDef(0)->reg.size / 4) - 1);
+   emitPRED (0x2c);
    emitO    (0x20);
    emitField(0x14, 11, insn->src(0).get()->reg.data.offset);
    emitGPR  (0x08, insn->src(0).getIndirect(0));
@@ -2524,7 +2525,7 @@ CodeEmitterGM107::emitTEX()
 
    if (insn->tex.rIndirectSrc >= 0) {
       emitInsn (0xdeb80000);
-      emitField(0x35, 2, lodm);
+      emitField(0x25, 2, lodm);
       emitField(0x24, 1, insn->tex.useOffsets == 1);
    } else {
       emitInsn (0xc0380000);

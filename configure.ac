@@ -1999,8 +1999,8 @@ if test "x$with_egl_platforms" != "x" -a "x$enable_egl" != xyes; then
     AC_MSG_ERROR([cannot build egl state tracker without EGL library])
 fi
 
-PKG_CHECK_MODULES([WAYLAND_SCANNER], [wayland_scanner],
-        WAYLAND_SCANNER=`$PKG_CONFIG --variable=wayland_scanner wayland_scanner`,
+PKG_CHECK_MODULES([WAYLAND_SCANNER], [wayland-scanner],
+        WAYLAND_SCANNER=`$PKG_CONFIG --variable=wayland_scanner wayland-scanner`,
         WAYLAND_SCANNER='')
 if test "x$WAYLAND_SCANNER" = x; then
     AC_PATH_PROG([WAYLAND_SCANNER], [wayland-scanner])
@@ -2183,6 +2183,10 @@ if test "x$enable_gallium_llvm" = xyes; then
         fi
 
         LLVM_COMPONENTS="engine bitwriter mcjit mcdisassembler"
+
+        if $LLVM_CONFIG --components | grep -q inteljitevents ; then
+            LLVM_COMPONENTS="${LLVM_COMPONENTS} inteljitevents"
+        fi
 
         if test "x$enable_opencl" = xyes; then
             llvm_check_version_for "3" "5" "0" "opencl"
@@ -2592,6 +2596,8 @@ fi
 AM_CONDITIONAL(HAVE_LIBDRM, test "x$have_libdrm" = xyes)
 AM_CONDITIONAL(HAVE_OSMESA, test "x$enable_osmesa" = xyes)
 AM_CONDITIONAL(HAVE_GALLIUM_OSMESA, test "x$enable_gallium_osmesa" = xyes)
+AM_CONDITIONAL(HAVE_COMMON_OSMESA, test "x$enable_osmesa" = xyes -o \
+                                        "x$enable_gallium_osmesa" = xyes)
 
 AM_CONDITIONAL(HAVE_X86_ASM, test "x$asm_arch" = xx86 -o "x$asm_arch" = xx86_64)
 AM_CONDITIONAL(HAVE_X86_64_ASM, test "x$asm_arch" = xx86_64)

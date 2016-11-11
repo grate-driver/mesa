@@ -242,6 +242,15 @@ dri2_add_config(_EGLDisplay *disp, const __DRIconfig *dri_config, int id,
             return NULL;
          break;
 
+      case __DRI_ATTRIB_MAX_PBUFFER_WIDTH:
+         _eglSetConfigKey(&base, EGL_MAX_PBUFFER_WIDTH,
+                          _EGL_MAX_PBUFFER_WIDTH);
+         break;
+      case __DRI_ATTRIB_MAX_PBUFFER_HEIGHT:
+         _eglSetConfigKey(&base, EGL_MAX_PBUFFER_HEIGHT,
+                          _EGL_MAX_PBUFFER_HEIGHT);
+         break;
+
       default:
 	 key = dri2_to_egl_attribute_map[attrib];
 	 if (key != 0)
@@ -318,6 +327,15 @@ dri2_add_config(_EGLDisplay *disp, const __DRIconfig *dri_config, int id,
 
    if (double_buffer) {
       surface_type &= ~EGL_PIXMAP_BIT;
+   }
+
+   /* No support for pbuffer + MSAA for now.
+    *
+    * XXX TODO: pbuffer + MSAA does not work and causes crashes.
+    * See QT bugreport: https://bugreports.qt.io/browse/QTBUG-47509
+    */
+   if (base.Samples) {
+      surface_type &= ~EGL_PBUFFER_BIT;
    }
 
    conf->base.SurfaceType |= surface_type;

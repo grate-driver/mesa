@@ -366,7 +366,8 @@ struct brw_blorp_blit_prog_key
 void brw_blorp_init_wm_prog_key(struct brw_wm_prog_key *wm_key);
 
 const unsigned *
-brw_blorp_compile_nir_shader(struct brw_context *brw, struct nir_shader *nir,
+brw_blorp_compile_nir_shader(struct brw_context *brw, void *mem_ctx,
+                             struct nir_shader *nir,
                              const struct brw_wm_prog_key *wm_key,
                              bool use_repclear,
                              struct brw_blorp_prog_data *prog_data,
