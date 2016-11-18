@@ -1,16 +1,16 @@
-mesa (13.0.1-1) experimental; urgency=medium
-
-  * New upstream release.
-
- -- Andreas Boll <andreas.boll.dev@gmail.com>  Mon, 14 Nov 2016 16:23:42 +0100
-
-mesa (13.0.0-1ubuntu1) UNRELEASED; urgency=medium
+mesa (13.0.1-1ubuntu1) UNRELEASED; urgency=medium
 
   * Merge from Debian experimental.
   * dri3-fix-totem-with-libva.diff: Dropped, upstream.
   * egl-platform-mir.patch: Refreshed.
 
  -- Timo Aaltonen <tjaalton@debian.org>  Mon, 07 Nov 2016 10:57:41 +0200
+
+mesa (13.0.1-1) experimental; urgency=medium
+
+  * New upstream release.
+
+ -- Andreas Boll <andreas.boll.dev@gmail.com>  Mon, 14 Nov 2016 16:23:42 +0100
 
 mesa (13.0.0-1) experimental; urgency=medium
 
