@@ -1,10 +1,10 @@
-mesa (12.0.4-2ubuntu1) UNRELEASED; urgency=medium
+mesa (12.0.4-2ubuntu1) zesty; urgency=medium
 
   * Merge from Debian
     - New upstream bugfix release. (LP: #1641017)
   * dri3-fix-totem-with-libva.diff: Dropped, upstream.
 
- -- Timo Aaltonen <tjaalton@debian.org>  Wed, 23 Nov 2016 11:40:25 +0200
+ -- Timo Aaltonen <tjaalton@debian.org>  Wed, 23 Nov 2016 14:04:45 +0200
 
 mesa (12.0.4-2) unstable; urgency=medium
 
