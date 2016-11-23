@@ -1,3 +1,11 @@
+mesa (12.0.4-2ubuntu1) UNRELEASED; urgency=medium
+
+  * Merge from Debian
+    - New upstream bugfix release. (LP: #1641017)
+  * dri3-fix-totem-with-libva.diff: Dropped, upstream.
+
+ -- Timo Aaltonen <tjaalton@debian.org>  Wed, 23 Nov 2016 11:40:25 +0200
+
 mesa (12.0.4-2) unstable; urgency=medium
 
   * Limit new glx symbols to !hurd-any. Should fix FTBFS on hurd.
