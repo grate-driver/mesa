@@ -1014,7 +1014,7 @@ static LLVMValueRef lds_load(struct lp_build_tgsi_context *bld_base,
 	if (type == TGSI_TYPE_DOUBLE) {
 		LLVMValueRef value2;
 		dw_addr = lp_build_add(&bld_base->uint_bld, dw_addr,
-				       lp_build_const_int32(gallivm, swizzle + 1));
+				       lp_build_const_int32(gallivm, 1));
 		value2 = build_indexed_load(ctx, ctx->lds, dw_addr, false);
 		return radeon_llvm_emit_fetch_double(bld_base, value, value2);
 	}
@@ -1846,13 +1846,13 @@ static LLVMValueRef fetch_constant(
 		result = bitcast(bld_base, type, result);
 	else {
 		LLVMValueRef addr2, result2;
-		addr2 = ctx->radeon_bld.soa.addr[ireg->Index][ireg->Swizzle + 1];
+		addr2 = ctx->radeon_bld.soa.addr[ireg->Index][ireg->Swizzle];
 		addr2 = LLVMBuildLoad(base->gallivm->builder, addr2, "load addr reg2");
 		addr2 = lp_build_mul_imm(&bld_base->uint_bld, addr2, 16);
 		addr2 = lp_build_add(&bld_base->uint_bld, addr2,
-				     lp_build_const_int32(base->gallivm, idx * 4));
+				     lp_build_const_int32(base->gallivm, (idx + 1) * 4));
 
-		result2 = buffer_load_const(base->gallivm->builder, ctx->const_buffers[buf],
+		result2 = buffer_load_const(base->gallivm->builder, bufp,
 				   addr2, ctx->f32);
 
 		result = radeon_llvm_emit_fetch_double(bld_base,
@@ -5072,7 +5072,7 @@ static void build_interp_intrinsic(const struct lp_build_tgsi_action *action,
 	}
 
 	intr_name = interp_param ? "llvm.SI.fs.interp" : "llvm.SI.fs.constant";
-	for (chan = 0; chan < 2; chan++) {
+	for (chan = 0; chan < 4; chan++) {
 		LLVMValueRef args[4];
 		LLVMValueRef llvm_chan;
 		unsigned schan;

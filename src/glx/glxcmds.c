@@ -1630,7 +1630,6 @@ glXCreateNewContext(Display * dpy, GLXFBConfig fbconfig,
                     int renderType, GLXContext shareList, Bool allowDirect)
 {
    struct glx_config *config = (struct glx_config *) fbconfig;
-   int screen = DefaultScreen(dpy);
    struct glx_config **config_list;
    int list_size;
    unsigned i;
@@ -1641,7 +1640,7 @@ glXCreateNewContext(Display * dpy, GLXFBConfig fbconfig,
    }
 
    config_list = (struct glx_config **)
-      glXGetFBConfigs(dpy, screen, &list_size);
+      glXGetFBConfigs(dpy, config->screen, &list_size);
 
    for (i = 0; i < list_size; i++) {
        if (config_list[i] == config)
@@ -2718,7 +2717,7 @@ __glXGetUST(int64_t * ust)
 
 #if defined(GLX_DIRECT_RENDERING) && !defined(GLX_USE_APPLEGL)
 
-int
+PUBLIC int
 MesaGLInteropGLXQueryDeviceInfo(Display *dpy, GLXContext context,
                                 struct mesa_glinterop_device_info *out)
 {
@@ -2742,7 +2741,7 @@ MesaGLInteropGLXQueryDeviceInfo(Display *dpy, GLXContext context,
    return ret;
 }
 
-int
+PUBLIC int
 MesaGLInteropGLXExportObject(Display *dpy, GLXContext context,
                              struct mesa_glinterop_export_in *in,
                              struct mesa_glinterop_export_out *out)

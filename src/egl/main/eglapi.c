@@ -627,7 +627,9 @@ eglCreateContext(EGLDisplay dpy, EGLConfig config, EGLContext share_list,
 
    _EGL_CHECK_DISPLAY(disp, EGL_NO_CONTEXT, drv);
 
-   if (!config && !disp->Extensions.MESA_configless_context)
+   if (config)
+      _EGL_CHECK_CONFIG(disp, conf, EGL_NO_CONTEXT, drv);
+   else if (!disp->Extensions.MESA_configless_context)
       RETURN_EGL_ERROR(disp, EGL_BAD_CONFIG, EGL_NO_CONTEXT);
 
    if (!share && share_list != EGL_NO_CONTEXT)
@@ -1937,7 +1939,7 @@ _eglLockDisplayInterop(EGLDisplay dpy, EGLContext context,
    return MESA_GLINTEROP_SUCCESS;
 }
 
-int
+PUBLIC int
 MesaGLInteropEGLQueryDeviceInfo(EGLDisplay dpy, EGLContext context,
                                 struct mesa_glinterop_device_info *out)
 {
@@ -1959,7 +1961,7 @@ MesaGLInteropEGLQueryDeviceInfo(EGLDisplay dpy, EGLContext context,
    return ret;
 }
 
-int
+PUBLIC int
 MesaGLInteropEGLExportObject(EGLDisplay dpy, EGLContext context,
                              struct mesa_glinterop_export_in *in,
                              struct mesa_glinterop_export_out *out)

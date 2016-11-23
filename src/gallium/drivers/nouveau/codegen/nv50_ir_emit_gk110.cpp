@@ -726,7 +726,7 @@ void
 CodeEmitterGK110::emitIMAD(const Instruction *i)
 {
    uint8_t addOp =
-      (i->src(2).mod.neg() << 1) | (i->src(0).mod.neg() ^ i->src(1).mod.neg());
+      i->src(2).mod.neg() | ((i->src(0).mod.neg() ^ i->src(1).mod.neg()) << 1);
 
    emitForm_21(i, 0x100, 0xa00);
 
@@ -773,7 +773,7 @@ CodeEmitterGK110::emitNOT(const Instruction *i)
       break;
    case FILE_MEMORY_CONST:
       code[1] |= 0x4 << 28;
-      setCAddress14(i->src(1));
+      setCAddress14(i->src(0));
       break;
    default:
       assert(0);

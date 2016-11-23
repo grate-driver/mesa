@@ -255,6 +255,7 @@ public:
    ir_instruction *ir;
    GLboolean cond_update;
    bool saturate;
+   bool is_64bit_expanded;
    st_src_reg sampler; /**< sampler register */
    int sampler_base;
    int sampler_array_size; /**< 1-based size of sampler array, 1 if not array */
@@ -515,7 +516,8 @@ public:
                           unsigned *array_size,
                           unsigned *base,
                           unsigned *index,
-                          st_src_reg *reladdr);
+                          st_src_reg *reladdr,
+                          bool opaque);
   void calc_deref_offsets(ir_dereference *head,
                           ir_dereference *tail,
                           unsigned *array_elements,
@@ -523,6 +525,7 @@ public:
                           unsigned *index,
                           st_src_reg *indirect,
                           unsigned *location);
+   st_src_reg canonicalize_gather_offset(st_src_reg offset);
 
    bool try_emit_mad(ir_expression *ir,
               int mul_operand);
@@ -670,6 +673,7 @@ glsl_to_tgsi_visitor::emit_asm(ir_instruction *ir, unsigned op,
    inst->src[1] = src1;
    inst->src[2] = src2;
    inst->src[3] = src3;
+   inst->is_64bit_expanded = false;
    inst->ir = ir;
    inst->dead_mask = 0;
    /* default to float, for paths where this is not initialized
@@ -792,6 +796,7 @@ glsl_to_tgsi_visitor::emit_asm(ir_instruction *ir, unsigned op,
             dinst->prev = NULL;
          }
          this->instructions.push_tail(dinst);
+         dinst->is_64bit_expanded = true;
 
          /* modify the destination if we are splitting */
          for (j = 0; j < 2; j++) {
@@ -2794,6 +2799,7 @@ glsl_to_tgsi_visitor::emit_block_mov(ir_assignment *ir, const struct glsl_type *
 
    assert(type->is_scalar() || type->is_vector());
 
+   l->type = type->base_type;
    r->type = type->base_type;
    if (cond) {
       st_src_reg l_src = st_src_reg(*l);
@@ -2905,6 +2911,7 @@ glsl_to_tgsi_visitor::visit(ir_assignment *ir)
    } else if (ir->rhs->as_expression() &&
               this->instructions.get_tail() &&
               ir->rhs == ((glsl_to_tgsi_instruction *)this->instructions.get_tail())->ir &&
+              !((glsl_to_tgsi_instruction *)this->instructions.get_tail())->is_64bit_expanded &&
               type_size(ir->lhs->type) == 1 &&
               l.writemask == ((glsl_to_tgsi_instruction *)this->instructions.get_tail())->dst[0].writemask) {
       /* To avoid emitting an extra MOV when assigning an expression to a
@@ -3146,7 +3153,7 @@ glsl_to_tgsi_visitor::visit_atomic_counter_intrinsic(ir_call *ir)
    st_src_reg offset;
    unsigned array_size = 0, base = 0, index = 0;
 
-   get_deref_offsets(deref, &array_size, &base, &index, &offset);
+   get_deref_offsets(deref, &array_size, &base, &index, &offset, false);
 
    if (offset.file != PROGRAM_UNDEFINED) {
       emit_asm(ir, TGSI_OPCODE_MUL, st_dst_reg(offset),
@@ -3453,7 +3460,7 @@ glsl_to_tgsi_visitor::visit_image_intrinsic(ir_call *ir)
    st_src_reg image(PROGRAM_IMAGE, 0, GLSL_TYPE_UINT);
 
    get_deref_offsets(img, &sampler_array_size, &sampler_base,
-                     (unsigned int *)&image.index, &reladdr);
+                     (unsigned int *)&image.index, &reladdr, true);
    if (reladdr.file != PROGRAM_UNDEFINED) {
       emit_arl(ir, sampler_reladdr, reladdr);
       image.reladdr = ralloc(mem_ctx, st_src_reg);
@@ -3813,7 +3820,8 @@ glsl_to_tgsi_visitor::get_deref_offsets(ir_dereference *ir,
                                         unsigned *array_size,
                                         unsigned *base,
                                         unsigned *index,
-                                        st_src_reg *reladdr)
+                                        st_src_reg *reladdr,
+                                        bool opaque)
 {
    GLuint shader = _mesa_program_enum_to_shader_stage(this->prog->Target);
    unsigned location = 0;
@@ -3838,10 +3846,25 @@ glsl_to_tgsi_visitor::get_deref_offsets(ir_dereference *ir,
       *array_size = 1;
    }
 
-   if (location != 0xffffffff) {
+   if (opaque) {
+      assert(location != 0xffffffff);
       *base += this->shader_program->UniformStorage[location].opaque[shader].index;
       *index += this->shader_program->UniformStorage[location].opaque[shader].index;
    }
+}
+
+st_src_reg
+glsl_to_tgsi_visitor::canonicalize_gather_offset(st_src_reg offset)
+{
+   if (offset.reladdr || offset.reladdr2) {
+      st_src_reg tmp = get_temp(glsl_type::ivec2_type);
+      st_dst_reg tmp_dst = st_dst_reg(tmp);
+      tmp_dst.writemask = WRITEMASK_XY;
+      emit_asm(NULL, TGSI_OPCODE_MOV, tmp_dst, offset);
+      return tmp;
+   }
+
+   return offset;
 }
 
 void
@@ -3969,9 +3992,10 @@ glsl_to_tgsi_visitor::visit(ir_texture *ir)
                offset[i].index += i * type_size(elt_type);
                offset[i].type = elt_type->base_type;
                offset[i].swizzle = swizzle_for_size(elt_type->vector_elements);
+               offset[i] = canonicalize_gather_offset(offset[i]);
             }
          } else {
-            offset[0] = this->result;
+            offset[0] = canonicalize_gather_offset(this->result);
          }
       }
       break;
@@ -4077,7 +4101,7 @@ glsl_to_tgsi_visitor::visit(ir_texture *ir)
    }
 
    get_deref_offsets(ir->sampler, &sampler_array_size, &sampler_base,
-                     &sampler_index, &reladdr);
+                     &sampler_index, &reladdr, true);
    if (reladdr.file != PROGRAM_UNDEFINED)
       emit_arl(ir, sampler_reladdr, reladdr);
 
@@ -5528,60 +5552,24 @@ translate_src(struct st_translate *t, const st_src_reg *src_reg)
 
 static struct tgsi_texture_offset
 translate_tex_offset(struct st_translate *t,
-                     const st_src_reg *in_offset, int idx)
+                     const st_src_reg *in_offset)
 {
    struct tgsi_texture_offset offset;
-   struct ureg_src imm_src;
-   struct ureg_dst dst;
-   int array;
+   struct ureg_src src = translate_src(t, in_offset);
 
-   switch (in_offset->file) {
-   case PROGRAM_IMMEDIATE:
-      assert(in_offset->index >= 0 && in_offset->index < t->num_immediates);
-      imm_src = t->immediates[in_offset->index];
+   offset.File = src.File;
+   offset.Index = src.Index;
+   offset.SwizzleX = src.SwizzleX;
+   offset.SwizzleY = src.SwizzleY;
+   offset.SwizzleZ = src.SwizzleZ;
+   offset.Padding = 0;
 
-      offset.File = imm_src.File;
-      offset.Index = imm_src.Index;
-      offset.SwizzleX = imm_src.SwizzleX;
-      offset.SwizzleY = imm_src.SwizzleY;
-      offset.SwizzleZ = imm_src.SwizzleZ;
-      offset.Padding = 0;
-      break;
-   case PROGRAM_INPUT:
-      imm_src = t->inputs[t->inputMapping[in_offset->index]];
-      offset.File = imm_src.File;
-      offset.Index = imm_src.Index;
-      offset.SwizzleX = GET_SWZ(in_offset->swizzle, 0);
-      offset.SwizzleY = GET_SWZ(in_offset->swizzle, 1);
-      offset.SwizzleZ = GET_SWZ(in_offset->swizzle, 2);
-      offset.Padding = 0;
-      break;
-   case PROGRAM_TEMPORARY:
-      imm_src = ureg_src(t->temps[in_offset->index]);
-      offset.File = imm_src.File;
-      offset.Index = imm_src.Index;
-      offset.SwizzleX = GET_SWZ(in_offset->swizzle, 0);
-      offset.SwizzleY = GET_SWZ(in_offset->swizzle, 1);
-      offset.SwizzleZ = GET_SWZ(in_offset->swizzle, 2);
-      offset.Padding = 0;
-      break;
-   case PROGRAM_ARRAY:
-      array = in_offset->index >> 16;
+   assert(!src.Indirect);
+   assert(!src.DimIndirect);
+   assert(!src.Dimension);
+   assert(!src.Absolute); /* those shouldn't be used with integers anyway */
+   assert(!src.Negate);
 
-      assert(array >= 0);
-      assert(array < (int)t->num_temp_arrays);
-
-      dst = t->arrays[array];
-      offset.File = dst.File;
-      offset.Index = dst.Index + (in_offset->index & 0xFFFF) - 0x8000;
-      offset.SwizzleX = GET_SWZ(in_offset->swizzle, 0);
-      offset.SwizzleY = GET_SWZ(in_offset->swizzle, 1);
-      offset.SwizzleZ = GET_SWZ(in_offset->swizzle, 2);
-      offset.Padding = 0;
-      break;
-   default:
-      break;
-   }
    return offset;
 }
 
@@ -5645,7 +5633,7 @@ compile_tgsi_instruction(struct st_translate *t,
             ureg_src_indirect(src[num_src], ureg_src(t->address[2]));
       num_src++;
       for (i = 0; i < (int)inst->tex_offset_num_offset; i++) {
-         texoffsets[i] = translate_tex_offset(t, &inst->tex_offsets[i], i);
+         texoffsets[i] = translate_tex_offset(t, &inst->tex_offsets[i]);
       }
       tex_target = st_translate_texture_target(inst->tex_target, inst->tex_shadow);
 

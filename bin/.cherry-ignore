@@ -3,3 +3,23 @@ be32a2132785fbc119f17e62070e007ee7d17af7 i965/compiler: Bring back the INTEL_PRE
 
 # The patch depends on the batch_cache work at least.
 89f00f749fda4c1beca38f362c7f86bdc6e32785 a4xx: make sure to actually clamp depth as requested
+
+# The patch depends on the 'generic' interoplation and location
+# implementation introduced with 2d6dd30a9b30
+114874b22beafb2d07006b197c62d717fc7f80cc i965/fs: Use sample interpolation for interpolateAtCentroid in persample mode
+
+# VAAPI encode landed after the branch point.
+a5993022275c20061ac025d9adc26c5f9d02afee st/va Avoid VBR bitrate calculation overflow v2
+
+# EGL_KHR_debug landed after the branch point.
+17084b6f9340f798111e53e08f5d35c7630cee48 egl: Fix missing unlock in eglGetSyncAttribKHR
+
+# Depends on update_renderbuffer_read_surfaces at least
+f2b9b0c730e345bcffa9eadabb25af3ab02642f2 i965: Add missing BRW_NEW_FS_PROG_DATA to render target reads.
+
+# The commit in question hasn't landed in branch
+1ef787339774bc7f1cc9c1615722f944005e070c Revert "egl/android: Set EGL_MAX_PBUFFER_WIDTH and EGL_MAX_PBUFFER_HEIGHT"
+
+# Patches depend on the fence_finish() gallium API change and corresponding driver work
+f240ad98bc05281ea7013d91973cb5f932ae9434 st/mesa: unduplicate st_check_sync code
+b687f766fddb7b39479cd9ee0427984029ea3559 st/mesa: allow multiple concurrent waiters in ClientWaitSync

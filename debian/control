@@ -123,6 +123,7 @@ Architecture: any
 Depends:
  ${shlibs:Depends},
  ${misc:Depends},
+ libgbm1 (= ${binary:Version}) [!hurd-any],
  libudev1 [linux-any],
  libgl1-mesa-dri (= ${binary:Version}),
 Provides: libegl1-x11
@@ -330,7 +331,7 @@ Pre-Depends: ${misc:Pre-Depends}
 Depends:
  ${shlibs:Depends},
  ${misc:Depends}
-Recommends: libtxc-dxtn-s2tc0 | libtxc-dxtn0
+Recommends: libtxc-dxtn-s2tc | libtxc-dxtn-s2tc0 | libtxc-dxtn0
 Breaks:
  xserver-xorg-core (<< 2:1.14.3-5),
 Multi-Arch: same

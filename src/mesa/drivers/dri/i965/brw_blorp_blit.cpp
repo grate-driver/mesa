@@ -1296,7 +1296,7 @@ blorp_nir_manual_blend_bilinear(nir_builder *b, nir_ssa_def *pos,
  * of samples).
  */
 static nir_shader *
-brw_blorp_build_nir_shader(struct brw_context *brw,
+brw_blorp_build_nir_shader(struct brw_context *brw, void *mem_ctx,
                            const brw_blorp_blit_prog_key *key)
 {
    nir_ssa_def *src_pos, *dst_pos, *color;
@@ -1342,7 +1342,7 @@ brw_blorp_build_nir_shader(struct brw_context *brw,
           (key->dst_samples == 0));
 
    nir_builder b;
-   nir_builder_init_simple_shader(&b, NULL, MESA_SHADER_FRAGMENT, NULL);
+   nir_builder_init_simple_shader(&b, mem_ctx, MESA_SHADER_FRAGMENT, NULL);
 
    struct brw_blorp_blit_vars v;
    brw_blorp_blit_vars_init(&b, &v, key);
@@ -1505,6 +1505,8 @@ brw_blorp_get_blit_kernel(struct brw_context *brw,
                         &params->wm_prog_kernel, &params->wm_prog_data))
       return;
 
+   void *mem_ctx = ralloc_context(NULL);
+
    const unsigned *program;
    unsigned program_size;
    struct brw_blorp_prog_data prog_data;
@@ -1512,7 +1514,7 @@ brw_blorp_get_blit_kernel(struct brw_context *brw,
    /* Try and compile with NIR first.  If that fails, fall back to the old
     * method of building shaders manually.
     */
-   nir_shader *nir = brw_blorp_build_nir_shader(brw, prog_key);
+   nir_shader *nir = brw_blorp_build_nir_shader(brw, mem_ctx, prog_key);
    struct brw_wm_prog_key wm_key;
    brw_blorp_init_wm_prog_key(&wm_key);
    wm_key.tex.compressed_multisample_layout_mask =
@@ -1520,7 +1522,7 @@ brw_blorp_get_blit_kernel(struct brw_context *brw,
    wm_key.tex.msaa_16 = prog_key->tex_samples == 16;
    wm_key.multisample_fbo = prog_key->rt_samples > 1;
 
-   program = brw_blorp_compile_nir_shader(brw, nir, &wm_key, false,
+   program = brw_blorp_compile_nir_shader(brw, mem_ctx, nir, &wm_key, false,
                                           &prog_data, &program_size);
 
    brw_upload_cache(&brw->cache, BRW_CACHE_BLORP_PROG,
@@ -1528,6 +1530,8 @@ brw_blorp_get_blit_kernel(struct brw_context *brw,
                     program, program_size,
                     &prog_data, sizeof(prog_data),
                     &params->wm_prog_kernel, &params->wm_prog_data);
+
+   ralloc_free(mem_ctx);
 }
 
 static void
