@@ -1,10 +1,10 @@
-mesa (13.0.1-1ubuntu1) UNRELEASED; urgency=medium
+mesa (13.0.1-1ubuntu1) zesty; urgency=medium
 
   * Merge from Debian experimental.
   * dri3-fix-totem-with-libva.diff: Dropped, upstream.
   * egl-platform-mir.patch: Refreshed.
 
- -- Timo Aaltonen <tjaalton@debian.org>  Mon, 07 Nov 2016 10:57:41 +0200
+ -- Timo Aaltonen <tjaalton@debian.org>  Wed, 23 Nov 2016 16:36:34 +0200
 
 mesa (13.0.1-1) experimental; urgency=medium
 
