@@ -1,6 +1,9 @@
 mesa (13.0.2-1) UNRELEASED; urgency=medium
 
   * New upstream release.
+  * workaround-binutils-mips-844357.diff: Add workaround for broken
+    binutils on mips*. Fixes invalid symbol table of libGL.so.1. See
+    also Bug #844357.
 
  -- Andreas Boll <andreas.boll.dev@gmail.com>  Mon, 28 Nov 2016 17:52:35 +0100
 
