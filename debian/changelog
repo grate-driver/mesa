@@ -2,6 +2,7 @@ mesa (13.0.1-2) UNRELEASED; urgency=medium
 
   * Cherry-pick commit 1809f17 (mesa: Drop PATH_MAX usage.) from
     upstream 13.0 branch. Should fix FTBFS on hurd.
+  * Enable extra HUD support for showing I/O stats of block/NIC devices.
 
  -- Andreas Boll <andreas.boll.dev@gmail.com>  Mon, 28 Nov 2016 12:03:59 +0100
 
