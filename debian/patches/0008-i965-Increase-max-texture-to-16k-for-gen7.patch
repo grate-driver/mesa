@@ -1,0 +1,45 @@
+From 9a19d5a37ae479767d56706275cbe7cc9770d5c7 Mon Sep 17 00:00:00 2001
+From: Jordan Justen <jordan.l.justen@intel.com>
+Date: Thu, 3 Nov 2016 12:20:19 -0700
+Subject: [PATCH 8/8] i965: Increase max texture to 16k for gen7+
+
+Bugzilla: https://bugs.freedesktop.org/show_bug.cgi?id=98297
+Signed-off-by: Jordan Justen <jordan.l.justen@intel.com>
+Reviewed-by: Jason Ekstrand <jason@jlekstrand.net>
+(cherry picked from commit e9133dd90ec498cfb6a23fa22504e06488352c51)
+---
+ src/mesa/drivers/dri/i965/brw_context.c | 13 ++++++++++---
+ 1 file changed, 10 insertions(+), 3 deletions(-)
+
+diff --git a/src/mesa/drivers/dri/i965/brw_context.c b/src/mesa/drivers/dri/i965/brw_context.c
+index d6204fd..0ccc574 100644
+--- a/src/mesa/drivers/dri/i965/brw_context.c
++++ b/src/mesa/drivers/dri/i965/brw_context.c
+@@ -523,14 +523,21 @@ brw_initialize_context_constants(struct brw_context *brw)
+ 
+    ctx->Const.MaxTextureCoordUnits = 8; /* Mesa limit */
+    ctx->Const.MaxImageUnits = MAX_IMAGE_UNITS;
+-   ctx->Const.MaxRenderbufferSize = 8192;
+-   ctx->Const.MaxTextureLevels = MIN2(14 /* 8192 */, MAX_TEXTURE_LEVELS);
++   if (brw->gen >= 7) {
++      ctx->Const.MaxRenderbufferSize = 16384;
++      ctx->Const.MaxTextureLevels = MIN2(15 /* 16384 */, MAX_TEXTURE_LEVELS);
++      ctx->Const.MaxCubeTextureLevels = 15; /* 16384 */
++   } else {
++      ctx->Const.MaxRenderbufferSize = 8192;
++      ctx->Const.MaxTextureLevels = MIN2(14 /* 8192 */, MAX_TEXTURE_LEVELS);
++      ctx->Const.MaxCubeTextureLevels = 14; /* 8192 */
++   }
+    ctx->Const.Max3DTextureLevels = 12; /* 2048 */
+-   ctx->Const.MaxCubeTextureLevels = 14; /* 8192 */
+    ctx->Const.MaxArrayTextureLayers = brw->gen >= 7 ? 2048 : 512;
+    ctx->Const.MaxTextureMbytes = 1536;
+    ctx->Const.MaxTextureRectSize = 1 << 12;
+    ctx->Const.MaxTextureMaxAnisotropy = 16.0;
++   ctx->Const.MaxTextureLodBias = 15.0;
+    ctx->Const.StripTextureBorder = true;
+    if (brw->gen >= 7)
+       ctx->Const.MaxProgramTextureGatherComponents = 4;
+-- 
+2.7.4
+
