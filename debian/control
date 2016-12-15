@@ -5,8 +5,7 @@ Maintainer: Debian X Strike Force <debian-x@lists.debian.org>
 Uploaders: Andreas Boll <andreas.boll.dev@gmail.com>
 Standards-Version: 3.9.8
 Build-Depends:
- debhelper (>= 9),
- dh-autoreconf,
+ debhelper (>= 10),
  quilt (>= 0.40),
  pkg-config,
  libdrm-dev (>= 2.4.69) [!hurd-any],
