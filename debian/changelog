@@ -1,6 +1,7 @@
 mesa (13.0.2-3) UNRELEASED; urgency=medium
 
   * Fix typo to correctly disable asm on x32. Should fix FTBFS on x32.
+  * Add debian/source/format file.
 
  -- Andreas Boll <andreas.boll.dev@gmail.com>  Thu, 15 Dec 2016 16:38:14 +0100
 
