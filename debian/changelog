@@ -8,6 +8,7 @@ mesa (13.0.2-2) UNRELEASED; urgency=medium
   * Bump debhelper compat to 10.
   * Stop passing --disable-silent-rules to configure, debhelper does
     that for a while.
+  * Drop no longer needed dpkg-dev versioned build-dependency.
 
  -- Andreas Boll <andreas.boll.dev@gmail.com>  Thu, 15 Dec 2016 12:36:12 +0100
 
