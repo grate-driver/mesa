@@ -150,7 +150,6 @@ override_dh_clean:
 
 override_dh_auto_configure:
 	dh_auto_configure -- \
-		--disable-silent-rules \
 		$(confflags)
 
 override_dh_auto_install:

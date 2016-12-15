@@ -6,6 +6,8 @@ mesa (13.0.2-2) UNRELEASED; urgency=medium
     bound) from upstream master branch. Fixes random GPU hangs on
     radeonsi (AMD Southern Islands and newer) in many games.
   * Bump debhelper compat to 10.
+  * Stop passing --disable-silent-rules to configure, debhelper does
+    that for a while.
 
  -- Andreas Boll <andreas.boll.dev@gmail.com>  Thu, 15 Dec 2016 12:36:12 +0100
 
