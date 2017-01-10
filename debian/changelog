@@ -1,4 +1,4 @@
-mesa (13.0.3-1) UNRELEASED; urgency=medium
+mesa (13.0.3-1) unstable; urgency=medium
 
   [ Timo Aaltonen ]
   * New upstream release.
@@ -12,7 +12,7 @@ mesa (13.0.3-1) UNRELEASED; urgency=medium
     GPU hangs on r600g (Evergreen and Northern Islands GPUs) in many
     games.
 
- -- Timo Aaltonen <tjaalton@debian.org>  Tue, 10 Jan 2017 14:42:30 +0200
+ -- Timo Aaltonen <tjaalton@debian.org>  Tue, 10 Jan 2017 17:38:23 +0200
 
 mesa (13.0.2-3) unstable; urgency=medium
 
