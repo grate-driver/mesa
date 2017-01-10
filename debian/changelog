@@ -1,6 +1,13 @@
 mesa (13.0.3-1) UNRELEASED; urgency=medium
 
+  [ Timo Aaltonen ]
   * New upstream release.
+
+  [ Andreas Boll ]
+  * Add vl-zscan-fix-Fix-trivial-sign-compare-warnings.diff: Fixes mpeg2
+    decoding on radeon GPUs without native mpeg2 support (Closes:
+    #846297).  Thanks to Jörg-Volker Peetz for reporting and tracking
+    down this regression!
 
  -- Timo Aaltonen <tjaalton@debian.org>  Tue, 10 Jan 2017 14:42:30 +0200
 
