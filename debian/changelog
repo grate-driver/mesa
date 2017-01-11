@@ -1,9 +1,9 @@
-mesa (13.0.3-1ubuntu1) UNRELEASED; urgency=medium
+mesa (13.0.3-1ubuntu1) zesty; urgency=medium
 
   * Merge from Debian.
   * intel: Add patches to support 16k textures. (LP: #1655556)
 
- -- Timo Aaltonen <tjaalton@debian.org>  Tue, 13 Dec 2016 11:04:38 +0200
+ -- Timo Aaltonen <tjaalton@debian.org>  Wed, 11 Jan 2017 09:45:19 +0200
 
 mesa (13.0.3-1) unstable; urgency=medium
 
