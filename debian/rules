@@ -12,7 +12,7 @@ DEB_HOST_ARCH_CPU  ?= $(shell dpkg-architecture -qDEB_HOST_ARCH_CPU)
 
 ifeq (,$(filter $(DEB_HOST_ARCH), armhf))
 buildflags = \
-	$(shell DEB_CFLAGS_MAINT_APPEND="-Wall -O2" DEB_CXXFLAGS_MAINT_APPEND="-Wall -O2" dpkg-buildflags --export=configure)
+	$(shell DEB_CFLAGS_MAINT_APPEND=-Wall DEB_CXXFLAGS_MAINT_APPEND=-Wall dpkg-buildflags --export=configure)
 else
 # Workaround for a variant of LP: #725126
 buildflags = \
