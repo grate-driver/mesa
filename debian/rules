@@ -231,7 +231,8 @@ override_dh_makeshlibs:
 	dh_makeshlibs -a -- -c4
 
 %:
-	dh $@ --with quilt \
+	dh $@ --with quilt,autoreconf \
+		--parallel \
 		--builddirectory=build/
 
 # For maintainer use only, generate a tarball:

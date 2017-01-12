@@ -3,6 +3,8 @@ mesa (13.0.3-1ubuntu2) UNRELEASED; urgency=medium
   * rules: Drop forcing -O2 to fix ppc64el ftbfs, gcc got fixed already.
     (LP: #1605796)
   * control: Fix dependencies for ubuntuBSD. (LP: #1565080)
+  * compat,rules: Don't bump compat to 10, breaks applying patches
+    before autoreconf which we need for the Mir EGL platform.
 
  -- Timo Aaltonen <tjaalton@debian.org>  Wed, 11 Jan 2017 19:01:00 +0200
 
