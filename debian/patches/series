@@ -16,3 +16,4 @@ i915-dont-default-to-2.1.patch
 0006-intel-blorp_blit-Enable-splitting-large-blorp-blits.patch
 0007-intel-blorp_blit-Add-split_blorp_blit_debug-switch.patch
 0008-i965-Increase-max-texture-to-16k-for-gen7.patch
+radeonsi-always-leave-poly-offset-in-a-valid-state.diff
