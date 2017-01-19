@@ -10,6 +10,7 @@ mesa (17.0.0~rc1-1) UNRELEASED; urgency=medium
   * Drop workaround-binutils-mips-844357.diff, binutils regression has
     been fixed.
   * Rename EGL_DISPLAYS to EGL_PLATFORMS.
+  * Update extend-diff-ignore.
 
  -- Andreas Boll <andreas.boll.dev@gmail.com>  Thu, 19 Jan 2017 16:50:33 +0100
 
