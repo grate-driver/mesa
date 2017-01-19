@@ -1,10 +1,10 @@
-mesa (13.0.3-1ubuntu3) UNRELEASED; urgency=medium
+mesa (13.0.3-1ubuntu3) zesty; urgency=medium
 
   * control: Add dh-autoreconf back to build-deps, for backports.
   * radeonsi-always-leave-poly-offset-in-a-valid-state.diff:
     Fix fdo#99451.
 
- -- Timo Aaltonen <tjaalton@debian.org>  Thu, 19 Jan 2017 18:58:15 +0200
+ -- Timo Aaltonen <tjaalton@debian.org>  Thu, 19 Jan 2017 18:59:24 +0200
 
 mesa (13.0.3-1ubuntu2) zesty; urgency=medium
 
