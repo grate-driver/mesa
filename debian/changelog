@@ -1,3 +1,9 @@
+mesa (13.0.3-1ubuntu3) UNRELEASED; urgency=medium
+
+  * control: Add dh-autoreconf back to build-deps, for backports.
+
+ -- Timo Aaltonen <tjaalton@debian.org>  Thu, 19 Jan 2017 18:58:15 +0200
+
 mesa (13.0.3-1ubuntu2) zesty; urgency=medium
 
   * rules: Drop forcing -O2 to fix ppc64el ftbfs, gcc got fixed already.

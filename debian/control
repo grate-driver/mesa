@@ -7,6 +7,7 @@ Uploaders: Andreas Boll <andreas.boll.dev@gmail.com>
 Standards-Version: 3.9.8
 Build-Depends:
  debhelper (>= 10),
+ dh-autoreconf,
  quilt (>= 0.40),
  pkg-config,
  libdrm-dev (>= 2.4.69) [!hurd-any],
