@@ -1,4 +1,4 @@
-mesa (17.0.0~rc1-1) UNRELEASED; urgency=medium
+mesa (17.0.0~rc1-1) experimental; urgency=medium
 
   * New upstream release candidate.
   * Bump libdrm-dev build-dep to 2.4.74 per configure.ac.
@@ -12,7 +12,7 @@ mesa (17.0.0~rc1-1) UNRELEASED; urgency=medium
   * Rename EGL_DISPLAYS to EGL_PLATFORMS.
   * Update extend-diff-ignore.
 
- -- Andreas Boll <andreas.boll.dev@gmail.com>  Thu, 19 Jan 2017 16:50:33 +0100
+ -- Andreas Boll <andreas.boll.dev@gmail.com>  Thu, 19 Jan 2017 18:39:06 +0100
 
 mesa (13.0.3-1) unstable; urgency=medium
 
