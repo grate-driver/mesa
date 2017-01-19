@@ -8,7 +8,7 @@ Build-Depends:
  debhelper (>= 10),
  quilt (>= 0.40),
  pkg-config,
- libdrm-dev (>= 2.4.69) [!hurd-any],
+ libdrm-dev (>= 2.4.74) [!hurd-any],
  libx11-dev,
  x11proto-gl-dev (>= 1.4.14),
  libxxf86vm-dev,
@@ -136,7 +136,7 @@ Architecture: any
 Depends:
  libegl1-mesa (= ${binary:Version}),
  libwayland-egl1-mesa (= ${binary:Version}) [linux-any],
- libdrm-dev (>= 2.4.69) [!hurd-any],
+ libdrm-dev (>= 2.4.74) [!hurd-any],
  x11proto-dri2-dev (>= 2.6),
  x11proto-gl-dev (>= 1.4.14),
  libx11-dev,
@@ -340,7 +340,7 @@ Architecture: any
 Depends:
  mesa-common-dev (= ${binary:Version}),
  libgl1-mesa-glx (= ${binary:Version}),
- libdrm-dev (>= 2.4.69) [!hurd-any],
+ libdrm-dev (>= 2.4.74) [!hurd-any],
  libx11-dev,
  libx11-xcb-dev,
  libxcb-dri3-dev,
