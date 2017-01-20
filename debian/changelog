@@ -1,3 +1,9 @@
+mesa (13.0.3-1ubuntu4) UNRELEASED; urgency=medium
+
+  * control: Lower debhelper build-dep to 9 for backports.
+
+ -- Timo Aaltonen <tjaalton@debian.org>  Fri, 20 Jan 2017 07:42:58 +0200
+
 mesa (13.0.3-1ubuntu3) zesty; urgency=medium
 
   * control: Add dh-autoreconf back to build-deps, for backports.
