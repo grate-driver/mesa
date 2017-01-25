@@ -1,3 +1,9 @@
+mesa (17.0.0~rc2-1) UNRELEASED; urgency=medium
+
+  * New upstream release candidate.
+
+ -- Andreas Boll <andreas.boll.dev@gmail.com>  Wed, 25 Jan 2017 15:14:24 +0100
+
 mesa (17.0.0~rc1-1) experimental; urgency=medium
 
   * New upstream release candidate.
