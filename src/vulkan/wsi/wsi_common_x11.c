@@ -261,8 +261,12 @@ VkBool32 wsi_get_physical_device_xcb_presentation_support(
    struct wsi_x11_connection *wsi_conn =
       wsi_x11_get_connection(wsi_device, alloc, connection);
 
+   if (!wsi_conn)
+      return false;
+
    if (!wsi_conn->has_dri3) {
-      fprintf(stderr, "vulkan: No DRI3 support\n");
+      fprintf(stderr, "vulkan: No DRI3 support detected - required for presentation\n");
+      fprintf(stderr, "Note: Buggy applications may crash, if they do please report to vendor\n");
       return false;
    }
 
@@ -310,7 +314,8 @@ x11_surface_get_support(VkIcdSurfaceBase *icd_surface,
       return VK_ERROR_OUT_OF_HOST_MEMORY;
 
    if (!wsi_conn->has_dri3) {
-      fprintf(stderr, "vulkan: No DRI3 support\n");
+      fprintf(stderr, "vulkan: No DRI3 support detected - required for presentation\n");
+      fprintf(stderr, "Note: Buggy applications may crash, if they do please report to vendor\n");
       *pSupported = false;
       return VK_SUCCESS;
    }
@@ -348,6 +353,9 @@ x11_surface_get_capabilities(VkIcdSurfaceBase *icd_surface,
     */
    xcb_visualtype_t *visual =
       get_visualtype_for_window(conn, window, &visual_depth);
+
+   if (!visual)
+      return VK_ERROR_SURFACE_LOST_KHR;
 
    geom = xcb_get_geometry_reply(conn, geom_cookie, &err);
    if (geom) {
@@ -447,7 +455,7 @@ VkResult wsi_create_xcb_surface(const VkAllocationCallbacks *pAllocator,
    surface->connection = pCreateInfo->connection;
    surface->window = pCreateInfo->window;
 
-   *pSurface = _VkIcdSurfaceBase_to_handle(&surface->base);
+   *pSurface = VkIcdSurfaceBase_to_handle(&surface->base);
    return VK_SUCCESS;
 }
 
@@ -466,7 +474,7 @@ VkResult wsi_create_xlib_surface(const VkAllocationCallbacks *pAllocator,
    surface->dpy = pCreateInfo->dpy;
    surface->window = pCreateInfo->window;
 
-   *pSurface = _VkIcdSurfaceBase_to_handle(&surface->base);
+   *pSurface = VkIcdSurfaceBase_to_handle(&surface->base);
    return VK_SUCCESS;
 }
 
