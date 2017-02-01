@@ -6,6 +6,7 @@ mesa (13.0.4-1) UNRELEASED; urgency=medium
   * Drop workaround-binutils-mips-844357.diff, binutils regression has
     been fixed (Closes: #852030).
   * Revert to debhelper compat 9 (Workaround for #851130).
+  * Update extend-diff-ignore.
 
  -- Andreas Boll <andreas.boll.dev@gmail.com>  Wed, 01 Feb 2017 13:30:04 +0100
 
