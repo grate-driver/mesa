@@ -1,4 +1,4 @@
-mesa (13.0.4-1) UNRELEASED; urgency=medium
+mesa (13.0.4-1) unstable; urgency=medium
 
   * New upstream release.
   * Drop vl-zscan-fix-Fix-trivial-sign-compare-warnings.diff and r600-
@@ -8,7 +8,7 @@ mesa (13.0.4-1) UNRELEASED; urgency=medium
   * Revert to debhelper compat 9 (Workaround for #851130).
   * Update extend-diff-ignore.
 
- -- Andreas Boll <andreas.boll.dev@gmail.com>  Wed, 01 Feb 2017 13:30:04 +0100
+ -- Andreas Boll <andreas.boll.dev@gmail.com>  Wed, 01 Feb 2017 15:36:10 +0100
 
 mesa (13.0.3-1) unstable; urgency=medium
 
