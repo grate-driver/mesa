@@ -172,8 +172,7 @@ Depends:
  libegl1-mesa (= ${binary:Version})
 Provides: libwayland-egl1
 Conflicts: libwayland-egl1
-Replaces: libwayland-egl1, libegl1-mesa-drivers  (<< 10.1.0-2)
-Breaks: libegl1-mesa-drivers (<< 10.1.0-2)
+Replaces: libwayland-egl1
 Pre-Depends: ${misc:Pre-Depends}
 Multi-Arch: same
 Description: implementation of the Wayland EGL platform -- runtime
@@ -245,7 +244,6 @@ Conflicts: libgl1
 Replaces: libgl1
 Provides: libgl1
 Breaks:
- glx-diversions (<< 0.4),
  libopengl-perl (<< 0.6704+dfsg-2),
 Pre-Depends: ${misc:Pre-Depends}
 Multi-Arch: same
@@ -272,8 +270,6 @@ Depends:
  ${shlibs:Depends},
  ${misc:Depends}
 Recommends: libtxc-dxtn-s2tc | libtxc-dxtn-s2tc0 | libtxc-dxtn0
-Breaks:
- xserver-xorg-core (<< 2:1.14.3-5),
 Multi-Arch: same
 Description: free implementation of the OpenGL API -- DRI modules
  This version of Mesa provides GLX and DRI capabilities: it is capable of
@@ -434,10 +430,6 @@ Depends:
  ocl-icd-libopencl1 | libopencl1,
  ${shlibs:Depends},
  ${misc:Depends},
-Replaces:
- libgl1-mesa-dri (<< 10.3.0-1),
-Breaks:
- libgl1-mesa-dri (<< 10.3.0-1),
 Provides: opencl-icd
 Multi-Arch: same
 Description: free implementation of the OpenCL API -- ICD runtime

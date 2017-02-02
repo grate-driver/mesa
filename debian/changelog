@@ -5,6 +5,7 @@ mesa (17.0.0~rc2-2) UNRELEASED; urgency=medium
 
   [ Andreas Boll ]
   * Drop transitional package libegl1-mesa-drivers.
+  * Remove Breaks/Replaces from pre-jessie.
 
  -- Timo Aaltonen <tjaalton@debian.org>  Thu, 02 Feb 2017 12:02:07 +0200
 
