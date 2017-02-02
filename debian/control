@@ -163,15 +163,6 @@ Description: free implementation of the EGL API -- development files
  This package provides the development environment for compiling programs
  against the EGL library.
 
-Package: libegl1-mesa-drivers
-Section: libs
-Architecture: linux-any kfreebsd-any
-Depends:
- ${misc:Depends},
-Multi-Arch: same
-Description: transitional dummy package
- This is a transitional dummy package, it can be safely removed.
-
 Package: libwayland-egl1-mesa
 Section: libs
 Architecture: linux-any
