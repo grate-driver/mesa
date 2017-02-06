@@ -15,6 +15,8 @@ mesa (17.0.0~rc3-1) UNRELEASED; urgency=medium
   * Update list of unwanted vulkan headers.
   * Drop unused git-cleanup.sh script. Replaced with usage of --extend-
     diff-ignore some time ago.
+  * Enable building etnaviv and imx on armhf (Closes: #852614).
+    - Bump libdrm-dev build-dep to 2.4.74-2~.
 
  -- Timo Aaltonen <tjaalton@debian.org>  Thu, 02 Feb 2017 12:02:07 +0200
 

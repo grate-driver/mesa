@@ -51,6 +51,11 @@ else
 		GALLIUM_DRIVERS += vc4
 	endif
 
+	# etnaviv kernel support is currently only available on armhf
+	ifneq (,$(filter $(DEB_HOST_ARCH), armhf))
+		GALLIUM_DRIVERS += etnaviv imx
+	endif
+
 	# svga needs xa state tracker
 	confflags_GALLIUM += --enable-xa
 
