@@ -1,3 +1,11 @@
+mesa (13.0.4-1ubuntu1) UNRELEASED; urgency=medium
+
+  * Merge from debian.
+  * radeonsi-always-leave-poly-offset-in-a-valid-state.diff:
+    Dropped, upstream.
+
+ -- Timo Aaltonen <tjaalton@debian.org>  Mon, 06 Feb 2017 09:27:14 +0200
+
 mesa (13.0.4-1) unstable; urgency=medium
 
   * New upstream release.
@@ -9,12 +17,6 @@ mesa (13.0.4-1) unstable; urgency=medium
   * Update extend-diff-ignore.
 
  -- Andreas Boll <andreas.boll.dev@gmail.com>  Wed, 01 Feb 2017 15:36:10 +0100
-
-mesa (13.0.3-1ubuntu4) UNRELEASED; urgency=medium
-
-  * control: Lower debhelper build-dep to 9 for backports.
-
- -- Timo Aaltonen <tjaalton@debian.org>  Fri, 20 Jan 2017 07:42:58 +0200
 
 mesa (13.0.3-1ubuntu3) zesty; urgency=medium
 
