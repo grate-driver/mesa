@@ -46,6 +46,18 @@ mesa (17.0.0~rc1-1) experimental; urgency=medium
 
  -- Andreas Boll <andreas.boll.dev@gmail.com>  Thu, 19 Jan 2017 18:39:06 +0100
 
+mesa (13.0.4-1) unstable; urgency=medium
+
+  * New upstream release.
+  * Drop vl-zscan-fix-Fix-trivial-sign-compare-warnings.diff and r600-
+    sb-Fix-loop-optimization-related-hangs-on-eg.diff, upstream.
+  * Drop workaround-binutils-mips-844357.diff, binutils regression has
+    been fixed (Closes: #852030).
+  * Revert to debhelper compat 9 (Workaround for #851130).
+  * Update extend-diff-ignore.
+
+ -- Andreas Boll <andreas.boll.dev@gmail.com>  Wed, 01 Feb 2017 15:36:10 +0100
+
 mesa (13.0.3-1) unstable; urgency=medium
 
   [ Timo Aaltonen ]
