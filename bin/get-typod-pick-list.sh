@@ -1,12 +1,16 @@
 #!/bin/sh
 
-# Script for generating a list of candidates for cherry-picking to a stable branch
+# Script for generating a list of candidates which have typos in the nomination line
 #
 # Usage examples:
 #
-# $ bin/get-pick-list.sh
-# $ bin/get-pick-list.sh > picklist
-# $ bin/get-pick-list.sh | tee picklist
+# $ bin/get-typod-pick-list.sh
+# $ bin/get-typod-pick-list.sh > picklist
+# $ bin/get-typod-pick-list.sh | tee picklist
+
+# NB:
+# This script intentionally _never_ checks for specific version tag
+# Should we consider folding it with the original get-pick-list.sh
 
 # Grep for commits with "cherry picked from commit" in the commit message.
 git log --reverse --grep="cherry picked from commit" origin/master..HEAD |\
@@ -14,7 +18,7 @@ git log --reverse --grep="cherry picked from commit" origin/master..HEAD |\
 	sed -e 's/^[[:space:]]*(cherry picked from commit[[:space:]]*//' -e 's/)//' > already_picked
 
 # Grep for commits that were marked as a candidate for the stable tree.
-git log --reverse --pretty=%H -i --grep='^\([[:space:]]*NOTE: .*[Cc]andidate\|CC:.*13\.0.*mesa-stable\)' HEAD..origin/master |\
+git log --reverse --pretty=%H -i --grep='^CC:.*mesa-dev' HEAD..origin/master |\
 while read sha
 do
 	# Check to see whether the patch is on the ignore list.
