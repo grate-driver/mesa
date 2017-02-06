@@ -12,6 +12,7 @@ mesa (17.0.0~rc3-1) UNRELEASED; urgency=medium
     upstream.
   * Cherry-pick 045f38a (vulkan: Don't install vk_platform.h or
     vulkan.h).
+  * Update list of unwanted vulkan headers.
 
  -- Timo Aaltonen <tjaalton@debian.org>  Thu, 02 Feb 2017 12:02:07 +0200
 
