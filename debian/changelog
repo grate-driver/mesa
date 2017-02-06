@@ -10,6 +10,8 @@ mesa (17.0.0~rc3-1) UNRELEASED; urgency=medium
   * Explicitly disable LLVM on some arches. Should fix FTBFS on x32.
   * Drop configure.ac-Require-LLVM-for-r300-only-on-x86-and-x.patch,
     upstream.
+  * Cherry-pick 045f38a (vulkan: Don't install vk_platform.h or
+    vulkan.h).
 
  -- Timo Aaltonen <tjaalton@debian.org>  Thu, 02 Feb 2017 12:02:07 +0200
 
