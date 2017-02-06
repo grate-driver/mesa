@@ -1,10 +1,10 @@
-mesa (13.0.4-1ubuntu1) UNRELEASED; urgency=medium
+mesa (13.0.4-1ubuntu1) zesty; urgency=medium
 
   * Merge from debian.
   * radeonsi-always-leave-poly-offset-in-a-valid-state.diff:
     Dropped, upstream.
 
- -- Timo Aaltonen <tjaalton@debian.org>  Mon, 06 Feb 2017 09:27:14 +0200
+ -- Timo Aaltonen <tjaalton@debian.org>  Mon, 06 Feb 2017 09:47:24 +0200
 
 mesa (13.0.4-1) unstable; urgency=medium
 
