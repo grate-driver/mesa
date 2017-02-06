@@ -8,6 +8,8 @@ mesa (17.0.0~rc3-1) UNRELEASED; urgency=medium
   * Drop transitional package libegl1-mesa-drivers.
   * Remove Breaks/Replaces from pre-jessie.
   * Explicitly disable LLVM on some arches. Should fix FTBFS on x32.
+  * Drop configure.ac-Require-LLVM-for-r300-only-on-x86-and-x.patch,
+    upstream.
 
  -- Timo Aaltonen <tjaalton@debian.org>  Thu, 02 Feb 2017 12:02:07 +0200
 
