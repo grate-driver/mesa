@@ -1,4 +1,4 @@
-mesa (17.0.0~rc3-1) UNRELEASED; urgency=medium
+mesa (17.0.0~rc3-1) experimental; urgency=medium
 
   [ Timo Aaltonen ]
   * Drop libgles1.
@@ -18,7 +18,7 @@ mesa (17.0.0~rc3-1) UNRELEASED; urgency=medium
   * Enable building etnaviv and imx on armhf (Closes: #852614).
     - Bump libdrm-dev build-dep to 2.4.74-2~.
 
- -- Timo Aaltonen <tjaalton@debian.org>  Thu, 02 Feb 2017 12:02:07 +0200
+ -- Andreas Boll <andreas.boll.dev@gmail.com>  Mon, 06 Feb 2017 19:05:30 +0100
 
 mesa (17.0.0~rc2-1) experimental; urgency=medium
 
