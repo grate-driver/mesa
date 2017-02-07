@@ -21,15 +21,16 @@
  * IN THE SOFTWARE.
  */
 
+#include <dlfcn.h>
 #include <assert.h>
 #include <stdbool.h>
 #include <string.h>
 #include <sys/mman.h>
+#include <sys/stat.h>
 #include <unistd.h>
 #include <fcntl.h>
 
 #include "anv_private.h"
-#include "anv_timestamp.h"
 #include "util/strtod.h"
 #include "util/debug.h"
 
@@ -51,6 +52,34 @@ compiler_perf_log(void *data, const char *fmt, ...)
       vfprintf(stderr, fmt, args);
 
    va_end(args);
+}
+
+static bool
+anv_get_function_timestamp(void *ptr, uint32_t* timestamp)
+{
+   Dl_info info;
+   struct stat st;
+   if (!dladdr(ptr, &info) || !info.dli_fname)
+      return false;
+
+   if (stat(info.dli_fname, &st))
+      return false;
+
+   *timestamp = st.st_mtim.tv_sec;
+   return true;
+}
+
+static bool
+anv_device_get_cache_uuid(void *uuid)
+{
+   uint32_t timestamp;
+
+   memset(uuid, 0, VK_UUID_SIZE);
+   if (!anv_get_function_timestamp(anv_device_get_cache_uuid, &timestamp))
+      return false;
+
+   snprintf(uuid, VK_UUID_SIZE, "anv-%d", timestamp);
+   return true;
 }
 
 static VkResult
@@ -134,6 +163,11 @@ anv_physical_device_init(struct anv_physical_device *device,
       goto fail;
    }
 
+   if (!anv_device_get_cache_uuid(device->uuid)) {
+      result = vk_errorf(VK_ERROR_INITIALIZATION_FAILED,
+                         "cannot generate UUID");
+      goto fail;
+   }
    bool swizzled = anv_gem_get_bit6_swizzle(fd, I915_TILING_X);
 
    /* GENs prior to 8 do not support EU/Subslice info */
@@ -179,7 +213,6 @@ anv_physical_device_init(struct anv_physical_device *device,
       goto fail;
    }
 
-   /* XXX: Actually detect bit6 swizzling */
    isl_device_init(&device->isl_dev, &device->info, swizzled);
 
    close(fd);
@@ -227,6 +260,10 @@ static const VkExtensionProperties device_extensions[] = {
       .extensionName = VK_KHR_SWAPCHAIN_EXTENSION_NAME,
       .specVersion = 68,
    },
+   {
+      .extensionName = VK_KHR_SAMPLER_MIRROR_CLAMP_TO_EDGE_EXTENSION_NAME,
+      .specVersion = 1,
+   }
 };
 
 static void *
@@ -405,17 +442,17 @@ void anv_GetPhysicalDeviceFeatures(
    *pFeatures = (VkPhysicalDeviceFeatures) {
       .robustBufferAccess                       = true,
       .fullDrawIndexUint32                      = true,
-      .imageCubeArray                           = false,
+      .imageCubeArray                           = true,
       .independentBlend                         = true,
       .geometryShader                           = true,
-      .tessellationShader                       = false,
+      .tessellationShader                       = true,
       .sampleRateShading                        = true,
       .dualSrcBlend                             = true,
       .logicOp                                  = true,
       .multiDrawIndirect                        = false,
-      .drawIndirectFirstInstance                = false,
+      .drawIndirectFirstInstance                = true,
       .depthClamp                               = true,
-      .depthBiasClamp                           = false,
+      .depthBiasClamp                           = true,
       .fillModeNonSolid                         = true,
       .depthBounds                              = false,
       .wideLines                                = true,
@@ -431,21 +468,21 @@ void anv_GetPhysicalDeviceFeatures(
       .pipelineStatisticsQuery                  = false,
       .fragmentStoresAndAtomics                 = true,
       .shaderTessellationAndGeometryPointSize   = true,
-      .shaderImageGatherExtended                = false,
-      .shaderStorageImageExtendedFormats        = false,
+      .shaderImageGatherExtended                = true,
+      .shaderStorageImageExtendedFormats        = true,
       .shaderStorageImageMultisample            = false,
+      .shaderStorageImageReadWithoutFormat      = false,
+      .shaderStorageImageWriteWithoutFormat     = false,
       .shaderUniformBufferArrayDynamicIndexing  = true,
       .shaderSampledImageArrayDynamicIndexing   = true,
       .shaderStorageBufferArrayDynamicIndexing  = true,
       .shaderStorageImageArrayDynamicIndexing   = true,
-      .shaderStorageImageReadWithoutFormat      = false,
-      .shaderStorageImageWriteWithoutFormat     = true,
-      .shaderClipDistance                       = false,
-      .shaderCullDistance                       = false,
-      .shaderFloat64                            = false,
+      .shaderClipDistance                       = true,
+      .shaderCullDistance                       = true,
+      .shaderFloat64                            = pdevice->info.gen >= 8,
       .shaderInt64                              = false,
       .shaderInt16                              = false,
-      .alphaToOne                               = true,
+      .shaderResourceMinLod                     = false,
       .variableMultisampleRate                  = false,
       .inheritedQueries                         = false,
    };
@@ -454,13 +491,6 @@ void anv_GetPhysicalDeviceFeatures(
    pFeatures->vertexPipelineStoresAndAtomics =
       pdevice->compiler->scalar_stage[MESA_SHADER_VERTEX] &&
       pdevice->compiler->scalar_stage[MESA_SHADER_GEOMETRY];
-}
-
-void
-anv_device_get_cache_uuid(void *uuid)
-{
-   memset(uuid, 0, VK_UUID_SIZE);
-   snprintf(uuid, VK_UUID_SIZE, "anv-%s", ANV_TIMESTAMP);
 }
 
 void anv_GetPhysicalDeviceProperties(
@@ -514,14 +544,14 @@ void anv_GetPhysicalDeviceProperties(
       .maxVertexInputAttributeOffset            = 2047,
       .maxVertexInputBindingStride              = 2048,
       .maxVertexOutputComponents                = 128,
-      .maxTessellationGenerationLevel           = 0,
-      .maxTessellationPatchSize                 = 0,
-      .maxTessellationControlPerVertexInputComponents = 0,
-      .maxTessellationControlPerVertexOutputComponents = 0,
-      .maxTessellationControlPerPatchOutputComponents = 0,
-      .maxTessellationControlTotalOutputComponents = 0,
-      .maxTessellationEvaluationInputComponents = 0,
-      .maxTessellationEvaluationOutputComponents = 0,
+      .maxTessellationGenerationLevel           = 64,
+      .maxTessellationPatchSize                 = 32,
+      .maxTessellationControlPerVertexInputComponents = 128,
+      .maxTessellationControlPerVertexOutputComponents = 128,
+      .maxTessellationControlPerPatchOutputComponents = 128,
+      .maxTessellationControlTotalOutputComponents = 2048,
+      .maxTessellationEvaluationInputComponents = 128,
+      .maxTessellationEvaluationOutputComponents = 128,
       .maxGeometryShaderInvocations             = 32,
       .maxGeometryInputComponents               = 64,
       .maxGeometryOutputComponents              = 128,
@@ -556,14 +586,14 @@ void anv_GetPhysicalDeviceProperties(
       .minStorageBufferOffsetAlignment          = 4,
       .minTexelOffset                           = -8,
       .maxTexelOffset                           = 7,
-      .minTexelGatherOffset                     = -8,
-      .maxTexelGatherOffset                     = 7,
+      .minTexelGatherOffset                     = -32,
+      .maxTexelGatherOffset                     = 31,
       .minInterpolationOffset                   = -0.5,
       .maxInterpolationOffset                   = 0.4375,
       .subPixelInterpolationOffsetBits          = 4,
       .maxFramebufferWidth                      = (1 << 14),
       .maxFramebufferHeight                     = (1 << 14),
-      .maxFramebufferLayers                     = (1 << 10),
+      .maxFramebufferLayers                     = (1 << 11),
       .framebufferColorSampleCounts             = sample_counts,
       .framebufferDepthSampleCounts             = sample_counts,
       .framebufferStencilSampleCounts           = sample_counts,
@@ -577,9 +607,9 @@ void anv_GetPhysicalDeviceProperties(
       .maxSampleMaskWords                       = 1,
       .timestampComputeAndGraphics              = false,
       .timestampPeriod                          = time_stamp_base,
-      .maxClipDistances                         = 0 /* FIXME */,
-      .maxCullDistances                         = 0 /* FIXME */,
-      .maxCombinedClipAndCullDistances          = 0 /* FIXME */,
+      .maxClipDistances                         = 8,
+      .maxCullDistances                         = 8,
+      .maxCombinedClipAndCullDistances          = 8,
       .discreteQueuePriorities                  = 1,
       .pointSizeRange                           = { 0.125, 255.875 },
       .lineWidthRange                           = { 0.0, 7.9921875 },
@@ -603,7 +633,7 @@ void anv_GetPhysicalDeviceProperties(
    };
 
    strcpy(pProperties->deviceName, pdevice->name);
-   anv_device_get_cache_uuid(pProperties->pipelineCacheUUID);
+   memcpy(pProperties->pipelineCacheUUID, pdevice->uuid, VK_UUID_SIZE);
 }
 
 void anv_GetPhysicalDeviceQueueFamilyProperties(
@@ -720,14 +750,12 @@ PFN_vkVoidFunction anv_GetDeviceProcAddr(
    return anv_lookup_entrypoint(&device->info, pName);
 }
 
-static VkResult
+static void
 anv_queue_init(struct anv_device *device, struct anv_queue *queue)
 {
    queue->_loader_data.loaderMagic = ICD_LOADER_MAGIC;
    queue->device = device;
    queue->pool = &device->surface_state_pool;
-
-   return VK_SUCCESS;
 }
 
 static void
@@ -920,7 +948,7 @@ VkResult anv_CreateDevice(
    anv_state_pool_init(&device->dynamic_state_pool,
                        &device->dynamic_state_block_pool);
 
-   anv_block_pool_init(&device->instruction_block_pool, device, 128 * 1024);
+   anv_block_pool_init(&device->instruction_block_pool, device, 1024 * 1024);
    anv_state_pool_init(&device->instruction_state_pool,
                        &device->instruction_block_pool);
 
@@ -1103,7 +1131,8 @@ anv_device_execbuf(struct anv_device *device,
       return vk_errorf(VK_ERROR_DEVICE_LOST, "execbuf2 failed: %m");
    }
 
-   struct drm_i915_gem_exec_object2 *objects = (void *)execbuf->buffers_ptr;
+   struct drm_i915_gem_exec_object2 *objects =
+      (void *)(uintptr_t)execbuf->buffers_ptr;
    for (uint32_t k = 0; k < execbuf->buffer_count; k++)
       execbuf_bos[k]->offset = objects[k].offset;
 
@@ -1226,11 +1255,8 @@ VkResult anv_AllocateMemory(
 
    assert(pAllocateInfo->sType == VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO);
 
-   if (pAllocateInfo->allocationSize == 0) {
-      /* Apparently, this is allowed */
-      *pMem = VK_NULL_HANDLE;
-      return VK_SUCCESS;
-   }
+   /* The Vulkan 1.0.33 spec says "allocationSize must be greater than 0". */
+   assert(pAllocateInfo->allocationSize > 0);
 
    /* We support exactly one memory heap. */
    assert(pAllocateInfo->memoryTypeIndex == 0 ||
@@ -1306,6 +1332,16 @@ VkResult anv_MapMemory(
 
    if (size == VK_WHOLE_SIZE)
       size = mem->bo.size - offset;
+
+   /* From the Vulkan spec version 1.0.32 docs for MapMemory:
+    *
+    *  * If size is not equal to VK_WHOLE_SIZE, size must be greater than 0
+    *    assert(size != 0);
+    *  * If size is not equal to VK_WHOLE_SIZE, size must be less than or
+    *    equal to the size of the memory minus offset
+    */
+   assert(size > 0);
+   assert(offset + size <= mem->bo.size);
 
    /* FIXME: Is this supposed to be thread safe? Since vkUnmapMemory() only
     * takes a VkDeviceMemory pointer, it seems like only one map of the memory

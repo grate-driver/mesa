@@ -137,7 +137,7 @@ static int store_shader(struct pipe_context *ctx,
 
 	if (shader->bo == NULL) {
 		shader->bo = (struct r600_resource*)
-			pipe_buffer_create(ctx->screen, PIPE_BIND_CUSTOM, PIPE_USAGE_IMMUTABLE, shader->shader.bc.ndw * 4);
+			pipe_buffer_create(ctx->screen, 0, PIPE_USAGE_IMMUTABLE, shader->shader.bc.ndw * 4);
 		if (shader->bo == NULL) {
 			return -ENOMEM;
 		}
@@ -2924,7 +2924,7 @@ static int r600_shader_from_tgsi(struct r600_context *rctx,
 	struct pipe_stream_output_info so = pipeshader->selector->so;
 	struct tgsi_full_immediate *immediate;
 	struct r600_shader_ctx ctx;
-	struct r600_bytecode_output output[32];
+	struct r600_bytecode_output output[ARRAY_SIZE(shader->output)];
 	unsigned output_done, noutput;
 	unsigned opcode;
 	int i, j, k, r = 0;
@@ -3804,9 +3804,6 @@ static int tgsi_op2_64_params(struct r600_shader_ctx *ctx, bool singledest, bool
 		/* handle some special cases */
 		if (i == 1 || i == 3) {
 			switch (ctx->parse.FullToken.FullInstruction.Instruction.Opcode) {
-			case TGSI_OPCODE_SUB:
-				r600_bytecode_src_toggle_neg(&alu.src[1]);
-				break;
 			case TGSI_OPCODE_DABS:
 				r600_bytecode_src_set_abs(&alu.src[0]);
 				break;
@@ -3930,17 +3927,6 @@ static int tgsi_op2_s(struct r600_shader_ctx *ctx, int swap, int trans_only)
 		} else {
 			r600_bytecode_src(&alu.src[0], &ctx->src[1], i);
 			r600_bytecode_src(&alu.src[1], &ctx->src[0], i);
-		}
-		/* handle some special cases */
-		switch (inst->Instruction.Opcode) {
-		case TGSI_OPCODE_SUB:
-			r600_bytecode_src_toggle_neg(&alu.src[1]);
-			break;
-		case TGSI_OPCODE_ABS:
-			r600_bytecode_src_set_abs(&alu.src[0]);
-			break;
-		default:
-			break;
 		}
 		if (i == lasti || trans_only) {
 			alu.last = 1;
@@ -4199,41 +4185,63 @@ static int egcm_double_to_int(struct r600_shader_ctx *ctx)
 	return 0;
 }
 
+static int cayman_emit_unary_double_raw(struct r600_bytecode *bc,
+					unsigned op,
+					int dst_reg,
+					struct r600_shader_src *src,
+					bool abs)
+{
+	struct r600_bytecode_alu alu;
+	const int last_slot = 3;
+	int r;
+
+	/* these have to write the result to X/Y by the looks of it */
+	for (int i = 0 ; i < last_slot; i++) {
+		memset(&alu, 0, sizeof(struct r600_bytecode_alu));
+		alu.op = op;
+
+		r600_bytecode_src(&alu.src[0], src, 1);
+		r600_bytecode_src(&alu.src[1], src, 0);
+
+		if (abs)
+			r600_bytecode_src_set_abs(&alu.src[1]);
+
+		alu.dst.sel = dst_reg;
+		alu.dst.chan = i;
+		alu.dst.write = (i == 0 || i == 1);
+
+		if (bc->chip_class != CAYMAN || i == last_slot - 1)
+			alu.last = 1;
+		r = r600_bytecode_add_alu(bc, &alu);
+		if (r)
+			return r;
+	}
+
+	return 0;
+}
+
 static int cayman_emit_double_instr(struct r600_shader_ctx *ctx)
 {
 	struct tgsi_full_instruction *inst = &ctx->parse.FullToken.FullInstruction;
 	int i, r;
 	struct r600_bytecode_alu alu;
-	int last_slot = 3;
 	int lasti = tgsi_last_instruction(inst->Dst[0].Register.WriteMask);
 	int t1 = ctx->temp_reg;
 
-	/* these have to write the result to X/Y by the looks of it */
-	for (i = 0 ; i < last_slot; i++) {
-		memset(&alu, 0, sizeof(struct r600_bytecode_alu));
-		alu.op = ctx->inst_info->op;
+	/* should only be one src regs */
+	assert(inst->Instruction.NumSrcRegs == 1);
 
-		/* should only be one src regs */
-		assert (inst->Instruction.NumSrcRegs == 1);
+	/* only support one double at a time */
+	assert(inst->Dst[0].Register.WriteMask == TGSI_WRITEMASK_XY ||
+	       inst->Dst[0].Register.WriteMask == TGSI_WRITEMASK_ZW);
 
-		r600_bytecode_src(&alu.src[0], &ctx->src[0], 1);
-		r600_bytecode_src(&alu.src[1], &ctx->src[0], 0);
-
-		/* RSQ should take the absolute value of src */
-		if (ctx->parse.FullToken.FullInstruction.Instruction.Opcode == TGSI_OPCODE_DRSQ ||
-		    ctx->parse.FullToken.FullInstruction.Instruction.Opcode == TGSI_OPCODE_DSQRT) {
-			r600_bytecode_src_set_abs(&alu.src[1]);
-		}
-		alu.dst.sel = t1;
-		alu.dst.chan = i;
-		alu.dst.write = (i == 0 || i == 1);
-
-		if (ctx->bc->chip_class != CAYMAN || i == last_slot - 1)
-			alu.last = 1;
-		r = r600_bytecode_add_alu(ctx->bc, &alu);
-		if (r)
-			return r;
-	}
+	r = cayman_emit_unary_double_raw(
+		ctx->bc, ctx->inst_info->op, t1,
+		&ctx->src[0],
+		ctx->parse.FullToken.FullInstruction.Instruction.Opcode == TGSI_OPCODE_DRSQ ||
+		ctx->parse.FullToken.FullInstruction.Instruction.Opcode == TGSI_OPCODE_DSQRT);
+	if (r)
+		return r;
 
 	for (i = 0 ; i <= lasti; i++) {
 		if (!(inst->Dst[0].Register.WriteMask & (1 << i)))
@@ -4340,25 +4348,27 @@ static int cayman_mul_double_instr(struct r600_shader_ctx *ctx)
 	int lasti = tgsi_last_instruction(inst->Dst[0].Register.WriteMask);
 	int t1 = ctx->temp_reg;
 
-	for (k = 0; k < 2; k++) {
-		if (!(inst->Dst[0].Register.WriteMask & (0x3 << (k * 2))))
-			continue;
+	/* t1 would get overwritten below if we actually tried to
+	 * multiply two pairs of doubles at a time. */
+	assert(inst->Dst[0].Register.WriteMask == TGSI_WRITEMASK_XY ||
+	       inst->Dst[0].Register.WriteMask == TGSI_WRITEMASK_ZW);
 
-		for (i = 0; i < 4; i++) {
-			memset(&alu, 0, sizeof(struct r600_bytecode_alu));
-			alu.op = ctx->inst_info->op;
-			for (j = 0; j < inst->Instruction.NumSrcRegs; j++) {
-				r600_bytecode_src(&alu.src[j], &ctx->src[j], k * 2 + ((i == 3) ? 0 : 1));
-			}
-			alu.dst.sel = t1;
-			alu.dst.chan = i;
-			alu.dst.write = 1;
-			if (i == 3)
-				alu.last = 1;
-			r = r600_bytecode_add_alu(ctx->bc, &alu);
-			if (r)
-				return r;
+	k = inst->Dst[0].Register.WriteMask == TGSI_WRITEMASK_XY ? 0 : 1;
+
+	for (i = 0; i < 4; i++) {
+		memset(&alu, 0, sizeof(struct r600_bytecode_alu));
+		alu.op = ctx->inst_info->op;
+		for (j = 0; j < inst->Instruction.NumSrcRegs; j++) {
+			r600_bytecode_src(&alu.src[j], &ctx->src[j], k * 2 + ((i == 3) ? 0 : 1));
 		}
+		alu.dst.sel = t1;
+		alu.dst.chan = i;
+		alu.dst.write = 1;
+		if (i == 3)
+			alu.last = 1;
+		r = r600_bytecode_add_alu(ctx->bc, &alu);
+		if (r)
+			return r;
 	}
 
 	for (i = 0; i <= lasti; i++) {
@@ -4377,6 +4387,63 @@ static int cayman_mul_double_instr(struct r600_shader_ctx *ctx)
 			return r;
 	}
 
+	return 0;
+}
+
+/*
+ * Emit RECIP_64 + MUL_64 to implement division.
+ */
+static int cayman_ddiv_instr(struct r600_shader_ctx *ctx)
+{
+	struct tgsi_full_instruction *inst = &ctx->parse.FullToken.FullInstruction;
+	int r;
+	struct r600_bytecode_alu alu;
+	int t1 = ctx->temp_reg;
+	int k;
+
+	/* Only support one double at a time. This is the same constraint as
+	 * in DMUL lowering. */
+	assert(inst->Dst[0].Register.WriteMask == TGSI_WRITEMASK_XY ||
+	       inst->Dst[0].Register.WriteMask == TGSI_WRITEMASK_ZW);
+
+	k = inst->Dst[0].Register.WriteMask == TGSI_WRITEMASK_XY ? 0 : 1;
+
+	r = cayman_emit_unary_double_raw(ctx->bc, ALU_OP2_RECIP_64, t1, &ctx->src[1], false);
+	if (r)
+		return r;
+
+	for (int i = 0; i < 4; i++) {
+		memset(&alu, 0, sizeof(struct r600_bytecode_alu));
+		alu.op = ALU_OP2_MUL_64;
+
+		r600_bytecode_src(&alu.src[0], &ctx->src[0], k * 2 + ((i == 3) ? 0 : 1));
+
+		alu.src[1].sel = t1;
+		alu.src[1].chan = (i == 3) ? 0 : 1;
+
+		alu.dst.sel = t1;
+		alu.dst.chan = i;
+		alu.dst.write = 1;
+		if (i == 3)
+			alu.last = 1;
+		r = r600_bytecode_add_alu(ctx->bc, &alu);
+		if (r)
+			return r;
+	}
+
+	for (int i = 0; i < 2; i++) {
+		memset(&alu, 0, sizeof(struct r600_bytecode_alu));
+		alu.op = ALU_OP1_MOV;
+		alu.src[0].sel = t1;
+		alu.src[0].chan = i;
+		tgsi_dst(ctx, &inst->Dst[0], k * 2 + i, &alu.dst);
+		alu.dst.write = 1;
+		if (i == 1)
+			alu.last = 1;
+		r = r600_bytecode_add_alu(ctx->bc, &alu);
+		if (r)
+			return r;
+	}
 	return 0;
 }
 
@@ -9009,7 +9076,6 @@ static const struct r600_shader_tgsi_instruction r600_shader_tgsi_instruction[] 
 	[TGSI_OPCODE_SLT]	= { ALU_OP2_SETGT, tgsi_op2_swap},
 	[TGSI_OPCODE_SGE]	= { ALU_OP2_SETGE, tgsi_op2},
 	[TGSI_OPCODE_MAD]	= { ALU_OP3_MULADD, tgsi_op3},
-	[TGSI_OPCODE_SUB]	= { ALU_OP2_ADD, tgsi_op2},
 	[TGSI_OPCODE_LRP]	= { ALU_OP0_NOP, tgsi_lrp},
 	[TGSI_OPCODE_FMA]	= { ALU_OP0_NOP, tgsi_unsupported},
 	[TGSI_OPCODE_SQRT]	= { ALU_OP1_SQRT_IEEE, tgsi_trans_srcx_replicate},
@@ -9025,7 +9091,7 @@ static const struct r600_shader_tgsi_instruction r600_shader_tgsi_instruction[] 
 	[TGSI_OPCODE_POW]	= { ALU_OP0_NOP, tgsi_pow},
 	[TGSI_OPCODE_XPD]	= { ALU_OP0_NOP, tgsi_xpd},
 	[32]			= { ALU_OP0_NOP, tgsi_unsupported},
-	[TGSI_OPCODE_ABS]	= { ALU_OP1_MOV, tgsi_op2},
+	[33]			= { ALU_OP0_NOP, tgsi_unsupported},
 	[34]			= { ALU_OP0_NOP, tgsi_unsupported},
 	[TGSI_OPCODE_DPH]	= { ALU_OP2_DOT4, tgsi_dp},
 	[TGSI_OPCODE_COS]	= { ALU_OP1_COS, tgsi_trig},
@@ -9208,7 +9274,6 @@ static const struct r600_shader_tgsi_instruction eg_shader_tgsi_instruction[] = 
 	[TGSI_OPCODE_SLT]	= { ALU_OP2_SETGT, tgsi_op2_swap},
 	[TGSI_OPCODE_SGE]	= { ALU_OP2_SETGE, tgsi_op2},
 	[TGSI_OPCODE_MAD]	= { ALU_OP3_MULADD, tgsi_op3},
-	[TGSI_OPCODE_SUB]	= { ALU_OP2_ADD, tgsi_op2},
 	[TGSI_OPCODE_LRP]	= { ALU_OP0_NOP, tgsi_lrp},
 	[TGSI_OPCODE_FMA]	= { ALU_OP3_FMA, tgsi_op3},
 	[TGSI_OPCODE_SQRT]	= { ALU_OP1_SQRT_IEEE, tgsi_trans_srcx_replicate},
@@ -9224,7 +9289,7 @@ static const struct r600_shader_tgsi_instruction eg_shader_tgsi_instruction[] = 
 	[TGSI_OPCODE_POW]	= { ALU_OP0_NOP, tgsi_pow},
 	[TGSI_OPCODE_XPD]	= { ALU_OP0_NOP, tgsi_xpd},
 	[32]			= { ALU_OP0_NOP, tgsi_unsupported},
-	[TGSI_OPCODE_ABS]	= { ALU_OP1_MOV, tgsi_op2},
+	[33]			= { ALU_OP0_NOP, tgsi_unsupported},
 	[34]			= { ALU_OP0_NOP, tgsi_unsupported},
 	[TGSI_OPCODE_DPH]	= { ALU_OP2_DOT4, tgsi_dp},
 	[TGSI_OPCODE_COS]	= { ALU_OP1_COS, tgsi_trig},
@@ -9392,6 +9457,7 @@ static const struct r600_shader_tgsi_instruction eg_shader_tgsi_instruction[] = 
 	[TGSI_OPCODE_DNEG]	= { ALU_OP2_ADD_64, tgsi_dneg},
 	[TGSI_OPCODE_DADD]	= { ALU_OP2_ADD_64, tgsi_op2_64},
 	[TGSI_OPCODE_DMUL]	= { ALU_OP2_MUL_64, cayman_mul_double_instr},
+	[TGSI_OPCODE_DDIV]	= { 0, cayman_ddiv_instr },
 	[TGSI_OPCODE_DMAX]	= { ALU_OP2_MAX_64, tgsi_op2_64},
 	[TGSI_OPCODE_DMIN]	= { ALU_OP2_MIN_64, tgsi_op2_64},
 	[TGSI_OPCODE_DSLT]	= { ALU_OP2_SETGT_64, tgsi_op2_64_single_dest_s},
@@ -9431,7 +9497,6 @@ static const struct r600_shader_tgsi_instruction cm_shader_tgsi_instruction[] = 
 	[TGSI_OPCODE_SLT]	= { ALU_OP2_SETGT, tgsi_op2_swap},
 	[TGSI_OPCODE_SGE]	= { ALU_OP2_SETGE, tgsi_op2},
 	[TGSI_OPCODE_MAD]	= { ALU_OP3_MULADD, tgsi_op3},
-	[TGSI_OPCODE_SUB]	= { ALU_OP2_ADD, tgsi_op2},
 	[TGSI_OPCODE_LRP]	= { ALU_OP0_NOP, tgsi_lrp},
 	[TGSI_OPCODE_FMA]	= { ALU_OP3_FMA, tgsi_op3},
 	[TGSI_OPCODE_SQRT]	= { ALU_OP1_SQRT_IEEE, cayman_emit_float_instr},
@@ -9447,7 +9512,7 @@ static const struct r600_shader_tgsi_instruction cm_shader_tgsi_instruction[] = 
 	[TGSI_OPCODE_POW]	= { ALU_OP0_NOP, cayman_pow},
 	[TGSI_OPCODE_XPD]	= { ALU_OP0_NOP, tgsi_xpd},
 	[32]			= { ALU_OP0_NOP, tgsi_unsupported},
-	[TGSI_OPCODE_ABS]	= { ALU_OP1_MOV, tgsi_op2},
+	[33]			= { ALU_OP0_NOP, tgsi_unsupported},
 	[34]			= { ALU_OP0_NOP, tgsi_unsupported},
 	[TGSI_OPCODE_DPH]	= { ALU_OP2_DOT4, tgsi_dp},
 	[TGSI_OPCODE_COS]	= { ALU_OP1_COS, cayman_trig},
@@ -9615,6 +9680,7 @@ static const struct r600_shader_tgsi_instruction cm_shader_tgsi_instruction[] = 
 	[TGSI_OPCODE_DNEG]	= { ALU_OP2_ADD_64, tgsi_dneg},
 	[TGSI_OPCODE_DADD]	= { ALU_OP2_ADD_64, tgsi_op2_64},
 	[TGSI_OPCODE_DMUL]	= { ALU_OP2_MUL_64, cayman_mul_double_instr},
+	[TGSI_OPCODE_DDIV]	= { 0, cayman_ddiv_instr },
 	[TGSI_OPCODE_DMAX]	= { ALU_OP2_MAX_64, tgsi_op2_64},
 	[TGSI_OPCODE_DMIN]	= { ALU_OP2_MIN_64, tgsi_op2_64},
 	[TGSI_OPCODE_DSLT]	= { ALU_OP2_SETGT_64, tgsi_op2_64_single_dest_s},

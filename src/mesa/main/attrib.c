@@ -1071,7 +1071,8 @@ _mesa_PopAttrib(void)
                if (ctx->Extensions.ARB_color_buffer_float)
                   _mesa_ClampColor(GL_CLAMP_FRAGMENT_COLOR_ARB,
                                    color->ClampFragmentColor);
-               _mesa_ClampColor(GL_CLAMP_READ_COLOR_ARB, color->ClampReadColor);
+               if (ctx->Extensions.ARB_color_buffer_float || ctx->Version >= 30)
+                  _mesa_ClampColor(GL_CLAMP_READ_COLOR_ARB, color->ClampReadColor);
 
                /* GL_ARB_framebuffer_sRGB / GL_EXT_framebuffer_sRGB */
                if (ctx->Extensions.EXT_framebuffer_sRGB)
@@ -1484,7 +1485,7 @@ copy_array_object(struct gl_context *ctx,
    for (i = 0; i < ARRAY_SIZE(src->VertexAttrib); i++) {
       _mesa_copy_client_array(ctx, &dest->_VertexAttrib[i], &src->_VertexAttrib[i]);
       _mesa_copy_vertex_attrib_array(ctx, &dest->VertexAttrib[i], &src->VertexAttrib[i]);
-      _mesa_copy_vertex_buffer_binding(ctx, &dest->VertexBinding[i], &src->VertexBinding[i]);
+      _mesa_copy_vertex_buffer_binding(ctx, &dest->BufferBinding[i], &src->BufferBinding[i]);
    }
 
    /* _Enabled must be the same than on push */

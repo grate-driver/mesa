@@ -54,8 +54,8 @@
  * want to recognize add(op0, neg(op1)) or the other way around to
  * produce a subtract anyway.
  *
- * DIV_TO_MUL_RCP and INT_DIV_TO_MUL_RCP:
- * --------------------------------------
+ * FDIV_TO_MUL_RCP, DDIV_TO_MUL_RCP, and INT_DIV_TO_MUL_RCP:
+ * ---------------------------------------------------------
  * Breaks an ir_binop_div expression down to op0 * (rcp(op1)).
  *
  * Many GPUs don't have a divide instruction (945 and 965 included),
@@ -63,9 +63,11 @@
  * reciprocal.  By breaking the operation down, constant reciprocals
  * can get constant folded.
  *
- * DIV_TO_MUL_RCP only lowers floating point division; INT_DIV_TO_MUL_RCP
- * handles the integer case, converting to and from floating point so that
- * RCP is possible.
+ * FDIV_TO_MUL_RCP only lowers single-precision floating point division;
+ * DDIV_TO_MUL_RCP only lowers double-precision floating point division.
+ * DIV_TO_MUL_RCP is a convenience macro that sets both flags.
+ * INT_DIV_TO_MUL_RCP handles the integer case, converting to and from floating
+ * point so that RCP is possible.
  *
  * EXP_TO_EXP2 and LOG_TO_LOG2:
  * ----------------------------
@@ -326,7 +328,8 @@ lower_instructions_visitor::mod_to_floor(ir_expression *ir)
    /* Don't generate new IR that would need to be lowered in an additional
     * pass.
     */
-   if (lowering(DIV_TO_MUL_RCP) && (ir->type->is_float() || ir->type->is_double()))
+   if ((lowering(FDIV_TO_MUL_RCP) && ir->type->is_float()) ||
+       (lowering(DDIV_TO_MUL_RCP) && ir->type->is_double()))
       div_to_mul_rcp(div_expr);
 
    ir_expression *const floor_expr =
@@ -392,7 +395,6 @@ lower_instructions_visitor::ldexp_to_arith(ir_expression *ir)
    ir_constant *sign_mask = new(ir) ir_constant(0x80000000u, vec_elem);
 
    ir_constant *exp_shift = new(ir) ir_constant(23, vec_elem);
-   ir_constant *exp_width = new(ir) ir_constant(8, vec_elem);
 
    /* Temporary variables */
    ir_variable *x = new(ir) ir_variable(ir->type, "x", ir_var_temporary);
@@ -455,10 +457,22 @@ lower_instructions_visitor::ldexp_to_arith(ir_expression *ir)
     */
 
    ir_constant *exp_shift_clone = exp_shift->clone(ir, NULL);
-   ir->operation = ir_unop_bitcast_i2f;
-   ir->operands[0] = bitfield_insert(bitcast_f2i(x), resulting_biased_exp,
-                                     exp_shift_clone, exp_width);
-   ir->operands[1] = NULL;
+
+   /* Don't generate new IR that would need to be lowered in an additional
+    * pass.
+    */
+   if (!lowering(INSERT_TO_SHIFTS)) {
+      ir_constant *exp_width = new(ir) ir_constant(8, vec_elem);
+      ir->operation = ir_unop_bitcast_i2f;
+      ir->operands[0] = bitfield_insert(bitcast_f2i(x), resulting_biased_exp,
+                                        exp_shift_clone, exp_width);
+      ir->operands[1] = NULL;
+   } else {
+      ir_constant *sign_mantissa_mask = new(ir) ir_constant(0x807fffffu, vec_elem);
+      ir->operation = ir_unop_bitcast_u2f;
+      ir->operands[0] = bit_or(bit_and(bitcast_f2u(x), sign_mantissa_mask),
+                               lshift(i2u(resulting_biased_exp), exp_shift_clone));
+   }
 
    this->progress = true;
 }
@@ -1588,8 +1602,8 @@ lower_instructions_visitor::visit_leave(ir_expression *ir)
    case ir_binop_div:
       if (ir->operands[1]->type->is_integer() && lowering(INT_DIV_TO_MUL_RCP))
 	 int_div_to_mul_rcp(ir);
-      else if ((ir->operands[1]->type->is_float() ||
-                ir->operands[1]->type->is_double()) && lowering(DIV_TO_MUL_RCP))
+      else if ((ir->operands[1]->type->is_float() && lowering(FDIV_TO_MUL_RCP)) ||
+               (ir->operands[1]->type->is_double() && lowering(DDIV_TO_MUL_RCP)))
 	 div_to_mul_rcp(ir);
       break;
 

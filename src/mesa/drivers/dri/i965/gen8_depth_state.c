@@ -93,10 +93,10 @@ emit_depth_packets(struct brw_context *brw,
       assert(depth_mt);
       BEGIN_BATCH(5);
       OUT_BATCH(GEN7_3DSTATE_HIER_DEPTH_BUFFER << 16 | (5 - 2));
-      OUT_BATCH((depth_mt->hiz_buf->pitch - 1) | mocs_wb << 25);
-      OUT_RELOC64(depth_mt->hiz_buf->bo,
+      OUT_BATCH((depth_mt->hiz_buf->aux_base.pitch - 1) | mocs_wb << 25);
+      OUT_RELOC64(depth_mt->hiz_buf->aux_base.bo,
                   I915_GEM_DOMAIN_RENDER, I915_GEM_DOMAIN_RENDER, 0);
-      OUT_BATCH(depth_mt->hiz_buf->qpitch >> 2);
+      OUT_BATCH(depth_mt->hiz_buf->aux_base.qpitch >> 2);
       ADVANCE_BATCH();
    }
 
@@ -218,7 +218,7 @@ gen8_emit_depth_stencil_hiz(struct brw_context *brw,
    }
 
    emit_depth_packets(brw, depth_mt, brw_depthbuffer_format(brw), surftype,
-                      ctx->Depth.Mask != 0,
+                      brw_depth_writes_enabled(brw),
                       stencil_mt, ctx->Stencil._WriteEnabled,
                       hiz, width, height, depth, lod, min_array_element);
 }
@@ -280,7 +280,7 @@ pma_fix_enable(const struct brw_context *brw)
     * 3DSTATE_WM_DEPTH_STENCIL::DepthWriteEnable &&
     * 3DSTATE_DEPTH_BUFFER::DEPTH_WRITE_ENABLE.
     */
-   const bool depth_writes_enabled = ctx->Depth.Mask;
+   const bool depth_writes_enabled = brw_depth_writes_enabled(brw);
 
    /* _NEW_STENCIL:
     * !DEPTH_STENCIL_STATE::Stencil Buffer Write Enable ||
@@ -293,10 +293,12 @@ pma_fix_enable(const struct brw_context *brw)
    const bool ps_computes_depth =
       wm_prog_data->computed_depth_mode != BRW_PSCDEPTH_OFF;
 
-   /* BRW_NEW_FS_PROG_DATA:        3DSTATE_PS_EXTRA::PixelShaderKillsPixels
-    * BRW_NEW_FS_PROG_DATA:        3DSTATE_PS_EXTRA::oMask Present to RenderTarget
+   /* BRW_NEW_FS_PROG_DATA:     3DSTATE_PS_EXTRA::PixelShaderKillsPixels
+    * BRW_NEW_FS_PROG_DATA:     3DSTATE_PS_EXTRA::oMask Present to RenderTarget
     * _NEW_MULTISAMPLE:         3DSTATE_PS_BLEND::AlphaToCoverageEnable
     * _NEW_COLOR:               3DSTATE_PS_BLEND::AlphaTestEnable
+    * _NEW_BUFFERS:             3DSTATE_PS_BLEND::AlphaTestEnable
+    *                           3DSTATE_PS_BLEND::AlphaToCoverageEnable
     *
     * 3DSTATE_WM_CHROMAKEY::ChromaKeyKillEnable is always false.
     * 3DSTATE_WM::ForceKillPix != ForceOff is always true.
@@ -304,8 +306,8 @@ pma_fix_enable(const struct brw_context *brw)
    const bool kill_pixel =
       wm_prog_data->uses_kill ||
       wm_prog_data->uses_omask ||
-      (_mesa_is_multisample_enabled(ctx) && ctx->Multisample.SampleAlphaToCoverage) ||
-      ctx->Color.AlphaEnabled;
+      _mesa_is_alpha_test_enabled(ctx) ||
+      _mesa_is_alpha_to_coverage_enabled(ctx);
 
    /* The big formula in CACHE_MODE_1::NP PMA FIX ENABLE. */
    return !wm_force_thread_dispatch &&
@@ -475,6 +477,18 @@ gen8_hiz_exec(struct brw_context *brw, struct intel_mipmap_tree *mt,
       break;
    case BLORP_HIZ_OP_DEPTH_CLEAR:
       dw1 |= GEN8_WM_HZ_DEPTH_CLEAR;
+
+      /* The "Clear Rectangle X Max" (and Y Max) fields are exclusive,
+       * rather than inclusive, and limited to 16383.  This means that
+       * for a 16384x16384 render target, we would miss the last row
+       * or column of pixels along the edge.
+       *
+       * To work around this, we have to set the "Full Surface Depth
+       * and Stencil Clear" bit.  We can do this in all cases because
+       * we always clear the full rectangle anyway.  We'll need to
+       * change this if we ever add scissored clear support.
+       */
+      dw1 |= GEN8_WM_HZ_FULL_SURFACE_DEPTH_CLEAR;
       break;
    case BLORP_HIZ_OP_NONE:
       unreachable("Should not get here.");
@@ -508,6 +522,22 @@ gen8_hiz_exec(struct brw_context *brw, struct intel_mipmap_tree *mt,
    OUT_BATCH(0);
    OUT_BATCH(0);
    ADVANCE_BATCH();
+
+   /*
+    * From the Broadwell PRM, volume 7, "Depth Buffer Clear":
+    *
+    *  Depth buffer clear pass using any of the methods (WM_STATE, 3DSTATE_WM
+    *  or 3DSTATE_WM_HZ_OP) must be followed by a PIPE_CONTROL command with
+    *  DEPTH_STALL bit and Depth FLUSH bits "set" before starting to render.
+    *  DepthStall and DepthFlush are not needed between consecutive depth
+    *  clear passes nor is it required if th e depth clear pass was done with
+    *  "full_surf_clear" bit set in the 3DSTATE_WM_HZ_OP.
+    *
+    *  TODO: Such as the spec says, this could be conditional.
+    */
+   brw_emit_pipe_control_flush(brw, 
+                               PIPE_CONTROL_DEPTH_CACHE_FLUSH |
+                               PIPE_CONTROL_DEPTH_STALL);
 
    /* Mark this buffer as needing a TC flush, as we've rendered to it. */
    brw_render_cache_set_add_bo(brw, mt->bo);

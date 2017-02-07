@@ -23,9 +23,11 @@ include Makefile.sources
 
 vulkan_includedir = $(includedir)/vulkan
 
-vulkan_include_HEADERS = \
+noinst_HEADERS = \
 	$(top_srcdir)/include/vulkan/vk_platform.h \
-	$(top_srcdir)/include/vulkan/vulkan.h \
+	$(top_srcdir)/include/vulkan/vulkan.h
+
+vulkan_include_HEADERS = \
 	$(top_srcdir)/include/vulkan/vulkan_intel.h
 
 lib_LTLIBRARIES = libvulkan_intel.la
@@ -43,9 +45,6 @@ noinst_LTLIBRARIES = $(PER_GEN_LIBS)
 # The gallium includes are for the util/u_math.h include from main/macros.h
 
 AM_CPPFLAGS = \
-	$(INTEL_CFLAGS) \
-	$(VALGRIND_CFLAGS) \
-	$(DEFINES) \
 	-I$(top_srcdir)/include \
 	-I$(top_builddir)/src \
 	-I$(top_srcdir)/src \
@@ -61,6 +60,17 @@ AM_CPPFLAGS = \
 	-I$(top_srcdir)/src/gallium/include \
 	-I$(top_builddir)/src/intel \
 	-I$(top_srcdir)/src/intel
+
+if HAVE_PLATFORM_WAYLAND
+AM_CPPFLAGS += \
+	-I$(top_builddir)/src/egl/wayland/wayland-drm \
+	-I$(top_srcdir)/src/egl/wayland/wayland-drm
+endif
+
+AM_CPPFLAGS += \
+	$(INTEL_CFLAGS) \
+	$(VALGRIND_CFLAGS) \
+	$(DEFINES)
 
 AM_CFLAGS = \
 	$(VISIBILITY_CFLAGS) \
@@ -100,8 +110,6 @@ endif
 
 if HAVE_PLATFORM_WAYLAND
 AM_CPPFLAGS += \
-	-I$(top_builddir)/src/egl/wayland/wayland-drm \
-	-I$(top_srcdir)/src/egl/wayland/wayland-drm \
 	$(WAYLAND_CFLAGS) \
 	-DVK_USE_PLATFORM_WAYLAND_KHR
 
@@ -132,19 +140,15 @@ VULKAN_LIB_DEPS += \
 nodist_EXTRA_libvulkan_intel_la_SOURCES = dummy.cpp
 libvulkan_intel_la_SOURCES = $(VULKAN_GEM_FILES)
 
-anv_entrypoints.h : anv_entrypoints_gen.py $(vulkan_include_HEADERS)
-	$(AM_V_GEN) cat $(vulkan_include_HEADERS) |\
+vulkan_api_xml = $(top_srcdir)/src/vulkan/registry/vk.xml
+
+anv_entrypoints.h : anv_entrypoints_gen.py $(vulkan_api_xml)
+	$(AM_V_GEN) cat $(vulkan_api_xml) |\
 	$(PYTHON2) $(srcdir)/anv_entrypoints_gen.py header > $@
 
-anv_entrypoints.c : anv_entrypoints_gen.py $(vulkan_include_HEADERS)
-	$(AM_V_GEN) cat $(vulkan_include_HEADERS) |\
+anv_entrypoints.c : anv_entrypoints_gen.py $(vulkan_api_xml)
+	$(AM_V_GEN) cat $(vulkan_api_xml) |\
 	$(PYTHON2) $(srcdir)/anv_entrypoints_gen.py code > $@
-
-.PHONY: anv_timestamp.h
-
-anv_timestamp.h:
-	@echo "Updating anv_timestamp.h"
-	$(AM_V_GEN) echo "#define ANV_TIMESTAMP \"$(TIMESTAMP_CMD)\"" > $@
 
 BUILT_SOURCES = $(VULKAN_GENERATED_FILES)
 CLEANFILES = $(BUILT_SOURCES) dev_icd.json intel_icd.@host_cpu@.json
@@ -187,7 +191,7 @@ libvulkan_test_la_LIBADD = $(VULKAN_LIB_DEPS)
 
 include $(top_srcdir)/install-lib-links.mk
 
-noinst_HEADERS = \
+noinst_HEADERS += \
 	tests/state_pool_test_helper.h
 
 LDADD = \

@@ -25,6 +25,7 @@
 
 #include "intel_batchbuffer.h"
 #include "intel_mipmap_tree.h"
+#include "intel_fbo.h"
 
 #include "brw_context.h"
 #include "brw_state.h"
@@ -55,12 +56,12 @@ blorp_emit_reloc(struct blorp_batch *batch,
 
    uint32_t offset = (char *)location - (char *)brw->batch.map;
    if (brw->gen >= 8) {
-      return intel_batchbuffer_reloc64(brw, address.buffer, offset,
+      return intel_batchbuffer_reloc64(&brw->batch, address.buffer, offset,
                                        address.read_domains,
                                        address.write_domain,
                                        address.offset + delta);
    } else {
-      return intel_batchbuffer_reloc(brw, address.buffer, offset,
+      return intel_batchbuffer_reloc(&brw->batch, address.buffer, offset,
                                      address.read_domains,
                                      address.write_domain,
                                      address.offset + delta);
@@ -179,7 +180,9 @@ genX(blorp_exec)(struct blorp_batch *batch,
     * data with different formats, which blorp does for stencil and depth
     * data.
     */
-   brw_emit_mi_flush(brw);
+   if (params->src.enabled)
+      brw_render_cache_set_check_flush(brw, params->src.addr.buffer);
+   brw_render_cache_set_check_flush(brw, params->dst.addr.buffer);
 
    brw_select_pipeline(brw, BRW_RENDER_PIPELINE);
 
@@ -256,8 +259,10 @@ retry:
    brw->no_depth_or_stencil = false;
    brw->ib.type = -1;
 
-   /* Flush the sampler cache so any texturing from the destination is
-    * coherent.
-    */
-   brw_emit_mi_flush(brw);
+   if (params->dst.enabled)
+      brw_render_cache_set_add_bo(brw, params->dst.addr.buffer);
+   if (params->depth.enabled)
+      brw_render_cache_set_add_bo(brw, params->depth.addr.buffer);
+   if (params->stencil.enabled)
+      brw_render_cache_set_add_bo(brw, params->stencil.addr.buffer);
 }

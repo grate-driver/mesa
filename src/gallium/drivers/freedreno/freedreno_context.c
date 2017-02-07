@@ -44,14 +44,26 @@ fd_context_flush(struct pipe_context *pctx, struct pipe_fence_handle **fence,
 {
 	struct fd_context *ctx = fd_context(pctx);
 
+	if (flags & PIPE_FLUSH_FENCE_FD)
+		ctx->batch->needs_out_fence_fd = true;
+
 	if (!ctx->screen->reorder) {
 		fd_batch_flush(ctx->batch, true);
 	} else {
 		fd_bc_flush(&ctx->screen->batch_cache, ctx);
 	}
 
-	if (fence)
+	if (fence) {
+		/* if there hasn't been any rendering submitted yet, we might not
+		 * have actually created a fence
+		 */
+		if (!ctx->last_fence || ctx->batch->needs_out_fence_fd) {
+			ctx->batch->needs_flush = true;
+			fd_gmem_render_noop(ctx->batch);
+			fd_batch_reset(ctx->batch);
+		}
 		fd_fence_ref(pctx->screen, fence, ctx->last_fence);
+	}
 }
 
 /**
@@ -73,7 +85,10 @@ fd_emit_string_marker(struct pipe_context *pctx, const char *string, int len)
 	/* max packet size is 0x3fff dwords: */
 	len = MIN2(len, 0x3fff * 4);
 
-	OUT_PKT3(ring, CP_NOP, align(len, 4) / 4);
+	if (ctx->screen->gpu_id >= 500)
+		OUT_PKT7(ring, CP_NOP, align(len, 4) / 4);
+	else
+		OUT_PKT3(ring, CP_NOP, align(len, 4) / 4);
 	while (len >= 4) {
 		OUT_RING(ring, *buf);
 		buf++;
@@ -251,6 +266,8 @@ fd_context_init(struct fd_context *ctx, struct pipe_screen *pscreen,
 	pctx->flush = fd_context_flush;
 	pctx->emit_string_marker = fd_emit_string_marker;
 	pctx->set_debug_callback = fd_set_debug_callback;
+	pctx->create_fence_fd = fd_create_fence_fd;
+	pctx->fence_server_sync = fd_fence_server_sync;
 
 	/* TODO what about compute?  Ideally it creates it's own independent
 	 * batches per compute job (since it isn't using tiling, so no point

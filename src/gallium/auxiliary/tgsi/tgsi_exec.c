@@ -210,6 +210,16 @@ micro_dadd(union tgsi_double_channel *dst,
 }
 
 static void
+micro_ddiv(union tgsi_double_channel *dst,
+          const union tgsi_double_channel *src)
+{
+   dst->d[0] = src[0].d[0] / src[1].d[0];
+   dst->d[1] = src[0].d[1] / src[1].d[1];
+   dst->d[2] = src[0].d[2] / src[1].d[2];
+   dst->d[3] = src[0].d[3] / src[1].d[3];
+}
+
+static void
 micro_ddx(union tgsi_exec_channel *dst,
           const union tgsi_exec_channel *src)
 {
@@ -5208,10 +5218,6 @@ exec_instruction(
       exec_vector_trinary(mach, inst, micro_mad, TGSI_EXEC_DATA_FLOAT, TGSI_EXEC_DATA_FLOAT);
       break;
 
-   case TGSI_OPCODE_SUB:
-      exec_vector_binary(mach, inst, micro_sub, TGSI_EXEC_DATA_FLOAT, TGSI_EXEC_DATA_FLOAT);
-      break;
-
    case TGSI_OPCODE_LRP:
       exec_vector_trinary(mach, inst, micro_lrp, TGSI_EXEC_DATA_FLOAT, TGSI_EXEC_DATA_FLOAT);
       break;
@@ -5254,10 +5260,6 @@ exec_instruction(
 
    case TGSI_OPCODE_XPD:
       exec_xpd(mach, inst);
-      break;
-
-   case TGSI_OPCODE_ABS:
-      exec_vector_unary(mach, inst, micro_abs, TGSI_EXEC_DATA_FLOAT, TGSI_EXEC_DATA_FLOAT);
       break;
 
    case TGSI_OPCODE_DPH:
@@ -6001,6 +6003,10 @@ exec_instruction(
 
    case TGSI_OPCODE_DADD:
       exec_double_binary(mach, inst, micro_dadd, TGSI_EXEC_DATA_DOUBLE);
+      break;
+
+   case TGSI_OPCODE_DDIV:
+      exec_double_binary(mach, inst, micro_ddiv, TGSI_EXEC_DATA_DOUBLE);
       break;
 
    case TGSI_OPCODE_DMUL:
