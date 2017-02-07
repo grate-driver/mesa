@@ -1015,11 +1015,12 @@ require_llvm() {
     fi
 }
 
-llvm_check_version_for() {
+llvm_require_version() {
     if test "x$MESA_LLVM" = x0; then
         AC_MSG_ERROR([LLVM $1 or newer is required for $2])
         return
     fi
+    require_llvm $2
 
     llvm_target_version_major=`echo $1 | cut -d. -f1 | egrep -o '^[[0-9]]+'`
     llvm_target_version_minor=`echo $1 | cut -d. -f2 | egrep -o '^[[0-9]]+'`
@@ -1060,7 +1061,7 @@ radeon_llvm_check() {
         amdgpu_llvm_target_name='amdgpu'
     fi
 
-    llvm_check_version_for $*
+    llvm_require_version $*
 
     llvm_add_target $amdgpu_llvm_target_name $2
 
@@ -2036,7 +2037,7 @@ if test "x$enable_opencl" = xyes; then
        AC_MSG_ERROR([Clover requires libelf])
     fi
 
-    llvm_check_version_for $LLVM_REQUIRED_OPENCL "opencl"
+    llvm_require_version $LLVM_REQUIRED_OPENCL "opencl"
 
     llvm_add_default_components "opencl"
     llvm_add_component "all-targets" "opencl"
@@ -2352,8 +2353,7 @@ if test -n "$with_gallium_drivers"; then
             fi
             ;;
         xswr)
-            llvm_check_version_for $LLVM_REQUIRED_SWR "swr"
-            require_llvm "swr"
+            llvm_require_version $LLVM_REQUIRED_SWR "swr"
 
             swr_require_cxx_feature_flags "C++11" "__cplusplus >= 201103L" \
                 ",-std=c++11" \
@@ -2395,7 +2395,7 @@ if test -n "$with_gallium_drivers"; then
 fi
 
 if test "x$enable_gallium_llvm" == "xyes"; then
-    llvm_check_version_for $LLVM_REQUIRED_GALLIUM "gallium"
+    llvm_require_version $LLVM_REQUIRED_GALLIUM "gallium"
     llvm_add_default_components "gallium"
 fi
 
