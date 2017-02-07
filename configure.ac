@@ -1009,6 +1009,12 @@ llvm_set_environment_variables() {
     fi
 }
 
+require_llvm() {
+    if test "x$enable_gallium_llvm" != "xyes"; then
+        AC_MSG_ERROR([--enable-gallium-llvm is required when building $1])
+    fi
+}
+
 llvm_check_version_for() {
     if test "x$MESA_LLVM" = x0; then
         AC_MSG_ERROR([LLVM $1 or newer is required for $2])
@@ -2202,15 +2208,6 @@ AC_ARG_WITH([d3d-libdir],
 AC_SUBST([D3D_DRIVER_INSTALL_DIR])
 
 dnl
-dnl Gallium helper functions
-dnl
-gallium_require_llvm() {
-    if test "x$enable_gallium_llvm" != "xyes"; then
-        AC_MSG_ERROR([--enable-gallium-llvm is required when building $1])
-    fi
-}
-
-dnl
 dnl r300 doesn't strictly require LLVM, but for performance reasons we
 dnl highly recommend LLVM usage. So require it at least on x86 and x86_64
 dnl architectures.
@@ -2218,7 +2215,7 @@ dnl
 r300_require_llvm() {
     case "$host" in *gnux32) return;; esac
     case "$host_cpu" in
-    i*86|x86_64|amd64) gallium_require_llvm $1
+    i*86|x86_64|amd64) require_llvm $1
         ;;
     esac
 }
@@ -2356,7 +2353,7 @@ if test -n "$with_gallium_drivers"; then
             ;;
         xswr)
             llvm_check_version_for $LLVM_REQUIRED_SWR "swr"
-            gallium_require_llvm "swr"
+            require_llvm "swr"
 
             swr_require_cxx_feature_flags "C++11" "__cplusplus >= 201103L" \
                 ",-std=c++11" \
