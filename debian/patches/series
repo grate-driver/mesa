@@ -4,12 +4,3 @@
 # Ubuntu patches.
 egl-platform-mir.patch
 i915-dont-default-to-2.1.patch
-
-0001-intel-blorp_blit-Create-structure-for-src-dst-coordi.patch
-0002-intel-blorp_blit-Split-blorp-blits-if-they-are-too-l.patch
-0003-intel-blorp_blit-Adjust-blorp-surface-parameters-for.patch
-0004-intel-blorp-Always-use-UINT-formats-on-SKL.patch
-0005-intel-blorp_blit-Move-RGB-R-conversion-to-follow-bli.patch
-0006-intel-blorp_blit-Enable-splitting-large-blorp-blits.patch
-0007-intel-blorp_blit-Add-split_blorp_blit_debug-switch.patch
-0008-i965-Increase-max-texture-to-16k-for-gen7.patch

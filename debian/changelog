@@ -1,3 +1,10 @@
+mesa (17.0.0~rc3-1ubuntu1) UNRELEASED; urgency=medium
+
+  * Merge from Debian.
+  * Drop patches for 16k wide textures on i965, upstream.
+
+ -- Timo Aaltonen <tjaalton@debian.org>  Tue, 07 Feb 2017 13:50:06 +0200
+
 mesa (17.0.0~rc3-1) experimental; urgency=medium
 
   [ Timo Aaltonen ]
