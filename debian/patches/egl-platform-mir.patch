@@ -1,8 +1,8 @@
 --- a/configure.ac
 +++ b/configure.ac
-@@ -2054,7 +2054,9 @@ for plat in $egl_platforms; do
- 
+@@ -2099,7 +2099,9 @@ for plat in $egl_platforms; do
  	android)
+ 		PKG_CHECK_MODULES([ANDROID], [cutils hardware sync])
  		;;
 -
 +        mir)
@@ -11,14 +11,14 @@
  	*)
  		AC_MSG_ERROR([EGL platform '$plat' does not exist])
  		;;
-@@ -2081,6 +2083,7 @@ AM_CONDITIONAL(HAVE_PLATFORM_WAYLAND, ec
+@@ -2126,6 +2128,7 @@ AM_CONDITIONAL(HAVE_PLATFORM_WAYLAND, ec
  AM_CONDITIONAL(HAVE_EGL_PLATFORM_DRM, echo "$egl_platforms" | grep -q 'drm')
  AM_CONDITIONAL(HAVE_EGL_PLATFORM_SURFACELESS, echo "$egl_platforms" | grep -q 'surfaceless')
  AM_CONDITIONAL(HAVE_EGL_PLATFORM_ANDROID, echo "$egl_platforms" | grep -q 'android')
 +AM_CONDITIONAL(HAVE_EGL_PLATFORM_MIR, echo "$egl_platforms" | grep -q 'mir')
  
- AM_CONDITIONAL(HAVE_EGL_DRIVER_DRI2, test "x$HAVE_EGL_DRIVER_DRI2" != "x")
- 
+ AC_SUBST([EGL_NATIVE_PLATFORM])
+ AC_SUBST([EGL_CFLAGS])
 --- a/include/EGL/eglplatform.h
 +++ b/include/EGL/eglplatform.h
 @@ -105,6 +105,13 @@ typedef struct ANativeWindow*
@@ -37,7 +37,7 @@
  #if defined(MESA_EGL_NO_X11_HEADERS)
 --- a/include/GL/internal/dri_interface.h
 +++ b/include/GL/internal/dri_interface.h
-@@ -921,10 +921,12 @@ struct __DRIbufferRec {
+@@ -963,10 +963,12 @@ struct __DRIbufferRec {
      unsigned int pitch;
      unsigned int cpp;
      unsigned int flags;
@@ -53,7 +53,7 @@
  
 --- a/src/egl/drivers/dri2/egl_dri2.c
 +++ b/src/egl/drivers/dri2/egl_dri2.c
-@@ -827,6 +827,11 @@ dri2_initialize(_EGLDriver *drv, _EGLDis
+@@ -834,6 +834,11 @@ dri2_initialize(_EGLDriver *drv, _EGLDis
        ret = dri2_initialize_wayland(drv, disp);
        break;
  #endif
@@ -65,7 +65,7 @@
  #ifdef HAVE_ANDROID_PLATFORM
     case _EGL_PLATFORM_ANDROID:
        ret = dri2_initialize_android(drv, disp);
-@@ -899,6 +904,13 @@ dri2_display_release(_EGLDisplay *disp)
+@@ -906,6 +911,13 @@ dri2_display_release(_EGLDisplay *disp)
        }
        break;
  #endif
@@ -79,7 +79,7 @@
  #ifdef HAVE_WAYLAND_PLATFORM
     case _EGL_PLATFORM_WAYLAND:
        if (dri2_dpy->wl_drm)
-@@ -920,7 +932,8 @@ dri2_display_release(_EGLDisplay *disp)
+@@ -928,7 +940,8 @@ dri2_display_release(_EGLDisplay *disp)
      * the ones from the gbm device. As such the gbm itself is responsible
      * for the cleanup.
      */
@@ -102,7 +102,7 @@
  #include "eglconfig.h"
  #include "eglcontext.h"
  #include "egldisplay.h"
-@@ -223,6 +227,10 @@ struct dri2_egl_display
+@@ -226,6 +230,10 @@ struct dri2_egl_display
  
     int                       is_render_node;
     int                       is_different_gpu;
@@ -113,7 +113,7 @@
  };
  
  struct dri2_egl_context
-@@ -269,7 +277,7 @@ struct dri2_egl_surface
+@@ -272,7 +280,7 @@ struct dri2_egl_surface
     struct gbm_dri_surface *gbm_surf;
  #endif
  
@@ -122,7 +122,7 @@
     __DRIbuffer           *dri_buffers[__DRI_BUFFER_COUNT];
     struct {
  #ifdef HAVE_WAYLAND_PLATFORM
-@@ -281,9 +289,13 @@ struct dri2_egl_surface
+@@ -284,9 +292,13 @@ struct dri2_egl_surface
        void *data;
        int data_size;
  #endif
@@ -137,7 +137,7 @@
        int                 locked;
        int                 age;
     } color_buffers[4], *back, *current;
-@@ -302,6 +314,10 @@ struct dri2_egl_surface
+@@ -306,6 +318,10 @@ struct dri2_egl_surface
        __DRIimage           *front;
        unsigned int         visual;
  #endif
@@ -148,7 +148,7 @@
  };
  
  struct dri2_egl_config
-@@ -390,6 +406,9 @@ dri2_initialize_android(_EGLDriver *drv,
+@@ -394,6 +410,9 @@ dri2_initialize_android(_EGLDriver *drv,
  EGLBoolean
  dri2_initialize_surfaceless(_EGLDriver *drv, _EGLDisplay *disp);
  
@@ -938,7 +938,7 @@
  
     .getBuffers              = dri_get_buffers,
     .flushFrontBuffer        = dri_flush_front_buffer,
-@@ -645,6 +645,49 @@ gbm_dri_to_gbm_format(uint32_t dri_forma
+@@ -646,6 +646,49 @@ gbm_dri_to_gbm_format(uint32_t dri_forma
     return ret;
  }
  
@@ -988,7 +988,7 @@
  static struct gbm_bo *
  gbm_dri_bo_import(struct gbm_device *gbm,
                    uint32_t type, void *buffer, uint32_t usage)
-@@ -869,40 +912,7 @@ gbm_dri_bo_create(struct gbm_device *gbm
+@@ -870,40 +913,7 @@ gbm_dri_bo_create(struct gbm_device *gbm
     bo->base.base.height = height;
     bo->base.base.format = format;
  
@@ -1032,7 +1032,7 @@
        dri_use |= __DRI_IMAGE_USE_SCANOUT;
 --- a/src/egl/Makefile.am
 +++ b/src/egl/Makefile.am
-@@ -89,6 +89,12 @@ AM_CFLAGS += -DHAVE_ANDROID_PLATFORM
+@@ -91,6 +91,12 @@ libEGL_la_LIBADD += $(ANDROID_LIBS)
  dri2_backend_FILES += drivers/dri2/platform_android.c
  endif
  
@@ -1042,6 +1042,6 @@
 +dri2_backend_FILES += drivers/dri2/platform_mir.c
 +endif
 +
- if HAVE_EGL_DRIVER_DRI2
  AM_CFLAGS += \
  	-I$(top_srcdir)/src/loader \
+ 	-I$(top_srcdir)/src/egl/drivers/dri2 \
