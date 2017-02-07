@@ -229,18 +229,6 @@ override_dh_install:
 
 	dh_install -a --fail-missing
 
-	# Create an ld.so.conf which says where to find libGL from Mesa
-	echo "/usr/lib/$(DEB_HOST_MULTIARCH)/mesa" \
-	> $(CURDIR)/debian/libgl1-mesa-glx/usr/lib/$(DEB_HOST_MULTIARCH)/mesa/ld.so.conf
-
-	# Empty directory for the alternative
-	mkdir -p $(CURDIR)/debian/libgl1-mesa-glx/usr/lib/$(DEB_HOST_MULTIARCH)/xorg/x11-extra-modules
-
-	# Create an ld.so.conf which says where to find libEGL, libGLES{1,2}
-	# from Mesa.
-	echo "/usr/lib/$(DEB_HOST_MULTIARCH)/mesa-egl" \
-	> $(CURDIR)/debian/libegl1-mesa/usr/lib/$(DEB_HOST_MULTIARCH)/mesa-egl/ld.so.conf
-
 	# Install bug control and script:
 	set -e; for p in $(allpkg); do \
 		install -d debian/$$p/usr/share/bug/$$p && \

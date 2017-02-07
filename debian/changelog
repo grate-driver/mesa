@@ -1,6 +1,7 @@
 mesa (18.0.0~rc2-1ubuntu1) UNRELEASED; urgency=medium
 
   * Merge with Debian experimental.
+  * Stop using alternatives, not needed anymore with libglvnd.
 
  -- Timo Aaltonen <tjaalton@debian.org>  Fri, 26 Jan 2018 17:52:21 +0200
 

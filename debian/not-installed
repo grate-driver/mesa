@@ -2,4 +2,4 @@
 
 # Common list:
 NOT_INSTALLED := \
-	# usr/lib/*/libglapi.so
+	usr/lib/*/libglapi.so

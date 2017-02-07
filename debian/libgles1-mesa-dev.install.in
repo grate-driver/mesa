@@ -1,3 +1,0 @@
-usr/lib/${DEB_HOST_MULTIARCH}/libGLESv1_CM.so usr/lib/${DEB_HOST_MULTIARCH}/mesa-egl
-usr/include/GLES
-usr/lib/*/pkgconfig/glesv1_cm.pc
