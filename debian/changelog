@@ -1,8 +1,14 @@
 mesa (17.0.0-1ubuntu1) UNRELEASED; urgency=medium
 
+  [ Timo Aaltonen ]
   * Merge from Debian.
   * Drop patches for 16k wide textures on i965, upstream.
-  * egl-platform-mir.patch: Refreshed.
+
+  [ Cemil Azizoglu ]
+  * Updated egl-platform-mir.patch.
+    - remove device_name field (removed from the generic struct in the
+      upstream and made wayland specific).
+    - Change MirSurfaceParameters into MirWindowParameters.
 
  -- Timo Aaltonen <tjaalton@debian.org>  Tue, 07 Feb 2017 13:50:06 +0200
 

@@ -160,7 +160,7 @@
  
 --- /dev/null
 +++ b/src/egl/drivers/dri2/platform_mir.c
-@@ -0,0 +1,637 @@
+@@ -0,0 +1,636 @@
 +/*
 + * Copyright © 2012 Canonical, Inc
 + *
@@ -487,7 +487,7 @@
 +   struct dri2_egl_config *dri2_conf = dri2_egl_config(conf);
 +   struct dri2_egl_surface *dri2_surf;
 +   const __DRIconfig *config;
-+   MirSurfaceParameters surf_params;
++   MirWindowParameters win_params;
 +
 +   (void) drv;
 +
@@ -501,11 +501,11 @@
 +      goto cleanup_surf;
 +
 +   dri2_surf->mir_surf = window;
-+   if (!dri2_surf->mir_surf->surface_get_parameters(dri2_surf->mir_surf, &surf_params))
++   if (!dri2_surf->mir_surf->surface_get_parameters(dri2_surf->mir_surf, &win_params))
 +      goto cleanup_surf;
 +
-+   dri2_surf->base.Width = surf_params.width;
-+   dri2_surf->base.Height = surf_params.height;
++   dri2_surf->base.Width = win_params.width;
++   dri2_surf->base.Height = win_params.height;
 +
 +   dri2_surf->dri_buffers[__DRI_BUFFER_FRONT_LEFT] =
 +      calloc(sizeof(*dri2_surf->dri_buffers[0]), 1);
@@ -739,7 +739,6 @@
 +   dri2_dpy->mir_disp = disp->PlatformDisplay;
 +   dri2_dpy->mir_disp->display_get_platform(dri2_dpy->mir_disp, &platform);
 +   dri2_dpy->fd = platform.fd[0];
-+   dri2_dpy->device_name = loader_get_device_name_for_fd(dri2_dpy->fd);
 +
 +   /*
 +    * At the moment, a pointer to gbm_device is the first and only
