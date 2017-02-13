@@ -38,7 +38,7 @@ Build-Depends:
  libxcb-randr0-dev,
  libxcb-sync-dev,
  libxshmfence-dev (>= 1.1),
- libmirclient-dev [linux-any],
+ libmirclient-dev (>= 0.26.2) [linux-any],
  mir-client-platform-mesa-dev [linux-any],
  python,
  python-mako,
@@ -157,7 +157,7 @@ Depends:
  libx11-xcb-dev,
  libwayland-dev (>= 1.11.0) [linux-any],
  ${misc:Depends},
- libmirclient-dev [!arm64 !powerpc !ppc64 !ppc64el !kfreebsd-any !hurd-any],
+ libmirclient-dev (>= 0.26.2) [!arm64 !powerpc !ppc64 !ppc64el !kfreebsd-any !hurd-any],
 Multi-Arch: same
 Description: free implementation of the EGL API -- development files
  This package contains the development environment required for compiling

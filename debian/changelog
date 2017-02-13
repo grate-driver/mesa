@@ -1,3 +1,13 @@
+mesa (17.0.2-1ubuntu2) UNRELEASED; urgency=medium
+
+  [ Cemil Azizoglu ]
+  * egl-platform-rs.patch: Add support for Mir's new render surface based
+    EGL driver
+  * khr_platform_mir.patch: Add EGL_KHR_platform_mir
+  * vulkan-mir.patch: Add Vulkan WSI driver for Mir
+
+ -- Timo Aaltonen <tjaalton@debian.org>  Tue, 28 Mar 2017 19:15:55 +0300
+
 mesa (17.0.2-1ubuntu1) zesty; urgency=medium
 
   * Merge from Debian experimental.

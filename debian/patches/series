@@ -4,3 +4,6 @@
 # Ubuntu patches.
 egl-platform-mir.patch
 i915-dont-default-to-2.1.patch
+egl-platform-rs.patch
+vulkan-mir.patch
+khr_platform_mir.patch
