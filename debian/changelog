@@ -1,4 +1,4 @@
-mesa (17.0.0-1ubuntu1) UNRELEASED; urgency=medium
+mesa (17.0.0-1ubuntu1) zesty; urgency=medium
 
   [ Timo Aaltonen ]
   * Merge from Debian.
@@ -10,7 +10,7 @@ mesa (17.0.0-1ubuntu1) UNRELEASED; urgency=medium
       upstream and made wayland specific).
     - Change MirSurfaceParameters into MirWindowParameters.
 
- -- Timo Aaltonen <tjaalton@debian.org>  Tue, 07 Feb 2017 13:50:06 +0200
+ -- Timo Aaltonen <tjaalton@debian.org>  Mon, 13 Feb 2017 16:19:39 +0200
 
 mesa (17.0.0-1) experimental; urgency=medium
 
