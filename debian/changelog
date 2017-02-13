@@ -1,6 +1,7 @@
 mesa (17.0.0-1) UNRELEASED; urgency=medium
 
   * New upstream release.
+  * control, rules: Bump clang/llvm to 4.0, and libclc to match.
 
  -- Timo Aaltonen <tjaalton@debian.org>  Mon, 13 Feb 2017 15:35:16 +0200
 
