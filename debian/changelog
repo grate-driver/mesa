@@ -2,6 +2,7 @@ mesa (13.0.5-1) UNRELEASED; urgency=medium
 
   * New upstream release.
   * Switch mesa3d.org URLs to https.
+  * Update extend-diff-ignore.
 
  -- Andreas Boll <andreas.boll.dev@gmail.com>  Tue, 21 Feb 2017 11:53:15 +0100
 

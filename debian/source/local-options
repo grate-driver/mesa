@@ -10,7 +10,7 @@ extend-diff-ignore = Android.*mk|CleanSpec\.mk
 extend-diff-ignore = \.clang-format|\.dir-locals\.el|\.editorconfig|\.mailmap|\.travis\.yml|appveyor\.yml
 
 # misc. files and scripts used by Mesa developers but not required for the build
-extend-diff-ignore = src/compiler/nir/README|src/gallium/drivers/vc4/kernel/README|REVIEWERS|scripts/get_reviewer\.pl|bin/\.cherry-ignore|bin/bugzilla_mesa\.sh|bin/get-extra-pick-list\.sh|bin/get-pick-list\.sh|bin/get-typod-pick-list\.sh|bin/perf-annotate-jit|bin/shortlog_mesa\.sh|src/intel/blorp/TODO|src/mapi/glapi/gen/next_available_offset\.sh|src/mesa/drivers/dri/gen-symbol-redefs\.py|src/mesa/drivers/dri/r200/Doxyfile
+extend-diff-ignore = src/compiler/nir/README|src/gallium/drivers/vc4/kernel/README|REVIEWERS|scripts/get_reviewer\.pl|bin/\.cherry-ignore|bin/bugzilla_mesa\.sh|bin/get-extra-pick-list\.sh|bin/get-fixes-pick-list\.sh|bin/get-pick-list\.sh|bin/get-typod-pick-list\.sh|bin/perf-annotate-jit|bin/shortlog_mesa\.sh|src/intel/blorp/TODO|src/mapi/glapi/gen/next_available_offset\.sh|src/mesa/drivers/dri/gen-symbol-redefs\.py|src/mesa/drivers/dri/r200/Doxyfile
 
 # radeonsi GLSL lit tests (for developers only)
 extend-diff-ignore = src/gallium/drivers/radeonsi/glsl_tests/
