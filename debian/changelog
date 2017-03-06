@@ -59,6 +59,14 @@ mesa (17.0.0~rc1-1) experimental; urgency=medium
 
  -- Andreas Boll <andreas.boll.dev@gmail.com>  Thu, 19 Jan 2017 18:39:06 +0100
 
+mesa (13.0.5-1) unstable; urgency=medium
+
+  * New upstream release.
+  * Switch mesa3d.org URLs to https.
+  * Update extend-diff-ignore.
+
+ -- Andreas Boll <andreas.boll.dev@gmail.com>  Tue, 21 Feb 2017 13:13:50 +0100
+
 mesa (13.0.4-1) unstable; urgency=medium
 
   * New upstream release.
