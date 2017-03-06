@@ -44,8 +44,8 @@ Build-Depends:
  llvm-4.0-dev (>= 1:4.0~) [amd64 i386 kfreebsd-amd64 kfreebsd-i386 arm64 armhf ppc64el],
  libelf-dev [amd64 i386 kfreebsd-amd64 kfreebsd-i386 arm64 armhf ppc64el],
  libwayland-dev (>= 1.11.0) [linux-any],
- libclang-4.0-dev (>= 1:4.0~) [amd64 i386 kfreebsd-amd64 kfreebsd-i386 arm64 armhf],
- libclc-dev (>= 0.2.0+git20170213) [amd64 i386 kfreebsd-amd64 kfreebsd-i386 arm64 armhf],
+ libclang-4.0-dev (>= 1:4.0~) [amd64 i386 kfreebsd-amd64 kfreebsd-i386 arm64 armhf ppc64el],
+ libclc-dev (>= 0.2.0+git20170213) [amd64 i386 kfreebsd-amd64 kfreebsd-i386 arm64 armhf ppc64el],
 Vcs-Git: https://anonscm.debian.org/git/pkg-xorg/lib/mesa.git
 Vcs-Browser: https://anonscm.debian.org/cgit/pkg-xorg/lib/mesa.git
 Homepage: https://mesa3d.org/
@@ -423,7 +423,7 @@ Description: Mesa Vulkan graphics drivers
 
 Package: mesa-opencl-icd
 Section: libs
-Architecture: amd64 i386 kfreebsd-amd64 kfreebsd-i386 arm64 armhf
+Architecture: amd64 i386 kfreebsd-amd64 kfreebsd-i386 arm64 armhf ppc64el
 Pre-Depends: ${misc:Pre-Depends}
 Depends:
  libclc-r600 (>= 0.2.0+git20170213),

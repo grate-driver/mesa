@@ -80,10 +80,9 @@ else
     DRI_DRIVERS += r200 radeon
     GALLIUM_DRIVERS += r600 r300
   endif
-  ifneq (,$(filter $(DEB_HOST_ARCH),amd64 i386 kfreebsd-amd64 kfreebsd-i386 arm64 armhf))
+  ifneq (,$(filter $(DEB_HOST_ARCH),amd64 i386 kfreebsd-amd64 kfreebsd-i386 arm64 armhf ppc64el))
 	# opencl needs LLVM and Clang, so only build it on the subset
 	# of arches where we have LLVM enabled.
-	# opencl on ppc64el is currently disabled (see #810913).
 	confflags_GALLIUM += --enable-opencl --enable-opencl-icd
   endif
 
