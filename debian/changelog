@@ -5,6 +5,8 @@ mesa (17.0.1-1) UNRELEASED; urgency=medium
 
   [ Andreas Boll ]
   * Declare Multi-Arch: same for mesa-vulkan-drivers (Closes: #853897).
+  * Cherry-pick 7d1195c (clover: Work around build failure with
+    AltiVec.) from upstream master branch.
 
  -- Timo Aaltonen <tjaalton@debian.org>  Mon, 06 Mar 2017 13:59:38 +0200
 
