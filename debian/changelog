@@ -1,4 +1,4 @@
-mesa (17.0.1-1) UNRELEASED; urgency=medium
+mesa (17.0.1-1) experimental; urgency=medium
 
   [ Timo Aaltonen ]
   * New upstream release.
@@ -13,7 +13,7 @@ mesa (17.0.1-1) UNRELEASED; urgency=medium
     - Enables radeonsi, llvmpipe and radv drivers.
     - Enables OpenCL support.
 
- -- Timo Aaltonen <tjaalton@debian.org>  Mon, 06 Mar 2017 13:59:38 +0200
+ -- Andreas Boll <andreas.boll.dev@gmail.com>  Mon, 06 Mar 2017 15:15:00 +0100
 
 mesa (17.0.0-1) experimental; urgency=medium
 
