@@ -1,3 +1,9 @@
+mesa (17.0.1-1) UNRELEASED; urgency=medium
+
+  * New upstream release.
+
+ -- Timo Aaltonen <tjaalton@debian.org>  Mon, 06 Mar 2017 13:59:38 +0200
+
 mesa (17.0.0-1) experimental; urgency=medium
 
   * New upstream release.
