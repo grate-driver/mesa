@@ -416,6 +416,7 @@ Depends:
  libvulkan1,
  ${shlibs:Depends},
  ${misc:Depends}
+Multi-Arch: same
 Description: Mesa Vulkan graphics drivers
  Vulkan is a low-overhead 3D graphics and compute API. This package
  includes Vulkan drivers provided by the Mesa project.
