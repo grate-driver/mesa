@@ -1,9 +1,9 @@
-mesa (17.0.1-1ubuntu1) UNRELEASED; urgency=medium
+mesa (17.0.1-1ubuntu1) zesty; urgency=medium
 
   * Merge from Debian.
     - enable llvmpipe on ppc64el (LP: #1489483)
 
- -- Timo Aaltonen <tjaalton@debian.org>  Tue, 07 Mar 2017 11:30:32 +0200
+ -- Timo Aaltonen <tjaalton@debian.org>  Fri, 10 Mar 2017 14:25:48 +0200
 
 mesa (17.0.1-1) experimental; urgency=medium
 
