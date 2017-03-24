@@ -643,6 +643,11 @@ genX(CmdExecuteCommands)(
 
    assert(primary->level == VK_COMMAND_BUFFER_LEVEL_PRIMARY);
 
+   /* The secondary command buffer doesn't know which textures etc. have been
+    * flushed prior to their execution.  Apply those flushes now.
+    */
+   genX(cmd_buffer_apply_pipe_flushes)(primary);
+
    for (uint32_t i = 0; i < commandBufferCount; i++) {
       ANV_FROM_HANDLE(anv_cmd_buffer, secondary, pCmdBuffers[i]);
 
