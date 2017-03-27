@@ -2411,7 +2411,13 @@ static void radv_handle_depth_image_transition(struct radv_cmd_buffer *cmd_buffe
 		range.baseMipLevel = 0;
 		range.levelCount = 1;
 
+		cmd_buffer->state.flush_bits |= RADV_CMD_FLAG_FLUSH_AND_INV_DB |
+		                                RADV_CMD_FLAG_FLUSH_AND_INV_DB_META;
+
 		radv_decompress_depth_image_inplace(cmd_buffer, image, &range);
+
+		cmd_buffer->state.flush_bits |= RADV_CMD_FLAG_FLUSH_AND_INV_DB |
+		                                RADV_CMD_FLAG_FLUSH_AND_INV_DB_META;
 	}
 }
 
