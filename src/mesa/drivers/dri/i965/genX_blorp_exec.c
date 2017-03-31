@@ -130,9 +130,21 @@ blorp_alloc_vertex_buffer(struct blorp_batch *batch, uint32_t size,
    assert(batch->blorp->driver_ctx == batch->driver_batch);
    struct brw_context *brw = batch->driver_batch;
 
+   /* From the Skylake PRM, 3DSTATE_VERTEX_BUFFERS:
+    *
+    *    "The VF cache needs to be invalidated before binding and then using
+    *    Vertex Buffers that overlap with any previously bound Vertex Buffer
+    *    (at a 64B granularity) since the last invalidation.  A VF cache
+    *    invalidate is performed by setting the "VF Cache Invalidation Enable"
+    *    bit in PIPE_CONTROL."
+    *
+    * This restriction first appears in the Skylake PRM but the internal docs
+    * also list it as being an issue on Broadwell.  In order to avoid this
+    * problem, we align all vertex buffer allocations to 64 bytes.
+    */
    uint32_t offset;
    void *data = brw_state_batch(brw, AUB_TRACE_VERTEX_BUFFER,
-                                size, 32, &offset);
+                                size, 64, &offset);
 
    *addr = (struct blorp_address) {
       .buffer = brw->batch.bo,
