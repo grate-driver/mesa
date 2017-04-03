@@ -1,3 +1,9 @@
+mesa (17.0.3-1ubuntu1) zesty; urgency=medium
+
+  * Merge from Debian.
+
+ -- Timo Aaltonen <tjaalton@debian.org>  Mon, 03 Apr 2017 19:03:10 +0300
+
 mesa (17.0.3-1) experimental; urgency=medium
 
   * New upstream release.
