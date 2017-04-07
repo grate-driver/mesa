@@ -1153,7 +1153,18 @@ emit_binding_table(struct anv_cmd_buffer *cmd_buffer,
          assert(binding->binding == 0);
          if (binding->index < subpass->color_count) {
             const unsigned att = subpass->color_attachments[binding->index];
-            surface_state = cmd_buffer->state.attachments[att].color_rt_state;
+
+            /* From the Vulkan 1.0.46 spec:
+             *
+             *    "If any color or depth/stencil attachments are
+             *    VK_ATTACHMENT_UNUSED, then no writes occur for those
+             *    attachments."
+             */
+            if (att == VK_ATTACHMENT_UNUSED) {
+               surface_state = cmd_buffer->state.null_surface_state;
+            } else {
+               surface_state = cmd_buffer->state.attachments[att].color_rt_state;
+            }
          } else {
             surface_state = cmd_buffer->state.null_surface_state;
          }
