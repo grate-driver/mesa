@@ -404,7 +404,8 @@ vbo_bind_arrays(struct gl_context *ctx)
  */
 static void
 vbo_draw_arrays(struct gl_context *ctx, GLenum mode, GLint start,
-                GLsizei count, GLuint numInstances, GLuint baseInstance)
+                GLsizei count, GLuint numInstances, GLuint baseInstance,
+                GLuint drawID)
 {
    struct vbo_context *vbo = vbo_context(ctx);
    struct _mesa_prim prim[2];
@@ -418,6 +419,7 @@ vbo_draw_arrays(struct gl_context *ctx, GLenum mode, GLint start,
    prim[0].mode = mode;
    prim[0].num_instances = numInstances;
    prim[0].base_instance = baseInstance;
+   prim[0].draw_id = drawID;
    prim[0].is_indirect = 0;
 
    /* Implement the primitive restart index */
@@ -614,7 +616,7 @@ vbo_exec_DrawArrays(GLenum mode, GLint start, GLsizei count)
    if (0)
       check_draw_arrays_data(ctx, start, count);
 
-   vbo_draw_arrays(ctx, mode, start, count, 1, 0);
+   vbo_draw_arrays(ctx, mode, start, count, 1, 0, 0);
 
    if (0)
       print_draw_arrays(ctx, mode, start, count);
@@ -642,7 +644,7 @@ vbo_exec_DrawArraysInstanced(GLenum mode, GLint start, GLsizei count,
    if (0)
       check_draw_arrays_data(ctx, start, count);
 
-   vbo_draw_arrays(ctx, mode, start, count, numInstances, 0);
+   vbo_draw_arrays(ctx, mode, start, count, numInstances, 0, 0);
 
    if (0)
       print_draw_arrays(ctx, mode, start, count);
@@ -672,7 +674,7 @@ vbo_exec_DrawArraysInstancedBaseInstance(GLenum mode, GLint first,
    if (0)
       check_draw_arrays_data(ctx, first, count);
 
-   vbo_draw_arrays(ctx, mode, first, count, numInstances, baseInstance);
+   vbo_draw_arrays(ctx, mode, first, count, numInstances, baseInstance, 0);
 
    if (0)
       print_draw_arrays(ctx, mode, first, count);
@@ -702,7 +704,14 @@ vbo_exec_MultiDrawArrays(GLenum mode, const GLint *first,
          if (0)
             check_draw_arrays_data(ctx, first[i], count[i]);
 
-         vbo_draw_arrays(ctx, mode, first[i], count[i], 1, 0);
+         /* The GL_ARB_shader_draw_parameters spec adds the following after the
+          * pseudo-code describing glMultiDrawArrays:
+          *
+          *    "The index of the draw (<i> in the above pseudo-code) may be
+          *     read by a vertex shader as <gl_DrawIDARB>, as described in
+          *     Section 11.1.3.9."
+          */
+         vbo_draw_arrays(ctx, mode, first[i], count[i], 1, 0, i);
 
          if (0)
             print_draw_arrays(ctx, mode, first[i], count[i]);
@@ -1304,7 +1313,7 @@ vbo_draw_transform_feedback(struct gl_context *ctx, GLenum mode,
         !_mesa_all_varyings_in_vbos(ctx->Array.VAO))) {
       GLsizei n =
          ctx->Driver.GetTransformFeedbackVertexCount(ctx, obj, stream);
-      vbo_draw_arrays(ctx, mode, 0, n, numInstances, 0);
+      vbo_draw_arrays(ctx, mode, 0, n, numInstances, 0, 0);
       return;
    }
 
