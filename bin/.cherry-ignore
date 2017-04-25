@@ -17,3 +17,6 @@ b81d85f1754928139f9f01474495e024946aa1b4 configure.ac: Fix typos.
 # extra: this reverts a commit in stable only because a new feature in
 # 	 master replaces it.
 e75001811e3b66986b4ede165a0fdde703d4f05b Revert "etnaviv: Cannot render to rb-swapped formats"
+# extra: the commit depends on earlier commits which did not land in
+#	 branch.
+dee31311eb024a636466e359b43d3a67b0135f32 Revert "i965/fs: Don't emit SEL instructions for type-converting MOVs."
