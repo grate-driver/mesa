@@ -20,3 +20,6 @@ e75001811e3b66986b4ede165a0fdde703d4f05b Revert "etnaviv: Cannot render to rb-sw
 # extra: the commit depends on earlier commits which did not land in
 #	 branch.
 dee31311eb024a636466e359b43d3a67b0135f32 Revert "i965/fs: Don't emit SEL instructions for type-converting MOVs."
+# fixes: finds 2 commit references but it is really only one, and only
+#        in master.
+2b3c490e23a6cd7f4f6bb489267c2b9b4fde5b20 radv: fix typo in a2b10g10r10 fast clear calculation
