@@ -26,3 +26,6 @@ dee31311eb024a636466e359b43d3a67b0135f32 Revert "i965/fs: Don't emit SEL instruc
 # fixes: removes unused symbols but it doesn't really add nor fix
 #        anything relevant.
 9807e9dea67a60ab8ee04741c75b748eade582ee anv: remove unused anv_dispatch_table dtable
+# fixes: removes unused symbols but it doesn't really add nor fix
+#        anything relevant.
+320561bd831b81843e732d38d2b254aa3b25f2f6 radv: remove unused radv_dispatch_table dtable
