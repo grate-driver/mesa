@@ -45,3 +45,6 @@ f282ace67862c0633d0a8135e4808867740d0d39 i965: remove i965_symbols_test referenc
 # fixes: reported only because referes to fixes in 2 commits, but they
 #        are not in stable.
 15603055fb36a630cf3023219e9dd5c4a49c0596 anv: automake: ensure that the destination directory is created
+# fixes: reported only because referes to fixes in 2 commits, but they
+#        are not in stable.
+a6840efc096bd26e92bcee1a50515d845988a2f9 anv: provide required gem stubs for the tests
