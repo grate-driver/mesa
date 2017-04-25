@@ -14,3 +14,6 @@ d4601b0efc7f5e24e3f39fefa8e29e79560245ce freedreno: fix crash if ctx torn down w
 # 	  could be merged is not really providing anything relevant to
 # 	  stable.
 b81d85f1754928139f9f01474495e024946aa1b4 configure.ac: Fix typos.
+# extra: this reverts a commit in stable only because a new feature in
+# 	 master replaces it.
+e75001811e3b66986b4ede165a0fdde703d4f05b Revert "etnaviv: Cannot render to rb-swapped formats"
