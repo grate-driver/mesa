@@ -6,3 +6,6 @@ bc5d587a80b64fb3e0a5ea8067e6317fbca2bbc5 radv: Invalidate L2 for TRANSFER_WRITE 
 # stable: the commit depends on earlier commit 656e30b6860 which did
 # 	  not land in branch, and some other dependencies.
 d2d6cf6c8387ac06c8559027f57683a61b48671b anv: Add the pci_id into the shader cache UUID
+# stable: 17.1 nomination only. Fixes earlier commit 0b613c20 which
+# 	  did not land in branch.
+d4601b0efc7f5e24e3f39fefa8e29e79560245ce freedreno: fix crash if ctx torn down with no rendering
