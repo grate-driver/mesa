@@ -42,3 +42,6 @@ dee31311eb024a636466e359b43d3a67b0135f32 Revert "i965/fs: Don't emit SEL instruc
 b69a03e12aa38ed5d8b60a056630ed445f6097dc i965: remove dead brw_new_shader() declaration
 # fixes: it just cleans .gitignore.
 f282ace67862c0633d0a8135e4808867740d0d39 i965: remove i965_symbols_test reference from .gitignore
+# fixes: reported only because referes to fixes in 2 commits, but they
+#        are not in stable.
+15603055fb36a630cf3023219e9dd5c4a49c0596 anv: automake: ensure that the destination directory is created
