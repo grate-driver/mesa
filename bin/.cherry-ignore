@@ -31,3 +31,6 @@ dee31311eb024a636466e359b43d3a67b0135f32 Revert "i965/fs: Don't emit SEL instruc
 320561bd831b81843e732d38d2b254aa3b25f2f6 radv: remove unused radv_dispatch_table dtable
 # fixes: it just makes a local function static.
 8b79f0ed0812a3a80dd91e47112fd722bd2d6978 radv: make radv_resolve_entrypoint static
+# fixes: reported only because referes to fixes in 2 commits, but they
+#        are not in stable.
+3f2cb699cfe0481f214c709b5a1375caf0a9c7fe android: vulkan: add support for libmesa_vulkan_util
