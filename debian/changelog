@@ -1,3 +1,9 @@
+mesa (17.0.4-1ubuntu1) artful; urgency=medium
+
+  * Merge from Debian.
+
+ -- Timo Aaltonen <tjaalton@debian.org>  Wed, 26 Apr 2017 11:01:18 +0300
+
 mesa (17.0.4-1) experimental; urgency=medium
 
   * New upstrem release.
