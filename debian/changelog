@@ -1,6 +1,7 @@
 mesa (17.1.0~rc2-1) UNRELEASED; urgency=medium
 
   * New upstream release candidate.
+  * control: Add zlib1g-dev to build-depends.
 
  -- Timo Aaltonen <tjaalton@debian.org>  Wed, 26 Apr 2017 09:09:19 +0300
 
