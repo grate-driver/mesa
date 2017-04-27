@@ -2,6 +2,7 @@ mesa (17.1.0~rc2-0ubuntu1) UNRELEASED; urgency=medium
 
   * Merge from Debian.
   * i915-dont-default-to-2.1.patch: Dropped, implemented upstream.
+  * Refresh patches, disable Mir vulkan support as it doesn't build.
 
  -- Timo Aaltonen <tjaalton@debian.org>  Thu, 27 Apr 2017 08:23:14 +0300
 

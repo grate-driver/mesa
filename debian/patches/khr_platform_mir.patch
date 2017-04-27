@@ -1,6 +1,6 @@
 --- a/src/egl/main/eglapi.c
 +++ b/src/egl/main/eglapi.c
-@@ -398,6 +398,11 @@ _eglGetPlatformDisplayCommon(EGLenum pla
+@@ -404,6 +404,11 @@ _eglGetPlatformDisplayCommon(EGLenum pla
        dpy = _eglGetSurfacelessDisplay(native_display, attrib_list);
        break;
  #endif
@@ -56,19 +56,19 @@
  #endif
 --- a/src/egl/main/eglglobals.c
 +++ b/src/egl/main/eglglobals.c
-@@ -65,6 +65,9 @@ struct _egl_global _eglGlobal =
+@@ -71,6 +71,9 @@ struct _egl_global _eglGlobal =
  #ifdef HAVE_SURFACELESS_PLATFORM
     " EGL_MESA_platform_surfaceless"
  #endif
 +#ifdef HAVE_RS_PLATFORM
 +   " EGL_KHR_platform_mir"
 +#endif
-    " EGL_KHR_client_get_all_proc_addresses"
-    " EGL_KHR_debug",
+    "",
  
+    NULL, /* ClientExtensionsString */
 --- a/include/EGL/eglext.h
 +++ b/include/EGL/eglext.h
-@@ -290,6 +290,11 @@ EGLAPI EGLBoolean EGLAPIENTRY eglSetDama
+@@ -297,6 +297,11 @@ EGLAPI EGLBoolean EGLAPIENTRY eglSetDama
  #define EGL_PLATFORM_X11_SCREEN_KHR       0x31D6
  #endif /* EGL_KHR_platform_x11 */
  

@@ -1,6 +1,6 @@
 --- a/configure.ac
 +++ b/configure.ac
-@@ -2164,6 +2164,7 @@ fi
+@@ -2247,6 +2247,7 @@ fi
  
  AM_CONDITIONAL(HAVE_PLATFORM_X11, echo "$egl_platforms" | grep -q 'x11')
  AM_CONDITIONAL(HAVE_PLATFORM_WAYLAND, echo "$egl_platforms" | grep -q 'wayland')
@@ -8,41 +8,9 @@
  AM_CONDITIONAL(HAVE_EGL_PLATFORM_DRM, echo "$egl_platforms" | grep -q 'drm')
  AM_CONDITIONAL(HAVE_EGL_PLATFORM_SURFACELESS, echo "$egl_platforms" | grep -q 'surfaceless')
  AM_CONDITIONAL(HAVE_EGL_PLATFORM_ANDROID, echo "$egl_platforms" | grep -q 'android')
---- a/src/intel/vulkan/Makefile.am
-+++ b/src/intel/vulkan/Makefile.am
-@@ -120,6 +120,17 @@ VULKAN_LIB_DEPS += \
- 	$(WAYLAND_LIBS)
- endif
- 
-+if HAVE_PLATFORM_RS
-+AM_CPPFLAGS += \
-+	$(RS_CFLAGS) \
-+	-DVK_USE_PLATFORM_MIR_KHR
-+
-+VULKAN_SOURCES += $(VULKAN_WSI_MIR_FILES)
-+
-+VULKAN_LIB_DEPS += \
-+	$(RS_LIBS)
-+endif
-+
- noinst_LTLIBRARIES += libvulkan_common.la
- libvulkan_common_la_SOURCES = $(VULKAN_SOURCES)
- 
---- a/src/intel/vulkan/Makefile.sources
-+++ b/src/intel/vulkan/Makefile.sources
-@@ -51,6 +51,9 @@ VULKAN_WSI_WAYLAND_FILES := \
- VULKAN_WSI_X11_FILES := \
- 	anv_wsi_x11.c
- 
-+VULKAN_WSI_MIR_FILES := \
-+	anv_wsi_mir.c
-+
- VULKAN_GEM_FILES := \
- 	anv_gem.c
- 
 --- a/src/intel/vulkan/anv_device.c
 +++ b/src/intel/vulkan/anv_device.c
-@@ -253,6 +253,12 @@ static const VkExtensionProperties globa
+@@ -293,6 +293,12 @@ static const VkExtensionProperties globa
        .specVersion = 5,
     },
  #endif
@@ -52,10 +20,10 @@
 +      .specVersion = 4,
 +   },
 +#endif
- };
- 
- static const VkExtensionProperties device_extensions[] = {
-@@ -293,6 +299,69 @@ static const VkAllocationCallbacks defau
+    {
+       .extensionName = VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME,
+       .specVersion = 1,
+@@ -357,6 +363,69 @@ static const VkAllocationCallbacks defau
     .pfnFree = default_free_func,
  };
  
@@ -70,7 +38,7 @@
 +   bo->index = 0;
 +   bo->offset = 0;
 +   bo->size = size;
-+   bo->is_winsys_bo = false;
++   bo->flags = 0;
 +
 +   return VK_SUCCESS;
 +}
@@ -128,8 +96,8 @@
 --- a/src/intel/vulkan/anv_private.h
 +++ b/src/intel/vulkan/anv_private.h
 @@ -72,6 +72,13 @@ struct gen_l3_config;
- extern "C" {
- #endif
+ #include "common/gen_debug.h"
+ #include "wsi_common.h"
  
 +VkResult anv_ImportAllocatedMemory(
 +   VkDevice                                    _device,
@@ -143,7 +111,7 @@
   * the clear color in the HiZ buffer, fast clears (without a resolve) don't.
 --- a/src/intel/vulkan/anv_wsi.c
 +++ b/src/intel/vulkan/anv_wsi.c
-@@ -54,12 +54,28 @@ anv_init_wsi(struct anv_physical_device
+@@ -57,12 +57,28 @@ anv_init_wsi(struct anv_physical_device
     }
  #endif
  
@@ -172,15 +140,15 @@
  #ifdef VK_USE_PLATFORM_WAYLAND_KHR
     wsi_wl_finish_wsi(&physical_device->wsi_device, &physical_device->instance->alloc);
  #endif
-@@ -142,6 +158,7 @@ static VkResult
- x11_anv_wsi_image_create(VkDevice device_h,
-                          const VkSwapchainCreateInfoKHR *pCreateInfo,
+@@ -147,6 +163,7 @@ x11_anv_wsi_image_create(VkDevice device
                           const VkAllocationCallbacks* pAllocator,
+                          bool different_gpu,
+                          bool linear,
 +                         bool import_fd,
                           VkImage *image_p,
                           VkDeviceMemory *memory_p,
                           uint32_t *size,
-@@ -186,6 +203,18 @@ x11_anv_wsi_image_create(VkDevice device
+@@ -191,6 +208,18 @@ x11_anv_wsi_image_create(VkDevice device
  
     VkDeviceMemory memory_h;
     struct anv_device_memory *memory;
@@ -199,7 +167,7 @@
     result = anv_AllocateMemory(anv_device_to_handle(device),
        &(VkMemoryAllocateInfo) {
           .sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
-@@ -194,13 +223,21 @@ x11_anv_wsi_image_create(VkDevice device
+@@ -199,18 +228,26 @@ x11_anv_wsi_image_create(VkDevice device
        },
        NULL /* XXX: pAllocator */,
        &memory_h);
@@ -208,22 +176,31 @@
        goto fail_create_image;
  
     memory = anv_device_memory_from_handle(memory_h);
--   memory->bo.is_winsys_bo = true;
  
--   anv_BindImageMemory(device_h, image_h, memory_h, 0);
+-   /* We need to set the WRITE flag on window system buffers so that GEM will
+-    * know we're writing to them and synchronize uses on other rings (eg if
+-    * the display server uses the blitter ring).
+-    */
+-   memory->bo.flags |= EXEC_OBJECT_WRITE;
 +   if (import_fd) {
 +       // Do we need to do more of what anv_BindImageMemory() does here?
 +       image->bo = &memory->bo;
 +       image->offset = 0;
 +   }
 +   else {
-+      memory->bo.is_winsys_bo = true;
 +      anv_BindImageMemory(device_h, image_h, memory_h, 0);
+ 
+-   anv_BindImageMemory(device_h, image_h, memory_h, 0);
++      /* We need to set the WRITE flag on window system buffers so that GEM will
++       * know we're writing to them and synchronize uses on other rings (eg if
++       * the display server uses the blitter ring).
++       */
++      memory->bo.flags |= EXEC_OBJECT_WRITE;
 +   }
  
     struct anv_surface *surface = &image->color_surface;
     assert(surface->isl.tiling == ISL_TILING_X);
-@@ -215,13 +252,18 @@ x11_anv_wsi_image_create(VkDevice device
+@@ -225,13 +262,18 @@ x11_anv_wsi_image_create(VkDevice device
        goto fail_alloc_memory;
     }
  
@@ -248,7 +225,7 @@
  
     *image_p = image_h;
     *memory_p = memory_h;
-@@ -240,12 +282,14 @@ fail_create_image:
+@@ -250,12 +292,14 @@ fail_create_image:
  static void
  x11_anv_wsi_image_free(VkDevice device,
                         const VkAllocationCallbacks* pAllocator,
@@ -320,49 +297,17 @@
 +
 +   return wsi_create_mir_surface(alloc, pCreateInfo, pSurface);
 +}
---- a/src/vulkan/wsi/Makefile.am
-+++ b/src/vulkan/wsi/Makefile.am
-@@ -46,4 +46,16 @@ VULKAN_LIB_DEPS += \
- 	$(WAYLAND_LIBS)
- endif
- 
-+if HAVE_PLATFORM_RS
-+AM_CPPFLAGS += \
-+	-I$(top_srcdir)/src/gbm/main \
-+	$(RS_CFLAGS) \
-+	-DVK_USE_PLATFORM_MIR_KHR
-+
-+VULKAN_WSI_SOURCES += $(VULKAN_WSI_MIR_FILES)
-+
-+VULKAN_LIB_DEPS += \
-+	$(RS_LIBS)
-+endif
-+
- libvulkan_wsi_la_SOURCES = $(VULKAN_WSI_SOURCES)
---- a/src/vulkan/wsi/Makefile.sources
-+++ b/src/vulkan/wsi/Makefile.sources
-@@ -9,4 +9,8 @@ VULKAN_WSI_WAYLAND_FILES := \
- 
- VULKAN_WSI_X11_FILES := \
- 	wsi_common_x11.c \
--	wsi_common_x11.h
-\ No newline at end of file
-+	wsi_common_x11.h
-+
-+VULKAN_WSI_MIR_FILES := \
-+	wsi_common_mir.c \
-+	wsi_common_mir.h
 --- a/src/vulkan/wsi/wsi_common.h
 +++ b/src/vulkan/wsi/wsi_common.h
-@@ -35,6 +35,7 @@ struct wsi_image_fns {
-    VkResult (*create_wsi_image)(VkDevice device_h,
-                                 const VkSwapchainCreateInfoKHR *pCreateInfo,
+@@ -37,6 +37,7 @@ struct wsi_image_fns {
                                  const VkAllocationCallbacks *pAllocator,
+                                 bool needs_linear_copy,
+                                 bool linear,
 +                                bool import_fd,
                                  VkImage *image_p,
                                  VkDeviceMemory *memory_p,
                                  uint32_t *size_p,
-@@ -43,6 +44,7 @@ struct wsi_image_fns {
+@@ -45,6 +46,7 @@ struct wsi_image_fns {
                                  int *fd_p);
     void (*free_wsi_image)(VkDevice device,
                            const VkAllocationCallbacks *pAllocator,
@@ -370,7 +315,7 @@
                            VkImage image_h,
                            VkDeviceMemory memory_h);
  };
-@@ -147,6 +149,9 @@ VkResult wsi_wl_init_wsi(struct wsi_devi
+@@ -161,6 +163,9 @@ VkResult wsi_wl_init_wsi(struct wsi_devi
                           const struct wsi_callbacks *cbs);
  void wsi_wl_finish_wsi(struct wsi_device *wsi_device,
                         const VkAllocationCallbacks *alloc);
@@ -383,7 +328,7 @@
  #endif
 --- /dev/null
 +++ b/src/vulkan/wsi/wsi_common_mir.c
-@@ -0,0 +1,583 @@
+@@ -0,0 +1,585 @@
 +/*
 + * Copyright © 2017 Canonical Ltd.
 + *
@@ -742,6 +687,8 @@
 +   result = chain->base.image_fns->create_wsi_image(vk_device,
 +                                                    pCreateInfo,
 +                                                    pAllocator,
++                                                    false,
++                                                    false,
 +                                                    true,
 +                                                    &mir_image->image,
 +                                                    &mir_image->memory,
@@ -1009,15 +956,15 @@
 +#endif
 --- a/src/vulkan/wsi/wsi_common_wayland.c
 +++ b/src/vulkan/wsi/wsi_common_wayland.c
-@@ -637,6 +637,7 @@ wsi_wl_image_init(struct wsi_wl_swapchai
-    result = chain->base.image_fns->create_wsi_image(vk_device,
-                                                     pCreateInfo,
+@@ -654,6 +654,7 @@ wsi_wl_image_init(struct wsi_wl_swapchai
                                                      pAllocator,
+                                                     false,
+                                                     false,
 +                                                    false,
                                                      &image->image,
                                                      &image->memory,
                                                      &size,
-@@ -666,7 +667,7 @@ wsi_wl_image_init(struct wsi_wl_swapchai
+@@ -683,7 +684,7 @@ wsi_wl_image_init(struct wsi_wl_swapchai
     return VK_SUCCESS;
  
  fail_image:
@@ -1026,9 +973,9 @@
                                           image->image, image->memory);
  
     return result;
-@@ -680,7 +681,7 @@ wsi_wl_swapchain_destroy(struct wsi_swap
+@@ -697,7 +698,7 @@ wsi_wl_swapchain_destroy(struct wsi_swap
  
-    for (uint32_t i = 0; i < chain->image_count; i++) {
+    for (uint32_t i = 0; i < chain->base.image_count; i++) {
        if (chain->images[i].buffer)
 -         chain->base.image_fns->free_wsi_image(chain->base.device, pAllocator,
 +         chain->base.image_fns->free_wsi_image(chain->base.device, pAllocator, false,
@@ -1037,29 +984,118 @@
     }
 --- a/src/vulkan/wsi/wsi_common_x11.c
 +++ b/src/vulkan/wsi/wsi_common_x11.c
-@@ -853,6 +853,7 @@ x11_image_init(VkDevice device_h, struct
-    result = chain->base.image_fns->create_wsi_image(device_h,
-                                                     pCreateInfo,
+@@ -939,6 +939,7 @@ x11_image_init(VkDevice device_h, struct
                                                      pAllocator,
+                                                     chain->base.needs_linear_copy,
+                                                     false,
 +                                                    false,
                                                      &image->image,
                                                      &image->memory,
                                                      &size,
-@@ -902,7 +903,7 @@ fail_pixmap:
-    cookie = xcb_free_pixmap(chain->conn, image->pixmap);
+@@ -954,6 +955,7 @@ x11_image_init(VkDevice device_h, struct
+                                                        pAllocator,
+                                                        chain->base.needs_linear_copy,
+                                                        true,
++                                                       false,
+                                                        &image->linear_image,
+                                                        &image->linear_memory,
+                                                        &size,
+@@ -961,7 +963,7 @@ x11_image_init(VkDevice device_h, struct
+                                                        &row_pitch,
+                                                        &fd);
+       if (result != VK_SUCCESS) {
+-         chain->base.image_fns->free_wsi_image(device_h, pAllocator,
++         chain->base.image_fns->free_wsi_image(device_h, pAllocator, false,
+                                                image->image, image->memory);
+          return result;
+       }
+@@ -1008,10 +1010,10 @@ fail_pixmap:
     xcb_discard_reply(chain->conn, cookie.sequence);
  
+    if (chain->base.needs_linear_copy) {
+-      chain->base.image_fns->free_wsi_image(device_h, pAllocator,
++      chain->base.image_fns->free_wsi_image(device_h, pAllocator, false,
+                                             image->linear_image, image->linear_memory);
+    }
 -   chain->base.image_fns->free_wsi_image(device_h, pAllocator,
 +   chain->base.image_fns->free_wsi_image(device_h, pAllocator, false,
-                                         image->image, image->memory);
+                                          image->image, image->memory);
  
     return result;
-@@ -922,7 +923,7 @@ x11_image_finish(struct x11_swapchain *c
-    cookie = xcb_free_pixmap(chain->conn, image->pixmap);
+@@ -1032,10 +1034,10 @@ x11_image_finish(struct x11_swapchain *c
     xcb_discard_reply(chain->conn, cookie.sequence);
  
+    if (chain->base.needs_linear_copy) {
+-      chain->base.image_fns->free_wsi_image(chain->base.device, pAllocator,
++      chain->base.image_fns->free_wsi_image(chain->base.device, pAllocator, false,
+                                             image->linear_image, image->linear_memory);
+    }
 -   chain->base.image_fns->free_wsi_image(chain->base.device, pAllocator,
 +   chain->base.image_fns->free_wsi_image(chain->base.device, pAllocator, false,
                                          image->image, image->memory);
  }
  
+--- a/src/intel/Makefile.sources
++++ b/src/intel/Makefile.sources
+@@ -212,6 +212,9 @@ VULKAN_WSI_WAYLAND_FILES := \
+ VULKAN_WSI_X11_FILES := \
+ 	vulkan/anv_wsi_x11.c
+ 
++VULKAN_WSI_MIR_FILES := \
++	vulkan/anv_wsi_mir.c
++
+ VULKAN_GEM_FILES := \
+ 	vulkan/anv_gem.c
+ 
+--- a/src/intel/Makefile.vulkan.am
++++ b/src/intel/Makefile.vulkan.am
+@@ -136,6 +136,17 @@ VULKAN_SOURCES += $(VULKAN_WSI_WAYLAND_F
+ VULKAN_LIB_DEPS += $(WAYLAND_LIBS)
+ endif
+ 
++if HAVE_PLATFORM_RS
++AM_CPPFLAGS += \
++       $(RS_CFLAGS) \
++       -DVK_USE_PLATFORM_MIR_KHR
++
++VULKAN_SOURCES += $(VULKAN_WSI_MIR_FILES)
++
++VULKAN_LIB_DEPS += \
++       $(RS_LIBS)
++endif
++
+ noinst_LTLIBRARIES += vulkan/libvulkan_common.la
+ vulkan_libvulkan_common_la_SOURCES = $(VULKAN_SOURCES)
+ vulkan_libvulkan_common_la_CFLAGS = $(VULKAN_CFLAGS)
+--- a/src/vulkan/Makefile.am
++++ b/src/vulkan/Makefile.am
+@@ -75,4 +75,16 @@ VULKAN_LIB_DEPS += \
+ 	$(WAYLAND_LIBS)
+ endif
+ 
++if HAVE_PLATFORM_RS
++AM_CPPFLAGS += \
++	-I$(top_srcdir)/src/gbm/main \
++	$(RS_CFLAGS) \
++	-DVK_USE_PLATFORM_MIR_KHR
++
++VULKAN_WSI_SOURCES += $(VULKAN_WSI_MIR_FILES)
++
++VULKAN_LIB_DEPS += \
++	$(RS_LIBS)
++endif
++
+ libvulkan_wsi_la_SOURCES = $(VULKAN_WSI_SOURCES)
+--- a/src/vulkan/Makefile.sources
++++ b/src/vulkan/Makefile.sources
+@@ -15,6 +15,10 @@ VULKAN_WSI_X11_FILES := \
+ 	wsi/wsi_common_x11.c \
+ 	wsi/wsi_common_x11.h
+ 
++VULKAN_WSI_MIR_FILES := \
++	wsi/wsi_common_mir.c \
++	wsi/wsi_common_mir.h
++
+ VULKAN_UTIL_GENERATED_FILES := \
+ 	util/vk_enum_to_str.c \
+ 	util/vk_enum_to_str.h
