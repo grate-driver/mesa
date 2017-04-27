@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # Script for generating a list of candidates [referenced by a Fixes tag] for
 # cherry-picking to a stable branch
@@ -27,7 +27,7 @@ do
 	# For each one try to extract the tag
 	fixes_count=`git show $sha | grep -i "fixes:" | wc -l`
 	if [ "x$fixes_count" != x1 ] ; then
-		echo WARNING: Commit $sha has nore than one Fixes tag
+		echo WARNING: Commit $sha has more than one Fixes tag
 	fi
 	fixes=`git show $sha | grep -i "fixes:" | head -n 1`
 	# The following sed/cut combination is borrowed from GregKH

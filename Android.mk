@@ -24,7 +24,7 @@
 # BOARD_GPU_DRIVERS should be defined.  The valid values are
 #
 #   classic drivers: i915 i965
-#   gallium drivers: swrast freedreno i915g ilo nouveau r300g r600g radeonsi vc4 virgl vmwgfx
+#   gallium drivers: swrast freedreno i915g nouveau r300g r600g radeonsi vc4 virgl vmwgfx
 #
 # The main target is libGLES_mesa.  For each classic driver enabled, a DRI
 # module will also be built.  DRI modules will be loaded by libGLES_mesa.
@@ -32,15 +32,6 @@
 MESA_TOP := $(call my-dir)
 
 MESA_ANDROID_MAJOR_VERSION := $(word 1, $(subst ., , $(PLATFORM_VERSION)))
-MESA_ANDROID_MINOR_VERSION := $(word 2, $(subst ., , $(PLATFORM_VERSION)))
-MESA_ANDROID_VERSION := $(MESA_ANDROID_MAJOR_VERSION).$(MESA_ANDROID_MINOR_VERSION)
-ifeq ($(filter 1 2 3 4,$(MESA_ANDROID_MAJOR_VERSION)),)
-MESA_LOLLIPOP_BUILD := true
-else
-define local-generated-sources-dir
-$(call local-intermediates-dir)
-endef
-endif
 
 MESA_DRI_MODULE_REL_PATH := dri
 MESA_DRI_MODULE_PATH := $(TARGET_OUT_SHARED_LIBRARIES)/$(MESA_DRI_MODULE_REL_PATH)
@@ -50,7 +41,7 @@ MESA_COMMON_MK := $(MESA_TOP)/Android.common.mk
 MESA_PYTHON2 := python
 
 classic_drivers := i915 i965
-gallium_drivers := swrast freedreno i915g ilo nouveau r300g r600g radeonsi vmwgfx vc4 virgl
+gallium_drivers := swrast freedreno i915g nouveau r300g r600g radeonsi vmwgfx vc4 virgl
 
 MESA_GPU_DRIVERS := $(strip $(BOARD_GPU_DRIVERS))
 
@@ -97,7 +88,8 @@ SUBDIRS := \
 	src/egl \
 	src/amd \
 	src/intel \
-	src/mesa/drivers/dri
+	src/mesa/drivers/dri \
+	src/vulkan
 
 INC_DIRS := $(call all-named-subdir-makefiles,$(SUBDIRS))
 

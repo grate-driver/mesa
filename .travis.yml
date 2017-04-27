@@ -1,6 +1,6 @@
 language: c
 
-sudo: true
+sudo: required
 dist: trusty
 
 cache:
@@ -15,11 +15,9 @@ addons:
       - libexpat1-dev
       - libxcb-dri2-0-dev
       - libx11-xcb-dev
-      - llvm-3.5-dev
-      # llvm-config is not in the dev package?
-      - llvm-3.5
-      # LLVM packaging is broken and misses this dep.
+      # LLVM packaging is broken and misses these dependencies
       - libedit-dev
+      - libelf-dev
       - scons
 
 env:
@@ -29,14 +27,16 @@ env:
     - XORGMACROS_VERSION=util-macros-1.19.0
     - GLPROTO_VERSION=glproto-1.4.17
     - DRI2PROTO_VERSION=dri2proto-2.8
-    - DRI3PROTO_VERSION=dri3proto-1.0
-    - PRESENTPROTO_VERSION=presentproto-1.0
     - LIBPCIACCESS_VERSION=libpciaccess-0.13.4
     - LIBDRM_VERSION=libdrm-2.4.74
     - XCBPROTO_VERSION=xcb-proto-1.11
     - LIBXCB_VERSION=libxcb-1.11
     - LIBXSHMFENCE_VERSION=libxshmfence-1.2
+    - LLVM_VERSION=3.9
+    - LLVM_PACKAGE="llvm-${LLVM_VERSION} llvm-${LLVM_VERSION}-dev"
+    - LLVM_CONFIG="llvm-config-${LLVM_VERSION}"
     - PKG_CONFIG_PATH=$HOME/prefix/lib/pkgconfig
+    - MAKEFLAGS=-j2
   matrix:
     - BUILD=make
     - BUILD=scons
@@ -47,7 +47,7 @@ install:
 
   # Since libdrm gets updated in configure.ac regularly, try to pick up the
   # latest version from there.
-  - for line in `grep "^LIBDRM_.*_REQUIRED=" configure.ac`; do
+  - for line in `grep "^LIBDRM.*_REQUIRED=" configure.ac`; do
       old_ver=`echo $LIBDRM_VERSION | sed 's/libdrm-//'`;
       new_ver=`echo $line | sed 's/.*REQUIRED=//'`;
       if `echo "$old_ver,$new_ver" | tr ',' '\n' | sort -Vc 2> /dev/null`; then
@@ -70,14 +70,6 @@ install:
   - tar -jxvf $DRI2PROTO_VERSION.tar.bz2
   - (cd $DRI2PROTO_VERSION && ./configure --prefix=$HOME/prefix && make install)
 
-  - wget $XORG_RELEASES/proto/$DRI3PROTO_VERSION.tar.bz2
-  - tar -jxvf $DRI3PROTO_VERSION.tar.bz2
-  - (cd $DRI3PROTO_VERSION && ./configure --prefix=$HOME/prefix && make install)
-
-  - wget $XORG_RELEASES/proto/$PRESENTPROTO_VERSION.tar.bz2
-  - tar -jxvf $PRESENTPROTO_VERSION.tar.bz2
-  - (cd $PRESENTPROTO_VERSION && ./configure --prefix=$HOME/prefix && make install)
-
   - wget $XCB_RELEASES/$XCBPROTO_VERSION.tar.bz2
   - tar -jxvf $XCBPROTO_VERSION.tar.bz2
   - (cd $XCBPROTO_VERSION && ./configure --prefix=$HOME/prefix && make install)
@@ -92,21 +84,31 @@ install:
 
   - wget http://dri.freedesktop.org/libdrm/$LIBDRM_VERSION.tar.bz2
   - tar -jxvf $LIBDRM_VERSION.tar.bz2
-  - (cd $LIBDRM_VERSION && ./configure --prefix=$HOME/prefix --enable-vc4 --enable-etnaviv-experimental-api && make install)
+  - (cd $LIBDRM_VERSION && ./configure --prefix=$HOME/prefix --enable-vc4 --enable-freedreno --enable-etnaviv-experimental-api && make install)
 
   - wget $XORG_RELEASES/lib/$LIBXSHMFENCE_VERSION.tar.bz2
   - tar -jxvf $LIBXSHMFENCE_VERSION.tar.bz2
   - (cd $LIBXSHMFENCE_VERSION && ./configure --prefix=$HOME/prefix && make install)
 
+  # Install LLVM directly via apt-get (not Travis-CI's apt addon)
+  # See https://github.com/travis-ci/apt-source-whitelist/pull/205#issuecomment-216054237
+
+  - wget -nv -O - http://llvm.org/apt/llvm-snapshot.gpg.key | sudo apt-key add -
+  - sudo apt-add-repository -y 'deb http://llvm.org/apt/trusty llvm-toolchain-trusty-3.9 main'
+  - sudo apt-add-repository -y 'deb http://llvm.org/apt/trusty llvm-toolchain-trusty main'
+  - sudo apt-get update -qq
+  - sudo apt-get install -qq -y $LLVM_PACKAGE
+
 script:
   - if test "x$BUILD" = xmake; then
       ./autogen.sh --enable-debug
-        --with-egl-platforms=x11,drm
+        --with-platforms=x11,drm
         --with-dri-drivers=i915,i965,radeon,r200,swrast,nouveau
-        --with-gallium-drivers=svga,swrast,vc4,virgl,r300,r600,etnaviv,imx
+        --with-gallium-drivers=i915,nouveau,r300,r600,radeonsi,freedreno,svga,swrast,vc4,virgl,etnaviv,imx
+        --with-vulkan-drivers=radeon
         --disable-llvm-shared-libs
         ;
       make && make check;
     elif test x$BUILD = xscons; then
-      scons;
+      scons llvm=1 && scons llvm=1 check;
     fi

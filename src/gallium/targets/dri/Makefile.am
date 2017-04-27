@@ -75,8 +75,6 @@ TARGET_LIB_DEPS =
 
 include $(top_srcdir)/src/gallium/drivers/i915/Automake.inc
 
-include $(top_srcdir)/src/gallium/drivers/ilo/Automake.inc
-
 include $(top_srcdir)/src/gallium/drivers/nouveau/Automake.inc
 
 include $(top_srcdir)/src/gallium/drivers/r300/Automake.inc
@@ -144,7 +142,8 @@ install-data-hook:
 		ln -f $(DESTDIR)$(dridir)/gallium_dri.so                \
 		      $(DESTDIR)$(dridir)/$${i}_dri.so;                 \
 	done;                                                           \
-	$(RM) $(DESTDIR)$(dridir)/gallium_dri.*
+	$(RM) $(DESTDIR)$(dridir)/gallium_dri.*;                        \
+	$(RM) -d $(DESTDIR)$(dridir) &>/dev/null || true
 
 uninstall-hook:
 	for i in $(TARGET_DRIVERS); do                                  \

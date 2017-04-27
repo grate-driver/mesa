@@ -152,44 +152,13 @@ include $(MESA_COMMON_MK)
 include $(BUILD_STATIC_LIBRARY)
 
 # ---------------------------------------
-# Build libmesa_i965_compiler
-# ---------------------------------------
-
-include $(CLEAR_VARS)
-
-LOCAL_MODULE := libmesa_i965_compiler
-LOCAL_MODULE_CLASS := STATIC_LIBRARIES
-
-LOCAL_SRC_FILES := \
-	$(i965_compiler_FILES)
-
-LOCAL_C_INCLUDES := \
-	$(MESA_DRI_C_INCLUDES) \
-	$(MESA_TOP)/src/intel \
-	$(MESA_TOP)/src/compiler/nir \
-	$(call generated-sources-dir-for,STATIC_LIBRARIES,libmesa_nir,,)/nir \
-	$(call generated-sources-dir-for,STATIC_LIBRARIES,libmesa_glsl,,)/glsl
-
-LOCAL_SHARED_LIBRARIES := \
-	libdrm_intel
-
-include $(LOCAL_PATH)/Android.gen.mk
-include $(MESA_COMMON_MK)
-include $(BUILD_STATIC_LIBRARY)
-
-# ---------------------------------------
 # Build i965_dri
 # ---------------------------------------
 
 include $(CLEAR_VARS)
 
 LOCAL_MODULE := i965_dri
-ifeq ($(MESA_LOLLIPOP_BUILD),true)
 LOCAL_MODULE_RELATIVE_PATH := $(MESA_DRI_MODULE_REL_PATH)
-else
-LOCAL_MODULE_PATH := $(MESA_DRI_MODULE_PATH)
-LOCAL_UNSTRIPPED_PATH := $(MESA_DRI_MODULE_UNSTRIPPED_PATH)
-endif
 
 LOCAL_CFLAGS := \
 	$(MESA_DRI_CFLAGS)
@@ -209,9 +178,9 @@ LOCAL_WHOLE_STATIC_LIBRARIES := \
 	$(MESA_DRI_WHOLE_STATIC_LIBRARIES) \
 	$(I965_PERGEN_LIBS) \
 	libmesa_intel_common \
-	libmesa_blorp \
 	libmesa_isl \
-	libmesa_i965_compiler
+	libmesa_blorp \
+	libmesa_intel_compiler
 
 LOCAL_SHARED_LIBRARIES := \
 	$(MESA_DRI_SHARED_LIBRARIES) \
@@ -220,6 +189,23 @@ LOCAL_SHARED_LIBRARIES := \
 LOCAL_GENERATED_SOURCES := \
 	$(MESA_DRI_OPTIONS_H) \
 	$(MESA_GEN_NIR_H)
+
+LOCAL_MODULE_CLASS := SHARED_LIBRARIES
+
+intermediates := $(call local-generated-sources-dir)
+
+LOCAL_GENERATED_SOURCES += $(addprefix $(intermediates)/, \
+	$(i965_oa_GENERATED_FILES))
+
+$(intermediates)/brw_oa_%.h: $(LOCAL_PATH)/brw_oa_%.xml $(LOCAL_PATH)/brw_oa.py
+	@echo "target Generated: $(PRIVATE_MODULE) <= $(notdir $(@))"
+	@mkdir -p $(dir $@)
+	$(hide) $(MESA_PYTHON2) $(word 2, $^) --header=$@ --chipset=$(basename $*) $<
+
+$(intermediates)/brw_oa_%.c: $(LOCAL_PATH)/brw_oa_%.xml $(LOCAL_PATH)/brw_oa.py
+	@echo "target Generated: $(PRIVATE_MODULE) <= $(notdir $(@))"
+	@mkdir -p $(dir $@)
+	$(hide) $(MESA_PYTHON2) $(word 2, $^) --code=$@ --chipset=$(basename $*) $<
 
 include $(MESA_COMMON_MK)
 include $(BUILD_SHARED_LIBRARY)

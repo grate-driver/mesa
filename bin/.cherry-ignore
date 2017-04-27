@@ -1,5 +1,0 @@
-# The commit addressed an earlier commit ccdd5b3738e which did not land in branch.
-d49d275c415d60ae08dc3e52d8db11f19a44010f anv/blorp: Don't sanitize the swizzle for blorp_clear
-# The commit addressed an earlier commit 0567ab0407e which did not land in branch.
-# A stable specific backported patch will follow later ...
-bc5d587a80b64fb3e0a5ea8067e6317fbca2bbc5 radv: Invalidate L2 for TRANSFER_WRITE barriers

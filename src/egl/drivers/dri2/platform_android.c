@@ -32,10 +32,7 @@
 #include <fcntl.h>
 #include <xf86drm.h>
 #include <stdbool.h>
-
-#if ANDROID_VERSION >= 0x402
 #include <sync/sync.h>
-#endif
 
 #include "loader.h"
 #include "egl_dri2.h"
@@ -160,7 +157,6 @@ get_native_buffer_name(struct ANativeWindowBuffer *buf)
 static EGLBoolean
 droid_window_dequeue_buffer(struct dri2_egl_surface *dri2_surf)
 {
-#if ANDROID_VERSION >= 0x0402
    int fence_fd;
 
    if (dri2_surf->window->dequeueBuffer(dri2_surf->window, &dri2_surf->buffer,
@@ -195,13 +191,33 @@ droid_window_dequeue_buffer(struct dri2_egl_surface *dri2_surf)
    }
 
    dri2_surf->buffer->common.incRef(&dri2_surf->buffer->common);
-#else
-   if (dri2_surf->window->dequeueBuffer(dri2_surf->window, &dri2_surf->buffer))
-      return EGL_FALSE;
 
-   dri2_surf->buffer->common.incRef(&dri2_surf->buffer->common);
-   dri2_surf->window->lockBuffer(dri2_surf->window, dri2_surf->buffer);
-#endif
+   /* Record all the buffers created by ANativeWindow and update back buffer
+    * for updating buffer's age in swap_buffers.
+    */
+   EGLBoolean updated = EGL_FALSE;
+   for (int i = 0; i < ARRAY_SIZE(dri2_surf->color_buffers); i++) {
+      if (!dri2_surf->color_buffers[i].buffer) {
+         dri2_surf->color_buffers[i].buffer = dri2_surf->buffer;
+      }
+      if (dri2_surf->color_buffers[i].buffer == dri2_surf->buffer) {
+         dri2_surf->back = &dri2_surf->color_buffers[i];
+         updated = EGL_TRUE;
+         break;
+      }
+   }
+
+   if (!updated) {
+      /* In case of all the buffers were recreated by ANativeWindow, reset
+       * the color_buffers
+       */
+      for (int i = 0; i < ARRAY_SIZE(dri2_surf->color_buffers); i++) {
+         dri2_surf->color_buffers[i].buffer = NULL;
+         dri2_surf->color_buffers[i].age = 0;
+      }
+      dri2_surf->color_buffers[0].buffer = dri2_surf->buffer;
+      dri2_surf->back = &dri2_surf->color_buffers[0];
+   }
 
    return EGL_TRUE;
 }
@@ -217,7 +233,6 @@ droid_window_enqueue_buffer(_EGLDisplay *disp, struct dri2_egl_surface *dri2_sur
     */
    mtx_unlock(&disp->Mutex);
 
-#if ANDROID_VERSION >= 0x0402
    /* Queue the buffer without a sync fence. This informs the ANativeWindow
     * that it may access the buffer immediately.
     *
@@ -233,12 +248,10 @@ droid_window_enqueue_buffer(_EGLDisplay *disp, struct dri2_egl_surface *dri2_sur
    int fence_fd = -1;
    dri2_surf->window->queueBuffer(dri2_surf->window, dri2_surf->buffer,
                                   fence_fd);
-#else
-   dri2_surf->window->queueBuffer(dri2_surf->window, dri2_surf->buffer);
-#endif
 
    dri2_surf->buffer->common.decRef(&dri2_surf->buffer->common);
    dri2_surf->buffer = NULL;
+   dri2_surf->back = NULL;
 
    mtx_lock(&disp->Mutex);
 
@@ -579,6 +592,20 @@ droid_image_get_buffers(__DRIdrawable *driDrawable,
    return 1;
 }
 
+static EGLint
+droid_query_buffer_age(_EGLDriver *drv,
+                          _EGLDisplay *disp, _EGLSurface *surface)
+{
+   struct dri2_egl_surface *dri2_surf = dri2_egl_surface(surface);
+
+   if (update_buffers(dri2_surf) < 0) {
+      _eglError(EGL_BAD_ALLOC, "droid_query_buffer_age");
+      return 0;
+   }
+
+   return dri2_surf->back->age;
+}
+
 static EGLBoolean
 droid_swap_buffers(_EGLDriver *drv, _EGLDisplay *disp, _EGLSurface *draw)
 {
@@ -587,6 +614,20 @@ droid_swap_buffers(_EGLDriver *drv, _EGLDisplay *disp, _EGLSurface *draw)
 
    if (dri2_surf->base.Type != EGL_WINDOW_BIT)
       return EGL_TRUE;
+
+   for (int i = 0; i < ARRAY_SIZE(dri2_surf->color_buffers); i++) {
+      if (dri2_surf->color_buffers[i].age > 0)
+         dri2_surf->color_buffers[i].age++;
+   }
+
+   /* Make sure we have a back buffer in case we're swapping without
+    * ever rendering. */
+   if (get_back_bo(dri2_surf, 0) < 0) {
+      _eglError(EGL_BAD_ALLOC, "dri2_swap_buffers");
+      return EGL_FALSE;
+   }
+
+   dri2_surf->back->age = 1;
 
    dri2_flush_drawable_for_swapbuffers(disp, draw);
 
@@ -1042,7 +1083,7 @@ static struct dri2_egl_display_vtbl droid_display_vtbl = {
    .swap_buffers_region = dri2_fallback_swap_buffers_region,
    .post_sub_buffer = dri2_fallback_post_sub_buffer,
    .copy_buffers = dri2_fallback_copy_buffers,
-   .query_buffer_age = dri2_fallback_query_buffer_age,
+   .query_buffer_age = droid_query_buffer_age,
    .query_surface = droid_query_surface,
    .create_wayland_buffer_from_image = dri2_fallback_create_wayland_buffer_from_image,
    .get_sync_values = dri2_fallback_get_sync_values,
@@ -1141,6 +1182,7 @@ dri2_initialize_android(_EGLDriver *drv, _EGLDisplay *dpy)
    dpy->Extensions.ANDROID_framebuffer_target = EGL_TRUE;
    dpy->Extensions.ANDROID_image_native_buffer = EGL_TRUE;
    dpy->Extensions.ANDROID_recordable = EGL_TRUE;
+   dpy->Extensions.EXT_buffer_age = EGL_TRUE;
 
    /* Fill vtbl last to prevent accidentally calling virtual function during
     * initialization.
