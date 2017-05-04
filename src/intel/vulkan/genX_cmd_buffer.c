@@ -272,26 +272,21 @@ color_attachment_compute_aux_usage(struct anv_device *device,
       att_state->input_aux_usage = ISL_AUX_USAGE_CCS_E;
    } else if (att_state->fast_clear) {
       att_state->aux_usage = ISL_AUX_USAGE_CCS_D;
-      if (GEN_GEN >= 9) {
-         /* From the Sky Lake PRM, RENDER_SURFACE_STATE::AuxiliarySurfaceMode:
-          *
-          *    "If Number of Multisamples is MULTISAMPLECOUNT_1, AUX_CCS_D
-          *    setting is only allowed if Surface Format supported for Fast
-          *    Clear. In addition, if the surface is bound to the sampling
-          *    engine, Surface Format must be supported for Render Target
-          *    Compression for surfaces bound to the sampling engine."
-          *
-          * In other words, we can't sample from a fast-cleared image if it
-          * doesn't also support color compression.
-          */
-         att_state->input_aux_usage = ISL_AUX_USAGE_NONE;
-      } else if (GEN_GEN == 8) {
-         /* Broadwell can sample from fast-cleared images */
+      /* From the Sky Lake PRM, RENDER_SURFACE_STATE::AuxiliarySurfaceMode:
+       *
+       *    "If Number of Multisamples is MULTISAMPLECOUNT_1, AUX_CCS_D
+       *    setting is only allowed if Surface Format supported for Fast
+       *    Clear. In addition, if the surface is bound to the sampling
+       *    engine, Surface Format must be supported for Render Target
+       *    Compression for surfaces bound to the sampling engine."
+       *
+       * In other words, we can only sample from a fast-cleared image if it
+       * also supports color compression.
+       */
+      if (isl_format_supports_lossless_compression(&device->info, iview->isl.format))
          att_state->input_aux_usage = ISL_AUX_USAGE_CCS_D;
-      } else {
-         /* Ivy Bridge and Haswell cannot */
+      else
          att_state->input_aux_usage = ISL_AUX_USAGE_NONE;
-      }
    } else {
       att_state->aux_usage = ISL_AUX_USAGE_NONE;
       att_state->input_aux_usage = ISL_AUX_USAGE_NONE;
@@ -418,23 +413,15 @@ genX(cmd_buffer_setup_attachments)(struct anv_cmd_buffer *cmd_buffer,
       abort();
    }
 
-   bool need_null_state = false;
-   unsigned num_states = 0;
+   /* Reserve one for the NULL state. */
+   unsigned num_states = 1;
    for (uint32_t i = 0; i < pass->attachment_count; ++i) {
-      if (vk_format_is_color(pass->attachments[i].format)) {
+      if (vk_format_is_color(pass->attachments[i].format))
          num_states++;
-      } else {
-         /* We need a null state for any depth-stencil-only subpasses.
-          * Importantly, this includes depth/stencil clears so we create one
-          * whenever we have depth or stencil
-          */
-         need_null_state = true;
-      }
 
       if (need_input_attachment_state(&pass->attachments[i]))
          num_states++;
    }
-   num_states += need_null_state;
 
    const uint32_t ss_stride = align_u32(isl_dev->ss.size, isl_dev->ss.align);
    state->render_pass_states =
@@ -444,11 +431,9 @@ genX(cmd_buffer_setup_attachments)(struct anv_cmd_buffer *cmd_buffer,
    struct anv_state next_state = state->render_pass_states;
    next_state.alloc_size = isl_dev->ss.size;
 
-   if (need_null_state) {
-      state->null_surface_state = next_state;
-      next_state.offset += ss_stride;
-      next_state.map += ss_stride;
-   }
+   state->null_surface_state = next_state;
+   next_state.offset += ss_stride;
+   next_state.map += ss_stride;
 
    for (uint32_t i = 0; i < pass->attachment_count; ++i) {
       if (vk_format_is_color(pass->attachments[i].format)) {
@@ -470,24 +455,22 @@ genX(cmd_buffer_setup_attachments)(struct anv_cmd_buffer *cmd_buffer,
       ANV_FROM_HANDLE(anv_framebuffer, framebuffer, begin->framebuffer);
       assert(pass->attachment_count == framebuffer->attachment_count);
 
-      if (need_null_state) {
-         struct GENX(RENDER_SURFACE_STATE) null_ss = {
-            .SurfaceType = SURFTYPE_NULL,
-            .SurfaceArray = framebuffer->layers > 0,
-            .SurfaceFormat = ISL_FORMAT_R8G8B8A8_UNORM,
+      struct GENX(RENDER_SURFACE_STATE) null_ss = {
+         .SurfaceType = SURFTYPE_NULL,
+         .SurfaceArray = framebuffer->layers > 0,
+         .SurfaceFormat = ISL_FORMAT_R8G8B8A8_UNORM,
 #if GEN_GEN >= 8
-            .TileMode = YMAJOR,
+         .TileMode = YMAJOR,
 #else
-            .TiledSurface = true,
+         .TiledSurface = true,
 #endif
-            .Width = framebuffer->width - 1,
-            .Height = framebuffer->height - 1,
-            .Depth = framebuffer->layers - 1,
-            .RenderTargetViewExtent = framebuffer->layers - 1,
-         };
-         GENX(RENDER_SURFACE_STATE_pack)(NULL, state->null_surface_state.map,
-                                         &null_ss);
-      }
+         .Width = framebuffer->width - 1,
+         .Height = framebuffer->height - 1,
+         .Depth = framebuffer->layers - 1,
+         .RenderTargetViewExtent = framebuffer->layers - 1,
+      };
+      GENX(RENDER_SURFACE_STATE_pack)(NULL, state->null_surface_state.map,
+                                      &null_ss);
 
       for (uint32_t i = 0; i < pass->attachment_count; ++i) {
          struct anv_render_pass_attachment *att = &pass->attachments[i];
@@ -602,6 +585,18 @@ genX(BeginCommandBuffer)(
           !(cmd_buffer->usage_flags & VK_COMMAND_BUFFER_USAGE_RENDER_PASS_CONTINUE_BIT));
 
    genX(cmd_buffer_emit_state_base_address)(cmd_buffer);
+
+   /* We sometimes store vertex data in the dynamic state buffer for blorp
+    * operations and our dynamic state stream may re-use data from previous
+    * command buffers.  In order to prevent stale cache data, we flush the VF
+    * cache.  We could do this on every blorp call but that's not really
+    * needed as all of the data will get written by the CPU prior to the GPU
+    * executing anything.  The chances are fairly high that they will use
+    * blorp at least once per primary command buffer so it shouldn't be
+    * wasted.
+    */
+   if (cmd_buffer->level == VK_COMMAND_BUFFER_LEVEL_PRIMARY)
+      cmd_buffer->state.pending_pipe_bits |= ANV_PIPE_VF_CACHE_INVALIDATE_BIT;
 
    if (cmd_buffer->usage_flags &
        VK_COMMAND_BUFFER_USAGE_RENDER_PASS_CONTINUE_BIT) {
@@ -1153,7 +1148,18 @@ emit_binding_table(struct anv_cmd_buffer *cmd_buffer,
          assert(binding->binding == 0);
          if (binding->index < subpass->color_count) {
             const unsigned att = subpass->color_attachments[binding->index];
-            surface_state = cmd_buffer->state.attachments[att].color_rt_state;
+
+            /* From the Vulkan 1.0.46 spec:
+             *
+             *    "If any color or depth/stencil attachments are
+             *    VK_ATTACHMENT_UNUSED, then no writes occur for those
+             *    attachments."
+             */
+            if (att == VK_ATTACHMENT_UNUSED) {
+               surface_state = cmd_buffer->state.null_surface_state;
+            } else {
+               surface_state = cmd_buffer->state.attachments[att].color_rt_state;
+            }
          } else {
             surface_state = cmd_buffer->state.null_surface_state;
          }

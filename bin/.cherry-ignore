@@ -3,3 +3,48 @@ d49d275c415d60ae08dc3e52d8db11f19a44010f anv/blorp: Don't sanitize the swizzle f
 # The commit addressed an earlier commit 0567ab0407e which did not land in branch.
 # A stable specific backported patch will follow later ...
 bc5d587a80b64fb3e0a5ea8067e6317fbca2bbc5 radv: Invalidate L2 for TRANSFER_WRITE barriers
+# stable: the commit depends on earlier commit 656e30b6860 which did
+# 	  not land in branch, and some other dependencies.
+d2d6cf6c8387ac06c8559027f57683a61b48671b anv: Add the pci_id into the shader cache UUID
+# stable: 17.1 nomination only. Fixes earlier commit 0b613c20 which
+# 	  did not land in branch.
+d4601b0efc7f5e24e3f39fefa8e29e79560245ce freedreno: fix crash if ctx torn down with no rendering
+# stable: 17.1 nomination only. the commit depends on earlier commit
+# 	  7748c3f5eb1 which did not land in branch and the part that
+# 	  could be merged is not really providing anything relevant to
+# 	  stable.
+b81d85f1754928139f9f01474495e024946aa1b4 configure.ac: Fix typos.
+# extra: this reverts a commit in stable only because a new feature in
+# 	 master replaces it.
+e75001811e3b66986b4ede165a0fdde703d4f05b Revert "etnaviv: Cannot render to rb-swapped formats"
+# extra: the commit depends on earlier commits which did not land in
+#	 branch.
+dee31311eb024a636466e359b43d3a67b0135f32 Revert "i965/fs: Don't emit SEL instructions for type-converting MOVs."
+# fixes: finds 2 commit references but it is really only one, and only
+#        in master.
+2b3c490e23a6cd7f4f6bb489267c2b9b4fde5b20 radv: fix typo in a2b10g10r10 fast clear calculation
+# fixes: removes unused symbols but it doesn't really add nor fix
+#        anything relevant.
+9807e9dea67a60ab8ee04741c75b748eade582ee anv: remove unused anv_dispatch_table dtable
+# fixes: removes unused symbols but it doesn't really add nor fix
+#        anything relevant.
+320561bd831b81843e732d38d2b254aa3b25f2f6 radv: remove unused radv_dispatch_table dtable
+# fixes: it just makes a local function static.
+8b79f0ed0812a3a80dd91e47112fd722bd2d6978 radv: make radv_resolve_entrypoint static
+# fixes: reported only because referes to fixes in 2 commits, but they
+#        are not in stable.
+3f2cb699cfe0481f214c709b5a1375caf0a9c7fe android: vulkan: add support for libmesa_vulkan_util
+# fixes: reported only because referes to fixes in 2 commits, but they
+#        are not in stable.
+61c38d14b7b1d0ccacc440340ee0b1bc4454eca2 android: r600: fix libmesa_amd_common dependency
+# fixes: removes unused symbols but it doesn't really add nor fix
+#        anything relevant.
+b69a03e12aa38ed5d8b60a056630ed445f6097dc i965: remove dead brw_new_shader() declaration
+# fixes: it just cleans .gitignore.
+f282ace67862c0633d0a8135e4808867740d0d39 i965: remove i965_symbols_test reference from .gitignore
+# fixes: reported only because referes to fixes in 2 commits, but they
+#        are not in stable.
+15603055fb36a630cf3023219e9dd5c4a49c0596 anv: automake: ensure that the destination directory is created
+# fixes: reported only because referes to fixes in 2 commits, but they
+#        are not in stable.
+a6840efc096bd26e92bcee1a50515d845988a2f9 anv: provide required gem stubs for the tests

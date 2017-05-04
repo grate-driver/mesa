@@ -68,14 +68,13 @@ _mesa_update_shader_textures_used(struct gl_shader_program *shProg,
 				  struct gl_program *prog)
 {
    GLbitfield mask = prog->SamplersUsed;
-   struct gl_linked_shader *shader =
-      shProg->_LinkedShaders[_mesa_program_enum_to_shader_stage(prog->Target)];
+   gl_shader_stage prog_stage =
+      _mesa_program_enum_to_shader_stage(prog->Target);
+   struct gl_linked_shader *shader = shProg->_LinkedShaders[prog_stage];
 
    assert(shader);
 
    memset(prog->TexturesUsed, 0, sizeof(prog->TexturesUsed));
-
-   shProg->SamplersValidated = GL_TRUE;
 
    while (mask) {
       const int s = u_bit_scan(&mask);
@@ -92,8 +91,20 @@ _mesa_update_shader_textures_used(struct gl_shader_program *shProg,
        *     types pointing to the same texture image unit within a program
        *     object."
        */
-      if (prog->TexturesUsed[unit] & ~(1 << tgt))
-         shProg->SamplersValidated = GL_FALSE;
+      unsigned stages_mask = shProg->data->linked_stages;
+      while (stages_mask) {
+         const int stage = u_bit_scan(&stages_mask);
+
+         /* Skip validation if we are yet to update textures used in this
+          * stage.
+          */
+         if (prog_stage < stage)
+            break;
+
+         struct gl_program *glprog = shProg->_LinkedShaders[stage]->Program;
+         if (glprog->TexturesUsed[unit] & ~(1 << tgt))
+            shProg->SamplersValidated = GL_FALSE;
+      }
 
       prog->TexturesUsed[unit] |= (1 << tgt);
    }
