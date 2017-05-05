@@ -1,7 +1,7 @@
 #include <errno.h>
 #include <stdio.h>
 
-#include "util/u_inlines.h"
+#include "util/u_memory.h"
 
 #include "tegra_context.h"
 #include "tegra_resource.h"
@@ -20,7 +20,7 @@ static int tegra_channel_create(struct tegra_context *context,
 	fprintf(stdout, "> %s(context=%p, client=%d, channelp=%p)\n",
 		__func__, context, client, channelp);
 
-	channel = calloc(1, sizeof(*channel));
+	channel = CALLOC_STRUCT(tegra_channel);
 	if (!channel)
 		return -ENOMEM;
 
@@ -28,7 +28,7 @@ static int tegra_channel_create(struct tegra_context *context,
 
 	err = tegra_stream_create(screen->drm, &channel->stream, 32768);
 	if (err < 0) {
-		free(channel);
+		FREE(channel);
 		return err;
 	}
 
@@ -43,7 +43,7 @@ static void tegra_channel_delete(struct tegra_channel *channel)
 	fprintf(stdout, "> %s(channel=%p)\n", __func__, channel);
 
 	tegra_stream_destroy(&channel->stream);
-	free(channel);
+	FREE(channel);
 
 	fprintf(stdout, "< %s()\n", __func__);
 }
@@ -74,7 +74,7 @@ static void tegra_context_destroy(struct pipe_context *pcontext)
 
 	tegra_channel_delete(context->gr3d);
 	tegra_channel_delete(context->gr2d);
-	free(context);
+	FREE(context);
 
 	fprintf(stdout, "< %s()\n", __func__);
 }
@@ -94,7 +94,7 @@ static void tegra_context_flush(struct pipe_context *pcontext,
 	if (pfence) {
 		struct tegra_fence *fence;
 
-		fence = calloc(1, sizeof(*fence));
+		fence = CALLOC_STRUCT(tegra_fence);
 		if (!fence)
 			goto out;
 
@@ -116,7 +116,7 @@ struct pipe_context *tegra_screen_context_create(struct pipe_screen *pscreen,
 
 	fprintf(stdout, "> %s(pscreen=%p, priv=%p)\n", __func__, pscreen, priv);
 
-	context = calloc(1, sizeof(*context));
+	context = CALLOC_STRUCT(tegra_context);
 	if (!context) {
 		fprintf(stdout, "< %s() = NULL\n", __func__);
 		return NULL;

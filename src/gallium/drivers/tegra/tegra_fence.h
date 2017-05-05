@@ -21,7 +21,7 @@ static inline struct tegra_fence *tegra_fence_create(struct host1x_fence *fence)
 {
 	struct tegra_fence *ret;
 
-	ret = calloc(1, sizeof(*ret));
+	ret = CALLOC_STRUCT(tegra_fence);
 	if (!ret)
 		return NULL;
 

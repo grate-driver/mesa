@@ -1,5 +1,7 @@
 #include <stdio.h>
 
+#include "util/u_memory.h"
+
 #include "tegra_context.h"
 #include "tegra_resource.h"
 #include "tegra_screen.h"
@@ -13,7 +15,7 @@ static void tegra_screen_destroy(struct pipe_screen *pscreen)
 	slab_destroy_parent(&screen->transfer_pool);
 
 	drm_tegra_close(screen->drm);
-	free(screen);
+	FREE(screen);
 
 	fprintf(stdout, "< %s()\n", __func__);
 }
@@ -360,8 +362,8 @@ tegra_screen_fence_reference(struct pipe_screen *pscreen,
 // 	assert(fence);
 //
 // 	if (pipe_reference(&tegra_fence(*ptr)->reference, &tegra_fence(fence)->reference)) {
-// 		free(tegra_fence(*ptr)->fence);
-// 		free(*ptr);
+// 		FREE(tegra_fence(*ptr)->fence);
+// 		FREE(*ptr);
 // 	}
 //
 // 	*ptr = fence;
@@ -389,7 +391,7 @@ struct pipe_screen *tegra_screen_create(struct drm_tegra *drm)
 
 	fprintf(stdout, "> %s(drm=%p)\n", __func__, drm);
 
-	screen = calloc(1, sizeof(*screen));
+	screen = CALLOC_STRUCT(tegra_screen);
 	if (!screen) {
 		fprintf(stdout, "< %s() = NULL\n", __func__);
 		return NULL;

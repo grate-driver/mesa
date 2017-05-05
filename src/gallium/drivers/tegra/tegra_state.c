@@ -1,7 +1,7 @@
 #include <stdio.h>
 
 #include "util/u_helpers.h"
-#include "util/u_inlines.h"
+#include "util/u_memory.h"
 
 #include "tgsi/tgsi_parse.h"
 #include "tgsi/tgsi_info.h"
@@ -182,7 +182,7 @@ static void *tegra_create_blend_state(struct pipe_context *pcontext,
 	fprintf(stdout, "> %s(pcontext=%p, template=%p)\n", __func__,
 		pcontext, template);
 
-	so = calloc(1, sizeof(*so));
+	so = CALLOC_STRUCT(tegra_blend_state);
 	if (!so) {
 		fprintf(stdout, "< %s() = NULL\n", __func__);
 		return NULL;
@@ -204,7 +204,7 @@ static void tegra_delete_blend_state(struct pipe_context *pcontext, void *so)
 {
 	fprintf(stdout, "> %s(pcontext=%p, so=%p)\n", __func__, pcontext, so);
 
-	free(so);
+	FREE(so);
 
 	fprintf(stdout, "< %s()\n", __func__);
 }
@@ -225,7 +225,7 @@ tegra_create_sampler_state(struct pipe_context *pcontext,
 	fprintf(stdout, "> %s(pcontext=%p, template=%p)\n", __func__,
 		pcontext, template);
 
-	so = calloc(1, sizeof(*so));
+	so = CALLOC_STRUCT(tegra_sampler_state);
 	if (!so) {
 		fprintf(stdout, "< %s() = NULL\n", __func__);
 		return NULL;
@@ -250,7 +250,7 @@ static void tegra_delete_sampler_state(struct pipe_context *pcontext, void *so)
 {
 	fprintf(stdout, "> %s(pcontext=%p, so=%p)\n", __func__, pcontext, so);
 
-	free(so);
+	FREE(so);
 
 	fprintf(stdout, "< %s()\n", __func__);
 }
@@ -271,7 +271,7 @@ tegra_create_rasterizer_state(struct pipe_context *pcontext,
 	fprintf(stdout, "> %s(pcontext=%p, template=%p)\n", __func__,
 		pcontext, template);
 
-	so = calloc(1, sizeof(*so));
+	so = CALLOC_STRUCT(tegra_rasterizer_state);
 	if (!so) {
 		fprintf(stdout, "< %s() = NULL\n", __func__);
 		return NULL;
@@ -295,7 +295,7 @@ static void tegra_delete_rasterizer_state(struct pipe_context *pcontext,
 {
 	fprintf(stdout, "> %s(pcontext=%p, so=%p)\n", __func__, pcontext, so);
 
-	free(so);
+	FREE(so);
 
 	fprintf(stdout, "< %s()\n", __func__);
 }
@@ -316,7 +316,7 @@ tegra_create_zsa_state(struct pipe_context *pcontext,
 	fprintf(stdout, "> %s(pcontext=%p, template=%p)\n", __func__,
 		pcontext, template);
 
-	so = calloc(1, sizeof(*so));
+	so = CALLOC_STRUCT(tegra_zsa_state);
 	if (!so) {
 		fprintf(stdout, "< %s() = NULL\n", __func__);
 		return NULL;
@@ -338,7 +338,7 @@ static void tegra_delete_zsa_state(struct pipe_context *pcontext, void *so)
 {
 	fprintf(stdout, "> %s(pcontext=%p, so=%p)\n", __func__, pcontext, so);
 
-	free(so);
+	FREE(so);
 
 	fprintf(stdout, "< %s()\n", __func__);
 }
@@ -426,7 +426,7 @@ tegra_create_vs_state(struct pipe_context *pcontext,
 	fprintf(stdout, "> %s(pcontext=%p, template=%p)\n", __func__,
 		pcontext, template);
 
-	so = calloc(1, sizeof(*so));
+	so = CALLOC_STRUCT(tegra_vs_state);
 	if (!so) {
 		fprintf(stdout, "< %s() = NULL\n", __func__);
 		return NULL;
@@ -533,7 +533,7 @@ static void tegra_delete_vs_state(struct pipe_context *pcontext, void *so)
 {
 	fprintf(stdout, "> %s(pcontext=%p, so=%p)\n", __func__, pcontext, so);
 
-	free(so);
+	FREE(so);
 
 	fprintf(stdout, "< %s()\n", __func__);
 }
@@ -554,7 +554,7 @@ tegra_create_fs_state(struct pipe_context *pcontext,
 	fprintf(stdout, "> %s(pcontext=%p, template=%p)\n", __func__,
 		pcontext, template);
 
-	so = calloc(1, sizeof(*so));
+	so = CALLOC_STRUCT(tegra_fs_state);
 	if (!so) {
 		fprintf(stdout, "< %s() = NULL\n", __func__);
 		return NULL;
@@ -576,7 +576,7 @@ static void tegra_delete_fs_state(struct pipe_context *pcontext, void *so)
 {
 	fprintf(stdout, "> %s(pcontext=%p, so=%p)\n", __func__, pcontext, so);
 
-	free(so);
+	FREE(so);
 
 	fprintf(stdout, "< %s()\n", __func__);
 }
@@ -597,7 +597,7 @@ tegra_create_vertex_state(struct pipe_context *pcontext, unsigned int count,
 	fprintf(stdout, "> %s(pcontext=%p, count=%u, elements=%p)\n",
 		__func__, pcontext, count, elements);
 
-	vtx = calloc(1, sizeof(*vtx));
+	vtx = CALLOC_STRUCT(tegra_vertex_state);
 	if (!vtx) {
 		fprintf(stdout, "< %s() = NULL\n", __func__);
 		return NULL;
@@ -637,7 +637,7 @@ static void tegra_delete_vertex_state(struct pipe_context *pcontext, void *so)
 {
 	fprintf(stdout, "> %s(pcontext=%p, so=%p)\n", __func__, pcontext, so);
 
-	free(so);
+	FREE(so);
 
 	fprintf(stdout, "< %s()\n", __func__);
 }

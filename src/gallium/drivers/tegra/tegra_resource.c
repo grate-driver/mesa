@@ -1,7 +1,7 @@
 #include <stdio.h>
 
 #include "util/u_format.h"
-#include "util/u_inlines.h"
+#include "util/u_memory.h"
 #include "util/u_pack_color.h"
 #include "util/u_transfer.h"
 
@@ -78,7 +78,7 @@ static void tegra_resource_destroy(struct pipe_screen *pscreen,
 		presource);
 
 	drm_tegra_bo_unref(resource->bo);
-	free(resource);
+	FREE(resource);
 
 	fprintf(stdout, "< %s()\n", __func__);
 }
@@ -191,7 +191,7 @@ tegra_screen_resource_create(struct pipe_screen *pscreen,
 	fprintf(stdout, "    bind: %x\n", template->bind);
 	fprintf(stdout, "    flags: %x\n", template->flags);
 
-	resource = calloc(1, sizeof(*resource));
+	resource = CALLOC_STRUCT(tegra_resource);
 	if (!resource) {
 		fprintf(stdout, "< %s() = NULL\n", __func__);
 		return NULL;
@@ -251,7 +251,7 @@ tegra_screen_resource_from_handle(struct pipe_screen *pscreen,
 	fprintf(stdout, "    handle: %u\n", handle->handle);
 	fprintf(stdout, "    stride: %u\n", handle->stride);
 
-	resource = calloc(1, sizeof(*resource));
+	resource = CALLOC_STRUCT(tegra_resource);
 	if (!resource) {
 		fprintf(stdout, "< %s() = NULL\n", __func__);
 		return NULL;
@@ -267,7 +267,7 @@ tegra_screen_resource_from_handle(struct pipe_screen *pscreen,
 				     handle->handle);
 	if (err < 0) {
 		fprintf(stderr, "drm_tegra_bo_from_name() failed: %d\n", err);
-		free(resource);
+		FREE(resource);
 		return NULL;
 	}
 

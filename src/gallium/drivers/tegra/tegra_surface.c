@@ -1,6 +1,7 @@
 #include <stdio.h>
 
 #include "util/u_inlines.h"
+#include "util/u_memory.h"
 
 #include "tegra_surface.h"
 
@@ -15,7 +16,7 @@ tegra_create_surface(struct pipe_context *context,
 	fprintf(stdout, "> %s(context=%p, resource=%p, template=%p)\n",
 		__func__, context, resource, template);
 
-	surface = calloc(1, sizeof(*surface));
+	surface = CALLOC_STRUCT(tegra_surface);
 	if (!surface) {
 		fprintf(stdout, "< %s() = NULL\n", __func__);
 		return NULL;
@@ -43,7 +44,7 @@ static void tegra_surface_destroy(struct pipe_context *context,
 		surface);
 
 	pipe_resource_reference(&surface->texture, NULL);
-	free(surface);
+	FREE(surface);
 
 	fprintf(stdout, "< %s()\n", __func__);
 }
