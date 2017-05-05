@@ -17,6 +17,7 @@ libtegra_la_SOURCES = \
 	hw_host1x01_uclass.h \
 	tegra_context.c \
 	tegra_context.h \
+	tegra_fence.h \
 	tegra_resource.c \
 	tegra_resource.h \
 	tegra_screen.c \
