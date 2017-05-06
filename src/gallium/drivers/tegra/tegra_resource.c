@@ -271,7 +271,7 @@ tegra_screen_resource_from_handle(struct pipe_screen *pscreen,
 		return NULL;
 	}
 
-	resource->pitch = align(template->width0 * util_format_get_blocksize(template->format), 32);
+	resource->pitch = handle->stride;
 
 	fprintf(stdout, "< %s() = %p\n", __func__, &resource->base.b);
 	return &resource->base.b;
