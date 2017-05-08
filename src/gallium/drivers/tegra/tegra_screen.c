@@ -230,6 +230,7 @@ static int tegra_screen_get_shader_param(struct pipe_screen *pscreen,
 		case PIPE_SHADER_CAP_MAX_TEX_INSTRUCTIONS:
 		case PIPE_SHADER_CAP_MAX_TEX_INDIRECTIONS:
 		case PIPE_SHADER_CAP_MAX_TEXTURE_SAMPLERS:
+		case PIPE_SHADER_CAP_MAX_SAMPLER_VIEWS:
 			return 0;
 
 		case PIPE_SHADER_CAP_MAX_CONTROL_FLOW_DEPTH:
@@ -258,10 +259,32 @@ static int tegra_screen_get_shader_param(struct pipe_screen *pscreen,
 			return 1; /* can index constant registers */
 
 		case PIPE_SHADER_CAP_INTEGERS:
+		case PIPE_SHADER_CAP_MAX_SHADER_IMAGES:
 			return 0;
 
 		case PIPE_SHADER_CAP_TGSI_SQRT_SUPPORTED:
 			return 1;
+
+		case PIPE_SHADER_CAP_TGSI_DROUND_SUPPORTED:
+		case PIPE_SHADER_CAP_TGSI_DFRACEXP_DLDEXP_SUPPORTED:
+		case PIPE_SHADER_CAP_TGSI_FMA_SUPPORTED:
+		case PIPE_SHADER_CAP_MAX_SHADER_BUFFERS:
+			return 0;
+
+		case PIPE_SHADER_CAP_TGSI_ANY_INOUT_DECL_RANGE:
+			return 0;
+
+		case PIPE_SHADER_CAP_MAX_UNROLL_ITERATIONS_HINT:
+			return INT_MAX;
+
+		case PIPE_SHADER_CAP_SUPPORTED_IRS:
+			return PIPE_SHADER_IR_TGSI;
+
+		case PIPE_SHADER_CAP_PREFERRED_IR:
+			return PIPE_SHADER_IR_TGSI;
+
+		case PIPE_SHADER_CAP_LOWER_IF_THRESHOLD:
+			return INT_MAX;
 
 		default:
 			fprintf(stdout, "%s: unsupported vertex-shader parameter: %d\n", __func__, param);
@@ -308,13 +331,40 @@ static int tegra_screen_get_shader_param(struct pipe_screen *pscreen,
 			return 0;
 
 		case PIPE_SHADER_CAP_INTEGERS:
+		case PIPE_SHADER_CAP_MAX_SHADER_IMAGES:
 			return 0;
 
 		case PIPE_SHADER_CAP_MAX_TEXTURE_SAMPLERS:
+		case PIPE_SHADER_CAP_MAX_SAMPLER_VIEWS:
 			return 16;
 
 		case PIPE_SHADER_CAP_TGSI_SQRT_SUPPORTED:
 			return 1;
+
+		case PIPE_SHADER_CAP_TGSI_DROUND_SUPPORTED:
+		case PIPE_SHADER_CAP_TGSI_DFRACEXP_DLDEXP_SUPPORTED:
+			return 0;
+
+		case PIPE_SHADER_CAP_TGSI_FMA_SUPPORTED:
+			return 0; /* might really be true, but need more testing to be sure */
+
+		case PIPE_SHADER_CAP_TGSI_ANY_INOUT_DECL_RANGE:
+			return 0;
+
+		case PIPE_SHADER_CAP_MAX_UNROLL_ITERATIONS_HINT:
+			return INT_MAX;
+
+		case PIPE_SHADER_CAP_MAX_SHADER_BUFFERS:
+			return 0;
+
+		case PIPE_SHADER_CAP_SUPPORTED_IRS:
+			return PIPE_SHADER_IR_TGSI;
+
+		case PIPE_SHADER_CAP_PREFERRED_IR:
+			return PIPE_SHADER_IR_TGSI;
+
+		case PIPE_SHADER_CAP_LOWER_IF_THRESHOLD:
+			return INT_MAX;
 
 		default:
 			fprintf(stdout, "%s: unsupported fragment-shader parameter: %d\n", __func__, param);
