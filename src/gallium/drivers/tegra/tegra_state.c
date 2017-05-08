@@ -107,7 +107,7 @@ static void tegra_set_vertex_buffers(struct pipe_context *pcontext,
 		__func__, pcontext, start, count, buffer);
 	fprintf(stdout, "  buffers:\n");
 
-	for (i = 0; i < count; i++) {
+	for (i = 0; buffer != NULL && i < count; i++) {
 		const struct pipe_vertex_buffer *vb = &buffer[i];
 
 		fprintf(stdout, "    %u:\n", i);
@@ -144,11 +144,12 @@ static void tegra_set_index_buffer(struct pipe_context *pcontext,
 	fprintf(stdout, "> %s(pcontext=%p, buffer=%p)\n", __func__, pcontext,
 		buffer);
 	fprintf(stdout, "  buffer:\n");
-	fprintf(stdout, "    index_size: %u\n", buffer->index_size);
-	fprintf(stdout, "    offset: %u\n", buffer->offset);
-	fprintf(stdout, "    buffer: %p\n", buffer->buffer);
 
 	if (buffer) {
+		fprintf(stdout, "    index_size: %u\n", buffer->index_size);
+		fprintf(stdout, "    offset: %u\n", buffer->offset);
+		fprintf(stdout, "    buffer: %p\n", buffer->buffer);
+
 		pipe_resource_reference(&context->index_buffer.buffer,
 					buffer->buffer);
 		context->index_buffer.index_size = buffer->index_size;
