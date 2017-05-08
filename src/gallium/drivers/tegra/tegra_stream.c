@@ -176,6 +176,22 @@ int tegra_stream_flush(struct tegra_stream *stream)
         goto cleanup;
     }
 
+    if (stream->num_words == stream->buffer_size) {
+        stream->status = TEGRADRM_STREAM_CONSTRUCTION_FAILED;
+        fprintf(stderr, "Commands buffer is full\n");
+        result = -1;
+        goto cleanup;
+    }
+
+    result = drm_tegra_pushbuf_sync(stream->buffer.pushbuf,
+                                    DRM_TEGRA_SYNCPT_COND_OP_DONE);
+    if (result != 0) {
+        stream->status = TEGRADRM_STREAM_CONSTRUCTION_FAILED;
+        fprintf(stderr, "drm_tegra_pushbuf_sync() failed %d\n", result);
+        result = -1;
+        goto cleanup;
+    }
+
     result = drm_tegra_job_submit(stream->job, &fence);
     if (result != 0) {
         fprintf(stderr, "drm_tegra_job_submit() failed %d\n", result);
@@ -224,7 +240,11 @@ int tegra_stream_begin(struct tegra_stream *stream)
     int ret;
 
     /* check stream and its state */
-    if (!(stream && stream->status == TEGRADRM_STREAM_FREE)) {
+    if (stream->status == TEGRADRM_STREAM_READY) {
+        goto out;
+    }
+
+    if (stream->status != TEGRADRM_STREAM_FREE) {
         fprintf(stderr, "Stream status isn't FREE\n");
         return -1;
     }
@@ -243,13 +263,14 @@ int tegra_stream_begin(struct tegra_stream *stream)
         return -1;
     }
 
-    stream->class_id = 0;
-    stream->status = TEGRADRM_STREAM_CONSTRUCT;
-
     /* include following in num words:
      *  - syncpoint increment at the end of the stream (2 words)
      */
     stream->num_words = stream->buffer_size - 2;
+
+out:
+    stream->class_id = 0;
+    stream->status = TEGRADRM_STREAM_CONSTRUCT;
 
     return 0;
 }
@@ -342,30 +363,13 @@ int tegra_stream_push_setclass(struct tegra_stream *stream,
 /*
  * tegra_stream_end(stream)
  *
- * Mark end of stream. This function pushes last syncpoint increment for
- * marking end of stream.
+ * Mark end of stream.
  */
 
 int tegra_stream_end(struct tegra_stream *stream)
 {
-    int ret;
-
-    if (!(stream && stream->status == TEGRADRM_STREAM_CONSTRUCT)) {
+    if (stream->status != TEGRADRM_STREAM_CONSTRUCT) {
         fprintf(stderr, "Stream status isn't CONSTRUCT\n");
-        return -1;
-    }
-
-    if (stream->num_words == stream->buffer_size) {
-        stream->status = TEGRADRM_STREAM_CONSTRUCTION_FAILED;
-        fprintf(stderr, "Commands buffer is full\n");
-        return -1;
-    }
-
-    ret = drm_tegra_pushbuf_sync(stream->buffer.pushbuf,
-                                 DRM_TEGRA_SYNCPT_COND_OP_DONE);
-    if (ret != 0) {
-        stream->status = TEGRADRM_STREAM_CONSTRUCTION_FAILED;
-        fprintf(stderr, "drm_tegra_pushbuf_sync() failed %d\n", ret);
         return -1;
     }
 

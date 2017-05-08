@@ -390,13 +390,6 @@ static void tegra_blit(struct pipe_context *pcontext,
 	tegra_stream_push(&gr2d->stream, value);                 /* 0x03a - dstps */
 
 	tegra_stream_end(&gr2d->stream);
-
-	err = tegra_stream_flush(&gr2d->stream);
-	if (err < 0) {
-		fprintf(stderr, "tegra_stream_flush() failed: %d\n", err);
-		goto out;
-	}
-
 out:
 	fprintf(stdout, "< %s()\n", __func__);
 }
@@ -446,7 +439,7 @@ static int tegra_fill(struct tegra_channel *gr2d,
 		break;
 	default:
 		assert(0);
-		return -1;
+		goto out;
 	}
 	tegra_stream_push(&gr2d->stream, value);           /* 0x01f - controlmain */
 
@@ -466,14 +459,8 @@ static int tegra_fill(struct tegra_channel *gr2d,
 	tegra_stream_push(&gr2d->stream, host1x_opcode_mask(0x38, 0x05));
 	tegra_stream_push(&gr2d->stream, height << 16 | width); /* 0x038 - dstsize */
 	tegra_stream_push(&gr2d->stream, dsty << 16 | dstx);    /* 0x03a - dstps */
-
+out:
 	tegra_stream_end(&gr2d->stream);
-
-	err = tegra_stream_flush(&gr2d->stream);
-	if (err < 0) {
-		fprintf(stderr, "tegra_stream_flush() failed: %d\n", err);
-		return -1;
-	}
 
 	return 0;
 }
