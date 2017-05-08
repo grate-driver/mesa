@@ -469,6 +469,12 @@ static int tegra_fill(struct tegra_channel *gr2d,
 
 	tegra_stream_end(&gr2d->stream);
 
+	err = tegra_stream_flush(&gr2d->stream);
+	if (err < 0) {
+		fprintf(stderr, "tegra_stream_flush() failed: %d\n", err);
+		return -1;
+	}
+
 	return 0;
 }
 
