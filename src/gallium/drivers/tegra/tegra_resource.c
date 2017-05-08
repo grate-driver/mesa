@@ -214,11 +214,11 @@ tegra_screen_resource_create(struct pipe_screen *pscreen,
 		flags = DRM_TEGRA_GEM_CREATE_BOTTOM_UP;
 
 		/* use linear layout for staging-textures, otherwise tiled */
-		if (template->usage != PIPE_USAGE_STAGING && !(template->bind & PIPE_BIND_SHARED)) {
-			flags |= DRM_TEGRA_GEM_CREATE_TILED;
-			height = align(height, 16);
-			resource->tiled = 1;
-		}
+// 		if (template->usage != PIPE_USAGE_STAGING && !(template->bind & PIPE_BIND_SHARED)) {
+// 			flags |= DRM_TEGRA_GEM_CREATE_TILED;
+// 			height = align(height, 16);
+// 			resource->tiled = 1;
+// 		}
 	}
 
 	size = resource->pitch * height;
@@ -361,7 +361,7 @@ static void tegra_blit(struct pipe_context *pcontext,
 	 * [20:20] destination write tile mode (0: linear, 1: tiled)
 	 * [ 0: 0] tile mode Y/RGB (0: linear, 1: tiled)
 	 */
-	value = 0/*(dst->tiled << 20) | src->tiled*/;
+	value = (dst->tiled << 20) | src->tiled;
 	tegra_stream_push(&gr2d->stream, value);                 /* 0x046 - tilemode */
 
 	tegra_stream_push(&gr2d->stream, host1x_opcode_mask(0x02b, 0xe149));
@@ -454,7 +454,7 @@ static int tegra_fill(struct tegra_channel *gr2d,
 	tegra_stream_push(&gr2d->stream, fill_value);           /* 0x035 - srcfgc */
 
 	tegra_stream_push(&gr2d->stream, host1x_opcode_nonincr(0x46, 1));
-	tegra_stream_push(&gr2d->stream, 0/*dst->tiled << 20*/); /* 0x046 - tilemode */
+	tegra_stream_push(&gr2d->stream, dst->tiled << 20);     /* 0x046 - tilemode */
 
 	tegra_stream_push(&gr2d->stream, host1x_opcode_mask(0x38, 0x05));
 	tegra_stream_push(&gr2d->stream, height << 16 | width); /* 0x038 - dstsize */
