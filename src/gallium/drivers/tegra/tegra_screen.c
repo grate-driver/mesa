@@ -187,7 +187,7 @@ static int tegra_screen_get_param(struct pipe_screen *pscreen,
 		return 1;
 
 	default:
-		fprintf(stdout, "  unsupported parameter: %d\n", param);
+		fprintf(stdout, "%s: unsupported parameter: %d\n", __func__, param);
 		return 0;
 	}
 }
@@ -209,7 +209,7 @@ static float tegra_screen_get_paramf(struct pipe_screen *pscreen,
 		return 16.0f;
 
 	default:
-		fprintf(stdout, "  unsupported parameter: %d\n", param);
+		fprintf(stdout, "%s: unsupported parameter: %d\n", __func__, param);
 		return 0.0f;
 	}
 }
@@ -264,7 +264,7 @@ static int tegra_screen_get_shader_param(struct pipe_screen *pscreen,
 			return 1;
 
 		default:
-			fprintf(stdout, "unsupported vertex-shader parameter: %d\n", param);
+			fprintf(stdout, "%s: unsupported vertex-shader parameter: %d\n", __func__, param);
 			return 0;
 		}
 
@@ -317,7 +317,7 @@ static int tegra_screen_get_shader_param(struct pipe_screen *pscreen,
 			return 1;
 
 		default:
-			fprintf(stdout, "unsupported parameter: %d\n", param);
+			fprintf(stdout, "%s: unsupported fragment-shader parameter: %d\n", __func__, param);
 			return 0;
 		}
 		break;
@@ -331,7 +331,7 @@ static int tegra_screen_get_shader_param(struct pipe_screen *pscreen,
 		return 0;
 
 	default:
-		fprintf(stdout, "  unknown shader type: %u\n", shader);
+		fprintf(stdout, "%s: unknown shader type: %u\n", __func__, shader);
 		return 0;
 	}
 }
