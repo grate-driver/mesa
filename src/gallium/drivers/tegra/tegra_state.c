@@ -6,20 +6,29 @@
 #include "tegra_context.h"
 #include "tegra_state.h"
 
+#define unimplemented() printf("TODO: %s()\n", __func__)
+
 static void tegra_set_sample_mask(struct pipe_context *pcontext,
 				  unsigned int sample_mask)
 {
-	fprintf(stdout, "> %s(pcontext=%p, sample_mask=%x)\n", __func__,
-		pcontext, sample_mask);
-	fprintf(stdout, "< %s()\n", __func__);
+	unimplemented();
 }
 
 static void tegra_set_constant_buffer(struct pipe_context *pcontext,
 				      unsigned int shader, unsigned int index,
 				      const struct pipe_constant_buffer *buffer)
 {
-	fprintf(stdout, "> %s(pcontext=%p, shader=%u, index=%u, buffer=%p)\n",
+	fprintf(stdout, "> %s(pcontext=%p, shader=%d, index=%d, buffer=%p)\n",
 		__func__, pcontext, shader, index, buffer);
+	fprintf(stdout, "  buffer:\n");
+
+	if (buffer) {
+		fprintf(stdout, "    buffer: %p\n", buffer->buffer);
+		fprintf(stdout, "    buffer_offset: %u\n", buffer->buffer_offset);
+		fprintf(stdout, "    buffer_size: %u\n", buffer->buffer_size);
+		assert(!buffer->user_buffer);
+	}
+
 	fprintf(stdout, "< %s()\n", __func__);
 }
 
@@ -29,18 +38,6 @@ tegra_set_framebuffer_state(struct pipe_context *pcontext,
 {
 	struct tegra_context *context = tegra_context(pcontext);
 	unsigned int i;
-
-	fprintf(stdout, "> %s(pcontext=%p, framebuffer=%p)\n", __func__,
-		pcontext, framebuffer);
-	fprintf(stdout, "  framebuffer:\n");
-	fprintf(stdout, "    resolution: %ux%u\n", framebuffer->width,
-		framebuffer->height);
-	fprintf(stdout, "    nr_cbufs: %u\n", framebuffer->nr_cbufs);
-
-	for (i = 0; i < framebuffer->nr_cbufs; i++)
-		fprintf(stdout, "      %u: %p\n", i, framebuffer->cbufs[i]);
-
-	fprintf(stdout, "    zsbuf: %p\n", framebuffer->zsbuf);
 
 	for (i = 0; i < framebuffer->nr_cbufs; i++) {
 		struct pipe_surface *ref = framebuffer->cbufs[i];
@@ -58,16 +55,12 @@ tegra_set_framebuffer_state(struct pipe_context *pcontext,
 	context->framebuffer.base.width = framebuffer->width;
 	context->framebuffer.base.height = framebuffer->height;
 	context->framebuffer.base.nr_cbufs = framebuffer->nr_cbufs;
-
-	fprintf(stdout, "< %s()\n", __func__);
 }
 
 static void tegra_set_polygon_stipple(struct pipe_context *pcontext,
 				      const struct pipe_poly_stipple *stipple)
 {
-	fprintf(stdout, "> %s(pcontext=%p, stipple=%p)\n", __func__, pcontext,
-		stipple);
-	fprintf(stdout, "< %s()\n", __func__);
+	unimplemented();
 }
 
 static void tegra_set_scissor_states(struct pipe_context *pcontext,
@@ -75,10 +68,8 @@ static void tegra_set_scissor_states(struct pipe_context *pcontext,
                                unsigned num_scissors,
                                const struct pipe_scissor_state * scissors)
 {
-	fprintf(stdout, "> %s(pcontext=%p, start_slot=%d, num_scissors=%d, scissors=%p)\n",
-		__func__, pcontext, start_slot, num_scissors, scissors);
 	assert(num_scissors == 1);
-	fprintf(stdout, "< %s()\n", __func__);
+	unimplemented();
 }
 
 static void tegra_set_viewport_states(struct pipe_context *pcontext,
@@ -86,10 +77,8 @@ static void tegra_set_viewport_states(struct pipe_context *pcontext,
                                 unsigned num_viewports,
                                 const struct pipe_viewport_state *viewports)
 {
-	fprintf(stdout, "> %s(pcontext=%p, start_slot=%d, num_viewports=%d, viewports=%p)\n",
-		__func__, pcontext, start_slot, num_viewports, viewports);
 	assert(num_viewports == 1);
-	fprintf(stdout, "< %s()\n", __func__);
+	unimplemented();
 }
 
 static void tegra_set_vertex_buffers(struct pipe_context *pcontext,
@@ -128,9 +117,7 @@ static void tegra_set_sampler_views(struct pipe_context *pcontext,
 				    unsigned start_slot, unsigned num_views,
 				    struct pipe_sampler_view **views)
 {
-	fprintf(stdout, "> %s(pcontext=%p, shader=%u, start_slot=%u num_views=%u, views=%p)\n",
-		__func__, pcontext, shader, start_slot, num_views, views);
-	fprintf(stdout, "< %s()\n", __func__);
+	unimplemented();
 }
 
 static void tegra_set_index_buffer(struct pipe_context *pcontext,
@@ -175,36 +162,23 @@ void tegra_context_state_init(struct pipe_context *pcontext)
 static void *tegra_create_blend_state(struct pipe_context *pcontext,
 				      const struct pipe_blend_state *template)
 {
-	struct tegra_blend_state *so;
-
-	fprintf(stdout, "> %s(pcontext=%p, template=%p)\n", __func__,
-		pcontext, template);
-
-	so = CALLOC_STRUCT(tegra_blend_state);
-	if (!so) {
-		fprintf(stdout, "< %s() = NULL\n", __func__);
+	struct tegra_blend_state *so = CALLOC_STRUCT(tegra_blend_state);
+	if (!so)
 		return NULL;
-	}
 
 	so->base = *template;
 
-	fprintf(stdout, "< %s() = %p\n", __func__, so);
 	return so;
 }
 
 static void tegra_bind_blend_state(struct pipe_context *pcontext, void *so)
 {
-	fprintf(stdout, "> %s(pcontext=%p, so=%p)\n", __func__, pcontext, so);
-	fprintf(stdout, "< %s()\n", __func__);
+	unimplemented();
 }
 
 static void tegra_delete_blend_state(struct pipe_context *pcontext, void *so)
 {
-	fprintf(stdout, "> %s(pcontext=%p, so=%p)\n", __func__, pcontext, so);
-
 	FREE(so);
-
-	fprintf(stdout, "< %s()\n", __func__);
 }
 
 void tegra_context_blend_init(struct pipe_context *pcontext)
@@ -218,20 +192,12 @@ static void *
 tegra_create_sampler_state(struct pipe_context *pcontext,
 			   const struct pipe_sampler_state *template)
 {
-	struct tegra_sampler_state *so;
-
-	fprintf(stdout, "> %s(pcontext=%p, template=%p)\n", __func__,
-		pcontext, template);
-
-	so = CALLOC_STRUCT(tegra_sampler_state);
-	if (!so) {
-		fprintf(stdout, "< %s() = NULL\n", __func__);
+	struct tegra_sampler_state *so = CALLOC_STRUCT(tegra_sampler_state);
+	if (!so)
 		return NULL;
-	}
 
 	so->base = *template;
 
-	fprintf(stdout, "< %s() = %p\n", __func__, so);
 	return so;
 }
 
@@ -239,18 +205,12 @@ static void tegra_bind_sampler_states(struct pipe_context *pcontext,
                                       unsigned shader, unsigned start_slot,
                                       unsigned num_samplers, void **samplers)
 {
-	fprintf(stdout, "> %s(pcontext=%p, shader=%u, start_slot=%u, num_samplerst=%u, samplers=%p)\n", __func__,
-		pcontext, shader, start_slot, num_samplers, samplers);
-	fprintf(stdout, "< %s()\n", __func__);
+	unimplemented();
 }
 
 static void tegra_delete_sampler_state(struct pipe_context *pcontext, void *so)
 {
-	fprintf(stdout, "> %s(pcontext=%p, so=%p)\n", __func__, pcontext, so);
-
 	FREE(so);
-
-	fprintf(stdout, "< %s()\n", __func__);
 }
 
 void tegra_context_sampler_init(struct pipe_context *pcontext)
@@ -264,38 +224,25 @@ static void *
 tegra_create_rasterizer_state(struct pipe_context *pcontext,
 			      const struct pipe_rasterizer_state *template)
 {
-	struct tegra_rasterizer_state *so;
-
-	fprintf(stdout, "> %s(pcontext=%p, template=%p)\n", __func__,
-		pcontext, template);
-
-	so = CALLOC_STRUCT(tegra_rasterizer_state);
-	if (!so) {
-		fprintf(stdout, "< %s() = NULL\n", __func__);
+	struct tegra_rasterizer_state *so = CALLOC_STRUCT(tegra_rasterizer_state);
+	if (!so)
 		return NULL;
-	}
 
 	so->base = *template;
 
-	fprintf(stdout, "< %s() = %p\n", __func__, so);
 	return so;
 }
 
 static void tegra_bind_rasterizer_state(struct pipe_context *pcontext,
 					void *so)
 {
-	fprintf(stdout, "> %s(pcontext=%p, so=%p)\n", __func__, pcontext, so);
-	fprintf(stdout, "< %s()\n", __func__);
+	unimplemented();
 }
 
 static void tegra_delete_rasterizer_state(struct pipe_context *pcontext,
 					  void *so)
 {
-	fprintf(stdout, "> %s(pcontext=%p, so=%p)\n", __func__, pcontext, so);
-
 	FREE(so);
-
-	fprintf(stdout, "< %s()\n", __func__);
 }
 
 void tegra_context_rasterizer_init(struct pipe_context *pcontext)
@@ -309,36 +256,23 @@ static void *
 tegra_create_zsa_state(struct pipe_context *pcontext,
 		       const struct pipe_depth_stencil_alpha_state *template)
 {
-	struct tegra_zsa_state *so;
-
-	fprintf(stdout, "> %s(pcontext=%p, template=%p)\n", __func__,
-		pcontext, template);
-
-	so = CALLOC_STRUCT(tegra_zsa_state);
-	if (!so) {
-		fprintf(stdout, "< %s() = NULL\n", __func__);
+	struct tegra_zsa_state *so = CALLOC_STRUCT(tegra_zsa_state);
+	if (!so)
 		return NULL;
-	}
 
 	so->base = *template;
 
-	fprintf(stdout, "< %s() = %p\n", __func__, so);
 	return so;
 }
 
 static void tegra_bind_zsa_state(struct pipe_context *pcontext, void *so)
 {
-	fprintf(stdout, "> %s(pcontext=%p, so=%p)\n", __func__, pcontext, so);
-	fprintf(stdout, "< %s()\n", __func__);
+	unimplemented();
 }
 
 static void tegra_delete_zsa_state(struct pipe_context *pcontext, void *so)
 {
-	fprintf(stdout, "> %s(pcontext=%p, so=%p)\n", __func__, pcontext, so);
-
 	FREE(so);
-
-	fprintf(stdout, "< %s()\n", __func__);
 }
 
 void tegra_context_zsa_init(struct pipe_context *pcontext)
@@ -352,36 +286,23 @@ static void *
 tegra_create_vs_state(struct pipe_context *pcontext,
 		      const struct pipe_shader_state *template)
 {
-	struct tegra_vs_state *so;
-
-	fprintf(stdout, "> %s(pcontext=%p, template=%p)\n", __func__,
-		pcontext, template);
-
-	so = CALLOC_STRUCT(tegra_vs_state);
-	if (!so) {
-		fprintf(stdout, "< %s() = NULL\n", __func__);
+	struct tegra_vs_state *so = CALLOC_STRUCT(tegra_vs_state);
+	if (!so)
 		return NULL;
-	}
 
 	so->base = *template;
 
-	fprintf(stdout, "< %s() = %p\n", __func__, so);
 	return so;
 }
 
 static void tegra_bind_vs_state(struct pipe_context *pcontext, void *so)
 {
-	fprintf(stdout, "> %s(pcontext=%p, so=%p)\n", __func__, pcontext, so);
-	fprintf(stdout, "< %s()\n", __func__);
+	unimplemented();
 }
 
 static void tegra_delete_vs_state(struct pipe_context *pcontext, void *so)
 {
-	fprintf(stdout, "> %s(pcontext=%p, so=%p)\n", __func__, pcontext, so);
-
 	FREE(so);
-
-	fprintf(stdout, "< %s()\n", __func__);
 }
 
 void tegra_context_vs_init(struct pipe_context *pcontext)
@@ -395,36 +316,23 @@ static void *
 tegra_create_fs_state(struct pipe_context *pcontext,
 		      const struct pipe_shader_state *template)
 {
-	struct tegra_fs_state *so;
-
-	fprintf(stdout, "> %s(pcontext=%p, template=%p)\n", __func__,
-		pcontext, template);
-
-	so = CALLOC_STRUCT(tegra_fs_state);
-	if (!so) {
-		fprintf(stdout, "< %s() = NULL\n", __func__);
+	struct tegra_fs_state *so = CALLOC_STRUCT(tegra_fs_state);
+	if (!so)
 		return NULL;
-	}
 
 	so->base = *template;
 
-	fprintf(stdout, "< %s() = %p\n", __func__, so);
 	return so;
 }
 
 static void tegra_bind_fs_state(struct pipe_context *pcontext, void *so)
 {
-	fprintf(stdout, "> %s(pcontext=%p, so=%p)\n", __func__, pcontext, so);
-	fprintf(stdout, "< %s()\n", __func__);
+	unimplemented();
 }
 
 static void tegra_delete_fs_state(struct pipe_context *pcontext, void *so)
 {
-	fprintf(stdout, "> %s(pcontext=%p, so=%p)\n", __func__, pcontext, so);
-
 	FREE(so);
-
-	fprintf(stdout, "< %s()\n", __func__);
 }
 
 void tegra_context_fs_init(struct pipe_context *pcontext)
@@ -438,21 +346,13 @@ static void *
 tegra_create_vertex_state(struct pipe_context *pcontext, unsigned int count,
 			  const struct pipe_vertex_element *elements)
 {
-	struct tegra_vertex_state *vtx;
-
-	fprintf(stdout, "> %s(pcontext=%p, count=%u, elements=%p)\n",
-		__func__, pcontext, count, elements);
-
-	vtx = CALLOC_STRUCT(tegra_vertex_state);
-	if (!vtx) {
-		fprintf(stdout, "< %s() = NULL\n", __func__);
+	struct tegra_vertex_state *vtx = CALLOC_STRUCT(tegra_vertex_state);
+	if (!vtx)
 		return NULL;
-	}
 
 	memcpy(vtx->elements, elements, sizeof(*elements) * count);
 	vtx->num_elements = count;
 
-	fprintf(stdout, "< %s() = %p\n", __func__, vtx);
 	return vtx;
 }
 
@@ -481,11 +381,7 @@ static void tegra_bind_vertex_state(struct pipe_context *pcontext, void *so)
 
 static void tegra_delete_vertex_state(struct pipe_context *pcontext, void *so)
 {
-	fprintf(stdout, "> %s(pcontext=%p, so=%p)\n", __func__, pcontext, so);
-
 	FREE(so);
-
-	fprintf(stdout, "< %s()\n", __func__);
 }
 
 static void tegra_draw_vbo(struct pipe_context *pcontext,

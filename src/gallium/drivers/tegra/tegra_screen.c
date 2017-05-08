@@ -10,30 +10,20 @@ static void tegra_screen_destroy(struct pipe_screen *pscreen)
 {
 	struct tegra_screen *screen = tegra_screen(pscreen);
 
-	fprintf(stdout, "> %s(pscreen=%p)\n", __func__, pscreen);
-
 	slab_destroy_parent(&screen->transfer_pool);
 
 	drm_tegra_close(screen->drm);
 	FREE(screen);
-
-	fprintf(stdout, "< %s()\n", __func__);
 }
 
 static const char *tegra_screen_get_name(struct pipe_screen *pscreen)
 {
-	const char *name = "Tegra";
-	fprintf(stderr, "> %s(pscreen=%p)\n", __func__, pscreen);
-	fprintf(stderr, "< %s() = %s\n", __func__, name);
-	return name;
+	return "Tegra";
 }
 
 static const char *tegra_screen_get_vendor(struct pipe_screen *pscreen)
 {
-	const char *vendor = "NVIDIA";
-	fprintf(stderr, "> %s(pscreen=%p)\n", __func__, pscreen);
-	fprintf(stderr, "< %s() = %s\n", __func__, vendor);
-	return vendor;
+	return "NVIDIA";
 }
 
 static int tegra_screen_get_param(struct pipe_screen *pscreen,
@@ -489,19 +479,9 @@ static int tegra_screen_get_shader_param(struct pipe_screen *pscreen,
 		break;
 
 	case PIPE_SHADER_GEOMETRY:
-		fprintf(stdout, "  PIPE_SHADER_GEOMETRY not supported\n");
-		return 0;
-
 	case PIPE_SHADER_TESS_CTRL:
-		fprintf(stdout, "  PIPE_SHADER_TESS_CTRL not supported\n");
-		return 0;
-
 	case PIPE_SHADER_TESS_EVAL:
-		fprintf(stdout, "  PIPE_SHADER_TESS_EVAL not supported\n");
-		return 0;
-
 	case PIPE_SHADER_COMPUTE:
-		fprintf(stdout, "  PIPE_SHADER_COMPUTE not supported\n");
 		return 0;
 
 	default:
@@ -518,13 +498,6 @@ static boolean tegra_screen_is_format_supported(struct pipe_screen *pscreen,
 {
 	boolean ret = FALSE;
 
-	fprintf(stdout, "> %s\n", __func__);
-
-	fprintf(stdout, "  format: %u\n", format);
-	fprintf(stdout, "  target: %u\n", target);
-	fprintf(stdout, "  sample_count: %u\n", sample_count);
-	fprintf(stdout, "  bindings: %u\n", bindings);
-
 	switch (format) {
 	case PIPE_FORMAT_B8G8R8A8_UNORM:
 	case PIPE_FORMAT_B8G8R8X8_UNORM:
@@ -538,8 +511,6 @@ static boolean tegra_screen_is_format_supported(struct pipe_screen *pscreen,
 		break;
 	}
 
-	fprintf(stdout, "< %s() = %d\n", __func__, ret);
-
 	return ret;
 }
 
@@ -548,8 +519,6 @@ tegra_screen_fence_reference(struct pipe_screen *pscreen,
 			struct pipe_fence_handle **ptr,
 			struct pipe_fence_handle *fence)
 {
-	fprintf(stdout, "> %s\n", __func__);
-
 // 	assert(ptr && *ptr);
 // 	assert(fence);
 //
@@ -559,7 +528,6 @@ tegra_screen_fence_reference(struct pipe_screen *pscreen,
 // 	}
 //
 // 	*ptr = fence;
-	fprintf(stdout, "< %s()\n", __func__);
 }
 
 static boolean
@@ -568,26 +536,14 @@ tegra_screen_fence_finish(struct pipe_screen *screen,
 		struct pipe_fence_handle *fence,
 		uint64_t timeout)
 {
-	boolean ret = 0;
-
-	fprintf(stdout, "> %s\n", __func__);
-
-	fprintf(stdout, "< %s() = %d\n", __func__, ret);
-
-	return ret;
+	return 0;
 }
 
 struct pipe_screen *tegra_screen_create(struct drm_tegra *drm)
 {
-	struct tegra_screen *screen;
-
-	fprintf(stdout, "> %s(drm=%p)\n", __func__, drm);
-
-	screen = CALLOC_STRUCT(tegra_screen);
-	if (!screen) {
-		fprintf(stdout, "< %s() = NULL\n", __func__);
+	struct tegra_screen *screen = CALLOC_STRUCT(tegra_screen);
+	if (!screen)
 		return NULL;
-	}
 
 	screen->drm = drm;
 
@@ -608,6 +564,5 @@ struct pipe_screen *tegra_screen_create(struct drm_tegra *drm)
 
 	slab_create_parent(&screen->transfer_pool, sizeof(struct pipe_transfer), 16);
 
-	fprintf(stdout, "< %s() = %p\n", __func__, &screen->base);
 	return &screen->base;
 }

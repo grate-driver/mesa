@@ -31,13 +31,6 @@ tegra_resource_get_handle(struct pipe_screen *pscreen,
 	boolean ret = TRUE;
 	int err;
 
-	fprintf(stdout, "> %s(pscreen=%p, presource=%p, handle=%p)\n",
-		__func__, pscreen, presource, handle);
-	fprintf(stdout, "  handle:\n");
-	fprintf(stdout, "    type: %u\n", handle->type);
-	fprintf(stdout, "    handle: %u\n", handle->handle);
-	fprintf(stdout, "    stride: %u\n", handle->stride);
-
 	if (handle->type == DRM_API_HANDLE_TYPE_SHARED) {
 		err = drm_tegra_bo_get_name(resource->bo, &handle->handle);
 		if (err < 0) {
@@ -60,12 +53,9 @@ tegra_resource_get_handle(struct pipe_screen *pscreen,
 
 	if (ret) {
 		handle->stride = resource->pitch;
-		fprintf(stdout, "  handle: %u\n", handle->handle);
-		fprintf(stdout, "  stride: %u\n", handle->stride);
 	}
 
 out:
-	fprintf(stdout, "< %s() = %d\n", __func__, ret);
 	return ret;
 }
 
@@ -74,13 +64,8 @@ static void tegra_resource_destroy(struct pipe_screen *pscreen,
 {
 	struct tegra_resource *resource = tegra_resource(presource);
 
-	fprintf(stdout, "> %s(pscreen=%p, presource=%p)\n", __func__, pscreen,
-		presource);
-
 	drm_tegra_bo_unref(resource->bo);
 	FREE(resource);
-
-	fprintf(stdout, "< %s()\n", __func__);
 }
 
 static void *tegra_resource_transfer_map(struct pipe_context *pcontext,
@@ -93,9 +78,6 @@ static void *tegra_resource_transfer_map(struct pipe_context *pcontext,
 	struct tegra_resource *resource = tegra_resource(presource);
 	void *ret = NULL;
 	struct pipe_transfer *ptrans;
-
-	fprintf(stdout, "> %s(pcontext=%p, presource=%p, level=%u, usage=%u, box=%p, transfer=%p)\n",
-		__func__, pcontext, presource, level, usage, box, transfer);
 
 	if (usage & PIPE_TRANSFER_MAP_DIRECTLY)
 		goto out;
@@ -119,13 +101,11 @@ static void *tegra_resource_transfer_map(struct pipe_context *pcontext,
 	*transfer = ptrans;
 
 out:
-	fprintf(stdout, "< %s() = %p\n", __func__, ret);
 	return ret;
 
 err:
 	if (ret)
 		drm_tegra_bo_unmap(resource->bo);
-	fprintf(stdout, "< %s() = NULL\n", __func__);
 	return NULL;
 }
 
@@ -134,9 +114,6 @@ tegra_resource_transfer_flush_region(struct pipe_context *pcontext,
 				     struct pipe_transfer *transfer,
 				     const struct pipe_box *box)
 {
-	fprintf(stdout, "> %s(pcontext=%p, transfer=%p, presource=%p box=%p)\n",
-		__func__, pcontext, transfer, transfer->resource, box);
-	fprintf(stdout, "< %s()\n", __func__);
 }
 
 static void tegra_resource_transfer_unmap(struct pipe_context *pcontext,
@@ -144,15 +121,10 @@ static void tegra_resource_transfer_unmap(struct pipe_context *pcontext,
 {
 	struct tegra_context *context = tegra_context(pcontext);
 
-	fprintf(stdout, "> %s(pcontext=%p, transfer=%p presource=%p)\n",
-		__func__, pcontext, transfer, transfer->resource);
-
 	drm_tegra_bo_unmap(tegra_resource(transfer->resource)->bo);
 
 	pipe_resource_reference(&transfer->resource, NULL);
 	slab_free(&context->transfer_pool, transfer);
-
-	fprintf(stdout, "< %s()\n", __func__);
 }
 
 static const struct u_resource_vtbl tegra_resource_vtbl = {
@@ -167,11 +139,7 @@ static boolean
 tegra_screen_can_create_resource(struct pipe_screen *pscreen,
 				 const struct pipe_resource *template)
 {
-	bool ret = TRUE;
-	fprintf(stdout, "> %s(pscreen=%p, template=%p)\n", __func__, pscreen,
-		template);
-	fprintf(stdout, "< %s() = %d\n", __func__, ret);
-	return ret;
+	return TRUE;
 }
 
 static struct pipe_resource *
@@ -183,26 +151,9 @@ tegra_screen_resource_create(struct pipe_screen *pscreen,
 	uint32_t flags = 0, height, size;
 	int err;
 
-	fprintf(stdout, "> %s(pscreen=%p, template=%p)\n", __func__, pscreen,
-		template);
-	fprintf(stdout, "  template:\n");
-	fprintf(stdout, "    target: %d\n", template->target);
-	fprintf(stdout, "    format: %d\n", template->format);
-	fprintf(stdout, "    width: %u\n", template->width0);
-	fprintf(stdout, "    height: %u\n", template->height0);
-	fprintf(stdout, "    depth: %u\n", template->depth0);
-	fprintf(stdout, "    array_size: %u\n", template->array_size);
-	fprintf(stdout, "    last_level: %u\n", template->last_level);
-	fprintf(stdout, "    nr_samples: %u\n", template->nr_samples);
-	fprintf(stdout, "    usage: %u\n", template->usage);
-	fprintf(stdout, "    bind: %x\n", template->bind);
-	fprintf(stdout, "    flags: %x\n", template->flags);
-
 	resource = CALLOC_STRUCT(tegra_resource);
-	if (!resource) {
-		fprintf(stdout, "< %s() = NULL\n", __func__);
+	if (!resource)
 		return NULL;
-	}
 
 	resource->base.b = *template;
 
@@ -229,7 +180,6 @@ tegra_screen_resource_create(struct pipe_screen *pscreen,
 	}
 
 	size = resource->pitch * height;
-	fprintf(stdout, "  pitch:%u size:%u flags:%x\n", resource->pitch, size, flags);
 
 	err = drm_tegra_bo_new(&resource->bo, screen->drm, flags, size);
 	if (err < 0) {
@@ -237,7 +187,6 @@ tegra_screen_resource_create(struct pipe_screen *pscreen,
 		return NULL;
 	}
 
-	fprintf(stdout, "< %s() = %p\n", __func__, &resource->base.b);
 	return &resource->base.b;
 }
 
@@ -251,18 +200,9 @@ tegra_screen_resource_from_handle(struct pipe_screen *pscreen,
 	struct tegra_resource *resource;
 	int err;
 
-	fprintf(stdout, "> %s(pscreen=%p, template=%p, handle=%p, usage=%x)\n",
-		__func__, pscreen, template, handle, usage);
-	fprintf(stdout, "  handle:\n");
-	fprintf(stdout, "    type: %u\n", handle->type);
-	fprintf(stdout, "    handle: %u\n", handle->handle);
-	fprintf(stdout, "    stride: %u\n", handle->stride);
-
 	resource = CALLOC_STRUCT(tegra_resource);
-	if (!resource) {
-		fprintf(stdout, "< %s() = NULL\n", __func__);
+	if (!resource)
 		return NULL;
-	}
 
 	resource->base.b = *template;
 
@@ -280,7 +220,6 @@ tegra_screen_resource_from_handle(struct pipe_screen *pscreen,
 
 	resource->pitch = handle->stride;
 
-	fprintf(stdout, "< %s() = %p\n", __func__, &resource->base.b);
 	return &resource->base.b;
 }
 
@@ -316,19 +255,13 @@ static void tegra_blit(struct pipe_context *pcontext,
 	struct tegra_channel *gr2d = context->gr2d;
 	struct tegra_resource *dst, *src;
 
-	fprintf(stdout, "> %s(pcontext=%p, info=%p)\n", __func__, pcontext,
-		info);
-
 	dst = tegra_resource(info->dst.resource);
 	src = tegra_resource(info->src.resource);
-
-	printf("blit-target: %p\n", dst);
-	printf("blit-source: %p\n", tegra_resource(info->src.resource));
 
 	err = tegra_stream_begin(&gr2d->stream);
 	if (err < 0) {
 		fprintf(stderr, "tegra_stream_begin() failed: %d\n", err);
-		goto out;
+		return;
 	}
 
 	tegra_stream_push_setclass(&gr2d->stream, HOST1X_CLASS_GR2D);
@@ -390,8 +323,6 @@ static void tegra_blit(struct pipe_context *pcontext,
 	tegra_stream_push(&gr2d->stream, value);                 /* 0x03a - dstps */
 
 	tegra_stream_end(&gr2d->stream);
-out:
-	fprintf(stdout, "< %s()\n", __func__);
 }
 
 static uint32_t pack_color(enum pipe_format format, const float *rgba)
@@ -472,9 +403,6 @@ static void tegra_clear(struct pipe_context *pcontext, unsigned int buffers,
 	struct tegra_context *context = tegra_context(pcontext);
 	struct pipe_framebuffer_state *fb;
 
-	fprintf(stdout, "> %s(pcontext=%p, buffers=%x, color=%p, depth=%f, stencil=%u)\n",
-		__func__, pcontext, buffers, color, depth, stencil);
-
 	fb = &context->framebuffer.base;
 
 	if (buffers & PIPE_CLEAR_COLOR) {
@@ -484,7 +412,7 @@ static void tegra_clear(struct pipe_context *pcontext, unsigned int buffers,
 			if (tegra_fill(context->gr2d, tegra_resource(dst->texture),
 			    pack_color(dst->format, color->f), util_format_get_blocksize(dst->format),
 			    0, 0, dst->width, dst->height) < 0)
-				goto out;
+				return;
 		}
 	}
 
@@ -493,11 +421,8 @@ static void tegra_clear(struct pipe_context *pcontext, unsigned int buffers,
 		    util_pack_z_stencil(depth, stencil, fb->zsbuf->format),
 		    util_format_get_blocksize(fb->zsbuf->format),
 		    0, 0, fb->zsbuf->width, fb->zsbuf->height) < 0)
-			goto out;
+			return;
 	}
-
-out:
-	fprintf(stdout, "< %s()\n", __func__);
 }
 
 static void tegra_clear_render_target(struct pipe_context *pipe,
@@ -507,14 +432,9 @@ static void tegra_clear_render_target(struct pipe_context *pipe,
                                unsigned width, unsigned height,
                                bool render_condition_enabled)
 {
-	fprintf(stdout, "> %s(pipe=%p, dst=%p, color=%p, dstx=%d, dsty=%d, width=%d, height=%d)\n",
-		__func__, pipe, dst, color, dstx, dsty, width, height);
-
 	tegra_fill(tegra_context(pipe)->gr2d, tegra_resource(dst->texture),
 	           pack_color(dst->format, color->f), util_format_get_blocksize(dst->format),
 		   dstx, dsty, width, height);
-
-	fprintf(stdout, "< %s()\n", __func__);
 }
 
 static void tegra_clear_depth_stencil(struct pipe_context *pipe,
@@ -526,15 +446,10 @@ static void tegra_clear_depth_stencil(struct pipe_context *pipe,
                                unsigned width, unsigned height,
                                bool render_condition_enabled)
 {
-	fprintf(stdout, "> %s(pipe=%p, dst=%p, clear_flags=%x, depth=%f, stencil=%d, dstx=%d, dsty=%d, width=%d, height=%d)\n",
-		__func__, pipe, dst, clear_flags, depth, stencil, dstx, dsty, width, height);
-
 	tegra_fill(tegra_context(pipe)->gr2d, tegra_resource(dst->texture),
 	           util_pack_z_stencil(depth, stencil, dst->format),
 	           util_format_get_blocksize(dst->format),
 	           dstx, dsty, width, height);
-
-	fprintf(stdout, "< %s()\n", __func__);
 }
 
 static void tegra_flush_resource(struct pipe_context *ctx, struct pipe_resource *resource)
