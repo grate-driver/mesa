@@ -107,6 +107,9 @@ static void *tegra_resource_transfer_map(struct pipe_context *pcontext,
 	if (!ptrans)
 		goto err;
 
+	memset(ptrans, 0, sizeof(*ptrans));
+
+	pipe_resource_reference(&ptrans->resource, presource);
 	ptrans->resource = presource;
 	ptrans->level = level;
 	ptrans->usage = usage;
@@ -131,8 +134,8 @@ tegra_resource_transfer_flush_region(struct pipe_context *pcontext,
 				     struct pipe_transfer *transfer,
 				     const struct pipe_box *box)
 {
-	fprintf(stdout, "> %s(pcontext=%p, transfer=%p, box=%p)\n", __func__,
-		pcontext, transfer, box);
+	fprintf(stdout, "> %s(pcontext=%p, transfer=%p, presource=%p box=%p)\n",
+		__func__, pcontext, transfer, transfer->resource, box);
 	fprintf(stdout, "< %s()\n", __func__);
 }
 
@@ -140,11 +143,15 @@ static void tegra_resource_transfer_unmap(struct pipe_context *pcontext,
 					  struct pipe_transfer *transfer)
 {
 	struct tegra_context *context = tegra_context(pcontext);
-	fprintf(stdout, "> %s(pcontext=%p, transfer=%p)\n", __func__, pcontext,
-		transfer);
+
+	fprintf(stdout, "> %s(pcontext=%p, transfer=%p presource=%p)\n",
+		__func__, pcontext, transfer, transfer->resource);
+
 	drm_tegra_bo_unmap(tegra_resource(transfer->resource)->bo);
+
 	pipe_resource_reference(&transfer->resource, NULL);
 	slab_free(&context->transfer_pool, transfer);
+
 	fprintf(stdout, "< %s()\n", __func__);
 }
 
