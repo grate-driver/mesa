@@ -326,6 +326,14 @@ static int tegra_screen_get_shader_param(struct pipe_screen *pscreen,
 		fprintf(stdout, "  PIPE_SHADER_GEOMETRY not supported\n");
 		return 0;
 
+	case PIPE_SHADER_TESS_CTRL:
+		fprintf(stdout, "  PIPE_SHADER_TESS_CTRL not supported\n");
+		return 0;
+
+	case PIPE_SHADER_TESS_EVAL:
+		fprintf(stdout, "  PIPE_SHADER_TESS_EVAL not supported\n");
+		return 0;
+
 	case PIPE_SHADER_COMPUTE:
 		fprintf(stdout, "  PIPE_SHADER_COMPUTE not supported\n");
 		return 0;
