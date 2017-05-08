@@ -2,6 +2,7 @@
 #include <stdio.h>
 
 #include "util/u_memory.h"
+#include "util/u_upload_mgr.h"
 
 #include "tegra_context.h"
 #include "tegra_resource.h"
@@ -141,6 +142,8 @@ struct pipe_context *tegra_screen_context_create(struct pipe_screen *pscreen,
 
 	context->base.destroy = tegra_context_destroy;
 	context->base.flush = tegra_context_flush;
+	context->base.stream_uploader = u_upload_create_default(&context->base);
+	context->base.const_uploader = context->base.stream_uploader;
 
 	tegra_context_resource_init(&context->base);
 	tegra_context_surface_init(&context->base);
