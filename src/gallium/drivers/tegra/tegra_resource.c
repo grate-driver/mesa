@@ -233,7 +233,7 @@ tegra_screen_resource_create(struct pipe_screen *pscreen,
 
 	err = drm_tegra_bo_new(&resource->bo, screen->drm, flags, size);
 	if (err < 0) {
-		fprintf(stderr, "drm_tegra_bo_create() failed: %d\n", err);
+		fprintf(stderr, "drm_tegra_bo_new() failed: %d\n", err);
 		return NULL;
 	}
 
