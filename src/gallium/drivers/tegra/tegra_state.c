@@ -387,6 +387,9 @@ static void tegra_delete_vertex_state(struct pipe_context *pcontext, void *so)
 static void tegra_draw_vbo(struct pipe_context *pcontext,
 			   const struct pipe_draw_info *info)
 {
+	struct tegra_context *context = tegra_context(pcontext);
+	struct tegra_channel *gr3d = context->gr3d;
+
 	fprintf(stdout, "> %s(pcontext=%p, info=%p)\n", __func__, pcontext,
 		info);
 	fprintf(stdout, "  info:\n");
@@ -395,7 +398,9 @@ static void tegra_draw_vbo(struct pipe_context *pcontext,
 	fprintf(stdout, "    start: %u\n", info->start);
 	fprintf(stdout, "    count: %u\n", info->count);
 
+	tegra_stream_begin(&gr3d->stream);
 	/* TODO: draw */
+	tegra_stream_end(&gr3d->stream);
 
 	fprintf(stdout, "< %s()\n", __func__);
 }
