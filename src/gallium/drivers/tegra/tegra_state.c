@@ -8,6 +8,8 @@
 #include "tegra_context.h"
 #include "tegra_state.h"
 
+#include "tgr_3d.xml.h"
+#include "host1x01_hardware.h"
 
 static void
 tegra_set_sample_mask(struct pipe_context *pcontext,
@@ -259,6 +261,12 @@ static void
 tegra_delete_vertex_state(struct pipe_context *pcontext, void *so)
 {
    FREE(so);
+}
+
+void
+tegra_emit_state(struct tegra_context *context)
+{
+   /* TODO: emit state */
 }
 
 void
