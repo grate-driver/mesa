@@ -4,6 +4,11 @@
 #include "pipe/p_context.h"
 #include "pipe/p_state.h"
 
+struct grate_context;
+
+void
+grate_emit_state(struct grate_context *context);
+
 void
 grate_context_state_init(struct pipe_context *pcontext);
 
