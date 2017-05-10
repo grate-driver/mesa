@@ -8,6 +8,8 @@
 #include "grate_context.h"
 #include "grate_state.h"
 
+#include "tgr_3d.xml.h"
+#include "host1x01_hardware.h"
 
 static void
 grate_set_sample_mask(struct pipe_context *pcontext,
@@ -259,6 +261,12 @@ static void
 grate_delete_vertex_state(struct pipe_context *pcontext, void *so)
 {
    FREE(so);
+}
+
+void
+grate_emit_state(struct grate_context *context)
+{
+   /* TODO: emit state */
 }
 
 void
