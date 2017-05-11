@@ -264,10 +264,15 @@ droid_window_enqueue_buffer(_EGLDisplay *disp, struct dri2_egl_surface *dri2_sur
 }
 
 static void
-droid_window_cancel_buffer(_EGLDisplay *disp, struct dri2_egl_surface *dri2_surf)
+droid_window_cancel_buffer(struct dri2_egl_surface *dri2_surf)
 {
-   /* no cancel buffer? */
-   droid_window_enqueue_buffer(disp, dri2_surf);
+   int ret;
+
+   ret = dri2_surf->window->cancelBuffer(dri2_surf->window, dri2_surf->buffer, -1);
+   if (ret < 0) {
+      _eglLog(_EGL_WARNING, "ANativeWindow::cancelBuffer failed");
+      dri2_surf->base.Lost = EGL_TRUE;
+   }
 }
 
 static __DRIbuffer *
@@ -399,7 +404,7 @@ droid_destroy_surface(_EGLDriver *drv, _EGLDisplay *disp, _EGLSurface *surf)
 
    if (dri2_surf->base.Type == EGL_WINDOW_BIT) {
       if (dri2_surf->buffer)
-         droid_window_cancel_buffer(disp, dri2_surf);
+         droid_window_cancel_buffer(dri2_surf);
 
       dri2_surf->window->common.decRef(&dri2_surf->window->common);
    }
@@ -426,12 +431,16 @@ droid_destroy_surface(_EGLDriver *drv, _EGLDisplay *disp, _EGLSurface *surf)
 static int
 update_buffers(struct dri2_egl_surface *dri2_surf)
 {
+   if (dri2_surf->base.Lost)
+      return -1;
+
    if (dri2_surf->base.Type != EGL_WINDOW_BIT)
       return 0;
 
    /* try to dequeue the next back buffer */
    if (!dri2_surf->buffer && !droid_window_dequeue_buffer(dri2_surf)) {
       _eglLog(_EGL_WARNING, "Could not dequeue buffer from native window");
+      dri2_surf->base.Lost = EGL_TRUE;
       return -1;
    }
 
@@ -631,6 +640,12 @@ droid_swap_buffers(_EGLDriver *drv, _EGLDisplay *disp, _EGLSurface *draw)
 
    dri2_flush_drawable_for_swapbuffers(disp, draw);
 
+   /* dri2_surf->buffer can be null even when no error has occured. For
+    * example, if the user has called no GL rendering commands since the
+    * previous eglSwapBuffers, then the driver may have not triggered
+    * a callback to ANativeWindow::dequeueBuffer, in which case
+    * dri2_surf->buffer remains null.
+    */
    if (dri2_surf->buffer)
       droid_window_enqueue_buffer(disp, dri2_surf);
 

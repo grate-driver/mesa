@@ -2976,7 +2976,40 @@ si_make_buffer_descriptor(struct si_screen *screen, struct r600_resource *buf,
 	num_records = size / stride;
 	num_records = MIN2(num_records, (buf->b.b.width0 - offset) / stride);
 
-	if (screen->b.chip_class == VI)
+	/* The NUM_RECORDS field has a different meaning depending on the chip,
+	 * instruction type, STRIDE, and SWIZZLE_ENABLE.
+	 *
+	 * SI-CIK:
+	 * - If STRIDE == 0, it's in byte units.
+	 * - If STRIDE != 0, it's in units of STRIDE, used with inst.IDXEN.
+	 *
+	 * VI:
+	 * - For SMEM and STRIDE == 0, it's in byte units.
+	 * - For SMEM and STRIDE != 0, it's in units of STRIDE.
+	 * - For VMEM and STRIDE == 0 or SWIZZLE_ENABLE == 0, it's in byte units.
+	 * - For VMEM and STRIDE != 0 and SWIZZLE_ENABLE == 1, it's in units of STRIDE.
+	 * NOTE: There is incompatibility between VMEM and SMEM opcodes due to SWIZZLE_-
+	 *       ENABLE. The workaround is to set STRIDE = 0 if SWIZZLE_ENABLE == 0 when
+	 *       using SMEM. This can be done in the shader by clearing STRIDE with s_and.
+	 *       That way the same descriptor can be used by both SMEM and VMEM.
+	 *
+	 * GFX9:
+	 * - For SMEM and STRIDE == 0, it's in byte units.
+	 * - For SMEM and STRIDE != 0, it's in units of STRIDE.
+	 * - For VMEM and inst.IDXEN == 0 or STRIDE == 0, it's in byte units.
+	 * - For VMEM and inst.IDXEN == 1 and STRIDE != 0, it's in units of STRIDE.
+	 */
+	if (screen->b.chip_class >= GFX9)
+		/* When vindex == 0, LLVM sets IDXEN = 0, thus changing units
+		 * from STRIDE to bytes. This works around it by setting
+		 * NUM_RECORDS to at least the size of one element, so that
+		 * the first element is readable when IDXEN == 0.
+		 *
+		 * TODO: Fix this in LLVM, but do we need a new intrinsic where
+		 *       IDXEN is enforced?
+		 */
+		num_records = num_records ? MAX2(num_records, stride) : 0;
+	else if (screen->b.chip_class == VI)
 		num_records *= stride;
 
 	state[4] = 0;
@@ -3156,7 +3189,8 @@ si_make_texture_descriptor(struct si_screen *screen,
 	if (!sampler &&
 	    (res->target == PIPE_TEXTURE_CUBE ||
 	     res->target == PIPE_TEXTURE_CUBE_ARRAY ||
-	     res->target == PIPE_TEXTURE_3D)) {
+	     (screen->b.chip_class <= VI &&
+	      res->target == PIPE_TEXTURE_3D))) {
 		/* For the purpose of shader images, treat cube maps and 3D
 		 * textures as 2D arrays. For 3D textures, the address
 		 * calculations for mipmaps are different, so we rely on the
@@ -4527,15 +4561,30 @@ static void si_init_config(struct si_context *sctx)
 		      RADEON_PRIO_BORDER_COLORS);
 
 	if (sctx->b.chip_class >= GFX9) {
-		si_pm4_set_reg(pm4, R_028060_DB_DFSM_CONTROL, 0);
+		unsigned num_se = sscreen->b.info.max_se;
+		unsigned pc_lines = 0;
+
+		switch (sctx->b.family) {
+		case CHIP_VEGA10:
+			pc_lines = 4096;
+			break;
+		default:
+			assert(0);
+		}
+
+		si_pm4_set_reg(pm4, R_028060_DB_DFSM_CONTROL,
+			       S_028060_PUNCHOUT_MODE(V_028060_FORCE_OFF));
 		si_pm4_set_reg(pm4, R_028064_DB_RENDER_FILTER, 0);
 		/* TODO: We can use this to disable RBs for rendering to GART: */
 		si_pm4_set_reg(pm4, R_02835C_PA_SC_TILE_STEERING_OVERRIDE, 0);
 		si_pm4_set_reg(pm4, R_02883C_PA_SU_OVER_RASTERIZATION_CNTL, 0);
 		/* TODO: Enable the binner: */
 		si_pm4_set_reg(pm4, R_028C44_PA_SC_BINNER_CNTL_0,
-			       S_028C44_BINNING_MODE(V_028C44_DISABLE_BINNING_USE_LEGACY_SC));
-		si_pm4_set_reg(pm4, R_028C48_PA_SC_BINNER_CNTL_1, 0);
+			       S_028C44_BINNING_MODE(V_028C44_DISABLE_BINNING_USE_LEGACY_SC) |
+			       S_028C44_DISABLE_START_OF_PRIM(1));
+		si_pm4_set_reg(pm4, R_028C48_PA_SC_BINNER_CNTL_1,
+			       S_028C48_MAX_ALLOC_COUNT(MIN2(128, pc_lines / (4 * num_se))) |
+			       S_028C48_MAX_PRIM_PER_BATCH(1023));
 		si_pm4_set_reg(pm4, R_028C4C_PA_SC_CONSERVATIVE_RASTERIZATION_CNTL,
 			       S_028C4C_NULL_SQUAD_AA_MASK_ENABLE(1));
 		si_pm4_set_reg(pm4, R_030968_VGT_INSTANCE_BASE_ID, 0);

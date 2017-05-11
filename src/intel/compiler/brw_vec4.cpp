@@ -1071,6 +1071,13 @@ vec4_instruction::can_reswizzle(const struct gen_device_info *devinfo,
    if (devinfo->gen == 6 && is_math() && swizzle != BRW_SWIZZLE_XYZW)
       return false;
 
+   /* We can't swizzle implicit accumulator access.  We'd have to
+    * reswizzle the producer of the accumulator value in addition
+    * to the consumer (i.e. both MUL and MACH).  Just skip this.
+    */
+   if (reads_accumulator_implicitly())
+      return false;
+
    if (!can_do_writemask(devinfo) && dst_writemask != WRITEMASK_XYZW)
       return false;
 
@@ -1941,6 +1948,24 @@ vec4_visitor::emit_shader_time_write(int shader_time_subindex, src_reg value)
    inst->mlen = 2;
 }
 
+static bool
+is_align1_df(vec4_instruction *inst)
+{
+   switch (inst->opcode) {
+   case VEC4_OPCODE_DOUBLE_TO_F32:
+   case VEC4_OPCODE_DOUBLE_TO_D32:
+   case VEC4_OPCODE_DOUBLE_TO_U32:
+   case VEC4_OPCODE_TO_DOUBLE:
+   case VEC4_OPCODE_PICK_LOW_32BIT:
+   case VEC4_OPCODE_PICK_HIGH_32BIT:
+   case VEC4_OPCODE_SET_LOW_32BIT:
+   case VEC4_OPCODE_SET_HIGH_32BIT:
+      return true;
+   default:
+      return false;
+   }
+}
+
 void
 vec4_visitor::convert_to_hw_regs()
 {
@@ -1950,9 +1975,7 @@ vec4_visitor::convert_to_hw_regs()
          struct brw_reg reg;
          switch (src.file) {
          case VGRF: {
-            const unsigned type_size = type_sz(src.type);
-            const unsigned width = REG_SIZE / 2 / MAX2(4, type_size);
-            reg = byte_offset(brw_vecn_grf(width, src.nr, 0), src.offset);
+            reg = byte_offset(brw_vecn_grf(4, src.nr, 0), src.offset);
             reg.type = src.type;
             reg.abs = src.abs;
             reg.negate = src.negate;
@@ -1960,12 +1983,11 @@ vec4_visitor::convert_to_hw_regs()
          }
 
          case UNIFORM: {
-            const unsigned width = REG_SIZE / 2 / MAX2(4, type_sz(src.type));
             reg = stride(byte_offset(brw_vec4_grf(
                                         prog_data->base.dispatch_grf_start_reg +
                                         src.nr / 2, src.nr % 2 * 4),
                                      src.offset),
-                         0, width, 1);
+                         0, 4, 1);
             reg.type = src.type;
             reg.abs = src.abs;
             reg.negate = src.negate;
@@ -1998,6 +2020,20 @@ vec4_visitor::convert_to_hw_regs()
 
          apply_logical_swizzle(&reg, inst, i);
          src = reg;
+
+         /* From IVB PRM, vol4, part3, "General Restrictions on Regioning
+          * Parameters":
+          *
+          *   "If ExecSize = Width and HorzStride ≠ 0, VertStride must be set
+          *    to Width * HorzStride."
+          *
+          * We can break this rule with DF sources on DF align1
+          * instructions, because the exec_size would be 4 and width is 4.
+          * As we know we are not accessing to next GRF, it is safe to
+          * set vstride to the formula given by the rule itself.
+          */
+         if (is_align1_df(inst) && (cvt(inst->exec_size) - 1) == src.width)
+            src.vstride = src.width + src.hstride;
       }
 
       if (inst->is_3src(devinfo)) {
@@ -2255,24 +2291,6 @@ vec4_visitor::lower_simd_width()
    return progress;
 }
 
-static bool
-is_align1_df(vec4_instruction *inst)
-{
-   switch (inst->opcode) {
-   case VEC4_OPCODE_DOUBLE_TO_F32:
-   case VEC4_OPCODE_DOUBLE_TO_D32:
-   case VEC4_OPCODE_DOUBLE_TO_U32:
-   case VEC4_OPCODE_TO_DOUBLE:
-   case VEC4_OPCODE_PICK_LOW_32BIT:
-   case VEC4_OPCODE_PICK_HIGH_32BIT:
-   case VEC4_OPCODE_SET_LOW_32BIT:
-   case VEC4_OPCODE_SET_HIGH_32BIT:
-      return true;
-   default:
-      return false;
-   }
-}
-
 static brw_predicate
 scalarize_predicate(brw_predicate predicate, unsigned writemask)
 {
@@ -2505,6 +2523,11 @@ vec4_visitor::apply_logical_swizzle(struct brw_reg *hw_reg,
    /* Take the 64-bit logical swizzle channel and translate it to 32-bit */
    assert(brw_is_single_value_swizzle(reg.swizzle) ||
           is_supported_64bit_region(inst, arg));
+
+   /* Apply the region <2, 2, 1> for GRF or <0, 2, 1> for uniforms, as align16
+    * HW can only do 32-bit swizzle channels.
+    */
+   hw_reg->width = BRW_WIDTH_2;
 
    if (is_supported_64bit_region(inst, arg) &&
        !is_gen7_supported_64bit_swizzle(inst, arg)) {

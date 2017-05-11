@@ -2344,8 +2344,8 @@ handle_semantic:
 	    shader->selector->info.writes_layer) {
 		pos_args[1].enabled_channels = shader->selector->info.writes_psize |
 					       (shader->selector->info.writes_edgeflag << 1) |
-					       (shader->selector->info.writes_layer << 2) |
-					       (shader->selector->info.writes_viewport_index << 3);
+					       (shader->selector->info.writes_layer << 2);
+
 		pos_args[1].valid_mask = 0; /* EXEC mask */
 		pos_args[1].done = 0; /* last export? */
 		pos_args[1].target = V_008DFC_SQ_EXP_POS + 1;
@@ -2374,11 +2374,34 @@ handle_semantic:
 							  ctx->f32, "");
 		}
 
-		if (shader->selector->info.writes_layer)
-			pos_args[1].out[2] = layer_value;
+		if (ctx->screen->b.chip_class >= GFX9) {
+			/* GFX9 has the layer in out.z[10:0] and the viewport
+			 * index in out.z[19:16].
+			 */
+			if (shader->selector->info.writes_layer)
+				pos_args[1].out[2] = layer_value;
 
-		if (shader->selector->info.writes_viewport_index)
-			pos_args[1].out[3] = viewport_index_value;
+			if (shader->selector->info.writes_viewport_index) {
+				LLVMValueRef v = viewport_index_value;
+
+				v = bitcast(bld_base, TGSI_TYPE_UNSIGNED, v);
+				v = LLVMBuildShl(ctx->gallivm.builder, v,
+						 LLVMConstInt(ctx->i32, 16, 0), "");
+				v = LLVMBuildOr(ctx->gallivm.builder, v,
+						bitcast(bld_base, TGSI_TYPE_UNSIGNED,
+						        pos_args[1].out[2]), "");
+				pos_args[1].out[2] = bitcast(bld_base, TGSI_TYPE_FLOAT, v);
+				pos_args[1].enabled_channels |= 1 << 2;
+			}
+		} else {
+			if (shader->selector->info.writes_layer)
+				pos_args[1].out[2] = layer_value;
+
+			if (shader->selector->info.writes_viewport_index) {
+				pos_args[1].out[3] = viewport_index_value;
+				pos_args[1].enabled_channels |= 1 << 3;
+			}
+		}
 	}
 
 	for (i = 0; i < 4; i++)
@@ -3400,7 +3423,7 @@ image_fetch_rsrc(
 static LLVMValueRef image_fetch_coords(
 		struct lp_build_tgsi_context *bld_base,
 		const struct tgsi_full_instruction *inst,
-		unsigned src)
+		unsigned src, LLVMValueRef desc)
 {
 	struct si_shader_context *ctx = si_shader_context(bld_base);
 	struct gallivm_state *gallivm = &ctx->gallivm;
@@ -3417,14 +3440,30 @@ static LLVMValueRef image_fetch_coords(
 		coords[chan] = tmp;
 	}
 
-	/* 1D textures are allocated and used as 2D on GFX9. */
 	if (ctx->screen->b.chip_class >= GFX9) {
+		/* 1D textures are allocated and used as 2D on GFX9. */
 		if (target == TGSI_TEXTURE_1D) {
 			coords[1] = ctx->i32_0;
 			num_coords++;
 		} else if (target == TGSI_TEXTURE_1D_ARRAY) {
 			coords[2] = coords[1];
 			coords[1] = ctx->i32_0;
+			num_coords++;
+		} else if (target == TGSI_TEXTURE_2D) {
+			/* The hw can't bind a slice of a 3D image as a 2D
+			 * image, because it ignores BASE_ARRAY if the target
+			 * is 3D. The workaround is to read BASE_ARRAY and set
+			 * it as the 3rd address operand for all 2D images.
+			 */
+			LLVMValueRef first_layer, const5, mask;
+
+			const5 = LLVMConstInt(ctx->i32, 5, 0);
+			mask = LLVMConstInt(ctx->i32, S_008F24_BASE_ARRAY(~0), 0);
+			first_layer = LLVMBuildExtractElement(builder, desc, const5, "");
+			first_layer = LLVMBuildAnd(builder, first_layer, mask, "");
+
+			coords[2] = first_layer;
+			num_coords++;
 		}
 	}
 
@@ -3539,7 +3578,7 @@ static void load_fetch_args(
 		LLVMValueRef coords;
 
 		image_fetch_rsrc(bld_base, &inst->Src[0], false, target, &rsrc);
-		coords = image_fetch_coords(bld_base, inst, 1);
+		coords = image_fetch_coords(bld_base, inst, 1, rsrc);
 
 		if (target == TGSI_TEXTURE_BUFFER) {
 			buffer_append_args(ctx, emit_data, rsrc, coords,
@@ -3814,16 +3853,15 @@ static void store_fetch_args(
 		 */
 		bool force_glc = ctx->screen->b.chip_class == SI;
 
-		coords = image_fetch_coords(bld_base, inst, 0);
+		image_fetch_rsrc(bld_base, &memory, true, target, &rsrc);
+		coords = image_fetch_coords(bld_base, inst, 0, rsrc);
 
 		if (target == TGSI_TEXTURE_BUFFER) {
-			image_fetch_rsrc(bld_base, &memory, true, target, &rsrc);
 			buffer_append_args(ctx, emit_data, rsrc, coords,
 					   ctx->i32_0, false, force_glc);
 		} else {
 			emit_data->args[1] = coords;
-			image_fetch_rsrc(bld_base, &memory, true, target,
-					 &emit_data->args[2]);
+			emit_data->args[2] = rsrc;
 			emit_data->args[3] = LLVMConstInt(ctx->i32, 15, 0); /* dmask */
 			emit_data->arg_count = 4;
 
@@ -4027,7 +4065,7 @@ static void atomic_fetch_args(
 		LLVMValueRef coords;
 
 		image_fetch_rsrc(bld_base, &inst->Src[0], true, target, &rsrc);
-		coords = image_fetch_coords(bld_base, inst, 1);
+		coords = image_fetch_coords(bld_base, inst, 1, rsrc);
 
 		if (target == TGSI_TEXTURE_BUFFER) {
 			buffer_append_args(ctx, emit_data, rsrc, coords,
