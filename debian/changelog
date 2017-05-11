@@ -1,6 +1,6 @@
-mesa (17.1.0~rc2-1) UNRELEASED; urgency=medium
+mesa (17.1.0-1) UNRELEASED; urgency=medium
 
-  * New upstream release candidate.
+  * New upstream release.
   * control: Add zlib1g-dev to build-depends.
   * control: Bump libdrm-dev build-dep to 2.4.80.
   * libgbm1.symbols: Updated.
