@@ -1,3 +1,11 @@
+mesa (17.1.0-1ubuntu1) UNRELEASED; urgency=medium
+
+  * Merge from Debian.
+  * i915-dont-default-to-2.1.patch: Dropped, implemented upstream.
+  * Refresh patches, disable Mir vulkan support as it doesn't build.
+
+ -- Timo Aaltonen <tjaalton@debian.org>  Thu, 27 Apr 2017 08:23:14 +0300
+
 mesa (17.1.0-1) experimental; urgency=medium
 
   * New upstream release.
@@ -6,14 +14,6 @@ mesa (17.1.0-1) experimental; urgency=medium
   * libgbm1.symbols: Updated.
 
  -- Timo Aaltonen <tjaalton@debian.org>  Thu, 11 May 2017 09:59:50 +0300
-
-mesa (17.1.0~rc2-0ubuntu1) UNRELEASED; urgency=medium
-
-  * Merge from Debian.
-  * i915-dont-default-to-2.1.patch: Dropped, implemented upstream.
-  * Refresh patches, disable Mir vulkan support as it doesn't build.
-
- -- Timo Aaltonen <tjaalton@debian.org>  Thu, 27 Apr 2017 08:23:14 +0300
 
 mesa (17.0.5-0ubuntu1) artful; urgency=medium
 
