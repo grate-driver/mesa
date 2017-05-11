@@ -822,12 +822,11 @@ fs_visitor::choose_spill_reg(struct ra_graph *g)
    foreach_block_and_inst(block, fs_inst, inst, cfg) {
       for (unsigned int i = 0; i < inst->sources; i++) {
 	 if (inst->src[i].file == VGRF)
-            spill_costs[inst->src[i].nr] += block_scale;
+            spill_costs[inst->src[i].nr] += regs_read(inst, i) * block_scale;
       }
 
       if (inst->dst.file == VGRF)
-         spill_costs[inst->dst.nr] += DIV_ROUND_UP(inst->size_written, REG_SIZE)
-                                      * block_scale;
+         spill_costs[inst->dst.nr] += regs_written(inst) * block_scale;
 
       switch (inst->opcode) {
 

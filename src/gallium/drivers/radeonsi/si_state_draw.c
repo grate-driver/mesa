@@ -291,13 +291,15 @@ si_get_init_multi_vgt_param(struct si_screen *sscreen,
 		/* Needed for 028B6C_DISTRIBUTION_MODE != 0 */
 		if (sscreen->has_distributed_tess) {
 			if (key->u.uses_gs) {
-				partial_es_wave = true;
+				if (sscreen->b.chip_class <= VI)
+					partial_es_wave = true;
 
 				/* GPU hang workaround. */
 				if (sscreen->b.family == CHIP_TONGA ||
 				    sscreen->b.family == CHIP_FIJI ||
 				    sscreen->b.family == CHIP_POLARIS10 ||
-				    sscreen->b.family == CHIP_POLARIS11)
+				    sscreen->b.family == CHIP_POLARIS11 ||
+				    sscreen->b.family == CHIP_POLARIS12)
 					partial_vs_wave = true;
 			} else {
 				partial_vs_wave = true;
@@ -371,7 +373,7 @@ si_get_init_multi_vgt_param(struct si_screen *sscreen,
 	}
 
 	/* If SWITCH_ON_EOI is set, PARTIAL_ES_WAVE must be set too. */
-	if (ia_switch_on_eoi)
+	if (sscreen->b.chip_class <= VI && ia_switch_on_eoi)
 		partial_es_wave = true;
 
 	return S_028AA8_SWITCH_ON_EOP(ia_switch_on_eop) |
@@ -379,7 +381,8 @@ si_get_init_multi_vgt_param(struct si_screen *sscreen,
 		S_028AA8_PARTIAL_VS_WAVE_ON(partial_vs_wave) |
 		S_028AA8_PARTIAL_ES_WAVE_ON(partial_es_wave) |
 		S_028AA8_WD_SWITCH_ON_EOP(sscreen->b.chip_class >= CIK ? wd_switch_on_eop : 0) |
-		S_028AA8_MAX_PRIMGRP_IN_WAVE(sscreen->b.chip_class >= VI ?
+		/* The following field was moved to VGT_SHADER_STAGES_EN in GFX9. */
+		S_028AA8_MAX_PRIMGRP_IN_WAVE(sscreen->b.chip_class == VI ?
 					     max_primgroup_in_wave : 0) |
 		S_030960_EN_INST_OPT_BASIC(sscreen->b.chip_class >= GFX9) |
 		S_030960_EN_INST_OPT_ADV(sscreen->b.chip_class >= GFX9);
