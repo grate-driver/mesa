@@ -1,10 +1,10 @@
-mesa (17.1.0-1ubuntu1) UNRELEASED; urgency=medium
+mesa (17.1.0-1ubuntu1) artful; urgency=medium
 
   * Merge from Debian.
   * i915-dont-default-to-2.1.patch: Dropped, implemented upstream.
   * Refresh patches.
 
- -- Timo Aaltonen <tjaalton@debian.org>  Thu, 27 Apr 2017 08:23:14 +0300
+ -- Timo Aaltonen <tjaalton@debian.org>  Fri, 12 May 2017 16:35:35 +0300
 
 mesa (17.1.0-1) experimental; urgency=medium
 
