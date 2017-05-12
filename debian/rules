@@ -159,6 +159,9 @@ override_dh_auto_configure:
 	dh_auto_configure -- \
 		$(confflags)
 
+	# hack to regenerate anv_entrypoints.{c,h} which are shipped with the tarball
+	rm -f src/intel/vulkan/anv_entrypoints.c src/intel/vulkan/anv_entrypoints.h
+
 override_dh_auto_install:
 	dh_auto_install
 	for file in debian/*.in; \

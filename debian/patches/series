@@ -4,5 +4,5 @@
 # Ubuntu patches.
 egl-platform-mir.patch
 egl-platform-rs.patch
-#vulkan-mir.patch
+vulkan-mir.patch
 khr_platform_mir.patch
