@@ -361,7 +361,7 @@ tegra_create_vertex_state(struct pipe_context *pcontext, unsigned int count,
 		fprintf(stdout, "      src_offset: %u\n", e->src_offset);
 		fprintf(stdout, "      instance_divisor: %u\n", e->instance_divisor);
 		fprintf(stdout, "      vertex_buffer_index: %u\n", e->vertex_buffer_index);
-		fprintf(stdout, "      src_format: %d\n", e->src_format);
+		fprintf(stdout, "      src_format: %s\n", util_format_name(e->src_format));
 	}
 
 	memcpy(vtx->elements, elements, sizeof(*elements) * count);
