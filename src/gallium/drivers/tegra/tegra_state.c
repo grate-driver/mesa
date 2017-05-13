@@ -3,6 +3,9 @@
 #include "util/u_helpers.h"
 #include "util/u_memory.h"
 
+#include "tgsi/tgsi_parse.h"
+#include "tgsi/tgsi_info.h"
+
 #include "tegra_context.h"
 #include "tegra_state.h"
 
@@ -282,15 +285,175 @@ void tegra_context_zsa_init(struct pipe_context *pcontext)
 	pcontext->delete_depth_stencil_alpha_state = tegra_delete_zsa_state;
 }
 
+static void print_dst_reg(const struct tgsi_dst_register *dst)
+{
+	fprintf(stdout, " %c%d.%s%s%s%s",
+	    dst->File == TGSI_FILE_OUTPUT ? 'o' : 'r',
+	    dst->Index,
+	    (dst->WriteMask & TGSI_WRITEMASK_X) ? "x" : "",
+	    (dst->WriteMask & TGSI_WRITEMASK_Y) ? "y" : "",
+	    (dst->WriteMask & TGSI_WRITEMASK_Z) ? "z" : "",
+	    (dst->WriteMask & TGSI_WRITEMASK_W) ? "w" : "");
+}
+
+static void print_src_reg(const struct tgsi_src_register *src)
+{
+	const char swz[] = { 'x', 'y', 'z', 'w'};
+	char ch = 'r';
+	switch (src->File) {
+	case TGSI_FILE_INPUT:
+		ch = 'a';
+		break;
+	case TGSI_FILE_CONSTANT:
+		ch = 'u';
+		break;
+	}
+
+	fprintf(stdout, ", %c%d.%c%c%c%c", ch, src->Index,
+	    swz[src->SwizzleX],
+	    swz[src->SwizzleY],
+	    swz[src->SwizzleZ],
+	    swz[src->SwizzleW]);
+}
+
+
+static void emit_vs_instr(struct tegra_vs_state *so, const struct tgsi_full_instruction *inst)
+{
+	int i;
+	fprintf(stdout, "instr: %s", tgsi_get_opcode_name(inst->Instruction.Opcode));
+
+	for (i = 0; i < inst->Instruction.NumDstRegs; ++i)
+		print_dst_reg(&inst->Dst[i].Register);
+
+	for (i = 0; i < inst->Instruction.NumSrcRegs; ++i)
+		print_src_reg(&inst->Src[i].Register);
+
+	fprintf(stdout, "\n");
+}
+
 static void *
 tegra_create_vs_state(struct pipe_context *pcontext,
 		      const struct pipe_shader_state *template)
 {
+	unsigned ok;
+	struct tgsi_parse_context parser;
+
 	struct tegra_vs_state *so = CALLOC_STRUCT(tegra_vs_state);
 	if (!so)
 		return NULL;
 
 	so->base = *template;
+
+	ok = tgsi_parse_init(&parser, template->tokens);
+
+	/* we shouldn't get malformed programs at this point, no? */
+	assert(ok == TGSI_PARSE_OK);
+
+	/* yeah, I'm being paranoid! */
+	assert(parser.FullHeader.Processor.Processor == PIPE_SHADER_VERTEX);
+
+	while (!tgsi_parse_end_of_tokens(&parser)) {
+		const struct tgsi_full_declaration *decl;
+		const struct tgsi_full_immediate *imm;
+		const struct tgsi_full_instruction *inst;
+
+	        tgsi_parse_token(&parser);
+
+		switch (parser.FullToken.Token.Type) {
+		case TGSI_TOKEN_TYPE_DECLARATION:
+			decl = &parser.FullToken.FullDeclaration;
+
+			switch (decl->Declaration.File) {
+			case TGSI_FILE_INPUT:
+				/* OpenGL ES 2.0 only supports generic attributes */
+				if (decl->Declaration.Semantic) {
+					assert(decl->Semantic.Name == TGSI_SEMANTIC_GENERIC);
+					fprintf(stdout, "input-generic %d (%d)\n", decl->Semantic.Index, decl->Range.First);
+				} else
+					fprintf(stdout, "input-generic\n");
+				break;
+
+			case TGSI_FILE_OUTPUT:
+				switch (decl->Semantic.Name) {
+				case TGSI_SEMANTIC_POSITION:
+					fprintf(stdout, "position (%d)\n", decl->Range.First);
+					assert(decl->Declaration.Semantic);
+					assert(decl->Semantic.Index == 0);
+					break;
+
+				case TGSI_SEMANTIC_COLOR:
+					fprintf(stdout, "color (%d)\n", decl->Range.First);
+					assert(decl->Declaration.Semantic);
+					assert(decl->Semantic.Index == 0);
+					break;
+
+				case TGSI_SEMANTIC_PSIZE:
+					fprintf(stdout, "point-size (%d)\n", decl->Range.First);
+					assert(decl->Declaration.Semantic);
+					assert(decl->Semantic.Index == 0);
+					break;
+
+				case TGSI_SEMANTIC_GENERIC:
+					fprintf(stdout, "output-generic %d (%d)\n", decl->Semantic.Index, decl->Range.First);
+					assert(decl->Declaration.Semantic);
+					break;
+
+				case TGSI_SEMANTIC_FOG:
+					fprintf(stdout, "fog\n");
+					break;
+
+				default:
+					assert(0); /* unsupported output-semantic */
+				}
+				break;
+
+			case TGSI_FILE_CONSTANT:
+				fprintf(stdout, "const\n");
+				break;
+
+			case TGSI_FILE_TEMPORARY:
+				fprintf(stdout, "temp\n");
+				break;
+
+			default:
+				assert(0); /* unsupported register-file */
+			}
+			break;
+
+		case TGSI_TOKEN_TYPE_IMMEDIATE:
+			imm = &parser.FullToken.FullImmediate;
+
+			switch (imm->Immediate.Type) {
+			case TGSI_IMM_FLOAT32:
+				fprintf(stdout, "imm: %f %f %f %f\n",
+				    imm->u[0].Float, imm->u[1].Float,
+				    imm->u[2].Float, imm->u[3].Float);
+				break;
+
+			case TGSI_IMM_UINT32:
+				fprintf(stdout, "imm: %d %d %d %d\n",
+				    imm->u[0].Uint, imm->u[1].Uint,
+				    imm->u[2].Uint, imm->u[3].Uint);
+				break;
+
+			default:
+				assert(0);
+			}
+			break;
+
+		case TGSI_TOKEN_TYPE_INSTRUCTION:
+			inst = &parser.FullToken.FullInstruction;
+			emit_vs_instr(so, inst);
+			break;
+
+		case TGSI_TOKEN_TYPE_PROPERTY:
+			break;
+
+		default:
+			assert(0); /* unsupported token */
+		}
+
+	}
 
 	return so;
 }
