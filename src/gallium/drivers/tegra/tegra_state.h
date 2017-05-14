@@ -34,8 +34,14 @@ struct tegra_vertexbuf_state {
 	uint32_t enabled;
 };
 
+struct tegra_vertex_element {
+	uint32_t attrib;
+	unsigned int buffer_index;
+	unsigned int offset;
+};
+
 struct tegra_vertex_state {
-	struct pipe_vertex_element elements[PIPE_MAX_ATTRIBS];
+	struct tegra_vertex_element elements[PIPE_MAX_ATTRIBS];
 	unsigned int num_elements;
 };
 

@@ -108,6 +108,12 @@ static inline uint32_t host1x_opcode_setclass(unsigned class_id,
 {
 	return (0 << 28) | (offset << 16) | (class_id << 6) | mask;
 }
+
+static inline uint32_t host1x_opcode_incr(unsigned offset, unsigned count)
+{
+	return (1 << 28) | (offset << 16) | count;
+}
+
 static inline uint32_t host1x_opcode_nonincr(unsigned offset, unsigned count)
 {
 	return (2 << 28) | (offset << 16) | count;
