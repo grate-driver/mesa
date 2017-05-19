@@ -1362,7 +1362,8 @@ isl_surf_init_s(const struct isl_device *dev,
                            &phys_slice0_sa, &row_pitch))
       return false;
 
-   uint32_t size, base_alignment;
+   uint32_t base_alignment;
+   uint64_t size;
    if (tiling == ISL_TILING_LINEAR) {
       size = row_pitch * total_h_el + pad_bytes;
 
