@@ -6,6 +6,10 @@
 
 #include <libdrm/tegra.h>
 
+extern uint32_t tegra_debug;
+
+#define TEGRA_DEBUG_TGSI 0x1
+
 struct tegra_screen {
 	struct pipe_screen base;
 

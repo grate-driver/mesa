@@ -6,6 +6,15 @@
 #include "tegra_resource.h"
 #include "tegra_screen.h"
 
+static const struct debug_named_value debug_options[] = {
+        { "tgsi", TEGRA_DEBUG_TGSI,
+          "Dump TGSI during program compile" },
+        { NULL }
+};
+
+DEBUG_GET_ONCE_FLAGS_OPTION(tegra_debug, "TEGRA_DEBUG", debug_options, 0)
+uint32_t tegra_debug;
+
 static void tegra_screen_destroy(struct pipe_screen *pscreen)
 {
 	struct tegra_screen *screen = tegra_screen(pscreen);
@@ -554,6 +563,8 @@ struct pipe_screen *tegra_screen_create(struct drm_tegra *drm)
 		return NULL;
 
 	screen->drm = drm;
+
+        tegra_debug = debug_get_option_tegra_debug();
 
 	screen->base.destroy = tegra_screen_destroy;
 	screen->base.get_name = tegra_screen_get_name;
