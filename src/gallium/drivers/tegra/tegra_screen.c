@@ -494,24 +494,32 @@ static boolean tegra_screen_is_format_supported(struct pipe_screen *pscreen,
 						enum pipe_format format,
 						enum pipe_texture_target target,
 						unsigned int sample_count,
-						unsigned int bindings)
+						unsigned int usage)
 {
-	boolean ret = FALSE;
-
-	switch (format) {
-	case PIPE_FORMAT_B8G8R8A8_UNORM:
-	case PIPE_FORMAT_B8G8R8X8_UNORM:
-	case PIPE_FORMAT_A8R8G8B8_UNORM:
-	case PIPE_FORMAT_X8R8G8B8_UNORM:
-	case PIPE_FORMAT_Z16_UNORM:
-	case PIPE_FORMAT_Z24_UNORM_S8_UINT:
-	case PIPE_FORMAT_S8_UINT:
-		ret = TRUE;
-	default:
-		break;
+	if (usage & PIPE_BIND_RENDER_TARGET) {
+		switch (format) {
+		case PIPE_FORMAT_B8G8R8A8_UNORM:
+		case PIPE_FORMAT_B8G8R8X8_UNORM:
+		case PIPE_FORMAT_A8R8G8B8_UNORM:
+		case PIPE_FORMAT_X8R8G8B8_UNORM:
+			break;
+		default:
+			return false;
+		}
 	}
 
-	return ret;
+	if (usage & PIPE_BIND_DEPTH_STENCIL) {
+		switch (format) {
+		case PIPE_FORMAT_Z16_UNORM:
+		case PIPE_FORMAT_Z24_UNORM_S8_UINT:
+		case PIPE_FORMAT_S8_UINT:
+			break;
+		default:
+			return false;
+		}
+	}
+
+	return true;
 }
 
 static void
