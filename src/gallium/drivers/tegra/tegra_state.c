@@ -2,6 +2,7 @@
 
 #include "util/u_helpers.h"
 #include "util/u_memory.h"
+#include "util/u_format.h"
 
 #include "tgsi/tgsi_parse.h"
 #include "tgsi/tgsi_info.h"
