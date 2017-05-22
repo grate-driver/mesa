@@ -6,6 +6,15 @@
 #include "tegra_resource.h"
 #include "tegra_screen.h"
 
+static const struct debug_named_value debug_options[] = {
+        { "tgsi", TEGRA_DEBUG_TGSI,
+          "Dump TGSI during program compile" },
+        { NULL }
+};
+
+DEBUG_GET_ONCE_FLAGS_OPTION(tegra_debug, "TEGRA_DEBUG", debug_options, 0)
+uint32_t tegra_debug;
+
 static void tegra_screen_destroy(struct pipe_screen *pscreen)
 {
 	struct tegra_screen *screen = tegra_screen(pscreen);
@@ -494,24 +503,32 @@ static boolean tegra_screen_is_format_supported(struct pipe_screen *pscreen,
 						enum pipe_format format,
 						enum pipe_texture_target target,
 						unsigned int sample_count,
-						unsigned int bindings)
+						unsigned int usage)
 {
-	boolean ret = FALSE;
-
-	switch (format) {
-	case PIPE_FORMAT_B8G8R8A8_UNORM:
-	case PIPE_FORMAT_B8G8R8X8_UNORM:
-	case PIPE_FORMAT_A8R8G8B8_UNORM:
-	case PIPE_FORMAT_X8R8G8B8_UNORM:
-	case PIPE_FORMAT_Z16_UNORM:
-	case PIPE_FORMAT_Z24_UNORM_S8_UINT:
-	case PIPE_FORMAT_S8_UINT:
-		ret = TRUE;
-	default:
-		break;
+	if (usage & PIPE_BIND_RENDER_TARGET) {
+		switch (format) {
+		case PIPE_FORMAT_B8G8R8A8_UNORM:
+		case PIPE_FORMAT_B8G8R8X8_UNORM:
+		case PIPE_FORMAT_A8R8G8B8_UNORM:
+		case PIPE_FORMAT_X8R8G8B8_UNORM:
+			break;
+		default:
+			return false;
+		}
 	}
 
-	return ret;
+	if (usage & PIPE_BIND_DEPTH_STENCIL) {
+		switch (format) {
+		case PIPE_FORMAT_Z16_UNORM:
+		case PIPE_FORMAT_Z24_UNORM_S8_UINT:
+		case PIPE_FORMAT_S8_UINT:
+			break;
+		default:
+			return false;
+		}
+	}
+
+	return true;
 }
 
 static void
@@ -546,6 +563,8 @@ struct pipe_screen *tegra_screen_create(struct drm_tegra *drm)
 		return NULL;
 
 	screen->drm = drm;
+
+        tegra_debug = debug_get_option_tegra_debug();
 
 	screen->base.destroy = tegra_screen_destroy;
 	screen->base.get_name = tegra_screen_get_name;

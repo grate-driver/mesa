@@ -415,6 +415,7 @@ static void tegra_clear(struct pipe_context *pcontext, unsigned int buffers,
 	}
 
 	if (buffers & PIPE_CLEAR_DEPTH || buffers & PIPE_CLEAR_STENCIL) {
+		/* TODO: handle the case where both are not set! */
 		if (tegra_fill(context->gr2d, tegra_resource(fb->zsbuf->texture),
 		    util_pack_z_stencil(depth, stencil, fb->zsbuf->format),
 		    util_format_get_blocksize(fb->zsbuf->format),
@@ -430,6 +431,7 @@ static void tegra_clear_render_target(struct pipe_context *pipe,
                                unsigned width, unsigned height,
                                bool render_condition_enabled)
 {
+	assert(!render_condition_enabled);
 	tegra_fill(tegra_context(pipe)->gr2d, tegra_resource(dst->texture),
 	           pack_color(dst->format, color->f), util_format_get_blocksize(dst->format),
 		   dstx, dsty, width, height);
@@ -444,6 +446,7 @@ static void tegra_clear_depth_stencil(struct pipe_context *pipe,
                                unsigned width, unsigned height,
                                bool render_condition_enabled)
 {
+	assert(!render_condition_enabled);
 	tegra_fill(tegra_context(pipe)->gr2d, tegra_resource(dst->texture),
 	           util_pack_z_stencil(depth, stencil, dst->format),
 	           util_format_get_blocksize(dst->format),
