@@ -450,7 +450,7 @@ static void tegra_delete_vertex_state(struct pipe_context *pcontext, void *so)
 	FREE(so);
 }
 
-static void setup_attribs(struct tegra_context *context)
+static void emit_attribs(struct tegra_context *context)
 {
 	unsigned int i;
 	struct tegra_stream *stream = &context->gr3d->stream;
@@ -498,7 +498,7 @@ static void tegra_draw_vbo(struct pipe_context *pcontext,
 
 	tegra_stream_push_setclass(&gr3d->stream, HOST1X_CLASS_GR3D);
 
-	setup_attribs(context);
+	emit_attribs(context);
 
 	/* TODO: draw */
 
