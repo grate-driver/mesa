@@ -104,21 +104,16 @@ static int tegra_allocate_cmdbuf(struct drm_tegra *drm,
  * tegra_stream_push().
  */
 
-int tegra_stream_create(struct drm_tegra *drm, struct tegra_stream *stream,
+int tegra_stream_create(struct drm_tegra *drm,
+                        struct drm_tegra_channel *channel,
+                        struct tegra_stream *stream,
                         uint32_t words_num)
 {
-    int ret;
-
-    ret = drm_tegra_channel_open(&stream->channel, drm, DRM_TEGRA_GR2D);
-    if (ret) {
-        fprintf(stderr, "drm_tegra_channel_open() failed %d\n", ret);
-        goto err_open_channel;
-    }
-
     words_num = words_num ? words_num : BUFFER_SIZE_WORDS;
 
     stream->status      = TEGRADRM_STREAM_FREE;
     stream->buffer_size = words_num;
+    stream->channel     = channel;
 
     if (tegra_allocate_cmdbuf(drm, &stream->buffer, words_num))
         goto err_buffer_alloc;
@@ -127,8 +122,6 @@ int tegra_stream_create(struct drm_tegra *drm, struct tegra_stream *stream,
 
 err_buffer_alloc:
     tegra_release_cmdbuf(&stream->buffer);
-    drm_tegra_channel_close(stream->channel);
-err_open_channel:
     return -1;
 }
 

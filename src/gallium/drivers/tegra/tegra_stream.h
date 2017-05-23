@@ -65,7 +65,9 @@ struct tegra_reloc {
 };
 
 /* Stream operations */
-int tegra_stream_create(struct drm_tegra *drm, struct tegra_stream *stream,
+int tegra_stream_create(struct drm_tegra *drm,
+                        struct drm_tegra_channel *channel,
+                        struct tegra_stream *stream,
                         uint32_t words_num);
 void tegra_stream_destroy(struct tegra_stream *stream);
 int tegra_stream_begin(struct tegra_stream *stream);
