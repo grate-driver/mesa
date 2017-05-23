@@ -457,7 +457,7 @@ static void emit_attribs(struct tegra_context *context)
 
 	assert(context->vs);
 
-	for (i = 0; i < 16; ++i) {
+	for (i = 0; i < context->vs->num_elements; ++i) {
 		const struct pipe_vertex_buffer *vb;
 		const struct tegra_vertex_element *e = context->vs->elements + i;
 		const struct tegra_resource *r;
