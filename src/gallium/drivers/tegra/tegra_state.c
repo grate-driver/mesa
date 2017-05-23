@@ -478,6 +478,7 @@ static void setup_attribs(struct tegra_context *context)
 static void tegra_draw_vbo(struct pipe_context *pcontext,
 			   const struct pipe_draw_info *info)
 {
+	int err;
 	struct tegra_context *context = tegra_context(pcontext);
 	struct tegra_channel *gr3d = context->gr3d;
 
@@ -489,7 +490,13 @@ static void tegra_draw_vbo(struct pipe_context *pcontext,
 	fprintf(stdout, "    start: %u\n", info->start);
 	fprintf(stdout, "    count: %u\n", info->count);
 
-	tegra_stream_begin(&gr3d->stream);
+	err = tegra_stream_begin(&gr3d->stream);
+	if (err < 0) {
+		fprintf(stderr, "tegra_stream_begin() failed: %d\n", err);
+		return;
+	}
+
+	tegra_stream_push_setclass(&gr3d->stream, HOST1X_CLASS_GR3D);
 
 	setup_attribs(context);
 
