@@ -18,6 +18,8 @@ libtegra_la_SOURCES = \
 	tegra_context.c \
 	tegra_context.h \
 	tegra_fence.h \
+	tegra_program.c \
+	tegra_program.h \
 	tegra_resource.c \
 	tegra_resource.h \
 	tegra_screen.c \

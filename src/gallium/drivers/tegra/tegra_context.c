@@ -5,6 +5,7 @@
 #include "util/u_upload_mgr.h"
 
 #include "tegra_context.h"
+#include "tegra_program.h"
 #include "tegra_resource.h"
 #include "tegra_screen.h"
 #include "tegra_state.h"
@@ -130,8 +131,7 @@ struct pipe_context *tegra_screen_context_create(struct pipe_screen *pscreen,
 	tegra_context_sampler_init(&context->base);
 	tegra_context_rasterizer_init(&context->base);
 	tegra_context_zsa_init(&context->base);
-	tegra_context_vs_init(&context->base);
-	tegra_context_fs_init(&context->base);
+	tegra_context_program_init(&context->base);
 	tegra_context_vbo_init(&context->base);
 
 	return &context->base;
