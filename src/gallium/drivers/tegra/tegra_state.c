@@ -4,8 +4,6 @@
 #include "util/u_memory.h"
 #include "util/u_format.h"
 
-#include "tgsi/tgsi_dump.h"
-
 #include "tegra_context.h"
 #include "tegra_resource.h"
 #include "tegra_screen.h"
@@ -21,6 +19,8 @@
 	(((value) << TGR3D_ ## reg_name ## _ ## field_name ## __SHIFT) & \
 		     TGR3D_ ## reg_name ## _ ## field_name ## __MASK)
 
+#define TGR3D_BOOL(reg_name, field_name, boolean) \
+	((boolean) ? TGR3D_ ## reg_name ## _ ## field_name : 0)
 
 static void tegra_set_sample_mask(struct pipe_context *pcontext,
 				  unsigned int sample_mask)
@@ -51,20 +51,48 @@ tegra_set_framebuffer_state(struct pipe_context *pcontext,
 			    const struct pipe_framebuffer_state *framebuffer)
 {
 	struct tegra_context *context = tegra_context(pcontext);
+	struct pipe_framebuffer_state *cso = &context->framebuffer.base;
 	unsigned int i;
+	uint32_t mask = 0;
 
 	for (i = 0; i < framebuffer->nr_cbufs; i++) {
 		struct pipe_surface *ref = framebuffer->cbufs[i];
+		struct tegra_resource *res = tegra_resource(ref->texture);
+		uint32_t rt_params;
 
-		if (i >= framebuffer->nr_cbufs)
-			ref = NULL;
+		rt_params  = TGR3D_VAL(RT_PARAMS, FORMAT, res->format);
+		rt_params |= TGR3D_VAL(RT_PARAMS, PITCH, res->pitch);
+		rt_params |= TGR3D_BOOL(RT_PARAMS, TILED, res->tiled);
 
-		pipe_surface_reference(&context->framebuffer.base.cbufs[i],
-				       ref);
+		context->framebuffer.rt_params[i] = rt_params;
+		context->framebuffer.bos[i] = res->bo;
+		mask |= 1 << i;
+
+		pipe_surface_reference(&cso->cbufs[i], ref);
 	}
+
+	for (; i < cso->nr_cbufs; i++)
+                pipe_surface_reference(&cso->cbufs[i], NULL);
 
 	pipe_surface_reference(&context->framebuffer.base.zsbuf,
 			       framebuffer->zsbuf);
+
+	if (framebuffer->zsbuf) {
+		struct tegra_resource *res = tegra_resource(framebuffer->zsbuf->texture);
+		uint32_t rt_params;
+
+		rt_params  = TGR3D_VAL(RT_PARAMS, FORMAT, res->format);
+		rt_params |= TGR3D_VAL(RT_PARAMS, PITCH, res->pitch);
+		rt_params |= TGR3D_BOOL(RT_PARAMS, TILED, res->tiled);
+
+		context->framebuffer.rt_params[i] = rt_params;
+		context->framebuffer.bos[i] = res->bo;
+		mask |= 1 << i;
+		++i;
+	}
+
+	context->framebuffer.num_rts = i;
+	context->framebuffer.mask = mask;
 
 	context->framebuffer.base.width = framebuffer->width;
 	context->framebuffer.base.height = framebuffer->height;
@@ -296,72 +324,6 @@ void tegra_context_zsa_init(struct pipe_context *pcontext)
 	pcontext->delete_depth_stencil_alpha_state = tegra_delete_zsa_state;
 }
 
-static void *
-tegra_create_vs_state(struct pipe_context *pcontext,
-		      const struct pipe_shader_state *template)
-{
-	struct tegra_vs_state *so = CALLOC_STRUCT(tegra_vs_state);
-	if (!so)
-		return NULL;
-
-	so->base = *template;
-
-	if (tegra_debug & TEGRA_DEBUG_TGSI) {
-		fprintf(stderr, "DEBUG: TGSI:\n");
-		tgsi_dump(template->tokens, 0);
-		fprintf(stderr, "\n");
-	}
-
-	return so;
-}
-
-static void tegra_bind_vs_state(struct pipe_context *pcontext, void *so)
-{
-	unimplemented();
-}
-
-static void tegra_delete_vs_state(struct pipe_context *pcontext, void *so)
-{
-	FREE(so);
-}
-
-void tegra_context_vs_init(struct pipe_context *pcontext)
-{
-	pcontext->create_vs_state = tegra_create_vs_state;
-	pcontext->bind_vs_state = tegra_bind_vs_state;
-	pcontext->delete_vs_state = tegra_delete_vs_state;
-}
-
-static void *
-tegra_create_fs_state(struct pipe_context *pcontext,
-		      const struct pipe_shader_state *template)
-{
-	struct tegra_fs_state *so = CALLOC_STRUCT(tegra_fs_state);
-	if (!so)
-		return NULL;
-
-	so->base = *template;
-
-	return so;
-}
-
-static void tegra_bind_fs_state(struct pipe_context *pcontext, void *so)
-{
-	unimplemented();
-}
-
-static void tegra_delete_fs_state(struct pipe_context *pcontext, void *so)
-{
-	FREE(so);
-}
-
-void tegra_context_fs_init(struct pipe_context *pcontext)
-{
-	pcontext->create_fs_state = tegra_create_fs_state;
-	pcontext->bind_fs_state = tegra_bind_fs_state;
-	pcontext->delete_fs_state = tegra_delete_fs_state;
-}
-
 /*
  * Note: this does not include the stride, which needs to be mixed in later
  **/
@@ -450,14 +412,14 @@ static void tegra_delete_vertex_state(struct pipe_context *pcontext, void *so)
 	FREE(so);
 }
 
-static void setup_attribs(struct tegra_context *context)
+static void emit_attribs(struct tegra_context *context)
 {
 	unsigned int i;
 	struct tegra_stream *stream = &context->gr3d->stream;
 
 	assert(context->vs);
 
-	for (i = 0; i < 16; ++i) {
+	for (i = 0; i < context->vs->num_elements; ++i) {
 		const struct pipe_vertex_buffer *vb;
 		const struct tegra_vertex_element *e = context->vs->elements + i;
 		const struct tegra_resource *r;
@@ -475,9 +437,32 @@ static void setup_attribs(struct tegra_context *context)
 	}
 }
 
+static void emit_render_targets(struct tegra_context *context)
+{
+	unsigned int i;
+	struct tegra_stream *stream = &context->gr3d->stream;
+	const struct tegra_framebuffer_state *fb = &context->framebuffer;
+
+	tegra_stream_push(stream, host1x_opcode_incr(TGR3D_RT_PARAMS(0), fb->num_rts));
+	for (i = 0; i < fb->num_rts; ++i) {
+		uint32_t rt_params = fb->rt_params[i];
+		/* TODO: setup dither */
+		/* rt_params |= TGR3D_BOOL(RT_PARAMS, DITHER_ENABLE, enable_dither); */
+		tegra_stream_push(stream, rt_params);
+	}
+
+	tegra_stream_push(stream, host1x_opcode_incr(TGR3D_RT_PTR(0), fb->num_rts));
+	for (i = 0; i < fb->num_rts; ++i)
+		tegra_stream_push_reloc(stream, fb->bos[i], 0);
+
+	tegra_stream_push(stream, host1x_opcode_incr(TGR3D_RT_ENABLE, 1));
+	tegra_stream_push(stream, fb->mask);
+}
+
 static void tegra_draw_vbo(struct pipe_context *pcontext,
 			   const struct pipe_draw_info *info)
 {
+	int err;
 	struct tegra_context *context = tegra_context(pcontext);
 	struct tegra_channel *gr3d = context->gr3d;
 
@@ -489,9 +474,16 @@ static void tegra_draw_vbo(struct pipe_context *pcontext,
 	fprintf(stdout, "    start: %u\n", info->start);
 	fprintf(stdout, "    count: %u\n", info->count);
 
-	tegra_stream_begin(&gr3d->stream);
+	err = tegra_stream_begin(&gr3d->stream);
+	if (err < 0) {
+		fprintf(stderr, "tegra_stream_begin() failed: %d\n", err);
+		return;
+	}
 
-	setup_attribs(context);
+	tegra_stream_push_setclass(&gr3d->stream, HOST1X_CLASS_GR3D);
+
+	emit_render_targets(context);
+	emit_attribs(context);
 
 	/* TODO: draw */
 

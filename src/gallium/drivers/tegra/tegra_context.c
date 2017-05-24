@@ -5,27 +5,35 @@
 #include "util/u_upload_mgr.h"
 
 #include "tegra_context.h"
+#include "tegra_program.h"
 #include "tegra_resource.h"
 #include "tegra_screen.h"
 #include "tegra_state.h"
 #include "tegra_surface.h"
 
 static int tegra_channel_create(struct tegra_context *context,
-				enum host1x_class client,
+				enum drm_tegra_class class,
 				struct tegra_channel **channelp)
 {
 	struct tegra_screen *screen = tegra_screen(context->base.screen);
 	int err;
+	struct drm_tegra_channel *drm_channel;
+	struct tegra_channel *channel;
 
-	struct tegra_channel *channel = CALLOC_STRUCT(tegra_channel);
+	err = drm_tegra_channel_open(&drm_channel, screen->drm, class);
+	if (err < 0)
+		return err;
+
+	channel = CALLOC_STRUCT(tegra_channel);
 	if (!channel)
 		return -ENOMEM;
 
 	channel->context = context;
 
-	err = tegra_stream_create(screen->drm, &channel->stream, 32768);
+	err = tegra_stream_create(screen->drm, drm_channel, &channel->stream, 32768);
 	if (err < 0) {
 		FREE(channel);
+		drm_tegra_channel_close(drm_channel);
 		return err;
 	}
 
@@ -97,13 +105,13 @@ struct pipe_context *tegra_screen_context_create(struct pipe_screen *pscreen,
 	context->base.screen = pscreen;
 	context->base.priv = priv;
 
-	err = tegra_channel_create(context, HOST1X_CLASS_GR2D, &context->gr2d);
+	err = tegra_channel_create(context, DRM_TEGRA_GR2D, &context->gr2d);
 	if (err < 0) {
 		fprintf(stderr, "tegra_channel_create() failed: %d\n", err);
 		return NULL;
 	}
 
-	err = tegra_channel_create(context, HOST1X_CLASS_GR3D, &context->gr3d);
+	err = tegra_channel_create(context, DRM_TEGRA_GR3D, &context->gr3d);
 	if (err < 0) {
 		fprintf(stderr, "tegra_channel_create() failed: %d\n", err);
 		return NULL;
@@ -123,8 +131,7 @@ struct pipe_context *tegra_screen_context_create(struct pipe_screen *pscreen,
 	tegra_context_sampler_init(&context->base);
 	tegra_context_rasterizer_init(&context->base);
 	tegra_context_zsa_init(&context->base);
-	tegra_context_vs_init(&context->base);
-	tegra_context_fs_init(&context->base);
+	tegra_context_program_init(&context->base);
 	tegra_context_vbo_init(&context->base);
 
 	return &context->base;

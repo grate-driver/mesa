@@ -10,6 +10,7 @@
 #include "tegra_screen.h"
 
 #include "host1x01_hardware.h"
+#include "tgr_3d.xml.h"
 
 #include <libdrm/tegra_drm.h>
 #include <libdrm/tegra.h>
@@ -142,6 +143,35 @@ tegra_screen_can_create_resource(struct pipe_screen *pscreen,
 	return TRUE;
 }
 
+int tegra_pixel_format(enum pipe_format format)
+{
+	switch (format) {
+	case PIPE_FORMAT_A8_UNORM:
+		return TGR3D_PIXEL_FORMAT_A8;
+	case PIPE_FORMAT_L8_UNORM:
+		return TGR3D_PIXEL_FORMAT_L8;
+	case PIPE_FORMAT_L8A8_UNORM:
+		return TGR3D_PIXEL_FORMAT_LA88;
+	case PIPE_FORMAT_B5G6R5_UNORM:
+		return TGR3D_PIXEL_FORMAT_RGB565;
+	case PIPE_FORMAT_B5G5R5A1_UNORM:
+		return TGR3D_PIXEL_FORMAT_RGBA5551;
+	case PIPE_FORMAT_B4G4R4A4_UNORM:
+		return TGR3D_PIXEL_FORMAT_RGBA4444;
+	case PIPE_FORMAT_B8G8R8A8_UNORM:
+	case PIPE_FORMAT_B8G8R8X8_UNORM:
+		return TGR3D_PIXEL_FORMAT_RGBA8888;
+	case PIPE_FORMAT_R32G32B32A32_FLOAT:
+		return TGR3D_PIXEL_FORMAT_RGBA_FP32;
+	case PIPE_FORMAT_S8_UINT:
+		return TGR3D_PIXEL_FORMAT_S8;
+	case PIPE_FORMAT_Z16_UNORM:
+		return TGR3D_PIXEL_FORMAT_D16_LINEAR;
+	default:
+		return -1;
+	}
+}
+
 static struct pipe_resource *
 tegra_screen_resource_create(struct pipe_screen *pscreen,
 			     const struct pipe_resource *template)
@@ -179,6 +209,13 @@ tegra_screen_resource_create(struct pipe_screen *pscreen,
 // 		}
 	}
 
+	if (template->target != PIPE_BUFFER) {
+		/* pick pixel-format */
+		int format = tegra_pixel_format(template->format);
+		assert(format >= 0);
+		resource->format = format;
+	}
+
 	size = resource->pitch * height;
 
 	err = drm_tegra_bo_new(&resource->bo, screen->drm, flags, size);
@@ -198,7 +235,7 @@ tegra_screen_resource_from_handle(struct pipe_screen *pscreen,
 {
 	struct tegra_screen *screen = tegra_screen(pscreen);
 	struct tegra_resource *resource;
-	int err;
+	int err, format;
 
 	resource = CALLOC_STRUCT(tegra_resource);
 	if (!resource)
@@ -219,6 +256,10 @@ tegra_screen_resource_from_handle(struct pipe_screen *pscreen,
 	}
 
 	resource->pitch = handle->stride;
+
+	format = tegra_pixel_format(template->format);
+	assert(format >= 0);
+	resource->format = format;
 
 	return &resource->base.b;
 }
