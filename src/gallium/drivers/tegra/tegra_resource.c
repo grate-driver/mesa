@@ -248,7 +248,7 @@ tegra_screen_resource_from_handle(struct pipe_screen *pscreen,
 	resource->base.b.screen = pscreen;
 
 	err = drm_tegra_bo_from_name(&resource->bo, screen->drm,
-				     handle->handle);
+				     handle->handle, 0);
 	if (err < 0) {
 		fprintf(stderr, "drm_tegra_bo_from_name() failed: %d\n", err);
 		FREE(resource);
