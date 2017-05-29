@@ -49,10 +49,6 @@ static void tegra_channel_delete(struct tegra_channel *channel)
 	FREE(channel);
 }
 
-static void tegra_channel_flush(struct tegra_channel *channel)
-{
-}
-
 static void tegra_context_destroy(struct pipe_context *pcontext)
 {
 	struct tegra_context *context = tegra_context(pcontext);
@@ -68,11 +64,6 @@ static void tegra_context_flush(struct pipe_context *pcontext,
 				struct pipe_fence_handle **pfence,
 				enum pipe_flush_flags flags)
 {
-	struct tegra_context *context = tegra_context(pcontext);
-
-	tegra_channel_flush(context->gr2d);
-	tegra_channel_flush(context->gr3d);
-
 	if (pfence) {
 		struct tegra_fence *fence;
 
