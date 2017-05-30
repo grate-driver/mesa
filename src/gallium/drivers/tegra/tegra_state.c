@@ -489,6 +489,8 @@ static void tegra_draw_vbo(struct pipe_context *pcontext,
 
 	tegra_stream_end(&gr3d->stream);
 
+	tegra_stream_flush(&gr3d->stream);
+
 	fprintf(stdout, "< %s()\n", __func__);
 }
 

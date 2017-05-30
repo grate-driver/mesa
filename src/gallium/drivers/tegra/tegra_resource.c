@@ -248,7 +248,7 @@ tegra_screen_resource_from_handle(struct pipe_screen *pscreen,
 	resource->base.b.screen = pscreen;
 
 	err = drm_tegra_bo_from_name(&resource->bo, screen->drm,
-				     handle->handle);
+				     handle->handle, 0);
 	if (err < 0) {
 		fprintf(stderr, "drm_tegra_bo_from_name() failed: %d\n", err);
 		FREE(resource);
@@ -364,6 +364,8 @@ static void tegra_blit(struct pipe_context *pcontext,
 	tegra_stream_push(&gr2d->stream, value);                 /* 0x03a - dstps */
 
 	tegra_stream_end(&gr2d->stream);
+
+	tegra_stream_flush(&gr2d->stream);
 }
 
 static uint32_t pack_color(enum pipe_format format, const float *rgba)
@@ -431,6 +433,8 @@ static int tegra_fill(struct tegra_channel *gr2d,
 	tegra_stream_push(&gr2d->stream, height << 16 | width); /* 0x038 - dstsize */
 	tegra_stream_push(&gr2d->stream, dsty << 16 | dstx);    /* 0x03a - dstps */
 	tegra_stream_end(&gr2d->stream);
+
+	tegra_stream_flush(&gr2d->stream);
 
 	return 0;
 }
