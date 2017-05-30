@@ -34,6 +34,9 @@ struct grate_context {
 
    struct grate_vertex_state *vs;
    struct grate_vertexbuf_state vbs;
+
+   uint32_t no_scissor[3];
+   uint32_t viewport[7];
 };
 
 static inline struct grate_context *
