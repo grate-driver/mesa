@@ -1,5 +1,7 @@
 #include <stdio.h>
+#include <math.h>
 
+#include "util/u_bitcast.h"
 #include "util/u_helpers.h"
 #include "util/u_inlines.h"
 #include "util/u_memory.h"
@@ -81,6 +83,13 @@ grate_set_framebuffer_state(struct pipe_context *pcontext,
    context->framebuffer.base.width = framebuffer->width;
    context->framebuffer.base.height = framebuffer->height;
    context->framebuffer.base.nr_cbufs = framebuffer->nr_cbufs;
+
+   /* prepare the scissor-registers for the non-scissor case */
+   context->no_scissor[0]  = host1x_opcode_incr(TGR3D_SCISSOR_HORIZ, 2);
+   context->no_scissor[1]  = TGR3D_VAL(SCISSOR_HORIZ, MIN, 0);
+   context->no_scissor[1] |= TGR3D_VAL(SCISSOR_HORIZ, MAX, framebuffer->width);
+   context->no_scissor[2]  = TGR3D_VAL(SCISSOR_VERT, MIN, 0);
+   context->no_scissor[2] |= TGR3D_VAL(SCISSOR_VERT, MAX, framebuffer->height);
 }
 
 static void
@@ -106,8 +115,19 @@ grate_set_viewport_states(struct pipe_context *pcontext,
                           unsigned num_viewports,
                           const struct pipe_viewport_state *viewports)
 {
+   struct grate_context *context = grate_context(pcontext);
+   static const float zeps = powf(2.0f, -21);
+
    assert(num_viewports == 1);
-   unimplemented();
+   assert(start_slot == 0);
+
+   context->viewport[0] = host1x_opcode_incr(TGR3D_VIEWPORT_X_BIAS, 6);
+   context->viewport[1] = u_bitcast_f2u(viewports[0].translate[0] * 16.0f);
+   context->viewport[2] = u_bitcast_f2u(viewports[0].translate[1] * 16.0f);
+   context->viewport[3] = u_bitcast_f2u(viewports[0].translate[2] - zeps);
+   context->viewport[4] = u_bitcast_f2u(viewports[0].scale[0] * 16.0f);
+   context->viewport[5] = u_bitcast_f2u(viewports[0].scale[1] * 16.0f);
+   context->viewport[6] = u_bitcast_f2u(viewports[0].scale[2] - zeps);
 }
 
 static void
@@ -424,10 +444,26 @@ emit_render_targets(struct grate_context *context)
    grate_stream_push(stream, fb->mask);
 }
 
+static void
+emit_scissor(struct grate_context *context)
+{
+   struct grate_stream *stream = &context->gr3d->stream;
+   grate_stream_push_words(stream, context->no_scissor, 3, 0);
+}
+
+static void
+emit_viewport(struct grate_context *context)
+{
+   struct grate_stream *stream = &context->gr3d->stream;
+   grate_stream_push_words(stream, context->viewport, 7, 0);
+}
+
 void
 grate_emit_state(struct grate_context *context)
 {
    emit_render_targets(context);
+   emit_viewport(context);
+   emit_scissor(context);
    emit_attribs(context);
 }
 
