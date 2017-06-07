@@ -2,6 +2,8 @@ mesa (17.1.2-1) UNRELEASED; urgency=medium
 
   * New upstream release.
   * Update d/upstream/signing-key.asc with key from Juan A. Suarez Romero.
+  * README.source: Add documentation about how to update d/u/signing-
+    key.asc.
 
  -- Timo Aaltonen <tjaalton@debian.org>  Tue, 06 Jun 2017 11:52:09 +0300
 
