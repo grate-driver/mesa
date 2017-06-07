@@ -1,24 +1,24 @@
 --- a/configure.ac
 +++ b/configure.ac
-@@ -2214,7 +2214,9 @@ for plat in $egl_platforms; do
- 	android)
+@@ -1701,7 +1701,9 @@ for plat in $platforms; do
  		PKG_CHECK_MODULES([ANDROID], [cutils hardware sync])
+ 		DEFINES="$DEFINES -DHAVE_ANDROID_PLATFORM"
  		;;
 -
 +        mir)
 +                PKG_CHECK_MODULES([MIR], [mirclient mir-client-platform-mesa])
 +                ;;
  	*)
- 		AC_MSG_ERROR([EGL platform '$plat' does not exist])
+ 		AC_MSG_ERROR([platform '$plat' does not exist])
  		;;
-@@ -2241,6 +2243,7 @@ AM_CONDITIONAL(HAVE_PLATFORM_WAYLAND, ec
- AM_CONDITIONAL(HAVE_EGL_PLATFORM_DRM, echo "$egl_platforms" | grep -q 'drm')
- AM_CONDITIONAL(HAVE_EGL_PLATFORM_SURFACELESS, echo "$egl_platforms" | grep -q 'surfaceless')
- AM_CONDITIONAL(HAVE_EGL_PLATFORM_ANDROID, echo "$egl_platforms" | grep -q 'android')
-+AM_CONDITIONAL(HAVE_EGL_PLATFORM_MIR, echo "$egl_platforms" | grep -q 'mir')
+@@ -1732,6 +1734,7 @@ AM_CONDITIONAL(HAVE_PLATFORM_WAYLAND, ec
+ AM_CONDITIONAL(HAVE_PLATFORM_DRM, echo "$platforms" | grep -q 'drm')
+ AM_CONDITIONAL(HAVE_PLATFORM_SURFACELESS, echo "$platforms" | grep -q 'surfaceless')
+ AM_CONDITIONAL(HAVE_PLATFORM_ANDROID, echo "$platforms" | grep -q 'android')
++AM_CONDITIONAL(HAVE_PLATFORM_MIR, echo "$egl_platforms" | grep -q 'mir')
  
- AC_SUBST([EGL_NATIVE_PLATFORM])
- AC_SUBST([EGL_CFLAGS])
+ dnl
+ dnl More DRI setup
 --- a/include/EGL/eglplatform.h
 +++ b/include/EGL/eglplatform.h
 @@ -105,6 +105,13 @@ typedef struct ANativeWindow*
@@ -113,7 +113,7 @@
  };
  
  struct dri2_egl_context
-@@ -265,7 +273,7 @@ struct dri2_egl_surface
+@@ -269,7 +277,7 @@ struct dri2_egl_surface
     struct gbm_dri_surface *gbm_surf;
  #endif
  
@@ -122,7 +122,7 @@
     __DRIbuffer           *dri_buffers[__DRI_BUFFER_COUNT];
     struct {
  #ifdef HAVE_WAYLAND_PLATFORM
-@@ -277,9 +285,13 @@ struct dri2_egl_surface
+@@ -281,9 +289,13 @@ struct dri2_egl_surface
        void *data;
        int data_size;
  #endif
@@ -137,7 +137,7 @@
        int                 locked;
        int                 age;
     } color_buffers[4], *back, *current;
-@@ -308,6 +320,10 @@ struct dri2_egl_surface
+@@ -312,6 +324,10 @@ struct dri2_egl_surface
        __DRIimage           *front;
        unsigned int         visual;
  #endif
@@ -148,7 +148,7 @@
  };
  
  struct dri2_egl_config
-@@ -397,6 +413,9 @@ dri2_initialize_android(_EGLDriver *drv,
+@@ -401,6 +417,9 @@ dri2_initialize_android(_EGLDriver *drv,
  EGLBoolean
  dri2_initialize_surfaceless(_EGLDriver *drv, _EGLDisplay *disp);
  
@@ -810,7 +810,7 @@
 +#endif
  
  /**
-  * Map --with-egl-platforms names to platform types.
+  * Map --with-platforms names to platform types.
 @@ -73,6 +76,7 @@ static const struct {
     { _EGL_PLATFORM_ANDROID, "android" },
     { _EGL_PLATFORM_HAIKU, "haiku" },
@@ -1031,11 +1031,11 @@
        dri_use |= __DRI_IMAGE_USE_SCANOUT;
 --- a/src/egl/Makefile.am
 +++ b/src/egl/Makefile.am
-@@ -88,6 +88,12 @@ libEGL_common_la_LIBADD += $(ANDROID_LIB
+@@ -83,6 +83,12 @@ libEGL_common_la_LIBADD += $(ANDROID_LIB
  dri2_backend_FILES += drivers/dri2/platform_android.c
  endif
  
-+if HAVE_EGL_PLATFORM_MIR
++if HAVE_PLATFORM_MIR
 +AM_CFLAGS += -DHAVE_MIR_PLATFORM
 +AM_CFLAGS += $(MIR_CFLAGS)
 +dri2_backend_FILES += drivers/dri2/platform_mir.c
