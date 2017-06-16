@@ -30,8 +30,8 @@
 @@ -1735,6 +1742,7 @@ AM_CONDITIONAL(HAVE_PLATFORM_DRM, echo "
  AM_CONDITIONAL(HAVE_PLATFORM_SURFACELESS, echo "$platforms" | grep -q 'surfaceless')
  AM_CONDITIONAL(HAVE_PLATFORM_ANDROID, echo "$platforms" | grep -q 'android')
- AM_CONDITIONAL(HAVE_PLATFORM_MIR, echo "$egl_platforms" | grep -q 'mir')
-+AM_CONDITIONAL(HAVE_PLATFORM_RS, echo "$egl_platforms" | grep -q 'rs')
+ AM_CONDITIONAL(HAVE_PLATFORM_MIR, echo "$platforms" | grep -q 'mir')
++AM_CONDITIONAL(HAVE_PLATFORM_RS, echo "$platforms" | grep -q 'rs')
  
  dnl
  dnl More DRI setup
