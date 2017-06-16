@@ -1,3 +1,12 @@
+mesa (17.1.2-1ubuntu2) artful; urgency=medium
+
+  * egl-platform-mir.patch
+  * egl-platform-rs.patch
+    - Fix configure.ac so that the Mir EGL platforms are actually
+      built. (LP: #1526658) (LP: #1696797)
+
+ -- Christopher James Halse Rogers <raof@ubuntu.com>  Fri, 16 Jun 2017 17:51:50 +1000
+
 mesa (17.1.2-1ubuntu1) artful; urgency=medium
 
   * Merge from Debian.
