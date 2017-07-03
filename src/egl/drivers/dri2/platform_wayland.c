@@ -808,7 +808,7 @@ dri2_wl_query_buffer_age(_EGLDriver *drv,
 
    if (get_back_bo(dri2_surf) < 0) {
       _eglError(EGL_BAD_ALLOC, "dri2_query_buffer_age");
-      return 0;
+      return -1;
    }
 
    return dri2_surf->back->age;
@@ -1128,7 +1128,8 @@ dri2_wl_add_configs_for_visuals(_EGLDriver *drv, _EGLDisplay *disp)
          dri2_conf = dri2_add_config(disp, dri2_dpy->driver_configs[i],
                count + 1, EGL_WINDOW_BIT, NULL, visuals[j].rgba_masks);
          if (dri2_conf) {
-            count++;
+            if (dri2_conf->base.ConfigID == count + 1)
+               count++;
             format_count[j]++;
          }
       }

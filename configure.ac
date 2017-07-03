@@ -97,7 +97,7 @@ XSHMFENCE_REQUIRED=1.1
 XVMC_REQUIRED=1.0.6
 PYTHON_MAKO_REQUIRED=0.8.0
 LIBSENSORS_REQUIRED=4.0.0
-ZLIB_REQUIRED=1.2.8
+ZLIB_REQUIRED=1.2.3
 
 dnl LLVM versions
 LLVM_REQUIRED_GALLIUM=3.3.0
@@ -837,6 +837,11 @@ dnl is not valid for that platform.
 if test "x$android" = xno; then
     test -z "$PTHREAD_LIBS" && PTHREAD_LIBS="-lpthread"
 fi
+dnl According to the manual when using pthreads, one should add -pthread to
+dnl both compile and link-time arguments.
+dnl In practise that should be sufficient for all platforms, since any
+dnl platforms build with GCC and Clang support the flag.
+PTHREAD_LIBS="$PTHREAD_LIBS -pthread"
 
 dnl pthread-stubs is mandatory on BSD platforms, due to the nature of the
 dnl project. Even then there's a notable issue as described in the project README
@@ -2476,10 +2481,10 @@ if test -n "$with_gallium_drivers"; then
         xswr)
             llvm_require_version $LLVM_REQUIRED_SWR "swr"
 
-            swr_require_cxx_feature_flags "C++14" "__cplusplus >= 201402L" \
-                "-std=c++14" \
-                SWR_CXX14_CXXFLAGS
-            AC_SUBST([SWR_CXX14_CXXFLAGS])
+            swr_require_cxx_feature_flags "C++11" "__cplusplus >= 201103L" \
+                ",-std=c++11" \
+                SWR_CXX11_CXXFLAGS
+            AC_SUBST([SWR_CXX11_CXXFLAGS])
 
             swr_require_cxx_feature_flags "AVX" "defined(__AVX__)" \
                 ",-mavx,-march=core-avx" \
