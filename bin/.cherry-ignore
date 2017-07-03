@@ -12,3 +12,6 @@ b28938ffce0580e89e6012826900da2b6013b0df st/glsl_to_tgsi: use correct writemask 
 c12f8305a8ae4fd5d78a9ab8bbda790a711d5bed nv50,nvc0: remove IDX from bufctx immediately, to avoid conflicts with clear
 # fixes:  Genuine false positive.
 5d87667fed1bd5ab850abdfb3a10db8c8c21c330 bin/get-fixes-pick-list.sh: better identify multiple "fixes:" tags" has more than one Fixes tag
+# extra: References 6a7c5257cac but because later f8d69beed49
+#        introduced a regression and the latter didn't land
+c35fd58688fd8c0c421c35b28419d20befdcb8b9 i965: Fix anisotropic filtering for mag filter
