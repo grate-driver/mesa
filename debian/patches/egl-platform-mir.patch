@@ -1,6 +1,6 @@
 --- a/configure.ac
 +++ b/configure.ac
-@@ -1701,7 +1701,9 @@ for plat in $platforms; do
+@@ -1706,7 +1706,9 @@ for plat in $platforms; do
  		PKG_CHECK_MODULES([ANDROID], [cutils hardware sync])
  		DEFINES="$DEFINES -DHAVE_ANDROID_PLATFORM"
  		;;
@@ -11,7 +11,7 @@
  	*)
  		AC_MSG_ERROR([platform '$plat' does not exist])
  		;;
-@@ -1732,6 +1734,7 @@ AM_CONDITIONAL(HAVE_PLATFORM_WAYLAND, ec
+@@ -1737,6 +1739,7 @@ AM_CONDITIONAL(HAVE_PLATFORM_WAYLAND, ec
  AM_CONDITIONAL(HAVE_PLATFORM_DRM, echo "$platforms" | grep -q 'drm')
  AM_CONDITIONAL(HAVE_PLATFORM_SURFACELESS, echo "$platforms" | grep -q 'surfaceless')
  AM_CONDITIONAL(HAVE_PLATFORM_ANDROID, echo "$platforms" | grep -q 'android')
@@ -799,7 +799,7 @@
 +}
 --- a/src/egl/main/egldisplay.c
 +++ b/src/egl/main/egldisplay.c
-@@ -58,7 +58,10 @@
+@@ -59,7 +59,10 @@
  #ifdef HAVE_DRM_PLATFORM
  #include <gbm.h>
  #endif
@@ -811,7 +811,7 @@
  
  /**
   * Map --with-platforms names to platform types.
-@@ -73,6 +76,7 @@ static const struct {
+@@ -74,6 +77,7 @@ static const struct {
     { _EGL_PLATFORM_ANDROID, "android" },
     { _EGL_PLATFORM_HAIKU, "haiku" },
     { _EGL_PLATFORM_SURFACELESS, "surfaceless" },
@@ -819,7 +819,7 @@
  };
  
  
-@@ -132,6 +136,47 @@ _eglPointerIsDereferencable(void *p)
+@@ -133,6 +137,47 @@ _eglPointerIsDereferencable(void *p)
  #endif
  }
  
@@ -867,7 +867,7 @@
  
  /**
   * Try detecting native platform with the help of native display characteristcs.
-@@ -142,6 +187,11 @@ _eglNativePlatformDetectNativeDisplay(vo
+@@ -143,6 +188,11 @@ _eglNativePlatformDetectNativeDisplay(vo
     if (nativeDisplay == EGL_DEFAULT_DISPLAY)
        return _EGL_INVALID_PLATFORM;
  
@@ -879,15 +879,15 @@
     if (_eglPointerIsDereferencable(nativeDisplay)) {
        void *first_pointer = *(void **) nativeDisplay;
  
-@@ -180,7 +230,7 @@ _eglNativePlatformDetectNativeDisplay(vo
+@@ -181,7 +231,7 @@ _eglNativePlatformDetectNativeDisplay(vo
  _EGLPlatformType
  _eglGetNativePlatform(void *nativeDisplay)
  {
--   static _EGLPlatformType native_platform;
-+   _EGLPlatformType native_platform;
-    char *detection_method;
+-   static _EGLPlatformType native_platform = _EGL_INVALID_PLATFORM;
++   _EGLPlatformType native_platform = _EGL_INVALID_PLATFORM;
+    _EGLPlatformType detected_platform = native_platform;
  
-    native_platform = _eglGetNativePlatformFromEnv();
+    if (detected_platform == _EGL_INVALID_PLATFORM) {
 --- a/src/egl/main/egldisplay.h
 +++ b/src/egl/main/egldisplay.h
 @@ -50,6 +50,7 @@ enum _egl_platform_type {

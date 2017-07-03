@@ -1,3 +1,10 @@
+mesa (17.1.4-1ubuntu1) UNRELEASED; urgency=medium
+
+  * Merge from Debian.
+    - update/refresh Mir patches
+
+ -- Timo Aaltonen <tjaalton@debian.org>  Mon, 03 Jul 2017 19:03:39 +0300
+
 mesa (17.1.4-1) unstable; urgency=medium
 
   * New upstream release.

@@ -14,7 +14,7 @@
     }
 --- a/src/egl/main/egldisplay.c
 +++ b/src/egl/main/egldisplay.c
-@@ -620,3 +620,22 @@ _eglGetSurfacelessDisplay(void *native_d
+@@ -628,3 +628,22 @@ _eglGetSurfacelessDisplay(void *native_d
     return _eglFindDisplay(_EGL_PLATFORM_SURFACELESS, native_display);
  }
  #endif /* HAVE_SURFACELESS_PLATFORM */

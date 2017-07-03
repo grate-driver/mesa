@@ -3,12 +3,12 @@
 @@ -98,6 +98,7 @@ XVMC_REQUIRED=1.0.6
  PYTHON_MAKO_REQUIRED=0.8.0
  LIBSENSORS_REQUIRED=4.0.0
- ZLIB_REQUIRED=1.2.8
+ ZLIB_REQUIRED=1.2.3
 +MIR_REQUIRED=0.26.2
  
  dnl LLVM versions
  LLVM_REQUIRED_GALLIUM=3.3.0
-@@ -1701,9 +1702,15 @@ for plat in $platforms; do
+@@ -1706,9 +1707,15 @@ for plat in $platforms; do
  		PKG_CHECK_MODULES([ANDROID], [cutils hardware sync])
  		DEFINES="$DEFINES -DHAVE_ANDROID_PLATFORM"
  		;;
@@ -27,7 +27,7 @@
  	*)
  		AC_MSG_ERROR([platform '$plat' does not exist])
  		;;
-@@ -1735,6 +1742,7 @@ AM_CONDITIONAL(HAVE_PLATFORM_DRM, echo "
+@@ -1740,6 +1747,7 @@ AM_CONDITIONAL(HAVE_PLATFORM_DRM, echo "
  AM_CONDITIONAL(HAVE_PLATFORM_SURFACELESS, echo "$platforms" | grep -q 'surfaceless')
  AM_CONDITIONAL(HAVE_PLATFORM_ANDROID, echo "$platforms" | grep -q 'android')
  AM_CONDITIONAL(HAVE_PLATFORM_MIR, echo "$platforms" | grep -q 'mir')
@@ -1137,7 +1137,7 @@
 +}
 --- a/src/egl/main/egldisplay.c
 +++ b/src/egl/main/egldisplay.c
-@@ -62,6 +62,9 @@
+@@ -63,6 +63,9 @@
  #include <dlfcn.h>
  #include <mir_toolkit/mesa/native_display.h>
  #endif
@@ -1147,7 +1147,7 @@
  
  /**
   * Map --with-platforms names to platform types.
-@@ -76,7 +79,8 @@ static const struct {
+@@ -77,7 +80,8 @@ static const struct {
     { _EGL_PLATFORM_ANDROID, "android" },
     { _EGL_PLATFORM_HAIKU, "haiku" },
     { _EGL_PLATFORM_SURFACELESS, "surfaceless" },
@@ -1157,7 +1157,7 @@
  };
  
  
-@@ -187,9 +191,14 @@ _eglNativePlatformDetectNativeDisplay(vo
+@@ -188,9 +192,14 @@ _eglNativePlatformDetectNativeDisplay(vo
     if (nativeDisplay == EGL_DEFAULT_DISPLAY)
        return _EGL_INVALID_PLATFORM;
  
