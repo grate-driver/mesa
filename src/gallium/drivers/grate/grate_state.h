@@ -32,6 +32,7 @@ struct grate_vertex_element {
 struct grate_vertex_state {
    struct grate_vertex_element elements[PIPE_MAX_ATTRIBS];
    unsigned int num_elements;
+   uint16_t mask;
 };
 
 void
