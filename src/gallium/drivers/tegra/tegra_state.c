@@ -439,6 +439,7 @@ tegra_create_vertex_state(struct pipe_context *pcontext, unsigned int count,
                           const struct pipe_vertex_element *elements)
 {
    unsigned int i;
+   uint16_t mask = 0;
    struct tegra_vertex_state *vtx = CALLOC_STRUCT(tegra_vertex_state);
    if (!vtx)
       return NULL;
@@ -449,9 +450,11 @@ tegra_create_vertex_state(struct pipe_context *pcontext, unsigned int count,
       dst->attrib = tegra_attrib_mode(src);
       dst->buffer_index = src->vertex_buffer_index;
       dst->offset = src->src_offset;
+      mask |= 1 << i;
    }
 
    vtx->num_elements = count;
+   vtx->mask = mask;
 
    return vtx;
 }
