@@ -1,3 +1,9 @@
+mesa (17.2.0~rc1-1) UNRELEASED; urgency=medium
+
+  * New upstream release candidate.
+
+ -- Timo Aaltonen <tjaalton@debian.org>  Tue, 25 Jul 2017 11:40:09 +0300
+
 mesa (17.1.5-1) unstable; urgency=medium
 
   * Team upload.
