@@ -1,6 +1,7 @@
 mesa (17.2.0~rc1-1) UNRELEASED; urgency=medium
 
   * New upstream release candidate.
+  * control: Add wayland-protocols (>= 1.9) to Build-Depends.
 
  -- Timo Aaltonen <tjaalton@debian.org>  Tue, 25 Jul 2017 11:40:09 +0300
 
