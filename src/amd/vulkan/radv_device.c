@@ -3246,6 +3246,8 @@ radv_initialise_ds_surface(struct radv_device *device,
 			ds->db_z_info |= S_028040_TILE_MODE_INDEX(tile_mode_index);
 			tile_mode_index = si_tile_mode_index(iview->image, level, true);
 			ds->db_stencil_info |= S_028044_TILE_MODE_INDEX(tile_mode_index);
+			if (stencil_only)
+				ds->db_z_info |= S_028040_TILE_MODE_INDEX(tile_mode_index);
 		}
 
 		ds->db_depth_size = S_028058_PITCH_TILE_MAX((level_info->nblk_x / 8) - 1) |
@@ -3624,9 +3626,14 @@ void radv_GetPhysicalDeviceExternalSemaphorePropertiesKHR(
 	const VkPhysicalDeviceExternalSemaphoreInfoKHR* pExternalSemaphoreInfo,
 	VkExternalSemaphorePropertiesKHR*           pExternalSemaphoreProperties)
 {
-	pExternalSemaphoreProperties->exportFromImportedHandleTypes = VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_OPAQUE_FD_BIT_KHR;
-	pExternalSemaphoreProperties->compatibleHandleTypes = VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_OPAQUE_FD_BIT_KHR;
-	pExternalSemaphoreProperties->externalSemaphoreFeatures = VK_EXTERNAL_SEMAPHORE_FEATURE_EXPORTABLE_BIT_KHR |
-		VK_EXTERNAL_SEMAPHORE_FEATURE_IMPORTABLE_BIT_KHR;
-
+	if (pExternalSemaphoreInfo->handleType == VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_OPAQUE_FD_BIT_KHR) {
+		pExternalSemaphoreProperties->exportFromImportedHandleTypes = VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_OPAQUE_FD_BIT_KHR;
+		pExternalSemaphoreProperties->compatibleHandleTypes = VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_OPAQUE_FD_BIT_KHR;
+		pExternalSemaphoreProperties->externalSemaphoreFeatures = VK_EXTERNAL_SEMAPHORE_FEATURE_EXPORTABLE_BIT_KHR |
+			VK_EXTERNAL_SEMAPHORE_FEATURE_IMPORTABLE_BIT_KHR;
+	} else {
+		pExternalSemaphoreProperties->exportFromImportedHandleTypes = 0;
+		pExternalSemaphoreProperties->compatibleHandleTypes = 0;
+		pExternalSemaphoreProperties->externalSemaphoreFeatures = 0;
+	}
 }

@@ -970,7 +970,7 @@ struct pipe_screen *radeonsi_screen_create(struct radeon_winsys *ws,
 
 	if (!util_queue_init(&sscreen->shader_compiler_queue_low_priority,
 			     "si_shader_low",
-			     32, num_compiler_threads,
+			     32, num_compiler_threads_lowprio,
 			     UTIL_QUEUE_INIT_RESIZE_IF_FULL |
 			     UTIL_QUEUE_INIT_USE_MINIMUM_PRIORITY)) {
 	       si_destroy_shader_cache(sscreen);
@@ -1002,8 +1002,8 @@ struct pipe_screen *radeonsi_screen_create(struct radeon_winsys *ws,
 		 sscreen->b.info.pfp_fw_version >= 211 &&
 		 sscreen->b.info.me_fw_version >= 173) ||
 		(sscreen->b.chip_class == SI &&
-		 sscreen->b.info.pfp_fw_version >= 121 &&
-		 sscreen->b.info.me_fw_version >= 87);
+		 sscreen->b.info.pfp_fw_version >= 79 &&
+		 sscreen->b.info.me_fw_version >= 142);
 
 	sscreen->has_ds_bpermute = sscreen->b.chip_class >= VI;
 	sscreen->has_msaa_sample_loc_bug = (sscreen->b.family >= CHIP_POLARIS10 &&
