@@ -38,6 +38,7 @@ struct grate_context {
 
    uint32_t no_scissor[3];
    uint32_t viewport[7];
+   uint32_t guardband[4];
 };
 
 static inline struct grate_context *
