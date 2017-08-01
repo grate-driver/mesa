@@ -134,6 +134,12 @@ grate_set_viewport_states(struct pipe_context *pcontext,
    context->viewport[5] = u_bitcast_f2u(viewports[0].scale[1] * 16.0f);
    context->viewport[6] = u_bitcast_f2u(viewports[0].scale[2] - zeps);
 
+   uint32_t depth_near = (viewports[0].translate[2] - viewports[0].scale[2]) * ((1 << 20) - 1);
+   uint32_t depth_far = (viewports[0].translate[2] + viewports[0].scale[2]) * ((1 << 20) - 1);
+   context->viewport[7] = host1x_opcode_incr(TGR3D_DEPTH_RANGE_NEAR, 2);
+   context->viewport[8] = depth_near;
+   context->viewport[9] = depth_far;
+
    assert(viewports[0].scale[0] >= 0.0f);
    float max_x = fabs(viewports[0].translate[0]);
    float max_y = fabs(viewports[0].translate[1]);
@@ -470,7 +476,7 @@ static void
 emit_viewport(struct grate_context *context)
 {
    struct grate_stream *stream = &context->gr3d->stream;
-   grate_stream_push_words(stream, context->viewport, 7, 0);
+   grate_stream_push_words(stream, context->viewport, 10, 0);
 }
 
 static void
