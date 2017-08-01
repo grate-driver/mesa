@@ -133,6 +133,16 @@ grate_set_viewport_states(struct pipe_context *pcontext,
    context->viewport[4] = u_bitcast_f2u(viewports[0].scale[0] * 16.0f);
    context->viewport[5] = u_bitcast_f2u(viewports[0].scale[1] * 16.0f);
    context->viewport[6] = u_bitcast_f2u(viewports[0].scale[2] - zeps);
+
+   assert(viewports[0].scale[0] >= 0.0f);
+   float max_x = fabs(viewports[0].translate[0]);
+   float max_y = fabs(viewports[0].translate[1]);
+   float scale_x = viewports[0].scale[0];
+   float scale_y = fabs(viewports[0].scale[1]);
+   context->guardband[0] = host1x_opcode_incr(TGR3D_GUARDBAND_WIDTH, 3);
+   context->guardband[1] = u_bitcast_f2u((3967 - max_x) / scale_x);
+   context->guardband[2] = u_bitcast_f2u((3967 - max_y) / scale_y);
+   context->guardband[3] = u_bitcast_f2u(6.99);
 }
 
 static void
@@ -464,6 +474,13 @@ emit_viewport(struct grate_context *context)
 }
 
 static void
+emit_guardband(struct grate_context *context)
+{
+   struct grate_stream *stream = &context->gr3d->stream;
+   grate_stream_push_words(stream, context->guardband, 4, 0);
+}
+
+static void
 emit_vs_uniforms(struct grate_context *context)
 {
    struct grate_stream *stream = &context->gr3d->stream;
@@ -487,6 +504,7 @@ grate_emit_state(struct grate_context *context)
 {
    emit_render_targets(context);
    emit_viewport(context);
+   emit_guardband(context);
    emit_scissor(context);
    emit_attribs(context);
    emit_vs_uniforms(context);
