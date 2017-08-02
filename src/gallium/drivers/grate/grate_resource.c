@@ -13,6 +13,7 @@
 #include "grate_screen.h"
 
 #include "host1x01_hardware.h"
+#include "tgr_3d.xml.h"
 
 #include <tegra_drm.h>
 #include <libdrm/tegra.h>
@@ -130,11 +131,34 @@ static const struct u_resource_vtbl grate_resource_vtbl = {
    .transfer_unmap = grate_resource_transfer_unmap,
 };
 
-static bool
-grate_screen_can_create_resource(struct pipe_screen *pscreen,
-                                 const struct pipe_resource *template)
+int
+grate_pixel_format(enum pipe_format format)
 {
-   return TRUE;
+   switch (format) {
+   case PIPE_FORMAT_A8_UNORM:
+      return TGR3D_PIXEL_FORMAT_A8;
+   case PIPE_FORMAT_L8_UNORM:
+      return TGR3D_PIXEL_FORMAT_L8;
+   case PIPE_FORMAT_L8A8_UNORM:
+      return TGR3D_PIXEL_FORMAT_LA88;
+   case PIPE_FORMAT_B5G6R5_UNORM:
+      return TGR3D_PIXEL_FORMAT_RGB565;
+   case PIPE_FORMAT_B5G5R5A1_UNORM:
+      return TGR3D_PIXEL_FORMAT_RGBA5551;
+   case PIPE_FORMAT_B4G4R4A4_UNORM:
+      return TGR3D_PIXEL_FORMAT_RGBA4444;
+   case PIPE_FORMAT_B8G8R8A8_UNORM:
+   case PIPE_FORMAT_B8G8R8X8_UNORM:
+      return TGR3D_PIXEL_FORMAT_RGBA8888;
+   case PIPE_FORMAT_R32G32B32A32_FLOAT:
+      return TGR3D_PIXEL_FORMAT_RGBA_FP32;
+   case PIPE_FORMAT_S8_UINT:
+      return TGR3D_PIXEL_FORMAT_S8;
+   case PIPE_FORMAT_Z16_UNORM:
+      return TGR3D_PIXEL_FORMAT_D16_LINEAR;
+   default:
+      return -1;
+   }
 }
 
 static struct pipe_resource *
@@ -165,6 +189,13 @@ grate_screen_resource_create(struct pipe_screen *pscreen,
       flags = DRM_TEGRA_GEM_CREATE_BOTTOM_UP;
    }
 
+   if (template->target != PIPE_BUFFER) {
+      /* pick pixel-format */
+      int format = grate_pixel_format(template->format);
+      assert(format >= 0);
+      resource->format = format;
+   }
+
    size = resource->pitch * height;
 
    err = drm_tegra_bo_new(&resource->bo, screen->drm, flags, size);
@@ -184,7 +215,7 @@ grate_screen_resource_from_handle(struct pipe_screen *pscreen,
 {
    struct grate_screen *screen = grate_screen(pscreen);
    struct grate_resource *resource;
-   int err;
+   int err, format;
 
    resource = CALLOC_STRUCT(grate_resource);
    if (!resource)
@@ -206,13 +237,16 @@ grate_screen_resource_from_handle(struct pipe_screen *pscreen,
 
    resource->pitch = handle->stride;
 
+   format = grate_pixel_format(template->format);
+   assert(format >= 0);
+   resource->format = format;
+
    return &resource->base.b;
 }
 
 void
 grate_screen_resource_init(struct pipe_screen *pscreen)
 {
-   pscreen->can_create_resource = grate_screen_can_create_resource;
    pscreen->resource_create = grate_screen_resource_create;
    pscreen->resource_from_handle = grate_screen_resource_from_handle;
    pscreen->resource_get_handle = u_resource_get_handle_vtbl;
