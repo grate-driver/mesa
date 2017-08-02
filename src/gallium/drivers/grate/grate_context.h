@@ -11,6 +11,10 @@
 
 struct grate_framebuffer_state {
    struct pipe_framebuffer_state base;
+   int num_rts;
+   struct drm_tegra_bo *bos[16];
+   uint32_t rt_params[16];
+   uint32_t mask;
 };
 
 struct grate_channel {
