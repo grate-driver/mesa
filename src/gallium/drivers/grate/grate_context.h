@@ -15,6 +15,10 @@
 
 struct grate_framebuffer_state {
    struct pipe_framebuffer_state base;
+   int num_rts;
+   struct drm_tegra_bo *bos[16];
+   uint32_t rt_params[16];
+   uint32_t mask;
 };
 
 struct grate_channel {
@@ -34,6 +38,9 @@ struct grate_context {
 
    struct grate_vertex_state *vs;
    struct grate_vertexbuf_state vbs;
+
+   uint32_t no_scissor[3];
+   uint32_t viewport[7];
 };
 
 static inline struct grate_context *
