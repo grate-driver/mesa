@@ -557,27 +557,9 @@ tegra_screen_is_format_supported(struct pipe_screen *pscreen,
                                  unsigned int sample_count,
                                  unsigned int usage)
 {
-   if (usage & PIPE_BIND_RENDER_TARGET) {
-      switch (format) {
-      case PIPE_FORMAT_B8G8R8A8_UNORM:
-      case PIPE_FORMAT_B8G8R8X8_UNORM:
-      case PIPE_FORMAT_A8R8G8B8_UNORM:
-      case PIPE_FORMAT_X8R8G8B8_UNORM:
-         break;
-      default:
+   if (usage & (PIPE_BIND_RENDER_TARGET | PIPE_BIND_DEPTH_STENCIL)) {
+      if (tegra_pixel_format(format) < 0)
          return false;
-      }
-   }
-
-   if (usage & PIPE_BIND_DEPTH_STENCIL) {
-      switch (format) {
-      case PIPE_FORMAT_Z16_UNORM:
-      case PIPE_FORMAT_Z24_UNORM_S8_UINT:
-      case PIPE_FORMAT_S8_UINT:
-         break;
-      default:
-         return false;
-      }
    }
 
    return true;

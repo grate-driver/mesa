@@ -33,20 +33,50 @@ tegra_set_framebuffer_state(struct pipe_context *pcontext,
                             const struct pipe_framebuffer_state *framebuffer)
 {
    struct tegra_context *context = tegra_context(pcontext);
+   struct pipe_framebuffer_state *cso = &context->framebuffer.base;
    unsigned int i;
+   uint32_t mask = 0;
 
-   for (i = 0; i < framebuffer->nr_cbufs; i++) {
-      struct pipe_surface *ref = framebuffer->cbufs[i];
+   if (framebuffer->zsbuf) {
+      struct tegra_resource *res = tegra_resource(framebuffer->zsbuf->texture);
+      uint32_t rt_params;
 
-      if (i >= framebuffer->nr_cbufs)
-         ref = NULL;
+      rt_params  = TGR3D_VAL(RT_PARAMS, FORMAT, res->format);
+      rt_params |= TGR3D_VAL(RT_PARAMS, PITCH, res->pitch);
+      rt_params |= TGR3D_BOOL(RT_PARAMS, TILED, res->tiled);
 
-      pipe_surface_reference(&context->framebuffer.base.cbufs[i],
-                   ref);
+      context->framebuffer.rt_params[0] = rt_params;
+      context->framebuffer.bos[0] = res->bo;
+      mask |= 1;
+   } else {
+      context->framebuffer.rt_params[0] = 0;
+      context->framebuffer.bos[0] = NULL;
    }
 
    pipe_surface_reference(&context->framebuffer.base.zsbuf,
-                framebuffer->zsbuf);
+                          framebuffer->zsbuf);
+
+   for (i = 0; i < framebuffer->nr_cbufs; i++) {
+      struct pipe_surface *ref = framebuffer->cbufs[i];
+      struct tegra_resource *res = tegra_resource(ref->texture);
+      uint32_t rt_params;
+
+      rt_params  = TGR3D_VAL(RT_PARAMS, FORMAT, res->format);
+      rt_params |= TGR3D_VAL(RT_PARAMS, PITCH, res->pitch);
+      rt_params |= TGR3D_BOOL(RT_PARAMS, TILED, res->tiled);
+
+      context->framebuffer.rt_params[1 + i] = rt_params;
+      context->framebuffer.bos[1 + i] = res->bo;
+      mask |= 1 << (1 + i);
+
+      pipe_surface_reference(&cso->cbufs[i], ref);
+   }
+
+   for (; i < cso->nr_cbufs; i++)
+      pipe_surface_reference(&cso->cbufs[i], NULL);
+
+   context->framebuffer.num_rts = 1 + i;
+   context->framebuffer.mask = mask;
 
    context->framebuffer.base.width = framebuffer->width;
    context->framebuffer.base.height = framebuffer->height;
@@ -371,9 +401,33 @@ emit_attribs(struct tegra_context *context)
    }
 }
 
+static void
+emit_render_targets(struct tegra_context *context)
+{
+   unsigned int i;
+   struct tegra_stream *stream = &context->gr3d->stream;
+   const struct tegra_framebuffer_state *fb = &context->framebuffer;
+
+   tegra_stream_push(stream, host1x_opcode_incr(TGR3D_RT_PARAMS(0), fb->num_rts));
+   for (i = 0; i < fb->num_rts; ++i) {
+      uint32_t rt_params = fb->rt_params[i];
+      /* TODO: setup dither */
+      /* rt_params |= TGR3D_BOOL(RT_PARAMS, DITHER_ENABLE, enable_dither); */
+      tegra_stream_push(stream, rt_params);
+   }
+
+   tegra_stream_push(stream, host1x_opcode_incr(TGR3D_RT_PTR(0), fb->num_rts));
+   for (i = 0; i < fb->num_rts; ++i)
+      tegra_stream_push_reloc(stream, fb->bos[i], 0);
+
+   tegra_stream_push(stream, host1x_opcode_incr(TGR3D_RT_ENABLE, 1));
+   tegra_stream_push(stream, fb->mask);
+}
+
 void
 tegra_emit_state(struct tegra_context *context)
 {
+   emit_render_targets(context);
    emit_attribs(context);
 }
 
