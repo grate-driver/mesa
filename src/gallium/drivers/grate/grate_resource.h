@@ -9,6 +9,7 @@ struct grate_resource {
    struct drm_tegra_bo *bo;
    unsigned int pitch;
    unsigned int tiled : 1;
+   unsigned int format : 5;
 };
 
 static inline struct grate_resource *
@@ -16,6 +17,9 @@ grate_resource(struct pipe_resource *resource)
 {
    return (struct grate_resource *)resource;
 }
+
+int
+grate_pixel_format(enum pipe_format format);
 
 void
 grate_context_resource_init(struct pipe_context *pcontext);
