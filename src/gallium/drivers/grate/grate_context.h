@@ -26,6 +26,7 @@ struct grate_context {
    struct pipe_context base;
 
    struct grate_channel *gr2d;
+   struct grate_channel *gr3d;
 
    struct grate_framebuffer_state framebuffer;
 
