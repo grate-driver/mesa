@@ -22,6 +22,7 @@ struct tegra_context {
    struct pipe_context base;
 
    struct tegra_channel *gr2d;
+   struct tegra_channel *gr3d;
 
    struct tegra_framebuffer_state framebuffer;
 
