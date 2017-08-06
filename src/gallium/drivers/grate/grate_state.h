@@ -6,6 +6,23 @@
 
 struct grate_context;
 
+struct grate_vertexbuf_state {
+   struct pipe_vertex_buffer vb[PIPE_MAX_ATTRIBS];
+   unsigned int count;
+   uint32_t enabled;
+};
+
+struct grate_vertex_element {
+   uint32_t attrib;
+   unsigned int buffer_index;
+   unsigned int offset;
+};
+
+struct grate_vertex_state {
+   struct grate_vertex_element elements[PIPE_MAX_ATTRIBS];
+   unsigned int num_elements;
+};
+
 void
 grate_emit_state(struct grate_context *context);
 
