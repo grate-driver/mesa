@@ -17,6 +17,8 @@ tegra_context_destroy(struct pipe_context *pcontext)
 {
    struct tegra_context *context = tegra_context(pcontext);
 
+   slab_destroy_child(&context->transfer_pool);
+
    FREE(context);
 }
 
@@ -32,12 +34,16 @@ struct pipe_context *
 tegra_screen_context_create(struct pipe_screen *pscreen,
                             void *priv, unsigned flags)
 {
+   struct tegra_screen *screen = tegra_screen(pscreen);
+
    struct tegra_context *context = CALLOC_STRUCT(tegra_context);
    if (!context)
       return NULL;
 
    context->base.screen = pscreen;
    context->base.priv = priv;
+
+   slab_create_child(&context->transfer_pool, &screen->transfer_pool);
 
    context->base.destroy = tegra_context_destroy;
    context->base.flush = tegra_context_flush;
