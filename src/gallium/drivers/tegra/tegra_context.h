@@ -7,13 +7,21 @@
 #include "pipe/p_state.h"
 
 #include "tegra_state.h"
+#include "tegra_stream.h"
 
 struct tegra_framebuffer_state {
    struct pipe_framebuffer_state base;
 };
 
+struct tegra_channel {
+   struct tegra_context *context;
+   struct tegra_stream stream;
+};
+
 struct tegra_context {
    struct pipe_context base;
+
+   struct tegra_channel *gr2d;
 
    struct tegra_framebuffer_state framebuffer;
 

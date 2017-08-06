@@ -3,6 +3,7 @@
 #include "util/u_format.h"
 #include "util/u_inlines.h"
 #include "util/u_memory.h"
+#include "util/u_pack_color.h"
 #include "util/u_transfer.h"
 #include "util/u_inlines.h"
 
@@ -10,6 +11,8 @@
 #include "tegra_context.h"
 #include "tegra_resource.h"
 #include "tegra_screen.h"
+
+#include "host1x01_hardware.h"
 
 #include <libdrm/tegra_drm.h>
 #include <libdrm/tegra.h>
@@ -232,7 +235,154 @@ tegra_resource_copy_region(struct pipe_context *pcontext,
 static void
 tegra_blit(struct pipe_context *pcontext, const struct pipe_blit_info *info)
 {
-   unimplemented();
+   int err, value;
+   struct tegra_context *context = tegra_context(pcontext);
+   struct tegra_channel *gr2d = context->gr2d;
+   struct tegra_resource *dst, *src;
+
+   dst = tegra_resource(info->dst.resource);
+   src = tegra_resource(info->src.resource);
+
+   err = tegra_stream_begin(&gr2d->stream);
+   if (err < 0) {
+      fprintf(stderr, "tegra_stream_begin() failed: %d\n", err);
+      return;
+   }
+
+   tegra_stream_push_setclass(&gr2d->stream, HOST1X_CLASS_GR2D);
+
+   tegra_stream_push(&gr2d->stream, host1x_opcode_mask(0x009, 0x9));
+   tegra_stream_push(&gr2d->stream, 0x0000003a);            /* 0x009 - trigger */
+   tegra_stream_push(&gr2d->stream, 0x00000000);            /* 0x00c - cmdsel */
+
+   tegra_stream_push(&gr2d->stream, host1x_opcode_mask(0x01e, 0x7));
+   tegra_stream_push(&gr2d->stream, 0x00000000);            /* 0x01e - controlsecond */
+   /*
+    * [20:20] source color depth (0: mono, 1: same)
+    * [17:16] destination color depth (0: 8 bpp, 1: 16 bpp, 2: 32 bpp)
+    */
+
+   value = 1 << 20;
+   switch (util_format_get_blocksize(dst->base.b.format)) {
+   case 1:
+      value |= 0 << 16;
+      break;
+   case 2:
+      value |= 1 << 16;
+      break;
+   case 4:
+      value |= 2 << 16;
+      break;
+   default:
+      assert(0);
+   }
+
+   tegra_stream_push(&gr2d->stream, value);                 /* 0x01f - controlmain */
+   tegra_stream_push(&gr2d->stream, 0x000000cc);            /* 0x020 - ropfade */
+
+   tegra_stream_push(&gr2d->stream, host1x_opcode_nonincr(0x046, 1));
+
+   /*
+    * [20:20] destination write tile mode (0: linear, 1: tiled)
+    * [ 0: 0] tile mode Y/RGB (0: linear, 1: tiled)
+    */
+   value = (dst->tiled << 20) | src->tiled;
+   tegra_stream_push(&gr2d->stream, value);                 /* 0x046 - tilemode */
+
+   tegra_stream_push(&gr2d->stream, host1x_opcode_mask(0x02b, 0xe149));
+   tegra_stream_push_reloc(&gr2d->stream, dst->bo, 0);      /* 0x02b - dstba */
+
+   tegra_stream_push(&gr2d->stream, dst->pitch);            /* 0x02e - dstst */
+
+   tegra_stream_push_reloc(&gr2d->stream, src->bo, 0);      /* 0x031 - srcba */
+
+   tegra_stream_push(&gr2d->stream, src->pitch);            /* 0x033 - srcst */
+
+   value = info->dst.box.height << 16 | info->dst.box.width;
+   tegra_stream_push(&gr2d->stream, value);                 /* 0x038 - dstsize */
+
+   value = info->src.box.y << 16 | info->src.box.x;
+   tegra_stream_push(&gr2d->stream, value);                 /* 0x039 - srcps */
+
+   value = info->dst.box.y << 16 | info->dst.box.x;
+   tegra_stream_push(&gr2d->stream, value);                 /* 0x03a - dstps */
+
+   tegra_stream_end(&gr2d->stream);
+
+   tegra_stream_flush(&gr2d->stream);
+}
+
+static uint32_t
+pack_color(enum pipe_format format, const float *rgba)
+{
+   union util_color uc;
+   util_pack_color(rgba, format, &uc);
+   return uc.ui[0];
+}
+
+static int
+tegra_fill(struct tegra_channel *gr2d,
+           struct tegra_resource *dst,
+           uint32_t fill_value, int blocksize,
+           unsigned dstx, unsigned dsty,
+           unsigned width, unsigned height)
+{
+   uint32_t value;
+   int err;
+
+   err = tegra_stream_begin(&gr2d->stream);
+   if (err < 0) {
+      fprintf(stderr, "tegra_stream_begin() failed: %d\n", err);
+      return -1;
+   }
+
+   tegra_stream_push_setclass(&gr2d->stream, HOST1X_CLASS_GR2D);
+
+   tegra_stream_push(&gr2d->stream, host1x_opcode_mask(0x09, 0x09));
+   tegra_stream_push(&gr2d->stream, 0x0000003a);           /* 0x009 - trigger */
+   tegra_stream_push(&gr2d->stream, 0x00000000);           /* 0x00C - cmdsel */
+
+   tegra_stream_push(&gr2d->stream, host1x_opcode_mask(0x1e, 0x07));
+   tegra_stream_push(&gr2d->stream, 0x00000000);           /* 0x01e - controlsecond */
+
+   value  = 1 << 6; /* fill mode */
+   value |= 1 << 2; /* turbofill */
+   switch (blocksize) {
+   case 1:
+      value |= 0 << 16;
+      break;
+   case 2:
+      value |= 1 << 16;
+      break;
+   case 4:
+      value |= 2 << 16;
+      break;
+   default:
+      unreachable("invalid blocksize");
+   }
+   tegra_stream_push(&gr2d->stream, value);           /* 0x01f - controlmain */
+
+   tegra_stream_push(&gr2d->stream, 0x000000cc);      /* 0x020 - ropfade */
+
+   tegra_stream_push(&gr2d->stream, host1x_opcode_mask(0x2b, 0x09));
+   tegra_stream_push_reloc(&gr2d->stream, dst->bo, 0);/* 0x02b - dstba */
+   tegra_stream_push(&gr2d->stream, dst->pitch);      /* 0x02e - dstst */
+
+   tegra_stream_push(&gr2d->stream, host1x_opcode_nonincr(0x35, 1));
+
+   tegra_stream_push(&gr2d->stream, fill_value);           /* 0x035 - srcfgc */
+
+   tegra_stream_push(&gr2d->stream, host1x_opcode_nonincr(0x46, 1));
+   tegra_stream_push(&gr2d->stream, dst->tiled << 20);     /* 0x046 - tilemode */
+
+   tegra_stream_push(&gr2d->stream, host1x_opcode_mask(0x38, 0x05));
+   tegra_stream_push(&gr2d->stream, height << 16 | width); /* 0x038 - dstsize */
+   tegra_stream_push(&gr2d->stream, dsty << 16 | dstx);    /* 0x03a - dstps */
+   tegra_stream_end(&gr2d->stream);
+
+   tegra_stream_flush(&gr2d->stream);
+
+   return 0;
 }
 
 static void
@@ -240,7 +390,31 @@ tegra_clear(struct pipe_context *pcontext, unsigned int buffers,
             const union pipe_color_union *color, double depth,
             unsigned int stencil)
 {
-   unimplemented();
+   struct tegra_context *context = tegra_context(pcontext);
+   struct pipe_framebuffer_state *fb;
+
+   fb = &context->framebuffer.base;
+
+   if (buffers & PIPE_CLEAR_COLOR) {
+      int i;
+      for (i = 0; i < fb->nr_cbufs; ++i) {
+         struct pipe_surface *dst = fb->cbufs[i];
+         if (tegra_fill(context->gr2d, tegra_resource(dst->texture),
+                        pack_color(dst->format, color->f),
+                        util_format_get_blocksize(dst->format),
+                        0, 0, dst->width, dst->height) < 0)
+            return;
+      }
+   }
+
+   if (buffers & PIPE_CLEAR_DEPTH || buffers & PIPE_CLEAR_STENCIL) {
+      /* TODO: handle the case where both are not set! */
+      if (tegra_fill(context->gr2d, tegra_resource(fb->zsbuf->texture),
+                     util_pack_z_stencil(fb->zsbuf->format, depth, stencil),
+                     util_format_get_blocksize(fb->zsbuf->format),
+                     0, 0, fb->zsbuf->width, fb->zsbuf->height) < 0)
+         return;
+   }
 }
 
 static void
@@ -251,7 +425,10 @@ tegra_clear_render_target(struct pipe_context *pipe,
                           unsigned width, unsigned height,
                           bool render_condition_enabled)
 {
-   unimplemented();
+   assert(!render_condition_enabled);
+   tegra_fill(tegra_context(pipe)->gr2d, tegra_resource(dst->texture),
+              pack_color(dst->format, color->f), util_format_get_blocksize(dst->format),
+              dstx, dsty, width, height);
 }
 
 static void
@@ -264,7 +441,11 @@ tegra_clear_depth_stencil(struct pipe_context *pipe,
                           unsigned width, unsigned height,
                           bool render_condition_enabled)
 {
-   unimplemented();
+   assert(!render_condition_enabled);
+   tegra_fill(tegra_context(pipe)->gr2d, tegra_resource(dst->texture),
+              util_pack_z_stencil(dst->format, depth, stencil),
+              util_format_get_blocksize(dst->format),
+              dstx, dsty, width, height);
 }
 
 static void
