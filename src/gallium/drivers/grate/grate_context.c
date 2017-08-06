@@ -12,6 +12,46 @@
 #include "grate_state.h"
 #include "grate_surface.h"
 
+static int
+grate_channel_create(struct grate_context *context,
+                     enum drm_tegra_class class,
+                     struct grate_channel **channelp)
+{
+   struct grate_screen *screen = grate_screen(context->base.screen);
+   int err;
+   struct drm_tegra_channel *drm_channel;
+   struct grate_channel *channel;
+
+   err = drm_tegra_channel_open(&drm_channel, screen->drm, class);
+   if (err < 0)
+      return err;
+
+   channel = CALLOC_STRUCT(grate_channel);
+   if (!channel)
+      return -ENOMEM;
+
+   channel->context = context;
+
+   err = grate_stream_create(screen->drm, drm_channel, &channel->stream, 32768);
+   if (err < 0) {
+      FREE(channel);
+      drm_tegra_channel_close(drm_channel);
+      return err;
+   }
+
+   *channelp = channel;
+
+   return 0;
+}
+
+static void
+grate_channel_delete(struct grate_channel *channel)
+{
+   grate_stream_destroy(&channel->stream);
+   drm_tegra_channel_close(channel->stream.channel);
+   FREE(channel);
+}
+
 static void
 grate_context_destroy(struct pipe_context *pcontext)
 {
@@ -19,6 +59,7 @@ grate_context_destroy(struct pipe_context *pcontext)
 
    slab_destroy_child(&context->transfer_pool);
 
+   grate_channel_delete(context->gr2d);
    FREE(context);
 }
 
@@ -35,6 +76,7 @@ grate_screen_context_create(struct pipe_screen *pscreen,
                             void *priv, unsigned flags)
 {
    struct grate_screen *screen = grate_screen(pscreen);
+   int err;
 
    struct grate_context *context = CALLOC_STRUCT(grate_context);
    if (!context)
@@ -42,6 +84,12 @@ grate_screen_context_create(struct pipe_screen *pscreen,
 
    context->base.screen = pscreen;
    context->base.priv = priv;
+
+   err = grate_channel_create(context, DRM_TEGRA_GR2D, &context->gr2d);
+   if (err < 0) {
+      fprintf(stderr, "grate_channel_create() failed: %d\n", err);
+      return NULL;
+   }
 
    slab_create_child(&context->transfer_pool, &screen->transfer_pool);
 
