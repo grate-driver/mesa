@@ -48,21 +48,21 @@
             __FILE__, __LINE__, __func__, ##args)
 
 /*
- * tegra_stream_create(channel)
+ * grate_stream_create(channel)
  *
  * Create a stream for given channel. This function preallocates several
  * command buffers for later usage to improve performance. Streams are
  * used for generating command buffers opcode by opcode using
- * tegra_stream_push().
+ * grate_stream_push().
  */
 
 int
-tegra_stream_create(struct drm_tegra *drm,
+grate_stream_create(struct drm_tegra *drm,
                     struct drm_tegra_channel *channel,
-                    struct tegra_stream *stream,
+                    struct grate_stream *stream,
                     uint32_t words_num)
 {
-   stream->status    = TEGRADRM_STREAM_FREE;
+   stream->status    = GRATE_STREAM_FREE;
    stream->channel   = channel;
    stream->num_words = words_num;
 
@@ -70,13 +70,13 @@ tegra_stream_create(struct drm_tegra *drm,
 }
 
 /*
- * tegra_stream_destroy(stream)
+ * grate_stream_destroy(stream)
  *
  * Destroy the given stream object. All resrouces are released.
  */
 
 void
-tegra_stream_destroy(struct tegra_stream *stream)
+grate_stream_destroy(struct grate_stream *stream)
 {
    if (!stream)
       return;
@@ -85,7 +85,7 @@ tegra_stream_destroy(struct tegra_stream *stream)
 }
 
 /*
- * tegra_stream_flush(stream, fence)
+ * grate_stream_flush(stream, fence)
  *
  * Send the current contents of stream buffer. The stream must be
  * synchronized correctly (we cannot send partial streams). If
@@ -94,7 +94,7 @@ tegra_stream_destroy(struct tegra_stream *stream)
  */
 
 int
-tegra_stream_flush(struct tegra_stream *stream)
+grate_stream_flush(struct grate_stream *stream)
 {
    struct drm_tegra_fence *fence;
    int result = 0;
@@ -103,11 +103,11 @@ tegra_stream_flush(struct tegra_stream *stream)
       return -1;
 
    /* Reflushing is fine */
-   if (stream->status == TEGRADRM_STREAM_FREE)
+   if (stream->status == GRATE_STREAM_FREE)
       return 0;
 
    /* Return error if stream is constructed badly */
-   if (stream->status != TEGRADRM_STREAM_READY) {
+   if (stream->status != GRATE_STREAM_READY) {
       result = -1;
       goto cleanup;
    }
@@ -131,13 +131,13 @@ cleanup:
    drm_tegra_job_free(stream->job);
 
    stream->job = NULL;
-   stream->status = TEGRADRM_STREAM_FREE;
+   stream->status = GRATE_STREAM_FREE;
 
    return result;
 }
 
 /*
- * tegra_stream_begin(stream, num_words, fence, num_fences, num_syncpt_incrs,
+ * grate_stream_begin(stream, num_words, fence, num_fences, num_syncpt_incrs,
  *          num_relocs, class_id)
  *
  * Start constructing a stream.
@@ -156,12 +156,12 @@ cleanup:
  */
 
 int
-tegra_stream_begin(struct tegra_stream *stream)
+grate_stream_begin(struct grate_stream *stream)
 {
    int ret;
 
    /* check stream and its state */
-   if (!(stream && stream->status == TEGRADRM_STREAM_FREE)) {
+   if (!(stream && stream->status == GRATE_STREAM_FREE)) {
       ErrorMsg("Stream status isn't FREE\n");
       return -1;
    }
@@ -187,25 +187,25 @@ tegra_stream_begin(struct tegra_stream *stream)
    }
 
    stream->class_id = 0;
-   stream->status = TEGRADRM_STREAM_CONSTRUCT;
+   stream->status = GRATE_STREAM_CONSTRUCT;
 
    return 0;
 }
 
 /*
- * tegra_stream_push_reloc(stream, h, offset)
+ * grate_stream_push_reloc(stream, h, offset)
  *
  * Push a memory reference to the stream.
  */
 
 int
-tegra_stream_push_reloc(struct tegra_stream *stream,
+grate_stream_push_reloc(struct grate_stream *stream,
                         struct drm_tegra_bo *bo,
                         unsigned offset)
 {
    int ret;
 
-   if (!(stream && stream->status == TEGRADRM_STREAM_CONSTRUCT)) {
+   if (!(stream && stream->status == GRATE_STREAM_CONSTRUCT)) {
       ErrorMsg("Stream status isn't CONSTRUCT\n");
       return -1;
    }
@@ -213,7 +213,7 @@ tegra_stream_push_reloc(struct tegra_stream *stream,
    ret = drm_tegra_pushbuf_relocate(stream->buffer.pushbuf,
                                     bo, offset, 0);
    if (ret != 0) {
-      stream->status = TEGRADRM_STREAM_CONSTRUCTION_FAILED;
+      stream->status = GRATE_STREAM_CONSTRUCTION_FAILED;
       ErrorMsg("drm_tegra_pushbuf_relocate() failed %d\n", ret);
       return -1;
    }
@@ -222,24 +222,24 @@ tegra_stream_push_reloc(struct tegra_stream *stream,
 }
 
 /*
- * tegra_stream_push(stream, word)
+ * grate_stream_push(stream, word)
  *
  * Push a single word to given stream.
  */
 
 int
-tegra_stream_push(struct tegra_stream *stream, uint32_t word)
+grate_stream_push(struct grate_stream *stream, uint32_t word)
 {
    int ret;
 
-   if (!(stream && stream->status == TEGRADRM_STREAM_CONSTRUCT)) {
+   if (!(stream && stream->status == GRATE_STREAM_CONSTRUCT)) {
       ErrorMsg("Stream status isn't CONSTRUCT\n");
       return -1;
    }
 
    ret = drm_tegra_pushbuf_prepare(stream->buffer.pushbuf, 1);
    if (ret != 0) {
-      stream->status = TEGRADRM_STREAM_CONSTRUCTION_FAILED;
+      stream->status = GRATE_STREAM_CONSTRUCTION_FAILED;
       ErrorMsg("drm_tegra_pushbuf_prepare() failed %d\n", ret);
       return -1;
    }
@@ -250,21 +250,21 @@ tegra_stream_push(struct tegra_stream *stream, uint32_t word)
 }
 
 /*
- * tegra_stream_push_setclass(stream, class_id)
+ * grate_stream_push_setclass(stream, class_id)
  *
  * Push "set class" opcode to the stream. Do nothing if the class is already
  * active
  */
 
 int
-tegra_stream_push_setclass(struct tegra_stream *stream, unsigned class_id)
+grate_stream_push_setclass(struct grate_stream *stream, unsigned class_id)
 {
    int result;
 
    if (stream->class_id == class_id)
       return 0;
 
-   result = tegra_stream_push(stream, host1x_opcode_setclass(class_id, 0, 0));
+   result = grate_stream_push(stream, host1x_opcode_setclass(class_id, 0, 0));
 
    if (result == 0)
       stream->class_id = class_id;
@@ -273,18 +273,18 @@ tegra_stream_push_setclass(struct tegra_stream *stream, unsigned class_id)
 }
 
 /*
- * tegra_stream_end(stream)
+ * grate_stream_end(stream)
  *
  * Mark end of stream. This function pushes last syncpoint increment for
  * marking end of stream.
  */
 
 int
-tegra_stream_end(struct tegra_stream *stream)
+grate_stream_end(struct grate_stream *stream)
 {
    int ret;
 
-   if (!(stream && stream->status == TEGRADRM_STREAM_CONSTRUCT)) {
+   if (!(stream && stream->status == GRATE_STREAM_CONSTRUCT)) {
       ErrorMsg("Stream status isn't CONSTRUCT\n");
       return -1;
    }
@@ -292,62 +292,62 @@ tegra_stream_end(struct tegra_stream *stream)
    ret = drm_tegra_pushbuf_sync(stream->buffer.pushbuf,
                                 DRM_TEGRA_SYNCPT_COND_OP_DONE);
    if (ret != 0) {
-      stream->status = TEGRADRM_STREAM_CONSTRUCTION_FAILED;
+      stream->status = GRATE_STREAM_CONSTRUCTION_FAILED;
       ErrorMsg("drm_tegra_pushbuf_sync() failed %d\n", ret);
       return -1;
    }
 
-   stream->status = TEGRADRM_STREAM_READY;
+   stream->status = GRATE_STREAM_READY;
 
    return 0;
 }
 
 /*
- * tegra_reloc (variable, handle, offset)
+ * grate_reloc (variable, handle, offset)
  *
  * This function creates a reloc allocation. The function should be used in
- * conjunction with tegra_stream_push_words.
+ * conjunction with grate_stream_push_words.
  */
 
-struct tegra_reloc
-tegra_reloc(const void *var_ptr, struct drm_tegra_bo *bo,
+struct grate_reloc
+grate_reloc(const void *var_ptr, struct drm_tegra_bo *bo,
             uint32_t offset, uint32_t var_offset)
 {
-   struct tegra_reloc reloc = {var_ptr, bo, offset, var_offset};
+   struct grate_reloc reloc = {var_ptr, bo, offset, var_offset};
    return reloc;
 }
 
 /*
- * tegra_stream_push_words(stream, addr, words, ...)
+ * grate_stream_push_words(stream, addr, words, ...)
  *
  * Push words from given address to stream. The function takes
- * reloc structs as its argument. You can generate the structs with tegra_reloc
+ * reloc structs as its argument. You can generate the structs with grate_reloc
  * function.
  */
 
-int tegra_stream_push_words(struct tegra_stream *stream, const void *addr,
+int grate_stream_push_words(struct grate_stream *stream, const void *addr,
                             unsigned words, int num_relocs, ...)
 {
-   struct tegra_reloc reloc_arg;
+   struct grate_reloc reloc_arg;
    va_list ap;
    uint32_t *pushbuf_ptr;
    int ret;
 
-   if (!(stream && stream->status == TEGRADRM_STREAM_CONSTRUCT)) {
+   if (!(stream && stream->status == GRATE_STREAM_CONSTRUCT)) {
       ErrorMsg("Stream status isn't CONSTRUCT\n");
       return -1;
    }
 
    ret = drm_tegra_pushbuf_prepare(stream->buffer.pushbuf, words);
    if (ret != 0) {
-      stream->status = TEGRADRM_STREAM_CONSTRUCTION_FAILED;
+      stream->status = GRATE_STREAM_CONSTRUCTION_FAILED;
       ErrorMsg("drm_tegra_pushbuf_prepare() failed %d\n", ret);
       return -1;
    }
 
    /* Class id should be set explicitly, for simplicity. */
    if (stream->class_id == 0) {
-      stream->status = TEGRADRM_STREAM_CONSTRUCTION_FAILED;
+      stream->status = GRATE_STREAM_CONSTRUCTION_FAILED;
       ErrorMsg("HOST1X class not specified\n");
       return -1;
    }
@@ -359,7 +359,7 @@ int tegra_stream_push_words(struct tegra_stream *stream, const void *addr,
    /* Copy relocs */
    va_start(ap, num_relocs);
    for (; num_relocs; num_relocs--) {
-      reloc_arg = va_arg(ap, struct tegra_reloc);
+      reloc_arg = va_arg(ap, struct grate_reloc);
 
       stream->buffer.pushbuf->ptr  = pushbuf_ptr;
       stream->buffer.pushbuf->ptr += reloc_arg.var_offset / sizeof(uint32_t);
@@ -367,7 +367,7 @@ int tegra_stream_push_words(struct tegra_stream *stream, const void *addr,
       ret = drm_tegra_pushbuf_relocate(stream->buffer.pushbuf, reloc_arg.bo,
                                        reloc_arg.offset, 0);
       if (ret != 0) {
-         stream->status = TEGRADRM_STREAM_CONSTRUCTION_FAILED;
+         stream->status = GRATE_STREAM_CONSTRUCTION_FAILED;
          ErrorMsg("drm_tegra_pushbuf_relocate() failed %d\n", ret);
          break;
       }
