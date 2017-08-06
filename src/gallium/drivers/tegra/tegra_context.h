@@ -8,8 +8,14 @@
 
 #include "tegra_state.h"
 
+struct tegra_framebuffer_state {
+   struct pipe_framebuffer_state base;
+};
+
 struct tegra_context {
    struct pipe_context base;
+
+   struct tegra_framebuffer_state framebuffer;
 
    struct slab_child_pool transfer_pool;
 };
