@@ -10,6 +10,8 @@
 
 struct grate_context {
    struct pipe_context base;
+
+   struct slab_child_pool transfer_pool;
 };
 
 static inline struct grate_context *

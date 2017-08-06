@@ -17,6 +17,8 @@ grate_context_destroy(struct pipe_context *pcontext)
 {
    struct grate_context *context = grate_context(pcontext);
 
+   slab_destroy_child(&context->transfer_pool);
+
    FREE(context);
 }
 
@@ -32,12 +34,16 @@ struct pipe_context *
 grate_screen_context_create(struct pipe_screen *pscreen,
                             void *priv, unsigned flags)
 {
+   struct grate_screen *screen = grate_screen(pscreen);
+
    struct grate_context *context = CALLOC_STRUCT(grate_context);
    if (!context)
       return NULL;
 
    context->base.screen = pscreen;
    context->base.priv = priv;
+
+   slab_create_child(&context->transfer_pool, &screen->transfer_pool);
 
    context->base.destroy = grate_context_destroy;
    context->base.flush = grate_context_flush;

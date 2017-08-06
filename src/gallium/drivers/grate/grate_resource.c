@@ -1,6 +1,7 @@
 #include <stdio.h>
 
 #include "util/u_format.h"
+#include "util/u_inlines.h"
 #include "util/u_memory.h"
 #include "util/u_transfer.h"
 #include "util/u_inlines.h"
@@ -67,9 +68,35 @@ grate_resource_transfer_map(struct pipe_context *pcontext,
                             const struct pipe_box *box,
                             struct pipe_transfer **transfer)
 {
-   unimplemented();
+   struct grate_context *context = grate_context(pcontext);
+   struct grate_resource *resource = grate_resource(presource);
+   void *ret = NULL;
+   struct pipe_transfer *ptrans;
 
-   return NULL;
+   if (usage & PIPE_TRANSFER_MAP_DIRECTLY)
+      return NULL;
+
+   ptrans = slab_alloc(&context->transfer_pool);
+   if (!ptrans)
+      return NULL;
+
+   if (drm_tegra_bo_map(resource->bo, &ret))
+      return NULL;
+
+   memset(ptrans, 0, sizeof(*ptrans));
+
+   pipe_resource_reference(&ptrans->resource, presource);
+   ptrans->resource = presource;
+   ptrans->level = level;
+   ptrans->usage = usage;
+   ptrans->box = *box;
+   ptrans->stride = resource->pitch;
+   ptrans->layer_stride = ptrans->stride;
+   *transfer = ptrans;
+
+   return (uint8_t *)ret +
+          box->y * resource->pitch +
+          box->x * util_format_get_blocksize(presource->format);
 }
 
 static void
@@ -84,7 +111,12 @@ static void
 grate_resource_transfer_unmap(struct pipe_context *pcontext,
                               struct pipe_transfer *transfer)
 {
-   unimplemented();
+   struct grate_context *context = grate_context(pcontext);
+
+   drm_tegra_bo_unmap(grate_resource(transfer->resource)->bo);
+
+   pipe_resource_reference(&transfer->resource, NULL);
+   slab_free(&context->transfer_pool, transfer);
 }
 
 static const struct u_resource_vtbl grate_resource_vtbl = {
