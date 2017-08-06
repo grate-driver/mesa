@@ -7,13 +7,21 @@
 #include "pipe/p_state.h"
 
 #include "grate_state.h"
+#include "grate_stream.h"
 
 struct grate_framebuffer_state {
    struct pipe_framebuffer_state base;
 };
 
+struct grate_channel {
+   struct grate_context *context;
+   struct grate_stream stream;
+};
+
 struct grate_context {
    struct pipe_context base;
+
+   struct grate_channel *gr2d;
 
    struct grate_framebuffer_state framebuffer;
 
