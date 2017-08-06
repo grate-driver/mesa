@@ -24,6 +24,8 @@ grate_screen_destroy(struct pipe_screen *pscreen)
 {
    struct grate_screen *screen = grate_screen(pscreen);
 
+   slab_destroy_parent(&screen->transfer_pool);
+
    drm_tegra_close(screen->drm);
    FREE(screen);
 }
@@ -628,6 +630,8 @@ grate_screen_create(struct drm_tegra *drm)
    screen->base.fence_finish = grate_screen_fence_finish;
 
    grate_screen_resource_init(&screen->base);
+
+   slab_create_parent(&screen->transfer_pool, sizeof(struct pipe_transfer), 16);
 
    return &screen->base;
 }

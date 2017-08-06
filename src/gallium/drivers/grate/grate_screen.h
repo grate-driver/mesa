@@ -13,6 +13,8 @@ extern uint32_t grate_debug;
 struct grate_screen {
    struct pipe_screen base;
 
+   struct slab_parent_pool transfer_pool;
+
    struct drm_tegra *drm;
 };
 
