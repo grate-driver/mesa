@@ -27,6 +27,9 @@ struct grate_context {
    struct grate_framebuffer_state framebuffer;
 
    struct slab_child_pool transfer_pool;
+
+   struct grate_vertex_state *vs;
+   struct grate_vertexbuf_state vbs;
 };
 
 static inline struct grate_context *
