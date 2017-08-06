@@ -12,8 +12,14 @@
 
 #include "grate_state.h"
 
+struct grate_framebuffer_state {
+   struct pipe_framebuffer_state base;
+};
+
 struct grate_context {
    struct pipe_context base;
+
+   struct grate_framebuffer_state framebuffer;
 
    struct slab_child_pool transfer_pool;
 };
