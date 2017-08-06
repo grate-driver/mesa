@@ -27,6 +27,9 @@ struct tegra_context {
    struct tegra_framebuffer_state framebuffer;
 
    struct slab_child_pool transfer_pool;
+
+   struct tegra_vertex_state *vs;
+   struct tegra_vertexbuf_state vbs;
 };
 
 static inline struct tegra_context *
