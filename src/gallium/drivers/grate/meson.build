@@ -19,6 +19,9 @@
 # SOFTWARE.
 
 files_libgrate = files(
+  'class_ids.h',
+  'host1x01_hardware.h',
+  'hw_host1x01_uclass.h',
   'grate_common.h',
   'grate_context.c',
   'grate_context.h',
@@ -30,6 +33,8 @@ files_libgrate = files(
   'grate_screen.h',
   'grate_state.c',
   'grate_state.h',
+  'grate_stream.c',
+  'grate_stream.h',
   'grate_surface.c',
   'grate_surface.h',
 )
