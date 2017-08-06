@@ -12,6 +12,9 @@ AM_CFLAGS = \
 	$(LIBDRM_CFLAGS)
 
 libgrate_la_SOURCES = \
+	class_ids.h \
+	host1x01_hardware.h \
+	hw_host1x01_uclass.h \
 	grate_common.h \
 	grate_context.c \
 	grate_context.h \
@@ -24,5 +27,7 @@ libgrate_la_SOURCES = \
 	grate_screen.h \
 	grate_state.c \
 	grate_state.h \
+	grate_stream.c \
+	grate_stream.h \
 	grate_surface.c \
 	grate_surface.h
