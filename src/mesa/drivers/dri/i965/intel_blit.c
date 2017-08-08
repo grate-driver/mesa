@@ -187,7 +187,6 @@ get_blit_intratile_offset_el(const struct brw_context *brw,
        * The offsets we get from ISL in the tiled case are already aligned.
        * In the linear case, we need to do some of our own aligning.
        */
-      assert(mt->surf.row_pitch % 64 == 0);
       uint32_t delta = *base_address_offset & 63;
       assert(delta % mt->cpp == 0);
       *base_address_offset -= delta;
@@ -831,11 +830,11 @@ intel_miptree_set_alpha_to_one(struct brw_context *brw,
          if (brw->gen >= 8) {
             OUT_RELOC64(mt->bo,
                         I915_GEM_DOMAIN_RENDER, I915_GEM_DOMAIN_RENDER,
-                        offset);
+                        mt->offset + offset);
          } else {
             OUT_RELOC(mt->bo,
                       I915_GEM_DOMAIN_RENDER, I915_GEM_DOMAIN_RENDER,
-                      offset);
+                      mt->offset + offset);
          }
          OUT_BATCH(0xffffffff); /* white, but only alpha gets written */
          ADVANCE_BATCH_TILED(dst_y_tiled, false);
