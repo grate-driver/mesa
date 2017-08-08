@@ -34,15 +34,17 @@ LOCAL_CFLAGS := \
 	$(AMDGPU_CFLAGS) \
 	-DBRAHMA_BUILD=1
 
-LOCAL_C_INCLUDES := \
-	$(MESA_TOP)/src \
-	$(MESA_TOP)/src/amd \
-	$(MESA_TOP)/src/amd/addrlib/core \
-	$(MESA_TOP)/src/amd/addrlib/inc/chip/r800 \
-	$(MESA_TOP)/src/amd/addrlib/r800/chip
+LOCAL_STATIC_LIBRARIES := libmesa_amdgpu_addrlib
 
 LOCAL_SHARED_LIBRARIES := libdrm_amdgpu
 LOCAL_MODULE := libmesa_winsys_amdgpu
 
+$(call mesa-build-with-llvm)
+
 include $(GALLIUM_COMMON_MK)
 include $(BUILD_STATIC_LIBRARY)
+
+ifneq ($(HAVE_GALLIUM_RADEONSI),)
+$(eval GALLIUM_LIBS += $(LOCAL_MODULE) $(LOCAL_STATIC_LIBRARIES))
+$(eval GALLIUM_SHARED_LIBS += $(LOCAL_SHARED_LIBRARIES))
+endif

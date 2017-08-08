@@ -41,3 +41,8 @@ LOCAL_MODULE := libmesa_pipe_r300
 include $(GALLIUM_COMMON_MK)
 include $(BUILD_STATIC_LIBRARY)
 
+ifneq ($(HAVE_GALLIUM_R300),)
+GALLIUM_TARGET_DRIVERS += r300
+$(eval GALLIUM_LIBS += $(LOCAL_MODULE) libmesa_winsys_radeon)
+$(eval GALLIUM_SHARED_LIBS += $(LOCAL_SHARED_LIBRARIES))
+endif

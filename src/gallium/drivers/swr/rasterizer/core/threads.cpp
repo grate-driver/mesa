@@ -363,7 +363,7 @@ INLINE void UpdateClientStats(SWR_CONTEXT* pContext, uint32_t workerId, DRAW_CON
     }
 
     DRAW_DYNAMIC_STATE& dynState = pDC->dynState;
-    SWR_STATS stats{ 0 };
+    OSALIGNLINE(SWR_STATS) stats{ 0 };
 
     // Sum up stats across all workers before sending to client.
     for (uint32_t i = 0; i < pContext->NumWorkerThreads; ++i)
@@ -726,10 +726,11 @@ void WorkOnCompute(
         if (queue.getNumQueued() > 0)
         {
             void* pSpillFillBuffer = nullptr;
+            void* pScratchSpace = nullptr;
             uint32_t threadGroupId = 0;
             while (queue.getWork(threadGroupId))
             {
-                queue.dispatch(pDC, workerId, threadGroupId, pSpillFillBuffer);
+                queue.dispatch(pDC, workerId, threadGroupId, pSpillFillBuffer, pScratchSpace);
                 queue.finishedWork();
             }
 
@@ -747,7 +748,20 @@ DWORD workerThreadMain(LPVOID pData)
     uint32_t threadId = pThreadData->threadId;
     uint32_t workerId = pThreadData->workerId;
 
-    bindThread(pContext, threadId, pThreadData->procGroupId, pThreadData->forceBindProcGroup); 
+    bindThread(pContext, threadId, pThreadData->procGroupId, pThreadData->forceBindProcGroup);
+
+    {
+        char threadName[64];
+        sprintf_s(threadName,
+#if defined(_WIN32)
+                  "SWRWorker_%02d_NUMA%d_Core%02d_T%d",
+#else
+                  // linux pthread name limited to 16 chars (including \0)
+                  "w%03d-n%d-c%03d-t%d",
+#endif
+            workerId, pThreadData->numaId, pThreadData->coreId, pThreadData->htId);
+        SetCurrentThreadName(threadName);
+    }
 
     RDTSC_INIT(threadId);
 
@@ -972,7 +986,7 @@ void CreateThreadPool(SWR_CONTEXT* pContext, THREAD_POOL* pPool)
     // Initialize DRAW_CONTEXT's per-thread stats
     for (uint32_t dc = 0; dc < KNOB_MAX_DRAWS_IN_FLIGHT; ++dc)
     {
-        pContext->dcRing[dc].dynState.pStats = new SWR_STATS[numThreads];
+        pContext->dcRing[dc].dynState.pStats = (SWR_STATS*)AlignedMalloc(sizeof(SWR_STATS) * numThreads, 64);
         memset(pContext->dcRing[dc].dynState.pStats, 0, sizeof(SWR_STATS) * numThreads);
     }
 

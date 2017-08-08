@@ -145,6 +145,17 @@ def check_cc(env, cc, expr, cpp_opt = '-E'):
     sys.stdout.write(' %s\n' % ['no', 'yes'][int(bool(result))])
     return result
 
+def check_header(env, header):
+    '''Check if the header exist'''
+
+    conf = SCons.Script.Configure(env)
+    have_header = False
+
+    if conf.CheckHeader(header):
+        have_header = True
+
+    env = conf.Finish()
+    return have_header
 
 def check_prog(env, prog):
     """Check whether this program exists."""
@@ -325,7 +336,7 @@ def generate(env):
                 'GLX_INDIRECT_RENDERING',
             ]
 
-        if env['platform'] in ('linux', 'darwin'):
+        if check_header(env, 'xlocale.h'):
             cppdefines += ['HAVE_XLOCALE_H']
 
     if platform == 'windows':

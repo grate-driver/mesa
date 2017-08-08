@@ -31,6 +31,7 @@ include $(CLEAR_VARS)
 LOCAL_SRC_FILES := \
 	$(C_SOURCES) \
 	$(NIR_SOURCES) \
+	$(RENDERONLY_SOURCES) \
 	$(VL_STUB_SOURCES)
 
 LOCAL_C_INCLUDES := \
@@ -38,15 +39,18 @@ LOCAL_C_INCLUDES := \
 
 ifeq ($(MESA_ENABLE_LLVM),true)
 LOCAL_SRC_FILES += \
-	$(GALLIVM_SOURCES) \
-	$(GALLIVM_CPP_SOURCES)
-LOCAL_STATIC_LIBRARIES += libLLVMCore
-LOCAL_CPPFLAGS := -std=c++11
+	$(GALLIVM_SOURCES)
+$(call mesa-build-with-llvm)
 endif
+
+LOCAL_CPPFLAGS += -std=c++11
 
 # We need libmesa_nir to get NIR's generated include directories.
 LOCAL_MODULE := libmesa_gallium
 LOCAL_STATIC_LIBRARIES += libmesa_nir
+
+LOCAL_WHOLE_STATIC_LIBRARIES += cpufeatures
+LOCAL_CFLAGS += -DHAS_ANDROID_CPUFEATURES
 
 # generate sources
 LOCAL_MODULE_CLASS := STATIC_LIBRARIES

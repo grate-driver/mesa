@@ -27,7 +27,9 @@ include $(LOCAL_PATH)/Makefile.sources
 
 include $(CLEAR_VARS)
 
-LOCAL_SRC_FILES := $(common_SOURCES)
+LOCAL_SRC_FILES := \
+	$(common_SOURCES) \
+	$(dri2_SOURCES)
 
 LOCAL_C_INCLUDES := \
 	$(MESA_TOP)/src/mapi \
@@ -40,12 +42,8 @@ LOCAL_EXPORT_C_INCLUDE_DIRS := \
 LOCAL_STATIC_LIBRARIES := \
 	libmesa_dri_common
 
-ifneq ($(filter swrast,$(MESA_GPU_DRIVERS)),)
+ifneq ($(HAVE_GALLIUM_SOFTPIPE),)
 LOCAL_SRC_FILES += $(drisw_SOURCES)
-endif
-
-ifneq ($(filter-out swrast,$(MESA_GPU_DRIVERS)),)
-LOCAL_SRC_FILES += $(dri2_SOURCES)
 endif
 
 LOCAL_MODULE := libmesa_st_dri

@@ -25,16 +25,24 @@ include $(LOCAL_PATH)/Makefile.sources
 
 include $(CLEAR_VARS)
 
-LOCAL_CFLAGS_arm := -DVC4_BUILD_NEON
-
 LOCAL_SRC_FILES := \
 	$(C_SOURCES)
 
 LOCAL_GENERATED_SOURCES := $(MESA_GEN_NIR_H)
+LOCAL_C_INCLUDES := \
+	$(MESA_TOP)/include/drm-uapi
 
 # We need libmesa_nir to get NIR's generated include directories.
-LOCAL_STATIC_LIBRARIES := libmesa_nir
+LOCAL_STATIC_LIBRARIES := \
+	libmesa_nir \
+	libmesa_broadcom_genxml
+
 LOCAL_MODULE := libmesa_pipe_vc4
 
 include $(GALLIUM_COMMON_MK)
 include $(BUILD_STATIC_LIBRARY)
+
+ifneq ($(HAVE_GALLIUM_VC4),)
+GALLIUM_TARGET_DRIVERS += vc4
+$(eval GALLIUM_LIBS += $(LOCAL_MODULE) libmesa_winsys_vc4)
+endif

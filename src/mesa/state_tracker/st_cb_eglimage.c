@@ -96,6 +96,7 @@ st_egl_image_get_surface(struct gl_context *ctx, GLeglImageOES image_handle,
 
    if (!is_format_supported(screen, stimg.format, stimg.texture->nr_samples, usage)) {
       /* unable to specify a texture object using the specified EGL image */
+      pipe_resource_reference(&stimg.texture, NULL);
       _mesa_error(ctx, GL_INVALID_OPERATION, "%s(format not supported)", error);
       return NULL;
    }
@@ -158,7 +159,12 @@ st_egl_image_target_renderbuffer_storage(struct gl_context *ctx,
       strb->Base._BaseFormat = st_pipe_format_to_base_format(ps->format);
       strb->Base.InternalFormat = strb->Base._BaseFormat;
 
-      pipe_surface_reference(&strb->surface, ps);
+      struct pipe_surface **psurf =
+         util_format_is_srgb(ps->format) ? &strb->surface_srgb :
+                                           &strb->surface_linear;
+
+      pipe_surface_reference(psurf, ps);
+      strb->surface = *psurf;
       pipe_resource_reference(&strb->texture, ps->texture);
 
       pipe_surface_reference(&ps, NULL);

@@ -30,12 +30,28 @@ include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES := $(C_SOURCES) $(CXX_SOURCES)
 
-LOCAL_C_INCLUDES := $(MESA_TOP)/src/amd/common \
-	external/libcxx/include
+LOCAL_C_INCLUDES += $(MESA_TOP)/src/amd/common
 
-LOCAL_STATIC_LIBRARIES := libmesa_amd_common
 LOCAL_SHARED_LIBRARIES := libdrm_radeon
 LOCAL_MODULE := libmesa_pipe_r600
 
+LOCAL_MODULE_CLASS := STATIC_LIBRARIES
+intermediates := $(call local-generated-sources-dir)
+
+LOCAL_GENERATED_SOURCES += $(addprefix $(intermediates)/, $(R600_GENERATED_FILES))
+
+$(intermediates)/egd_tables.h: $(MESA_TOP)/src/gallium/drivers/r600/egd_tables.py $(MESA_TOP)/src/gallium/drivers/r600/evergreend.h
+	@mkdir -p $(dir $@)
+	@echo "Gen Header: $(PRIVATE_MODULE) <= $(notdir $(@))"
+	$(hide) $(MESA_PYTHON2) $(MESA_TOP)/src/gallium/drivers/r600/egd_tables.py $(MESA_TOP)/src/gallium/drivers/r600/evergreend.h > $@
+
 include $(GALLIUM_COMMON_MK)
 include $(BUILD_STATIC_LIBRARY)
+
+ifneq ($(HAVE_GALLIUM_R600),)
+GALLIUM_TARGET_DRIVERS += r600
+$(eval GALLIUM_LIBS += \
+	$(LOCAL_MODULE) \
+	libmesa_winsys_radeon)
+$(eval GALLIUM_SHARED_LIBS += $(LOCAL_SHARED_LIBRARIES))
+endif

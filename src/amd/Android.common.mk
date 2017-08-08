@@ -29,6 +29,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE := libmesa_amd_common
 
 LOCAL_SRC_FILES := \
+	$(AMD_COMMON_FILES) \
 	$(AMD_COMPILER_FILES) \
 	$(AMD_DEBUG_FILES)
 
@@ -49,15 +50,27 @@ LOCAL_C_INCLUDES := \
 	$(MESA_TOP)/include \
 	$(MESA_TOP)/src \
 	$(MESA_TOP)/src/amd/common \
+	$(MESA_TOP)/src/compiler \
+	$(call generated-sources-dir-for,STATIC_LIBRARIES,libmesa_nir,,)/nir \
 	$(MESA_TOP)/src/gallium/include \
 	$(MESA_TOP)/src/gallium/auxiliary \
 	$(intermediates)/common \
 	external/llvm/include \
-	external/llvm/device/include \
-	external/libcxx/include \
-	$(ELF_INCLUDES)
+	external/llvm/device/include
 
-LOCAL_STATIC_LIBRARIES := libLLVMCore
+LOCAL_EXPORT_C_INCLUDE_DIRS := \
+	$(LOCAL_PATH)/common
+
+LOCAL_SHARED_LIBRARIES := \
+	libdrm_amdgpu
+
+LOCAL_STATIC_LIBRARIES := \
+	libmesa_nir
+
+LOCAL_WHOLE_STATIC_LIBRARIES := \
+	libelf
+
+$(call mesa-build-with-llvm)
 
 include $(MESA_COMMON_MK)
 include $(BUILD_STATIC_LIBRARY)
