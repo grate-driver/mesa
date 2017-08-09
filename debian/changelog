@@ -1,6 +1,7 @@
 mesa (17.2.0~rc3-1ubuntu1) UNRELEASED; urgency=medium
 
   * Merge from Debian.
+  * patches: Refresh Mir support patches.
 
  -- Timo Aaltonen <tjaalton@debian.org>  Tue, 08 Aug 2017 09:40:55 +0300
 

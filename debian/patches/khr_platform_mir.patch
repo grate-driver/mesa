@@ -14,7 +14,7 @@
     }
 --- a/src/egl/main/egldisplay.c
 +++ b/src/egl/main/egldisplay.c
-@@ -628,3 +628,22 @@ _eglGetSurfacelessDisplay(void *native_d
+@@ -599,3 +599,22 @@ _eglGetSurfacelessDisplay(void *native_d
     return _eglFindDisplay(_EGL_PLATFORM_SURFACELESS, native_display);
  }
  #endif /* HAVE_SURFACELESS_PLATFORM */
@@ -39,7 +39,7 @@
 +#endif /* HAVE_RS_PLATFORM */
 --- a/src/egl/main/egldisplay.h
 +++ b/src/egl/main/egldisplay.h
-@@ -284,6 +284,14 @@ _eglGetSurfacelessDisplay(void *native_d
+@@ -288,6 +288,14 @@ _eglGetSurfacelessDisplay(void *native_d
                            const EGLint *attrib_list);
  #endif
  
@@ -56,7 +56,7 @@
  #endif
 --- a/src/egl/main/eglglobals.c
 +++ b/src/egl/main/eglglobals.c
-@@ -71,6 +71,9 @@ struct _egl_global _eglGlobal =
+@@ -77,6 +77,9 @@ struct _egl_global _eglGlobal =
  #ifdef HAVE_SURFACELESS_PLATFORM
     " EGL_MESA_platform_surfaceless"
  #endif
