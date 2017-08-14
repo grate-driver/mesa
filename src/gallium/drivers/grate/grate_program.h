@@ -12,6 +12,7 @@ struct grate_shader_blob {
 struct grate_vertex_shader_state {
    struct pipe_shader_state base;
    struct grate_shader_blob blob;
+   uint16_t output_mask;
 };
 
 void
