@@ -23,6 +23,8 @@ files_libgrate = files(
   'host1x01_hardware.h',
   'hw_host1x01_uclass.h',
   'grate_common.h',
+  'grate_compiler_vpe.c',
+  'grate_compiler.h',
   'grate_context.c',
   'grate_context.h',
   'grate_draw.c',
@@ -39,6 +41,8 @@ files_libgrate = files(
   'grate_stream.h',
   'grate_surface.c',
   'grate_surface.h',
+  'grate_vpe_ir.c',
+  'grate_vpe_ir.h'
 )
 
 libgrate = static_library(
