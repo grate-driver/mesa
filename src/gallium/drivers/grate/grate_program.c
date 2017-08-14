@@ -3,12 +3,16 @@
 #include "util/u_memory.h"
 
 #include "tgsi/tgsi_dump.h"
+#include "tgsi/tgsi_parse.h"
 
+#include "host1x01_hardware.h"
 #include "grate_common.h"
 #include "grate_context.h"
 #include "grate_screen.h"
 #include "grate_program.h"
-
+#include "grate_compiler.h"
+#include "grate_vpe_ir.h"
+#include "tgr_3d.xml.h"
 
 static void *
 grate_create_vs_state(struct pipe_context *pcontext,
@@ -28,7 +32,37 @@ grate_create_vs_state(struct pipe_context *pcontext,
       fprintf(stderr, "\n");
    }
 
-   /* TODO: generate code! */
+   struct tgsi_parse_context parser;
+   unsigned ok = tgsi_parse_init(&parser, template->tokens);
+   assert(ok == TGSI_PARSE_OK);
+
+   struct grate_vpe_shader vpe;
+   grate_tgsi_to_vpe(&vpe, &parser);
+
+   int num_instructions = list_length(&vpe.instructions);
+   assert(num_instructions < 256);
+   int num_commands = 2 + num_instructions * 4;
+   uint32_t *commands = MALLOC(num_commands * sizeof(uint32_t));
+   if (!commands) {
+      FREE(so);
+      return NULL;
+   }
+
+   commands[0] = host1x_opcode_imm(TGR3D_VP_UPLOAD_INST_ID, 0);
+   commands[1] = host1x_opcode_nonincr(TGR3D_VP_UPLOAD_INST,
+                                       num_instructions * 4);
+
+   struct vpe_instr *last = list_last_entry(&vpe.instructions, struct vpe_instr, link);
+   int offset = 2;
+   list_for_each_entry(struct vpe_instr, instr, &vpe.instructions, link) {
+      bool end_of_program = instr == last;
+      grate_vpe_pack(commands + offset, instr, end_of_program);
+      offset += 4;
+   }
+
+   so->blob.commands = commands;
+   so->blob.num_commands = num_commands;
+   so->output_mask = vpe.output_mask;
 
    return so;
 }
@@ -36,7 +70,7 @@ grate_create_vs_state(struct pipe_context *pcontext,
 static void
 grate_bind_vs_state(struct pipe_context *pcontext, void *so)
 {
-   unimplemented();
+   grate_context(pcontext)->vshader = so;
 }
 
 static void
