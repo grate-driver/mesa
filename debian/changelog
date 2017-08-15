@@ -1,4 +1,4 @@
-mesa (17.2.0~rc3-2) experimental; urgency=medium
+mesa (17.2.0~rc4-1) experimental; urgency=medium
 
   * Migrate mesa to build against libglvnd:
     + patches:
@@ -21,7 +21,7 @@ mesa (17.2.0~rc3-2) experimental; urgency=medium
       - GLESv2 libs still get built, purge them from debian/tmp
       - Remove lib{EGL,GLX}_mesa.so which are not needed for anything
 
- -- Timo Aaltonen <tjaalton@debian.org>  Thu, 10 Aug 2017 13:40:34 +0300
+ -- Timo Aaltonen <tjaalton@debian.org>  Tue, 15 Aug 2017 09:44:24 +0300
 
 mesa (17.2.0~rc3-1) experimental; urgency=medium
 
