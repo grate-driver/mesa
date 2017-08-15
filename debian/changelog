@@ -1,6 +1,6 @@
 mesa (17.2.0~rc4-2) UNRELEASED; urgency=medium
 
-  * rules: Build gallium/svga only on x86.
+  * control, rules: Build gallium/svga only on x86.
   * rules: Improve readability.
 
  -- Timo Aaltonen <tjaalton@debian.org>  Tue, 15 Aug 2017 15:02:04 +0300
