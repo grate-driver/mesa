@@ -57,7 +57,7 @@ Homepage: https://mesa3d.org/
 
 Package: libxatracker2
 Section: libs
-Architecture: linux-any 
+Architecture: amd64 i386 x32
 Depends:
  ${shlibs:Depends},
  ${misc:Depends},
@@ -71,7 +71,7 @@ Description: X acceleration library -- runtime
 
 Package: libxatracker-dev
 Section: libdevel
-Architecture: linux-any
+Architecture: amd64 i386 x32
 Depends:
  libxatracker2 (= ${binary:Version}),
  ${misc:Depends},

@@ -1,3 +1,9 @@
+mesa (17.2.0~rc4-0ubuntu3) artful; urgency=medium
+
+  * control: Build libxatracker* only on x86.
+
+ -- Timo Aaltonen <tjaalton@debian.org>  Tue, 15 Aug 2017 15:52:41 +0300
+
 mesa (17.2.0~rc4-0ubuntu2) artful; urgency=medium
 
   * rules: Build gallium/svga only on x86.
