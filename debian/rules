@@ -63,11 +63,12 @@ else
 		VULKAN_DRIVERS += intel
 	endif
 
-# Non-Linux ports also lack *_CLOEXEC and epoll, so wayland isn't ready yet:
+	# Non-Linux ports also lack *_CLOEXEC and epoll, so wayland isn't ready yet:
 	EGL_PLATFORMS += wayland
-    ifeq (,$(filter $(DEB_HOST_ARCH), s390 s390x))
-	DRI_DRIVERS += nouveau
-    endif
+
+	ifeq (,$(filter $(DEB_HOST_ARCH), s390 s390x))
+		DRI_DRIVERS += nouveau
+	endif
   endif
 
 	EGL_PLATFORMS += drm
@@ -78,8 +79,8 @@ else
   endif
 
   ifeq (,$(filter $(DEB_HOST_ARCH), s390 s390x))
-    DRI_DRIVERS += r200 radeon
-    GALLIUM_DRIVERS += r600 r300
+	DRI_DRIVERS += r200 radeon
+	GALLIUM_DRIVERS += r600 r300
   endif
 
   # LLVM is required for building r300g, radeonsi and llvmpipe drivers.
