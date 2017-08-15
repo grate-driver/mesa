@@ -1,5 +1,6 @@
-mesa (17.2.0~rc3-1ubuntu1) UNRELEASED; urgency=medium
+mesa (17.2.0~rc4-0ubuntu1) UNRELEASED; urgency=medium
 
+  * New upstream release candidate.
   * Merge from Debian.
   * patches: Refresh Mir support patches.
 
