@@ -13,6 +13,8 @@
 #include "grate_state.h"
 #include "grate_stream.h"
 
+struct primconvert_context;
+
 struct grate_framebuffer_state {
    struct pipe_framebuffer_state base;
    int num_rts;
@@ -28,6 +30,7 @@ struct grate_channel {
 
 struct grate_context {
    struct pipe_context base;
+   struct primconvert_context *primconvert;
 
    struct grate_channel *gr2d;
    struct grate_channel *gr3d;
