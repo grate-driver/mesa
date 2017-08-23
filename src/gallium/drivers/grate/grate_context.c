@@ -6,6 +6,8 @@
 #include "util/u_memory.h"
 #include "util/u_upload_mgr.h"
 
+#include "indices/u_primconvert.h"
+
 #include "grate_common.h"
 #include "grate_context.h"
 #include "grate_draw.h"
@@ -241,6 +243,9 @@ grate_context_destroy(struct pipe_context *pcontext)
 {
    struct grate_context *context = grate_context(pcontext);
 
+   if (context->primconvert)
+      util_primconvert_destroy(context->primconvert);
+
    slab_destroy_child(&context->transfer_pool);
 
    grate_channel_delete(context->gr3d);
@@ -269,6 +274,9 @@ grate_screen_context_create(struct pipe_screen *pscreen,
 
    context->base.screen = pscreen;
    context->base.priv = priv;
+
+   context->primconvert = util_primconvert_create(&context->base,
+                                                  (1 << PIPE_PRIM_QUADS) - 1);
 
    err = grate_channel_create(context, DRM_TEGRA_GR2D, &context->gr2d);
    if (err < 0) {
