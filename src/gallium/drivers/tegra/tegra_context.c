@@ -6,6 +6,8 @@
 #include "util/u_memory.h"
 #include "util/u_upload_mgr.h"
 
+#include "indices/u_primconvert.h"
+
 #include "tegra_common.h"
 #include "tegra_context.h"
 #include "tegra_draw.h"
@@ -241,6 +243,9 @@ tegra_context_destroy(struct pipe_context *pcontext)
 {
    struct tegra_context *context = tegra_context(pcontext);
 
+   if (context->primconvert)
+      util_primconvert_destroy(context->primconvert);
+
    slab_destroy_child(&context->transfer_pool);
 
    tegra_channel_delete(context->gr3d);
@@ -269,6 +274,9 @@ tegra_screen_context_create(struct pipe_screen *pscreen,
 
    context->base.screen = pscreen;
    context->base.priv = priv;
+
+   context->primconvert = util_primconvert_create(&context->base,
+                                                  (1 << PIPE_PRIM_QUADS) - 1);
 
    err = tegra_channel_create(context, DRM_TEGRA_GR2D, &context->gr2d);
    if (err < 0) {

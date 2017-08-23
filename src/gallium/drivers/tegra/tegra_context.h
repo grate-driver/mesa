@@ -9,6 +9,8 @@
 #include "tegra_state.h"
 #include "tegra_stream.h"
 
+struct primconvert_context;
+
 struct tegra_framebuffer_state {
    struct pipe_framebuffer_state base;
    int num_rts;
@@ -24,6 +26,7 @@ struct tegra_channel {
 
 struct tegra_context {
    struct pipe_context base;
+   struct primconvert_context *primconvert;
 
    struct tegra_channel *gr2d;
    struct tegra_channel *gr3d;
