@@ -2,6 +2,8 @@
 
 #include "pipe/p_state.h"
 #include "util/u_helpers.h"
+#include "util/u_prim.h"
+#include "indices/u_primconvert.h"
 
 #include "grate_common.h"
 #include "grate_context.h"
@@ -52,6 +54,16 @@ grate_draw_vbo(struct pipe_context *pcontext,
    struct grate_context *context = grate_context(pcontext);
    struct grate_stream *stream = &context->gr3d->stream;
    uint16_t out_mask = context->vshader->output_mask;
+
+   if (info->mode >= PIPE_PRIM_QUADS) {
+      // the HW can handle non-trimmed sizes, but pimconvert can't
+      if (!u_trim_pipe_prim(info->mode, (unsigned *)&info->count))
+         return;
+
+      util_primconvert_save_rasterizer_state(context->primconvert, &context->rast->base);
+      util_primconvert_draw_vbo(context->primconvert, info);
+      return;
+   }
 
    err = grate_stream_begin(stream);
    if (err < 0) {
