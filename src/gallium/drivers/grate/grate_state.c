@@ -287,15 +287,42 @@ grate_context_rasterizer_init(struct pipe_context *pcontext)
    pcontext->delete_rasterizer_state = grate_delete_rasterizer_state;
 }
 
+static int
+grate_compare_func(enum pipe_compare_func func)
+{
+   switch (func) {
+   case PIPE_FUNC_NEVER: return TGR3D_COMPARE_FUNC_NEVER;
+   case PIPE_FUNC_LESS: return TGR3D_COMPARE_FUNC_LESS;
+   case PIPE_FUNC_EQUAL: return TGR3D_COMPARE_FUNC_EQUAL;
+   case PIPE_FUNC_LEQUAL: return TGR3D_COMPARE_FUNC_LEQUAL;
+   case PIPE_FUNC_GREATER: return TGR3D_COMPARE_FUNC_GREATER;
+   case PIPE_FUNC_NOTEQUAL: return TGR3D_COMPARE_FUNC_NOTEQUAL;
+   case PIPE_FUNC_ALWAYS: return TGR3D_COMPARE_FUNC_ALWAYS;
+   default: unreachable("unknown pipe_compare_func");
+   }
+}
+
 static void *
 grate_create_zsa_state(struct pipe_context *pcontext,
                        const struct pipe_depth_stencil_alpha_state *template)
 {
-   struct pipe_depth_stencil_alpha_state *so = CALLOC_STRUCT(pipe_depth_stencil_alpha_state);
+   struct grate_zsa_state *so = CALLOC_STRUCT(grate_zsa_state);
    if (!so)
       return NULL;
 
-   *so = *template;
+   so->base = *template;
+
+   uint32_t depth_test = 0;
+   depth_test |= TGR3D_VAL(DEPTH_TEST_PARAMS, FUNC,
+                           grate_compare_func(template->depth.func));
+   depth_test |= TGR3D_BOOL(DEPTH_TEST_PARAMS, DEPTH_TEST,
+                            template->depth.enabled);
+   depth_test |= TGR3D_BOOL(DEPTH_TEST_PARAMS, DEPTH_WRITE,
+                            template->depth.writemask);
+   depth_test |= 0x200;
+
+   so->commands[0] = host1x_opcode_incr(TGR3D_DEPTH_TEST_PARAMS, 1);
+   so->commands[1] = depth_test;
 
    return so;
 }
@@ -303,7 +330,7 @@ grate_create_zsa_state(struct pipe_context *pcontext,
 static void
 grate_bind_zsa_state(struct pipe_context *pcontext, void *so)
 {
-   unimplemented();
+   grate_context(pcontext)->zsa = so;
 }
 
 static void
@@ -487,6 +514,13 @@ emit_guardband(struct grate_context *context)
 }
 
 static void
+emit_zsa_state(struct grate_context *context)
+{
+   struct grate_stream *stream = &context->gr3d->stream;
+   grate_stream_push_words(stream, context->zsa->commands, 2, 0);
+}
+
+static void
 emit_vs_uniforms(struct grate_context *context)
 {
    struct grate_stream *stream = &context->gr3d->stream;
@@ -512,6 +546,7 @@ grate_emit_state(struct grate_context *context)
    emit_viewport(context);
    emit_guardband(context);
    emit_scissor(context);
+   emit_zsa_state(context);
    emit_attribs(context);
    emit_vs_uniforms(context);
 }
