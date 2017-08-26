@@ -184,8 +184,13 @@ grate_screen_resource_create(struct pipe_screen *pscreen,
    height = template->height0;
 
    resource->tiled = 0;
-   if (template->bind & (PIPE_BIND_RENDER_TARGET | PIPE_BIND_SAMPLER_VIEW | PIPE_BIND_SCANOUT)) {
-      resource->pitch = align(resource->pitch, 32);
+   if (template->bind & (PIPE_BIND_RENDER_TARGET | PIPE_BIND_SAMPLER_VIEW |
+                         PIPE_BIND_SCANOUT | PIPE_BIND_DEPTH_STENCIL)) {
+      if (template->bind & PIPE_BIND_DEPTH_STENCIL)
+         resource->pitch = align(resource->pitch, 256);
+      else
+         resource->pitch = align(resource->pitch, 32);
+
       flags = DRM_TEGRA_GEM_CREATE_BOTTOM_UP;
    }
 
