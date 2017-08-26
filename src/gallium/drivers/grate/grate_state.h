@@ -6,6 +6,11 @@
 
 struct grate_context;
 
+struct grate_zsa_state {
+   struct pipe_depth_stencil_alpha_state base;
+   uint32_t commands[2];
+};
+
 struct grate_vertexbuf_state {
    struct pipe_vertex_buffer vb[PIPE_MAX_ATTRIBS];
    unsigned int count;
