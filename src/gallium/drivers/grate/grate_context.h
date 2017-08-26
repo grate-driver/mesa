@@ -36,6 +36,8 @@ struct grate_context {
    struct grate_vertexbuf_state vbs;
    struct pipe_constant_buffer constant_buffer[PIPE_SHADER_TYPES];
 
+   struct grate_zsa_state *zsa;
+
    uint32_t no_scissor[3];
    uint32_t viewport[10];
    uint32_t guardband[4];
