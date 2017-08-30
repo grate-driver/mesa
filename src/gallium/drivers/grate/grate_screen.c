@@ -13,6 +13,8 @@
 static const struct debug_named_value debug_options[] = {
    { "unimplemented", GRATE_DEBUG_UNIMPLEMENTED,
      "Print unimplemented functions" },
+   { "tgsi", GRATE_DEBUG_TGSI,
+     "Dump TGSI during program compile" },
    { NULL }
 };
 
