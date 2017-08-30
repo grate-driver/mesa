@@ -9,6 +9,7 @@
 extern uint32_t tegra_debug;
 
 #define TEGRA_DEBUG_UNIMPLEMENTED 0x1
+#define TEGRA_DEBUG_TGSI 0x2
 
 struct tegra_screen {
    struct pipe_screen base;

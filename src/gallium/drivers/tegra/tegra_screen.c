@@ -10,6 +10,8 @@
 static const struct debug_named_value debug_options[] = {
    { "unimplemented", TEGRA_DEBUG_UNIMPLEMENTED,
      "Print unimplemented functions" },
+   { "tgsi", TEGRA_DEBUG_TGSI,
+     "Dump TGSI during program compile" },
    { NULL }
 };
 
