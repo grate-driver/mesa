@@ -240,8 +240,8 @@ Depends:
  ${shlibs:Depends},
  ${misc:Depends},
  libglapi-mesa (= ${binary:Version}),
+ libgl1-mesa-dri,
 Provides: libglx-vendor
-Recommends: libgl1-mesa-dri
 Breaks:
  libopengl-perl (<< 0.6704+dfsg-2),
 Pre-Depends: ${misc:Pre-Depends}
