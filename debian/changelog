@@ -1,4 +1,4 @@
-mesa (17.2.0~rc6-1) UNRELEASED; urgency=medium
+mesa (17.2.0~rc6-1) experimental; urgency=medium
 
   * New release candidate.
   * control, rules: Build gallium/svga only on x86.
@@ -7,7 +7,7 @@ mesa (17.2.0~rc6-1) UNRELEASED; urgency=medium
   * control: Bump libgl1-mesa-dri to libglx-mesa0 Depends, it's needed
     for swrast used on some tests.
 
- -- Timo Aaltonen <tjaalton@debian.org>  Tue, 15 Aug 2017 15:02:04 +0300
+ -- Timo Aaltonen <tjaalton@debian.org>  Fri, 01 Sep 2017 11:37:30 +0300
 
 mesa (17.2.0~rc4-1) experimental; urgency=medium
 
