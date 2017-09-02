@@ -267,6 +267,7 @@ Priority: extra
 Architecture: any
 Depends:
  libgl1,
+ libglx-mesa0,
  ${misc:Depends},
 Multi-Arch: foreign
 Description: transitional dummy package

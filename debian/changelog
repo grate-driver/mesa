@@ -1,6 +1,7 @@
 mesa (17.2.0~rc6-2) UNRELEASED; urgency=medium
 
   * control: Make transitional packages arch:any. (Closes: #874013)
+  * control: Add libglx-mesa0 to libgl1-mesa-glx Depends.
 
  -- Timo Aaltonen <tjaalton@debian.org>  Sat, 02 Sep 2017 15:47:13 +0300
 
