@@ -16,6 +16,7 @@ libgrate_la_SOURCES = \
 	host1x01_hardware.h \
 	hw_host1x01_uclass.h \
 	grate_common.h \
+	grate_compiler_fp.c \
 	grate_compiler_vpe.c \
 	grate_compiler.h \
 	grate_context.c \
@@ -23,6 +24,9 @@ libgrate_la_SOURCES = \
 	grate_draw.c \
 	grate_draw.h \
 	grate_fence.h \
+	grate_fp_ir.c \
+	grate_fp_ir.h \
+	grate_fp_vliw.h \
 	grate_program.c \
 	grate_program.h \
 	grate_resource.c \
