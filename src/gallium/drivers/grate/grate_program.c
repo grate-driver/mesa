@@ -1,5 +1,7 @@
 #include <stdio.h>
+#include <string.h>
 
+#include "util/u_dynarray.h"
 #include "util/u_memory.h"
 
 #include "tgsi/tgsi_dump.h"
@@ -11,6 +13,7 @@
 #include "grate_screen.h"
 #include "grate_program.h"
 #include "grate_compiler.h"
+#include "grate_fp_ir.h"
 #include "grate_vpe_ir.h"
 #include "tgr_3d.xml.h"
 
@@ -97,8 +100,90 @@ grate_create_fs_state(struct pipe_context *pcontext,
       fprintf(stderr, "\n");
    }
 
-   /* TODO: generate code! */
+   struct tgsi_parse_context parser;
+   unsigned ok = tgsi_parse_init(&parser, template->tokens);
+   assert(ok == TGSI_PARSE_OK);
 
+   struct grate_fp_shader fp;
+   grate_tgsi_to_fp(&fp, &parser);
+
+   struct util_dynarray buf;
+   util_dynarray_init(&buf, NULL);
+
+#define PUSH(x) util_dynarray_append(&buf, uint32_t, (x))
+   PUSH(host1x_opcode_incr(TGR3D_ALU_BUFFER_SIZE, 1));
+   PUSH(0x58000000);
+
+   PUSH(host1x_opcode_imm(TGR3D_FP_PSEQ_QUAD_ID, 0));
+   PUSH(host1x_opcode_imm(TGR3D_FP_UPLOAD_INST_ID_COMMON, 0));
+   PUSH(host1x_opcode_imm(TGR3D_FP_UPLOAD_MFU_INST_ID, 0));
+   PUSH(host1x_opcode_imm(TGR3D_FP_UPLOAD_ALU_INST_ID, 0));
+
+   int num_fp_instrs = list_length(&fp.fp_instructions);
+   assert(num_fp_instrs < 64);
+
+   PUSH(host1x_opcode_incr(TGR3D_FP_PSEQ_ENGINE_INST, 1));
+   PUSH(0x20006000 | num_fp_instrs);
+
+   PUSH(host1x_opcode_incr(TGR3D_FP_PSEQ_DW_CFG, 1));
+   PUSH(0x00000040);
+
+   PUSH(host1x_opcode_imm(TGR3D_FP_PSEQ_UPLOAD_INST_BUFFER_FLUSH, 0));
+
+   PUSH(host1x_opcode_nonincr(TGR3D_FP_PSEQ_UPLOAD_INST, num_fp_instrs));
+   list_for_each_entry(struct fp_instr, instr, &fp.fp_instructions, link)
+      PUSH(0x00000000);
+
+   PUSH(host1x_opcode_nonincr(TGR3D_FP_UPLOAD_MFU_SCHED, num_fp_instrs));
+   list_for_each_entry(struct fp_instr, instr, &fp.fp_instructions, link)
+      PUSH(grate_fp_pack_sched(&instr->mfu_sched));
+
+   int num_mfu_instrs = list_length(&fp.mfu_instructions);
+   assert(num_mfu_instrs < 64); // TODO: not sure if this is really correct
+
+   PUSH(host1x_opcode_nonincr(TGR3D_FP_UPLOAD_MFU_INST, num_mfu_instrs * 2));
+   list_for_each_entry(struct fp_mfu_instr, instr, &fp.mfu_instructions, link) {
+      uint32_t words[2];
+      grate_fp_pack_mfu(words, instr);
+      PUSH(words[0]);
+      PUSH(words[1]);
+   }
+
+   // TODO: emit actual instructions here
+   PUSH(host1x_opcode_nonincr(TGR3D_FP_UPLOAD_TEX_INST, num_fp_instrs));
+   for (int i = 0; i < num_fp_instrs; ++i)
+      PUSH(0x00000000);
+
+   PUSH(host1x_opcode_nonincr(TGR3D_FP_UPLOAD_ALU_SCHED, num_fp_instrs));
+   list_for_each_entry(struct fp_instr, instr, &fp.fp_instructions, link)
+      PUSH(grate_fp_pack_sched(&instr->alu_sched));
+
+   int num_alu_instrs = list_length(&fp.alu_instructions);
+   PUSH(host1x_opcode_nonincr(TGR3D_FP_UPLOAD_ALU_INST,
+        num_alu_instrs * 4 * 2));
+   list_for_each_entry(struct fp_alu_instr_packet, instr, &fp.alu_instructions, link) {
+      for (int i = 0; i < 4; ++i) {
+         uint32_t words[2];
+         grate_fp_pack_alu(words, instr->slots + i);
+         PUSH(words[0]);
+         PUSH(words[1]);
+      }
+   }
+
+   PUSH(host1x_opcode_nonincr(TGR3D_FP_UPLOAD_ALU_INST_COMPLEMENT, num_fp_instrs));
+   list_for_each_entry(struct fp_instr, instr, &fp.fp_instructions, link)
+      PUSH(0x00000000);
+
+   PUSH(host1x_opcode_nonincr(TGR3D_FP_UPLOAD_DW_INST, num_fp_instrs));
+   list_for_each_entry(struct fp_instr, instr, &fp.fp_instructions, link)
+      PUSH(grate_fp_pack_dw(&instr->dw));
+
+   PUSH(host1x_opcode_imm(TGR3D_TRAM_SETUP, 0x0140));
+#undef PUSH
+   util_dynarray_trim(&buf);
+
+   so->blob.num_commands = buf.size / sizeof(uint32_t);
+   so->blob.commands = buf.data;
    return so;
 }
 
