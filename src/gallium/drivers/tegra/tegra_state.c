@@ -9,6 +9,7 @@
 
 #include "tegra_common.h"
 #include "tegra_context.h"
+#include "tegra_program.h"
 #include "tegra_resource.h"
 #include "tegra_state.h"
 
@@ -565,6 +566,21 @@ emit_vs_uniforms(struct tegra_context *context)
    }
 }
 
+static void
+emit_shader(struct tegra_stream *stream, struct tegra_shader_blob *blob)
+{
+   tegra_stream_push_words(stream, blob->commands, blob->num_commands, 0);
+}
+
+static void
+emit_program(struct tegra_context *context)
+{
+   struct tegra_stream *stream = &context->gr3d->stream;
+
+   emit_shader(stream, &context->vshader->blob);
+   emit_shader(stream, &context->fshader->blob);
+}
+
 void
 tegra_emit_state(struct tegra_context *context)
 {
@@ -575,6 +591,7 @@ tegra_emit_state(struct tegra_context *context)
    emit_zsa_state(context);
    emit_attribs(context);
    emit_vs_uniforms(context);
+   emit_program(context);
 }
 
 void
