@@ -9,6 +9,7 @@
 
 #include "grate_common.h"
 #include "grate_context.h"
+#include "grate_program.h"
 #include "grate_resource.h"
 #include "grate_state.h"
 
@@ -565,6 +566,21 @@ emit_vs_uniforms(struct grate_context *context)
    }
 }
 
+static void
+emit_shader(struct grate_stream *stream, struct grate_shader_blob *blob)
+{
+   grate_stream_push_words(stream, blob->commands, blob->num_commands, 0);
+}
+
+static void
+emit_program(struct grate_context *context)
+{
+   struct grate_stream *stream = &context->gr3d->stream;
+
+   emit_shader(stream, &context->vshader->blob);
+   emit_shader(stream, &context->fshader->blob);
+}
+
 void
 grate_emit_state(struct grate_context *context)
 {
@@ -575,6 +591,7 @@ grate_emit_state(struct grate_context *context)
    emit_zsa_state(context);
    emit_attribs(context);
    emit_vs_uniforms(context);
+   emit_program(context);
 }
 
 void
