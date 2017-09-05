@@ -12,7 +12,16 @@ struct tegra_vpe_shader {
    uint16_t output_mask;
 };
 
+struct tegra_fp_shader {
+   struct list_head fp_instructions;
+   struct list_head alu_instructions;
+   struct list_head mfu_instructions;
+};
+
 void
 tegra_tgsi_to_vpe(struct tegra_vpe_shader *vpe, struct tgsi_parse_context *tgsi);
+
+void
+tegra_tgsi_to_fp(struct tegra_fp_shader *fp, struct tgsi_parse_context *tgsi);
 
 #endif
