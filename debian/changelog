@@ -1,10 +1,10 @@
-mesa (17.2.0-1) UNRELEASED; urgency=medium
+mesa (17.2.0-1) unstable; urgency=medium
 
   * New upstream release.
   * control: Make transitional packages arch:any. (Closes: #874013)
   * control: Add libglx-mesa0 to libgl1-mesa-glx Depends.
 
- -- Timo Aaltonen <tjaalton@debian.org>  Sat, 02 Sep 2017 15:47:13 +0300
+ -- Timo Aaltonen <tjaalton@debian.org>  Tue, 05 Sep 2017 14:41:01 +0300
 
 mesa (17.2.0~rc6-1) experimental; urgency=medium
 
