@@ -14,3 +14,7 @@ be5773fa8dfe9255d9abaf5c7d5bbbd2d922da08 Android: fix compile error for DRI2 loa
 
 # stable: Commit is not applicable when 4fab67a4415 is missing.
 d496780fb2c7f2cf0e32b6a79dc528e5156dfcb3 intel/eu/validate: Look up types on demand in execution_type()
+
+# fixes: Depend on preseding commit which adds new public GBM API
+3a5e3aa5a53cff55a5e31766d713a41ffa5a93d7 egl/drm: Fix misused x and y offsets in swrast_put_image2()
+fe2a6281b3b299998fe7399e7dbcc2077d773824 egl/drm: Fix misused x and y offsets in swrast_get_image()
