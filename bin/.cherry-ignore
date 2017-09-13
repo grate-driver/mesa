@@ -11,3 +11,6 @@ be5773fa8dfe9255d9abaf5c7d5bbbd2d922da08 Android: fix compile error for DRI2 loa
 
 # stable: The commit addresses code that did not land in the stable branch
 31bb8517a194af733deefe2d821537d994d39365 radv/gfx9: fix tile swizzle handling for gfx9
+
+# stable: Commit is not applicable when 4fab67a4415 is missing.
+d496780fb2c7f2cf0e32b6a79dc528e5156dfcb3 intel/eu/validate: Look up types on demand in execution_type()
