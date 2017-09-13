@@ -6160,7 +6160,7 @@ LLVMModuleRef ac_translate_nir_to_llvm(LLVMTargetMachineRef tm,
 	ctx.context = LLVMContextCreate();
 	ctx.module = LLVMModuleCreateWithNameInContext("shader", ctx.context);
 
-	ac_llvm_context_init(&ctx.ac, ctx.context);
+	ac_llvm_context_init(&ctx.ac, ctx.context, options->chip_class);
 	ctx.ac.module = ctx.module;
 
 	ctx.has_ds_bpermute = ctx.options->chip_class >= VI;
@@ -6494,7 +6494,7 @@ void ac_create_gs_copy_shader(LLVMTargetMachineRef tm,
 	ctx.options = options;
 	ctx.shader_info = shader_info;
 
-	ac_llvm_context_init(&ctx.ac, ctx.context);
+	ac_llvm_context_init(&ctx.ac, ctx.context, options->chip_class);
 	ctx.ac.module = ctx.module;
 
 	ctx.is_gs_copy_shader = true;

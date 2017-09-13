@@ -28,6 +28,8 @@
 #include <stdbool.h>
 #include <llvm-c/TargetMachine.h>
 
+#include "amd_family.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -61,10 +63,13 @@ struct ac_llvm_context {
 	unsigned fpmath_md_kind;
 	LLVMValueRef fpmath_md_2p5_ulp;
 	LLVMValueRef empty_md;
+
+	enum chip_class chip_class;
 };
 
 void
-ac_llvm_context_init(struct ac_llvm_context *ctx, LLVMContextRef context);
+ac_llvm_context_init(struct ac_llvm_context *ctx, LLVMContextRef context,
+		     enum chip_class chip_class);
 
 LLVMValueRef
 ac_build_intrinsic(struct ac_llvm_context *ctx, const char *name,
