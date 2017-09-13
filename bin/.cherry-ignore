@@ -2,3 +2,9 @@
 #         causing regressions have been reverted.
 365d34540f331df57780dddf8da87235be0a6bcb mesa: correctly calculate the storage offset for i915
 de0e62e1065e2d9172acf3ab7c70bba0160125c8 st/mesa: correctly calculate the storage offset
+
+# stable: Add loader::getCapability patches. It's rather invasive infra
+#         not suitable as a bugfix.
+1bf703e4ea5c4f742bc7ba55d01e5afc3f4e11f9 dri_interface,egl,gallium: only expose RGBA visuals on Android
+be5773fa8dfe9255d9abaf5c7d5bbbd2d922da08 Android: fix compile error for DRI2 loader getCapability
+31a6750988d7dd431f72ff1ff11bfca83bde5d8c st/dri: NULL check before deref DRI loader .getCapability
