@@ -637,6 +637,10 @@ bool r600_common_context_init(struct r600_common_context *rctx,
 	else
 		rctx->b.buffer_subdata = r600_buffer_subdata;
 
+	/* Set a reasonable default to avoid a performance regression in r600
+	 * on stable branches. */
+	rctx->current_rast_prim = PIPE_PRIM_TRIANGLES;
+
 	if (rscreen->info.drm_major == 2 && rscreen->info.drm_minor >= 43) {
 		rctx->b.get_device_reset_status = r600_get_reset_status;
 		rctx->gpu_reset_counter =
