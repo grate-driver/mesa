@@ -2,3 +2,19 @@
 #         causing regressions have been reverted.
 365d34540f331df57780dddf8da87235be0a6bcb mesa: correctly calculate the storage offset for i915
 de0e62e1065e2d9172acf3ab7c70bba0160125c8 st/mesa: correctly calculate the storage offset
+
+# stable: Add loader::getCapability patches. It's rather invasive infra
+#         not suitable as a bugfix.
+1bf703e4ea5c4f742bc7ba55d01e5afc3f4e11f9 dri_interface,egl,gallium: only expose RGBA visuals on Android
+be5773fa8dfe9255d9abaf5c7d5bbbd2d922da08 Android: fix compile error for DRI2 loader getCapability
+31a6750988d7dd431f72ff1ff11bfca83bde5d8c st/dri: NULL check before deref DRI loader .getCapability
+
+# stable: The commit addresses code that did not land in the stable branch
+31bb8517a194af733deefe2d821537d994d39365 radv/gfx9: fix tile swizzle handling for gfx9
+
+# stable: Commit is not applicable when 4fab67a4415 is missing.
+d496780fb2c7f2cf0e32b6a79dc528e5156dfcb3 intel/eu/validate: Look up types on demand in execution_type()
+
+# fixes: Depend on preseding commit which adds new public GBM API
+3a5e3aa5a53cff55a5e31766d713a41ffa5a93d7 egl/drm: Fix misused x and y offsets in swrast_put_image2()
+fe2a6281b3b299998fe7399e7dbcc2077d773824 egl/drm: Fix misused x and y offsets in swrast_get_image()
