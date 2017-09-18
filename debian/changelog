@@ -1,3 +1,9 @@
+mesa (17.2.1-0ubuntu1) artful; urgency=medium
+
+  * New upstream bugfix release. (LP: #1716250)
+
+ -- Timo Aaltonen <tjaalton@debian.org>  Mon, 18 Sep 2017 14:42:16 +0300
+
 mesa (17.2.0-0ubuntu1) artful; urgency=medium
 
   * New upstream release.
