@@ -1,8 +1,8 @@
-mesa (17.2.1-1) UNRELEASED; urgency=medium
+mesa (17.2.1-1) unstable; urgency=medium
 
   * New upstream bugfix release. (LP: #1716250)
 
- -- Timo Aaltonen <tjaalton@debian.org>  Mon, 18 Sep 2017 08:41:45 +0300
+ -- Timo Aaltonen <tjaalton@debian.org>  Mon, 18 Sep 2017 14:33:02 +0300
 
 mesa (17.2.0-2) unstable; urgency=medium
 
