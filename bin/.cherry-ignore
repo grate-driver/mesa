@@ -22,3 +22,7 @@ fe2a6281b3b299998fe7399e7dbcc2077d773824 egl/drm: Fix misused x and y offsets in
 # fixes: This commit addressed an earlier commit c7e9ebb3ab8 which did not
 #        land in branch
 45c5c444518b7e83d9accd9f44702fa49282a3b8 radeonsi/gfx9: proper workaround for LS/HS VGPR initialization bug
+
+# fixes: This commit addressed earlier commits 61ad2f13 and 6dcc54b4 which did
+#        not land in branch
+979978ee06867a531b8d56cee252f5c83920a339 radv: Check for GFX9 for 1D arrays in image_size intrinsic.
