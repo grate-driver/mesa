@@ -3609,7 +3609,8 @@ static LLVMValueRef visit_image_size(struct nir_to_llvm_context *ctx,
 		z = LLVMBuildSDiv(ctx->builder, z, six, "");
 		res = LLVMBuildInsertElement(ctx->builder, res, z, two, "");
 	}
-	if (glsl_get_sampler_dim(type) == GLSL_SAMPLER_DIM_1D &&
+	if (ctx->options->chip_class >= GFX9 &&
+	    glsl_get_sampler_dim(type) == GLSL_SAMPLER_DIM_1D &&
 	    glsl_sampler_type_is_array(type)) {
 		LLVMValueRef layers = LLVMBuildExtractElement(ctx->builder, res, two, "");
 		res = LLVMBuildInsertElement(ctx->builder, res, layers,
