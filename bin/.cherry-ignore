@@ -18,3 +18,15 @@ d496780fb2c7f2cf0e32b6a79dc528e5156dfcb3 intel/eu/validate: Look up types on dem
 # fixes: Depend on preseding commit which adds new public GBM API
 3a5e3aa5a53cff55a5e31766d713a41ffa5a93d7 egl/drm: Fix misused x and y offsets in swrast_put_image2()
 fe2a6281b3b299998fe7399e7dbcc2077d773824 egl/drm: Fix misused x and y offsets in swrast_get_image()
+
+# fixes: This commit addressed an earlier commit c7e9ebb3ab8 which did not
+#        land in branch
+45c5c444518b7e83d9accd9f44702fa49282a3b8 radeonsi/gfx9: proper workaround for LS/HS VGPR initialization bug
+
+# fixes: This commit addressed earlier commits 61ad2f13 and 6dcc54b4 which did
+#        not land in branch
+979978ee06867a531b8d56cee252f5c83920a339 radv: Check for GFX9 for 1D arrays in image_size intrinsic.
+
+# fixes: This commit addressed earlier commits dcf46e99 and 60878dd0 which did
+#        not land in branch
+8e9e339c530c7b82b5a29d4b3183e8f5a01eae28 radv: copy the number of viewports/scissors at pipeline bind time
