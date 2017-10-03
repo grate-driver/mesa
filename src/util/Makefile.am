@@ -46,8 +46,10 @@ libmesautil_la_SOURCES = \
 
 libmesautil_la_LIBADD = \
 	$(CLOCK_LIB) \
-	$(ZLIB_LIBS)
+	$(ZLIB_LIBS) \
+	$(LIBATOMIC_LIBS)
 
+u_atomic_test_LDADD = libmesautil.la
 roundeven_test_LDADD = -lm
 
 check_PROGRAMS = u_atomic_test roundeven_test
