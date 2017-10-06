@@ -254,15 +254,41 @@ grate_context_sampler_init(struct pipe_context *pcontext)
    pcontext->delete_sampler_state = grate_delete_sampler_state;
 }
 
+static int
+grate_cull_face(int cull_face, bool front_ccw)
+{
+   switch (cull_face) {
+   case PIPE_FACE_NONE:
+      return TGR3D_CULL_FACE_NONE;
+
+   case PIPE_FACE_FRONT:
+      return front_ccw ? TGR3D_CULL_FACE_CCW : TGR3D_CULL_FACE_CW;
+
+   case PIPE_FACE_BACK:
+      return front_ccw ? TGR3D_CULL_FACE_CW : TGR3D_CULL_FACE_CCW;
+
+   case PIPE_FACE_FRONT_AND_BACK:
+      return TGR3D_CULL_FACE_BOTH;
+
+   default:
+      unreachable("unknown cull_face");
+   }
+}
+
 static void *
 grate_create_rasterizer_state(struct pipe_context *pcontext,
                               const struct pipe_rasterizer_state *template)
 {
-   struct pipe_rasterizer_state *so = CALLOC_STRUCT(pipe_rasterizer_state);
+   struct grate_rasterizer_state *so = CALLOC_STRUCT(grate_rasterizer_state);
    if (!so)
       return NULL;
 
-   *so = *template;
+   so->base = *template;
+
+   so->draw_params = TGR3D_VAL(DRAW_PARAMS, PROVOKING_VERTEX, !template->flatshade_first);
+
+   so->cull_face = TGR3D_BOOL(CULL_FACE_LINKER_SETUP, FRONT_CW, !template->front_ccw);
+   so->cull_face |= TGR3D_VAL(CULL_FACE_LINKER_SETUP, CULL_FACE, grate_cull_face(template->cull_face, template->front_ccw));
 
    return so;
 }
@@ -270,7 +296,7 @@ grate_create_rasterizer_state(struct pipe_context *pcontext,
 static void
 grate_bind_rasterizer_state(struct pipe_context *pcontext, void *so)
 {
-   unimplemented();
+   grate_context(pcontext)->rast = so;
 }
 
 static void
