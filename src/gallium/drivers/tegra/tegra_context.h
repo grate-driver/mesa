@@ -37,6 +37,7 @@ struct tegra_context {
    struct pipe_constant_buffer constant_buffer[PIPE_SHADER_TYPES];
 
    struct tegra_zsa_state *zsa;
+   struct tegra_rasterizer_state *rast;
 
    uint32_t no_scissor[3];
    uint32_t viewport[10];
