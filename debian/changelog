@@ -2,6 +2,7 @@ mesa (17.2.3-1) UNRELEASED; urgency=medium
 
   * New upstream bugfix release.
   * Bump standards version to 4.1.1 (Priority: extra -> optional).
+  * Update extend-diff-ignore.
 
  -- Andreas Boll <andreas.boll.dev@gmail.com>  Fri, 20 Oct 2017 10:45:20 +0200
 
