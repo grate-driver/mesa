@@ -30,3 +30,12 @@ fe2a6281b3b299998fe7399e7dbcc2077d773824 egl/drm: Fix misused x and y offsets in
 # fixes: This commit addressed earlier commits dcf46e99 and 60878dd0 which did
 #        not land in branch
 8e9e339c530c7b82b5a29d4b3183e8f5a01eae28 radv: copy the number of viewports/scissors at pipeline bind time
+
+# stable: The commit regresses a few dEQP tests. Namely:
+#         dEQP-VK.api.copy_and_blit.core.buffer_to_buffer.partial
+#         dEQP-VK.api.copy_and_blit.dedicated_allocation.buffer_to_buffer.partial
+14555d0b7a51bd3701764fd213c2459410143431 anv: Remove unreachable cases from isl_format_for_size()
+
+# stable: The commit addresses earlier commit a62a9793357 which is no applicable
+#         for the stable branch
+6c7720ed78db754d52f204cbb74897aa9e65ea7e anv/wsi: Allocate enough memory for the entire image
