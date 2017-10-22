@@ -4553,7 +4553,9 @@ static void visit_tex(struct nir_to_llvm_context *ctx, nir_tex_instr *instr)
 				filler = LLVMConstReal(ctx->f32, 0.5);
 
 			if (instr->sampler_dim == GLSL_SAMPLER_DIM_1D) {
-				if (instr->is_array) {
+				/* No nir_texop_lod, because it does not take a slice
+				 * even with array textures. */
+				if (instr->is_array && instr->op != nir_texop_lod ) {
 					address[count] = address[count - 1];
 					address[count - 1] = filler;
 					count++;
