@@ -1,6 +1,8 @@
 mesa (17.2.3-0ubuntu1) UNRELEASED; urgency=medium
 
   * New upstream bugfix release. (LP: #1727390)
+  * i965-disable-l3-cache-alloc-for-ext-buffers.diff: Fix corruption
+    running windowed 3D apps on dGPU. (LP: #1727401)
 
  -- Timo Aaltonen <tjaalton@debian.org>  Wed, 25 Oct 2017 18:49:00 +0300
 
