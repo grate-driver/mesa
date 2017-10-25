@@ -49,3 +49,9 @@ df3a43018020c16c1dfa88a76c9a84c9fb85be38 configure.ac: add missing LLVM componen
 
 # stable: Commit is too big for stable at this point.
 4d24a7cb97641cacecd371d1968f6964785822e4 glsl: fix derived cs variables
+
+# stable: 17.3 nomination only.
+fee9d05e2136b2b7c5a1ad2be7180b99f733f539 radv: Update code pointer correctly if a variant is already created
+
+# stable: 17.3 nomination only.
+d8cefaa197f02944812ef535b1b303dd5bf26848 radv: use device name in cache creation like radeonsi.
