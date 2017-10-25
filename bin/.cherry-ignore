@@ -65,3 +65,6 @@ c07d719e8b683e1bf78f187dd17fe4716f4e5e9c radv: Disallow indirect outputs for GS 
 # fixes:  This commit addressed earlier commit 35ac13ed3 which did not
 #         land in branch.
 11d688d9f0d2ee4d0178d1807c0075e5e8364b1d mesa/bufferobj: don't double negate the range
+
+# extra:  Commit is not applicable when ade416d0236 is missing.
+07bfdb478bf844a0ac9cf3679f51f83c4abea5a1 broadcom/vc5: Propagate vc4 aliasing fix to vc5.
