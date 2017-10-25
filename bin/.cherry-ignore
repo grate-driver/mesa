@@ -55,3 +55,6 @@ fee9d05e2136b2b7c5a1ad2be7180b99f733f539 radv: Update code pointer correctly if 
 
 # stable: 17.3 nomination only.
 d8cefaa197f02944812ef535b1b303dd5bf26848 radv: use device name in cache creation like radeonsi.
+
+# fixes:  Commit is not applicable when 087e010b2b3 is missing.
+6ce550453f1df64caeb956f215d32da96b89f2b1 radv: Don't use vgpr indexing for outputs on GFX9.
