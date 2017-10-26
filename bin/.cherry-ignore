@@ -39,3 +39,10 @@ fe2a6281b3b299998fe7399e7dbcc2077d773824 egl/drm: Fix misused x and y offsets in
 # stable: The commit addresses earlier commit a62a9793357 which is no applicable
 #         for the stable branch
 6c7720ed78db754d52f204cbb74897aa9e65ea7e anv/wsi: Allocate enough memory for the entire image
+
+# stable: Commits are too invasive for 17.2.
+98fdff7247b6877d028d33284f9cc63189ee204e configure.ac: factor out detection for old and buggy llvm
+13a53c4f5cdd664fd155c9e78fb46a4387af006c configure.ac: rework llvm libs handling for 3.9+
+a7ecf7b86f4eae59f3ceac2125e5d1725c403c07 Travis: add binutils 2.26 for a few more LLVM 3.9 builds
+36d6d1e931936a80da327889862ba02942ac427b configure.ac: add llvm_add_optional_component helper
+df3a43018020c16c1dfa88a76c9a84c9fb85be38 configure.ac: add missing LLVM components for OpenCL
