@@ -46,3 +46,6 @@ fe2a6281b3b299998fe7399e7dbcc2077d773824 egl/drm: Fix misused x and y offsets in
 a7ecf7b86f4eae59f3ceac2125e5d1725c403c07 Travis: add binutils 2.26 for a few more LLVM 3.9 builds
 36d6d1e931936a80da327889862ba02942ac427b configure.ac: add llvm_add_optional_component helper
 df3a43018020c16c1dfa88a76c9a84c9fb85be38 configure.ac: add missing LLVM components for OpenCL
+
+# stable: Commit is too big for stable at this point.
+4d24a7cb97641cacecd371d1968f6964785822e4 glsl: fix derived cs variables
