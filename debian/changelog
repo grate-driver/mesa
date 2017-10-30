@@ -1,6 +1,7 @@
 mesa (17.3.0~rc1-1) UNRELEASED; urgency=medium
 
   * New upstream release candidate.
+  * Bump libdrm-dev build-dep to 2.4.85 per configure.ac.
 
  -- Andreas Boll <andreas.boll.dev@gmail.com>  Mon, 30 Oct 2017 14:26:42 +0100
 
