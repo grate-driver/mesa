@@ -1,9 +1,9 @@
-mesa (17.2.4-1) UNRELEASED; urgency=medium
+mesa (17.2.4-1) unstable; urgency=medium
 
   * New upstream release.
   * Build with dh_libva (Closes: #879064).
 
- -- Andreas Boll <andreas.boll.dev@gmail.com>  Tue, 31 Oct 2017 10:35:28 +0100
+ -- Andreas Boll <andreas.boll.dev@gmail.com>  Tue, 31 Oct 2017 12:19:49 +0100
 
 mesa (17.2.3-1) unstable; urgency=medium
 
