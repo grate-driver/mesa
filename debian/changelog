@@ -1,4 +1,4 @@
-mesa (17.3.0~rc1-1) UNRELEASED; urgency=medium
+mesa (17.3.0~rc2-1) UNRELEASED; urgency=medium
 
   * New upstream release candidate.
   * Bump libdrm-dev build-dep to 2.4.85 per configure.ac.
