@@ -227,7 +227,7 @@ override_dh_makeshlibs:
 	dh_makeshlibs -a -- -c4
 
 %:
-	dh $@ --with quilt,autoreconf \
+	dh $@ --with quilt,autoreconf,libva \
 		--parallel \
 		--builddirectory=build/
 
