@@ -74,3 +74,9 @@ d8cefaa197f02944812ef535b1b303dd5bf26848 radv: use device name in cache creation
 # stable: This commit addressed earlier commit 8d90e28839 which did
 #         not land in branch.
 7b4387519c382cffef9c62bbbbefcfe71cfde905 intel/fs: Alloc pull constants off mem_ctx
+
+# stable: 17.3 nomination only.
+3f8e3c2bd8f54ae6817f7496be47f4e1a8860d9c radeonsi: add a workaround for weird s_buffer_load_dword behavior on SI
+
+# stable: 17.3 nomination only.
+7dae419aa7c34af820c08896acef3b65d855188e Android: move drivers' symlinks to /vendor (v2)
