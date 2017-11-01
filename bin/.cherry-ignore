@@ -62,3 +62,7 @@ d8cefaa197f02944812ef535b1b303dd5bf26848 radv: use device name in cache creation
 
 # extra:  Commit is not applicable when ade416d0236 is missing.
 07bfdb478bf844a0ac9cf3679f51f83c4abea5a1 broadcom/vc5: Propagate vc4 aliasing fix to vc5.
+
+# stable: This commit addressed earlier commit 8d90e28839 which did
+#         not land in branch.
+446c5726ecb968d06a6607e0df42be1cb74948c4 i965: fix blorp stage_prog_data->param leak
