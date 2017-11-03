@@ -70,3 +70,7 @@ d8cefaa197f02944812ef535b1b303dd5bf26848 radv: use device name in cache creation
 # stable: This commit addressed earlier commit 78ade659569 which did
 #         not land in branch.
 8fbd82f464f26a56167f7962174b2b69756a105a etnaviv: don't do resolve-in-place without valid TS
+
+# stable: This commit addressed earlier commit 8d90e28839 which did
+#         not land in branch.
+7b4387519c382cffef9c62bbbbefcfe71cfde905 intel/fs: Alloc pull constants off mem_ctx
