@@ -80,3 +80,7 @@ d8cefaa197f02944812ef535b1b303dd5bf26848 radv: use device name in cache creation
 
 # stable: 17.3 nomination only.
 7dae419aa7c34af820c08896acef3b65d855188e Android: move drivers' symlinks to /vendor (v2)
+
+# fixes:  This commit has more than one Fixes tag but the commit it
+#         addresses didn't land in branch.
+e17e8934f9e4b008bdfb4f9abd8ed4faa604c7d9 automake: include git_sha1.h.in in release tarball
