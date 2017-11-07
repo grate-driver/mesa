@@ -3511,15 +3511,17 @@ static LLVMValueRef visit_image_atomic(struct nir_to_llvm_context *ctx,
 	if (ctx->stage == MESA_SHADER_FRAGMENT)
 		ctx->shader_info->fs.writes_memory = true;
 
+	bool is_unsigned = glsl_get_sampler_result_type(type) == GLSL_TYPE_UINT;
+
 	switch (instr->intrinsic) {
 	case nir_intrinsic_image_atomic_add:
 		atomic_name = "add";
 		break;
 	case nir_intrinsic_image_atomic_min:
-		atomic_name = "smin";
+		atomic_name = is_unsigned ? "umin" : "smin";
 		break;
 	case nir_intrinsic_image_atomic_max:
-		atomic_name = "smax";
+		atomic_name = is_unsigned ? "umax" : "smax";
 		break;
 	case nir_intrinsic_image_atomic_and:
 		atomic_name = "and";
@@ -4553,7 +4555,9 @@ static void visit_tex(struct nir_to_llvm_context *ctx, nir_tex_instr *instr)
 				filler = LLVMConstReal(ctx->f32, 0.5);
 
 			if (instr->sampler_dim == GLSL_SAMPLER_DIM_1D) {
-				if (instr->is_array) {
+				/* No nir_texop_lod, because it does not take a slice
+				 * even with array textures. */
+				if (instr->is_array && instr->op != nir_texop_lod ) {
 					address[count] = address[count - 1];
 					address[count - 1] = filler;
 					count++;

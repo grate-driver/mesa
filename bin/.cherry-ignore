@@ -39,3 +39,32 @@ fe2a6281b3b299998fe7399e7dbcc2077d773824 egl/drm: Fix misused x and y offsets in
 # stable: The commit addresses earlier commit a62a9793357 which is no applicable
 #         for the stable branch
 6c7720ed78db754d52f204cbb74897aa9e65ea7e anv/wsi: Allocate enough memory for the entire image
+
+# stable: Commits are too invasive for 17.2.
+98fdff7247b6877d028d33284f9cc63189ee204e configure.ac: factor out detection for old and buggy llvm
+13a53c4f5cdd664fd155c9e78fb46a4387af006c configure.ac: rework llvm libs handling for 3.9+
+a7ecf7b86f4eae59f3ceac2125e5d1725c403c07 Travis: add binutils 2.26 for a few more LLVM 3.9 builds
+36d6d1e931936a80da327889862ba02942ac427b configure.ac: add llvm_add_optional_component helper
+df3a43018020c16c1dfa88a76c9a84c9fb85be38 configure.ac: add missing LLVM components for OpenCL
+
+# stable: Commit is too big for stable at this point.
+4d24a7cb97641cacecd371d1968f6964785822e4 glsl: fix derived cs variables
+
+# stable: 17.3 nomination only.
+fee9d05e2136b2b7c5a1ad2be7180b99f733f539 radv: Update code pointer correctly if a variant is already created
+
+# stable: 17.3 nomination only.
+d8cefaa197f02944812ef535b1b303dd5bf26848 radv: use device name in cache creation like radeonsi.
+
+# fixes:  Commit is not applicable when 087e010b2b3 is missing.
+6ce550453f1df64caeb956f215d32da96b89f2b1 radv: Don't use vgpr indexing for outputs on GFX9.
+
+# fixes:  Commit is not applicable when 6ce550453f1 is missing.
+c07d719e8b683e1bf78f187dd17fe4716f4e5e9c radv: Disallow indirect outputs for GS on GFX9 as well.
+
+# fixes:  This commit addressed earlier commit 35ac13ed3 which did not
+#         land in branch.
+11d688d9f0d2ee4d0178d1807c0075e5e8364b1d mesa/bufferobj: don't double negate the range
+
+# extra:  Commit is not applicable when ade416d0236 is missing.
+07bfdb478bf844a0ac9cf3679f51f83c4abea5a1 broadcom/vc5: Propagate vc4 aliasing fix to vc5.

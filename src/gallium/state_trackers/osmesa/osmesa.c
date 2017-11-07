@@ -62,6 +62,7 @@
 #include "util/u_box.h"
 #include "util/u_debug.h"
 #include "util/u_format.h"
+#include "util/u_inlines.h"
 #include "util/u_memory.h"
 
 #include "postprocess/filters.h"
@@ -432,6 +433,7 @@ osmesa_st_framebuffer_validate(struct st_context_iface *stctx,
 
       templat.format = format;
       templat.bind = bind;
+      pipe_resource_reference(&out[i], NULL);
       out[i] = osbuffer->textures[statts[i]] =
          screen->resource_create(screen, &templat);
    }
