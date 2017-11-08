@@ -1,4 +1,4 @@
-mesa (17.3.0~rc3-1) UNRELEASED; urgency=medium
+mesa (17.3.0~rc3-1) experimental; urgency=medium
 
   [ Andreas Boll ]
   * New upstream release candidate.
@@ -7,7 +7,7 @@ mesa (17.3.0~rc3-1) UNRELEASED; urgency=medium
   * control: Remove libtxc-dxtn* recommends for S3TC.
   * rules: Rename --enable-gallium-llvm to --enable-llvm.
 
- -- Andreas Boll <andreas.boll.dev@gmail.com>  Wed, 08 Nov 2017 12:37:24 +0100
+ -- Andreas Boll <andreas.boll.dev@gmail.com>  Wed, 08 Nov 2017 14:00:55 +0100
 
 mesa (17.3.0~rc2-1) experimental; urgency=medium
 
