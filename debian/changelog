@@ -6,6 +6,13 @@ mesa (17.2.4-0ubuntu1) bionic; urgency=medium
 
  -- Timo Aaltonen <tjaalton@debian.org>  Tue, 07 Nov 2017 15:36:09 +0200
 
+mesa (17.2.2-0ubuntu2) bionic; urgency=medium
+
+  [ Andreas Boll ]
+  * Build with dh_libva (Closes: #879064).
+
+ -- Jeremy Bicha <jbicha@ubuntu.com>  Sat, 04 Nov 2017 15:43:28 -0400
+
 mesa (17.2.2-0ubuntu1) artful; urgency=medium
 
   * New upstream bugfix release.

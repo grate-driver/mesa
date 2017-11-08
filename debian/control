@@ -377,7 +377,6 @@ Package: mesa-va-drivers
 Section: libs
 Architecture: linux-any kfreebsd-any
 Depends:
- libva1,
  ${shlibs:Depends},
  ${misc:Depends},
 Enhances:
