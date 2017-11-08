@@ -1,9 +1,10 @@
-mesa (17.2.4-0ubuntu2) UNRELEASED; urgency=medium
+mesa (17.2.4-0ubuntu2) bionic; urgency=medium
 
+  * Import changes from 17.2.2-0ubuntu2
   * Make mesa-va-drivers enhance libva2 rather than libva1.
   * vulkan-mir.patch: Dropped, breaks radeon vulkan driver. (LP: #1720890)
 
- -- Timo Aaltonen <tjaalton@debian.org>  Wed, 08 Nov 2017 16:22:08 +0200
+ -- Timo Aaltonen <tjaalton@debian.org>  Wed, 08 Nov 2017 16:29:58 +0200
 
 mesa (17.2.4-0ubuntu1) bionic; urgency=medium
 
