@@ -1,3 +1,9 @@
+mesa (17.2.4-0ubuntu2) UNRELEASED; urgency=medium
+
+  * Make mesa-va-drivers enhance libva2 rather than libva1.
+
+ -- Timo Aaltonen <tjaalton@debian.org>  Wed, 08 Nov 2017 16:22:08 +0200
+
 mesa (17.2.4-0ubuntu1) bionic; urgency=medium
 
   * New upstream bugfix release. (LP: #1727390)
