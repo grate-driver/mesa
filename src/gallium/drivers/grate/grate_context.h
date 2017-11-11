@@ -39,6 +39,8 @@ struct grate_context {
    struct grate_zsa_state *zsa;
    struct grate_rasterizer_state *rast;
 
+   struct grate_vertex_shader_state *vshader;
+
    uint32_t no_scissor[3];
    uint32_t viewport[10];
    uint32_t guardband[4];
