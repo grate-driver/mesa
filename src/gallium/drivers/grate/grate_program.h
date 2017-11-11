@@ -15,6 +15,11 @@ struct grate_vertex_shader_state {
    uint16_t output_mask;
 };
 
+struct grate_fragment_shader_state {
+   struct pipe_shader_state base;
+   struct grate_shader_blob blob;
+};
+
 void
 grate_context_program_init(struct pipe_context *pcontext);
 
