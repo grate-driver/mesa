@@ -15,6 +15,11 @@ struct tegra_vertex_shader_state {
    uint16_t output_mask;
 };
 
+struct tegra_fragment_shader_state {
+   struct pipe_shader_state base;
+   struct tegra_shader_blob blob;
+};
+
 void
 tegra_context_program_init(struct pipe_context *pcontext);
 

@@ -40,6 +40,7 @@ struct tegra_context {
    struct tegra_rasterizer_state *rast;
 
    struct tegra_vertex_shader_state *vshader;
+   struct tegra_fragment_shader_state *fshader;
 
    uint32_t no_scissor[3];
    uint32_t viewport[10];
