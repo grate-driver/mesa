@@ -9,6 +9,7 @@
 #include "grate_common.h"
 #include "grate_context.h"
 #include "grate_draw.h"
+#include "grate_program.h"
 #include "grate_resource.h"
 #include "grate_screen.h"
 #include "grate_state.h"
@@ -297,6 +298,7 @@ grate_screen_context_create(struct pipe_screen *pscreen,
    grate_context_sampler_init(&context->base);
    grate_context_rasterizer_init(&context->base);
    grate_context_zsa_init(&context->base);
+   grate_context_program_init(&context->base);
    grate_context_vbo_init(&context->base);
    grate_context_draw_init(&context->base);
 

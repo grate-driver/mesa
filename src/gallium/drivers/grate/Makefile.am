@@ -21,6 +21,8 @@ libgrate_la_SOURCES = \
 	grate_draw.c \
 	grate_draw.h \
 	grate_fence.h \
+	grate_program.c \
+	grate_program.h \
 	grate_resource.c \
 	grate_resource.h \
 	grate_screen.c \
