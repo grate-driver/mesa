@@ -39,6 +39,8 @@ struct tegra_context {
    struct tegra_zsa_state *zsa;
    struct tegra_rasterizer_state *rast;
 
+   struct tegra_vertex_shader_state *vshader;
+
    uint32_t no_scissor[3];
    uint32_t viewport[10];
    uint32_t guardband[4];

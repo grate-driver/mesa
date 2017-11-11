@@ -27,6 +27,8 @@ files_libtegra = files(
   'tegra_context.h',
   'tegra_draw.c',
   'tegra_draw.h',
+  'tegra_program.c',
+  'tegra_program.h',
   'tegra_resource.c',
   'tegra_resource.h',
   'tegra_screen.c',
