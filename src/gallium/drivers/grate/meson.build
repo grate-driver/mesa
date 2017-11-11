@@ -27,6 +27,8 @@ files_libgrate = files(
   'grate_context.h',
   'grate_draw.c',
   'grate_draw.h',
+  'grate_program.c',
+  'grate_program.h',
   'grate_resource.c',
   'grate_resource.h',
   'grate_screen.c',
