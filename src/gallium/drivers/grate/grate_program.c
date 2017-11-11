@@ -79,10 +79,43 @@ grate_delete_vs_state(struct pipe_context *pcontext, void *so)
    FREE(so);
 }
 
+static void *
+grate_create_fs_state(struct pipe_context *pcontext,
+                      const struct pipe_shader_state *template)
+{
+   struct grate_fragment_shader_state *so =
+      CALLOC_STRUCT(grate_fragment_shader_state);
+
+   if (!so)
+      return NULL;
+
+   so->base = *template;
+
+   /* TODO: generate code! */
+
+   return so;
+}
+
+static void
+grate_bind_fs_state(struct pipe_context *pcontext, void *so)
+{
+   grate_context(pcontext)->fshader = so;
+}
+
+static void
+grate_delete_fs_state(struct pipe_context *pcontext, void *so)
+{
+   FREE(so);
+}
+
 void
 grate_context_program_init(struct pipe_context *pcontext)
 {
    pcontext->create_vs_state = grate_create_vs_state;
    pcontext->bind_vs_state = grate_bind_vs_state;
    pcontext->delete_vs_state = grate_delete_vs_state;
+
+   pcontext->create_fs_state = grate_create_fs_state;
+   pcontext->bind_fs_state = grate_bind_fs_state;
+   pcontext->delete_fs_state = grate_delete_fs_state;
 }
