@@ -40,6 +40,7 @@ struct grate_context {
    struct grate_rasterizer_state *rast;
 
    struct grate_vertex_shader_state *vshader;
+   struct grate_fragment_shader_state *fshader;
 
    uint32_t no_scissor[3];
    uint32_t viewport[10];
