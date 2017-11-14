@@ -150,6 +150,8 @@ grate_set_viewport_states(struct pipe_context *pcontext,
    context->guardband[1] = u_bitcast_f2u((3967 - max_x) / scale_x);
    context->guardband[2] = u_bitcast_f2u((3967 - max_y) / scale_y);
    context->guardband[3] = u_bitcast_f2u(6.99);
+
+   context->y_invert = viewports[0].scale[1] < 0.0f;
 }
 
 static void
@@ -288,8 +290,19 @@ grate_create_rasterizer_state(struct pipe_context *pcontext,
 
    so->draw_params = TGR3D_VAL(DRAW_PARAMS, PROVOKING_VERTEX, !template->flatshade_first);
 
-   so->cull_face = TGR3D_BOOL(CULL_FACE_LINKER_SETUP, FRONT_CW, !template->front_ccw);
-   so->cull_face |= TGR3D_VAL(CULL_FACE_LINKER_SETUP, CULL_FACE, grate_cull_face(template->cull_face, template->front_ccw));
+   /* normal */
+   so->cull_face[0] = TGR3D_BOOL(CULL_FACE_LINKER_SETUP, FRONT_CW,
+                                 !template->front_ccw);
+   so->cull_face[0] |= TGR3D_VAL(CULL_FACE_LINKER_SETUP, CULL_FACE,
+                                 grate_cull_face(template->cull_face,
+                                                 template->front_ccw));
+
+   /* y-inverted */
+   so->cull_face[1] = TGR3D_BOOL(CULL_FACE_LINKER_SETUP, FRONT_CW,
+                                 template->front_ccw);
+   so->cull_face[1] |= TGR3D_VAL(CULL_FACE_LINKER_SETUP, CULL_FACE,
+                                 grate_cull_face(template->cull_face,
+                                                 !template->front_ccw));
 
    return so;
 }
@@ -587,7 +600,7 @@ emit_program(struct grate_context *context)
                                                UNK_18_31, 0x2e38);
 
    /* depends on cull-face */
-   cull_face_linker_setup |= context->rast->cull_face;
+   cull_face_linker_setup |= context->rast->cull_face[context->y_invert];
 
    /* depends on linking */
    struct grate_fp_info *info = &context->fshader->info;
