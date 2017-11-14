@@ -48,6 +48,7 @@ struct grate_context {
    uint32_t no_scissor[3];
    uint32_t viewport[10];
    uint32_t guardband[4];
+   bool y_invert;
 };
 
 static inline struct grate_context *
