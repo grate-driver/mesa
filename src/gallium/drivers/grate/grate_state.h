@@ -9,7 +9,7 @@ struct grate_context;
 struct grate_rasterizer_state {
    struct pipe_rasterizer_state base;
    uint32_t draw_params;
-   uint32_t cull_face;
+   uint32_t cull_face[2];
 };
 
 struct grate_zsa_state {
