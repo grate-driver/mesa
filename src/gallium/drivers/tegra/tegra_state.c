@@ -289,7 +289,7 @@ tegra_create_rasterizer_state(struct pipe_context *pcontext,
    so->draw_params = TGR3D_VAL(DRAW_PARAMS, PROVOKING_VERTEX, !template->flatshade_first);
 
    so->cull_face = TGR3D_BOOL(CULL_FACE_LINKER_SETUP, FRONT_CW, !template->front_ccw);
-   so->cull_face |= TGR3D_VAL(CULL_FACE_LINKER_SETUP, CULL_FACE, tegra_cull_face(template->cull_face, template->front_ccw));
+   so->cull_face |= TGR3D_VAL(CULL_FACE_LINKER_SETUP, CULL_FACE, tegra_cull_face(template->cull_face, !template->front_ccw));
 
    return so;
 }
