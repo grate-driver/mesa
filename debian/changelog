@@ -1,6 +1,11 @@
 mesa (17.2.4-2) UNRELEASED; urgency=medium
 
+  [ Emilio Pozuelo Monfort ]
   * Make mesa-va-drivers enhance libva2 rather than libva1.
+
+  [ Timo Aaltonen ]
+  * libglx-mesa0.links.in: Add libGLX_indirect.so.0 to link against
+    libGLX_mesa so that GLX with a remote xserver works. (Closes: #881789)
 
  -- Emilio Pozuelo Monfort <pochu@debian.org>  Sun, 05 Nov 2017 01:44:41 +0100
 
