@@ -56,15 +56,31 @@ fee9d05e2136b2b7c5a1ad2be7180b99f733f539 radv: Update code pointer correctly if 
 # stable: 17.3 nomination only.
 d8cefaa197f02944812ef535b1b303dd5bf26848 radv: use device name in cache creation like radeonsi.
 
-# fixes:  Commit is not applicable when 087e010b2b3 is missing.
-6ce550453f1df64caeb956f215d32da96b89f2b1 radv: Don't use vgpr indexing for outputs on GFX9.
-
-# fixes:  Commit is not applicable when 6ce550453f1 is missing.
-c07d719e8b683e1bf78f187dd17fe4716f4e5e9c radv: Disallow indirect outputs for GS on GFX9 as well.
-
 # fixes:  This commit addressed earlier commit 35ac13ed3 which did not
 #         land in branch.
 11d688d9f0d2ee4d0178d1807c0075e5e8364b1d mesa/bufferobj: don't double negate the range
 
 # extra:  Commit is not applicable when ade416d0236 is missing.
 07bfdb478bf844a0ac9cf3679f51f83c4abea5a1 broadcom/vc5: Propagate vc4 aliasing fix to vc5.
+
+# stable: This commit addressed earlier commit 8d90e28839 which did
+#         not land in branch.
+446c5726ecb968d06a6607e0df42be1cb74948c4 i965: fix blorp stage_prog_data->param leak
+
+# stable: This commit addressed earlier commit 78ade659569 which did
+#         not land in branch.
+8fbd82f464f26a56167f7962174b2b69756a105a etnaviv: don't do resolve-in-place without valid TS
+
+# stable: This commit addressed earlier commit 8d90e28839 which did
+#         not land in branch.
+7b4387519c382cffef9c62bbbbefcfe71cfde905 intel/fs: Alloc pull constants off mem_ctx
+
+# stable: 17.3 nomination only.
+3f8e3c2bd8f54ae6817f7496be47f4e1a8860d9c radeonsi: add a workaround for weird s_buffer_load_dword behavior on SI
+
+# stable: 17.3 nomination only.
+7dae419aa7c34af820c08896acef3b65d855188e Android: move drivers' symlinks to /vendor (v2)
+
+# fixes:  This commit has more than one Fixes tag but the commit it
+#         addresses didn't land in branch.
+e17e8934f9e4b008bdfb4f9abd8ed4faa604c7d9 automake: include git_sha1.h.in in release tarball

@@ -215,15 +215,6 @@ brw_update_renderbuffer_surface(struct brw_context *brw,
    struct intel_renderbuffer *irb = intel_renderbuffer(rb);
    struct intel_mipmap_tree *mt = irb->mt;
 
-   enum isl_aux_usage aux_usage =
-      intel_miptree_render_aux_usage(brw, mt, ctx->Color.sRGBEnabled,
-                                     ctx->Color.BlendEnabled & (1 << unit));
-
-   if (flags & INTEL_AUX_BUFFER_DISABLED) {
-      assert(brw->gen >= 9);
-      aux_usage = ISL_AUX_USAGE_NONE;
-   }
-
    assert(brw_render_target_supported(brw, rb));
 
    mesa_format rb_format = _mesa_get_render_format(ctx, intel_rb_format(irb));
@@ -231,9 +222,15 @@ brw_update_renderbuffer_surface(struct brw_context *brw,
       _mesa_problem(ctx, "%s: renderbuffer format %s unsupported\n",
                     __func__, _mesa_get_format_name(rb_format));
    }
+   enum isl_format isl_format = brw->mesa_to_isl_render_format[rb_format];
+
+   enum isl_aux_usage aux_usage =
+      brw->draw_aux_buffer_disabled[unit] ? ISL_AUX_USAGE_NONE :
+      intel_miptree_render_aux_usage(brw, mt, isl_format,
+                                     ctx->Color.BlendEnabled & (1 << unit));
 
    struct isl_view view = {
-      .format = brw->mesa_to_isl_render_format[rb_format],
+      .format = isl_format,
       .base_level = irb->mt_level - irb->mt->first_level,
       .levels = 1,
       .base_array_layer = irb->mt_layer,

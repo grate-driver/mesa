@@ -276,6 +276,9 @@ struct radv_physical_device {
 
 	bool has_rbplus; /* if RB+ register exist */
 	bool rbplus_allowed; /* if RB+ is allowed */
+
+	VkPhysicalDeviceMemoryProperties memory_properties;
+	enum radv_mem_type mem_type_indices[RADV_MEM_TYPE_COUNT];
 };
 
 struct radv_instance {

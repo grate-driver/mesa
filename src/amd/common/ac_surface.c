@@ -888,9 +888,11 @@ static int gfx9_compute_miptree(ADDR_HANDLE addrlib,
 		    in->numSamples == 1) {
 			ADDR2_COMPUTE_DCCINFO_INPUT din = {0};
 			ADDR2_COMPUTE_DCCINFO_OUTPUT dout = {0};
+			ADDR2_META_MIP_INFO meta_mip_info[RADEON_SURF_MAX_LEVELS] = {};
 
 			din.size = sizeof(ADDR2_COMPUTE_DCCINFO_INPUT);
 			dout.size = sizeof(ADDR2_COMPUTE_DCCINFO_OUTPUT);
+			dout.pMipInfo = meta_mip_info;
 
 			din.dccKeyFlags.pipeAligned = 1;
 			din.dccKeyFlags.rbAligned = 1;
@@ -914,6 +916,39 @@ static int gfx9_compute_miptree(ADDR_HANDLE addrlib,
 			surf->u.gfx9.dcc_pitch_max = dout.pitch - 1;
 			surf->dcc_size = dout.dccRamSize;
 			surf->dcc_alignment = dout.dccRamBaseAlign;
+			surf->num_dcc_levels = in->numMipLevels;
+
+			/* Disable DCC for levels that are in the mip tail.
+			 *
+			 * There are two issues that this is intended to
+			 * address:
+			 *
+			 * 1. Multiple mip levels may share a cache line. This
+			 *    can lead to corruption when switching between
+			 *    rendering to different mip levels because the
+			 *    RBs don't maintain coherency.
+			 *
+			 * 2. Texturing with metadata after rendering sometimes
+			 *    fails with corruption, probably for a similar
+			 *    reason.
+			 *
+			 * Working around these issues for all levels in the
+			 * mip tail may be overly conservative, but it's what
+			 * Vulkan does.
+			 *
+			 * Alternative solutions that also work but are worse:
+			 * - Disable DCC entirely.
+			 * - Flush TC L2 after rendering.
+			 */
+			for (unsigned i = 0; i < in->numMipLevels; i++) {
+				if (meta_mip_info[i].inMiptail) {
+					surf->num_dcc_levels = i;
+					break;
+				}
+			}
+
+			if (!surf->num_dcc_levels)
+				surf->dcc_size = 0;
 		}
 
 		/* FMASK */
@@ -1067,6 +1102,7 @@ static int gfx9_compute_surface(ADDR_HANDLE addrlib,
 
 	surf->u.gfx9.resource_type = AddrSurfInfoIn.resourceType;
 
+	surf->num_dcc_levels = 0;
 	surf->surf_size = 0;
 	surf->dcc_size = 0;
 	surf->htile_size = 0;
@@ -1100,7 +1136,6 @@ static int gfx9_compute_surface(ADDR_HANDLE addrlib,
 	}
 
 	surf->is_linear = surf->u.gfx9.surf.swizzle_mode == ADDR_SW_LINEAR;
-	surf->num_dcc_levels = surf->dcc_size ? config->info.levels : 0;
 
 	switch (surf->u.gfx9.surf.swizzle_mode) {
 		/* S = standard. */
