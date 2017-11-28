@@ -12,10 +12,20 @@ struct tegra_vpe_shader {
    uint16_t output_mask;
 };
 
+struct tegra_fp_info {
+   struct {
+      uint32_t src;
+      uint32_t dst;
+   } inputs[16];
+   int num_inputs;
+   int color_input;
+};
+
 struct tegra_fp_shader {
    struct list_head fp_instructions;
    struct list_head alu_instructions;
    struct list_head mfu_instructions;
+   struct tegra_fp_info info;
 };
 
 void

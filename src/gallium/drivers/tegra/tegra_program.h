@@ -4,6 +4,8 @@
 #include "pipe/p_context.h"
 #include "pipe/p_state.h"
 
+#include "tegra_compiler.h"
+
 struct tegra_shader_blob {
    uint32_t *commands;
    int num_commands;
@@ -18,6 +20,7 @@ struct tegra_vertex_shader_state {
 struct tegra_fragment_shader_state {
    struct pipe_shader_state base;
    struct tegra_shader_blob blob;
+   struct tegra_fp_info info;
 };
 
 void
