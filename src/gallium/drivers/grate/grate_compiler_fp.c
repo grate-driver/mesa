@@ -161,6 +161,42 @@ emit_tgsi_instr(struct grate_fp_shader *fp, const struct tgsi_full_instruction *
    }
 }
 
+#define LINK_SRC(index) ((index) << 3)
+#define LINK_DST(index, comp, type) (((comp) | (type) << 2) << ((index) * 4))
+#define LINK_DST_NONE      0
+#define LINK_DST_FX10_LOW  1
+#define LINK_DST_FX10_HIGH 2
+#define LINK_DST_FP20      3
+
+static void
+emit_tgsi_input(struct grate_fp_shader *fp, const struct tgsi_full_declaration *decl)
+{
+   assert(decl->Range.First == decl->Range.Last);
+
+   uint32_t src = LINK_SRC(1);
+   uint32_t dst = 0;
+   for (int i = 0; i < 4; ++i)
+      dst |= LINK_DST(i, i, LINK_DST_FP20);
+
+   fp->info.inputs[fp->info.num_inputs].src = src;
+   fp->info.inputs[fp->info.num_inputs].dst = dst;
+
+   if (decl->Declaration.Semantic == TGSI_SEMANTIC_COLOR)
+      fp->info.color_input = decl->Range.First;
+
+   fp->info.num_inputs++;
+}
+
+static void
+emit_tgsi_declaration(struct grate_fp_shader *fp, const struct tgsi_full_declaration *decl)
+{
+   switch (decl->Declaration.File) {
+   case TGSI_FILE_INPUT:
+      emit_tgsi_input(fp, decl);
+      break;
+   }
+}
+
 void
 grate_tgsi_to_fp(struct grate_fp_shader *fp, struct tgsi_parse_context *tgsi)
 {
@@ -168,9 +204,16 @@ grate_tgsi_to_fp(struct grate_fp_shader *fp, struct tgsi_parse_context *tgsi)
    list_inithead(&fp->alu_instructions);
    list_inithead(&fp->mfu_instructions);
 
+   fp->info.num_inputs = 0;
+   fp->info.color_input = -1;
+
    while (!tgsi_parse_end_of_tokens(tgsi)) {
       tgsi_parse_token(tgsi);
       switch (tgsi->FullToken.Token.Type) {
+      case TGSI_TOKEN_TYPE_DECLARATION:
+         emit_tgsi_declaration(fp, &tgsi->FullToken.FullDeclaration);
+         break;
+
       case TGSI_TOKEN_TYPE_INSTRUCTION:
          if (tgsi->FullToken.FullInstruction.Instruction.Opcode != TGSI_OPCODE_END)
             emit_tgsi_instr(fp, &tgsi->FullToken.FullInstruction);
