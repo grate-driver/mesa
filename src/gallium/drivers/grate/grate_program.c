@@ -178,7 +178,13 @@ grate_create_fs_state(struct pipe_context *pcontext,
    list_for_each_entry(struct fp_instr, instr, &fp.fp_instructions, link)
       PUSH(grate_fp_pack_dw(&instr->dw));
 
-   PUSH(host1x_opcode_imm(TGR3D_TRAM_SETUP, 0x0140));
+   uint32_t tram_setup = 0;
+   tram_setup |= TGR3D_VAL(TRAM_SETUP, USED_TRAM_ROWS_NB, fp.info.max_tram_row);
+   tram_setup |= TGR3D_VAL(TRAM_SETUP, DIV64, 64 / fp.info.max_tram_row);
+
+   PUSH(host1x_opcode_incr(TGR3D_TRAM_SETUP, 1));
+   PUSH(tram_setup);
+
 #undef PUSH
    util_dynarray_trim(&buf);
 
