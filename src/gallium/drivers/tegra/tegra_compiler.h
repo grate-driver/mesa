@@ -19,6 +19,7 @@ struct tegra_fp_info {
    } inputs[16];
    int num_inputs;
    int color_input;
+   int max_tram_row;
 };
 
 struct tegra_fp_shader {
