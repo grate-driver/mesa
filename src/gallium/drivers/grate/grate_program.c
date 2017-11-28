@@ -184,6 +184,7 @@ grate_create_fs_state(struct pipe_context *pcontext,
 
    so->blob.num_commands = buf.size / sizeof(uint32_t);
    so->blob.commands = buf.data;
+   so->info = fp.info;
    return so;
 }
 
