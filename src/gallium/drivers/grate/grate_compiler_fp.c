@@ -119,6 +119,7 @@ emit_vMOV(struct grate_fp_shader *fp, const struct tgsi_dst_register *dst,
       if (src->File == TGSI_FILE_INPUT) {
          mfu->var[i].op = FP_VAR_OP_FP20;
          mfu->var[i].tram_row = src->Index;
+         fp->info.max_tram_row = MAX2(fp->info.max_tram_row, src->Index);
          src0 = fp_alu_src_row(comp);
       } else
          src0 = fp_alu_src_reg(src->Index + comp);
@@ -206,6 +207,7 @@ grate_tgsi_to_fp(struct grate_fp_shader *fp, struct tgsi_parse_context *tgsi)
 
    fp->info.num_inputs = 0;
    fp->info.color_input = -1;
+   fp->info.max_tram_row = 1;
 
    while (!tgsi_parse_end_of_tokens(tgsi)) {
       tgsi_parse_token(tgsi);
