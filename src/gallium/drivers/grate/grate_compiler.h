@@ -12,10 +12,21 @@ struct grate_vpe_shader {
    uint16_t output_mask;
 };
 
+struct grate_fp_info {
+   struct {
+      uint32_t src;
+      uint32_t dst;
+   } inputs[16];
+   int num_inputs;
+   int color_input;
+   int max_tram_row;
+};
+
 struct grate_fp_shader {
    struct list_head fp_instructions;
    struct list_head alu_instructions;
    struct list_head mfu_instructions;
+   struct grate_fp_info info;
 };
 
 void
