@@ -579,6 +579,34 @@ emit_program(struct grate_context *context)
 
    emit_shader(stream, &context->vshader->blob);
    emit_shader(stream, &context->fshader->blob);
+
+   uint32_t cull_face_linker_setup = TGR3D_VAL(CULL_FACE_LINKER_SETUP,
+                                               UNK_18_31, 0x2e38);
+
+   /* depends on cull-face */
+   cull_face_linker_setup |= context->rast->cull_face;
+
+   /* depends on linking */
+   struct grate_fp_info *info = &context->fshader->info;
+   assert(info->num_inputs > 0);
+   cull_face_linker_setup |= TGR3D_VAL(CULL_FACE_LINKER_SETUP,
+                                       LINKER_INST_COUNT,
+                                       info->num_inputs - 1);
+
+   uint32_t linker_insts[3 + info->num_inputs * 2];
+   linker_insts[0] = host1x_opcode_incr(TGR3D_CULL_FACE_LINKER_SETUP, 1);
+   linker_insts[1] = cull_face_linker_setup;
+   linker_insts[2] = host1x_opcode_incr(TGR3D_LINKER_INSTRUCTION(0), info->num_inputs * 2);
+
+   for (int i = 0; i < info->num_inputs; ++i) {
+      linker_insts[3 + i * 2] = info->inputs[i].src;
+      linker_insts[3 + i * 2 + 1] = info->inputs[i].dst;
+   }
+
+   if (context->rast->base.flatshade && info->color_input >= 0)
+      linker_insts[3 + info->color_input * 2 + 1] |= 0xf << 16;
+
+   grate_stream_push_words(stream, linker_insts, ARRAY_SIZE(linker_insts), 0);
 }
 
 void
