@@ -662,8 +662,11 @@ static boolean r600_texture_get_handle(struct pipe_screen* screen,
 			slice_size = rtex->surface.u.legacy.level[0].slice_size;
 		}
 	} else {
+		/* Buffer exports are for the OpenCL interop. */
 		/* Move a suballocated buffer into a non-suballocated allocation. */
-		if (rscreen->ws->buffer_is_suballocated(res->buf)) {
+		if (rscreen->ws->buffer_is_suballocated(res->buf) ||
+		    /* A DMABUF export always fails if the BO is local. */
+		    rtex->resource.flags & RADEON_FLAG_NO_INTERPROCESS_SHARING) {
 			assert(!res->b.is_shared);
 
 			/* Allocate a new buffer with PIPE_BIND_SHARED. */
