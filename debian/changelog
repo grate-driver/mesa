@@ -1,6 +1,7 @@
 mesa (17.3.0-1) UNRELEASED; urgency=medium
 
   * New upstream release.
+  * Bump standards version to 4.1.2.
 
  -- Andreas Boll <andreas.boll.dev@gmail.com>  Wed, 13 Dec 2017 16:30:02 +0100
 
