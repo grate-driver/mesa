@@ -1,2 +1,5 @@
 # fixes:  The commit addresses Meson which is explicitly disabled for 17.3
 ab0809e5529725bd0af6f7b6ce06415020b9d32e meson: fix strtof locale support check
+
+# fixes:  The commit addresses Meson which is explicitly disabled for 17.3
+44fbbd6fd07e5784b05e08e762e54b6c71f95ab1 util: add mesa-sha1 test to meson
