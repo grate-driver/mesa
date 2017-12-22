@@ -1,3 +1,9 @@
+mesa (17.3.1-0ubuntu1) UNRELEASED; urgency=medium
+
+  * New upstream release.
+
+ -- Timo Aaltonen <tjaalton@debian.org>  Fri, 22 Dec 2017 17:29:54 +0200
+
 mesa (17.2.4-0ubuntu2) bionic; urgency=medium
 
   * Import changes from 17.2.2-0ubuntu2
