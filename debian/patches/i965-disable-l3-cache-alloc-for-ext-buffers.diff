@@ -1,0 +1,167 @@
+Subject: [PATCH] i965: Disable L3 cache allocation for external buffers
+From: Chris Wilson <chris@chris-wilson.co.uk>
+Date: 24.10.2017 19:06
+
+Through the use of mocs, we can define the cache usage for any surface
+used by the GPU. In particular, we can request that L3 cache be
+allocated for either a read/write miss so that subsequent reads can be
+fetched from cache rather than memory. A consequence of this is that if
+we allocate a L3/LLC cacheline for a read and the object is changed in
+main memory (e.g. a PCIe write bypassing the CPU) then the next read
+will be serviced from the stale cache and not from the new data in
+memory. This is an issue for external PRIME buffers where we may miss
+the updates entirely if the image is small enough to fit within our
+cache.
+
+Currently, we have a single bit to mark all external buffers so use that
+to tell us when it is unsafe to use a cache override in mocs and
+fallback to the PTE value instead (which should be set to the correct
+cache level to be coherent amongst all active parties: PRIME, scanout and
+render). This may be refined in future to limit the override to buffers
+outside the control of mesa; as buffers being shared between mesa
+clients should be able to coordinate themselves without resolves.
+
+Bugzilla: https://bugs.freedesktop.org/show_bug.cgi?id=101691
+Cc: Kenneth Graunke <kenneth@whitecape.org>
+Cc: Jason Ekstrand <jason@jlekstrand.net>
+Cc: Lyude Paul <lyude@redhat.com>
+Cc: Timo Aalton <tjaalton@ubuntu.com>
+Cc: Ben Widawsky <ben@bwidawsk.net>
+Cc: Daniel Vetter <daniel.vetter@ffwll.ch>
+---
+ src/intel/blorp/blorp.c                          |  1 +
+ src/intel/blorp/blorp.h                          |  1 +
+ src/intel/blorp/blorp_genX_exec.h                |  2 +-
+ src/intel/blorp/blorp_priv.h                     |  1 +
+ src/mesa/drivers/dri/i965/brw_blorp.c            |  1 +
+ src/mesa/drivers/dri/i965/brw_state.h            |  3 ++-
+ src/mesa/drivers/dri/i965/brw_wm_surface_state.c | 16 +++++++++++-----
+ 7 files changed, 18 insertions(+), 7 deletions(-)
+
+--- a/src/intel/blorp/blorp.c
++++ b/src/intel/blorp/blorp.c
+@@ -71,6 +71,7 @@ brw_blorp_surface_info_init(struct blorp
+                        surf->surf->logical_level0_px.array_len));
+ 
+    info->enabled = true;
++   info->external = surf->external;
+ 
+    if (format == ISL_FORMAT_UNSUPPORTED)
+       format = surf->surf->format;
+--- a/src/intel/blorp/blorp.h
++++ b/src/intel/blorp/blorp.h
+@@ -107,6 +107,7 @@ struct blorp_surf
+    enum isl_aux_usage aux_usage;
+ 
+    union isl_color_value clear_color;
++   bool external;
+ };
+ 
+ void
+--- a/src/intel/blorp/blorp_genX_exec.h
++++ b/src/intel/blorp/blorp_genX_exec.h
+@@ -1328,7 +1328,7 @@ blorp_emit_surface_states(struct blorp_b
+          blorp_emit_surface_state(batch, &params->src,
+                                   surface_maps[BLORP_TEXTURE_BT_INDEX],
+                                   surface_offsets[BLORP_TEXTURE_BT_INDEX],
+-                                  NULL, false);
++                                  NULL, params->src.external);
+       }
+    }
+ 
+--- a/src/intel/blorp/blorp_priv.h
++++ b/src/intel/blorp/blorp_priv.h
+@@ -47,6 +47,7 @@ enum {
+ struct brw_blorp_surface_info
+ {
+    bool enabled;
++   bool external;
+ 
+    struct isl_surf surf;
+    struct blorp_address addr;
+--- a/src/mesa/drivers/dri/i965/brw_blorp.c
++++ b/src/mesa/drivers/dri/i965/brw_blorp.c
+@@ -156,6 +156,7 @@ blorp_surf_for_miptree(struct brw_contex
+                                          I915_GEM_DOMAIN_SAMPLER,
+       .write_domain = is_render_target ? I915_GEM_DOMAIN_RENDER : 0,
+    };
++   surf->external = mt->bo->external;
+ 
+    surf->aux_usage = aux_usage;
+ 
+--- a/src/mesa/drivers/dri/i965/brw_state.h
++++ b/src/mesa/drivers/dri/i965/brw_state.h
+@@ -360,6 +360,7 @@ void gen10_init_atoms(struct brw_context
+  * may still respect that.
+  */
+ #define GEN7_MOCS_L3                    1
++#define GEN7_MOCS_PTE                   0
+ 
+ /* Ivybridge only: cache in LLC.
+  * Specifying zero here means to use the PTE values set by the kernel;
+@@ -385,7 +386,7 @@ void gen10_init_atoms(struct brw_context
+  */
+ #define BDW_MOCS_WB  0x78
+ #define BDW_MOCS_WT  0x58
+-#define BDW_MOCS_PTE 0x18
++#define BDW_MOCS_PTE 0x08
+ 
+ /* Skylake: MOCS is now an index into an array of 62 different caching
+  * configurations programmed by the kernel.
+--- a/src/mesa/drivers/dri/i965/brw_wm_surface_state.c
++++ b/src/mesa/drivers/dri/i965/brw_wm_surface_state.c
+@@ -68,12 +68,17 @@ uint32_t tex_mocs[] = {
+ };
+ 
+ uint32_t rb_mocs[] = {
+-   [7] = GEN7_MOCS_L3,
++   [7] = GEN7_MOCS_PTE,
+    [8] = BDW_MOCS_PTE,
+    [9] = SKL_MOCS_PTE,
+    [10] = CNL_MOCS_PTE,
+ };
+ 
++static inline uint32_t get_tex_mocs(struct brw_bo *bo, unsigned int gen)
++{
++	return (bo && bo->external ? rb_mocs : tex_mocs)[gen];
++}
++
+ static void
+ get_isl_surf(struct brw_context *brw, struct intel_mipmap_tree *mt,
+              GLenum target, struct isl_view *view,
+@@ -589,7 +594,7 @@ brw_update_texture_surface(struct gl_con
+          aux_usage = ISL_AUX_USAGE_NONE;
+ 
+       brw_emit_surface_state(brw, mt, mt->target, view, aux_usage,
+-                             tex_mocs[brw->gen],
++                             get_tex_mocs(mt->bo, brw->gen),
+                              surf_offset, surf_index,
+                              I915_GEM_DOMAIN_SAMPLER, 0);
+    }
+@@ -615,7 +620,7 @@ brw_emit_buffer_surface_state(struct brw
+                          .size = buffer_size,
+                          .format = surface_format,
+                          .stride = pitch,
+-                         .mocs = tex_mocs[brw->gen]);
++                         .mocs = get_tex_mocs(bo, brw->gen));
+ 
+    if (bo) {
+       brw_emit_reloc(&brw->batch, *out_offset + brw->isl_dev.ss.addr_offset,
+@@ -1164,7 +1169,7 @@ update_renderbuffer_read_surfaces(struct
+                aux_usage = ISL_AUX_USAGE_NONE;
+ 
+             brw_emit_surface_state(brw, irb->mt, target, view, aux_usage,
+-                                   tex_mocs[brw->gen],
++                                   get_tex_mocs(irb->mt->bo, brw->gen),
+                                    surf_offset, surf_index,
+                                    I915_GEM_DOMAIN_SAMPLER, 0);
+ 
+@@ -1657,7 +1662,7 @@ update_image_surface(struct brw_context
+                                                        view.base_array_layer,
+                                                        view.array_len));
+             brw_emit_surface_state(brw, mt, mt->target, view,
+-                                   ISL_AUX_USAGE_NONE, tex_mocs[brw->gen],
++                                   ISL_AUX_USAGE_NONE, get_tex_mocs(mt->bo, brw->gen),
+                                    surf_offset, surf_index,
+                                    I915_GEM_DOMAIN_SAMPLER,
+                                    access == GL_READ_ONLY ? 0 :

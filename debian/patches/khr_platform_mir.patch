@@ -1,0 +1,82 @@
+--- a/src/egl/main/eglapi.c
++++ b/src/egl/main/eglapi.c
+@@ -404,6 +404,11 @@ _eglGetPlatformDisplayCommon(EGLenum pla
+       dpy = _eglGetSurfacelessDisplay(native_display, attrib_list);
+       break;
+ #endif
++#ifdef HAVE_RS_PLATFORM
++   case EGL_PLATFORM_MIR_KHR:
++      dpy = _eglGetMirDisplay(native_display, attrib_list);
++      break;
++#endif
+    default:
+       RETURN_EGL_ERROR(NULL, EGL_BAD_PARAMETER, NULL);
+    }
+--- a/src/egl/main/egldisplay.c
++++ b/src/egl/main/egldisplay.c
+@@ -599,3 +599,22 @@ _eglGetSurfacelessDisplay(void *native_d
+    return _eglFindDisplay(_EGL_PLATFORM_SURFACELESS, native_display);
+ }
+ #endif /* HAVE_SURFACELESS_PLATFORM */
++
++#ifdef HAVE_RS_PLATFORM
++_EGLDisplay*
++_eglGetMirDisplay(MirConnection *mir_connection,
++                  const EGLint *attrib_list)
++{
++   if (!mir_connection_is_valid(mir_connection)) {
++      _eglError(EGL_BAD_PARAMETER, "eglGetPlatformDisplay");
++   }
++
++   /* EGL_KHR_platform_mir recognizes no attributes. */
++   if (attrib_list != NULL && attrib_list[0] != EGL_NONE) {
++      _eglError(EGL_BAD_ATTRIBUTE, "eglGetPlatformDisplay");
++      return NULL;
++   }
++
++   return _eglFindDisplay(_EGL_PLATFORM_RS, mir_connection);
++}
++#endif /* HAVE_RS_PLATFORM */
+--- a/src/egl/main/egldisplay.h
++++ b/src/egl/main/egldisplay.h
+@@ -288,6 +288,14 @@ _eglGetSurfacelessDisplay(void *native_d
+                           const EGLint *attrib_list);
+ #endif
+ 
++#ifdef HAVE_RS_PLATFORM
++typedef struct MirConnection MirConnection;
++
++_EGLDisplay*
++_eglGetMirDisplay(MirConnection *mir_connection,
++                  const EGLint *attrib_list);
++#endif
++
+ #ifdef __cplusplus
+ }
+ #endif
+--- a/src/egl/main/eglglobals.c
++++ b/src/egl/main/eglglobals.c
+@@ -77,6 +77,9 @@ struct _egl_global _eglGlobal =
+ #ifdef HAVE_SURFACELESS_PLATFORM
+    " EGL_MESA_platform_surfaceless"
+ #endif
++#ifdef HAVE_RS_PLATFORM
++   " EGL_KHR_platform_mir"
++#endif
+    "",
+ 
+    NULL, /* ClientExtensionsString */
+--- a/include/EGL/eglext.h
++++ b/include/EGL/eglext.h
+@@ -297,6 +297,11 @@ EGLAPI EGLBoolean EGLAPIENTRY eglSetDama
+ #define EGL_PLATFORM_X11_SCREEN_KHR       0x31D6
+ #endif /* EGL_KHR_platform_x11 */
+ 
++#ifndef EGL_KHR_platform_mir
++#define EGL_KHR_platform_mir 1
++#define EGL_PLATFORM_MIR_KHR              0x31D9
++#endif /* EGL_KHR_platform_mir */
++
+ #ifndef EGL_KHR_reusable_sync
+ #define EGL_KHR_reusable_sync 1
+ #ifdef KHRONOS_SUPPORT_INT64
