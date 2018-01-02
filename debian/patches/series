@@ -5,4 +5,3 @@
 egl-platform-mir.patch
 egl-platform-rs.patch
 khr_platform_mir.patch
-i965-disable-l3-cache-alloc-for-ext-buffers.diff
