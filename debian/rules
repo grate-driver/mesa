@@ -133,7 +133,7 @@ confflags += \
 	--enable-shared-glapi \
 	--enable-texture-float \
 	--disable-xvmc \
-	--disable-omx \
+	--disable-omx-bellagio \
 	$(confflags_DIRECT_RENDERING) \
 	$(confflags_GBM) \
 	$(confflags_DRI3) \
