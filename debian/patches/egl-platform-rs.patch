@@ -1,7 +1,7 @@
 Index: mesa/configure.ac
 ===================================================================
---- mesa.orig/configure.ac	2017-08-10 16:08:00.456139559 +1000
-+++ mesa/configure.ac	2017-08-10 16:08:00.452139468 +1000
+--- mesa.orig/configure.ac	2018-01-12 10:34:19.529583858 +1100
++++ mesa/configure.ac	2018-01-12 10:34:19.525583889 +1100
 @@ -98,6 +98,7 @@
  PYTHON_MAKO_REQUIRED=0.8.0
  LIBSENSORS_REQUIRED=4.0.0
@@ -10,7 +10,7 @@ Index: mesa/configure.ac
  
  dnl LLVM versions
  LLVM_REQUIRED_GALLIUM=3.3.0
-@@ -1726,6 +1727,9 @@
+@@ -1747,6 +1748,9 @@
      mir)
          PKG_CHECK_MODULES([MIR], [mirclient mir-client-platform-mesa])
          ;;
@@ -20,7 +20,7 @@ Index: mesa/configure.ac
      *)
          AC_MSG_ERROR([platform '$plat' does not exist])
          ;;
-@@ -1757,6 +1761,7 @@
+@@ -1778,6 +1782,7 @@
  AM_CONDITIONAL(HAVE_PLATFORM_SURFACELESS, echo "$platforms" | grep -q 'surfaceless')
  AM_CONDITIONAL(HAVE_PLATFORM_ANDROID, echo "$platforms" | grep -q 'android')
  AM_CONDITIONAL(HAVE_PLATFORM_MIR, echo "$platforms" | grep -q 'mir')
@@ -30,9 +30,9 @@ Index: mesa/configure.ac
  dnl More DRI setup
 Index: mesa/include/EGL/eglplatform.h
 ===================================================================
---- mesa.orig/include/EGL/eglplatform.h	2017-08-10 16:08:00.456139559 +1000
-+++ mesa/include/EGL/eglplatform.h	2017-08-10 16:08:00.452139468 +1000
-@@ -112,6 +112,13 @@
+--- mesa.orig/include/EGL/eglplatform.h	2018-01-12 10:34:19.529583858 +1100
++++ mesa/include/EGL/eglplatform.h	2018-01-12 10:34:19.525583889 +1100
+@@ -111,6 +111,13 @@
  typedef void                   *EGLNativePixmapType;
  typedef MirEGLNativeWindowType  EGLNativeWindowType;
  
@@ -48,9 +48,9 @@ Index: mesa/include/EGL/eglplatform.h
  #if defined(MESA_EGL_NO_X11_HEADERS)
 Index: mesa/src/egl/Makefile.am
 ===================================================================
---- mesa.orig/src/egl/Makefile.am	2017-08-10 16:08:00.456139559 +1000
-+++ mesa/src/egl/Makefile.am	2017-08-10 16:08:00.452139468 +1000
-@@ -110,6 +110,13 @@
+--- mesa.orig/src/egl/Makefile.am	2018-01-12 10:34:19.529583858 +1100
++++ mesa/src/egl/Makefile.am	2018-01-12 10:34:19.525583889 +1100
+@@ -114,6 +114,13 @@
  dri2_backend_FILES += drivers/dri2/platform_mir.c
  endif
  
@@ -66,9 +66,9 @@ Index: mesa/src/egl/Makefile.am
  	-I$(top_builddir)/src/egl/drivers/dri2 \
 Index: mesa/src/egl/drivers/dri2/egl_dri2.c
 ===================================================================
---- mesa.orig/src/egl/drivers/dri2/egl_dri2.c	2017-08-10 16:08:00.456139559 +1000
-+++ mesa/src/egl/drivers/dri2/egl_dri2.c	2017-08-10 16:08:00.452139468 +1000
-@@ -868,6 +868,11 @@
+--- mesa.orig/src/egl/drivers/dri2/egl_dri2.c	2018-01-12 10:34:19.529583858 +1100
++++ mesa/src/egl/drivers/dri2/egl_dri2.c	2018-01-12 10:34:19.525583889 +1100
+@@ -939,6 +939,11 @@
        ret = dri2_initialize_android(drv, disp);
        break;
  #endif
@@ -80,7 +80,7 @@ Index: mesa/src/egl/drivers/dri2/egl_dri2.c
     default:
        _eglLog(_EGL_WARNING, "No EGL platform enabled.");
        return EGL_FALSE;
-@@ -941,6 +946,13 @@
+@@ -1011,6 +1016,13 @@
        }
        break;
  #endif
@@ -94,7 +94,7 @@ Index: mesa/src/egl/drivers/dri2/egl_dri2.c
  #ifdef HAVE_MIR_PLATFORM
     case _EGL_PLATFORM_MIR:
        if (dri2_dpy->own_device) {
-@@ -976,7 +988,9 @@
+@@ -1049,7 +1061,9 @@
      * for the cleanup.
      */
     if (disp->Platform != _EGL_PLATFORM_DRM &&
@@ -107,8 +107,8 @@ Index: mesa/src/egl/drivers/dri2/egl_dri2.c
        free(dri2_dpy->driver_configs);
 Index: mesa/src/egl/drivers/dri2/egl_dri2.h
 ===================================================================
---- mesa.orig/src/egl/drivers/dri2/egl_dri2.h	2017-08-10 16:08:00.456139559 +1000
-+++ mesa/src/egl/drivers/dri2/egl_dri2.h	2017-08-10 16:08:00.452139468 +1000
+--- mesa.orig/src/egl/drivers/dri2/egl_dri2.h	2018-01-12 10:34:19.529583858 +1100
++++ mesa/src/egl/drivers/dri2/egl_dri2.h	2018-01-12 10:34:19.525583889 +1100
 @@ -69,6 +69,10 @@
  #include <mir_toolkit/mesa/native_display.h>
  #endif
@@ -120,7 +120,7 @@ Index: mesa/src/egl/drivers/dri2/egl_dri2.h
  #include "eglconfig.h"
  #include "eglcontext.h"
  #include "egldisplay.h"
-@@ -241,6 +245,11 @@
+@@ -234,6 +238,11 @@
  #ifdef HAVE_MIR_PLATFORM
     MirMesaEGLNativeDisplay *mir_disp;
  #endif
@@ -132,7 +132,7 @@ Index: mesa/src/egl/drivers/dri2/egl_dri2.h
  };
  
  struct dri2_egl_context
-@@ -302,10 +311,10 @@
+@@ -297,10 +306,10 @@
        void *data;
        int data_size;
  #endif
@@ -145,7 +145,7 @@ Index: mesa/src/egl/drivers/dri2/egl_dri2.h
        int                 fd;
        int                 buffer_age;
  #endif
-@@ -333,6 +342,10 @@
+@@ -325,6 +334,10 @@
     } color_buffers[3], *back;
  #endif
  
@@ -156,7 +156,7 @@ Index: mesa/src/egl/drivers/dri2/egl_dri2.h
  #if defined(HAVE_SURFACELESS_PLATFORM)
        __DRIimage           *front;
        unsigned int         visual;
-@@ -435,6 +448,9 @@
+@@ -432,6 +445,9 @@
  EGLBoolean
  dri2_initialize_mir(_EGLDriver *drv, _EGLDisplay *disp);
  
@@ -169,7 +169,7 @@ Index: mesa/src/egl/drivers/dri2/egl_dri2.h
 Index: mesa/src/egl/drivers/dri2/platform_rs.c
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ mesa/src/egl/drivers/dri2/platform_rs.c	2017-08-10 16:37:18.982594770 +1000
++++ mesa/src/egl/drivers/dri2/platform_rs.c	2018-01-12 10:34:39.477433388 +1100
 @@ -0,0 +1,964 @@
 +/*
 + * Copyright © 2016 Canonical, Inc
@@ -440,7 +440,7 @@ Index: mesa/src/egl/drivers/dri2/platform_rs.c
 +      if (sc->state[i] == buffer_state_acquired)
 +      {
 +         int buffer_fd = sc->gbm_buffer_ext->fd(sc->buffers[i]);
-+         if (buffer_fd == dri2_surf->dri_buffers[__DRI_BUFFER_BACK_LEFT]->fd)
++         if (buffer_fd == dri2_surf->local_buffers[__DRI_BUFFER_BACK_LEFT]->fd)
 +         {
 +//            _eglLog(_EGL_DEBUG, "..submitting buffer %p", sc->buffers[i]);
 +            sc->state[i] = buffer_state_submitted;
@@ -545,9 +545,9 @@ Index: mesa/src/egl/drivers/dri2/platform_rs.c
 +
 +   dri2_surf->back = &dri2_surf->color_buffers[buf_slot];
 +   dri2_surf->back->buffer_age = buffer_age;
-+   dri2_surf->dri_buffers[__DRI_BUFFER_BACK_LEFT]->name = 0;
-+   dri2_surf->dri_buffers[__DRI_BUFFER_BACK_LEFT]->fd = buffer_fd;
-+   dri2_surf->dri_buffers[__DRI_BUFFER_BACK_LEFT]->pitch = buffer_stride;
++   dri2_surf->local_buffers[__DRI_BUFFER_BACK_LEFT]->name = 0;
++   dri2_surf->local_buffers[__DRI_BUFFER_BACK_LEFT]->fd = buffer_fd;
++   dri2_surf->local_buffers[__DRI_BUFFER_BACK_LEFT]->pitch = buffer_stride;
 +
 +   return EGL_TRUE;
 +}
@@ -646,15 +646,15 @@ Index: mesa/src/egl/drivers/dri2/platform_rs.c
 +   dri2_surf->base.Width = width;
 +   dri2_surf->base.Height = height;
 +
-+   dri2_surf->dri_buffers[__DRI_BUFFER_FRONT_LEFT] =
-+      calloc(sizeof(*dri2_surf->dri_buffers[0]), 1);
-+   dri2_surf->dri_buffers[__DRI_BUFFER_BACK_LEFT] =
-+      calloc(sizeof(*dri2_surf->dri_buffers[0]), 1);
++   dri2_surf->local_buffers[__DRI_BUFFER_FRONT_LEFT] =
++      calloc(sizeof(*dri2_surf->local_buffers[0]), 1);
++   dri2_surf->local_buffers[__DRI_BUFFER_BACK_LEFT] =
++      calloc(sizeof(*dri2_surf->local_buffers[0]), 1);
 +
-+   dri2_surf->dri_buffers[__DRI_BUFFER_BACK_LEFT]->attachment =
++   dri2_surf->local_buffers[__DRI_BUFFER_BACK_LEFT]->attachment =
 +      __DRI_BUFFER_BACK_LEFT;
 +
-+   dri2_surf->dri_buffers[__DRI_BUFFER_BACK_LEFT]->cpp = get_format_bpp(sc->format);
++   dri2_surf->local_buffers[__DRI_BUFFER_BACK_LEFT]->cpp = get_format_bpp(sc->format);
 +
 +   clear_cached_buffers(dri2_surf);
 +
@@ -724,14 +724,14 @@ Index: mesa/src/egl/drivers/dri2/platform_rs.c
 +   (*dri2_dpy->core->destroyDrawable)(dri2_surf->dri_drawable);
 +
 +   for (i = 0; i < __DRI_BUFFER_COUNT; ++i) {
-+      if (dri2_surf->dri_buffers[i]) {
++      if (dri2_surf->local_buffers[i]) {
 +         if ((i == __DRI_BUFFER_FRONT_LEFT) ||
 +             (i == __DRI_BUFFER_BACK_LEFT)) {
-+            free(dri2_surf->dri_buffers[i]);
++            free(dri2_surf->local_buffers[i]);
 +         }
 +         else {
 +            dri2_dpy->dri2->releaseBuffer(dri2_dpy->dri_screen,
-+                                          dri2_surf->dri_buffers[i]);
++                                          dri2_surf->local_buffers[i]);
 +         }
 +      }
 +   }
@@ -861,29 +861,29 @@ Index: mesa/src/egl/drivers/dri2/platform_rs.c
 +      assert(attachments[i] < __DRI_BUFFER_COUNT);
 +      assert((i/2) < ARRAY_SIZE(dri2_surf->buffers));
 +
-+      if (dri2_surf->dri_buffers[attachments[i]] == NULL) {
++      if (dri2_surf->local_buffers[attachments[i]] == NULL) {
 +         /* Our frame callback must keep these buffers valid */
 +         assert(attachments[i] != __DRI_BUFFER_FRONT_LEFT);
 +         assert(attachments[i] != __DRI_BUFFER_BACK_LEFT);
 +
-+         dri2_surf->dri_buffers[attachments[i]] =
++         dri2_surf->local_buffers[attachments[i]] =
 +            dri2_dpy->dri2->allocateBuffer(dri2_dpy->dri_screen,
 +                  attachments[i], attachments[i+1],
 +                  dri2_surf->base.Width, dri2_surf->base.Height);
 +
-+         if (!dri2_surf->dri_buffers[attachments[i]]) {
++         if (!dri2_surf->local_buffers[attachments[i]]) {
 +            _eglError(EGL_BAD_ALLOC, "Failed to allocate auxiliary buffer");
 +            return NULL;
 +         }
 +      }
 +
 +      memcpy(&dri2_surf->buffers[(i/2)],
-+             dri2_surf->dri_buffers[attachments[i]],
++             dri2_surf->local_buffers[attachments[i]],
 +             sizeof(__DRIbuffer));
 +   }
 +
 +   assert(dri2_surf->base.Type == EGL_PIXMAP_BIT ||
-+          dri2_surf->dri_buffers[__DRI_BUFFER_BACK_LEFT]);
++          dri2_surf->local_buffers[__DRI_BUFFER_BACK_LEFT]);
 +
 +   *out_count = i/2;
 +   if (i == 0)
@@ -1137,8 +1137,8 @@ Index: mesa/src/egl/drivers/dri2/platform_rs.c
 +}
 Index: mesa/src/egl/main/egldisplay.c
 ===================================================================
---- mesa.orig/src/egl/main/egldisplay.c	2017-08-10 16:08:00.456139559 +1000
-+++ mesa/src/egl/main/egldisplay.c	2017-08-10 16:37:05.000000000 +1000
+--- mesa.orig/src/egl/main/egldisplay.c	2018-01-12 10:34:19.529583858 +1100
++++ mesa/src/egl/main/egldisplay.c	2018-01-12 10:34:19.525583889 +1100
 @@ -59,6 +59,9 @@
  #include <dlfcn.h>
  #include <mir_toolkit/mesa/native_display.h>
@@ -1173,8 +1173,8 @@ Index: mesa/src/egl/main/egldisplay.c
        return _EGL_PLATFORM_MIR;
 Index: mesa/src/egl/main/egldisplay.h
 ===================================================================
---- mesa.orig/src/egl/main/egldisplay.h	2017-08-10 16:08:00.456139559 +1000
-+++ mesa/src/egl/main/egldisplay.h	2017-08-10 16:37:05.000000000 +1000
+--- mesa.orig/src/egl/main/egldisplay.h	2018-01-12 10:34:19.529583858 +1100
++++ mesa/src/egl/main/egldisplay.h	2018-01-12 10:34:19.525583889 +1100
 @@ -51,6 +51,7 @@
     _EGL_PLATFORM_HAIKU,
     _EGL_PLATFORM_SURFACELESS,
