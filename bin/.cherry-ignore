@@ -18,3 +18,7 @@ c1ff99fd70cd2ceb2cac4723e4fd5efc93834746 main: Clear shader program data wheneve
 # fixes: The commit addresses earlier commits 40a01c9a0ef and 8d745abc009 which
 #        did not land in branch
 9b0223046668593deb9c0be0b557994bb5218788 egl: pass the dri2_dpy to the $plat_teardown functions
+
+# fixes: The commit addresses earlier commit d50937f137 which did not land in
+#        branch
+78a8b73e7d45f55ced98a148b26247d91f4e0171 vulkan/wsi: free cmd pools
