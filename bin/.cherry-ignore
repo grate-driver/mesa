@@ -7,3 +7,7 @@ ab0809e5529725bd0af6f7b6ce06415020b9d32e meson: fix strtof locale support check
 # stable: The commit is causing a regression
 #         (https://bugs.freedesktop.org/show_bug.cgi?id=103626)
 18fde36ced4279f2577097a1a7d31b55f2f5f141 intel/fs: Use the original destination region for int MUL lowering
+
+# stable: The commit addresses earlier commit 6132992cdb which did not land in
+#         branch
+3d2b157e23c9d66df97d59be6efd1098878cc110 i965/fs: Use UW types when using V immediates
