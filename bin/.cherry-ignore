@@ -14,3 +14,7 @@ ab0809e5529725bd0af6f7b6ce06415020b9d32e meson: fix strtof locale support check
 
 # extra: The commit just references a fix for an additional change in its v2.
 c1ff99fd70cd2ceb2cac4723e4fd5efc93834746 main: Clear shader program data whenever ProgramBinary is called
+
+# fixes: The commit addresses earlier commits 40a01c9a0ef and 8d745abc009 which
+#        did not land in branch
+9b0223046668593deb9c0be0b557994bb5218788 egl: pass the dri2_dpy to the $plat_teardown functions
