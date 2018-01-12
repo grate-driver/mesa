@@ -11,3 +11,6 @@ ab0809e5529725bd0af6f7b6ce06415020b9d32e meson: fix strtof locale support check
 # stable: The commit addresses earlier commit 6132992cdb which did not land in
 #         branch
 3d2b157e23c9d66df97d59be6efd1098878cc110 i965/fs: Use UW types when using V immediates
+
+# extra: The commit just references a fix for an additional change in its v2.
+c1ff99fd70cd2ceb2cac4723e4fd5efc93834746 main: Clear shader program data whenever ProgramBinary is called
