@@ -562,7 +562,30 @@ struct user_sgpr_info {
 	bool indirect_all_descriptor_sets;
 };
 
+static bool needs_view_index_sgpr(struct nir_to_llvm_context *ctx,
+				  gl_shader_stage stage)
+{
+	switch (stage) {
+	case MESA_SHADER_VERTEX:
+		if (ctx->shader_info->info.needs_multiview_view_index ||
+		    (!ctx->options->key.vs.as_es && !ctx->options->key.vs.as_ls && ctx->options->key.has_multiview_view_index))
+			return true;
+		break;
+	case MESA_SHADER_TESS_EVAL:
+		if (ctx->shader_info->info.needs_multiview_view_index || (!ctx->options->key.tes.as_es && ctx->options->key.has_multiview_view_index))
+			return true;
+	case MESA_SHADER_GEOMETRY:
+	case MESA_SHADER_TESS_CTRL:
+		if (ctx->shader_info->info.needs_multiview_view_index)
+			return true;
+	default:
+		break;
+	}
+	return false;
+}
+
 static void allocate_user_sgprs(struct nir_to_llvm_context *ctx,
+				bool needs_view_index,
 				struct user_sgpr_info *user_sgpr_info)
 {
 	memset(user_sgpr_info, 0, sizeof(struct user_sgpr_info));
@@ -615,6 +638,9 @@ static void allocate_user_sgprs(struct nir_to_llvm_context *ctx,
 	default:
 		break;
 	}
+
+	if (needs_view_index)
+		user_sgpr_info->sgpr_count++;
 
 	if (ctx->shader_info->info.needs_push_constants)
 		user_sgpr_info->sgpr_count += 2;
@@ -745,8 +771,8 @@ static void create_function(struct nir_to_llvm_context *ctx,
 	struct user_sgpr_info user_sgpr_info;
 	struct arg_info args = {};
 	LLVMValueRef desc_sets;
-
-	allocate_user_sgprs(ctx, &user_sgpr_info);
+	bool needs_view_index = needs_view_index_sgpr(ctx, stage);
+	allocate_user_sgprs(ctx, needs_view_index, &user_sgpr_info);
 
 	if (user_sgpr_info.need_ring_offsets && !ctx->options->supports_spill) {
 		add_user_sgpr_argument(&args, const_array(ctx->v4i32, 16), &ctx->ring_offsets); /* address of rings */
@@ -764,7 +790,7 @@ static void create_function(struct nir_to_llvm_context *ctx,
 	case MESA_SHADER_VERTEX:
 		radv_define_common_user_sgprs_phase1(ctx, stage, has_previous_stage, previous_stage, &user_sgpr_info, &args, &desc_sets);
 		radv_define_vs_user_sgprs_phase1(ctx, stage, has_previous_stage, previous_stage, &args);
-		if (ctx->shader_info->info.needs_multiview_view_index || (!ctx->options->key.vs.as_es && !ctx->options->key.vs.as_ls && ctx->options->key.has_multiview_view_index))
+		if (needs_view_index)
 			add_user_sgpr_argument(&args, ctx->i32, &ctx->view_index);
 		if (ctx->options->key.vs.as_es)
 			add_sgpr_argument(&args, ctx->i32, &ctx->es2gs_offset); // es2gs offset
@@ -796,7 +822,7 @@ static void create_function(struct nir_to_llvm_context *ctx,
 			add_user_sgpr_argument(&args, ctx->i32, &ctx->tcs_out_offsets); // tcs out offsets
 			add_user_sgpr_argument(&args, ctx->i32, &ctx->tcs_out_layout); // tcs out layout
 			add_user_sgpr_argument(&args, ctx->i32, &ctx->tcs_in_layout); // tcs in layout
-			if (ctx->shader_info->info.needs_multiview_view_index)
+			if (needs_view_index)
 				add_user_sgpr_argument(&args, ctx->i32, &ctx->view_index);
 
 			add_vgpr_argument(&args, ctx->i32, &ctx->tcs_patch_id); // patch id
@@ -811,7 +837,7 @@ static void create_function(struct nir_to_llvm_context *ctx,
 			add_user_sgpr_argument(&args, ctx->i32, &ctx->tcs_out_offsets); // tcs out offsets
 			add_user_sgpr_argument(&args, ctx->i32, &ctx->tcs_out_layout); // tcs out layout
 			add_user_sgpr_argument(&args, ctx->i32, &ctx->tcs_in_layout); // tcs in layout
-			if (ctx->shader_info->info.needs_multiview_view_index)
+			if (needs_view_index)
 				add_user_sgpr_argument(&args, ctx->i32, &ctx->view_index);
 			add_sgpr_argument(&args, ctx->i32, &ctx->oc_lds); // param oc lds
 			add_sgpr_argument(&args, ctx->i32, &ctx->tess_factor_offset); // tess factor offset
@@ -822,8 +848,9 @@ static void create_function(struct nir_to_llvm_context *ctx,
 	case MESA_SHADER_TESS_EVAL:
 		radv_define_common_user_sgprs_phase1(ctx, stage, has_previous_stage, previous_stage, &user_sgpr_info, &args, &desc_sets);
 		add_user_sgpr_argument(&args, ctx->i32, &ctx->tcs_offchip_layout); // tcs offchip layout
-		if (ctx->shader_info->info.needs_multiview_view_index || (!ctx->options->key.tes.as_es && ctx->options->key.has_multiview_view_index))
+		if (needs_view_index)
 			add_user_sgpr_argument(&args, ctx->i32, &ctx->view_index);
+
 		if (ctx->options->key.tes.as_es) {
 			add_sgpr_argument(&args, ctx->i32, &ctx->oc_lds); // OC LDS
 			add_sgpr_argument(&args, ctx->i32, NULL); //
@@ -855,7 +882,7 @@ static void create_function(struct nir_to_llvm_context *ctx,
 				radv_define_vs_user_sgprs_phase1(ctx, stage, has_previous_stage, previous_stage, &args);
 			add_user_sgpr_argument(&args, ctx->i32, &ctx->gsvs_ring_stride); // gsvs stride
 			add_user_sgpr_argument(&args, ctx->i32, &ctx->gsvs_num_entries); // gsvs num entires
-			if (ctx->shader_info->info.needs_multiview_view_index)
+			if (needs_view_index)
 				add_user_sgpr_argument(&args, ctx->i32, &ctx->view_index);
 
 			add_vgpr_argument(&args, ctx->i32, &ctx->gs_vtx_offset[0]); // vtx01
@@ -880,7 +907,7 @@ static void create_function(struct nir_to_llvm_context *ctx,
 			radv_define_vs_user_sgprs_phase1(ctx, stage, has_previous_stage, previous_stage, &args);
 			add_user_sgpr_argument(&args, ctx->i32, &ctx->gsvs_ring_stride); // gsvs stride
 			add_user_sgpr_argument(&args, ctx->i32, &ctx->gsvs_num_entries); // gsvs num entires
-			if (ctx->shader_info->info.needs_multiview_view_index)
+			if (needs_view_index)
 				add_user_sgpr_argument(&args, ctx->i32, &ctx->view_index);
 			add_sgpr_argument(&args, ctx->i32, &ctx->gs2vs_offset); // gs2vs offset
 			add_sgpr_argument(&args, ctx->i32, &ctx->gs_wave_id); // wave id
