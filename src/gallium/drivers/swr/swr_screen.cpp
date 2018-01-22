@@ -1125,7 +1125,6 @@ swr_validate_env_options(struct swr_screen *screen)
 }
 
 
-PUBLIC
 struct pipe_screen *
 swr_create_screen_internal(struct sw_winsys *winsys)
 {
