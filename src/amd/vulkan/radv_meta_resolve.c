@@ -347,7 +347,10 @@ static void radv_pick_resolve_method_images(struct radv_image *src_image,
 					    enum radv_resolve_method *method)
 
 {
-	if (vk_format_is_int(src_image->vk_format))
+	if (src_image->vk_format == VK_FORMAT_R16G16_UNORM ||
+	    src_image->vk_format == VK_FORMAT_R16G16_SNORM)
+		*method = RESOLVE_COMPUTE;
+	else if (vk_format_is_int(src_image->vk_format))
 		*method = RESOLVE_COMPUTE;
 
 	if (dest_image->surface.num_dcc_levels > 0) {
