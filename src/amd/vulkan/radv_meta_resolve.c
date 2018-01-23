@@ -26,6 +26,7 @@
 
 #include "radv_meta.h"
 #include "radv_private.h"
+#include "vk_format.h"
 #include "nir/nir_builder.h"
 #include "sid.h"
 
@@ -346,6 +347,9 @@ static void radv_pick_resolve_method_images(struct radv_image *src_image,
 					    enum radv_resolve_method *method)
 
 {
+	if (vk_format_is_int(src_image->vk_format))
+		*method = RESOLVE_COMPUTE;
+
 	if (dest_image->surface.num_dcc_levels > 0) {
 		*method = RESOLVE_FRAGMENT;
 	} else if (dest_image->surface.micro_tile_mode != src_image->surface.micro_tile_mode) {
