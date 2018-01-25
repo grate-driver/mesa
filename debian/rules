@@ -10,13 +10,19 @@ DEB_HOST_ARCH      ?= $(shell dpkg-architecture -qDEB_HOST_ARCH)
 DEB_HOST_ARCH_OS   ?= $(shell dpkg-architecture -qDEB_HOST_ARCH_OS)
 DEB_HOST_ARCH_CPU  ?= $(shell dpkg-architecture -qDEB_HOST_ARCH_CPU)
 
-ifeq (,$(filter $(DEB_HOST_ARCH), armhf))
+ifeq (,$(filter $(DEB_HOST_ARCH), armhf sh3 sh4))
 buildflags = \
 	$(shell DEB_CFLAGS_MAINT_APPEND=-Wall DEB_CXXFLAGS_MAINT_APPEND=-Wall dpkg-buildflags --export=configure)
 else
-# Workaround for a variant of LP: #725126
-buildflags = \
+  ifneq (,$(filter $(DEB_HOST_ARCH), armhf))
+  # Workaround for a variant of LP: #725126
+  buildflags = \
 	$(shell DEB_CFLAGS_MAINT_APPEND="-Wall -fno-optimize-sibling-calls" DEB_CXXFLAGS_MAINT_APPEND="-Wall -fno-optimize-sibling-calls" dpkg-buildflags --export=configure)
+  else
+  # Workaround for https://gcc.gnu.org/bugzilla/show_bug.cgi?id=83143
+  buildflags = \
+	$(shell DEB_CFLAGS_MAINT_APPEND="-Wall -O1" DEB_CXXFLAGS_MAINT_APPEND="-Wall -O1" dpkg-buildflags --export=configure)
+  endif
 endif
 
 # keep a list of files we don't install (yet), but since it's a bit
