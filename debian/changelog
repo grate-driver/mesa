@@ -1,6 +1,7 @@
 mesa (18.0.0~rc2-1) UNRELEASED; urgency=medium
 
   * New upstream release.
+  * libgbm1.symbols: Updated.
 
  -- Timo Aaltonen <tjaalton@debian.org>  Thu, 25 Jan 2018 11:55:37 +0200
 
