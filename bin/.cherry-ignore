@@ -22,3 +22,7 @@ c1ff99fd70cd2ceb2cac4723e4fd5efc93834746 main: Clear shader program data wheneve
 # fixes: The commit addresses earlier commit d50937f137 which did not land in
 #        branch
 78a8b73e7d45f55ced98a148b26247d91f4e0171 vulkan/wsi: free cmd pools
+
+# stable: The commit addresses earlier commit 6d87500fe12 which did not land in
+#         branch
+525b4f7548462bfc2e82f2d1f04f61ce6854a3c5 i965: Accept CONTEXT_ATTRIB_PRIORITY for brwCreateContext
