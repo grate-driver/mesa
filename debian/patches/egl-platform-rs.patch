@@ -1,8 +1,6 @@
-Index: mesa/configure.ac
-===================================================================
---- mesa.orig/configure.ac	2018-01-12 10:34:19.529583858 +1100
-+++ mesa/configure.ac	2018-01-12 10:34:19.525583889 +1100
-@@ -98,6 +98,7 @@
+--- a/configure.ac
++++ b/configure.ac
+@@ -98,6 +98,7 @@ XVMC_REQUIRED=1.0.6
  PYTHON_MAKO_REQUIRED=0.8.0
  LIBSENSORS_REQUIRED=4.0.0
  ZLIB_REQUIRED=1.2.3
@@ -10,7 +8,7 @@ Index: mesa/configure.ac
  
  dnl LLVM versions
  LLVM_REQUIRED_GALLIUM=3.3.0
-@@ -1747,6 +1748,9 @@
+@@ -1810,6 +1811,9 @@ for plat in $platforms; do
      mir)
          PKG_CHECK_MODULES([MIR], [mirclient mir-client-platform-mesa])
          ;;
@@ -20,7 +18,7 @@ Index: mesa/configure.ac
      *)
          AC_MSG_ERROR([platform '$plat' does not exist])
          ;;
-@@ -1778,6 +1782,7 @@
+@@ -1841,6 +1845,7 @@ AM_CONDITIONAL(HAVE_PLATFORM_DRM, echo "
  AM_CONDITIONAL(HAVE_PLATFORM_SURFACELESS, echo "$platforms" | grep -q 'surfaceless')
  AM_CONDITIONAL(HAVE_PLATFORM_ANDROID, echo "$platforms" | grep -q 'android')
  AM_CONDITIONAL(HAVE_PLATFORM_MIR, echo "$platforms" | grep -q 'mir')
@@ -28,11 +26,9 @@ Index: mesa/configure.ac
  
  dnl
  dnl More DRI setup
-Index: mesa/include/EGL/eglplatform.h
-===================================================================
---- mesa.orig/include/EGL/eglplatform.h	2018-01-12 10:34:19.529583858 +1100
-+++ mesa/include/EGL/eglplatform.h	2018-01-12 10:34:19.525583889 +1100
-@@ -111,6 +111,13 @@
+--- a/include/EGL/eglplatform.h
++++ b/include/EGL/eglplatform.h
+@@ -111,6 +111,13 @@ typedef MirEGLNativeDisplayType EGLNativ
  typedef void                   *EGLNativePixmapType;
  typedef MirEGLNativeWindowType  EGLNativeWindowType;
  
@@ -46,11 +42,9 @@ Index: mesa/include/EGL/eglplatform.h
  #elif defined(__unix__) || defined(__APPLE__)
  
  #if defined(MESA_EGL_NO_X11_HEADERS)
-Index: mesa/src/egl/Makefile.am
-===================================================================
---- mesa.orig/src/egl/Makefile.am	2018-01-12 10:34:19.529583858 +1100
-+++ mesa/src/egl/Makefile.am	2018-01-12 10:34:19.525583889 +1100
-@@ -114,6 +114,13 @@
+--- a/src/egl/Makefile.am
++++ b/src/egl/Makefile.am
+@@ -113,6 +113,13 @@ AM_CFLAGS += $(MIR_CFLAGS)
  dri2_backend_FILES += drivers/dri2/platform_mir.c
  endif
  
@@ -64,37 +58,29 @@ Index: mesa/src/egl/Makefile.am
  AM_CFLAGS += \
  	-I$(top_srcdir)/src/loader \
  	-I$(top_builddir)/src/egl/drivers/dri2 \
-Index: mesa/src/egl/drivers/dri2/egl_dri2.c
-===================================================================
---- mesa.orig/src/egl/drivers/dri2/egl_dri2.c	2018-01-12 10:34:19.529583858 +1100
-+++ mesa/src/egl/drivers/dri2/egl_dri2.c	2018-01-12 10:34:19.525583889 +1100
-@@ -939,6 +939,11 @@
+--- a/src/egl/drivers/dri2/egl_dri2.c
++++ b/src/egl/drivers/dri2/egl_dri2.c
+@@ -929,6 +929,9 @@ dri2_initialize(_EGLDriver *drv, _EGLDis
+    case _EGL_PLATFORM_ANDROID:
        ret = dri2_initialize_android(drv, disp);
        break;
- #endif
-+#ifdef HAVE_RS_PLATFORM
 +   case _EGL_PLATFORM_RS:
 +      ret = dri2_initialize_rs(drv, disp);
 +      break;
-+#endif
     default:
-       _eglLog(_EGL_WARNING, "No EGL platform enabled.");
+       unreachable("Callers ensure we cannot get here.");
        return EGL_FALSE;
-@@ -1011,6 +1016,13 @@
-       }
+@@ -999,6 +1002,9 @@ dri2_display_destroy(_EGLDisplay *disp)
+    case _EGL_PLATFORM_WAYLAND:
+       dri2_teardown_wayland(dri2_dpy);
        break;
- #endif
-+#ifdef HAVE_RS_PLATFORM
 +   case _EGL_PLATFORM_RS:
-+      if (dri2_dpy->own_device) {
-+         gbm_device_destroy(&dri2_dpy->gbm_dri->base);
-+      }
++      dri2_teardown_rs(dri2_dpy);
 +      break;
-+#endif
- #ifdef HAVE_MIR_PLATFORM
-    case _EGL_PLATFORM_MIR:
-       if (dri2_dpy->own_device) {
-@@ -1049,7 +1061,9 @@
+    default:
+       /* TODO: add teardown for other platforms */
+       break;
+@@ -1009,7 +1015,9 @@ dri2_display_destroy(_EGLDisplay *disp)
      * for the cleanup.
      */
     if (disp->Platform != _EGL_PLATFORM_DRM &&
@@ -105,11 +91,9 @@ Index: mesa/src/egl/drivers/dri2/egl_dri2.c
        for (unsigned i = 0; dri2_dpy->driver_configs[i]; i++)
           free((__DRIconfig *) dri2_dpy->driver_configs[i]);
        free(dri2_dpy->driver_configs);
-Index: mesa/src/egl/drivers/dri2/egl_dri2.h
-===================================================================
---- mesa.orig/src/egl/drivers/dri2/egl_dri2.h	2018-01-12 10:34:19.529583858 +1100
-+++ mesa/src/egl/drivers/dri2/egl_dri2.h	2018-01-12 10:34:19.525583889 +1100
-@@ -69,6 +69,10 @@
+--- a/src/egl/drivers/dri2/egl_dri2.h
++++ b/src/egl/drivers/dri2/egl_dri2.h
+@@ -69,6 +69,10 @@ struct zwp_linux_dmabuf_v1;
  #include <mir_toolkit/mesa/native_display.h>
  #endif
  
@@ -120,7 +104,7 @@ Index: mesa/src/egl/drivers/dri2/egl_dri2.h
  #include "eglconfig.h"
  #include "eglcontext.h"
  #include "egldisplay.h"
-@@ -234,6 +238,11 @@
+@@ -237,6 +241,11 @@ struct dri2_egl_display
  #ifdef HAVE_MIR_PLATFORM
     MirMesaEGLNativeDisplay *mir_disp;
  #endif
@@ -132,7 +116,7 @@ Index: mesa/src/egl/drivers/dri2/egl_dri2.h
  };
  
  struct dri2_egl_context
-@@ -297,10 +306,10 @@
+@@ -300,10 +309,10 @@ struct dri2_egl_surface
        void *data;
        int data_size;
  #endif
@@ -145,7 +129,7 @@ Index: mesa/src/egl/drivers/dri2/egl_dri2.h
        int                 fd;
        int                 buffer_age;
  #endif
-@@ -325,6 +334,10 @@
+@@ -328,6 +337,10 @@ struct dri2_egl_surface
     } color_buffers[3], *back;
  #endif
  
@@ -156,21 +140,33 @@ Index: mesa/src/egl/drivers/dri2/egl_dri2.h
  #if defined(HAVE_SURFACELESS_PLATFORM)
        __DRIimage           *front;
        unsigned int         visual;
-@@ -432,6 +445,9 @@
- EGLBoolean
- dri2_initialize_mir(_EGLDriver *drv, _EGLDisplay *disp);
+@@ -382,6 +395,9 @@ dri2_load_driver(_EGLDisplay *disp);
+ void
+ dri2_setup_screen(_EGLDisplay *disp);
  
 +EGLBoolean
 +dri2_initialize_rs(_EGLDriver *drv, _EGLDisplay *disp);
 +
  void
- dri2_flush_drawable_for_swapbuffers(_EGLDisplay *disp, _EGLSurface *draw);
+ dri2_setup_swap_interval(_EGLDisplay *disp, int max_swap_interval);
  
-Index: mesa/src/egl/drivers/dri2/platform_rs.c
-===================================================================
---- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ mesa/src/egl/drivers/dri2/platform_rs.c	2018-01-12 10:34:39.477433388 +1100
-@@ -0,0 +1,964 @@
+@@ -454,6 +470,13 @@ void
+ dri2_teardown_mir(struct dri2_egl_display *dri2_dpy);
+ #endif
+ 
++#ifdef HAVE_RS_PLATFORM
++EGLBoolean
++dri2_initialize_rs(_EGLDriver *drv, _EGLDisplay *disp);
++void
++dri2_teardown_rs(struct dri2_egl_display *dri2_dpy);
++#endif
++
+ #ifdef HAVE_WAYLAND_PLATFORM
+ EGLBoolean
+ dri2_initialize_wayland(_EGLDriver *drv, _EGLDisplay *disp);
+--- /dev/null
++++ b/src/egl/drivers/dri2/platform_rs.c
+@@ -0,0 +1,971 @@
 +/*
 + * Copyright © 2016 Canonical, Inc
 + *
@@ -1135,10 +1131,15 @@ Index: mesa/src/egl/drivers/dri2/platform_rs.c
 +
 +   return EGL_FALSE;
 +}
-Index: mesa/src/egl/main/egldisplay.c
-===================================================================
---- mesa.orig/src/egl/main/egldisplay.c	2018-01-12 10:34:19.529583858 +1100
-+++ mesa/src/egl/main/egldisplay.c	2018-01-12 10:34:19.525583889 +1100
++
++void
++dri2_teardown_rs(struct dri2_egl_display *dri2_dpy)
++{
++   if (dri2_dpy->own_device)
++      gbm_device_destroy(&dri2_dpy->gbm_dri->base);
++}
+--- a/src/egl/main/egldisplay.c
++++ b/src/egl/main/egldisplay.c
 @@ -59,6 +59,9 @@
  #include <dlfcn.h>
  #include <mir_toolkit/mesa/native_display.h>
@@ -1149,7 +1150,7 @@ Index: mesa/src/egl/main/egldisplay.c
  
  /**
   * Map --with-platforms names to platform types.
-@@ -73,7 +76,8 @@
+@@ -73,7 +76,8 @@ static const struct {
     { _EGL_PLATFORM_ANDROID, "android" },
     { _EGL_PLATFORM_HAIKU, "haiku" },
     { _EGL_PLATFORM_SURFACELESS, "surfaceless" },
@@ -1159,7 +1160,7 @@ Index: mesa/src/egl/main/egldisplay.c
  };
  
  
-@@ -155,6 +159,11 @@
+@@ -155,6 +159,11 @@ _eglNativePlatformDetectNativeDisplay(vo
     if (nativeDisplay == EGL_DEFAULT_DISPLAY)
        return _EGL_INVALID_PLATFORM;
  
@@ -1171,11 +1172,9 @@ Index: mesa/src/egl/main/egldisplay.c
  #ifdef HAVE_MIR_PLATFORM
     if (_mir_display_is_valid(nativeDisplay))
        return _EGL_PLATFORM_MIR;
-Index: mesa/src/egl/main/egldisplay.h
-===================================================================
---- mesa.orig/src/egl/main/egldisplay.h	2018-01-12 10:34:19.529583858 +1100
-+++ mesa/src/egl/main/egldisplay.h	2018-01-12 10:34:19.525583889 +1100
-@@ -51,6 +51,7 @@
+--- a/src/egl/main/egldisplay.h
++++ b/src/egl/main/egldisplay.h
+@@ -51,6 +51,7 @@ enum _egl_platform_type {
     _EGL_PLATFORM_HAIKU,
     _EGL_PLATFORM_SURFACELESS,
     _EGL_PLATFORM_MIR,

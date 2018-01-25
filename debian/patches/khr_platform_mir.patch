@@ -1,6 +1,6 @@
 --- a/src/egl/main/eglapi.c
 +++ b/src/egl/main/eglapi.c
-@@ -404,6 +404,11 @@ _eglGetPlatformDisplayCommon(EGLenum pla
+@@ -403,6 +403,11 @@ _eglGetPlatformDisplayCommon(EGLenum pla
        dpy = _eglGetSurfacelessDisplay(native_display, attrib_list);
        break;
  #endif
@@ -14,7 +14,7 @@
     }
 --- a/src/egl/main/egldisplay.c
 +++ b/src/egl/main/egldisplay.c
-@@ -599,3 +599,22 @@ _eglGetSurfacelessDisplay(void *native_d
+@@ -600,3 +600,22 @@ _eglGetSurfacelessDisplay(void *native_d
     return _eglFindDisplay(_EGL_PLATFORM_SURFACELESS, native_display);
  }
  #endif /* HAVE_SURFACELESS_PLATFORM */
@@ -39,8 +39,8 @@
 +#endif /* HAVE_RS_PLATFORM */
 --- a/src/egl/main/egldisplay.h
 +++ b/src/egl/main/egldisplay.h
-@@ -288,6 +288,14 @@ _eglGetSurfacelessDisplay(void *native_d
-                           const EGLint *attrib_list);
+@@ -294,6 +294,14 @@ _eglGetSurfacelessDisplay(void *native_d
+                           const EGLAttrib *attrib_list);
  #endif
  
 +#ifdef HAVE_RS_PLATFORM
@@ -65,10 +65,10 @@
 +#endif
     "",
  
-    NULL, /* ClientExtensionsString */
+    .ClientExtensionString = NULL,
 --- a/include/EGL/eglext.h
 +++ b/include/EGL/eglext.h
-@@ -297,6 +297,11 @@ EGLAPI EGLBoolean EGLAPIENTRY eglSetDama
+@@ -306,6 +306,11 @@ EGLAPI EGLBoolean EGLAPIENTRY eglSetDama
  #define EGL_PLATFORM_X11_SCREEN_KHR       0x31D6
  #endif /* EGL_KHR_platform_x11 */
  
