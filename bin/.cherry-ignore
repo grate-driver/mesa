@@ -26,3 +26,7 @@ c1ff99fd70cd2ceb2cac4723e4fd5efc93834746 main: Clear shader program data wheneve
 # stable: The commit addresses earlier commit 6d87500fe12 which did not land in
 #         branch
 525b4f7548462bfc2e82f2d1f04f61ce6854a3c5 i965: Accept CONTEXT_ATTRIB_PRIORITY for brwCreateContext
+
+# stable: The commit depends on earlier commit a4be2bcee2 which did not land in
+#         branch
+a29d63ecf71546c4798c609e37810f0ec81793d8 swr: refactor swr_create_screen to allow for proper cleanup on error
