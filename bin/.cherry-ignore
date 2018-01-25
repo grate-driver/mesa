@@ -49,3 +49,7 @@ e85aaec1489b00f24ebef4ae5b1da598091275e1 anv/cmd_buffer: Move dirty bits into an
 95ff2322948692f5f7b1d444aabe878fba53304c anv/cmd_buffer: Move dynamic state to graphics state
 38ec78049f69821091a2d42b0f457a1b044d4273 anv/cmd_buffer: Move num_workgroups to compute state
 4064fe59e7144fa822568543cfcc043387645d4e anv/cmd_buffer: Move gen7 index buffer state to graphics state
+
+# fixes: The commit requires earlier commit 49d035122ee which did not land in
+#        branch
+766589d89a211e67f313e8cb38f2d05b09975f96 radv: fix sample_mask_in loading. (v3.1)
