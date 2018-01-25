@@ -4,6 +4,7 @@ mesa (18.0.0~rc2-1) UNRELEASED; urgency=medium
   * libgbm1.symbols: Updated.
   * rules: Use -O1 for sh3 & sh4, thanks John Paul Adrian Glaubitz!
     (Closes:# 887444)
+  * rules: Fix hurd FTBFS, thanks Samuel Thibault! (Closes: #888047)
 
  -- Timo Aaltonen <tjaalton@debian.org>  Thu, 25 Jan 2018 11:55:37 +0200
 

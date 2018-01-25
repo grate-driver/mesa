@@ -32,16 +32,20 @@ include debian/not-installed
 DRI_DRIVERS =
 GALLIUM_DRIVERS =
 VULKAN_DRIVERS =
-EGL_PLATFORMS = x11,surfaceless
 
 confflags_DRI3 = --disable-dri3
 
 # hurd doesn't do direct rendering
 ifeq ($(DEB_HOST_ARCH_OS), hurd)
+	EGL_PLATFORMS = x11
+
 	confflags_DIRECT_RENDERING = --disable-driglx-direct
 	confflags_GBM = --disable-gbm
 	DRI_DRIVERS = swrast
+	with_libva = 
 else
+	EGL_PLATFORMS = x11,surfaceless
+
   ifeq ($(DEB_HOST_ARCH_OS), linux)
 	confflags_DRI3 = --enable-dri3
 	# Gallium drivers which require kernel support, not yet ported to non-Linux
@@ -114,6 +118,7 @@ else
 	confflags_GALLIUM += --enable-va
 	confflags_GALLIUM += --enable-gallium-extra-hud
 	confflags_GALLIUM += --enable-lmsensors
+	with_libva = ,libva
 endif
 
 # Disable assembly usage on x32 otherwise Mesa defaults to x86_64 assembly
@@ -233,7 +238,7 @@ override_dh_makeshlibs:
 	dh_makeshlibs -a -- -c4
 
 %:
-	dh $@ --with quilt,libva \
+	dh $@ --with quilt$(with_libva) \
 		--builddirectory=build/
 
 # For maintainer use only, generate a tarball:
