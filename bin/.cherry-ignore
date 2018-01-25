@@ -53,3 +53,12 @@ e85aaec1489b00f24ebef4ae5b1da598091275e1 anv/cmd_buffer: Move dirty bits into an
 # fixes: The commit requires earlier commit 49d035122ee which did not land in
 #        branch
 766589d89a211e67f313e8cb38f2d05b09975f96 radv: fix sample_mask_in loading. (v3.1)
+
+# stable: The commits address the Meson build that is explicitly disabled in
+#         branch
+c38c60a63c63b02d1030c6c349aa0a73105e10eb meson: fix BSD build
+5781c3d1db4a01e77f416c1685025c4d830ae87d meson: correctly set SYSCONFDIR for loading dirrc
+7c8cfe2d59bfc0dbf718a74b08b6dceaa84f7242 meson: fix missing dependencies
+53f9131205a63fa8b282ab2a7e96c48209447da0 meson: fix getting cflags from pkg-config
+8fae5eddd9982f4586d76471d0196befeb46de24 meson: handle LLVM 'x.x.xgit-revision' versionsi
+
