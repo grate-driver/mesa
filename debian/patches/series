@@ -1,0 +1,7 @@
+07_gallium-fix-build-failure-on-powerpcspe.diff
+
+
+# Ubuntu patches.
+egl-platform-mir.patch
+egl-platform-rs.patch
+khr_platform_mir.patch
