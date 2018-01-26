@@ -1,4 +1,4 @@
-mesa (17.3.1-0ubuntu1) UNRELEASED; urgency=medium
+mesa (17.3.3-0ubuntu1) UNRELEASED; urgency=medium
 
   * New upstream release.
   * patches: Drop upstreamed patch, refresh egl-platform-mir.patch.
