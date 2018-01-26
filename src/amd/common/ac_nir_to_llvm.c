@@ -1517,23 +1517,13 @@ static LLVMValueRef emit_bitfield_insert(struct ac_llvm_context *ctx,
 static LLVMValueRef emit_pack_half_2x16(struct ac_llvm_context *ctx,
 					LLVMValueRef src0)
 {
-	LLVMValueRef const16 = LLVMConstInt(ctx->i32, 16, false);
-	int i;
 	LLVMValueRef comp[2];
 
 	src0 = ac_to_float(ctx, src0);
 	comp[0] = LLVMBuildExtractElement(ctx->builder, src0, ctx->i32_0, "");
 	comp[1] = LLVMBuildExtractElement(ctx->builder, src0, ctx->i32_1, "");
-	for (i = 0; i < 2; i++) {
-		comp[i] = LLVMBuildFPTrunc(ctx->builder, comp[i], ctx->f16, "");
-		comp[i] = LLVMBuildBitCast(ctx->builder, comp[i], ctx->i16, "");
-		comp[i] = LLVMBuildZExt(ctx->builder, comp[i], ctx->i32, "");
-	}
 
-	comp[1] = LLVMBuildShl(ctx->builder, comp[1], const16, "");
-	comp[0] = LLVMBuildOr(ctx->builder, comp[0], comp[1], "");
-
-	return comp[0];
+	return ac_build_cvt_pkrtz_f16(ctx, comp);
 }
 
 static LLVMValueRef emit_unpack_half_2x16(struct ac_llvm_context *ctx,
@@ -3083,6 +3073,7 @@ static LLVMValueRef visit_load_var(struct ac_nir_context *ctx,
 	LLVMValueRef indir_index;
 	LLVMValueRef ret;
 	unsigned const_index;
+	unsigned stride = instr->variables[0]->var->data.compact ? 1 : 4;
 	bool vs_in = ctx->stage == MESA_SHADER_VERTEX &&
 	             instr->variables[0]->var->data.mode == nir_var_shader_in;
 	get_deref_offset(ctx, instr->variables[0], vs_in, NULL, NULL,
@@ -3108,13 +3099,13 @@ static LLVMValueRef visit_load_var(struct ac_nir_context *ctx,
 				count -= chan / 4;
 				LLVMValueRef tmp_vec = ac_build_gather_values_extended(
 						&ctx->ac, ctx->abi->inputs + idx + chan, count,
-						4, false, true);
+						stride, false, true);
 
 				values[chan] = LLVMBuildExtractElement(ctx->ac.builder,
 								       tmp_vec,
 								       indir_index, "");
 			} else
-				values[chan] = ctx->abi->inputs[idx + chan + const_index * 4];
+				values[chan] = ctx->abi->inputs[idx + chan + const_index * stride];
 		}
 		break;
 	case nir_var_local:
@@ -3125,13 +3116,13 @@ static LLVMValueRef visit_load_var(struct ac_nir_context *ctx,
 				count -= chan / 4;
 				LLVMValueRef tmp_vec = ac_build_gather_values_extended(
 						&ctx->ac, ctx->locals + idx + chan, count,
-						4, true, true);
+						stride, true, true);
 
 				values[chan] = LLVMBuildExtractElement(ctx->ac.builder,
 								       tmp_vec,
 								       indir_index, "");
 			} else {
-				values[chan] = LLVMBuildLoad(ctx->ac.builder, ctx->locals[idx + chan + const_index * 4], "");
+				values[chan] = LLVMBuildLoad(ctx->ac.builder, ctx->locals[idx + chan + const_index * stride], "");
 			}
 		}
 		break;
@@ -3153,14 +3144,14 @@ static LLVMValueRef visit_load_var(struct ac_nir_context *ctx,
 				count -= chan / 4;
 				LLVMValueRef tmp_vec = ac_build_gather_values_extended(
 						&ctx->ac, ctx->outputs + idx + chan, count,
-						4, true, true);
+						stride, true, true);
 
 				values[chan] = LLVMBuildExtractElement(ctx->ac.builder,
 								       tmp_vec,
 								       indir_index, "");
 			} else {
 				values[chan] = LLVMBuildLoad(ctx->ac.builder,
-						     ctx->outputs[idx + chan + const_index * 4],
+						     ctx->outputs[idx + chan + const_index * stride],
 						     "");
 			}
 		}
@@ -5456,6 +5447,7 @@ setup_locals(struct ac_nir_context *ctx,
 	nir_foreach_variable(variable, &func->impl->locals) {
 		unsigned attrib_count = glsl_count_attribute_slots(variable->type, false);
 		variable->data.driver_location = ctx->num_locals * 4;
+		variable->data.location_frac = 0;
 		ctx->num_locals += attrib_count;
 	}
 	ctx->locals = malloc(4 * ctx->num_locals * sizeof(LLVMValueRef));
