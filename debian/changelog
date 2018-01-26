@@ -1,11 +1,11 @@
-mesa (17.3.3-0ubuntu1) UNRELEASED; urgency=medium
+mesa (17.3.3-0ubuntu1) bionic; urgency=medium
 
   * New upstream release.
   * patches: Drop upstreamed patch, refresh egl-platform-mir.patch.
   * rules: Fix disabling omx.
   * libgbm1.symbols: Updated.
 
- -- Timo Aaltonen <tjaalton@debian.org>  Fri, 22 Dec 2017 17:29:54 +0200
+ -- Timo Aaltonen <tjaalton@debian.org>  Fri, 26 Jan 2018 14:45:02 +0200
 
 mesa (17.2.4-0ubuntu2) bionic; urgency=medium
 
