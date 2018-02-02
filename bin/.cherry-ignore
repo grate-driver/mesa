@@ -84,3 +84,6 @@ d0343bef6680cc660ba691bbed31a2a1b7449f79 nir: mark unused space in packed_tex_da
 
 # stable: The KHX extension is disabled all together in the stable branches.
 bee9270853c34aa8e4b3d19a125608ee67c87b86 radv: Don't expose VK_KHX_multiview on android.
+
+# fixes: The commit addresses the meson build, which is disabled in branch
+4a0bab1d7f942ad0ac9b98ab34e6a9e4694f3c04 meson: libdrm shouldn't appear in Requires.private: if it wasn't found
