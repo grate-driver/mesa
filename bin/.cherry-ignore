@@ -74,3 +74,7 @@ bcfd78e4489f538e34138269650fc6cbe8c9d75f i965/gen10: Re-enable push constants.
 # stable: The commits are explicit 18.0 nominations
 17423c993d0b083c7a77a404b85788687f5efe36 winsys/amdgpu: fix assertion failure with UVD and VCE rings
 e0e23ea69cab23b9193b1e7c568fd23fc7073071 r600/eg: construct proper rat mask for image/buffers.
+
+# stable: The commits address the initial shader cache support which did not land in branch
+28db950b51274ce296cd625db62abe935d1e4ed9 i965: fix prog_data leak in brw_disk_cache
+b99c88037bf64b033579f237ec287857c53b0ad6 i965: fix disk_cache leak when destroying context
