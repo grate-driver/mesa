@@ -78,3 +78,6 @@ e0e23ea69cab23b9193b1e7c568fd23fc7073071 r600/eg: construct proper rat mask for 
 # stable: The commits address the initial shader cache support which did not land in branch
 28db950b51274ce296cd625db62abe935d1e4ed9 i965: fix prog_data leak in brw_disk_cache
 b99c88037bf64b033579f237ec287857c53b0ad6 i965: fix disk_cache leak when destroying context
+
+# stable: The commit covers nir serialise, which did not land in branch
+d0343bef6680cc660ba691bbed31a2a1b7449f79 nir: mark unused space in packed_tex_data
