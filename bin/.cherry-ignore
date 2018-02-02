@@ -65,3 +65,9 @@ c38c60a63c63b02d1030c6c349aa0a73105e10eb meson: fix BSD build
 # stable: The commit requires earlier commit w41c36c45 which did not land in
 #        branch
 49b0a140a731069e0e4959c65bfd1b597a4fb141 ac/nir: set amdgpu.uniform and invariant.load for UBOs
+
+# stable: The commits address gen10 support which is missing in branch
+ca19ee33d7d39cb89d948b1c983763065975ce5b i965/gen10: Ignore push constant packets during context restore.
+78c125af3904c539ea69bec2dd9fdf7a5162854f anv/gen10: Ignore push constant packets during context restore.
+bcfd78e4489f538e34138269650fc6cbe8c9d75f i965/gen10: Re-enable push constants.
+
