@@ -61,3 +61,7 @@ c38c60a63c63b02d1030c6c349aa0a73105e10eb meson: fix BSD build
 # stable: The commit requires earlier commit 01ab218bbc which did not land in
 #        branch
 0e879aad2fd1dac102c13d680edf455aa068d5df swr/rast: support llvm 3.9 type declarations
+
+# stable: The commit requires earlier commit w41c36c45 which did not land in
+#        branch
+49b0a140a731069e0e4959c65bfd1b597a4fb141 ac/nir: set amdgpu.uniform and invariant.load for UBOs
