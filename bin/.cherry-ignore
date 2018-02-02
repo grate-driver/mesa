@@ -62,3 +62,6 @@ c38c60a63c63b02d1030c6c349aa0a73105e10eb meson: fix BSD build
 53f9131205a63fa8b282ab2a7e96c48209447da0 meson: fix getting cflags from pkg-config
 8fae5eddd9982f4586d76471d0196befeb46de24 meson: handle LLVM 'x.x.xgit-revision' versionsi
 
+# stable: The commit requires earlier commit 01ab218bbc which did not land in
+#        branch
+0e879aad2fd1dac102c13d680edf455aa068d5df swr/rast: support llvm 3.9 type declarations
