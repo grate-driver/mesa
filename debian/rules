@@ -75,7 +75,7 @@ ifneq (,$(filter $(DEB_HOST_ARCH), x32))
 endif
 
 confflags_EGL = --with-platforms="$(EGL_PLATFORMS)"
-confflags_GLES = --enable-gles1 --enable-gles2
+confflags_GLES = --disable-gles1 --enable-gles2
 confflags_GALLIUM += --with-gallium-drivers="$(GALLIUM_DRIVERS)"
 
 confflags += \
