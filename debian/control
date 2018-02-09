@@ -10,7 +10,7 @@ Build-Depends:
  dh-autoreconf,
  quilt (>= 0.40),
  pkg-config,
- libdrm-dev (>= 2.4.82) [!hurd-any],
+ libdrm-dev [!hurd-any],
  libx11-dev,
  x11proto-gl-dev (>= 1.4.14),
  libxxf86vm-dev,
@@ -292,7 +292,7 @@ Architecture: any
 Depends:
  mesa-common-dev (= ${binary:Version}),
  libgl1-mesa-glx (= ${binary:Version}),
- libdrm-dev (>= 2.4.74) [!hurd-any],
+ libdrm-dev [!hurd-any],
  libx11-dev,
  libx11-xcb-dev,
  libxcb-dri3-dev,
@@ -328,7 +328,7 @@ Section: libdevel
 Architecture: any
 Depends:
  libx11-dev,
- libdrm-dev (>= 2.4.65) [!hurd-any],
+ libdrm-dev [!hurd-any],
  ${misc:Depends},
 Multi-Arch: same
 Description: Developer documentation for Mesa
