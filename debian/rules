@@ -28,7 +28,7 @@ GALLIUM_DRIVERS =
 VULKAN_DRIVERS =
 EGL_PLATFORMS = x11,surfaceless
 
-confflags_DRI3 = --disable-dri3
+confflags_DRI3 = --enable-dri3
 
 # hurd doesn't do direct rendering
 ifeq ($(DEB_HOST_ARCH_OS), hurd)
@@ -50,10 +50,7 @@ else
 	endif
 
 # Non-Linux ports also lack *_CLOEXEC and epoll, so wayland isn't ready yet:
-	EGL_PLATFORMS += wayland
-# Likewise, Mir makes no attempt to be portable to random kernels.
-#	EGL_PLATFORMS += mir
-#	EGL_PLATFORMS += rs
+#	EGL_PLATFORMS += wayland
   endif
 
 	EGL_PLATFORMS += drm
