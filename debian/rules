@@ -50,7 +50,7 @@ else
 	endif
 
 # Non-Linux ports also lack *_CLOEXEC and epoll, so wayland isn't ready yet:
-#	EGL_PLATFORMS += wayland
+	EGL_PLATFORMS += wayland
   endif
 
 	EGL_PLATFORMS += drm
@@ -160,16 +160,6 @@ override_dh_install:
   endif
 
 	#find
-
-	# gallium nine:
-	if [ -e "debian/tmp/usr/lib/${DEB_HOST_MULTIARCH}/d3d/" ] && \
-	  [ -d "debian/tmp/usr/include/d3dadapter/" ]; then \
-	  mv debian/tmp/usr/lib/${DEB_HOST_MULTIARCH}/d3d/ \
-	    debian/libgl1-mesa-dri/usr/lib/${DEB_HOST_MULTIARCH}/ && \
-	  install -m755 -d debian/mesa-common-dev/usr/include/d3dadapter/ && \
-	  mv debian/tmp/usr/include/d3dadapter/* \
-	    debian/mesa-common-dev/usr/include/d3dadapter/ ; \
-	fi
 
 	dh_install -a --fail-missing
 
