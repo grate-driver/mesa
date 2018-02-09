@@ -1,0 +1,1 @@
+/usr/lib/${DEB_HOST_MULTIARCH}/mesa-egl/libGLESv2.so /usr/lib/${DEB_HOST_MULTIARCH}/libGLESv2.so
