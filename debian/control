@@ -41,7 +41,6 @@ Build-Depends:
  python-mako,
  flex,
  bison,
- llvm-5.0-dev (>= 1:4.0~) [amd64 arm64 armel armhf i386 kfreebsd-amd64 kfreebsd-i386 mips mips64el mipsel powerpc ppc64 sparc64 ppc64el],
  libelf-dev [amd64 arm64 armel armhf i386 kfreebsd-amd64 kfreebsd-i386 mips mips64el mipsel powerpc ppc64 sparc64 ppc64el],
  libwayland-dev (>= 1.11.0) [linux-any],
  libclang-5.0-dev (>= 1:4.0~) [amd64 arm64 armel armhf i386 kfreebsd-amd64 kfreebsd-i386 mips mips64el mipsel powerpc ppc64 sparc64 ppc64el],

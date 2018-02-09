@@ -93,6 +93,12 @@ confflags += \
 	--enable-texture-float \
 	--disable-xvmc \
 	--disable-omx-bellagio \
+	--disable-nine \
+	--enable-debug \
+	--enable-valgrind=auto \
+	--disable-llvm \
+	--disable-va \
+	--disable-vdpau \
 	$(confflags_DIRECT_RENDERING) \
 	$(confflags_GBM) \
 	$(confflags_DRI3) \
