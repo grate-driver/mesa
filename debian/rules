@@ -93,12 +93,6 @@ else
 	DRI_DRIVERS += swrast
 	confflags_GALLIUM += --disable-gallium-llvm
 
-  # radv needs LLVM and the Vulkan loader, so only build on the subset of
-  # arches where we have LLVM enabled and where the Vulkan loader is built.
-  ifneq (,$(filter $(DEB_HOST_ARCH), amd64 arm64 armel armhf i386 mips mips64el mipsel powerpc ppc64 sparc64 ppc64el))
-	VULKAN_DRIVERS += radeon
-  endif
-
 	confflags_DIRECT_RENDERING = --enable-driglx-direct
 	confflags_GBM = --enable-gbm
 	confflags_GALLIUM += --enable-vdpau

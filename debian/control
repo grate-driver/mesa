@@ -21,7 +21,6 @@ Build-Depends:
  libxext-dev,
  libva-dev (>= 1.6.0) [linux-any kfreebsd-any],
  libvdpau-dev (>= 1.1.1) [linux-any kfreebsd-any],
- libvulkan-dev [amd64 arm64 armel armhf i386 mips mips64el mipsel powerpc ppc64 ppc64el sparc64 x32],
  autoconf,
  automake,
  libtool,
@@ -412,18 +411,5 @@ Description: Mesa VDPAU video acceleration drivers
  post-processing for the supported graphics cards.
  .
  This package enables support for VDPAU for some gallium drivers.
-
-Package: mesa-vulkan-drivers
-Section: libs
-Architecture: amd64 arm64 armel armhf i386 mips mips64el mipsel powerpc ppc64 ppc64el sparc64 x32
-Pre-Depends: ${misc:Pre-Depends}
-Depends:
- libvulkan1,
- ${shlibs:Depends},
- ${misc:Depends}
-Multi-Arch: same
-Description: Mesa Vulkan graphics drivers
- Vulkan is a low-overhead 3D graphics and compute API. This package
- includes Vulkan drivers provided by the Mesa project.
 
 # vim: tw=0
