@@ -87,3 +87,9 @@ bee9270853c34aa8e4b3d19a125608ee67c87b86 radv: Don't expose VK_KHX_multiview on 
 
 # fixes: The commit addresses the meson build, which is disabled in branch
 4a0bab1d7f942ad0ac9b98ab34e6a9e4694f3c04 meson: libdrm shouldn't appear in Requires.private: if it wasn't found
+16bf8138308008f4b889caa827a8291ff72745b8 meson/swr: re-shuffle generated files
+bbef9474fa52d9aba06eeede52558fc5ccb762dd meson/swr: Updated copyright dates
+d7235ef83b92175537e3b538634ffcff29bf0dce meson: Don't confuse the install and search paths for dri drivers
+c75a4e5b465261e982ea31ef875325a3cc30e79d meson: Check for actual LLVM required versions
+105178db8f5d7d45b268c7664388d7db90350704 meson: fix test source name for static glapi
+c74719cf4adae2fa142e154bff56716427d3d992 glapi: fix check_table test for non-shared glapi with meson
