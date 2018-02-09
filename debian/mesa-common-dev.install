@@ -7,4 +7,3 @@ usr/include/GL/glxext.h
 usr/include/GL/glx_mangle.h
 usr/include/GL/internal/dri_interface.h
 usr/lib/*/pkgconfig/dri.pc
-usr/lib/*/pkgconfig/d3d.pc
