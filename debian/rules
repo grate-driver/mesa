@@ -90,18 +90,8 @@ else
     GALLIUM_DRIVERS += r600 r300
   endif
 
-  # LLVM is required for building r300g, radeonsi and llvmpipe drivers.
-  # It's also required for building OpenCL support.
-  ifneq (,$(filter $(DEB_HOST_ARCH), amd64 arm64 armel armhf i386 kfreebsd-amd64 kfreebsd-i386 mips mips64el mipsel powerpc ppc64 sparc64 ppc64el))
-	GALLIUM_DRIVERS += radeonsi
-	confflags_GALLIUM += --enable-llvm
-	confflags_GALLIUM += --enable-opencl --enable-opencl-icd
-	confflags_GALLIUM += ac_cv_path_LLVM_CONFIG=llvm-config-5.0
-	GALLIUM_DRIVERS += swrast
-  else
 	DRI_DRIVERS += swrast
 	confflags_GALLIUM += --disable-gallium-llvm
-  endif
 
   # radv needs LLVM and the Vulkan loader, so only build on the subset of
   # arches where we have LLVM enabled and where the Vulkan loader is built.

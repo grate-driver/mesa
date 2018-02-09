@@ -48,7 +48,6 @@ Build-Depends:
  libelf-dev [amd64 arm64 armel armhf i386 kfreebsd-amd64 kfreebsd-i386 mips mips64el mipsel powerpc ppc64 sparc64 ppc64el],
  libwayland-dev (>= 1.11.0) [linux-any],
  libclang-5.0-dev (>= 1:4.0~) [amd64 arm64 armel armhf i386 kfreebsd-amd64 kfreebsd-i386 mips mips64el mipsel powerpc ppc64 sparc64 ppc64el],
- libclc-dev (>= 0.2.0+git20170330-3) [amd64 arm64 armel armhf i386 kfreebsd-amd64 kfreebsd-i386 mips mips64el mipsel powerpc ppc64 sparc64 ppc64el],
  wayland-protocols (>= 1.9),
  zlib1g-dev,
 Vcs-Git: https://anonscm.debian.org/git/pkg-xorg/lib/mesa.git
@@ -142,7 +141,7 @@ Architecture: any
 Depends:
  libegl1-mesa (= ${binary:Version}),
  libwayland-egl1-mesa (= ${binary:Version}) [linux-any],
- libdrm-dev (>= 2.4.74) [!hurd-any],
+ libdrm-dev [!hurd-any],
  x11proto-dri2-dev (>= 2.6),
  x11proto-gl-dev (>= 1.4.14),
  libx11-dev,
@@ -426,23 +425,5 @@ Multi-Arch: same
 Description: Mesa Vulkan graphics drivers
  Vulkan is a low-overhead 3D graphics and compute API. This package
  includes Vulkan drivers provided by the Mesa project.
-
-Package: mesa-opencl-icd
-Section: libs
-Architecture: amd64 arm64 armel armhf i386 kfreebsd-amd64 kfreebsd-i386 mips mips64el mipsel powerpc ppc64 sparc64 ppc64el
-Pre-Depends: ${misc:Pre-Depends}
-Depends:
- libclc-r600 (>= 0.2.0+git20170330-3),
- libclc-amdgcn (>= 0.2.0+git20170330-3),
- ocl-icd-libopencl1 | libopencl1,
- ${shlibs:Depends},
- ${misc:Depends},
-Provides: opencl-icd
-Multi-Arch: same
-Description: free implementation of the OpenCL API -- ICD runtime
- This package contains the mesa implementation of the OpenCL (Open Compute
- Language) library, which is intended for use with an ICD loader. OpenCL
- provides a standardized interface for computational analysis on graphical
- processing units.
 
 # vim: tw=0
