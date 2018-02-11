@@ -1,5 +1,6 @@
 #include <stdio.h>
 
+#include "pipe/p_defines.h"
 #include "util/u_memory.h"
 
 #include "tegra_common.h"
