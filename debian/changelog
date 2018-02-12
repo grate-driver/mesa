@@ -1,10 +1,16 @@
-mesa (18.0.0~rc2-1ubuntu1) UNRELEASED; urgency=medium
+mesa (18.0.0~rc4-1ubuntu1) UNRELEASED; urgency=medium
 
   * Merge with Debian experimental.
   * Stop using alternatives, not needed anymore with libglvnd.
   * patches: Mir patches updated.
 
  -- Timo Aaltonen <tjaalton@debian.org>  Fri, 26 Jan 2018 17:52:21 +0200
+
+mesa (18.0.0~rc4-1) experimental; urgency=medium
+
+  * New upstream release candidate.
+
+ -- Timo Aaltonen <tjaalton@debian.org>  Mon, 12 Feb 2018 10:43:32 +0200
 
 mesa (18.0.0~rc2-1) experimental; urgency=medium
 
