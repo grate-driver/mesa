@@ -1,0 +1,126 @@
+Subject: [Mesa-dev] [PATCH] loader_dri3/glx/egl: Reinstate the loader_dri3_vtable get_dri_screen callback
+From: Thomas Hellstrom <thellstrom@vmware.com>
+Date: 09.02.2018 10:37
+To: mesa-dev@lists.freedesktop.org
+
+Removing this callback caused rendering corruption in some multi-screen cases,
+so it is reinstated but without the drawable argument which was never used
+by implementations and was confusing since the drawable could have been
+created with another screen.
+
+Cc: "17.3" mesa-stable@lists.freedesktop.org
+Fixes: 5198e48a0d (loader_dri3/glx/egl: Remove the loader_dri3_vtable get_dri_screen callback)
+Bugzilla: https://bugs.freedesktop.org/show_bug.cgi?id=105013
+Reported-by: Daniel van Vugt <daniel.van.vugt@canonical.com>
+Signed-off-by: Thomas Hellstrom <thellstrom@vmware.com>
+---
+ src/egl/drivers/dri2/platform_x11_dri3.c | 12 ++++++++++++
+ src/glx/dri3_glx.c                       | 11 +++++++++++
+ src/loader/loader_dri3_helper.c          | 12 +++++++++++-
+ src/loader/loader_dri3_helper.h          |  1 +
+ 4 files changed, 35 insertions(+), 1 deletion(-)
+
+diff --git a/src/egl/drivers/dri2/platform_x11_dri3.c b/src/egl/drivers/dri2/platform_x11_dri3.c
+index 6e40eaa596..060b5f83a3 100644
+--- a/src/egl/drivers/dri2/platform_x11_dri3.c
++++ b/src/egl/drivers/dri2/platform_x11_dri3.c
+@@ -75,6 +75,17 @@ egl_dri3_get_dri_context(struct loader_dri3_drawable *draw)
+    return dri2_ctx->dri_context;
+ }
+ 
++static __DRIscreen *
++egl_dri3_get_dri_screen(void)
++{
++   _EGLContext *ctx = _eglGetCurrentContext();
++   struct dri2_egl_context *dri2_ctx;
++   if (!ctx)
++      return NULL;
++   dri2_ctx = dri2_egl_context(ctx);
++   return dri2_egl_display(dri2_ctx->base.Resource.Display)->dri_screen;
++}
++
+ static void
+ egl_dri3_flush_drawable(struct loader_dri3_drawable *draw, unsigned flags)
+ {
+@@ -88,6 +99,7 @@ static const struct loader_dri3_vtable egl_dri3_vtable = {
+    .set_drawable_size = egl_dri3_set_drawable_size,
+    .in_current_context = egl_dri3_in_current_context,
+    .get_dri_context = egl_dri3_get_dri_context,
++   .get_dri_screen = egl_dri3_get_dri_screen,
+    .flush_drawable = egl_dri3_flush_drawable,
+    .show_fps = NULL,
+ };
+diff --git a/src/glx/dri3_glx.c b/src/glx/dri3_glx.c
+index f280a8cef7..016f91b196 100644
+--- a/src/glx/dri3_glx.c
++++ b/src/glx/dri3_glx.c
+@@ -116,6 +116,16 @@ glx_dri3_get_dri_context(struct loader_dri3_drawable *draw)
+    return (gc != &dummyContext) ? dri3Ctx->driContext : NULL;
+ }
+ 
++static __DRIscreen *
++glx_dri3_get_dri_screen(void)
++{
++   struct glx_context *gc = __glXGetCurrentContext();
++   struct dri3_context *pcp = (struct dri3_context *) gc;
++   struct dri3_screen *psc = (struct dri3_screen *) pcp->base.psc;
++
++   return (gc != &dummyContext && psc) ? psc->driScreen : NULL;
++}
++
+ static void
+ glx_dri3_flush_drawable(struct loader_dri3_drawable *draw, unsigned flags)
+ {
+@@ -150,6 +160,7 @@ static const struct loader_dri3_vtable glx_dri3_vtable = {
+    .set_drawable_size = glx_dri3_set_drawable_size,
+    .in_current_context = glx_dri3_in_current_context,
+    .get_dri_context = glx_dri3_get_dri_context,
++   .get_dri_screen = glx_dri3_get_dri_screen,
+    .flush_drawable = glx_dri3_flush_drawable,
+    .show_fps = glx_dri3_show_fps,
+ };
+diff --git a/src/loader/loader_dri3_helper.c b/src/loader/loader_dri3_helper.c
+index fbda3d635c..2e3b6c619e 100644
+--- a/src/loader/loader_dri3_helper.c
++++ b/src/loader/loader_dri3_helper.c
+@@ -1311,6 +1311,7 @@ dri3_get_pixmap_buffer(__DRIdrawable *driDrawable, unsigned int format,
+    xcb_sync_fence_t                     sync_fence;
+    struct xshmfence                     *shm_fence;
+    int                                  fence_fd;
++   __DRIscreen                          *cur_screen;
+ 
+    if (buffer)
+       return buffer;
+@@ -1341,8 +1342,17 @@ dri3_get_pixmap_buffer(__DRIdrawable *driDrawable, unsigned int format,
+    if (!bp_reply)
+       goto no_image;
+ 
++   /* Get the currently-bound screen or revert to using the drawable's screen if
++    * no contexts are currently bound. The latter case is at least necessary for
++    * obs-studio, when using Window Capture (Xcomposite) as a Source.
++    */
++   cur_screen = draw->vtable->get_dri_screen();
++   if (!cur_screen) {
++       cur_screen = draw->dri_screen;
++   }
++
+    buffer->image = loader_dri3_create_image(draw->conn, bp_reply, format,
+-                                            draw->dri_screen, draw->ext->image,
++                                            cur_screen, draw->ext->image,
+                                             buffer);
+    if (!buffer->image)
+       goto no_image;
+diff --git a/src/loader/loader_dri3_helper.h b/src/loader/loader_dri3_helper.h
+index 4ce98b8c59..839cba30df 100644
+--- a/src/loader/loader_dri3_helper.h
++++ b/src/loader/loader_dri3_helper.h
+@@ -99,6 +99,7 @@ struct loader_dri3_vtable {
+    void (*set_drawable_size)(struct loader_dri3_drawable *, int, int);
+    bool (*in_current_context)(struct loader_dri3_drawable *);
+    __DRIcontext *(*get_dri_context)(struct loader_dri3_drawable *);
++   __DRIscreen *(*get_dri_screen)(void);
+    void (*flush_drawable)(struct loader_dri3_drawable *, unsigned);
+    void (*show_fps)(struct loader_dri3_drawable *, uint64_t);
+ };
+-- 2.14.3 _______________________________________________ mesa-dev mailing list mesa-dev@lists.freedesktop.org https://lists.freedesktop.org/mailman/listinfo/mesa-dev
+

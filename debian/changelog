@@ -3,6 +3,8 @@ mesa (18.0.0~rc4-1ubuntu1) UNRELEASED; urgency=medium
   * Merge with Debian experimental.
   * Stop using alternatives, not needed anymore with libglvnd.
   * patches: Mir patches updated.
+  * dri3-reinstate-get_dri_screen-callback.diff: Fix a regression in
+    accelerated video playback. (LP: #1747744)
 
  -- Timo Aaltonen <tjaalton@debian.org>  Fri, 26 Jan 2018 17:52:21 +0200
 
