@@ -123,6 +123,10 @@ Depends:
  ${misc:Depends},
  libgbm1 (= ${binary:Version}) [!hurd-any],
 Provides: libegl-vendor
+Breaks:
+ nvidia-304,
+ nvidia-340 (<= 340.106-0ubuntu1),
+ nvidia-384 (<< 390.25),
 Pre-Depends: ${misc:Pre-Depends}
 Multi-Arch: same
 Description: free implementation of the EGL API -- Mesa vendor library
@@ -197,6 +201,10 @@ Architecture: any
 Depends:
  libgles2,
  ${misc:Depends},
+Breaks:
+ nvidia-304,
+ nvidia-340 (<= 340.106-0ubuntu1),
+ nvidia-384 (<< 390.25),
 Multi-Arch: same
 Description: transitional dummy package
  This is a transitional dummy package, it can be safely removed.
@@ -245,6 +253,9 @@ Depends:
 Provides: libglx-vendor
 Breaks:
  libopengl-perl (<< 0.6704+dfsg-2),
+ nvidia-304,
+ nvidia-340 (<= 340.106-0ubuntu1),
+ nvidia-384 (<< 390.25),
 Pre-Depends: ${misc:Pre-Depends}
 Multi-Arch: same
 Description: free implementation of the OpenGL API -- GLX vendor library

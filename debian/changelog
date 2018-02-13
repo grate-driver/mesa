@@ -5,6 +5,8 @@ mesa (18.0.0~rc4-1ubuntu1) UNRELEASED; urgency=medium
   * patches: Mir patches updated.
   * dri3-reinstate-get_dri_screen-callback.diff: Fix a regression in
     accelerated video playback. (LP: #1747744)
+  * control: Add nvidia-304/340/384 to libegl-mesa0, libgles2-mesa and
+    libglx-mesa0 Breaks.
 
  -- Timo Aaltonen <tjaalton@debian.org>  Fri, 26 Jan 2018 17:52:21 +0200
 
