@@ -5117,7 +5117,7 @@ handle_vs_input_decl(struct nir_to_llvm_context *ctx,
 	variable->data.driver_location = idx * 4;
 
 	for (unsigned i = 0; i < attrib_count; ++i, ++idx) {
-		if (ctx->options->key.vs.instance_rate_inputs & (1u << (index + 1))) {
+		if (ctx->options->key.vs.instance_rate_inputs & (1u << (index + i))) {
 			buffer_index = LLVMBuildAdd(ctx->builder, ctx->abi.instance_id,
 						    ctx->abi.start_instance, "");
 			ctx->shader_info->vs.vgpr_comp_cnt =
