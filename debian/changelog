@@ -1,4 +1,4 @@
-mesa (18.0.0~rc4-1ubuntu1) UNRELEASED; urgency=medium
+mesa (18.0.0~rc4-1ubuntu1) bionic; urgency=medium
 
   * Merge with Debian experimental.
   * Stop using alternatives, not needed anymore with libglvnd.
@@ -8,7 +8,7 @@ mesa (18.0.0~rc4-1ubuntu1) UNRELEASED; urgency=medium
   * control: Add nvidia-304/340/384 to libegl-mesa0, libgles2-mesa and
     libglx-mesa0 Breaks.
 
- -- Timo Aaltonen <tjaalton@debian.org>  Fri, 26 Jan 2018 17:52:21 +0200
+ -- Timo Aaltonen <tjaalton@debian.org>  Tue, 13 Feb 2018 17:56:35 +0200
 
 mesa (18.0.0~rc4-1) experimental; urgency=medium
 
