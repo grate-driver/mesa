@@ -207,13 +207,7 @@ intel_miptree_supports_ccs(struct brw_context *brw,
    if (!brw->mesa_format_supports_render[mt->format])
       return false;
 
-   if (devinfo->gen >= 9) {
-      mesa_format linear_format = _mesa_get_srgb_format_linear(mt->format);
-      const enum isl_format isl_format =
-         brw_isl_format_for_mesa_format(linear_format);
-      return isl_format_supports_ccs_e(&brw->screen->devinfo, isl_format);
-   } else
-      return true;
+   return true;
 }
 
 static bool
@@ -256,7 +250,7 @@ intel_miptree_supports_hiz(const struct brw_context *brw,
  * our HW tends to support more linear formats than sRGB ones, we use this
  * format variant for check for CCS_E compatibility.
  */
-MAYBE_UNUSED static bool
+static bool
 format_ccs_e_compat_with_miptree(const struct gen_device_info *devinfo,
                                  const struct intel_mipmap_tree *mt,
                                  enum isl_format access_format)
@@ -290,12 +284,13 @@ intel_miptree_supports_ccs_e(struct brw_context *brw,
    if (!intel_miptree_supports_ccs(brw, mt))
       return false;
 
-   /* Fast clear can be also used to clear srgb surfaces by using equivalent
-    * linear format. This trick, however, can't be extended to be used with
-    * lossless compression and therefore a check is needed to see if the format
-    * really is linear.
+   /* Many window system buffers are sRGB even if they are never rendered as
+    * sRGB.  For those, we want CCS_E for when sRGBEncode is false.  When the
+    * surface is used as sRGB, we fall back to CCS_D.
     */
-   return _mesa_get_srgb_format_linear(mt->format) == mt->format;
+   mesa_format linear_format = _mesa_get_srgb_format_linear(mt->format);
+   enum isl_format isl_format = brw_isl_format_for_mesa_format(linear_format);
+   return isl_format_supports_ccs_e(&brw->screen->devinfo, isl_format);
 }
 
 /**
@@ -805,11 +800,11 @@ intel_miptree_create_for_bo(struct brw_context *brw,
                             uint32_t height,
                             uint32_t depth,
                             int pitch,
+                            enum isl_tiling tiling,
                             enum intel_miptree_create_flags flags)
 {
    const struct gen_device_info *devinfo = &brw->screen->devinfo;
    struct intel_mipmap_tree *mt;
-   uint32_t tiling, swizzle;
    const GLenum target = depth > 1 ? GL_TEXTURE_2D_ARRAY : GL_TEXTURE_2D;
    const GLenum base_format = _mesa_get_format_base_format(format);
 
@@ -847,12 +842,10 @@ intel_miptree_create_for_bo(struct brw_context *brw,
       return mt;
    }
 
-   brw_bo_get_tiling(bo, &tiling, &swizzle);
-
    /* Nothing will be able to use this miptree with the BO if the offset isn't
     * aligned.
     */
-   if (tiling != I915_TILING_NONE)
+   if (tiling != ISL_TILING_LINEAR)
       assert(offset % 4096 == 0);
 
    /* miptrees can't handle negative pitch.  If you need flipping of images,
@@ -867,7 +860,7 @@ intel_miptree_create_for_bo(struct brw_context *brw,
 
    mt = make_surface(brw, target, format,
                      0, 0, width, height, depth, 1,
-                     1lu << isl_tiling_from_i915_tiling(tiling),
+                     1lu << tiling,
                      ISL_SURF_USAGE_RENDER_TARGET_BIT |
                      ISL_SURF_USAGE_TEXTURE_BIT,
                      0, pitch, bo);
@@ -892,7 +885,8 @@ intel_miptree_create_for_bo(struct brw_context *brw,
 
 static struct intel_mipmap_tree *
 miptree_create_for_planar_image(struct brw_context *brw,
-                                __DRIimage *image, GLenum target)
+                                __DRIimage *image, GLenum target,
+                                enum isl_tiling tiling)
 {
    const struct intel_image_format *f = image->planar_format;
    struct intel_mipmap_tree *planar_mt = NULL;
@@ -914,6 +908,7 @@ miptree_create_for_planar_image(struct brw_context *brw,
                                      image->offsets[index],
                                      width, height, 1,
                                      image->strides[index],
+                                     tiling,
                                      MIPTREE_CREATE_NO_AUX);
       if (mt == NULL)
          return NULL;
@@ -988,8 +983,17 @@ intel_miptree_create_for_dri_image(struct brw_context *brw,
                                    mesa_format format,
                                    bool is_winsys_image)
 {
+   uint32_t bo_tiling, bo_swizzle;
+   brw_bo_get_tiling(image->bo, &bo_tiling, &bo_swizzle);
+
+   const struct isl_drm_modifier_info *mod_info =
+      isl_drm_modifier_get_info(image->modifier);
+
+   const enum isl_tiling tiling =
+      mod_info ? mod_info->tiling : isl_tiling_from_i915_tiling(bo_tiling);
+
    if (image->planar_format && image->planar_format->nplanes > 1)
-      return miptree_create_for_planar_image(brw, image, target);
+      return miptree_create_for_planar_image(brw, image, target, tiling);
 
    if (image->planar_format)
       assert(image->planar_format->planes[0].dri_format == image->dri_format);
@@ -1009,9 +1013,6 @@ intel_miptree_create_for_dri_image(struct brw_context *brw,
 
    if (!brw->ctx.TextureFormatSupported[format])
       return NULL;
-
-   const struct isl_drm_modifier_info *mod_info =
-      isl_drm_modifier_get_info(image->modifier);
 
    enum intel_miptree_create_flags mt_create_flags = 0;
 
@@ -1038,7 +1039,7 @@ intel_miptree_create_for_dri_image(struct brw_context *brw,
    struct intel_mipmap_tree *mt =
       intel_miptree_create_for_bo(brw, image->bo, format,
                                   image->offset, image->width, image->height, 1,
-                                  image->pitch, mt_create_flags);
+                                  image->pitch, tiling, mt_create_flags);
    if (mt == NULL)
       return NULL;
 
@@ -2682,38 +2683,42 @@ enum isl_aux_usage
 intel_miptree_render_aux_usage(struct brw_context *brw,
                                struct intel_mipmap_tree *mt,
                                enum isl_format render_format,
-                               bool blend_enabled)
+                               bool blend_enabled,
+                               bool draw_aux_disabled)
 {
+   struct gen_device_info *devinfo = &brw->screen->devinfo;
+
+   if (draw_aux_disabled)
+      return ISL_AUX_USAGE_NONE;
+
    switch (mt->aux_usage) {
    case ISL_AUX_USAGE_MCS:
       assert(mt->mcs_buf);
       return ISL_AUX_USAGE_MCS;
 
    case ISL_AUX_USAGE_CCS_D:
-      /* If FRAMEBUFFER_SRGB is used on Gen9+ then we need to resolve any of
-       * the single-sampled color renderbuffers because the CCS buffer isn't
-       * supported for SRGB formats. This only matters if FRAMEBUFFER_SRGB is
-       * enabled because otherwise the surface state will be programmed with
-       * the linear equivalent format anyway.
-       */
-      if (isl_format_is_srgb(render_format) &&
-          _mesa_get_srgb_format_linear(mt->format) != mt->format) {
+   case ISL_AUX_USAGE_CCS_E:
+      if (!mt->mcs_buf) {
+         assert(mt->aux_usage == ISL_AUX_USAGE_CCS_D);
          return ISL_AUX_USAGE_NONE;
-      } else if (!mt->mcs_buf) {
-         return ISL_AUX_USAGE_NONE;
-      } else {
-         return ISL_AUX_USAGE_CCS_D;
       }
 
-   case ISL_AUX_USAGE_CCS_E: {
-      /* Lossless compression is not supported for SRGB formats, it
-       * should be impossible to get here with such surfaces.
+      /* gen9 hardware technically supports non-0/1 clear colors with sRGB
+       * formats.  However, there are issues with blending where it doesn't
+       * properly apply the sRGB curve to the clear color when blending.
        */
-      assert(!isl_format_is_srgb(render_format) ||
-             _mesa_get_srgb_format_linear(mt->format) == mt->format);
+      if (devinfo->gen == 9 && blend_enabled &&
+          isl_format_is_srgb(render_format) &&
+          !isl_color_value_is_zero_one(mt->fast_clear_color, render_format))
+         return ISL_AUX_USAGE_NONE;
 
-      return ISL_AUX_USAGE_CCS_E;
-   }
+      if (mt->aux_usage == ISL_AUX_USAGE_CCS_E &&
+          format_ccs_e_compat_with_miptree(&brw->screen->devinfo,
+                                           mt, render_format))
+         return ISL_AUX_USAGE_CCS_E;
+
+      /* Otherwise, we have to fall back to CCS_D */
+      return ISL_AUX_USAGE_CCS_D;
 
    default:
       return ISL_AUX_USAGE_NONE;
@@ -2724,11 +2729,8 @@ void
 intel_miptree_prepare_render(struct brw_context *brw,
                              struct intel_mipmap_tree *mt, uint32_t level,
                              uint32_t start_layer, uint32_t layer_count,
-                             enum isl_format render_format,
-                             bool blend_enabled)
+                             enum isl_aux_usage aux_usage)
 {
-   enum isl_aux_usage aux_usage =
-      intel_miptree_render_aux_usage(brw, mt, render_format, blend_enabled);
    intel_miptree_prepare_access(brw, mt, level, 1, start_layer, layer_count,
                                 aux_usage, aux_usage != ISL_AUX_USAGE_NONE);
 }
@@ -2737,13 +2739,10 @@ void
 intel_miptree_finish_render(struct brw_context *brw,
                             struct intel_mipmap_tree *mt, uint32_t level,
                             uint32_t start_layer, uint32_t layer_count,
-                            enum isl_format render_format,
-                            bool blend_enabled)
+                            enum isl_aux_usage aux_usage)
 {
    assert(_mesa_is_format_color_format(mt->format));
 
-   enum isl_aux_usage aux_usage =
-      intel_miptree_render_aux_usage(brw, mt, render_format, blend_enabled);
    intel_miptree_finish_write(brw, mt, level, start_layer, layer_count,
                               aux_usage);
 }
@@ -3007,7 +3006,7 @@ intel_update_r8stencil(struct brw_context *brw,
       }
    }
 
-   brw_render_cache_set_check_flush(brw, dst->bo);
+   brw_cache_flush_for_read(brw, dst->bo);
    src->r8stencil_needs_update = false;
 }
 

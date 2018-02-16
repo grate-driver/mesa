@@ -230,9 +230,9 @@ gen6_update_renderbuffer_surface(struct brw_context *brw,
    enum isl_format isl_format = brw->mesa_to_isl_render_format[rb_format];
 
    enum isl_aux_usage aux_usage =
-      brw->draw_aux_buffer_disabled[unit] ? ISL_AUX_USAGE_NONE :
       intel_miptree_render_aux_usage(brw, mt, isl_format,
-                                     ctx->Color.BlendEnabled & (1 << unit));
+                                     ctx->Color.BlendEnabled & (1 << unit),
+                                     brw->draw_aux_buffer_disabled[unit]);
 
    struct isl_view view = {
       .format = isl_format,
@@ -441,23 +441,6 @@ swizzle_to_scs(GLenum swizzle, bool need_green_to_blue)
    return (need_green_to_blue && scs == HSW_SCS_GREEN) ? HSW_SCS_BLUE : scs;
 }
 
-static bool
-brw_aux_surface_disabled(const struct brw_context *brw,
-                         const struct intel_mipmap_tree *mt)
-{
-   const struct gl_framebuffer *fb = brw->ctx.DrawBuffer;
-
-   for (unsigned i = 0; i < fb->_NumColorDrawBuffers; i++) {
-      const struct intel_renderbuffer *irb =
-         intel_renderbuffer(fb->_ColorDrawBuffers[i]);
-
-      if (irb && irb->mt == mt)
-         return brw->draw_aux_buffer_disabled[i];
-   }
-
-   return false;
-}
-
 static void
 brw_update_texture_surface(struct gl_context *ctx,
                            unsigned unit,
@@ -587,9 +570,6 @@ brw_update_texture_surface(struct gl_context *ctx,
 
       enum isl_aux_usage aux_usage =
          intel_miptree_texture_aux_usage(brw, mt, format);
-
-      if (brw_aux_surface_disabled(brw, mt))
-         aux_usage = ISL_AUX_USAGE_NONE;
 
       brw_emit_surface_state(brw, mt, mt->target, view, aux_usage,
                              surf_offset, surf_index,
@@ -1133,6 +1113,14 @@ const struct brw_tracked_state brw_renderbuffer_read_surfaces = {
    .emit = update_renderbuffer_read_surfaces,
 };
 
+static bool
+is_depth_texture(struct intel_texture_object *iobj)
+{
+   GLenum base_format = _mesa_get_format_base_format(iobj->_Format);
+   return base_format == GL_DEPTH_COMPONENT ||
+          (base_format == GL_DEPTH_STENCIL && !iobj->base.StencilSampling);
+}
+
 static void
 update_stage_texture_surfaces(struct brw_context *brw,
                               const struct gl_program *prog,
@@ -1159,9 +1147,32 @@ update_stage_texture_surfaces(struct brw_context *brw,
       if (prog->SamplersUsed & (1 << s)) {
          const unsigned unit = prog->SamplerUnits[s];
          const bool used_by_txf = prog->info.textures_used_by_txf & (1 << s);
+         struct gl_texture_object *obj = ctx->Texture.Unit[unit]._Current;
+         struct intel_texture_object *iobj = intel_texture_object(obj);
 
          /* _NEW_TEXTURE */
-         if (ctx->Texture.Unit[unit]._Current) {
+         if (!obj)
+            continue;
+
+         if ((prog->ShadowSamplers & (1 << s)) && !is_depth_texture(iobj)) {
+            /* A programming note for the sample_c message says:
+             *
+             *    "The Surface Format of the associated surface must be
+             *     indicated as supporting shadow mapping as indicated in the
+             *     surface format table."
+             *
+             * Accessing non-depth textures via a sampler*Shadow type is
+             * undefined.  GLSL 4.50 page 162 says:
+             *
+             *    "If a shadow texture call is made to a sampler that does not
+             *     represent a depth texture, then results are undefined."
+             *
+             * We give them a null surface (zeros) for undefined.  We've seen
+             * GPU hangs with color buffers and sample_c, so we try and avoid
+             * those with this hack.
+             */
+            emit_null_surface_state(brw, NULL, surf_offset + s);
+         } else {
             brw_update_texture_surface(ctx, unit, surf_offset + s, for_gather,
                                        used_by_txf, plane);
          }

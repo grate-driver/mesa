@@ -225,8 +225,16 @@ genX(blorp_exec)(struct blorp_batch *batch,
     * data.
     */
    if (params->src.enabled)
-      brw_render_cache_set_check_flush(brw, params->src.addr.buffer);
-   brw_render_cache_set_check_flush(brw, params->dst.addr.buffer);
+      brw_cache_flush_for_read(brw, params->src.addr.buffer);
+   if (params->dst.enabled) {
+      brw_cache_flush_for_render(brw, params->dst.addr.buffer,
+                                 params->dst.view.format,
+                                 params->dst.aux_usage);
+   }
+   if (params->depth.enabled)
+      brw_cache_flush_for_depth(brw, params->depth.addr.buffer);
+   if (params->stencil.enabled)
+      brw_cache_flush_for_depth(brw, params->stencil.addr.buffer);
 
    brw_select_pipeline(brw, BRW_RENDER_PIPELINE);
 
@@ -292,10 +300,13 @@ retry:
                               !params->stencil.enabled;
    brw->ib.index_size = -1;
 
-   if (params->dst.enabled)
-      brw_render_cache_set_add_bo(brw, params->dst.addr.buffer);
+   if (params->dst.enabled) {
+      brw_render_cache_add_bo(brw, params->dst.addr.buffer,
+                              params->dst.view.format,
+                              params->dst.aux_usage);
+   }
    if (params->depth.enabled)
-      brw_render_cache_set_add_bo(brw, params->depth.addr.buffer);
+      brw_depth_cache_add_bo(brw, params->depth.addr.buffer);
    if (params->stencil.enabled)
-      brw_render_cache_set_add_bo(brw, params->stencil.addr.buffer);
+      brw_depth_cache_add_bo(brw, params->stencil.addr.buffer);
 }

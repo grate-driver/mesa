@@ -3485,18 +3485,25 @@ fs_visitor::lower_integer_multiplication()
 
             bool needs_mov = false;
             fs_reg orig_dst = inst->dst;
+            fs_reg low = inst->dst;
             if (orig_dst.is_null() || orig_dst.file == MRF ||
                 regions_overlap(inst->dst, inst->size_written,
                                 inst->src[0], inst->size_read(0)) ||
                 regions_overlap(inst->dst, inst->size_written,
                                 inst->src[1], inst->size_read(1))) {
                needs_mov = true;
-               inst->dst = fs_reg(VGRF, alloc.allocate(dispatch_width / 8),
-                                  inst->dst.type);
+               /* Get a new VGRF but keep the same stride as inst->dst */
+               low = fs_reg(VGRF, alloc.allocate(regs_written(inst)),
+                            inst->dst.type);
+               low.stride = inst->dst.stride;
+               low.offset = inst->dst.offset % REG_SIZE;
             }
-            fs_reg low = inst->dst;
-            fs_reg high(VGRF, alloc.allocate(dispatch_width / 8),
+
+            /* Get a new VGRF but keep the same stride as inst->dst */
+            fs_reg high(VGRF, alloc.allocate(regs_written(inst)),
                         inst->dst.type);
+            high.stride = inst->dst.stride;
+            high.offset = inst->dst.offset % REG_SIZE;
 
             if (devinfo->gen >= 7) {
                if (inst->src[1].file == IMM) {
@@ -3517,13 +3524,13 @@ fs_visitor::lower_integer_multiplication()
                         inst->src[1]);
             }
 
-            ibld.ADD(subscript(inst->dst, BRW_REGISTER_TYPE_UW, 1),
+            ibld.ADD(subscript(low, BRW_REGISTER_TYPE_UW, 1),
                      subscript(low, BRW_REGISTER_TYPE_UW, 1),
                      subscript(high, BRW_REGISTER_TYPE_UW, 0));
 
             if (needs_mov || inst->conditional_mod) {
                set_condmod(inst->conditional_mod,
-                           ibld.MOV(orig_dst, inst->dst));
+                           ibld.MOV(orig_dst, low));
             }
          }
 

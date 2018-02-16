@@ -734,6 +734,6 @@ void st_init_driver_functions(struct pipe_screen *screen,
    functions->UpdateState = st_invalidate_state;
    functions->QueryMemoryInfo = st_query_memory_info;
    functions->SetBackgroundContext = st_set_background_context;
-   functions->GetDriverUuid = st_get_device_uuid;
-   functions->GetDeviceUuid = st_get_driver_uuid;
+   functions->GetDriverUuid = st_get_driver_uuid;
+   functions->GetDeviceUuid = st_get_device_uuid;
 }

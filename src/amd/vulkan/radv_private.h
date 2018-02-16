@@ -449,8 +449,9 @@ struct radv_meta_state {
 	} cleari;
 
 	struct {
-		VkPipeline                                pipeline;
-		VkRenderPass                              pass;
+		VkPipelineLayout                          p_layout;
+		VkPipeline                                pipeline[NUM_META_FS_KEYS];
+		VkRenderPass                              pass[NUM_META_FS_KEYS];
 	} resolve;
 
 	struct {
@@ -474,12 +475,14 @@ struct radv_meta_state {
 	} resolve_fragment;
 
 	struct {
+		VkPipelineLayout                          p_layout;
 		VkPipeline                                decompress_pipeline;
 		VkPipeline                                resummarize_pipeline;
 		VkRenderPass                              pass;
 	} depth_decomp[1 + MAX_SAMPLES_LOG2];
 
 	struct {
+		VkPipelineLayout                          p_layout;
 		VkPipeline                                cmask_eliminate_pipeline;
 		VkPipeline                                fmask_decompress_pipeline;
 		VkRenderPass                              pass;
@@ -915,7 +918,6 @@ void si_emit_wait_fence(struct radeon_winsys_cs *cs,
 			uint64_t va, uint32_t ref,
 			uint32_t mask);
 void si_cs_emit_cache_flush(struct radeon_winsys_cs *cs,
-			    bool predicated,
 			    enum chip_class chip_class,
 			    uint32_t *fence_ptr, uint64_t va,
 			    bool is_mec,
@@ -1129,6 +1131,7 @@ struct radv_pipeline {
 			struct radv_gs_state gs;
 			uint32_t db_shader_control;
 			uint32_t shader_z_format;
+			uint32_t spi_baryc_cntl;
 			unsigned prim;
 			unsigned gs_out;
 			uint32_t vgt_gs_mode;

@@ -4,10 +4,6 @@ ab0809e5529725bd0af6f7b6ce06415020b9d32e meson: fix strtof locale support check
 # fixes:  The commit addresses Meson which is explicitly disabled for 17.3
 44fbbd6fd07e5784b05e08e762e54b6c71f95ab1 util: add mesa-sha1 test to meson
 
-# stable: The commit is causing a regression
-#         (https://bugs.freedesktop.org/show_bug.cgi?id=103626)
-18fde36ced4279f2577097a1a7d31b55f2f5f141 intel/fs: Use the original destination region for int MUL lowering
-
 # stable: The commit addresses earlier commit 6132992cdb which did not land in
 #         branch
 3d2b157e23c9d66df97d59be6efd1098878cc110 i965/fs: Use UW types when using V immediates
@@ -22,3 +18,78 @@ c1ff99fd70cd2ceb2cac4723e4fd5efc93834746 main: Clear shader program data wheneve
 # fixes: The commit addresses earlier commit d50937f137 which did not land in
 #        branch
 78a8b73e7d45f55ced98a148b26247d91f4e0171 vulkan/wsi: free cmd pools
+
+# stable: The commit addresses earlier commit 6d87500fe12 which did not land in
+#         branch
+525b4f7548462bfc2e82f2d1f04f61ce6854a3c5 i965: Accept CONTEXT_ATTRIB_PRIORITY for brwCreateContext
+
+# stable: The commit depends on earlier commit a4be2bcee2 which did not land in
+#         branch
+a29d63ecf71546c4798c609e37810f0ec81793d8 swr: refactor swr_create_screen to allow for proper cleanup on error
+
+# stable: Explicit 18.0 only nominations
+4b69ba381766cd911eb1284f1b0332a139ec8a75 anv/pipeline: Don't assert on more than 32 samplers
+bc0a21e34811e0e1542236dbaf5fb1fa56bbb98c anv/cmd_state: Drop the scratch_size field
+d6c9a89d1324ed2c723cbd3c6d8390691c58dfd2 anv/cmd_buffer: Get rid of the meta query workaround
+cd3feea74582cea2d18306d167609f4fbe681bb3 anv/cmd_buffer: Rework anv_cmd_state_reset
+ddc2d285484a1607f79ffeb2fc6c09367c6aea1f anv/cmd_buffer: Use some pre-existing pipeline temporaries
+9af5379228d7be9c7ea41e0912a8770d28ead92b anv/cmd_buffer: Add substructs to anv_cmd_state for graphics and compute
+d5592e2fdaa9ce8b98d38b2d29e2a7d2c4abda08 anv: Remove semicolons from vk_error[f] definitions
+90cceaa9dd3b12e039a131a50c6866dce04e7fb2 anv/cmd_buffer: Refactor ensure_push_descriptor_set
+b9e1ca16f84016f1d40efa9bfee89db48a7702b4 anv/cmd_buffer: Add a helper for binding descriptor sets
+31b2144c836485ef6476bd455f1c02b96deafab7 anv/cmd_buffer: Use anv_descriptor_for_binding for samplers
+97f96610c8b858267c121c0ad6ffc630e2aafc09 anv: Separate compute and graphics descriptor sets
+e85aaec1489b00f24ebef4ae5b1da598091275e1 anv/cmd_buffer: Move dirty bits into anv_cmd_*_state
+8bd5ec5b862333c936426ff18d093d07dd006182 anv/cmd_buffer: Move vb_dirty bits into anv_cmd_graphics_state
+24caee8975355a2b54b41c484ff3c897e1911760 anv/cmd_buffer: Use a temporary variable for dynamic state
+95ff2322948692f5f7b1d444aabe878fba53304c anv/cmd_buffer: Move dynamic state to graphics state
+38ec78049f69821091a2d42b0f457a1b044d4273 anv/cmd_buffer: Move num_workgroups to compute state
+4064fe59e7144fa822568543cfcc043387645d4e anv/cmd_buffer: Move gen7 index buffer state to graphics state
+
+# fixes: The commit requires earlier commit 49d035122ee which did not land in
+#        branch
+766589d89a211e67f313e8cb38f2d05b09975f96 radv: fix sample_mask_in loading. (v3.1)
+
+# stable: The commits address the Meson build that is explicitly disabled in
+#         branch
+c38c60a63c63b02d1030c6c349aa0a73105e10eb meson: fix BSD build
+5781c3d1db4a01e77f416c1685025c4d830ae87d meson: correctly set SYSCONFDIR for loading dirrc
+7c8cfe2d59bfc0dbf718a74b08b6dceaa84f7242 meson: fix missing dependencies
+53f9131205a63fa8b282ab2a7e96c48209447da0 meson: fix getting cflags from pkg-config
+8fae5eddd9982f4586d76471d0196befeb46de24 meson: handle LLVM 'x.x.xgit-revision' versionsi
+
+# stable: The commit requires earlier commit 01ab218bbc which did not land in
+#        branch
+0e879aad2fd1dac102c13d680edf455aa068d5df swr/rast: support llvm 3.9 type declarations
+
+# stable: The commit requires earlier commit w41c36c45 which did not land in
+#        branch
+49b0a140a731069e0e4959c65bfd1b597a4fb141 ac/nir: set amdgpu.uniform and invariant.load for UBOs
+
+# stable: The commits address gen10 support which is missing in branch
+ca19ee33d7d39cb89d948b1c983763065975ce5b i965/gen10: Ignore push constant packets during context restore.
+78c125af3904c539ea69bec2dd9fdf7a5162854f anv/gen10: Ignore push constant packets during context restore.
+bcfd78e4489f538e34138269650fc6cbe8c9d75f i965/gen10: Re-enable push constants.
+
+# stable: The commits are explicit 18.0 nominations
+17423c993d0b083c7a77a404b85788687f5efe36 winsys/amdgpu: fix assertion failure with UVD and VCE rings
+e0e23ea69cab23b9193b1e7c568fd23fc7073071 r600/eg: construct proper rat mask for image/buffers.
+
+# stable: The commits address the initial shader cache support which did not land in branch
+28db950b51274ce296cd625db62abe935d1e4ed9 i965: fix prog_data leak in brw_disk_cache
+b99c88037bf64b033579f237ec287857c53b0ad6 i965: fix disk_cache leak when destroying context
+
+# stable: The commit covers nir serialise, which did not land in branch
+d0343bef6680cc660ba691bbed31a2a1b7449f79 nir: mark unused space in packed_tex_data
+
+# stable: The KHX extension is disabled all together in the stable branches.
+bee9270853c34aa8e4b3d19a125608ee67c87b86 radv: Don't expose VK_KHX_multiview on android.
+
+# fixes: The commit addresses the meson build, which is disabled in branch
+4a0bab1d7f942ad0ac9b98ab34e6a9e4694f3c04 meson: libdrm shouldn't appear in Requires.private: if it wasn't found
+16bf8138308008f4b889caa827a8291ff72745b8 meson/swr: re-shuffle generated files
+bbef9474fa52d9aba06eeede52558fc5ccb762dd meson/swr: Updated copyright dates
+d7235ef83b92175537e3b538634ffcff29bf0dce meson: Don't confuse the install and search paths for dri drivers
+c75a4e5b465261e982ea31ef875325a3cc30e79d meson: Check for actual LLVM required versions
+105178db8f5d7d45b268c7664388d7db90350704 meson: fix test source name for static glapi
+c74719cf4adae2fa142e154bff56716427d3d992 glapi: fix check_table test for non-shared glapi with meson

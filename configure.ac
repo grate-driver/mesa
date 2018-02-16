@@ -1207,10 +1207,10 @@ AC_ARG_ENABLE([xa],
     [enable_xa=no])
 AC_ARG_ENABLE([gbm],
    [AS_HELP_STRING([--enable-gbm],
-         [enable gbm library @<:@default=yes except cygwin@:>@])],
+         [enable gbm library @<:@default=yes except cygwin and macOS@:>@])],
    [enable_gbm="$enableval"],
    [case "$host_os" in
-       cygwin*)
+       cygwin* | darwin*)
           enable_gbm=no
           ;;
        *)
@@ -1535,7 +1535,7 @@ fi
 AC_ARG_ENABLE([driglx-direct],
     [AS_HELP_STRING([--disable-driglx-direct],
         [disable direct rendering in GLX and EGL for DRI \
-            @<:@default=auto@:>@])],
+            @<:@default=enabled@:>@])],
     [driglx_direct="$enableval"],
     [driglx_direct="yes"])
 
@@ -2710,6 +2710,18 @@ if test "x$enable_llvm" = xyes; then
                 LLVM_LIBS="$LLVM_LIBS `$LLVM_CONFIG --system-libs`"
             fi
         fi
+    fi
+
+    dnl The gallium-xlib GLX and gallium OSMesa targets directly embed the
+    dnl swr/llvmpipe driver into the final binary.  Adding LLVM_LIBS results in 
+    dnl the LLVM library propagated in the Libs.private of the respective .pc
+    dnl file which ensures complete dependency information when statically
+    dnl linking.
+    if test "x$enable_glx" == xgallium-xlib; then
+        GL_PC_LIB_PRIV="$GL_PC_LIB_PRIV $LLVM_LIBS"
+    fi
+    if test "x$enable_gallium_osmesa" = xyes; then
+        OSMESA_PC_LIB_PRIV="$OSMESA_PC_LIB_PRIV $LLVM_LIBS"
     fi
 fi
 
