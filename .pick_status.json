@@ -6160,7 +6160,7 @@
         "description": "anv: Use the PIPE_CONTROL instead of bits for the CS stall W/A",
         "nominated": false,
         "nomination_type": null,
-        "resolution": 4,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": null
     },
