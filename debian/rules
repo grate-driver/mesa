@@ -61,7 +61,6 @@ else
   endif
 
 	DRI_DRIVERS += swrast
-	confflags_GALLIUM += --disable-gallium-llvm
 
 	confflags_DIRECT_RENDERING = --enable-driglx-direct
 	confflags_GBM = --enable-gbm
@@ -93,7 +92,7 @@ confflags += \
 	--disable-nine \
 	--enable-debug \
 	--enable-valgrind=auto \
-	--disable-llvm \
+	--enable-llvm \
 	--disable-va \
 	--disable-vdpau \
 	$(confflags_DIRECT_RENDERING) \
