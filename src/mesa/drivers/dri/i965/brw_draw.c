@@ -40,6 +40,7 @@
 #include "swrast_setup/swrast_setup.h"
 #include "drivers/common/meta.h"
 #include "util/bitscan.h"
+#include "util/bitset.h"
 
 #include "brw_blorp.h"
 #include "brw_draw.h"
@@ -344,6 +345,7 @@ brw_merge_inputs(struct brw_context *brw,
  */
 static bool
 intel_disable_rb_aux_buffer(struct brw_context *brw,
+                            bool *draw_aux_buffer_disabled,
                             struct intel_mipmap_tree *tex_mt,
                             unsigned min_level, unsigned num_levels,
                             const char *usage)
@@ -363,7 +365,7 @@ intel_disable_rb_aux_buffer(struct brw_context *brw,
       if (irb && irb->mt->bo == tex_mt->bo &&
           irb->mt_level >= min_level &&
           irb->mt_level < min_level + num_levels) {
-         found = brw->draw_aux_buffer_disabled[i] = true;
+         found = draw_aux_buffer_disabled[i] = true;
       }
    }
 
@@ -375,6 +377,20 @@ intel_disable_rb_aux_buffer(struct brw_context *brw,
    return found;
 }
 
+static void
+mark_textures_used_for_txf(BITSET_WORD *used_for_txf,
+                           const struct gl_program *prog)
+{
+   if (!prog)
+      return;
+
+   unsigned mask = prog->SamplersUsed & prog->info.textures_used_by_txf;
+   while (mask) {
+      int s = u_bit_scan(&mask);
+      BITSET_SET(used_for_txf, prog->SamplerUnits[s]);
+   }
+}
+
 /**
  * \brief Resolve buffers before drawing.
  *
@@ -382,13 +398,23 @@ intel_disable_rb_aux_buffer(struct brw_context *brw,
  * enabled depth texture, and flush the render cache for any dirty textures.
  */
 void
-brw_predraw_resolve_inputs(struct brw_context *brw)
+brw_predraw_resolve_inputs(struct brw_context *brw, bool rendering,
+                           bool *draw_aux_buffer_disabled)
 {
    struct gl_context *ctx = &brw->ctx;
    struct intel_texture_object *tex_obj;
 
-   memset(brw->draw_aux_buffer_disabled, 0,
-          sizeof(brw->draw_aux_buffer_disabled));
+   BITSET_DECLARE(used_for_txf, MAX_COMBINED_TEXTURE_IMAGE_UNITS);
+   memset(used_for_txf, 0, sizeof(used_for_txf));
+   if (rendering) {
+      mark_textures_used_for_txf(used_for_txf, ctx->VertexProgram._Current);
+      mark_textures_used_for_txf(used_for_txf, ctx->TessCtrlProgram._Current);
+      mark_textures_used_for_txf(used_for_txf, ctx->TessEvalProgram._Current);
+      mark_textures_used_for_txf(used_for_txf, ctx->GeometryProgram._Current);
+      mark_textures_used_for_txf(used_for_txf, ctx->FragmentProgram._Current);
+   } else {
+      mark_textures_used_for_txf(used_for_txf, ctx->ComputeProgram._Current);
+   }
 
    /* Resolve depth buffer and render cache of each enabled texture. */
    int maxEnabledUnit = ctx->Texture._MaxEnabledTexImageUnit;
@@ -417,14 +443,28 @@ brw_predraw_resolve_inputs(struct brw_context *brw)
          num_layers = INTEL_REMAINING_LAYERS;
       }
 
-      const bool disable_aux =
-         intel_disable_rb_aux_buffer(brw, tex_obj->mt, min_level, num_levels,
+      if (rendering) {
+         intel_disable_rb_aux_buffer(brw, draw_aux_buffer_disabled,
+                                     tex_obj->mt, min_level, num_levels,
                                      "for sampling");
+      }
 
       intel_miptree_prepare_texture(brw, tex_obj->mt, view_format,
                                     min_level, num_levels,
-                                    min_layer, num_layers,
-                                    disable_aux);
+                                    min_layer, num_layers);
+
+      /* If any programs are using it with texelFetch, we may need to also do
+       * a prepare with an sRGB format to ensure texelFetch works "properly".
+       */
+      if (BITSET_TEST(used_for_txf, i)) {
+         enum isl_format txf_format =
+            translate_tex_format(brw, tex_obj->_Format, GL_DECODE_EXT);
+         if (txf_format != view_format) {
+            intel_miptree_prepare_texture(brw, tex_obj->mt, txf_format,
+                                          min_level, num_levels,
+                                          min_layer, num_layers);
+         }
+      }
 
       brw_cache_flush_for_read(brw, tex_obj->mt->bo);
 
@@ -445,8 +485,11 @@ brw_predraw_resolve_inputs(struct brw_context *brw)
             tex_obj = intel_texture_object(u->TexObj);
 
             if (tex_obj && tex_obj->mt) {
-               intel_disable_rb_aux_buffer(brw, tex_obj->mt, 0, ~0,
-                                           "as a shader image");
+               if (rendering) {
+                  intel_disable_rb_aux_buffer(brw, draw_aux_buffer_disabled,
+                                              tex_obj->mt, 0, ~0,
+                                              "as a shader image");
+               }
 
                intel_miptree_prepare_image(brw, tex_obj->mt);
 
@@ -458,7 +501,8 @@ brw_predraw_resolve_inputs(struct brw_context *brw)
 }
 
 static void
-brw_predraw_resolve_framebuffer(struct brw_context *brw)
+brw_predraw_resolve_framebuffer(struct brw_context *brw,
+                                bool *draw_aux_buffer_disabled)
 {
    struct gl_context *ctx = &brw->ctx;
    struct intel_renderbuffer *depth_irb;
@@ -490,8 +534,7 @@ brw_predraw_resolve_framebuffer(struct brw_context *brw)
          if (irb) {
             intel_miptree_prepare_texture(brw, irb->mt, irb->mt->surf.format,
                                           irb->mt_level, 1,
-                                          irb->mt_layer, irb->layer_count,
-                                          false);
+                                          irb->mt_layer, irb->layer_count);
          }
       }
    }
@@ -511,7 +554,11 @@ brw_predraw_resolve_framebuffer(struct brw_context *brw)
       enum isl_aux_usage aux_usage =
          intel_miptree_render_aux_usage(brw, irb->mt, isl_format,
                                         blend_enabled,
-                                        brw->draw_aux_buffer_disabled[i]);
+                                        draw_aux_buffer_disabled[i]);
+      if (brw->draw_aux_usage[i] != aux_usage) {
+         brw->ctx.NewDriverState |= BRW_NEW_AUX_STATE;
+         brw->draw_aux_usage[i] = aux_usage;
+      }
 
       intel_miptree_prepare_render(brw, irb->mt, irb->mt_level,
                                    irb->mt_layer, irb->layer_count,
@@ -584,11 +631,7 @@ brw_postdraw_set_buffers_need_resolve(struct brw_context *brw)
       mesa_format mesa_format =
          _mesa_get_render_format(ctx, intel_rb_format(irb));
       enum isl_format isl_format = brw_isl_format_for_mesa_format(mesa_format);
-      bool blend_enabled = ctx->Color.BlendEnabled & (1 << i);
-      enum isl_aux_usage aux_usage =
-         intel_miptree_render_aux_usage(brw, irb->mt, isl_format,
-                                        blend_enabled,
-                                        brw->draw_aux_buffer_disabled[i]);
+      enum isl_aux_usage aux_usage = brw->draw_aux_usage[i];
 
       brw_render_cache_add_bo(brw, irb->mt->bo, isl_format, aux_usage);
 
@@ -697,8 +740,9 @@ brw_prepare_drawing(struct gl_context *ctx,
     * and finalizing textures but before setting up any hardware state for
     * this draw call.
     */
-   brw_predraw_resolve_inputs(brw);
-   brw_predraw_resolve_framebuffer(brw);
+   bool draw_aux_buffer_disabled[MAX_DRAW_BUFFERS] = { };
+   brw_predraw_resolve_inputs(brw, true, draw_aux_buffer_disabled);
+   brw_predraw_resolve_framebuffer(brw, draw_aux_buffer_disabled);
 
    /* Bind all inputs, derive varying and size information:
     */
