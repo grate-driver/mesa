@@ -1,6 +1,7 @@
 mesa (17.3.6-1) UNRELEASED; urgency=medium
 
   * New upstream release.
+    - Fixes GPU hangs in the i965 driver (Closes: #890866).
 
  -- Andreas Boll <andreas.boll.dev@gmail.com>  Tue, 27 Feb 2018 09:11:41 +0100
 
