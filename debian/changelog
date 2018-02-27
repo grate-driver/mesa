@@ -1,9 +1,9 @@
-mesa (17.3.6-1) UNRELEASED; urgency=medium
+mesa (17.3.6-1) unstable; urgency=medium
 
   * New upstream release.
     - Fixes GPU hangs in the i965 driver (Closes: #890866).
 
- -- Andreas Boll <andreas.boll.dev@gmail.com>  Tue, 27 Feb 2018 09:11:41 +0100
+ -- Andreas Boll <andreas.boll.dev@gmail.com>  Tue, 27 Feb 2018 09:41:37 +0100
 
 mesa (17.3.5-1) unstable; urgency=medium
 
