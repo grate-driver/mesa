@@ -65,13 +65,14 @@ Signed-off-by: Mario Kleiner <mario.kleiner.de@gmail.com>
 
 --- a/src/util/drirc
 +++ b/src/util/drirc
-@@ -166,6 +166,9 @@ TODO: document the other workarounds.
- 
-         <application name="Observer" executable="TheObserver-Linux-Shipping">
+@@ -168,6 +168,10 @@ TODO: document the other workarounds.
              <option name="allow_glsl_cross_stage_interpolation_mismatch" value="true"/>
-+
-+        <application name="gnome-shell" executable="gnome-shell">
-+            <option name="allow_rgb10_configs" value="false"/>
          </application>
  
++        <application name="gnome-shell" executable="gnome-shell">
++            <option name="allow_rgb10_configs" value="false"/>
++        </application>
++
          <application name="Steamroll" executable="Steamroll-Linux-Shipping">
+             <option name="allow_glsl_cross_stage_interpolation_mismatch" value="true"/>
+         </application>
