@@ -9,4 +9,4 @@ egl-platform-mir.patch
 egl-platform-rs.patch
 khr_platform_mir.patch
 dri3-reinstate-get_dri_screen-callback.diff
-dont-expose-10bpc-to-gnome-shell.diff
+dont-enable-10bpc-by-default.diff

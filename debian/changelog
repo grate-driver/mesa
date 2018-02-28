@@ -1,3 +1,11 @@
+mesa (18.0.0~rc4-1ubuntu3) bionic; urgency=medium
+
+  * dont-enable-10bpc-by-default.diff: Replace the drirc hack, just flip
+    the default to not enable 10bpc configs by default for gallium drivers.
+    (LP: #1752123)
+
+ -- Timo Aaltonen <tjaalton@debian.org>  Wed, 28 Feb 2018 19:34:58 +0200
+
 mesa (18.0.0~rc4-1ubuntu2) bionic; urgency=medium
 
   * control: Remove libtxc-* Recommends which were left over after a
