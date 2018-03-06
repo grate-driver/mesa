@@ -109,6 +109,9 @@ c956d0f4069cf39d8d3c57ebed8d905575e9ea34 radv: make sure to emit cache flushes b
 c133a3411bbf47c2ba7d9cdae7e35a64fe276068 radv: do not set pending_reset_query in BeginCommandBuffer()
 55376cb31e2f495a4d872b4ffce2135c3365b873 st/mesa: expose 0 shader binary formats for compat profiles for Qt
 
+# stable: The commits address gen10 support which is missing in branch
+56dc9f9f49638e0769d6bc696ff7f5dafccec9fc intel/compiler: Memory fence commit must always be enabled for gen10+
+
 # stable: The commit requires earlier commits 4e7f6437b535 and a6b379284365
 #         which did not land in branch
 ab5cee4c241cb360cf67101dd751e0f38637b526 r600/compute: only mark buffer/image state dirty for fragment shaders
