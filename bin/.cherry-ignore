@@ -93,3 +93,18 @@ d7235ef83b92175537e3b538634ffcff29bf0dce meson: Don't confuse the install and se
 c75a4e5b465261e982ea31ef875325a3cc30e79d meson: Check for actual LLVM required versions
 105178db8f5d7d45b268c7664388d7db90350704 meson: fix test source name for static glapi
 c74719cf4adae2fa142e154bff56716427d3d992 glapi: fix check_table test for non-shared glapi with meson
+
+# stable: Explicit 18.0 only nominations
+2ffe395cba0f7b3c1f1c41062f4376eae3a188b5 radv: Don't expose VK_KHX_multiview on android.
+4195eed961ccfe404ae81b9112189fc93a254ded glsl/linker: check same name is not used in block and outside
+a5053ba27ed76f666e315de7150433c5aaaaf2c3 anv/device: initialize the list of enabled extensions properly
+bd6c0cab606fa0a3b821e50542ba06ff714292bf i965: perf: use drmIoctl() instead of ioctl()
+bf1577fe0972ae910c071743dc89d261a46c2926 i965/gen10: Remove warning message.
+fcae3d1a9acc080bf31cf7b5c4d0b18e67319b09 anv/gen10: Remove warning message.
+eb2e17e2d15bf58b60460437330d719131fb859e docs: Add Cannonlake support to 18.0 release notes.
+9a508b719be32ef10ca929250b7aafba313104c6 android: anv/extensions: fix generated sources build
+d448954228e69fd1b4000ea13e28c2ba2832db13 android: anv: add dependency on libnativewindow for O and later
+6451b0703ff3027b746d6268b98dd2b3e6698be5 android: vulkan/util: add dependency on libnativewindow for O and later
+c956d0f4069cf39d8d3c57ebed8d905575e9ea34 radv: make sure to emit cache flushes before starting a query
+c133a3411bbf47c2ba7d9cdae7e35a64fe276068 radv: do not set pending_reset_query in BeginCommandBuffer()
+55376cb31e2f495a4d872b4ffce2135c3365b873 st/mesa: expose 0 shader binary formats for compat profiles for Qt
