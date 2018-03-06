@@ -5,8 +5,5 @@ glvnd-fix-gl-dot-pc.patch
 
 
 # Ubuntu patches.
-egl-platform-mir.patch
-egl-platform-rs.patch
-khr_platform_mir.patch
 dri3-reinstate-get_dri_screen-callback.diff
 dont-enable-10bpc-by-default.diff

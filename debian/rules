@@ -75,9 +75,6 @@ else
 
 	# Non-Linux ports also lack *_CLOEXEC and epoll, so wayland isn't ready yet:
 	EGL_PLATFORMS += wayland
-# Likewise, Mir makes no attempt to be portable to random kernels.
-	EGL_PLATFORMS += mir
-	EGL_PLATFORMS += rs
 	ifeq (,$(filter $(DEB_HOST_ARCH), s390 s390x))
 		DRI_DRIVERS += nouveau
 	endif
