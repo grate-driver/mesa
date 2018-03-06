@@ -6629,6 +6629,8 @@ static void ac_llvm_finalize_module(struct nir_to_llvm_context * ctx)
 
 	LLVMDisposeBuilder(ctx->builder);
 	LLVMDisposePassManager(passmgr);
+
+	ac_llvm_context_dispose(&ctx->ac);
 }
 
 static void
