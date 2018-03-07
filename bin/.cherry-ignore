@@ -155,3 +155,7 @@ fa8a764b62588420ac789df79ec0ab858b38639f i965: Use absolute addressing for const
 # extra: The commit requires earlier commit a44744e01d which did not land in
 #        branch
 adca1e4a92a53a403b7620c3356dcf038f0bcecc anv/image: Separate modifiers from legacy scanout
+
+# stable: The commit requires earlier commits fe81e1f9751 and 92c1290dc57 which
+#         did not land in branch
+fb5825e7ceeb16ac05f870ffe1e5a5daa09e68dd glsl: Fix memory leak with known glsl_type instances
