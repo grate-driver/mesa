@@ -147,3 +147,7 @@ e23192022a2cde122a6ccc70e5495fda009bee12 meson: install vulkan_intel.h header
 # fixes: The commit fixes earlier commit 1c57a6da5e which did not land in
 #        branch
 3401b028df1074a06a7fbc3fb1cda949646ef75d ac/shader: fix vertex input with components.
+
+# extra: The commit requires earlier commit a63c74be851 which did not land in
+#        branch
+fa8a764b62588420ac789df79ec0ab858b38639f i965: Use absolute addressing for constant buffer 0 on Kernel 4.16+.
