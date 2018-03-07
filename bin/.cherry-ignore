@@ -151,3 +151,7 @@ e23192022a2cde122a6ccc70e5495fda009bee12 meson: install vulkan_intel.h header
 # extra: The commit requires earlier commit a63c74be851 which did not land in
 #        branch
 fa8a764b62588420ac789df79ec0ab858b38639f i965: Use absolute addressing for constant buffer 0 on Kernel 4.16+.
+
+# extra: The commit requires earlier commit a44744e01d which did not land in
+#        branch
+adca1e4a92a53a403b7620c3356dcf038f0bcecc anv/image: Separate modifiers from legacy scanout
