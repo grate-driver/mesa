@@ -143,3 +143,7 @@ d672084ba29a64f5ec8c9cd23d4b77c0efa05693 meson: define empty variables for libsw
 7023b373ec76a2ea25b1bd0a7501276de9007047 meson: link dri3 xcb libs into vlwinsys instead of into each target
 5c460337fd9c1096dea4bc569bd876a112ed6f16 meson: Fix GL and EGL pkg-config files with glvnd
 e23192022a2cde122a6ccc70e5495fda009bee12 meson: install vulkan_intel.h header
+
+# fixes: The commit fixes earlier commit 1c57a6da5e which did not land in
+#        branch
+3401b028df1074a06a7fbc3fb1cda949646ef75d ac/shader: fix vertex input with components.
