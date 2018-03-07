@@ -131,3 +131,7 @@ ab5cee4c241cb360cf67101dd751e0f38637b526 r600/compute: only mark buffer/image st
 # stable: The commit requires earlier commit a03d456f5a41 which did not land in
 #         branch
 c7cadcbda47537d474eea52b9e77e57ef9287f9b r600: Take ALU_EXTENDED into account when evaluating jump offsets
+
+# fixes: The commit requires earlier commits 77097d96a0 and a5a654b19a which
+#        did not land in branch
+c7dcee58b5fe183e1653c13bff6a212f0d157b29 i965: Avoid problems from referencing orphaned BOs after growing.
