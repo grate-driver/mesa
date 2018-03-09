@@ -118,8 +118,8 @@ else
 
 	confflags_DIRECT_RENDERING = --enable-driglx-direct
 	confflags_GBM = --enable-gbm
-	confflags_GALLIUM += --enable-vdpau
-	confflags_GALLIUM += --enable-va
+#	confflags_GALLIUM += --enable-vdpau
+#	confflags_GALLIUM += --enable-va
 	confflags_GALLIUM += --enable-gallium-extra-hud
 	confflags_GALLIUM += --enable-lmsensors
 	with_libva = ,libva
@@ -217,17 +217,17 @@ override_dh_install:
 	rmdir debian/tmp/usr/include/vulkan
   endif
 
-  ifneq ($(DEB_HOST_ARCH_OS), hurd)
-	# Copy the hardlinked vdpau drivers correctly.
-	install -m755 -d debian/mesa-vdpau-drivers/usr/lib/${DEB_HOST_MULTIARCH}/vdpau/
-	mv debian/tmp/usr/lib/${DEB_HOST_MULTIARCH}/vdpau/libvdpau*.so* \
-	   debian/mesa-vdpau-drivers/usr/lib/${DEB_HOST_MULTIARCH}/vdpau/
-
-	# Copy the hardlinked va drivers correctly.
-	install -m755 -d debian/mesa-va-drivers/usr/lib/${DEB_HOST_MULTIARCH}/dri/
-	mv debian/tmp/usr/lib/${DEB_HOST_MULTIARCH}/dri/*_drv_video.so \
-	   debian/mesa-va-drivers/usr/lib/${DEB_HOST_MULTIARCH}/dri/
-  endif
+#  ifneq ($(DEB_HOST_ARCH_OS), hurd)
+#	# Copy the hardlinked vdpau drivers correctly.
+#	install -m755 -d debian/mesa-vdpau-drivers/usr/lib/${DEB_HOST_MULTIARCH}/vdpau/
+#	mv debian/tmp/usr/lib/${DEB_HOST_MULTIARCH}/vdpau/libvdpau*.so* \
+#	   debian/mesa-vdpau-drivers/usr/lib/${DEB_HOST_MULTIARCH}/vdpau/
+#
+#	# Copy the hardlinked va drivers correctly.
+#	install -m755 -d debian/mesa-va-drivers/usr/lib/${DEB_HOST_MULTIARCH}/dri/
+#	mv debian/tmp/usr/lib/${DEB_HOST_MULTIARCH}/dri/*_drv_video.so \
+#	   debian/mesa-va-drivers/usr/lib/${DEB_HOST_MULTIARCH}/dri/
+#  endif
 
 	dh_install -a --fail-missing
 
