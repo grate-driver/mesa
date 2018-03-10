@@ -116,3 +116,7 @@ ab5cee4c241cb360cf67101dd751e0f38637b526 r600/compute: only mark buffer/image st
 # stable: The commit fixes earlier commit cd3feea74582 which did not land in
 #         branch
 4c77e21c814145e845bac64cce40eadfd7ac0bd9 anv: Move setting current_pipeline to cmd_state_init
+
+# stable: The commit is causing several regressions in Vulkan CTS tests in
+#         different platforms (hsw, bdw, bsw, ...)
+85d0bec9616bc1ffa8e4ab5e7c5d12ff4e414872 anv: Be more careful about fast-clear colors
