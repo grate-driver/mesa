@@ -3,6 +3,9 @@ mesa (18.0.0~rc4-2) UNRELEASED; urgency=medium
   [ Fabio Pedretti ]
   * rules: Rename --disable-gallium-llvm to --disable-llvm
 
+  [ Timo Aaltonen ]
+  * control, rules: Switch to llvm 6.0, bump libclc to match.
+
  -- Andreas Boll <andreas.boll.dev@gmail.com>  Fri, 23 Feb 2018 11:44:04 +0100
 
 mesa (18.0.0~rc4-1) experimental; urgency=medium
