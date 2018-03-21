@@ -113,6 +113,27 @@ static int amdgpu_fence_export_sync_file(struct radeon_winsys *rws,
    return fd;
 }
 
+static int amdgpu_export_signalled_sync_file(struct radeon_winsys *rws)
+{
+   struct amdgpu_winsys *ws = amdgpu_winsys(rws);
+   uint32_t syncobj;
+   int fd = -1;
+
+   int r = amdgpu_cs_create_syncobj2(ws->dev, DRM_SYNCOBJ_CREATE_SIGNALED,
+                                     &syncobj);
+   if (r) {
+      return -1;
+   }
+
+   r = amdgpu_cs_syncobj_export_sync_file(ws->dev, syncobj, &fd);
+   if (r) {
+      fd = -1;
+   }
+
+   amdgpu_cs_destroy_syncobj(ws->dev, syncobj);
+   return fd;
+}
+
 static void amdgpu_fence_submitted(struct pipe_fence_handle *fence,
                                    uint64_t seq_no,
                                    uint64_t *user_fence_cpu_address)
@@ -752,10 +773,11 @@ static void amdgpu_set_ib_size(struct amdgpu_ib *ib)
    }
 }
 
-static void amdgpu_ib_finalize(struct amdgpu_ib *ib)
+static void amdgpu_ib_finalize(struct amdgpu_winsys *ws, struct amdgpu_ib *ib)
 {
    amdgpu_set_ib_size(ib);
    ib->used_ib_space += ib->base.current.cdw * 4;
+   ib->used_ib_space = align(ib->used_ib_space, ws->info.ib_start_alignment);
    ib->max_ib_size = MAX2(ib->max_ib_size, ib->base.prev_dw + ib->base.current.cdw);
 }
 
@@ -1448,7 +1470,7 @@ static int amdgpu_cs_flush(struct radeon_winsys_cs *rcs,
       struct amdgpu_cs_context *cur = cs->csc;
 
       /* Set IB sizes. */
-      amdgpu_ib_finalize(&cs->main);
+      amdgpu_ib_finalize(ws, &cs->main);
 
       /* Create a fence. */
       amdgpu_fence_reference(&cur->fence, NULL);
@@ -1552,4 +1574,5 @@ void amdgpu_cs_init_functions(struct amdgpu_winsys *ws)
    ws->base.fence_reference = amdgpu_fence_reference;
    ws->base.fence_import_sync_file = amdgpu_fence_import_sync_file;
    ws->base.fence_export_sync_file = amdgpu_fence_export_sync_file;
+   ws->base.export_signalled_sync_file = amdgpu_export_signalled_sync_file;
 }

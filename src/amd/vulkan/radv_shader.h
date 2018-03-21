@@ -103,6 +103,10 @@ void
 radv_shader_variant_destroy(struct radv_device *device,
 			    struct radv_shader_variant *variant);
 
+bool
+radv_lower_indirect_derefs(struct nir_shader *nir,
+                           struct radv_physical_device *device);
+
 uint32_t
 radv_shader_stage_to_user_data_0(gl_shader_stage stage, enum chip_class chip_class,
 				 bool has_gs, bool has_tess);

@@ -93,3 +93,69 @@ d7235ef83b92175537e3b538634ffcff29bf0dce meson: Don't confuse the install and se
 c75a4e5b465261e982ea31ef875325a3cc30e79d meson: Check for actual LLVM required versions
 105178db8f5d7d45b268c7664388d7db90350704 meson: fix test source name for static glapi
 c74719cf4adae2fa142e154bff56716427d3d992 glapi: fix check_table test for non-shared glapi with meson
+
+# stable: Explicit 18.0 only nominations
+2ffe395cba0f7b3c1f1c41062f4376eae3a188b5 radv: Don't expose VK_KHX_multiview on android.
+4195eed961ccfe404ae81b9112189fc93a254ded glsl/linker: check same name is not used in block and outside
+a5053ba27ed76f666e315de7150433c5aaaaf2c3 anv/device: initialize the list of enabled extensions properly
+bd6c0cab606fa0a3b821e50542ba06ff714292bf i965: perf: use drmIoctl() instead of ioctl()
+bf1577fe0972ae910c071743dc89d261a46c2926 i965/gen10: Remove warning message.
+fcae3d1a9acc080bf31cf7b5c4d0b18e67319b09 anv/gen10: Remove warning message.
+eb2e17e2d15bf58b60460437330d719131fb859e docs: Add Cannonlake support to 18.0 release notes.
+9a508b719be32ef10ca929250b7aafba313104c6 android: anv/extensions: fix generated sources build
+d448954228e69fd1b4000ea13e28c2ba2832db13 android: anv: add dependency on libnativewindow for O and later
+6451b0703ff3027b746d6268b98dd2b3e6698be5 android: vulkan/util: add dependency on libnativewindow for O and later
+c956d0f4069cf39d8d3c57ebed8d905575e9ea34 radv: make sure to emit cache flushes before starting a query
+c133a3411bbf47c2ba7d9cdae7e35a64fe276068 radv: do not set pending_reset_query in BeginCommandBuffer()
+55376cb31e2f495a4d872b4ffce2135c3365b873 st/mesa: expose 0 shader binary formats for compat profiles for Qt
+
+# stable: The commits address gen10 support which is missing in branch
+56dc9f9f49638e0769d6bc696ff7f5dafccec9fc intel/compiler: Memory fence commit must always be enabled for gen10+
+
+# stable: The commit requires earlier commits 4e7f6437b535 and a6b379284365
+#         which did not land in branch
+ab5cee4c241cb360cf67101dd751e0f38637b526 r600/compute: only mark buffer/image state dirty for fragment shaders
+
+# stable: The commits have a specific version for the 17.3 branch
+4796025ba518baa0e8893337591a3f452a375d94 intel/isl: Add an isl_color_value_is_zero helper
+85d0bec9616bc1ffa8e4ab5e7c5d12ff4e414872 anv: Be more careful about fast-clear colors
+
+# stable: The commit fixes earlier commit cd3feea74582 which did not land in
+#         branch
+4c77e21c814145e845bac64cce40eadfd7ac0bd9 anv: Move setting current_pipeline to cmd_state_init
+
+# stable: The commit is causing several regressions in Vulkan CTS tests in
+#         different platforms (hsw, bdw, bsw, ...)
+85d0bec9616bc1ffa8e4ab5e7c5d12ff4e414872 anv: Be more careful about fast-clear colors
+
+# stable: The commit requires earlier commit a03d456f5a41 which did not land in
+#         branch
+c7cadcbda47537d474eea52b9e77e57ef9287f9b r600: Take ALU_EXTENDED into account when evaluating jump offsets
+
+# fixes: The commit requires earlier commits 77097d96a0 and a5a654b19a which
+#        did not land in branch
+c7dcee58b5fe183e1653c13bff6a212f0d157b29 i965: Avoid problems from referencing orphaned BOs after growing.
+
+# fixes: The commit addresses the meson build, which is disabled in branch
+5317211fa029ee8d0e1c802ef8c01f64c470e3d5 meson: use a custom target instead of a generator for i965 oa
+d672084ba29a64f5ec8c9cd23d4b77c0efa05693 meson: define empty variables for libswdri and libswkmsdri
+8eb608df61912cfd0633fe982b140e22e7563770 meson: add libswdri and libswkmsdri to dri link_with
+7023b373ec76a2ea25b1bd0a7501276de9007047 meson: link dri3 xcb libs into vlwinsys instead of into each target
+5c460337fd9c1096dea4bc569bd876a112ed6f16 meson: Fix GL and EGL pkg-config files with glvnd
+e23192022a2cde122a6ccc70e5495fda009bee12 meson: install vulkan_intel.h header
+
+# fixes: The commit fixes earlier commit 1c57a6da5e which did not land in
+#        branch
+3401b028df1074a06a7fbc3fb1cda949646ef75d ac/shader: fix vertex input with components.
+
+# extra: The commit requires earlier commit a63c74be851 which did not land in
+#        branch
+fa8a764b62588420ac789df79ec0ab858b38639f i965: Use absolute addressing for constant buffer 0 on Kernel 4.16+.
+
+# extra: The commit requires earlier commit a44744e01d which did not land in
+#        branch
+adca1e4a92a53a403b7620c3356dcf038f0bcecc anv/image: Separate modifiers from legacy scanout
+
+# stable: The commit requires earlier commits fe81e1f9751 and 92c1290dc57 which
+#         did not land in branch
+fb5825e7ceeb16ac05f870ffe1e5a5daa09e68dd glsl: Fix memory leak with known glsl_type instances
