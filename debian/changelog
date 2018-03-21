@@ -1,3 +1,9 @@
+mesa (17.3.7-1) UNRELEASED; urgency=medium
+
+  * New upstream release.
+
+ -- Andreas Boll <andreas.boll.dev@gmail.com>  Wed, 21 Mar 2018 17:43:51 +0100
+
 mesa (17.3.6-1) unstable; urgency=medium
 
   * New upstream release.
