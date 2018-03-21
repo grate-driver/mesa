@@ -1,4 +1,4 @@
-mesa (18.0.0~rc5-1) UNRELEASED; urgency=medium
+mesa (18.0.0~rc5-1) experimental; urgency=medium
 
   [ Andreas Boll ]
   * New upstream release candidate.
@@ -10,7 +10,7 @@ mesa (18.0.0~rc5-1) UNRELEASED; urgency=medium
   * control, rules: Switch to llvm 6.0, bump libclc to match.
   * Drop libwayland-egl-mesa, which is now provided by src:wayland.
 
- -- Andreas Boll <andreas.boll.dev@gmail.com>  Fri, 23 Feb 2018 11:44:04 +0100
+ -- Andreas Boll <andreas.boll.dev@gmail.com>  Wed, 21 Mar 2018 20:05:23 +0100
 
 mesa (18.0.0~rc4-1) experimental; urgency=medium
 
