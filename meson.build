@@ -838,7 +838,7 @@ elif cc.has_header_symbol('sys/mkdev.h', 'major')
   pre_args += '-DMAJOR_IN_MKDEV'
 endif
 
-foreach h : ['xlocale.h', 'sys/sysctl.h', 'linux/futex.h']
+foreach h : ['xlocale.h', 'sys/sysctl.h', 'linux/futex.h', 'endian.h']
   if cc.has_header(h)
     pre_args += '-DHAVE_@0@'.format(h.to_upper().underscorify())
   endif
