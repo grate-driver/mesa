@@ -172,7 +172,7 @@ Description: free implementation of the EGL API -- development files
  against the EGL library.
 
 Package: libwayland-egl1-mesa
-Section: libs
+Section: oldlibs
 Architecture: linux-any
 Depends:
  ${misc:Depends},
