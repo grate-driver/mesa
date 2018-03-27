@@ -159,3 +159,8 @@ adca1e4a92a53a403b7620c3356dcf038f0bcecc anv/image: Separate modifiers from lega
 # stable: The commit requires earlier commits fe81e1f9751 and 92c1290dc57 which
 #         did not land in branch
 fb5825e7ceeb16ac05f870ffe1e5a5daa09e68dd glsl: Fix memory leak with known glsl_type instances
+
+# fixes: The commits require earlier commits 2deb82207572 and b2653007b980
+#        which did not land in branch
+4f0c89d66c570e82d832e2e49227517302e271a2 ac/nir: pass the nir variable through tcs loading.
+27a5e5366e89498d98d786cc84fafbdb220c4d94 radv: mark all tess output for an indirect access.
