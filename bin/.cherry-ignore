@@ -168,3 +168,8 @@ fb5825e7ceeb16ac05f870ffe1e5a5daa09e68dd glsl: Fix memory leak with known glsl_t
 # fixes: The commit requires earlier commits b358e0e67fac and b2653007b980
 #        which did not land in branch
 8f052a3e257a61240cb311032497d016278117a8 radv: handle exporting view index to fragment shader. (v1.1)
+
+# fixes: The commit fixes earier commits 83d4a5d5aea5a8a05be2,
+#        b2f2236dc565dd1460f0 and c62cf1f165919bc74296 which did not land in
+#        branch
+880c1718b6d14b33fe5ba918af70fea5be890c6b omx: always define ENABLE_ST_OMX_{BELLAGIO,TIZONIA}
