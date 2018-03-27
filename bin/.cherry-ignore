@@ -164,3 +164,7 @@ fb5825e7ceeb16ac05f870ffe1e5a5daa09e68dd glsl: Fix memory leak with known glsl_t
 #        which did not land in branch
 4f0c89d66c570e82d832e2e49227517302e271a2 ac/nir: pass the nir variable through tcs loading.
 27a5e5366e89498d98d786cc84fafbdb220c4d94 radv: mark all tess output for an indirect access.
+
+# fixes: The commit requires earlier commits b358e0e67fac and b2653007b980
+#        which did not land in branch
+8f052a3e257a61240cb311032497d016278117a8 radv: handle exporting view index to fragment shader. (v1.1)
