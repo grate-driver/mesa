@@ -1318,7 +1318,7 @@
         "description": "util: unbreak endian detection on OpenBSD",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "cbee1bfb34274668a05995b9d4c78ddec9e5ea4c"
     },
