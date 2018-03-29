@@ -173,3 +173,6 @@ fb5825e7ceeb16ac05f870ffe1e5a5daa09e68dd glsl: Fix memory leak with known glsl_t
 #        b2f2236dc565dd1460f0 and c62cf1f165919bc74296 which did not land in
 #        branch
 880c1718b6d14b33fe5ba918af70fea5be890c6b omx: always define ENABLE_ST_OMX_{BELLAGIO,TIZONIA}
+
+# stable: Explicit 18.0 only nominations
+d77844a5290948a490ce6921c1623d1dd7af6c31 docs: fix 18.0 release note version
