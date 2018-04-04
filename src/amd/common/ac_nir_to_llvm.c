@@ -2257,11 +2257,19 @@ static LLVMValueRef build_tex_intrinsic(struct ac_nir_context *ctx,
 					struct ac_image_args *args)
 {
 	if (instr->sampler_dim == GLSL_SAMPLER_DIM_BUF) {
-		return ac_build_buffer_load_format(&ctx->ac,
-						   args->resource,
-						   args->addr,
-						   LLVMConstInt(ctx->ac.i32, 0, false),
-						   true);
+		if (ctx->abi->gfx9_stride_size_workaround) {
+			return ac_build_buffer_load_format_gfx9_safe(&ctx->ac,
+								     args->resource,
+								     args->addr,
+								     ctx->ac.i32_0,
+								     true);
+		} else {
+			return ac_build_buffer_load_format(&ctx->ac,
+							   args->resource,
+							   args->addr,
+							   ctx->ac.i32_0,
+							   true);
+		}
 	}
 
 	args->opcode = ac_image_sample;
@@ -3613,8 +3621,23 @@ static void visit_image_store(struct ac_nir_context *ctx,
 		glc = i1true;
 
 	if (glsl_get_sampler_dim(type) == GLSL_SAMPLER_DIM_BUF) {
+		LLVMValueRef rsrc = get_sampler_desc(ctx, instr->variables[0], AC_DESC_BUFFER, true, true);
+
+		if (ctx->abi->gfx9_stride_size_workaround) {
+			LLVMValueRef elem_count = LLVMBuildExtractElement(ctx->ac.builder, rsrc, LLVMConstInt(ctx->ac.i32, 2, 0), "");
+			LLVMValueRef stride = LLVMBuildExtractElement(ctx->ac.builder, rsrc, LLVMConstInt(ctx->ac.i32, 1, 0), "");
+			stride = LLVMBuildLShr(ctx->ac.builder, stride, LLVMConstInt(ctx->ac.i32, 16, 0), "");
+
+			LLVMValueRef new_elem_count = LLVMBuildSelect(ctx->ac.builder,
+			                                              LLVMBuildICmp(ctx->ac.builder, LLVMIntUGT, elem_count, stride, ""),
+			                                              elem_count, stride, "");
+
+			rsrc = LLVMBuildInsertElement(ctx->ac.builder, rsrc, new_elem_count,
+			                              LLVMConstInt(ctx->ac.i32, 2, 0), "");
+		}
+
 		params[0] = ac_to_float(&ctx->ac, get_src(ctx, instr->src[2])); /* data */
-		params[1] = get_sampler_desc(ctx, instr->variables[0], AC_DESC_BUFFER, true, true);
+		params[1] = rsrc;
 		params[2] = LLVMBuildExtractElement(ctx->ac.builder, get_src(ctx, instr->src[0]),
 						    ctx->ac.i32_0, ""); /* vindex */
 		params[3] = ctx->ac.i32_0; /* voffset */
@@ -6645,6 +6668,7 @@ LLVMModuleRef ac_translate_nir_to_llvm(LLVMTargetMachineRef tm,
 	ctx.abi.load_ssbo = radv_load_ssbo;
 	ctx.abi.load_sampler_desc = radv_get_sampler_desc;
 	ctx.abi.clamp_shadow_reference = false;
+	ctx.abi.gfx9_stride_size_workaround = ctx.ac.chip_class == GFX9;
 
 	if (shader_count >= 2)
 		ac_init_exec_full_mask(&ctx.ac);
