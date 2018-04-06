@@ -1935,7 +1935,7 @@ nine_ff_load_lights(struct NineDevice9 *device)
         dst[38 + l * 8].x = cosf(light->Theta * 0.5f);
         dst[38 + l * 8].y = cosf(light->Phi * 0.5f);
         dst[38 + l * 8].z = 1.0f / (dst[38 + l * 8].x - dst[38 + l * 8].y);
-        dst[39 + l * 8].w = (l + 1) == context->ff.num_lights_active;
+        dst[39 + l * 8].w = (float)((l + 1) == context->ff.num_lights_active);
     }
 }
 
@@ -2498,7 +2498,7 @@ nine_d3d_matrix_inverse(D3DMATRIX *D, const D3DMATRIX *M)
         M->m[2][0] * D->m[0][2] +
         M->m[3][0] * D->m[0][3];
 
-    if (det < 1e-30) {/* non inversible */
+    if (fabsf(det) < 1e-30) {/* non inversible */
         *D = *M; /* wine tests */
         return;
     }
