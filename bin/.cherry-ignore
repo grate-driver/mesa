@@ -12,3 +12,7 @@ ac4437b20b87c7285b89466f05b51518ae616873 automake: small cleanup after the meson
 # fixes: The commit fixes earlier commit 1c57a6da5e3 which did not land in
 #        branch.
 3401b028df1074a06a7fbc3fb1cda949646ef75d ac/shader: fix vertex input with components.
+
+# fixes: The commit requires earlier commits 639c4f2b54a6 and 2cfba40eea4c
+#        which did not land in branch.
+8f052a3e257a61240cb311032497d016278117a8 radv: handle exporting view index to fragment shader. (v1.1)
