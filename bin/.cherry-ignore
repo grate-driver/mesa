@@ -8,3 +8,7 @@ ac4437b20b87c7285b89466f05b51518ae616873 automake: small cleanup after the meson
 # stable: There is a specific version for this patch for stable branches, but
 #         it is causing regressions.
 85d0bec9616bc1ffa8e4ab5e7c5d12ff4e414872 anv: Be more careful about fast-clear colors
+
+# fixes: The commit fixes earlier commit 1c57a6da5e3 which did not land in
+#        branch.
+3401b028df1074a06a7fbc3fb1cda949646ef75d ac/shader: fix vertex input with components.
