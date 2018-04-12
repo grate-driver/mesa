@@ -4,3 +4,7 @@ ac4437b20b87c7285b89466f05b51518ae616873 automake: small cleanup after the meson
 
 # stable: The KHX extension is disabled all together in the stable branches.
 2ffe395cba0f7b3c1f1c41062f4376eae3a188b5 radv: Don't expose VK_KHX_multiview on android.
+
+# stable: There is a specific version for this patch for stable branches, but
+#         it is causing regressions.
+85d0bec9616bc1ffa8e4ab5e7c5d12ff4e414872 anv: Be more careful about fast-clear colors
