@@ -21,3 +21,6 @@ ac4437b20b87c7285b89466f05b51518ae616873 automake: small cleanup after the meson
 #        b2f2236dc565dd1460f0 and c62cf1f165919bc74296 which did not land in
 #        branch.
 880c1718b6d14b33fe5ba918af70fea5be890c6b omx: always define ENABLE_ST_OMX_{BELLAGIO,TIZONIA}
+
+# stable: There is a specific port for this patch for stable branch.
+d15fb766aa3c98ffbe16d050b2af4804e4b12c57 radeonsi/gfx9: fix a hang with an empty first IB
