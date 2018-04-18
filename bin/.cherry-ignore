@@ -4,3 +4,20 @@ ac4437b20b87c7285b89466f05b51518ae616873 automake: small cleanup after the meson
 
 # stable: The KHX extension is disabled all together in the stable branches.
 2ffe395cba0f7b3c1f1c41062f4376eae3a188b5 radv: Don't expose VK_KHX_multiview on android.
+
+# stable: There is a specific version for this patch for stable branches, but
+#         it is causing regressions.
+85d0bec9616bc1ffa8e4ab5e7c5d12ff4e414872 anv: Be more careful about fast-clear colors
+
+# fixes: The commit fixes earlier commit 1c57a6da5e3 which did not land in
+#        branch.
+3401b028df1074a06a7fbc3fb1cda949646ef75d ac/shader: fix vertex input with components.
+
+# fixes: The commit requires earlier commits 639c4f2b54a6 and 2cfba40eea4c
+#        which did not land in branch.
+8f052a3e257a61240cb311032497d016278117a8 radv: handle exporting view index to fragment shader. (v1.1)
+
+# fixes: The commit fixes earlier commits 83d4a5d5aea5a8a05be2,
+#        b2f2236dc565dd1460f0 and c62cf1f165919bc74296 which did not land in
+#        branch.
+880c1718b6d14b33fe5ba918af70fea5be890c6b omx: always define ENABLE_ST_OMX_{BELLAGIO,TIZONIA}
