@@ -34,6 +34,8 @@
 extern "C" {
 #endif
 
+struct ac_llvm_flow;
+
 struct ac_llvm_context {
 	LLVMContextRef context;
 	LLVMModuleRef module;
@@ -57,6 +59,10 @@ struct ac_llvm_context {
 	LLVMValueRef f32_0;
 	LLVMValueRef f32_1;
 
+	struct ac_llvm_flow *flow;
+	unsigned flow_depth;
+	unsigned flow_depth_max;
+
 	unsigned range_md_kind;
 	unsigned invariant_load_md_kind;
 	unsigned uniform_md_kind;
@@ -70,6 +76,9 @@ struct ac_llvm_context {
 void
 ac_llvm_context_init(struct ac_llvm_context *ctx, LLVMContextRef context,
 		     enum chip_class chip_class);
+
+void
+ac_llvm_context_dispose(struct ac_llvm_context *ctx);
 
 unsigned ac_get_type_size(LLVMTypeRef type);
 
@@ -188,6 +197,14 @@ LLVMValueRef ac_build_buffer_load_format(struct ac_llvm_context *ctx,
 					 LLVMValueRef voffset,
 					 bool can_speculate);
 
+/* load_format that handles the stride & element count better if idxen is
+ * disabled by LLVM. */
+LLVMValueRef ac_build_buffer_load_format_gfx9_safe(struct ac_llvm_context *ctx,
+						   LLVMValueRef rsrc,
+						   LLVMValueRef vindex,
+						   LLVMValueRef voffset,
+						   bool can_speculate);
+
 LLVMValueRef
 ac_get_thread_id(struct ac_llvm_context *ctx);
 
@@ -282,6 +299,18 @@ void ac_optimize_vs_outputs(struct ac_llvm_context *ac,
 			    uint32_t num_outputs,
 			    uint8_t *num_param_exports);
 void ac_init_exec_full_mask(struct ac_llvm_context *ctx);
+
+void ac_build_bgnloop(struct ac_llvm_context *ctx, int lable_id);
+void ac_build_break(struct ac_llvm_context *ctx);
+void ac_build_continue(struct ac_llvm_context *ctx);
+void ac_build_else(struct ac_llvm_context *ctx, int lable_id);
+void ac_build_endif(struct ac_llvm_context *ctx, int lable_id);
+void ac_build_endloop(struct ac_llvm_context *ctx, int lable_id);
+void ac_build_if(struct ac_llvm_context *ctx, LLVMValueRef value,
+		 int lable_id);
+void ac_build_uif(struct ac_llvm_context *ctx, LLVMValueRef value,
+		  int lable_id);
+
 #ifdef __cplusplus
 }
 #endif

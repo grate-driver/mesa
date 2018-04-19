@@ -176,3 +176,10 @@ fb5825e7ceeb16ac05f870ffe1e5a5daa09e68dd glsl: Fix memory leak with known glsl_t
 
 # stable: Explicit 18.0 only nominations
 d77844a5290948a490ce6921c1623d1dd7af6c31 docs: fix 18.0 release note version
+
+# stable: Explicit 18.0 only nominations
+1866f76f7bc3ec54b4e91eb7d329b2e6f7b6277c freedreno/a5xx: fix page faults on last level
+2f175bfe5d8ca59a8a68b6d6d072cd7bf2f8baa9 freedreno/a5xx: don't align height for PIPE_BUFFER
+
+# fixes: A specific backport of this commit was applied for this branch.
+4503ff760c794c3bb15b978a47c530037d56498e ac/nir: Add workaround for GFX9 buffer views.
