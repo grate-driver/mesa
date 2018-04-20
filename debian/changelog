@@ -1,6 +1,11 @@
 mesa (18.0.1-1) UNRELEASED; urgency=medium
 
+  [ Timo Aaltonen ]
   * New upstream release.
+
+  [ Andreas Boll ]
+  * Update Vcs-* URLs to point at salsa.debian.org (Closes: #896146).
+    Thanks, Stuart Young!
 
  -- Timo Aaltonen <tjaalton@debian.org>  Wed, 18 Apr 2018 19:28:11 +0300
 
