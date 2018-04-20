@@ -41,6 +41,18 @@ mesa (18.0.0~rc2-1) experimental; urgency=medium
 
  -- Timo Aaltonen <tjaalton@debian.org>  Thu, 25 Jan 2018 13:42:14 +0200
 
+mesa (17.3.9-1) unstable; urgency=medium
+
+  * New upstream release.
+
+ -- Andreas Boll <aboll@debian.org>  Thu, 19 Apr 2018 11:18:35 +0200
+
+mesa (17.3.8-1) unstable; urgency=medium
+
+  * New upstream release.
+
+ -- Andreas Boll <aboll@debian.org>  Fri, 06 Apr 2018 10:24:44 +0200
+
 mesa (17.3.7-1) unstable; urgency=medium
 
   * New upstream release.
