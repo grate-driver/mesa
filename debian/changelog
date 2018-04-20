@@ -1,4 +1,4 @@
-mesa (18.0.1-1) UNRELEASED; urgency=medium
+mesa (18.0.1-1) experimental; urgency=medium
 
   [ Timo Aaltonen ]
   * New upstream release.
@@ -9,7 +9,7 @@ mesa (18.0.1-1) UNRELEASED; urgency=medium
   * Bump debhelper compat to 11.
   * Bump standards version to 4.1.4.
 
- -- Timo Aaltonen <tjaalton@debian.org>  Wed, 18 Apr 2018 19:28:11 +0300
+ -- Andreas Boll <aboll@debian.org>  Fri, 20 Apr 2018 13:29:30 +0200
 
 mesa (18.0.0-1) experimental; urgency=medium
 
