@@ -39,12 +39,12 @@ matrix:
       addons:
         apt:
           sources:
-            - llvm-toolchain-trusty-3.9
+            - llvm-toolchain-trusty-4.0
           packages:
             # LLVM packaging is broken and misses these dependencies
             - libedit-dev
             # From sources above
-            - llvm-3.9-dev
+            - llvm-4.0-dev
             # Common
             - xz-utils
             - libexpat1-dev
