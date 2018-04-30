@@ -32,3 +32,10 @@ d136a5fad9c7e67c1362453388914ecc60420883 ac: fix the number of coordinates for a
 
 # stable: There is a specific port for this patch for stable branch.
 fedd0a4215bcd387525000d76b77993ca38916ae radv/winsys: allow to submit up to 4 IBs for chips without chaining
+
+# stable: Explicit 18.1 only nominations
+413c5ca3727898fdb4fa1d2849d0c2defdd77b48 travis: update libva required version
+a6fbefa67b5b0ed1ee42a9034ee74dfaed1c389a radv: fix DCC enablement since partial MSAA implementation
+d7ffe3b384f4d1c15a9364768cf405d416522e60 radv: set ac_surf_info::num_channels correctly
+d38425ce872c4a00cfb691ae9dceca6a07afc516 ac: fix texture query LOD for 1D textures on GFX9
+4d449c94e450c33d7b2b09c1c263322042503893 autotools, meson: bump up required VA version
