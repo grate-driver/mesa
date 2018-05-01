@@ -2991,9 +2991,11 @@ AC_CONFIG_FILES([Makefile
                  src/gallium/Makefile
                  src/gallium/auxiliary/Makefile
                  src/gallium/auxiliary/pipe-loader/Makefile
-                 src/gallium/drivers/freedreno/Makefile
                  src/gallium/drivers/ddebug/Makefile
+                 src/gallium/drivers/etnaviv/Makefile
+                 src/gallium/drivers/freedreno/Makefile
                  src/gallium/drivers/i915/Makefile
+                 src/gallium/drivers/imx/Makefile
                  src/gallium/drivers/llvmpipe/Makefile
                  src/gallium/drivers/noop/Makefile
                  src/gallium/drivers/nouveau/Makefile
@@ -3007,8 +3009,6 @@ AC_CONFIG_FILES([Makefile
                  src/gallium/drivers/svga/Makefile
                  src/gallium/drivers/swr/Makefile
                  src/gallium/drivers/trace/Makefile
-                 src/gallium/drivers/etnaviv/Makefile
-                 src/gallium/drivers/imx/Makefile
                  src/gallium/drivers/vc4/Makefile
                  src/gallium/drivers/vc5/Makefile
                  src/gallium/drivers/virgl/Makefile
@@ -3042,14 +3042,14 @@ AC_CONFIG_FILES([Makefile
                  src/gallium/targets/xvmc/Makefile
                  src/gallium/tests/trivial/Makefile
                  src/gallium/tests/unit/Makefile
+                 src/gallium/winsys/amdgpu/drm/Makefile
                  src/gallium/winsys/etnaviv/drm/Makefile
-                 src/gallium/winsys/imx/drm/Makefile
                  src/gallium/winsys/freedreno/drm/Makefile
                  src/gallium/winsys/i915/drm/Makefile
+                 src/gallium/winsys/imx/drm/Makefile
                  src/gallium/winsys/nouveau/drm/Makefile
                  src/gallium/winsys/pl111/drm/Makefile
                  src/gallium/winsys/radeon/drm/Makefile
-                 src/gallium/winsys/amdgpu/drm/Makefile
                  src/gallium/winsys/svga/drm/Makefile
                  src/gallium/winsys/sw/dri/Makefile
                  src/gallium/winsys/sw/kms-dri/Makefile
