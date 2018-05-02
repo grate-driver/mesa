@@ -342,6 +342,8 @@ bool ac_query_gpu_info(int fd, amdgpu_device_handle dev,
 	/* TODO: Enable this once the kernel handles it efficiently. */
 	info->has_local_buffers = info->drm_minor >= 20 &&
 				  !info->has_dedicated_vram;
+	info->kernel_flushes_hdp_before_ib = true;
+
 	info->num_render_backends = amdinfo->rb_pipes;
 	info->clock_crystal_freq = amdinfo->gpu_counter_freq;
 	if (!info->clock_crystal_freq) {
@@ -484,6 +486,7 @@ void ac_print_gpu_info(struct radeon_info *info)
 	printf("    has_fence_to_handle = %u\n", info->has_fence_to_handle);
 	printf("    has_ctx_priority = %u\n", info->has_ctx_priority);
 	printf("    has_local_buffers = %u\n", info->has_local_buffers);
+	printf("    kernel_flushes_hdp_before_ib = %u\n", info->kernel_flushes_hdp_before_ib);
 
 	printf("Shader core info:\n");
 	printf("    max_shader_clock = %i\n", info->max_shader_clock);
