@@ -1,6 +1,7 @@
 mesa (18.1.0~rc2-1) UNRELEASED; urgency=medium
 
   * New upstream release candidate.
+  * signing-key.asc: Add the key from Dylan Baker.
 
  -- Timo Aaltonen <tjaalton@debian.org>  Wed, 02 May 2018 13:33:59 +0300
 
