@@ -3,6 +3,10 @@ mesa (18.0.2-3) UNRELEASED; urgency=medium
   [ Nicolas Braud-Santoni ]
   * Add debian/gbp.conf.
 
+  [ Timo Aaltonen ]
+  * control: libegl1-mesa-dev should pull the new libwayland-dev, update
+    dependency.
+
  -- Andreas Boll <aboll@debian.org>  Wed, 02 May 2018 19:42:26 +0200
 
 mesa (18.0.2-2) unstable; urgency=medium
