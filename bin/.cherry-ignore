@@ -46,3 +46,7 @@ d38425ce872c4a00cfb691ae9dceca6a07afc516 ac: fix texture query LOD for 1D textur
 b17cfb08a3fc9a599eff64fffe48daba398a672f vulkan/wsi: Only use LINEAR modifier for prime if supported.
 597b9e881083533b987dbcbb8f679ca1eefff974 radeonsi/gfx9: work around a GPU hang due to broken indirect indexing in LLVM
 62f50df7b79c273a0eb9bf769eded76933bddc3a radv: Fix multiview queries.
+
+# stable: The commit requires earlier commit ba79a90fb52 which did not land in
+#         branch.
+901db25d5b7cd2ac2dd648b370c4bddf23dd5c44 glsl: change ast_type_qualifier bitset size to work around GCC 5.4 bug
