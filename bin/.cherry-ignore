@@ -54,3 +54,7 @@ b17cfb08a3fc9a599eff64fffe48daba398a672f vulkan/wsi: Only use LINEAR modifier fo
 # stable: The commit fixes earlier commit d5f42f96e16 which did not land in
 #         branch.
 d07466fe18522cde1acadfc597583f80b69c15b7 mesa: fix glGetInteger/Float/etc queries for vertex arrays attribs
+
+# stable: The commit fixes earlier commit d07466fe18522 which did not land in
+#         branch.
+e4211b36bba4acde3e56ce1e22b12759e820a241 mesa: revert GL_[SECONDARY_]COLOR_ARRAY_SIZE glGet type to TYPE_INT
