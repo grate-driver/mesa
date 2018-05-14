@@ -62,3 +62,6 @@ e4211b36bba4acde3e56ce1e22b12759e820a241 mesa: revert GL_[SECONDARY_]COLOR_ARRAY
 # stable: The commit requires earlier commits ab0e625a671 and 62510846b6e which
 #         did not land in branch.
 b16fc6cda11576a4dd6c8d95f7bee94121c4b8e7 radv/resolve: do fmask decompress on all layers.
+
+# stable: There is a specific port for this patch for stable branch.
+3d4d388e3929d7948b62d90867357aecbfba5aeb radv: Fix up 2_10_10_10 alpha sign.
