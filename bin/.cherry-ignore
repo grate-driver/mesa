@@ -58,3 +58,7 @@ d07466fe18522cde1acadfc597583f80b69c15b7 mesa: fix glGetInteger/Float/etc querie
 # stable: The commit fixes earlier commit d07466fe18522 which did not land in
 #         branch.
 e4211b36bba4acde3e56ce1e22b12759e820a241 mesa: revert GL_[SECONDARY_]COLOR_ARRAY_SIZE glGet type to TYPE_INT
+
+# stable: The commit requires earlier commits ab0e625a671 and 62510846b6e which
+#         did not land in branch.
+b16fc6cda11576a4dd6c8d95f7bee94121c4b8e7 radv/resolve: do fmask decompress on all layers.
