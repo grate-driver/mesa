@@ -5523,9 +5523,6 @@ static void
 prepare_interp_optimize(struct nir_to_llvm_context *ctx,
                         struct nir_shader *nir)
 {
-	if (!ctx->options->key.fs.multisample)
-		return;
-
 	bool uses_center = false;
 	bool uses_centroid = false;
 	nir_foreach_variable(variable, &nir->inputs) {
