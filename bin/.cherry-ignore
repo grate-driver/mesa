@@ -39,3 +39,29 @@ a6fbefa67b5b0ed1ee42a9034ee74dfaed1c389a radv: fix DCC enablement since partial 
 d7ffe3b384f4d1c15a9364768cf405d416522e60 radv: set ac_surf_info::num_channels correctly
 d38425ce872c4a00cfb691ae9dceca6a07afc516 ac: fix texture query LOD for 1D textures on GFX9
 4d449c94e450c33d7b2b09c1c263322042503893 autotools, meson: bump up required VA version
+
+# stable: Explicit 18.1 only nominations
+9267ff9883f749dd1708c573c0df4b46687ff973 radv: Allow vkEnumerateInstanceVersion ProcAddr without instance.
+467c562a292b4424f24381932b90bcb9869c3d73 radv: Don't check the incoming apiVersion on CreateInstance.
+b17cfb08a3fc9a599eff64fffe48daba398a672f vulkan/wsi: Only use LINEAR modifier for prime if supported.
+597b9e881083533b987dbcbb8f679ca1eefff974 radeonsi/gfx9: work around a GPU hang due to broken indirect indexing in LLVM
+62f50df7b79c273a0eb9bf769eded76933bddc3a radv: Fix multiview queries.
+
+# stable: The commit requires earlier commit ba79a90fb52 which did not land in
+#         branch.
+901db25d5b7cd2ac2dd648b370c4bddf23dd5c44 glsl: change ast_type_qualifier bitset size to work around GCC 5.4 bug
+
+# stable: The commit fixes earlier commit d5f42f96e16 which did not land in
+#         branch.
+d07466fe18522cde1acadfc597583f80b69c15b7 mesa: fix glGetInteger/Float/etc queries for vertex arrays attribs
+
+# stable: The commit fixes earlier commit d07466fe18522 which did not land in
+#         branch.
+e4211b36bba4acde3e56ce1e22b12759e820a241 mesa: revert GL_[SECONDARY_]COLOR_ARRAY_SIZE glGet type to TYPE_INT
+
+# stable: The commit requires earlier commits ab0e625a671 and 62510846b6e which
+#         did not land in branch.
+b16fc6cda11576a4dd6c8d95f7bee94121c4b8e7 radv/resolve: do fmask decompress on all layers.
+
+# stable: There is a specific port for this patch for stable branch.
+3d4d388e3929d7948b62d90867357aecbfba5aeb radv: Fix up 2_10_10_10 alpha sign.
