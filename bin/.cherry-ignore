@@ -72,3 +72,7 @@ b16fc6cda11576a4dd6c8d95f7bee94121c4b8e7 radv/resolve: do fmask decompress on al
 
 # stable: Explicit 18.1 only nominations
 549e54270ba3a519b46a1fbffa4aa6b628a052d3 radv: fix VK_EXT_descriptor_indexing
+
+# fixes: The commit fixes earlier commits 19a91841c3 and 9987a072cb which did
+#        not land in branch.
+d89f58a6b8436b59dcf3b896c0ccddabed3f78fd mesa/st: handle vert_attrib_mask in nir case too
