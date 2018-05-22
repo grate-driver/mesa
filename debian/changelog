@@ -1,6 +1,7 @@
 mesa (18.0.4-1) UNRELEASED; urgency=medium
 
   * New upstream release.
+  * Add key from Juan A. Suarez.
 
  -- Timo Aaltonen <tjaalton@debian.org>  Tue, 22 May 2018 09:28:39 +0300
 
