@@ -69,3 +69,6 @@ b16fc6cda11576a4dd6c8d95f7bee94121c4b8e7 radv/resolve: do fmask decompress on al
 # stable: The commit requires earlier commit af4e9295fe which did not land in
 #         branch.
 816f2dc67da72be8993e724aeda4c2ec2f5a2978 i965/miptree: Fix handling of uninitialized MCS buffers
+
+# stable: Explicit 18.1 only nominations
+549e54270ba3a519b46a1fbffa4aa6b628a052d3 radv: fix VK_EXT_descriptor_indexing
