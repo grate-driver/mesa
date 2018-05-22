@@ -65,3 +65,7 @@ b16fc6cda11576a4dd6c8d95f7bee94121c4b8e7 radv/resolve: do fmask decompress on al
 
 # stable: There is a specific port for this patch for stable branch.
 3d4d388e3929d7948b62d90867357aecbfba5aeb radv: Fix up 2_10_10_10 alpha sign.
+
+# stable: The commit requires earlier commit af4e9295fe which did not land in
+#         branch.
+816f2dc67da72be8993e724aeda4c2ec2f5a2978 i965/miptree: Fix handling of uninitialized MCS buffers
