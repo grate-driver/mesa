@@ -8,6 +8,7 @@ mesa (18.1.0-1) UNRELEASED; urgency=medium
   [ Andreas Boll ]
   * New upstream release.
   * signing-key.asc: Remove old key from Juan A. Suarez Romero.
+  * Enable support for tegra on armhf and arm64. Thanks, Fabio Pedretti!
 
  -- Andreas Boll <aboll@debian.org>  Sat, 26 May 2018 09:13:16 +0200
 
