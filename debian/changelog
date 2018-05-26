@@ -1,10 +1,14 @@
-mesa (18.1.0~rc2-1) UNRELEASED; urgency=medium
+mesa (18.1.0-1) UNRELEASED; urgency=medium
 
+  [ Timo Aaltonen ]
   * New upstream release candidate.
   * signing-key.asc: Add the key from Dylan Baker.
   * rules: Update clean target.
 
- -- Timo Aaltonen <tjaalton@debian.org>  Wed, 02 May 2018 13:33:59 +0300
+  [ Andreas Boll ]
+  * New upstream release.
+
+ -- Andreas Boll <aboll@debian.org>  Sat, 26 May 2018 09:13:16 +0200
 
 mesa (18.0.4-1) unstable; urgency=medium
 
