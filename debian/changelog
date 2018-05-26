@@ -1,4 +1,4 @@
-mesa (18.1.0-1) UNRELEASED; urgency=medium
+mesa (18.1.0-1) experimental; urgency=medium
 
   [ Timo Aaltonen ]
   * New upstream release candidate.
@@ -11,7 +11,7 @@ mesa (18.1.0-1) UNRELEASED; urgency=medium
   * Enable support for tegra on armhf and arm64. Thanks, Fabio Pedretti!
   * Bump libdrm-dev dependency to 2.4.91.
 
- -- Andreas Boll <aboll@debian.org>  Sat, 26 May 2018 09:13:16 +0200
+ -- Andreas Boll <aboll@debian.org>  Sat, 26 May 2018 10:34:44 +0200
 
 mesa (18.0.4-1) unstable; urgency=medium
 
