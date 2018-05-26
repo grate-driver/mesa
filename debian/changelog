@@ -7,6 +7,7 @@ mesa (18.1.0-1) UNRELEASED; urgency=medium
 
   [ Andreas Boll ]
   * New upstream release.
+  * signing-key.asc: Remove old key from Juan A. Suarez Romero.
 
  -- Andreas Boll <aboll@debian.org>  Sat, 26 May 2018 09:13:16 +0200
 
