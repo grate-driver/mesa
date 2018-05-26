@@ -9,6 +9,7 @@ mesa (18.1.0-1) UNRELEASED; urgency=medium
   * New upstream release.
   * signing-key.asc: Remove old key from Juan A. Suarez Romero.
   * Enable support for tegra on armhf and arm64. Thanks, Fabio Pedretti!
+  * Bump libdrm-dev dependency to 2.4.91.
 
  -- Andreas Boll <aboll@debian.org>  Sat, 26 May 2018 09:13:16 +0200
 
