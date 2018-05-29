@@ -39,7 +39,7 @@ else
   ifeq ($(DEB_HOST_ARCH_OS), linux)
 	# tegra kernel support is only available on armhf and arm64
 	ifneq (,$(filter $(DEB_HOST_ARCH), armhf arm64))
-		GALLIUM_DRIVERS += tegra
+		GALLIUM_DRIVERS += grate
 	endif
 
 	ifneq (,$(filter $(DEB_HOST_ARCH), amd64 i386 x32))
