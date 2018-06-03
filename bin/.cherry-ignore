@@ -65,3 +65,26 @@ b16fc6cda11576a4dd6c8d95f7bee94121c4b8e7 radv/resolve: do fmask decompress on al
 
 # stable: There is a specific port for this patch for stable branch.
 3d4d388e3929d7948b62d90867357aecbfba5aeb radv: Fix up 2_10_10_10 alpha sign.
+
+# stable: The commit requires earlier commit af4e9295fe which did not land in
+#         branch.
+816f2dc67da72be8993e724aeda4c2ec2f5a2978 i965/miptree: Fix handling of uninitialized MCS buffers
+
+# stable: Explicit 18.1 only nominations
+549e54270ba3a519b46a1fbffa4aa6b628a052d3 radv: fix VK_EXT_descriptor_indexing
+
+# fixes: The commit fixes earlier commits 19a91841c3 and 9987a072cb which did
+#        not land in branch.
+d89f58a6b8436b59dcf3b896c0ccddabed3f78fd mesa/st: handle vert_attrib_mask in nir case too
+
+# stable: Tegra support is not part of the current branch
+bd3e97e5aad7800b8e17ed10d34a070926691945 tegra: Remove usage of non-stable UAPI
+9603d81df05105857b676f20dff964ef3ab0ecff tegra: Fix scanout resources without modifiers
+9e539012dfaa848fc4cfde83c3f3a83fee274ca4 tegra: Treat resources with modifiers as scanout
+
+# stable: The commit requires earlier commit 19a91841c3 which did not land in
+#         branch.
+a7d0c53ab89ca86b705014925214101f5bc4187f st/mesa: fix assertion failures with GL_UNSIGNED_INT64_ARB (v2)
+
+# stable: Explicit 18.1 only nomination
+30918b77ac82ba1da7764c0375233656e0ebf9f9 nv30: ensure that displayable formats are marked accordingly
