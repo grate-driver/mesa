@@ -1,3 +1,10 @@
+mesa (18.0.5-1) UNRELEASED; urgency=medium
+
+  * New upstream release.
+    - Fixes compositor freezes with XServer 1.20. Closes: #900149.
+
+ -- Emilio Pozuelo Monfort <pochu@debian.org>  Sun, 03 Jun 2018 19:25:45 +0200
+
 mesa (18.0.4-1) unstable; urgency=medium
 
   * New upstream release.
