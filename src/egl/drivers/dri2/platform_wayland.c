@@ -260,6 +260,10 @@ dri2_wl_create_window_surface(_EGLDriver *drv, _EGLDisplay *disp,
 
    config = dri2_get_dri_config(dri2_conf, EGL_WINDOW_BIT,
                                 dri2_surf->base.GLColorspace);
+
+   dri2_surf->base.Width = window->width;
+   dri2_surf->base.Height = window->height;
+
    visual_idx = dri2_wl_visual_idx_from_config(dri2_dpy, config);
    assert(visual_idx != -1);
 
