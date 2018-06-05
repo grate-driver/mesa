@@ -1259,20 +1259,22 @@ static GLboolean
 intel_query_dma_buf_formats(__DRIscreen *screen, int max,
                             int *formats, int *count)
 {
-   int i, j = 0;
+   int num_formats = 0, i;
 
-   if (max == 0) {
-      *count = ARRAY_SIZE(intel_image_formats) - 1; /* not SARGB */
-      return true;
-   }
-
-   for (i = 0; i < (ARRAY_SIZE(intel_image_formats)) && j < max; i++) {
+   for (i = 0; i < ARRAY_SIZE(intel_image_formats); i++) {
      if (intel_image_formats[i].fourcc == __DRI_IMAGE_FOURCC_SARGB8888)
-       continue;
-     formats[j++] = intel_image_formats[i].fourcc;
+         continue;
+
+      num_formats++;
+      if (max == 0)
+         continue;
+
+      formats[num_formats - 1] = intel_image_formats[i].fourcc;
+      if (num_formats >= max)
+         break;
    }
 
-   *count = j;
+   *count = num_formats;
    return true;
 }
 
