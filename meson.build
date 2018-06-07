@@ -873,7 +873,7 @@ endif
 # TODO: it should be possible to use an exe_wrapper to run the binary during
 # the build. 
 if meson.is_cross_build() 
-  if not (build_machine.cpu_family() == 'x86_64' and host_machine.cpu_family() == 'x86'
+  if not (build_machine.cpu_family().startswith('x86') and host_machine.cpu_family() == 'x86'
           and build_machine.system() == host_machine.system())
     message('Cross compiling to x86 from non-x86, disabling asm')
     with_asm = false
