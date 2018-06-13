@@ -1,3 +1,9 @@
+mesa (18.1.1-1) UNRELEASED; urgency=medium
+
+  * New upstream release. (Closes: #901342)
+
+ -- Timo Aaltonen <tjaalton@debian.org>  Wed, 13 Jun 2018 10:35:59 +0300
+
 mesa (18.1.0-1) experimental; urgency=medium
 
   [ Timo Aaltonen ]
