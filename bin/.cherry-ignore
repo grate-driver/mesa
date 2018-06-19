@@ -1,0 +1,16 @@
+d89f58a6b8436b59dcf3b896c0ccddabed3f78fd
+a7d0c53ab89ca86b705014925214101f5bc4187f
+
+# These patches are ignored becuase Jason provided a version rebased on the 18.1
+# branch that was pulled instead
+#
+778e2881a04817e8c10c7a400bf1e37414420194
+3b54dd87f707a0fa40a1555bee64aeb06a381c27
+eeae4851494c16d2a6591550bfa6ef77d887ebe3
+a26693493570a9d0f0fba1be617e01ee7bfff4db
+0e7f3febf7e739c075a139ae641d65a0618752f3
+
+# This has a warning that it fixes more than one commit, but isn't needed in
+# 18.1
+#
+a1220e73116bad74f39c1792a0b0cf0e4e5031db
