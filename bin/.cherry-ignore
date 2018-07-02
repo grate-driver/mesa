@@ -14,3 +14,19 @@ a26693493570a9d0f0fba1be617e01ee7bfff4db
 # 18.1
 #
 a1220e73116bad74f39c1792a0b0cf0e4e5031db
+
+# This doesn't apply and isn't necessary since
+# 1cc2e0cc6b47bd5efbf2af266405060785085e6b isn't in the 18.1 branch
+#
+587e712eda95c31d88ea9d20e59ad0ae59afef4f
+
+# This requires too many previous patch, and Marek (the author) decided to
+# to drop it from stable
+# 
+cac7ab1192eefdd8d8b3f25053fb006b5c330eb8
+
+# This patch is excluded since it requires additional patches to be pulled,
+# and is mainly aimed at developers, who rarely (if ever) work in the
+# stable branch
+#
+a2f5292c82ad07731d633b36a663e46adc181db9
