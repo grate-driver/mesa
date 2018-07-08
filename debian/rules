@@ -62,6 +62,7 @@ else
 
 	confflags_GALLIUM += ac_cv_path_LLVM_CONFIG=llvm-config-5.0
 	DRI_DRIVERS += swrast
+	GALLIUM_DRIVERS += swrast
 
 	confflags_DIRECT_RENDERING = --enable-driglx-direct
 	confflags_GBM = --enable-gbm
