@@ -1559,7 +1559,7 @@ struct blt_coords {
    struct blt_axis x, y;
 };
 
-static void
+void
 surf_fake_rgb_with_red(const struct isl_device *isl_dev,
                        struct brw_blorp_surface_info *info)
 {
