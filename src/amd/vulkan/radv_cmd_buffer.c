@@ -2500,6 +2500,11 @@ VkResult radv_EndCommandBuffer(
 		si_emit_cache_flush(cmd_buffer);
 	}
 
+	/* Make sure CP DMA is idle at the end of IBs because the kernel
+	 * doesn't wait for it.
+	 */
+	si_cp_dma_wait_for_idle(cmd_buffer);
+
 	vk_free(&cmd_buffer->pool->alloc, cmd_buffer->state.attachments);
 
 	if (!cmd_buffer->device->ws->cs_finalize(cmd_buffer->cs))
@@ -4054,6 +4059,11 @@ void radv_CmdPipelineBarrier(
 					     0);
 	}
 
+	/* Make sure CP DMA is idle because the driver might have performed a
+	 * DMA operation for copying or filling buffers/images.
+	 */
+	si_cp_dma_wait_for_idle(cmd_buffer);
+
 	cmd_buffer->state.flush_bits |= dst_flush_bits;
 }
 
@@ -4069,6 +4079,11 @@ static void write_event(struct radv_cmd_buffer *cmd_buffer,
 	radv_cs_add_buffer(cmd_buffer->device->ws, cs, event->bo, 8);
 
 	MAYBE_UNUSED unsigned cdw_max = radeon_check_space(cmd_buffer->device->ws, cs, 18);
+
+	/* Make sure CP DMA is idle because the driver might have performed a
+	 * DMA operation for copying or filling buffers/images.
+	 */
+	si_cp_dma_wait_for_idle(cmd_buffer);
 
 	/* TODO: this is overkill. Probably should figure something out from
 	 * the stage mask. */
