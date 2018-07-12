@@ -30,3 +30,8 @@ cac7ab1192eefdd8d8b3f25053fb006b5c330eb8
 # stable branch
 #
 a2f5292c82ad07731d633b36a663e46adc181db9
+
+# This patch required manual backport, which was provided as
+# 3953467ee7851792c1d4b1c9435499545a7da9fc
+#
+4a67ce886a7b3def5f66c1aedf9e5436d157a03c
