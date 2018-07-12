@@ -54,7 +54,7 @@ with_osmesa = get_option('osmesa')
 with_swr_arches = get_option('swr-arches').split(',')
 with_tools = get_option('tools').split(',')
 if with_tools.contains('all')
-  with_tools = ['freedreno', 'glsl', 'intel', 'nir', 'nouveau']
+  with_tools = ['freedreno', 'glsl', 'intel', 'nir', 'nouveau', 'xvmc']
 endif
 if get_option('texture-float')
   pre_args += '-DTEXTURE_FLOAT_ENABLED'
