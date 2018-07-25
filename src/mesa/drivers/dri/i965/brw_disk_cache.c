@@ -422,6 +422,9 @@ void
 brw_disk_cache_init(struct intel_screen *screen)
 {
 #ifdef ENABLE_SHADER_CACHE
+   if (INTEL_DEBUG & DEBUG_DISK_CACHE_DISABLE_MASK)
+      return;
+
    char renderer[10];
    MAYBE_UNUSED int len = snprintf(renderer, sizeof(renderer), "i965_%04x",
                                    screen->deviceID);
