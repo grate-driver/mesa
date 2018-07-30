@@ -30,3 +30,18 @@ cac7ab1192eefdd8d8b3f25053fb006b5c330eb8
 # stable branch
 #
 a2f5292c82ad07731d633b36a663e46adc181db9
+
+# This patch required manual backport, which was provided as
+# 3953467ee7851792c1d4b1c9435499545a7da9fc
+#
+4a67ce886a7b3def5f66c1aedf9e5436d157a03c
+
+# This patch required manual backport, which was provided as
+# 31677c5aa867e457cd06ae25150be2155e8da3c6
+#
+1f616a840eac02241c585d28e9dac8f19a297f39
+
+# Jason de-nominated this because it "a) shouldn't be needed and b) is horribly
+# broken"
+#
+11712b9ca17e4e1a819dcb7d020e19c6da77bc90
