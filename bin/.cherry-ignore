@@ -45,3 +45,9 @@ a2f5292c82ad07731d633b36a663e46adc181db9
 # broken"
 #
 11712b9ca17e4e1a819dcb7d020e19c6da77bc90
+
+# Neither of these are tagged fro 18.1, they'r both for 18.2, but get-pick-list
+# still finds them
+#
+1c7a2433b270afb65f044d0cf49cb67715f50b5b
+0f79b2015bc0c44a8ed470684b6789f0e2e6aa6c
