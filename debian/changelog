@@ -1,3 +1,9 @@
+mesa (18.1.6-1) UNRELEASED; urgency=medium
+
+  * New upstream release.
+
+ -- Andreas Boll <aboll@debian.org>  Tue, 14 Aug 2018 08:17:38 +0200
+
 mesa (18.1.5-1) unstable; urgency=medium
 
   * New upstream release.
