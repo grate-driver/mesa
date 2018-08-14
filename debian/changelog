@@ -1,6 +1,8 @@
 mesa (18.1.6-1) UNRELEASED; urgency=medium
 
   * New upstream release.
+    - Fixes white screen when running Xfwm4 with compositing
+      (Closes: #901789).
   * Drop glvnd-fix-gl-dot-pc.patch, fixed upstream (0c927e8da9e)
     (Closes: #896447).
 
