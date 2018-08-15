@@ -99,6 +99,7 @@ endif
 
 if with_platform_x11
   files_egl += files('drivers/dri2/platform_x11.c')
+  incs_for_egl += inc_loader
   if with_dri3
     files_egl += files('drivers/dri2/platform_x11_dri3.c')
     link_for_egl += libloader_dri3_helper
