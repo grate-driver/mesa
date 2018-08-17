@@ -692,7 +692,7 @@ static int radv_amdgpu_create_bo_list(struct radv_amdgpu_winsys *ws,
 			if (!cs->num_buffers)
 				continue;
 
-			if (unique_bo_count == 0) {
+			if (unique_bo_count == 0 && !cs->num_virtual_buffers) {
 				memcpy(handles, cs->handles, cs->num_buffers * sizeof(amdgpu_bo_handle));
 				memcpy(priorities, cs->priorities, cs->num_buffers * sizeof(uint8_t));
 				unique_bo_count = cs->num_buffers;
