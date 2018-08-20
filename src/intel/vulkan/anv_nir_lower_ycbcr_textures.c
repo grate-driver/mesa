@@ -337,18 +337,16 @@ try_lower_tex_ycbcr(struct anv_pipeline_layout *layout,
    if (binding->immutable_samplers == NULL)
       return false;
 
-   unsigned texture_index = tex->texture_index;
+   assert(tex->texture_index == 0);
+   unsigned array_index = 0;
    if (tex->texture->deref.child) {
       assert(tex->texture->deref.child->deref_type == nir_deref_type_array);
       nir_deref_array *deref_array = nir_deref_as_array(tex->texture->deref.child);
       if (deref_array->deref_array_type != nir_deref_array_type_direct)
          return false;
-      size_t hw_binding_size =
-         anv_descriptor_set_binding_layout_get_hw_size(binding);
-      texture_index += MIN2(deref_array->base_offset, hw_binding_size - 1);
+      array_index = MIN2(deref_array->base_offset, binding->array_size - 1);
    }
-   const struct anv_sampler *sampler =
-      binding->immutable_samplers[texture_index];
+   const struct anv_sampler *sampler = binding->immutable_samplers[array_index];
 
    if (sampler->conversion == NULL)
       return false;
