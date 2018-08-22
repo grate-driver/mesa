@@ -1,4 +1,4 @@
-mesa (18.2.0~rc1-1) UNRELEASED; urgency=medium
+mesa (18.2.0~rc4-1) UNRELEASED; urgency=medium
 
   * New upstream release candidate.
   * control: Add libxrandr-dev and libwayland-egl-backend-dev to build-
