@@ -94,6 +94,15 @@ v3d_choose_spill_node(struct v3d_compile *c, struct ra_graph *g,
                                 }
                         }
 
+                        /* Refuse to spill a ldvary's dst, because that means
+                         * that ldvary's r5 would end up being used across a
+                         * thrsw.
+                         */
+                        if (inst->qpu.sig.ldvary) {
+                                assert(inst->dst.file == QFILE_TEMP);
+                                BITSET_CLEAR(c->spillable, inst->dst.index);
+                        }
+
                         if (inst->is_last_thrsw)
                                 started_last_seg = true;
 
@@ -102,12 +111,16 @@ v3d_choose_spill_node(struct v3d_compile *c, struct ra_graph *g,
                                 started_last_seg = true;
 
                         /* Track when we're in between a TMU setup and the
-                         * final LDTMU from that TMU setup.  We can't
+                         * final LDTMU or TMUWT from that TMU setup.  We can't
                          * spill/fill any temps during that time, because that
                          * involves inserting a new TMU setup/LDTMU sequence.
                          */
                         if (inst->qpu.sig.ldtmu &&
                             is_last_ldtmu(inst, block))
+                                in_tmu_operation = false;
+
+                        if (inst->qpu.type == V3D_QPU_INSTR_TYPE_ALU &&
+                            inst->qpu.alu.add.op == V3D_QPU_A_TMUWT)
                                 in_tmu_operation = false;
 
                         if (v3d_qpu_writes_tmu(&inst->qpu))
@@ -206,6 +219,7 @@ v3d_spill_reg(struct v3d_compile *c, int spill_temp)
                                      inst->dst);
                         v3d_emit_spill_tmua(c, spill_offset);
                         vir_emit_thrsw(c);
+                        vir_TMUWT(c);
                         c->spills++;
                 }
 

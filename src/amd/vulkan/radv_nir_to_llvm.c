@@ -1991,8 +1991,7 @@ handle_vs_input_decl(struct radv_shader_context *ctx,
 			uint32_t divisor = ctx->options->key.vs.instance_rate_divisors[attrib_index];
 
 			if (divisor) {
-				buffer_index = LLVMBuildAdd(ctx->ac.builder, ctx->abi.instance_id,
-				                            ctx->abi.start_instance, "");
+				buffer_index = ctx->abi.instance_id;
 
 				if (divisor != 1) {
 					buffer_index = LLVMBuildUDiv(ctx->ac.builder, buffer_index,
@@ -2009,6 +2008,8 @@ handle_vs_input_decl(struct radv_shader_context *ctx,
 			} else {
 				buffer_index = ctx->ac.i32_0;
 			}
+
+			buffer_index = LLVMBuildAdd(ctx->ac.builder, ctx->abi.start_instance, buffer_index, "");
 		} else
 			buffer_index = LLVMBuildAdd(ctx->ac.builder, ctx->abi.vertex_id,
 			                            ctx->abi.base_vertex, "");

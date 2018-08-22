@@ -776,6 +776,14 @@ blorp_nir_manual_blend_bilinear(nir_builder *b, nir_ssa_def *pos,
        * grid of samples with in a pixel. Sample number layout shows the
        * rectangular grid of samples roughly corresponding to the real sample
        * locations with in a pixel.
+       *
+       * In the case of 2x MSAA, the layout of sample indices is reversed from
+       * the layout of sample numbers:
+       *
+       * sample index layout :  ---------    sample number layout :  ---------
+       *                        | 0 | 1 |                            | 1 | 0 |
+       *                        ---------                            ---------
+       *
        * In case of 4x MSAA, layout of sample indices matches the layout of
        * sample numbers:
        *           ---------
@@ -819,7 +827,9 @@ blorp_nir_manual_blend_bilinear(nir_builder *b, nir_ssa_def *pos,
                                             key->x_scale * key->y_scale));
       sample = nir_f2i32(b, sample);
 
-      if (tex_samples == 8) {
+      if (tex_samples == 2) {
+         sample = nir_isub(b, nir_imm_int(b, 1), sample);
+      } else if (tex_samples == 8) {
          sample = nir_iand(b, nir_ishr(b, nir_imm_int(b, 0x64210573),
                                        nir_ishl(b, sample, nir_imm_int(b, 2))),
                            nir_imm_int(b, 0xf));
@@ -984,14 +994,14 @@ convert_color(struct nir_builder *b, nir_ssa_def *color,
    nir_ssa_def *value;
 
    if (key->dst_format == ISL_FORMAT_R24_UNORM_X8_TYPELESS) {
-      /* The destination image is bound as R32_UNORM but the data needs to be
+      /* The destination image is bound as R32_UINT but the data needs to be
        * in R24_UNORM_X8_TYPELESS.  The bottom 24 are the actual data and the
        * top 8 need to be zero.  We can accomplish this by simply multiplying
        * by a factor to scale things down.
        */
-      float factor = (float)((1 << 24) - 1) / (float)UINT32_MAX;
-      value = nir_fmul(b, nir_fsat(b, nir_channel(b, color, 0)),
-                          nir_imm_float(b, factor));
+      unsigned factor = (1 << 24) - 1;
+      value = nir_fsat(b, nir_channel(b, color, 0));
+      value = nir_f2i32(b, nir_fmul(b, value, nir_imm_float(b, factor)));
    } else if (key->dst_format == ISL_FORMAT_L8_UNORM_SRGB) {
       value = nir_format_linear_to_srgb(b, nir_channel(b, color, 0));
    } else if (key->dst_format == ISL_FORMAT_R8G8B8_UNORM_SRGB) {
@@ -1976,7 +1986,7 @@ try_blorp_blit(struct blorp_batch *batch,
          isl_format_rgbx_to_rgba(params->dst.view.format);
    } else if (params->dst.view.format == ISL_FORMAT_R24_UNORM_X8_TYPELESS) {
       wm_prog_key->dst_format = params->dst.view.format;
-      params->dst.view.format = ISL_FORMAT_R32_UNORM;
+      params->dst.view.format = ISL_FORMAT_R32_UINT;
    } else if (params->dst.view.format == ISL_FORMAT_A4B4G4R4_UNORM) {
       params->dst.view.swizzle =
          isl_swizzle_compose(params->dst.view.swizzle,
@@ -2238,6 +2248,17 @@ blorp_blit(struct blorp_batch *batch,
          src_format = ISL_FORMAT_R8_UNORM;
          dst_format = ISL_FORMAT_R8_UNORM;
       }
+   }
+
+   /* ISL_FORMAT_R24_UNORM_X8_TYPELESS it isn't supported as a render target,
+    * which requires shader math to render to it.  Blitting Z24X8 to Z24X8
+    * is fairly common though, so we'd like to avoid it.  Since we don't need
+    * to blend depth values, we can simply pick a renderable format with the
+    * right number of bits-per-pixel, like 8-bit BGRA.
+    */
+   if (dst_surf->surf->format == ISL_FORMAT_R24_UNORM_X8_TYPELESS &&
+       src_surf->surf->format == ISL_FORMAT_R24_UNORM_X8_TYPELESS) {
+      src_format = dst_format = ISL_FORMAT_B8G8R8A8_UNORM;
    }
 
    brw_blorp_surface_info_init(batch->blorp, &params.src, src_surf, src_level,

@@ -121,7 +121,8 @@ vc4_fence_server_sync(struct pipe_context *pctx,
         struct vc4_context *vc4 = vc4_context(pctx);
         struct vc4_fence *fence = vc4_fence(pfence);
 
-        sync_accumulate("vc4", &vc4->in_fence_fd, fence->fd);
+        if (fence->fd >= 0)
+                sync_accumulate("vc4", &vc4->in_fence_fd, fence->fd);
 }
 
 static int
@@ -142,8 +143,12 @@ vc4_fence_context_init(struct vc4_context *vc4)
         /* Since we initialize the in_fence_fd to -1 (no wait necessary),
          * we also need to initialize our in_syncobj as signaled.
          */
-        return drmSyncobjCreate(vc4->fd, DRM_SYNCOBJ_CREATE_SIGNALED,
-                                &vc4->in_syncobj);
+        if (vc4->screen->has_syncobj) {
+                return drmSyncobjCreate(vc4->fd, DRM_SYNCOBJ_CREATE_SIGNALED,
+                                        &vc4->in_syncobj);
+        } else {
+                return 0;
+        }
 }
 
 void

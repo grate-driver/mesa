@@ -1,0 +1,3 @@
+# fixes:  This commit has more than one Fixes tag but the commit it
+#         addresses didn't land in branch.
+6ff1c479968819b93c46d24bd898e89ce14ac401 autotools: don't ship the git_sha1.h generated in git in the tarballs
