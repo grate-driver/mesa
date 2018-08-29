@@ -81,3 +81,8 @@ c92a463d2341dd7893dd8b54775930ed9be72ac0
 # to pull them.
 #
 48820ed8da0ad50d51a58f26e156d82b685492e2
+
+# This patch doesn't apply and either needs to be backported or can just be
+# ignored
+#
+1e40f6948310be07abb2d0198e6602769892cdac
