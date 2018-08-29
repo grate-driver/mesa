@@ -1,3 +1,6 @@
 # fixes:  This commit has more than one Fixes tag but the commit it
 #         addresses didn't land in branch.
 6ff1c479968819b93c46d24bd898e89ce14ac401 autotools: don't ship the git_sha1.h generated in git in the tarballs
+# pick:   This commit addresses a regression introduced by previous
+#         commit fa9e6c235da, which didn't make it for 18.2.
+a72dbc461bdb7714656e62cd8f4b00a404c2e6e0 mesa: allow GL_UNSIGNED_BYTE type for SNORM reads
