@@ -1,10 +1,10 @@
-mesa (18.1.7-1) UNRELEASED; urgency=medium
+mesa (18.1.7-1) unstable; urgency=medium
 
   * New upstream release.
   * libglx-mesa0: Add Breaks: glx-diversions (<< 0.8.4~) (Closes:
     #903929).
 
- -- Andreas Boll <aboll@debian.org>  Wed, 29 Aug 2018 10:33:07 +0200
+ -- Andreas Boll <aboll@debian.org>  Wed, 29 Aug 2018 11:16:55 +0200
 
 mesa (18.1.6-1) unstable; urgency=medium
 
