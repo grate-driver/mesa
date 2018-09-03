@@ -7,3 +7,5 @@ a72dbc461bdb7714656e62cd8f4b00a404c2e6e0 mesa: allow GL_UNSIGNED_BYTE type for S
 # fixes:  This commit has more than one Fixes tag but the commit it
 #         addresses didn't land in branch.
 c9f54486959716762e6818dabb0a73a8cd46df67 radeonsi: fix regression in indirect input swizzles.
+# extra:  Just some comments update.
+2ad9917e187c1e9dbb053d3c98aa0e39fa374059 anv/blorp: Fix a comment as per Nanley's review feedback
