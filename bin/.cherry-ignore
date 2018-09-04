@@ -75,6 +75,8 @@ c92a463d2341dd7893dd8b54775930ed9be72ac0
 #
 24839663a40257e0468406d72c48d431b5ae2bd4
 6ff1c479968819b93c46d24bd898e89ce14ac401
+ac0856ae4100a05dcd1fd932d9fd10200f8f7a7c
+c9f54486959716762e6818dabb0a73a8cd46df67
 
 # This patch requires patches that would require python 3, the thing they're
 # fixing isn't really even a bug, it's more of a style choice, so I'm not going
