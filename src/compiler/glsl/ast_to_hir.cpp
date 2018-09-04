@@ -3944,7 +3944,8 @@ apply_type_qualifier_to_variable(const struct ast_type_qualifier *qual,
                           "`invariant' after being used",
                           var->name);
       } else {
-         var->data.invariant = 1;
+         var->data.explicit_invariant = true;
+         var->data.invariant = true;
       }
    }
 
@@ -4152,8 +4153,10 @@ apply_type_qualifier_to_variable(const struct ast_type_qualifier *qual,
       }
    }
 
-   if (state->all_invariant && var->data.mode == ir_var_shader_out)
+   if (state->all_invariant && var->data.mode == ir_var_shader_out) {
+      var->data.explicit_invariant = true;
       var->data.invariant = true;
+   }
 
    var->data.interpolation =
       interpret_interpolation_qualifier(qual, var->type,
@@ -4861,6 +4864,7 @@ ast_declarator_list::hir(exec_list *instructions,
                             "`invariant' after being used",
                             earlier->name);
          } else {
+            earlier->data.explicit_invariant = true;
             earlier->data.invariant = true;
          }
       }
