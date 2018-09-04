@@ -92,3 +92,7 @@ c9f54486959716762e6818dabb0a73a8cd46df67
 # This patch isn't necessary, since the patch it fixes is not present in 18.1
 #
 a72dbc461bdb7714656e62cd8f4b00a404c2e6e0
+
+# This requires a much more significant patch not present in 18.1
+#
+4dc244eb447b1fa4e39d67a58328ed774395c901
