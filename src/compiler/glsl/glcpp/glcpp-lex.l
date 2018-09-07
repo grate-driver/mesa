@@ -420,10 +420,8 @@ HEXADECIMAL_INTEGER	0[xX][0-9a-fA-F]+[uU]?
 
 	/* This will catch any non-directive garbage after a HASH */
 <HASH>{NONSPACE} {
-	if (!parser->skipping) {
-		BEGIN INITIAL;
-		RETURN_TOKEN (GARBAGE);
-	}
+	BEGIN INITIAL;
+	RETURN_TOKEN (GARBAGE);
 }
 
 	/* An identifier immediately followed by '(' */
