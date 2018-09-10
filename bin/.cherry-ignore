@@ -66,8 +66,33 @@ f9e8456c39136aa41f85f82758a00e5aa2aab334
 a4a104fc81e93555899050efac23c3cd6ba762ab
 24ee53231da84a1be5ec08abebe8a2ff6aa019ca
 4c43ec461de4f122d5d6566361d064c816e4ef69
+743e11c10b180247488ae0cc24900560e0a74e2b
+4ffb575da59fd3aece02734ca4fd3212d5002d55
+8c048af5890d43578ca41eb9dcfa60cb9cc3fc9c
+c92a463d2341dd7893dd8b54775930ed9be72ac0
 
 # These have more than one fixes tag and generate a warning
 #
 24839663a40257e0468406d72c48d431b5ae2bd4
 6ff1c479968819b93c46d24bd898e89ce14ac401
+ac0856ae4100a05dcd1fd932d9fd10200f8f7a7c
+c9f54486959716762e6818dabb0a73a8cd46df67
+
+# This patch requires patches that would require python 3, the thing they're
+# fixing isn't really even a bug, it's more of a style choice, so I'm not going
+# to pull them.
+#
+48820ed8da0ad50d51a58f26e156d82b685492e2
+
+# This patch doesn't apply and either needs to be backported or can just be
+# ignored
+#
+1e40f6948310be07abb2d0198e6602769892cdac
+
+# This patch isn't necessary, since the patch it fixes is not present in 18.1
+#
+a72dbc461bdb7714656e62cd8f4b00a404c2e6e0
+
+# This requires a much more significant patch not present in 18.1
+#
+4dc244eb447b1fa4e39d67a58328ed774395c901

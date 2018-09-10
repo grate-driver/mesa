@@ -509,7 +509,7 @@ free_aux_state_map(enum isl_aux_state **state)
 }
 
 static bool
-need_to_retile_as_linear(struct brw_context *brw, unsigned row_pitch,
+need_to_retile_as_linear(struct brw_context *brw, unsigned blt_pitch,
                          enum isl_tiling tiling, unsigned samples)
 {
    if (samples > 1)
@@ -518,13 +518,9 @@ need_to_retile_as_linear(struct brw_context *brw, unsigned row_pitch,
    if (tiling == ISL_TILING_LINEAR)
       return false;
 
-    /* If the width is much smaller than a tile, don't bother tiling. */
-   if (row_pitch < 64)
-      return true;
-
-   if (ALIGN(row_pitch, 512) >= 32768) {
-      perf_debug("row pitch %u too large to blit, falling back to untiled",
-                 row_pitch);
+   if (blt_pitch >= 32768) {
+      perf_debug("blt pitch %u too large to blit, falling back to untiled",
+                 blt_pitch);
       return true;
    }
 
@@ -604,7 +600,7 @@ make_surface(struct brw_context *brw, GLenum target, mesa_format format,
    bool is_depth_stencil =
       mt->surf.usage & (ISL_SURF_USAGE_STENCIL_BIT | ISL_SURF_USAGE_DEPTH_BIT);
    if (!is_depth_stencil) {
-      if (need_to_retile_as_linear(brw, mt->surf.row_pitch,
+      if (need_to_retile_as_linear(brw, intel_miptree_blt_pitch(mt),
                                    mt->surf.tiling, mt->surf.samples)) {
          init_info.tiling_flags = 1u << ISL_TILING_LINEAR;
          if (!isl_surf_init_s(&brw->isl_dev, &mt->surf, &init_info))
@@ -3578,21 +3574,18 @@ intel_miptree_release_map(struct intel_mipmap_tree *mt,
 
 static bool
 can_blit_slice(struct intel_mipmap_tree *mt,
-               unsigned int level, unsigned int slice)
+               const struct intel_miptree_map *map)
 {
    /* See intel_miptree_blit() for details on the 32k pitch limit. */
-   if (mt->surf.row_pitch >= 32768)
-      return false;
-
-   return true;
+   const unsigned src_blt_pitch = intel_miptree_blt_pitch(mt);
+   const unsigned dst_blt_pitch = ALIGN(map->w * mt->cpp, 64);
+   return src_blt_pitch < 32768 && dst_blt_pitch < 32768;
 }
 
 static bool
 use_intel_mipree_map_blit(struct brw_context *brw,
                           struct intel_mipmap_tree *mt,
-                          GLbitfield mode,
-                          unsigned int level,
-                          unsigned int slice)
+                          const struct intel_miptree_map *map)
 {
    const struct gen_device_info *devinfo = &brw->screen->devinfo;
 
@@ -3600,19 +3593,19 @@ use_intel_mipree_map_blit(struct brw_context *brw,
       /* It's probably not worth swapping to the blit ring because of
        * all the overhead involved.
        */
-       !(mode & GL_MAP_WRITE_BIT) &&
+       !(map->mode & GL_MAP_WRITE_BIT) &&
        !mt->compressed &&
        (mt->surf.tiling == ISL_TILING_X ||
         /* Prior to Sandybridge, the blitter can't handle Y tiling */
         (devinfo->gen >= 6 && mt->surf.tiling == ISL_TILING_Y0) ||
         /* Fast copy blit on skl+ supports all tiling formats. */
         devinfo->gen >= 9) &&
-       can_blit_slice(mt, level, slice))
+       can_blit_slice(mt, map))
       return true;
 
    if (mt->surf.tiling != ISL_TILING_LINEAR &&
        mt->bo->size >= brw->max_gtt_map_object_size) {
-      assert(can_blit_slice(mt, level, slice));
+      assert(can_blit_slice(mt, map));
       return true;
    }
 
@@ -3664,7 +3657,7 @@ intel_miptree_map(struct brw_context *brw,
       intel_miptree_map_etc(brw, mt, map, level, slice);
    } else if (mt->stencil_mt && !(mode & BRW_MAP_DIRECT_BIT)) {
       intel_miptree_map_depthstencil(brw, mt, map, level, slice);
-   } else if (use_intel_mipree_map_blit(brw, mt, mode, level, slice)) {
+   } else if (use_intel_mipree_map_blit(brw, mt, map)) {
       intel_miptree_map_blit(brw, mt, map, level, slice);
 #if defined(USE_SSE41)
    } else if (!(mode & GL_MAP_WRITE_BIT) &&

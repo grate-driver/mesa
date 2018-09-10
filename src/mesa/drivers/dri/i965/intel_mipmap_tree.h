@@ -741,6 +741,16 @@ intel_miptree_set_depth_clear_value(struct brw_context *brw,
                                     struct intel_mipmap_tree *mt,
                                     float clear_value);
 
+
+static inline int
+intel_miptree_blt_pitch(struct intel_mipmap_tree *mt)
+{
+   int pitch = mt->surf.row_pitch;
+   if (mt->surf.tiling != ISL_TILING_LINEAR)
+      pitch /= 4;
+   return pitch;
+}
+
 #ifdef __cplusplus
 }
 #endif
