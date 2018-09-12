@@ -4443,7 +4443,7 @@ void radv_CmdSetDeviceMask(VkCommandBuffer commandBuffer,
 }
 
 /* VK_EXT_conditional_rendering */
-void vkCmdBeginConditionalRenderingEXT(
+void radv_CmdBeginConditionalRenderingEXT(
 	VkCommandBuffer                             commandBuffer,
 	const VkConditionalRenderingBeginInfoEXT*   pConditionalRenderingBegin)
 {
@@ -4465,7 +4465,7 @@ void vkCmdBeginConditionalRenderingEXT(
 	cmd_buffer->state.predication_va = va;
 }
 
-void vkCmdEndConditionalRenderingEXT(
+void radv_CmdEndConditionalRenderingEXT(
 	VkCommandBuffer                             commandBuffer)
 {
 	RADV_FROM_HANDLE(radv_cmd_buffer, cmd_buffer, commandBuffer);
