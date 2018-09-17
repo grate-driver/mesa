@@ -2,6 +2,8 @@ mesa (18.2.0-2) UNRELEASED; urgency=medium
 
   * control: Bump build-dep on libxcb-dri3-dev and libxcb-present-dev to
     1.13. (Closes: #908827)
+  * control: Build-depend on x11proto-dev, modify libegl1-mesa-dev and
+    libgl1-mesa-dev depends.
 
  -- Timo Aaltonen <tjaalton@debian.org>  Mon, 17 Sep 2018 15:46:55 +0300
 
