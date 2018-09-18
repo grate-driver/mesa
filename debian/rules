@@ -142,7 +142,6 @@ confflags += \
 	--enable-osmesa \
 	--enable-glx-tls \
 	--enable-shared-glapi \
-	--enable-texture-float \
 	--disable-xvmc \
 	--disable-omx-bellagio \
 	$(confflags_DIRECT_RENDERING) \

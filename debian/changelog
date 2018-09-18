@@ -8,6 +8,7 @@ mesa (18.2.0-2) UNRELEASED; urgency=medium
   * Enable gallium D3D state tracker, thanks Antonio Russo and Andrew
     Cook! (Closes: #863972)
   * rules: Enable v3d on arm. Thanks, Fabio Pedretti!
+  * rules: Drop enabling texture float, it's enabled by default now.
 
  -- Timo Aaltonen <tjaalton@debian.org>  Mon, 17 Sep 2018 15:46:55 +0300
 
