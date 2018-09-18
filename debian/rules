@@ -118,6 +118,7 @@ else
 	confflags_GALLIUM += --enable-va
 	confflags_GALLIUM += --enable-gallium-extra-hud
 	confflags_GALLIUM += --enable-lmsensors
+	confflags_GALLIUM += --enable-nine
 	with_libva = ,libva
 endif
 
@@ -139,7 +140,6 @@ confflags += \
 	--with-vulkan-drivers="$(VULKAN_DRIVERS)" \
 	--enable-libglvnd \
 	--enable-osmesa \
-	--enable-nine \
 	--enable-glx-tls \
 	--enable-shared-glapi \
 	--enable-texture-float \
