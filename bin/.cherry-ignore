@@ -114,3 +114,7 @@ a72dbc461bdb7714656e62cd8f4b00a404c2e6e0
 #
 97fcccb25ed5f55139c03ebc1c71742f0f25f683
 4aec44c0d9c4c0649c362199fac97efe0a3b38a4
+
+# This patch was reverted on master shortly after merging.
+#
+90819abb56f6b1a0cd4946b13b6caf24fb46e500
