@@ -101,6 +101,11 @@ else
 	confflags_GALLIUM += --enable-opencl --enable-opencl-icd
 	confflags_GALLIUM += ac_cv_path_LLVM_CONFIG=llvm-config-7
 	GALLIUM_DRIVERS += swrast
+
+	# nine makes sense only on archs that build wine
+	ifneq (,$(filter $(DEB_HOST_ARCH), amd64 arm64 armel armhf i386 kfreebsd-i386 powerpc))
+		confflags_GALLIUM += --enable-nine
+	endif
   else
 	DRI_DRIVERS += swrast
 	confflags_GALLIUM += --disable-llvm
@@ -118,7 +123,6 @@ else
 	confflags_GALLIUM += --enable-va
 	confflags_GALLIUM += --enable-gallium-extra-hud
 	confflags_GALLIUM += --enable-lmsensors
-	confflags_GALLIUM += --enable-nine
 	with_libva = ,libva
 endif
 

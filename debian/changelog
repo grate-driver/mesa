@@ -1,3 +1,10 @@
+mesa (18.2.0-3) UNRELEASED; urgency=medium
+
+  * rules: Nine needs llvmpipe, and also makes sense to build it only on
+    archs that have wine.
+
+ -- Timo Aaltonen <tjaalton@debian.org>  Tue, 18 Sep 2018 18:40:04 +0300
+
 mesa (18.2.0-2) experimental; urgency=medium
 
   * control: Bump build-dep on libxcb-dri3-dev and libxcb-present-dev to
