@@ -7,6 +7,7 @@ mesa (18.2.0-2) UNRELEASED; urgency=medium
   * Migrate to llvm/clang-7.
   * Enable gallium D3D state tracker, thanks Antonio Russo and Andrew
     Cook! (Closes: #863972)
+  * rules: Enable v3d on arm. Thanks, Fabio Pedretti!
 
  -- Timo Aaltonen <tjaalton@debian.org>  Mon, 17 Sep 2018 15:46:55 +0300
 
