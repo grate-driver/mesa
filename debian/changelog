@@ -1,9 +1,9 @@
-mesa (18.2.0-3) UNRELEASED; urgency=medium
+mesa (18.2.0-3) experimental; urgency=medium
 
   * control, rules: Nine needs llvmpipe, and also makes sense to build it
     only on archs that have wine.
 
- -- Timo Aaltonen <tjaalton@debian.org>  Tue, 18 Sep 2018 18:40:04 +0300
+ -- Timo Aaltonen <tjaalton@debian.org>  Wed, 19 Sep 2018 13:41:29 +0300
 
 mesa (18.2.0-2) experimental; urgency=medium
 
