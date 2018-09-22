@@ -96,12 +96,11 @@ Description: state-tracker for Direct3D9
  achieve native (or better) graphics performance.
 
 Package: libd3dadapter9-mesa-dev
-Section: libs
+Section: libdevel
 Architecture: amd64 arm64 armel armhf i386 kfreebsd-i386 powerpc
 Depends:
  libd3dadapter9-mesa (= ${binary:Version}),
  libudev1 [linux-any],
- ${shlibs:Depends},
  ${misc:Depends},
 Pre-Depends: ${misc:Pre-Depends}
 Multi-Arch: same

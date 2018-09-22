@@ -1,6 +1,8 @@
 mesa (18.2.0-4) UNRELEASED; urgency=medium
 
   * control: Add libd3dadapter9-mesa to -dev depends.
+  * control: Fix libd3dadapter9-mesa-dev section, and drop
+    shlibs:Depends.
 
  -- Timo Aaltonen <tjaalton@debian.org>  Sat, 22 Sep 2018 17:34:47 +0300
 
