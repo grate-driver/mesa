@@ -1,3 +1,9 @@
+mesa (18.2.0-4) UNRELEASED; urgency=medium
+
+  * control: Add libd3dadapter9-mesa to -dev depends.
+
+ -- Timo Aaltonen <tjaalton@debian.org>  Sat, 22 Sep 2018 17:34:47 +0300
+
 mesa (18.2.0-3) experimental; urgency=medium
 
   * control, rules: Nine needs llvmpipe, and also makes sense to build it
