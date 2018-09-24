@@ -2493,6 +2493,8 @@ genX(cmd_buffer_flush_state)(struct anv_cmd_buffer *cmd_buffer)
    uint32_t *p;
 
    uint32_t vb_emit = cmd_buffer->state.gfx.vb_dirty & pipeline->vb_used;
+   if (cmd_buffer->state.gfx.dirty & ANV_CMD_DIRTY_PIPELINE)
+      vb_emit |= pipeline->vb_used;
 
    assert((pipeline->active_stages & VK_SHADER_STAGE_COMPUTE_BIT) == 0);
 
@@ -2612,7 +2614,8 @@ genX(cmd_buffer_flush_state)(struct anv_cmd_buffer *cmd_buffer)
                                           pipeline->depth_clamp_enable);
    }
 
-   if (cmd_buffer->state.gfx.dirty & ANV_CMD_DIRTY_DYNAMIC_SCISSOR)
+   if (cmd_buffer->state.gfx.dirty & (ANV_CMD_DIRTY_DYNAMIC_SCISSOR |
+                                      ANV_CMD_DIRTY_RENDER_TARGETS))
       gen7_cmd_buffer_emit_scissor(cmd_buffer);
 
    genX(cmd_buffer_flush_dynamic_state)(cmd_buffer);

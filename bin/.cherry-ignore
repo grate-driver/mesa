@@ -9,3 +9,7 @@ a72dbc461bdb7714656e62cd8f4b00a404c2e6e0 mesa: allow GL_UNSIGNED_BYTE type for S
 c9f54486959716762e6818dabb0a73a8cd46df67 radeonsi: fix regression in indirect input swizzles.
 # extra:  Just some comments update.
 2ad9917e187c1e9dbb053d3c98aa0e39fa374059 anv/blorp: Fix a comment as per Nanley's review feedback
+# fixes:  This commit was immediately reverted by commit 2dce1175c1c.
+4aec44c0d9c4c0649c362199fac97efe0a3b38a4 i965/tools: 32bit compilation with meson
+# pick:   This commit was reverted by commit 95bb7d82ca8.
+90819abb56f6b1a0cd4946b13b6caf24fb46e500 radv: fix descriptor pool allocation size
