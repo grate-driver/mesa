@@ -1,5 +1,6 @@
-mesa (18.2.0-4) UNRELEASED; urgency=medium
+mesa (18.2.1-4) UNRELEASED; urgency=medium
 
+  * New upstream release.
   * control: Add libd3dadapter9-mesa to -dev depends.
   * control: Fix libd3dadapter9-mesa-dev section, and drop
     shlibs:Depends.
