@@ -36,7 +36,8 @@ static void kill_if_fetch_args(struct lp_build_tgsi_context *bld_base,
 
 	for (i = 0; i < TGSI_NUM_CHANNELS; i++) {
 		LLVMValueRef value = lp_build_emit_fetch(bld_base, inst, 0, i);
-		conds[i] = LLVMBuildFCmp(builder, LLVMRealOGE, value,
+		/* UGE because NaN shouldn't get killed */
+		conds[i] = LLVMBuildFCmp(builder, LLVMRealUGE, value,
 					ctx->ac.f32_0, "");
 	}
 
