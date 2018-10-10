@@ -1,6 +1,8 @@
 mesa (18.2.2-1) UNRELEASED; urgency=medium
 
   * New upstream release.
+    - vulkan: Disable randr lease for libxcb < 1.13 (Closes: #908827,
+    #909720).
 
  -- Andreas Boll <aboll@debian.org>  Wed, 10 Oct 2018 20:06:00 +0200
 
