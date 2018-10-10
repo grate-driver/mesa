@@ -70,6 +70,21 @@ a4a104fc81e93555899050efac23c3cd6ba762ab
 4ffb575da59fd3aece02734ca4fd3212d5002d55
 8c048af5890d43578ca41eb9dcfa60cb9cc3fc9c
 c92a463d2341dd7893dd8b54775930ed9be72ac0
+ea1e50cc166ae855f9fa91ca6a4f944123298e4e
+f73f748323ef5a421ffd8fa0f02afd9627e31023
+d4e52281aa9c1acc92619736da8b67d8c02ce380
+a5f35aa742c3f1e2fae6a6c2fb53f92822f0cb70
+f6e09db2e613c215257b80f40957d580165b5ddf
+d4bf954fe61ec231be2bfa5e059f0fb7f6150bd1
+abdf396cbeaec2bfe9da2fd773d42fa3022ca8b5
+b9f6521157ab55073eec528cacc1f3b567e49503
+aa3020592964344c7032396d159e4ab2df743587
+063264db5be2941746fa58f164cdc803362753a9
+748f4cce183007587a6688ef25ad5f9dbea5c33c
+9de062ef207c6062d1fabb70209f4bbc9dc4732d
+7d1d1208c2b38890fe065b6431ef2e3b7166bae4
+0796c3934ebfe3448acf2d63f478f51c08e33046
+864c780566b8782c4fc69b4337db768223717bd8
 
 # These have more than one fixes tag and generate a warning
 #
@@ -96,3 +111,19 @@ a72dbc461bdb7714656e62cd8f4b00a404c2e6e0
 # This requires a much more significant patch not present in 18.1
 #
 4dc244eb447b1fa4e39d67a58328ed774395c901
+
+# This patches were dropped since they only fix developer tools, which aren't
+# built by default and should be of no use to end users or distros
+#
+97fcccb25ed5f55139c03ebc1c71742f0f25f683
+4aec44c0d9c4c0649c362199fac97efe0a3b38a4
+
+# This patch was reverted on master shortly after merging.
+#
+90819abb56f6b1a0cd4946b13b6caf24fb46e500
+
+# These were supreceeded by patches backported to 18.1
+#
+3341429d74099b436c3824164837eebd47029ded
+9158e0bd82ffdad4baf46221bccbbb3fe4764c11
+cc3b99bb48769ccd018b781338b548306af5046b

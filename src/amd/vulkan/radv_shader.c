@@ -379,7 +379,8 @@ radv_fill_shader_variant(struct radv_device *device,
 
 	variant->code_size = binary->code_size;
 	variant->rsrc2 = S_00B12C_USER_SGPR(variant->info.num_user_sgprs) |
-			S_00B12C_SCRATCH_EN(scratch_enabled);
+			 S_00B12C_USER_SGPR_MSB(variant->info.num_user_sgprs >> 5) |
+			 S_00B12C_SCRATCH_EN(scratch_enabled);
 
 	variant->rsrc1 =  S_00B848_VGPRS((variant->config.num_vgprs - 1) / 4) |
 		S_00B848_SGPRS((variant->config.num_sgprs - 1) / 8) |
