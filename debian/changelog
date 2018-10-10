@@ -1,11 +1,11 @@
-mesa (18.1.9-1) UNRELEASED; urgency=medium
+mesa (18.1.9-1) unstable; urgency=medium
 
   * New upstream release.
   * Cherry-pick 2f1ad72ac17 (clover: Add explicit virtual destructor to
     argument class) from upstream master branch. Fixes memory leaks with
     some OpenCL apps (Closes: #909741). Thanks, David Kuehling!
 
- -- Andreas Boll <aboll@debian.org>  Wed, 10 Oct 2018 16:10:00 +0200
+ -- Andreas Boll <aboll@debian.org>  Wed, 10 Oct 2018 16:54:18 +0200
 
 mesa (18.1.8-1) unstable; urgency=medium
 
