@@ -13,3 +13,5 @@ c9f54486959716762e6818dabb0a73a8cd46df67 radeonsi: fix regression in indirect in
 4aec44c0d9c4c0649c362199fac97efe0a3b38a4 i965/tools: 32bit compilation with meson
 # pick:   This commit was reverted by commit 95bb7d82ca8.
 90819abb56f6b1a0cd4946b13b6caf24fb46e500 radv: fix descriptor pool allocation size
+# pick:   There is a specific patch for stable branch for this commit.
+0d495bec25bd7584de4e988c2b4528c1996bc1d0 radeonsi: NaN should pass kill_if
