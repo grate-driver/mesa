@@ -5,6 +5,7 @@ mesa (18.2.2-1) UNRELEASED; urgency=medium
     #909720).
   * Drop version from build-deps libxcb-dri3-dev and libxcb-present-dev.
   * Bump libdrm-dev dependency to 2.4.92.
+  * Enable building etnaviv and imx on arm64 (Closes: #907136).
 
  -- Andreas Boll <aboll@debian.org>  Wed, 10 Oct 2018 20:06:00 +0200
 
