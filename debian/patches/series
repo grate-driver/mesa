@@ -1,9 +1,6 @@
 07_gallium-fix-build-failure-on-powerpcspe.diff
 
-# glvnd support patches
-glvnd-fix-gl-dot-pc.patch
-
 
 # Ubuntu patches.
-dri3-reinstate-get_dri_screen-callback.diff
 dont-enable-10bpc-by-default.diff
+disable-intel-ccs-compression.diff

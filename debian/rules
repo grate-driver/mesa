@@ -47,28 +47,23 @@ else
 	EGL_PLATFORMS = x11,surfaceless
 
   ifeq ($(DEB_HOST_ARCH_OS), linux)
-#	confflags_DRI3 = --enable-dri3
+	confflags_DRI3 = --enable-dri3
 	# Gallium drivers which require kernel support, not yet ported to non-Linux
-#	GALLIUM_DRIVERS += nouveau virgl
+	GALLIUM_DRIVERS += nouveau virgl
 
 	# Freedreno requires arm in addition
-#	ifneq (,$(filter arm arm64,$(DEB_HOST_ARCH_CPU)))
-#		GALLIUM_DRIVERS += freedreno
-#	endif
+	ifneq (,$(filter arm arm64,$(DEB_HOST_ARCH_CPU)))
+		GALLIUM_DRIVERS += freedreno
+	endif
 
-	# vc4 kernel support is only available on armhf and arm64
-#	ifneq (,$(filter $(DEB_HOST_ARCH), armhf arm64))
-#		GALLIUM_DRIVERS += vc4
-#	endif
+	# tegra, vc4 and v3d kernel support are only available on armhf and arm64
+	ifneq (,$(filter $(DEB_HOST_ARCH), armhf arm64))
+		GALLIUM_DRIVERS += tegra vc4 v3d
+	endif
 
 	# etnaviv kernel support is currently only available on armhf
-#	ifneq (,$(filter $(DEB_HOST_ARCH), armhf))
-#		GALLIUM_DRIVERS += etnaviv imx
-#	endif
-
-	# tegra kernel support is only available on armhf and arm64
-	ifneq (,$(filter $(DEB_HOST_ARCH), armhf arm64))
-		GALLIUM_DRIVERS += tegra
+	ifneq (,$(filter $(DEB_HOST_ARCH), armhf))
+		GALLIUM_DRIVERS += etnaviv imx grate
 	endif
 
 	ifneq (,$(filter $(DEB_HOST_ARCH), amd64 i386 x32))
@@ -80,9 +75,10 @@ else
 
 	# Non-Linux ports also lack *_CLOEXEC and epoll, so wayland isn't ready yet:
 	EGL_PLATFORMS += wayland
-#	ifeq (,$(filter $(DEB_HOST_ARCH), s390 s390x))
-#		DRI_DRIVERS += nouveau
-#	endif
+
+	ifeq (,$(filter $(DEB_HOST_ARCH), s390 s390x))
+		DRI_DRIVERS += nouveau
+	endif
   endif
 
 	EGL_PLATFORMS += drm
@@ -92,37 +88,42 @@ else
 	DRI_DRIVERS += i915 i965
   endif
 
-#  ifeq (,$(filter $(DEB_HOST_ARCH), s390 s390x))
-#	DRI_DRIVERS += r200 radeon
-#	GALLIUM_DRIVERS += r600 r300
-#  endif
+  ifeq (,$(filter $(DEB_HOST_ARCH), s390 s390x))
+	DRI_DRIVERS += r200 radeon
+	GALLIUM_DRIVERS += r600 r300
+  endif
 
   # LLVM is required for building r300g, radeonsi and llvmpipe drivers.
   # It's also required for building OpenCL support.
-#  ifneq (,$(filter $(DEB_HOST_ARCH), amd64 arm64 armel armhf i386 kfreebsd-amd64 kfreebsd-i386 mips mips64el mipsel powerpc ppc64 sparc64 ppc64el))
-#	GALLIUM_DRIVERS += radeonsi
-#	confflags_GALLIUM += --enable-llvm
-#	confflags_GALLIUM += --enable-opencl --enable-opencl-icd
-#	confflags_GALLIUM += ac_cv_path_LLVM_CONFIG=llvm-config-5.0
-#	GALLIUM_DRIVERS += swrast
- # else
+  ifneq (,$(filter $(DEB_HOST_ARCH), amd64 arm64 armel armhf i386 kfreebsd-amd64 kfreebsd-i386 mips mips64el mipsel powerpc ppc64 sparc64 ppc64el))
+	GALLIUM_DRIVERS += radeonsi
+	confflags_GALLIUM += --enable-llvm
+	confflags_GALLIUM += --enable-opencl --enable-opencl-icd
+	confflags_GALLIUM += ac_cv_path_LLVM_CONFIG=llvm-config-7
+	GALLIUM_DRIVERS += swrast
+
+	# nine makes sense only on archs that build wine
+	ifneq (,$(filter $(DEB_HOST_ARCH), amd64 arm64 armel armhf i386 kfreebsd-i386 powerpc))
+		confflags_GALLIUM += --enable-nine
+	endif
+  else
 	DRI_DRIVERS += swrast
-	confflags_GALLIUM += --disable-gallium-llvm
-#  endif
+	confflags_GALLIUM += --disable-llvm
+  endif
 
   # radv needs LLVM and the Vulkan loader, so only build on the subset of
   # arches where we have LLVM enabled and where the Vulkan loader is built.
-#  ifneq (,$(filter $(DEB_HOST_ARCH), amd64 arm64 armel armhf i386 mips mips64el mipsel powerpc ppc64 sparc64 ppc64el))
-#	VULKAN_DRIVERS += radeon
-#  endif
+  ifneq (,$(filter $(DEB_HOST_ARCH), amd64 arm64 armel armhf i386 mips mips64el mipsel powerpc ppc64 sparc64 ppc64el))
+	VULKAN_DRIVERS += radeon
+  endif
 
 	confflags_DIRECT_RENDERING = --enable-driglx-direct
 	confflags_GBM = --enable-gbm
-#	confflags_GALLIUM += --enable-vdpau
-#	confflags_GALLIUM += --enable-va
+	confflags_GALLIUM += --enable-vdpau
+	confflags_GALLIUM += --enable-va
 	confflags_GALLIUM += --enable-gallium-extra-hud
 	confflags_GALLIUM += --enable-lmsensors
-	with_libva = libva
+	with_libva = ,libva
 endif
 
 # Disable assembly usage on x32 otherwise Mesa defaults to x86_64 assembly
@@ -145,7 +146,6 @@ confflags += \
 	--enable-osmesa \
 	--enable-glx-tls \
 	--enable-shared-glapi \
-	--enable-texture-float \
 	--disable-xvmc \
 	--disable-omx-bellagio \
 	$(confflags_DIRECT_RENDERING) \
@@ -163,7 +163,10 @@ override_dh_clean:
 	rm -rf $$(find -name Makefile.in)
 	rm -rf bin/install-sh bin/ltmain.sh
 	for file in debian/*.in; do rm -f $${file%%.in}; done
+	rm -f src/amd/vulkan/*.pyc
 	rm -f src/compiler/nir/*.pyc
+	rm -f src/egl/generate/*.pyc
+	rm -f src/intel/vulkan/*.pyc
 	rm -f src/mapi/glapi/gen/*.pyc
 	rm -f src/mesa/main/*.pyc
 	rm -f src/gallium/auxiliary/util/*.pyc
@@ -205,6 +208,10 @@ override_dh_install:
 	rm -f debian/tmp/usr/lib/*/libEGL_mesa.so
 	rm -f debian/tmp/usr/lib/*/libGLX_mesa.so
 
+	# Drop libwayland-egl which is provided by src:wayland now
+	rm -f debian/tmp/usr/lib/*/libwayland-egl.so*
+	rm -f debian/tmp/usr/lib/*/pkgconfig/wayland-egl.pc
+
 	# Copy the hardlinked *_dri.so correctly.
 	install -m755 -d debian/libgl1-mesa-dri/usr/lib/${DEB_HOST_MULTIARCH}/dri/
 	mv debian/tmp/usr/lib/${DEB_HOST_MULTIARCH}/dri/*_dri.so \
@@ -217,19 +224,19 @@ override_dh_install:
 	rmdir debian/tmp/usr/include/vulkan
   endif
 
-#  ifneq ($(DEB_HOST_ARCH_OS), hurd)
-#	# Copy the hardlinked vdpau drivers correctly.
-#	install -m755 -d debian/mesa-vdpau-drivers/usr/lib/${DEB_HOST_MULTIARCH}/vdpau/
-#	mv debian/tmp/usr/lib/${DEB_HOST_MULTIARCH}/vdpau/libvdpau*.so* \
-#	   debian/mesa-vdpau-drivers/usr/lib/${DEB_HOST_MULTIARCH}/vdpau/
-#
-#	# Copy the hardlinked va drivers correctly.
-#	install -m755 -d debian/mesa-va-drivers/usr/lib/${DEB_HOST_MULTIARCH}/dri/
-#	mv debian/tmp/usr/lib/${DEB_HOST_MULTIARCH}/dri/*_drv_video.so \
-#	   debian/mesa-va-drivers/usr/lib/${DEB_HOST_MULTIARCH}/dri/
-#  endif
+  ifneq ($(DEB_HOST_ARCH_OS), hurd)
+	# Copy the hardlinked vdpau drivers correctly.
+	install -m755 -d debian/mesa-vdpau-drivers/usr/lib/${DEB_HOST_MULTIARCH}/vdpau/
+	mv debian/tmp/usr/lib/${DEB_HOST_MULTIARCH}/vdpau/libvdpau*.so* \
+	   debian/mesa-vdpau-drivers/usr/lib/${DEB_HOST_MULTIARCH}/vdpau/
 
-	dh_install -a --list-missing
+	# Copy the hardlinked va drivers correctly.
+	install -m755 -d debian/mesa-va-drivers/usr/lib/${DEB_HOST_MULTIARCH}/dri/
+	mv debian/tmp/usr/lib/${DEB_HOST_MULTIARCH}/dri/*_drv_video.so \
+	   debian/mesa-va-drivers/usr/lib/${DEB_HOST_MULTIARCH}/dri/
+  endif
+
+	dh_install -a --fail-missing
 
 	# Install bug control and script:
 	set -e; for p in $(allpkg); do \
@@ -242,7 +249,7 @@ override_dh_makeshlibs:
 	dh_makeshlibs -a -- -c4
 
 %:
-	dh $@ --with $(with_libva) \
+	dh $@ --with quilt$(with_libva) \
 		--builddirectory=build/
 
 # For maintainer use only, generate a tarball:
