@@ -107,8 +107,9 @@ else
 		confflags_GALLIUM += --enable-nine
 	endif
   else
+	GALLIUM_DRIVERS += swrast
 	DRI_DRIVERS += swrast
-	confflags_GALLIUM += --disable-llvm
+	confflags_GALLIUM += --disable-gallium-llvm
   endif
 
   # radv needs LLVM and the Vulkan loader, so only build on the subset of
