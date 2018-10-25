@@ -1,4 +1,4 @@
-mesa (18.2.2-1) UNRELEASED; urgency=medium
+mesa (18.2.3-1) UNRELEASED; urgency=medium
 
   * New upstream release.
     - vulkan: Disable randr lease for libxcb < 1.13 (Closes: #908827,
@@ -7,7 +7,7 @@ mesa (18.2.2-1) UNRELEASED; urgency=medium
   * Bump libdrm-dev dependency to 2.4.92.
   * Enable building etnaviv and imx on arm64 (Closes: #907136).
 
- -- Andreas Boll <aboll@debian.org>  Wed, 10 Oct 2018 20:06:00 +0200
+ -- Andreas Boll <aboll@debian.org>  Thu, 25 Oct 2018 10:28:22 +0200
 
 mesa (18.2.1-1) experimental; urgency=medium
 
