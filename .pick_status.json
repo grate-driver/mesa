@@ -940,7 +940,7 @@
         "description": "util/anon_file: add OpenBSD shm_mkstemp() path",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "c0376a123418df0050dc45d3e1e84f6b29a6a1f3"
     },
