@@ -1,4 +1,4 @@
-mesa (18.2.3-1) UNRELEASED; urgency=medium
+mesa (18.2.4-1) UNRELEASED; urgency=medium
 
   * New upstream release.
     - vulkan: Disable randr lease for libxcb < 1.13 (Closes: #908827,
