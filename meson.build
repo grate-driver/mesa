@@ -774,7 +774,7 @@ endif
 
 # Check for generic C arguments
 c_args = []
-foreach a : ['-Wall', '-Werror=implicit-function-declaration',
+foreach a : ['-Werror=implicit-function-declaration',
              '-Werror=missing-prototypes', '-fno-math-errno',
              '-fno-trapping-math', '-Qunused-arguments']
   if cc.has_argument(a)
@@ -792,7 +792,7 @@ endif
 
 # Check for generic C++ arguments
 cpp_args = []
-foreach a : ['-Wall', '-fno-math-errno', '-fno-trapping-math',
+foreach a : ['-fno-math-errno', '-fno-trapping-math',
              '-Qunused-arguments']
   if cpp.has_argument(a)
     cpp_args += a
