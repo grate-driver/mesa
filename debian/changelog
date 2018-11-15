@@ -1,4 +1,4 @@
-mesa (18.2.4-1) UNRELEASED; urgency=medium
+mesa (18.2.4-1) experimental; urgency=medium
 
   [ Andreas Boll ]
   * New upstream release.
@@ -11,7 +11,7 @@ mesa (18.2.4-1) UNRELEASED; urgency=medium
   [ Timo Aaltonen ]
   * copyright: Rewrite for format 1.0.
 
- -- Andreas Boll <aboll@debian.org>  Thu, 25 Oct 2018 10:28:22 +0200
+ -- Timo Aaltonen <tjaalton@debian.org>  Thu, 15 Nov 2018 11:20:08 +0200
 
 mesa (18.2.1-1) experimental; urgency=medium
 
