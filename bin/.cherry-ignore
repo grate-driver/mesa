@@ -17,3 +17,7 @@ c9f54486959716762e6818dabb0a73a8cd46df67 radeonsi: fix regression in indirect in
 0d495bec25bd7584de4e988c2b4528c1996bc1d0 radeonsi: NaN should pass kill_if
 # pick:   This commit reverts 0fa9e6d7b30 which did not land in branch.
 aa02d7e8781c25ee18b6da97606300808c84973a Revert "anv/skylake: disable ForceThreadDispatchEnable"
+# pick:   Explicit 18.3 only nominations.
+b1b2dd06a7b777e862b525302b15bcaf407d3648 radv: add missing TFB queries support to CmdCopyQueryPoolsResults()
+# fixes:  This commit was reverted by commit 5f312e95f87.
+a9031bf9b55602d93cccef6c926e2179c23205b4 i965/batch: avoid reverting batch buffer if saved state is an empty
