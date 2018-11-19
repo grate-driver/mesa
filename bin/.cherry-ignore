@@ -25,3 +25,5 @@ b5f213bb1dcde22949dffe9d3a431fecd5d0f33b radv: binding streamout buffers doesn't
 ea9f95e2a67eca90bb84eea24e7b4b804b3b1345 radeonsi: go back to using bottom-of-pipe for beginning of TIME_ELAPSED
 # fixes:  This commit was reverted by commit 5f312e95f87.
 a9031bf9b55602d93cccef6c926e2179c23205b4 i965/batch: avoid reverting batch buffer if saved state is an empty
+# extra:  intel/aub_viewer is not present in branch
+ac324a6809c09c54d3b0bfdb00e5e62987ec4ad8 intel/aub_viewer: fix dynamic state printing
