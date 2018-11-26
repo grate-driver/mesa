@@ -28,3 +28,6 @@ a9031bf9b55602d93cccef6c926e2179c23205b4 i965/batch: avoid reverting batch buffe
 # extra:  intel/aub_viewer is not present in branch
 ac324a6809c09c54d3b0bfdb00e5e62987ec4ad8 intel/aub_viewer: fix dynamic state printing
 0db898cef2f5a455138e5845689c075aadba1c1f intel/aub_viewer: Print blend states properly
+# fixes: This commit requires commits 854202f70e6 and 84bc5738401 which did not
+#        land in branch.
+c120dbfe4d18240315ecec9b43a61aeb9ab239ac mesa/main: fix incorrect depth-error
