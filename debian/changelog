@@ -4,6 +4,7 @@ mesa (18.3.0~rc4-1) UNRELEASED; urgency=medium
   * control: Bump libdrm-dev dependency to 2.4.95.
   * libgl1-mesa-dri.install: Updated, etc/drirc is now
     usr/share/drirc.d/00-mesa-defaults.conf.
+  * libegl-mesa0.symbols: Updated.
 
  -- Timo Aaltonen <tjaalton@debian.org>  Tue, 27 Nov 2018 15:46:54 +0200
 
