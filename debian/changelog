@@ -1,6 +1,7 @@
 mesa (18.3.0~rc4-1) UNRELEASED; urgency=medium
 
   * New upstream release candidate.
+  * control: Bump libdrm-dev dependency to 2.4.95.
 
  -- Timo Aaltonen <tjaalton@debian.org>  Tue, 27 Nov 2018 15:46:54 +0200
 
