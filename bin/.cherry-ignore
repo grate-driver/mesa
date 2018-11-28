@@ -1,0 +1,2 @@
+# fixes: Commit was squashed into the respective offenders
+c02390f8fcd367c7350db568feabb2f062efca14 egl/wayland: rather obvious build fix
