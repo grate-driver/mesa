@@ -411,6 +411,8 @@ anv_pipeline_hash_shader(struct anv_pipeline *pipeline,
    }
    if (layout)
       _mesa_sha1_update(&ctx, layout->sha1, sizeof(layout->sha1));
+   const bool rba = pipeline->device->robust_buffer_access;
+   _mesa_sha1_update(&ctx, &rba, sizeof(rba));
    _mesa_sha1_update(&ctx, module->sha1, sizeof(module->sha1));
    _mesa_sha1_update(&ctx, entrypoint, strlen(entrypoint));
    _mesa_sha1_update(&ctx, &stage, sizeof(stage));

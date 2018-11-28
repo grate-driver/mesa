@@ -19,5 +19,15 @@ c9f54486959716762e6818dabb0a73a8cd46df67 radeonsi: fix regression in indirect in
 aa02d7e8781c25ee18b6da97606300808c84973a Revert "anv/skylake: disable ForceThreadDispatchEnable"
 # pick:   Explicit 18.3 only nominations.
 b1b2dd06a7b777e862b525302b15bcaf407d3648 radv: add missing TFB queries support to CmdCopyQueryPoolsResults()
+e0c7114eb3c19d4c2653f661698a6baa3bc9bedf st/mesa: disable L3 thread pinning
+b5f213bb1dcde22949dffe9d3a431fecd5d0f33b radv: binding streamout buffers doesn't change context regs
+9367514524f70faad99c721bac92339c8ff8bad9 radeonsi: fix video APIs on Raven2
+ea9f95e2a67eca90bb84eea24e7b4b804b3b1345 radeonsi: go back to using bottom-of-pipe for beginning of TIME_ELAPSED
 # fixes:  This commit was reverted by commit 5f312e95f87.
 a9031bf9b55602d93cccef6c926e2179c23205b4 i965/batch: avoid reverting batch buffer if saved state is an empty
+# extra:  intel/aub_viewer is not present in branch
+ac324a6809c09c54d3b0bfdb00e5e62987ec4ad8 intel/aub_viewer: fix dynamic state printing
+0db898cef2f5a455138e5845689c075aadba1c1f intel/aub_viewer: Print blend states properly
+# fixes: This commit requires commits 854202f70e6 and 84bc5738401 which did not
+#        land in branch.
+c120dbfe4d18240315ecec9b43a61aeb9ab239ac mesa/main: fix incorrect depth-error

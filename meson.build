@@ -565,8 +565,6 @@ elif not (with_gallium_r600 or with_gallium_radeonsi or with_gallium_nouveau)
   else
     _va = 'false'
   endif
-elif _va == 'auto'
-  _va = 'true'
 endif
 with_gallium_va = false
 dep_va = null_dep
@@ -774,7 +772,7 @@ endif
 
 # Check for generic C arguments
 c_args = []
-foreach a : ['-Wall', '-Werror=implicit-function-declaration',
+foreach a : ['-Werror=implicit-function-declaration',
              '-Werror=missing-prototypes', '-fno-math-errno',
              '-fno-trapping-math', '-Qunused-arguments']
   if cc.has_argument(a)
@@ -792,7 +790,7 @@ endif
 
 # Check for generic C++ arguments
 cpp_args = []
-foreach a : ['-Wall', '-fno-math-errno', '-fno-trapping-math',
+foreach a : ['-fno-math-errno', '-fno-trapping-math',
              '-Qunused-arguments']
   if cpp.has_argument(a)
     cpp_args += a
@@ -1300,12 +1298,6 @@ if with_platform_wayland
     'linux-dmabuf', 'linux-dmabuf-unstable-v1.xml'
   )
   pre_args += ['-DHAVE_WAYLAND_PLATFORM', '-DWL_HIDE_DEPRECATED']
-else
-  prog_wl_scanner = []
-  dep_wl_protocols = null_dep
-  dep_wayland_client = null_dep
-  dep_wayland_server = null_dep
-  wayland_dmabuf_xml = ''
 endif
 
 dep_x11 = null_dep
@@ -1338,7 +1330,7 @@ if with_platform_x11
     dep_xdamage = dependency('xdamage', version : '>= 1.1')
     dep_xfixes = dependency('xfixes')
     dep_xcb_glx = dependency('xcb-glx', version : '>= 1.8.1')
-    dep_xxf86vm = dependency('xxf86vm', required : false)
+    dep_xxf86vm = dependency('xxf86vm')
   endif
   if (with_any_vk or with_glx == 'dri' or
        (with_gallium_vdpau or with_gallium_xvmc or with_gallium_va or
@@ -1416,12 +1408,10 @@ elif with_glx == 'dri'
   if with_dri_platform == 'drm'
     gl_priv_reqs += 'xcb-dri2 >= 1.8'
   endif
+  gl_priv_reqs += 'xxf86vm'
 endif
 if dep_libdrm.found()
   gl_priv_reqs += 'libdrm >= 2.4.75'
-endif
-if dep_xxf86vm.found()
-  gl_priv_reqs += 'xxf86vm'
 endif
 
 gl_priv_libs = []
