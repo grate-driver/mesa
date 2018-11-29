@@ -85,7 +85,7 @@ else
   endif
 
   ifeq (,$(filter $(DEB_HOST_ARCH), s390 s390x))
-	DRI_DRIVERS += r200, r100
+	DRI_DRIVERS += r200, r100,
 	GALLIUM_DRIVERS += r600, r300,
   endif
 
