@@ -6,6 +6,7 @@ mesa (18.3.0~rc4-1) UNRELEASED; urgency=medium
     usr/share/drirc.d/00-mesa-defaults.conf.
   * libegl-mesa0.symbols: Updated.
   * Build with gcc8 again.
+  * control, rules: Build with meson.
 
  -- Timo Aaltonen <tjaalton@debian.org>  Tue, 27 Nov 2018 15:46:54 +0200
 
