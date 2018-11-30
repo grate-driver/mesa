@@ -93,10 +93,10 @@ else
   # LLVM is required for building r300g, radeonsi and llvmpipe drivers.
   # It's also required for building OpenCL support.
   ifneq (,$(filter $(DEB_HOST_ARCH), amd64 arm64 armel armhf i386 kfreebsd-amd64 kfreebsd-i386 mips mips64el mipsel powerpc ppc64 sparc64 ppc64el))
-	GALLIUM_DRIVERS += radeonsi,
+	GALLIUM_DRIVERS += radeonsi, swrast
 	confflags_GALLIUM += -Dllvm=true
 	confflags_GALLIUM += -Dgallium-opencl=icd
-	GALLIUM_DRIVERS += swrast,
+	confflags_OSMESA = -Dosmesa=gallium
 
 	# nine makes sense only on archs that build wine
 	ifneq (,$(filter $(DEB_HOST_ARCH), amd64 arm64 armel armhf i386 kfreebsd-i386 powerpc))
@@ -105,6 +105,7 @@ else
   else
 	DRI_DRIVERS += swrast,
 	confflags_GALLIUM += -Dllvm=false
+	confflags_OSMESA = -Dosmesa=classic
   endif
 
   # radv needs LLVM and the Vulkan loader, so only build on the subset of
@@ -119,7 +120,6 @@ else
 	confflags_GALLIUM += -Dgallium-va=true
 	confflags_GALLIUM += -Dgallium-extra-hud=true
 	confflags_GALLIUM += -Dlmsensors=true
-	confflags_OSMESA = -Dosmesa=gallium
 	with_libva = ,libva
 endif
 
