@@ -138,7 +138,6 @@ confflags += \
 	-Ddri-search-path='/usr/lib/$(DEB_HOST_MULTIARCH)/dri:\$$$${ORIGIN}/dri:/usr/lib/dri' \
 	-Dvulkan-drivers="$(VULKAN_DRIVERS)" \
 	-Dglvnd=true \
-	-Dosmesa=classic \
 	-Dshared-glapi=true \
 	-Dgallium-xvmc=false \
 	-Dgallium-omx=disabled \
