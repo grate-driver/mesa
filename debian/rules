@@ -39,7 +39,7 @@ confflags_DRI3 = -Ddri3=false
 ifeq ($(DEB_HOST_ARCH_OS), hurd)
 	EGL_PLATFORMS = x11,
 
-	confflags_DIRECT_RENDERING = -Dglx=xlib
+	confflags_DIRECT_RENDERING = -Dglx-direct=false
 	confflags_GBM = -Dgbm=false
 	confflags_OSMESA = -Dosmesa=classic
 	DRI_DRIVERS = swrast,
@@ -112,7 +112,7 @@ else
 	VULKAN_DRIVERS += amd,
   endif
 
-	confflags_DIRECT_RENDERING = -Dglx=dri
+	confflags_DIRECT_RENDERING = -Dglx-direct=true
 	confflags_GBM = -Dgbm=true
 	confflags_GALLIUM += -Dgallium-vdpau=true
 	confflags_GALLIUM += -Dgallium-va=true
