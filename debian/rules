@@ -50,7 +50,7 @@ else
   ifeq ($(DEB_HOST_ARCH_OS), linux)
 	confflags_DRI3 = -Ddri3=true
 	# Gallium drivers which require kernel support, not yet ported to non-Linux
-	GALLIUM_DRIVERS += nouveau, virgl,
+	GALLIUM_DRIVERS += virgl,
 
 	# Freedreno requires arm in addition
 	ifneq (,$(filter arm arm64,$(DEB_HOST_ARCH_CPU)))
@@ -74,6 +74,7 @@ else
 
 	ifeq (,$(filter $(DEB_HOST_ARCH), s390 s390x))
 		DRI_DRIVERS += nouveau,
+		GALLIUM_DRIVERS += nouveau,
 	endif
   endif
 
