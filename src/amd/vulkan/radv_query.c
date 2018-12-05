@@ -1341,10 +1341,13 @@ void radv_CmdCopyQueryPoolResults(
 
 
 			if (flags & VK_QUERY_RESULT_WAIT_BIT) {
+				/* Wait on the high 32 bits of the timestamp in
+				 * case the low part is 0xffffffff.
+				 */
 				radeon_emit(cs, PKT3(PKT3_WAIT_REG_MEM, 5, false));
 				radeon_emit(cs, WAIT_REG_MEM_NOT_EQUAL | WAIT_REG_MEM_MEM_SPACE(1));
-				radeon_emit(cs, local_src_va);
-				radeon_emit(cs, local_src_va >> 32);
+				radeon_emit(cs, local_src_va + 4);
+				radeon_emit(cs, (local_src_va + 4) >> 32);
 				radeon_emit(cs, TIMESTAMP_NOT_READY >> 32);
 				radeon_emit(cs, 0xffffffff);
 				radeon_emit(cs, 4);
