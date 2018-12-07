@@ -32,6 +32,7 @@
 #include "util/u_memory.h"
 #include "util/u_format.h"
 #include "util/u_hash_table.h"
+#include "util/u_transfer_helper.h"
 #include "util/ralloc.h"
 
 #include <xf86drm.h>
@@ -108,6 +109,8 @@ vc4_screen_destroy(struct pipe_screen *pscreen)
 #ifdef USE_VC4_SIMULATOR
         vc4_simulator_destroy(screen);
 #endif
+
+        u_transfer_helper_destroy(pscreen->transfer_helper);
 
         close(screen->fd);
         ralloc_free(pscreen);
