@@ -25,10 +25,6 @@ else
   endif
 endif
 
-# keep a list of files we don't install (yet), but since it's a bit
-# large, use an external file:
-include debian/not-installed
-
 DRI_DRIVERS =
 GALLIUM_DRIVERS =
 VULKAN_DRIVERS =
@@ -183,13 +179,12 @@ override_dh_installchangelogs:
 	dh_installchangelogs -pmesa-common-dev
 
 override_dh_install:
-	# Also get rid of other files which aren't installed. Do not
-	# use -f to ensure we notice disappearing files:
-	set -e; for file in $(NOT_INSTALLED); do rm debian/tmp/$$file; done
-	# Files only in git, not in tarballs, OK to use rm -f here:
-	set -e; for file in $(NOT_INSTALLED_EITHER); do rm -f debian/tmp/$$file; done
 	# purge .la files
 	find debian/tmp/ -name '*.la' -exec rm '{}' ';'
+
+	# Get rid of some files which aren't installed. Do not
+	# use -f to ensure we notice disappearing files:
+	rm debian/tmp/usr/lib/*/libglapi.so
 
 	# GLESv2 libs still get built for some reason
 	rm -f debian/tmp/usr/lib/*/libGLESv2*
