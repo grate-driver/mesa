@@ -6,7 +6,7 @@ Uploaders: Andreas Boll <aboll@debian.org>
 Standards-Version: 4.1.4
 Build-Depends:
  debhelper (>= 11),
- meson,
+ meson (>= 0.45),
  quilt (>= 0.63-8.2~),
  pkg-config,
  libdrm-dev (>= 2.4.95) [!hurd-any],

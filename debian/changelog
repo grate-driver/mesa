@@ -8,6 +8,7 @@ mesa (18.3.0-1) UNRELEASED; urgency=medium
   [ Andreas Boll ]
   * New upstream release.
   * Use proposed meson patches from upstream to fix hurd and ppc64el.
+  * control: Bump meson build-dep to 0.45 per meson.build.
 
  -- Andreas Boll <aboll@debian.org>  Mon, 10 Dec 2018 20:10:24 +0100
 
