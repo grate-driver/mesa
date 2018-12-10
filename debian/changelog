@@ -12,6 +12,7 @@ mesa (18.3.0-1) UNRELEASED; urgency=medium
   * control: Drop unused build-dep libtool.
   * control: Switch to python3 build-deps.
   * Inline debian/not-installed into debian/rules.
+  * rules: Tidy up override_dh_install.
 
  -- Andreas Boll <aboll@debian.org>  Mon, 10 Dec 2018 20:10:24 +0100
 
