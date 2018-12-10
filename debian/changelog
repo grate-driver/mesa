@@ -1,4 +1,4 @@
-mesa (18.3.0-1) UNRELEASED; urgency=medium
+mesa (18.3.0-1) experimental; urgency=medium
 
   [ Timo Aaltonen ]
   * control, rules. LLVM is available on s390x these days, so simplify
@@ -14,7 +14,7 @@ mesa (18.3.0-1) UNRELEASED; urgency=medium
   * Inline debian/not-installed into debian/rules.
   * rules: Tidy up override_dh_install.
 
- -- Andreas Boll <aboll@debian.org>  Mon, 10 Dec 2018 20:10:24 +0100
+ -- Andreas Boll <aboll@debian.org>  Mon, 10 Dec 2018 22:52:55 +0100
 
 mesa (18.3.0~rc5-2) experimental; urgency=medium
 
