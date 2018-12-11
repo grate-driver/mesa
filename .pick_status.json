@@ -2614,7 +2614,7 @@
         "description": "anv: use urb_setup_attribs in SBE",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": null
     },
@@ -9796,7 +9796,7 @@
         "description": "i965: Move down genX_upload_sbe in profiles.",
         "nominated": false,
         "nomination_type": null,
-        "resolution": 4,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": null
     },
