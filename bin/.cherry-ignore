@@ -23,6 +23,9 @@ e0c7114eb3c19d4c2653f661698a6baa3bc9bedf st/mesa: disable L3 thread pinning
 b5f213bb1dcde22949dffe9d3a431fecd5d0f33b radv: binding streamout buffers doesn't change context regs
 9367514524f70faad99c721bac92339c8ff8bad9 radeonsi: fix video APIs on Raven2
 ea9f95e2a67eca90bb84eea24e7b4b804b3b1345 radeonsi: go back to using bottom-of-pipe for beginning of TIME_ELAPSED
+8f401b0ce6e6650e1a85e9bb2be23d5ff08812b8 anv,radv: Disable VK_EXT_pci_bus_info
+8c77f4c76ddfe0b692b430b012b65f6981a53336 meson: Add support for gnu hurd
+7a90886921eb1d5d73b40aadd6fd3f340041bd26 meson: Add toggle for glx-direct
 # fixes:  This commit was reverted by commit 5f312e95f87.
 a9031bf9b55602d93cccef6c926e2179c23205b4 i965/batch: avoid reverting batch buffer if saved state is an empty
 # extra:  intel/aub_viewer is not present in branch
