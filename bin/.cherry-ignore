@@ -40,3 +40,5 @@ d0c7b079d07f751eb37ecaa45a2a6db920d71d7a freedreno: Fix autotools build.
 # pick:  While this commit does not include the proper CC tag, it was intended
 #        to be applied only in 18.3 branch.
 017199d2d2e4c57015bc60edfcc656062c3a7472 mesa: Revert INTEL_fragment_shader_ordering support
+# fixes: The changes this commit provides are already included in the branch.
+ff6f1dd0d3c6b4c15ca51b478b2884d14f6a1e06 meson: libfreedreno depends upon libdrm (for fence support)
