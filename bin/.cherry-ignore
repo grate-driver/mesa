@@ -31,3 +31,9 @@ ac324a6809c09c54d3b0bfdb00e5e62987ec4ad8 intel/aub_viewer: fix dynamic state pri
 # fixes: This commit requires commits 854202f70e6 and 84bc5738401 which did not
 #        land in branch.
 c120dbfe4d18240315ecec9b43a61aeb9ab239ac mesa/main: fix incorrect depth-error
+# fixes: This commit fixes commits b4476138d5ad and aa0fed10d357 which did not
+#        land in branch.
+d0c7b079d07f751eb37ecaa45a2a6db920d71d7a freedreno: Fix autotools build.
+# pick:  While this commit does not include the proper CC tag, it was intended
+#        to be applied only in 18.3 branch.
+017199d2d2e4c57015bc60edfcc656062c3a7472 mesa: Revert INTEL_fragment_shader_ordering support

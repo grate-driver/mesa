@@ -745,11 +745,19 @@ void genX(CmdCopyQueryPoolResults)(
    ANV_FROM_HANDLE(anv_buffer, buffer, destBuffer);
    uint32_t slot_offset;
 
-   if (flags & VK_QUERY_RESULT_WAIT_BIT) {
-      anv_batch_emit(&cmd_buffer->batch, GENX(PIPE_CONTROL), pc) {
-         pc.CommandStreamerStallEnable = true;
-         pc.StallAtPixelScoreboard     = true;
-      }
+   /* If render target writes are ongoing, request a render target cache flush
+    * to ensure proper ordering of the commands from the 3d pipe and the
+    * command streamer.
+    */
+   if (cmd_buffer->state.pending_pipe_bits & ANV_PIPE_RENDER_TARGET_WRITES) {
+      cmd_buffer->state.pending_pipe_bits |=
+         ANV_PIPE_RENDER_TARGET_CACHE_FLUSH_BIT;
+   }
+
+   if ((flags & VK_QUERY_RESULT_WAIT_BIT) ||
+       (cmd_buffer->state.pending_pipe_bits & ANV_PIPE_FLUSH_BITS)) {
+      cmd_buffer->state.pending_pipe_bits |= ANV_PIPE_CS_STALL_BIT;
+      genX(cmd_buffer_apply_pipe_flushes)(cmd_buffer);
    }
 
    for (uint32_t i = 0; i < queryCount; i++) {

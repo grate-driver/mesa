@@ -853,6 +853,14 @@ radv_image_alloc_htile(struct radv_image *image)
 	/* + 8 for storing the clear values */
 	image->clear_value_offset = image->htile_offset + image->surface.htile_size;
 	image->size = image->clear_value_offset + 8;
+	if (radv_image_is_tc_compat_htile(image)) {
+		/* Metadata for the TC-compatible HTILE hardware bug which
+		 * have to be fixed by updating ZRANGE_PRECISION when doing
+		 * fast depth clears to 0.0f.
+		 */
+		image->tc_compat_zrange_offset = image->clear_value_offset + 8;
+		image->size = image->clear_value_offset + 16;
+	}
 	image->alignment = align64(image->alignment, image->surface.htile_alignment);
 }
 
@@ -995,8 +1003,8 @@ radv_image_create(VkDevice _device,
 			/* Otherwise, try to enable HTILE for depth surfaces. */
 			if (radv_image_can_enable_htile(image) &&
 			    !(device->instance->debug_flags & RADV_DEBUG_NO_HIZ)) {
-				radv_image_alloc_htile(image);
 				image->tc_compatible_htile = image->surface.flags & RADEON_SURF_TC_COMPATIBLE_HTILE;
+				radv_image_alloc_htile(image);
 			} else {
 				image->surface.htile_size = 0;
 			}
@@ -1156,8 +1164,6 @@ radv_image_view_init(struct radv_image_view *iview,
 		 if (device->physical_device->rad_info.chip_class >= GFX9 &&
 		     vk_format_is_compressed(image->vk_format) &&
 		     !vk_format_is_compressed(iview->vk_format)) {
-			 unsigned rounded_img_w = util_next_power_of_two(iview->extent.width);
-			 unsigned rounded_img_h = util_next_power_of_two(iview->extent.height);
 			 unsigned lvl_width  = radv_minify(image->info.width , range->baseMipLevel);
 			 unsigned lvl_height = radv_minify(image->info.height, range->baseMipLevel);
 
@@ -1167,8 +1173,8 @@ radv_image_view_init(struct radv_image_view *iview,
 			 lvl_width <<= range->baseMipLevel;
 			 lvl_height <<= range->baseMipLevel;
 
-			 iview->extent.width = CLAMP(lvl_width, iview->extent.width, rounded_img_w);
-			 iview->extent.height = CLAMP(lvl_height, iview->extent.height, rounded_img_h);
+			 iview->extent.width = CLAMP(lvl_width, iview->extent.width, iview->image->surface.u.gfx9.surf_pitch);
+			 iview->extent.height = CLAMP(lvl_height, iview->extent.height, iview->image->surface.u.gfx9.surf_height);
 		 }
 	}
 
