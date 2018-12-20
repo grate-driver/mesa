@@ -51,3 +51,6 @@ bde9f482de69528db5ccf5dd6bbfd8359adfbb19 ac: split 16-bit ssbo loads that may no
 #        is in 18.3 stable. Hence, this commit is considered as nominated to
 #        18.3 stable.
 947f7b452a550c66cfb9a8c9518e35635eb25947 nir: properly find the entry to keep in copy_prop_vars
+# pick:  This commit is nominated to stable, but fixes commit 11dc1307794 which
+#        is not in the current stable branch.
+d6110d4d547ad98dce7a89d0e020ab5be5aaaad6 intel/compiler: move nir_lower_bool_to_int32 before nir_lower_locals_to_regs
