@@ -1510,6 +1510,7 @@ dri3_update_drawable(__DRIdrawable *driDrawable,
             mtx_unlock(&draw->mtx);
             return false;
          }
+         free(error);
          draw->is_pixmap = true;
          xcb_unregister_for_special_event(draw->conn, draw->special_event);
          draw->special_event = NULL;

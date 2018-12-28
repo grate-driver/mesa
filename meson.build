@@ -379,9 +379,9 @@ endif
 if with_any_vk and (with_platform_x11 and not with_dri3)
   error('Vulkan drivers require dri3 for X11 support')
 endif
-if with_dri or with_gallium
-  if with_glx == 'disabled' and not with_egl and not with_platform_haiku
-    error('building dri or gallium drivers require at least one window system')
+if with_dri
+  if with_glx == 'disabled' and not with_egl and not with_gbm
+    error('building dri drivers require at least one windowing system')
   endif
 endif
 
@@ -611,7 +611,7 @@ if with_gallium_st_nine
     error('The nine state tracker requires gallium softpipe/llvmpipe.')
   elif not (with_gallium_radeonsi or with_gallium_nouveau or with_gallium_r600
             or with_gallium_r300 or with_gallium_svga or with_gallium_i915)
-    error('The nine state tracker requires at least on non-swrast gallium driver.')
+    error('The nine state tracker requires at least one non-swrast gallium driver.')
   endif
   if not with_dri3
     error('Using nine with wine requires dri3')
@@ -619,7 +619,12 @@ if with_gallium_st_nine
 endif
 
 if get_option('power8') != 'false'
-  if host_machine.cpu_family() == 'ppc64le'
+  # on old versions of meson the cpu family would return as ppc64le on little
+  # endian power8, this was changed in 0.48 such that the family would always
+  # be ppc64 regardless of endianness, and the the machine.endian() value
+  # should be checked. Since we support versions < 0.48 we need to use
+  # startswith.
+  if host_machine.cpu_family().startswith('ppc64') and host_machine.endian() == 'little'
     if cc.get_id() == 'gcc' and cc.version().version_compare('< 4.8')
       error('Altivec is not supported with gcc version < 4.8.')
     endif
@@ -949,7 +954,7 @@ if with_asm
       with_asm_arch = 'sparc'
       pre_args += ['-DUSE_SPARC_ASM']
     endif
-  elif host_machine.cpu_family() == 'ppc64le'
+  elif host_machine.cpu_family().startswith('ppc64') and host_machine.endian() == 'little'
     if system_has_kms_drm
       with_asm_arch = 'ppc64le'
       pre_args += ['-DUSE_PPC64LE_ASM']
@@ -1330,7 +1335,6 @@ if with_platform_x11
     dep_xdamage = dependency('xdamage', version : '>= 1.1')
     dep_xfixes = dependency('xfixes')
     dep_xcb_glx = dependency('xcb-glx', version : '>= 1.8.1')
-    dep_xxf86vm = dependency('xxf86vm')
   endif
   if (with_any_vk or with_glx == 'dri' or
        (with_gallium_vdpau or with_gallium_xvmc or with_gallium_va or
@@ -1357,6 +1361,7 @@ if with_platform_x11
   if with_glx == 'dri'
     if with_dri_platform == 'drm'
       dep_dri2proto = dependency('dri2proto', version : '>= 2.8')
+      dep_xxf86vm = dependency('xxf86vm')
     endif
     dep_glproto = dependency('glproto', version : '>= 1.4.14')
   endif
@@ -1377,7 +1382,7 @@ endif
 
 _sensors = get_option('lmsensors')
 if _sensors != 'false'
-  dep_lmsensors = cc.find_library('libsensors', required : _sensors == 'true')
+  dep_lmsensors = cc.find_library('sensors', required : _sensors == 'true')
   if dep_lmsensors.found()
     pre_args += '-DHAVE_LIBSENSORS=1'
   endif
@@ -1407,8 +1412,8 @@ elif with_glx == 'dri'
     'xcb-glx >= 1.8.1']
   if with_dri_platform == 'drm'
     gl_priv_reqs += 'xcb-dri2 >= 1.8'
+    gl_priv_reqs += 'xxf86vm'
   endif
-  gl_priv_reqs += 'xxf86vm'
 endif
 if dep_libdrm.found()
   gl_priv_reqs += 'libdrm >= 2.4.75'

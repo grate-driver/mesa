@@ -23,6 +23,9 @@ e0c7114eb3c19d4c2653f661698a6baa3bc9bedf st/mesa: disable L3 thread pinning
 b5f213bb1dcde22949dffe9d3a431fecd5d0f33b radv: binding streamout buffers doesn't change context regs
 9367514524f70faad99c721bac92339c8ff8bad9 radeonsi: fix video APIs on Raven2
 ea9f95e2a67eca90bb84eea24e7b4b804b3b1345 radeonsi: go back to using bottom-of-pipe for beginning of TIME_ELAPSED
+8f401b0ce6e6650e1a85e9bb2be23d5ff08812b8 anv,radv: Disable VK_EXT_pci_bus_info
+8c77f4c76ddfe0b692b430b012b65f6981a53336 meson: Add support for gnu hurd
+7a90886921eb1d5d73b40aadd6fd3f340041bd26 meson: Add toggle for glx-direct
 # fixes:  This commit was reverted by commit 5f312e95f87.
 a9031bf9b55602d93cccef6c926e2179c23205b4 i965/batch: avoid reverting batch buffer if saved state is an empty
 # extra:  intel/aub_viewer is not present in branch
@@ -37,3 +40,17 @@ d0c7b079d07f751eb37ecaa45a2a6db920d71d7a freedreno: Fix autotools build.
 # pick:  While this commit does not include the proper CC tag, it was intended
 #        to be applied only in 18.3 branch.
 017199d2d2e4c57015bc60edfcc656062c3a7472 mesa: Revert INTEL_fragment_shader_ordering support
+# fixes: The changes this commit provides are already included in the branch.
+ff6f1dd0d3c6b4c15ca51b478b2884d14f6a1e06 meson: libfreedreno depends upon libdrm (for fence support)
+# fixes: This commit requires commits aeaf8dbd097 and 7484bc894b9 which did not
+#        land in branch.
+f67dea5e19ef14187be0e8d0f61b1f764c7ccb4f radv: Fix multiview depth clears
+# fixes: There is a specific patch for stable franch for this commit.
+bde9f482de69528db5ccf5dd6bbfd8359adfbb19 ac: split 16-bit ssbo loads that may not be dword aligned
+# pick:  This commit is nominated to stable, but fixes commit b3c61469255 which
+#        is in 18.3 stable. Hence, this commit is considered as nominated to
+#        18.3 stable.
+947f7b452a550c66cfb9a8c9518e35635eb25947 nir: properly find the entry to keep in copy_prop_vars
+# pick:  This commit is nominated to stable, but fixes commit 11dc1307794 which
+#        is not in the current stable branch.
+d6110d4d547ad98dce7a89d0e020ab5be5aaaad6 intel/compiler: move nir_lower_bool_to_int32 before nir_lower_locals_to_regs

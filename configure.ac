@@ -1698,6 +1698,8 @@ xdri)
             if test x"$enable_dri" = xyes; then
                dri_modules="$dri_modules xcb-dri2 >= $XCBDRI2_REQUIRED"
             fi
+
+            dri_modules="$dri_modules xxf86vm"
         fi
         if test x"$dri_platform" = xapple ; then
             DEFINES="$DEFINES -DGLX_USE_APPLEGL"
@@ -1706,8 +1708,6 @@ xdri)
             DEFINES="$DEFINES -DGLX_USE_WINDOWSGL"
         fi
     fi
-
-    dri_modules="$dri_modules xxf86vm"
 
     PKG_CHECK_MODULES([DRIGL], [$dri_modules])
     GL_PC_REQ_PRIV="$GL_PC_REQ_PRIV $dri_modules"
