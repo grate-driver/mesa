@@ -1,3 +1,9 @@
+mesa (18.2.8-1) UNRELEASED; urgency=medium
+
+  * New upstream release.
+
+ -- Timo Aaltonen <tjaalton@debian.org>  Fri, 28 Dec 2018 10:13:07 +0200
+
 mesa (18.2.7-2) unstable; urgency=medium
 
   * Temporarily disable libsensors support to bootstrap with libsensors5.
