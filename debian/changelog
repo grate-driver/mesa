@@ -1,6 +1,7 @@
 mesa (18.2.8-1) UNRELEASED; urgency=medium
 
   * New upstream release.
+  * control: Build-depend on libsensors-dev. (Closes: #917442)
 
  -- Timo Aaltonen <tjaalton@debian.org>  Fri, 28 Dec 2018 10:13:07 +0200
 
