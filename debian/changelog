@@ -1,3 +1,9 @@
+mesa (18.2.8-2) unstable; urgency=medium
+
+  * Actually merge the upstream version. (Closes: #917556)
+
+ -- Timo Aaltonen <tjaalton@debian.org>  Fri, 28 Dec 2018 20:11:40 +0200
+
 mesa (18.2.8-1) unstable; urgency=medium
 
   * New upstream release.
