@@ -85,13 +85,13 @@ vc4_load_utile(void *cpu, void *gpu, uint32_t cpu_stride, uint32_t cpp)
                         "vst1.8 d5, [%[cpu]], %[cpu_stride]\n"
                         "vst1.8 d6, [%[cpu]], %[cpu_stride]\n"
                         "vst1.8 d7, [%[cpu]]\n"
-                        :
+                        : [cpu]         "+r"(cpu)
                         : [gpu]         "r"(gpu),
-                          [cpu]         "r"(cpu),
                           [cpu_stride]  "r"(cpu_stride)
                         : "q0", "q1", "q2", "q3");
         } else {
                 assert(gpu_stride == 16);
+                void *cpu2 = cpu + 8;
                 __asm__ volatile (
                         /* Load from the GPU in one shot, no interleave, to
                          * d0-d7.
@@ -109,10 +109,9 @@ vc4_load_utile(void *cpu, void *gpu, uint32_t cpu_stride, uint32_t cpp)
                         "vst1.8 d5, [%[cpu2]],%[cpu_stride]\n"
                         "vst1.8 d6, [%[cpu]]\n"
                         "vst1.8 d7, [%[cpu2]]\n"
-                        :
+                        : [cpu]         "+r"(cpu),
+                          [cpu2]        "+r"(cpu2)
                         : [gpu]         "r"(gpu),
-                          [cpu]         "r"(cpu),
-                          [cpu2]        "r"(cpu + 8),
                           [cpu_stride]  "r"(cpu_stride)
                         : "q0", "q1", "q2", "q3");
         }
@@ -134,13 +133,13 @@ vc4_load_utile(void *cpu, void *gpu, uint32_t cpu_stride, uint32_t cpp)
                         "st1 {v2.D}[1], [%[cpu]], %[cpu_stride]\n"
                         "st1 {v3.D}[0], [%[cpu]], %[cpu_stride]\n"
                         "st1 {v3.D}[1], [%[cpu]]\n"
-			:
+                        : [cpu]         "+r"(cpu)
                         : [gpu]         "r"(gpu),
-                          [cpu]         "r"(cpu),
                           [cpu_stride]  "r"(cpu_stride)
                         : "v0", "v1", "v2", "v3");
         } else {
                 assert(gpu_stride == 16);
+                void *cpu2 = cpu + 8;
                 __asm__ volatile (
                         /* Load from the GPU in one shot, no interleave, to
                          * d0-d7.
@@ -158,10 +157,9 @@ vc4_load_utile(void *cpu, void *gpu, uint32_t cpu_stride, uint32_t cpp)
                         "st1 {v2.D}[1], [%[cpu2]],%[cpu_stride]\n"
                         "st1 {v3.D}[0], [%[cpu]]\n"
                         "st1 {v3.D}[1], [%[cpu2]]\n"
-                        :
+                        : [cpu]         "+r"(cpu),
+                          [cpu2]        "+r"(cpu2)
                         : [gpu]         "r"(gpu),
-                          [cpu]         "r"(cpu),
-                          [cpu2]        "r"(cpu + 8),
                           [cpu_stride]  "r"(cpu_stride)
                         : "v0", "v1", "v2", "v3");
         }
@@ -196,13 +194,13 @@ vc4_store_utile(void *gpu, void *cpu, uint32_t cpu_stride, uint32_t cpp)
                          * d0-d7.
                          */
                         "vstm %[gpu], {q0, q1, q2, q3}\n"
-                        :
+                        : [cpu]         "r"(cpu)
                         : [gpu]         "r"(gpu),
-                          [cpu]         "r"(cpu),
                           [cpu_stride]  "r"(cpu_stride)
                         : "q0", "q1", "q2", "q3");
         } else {
                 assert(gpu_stride == 16);
+                void *cpu2 = cpu + 8;
                 __asm__ volatile (
                         /* Load each 16-byte line in 2 parts from the cpu-side
                          * destination.  (vld1 can only store one d-register
@@ -218,10 +216,9 @@ vc4_store_utile(void *gpu, void *cpu, uint32_t cpu_stride, uint32_t cpp)
                         "vld1.8 d7, [%[cpu2]]\n"
                         /* Store to the GPU in one shot, no interleave. */
                         "vstm %[gpu], {q0, q1, q2, q3}\n"
-                        :
+                        : [cpu]         "+r"(cpu),
+                          [cpu2]        "+r"(cpu2)
                         : [gpu]         "r"(gpu),
-                          [cpu]         "r"(cpu),
-                          [cpu2]        "r"(cpu + 8),
                           [cpu_stride]  "r"(cpu_stride)
                         : "q0", "q1", "q2", "q3");
         }
@@ -241,13 +238,13 @@ vc4_store_utile(void *gpu, void *cpu, uint32_t cpu_stride, uint32_t cpp)
                         "ld1 {v3.D}[1], [%[cpu]]\n"
                         /* Store to the GPU in one shot, no interleave. */
                         "st1 {v0.2d, v1.2d, v2.2d, v3.2d}, [%[gpu]]\n"
-                        :
+                        : [cpu]         "+r"(cpu)
                         : [gpu]         "r"(gpu),
-                          [cpu]         "r"(cpu),
                           [cpu_stride]  "r"(cpu_stride)
                         : "v0", "v1", "v2", "v3");
         } else {
                 assert(gpu_stride == 16);
+                void *cpu2 = cpu + 8;
                 __asm__ volatile (
                         /* Load each 16-byte line in 2 parts from the cpu-side
                          * destination.  (vld1 can only store one d-register
@@ -263,10 +260,9 @@ vc4_store_utile(void *gpu, void *cpu, uint32_t cpu_stride, uint32_t cpp)
                         "ld1 {v3.D}[1], [%[cpu2]]\n"
                         /* Store to the GPU in one shot, no interleave. */
                         "st1 {v0.2d, v1.2d, v2.2d, v3.2d}, [%[gpu]]\n"
-                        :
+                        : [cpu]         "+r"(cpu),
+                          [cpu2]        "+r"(cpu2)
                         : [gpu]         "r"(gpu),
-                          [cpu]         "r"(cpu),
-                          [cpu2]        "r"(cpu + 8),
                           [cpu_stride]  "r"(cpu_stride)
                         : "v0", "v1", "v2", "v3");
         }
