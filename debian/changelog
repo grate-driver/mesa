@@ -1,9 +1,9 @@
-mesa (18.3.1-1) UNRELEASED; urgency=medium
+mesa (18.3.1-1) experimental; urgency=medium
 
   * New upstream release.
   * fix-hurd-ftbfs.diff: Fix src/util build on Hurd.
 
- -- Timo Aaltonen <tjaalton@debian.org>  Mon, 24 Dec 2018 06:49:58 +0200
+ -- Timo Aaltonen <tjaalton@debian.org>  Sat, 12 Jan 2019 20:02:51 +0200
 
 mesa (18.3.0-1) experimental; urgency=medium
 
