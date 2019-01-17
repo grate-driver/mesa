@@ -1,2 +1,4 @@
 # fixes: Commit was squashed into the respective offenders
 c02390f8fcd367c7350db568feabb2f062efca14 egl/wayland: rather obvious build fix
+# fixes: The commit addresses b4476138d5ad3f8d30c14ee61f2f375edfdbab2a
+ff6f1dd0d3c6b4c15ca51b478b2884d14f6a1e06 meson: libfreedreno depends upon libdrm (for fence support)
