@@ -1,4 +1,4 @@
-mesa (18.3.2-1) UNRELEASED; urgency=medium
+mesa (18.3.2-1) unstable; urgency=medium
 
   * New upstream release.
     - 2-5..5-5*.patch: Dropped, upstream.
@@ -7,7 +7,7 @@ mesa (18.3.2-1) UNRELEASED; urgency=medium
   * nv30: Cherry-pick patches to fix a plasmashell crash. (Closes:
     #918835)
 
- -- Timo Aaltonen <tjaalton@debian.org>  Sun, 13 Jan 2019 14:27:33 +0200
+ -- Timo Aaltonen <tjaalton@debian.org>  Thu, 17 Jan 2019 20:36:15 +0200
 
 mesa (18.3.1-1) experimental; urgency=medium
 
