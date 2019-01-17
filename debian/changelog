@@ -1,6 +1,7 @@
 mesa (18.3.2-1) UNRELEASED; urgency=medium
 
   * New upstream release.
+    - 2-5..5-5*.patch: Dropped, upstream.
   * fix-hurd-ftbfs.diff: Add one more check for PIPE_OS_HURD, and fixes
     from James Clarke to address other issues with the build.
   * nv30: Cherry-pick patches to fix a plasmashell crash. (Closes:
