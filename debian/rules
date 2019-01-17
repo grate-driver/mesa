@@ -128,7 +128,11 @@ else
 #	confflags_GALLIUM += --enable-va
 	confflags_GALLIUM += --enable-gallium-extra-hud
 	confflags_GALLIUM += --enable-lmsensors
-	with_libva = libva
+
+  ifeq (,$(filter pkg.mesa.nolibva,$(DEB_BUILD_PROFILES)))
+	confflags_GALLIUM += -Dgallium-va=true
+	with_libva = ,libva
+  endif
 endif
 
 # Disable assembly usage on x32 otherwise Mesa defaults to x86_64 assembly
@@ -235,10 +239,12 @@ override_dh_install:
 #	mv debian/tmp/usr/lib/${DEB_HOST_MULTIARCH}/vdpau/libvdpau*.so* \
 #	   debian/mesa-vdpau-drivers/usr/lib/${DEB_HOST_MULTIARCH}/vdpau/
 #
+#    ifeq (,$(filter pkg.mesa.nolibva,$(DEB_BUILD_PROFILES)))
 #	# Copy the hardlinked va drivers correctly.
 #	install -m755 -d debian/mesa-va-drivers/usr/lib/${DEB_HOST_MULTIARCH}/dri/
 #	mv debian/tmp/usr/lib/${DEB_HOST_MULTIARCH}/dri/*_drv_video.so \
 #	   debian/mesa-va-drivers/usr/lib/${DEB_HOST_MULTIARCH}/dri/
+#    endif
 #  endif
 
 	dh_install -a --list-missing
