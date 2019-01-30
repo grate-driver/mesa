@@ -122,7 +122,7 @@ LLVM_REQUIRED_OPENCL=3.9.0
 LLVM_REQUIRED_R600=3.9.0
 LLVM_REQUIRED_RADEONSI=7.0.0
 LLVM_REQUIRED_RADV=7.0.0
-LLVM_REQUIRED_SWR=6.0.0
+LLVM_REQUIRED_SWR=7.0.0
 
 dnl Check for progs
 AC_PROG_CPP
@@ -2845,8 +2845,8 @@ if test -n "$with_gallium_drivers"; then
 fi
 
 # XXX: Keep in sync with LLVM_REQUIRED_SWR
-AM_CONDITIONAL(SWR_INVALID_LLVM_VERSION, test "x$LLVM_VERSION" != x6.0.0 -a \
-                                              "x$LLVM_VERSION" != x6.0.1)
+AM_CONDITIONAL(SWR_INVALID_LLVM_VERSION, test "x$LLVM_VERSION" != x7.0.0 -a \
+                                              "x$LLVM_VERSION" != x7.0.1)
 
 if test "x$enable_llvm" = "xyes" -a "$with_gallium_drivers"; then
     llvm_require_version $LLVM_REQUIRED_GALLIUM "gallium"
