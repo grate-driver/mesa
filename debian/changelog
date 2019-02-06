@@ -1,6 +1,7 @@
 mesa (19.0.0~rc2-1) UNRELEASED; urgency=medium
 
   * New upstream snapshot.
+  * 1-5-meson-remove-duplicate-definition.patch: Dropped, upstream.
 
  -- Timo Aaltonen <tjaalton@debian.org>  Wed, 06 Feb 2019 11:41:20 +0200
 
