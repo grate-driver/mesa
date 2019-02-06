@@ -1,4 +1,4 @@
-mesa (18.3.3-1) UNRELEASED; urgency=medium
+mesa (18.3.3-1) unstable; urgency=medium
 
   [ James Clarke ]
   * Add pkg.mesa.nolibva build profile; this breaks the mesa -> libva-dev ->
@@ -8,7 +8,7 @@ mesa (18.3.3-1) UNRELEASED; urgency=medium
   [ Timo Aaltonen ]
   * New upstream release.
 
- -- James Clarke <jrtc27@debian.org>  Thu, 17 Jan 2019 22:10:22 +0000
+ -- Timo Aaltonen <tjaalton@debian.org>  Wed, 06 Feb 2019 11:36:46 +0200
 
 mesa (18.3.2-1) unstable; urgency=medium
 
