@@ -2,3 +2,15 @@
 c02390f8fcd367c7350db568feabb2f062efca14 egl/wayland: rather obvious build fix
 # fixes: The commit addresses b4476138d5ad3f8d30c14ee61f2f375edfdbab2a
 ff6f1dd0d3c6b4c15ca51b478b2884d14f6a1e06 meson: libfreedreno depends upon libdrm (for fence support)
+
+# fixes: This commit requires commits aeaf8dbd097 and 7484bc894b9 which did not
+#        land in branch.
+f67dea5e19ef14187be0e8d0f61b1f764c7ccb4f radv: Fix multiview depth clears
+
+# stable The commits aren't suitable in their present form.
+bfe31c5e461a1330d6f606bf5310685eff1198dd nir/builder: Add nir_i2i and nir_u2u helpers which take a bit size
+abfe674c54bee6f8fdcae411b07db89c10b9d530 spirv: Handle arbitrary bit sizes for deref array indices
+
+# warn   The commits refer stale sha, yet don't fix anything in particular.
+98984b7cdd79c15cc7331c791f8be61e873b8bbd Revert "mapi/new: sort by slot number"
+9f86f1da7c68b5b900cd6f60925610ff1225a72d egl: add glvnd entrypoints for EGL_MESA_query_driver
