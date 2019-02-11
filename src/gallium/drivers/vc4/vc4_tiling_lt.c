@@ -194,7 +194,7 @@ vc4_store_utile(void *gpu, void *cpu, uint32_t cpu_stride, uint32_t cpp)
                          * d0-d7.
                          */
                         "vstm %[gpu], {q0, q1, q2, q3}\n"
-                        : [cpu]         "r"(cpu)
+                        : [cpu]         "+r"(cpu)
                         : [gpu]         "r"(gpu),
                           [cpu_stride]  "r"(cpu_stride)
                         : "q0", "q1", "q2", "q3");
