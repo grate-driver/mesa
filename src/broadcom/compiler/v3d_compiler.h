@@ -519,6 +519,7 @@ struct v3d_compile {
         uint32_t centroid_flags[BITSET_WORDS(V3D_MAX_FS_INPUTS)];
 
         bool uses_center_w;
+        bool writes_z;
 
         struct v3d_ubo_range *ubo_ranges;
         bool *ubo_range_used;
@@ -716,7 +717,7 @@ struct v3d_fs_prog_data {
         uint32_t centroid_flags[((V3D_MAX_FS_INPUTS - 1) / 24) + 1];
 
         bool writes_z;
-        bool discard;
+        bool disable_ez;
         bool uses_center_w;
 };
 
