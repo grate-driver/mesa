@@ -33,3 +33,6 @@ e00799d3dc0595dc3998dbf199ceec8b1eece966 nv50,nvc0: use condition for occlusion 
 cce495572136a606dd2a35e79f45080c3796e2cc gm107/ir: add fp64 rsq
 6010d7b8e8bee1bcea2b329cf6d3b44c5fc3ca66 gallium: add PIPE_CAP_MAX_VARYINGS
 cbd1ad6165f0aea7fb7c6fd1b36ad5317dd65cb7 st/mesa: require RGBA2, RGB4, and RGBA4 to be renderable
+
+# stable The commit addresses functionality not present in branch
+1b8983c25be19073c02fe9630e949be55f8280fa radv: fix using LOAD_CONTEXT_REG with old GFX ME firmwares on GFX8
