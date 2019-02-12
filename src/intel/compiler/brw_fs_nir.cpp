@@ -511,6 +511,15 @@ fs_visitor::optimize_extract_to_float(nir_alu_instr *instr,
        src0->op != nir_op_extract_i8 && src0->op != nir_op_extract_i16)
       return false;
 
+   /* If either opcode has source modifiers, bail.
+    *
+    * TODO: We can potentially handle source modifiers if both of the opcodes
+    * we're combining are signed integers.
+    */
+   if (instr->src[0].abs || instr->src[0].negate ||
+       src0->src[0].abs || src0->src[0].negate)
+      return false;
+
    nir_const_value *element = nir_src_as_const_value(src0->src[1].src);
    assert(element != NULL);
 
