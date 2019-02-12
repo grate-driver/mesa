@@ -14,3 +14,6 @@ abfe674c54bee6f8fdcae411b07db89c10b9d530 spirv: Handle arbitrary bit sizes for d
 # warn   The commits refer stale sha, yet don't fix anything in particular.
 98984b7cdd79c15cc7331c791f8be61e873b8bbd Revert "mapi/new: sort by slot number"
 9f86f1da7c68b5b900cd6f60925610ff1225a72d egl: add glvnd entrypoints for EGL_MESA_query_driver
+
+# stable Explicit 19.0 only nomination.
+38f542783faa360020b77fdd76b97f207a9e0068 v50,nvc0: add explicit settings for recent caps
