@@ -14,3 +14,25 @@ abfe674c54bee6f8fdcae411b07db89c10b9d530 spirv: Handle arbitrary bit sizes for d
 # warn   The commits refer stale sha, yet don't fix anything in particular.
 98984b7cdd79c15cc7331c791f8be61e873b8bbd Revert "mapi/new: sort by slot number"
 9f86f1da7c68b5b900cd6f60925610ff1225a72d egl: add glvnd entrypoints for EGL_MESA_query_driver
+
+# stable Explicit 19.0 only nomination.
+38f542783faa360020b77fdd76b97f207a9e0068 v50,nvc0: add explicit settings for recent caps
+
+# stable Explicit 19.0 only nominations.
+399215eb7a0517463e5757c598d6cff6ae2301d0 nvc0: add support for handling indirect draws with attrib conversion
+4443b6ddf2e08d06f3d0457cf20a2e04244cde37 nvc0/ir: always use CG mode for loads from atomic-only buffers
+5de5beedf21306b01730085f8e03d8f424729016 nvc0/ir: fix second tex argument after levelZero optimization
+162352e6711b3ceab114686f7a3248074339e7f7 nvc0: fix 3d images on kepler
+e00799d3dc0595dc3998dbf199ceec8b1eece966 nv50,nvc0: use condition for occlusion queries when already complete
+6adb9b38bfb1f6ee4c94596bf0744225aa8e967a nvc0: stick zero values for the compute invocation counts
+04593d9a73ea257a36cc3b9fb5cd41427beaaea5 gk110/ir: Add rcp f64 implementation
+7937408052a1896f0b08b0110bb8a1790eeee351 gk110/ir: Add rsq f64 implementation
+656ad060518d067a3b311db8c2de2a396fb41898 gk110/ir: Use the new rcp/rsq in library
+12669d29705a26478aa691cb454149628be65f17 gk104/ir: Use the new rcp/rsq in library
+815a8e59c6d462a7008653ea9e3010d40b6ba589 gm107/ir: add fp64 rcp
+cce495572136a606dd2a35e79f45080c3796e2cc gm107/ir: add fp64 rsq
+6010d7b8e8bee1bcea2b329cf6d3b44c5fc3ca66 gallium: add PIPE_CAP_MAX_VARYINGS
+cbd1ad6165f0aea7fb7c6fd1b36ad5317dd65cb7 st/mesa: require RGBA2, RGB4, and RGBA4 to be renderable
+
+# stable The commit addresses functionality not present in branch
+1b8983c25be19073c02fe9630e949be55f8280fa radv: fix using LOAD_CONTEXT_REG with old GFX ME firmwares on GFX8
