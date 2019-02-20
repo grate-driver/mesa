@@ -1,3 +1,9 @@
+mesa (19.0.0~rc5-1) UNRELEASED; urgency=medium
+
+  * New upstream release candidate.
+
+ -- Timo Aaltonen <tjaalton@debian.org>  Wed, 20 Feb 2019 10:16:02 +0200
+
 mesa (19.0.0~rc2-1) experimental; urgency=medium
 
   * New upstream snapshot.
