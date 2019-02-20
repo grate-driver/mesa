@@ -1,9 +1,9 @@
-mesa (19.0.0~rc5-1) UNRELEASED; urgency=medium
+mesa (19.0.0~rc5-1) experimental; urgency=medium
 
   * New upstream release candidate.
   * libgbm1.symbols: Updated.
 
- -- Timo Aaltonen <tjaalton@debian.org>  Wed, 20 Feb 2019 10:16:02 +0200
+ -- Timo Aaltonen <tjaalton@debian.org>  Wed, 20 Feb 2019 14:02:45 +0200
 
 mesa (19.0.0~rc2-1) experimental; urgency=medium
 
