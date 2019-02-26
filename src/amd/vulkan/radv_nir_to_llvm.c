@@ -2154,7 +2154,8 @@ handle_fs_input_decl(struct radv_shader_context *ctx,
 		unsigned component_count = variable->data.location_frac +
 		                           glsl_get_length(variable->type);
 		attrib_count = (component_count + 3) / 4;
-	}
+	} else
+		mark_16bit_fs_input(ctx, variable->type, idx);
 
 	mask = ((1ull << attrib_count) - 1) << variable->data.location;
 
