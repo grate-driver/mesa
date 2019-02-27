@@ -1531,6 +1531,13 @@ fs_visitor::nir_emit_alu(const fs_builder &bld, nir_alu_instr *instr)
             fs_reg w_temp = bld.vgrf(BRW_REGISTER_TYPE_W);
             bld.MOV(w_temp, subscript(op[0], type, byte->u32[0]));
             bld.MOV(result, w_temp);
+         } else if (byte->u32[0] & 1) {
+            /* Extract the high byte from the word containing the desired byte
+             * offset.
+             */
+            bld.SHR(result,
+                    subscript(op[0], BRW_REGISTER_TYPE_UW, byte->u32[0] / 2),
+                    brw_imm_uw(8));
          } else {
             /* Otherwise use an AND with 0xff and a word type */
             bld.AND(result,
