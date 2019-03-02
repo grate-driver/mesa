@@ -136,6 +136,7 @@ confflags += \
 	-Dshared-glapi=true \
 	-Dgallium-xvmc=false \
 	-Dgallium-omx=disabled \
+	-Db_ndebug=true \
 	$(confflags_DIRECT_RENDERING) \
 	$(confflags_GBM) \
 	$(confflags_DRI3) \
