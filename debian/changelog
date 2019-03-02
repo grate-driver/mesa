@@ -5,6 +5,8 @@ mesa (18.3.4-2) unstable; urgency=medium
     switching to meson (Closes: #922807).
   * rules: Add meson option -Db_ndebug=true to disable assertions
     (Related bugs: #920462, #922162, #922346).
+  * source/local-options: Remove meson build files from extend-diff-
+    ignore.
 
  -- Andreas Boll <aboll@debian.org>  Sat, 02 Mar 2019 13:11:29 +0100
 

@@ -6,9 +6,6 @@ extend-diff-ignore = src/mesa/drivers/dri/r200/.*radeon_.*
 # Android Makefiles
 extend-diff-ignore = Android.*mk|CleanSpec\.mk
 
-# Meson build files
-extend-diff-ignore = meson\.build|meson_options\.txt|bin/install_megadrivers\.py
-
 # coding-style and other config files
 extend-diff-ignore = \.clang-format|\.dir-locals\.el|\.editorconfig|\.mailmap|\.travis\.yml|appveyor\.yml
 
