@@ -1,4 +1,4 @@
-mesa (18.3.4-2) UNRELEASED; urgency=medium
+mesa (18.3.4-2) unstable; urgency=medium
 
   * Cherry-pick f6556ec7d12 (dri: meson: do not prefix user provided dri-
     drivers-path) from upstream master branch. Fixes a regression since
@@ -6,7 +6,7 @@ mesa (18.3.4-2) UNRELEASED; urgency=medium
   * rules: Add meson option -Db_ndebug=true to disable assertions
     (Related bugs: #920462, #922162, #922346).
 
- -- Andreas Boll <aboll@debian.org>  Thu, 28 Feb 2019 11:45:35 +0100
+ -- Andreas Boll <aboll@debian.org>  Sat, 02 Mar 2019 13:11:29 +0100
 
 mesa (18.3.4-1) unstable; urgency=medium
 
