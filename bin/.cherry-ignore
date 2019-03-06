@@ -36,3 +36,7 @@ cbd1ad6165f0aea7fb7c6fd1b36ad5317dd65cb7 st/mesa: require RGBA2, RGB4, and RGBA4
 
 # stable The commit addresses functionality not present in branch
 1b8983c25be19073c02fe9630e949be55f8280fa radv: fix using LOAD_CONTEXT_REG with old GFX ME firmwares on GFX8
+
+# stable Explicit 19.0 only nominations, require work which did not land in branch
+8ab95b849e66f3221d80a67eef2ec6e3730901a8 anv: Refactor descriptor pushing a bit
+5c30fffeec1732c21d600c036f95f8cdb1bb5487 anv: Take references to push descriptor set layouts
