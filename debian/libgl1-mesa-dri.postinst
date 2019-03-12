@@ -1,0 +1,8 @@
+#!/bin/sh
+
+dpkg-maintscript-helper rm_conffile \
+	/etc/drirc 18.3.4-3 libgl1-mesa-dri -- "$@"
+
+#DEBHELPER#
+
+exit 0
