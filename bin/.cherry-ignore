@@ -46,3 +46,9 @@ cbd1ad6165f0aea7fb7c6fd1b36ad5317dd65cb7 st/mesa: require RGBA2, RGB4, and RGBA4
 
 # revert The commit was reverted shortly after it was applied on master
 47fc359822494935852de1e70e4d840b2fe6a25c anv: release memory allocated by glsl types during spirv_to_nir
+
+# stable Explicitly 19.0 nomination, seemingly a performance patch
+5ef2b8f1f2ebcdb4ffe5c98b3f4f48e584cb4b22 nir: Add a pass for lowering IO back to vector when possible
+
+# fixes Temporary block perf. fix depending on previous opt. pass
+6d5d89d25a0a4299dbfcbfeca71b6c7e65ef3d45 intel/nir: Vectorize all IO
