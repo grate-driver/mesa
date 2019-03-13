@@ -43,3 +43,6 @@ cbd1ad6165f0aea7fb7c6fd1b36ad5317dd65cb7 st/mesa: require RGBA2, RGB4, and RGBA4
 
 # sha    Commit references invalid sha - a offender did not land in branch.
 85ee157283c667372baf7c03259cba08853f0067 gitlab-ci: autotools needs to be told which llvm version to use
+
+# revert The commit was reverted shortly after it was applied on master
+47fc359822494935852de1e70e4d840b2fe6a25c anv: release memory allocated by glsl types during spirv_to_nir
