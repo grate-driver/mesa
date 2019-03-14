@@ -1,3 +1,14 @@
 # Both of these were already merged with different shas
 da48cba61ef6fefb799bf96e6364b70dbf4ec712
 c812c740e60c14060eb89db66039111881a0f42f
+
+# The commit these fix was reverted from 19.0, but fixed for 19.1 due
+# to the number of fixes required to make that commit work
+8d8f80af3a17354508f2ec9d6559c915d5be351d
+0c0c69729b6d72a5297122856c8fe48510e90764
+0881e90c09965818b02e359474a6f7446b41d647
+b031c643491a92a5574c7a4bd659df33f2d89bb6
+
+# These were manually rebased by Jason, thanks!
+8ab95b849e66f3221d80a67eef2ec6e3730901a8
+5c30fffeec1732c21d600c036f95f8cdb1bb5487
