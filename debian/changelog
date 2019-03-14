@@ -1,6 +1,8 @@
 mesa (19.0.0-1) UNRELEASED; urgency=medium
 
   * New upstream release.
+  * meson-fix-with-dri2-def-for-hurd.diff: Restored the original diff to
+    fix hurd build.
 
  -- Timo Aaltonen <tjaalton@debian.org>  Thu, 14 Mar 2019 18:16:37 +0200
 
