@@ -49,6 +49,7 @@
 #include "util/build_id.h"
 #include "util/debug.h"
 #include "util/mesa-sha1.h"
+#include "compiler/glsl_types.h"
 
 static int
 radv_device_get_cache_uuid(enum radeon_family family, void *uuid)
@@ -597,6 +598,7 @@ void radv_DestroyInstance(
 
 	VG(VALGRIND_DESTROY_MEMPOOL(instance));
 
+	_mesa_glsl_release_types();
 	_mesa_locale_fini();
 
 	vk_debug_report_instance_destroy(&instance->debug_report_callbacks);
