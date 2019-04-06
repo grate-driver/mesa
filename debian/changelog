@@ -1,9 +1,13 @@
-mesa (18.3.4-3) UNRELEASED; urgency=medium
+mesa (18.3.6-1) UNRELEASED; urgency=medium
 
+  [ Timo Aaltonen ]
   * libgl1-mesa-dri: Remove /etc/drirc which isn't installed anymore.
     (Closes: #920241)
 
- -- Timo Aaltonen <tjaalton@debian.org>  Tue, 12 Mar 2019 12:06:03 +0200
+  [ Andreas Boll ]
+  * New upstream release.
+
+ -- Andreas Boll <aboll@debian.org>  Sat, 06 Apr 2019 19:24:52 +0200
 
 mesa (18.3.4-2) unstable; urgency=medium
 
