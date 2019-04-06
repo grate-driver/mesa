@@ -60,21 +60,6 @@
      }
  }
  
---- a/src/egl/main/egldevice.c
-+++ b/src/egl/main/egldevice.c
-@@ -211,7 +211,12 @@ _eglDeviceSupports(_EGLDevice *dev, _EGL
- const char *
- _eglGetDRMDeviceRenderNode(_EGLDevice *dev)
- {
-+#ifdef HAVE_LIBDRM
-    return dev->device->nodes[DRM_NODE_RENDER];
-+#else
-+   _eglLog(_EGL_FATAL, "Driver bug: Built without libdrm, yet requesting DRM render node");
-+   return NULL;
-+#endif
- }
- 
- EGLBoolean
 --- a/src/egl/meson.build
 +++ b/src/egl/meson.build
 @@ -87,7 +87,7 @@ g_egldispatchstubs_h = custom_target(
