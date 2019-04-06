@@ -1,4 +1,4 @@
-mesa (18.3.6-1) UNRELEASED; urgency=medium
+mesa (18.3.6-1) unstable; urgency=medium
 
   [ Timo Aaltonen ]
   * libgl1-mesa-dri: Remove /etc/drirc which isn't installed anymore.
@@ -10,7 +10,7 @@ mesa (18.3.6-1) UNRELEASED; urgency=medium
       update_buffers(). Fixes a crash with xwayland (Closes: #922346).
   * Rebase patches/fix-hurd-ftbfs.diff.
 
- -- Andreas Boll <aboll@debian.org>  Sat, 06 Apr 2019 19:24:52 +0200
+ -- Andreas Boll <aboll@debian.org>  Sat, 06 Apr 2019 20:58:43 +0200
 
 mesa (18.3.4-2) unstable; urgency=medium
 
