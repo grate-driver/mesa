@@ -36,3 +36,19 @@ cbd1ad6165f0aea7fb7c6fd1b36ad5317dd65cb7 st/mesa: require RGBA2, RGB4, and RGBA4
 
 # stable The commit addresses functionality not present in branch
 1b8983c25be19073c02fe9630e949be55f8280fa radv: fix using LOAD_CONTEXT_REG with old GFX ME firmwares on GFX8
+
+# stable Explicit 19.0 only nominations, require work which did not land in branch
+8ab95b849e66f3221d80a67eef2ec6e3730901a8 anv: Refactor descriptor pushing a bit
+5c30fffeec1732c21d600c036f95f8cdb1bb5487 anv: Take references to push descriptor set layouts
+
+# sha    Commit references invalid sha - a offender did not land in branch.
+85ee157283c667372baf7c03259cba08853f0067 gitlab-ci: autotools needs to be told which llvm version to use
+
+# revert The commit was reverted shortly after it was applied on master
+47fc359822494935852de1e70e4d840b2fe6a25c anv: release memory allocated by glsl types during spirv_to_nir
+
+# stable Explicitly 19.0 nomination, seemingly a performance patch
+5ef2b8f1f2ebcdb4ffe5c98b3f4f48e584cb4b22 nir: Add a pass for lowering IO back to vector when possible
+
+# fixes Temporary block perf. fix depending on previous opt. pass
+6d5d89d25a0a4299dbfcbfeca71b6c7e65ef3d45 intel/nir: Vectorize all IO
