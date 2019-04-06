@@ -6,6 +6,8 @@ mesa (18.3.6-1) UNRELEASED; urgency=medium
 
   [ Andreas Boll ]
   * New upstream release.
+    - wayland/egl: Ensure EGL surface is resized on DRI
+      update_buffers(). Fixes a crash with xwayland (Closes: #922346).
   * Rebase patches/fix-hurd-ftbfs.diff.
 
  -- Andreas Boll <aboll@debian.org>  Sat, 06 Apr 2019 19:24:52 +0200
