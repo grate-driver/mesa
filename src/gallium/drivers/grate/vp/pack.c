@@ -3,7 +3,7 @@
 
 #include "util/macros.h"
 
-#include "grate_vpe_ir.h"
+#include "vpir.h"
 
 static unsigned
 vpe_write_mask(unsigned input)
