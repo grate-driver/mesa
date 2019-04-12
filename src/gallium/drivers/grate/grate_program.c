@@ -39,10 +39,10 @@ grate_create_vs_state(struct pipe_context *pcontext,
    unsigned ok = tgsi_parse_init(&parser, template->tokens);
    assert(ok == TGSI_PARSE_OK);
 
-   struct grate_vpe_shader vpe;
-   grate_tgsi_to_vpe(&vpe, &parser);
+   struct grate_vp_shader vp;
+   grate_tgsi_to_vp(&vp, &parser);
 
-   int num_instructions = list_length(&vpe.instructions);
+   int num_instructions = list_length(&vp.instructions);
    assert(num_instructions < 256);
    int num_commands = 2 + num_instructions * 4;
    uint32_t *commands = MALLOC(num_commands * sizeof(uint32_t));
@@ -55,17 +55,17 @@ grate_create_vs_state(struct pipe_context *pcontext,
    commands[1] = host1x_opcode_nonincr(TGR3D_VP_UPLOAD_INST,
                                        num_instructions * 4);
 
-   struct vpe_instr *last = list_last_entry(&vpe.instructions, struct vpe_instr, link);
+   struct vp_instr *last = list_last_entry(&vp.instructions, struct vp_instr, link);
    int offset = 2;
-   list_for_each_entry(struct vpe_instr, instr, &vpe.instructions, link) {
+   list_for_each_entry(struct vp_instr, instr, &vp.instructions, link) {
       bool end_of_program = instr == last;
-      grate_vpe_pack(commands + offset, instr, end_of_program);
+      grate_vp_pack(commands + offset, instr, end_of_program);
       offset += 4;
    }
 
    so->blob.commands = commands;
    so->blob.num_commands = num_commands;
-   so->output_mask = vpe.output_mask;
+   so->output_mask = vp.output_mask;
 
    return so;
 }
