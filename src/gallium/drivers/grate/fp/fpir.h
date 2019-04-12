@@ -1,5 +1,5 @@
-#ifndef FP_IR_H
-#define FP_IR_H
+#ifndef FPIR_H
+#define FPIR_H
 
 #include "util/list.h"
 

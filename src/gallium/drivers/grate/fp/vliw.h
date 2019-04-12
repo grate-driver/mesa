@@ -1,5 +1,5 @@
-#ifndef FP_VLIW_H
-#define FP_VLIW_H
+#ifndef VLIW_H
+#define VLIW_H
 
 #include <stdint.h>
 
