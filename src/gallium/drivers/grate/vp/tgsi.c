@@ -5,22 +5,22 @@
 
 #include "util/u_memory.h"
 
-static struct vpe_src_operand
+static struct vp_src_operand
 src_undef()
 {
-   struct vpe_src_operand ret = {
-      .file = VPE_SRC_FILE_UNDEF,
+   struct vp_src_operand ret = {
+      .file = VP_SRC_FILE_UNDEF,
       .index = 0,
-      .swizzle = { VPE_SWZ_X, VPE_SWZ_Y, VPE_SWZ_Z, VPE_SWZ_W }
+      .swizzle = { VP_SWZ_X, VP_SWZ_Y, VP_SWZ_Z, VP_SWZ_W }
    };
    return ret;
 }
 
-static struct vpe_src_operand
-attrib(int index, const enum vpe_swz swizzle[4], bool negate, bool absolute)
+static struct vp_src_operand
+attrib(int index, const enum vp_swz swizzle[4], bool negate, bool absolute)
 {
-   struct vpe_src_operand ret = {
-      .file = VPE_SRC_FILE_ATTRIB,
+   struct vp_src_operand ret = {
+      .file = VP_SRC_FILE_ATTRIB,
       .index = index,
       .negate = negate,
       .absolute = absolute
@@ -29,11 +29,11 @@ attrib(int index, const enum vpe_swz swizzle[4], bool negate, bool absolute)
    return ret;
 }
 
-static struct vpe_src_operand
-uniform(int index, const enum vpe_swz swizzle[4], bool negate, bool absolute)
+static struct vp_src_operand
+uniform(int index, const enum vp_swz swizzle[4], bool negate, bool absolute)
 {
-   struct vpe_src_operand ret = {
-      .file = VPE_SRC_FILE_UNIFORM,
+   struct vp_src_operand ret = {
+      .file = VP_SRC_FILE_UNIFORM,
       .index = index,
       .negate = negate,
       .absolute = absolute
@@ -42,11 +42,11 @@ uniform(int index, const enum vpe_swz swizzle[4], bool negate, bool absolute)
    return ret;
 }
 
-static struct vpe_src_operand
-src_temp(int index, const enum vpe_swz swizzle[4], bool negate, bool absolute)
+static struct vp_src_operand
+src_temp(int index, const enum vp_swz swizzle[4], bool negate, bool absolute)
 {
-   struct vpe_src_operand ret = {
-      .file = VPE_SRC_FILE_TEMP,
+   struct vp_src_operand ret = {
+      .file = VP_SRC_FILE_TEMP,
       .index = index,
       .negate = negate,
       .absolute = absolute
@@ -55,11 +55,11 @@ src_temp(int index, const enum vpe_swz swizzle[4], bool negate, bool absolute)
    return ret;
 }
 
-static struct vpe_dst_operand
+static struct vp_dst_operand
 dst_undef()
 {
-   struct vpe_dst_operand ret = {
-      .file = VPE_DST_FILE_UNDEF,
+   struct vp_dst_operand ret = {
+      .file = VP_DST_FILE_UNDEF,
       .index = 0,
       .write_mask = 0,
       .saturate = 0
@@ -67,13 +67,13 @@ dst_undef()
    return ret;
 }
 
-static struct vpe_dst_operand
-emit_output(struct grate_vpe_shader *vpe, int index,
+static struct vp_dst_operand
+emit_output(struct grate_vp_shader *vp, int index,
             unsigned int write_mask, bool saturate)
 {
-   vpe->output_mask |= 1 << index;
-   struct vpe_dst_operand ret = {
-      .file = VPE_DST_FILE_OUTPUT,
+   vp->output_mask |= 1 << index;
+   struct vp_dst_operand ret = {
+      .file = VP_DST_FILE_OUTPUT,
       .index = index,
       .write_mask = write_mask,
       .saturate = saturate
@@ -81,11 +81,11 @@ emit_output(struct grate_vpe_shader *vpe, int index,
    return ret;
 }
 
-static struct vpe_dst_operand
+static struct vp_dst_operand
 dst_temp(int index, unsigned int write_mask, bool saturate)
 {
-   struct vpe_dst_operand ret = {
-      .file = VPE_DST_FILE_TEMP,
+   struct vp_dst_operand ret = {
+      .file = VP_DST_FILE_TEMP,
       .index = index,
       .write_mask = write_mask,
       .saturate = saturate
@@ -93,11 +93,11 @@ dst_temp(int index, unsigned int write_mask, bool saturate)
    return ret;
 }
 
-static struct vpe_vec_instr
-emit_vec_unop(enum vpe_vec_op op, struct vpe_dst_operand dst,
-              struct vpe_src_operand src)
+static struct vp_vec_instr
+emit_vec_unop(enum vp_vec_op op, struct vp_dst_operand dst,
+              struct vp_src_operand src)
 {
-   struct vpe_vec_instr ret = {
+   struct vp_vec_instr ret = {
       .op = op,
       .dst = dst,
       .src = { src, src_undef(), src_undef() }
@@ -105,11 +105,11 @@ emit_vec_unop(enum vpe_vec_op op, struct vpe_dst_operand dst,
    return ret;
 }
 
-static struct vpe_vec_instr
-emit_vec_binop(enum vpe_vec_op op, struct vpe_dst_operand dst,
-              struct vpe_src_operand src0, struct vpe_src_operand src1)
+static struct vp_vec_instr
+emit_vec_binop(enum vp_vec_op op, struct vp_dst_operand dst,
+              struct vp_src_operand src0, struct vp_src_operand src1)
 {
-   struct vpe_vec_instr ret = {
+   struct vp_vec_instr ret = {
       .op = op,
       .dst = dst,
       .src = { src0, src1, src_undef() }
@@ -117,29 +117,29 @@ emit_vec_binop(enum vpe_vec_op op, struct vpe_dst_operand dst,
    return ret;
 }
 
-static struct vpe_vec_instr
+static struct vp_vec_instr
 emit_vNOP()
 {
-   struct vpe_vec_instr ret = {
-      .op = VPE_VEC_OP_NOP,
+   struct vp_vec_instr ret = {
+      .op = VP_VEC_OP_NOP,
       .dst = dst_undef(),
       .src = { src_undef(), src_undef(), src_undef() }
    };
    return ret;
 }
 
-static struct vpe_vec_instr
-emit_vMOV(struct vpe_dst_operand dst, struct vpe_src_operand src)
+static struct vp_vec_instr
+emit_vMOV(struct vp_dst_operand dst, struct vp_src_operand src)
 {
-   return emit_vec_unop(VPE_VEC_OP_MOV, dst, src);
+   return emit_vec_unop(VP_VEC_OP_MOV, dst, src);
 }
 
-static struct vpe_vec_instr
-emit_vADD(struct vpe_dst_operand dst, struct vpe_src_operand src0,
-          struct vpe_src_operand src2)
+static struct vp_vec_instr
+emit_vADD(struct vp_dst_operand dst, struct vp_src_operand src0,
+          struct vp_src_operand src2)
 {
-   struct vpe_vec_instr ret = {
-      .op = VPE_VEC_OP_ADD,
+   struct vp_vec_instr ret = {
+      .op = VP_VEC_OP_ADD,
       .dst = dst,
       .src = { src0, src_undef(), src2 } // add is "strange" in that it takes src0 and src2
    };
@@ -147,11 +147,11 @@ emit_vADD(struct vpe_dst_operand dst, struct vpe_src_operand src0,
 }
 
 #define GEN_V_BINOP(OP) \
-static struct vpe_vec_instr \
-emit_v ## OP (struct vpe_dst_operand dst, struct vpe_src_operand src0, \
-          struct vpe_src_operand src1) \
+static struct vp_vec_instr \
+emit_v ## OP (struct vp_dst_operand dst, struct vp_src_operand src0, \
+          struct vp_src_operand src1) \
 { \
-   return emit_vec_binop(VPE_VEC_OP_ ## OP, dst, src0, src1); \
+   return emit_vec_binop(VP_VEC_OP_ ## OP, dst, src0, src1); \
 }
 
 GEN_V_BINOP(MUL)
@@ -160,23 +160,23 @@ GEN_V_BINOP(DP4)
 GEN_V_BINOP(SLT)
 GEN_V_BINOP(MAX)
 
-static struct vpe_vec_instr
-emit_vMAD(struct vpe_dst_operand dst, struct vpe_src_operand src0,
-          struct vpe_src_operand src1, struct vpe_src_operand src2)
+static struct vp_vec_instr
+emit_vMAD(struct vp_dst_operand dst, struct vp_src_operand src0,
+          struct vp_src_operand src1, struct vp_src_operand src2)
 {
-   struct vpe_vec_instr ret = {
-      .op = VPE_VEC_OP_MAD,
+   struct vp_vec_instr ret = {
+      .op = VP_VEC_OP_MAD,
       .dst = dst,
       .src = { src0, src1, src2 }
    };
    return ret;
 }
 
-static struct vpe_scalar_instr
+static struct vp_scalar_instr
 emit_sNOP()
 {
-   struct vpe_scalar_instr ret = {
-      .op = VPE_SCALAR_OP_NOP,
+   struct vp_scalar_instr ret = {
+      .op = VP_SCALAR_OP_NOP,
       .dst = dst_undef(),
       .src = src_undef()
    };
@@ -184,11 +184,11 @@ emit_sNOP()
 }
 
 #define GEN_S_UNOP(OP) \
-static struct vpe_scalar_instr \
-emit_s ## OP (struct vpe_dst_operand dst, struct vpe_src_operand src) \
+static struct vp_scalar_instr \
+emit_s ## OP (struct vp_dst_operand dst, struct vp_src_operand src) \
 { \
-   struct vpe_scalar_instr ret = { \
-      .op = VPE_SCALAR_OP_ ## OP, \
+   struct vp_scalar_instr ret = { \
+      .op = VP_SCALAR_OP_ ## OP, \
       .dst = dst, \
       .src = src \
    }; \
@@ -197,22 +197,22 @@ emit_s ## OP (struct vpe_dst_operand dst, struct vpe_src_operand src) \
 
 GEN_S_UNOP(RSQ)
 
-static struct vpe_instr *
-emit_packed(struct vpe_vec_instr vec, struct vpe_scalar_instr scalar)
+static struct vp_instr *
+emit_packed(struct vp_vec_instr vec, struct vp_scalar_instr scalar)
 {
-   struct vpe_instr *ret = CALLOC_STRUCT(vpe_instr);
+   struct vp_instr *ret = CALLOC_STRUCT(vp_instr);
    list_inithead(&ret->link);
    ret->vec = vec;
    ret->scalar = scalar;
    return ret;
 }
 
-static struct vpe_dst_operand
-tgsi_dst_to_vpe(struct grate_vpe_shader *vpe, const struct tgsi_dst_register *dst, bool saturate)
+static struct vp_dst_operand
+tgsi_dst_to_vp(struct grate_vp_shader *vp, const struct tgsi_dst_register *dst, bool saturate)
 {
    switch (dst->File) {
    case TGSI_FILE_OUTPUT:
-      return emit_output(vpe, dst->Index, dst->WriteMask, saturate);
+      return emit_output(vp, dst->Index, dst->WriteMask, saturate);
 
    case TGSI_FILE_TEMPORARY:
       return dst_temp(dst->Index, dst->WriteMask, saturate);
@@ -222,10 +222,10 @@ tgsi_dst_to_vpe(struct grate_vpe_shader *vpe, const struct tgsi_dst_register *ds
    }
 }
 
-static struct vpe_src_operand
-tgsi_src_to_vpe(struct grate_vpe_shader *vpe, const struct tgsi_src_register *src)
+static struct vp_src_operand
+tgsi_src_to_vp(struct grate_vp_shader *vp, const struct tgsi_src_register *src)
 {
-   enum vpe_swz swizzle[4] = {
+   enum vp_swz swizzle[4] = {
       src->SwizzleX,
       src->SwizzleY,
       src->SwizzleZ,
@@ -253,63 +253,63 @@ tgsi_src_to_vpe(struct grate_vpe_shader *vpe, const struct tgsi_src_register *sr
    }
 }
 
-static struct vpe_instr *
-tgsi_to_vpe(struct grate_vpe_shader *vpe, const struct tgsi_full_instruction *inst)
+static struct vp_instr *
+tgsi_to_vp(struct grate_vp_shader *vp, const struct tgsi_full_instruction *inst)
 {
    bool saturate = inst->Instruction.Saturate != 0;
    switch (inst->Instruction.Opcode) {
    case TGSI_OPCODE_MOV:
-      return emit_packed(emit_vMOV(tgsi_dst_to_vpe(vpe, &inst->Dst[0].Register, saturate),
-                                   tgsi_src_to_vpe(vpe, &inst->Src[0].Register)),
+      return emit_packed(emit_vMOV(tgsi_dst_to_vp(vp, &inst->Dst[0].Register, saturate),
+                                   tgsi_src_to_vp(vp, &inst->Src[0].Register)),
                          emit_sNOP());
 
    case TGSI_OPCODE_ADD:
-      return emit_packed(emit_vADD(tgsi_dst_to_vpe(vpe, &inst->Dst[0].Register, saturate),
-                                   tgsi_src_to_vpe(vpe, &inst->Src[0].Register),
-                                   tgsi_src_to_vpe(vpe, &inst->Src[1].Register)),
+      return emit_packed(emit_vADD(tgsi_dst_to_vp(vp, &inst->Dst[0].Register, saturate),
+                                   tgsi_src_to_vp(vp, &inst->Src[0].Register),
+                                   tgsi_src_to_vp(vp, &inst->Src[1].Register)),
                          emit_sNOP());
 
    case TGSI_OPCODE_MUL:
-      return emit_packed(emit_vMUL(tgsi_dst_to_vpe(vpe, &inst->Dst[0].Register, saturate),
-                                   tgsi_src_to_vpe(vpe, &inst->Src[0].Register),
-                                   tgsi_src_to_vpe(vpe, &inst->Src[1].Register)),
+      return emit_packed(emit_vMUL(tgsi_dst_to_vp(vp, &inst->Dst[0].Register, saturate),
+                                   tgsi_src_to_vp(vp, &inst->Src[0].Register),
+                                   tgsi_src_to_vp(vp, &inst->Src[1].Register)),
                          emit_sNOP());
 
    case TGSI_OPCODE_DP3:
-      return emit_packed(emit_vDP3(tgsi_dst_to_vpe(vpe, &inst->Dst[0].Register, saturate),
-                                   tgsi_src_to_vpe(vpe, &inst->Src[0].Register),
-                                   tgsi_src_to_vpe(vpe, &inst->Src[1].Register)),
+      return emit_packed(emit_vDP3(tgsi_dst_to_vp(vp, &inst->Dst[0].Register, saturate),
+                                   tgsi_src_to_vp(vp, &inst->Src[0].Register),
+                                   tgsi_src_to_vp(vp, &inst->Src[1].Register)),
                          emit_sNOP());
 
    case TGSI_OPCODE_DP4:
-      return emit_packed(emit_vDP4(tgsi_dst_to_vpe(vpe, &inst->Dst[0].Register, saturate),
-                                   tgsi_src_to_vpe(vpe, &inst->Src[0].Register),
-                                   tgsi_src_to_vpe(vpe, &inst->Src[1].Register)),
+      return emit_packed(emit_vDP4(tgsi_dst_to_vp(vp, &inst->Dst[0].Register, saturate),
+                                   tgsi_src_to_vp(vp, &inst->Src[0].Register),
+                                   tgsi_src_to_vp(vp, &inst->Src[1].Register)),
                          emit_sNOP());
 
    case TGSI_OPCODE_SLT:
-      return emit_packed(emit_vSLT(tgsi_dst_to_vpe(vpe, &inst->Dst[0].Register, saturate),
-                                   tgsi_src_to_vpe(vpe, &inst->Src[0].Register),
-                                   tgsi_src_to_vpe(vpe, &inst->Src[1].Register)),
+      return emit_packed(emit_vSLT(tgsi_dst_to_vp(vp, &inst->Dst[0].Register, saturate),
+                                   tgsi_src_to_vp(vp, &inst->Src[0].Register),
+                                   tgsi_src_to_vp(vp, &inst->Src[1].Register)),
                          emit_sNOP());
 
    case TGSI_OPCODE_MAX:
-      return emit_packed(emit_vMAX(tgsi_dst_to_vpe(vpe, &inst->Dst[0].Register, saturate),
-                                   tgsi_src_to_vpe(vpe, &inst->Src[0].Register),
-                                   tgsi_src_to_vpe(vpe, &inst->Src[1].Register)),
+      return emit_packed(emit_vMAX(tgsi_dst_to_vp(vp, &inst->Dst[0].Register, saturate),
+                                   tgsi_src_to_vp(vp, &inst->Src[0].Register),
+                                   tgsi_src_to_vp(vp, &inst->Src[1].Register)),
                          emit_sNOP());
 
    case TGSI_OPCODE_MAD:
-      return emit_packed(emit_vMAD(tgsi_dst_to_vpe(vpe, &inst->Dst[0].Register, saturate),
-                                   tgsi_src_to_vpe(vpe, &inst->Src[0].Register),
-                                   tgsi_src_to_vpe(vpe, &inst->Src[1].Register),
-                                   tgsi_src_to_vpe(vpe, &inst->Src[2].Register)),
+      return emit_packed(emit_vMAD(tgsi_dst_to_vp(vp, &inst->Dst[0].Register, saturate),
+                                   tgsi_src_to_vp(vp, &inst->Src[0].Register),
+                                   tgsi_src_to_vp(vp, &inst->Src[1].Register),
+                                   tgsi_src_to_vp(vp, &inst->Src[2].Register)),
                          emit_sNOP());
 
    case TGSI_OPCODE_RSQ:
       return emit_packed(emit_vNOP(),
-                         emit_sRSQ(tgsi_dst_to_vpe(vpe, &inst->Dst[0].Register, saturate),
-                                   tgsi_src_to_vpe(vpe, &inst->Src[0].Register)));
+                         emit_sRSQ(tgsi_dst_to_vp(vp, &inst->Dst[0].Register, saturate),
+                                   tgsi_src_to_vp(vp, &inst->Src[0].Register)));
 
    default:
       unreachable("unsupported TGSI-opcode!");
@@ -317,18 +317,18 @@ tgsi_to_vpe(struct grate_vpe_shader *vpe, const struct tgsi_full_instruction *in
 }
 
 void
-grate_tgsi_to_vpe(struct grate_vpe_shader *vpe, struct tgsi_parse_context *tgsi)
+grate_tgsi_to_vp(struct grate_vp_shader *vp, struct tgsi_parse_context *tgsi)
 {
-   list_inithead(&vpe->instructions);
-   vpe->output_mask = 0;
+   list_inithead(&vp->instructions);
+   vp->output_mask = 0;
 
    while (!tgsi_parse_end_of_tokens(tgsi)) {
       tgsi_parse_token(tgsi);
       switch (tgsi->FullToken.Token.Type) {
       case TGSI_TOKEN_TYPE_INSTRUCTION:
          if (tgsi->FullToken.FullInstruction.Instruction.Opcode != TGSI_OPCODE_END) {
-            struct vpe_instr *instr = tgsi_to_vpe(vpe, &tgsi->FullToken.FullInstruction);
-            list_addtail(&instr->link, &vpe->instructions);
+            struct vp_instr *instr = tgsi_to_vp(vp, &tgsi->FullToken.FullInstruction);
+            list_addtail(&instr->link, &vp->instructions);
          }
          break;
       }
