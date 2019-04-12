@@ -13,8 +13,8 @@
 #include "grate_screen.h"
 #include "grate_program.h"
 #include "grate_compiler.h"
-#include "grate_fp_ir.h"
-#include "grate_vpe_ir.h"
+#include "fp/fpir.h"
+#include "vp/vpir.h"
 #include "tgr_3d.xml.h"
 
 static void *
