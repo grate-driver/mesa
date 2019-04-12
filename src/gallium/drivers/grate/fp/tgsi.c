@@ -1,5 +1,5 @@
 #include "grate_compiler.h"
-#include "grate_fp_ir.h"
+#include "fpir.h"
 
 #include "tgsi/tgsi_parse.h"
 

@@ -1,5 +1,5 @@
-#ifndef GRATE_VPE_IR_H
-#define GRATE_VPE_IR_H
+#ifndef VPIR_H
+#define VPIR_H
 
 #include "util/list.h"
 

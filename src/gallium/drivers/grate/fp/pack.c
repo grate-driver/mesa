@@ -1,4 +1,4 @@
-#include "grate_fp_ir.h"
+#include "fpir.h"
 
 void
 grate_fp_pack_alu(uint32_t *dst, struct fp_alu_instr *instr)
