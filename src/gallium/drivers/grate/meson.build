@@ -19,20 +19,22 @@
 # SOFTWARE.
 
 files_libgrate = files(
+  'fp/fpir.h',
+  'fp/pack.c',
+  'fp/tgsi.c',
+  'fp/vliw.h',
+  'vp/pack.c',
+  'vp/tgsi.c',
+  'vp/vpir.h',
   'class_ids.h',
   'host1x01_hardware.h',
   'hw_host1x01_uclass.h',
   'grate_common.h',
-  'grate_compiler_fp.c',
-  'grate_compiler_vpe.c',
   'grate_compiler.h',
   'grate_context.c',
   'grate_context.h',
   'grate_draw.c',
   'grate_draw.h',
-  'grate_fp_ir.c',
-  'grate_fp_ir.h',
-  'grate_fp_vliw.h',
   'grate_program.c',
   'grate_program.h',
   'grate_resource.c',
@@ -45,8 +47,6 @@ files_libgrate = files(
   'grate_stream.h',
   'grate_surface.c',
   'grate_surface.h',
-  'grate_vpe_ir.c',
-  'grate_vpe_ir.h'
 )
 
 libgrate = static_library(
