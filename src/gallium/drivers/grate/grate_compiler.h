@@ -7,7 +7,7 @@
 
 struct tgsi_parse_context;
 
-struct grate_vpe_shader {
+struct grate_vp_shader {
    struct list_head instructions;
    uint16_t output_mask;
 };
@@ -30,7 +30,7 @@ struct grate_fp_shader {
 };
 
 void
-grate_tgsi_to_vpe(struct grate_vpe_shader *vpe, struct tgsi_parse_context *tgsi);
+grate_tgsi_to_vp(struct grate_vp_shader *vp, struct tgsi_parse_context *tgsi);
 
 void
 grate_tgsi_to_fp(struct grate_fp_shader *fp, struct tgsi_parse_context *tgsi);
