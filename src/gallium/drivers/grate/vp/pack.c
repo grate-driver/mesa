@@ -6,7 +6,7 @@
 #include "vpir.h"
 
 static unsigned
-vpe_write_mask(unsigned input)
+vp_write_mask(unsigned input)
 {
    return (((input >> 0) & 1) << 3) |
           (((input >> 1) & 1) << 2) |
@@ -15,7 +15,7 @@ vpe_write_mask(unsigned input)
 }
 
 static unsigned
-vpe_swizzle(enum vpe_swz swizzle[4])
+vp_swizzle(enum vp_swz swizzle[4])
 {
    return (swizzle[0] << 6) |
           (swizzle[1] << 4) |
@@ -24,7 +24,7 @@ vpe_swizzle(enum vpe_swz swizzle[4])
 }
 
 static unsigned
-vpe_src_reg(struct vpe_src_operand op)
+vp_src_reg(struct vp_src_operand op)
 {
    union {
       struct __attribute__((packed)) {
@@ -38,7 +38,7 @@ vpe_src_reg(struct vpe_src_operand op)
 
    u.type = op.file;
    u.index = op.index;
-   u.swizzle = vpe_swizzle(op.swizzle);
+   u.swizzle = vp_swizzle(op.swizzle);
    u.negate = op.negate;
 
    return u.value;
@@ -46,11 +46,11 @@ vpe_src_reg(struct vpe_src_operand op)
 
 
 void
-grate_vpe_pack(uint32_t *dst, struct vpe_instr *instr, bool end_of_program)
+grate_vp_pack(uint32_t *dst, struct vp_instr *instr, bool end_of_program)
 {
    /* we can only handle one output register per instruction */
-   assert(instr->vec.dst.file != VPE_DST_FILE_OUTPUT ||
-          instr->scalar.dst.file != VPE_DST_FILE_OUTPUT);
+   assert(instr->vec.dst.file != VP_DST_FILE_OUTPUT ||
+          instr->scalar.dst.file != VP_DST_FILE_OUTPUT);
 
    union {
       struct __attribute__((packed)) {
@@ -103,14 +103,14 @@ grate_vpe_pack(uint32_t *dst, struct vpe_instr *instr, bool end_of_program)
    int attr_fetch = -1, uniform_fetch = -1;
    for (int i = 0; i < 3; ++i) {
       switch (instr->vec.src[i].file) {
-      case VPE_SRC_FILE_ATTRIB:
+      case VP_SRC_FILE_ATTRIB:
          assert(attr_fetch < 0 ||
                 attr_fetch == instr->vec.src[i].index);
          attr_fetch = instr->vec.src[i].index;
          instr->vec.src[i].index = 0;
          break;
 
-      case VPE_SRC_FILE_UNIFORM:
+      case VP_SRC_FILE_UNIFORM:
          assert(uniform_fetch < 0 ||
                 uniform_fetch == instr->vec.src[i].index);
          uniform_fetch = instr->vec.src[i].index;
@@ -123,14 +123,14 @@ grate_vpe_pack(uint32_t *dst, struct vpe_instr *instr, bool end_of_program)
    }
 
    switch (instr->scalar.src.file) {
-   case VPE_SRC_FILE_ATTRIB:
+   case VP_SRC_FILE_ATTRIB:
       assert(attr_fetch < 0 ||
              attr_fetch == instr->scalar.src.index);
       attr_fetch = instr->scalar.src.index;
       instr->scalar.src.index = 0;
       break;
 
-      case VPE_SRC_FILE_UNIFORM:
+      case VP_SRC_FILE_UNIFORM:
          assert(uniform_fetch < 0 ||
                 uniform_fetch == instr->scalar.src.index);
          uniform_fetch = instr->scalar.src.index;
@@ -147,59 +147,59 @@ grate_vpe_pack(uint32_t *dst, struct vpe_instr *instr, bool end_of_program)
 
    tmp.vector_opcode = instr->vec.op;
    switch (instr->vec.dst.file) {
-   case VPE_DST_FILE_TEMP:
+   case VP_DST_FILE_TEMP:
       tmp.vector_rD_index = instr->vec.dst.index;
       tmp.export_write_index = 31;
       break;
 
-   case VPE_DST_FILE_OUTPUT:
+   case VP_DST_FILE_OUTPUT:
       tmp.vector_rD_index = 63; // disable register-write
       tmp.export_vector_write_enable = 1;
       tmp.export_write_index = instr->vec.dst.index;
       break;
 
-   case VPE_DST_FILE_UNDEF:
+   case VP_DST_FILE_UNDEF:
       // assert(0);  // TODO: consult NOP
       break;
 
    default:
-      unreachable("illegal enum vpe_dst_file value");
+      unreachable("illegal enum vp_dst_file value");
    }
-   tmp.vector_op_write_mask = vpe_write_mask(instr->vec.dst.write_mask);
+   tmp.vector_op_write_mask = vp_write_mask(instr->vec.dst.write_mask);
 
    tmp.scalar_opcode = instr->scalar.op;
    switch (instr->scalar.dst.file) {
-   case VPE_DST_FILE_TEMP:
+   case VP_DST_FILE_TEMP:
       tmp.scalar_rD_index = instr->scalar.dst.index;
       tmp.export_write_index = 31;
       break;
 
-   case VPE_DST_FILE_OUTPUT:
+   case VP_DST_FILE_OUTPUT:
       tmp.scalar_rD_index = 63; // disable register-write
       tmp.export_vector_write_enable = 0;
       tmp.export_write_index = instr->scalar.dst.index;
       break;
 
-   case VPE_DST_FILE_UNDEF:
+   case VP_DST_FILE_UNDEF:
       // assert(0);  // TODO: consult NOP
       break;
 
    default:
-      unreachable("illegal enum vpe_dst_file value");
+      unreachable("illegal enum vp_dst_file value");
    }
-   tmp.scalar_op_write_mask = vpe_write_mask(instr->scalar.dst.write_mask);
+   tmp.scalar_op_write_mask = vp_write_mask(instr->scalar.dst.write_mask);
 
-   tmp.rA = vpe_src_reg(instr->vec.src[0]);
+   tmp.rA = vp_src_reg(instr->vec.src[0]);
    tmp.rA_absolute = instr->vec.src[0].absolute;
 
-   tmp.rB = vpe_src_reg(instr->vec.src[1]);
+   tmp.rB = vp_src_reg(instr->vec.src[1]);
    tmp.rB_absolute = instr->vec.src[1].absolute;
 
-   if (instr->vec.src[2].file != VPE_SRC_FILE_UNDEF) {
-      tmp.rC = vpe_src_reg(instr->vec.src[2]);
+   if (instr->vec.src[2].file != VP_SRC_FILE_UNDEF) {
+      tmp.rC = vp_src_reg(instr->vec.src[2]);
       tmp.rC_absolute = instr->vec.src[2].absolute;
-   } else if (instr->scalar.src.file != VPE_SRC_FILE_UNDEF) {
-      tmp.rC = vpe_src_reg(instr->scalar.src);
+   } else if (instr->scalar.src.file != VP_SRC_FILE_UNDEF) {
+      tmp.rC = vp_src_reg(instr->scalar.src);
       tmp.rC_absolute = instr->scalar.src.absolute;
    }
 
