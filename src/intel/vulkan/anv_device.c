@@ -1029,7 +1029,7 @@ void anv_GetPhysicalDeviceProperties(
       .maxPerStageDescriptorSampledImages       = max_samplers,
       .maxPerStageDescriptorStorageImages       = max_images,
       .maxPerStageDescriptorInputAttachments    = 64,
-      .maxPerStageResources                     = 250,
+      .maxPerStageResources                     = MAX_BINDING_TABLE_SIZE - MAX_RTS,
       .maxDescriptorSetSamplers                 = 6 * max_samplers, /* number of stages * maxPerStageDescriptorSamplers */
       .maxDescriptorSetUniformBuffers           = 6 * 64,           /* number of stages * maxPerStageDescriptorUniformBuffers */
       .maxDescriptorSetUniformBuffersDynamic    = MAX_DYNAMIC_BUFFERS / 2,
