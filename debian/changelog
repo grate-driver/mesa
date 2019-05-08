@@ -49,6 +49,20 @@ mesa (19.0.0~rc2-1) experimental; urgency=medium
 
  -- Timo Aaltonen <tjaalton@debian.org>  Fri, 08 Feb 2019 10:44:48 +0200
 
+mesa (18.3.6-1) unstable; urgency=medium
+
+  [ Timo Aaltonen ]
+  * libgl1-mesa-dri: Remove /etc/drirc which isn't installed anymore.
+    (Closes: #920241)
+
+  [ Andreas Boll ]
+  * New upstream release.
+    - wayland/egl: Ensure EGL surface is resized on DRI
+      update_buffers(). Fixes a crash with xwayland (Closes: #922346).
+  * Rebase patches/fix-hurd-ftbfs.diff.
+
+ -- Andreas Boll <aboll@debian.org>  Sat, 06 Apr 2019 20:58:43 +0200
+
 mesa (18.3.4-2) unstable; urgency=medium
 
   * Cherry-pick f6556ec7d12 (dri: meson: do not prefix user provided dri-
