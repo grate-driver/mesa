@@ -1,6 +1,8 @@
 mesa (19.0.3-1) UNRELEASED; urgency=medium
 
   * New upstream release.
+  * libgl1-mesa-dri.maintscript: Bump version so that drirc gets removed
+    for those who already upgraded to 19.0.
 
  -- Timo Aaltonen <tjaalton@debian.org>  Wed, 08 May 2019 13:26:40 +0300
 
