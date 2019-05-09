@@ -5,6 +5,8 @@ mesa (19.1.0~rc1-1) UNRELEASED; urgency=medium
   * rules: Use pkg-info.mk for gentarball.
   * Drop upstreamed patches.
   * libegl-mesa0.symbols: Updated.
+  * rules, libgles2-mesa-dev.install: GLES2 files aren't built anymore
+    now that GLVND is used.
 
  -- Timo Aaltonen <tjaalton@debian.org>  Thu, 09 May 2019 14:24:13 +0300
 
