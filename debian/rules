@@ -78,6 +78,7 @@ else
   # Build intel drivers on archs where libdrm-intel is installed
   ifneq (,$(filter $(DEB_HOST_ARCH),amd64 i386 kfreebsd-amd64 kfreebsd-i386 x32))
 	DRI_DRIVERS += i915, i965,
+	GALLIUM_DRIVERS += iris,
   endif
 
 	DRI_DRIVERS += r200, r100,
