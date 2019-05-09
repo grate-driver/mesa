@@ -1,6 +1,7 @@
 mesa (19.1.0~rc1-1) UNRELEASED; urgency=medium
 
   * New upstream release candidate.
+  * watch: Upstream switched to xz tarballs.
 
  -- Timo Aaltonen <tjaalton@debian.org>  Thu, 09 May 2019 14:24:13 +0300
 
