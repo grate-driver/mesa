@@ -1,2 +1,0 @@
-stable: this commit causes issues in several systems
-78e35df52aa2f7d770f929a0866a0faa89c261a9 radeonsi: update buffer descriptors in all contexts after buffer invalidation
