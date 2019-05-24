@@ -1219,7 +1219,7 @@
         "description": "nir/lower_double_ops: Rework the if (progress) tree",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "d7d35a9522ea5b524732a8b730008d725b84abdf"
     },
