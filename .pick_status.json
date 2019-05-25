@@ -1210,7 +1210,7 @@
         "description": "nir/opt_deref: Report progress if we remove a deref",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "a1c688517dee32c57af17d8e11029eb7470f52d4"
     },
