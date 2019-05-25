@@ -34,6 +34,7 @@ read_first_invocation(nir_builder *b, nir_ssa_def *x)
    first->src[0] = nir_src_for_ssa(x);
    nir_ssa_dest_init(&first->instr, &first->dest,
                      x->num_components, x->bit_size, NULL);
+   nir_builder_instr_insert(b, &first->instr);
    return &first->dest.ssa;
 }
 
@@ -129,7 +130,7 @@ nir_lower_non_uniform_access_impl(nir_function_impl *impl,
    nir_builder_init(&b, impl);
 
    nir_foreach_block(block, impl) {
-      nir_foreach_instr(instr, block) {
+      nir_foreach_instr_safe(instr, block) {
          switch (instr->type) {
          case nir_instr_type_tex: {
             nir_tex_instr *tex = nir_instr_as_tex(instr);
