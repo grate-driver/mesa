@@ -160,9 +160,8 @@ override_dh_clean:
 	rm -rf src/egl/generate/*.pyc src/egl/generate/__pycache__/
 	rm -rf src/gallium/auxiliary/util/*.pyc src/gallium/auxiliary/util/__pycache__/
 	rm -rf src/intel/vulkan/*.pyc src/intel/vulkan/__pycache__/
-	rm -rf src/mapi/glapi/gen/*.pyc src/mapi/glapi/gen/__pycache__/
+	rm -rf src/mapi/glapi/gen/*.pyc src/mapi/glapi/gen/__pycache__/ src/mapi/new/__pycache__/
 	rm -rf src/mesa/main/*.pyc src/mesa/main/__pycache__/
-
 	dh_clean
 
 override_dh_auto_configure:
