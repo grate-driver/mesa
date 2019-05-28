@@ -1201,7 +1201,7 @@
         "description": "nir/copy_prop_vars: Record progress in more places",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "96c32d77763c4b561f751ca360e6539a3c5e7f4d"
     },
