@@ -1894,7 +1894,7 @@
         "description": "iris: Delete shader variants when deleting the API-facing shader",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "ed4ffb971585908e7bdd8ec1bfffbc6f7b06bd10"
     },
