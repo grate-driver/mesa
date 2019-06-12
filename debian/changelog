@@ -1,6 +1,6 @@
-mesa (19.1.0~rc3-1) UNRELEASED; urgency=medium
+mesa (19.1.0-1) UNRELEASED; urgency=medium
 
-  * New upstream release candidate.
+  * New upstream release.
   * watch: Upstream switched to xz tarballs.
   * rules: Use pkg-info.mk for gentarball.
   * Drop upstreamed patches.
