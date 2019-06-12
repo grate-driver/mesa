@@ -1113,7 +1113,9 @@ brw_untyped_surface_write(struct brw_codegen *p,
 void
 brw_memory_fence(struct brw_codegen *p,
                  struct brw_reg dst,
-                 enum opcode send_op);
+                 struct brw_reg src,
+                 enum opcode send_op,
+                 bool stall);
 
 void
 brw_pixel_interpolator_query(struct brw_codegen *p,

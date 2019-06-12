@@ -707,9 +707,9 @@ brw_alu3(struct brw_codegen *p, unsigned opcode, struct brw_reg dest,
    gen7_convert_mrf_to_grf(p, &dest);
 
    assert(dest.nr < 128);
-   assert(src0.file != BRW_IMMEDIATE_VALUE || src0.nr < 128);
-   assert(src1.file != BRW_IMMEDIATE_VALUE || src1.nr < 128);
-   assert(src2.file != BRW_IMMEDIATE_VALUE || src2.nr < 128);
+   assert(src0.file == BRW_IMMEDIATE_VALUE || src0.nr < 128);
+   assert(src1.file != BRW_IMMEDIATE_VALUE && src1.nr < 128);
+   assert(src2.file == BRW_IMMEDIATE_VALUE || src2.nr < 128);
    assert(dest.address_mode == BRW_ADDRESS_DIRECT);
    assert(src0.address_mode == BRW_ADDRESS_DIRECT);
    assert(src1.address_mode == BRW_ADDRESS_DIRECT);
@@ -3037,10 +3037,12 @@ brw_set_memory_fence_message(struct brw_codegen *p,
 void
 brw_memory_fence(struct brw_codegen *p,
                  struct brw_reg dst,
-                 enum opcode send_op)
+                 struct brw_reg src,
+                 enum opcode send_op,
+                 bool stall)
 {
    const struct gen_device_info *devinfo = p->devinfo;
-   const bool commit_enable =
+   const bool commit_enable = stall ||
       devinfo->gen >= 10 || /* HSD ES # 1404612949 */
       (devinfo->gen == 7 && !devinfo->is_haswell);
    struct brw_inst *insn;
@@ -3048,15 +3050,15 @@ brw_memory_fence(struct brw_codegen *p,
    brw_push_insn_state(p);
    brw_set_default_mask_control(p, BRW_MASK_DISABLE);
    brw_set_default_exec_size(p, BRW_EXECUTE_1);
-   dst = vec1(dst);
+   dst = retype(vec1(dst), BRW_REGISTER_TYPE_UW);
+   src = retype(vec1(src), BRW_REGISTER_TYPE_UD);
 
    /* Set dst as destination for dependency tracking, the MEMORY_FENCE
     * message doesn't write anything back.
     */
    insn = next_insn(p, send_op);
-   dst = retype(dst, BRW_REGISTER_TYPE_UW);
    brw_set_dest(p, insn, dst);
-   brw_set_src0(p, insn, dst);
+   brw_set_src0(p, insn, src);
    brw_set_memory_fence_message(p, insn, GEN7_SFID_DATAPORT_DATA_CACHE,
                                 commit_enable);
 
@@ -3067,7 +3069,7 @@ brw_memory_fence(struct brw_codegen *p,
        */
       insn = next_insn(p, send_op);
       brw_set_dest(p, insn, offset(dst, 1));
-      brw_set_src0(p, insn, offset(dst, 1));
+      brw_set_src0(p, insn, src);
       brw_set_memory_fence_message(p, insn, GEN6_SFID_DATAPORT_RENDER_CACHE,
                                    commit_enable);
 
@@ -3078,6 +3080,9 @@ brw_memory_fence(struct brw_codegen *p,
        */
       brw_MOV(p, dst, offset(dst, 1));
    }
+
+   if (stall)
+      brw_MOV(p, retype(brw_null_reg(), BRW_REGISTER_TYPE_UW), dst);
 
    brw_pop_insn_state(p);
 }

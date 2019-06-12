@@ -1044,6 +1044,7 @@ emit_intrinsic_barrier(struct ir3_context *ctx, nir_intrinsic_instr *intr)
 		barrier->cat7.g = true;
 		barrier->cat7.r = true;
 		barrier->cat7.w = true;
+		barrier->cat7.l = true;
 		barrier->barrier_class = IR3_BARRIER_IMAGE_W |
 				IR3_BARRIER_BUFFER_W;
 		barrier->barrier_conflict =
@@ -2376,6 +2377,7 @@ setup_input(struct ir3_context *ctx, nir_variable *in)
 	so->inputs[n].compmask = (1 << (ncomp + frac)) - 1;
 	so->inputs_count = MAX2(so->inputs_count, n + 1);
 	so->inputs[n].interpolate = in->data.interpolation;
+	so->inputs[n].ncomp = ncomp;
 
 	if (ctx->so->type == MESA_SHADER_FRAGMENT) {
 
