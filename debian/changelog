@@ -1,4 +1,4 @@
-mesa (19.1.0-1) UNRELEASED; urgency=medium
+mesa (19.1.0-1) experimental; urgency=medium
 
   * New upstream release.
   * watch: Upstream switched to xz tarballs.
@@ -11,7 +11,7 @@ mesa (19.1.0-1) UNRELEASED; urgency=medium
   * rules: Enable lima, panfrost on armhf/arm64. (Closes: #927893)
   * rules: Update clean target.
 
- -- Timo Aaltonen <tjaalton@debian.org>  Thu, 09 May 2019 14:24:13 +0300
+ -- Timo Aaltonen <tjaalton@debian.org>  Thu, 13 Jun 2019 10:52:07 +0300
 
 mesa (19.0.3-1) experimental; urgency=medium
 
