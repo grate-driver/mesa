@@ -1163,7 +1163,7 @@ _drm_radeon_ver = '2.4.71'
 _drm_nouveau_ver = '2.4.66'
 _drm_etnaviv_ver = '2.4.89'
 _drm_intel_ver = '2.4.75'
-_drm_ver = '2.4.75'
+_drm_ver = '2.4.81'
 
 _libdrm_checks = [
   ['intel', with_dri_i915 or with_gallium_i915],
