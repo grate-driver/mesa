@@ -3,6 +3,8 @@ mesa (19.1.1-1) UNRELEASED; urgency=medium
   * New upstream bugfix release.
   * rules: Disable panfrost for now, revisit it again for 19.2. (Closes:
     #930879)
+  * control, rules: Enable vulkan-overlay, add glslang-tools to build-depends.
+    (Closes: #930945)
 
  -- Timo Aaltonen <tjaalton@debian.org>  Thu, 27 Jun 2019 10:41:51 +0300
 
