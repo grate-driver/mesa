@@ -5,6 +5,8 @@ mesa (19.1.1-1) UNRELEASED; urgency=medium
     #930879)
   * control, rules: Enable vulkan-overlay, add glslang-tools to build-depends.
     (Closes: #930945)
+  * rules, libgles2-mesa-dev.install: Re-add the pkgconfig file for now.
+    (Closes: #930514)
 
  -- Timo Aaltonen <tjaalton@debian.org>  Thu, 27 Jun 2019 10:41:51 +0300
 
