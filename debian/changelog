@@ -1,4 +1,4 @@
-mesa (19.1.1-1) UNRELEASED; urgency=medium
+mesa (19.1.1-1) experimental; urgency=medium
 
   * New upstream bugfix release.
   * rules: Disable panfrost for now, revisit it again for 19.2. (Closes:
@@ -8,7 +8,7 @@ mesa (19.1.1-1) UNRELEASED; urgency=medium
   * rules, libgles2-mesa-dev.install: Re-add the pkgconfig file for now.
     (Closes: #930514)
 
- -- Timo Aaltonen <tjaalton@debian.org>  Thu, 27 Jun 2019 10:41:51 +0300
+ -- Timo Aaltonen <tjaalton@debian.org>  Mon, 01 Jul 2019 17:24:52 +0300
 
 mesa (19.1.0-1) experimental; urgency=medium
 
