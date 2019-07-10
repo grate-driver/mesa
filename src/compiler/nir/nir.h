@@ -3649,6 +3649,7 @@ bool nir_opt_peephole_select(nir_shader *shader, unsigned limit,
                              bool indirect_load_ok, bool expensive_alu_ok);
 
 bool nir_opt_remove_phis(nir_shader *shader);
+bool nir_opt_remove_phis_block(nir_block *block);
 
 bool nir_opt_shrink_load(nir_shader *shader);
 
