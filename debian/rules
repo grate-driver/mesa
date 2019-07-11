@@ -259,8 +259,7 @@ override_dh_makeshlibs:
 	dh_makeshlibs -a -- -c4
 
 %:
-	dh $@ --with $(with_libva) \
-		--builddirectory=build/
+	dh $@ --builddirectory=build/
 
 # For maintainer use only, generate a tarball:
 gentarball: SOURCE=mesa
