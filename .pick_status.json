@@ -2731,7 +2731,7 @@
         "description": "iris: Fix aux assertion in resource_get_handle",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "e81392868e6827360762fff38baf2c10c1f3b7f0"
     },
