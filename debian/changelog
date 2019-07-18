@@ -1,6 +1,7 @@
 mesa (19.1.2-1) UNRELEASED; urgency=medium
 
   * New upstream bugfix release.
+  * control: Add python3-setuptools to build-depends.
 
  -- Timo Aaltonen <tjaalton@debian.org>  Thu, 18 Jul 2019 10:44:41 +0300
 
