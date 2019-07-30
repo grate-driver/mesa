@@ -190,6 +190,12 @@ if cc.get_id() == 'intel'
   endif
 endif
 
+#This message is needed until we bump meson version to 0.46 because of known 0.45.0 and 0.45.1 issue
+#https://bugs.freedesktop.org/show_bug.cgi?id=109791
+if meson.version().version_compare('< 0.46.0')
+    warning('''Meson < 0.46 doesn't automatically define `NDEBUG`; please update meson to at least 0.46.''')
+endif
+
 with_gallium = gallium_drivers.length() != 0 and gallium_drivers != ['']
 
 if with_gallium and system_has_kms_drm
