@@ -1382,8 +1382,8 @@ typedef enum {
    NIR_INTRINSIC_DESC_TYPE = 19,
 
    /* Separate source/dest access flags for copies */
-   NIR_INTRINSIC_SRC_ACCESS = 21,
-   NIR_INTRINSIC_DST_ACCESS = 22,
+   NIR_INTRINSIC_SRC_ACCESS,
+   NIR_INTRINSIC_DST_ACCESS,
 
    NIR_INTRINSIC_NUM_INDEX_FLAGS,
 
