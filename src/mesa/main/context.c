@@ -361,6 +361,7 @@ static void
 one_time_fini(void)
 {
    _mesa_destroy_shader_compiler();
+   _mesa_destroy_shader_compiler_types();
    _mesa_locale_fini();
 }
 
@@ -392,6 +393,8 @@ one_time_init( struct gl_context *ctx )
       STATIC_ASSERT(sizeof(GLuint) == 4);
 
       _mesa_locale_init();
+
+      _mesa_init_shader_compiler_types();
 
       _mesa_one_time_init_extension_overrides(ctx);
 
