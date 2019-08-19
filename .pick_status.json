@@ -292,7 +292,7 @@
         "description": "intel: Load the driver even if I915_PARAM_REVISION is not found.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "96e1c945f2bc4047a603753ae10fc4f27754361c"
     },
