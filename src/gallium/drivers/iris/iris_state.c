@@ -3940,7 +3940,7 @@ surf_state_offset_for_aux(struct iris_resource *res,
                           enum isl_aux_usage aux_usage)
 {
    return SURFACE_STATE_ALIGNMENT *
-          util_bitcount(res->aux.possible_usages & ((1 << aux_usage) - 1));
+          util_bitcount(aux_modes & ((1 << aux_usage) - 1));
 }
 
 static void
@@ -3970,11 +3970,12 @@ update_clear_value(struct iris_context *ice,
                    struct iris_batch *batch,
                    struct iris_resource *res,
                    struct iris_state_ref *state,
-                   unsigned aux_modes,
+                   unsigned all_aux_modes,
                    struct isl_view *view)
 {
    struct iris_screen *screen = batch->screen;
    const struct gen_device_info *devinfo = &screen->devinfo;
+   UNUSED unsigned aux_modes = all_aux_modes;
 
    /* We only need to update the clear color in the surface state for gen8 and
     * gen9. Newer gens can read it directly from the clear color state buffer.
@@ -3989,13 +3990,13 @@ update_clear_value(struct iris_context *ice,
       while (aux_modes) {
          enum isl_aux_usage aux_usage = u_bit_scan(&aux_modes);
 
-         surf_state_update_clear_value(batch, res, state, aux_modes,
+         surf_state_update_clear_value(batch, res, state, all_aux_modes,
                                        aux_usage);
       }
    } else if (devinfo->gen == 8) {
       pipe_resource_reference(&state->res, NULL);
       void *map = alloc_surface_states(ice->state.surface_uploader,
-                                       state, res->aux.possible_usages);
+                                       state, all_aux_modes);
       while (aux_modes) {
          enum isl_aux_usage aux_usage = u_bit_scan(&aux_modes);
          fill_surface_state(&screen->isl_dev, map, res, view, aux_usage);
