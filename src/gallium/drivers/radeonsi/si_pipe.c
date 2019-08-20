@@ -1136,7 +1136,8 @@ radeonsi_screen_create_impl(struct radeon_winsys *ws,
 	sscreen->has_dcc_constant_encode = sscreen->info.family == CHIP_RAVEN2 ||
 					   sscreen->info.family == CHIP_RENOIR ||
 					   sscreen->info.chip_class >= GFX10;
-	sscreen->use_ngg = sscreen->info.chip_class >= GFX10;
+	sscreen->use_ngg = sscreen->info.chip_class >= GFX10 &&
+			   sscreen->info.family != CHIP_NAVI14;
 	sscreen->use_ngg_streamout = false;
 
 	/* Only enable primitive binning on APUs by default. */
