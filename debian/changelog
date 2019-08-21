@@ -1,6 +1,7 @@
 mesa (19.2.0~rc1-1) UNRELEASED; urgency=medium
 
   * New upstream release candidate.
+  * rules: Avoid having an empty string for -Dplatforms.
 
  -- Timo Aaltonen <tjaalton@debian.org>  Wed, 21 Aug 2019 06:42:18 +0300
 
