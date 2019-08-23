@@ -3,6 +3,9 @@
 20b00e1ff24f974bc99e7ca9a720518da0ce5b89 panfrost: Make ctx->job useful
 f6c44549ee2dd0f218deea1feba3965523609406 iris: Replace devinfo->gen with GEN_GEN
 1cd13ccee7bc2733e7a56284dc02bdb1b1c40081 iris: Update fast clear colors on Gen9 with direct immediate writes.
+# fixes: The following commit depends on commits 77a1070d366a and df4c2ec5e19b
+#        in order to compile, which did not land in the branch.
+2d799250346331a93b21678dc5605cff74dfa3a1 iris: Avoid unnecessary resolves on transfer maps
 # stable: Explicit 19.2 only nominations.
 e73d863a66caac796ed5fb543a77f0b892df8573 radv: allow to enable VK_AMD_shader_ballot only on GFX8+
 f202ac27a99caf9009aa9d60e2e0d7f3b528e99f radv: add a new debug option called RADV_DEBUG=noshaderballot
