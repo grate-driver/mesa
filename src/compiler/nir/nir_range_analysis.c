@@ -463,6 +463,7 @@ analyze_expression(const nir_alu_instr *instr, unsigned src,
 
       r = analyze_expression(alu, 0, ht);
 
+      r.is_integral = r.is_integral && is_not_negative(r.range);
       r.range = table[r.range];
       break;
    }
