@@ -1,6 +1,8 @@
 mesa (19.2.0~rc1-2) UNRELEASED; urgency=medium
 
   * Migrate to llvm/clang-9. (Closes: #935768)
+  * control: Add vulkan-icd to mesa-vulkan-drivers Provides. (Closes:
+    #935869)
 
  -- Timo Aaltonen <tjaalton@debian.org>  Tue, 27 Aug 2019 10:51:47 +0300
 
