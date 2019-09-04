@@ -31,6 +31,12 @@
  * the result.
  */
 
+static bool
+is_not_negative(enum ssa_ranges r)
+{
+   return r == gt_zero || r == ge_zero || r == eq_zero;
+}
+
 static void *
 pack_data(const struct ssa_result_range r)
 {
