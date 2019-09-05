@@ -1,5 +1,6 @@
-mesa (19.2.0~rc1-2) UNRELEASED; urgency=medium
+mesa (19.2.0~rc2-1) UNRELEASED; urgency=medium
 
+  * New upstream release candidate.
   * Migrate to llvm/clang-9. (Closes: #935768)
   * control: Add vulkan-icd to mesa-vulkan-drivers Provides. (Closes:
     #935869)
