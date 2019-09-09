@@ -1,4 +1,4 @@
-mesa (19.2.0~rc2-1) UNRELEASED; urgency=medium
+mesa (19.2.0~rc2-1) experimental; urgency=medium
 
   * New upstream release candidate.
   * Migrate to llvm/clang-9. (Closes: #935768)
@@ -9,7 +9,7 @@ mesa (19.2.0~rc2-1) UNRELEASED; urgency=medium
     is done.
   * control: Bump llvm/clang build-dep.
 
- -- Timo Aaltonen <tjaalton@debian.org>  Tue, 27 Aug 2019 10:51:47 +0300
+ -- Timo Aaltonen <tjaalton@debian.org>  Mon, 09 Sep 2019 14:36:14 +0300
 
 mesa (19.2.0~rc1-1) experimental; urgency=medium
 
