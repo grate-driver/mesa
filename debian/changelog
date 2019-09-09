@@ -7,6 +7,7 @@ mesa (19.2.0~rc2-1) UNRELEASED; urgency=medium
   * control, rules: Drop libva-dev from build-depends, don't use
     dh_libva and drop pkg.mesa.nolibva build profile, libva2 transition
     is done.
+  * control: Bump llvm/clang build-dep.
 
  -- Timo Aaltonen <tjaalton@debian.org>  Tue, 27 Aug 2019 10:51:47 +0300
 
