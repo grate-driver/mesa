@@ -93,7 +93,7 @@ with_shared_glapi = get_option('shared-glapi')
 
 # shared-glapi is required if at least two OpenGL APIs are being built
 if not with_shared_glapi
-  if ((with_gles1 == 'true' and with_gles2 == 'true') or 
+  if ((with_gles1 == 'true' and with_gles2 == 'true') or
       (with_gles1 == 'true' and with_opengl) or
       (with_gles2 == 'true' and with_opengl))
     error('shared-glapi required for building two or more of OpenGL, OpenGL ES 1.x, OpenGL ES 2.x')
@@ -385,7 +385,7 @@ endif
 if with_glx != 'disabled'
   if not (with_platform_x11 and with_any_opengl)
     error('Cannot build GLX support without X11 platform support and at least one OpenGL API')
-  elif with_glx == 'gallium-xlib' 
+  elif with_glx == 'gallium-xlib'
     if not with_gallium
       error('Gallium-xlib based GLX requires at least one gallium driver')
     elif not with_gallium_softpipe
@@ -393,7 +393,7 @@ if with_glx != 'disabled'
     elif with_dri
       error('gallium-xlib conflicts with any dri driver')
     endif
-  elif with_glx == 'xlib' 
+  elif with_glx == 'xlib'
     if with_dri
       error('xlib conflicts with any dri driver')
     endif
@@ -1298,6 +1298,7 @@ else
 endif
 
 dep_glvnd = null_dep
+glvnd_missing_pc_files = false
 if with_glvnd
   dep_glvnd = dependency('libglvnd', version : '>= 0.2.0')
   # GLVND until commit 0dfaea2bcb7cdcc785f9 ("Add pkg-config files for EGL, GL,
@@ -1434,7 +1435,7 @@ if with_platform_x11
   if with_glx == 'dri' or with_glx == 'gallium-xlib'
     dep_glproto = dependency('glproto', version : '>= 1.4.14')
   endif
-  if with_glx == 'dri' 
+  if with_glx == 'dri'
     if with_dri_platform == 'drm'
       dep_dri2proto = dependency('dri2proto', version : '>= 2.8')
       dep_xxf86vm = dependency('xxf86vm')
