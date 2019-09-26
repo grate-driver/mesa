@@ -2,6 +2,9 @@ mesa (19.3.0~rc6-1) UNRELEASED; urgency=medium
 
   * New upstream release candidate.
   * control, rules: Don't build radv on non-x86.
+  * Don't install EGL/GL/GLES headers or pkg-config files, they're
+    shipped by libglvnd 1.3.0 now. Make old -dev packages transitional,
+    except libegl1-mesa-dev which still has two mesa specific headers.
 
  -- Timo Aaltonen <tjaalton@debian.org>  Thu, 05 Dec 2019 09:21:11 +0200
 
