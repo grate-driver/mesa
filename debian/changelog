@@ -4,6 +4,7 @@ mesa (19.2.0-1) UNRELEASED; urgency=medium
   * rules: Enable panfrost again, should be good now. (Closes: #941136)
   * Drop reverts on pkgconfig removals, upstream now supports building
     them with an older libglvnd.
+  * copyright: Don't refer to BSD license file.
 
  -- Timo Aaltonen <tjaalton@debian.org>  Wed, 25 Sep 2019 16:44:37 +0300
 
