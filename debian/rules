@@ -123,12 +123,6 @@ else
   endif
 endif
 
-# Disable assembly usage on x32 otherwise Mesa defaults to x86_64 assembly
-# which doesn't work on x32 (see #758094)
-ifneq (,$(filter $(DEB_HOST_ARCH), x32))
-	confflags += -Dasm=false
-endif
-
 confflags_EGL = -Dplatforms="$(EGL_PLATFORMS)"
 confflags_GLES = -Dgles1=false -Dgles2=true
 confflags_GALLIUM += -Dgallium-drivers="$(GALLIUM_DRIVERS)"
