@@ -4,7 +4,7 @@ mesa (19.2.0-2) UNRELEASED; urgency=medium
   * rules: Build Vulkan overlay on x32. (Closes: #932733)
 
   [ Sven Joachim ]
-  * rules: Reeable asm on x32, should be fixed since mesa 17.0.0
+  * rules: Re-enable asm on x32, should be fixed since mesa 17.0.0
     (Closes: #758094).
 
  -- Timo Aaltonen <tjaalton@debian.org>  Fri, 04 Oct 2019 17:39:06 +0300
