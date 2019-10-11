@@ -1882,6 +1882,8 @@ VkResult radv_image_create(VkDevice _device,
 			   const VkAllocationCallbacks* alloc,
 			   VkImage *pImage);
 
+bool vi_alpha_is_on_msb(struct radv_device *device, VkFormat format);
+
 VkResult
 radv_image_from_gralloc(VkDevice device_h,
                        const VkImageCreateInfo *base_info,
