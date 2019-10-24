@@ -238,7 +238,7 @@
         "description": "intel/compiler: Restrict cs_threads to 64",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "932045061b5850368e8a4a5b3e6609eba6ed8d66"
     },
