@@ -877,6 +877,9 @@ static void si_disk_cache_create(struct si_screen *sscreen)
 	/* These flags affect shader compilation. */
 	#define ALL_FLAGS (DBG(SI_SCHED) | DBG(GISEL))
 	uint64_t shader_debug_flags = sscreen->debug_flags & ALL_FLAGS;
+	/* Reserve left-most bit for tgsi/nir selector */
+	assert(!(shader_debug_flags & (1 << 31)));
+	shader_debug_flags |= ((sscreen->options.enable_nir & 0x1) << 31);
 
 	/* Add the high bits of 32-bit addresses, which affects
 	 * how 32-bit addresses are expanded to 64 bits.
@@ -997,6 +1000,13 @@ radeonsi_screen_create_impl(struct radeon_winsys *ws,
 	if (!si_init_shader_cache(sscreen)) {
 		FREE(sscreen);
 		return NULL;
+	}
+
+	{
+#define OPT_BOOL(name, dflt, description) \
+		sscreen->options.name = \
+			driQueryOptionb(config->options, "radeonsi_"#name);
+#include "si_debug_options.h"
 	}
 
 	si_disk_cache_create(sscreen);
@@ -1124,13 +1134,6 @@ radeonsi_screen_create_impl(struct radeon_winsys *ws,
 		driQueryOptionb(config->options, "radeonsi_assume_no_z_fights");
 	sscreen->commutative_blend_add =
 		driQueryOptionb(config->options, "radeonsi_commutative_blend_add");
-
-	{
-#define OPT_BOOL(name, dflt, description) \
-		sscreen->options.name = \
-			driQueryOptionb(config->options, "radeonsi_"#name);
-#include "si_debug_options.h"
-	}
 
 	sscreen->has_gfx9_scissor_bug = sscreen->info.family == CHIP_VEGA10 ||
 					sscreen->info.family == CHIP_RAVEN;
