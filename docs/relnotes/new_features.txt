@@ -16,3 +16,5 @@ VK_INTEL_performance_query on Intel.
 Meson support for windows using MSVC and MinGW
 scons has been deprecated for non windows
 Initial Intel gen12 (Tigerlake) support on anvil and iris
+New compiler backend "ACO" for RADV (RADV_PERFTEST=aco)
+VK_EXT_shader_demote_to_helper_invocation on RADV/ACO.
