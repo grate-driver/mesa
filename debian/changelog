@@ -3,6 +3,7 @@ mesa (19.2.3-1) UNRELEASED; urgency=medium
   * New upstream release.
   * create-gles-pc-files-with-old-glvnd.diff: Drop the revert with a
     proposed patch to fix creating gles pc files with old glvnd.
+  * rules: GLESv2 libs aren't built anymore, drop removing the libs.
 
  -- Timo Aaltonen <tjaalton@debian.org>  Thu, 07 Nov 2019 10:09:19 +0200
 
