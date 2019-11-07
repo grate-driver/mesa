@@ -112,7 +112,7 @@
         "description": "freedreno/ir3: put the conversion back for half const to the right place.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "cbd1f47433b7d735e3be5c8126f7f2b9343a1cdf"
     },
