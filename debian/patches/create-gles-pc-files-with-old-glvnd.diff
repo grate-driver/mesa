@@ -17,7 +17,7 @@ index 2c79a04f1df2dbaf3851540ef0830ee884d18203..1a15f2c655c33c97f937d97e9b93ee31
 +if with_gles1
 +  if not with_glvnd
      subdir('es1api')
-+  elif glvnd_missing_pc_files
++  elif not glvnd_has_headers_and_pc_files
 +    pkg.generate(
 +      name : 'glesv1_cm',
 +      filebase : 'glesv1_cm',
@@ -32,7 +32,7 @@ index 2c79a04f1df2dbaf3851540ef0830ee884d18203..1a15f2c655c33c97f937d97e9b93ee31
 +if with_gles2
 +  if not with_glvnd
      subdir('es2api')
-+  elif glvnd_missing_pc_files
++  elif not glvnd_has_headers_and_pc_files
 +    pkg.generate(
 +      name : 'glesv2',
 +      filebase : 'glesv2',
