@@ -1,3 +1,9 @@
+mesa (19.2.6-1) UNRELEASED; urgency=medium
+
+  * New upstream release.
+
+ -- Timo Aaltonen <tjaalton@debian.org>  Wed, 27 Nov 2019 10:56:24 +0200
+
 mesa (19.2.4-1) unstable; urgency=medium
 
   * New upstream release. (Closes: #944880)
