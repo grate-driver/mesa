@@ -1,6 +1,7 @@
 mesa (19.2.6-1) UNRELEASED; urgency=medium
 
   * New upstream release.
+  * create-gles-pc-files-with-old-glvnd.diff: Dropped, upstream.
 
  -- Timo Aaltonen <tjaalton@debian.org>  Wed, 27 Nov 2019 10:56:24 +0200
 
