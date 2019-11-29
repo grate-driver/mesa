@@ -1,10 +1,10 @@
-mesa (19.3.0~rc5-1) UNRELEASED; urgency=medium
+mesa (19.3.0~rc5-1) experimental; urgency=medium
 
   * New upstream release candidate.
   * generate-pc-files-for-gles-and-gles2.diff: This is needed until we
     have glvnd 1.2 in the archive.
 
- -- Timo Aaltonen <tjaalton@debian.org>  Mon, 11 Nov 2019 11:10:16 +0200
+ -- Timo Aaltonen <tjaalton@debian.org>  Fri, 29 Nov 2019 21:56:04 +0200
 
 mesa (19.2.6-1) unstable; urgency=medium
 
