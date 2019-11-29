@@ -488,9 +488,10 @@ get_render_pass(struct zink_context *ctx)
    struct zink_render_pass_state state;
 
    for (int i = 0; i < fb->nr_cbufs; i++) {
-      struct zink_resource *cbuf = zink_resource(fb->cbufs[i]->texture);
-      state.rts[i].format = cbuf->format;
-      state.rts[i].samples = cbuf->base.nr_samples > 0 ? cbuf->base.nr_samples : VK_SAMPLE_COUNT_1_BIT;
+      struct pipe_resource *res = fb->cbufs[i]->texture;
+      state.rts[i].format = zink_get_format(screen, fb->cbufs[i]->format);
+      state.rts[i].samples = res->nr_samples > 0 ? res->nr_samples :
+                                                   VK_SAMPLE_COUNT_1_BIT;
    }
    state.num_cbufs = fb->nr_cbufs;
 
@@ -1312,6 +1313,10 @@ blit_native(struct zink_context *ctx, const struct pipe_blit_info *info)
    struct zink_batch *batch = zink_batch_no_rp(ctx);
    zink_batch_reference_resoure(batch, src);
    zink_batch_reference_resoure(batch, dst);
+
+   if (src->layout != VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL)
+      zink_resource_barrier(batch->cmdbuf, src, src->aspect,
+                            VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
 
    if (dst->layout != VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL)
       zink_resource_barrier(batch->cmdbuf, dst, dst->aspect,

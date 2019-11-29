@@ -470,10 +470,6 @@ fd_screen_get_shader_param(struct pipe_screen *pscreen,
 	case PIPE_SHADER_FRAGMENT:
 	case PIPE_SHADER_VERTEX:
 		break;
-	case PIPE_SHADER_GEOMETRY:
-		if (is_a6xx(screen))
-			break;
-		return 0;
 	case PIPE_SHADER_COMPUTE:
 		if (has_compute(screen))
 			break;

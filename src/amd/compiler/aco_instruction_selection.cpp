@@ -134,10 +134,7 @@ Temp emit_wqm(isel_context *ctx, Temp src, Temp dst=Temp(0, s1), bool program_ne
       if (!dst.id())
          return src;
 
-      if (src.type() == RegType::vgpr || src.size() > 1)
-         bld.copy(Definition(dst), src);
-      else
-         bld.sop1(aco_opcode::s_mov_b32, Definition(dst), src);
+      bld.copy(Definition(dst), src);
       return dst;
    }
 
@@ -148,6 +145,9 @@ Temp emit_wqm(isel_context *ctx, Temp src, Temp dst=Temp(0, s1), bool program_ne
 
 static Temp emit_bpermute(isel_context *ctx, Builder &bld, Temp index, Temp data)
 {
+   if (index.regClass() == s1)
+      return bld.vop3(aco_opcode::v_readlane_b32, bld.def(s1), data, index);
+
    Temp index_x4 = bld.vop2(aco_opcode::v_lshlrev_b32, bld.def(v1), Operand(2u), index);
 
    /* Currently not implemented on GFX6-7 */
@@ -1647,7 +1647,7 @@ void visit_alu_instr(isel_context *ctx, nir_alu_instr *instr)
       } else if (dst.size() == 2) {
          Temp cond = bld.vopc(aco_opcode::v_cmp_nlt_f64, bld.hint_vcc(bld.def(s2)), Operand(0u), src);
          Temp tmp = bld.vop1(aco_opcode::v_mov_b32, bld.def(v1), Operand(0x3FF00000u));
-         Temp upper = bld.vop2_e64(aco_opcode::v_cndmask_b32, bld.def(v1), tmp, src, cond);
+         Temp upper = bld.vop2_e64(aco_opcode::v_cndmask_b32, bld.def(v1), tmp, emit_extract_vector(ctx, src, 1, v1), cond);
 
          cond = bld.vopc(aco_opcode::v_cmp_le_f64, bld.hint_vcc(bld.def(s2)), Operand(0u), src);
          tmp = bld.vop1(aco_opcode::v_mov_b32, bld.def(v1), Operand(0xBFF00000u));
@@ -5557,11 +5557,11 @@ void visit_intrinsic(isel_context *ctx, nir_intrinsic_instr *instr)
    }
    case nir_intrinsic_shuffle: {
       Temp src = get_ssa_temp(ctx, instr->src[0].ssa);
-      if (!ctx->divergent_vals[instr->dest.ssa.index]) {
+      if (!ctx->divergent_vals[instr->dest.ssa.index] &&
+          !ctx->divergent_vals[instr->src[0].ssa->index]) {
          emit_uniform_subgroup(ctx, instr, src);
       } else {
          Temp tid = get_ssa_temp(ctx, instr->src[1].ssa);
-         assert(tid.regClass() == v1);
          Temp dst = get_ssa_temp(ctx, &instr->dest.ssa);
          if (src.regClass() == v1) {
             emit_wqm(ctx, emit_bpermute(ctx, bld, tid, src), dst);
@@ -5626,9 +5626,8 @@ void visit_intrinsic(isel_context *ctx, nir_intrinsic_instr *instr)
    }
    case nir_intrinsic_read_invocation: {
       Temp src = get_ssa_temp(ctx, instr->src[0].ssa);
-      Temp lane = get_ssa_temp(ctx, instr->src[1].ssa);
+      Temp lane = bld.as_uniform(get_ssa_temp(ctx, instr->src[1].ssa));
       Temp dst = get_ssa_temp(ctx, &instr->dest.ssa);
-      assert(lane.regClass() == s1);
       if (src.regClass() == v1) {
          emit_wqm(ctx, bld.vop3(aco_opcode::v_readlane_b32, bld.def(s1), src, lane), dst);
       } else if (src.regClass() == v2) {

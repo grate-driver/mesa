@@ -1400,7 +1400,7 @@ fs_visitor::nir_emit_alu(const fs_builder &bld, nir_alu_instr *instr,
       temp_op[0] = bld.fix_byte_src(op[0]);
       temp_op[1] = bld.fix_byte_src(op[1]);
 
-      const uint32_t bit_size = nir_src_bit_size(instr->src[0].src);
+      const uint32_t bit_size = type_sz(temp_op[0].type) * 8;
       if (bit_size != 32)
          dest = bld.vgrf(temp_op[0].type, 1);
 
@@ -3460,7 +3460,14 @@ fs_visitor::nir_emit_fs_intrinsic(const fs_builder &bld,
 
          if (alu != NULL &&
              alu->op != nir_op_bcsel &&
-             alu->op != nir_op_inot) {
+             alu->op != nir_op_inot &&
+             (devinfo->gen > 5 ||
+              (alu->instr.pass_flags & BRW_NIR_BOOLEAN_MASK) != BRW_NIR_BOOLEAN_NEEDS_RESOLVE ||
+              alu->op == nir_op_fne32 || alu->op == nir_op_feq32 ||
+              alu->op == nir_op_flt32 || alu->op == nir_op_fge32 ||
+              alu->op == nir_op_ine32 || alu->op == nir_op_ieq32 ||
+              alu->op == nir_op_ilt32 || alu->op == nir_op_ige32 ||
+              alu->op == nir_op_ult32 || alu->op == nir_op_uge32)) {
             /* Re-emit the instruction that generated the Boolean value, but
              * do not store it.  Since this instruction will be conditional,
              * other instructions that want to use the real Boolean value may

@@ -469,9 +469,22 @@ bool can_accept_constant(aco_ptr<Instruction>& instr, unsigned operand)
 
 bool valu_can_accept_literal(opt_ctx& ctx, aco_ptr<Instruction>& instr, unsigned operand)
 {
+   /* instructions like v_cndmask_b32 can't take a literal because they always
+    * read SGPRs */
+   if (instr->operands.size() >= 3 &&
+       instr->operands[2].isTemp() && instr->operands[2].regClass().type() == RegType::sgpr)
+      return false;
+
    // TODO: VOP3 can take a literal on GFX10
    return !instr->isSDWA() && !instr->isDPP() && !instr->isVOP3() &&
           operand == 0 && can_accept_constant(instr, operand);
+}
+
+bool valu_can_accept_vgpr(aco_ptr<Instruction>& instr, unsigned operand)
+{
+   if (instr->opcode == aco_opcode::v_readlane_b32 || instr->opcode == aco_opcode::v_writelane_b32)
+      return operand != 1;
+   return true;
 }
 
 bool parse_base_offset(opt_ctx &ctx, Instruction* instr, unsigned op_index, Temp *base, uint32_t *offset)
@@ -576,7 +589,7 @@ void label_instruction(opt_ctx &ctx, aco_ptr<Instruction>& instr)
 
       /* VALU: propagate neg, abs & inline constants */
       else if (instr->isVALU()) {
-         if (info.is_temp() && info.temp.type() == RegType::vgpr) {
+         if (info.is_temp() && info.temp.type() == RegType::vgpr && valu_can_accept_vgpr(instr, i)) {
             instr->operands[i].setTemp(info.temp);
             info = ctx.info[info.temp.id()];
          }

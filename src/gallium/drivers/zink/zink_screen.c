@@ -125,6 +125,8 @@ zink_get_param(struct pipe_screen *pscreen, enum pipe_cap param)
       return 1;
 
    case PIPE_CAP_FRAGMENT_SHADER_TEXTURE_LOD:
+      return 0; /* TODO: re-enable after implementing nir_texop_txd */
+
    case PIPE_CAP_FRAGMENT_SHADER_DERIVATIVES:
    case PIPE_CAP_VERTEX_SHADER_SATURATE:
       return 1;
@@ -284,7 +286,7 @@ zink_get_param(struct pipe_screen *pscreen, enum pipe_cap param)
       return 0;
 
    case PIPE_CAP_BUFFER_MAP_PERSISTENT_COHERENT:
-      return 1;
+      return 0;
 
    case PIPE_CAP_NIR_COMPACT_ARRAYS:
       return 1;
@@ -549,7 +551,7 @@ static const VkFormat formats[PIPE_FORMAT_COUNT] = {
    [PIPE_FORMAT_Z32_FLOAT] = VK_FORMAT_D32_SFLOAT,
    [PIPE_FORMAT_Z32_FLOAT_S8X24_UINT] = VK_FORMAT_D32_SFLOAT_S8_UINT,
    [PIPE_FORMAT_Z16_UNORM] = VK_FORMAT_D16_UNORM,
-   [PIPE_FORMAT_X8Z24_UNORM] = VK_FORMAT_X8_D24_UNORM_PACK32,
+   [PIPE_FORMAT_Z24X8_UNORM] = VK_FORMAT_X8_D24_UNORM_PACK32,
    [PIPE_FORMAT_Z24_UNORM_S8_UINT] = VK_FORMAT_D24_UNORM_S8_UINT,
 
    // compressed formats
