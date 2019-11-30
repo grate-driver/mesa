@@ -3361,7 +3361,7 @@
         "description": "anv: use os_get_total_physical_memory()",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "060a6434eca9fb05ca2dfd612f8abd4786ee4549"
     },
