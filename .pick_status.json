@@ -1399,7 +1399,7 @@
         "description": "radv: disable FMASK compression when drawing with GENERAL layout",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "96063100812d1de46f4146fde92975c98e78c3ce"
     },
