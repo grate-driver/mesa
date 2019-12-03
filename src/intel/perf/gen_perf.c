@@ -69,6 +69,8 @@
 #define MAP_READ  (1 << 0)
 #define MAP_WRITE (1 << 1)
 
+#define OA_REPORT_INVALID_CTX_ID (0xffffffff)
+
 /**
  * Periodic OA samples are read() into these buffer structures via the
  * i915 perf kernel interface and appended to the
@@ -997,7 +999,9 @@ query_result_accumulate(struct gen_perf_query_result *result,
 {
    int i, idx = 0;
 
-   result->hw_id = start[2];
+   if (result->hw_id == OA_REPORT_INVALID_CTX_ID &&
+       start[2] != OA_REPORT_INVALID_CTX_ID)
+      result->hw_id = start[2];
    result->reports_accumulated++;
 
    switch (query->oa_format) {
@@ -1035,7 +1039,7 @@ static void
 query_result_clear(struct gen_perf_query_result *result)
 {
    memset(result, 0, sizeof(*result));
-   result->hw_id = 0xffffffff; /* invalid */
+   result->hw_id = OA_REPORT_INVALID_CTX_ID; /* invalid */
 }
 
 static void
