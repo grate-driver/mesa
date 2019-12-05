@@ -121,7 +121,7 @@
         "description": "util/os_misc: add os_get_available_system_memory()",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "b80930a6fea075d2ef283ceac5a2a64e65fd7bc4"
     },
