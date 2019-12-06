@@ -1,7 +1,7 @@
 mesa (19.3.0~rc6-1) UNRELEASED; urgency=medium
 
   * New upstream release candidate.
-  * control, rules: Don't build mesa-vulkan-drivers on mips*.
+  * control, rules: Don't build radv on non-x86.
 
  -- Timo Aaltonen <tjaalton@debian.org>  Thu, 05 Dec 2019 09:21:11 +0200
 
