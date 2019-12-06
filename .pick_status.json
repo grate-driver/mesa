@@ -1273,7 +1273,7 @@
         "description": "meson: conditionally include -ldl in gbm pkg-config file",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "816bf7d1644b9b14df253c5d54f595514aa34703"
     },
