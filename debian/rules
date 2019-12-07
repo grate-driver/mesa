@@ -153,6 +153,7 @@ override_dh_clean:
 	rm -rf $$(find -name Makefile.in)
 	rm -rf bin/install-sh bin/ltmain.sh
 	for file in debian/*.in; do rm -f $${file%%.in}; done
+	rm -rf src/amd/compiler/__pycache__/ src/amd/registers/__pycache__
 	rm -rf src/amd/vulkan/*.pyc src/amd/vulkan/__pycache__/
 	rm -rf src/compiler/nir/*.pyc src/compiler/nir/__pycache__/
 	rm -rf src/egl/generate/*.pyc src/egl/generate/__pycache__/

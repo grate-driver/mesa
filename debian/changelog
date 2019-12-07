@@ -6,6 +6,7 @@ mesa (19.3.0~rc6-1) UNRELEASED; urgency=medium
     shipped by libglvnd 1.3.0 now. Make old -dev packages transitional,
     except libegl1-mesa-dev which still has two mesa specific headers.
   * generate-pc-files-for-gles-and-gles2.diff: Dropped, not needed anymore.
+  * rules: Update clean target.
 
  -- Timo Aaltonen <tjaalton@debian.org>  Thu, 05 Dec 2019 09:21:11 +0200
 
