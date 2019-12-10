@@ -580,7 +580,7 @@
         "description": "svga: Use pipe_shader_state_from_tgsi to set shader state",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "bf12bc2dd7a28844103bb30a07be0440e60c5864"
     },
