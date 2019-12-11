@@ -1,4 +1,4 @@
-mesa (19.3.0~rc6-1) UNRELEASED; urgency=medium
+mesa (19.3.0~rc6-1) experimental; urgency=medium
 
   * New upstream release candidate.
   * control, rules: Don't build radv on non-x86.
@@ -8,7 +8,7 @@ mesa (19.3.0~rc6-1) UNRELEASED; urgency=medium
   * generate-pc-files-for-gles-and-gles2.diff: Dropped, not needed anymore.
   * rules: Update clean target.
 
- -- Timo Aaltonen <tjaalton@debian.org>  Thu, 05 Dec 2019 09:21:11 +0200
+ -- Timo Aaltonen <tjaalton@debian.org>  Mon, 09 Dec 2019 13:29:49 +0200
 
 mesa (19.3.0~rc5-1) experimental; urgency=medium
 
