@@ -1,6 +1,8 @@
 mesa (19.3.0-1) UNRELEASED; urgency=medium
 
   * New upstream release.
+  * fix-radv-secure-compile.diff: Fix radv build where __NR__newselect
+    isn't defined.
 
  -- Timo Aaltonen <tjaalton@debian.org>  Fri, 13 Dec 2019 01:24:09 +0200
 
