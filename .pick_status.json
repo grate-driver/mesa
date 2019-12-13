@@ -247,7 +247,7 @@
         "description": "egl: Implement getImage/putImage on pbuffer swrast.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "d6edccee8da38d4802020d5aa4d9e11bb7aae801"
     },
