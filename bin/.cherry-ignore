@@ -27,6 +27,8 @@ bcd9224728dcb8d8fe4bcddc4bd9b2c36fcfe9dd
 869e32593a9096b845dd6106f8f86e1c41fac968
 a2c3c65a31de90fdb55f76f2894860dfbafe2043
 bb0c5c487e63e88acbb792f092dd8f392bad8540
+937b9055698be0dfdb7d2e0673a989e2ecc05912
+21376cffb37018160ad3eef38b5a640ba1675a4f
 
 # This is reverted shortly after it was landed
 4432a2d14d80081d062f7939a950d65ea3a16eed
@@ -35,6 +37,15 @@ bb0c5c487e63e88acbb792f092dd8f392bad8540
 1a05811936dd8d0c3a367c6f00629624ef39d537
 911a8261419f48dcd756f78832fa5a5f4c5b8d93
 
-# This was manuall backported
+# This was manually backported
 2afeed301010917c4eae55dcd2544f9d329df934
 4b392ced2d744fccffe95490ff57e6b41033c266
+
+# This is not being backported to 19.2 due to causing build regressions for
+# downstream projects
+eaf43966027cf9654e91ca57aecc8f5a65b58f49
+
+# Invalid sha warnings
+023282a4f667695ea1dbbe9fbe1cd3a9d550a426
+2fca325ea65f068043d4c18c9cd0fe7f25bde8f7
+7564c5fc6d79a2ddec49a19f67183fb3be799fe5
