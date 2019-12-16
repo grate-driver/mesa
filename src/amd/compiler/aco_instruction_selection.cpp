@@ -5928,6 +5928,9 @@ void visit_intrinsic(isel_context *ctx, nir_intrinsic_instr *instr)
    }
    case nir_intrinsic_demote:
       bld.pseudo(aco_opcode::p_demote_to_helper);
+
+      if (ctx->cf_info.loop_nest_depth || ctx->cf_info.parent_if.is_divergent)
+         ctx->cf_info.exec_potentially_empty = true;
       ctx->block->kind |= block_kind_uses_demote;
       ctx->program->needs_exact = true;
       break;
@@ -5936,6 +5939,9 @@ void visit_intrinsic(isel_context *ctx, nir_intrinsic_instr *instr)
                            as_divergent_bool(ctx, get_ssa_temp(ctx, instr->src[0].ssa), false),
                            Operand(exec, s2));
       bld.pseudo(aco_opcode::p_demote_to_helper, cond);
+
+      if (ctx->cf_info.loop_nest_depth || ctx->cf_info.parent_if.is_divergent)
+         ctx->cf_info.exec_potentially_empty = true;
       ctx->block->kind |= block_kind_uses_demote;
       ctx->program->needs_exact = true;
       break;
