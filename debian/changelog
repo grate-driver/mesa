@@ -1,6 +1,7 @@
 mesa (19.3.1-1) UNRELEASED; urgency=medium
 
   * New upstream release.
+  * fix-radv-secure-compile.diff: Dropped, upstream.
 
  -- Timo Aaltonen <tjaalton@debian.org>  Thu, 19 Dec 2019 09:03:39 +0200
 
