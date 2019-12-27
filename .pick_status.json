@@ -472,7 +472,7 @@
         "description": "st/mesa: Handle the rest renderbuffer formats from OSMesa",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": null
     },
