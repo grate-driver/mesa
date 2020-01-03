@@ -235,7 +235,6 @@ Architecture: any
 Depends:
  ${shlibs:Depends},
  ${misc:Depends},
- libglapi-mesa (= ${binary:Version}),
  libgl1-mesa-dri,
 Provides: libglx-vendor
 Breaks:
@@ -319,7 +318,6 @@ Architecture: any
 Depends:
  ${shlibs:Depends},
  ${misc:Depends},
- libglapi-mesa (= ${binary:Version}),
 Pre-Depends: ${misc:Pre-Depends}
 Multi-Arch: same
 Description: Mesa Off-screen rendering extension
