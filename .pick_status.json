@@ -1453,7 +1453,7 @@
         "description": "etnaviv: simplify linear stride implementation",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "34458c1cf6caf1718e111096143e74aabc7985a7"
     },
