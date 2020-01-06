@@ -211,7 +211,7 @@
         "description": "drisw: Cache the depth of the X drawable",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "90d58286cc76c9f6652a8f8342fe568d2fc0bb15"
     },
