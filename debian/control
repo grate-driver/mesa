@@ -301,6 +301,8 @@ Package: mesa-common-dev
 Section: libdevel
 Architecture: any
 Depends:
+ libgl-dev,
+ libglx-dev,
  libx11-dev,
  libdrm-dev (>= 2.4.95) [!hurd-any],
  ${misc:Depends},

@@ -1,6 +1,8 @@
 mesa (19.3.1-4) UNRELEASED; urgency=medium
 
   * Ensure strict dependencies on libglapi-mesa (closes: #947813).
+  * control: Add libgl{,x}-dev to mesa-common-dev Depends. (Closes:
+    #947392)
 
  -- Julien Cristau <jcristau@debian.org>  Fri, 03 Jan 2020 17:13:00 +0100
 
