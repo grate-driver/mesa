@@ -436,7 +436,7 @@
         "description": "meson: bump required glvnd version",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "9a74746bd1f3bd28d4c4c7cba75e3245e1d25530"
     },
