@@ -3082,7 +3082,7 @@
         "description": "aco: rework lower_to_cssa()",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "0b8216b2cdbcaccfd2bd1a65be6b8ac5654e3067"
     },
