@@ -69,6 +69,7 @@ gen_device_name_to_pci_device_id(const char *name)
       { "ehl", 0x4500 },
       { "jsl", 0x4E71 },
       { "tgl", 0x9a49 },
+      { "rkl", 0x4c8a },
    };
 
    for (unsigned i = 0; i < ARRAY_SIZE(name_map); i++) {
@@ -1073,6 +1074,10 @@ static const struct gen_device_info gen_device_info_ehl_4 = {
 
 #define dual_subslices(args...) { args, }
 
+#define GEN12_GT05_FEATURES                                     \
+   GEN12_FEATURES(1, 1, 4),                                     \
+   .num_subslices = dual_subslices(1)
+
 #define GEN12_GT_FEATURES(_gt)                                  \
    GEN12_FEATURES(1, 1, _gt == 1 ? 4 : 8),                      \
    .num_subslices = dual_subslices(_gt == 1 ? 2 : 6)
@@ -1083,6 +1088,14 @@ static const struct gen_device_info gen_device_info_tgl_gt1 = {
 
 static const struct gen_device_info gen_device_info_tgl_gt2 = {
    GEN12_GT_FEATURES(2),
+};
+
+static const struct gen_device_info gen_device_info_rkl_gt05 = {
+   GEN12_GT05_FEATURES,
+};
+
+static const struct gen_device_info gen_device_info_rkl_gt1 = {
+   GEN12_GT_FEATURES(1),
 };
 
 static void
