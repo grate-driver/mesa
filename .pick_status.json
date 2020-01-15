@@ -94,7 +94,7 @@
         "description": "Revert \"glx: convert glx_config_create_list to one big calloc\"",
         "nominated": true,
         "nomination_type": 2,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "35fc7bdf0e6ad6547e39099e7060a3d89539b56d"
     },
