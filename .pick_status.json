@@ -3424,7 +3424,7 @@
         "description": "intel/compiler: Fix illegal mutation in get_nir_image_intrinsic_image",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "09f1de97a76a4990fd7ce909760f3c8933263b05"
     },
