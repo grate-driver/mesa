@@ -3010,7 +3010,7 @@
         "description": "docs: fix typo in html tag name",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "5d11a828e10916e38526a3ae7334353102b5d0c6"
     },
