@@ -2974,7 +2974,7 @@
         "description": "docs: use code-tags instead of pre-tags",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "ca0c1e69cab67276b2f701f7c3ea43658a52fd83"
     },
