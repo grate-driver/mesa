@@ -2947,7 +2947,7 @@
         "description": "docs: remove double-closed definition-list",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "bc17ac58661c2dbbd5fea48d4af628baef434e86"
     },
