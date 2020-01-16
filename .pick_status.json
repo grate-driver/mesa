@@ -2992,7 +2992,7 @@
         "description": "docs: open paragraph before closing it",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "44c5e634a5cd568306d42777af6c660fbbb5773e"
     },
