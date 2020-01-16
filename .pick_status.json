@@ -2983,7 +2983,7 @@
         "description": "docs: use code-tag instead of pre-tag",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "41b3eb08d9feac97ac1be1802093ad4cc4c6ecaf"
     },
