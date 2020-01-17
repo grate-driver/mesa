@@ -2038,7 +2038,7 @@
         "description": "turnip: fix invalid VK_ERROR_OUT_OF_POOL_MEMORY",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "c39afe68f0390d45130c1317b3b7e65f55542c36"
     },
