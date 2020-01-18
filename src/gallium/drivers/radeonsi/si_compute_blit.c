@@ -59,15 +59,18 @@ unsigned si_get_flush_flags(struct si_context *sctx, enum si_coherency coher,
 	}
 }
 
-static void si_compute_internal_begin(struct si_context *sctx)
+static void si_launch_grid_internal(struct si_context *sctx,
+				    struct pipe_grid_info *info)
 {
+	/* Set settings for driver-internal compute dispatches. */
 	sctx->flags &= ~SI_CONTEXT_START_PIPELINE_STATS;
 	sctx->flags |= SI_CONTEXT_STOP_PIPELINE_STATS;
 	sctx->render_cond_force_off = true;
-}
 
-static void si_compute_internal_end(struct si_context *sctx)
-{
+	/* Dispatch compute. */
+	sctx->b.launch_grid(&sctx->b, info);
+
+	/* Restore default settings. */
 	sctx->flags &= ~SI_CONTEXT_STOP_PIPELINE_STATS;
 	sctx->flags |= SI_CONTEXT_START_PIPELINE_STATS;
 	sctx->render_cond_force_off = false;
@@ -92,7 +95,6 @@ static void si_compute_do_clear_or_copy(struct si_context *sctx,
 	assert(dst->target != PIPE_BUFFER || dst_offset + size <= dst->width0);
 	assert(!src || src_offset + size <= src->width0);
 
-	si_compute_internal_begin(sctx);
 	sctx->flags |= SI_CONTEXT_PS_PARTIAL_FLUSH |
 		       SI_CONTEXT_CS_PARTIAL_FLUSH |
 		       si_get_flush_flags(sctx, coher, SI_COMPUTE_DST_CACHE_POLICY);
@@ -169,7 +171,7 @@ static void si_compute_do_clear_or_copy(struct si_context *sctx,
 		ctx->bind_compute_state(ctx, sctx->cs_clear_buffer);
 	}
 
-	ctx->launch_grid(ctx, &info);
+	si_launch_grid_internal(sctx, &info);
 
 	enum si_cache_policy cache_policy = get_cache_policy(sctx, coher, size);
 	sctx->flags |= SI_CONTEXT_CS_PARTIAL_FLUSH |
@@ -182,7 +184,6 @@ static void si_compute_do_clear_or_copy(struct si_context *sctx,
 	ctx->bind_compute_state(ctx, saved_cs);
 	ctx->set_shader_buffers(ctx, PIPE_SHADER_COMPUTE, 0, src ? 2 : 1, saved_sb,
 				saved_writable_mask);
-	si_compute_internal_end(sctx);
 	for (int i = 0; i < 2; i++)
 		pipe_resource_reference(&saved_sb[i].buffer, NULL);
 }
@@ -334,7 +335,6 @@ void si_compute_copy_image(struct si_context *sctx,
 	if (width == 0 || height == 0)
 		return;
 
-	si_compute_internal_begin(sctx);
 	sctx->flags |= SI_CONTEXT_CS_PARTIAL_FLUSH |
 		       si_get_flush_flags(sctx, SI_COHERENCY_SHADER, L2_STREAM);
 
@@ -418,7 +418,7 @@ void si_compute_copy_image(struct si_context *sctx,
 		info.grid[2] = depth;
 	}
 
-	ctx->launch_grid(ctx, &info);
+	si_launch_grid_internal(sctx, &info);
 
 	sctx->flags |= SI_CONTEXT_CS_PARTIAL_FLUSH |
 		       (sctx->chip_class <= GFX8 ? SI_CONTEXT_WB_L2 : 0) |
@@ -426,7 +426,6 @@ void si_compute_copy_image(struct si_context *sctx,
 	ctx->bind_compute_state(ctx, saved_cs);
 	ctx->set_shader_images(ctx, PIPE_SHADER_COMPUTE, 0, 2, saved_image);
 	ctx->set_constant_buffer(ctx, PIPE_SHADER_COMPUTE, 0, &saved_cb);
-	si_compute_internal_end(sctx);
 	for (int i = 0; i < 2; i++)
 		pipe_resource_reference(&saved_image[i].resource, NULL);
 	pipe_resource_reference(&saved_cb.buffer, NULL);
@@ -499,7 +498,7 @@ void si_retile_dcc(struct si_context *sctx, struct si_texture *tex)
 	info.grid[2] = 1;
 	info.last_block[0] = num_threads % 64;
 
-	ctx->launch_grid(ctx, &info);
+	si_launch_grid_internal(sctx, &info);
 
 	/* Don't flush caches or wait. The driver will wait at the end of this IB,
 	 * and L2 will be flushed by the kernel fence.
@@ -526,8 +525,6 @@ void si_compute_expand_fmask(struct pipe_context *ctx, struct pipe_resource *tex
 	/* EQAA FMASK expansion is unimplemented. */
 	if (tex->nr_samples != tex->nr_storage_samples)
 		return;
-
-	si_compute_internal_begin(sctx);
 
 	/* Flush caches and sync engines. */
 	sctx->flags |= SI_CONTEXT_CS_PARTIAL_FLUSH |
@@ -569,7 +566,7 @@ void si_compute_expand_fmask(struct pipe_context *ctx, struct pipe_resource *tex
 	info.grid[1] = DIV_ROUND_UP(tex->height0, 8);
 	info.grid[2] = is_array ? tex->array_size : 1;
 
-	ctx->launch_grid(ctx, &info);
+	si_launch_grid_internal(sctx, &info);
 
 	/* Flush caches and sync engines. */
 	sctx->flags |= SI_CONTEXT_CS_PARTIAL_FLUSH |
@@ -579,7 +576,6 @@ void si_compute_expand_fmask(struct pipe_context *ctx, struct pipe_resource *tex
 	/* Restore previous states. */
 	ctx->bind_compute_state(ctx, saved_cs);
 	ctx->set_shader_images(ctx, PIPE_SHADER_COMPUTE, 0, 1, &saved_image);
-	si_compute_internal_end(sctx);
 	pipe_resource_reference(&saved_image.resource, NULL);
 
 	/* Array of fully expanded FMASK values, arranged by [log2(fragments)][log2(samples)-1]. */
@@ -630,7 +626,6 @@ void si_compute_clear_render_target(struct pipe_context *ctx,
 		memcpy(data + 4, color->ui, sizeof(color->ui));
 	}
 
-	si_compute_internal_begin(sctx);
 	sctx->render_cond_force_off = !render_condition_enabled;
 
 	sctx->flags |= SI_CONTEXT_CS_PARTIAL_FLUSH |
@@ -690,7 +685,7 @@ void si_compute_clear_render_target(struct pipe_context *ctx,
 		info.grid[2] = 1;
 	}
 
-	ctx->launch_grid(ctx, &info);
+	si_launch_grid_internal(sctx, &info);
 
 	sctx->flags |= SI_CONTEXT_CS_PARTIAL_FLUSH |
 		       (sctx->chip_class <= GFX8 ? SI_CONTEXT_WB_L2 : 0) |
@@ -698,7 +693,6 @@ void si_compute_clear_render_target(struct pipe_context *ctx,
 	ctx->bind_compute_state(ctx, saved_cs);
 	ctx->set_shader_images(ctx, PIPE_SHADER_COMPUTE, 0, 1, &saved_image);
 	ctx->set_constant_buffer(ctx, PIPE_SHADER_COMPUTE, 0, &saved_cb);
-	si_compute_internal_end(sctx);
 	pipe_resource_reference(&saved_image.resource, NULL);
 	pipe_resource_reference(&saved_cb.buffer, NULL);
 }
