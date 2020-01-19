@@ -1,0 +1,3 @@
+C_SOURCES := \
+	grate_drm_public.h \
+	grate_drm_winsys.c

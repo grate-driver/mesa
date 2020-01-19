@@ -90,7 +90,7 @@ else
   driver_freedreno = declare_dependency()
 endif
 if with_gallium_grate
-  subdir('winsys/tegra/drm')
+  subdir('winsys/grate/drm')
   subdir('drivers/grate')
 else
   driver_grate = declare_dependency()

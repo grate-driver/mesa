@@ -47,5 +47,5 @@ libgrate = static_library(
 
 driver_grate = declare_dependency(
   compile_args : '-DGALLIUM_GRATE',
-  link_with : [libgrate, libtegradrm],
+  link_with : [libgrate, libgratedrm],
 )
