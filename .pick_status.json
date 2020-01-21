@@ -1444,7 +1444,7 @@
         "description": "egl/android: fix buffer_count for applications setting max count",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "be08e6a4496aad219df1fd829fca3e4f7b322538"
     },
