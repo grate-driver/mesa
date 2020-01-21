@@ -1984,7 +1984,7 @@
         "description": "radv: Remove syncobj_handle variable in header.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "eaa56eab6da565c7bc84419c025c7c9bc90cf87a"
     },
