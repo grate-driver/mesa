@@ -1282,7 +1282,7 @@
         "description": "radv: fix double free corruption in radv_alloc_memory()",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "825ddfee59945e00845637262fba05975f7d16a4"
     },
