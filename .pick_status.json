@@ -1273,7 +1273,7 @@
         "description": "aco: fix off-by-one error when initializing sgpr_live_in",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "93c8ebfa780ebd1495095e794731881aef29e7d3"
     },
