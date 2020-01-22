@@ -904,7 +904,7 @@
         "description": "intel: Fix aux map alignments on 32-bit builds.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "2e6a7ced4dbc70149280fe3c8c453a228c73c524"
     },
