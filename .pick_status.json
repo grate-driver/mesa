@@ -328,7 +328,7 @@
         "description": "gallium: let the pipe drivers decide the supported modifiers",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "ac0219cc5b6afa6d0392a164b58e21ce95079930"
     },
