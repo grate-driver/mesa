@@ -58,7 +58,7 @@
         "description": "intel/fs: Don't count integer instructions as being possibly coissue",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "e64be391dd065b6a0eabee17ada038db7a28c112"
     },
