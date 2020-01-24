@@ -1003,7 +1003,7 @@
         "description": "intel/fs/gen12: Fixup/simplify SWSB annotations of SIMD32 scratch writes.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "15e3a0d9d264beccb914432ca749d7c0b8a5d43c"
     },
