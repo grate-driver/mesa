@@ -1012,7 +1012,7 @@
         "description": "intel/fs/gen12: Workaround unwanted SEND execution due to broken NoMask control flow.",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": null
     },
