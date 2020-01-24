@@ -4,7 +4,7 @@
         "description": "aco/gfx10: Fix VcmpxExecWARHazard mitigation.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "d6dfce02d074d615a3b88a3fccd8ee8c7e13c010"
     },
