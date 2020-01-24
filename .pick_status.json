@@ -1039,7 +1039,7 @@
         "description": "intel/fs/cse: Make HALT instruction act as CSE barrier.",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": null
     },
