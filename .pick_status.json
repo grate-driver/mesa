@@ -400,7 +400,7 @@
         "description": "intel/device: bdw_gt1 actually has 6 eus per subslice",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": null
     },
