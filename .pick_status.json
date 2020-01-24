@@ -1030,7 +1030,7 @@
         "description": "intel/fs/gen7: Fix fs_inst::flags_written() for SHADER_OPCODE_FIND_LIVE_CHANNEL.",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": null
     },
