@@ -607,7 +607,7 @@
         "description": "ac/llvm: add missing optimization barrier for 64-bit readlanes",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "0f45d4dc2b15e137346e1e3f064a24302e1c9048"
     },
