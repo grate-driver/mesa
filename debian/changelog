@@ -1,4 +1,4 @@
-mesa (19.3.3-1) UNRELEASED; urgency=medium
+mesa (19.3.3-1) unstable; urgency=medium
 
   * New upstream release.
   * rules: Build zink on x86.
@@ -6,7 +6,7 @@ mesa (19.3.3-1) UNRELEASED; urgency=medium
     dev/libgl1-mesa-dev Depends to ease the transition. (Closes: #949677)
   * drisw-fix-depth-for-ximage.diff: Dropped, upstream.
 
- -- Timo Aaltonen <tjaalton@debian.org>  Mon, 20 Jan 2020 14:58:38 +0200
+ -- Timo Aaltonen <tjaalton@debian.org>  Tue, 28 Jan 2020 21:45:02 +0200
 
 mesa (19.3.2-1) unstable; urgency=medium
 
