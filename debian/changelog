@@ -1,6 +1,8 @@
 mesa (19.3.2-2) UNRELEASED; urgency=medium
 
   * rules: Build zink on x86.
+  * control: Add libglvnd-dev to libegl1-mesa-dev/libgles2-mesa-
+    dev/libgl1-mesa-dev Depends to ease the transition. (Closes: #949677)
 
  -- Timo Aaltonen <tjaalton@debian.org>  Mon, 20 Jan 2020 14:58:38 +0200
 
