@@ -391,7 +391,7 @@
         "description": "llvmpipe: Fix real uninitialized use of \"atype\" for SEMANTIC_FACE",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "502548a09c5a87d06da97be45a2386bb1e5e800e"
     },
