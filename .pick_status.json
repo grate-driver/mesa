@@ -2380,7 +2380,7 @@
         "description": "ac/nir: split 8-bit load/store to global memory on GFX6",
         "nominated": false,
         "nomination_type": null,
-        "resolution": 4,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": null
     },
