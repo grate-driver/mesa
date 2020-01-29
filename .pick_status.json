@@ -2362,7 +2362,7 @@
         "description": "radv/llvm: enable 8-bit storage features on GFX6-GFX7",
         "nominated": false,
         "nomination_type": null,
-        "resolution": 4,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": null
     },
