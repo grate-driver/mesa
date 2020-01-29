@@ -67,7 +67,7 @@
         "description": "radeonsi: don't report that multi-plane formats are supported",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "a554b45d736073bbea4978118c02f7929f75cd77"
     },
