@@ -76,7 +76,7 @@
         "description": "etnaviv: Destroy rsc->pending_ctx set in etna_resource_destroy()",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "9e672e4d20fb77e1b39aee29f9e8e76a5c2af68e"
     },
