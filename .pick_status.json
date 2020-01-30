@@ -283,7 +283,7 @@
         "description": "radv: Do not set SX DISABLE bits for RB+ with unused surfaces.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "e9316fdfd4899c269a19e106a6ffa4309ae48b27"
     },
