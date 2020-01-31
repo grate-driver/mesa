@@ -418,7 +418,7 @@
         "description": "aco: fix image_atomic_cmp_swap",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "71440ba0f5512fe455be66ca48b253ecc37478a9"
     },
