@@ -418,7 +418,7 @@
         "description": "intel: fix the gen 11 compute shader scratch IDs",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": null
     },
