@@ -1,0 +1,263 @@
+[
+    {
+        "sha": "0d14f41625fa00187f690f283c1eb6a22e354a71",
+        "description": "aco: fix MUBUF VS input loads when expanding vec3 to vec4 on GFX6",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "6aecc316c000c343b25963c1356525f95ea6cafe"
+    },
+    {
+        "sha": "d8410fec4efa4fb8847342a15b021501e3e2341b",
+        "description": "gallium/swr: Fix gcc 4.8.5 compile error",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8dacf5f9d1df95c768016a1b92465bbabed37b54",
+        "description": "swr: Fix build with GCC 10.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "790516db0bfc056df0290c42565214d4148e901a",
+        "description": "gallium/swr: fix gcc warnings",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8405e1bef0cfa99a2e5e865cf5f933fddbd35222",
+        "description": "zink: implement support for derivative-control",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f12b844e7c284f691323d4f77f2fd94c648e37e0",
+        "description": "zink: implement load_instance_id",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c0ced1e79b3311cf55f3c8852417825e3fe102ef",
+        "description": "zink: enable texture-buffer objects",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "00edb82fde2cfebe97457cb7819e7e560c4d3a4c",
+        "description": "radeonsi: Add support for midstream bitrate change in encoder",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d902e23d8094a01f752d3404ec484e0c059eb193",
+        "description": "panfrost: Use DBG macro to avoid noise in the console",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "25042062215c682445a70b4527e8298b30996d93",
+        "description": "pan/midgard: Handle nir_intrinsic_load_barycentric_centroid",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "226c1efe9a8b7a4f1802ab13f249dc06b2bd7d3d",
+        "description": "panfrost: Add more info to some assertions",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2d5c433aeeeb083f1a5902d58e520614d2fe35be",
+        "description": "panfrost: Print intended field when decoding",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8c5fd2942b4fb2005b3d01fb4cab86a4162c8a90",
+        "description": "anv: Always fill out the AUX table even if CCS is disabled",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2ccdf881aba7c8cd0c7175995e351e783e0fd11d",
+        "description": "iris: Plumb deref block size through to 3DSTATE_SF",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e6b39850f092b387881c4fb4260c9465971422aa",
+        "description": "anv: Plumb deref block size through to 3DSTATE_SF",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ce9c45a60ed51ddb27bd969bdc61336f18121a07",
+        "description": "intel/blorp: Plumb deref block size through to 3DSTATE_SF",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "fdc0c19328fd8e02e4b1bd5c62b93ce6c4597ca1",
+        "description": "intel/common: Return the block size from get_urb_config",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e340a79b9c4b6ee35eaa10a685395a67d0b0b440",
+        "description": "anv: Emit URB setup earlier",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e928676b69bf9cafce1c0304dd473c926b9f2854",
+        "description": "iris: Consolodate URB emit",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "09e4c33085f15ffa691053143bec9dbf4aecfeaa",
+        "description": "intel/blorp: Always emit URB config on Gen7+",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "73a684964b392c4df84373e8419e355267d57ff5",
+        "description": "intel: Take a gen_l3_config in gen_get_urb_config",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9d05822cb8b5d3fd066c64722b76b3507a7fd24f",
+        "description": "i965: Re-emit l3 state before BLORP executes",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "bff7b3c7bd56c25544ea6e3ea9452358374db10a",
+        "description": "iris: Use the URB size from the L3$ config",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "99f3178a249525d333c5b27d755a0f99a81b3c17",
+        "description": "iris: Store the L3$ configs in the screen",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6471bac99ec11c7901d6fc9bda908c047e621f5f",
+        "description": "iris: Set SLMEnable based on the L3$ config",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "73434b665b2ec50cbd1060ce831aec3b2e21517c",
+        "description": "intel/genxml: Drop SLMEnable from L3CNTLREG on Gen11",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e1bdb127b6875df602bd736465d597725f326621",
+        "description": "anv,iris: Set 3DSTATE_SF::DerefBlockSize to per-poly on Gen12+",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9da9abf8a7a605cc9b79bd4240ff715b79ac774a",
+        "description": "genxml: Add a new 3DSTATE_SF field on gen12",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "21dd0a151401956523d7facaccfa8e8cdf915c18",
+        "description": "docs/release-calendar: 20.0.0-rc1 has been released",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    }
+]
