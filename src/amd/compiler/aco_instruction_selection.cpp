@@ -8180,7 +8180,7 @@ static void end_divergent_if(isel_context *ctx, if_context *ic)
    }
 }
 
-static void visit_if(isel_context *ctx, nir_if *if_stmt)
+static bool visit_if(isel_context *ctx, nir_if *if_stmt)
 {
    Temp cond = get_ssa_temp(ctx, if_stmt->condition.ssa);
    Builder bld(ctx->program, ctx->block);
@@ -8273,6 +8273,7 @@ static void visit_if(isel_context *ctx, nir_if *if_stmt)
          ctx->block = ctx->program->insert_block(std::move(BB_endif));
          append_logical_start(ctx->block);
       }
+      return !ctx->cf_info.has_branch;
    } else { /* non-uniform condition */
       /**
        * To maintain a logical and linear CFG without critical edges,
@@ -8308,6 +8309,8 @@ static void visit_if(isel_context *ctx, nir_if *if_stmt)
       visit_cf_list(ctx, &if_stmt->else_list);
 
       end_divergent_if(ctx, &ic);
+
+      return true;
    }
 }
 
@@ -8320,7 +8323,8 @@ static void visit_cf_list(isel_context *ctx,
          visit_block(ctx, nir_cf_node_as_block(node));
          break;
       case nir_cf_node_if:
-         visit_if(ctx, nir_cf_node_as_if(node));
+         if (!visit_if(ctx, nir_cf_node_as_if(node)))
+            return;
          break;
       case nir_cf_node_loop:
          visit_loop(ctx, nir_cf_node_as_loop(node));
