@@ -58,7 +58,7 @@
         "description": "util/os_socket: Include unistd.h to fix build error",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "ef5266ebd50e7fa65c56bdb623e12ca8c233b470"
     },
