@@ -4,7 +4,7 @@
         "description": "aco: fix MUBUF VS input loads when expanding vec3 to vec4 on GFX6",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "6aecc316c000c343b25963c1356525f95ea6cafe"
     },
