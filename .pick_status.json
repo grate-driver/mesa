@@ -148,7 +148,7 @@
         "description": "lima: Fix build with GCC 10.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "d71cd245d7445121342a4933cc6ed8ce3fc6e568"
     },
