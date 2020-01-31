@@ -517,7 +517,7 @@
         "description": "intel/gen12: Take into account opcode when decoding SWSB",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "6154cdf924f4d0d3a6fb0cef38bc62eb4494c69c"
     },
