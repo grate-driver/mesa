@@ -319,7 +319,7 @@
         "description": "swr: Fix GCC 4.9 checks.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "f0a22956be4802e01f2b4f3244f011212626f12d"
     },
