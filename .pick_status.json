@@ -274,7 +274,7 @@
         "description": "radeonsi: make si_fence_server_signal flush pipe without work",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": null
     },
