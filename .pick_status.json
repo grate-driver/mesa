@@ -157,7 +157,7 @@
         "description": "util/disk_cache: check for write() failure in the zstd path",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "a8d941091f72923561a6c58b46ccb264b6a0e205"
     },
