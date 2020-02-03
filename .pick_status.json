@@ -238,7 +238,7 @@
         "description": "aco: fix gfx10_wave64_bpermute",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "9254fb4fc72ed289ffded28ef067b4582973e90c"
     },
