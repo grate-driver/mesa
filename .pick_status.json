@@ -1,5 +1,428 @@
 [
     {
+        "sha": "b550b7ef3b8d12f533b67b1a03159a127a3ff34a",
+        "description": "panfrost: Fix the damage box clamping logic",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "65ae86b85422ae0d41624dd56f935d85b0164a13"
+    },
+    {
+        "sha": "2b089e26bfe615cf616926cdddafd8439c835878",
+        "description": "pan/midgard: Stop leaking instruction objects in mir_schedule_alu()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c7e68d8625e4efcc776b5352de3b16b6951fabf7",
+        "description": "pan/midgard: Don't check 'branch && branch->writeout' twice in mir_schedule_alu()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ef89a52fe58e85402d7652d863da1cc90b378772",
+        "description": "pan/midgard: Lower bitfield extract to shifts",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c68cd39eb3797eb34a049950cb34acfd0719cde7",
+        "description": "pan/midgard: Make sure we pass the right RT id to emit_fragment_store()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "25946be4c451fe1cc645a6fd3cb5d59160e93f25",
+        "description": "pan/midgard: Add an enum to describe the render targets",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e62c3cf350a8b169e6401d5f1e1f17388cdc4b77",
+        "description": "util/os_socket: Include unistd.h to fix build error",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "ef5266ebd50e7fa65c56bdb623e12ca8c233b470"
+    },
+    {
+        "sha": "f38851d84c583b1c62ea95edbc42eb5e2ad14fa8",
+        "description": "gitlab-ci: disable a630 tests as mesa-cheza is down",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a4e627054167ff52742cf45b1aefccffb0de7071",
+        "description": "nv50: report max lod bias of 15.0",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0021f7dc307f4852955359adb5ac2b7667e6d4ac",
+        "description": "egl: put full path to libEGL_mesa.so in GLVND json",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d5fd8cd46eeedeabf8647c06489a755aea8f0080",
+        "description": "radv: Allow non-dedicated linear images and buffer.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "38f963226bdf8277826e80848d2a6b44cbabddd3",
+        "description": "pan/midgard: Implement mixed-type constant packing",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a12fe52cbc86b2d33cd5a726ce1020cdcd6c064c",
+        "description": "pan/midgard: Break out one-src read_components",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b74212e70153f3a199a60a95d003208144f5fac9",
+        "description": "panfrost: Fix non-debug builds",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "226c1efe9a8b7a4f1802ab13f249dc06b2bd7d3d"
+    },
+    {
+        "sha": "d7fe9af6202413aa4e6f0f53d89577ed8ea80027",
+        "description": "anv/blorp: Use the correct size for vkCmdCopyBufferToImage",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "dd92179a72e5263b9db730d92a883e2536aa4474"
+    },
+    {
+        "sha": "8ff613dc58782eab0fa915056255aedb838e3470",
+        "description": "VERSION: bump after 20.0 branch point",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "02658df152d1a7fedd8ce61dbe6e84566c8c75d0",
+        "description": "lima: Fix build with GCC 10.",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "d71cd245d7445121342a4933cc6ed8ce3fc6e568"
+    },
+    {
+        "sha": "982d61e2cdd5a5e3f82444787634fa45ba2fd44f",
+        "description": "freedreno/ir3: fix a dirty lie",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "752aeb7b3fe75b3c6ce8d9dadaba9c4111fa7254",
+        "description": "freedreno/ir3: simplify split from collect",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8d0e7d9a4c1cfe28b3cd2356e94e287e82821e1a",
+        "description": "freedreno/ir3: create fragcoord instructions in input block",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "fb09020ef23cc87c1c3024add572cf0a571e8ddc",
+        "description": "freedreno/ir3: remove unused tex arg harder",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2ffe44ec0a5dba18e4a88ca7dd1042e823f9685e",
+        "description": "freedreno/ir3: add RA sanity check",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2f4f46b7080a1087420939b2f4bf0bea414cd3ce",
+        "description": "freedreno/a6xx: fix lrz overflow",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3e79c4f0edc4a263c29f8df6169d0ad74aee7c69",
+        "description": "freedreno/ir3: two pass register allocation",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b0293af7a5d821776e7e90e3892015581c497810",
+        "description": "freedreno/ir3: don't precolor unused inputs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ad2587d3c8885ce4aa0403269268a1c0ab8c2cac",
+        "description": "freedreno/ir3: add is_tex_or_prefetch()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4a7a6c9ef0eb6b26d8410591353142207689d085",
+        "description": "freedreno/ir3: number instructions from one",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0f78c32492ed096649b015a4967d6d56c18dd14a",
+        "description": "freedreno/ir3: post-RA sched pass",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3369406e44b0226295e7475e189da2e42efd7f22",
+        "description": "freedreno/ir3: fix kill scheduling",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9a9f78f1f9f0019687eb374aae5abcd3b0617cf4",
+        "description": "freedreno/ir3/ra: make use()/def() functions instead of macros",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a5f24f966ae217981cd39e867a0de1fee029e740",
+        "description": "freedreno/ir3: a bit more optmsgs debug",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "300d1181c72043afe045a155079fc152fcd1283e",
+        "description": "freedreno/ir3: move atomic fixup after RA",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "304b50c9f8f57a115ac251f022093c8adfb0823d",
+        "description": "freedreno/ir3: move block-scheduling into legalize",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "093c94456bc99308bd80bcc952d1f77ea71a831c",
+        "description": "freedreno/ir3: move nop padding to legalize",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c803c662f990621acefd2f002d9df0d42ad8a3a0",
+        "description": "freedreno/ir3: split out delay helpers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "54c795f8297d5087b013777bddac32ed47941cb7",
+        "description": "freedreno/ir3: fix crash when no non-input instructions",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c1194e10b2dc4d14ea21eb9bc8e607056ebaffcd",
+        "description": "freedreno/ir3: cleanup after lower_locals_to_regs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f0b792ea0602dd344b8a2dce4ab582b167f6fd35",
+        "description": "freedreno/ir3: shuffle a few ir3_register fields",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "95831e2f66a16e2334cb1f972c9485b71955900b",
+        "description": "intel/gen12+: Set way_size_per_bank to 4",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "00a84c170a0a495f21008a80557a1d2b8257ea56",
+        "description": "intel/gen12+: Reserve 4KB of URB space per bank for Compute Engine",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c0d8b373adebbf8396b16537bd4d633ab6659900",
+        "description": "virgl: Use align_free for align_malloc allocated buffer",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d326d30efefd132255826ff33a9a4c51c216fe39",
+        "description": "freedreno/drm: readonly cmdstream",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f93dfb509cbf9474befae9919dd8c135bbd67093",
+        "description": "intel/fs: Write the address register with NoMask for MOV_INDIRECT",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9a95abd0f755331503e283354b44b639865f1329",
+        "description": "intel/tools: Handle strides better when dumping buffers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "51d7c42165d2344d0019299d42b34c07f7f5e8d0",
+        "description": "intel/disasm: SEND has two sources on Gen12+",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "fa3ef6a8370bf1ce121806e60ccdedb2ddc6aa83",
+        "description": "intel/eu/validate: Don't validate regions of sends",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3b323d66019bcbb56811b66947b39e77a2c7c3e0",
+        "description": "aco: fix image_atomic_cmp_swap",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "71440ba0f5512fe455be66ca48b253ecc37478a9"
+    },
+    {
         "sha": "0d14f41625fa00187f690f283c1eb6a22e354a71",
         "description": "aco: fix MUBUF VS input loads when expanding vec3 to vec4 on GFX6",
         "nominated": true,
