@@ -661,7 +661,7 @@
         "description": "pan/midgard: Fix missing prefixes",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "c1952779d68fdaea153d762fe2d83810b346085b"
     },
