@@ -40,7 +40,7 @@
         "description": "st/mesa: use uint-result for sampling stencil buffers",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "642125edd97384b88f491c1383a06c42ed16e11e"
     },
