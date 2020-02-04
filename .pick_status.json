@@ -13,7 +13,7 @@
         "description": "nir: do not use De Morgan's Law rules for flt and fge",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "d1ed4ffe0b70762477709e699f95c73602f9dc5a"
     },
