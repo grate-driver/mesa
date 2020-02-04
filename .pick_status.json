@@ -472,7 +472,7 @@
         "description": "aco: Fix signed-vs-unsigned warning.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "dba71de5c63617677fe44558f995d35fad643413"
     },
