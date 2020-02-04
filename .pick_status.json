@@ -1,5 +1,185 @@
 [
     {
+        "sha": "9afdcd64f2c96f3fcc1a28912987f2e8066aa995",
+        "description": "gitlab-ci: Switch kernel for LAVA jobs to 5.5",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "162927e43cdb5d6c184a4064fbd0799012fc297e",
+        "description": "panfrost: Use size0 when calculating the offset to a depth level",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "64541dd69875d043d90525769901d18fdde4b68b",
+        "description": "panfrost: Only clamp the LOD to disable mipmapping when needed",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "255227ececb4444fdf5cc2925fc1064d729021f4",
+        "description": "panfrost: Fix decoding of tiled 3D textures",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "fd27fb511386615cd6b44b037f9f5117846b51d4",
+        "description": "st/mesa: use uint-result for sampling stencil buffers",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "642125edd97384b88f491c1383a06c42ed16e11e"
+    },
+    {
+        "sha": "9cdd89a34b89973fbe646de5976f190ec7bd8d1c",
+        "description": "pan/midgard: Remove unused variable",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0f3eb7989b38239d08d729a488ad6b737ec61ad8",
+        "description": "pan/midgard: Check for null consts",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8ec4028d4057da19708b4f4bce88ee16f96f322a",
+        "description": "panfrost: Avoid overlapping copy",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c32bd325e7688c781b7e5de58a2d0534c82f00a0",
+        "description": "etnaviv: Destroy rsc->pending_ctx set in etna_resource_destroy()",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "9e672e4d20fb77e1b39aee29f9e8e76a5c2af68e"
+    },
+    {
+        "sha": "df6a2a719798d706d60b508106da363311a43469",
+        "description": "turnip: Be explicit about converting vk compare func to a6xx",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6dd57f0e3811d61c9d6179452a420f28008ca9ba",
+        "description": "nir: Remove always-true assert",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e3dfa8f4d694e7d64a6401752af1f973b0852aab",
+        "description": "glsl: Use 'using' to be explicit about visitor overloads",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0bc516fceb742e4c1ce2d47f129d19d8bb005d13",
+        "description": "spirv/opencl: Cast opcode up front to avoid warnings",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "67dd51606ca1670e21ce414591cc48caaf2e2e9f",
+        "description": "freedreno/fdperf: Cast away some ignored return values",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2be81a3bfa839e51b9719567236acaff70babd62",
+        "description": "nir: Make unroll pragma work on clang",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "de856c6170fbfd57f480c04069feb2fac0099060",
+        "description": "nir: Delete unused is_var_constant() helper",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "42f7e124cae38dc95e219097cc23f48d24e3071a",
+        "description": "Revert \"gitlab-ci: disable a630 tests as mesa-cheza is down\"",
+        "nominated": false,
+        "nomination_type": 2,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "f38851d84c583b1c62ea95edbc42eb5e2ad14fa8"
+    },
+    {
+        "sha": "0ccda2ebff83816cecf4dcb48f367a0d5c8f5fb1",
+        "description": "clover: Use explicit conversion from llvm::StringRef to std::string",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5d83314945d5f286cbe4fff9b07d2756f36a64c6",
+        "description": "zink: disallow depth-stencil blits with format-change",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "85d4b41f6830253b81b591fa401a9c5aea5e407a",
+        "description": "zink: be more careful about the mask-check",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "b550b7ef3b8d12f533b67b1a03159a127a3ff34a",
         "description": "panfrost: Fix the damage box clamping logic",
         "nominated": true,
