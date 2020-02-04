@@ -481,7 +481,7 @@
         "description": "util/os_socket: fix header unavailable on windows",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "e62c3cf350a8b169e6401d5f1e1f17388cdc4b77"
     },
