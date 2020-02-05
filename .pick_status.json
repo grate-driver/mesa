@@ -1,5 +1,500 @@
 [
     {
+        "sha": "7eaf21cb6f67adbe0e79b80b4feb8c816a98a720",
+        "description": "pan/midgard: Fix scheduling issue with csel + render target reference",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "38c20696a5358d6898c4ee96fb127d603c1e1404",
+        "description": "panfrost: Set the MALI_WRITES_{Z,S} flags when needed",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8ed94d38b4169e18bf81e956241d1c8674cc2ec6",
+        "description": "panfrost: Add the MALI_WRITES_{Z,S} flags",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0406ea4856498c25479b1e1b191471f7222747d6",
+        "description": "panfrost: Z24 variants should be sampled as R32UI",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e1ba0cd452cb456e5d06ee22fdecaed451a7a48b",
+        "description": "pan/midgard: Add nir_intrinsic_store_zs_output_pan support",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f5619f50738c0ea2bee49d982e88f18496d7514a",
+        "description": "pan/midgard: Turn Z/S stores into zs_output_pan intrinsics",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "59488cbbaca1268841fe5ba42d0a1202b33be23b",
+        "description": "intel/fs: Don't count integer instructions as being possibly coissue",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "e64be391dd065b6a0eabee17ada038db7a28c112"
+    },
+    {
+        "sha": "8455648ccae92692e4a522d23b1491d5825b030c",
+        "description": "tu: Move vsc_data and vsc_data2 allocation into the device",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "84bd4da468cd21dad5d41110b495b08623e82a0e",
+        "description": "freedreno: Fix CP_COND_EXEC",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ed5d1c1c471b9a7017625ab7d742f2895ab64b96",
+        "description": "freedreno: Add CP_REG_WRITE documentation",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "65197a3ac1cf4303e37927ed3faae47e41ee74e6",
+        "description": "freedreno: Fix CP_COND_REG_EXEC bit positions",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8be81f8a2a9f3f838cc550aeddf79657608e1008",
+        "description": "gitlab-ci: Build radeonsi & RADV in the ppc64el job",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "65610ec774ae095cfee3602b3f06d51d0a199791",
+        "description": "gitlab-ci: Add ppc64el and s390x cross-build jobs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a443f81f2631efa0881f72472c476d9d368b5d05",
+        "description": "gitlab-ci: Merge ccache and libxml2-utils into main apt-get install",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a06fc0296d6ab3567320fb4ecab6d297eba08223",
+        "description": "gitlab-ci: Pass -j4 to make",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "84fefa206c43e6a7b9a1ff34230eed0439f59e35",
+        "description": "gitlab-ci: Update to latest ci-templates HEAD",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3da91b3327fb93d0364c0ca9d0216f695160831d",
+        "description": "radeonsi/ngg: add VGT_FLUSH when enabling fast launch",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2799676218249c5b9f1dc0a6367e459a1ad5642e",
+        "description": "util/disk_cache: check for write() failure in the zstd path",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "a8d941091f72923561a6c58b46ccb264b6a0e205"
+    },
+    {
+        "sha": "6321e3fb9fd9cc9d817071d435c6b8a59869b8bc",
+        "description": "dri: delete gen-symbol-redefs.py",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "bcb611361b08528b14d3c5827ee2c4b21de1199d",
+        "description": "anv: implement gen12 post sync pipe control workaround",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8949d27bb8b4385e92049c18f728bdcf0a79b093",
+        "description": "anv: implement gen9 post sync pipe control workaround",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "19e7bcee1742a40981a0b1c06447bca22646c294",
+        "description": "iris: implement gen12 post sync pipe control workaround",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2c07e03b792d57ae807a6953f0d8ff5f4bcdffd0",
+        "description": "freedreno: allow ctx->batch to be NULL",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "22d2cbe6856fea65bf01dc96941b5127f17dacab",
+        "description": "freedreno: Allow UBWC on textures with multiple mipmap levels.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ecd62ff7665d0a731ead705321e4e1ee0757974d",
+        "description": "freedreno: Disable UBWC on Z24S8 if not TEXTURE_2D.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ddb0b35b76dfee95a3bd472538bf9510c1cbd2f7",
+        "description": "freedreno: Blit all array levels when uncompressing UBWC.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6b586d5a48cc11ee216f18ac093a601917861cff",
+        "description": "freedreno: Swap the whole resource layout in shadowing.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f9f5d3eb554e6096b762744125580a239d3809b0",
+        "description": "freedreno/a6xx: Disable the core layer-size setup.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "17312b4a10718ee14a80e5c1b4e2e586d8a79920",
+        "description": "freedreno: Rename the UBWC layer size field and store it as bytes.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b6b4118bb06c5a38d7b7bf61ab67551c3129176d",
+        "description": "freedreno: Include the layer size in layout debug.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "20357dfde85712503ae82aeedcfa9b2bf31f2adc",
+        "description": "freedreno: Move the layout debug under FD_MESA_DEBUG=layout.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "65a6dc5139fddd5e01eaedcc57fc67e0a6a28c94",
+        "description": "radv: Do not set SX DISABLE bits for RB+ with unused surfaces.",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "e9316fdfd4899c269a19e106a6ffa4309ae48b27"
+    },
+    {
+        "sha": "17303c9851e32194550f899399859944fa5b3009",
+        "description": "mesa: implement missing display list functions while switching to the template",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "56de59b931ac162de932d650176fbd981cc68aed",
+        "description": "vbo: move reusable code from vbo_attrib_tmp.h into vbo_util.h",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "052e8f758e68061adaee7f6f95bdbb01ae8f519d",
+        "description": "vbo: use the template for save GLvertexformat initialization",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9ec5e96ec8297216bcab4036deaa6eb714ca4e67",
+        "description": "vbo: use the template for noop GLvertexformat initialization",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d447a4888fe0089c0c3589ea68daf400e866de2a",
+        "description": "vbo: move GLvertexformat initialization into a template header file for reuse",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cae609326678bd00702261f756ce0c16efd530d4",
+        "description": "freedreno/perfcntrs: fix fd leak",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "5a13507164a26fc796f02c57a24468b834254b4d"
+    },
+    {
+        "sha": "8a2c507a8abe2537df5bc1f4847c40e6d4314dec",
+        "description": "util: Drop unpacking from int signed to unsigned and vice versa.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1d367c3aa57da54f5dbd6871a38b9fc1d6cbcc45",
+        "description": "gallium: Refactor some single-pixel util_format_read/writes.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ab081970e07d97c4218a68341d8534693d27e474",
+        "description": "gallium: Add and use a helper for packing uc from a color_union.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b2a2cf492decf35e1e2c622e3c45e98333ec15d7",
+        "description": "softpipe: Refactor pipe_get/put_tile_rgba_* paths.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8bc56551da9ce64be3e253c5131a572501ad44a7",
+        "description": "softpipe: Drop the raw_to* part of the tile cache interface.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6cdf523f00398b98c73743f6eb4167409ff065e0",
+        "description": "gallium/util: Remove pipe_get_tile_z/put_tile_z.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e986f2b7aff6c51e420fbb06553a748f15f55a01",
+        "description": "mesa/st: Use direct util_format_pack/unpack instead of u_tile.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c574cda3c6a3f880f99e4e22967fc82e34609942",
+        "description": "util: Make helper functions for pack/unpacking pixel rows.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "333c9d5bb054d5ac5518e830b535e8a4f3f80187",
+        "description": "clover: add trivial clCreateCommandQueueWithProperties implementation",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b064697af1dc8927756986f396c793e0e23c42e9",
+        "description": "gallium/osmesa: Try to fix the test for big-endian.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "dd899fd43ebc56fee6ad41126db340a9c2f7bc72",
+        "description": "gallium/osmesa: Fill out other format tests.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0a53918f025af606450ddb9df3d032191a82ce89",
+        "description": "gallium/osmesa: Fix MakeCurrent of non-8888 contexts.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "655394c6ed2ef15c66ea8234d7ab388901f7e295",
+        "description": "gallium/osmesa: Fix a typo in the unit test's test names.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "75c50d03422eb6a74f462419015a697f371468d6",
+        "description": "osmesa/tests: Cover OSMESA_RGB GL_UNSIGNED_BYTE case",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d83abf1d378be059b4f41a6a44a9bf24c7394084",
+        "description": "st/mesa: Handle the rest renderbuffer formats from OSMesa",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d1165ad18b5e1d8b137daff1b1ad3d11ba4445e4",
+        "description": "util/os_socket: fix header unavailable on windows",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "e62c3cf350a8b169e6401d5f1e1f17388cdc4b77"
+    },
+    {
+        "sha": "36126b6211f1ac2da0aa94411608b2320553dbb6",
+        "description": "i965: Do not set front_buffer_dirty if there is no front buffer",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "9afdcd64f2c96f3fcc1a28912987f2e8066aa995",
         "description": "gitlab-ci: Switch kernel for LAVA jobs to 5.5",
         "nominated": false,
