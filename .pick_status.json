@@ -886,7 +886,7 @@
         "description": "isl: Set 3DSTATE_DEPTH_BUFFER::Depth correctly for 3D surfaces",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": null
     },
