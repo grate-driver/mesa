@@ -256,7 +256,7 @@
         "description": "svga: Fix banded DMA upload",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "287c94ea4987033f9c99a2f91c5750c9083504ca"
     },
