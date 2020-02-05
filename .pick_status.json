@@ -85,7 +85,7 @@
         "description": "Revert \"gallium: Fix big-endian addressing of non-bitmask array formats.\"",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "d17ff2f7f1864c81c1e00d04baf20f953c6d276a"
     },
