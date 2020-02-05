@@ -310,7 +310,7 @@
         "description": "iris: Make mocs an inline helper in iris_resource.h",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "a4da6008b6a0d8876eaf5a67c95d88038bbf35e6"
     },
