@@ -274,7 +274,7 @@
         "description": "anv: set MOCS on push constants",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "67d2cb3e9367a723d6f6310f75048c6d97afe9d4"
     },
