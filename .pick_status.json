@@ -40,7 +40,7 @@
         "description": "Vulkan Overlay: Don't try to change the image layout to present twice",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "320b0f66c27407008784da3606e23cb44c70ddf0"
     },
