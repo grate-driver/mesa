@@ -58,7 +58,7 @@
         "description": "panfrost: Remove unused anonymous enum variables.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "7e8de5a707f7279929d7396550024b8cdc6a8c61"
     },
