@@ -1417,7 +1417,7 @@
         "description": "egl: Fix A2RGB10 platform_{device,surfaceless} PBuffer configs.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "9acb94b6236f8a76a5558cf1cb60bac976067851"
     },
