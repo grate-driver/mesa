@@ -499,7 +499,7 @@
         "description": "util: promote u_debug_memory.c to src/util",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "88c4680b5a50ea8840c38aa0a80acde63ef1677b"
     },
