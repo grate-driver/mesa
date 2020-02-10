@@ -112,7 +112,7 @@
         "description": "glsl: fix gl_nir_set_uniform_initializers() for image arrays",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "2bf91733fcb5ff8f74d71de03feeb5f3d664d199"
     },
