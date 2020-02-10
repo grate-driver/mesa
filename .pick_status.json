@@ -22,7 +22,7 @@
         "description": "aco: fix creating v_madak if v_mad_f32 has two sgpr literals",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": null
     },
