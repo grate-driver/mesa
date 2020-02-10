@@ -1,5 +1,167 @@
 [
     {
+        "sha": "689817c9dfde9a0852f2b2489cb0fa93ffbcb215",
+        "description": "gallium/swr: simplify environmental variabled expansion code",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "34fd894e42ae1ec9d35bf9c4f05364b03dd4a223",
+        "description": "aco: fix waiting for scalar stores before \"writing back\" data on GFX8-GFX9",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7283c33b981f975361e3bfa62a339c88f2642cbb",
+        "description": "Vulkan overlay: use the corresponding image index for each swapchain",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "eb0195358c4e0376d93f10fb4f90703e51718779",
+        "description": "zink: only inspect dual-src limit if feature enabled",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e365f83740f1faa0e4d022da7b9aea9ae6dacbda",
+        "description": "zink: emit blend-target index",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8736ffae2eda9de1ac49200ef399170b428b9f8c",
+        "description": "zink: replace unset buffer with a dummy-buffer",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "18657c0c0a9074d3dfc0763b396929bcf34f71b4",
+        "description": "gitlab-ci: disable a630 tests as mesa-cheza is down (again)",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "35961b10da2dee4d3820ab1f250007412b06d876",
+        "description": "radeonsi: don't report that multi-plane formats are supported",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "a554b45d736073bbea4978118c02f7929f75cd77"
+    },
+    {
+        "sha": "1c3f4c07047cef0dfcb9182690b22792b00d5935",
+        "description": "zink: fixup sampler-usage",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "fa915a724fbff0878478ca7dd968207bc9906016",
+        "description": "zink: lower away fdph",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0c36b1c0dbf2dcb8ded2509bc547a026b9624cc0",
+        "description": "etnaviv: enable texture upload memory throttling",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7bddaa61362924ec9dc360a2846cbdc8c647d834",
+        "description": "freedreno/ir3: Fold const only when the type is float",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "260bd32b58a55ac0d9870497caef3a4602e19d47",
+        "description": "freedreno/ir3: put the conversion back for half const to the right place.",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "cbd1f47433b7d735e3be5c8126f7f2b9343a1cdf"
+    },
+    {
+        "sha": "d70192e6973aec3bbe2be70192f18b6a2257872a",
+        "description": "freedreno/ir3: Add cat4 mediump opcodes",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3eca6d9ce14abfc542031248be6a53c31cd113f9",
+        "description": "freedreno/ir3: fold const conversion into consumer",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5e2012d5c7496d04772c83e89d9fa1c9bc4087e2",
+        "description": "freedreno/ir3: fix printing half constant registers.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d55dfef78237380d3734f2341818daa299a7f330",
+        "description": "freedreno/ir3: Set IR3_REG_HALF flag on src as well in immediate MOV",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "fbfc8c35315f666d14c8b1f9ec71cb70d5e57d84",
+        "description": "docs: Mark 20.0-rc2 as done",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "d8bae10bfe0f487dcaec721743cd51441bcc12f5",
         "description": "freedreno: android: fix build of perfcounters.",
         "nominated": false,
