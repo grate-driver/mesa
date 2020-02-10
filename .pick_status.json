@@ -589,7 +589,7 @@
         "description": "svga: fix size of format_conversion_table[]",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "84db6ba740d376b75e60c3a2a4ac0153c5b0e01a"
     },
