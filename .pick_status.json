@@ -76,7 +76,7 @@
         "description": "intel/fs: Correctly handle multiply of fsign with a source modifier",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "06d2c116415c0ab163a57ed7f2522342ed43e4d4"
     },
