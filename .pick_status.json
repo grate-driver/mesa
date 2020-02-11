@@ -1,5 +1,599 @@
 [
     {
+        "sha": "23037627359e739c42b194dec54875aefbb9d00b",
+        "description": "gitlab-ci: Only use gstreamer runners for the s390x job for now",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8e7728077435c5c5ad8c328761277f8ff3b32112",
+        "description": "nir: do not use De Morgan's Law rules for flt and fge",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "d1ed4ffe0b70762477709e699f95c73602f9dc5a"
+    },
+    {
+        "sha": "ddd767387f336ed1578f171a2af4ca33c564d7f3",
+        "description": "aco: fix creating v_madak if v_mad_f32 has two sgpr literals",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cd08d9abd76ce0002572639c26c79e051a2a0549",
+        "description": "radv: set the chip name to GCN-NOOP when RADV_FORCE_FAMILY is set",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a8024aaaab9812d018cfa656d0dfce6ffedc123f",
+        "description": "radv: make sure to not submit any IBs when RADV_FORCE_FAMILY is set",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5b335e1599e90dae9a7a1b4a1d9a4498f0d0cedd",
+        "description": "radv: Do not redundantly set the RB+ regs on pipeline switch.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "63345a359656246df83b416743031c1836457d23",
+        "description": "panfrost: Remove unused anonymous enum variables.",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "7e8de5a707f7279929d7396550024b8cdc6a8c61"
+    },
+    {
+        "sha": "7792d774e0ab4f3d45d758da1e9ac80fef0d7934",
+        "description": "radv: Optimize emitting index buffer changes.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1d97d186fbea0de22f75346cba07133b145f95bc",
+        "description": "nir: Mark fmin and fmax as commutative and associative",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1886dbfe7362baa221009371434f158b97183164",
+        "description": "Revert \"gallium: Fix big-endian addressing of non-bitmask array formats.\"",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "d17ff2f7f1864c81c1e00d04baf20f953c6d276a"
+    },
+    {
+        "sha": "11db8e0e00a72884ba9fda953b549dd65119dc73",
+        "description": "st/mesa: optimize st_update_array with ALWAYSINLINE",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "36cc6b105b5299ae07f005feabd8bd6eb34c5257",
+        "description": "mesa: don't use bitfields in _mesa_prim",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "47d7e21619218348c86ca6909cf695f78c9778c6",
+        "description": "mesa: remove unused _mesa_prim::is_indirect",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "734654a89cf588d88b2932b931612374ef2884eb",
+        "description": "\u00ed965: don't use _mesa_prim::is_indirect",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a7d03103f30bfff532a0c6d6e22fa5e7a24cad27",
+        "description": "vbo: merge use_buffer_objects into vbo_CreateContext to skip the big malloc",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7575a0a25120b9637d50fcf2b55a4859b505f781",
+        "description": "vbo: clean up resetting vertex attribs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ee5bd8638bd123ab3ea49d513f8bba9e7cd4ae28",
+        "description": "vbo: also map the immediate mode buffer for read",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "27bd241103e8fa1fc34859cac6bd23d5a5fb04fe",
+        "description": "vbo: delay flagging FLUSH_STORED_VERTICES until glEnd",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ca99fe8a603b08883493c786037ca872c00df145",
+        "description": "vbo: add/update unlikely statements in ATTR_UNION",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a5f72c91e5ac38c82bcc1585e6d6f08b9929dba3",
+        "description": "vbo: increase the size of the immediate mode buffer to decrease draw count",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2fe771f4e963cbb3a3032f1e148fb594c3c1a2a3",
+        "description": "vbo: use FlushVertices flags properly and clear NeedFlush correctly",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "63a241fa3283a0c389f671a556f705d1da25dd2a",
+        "description": "vbo: fix resizing 64-bit vertex attributes",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "077a843c27d84d4531074bbc477391e886a7ba71",
+        "description": "vbo: optimize resizing vertex attributes during immediate mode",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1f6e53e2437690de9a84e47f5587ff359b8484f2",
+        "description": "vbo: don't store glVertex values temporarily into exec",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cd7241c4f8082dbd07f0bcd268741c527512c66b",
+        "description": "vbo: pass only either uint32_t or uint64_t into ATTR_UNION",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "afa7f1984a4f1779c42e2dfa5535635d364e92a7",
+        "description": "vbo: don't set FLUSH_UPDATE_CURRENT for glVertex",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f8b98d48bffacc0a1b5393307c8405f4eda8e27c",
+        "description": "vbo: keep the immediate mode buffer always mapped for simplicity",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8c76ef5b590d5795ec2dafb9304747ed74fd37a2",
+        "description": "vbo: don't check ctx->NewState twice in glBegin",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f2c6de1eecb52ded412a88c4724f042c0c75d5f7",
+        "description": "vbo: remove a funky recursive call in glBegin",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "653bd14730035d514127b2253a025a1e98db5e75",
+        "description": "vbo: interleave attrsz, attrtype, and active_sz in memory",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2b22e33c10f98f2f58101881818f55b4c4b73606",
+        "description": "vbo: remove immediate mode code that doesn't do anything and simplify stuff",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3e0d612f5e22fee19aff0e40814db24d63f63103",
+        "description": "vbo: don't unmap persistent buffer mappings for glBegin/End",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "03ded3d6ce37d3be12776bcc5dcd3c4d91f33248",
+        "description": "vbo: skip FlushMappedBufferRange for glBegin/End by using a persistent mapping",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "10cf7a5113446c85dd39bbb12544dd4ac30a0200",
+        "description": "vbo: create the immediate mode buffer only in vbo_exec_vtx_map",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f89ee44ab0300b72ab957c3135858ff46187dfb5",
+        "description": "mesa: import PIPE_CAP_SIGNED_VERTEX_BUFFER_OFFSET handling",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "27dada7ce90315d47184c51879a3f67e99f2bab2",
+        "description": "mesa: remove FLUSH_CURRENT calls that have no effect",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c7c8fe1cc1a972e59885cc14778dbf5a520f48dd",
+        "description": "mesa: fix incorrect uses of FLUSH_CURRENT",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "01443dc7383f4634e4a66fa194ed51db74186128",
+        "description": "glx: print FPS with 2 decimal places",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1082e6fcb87d723986b640b5c077d05692df3511",
+        "description": "radeonsi: don't update states for the DCC MSAA bug on GFX6-7",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "fbb27eebc8cab1a5d70ea67a37de8d18f20a88f0",
+        "description": "radeonsi: fix the DCC MSAA bug workaround",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "897a4a0041e2477aa7ac487f23d85a5fc8900c49",
+        "description": "r600/sfn: Add some documentation",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7413aab3c837813331a706a022f493d0474caa13",
+        "description": "r600/sfn: Add .editorconfig file",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "110ee7ff93a42624b1e89065ec75b7649047715e",
+        "description": "r600/sfn: Add support for SSBO load and store",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "148f0ad4f9c4b4c291abcaa1722f5ae91f9c4014",
+        "description": "r600/sfn: Add support for atomic instructions",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "90a7d2e08fbd94d443fe6aeed093e4c758b169da",
+        "description": "r600: Make sure LLVM is not used for DRAW",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "37125b7cc220fd9b77e9882268892ca4e79a0627",
+        "description": "r600/sfn: Add lowering UBO access to r600 specific codes",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "32d3435a78675ff5ebf933d45b9b99fdc4dc7d82",
+        "description": "r600/sfn: Add GDS instructions",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5aadd809d07f6d7ce4d0cae18a410cc111c12c65",
+        "description": "r600/sfn: Add compute shader skeleton",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7fb5c835f7c9462e2095b6de645a0a75ad118c87",
+        "description": "r600/sfn: Add VS for TCS shader skeleton",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e17ac0d774b5a48a8d5a8a736e4a7a28554befa7",
+        "description": "r600/sfn: Add support for geometry shader",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5c7124e134395c4fe0dbc442a5b7b94f44d16aee",
+        "description": "r600/sfn: add emitVertex instructions",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f7ec616bedce226e0f710727d21ba2059b36d66c",
+        "description": "r600/sfn: Add MemRingOut instructions",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1b17316bf38b7f2c23ce648ddd718e1f48641309",
+        "description": "r600/sfn: Add a load GDS result instruction",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "31a4dd6451eec9cf96bec6d211e8e9b9f8032706",
+        "description": "r600/sfn: Add lowering arrays to scratch and according instructions",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5c19013904ef0ae68c582cd6d77fe54331b36baa",
+        "description": "r600/sfn: add register remapping",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "393655d5cb2ae499783408d36a96e34257473fcf",
+        "description": "r600/sfn: add live range evaluation for the GPR",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "24f683fe810904ae7355ddb036e1e4f37f1480c4",
+        "description": "r600/sfn: Add the WaitAck instruction",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e09cdb3f86ca53d4c24aa7b60d9ab44d1d679018",
+        "description": "r600/sfn: Add the VS in and FS out vectorization",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c5d9456d841c54b50616b293a532d106323658ce",
+        "description": "r600: enable NIR backend DEBUG flag for supported architectures",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f718ac62688b555a933c7112f656944288d04edb",
+        "description": "r600/sfn: Add a basic nir shader backend",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "295be0e8dfcc28366bcd193c44abc7913d5132d8",
+        "description": "r600: Update state code to accept NIR shaders",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "51285bf32ee98dcf92c4c31f7862b18ed2db322c",
+        "description": "r600: Add NIR compiler options",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "27cacd28ace6d6db5083beaceb35c140d827fe96",
+        "description": "r600: Increase space for IO values to agree with PIPE_MAX_SHADER_IN/OUTPUTS",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4422ce1b04c117f61394a6834cd7933f06ce4e1f",
+        "description": "r600: force new CF with TEX only if any texture value is written",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "144561dc5ec3dcbe63cb054f806247bc120b64e4",
+        "description": "svga: Use pipe_shader_state_from_tgsi to set shader state",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "bf12bc2dd7a28844103bb30a07be0440e60c5864"
+    },
+    {
+        "sha": "470e73e7f86b4530cf789a779f43674ecec91881",
+        "description": "svga: fix size of format_conversion_table[]",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "84db6ba740d376b75e60c3a2a4ac0153c5b0e01a"
+    },
+    {
         "sha": "689817c9dfde9a0852f2b2489cb0fa93ffbcb215",
         "description": "gallium/swr: simplify environmental variabled expansion code",
         "nominated": false,
