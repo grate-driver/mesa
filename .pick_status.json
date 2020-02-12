@@ -103,7 +103,7 @@
         "description": "Revert \"nir: Add a couple trivial abs optimizations\"",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "e4d346c86db0ae332fcdf55eac0e075cfb99a7eb"
     },
