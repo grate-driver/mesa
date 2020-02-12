@@ -121,7 +121,7 @@
         "description": "st/nir: Unify inputs_read/outputs_written before serializing NIR",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "19ed12afd170c97180a9cc7eb6c5589d4c427a40"
     },
