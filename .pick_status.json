@@ -1057,7 +1057,7 @@
         "description": "radeonsi: don't wait for shader compilation to finish when destroying a context",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": null
     },
