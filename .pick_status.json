@@ -715,7 +715,7 @@
         "description": "anv: Parse VkPhysicalDeviceFeatures2 in CreateDevice",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "022e5c7e5a5a1ff40d7f5e8d3d768345e7746678"
     },
