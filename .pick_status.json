@@ -58,7 +58,7 @@
         "description": "Revert \"st/va: Convert interlaced NV12 to progressive\"",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "2add63060b51ea2ae432d10e1bd52d6cc0a4dcbb"
     },
