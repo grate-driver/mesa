@@ -553,7 +553,7 @@
         "description": "pan/midgard: Don't crash with constants on unknown ops",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "24360966ab31a9bedfe07356413769218fd2e0b6"
     },
