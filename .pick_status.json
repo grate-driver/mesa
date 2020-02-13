@@ -1,5 +1,410 @@
 [
     {
+        "sha": "2a98cf3b2ecea43cea148df7f77d2abadfd1c9db",
+        "description": "Revert \"gitlab-ci: disable a630 tests as mesa-cheza is down (again)\"",
+        "nominated": false,
+        "nomination_type": 2,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "18657c0c0a9074d3dfc0763b396929bcf34f71b4"
+    },
+    {
+        "sha": "5a82273f09d92a815b1ade0d82d095a9e6b8244e",
+        "description": "freedreno/a6xx: fix Z24_UNORM_S8_UINT_AS_R8G8B8A8",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "18786cc7d55598e82fe1de45bd2c3ffea136418e"
+    },
+    {
+        "sha": "4151d843236ab350a70d8e13e4e7c79d11ec7bb6",
+        "description": "iris: add support INTEL_blackhole_render",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6d35610bd57aacb494e49da692b5331b0e4d11b6",
+        "description": "st: add support for INTEL_blackhole_render",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5d7e9edba1876523f75c74362242aaa56629fba5",
+        "description": "i965: enable INTEL_blackhole_render",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "74ec39f66d506c78ee62a685b7fa055faa0991b9",
+        "description": "mesa: add INTEL_blackhole_render",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "08cff938b76b6fe146334e44dc97b6be8274a281",
+        "description": "Revert \"st/va: Convert interlaced NV12 to progressive\"",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "2add63060b51ea2ae432d10e1bd52d6cc0a4dcbb"
+    },
+    {
+        "sha": "3a2977e7b5ccead8a3a0e3d7df7823325c64b90b",
+        "description": "anv: Reject modifiers on depth/stencil formats",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5a593bec16b1e5830bc57462abc0b056342ac876",
+        "description": "gallium/swr: fix rdtsc debug statistics mechanism",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "dd16ad107da7ade9c6c0f738626b29cfd875f51f",
+        "description": "gitlab-ci: remove load_store_vectorizer from expected s390x test failures",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "aca2458d1bf5c38f5291efa27712868d45ad8231",
+        "description": "nir: fix nir_const_value_as_uint bit size in load/store vectorizer tests",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0c1ba69a27090d3ef000943b47468705fe0454c4",
+        "description": "Revert \"nir: Add a couple trivial abs optimizations\"",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "e4d346c86db0ae332fcdf55eac0e075cfb99a7eb"
+    },
+    {
+        "sha": "fdd20be324eabab7da1ba67cf7e379398d771186",
+        "description": "iris: fix aux buf map failure in 32bits app on Android",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b9e0947a9eedcfbcf1e0955fa430b1cfbc43021f",
+        "description": "radv: remove unused RADV_HASH_SHADER_IS_GEOM_COPY_SHADER",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b2531370c968373c24b0c9814610a686bd63f128",
+        "description": "radv: remove RADV_DEBUG=nosisched and RADV_PERFTEST=sisched",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "fa48e7edc23bd1148329a69d6e32ddf5acdb2926",
+        "description": "radv: remove LLVM sicheduler enable for The Talos Principle",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f7d1bf075ab833eb39c35f9e213dc4fc115b46b1",
+        "description": "glsl: fix a memory leak with resource_set",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "a6aedc662ebbcac747475324abe3791ff67fc1a8"
+    },
+    {
+        "sha": "556c9401495930c23a10ca2a26db098d12663e27",
+        "description": "radv: implement VK_EXT_line_rasterization",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "fbcf05382baefe6ecdd279e2c98025f15938fadc",
+        "description": "radv: fix line width range and granularity",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "da64c35ff920df58b872619bb6f54ae978cb47c9",
+        "description": "tu: Force sysmem with mipmapped non-aligned linear stores",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f026982265afc87893015b3438bc73d09f703b92",
+        "description": "tu: Support input attachments with sysmem",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c1b3f9e83297494fb0ea5d41077c60a33daf37c9",
+        "description": "tu: Support resolve ops with sysmem rendering",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8647a24a8d66a0a3663563d4d713a5a5b28d8d64",
+        "description": "tu: Handle vkCmdClearAttachments() with sysmem",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "07e07daeaeb952963df37a6d0d899e0765e82ba4",
+        "description": "tu: Add helper for CP_COND_REG_EXEC",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6a0c4008bf78e259bb1cb9bcbe39248762b03cc8",
+        "description": "tu: Sysmem rendering",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "041783d49d3aaf451420ce880dcd886388f4b274",
+        "description": "tu: Disable linear depth attachments",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ab3db20cb5e8ef489b8331235498cd1806e4c6ea",
+        "description": "tu: Support multisample image clears",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a5fb515301251b476800a1560f9f8edc8ff325d6",
+        "description": "tu/blit: Support blits in secondary cmdstreams",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a94be3da84277701b5d74b326e5364cb854a19f1",
+        "description": "tu: Properly set UBWC flags in RB_RENDER_CNTL",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "49817cb3eaddf1085dadbdcadf2c3c93b02a8f16",
+        "description": "tu: Don't emit initial render target state in tile_load_ib",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0660cbf4262891e6380faf0d99217b2d27873051",
+        "description": "radeonsi: make si_fence_server_signal flush pipe without work",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "787b56ac0e5d62ad07cb0804be5275d885201262",
+        "description": "turnip: Add a618 support",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ef5da26089975a6f26096151da9fa94f55fc338f",
+        "description": "turnip: Add magic register values to tu_physical_device",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "18786cc7d55598e82fe1de45bd2c3ffea136418e",
+        "description": "freedreno/a6xx: use single format enum",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c13202af7a86976e6d0400f2cee77afcc60ea828",
+        "description": "anv: Respect ISL_SURF_USAGE_DISABLE_AUX_BIT in make_surface()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a76fd8b08cf0274a6d8bfe97f05b96014f2a9e98",
+        "description": "anv: Clarify behavior of anv_image_aspect_to_plane()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "da2b0c6c19b080a1e4d91d3b2248dd974483c9fb",
+        "description": "anv: Delete anv_image::ccs_e_compatible",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "483d4ec57ce0ca0df26fffea648d52a738c8f4e0",
+        "description": "aco: improve SCC handling in some SALU combines",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d45e9451cf47014d37816baf2656981a1c715e50",
+        "description": "aco: disable some instruction combining if it could change an exec operand",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e9f83185a221b446717c96c4df8dc64ced43e24f",
+        "description": "Rename nir_lower_constant_initializers to nir_lower_variable_initalizers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e459c7f0a14b65617e16b92f42abad2fe5878872",
+        "description": "compiler/spirv: Add support for non-constant initializers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7acc81056f7ac6a869ef6403573b2572c77dbecf",
+        "description": "compiler/nir: Add support for variable initialization from a pointer",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "461c40e0fd5d67dc8155ae4f6c53ddd9acd995b1",
+        "description": "radeon/vce: Move global function pointer si_get_pic_param to local encoder structure Multi gpu use case broken when the function was global",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "286141197dac9fc6765da3fa8bba571840bfa61c",
+        "description": "anv: Rename param make_surface::dev to device",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "84b791a4bb1b3eb15b9a820e9a5dc61a373392f3",
+        "description": "anv: Drop unused anv_image_get_surface_for_aspect_mask()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "23037627359e739c42b194dec54875aefbb9d00b",
         "description": "gitlab-ci: Only use gstreamer runners for the s390x job for now",
         "nominated": false,
