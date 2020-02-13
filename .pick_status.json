@@ -544,7 +544,7 @@
         "description": "pan/midgard: Use fprintf instead of printf for constants",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "968f36d1fc081baf2e95eef1410b06552845440b"
     },
