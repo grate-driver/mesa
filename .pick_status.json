@@ -1,5 +1,158 @@
 [
     {
+        "sha": "946eacbafb47c8b94d47e7c9d2a8b02fff5a22fa",
+        "description": "freedreno/a6xx: document some unknown bits",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "75fbe089a6a29b01c2b3425b1c0fc2ee43bc5ff8",
+        "description": "freedreno: name sysmem color/depth flush events",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c57456aab6974abc86e7e1b0aae958a8ab3dad27",
+        "description": "panfrost: Simplify swizzle translation",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f3490a141c8d562fc29e714c3735f2ae8e3c0512",
+        "description": "panfrost: Inline panfrost_get_default_swizzle",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "efda2cfcf96b1071c18800ff3f878fe627359e8a",
+        "description": "spirv2nir: Add kernel spirv support",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "eeb6d6112859c3ba41f1c8914d503bf1a3dd981d",
+        "description": "spirv2nir: print nir shader if translation succed",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7e80b03dd15eefb7250b994e311864e720b0b1bb",
+        "description": "zink: do not use SpvDimRect",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f43a3fc28ff8914e4a9391233dfc3b63454c6dac",
+        "description": "lima: handle early-z and pixel kill better",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "582d0c5f1474ecbe52a666e30cb115144aeda7c0",
+        "description": "gitlab-ci: Add three more dEQP-GLES31 tests to softpipe skips",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3d16bfc42deec0e5002d4a314855a453cf340a49",
+        "description": "gitlab-ci: Sort random failure softpipe skips",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f86bf2e90a9ab0d76c7f8e322c07eeee4df31a7b",
+        "description": "docs/new_features: empty the feature list for the 20.1 cycle",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "886acbe1c535f0c564dbebdcdbcad38a5fef6c7d",
+        "description": "radv: remove unnecessary RADV_DEBUG=nobatchchain option",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "676869e1d4bb1660430fcdb99443238a7de50eb8",
+        "description": "glsl: fix gl_nir_set_uniform_initializers() for image arrays",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "2bf91733fcb5ff8f74d71de03feeb5f3d664d199"
+    },
+    {
+        "sha": "6baeca36899109cd9d8e06d1b5f4b9db8becd5fa",
+        "description": "intel/tools: Update aubinator_error_decode.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "334788d4cc9bb8a0a6b3166e609638687efa0f3f",
+        "description": "freedreno: allow INVALID modifier",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "9891062642a3f35dc326b305fca2407f9041915c"
+    },
+    {
+        "sha": "3547e19bbd0d70fc391f5982ea38a026a5994b1c",
+        "description": "intel/isl: Switch to R8_UNORM format for compatiblity",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "207a93bbff1ef0c40d8f7da339f03dbb12961a7c",
+        "description": "intel/isl: Move get_format_encoding function to isl",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "2a98cf3b2ecea43cea148df7f77d2abadfd1c9db",
         "description": "Revert \"gitlab-ci: disable a630 tests as mesa-cheza is down (again)\"",
         "nominated": false,
