@@ -67,7 +67,7 @@
         "description": "glx/drisw: add getImageShm2 path",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "02c3dad0f3b4d26e0faa5cc51d06bc50d693dcdc"
     },
