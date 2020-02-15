@@ -3019,7 +3019,7 @@
         "description": "util: call bind_sampler_states before setting sampler_views",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "69430d7e59e8b4b38567cd1f8bb6d4e747b2650c"
     },
