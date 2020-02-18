@@ -67,7 +67,7 @@
         "description": "util: remove the dependency on kcmp.h",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "f76cbc7901f7d500f5a4f74aedfd29970d1efd00"
     },
