@@ -94,7 +94,7 @@
         "description": "radeonsi: Fix compute copies for subsampled formats.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "e5167a9276de1f383888714b41d3a9be2b9c1da9"
     },
