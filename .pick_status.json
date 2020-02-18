@@ -157,7 +157,7 @@
         "description": "nir/search: Use larger type to hold linearized index",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "fbd5359a0a6f4b6d220c4cea9020ec4665ed4955"
     },
