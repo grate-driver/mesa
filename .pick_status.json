@@ -1291,7 +1291,7 @@
         "description": "nir/algebraic: Fix broken NaN and -0.0 behavior",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "25bfba3335d0fb2822dac02822d096dd75b3ef4d"
     },
