@@ -256,7 +256,7 @@
         "description": "st/vdpau: Only call is_video_format_supported hook if needed",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "5d5b414a7b840a4a90050041fabd88a9af6dca43"
     },
