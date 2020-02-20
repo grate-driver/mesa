@@ -76,7 +76,7 @@
         "description": "isl: only apply main surface ccs pitch constraint with CCS",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "a3f6db2c4e927be7e7d40cbc39c8664030d2af59"
     },
