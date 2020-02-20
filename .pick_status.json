@@ -1156,7 +1156,7 @@
         "description": "iris: Apply the flushes when switching pipelines.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "b8fbb39ab2c962e38f6c9d668de57582faf39b70"
     },
