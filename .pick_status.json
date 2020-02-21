@@ -175,7 +175,7 @@
         "description": "aco: fix carry-out size for wave32 v_add_co_u32_e64",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "e0bcefc3a0a15a8c7ec00cfa53fd8fffcc07342a"
     },
