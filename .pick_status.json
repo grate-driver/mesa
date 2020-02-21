@@ -400,7 +400,7 @@
         "description": "spirv: Remove outdated SPIR-V decoration warnings",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "cd4a14be063957964ae54e0e828174b9e40961e0"
     },
