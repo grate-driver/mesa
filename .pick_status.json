@@ -1246,7 +1246,7 @@
         "description": "turnip: Fix compiler warning about casting a nondispatchable handle.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "1c5d84fcae71b40f77891386ac53c8addee4f554"
     },
