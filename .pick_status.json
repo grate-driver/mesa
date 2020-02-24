@@ -1,5 +1,572 @@
 [
     {
+        "sha": "e4baff90812d799d586296fcad992ddcc553c359",
+        "description": "freedreno: Switch to using lowered image intrinsics.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3e16434acdd549f2721efc4ec80dc11fca1321f6",
+        "description": "nir: Move intel's intrinsic_image_coordinate_components() to core nir.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a7038403204b7f2017cdd390a911f2393a8f6513",
+        "description": "freedreno/ir3: Fix the arg to ir3_get_num_components_for_image_format()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8aa54e6ed0ba8db984541271404add6e496ed491",
+        "description": "prog_to_nir: Reuse glsl_get_sampler_dim_coordinate_components().",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b8644349d1d5e05c74cd763f98ee1d8d2c10903d",
+        "description": "tgsi_to_nir: Reuse glsl_get_sampler_dim_coordinate_components().",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1b7de2d6b857cd4f3dd45bbcdf135f70548b1935",
+        "description": "freedreno/ir3: Reuse glsl_get_sampler_dim_coordinate_components() in tex_info.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d37c6ebd3ce8e20adb57001629f21ac09bee0679",
+        "description": "spirv_to_nir: Reuse glsl_sampler_dim_coordinate_components().",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5072719e66b0f97a572f36e86bd5396ed2ebc915",
+        "description": "glsl: Factor out the sampler dim coordinate components switch statement.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "12cf484d025e3ed980dbbd8d65f2f9b95c6388db",
+        "description": "v3d: Ask the state tracker to lower image accesses off of derefs.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9c90ecf37ffab0978a983e49ecec48faebeb181a",
+        "description": "gallium: Add a cap for enabling lowering of image load/store intrinsics.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7342b859afb5a7e7f9fb1813e7ab3a55a1c8a704",
+        "description": "nir: Make image lowering optionally handle the !bindless case as well.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cad2d6583c9475bde584e5062a8de73fe7cbf353",
+        "description": "nir: Rename gl_nir_lower_bindless_images.c in preparation for extending it.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b62379ac6f699933da52d032e2b3c06ab73f9549",
+        "description": "i965: Use isl_aux_state_transition_write()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b9856fbf3b7ddbe0b77bf984fe7ec4a64ad858bf",
+        "description": "i965: Use ISL's access preparation functions",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b00e7a6485799761aa0910b7851982a180602c03",
+        "description": "iris: Use isl_aux_state_transition_write()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "af047794106b2d07e7c7eaa5b35d9790a13fb390",
+        "description": "iris: Use ISL's access preparation functions",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "fec957900d6612493a6e03d0e5958dbe8c362733",
+        "description": "iris: Use isl_aux_usage_has_fast_clear()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "58d4749e5683857d57b8b432559c9d837544ad88",
+        "description": "isl: Add a module which manages aux resolves",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "daa4020948867cc2c9b38d7536a1b73bf79d2745",
+        "description": "freedreno/ir3: Lower output precision",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6c750d9c4d51b07076115eb1d0e1be4a2d568095",
+        "description": "nir/types: Add glsl_float16_type() helper",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c822460f851ae6f3c74a01b9eec9ea924a0de12d",
+        "description": "freedreno/ir3: handle half registers for arrays during register allocation.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9e8466a866cbfb4c6745d85e9371b43827d16c8d",
+        "description": "nir: Add optimization for doing removing f16/f32 conversions",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6ee375f68dabc0dd9d6d9f919b797231aad19eab",
+        "description": "freedreno/ir3: Add new ir3 pass to fold out fp16 conversions",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "125f867d3dc32c7269c17d3426e35a0dcd5aadc4",
+        "description": "nir/opcodes: Add nir_op_f2fmp",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "18124d727865f1c53b0dac644560bce177b7d233",
+        "description": "glapi/copyimage: Implement CopyImageSubDataNV",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ae7bda27a0691d6d89c35c9f732b6e49d726c17f",
+        "description": "iris: Fix import sync-file into syncobj",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "f459c56be6bf33439cccc11e932b2b5b52ba7ad8"
+    },
+    {
+        "sha": "3a310fbd0b2bb5730fda57643a3e05870e70d248",
+        "description": "pan/midgard: Implement load/store_shared",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "fcbb3d422e40ab0759c550fb044605364c518e51",
+        "description": "pan/midgard: Implement nir_intrinsic_get_buffer_size",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3148937ef7c7be7a0685de333de6a5ed31ce3857",
+        "description": "pan/midgard: Lower SSBOs in NIR",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "99f2b6144b5c3c4f48096ed0de4b15d1d13afd96",
+        "description": "turnip/pipeline: Don't assume tu_shader is a valid object",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "12a22da6834f21cb089bf9ecd44c483bd264ccd3",
+        "description": "radv: add the trace BO to the BO list at submit time",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5e9a2c603f38308f7027d6a5e4575e5fc24c1bd5",
+        "description": "gallium/swr: Fix min/max range index draw",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4d57a2750485e51b34e0bc413100e4e2787a4e84",
+        "description": "iris: Set MOCS for constant packets on Gen12+",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4bac2fa3c6d30537e444c555f182abd9c739cfd4",
+        "description": "iris: Fix BLORP vertex buffers to respect ISL MOCS settings",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "a4da6008b6a0d8876eaf5a67c95d88038bbf35e6"
+    },
+    {
+        "sha": "1cdf5abdfaeba5a89574d7cc374e5667be2e2f93",
+        "description": "iris: Make mocs an inline helper in iris_resource.h",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "a4da6008b6a0d8876eaf5a67c95d88038bbf35e6"
+    },
+    {
+        "sha": "f8ab00776cc0b2a009403a8611c00341d879f9ab",
+        "description": "ci: Remove a useless filtering of the lava logs.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7f3f9b2b1920da3badf503a0682de7beb9e86464",
+        "description": "ci: Don't bother generating deqp junit results since we don't present it.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4c372d384a702e2be6887e4b2b0b6e04ab27e052",
+        "description": "ci: Document how LAVA runners work.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "994e258122663fd4d869b583cb9f4e0e2f36a0aa",
+        "description": "ci: Make LAVA job fails emit the full list of unexpected test results.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "54dbb55ea8203df354c406e67784ef6ca41ca89e",
+        "description": "ci: Make sure that we have a proper shell prompt for LAVA.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "985343e71aeed5f68697b440e9bcc2dc6a51bc2f",
+        "description": "ci: prepare-artifacts: Make the indent here match previously in the file",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "89a3856714e2410e9ae3e0ee2cafe2fdd86e8b81",
+        "description": "anv: Add pipe_state_for_stage() helper",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7df5d36078a8e0eeffa935a5d1a267cb431ca4db",
+        "description": "anv: Use intel_debug_flag_for_shader_stage()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f58b384fbef0cbfd8349c5baa28f2973d079cd7f",
+        "description": "spirv: Be consistent when checking for Shader/Kernel",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5f3cbbd958d14924dded0e0a0908127f6bfa006d",
+        "description": "spirv: Remove outdated SPIR-V decoration warnings",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "cd4a14be063957964ae54e0e828174b9e40961e0"
+    },
+    {
+        "sha": "1598370aca6459ba54915a26683a75bb66f88161",
+        "description": "nir/builder: Return an integer from nir_get_texture_size",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "f718ac62688b555a933c7112f656944288d04edb"
+    },
+    {
+        "sha": "265e234e234f75cd5c209f76900009f81e2d6aec",
+        "description": "nir: Fix the nir_builder include path for nir_builtin_builder",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f5a8958910f53d924d062cbf024cebe4134f757a",
+        "description": "util: Change os_same_file_description return type from bool to int",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "228cbdfe67e465dc79558fc76a51d8115251b5e5",
+        "description": "winsys/amdgpu: Make local variable r signed",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "87365e263ec46f4cc3c46d49a09a9c3b27550af7",
+        "description": "nir/lower_ssbo: handle atomics",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7ab4e4dd963028a4620ffc00c38988da4abc1860",
+        "description": "nir: Add SSBO->global lowering pass",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b929565ea8d4846b1943f35b6e86d685a616ed54",
+        "description": "panfrost: Rewrite texture descriptor creation logic",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ad44f587a8e3adbfa76aaea88f59e1f0724805b7",
+        "description": "panfrost: Move format translation to root",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "58f14018b4f0e47d72f718f322f8aa0a5b8d0f0a",
+        "description": "panfrost: Move pan_afbc.c to root",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5ddf7ad9d2098d21e1346b8ceb2756901ae1b0c1",
+        "description": "panfrost: Move checksum routines to root panfrost",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2e3318b151abddd456077ec0eed13f95245ce344",
+        "description": "util: promote u_debug_memory.c to src/util",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "88c4680b5a50ea8840c38aa0a80acde63ef1677b"
+    },
+    {
+        "sha": "8021daeb1fb58415af5d0a779368dc6617af947e",
+        "description": "lima: implement PLB PP stream cache",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7edde3d26bb4119be44a2bdda2c5ca0d2f8adfe9",
+        "description": "docs: Update index, relnotes, and release-calendar for 20.0",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0ada39f37add490a2a628236731f7dada421af52",
+        "description": "Docs: Add 20.0.0 release notes",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "740cb3d1939efc3c4d9e23b212074744123e9ad6",
+        "description": "radv: use RADEON_FLAG_ZERO_VRAM when creating the trace BO",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "37650bf93803822d6e3aefae7c2f4c7eef5d6171",
+        "description": "radv/winsys: add a new flag that requests zerovram allocations",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7a73446c513e2218a08ae9425a1bea49c63080a7",
+        "description": "gallivm: fix crash in emit_get_buffer_size",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1b610aab583211210f189b46904b66c483f8e38b",
+        "description": "gallivm: fix crash with bptc border color sampling",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "8291d728dc997e87b4d2e4e451692643a1dba881",
         "description": "aco: improve GFX9 1D ddx/ddy assertion",
         "nominated": false,
