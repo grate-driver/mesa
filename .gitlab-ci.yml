@@ -334,6 +334,8 @@ meson-armhf:
   variables:
     CROSS: armhf
     LLVM_VERSION: "7"
+    EXTRA_OPTION: >
+      -D llvm=false
   script:
     - .gitlab-ci/meson-build.sh
     - .gitlab-ci/prepare-artifacts.sh
@@ -345,6 +347,8 @@ meson-arm64:
   variables:
     LLVM_VERSION: "8"
     VULKAN_DRIVERS: "freedreno"
+    EXTRA_OPTION: >
+      -D llvm=false
   script:
     - .gitlab-ci/meson-build.sh
     - .gitlab-ci/prepare-artifacts.sh
