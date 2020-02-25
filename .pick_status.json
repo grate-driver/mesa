@@ -1111,7 +1111,7 @@
         "description": "gallivm/tgsi: fix stream id regression",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "163d5fde06696fed2e69e000a7621087c1636749"
     },
