@@ -1,5 +1,293 @@
 [
     {
+        "sha": "01496e3d1ea0370af03e6645dbd2b864c2ace94c",
+        "description": "v3d: Sync on last CS when non-compute stage uses resource written by CS",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5de8bc7c758cc86c7008708c2b7f19f40288459e",
+        "description": "gitlab-ci: Enable the lima job again",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "31a8075678f6517278985fe8bbaaec5100d7d826",
+        "description": "gitlab-ci: lima: Add flaky tests to the skips list",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5ab94df0f6a9b2fdf8c053a68486d8be4d254d01",
+        "description": "nir: fix gl_nir_lower_images for bindless images",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "7342b859afb5a7e7f9fb1813e7ab3a55a1c8a704"
+    },
+    {
+        "sha": "26d42645f9f7ae260031685ad3e0664e8b94b32b",
+        "description": "freedreno/computerator: fix build dependency",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "84395190ec8cae6158737777c8def7cc3304eb3f",
+        "description": "glx/drisw: fix shm put image fallback",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "02c3dad0f3b4d26e0faa5cc51d06bc50d693dcdc"
+    },
+    {
+        "sha": "246e4aeaef4c1f1071c64e9681fc9229aac22020",
+        "description": "glx/drisw: return false if shmid == -1",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "02c3dad0f3b4d26e0faa5cc51d06bc50d693dcdc"
+    },
+    {
+        "sha": "8d0bab8a9352bbb780bae6e7a432e73f7204f66a",
+        "description": "glx/drisw: add getImageShm2 path",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "02c3dad0f3b4d26e0faa5cc51d06bc50d693dcdc"
+    },
+    {
+        "sha": "466a0b2e4953018646ee344f5f6f6e9e84b66a1a",
+        "description": "dri: add another get shm variant.",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "02c3dad0f3b4d26e0faa5cc51d06bc50d693dcdc"
+    },
+    {
+        "sha": "a91067d3f5c8357548ca2756023b81daf013e47c",
+        "description": "ci: Blacklist another freedreno flaky test.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6fbe3f40a912296922e0d8bc0ea525b5381341db",
+        "description": "intel/isl: Add isl_aux_info.c to Makefile.sources",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "58d4749e5683857d57b8b432559c9d837544ad88"
+    },
+    {
+        "sha": "9ab0e92cff8bb8336cebd9dc68d02d7451ad78e1",
+        "description": "intel/blorp: Implement GEN:BUG:1605967699.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "36515e295c390edd713d92ce3aef35730a7d12e1",
+        "description": "gallium/util: remove unused debug_print_foo helpers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "dfea933a2a09b169ff3753de764aa4662de7e4e7",
+        "description": "gallium/util: do not use debug_print_format",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5f0b984cb8fd424facc7b245e4649b38f4815e3c",
+        "description": "util: move debug_memory_{begin,end} to os_memory_debug.h",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "31a781578522d44e6832893270a7902b001a827d",
+        "description": "hud: add GALLIUM_HUD_SCALE",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0ee76b90d5a0b3832b9498ab4809de19a03a63fa",
+        "description": "turnip: move tile_load_ib/sysmem_clear_ib into draw_cs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a410e64b6812b23e1db8b969516ae7f4ebb8b811",
+        "description": "turnip: make cond_exec helper easier to use",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6ede9749d2e96c788a1ef0bb642d1fbe87304386",
+        "description": "turnip: remove marker seqno",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cf94124e1c28c0c5953454ad1dbe71b9de8adc55",
+        "description": "turnip: automatically reserve cmdstream space in emit_pkt4/emit_pkt7",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4b2a7dcd93f285ea88a110afa75cbac5d147e5cb",
+        "description": "turnip: add tu_device pointer to tu_cs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a9a990a60b4669bd0af920a060d87a8e3551058e",
+        "description": "turnip: fix COND_EXEC reserved size in tu_query",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2275343ba346b04ebf8bafbaedfcd707702f9c06",
+        "description": "freedreno/computerator: add computerator",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "568e948d1fda10d825cf99f3cb05609c4ff248bd",
+        "description": "freedreno/ir3: allow block->predecessors to be null",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f87d412f08265ca6e5c47a5591c0ebbdefdbaf4c",
+        "description": "freedreno/computerator: rename prefix asm->ir3",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6ee68d796e433c2efb3313baf119a8e0ddcac759",
+        "description": "freedreno/computerator: polish out some of the rust",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3bb340cf4f21e12407720b7f46d2c4486a1ff2a5",
+        "description": "freedreno/computerator: import parser/lexer from fdre-a3xx",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6499738d3dee2c2420f8d2207442f57c432d9510",
+        "description": "lima: remove its hash table entry when invalidating a resource",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "c64994433c0da03d1dabf7cf561f1f1474d6554f"
+    },
+    {
+        "sha": "956e4b2d371736e073542cf8556f0c972c197989",
+        "description": "nir, intel: Move use_scoped_memory_barrier to nir_options",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6be766336a0ebb556f44765e3d6f6af0e67070a1",
+        "description": "nir/tests: Use nir_scoped_memory_barrier() helper",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6ff898a6530e19815e2877f5a5da54f7e6746cfa",
+        "description": "nir: Add the alias NIR_MEMORY_ACQ_REL",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "424737da3e25d9fc3dd33a4b8bdb9ad914e7a5f8",
+        "description": "nir/builder: Add nir_scoped_memory_barrier()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "e4baff90812d799d586296fcad992ddcc553c359",
         "description": "freedreno: Switch to using lowered image intrinsics.",
         "nominated": false,
