@@ -1552,7 +1552,7 @@
         "description": "nir/algebraic: Invert comparisons less often",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "0dbda153aae548a4087f7364c9013583a076e0e9"
     },
