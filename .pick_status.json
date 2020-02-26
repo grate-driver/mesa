@@ -1282,7 +1282,7 @@
         "description": "mesa/st: toggle EXT_texture_norm16 based on format support",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "7f467d4f73828ba782a2db38c74d33b85646dc85"
     },
