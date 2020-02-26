@@ -1048,7 +1048,7 @@
         "description": "ac/llvm: flush denorms for nir_op_fmed3 on GFX8 and older gens",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "d6a07732c9c155c73f7d2cddc10faa7eab768df9"
     },
