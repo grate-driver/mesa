@@ -1102,7 +1102,7 @@
         "description": "gallivm/nir: fix integer divide SIGFPE",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "c717ac1247c3c7243af2f1b2732cccb882b75f11"
     },
