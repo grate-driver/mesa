@@ -31,7 +31,7 @@
         "description": "Revert \"spirv: Use a simpler and more correct implementaiton of tanh()\"",
         "nominated": true,
         "nomination_type": 2,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "da1c49171d0df185545cfbbd600e287f7c6160fa"
     },
