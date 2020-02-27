@@ -490,7 +490,7 @@
         "description": "Revert \"mesa: check for z=0 in _mesa_Vertex3dv()\"",
         "nominated": true,
         "nomination_type": 2,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "f04d7439a0ad6e13ff2912ff824553b6bcf511a4"
     },
