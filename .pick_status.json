@@ -193,7 +193,7 @@
         "description": "turnip: fix srgb MRT",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "59f29fc845ce6425959e8db9b707363b1e273445"
     },
