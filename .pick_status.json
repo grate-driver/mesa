@@ -40,7 +40,7 @@
         "description": "Revert \"glsl: Use a simpler formula for tanh\"",
         "nominated": true,
         "nomination_type": 2,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "9807f502eb7a023be619a14119388b2a43271b0e"
     },
