@@ -103,7 +103,7 @@
         "description": "freedreno: fix FD_MESA_DEBUG=inorder",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "2c07e03b792d57ae807a6953f0d8ff5f4bcdffd0"
     },
