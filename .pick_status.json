@@ -193,7 +193,7 @@
         "description": "st/nine: Fix incompatible-pointer-types-discards-qualifiers errors.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "fdd96578ef2dfe9c4ad5aab5858036298d444a64"
     },
