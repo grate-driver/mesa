@@ -1,5 +1,248 @@
 [
     {
+        "sha": "3503cb4c28e01b34f3a25546c058150709c22348",
+        "description": "docs/features: add v3d driver",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "760fe44e8c09e533fb96d327e658aea4bfe3c883",
+        "description": "aco: pass vars by const &",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5469221e77bd6baf1dfe4a6c1c0149223bf2f890",
+        "description": "Revert \"gitlab-ci: disable panfrost runners\"",
+        "nominated": false,
+        "nomination_type": 2,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "a86662c44d7cb2541c3f613805533064219ad11f"
+    },
+    {
+        "sha": "2521c81c9e898b6785cb4fc069c329c42c2990c6",
+        "description": "aco: Minor optimization in spill_ctx constructor",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d555794f3032594dbef3623052103900138d2356",
+        "description": "radv: update entrypoints generation from ANV",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "79d4d2807ff60d571c377c7f4aa729601ab873e1",
+        "description": "radv/sqtt: add support for GFX10",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "eea3912451f411c3d61d258cda65a27f274bac38",
+        "description": "ac/registers: add definitions for thread trace on GFX10",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "fedbc4c929cb1528db646c2ec24b75f92de3e281",
+        "description": "radv/sqtt: update SPI_CONFIG_CNTL.EXP_PRIORITY_ORDER value",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "36768eee9acb4cdd08cd56b0e75c0bb870657bbb",
+        "description": "radv/sqtt: do not assume that the number of shader engines is 4",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1b565e56e94a363e49b2311bf57f38ccd548cc5d",
+        "description": "radv/rgp: adjust trace memory/shader clocks to fix frame duration",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "fbd61b3fb66bcc3eb0f65da2c869046c24c35dc8",
+        "description": "mesa/st: fix formats required for EXT_texture_norm16",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "de4eb9a3bb9fb073a5bf5cc157918bfa0f62b394"
+    },
+    {
+        "sha": "e58bb417b57243d9bf0faa0995522dde5bf3fbfb",
+        "description": "lima: Add etc1 support",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "37a670d76c245fab238f84dc31ecb281d62531e3",
+        "description": "doc: Update features.txt for r600 with misc supported features",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "85457e350dde0589c96083c75594d089d339fba4",
+        "description": "intel/tools/dump_gpu: fix getparam values",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "76bf38eaf0b6c839eaa4a36990e4b14b8095b7eb"
+    },
+    {
+        "sha": "1e43910aa2e018a1819bcfef6916d5ce5e1e7276",
+        "description": "meson: Enable -Wno-deprecated only for bison > 2.3.",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "11a1cb2fa8dadca9d918e8421a3b26a1b176937c"
+    },
+    {
+        "sha": "5306b662dd59ac8accccf25b81ee97742ce71849",
+        "description": "mesa: fix _mesa_draw_nonzero_divisor_bits to return nonzero divisors",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "fd6636ebc06d55b59851701c436b8b97f50fd7f4"
+    },
+    {
+        "sha": "a86662c44d7cb2541c3f613805533064219ad11f",
+        "description": "gitlab-ci: disable panfrost runners",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "02f3af2ad1eb1732d0bfb781de5e781bf83b400d",
+        "description": "radv: fix size of sqtt_file_chunk_asic_info on 32-bit system",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "33f604a33187cb001bfc389a43a98e8ef634bf86",
+        "description": "radv: fix 32-bit build failure in radv_queue_internal_submit()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ad094433b4180ae5d9a33562a0982d399a0bb4bc",
+        "description": "glsl: add some error checks to the nir uniform linker",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "61dc9354c0c9b5dae3f6763c5141ff38e3e72816",
+        "description": "glsl: fix sampler index calculation in nir linker",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ef47069cc30e0a3337fcb6ff0c740e1bc50879c5",
+        "description": "glsl: reset next_image_index count for each shader stage",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e0aa0a839f9c168784a1f50013c83877cc876094",
+        "description": "glsl: fix resizing of the uniform remap table",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "190a1ed170231d6f1db0526a1867a6766ccd4823",
+        "description": "glsl: set the correct number of images in a shader",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b232a54df11cf6864e344b08f77c0dab5ddf0baf",
+        "description": "glsl: set the correct number of samplers in a shader",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7dafc3050da4ab240c8ecf4ddcfba2c6192113f5",
+        "description": "glsl: fix possible memory leak in nir uniform linker",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cf12faef614ab7cd9996410f1d161558a3853936",
+        "description": "intel/compiler: Restrict cs_threads to 64",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "932045061b5850368e8a4a5b3e6609eba6ed8d66"
+    },
+    {
         "sha": "09323634898ab3efc0150dc7d756bf36b1b89b76",
         "description": "st/va: remove unneeded code",
         "nominated": false,
