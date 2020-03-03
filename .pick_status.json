@@ -220,7 +220,7 @@
         "description": "radeonsi: add a bug workaround for NGG - LATE_ALLOC_GS",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": null
     },
