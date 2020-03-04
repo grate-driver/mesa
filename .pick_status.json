@@ -310,7 +310,7 @@
         "description": "nir/lower_input_attachments: remove bogus assert in try_lower_input_texop()",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "84b08971fbdced78dbcb085d633298db7e4bfa7f"
     },
