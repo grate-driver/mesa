@@ -2785,7 +2785,7 @@
         "description": "egl/drm: reinstate (kms_)swrast support",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "47273d7312cb5b5b6b0b9faa814d574bbbce1c01"
     },
