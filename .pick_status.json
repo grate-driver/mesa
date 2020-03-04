@@ -2794,7 +2794,7 @@
         "description": "glx: set the loader_logger early and for everyone",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "d971a4230d54069c996bca78b6ed6a6a23377821"
     },
