@@ -211,7 +211,7 @@
         "description": "ac: add a bug workaround for the 100% NGG culling case",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "8db00a51f85109e958631ef74a458b0614f37097"
     },
