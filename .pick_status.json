@@ -2479,7 +2479,7 @@
         "description": "Revert \"ci: Remove T820 from CI temporarily\"",
         "nominated": true,
         "nomination_type": 2,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "089c8f0b8da86a05bde8359c84085e0b795abf17"
     },
