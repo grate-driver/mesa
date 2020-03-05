@@ -418,7 +418,7 @@
         "description": "aco: fix image load/store with lod and 1D images",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "4d49a7ac737f298b136ab6447e18c6e4654f8ad5"
     },
