@@ -2776,7 +2776,7 @@
         "description": "Revert \"egl/dri2: Don't dlclose() the driver on dri2_load_driver_common failure\"",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "1b87f4058de84d7a0bb4ead0c4f4b024d4cce8fb"
     },
