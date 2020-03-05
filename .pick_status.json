@@ -337,7 +337,7 @@
         "description": "soft-fp64: Split a block that was missing a cast on a comparison",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "f111d72596c4071ad38a2062699f17702bbd9c6d"
     },
