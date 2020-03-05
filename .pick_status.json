@@ -1471,7 +1471,7 @@
         "description": "gallium/cso_context: remove cso_delete_xxx_shader helpers to fix the live cache",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "0db74f479b9c5efe52c5d021fe04ba5ce1f4e1bd"
     },
