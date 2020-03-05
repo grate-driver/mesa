@@ -1,5 +1,617 @@
 [
     {
+        "sha": "07f1ef5656e0721282d01a8421eaca056348137d",
+        "description": "docs: Update stable process around using fixes: and gitlab",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "55dac91adc40db191c385f9a2ce393f46dd9b859",
+        "description": "turnip: fix tile->slot calculation",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "036230341f4f2e7b11791708015342cf9385cf76",
+        "description": "turnip: improve binning pipe layout config",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9f9432d56c055b9704a76cad44da88d5e12f825c",
+        "description": "Revert \"spirv: Use a simpler and more correct implementaiton of tanh()\"",
+        "nominated": true,
+        "nomination_type": 2,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "da1c49171d0df185545cfbbd600e287f7c6160fa"
+    },
+    {
+        "sha": "986e92f0ea803caf014adc40e900bc774af71da3",
+        "description": "Revert \"glsl: Use a simpler formula for tanh\"",
+        "nominated": true,
+        "nomination_type": 2,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "9807f502eb7a023be619a14119388b2a43271b0e"
+    },
+    {
+        "sha": "bc5724faf40df9aec6c8e2e52f4017db35d21330",
+        "description": "pan/bi: Add bi_print_shader",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c152d4c8352aca678386eaf75da83ae95e1bd7b5",
+        "description": "pan/bi: Add bi_print_block",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c316d1553bc27e9f64a14fcce147de96bea430e0",
+        "description": "pan/bi: Add bi_print_clause",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "919cdf15b3a88cf745e3aed1a52ea45a44846b35",
+        "description": "pan/bi: Add bi_print_bundle for printing bi_bundle",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "bde54cb6d319fd9516507c1040d9e5fe8e7b81f2",
+        "description": "pan/bi: Add bi_instruction printing",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "aef0f00cbc976a29e5b66da4b2abbd2bcd9c0d52",
+        "description": "pan/bi: Move bi_interp_mode_name to bi_print",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5d16a8109c88c869ce17e6b680e2922bb983caa6",
+        "description": "pan/bi: Add BIR manipulation routines to bir.c",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5f7a3ba872c90afc251035f24f7fc7faf6498fe3",
+        "description": "pan/bi: Move some print routines out of the disasm",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8ec671801a8decdd5c733f2fec53726d34666a0b",
+        "description": "pan/bi: Add IR iteration macros",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0b26cb194cc433a9910247051024bd6468d9b05c",
+        "description": "pan/bi: Add quirks system",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "07228a6895b4b57efaf55e7e6b180e308ceab879",
+        "description": "pan/bi: Add high-latency property for classes",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "546c301ff6d12cad678b6feb1c83cf75eb36def1",
+        "description": "pan/bi: Add CSEL condition",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "47451bb9f1c610dc62629d829c378034df83bf57",
+        "description": "pan/bi: Add bi_branch data",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "73c91f14c9f94c5b2ffbd1aaaf7d7c60cb7bc3c9",
+        "description": "pan/bi: Extract bifrost_branch structure",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2afddc4433f49eb44654a63b1406181ee3dc25d8",
+        "description": "pan/bi: Add pred/successors to build CFG",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d3370bd5a50d8a490a8b57a92853ff203f07711c",
+        "description": "pan/bi: Add constants to bi_clause",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cb3cd8aa56e76afa988429f0373642c53c1b4f92",
+        "description": "pan/bi: Add EXTRACT, MAKE_VEC synthetic ops",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8929fe0c84299cedd1ec86f49b795595ff3f90f8",
+        "description": "pan/bi: Add source type for conversions",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5896db957876c4dc1cd7ecb4e6eef44690b10530",
+        "description": "pan/bi: Add swizzles",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c70a198f24cbf5127d48673d96ad8f8153dbe729",
+        "description": "pan/bi: Clarify special op scheduling",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "fba1d12742db36536b6010807a59884abfb79973",
+        "description": "pan/bi: Add clause header fields to bi_clause",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "44ebc275fe83c007cb7c881cd5016dc1f6ec368b",
+        "description": "pan/bi: Add class-specific ops",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b5bdd894443507964cad63b40c0c598d115c7333",
+        "description": "pan/bi: Add constant field to bi_instruction",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a2c1265dd34a97cfb1abd11fa44d8cf93187c99e",
+        "description": "pan/bi: Add special indices",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c42002d26f4ff59e188891e5ff68d8387d1959d3",
+        "description": "pan/bi: Add dest_type field to bifrost_instruction",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a35854c5eee542c47e8be3c6d85a19d8fad99acc",
+        "description": "pan/bi: Add bi_clause, bi_bundle abstractions",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "99f3c1f34c0526a9d0a5177d71d0c4a6042c3409",
+        "description": "pan/bi: Add PAN_SCHED_* flags",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9643b9dd5b683d5e18c085cd49bdfe49143b861b",
+        "description": "pan/bi: Add bi_load_vary structure",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6a7987aba10aaf05fbe678b3f3ccf5882b687aea",
+        "description": "pan/bi: Pull out bifrost_load_var",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "aa2f12de562e38b7b0e154c7d467aa1d85279a32",
+        "description": "pan/bi: Add bi_load structure",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b93aec6df19d6daf3d6c28aad755af1cec52aab7",
+        "description": "pan/bi: Add bifrost_minmax_mode field",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d69bf8db6217b7309ea7a7aec8139c8151b39f3c",
+        "description": "pan/bi: Add a bifrost_roundmode field",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "bbf41ffb00d8d78db1cf43403ab7f6af5a2f9ec3",
+        "description": "pan/bi: Factor out enum bifrost_minmax_mode",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "34165c7ec0fb3a0a07f3a1ede833b8bbf336e44a",
+        "description": "pan/bi: Add BI_GENERIC property",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "29acd7bd8e50ac83aeeb68471f516ed6525aae99",
+        "description": "pan/bi: Add modifiers to bi_instruction",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7ac62121e037f3d9fbd3612d936ff736835e0b1f",
+        "description": "pan/bi: Add class properties",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "230be61f201d07ac95e32a82e688a05eb4093fcc",
+        "description": "pan/bi: Add src/dest fields to bifrost_instruction",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e7dc2a7b9beeb3fe9af00033d972f89bf436bb68",
+        "description": "pan/bi: Add the control flow graph",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "eceaea43e37e30e9bf7e5059d17cec445e59fbd3",
+        "description": "pan/bi: Stub out new compiler",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5d3a4e31138f1663b0c37b91d7263bba6025fa73",
+        "description": "pan/bi: Gut old compiler",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "eb15525ab798aea74b02a7160c0fa4b9ec6212be",
+        "description": "panfrost: Add note about preloaded varyings",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7618fe1b484eecc2246202df1e53ee607c6d70c4",
+        "description": "aco: fix image load/store with lod and 1D images",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "4d49a7ac737f298b136ab6447e18c6e4654f8ad5"
+    },
+    {
+        "sha": "cc9493f78ed3b366aaf1f4933c76984180a81a60",
+        "description": "gitlab-ci: Distribute jobs across more stages",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "71436f9640647e21651ae24bb57db36968a24ba0",
+        "description": "gitlab-ci: Drop \"test-\" prefix from llvmpipe/softpipe job names",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "53a22c4b89c860316e3c07a9f95ad4871339049e",
+        "description": "vbo: merge draws even when begin==0 or end==0",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ab7209fb83ee29b59eb20db2b683eb46b5268a93",
+        "description": "vbo: merge more primitive types for glBegin/End (v2)",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d740e3d6ee226c20870711c8df663b3aa97c8486",
+        "description": "mesa: deduplicate draw indirect functions",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7700ac3d80ae70d00e3cca52b6ea3d00122c7893",
+        "description": "mesa: optimize get_index_size",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "450152f8d85f9f54498ea5116561f2aefe7378dc",
+        "description": "mesa: remove _mesa_index_buffer::index_size in favor of index_size_shift",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "df3891e74a72d275aceba91adc94a9e7dc9aa029",
+        "description": "Revert \"mesa: check for z=0 in _mesa_Vertex3dv()\"",
+        "nominated": true,
+        "nomination_type": 2,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "f04d7439a0ad6e13ff2912ff824553b6bcf511a4"
+    },
+    {
+        "sha": "9c9c314e419e4085250e892be55ab67a71625458",
+        "description": "vbo: fold code from vbo_exec_fixup_vertex to vbo_exec_wrap_upgrade_vertex",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8205042be60ccfe8d1661767e6f293c97d33e2cd",
+        "description": "vbo: clean up conditional blocks in ATTR_UNION",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4c6323c49f1f394f54ea9b9d8e514c2706e3984d",
+        "description": "vbo: handle GS and tess primitive types when splitting Begin/End",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f97341a9d6d4377950e313e76f75230d80f6240d",
+        "description": "vbo: clean up vbo_copy_vertices",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1be1ea0b8e2d5eed5202f669d11f5644fb4b5de2",
+        "description": "vbo: deduplicate copy_vertices functions",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "fd8eb634fd93e61e47599fb74513eb0ab0bb3726",
+        "description": "vbo: don't look at the second draw's count when merging 2 glBegin/End draws",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e92a4f817d1f7a5094066e2a47a246fd5ccf94d6",
+        "description": "mesa: replace some index_size multiplications and divisions with shifts",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "87085c673d593e6332ca2f3fb6737b77f7087f66",
+        "description": "mesa: add index_size_shift = log2(index_size) into _mesa_index_buffer",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f38ffa4659aa985f5d1c78bdd5be5064b792b819",
+        "description": "android: r600/sfn: Add GDS instructions",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "32d3435a78675ff5ebf933d45b9b99fdc4dc7d82"
+    },
+    {
+        "sha": "88c68c0ac7618c56ba17755ea6b93827437dd46a",
+        "description": "android: r600/sfn: fix includes and libmesa_nir dependency",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "f718ac62688b555a933c7112f656944288d04edb"
+    },
+    {
+        "sha": "01778d1e3cc675e6c7627e5b7ef7acd5ad290bfb",
+        "description": "android: aco: fix PIPE_FORMAT related building errors",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "8d07d66180b1523d7e70681ca142955f896ebda9"
+    },
+    {
+        "sha": "b20693be416ddeea0bef050edb2acd13016d6532",
+        "description": "nir: Flush to zero with OOB low exponents in ldexp",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ec9da8990067332292709a221a168d56bb7a38a2",
+        "description": "zink. Added storage CISto descriptor pool. Added storage in descriptor pool for combined image samplers as well as uniform buffers. Stops some shaders from running through a pools storage faster than zinks internal tracking.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "0ac731b1ff96de46998948aa06081efa5140d50e",
         "description": "gitlab-ci: Add jobs to be able to test Vulkan",
         "nominated": false,
