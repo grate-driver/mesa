@@ -1,5 +1,896 @@
 [
     {
+        "sha": "70341d7746c177a4cd7377ef633e9f85afd11d54",
+        "description": "git-ck: unstaged",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "70349a2252a95f181de519be61ea84bd22381e4b",
+        "description": "intel/compiler: Calculate num_instructions in O(1) during register pressure calculation",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e5e4d016b94fc402c328d9a202504d811d2bb5ce",
+        "description": "intel/compiler: Move register pressure calculation into IR analysis object",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f6cdf66cd6e2515471c7944f67ddb87881c2366e",
+        "description": "entel/compiler: Simplify new_idom reduction in dominance tree calculation",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c9a608c0907ccdd745c8cb496e982bca68f8e6e4",
+        "description": "intel/compiler: Move dominance tree data structure into idom_tree object",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c2a7eababf568ecd23377408e5f837e3bb2e9943",
+        "description": "intel/compiler: Move idom tree calculation and related logic into analysis object",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2878817197fe94fe0c20efdf2947d63576e3ea8a",
+        "description": "intel/compiler: Drop invalidate_live_intervals()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "acf24df2017598eb23c57599e39738e0ec059438",
+        "description": "intel/compiler/vec4: Switch liveness analysis to IR analysis framework",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ea44de6d8c93551be73d91045686b59a5aa42c25",
+        "description": "intel/compiler/fs: Switch liveness analysis to IR analysis framework",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "bb8cfa6837fe7967cb9b02e32bd2d1aa37631c45",
+        "description": "intel/compiler/vec4: Add live interval validation pass",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "24535604aa645651987e41a3bce8eee9e0b871bd",
+        "description": "intel/compiler/fs: Add live interval validation pass",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a9cdc14f602144620c664f7f42ea2ba0eeb58720",
+        "description": "intel/compiler: Pass single backend_shader argument to the vec4_live_variables constructor",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d0433971f958be7d38cb96bfe226fbabdd7998e7",
+        "description": "intel/compiler: Pass single backend_shader argument to the fs_live_variables constructor",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d7e84cbb0f0530bb3e065bd522e5e1814373f589",
+        "description": "intel/compiler: Restructure live intervals computation code",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "48dfb30f9231c22a6af6885dbc9ef86dc2edde1e",
+        "description": "intel/compiler: Move all live interval analysis results into vec4_live_variables",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ba73e606f63a4633fa9d8bef69f87b2d88851416",
+        "description": "intel/compiler: Move all live interval analysis results into fs_live_variables",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3ceb496cdf5ef0ccc79e71c8fb856535501a9446",
+        "description": "intel/compiler: Mark virtual_grf_interferes and vars_interfere as const",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ab6d7929864b1c80a8de5b7cd58775f02fe1a7ff",
+        "description": "intel/compiler: Pass detailed dependency classes to invalidate_analysis()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "65080dc8df00d006912ade2d69d4a06c3d4c5e0a",
+        "description": "intel/compiler: Define more detailed analysis dependency classes",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d966a6b4c4684bc02647a8fdc69a6c88e5ed00c2",
+        "description": "intel/compiler: Introduce backend_shader method to propagate IR changes to analysis passes",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "03eb46f4a74c8df3de6785ffe18e968b876469b8",
+        "description": "intel/compiler: Introduce simple IR analysis pass framework",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "27ae3c1f684fe64e47f7a6cd374dc156f15847e0",
+        "description": "intel/compiler: Reverse inclusion dependency between brw_vec4_live_variables.h and brw_vec4.h",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a6fc88e91bdf9e235aa8a0a0f69f219c051cb1af",
+        "description": "intel/compiler: Reverse inclusion dependency between brw_fs_live_variables.h and brw_fs.h",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "06c5c4964621268f2dedd63a614ff89f4307057b",
+        "description": "intel/compiler: Nest definition of live variables block_data structures",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "310aef6b590d3d129b285ff8c50565af8cebacbc",
+        "description": "intel/compiler: Reverse inclusion dependency between brw_cfg.h and brw_shader.h",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d46fb2126d9fdd52386b001a140c1b70fec83f9e",
+        "description": "intel/compiler: Move base IR definitions into a separate header file",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "74e4cda64b9d114321216eefe536f80644b0f0fd",
+        "description": "etnaviv: add etna_constbuf_state object",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9f5802ad3e0cf303892f19d29803bba95eac9102",
+        "description": "st/va: add check for P010 and P016 encode/decode support",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d3758035760eadfcfcf4ce1e5dbf43ecd4d4ec29",
+        "description": "radeon: add support for 10-bit HEVC encoding to VCN 2.0",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8ab31808fd5ba7a2205d755ae98c67055f7f9286",
+        "description": "radeonsi: add 10-bit HEVC encode support for VCN2.0 devices",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2ba272135ad43a025b10b24182bc5b3ad7bef024",
+        "description": "nir/linker: remove reference to just SPIR-V linking",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d7a70fbb2305604ce75b1a0dbcd03e2ebe71f92a",
+        "description": "bin/gen_release_notes.py: fix commit list command",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "86079447da1e00d49db0cbff9a102eb4e71e8702"
+    },
+    {
+        "sha": "894e2863919420a6f3e3ac55d14bc46b222de447",
+        "description": "docs: fix typos in the release docs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "771f16cf6166a3911d374c3de6c19687605f1fef",
+        "description": "radeonsi: remove AMD_DEBUG=sisched option",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "913d2dcd231ed9c744970875883c185090389ea7",
+        "description": "nir/lower_input_attachments: remove bogus assert in try_lower_input_texop()",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "84b08971fbdced78dbcb085d633298db7e4bfa7f"
+    },
+    {
+        "sha": "6dc38cea52ce1e498a5d7a38cadcb9e7e15bde6c",
+        "description": "radv/rgp: report correct system ram size",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "eeb09a01e7699cbcf1836b0aba288e0e3c8656ac",
+        "description": "radv/rgp: report correct cu_mask info",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b3ece36257dce867e996e2ca1060d3fabc4ea2de",
+        "description": "ac: add ac_gpu_info::cu_mask to store bitmask of compute units",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c6c661de3118873b9a1f933917a08213e2435601",
+        "description": "radv/sqtt: abort if SQTT is used on GFX6-GFX7",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "14283ddc798686c669017f15c3eb0c0272cc6888",
+        "description": "radv/sqtt: add support for GFX8",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d7470159353d47fe4cafa03ef0e6eaefafba41e4",
+        "description": "ac/registers: adjust some definitions for thread trace on GFX8",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0d55732a61b1a4f3ea6026ad2b9fe238ddc55a7d",
+        "description": "radv/sqtt: add radv_copy_thread_trace_info_regs() helper",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9baad41469fa4d9fe3580ae60460dec489e6c358",
+        "description": "radv/sqtt: tidy up radv_emit_thread_trace_{start,stop}",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6c91aa7955793c8a4c515d4d3878860defd97ed4",
+        "description": "radv/sqtt: fix wrong check in radv_is_thread_trace_complete()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ba29c050a3b370ff75d229317a6c2107d736c583",
+        "description": "radv/winsys: fix missing initializations of shader info in the null device",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9d07d598423e4015bbc7beb7a2fdc4c657d5e0cf",
+        "description": "iris: Don't skip fast depth clears if the color changed",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "382b902a6db87a2b0409b760c320555d1f4eadca",
+        "description": "swr: Fix non-pod-varargs error.",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "ff8265b64ff19380170b50b7016191c9d53fbd1e"
+    },
+    {
+        "sha": "ed0bea4495aef3dd50fc0c9b8b05836b58a3cfc1",
+        "description": "glthread: fall back if a param size is non-zero and a pointer param is NULL",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "57a9c1ee478c5af8cc2f9ffe78b24917deebb1b3",
+        "description": "glthread: fix a crash with incorrect glShaderSource parameters",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c5825b7b6e734c991c65246aff59c04ea8cde102",
+        "description": "glthread: add custom marshalling for glNamedBuffer(Sub)DataEXT",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b8aa5edfc5632e7c7a164566b61c21a6658025b3",
+        "description": "glthread: merge glBufferSubData and glNamedBufferSubData into 1 set of functions",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8eb03327497f3f0c0147ceea5c22213c4dfd1b13",
+        "description": "glthread: merge glBufferData and glNamedBufferData into 1 set of functions",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "93b2ee18a1c00f8b60a60e34cee3743dca45bd47",
+        "description": "glthread: replace custom glBindBuffer marshalling with generated one",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "85276e2c1b8dfdf090a656a7fa1b5613d373515e",
+        "description": "glthread: sync instead of disabling glthread for non-VBO pointers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "28a2ad7ddf76702a5de56a7bc0d8754b7dbd66a0",
+        "description": "glthread: track for each VAO whether the user has set a user pointer",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d510e652d46f471a93eae5a07f7e7508633d1040",
+        "description": "glthread: add marshal_call_after and remove custom glFlush and glEnable code",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4970199d11907833858bbb2700ba313ae12f3a95",
+        "description": "glthread: don't insert an empty line after (void) cmd;",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b9eef27920ca7b670225cdc529f200b30140dc39",
+        "description": "glthread: add support for glMemoryObjectParameteriv, glSemaphoreParameterui64v",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b5c58bbf6ce49199eca076225a7985f3e149ffd3",
+        "description": "glthread: add support for glCallLists, glPatchParameterfv",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1668a9390321e31ee19292590874e9b16a498936",
+        "description": "glthread: add support for glClearNamedFramebuffer, glMaterial, glPointParameter",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b0a20e753110afaf4336d64928f7a11dc3901a6f",
+        "description": "glthread: add support for glFog, glLight, glLightModel, glTexEnv, glTexGen",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "59e96bc513be3938e2d6dc4357e4d38fa5481f6a",
+        "description": "glthread: add support for TexParameteri and SamplerParameteri functions",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "108fdb54c6c1b82ec3131b0c2e00d554b3729cfb",
+        "description": "glthread: replace custom ClearBuffer marshalling with generated one",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "88b5fb18b35e68edf2b187251df9a290f386d91c",
+        "description": "glthread: check the size of all variable params and clean up the code",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "358d923c8b40e71738cb3a3fb0413260361bec9b",
+        "description": "glthread: handle complex pointer parameters and support GL functions with strings",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d00f36ac25b25402c4d81a0229a703a1b84fc40c",
+        "description": "glthread: add/update count and marshal fields for many GL functions",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "fb95a4693f05b8a64d61267409fcdce937dd3383",
+        "description": "glthread: add GL_DRAW_INDIRECT_BUFFER tracking and generator support",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "30b6e8236400deac08aec6b0334f78b7eacb62d9",
+        "description": "glthread: don't increment variable_data if it's the last variable-size param",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "19dc528bbf74cb823c87420ee3e5b8cb6495a199",
+        "description": "glthread: don't insert _mesa_post_marshal_hook into every function",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c920572f603b5e0ac062501593a4ed6b53bc8f40",
+        "description": "glthread: simplify repeated function sequences in marshal_generated.c",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9dbf5ec9f7844dda9d2473a3168e3f8b0009a66d",
+        "description": "glthread: use int instead of size_t where it's OK",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "313e98fb8111c21fc89d2422d50dc12daec4efc6",
+        "description": "glthread: reduce pointer dereferences in glthread_unmarshal_batch",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "19151e2605c95498f9dbc85fa85e10e851df374d",
+        "description": "glthread: inline _mesa_unmarshal_dispatch_cmd and convert the switch to a table",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "245f9593b7967521bd6661d7059096c528cc7f0d",
+        "description": "glthread: don't prefix variable_data with const",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d93f4faefb0a867ea33b9530e9aa67ae1ed60e93",
+        "description": "glthread: don't generate the sync fallback if the call size is not variable",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a19c9290f44e6e73a104067a98420c273d98721b",
+        "description": "docs: update news, calendar, and link release notes for 20.0.1",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6b1f94e9f22e9c70da9e96bc490def5b8165c2a9",
+        "description": "docs: Add sha256sums for 20.0.1",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7c8766402ec6f43cd45219dc7cac310fc14101b6",
+        "description": "docs: add relnotes for 20.0.1",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f1890b7ad85b74bd92c858919a304dce8f7aae10",
+        "description": "docs: update releasing to cover updated post_version.py",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5cdaa06221f73fcb9476c30f52e3210f1e3f65b7",
+        "description": "bin/post_version.py: Make the git commit as well.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e3d3abb1bcc67891094f03c924fcc7110848eed2",
+        "description": "bin/post_version.py: Pretty print the html",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d7ada7d7e06359b01fcb6c25b295f58f10f50682",
+        "description": "bin/post_version.py: Update the release calendar as well",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d4cb9ef8260ced0a5693db18dedbdd11cbcfa7e6",
+        "description": "docs: Update release notes with current process",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7451eb9a2773a2dcde90ddc93fb5ef361b6f1b1e",
+        "description": "docs/submittingpatches: Fix confusing typo + missing pronoun",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "42a3d821cbd513db9abf31c4b61172dd7717f53c",
+        "description": "gitlab-ci: add a job that runs Fossilize on RADV/Polaris10",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "af1cd4585824e3efc941483d74915903439f27ba",
+        "description": "gitlab-ci: enable building the test image for VK unconditionally",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1cdb6edbe6dcfa3b0d254dc0f1f31e35be3b10ff",
+        "description": "gitlab-ci: add Fossilize support to detect compiler regressions",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "93fcc9ad57a7e0e64ae45988e62b24563ff9fdc3",
+        "description": "gitlab-ci: build Fossilize in the test image for VK",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b088a4b113f530ef8c1ad07df33b8fca8586c5d1",
+        "description": "aco: only reserve sgprs for vcc if it's used",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c6e0c062daa55269661b190deaec40e9749198bc",
+        "description": "aco: improve control flow handling in GFX6-9 NOP pass",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "47b7f104a0aa3692e9fb202741406a0c6d9ac8ad",
+        "description": "aco: consider non-hazard writes in handle_raw_hazard_internal",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "38743577f8b47c68ba01a9b9a982db52ef0f605d",
+        "description": "aco: improve get_wait_states()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7f1b537304d4837c907a9299dab3a7acf2518b0b",
+        "description": "aco: add new NOP insertion pass for GFX6-9",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ce196812579d48df8da05118a2a5098d048da83d",
+        "description": "iris: Enable HiZ and stencil CCS for blorp blit destinations",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a0d5c7da18c9ace4a2153d1352ac44cb3bd65425",
+        "description": "iris: Enable CCS for copies from HiZ+CCS depth buffers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "83b641a038704d7fe834d13dad39b0a9f841baca",
+        "description": "anv: Enable HiZ for VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6cec618e82aa233eee4e412a211a7bec0c40b090",
+        "description": "blorp: Write to depth/stencil images as depth/stencil when possible",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4531f0ffcec591e3853e78ce58f5d83cf276fb0d",
+        "description": "iris: Allow HiZ on blit sources",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9f5f4269a66eebfcaa3ae5cd7bdf91d88a7fc69c",
+        "description": "isl: Set 3DSTATE_DEPTH_BUFFER::Depth correctly for 3D surfaces",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "07f1ef5656e0721282d01a8421eaca056348137d",
         "description": "docs: Update stable process around using fixes: and gitlab",
         "nominated": false,
