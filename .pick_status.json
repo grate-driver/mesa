@@ -166,7 +166,7 @@
         "description": "iris: make resources take a ref on the screen object",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": null
     },
