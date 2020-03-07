@@ -1039,7 +1039,7 @@
         "description": "nv50/ir/nir: fix global_atomic_comp_swap",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "20d0ae464c4accd97227b1b4e805a9c10183647d"
     },
