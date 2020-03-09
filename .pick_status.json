@@ -517,7 +517,7 @@
         "description": "gen_release_notes: fix version in \"you should wait\" message",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "86079447da1e00d49db0cbff9a102eb4e71e8702"
     },
