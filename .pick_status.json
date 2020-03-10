@@ -1480,7 +1480,7 @@
         "description": "vulkan/wsi: fix cleanup when dup() fails",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "f5433e4d6ce247b86daed741c07aa99f2bd02c0d"
     },
