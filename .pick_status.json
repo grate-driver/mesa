@@ -1,5 +1,563 @@
 [
     {
+        "sha": "ba03e308b66b0b88f60b99d9d47851a5e1522e6e",
+        "description": "freedreno/fdperf: set locale",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "30dd0599250c4743ded25663d32c263ab226510c",
+        "description": "freedreno/computerator: add performance counter support",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "af68b0d3460259b4d9255c36f31381059e482019",
+        "description": "vulkan/wsi: Return an error if dup() fails",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "34d2637fa76ba4dd1969f06352e191ccb228d8f3",
+        "description": "vulkan/wsi: Don't leak the FD when GetImageDrmFormatModifierProperties fails",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3c96e25de77b4879f54ef5727378dacf13e7e398",
+        "description": "freedreno/ir3: try to avoid syncs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cc82521de4e8e85022a5facb1b5f52d5139d3022",
+        "description": "freedreno/ir3: round-robin RA",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b2b349096f03803b974d1d942cfff37f77325bee",
+        "description": "freedreno/ir3: track register usage in first RA pass",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9ae93be8fbdf753e07fbf1b707ce3bc89105b5a9",
+        "description": "freedreno/ir3: fix has_latency_to_hide",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b6eb11295a7fab543d738263798b96883e3a658b",
+        "description": "freedreno/ir3: split out has_latency_to_hide()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "dd2e050a8422aed2f4de601b3894cbba94ba30bb",
+        "description": "util/ra: move NO_REG to header",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "36aed70b591f7f4f642b26f46f7928be6d137e7b",
+        "description": "util/ra: spiff out select_reg_callback",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b3efa2a4da206112f6c9b5adb2df37c2efe646e6",
+        "description": "freedreno: fix FD_MESA_DEBUG=inorder",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "2c07e03b792d57ae807a6953f0d8ff5f4bcdffd0"
+    },
+    {
+        "sha": "752b9985bed171a39bb439421d0e2cd8d0ab82aa",
+        "description": "freedreno/ir3: add simplified stall estimation",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "64ae2ef8bbc63750346345e331750f0e0c643103",
+        "description": "freedreno/ir3: remove extra nops inserted in scheduler",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ad2ff7a278a80a05021c68fa014731e8d9c10713",
+        "description": "freedreno/computerator: add hrsq/hlog2/hexp2",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4a8e4c18d2f088458664363eba37173bd457bab8",
+        "description": "freedreno/ir3: also lower lowp frag outputs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3535797e8c991d5159871f1517fde107b6990a96",
+        "description": "nir/print: show variable precision",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "10eee6d8c630a346cb7d531263f69151016946d6",
+        "description": "intel/tools: Fix compilation with UBSan",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "74be835a84aaa9637c550ae4d71a2dfc66dc6990",
+        "description": "i965: Use gl_vertex_format in brw_vertex_element.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e62b82a693e6835dce809e924b4a2335486659d4",
+        "description": "i965: Make use of the vertex format functions in i965.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cf929823bf8253388a863fa495844380060f68fb",
+        "description": "mesa: Provide gl_vertex_format accessors.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1641c872ed36ee92ce8136385936e19f8535bec3",
+        "description": "mesa: Remove now unused _mesa_draw_attrib.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "305724dd7b716fc1c577fde6a0dd3fa62fc0f502",
+        "description": "mesa: Remove now unused _mesa_draw_attrib_and_binding.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4ccda7bfd9712f1a9e29b9209e444c8e5652167c",
+        "description": "i965: Remove glbinding from brw_vertex_element.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "38db4f17200cb5bfeb550bb732ccace5052afb04",
+        "description": "i965: Reorder workaround flags computation.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e53fd073beabfa36338fa349dedfa83e0d0a4d92",
+        "description": "i965: Split merge_inputs and clear_buffers.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "de579ffba2e4968cf9aca046369c3cbb6684a1e2",
+        "description": "i965: Test original vertex array pointer to skip array upload.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b684030c3a656ffdbc93581856034e0982db46fd",
+        "description": "i965: Use the VAOs binding information in array setup.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e1f2c84282bbcce9d7e94ac99d2ff1b3489f6e67",
+        "description": "i965: Use 32 bit u_bit_scan for vertex attribute setup.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0ea3ca3eca4c0c7ff3b41ff09e6cb30b532c8bc5",
+        "description": "iris: Move down iris_emit_sbe_swiz in profiles.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "630154e77b778ccb594be9e572988b05b0fc28e1",
+        "description": "i965: Move down genX_upload_sbe in profiles.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b1a6a15aafd1bca30753abe626b85f26f029207a",
+        "description": "panfrost: Get rid of ctx->payloads[]",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "093da77ce68dd7c57e330f817f51ffa63e99783d",
+        "description": "panfrost: Use ctx->active_prim in panfrost_writes_point_size()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d66ef690d127a37e6832c1d0e9fee0f48e2c6232",
+        "description": "panfrost: Re-init the VT payloads at draw/launch_grid() time",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "836686daf36cd8d7c17c909d98f5c9e07549d674",
+        "description": "panfrost: Move panfrost_emit_varying_descriptor() to pan_cmdstream.c",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b95530bef23826d3d6ca2e2e2d0ad2d74e572a47",
+        "description": "panfrost: Move panfrost_emit_vertex_data() to pan_cmdstream.c",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "251e685e726173f7256d12bdb6ce882859994793",
+        "description": "panfrost: Inline panfrost_queue_draw() and panfrost_emit_for_draw()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5d9995e82cdbf41efb7fb886922244eb958e4a9d",
+        "description": "panfrost: Move vertex/tiler payload initialization out of panfrost_draw_vbo()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "13881a4dada8653a5857a1dad969f7c4acf3db0c",
+        "description": "panfrost: Move streamout offset update out of panfrost_draw_vbo()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "046c15458575f826da430d86a3056876f1bcc638",
+        "description": "panfrost: Rename panfrost_stage_attributes()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "dcc0b1ff01254554dfc0b0b777bab9ba404fe5b8",
+        "description": "panfrost: Move the mali_attr.src_offset adjustment to a sub-function",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "575f62ea02ecd420572fd952cff5da0304ade17c",
+        "description": "panfrost: Emit attribute descriptors after patching the templates",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4a2ee61a22f5b408a4ac5377b735df3d9d312f50",
+        "description": "panfrost: Prepare attribute for builtins at state creation time",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b692ab076a72be97bea6bc527ea1c2e55c5f4d3c",
+        "description": "panfrost: Ignore BO start addr when adjusting src_offset",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "128820b88681dbcad156138594ca846c95904ee8",
+        "description": "panfrost: Drop initial mali_attr_meta.src_offset assignment",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "528384cb6dedfa43980e89ef8dc8c8380d8645a3",
+        "description": "panfrost: Add an helper to emit a pair of vertex/tiler jobs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8e0a08bc8eb2214bd2ba378a894c0b40568444cc",
+        "description": "panfrost: Move sampler/tex descs emission helpers to pan_cmdstream.c",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2b946a1d2b5319d2a24c04c79a64706b89efcc9e",
+        "description": "panfrost: Add a panfrost_sampler_desc_init() helper",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b02f97c87559256086a935836abae3f67ad478c6",
+        "description": "panfrost: Prepare shader_meta descriptors at emission time",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "55e014336fa69545b71f15c627bb29a7d7c39f7e",
+        "description": "panfrost: Prepare things to get rid of panfrost_shader_state.tripipe",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e94076f8f59c25ba1ccb5e3409b9587a9d0845e8",
+        "description": "panfrost: Add an helper to update the rasterizer part of a tiler job desc",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "56aeb921e92ace34e84440ff679590b98895b9e7",
+        "description": "panfrost: Add an helper to update the occclusion query part of a tiler job desc",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5f043cc7766fc506f8de88d38cf9b60d7a47afbf",
+        "description": "panfrost: Simplify panfrost_emit_for_draw() and make it private",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8ac17139b1c9b5f8b017c389a29fd373ecfd9e55",
+        "description": "panfrost: Stop using panfrost_emit_for_draw() for compute jobs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0d75eb002e1e3444052eb93046368dddea9b576c",
+        "description": "panfrost: Move panfrost_attach_vt_framebuffer() to pan_cmdstream.c",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5d33d42b4d42abc9fb8b212222ca5f6d17d94e7d",
+        "description": "panfrost: Dissociate shader meta patching from the desc emission",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "36725be4d952117f75c112db7eecbd3bc1f3139e",
+        "description": "panfrost: Move shared mem desc emission out of panfrost_launch_grid()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0b735a2d808205c8a3e5e496d85693db85f7716c",
+        "description": "panfrost: Move the const buf emission logic out of panfrost_emit_for_draw()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a72bab1c3e6b2732f2f4e7f4f0a16ff1a8927ebd",
+        "description": "panfrost: Move viewport desc emission out of panfrost_emit_for_draw()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "79f8850527756dd0d0e861a59d8c7e6700314a5d",
+        "description": "panfrost: Move the batch stack size adjustment out of panfrost_queue_draw()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b28f4bb67ce385b8e87c8d2c4d29195fe557547c",
+        "description": "panfrost: Add an helper to retrieve the currently active shader state",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a0402f79601c69089cc3cefab51adab9c3331669",
+        "description": "panfrost: Assign primitive_size.pointer only if writes_point_size() returns true",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "24db276d11976905b2e8a44965c684bb48c3d49f",
         "description": "radv/sqtt: describe pipeline and wait events barriers",
         "nominated": false,
