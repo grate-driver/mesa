@@ -76,7 +76,7 @@
         "description": "glsl: do not crash if string literal is used outside of #include/#line",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "67b32190f3c953c5b7091d76ddeff95c0cbfb439"
     },
