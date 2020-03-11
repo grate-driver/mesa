@@ -499,7 +499,7 @@
         "description": "nir: Add ability to lower non-const quad broadcasts to const ones.",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": null
     },
