@@ -1480,7 +1480,7 @@
         "description": "radv/llvm: fix subgroup shuffle for chips without bpermute",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": null
     },
@@ -4054,7 +4054,7 @@
         "description": "radv: Enable subgroup shuffle on GFX10 when ACO is used.",
         "nominated": false,
         "nomination_type": null,
-        "resolution": 4,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": null
     },
