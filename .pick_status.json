@@ -1741,7 +1741,7 @@
         "description": "nir: fix definition of imadsh_mix16 for vectors",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "c27b3758fa0dcd7fade9e85c5483b8310b8263d7"
     },
