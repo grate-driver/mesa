@@ -58,7 +58,7 @@
         "description": "llvmpipe: Use uintptr_t for pointer values",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "264663d55d321225a4962073ce4b7389d3d42287"
     },
