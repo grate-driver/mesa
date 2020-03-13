@@ -463,7 +463,7 @@
         "description": "amd/llvm: Fix divergent descriptor indexing. (v3)",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 3,
         "master_sha": null,
         "because_sha": "028ce527395642b68612d10c6030be5d4706a65e"
     },
