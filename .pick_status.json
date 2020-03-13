@@ -202,7 +202,7 @@
         "description": "st/mesa: Fix signed integer overflow when using util_throttle_memory_usage",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "21ca322e637291b89a445159fc45b8dbf638e6c9"
     },
