@@ -40,7 +40,7 @@
         "description": "nir: fix clip/cull_distance_array_size in nir_lower_clip_cull_distance_arrays",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": null
     },
