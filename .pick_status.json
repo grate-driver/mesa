@@ -607,7 +607,7 @@
         "description": "st/mesa: disallow deferred flush if there are multiple contexts",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "d17b35e671ae7c6ab6b89973506d12b958d2264d"
     },
