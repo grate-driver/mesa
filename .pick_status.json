@@ -1,5 +1,257 @@
 [
     {
+        "sha": "ee9e0d1ecae307fa48200d2604d3114070253299",
+        "description": "aco: set late kill for v_interp_p1_f32 for some APUs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1872759f55384175f8fb4277abe4bd45b85d2d9e",
+        "description": "aco: add a late kill flag",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c51348bd9b652aef65b5fd999165ecb8c388e61b",
+        "description": "aco: move some register demand helpers into aco_live_var_analysis.cpp",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e1b08b55ff461677f05e827ebeab02918096ba0a",
+        "description": "radv/sqtt: handle thread trace capture in sqtt_QueuePresentKHR()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4061ac859d0b612a801ae9047afbd352fb74e006",
+        "description": "anv: Push UBO ranges relative to the start of the binding",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "e03f9652801ad7f70091e084535a3fb6650c3acd"
+    },
+    {
+        "sha": "ae15b4fd733597880fee5357fb2d1f2f100b30c1",
+        "description": "anv: Fix the comparison in an assert",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "e03f9652801ad7f70091e084535a3fb6650c3acd"
+    },
+    {
+        "sha": "299fad5585c2b969ceebc5ad2bd4df1ad446ee1a",
+        "description": "gitlab-ci: bump Vulkan CTS to 1.2.1.0",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "af6d8dea008bfc1a2cc5e82caa2f36ff6657deaa",
+        "description": "gitlab-ci: do not set the number of deqp-parallel jobs for RADV CTS",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4668a08e9d7bf73683f9527920fc544eb95e8497",
+        "description": "gitlab-ci: allow deqp-runner to use the maximum number of jobs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "888b41f0ee0cc0f79c299d5a2a9149ae13306c12",
+        "description": "gitlab-ci: remove useless 'patch' package in the VK test image",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3349fe9a26d10a2d06c3f4a8ad0e5b554da2a243",
+        "description": "tu: Rewrite border color handling",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f6dad10d0474cc80228636d6deb45b6025583566",
+        "description": "meson: Avoid duplicate symbols.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4b61ad372d51681a3fb41b2dc21d2d58eb2becac",
+        "description": "Revert \"ci: Remove T820 from CI temporarily\"",
+        "nominated": true,
+        "nomination_type": 2,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "089c8f0b8da86a05bde8359c84085e0b795abf17"
+    },
+    {
+        "sha": "bbdb4b1a6d9c1f211ef7e67f3dcdf92de24c3a67",
+        "description": "gitlab-ci/lava:  fix handling of lava tags",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "fd1436440bd84d0b48fd7282b8f012ad382483ed",
+        "description": "iris: allow compression conditionally for images on gen12",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d836f3fadfbfe3dfc8bd1b60b2146f676e8ff8a1",
+        "description": "isl: allow compression for storage images on gen12+",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cd132a8eed94955332db6c8b553141f1b261066f",
+        "description": "iris: determine aux usage during predraw and state setup",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d4c879e69e2e54d3f422367a51dc4a4a82dddf22",
+        "description": "iris: move existing image format fallback as a helper function",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "fe2baf72e7b8068cc0abce3f0bb9bd81565c8cf8",
+        "description": "iris: provide dummy iris_image_view_aux_usage",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e8f0483ec408037ce7b7c6014674f13cc4461079",
+        "description": "intel/compiler: detect if atomic load store operations are used",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6dd654ba419d792806366f43ba9325f52eab9488",
+        "description": "iris: use the images_used mask in resolve pass",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5910c938a293c03337911ca3c067b4ecf4b406ee",
+        "description": "nir/glsl: gather bitmask of images used by program",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "51b1b102bd619b6a802807bde5f5228c1dabd1d7",
+        "description": "st/mesa: Fix signed integer overflow when using util_throttle_memory_usage",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "21ca322e637291b89a445159fc45b8dbf638e6c9"
+    },
+    {
+        "sha": "b93a1952258ebef6319fd4f4186d704e04b3064c",
+        "description": "isl: Avoid EXPECT_DEATH in unit tests",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5e523c9265d3a6f092bad17364cf7d7f5ead6e98",
+        "description": "gallium/swr: use ElementCount type arguments for getSplat()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a19d8c836f2263a2edeca4aea52676ecdbf2e8e9",
+        "description": "etnaviv: enable shareable shaders",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "fe204de632da54bc0902313a943374a413023e90",
+        "description": "etnaviv: get rid of etna_spec in etna_context",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4432dd6ea4fef2ae0f9a1bb3240d7df216cddf08",
+        "description": "anv: Dump push ranges via VK_KHR_pipeline_executable_properties",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "625d8705f02e211e2733c3fe12845505725c37d4",
         "description": "aco: don't stop scheduling at exports",
         "nominated": false,
