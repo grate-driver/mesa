@@ -283,7 +283,7 @@
         "description": "swr: Remove Byte Order Mark.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "c6e67f5a9373e916a8d2333585cb5787aa5f7bb7"
     },
