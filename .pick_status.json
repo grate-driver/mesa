@@ -40,7 +40,7 @@
         "description": "radv: only inject implicit subpass dependencies if necessary",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "e60de085473174e5a6b5a1e33e39006e62f5c786"
     },
