@@ -4,7 +4,7 @@
         "description": "radv: fix random depth range unrestricted failures due to a cache issue",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "f11ea2266644a016a898744d1283d83ab63f4fb2"
     },
