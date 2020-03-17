@@ -490,7 +490,7 @@
         "description": "swr/rasterizer: Use private functions for min/max to avoid namespace issues.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "ab5570820071d97c4adfe8cd8a90083f3784fa5e"
     },
