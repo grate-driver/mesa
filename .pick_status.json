@@ -1,5 +1,212 @@
 [
     {
+        "sha": "3dd0d12aa5fefa94123269a541c94cdf57599e34",
+        "description": "intel/blorp: Plumb the stage through blorp upload_shader",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4c35bc7e612f806d2e8a8a7126ddcdf45597806a",
+        "description": "zink: zero out zink_render_pass_state",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c923de68dd0ab10a5a5fb3196f539707d046d897",
+        "description": "radv/gfx10: fix required ballot size with VK_EXT_subgroup_size_control",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "fb07fd4e6cb9feb8c9a812dd5f859f165f213465"
+    },
+    {
+        "sha": "672d10619980687acec329742f055f7f3796c1b8",
+        "description": "radv/gfx10: fix required subgroup size with VK_EXT_subgroup_size_control",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "fb07fd4e6cb9feb8c9a812dd5f859f165f213465"
+    },
+    {
+        "sha": "46e8ba1344e840f9406537ae73c841a357278924",
+        "description": "radv: only inject implicit subpass dependencies if necessary",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "e60de085473174e5a6b5a1e33e39006e62f5c786"
+    },
+    {
+        "sha": "a0591863db891fd39bdbae199f740b0d4b5f0173",
+        "description": "gitlab-ci: Enable more Gallium drivers in meson-i386 job",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "106bf59ca903bd58c0bd2a9c5eff6b4180df0b24",
+        "description": "llvmpipe: Use uintptr_t for pointer values",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "264663d55d321225a4962073ce4b7389d3d42287"
+    },
+    {
+        "sha": "c56f09124b195c5cbaabdd7eadbb0523bede3abb",
+        "description": "gitlab-ci: Move classic driver testing to a new meson-classic job",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c3727ae431a132c1334884675f9c6c64ea6472b2",
+        "description": "gitlab-ci: Fold scons-swr job into scons job",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3ff437abb3f4ecaef1e3f241392b827cc3fdd202",
+        "description": "tu: Fix border color with compute shaders",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "32eecf58791ea3c5367e5ff4a542ae25fc3ce61d",
+        "description": "gitlab-ci: Don't use buster-backports packages by default for x86_build",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "90a39af5f65e5fa01beeec526594f7e04143e7cf",
+        "description": "ci: Drop the git dependency in tracie",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "43873afda4f8faa2b31a2f130fab52fbc24d490f",
+        "description": "gitlab-ci: Use surfaceless platform also for apitrace",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2ca662fb61269e3e3d36f8aab5939bc9dce14b4a",
+        "description": "gitlab-ci: Update renderdoc",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ac1dbd5ef81fe9bd389e38f22da32d940c1d9e02",
+        "description": "lima/gpir: fix crash in schedule_insert_ready_list()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2756b629171f61ca8e162be7b332e91a62c5c978",
+        "description": "lima/gpir: add better lowering for ftrunc",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b7d89476f1e7d0f3b9e751887f42b750a5ec216e",
+        "description": "lima/gpir: kill dead writes to regs in DCE",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8c1bcc8555ab17a1df043ebc8c2a3ebcf6c400bc",
+        "description": "lima/gpir: Optimize nots created from branch lowering",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "47dacf3867194fd456f015bc2a54d2ee4af30f4c",
+        "description": "lima/gpir: Optimize conditional break/continue",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9fb0fda8e7bfa95686fd60ee563938b8e1196437",
+        "description": "lima/gpir: Make lima_gpir_node_insert_child() useful",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5c3f20a25baa6f5b2baa2a6ef693e38095da5508",
+        "description": "panfrost: Fix gnu-empty-initializer error.",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "836686daf36cd8d7c17c909d98f5c9e07549d674"
+    },
+    {
+        "sha": "2d14a8f23721cba2f66ddecbece09a024dc1b45a",
+        "description": "aco: fix operand order for LS VGPR init bug workaround",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "a952bf394609134ff96f4bebb41bd022c621bfa6"
+    },
+    {
+        "sha": "ded7a8bb4625b28add06f8550526f2169045e87c",
+        "description": "aco: fix instruction encoding for LS VGPR init bug workaround",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "a952bf394609134ff96f4bebb41bd022c621bfa6"
+    },
+    {
         "sha": "ee9e0d1ecae307fa48200d2604d3114070253299",
         "description": "aco: set late kill for v_interp_p1_f32 for some APUs",
         "nominated": false,
