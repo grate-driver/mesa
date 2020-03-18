@@ -1,5 +1,194 @@
 [
     {
+        "sha": "94e37859a96cc56cf0c5418a5af00a3e9f5a1bf5",
+        "description": "radv: fix random depth range unrestricted failures due to a cache issue",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "f11ea2266644a016a898744d1283d83ab63f4fb2"
+    },
+    {
+        "sha": "a6625b15a466e2648a35810c64df882ea869971c",
+        "description": "turnip: Do gathering xfb info after nir_remove_dead_variables",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c11a2bc202f3fed542631024c618e7df528d9e02",
+        "description": "turnip: Fix wrong assignment of xfb output's offset.",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "2a1d6b81ed54971d33e83b7f5545da096b13b043"
+    },
+    {
+        "sha": "25a54554b319ce38dbe11f92cb2447bfb6b5b78f",
+        "description": "intel/decoder: don't consider header fields past dword0",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0c41937440276498b76c30657bc8d884ed8220db",
+        "description": "lima: decode depth/stencil write bits in RSW",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9205762caece0c4b9ecea3d56f72c6980935633a",
+        "description": "lima: implement zsbuf reload",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "dbceabed72977ffd49d84f926c59ff97554f349d",
+        "description": "lima: disable Z16 format",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8b8af6d398a94cb07015c695fdfdb5c157aa72cf",
+        "description": "gallium/util: Switch util_float_to_half to _mesa_float_to_half()'s impl.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8e4e2cedcf53d0f9649d51fc3acccaada96172bb",
+        "description": "amd/llvm: Fix divergent descriptor regressions with radeonsi.",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "b83c9aca4a5fd02d920c90c1799137fed52dc1d9"
+    },
+    {
+        "sha": "040ce9a1b3b596d34e224cf3be42747bdadc7163",
+        "description": "gallium: fix build with latest meson and gcc10",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8dc5e174c7b96b6d4b5a6923068410f298167a39",
+        "description": "ac: don't set old denormals flags with LLVM >= 11",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "63a5051ea6bf4d72a02594d21a3351e44bd70da7",
+        "description": "ac: set new LLVM denormal flags",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "56cc10bd27b24d513de88bf7fa94a6c8f43e348f",
+        "description": "ac: unify denorm setting enforcement",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e4959add2f44517b2227521af5aaf2919aaa6c3b",
+        "description": "gallium/u_vbuf: simplify the first if statement in u_vbuf_upload_buffers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "99a29a20d2e7b931c5ee6478665f0784eca2c0d8",
+        "description": "gallium/u_threaded: don't sync the thread for all unsychronized mappings",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5960dadd1f2494da6ea8fa04a46271beb66dea49",
+        "description": "freedreno/a5xx: Fix min-vs-mag filtering decisions on non-mipmap tex.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4bc15e78fa51e6c0df491a9fef4f99b2dfad77a9",
+        "description": "ci: Enable testing GLES2-3 on a530 (Dragonboard 820c).",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8997757c6abfe657a259bc5c681628e70792b67a",
+        "description": "ci: Enable ccaching of CMake builds as well.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ba39cc5e85ef3b2c14803d21f6fe437620432227",
+        "description": "ci: Enable ccache in the container builds.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "af7dca35602be1eda7481176cec596181c8fec41",
+        "description": "ci: Update the ci-templates commit.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d60375cbc2510ab7ad90b2654c0f6324468415cf",
+        "description": "anv: Do an end-of-pipe sync before updating AUX table entries",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "3dd0d12aa5fefa94123269a541c94cdf57599e34",
         "description": "intel/blorp: Plumb the stage through blorp upload_shader",
         "nominated": false,
