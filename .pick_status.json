@@ -121,7 +121,7 @@
         "description": "radv: fix optional pSizes parameter when binding streamout buffers",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "b4eb029062a944c428d6214447a852318e36016e"
     },
