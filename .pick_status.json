@@ -1,5 +1,635 @@
 [
     {
+        "sha": "cf62c2b2ac69637785f55b790fdd601c17e7e9d5",
+        "description": "radv: call nir_shader_gather_info again",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5193688e1ac696928109ade1b0eb901a91607436",
+        "description": "nir/gather_info: handle emit_vertex_with_counter",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "36ec3cbcf88e9dc4898bbe2319cc4a5a71ba72e1",
+        "description": "gallium/swr: spin-lock performance improvement",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "db5cc6a7ddeddbeb1e360156db520f55a5852b99",
+        "description": "radeonsi: enable glsl_zero_init for Curse of the Dead Gods",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3c03718fd7813b9023c286101d4f972aa3390de9",
+        "description": "nir: fix clip/cull_distance_array_size in nir_lower_clip_cull_distance_arrays",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "73812999d92ed9812993f22a8807895d670fa4b8",
+        "description": "pan/bi: Pack BI_BLEND",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a4fb88723e74041b53d3dddda5b08f3ec94510b6",
+        "description": "pan/bi: Flesh out BI_BLEND",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e06426ea85fa9092e3488c9e4600181f534454b6",
+        "description": "pan/bi: Add ATEST packing",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b18d0ef7081540b6c8d60bfd4f13792878ea1b28",
+        "description": "pan/bi: Flesh out ATEST in IR",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "61260819ba3f08fccf72dfe7d7498516eec413f9",
+        "description": "pan/bi: Track clause types during scheduling",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e323df05a906aa91edfd4895627d28b6f9a12c6d",
+        "description": "pan/bi: Don't hide SCHED_ADD inside HI_LATENCY",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d797822d31c1a19580de6a357f96405f04ad916a",
+        "description": "pan/bi: Pretty-print clause types in disassembler",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "42af9f47c8a91caad6803fdaccf111053e9303c4",
+        "description": "pan/bi: Route through clause header",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d4fbf751cfb863ee4b8e7963c0c37961519da774",
+        "description": "pan/bi: Skip over data registers in port assignment",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "32e5a7e6e91b43105d51047cc315119928ff09ab",
+        "description": "pan/bi: Emit load_vary ops",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "37f14c9e50ce144cc81bebf5124e7a9cd0ef0288",
+        "description": "pan/bi: Pass second src for load_vary ops",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "265169f48ada87fcea8e55dc4176954fb86d1153",
+        "description": "pan/bi: Generalize bi_get_src a bit",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1c0e786084f865d27b7be9d834855555fb0f049f",
+        "description": "pan/bi: List ADD classes in bi_pack_add",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6069904bbd46592d13a87520dc256c6006b12c50",
+        "description": "pan/bi: Pack fadd32",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f2afcc6101047b8cfcd5fac3f144e1f3325e6207",
+        "description": "pan/bi: Pack BI_FMA ops",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8a3bf3f1a1f13a6f14f849c5cdcdd1874566f88d",
+        "description": "pan/bi: Add struct bifrost_fma_fma",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cd40e189b6769f3cfb18557e3715a3289bebc13c",
+        "description": "pan/bi: Model 3-bit Bifrost srcs in IR",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "fe379776c7d7eca1bbb26af070710a1a2224b0ff",
+        "description": "pan/bi: Route through first_instruction field",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "90ca6a9a6b02087b97c12a6feb68381b41fa89d7",
+        "description": "pan/bi: Assign registers to ports",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ff39f57a48509f8a73655b6f4794cc5b73e4965c",
+        "description": "pan/bi: Add missing __attribute__((packed))",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9080ea8b57817e385d157c623af1bde87841c304",
+        "description": "pan/bi: Pack register fields",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "03a271bf15bd4aff587408be09066d2670ae47f8",
+        "description": "pan/bi: Add packing for register control field",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "50bce53cd0c44db531b37cb37426e3b087c788da",
+        "description": "pan/bi: Sketch out instruction word packing",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9269c85578bd68169681efad0fb2a3563eb280ab",
+        "description": "pan/bi: Setup initial clause packing",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0c5aab626bb52670267381383c823f4fb204b3d8",
+        "description": "docs: update calendar, add news item, and link releases notes for 20.0.2",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3c572fa571f7911a316ad9ef4697c65270c0d7e1",
+        "description": "docs/relnotes: Add sha256 sums for 20.0.2",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "552078aec6bad10ad04b5817611f2ff2f50c6f40",
+        "description": "Docs: Add release notes for 20.0.2",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3210214b67f783363c52c47a21d43a721d9388c9",
+        "description": "ci: Disable tests that showed intermittent fails on a530 in day 1.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "116a3ac481d4b5949027a5b0a798b0bef52e70b9",
+        "description": "ci: Ban the recent popular freedreno a630 flakes.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "56de6f698e3f164d97f132203e8159ef0b8e9bb8",
+        "description": "radv: remove wrong assert that checks compute subgroup size",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "672d10619980687acec329742f055f7f3796c1b8"
+    },
+    {
+        "sha": "46187bb54fe7a0ccfbafa09c5a168fb45da172d4",
+        "description": "anv: Swizzle fast-clear values",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3fb8f1948167c77f05f89b3a0933cbe2a1280b8d",
+        "description": "intel/blorp: Add support for swizzling fast-clear colors",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "bf2eb3e0eee39e79f5426dfa18d9d3b7f9dfbcb2",
+        "description": "soft-fp64: Split a block that was missing a cast on a comparison",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "f111d72596c4071ad38a2062699f17702bbd9c6d"
+    },
+    {
+        "sha": "a8882132f9243e61ca5a5b5f63cbfcca1120ff90",
+        "description": "soft-fp64/fadd: Common code optimization for differing sign case",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2d1216a039889cec8d8dbd994d4e50ed47d9692c",
+        "description": "soft-fp64/fadd: Move common code out of both branches of an if-statement",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "16dfd06472db407aee8a9c6ec761079633c6bdec",
+        "description": "soft-fp64/fadd: Use absolute value of expDiff",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "da3fa01891ec41ced3cbe2b63e8e5c8252e6e7ba",
+        "description": "soft-fp64/fadd: Rename aFrac and bFrac variables",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3c9ff97215b0c13c82f460dcc59cb61f6b02d78c",
+        "description": "soft-fp64/fadd: Combine an if-statement into the preceeding else-clause",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "480565812c1472faf440b3a27864c8c34610a0f5",
+        "description": "soft-fp64/fadd: Reformat after previous commit",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9496a67eece5717417b3b44ad1552c57b70b2897",
+        "description": "soft-fp64/fadd: Delete a redundant condition check",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7078105592bf332e1080fbd7049c3a8dd9cde0cc",
+        "description": "soft-fp64/fadd: Just let the subtraction happen when the result will be zero",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cae36fa217b427f67494bc67b3ca4bd0bbae517e",
+        "description": "soft-fp64/fadd: Pick zero or non-zero result based on subtraction result",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "70be98f17a1b8c66a92daac2a3d4eeb084bbc954",
+        "description": "soft-fp64/fadd: Massively split the live range of zFrac0 and zFrac1",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "73fa3a1ca44a5eb7bf1c4c5087fcacd912b62e65",
+        "description": "soft-fp64/fadd: Instead of tracking \"b < a\", track sign of the difference",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5b07f542e5a4ab698becbc238ff2ccc4720418bf",
+        "description": "soft-fp64: Optimize __fmin64 and __fmax64 by using different evaluation order [v2]",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "617a69107ee58e23ace06093bc49fa2c86b7dd4b",
+        "description": "soft-fp64/ffloor: Simplify the >= 0 comparison",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "abf28d6a70c3219e41c904806f77ea92d31bdb0f",
+        "description": "soft-fp64: Relax the way NaN is propagated",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8178fa88763a321cb5df853ee219884c2a7eedcc",
+        "description": "soft-fp64/fsat: Micro-optimize x >= 1 test",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b6f58b4709c240c7dd17c59674e0f63d70af70e5",
+        "description": "soft-fp64/fsat: Micro-optimize x < 0 test",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7673dcbd21150e67c5a36bdcc3eee419c025604b",
+        "description": "soft-fp64/fsat: Correctly handle NaN",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "a42163cbbc1abe02b7db4ade74b569f455942d1a"
+    },
+    {
+        "sha": "b421c0466d6ec28824b297d0545fca537c13a2b7",
+        "description": "soft-fp64/flt: Perform checks in a different order",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f6992bf62440e847ca129ea9f79862fa5ff4c35f",
+        "description": "soft-fp64/fneg: Don't treat NaN specially",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "de4acd8816cb02b65ade3ddafeffc194ff97f35e",
+        "description": "soft-fp64: Store sign value as 0 or 0x80000000",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "598e2fc6a1834ba8b1e0ee82ecf6c016f6ed7c3e",
+        "description": "soft-fp64: Pick a single idiom for treating sign value as a Boolean",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "325a21f5ebca90ccac9a7c3c571ed0513c4ec3d2",
+        "description": "soft-fp64: Simplify __countLeadingZeros32 function",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "812230fd94e2661b1e69234f35f3ec0e3bcc9571",
+        "description": "soft-fp64: Don't open-code umulExtended",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d1e0227ef14291242886be48424f723bf60bc439",
+        "description": "soft-fp64/b2f: Reimplement using bitwise logic ops",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4e3d69ad07d9c439fc99b7c1b1e999ce556d260f",
+        "description": "nir/algebraic: Simplify a contradiction that can occur in __flt64_nonnan",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e0cefc5a23a62b0bcf77db469adf1d0eb9ff8165",
+        "description": "nir/algebraic: Constant reassociation for bitwise operations too",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1d36af93389e0cdaa36e8b972f328566487bd7d5",
+        "description": "nir/algebraic: Generalize some and-of-shift-right patterns [v2]",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d6d63aec18624fe4cbc2e9b06d95f858500257df",
+        "description": "nir/algebraic: optimize ior(ine(a, 0), ine(b, 0)) to ine(ior(a, b), 0)",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "88eb8f190bd69c7f057063f5d88faece59477088",
+        "description": "nir/algebraic: Simplify logic to detect sign of an integer",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e7f3a8d6959c74f63c877dd8776fe519d54f946f",
+        "description": "st/mesa: disallow deferred flush if there are multiple contexts",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "d17b35e671ae7c6ab6b89973506d12b958d2264d"
+    },
+    {
+        "sha": "6ee971c8823d23e70ba34088fa5e9fd20eba2047",
+        "description": "anv: Use isl_drm_modifier_get_default_aux_state()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0905d5a14a790229c49914fc45e1dcd9d5c43c1d",
+        "description": "intel/isl: Don't align linear images to 64K on Gen12+",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "94e37859a96cc56cf0c5418a5af00a3e9f5a1bf5",
         "description": "radv: fix random depth range unrestricted failures due to a cache issue",
         "nominated": true,
