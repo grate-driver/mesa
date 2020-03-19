@@ -841,7 +841,7 @@
         "description": "radv/gfx10: fix required ballot size with VK_EXT_subgroup_size_control",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 3,
         "master_sha": null,
         "because_sha": "fb07fd4e6cb9feb8c9a812dd5f859f165f213465"
     },
