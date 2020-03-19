@@ -652,7 +652,7 @@
         "description": "intel/fs/gen12: Fix interaction of SWSB dependency combination with EU fusion workaround.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "e14529ff3262a527d630cecac655f69c8ae15c3f"
     },
