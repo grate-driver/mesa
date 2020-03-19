@@ -130,7 +130,7 @@
         "description": "mesa/main: Fix overflow in validation of DispatchComputeGroupSizeARB",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "45ab63c0cb274b20a7ae1f390b123e13a5b46c98"
     },
