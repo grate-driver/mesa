@@ -1,5 +1,122 @@
 [
     {
+        "sha": "3252041a7872c49e53bb02ffe8b079b5fc43f15e",
+        "description": "anv: Only add END_OF_PIPE_SYNC if we actually have AUX_INVAL",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "43dc842cb91c195fe7bb47a7ce324425096bf6f5"
+    },
+    {
+        "sha": "5b57aa79e2bd244079639bcc696251ce0f7af7c7",
+        "description": "freedreno: Switch to exposing only half-integer pixel centers.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5c8ba96a54feaf9bb783bb165bce91ee0c3253f9",
+        "description": "r600: Fix build error in sfn_nir_lower_fs_out_to_vector.cpp",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0df48e5d1f09c81bdbc9cc501c5a382c9175da33",
+        "description": "vc4_bufmgr: Remove duplicative VC definition",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e3bbe1fa65ede1e2504510d15b1c439fb81328fa",
+        "description": "etnaviv: Avoid shift overflow",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "511c6408f48097bb4c04087931e3712ade662525",
+        "description": "Android.mk: Tweak MESA_ENABLE_LLVM checks",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9dbff6f6ce0dea622f98c9d14336148e9afc19ae",
+        "description": "intel/iris: Always initialize CCS to 0",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "507abc395940debf59df19d51fdff071cdb9f6ed",
+        "description": "isl: drop min row pitch alignment when set by the driver",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "a3f6db2c4e927be7e7d40cbc39c8664030d2af59"
+    },
+    {
+        "sha": "def3470e9bc1c3c4d93b21cf15b7105e4f553dab",
+        "description": "isl: only apply main surface ccs pitch constraint with CCS",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "a3f6db2c4e927be7e7d40cbc39c8664030d2af59"
+    },
+    {
+        "sha": "dab0aadea9494ebf19a0c3e23a38bd01c857b49c",
+        "description": "isl: properly filter supported display modifiers on Gen9+",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "157a3cf3ecb6917c26508c5bf641e1b8c58e6228",
+        "description": "isl: implement linear tiling row pitch requirement for display",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f778c48869fb52c6afc757b307d95376aaabcf50",
+        "description": "ci: Only run the freedreno baremetal tests when freedreno/core changes.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7524717ba291a0df49e802c4fb690f40f7cf1f6c",
+        "description": "docs/release-calendar: Add calendar for 20.1 Release candidates",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "cf62c2b2ac69637785f55b790fdd601c17e7e9d5",
         "description": "radv: call nir_shader_gather_info again",
         "nominated": false,
