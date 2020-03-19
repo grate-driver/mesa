@@ -310,7 +310,7 @@
         "description": "radv: remove wrong assert that checks compute subgroup size",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 2,
         "master_sha": null,
         "because_sha": "672d10619980687acec329742f055f7f3796c1b8"
     },
