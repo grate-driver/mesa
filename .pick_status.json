@@ -1,5 +1,239 @@
 [
     {
+        "sha": "aee004a7c8900938d1c17f0ac299d40001b383b0",
+        "description": "util/sparse_array: Stash the node level in the node pointer",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6be65b077743fc80efe061b1e05cb13b2ff1a6b1",
+        "description": "meson,ci: Disable sparse_array tests on windows",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9fcd8bdbfcb556b72378ca6432ddf681b78f5a53",
+        "description": "util/sparse_array: Add a node_size_log2 temporary",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7893872a6c46a65d2f12bc0ae6bc4bd61fd3f8a1",
+        "description": "util/sparse_array: Finish the sparse_array in the tests",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8edaa843ab0f453300b981fd8f3d40b4984a75f2",
+        "description": "ci: Move db820c and db410c's gles3 tests to manual, like radv did.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "866a8da2a46d1e8722398450384df798619a3ca9",
+        "description": "tgsi/util: Change boolean for bool",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "24e82e453370e4105d73fcdf14cfb2f8922ddb9a",
+        "description": "util/blob: Add overwrite function for uint8",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1b49534df2197c59880ee703ff4dd813bc5f5231",
+        "description": "lima: add support for R and RG formats",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e763c6778ced36ba5f513391fc26952aab05d8af",
+        "description": "lima: split pixel and texel format tables",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d4b0e28f62421d0fb5a5bcb19038b4f6fec622c5",
+        "description": "zink/spirv: do not use bitwise operations on booleans",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "130c0ba1cc1b800641ed09fe7842c7ef4bce2dfb",
+        "description": "gitlab-ci: Restrict s390x/ppc64el jobs to packet runners",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "500842399a350481d99c691c1053a6adab095bc8",
+        "description": "radv/winsys: set has_syncobj_wait_for_submit in the null winsys",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "58deebe547014e64d8db3f8cc5e963efe7e0f743",
+        "description": "intel: add new TGL pci ids",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2d3223ca90ae946231c1bfbfd1b450e5e96106a3",
+        "description": "radv: fix optional pSizes parameter when binding streamout buffers",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "b4eb029062a944c428d6214447a852318e36016e"
+    },
+    {
+        "sha": "fdc603292862dd2663b75d18e9abc6096b8020ff",
+        "description": "mesa/main: Fix overflow in validation of DispatchComputeGroupSizeARB",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "45ab63c0cb274b20a7ae1f390b123e13a5b46c98"
+    },
+    {
+        "sha": "4ac1d3cc45121b88708ab7bfd8f3e12389a6cdfd",
+        "description": "driconf: enable glthread for \"From The Depths\"",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7a59d6eaa210dc22dc07de79ed7d8712b59e4042",
+        "description": "winsys/radeon: change to 3-space indentation",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b13d5265cce6b9879af197b629c188577ae0be2a",
+        "description": "glthread: don't declare unmarshal functions as inline",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "efaeac9e847a8234b1ea1cf32304c91f92b840a3",
+        "description": "glthread: clean up debug_print_sync code",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b00d219ec0da21c1bab89dc36aa20c9138b92226",
+        "description": "glthread: remove debug_print_marshal function",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "951c6acb074b18da0e595825fe05c77a0fbee96d",
+        "description": "glthread: don't execute any custom VAO and BindBuffer code in the Core profile",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "87f6be4456f3def3ccf6578714a993374ce98e5d",
+        "description": "glthread: track VAOs created by CreateVertexArrays",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "720f34d5ebd29fe8d8ffaa9098c5100346256418",
+        "description": "glthread: enable display lists",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4dcdf974f8df23bc0a5e284759a9379ec95192a9",
+        "description": "glthread: align the batch buffer to 8 bytes for pointers and doubles again",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ff0881c686cc250d492d38fd14063e4b18c951c1",
+        "description": "mesa: remove redundant api_loopback functions",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "98d11972334186b1b5ede148e32ac7758be56ce4",
+        "description": "mesa: use vbo_attrib_tmp.h to generate display list vertex attrib functions",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "3252041a7872c49e53bb02ffe8b079b5fc43f15e",
         "description": "anv: Only add END_OF_PIPE_SYNC if we actually have AUX_INVAL",
         "nominated": false,
