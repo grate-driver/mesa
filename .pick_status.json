@@ -886,7 +886,7 @@
         "description": "pan_bo.h: add time.h include for time_t",
         "nominated": false,
         "nomination_type": null,
-        "resolution": 4,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": null
     },
