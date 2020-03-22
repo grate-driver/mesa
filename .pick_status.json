@@ -895,7 +895,7 @@
         "description": "vc4_bufmgr: fix time_t printf",
         "nominated": false,
         "nomination_type": null,
-        "resolution": 4,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": null
     },
