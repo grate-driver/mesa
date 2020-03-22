@@ -211,7 +211,7 @@
         "description": "etnaviv: Emit PE.ALPHA_COLOR_EXT* on GPUs with half-float support",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "76adf041f25defad204abea1ed49b82fd9c264d1"
     },
