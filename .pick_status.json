@@ -211,7 +211,7 @@
         "description": "freedreno/ir3/ra: fix array liveranges",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "1b658533e1109b8ff9a6578a7eb4b390454e7876"
     },
