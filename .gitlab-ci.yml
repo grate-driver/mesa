@@ -559,7 +559,7 @@ scons-old-llvm:
     LIBGL_ALWAYS_SOFTWARE: 1
     PIGLIT_NO_WINDOW: 1
   script:
-    - artifacts/piglit/run.sh
+    - install/piglit/run.sh
 
 piglit-quick_gl:
   extends: .piglit-test
@@ -596,7 +596,7 @@ piglit-quick_shader:
   variables:
     DEQP_SKIPS: deqp-default-skips.txt
   script:
-    - ./artifacts/deqp-runner.sh
+    - ./install/deqp-runner.sh
 
 .deqp-test-gl:
   extends:
