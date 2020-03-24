@@ -229,7 +229,7 @@
         "description": "rbug: do not return void-value",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "fb04e5da97d904ab1dc7e0182bcba77071bbe340"
     },
