@@ -1,5 +1,257 @@
 [
     {
+        "sha": "05069e1f0794aadd40ce9269f858e50c64254388",
+        "description": "gitlab-ci: Fix traces caching in tracie",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "efdce97e4bb0a4b2e5d81d2f9276f3eedd9561b6",
+        "description": "vtn/opencl: add rint-support",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6d69ed88f875b1ed0cc0def96067fc2a92f4d0ed",
+        "description": "vtn/opencl: add native exp2/log2-support",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7b2bfb6bc4e354cfaf3f9f2774906c54c03cff0e",
+        "description": "vtn/opencl: add native exp10/log10-support",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "25cb87bcdd558747f3dd06be033c2a93ab634d53",
+        "description": "vtn/opencl: add native exp/log-support",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c98e745e787f5df9ad45db6472a37d51a03b5fb8",
+        "description": "compiler/nir: move build_log helper into builtin-builder",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f59ae6883853fd7c7ee0965111fc19d20f6acfd2",
+        "description": "compiler/nir: move build_exp helper into builtin-builder",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4821ec6d8fcd0287ee9ea5afdd922da5ab787900",
+        "description": "vtn/opencl: fully enable OpenCLstd_Clz",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "7325f6ac987d295b101372bffcb98799251fe678"
+    },
+    {
+        "sha": "51831537a2af75adc7d1611e4a7d6b02706eb32b",
+        "description": "gitlab-ci: re-enable mali400/450 and t820 jobs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "842f13d8f85c16fec350418e02dc593fbbc156f4",
+        "description": "gitlab-ci: add FILES_HOST_URL and move FILES_HOST_NAME into jobs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b1238498805bf600292f4663fc996e0396436435",
+        "description": "gitlab-ci: Serve files for LAVA via separate service",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "92f3c51560f9eb2387b1d929f694244c0b7bd577",
+        "description": "gitlab-ci: Place files from the Mesa repo into the build tarball",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b94c277fd1e7e8008ccc37aa2f4dd547ef92688b",
+        "description": "radeonsi: enable full out-of-order drawing when allow_draw_out_of_order is set",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8c053e5faded7b57fdd117ed86d572e0104c06bf",
+        "description": "mesa: allow out-of-order drawing to optimize immediate mode if it's safe",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0c6a667d9394c7bf0f5adef4320fd912653950af",
+        "description": "glsl_to_tgsi: set shader_info::writes_memory",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "85a723975bbd651fa6692655b9a4f14b4405d0ae",
+        "description": "nir: add and gather shader_info::writes_memory",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d269fb33b0a88045c42ff0733304ddc1e0d8f6c5",
+        "description": "radeonsi: Stop exposing PIPE_SHADER_CAP_FP16",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "603f38f1715b5dd88c8ef8bbd1192a5e3ce8a7c5",
+        "description": "util/u_process: Add util_get_process_exec_path for macOS.",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "f8f1413070ae079443ab31a75679cfd10cb756ed"
+    },
+    {
+        "sha": "8cdace95acdf83bdab3d1f1a55e77aec1dfdb39e",
+        "description": "freedreno: ssbo: mark resource read or written depending on usage",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "061b262a0c2482e10286c4ecc96a81b47546100a",
+        "description": "freedreno: ssbo: keep track if a buffer gets written",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0ed053f03d936d301091dd68e96ced8dbedc83b2",
+        "description": "freedreno: simplify fd_set_shader_buffers(..)",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3340cbd398bb5a74287e794277d2423d11bbbc52",
+        "description": "freedreno: calculate modified bit mask only once",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3cbcb1b73e5f764ed87fdcd1dea8a921e73bfd82",
+        "description": "gallium/util: Add back (and rename) util_float_to_half implementation",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9e78f17b74a862e34891901cde8292f91adeb655",
+        "description": "etnaviv: Emit PE.ALPHA_COLOR_EXT* on GPUs with half-float support",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "76adf041f25defad204abea1ed49b82fd9c264d1"
+    },
+    {
+        "sha": "4897e70ccd3987d470ec8622d473ee3405f6e96f",
+        "description": "gallivm: disable rgtc/latc SNORM accellerated fetches",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8c30b9d9878b14098d01a4bae5d51f1392e3baff",
+        "description": "rbug: do not return void-value",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "fb04e5da97d904ab1dc7e0182bcba77071bbe340"
+    },
+    {
+        "sha": "411d7429c942bc878675ea390c9a5f1eff86ddc6",
+        "description": "rbug: clean up cast-warnings",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "079cb4949dd3199ea5693cc0c6ac4c3d838ee022",
+        "description": "pipebuffer: clean up cast-warnings",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "1a66ead1c75246224bf43e82a07b4fdb2891959a"
+    },
+    {
         "sha": "12711939320e4fcd3a0d86af22da1042ad92035f",
         "description": "vulkan/overlay: Add a workaround semaphore for application presenting without one",
         "nominated": false,
