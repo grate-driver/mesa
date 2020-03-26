@@ -688,7 +688,7 @@
         "description": "util/u_queue: fix race in total_jobs_size access",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": null
     },
