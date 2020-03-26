@@ -40,7 +40,7 @@
         "description": "anv: Account for the header in anv_state_stream_alloc",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "955127db9376b49a41a428f5f89137cafec89b1c"
     },
