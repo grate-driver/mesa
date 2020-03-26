@@ -544,7 +544,7 @@
         "description": "radv: Store 64-bit availability bools if requested.",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": null
     },
