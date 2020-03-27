@@ -301,7 +301,7 @@
         "description": "nir: fix crash in varying packing on interface mismatch",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "26aa460940f6222565ad5eb40a21c2377c59c3a6"
     },
