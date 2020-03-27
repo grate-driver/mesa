@@ -31,7 +31,7 @@
         "description": "glsl: stop processing function parameters if error happened",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "d1fa69ed61d5aebeb69ce8a415c098035a953d48"
     },
