@@ -526,7 +526,7 @@
         "description": "nir/lower_int64: Lower 8 and 16-bit downcasts with nir_lower_mov64",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "62d55f12818e55bdbe83cf164f9af37a1a6d64d8"
     },
