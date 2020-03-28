@@ -580,7 +580,7 @@
         "description": "util: fix u_fifo_pop()",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "6e61d062093a71e267aed02870607fc5a0d7d8f4"
     },
