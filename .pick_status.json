@@ -1,5 +1,707 @@
 [
     {
+        "sha": "8970b7839aebefa7207c9535ac34ab4e8cc0ae25",
+        "description": "intel: drop unused include directories",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "231273d588a84436a96cc9c75ecf1858ca15c30c",
+        "description": "vulkan: drop unused include directories",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "79af30768d6cf8e28c7cf49f99fff6c2b2cb030b",
+        "description": "meson: inline `inc_common`",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5a32dda8e6f5780ed5e0927486f5eb4971d0162b",
+        "description": "meson: use existing variables in inc_common",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7df75203052fa8a8f2fbd603a4c7553752c57b0f",
+        "description": "mesa: Change _mesa_exec_malloc argument type.",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "e5339fe4a47c242693962c9f90bbab8b74935cba"
+    },
+    {
+        "sha": "fcd3377cfe23e419b9235424cef9db4792fac80b",
+        "description": "gitlab-ci: Update to current templates",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "447890ad64cb64bacafce8402e013b81e09359fe",
+        "description": "Revert \"gitlab-ci: Disable jobs for Collabora's LAVA lab\"",
+        "nominated": false,
+        "nomination_type": 2,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "1351ee03352b12690233a73e160f92da2edecf16"
+    },
+    {
+        "sha": "e6097375269a4823af3088bc2487d383c90c49f1",
+        "description": "radeonsi/gfx10: fix descriptors and compute registers for compute-based culling",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4ef1c8d60bd5f7ee2d8bc7e878d293256b921008",
+        "description": "radeonsi/gfx10: fix the wave size for compute-based culling",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b4a0087a1ceba4965b6c391e425d66f887c22de8",
+        "description": "radeonsi/gfx10: user correct ACQUIRE_MEM packet for compute-based culling",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "acc5bdf8870e0c47c00028f9f5502de036e79d3d",
+        "description": "radeonsi/gfx10: fix ds.ordered.add intrinsic for compute-based culling",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ee4d797d8b074c27de0e055d2e22b82f642f2359",
+        "description": "radeonsi/gfx10: don't use NGG culling if compute-based culling is used",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "65e9239977963c5caaef12cfd6b6c6e285f86381",
+        "description": "radeonsi: add num_vbos_in_user_sgprs into the shader cache key",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "be9455bdf767dd851c56075e6dd84b27e95dcfc2",
+        "description": "radeonsi: always create wait_mem_scratch for compute-based culling",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "42ce52b904323b1a165cfbc568f708ce7f39fe45",
+        "description": "radeonsi: set amdgpu-gds-size for mode == 2 of compute-based culling",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3381f2fa06be807c910ddb41aa239606419841d8",
+        "description": "radeonsi: fix incorrect ordered_wave_id initilization for compute-based culling",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d89b19cfe1bd8bd6f259b6a4d2070e8d08f3b67e",
+        "description": "radeonsi: remove obsolete TODO comment related to compute-based culling",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5d45ffbfb6c4db9962f705cddf90acee59f4f24b",
+        "description": "lima: Implement lima_texture_subdata",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6a10397a01248140de1aa92ce826dee88d445a1a",
+        "description": "gitlab-ci: disable vs2019 build",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f7d53275fb7e48481de00adfaff16ae8d333dd14",
+        "description": "freedreno/ir3/ra: re-work a6xx merged register file conflicts",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "faf276b4c85f807b4d57cd17a92ebcb421e99ea9",
+        "description": "freedreno/ir3/ra: split building regs/classes and conflicts",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "90f7d12236c5250bc56699a3071941daef0f515a",
+        "description": "freedreno/ir3/ra: pick higher numbered scalars in first pass",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1da90ca9bf9fc5b317e0b71f3f77f0bacd725969",
+        "description": "freedreno/ir3/ra: compute register target from liveranges",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d2cc92c747c20613190ba330f22f219d26422cfa",
+        "description": "freedreno/ir3/ra: fix array liveranges",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "1b658533e1109b8ff9a6578a7eb4b390454e7876"
+    },
+    {
+        "sha": "6347c2ea89bde624dd16cff6741db57e89d88ad5",
+        "description": "freedreno/ir3/ra: add def/use iterators",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "bf0aa7ed90231540c66328a515928dd8e3324343",
+        "description": "freedreno/ir3/ra: drop extending output live-ranges",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0e7d24b532e1a52cb5b3da36d1ed5b2204fb0acb",
+        "description": "freedreno/ir3/ra: add helper to map name to array",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d99d358389ca95ce23cfccf67150cccc66ff6407",
+        "description": "freedreno/ir3/ra: fix target register calculation",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d20a06e40199f4082cea73a3636b87823c76ed2b",
+        "description": "freedreno/ir3/ra: add helper to map name to instruction",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "29992a039e9959110139353664b7eb12d991e8d0",
+        "description": "freedreno/ir3/ra: split-up",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6da53911c15a33bf73fb1423b3e99affaceb0f75",
+        "description": "freedreno/ir3/ra: add debug option for RA debug msgs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "142f2d45516132dfe577815859179f661828c32b",
+        "description": "freedreno/ir3: convert debug bitfield to BITFIELD_BIT()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3d0905582a3d75882e1fd3846a500934045aa622",
+        "description": "freedreno/ir3: reformat disasm output",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "afdb8e390787b8199a554a0fe688cc1150e4c58f",
+        "description": "freedreno/ir3: fix bogus register footprint with tess/gs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1b4b455739dec43fea669509dc8585f6fbaa0487",
+        "description": "freedreno/ir3: remove unused helper",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c6a879275345c8c0b4885a68cfa8d72c2193fb8a",
+        "description": "freedreno/ir3: add bary_ij as src for meta:tex_prefetch",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a0de0db0e44c4a7096f57b6c242c7ec139987aa5",
+        "description": "freedreno/ir3: small cleanup and comments",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7d9a794f356beb73f08278df06fa1ef5670d012c",
+        "description": "freedreno/a6xx: register update",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "46a32f0b6bf91279d001a4905babe4e50007696e",
+        "description": "CI: Disable Panfrost Mali-T820 jobs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "871bd2819d51bf9720d2ff57522ec31f254431a5",
+        "description": "util: remove duplicated MALLOC_STRUCT and CALLOC_STRUCT",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "71646745002504302bcef51bdb438abbe66961fc",
+        "description": "util: don't include p_defines.h and u_pointer.h from gallium",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "013b65635f1db45650809d8d802436c1e9d009e3",
+        "description": "radv: stop including files from mesa/main",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "76f79db3f5d8492370c92080b5bbea7e31827b75",
+        "description": "util: stop including files from mesa/main",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c42fa40a51efcf877915689bf170c67fff7e5600",
+        "description": "mesa: don't use <> for including internal headers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e5339fe4a47c242693962c9f90bbab8b74935cba",
+        "description": "Move compiler.h and imports.h/c from src/mesa/main into src/util",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6cfe074b8617f92b4538f3006b0c4e55d6681436",
+        "description": "wgl: use gldrv.h instead of stw_icd.h",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ec201692645e1d7900d2500682e998a635eeb638",
+        "description": "wgl: add official gldrv.h header-file",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c9091f1f24394499100b475e232f6e6c54d40650",
+        "description": "nv50, nvc0: fix must_check warning of util_dynarray_resize_bytes",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f4a4d4607e33695faf17b98f54535df90289657b",
+        "description": "nv50: remove unused variable",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "c574cda3c6a3f880f99e4e22967fc82e34609942"
+    },
+    {
+        "sha": "aad0e6f81049c098fd3922d61aa228e4bf791317",
+        "description": "intel/perf: store the probed i915-perf version",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8e7202d45f6da94dcfdf2b8975a2d5a45734a14c",
+        "description": "intel/perf: document meaning of query field",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "dde96d31b75f7895900405ab771fb3dd0dd78069",
+        "description": "intel/perf: move mdapi query definitions to their own file",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "33b9c7a7f68bb5a4362751ba7daf1ba2b10ece95",
+        "description": "intel/perf: break GL query stuff away",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f5c5574f427c710fa2ed7413dc970ccb649b16d7",
+        "description": "intel/perf: move register definition to special file",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b9d2b5dcecc278055b0687f588255c7441a9a668",
+        "description": "gitlab-ci/traces: Add D3D11 sample entry for POLARIS10",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "07e5b3ad50118fac990fd56a08e5e5bcade5be44",
+        "description": "gitlab-ci: add Wine and DXVK env variables to Vulkan's tracie runner",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6bae042b3da4d962cd19137ddcde110ff6a88359",
+        "description": "gitlab-ci: replay apitrace traces in headless mode",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9f4acd465edc1360a1d5ea2646379bd5db3e1598",
+        "description": "gitlab-ci: add apitrace's DXGI traces support",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "fb8fa83a30a1ec66982854da0a8d7870cf1d2f93",
+        "description": "gitlab-ci: add Wine, win64's apitrace and DXVK to the Vulkan testing container",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "05a3b49308606fbf8c30688ece3177ad6eb17515",
+        "description": "gitlab-ci: Don't use buster-backports packages by default for x86_test-vk",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4a8876b025b7c9aa3ec8283f31e10b835c165980",
+        "description": "CI: Windows: Fix Docker tag argument inversion",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "07885cbcdb0b19265379c3941600faadc8a22d71",
+        "description": "CI: Add native Windows VS2019 build",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "bc98de4d14f9c099e47a7de6efc3766823ca3f54",
+        "description": "util/test: Use MAX_PATH on Windows",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "f8f1413070ae079443ab31a75679cfd10cb756ed"
+    },
+    {
+        "sha": "8f573bdaaa7c41b19edf99e891665378b76d8fd4",
+        "description": "util: fix process_test path",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "f8f1413070ae079443ab31a75679cfd10cb756ed"
+    },
+    {
+        "sha": "1351ee03352b12690233a73e160f92da2edecf16",
+        "description": "gitlab-ci: Disable jobs for Collabora's LAVA lab",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b5e00f5c2bd35920a1aaf9bb676c784d5d18b6fd",
+        "description": "nir: fix packing of TCS varyings not read by the TES",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "26aa460940f6222565ad5eb40a21c2377c59c3a6"
+    },
+    {
+        "sha": "8b9ebbcb546816f525298dc24711c1922751e312",
+        "description": "glsl: fix varying packing for 64bit integers",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ba2ec1f369d2c97fc7c54ecd52b0addcfd349a31",
+        "description": "ac/nir: use llvm.amdgcn.rcp in ac_build_fdiv()",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d548384fc686f4e9cc9e6551f9a582cc740f3233",
+        "description": "ac/nir: use llvm.amdgcn.rsq for nir_op_frsq",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "66426ce119b3b647f9ace62b74f18342cacd43a4",
+        "description": "ac/nir: use llvm.amdgcn.rcp for nir_op_frcp",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e352e7e792699661422218c1dc8ad06b4bbf6652",
+        "description": "x86: Add ENDBR at function entries",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9899a8e26c5c9063c3627e246981d727321e5ba3",
+        "description": "mesa: try to fix the android build",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "8a3e2cd9b26beb4d57ea417c4528e22c00c92126"
+    },
+    {
+        "sha": "36c155a0178d6f05d65a9acfe5b7553d7a522f07",
+        "description": "intel/fs/gen12: Fix interaction of SWSB dependency combination with EU fusion workaround.",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "e14529ff3262a527d630cecac655f69c8ae15c3f"
+    },
+    {
+        "sha": "007e623025bfc1f66686d1e1cd6a3efeff863f69",
+        "description": "x86_init_func_common: Add ENDBR at function entry",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2d0599b1b46968dda34953118e92d8720875162c",
+        "description": "intel/aub_viewer: Fix format specifier for uint64_t",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7b9f1b6ef755a07abcd396b42948ae6bf0a569a6",
+        "description": "panfrost: Extend the tiled store fast-path to loads",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "dac1573a3586565b8b78bd6aab3664921cc1adb1",
+        "description": "mesa/format_utils: Add a fast-path for RGBA to BGRA",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0847fe6e7fa6ee07420c6eed95bfee036748bc6a",
+        "description": "glsl: set error_emitted true if type not ok for assignment",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "d1fa69ed61d5aebeb69ce8a415c098035a953d48"
+    },
+    {
         "sha": "05069e1f0794aadd40ce9269f858e50c64254388",
         "description": "gitlab-ci: Fix traces caching in tracie",
         "nominated": false,
