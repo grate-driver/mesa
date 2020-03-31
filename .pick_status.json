@@ -2605,7 +2605,7 @@
         "description": "intel/compiler: store the FS inputs in WM prog data",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": null
     },
