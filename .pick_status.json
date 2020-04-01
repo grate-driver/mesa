@@ -283,7 +283,7 @@
         "description": "Revert \"spirv: Implement OpCopyObject and OpCopyLogical as blind copies\"",
         "nominated": false,
         "nomination_type": 2,
-        "resolution": 4,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "7a53e67816ed9baf7d825ed60ee59f0c05f9df48"
     },
