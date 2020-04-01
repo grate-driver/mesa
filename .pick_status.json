@@ -2290,7 +2290,7 @@
         "description": "EGL: Add eglSetDamageRegionKHR to GLVND dispatch list",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "9827547313c7239486efbd4067529575f98f1622"
     },
