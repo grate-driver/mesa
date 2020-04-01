@@ -1,5 +1,374 @@
 [
     {
+        "sha": "70ac7f5b0c46370075a35067c9f7dfe78e84b16d",
+        "description": "mesa/main: remove unused macro",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9ddd9d454c16959d92e6c785aac77ead83fab0b3",
+        "description": "mesa/main: clean up extension-check for GL_TEXTURE_EXTERNAL",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "dd6b35c99ee6e4cb1be60799fd653ced2c73940e",
+        "description": "mesa/main: clean up extension-check for GL_RASTERIZER_DISCARD",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0006dfbaed1376b88e1f2eadbd2da3ba3cd86ef3",
+        "description": "mesa/main: clean up extension-check for GL_TEXTURE_CUBE_MAP_SEAMLESS",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "994675b24d74e9092d9b41541436e911ae8faf18",
+        "description": "mesa/main: clean up extension-check for GL_FRAGMENT_SHADER_ATI",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "541708680f471eb3bd984bdecca7ba36fe12f0aa",
+        "description": "mesa/main: clean up extension-check for AMD_depth_clamp_separate",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e2dbd31dc0eb69f3a1df262842635c6ff8103d84",
+        "description": "mesa/main: clean up extension-check for GL_DEPTH_BOUNDS_TEST",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "67a7022f83965795c5a5080f3ac5aedb7d9387b3",
+        "description": "mesa/main: clean up extension-check for GL_STENCIL_TEST_TWO_SIDE",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "421a1accf0e7840f476d88e63e5861ec4f8deb76",
+        "description": "mesa/main: clean up extension-check for GL_TEXTURE_RECTANGLE",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "81d901aef1582dfaf7e5f27f01fc9928975ad047",
+        "description": "mesa/main: clean up extension-check for GL_VERTEX_PROGRAM_POINT_SIZE",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a5e781aa8085ef5f6fcfbf3dc09fc8899e64e13d",
+        "description": "mesa/main: clean up extension-check for GL_VERTEX_PROGRAM_TWO_SIDE",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "12e228fc9c7aa06809797d4b706ee05a2eb7c735",
+        "description": "mesa/main: clean up extension-check for GL_VERTEX_PROGRAM",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "23570066bfdeebb54953f2c3ac6c7dc73e368f38",
+        "description": "mesa/main: clean-up extension-checks for point-sprites",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "70b6972140e74037109b7f8c57d442c8316d09dc",
+        "description": "mesa/main: correct extension-checks for GL_BLACKHOLE_RENDER_INTEL",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "74ec39f66d506c78ee62a685b7fa055faa0991b9"
+    },
+    {
+        "sha": "1e3b74ee73f897bfe50c9bf27458c95870d8c317",
+        "description": "loader: Warn when we fail to open a device node due to permissions.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "15a9f6c07228f59401954bb18b9c2f980297f634",
+        "description": "svga: Treat forced coherent maps as maps of persistent memory",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "46fdc288fb52345134fd9aacd6d7ff71c7b747bb",
+        "description": "svga, winsys/svga: Fix persistent memory discard maps",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "71b43490dd04c03d4027230b0939b81ab91650ca"
+    },
+    {
+        "sha": "1b16d6354bc9f64ed97fc400977e3ffcb4c09268",
+        "description": "pan/bi: Fix outmod/roundmode flip",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "12cf9f43f02ac00b9604e12f1fb26e363941d90b",
+        "description": "pan/bi: Handle fmov class ops",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "357b8b59065c50dd4d8eecf437bb721be38092bd",
+        "description": "pan/bi: Fix unused port swapping",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b150fa214b259f0039293c2e727bb77d7417c541",
+        "description": "pan/bi: Add cmdline option for verbose disassembly",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ae4f48b2bc3b9e1969be738fe230a7b5a880bd0d",
+        "description": "pan/bi: Don't set the back-to-back bit yet",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0b241c70b6a1f39840aec2fe5db43f0e33221d7b",
+        "description": "pan/bi: Use STAGE srcs for scheduler nops",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2292e2aa10a3ef77ef4d195c09aad334a18bd080",
+        "description": "pan/bi: Fix writes_component for VECTOR",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b033189dd7d0e2c403ed17b5ec5e76b0c93dbb36",
+        "description": "pan/bit: Wire through I/O",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b26214e9075c5b8dfc24118a1724b5dd3bb5e22b",
+        "description": "pan/bit: Add `run` mode to the cmdline",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cb56d5d9f8b6df7f50cb60f734363b3c769d8d8c",
+        "description": "appveyor: Remove Meson job.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "59754409cc6e9c9e8f9f82a4a523e7370c373a07",
+        "description": "freedreno/log: fix build error",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b097e326b8b066d3697c79aec2c6c32c453757f9",
+        "description": "nir/algebraic: Remove a redundant fabs pattern",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "af1bc7e0c7dd1f3c4f2226f93e819e410fd7a731",
+        "description": "nir/algebraic: Use value range analysis to convert fmax to fsat",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "62795475e8f45f92bb8f467d9e2318fdfdba6297",
+        "description": "nir/algebraic: Distribute source modifiers into instructions",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c0bdf37c9100c4e473f53defccab4e2ae6b7a7b1",
+        "description": "nir/algebraic: Change the default cursor location when replacing a unary op",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d2b4f3f1374c179e066b1fec56875613b7e64945",
+        "description": "intel/vec4: Allow late copy propagation on vec4",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0f4a81430e65e09db13d2472fd46105a95ea625d",
+        "description": "nir: fix crash in varying packing on interface mismatch",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "26aa460940f6222565ad5eb40a21c2377c59c3a6"
+    },
+    {
+        "sha": "31011c7a39f0d054b97b730c8928176d72c9707c",
+        "description": "freedreno/turnip: Use the NIR info to decide if we need helper invocations.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "974b9c57c1efec7b58339f23d0d35bae2c6d9890",
+        "description": "freedreno: Drop an unnecessary include marked \"this should go away\"",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "127fa5d00c3fbcc23b7f5fea4ab50da061477cba",
+        "description": "freedreno/ir3: fix android build",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "e5339fe4a47c242693962c9f90bbab8b74935cba"
+    },
+    {
+        "sha": "ae7da1a01706835120bd59ea069e49cf325feaa3",
+        "description": "util: move ALIGN/ROUND_DOWN_TO to u_math.h",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7a53e67816ed9baf7d825ed60ee59f0c05f9df48",
+        "description": "spirv: Implement OpCopyObject and OpCopyLogical as blind copies",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "88c046a6d3228cc3a667cba96e4fa57c341ab162",
+        "description": "isl: don't warn in physical extent calculation for yuv formats",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "015f08dd4301ee6f6c00d76c03a197d1522a1e51",
+        "description": "isl: set bpb for Y8_UNORM",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "5f4d9b419a1c931ad468b8b22b8a95b1216891e4",
         "description": "scons: prune unused Makefile.sources",
         "nominated": false,
