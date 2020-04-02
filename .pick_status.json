@@ -247,7 +247,7 @@
         "description": "nir/algebraic: Optimize ushr of pack_half, not ishr",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "1f72857739beed55276f263f49b3802c336b8c58"
     },
