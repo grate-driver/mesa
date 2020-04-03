@@ -2236,7 +2236,7 @@
         "description": "nv50: don't try to upload MSAA settings for BUFFER textures",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "3bd40073b9803baf62f77ed5ac79979e037d2ed6"
     },
