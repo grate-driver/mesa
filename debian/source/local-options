@@ -20,3 +20,6 @@ extend-diff-ignore = src/gallium/auxiliary/gallivm/f.cpp
 
 # empty Makefile.sources
 extend-diff-ignore = src/gallium/drivers/pl111/Makefile.sources
+
+# CI
+extend-diff-ignore = .gitlab-ci|.gitlab-ci.yml
