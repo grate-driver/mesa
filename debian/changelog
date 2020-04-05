@@ -1,4 +1,4 @@
-mesa (20.0.3-1) UNRELEASED; urgency=medium
+mesa (20.0.4-1) UNRELEASED; urgency=medium
 
   * New upstream release.
   * path_max.diff, libglx-mesa0.symbols.hurd: Fix build on Hurd.
