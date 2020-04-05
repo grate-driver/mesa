@@ -1,5 +1,374 @@
 [
     {
+        "sha": "c71c1f44b055c680f073a2608a3bf560b55f8974",
+        "description": "nir/from_ssa: Only chain movs when a src is also a dest",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "73e574acb85c06386dd59f11401eea43a2895d5a",
+        "description": "freedreno: Rename RB_DONE_TS",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "36133a5434d38d8a4983df3fcd31b7e5dccf00cf",
+        "description": "freedreno: Cleanup event names",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2077421437038e3bd73544c34f567601b912ce09",
+        "description": "gallivm: fix stream id fetch",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0a3a8806707b7ba4fc2e79896b63c35b1d9f80f6",
+        "description": "gallivm: switch the mask6/mask7 cases for signed rgtc formats",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ebb5b88a02637908b9f4bfd0644964d6347b23af",
+        "description": "gallivm: fix rgtc2 format",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5cc27d59a11ed11081b3f5c9acc3280ec412ebed",
+        "description": "anv/image: Use align_u64 for image offsets",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4e3a7dcf6ee4946c46ae8b35e7883a49859ef6fb",
+        "description": "gallium: enable EGL_EXT_image_dma_buf_import_modifiers unconditionally",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e0aa203fa94a58f12b0ee10ee47ba9c59bbd43f1",
+        "description": "driconf: whilelist more games for glthread",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d0f836e5aef29c5887cb5f3d3cba2b1d7d5d78fd",
+        "description": "tracie: Switch to using shutil.move for cross filesystem moves",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7b7dbd4fc832eb67a4afd013f8cb623cedcf0d51",
+        "description": "wgl: do not create screen from DllMain",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "99a0864b481eaf3e8c50e6057628779096747333",
+        "description": "wgl: move screen-init to a helper",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "098d4cf25f34183f35482ee40d4ef2c4e810269d",
+        "description": "wgl: drop unused member",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0a8da6102d03d50ca5b220567e78e3fa1f922fba",
+        "description": "wgl: drop pointless debug_printf",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "dbc86fa3de6aba480f679a36b40227c0fe27c37b",
+        "description": "radeonsi: dump shader stats when hitting the live cache",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8306c533fe6b220b7ac3b40084266a47640fcf33",
+        "description": "gallium/util: let shader live cache users know if a hit occured",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d259768e62591b4e5bb49042d6535f0a76164e3f",
+        "description": "glsl_to_nir: remove dead code",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "191ced539a18e4738e7e6bce7612779dced1625a",
+        "description": "anv/pipeline: allow more than 16 FS inputs",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "460de2159e2aa8e67f216d9ad8e9ce00cc8c9679",
+        "description": "intel/compiler: store the FS inputs in WM prog data",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "67c7cabd7fa9e6babb423080d53a045980e295ef",
+        "description": "anv: use urb_setup_attribs in SBE",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1ac9f362e0f848ef5bdc6ede12d0389bb7407ff6",
+        "description": "docs: update calendar, add news item, and link releases notes for 20.0.3",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a264edd74c746409ec2d9231c6475361668e5d16",
+        "description": "docs/relnotes: add sha256sum for 20.0.3",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2e01090b54b721fbfe8d085e9b1dcf69f9f9cd99",
+        "description": "docs: add release notes for 20.0.3",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2a2fd4c5308dee51d48630863255f1c6a04768a9",
+        "description": "gallium/llvmpipe: add an optimised 32-bit memset",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c07bbdbe8268a2c80c602f71eb413f0d84920038",
+        "description": "nir: place aligned members after bitfields in shader_info.tess",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "f1dd81ae1047304a4cfb0861cb85c69a2ae776ec"
+    },
+    {
+        "sha": "90a8b458acea4231a921962bee220ba76e6517a2",
+        "description": "nir: check shader type before writing to shaderinfo.tess union",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "f1dd81ae1047304a4cfb0861cb85c69a2ae776ec"
+    },
+    {
+        "sha": "e47bf7dadff612694cf61eedbabc7b313766053f",
+        "description": "anv: Do not sample from 3d depth image with HiZ",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0487130d3477c85abee77018e17d0ffe2d136349",
+        "description": "gallium/swr: Re-enable scratch space for client-memory buffers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "37b8130bf9ecfc8c9138211ca9d89554bf70d47d",
+        "description": "gallium/swr: Fix array stride problem.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c1e7e83d52d912b9a1ba5009e8f84d737c1e0d21",
+        "description": "ci: Consistently use -j4 across x86 build jobs and -j8 on ARM.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2f424c83e072f6a21d15af1064f6e744e801fbfa",
+        "description": "aco: only break SMEM clauses if XNACK is enabled (mostly APUs)",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "68f325b256d96dca923f6c7d84bc6faf43911245",
+        "description": "Revert \"spirv: Implement OpCopyObject and OpCopyLogical as blind copies\"",
+        "nominated": false,
+        "nomination_type": 2,
+        "resolution": 1,
+        "master_sha": null,
+        "because_sha": "7a53e67816ed9baf7d825ed60ee59f0c05f9df48"
+    },
+    {
+        "sha": "91478db20d5ccfeb9c35652cf01acdcfcd285414",
+        "description": "loader: fallback to kernel name, if PCI fails",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "bf1838838a695f27d9d9c486e608a9412044a598",
+        "description": "loader: move \"using driver...\" message to  loader_get_kernel_driver_name",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e3572f977fc662bdecdac4f525f415bdc7e62147",
+        "description": "loader: simplify codeflow in drm_get_pci_id_for_fd",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "164f4a9a4a32b8e638ce3f3c684d147d70a3b1de",
+        "description": "loader: simplify loader_get_user_preferred_fd()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "25b2b325885710dc7dc7539d6d37e77182767088",
+        "description": "loader: use a maximum of 64 drmDevices",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d3c91439713ecf025c7fe97aae3a4829b3f1250b",
+        "description": "Revert \"egl/dri2: Don't dlclose() the driver on dri2_load_driver_common failure\"",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "1b87f4058de84d7a0bb4ead0c4f4b024d4cce8fb"
+    },
+    {
+        "sha": "fa5e800e05ab227786862383d3243e06c06d36d7",
+        "description": "egl/drm: reinstate (kms_)swrast support",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "47273d7312cb5b5b6b0b9faa814d574bbbce1c01"
+    },
+    {
+        "sha": "b699d070a6de273fb3a964e05944b203d0b57090",
+        "description": "glx: set the loader_logger early and for everyone",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "d971a4230d54069c996bca78b6ed6a6a23377821"
+    },
+    {
+        "sha": "06f758b0931794f5b8edb23587633f172e1b685d",
+        "description": "meson: glx: drop with_glx == dri check",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "70ac7f5b0c46370075a35067c9f7dfe78e84b16d",
         "description": "mesa/main: remove unused macro",
         "nominated": false,
