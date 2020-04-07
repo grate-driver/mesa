@@ -67,7 +67,7 @@
         "description": "glx: omit loader_loader() for macOS",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "b699d070a6de273fb3a964e05944b203d0b57090"
     },
