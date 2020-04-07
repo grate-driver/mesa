@@ -526,7 +526,7 @@
         "description": "radeonsi: don't lower constant arrays to uniforms in GLSL IR",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "3e1dd99adca55454239e197d4e793ee89f44fc6c"
     },
