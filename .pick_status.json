@@ -202,7 +202,7 @@
         "description": "v3d: Primitive Counts Feedback needs an extra 32-bit padding.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "0f2d1dfe65bfe1ee8f02ce45f100a5508debdfd4"
     },
