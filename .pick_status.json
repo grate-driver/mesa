@@ -103,7 +103,7 @@
         "description": "meson: Link Gallium Nine with ld_args_build_id",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "4756864cdc5fee9602ab63a9fa2c4b459667a6c2"
     },
