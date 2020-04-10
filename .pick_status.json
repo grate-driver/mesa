@@ -1,5 +1,500 @@
 [
     {
+        "sha": "65e2eaa4d3a7095ac438fafb09d1e36a4210966e",
+        "description": "pan/decode: Print Bifrost blend descriptor",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "80dd692813563332b7123b2ba9c9ad25177fa392",
+        "description": "pan/bi: Let !b2b imply branch_cond",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3439c24bdb529e6223de9cd18824b3d72ff52649",
+        "description": "panfrost: Fix BI_BLEND packing",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e34add229ff06203fe852b15cb7ff32cf9e4c344",
+        "description": "pan/bi: Fix backwards registers ports",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "23620d183035b068fe7dbda99fdc629264ca2d9e",
+        "description": "panfrost: Pass compiler-appropriate options",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e30091bc5162e560320e46abf23be8748cb269ae",
+        "description": "panfrost: Move uniform_count to pan_assemble",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d10423989ebace442cdbd8016188b44c663883c3",
+        "description": "panfrost: Move varying linking to cmdstream",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "776697dd349e4d5644a72fd293d8e7e436e6184c",
+        "description": "pan/midgard: Remove unused max_varying variable",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "90e02db9a13527cc5c64d83201614181cc95c131",
+        "description": "pan/bi: Fix nondeterministic register packing",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8016906cf20ab0f1cf84d11923ac38d2230bdba3",
+        "description": "panfrost: Call the Bifrost compiler on bi devices",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0a9fa4bcb6875f94700ec55d4f68560713cbba72",
+        "description": "panfrost: Set mfbd.msaa.sample_locations on Bifrost",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "46e4246d495da2fa836baaeec89a1030f3951f2e",
+        "description": "panfrost: On Bifrost, set the right tiler descriptor",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "547f999e2cb668e7cf4d0c30b9c72b45bf081e52",
+        "description": "panfrost: Don't emit write_value jobs on Bifrost",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "30e7027e1c74139b934f9b7768936299d3925fdb",
+        "description": "panfrost: Pass IS_BIFROST to pandecode_jc",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7b10d4ece6407db267bf89550b013829d9ad9b20",
+        "description": "panfrost: Remove most usage of midgard_payload_vertex_tiler",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b010a6d5f15520677d34015c88ec89046b811372",
+        "description": "panfrost: Unify vertex/tiler structures",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "aee68b06c8c1ba48e171b07a8d70606dbf7936c7",
+        "description": "panfrost: Staticize a few cmdstream functions",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "dd09571c7782834db44ae8ebafb24cceb224c2ec",
+        "description": "panfrost: Populate bifrost-specific structs within mali_shader_meta",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b096a1dbd3caca5d7a67ce139421736fc127cc35",
+        "description": "panfrost: Add IS_BIFROST quirk",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "693480a581e018bf61ca00889fcc8c479a418319",
+        "description": "etnaviv: remove the \"active\" member of queries",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7cb98e02e4e072389986b1f9461e76415e14531c",
+        "description": "etnaviv: change begin_query(..) to a void function",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7a9cbb2b6176b723d3ee54f7b4f6c885163da616",
+        "description": "etnaviv: drop redundant calls to etna_acc_query_suspend(..)",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b06fdb8edd9ef999ee8707335888f7609c144102",
+        "description": "v3d: Primitive Counts Feedback needs an extra 32-bit padding.",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "0f2d1dfe65bfe1ee8f02ce45f100a5508debdfd4"
+    },
+    {
+        "sha": "38622de2ec3328d601f415b9f910210bf64caf6f",
+        "description": "aco: make some reg_file helpers private and fix their uses",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "331794495ed0e8bbd87cafedfa9ef334bb43b0b7",
+        "description": "aco: rename aco_lower_bool_phis() -> aco_lower_phis()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1d41521b16c73113b5f5318d6e021310760f1e97",
+        "description": "aco: lower subdword phis with SGPR operands",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a39df3bfce2c418a251eeafe2e309c9543a9d50d",
+        "description": "aco: don't constant-propagate into subdword PSEUDO instructions",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1de18708cb5d3adba452f0c7f1aa3e8e6a6fd60b",
+        "description": "aco: ensure correct bit representation of subdword constants",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "637f45f3909326d18d6f64ff04eeb3bef205d2f8",
+        "description": "aco: setup subdword regclasses for ssa_undef & load_const",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "67b567d0d0c3c53a7fc04d22ea075494aae34cbf",
+        "description": "aco: implement nir_op_b2f16/nir_op_i2f16/nir_op_u2f16",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3119f978e5a4b7f532a74164866355b1c25238ba",
+        "description": "aco: implement 16-bit comparisons",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ccf8e23f59850c92f91e54438cbc6f4fa55978f4",
+        "description": "aco: implement 16-bit nir_op_fmax3/nir_op_fmin3/nir_op_fmed3",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "981ced07a542f94615b22762afa679af0605c692",
+        "description": "aco: implement 16-bit nir_op_ldexp",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "55537ed9d3e8869eaa9890a254ab35f7ce530ae1",
+        "description": "aco: implement 16-bit nir_op_f2i32/nir_op_f2u32",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "68339ff7a7b7766f0111f420c54c4f7516c2d6ec",
+        "description": "aco: implement 16-bit nir_op_bcsel",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0646562a17a9649461b60fd8723e91dbf527e4a6",
+        "description": "aco: implement 16-bit nir_op_fsign",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6793ae1c5e516c9f5a21414ccc800cde4fb0e7b5",
+        "description": "aco: implement 16-bit nir_op_fsat",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0ecca65d119ba34acbf2a681b78a574bd862785b",
+        "description": "aco: implement 16-bit nir_op_fmul",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b0c60999bc533327fa986ba0d80fe6954a1292ca",
+        "description": "aco: implement 16-bit nir_op_fcos/nir_op_fsin",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9be4be515f2a08b9c9e5ae1fc4c5dc9a830c2337",
+        "description": "aco: implement 16-bit nir_op_fsub/nir_op_fadd",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b0b637ca17a54ddef959870cc938e3f872a48977",
+        "description": "aco: implement 16-bit nir_op_fabs/nir_op_fneg",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "acc5912786197b4cbe7a32f76762db0d93f84e2a",
+        "description": "aco: implement 16-bit nir_op_fmax/nir_op_fmin",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "66d5bfb09ab067469ec747aa7745f77c302e2df6",
+        "description": "aco: implement 16-bit nir_op_ffloor/nir_op_fceil",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c097c9f20c8a246ed5ba37fe37108056e6619c77",
+        "description": "aco: implement 16-bit nir_op_fsqrt/nir_op_frcp/nir_op_frsq",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "26ed9fb79e409d4ad6ac3225d3bdaf7640b8cb30",
+        "description": "aco: implement 16-bit nir_op_ftrunc/nir_op_fround_even",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ee96181ad94499c28525961a241eaf443691f5ec",
+        "description": "aco: implement 16-bit nir_op_fexp2/nir_op_flog2",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b8486041df77a537c33cb0039833322ed2886354",
+        "description": "aco: implement 16-bit nir_op_ffract",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a8b45d7034eb482e217133180dff3e62bfb35150",
+        "description": "aco: implement 16-bit nir_op_frexp_sig/nir_op_frexp_exp",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "db74ad0696d205e0991281bc0e222290ab1addd5",
+        "description": "intel/compiler: Remove cs_prog_data->threads",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9ff55621d9c9d299ac8e4eb2fcfe6db8a7a1b2a1",
+        "description": "iris: Stop using cs_prog_data->threads",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "928f5f54349902c497e9293adeae2580123afbd9",
+        "description": "anv: Stop using cs_prog_data->threads",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5664bd6db383984192cf362884dd9fb17d8ed3a3",
+        "description": "i965: Implement ARB_compute_variable_group_size",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c77dc51203a45c8ae82d5a88d3e8fe99c32fc5bc",
+        "description": "intel/compiler: Add support for variable workgroup size",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c54fc0d07b1a92e065000c1301971b93439595e2",
+        "description": "intel/compiler: Replace cs_prog_data->push.total with a helper",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0536ca20d757b5ca9fc9f989ba64a545ab8235d7",
+        "description": "swr/rasterizer: Use private functions for min/max to avoid namespace issues.",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "ab5570820071d97c4adfe8cd8a90083f3784fa5e"
+    },
+    {
         "sha": "089e1fb287eb9b70c191091128ed5ba7edd2960a",
         "description": "tu: Implement descriptor set update templates",
         "nominated": false,
