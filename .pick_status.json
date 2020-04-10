@@ -2578,7 +2578,7 @@
         "description": "targets/opencl: fix build against LLVM>=10 with Polly support",
         "nominated": false,
         "nomination_type": null,
-        "resolution": 4,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": null
     },
