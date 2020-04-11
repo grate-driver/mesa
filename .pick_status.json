@@ -1174,7 +1174,7 @@
         "description": "st/mesa: fix a crash due to passing a draw vertex shader into the driver",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "bc99b22a305be5e5a5f8fdbf57105d220cf4b0ab"
     },
