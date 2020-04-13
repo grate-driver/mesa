@@ -193,7 +193,7 @@
         "description": "meson: Specify the maximum required libdrm in dri.pc",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "a3a16d4aa7e5a22816226d8e7417138164b10525"
     },
