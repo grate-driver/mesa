@@ -1,5 +1,239 @@
 [
     {
+        "sha": "28d36d26c2212276e1238fad8f0b12caab97fee8",
+        "description": "aco: fix p_extract_vector optimization in presence of unequally sized vector operands",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0e4432bfbaef1bca65239848c373cd683f083ee0",
+        "description": "pan/bi: Lower fsqrt",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3025ea6abe97b42bc85fc7f6e6c47bf916da0738",
+        "description": "panfrost: Drop dependency on nonexistant write_value",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "53e4159eaaf692071bf63365eb27a16c97c9a3e5",
+        "description": "glsl: stop processing function parameters if error happened",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "d1fa69ed61d5aebeb69ce8a415c098035a953d48"
+    },
+    {
+        "sha": "fc1068de0d124b746cc85b58564810c5453feee3",
+        "description": "aco: fix nir_op_pack_32_2x16_split if one operand is a constant",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4cfaef68d7de7959f6adeaec53077a630b603184",
+        "description": "aco: implement 16-bit nir_op_f2i64/nir_op_f2u64",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "729bdc0d70b0661c197e89b372f1b6d15e2acd69",
+        "description": "aco: fix f2i64/f2u64 with sgprs if the exponent computation overflow",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6a8e5dde6684c477edddb044a38a6618bf38d014",
+        "description": "gitlab-ci: Use all_paths in .test-manual rules",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5e6267b20b1a0c99cc58f3d4910525f9d07d50be",
+        "description": "nvc0: add NV_viewport_swizzle support for GM200+",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "90fcb3fef28f79d93f0baf88292c0ba068ede810",
+        "description": "st/mesa: add NV_viewport_swizzle support",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ff168b297d94f656899a904ac147a9ce5add65c9",
+        "description": "mesa: add GL_NV_viewport_swizzle support",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4137a79c2a7edb5f0caf0964ab748da7c279b61c",
+        "description": "gallium: add viewport swizzling state and cap",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e2457bedd389c6799fe99b1e0d6ade36b763c6c3",
+        "description": "glsl: remove redudant assignment",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e667802a7cb46c0aaeb93d3753d9c356c72b604e",
+        "description": "mesa: remove redudant assignment",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "fd241722006def2dfdffaf260daa74dc19332cae",
+        "description": "mesa: remove redudant check",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "25a61cce7dc6f5ab965577ebe589ccabf58945fa",
+        "description": "lima: set offset when export resource",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4094558e8643a266dfc8da9bc073751a3736a2fb",
+        "description": "i965: share buffer managers across screens",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "865b840a6b7545405a2e28f7c2d3422fadbc5b14",
+        "description": "i965: store DRM fd on intel_screen",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0a497eb1303d23f04ad7d9c28abf953a9105e32a",
+        "description": "iris: make resources take a ref on the screen object",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7557f1605968c39d680545d5b8457d17eea3b922",
+        "description": "iris: share buffer managers accross screens",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "bd3e50545339ffd4f258437d6282e2cfbf113725",
+        "description": "iris: properly free resources on BO allocation failure",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7aa6720ba4ea8dc107c7b363bcb2a1811a25dc71",
+        "description": "freedreno/log: better decoding for multiple chunks per batch",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7aa55f5acbcf7fa472805fd2c155a5cc0b9cb2a8",
+        "description": "freedreno/log: spiff out parser some more",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b5b32387d6fe16ae6ed5d582a165f8f21afee395",
+        "description": "freedreno/log: android support",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "904d5d63b47661950c5eace94e9ba3341bd4cb1c",
+        "description": "freedreno: Fix leak of binning shader variants.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5ec1f264f1f70806fe266606d3376a898a96292d",
+        "description": "freedreno/ir3: Fix sz vs class confusion",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "90f7d12236c5250bc56699a3071941daef0f515a"
+    },
+    {
         "sha": "65e2eaa4d3a7095ac438fafb09d1e36a4210966e",
         "description": "pan/decode: Print Bifrost blend descriptor",
         "nominated": false,
