@@ -1,5 +1,437 @@
 [
     {
+        "sha": "acf7e73be54c7f1cc52fcc9be38a9df26849200e",
+        "description": "gitlab-ci: make explicit tracie is gitlab specific",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1ca91683e22de3f5915081957ab829642e785ffe",
+        "description": "gitlab-ci: protect usage of shell variables with double quotes",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "35782b6593a676b5b057c79be69b519309c9ac69",
+        "description": "gitlab-ci: Vulkan tracie runner to return last command exit code",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4c6ce826af2bd633563ffd9f798d511c40805bd1",
+        "description": "gitlab-ci: Check the Mesa version used for tracie tests",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "fbd2be3f5db004090a311694aa1c17ff8c9fc5d8",
+        "description": "aco: clear moved operands in get_reg_create_vector()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "52cc1f8237d9ed0042578777af4b28e5b33c6354",
+        "description": "aco: improve p_create_vector RA for sub-dword operands",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e18711cda3bf173e03d9773001f641fd85ffd18d",
+        "description": "aco: fix p_extract_vector validation",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "41ac44e1b3ad19b9a889fc3d1052611ae309ffb0",
+        "description": "aco: improve vector optimization with sub-dword vectors",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "849eb0a77634d3ce8f5532ba47946a37fde8c20e",
+        "description": "radv: use RMW packets for updating the maximum sample distance",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cb6ab17d1fffe2f387ce4ec7691f926260091118",
+        "description": "radv: add radeon_set_context_reg_rmw() helper",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f0b94262c18284dc61755634f01eb78051b4423e",
+        "description": "scons/windows: Support build with LLVM 10.",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c38946e62ddce554d20bf913cebeebf25bf153a4",
+        "description": "meson: Link Gallium Nine with ld_args_build_id",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "4756864cdc5fee9602ab63a9fa2c4b459667a6c2"
+    },
+    {
+        "sha": "924f3f3de72a05dac1757e29b971cc680349b18b",
+        "description": "svga: fix build on FreeBSD",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9ce4db6231462998f9426c74681a464bda928842",
+        "description": "freedreno/a5xx+: Skip compiling the old gmem blit programs.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2513d0257c7698b1686fe26aa5db8b7b2969d845",
+        "description": "pan/bit: Add BI_CONVERT tests",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9f50b19534a2a534a5cc509516211656f84f2f08",
+        "description": "pan/bit: Add BI_CONVERT interpretation",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "640d69d1662b03f2d28319ede50be0bf3f6e9c4b",
+        "description": "pan/bi: ADD packing for CONVERT",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8cfe660326a2fb455bed0499c80f38f6f17f8f0e",
+        "description": "pan/bi: Rewrite conversion packing",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0b000c54c01930c5637526aa875f5372399f5e55",
+        "description": "pan/bi: Fix incorrect swizzle packing assert",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d0cf8b977c94e2bab0ccc91bb8bad91e2bb71358",
+        "description": "pan/bi: Set BI_ROUNDMODE for BI_CONVERT",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2799353f5b8acc0dc6a7a94090a13dbc76c23a33",
+        "description": "pan/midgard: Fix f2u naming confusion",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e4268ffb99279f46d9785bdccb6617022924a6c2",
+        "description": "meson: Specify the maximum required libdrm in dri.pc",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "a3a16d4aa7e5a22816226d8e7417138164b10525"
+    },
+    {
+        "sha": "4b24b9647d24e8651449971508347129bef9f42b",
+        "description": "freedreno/ir3/ra: cleanup some leftovers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "751c11a8c7a6f54f87c62e4b49802bf80826ec42",
+        "description": "freedreno/ir3: rename depth->dce",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cf74048fd14eb594dbb23e07d37cf8df44564263",
+        "description": "freedreno/ir3: better cleanup when removing unused instructions",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "96ff2a4099d0eb5c29255429a0e5284e461ec8d5",
+        "description": "freedreno/ir3/ra: handle array case for SFU select_reg opt",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "cc82521de4e8e85022a5facb1b5f52d5139d3022"
+    },
+    {
+        "sha": "b787b353d04e23fdea567186f7cb422fd687bcdd",
+        "description": "freedreno/ir3: add mov/cov stats",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "89a78a07dec8f6fab7a80bba951b134a42bb9a2c",
+        "description": "freedreno/ir3/postsched: avoid moving tex ahead of kill",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "017fdab2172c845eb7dd6e11d2a5c13245374247",
+        "description": "freedreno/ir3/postsched: remove some leftovers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9701008d64171b1f16be9a8a69555df2b651c37b",
+        "description": "freedreno/ir3/sched: awareness of partial liveness",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d2f4d332dbb552af62fe5caabe67664d98f32229",
+        "description": "freedreno/ir3: new pre-RA scheduler",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0f22f85fe73f89b80851bb24936202c9bba97cc6",
+        "description": "freedreno/ir3: fix location of inserted mov's",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "908044ef4bf00daccfbcb037144c6ebe74d021c5",
+        "description": "freedreno/ir3: simplify grouping pass",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "860f5981f0a0635c301cd856892747ac20f793f5",
+        "description": "freedreno/ir3: make falsedep use's optional",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d09e3afdcc3bd57be8b97e675948ca92b0563abd",
+        "description": "freedreno/ir3: spiff out disasm a bit",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "40ccbae622d8f09e9513b8837d24f55d877709c6",
+        "description": "freedreno/computerator: support bindless sampler instructions",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "bc9a28beed0c7764f2c17dd96a8ac6833af34445",
+        "description": "freedreno/computerator: support nop prefix",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "95d4a956c08acafe0167ff8ba4dcd9b912962a70",
+        "description": "freedreno/ir3: CSE the up/downconversion of SEL's cond's size.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "82375ccaa461c759d4a588a68ed20bcee92edf8e",
+        "description": "freedreno/ir3: Stop doing b2n on the SEL condition.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0d1917da86e813c5609e48dda62f7cf8a049c48f",
+        "description": "tnl: Code formatting in t_rebase.c",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "887ae78718832cafde7a9ddca1e410e36b4d84e3",
+        "description": "tnl: Code formatting in t_draw.c",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ac13258a6eb468b4cc3995b423319b9b62f54d94",
+        "description": "tnl: Silence unused parameter warnings in _tnl_split_inplace",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7a004f7987d179bdfba12ab7e92b0bb9a55b9df4",
+        "description": "tnl: Silence unused parameter warnings in dump_draw_info",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "114e078001b3bade76b80fe99e39d346e88b6a4a",
+        "description": "tnl: Silence unused parameter warnings in _tnl_draw_prims",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1996f1d3dd2ddd5e894ce608436219c63872570f",
+        "description": "tnl: Silence unused parameter 'attrib' warning in convert_half_to_float",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7a03240b635cd67f345811b86b9faf106f862ec0",
+        "description": "tnl: Don't dereference NULL obj pointer in t_rebase_prims",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "f3cce7087a562f77be7306e70d4e62bc214bb5fa"
+    },
+    {
+        "sha": "2e43b32e72b2adf7ce865f56cf2647b137a5342a",
+        "description": "tnl: Don't dereference NULL obj pointer in replay_init",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "f3cce7087a562f77be7306e70d4e62bc214bb5fa"
+    },
+    {
+        "sha": "65f14fd68dac4fb52c765c82f08931d7aa745e61",
+        "description": "tnl: Don't dereference NULL obj pointer in bind_indices",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "f3cce7087a562f77be7306e70d4e62bc214bb5fa"
+    },
+    {
         "sha": "28d36d26c2212276e1238fad8f0b12caab97fee8",
         "description": "aco: fix p_extract_vector optimization in presence of unequally sized vector operands",
         "nominated": false,
