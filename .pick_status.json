@@ -139,7 +139,7 @@
         "description": "aco: fix 1D textureGrad() on GFX9",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "6f718edcedd713beb547cda48aa8dc63a0af4c35"
     },
