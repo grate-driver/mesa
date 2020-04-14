@@ -1291,7 +1291,7 @@
         "description": "radeonsi: skip vs output optimizations for some outputs",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "3ec9975555d1cc5365413ad9062f412904f944a3"
     },
