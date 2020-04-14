@@ -490,7 +490,7 @@
         "description": "meson: update llvm dependency logic for meson 0.54.0",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "821cf6942a390f5f64d8a2cff9933b24c84f7dc1"
     },
