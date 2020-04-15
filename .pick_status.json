@@ -1,5 +1,338 @@
 [
     {
+        "sha": "13ce637f1b28381e72470763ff5e39dd3c562476",
+        "description": "freedreno/turnip: Update GRAS_LAYER_CNTL to GRAS_MAX_LAYER_INDEX",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c2399e9574591389bb5640744ab77f22699eea23",
+        "description": "turnip: Emit geometry shader descriptor consts",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d6d5ee29ab715c08d3b46e270f7eacde28e2e665",
+        "description": "turnip: Correctly set layer stride for 3D images",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7e525d29ab68d927d0f2aa7e3ef21d25e915e76d",
+        "description": "gallium: initialize viewport swizzle in cso_set_viewport_dims",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "4137a79c2a7edb5f0caf0964ab748da7c279b61c"
+    },
+    {
+        "sha": "1aefe78b47eab9caca6a1cbfe4ecb6b5d4cf87ef",
+        "description": "mesa: fix enum value of VIEWPORT_SWIZZLE_POSITIVE_W_NV",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "ff168b297d94f656899a904ac147a9ce5add65c9"
+    },
+    {
+        "sha": "e2650db95276662661960f87be5d4d3537d8acf5",
+        "description": "radv/aco: do not advertise VK_KHR_shader_subgroup_extended_types",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4ee23709724ff696db6613aba155963a1d8e0a41",
+        "description": "nvc0: enable ASTC and ETC on GM20B",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "22406da75671438bf9de68bc47e2b8871e5fa3e6",
+        "description": "glx: omit loader_loader() for macOS",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "b699d070a6de273fb3a964e05944b203d0b57090"
+    },
+    {
+        "sha": "471fd41e84e1a19b970c86d8d8a23e1996cd7483",
+        "description": "clover: expose cl_arm_shared_virtual_memory for devices with SVM support",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "657ff3b3b816be96f61a363b4479abfe785678e1",
+        "description": "clover: implement cl_arm_shared_virtual_memory",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a218658556a2961af26af9c046aae23b7f58fcc8",
+        "description": "clover: implement SVM functions for devices with fine grained system SVM support",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d6754eb92072332fc6e7d22dd98628d22ce76531",
+        "description": "clover: implement clSetKernelArgSVMPointer",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "035e882819bcb853fff7a59c638a0ecbf89cb762",
+        "description": "clover: implement CL_DEVICE_SVM_CAPABILITIES",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c170c0cfe4bd3c08385953e6e03f4403f5cfb5b9",
+        "description": "clover: add stubs for SVM",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e738967d6e4cfe25d4c14dd3211b27ddb67ed8cb",
+        "description": "gallium: add PIPE_CAP_SYSTEM_SVM",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c818b5c089914f5d3e0d233ab531571c4d5ec13c",
+        "description": "aco: fix 1D textureGrad() on GFX9",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "6f718edcedd713beb547cda48aa8dc63a0af4c35"
+    },
+    {
+        "sha": "8ce46f352e9e2ad103a5058895f3ab4ee164ea33",
+        "description": "iris: drop cache coherent cpu mapping for external BO",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "08a396033be1d7ceddf48da0563a7e4d2cb64429",
+        "description": "aco: fix nir_op_frexp_exp with 16-bit floats and negative exponents",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9bf8e923863230914f6bf2a4abcf257cb8778ee7",
+        "description": "u_blitter: fix stencil blitting",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "381e9fe64a80d98144a4ad75044edd9b878c7de7",
+        "description": "draw: fix user culling pipeline order. (v2)",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "30ef6f5137a5a6e9c0b08640a44e30e1aba14270",
+        "description": "draw/cull: run pipeline for culled points.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "dc261cdd4238038c91f9fe4232fad7b5a20050d7",
+        "description": "llvmpipe/setup: move line stats collection earlier.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "80fa8304c807b2ef28bf9e37bdd7afadfde216ce",
+        "description": "draw: fix tessellation stats query",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "335827eade38d6f0647d9a01af2a1a5a1b59dd2d",
+        "description": "llvmpipe: fix no tokens detections.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ccc6a48ec5be0a748d77d56168ba90e2784b0a33",
+        "description": "gallivm/draw: calloc prim id toavoid undef",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e20b3b37202eb775009c7a62d98515f49cda6e61",
+        "description": "gallivm/nir: lower implicit lod to tex.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c494ed0467573b992252fab3217ec158d5b7ccb3",
+        "description": "gallivm: fix left over shader vote debug",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7690606bf784c35c5318ebfe0f5162eec9b19b82",
+        "description": "llvmpipe/query: fix transform feedback overflow any queries.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "96e12ca7d77df365a96336561e32813818268c19",
+        "description": "llvmpipe: report tessellation shader statistics.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "202bc38ce9e3e52cea1448f22882d17c7e5e9a90",
+        "description": "draw: collect tessellation invocations statistics",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f4edc6f8bd89e97047b79a4685640d0546e90a10",
+        "description": "llvmpipe: fixup context leaks.",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "eb5227173f0354aade28e46397a5bb69b2af69fb"
+    },
+    {
+        "sha": "68b40cfe2728889d4bd86ff073b3b69fb8608e5a",
+        "description": "swr: Remove Byte Order Mark.",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "c6e67f5a9373e916a8d2333585cb5787aa5f7bb7"
+    },
+    {
+        "sha": "600c91fed89fb6c9389bcbdd41fe50893cfb984a",
+        "description": "glsl/list: Fix undefined behaviour of foreach_* macros",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "23be2160713a713a53519568efa2516b770f07ae",
+        "description": "freedreno/ir3: don't overwrite wrmask in ir3_SAM",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "aeb5b9cebf5c5fde2eed9be1d0ec64afd8aa8b6d",
+        "description": "freedreno/ir3: fix emit_tex_info split_dest",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cb08f451d01571e0a570e99553624ae7b0d3d075",
+        "description": "gallium/tgsi_to_nir: Set nir_intrinsic_align_mul to 16 and offset to 0",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "e78a7a182524f091e2d77ba97bfbe057c3975cab"
+    },
+    {
+        "sha": "31988baba48e974240af68aff84f8c5620d2e62a",
+        "description": "ir3: Fix txs with bindless",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "acf7e73be54c7f1cc52fcc9be38a9df26849200e",
         "description": "gitlab-ci: make explicit tracie is gitlab specific",
         "nominated": false,
