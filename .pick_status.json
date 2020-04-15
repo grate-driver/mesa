@@ -2083,7 +2083,7 @@
         "description": "Revert \"nvc0: fix line width on GM20x+\"",
         "nominated": true,
         "nomination_type": 2,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "a0e57432b76c32f2109dab0ad3df0ba03967441c"
     },
