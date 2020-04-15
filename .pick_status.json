@@ -1021,7 +1021,7 @@
         "description": "intel: Add _const versions of prog_data cast helpers",
         "nominated": false,
         "nomination_type": null,
-        "resolution": 4,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": null
     },
