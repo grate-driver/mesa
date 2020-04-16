@@ -193,7 +193,7 @@
         "description": "nir: Lower returns correctly inside nested loops",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "79dec93ead6e3b95b1240a9d843d617a88ee9179"
     },
