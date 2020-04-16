@@ -1786,7 +1786,7 @@
         "description": "intel/perf: Enable MDAPI queries for Gen12",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "15b7b56eb2fb418263199d5b47774cfb922fa343"
     },
