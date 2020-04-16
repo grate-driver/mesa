@@ -814,7 +814,7 @@
         "description": "st/mesa: Update shader info of ffvp/ARB_vp after translation to NIR",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "8a0dd0af3f1a6c0310a08daf4220132ec6815b31"
     },
