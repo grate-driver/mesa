@@ -238,7 +238,7 @@
         "description": "util/sparse_free_list: manipulate node pointers using atomic primitives",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "e4f01eca3b3cd1701f21cacbb8d29fe688ba42bb"
     },
