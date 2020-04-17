@@ -535,7 +535,7 @@
         "description": "freedreno: Fix calculation of the const buffer cmdstream size.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "b4df115d3f3c7e5a1f6105c3737d0fe9a80dfcf2"
     },
