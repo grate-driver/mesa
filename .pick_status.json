@@ -688,7 +688,7 @@
         "description": "Revert \"intel/compiler: Silence unused parameter warning in update_inst_scoreboard\"",
         "nominated": true,
         "nomination_type": 2,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "a80e44902f66244d257c523afe77558cf334d624"
     },
