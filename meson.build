@@ -1575,10 +1575,6 @@ if dep_libdrm.found()
   endif
 endif
 
-if with_gallium_grate
-  dep_libdrm_tegra = dependency('libdrm_tegra', version : '>= 2.4.81')
-endif
-
 llvm_modules = ['bitwriter', 'engine', 'mcdisassembler', 'mcjit', 'core', 'executionengine', 'scalaropts', 'transformutils', 'instcombine']
 llvm_optional_modules = ['coroutines']
 if with_amd_vk or with_gallium_radeonsi or with_gallium_r600
