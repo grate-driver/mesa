@@ -15,8 +15,8 @@
 #include "host1x01_hardware.h"
 #include "tgr_3d.xml.h"
 
-#include <tegra_drm.h>
-#include <libdrm/tegra.h>
+#include "opentegra_drm.h"
+#include "opentegra_lib.h"
 
 /*
  * XXX Required to access winsys_handle internals. Should go away in favour
