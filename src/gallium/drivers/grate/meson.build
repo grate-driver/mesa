@@ -19,6 +19,16 @@
 # SOFTWARE.
 
 files_libgrate = files(
+  'drm/opentegra_drm.h',
+  'drm/opentegra_lib.h',
+  'drm/private.h',
+  'drm/tegra.c',
+  'drm/tegra_bo_cache.c',
+  'drm/uapi_v1/channel.c',
+  'drm/uapi_v1/fence.c',
+  'drm/uapi_v1/job.c',
+  'drm/uapi_v1/pushbuf.c',
+  'drm/uapi_v2/job.c',
   'fp/fpir.h',
   'fp/pack.c',
   'fp/tgsi.c',
@@ -49,16 +59,18 @@ files_libgrate = files(
   'grate_surface.h',
 )
 
+inc_libgrate = include_directories('drm')
+
 libgrate = static_library(
   'grate',
   [files_libgrate],
   include_directories : [
     inc_src, inc_include, inc_gallium, inc_gallium_aux,
-    inc_gallium_drivers,
+    inc_gallium_drivers, inc_libgrate,
   ],
   c_args : [c_vis_args],
   cpp_args : [cpp_vis_args],
-  dependencies : [dep_libdrm, dep_libdrm_tegra],
+  dependencies : [dep_libdrm, dep_valgrind],
   build_by_default : false,
 )
 
