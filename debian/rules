@@ -60,6 +60,10 @@ else
 		GALLIUM_DRIVERS += etnaviv, kmsro, lima, panfrost, tegra, vc4, v3d,
 	endif
 
+	ifneq (,$(filter $(DEB_HOST_ARCH), armhf))
+		GALLIUM_DRIVERS += grate,
+	endif
+
 	ifneq (,$(filter $(DEB_HOST_ARCH), amd64 i386 x32))
 		GALLIUM_DRIVERS += svga,zink,
 		# svga needs xa state tracker
