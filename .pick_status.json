@@ -1,5 +1,2183 @@
 [
     {
+        "sha": "c3c1f4d6bcc210408f8b180727d269838b38193b",
+        "description": "aco: move src1 to vgpr instead of using VOP3 for VOP2 instructions during isel",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "be0bb7e1015ee0c5930b2aabd3e3de7c790be5e0",
+        "description": "aco: fix 64bit fsub",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "425558bfd595ed3a7a049ad0f47a46b8b3c4691e"
+    },
+    {
+        "sha": "ad3ef6d0fc01fead5b72c6376387ecf5c48bfef4",
+        "description": "gitlab-ci: Test virgl driver",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d6b7439619c55d317bfe05094a9f503d832c9eb7",
+        "description": "meson: do not disable incremental linking for debug-builds",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ed29b24e233a332799eed006f71540ac4c56c5ee",
+        "description": "gtest: Update to 1.10.0",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "59427b6d1d07a5824272f7d6b562bcfe83d63b2b",
+        "description": "nir/opt_algebraic: lower 64-bit fmin3/fmax3/fmed3",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "eed0ace466d05e4ab07e638ac94a821788a8deaa",
+        "description": "nir/lower_int64: lower imin3/imax3/umin3/umax3/imed3/umed3",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "17acff01a00109c87d59b9d876fc735dd5fbe3d1",
+        "description": "radeonsi: skip vs output optimizations for some outputs",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "3ec9975555d1cc5365413ad9062f412904f944a3"
+    },
+    {
+        "sha": "839818332c18a5cf59584ea3114f46aded792465",
+        "description": "nir/gcm: dont move movs unless we can replace them later with their src",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e4e5beee8a4cc0f7a6b27ce1ea1e04d1177442a1",
+        "description": "nir/gcm: be more conservative about moving instructions from loops",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "bf4a6c99d242022e6ad42af68682609401ffcd73",
+        "description": "nir/gcm: allow derivative dependent intrinisics to be moved earlier",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "50a6dd0d6534f802ca36b607ab5a453b531f4d78",
+        "description": "nir/gcm: Prefer the instruction's original block",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d4cf2df01a1f7b77660ea849ba552fd5b2d751d6",
+        "description": "nir/gcm: Delete dead instructions",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "dca3f351e5b70afd1a0088b829f9b45617c2e538",
+        "description": "nir/gcm: Add a real concept of \"progress\"",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5b1615fdb75659cb02fcbcd684046eabdb807930",
+        "description": "nir/gcm: Move block choosing into a helper function",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1f60f1aa3d0853b8374ec384c128eb4731fe4c85",
+        "description": "nir/gcm: Use an array for storing the early block",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6006a9e275750bf762f9f041f9078aaf8af4dd0e",
+        "description": "nir/gcm: Loop over blocks in pin_instructions",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4d083b52c04745d18d8f5446be5805077fa2c51a",
+        "description": "nir/dominance: Better handle unreachable blocks",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "425558bfd595ed3a7a049ad0f47a46b8b3c4691e",
+        "description": "aco: use v_subrev_f32 for fsub with an sgpr operand in src1",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "9be4be515f2a08b9c9e5ae1fc4c5dc9a830c2337"
+    },
+    {
+        "sha": "adeef43d15092a6910dceb3605f5ee3151dd2c47",
+        "description": "CI: Disable Lima jobs due to lab unhealthiness",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e6c7bdc85138abe00bc9db355f302778926b38e5",
+        "description": "ci/windows: Make Chocolatey installs more reliable",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ec1b96fdc8bccaf2c1a4e1e3cca32b4aacbe4f7c",
+        "description": "nir: Lower returns correctly inside nested loops",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "79dec93ead6e3b95b1240a9d843d617a88ee9179"
+    },
+    {
+        "sha": "969aeb6a93aefd037b130e4b37f58043fef493c3",
+        "description": "anv: Apply any needed PIPE_CONTROLs before emitting state",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ffc84eac0d5a0c30e445fcdb2f0cfd0c5bf5321d",
+        "description": "anv: Move vb_emit setup closer to where it's used in flush_state",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "06c5875fd6b8fa387a103bd0c6fad4fa5ef847a5",
+        "description": "Fix promotion of floats to doubles",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "94cb129d514b748db1342c6208ae4b7390bd33da",
+        "description": "ir3/ra: Fix off-by-one issues with live-range extension",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cdc43775917e301a7ca654fcebb94fad08dc4131",
+        "description": "util/sparse_free_list: manipulate node pointers using atomic primitives",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "e4f01eca3b3cd1701f21cacbb8d29fe688ba42bb"
+    },
+    {
+        "sha": "36d2a0eed69b6f584c417bdbe0ea0f4623f1b514",
+        "description": "glsl: only set stage ref when uniforms referenced in stage",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6afd0954e12eb75a4ce19580907b1fc4145369b9",
+        "description": "glsl: pull mark_array_elements_referenced() out into common helper",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5d992b539e977ac688e950866a1d872de5acec18",
+        "description": "glsl: fix block index in NIR uniform linker",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5dbebf49822ff3fb3bc3e6123bac30214c432b77",
+        "description": "glsl: error check max user assignable uniform locations",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c7355c4fb98cd052951f323b2dd241942000ac21",
+        "description": "glsl: fix explicit locations for the glsl linker",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5442712c6dae60529ceed0ea199751da7c9dd8e7",
+        "description": "Revert \"glsl: fix resizing of the uniform remap table\"",
+        "nominated": false,
+        "nomination_type": 2,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "e0aa0a839f9c168784a1f50013c83877cc876094"
+    },
+    {
+        "sha": "723edf859ff2cf7dd0d4c2cb01a7d941af055265",
+        "description": "glsl: tidy up uniform storage value count code in NIR linker",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3e2dbb6e7059f3ebe5a6e9f4633e923e29bcc705",
+        "description": "glsl: fix struct offsets in the nir uniform linker",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c19ebca308f30d09949ca66cc10ea63592fe98cf",
+        "description": "nir: add matrix_layout to nir_variable data",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f27c707585ccca0d61b0b688defb59598f37f8b1",
+        "description": "anv: skip writing perfcntr in results on Gen12+",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "086ea1ac7ee41fbb6bd031bfdf281a7e276cfe7a",
+        "description": "intel/perf: Enable MDAPI queries for Gen12",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "15b7b56eb2fb418263199d5b47774cfb922fa343"
+    },
+    {
+        "sha": "29fb5451a97a9c98821fa17dc8d7495c85c5e813",
+        "description": "pan/bit: Add fp16 min/max tests",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "532dfebc713bac114aa7a0f12f340f2cfae1ed52",
+        "description": "pan/bit: Add constants test",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "15fe8d5d7b0d7edc976ad39d93e76aab6ad0e929",
+        "description": "pan/bit: Add fexp2_fast test",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "20f255b18e48f61a5a0b22041c7149225f3bed64",
+        "description": "pan/bit: Add fexp2_fast interp",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8890fa4050dabee9f3ef4a44871a0bc696afb9c7",
+        "description": "pan/bit: Add FMA_MSCALE test",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b7dd5b579dadb02715029b47b284fb2979fa71c8",
+        "description": "pan/bit: _MSCALE interp",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1e3960a7256cc0bd3cf8d46d9f945372d86e0d7a",
+        "description": "pan/bit: Add BI_TABLE test",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "93fffd8a11ae78bfcb67a8ff5c0cd7842cad885f",
+        "description": "pan/bit: Add log2 helper interp",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1c45b58cebebf7f21035b22a98af8829fc002db0",
+        "description": "pan/bit: Add FMA_REDUCE test",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5546d1958b78ba9d933606960a888b62edbf8d01",
+        "description": "pan/bit: Add BI_REDUCE_FMA interp",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "68b4e708f14d116518edc55017dcb8da539328fd",
+        "description": "pan/bit: Add frexp_log test",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "36cfe722e5ab6c01216f30cad6909888425d2931",
+        "description": "pan/bit: Add FREXP interp support",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c05860789a858778d1cfcb5e8dec1168b1114cb0",
+        "description": "pan/bi: Lower special ops to 32-bit",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4d0f94103618a7f351774a2fb3208c8aefe1f315",
+        "description": "pan/bi: Round constants to 32-bit",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d30df466b57771ab5b28dadf6e113f46222e1b92",
+        "description": "pan/bi: Dump extra bits for disasm",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "590d66fa0c4af564f0f6f5c294500eb816c9477f",
+        "description": "pan/bi: Pack MAX.v2f16",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f87403c4c134454d991c1962b746a257f5f11d00",
+        "description": "pan/bi: Pack ADD.v2f16",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7e76c2b806dcef8254f0039ce27d916ca6dc2bf5",
+        "description": "pan/bi: Structify add and min/max fp16 ADD",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1647884cec58577024c0ff5e22d276b9e8e741f6",
+        "description": "pan/bi: Workaround constant packing errata",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d772bf01011fc41d14093892a46541dcb2b9b6db",
+        "description": "pan/bi: Try to reuse constants in ALU",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "aba7f09902f704819f0bc718a322793b265acd64",
+        "description": "pan/bi: Handle st_vary with <4 components",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "438e445e17864e91704c5c8a6ed33bfefe329008",
+        "description": "pan/bi: Fix vec2/3 handling",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "031ad0ecc2d585c109cbb5a757d07bcae344b8be",
+        "description": "pan/bi: Implement flog2",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8e52206dbef63ffe91f5e58043228bb51e41192c",
+        "description": "pan/bi: Add fexp2 implementation",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b1d4d8f7432ddff50dce4151603f70c47c01c5f9",
+        "description": "pan/bi: Fix lower_combine swizzle rewrite",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "60f252708fc7d0ad9b844c55b659e9fd3d6b5607",
+        "description": "pan/bi: Fix packing with low-nibble-set on hi constant",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "10fb5fb460b83f0cc2eca24557fbddf32cb1d0a9",
+        "description": "pan/bi: Fix packing with multiple constants",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "86c2a6b9fe885efa0366b262a226643184ca4ba4",
+        "description": "pan/bi: Fix bi_get_immediate with multiple imms",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "df69304ac829ee843cbe70b8fdd13a7a32704a48",
+        "description": "pan/bi: Ensure CONSTANT srcs have types",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8f70f4432cb05f96b184ff247cbca9f5c2954aa1",
+        "description": "pan/bi: Split src/dest index printing",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "db5c1ae8fd17f3113a88029ea90d23f10df293ed",
+        "description": "pan/bi: Add fexp2_fast packing",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c3eebfeb11cd57998134c0bb903c2447296f43c7",
+        "description": "pan/bi: Pack FMA_MSCALE",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0cb703984e68c426a173df1e0c951591dca17fb8",
+        "description": "pan/bi: Structify FMA_MSCALE",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4570c34fc76c16c149d6040883b92c30abe70531",
+        "description": "pan/bi: Add _MSCALE flag for FMA/ADD",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d3643cdd81bf2f1ad6ddf10d80e38d0ddaf9f908",
+        "description": "pan/bi: Add log2_help packing",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6039d51e32fe98c4e785b7a9039bfc066720c91a",
+        "description": "pan/bi: Pack ADD_FREXPM",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ffa9f6a7896cd1cfdfe0e8e880ab870f3da6033f",
+        "description": "pan/bi: Add bi_pack_fma_2src helper",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9904ed170a121bb15350b0882ddc6e54d13a8a8f",
+        "description": "pan/bi: Add frexp_log packing",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e067fd7b00c5a9b4ab4b60c98315344d673f5239",
+        "description": "pan/bi: Add log_frexpe op to IR",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "40befaa96590bb8ce93af6c6db50f054dd021ebe",
+        "description": "pan/bi: Add FLOG2_U op to disassembler",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "62c8c3445ed50b73ab3d40d63631cad64f084f12",
+        "description": "pan/bi: Add op for ADD_FREXPM",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cc611566260eacc0d4e92d8b3dc3a8a4d7c94b6e",
+        "description": "pan/bi: Add special op for exp2",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "af01378dce1873c520c52a536ee7d1731c18105d",
+        "description": "pan/bi: Add BI_TABLE for fast table accesses",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "83d961b0c26874622a0c72cebfa40ef4952ae5d3",
+        "description": "pan/bi: Disable FMA scheduling for CONVERT",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "86c0ea383db65b5ec019143606189231bdc65066",
+        "description": "pan/bi: Add disasm for ADD.i8",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f5deed138a0b4765438135367248f1d8f0649975",
+        "description": "spirv,nir: Move the SPIR-V vector insert code to NIR",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "feca4396974feb0e94603151eaebb6a7a6a22ce3",
+        "description": "spirv: Call nir_builder directly for vector_extract",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "acaccff4d331ecc4b2794fef3f4b117abdd15abf",
+        "description": "nir/builder: Handle any bit-size selector in nir_extract",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4b160c67764b3f0d0a843f7542d6079aa3a7d8f2",
+        "description": "spirv: Error if OpCompositeInsert/Extract has OOB indices",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c478f8ad6cf57425ffdae56a7c18b62b27985ea4",
+        "description": "spirv,nir: Add a better vector_insert",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "380bf556bfe34357f802dc49e1e104dc8fdf951a",
+        "description": "spirv: Handle OOB vector extract operations",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "dc3a17997b479f91f36b2421e9c41c11a025de47",
+        "description": "util/sparse_array: don't stomp head's counter on pop operations",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "e4f01eca3b3cd1701f21cacbb8d29fe688ba42bb"
+    },
+    {
+        "sha": "d684fb37bfbc47d098158cb03c0672119a4469fe",
+        "description": "st/mesa: Update shader info of ffvp/ARB_vp after translation to NIR",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "8a0dd0af3f1a6c0310a08daf4220132ec6815b31"
+    },
+    {
+        "sha": "c4ca9e66ddb507831b2d35e927d6310775006894",
+        "description": "aco: fix exporting the viewport index if the fragment shader needs it",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b424d49ac05563fd7d9f217fae9c25fc602f4330",
+        "description": "radv/llvm: fix exporting the viewport index if the fragment shader needs it",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "19aa68ae315df7654bd81a4c293aeaf5f7a7f4a6",
+        "description": "radv: set missing SHARED_VGPR_CNT for NGG VS and ACO",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "c24d9522daefce112b7a9d03a6d1abdf60f02656"
+    },
+    {
+        "sha": "fd6e44236c07583b3b838b2c7ed01fea27002ef9",
+        "description": "radv: fix geometry shader primitives query with ACO on GFX10",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "c24d9522daefce112b7a9d03a6d1abdf60f02656"
+    },
+    {
+        "sha": "f7d620f47d53d9ad513c41730f3a24b9564e5e74",
+        "description": "intel/compiler: Fixup operands in fs_builder::emit() that takes array",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "39ad0c2af8b40c728a91bebf05b365803d68022e",
+        "description": "intel/compiler: CSEL can do saturate",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5afaa407c1a2a27a23f1827d72d5ebde8b7882fe",
+        "description": "intel/compiler: Only GE and L modifiers are commutative for SEL",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a80e44902f66244d257c523afe77558cf334d624",
+        "description": "intel/compiler: Silence unused parameter warning in update_inst_scoreboard",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c836295dfdeafe9f2a731c4dcd75d59c4494bcf3",
+        "description": "intel/compiler: Silence unused parameter warning in fs_live_variables::setup_one_read",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "62f70a353f86e5ebd2889feed8d1223d11827312",
+        "description": "intel/compiler: Silence unused parameter warnings in vec4_tcs_visitor",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "030e5ceac4446dfc340d447c33222730596030d3",
+        "description": "intel/blorp: Delete an unused enum",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d0d039a4d3f49f3cc89e167b46edae54cf32a6be",
+        "description": "anv: Emit pushed UBO bounds checking code in the back-end compiler",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "eb5a10ff63f74f9e052ecc6c7399df8e0d193345",
+        "description": "intel/cfg: Add first/last_block helpers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "64e3b8d66b9d4103ff815606ff20b39246418122",
+        "description": "tu: Use tu_cs_add_entries() with non-render-pass secondaries",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ac0b8d58b963efbeadb4461b39f7d910996c2db7",
+        "description": "mesa: add interaction between compute derivatives and variable local sizes",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8c949b2aa6e0c27e92a05a57eda11672c2bdb157",
+        "description": "st/mesa: properly guard fallback_copy_texsubimage aginst failed maps",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8521acd660764973940fbdc2c85334670d620b45",
+        "description": "radeonsi: don't assume ctx is always a threaded_context",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "dcb1e8fef8ae60877a696a5bca337eba5475085d"
+    },
+    {
+        "sha": "791134658e30ed843acd68d39b06156563017d15",
+        "description": "Revert \"CI: Disable Windows/VS2019 builds\"",
+        "nominated": false,
+        "nomination_type": 2,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "460b8b1758d953b2b820443615d73ccdb1455b5e"
+    },
+    {
+        "sha": "2f009c4b494f5b158525e7ebc01c280f54227402",
+        "description": "docs: update for recently-added nvc0 features",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6ae214ac2eebf6a15ff41112d17940080a87d918",
+        "description": "nv50,nvc0: update with latest caps",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "029471c3c4eb1fde68fbebc79fdcb8e70090aab8",
+        "description": "intel/batch_decoder: Stop printing to stdout",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b8acf9a3d4af33cf8b6b8c870167c2aa348990a0",
+        "description": "anv: Report correct SLM size",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "d787a2d05e20642a7ec52ce80a830c7795a6bdc0"
+    },
+    {
+        "sha": "e003104605f506333d2ac8a9c2baf9f04eaebb81",
+        "description": "intel: Add _const versions of prog_data cast helpers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9b17d7caac76e1c2dd4579c198b2e32b762bb656",
+        "description": "nir: Add some sanity assertions in opt_large_constants",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "33eb43349e8c3e8216f51ec838d9b9ab23361873",
+        "description": "nir: Add an alignment to nir_intrinsic_load_constant",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "f1883cc73d4ea2c6d3a73dfe55c8b346f3ef8ac6"
+    },
+    {
+        "sha": "8cbeb13704a59034ffe19a7ffef7b3856a1733e8",
+        "description": "clover: Check if the detected clang libraries are usable",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "ff1a3a00cb37d84ab9a563f0aa241714876f56b4"
+    },
+    {
+        "sha": "839c886b346e0f68707804e17e9088d2e166e6d6",
+        "description": "aco: add missing scc clobber to nir_op_unpack_32_2x16_split_y",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ac74367befcf51917025f9fe2ce1dc431c2875fd",
+        "description": "aco: implement various 8/16-bit conversions",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0443a4a0af1ac76ec5284cd47c4860b3c5853cd8",
+        "description": "iris: Enable EXT_depth_bounds_test extension.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "daeff19608e8ef1937167ffa8b086bba5eb3f60e",
+        "description": "meson: tell flex that we support c99",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0752648a993c6f0fae2f4a072079000b9d84d074",
+        "description": "vbo: avoid including wingdi.h on win32",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b55b033f7624171d82ae1f79f3d3ad058ae0ac56",
+        "description": "mesa: fixup cast expression",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c55fc3543537fdc7b402584a076eb87d258b4c51",
+        "description": "util/tests: initialize variable",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "522bb081314131340804a160d5d53f2fbe9a10be",
+        "description": "wgl: silence some cast-warnings",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e9ad8af6f377a3afb5cbfb8d1844887af6894ea7",
+        "description": "meson: use override_options to change warning-level",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "24378086710bae7eb7b6d0cb4ec0e718d36ba32c",
+        "description": "turnip: image_view rework",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "300d0e2b809644262481c30cf205761abd2234bb",
+        "description": "turnip: don't limit framebuffer size to image size",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b6455e9a6a7dcd37483d1ff2193161c3568e74f6",
+        "description": "turnip: compute render_components/srgb_cntl at renderpass creation time",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d80fb024302aa6058945826a79ba0caf9611fcc1",
+        "description": "winsys/amdgpu: Retrieve WC flags from imported buffers.",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "80797edd7193409d0109d4d3378dd1b8d2597f80",
+        "description": "st/mesa: fix a crash due to passing a draw vertex shader into the driver",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "bc99b22a305be5e5a5f8fdbf57105d220cf4b0ab"
+    },
+    {
+        "sha": "7a794b1de40df87edc359a36d14e214daa1bfe60",
+        "description": "CI: Disable Windows/VS2019 builds",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9ecd9463de6ba7a9f0648da16ef9371dd8a202f0",
+        "description": "meson: Make shared-llvm into a tri-state boolean",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0c05d46237db3095ef92d61452d886286806a827",
+        "description": "tu: Align GMEM resolve blit scissor",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d2e172c03f7170382e8d93b2ad04f3ca92b2020f",
+        "description": ".mailmap: add an alias for Zhongmin Wu",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "eafacdc0fa02039cb2d2aebd5911f59d9178c3c0",
+        "description": ".mailmap: add alias for Zhaowei Yuan",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "56222c13cf680362213268fbff15762f8fd1bcbf",
+        "description": ".mailmap: add an alias for Yaakov Selkowitz",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8be72b4c7957c48cba446563a641fae00540f613",
+        "description": ".mailmap: add an alias for Xavier Bouchoux",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a96e1a2d9f6c983f6ed2ee7211a267a63a19503b",
+        "description": ".mailmap: specify spelling for Wladimir J. van der Laan",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f9e1e5857d3d27d9e517fd695b332f1429d4e81f",
+        "description": ".mailmap: specify spelling for Vivek Kasireddy",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "47d17238dd5d1d7dc8a2355890d4d8581bfc89da",
+        "description": ".mailmap: add an alias for Varad Gautam",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "55f883b8eabecb935001da088771da436e8bdb9b",
+        "description": ".mailmap: add an alias for Vadym Shovkoplias",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d8982ce84cb7ab7f57b18bad7c7994763468e0d5",
+        "description": ".mailmap: add an alias for Topi Pohjolainen",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0399b4f2987e56963ba22ceba0a4d7a3f51ef171",
+        "description": ".mailmap: add an alias for Tomasz Figa",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "049ce5f41768de6201fdfc33a085f7e9efb6d487",
+        "description": ".mailmap: add an alias for Tom Stellard",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "05b2a4471c50a3f2b02c29b4b4a9bcd96ae8e6e9",
+        "description": ".mailmap: add an alias for Tim Wiederhake",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e430136cc9f2219033b2ae3ea01ec5a8ac9ba11e",
+        "description": ".mailmap: add a couple of aliases for Timothy Arceri",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "34ab507c1fc762fbbab1e9c13b6ff95c9bbb18ae",
+        "description": ".mailmap: add an alias for Timo Aaltonen",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cb177e054a27b79088a9e9fee2c2a6cbba2128d8",
+        "description": ".mailmap: add an alias for Thierry Reding",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "032a603e3c5e4b1ae5be9d1afbcb91ccc2eacd72",
+        "description": ".mailmap: add a couple of aliases for Suresh Guttula",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6d1fe4a68730f241d01b0eaafa0969b584bf3665",
+        "description": ".mailmap: add a couple of aliases for Steinar H. Gunderson",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5ee82189f231551d7e25e00a50ee474bdc550955",
+        "description": ".mailmap: specify spelling for Sonny Jiang",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d3f36056fa9fefbd769dd3cf60d7ab5702a20c5b",
+        "description": ".mailmap: add an alias for Sergii Romantsov",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "00d9496a123a9b685b568a9d6482ad68206b9b4e",
+        "description": ".mailmap: add an alias for Samuel Li",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9a5bd1512a44db4d315110d57a9ec7010d7121aa",
+        "description": ".mailmap: add an alias for Rodrigo Vivi",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c6fcca4bd86c8fe7b71f45291edb517bb6f19960",
+        "description": ".mailmap: add an alias for Rob Clark",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b7c1f150c981c881805147d5e5d01a202da0e687",
+        "description": ".mailmap: add an alias for Renato Caldas",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3dac186704f1fc7f26d97d7778b052d902cb02ea",
+        "description": ".mailmap: specify spelling for Randy Xu",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9e904253e47014ffdaf0a3446b1212e496b24870",
+        "description": ".mailmap: add an alias for Qiang Yu",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3ba1d912a04d25d82ee636d7c3a095240b00c851",
+        "description": ".mailmap: add an alias for Plamena Manolova",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b42a25320e6d444f9fd90c2db12d209c4e87f286",
+        "description": ".mailmap: update aliases for Pierre-Eric Pelloux-Prayer",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3ffa511d60dbfa163e553d25cf2bcf45a569a777",
+        "description": ".mailmap: add an alias for Philipp Zabel",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2b82c50e794d8118de9291e6e04b7a2fa42bd479",
+        "description": ".mailmap: update aliases for Nicolai H\u00e4hnle",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f40c48c0c469580ab8f56e48bfc6ba50a0f2cb23",
+        "description": ".mailmap: add an alias for Nicholas Bishop",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "004c69fbfa67bb7fab628c3be65d636f65e6242b",
+        "description": ".mailmap: specify spelling for Nian Wu",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3ce0e25a988680711982a28f477f95024682b567",
+        "description": ".mailmap: add an alias for Neil Roberts",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1ac6946ded222e5dbfce6acd881966bc2b496923",
+        "description": ".mailmap: add an alias for Neha Bhende",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a9ed1085ab0ad5a2f474666496bcc1d0e52113ab",
+        "description": ".mailmap: add alias for Matthias Gro\u00df",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3223198b4d6b23408eee3d57beab86af71d4d160",
+        "description": ".mailmap: update aliases for Marc-Andr\u00e9 Lureau",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "79bb330904acb945abd8e22dccfa15d77c837f12",
+        "description": ".mailmap: specify spelling for Liviu Prodea",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "25dcbcbb5b08be140c8cf0963468273a6044df9b",
+        "description": ".mailmap: add an alias for Lionel Landwerlin",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2e53e65e23a896e258a8a4ffe123821cc2737a69",
+        "description": ".mailmap: add a few aliases for Kristian H\u00f8gsberg",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "69489e48bc24485e01f008290e6f65313e610ddc",
+        "description": ".mailmap: add a few aliases for Kevin Rogovin",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ab4c32a50e09d447be128ef3d36c8519eeab29f0",
+        "description": ".mailmap: add a few aliases for Karol Herbst",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "92e45975448b59c7a8d2ce6003b3711e4b29943c",
+        "description": ".mailmap: add an alias for Julien Isorce",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ec001fd3236ce50b4d504585588e86ded4231743",
+        "description": ".mailmap: clean up aliases for Jeremy Huddleston",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f131469d1471063b503a9f4e5cbf155488723700",
+        "description": ".mailmap: add an alias for Jan Beich",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d8cb7efd30e5a2ac49bbfe7c0f829549a487dffb",
+        "description": ".mailmap: specify spelling for James Zhu",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "16ed147cab84bbff4cd507ba7ab397efb016e5b1",
+        "description": ".mailmap: add an alias for Illia Iorin",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b7f912f11a09347191bb62d46fd9fe66b59f9c2e",
+        "description": ".mailmap: add an alias for Igor Gnatenko",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ebaa8765fe92ef247fb4f8eba6cefa0f50a342e3",
+        "description": ".mailmap: specify spelling for Henri Verbeet",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "eb96435aafa239ff0b082b8e16d78738210cb1fe",
+        "description": ".mailmap: specify spelling for Heinrich Fink",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "02b2dc22d30614617574ddb29a2a7008e8058d21",
+        "description": ".mailmap: add an alias for Harish Krupo",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3c86bc03b32690d55fbb4ac9ef4dbcdb8360bbda",
+        "description": ".mailmap: add an alias for Haihao Xiang",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5ea2e1044e85d85787fea02f668cdbcc9cb2649e",
+        "description": ".mailmap: specify spelling for Gurchetan Singh",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "194c9f9982cff810265bc240291d75819b73637b",
+        "description": ".mailmap: specify spelling for Francesco Ansanelli",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "edb4e21e262cb79734a5750776b6948813b2f5dc",
+        "description": ".mailmap: add an alias for Erik Faye-Lund",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c11e1d4408210c91ce6fd8d9fa92b47666595a41",
+        "description": ".mailmap: add an alias for Emmanuel Gil Peyrot",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8efee3cea374ee8179b3c25e7e78d73ac78610e2",
+        "description": ".mailmap: add a couple of aliases for Dylan Noblesmith",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ee068df4f58bb4678aaa0c3b7d503ce1f7b4eb0e",
+        "description": ".mailmap: add an alias for Dylan Baker",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e7699f92e9e3ad486a89e3a8077bdf99e808cd97",
+        "description": ".mailmap: add an alias for Dave Airlie",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4e793b7b4b837fae0969552b3bd8816b6901c1e5",
+        "description": ".mailmap: add an alias for Danylo Piliaiev",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "aa6ad898ba1d39ab374edcfae5afb17ada89da35",
+        "description": ".mailmap: add an alias for Daniel Sch\u00fcrmann",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e8764917c4bf6cbc287abf183886a608e853b405",
+        "description": ".mailmap: add an alias for Craig Stout",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7f4d26b3cd91ca87045f8b282d51f11b6735b99f",
+        "description": ".mailmap: specify spelling for Constantine Kharlamov",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5437ccda31b60a3f845ac1181c66c0908a3581a8",
+        "description": ".mailmap: add an alias for Colin McDonald",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a07c11b0fe5d343686d8ea0c1c7c896fd8b43327",
+        "description": ".mailmap: add a few aliases for Christoph Haag",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0d6af7f9b133c7c430aed6e44c4f43b656669f79",
+        "description": ".mailmap: add an alias for Christian Inci",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "832d1f913eeaed108c5994d851f495b575a8e5bf",
+        "description": ".mailmap: add an alias for Christian Gmeiner",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9278ea292092368feb3b71d29f5332e04f793d7b",
+        "description": ".mailmap: add alias for Chenglei Ren",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "43bdff8a5c28486e4d78b70ca09fa7dcfe5393f3",
+        "description": ".mailmap: add a couple of aliases for Chandu Babu Namburu",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d89e96313395b0a32a836f4675df18b72ca8bbeb",
+        "description": ".mailmap: add an alias for Chad Versace",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a3a2c49e13e23e95a5c2a87df0339e1263ebaedc",
+        "description": ".mailmap: update aliases for Carl-Philip H\u00e4nsch",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "88eb6b7d58b3a4fd255c60cb8d36ff5752ac70a3",
+        "description": ".mailmap: add an alias for Bruce Cherniak",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "da8a3098825b8dc5eeea12e91d89ac276a53ceca",
+        "description": ".mailmap: add an alias for Boris Brezillon",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0efc82183d6e4a84bd7bc5b0ad328ac34cdd6262",
+        "description": ".mailmap: add an alias for Axel Davy",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "84a9fe776646998c4b348adfd312997c5bfe170c",
+        "description": ".mailmap: add an alias for Anuj Phogat",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5cf8dc7f54c079e04043d41b7901a3cc402e9631",
+        "description": ".mailmap: add an alias for Andrii Simiklit",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "174e97e969666fe5977cb1c5d045401b8130262f",
+        "description": ".mailmap: add an alias for Alyssa Rosenzweig",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "12ec5b94eae9e440a49d8a919e87d26e39d8b625",
+        "description": ".mailmap: add an alias for Alan Swanson",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a934c8e7edd820ebb7286d0927090578cd6a3080",
+        "description": "mesa/st: initialize all winsys_handle fields for memory objects",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e3e704c7e7e46dfda820ea2e96fa4a32d63ef796",
+        "description": "amd/addrlib: Use enum instead of sparse chars to identify dimensions",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e58509cdeccc85adcf9127c6d1a462a73e7d5068",
+        "description": "gbm/dri: Propagate queryDmaBufModifiers return value",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "4e3a7dcf6ee4946c46ae8b35e7883a49859ef6fb"
+    },
+    {
+        "sha": "b5b25ee0327f65d837ff84f59b497232d52ec25d",
+        "description": "zink: be less picky about tiled resources",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "040a2643c08dd0accee6942bc05836b99417ee49",
+        "description": "st/dri: make sure software color-buffers are linear",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1c4f68b089b26918fff55196122309ac43e78e1b",
+        "description": "virgl: Use ETC2 formats directly when possible.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "dcb1e8fef8ae60877a696a5bca337eba5475085d",
+        "description": "radeonsi: use thread_context::bytes_mapped_limit",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "15cf7d170b3391ebde58f954cd2b90fff35b1ce5",
+        "description": "gallium/u_threaded: flush batch when hitting mapping limit",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "35b396392880871b8cc06172dafff238e67c44cc",
+        "description": "radv: do not abort with unknown/unimplemented descriptor types",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "11faaf646d1397db0d902298a3f0870f79692b68",
+        "description": "aco: fix emitting stream output with tess eval shaders",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "91aa596ca7ef3411264181f49f58743f5c965710",
+        "description": "aco: implement nir_op_f2i8/nir_op_f2u8",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "04a7ec7c8a7ca63fc3e90e5d2fe1290976a77bd6",
+        "description": "nvc0: enable GL_NV_viewport_array2",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cd092bf937020984d6008f93eb0d15d647c112c5",
+        "description": "st/mesa: add support for GL_NV_viewport_array2",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b0d0a3c916595860749220bcb3a4b1cc408ddd34",
+        "description": "gallium: add PIPE_CAP_VIEWPORT_MASK",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8f191e0c37356e684fa63db76174fdaee74b6982",
+        "description": "gallium: add TGSI_PROPERTY_LAYER_VIEWPORT_RELATIVE",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "17308c10141aa54ebf9e595920297888edf6146e",
+        "description": "gallium: add TGSI_SEMANTIC_VIEWPORT_MASK",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2d4787d77e3bd1986381b77105d2ca9d094ad7c0",
+        "description": "mesa: add NV_viewport_array2 enable, attach to glsl",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cc6661bfc87f6a8a46455ddaf2e0fb1c1fd332ed",
+        "description": "glsl: add NV_viewport_array2 support",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "54424a3d13f97bb1714f168f127f40d180f78a6b",
+        "description": "compiler: add VARYING_SLOT_VIEWPORT_MASK",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3a9e66277af68824fcfa1650d87222f37f0582cf",
+        "description": "ir3: Handle load_ubo_ir3 when promoting to constants",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "abcfb6437062f469335d27d5ef60ecf20272dc26",
+        "description": "ir3: Fix LDC offset units",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2d489f76f48095799392a915dcedc074bbb5e52a",
+        "description": "Revert \"nvc0: fix line width on GM20x+\"",
+        "nominated": true,
+        "nomination_type": 2,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "a0e57432b76c32f2109dab0ad3df0ba03967441c"
+    },
+    {
+        "sha": "26a1adce5bd2f0e44900f21e58ea09fea9f6690f",
+        "description": "anv: Fix UBO range detection in anv_nir_compute_push_layout",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "e03f9652801ad7f70091e084535a3fb6650c3acd"
+    },
+    {
+        "sha": "b2e4157143439a211d2f8e761dc8afd750fa791d",
+        "description": "anv: Advertise SEND count through VK_EXT_pipeline_executable_properties",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2c82b13c8ff63cc296215b6b5991ac00e6f3d495",
+        "description": "iris: make BATCH_SZ smaller by BATCH_RESERVED bytes",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "103cb32c794e6428d155d88e42cdf6b9a19b2f31",
+        "description": "iris: remove useless bo->gtt_offset assignment",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c586cb23e0a72e59cac45ad1fb85d0f3c71b6562",
+        "description": "iris: remove unnecessary forward declaration",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f3f5016c0bfe5dbe85015dc1c3f41848b02dd245",
+        "description": "iris: remove hole from struct iris_bo",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0158f73f086e0fe1b29a1e7bba995acce71d6bb9",
+        "description": "Fix util/process test on Cygwin",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "befe2ff3a610c468fb0bbb67624cc5b531a3fefe",
+        "description": "llvmpipe/nir: free the nir shader",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "18f896e55d96c63b11de7ed0cbe484988a1184c5"
+    },
+    {
+        "sha": "cb0a2b3df68d33be7c5bfbbb62825608b1b1948e",
+        "description": "draw/tess: free the NIR",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "0d02a7b8ca794a594c2e9cc5e6d63dc591593105"
+    },
+    {
+        "sha": "f01c0565bb9ad7335395920aebc7489cb76d1b72",
+        "description": "draw: free the NIR IR.",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "bf12bc2dd7a28844103bb30a07be0440e60c5864"
+    },
+    {
         "sha": "13ce637f1b28381e72470763ff5e39dd3c562476",
         "description": "freedreno/turnip: Update GRAS_LAYER_CNTL to GRAS_MAX_LAYER_INDEX",
         "nominated": false,
