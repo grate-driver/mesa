@@ -8,7 +8,7 @@
 #include "grate_resource.h"
 #include "grate_screen.h"
 
-#include <libdrm/tegra.h>
+#include "opentegra_lib.h"
 
 static const struct debug_named_value debug_options[] = {
    { "unimplemented", GRATE_DEBUG_UNIMPLEMENTED,
