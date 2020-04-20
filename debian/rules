@@ -75,6 +75,10 @@ else
 		VULKAN_DRIVERS += broadcom
 	endif
 
+	ifneq (,$(filter $(DEB_HOST_ARCH), armhf))
+		GALLIUM_DRIVERS += grate
+	endif
+
 	ifneq (,$(filter $(DEB_HOST_ARCH), amd64 i386 x32))
 		GALLIUM_DRIVERS += svga
 		# svga needs xa state tracker
