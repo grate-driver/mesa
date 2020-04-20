@@ -26,6 +26,6 @@ grate_screen(struct pipe_screen *screen)
 }
 
 struct pipe_screen *
-grate_screen_create(struct drm_tegra *drm);
+grate_screen_create(int fd);
 
 #endif

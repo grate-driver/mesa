@@ -18,6 +18,16 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+libtegradrm_c_args = []
+
+if with_gallium_tegra
+  libtegradrm_c_args += '-DGALLIUM_TEGRA'
+endif
+
+if with_gallium_grate
+  libtegradrm_c_args += '-DGALLIUM_GRATE'
+endif
+
 libtegradrm = static_library(
   'tegradrm',
   'tegra_drm_winsys.c',
@@ -25,7 +35,8 @@ libtegradrm = static_library(
     inc_include, inc_src, inc_gallium, inc_gallium_aux, inc_gallium_drivers,
     inc_gallium_winsys
   ],
-  dependencies : idep_mesautil,
+  dependencies : idep_mesautil, [dep_libdrm],
+  c_args : [libtegradrm_c_args],
 )
 
 driver_tegra = declare_dependency(

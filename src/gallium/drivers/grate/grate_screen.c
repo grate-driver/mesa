@@ -589,13 +589,30 @@ grate_screen_fence_finish(struct pipe_screen *screen,
 }
 
 struct pipe_screen *
-grate_screen_create(struct drm_tegra *drm)
+grate_screen_create(int fd)
 {
-   struct grate_screen *screen = CALLOC_STRUCT(grate_screen);
+   struct drm_tegra_channel *drm_channel;
+   struct grate_screen *screen;
+   int err;
+
+   screen = CALLOC_STRUCT(grate_screen);
    if (!screen)
       return NULL;
 
-   screen->drm = drm;
+   err = drm_tegra_new(&screen->drm, fd);
+   if (err) {
+      FREE(screen);
+      return NULL;
+   }
+
+   err = drm_tegra_channel_open(&drm_channel, screen->drm, DRM_TEGRA_GR3D);
+   if (err) {
+      drm_tegra_close(screen->drm);
+      FREE(screen);
+      return NULL;
+   }
+
+   drm_tegra_channel_close(drm_channel);
 
    grate_debug = debug_get_option_grate_debug();
 
