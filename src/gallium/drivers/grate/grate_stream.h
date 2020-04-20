@@ -29,9 +29,9 @@
 #define GRATE_STREAM_H_
 
 #include <stdint.h>
-#include <libdrm/tegra.h>
 
 #include "class_ids.h"
+#include "opentegra_lib.h"
 
 enum grate_stream_status {
    GRATE_STREAM_FREE,
