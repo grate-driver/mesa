@@ -1390,7 +1390,7 @@
         "description": "gitlab-ci: update tracie README after changes in main script",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "90a39af5f65e5fa01beeec526594f7e04143e7cf"
     },
