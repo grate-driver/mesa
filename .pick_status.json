@@ -769,7 +769,7 @@
         "description": "anv/android: fix assert in anv_import_ahw_memory",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "c79a528d2b58dfa6f3d856271cbf29697a5322a1"
     },
