@@ -1534,7 +1534,7 @@
         "description": "iris: don't assert on unfinished aux import in copy paths",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": null
     },
