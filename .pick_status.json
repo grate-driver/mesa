@@ -526,7 +526,7 @@
         "description": "vulkan: Allow destroying NULL debug report callbacks",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "086cfa5652ec202f87c14d11e0f6c959d75987d8"
     },
