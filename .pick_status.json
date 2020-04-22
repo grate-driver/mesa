@@ -994,7 +994,7 @@
         "description": "bin/gen_release_notes.py: Fix version detection for .0 release",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 2,
         "master_sha": null,
         "because_sha": "3226b12a09bbcbd25526fd6da6257057d26ddb31"
     },
