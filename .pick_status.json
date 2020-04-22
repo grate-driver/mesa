@@ -103,7 +103,7 @@
         "description": "meson: correct windows-version define",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "3aee462781abc0bfcce207fb64f9199b43a57542"
     },
