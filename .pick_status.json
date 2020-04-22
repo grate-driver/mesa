@@ -1255,7 +1255,7 @@
         "description": "spirv: Allow constants and NULLs in SpvOpConvertUToPtr",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "fb282a68bc46a1e28eaedb2670be241401f2b9da"
     },
