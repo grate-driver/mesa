@@ -148,7 +148,7 @@
         "description": "radv: make sure to export the viewport index if FS needs it",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "b424d49ac05563fd7d9f217fae9c25fc602f4330"
     },
