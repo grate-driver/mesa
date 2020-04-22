@@ -1,5 +1,1085 @@
 [
     {
+        "sha": "c552b5fd1d106adc04f62fcbe71d650a9a17f7e0",
+        "description": "turnip: implement VK_EXT_sampler_filter_minmax",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a77e2ac835e5a86965f61a1d628671cf7535890b",
+        "description": "turnip: enable cube arrays",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9daeb504543ccf3851ed058a860ada7d84de6f22",
+        "description": "turnip: implement VK_EXT_filter_cubic",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a92d2e11095d9f1f8bc1188fd3d2b8391acc4591",
+        "description": "turnip: implement VK_EXT_sample_locations",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "83b2f1d8cf53ec7f9defa2acdae313cdacb303af",
+        "description": "turnip: set shader key msaa field",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "36e0d2f39b0264e393fd4edab7c87d3e0d5454a4",
+        "description": "aco: coalesce v_mad's accumulator with definition's affinities",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d000d76f13e24aae701de0d4ab43bc06c3c9b361",
+        "description": "aco: use upper part of gap in register file if it is beneficial for striding",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d666d83be2fa03210f38b06e72410e8d8221b184",
+        "description": "aco: try to always find a register with stride for even sizes",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5a3c1f4f0bfbcc9ea1900891435c28df73b5afa8",
+        "description": "aco: stop get_reg_simple after reaching max_used_gpr",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2796cb4c2481c35b9510c03dad3a5ebe65a82d51",
+        "description": "aco: refactor get_reg_simple() to return early on exact matches",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6792e134f37323d8b56a60b4620e782fc0d673dd",
+        "description": "aco: don't create vector affinities for operands which are not killed or are duplicates",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "edc2b57ac14c6f9f3dadd3d7282e9d6ac1bc4304",
+        "description": "aco: allocate full register for subdword definitions if HW doesn't support it",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "97a870cf88a551cca9a1fd0773d183cddc4b2561",
+        "description": "aco: move attempt to find strided register into get_reg_simple()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c7f97f110c4c42bac54fd37a15e265669c8a2ab8",
+        "description": "aco: use DefInfo in more places to simplify RA",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "734f86db6b44544a15dc39f91e9951f411c5207d",
+        "description": "aco: create and use DefInfo struct in RA",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5b2f628da319cdbc2811ab3964d8031ca962f80c",
+        "description": "aco: create pseudo dummy instruction in RA to be used for live-range splits",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d9f7d1d5cb149cf86667876460fdff2e395c9bb1",
+        "description": "aco: refactor get_reg() to also handle affinities",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7c8f4ebca93f0252419996618a49d507bbfda231",
+        "description": "aco: refactor get_reg() to take Temp instead of RegClass",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0a9ed981780c98c33bf14829ef5bbe5a2c409882",
+        "description": "aco: simplify operand handling in RA",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a5cce9528072ed4ca60c6191471eca9bbe2e08cc",
+        "description": "turnip: enable VK_FORMAT_S8_UINT as stencil format",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "44c6c145daadf618607abb997f20608e820daee0",
+        "description": "turnip: improve GMEM load/store logic",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e72201c7873ea22dadf8d1775f97400a435a8b9a",
+        "description": "turnip: disable depth test for S8_UINT attachment",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f13049f48a068b435f3dfb24c9af801475f16fdb",
+        "description": "aco: implement 64-bit sgpr swaps",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2ab45f41e08a3892138a1e9b20552621b4e18682",
+        "description": "aco: implement sub-dword swaps",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "83fdb1ed3dd13228bcb761a4a4532b67a24a682b",
+        "description": "aco: add VOP3P_instruction",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8fc24f9a45d649fb644ce78f954ae7b6a04e26db",
+        "description": "aco: fix copy statistic for 64-bit vgpr constant copy",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4daa3917a38a6d18ba7cc66071342b9f7fa92f53",
+        "description": "ir3: Fix bug with shaders that only exit via discard",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8cfa60eab85bfe08098ddd014da861b9e3f6aca3",
+        "description": "ir3: Don't double-insert the first block",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "66229aa16968eb60dd631a8f48f593a4fa8478d5",
+        "description": "spirv: Expand workaround for OpControlBarrier on old GLSLang",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f402b7c57641dd2ab4d39032574294c03d75b595",
+        "description": "iris: fail screen creation when kernel support is not there",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "bca97abffae221ea8cf402032538a331abf1ca8e",
+        "description": "gitlab-ci: add a list of excluded tests for RADV",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f1a12d6855cbbf4fc337df6f299c006b14f3435e",
+        "description": "meta,i965: Rip GL_EXT_texture_multisample_blit_scaled support out of meta",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c6244f9311d0aefc806a0fa14785b3de78312bba",
+        "description": "panfrost: Assert on unimplemented fragcoord etc",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "133c1aba051f838a7651c966bdedc1e972d3e029",
+        "description": "panfrost: Fix crashes with small BOs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5c6952108c337e717df2607632b14275fc76b398",
+        "description": "pan/bi: Assert out multiple textures",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3551c138deb631fbe3e4710b8d4a862b79d3e360",
+        "description": "pan/bi: Pack TEX compact instructions",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cd5fe3b9e0265c9a14ce9117b23a214d469f67c1",
+        "description": "pan/bi: Generate TEX_COMPACT instruction",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0769036a5cdbf654b8924d68a7bc3d40cf2f37be",
+        "description": "pan/bi: Stub out tex_compact logic",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f85746af3587bfaa9f9be0a12792e73f63d10258",
+        "description": "pan/bi: Add normal/compact/dual switch to IR",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "93be49b14bcd15b2c6e056a8499c435dc1bbd182",
+        "description": "pan/bi: Feed data register to BI_TEX",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "76d1bb03d5301698204d39a30e7e2afba86383b7",
+        "description": "pan/bi: Include TEX_COMPACT f16 opcode",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "bfc06b10dea5a85f64a0c7d12f2c9e748c71d756",
+        "description": "pan/bi: Structify TEX compact",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cf7b952308a349994a24ea27b56e8fc5ae37a70f",
+        "description": "pan/bi: Disassemble f16 dual tex",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a2c735350ff0833a9a1f045a6ec8b163b01c56df",
+        "description": "pan/bi: Document when dual-tex is triggered",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6fe41a12e307c91794c80d7284cff0d7f885b2d4",
+        "description": "pan/bi: Print tex_compact coordinates",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "902c8731f4e16be4c66bb4280550a1c2d9d28537",
+        "description": "intel/compiler: Put back saturate on [iu]add_sat opcodes",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "b7c47c4f7cfd0513ee2b98179cc22f402e5b3817"
+    },
+    {
+        "sha": "f699bb42af2b4d3959ac04ce86f1a096dc85fe69",
+        "description": "panfrost: Align Android makefiles with recent changes",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2f4a3c1ca07e63b725c6eb4f013c5ee9efb0c1a0",
+        "description": "freedreno/ir3: Drop handling FRAG_RESULT_DEPTH writing to .z",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "eab73799d16ea142dcbcabb6d5bedf860b5c9af7",
+        "description": "turnip: fix GMEM resolve in CmdNextSubpass",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e4521aeafc8254da639feb8a4421a445a88d9fde",
+        "description": "gitlab-ci: adapt query_traces_yaml to gitlab specific changes",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "acf7e73be54c7f1cc52fcc9be38a9df26849200e"
+    },
+    {
+        "sha": "0a884d730455c3faf1ea48d4693c14f9f1e0c869",
+        "description": "egl: simplify client/platform extension handling",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "013d9e40feed336d983b728357e4ce77b871c36d",
+        "description": "mesa/gallium: do not use enum for bit-allocated member",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "b1c4c4c7f53cde52a8f3b3ec17cd66b89bf04199"
+    },
+    {
+        "sha": "a842dc154d3cac5af7ff30f7d0501ae42a1d1d7b",
+        "description": "util/ralloc: fix ralloc alignment on Win64",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b7c47c4f7cfd0513ee2b98179cc22f402e5b3817",
+        "description": "intel/compiler: Drop nir_lower_to_source_mods() and related handling.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "fdd0ce12ac88e433c7712acd5226fa07dc870057",
+        "description": "meson: update llvm dependency logic for meson 0.54.0",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "821cf6942a390f5f64d8a2cff9933b24c84f7dc1"
+    },
+    {
+        "sha": "8e3696137f2cb7b4f5a3824f26186ecbb06f9282",
+        "description": "remove final imports.h and imports.c bits",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "289f02d1d5990e052e21eb250f6d40b47d6eb12f",
+        "description": "dri/nouveau: replace assert with unreachable",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c3db0936ef3077b656d55208dd5ae10437ddc2f7",
+        "description": "mesa: move ADD_POINTERS to macros.h",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "bf188f3494b85f550a39dddbf059669c2a9ee324",
+        "description": "mesa|mapi: replace _mesa_[v]snprintf with [v]snprintf",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c495c3af26b73cb1d444fdd67cc6c1f0226bd168",
+        "description": "replace imports memory functions with utils memory functions",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "bb560f2d653dd5d080c7f03859936ce50bea5b72",
+        "description": "util: Add an aligned realloc function",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b85775900d084e3d27f269c3bd336b9aa356b98d",
+        "description": "replace malloc macros in imports.h with u_memory.h versions",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9ee6e78a8716eed09a088dad2d6153373423a565",
+        "description": "Replace IS_INF_OR_NAN with util_is_inf_or_nan",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "369f00259113d5c157b88d52bd002d292c21fedf",
+        "description": "move windows strtok_r define to u_string",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "53c36dfcfe3eb3749a53267f054870280afb0d71",
+        "description": "replace IROUND with util functions",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "df3ce8fb77e718ee4371fe7ca9f4a7c889319efb",
+        "description": "mesa/main: remove unused IROUNDD",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "64014c8302da52480643cb7711298153cfdb0d51",
+        "description": "Replace IROUND_POS with _mesa_roundevenf",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9d9a2819ee0e862f60abf50ba239a341b664845a",
+        "description": "replace IFLOOR with util_ifloor",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "72acb66527df6f38c7b8b15fa5062a616d67074b",
+        "description": "u_math: add x86 optimized version of ifloor",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "bd4e769515345a6b20562310334bc828c0bb6605",
+        "description": "replace LOG2 with util_fast_log2",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f8e4542bad7dd9bb97b2990947ef74dbb2ee75e4",
+        "description": "replace _mesa_logbase2 with util_logbase2",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e190e8cef2eaeabc16dda0cbd56addcd81968834",
+        "description": "replace _mesa_next_pow_two_* with util_next_power_of_two_*",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e533fad182e7069ee0850154f51316dd779501c3",
+        "description": "replace _mesa_is_pow_two with util_is_power_of_two_*",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c1e7c1f4224789f0bc4cc847cecde350e2c6d2f2",
+        "description": "freedreno/drm-shim: Add support for faking other adreno chips.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cc239207463916e992367e9f53351883bf82ea06",
+        "description": "r600/sfn: use new temp register allocation when loading single value temporaries",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "50b66622f19aa5e3d7c393e9bbff847d16d788de",
+        "description": "r600/sfn: Count only literals that are not inline to split instruction groups",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9c7ce4d76e7b772e9d51dda2532a94d69bd4bee1",
+        "description": "r600/sfn: Fix using the result of a fetch instruction in next fetch",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "67495ff9aa6bed9bce37a064b33ef561809fc35c",
+        "description": "r600/sfn: Fix handling of GS inputs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "58d6cda5f523639f016feddb5d98382f6a160ea5",
+        "description": "r600/sfn: Handle b2b1 like it was a mov",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "de7ea88ff852080429c46da332f38224e01e0e36",
+        "description": "r600/sfn: Fix null pointer deref in live range evalation",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5d10e3ec6066239d732d19f69cd95da447e73e32",
+        "description": "r600/nir: Pin interpolation results to channel",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5e036fef1f48d9946385b7fc13ee64e613e2264d",
+        "description": "r600/sfn: Implementing instructions blocks",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b51ced7306ea18df1c5ded700608f01db4f01e6d",
+        "description": "r600/sfn: Fix setting alignments when lowering UBOs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "bc9cf6adff663889c3816b590e0b045956164ab0",
+        "description": "r600/sfn: Reduce array limit for scratch usage",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6fdc75d1c6d84533c8488c712e53e7828de41456",
+        "description": "r600: Dump a few more variables when requested",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f06e4ab3190a0a715447c4df4017892adb8708dc",
+        "description": "anv/android: fix assert in anv_import_ahw_memory",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "c79a528d2b58dfa6f3d856271cbf29697a5322a1"
+    },
+    {
+        "sha": "829013d0cad0fa2513b32ae07cf8d745f6e5c62d",
+        "description": "st/mesa: Re-assign vs in locations after updating nir info for ffvp/ARB_vp",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "d684fb37bfbc47d098158cb03c0672119a4469fe"
+    },
+    {
+        "sha": "ae169f38cead48a669d39fcd4ab7747da56e19c2",
+        "description": "tu: Fix the advertised maxFragmentInputComponents",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "45ec9c0f3de7795c1cb910718749ad828368ca8a",
+        "description": "freedreno/a6xx: Expand various varying-count bitfields",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d29fea77b9182915c1689634ff2376ac3c8fc21b",
+        "description": "docs: remove outdated sentence",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "d4cb9ef8260ced0a5693db18dedbdd11cbcfa7e6"
+    },
+    {
+        "sha": "56f174d14eb4bdac07ae34b0538cfcc217d7eca5",
+        "description": "st/omx: fix gcc warnings",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "07071cac7b97b20ba3b5a633171af7ac8ac09d00",
+        "description": "gallium/utils: silence strncpy warning",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "dbfeec62c3852293d5f029db73ff7d63ff0f14e5",
+        "description": "mesa: fix crash in find_value",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7c43b8ce1b82f41e03147f824e87195ca8f1cb49",
+        "description": "nir: Delete the fnoise opcodes",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4386c06770508d86eaa51839871767887f903d1a",
+        "description": "glsl: Hard-code noise to zero in builtin_functions.cpp",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "95f555a93a8891ebba2a291eecd984eb2364d636",
+        "description": "st/glsl_to_nir: make use of nir linker for linking uniforms",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0f79e0f7c62d4ac34e6a4a827b5433402cf7c223",
+        "description": "glsl: fix gl_nir_set_uniform_initializers() for bindless textures",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "954644022771f45b1e6f719cab399a949a3fbb22",
+        "description": "glsl: add bindless support to nir uniform linker",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "57e65cabd4f030f325fce2ef3e52af77792c4b66",
+        "description": "pick-ui: show commit sha in the pick list",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "32451a15ecb6b4bb42a2b77d5125eeb1163beea2",
+        "description": "pick-ui: make .pick_status.json path relative to the git root instead of the script",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "26a26a358484bf03a6498c4116d8cb496f668cc1",
+        "description": "pick-ui: compute .pick_status.json path only once",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a4b36cd3dd307d75913dbc183cdf2d0c1e97ea0e",
+        "description": "intel/fs: Coalesce when the src live range is contained in the dst",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "14b8d979db4bfde66b8c5cac00a4cbabb285b816",
+        "description": "intel/fs: Rename block to scan_block in can_coalesce_vars",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "064d39e620f0dfd45dbdcea798e266464f769c8f",
+        "description": "radv: use common nir_convert_ycbcr",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7870d714598f80305d9b44a1ed12e981c67feed2",
+        "description": "anv: use common nir_convert_ycbcr",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "71820c6b02d71e40d413e2d080e87108e64cfeeb",
+        "description": "nir: convert_ycbcr: preserve alpha channel",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f8558fb1ce770a817a16bde439dd8865931f59a2",
+        "description": "nir: add common convert_ycbcr for vulkan csc",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c2d8a4bf176618bcbf37ef93b6ca06ecac1b1856",
+        "description": "nir/linking: fix issue with two compact variables in a row. (v2)",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a24ab26ff72634999ebc262dbdd3404d7b68bfea",
+        "description": "pick-ui: auto-scroll the feedback window",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8b8a99ba567314d5a83633a8ef73a5491976c67c",
+        "description": "bin/pick-ui: Add a new maintainer script for picking patches",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0123b8f63415d3d320929e6112da2be2d837b262",
+        "description": "bin/gen_release_notes.py: Fix version detection for .0 release",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "3226b12a09bbcbd25526fd6da6257057d26ddb31"
+    },
+    {
+        "sha": "4abf0837cdb14b10a58d28766d5c1d3698d8a6d8",
+        "description": "anv: Add support for new MMAP_OFFSET ioctl.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0d387da08349e1bdd222efae0657fc74009d9955",
+        "description": "anv: Add anv_device parameter to anv_gem_munmap.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d1c1ead7cd6ea8a9025703f519b09f0e0e8c673c",
+        "description": "iris/bufmgr: Add support for MMAP_OFFSET ioctl.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ae6f06c50939b49f7c7407d9bede00a246ab1891",
+        "description": "i965/bufmgr: Add support for MMAP_OFFSET ioctl.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5bc3f52dd8c2b5acaae959ccae2e1fb7c769bb22",
+        "description": "iris/bufmgr: Factor out GEM_MMAP ioctl from mmap_cpu and mmap_wc.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a42d7157849832485e63850abaf341b10c952ea0",
+        "description": "i965/bufmgr: Factor out GEM_MMAP ioctl from mmap_cpu and mmap_wc.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "16be8ff022758edf660baafb08c9084582a2ab5c",
+        "description": "drm-uapi: Update headers from Linux 5.7-rc1.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a1f6ae4744da830b9bf584296dd9738aa3532357",
+        "description": "spirv: Fix propagation of OpVariable access flags",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c76f2292b556502018ecc591f3388516c8ded469",
+        "description": "intel/fs,vec4: Properly account SENDs in IVB memory fence",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "c3c1f4d6bcc210408f8b180727d269838b38193b",
         "description": "aco: move src1 to vgpr instead of using VOP3 for VOP2 instructions during isel",
         "nominated": false,
