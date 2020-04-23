@@ -1147,7 +1147,7 @@
         "description": "nir/lower_subgroups: Mask off unused bits in ballot ops",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "d10de2530976ed3aba9c5d077e2edb141f71e7dd"
     },
