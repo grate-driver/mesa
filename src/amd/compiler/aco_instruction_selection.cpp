@@ -7220,7 +7220,7 @@ void visit_tex(isel_context *ctx, nir_tex_instr *instr)
       if (instr->sampler_dim == GLSL_SAMPLER_DIM_1D && ctx->options->chip_class == GFX9) {
          assert(has_ddx && has_ddy && ddy.size() == 1 && ddy.size() == 1);
          Temp zero = bld.copy(bld.def(v1), Operand(0u));
-         derivs = {ddy, zero, ddy, zero};
+         derivs = {ddx, zero, ddy, zero};
       } else {
          for (unsigned i = 0; has_ddx && i < ddx.size(); i++)
             derivs.emplace_back(emit_extract_vector(ctx, ddx, i, v1));
@@ -8438,8 +8438,10 @@ static void create_vs_exports(isel_context *ctx)
    }
 
    for (unsigned i = 0; i <= VARYING_SLOT_VAR31; ++i) {
-      if (i < VARYING_SLOT_VAR0 && i != VARYING_SLOT_LAYER &&
-          i != VARYING_SLOT_PRIMITIVE_ID)
+      if (i < VARYING_SLOT_VAR0 &&
+          i != VARYING_SLOT_LAYER &&
+          i != VARYING_SLOT_PRIMITIVE_ID &&
+          i != VARYING_SLOT_VIEWPORT)
          continue;
 
       export_vs_varying(ctx, i, false, NULL);

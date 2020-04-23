@@ -216,6 +216,7 @@ static int si_get_param(struct pipe_screen *pscreen, enum pipe_cap param)
 
 
 	case PIPE_CAP_UMA:
+	case PIPE_CAP_PREFER_IMM_ARRAYS_AS_CONSTBUF:
 		return 0;
 
 	case PIPE_CAP_FENCE_SIGNAL:

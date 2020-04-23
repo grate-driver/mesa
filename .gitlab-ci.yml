@@ -166,7 +166,7 @@ arm_build:
     - .debian@container-ifnot-exists@arm64v8
     - .container
   variables:
-    DEBIAN_TAG: &arm_build "2020-01-14"
+    DEBIAN_TAG: &arm_build "2020-04-06"
 
 .use-arm_build:
   variables:
@@ -334,6 +334,8 @@ meson-armhf:
   variables:
     CROSS: armhf
     LLVM_VERSION: "7"
+    EXTRA_OPTION: >
+      -D llvm=false
   script:
     - .gitlab-ci/meson-build.sh
     - .gitlab-ci/prepare-artifacts.sh
@@ -344,10 +346,22 @@ meson-arm64:
     - .ci-deqp-artifacts
   variables:
     LLVM_VERSION: "8"
-    VULKAN_DRIVERS: "freedreno,amd"
+    VULKAN_DRIVERS: "freedreno"
+    EXTRA_OPTION: >
+      -D llvm=false
   script:
     - .gitlab-ci/meson-build.sh
     - .gitlab-ci/prepare-artifacts.sh
+
+meson-arm64-build-test:
+  extends:
+    - .meson-arm
+    - .ci-deqp-artifacts
+  variables:
+    LLVM_VERSION: "8"
+    VULKAN_DRIVERS: "amd"
+  script:
+    - .gitlab-ci/meson-build.sh
 
 meson-clang:
   extends: .meson-build
@@ -545,7 +559,7 @@ scons-old-llvm:
     LIBGL_ALWAYS_SOFTWARE: 1
     PIGLIT_NO_WINDOW: 1
   script:
-    - artifacts/piglit/run.sh
+    - install/piglit/run.sh
 
 piglit-quick_gl:
   extends: .piglit-test
@@ -582,7 +596,7 @@ piglit-quick_shader:
   variables:
     DEQP_SKIPS: deqp-default-skips.txt
   script:
-    - ./artifacts/deqp-runner.sh
+    - ./install/deqp-runner.sh
 
 .deqp-test-gl:
   extends:

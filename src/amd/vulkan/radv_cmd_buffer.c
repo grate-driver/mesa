@@ -793,10 +793,12 @@ radv_emit_sample_locations(struct radv_cmd_buffer *cmd_buffer)
 					       num_samples);
 
 	/* Compute the maximum sample distance from the specified locations. */
-	for (uint32_t i = 0; i < num_samples; i++) {
-		VkOffset2D offset = sample_locs[0][i];
-		max_sample_dist = MAX2(max_sample_dist,
-				       MAX2(abs(offset.x), abs(offset.y)));
+	for (unsigned i = 0; i < 4; ++i) {
+		for (uint32_t j = 0; j < num_samples; j++) {
+			VkOffset2D offset = sample_locs[i][j];
+			max_sample_dist = MAX2(max_sample_dist,
+			                       MAX2(abs(offset.x), abs(offset.y)));
+		}
 	}
 
 	/* Emit the specified user sample locations. */
@@ -3511,7 +3513,7 @@ radv_bind_descriptor_set(struct radv_cmd_buffer *cmd_buffer,
 	assert(!(set->layout->flags & VK_DESCRIPTOR_SET_LAYOUT_CREATE_PUSH_DESCRIPTOR_BIT_KHR));
 
 	if (!cmd_buffer->device->use_global_bo_list) {
-		for (unsigned j = 0; j < set->layout->buffer_count; ++j)
+		for (unsigned j = 0; j < set->buffer_count; ++j)
 			if (set->descriptors[j])
 				radv_cs_add_buffer(ws, cmd_buffer->cs, set->descriptors[j]);
 	}

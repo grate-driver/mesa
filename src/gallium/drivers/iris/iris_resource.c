@@ -314,6 +314,8 @@ iris_resource_destroy(struct pipe_screen *screen,
    iris_resource_disable_aux(res);
 
    iris_bo_unreference(res->bo);
+   iris_pscreen_unref(res->base.screen);
+
    free(res);
 }
 
@@ -326,7 +328,7 @@ iris_alloc_resource(struct pipe_screen *pscreen,
       return NULL;
 
    res->base = *templ;
-   res->base.screen = pscreen;
+   res->base.screen = iris_pscreen_ref(pscreen);
    pipe_reference_init(&res->base.reference, 1);
 
    res->aux.possible_usages = 1 << ISL_AUX_USAGE_NONE;
@@ -772,6 +774,9 @@ iris_resource_create_for_buffer(struct pipe_screen *pscreen,
       return NULL;
    }
 
+   if (templ->bind & PIPE_BIND_SHARED)
+      iris_bo_make_external(res->bo);
+
    return &res->base;
 }
 
@@ -895,6 +900,9 @@ iris_resource_create_with_modifiers(struct pipe_screen *pscreen,
       map_aux_addresses(screen, res);
    }
 
+   if (templ->bind & PIPE_BIND_SHARED)
+      iris_bo_make_external(res->bo);
+
    return &res->base;
 
 fail:
@@ -946,7 +954,7 @@ iris_resource_from_user_memory(struct pipe_screen *pscreen,
                                     user_memory, templ->width0,
                                     IRIS_MEMZONE_OTHER);
    if (!res->bo) {
-      free(res);
+      iris_resource_destroy(pscreen, &res->base);
       return NULL;
    }
 
@@ -989,7 +997,7 @@ iris_resource_from_handle(struct pipe_screen *pscreen,
       unreachable("invalid winsys handle type");
    }
    if (!res->bo)
-      return NULL;
+      goto fail;
 
    res->offset = whandle->offset;
 
