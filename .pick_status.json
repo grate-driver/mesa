@@ -1,5 +1,149 @@
 [
     {
+        "sha": "51c1c4d95a05b6eb6fce74e8d624615e4a1b38ab",
+        "description": "mesa: enable GL_EXT_draw_instanced for gles2",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0edff5123c4f27ff0f8e35d29c2c45a230d3f939",
+        "description": "turnip: Skip unused regs when setting up streamout buffers",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "374406a7c420d266f920461f904864a94dc1b8c8"
+    },
+    {
+        "sha": "e892733b80fb2ecf4f48787116e47b8230fcf951",
+        "description": "turnip : Fix wrong offset calculation for xfb buffer.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e34b0d65f9715b9376408a769e2005bb579128f8",
+        "description": "turnip: Implement and enable VK_QUERY_TYPE_TRANSFORM_FEEDBACK_STREAM_EXT",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "aff02dd76ba7d5eacda231e386945cff60d6a0c5",
+        "description": "turnip: make the struct slot_value of queries get 2 values",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "259cae4442ba3ad1d1b8e981e47f42493d93ca86",
+        "description": "intel/compiler: Don't create 64-bit src1 immediates in opt_peephole_sel",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "a4b36cd3dd307d75913dbc183cdf2d0c1e97ea0e"
+    },
+    {
+        "sha": "4459a70a6e86ebe9e6e58510069ed8a499e792e3",
+        "description": "intel/compiler: Delete abs/neg handling in fsign code",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "b7c47c4f7cfd0513ee2b98179cc22f402e5b3817"
+    },
+    {
+        "sha": "220f0e10d8c27684b1c91c5291bdf8a8012e2a1a",
+        "description": "intel/compiler: Don't copy prop source mods into PICK_HIGH_32BIT",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "b7c47c4f7cfd0513ee2b98179cc22f402e5b3817"
+    },
+    {
+        "sha": "be33cf8ad04855d37a7f756ba46c1ee49461b908",
+        "description": "docs: update calendar, add news item, and link releases notes for 20.0.5",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "defc6400e132c39955f1e79f84a33e8651a63c97",
+        "description": "docs: Add sha256 sums for 20.0.5",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c790e1c642e8bd7267c72fb218f97d90572287e1",
+        "description": "docs: Add relnotes for 20.0.5",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ad460c5dd6ff3974fdc4c8887d035f9dea0ad01b",
+        "description": "v3d: support for textureQueryLOD",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9fd180394bddbb2abd7edb39852b1419249be450",
+        "description": "nir: add nir_tex_instr_need_sampler helper",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "41bfd0812b4aef70a6acd6c4d389c722f45e29c5",
+        "description": "v3d/packet: fixing TMU_Config_Parameter_2 definition",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9967c26ae6c5afffd238a8c33b4e97457283a9ca",
+        "description": "v3d/tex: Configuration Parameter 1 can be only skipped if P2 can be skipped too",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d0b644d9f9d9673d3fe28c8c200209f553adeda1",
+        "description": "v3d/tex: don't configure tmu config 1 if not needed",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "c552b5fd1d106adc04f62fcbe71d650a9a17f7e0",
         "description": "turnip: implement VK_EXT_sampler_filter_minmax",
         "nominated": false,
