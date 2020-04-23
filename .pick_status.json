@@ -1156,7 +1156,7 @@
         "description": "anv: Drop an assert",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "4ef3f7e3d37ece7b4339870282cb52c5e334a68d"
     },
