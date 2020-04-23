@@ -1318,7 +1318,7 @@
         "description": "meson: Use dependency.partial_dependency()",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "53f9131205a63fa8b282ab2a7e96c48209447da0"
     },
