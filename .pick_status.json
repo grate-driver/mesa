@@ -1,5 +1,230 @@
 [
     {
+        "sha": "efdb7fa9a83b0a216b1837a5912b71669bf3f984",
+        "description": "anv: force whole EU array to be powered for perf queries",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a7998371ed0208583cdffb28a6befc1134a9a27b",
+        "description": "intel/perf: specify sseu configuration when supported",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8f152ed101fbf3fad3f914a19d260c3bab556c45",
+        "description": "intel/perf: store default sseu configuration",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ea8cb79742fb061817c11bc8ee7854d3b2583283",
+        "description": "include/drm-uapi: bump headers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ff3f775476a907cd9410572d11e38b6c29e5e062",
+        "description": "radv: simplify checking for Navi1x chips",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0d9fe0405f5520716703d61544c6d899f051aa8b",
+        "description": "aco: improve code for 32-bit isign",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d1621834f367d41500b7c1a819c046eb429fb8a6",
+        "description": "aco: combine VALU and SALU into various VOP3 instructions",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "607fb4153da08cdec6845e8505983fafa3cd63b3",
+        "description": "aco: move call to store_output_to_temps in store_ls_or_es_output earlier",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b497b774a5008c5c424b05cdbc3f4e96a6765912",
+        "description": "aco: remove copy in load_input_from_temps()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2dc550202e82c5da198ad0a416a5d24dd89addd8",
+        "description": "aco: copy-propagate p_create_vector copies of vectors",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e4383b5c7f24a20ba16b0bb4f74fe5cecf406ddf",
+        "description": "aco: decrease the uses of other copy operations after splitting/removing",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7f17a0a809195cefa2240f55d30f00e3fe0572b3",
+        "description": "meson: correct windows-version define",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "3aee462781abc0bfcce207fb64f9199b43a57542"
+    },
+    {
+        "sha": "32d871b48fbf38cb309eaaa13c8b425695141b60",
+        "description": "nir/algebraic: don't undo lowering of 8/16-bit comparisons to 32-bit",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6d792989924ce79363f181462904fa46692a99b5",
+        "description": "nir/lower_bit_size: fix lowering of {imul,umul}_high",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "715ef95700c06a09582744f3d873107728615b7f",
+        "description": "nir/lower_bit_size: fix lowering of shifts",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "58f25098a0dc4f4976dadacdc4e7a9db42ec0c50",
+        "description": "radv: Use TRUNC_COORD on samplers",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7086b38c81ebe2f0520461c1bc1a7b92863cf871",
+        "description": "radv: make sure to export the viewport index if FS needs it",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "b424d49ac05563fd7d9f217fae9c25fc602f4330"
+    },
+    {
+        "sha": "133efa112dfa08f8f28ea2dde42a6072140cd977",
+        "description": "radeonsi: enable support for AlphaToCoverageDitherControlNV",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ede36a2efe4d40c0ec81f465fdde761a7c335290",
+        "description": "mesa: add support for AlphaToCoverageDitherControlNV",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d82f0572180a0d3f4bb87cf49c325439d38ab6e3",
+        "description": "gallium: prepare framework for supporting AlphaToCoverageDitherControlNV",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "227df2a2badf0047a3e6e2c1d196aa1b26427b10",
+        "description": "turnip: Fix crashes when geometry shader constants aren't used",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "85f84ea148474554af42ca513b9cb7c43a78a738",
+        "description": "gallium: add # of MRT to blend state",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b88778e2de3a593587e20a8d4f0363a499f91455",
+        "description": "mesa/st: avoid u_vbuf for GLES",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7e1b57a6d964ac58e84ec4ece2951e4e643d6b1a",
+        "description": "mesa: avoid redundant VBO updates",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "155bb74ea965e9b686a6bce89c7a77065f41755f",
+        "description": "nir: Actually do load/store vectorization beyond vec2",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "51c1c4d95a05b6eb6fce74e8d624615e4a1b38ab",
         "description": "mesa: enable GL_EXT_draw_instanced for gles2",
         "nominated": false,
