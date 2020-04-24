@@ -391,7 +391,7 @@
         "description": "panfrost: don't always build bifrost_compiler",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "ec2a59cd7aa42652645e76e29a72335370c80e50"
     },

@@ -54,5 +54,5 @@ bifrost_compiler = executable(
     libglsl_standalone,
     libpanfrost_bifrost
   ],
-  build_by_default : true
+  build_by_default : with_tools.contains('panfrost')
 )
