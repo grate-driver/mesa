@@ -6502,7 +6502,7 @@
         "description": "Revert \"CI: Disable Panfrost Mali-T820 jobs\"",
         "nominated": true,
         "nomination_type": 2,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "46a32f0b6bf91279d001a4905babe4e50007696e"
     },
