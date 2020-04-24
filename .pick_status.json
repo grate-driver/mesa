@@ -4,7 +4,7 @@
         "description": "util: Make process_test path compatible with mingw native toolchains",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "f8f1413070ae079443ab31a75679cfd10cb756ed"
     },
