@@ -868,7 +868,7 @@
         "description": "radeonsi: don't print gs_copy_shader stats for shaderdb",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "dbc86fa3de6aba480f679a36b40227c0fe27c37b"
     },
