@@ -6511,7 +6511,7 @@
         "description": "Revert \"CI: Disable Lima jobs due to lab unhealthiness\"",
         "nominated": true,
         "nomination_type": 2,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "adeef43d15092a6910dceb3605f5ee3151dd2c47"
     },
