@@ -1579,7 +1579,7 @@
         "description": "anv:gpu_memcpy: Emit 3DSTATE_VF_INDEXING on Gen8+",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "3d9747780bc2508f4474230a0998d9dba7b02d1e"
     },
