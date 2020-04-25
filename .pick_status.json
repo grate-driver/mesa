@@ -229,7 +229,7 @@
         "description": "anv: Expose CS workgroup sizes based on a maximum of 64 threads",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "cf12faef614ab7cd9996410f1d161558a3853936"
     },
