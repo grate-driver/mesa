@@ -274,7 +274,7 @@
         "description": "radv: Use actual memory type count for setting app-visible bitset.",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": null
     },
