@@ -931,7 +931,7 @@
         "description": "radeonsi: unify and align down the max SSBO/TBO/UBO buffer binding size",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "03e2adc990d239119619f22599204c1b37b83134"
     },
