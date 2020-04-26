@@ -30,6 +30,7 @@
 #include "vl/vl_video_buffer.h"
 #include "util/u_screen.h"
 #include "util/u_video.h"
+#include "mesa/main/macros.h"
 #include "compiler/nir/nir.h"
 
 #include <sys/utsname.h>
@@ -203,7 +204,8 @@ static int si_get_param(struct pipe_screen *pscreen, enum pipe_cap param)
 
    case PIPE_CAP_MAX_TEXTURE_BUFFER_SIZE:
    case PIPE_CAP_MAX_SHADER_BUFFER_SIZE:
-      return MIN2(sscreen->info.max_alloc_size, INT_MAX);
+      /* Align it down to 256 bytes. I've chosen the number randomly. */
+      return ROUND_DOWN_TO(MIN2(sscreen->info.max_alloc_size, INT_MAX), 256);
 
    case PIPE_CAP_VERTEX_BUFFER_OFFSET_4BYTE_ALIGNED_ONLY:
    case PIPE_CAP_VERTEX_BUFFER_STRIDE_4BYTE_ALIGNED_ONLY:
@@ -370,14 +372,6 @@ static int si_get_shader_param(struct pipe_screen* pscreen,
 
          return ir;
       }
-
-      case PIPE_SHADER_CAP_MAX_CONST_BUFFER_SIZE: {
-         uint64_t max_const_buffer_size;
-         pscreen->get_compute_param(pscreen, PIPE_SHADER_IR_NIR,
-            PIPE_COMPUTE_CAP_MAX_MEM_ALLOC_SIZE,
-            &max_const_buffer_size);
-         return MIN2(max_const_buffer_size, INT_MAX);
-      }
       default:
          /* If compute shaders don't require a special value
           * for this cap, we can return the same value we
@@ -404,7 +398,7 @@ static int si_get_shader_param(struct pipe_screen* pscreen,
    case PIPE_SHADER_CAP_MAX_TEMPS:
       return 256; /* Max native temporaries. */
    case PIPE_SHADER_CAP_MAX_CONST_BUFFER_SIZE:
-      return MIN2(sscreen->info.max_alloc_size, INT_MAX - 3); /* aligned to 4 */
+      return si_get_param(pscreen, PIPE_CAP_MAX_SHADER_BUFFER_SIZE);
    case PIPE_SHADER_CAP_MAX_CONST_BUFFERS:
       return SI_NUM_CONST_BUFFERS;
    case PIPE_SHADER_CAP_MAX_TEXTURE_SAMPLERS:
