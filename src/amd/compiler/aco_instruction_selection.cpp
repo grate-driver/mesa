@@ -8276,7 +8276,6 @@ static bool visit_if(isel_context *ctx, nir_if *if_stmt)
          ctx->block = ctx->program->insert_block(std::move(BB_endif));
          append_logical_start(ctx->block);
       }
-      return !ctx->cf_info.has_branch;
    } else { /* non-uniform condition */
       /**
        * To maintain a logical and linear CFG without critical edges,
@@ -8312,9 +8311,9 @@ static bool visit_if(isel_context *ctx, nir_if *if_stmt)
       visit_cf_list(ctx, &if_stmt->else_list);
 
       end_divergent_if(ctx, &ic);
-
-      return true;
    }
+
+   return !ctx->cf_info.has_branch && !ctx->block->logical_preds.empty();
 }
 
 static bool visit_cf_list(isel_context *ctx,
