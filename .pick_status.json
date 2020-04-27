@@ -166,7 +166,7 @@
         "description": "mesa: report GL_INVALID_OPERATION for invalid glTextureBuffer target",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "98e64e538afeaa800e1cdcbc7ce5d5093b274fe7"
     },
