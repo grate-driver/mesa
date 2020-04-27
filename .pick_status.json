@@ -1219,7 +1219,7 @@
         "description": "nir/copy_prop_vars: Report progress when deleting self-copies",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "62332d139c8f6deb7fd8b72a48b34b4b652df7c1"
     },
