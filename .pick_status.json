@@ -1,5 +1,779 @@
 [
     {
+        "sha": "6b551d9f360e45ba4e74867dbe79ae212e4766c5",
+        "description": "pan/bi: Add initial fcmp test",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "778e27b5acf99537f5301fdc1f04ed9467966261",
+        "description": "pan/bit: Interpret CMP",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "71501972e91ddc2b9796dab59cb45c5808d3c799",
+        "description": "pan/bit: Prepare condition evaluation for vectors",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0b8724c34016430c95ca68dd9a01280eb93c7cec",
+        "description": "pan/bi: Relax double-abs condition",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "81156ad55a10b2d1fddaf64ac707279c60eb3d54",
+        "description": "pan/bi: Pack fma.fcmp16",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7a689470d0f5dc7733780b61ca0822fe629c131a",
+        "description": "pan/bi: Factor out fp16 abs logic",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c94d41ad7c92a9549e16f733dcb6a0a0762e811f",
+        "description": "pan/bi: Pack FMA 32 FCMP",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1520131d82812c815a08e322d182f7f2dc84f627",
+        "description": "pan/bi: Fix source mod testing for CMP",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "12ca99f2c1ac70844153362528808858af9aec32",
+        "description": "pan/bi: Structify ADD ICMP 32",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ddcefefa7d5ad9fc111ca17495c002a6802dcd95",
+        "description": "pan/bi: Structify FMA ICMP 16",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3d41468e7df4486a4666e93439f52e0fab467438",
+        "description": "pan/bi: Structify FMA ICMP 32",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "527d7303cabb5512e7de2569feaaefc3a3ae4354",
+        "description": "pan/bi: Structify ADD FCMP16",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "74795dd3284772b8491683e66de83839880a964d",
+        "description": "pan/bi: Structify FMA FCMP16",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "28afe3037a2afc758ab8caecfd89a54f840ac8c6",
+        "description": "pan/bi Strucitfy ADD FCMP 32",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c861292ce20a202d0c18b04257ce55472a89767d",
+        "description": "pan/bi: Structify FMA FCMP",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7fe3c145d9728480106e8c5b4e97b289104e50e8",
+        "description": "pan/bi: Remove bi_round_op",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "95fc71ece29f97b093d5eb7d1146f1b55c61aae5",
+        "description": "pan/bi: Deduplicate csel/cmp cond",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "df486689c07d3965c9e4efa5d9444b91aecdc208",
+        "description": "pan/bi(t): Fix SELECT tests",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "814f2f1d33e0215a207f1dbeed645979daa21745",
+        "description": "pan/bi: Add CSEL.8 opcode",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e23d191245d4db63aecf83fadd80a9911a3dad40",
+        "description": "pan/bi: Add FCMP.GL.v2f16 on ADD opcode",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b4f2d3a51c988a53ebf5af31c6dd6d84e32d2ee3",
+        "description": "pan/bi: Add 64-bit int compares",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "52cc7165c6a1c7d9338edc9f0add5e8439d8a2c2",
+        "description": "pan/bi: Add some 8-bit compares",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2f286eed2a99da99a2934eeae6f1276894289059",
+        "description": "pan/bi: Add CSEL.64 opcode",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "100edfe26d947fbecd3cf2ca190478348601eb42",
+        "description": "pan/bi: Add bool->float opcodes",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "523e9603d3fba507be9fe9a70a24edfd0a41792b",
+        "description": "radv: enable FMASK for color attachments only",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "81ac741f8929b90a16a0b4251f3e6da02dde6133",
+        "description": "anv: Expose CS workgroup sizes based on a maximum of 64 threads",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "cf12faef614ab7cd9996410f1d161558a3853936"
+    },
+    {
+        "sha": "86f67952d31554b8b4b5a9943b43ace988c6401f",
+        "description": "intel/devinfo: Compute the correct L3$ size for Gen12",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "8125d7960b672bcd597a2687e3078899afc52560"
+    },
+    {
+        "sha": "7262c743dc84d4efa778658bb77b10850c29e014",
+        "description": "radv: Determine memory type for import based on fd.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f30983be3a87946083c58100d72717f9e522c949",
+        "description": "radv/winsys: Add function to get domains/flags from fd.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "bec92850270a046524056b8d43bbd2554ba9f2e0",
+        "description": "radv: Stop using memory type indices.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4a8d172d3f81ef981e386f0cc6c259c36818f697",
+        "description": "radv: Use actual memory type count for setting app-visible bitset.",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8e03cf15f9516642ba7f7cd7b7a2d7aad835796a",
+        "description": "radeonsi: Count planes for imported textures.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6747a984f59ea9a2dd74b98d59cb8fdb028969ae",
+        "description": "r600: Enable tesselation for NIR",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b6d4452661ae77f80d16f5c7f8d55b863ec79ab8",
+        "description": "r600/sfn: Add tesselation shaders",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d77b81ce50ea05736bc0554a1062156caffed358",
+        "description": "r600/sfn: Add lowering passes for Tesselation IO",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1b3e103d0bf1c506f9ec413be11af8bd207ad674",
+        "description": "r600/sfn: Move removing of unused variables",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "74e0a0a72398140a72c2f4a092982d5bef32ad14",
+        "description": "r600/sfn: Handle LDS output in VS",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f102301cc48913a5d61e20705218e49653b737df",
+        "description": "r600/sfn: derive the GS from the vertex stage for a common interface",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f7df2c57a207a386ba0d2130541ac9d0546670e1",
+        "description": "r600/sfn: extract class to handle the VS export to different stages",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "38038b369f92aa692188d88e7d14a8c5de209acc",
+        "description": "r600/sfn: Move some shader base methods to the public interface",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "93f5f9e584b3d39fc120d91b1e6276bc18e917d3",
+        "description": "r600/sfn: Add methods to valuepool to get a vector of values",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7cbca9cf64840627afa3f1de588442c5c2d96028",
+        "description": "r600/sfn: Move emission of barrier from compute shader to shader base",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "46a3033b43b9b51cae5c60eea39e7e5af325c4db",
+        "description": "r600/sfn: Emit some LDS instructions",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a122303711107a72dbc5ec84b8369fd4732f6c9c",
+        "description": "r600/sfn: Handle umul24 and umad24",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7e064659cb9665bb5d78c28156d146e4f8172a33",
+        "description": "r600/sfn: Add IR instruction to fetch the TESS parameters",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "075ea32e485252f0376ee7bbc84ed436e9eb4b65",
+        "description": "r600/sfn: Add TF write instruction",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "230beac5f8e5366082791b7b505583a5455e5495",
+        "description": "r600/sfn: Add LDS instruction to assembly conversion",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b9d175bed260995affc4aea0b511f8b1f0c1440d",
+        "description": "r600/sfn: Add LDS IO instructions to r600 IR",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "172868167ea250a077873d9df058692cc8c4cabc",
+        "description": "r600/sfn: Don't emit inline constants in the r600 IR",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9bc6c135acd59a48d35ce6d7fb619e064af04239",
+        "description": "r600/sfn: simplify UBO lowering pass",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "096a026354cb31a1c858e5ffe18ba9a2a02a9d65",
+        "description": "r600: Handle texcoord semantics in LDS index evaluation",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7d476a1360d3615f510719174887b9004dfdff48",
+        "description": "ci: bare-metal: power down device after tests",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b4cc116339f4eec9ddeba2b2efc9b07f06ae6d40",
+        "description": "panfrost: Fix GL_EXT_vertex_array_bgra",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0e135ca2271b12793cc7e3f36d123f4ff0917cc1",
+        "description": "ci: add llvmpipe paths to virgl rules",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7a0a6a718035e1a754972fbbad8b91d19f39fa42",
+        "description": "radv: do not expose GTT as device local memory mostly for APUs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4a523baa00fcf12dabd2e7b054ce73ac238c11a7",
+        "description": "gallium/swr: Fix LLVM 11 compilation issues",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5082ac007d1758fdbe516649a1b28363ca32456c",
+        "description": "ci/freedreno: Add a test run of a few driver options.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b8c66aeb9341d695c79a2d69935016919c42f843",
+        "description": "ci: Clean up some excessive use of pipes in dEQP results processing.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "951e101fec2dba93e146a4d78d11d7cc6594985d",
+        "description": "ci: Allow namespacing of dEQP run results files.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "69c8dfd49f565283f599b3be9af3f1327ea78803",
+        "description": "freedreno: Fix calculation of the const buffer cmdstream size.",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "b4df115d3f3c7e5a1f6105c3737d0fe9a80dfcf2"
+    },
+    {
+        "sha": "8b221e091427a749499179511d1c8438fd0dcd64",
+        "description": "ci: Add sanity checking that dEQP gets the expected GL_RENDERER.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a9e6a3ecc7de79dbaa8899d77c3b86fd303b513a",
+        "description": "ci: Enable --compact-display false on all dEQP runs.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "acc56300dcc0b026d219181854ae475dfc0e926e",
+        "description": "zink: explicitly unref old fb object when setting new one",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d3f0022a43a726af60bcd541162f8005610ba3ff",
+        "description": "zink: remove framebuffer cache",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "afd9274d4801d93dfaad13591d65c135d1c9e466",
+        "description": "st/dri: Set next in template instead of after creation. (v2)",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a1e453f504addc6c1c8b270803c85db394356770",
+        "description": "mesa/st: call _mesa_initialize() early",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "57f4c66028786d0efc4074811db79b784c11f9b8",
+        "description": "mesa/main: one_time_init() -> _mesa_initialize()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6ff94735c93b8fcc2a3e5c6eb668b069ac4e0a1a",
+        "description": "mesa/main: Do not pass context to one_time_init",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ac9d30431e2c670ae134e2619be9817a99101e1d",
+        "description": "mesa/main: do not init remap-table per api",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9bc98778a4792e260e1f6d9000fda54734a48860",
+        "description": "mesa/main: do not pass context to one-time extension init",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "05c69752cfda9e66130c64c01f0c8fac613c83ad",
+        "description": "mesa/main: do not store unrecognized extensions in context",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9bc5b2d169d3a3c9d52fc30987eaba52e3b7dc00",
+        "description": "vulkan: add initial device selection layer. (v6.1)",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4a42a5058564a1d862e29eee80925ecd8b0ed1a2",
+        "description": "freedreno/ir3: Add support for disasm of cat2 float32 immediates.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "292231596b24a65861d6f63c1886131b33102527",
+        "description": "freedreno/ir3: Refactor out print_reg_src().",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3bcf819b438938e500acbf602cbacc00a864181f",
+        "description": "freedreno/ir3: Convert remaining disasm src prints to reginfo.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1462b00391711ff86350e802c1a3e5075a3a1632",
+        "description": "freedreno/ir3: Add a unit test for our disassembler.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "90984ba853297993221027c49ce31959c1634790",
+        "description": "freedreno/ir3: Print a space after nop counts, like qcom's disasm.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "916629f9d70d479aa1829e631792bf9ddd61004c",
+        "description": "freedreno/ir3: Fix the disasm of half-float STG dests.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6c01152c92cca2b8133e5a116335d0ef3a6cd474",
+        "description": "ci: Enable GLES 3.1 testing on db820c (a530).",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b34ee185f44c6d473e4e343d1e9f406a25dae67f",
+        "description": "freedreno: Fix derivatives without texturing on a3xx-a5xx.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "fa49a5032f33802fc136ba7095edaf06df1efa33",
+        "description": "ci: Enable GLES3 testing on db410c/db820c (freedreno a306 and a530).",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c259b3ea128405d2e6cf9c831061298959abeb79",
+        "description": "ci: Drop redundant freedreno stage specification.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "065068c66aba9b32ac4c65ac91549360b5eb1b7b",
+        "description": "freedreno/ir3: run nir_lower_pack",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "42093bb694bdcb6fb5bb762c118520c107456f4a",
+        "description": "nir: add pack_32_2x16_split/unpack_32_2x16_split lowering",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cbeda7f78e36caa7e4ca775bd848e1c8d38ee5d7",
+        "description": "radv: Add WSI buffers to BO list only if they can be used.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9a61f2a8a9ca17e2d53dded9c1c490c890aa4a74",
+        "description": "vulkan/wsi: Add callback to set ownership of buffer.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "42b1696ef627a5bfee29911a780fa0a4dbf04610",
         "description": "ac,radeonsi: fix compilations issues with LLVM 11",
         "nominated": false,
