@@ -436,7 +436,7 @@
         "description": "etnaviv: do not use int filter when anisotropic filtering is used",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "7aaa0e59086fa2bf9c5fa7db2774cb2aa32f95b9"
     },
