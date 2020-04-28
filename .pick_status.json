@@ -1498,7 +1498,7 @@
         "description": "intel/ir: Update performance analysis parameters for memory fence codegen changes.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "f858fa26b4cca8834c8687f01d2ba431fcc8e006"
     },
