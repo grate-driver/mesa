@@ -868,7 +868,7 @@
         "description": "radeonsi: revert an accidental change in si_clear_buffer",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "7b0b085c94347cb9c94d88e11a64a6c341d95477"
     },
