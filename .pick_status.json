@@ -40,7 +40,7 @@
         "description": "anv: fix alignments for uniform buffers",
         "nominated": false,
         "nomination_type": 1,
-        "resolution": 4,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "a0de2e0090535bd49b70c52917e7bdab628d354a"
     },
@@ -472,7 +472,7 @@
         "description": "anv: increase minUniformBufferOffsetAlignment to 64",
         "nominated": false,
         "nomination_type": null,
-        "resolution": 4,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": null
     },
