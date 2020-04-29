@@ -3721,7 +3721,7 @@
         "description": "glsl: Prohibit implicit conversion of mem parameter in atomicOP functions",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "ea0a1f5beb22982a886ba862ba95f92c9e35165a"
     },
