@@ -1570,7 +1570,7 @@
         "description": "radv: Fix implicit sync with recent allocation changes.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "bec92850270a046524056b8d43bbd2554ba9f2e0"
     },
