@@ -4054,7 +4054,7 @@
         "description": "aco: check instruction format before waiting for a previous SMEM store",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "1749953ea3eb2f3e33a61243cc11860795c658f3"
     },
