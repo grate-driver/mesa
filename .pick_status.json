@@ -33736,7 +33736,7 @@
         "description": "intel/eu: Use non-coherent mode (BTI=253) for stateless A64 messages",
         "nominated": false,
         "nomination_type": null,
-        "resolution": 4,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": null
     },
