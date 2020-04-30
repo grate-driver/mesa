@@ -2794,7 +2794,7 @@
         "description": "mesa/swrast: use logf2 instead of util_fast_log2",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "bd4e769515345a6b20562310334bc828c0bb6605"
     },
