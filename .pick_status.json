@@ -157,7 +157,7 @@
         "description": "Revert \"ac: reassociate FP expressions for inexact instructions for radeonsi\"",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "cf2f3c27533d8721abed4cdd4dfb00d4d53e8a0f"
     },
