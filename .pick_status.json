@@ -787,7 +787,7 @@
         "description": "anv,iris: Fix input vertex max for tcs on gen12",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "44754279ace72bc36b016f9ca519141ea4cad038"
     },
