@@ -697,7 +697,7 @@
         "description": "ci: fix reporting the number of unexpected/flakes",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "b8c66aeb9341d695c79a2d69935016919c42f843"
     },
