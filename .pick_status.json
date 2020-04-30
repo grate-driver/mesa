@@ -4,7 +4,7 @@
         "description": "Revert \"anv/gen12: Temporarily disable VK_KHR_buffer_device_address (and EXT)\"",
         "nominated": true,
         "nomination_type": 2,
-        "resolution": 0,
+        "resolution": 2,
         "master_sha": null,
         "because_sha": "c61ad77cd260ce7666b257ce411e512e0ca12ec8"
     },
