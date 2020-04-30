@@ -1,5 +1,239 @@
 [
     {
+        "sha": "3fac55ce0d066d767d6c6c8308f79d0c3e566ec0",
+        "description": "Revert \"anv/gen12: Temporarily disable VK_KHR_buffer_device_address (and EXT)\"",
+        "nominated": true,
+        "nomination_type": 2,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "c61ad77cd260ce7666b257ce411e512e0ca12ec8"
+    },
+    {
+        "sha": "4985e380dd776ac65c4ae5627138211f9d9f03ce",
+        "description": "intel/eu: Use non-coherent mode (BTI=253) for stateless A64 messages",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0edc29020b2830497f31b06898ca26715ecfd001",
+        "description": "pan/decode: Use correct printf modifier for long int",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "03963febeffadefc4f47adaf0bbd3618d5692b25",
+        "description": "pan/decode: Check for correct unknown field",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "bc11deb86d8bc037d842a04f8782461a5472ecf1",
+        "description": "panfrost: Don't leak temporary descriptors array",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3c98c452f012d20bcca3038af88bcbe7278d9c68",
+        "description": "panfrost: Emit blend descriptors on Bifrost",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "33b13b9fbd2998977f76bfeeacf63900b0ed9cba",
+        "description": "panfrost: Enumify bifrost blend types",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5e9ae4043004e5505f3c7e327d38911330c04dcb",
+        "description": "gitlab-ci: update tracie README after changes in main script",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "90a39af5f65e5fa01beeec526594f7e04143e7cf"
+    },
+    {
+        "sha": "bd86399db012d93e81d1a7734214ee8d52ad43ce",
+        "description": ".mailmap: add an alias for Andres Gomez",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3cde4c3a0804347cfc5a8a2b4958a6e6a4b69a27",
+        "description": ".mailmap: add an alias for Iago Toral Quiroga",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2a70fee7dc9a212a0ab345b11008212f8d62cad3",
+        "description": "ci: Add intel to shaderdb runs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0f4f1d70bfe96fc9e218ef5c2196bb677aaa251b",
+        "description": "intel: add stub_gpu tool",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8c3c1d8a9906f3a45cbe50012b2ca60a3bc21fe8",
+        "description": "intel/dev: print out error when platform is not found by name",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "fd3c0146723043f66bd18e376fa6526126ff18c0",
+        "description": "drm-shim: silence warnings",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "764ef4bf1a6fe0c256859d275c5f922d46217dbc",
+        "description": "drm-shim: don't create a memfd per BO",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6b34c8d35f5c8cf8febc1310012de67e6f41b09f",
+        "description": "drm-shim: move handle lock to shim_fd",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f78af3372131e4c2f0344396d3490abe816992cf",
+        "description": "gallium: extract out logicop helper",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "51a82ec3e437d1d2dc4c688578640d25b3e7f0a2",
+        "description": "gallivm: fix half to float conversions with llvm 11",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ec6565bb2614afe605afae516a2f1dd8ada5bcad",
+        "description": "cut 20.1 branch",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0842758ec0fe716f6559ca630cb8704cf7fb97bf",
+        "description": "intel/ir: Update performance analysis parameters for memory fence codegen changes.",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "f858fa26b4cca8834c8687f01d2ba431fcc8e006"
+    },
+    {
+        "sha": "82aa4460492200c621a2f35c93519230b69dbc18",
+        "description": "docs: update calendar, add news item, and link releases notes for 20.0.6",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "06b5a646e865200aaee36be2d11aea57eca85aca",
+        "description": "docs: Add SHA256 sums for 20.0.6",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "55bb55e93c72b8519f9f50c9eb78951d67cf68e8",
+        "description": "docs: Add release notes for 20.0.6",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e70cfe47b3e94684fed79feff7da1cf94ac63e73",
+        "description": "pan/mdg: Be a bit more pedantic in invert passes",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "074815ca0e96c25df55879af9031a13bc4c20106",
+        "description": "pan/mdg: Track more types",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a0fe98b478767e90cc5ed976e4e953117fe38308",
+        "description": "freedreno: fix buffer import",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "5a8718f01b3976e1bc82362a907befef68a7f525"
+    },
+    {
         "sha": "2efa76f795cb2b2bf00b317c580aeeeddd1e9bc2",
         "description": "i965: remove unused variable",
         "nominated": false,
