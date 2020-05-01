@@ -580,7 +580,7 @@
         "description": "panfrost: Add Bifrost texture trampoline BO to batch",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "d3eb23adb50c621f49000191e6c024df01f090b7"
     },
