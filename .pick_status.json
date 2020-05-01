@@ -130,7 +130,7 @@
         "description": "aco: remove use of f-strings",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "2ab45f41e08a3892138a1e9b20552621b4e18682"
     },
