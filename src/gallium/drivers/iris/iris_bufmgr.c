@@ -589,6 +589,7 @@ iris_bo_create_userptr(struct iris_bufmgr *bufmgr, const char *name,
                        void *ptr, size_t size,
                        enum iris_memory_zone memzone)
 {
+   struct drm_gem_close close = { 0, };
    struct iris_bo *bo;
 
    bo = bo_calloc();
@@ -634,7 +635,8 @@ iris_bo_create_userptr(struct iris_bufmgr *bufmgr, const char *name,
    return bo;
 
 err_close:
-   gen_ioctl(bufmgr->fd, DRM_IOCTL_GEM_CLOSE, &bo->gem_handle);
+   close.handle = bo->gem_handle;
+   gen_ioctl(bufmgr->fd, DRM_IOCTL_GEM_CLOSE, &close);
 err_free:
    free(bo);
    return NULL;
