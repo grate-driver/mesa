@@ -112,7 +112,7 @@
         "description": "etnaviv: Disable seamless cube map on GC880",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "8dd26fa2f065e78f3204357d8b474656b9ea81db"
     },
