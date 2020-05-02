@@ -13,7 +13,7 @@
         "description": "ac/surface: fix MSAA crash with FORCE_SWIZZLE_MODE on gfx9",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "3dc2ccc14c0e035368fea6ae3cce8c481f3c4ad2"
     },
