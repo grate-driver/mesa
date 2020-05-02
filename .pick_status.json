@@ -1426,7 +1426,7 @@
         "description": "i965: fix export of GEM handles",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "4094558e8643a266dfc8da9bc073751a3736a2fb"
     },
