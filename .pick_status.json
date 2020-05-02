@@ -1435,7 +1435,7 @@
         "description": "iris: fix export of GEM handles",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "7557f1605968c39d680545d5b8457d17eea3b922"
     },
