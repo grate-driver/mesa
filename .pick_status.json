@@ -112,7 +112,7 @@
         "description": "radv: Extend tiling flags to 64-bit.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "bfd9e7ff243a48873721fd57d9a159cc82f580d6"
     },
