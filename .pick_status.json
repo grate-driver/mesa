@@ -85,7 +85,7 @@
         "description": "Revert \"ac/surface: remove RADEON_SURF_TC_COMPATIBLE_HTILE and assume it's always set\"",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "f6d87ec8a908250af5e805c8042524ac360094a2"
     },
