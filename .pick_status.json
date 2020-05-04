@@ -391,7 +391,7 @@
         "description": "radeonsi: fix export count",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "17acff01a00109c87d59b9d876fc735dd5fbe3d1"
     },
