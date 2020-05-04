@@ -184,7 +184,7 @@
         "description": "intel/dev: Split .num_subslices out of GEN12_FEATURES macro",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": null
     },
