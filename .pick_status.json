@@ -1,5 +1,554 @@
 [
     {
+        "sha": "57796946985de60204189426ca8eb7bbfa97c396",
+        "description": "android: iris: add iris_seqno.{c,h} to Makefile.sources",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "e31b703c4232fd59d512ab2a865161c9ce859706"
+    },
+    {
+        "sha": "c4cdef64ad6d11e82894d24691348c38d7fad6ce",
+        "description": "ac/surface: fix MSAA crash with FORCE_SWIZZLE_MODE on gfx9",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "3dc2ccc14c0e035368fea6ae3cce8c481f3c4ad2"
+    },
+    {
+        "sha": "1dcf291e3bf7050a396cee74b6baca99a575d915",
+        "description": "pan/bit: Add IMATH packing tests",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8fcc23bf28d2c533151465bdf1d1d0cecb59b8fc",
+        "description": "pan/bit: Factor out identity swizzle helper",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "36e4ffa382f9f82ff6d7ed1dd4fc66010ed48fea",
+        "description": "pan/bit: Use swizzle helper for round",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "118d53bf93d8ad39238fca6b43111675b1602725",
+        "description": "pan/bit: Remove test names",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "52cdaaacbbb546abdbf654f06e413eb250bb019d",
+        "description": "pan/bit: Interpret v4i8 ops",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "66163614dbfc546168bd44036669277f7a4a0209",
+        "description": "pan/bit: Interpret IMATH",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1799435df0f2782671596dd34c1f1965931943ad",
+        "description": "pan/bi: Don't schedule <32-bit IMATH to FMA",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2925e88996c6b819a6c0330fd61760a8be350837",
+        "description": "pan/bi: Add SUB.v2i16/SUB.v4i8 opcodes to disasm",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "10c18c6f69ed6ea8d82b300dc93c55e3180c1c74",
+        "description": "pan/bi: Pack ADD IADD/ISUB for 8/16/32",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a463b2c2ed452f1ee1497fbc19921c910de93237",
+        "description": "pan/bi: Pack FMA IADD/ISUB 32",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cf3c3563e0ead2b7050efd12de377b6b6d25dd2d",
+        "description": "pan/bi: Use IMATH for nir_op_iadd",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1a94daef589be2e95b12d30733d45b9ffeaad436",
+        "description": "pan/bi: Rename BI_ISUB to BI_IMATH",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5c81f51c3c7fb7aa86cee3d9ba4324b1610c726d",
+        "description": "freedreno/ir3: Define the bindful uniform/nonuniform desc modes for cat6 a6xx.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "97b21110b8b845bb02596036bdbf9e9562cfa7a5",
+        "description": "freedreno/ir3: Sync some new changes from envytools.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1e5b0c92c549b392065f4856a2e5370b2157d961",
+        "description": "freedreno/ir3: Add some more tests of cat6 disasm.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b97cc41aa203fd9fb9f5cf5f5aa7fd40f567917d",
+        "description": "Revert \"ac: reassociate FP expressions for inexact instructions for radeonsi\"",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "cf2f3c27533d8721abed4cdd4dfb00d4d53e8a0f"
+    },
+    {
+        "sha": "5f01869f74a497ee56fd01eedbe0b2802beea63c",
+        "description": "pan/bit: Add ICMP tests",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9bc684cad838094ae7d26a102079862246dc9eab",
+        "description": "pan/bit: Add more 16-bit fmod tests",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "041ba62e8766aec2565234d56c0df02517c26ad0",
+        "description": "pan/bit: Add swizzles to round tests",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "35c806e701d1557db7d97671030f50704bc7b833",
+        "description": "pan/bi: Don't pack ICMP on FMA",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5cbdf29b7e931fcda52aa1a0e8a9551cd7309651",
+        "description": "pan/bi: Pack ADD ICMP 16",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5bd417228020a670e73fc8bf43e9595d1118d085",
+        "description": "pan/bi: Pack ADD ICMP 32",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "336d5128f9ba5036834fe1fb6420931b8aaad0ff",
+        "description": "pan/bi: Structify ADD ICMP 16",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "fdf154d24af8b5a3b3e1dc073e9db329c2e21c5a",
+        "description": "pan/bi: Pack ADD.DISCARD",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7a9b9859e72fefb0d994be81e7edb42eeaece969",
+        "description": "pan/bi: Handle discard/branch in get_component_count",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8ab5c97895daa86d0ac777b60f31737e491a22f3",
+        "description": "pan/bi: Fuse conditions into discard_if",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "201a11a13ad7c9fddd621602b729440532c9a11f",
+        "description": "pan/bi: Add float-only mode to condition fusing",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7d867f787f9ada8b67e4d8ee6e9e388b6d6bc9bd",
+        "description": "pan/bi: Emit discard (not if)",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c9ab73296c1c80796b6a3e8cfc1affb486e4dd81",
+        "description": "pan/bi: Handle discard_if in NIR->BIR naively",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6627b20de3511da153f2733a649b22c13d9e570a",
+        "description": "pan/bi: Unwrap BRANCH into CONDITIONAL class",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6e5d2072939617bd6e0abe8b36cfadca83bed6f6",
+        "description": "pan/bi: Remove BI_GENERIC",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "20cb039457d79dd88aebff7e92cb223ae20b83d0",
+        "description": "pan/bi: Structify DISCARD",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5c03340fd1a12c42fce43ba4060f39706663d541",
+        "description": "pan/bi: Fix DISCARD ops in disasm",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "31a41bb6a62edf77e9c311064c43fffa1c8fcd8f",
+        "description": "pan/bi: Disable CSEL4 emit for now",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e14e3065a9f037df5c877057cd53587b58208063",
+        "description": "pan/bi: Fix incorrectly flipped swizzle",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8415b3d552328de44d4602b1d85561af48ef302a",
+        "description": "pan/bi: Fix missing swizzle",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c9634894a67d40c101f56f0f3e963359f271ed2a",
+        "description": "pan/bi: Fix double-abs flipping",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ef9b4b3a0bea318bcc853f9654721b56d7e1c27d",
+        "description": "pan/bi: Set clause type for gl_FragCoord.z",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "47c84ee73546f1b86df808c02aa509840e6158df",
+        "description": "pan/bi: Lower gl_FragCoord",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c5ef35c4334d7a9e6fdc10cbf10d6f90b963e714",
+        "description": "pan/bi: Passthrough direct ld_var addresses",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "513c774d58044447e0c7c6169a30b9537e0f8e64",
+        "description": "pan/bi: Print bad instruction on src packing fail",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0561fe3a06d61a182679eb43888797af5d8cc217",
+        "description": "pan/bi: Futureproof COMBINE lowering against non-u32",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c48839086dbb04bbf23efc1d9bfee73f21f94561",
+        "description": "pan/bi: Abort on unhandled intrinsics",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "94e6263c0b0ebb81c511452c7844394802bf37b9",
+        "description": "pan/bi: Abort on unknown op packing",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5a415259fc7404fa473722ebdb0773c8fec3cd3d",
+        "description": "pan/bi: Add clause type for gl_FragCoord.zw load",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "30f07e0d843935fcb34fc28e62bc4c832219c06b",
+        "description": "panfrost: Setup gl_FragCoord as sysval on Bifrost",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "89a41dae7702731bee298288f3acbcbd56096b30",
+        "description": "etnaviv: do not use int filter when anisotropic filtering is used",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "7aaa0e59086fa2bf9c5fa7db2774cb2aa32f95b9"
+    },
+    {
+        "sha": "b38e51bd969e212cce90998bc283049e74f9b33c",
+        "description": "etnaviv: fix SAMP_ANISOTROPY register value",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "7aaa0e59086fa2bf9c5fa7db2774cb2aa32f95b9"
+    },
+    {
+        "sha": "cb1e0db23e3fa17562bb276b125aeab0b85582cb",
+        "description": "vulkan/wsi: Make wsi_swapchain inherit from vk_object_base",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "32f20783a512129fc2d7dd8a11ffa8670cef0068",
+        "description": "vulkan: Add run-time object type asserts in handle casts",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7628585dd709f3ffb18c7ca134fff1f375ad7b6a",
+        "description": "anv: Refactor setting descriptors with immutable sampler",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "73fb7cdbe1c8ce476f21cb6d39944a96151ec4b5",
+        "description": "vulkan,anv: Move the DEFINE_HANDLE_CASTS macros to vk_object.h",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "682c81bdfb7ea28efccea1e8cbfeb7cfc67d02b8",
+        "description": "vulkan,anv: Add a base object struct type",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "369703774cfa304f4881e0e379eb02ed98933dde",
+        "description": "anv: Allocate CPU-side memory for events",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4ac4e8e11f36cdfa18562804931be59a4fe08544",
+        "description": "anv: Stop clflushing events",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a9158f795143fb8b333e6fe33b25c2a4e4d2da15",
+        "description": "vulkan,anv: Add a common base object type for VkDevice",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9d10bde5a878aac440ea34dfb304812cd00b231c",
+        "description": "vulkan: Allow destroying NULL debug report callbacks",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "086cfa5652ec202f87c14d11e0f6c959d75987d8"
+    },
+    {
+        "sha": "46b3cb011fd1c9198aeec33d453206846b579817",
+        "description": "st/mesa: destroy only own program variants when program is released",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "de3d7dbed521c40344c9f8b2b505b6e2b13a7636"
+    },
+    {
+        "sha": "7e7bb38bd8b12fec09afc0e515480bb6c5a8475a",
+        "description": "radeonsi: fix export count",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "17acff01a00109c87d59b9d876fc735dd5fbe3d1"
+    },
+    {
         "sha": "af55bdd05d94eda59ee1c9331a50045000da5db5",
         "description": "vtn/opencl: native sqrt support",
         "nominated": false,
