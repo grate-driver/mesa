@@ -67,7 +67,7 @@
         "description": "clover/nir: Check the result of spirv_to_nir",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "deb04adf2ae605a017d7ce4e81f57db679567dfa"
     },
