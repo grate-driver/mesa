@@ -31,7 +31,7 @@
         "description": "zink: lower b2b to b2i",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "c217ee8d35fcac8ab11e7b5bfd0e053e1fed7df0"
     },
