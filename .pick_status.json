@@ -724,7 +724,7 @@
         "description": "llvmpipo/nir: free compute shader NIR",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "18f896e55d96c63b11de7ed0cbe484988a1184c5"
     },
