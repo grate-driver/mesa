@@ -319,7 +319,7 @@
         "description": "clover/spirv: Remove unused tuple header",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "2147386505015e3089d51e3e5bf58489ab912aa6"
     },
