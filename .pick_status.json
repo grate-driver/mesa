@@ -733,7 +733,7 @@
         "description": "draw/tess: free tessellation control shader i/o memory.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "0d02a7b8ca794a594c2e9cc5e6d63dc591593105"
     },
