@@ -3019,7 +3019,7 @@
         "description": "post_version.py: invert `is_point` into `is_first_release` to make its purpose clearer",
         "nominated": false,
         "nomination_type": null,
-        "resolution": 4,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": null
     },
