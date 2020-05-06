@@ -4,7 +4,7 @@
         "description": "radeonsi: fix compilation of monolithic PS",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "8832a884345686e6a8b2c0c8aa7515ad3f775b9e"
     },
