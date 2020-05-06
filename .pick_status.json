@@ -868,7 +868,7 @@
         "description": "aco: fix 64-bit trunc with negative exponents on GFX6",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": null
     },
