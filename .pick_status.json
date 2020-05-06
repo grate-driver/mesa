@@ -1,5 +1,1004 @@
 [
     {
+        "sha": "29da52128090a1ef8ef782188c0f67c7f5ec8d19",
+        "description": "radeonsi: fix compilation of monolithic PS",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "8832a884345686e6a8b2c0c8aa7515ad3f775b9e"
+    },
+    {
+        "sha": "d5109741f372173d6e13bdb6fff06c75def19439",
+        "description": "tgsi_to_nir: translate non-vec4 image stores correctly",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "784358bd6e6d59c521133c2a31fa9b88f8e18598",
+        "description": "i965: Fix out-of-bounds access to brw_stage_state::surf_offset",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7f6a491eec02d6c141e2b4849a3ba924926a482a",
+        "description": "zink: lower b2b to b2i",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "c217ee8d35fcac8ab11e7b5bfd0e053e1fed7df0"
+    },
+    {
+        "sha": "f457e1b6d5814e51cb9e0ae47e8fd5936139f42f",
+        "description": "radv/winsys: do not count visible VRAM buffers twice in the budget",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f3e37f5d262606f1a0f5a3073835ac0ecc41f629",
+        "description": "radv: display an error message if the winsys init failed",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "701f2c3dfc9bd5b18b3103670f3946e723587f42",
+        "description": "radv: use a linked list for physical devices",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8d993c9d2c23d70d48248c9a8f8bc2855e12b18f",
+        "description": "radv: don't report error with other vendor DRM devices",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f03abd504102fc71ec0b18704a2ea3a92542b5f8",
+        "description": "radv: report INITIALIZATION_FAILED when the amdgpu winsys init failed",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9c62e63aca202bef07b20441618dd360b94b2f7d",
+        "description": "radv: fix a memleak if the physical device initialization failed",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b867a677e99f429d904021b37c5640d3eeaf0e8d",
+        "description": "radv: rename radv_devices() to radv_enumerate_physical_devices()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c5043287415179b9432a15b4a49e595c09513a28",
+        "description": "radv: cleanup radv_CreateInstance()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "dab8803af431ff2044b4d7b17bb505079bf63d1e",
+        "description": "llvmpipe: enable ARB_sample_shading",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8a83db420401fd3a29cae7a8b6a49b67fd2ddf58",
+        "description": "llvmpipe: add min samples support to the fragment shader.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d237e03a16b9e75a266799af24c2b9112f4d1126",
+        "description": "llvmpipe: enable GL_ARB_shader_texture_image_samples",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f036643772fca7e2f2070ab83189b695b0977a13",
+        "description": "gallivm/nir: hooks up texture samples queries",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8d09d621373747235d90099adf5bed647090ec97",
+        "description": "gallivm/sample: add num samples query for txqs (v2)",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3cc50cabf1459c6fd5db598de55ad02375aad880",
+        "description": "llvmpipe: enable 4x sample MSAA + texture multisample",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "94c4577331490693a887916323dee843b69bd141",
+        "description": "drisw: add multisample support to sw dri layer.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7898978377cfee74d69180d73118dc6b8b2d3579",
+        "description": "llvmpipe: don't choose pixel centers for multisample",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8297513aa900a22853a1a12ad4e98e9098e9a1f7",
+        "description": "llvmpipe: choose correct position for multisample",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b72f504e99307b5e9a153813f36ac08b9e9b1a05",
+        "description": "llvmpipe: choose multisample rasterizer functions per triangle (v2)",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "26cc01cefda3595acf261fff4a073464fca048f3",
+        "description": "llvmpipe: generate multisample triangle rasterizer functions (v2)",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8611a6b34b889d6ee9220767d6f19e4057dc2047",
+        "description": "llvmpipe: fixup multisample coverage masks for covered tiles",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2d13591ba4d9df28ef2e90f90b8eda4ff6c7fc98",
+        "description": "llvmpipe: build 64-bit coverage mask in rasterizer",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "88851c4798a5ee57441cc5ad71d439a5b6f1a609",
+        "description": "llvmpipe: add fixed point sample positions to scene.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "78b7f2283879d1f952cd13534f4c666447b5b3ea",
+        "description": "llvmpipe: add new rast api to pass full 64-bit mask.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c638a59fa890887ba4ef791c0186ec64a623110a",
+        "description": "llvmpipe: disable opaque variant for multisample",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c5021ebb15d2d4d29c9202bea01fe8d5acb62902",
+        "description": "llvmpipe: fix multisample occlusion queries.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "335938cffd10a7285b98999ad7a6bc8a4ed92ba1",
+        "description": "llvmpipe: move color storing earlier in frag shader",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "acba9a93ef23796b394b88d5352ec6ebdf14d123",
+        "description": "llvmpipe: pass mask store into interp for centroid interpolation",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "367332b0fce4a613676c0e6ea44c58b2c9c3b558",
+        "description": "llvmpipe: don't allow branch to end for early Z with multisample",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d9276ae965aadf967ee8f2ca85dab1dd31881919",
+        "description": "llvmpipe: handle gl_SampleMask writing.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "69009949e0418d0b1907fd31f486058642c90c92",
+        "description": "llvmpipe: add multisample alpha to one support",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "66a92e5d923a2e6b948c71f37a6b109a00938e9f",
+        "description": "llvmpipe: add multisample alpha to coverage support.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "38e81938b65ebc32654f20a65fa8c3673c0c1cf6",
+        "description": "llvmpipe: hook up sample position system value",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "210d714f46e72c954857ba32ca9ffcffbc264c9c",
+        "description": "llvmpipe: handle multisample color stores.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "102558912be91fa7d0eb22666dc7784739ca208b",
+        "description": "llvmpipe: interpolate Z at sample points for early depth test.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a0195240c44f55f35b2c3d2c07b64c9f97775759",
+        "description": "llvmpipe: handle multisample early depth test/late depth write",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9f8c7e232e6c3cf73e809e663f558752817abaad",
+        "description": "llvmpipe: multisample sample mask + early/late depth pass",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f12dac5e106b20704aa66f12c3783f5f005b4fe1",
+        "description": "llvmpipe: move some fs code around",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5e949b16c166c6e433307f25dd476d1f35fd6b7e",
+        "description": "llvmpipe: add per-sample depth/stencil test",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d297f2ecf1b14f573dc425fae192b1013d175493",
+        "description": "llvmpipe: move getting mask value out of depth code. (v2)",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "18fd62a26e1baa59b650968d798227c922c0352d",
+        "description": "llvmpipe: add per-sample interpolation.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8154bdf25ba2f78dc905759e50adf840471e334a",
+        "description": "llvmpipe: add centroid interpolation support.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5697b9c00c363568c16efbfe6289d58f233a3f11",
+        "description": "llvmpipe: pass interp location into interpolation code.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "339a3a4dea48e1c174be4b544cec8fac50123313",
+        "description": "nir/tgsi: translate the interp location",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "28cc2ed79c1ba7f994a3459de5d11102403e8187",
+        "description": "gallivm: add mask api to force mask",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d89499063bd96bcc5d7d9239a1da43bf568c11fa",
+        "description": "gallivm: add sample id/pos intrinsic support",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "455c8e35842b6e149d5d390ab9692e214db63662",
+        "description": "llvmpipe: add cbuf/zsbuf + coverage samples to the fragment shader key.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d2f488684ad398f5abffefb9b1424fcb1650a627",
+        "description": "llvmpipe: change mask input to fragment shader to 64-bit.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "67ec1760eecbcb5c52992d9098a7e220f22c7d22",
+        "description": "llvmpipe: add multisample bit to fragment shader key.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f5463576b94fa51a55e180c71dfbc249c2a3cc6b",
+        "description": "llvmpipe: plumb multisample state bit into setup code.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e47d39aee15e80976e62fec2937771b0b9346fef",
+        "description": "llvmpipe/rast: fix tile clearing for multisample color and depth tiles",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "01e9779c004efa8acedff83d2560880be894e7fc",
+        "description": "llvmpipe: record sample info for color/depth buffers in scene",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a30db60edeb7814415b04537cee8cc306ad11fd7",
+        "description": "llvmpipe: pass color and depth sample strides into fragment shader.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "24cf7a2b36fa784cce9eee4ae8957d3d9dac98c3",
+        "description": "draw: disable point/line smoothing for multisample (v2)",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4c72bb4a960e7362e7cf4cd6e3159af85c967614",
+        "description": "llvmpipe: handle multisample render target clears",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "782271c0e1544c36fb53ddda1fc0bc055671f82b",
+        "description": "llvmpipe: add clear texture support for multisample textures.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c8740cbf010f38878209c857e582260f7492976a",
+        "description": "llvmpipe: add multisample resource copy region support.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "178df068210d8c5ff3dd23e925160179c65a5c28",
+        "description": "llvmpipe: add internal multisample texture mapping path.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cab13f91747dc2acbb257b2d9067679b93b1e057",
+        "description": "llvmpipe: pass incoming sample_mask into fragment shader context.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c070af85114e37e4e1e28791528f336266c93261",
+        "description": "llvmpipe/jit: pass fragment sample mask via jit context.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0a6150251a1ea2545826036aad9c198a61ce815a",
+        "description": "llvmpipe: add get_sample_position support (v2)",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f6383673c96de2102edae0e705f7960753fe848b",
+        "description": "llvmpipe: fix race between draw and setting fragment shader.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6befeb66070498427e139d3ff86bfd0bd15b5668",
+        "description": "gallium/util: split out zstencil clearing code.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "bcbe5b3d268b325c1138ddc29785b6b002c38af9",
+        "description": "llvmpipe: add a max samples define set to 4.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1b02eb1a4c99b1268da2c17420ece6f341b42789",
+        "description": "llvmpipe: add multisample support to texture allocator.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "339aec7241f77fc027ee32d1537b30505c20028c",
+        "description": "util: add a resource wrapper to get resource samples",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "19703900260d51b709111206caebbad3a9578f7b",
+        "description": "llvmpipe: add samples support to image jit",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2e5cddacf7fb6e031540ae9f459d19cce5edefc4",
+        "description": "llvmpipe: add num_samples/sample_stride support to jit textures",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "bc3641d6162c0e876351ee36536f44581260dac0",
+        "description": "draw: add support for num_samples + sample_stride to the image paths",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "026bf2659975817cb8fceb759eb80b2459df8c06",
+        "description": "draw: introduce sampler num samples + stride members",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "609a3bea16b14cd5bbc59c702b91367ed768d629",
+        "description": "gallivm/nir: add multisample image operations",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "be8a10e2651d362b61a5566092a13311ba1ffe26",
+        "description": "gallivm/nir: add multisample support to image size",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ae95a08b9c366d5a8558e20c2c3a11558a9c0610",
+        "description": "gallivm/nir/tgsi: add multisample texture sampling.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "eb5919d9d8b09a40e5d5ce38f169b71b67661249",
+        "description": "gallivm/sample: add multisample image operation support",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c2545c9b15c98049e43904563c52079940bc4ee3",
+        "description": "gallivm/sample: add multisample support for texel fetch",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b6a20804ad5afb401f1d86dc28460e922d009588",
+        "description": "virgl: Properly check for encode_stride when encoding transfers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "99fce3a6d71ee9970183b3545a4fbb8234b7fa35",
+        "description": "llvmpipe: simple texture barrier implementation.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "870b6a60509e2dd547dc75fee9290224ad306779",
+        "description": "llvmpipo/nir: free compute shader NIR",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "18f896e55d96c63b11de7ed0cbe484988a1184c5"
+    },
+    {
+        "sha": "d1ad1be35a5ba609fd533f2a808a473a067028d8",
+        "description": "draw/tess: free tessellation control shader i/o memory.",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "0d02a7b8ca794a594c2e9cc5e6d63dc591593105"
+    },
+    {
+        "sha": "a46aa3dc2e4c5462630d40e152904b7d163c9233",
+        "description": "nir: add missing group_memory_barrier handling",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9a6bbf4c80ee9fc4294ec70073e1602ea527963c",
+        "description": "freedreno/ir3: Disable sin/cos range reduction for mediump.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "aac964af4aa1a215196d6ae351a11c9b6b937a22",
+        "description": "st/nine: Set correctly blend max_rt",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0d83e7f4b9887346e9b7b4d44c068d340aa04f28",
+        "description": "radeonsi: enable TC-compatible HTILE on demand for best Z/S performance",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "39571d384e02848aff8c8fe635ff4b93d740aab3",
+        "description": "radeonsi: allow tc_compatible_htile to be mutable",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "04085bedc26535e47d81e333ee8969b7755421b2",
+        "description": "radeonsi/gfx9: always use IMG_DATA_FORMAT_S8_32 for 8-bit stencil",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "345b8aed5cd85eab71b7c80bbf00d8ccc5659bb3",
+        "description": "ac/surface: unset RADEON_SURF_TC_COMPATIBLE_HTILE if HTILE hasn't been computed",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "266fec1307b26a544007423582afd8618791893c",
+        "description": "radeonsi: don't wait for idle at the end of gfx IBs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ae4379d81e42dec4f93983dfa9f31cf30384789f",
+        "description": "ac/nir: export some undef as zero",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0ee1a724bf78baa3fe514036d77d3e96abc998f7",
+        "description": "gallium: add a new cap PIPE_CAP_GLSL_ZERO_INIT",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ea289d1502dc5739ec9bf69328c037b72dc02789",
+        "description": "mesa: extend GLSLZeroInit semantics",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "679421628bf89067b4cbfa85530f196ca2835717",
+        "description": "glsl: add a is_implicit_initializer flag",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "fa6b22d36a915f27dee576063aead9e2c577f966",
+        "description": "glsl: rework zero initialization",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "84f58a08634d0ea07f557ffa5b91c9c8777a2b04",
+        "description": "glsl: init gl_FragColor if zero_init=true",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "547e81655a0b9f6d7742e25f2e353e22c3a3b393",
+        "description": "radeonsi: don't print gs_copy_shader stats for shaderdb",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "dbc86fa3de6aba480f679a36b40227c0fe27c37b"
+    },
+    {
+        "sha": "b0a7499d28dd5a7c89a70cea79cb14d943632609",
+        "description": "radv: enable shaderInt16 unconditionally with LLVM and only GFX8+ with ACO",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "64662dd5baeec19a618156b52df7a7e7adba94cf",
+        "description": "radeonsi: add workaround for issue 2647",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7983d97174de10670fce5a422ce6c1cb5e783b88",
+        "description": "zink: use nir_lower_uniforms_to_ubo",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4777ee1a62f0620efa2a105215eb589fc44dfa0f",
+        "description": "nir: Always create UBO variable when lowering uniforms to ubo",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "354474b9e5a9e9fdbba1b113f36d7d119d4187c0",
+        "description": "mesa/st: consider NumUniformBlocks instead of num_ubos when binding",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8471f7a5fa1d5c00de9f314eaccd23dd0e62e71b",
+        "description": "compiler/glsl: explicitly store NumUniformBlocks",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8059f206da88a7a2147c66b3057d60d775cbbfce",
+        "description": "glsl: rename has_implicit_uint_to_int_conversion to *_int_to_uint_*",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "403eb507f586e62acd648778dc1e7d20b5e1fa2f",
+        "description": "driconf: add force_integer_tex_nearest option",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "12fb7d700861fb0af639fa21c1e3b65981ee81e4",
+        "description": "mesa: add gl_coontext::ForceIntegerTexNearest",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "90d9f9a37ed6a84292a96a247f70ffeb88a2ccde",
+        "description": "aco: remove unecessary p_split_vector with v2b reg class",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b0cb38f36085ccee6e71b6e50cb4f094d7f03c58",
+        "description": "vulkan: Update Vulkan XML and headers to 1.2.140",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "785803a2e5472bb497a598643b2386c60c60347e",
+        "description": "turnip: Remove RANGE_SIZE usage",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "24f9aea770711c8b968177b6e4ff15d8fb8fb48e",
+        "description": "radv: Remove RANGE_SIZE usage",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c4d11ea3c43447da5add84bdd2e0c91786d9af9b",
+        "description": "anv: Remove RANGE_SIZE usage",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "57796946985de60204189426ca8eb7bbfa97c396",
         "description": "android: iris: add iris_seqno.{c,h} to Makefile.sources",
         "nominated": false,
