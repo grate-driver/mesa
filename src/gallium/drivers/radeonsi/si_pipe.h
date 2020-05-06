@@ -1536,8 +1536,8 @@ bool si_prepare_for_dma_blit(struct si_context *sctx,
 			     struct si_texture *src,
 			     unsigned src_level,
 			     const struct pipe_box *src_box);
-void si_eliminate_fast_color_clear(struct si_context *sctx,
-				   struct si_texture *tex);
+void si_eliminate_fast_color_clear(struct si_context *sctx, struct si_texture *tex,
+                                   bool *ctx_flushed);
 void si_texture_discard_cmask(struct si_screen *sscreen,
 			      struct si_texture *tex);
 bool si_init_flushed_depth_texture(struct pipe_context *ctx,
