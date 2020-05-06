@@ -292,7 +292,7 @@
         "description": "util/os_memory: never use os_memory_debug.h",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "76f79db3f5d8492370c92080b5bbea7e31827b75"
     },
