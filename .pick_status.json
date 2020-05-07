@@ -283,7 +283,7 @@
         "description": "anv: don't expose VK_INTEL_performance_query without kernel support",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "2b5f30b1d91b98ab27ba21439cd8a40a0d1ece36"
     },
