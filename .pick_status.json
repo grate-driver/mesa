@@ -1,5 +1,239 @@
 [
     {
+        "sha": "6d513eb0db25a272da65822f35907456b544f172",
+        "description": "tu: Support pipelines without a fragment shader",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7ba2333cc17e7f0a1520866bcfd60a991d34295e",
+        "description": "util/os_memory: never use os_memory_debug.h",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "76f79db3f5d8492370c92080b5bbea7e31827b75"
+    },
+    {
+        "sha": "905edc376dd1ace6ac2af0fc351606210a0141a1",
+        "description": "v3d: Include supported DXT formats to enable s3tc/dxt extensions",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e3ecf48dda2ddabfbabdad83e19d280d0edb8246",
+        "description": "v3d: Fix swizzle in DXT3 and DXT5 formats",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "469bbd8387d11bbac2aae4c49765c748c2a9fd04"
+    },
+    {
+        "sha": "17ed4a01ee2bdb773109cf06ea8f827737f88684",
+        "description": "docs/envvars: update RADV_FORCE_FAMILY",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5c6afd0f349b17aaa0b2e06ccee44fa709d6285c",
+        "description": "docs/envvars: document ACO_DEBUG",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1aaec1f3f451c60456aa4b28699fd57c7b22d021",
+        "description": "docs: add src/amd/ to sourcetree.html",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "38bbfd3a57d68abdc88a93b436eac9f30a397b0f",
+        "description": "clover/nir: Check the result of spirv_to_nir",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "deb04adf2ae605a017d7ce4e81f57db679567dfa"
+    },
+    {
+        "sha": "abc4a8285776dcded21d0b7f3035c9858d061611",
+        "description": "nir: make fsat return 0.0 with NaN instead of passing it through",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d8a27c0bb3049963934c77d104db39ecf610e3b9",
+        "description": "compiler/spirv: flag nclamp/nmin/nmax as exact",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9a11aa4ece691ac9b6d8911cac6f3727ac3d7094",
+        "description": "docs/features: Add ARB_clear_texture to virgl",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2e6bbab9aecd8e6cfb6e2e8dd408460a96365ada",
+        "description": "virgl: Enable CAP_CLEAR_TEXTURE if host supports it",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e705a2a9f48d3247557d468216c797dfb1758826",
+        "description": "virgl: implement ARB_clear_texture",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a6321c4b5a038db4682e49e098e9368df7ea18c4",
+        "description": "r600: Fix warning regarding mixing enums and unsigned in ?: expression",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5469fcea75457542b699404b003bfb051a5fc6b0",
+        "description": "r600: remove some unused variables to silence warnings",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "79f20eb819e4ca4c09a5602c0d82ac905773cc66",
+        "description": "r600/sb: replace memset by using member initialization/assignment",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ee3f4ab2f439c1180067072cb943d2ba4a6c33b9",
+        "description": "r600: remove unused static functions",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9a244778f7304d47e40a10415e06607835f18a63",
+        "description": "r600: Annotate some case fallthroughs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f9dbca8db5e2dc857410f1ab34f85ca6dc837413",
+        "description": "ci: run radv-fossils with Pitcairn (GFX6) and Bonaire (GFX7) too",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a44cfac502f9a740d0c21b561f270e4221cb78d7",
+        "description": "ci: set ACO_DEBUG=validateir,validatera global for RADV testing",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5dbf862b13214cec4765811abba91111c4b0f04d",
+        "description": "ci: remove unused .test-radv-fossilize rule",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a0de2e0090535bd49b70c52917e7bdab628d354a",
+        "description": "anv: increase minUniformBufferOffsetAlignment to 64",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e8cdf125112934b589d9682239e46bf196bd9de1",
+        "description": "freedreno/a6xx: enable tiled compressed textures",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "193560c44bfe35655a111870773a8ff5f08ee5dd",
+        "description": "freedreno/a6xx: compressed blit fixes",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "85f2cd84ac14be7d44eb7d5deb9b9756bd7bacc2",
+        "description": "freedreno/a6xx: Set tfetch correctly for compressed formats",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a34b3fa198a4f87f8e07c718ec2f2e07927c6d7d",
+        "description": "freedreno/fdl: Align after dividing by block size",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "6292059662dccd3e151c731a3b108fd0b9e4c606",
         "description": "docs: update calendar for 20.1.0-rc2",
         "nominated": false,
