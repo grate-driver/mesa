@@ -175,7 +175,7 @@
         "description": "freedreno/ir3: fix indirect cb0 load_ubo lowering",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "fc850080ee304c2a62f7313c4b7ebe121c3ebb53"
     },
