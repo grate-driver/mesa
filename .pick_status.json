@@ -22,7 +22,7 @@
         "description": "v3d: Include supported DXT formats to enable s3tc/dxt extensions",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": null
     },
