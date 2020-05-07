@@ -31,7 +31,7 @@
         "description": "v3d: Fix swizzle in DXT3 and DXT5 formats",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "469bbd8387d11bbac2aae4c49765c748c2a9fd04"
     },
