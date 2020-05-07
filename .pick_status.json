@@ -2362,7 +2362,7 @@
         "description": "i965/vec4: Ignore swizzle of VGRF for use by var_range_end()",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "48dfb30f9231c22a6af6885dbc9ef86dc2edde1e"
     },
