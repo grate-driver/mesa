@@ -3775,7 +3775,7 @@
         "description": "aco: consider blocks unreachable if they are in the logical cfg",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 3,
         "master_sha": null,
         "because_sha": "8d8c864beba399ae4ee2267f680d1f600ad32767"
     },
