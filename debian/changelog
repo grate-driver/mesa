@@ -1,8 +1,8 @@
-mesa (20.0.6-3) UNRELEASED; urgency=medium
+mesa (20.0.6-3) unstable; urgency=medium
 
   * src_glx_dri_common.h.diff: Dropped, breaks the build.
 
- -- Timo Aaltonen <tjaalton@debian.org>  Fri, 08 May 2020 12:39:21 +0300
+ -- Timo Aaltonen <tjaalton@debian.org>  Fri, 08 May 2020 12:44:12 +0300
 
 mesa (20.0.6-2) unstable; urgency=medium
 
