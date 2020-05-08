@@ -850,7 +850,7 @@
         "description": "Expose EGL_KHR_platform_* when EXT is supported",
         "nominated": false,
         "nomination_type": null,
-        "resolution": 4,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": null
     },
