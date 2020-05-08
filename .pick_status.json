@@ -1,5 +1,293 @@
 [
     {
+        "sha": "d11e4738a86ecac6bb4cfaf5cad5c1d32169b18f",
+        "description": "anv/allocator: Add a start_offset to anv_state_pool",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "772b15ad3227e08bb4e18932ac9ecf4c29271160",
+        "description": "util: Make process_test path compatible with mingw native toolchains",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "f8f1413070ae079443ab31a75679cfd10cb756ed"
+    },
+    {
+        "sha": "696bafac40f5f15ae140a2e844fb1b31d4918ebe",
+        "description": "CI: Disable Panfrost T7x0 jobs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "78d267e6dad9dbcc9e39d7d388075d15e67ba3c3",
+        "description": "Linux: Change minimum priority threads from SCHED_IDLE to nice 19 SCHED_BATCH.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f66bf5ba444e95e82401d8f6fd726e5ef17b3db9",
+        "description": "docs/features: add zink features",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8bcfce2fcd02e9b04b7edda5c0d8a0e4b77be39c",
+        "description": "anv: fix alignments for uniform buffers",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "a0de2e0090535bd49b70c52917e7bdab628d354a"
+    },
+    {
+        "sha": "f105b69464d908ee8b54c0bddb51909ebde4d686",
+        "description": "radv: report correct backend IR in hang reports when ACO is used",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "290d480c55199e013fdfb91e948046f23d9c704d",
+        "description": "radv: do not print the LLVM version string twice in hang reports",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b1ef1c1211373f9336aaf87de865ef7f0c29fc44",
+        "description": "radv: remove the LLVM version string when ACO is used",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ee2aef3ea531a03dbd50a78c943ca6e7cc99c7a7",
+        "description": "anv: call base finish only if pass given in DestroyRenderPass",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "682c81bdfb7ea28efccea1e8cbfeb7cfc67d02b8"
+    },
+    {
+        "sha": "a885ee5258241d7ec4b9288cb15955e59d526d1a",
+        "description": "st/wgl: allocate and resolve msaa-textures",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "947bb04fcc03c9c1b8a04a6b3cd7f86825e6f244",
+        "description": "st/wgl: pass st_context_iface into stw_st_framebuffer_present_locked",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "808eb20186a23be1a1917668e374243151e6699e",
+        "description": "radeonsi: Fix omitted flush when moving suballocated texture",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "5e805cc74bc52f97de8f6308fc06bc96623e7e09"
+    },
+    {
+        "sha": "37e89e30276724932328edb7b8bf4909606052d1",
+        "description": "aco: either copy-propagate or inline create_vector operands",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "2dc550202e82c5da198ad0a416a5d24dd89addd8"
+    },
+    {
+        "sha": "c9e73624022a482ffe0a41d0cae007e04cc61dc4",
+        "description": "ac/surface: override all offsets including metadata offsets",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "441eaef6a9e5bb6d55bb3f875d60b35a5e70042b",
+        "description": "amd: unify code for overriding offset and stride for imported buffers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c164ea86e193c710d41de769ddfb169ab53ced51",
+        "description": "ac/surface,radeonsi: move the set/get_umd_metadata code into ac_surface.c",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7691de0dcefd7a518ee1ecc4d2cd3803e42cc803",
+        "description": "ac/surface,radeonsi: move the set/get_bo_metadata code to ac_surface.c",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "56e37374ddbc3b66bcfa4d0dadcb1fd53074c822",
+        "description": "amd: assume HTILE is always rb/pipe_aligned, remove ac_surface.u.gfx9.htile",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cf61f635ff6a38aad344ebe30551eaaac6fec038",
+        "description": "amd: assume CMASK is always rb/pipe_aligned, remove ac_surface.u.gfx9.cmask",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "127aaf0b9ac1eb46633df35c899b5d1a175a7220",
+        "description": "amd: remove duplicated definitions from amdgpu_drm.h",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "25edf9b136415fc9c079ad8613b89ce261b5c351",
+        "description": "amd: update amdgpu_drm.h",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "89d4b6b5c857e1efcff4d945fb83b4e77d26378d",
+        "description": "llvmpipe: make sample position a global array.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3b6449d45317f4441eef464b415f5c65e5103dab",
+        "description": "nir/algebraic: Optimize some bfe patterns",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f46eabf84e6a3227ce846f6725ad16517d146dae",
+        "description": "nir/algebraic: Split ibfe and ubfe with two constant sources",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0d605a8bbfd0eb84e010bb9944df53b1f7242156",
+        "description": "nir/algebraic: Recognize open-coded byte or word extract from bfe",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "58dfb38f784c70020fd57dc38a0fd6c7f0aed80d",
+        "description": "gallium/swr: Fix crashes in sampling code",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "58b66f82e648eaa9378699aadcc5862bb941483d",
+        "description": "panfrost: Handle MALI_RGB8_UNORM in panfrost_format_to_bifrost_blend",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9c3e82296c8bfc96ac956918a69f917a954c1f12",
+        "description": "panfrost: Don't trample on top of Bifrost-specific unions",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7e53cce3ba4bdbddcad5f740a915f126f2388dd6",
+        "description": "pan/decode: Fix flags_hi printing",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a4d41a151095f73b4b8a7ba06bf06adc7cedebd8",
+        "description": "panfrost: Add checksum BOs to batch",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4f17e9eef6f9f8a2986264b3da5157542983a1da",
+        "description": "anv: don't expose VK_INTEL_performance_query without kernel support",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "2b5f30b1d91b98ab27ba21439cd8a40a0d1ece36"
+    },
+    {
         "sha": "6d513eb0db25a272da65822f35907456b544f172",
         "description": "tu: Support pipelines without a fragment shader",
         "nominated": false,
