@@ -296,7 +296,7 @@ radv_physical_device_init(struct radv_physical_device *device,
 	}
 
 	if (!device->ws) {
-		result = vk_error(instance, VK_ERROR_INCOMPATIBLE_DRIVER);
+		result = vk_error(instance, VK_ERROR_INITIALIZATION_FAILED);
 		goto fail;
 	}
 
@@ -757,7 +757,7 @@ radv_enumerate_devices(struct radv_instance *instance)
 {
 	/* TODO: Check for more devices ? */
 	drmDevicePtr devices[8];
-	VkResult result = VK_ERROR_INCOMPATIBLE_DRIVER;
+	VkResult result = VK_SUCCESS;
 	int max_devices;
 
 	instance->physicalDeviceCount = 0;
@@ -781,7 +781,7 @@ radv_enumerate_devices(struct radv_instance *instance)
 		radv_logi("Found %d drm nodes", max_devices);
 
 	if (max_devices < 1)
-		return vk_error(instance, VK_ERROR_INCOMPATIBLE_DRIVER);
+		return vk_error(instance, VK_SUCCESS);
 
 	for (unsigned i = 0; i < (unsigned)max_devices; i++) {
 		if (devices[i]->available_nodes & 1 << DRM_NODE_RENDER &&
@@ -792,14 +792,22 @@ radv_enumerate_devices(struct radv_instance *instance)
 			                                   instance->physicalDeviceCount,
 			                                   instance,
 			                                   devices[i]);
-			if (result == VK_SUCCESS)
-				++instance->physicalDeviceCount;
-			else if (result != VK_ERROR_INCOMPATIBLE_DRIVER)
+			/* Incompatible DRM device, skip. */
+			if (result == VK_ERROR_INCOMPATIBLE_DRIVER) {
+				result = VK_SUCCESS;
+				continue;
+			}
+
+			/* Error creating the physical device, report the error. */
+			if (result != VK_SUCCESS)
 				break;
+
+			++instance->physicalDeviceCount;
 		}
 	}
 	drmFreeDevices(devices, max_devices);
 
+	/* If we successfully enumerated any devices, call it success */
 	return result;
 }
 
@@ -813,8 +821,7 @@ VkResult radv_EnumeratePhysicalDevices(
 
 	if (instance->physicalDeviceCount < 0) {
 		result = radv_enumerate_devices(instance);
-		if (result != VK_SUCCESS &&
-		    result != VK_ERROR_INCOMPATIBLE_DRIVER)
+		if (result != VK_SUCCESS)
 			return result;
 	}
 
@@ -840,8 +847,7 @@ VkResult radv_EnumeratePhysicalDeviceGroups(
 
 	if (instance->physicalDeviceCount < 0) {
 		result = radv_enumerate_devices(instance);
-		if (result != VK_SUCCESS &&
-		    result != VK_ERROR_INCOMPATIBLE_DRIVER)
+		if (result != VK_SUCCESS)
 			return result;
 	}
 
@@ -5200,7 +5206,7 @@ static VkResult radv_alloc_memory(struct radv_device *device,
 
 		heap_index = device->physical_device->memory_properties.memoryTypes[pAllocateInfo->memoryTypeIndex].heapIndex;
 		domain = device->physical_device->memory_domains[pAllocateInfo->memoryTypeIndex];
-		flags = device->physical_device->memory_flags[pAllocateInfo->memoryTypeIndex];
+		flags |= device->physical_device->memory_flags[pAllocateInfo->memoryTypeIndex];
 
 		if (!dedicate_info && !import_info && (!export_info || !export_info->handleTypes)) {
 			flags |= RADEON_FLAG_NO_INTERPROCESS_SHARING;
