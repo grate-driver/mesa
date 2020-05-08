@@ -6,6 +6,19 @@ mesa (20.1.0~rc1-1) experimental; urgency=medium
 
  -- Timo Aaltonen <tjaalton@debian.org>  Tue, 05 May 2020 12:47:17 +0300
 
+mesa (20.0.6-2) unstable; urgency=medium
+
+  [ Timo Aaltonen ]
+  * control: Bump libdrm-dev build-dep.
+
+  [ Svante Signell ]
+  * src_glx_dri_common.h.diff: Fix build on Hurd. (Closes: #959975)
+
+  [ Frédéric Bonnard ]
+  * Fix ppc64el FTBFS. (Closes: #959943)
+
+ -- Timo Aaltonen <tjaalton@debian.org>  Fri, 08 May 2020 11:00:10 +0300
+
 mesa (20.0.6-1) unstable; urgency=medium
 
   * New upstream release.
