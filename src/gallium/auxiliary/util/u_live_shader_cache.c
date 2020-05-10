@@ -125,8 +125,11 @@ util_live_shader_cache_get(struct pipe_context *ctx,
    simple_mtx_unlock(&cache->lock);
 
    /* Return if the shader already exists. */
-   if (shader)
+   if (shader) {
+      if (state->type == PIPE_SHADER_IR_NIR)
+          ralloc_free(state->ir.nir);
       return shader;
+   }
 
    /* The cache mutex is unlocked to allow multiple create_shader
     * invocations to run simultaneously.
