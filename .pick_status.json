@@ -634,7 +634,7 @@
         "description": "gallium/util: Fix leak in the live shader cache",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "4bb919b0b8b4ed6f6a7049c3f8d294b74b50e198"
     },
