@@ -157,7 +157,7 @@
         "description": "radv: limit the Vulkan version to 1.1 for Android",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "7f5462e349a3f082e2944181cd610b1250d711cd"
     },
