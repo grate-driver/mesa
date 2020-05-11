@@ -1,5 +1,482 @@
 [
     {
+        "sha": "0bea2a13212be10982e14617002a3ff851b84717",
+        "description": "egl: Limit the EGL ver for android",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9c839e6394028a84c97ebd0a725ff512aeb75ce6",
+        "description": "amd/common: Fix incorrect use of asprintf instead of vasprintf",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "39d59cf87a3974142cb69dd52386d96b5e6e7dd9",
+        "description": "docs/features: mark GL_NV_conditional_render as done for zink",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5743fa6e709a01c5a6820320b2e87931af46e7cf",
+        "description": "zink: enable conditional rendering if available",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5c7dea394fc21d455cd00dff3d3881276427fc47",
+        "description": "zink: add a GET_PROC_ADDR macro to simplify load_device_extensions",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b8fd70eef2cb5936e8ccb4d237e50084d6ff2a7c",
+        "description": "zink: load vk_GetMemoryFdKHR while creating screen",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c668bdf05cf3aa6907b678c35805962ea79b258b",
+        "description": "radeonsi: do not use cmask with encrypted texture",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8873ea0e253b90eb91da514e36bd845d6a5f9734",
+        "description": "radeonsi: determine secure flag must be set for gfx IB",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "92e64f4b41ed0ab0b9291d1de0b285733fd92307",
+        "description": "amdgpu: use AMDGPU_IB_FLAGS_SECURE when requested",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2c2ab36f5346a07b14ee85703316f323a77c2530",
+        "description": "radeonsi: add support for PIPE_RESOURCE_FLAG_ENCRYPTED",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "413d91bbcb9f4a0db811c714d1cdcd731fee50b9",
+        "description": "gallium: PIPE_RESOURCE_FLAG_ENCRYPTED",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5c58cbe84d231b602d830f4d9e26ed8d42ddc145",
+        "description": "radeonsi/sdma: implement tmz support",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5d96c26b67da5a053d57782d42cb80447e4ade1a",
+        "description": "radeonsi: force using staging texture when uploading to secure texture",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "fe2a3b804bdf4773d853974a0a51584cd5a0f9d9",
+        "description": "amdgpu: add encrypted slabs support",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2853ed1a248d6be1f131a684cddaf4be5a2bb9b6",
+        "description": "radeonsi: allocate framebuffer texture as secure when using tmz",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5a67b52de46e42c745af3672767d0271d5425230",
+        "description": "radeon: add RADEON_CREATE_ENCRYPTED flag",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "856a03b4c1646cae36b0c2522a3a7b71ecec6fac",
+        "description": "radeonsi: add AMD_DEBUG=tmz option",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "977e19d5cfe02227756aa022a7471570aa17edf7",
+        "description": "amdgpu/radeon: add secure api",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "506f5d9bda64fc07ee1a216cb3aeef98491c6365",
+        "description": "ac/surface: remove shadowing declaration",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "7691de0dcefd7a518ee1ecc4d2cd3803e42cc803"
+    },
+    {
+        "sha": "266978f7cabe2c09e5538ef1b79efdd96b2cba00",
+        "description": "aco: prevent invalid loads/stores vectorization if robustness is enabled",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "04718a9cd63cea9d815bffd91495069a79db8ac5",
+        "description": "nir: do not vectorize load/store if offset can overflow and robustness enabled",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3fba0a7a6f01496344ddb93e774b2d4bc9195e8a",
+        "description": "aco: fix 64-bit trunc with negative exponents on GFX6",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "56f955e4850035d915a2a87e2ebea7fa66ab5e19",
+        "description": "etnaviv: drm: Normalize nano seconds",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "022327f7535a7d27f965af7c318005a56b44ab85",
+        "description": "etnaviv: drm: Use NSEC_PER_SEC",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a92a483ff7feee1a903fd1f4caab9c2a035882b8",
+        "description": "freedreno: android: add adreno-pm4-pack.xml.h generation to android build",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "ee293160d7d7341e0ec5f0aaf1ceb6950f785ed8"
+    },
+    {
+        "sha": "5dc3b22dd06c74cdb06cbc6cf3b6d073b221e7f3",
+        "description": "freedreno/drm: android: add libfreedreno_registers static dependency",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "6c688ae81f4a6249cdccf1d218da5bebaf23e4f4"
+    },
+    {
+        "sha": "e622e010fd838eb30eab46800015516703b76f4d",
+        "description": "lima/ppir: rework select conditions",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a0c58867cddcf199cf85d270b42965678ad8af10",
+        "description": "lima/ppir: add fallback mov option for const scheduler",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8c47640731303ed2607d28ce2cf19a7e8f0f4006",
+        "description": "lima/ppir: rework store output",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "570f1420dbf361cf889c21c119816e063ecc3cea",
+        "description": "lima/ppir: rework emit nir to ppir",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6b21b771f7b4bdd60089c784ed35e33622c8932a",
+        "description": "lima/ppir: remove unused clone functions",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8c4157138f331d5053036f756aefa7006bbb6fac",
+        "description": "lima/ppir: duplicate consts in nir",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5e6c3861182cbf481ce3d25d0bbbcad4916c92dd",
+        "description": "lima/ppir: duplicate intrinsics in nir",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "09003ba0700ed0ddc57d85e82320f15a2a90c8dd",
+        "description": "lima/ppir: combine varying loads in node_to_instr",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c6a3987f320fa26fa88e6d86cf236d7e426aab84",
+        "description": "lima/ppir: do not assume single src for pipeline outputs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "741aa3439d7d38c26d0baf20be506cf79c30978d",
+        "description": "lima/ppir: fix lod bias register codegen",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cef1c73634493ef9766baa0b6a898369eff7686f",
+        "description": "lima/ppir: introduce liveness internal live set",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9e790fea7c178141b5bb1b82ab6bcf4034bfdb18",
+        "description": "genxml: pack: deal with default field not being simple integers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "942d4538a46c3420570ccf5c5f5677380c75caf0",
+        "description": "genxml: factor out utility functions",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d07f69413ebd1ad56e5bba86a1891bbf571ff710",
+        "description": "genxml: fix invalid end value for video fields",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "af17e392b2e50c86dd9a11ee72ce119a4b0033a5",
+        "description": "genxml: run sorting script",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "45c33313e6ee5ec85e585b512270c3f668eb149e",
+        "description": "intel/dev: Add device info for RKL",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "54996ad49273641e20dbb2d7aff382199e27cd10",
+        "description": "intel/dev: Split .num_subslices out of GEN12_FEATURES macro",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "07b0fbea92a66499ef7c0f9b748b1034831201b1",
+        "description": "panfrost: don't always build bifrost_compiler",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "ec2a59cd7aa42652645e76e29a72335370c80e50"
+    },
+    {
+        "sha": "727a0a53fdd4a1cf63a28c53f51d49a4164b2c89",
+        "description": "radeonsi: remove emacs style config file",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6c998c7adfd386eede37de49080a043ef1ec0e34",
+        "description": "intel/dump_gpu: Fix name of LD_PRELOAD in env append logic",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1a59590e5d686a11687151d57f2fd43d366d6720",
+        "description": "ac/surface: fix broken pitch override on gfx8",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "441eaef6a9e5bb6d55bb3f875d60b35a5e70042b"
+    },
+    {
+        "sha": "c9e8df61dc8737f167767f2bda8a56abcae8ad5e",
+        "description": "freedreno: Initialize the bo's iova at creation time.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b3c4e6a597a45a0281cdcb8d70ec86ce8dabbb16",
+        "description": "freedreno: Rename append_bo() in case it doesn't get inlined.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e1c74f3facce57555284d23ee11bc009928806f1",
+        "description": "freedreno: Clean up tests around ORing in the reloc flags.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6c688ae81f4a6249cdccf1d218da5bebaf23e4f4",
+        "description": "freedreno: Deduplicate ringbuffer macros with computerator/fdperf",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "094c7646a3ae4980f76605a922572fe2ed78f6f1",
+        "description": "freedreno,tu: Don't request fragcoord components not being read.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ab5590e92bc36e2b785a088751c433d31989d778",
+        "description": "vulkan/object: Always include the type",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "32f20783a512129fc2d7dd8a11ffa8670cef0068"
+    },
+    {
         "sha": "d11e4738a86ecac6bb4cfaf5cad5c1d32169b18f",
         "description": "anv/allocator: Add a start_offset to anv_state_pool",
         "nominated": false,
