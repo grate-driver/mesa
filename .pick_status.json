@@ -274,7 +274,7 @@
         "description": "intel/compiler: fix alignment assert in nir_emit_intrinsic",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "c6439792287f11f25cb2b62d699f52daefe54a44"
     },
