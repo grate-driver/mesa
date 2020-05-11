@@ -580,7 +580,7 @@
         "description": "r600: Fix nir compiler options, i.e. don't lower IO to temps for TESS",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "6747a984f59ea9a2dd74b98d59cb8fdb028969ae"
     },
