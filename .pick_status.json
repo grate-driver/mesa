@@ -2416,7 +2416,7 @@
         "description": "anv/tests: Don't rely on assert or changing NDEBUG in tests",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "f7c56475d25138234ab0bb28a10df9000de594f9"
     },
