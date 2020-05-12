@@ -1,5 +1,266 @@
 [
     {
+        "sha": "d76e722ed63607ecead2c66ef9f3a37a12b62bab",
+        "description": "turnip: enable tiling for compressed formats",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f543d87f23555912110e2c0f67a57dcb99d94e08",
+        "description": "turnip: update \"fetchsize\" value to match fdl6_layout changes",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "a34b3fa198a4f87f8e07c718ec2f2e07927c6d7d"
+    },
+    {
+        "sha": "f789c5975c83f12216cf915d9a791e654b3c9e15",
+        "description": "freedreno: Fix non-constbuf-upload UBO block indices and count.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4553fc66a5f23607c2e872d8ac8755c747bd0bd2",
+        "description": "nir: Fix count when we didn't lower load_uniforms but did shift load_ubos.",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "4777ee1a62f0620efa2a105215eb589fc44dfa0f"
+    },
+    {
+        "sha": "0f2e44d55b01b3637fb96ce18840b8ab9250d508",
+        "description": "freedreno: Drop the \"write\" arg to emit_const_bo now relocs don't care.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "51d7a71bd4f086b42340b0d601d2c3ff4bc7de37",
+        "description": "freedreno: Replace OUT_RELOCW with OUT_RELOC.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "064f395a890158ea5502f685ef6c22e504e3f0df",
+        "description": "freedreno: Tell the kernel that all BOs are for writing.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b2c23b1e48f043edee1a6aaa3c132c13edba032e",
+        "description": "freedreno: Mark all ringbuffer BOs as to be dumped on crash.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "554b959df0d5b1117fb42d3d7d1e715ea318f079",
+        "description": "freedreno: Replace OUT_RELOCD with permanently flagging shader BOs for it.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9d8d936dfcdab52361b9824cdd1f3ddb41486145",
+        "description": "freedreno: Start moving relocs flags into the BOs.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4235624b6a1f1858a8f200c03b6492ed1b9f21ec",
+        "description": "aco: optimize add/sub(a, cndmask(b, 0, 1, cond)) -> addc/subbrev_co(0, a, b)",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a5fc96b533418dc2d68f17f3f19ac5f82d59b978",
+        "description": "aco: coalesce parallelcopies during register allocation",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "38cc649fcb54baf87a974ca2dc29d92b50c86cfa",
+        "description": "glthread: Fix use of alloca() without #include \"c99_alloca.h\"",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "2840bc3065b9e991b2c5880a2ee02e2458a758c4"
+    },
+    {
+        "sha": "dc6c42dc77e4bf0cb07037e038c4a50afa5a8143",
+        "description": "etnaviv: generalize FE stall before loading shader and sampler states",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8e5fc97be63e4c4296f16fe34523b68d39776fad",
+        "description": "CI: Re-enable Panfrost T7x0 jobs",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "696bafac40f5f15ae140a2e844fb1b31d4918ebe"
+    },
+    {
+        "sha": "8c6350d2bba852fccbda5e0534bdbb085882b3be",
+        "description": "radv: update the list of allowed Android extensions",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "021270cb3170ef38244d21cf3fe8780a3ef5fb3e",
+        "description": "radv: handle different Vulkan API versions correctly",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "69430921fc123b9016d5bf1779c0ab0ed4d95931",
+        "description": "radv: limit the Vulkan version to 1.1 for Android",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "7f5462e349a3f082e2944181cd610b1250d711cd"
+    },
+    {
+        "sha": "50eabb7035fe361d870f504b73c15962ddf0b67e",
+        "description": "r600: Fix nir compiler options, i.e. don't lower IO to temps for TESS",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "6747a984f59ea9a2dd74b98d59cb8fdb028969ae"
+    },
+    {
+        "sha": "f7fcbe9830d160c9610fe641ed0202397ed9c31e",
+        "description": "v3d/tex: use TMUSLOD register if possible",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c3af695bb0bae8aea119a2d05983acd57366b0fb",
+        "description": "v3d/tex: set up default values for Configuration Parameter 1 if possible",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "50c2c76ea31edf987594e8b811b7d62be71f5a33",
+        "description": "v3d/tex: only look up the 2nd texture gather offset for 1d non-arrays",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ad8c5bba0a44774477a1b26523a14e8679521fc3",
+        "description": "drirc: Enable glthread for rpcs3",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d1290e79489fb645fc73ebb365b684b7797f97b2",
+        "description": "pan/midgard: Fix old style shadows",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "47bfc799da61aadd60ef9cc5c4bf0651c519cc77",
+        "description": "gallium/util: Fix leak in the live shader cache",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "4bb919b0b8b4ed6f6a7049c3f8d294b74b50e198"
+    },
+    {
+        "sha": "412e29c277774391c461d0f62c47e54d2f17814a",
+        "description": "nir/algebraic: Eliminate useless extract before unpack",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "bc0bbb8f0b45049e597d7d585999ae4954266347",
+        "description": "nir/algebraic: Add some half packing optimizations for pack_half_2x16_split",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a2bf41ec6527fbedc2a75a8072d7222298bca347",
+        "description": "nir/algebraic: Optimize ushr of pack_half, not ishr",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "1f72857739beed55276f263f49b3802c336b8c58"
+    },
+    {
+        "sha": "ab16bff97d75301b56530c2c9a410960e2de8bc8",
+        "description": "intel: Delete hardcoded devinfo->urb.size values for Gen7+ (sans DG1).",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "0bea2a13212be10982e14617002a3ff851b84717",
         "description": "egl: Limit the EGL ver for android",
         "nominated": false,
