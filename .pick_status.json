@@ -724,7 +724,7 @@
         "description": "nir/opt_if: run opt_peel_loop_initial_if after all other optimizations",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "52c8bc0130a2031904f8f4e2187baf2f3f8ff6ec"
     },
