@@ -2830,7 +2830,7 @@
         "description": "anv: Translate relative timeout to absolute when calling anv_timelines_wait",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "34f32a6d6648073e2fda3fb78377124fb32bb288"
     },
