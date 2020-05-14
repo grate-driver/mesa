@@ -2074,7 +2074,7 @@
         "description": "radeonsi: don't expose 16xAA on chips with 1 RB due to an occlusion query issue",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": null
     },
