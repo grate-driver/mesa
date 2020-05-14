@@ -2092,7 +2092,7 @@
         "description": "etnaviv: retarget transfer to render resource when necessary",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "b9627765303356328c409cd59bef43d15f4eafcf"
     },
