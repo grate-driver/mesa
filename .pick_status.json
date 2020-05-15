@@ -1822,7 +1822,7 @@
         "description": "radv: use util_float_to_half_rtz",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "8b8af6d398a94cb07015c695fdfdb5c157aa72cf"
     },
