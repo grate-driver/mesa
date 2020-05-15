@@ -2227,7 +2227,7 @@
         "description": "zink: implement i2b1",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "7f6a491eec02d6c141e2b4849a3ba924926a482a"
     },
