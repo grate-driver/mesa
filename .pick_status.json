@@ -1408,7 +1408,7 @@
         "description": "Revert \"gallium/gallivm: fix compilation issues with llvm 11\"",
         "nominated": true,
         "nomination_type": 2,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "e2a7436dd10df70ba14d18ab7cf8ad538f80e653"
     },
