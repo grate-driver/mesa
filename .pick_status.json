@@ -1417,7 +1417,7 @@
         "description": "Revert \"ac,radeonsi: fix compilations issues with LLVM 11\"",
         "nominated": true,
         "nomination_type": 2,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "42b1696ef627a5bfee29911a780fa0a4dbf04610"
     },
