@@ -2173,7 +2173,7 @@
         "description": "meson: Disable GCC's dead store elimination for memory zeroing custom new",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": null
     },
