@@ -3955,7 +3955,7 @@
         "description": "nir: lower_tex: Don't normalize coordinates for TXF with RECT",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "1ce8060c25c7f2c7a54159fab6a6974c0ba182a8"
     },
