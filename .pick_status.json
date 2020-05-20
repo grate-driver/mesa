@@ -1453,7 +1453,7 @@
         "description": "amd/addrlib: fix forgotten char -> enum conversions",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "e3e704c7e7e46dfda820ea2e96fa4a32d63ef796"
     },
