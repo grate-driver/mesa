@@ -2218,7 +2218,7 @@
         "description": "llvmpipe: compute shaders work better with all the threads.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "1b24e3ba756ba4951086d0b1b351364acbd3af1d"
     },
