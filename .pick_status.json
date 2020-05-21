@@ -2740,7 +2740,7 @@
         "description": "vulkan-overlay/meson: use install_data instead of configure_file",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "56ccea58ae7f6fd56cf4a1697d2cceb68866b552"
     },
