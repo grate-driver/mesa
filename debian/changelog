@@ -1,3 +1,9 @@
+mesa (20.0.7-1) UNRELEASED; urgency=medium
+
+  * New upstream release.
+
+ -- Timo Aaltonen <tjaalton@debian.org>  Thu, 21 May 2020 11:02:36 +0300
+
 mesa (20.0.6-3) unstable; urgency=medium
 
   * src_glx_dri_common.h.diff: Dropped, breaks the build.
