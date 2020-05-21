@@ -67,6 +67,8 @@
 #include "cso_cache/cso_context.h"
 
 
+static void
+destroy_program_variants(struct st_context *st, struct gl_program *target);
 
 static void
 set_affected_state_flags(uint64_t *states,
@@ -342,7 +344,7 @@ st_release_program(struct st_context *st, struct st_program **p)
    if (!*p)
       return;
 
-   st_release_variants(st, *p);
+   destroy_program_variants(st, &((*p)->Base));
    st_reference_prog(st, p, NULL);
 }
 
