@@ -86,6 +86,7 @@ tracie_fails_on_image_mismatch() {
 }
 
 tracie_skips_traces_without_checksum() {
+    echo "traces:" > "$TEST_DIR/tests/traces.yml"
     echo "  - path: trace1/red.testtrace" >> "$TEST_DIR/tests/traces.yml"
     echo "    expectations:" >> "$TEST_DIR/tests/traces.yml"
     echo "    - device: bla" >> "$TEST_DIR/tests/traces.yml"
@@ -105,6 +106,7 @@ tracie_fails_on_dump_image_error() {
 
     run_tracie
     assert "[ $? != 0 ]"
+    assert_results_yaml_contains "error" "8e0a801367e1714463475a824dab363b" "trace1/magenta.testtrace" "$PWD/results/results.yml"
 }
 
 tracie_stores_only_logs_on_checksum_match() {
