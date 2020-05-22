@@ -4063,7 +4063,7 @@
         "description": "aco: consider SDWA during value numbering",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "23ac24f5b1fdde73cf8ec1ef6cbe08d73d6776f5"
     },
