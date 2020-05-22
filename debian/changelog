@@ -1,9 +1,9 @@
-mesa (20.1.0~rc4-1) UNRELEASED; urgency=medium
+mesa (20.1.0~rc4-1) experimental; urgency=medium
 
   * New upstream snapshot.
   * fix-build-with-llvm-10.diff: Dropped, upstream.
 
- -- Timo Aaltonen <tjaalton@debian.org>  Fri, 08 May 2020 11:41:09 +0300
+ -- Timo Aaltonen <tjaalton@debian.org>  Fri, 22 May 2020 09:17:06 +0300
 
 mesa (20.1.0~rc1-1) experimental; urgency=medium
 
