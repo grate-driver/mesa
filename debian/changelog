@@ -1,10 +1,10 @@
-mesa (20.0.7-1) UNRELEASED; urgency=medium
+mesa (20.0.7-1) unstable; urgency=medium
 
   * New upstream release.
   * src_glx_dri_common.h.diff: A new attempt to fix hurd ftbfs. (Closes:
     #960197)
 
- -- Timo Aaltonen <tjaalton@debian.org>  Thu, 21 May 2020 11:02:36 +0300
+ -- Timo Aaltonen <tjaalton@debian.org>  Fri, 22 May 2020 08:36:18 +0300
 
 mesa (20.0.6-3) unstable; urgency=medium
 
