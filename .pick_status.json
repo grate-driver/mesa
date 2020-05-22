@@ -1363,7 +1363,7 @@
         "description": "mesa: Fix double-lock of Shared->FrameBuffers and usage of wrong mutex",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "7534c536ca0f4b2b123200f421460094034f37a3"
     },
