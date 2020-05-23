@@ -877,7 +877,7 @@
         "description": "radv: Handle failing to create .cache dir.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "f4e499ec79147f4172f3669ae9dafd941aaeeb65"
     },
