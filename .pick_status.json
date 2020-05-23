@@ -859,7 +859,7 @@
         "description": "radv: Do not close fd -1 when NULL-winsys creation fails.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "cd6ec2b1abbd96f4456e92613c2232c919bb9023"
     },
