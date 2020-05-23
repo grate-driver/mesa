@@ -1057,7 +1057,7 @@
         "description": "r600/sfn: Initialize VertexStageExportForGS m_num_clip_dist member variable.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "f7df2c57a207a386ba0d2130541ac9d0546670e1"
     },
