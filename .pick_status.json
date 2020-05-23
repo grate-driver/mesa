@@ -688,7 +688,7 @@
         "description": "r600: Fix duplicated subexpression in r600_asm.c",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "4422ce1b04c117f61394a6834cd7933f06ce4e1f"
     },
