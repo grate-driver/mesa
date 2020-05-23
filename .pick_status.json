@@ -1543,7 +1543,7 @@
         "description": "vdpau: Fix wrong calloc sizeof argument.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "65fe0866aec7b5608419f6d184cb1fa4fe1dc45a"
     },
