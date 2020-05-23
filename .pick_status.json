@@ -436,7 +436,7 @@
         "description": "freedreno: clear last_fence after resource tracking",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "ddb7fadaf8b1aa3004e72d6b0e28e465f8f45fba"
     },
