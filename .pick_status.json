@@ -3262,7 +3262,7 @@
         "description": "rbug: Fix rbug_delete_vs_state lock acquisition.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "07838ff990a74e3acd95de7042042b49ecc51570"
     },
