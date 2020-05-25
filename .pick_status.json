@@ -706,7 +706,7 @@
         "description": "r600/sfn: Use correct setter method.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "5d10e3ec6066239d732d19f69cd95da447e73e32"
     },
