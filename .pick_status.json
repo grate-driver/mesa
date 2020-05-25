@@ -22,7 +22,7 @@
         "description": "zink: use general-layout when blitting to/from same resource",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "d2bb63c8d4cdc02b1c33afadea5becd58fb7286c"
     },
