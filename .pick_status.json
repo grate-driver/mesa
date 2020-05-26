@@ -67,7 +67,7 @@
         "description": "glsl: stop cascading errors if process_parameters() fails",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "53e4159eaaf692071bf63365eb27a16c97c9a3e5"
     },
