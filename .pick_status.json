@@ -454,7 +454,7 @@
         "description": "nir: fix lowering to scratch with boolean access",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "18ed82b084c79bf63666f2da22e5d675fb01aa26"
     },
