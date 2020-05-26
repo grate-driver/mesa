@@ -1872,6 +1872,9 @@ int ac_compute_surface(ADDR_HANDLE addrlib, const struct radeon_info *info,
 		surf->total_size = surf->cmask_offset + surf->cmask_size;
 	}
 
+	if (surf->is_displayable)
+		surf->flags |= RADEON_SURF_SCANOUT;
+
 	if (surf->dcc_size &&
 	    /* dcc_size is computed on GFX9+ only if it's displayable. */
 	    (info->chip_class >= GFX9 || !get_display_flag(config, surf))) {

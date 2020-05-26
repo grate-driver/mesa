@@ -139,7 +139,7 @@
         "description": "ac/surface: set SCANOUT if surf->is_displayable",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "ba10fb3f7f41f7ec9e260117a3e037dadd57b9b5"
     },
