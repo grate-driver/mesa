@@ -3433,7 +3433,7 @@
         "description": "panfrost: Fix fence leak",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "2dad9fde505c7d8e97f57f4a5a3f495f902f94f2"
     },
