@@ -2380,7 +2380,7 @@
         "description": "radeonsi: add a hack to disable TRUNC_COORD for shadow samplers",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "d573d1d82524b8a2e5f56938069cabc0f0176a0e"
     },
