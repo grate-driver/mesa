@@ -3937,7 +3937,7 @@
         "description": "util: Initialize pipe_shader_state for passthrough and transform shaders",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "f01c0565bb9ad7335395920aebc7489cb76d1b72"
     },
