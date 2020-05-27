@@ -3568,7 +3568,7 @@
         "description": "pan/bi: Fix emit_if successor assignment",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "9a00cf3d1efe336e09906d87a8f5a50cbbe10fd6"
     },
