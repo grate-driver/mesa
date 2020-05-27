@@ -4234,7 +4234,7 @@
         "description": "pan/bi: Initialize struct fma_op_info member extended.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "8c79c710d4e1f3e424d5abf1f9abccdfc9a59caa"
     },
