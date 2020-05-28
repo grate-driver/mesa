@@ -2299,7 +2299,7 @@
         "description": "zink: Use store_dest_raw instead of storing an uint",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "16339646f03a5cb527f119ca572c9328fd5d3923"
     },
