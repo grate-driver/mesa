@@ -3217,7 +3217,7 @@
         "description": "intel/dev: Don't consider all TGL SKUs as GT1 only",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "54996ad49273641e20dbb2d7aff382199e27cd10"
     },
