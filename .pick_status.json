@@ -823,7 +823,7 @@
         "description": "glsl: inline functions with unsupported return type before converting to nir",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "7e60d5a501f311fa5e7bca5335adc6013dc1aeb9"
     },
