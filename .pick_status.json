@@ -3271,7 +3271,7 @@
         "description": "radv: fix regression with builtin cache",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "cd61f5234d2c275b21c249fc2effc058a74ecf0a"
     },
