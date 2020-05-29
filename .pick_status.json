@@ -2110,7 +2110,7 @@
         "description": "glsl: Don't replace lrp pattern with lrp if arguments are not floats",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "8d37e9915a3b21b496269a39f677a80a6e02cb2c"
     },
