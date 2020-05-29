@@ -4216,7 +4216,7 @@
         "description": "v3d: add missing unlock() in error path",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "e5a81ac70431502bc592c05e4ae639c0504ec816"
     },
