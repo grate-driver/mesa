@@ -3226,7 +3226,7 @@
         "description": "r300g: Remove extra printf format specifiers.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "04c1536bf7abe253e0e900c311ff9474ff4d1813"
     },
