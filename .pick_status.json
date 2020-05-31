@@ -4072,7 +4072,7 @@
         "description": "intel/ir/gen12+: Work around FS performance regressions due to SIMD32 discard divergence.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "188a3659aea6dec9acf1c2fd15fcaecffe4f7d4e"
     },
