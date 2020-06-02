@@ -3046,7 +3046,7 @@
         "description": "util: enable futex usage on BSDs after 7dc2f4788288",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": null
     },
