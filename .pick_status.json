@@ -1417,7 +1417,7 @@
         "description": "nir: reuse existing psiz-variable",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "878c94288a8aed3479517660be3e9a88f9b44269"
     },
