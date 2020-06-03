@@ -850,7 +850,7 @@
         "description": "nir/lower_explicit_io: fix NON_UNIFORM access for UBO loads",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": null
     },
