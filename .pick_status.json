@@ -184,7 +184,7 @@
         "description": "glsl: fix crash on glsl macro redefinition",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "0346ad37741b11d640c1c4970b275c1f0c7f9e75"
     },
