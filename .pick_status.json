@@ -130,7 +130,7 @@
         "description": "ac/surface: fix epitch when modifying surf_pitch",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "69aadc493310bb7306d10559bf48412eb5865962"
     },
