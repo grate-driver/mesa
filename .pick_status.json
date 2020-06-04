@@ -1255,7 +1255,7 @@
         "description": "freedreno/computerator: fix missing dependency on generated header",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "da467817e3e25d201e94326ff876374093a3ba22"
     },
