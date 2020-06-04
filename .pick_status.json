@@ -1372,7 +1372,7 @@
         "description": "llvmpipe: move coroutines out of noopt case",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "d32690b43c91d4aab938da83704e4ebb68fccf6f"
     },
