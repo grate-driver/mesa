@@ -1840,7 +1840,7 @@
         "description": "st/mesa: make texture views inherit compressed_data storage",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "c3fafa127a01ef6d46c976bbf2c5be94350c0667"
     },
