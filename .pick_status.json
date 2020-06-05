@@ -1093,7 +1093,7 @@
         "description": "intel: fix gen_sort_tags.py",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "903e142f0d35bc550ffde321987a5b6fca1095eb"
     },
