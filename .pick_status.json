@@ -913,7 +913,7 @@
         "description": "llvmpipe: do not enable tessellation shader without llvm coroutines support",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "eb5227173f0354aade28e46397a5bb69b2af69fb"
     },
