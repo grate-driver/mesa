@@ -904,7 +904,7 @@
         "description": "glsl: fix potential slow compile times for GLSLOptimizeConservatively",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "0a5018c1a483abe6c4dddc6c65a7f4e939efc726"
     },
