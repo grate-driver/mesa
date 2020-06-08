@@ -1327,7 +1327,7 @@
         "description": "vulkan/wsi: Really terminate DRM lease in wsi_release_display().",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "352d320a07458eb05e4929fdc1e0d1dbe1b07dda"
     },
