@@ -5440,7 +5440,7 @@
         "description": "ac/surface: don't recompute the DCC retile map for imported textures",
         "nominated": false,
         "nomination_type": null,
-        "resolution": 4,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": null
     },
