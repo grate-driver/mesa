@@ -50,6 +50,10 @@
 #define CIASICIDGFXENGINE_ARCTICISLAND 0x0000000D
 #endif
 
+struct ac_addrlib {
+	ADDR_HANDLE handle;
+};
+
 static void *ADDR_API allocSysMem(const ADDR_ALLOCSYSMEM_INPUT * pInput)
 {
 	return malloc(pInput->sizeInBytes);
@@ -61,9 +65,9 @@ static ADDR_E_RETURNCODE ADDR_API freeSysMem(const ADDR_FREESYSMEM_INPUT * pInpu
 	return ADDR_OK;
 }
 
-ADDR_HANDLE amdgpu_addr_create(const struct radeon_info *info,
-			       const struct amdgpu_gpu_info *amdinfo,
-			       uint64_t *max_alignment)
+struct ac_addrlib *ac_addrlib_create(const struct radeon_info *info,
+				     const struct amdgpu_gpu_info *amdinfo,
+				     uint64_t *max_alignment)
 {
 	ADDR_CREATE_INPUT addrCreateInput = {0};
 	ADDR_CREATE_OUTPUT addrCreateOutput = {0};
@@ -123,7 +127,21 @@ ADDR_HANDLE amdgpu_addr_create(const struct radeon_info *info,
 			*max_alignment = addrGetMaxAlignmentsOutput.baseAlign;
 		}
 	}
-	return addrCreateOutput.hLib;
+
+	struct ac_addrlib *addrlib = calloc(1, sizeof(struct ac_addrlib));
+	if (!addrlib) {
+		AddrDestroy(addrCreateOutput.hLib);
+		return NULL;
+	}
+
+	addrlib->handle = addrCreateOutput.hLib;
+	return addrlib;
+}
+
+void ac_addrlib_destroy(struct ac_addrlib *addrlib)
+{
+	AddrDestroy(addrlib->handle);
+	free(addrlib);
 }
 
 static int surf_config_sanity(const struct ac_surf_config *config,
@@ -1107,7 +1125,7 @@ static bool is_dcc_supported_by_DCN(const struct radeon_info *info,
 	}
 }
 
-static int gfx9_compute_miptree(ADDR_HANDLE addrlib,
+static int gfx9_compute_miptree(struct ac_addrlib *addrlib,
 				const struct radeon_info *info,
 				const struct ac_surf_config *config,
 				struct radeon_surf *surf, bool compressed,
@@ -1120,7 +1138,7 @@ static int gfx9_compute_miptree(ADDR_HANDLE addrlib,
 	out.size = sizeof(ADDR2_COMPUTE_SURFACE_INFO_OUTPUT);
 	out.pMipInfo = mip_info;
 
-	ret = Addr2ComputeSurfaceInfo(addrlib, in, &out);
+	ret = Addr2ComputeSurfaceInfo(addrlib->handle, in, &out);
 	if (ret != ADDR_OK)
 		return ret;
 
@@ -1189,7 +1207,7 @@ static int gfx9_compute_miptree(ADDR_HANDLE addrlib,
 		hin.numMipLevels = in->numMipLevels;
 		hin.firstMipIdInTail = out.firstMipIdInTail;
 
-		ret = Addr2ComputeHtileInfo(addrlib, &hin, &hout);
+		ret = Addr2ComputeHtileInfo(addrlib->handle, &hin, &hout);
 		if (ret != ADDR_OK)
 			return ret;
 
@@ -1224,7 +1242,7 @@ static int gfx9_compute_miptree(ADDR_HANDLE addrlib,
 			xin.numSamples = in->numSamples;
 			xin.numFrags = in->numFrags;
 
-			ret = Addr2ComputePipeBankXor(addrlib, &xin, &xout);
+			ret = Addr2ComputePipeBankXor(addrlib->handle, &xin, &xout);
 			if (ret != ADDR_OK)
 				return ret;
 
@@ -1264,7 +1282,7 @@ static int gfx9_compute_miptree(ADDR_HANDLE addrlib,
 			din.dataSurfaceSize = out.surfSize;
 			din.firstMipIdInTail = out.firstMipIdInTail;
 
-			ret = Addr2ComputeDccInfo(addrlib, &din, &dout);
+			ret = Addr2ComputeDccInfo(addrlib->handle, &din, &dout);
 			if (ret != ADDR_OK)
 				return ret;
 
@@ -1325,7 +1343,7 @@ static int gfx9_compute_miptree(ADDR_HANDLE addrlib,
 				assert(surf->u.gfx9.dcc.pipe_aligned ||
 				       surf->u.gfx9.dcc.rb_aligned);
 
-				ret = Addr2ComputeDccInfo(addrlib, &din, &dout);
+				ret = Addr2ComputeDccInfo(addrlib->handle, &din, &dout);
 				if (ret != ADDR_OK)
 					return ret;
 
@@ -1385,7 +1403,7 @@ static int gfx9_compute_miptree(ADDR_HANDLE addrlib,
 							addrin.dccKeyFlags.rbAligned = surf->u.gfx9.dcc.rb_aligned;
 							addrout.addr = 0;
 
-							ret = Addr2ComputeDccAddrFromCoord(addrlib, &addrin, &addrout);
+							ret = Addr2ComputeDccAddrFromCoord(addrlib->handle, &addrin, &addrout);
 							if (ret != ADDR_OK)
 								return ret;
 
@@ -1396,7 +1414,7 @@ static int gfx9_compute_miptree(ADDR_HANDLE addrlib,
 							addrin.dccKeyFlags.rbAligned = 0;
 							addrout.addr = 0;
 
-							ret = Addr2ComputeDccAddrFromCoord(addrlib, &addrin, &addrout);
+							ret = Addr2ComputeDccAddrFromCoord(addrlib->handle, &addrin, &addrout);
 							if (ret != ADDR_OK)
 								return ret;
 
@@ -1422,7 +1440,7 @@ static int gfx9_compute_miptree(ADDR_HANDLE addrlib,
 			fin.size = sizeof(ADDR2_COMPUTE_FMASK_INFO_INPUT);
 			fout.size = sizeof(ADDR2_COMPUTE_FMASK_INFO_OUTPUT);
 
-			ret = gfx9_get_preferred_swizzle_mode(addrlib, surf, in,
+			ret = gfx9_get_preferred_swizzle_mode(addrlib->handle, surf, in,
 							      true, &fin.swizzleMode);
 			if (ret != ADDR_OK)
 				return ret;
@@ -1433,7 +1451,7 @@ static int gfx9_compute_miptree(ADDR_HANDLE addrlib,
 			fin.numSamples = in->numSamples;
 			fin.numFrags = in->numFrags;
 
-			ret = Addr2ComputeFmaskInfo(addrlib, &fin, &fout);
+			ret = Addr2ComputeFmaskInfo(addrlib->handle, &fin, &fout);
 			if (ret != ADDR_OK)
 				return ret;
 
@@ -1461,7 +1479,7 @@ static int gfx9_compute_miptree(ADDR_HANDLE addrlib,
 				xin.numSamples = in->numSamples;
 				xin.numFrags = in->numFrags;
 
-				ret = Addr2ComputePipeBankXor(addrlib, &xin, &xout);
+				ret = Addr2ComputePipeBankXor(addrlib->handle, &xin, &xout);
 				if (ret != ADDR_OK)
 					return ret;
 
@@ -1501,7 +1519,7 @@ static int gfx9_compute_miptree(ADDR_HANDLE addrlib,
 			else
 				cin.swizzleMode = in->swizzleMode;
 
-			ret = Addr2ComputeCmaskInfo(addrlib, &cin, &cout);
+			ret = Addr2ComputeCmaskInfo(addrlib->handle, &cin, &cout);
 			if (ret != ADDR_OK)
 				return ret;
 
@@ -1515,7 +1533,7 @@ static int gfx9_compute_miptree(ADDR_HANDLE addrlib,
 	return 0;
 }
 
-static int gfx9_compute_surface(ADDR_HANDLE addrlib,
+static int gfx9_compute_surface(struct ac_addrlib *addrlib,
 				const struct radeon_info *info,
 				const struct ac_surf_config *config,
 				enum radeon_surf_mode mode,
@@ -1672,7 +1690,7 @@ static int gfx9_compute_surface(ADDR_HANDLE addrlib,
 			break;
 		}
 
-		r = gfx9_get_preferred_swizzle_mode(addrlib, surf, &AddrSurfInfoIn,
+		r = gfx9_get_preferred_swizzle_mode(addrlib->handle, surf, &AddrSurfInfoIn,
 						    false, &AddrSurfInfoIn.swizzleMode);
 		if (r)
 			return r;
@@ -1711,7 +1729,7 @@ static int gfx9_compute_surface(ADDR_HANDLE addrlib,
 		AddrSurfInfoIn.format = ADDR_FMT_8;
 
 		if (!AddrSurfInfoIn.flags.depth) {
-			r = gfx9_get_preferred_swizzle_mode(addrlib, surf, &AddrSurfInfoIn,
+			r = gfx9_get_preferred_swizzle_mode(addrlib->handle, surf, &AddrSurfInfoIn,
 							    false, &AddrSurfInfoIn.swizzleMode);
 			if (r)
 				goto error;
@@ -1730,8 +1748,8 @@ static int gfx9_compute_surface(ADDR_HANDLE addrlib,
 	/* This is only useful for surfaces that are allocated without SCANOUT. */
 	bool displayable = false;
 	if (!config->is_3d && !config->is_cube) {
-		r = Addr2IsValidDisplaySwizzleMode(addrlib, surf->u.gfx9.surf.swizzle_mode,
-					   surf->bpe * 8, &displayable);
+		r = Addr2IsValidDisplaySwizzleMode(addrlib->handle, surf->u.gfx9.surf.swizzle_mode,
+						   surf->bpe * 8, &displayable);
 		if (r)
 			goto error;
 
@@ -1843,7 +1861,7 @@ error:
 	return r;
 }
 
-int ac_compute_surface(ADDR_HANDLE addrlib, const struct radeon_info *info,
+int ac_compute_surface(struct ac_addrlib *addrlib, const struct radeon_info *info,
 		       const struct ac_surf_config *config,
 		       enum radeon_surf_mode mode,
 		       struct radeon_surf *surf)
@@ -1857,7 +1875,7 @@ int ac_compute_surface(ADDR_HANDLE addrlib, const struct radeon_info *info,
 	if (info->chip_class >= GFX9)
 		r = gfx9_compute_surface(addrlib, info, config, mode, surf);
 	else
-		r = gfx6_compute_surface(addrlib, info, config, mode, surf);
+		r = gfx6_compute_surface(addrlib->handle, info, config, mode, surf);
 
 	if (r)
 		return r;
