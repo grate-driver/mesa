@@ -4621,7 +4621,7 @@
         "description": "glsl: fix incorrect optimisation in opt_constant_variable()",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "65122e9e8038488e8c586eb609e434a90188de27"
     },
