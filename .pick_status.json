@@ -3361,7 +3361,7 @@
         "description": "Revert \"gallium/hud: don't use user vertex buffers\"",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "4fe1fd4df40ac91b2783e3604fd81e6a6faf0cd2"
     },
