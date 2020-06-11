@@ -4729,7 +4729,7 @@
         "description": "ac/surface: don't free dcc_retile_map on failure",
         "nominated": false,
         "nomination_type": 1,
-        "resolution": 4,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "bd553f0546dc361fc7e8abba649e1e9c9ea2010b"
     },
