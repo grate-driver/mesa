@@ -2173,7 +2173,7 @@
         "description": "st/mesa: account for \"loose\", per-mipmap level textures in CopyImageSubData",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "f04f13622f3e71bee057d60a6be9c53b92b56cc9"
     },
