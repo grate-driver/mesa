@@ -2947,7 +2947,7 @@
         "description": "st_glsl_to_nir: fix potential use after free",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "36be8c2fcf94f5d800aed6c3d39ef23b226fd0d5"
     },
