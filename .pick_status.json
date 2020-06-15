@@ -1462,7 +1462,7 @@
         "description": "st/mesa: fix reporting of float perf counters max value",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "4cd1cfb9831d4d4081cbe80b0d72b340c8fd0c2c"
     },
