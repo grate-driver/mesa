@@ -3757,7 +3757,7 @@
         "description": "util/u_atomic: fix build on clang archs without 64-bit atomics",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "a6a38a038bd62e6d9558905f00bef81b5e7e6fcc"
     },
