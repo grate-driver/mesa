@@ -1237,7 +1237,7 @@
         "description": "nv50/ir: fix surface lowering when values get shared accross operations",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "869e32593a9096b845dd6106f8f86e1c41fac968"
     },
