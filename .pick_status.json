@@ -418,7 +418,7 @@
         "description": "nir: only uniforms with dynamically_uniform offset are dynamically_uniform",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "886d46b0897182e489e03f7302a575b54004faca"
     },
