@@ -616,7 +616,7 @@
         "description": "ac/nir: fix 64-bit division for GL CTS",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "ba2ec1f369d2c97fc7c54ecd52b0addcfd349a31"
     },
