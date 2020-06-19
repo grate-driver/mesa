@@ -4423,7 +4423,7 @@
         "description": "glsl: reject size1x8 for image variable with floating-point data types",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "8d07d66180b1523d7e70681ca142955f896ebda9"
     },
