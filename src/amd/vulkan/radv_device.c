@@ -556,6 +556,9 @@ radv_handle_per_app_options(struct radv_instance *instance,
 			instance->debug_flags |= RADV_DEBUG_ZERO_VRAM;
 		}
 	}
+
+	if (driQueryOptionb(&instance->dri_options, "radv_no_dynamic_bounds"))
+		instance->debug_flags |= RADV_DEBUG_NO_DYNAMIC_BOUNDS;
 }
 
 static int radv_get_instance_extension_index(const char *name)
@@ -573,6 +576,7 @@ DRI_CONF_BEGIN
 		DRI_CONF_ADAPTIVE_SYNC("true")
 		DRI_CONF_VK_X11_OVERRIDE_MIN_IMAGE_COUNT(0)
 		DRI_CONF_VK_X11_STRICT_IMAGE_COUNT("false")
+		DRI_CONF_RADV_NO_DYNAMIC_BOUNDS("false")
 	DRI_CONF_SECTION_END
 
 	DRI_CONF_SECTION_DEBUG
