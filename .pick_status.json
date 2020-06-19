@@ -4405,7 +4405,7 @@
         "description": "glsl: don't expose imageAtomicIncWrap for signed image",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "fc0a2e5d017dcb9e7f236d69745dff89e116b92e"
     },
