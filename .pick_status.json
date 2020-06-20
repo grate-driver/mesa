@@ -1093,7 +1093,7 @@
         "description": "r600/sfn: Don't set num_components on TESS sysvalue intrinsics",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "46a3033b43b9b51cae5c60eea39e7e5af325c4db"
     },
