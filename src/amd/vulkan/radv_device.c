@@ -3965,6 +3965,8 @@ radv_get_preamble_cs(struct radv_queue *queue,
 
 	if (descriptor_bo != queue->descriptor_bo) {
 		uint32_t *map = (uint32_t*)queue->device->ws->buffer_map(descriptor_bo);
+		if (!map)
+			goto fail;
 
 		if (scratch_bo) {
 			uint64_t scratch_va = radv_buffer_get_va(scratch_bo);
@@ -6218,7 +6220,13 @@ radv_SignalSemaphore(VkDevice _device,
 	return VK_SUCCESS;
 }
 
-
+static void radv_destroy_event(struct radv_device *device,
+                               const VkAllocationCallbacks* pAllocator,
+                               struct radv_event *event)
+{
+	device->ws->buffer_destroy(event->bo);
+	vk_free2(&device->alloc, pAllocator, event);
+}
 
 VkResult radv_CreateEvent(
 	VkDevice                                    _device,
@@ -6244,6 +6252,10 @@ VkResult radv_CreateEvent(
 	}
 
 	event->map = (uint64_t*)device->ws->buffer_map(event->bo);
+	if (!event->map) {
+		radv_destroy_event(device, pAllocator, event);
+		return vk_error(device->instance, VK_ERROR_OUT_OF_DEVICE_MEMORY);
+	}
 
 	*pEvent = radv_event_to_handle(event);
 
@@ -6260,8 +6272,8 @@ void radv_DestroyEvent(
 
 	if (!event)
 		return;
-	device->ws->buffer_destroy(event->bo);
-	vk_free2(&device->alloc, pAllocator, event);
+
+	radv_destroy_event(device, pAllocator, event);
 }
 
 VkResult radv_GetEventStatus(
