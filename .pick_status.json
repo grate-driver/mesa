@@ -1876,7 +1876,7 @@
         "description": "nir/algebraic: Don't distrubte absolute-value into dot-products",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "62795475e8f45f92bb8f467d9e2318fdfdba6297"
     },
