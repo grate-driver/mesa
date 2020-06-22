@@ -3352,7 +3352,7 @@
         "description": "mapi: x86: Fix dynamic entries in x86 tsd stubs.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "45206d7673adb1484cbdb3eadaf82e0849c9cdcf"
     },
