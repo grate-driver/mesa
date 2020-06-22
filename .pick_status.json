@@ -3163,7 +3163,7 @@
         "description": "dri_util: Update internal_format to GL_RGB8 for MESA_FORMAT_B8G8R8X8_UNORM",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "bf576772ab4d9e76dae716640bed6de879f19567"
     },
