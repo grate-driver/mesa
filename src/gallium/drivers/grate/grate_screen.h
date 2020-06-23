@@ -4,7 +4,7 @@
 #include "pipe/p_screen.h"
 #include "util/slab.h"
 
-#include <libdrm/tegra.h>
+#include "drm/opentegra_lib.h"
 
 extern uint32_t grate_debug;
 

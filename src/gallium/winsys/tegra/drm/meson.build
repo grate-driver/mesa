@@ -25,6 +25,6 @@ libtegrawinsys = static_library(
     inc_src, inc_include,
     inc_gallium, inc_gallium_aux, inc_gallium_drivers,
   ],
-  dependencies : [dep_libdrm, dep_libdrm_tegra],
+  dependencies : [dep_libdrm],
   c_args : [c_vis_args],
 )

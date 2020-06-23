@@ -2726,8 +2726,6 @@ if test -n "$with_gallium_drivers"; then
             ;;
         xgrate)
             HAVE_GALLIUM_GRATE=yes
-            PKG_CHECK_MODULES([GRATE], [libdrm_tegra >= $LIBDRM_TEGRA_REQUIRED])
-            require_libdrm "tegra"
             ;;
         *)
             AC_MSG_ERROR([Unknown Gallium driver: $driver])

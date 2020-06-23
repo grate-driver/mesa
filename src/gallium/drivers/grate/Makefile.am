@@ -3,15 +3,27 @@ include $(top_srcdir)/src/gallium/Automake.inc
 noinst_LTLIBRARIES = libgrate.la
 
 AM_CPPFLAGS = \
+	-I$(top_srcdir)/src/gallium/drivers/grate/drm \
 	-I$(top_srcdir)/src/gallium/drivers/grate/include \
 	-I$(top_srcdir)/src/gallium/drivers \
 	-I$(top_srcdir)/include
 
 AM_CFLAGS = \
+	$(VALGRIND_CFLAGS) \
 	$(GALLIUM_CFLAGS) \
 	$(LIBDRM_CFLAGS)
 
 libgrate_la_SOURCES = \
+	drm/opentegra_drm.h \
+	drm/opentegra_lib.h \
+	drm/private.h \
+	drm/tegra.c \
+	drm/tegra_bo_cache.c \
+	drm/uapi_v1/channel.c \
+	drm/uapi_v1/fence.c \
+	drm/uapi_v1/job.c \
+	drm/uapi_v1/pushbuf.c \
+	drm/uapi_v2/job.c \
 	class_ids.h \
 	host1x01_hardware.h \
 	hw_host1x01_uclass.h \

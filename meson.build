@@ -1047,9 +1047,6 @@ endif
 if with_gallium_freedreno
   dep_libdrm_freedreno = dependency('libdrm_freedreno', version : '>= 2.4.91')
 endif
-if with_gallium_grate
-  dep_libdrm_tegra = dependency('libdrm_tegra', version : '>= 2.4.81')
-endif
 
 llvm_modules = ['bitwriter', 'engine', 'mcdisassembler', 'mcjit']
 if with_amd_vk or with_gallium_radeonsi or with_gallium_r600

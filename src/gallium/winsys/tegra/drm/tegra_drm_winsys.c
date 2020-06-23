@@ -1,8 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include <libdrm/tegra.h>
-
+#include "grate/drm/opentegra_lib.h"
 #include "grate/grate_screen.h"
 #include "tegra_drm_public.h"
 
