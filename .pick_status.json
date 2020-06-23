@@ -328,7 +328,7 @@
         "description": "freedreno: Handle DRM_FORMAT_MOD_INVALID in shared code",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "9891062642a3f35dc326b305fca2407f9041915c"
     },
