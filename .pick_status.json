@@ -3685,7 +3685,7 @@
         "description": "v3d: Add missing macro for stvpmd instruction",
         "nominated": false,
         "nomination_type": null,
-        "resolution": 4,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": null
     },
