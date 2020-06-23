@@ -2920,7 +2920,7 @@
         "description": "radeonsi: don't flush in fence_server_sync",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "50b06cbc10dbca1dfee89b529ba9b564cc4ea6f6"
     },
