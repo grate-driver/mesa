@@ -886,7 +886,7 @@
         "description": "util/u_thread: include pthread_np.h if found",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "dcf9d91a80ee76f46e162afef9bd1b2ddb53ecc3"
     },
