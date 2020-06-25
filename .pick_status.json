@@ -2668,7 +2668,7 @@
         "description": "st/mesa: do not clear NewDriverState for inactive states",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "085aa7f91e82dfeb08dd6fb0655df3e229816db3"
     },
