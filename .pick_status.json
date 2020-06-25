@@ -3253,7 +3253,7 @@
         "description": "meson: Do not require shader cache for radv.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "cc10b34e9ed1104f4ceb88a49a42e1d6a743d52f"
     },
