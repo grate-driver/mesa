@@ -2,6 +2,7 @@ mesa (20.1.2-1) UNRELEASED; urgency=medium
 
   * New upstream release. (Closes: #963677)
   * mesa-vulkan-drivers: Add support for device-select-layer.
+  * control, rules: Enable valgrind where supported. (Closes: #890846)
 
  -- Timo Aaltonen <tjaalton@debian.org>  Tue, 23 Jun 2020 15:49:13 +0300
 

@@ -70,6 +70,9 @@ else
 	# Non-Linux ports also lack *_CLOEXEC and epoll, so wayland isn't ready yet:
 	EGL_PLATFORMS += ,wayland
 
+	ifneq (,$(filter $(DEB_HOST_ARCH), amd64 arm64 armhf i386 mips64el mipsel powerpc ppc64 ppc64el s390x))
+		confflags_VALGRIND += -Dvalgrind=true
+	endif
   endif
 
 	EGL_PLATFORMS += ,drm
@@ -146,6 +149,7 @@ confflags += \
 	$(confflags_GALLIUM) \
 	$(confflags_GLES) \
 	$(confflags_OSMESA) \
+	$(confflags_VALGRIND) \
 	$(confflags_VULKAN)
 
 override_dh_clean:
