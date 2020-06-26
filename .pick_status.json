@@ -3136,7 +3136,7 @@
         "description": "v3d/compiler: fix spill offset",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "97566efe5cac0ff11b23d8f27001fc98c7cea2af"
     },
