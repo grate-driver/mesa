@@ -3829,7 +3829,7 @@
         "description": "iris: Align last_seqnos to 64 bits.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 2,
         "master_sha": null,
         "because_sha": "aba3aed96e4394a213e188f2f71ef045803a27c5"
     },
