@@ -1363,7 +1363,7 @@
         "description": "vulkan/wsi: Don't consider VK_SUBOPTIMAL_KHR to be an error condition",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "ca3cfbf6f1e009c0208ffaa483c8a7e80394639d"
     },
