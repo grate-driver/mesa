@@ -3199,7 +3199,7 @@
         "description": "gallivm/nir: fix const loading on big endian systems",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "44a6b0107b37ad9644d3435cf6d2d29b6779654f"
     },
