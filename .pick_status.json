@@ -2749,7 +2749,7 @@
         "description": "mesa/get: fix enum16 big-endian getting.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "f96a69f916aed40519e755d0460a83940a58780e"
     },
