@@ -2722,7 +2722,7 @@
         "description": "gallium/docs: fixup formatting of numbered lists",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "0caf74bbcdf38914cecffa8772ee9b122b249b78"
     },
