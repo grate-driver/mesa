@@ -2713,7 +2713,7 @@
         "description": "gallium/docs: remove reference to non-existent label",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "3acd7a34ab05b87521b74f626ec637e7fdcc6595"
     },
