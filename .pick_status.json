@@ -310,7 +310,7 @@
         "description": "egl/dri2: try to bind old context if bindContext failed",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "4e8f95f64d004aa1278609c5bbac9a53c0c6e4c9"
     },
