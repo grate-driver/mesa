@@ -1759,7 +1759,7 @@
         "description": "mesa: fix unintended fallthrough in glIsEnabled()",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "08fae07f5246052dccdd89689e27dc8820a24ff7"
     },
