@@ -607,7 +607,7 @@
         "description": "nir/lower_int64: lower 64-bit amul",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "6320e37d4be16407cd237c2049a46360405599d5"
     },
