@@ -1867,7 +1867,7 @@
         "description": "mesa: fix fallthrough in glformats",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "908f817918fb14a12887f942b8358a5c648b3f92"
     },
