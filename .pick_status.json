@@ -2425,7 +2425,7 @@
         "description": "gallivm: add missing break",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "26c5ae80f0b5c5f1c8779e4540a9aba88720c2cd"
     },
