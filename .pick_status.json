@@ -2380,7 +2380,7 @@
         "description": "nir: add missing break to nir_opt_access()",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "f2d0e48ddc74d01be1d3e259c5687ff37e4c8d69"
     },
