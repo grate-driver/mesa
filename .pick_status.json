@@ -1660,7 +1660,7 @@
         "description": "meson: Add versioning for xvmc tracker",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "22a817af8a89eb3c762fc3e07b443a3ce37d7416"
     },
