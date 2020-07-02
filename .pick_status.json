@@ -706,7 +706,7 @@
         "description": "iris: Fix fast-clearing of depth via glClearTex(Sub)Image",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "51638cf18a532510f9e1fd8f36207b56d38137b8"
     },
