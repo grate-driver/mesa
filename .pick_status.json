@@ -1588,7 +1588,7 @@
         "description": "nouveau: fix pointer-sign warning",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "e630271e0ec3eee7d921d76d3924873f6ee6b59b"
     },
