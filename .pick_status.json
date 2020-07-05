@@ -1390,7 +1390,7 @@
         "description": "radv: Set handle types in Android semaphore/fence import.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "b1444c9ccb06661d932969302d19166df442818c"
     },
