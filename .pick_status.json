@@ -1336,7 +1336,7 @@
         "description": "freedreno/fdperf: better compatible string matching",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "5a13507164a26fc796f02c57a24468b834254b4d"
     },
