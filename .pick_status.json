@@ -31,7 +31,7 @@
         "description": "radv: Use correct semaphore handle type for Android import.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "ad151499583f1814280218bf2eae4eaf1e7090a4"
     },
