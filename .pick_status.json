@@ -4576,7 +4576,7 @@
         "description": "freedreno/a2xx: fix compressed textures",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "5a8718f01b3976e1bc82362a907befef68a7f525"
     },
