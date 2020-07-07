@@ -58,7 +58,7 @@
         "description": "v3d/compiler: Fix sorting the gs and fs inputs",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "5d578c27cecb4682074778b90b3e4d57a5cc0ebe"
     },
