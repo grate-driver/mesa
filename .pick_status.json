@@ -4540,7 +4540,7 @@
         "description": "radeonsi/gfx10: set the correct value for OFFCHIP_BUFFERING",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "0bf3e6fae7f82b4f16fbcbb05a1ae47f7930e189"
     },
