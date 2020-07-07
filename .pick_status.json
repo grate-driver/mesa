@@ -121,7 +121,7 @@
         "description": "radeonsi: fix SI_NUM_ATOMS",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "639b673fc3b8754dc85fd686dab6ac26738dc3d9"
     },
