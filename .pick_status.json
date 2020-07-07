@@ -4549,7 +4549,7 @@
         "description": "radeonsi: add missing initialization of registers",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "78cdf9a99f07679f95dacd9ae6712278a2e40202"
     },
