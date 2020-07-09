@@ -940,7 +940,7 @@
         "description": "ac/surface: adapt surf_size when modifying surf_pitch",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "8275dc1ed575888f46b4e54d29e56ca63b1accaf"
     },
