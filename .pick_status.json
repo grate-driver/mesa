@@ -4072,7 +4072,7 @@
         "description": "st/mesa: set compressed_data to NULL when freed",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "b6db703e0f007fbcf4389ec607ae4c3e8fc9ee0d"
     },
