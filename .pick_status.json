@@ -3424,7 +3424,7 @@
         "description": "panfrost: Fix write to free'd memory",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "82f18b713aceecf5ebf73d68e0cdd61be8aa2c59"
     },
