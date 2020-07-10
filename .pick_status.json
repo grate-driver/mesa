@@ -31,7 +31,7 @@
         "description": "anv: Use the same re-order mode for streamout as for GS",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "36ee2fd61c8f943be1d1e2b0354f7a121ffef28f"
     },
