@@ -3829,7 +3829,7 @@
         "description": "spirv: Allow block-decorated struct types for constants",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "9d0ae777dd68dad682dcc7768726996639ae2684"
     },
