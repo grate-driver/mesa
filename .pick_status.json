@@ -3991,7 +3991,7 @@
         "description": "iris: fix fallback to swrast driver",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "f402b7c57641dd2ab4d39032574294c03d75b595"
     },
