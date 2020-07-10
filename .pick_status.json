@@ -3838,7 +3838,7 @@
         "description": "spirv: Skip phis in unreachable blocks in the second phi pass",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "22fdb2f8551330fea308ce9cfe151ec00201e2b1"
     },
