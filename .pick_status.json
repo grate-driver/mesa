@@ -19192,7 +19192,7 @@
         "description": "amd/common: Cache intra-tile addresses for retile map.",
         "nominated": false,
         "nomination_type": null,
-        "resolution": 4,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": null
     },
