@@ -3280,7 +3280,7 @@
         "description": "mesa/st: introduce PIPE_CAP_NO_CLIP_ON_COPY_TEX",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": null
     },
