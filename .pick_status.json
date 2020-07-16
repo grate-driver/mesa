@@ -67,7 +67,7 @@
         "description": "nir/opt_if: Fix opt_if_simplification when else branch has jump",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "e3e929f8c342b32dc8f5296adf8fb337866fa40a"
     },
