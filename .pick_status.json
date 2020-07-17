@@ -121,7 +121,7 @@
         "description": "intel/fs: Fix MOV_INDIRECT and BROADCAST of Q types on Gen11+",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "49c21802cbca8240b272318759b1e472142929e6"
     },
