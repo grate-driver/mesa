@@ -220,7 +220,7 @@
         "description": "anv: properly handle fence import of sync_fd = -1",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "43e8808b82b9ebaecde4a30984fef897c1a1a030"
     },
