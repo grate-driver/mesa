@@ -211,7 +211,7 @@
         "description": "nvc0: fix macro define for NVE4_COPY()",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "e44089b2f79aa2dcaacf348911433d1e21235c0c"
     },
