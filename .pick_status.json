@@ -724,7 +724,7 @@
         "description": "draw/llvmpipe: multiply polygon offset units by 2",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "f9e2c24326869542c9b43220f63dd9841c6de38f"
     },
