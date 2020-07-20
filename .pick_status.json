@@ -121,7 +121,7 @@
         "description": "mesa/program: fix shadow property for samplers",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "1c0f92d8a8c480a5803c3ce45b2a6d46bfcd280f"
     },
