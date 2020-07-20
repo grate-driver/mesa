@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 GL_ARB_compute_variable_group_size on Iris.
 GL_ARB_gpu_shader5 on llvmpipe
 GL_ARB_post_depth_coverage on llvmpipe
@@ -25,3 +26,4 @@ VK_EXT_image_robustness for ANV
 VK_EXT_shader_atomic_float on ANV
 VK_EXT_4444_formats on ANV and RADV.
 VK_KHR_memory_model on RADV.
+GL 4.5 on llvmpipe
