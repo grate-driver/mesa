@@ -229,7 +229,7 @@
         "description": "meson: Add mising git_sha1.h dependency.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "606dff1b73fa9509e3a0b21970f02068a8d40219"
     },
