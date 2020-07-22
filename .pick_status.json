@@ -4198,7 +4198,7 @@
         "description": "anv: Advertise shaderIntegerFunctions2",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "c57338b924710b93193f921cd1e95d6de6b398ef"
     },
