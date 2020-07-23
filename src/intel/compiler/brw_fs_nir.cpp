@@ -3767,6 +3767,7 @@ fs_visitor::nir_emit_cs_intrinsic(const fs_builder &bld,
       srcs[SURFACE_LOGICAL_SRC_SURFACE] = brw_imm_ud(surface);
       srcs[SURFACE_LOGICAL_SRC_IMM_DIMS] = brw_imm_ud(1);
       srcs[SURFACE_LOGICAL_SRC_IMM_ARG] = brw_imm_ud(1); /* num components */
+      srcs[SURFACE_LOGICAL_SRC_ALLOW_SAMPLE_MASK] = brw_imm_ud(0);
 
       /* Read the 3 GLuint components of gl_NumWorkGroups */
       for (unsigned i = 0; i < 3; i++) {
@@ -3804,6 +3805,7 @@ fs_visitor::nir_emit_cs_intrinsic(const fs_builder &bld,
       srcs[SURFACE_LOGICAL_SRC_SURFACE] = brw_imm_ud(GEN7_BTI_SLM);
       srcs[SURFACE_LOGICAL_SRC_ADDRESS] = get_nir_src(instr->src[0]);
       srcs[SURFACE_LOGICAL_SRC_IMM_DIMS] = brw_imm_ud(1);
+      srcs[SURFACE_LOGICAL_SRC_ALLOW_SAMPLE_MASK] = brw_imm_ud(0);
 
       /* Make dest unsigned because that's what the temporary will be */
       dest.type = brw_reg_type_from_bit_size(bit_size, BRW_REGISTER_TYPE_UD);
@@ -3840,6 +3842,7 @@ fs_visitor::nir_emit_cs_intrinsic(const fs_builder &bld,
       srcs[SURFACE_LOGICAL_SRC_SURFACE] = brw_imm_ud(GEN7_BTI_SLM);
       srcs[SURFACE_LOGICAL_SRC_ADDRESS] = get_nir_src(instr->src[1]);
       srcs[SURFACE_LOGICAL_SRC_IMM_DIMS] = brw_imm_ud(1);
+      srcs[SURFACE_LOGICAL_SRC_ALLOW_SAMPLE_MASK] = brw_imm_ud(1);
 
       fs_reg data = get_nir_src(instr->src[0]);
       data.type = brw_reg_type_from_bit_size(bit_size, BRW_REGISTER_TYPE_UD);
@@ -4123,6 +4126,7 @@ fs_visitor::nir_emit_intrinsic(const fs_builder &bld, nir_intrinsic_instr *instr
       if (instr->intrinsic == nir_intrinsic_image_load ||
           instr->intrinsic == nir_intrinsic_bindless_image_load) {
          srcs[SURFACE_LOGICAL_SRC_IMM_ARG] = brw_imm_ud(instr->num_components);
+         srcs[SURFACE_LOGICAL_SRC_ALLOW_SAMPLE_MASK] = brw_imm_ud(0);
          fs_inst *inst =
             bld.emit(SHADER_OPCODE_TYPED_SURFACE_READ_LOGICAL,
                      dest, srcs, SURFACE_LOGICAL_NUM_SRCS);
@@ -4131,6 +4135,7 @@ fs_visitor::nir_emit_intrinsic(const fs_builder &bld, nir_intrinsic_instr *instr
                  instr->intrinsic == nir_intrinsic_bindless_image_store) {
          srcs[SURFACE_LOGICAL_SRC_IMM_ARG] = brw_imm_ud(instr->num_components);
          srcs[SURFACE_LOGICAL_SRC_DATA] = get_nir_src(instr->src[3]);
+         srcs[SURFACE_LOGICAL_SRC_ALLOW_SAMPLE_MASK] = brw_imm_ud(1);
          bld.emit(SHADER_OPCODE_TYPED_SURFACE_WRITE_LOGICAL,
                   fs_reg(), srcs, SURFACE_LOGICAL_NUM_SRCS);
       } else {
@@ -4153,6 +4158,7 @@ fs_visitor::nir_emit_intrinsic(const fs_builder &bld, nir_intrinsic_instr *instr
             data = tmp;
          }
          srcs[SURFACE_LOGICAL_SRC_DATA] = data;
+         srcs[SURFACE_LOGICAL_SRC_ALLOW_SAMPLE_MASK] = brw_imm_ud(1);
 
          bld.emit(SHADER_OPCODE_TYPED_ATOMIC_LOGICAL,
                   dest, srcs, SURFACE_LOGICAL_NUM_SRCS);
@@ -4210,6 +4216,7 @@ fs_visitor::nir_emit_intrinsic(const fs_builder &bld, nir_intrinsic_instr *instr
       srcs[SURFACE_LOGICAL_SRC_ADDRESS] = get_nir_src(instr->src[1]);
       srcs[SURFACE_LOGICAL_SRC_IMM_DIMS] = brw_imm_ud(1);
       srcs[SURFACE_LOGICAL_SRC_IMM_ARG] = brw_imm_ud(instr->num_components);
+      srcs[SURFACE_LOGICAL_SRC_ALLOW_SAMPLE_MASK] = brw_imm_ud(0);
 
       fs_inst *inst =
          bld.emit(SHADER_OPCODE_UNTYPED_SURFACE_READ_LOGICAL,
@@ -4229,6 +4236,7 @@ fs_visitor::nir_emit_intrinsic(const fs_builder &bld, nir_intrinsic_instr *instr
       srcs[SURFACE_LOGICAL_SRC_DATA] = get_nir_src(instr->src[2]);
       srcs[SURFACE_LOGICAL_SRC_IMM_DIMS] = brw_imm_ud(1);
       srcs[SURFACE_LOGICAL_SRC_IMM_ARG] = brw_imm_ud(instr->num_components);
+      srcs[SURFACE_LOGICAL_SRC_ALLOW_SAMPLE_MASK] = brw_imm_ud(1);
 
       bld.emit(SHADER_OPCODE_UNTYPED_SURFACE_WRITE_LOGICAL,
                fs_reg(), srcs, SURFACE_LOGICAL_NUM_SRCS);
@@ -4643,6 +4651,7 @@ fs_visitor::nir_emit_intrinsic(const fs_builder &bld, nir_intrinsic_instr *instr
          get_nir_ssbo_intrinsic_index(bld, instr);
       srcs[SURFACE_LOGICAL_SRC_ADDRESS] = get_nir_src(instr->src[1]);
       srcs[SURFACE_LOGICAL_SRC_IMM_DIMS] = brw_imm_ud(1);
+      srcs[SURFACE_LOGICAL_SRC_ALLOW_SAMPLE_MASK] = brw_imm_ud(0);
 
       /* Make dest unsigned because that's what the temporary will be */
       dest.type = brw_reg_type_from_bit_size(bit_size, BRW_REGISTER_TYPE_UD);
@@ -4682,6 +4691,7 @@ fs_visitor::nir_emit_intrinsic(const fs_builder &bld, nir_intrinsic_instr *instr
          get_nir_ssbo_intrinsic_index(bld, instr);
       srcs[SURFACE_LOGICAL_SRC_ADDRESS] = get_nir_src(instr->src[2]);
       srcs[SURFACE_LOGICAL_SRC_IMM_DIMS] = brw_imm_ud(1);
+      srcs[SURFACE_LOGICAL_SRC_ALLOW_SAMPLE_MASK] = brw_imm_ud(1);
 
       fs_reg data = get_nir_src(instr->src[0]);
       data.type = brw_reg_type_from_bit_size(bit_size, BRW_REGISTER_TYPE_UD);
@@ -4820,6 +4830,7 @@ fs_visitor::nir_emit_intrinsic(const fs_builder &bld, nir_intrinsic_instr *instr
 
       srcs[SURFACE_LOGICAL_SRC_IMM_DIMS] = brw_imm_ud(1);
       srcs[SURFACE_LOGICAL_SRC_IMM_ARG] = brw_imm_ud(bit_size);
+      srcs[SURFACE_LOGICAL_SRC_ALLOW_SAMPLE_MASK] = brw_imm_ud(0);
       const fs_reg nir_addr = get_nir_src(instr->src[0]);
 
       /* Make dest unsigned because that's what the temporary will be */
@@ -4865,6 +4876,14 @@ fs_visitor::nir_emit_intrinsic(const fs_builder &bld, nir_intrinsic_instr *instr
 
       srcs[SURFACE_LOGICAL_SRC_IMM_DIMS] = brw_imm_ud(1);
       srcs[SURFACE_LOGICAL_SRC_IMM_ARG] = brw_imm_ud(bit_size);
+      /**
+       * While this instruction has side-effects, it should not be predicated
+       * on sample mask, because otherwise fs helper invocations would
+       * load undefined values from scratch memory. And scratch memory
+       * load-stores are produced from operations without side-effects, thus
+       * they should not have different behaviour in the helper invocations.
+       */
+      srcs[SURFACE_LOGICAL_SRC_ALLOW_SAMPLE_MASK] = brw_imm_ud(0);
       const fs_reg nir_addr = get_nir_src(instr->src[1]);
 
       fs_reg data = get_nir_src(instr->src[0]);
@@ -5316,6 +5335,7 @@ fs_visitor::nir_emit_ssbo_atomic(const fs_builder &bld,
    srcs[SURFACE_LOGICAL_SRC_ADDRESS] = get_nir_src(instr->src[1]);
    srcs[SURFACE_LOGICAL_SRC_IMM_DIMS] = brw_imm_ud(1);
    srcs[SURFACE_LOGICAL_SRC_IMM_ARG] = brw_imm_ud(op);
+   srcs[SURFACE_LOGICAL_SRC_ALLOW_SAMPLE_MASK] = brw_imm_ud(1);
 
    fs_reg data;
    if (op != BRW_AOP_INC && op != BRW_AOP_DEC && op != BRW_AOP_PREDEC)
@@ -5351,6 +5371,7 @@ fs_visitor::nir_emit_ssbo_atomic_float(const fs_builder &bld,
    srcs[SURFACE_LOGICAL_SRC_ADDRESS] = get_nir_src(instr->src[1]);
    srcs[SURFACE_LOGICAL_SRC_IMM_DIMS] = brw_imm_ud(1);
    srcs[SURFACE_LOGICAL_SRC_IMM_ARG] = brw_imm_ud(op);
+   srcs[SURFACE_LOGICAL_SRC_ALLOW_SAMPLE_MASK] = brw_imm_ud(1);
 
    fs_reg data = get_nir_src(instr->src[2]);
    if (op == BRW_AOP_FCMPWR) {
@@ -5379,6 +5400,7 @@ fs_visitor::nir_emit_shared_atomic(const fs_builder &bld,
    srcs[SURFACE_LOGICAL_SRC_SURFACE] = brw_imm_ud(GEN7_BTI_SLM);
    srcs[SURFACE_LOGICAL_SRC_IMM_DIMS] = brw_imm_ud(1);
    srcs[SURFACE_LOGICAL_SRC_IMM_ARG] = brw_imm_ud(op);
+   srcs[SURFACE_LOGICAL_SRC_ALLOW_SAMPLE_MASK] = brw_imm_ud(1);
 
    fs_reg data;
    if (op != BRW_AOP_INC && op != BRW_AOP_DEC && op != BRW_AOP_PREDEC)
@@ -5420,6 +5442,7 @@ fs_visitor::nir_emit_shared_atomic_float(const fs_builder &bld,
    srcs[SURFACE_LOGICAL_SRC_SURFACE] = brw_imm_ud(GEN7_BTI_SLM);
    srcs[SURFACE_LOGICAL_SRC_IMM_DIMS] = brw_imm_ud(1);
    srcs[SURFACE_LOGICAL_SRC_IMM_ARG] = brw_imm_ud(op);
+   srcs[SURFACE_LOGICAL_SRC_ALLOW_SAMPLE_MASK] = brw_imm_ud(1);
 
    fs_reg data = get_nir_src(instr->src[1]);
    if (op == BRW_AOP_FCMPWR) {
