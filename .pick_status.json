@@ -6250,7 +6250,7 @@
         "description": "intel/fs: Disable sample mask predication for scratch stores",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "53bfcdeecf4c9632e09ee641d2ca02dd9ec25e34"
     },
