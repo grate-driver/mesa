@@ -1822,7 +1822,7 @@
         "description": "util: fix possible fd leaks in os_socket_listen_abstract",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "ef5266ebd50e7fa65c56bdb623e12ca8c233b470"
     },
