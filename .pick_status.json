@@ -3145,7 +3145,7 @@
         "description": "radv: Fix uninitialized variable in renderpass.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "66131ceb8bc9f3a3e17a73d90ef520694e3b50b6"
     },
