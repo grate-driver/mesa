@@ -1804,7 +1804,7 @@
         "description": "util: fix possible buffer overflow in util_get_process_exec_path",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "f8f1413070ae079443ab31a75679cfd10cb756ed"
     },
