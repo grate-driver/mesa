@@ -688,7 +688,7 @@
         "description": "nir/deref: Don't try to compare derefs containing casts",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "d8e3edb784d3afb313420fc8d58b491a57fad9c1"
     },
