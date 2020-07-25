@@ -841,7 +841,7 @@
         "description": "gallium/dri2: Report correct YUYV and UYVY plane count",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "d5c857837aae205c0e1fddee30300b4419e2bb3f"
     },
