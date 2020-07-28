@@ -2902,7 +2902,7 @@
         "description": "radv: Fix host->host signalling with legacy timeline semaphores.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "88d41367b8aee961e6c47173a1e8848009e2215a"
     },
