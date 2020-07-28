@@ -1,6 +1,7 @@
 mesa (20.1.4-1) UNRELEASED; urgency=medium
 
   * New upstream release.
+  * fix-ppc64el.patch: Dropped, upstream.
 
  -- Timo Aaltonen <tjaalton@debian.org>  Tue, 28 Jul 2020 12:37:40 +0300
 
