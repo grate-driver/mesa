@@ -44,29 +44,9 @@ fi
 
 set -ex
 
-# Copy the rootfs to a temporary for our setup, as I believe changes to the
-# container can end up impacting future runs.
-cp -Rp $BM_ROOTFS rootfs
-
-# Set up the init script that brings up the system.
-cp $BM/init.sh rootfs/init
-sed -i "s|DEQP_VER_REPLACE|$DEQP_VER|g" rootfs/init
-sed -i "s|DEQP_PARALLEL_REPLACE|$DEQP_PARALLEL|g" rootfs/init
-sed -i "s|DEQP_EXPECTED_RENDERER_REPLACE|$DEQP_EXPECTED_RENDERER|g" rootfs/init
-sed -i "s|CI_NODE_INDEX_REPLACE|$CI_NODE_INDEX|g" rootfs/init
-sed -i "s|CI_NODE_TOTAL_REPLACE|$CI_NODE_TOTAL|g" rootfs/init
-
-# Add the Mesa drivers we built, and make a consistent symlink to them.
-mkdir -p rootfs/$CI_PROJECT_DIR
-tar -C rootfs/$CI_PROJECT_DIR/ -xf $CI_PROJECT_DIR/artifacts/install.tar
-ln -sf $CI_PROJECT_DIR/install rootfs/install
-
-# Copy the deqp runner script and metadata.
-cp .gitlab-ci/deqp-runner.sh rootfs/deqp/.
-cp .gitlab-ci/$DEQP_SKIPS rootfs/$CI_PROJECT_DIR/install/deqp-skips.txt
-if [ -n "$DEQP_EXPECTED_FAILS" ]; then
-  cp .gitlab-ci/$DEQP_EXPECTED_FAILS rootfs/$CI_PROJECT_DIR/install/deqp-expected-fails.txt
-fi
+# Create the rootfs in a temp dir
+mkdir rootfs
+. .gitlab-ci/bare-metal/rootfs-setup.sh rootfs
 
 # Finally, pack it up into a cpio rootfs.
 pushd rootfs

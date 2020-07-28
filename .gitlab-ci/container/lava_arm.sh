@@ -17,17 +17,22 @@ else
     KERNEL_IMAGE_NAME="zImage"
 fi
 
-############### Build dEQP runner
-if [[ "$DEBIAN_ARCH" = "armhf" ]]; then
-    EXTRA_MESON_ARGS="--cross-file /cross_file-armhf.txt"
+# Determine if we're in a cross build.
+if [[ -e /cross_file-$DEBIAN_ARCH.txt ]]; then
+    EXTRA_MESON_ARGS="--cross-file /cross_file-$DEBIAN_ARCH.txt"
+    EXTRA_CMAKE_ARGS="-DCMAKE_TOOLCHAIN_FILE=/toolchain-$DEBIAN_ARCH.cmake"
+
+    export ARCH=${KERNEL_ARCH}
+    export CROSS_COMPILE="${GCC_ARCH}-"
 fi
+
+############### Build dEQP runner
 . .gitlab-ci/build-cts-runner.sh
 mkdir -p /lava-files/rootfs-${DEBIAN_ARCH}/usr/bin
 mv /usr/local/bin/deqp-runner /lava-files/rootfs-${DEBIAN_ARCH}/usr/bin/.
 
 
 ############### Build dEQP
-EXTRA_CMAKE_ARGS="-DCMAKE_C_COMPILER=${GCC_ARCH}-gcc -DCMAKE_CXX_COMPILER=${GCC_ARCH}-g++"
 STRIP_CMD="${GCC_ARCH}-strip"
 . .gitlab-ci/build-deqp-gl.sh
 mv /deqp /lava-files/rootfs-${DEBIAN_ARCH}/.
@@ -36,21 +41,31 @@ mv /deqp /lava-files/rootfs-${DEBIAN_ARCH}/.
 ############### Cross-build kernel
 KERNEL_URL="https://gitlab.freedesktop.org/tomeu/linux/-/archive/v5.5-panfrost-fixes/linux-v5.5-panfrost-fixes.tar.gz"
 
-if [[ "$DEBIAN_ARCH" = "armhf" ]]; then
-    export ARCH=${KERNEL_ARCH}
-    export CROSS_COMPILE="${GCC_ARCH}-"
-fi
-
 mkdir -p kernel
 wget -qO- ${KERNEL_URL} | tar -xz --strip-components=1 -C kernel
 pushd kernel
 ./scripts/kconfig/merge_config.sh ${DEFCONFIG} ../.gitlab-ci/${KERNEL_ARCH}.config
 make ${KERNEL_IMAGE_NAME} dtbs
-cp arch/${KERNEL_ARCH}/boot/${KERNEL_IMAGE_NAME} /lava-files/.
+for image in ${KERNEL_IMAGE_NAME}; do
+    cp arch/${KERNEL_ARCH}/boot/${image} /lava-files/.
+done
 cp ${DEVICE_TREES} /lava-files/.
+
+
+if [[ ${DEBIAN_ARCH} = "arm64" ]] && which mkimage > /dev/null; then
+    make Image.lzma
+    mkimage \
+        -f auto \
+        -A arm \
+        -O linux \
+        -d arch/arm64/boot/Image.lzma \
+        -C lzma\
+        -b arch/arm64/boot/dts/qcom/sdm845-cheza-r3.dtb \
+        /lava-files/cheza-kernel
+fi
+
 popd
 rm -rf kernel
-
 
 ############### Create rootfs
 set +e
@@ -95,4 +110,10 @@ if [ ${DEBIAN_ARCH} = arm64 ]; then
 
     # Make a gzipped copy of the Image for db410c.
     gzip -k /lava-files/Image
+
+    # Add missing a630 firmware, added to debian packge in apr 2020
+    wget https://git.kernel.org/pub/scm/linux/kernel/git/firmware/linux-firmware.git/plain/qcom/a630_gmu.bin \
+         -O /lava-files/rootfs-arm64/lib/firmware/qcom/a630_gmu.bin
+    wget https://git.kernel.org/pub/scm/linux/kernel/git/firmware/linux-firmware.git/plain/qcom/a630_sqe.fw \
+         -O /lava-files/rootfs-arm64/lib/firmware/qcom/a630_sqe.fw
 fi

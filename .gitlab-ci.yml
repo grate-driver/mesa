@@ -30,7 +30,10 @@ stages:
     # automatically once all dependency jobs have passed
     - changes: &all_paths
       - VERSION
-      - bin/**/*
+      - bin/git_sha1_gen.py
+      - bin/install_megadrivers.py
+      - bin/meson_get_version.py
+      - bin/symbols-check.py
       # GitLab CI
       - .gitlab-ci.yml
       - .gitlab-ci/**/*
@@ -133,7 +136,7 @@ x86_build:
     - .fdo.container-build@debian
     - .container
   variables:
-    FDO_DISTRIBUTION_TAG: &x86_build "2020-04-22-winehq"
+    FDO_DISTRIBUTION_TAG: &x86_build "2020-05-18-baremetal-2"
 
 .use-x86_build:
   variables:
@@ -146,13 +149,13 @@ x86_build:
 x86_test-gl:
   extends: x86_build
   variables:
-    FDO_DISTRIBUTION_TAG: &x86_test-gl "2020-04-21"
+    FDO_DISTRIBUTION_TAG: &x86_test-gl "2020-05-18"
 
 # Debian 10 based x86 test image for VK
 x86_test-vk:
   extends: x86_build
   variables:
-    FDO_DISTRIBUTION_TAG: &x86_test-vk "2020-04-09"
+    FDO_DISTRIBUTION_TAG: &x86_test-vk "2020-05-18"
 
 # Debian 9 based x86 build image (old LLVM)
 x86_build_old:
@@ -174,7 +177,7 @@ arm_build:
     - .fdo.container-build@debian@arm64v8
     - .container
   variables:
-    FDO_DISTRIBUTION_TAG: &arm_build "2020-04-01-jflags"
+    FDO_DISTRIBUTION_TAG: &arm_build "2020-05-28-cheza-2"
 
 .use-arm_build:
   variables:
@@ -183,18 +186,17 @@ arm_build:
   needs:
     - arm_build
 
-# Debian 10 based ARM test image
+# x86 image with ARM rootfses for baremetal testing.
 arm_test:
-  extends: arm_build
+  extends: x86_build
   variables:
-    FDO_DISTRIBUTION_TAG: &arm_test "2020-03-18-jflags"
+    FDO_DISTRIBUTION_TAG: &arm_test "2020-05-28-cheza-2"
 
 .use-arm_test:
   variables:
     TAG: *arm_test
   image: "$CI_REGISTRY_IMAGE/debian/arm_test:$TAG"
   needs:
-    - meson-arm64
     - arm_test
 
 # Native Windows docker builds
@@ -544,11 +546,13 @@ meson-s390x:
     - kvm
   variables:
     CROSS: s390x
+    EXTRA_OPTION: >
+      -D werror=true
     GALLIUM_DRIVERS: "swrast"
   script:
     # For unknown reasons "too many" installed i386 libraries cause qemu to
     # crash while executing llvm-config for s390x.
-    - apt-get purge -y winehq-stable
+    - apt-get purge -y wine32
     - apt-get autoremove -y --purge
     - dpkg -i /var/cache/apt/archives/$CROSS/*.deb
     - .gitlab-ci/meson-build.sh
@@ -558,6 +562,7 @@ meson-ppc64el:
     - meson-s390x
   variables:
     CROSS: ppc64el
+    EXTRA_OPTION: ""
     GALLIUM_DRIVERS: "nouveau,radeonsi,swrast,virgl"
     VULKAN_DRIVERS: "amd"
 
@@ -598,6 +603,7 @@ meson-mingw32-x86_64:
     TAG: *x86_test-gl
   image: "$CI_REGISTRY_IMAGE/debian/x86_test-gl:$TAG"
   needs:
+    - x86_build
     - meson-testing
     - x86_test-gl
 
@@ -608,6 +614,7 @@ meson-mingw32-x86_64:
     TAG: *x86_test-vk
   image: "$CI_REGISTRY_IMAGE/debian/x86_test-vk:$TAG"
   needs:
+    - x86_build
     - meson-testing
     - x86_test-vk
 
@@ -769,21 +776,19 @@ virgl-gles31:
 
 arm64_a630_gles2:
   extends:
-    - .deqp-test-gl
-    - .use-arm_test
-    - .freedreno-rules
+    - arm64_a306_gles2
   variables:
-    DEQP_VER: gles2
+    BM_KERNEL: /lava-files/cheza-kernel
+    BM_CMDLINE: "ip=dhcp console=ttyMSM0,115200n8 root=/dev/nfs rw nfsrootdebug nfsroot=,tcp,nfsvers=4.2 init=/init"
     DEQP_EXPECTED_FAILS: deqp-freedreno-a630-fails.txt
     DEQP_SKIPS: deqp-freedreno-a630-skips.txt
     NIR_VALIDATE: 0
-    DEQP_PARALLEL: 4
-    FLAKES_CHANNEL: "#freedreno-ci"
     DEQP_EXPECTED_RENDERER: FD630
+    DEQP_NO_SAVE_RESULTS: ""
   tags:
-    - mesa-cheza
-  dependencies:
-    - meson-arm64
+    - google-freedreno-cheza
+  script:
+    - .gitlab-ci/bare-metal/cros-servo.sh
 
 arm64_a630_gles31:
   extends: arm64_a630_gles2
@@ -795,45 +800,72 @@ arm64_a630_gles3:
   variables:
     DEQP_VER: gles3
 
-arm64_a630_gles31_options:
-  extends: arm64_a630_gles2
+# We almost always manage to lower UBOs back to constant uploads in
+# the test suite, so get a little testing for it here.
+arm64_a630_noubo:
+  extends: arm64_a630_gles31
   variables:
     DEQP_VER: gles31
+    IR3_SHADER_DEBUG: nouboopt
+    DEQP_CASELIST_FILTER: "functional.*ubo"
+    DEQP_EXPECTED_FAILS: deqp-freedreno-a630-noubo-fails.txt
+
+# The driver does some guessing as to whether to render using gmem
+# or bypass, and some GLES3.1 features interact with either one.
+# Do a little testing with gmem and bypass forced.
+arm64_a630_bypass:
+  extends: arm64_a630_gles31
+  variables:
     CI_NODE_INDEX: 1
     CI_NODE_TOTAL: 5
-  script:
-    # We almost always manage to lower UBOs back to constant uploads in
-    # the test suite, so get a little testing for it here.
-    - DEQP_RUN_SUFFIX=-nouboopt IR3_SHADER_DEBUG=nouboopt DEQP_EXPECTED_FAILS=deqp-freedreno-a630-noubo-fails.txt DEQP_CASELIST_FILTER="functional.\*ubo" ./install/deqp-runner.sh
-    # The driver does some guessing as to whether to render using gmem
-    # or bypass, and some GLES3.1 features interact with either one.
-    # Do a little testing with gmem and bypass forced.
-    - DEQP_RUN_SUFFIX=-bypass FD_MESA_DEBUG=nogmem DEQP_EXPECTED_FAILS=deqp-freedreno-a630-bypass-fails.txt ./install/deqp-runner.sh
-    - DEQP_RUN_SUFFIX=-gmem FD_MESA_DEBUG=nobypass ./install/deqp-runner.sh
+    FD_MESA_DEBUG: nogmem
+    DEQP_EXPECTED_FAILS: deqp-freedreno-a630-bypass-fails.txt
+
+# Along with checking gmem path, check that we don't get obvious nir
+# validation failures (though it's too expensive to have it on for the
+# full CTS)
+arm64_a630_gmem:
+  extends: arm64_a630_gles31
+  variables:
+    CI_NODE_INDEX: 1
+    CI_NODE_TOTAL: 5
+    FD_MESA_DEBUG: nobypass
+    NIR_VALIDATE: 1
 
 .baremetal-test:
   extends:
     - .ci-run-policy
   stage: test
+  artifacts:
+    when: always
+    name: "mesa_${CI_JOB_NAME}"
+    paths:
+      - results/
+      - serial*.txt
 
 arm64_a306_gles2:
   extends:
     - .baremetal-test
-    - .use-arm_build
+    - .use-arm_test
     - .freedreno-rules
   variables:
     BM_KERNEL: /lava-files/Image.gz
     BM_DTB: /lava-files/apq8016-sbc.dtb
     BM_ROOTFS: /lava-files/rootfs-arm64
     BM_CMDLINE: "ip=dhcp console=ttyMSM0,115200n8"
+    FLAKES_CHANNEL: "#freedreno-ci"
     DEQP_EXPECTED_FAILS: deqp-freedreno-a307-fails.txt
     DEQP_SKIPS: deqp-freedreno-a307-skips.txt
     DEQP_VER: gles2
     DEQP_PARALLEL: 4
     DEQP_EXPECTED_RENDERER: FD307
+    # Since we can't get artifacts back yet, skip making them.
+    DEQP_NO_SAVE_RESULTS: 1
   script:
     - .gitlab-ci/bare-metal/fastboot.sh
   needs:
+    - arm_test
+    - arm_build
     - meson-arm64
   tags:
     - google-freedreno-db410c
@@ -854,7 +886,9 @@ arm64_a530_gles2:
   variables:
     BM_KERNEL: /lava-files/db820c-kernel
     BM_DTB: /lava-files/db820c.dtb
-    BM_CMDLINE: "ip=dhcp console=ttyMSM0,115200n8"
+    # Disable SMP because only CPU 0 is at a freq higher than 19mhz on
+    # current upstream kernel.
+    BM_CMDLINE: "ip=dhcp console=ttyMSM0,115200n8 nosmp"
     DEQP_EXPECTED_FAILS: deqp-freedreno-a530-fails.txt
     DEQP_SKIPS: deqp-freedreno-a530-skips.txt
     DEQP_EXPECTED_RENDERER: FD530

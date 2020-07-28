@@ -20,23 +20,19 @@ apt-get install -y \
 apt-key add .gitlab-ci/container/llvm-snapshot.gpg.key
 echo "deb https://apt.llvm.org/buster/ llvm-toolchain-buster-9 main" >/etc/apt/sources.list.d/llvm9.list
 
-# Upstream Wine (WineHQ) package repository. We use the OBS service
-# instead of the repository at the winehq.org domain because:
-#
-#   " The WineHQ packages for Debian 10 and later require libfaudio0
-#     as a dependency. Since the distro does not provide it for Debian
-#     10, users of that version can download libfaudio0 packages from
-#     the OBS. See https://forum.winehq.org/viewtopic.php?f=8&t=32192
-#     for details."
-#
-# As explained at https://wiki.winehq.org/Debian
-apt-key add .gitlab-ci/container/obs-emulators-wine-debian.gpg.key
-echo 'deb https://download.opensuse.org/repositories/Emulators:/Wine:/Debian/Debian_10/ ./' >/etc/apt/sources.list.d/obs-emulators-wine-debian.list
-
 sed -i -e 's/http:\/\/deb/https:\/\/deb/g' /etc/apt/sources.list
 echo 'deb https://deb.debian.org/debian buster-backports main' >/etc/apt/sources.list.d/backports.list
+echo 'deb https://deb.debian.org/debian testing main' >/etc/apt/sources.list.d/testing.list
 
 apt-get update
+
+# Don't use newer packages from testing by default
+cat >/etc/apt/preferences <<EOF
+Package: *
+Pin: release a=testing
+Pin-Priority: 100
+EOF
+
 apt-get dist-upgrade -y
 
 apt-get install -y --no-remove \
@@ -54,9 +50,9 @@ apt-get install -y --no-remove \
       git \
       libclang-6.0-dev \
       libclang-7-dev \
-      libclang-8-dev \
       libclang-9-dev \
       libclc-dev \
+      libdrm-dev:s390x \
       libelf-dev \
       libepoxy-dev \
       libexpat1-dev \
@@ -64,6 +60,7 @@ apt-get install -y --no-remove \
       libgtk-3-dev \
       libomxil-bellagio-dev \
       libpciaccess-dev \
+      libpciaccess-dev:i386 \
       libtool \
       libunwind-dev \
       libva-dev \
@@ -97,41 +94,52 @@ apt-get install -y --no-remove \
       xz-utils \
       zlib1g-dev
 
-. .gitlab-ci/container/container_pre_build.sh
+apt-get install -y --no-remove -t buster-backports \
+      libclang-8-dev
 
 # Cross-build Mesa deps
 for arch in $CROSS_ARCHITECTURES; do
     apt-get install -y --no-remove \
             crossbuild-essential-${arch} \
-            libdrm-dev:${arch} \
             libelf-dev:${arch} \
             libexpat1-dev:${arch} \
             libffi-dev:${arch} \
-            libllvm8:${arch} \
             libstdc++6:${arch} \
             libtinfo-dev:${arch}
 
-    if [ "$arch" == "i386" ]; then
-        # libpciaccess-dev is only needed for Intel.
-        apt-get install -y --no-remove \
-            libpciaccess-dev:${arch}
-    fi
+    apt-get install -y --no-remove -t buster-backports \
+            libllvm8:${arch}
 
     mkdir /var/cache/apt/archives/${arch}
     # Download llvm-* packages, but don't install them yet, since they can
     # only be installed for one architecture at a time
-    apt-get install -o Dir::Cache::archives=/var/cache/apt/archives/$arch --download-only -y --no-remove \
+    apt-get install -o Dir::Cache::archives=/var/cache/apt/archives/$arch --download-only \
+       -y --no-remove -t buster-backports \
        llvm-8-dev:${arch}
 done
 
-apt-get install -y --no-remove \
+apt-get install -y --no-remove -t buster-backports \
       llvm-8-dev \
 
-# for 64bit windows cross-builds
-apt-get install -y --no-remove \
+
+# Install packages we need from Debian testing last, to avoid pulling in more
+
+# Need to allow removing libgcc1 for these
+apt-get install -y -t testing \
+      libstdc++6:i386 \
+      libstdc++6:ppc64el \
+      libstdc++6:s390x
+
+apt-get install -y --no-remove -t testing \
+      g++-mingw-w64-x86-64-win32 \
       libz-mingw-w64-dev \
-      mingw-w64 \
-      winehq-stable
+      wine \
+      wine32 \
+      wine64
+
+
+. .gitlab-ci/container/container_pre_build.sh
+
 
 # Debian's pkg-config wrapers for mingw are broken, and there's no sign that
 # they're going to be fixed, so we'll just have to fix it ourselves
@@ -146,17 +154,7 @@ chmod +x /usr/local/bin/x86_64-w64-mingw32-pkg-config
 
 # Generate cross build files for Meson
 for arch in $CROSS_ARCHITECTURES; do
-  cross_file="/cross_file-$arch.txt"
-  /usr/share/meson/debcrossgen --arch "$arch" -o "$cross_file"
-  # Explicitly set ccache path for cross compilers
-  sed -i "s|/usr/bin/\([^-]*\)-linux-gnu\([^-]*\)-g|/usr/lib/ccache/\\1-linux-gnu\\2-g|g" "$cross_file"
-  if [ "$arch" = "i386" ]; then
-    # Work around a bug in debcrossgen that should be fixed in the next release
-    sed -i "s|cpu_family = 'i686'|cpu_family = 'x86'|g" "$cross_file"
-  fi
-
-  # Rely on qemu-user being configured in binfmt_misc on the host
-  sed -i -e '/\[properties\]/a\' -e "needs_exe_wrapper = False" "$cross_file"
+    . .gitlab-ci/create-cross-file.sh $arch
 done
 
 
