@@ -67,7 +67,7 @@
         "description": "anv: Pass device to setup_gralloc0_usage for error reporting",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "aba57b11ee8c6d4be225f6e22ae00d96b1833d73"
     },
