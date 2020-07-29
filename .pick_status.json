@@ -85,7 +85,7 @@
         "description": "Revert \"radeonsi: honor a user-specified pitch on gfx10.3\"",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "c4b5fd9ab096a0bb5106b93191b13c81cc32243b"
     },
