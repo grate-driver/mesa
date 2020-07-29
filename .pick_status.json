@@ -3928,7 +3928,7 @@
         "description": "aco: ensure to not extract more components than have been fetched",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 2,
         "master_sha": null,
         "because_sha": "7015d2c249e1f7814bf5681ccd049e49e4d6495c"
     },
