@@ -3766,7 +3766,7 @@
         "description": "radeonsi: use correct wave size in gfx10_ngg_calculate_subgroup_info",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "88efb63cafcf249a370ee27683c41afde3b95ffd"
     },

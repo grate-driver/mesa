@@ -1990,7 +1990,7 @@ void gfx10_ngg_calculate_subgroup_info(struct si_shader *shader)
 
    /* Round up towards full wave sizes for better ALU utilization. */
    if (!max_vert_out_per_gs_instance) {
-      const unsigned wavesize = gs_sel->screen->ge_wave_size;
+      const unsigned wavesize = si_get_shader_wave_size(shader);
       unsigned orig_max_esverts;
       unsigned orig_max_gsprims;
       do {
