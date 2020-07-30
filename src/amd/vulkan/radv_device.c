@@ -627,6 +627,8 @@ static void  radv_init_dri_options(struct radv_instance *instance)
 	driParseConfigFiles(&instance->dri_options,
 	                    &instance->available_dri_options,
 	                    0, "radv", NULL,
+	                    instance->applicationName,
+	                    instance->applicationVersion,
 	                    instance->engineName,
 	                    instance->engineVersion);
 }
@@ -653,6 +655,11 @@ VkResult radv_CreateInstance(
 
 	if (pCreateInfo->pApplicationInfo) {
 		const VkApplicationInfo *app = pCreateInfo->pApplicationInfo;
+
+		instance->applicationName =
+			vk_strdup(&instance->alloc, app->pApplicationName,
+				  VK_SYSTEM_ALLOCATION_SCOPE_INSTANCE);
+		instance->applicationVersion = app->applicationVersion;
 
 		instance->engineName =
 			vk_strdup(&instance->alloc, app->pEngineName,
@@ -790,6 +797,7 @@ void radv_DestroyInstance(
 	}
 
 	vk_free(&instance->alloc, instance->engineName);
+	vk_free(&instance->alloc, instance->applicationName);
 
 	VG(VALGRIND_DESTROY_MEMPOOL(instance));
 
