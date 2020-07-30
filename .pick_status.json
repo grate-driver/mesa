@@ -31,7 +31,7 @@
         "description": "radeonsi: add a common function for getting the size of gs_ngg_scratch",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "a23802bcb9a42a02d34a5a36d6e66d6532813a0d"
     },
