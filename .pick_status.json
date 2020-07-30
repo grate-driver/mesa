@@ -1669,7 +1669,7 @@
         "description": "radv: Override the uniform buffer offset alignment for World War Z.",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": null
     },
