@@ -3739,7 +3739,7 @@
         "description": "radeonsi: fix applying the NGG minimum vertex count requirement",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "4ecc39e1aa1568f19ebf54a99ffe14643bac7d15"
     },
