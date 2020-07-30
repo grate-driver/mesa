@@ -4090,7 +4090,7 @@
         "description": "intel/compiler: Rotate instructions ROR and ROL cannot have source modifiers",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "1e92e83856b1ef8a827a63359d59ed7883ed4994"
     },
