@@ -595,6 +595,8 @@ static void  radv_init_dri_options(struct radv_instance *instance)
 	driParseConfigFiles(&instance->dri_options,
 	                    &instance->available_dri_options,
 	                    0, "radv", NULL,
+	                    instance->applicationName,
+	                    instance->applicationVersion,
 	                    instance->engineName,
 	                    instance->engineVersion);
 }
@@ -619,9 +621,13 @@ VkResult radv_CreateInstance(
 
 	const char *engine_name = NULL;
 	uint32_t engine_version = 0;
+	const char *application_name = NULL;
+	uint32_t application_version = 0;
 	if (pCreateInfo->pApplicationInfo) {
 		engine_name = pCreateInfo->pApplicationInfo->pEngineName;
 		engine_version = pCreateInfo->pApplicationInfo->engineVersion;
+		application_name = pCreateInfo->pApplicationInfo->pApplicationName;
+		application_version = pCreateInfo->pApplicationInfo->applicationVersion;
 	}
 
 	instance = vk_zalloc2(&default_alloc, pAllocator, sizeof(*instance), 8,
@@ -726,6 +732,9 @@ VkResult radv_CreateInstance(
 	instance->engineName = vk_strdup(&instance->alloc, engine_name,
 					 VK_SYSTEM_ALLOCATION_SCOPE_INSTANCE);
 	instance->engineVersion = engine_version;
+	instance->applicationName = vk_strdup(&instance->alloc, application_name,
+					 VK_SYSTEM_ALLOCATION_SCOPE_INSTANCE);
+	instance->applicationVersion = application_version;
 
 	glsl_type_singleton_init_or_ref();
 
@@ -753,6 +762,7 @@ void radv_DestroyInstance(
 	}
 
 	vk_free(&instance->alloc, instance->engineName);
+	vk_free(&instance->alloc, instance->applicationName);
 
 	VG(VALGRIND_DESTROY_MEMPOOL(instance));
 

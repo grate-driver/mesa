@@ -345,6 +345,8 @@ struct radv_instance {
 	int                                         physicalDeviceCount;
 	struct radv_physical_device                 physicalDevices[RADV_MAX_DRM_DEVICES];
 
+	char *                                      applicationName;
+	uint32_t                                    applicationVersion;
 	char *                                      engineName;
 	uint32_t                                    engineVersion;
 
