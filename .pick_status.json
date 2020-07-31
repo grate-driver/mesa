@@ -904,7 +904,7 @@
         "description": "pan/mdg: Test for SSA before chasing addresses",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "f5401cb8866cc74c5b3d0fde278fb1046779b415"
     },
