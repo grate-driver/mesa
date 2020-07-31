@@ -2038,7 +2038,7 @@
         "description": "pan/bit: Set d3d=true for CMP tests",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "ec37c7126dc9c2ea02a7910c82c1085e96ad5654"
     },
