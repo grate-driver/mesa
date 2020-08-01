@@ -931,7 +931,7 @@
         "description": "mesa/st: Actually free the driver part of memory objects on destruction.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "49f4ecc67773c082d93708bdf111acc4248678da"
     },
