@@ -1309,7 +1309,7 @@
         "description": "android: freedreno: Another build fix",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "62ebd342e67fc0c12b181f91a488fa7a834fff6c"
     },
