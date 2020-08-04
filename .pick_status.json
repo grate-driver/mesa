@@ -976,7 +976,7 @@
         "description": "aco: use UINT64_C on 64 bit constant arguments",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "df645fa369d12be4d5e0fd9e4f6d4455caf2f4c3"
     },
