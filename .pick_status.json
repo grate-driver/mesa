@@ -3748,7 +3748,7 @@
         "description": "util: fix build with clang 10 on mips64",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "dc94a0506f1d267a761961d3ac905d77de3dae2e"
     },
