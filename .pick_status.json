@@ -22,7 +22,7 @@
         "description": "aco: don't move memory accesses to before control barriers",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "cd392a10d056833d915ba2912e4dbe58d86bf28f"
     },
