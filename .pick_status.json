@@ -4180,7 +4180,7 @@
         "description": "st/mesa: Treat vertex outputs absent in outputMapping as zero in mesa_to_tgsi",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "d684fb37bfbc47d098158cb03c0672119a4469fe"
     },
