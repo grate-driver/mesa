@@ -382,7 +382,7 @@
         "description": "aco: fix C++11/C++14 compilation",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "d1f992f3c2d138faa0c89a2486c4252a06886106"
     },
