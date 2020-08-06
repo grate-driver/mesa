@@ -3613,7 +3613,7 @@
         "description": "driconf: fix force_gl_vendor description",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "dca119f12c291d7665d72464c92a8bf4328ef38e"
     },
