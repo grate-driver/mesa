@@ -373,7 +373,7 @@
         "description": "anv: fix incorrect realloc failure handling",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "246261f0addfc24f69ae412b9ef7e40e2c667a4a"
     },
