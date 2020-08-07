@@ -517,7 +517,7 @@
         "description": "freedreno/registers: add some missing regs to build",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "9c33c5389818bc5035eb4538ea5d3fc1321dd27e"
     },
