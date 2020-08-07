@@ -1,0 +1,407 @@
+[
+    {
+        "sha": "9333a8570d2174b73da63c3ee6f1a740ae487ab8",
+        "description": "radeonsi: enable ETC2 hw acceleration on Raven2",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1185b3f32d97a260dfd388bd0ca032bc6a380bbf",
+        "description": "zink: pre-hash gfx-pipeline-state",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7be12df5e621e6d339b1dca3fb0a84e9b8550337",
+        "description": "zink: rename zink_gfx_program::stages to 'modules'",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6196f2aa9370978724be7dbedf4931889a54062b",
+        "description": "zink: always compile shaders in pipeline order",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c312299316cc97d86d5ca642c6b4d502f9a3ff73",
+        "description": "zink: start using per-stage flags for new shaders, refcount shader modules",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "76d3645dd2e1737ecac3244d687d0eadab8456d2",
+        "description": "zink: use ZINK_SHADER_COUNT instead of PIPE_SHADER_TYPES - 1 everywhere",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0f059d550bd935c923acd5355de0916ddd6a2f84",
+        "description": "zink: split up creating zink_shader objects and VkShaderModule objects",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a03d17ede778610f2c66099d0d5342cf09ef12a2",
+        "description": "zink: refcount zink_gfx_program objects",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8772c693c5a0b94be7fd891c278e504dabc0ee54",
+        "description": "zink: adjust zink_shader struct to contain full streamout info",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e481d3e2ed02f965bdacf9c7518158ef495c850a",
+        "description": "zink: move shader state methods for pipe_context into zink_program.c",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d83be29a53396c013ad2d1146ca4b8136703259a",
+        "description": "intel/dump_gpu: add an option to capture a single frame",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a6a5b0e52eb954aa5f91ee5d748c25c983abb438",
+        "description": "intel/dump_gpu: fix --platform option",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9f0db069d3a507fbb4a64393d50df18fa9376b62",
+        "description": "anv: track the current frame and write it into the driver identifier BO",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "42cb068d9f16bdf4d6b82d17265c13673f38f75a",
+        "description": "intel/dump_gpu: only map in GTT buffers not previously mapped",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "22b512ea5b11c3b02f488d7143556eb0ef8c1303",
+        "description": "intel/dump_gpu: add an only-capture option",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f0e13827aab4afbe3a3cb239a5bfe9287c419d44",
+        "description": "intel/dump_gpu: set default device_override",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c4bfa6dfbb15e34171f31854c04cb8abcfdba01b",
+        "description": "intel/dump_gpu: further track mapping of BOs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "63c90acc9eba2c7252794b415ad4d5ace6956c4e",
+        "description": "intel/dump_gpu: only write BOs mapped by the driver",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "54c68498d4c4627a56fd73f8a4becbed3327cad6",
+        "description": "zink: set primitive restart cap",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5959178381f3a3e88d33f76426172e55c9884ddd",
+        "description": "zink: use util_draw_vbo_without_prim_restart for unsupported prim modes",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f4583b40863e3e57fe0df60daf1d5ab5ea8ebbae",
+        "description": "zink: move 8bit index handling out of u_primconvert path",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5edaf081cdbdadfd027c2ba9ee5095f49b274f81",
+        "description": "zink: basic primitive restart support for strip/fan topologies",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8531830038de9f0d8a97d55ccf209f549b720d8c",
+        "description": "radv: Add ETC2 support on RAVEN2.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "bea8930468e18e3371e4457380232ec04bda4990",
+        "description": "radv: allow to force-enable LLVM internally for a specific shader stage",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e63a7882a0ae2461cc2b84de96549c2df9d25985",
+        "description": "etnaviv: call nir_lower_bool_to_bitsize",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c5b231962887e687f6665a79900a21ec0fd95cbf",
+        "description": "panfrost: Drop compiler cmdstream deps",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1d0b3ef051e437392cb6bfff5eccf3579c1fe905",
+        "description": "panfrost: Treat texture dimension as first-class",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5a3088e85f24672323cb2e66b5cb6e8b52452f7c",
+        "description": "panfrost: Inline max rt into compilers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "54f96544ec244cffae784cec072f8e7327c58301",
+        "description": "pan/bi: Drop use of MALI_POSITIVE",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c94013c8194fea8e4107e1f3eaa8a0d9ebd2251d",
+        "description": "panfrost: Add panloader/ to .gitignore",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "52e3a67bb1aa56c424d2959fdafd0c3e67ffe974",
+        "description": "panfrost: Reduce bit dependency to disassembly only",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "14bb72c68b44e98f4a38bf2b993bcc0d64fb3162",
+        "description": "pan/bi: Separate disasm/compiler targets",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b792d613e65ce37d75965885f029bd7e95cb6ffc",
+        "description": "pan/mdg: Separate disassembler and compiler targets",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d62a6e7c5f678b986af0c6b3a0ea1ce6d9880c66",
+        "description": "panfrost: Move pandecode into lib/",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1c62b5528ab09731388670202fa4a6ca5aa96534",
+        "description": "panfrost: Rename encoder/ to lib/",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "956b09653cc171f290ccef3da6bbac769cbec470",
+        "description": "panfrost: Don't export exception_status",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4ddc6e543cb1fc67a5912638d13a543827b3ae50",
+        "description": "panfrost: Remove panfrost-misc.h",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "64f3c9da87b701cd863315849f1beccee8f5fb3f",
+        "description": "panfrost: Inline panfrost-misc.h into panfrost-job.h",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ebf7e87f2cd818251bbabba134e8cfd2faada1e0",
+        "description": "pan/decode: Remove shader replacement artefact",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e4df95bf9fd8dac1a10b5f32d8c95c9cad61395f",
+        "description": "panfrost: Move format stringify to decode.c",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b80e753940ac3749789fe4b17e914956f99a27a5",
+        "description": "panfrost: Remove blend prettyprinters",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b43bcb05a172e44bc2bd4dda5eac9397a54fa2f0",
+        "description": "anv: fix incorrect realloc failure handling",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "246261f0addfc24f69ae412b9ef7e40e2c667a4a"
+    },
+    {
+        "sha": "21b47cbd9968035edff9069b0939151bc3ad8182",
+        "description": "aco: fix C++11/C++14 compilation",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "d1f992f3c2d138faa0c89a2486c4252a06886106"
+    },
+    {
+        "sha": "782ba8d3ae55af392da8ca829f3a185c10bbecfc",
+        "description": "st/mesa: Treat vertex outputs absent in outputMapping as zero in mesa_to_tgsi",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "d684fb37bfbc47d098158cb03c0672119a4469fe"
+    },
+    {
+        "sha": "a92cfa66b4ebf51b59fda81bd65d83f4ca013e7e",
+        "description": "Bump development version and clear new_features",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    }
+]
