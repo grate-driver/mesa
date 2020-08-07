@@ -328,7 +328,7 @@
         "description": "radv: Fix assert that is too strict.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "c6aadbae71562c14166a6e7942867eaf56b3e017"
     },
