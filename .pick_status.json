@@ -1156,7 +1156,7 @@
         "description": "intel/nir: Pass the nir_builder by reference in lower_alpha_to_coverage",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "7ecfbd4f6d407460ae47c598f07627b2b8468811"
     },
