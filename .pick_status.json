@@ -4,7 +4,7 @@
         "description": "meson/freedreno: Fix lua requirement",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "caa107cb8db930bc59cd557a325a6a0bc4a86565"
     },
