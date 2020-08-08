@@ -1707,7 +1707,7 @@ if with_platform_x11
     dep_x11 = dependency('x11')
     dep_xext = dependency('xext')
     dep_xdamage = dependency('xdamage', version : '>= 1.1')
-    dep_xfixes = dependency('xfixes')
+    dep_xfixes = dependency('xfixes', version : '>= 2.0')
     dep_xcb_glx = dependency('xcb-glx', version : '>= 1.8.1')
   endif
   if (with_any_vk or with_glx == 'dri' or with_egl or
