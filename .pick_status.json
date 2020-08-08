@@ -472,7 +472,7 @@
         "description": "Revert \"python: Explicitly add the 'L' suffix on Python 3\"",
         "nominated": true,
         "nomination_type": 2,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "ad363913e6766280f53838126d67370f9e97aa12"
     },
