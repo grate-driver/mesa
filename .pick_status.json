@@ -67,7 +67,7 @@
         "description": "anv: add a check for depthStencilState before using it",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "e4590c07500941ae1afa82db5e4fea2111a68604"
     },
