@@ -454,7 +454,7 @@
         "description": "isl: drop left-over comment",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "cf9ff082b48779c52fa6b82dc4bb163303287772"
     },
