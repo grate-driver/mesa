@@ -3172,7 +3172,7 @@
         "description": "aco: execute branch instructions in WQM if necessary",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "3817fa7a4d1f51c385b28a2e45a1edf227526028"
     },
