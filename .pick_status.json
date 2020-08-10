@@ -697,7 +697,7 @@
         "description": "ac/llvm: handle static/shared llvm init separately",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "50d20dc055decf43f956601d71572f825c2b2eca"
     },
