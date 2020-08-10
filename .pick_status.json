@@ -751,7 +751,7 @@
         "description": "anv: VK_INTEL_performance_query interaction with VK_EXT_private_data",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "51c6bc13ce3a70b1948ce5c4edbc1d29c5460986"
     },
