@@ -76,7 +76,7 @@
         "description": "anv: fix up dynamic clip emission",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "c34d8ac26e0a21c9036b4cfaf9e42c1e4298794f"
     },
