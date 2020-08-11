@@ -2533,7 +2533,7 @@
         "description": "nir/lower_idiv: Port recent LLVM fixes to emit_udiv",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "8b98d0954e6168484479cf51d56bface448d00d5"
     },
