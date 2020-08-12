@@ -1615,7 +1615,7 @@
         "description": "iris: Don't call SET_TILING for dmabuf imports",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "c19492bcdb9ff5c5bf4092d2daff6e2e5d7bce1b"
     },
