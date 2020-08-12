@@ -1111,7 +1111,7 @@
         "description": "i915g: Stop advertising support for indirect addressing in the FS.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "8a22064d316efcdc0d0107fe227a2ed5a746c4f8"
     },
