@@ -1,5 +1,338 @@
 [
     {
+        "sha": "61042b1bdb199f98dd34085ed29a8c492ed9b2a3",
+        "description": "zink: handle more draw modes",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ced9e6e3e5c14a0f9b7e6d20d01a337227fcf40a",
+        "description": "zink: change pipeline hashes to index based on vk primitive type",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2701f887fc376202577ad942c20a7284b12823f3",
+        "description": "anv/nir: Unify inputs_read/outputs_written between geometry stages",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2a1217513e1c5d881718c2a7f2afb951e1fe6305",
+        "description": "panfrost: Implement panfrost_query_dmabuf_modifiers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "24c921b1b5cc427c7ab1abd76c443db4a008d1b9",
+        "description": "panfrost: Ensure AFBC slices are aligned",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4d0241dfed3c457ffbdc51bcc41cfe723e5bb586",
+        "description": "panfrost: Allocate enough space for tiled formats",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8c0cb56fd9e9742af1186fe093bb38d7e2e59285",
+        "description": "panfrost: Enable YTR where allowed",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d285ea6467d382e3865c60f57d86501d362380de",
+        "description": "panfrost: Implement YTR availability check",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "acb8dcfebdde56a748ec50a3fbecf27912974be9",
+        "description": "panfrost: Choose AFBC when available",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c54d45dd90a0606a9287bdcc03fd2463e47039a2",
+        "description": "panfrost: Import staging routines from freedreno",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "348d374d01302ffe0e88e04e2509ff1407d731b5",
+        "description": "panfrost: Respect modifiers in resource management",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "56f9cc9948745b570704f20e18f0247628817de5",
+        "description": "panfrost: Account for modifiers when creating BO",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "965537df2afcaf94c4b96c2acd5e8f7036f71829",
+        "description": "panfrost: Use modifier instead of layout throughout",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6fed69cde2a96248ad3a5c20621c1e58c88f8d2f",
+        "description": "panfrost: Introduce create_with_modifier helper",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "32bd588fedef6411bb4538988475f38761e3de8c",
+        "description": "panfrost: Remove hint-based AFBC heuristic",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "340017ec476bf4af3297b7b3a65f667cbfc93a5f",
+        "description": "panfrost: Set `initialized` more conservatively",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "22777025d4ac63a8f5909f8da7baa2501a32682f",
+        "description": "gallium/dri2: Support Arm modifiers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "37872edf6fc678f90b1b2c8354a91007089f43b8",
+        "description": "zink: print error when getprocaddr fails for extension functions",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "371f6f42ad423509b83dae9109b295e4b3eb4852",
+        "description": "radv: Update CI expectations for the recent descriptor indexing regressions.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3d7d76c15258a7e856ab60d7bf98565a93ed6aee",
+        "description": "iris: Add support for MESA_SHADER_KERNEL in the disk cache",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "65eeb06a7f7afd1fbf48490f06051dfad9de3214",
+        "description": "iris: Upload kernel inputs with system values",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f5e7be386ffa8d5805fd0381ee0c921af65a6bcb",
+        "description": "iris: Copy dest size from the original intrinsic in setup_uniforms",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "43429efc61e836b3a1eda5b2290153c20ec099b2",
+        "description": "iris/disk_cache: Stop assuming stage == cache_id",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6dfe41c54e2cc1554a64c4291f83f39966457154",
+        "description": "iris: Add a kernel_input_size field for compiled shaders",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e39326e617dbf53fdbe1f561b069fe6f875545c4",
+        "description": "iris: Use blob_write_uint32 for num_system_values",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "003b04e266ae0faad563c1228561b53f33a68474",
+        "description": "intel/compiler: Allow MESA_SHADER_KERNEL",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e2b6ccbdadd9438eab60ba7dbf8c0d870079c839",
+        "description": "intel/compiler: Use C99 array initializers for prog_data/key sizes",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8e1de8e5ac90a9dd0a2fb9310cb36371a9d12dce",
+        "description": "intel/cs_intrinsics: Handle 64-bit intrinsics",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8d62735b470c0851a567bd2cc0759c18af987923",
+        "description": "iris: Add support for serialized NIR",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "baa4cf9b8ed25630d795926ff2e1dfae9ae955b2",
+        "description": "iris: Implement set_global_binding",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "17280a8ef1a90b73add63682b0d956fd4383c6b1",
+        "description": "iris: no-op implement set_compute_resources",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ac6e207ee07f74f4fcc8eaeff2f76f93bf033484",
+        "description": "gitlab-ci: test Fossilize with GFX1030",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "431a3cf239eed2b6fac79ea7e66d3779a2ab4b08",
+        "description": "radv/winsys: add null winsys entries for Sienna Cichild/Navy Flounder",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "638a09b827f1e7b561e878612890fc0ebcdb1613",
+        "description": "radv: fix emitting the border color pointer on the compute queue",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "57e796a12a883f5845c8e0ed05ec6bdb6d055b53"
+    },
+    {
+        "sha": "96cfc684e63238a7aeabc8893fb04fe5f3781a66",
+        "description": "util: Fix memory leaks in unit test.",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "d0d14f3f6481e015b4413fa0487164b76fe45296"
+    },
+    {
+        "sha": "ef66e02a408c4b8d11a3b7122b0e8e05ffac8eb8",
+        "description": "src/mesa: add GL_NV_half_float extension support (v2)",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8abf59ff98863634321e3e0d60035277e58e92e8",
+        "description": "dri_util: Update internal_format to GL_RGB8 for MESA_FORMAT_B8G8R8X8_UNORM",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "bf576772ab4d9e76dae716640bed6de879f19567"
+    },
+    {
         "sha": "fdb97d3d2914c8f887a7968432db4fdbd35d8376",
         "description": "aco: execute branch instructions in WQM if necessary",
         "nominated": true,
