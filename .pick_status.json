@@ -3316,7 +3316,7 @@
         "description": "st/mesa: don't generate NIR for ARB_vp/fp if NIR is not preferred",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "5d0630e5043fc25aea3788c6a94059e2aceedf06"
     },
