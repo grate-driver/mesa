@@ -1246,7 +1246,7 @@
         "description": "anv: don't fail userspace relocation with perf queries",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "2001a80d4a81f2e8194b29cca301dd1b27be9acb"
     },
