@@ -1887,6 +1887,16 @@ static void clamp_gsprims_to_esverts(unsigned *max_gsprims, unsigned max_esverts
    *max_gsprims = MIN2(*max_gsprims, 1 + max_reuse);
 }
 
+unsigned gfx10_ngg_get_scratch_dw_size(struct si_shader *shader)
+{
+   const struct si_shader_selector *sel = shader->selector;
+
+   if (sel->type == PIPE_SHADER_GEOMETRY && sel->so.num_outputs)
+      return 44;
+
+   return 8;
+}
+
 /**
  * Determine subgroup information like maximum number of vertices and prims.
  *
@@ -1907,19 +1917,15 @@ bool gfx10_ngg_calculate_subgroup_info(struct si_shader *shader)
    const unsigned min_verts_per_prim = gs_type == PIPE_SHADER_GEOMETRY ? max_verts_per_prim : 1;
 
    /* All these are in dwords: */
-   /* We can't allow using the whole LDS, because GS waves compete with
-    * other shader stages for LDS space.
-    *
-    * TODO: We should really take the shader's internal LDS use into
-    *       account. The linker will fail if the size is greater than
-    *       8K dwords.
+   /* GE can only use 8K dwords (32KB) of LDS per workgroup.
     */
-   const unsigned max_lds_size = 8 * 1024 - 768;
+   const unsigned max_lds_size = 8 * 1024 - gfx10_ngg_get_scratch_dw_size(shader);
    const unsigned target_lds_size = max_lds_size;
    unsigned esvert_lds_size = 0;
    unsigned gsprim_lds_size = 0;
 
    /* All these are per subgroup: */
+   const unsigned min_esverts = gs_sel->screen->info.chip_class >= GFX10_3 ? 29 : 24;
    bool max_vert_out_per_gs_instance = false;
    unsigned max_gsprims_base = 128; /* default prim group size clamp */
    unsigned max_esverts_base = 128;
@@ -2008,7 +2014,7 @@ retry_select_mode:
 
    /* Round up towards full wave sizes for better ALU utilization. */
    if (!max_vert_out_per_gs_instance) {
-      const unsigned wavesize = gs_sel->screen->ge_wave_size;
+      const unsigned wavesize = si_get_shader_wave_size(shader);
       unsigned orig_max_esverts;
       unsigned orig_max_gsprims;
       do {
@@ -2021,19 +2027,30 @@ retry_select_mode:
             max_esverts =
                MIN2(max_esverts, (max_lds_size - max_gsprims * gsprim_lds_size) / esvert_lds_size);
          max_esverts = MIN2(max_esverts, max_gsprims * max_verts_per_prim);
+         /* Hardware restriction: minimum value of max_esverts */
+         max_esverts = MAX2(max_esverts, min_esverts - 1 + max_verts_per_prim);
 
          max_gsprims = align(max_gsprims, wavesize);
          max_gsprims = MIN2(max_gsprims, max_gsprims_base);
-         if (gsprim_lds_size)
+         if (gsprim_lds_size) {
+            /* Don't count unusable vertices to the LDS size. Those are vertices above
+             * the maximum number of vertices that can occur in the workgroup,
+             * which is e.g. max_gsprims * 3 for triangles.
+             */
+            unsigned usable_esverts = MIN2(max_esverts, max_gsprims * max_verts_per_prim);
             max_gsprims =
-               MIN2(max_gsprims, (max_lds_size - max_esverts * esvert_lds_size) / gsprim_lds_size);
+               MIN2(max_gsprims, (max_lds_size - usable_esverts * esvert_lds_size) / gsprim_lds_size);
+         }
          clamp_gsprims_to_esverts(&max_gsprims, max_esverts, min_verts_per_prim, use_adjacency);
          assert(max_esverts >= max_verts_per_prim && max_gsprims >= 1);
       } while (orig_max_esverts != max_esverts || orig_max_gsprims != max_gsprims);
-   }
 
-   /* Hardware restriction: minimum value of max_esverts */
-   max_esverts = MAX2(max_esverts, 23 + max_verts_per_prim);
+      /* Verify the restriction. */
+      assert(max_esverts >= min_esverts - 1 + max_verts_per_prim);
+   } else {
+      /* Hardware restriction: minimum value of max_esverts */
+      max_esverts = MAX2(max_esverts, min_esverts - 1 + max_verts_per_prim);
+   }
 
    unsigned max_out_vertices =
       max_vert_out_per_gs_instance
@@ -2061,13 +2078,15 @@ retry_select_mode:
    shader->ngg.prim_amp_factor = prim_amp_factor;
    shader->ngg.max_vert_out_per_gs_instance = max_vert_out_per_gs_instance;
 
-   shader->gs_info.esgs_ring_size = 4 * max_esverts * esvert_lds_size;
+   /* Don't count unusable vertices. */
+   shader->gs_info.esgs_ring_size = MIN2(max_esverts, max_gsprims * max_verts_per_prim) *
+                                    esvert_lds_size;
    shader->ngg.ngg_emit_size = max_gsprims * gsprim_lds_size;
 
-   assert(shader->ngg.hw_max_esverts >= 24); /* HW limitation */
+   assert(shader->ngg.hw_max_esverts >= min_esverts); /* HW limitation */
 
    /* If asserts are disabled, we use the same conditions to return false */
    return max_esverts >= max_verts_per_prim && max_gsprims >= 1 &&
           max_out_vertices <= 256 &&
-          shader->ngg.hw_max_esverts >= 24;
+          shader->ngg.hw_max_esverts >= min_esverts;
 }

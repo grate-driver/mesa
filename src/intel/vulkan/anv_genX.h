@@ -28,13 +28,23 @@
 /*
  * Gen-specific function declarations.  This header must *not* be included
  * directly.  Instead, it is included multiple times by anv_private.h.
- * 
+ *
  * In this header file, the usual genx() macro is available.
  */
 
 #ifndef ANV_PRIVATE_H
 #error This file is included by means other than anv_private.h
 #endif
+
+extern const uint32_t genX(vk_to_gen_cullmode)[];
+
+extern const uint32_t genX(vk_to_gen_front_face)[];
+
+extern const uint32_t genX(vk_to_gen_primitive_type)[];
+
+extern const uint32_t genX(vk_to_gen_compare_op)[];
+
+extern const uint32_t genX(vk_to_gen_stencil_op)[];
 
 VkResult genX(init_device_state)(struct anv_device *device);
 
@@ -61,8 +71,6 @@ void genX(flush_pipeline_select_gpgpu)(struct anv_cmd_buffer *cmd_buffer);
 
 void genX(cmd_buffer_config_l3)(struct anv_cmd_buffer *cmd_buffer,
                                 const struct gen_l3_config *cfg);
-
-void genX(cmd_buffer_emit_clip)(struct anv_cmd_buffer *cmd_buffer);
 
 void genX(cmd_buffer_flush_state)(struct anv_cmd_buffer *cmd_buffer);
 void genX(cmd_buffer_flush_dynamic_state)(struct anv_cmd_buffer *cmd_buffer);
