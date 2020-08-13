@@ -1597,7 +1597,7 @@
         "description": "u_debug_stack_test: Fix MSVC compiling by using ATTRIBUTE_NOINLINE",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "d0d14f3f6481e015b4413fa0487164b76fe45296"
     },
