@@ -679,7 +679,7 @@
         "description": "turnip: Make sure we include the build id.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "f97acb4bb4b18f127b62aa8eeb57cdf3d8fe3aa2"
     },
