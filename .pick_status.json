@@ -3640,7 +3640,7 @@
         "description": "clover/spirv: Don't call llvm::regularizeLlvmForSpirv",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "2043c5f37cf1f1b64a8f5d9ae04bbf8e7860f616"
     },
