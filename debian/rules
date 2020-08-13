@@ -35,14 +35,16 @@ confflags_DRI3 = -Ddri3=false
 
 # hurd doesn't do direct rendering
 ifeq ($(DEB_HOST_ARCH_OS), hurd)
+	DRI_DRIVERS = swrast,
 	EGL_PLATFORMS = x11
 
 	confflags_DIRECT_RENDERING = -Dglx-direct=false
 	confflags_GBM = -Dgbm=false
 	confflags_OSMESA = -Dosmesa=classic
-	DRI_DRIVERS = swrast,
 else
-	EGL_PLATFORMS = x11,surfaceless
+	DRI_DRIVERS += r200, r100,
+	EGL_PLATFORMS = drm,surfaceless,x11
+	GALLIUM_DRIVERS += r600, r300,
 
   ifeq ($(DEB_HOST_ARCH_OS), linux)
 	confflags_DRI3 = -Ddri3=true
@@ -75,16 +77,11 @@ else
 	endif
   endif
 
-	EGL_PLATFORMS += ,drm
-
   # Build intel drivers on archs where libdrm-intel is installed
   ifneq (,$(filter $(DEB_HOST_ARCH),amd64 i386 kfreebsd-amd64 kfreebsd-i386 x32))
 	DRI_DRIVERS += i915, i965,
 	GALLIUM_DRIVERS += iris,
   endif
-
-	DRI_DRIVERS += r200, r100,
-	GALLIUM_DRIVERS += r600, r300,
 
   # LLVM is required for building r300g, radeonsi and llvmpipe drivers.
   # It's also required for building OpenCL support.
