@@ -1300,7 +1300,7 @@
         "description": "panfrost: Fix WRITES_GLOBAL bit",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "dce7722ef89100e5dea337064a9d6631bb18822a"
     },
