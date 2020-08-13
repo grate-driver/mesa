@@ -1,6 +1,7 @@
 mesa (20.2.0~rc2-1) UNRELEASED; urgency=medium
 
   * New upstream release candidate.
+  * rules: Get rid of trailing commas in *_DRIVERS options.
 
  -- Timo Aaltonen <tjaalton@debian.org>  Thu, 13 Aug 2020 14:35:26 +0300
 
