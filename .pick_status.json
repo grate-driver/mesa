@@ -1093,7 +1093,7 @@
         "description": "freedreno/ir3: Fix assertion failures dumping CS high full regs.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "f7bd3456d79aaeccb5f5e8d1408e85ad198f4f38"
     },
