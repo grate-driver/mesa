@@ -796,7 +796,7 @@
         "description": "radv: Use getter instead of setter to extract value.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "64768111c302014a6ae8db6122dedf0d5e5168cc"
     },
