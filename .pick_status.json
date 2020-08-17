@@ -985,7 +985,7 @@
         "description": "spirv: Only require bare types to match when copying variables",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "bf1a1eed882980a1cd08482386e3a001ce64a5a4"
     },
