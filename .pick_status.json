@@ -94,7 +94,7 @@
         "description": "aco: fix non-rtz pack_half_2x16",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "df645fa369d12be4d5e0fd9e4f6d4455caf2f4c3"
     },
