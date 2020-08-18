@@ -1183,7 +1183,7 @@
         "description": "freedreno/a6xx: fix occlusion query with more than one tile",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "13fc03f4c0e709f6d1a8d811f9bc8a0c8c42943c"
     },
