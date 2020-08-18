@@ -805,7 +805,7 @@
         "description": "anv: null check for buffer before reading size",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "b9a05447a1976101c04a02f5588c51de0b0f6573"
     },
