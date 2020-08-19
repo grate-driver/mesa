@@ -823,7 +823,7 @@
         "description": "v3d/packet: fix typo on Set InstanceID/PrimitiveID packet",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "276d22c52dd9c50a2b2becd13c702fbb801a7e17"
     },
