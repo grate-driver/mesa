@@ -1525,7 +1525,7 @@
         "description": "meson: Fix lmsensors warning message.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "138c003d22739b0d1e6860ed398dd511a44cde04"
     },
