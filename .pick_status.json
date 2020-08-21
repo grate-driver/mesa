@@ -427,7 +427,7 @@
         "description": "nir/large_constants: Eliminate out-of-bounds writes to large constants",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "1235850522cd5e7b07701f7065996430ca1514b6"
     },
