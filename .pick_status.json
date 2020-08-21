@@ -211,7 +211,7 @@
         "description": "nir/lower_io_arrays: Fix xfb_offset bug",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "b2bbd978d0b1c85919c6f3b5f631b3c6cbaaaf8a"
     },
