@@ -228,6 +228,11 @@ struct gen_perf_config {
     */
    struct hash_table *oa_metrics_table;
 
+   /* When MDAPI hasn't configured the metric we need to use by the time the
+    * query begins, this OA metric is used as a fallback.
+    */
+   uint64_t fallback_raw_oa_metric;
+
    /* Location of the device's sysfs entry. */
    char sysfs_dev_dir[256];
 
