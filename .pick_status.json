@@ -2659,7 +2659,7 @@
         "description": "aco: fix byte_align_scalar for 3 dword vectors",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "fe08f0ccf94a7315bded5868b4f6a8bae744de79"
     },
