@@ -170,6 +170,7 @@ struct gen_perf_query_info {
       GEN_PERF_QUERY_TYPE_PIPELINE,
    } kind;
    const char *name;
+   const char *symbol_name;
    const char *guid;
    struct gen_perf_query_counter *counters;
    int n_counters;
