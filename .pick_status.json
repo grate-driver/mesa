@@ -2623,7 +2623,7 @@
         "description": "radeonsi: fix tess levels coming as scalar arrays from SPIR-V",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "75ce078a0aff7fa0f4d6467bea787327da3a4b69"
     },
