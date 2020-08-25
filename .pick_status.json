@@ -4396,7 +4396,7 @@
         "description": "panfrost: Free cloned NIR shader",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 2,
         "master_sha": null,
         "because_sha": null
     },
