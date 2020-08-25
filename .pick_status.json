@@ -580,7 +580,7 @@
         "description": "iris: Drop stale syncobj references in fence_server_sync",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "f459c56be6bf33439cccc11e932b2b5b52ba7ad8"
     },
