@@ -3577,7 +3577,7 @@
         "description": "gallium/tgsi_exec: Fix up NumOutputs counting",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "49155c3264d019869fadde50ff6167a369e966b6"
     },
