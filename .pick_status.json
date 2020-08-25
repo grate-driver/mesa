@@ -13,7 +13,7 @@
         "description": "zink: reorder create_stream_output_target to fix failure case leak",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "37778fcd9a352430af0cd3b28a8776479a7c8380"
     },
