@@ -895,7 +895,7 @@
         "description": "freedreno/gmemtool: add tile_alignw/h and a650",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "f6f8a19092027ab0248e216997a5529565ce2e12"
     },
