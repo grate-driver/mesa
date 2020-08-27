@@ -984,6 +984,7 @@ static void
 panfrost_batch_submit(struct panfrost_batch *batch)
 {
         assert(batch);
+        struct panfrost_device *dev = pan_device(batch->ctx->base.screen);
 
         /* Submit the dependencies first. */
         util_dynarray_foreach(&batch->dependencies,
@@ -996,6 +997,9 @@ panfrost_batch_submit(struct panfrost_batch *batch)
 
         /* Nothing to do! */
         if (!batch->first_job && !batch->clear) {
+                if (batch->out_sync->syncobj)
+                        drmSyncobjSignal(dev->fd, &batch->out_sync->syncobj, 1);
+
                 /* Mark the fence as signaled so the fence logic does not try
                  * to wait on it.
                  */

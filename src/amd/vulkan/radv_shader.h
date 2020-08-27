@@ -35,6 +35,8 @@
 #include "nir/nir.h"
 #include "vulkan/vulkan.h"
 
+#define RADV_VERT_ATTRIB_MAX MAX2(VERT_ATTRIB_MAX, VERT_ATTRIB_GENERIC0 + MAX_VERTEX_ATTRIBS)
+
 struct radv_device;
 
 struct radv_shader_module {
@@ -249,7 +251,7 @@ struct radv_shader_info {
 	bool is_ngg_passthrough;
 	struct {
 		uint64_t ls_outputs_written;
-		uint8_t input_usage_mask[VERT_ATTRIB_MAX];
+		uint8_t input_usage_mask[RADV_VERT_ATTRIB_MAX];
 		uint8_t output_usage_mask[VARYING_SLOT_VAR31 + 1];
 		bool has_vertex_buffers; /* needs vertex buffers and base/start */
 		bool needs_draw_id;

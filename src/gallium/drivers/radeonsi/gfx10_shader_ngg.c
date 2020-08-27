@@ -1990,7 +1990,7 @@ void gfx10_ngg_calculate_subgroup_info(struct si_shader *shader)
 
    /* Round up towards full wave sizes for better ALU utilization. */
    if (!max_vert_out_per_gs_instance) {
-      const unsigned wavesize = gs_sel->screen->ge_wave_size;
+      const unsigned wavesize = si_get_shader_wave_size(shader);
       unsigned orig_max_esverts;
       unsigned orig_max_gsprims;
       do {
@@ -2003,6 +2003,8 @@ void gfx10_ngg_calculate_subgroup_info(struct si_shader *shader)
             max_esverts =
                MIN2(max_esverts, (max_lds_size - max_gsprims * gsprim_lds_size) / esvert_lds_size);
          max_esverts = MIN2(max_esverts, max_gsprims * max_verts_per_prim);
+         /* Hardware restriction: minimum value of max_esverts */
+         max_esverts = MAX2(max_esverts, 23 + max_verts_per_prim);
 
          max_gsprims = align(max_gsprims, wavesize);
          max_gsprims = MIN2(max_gsprims, max_gsprims_base);
@@ -2012,10 +2014,13 @@ void gfx10_ngg_calculate_subgroup_info(struct si_shader *shader)
          clamp_gsprims_to_esverts(&max_gsprims, max_esverts, min_verts_per_prim, use_adjacency);
          assert(max_esverts >= max_verts_per_prim && max_gsprims >= 1);
       } while (orig_max_esverts != max_esverts || orig_max_gsprims != max_gsprims);
-   }
 
-   /* Hardware restriction: minimum value of max_esverts */
-   max_esverts = MAX2(max_esverts, 23 + max_verts_per_prim);
+      /* Verify the restriction. */
+      assert(max_esverts >= 23 + max_verts_per_prim);
+   } else {
+      /* Hardware restriction: minimum value of max_esverts */
+      max_esverts = MAX2(max_esverts, 23 + max_verts_per_prim);
+   }
 
    unsigned max_out_vertices =
       max_vert_out_per_gs_instance

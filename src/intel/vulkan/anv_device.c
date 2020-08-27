@@ -763,6 +763,8 @@ VkResult anv_CreateInstance(
    driParseOptionInfo(&instance->available_dri_options, anv_dri_options_xml);
    driParseConfigFiles(&instance->dri_options, &instance->available_dri_options,
                        0, "anv", NULL,
+                       instance->app_info.app_name,
+                       instance->app_info.app_version,
                        instance->app_info.engine_name,
                        instance->app_info.engine_version);
 
@@ -1294,6 +1296,13 @@ void anv_GetPhysicalDeviceFeatures2(
       case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_DRAW_PARAMETERS_FEATURES: {
          VkPhysicalDeviceShaderDrawParametersFeatures *features = (void *)ext;
          CORE_FEATURE(1, 1, shaderDrawParameters);
+         break;
+      }
+
+      case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_INTEGER_FUNCTIONS_2_FEATURES_INTEL: {
+         VkPhysicalDeviceShaderIntegerFunctions2FeaturesINTEL *features =
+            (VkPhysicalDeviceShaderIntegerFunctions2FeaturesINTEL *)ext;
+         features->shaderIntegerFunctions2 = true;
          break;
       }
 
