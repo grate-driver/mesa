@@ -305,6 +305,7 @@ dri2_x11_create_surface(_EGLDriver *drv, _EGLDisplay *disp, EGLint type,
          else
             _eglError(EGL_BAD_NATIVE_PIXMAP, "xcb_get_geometry");
          free(error);
+         free(reply);
          goto cleanup_dri_drawable;
       } else if (reply == NULL) {
          _eglError(EGL_BAD_ALLOC, "xcb_get_geometry");
@@ -529,8 +530,10 @@ dri2_x11_get_buffers(__DRIdrawable * driDrawable,
    if (reply == NULL)
       return NULL;
    buffers = xcb_dri2_get_buffers_buffers (reply);
-   if (buffers == NULL)
+   if (buffers == NULL) {
+      free(reply);
       return NULL;
+   }
 
    *out_count = reply->count;
    dri2_surf->base.Width = *width = reply->width;
@@ -687,6 +690,7 @@ dri2_x11_connect(struct dri2_egl_display *dri2_dpy)
    if (dri2_query == NULL || error != NULL) {
       _eglLog(_EGL_WARNING, "DRI2: failed to query version");
       free(error);
+      free(dri2_query);
       return EGL_FALSE;
    }
    dri2_dpy->dri2_major = dri2_query->major_version;
@@ -697,6 +701,7 @@ dri2_x11_connect(struct dri2_egl_display *dri2_dpy)
    if (connect == NULL ||
        connect->driver_name_length + connect->device_name_length == 0) {
       _eglLog(_EGL_WARNING, "DRI2: failed to authenticate");
+      free(connect);
       return EGL_FALSE;
    }
 
@@ -1087,6 +1092,7 @@ dri2_create_image_khr_pixmap(_EGLDisplay *disp, _EGLContext *ctx,
 
    buffers = xcb_dri2_get_buffers_buffers (buffers_reply);
    if (buffers == NULL) {
+      free(buffers_reply);
       return NULL;
    }
 
@@ -1096,6 +1102,7 @@ dri2_create_image_khr_pixmap(_EGLDisplay *disp, _EGLContext *ctx,
       _eglError(EGL_BAD_ALLOC, "xcb_get_geometry");
       free(error);
       free(buffers_reply);
+      free(geometry_reply);
       return NULL;
    }
 
