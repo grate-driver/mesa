@@ -2965,7 +2965,7 @@
         "description": "radv: Fix threading issue with submission refcounts.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "4aa75bb3bdd195d4715ee8fae51bfb0c0fcd823b"
     },
