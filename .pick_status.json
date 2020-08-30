@@ -2956,7 +2956,7 @@
         "description": "radv: Avoid deadlock on bo_list.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "6bc5ce7a91d07197043c097f876edf1d630c1375"
     },
