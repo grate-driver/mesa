@@ -112,7 +112,7 @@
         "description": "intel/mi_builder: fix self modifying batches",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "796fccce631bf8ecb6ce2fd1a68f219788693a6e"
     },
