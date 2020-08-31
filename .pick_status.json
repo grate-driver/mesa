@@ -2938,7 +2938,7 @@
         "description": "spirv: Deal with glslang not setting NonUniform on constructors.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "af81486a8cde4dec2a695884b93b282c1710d8bd"
     },
