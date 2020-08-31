@@ -1039,7 +1039,7 @@
         "description": "util: use correct type in sysctl argument",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "01bd21eef8f572944c09771f44e3006e2991280e"
     },
