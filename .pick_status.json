@@ -1282,7 +1282,7 @@
         "description": "meson: don't build with USE_ELF_TLS on OpenBSD",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "a47c525f3281a2753180e076c7e9b7772aff8f06"
     },
@@ -1291,7 +1291,7 @@
         "description": "meson: don't advertise TLS support if glx wasn't build with it",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "a47c525f3281a2753180e076c7e9b7772aff8f06"
     },
@@ -11074,7 +11074,7 @@
         "description": "freedreno/a6xx: fixup draw state earlier",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 2,
         "master_sha": null,
         "because_sha": "4d8f42c85125fa86008553ddaf48f44498d8bddc"
     },
