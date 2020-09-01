@@ -4,7 +4,7 @@
         "description": "nir/loop_unroll: unroll more aggressively if it can improve load scheduling",
         "nominated": false,
         "nomination_type": null,
-        "resolution": 4,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": null
     },
