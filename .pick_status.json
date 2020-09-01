@@ -2929,7 +2929,7 @@
         "description": "panfrost: Identify additional SFBD flags",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 2,
         "master_sha": null,
         "because_sha": "a64599a303ee8ded4bd6b3cef1f720bb7c308127"
     },
