@@ -3316,7 +3316,7 @@
         "description": "vulkan: make VK_TIME_DOMAIN_CLOCK_MONOTONIC_RAW_EXT conditional",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "67a2c1493c068281936fecba9fa6784becf08f8e"
     },
