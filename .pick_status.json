@@ -2704,7 +2704,7 @@
         "description": "meson: drop leftover PTHREAD_SETAFFINITY_IN_NP_HEADER",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "55765f80b9ce7cce4ec6a1c2bed6476776d9cbed"
     },
