@@ -2425,7 +2425,7 @@
         "description": "Revert \"ac: generate FMA for inexact instructions for radeonsi\"",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "4b9370cb0f3a2d9030e827f847f66bdefeaf08fd"
     },
