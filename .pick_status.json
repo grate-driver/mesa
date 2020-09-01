@@ -3235,7 +3235,7 @@
         "description": "anv: refresh cached current batch bo after emitting some commands",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "34a0ce58c7f85ea3ec3f1026469ce06602f38a5b"
     },
