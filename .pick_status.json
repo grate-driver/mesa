@@ -2767,7 +2767,7 @@
         "description": "iris: Re-emit push constants if we have a varying workgroup size",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "33c61eb2f10526c0b90c5ad376e5b0433aec296d"
     },
