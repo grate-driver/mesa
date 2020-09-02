@@ -21478,7 +21478,7 @@
         "description": "loader/dri3: Use dri3_wait_for_event_locked in loader_dri3_wait_for_msc",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 2,
         "master_sha": null,
         "because_sha": "7b0e8264dd21ae05521d08d41fecd84139401fef"
     },
