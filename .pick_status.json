@@ -2200,7 +2200,7 @@
         "description": "amd/common: Fix various non-critical integer overflows",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": null
     },
