@@ -1201,7 +1201,7 @@
         "description": "aco: fix one-off error in Operand(uint16_t)",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "3d6f67950d91de1dd50b096de144e504a89ea21d"
     },
