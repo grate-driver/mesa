@@ -751,7 +751,7 @@
         "description": "turnip: Fix truncation of iovas to 32 bits in queries.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "e34b0d65f9715b9376408a769e2005bb579128f8"
     },
