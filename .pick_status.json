@@ -400,7 +400,7 @@
         "description": "aco: fix VOP3P assembly, VN and validation",
         "nominated": false,
         "nomination_type": null,
-        "resolution": 4,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": null
     },
