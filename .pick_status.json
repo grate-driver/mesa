@@ -760,7 +760,7 @@
         "description": "turnip: Fix truncation of CS shader iovas to 32 bits.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "13525a9c706bc3b5aef2b9bc649644f2e3607f31"
     },
