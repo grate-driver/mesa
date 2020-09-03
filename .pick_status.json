@@ -1714,7 +1714,7 @@
         "description": "radeonsi: fix user fence space when MCBP is enabled",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "89d2dac55486464832552dfc3349054c29a82922"
     },
