@@ -2092,7 +2092,7 @@
         "description": "ac/llvm: fix unaligned VS input loads on gfx10.3",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "a23802bcb9a42a02d34a5a36d6e66d6532813a0d"
     },
