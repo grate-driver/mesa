@@ -1,6 +1,7 @@
 mesa (20.2.0~rc4-1) UNRELEASED; urgency=medium
 
   * New upstream prerelease.
+  * rules: Move radv rule up to fix build on non-intel archs.
 
  -- Timo Aaltonen <tjaalton@debian.org>  Fri, 28 Aug 2020 20:20:09 +0300
 
