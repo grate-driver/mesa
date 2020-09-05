@@ -1291,7 +1291,7 @@
         "description": "android: freedreno/common: add libmesa_git_sha1 static dependency",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "e7458f19e1de7d40ff8aa72b6a141f24d33451c6"
     },
