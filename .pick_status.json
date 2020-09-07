@@ -400,7 +400,7 @@
         "description": "pan/mdg: Fix promoted uniform moves with 64-bit types",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "5e5ea25a0da97a5dbec6e2fd7409e28ff62714cf"
     },
