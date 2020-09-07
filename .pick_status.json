@@ -1660,7 +1660,7 @@
         "description": "nir/opt_if: fix opt_if_merge when destination branch has a jump",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "4d3f6cb9739dfeaf9605fcd2f5318e03acf5066e"
     },
