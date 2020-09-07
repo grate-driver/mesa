@@ -967,7 +967,7 @@
         "description": "llvmpipe: include gallivm perf flags in shader cache.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "6c0c61cb48e87d9b0fc545cf30016d3947a47b6a"
     },
