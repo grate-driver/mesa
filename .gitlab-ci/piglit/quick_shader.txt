@@ -1693,10 +1693,6 @@ spec/glsl-1.10/execution/built-in-functions/vs-pow-float-float: fail
 spec/glsl-1.10/preprocessor/extension-defined-test: skip
 spec/glsl-1.10/preprocessor/extension-if-1: skip
 spec/glsl-1.30/execution/fs-texturegrad-miplevels: fail
-spec/glsl-1.30/execution/fs-texturelod-miplevels: fail
-spec/glsl-1.30/execution/fs-texturelod-miplevels-biased: fail
-spec/glsl-1.30/execution/vs-texturelod-miplevels: fail
-spec/glsl-1.30/execution/vs-texturelod-miplevels-biased: fail
 spec/glsl-1.50/execution/built-in-functions/gs-pow-float-float: fail
 spec/glsl-1.50/execution/compatibility/clipping/gs-clip-vertex-const-accept: skip
 spec/glsl-1.50/execution/compatibility/clipping/gs-clip-vertex-const-reject: skip
@@ -4635,8 +4631,8 @@ spec/oes_viewport_array/viewport-gs-writes-out-of-range: skip
 summary:
        name:  results
        ----  --------
-       pass:    10712
-       fail:       57
+       pass:    10716
+       fail:       53
       crash:        0
        skip:     4577
     timeout:        0
