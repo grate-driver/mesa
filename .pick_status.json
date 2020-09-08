@@ -544,7 +544,7 @@
         "description": "svga: Fix unused printf argument.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "ccb4ea5a43e89fcc93fff98c881639223f1538e5"
     },
