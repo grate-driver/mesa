@@ -796,7 +796,7 @@
         "description": "blorp: Fix alignment test for HIZ_CCS_WT fast-clears",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "5425fcf2cb39dc9df56593d4460b56688506c0cc"
     },
