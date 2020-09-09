@@ -1156,7 +1156,7 @@
         "description": "pan/mdg: Fix spilling of non-32-bit types",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "b4de9e035ac0afe64ebfd58cd0eb04c1a671afce"
     },
