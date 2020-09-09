@@ -355,7 +355,7 @@
         "description": "anv: fix minor gen_ioctl(I915_PERF_IOCTL_CONFIG) error handling issue",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "2001a80d4a81f2e8194b29cca301dd1b27be9acb"
     },
