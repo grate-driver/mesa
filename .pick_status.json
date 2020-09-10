@@ -598,7 +598,7 @@
         "description": "radeonsi: fix max syncobj wait timeout",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "c638301b42bc6ea1a623c2a53646047197fb8030"
     },
