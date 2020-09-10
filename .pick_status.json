@@ -1876,7 +1876,7 @@
         "description": "nir: fix sampler_lod_parameters_pan indices",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "deaebc82a73ba3f34c4f2ecf97cedb7fc9b0b154"
     },
