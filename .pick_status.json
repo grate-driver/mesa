@@ -2074,7 +2074,7 @@
         "description": "etnaviv: stop leaking the dummy texure descriptor BO",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "eda73d71277a0dd9d7832da96c2aaca2dd513d4d"
     },
