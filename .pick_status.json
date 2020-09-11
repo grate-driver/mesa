@@ -2074,7 +2074,7 @@
         "description": "glsl: fix per_vertex_accumulator::fields size",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "49d35f3d882bd0f4418a1ce056344b8f06bd75dd"
     },
