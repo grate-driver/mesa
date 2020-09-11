@@ -1993,7 +1993,7 @@
         "description": "freedreno: Check file descriptor before write.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "1ea4ef0d3be829e392922f5d26fbc89bf69a8a67"
     },
