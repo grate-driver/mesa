@@ -526,7 +526,7 @@
         "description": "aco: Fix emit_boolean_exclusive_scan in wave32 mode.",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": null
     },
