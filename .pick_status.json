@@ -1327,7 +1327,7 @@
         "description": "mesa: fix glUniform* when a struct contains a bindless sampler",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "990c8d15ac3de8623940b32b662ef956703cc6bc"
     },
