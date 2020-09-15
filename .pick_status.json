@@ -22,7 +22,7 @@
         "description": "radv: initialize with expanded cmask if the destination layout needs it",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "7b21ce401f7e81deca5ab6a4353b1369d059bcee"
     },
