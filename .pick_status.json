@@ -589,7 +589,7 @@
         "description": "intel/compiler: fixup Gen12 workaround for array sizes",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "397ff2976ba281a7d599b6246b7f6311011eaa0c"
     },
