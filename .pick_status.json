@@ -472,7 +472,7 @@
         "description": "radeonsi: fix indirect dispatches with variable block sizes",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "77c81164bc1cd9ec98b32c40753f590791450434"
     },
