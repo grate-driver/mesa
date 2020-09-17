@@ -1,0 +1,134 @@
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<title>Mesa Release Notes</title>
+<link rel="stylesheet" type="text/css" href="../mesa.css">
+</head>
+<body>
+
+<div class="header">
+<h1>The Mesa 3D Graphics Library</h1>
+</div>
+
+<iframe src="../contents.html"></iframe>
+<div class="content">
+
+<h1>Mesa 20.1.8 Release Notes / 2020-09-16</h1>
+
+<p>
+    Mesa 20.1.8 is a bug fix release which fixes bugs found since the 20.1.7 release.
+</p>
+<p>
+Mesa 20.1.8 implements the OpenGL 4.6 API, but the version reported by
+glGetString(GL_VERSION) or glGetIntegerv(GL_MAJOR_VERSION) /
+glGetIntegerv(GL_MINOR_VERSION) depends on the particular driver being used.
+Some drivers don't support all the features required in OpenGL 4.6. OpenGL
+4.6 is <strong>only</strong> available if requested at context creation.
+Compatibility contexts may report a lower version depending on each driver.
+</p>
+<p>
+Mesa 20.1.8 implements the Vulkan 1.2 API, but the version reported by
+the apiVersion property of the VkPhysicalDeviceProperties struct
+depends on the particular driver being used.
+</p>
+
+<h2>SHA256 checksum</h2>
+<pre>
+TBD.
+</pre>
+
+
+<h2>New features</h2>
+
+<ul>
+    <li>None</li>
+</ul>
+
+<h2>Bug fixes</h2>
+
+<ul>
+    <li>Crash in ruvd_end_frame when calling vaBeginPicture/vaEndPicture without rendering anything</li>
+    <li>khr_debug-push-pop-group_gl: ../src/util/simple_mtx.h:86: simple_mtx_lock: Assertion `c != _SIMPLE_MTX_INVALID_VALUE&#x27; failed.</li>
+    <li>Amber test opt_peel_loop_initial_if: Assertion failed</li>
+    <li>Dirt Rally: Flickering glitches on certain foliage since Mesa 20.1.0 caused by MSAA</li>
+    <li>[BRW] WRC 5 asserts with gallium nine and iris.</li>
+</ul>
+
+<h2>Changes</h2>
+
+<ul>
+    <p>Andrey Vostrikov (1):</p>
+    <li>      egl/x11: Free memory allocated for reply structures on error</li>
+    <p></p>
+    <p>Bas Nieuwenhuizen (2):</p>
+    <li>      radv: Fix threading issue with submission refcounts.</li>
+    <li>      radeonsi: Work around Wasteland 2 bug.</li>
+    <p></p>
+    <p>Danylo Piliaiev (1):</p>
+    <li>      intel/compiler: Fix pointer arithmetic when reading shader assembly</li>
+    <p></p>
+    <p>Dave Airlie (1):</p>
+    <li>      gallivm: disable brilinear for lod bias and explicit lod.</li>
+    <p></p>
+    <p>Eric Anholt (2):</p>
+    <li>      gallium/tgsi_exec: Fix up NumOutputs counting</li>
+    <li>      freedreno: Make the pack struct have a .qword for wide addresses.</li>
+    <p></p>
+    <p>Eric Engestrom (4):</p>
+    <li>      docs/relnotes: add sha256 sums to 20.1.7</li>
+    <li>      .pick_status.json: Update to 123bdb61cc0be64ee29b63cf27565ec98c2a0ab8</li>
+    <li>      .pick_status.json: Mark c8ac01af33a5bc63822915f08f89a7dbaf7d433f as denominated</li>
+    <li>      meson: drop leftover PTHREAD_SETAFFINITY_IN_NP_HEADER</li>
+    <p></p>
+    <p>Icecream95 (1):</p>
+    <li>      pan/mdg: Fix spilling of non-32-bit types</li>
+    <p></p>
+    <p>Jason Ekstrand (3):</p>
+    <li>      intel/fs: Don&#x27;t copy-propagate stride=0 sources into ddx/ddy</li>
+    <li>      spirv: Run repair_ssa if there are discard instructions</li>
+    <li>      nir: More NIR_MAX_VEC_COMPONENTS fixes</li>
+    <p></p>
+    <p>Jordan Justen (1):</p>
+    <li>      anv, iris: Set MediaSamplerDOPClockGateEnable for gen12+</li>
+    <p></p>
+    <p>Marek Olšák (1):</p>
+    <li>      Revert &quot;ac: generate FMA for inexact instructions for radeonsi&quot;</li>
+    <p></p>
+    <p>Michel Zou (1):</p>
+    <li>      swr: fix build with mingw</li>
+    <p></p>
+    <p>Nanley Chery (2):</p>
+    <li>      iris: Fix aux assertion in resource_get_handle</li>
+    <li>      blorp: Fix alignment test for HIZ_CCS_WT fast-clears</li>
+    <p></p>
+    <p>Pierre-Eric Pelloux-Prayer (5):</p>
+    <li>      mesa: rename _mesa_free_errors_data</li>
+    <li>      mesa: add bool param to _mesa_free_context_data</li>
+    <li>      mesa/st: release debug_output after destroying the context</li>
+    <li>      r600/uvd: set dec-&gt;bs_ptr = NULL on unmap</li>
+    <li>      radeon/vcn: set dec-&gt;bs_ptr = NULL on unmap</li>
+    <p></p>
+    <p>Qiang Yu (2):</p>
+    <li>      radeonsi: fix syncobj wait timeout</li>
+    <li>      radeonsi: fix max syncobj wait timeout</li>
+    <p></p>
+    <p>Rhys Perry (2):</p>
+    <li>      aco: fix byte_align_scalar for 3 dword vectors</li>
+    <li>      nir/opt_if: fix opt_if_merge when destination branch has a jump</li>
+    <p></p>
+    <p>Timur Kristóf (1):</p>
+    <li>      aco: Fix emit_boolean_exclusive_scan in wave32 mode.</li>
+    <p></p>
+    <p>Tony Wasserka (3):</p>
+    <li>      radv: Fix various non-critical integer overflows</li>
+    <li>      aco: Fix integer overflows when emitting parallel copies during RA</li>
+    <li>      amd/common: Fix various non-critical integer overflows</li>
+    <p></p>
+    <p></p>
+</ul>
+
+</div>
+</body>
+</html>

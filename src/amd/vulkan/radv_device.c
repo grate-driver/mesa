@@ -4636,6 +4636,12 @@ radv_queue_enqueue_submission(struct radv_deferred_queue_submission *submission,
 	 * submitted, but if the queue was empty, we decrement ourselves as there is no previous
 	 * submission. */
 	uint32_t decrement = submission->wait_semaphore_count - wait_cnt + (is_first ? 1 : 0);
+
+	/* if decrement is zero, then we don't have a refcounted reference to the
+	 * submission anymore, so it is not safe to access the submission. */
+	if (!decrement)
+		return;
+
 	if (__atomic_sub_fetch(&submission->submission_wait_count, decrement, __ATOMIC_ACQ_REL) == 0) {
 		list_addtail(&submission->processing_list, processing_list);
 	}
