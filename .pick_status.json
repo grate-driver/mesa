@@ -1,5 +1,338 @@
 [
     {
+        "sha": "d74fe47101995d2659b1e59495d2f77b9dc14f3d",
+        "description": "glx: Allow depth-30 pbuffers to work without a depth-30 pixmap format",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a163cba1e3a20536377d9b0f9617f8433d580114",
+        "description": "anv: Fix the target_bo assertion in anv_reloc_list_add",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "b75a92e2010e81fdd387f1eae3be11e327d0a0bf"
+    },
+    {
+        "sha": "85cc2950a045ca0fe153498fb7d48322d2906482",
+        "description": "radv: initialize with expanded cmask if the destination layout needs it",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "7b21ce401f7e81deca5ab6a4353b1369d059bcee"
+    },
+    {
+        "sha": "6f2b6952bef69af9cf8ae66be4261837bacb3137",
+        "description": "nir: remove ubo_r600 instrinsic since ubo_vec4 is used now",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "18e97817148eb376274a8749c03b45c2f817c139",
+        "description": "r600/sfn: Use load_ubo_vec4 lowering pass",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "98eb00face93b9af5aac19008ecff5a2bf376745",
+        "description": "r600: enable lowering uniforms to UBO",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4ac4cdb5bfece49db29939e00dbf8d67fddc3b65",
+        "description": "aco: fix incorrect assertion in emit_vop3a_instruction()",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "0b6448bbe791474a152d53bfaf750408807ac166"
+    },
+    {
+        "sha": "207219d4356786e8bb4b5f19c67322ee82874967",
+        "description": "turnip: Add support for a615.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "45bff4e989036e9c9ef9fb475c4305ccc80a6c3d",
+        "description": "util: Makefile.sources: Add disk_cache_os.{c,h}",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "4339ecde35cffce82b5f4b8cd3cfdc88edca4331"
+    },
+    {
+        "sha": "2aaa1564ad0620724eaf38d66cec85dafad4613e",
+        "description": "nir/lower_io: don't reduce range if parent length is zero",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a51aa6feb4dab07e29b9834f7ad431cc0dd6f9fe",
+        "description": "pan/bi: Drop *FMIN reference",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "865e252dd0185313cbf06cca782fc3b3c3867239",
+        "description": "pan/bi: Remove unused packing data structures",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ec43629e8c03f759e446018d56e4adece3dc913c",
+        "description": "pan/bi: Remove unused prints",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2ff53879f214700def92fd2cc3ead89119cd2fef",
+        "description": "pan/bi: Use new packing",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3fadd8234611837798311ff1ace7a39c1cc3adc4",
+        "description": "pan/bi: Move packing helpers to dedicated file",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d2158a5b3016bf4e6593ba4f0fc4de653323bf87",
+        "description": "pan/bi: Use src1/dest_invert instead of src_invert[]",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "08b105d78254612ad64fe7aec825c3fbe102cc90",
+        "description": "pan/bi: Use 8-bit shifts",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3d63a476f7a05eaa7810b86405381285fb6672ad",
+        "description": "pan/bi: Pass blend descriptor explicitly in IR",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "67d89568af22c77df6d63e6c5dd405692a846ab3",
+        "description": "pan/bi: Track compute_lod in IR",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8dd3a81c1d7fd43218a4d206259dbc1cd6fc0a17",
+        "description": "pan/bi: Add format field to IR",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6f5b78874ab34095dd55d6020d3d63318b7336d8",
+        "description": "pan/bi: Introduce segments into the IR",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "33710ff8953c5112b88ae8f0f2ff55b021815ca6",
+        "description": "pan/bi: Add dummy carry/borrow argument for iadd/isub",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "42ec4aa47851fa5c5ce22ab03b2762b7bdc3e027",
+        "description": "pan/bi: Use canonical syntax for special constants",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5a569d09f421eb6445ca2f4500a38fbb1c76896a",
+        "description": "pan/bi: Use canonical syntax for registers/uniforms/imms",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f8fc21059f304cd22796d8e762ff7a5d00dbfa3f",
+        "description": "pan/bi: Use new disassembler",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "deab75250c5cd90335ae2303f89eda33e10c870c",
+        "description": "pan/bi: Export dump_src",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "05041811ce51ebf53cd77acd88c53670b0ef78b1",
+        "description": "pan/bi: Add bi_disasm_dest_* helpers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "944cb8bcba51342cd3c3d38a77a7970242eda74b",
+        "description": "pan/bi: Add disassembly prototypes",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "82f33155f6d4b946d88cd0c0b6723f7cedb9a518",
+        "description": "pan/bi: Add disassembler generator",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cf8f79a9fcfcca1e4337ed22c02595516024c22c",
+        "description": "pan/bi: Add packing generator",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "58da316de7a7858eb96a18ee8c1f9d35bf0c2b99",
+        "description": "pan/bi: Add ISA parser",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "07a5ec83fb09de861d940fea69b49cefb08fda75",
+        "description": "pan/bi: Add XML describing the instruction set",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2044b1fba5d19d475d73f39ddb17ff86213941a1",
+        "description": "pan/bi: Lower flrp16",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "3c8934a644b8df57e80a46020ac725cb61076d5a"
+    },
+    {
+        "sha": "b75a92e2010e81fdd387f1eae3be11e327d0a0bf",
+        "description": "anv: assert that the target bo is valid when adding a reloc list",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "355f241d4153aeba14268498d4d6f68b80c95aa5",
+        "description": "anv: improve error message when failing to open device path",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "203b934921677b7251dec1c6e1317b9bfb709da2",
+        "description": "docs: update calendar and link releases notes for 20.1.8",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "fdff24d930d78a64c9d4f2488d88e0328cd857ee",
+        "description": "docs: add release notes for 20.1.8",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "123bdb61cc0be64ee29b63cf27565ec98c2a0ab8",
         "description": "gallium+mesa/st: lower uniforms based on compiler flag instead of packed uniforms cap",
         "nominated": false,
