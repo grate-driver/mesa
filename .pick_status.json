@@ -1102,7 +1102,7 @@
         "description": "radeonsi: fix user fence GPU address",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "3d5bed0e883217242a4357116399f60486580170"
     },
