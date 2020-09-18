@@ -1309,7 +1309,7 @@
         "description": "radv: fix vertex buffer null descriptors",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "0f1ead7b5366470dfd834e68b7b62305ac1602a8"
     },

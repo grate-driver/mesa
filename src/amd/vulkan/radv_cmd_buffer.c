@@ -2486,8 +2486,10 @@ radv_flush_vertex_descriptors(struct radv_cmd_buffer *cmd_buffer,
 			uint32_t stride = cmd_buffer->state.pipeline->binding_stride[i];
 			unsigned num_records;
 
-			if (!buffer)
+			if (!buffer) {
+				memset(desc, 0, 4 * 4);
 				continue;
+			}
 
 			va = radv_buffer_get_va(buffer->bo);
 
