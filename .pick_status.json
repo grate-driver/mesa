@@ -1165,7 +1165,7 @@
         "description": "intel/fs/swsb: SCHEDULING_FENCE only emits SYNC_NOP",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "18e72ee2108a9388b8d1890311dd22f69886438a"
     },
