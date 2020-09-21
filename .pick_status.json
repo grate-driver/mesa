@@ -4,7 +4,7 @@
         "description": "ci: Use ignore_scheduled_pipelines anchor in .radeonsi-rules",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "6c8b921572a542f5de62475a76501a9db73dae4d"
     },
