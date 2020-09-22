@@ -1273,7 +1273,7 @@
         "description": "nir/liveness: Consider if uses in nir_ssa_defs_interfere",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "f86902e75d989b781be36ced5dc98dfc0cd34b7b"
     },
