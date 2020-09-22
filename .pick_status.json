@@ -22,7 +22,7 @@
         "description": "gallium/vl: add chroma_format arg to vl_video_buffer functions",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "24f2b0a8560f34745854bf8263fa7c2d0f95f2bc"
     },
