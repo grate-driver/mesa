@@ -2335,7 +2335,7 @@
         "description": "gallium/dri2: Move image->texture assignment after image NULL check.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "ad609bf55a87200ab11ad7cf31420dcfd8dfc141"
     },
