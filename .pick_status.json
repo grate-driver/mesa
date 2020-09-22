@@ -940,7 +940,7 @@
         "description": "mesa: handle GL_FRONT after translating to it",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "e6ca6e587e7f88d6b06c0a5c966438beac6cb18e"
     },
