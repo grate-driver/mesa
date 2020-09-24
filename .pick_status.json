@@ -1,5 +1,140 @@
 [
     {
+        "sha": "472a20c5fc0feda0f074b4ff95fd7c7a6305c8cd",
+        "description": "radeonsi: Only call nir_lower_var_copies at the end of the opt loop",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "283ad85944b5d9082f0ede7ab41fb353db53fee8"
+    },
+    {
+        "sha": "7971918924dd84c2f33a5b7f0a8bf0c23ed994d8",
+        "description": "zink: reorder create_stream_output_target to fix failure case leak",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "37778fcd9a352430af0cd3b28a8776479a7c8380"
+    },
+    {
+        "sha": "bc5c0433be806e458d0a91a9a7df342c70a5d1ee",
+        "description": "zink: apply viewport count when creating pipelines",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cc939fe9b7013b8d9c043cfae3444ca0a35e5f98",
+        "description": "zink: correctly set up fb-sized scissors for each viewport",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8a2ddcb4a940196a1698fe15a96963875bab47f0",
+        "description": "zink: set multiviewport cap in ntv when gl_ViewportIndex is a written output",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "09be30b9e4c1d9246fb2084b6f30feed35f80c62",
+        "description": "zink: move viewport count to zink_gfx_pipeline_state",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "818bd610992f1808f4d680a2e98aaa445dc8f442",
+        "description": "zink: implement ARB_instanced_arrays",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "00515517016d3759543c097db68013fe287d8342",
+        "description": "zink: verify that src and dst aspects are the same in resource_copy_region hook",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6feec2d40e0acef6b2b1950fd960a9bfc84258b2",
+        "description": "zink: clamp min created fb size to 1x1",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9ce1e99913dac4ccf323c786a0555e2b1e032188",
+        "description": "zink: use correct layer count when creating framebuffer",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e30367a27361bc561c2d1ab513f7d522ce9ada33",
+        "description": "zink: use correct number of samples on framebuffer in set_framebuffer_state",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f6c87216d3190bef3c5cbe66a934d0f72fb2fd64",
+        "description": "zink: use correct value for color buffer sample count when creating renderpass",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "140f53e64646668c09dd4f09d2df9c17ce5d0d5f",
+        "description": "Revert \"nir: replace lower_ffma and fuse_ffma with has_ffma\"",
+        "nominated": false,
+        "nomination_type": 2,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "939ddf3f67de2ed1700c093e60cf95c1b72ff20b"
+    },
+    {
+        "sha": "d8cdcd4adf7a1209da7afe47056118183e2b3529",
+        "description": "radv: use syncobj for wsi fence",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1aa1b9f86ce89519ea0150a61cfc53c5e5ddb7ea",
+        "description": "radv: fix incorrect ResetFences path for WSI fence",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "90b98c06493f8a9759e5496d5ec91fb60edf7b92",
         "description": "amd/tmz: move uses_secure_bos to radeon_winsys",
         "nominated": false,
