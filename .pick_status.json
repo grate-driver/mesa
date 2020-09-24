@@ -1,5 +1,770 @@
 [
     {
+        "sha": "90b98c06493f8a9759e5496d5ec91fb60edf7b92",
+        "description": "amd/tmz: move uses_secure_bos to radeon_winsys",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "24796899685c0be3cd99fef02a7ec3ebb7b1b63b",
+        "description": "radeonsi/tmz: add workaround for mpv/vaapi subtitles",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2c6643546ad85f4e19aa3728a96fa4d6ddb571d9",
+        "description": "radeonsi/tmz: add a tmz variant for sctx::eop_bug_scratch",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "133895574c97af369a26b6ab820c65347f7042a7",
+        "description": "radeonsi: disable primitive discard if tmz is in use",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8e2768bbfb1b0e9d70bb5a4d0267c6eb387d1c30",
+        "description": "radeonsi/tmz: add tmz variant for sctx::tess_rings",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2589888ce969fe0254cd69c200afe535e2cdfb79",
+        "description": "radeonsi/tmz: add tmz variant of sctx::wait_mem_scratch",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "de088daccc2b5d0c7dca1d09d827f225ba8e4d53",
+        "description": "radeonsi/tmz: fail si_texture_transfer_map if tex is encrypted",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "55b018b634be8409a8a3f421082827509d23ac03",
+        "description": "amd/winsys: add RADEON_FLUSH_TOGGLE_SECURE_SUBMISSION",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1b0d660cbc7a0b4e856295eeb5350dfa9b45f405",
+        "description": "radeonsi/tmz: allow secure job if the app made a tmz allocation",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f5ec61767743b091e60740a1ec177829a1786682",
+        "description": "ac/gpu_info: add detection of TMZ support",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "846e3931428385d82ec65dc552d2b3f8dfa7cc5c",
+        "description": "amd: add AMDGPU_IDS_FLAGS_TMZ definition to amdgpu_drm.h",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5e4aecec93204c832dc7756286f79fd8f1e4f8d2",
+        "description": "radeonsi: introduce SI_RESOURCE_FLAG_INTERNAL / RADEON_FLAG_DRIVER_INTERNAL",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "131412cc4d09d2853da9e31a30542ddb97d9e678",
+        "description": "radeonsi/tmz: allocate depth/stencil buffers as encrypted",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0a59d2a3e9ed9965b303abd469065486ced5da77",
+        "description": "radeonsi/tmz: add safety assert when tmz is enabled",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "59b267dea4510d4b828711acb08979222be20955",
+        "description": "radeonsi/tmz: use secure job if using an encrypted z/s buffer",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5bc24fe2833b1d7d5d482787c452b92b214d9abe",
+        "description": "radeonsi/tmz: use secure job if framebuffer has dcc",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cec0bc73e550859635a71d330625bccdf71e87ee",
+        "description": "turnip: rework fences to use syncobjs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c23206757a1821738f112b59a698d95f8526b8e9",
+        "description": "turnip: require syncobj support",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "89ffe859a8fddaa12c25099da30aa7008d8969e6",
+        "description": "turnip: add a fd field to tu_device",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ec4fe92c834d9290e42c2e78b7b4227bfe38dbf3",
+        "description": "turnip: delete unused tu_fence_signal function",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9e13a16c974b239eedc121c647f1d54a1fe4d9e4",
+        "description": "mesa: handle GL_FRONT after translating to it",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "e6ca6e587e7f88d6b06c0a5c966438beac6cb18e"
+    },
+    {
+        "sha": "005d9d22190b3cc80480b98f78b7a6d7c7b979ae",
+        "description": "ci: adjust RadeonSI rules",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4c71cda9abc78312442d451b58b0163ae09adb88",
+        "description": "vulkan/wsi/display: add option for display fence to signal syncobj",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "32d754825c45a17b60aefb45d0e0606ab1f2b6e7",
+        "description": "radeonsi: always inline draw-related functions that have only one use",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f24b5894f8c6aef66adbed944ef0bfa3001a40f8",
+        "description": "radeonsi: lift the conditional for skipping si_upload_vertex_buffer_descriptors",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0b2f75f9ac2ac0f7cd7755cdd0799385c86166c6",
+        "description": "radeonsi: add unlikely statements into si_draw_vbo",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8ab15c9e33a71923bb1b2c338544393b0e7bcffb",
+        "description": "radeonsi: move si_upload_vertex_buffer_descriptors into si_state_draw.c",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "12b1e8a35d2cbbb614136d0b2b7b72c8075c5cdc",
+        "description": "radeonsi: reorganize the code around the gfx9 scissor bug",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "532259b8a3b8a92c79a1c6ea8d367394d1b39052",
+        "description": "radeonsi: don't call emit_cache_flush after uploading bindless descriptors",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d647065b069d232ba41aa1512b5aa259feadd596",
+        "description": "radeonsi: move a displaced comment in si_draw_vbo",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "816a867bbd071d8b119023d6769164cdca218faf",
+        "description": "radeonsi: call si_upload_graphics_shader_descriptors before the big conditional",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0051f2cb2a6092a9907cc6a491a19ce63fc5f0b9",
+        "description": "radeonsi: use optimal order of operations when setting up a compute dispatch",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e560028c8e76727b6459cc9e7769200792dc68a7",
+        "description": "panfrost: Remove redundant casts of viewport position",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3d0ae7a9dab839823a47da228c40935667e05ca0",
+        "description": "panfrost: Handle non-positive viewport positions",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2aa48bb5a8dbf3cc6584011ee2b869c586402d34",
+        "description": "panfrost: Clamp uniform buffer size",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "939ddf3f67de2ed1700c093e60cf95c1b72ff20b",
+        "description": "nir: replace lower_ffma and fuse_ffma with has_ffma",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f1284505f0fae78dee2af06e2d8a194d1bc5b442",
+        "description": "radeonsi: fuse or lower ffma optimally on all chips",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "771aad30276397d6388c147b93c9e298fe30b72b",
+        "description": "nir: split lower_ffma into lower_ffma16/32/64",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "21174dedec43df155309653764d76b4acd4d5f86",
+        "description": "nir: split fuse_ffma into fuse_ffma16/32/64",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c58b46edf0e96f927c3d7401229479046e57dc7d",
+        "description": "radeonsi: force linear for textures with height=1 (gfx6-8)",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5f27777379f5939871d4a5fdedc64b27a592d82a",
+        "description": "radeonsi: add a tweak for PS wave CU utilization for gfx10.3",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b5debe180efd3a8b2cd02a3c452a8917473a312b",
+        "description": "radeonsi: break a binning batch on a new PS if bins can use multiple state sets",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "972fb0368cbe85d52a0f65973b76607b02a32d69",
+        "description": "radeonsi: move binning parameters into si_screen",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8b134fb915d8ca5ae1aefacc25d91de88862d46d",
+        "description": "radeonsi: set KEEP_TOGETHER_ENABLE if needed",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "28a76161e5d4ef79381206b734e8ce415675a3ca",
+        "description": "pan/bi: Remove old register mode definitions",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7a0f3b607ed5891eb980ea4fd90afd8b5c7b5032",
+        "description": "pan/bi: Use canonical register packing",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "514da97ccacc766eccb9a3e32ef08b6c318c9a39",
+        "description": "pan/bi: Rename port -> slot",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c749803dbbed4f7bfed9e0d6298956a10e0b984a",
+        "description": "pan/bi: Decode all 32-bit register modes",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "bdb33f75297a04caf52774869b2206bcb4f01a68",
+        "description": "pan/bi: Pass 'first' through disassembler",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4d3d5a66c92d26b092800544b2a1f168c84b195a",
+        "description": "pan/bi: Add bifrost_reg_mode enum",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b392c07983441456c824688ba30b3c8e77995604",
+        "description": "pan/bi: Disassemble PC-relative addresses",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "08a9e5e3e892e9acc7fcfc2cefb45990efa62e40",
+        "description": "pan/bi: Decode M values in disasm",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9de34e16e0e0d6af8bdcb906961320b46d08ff1b",
+        "description": "pan/bi: Track M values of disassembled constants",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "43c6623c9eb106ef54191b7f404db669f8c9aec4",
+        "description": "pan/bi: Inline dump_instr",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5ff3feab88a1e8b187267bdfbbae86d45a87b489",
+        "description": "pan/bi: Annotate disassemble with format names",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ab5cc3e717dc7cfe26127cb206b5305fb8a35f45",
+        "description": "pan/bi: Annotate stop bit (canonically \"Z-bit\")",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "24a74b352c8f2c06e47ce32192df5cbe125e77d7",
+        "description": "radv: add a tweak for PS wave CU utilization for gfx10.3",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6865a6a74cf4b55e289786dfe303c35dacffed3b",
+        "description": "radv: set KEEP_TOGETHER_ENABLE if necessary on GFX10+",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "68bb91ee11125c563ddaaa7580f351a27f85e1d4",
+        "description": "radeonsi: don't use nir_opt_access",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "87f91e20143eae314c2a93b7f676413a08cd5c11",
+        "description": "st/nir: call nir_opt_access before gl_nir_lower_buffers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e893102bcf5d6632f36399d745481639344e5526",
+        "description": "radv: Add VK_FORMAT_E5B9G9R9_UFLOAT_PACK32 rendering support.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "43735c06df439ec5c1254c153a21813c5b230094",
+        "description": "radv: Simplify radv_is_hw_resolve_pipeline.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "bf0c82b7f8cd8acece2adf63a32590711015864d",
+        "description": "radv: Disable NGG on APUs.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "12128fb1351eee6ec681039fe8483b3c39db7c8e",
+        "description": "lima: add natively supported vertex buffer formats",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c669db0b503c10faf2d1c67c9340d7222b4f946e",
+        "description": "radv: advertise VK_KHR_copy_commands2",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0401507b77db041cf1364dfd37973bf3bd2597e0",
+        "description": "radv: add support for CmdResolveImage2KHR()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9a700af65cf8d34b44dae1fbf2cef9d5a8f7d7d1",
+        "description": "radv: cleanup selecting the hardware resolve path",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "fe819710adcc337ff87bb8eca259f0235ba9a1ed",
+        "description": "radv: add support for CmdCopyImageToBuffer2KHR()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f9915ac465b2926df8f12a7221062e42e57cc494",
+        "description": "radv: add support for CmdCopyImage2KHR()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "69dfcfbb24af13a32a58aadaa231d10238d8f1cc",
+        "description": "radv: add support for CmdCopyBufferToImage2KHR()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "22a08da7370e581d71a8c19dee028be4c7c07a86",
+        "description": "radv: add support for CmdCopyBuffer2KHR()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "eccc73ff780da0380067690f81ca9db93d67b66c",
+        "description": "radv: add support for CmdBlitImage2KHR()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cc709a07f27c6d0ac2b8a8c98a15fb00014a8efc",
+        "description": "radv: add VK_KHR_copy_commands2 but leave it disabled",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "93f158fa2ea6f05cd96304a48b8eeb7c6ba1173b",
+        "description": "radv: bump the advertised patch version to 145",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "43c7de6b910d965962d83877eb9560a027c1350c",
+        "description": "radv: remove useless assignment of MAX_API_VERSION",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e8a40715a8bcd479c0c33eab411d276777153a0e",
+        "description": "gallium/util: add blitter-support for stencil-fallback",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2970d388a2a956b6c2571dccc2612d71aa666612",
+        "description": "gallium/util: add shader for stencil-blits",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "924e27647e47d51111bca12bce470aba4fd85e37",
+        "description": "nir_lower_system_values: Fix load_global_invocation_id to use base_work_group_id even with no base_global id",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ee4cee6dbdfcafb0ec88fe010d4ae05ce06e2e52",
+        "description": "android: Disable trying to read/write to the disk cache.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "25b36d900acb0d3d923bd0b99a6d8443b4616c73",
+        "description": "mesa: Make the android_stub be a set of non-installed shared libraries.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "283686ad6762182037b708f1b5187129aff0a5dd",
+        "description": "amd: add VanGogh support",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d7495bd123a6215f85a5b9a01e2c3ab5bc203c53",
+        "description": "amd: add Dimgrey Cavefish support",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "40a50e939851c7b1a3c7d3fe92bf7706a1f28025",
+        "description": "radeonsi: remove KILL_PS_INF_INTERP/CLAMP_DIV_BY_ZERO, use screen::options",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "98188409d115d08f3b4e99cdb942118acdf71513",
+        "description": "radeonsi: move debug options from si_disk_cache_create to si_get_ir_cache_key",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cd12fcff96cc7db794047e2a045142ea861254a2",
+        "description": "radeonsi: set TRUNC_COORD=0 for Total War: WARHAMMER to fix it",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "a1f46d7b6943699e5efb60fbcfdd1450db85adb1",
         "description": "ci: Use ignore_scheduled_pipelines anchor in .radeonsi-rules",
         "nominated": true,
