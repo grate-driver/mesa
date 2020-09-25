@@ -4,7 +4,7 @@
         "description": "nir/cf: Better handle intra-block splits",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "fc7f2d2364a98d4ec8fb8627b03c6f84b353998c"
     },
