@@ -598,7 +598,7 @@
         "description": "nir/opt_load_store_vectorize: Use bit sizes when checking mask compatibility",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "ce9205c03bd20d26af23ca891e97a9f848a612d1"
     },
