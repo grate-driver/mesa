@@ -580,7 +580,7 @@
         "description": "mesa: call FLUSH_VERTICES before changing sampler uniforms",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "9545139ce5f10180547568a3da94af9e291253fd"
     },
