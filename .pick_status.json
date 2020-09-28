@@ -238,7 +238,7 @@
         "description": "freedreno: Move rsc NULL check to before rsc dereferences.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "6173cc19c45d92ef0b7bc6aa008aa89bb29abbda"
     },
