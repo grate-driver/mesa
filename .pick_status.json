@@ -310,7 +310,7 @@
         "description": "st/mesa: use roundf instead of floorf for lod-bias rounding",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "132b69c4edb824c70c98f8937c63e49b04f3adff"
     },
