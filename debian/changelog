@@ -1,3 +1,9 @@
+mesa (20.2.0-1) UNRELEASED; urgency=medium
+
+  * New upstream release.
+
+ -- Timo Aaltonen <tjaalton@debian.org>  Tue, 29 Sep 2020 09:49:20 +0300
+
 mesa (20.2.0~rc4-2) experimental; urgency=medium
 
   * Migrate to llvm/clang-11.
