@@ -4711,7 +4711,7 @@
         "description": "nir: Handle incomplete derefs in split_struct_vars",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "f1cb3348f18a9b679925ee537091e52749e9f6da"
     },
