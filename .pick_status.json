@@ -2461,7 +2461,7 @@
         "description": "iris: Fix a fast-clear skipping optimization",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "393f659ed83abfc67d2a57ca1d962d53b22ec03f"
     },
