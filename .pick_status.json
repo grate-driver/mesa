@@ -1,5 +1,797 @@
 [
     {
+        "sha": "7dbb1f7462433940951ce6c3fa22f6368aeafd50",
+        "description": "nir/cf: Better handle intra-block splits",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "fc7f2d2364a98d4ec8fb8627b03c6f84b353998c"
+    },
+    {
+        "sha": "5e2e882270cfb174513bcc9a1e717077a8f39130",
+        "description": "nir: Disallow goto and goto_if in clone and [de]serialize",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9a48ed84ecd166d57fb8018401eb5491d8f80bb1",
+        "description": "nir/copy_propagate: Copy-prop into jump conditions",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7f0cd6f1539ff4a98d1d084116834073f20c515d",
+        "description": "nir/opt_if: Use early returns in opt_if_merge()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "656e428ff4e027d134027df73a0fe13e587011a8",
+        "description": "nir/opt_if: Remove open-coded nir_ssa_def_rewrite_uses()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c6f871b62e21343263a7a4c1fd945269e87fd7ee",
+        "description": "nir/lower_returns: Use nir control flow insertion helpers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f103bded0b5b7f1860a1d0be92d19bb248d29fd4",
+        "description": "ttn: Use nir control flow insertion helpers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f504eb683d8596326015d18b6fcdfccc8a4ad32e",
+        "description": "radv: Use nir control flow insertion helpers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b2ede6280c0a6030efb0bf2005b018dbacfbf4f1",
+        "description": "intel/nir: Use nir control flow helpers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "55e2b3424decf9f0240bb6fe0fd521e775d28d66",
+        "description": "radeonsi: Fix imports with displayable DCC.",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "c6c1fa9a2638800155b31701190af7baccb0c18f"
+    },
+    {
+        "sha": "636f770233543c00c319895201498c57eece6774",
+        "description": "bin/gen_release_notes.py: escape special rST characters",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ae7975ecd43d769a31debb6190586bd2437a6f63",
+        "description": "docs: cpu -> CPU",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5fe6124661db8e89c437ef1cd4e947c1275c046a",
+        "description": "docs: Sandybridge -> Sandy Bridge",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "302fc31847354550cfaba4141cb64b0df3b66e9c",
+        "description": "docs: vmware -> VMWare",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "37bb6ddcc25a67327e8759901930bccb5b495c67",
+        "description": "docs: ubuntu -> Ubuntu",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0c90662dfbac62157e3673c7d91bf4e2d6c69049",
+        "description": "docs: scons -> SCons",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7f4f441465acd324f8eb4744b0a34aed5f2d17fa",
+        "description": "docs: quote \"git log\"",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "50e26e5376e542b6c6483bcfd689ffd5ffd20369",
+        "description": "docs: git -> Git",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "24e8e53bac37de19e1377fac76e98e680eb415bb",
+        "description": "docs: android -> Android",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ca613a5a7ef07ff95ffd02c241488fe7f006595d",
+        "description": "docs: drm -> DRM",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9f59b19ad04931570c6e9be722943368b8b06a42",
+        "description": "docs: wayland -> Wayland",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8d2090e79d0dc56448ac15f6900104c24be1d259",
+        "description": "docs: x11 -> X11",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0db015294ea3ada56dc2cec7ba80d495a6040e27",
+        "description": "docs: cmake -> CMake",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b8b0e5ece02c3f8c40f565688263c3bb7007ee52",
+        "description": "docs: gpu -> GPU",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "12d925dc8d608b80e9078201cefc04ff54d38661",
+        "description": "docs: visual studio -> Visual Studio",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0e9d87eacc568366753606b47843c9b7ca8341b0",
+        "description": "docs: windows -> Windows",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0df19e3c6bf74c3b2427740ff62e709c132350ed",
+        "description": "docs: linux -> Linux",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "557ee09c2eab7032180952ff82c8f83363735613",
+        "description": "docs: microsoft -> Microsoft",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d84420f51362b5363414d9121446211f1cbaf1c8",
+        "description": "docs: mingw -> MinGW",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a14d64757b3e8b2cff19ca186cc79dbb67677659",
+        "description": "docs: ninja -> Ninja",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "eb1e7e61e529239ec345db26a28e6dbf779a4645",
+        "description": "docs: chocolatey -> Chocolatey",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0732efbda91e4c7fed6f99c09940a39cdaa5315c",
+        "description": "docs: mako -> Mako",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "fafd1f442573ab11c408ce17bea16ca21c3fe8d0",
+        "description": "docs: bison -> Bison",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1e75294e82792d0ce478b88d2f9c9bd8cc1389b5",
+        "description": "docs: flex -> Flex",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d95e2e48a9beda7a3af81ca271f1b1e2c53b4367",
+        "description": "docs: python3 -> Python 3",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e198fb64e10ed6753d2f38657a96eaf4fec7578e",
+        "description": "docs: meson -> Meson",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0835ee9e8da19f1fb398e6439db82a59932453c0",
+        "description": "docs: correct reference to meson.build",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5ed6432eebbc03a21359ff92edfe5b7efc5a6257",
+        "description": "docs: llvm -> LLVM",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a1904c96f3b4b14dc6739ad40da4648ccb5b0b66",
+        "description": "docs: bpp -> BPP",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "647a8283674874c445b7864a67ea6834df39bf75",
+        "description": "docs: webservice -> web service",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "648cf6334378860dc5a1b2c629afb54ec1f7271a",
+        "description": "docs: existant -> existent",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "766705d03b9a59051e42e7f070698effbfd530d2",
+        "description": "docs: softwara -> software",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "92a594b15402364097a62b5724c3da33327e17fd",
+        "description": "spirv: Delete the legacy offset/index UBO/SSBO lowering",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1cadbe514138e898d4b0cd3f3d5ba35c20fac87b",
+        "description": "vallium: Stop using lower_ubo_ssbo_access_to_offsets",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "657d49a9ba17bea52689c8ad53a3752a647cdc53",
+        "description": "spirv: Use derefs for push constants",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d3fa7451a6651ea78bd4d1ec2f63e052e7608531",
+        "description": "anv,radv,tu,val: Call nir_lower_io for push constants",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ac7537f155b65801fa41773c8024c335c006c8bb",
+        "description": "nir/lower_io: Add support for push constants",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7a2b4ce22e40471b45c5506f970bedac678243fe",
+        "description": "nir: Allow creating variables with nir_var_mem_push_const.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b0504ed682f7df16ec108016b09ad6ede1c290a4",
+        "description": "llvmpipe: use an alternate env var to enable clover.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "760ba65733d7915a61eaaebd073ce7c06cafec2e",
+        "description": "gallivm/nir: handle non-32-bit mul high",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5d4502c085521ba149048c958f56ee4a62b8484c",
+        "description": "gallivm/nir: fix up non 32-bit load stores",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "28911360507312dd6176c1c53d147846a9849e1a",
+        "description": "gallivm: fix 64-bit CL intrinsics.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "728061b96891290c02297f3097d790221f624a8d",
+        "description": "turnip: signal fence and semaphore in AcquireNextImage2KHR",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e192f8f30a932368c13319990228dfc8661c8aed",
+        "description": "turnip: share code between semaphores/fences + fence import/export",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0497c9cb6ccd54e07a1ddb5777ecf383a988f806",
+        "description": "turnip: remove remaining uses of drmSyncobj helpers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c4d5010c54d83f102f07a98575189a5f1429b6a1",
+        "description": "turnip: rework ImportSemaphoreFdKHR",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8343c32f5af33d773df703b845562385c5126758",
+        "description": "turnip: rework GetSemaphoreFdKHR",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "fb76af24a228213e37d00b5467b1871281969fea",
+        "description": "turnip: semaphores simplification (only syncobj semaphores supported)",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1dfb5a93d2663128850c2280e1feb808a5960b4f",
+        "description": "turnip: set MSM_SUBMIT_SYNCOBJ_RESET for submit pWaitSemaphores",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2a3f6e0267f1be7c0290eb0c14e5ca6f1c387cab",
+        "description": "turnip: always create permanent syncobj for semaphore",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "dcc278c72277fad5ee2f0b86e8215fd78ffc57e0",
+        "description": "turnip: clean up tu_device_memory",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d12cdc9374dc30fa032ea309cad8e921d92ad0e5",
+        "description": "gallivm: fix pow(0, y) to be 0",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "89a1a3e9d60b98dca132c12b0952e0201d28bfc6",
+        "description": "r600/sfn: extend life range of all variables by one",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "02245e38fcf3664247738219f198f064d3b625b5",
+        "description": "r600/sfn: Add support for more barrier instructions",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "48edb98a7ef0366629aebc0a7248b74b50c1ff50",
+        "description": "r600/sfn: Fix IDX register ID",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "9a6b11a7330b08f57876bd8b16c3b360e4818e86"
+    },
+    {
+        "sha": "7683e2756195c01e8786323d9b9329726d0510b2",
+        "description": "r600/sfn: Fix enabling the right interpolator for inerpolate_at_sample",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "73c5f451916de2d14b304d762b65d5db354b6cfa"
+    },
+    {
+        "sha": "16a3a563212733c1d8ec699c956a8ab8a00ea352",
+        "description": "freedreno: Don't leak LRZ bo's",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7454ae4ea6588508687830644ff1f1dcfb74a65d",
+        "description": "freedreno/registers: Add a couple things used on kernel side",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "27c8d976577effe89c336181db7d140ddbb5cfa8",
+        "description": "freedreno/drm: Also clean ring_cache",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "98093e2780eb14dc917eff6389da7ef48803f1ff",
+        "description": "freedreno/a6xx: Small cleanup",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5be3cfdc13eddaca1f15bbd9e9a298b07c1c8ef2",
+        "description": "freedreno: Don't leak border_color_buf reference",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "69a3ef6511255d6652c74439efa2162d14340cc7",
+        "description": "freedreno/drm: drop bo's dev reference",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6a20c630b93b1519c71a0a90185aebe30054be9d",
+        "description": "zink: unify all occurrences of waiting on a fence",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e31381ac2609ef06dfa5a230c38e7044009f5526",
+        "description": "zink: combine all surface layout-setting for src/dst into util function",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "24f19f409d36e71a1c228296da50c75d6894930f",
+        "description": "radv: Write correct dispatch size for RGP.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1b39d74c6823f451b7ed39d9b29d7cda607527c8",
+        "description": "ci: Enable remaining (non-rotate) mustpass CTS tests",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8abe3bb95a869182ada6b75952a059c060766afa",
+        "description": "ci: cherry-pick deqp fix for config choosing",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "aee1c08c06567a7c83f97f3e736dec4bb0008403",
+        "description": "ci/deqp-runner: Allow overriding width/height/config",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "efaea653b5766427701817ab06c319902a148ee9",
+        "description": "intel: Add support for i945g to intel_stub_gpu.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f5901484a773765dc19a473320e5b6b2575f2cd6",
+        "description": "Add driver override to envvars.rst",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2584d48b2cf13ea50b4e6177f32bacf0c7027e79",
+        "description": "gallium/vl: add chroma_format arg to vl_video_buffer functions",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "24f2b0a8560f34745854bf8263fa7c2d0f95f2bc"
+    },
+    {
+        "sha": "b121b1b8b8f6df790dd8150a8b5e8021dc9e56bb",
+        "description": "gallium/vl: do not call transfer_unmap if transfer is NULL",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8d2757789a72714489fc1fd5dfee04e48c52fee8",
+        "description": "tu: Enable multi-position output",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "64ad5a1f7b3be382a9b6297a4a035dcaa1b36740",
+        "description": "ir3, tu: Link per-view position correctly",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6982e8510b56991532533bf7da70344bdbb695b9",
+        "description": "ir3, tu: Run optimization loop twice",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "41a5a2185827257820af37ee8752a839d6f2d519",
+        "description": "tu: Refactor shader compilation flow",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "67ac16611bd31a84e9dd6e54ea4747ab7aad717a",
+        "description": "tu: Write multiview control registers in binning pass",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "c0c7dbd103481b9a07a0f5b56040b1cfadafd89f"
+    },
+    {
+        "sha": "a3363c348dcd968f2d3e413099a4d28fcda047eb",
+        "description": "gallium: Make pipe_viewport_state swizzle_x/y/z/w bit-fields 8 bits wide",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "291cfb1e41513008a5be08be95399373a7de206d",
         "description": "radv: move lowering of FS outputs outside of ACO",
         "nominated": false,
