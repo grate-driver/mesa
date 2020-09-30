@@ -1210,7 +1210,7 @@
         "description": "radeonsi: Fix dead lock with aux_context_lock in si_screen_clear_buffer.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "07a49bf59766b7c40d35608a98bd4a5796dcc2fe"
     },
