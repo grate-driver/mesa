@@ -5125,7 +5125,7 @@
         "description": "aco: implement missing nir_op_unpack_half_2x16_split_{x,y}_flush_to_zero",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "56d9bcdded8f3eb7bd45262ce013ef1809d8edb1"
     },
