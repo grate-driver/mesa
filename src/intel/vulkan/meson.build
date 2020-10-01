@@ -203,7 +203,7 @@ libvulkan_intel = shared_library(
     idep_nir, idep_genxml, idep_vulkan_util, idep_mesautil, idep_xmlconfig,
   ],
   c_args : anv_flags,
-  link_args : ['-Wl,--build-id=sha1', ld_args_bsymbolic, ld_args_gc_sections],
+  link_args : [ld_args_build_id, ld_args_bsymbolic, ld_args_gc_sections],
   install : true,
 )
 

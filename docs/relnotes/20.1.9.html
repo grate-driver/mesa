@@ -1,0 +1,140 @@
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<title>Mesa Release Notes</title>
+<link rel="stylesheet" type="text/css" href="../mesa.css">
+</head>
+<body>
+
+<div class="header">
+<h1>The Mesa 3D Graphics Library</h1>
+</div>
+
+<iframe src="../contents.html"></iframe>
+<div class="content">
+
+<h1>Mesa 20.1.9 Release Notes / 2020-09-30</h1>
+
+<p>
+    Mesa 20.1.9 is a bug fix release which fixes bugs found since the 20.1.8 release.
+</p>
+<p>
+Mesa 20.1.9 implements the OpenGL 4.6 API, but the version reported by
+glGetString(GL_VERSION) or glGetIntegerv(GL_MAJOR_VERSION) /
+glGetIntegerv(GL_MINOR_VERSION) depends on the particular driver being used.
+Some drivers don't support all the features required in OpenGL 4.6. OpenGL
+4.6 is <strong>only</strong> available if requested at context creation.
+Compatibility contexts may report a lower version depending on each driver.
+</p>
+<p>
+Mesa 20.1.9 implements the Vulkan 1.2 API, but the version reported by
+the apiVersion property of the VkPhysicalDeviceProperties struct
+depends on the particular driver being used.
+</p>
+
+<h2>SHA256 checksum</h2>
+<pre>
+TBD.
+</pre>
+
+
+<h2>New features</h2>
+
+<ul>
+    <li>None</li>
+</ul>
+
+<h2>Bug fixes</h2>
+
+<ul>
+    <li>Horizon Zero Dawn graphics corruption with with radv</li>
+    <li>Running Amber test leads to VK_DEVICE_LOST</li>
+    <li>[spirv-fuzz] Shader generates a wrong image</li>
+    <li>anv: dEQP-VK.robustness.robustness2.* failures on gen12</li>
+    <li>[RADV] Problems reading primitive ID in fragment shader after tessellation</li>
+    <li>Substance Painter 6.1.3 black glitches on Radeon RX570</li>
+    <li>vkCmdCopyImage broadcasts subsample 0 of MSAA src into all subsamples of dst on RADV</li>
+</ul>
+
+<h2>Changes</h2>
+
+<ul>
+    <p>Bas Nieuwenhuizen (3):</p>
+    <li>      amd/common: Cache intra-tile addresses for retile map.</li>
+    <li>      ac/surface: Fix depth import on GFX6-GFX8.</li>
+    <li>      st/mesa: Deal with empty textures/buffers in semaphore wait/signal.</li>
+    <p></p>
+    <p>Christian Gmeiner (1):</p>
+    <li>      etnaviv: simplify linear stride implementation</li>
+    <p></p>
+    <p>Connor Abbott (1):</p>
+    <li>      nir/lower_io_arrays: Fix xfb_offset bug</li>
+    <p></p>
+    <p>Danylo Piliaiev (4):</p>
+    <li>      nir/lower_io: Eliminate oob writes and return zero for oob reads</li>
+    <li>      nir/large_constants: Eliminate out-of-bounds writes to large constants</li>
+    <li>      nir/lower_samplers: Clamp out-of-bounds access to array of samplers</li>
+    <li>      intel/fs: Disable sample mask predication for scratch stores</li>
+    <p></p>
+    <p>Dylan Baker (1):</p>
+    <li>      meson/anv: Use variable that checks for --build-id</li>
+    <p></p>
+    <p>Eric Engestrom (9):</p>
+    <li>      docs/relnotes: add sha256 sums to 20.1.8</li>
+    <li>      .pick_status.json: Update to d74fe47101995d2659b1e59495d2f77b9dc14f3d</li>
+    <li>      .pick_status.json: Update to c669db0b503c10faf2d1c67c9340d7222b4f946e</li>
+    <li>      .pick_status.json: Update to a3543adc2628461818cfa691a7f547af7bc6f0fb</li>
+    <li>      .pick_status.json: Mark 802d3611dcec8102ef75fe2461340c2997af931e as denominated</li>
+    <li>      .pick_status.json: Mark e98c7a66347a05fc166c377ab1abb77955aff775 as denominated</li>
+    <li>      .pick_status.json: Mark 6b1a56b908e702c06f55c63b19b695a47f607456 as denominated</li>
+    <li>      .pick_status.json: Mark 89401e58672e1251b954662f0f776a6e9bce6df8 as denominated</li>
+    <li>      .pick_status.json: Update to efaea653b5766427701817ab06c319902a148ee9</li>
+    <p></p>
+    <p>Erik Faye-Lund (2):</p>
+    <li>      mesa: handle GL_FRONT after translating to it</li>
+    <li>      st/mesa: use roundf instead of floorf for lod-bias rounding</li>
+    <p></p>
+    <p>Jason Ekstrand (2):</p>
+    <li>      intel/fs/swsb: SCHEDULING_FENCE only emits SYNC_NOP</li>
+    <li>      nir/liveness: Consider if uses in nir_ssa_defs_interfere</li>
+    <p></p>
+    <p>Jesse Natalie (1):</p>
+    <li>      glsl_type: Add packed to structure type comparison for hash map</li>
+    <p></p>
+    <p>Karol Herbst (1):</p>
+    <li>      spirv: extract switch parsing into its own function</li>
+    <p></p>
+    <p>Lionel Landwerlin (1):</p>
+    <li>      intel/compiler: fixup Gen12 workaround for array sizes</li>
+    <p></p>
+    <p>Marek Olšák (1):</p>
+    <li>      radeonsi: fix indirect dispatches with variable block sizes</li>
+    <p></p>
+    <p>Nanley Chery (1):</p>
+    <li>      blorp: Ensure aligned HIZ_CCS_WT partial clears</li>
+    <p></p>
+    <p>Pierre-Eric Pelloux-Prayer (3):</p>
+    <li>      mesa: fix glUniform* when a struct contains a bindless sampler</li>
+    <li>      gallium/vl: do not call transfer_unmap if transfer is NULL</li>
+    <li>      gallium/vl: add chroma_format arg to vl_video_buffer functions</li>
+    <p></p>
+    <p>Pierre-Loup A. Griffais (2):</p>
+    <li>      radv: fix null descriptor for dynamic buffers</li>
+    <li>      radv: fix vertex buffer null descriptors</li>
+    <p></p>
+    <p>Rhys Perry (2):</p>
+    <li>      radv: initialize with expanded cmask if the destination layout needs it</li>
+    <li>      radv,aco: fix reading primitive ID in FS after TES</li>
+    <p></p>
+    <p>Samuel Pitoiset (2):</p>
+    <li>      radv: fix transform feedback crashes if pCounterBufferOffsets is NULL</li>
+    <li>      spirv: fix emitting switch cases that directly jump to the merge block</li>
+    <p></p>
+    <p></p>
+</ul>
+
+</div>
+</body>
+</html>
