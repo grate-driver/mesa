@@ -796,7 +796,7 @@
         "description": "glsl: don't duplicate state vars as uniforms in the NIR linker",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "664e4a610dc8c0f2adc50de645a07cf4e2b622fd"
     },
