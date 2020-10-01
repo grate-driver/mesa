@@ -1,6 +1,7 @@
 mesa (20.1.9-1) UNRELEASED; urgency=medium
 
   * New upstream release.
+  * control: Add libclang-cpp11-dev to build-depends. (Closes: #954849)
 
  -- Timo Aaltonen <tjaalton@debian.org>  Thu, 01 Oct 2020 09:57:37 +0300
 
