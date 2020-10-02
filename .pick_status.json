@@ -463,7 +463,7 @@
         "description": "pan/bi: Handle vector moves",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "b2c6cf2b6db11eb2293f59b42dfeb3d7481477b0"
     },
