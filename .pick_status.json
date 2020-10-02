@@ -391,7 +391,7 @@
         "description": "intel/fs: Don't use NoDDClk/NoDDClr for split SHUFFLEs",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "a8ac61b0ee2fdf4e8bc7b47aee9c24f96c40435c"
     },
