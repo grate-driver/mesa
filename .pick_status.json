@@ -1201,7 +1201,7 @@
         "description": "loader/dri3: Allocate up to 4 back buffers for page flips",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": null
     },
