@@ -4,7 +4,7 @@
         "description": "glsl: default to compat shaders in compat profile",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "c7e3d31b0b5f22299a6bd72655502ce8427b40bf"
     },
