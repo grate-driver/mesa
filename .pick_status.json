@@ -1588,7 +1588,7 @@
         "description": "glsl/xxd.py: fix imports",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "412472da5cb30b603e218b34893936cc70039ded"
     },
