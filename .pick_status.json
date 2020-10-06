@@ -27436,7 +27436,7 @@
         "description": "radeonsi: disable SDMA on gfx6-7 and gfx10.3 to decrease CPU overhead",
         "nominated": false,
         "nomination_type": null,
-        "resolution": 4,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": null
     },
