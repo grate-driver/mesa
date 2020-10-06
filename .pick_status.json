@@ -5971,7 +5971,7 @@
         "description": "ac/surface: fix valgrind warnings in DCC retile tile lookups",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "a37aeb128d5f7cf2fa5b8c61566bbd9f2c224a28"
     },
