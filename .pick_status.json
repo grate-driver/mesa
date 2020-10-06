@@ -2524,7 +2524,7 @@
         "description": "intel/perf: fix crash when no perf queries are supported",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "ec1fa1d51ff614c19d08c949482b40c060de48c9"
     },
