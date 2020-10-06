@@ -445,7 +445,7 @@
         "description": "pan/bi: Fix simple txl test",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "731dfc6066dac8da477ba02ad90d5f2145fa0811"
     },
