@@ -1237,7 +1237,7 @@
         "description": "anv: Enable multi-layer aux-map init for HIZ+CCS",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "80ffbe915fe1cb0b8229d349e2d02f56d17c3a19"
     },
