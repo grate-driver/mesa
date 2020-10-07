@@ -5332,7 +5332,7 @@
         "description": "spirv: replace discard with demote for incorrect HLSL->SPIR-V translations",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": null
     },
