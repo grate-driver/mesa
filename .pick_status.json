@@ -5170,7 +5170,7 @@
         "description": "radv: add missing u_atomic.h include",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "7568c97df14f8702efcc5691cd8c2fff8f9bff49"
     },
