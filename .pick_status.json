@@ -5908,7 +5908,7 @@
         "description": "vc4: Enable lower_umax and lower_umin",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "8e1b75b330954a2e40e8ed0c04871e43120d4f4a"
     },
