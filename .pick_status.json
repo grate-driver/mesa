@@ -490,7 +490,7 @@
         "description": "winsys/amdgpu: remove incorrect assertion check against max_check_space_size",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "114a899cc89faea1946ccc3aafbadc25a070f08e"
     },
