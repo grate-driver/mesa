@@ -9256,7 +9256,7 @@
         "description": "Revert \"radeonsi: set BIG_PAGE fields on gfx10.3\"",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 2,
         "master_sha": null,
         "because_sha": "430d384c311468c6180a1d67ed90bb74d4fe1c3b"
     },
