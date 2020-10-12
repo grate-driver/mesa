@@ -4954,7 +4954,7 @@
         "description": "scons: fix SPIR-V -> NIR build",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "18f9fc919e1b5e7511cc3085dd990b7ca037f38e"
     },
