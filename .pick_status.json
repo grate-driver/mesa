@@ -9247,7 +9247,7 @@
         "description": "Revert \"radeonsi: move L2_CACHE_CONTROL registers into si_emit_framebuffer_state\"",
         "nominated": true,
         "nomination_type": 2,
-        "resolution": 0,
+        "resolution": 2,
         "master_sha": null,
         "because_sha": "7edf15ad4762eac3bfbcfbf1c8ec8ea4d955c6d6"
     },
