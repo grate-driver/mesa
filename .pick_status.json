@@ -1,5 +1,383 @@
 [
     {
+        "sha": "f29c81f863c9879a6a87724cbdae1e1818f3f6b4",
+        "description": "aco: use VOP2 for v_cvt_pkrtz_f16_f32 if possible",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7240edec2a6554d2cf8f49324d7415bbdb68a97c",
+        "description": "aco: use VOP2 version of v_cvt_pkrtz_f16_f32 on GFX_6_7_10",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2f125908b358c2423aa34d2673ec04aa546b971a",
+        "description": "radv,aco: lower_pack_half_2x16",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "dae1e6f7568dcf6eb536098931478f6b5b4af4b2",
+        "description": "aco: use v_cvt_pkrtz_f16_f32 for pack_half_2x16",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9185b7c0698e8dc8c1a771493605a195531ac704",
+        "description": "aco: add validation rules for p_split_vector",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "aec872cda0b0a6cd73a591e28d1beef6cc6f7865",
+        "description": "aco: use p_split_vector for nir_op_unpack_half_*",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f503699e1068e1670355e3dc14f3d28419c5cbc3",
+        "description": "nir/opt_algebraic: optimize unpack_half_2x16_split_x(ushr, a, 16)",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a38a497b86cffa9a67f95cb4a39c77642a2ef0a9",
+        "description": "aco: use p_create_vector for nir_op_pack_half_2x16",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3c2abd7116b8b5cbd60370ed91943970c158494d",
+        "description": "aco: expand create_vector more carefully w.r.t. subdword operands",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d887eb141bd46f499c83bc624593e4cd2007fd6e",
+        "description": "aco: propagate SGPRs into VOP1 instructions early.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3424e17b9a9beca85c0ef60e195eb544faea8995",
+        "description": "zink: unify code for emitting named uint-based variable instructions",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "20d73a9049f0d3354d6bca4af32613b0466ba0f9",
+        "description": "aco: adjust an assertion about the wavesize in emit_gfx10_wave64_bpermute()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "112e66fa090929401b2193e32a905221c3233a49",
+        "description": "aco: compute the CS workgroup size from the shader NIR info",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e3e8d13ada6c855e2f87be82c33d20ef9d43a875",
+        "description": "radv: move compiler statistics to ACO",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "97afb2a0a93514df1ba088b222e3e3bdedf8baf7",
+        "description": "aco: remove unused radv_shader.h includes",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "408195ec53055d6ef0f4f735da60af9a8451b9c4",
+        "description": "aco: remove useless occurences of radv_nir_compiler_options",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8a6f60fc6b850b6553283c4fb8a7348635bb6cb6",
+        "description": "aco: remove stub lower_wqm() prototype",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "23e731fcdba429f48324a7c904e5f655116e4858",
+        "description": "zink: export PIPE_CAP_MAX*_VARYINGS values",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d50e8554b997338d709e526a8e7c6cd7e970f68c",
+        "description": "zink: add feature-documentation",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f85488ab827412114f2cb4ff9ee54aafd751454d",
+        "description": "zink: redo slot mapping again for the last time really I mean it",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4f144dc92ce221e0c7106436a1c2a43da2e9f733",
+        "description": "zink: don't leak sampler view textures",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "270969b55ef19edd908ae77a86297907e6035dd2",
+        "description": "zink: explicitly flag fb attachments as being written to in render passes",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8dfb941a4c5f7178f818758175c64bc9093b094f",
+        "description": "zink: add more explicit fencing for transfer maps",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e3ed624072e28d06b5afa198161afbbe3aadcaf2",
+        "description": "zink: optimize transfer_map for resources with pending reads/writes",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c6687eef2dcac3399adb26c4deae9b62d04d88cf",
+        "description": "zink: add a mechanism to track current resource usage in batches",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "48b988e35fe1c45e77138d92d162637b1ffc4486",
+        "description": "radv: fix ignoring the vertex attribute stride if set as dynamic",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "28d02b9d3e7b23146ac8bb28f11c797184638b5c",
+        "description": "ac,amd/llvm,radv: Initialize structs with {0}",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b84d1a0c42c5a1973ebc53a49fd941590e540a82",
+        "description": "radv/aco: disable NGG GS support because it randomly hangs the GPU",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "21422b1ff204bbeac9951f0f146151e5dbf09b06",
+        "description": "nir/opt_uniform_atomics: remove useless returns",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "775866478807faef626130382c86f9490e13140e",
+        "description": "radv: Only close local_fd when valid",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4ca6faa933abb01516ada903335cd66024859eeb",
+        "description": "util: Hide timespec_passed on Windows",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1026e2ac0f705cffc94a9f1183bcb23272227719",
+        "description": "radv: Increased const usage",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1b551857f98b81650b6acc47c5e8f7a4cb4d3192",
+        "description": "amd/addrlib: Fix warning list for msvc",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5abac85177d34bd05f89104c14fb4c7503134c8f",
+        "description": "intel/fs: Rework scratch handling on Gen9+",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e557af978111178361b9c990fd25302ffca3edf2",
+        "description": "intel/fs/ra: Use a set to track added spill/fill instructions",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f650c4c0c6b5d26cabde2b5672c9a6c769cd35e1",
+        "description": "intel/fs/ra: Sanity-check our IP counts",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d80d0a6ced99c009986965e80f3b4174d19fa673",
+        "description": "intel/fs/ra: Store the last non-spill VGRF node",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2af6528c334264492ad8b6b62c2b10836c7ec568",
+        "description": "intel/fs/ra: Refactor handling of Gen7 scratch reads",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "74a1843ca0fd85d60320c441944f3b005c50debf",
+        "description": "intel/fs/ra: Increment spill_offset as part of the emit_spill loop",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "06ebf23283e11c9abb507a523bd0633a82f7960b",
+        "description": "intel/fs: Add a SCRATCH_HEADER opcode",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "24b64c8408b3758c198aab90618d69dec093b4ad",
+        "description": "intel/fs: Copy the PTSS from g0 for scratch reads/writes",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f103012fad7af5c74505075cdc71c4280216b229",
+        "description": "intel/batch_decoder: Don't clame vec4 vs/gs/tcs shaders on Gen11+",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "e1efc534e6c452e3e606d663864896a654acc185",
         "description": "v3dv/device: Support loader interface version 3.",
         "nominated": false,
