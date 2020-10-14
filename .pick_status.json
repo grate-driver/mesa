@@ -1300,7 +1300,7 @@
         "description": "aco: ignore the ACO-inserted continue in create_continue_phis()",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "638cbc21a1c01c87f620edc820e913e48aba2287"
     },
