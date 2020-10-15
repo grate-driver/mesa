@@ -67,7 +67,7 @@
         "description": "aco: add missing SCC clobber in get_buffer_size",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "fcd6d8324560b5897586cbf8161f9b46bff5d11f"
     },
