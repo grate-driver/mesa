@@ -112,7 +112,7 @@
         "description": "vc4: Add missing load_ubo set_align in yuv_blit fs.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "e78a7a182524f091e2d77ba97bfbe057c3975cab"
     },
