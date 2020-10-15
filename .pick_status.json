@@ -94,7 +94,7 @@
         "description": "vc4: Enable nir_lower_io for uniforms",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "96d99f2eccb4bea4b9ede38f9b2e472cdc617e99"
     },
