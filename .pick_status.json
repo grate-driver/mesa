@@ -202,7 +202,7 @@
         "description": "intel/isl: Drop redundant unpack of unorm channels",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "09ced6542049986f7fe52af8087aec9fc23d9f16"
     },
