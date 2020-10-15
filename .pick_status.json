@@ -274,7 +274,7 @@
         "description": "frontends/va/postproc: Un-break field flag",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "78786a219ea2322af09576472dcc2d6d01cb9060"
     },
