@@ -1,5 +1,275 @@
 [
     {
+        "sha": "7c5129985bcac75053823a31674e8a1e2629230c",
+        "description": "zink: implement ARB_draw_indirect",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3e3b6e995fa44ab778451c1fc24c2caabca4299f",
+        "description": "zink: set 3.3 complete in features.txt",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "80c66642cc88dcd06432ea5d49bb768c3cd9f06d",
+        "description": "zink: bump GLSL to 3.30",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "44baddf1fe995d25762e048ddf5cf10acdcd718a",
+        "description": "zink: set 3.2 complete in features.txt",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "26b076ff66f0c95a63a7afb048d4adbe39e76c50",
+        "description": "zink: GLSL 1.50",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b27ec49e0220b1a71f24fd0e451dbee305ab0877",
+        "description": "zink: mark off GL 3.1 as done in features.txt",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "815f0c01b0f373848784a8f4c7ef5a9026050413",
+        "description": "zink: bump to glsl 1.40",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8028991f361f22f20abdbed0c2f61f7c5c23c052",
+        "description": "zink: enable gs pipe caps",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4c734da7defb6869af4f2f509782b95eb0180024",
+        "description": "zink: add gallium handling for geometry shaders",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d59e4b8ce6497097954028df2469fc7b404a106b",
+        "description": "zink: round out handling for streamout buffer stride setting during draw",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9915c540b269943907874a666911a9efb2ea4303",
+        "description": "zink: remove ADJACENCY prim types from primconvert path",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d656c600a399e09a80dbec4c03e5d8e122904521",
+        "description": "zink: add handling for gs in ntv",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9671cd9215150d8eeecfe0868dbedba3493f8b5a",
+        "description": "zink: re-transform gl_Position for gs input",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ea2279daf1f561acedaae90959d23888cf754d5d",
+        "description": "zink: add ntv handling for geometry shader variables",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "423a342ae7486173fc7ef26a3776de1aafcf91bd",
+        "description": "zink: handle shader io vars more generically for use with gs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "182f7f9ae8e492355d6e98bc88d52a761b2b2996",
+        "description": "zink: add some spirv_builder functions we'll be using for geometry shaders",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5934fc170841f9dd46fdc71b794e7c468e4945ff",
+        "description": "r600/sfn: Update state docu",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9f5e5fb912203c0ae6de242144a91da8a7e41c8b",
+        "description": "r600/sfn: Fix the parameter component type",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5f661977f8e66bb558eb43e9b72719749d86db03",
+        "description": "r600/sfn: Use register keep-alive also when scanning the shader",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9eda7176e314712cae2468313b5c83b5f2a72f1d",
+        "description": "r600/sfn: fix remapping of deleted attributes",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f79b7fcf7c7f5db626efdb63f27e8bc64d0aed77",
+        "description": "r600/sfn: use 32 bit bools",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "92a4d45bee61c29256b592e236b04852d101a90a",
+        "description": "r600/sfn: use cacheless op for coherent image write",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "02e39b737a7c74486a7e66b9bb46eca63dbd1a75",
+        "description": "r600/sfn: Handle mem barrier and image barrier by using ACK",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f664fc1c7b54e90a0bff5dd25be0381b6224cbbc",
+        "description": "r600/sfn: use shared pointer to GPR for FS sysvalues",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "876b975becb25236c986c4055b0dd4cfd79a0230",
+        "description": "r600/sfn: Rework get_temp_register to return a smart pointer to GPRValue",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "92bc0661f5ced456116812b4416f1eea916a14b4",
+        "description": "r600/sfn: fix mega fetch count for SSBO/Image atomics result fetch",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d79d20d398a809d05f6d5ea45ce54ca0b9065a4f",
+        "description": "r600/sfn: Fix keepalive patch",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "86254134b38a7337c6685e9c499ad08eb8ff2c89",
+        "description": "r600/sfn: Fix ssbo resource offset for buffer loads",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ed66eafb6d811d2f53f25e69bee006489a63fead",
+        "description": "r600/sfn: Don't reuse registers for workgroup ID and local invocation ID",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "bafb2bb5516ce17f9636a7d4069aed0053e41981",
+        "description": "glsl: Initialize add_uniform_to_shader member var in constructor.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "aea74eac3d7706ed8d870504b163356e3f104a4c",
         "description": "zink: fix stencil wrapping",
         "nominated": false,
