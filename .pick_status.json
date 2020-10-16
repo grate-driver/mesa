@@ -2281,7 +2281,7 @@
         "description": "vdpau: Add missing printf format specifier.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "89b9863252272a7109d468738517a0d68376a909"
     },
