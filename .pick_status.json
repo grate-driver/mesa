@@ -166,7 +166,7 @@
         "description": "vulkan/wsi: fix possible random stalls in wsi_display_wait_for_event",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "da997ebec92942193955386535813374286b7fb1"
     },
