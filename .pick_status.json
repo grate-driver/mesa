@@ -319,7 +319,7 @@
         "description": "glsl: relax rule on varying matching for shaders older than 4.00",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "18004c338f6be8af2e36d2f54972c60136229aeb"
     },
