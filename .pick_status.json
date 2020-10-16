@@ -4,7 +4,7 @@
         "description": "isl: Fix the aux-map encoding for D24_UNORM_X8",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": null
     },
