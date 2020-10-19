@@ -1332,6 +1332,8 @@ struct radv_cmd_state {
 	uint32_t current_event_type;
 	uint32_t num_events;
 	uint32_t num_layout_transitions;
+
+	uint8_t cb_mip[MAX_RTS];
 };
 
 struct radv_cmd_pool {
