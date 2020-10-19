@@ -1,5 +1,257 @@
 [
     {
+        "sha": "3c87ac1f60875b5bbd4facca22fc426ee747997a",
+        "description": "isl: Fix the aux-map encoding for D24_UNORM_X8",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9a062383e35f812410fe025930b016b4b67710e5",
+        "description": "anv: Implement VariableDescriptorCount",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "215218f32f50136534cc37eec9bada2b4b6d1f95",
+        "description": "anv: Add a descriptor_count to descriptor sets",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "dd1971c9d8f7ea80a52538c04a82f6166d96b952",
+        "description": "anv: Bump the number of update-after-bind descriptors to 1M",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3c0ba7b1802bf231ef3f0a7bdbeb474be99a2aed",
+        "description": "zink: reject resource-imports with modifiers",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "d686835171c44cf325306f6c87408bef999f5496"
+    },
+    {
+        "sha": "068b4bf76c03a983982be8af13daf228be4531ce",
+        "description": "doc/features: remove zink entries for GL 3.3 items",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "af8d488ea5e13219c67c132a3edfa2e7a698746d",
+        "description": "util,ac,aco,radv: Cross-platform memstream API",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4c2e7b08930654cff115b1a4a22abc851dae958b",
+        "description": "util,radv,radv/winsys: Cross-platform rwlock API",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9d4999e7cf7ca530b3e99a1923f1df9e2069cd34",
+        "description": "anv: Ignore continue flag in primary cmd buffers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b3529e56b5d98b7cae22d57f7c474092c94f7f65",
+        "description": "ac/nir: implement missing nir_op_pack_half_2x16_split",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "2f125908b358c2423aa34d2673ec04aa546b971a"
+    },
+    {
+        "sha": "57d317865e7bee02a17efcde8beeb6a220f900f1",
+        "description": "radeonsi: enable NGG culling by default on Navi1x PRO cards",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "67a67ea29e7177393c3ba9f70c5b7207862065ab",
+        "description": "radeonsi: enable NGG on Navi14 PRO cards",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "bc3c74e2a296b48c4473a37c863e9df3005355fb",
+        "description": "radeonsi: tweak LATE_ALLOC_GS numbers for faster NGG culling",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b38b5aabee4a106ca3a071ed6568a2a0bd4bd977",
+        "description": "radeonsi: pack LDS better for NGG culling",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8094367988932b071ec482fe717eebddeaaf58ca",
+        "description": "radeonsi: write VS/TES system values into LDS after culling",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1de0bf0a56d630fa1d070eaff55c40053032cd6b",
+        "description": "radeonsi: remove indirection when loading position at the end for NGG culling",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "823ee12d57edf2a414f25f3bfc91caf5e576589c",
+        "description": "radeonsi: optimize out LDS bank conflicts in the NGG culling shader",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7648060dc03775979e3fa8904c4948c084e82b6a",
+        "description": "radeonsi: enable NGG culling by default on gfx10.3 dGPUs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e7d3f22c6ae532e25f26c0f2740fa9ad88794d71",
+        "description": "radeonsi: don't disable NGG culling on gfx10.3",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6810e6e4d0e321fc45f55e984912b824fe2a1b28",
+        "description": "Revert \"radeonsi/gfx10: disable vertex grouping\"",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "a23802bcb9a42a02d34a5a36d6e66d6532813a0d"
+    },
+    {
+        "sha": "7d1fb5fffe346dacda896f9feaa7df4695a1d543",
+        "description": "v3dv: Initialize time before usage by free_stale_bos.",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "f78c99f357eee08926dcf9434c3944707837fe34"
+    },
+    {
+        "sha": "8eb246d7f6137c6d1783c187d37e415e61211d2d",
+        "description": "v3dv: Remove unsigned comparison to zero.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5e27e0432274a29e75f9267269a2b367eda33cbf",
+        "description": "intel/isl: Drop redundant unpack of unorm channels",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "09ced6542049986f7fe52af8087aec9fc23d9f16"
+    },
+    {
+        "sha": "cf11ebfbc22b5ebabdcedac0e045deb0f63ecff7",
+        "description": "st/mesa: Add missing sentinels in format_map[]",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0c70268ff73adfc9d588fa5a10c500ed9f66bab6",
+        "description": "zink: mark ARB_sample_shading as supported",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "bf9a1e0a4be96b5f74d792596b10394ca9092703",
+        "description": "zink: add a pipe_context::get_sample_position hook",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b009bd968599ea2a6c319c2750b0b12b15582e8d",
+        "description": "zink: add ntv handling for ARB_sample_shading",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "441b32bf3f4ea79b90f5c4de4ffab180dc53d2f8",
+        "description": "zink: add helper for vec-type input variables in ntv",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "7c5129985bcac75053823a31674e8a1e2629230c",
         "description": "zink: implement ARB_draw_indirect",
         "nominated": false,
