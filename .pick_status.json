@@ -1012,7 +1012,7 @@
         "description": "util/set: Fix the _mesa_set_clear function to not leave tombstones.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "5c075b085585b1629022d40ce7af9448c7d0e906"
     },
