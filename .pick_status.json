@@ -1,5 +1,356 @@
 [
     {
+        "sha": "d0f8fe5909107aa342f62813ced9ce535ed6da32",
+        "description": "softpipe: Switch to using NIR as the shader format from mesa/st.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6444f5702dcac87c41e9c7af66c1762c7a48f3a0",
+        "description": "softpipe: Fix buffer overflows in SSBO atomics.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "34cc6a804ec92b5e74cde5b346828874737276a8",
+        "description": "gallium: Add a nir-to-TGSI pass.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d867e7c97482ee4682b59c5d17ef42232b480f36",
+        "description": "nir: Add an option to not lower source mods for f64/u64/i64.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c730feacc0dea9749d8ff070b2d45fcd0cfeaf51",
+        "description": "nir: Add a call to get a struct describing SSA liveness per instruction.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a206b581578d585d845250f62dfb1e6684ddf2f0",
+        "description": "nir: Add a block start/end ip to live instr index metadata.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2f5d18403a4d51a2cd927c141884361850bad41d",
+        "description": "nir: Replace nir_ssa_def->live_index with nir_instr->index.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b6cb184e86dd381dcc1c90c8273b92ddc6d51ed8",
+        "description": "nir: Introduce nir_metadata_instr_index for nir_index_instr() being current.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b05c107d74487c7e60d8fb44b9375b6551b334ac",
+        "description": "ci: Enable NIR_VALIDATE everywhere.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4ca103077454beca6d94321a050e2dc27880e0ea",
+        "description": "radv: move all NIR pass outside of ACO",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9aa89b36fc413c34a14dfdb47fe7792d43cce7cf",
+        "description": "ac/nir: handle non-const offset with txf/txf_ms",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e690a1b78bf902e0f39174ccef8a8caaa2fe2f6e",
+        "description": "ac/llvm: don't lower bool to int32, switch to native i1 bool",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ed0eb511d9c342f1cd308a14a82782c965e06ffe",
+        "description": "util: Fix rwlock Windows include for MinGW",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "afeb0c30226c38142ce37ed3f1ddfd87892a057a",
+        "description": "genxml: drop gen10",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6d32fcaaafb4b26b2459bd01380eea0a00fdd3da",
+        "description": "Revert \"radv/aco: disable NGG GS support because it randomly hangs the GPU\"",
+        "nominated": false,
+        "nomination_type": 2,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "b84d1a0c42c5a1973ebc53a49fd941590e540a82"
+    },
+    {
+        "sha": "d8435c1628ce6659e28c0f0625c9af42f3a19860",
+        "description": "aco/ngg: Add assertion to make sure we always know the vertex count.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d9cb9ff41489bb56a6e2ac109d93db2d5bb7a377",
+        "description": "nir: Emit set_vertex_and_primitive_count for inactive streams.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "07fae31e8cbe216884be6ecb826cbb5fda55c3bb",
+        "description": "radv: add missing 'discardtodemote' option in the debug list",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "440813114281bfd05c2b0d26c6488d1410790be4",
+        "description": "vulkan/wsi: fix possible random stalls in wsi_display_wait_for_event",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "da997ebec92942193955386535813374286b7fb1"
+    },
+    {
+        "sha": "85053c016c898455434f6264981a2ddd4b60f04e",
+        "description": "panfrost: Fix stride for AFBC_FORMAT_MOD_BLOCK_SIZE_32x8.",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "8bb1d61f276c3ee8e546c861b86cd6e6f3dd1b6f"
+    },
+    {
+        "sha": "8dd03a7c125f8e7f3d29d0fd131f7129cddb5244",
+        "description": "anv: Advertise VK_KHR_shader_terminate_invocation",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8251eed83e72317db3f0fc2d5edad4e42b136561",
+        "description": "vulkan: Update XML and headers to 1.2.158",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7e55f0e17dfc11717513fee1f62772de49eddb66",
+        "description": "clover/nir: add a constant folding pass before lowering mem const",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "aca31baafc09634d69134d7ccbdfe6d426cbbbff",
+        "description": "isl: Enable Tigerlake HDC:L1 caches via MOCS in various cases.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "02fe825a61344a065260da40b72852cce800ac01",
+        "description": "isl, anv, iris: Add a centralized helper to select MOCS based on usage",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "103ad427bc7f61015cea65f71486355644c276b3",
+        "description": "anv: Set only one ISL usage bit (RT/texture) for CopyBuffer sources",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4df98c3c0ca14b3fc6468ef792bbb7484d1e8c47",
+        "description": "turnip: Only link libdrm in the DRM case, not KGSL.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f63ce9bbe0c7c0157dd4ef22acfe9f412a8ec0b2",
+        "description": "turnip: Don't link the WSI code if we don't have a WSI extension.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8f3313fb4797bfbc597654d045fff54948749dd1",
+        "description": "turnip: Use Mesa's libsync.h instead of libdrm's libsync.h.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8a72666e91bd14e8ff1b8246ba636189abe8ddf3",
+        "description": "turnip: Drop a dead error checking path in device init.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "27b888794624225343287e57f5fcea63f94850b3",
+        "description": "android: Add pre-4.7 Android kernel compatibility to our libsync header.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e8c89a9bcbaf85bd8772991151cbef7c0a2ddd76",
+        "description": "util: Import a copy of drm's libsync.h",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ab57df26225ef99f91e179dc53ebeabfaaaf92fa",
+        "description": "ci/android: Switch build to using platform SDK version 26.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e92f4ac9f46848a5d0eab482b867c1f3f1c15b68",
+        "description": "android_stub: Update platform headers to include gralloc1.h.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "72799886e7e10202e2756ad93fd93d59b11f900b",
+        "description": "radv: report latest extension spec versions",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cf17d6251653f4a98e7c4f904ea2f0bc0ecedd5c",
+        "description": "meson: Add xcb-fixes to loader when using x11 and dri3. Fixes undefined symbol for xcb_xfixes_create_region in loader_dri3_helper.c",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "25627ffe656339da9477d47039d3ad561dd70fd3",
+        "description": "mesa: Pass the correct caller string to _mesa_lookup_or_create_texture",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9b847d4150fff3e8871617b2c0f971127bf71280",
+        "description": "mesa/st: Silence unused parameter warnings in st_context.c",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4cd930565e3887f52e2bedc3040daa14df0ff8d3",
+        "description": "i965: Silence unused parameter warnings",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "3c87ac1f60875b5bbd4facca22fc426ee747997a",
         "description": "isl: Fix the aux-map encoding for D24_UNORM_X8",
         "nominated": true,
