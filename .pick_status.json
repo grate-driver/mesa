@@ -1219,7 +1219,7 @@
         "description": "radv: Fix 1D compressed mipmaps on GFX9.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "1fb3e1fb70844d1bd84bc61de6022b85e4d45374"
     },
