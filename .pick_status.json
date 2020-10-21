@@ -1282,7 +1282,7 @@
         "description": "aco: fix determining if LOD is zero for nir_texop_txf/nir_texop_txs",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "93c8ebfa780ebd1495095e794731881aef29e7d3"
     },
