@@ -103,7 +103,7 @@
         "description": "virgl: Fixes portal2 binary name in tweak config",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "9760a7ed9138b84d83a712afeb0e673399d9e200"
     },
