@@ -5521,7 +5521,7 @@
         "description": "anv: always annotate memory returned from anv_gem_mmap",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "4abf0837cdb14b10a58d28766d5c1d3698d8a6d8"
     },
