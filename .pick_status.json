@@ -1,5 +1,707 @@
 [
     {
+        "sha": "025050bae73d0598d788e3c307328670a3bf51c1",
+        "description": "glsl: Initialize ir_if_to_cond_assign_visitor members in constructor.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8cf00244328c1697b93ed0eb57e009f283d03269",
+        "description": "nir: Use a switch in nir_lower_explicit_io_instr",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8033200560f6d76b1f84480cc0df809112389686",
+        "description": "docs/v3d: Add a little stub of v3d documentation.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "97dd039191d2df4e343ef5b5e5cd18d71fb4cba0",
+        "description": "docs/vc4: Add information on the hw documentation available.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c4290a52ddbe11a5e78179392ca47467b17a46ce",
+        "description": "docs/vc4: Move my old vc4 wiki's documentation into docs.mesa3d.org.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4a4b854aa0286bbd3eede784a915e557bcfa138f",
+        "description": "docs/vmware: Move the vmware driver docs into the drivers section.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "313f951f1bd5197f376f851c0f6b4414a09f92ab",
+        "description": "docs: Move the gallium driver documentation to the top level.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9a644d701730cbec1a8f4d7caa94a72f21ea8e72",
+        "description": "docs: specify redirects in conf.py instead",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "47f52e83d1074b3833a4a4c98b87ac23c04a38f6",
+        "description": "docs: specify redirects relative to docs-root",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7daf953bc0e67f4f205560138f8fdedb2ec6ca57",
+        "description": "docs: verify that targets for relative redirects exist",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a85c3189fa7f5b2a40b49ac953d88cf8c8ca8206",
+        "description": "docs: create leading directories for redirects",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b2c737cf57382d543002177b6e4810b19ab62c74",
+        "description": "virgl: Fixes portal2 binary name in tweak config",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "9760a7ed9138b84d83a712afeb0e673399d9e200"
+    },
+    {
+        "sha": "3d51c27de5576b9a62761726f33b0cc7a66da1d2",
+        "description": "st/mesa: initialize lower alpha func to ALWAYS",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "33ccf0e9bc5cdfbc9b2bd821c7a31d48043a8cf8",
+        "description": "nir: drop unused alpha_ref_float",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "42ee423e3ac1a3d24d55c9044cf3d98be0280811",
+        "description": "nir: drop support for using load_alpha_ref_float",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1404b8b1e5b6c517851d3296feb659c1fa4cfdef",
+        "description": "vc4: do not report alpha-test as supported",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8ad931808e2d3f54b4bf2ddbbaa632be1018801a",
+        "description": "v3d: do not report alpha-test as supported",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4c41d1900e58cb09501cbf113568645e70634aff",
+        "description": "ci: Add jobs running ci-fairy checks",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7b09d501e4511d0213f1a52c1fc09d7bede3ae85",
+        "description": "ci: Add empty needs: to pages job",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9d1d3a89c49b4afab3e6ff7fcca2ac14347d4dca",
+        "description": "ci: Move test-docs job to deploy stage",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "549ae5f84375dfadb86cfd465f0103acfae3249f",
+        "description": "st/mesa: make sure prog->info is up to date for NIR (v2)",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1126b5cd2f14776b1554591e5cc238e05882b5ef",
+        "description": "Revert \"st/mesa: don't pass NIR to draw module if IO is lowered\"",
+        "nominated": false,
+        "nomination_type": 2,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "493fdcf44647ee471e934de3e63d193c6a3b6ff0"
+    },
+    {
+        "sha": "233520035a0cf3bee7ed58de6a4fad6cc7e097f0",
+        "description": "nir: consider load_color intrinsics as both inputs and sysval in gathering",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c69849ef803bee8296c961df355499b42c76e973",
+        "description": "amd: update addrlib",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e6e3d8951ab14cb4f4f764e9957297485bc12d1a",
+        "description": "glx: Move glXGet{ScreenDriver,DriverConfig} to common code",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ce8530d6c9292d5a0c82522e5fd05831403a9c70",
+        "description": "glx: Delegate the core of glXGetScreenDriver to the GLX screen vtable",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3bb7ebfc7504af0e85596f3ad4b72a2ede10d227",
+        "description": "glx: move __glXGetUST into the DRI1 code",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "eb6877d3af337f76143755606d4a7aea132526c7",
+        "description": "radv,aco: fix use of texop_samples_identical in the resolve meta path",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "eacdad7ea0df5d9804282f697b3cfeebf88a1325",
+        "description": "ac/nir: do not sign-extend the result of texop_samples_identical",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "e690a1b78bf902e0f39174ccef8a8caaa2fe2f6e"
+    },
+    {
+        "sha": "11d70e7ab963aa96c6c61af8a011de647304bed7",
+        "description": "docs/features: add v3dv driver",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "354e375c9cc937ecfafd7b98a768621c53458528",
+        "description": "frontends/va/postproc: Un-break field flag",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "78786a219ea2322af09576472dcc2d6d01cb9060"
+    },
+    {
+        "sha": "fd038132de01c7bc37ccbc96fdc556050644a09e",
+        "description": "aco/isel: Miscellaneous cleanups using the new Stage API",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "34bc9477de18a92e76ea7c536940a631323a83b6",
+        "description": "aco: Clean up symbol names and comments related to NGG",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "86c227c10cb729aef05bc8a26b56957e3fa7683b",
+        "description": "aco: Use strong typing to model SW<->HW stage mappings",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "fdbc45d1d46341b7efd596e5fb5ff9d242f649da",
+        "description": "nir: Only validate in passes that might have changed things.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c54c42321ea5a3d9a09bbe89c00346f8c26b9300",
+        "description": "glsl: relax rule on varying matching for shaders older than 4.00",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "18004c338f6be8af2e36d2f54972c60136229aeb"
+    },
+    {
+        "sha": "c97e82bab50a2ec2d9d6e73a68c59c544526d01c",
+        "description": "panfrost: Only enable occlusion queries when active",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "04e955f19bb760b88acad414425cd4708a58e58e",
+        "description": "panfrost: Precise occlusion query support",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "584b1070372a0e010a0e9a221493e5042575abb1",
+        "description": "st/mesa: Drop the TGSI paths for drawpixels and use nir-to-tgsi if needed.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "57effa342b75a2ae681f2a7665925022dd6e4aa9",
+        "description": "st/mesa: Drop the TGSI paths for PBOs and use nir-to-tgsi if needed.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "da4c4c0e6785d48b6aa053766e73e80df292ce82",
+        "description": "gallium/ntt: Add default compiler options for non-native-NIR drivers.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f5841c343b44709cc8820b00e2fd411153a34931",
+        "description": "v3dv: Fix assert using assign instead of compare.",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "ca86c7c65a824d6dc4757b0dba82490acc85cee5"
+    },
+    {
+        "sha": "e7ce74497e5f1847eaf78002a37571866fee4097",
+        "description": "radv: Advertise VK_KHR_shader_terminate_invocation.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "bf955d5f0a3590b05f8949cb5858dcd9a36043c4",
+        "description": "amd/llvm: Add VK_KHR_shader_terminate_invocation support.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "76421667ecfe9b5f64dfb756769d1f12f4995935",
+        "description": "aco: Add VK_KHR_shader_terminate_invocation support.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "22a6396340ce9a0c56d55eade3bb2370ae8a8bf0",
+        "description": "ci: Enable Werror on meson-arm64-build-test.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b03fdca2e003d4b866bf2a2d14b1a475588e0500",
+        "description": "turnip: Add error path handling for descriptor pool init.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d384f3be4c0c753c38498f9cf8f66dedafda0024",
+        "description": "turnip: Handle the error path for tu/drm's vkResetFences().",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "296468ef1ac5bef98afaa2ebc141e3bc53af2667",
+        "description": "turnip: Handle some error paths in allocating CS space from a command buffer.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9b156ef57bf9a5eeae89b3222bf6b321faa2471f",
+        "description": "freedreno/fdperf: Silence a compiler warning about current counter.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a512e9eecd80a171626d3651b9d9e1f2e31dc147",
+        "description": "freedreno/tools: Fix compiler warnings about using sz in the error paths.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "91c5bbc128b13e14ecccd06d6004c364bc2ebc6e",
+        "description": "freedreno/cffdec: Fix format overflow warning.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e4dba528cad65ab3a7ef514abd3598bf175c416a",
+        "description": "llvmpipe: enable CL images",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cda192dc1579d260348c3ed0fccdd097e0544eeb",
+        "description": "llvmpipe: fix sampler/image binding for clover.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "874371876e2faecf62e057016f35660dd6d8761c",
+        "description": "nvc0/CL: enable images",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ee035c75d42606a18ad54bd45ae1a751c421c98a",
+        "description": "nouveau: hide SVM support behing a variable for now as kernel space is broken",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1a775b71ca588a3b9ffc15b5d892739fda41e5d3",
+        "description": "clover/nir: set kernel_image cap",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4f24dee22a7036f90487ca01fc25f7122767cbed",
+        "description": "clover/nir: Add an image lowering pass",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5e31fad8c9c07d984837a07010c6a9dcd2a2aa97",
+        "description": "clover/nir: Calculate sizes of images and samplers properly",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f6c46e8408ba0d3a14da113b8db679616f22b04b",
+        "description": "clover/device: use PIPE_MAX_SHADER_SAMPLER_VIEWS for max_images_read",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "43a42b6e1d063ba86cd9af342b2d3a9768bfae8b",
+        "description": "clover: clCreateImage: calculate image row_pitch and slice_pitch when not provided",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f2bdb69218829551f7c1f47a77ace122c9da619b",
+        "description": "clover: support custom driver strides",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9583ce04db3ac4d892eedfcc635c86eca41958d4",
+        "description": "clover: validate image_row_pitch and image_slice_pitch in clEnqueueMapImage",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1ff4db1935111593540dd0e1341cb89aa7a67b36",
+        "description": "clover: Fix incorrect error check in clGetSupportedImageFormats",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3aead7198bcbb5ed0b58b3c84119f1ce28793f70",
+        "description": "clover: use pipe_image_view for images instead of set_compute_resources",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "eb965719abfe740a09c839565a3f0d9f286be130",
+        "description": "compiler/types: Allow images and samplers in get_explicit_type_for_size_align",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0021d3ae87a5c27d084de6ecb6cd99235466774b",
+        "description": "compiler/types: Assert non-zero alignments in get_explicit_type_for_size_align",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ef68f740a67fd1824e44a67d1023e7937fce0cf3",
+        "description": "nir/lower_io: Assert non-zero power-of-two alignments",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "589d918a4f9da83e3ae441aa674372a141d23349",
+        "description": "spirv: Add 0.5 to integer coordinates for OpImageSampleExplicitLod",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "701cb9d60c0350b0134e52cb1b51eefbbf27bd22"
+    },
+    {
+        "sha": "2015a109ff287cdf04607d5acc540aae2e87daa3",
+        "description": "anv,iris: Use the data cache for UBO pulls on Gen12+",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cdc546ae7fe7477d97cf7b09ac8db0e44a3cfc45",
+        "description": "iris: Flush caches based on brw_compiler::indirect_ubos_use_sampler",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "fa483d8cd1bc975c339082435a2e0f657959ea39",
+        "description": "android: gallium/auxiliary: Deduplicate nir_to_tgsi.c inclusion",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "d0f8fe5909107aa342f62813ced9ce535ed6da32"
+    },
+    {
+        "sha": "0f82c99c4e62d999efaa4d9355c151d00d1931ac",
+        "description": "docs: Document how to build and install Android drivers.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c4f8d421df2e62bf02063906ce722f3fe25cbea7",
+        "description": "meson: Don't enable libunwind by in 'auto' mode on Android.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f2a27d72de5bf1452f187779f5a981bb89e3ae8c",
+        "description": "meson: Don't try to build GLX by default on Android.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e3c330c7b21f36aef872b130e5f79a9fcaf99506",
+        "description": "freedreno: Use Android's libsync instead of libdrm's.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "81a0f1eca24b8605b9f2506122ff90db7129c39e",
+        "description": "meson: Only require libexpat when a part of the build needs it.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "442a7696004c5998d84a3df07d37fa9064dba214",
+        "description": "meson.build: xxf86vm is not needed for -Dglx-direct=false",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "d0f8fe5909107aa342f62813ced9ce535ed6da32",
         "description": "softpipe: Switch to using NIR as the shader format from mesa/st.",
         "nominated": false,
