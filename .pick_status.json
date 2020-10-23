@@ -940,7 +940,7 @@
         "description": "iris: fix the order of src and dst for fence memcpy",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "6b1a56b908e702c06f55c63b19b695a47f607456"
     },
