@@ -3919,7 +3919,7 @@
         "description": "amd/addrlib: Add missing va_end.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "69ea473eeb91b2c4db26402c3bc2ed5799d26605"
     },
