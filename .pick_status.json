@@ -40,7 +40,7 @@
         "description": "freedreno: Disallow tiled if SHARED and not QCOM_COMPRESSED",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": null
     },
