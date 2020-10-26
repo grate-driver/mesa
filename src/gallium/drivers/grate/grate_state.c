@@ -1,11 +1,11 @@
 #include <stdio.h>
 #include <math.h>
 
+#include "util/format/u_format.h"
 #include "util/u_bitcast.h"
 #include "util/u_helpers.h"
 #include "util/u_inlines.h"
 #include "util/u_memory.h"
-#include "util/u_format.h"
 
 #include "grate_common.h"
 #include "grate_context.h"
