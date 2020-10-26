@@ -328,6 +328,9 @@ grate_screen_get_param(struct pipe_screen *pscreen, enum pipe_cap param)
    case PIPE_CAP_SIGNED_VERTEX_BUFFER_OFFSET:
       return 0;
 
+   case PIPE_CAP_MAX_VARYINGS:
+      return 16;
+
    default:
       return u_pipe_screen_get_param_defaults(pscreen, param);
    }
@@ -472,7 +475,6 @@ grate_screen_get_shader_param(struct pipe_screen *pscreen,
 
       case PIPE_SHADER_CAP_MAX_INPUTS:
       case PIPE_SHADER_CAP_MAX_OUTPUTS:
-      case PIPE_CAP_MAX_VARYINGS:
          return 16;
 
       case PIPE_SHADER_CAP_MAX_CONST_BUFFER_SIZE:
