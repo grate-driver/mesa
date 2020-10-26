@@ -83,7 +83,7 @@ grate_draw_vbo(struct pipe_context *pcontext,
    if (info->index_size > 0) {
       unsigned index_offset = 0;
       if (info->has_user_indices) {
-         if (!util_upload_index_buffer(pcontext, info, &index_buffer, &index_offset)) {
+         if (!util_upload_index_buffer(pcontext, info, &index_buffer, &index_offset, 64)) {
             fprintf(stderr, "util_upload_index_buffer() failed\n");
             return;
          }

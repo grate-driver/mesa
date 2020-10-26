@@ -68,8 +68,7 @@ libgrate = static_library(
     inc_src, inc_include, inc_gallium, inc_gallium_aux,
     inc_gallium_drivers, inc_libgrate,
   ],
-  c_args : [c_vis_args],
-  cpp_args : [cpp_vis_args],
+  gnu_symbol_visibility : 'hidden',
   dependencies : [dep_libdrm, dep_valgrind],
   build_by_default : false,
 )
