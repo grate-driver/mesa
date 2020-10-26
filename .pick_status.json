@@ -5143,7 +5143,7 @@
         "description": "mesa/st: call memobj_destroy only if there is memory imported",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "99cf9108340c2ccf7c1b05ec6f951e2e91b9c76c"
     },
