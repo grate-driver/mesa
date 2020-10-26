@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-#include "util/u_format.h"
+#include "util/format/u_format.h"
 #include "util/u_inlines.h"
 #include "util/u_memory.h"
 #include "util/u_pack_color.h"
@@ -23,7 +23,7 @@
  * of some abstraction to handle handles in a Tegra-specific winsys
  * implementation.
  */
-#include "state_tracker/drm_driver.h"
+#include "frontend/drm_driver.h"
 
 
 static bool
@@ -426,6 +426,7 @@ fill(struct grate_channel *gr2d,
 
 static void
 grate_clear(struct pipe_context *pcontext, unsigned int buffers,
+            const struct pipe_scissor_state *scissor_state,
             const union pipe_color_union *color, double depth,
             unsigned int stencil)
 {
