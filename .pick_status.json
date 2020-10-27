@@ -5539,7 +5539,7 @@
         "description": "os: Fix open result check.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "13fa0513569d0145487e12f3bc3aa10bc51088f7"
     },
