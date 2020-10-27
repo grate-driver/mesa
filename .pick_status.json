@@ -1471,7 +1471,7 @@
         "description": "aco: update phi_map in add_subdword_operand()",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "56345b8c610e06b2c6ccb0d0975e62f9a008e34e"
     },
