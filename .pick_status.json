@@ -670,7 +670,7 @@
         "description": "intel/fs: QUAD_SWIZZLE requires packed data",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "8b4a5e641bc3cb9cf0cfe7d0487926127fc25de7"
     },
