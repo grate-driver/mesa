@@ -5593,7 +5593,7 @@
         "description": "nir/large_constants: only search for constant duplicates",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "b6d475356846f57a034e662ab9245d11ed0dd4a0"
     },
