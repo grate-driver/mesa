@@ -841,7 +841,7 @@
         "description": "intel/fs: Shuffle can't handle source modifiers",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "90c9f29518d32a29725b114f3b16ad8c62a812ff"
     },
