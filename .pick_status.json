@@ -850,7 +850,7 @@
         "description": "intel/tools: fix invalid type in argument to printf",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "70308a5a8a801a960bb9f45fb597f80b77c51014"
     },
