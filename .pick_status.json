@@ -4459,7 +4459,7 @@
         "description": "nir/opt_intrinsics: Report progress for the gl_SampleMask optimization",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "d3ce8a7f6b93e893929b81f4d6605a2a968730a1"
     },
