@@ -481,7 +481,7 @@
         "description": "frontends/va: Fix *num_entrypoints check.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "5bcaa1b9e9707aea7be73b406345bb9e46f92a18"
     },
