@@ -1939,7 +1939,7 @@
         "description": "glsl: avoid an out-of-bound access while setting up a location for variable",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "47c358233d45747def3b796c37ae92df86860141"
     },
