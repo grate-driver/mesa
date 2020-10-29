@@ -6367,7 +6367,7 @@
         "description": "glsl: add extra pp tokens workaround and enable for CoR",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "43047384c331a9240339563704fe5d97ebe599d7"
     },
