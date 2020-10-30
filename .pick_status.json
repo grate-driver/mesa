@@ -517,7 +517,7 @@
         "description": "radv: Fix variable name collision.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "eb104e949ee4b7e0813d14f11a4a952bae48fe80"
     },
