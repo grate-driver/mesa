@@ -1498,7 +1498,7 @@
         "description": "panfrost: Fix AFBC blits of resources with faked RGTC",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "acb8dcfebdde56a748ec50a3fbecf27912974be9"
     },
