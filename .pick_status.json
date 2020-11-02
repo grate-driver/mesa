@@ -5134,7 +5134,7 @@
         "description": "mesa: do not throw _mesa_problem when invalid enum is used",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "e064d660205a04e7d9c63fdceebf3c293a6872ed"
     },
