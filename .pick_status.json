@@ -4477,7 +4477,7 @@
         "description": "nir: skip bcsel with non-trivial swizzle in opt_simplify_bcsel_of_phi()",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "b031c643491a92a5574c7a4bd659df33f2d89bb6"
     },
