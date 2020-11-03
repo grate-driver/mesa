@@ -5179,7 +5179,7 @@
         "description": "radv: fix shader caching with NaN fixup workaround",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "6f21995f986a8f119c916bef3293991e34774678"
     },
