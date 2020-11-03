@@ -4486,7 +4486,7 @@
         "description": "nir: add nir_alu_src_is_trivial_ssa()",
         "nominated": false,
         "nomination_type": null,
-        "resolution": 4,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": null
     },
