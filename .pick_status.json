@@ -4837,7 +4837,7 @@
         "description": "r600: amend space check for chips older than EVERGREEN",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "32529e60849dd20d167f14cb8542c5798343f0e0"
     },
