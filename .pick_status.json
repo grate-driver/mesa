@@ -355,7 +355,7 @@
         "description": "spirv: Don't add 0.5 to array indicies for OpImageSampleExplicitLod",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "589d918a4f9da83e3ae441aa674372a141d23349"
     },
