@@ -1327,7 +1327,7 @@
         "description": "st/mesa: fix use-after-free when updating shader info in st_link_nir",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "549ae5f84375dfadb86cfd465f0103acfae3249f"
     },
