@@ -832,7 +832,7 @@
         "description": "ci: Only install kernel modules for LAVA devices.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "60c5729d1669f9d91cc77d71f8e1893f2c0d0c94"
     },
