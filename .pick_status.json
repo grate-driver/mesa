@@ -706,7 +706,7 @@
         "description": "radeonsi: do VGT_FLUSH when switching NGG -> legacy on Sienna Cichlid",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "9538b9a68ed9aa0f8a231d6bf681f6f0a2a9d341"
     },
