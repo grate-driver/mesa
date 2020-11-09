@@ -1183,7 +1183,7 @@
         "description": "freedreno: Protect gmem_cache ralloc allocations",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "91f9bb99c5e0db38a1ac26dd9e6a967312f5e8b0"
     },
