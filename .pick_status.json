@@ -778,7 +778,7 @@
         "description": "intel/fs: Fix use of undefined value in fixup_nomask_control_flow",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "a8ac0bd759cbf9a5984df4bc9f553a3dca41a8ab"
     },
