@@ -1453,7 +1453,7 @@
         "description": "softpipe: correct signature of get_compiler_options",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "73bafb5ee38964019c3da2000095608a7fb4b554"
     },
