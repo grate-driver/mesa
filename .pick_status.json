@@ -958,7 +958,7 @@
         "description": "tu: Correctly preserve old push descriptor contents",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "6d4f33e469b301b2fc4f398f62c81ef66f9150be"
     },
