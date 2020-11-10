@@ -625,7 +625,7 @@
         "description": "ac: fix detection of Pro graphics",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "bfb92875992599d9c5ca5ecf39fce36a1719272d"
     },
