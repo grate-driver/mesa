@@ -472,7 +472,7 @@
         "description": "clover/spirv: Add missing break for SpvOpExecutionMode case.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "ee5b46fcfdb4df3d28839499e5945178af9b76f7"
     },
