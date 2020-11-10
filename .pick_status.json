@@ -715,7 +715,7 @@
         "description": "radeonsi: fix min_direct_count value",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "0ce68852c1a8d37e837d64f97a2a2ef5d6b669a5"
     },
