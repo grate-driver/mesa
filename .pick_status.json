@@ -1471,7 +1471,7 @@
         "description": "panfrost: Fix Bifrost blend descriptor emission",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "edd98aac3f16f216fa157f031f4c10fc294e7c8e"
     },
