@@ -1462,7 +1462,7 @@
         "description": "panfrost: Fix ->reads_frag_coord assignment",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "f1de952b695b8f2053d576d3e8093427e598bd4f"
     },
