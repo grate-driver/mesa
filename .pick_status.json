@@ -985,7 +985,7 @@
         "description": "ir3: Fix list corruption in legalize_block()",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "adf1659ff5f07d907eca552be3b566e408c8601e"
     },
