@@ -643,7 +643,7 @@
         "description": "radeonsi: add options.inline_uniforms to the shader cache key",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "b7501184b90a20015885b3f2276a7a5ceaef31a7"
     },

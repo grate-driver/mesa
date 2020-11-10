@@ -89,6 +89,8 @@ void si_get_ir_cache_key(struct si_shader_selector *sel, bool ngg, bool es,
       shader_variant_flags |= 1 << 8;
    if (sel->screen->debug_flags & DBG(GISEL))
       shader_variant_flags |= 1 << 9;
+   if (sel->screen->options.inline_uniforms)
+      shader_variant_flags |= 1 << 11;
 
    struct mesa_sha1 ctx;
    _mesa_sha1_init(&ctx);
