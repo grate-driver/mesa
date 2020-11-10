@@ -31,6 +31,7 @@ else
 endif
 
 DRI_DRIVERS =
+EGL_PLATFORMS = x11
 GALLIUM_DRIVERS =
 VULKAN_DRIVERS =
 
@@ -39,14 +40,12 @@ confflags_DRI3 = -Ddri3=false
 # hurd doesn't do direct rendering
 ifeq ($(DEB_HOST_ARCH_OS), hurd)
 	DRI_DRIVERS = swrast
-	EGL_PLATFORMS = x11
 
 	confflags_DIRECT_RENDERING = -Dglx-direct=false
 	confflags_GBM = -Dgbm=false
 	confflags_OSMESA = -Dosmesa=classic
 else
 	DRI_DRIVERS += r200,r100
-	EGL_PLATFORMS = drm,surfaceless,x11
 	GALLIUM_DRIVERS += r600,r300
 
   # radv needs LLVM and the Vulkan loader, so only build on the subset of
