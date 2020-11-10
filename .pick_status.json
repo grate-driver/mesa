@@ -2965,7 +2965,7 @@
         "description": "nir: handle float atomics in copy propagation pass",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "8424cd8fbd1671c4c13f57cfa34bf8145d0fffcf"
     },
