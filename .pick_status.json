@@ -688,7 +688,7 @@
         "description": "radeonsi: determine correctly if switching from normal launch to fast launch",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "3da91b3327fb93d0364c0ca9d0216f695160831d"
     },
