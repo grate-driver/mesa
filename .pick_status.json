@@ -2956,7 +2956,7 @@
         "description": "mesa: Fix vertex_format_to_pipe_format index.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "e6448f993b157a6d3757b69d5d4c2424e8af737e"
     },
