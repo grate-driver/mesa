@@ -571,7 +571,7 @@
         "description": "radeonsi: fix NGG streamout regression",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "81d106d6ecab326c96fb9f8db8e7f39621c9816e"
     },
