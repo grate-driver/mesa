@@ -184,7 +184,7 @@
         "description": "nir: handle float atomics in nir_lower_memory_model",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "2adb337256f146b10b31365ac6ba8ab820d9014e"
     },
