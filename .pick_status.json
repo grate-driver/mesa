@@ -202,7 +202,7 @@
         "description": "st/mesa: fix uninitialized/random clip plane state vars in lower_ucp",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "584f27326c1560cc23538cb76fb734ab492ccc3c"
     },
