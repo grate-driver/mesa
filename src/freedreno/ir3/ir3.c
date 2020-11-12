@@ -986,7 +986,7 @@ void * ir3_assemble(struct ir3_shader_variant *v)
 	return ptr;
 
 fail:
-	free(ptr);
+	ralloc_free(ptr);
 	return NULL;
 }
 

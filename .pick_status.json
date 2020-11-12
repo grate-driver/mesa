@@ -2299,7 +2299,7 @@
         "description": "freedreno/ir3: Fix crash in shader compile fail path",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "74140c2e859c15593a379cbde96b1048f2ad69dc"
     },
