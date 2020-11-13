@@ -2173,7 +2173,7 @@
         "description": "draw: fix tess eval pipeline statistics.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "202bc38ce9e3e52cea1448f22882d17c7e5e9a90"
     },
