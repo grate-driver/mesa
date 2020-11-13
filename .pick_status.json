@@ -697,7 +697,7 @@
         "description": "aco: fix fp16 *0.5 omod",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "1210e0bd6205c5f5365a29c91425dea3e49d89a7"
     },
