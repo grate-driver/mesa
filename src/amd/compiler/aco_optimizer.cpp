@@ -2539,7 +2539,11 @@ bool apply_omod_clamp(opt_ctx &ctx, Block& block, aco_ptr<Instruction>& instr)
    /* apply omod / clamp modifiers if the def is used only once and the instruction can have modifiers */
    if (!instr->definitions.empty() && ctx.uses[instr->definitions[0].tempId()] == 1 &&
        can_use_VOP3(ctx, instr) && instr_info.can_use_output_modifiers[(int)instr->opcode]) {
-      bool can_use_omod = (instr->definitions[0].bytes() == 4 ? block.fp_mode.denorm32 : block.fp_mode.denorm16_64) == 0;
+      bool can_use_omod;
+      if (instr->definitions[0].bytes() == 4)
+         can_use_omod = block.fp_mode.denorm32 == 0 && !block.fp_mode.preserve_signed_zero_inf_nan32;
+      else
+         can_use_omod = block.fp_mode.denorm16_64 == 0 && !block.fp_mode.preserve_signed_zero_inf_nan16_64;
       ssa_info& def_info = ctx.info[instr->definitions[0].tempId()];
       if (can_use_omod && def_info.is_omod2() && ctx.uses[def_info.temp.id()]) {
          to_VOP3(ctx, instr);
