@@ -1232,7 +1232,7 @@ void label_instruction(opt_ctx &ctx, Block& block, aco_ptr<Instruction>& instr)
                ctx.info[instr->operands[i].tempId()].set_omod2(instr->definitions[0].getTemp());
             } else if (instr->operands[!i].constantValue() == (fp16 ? 0x4400 : 0x40800000)) { /* 4.0 */
                ctx.info[instr->operands[i].tempId()].set_omod4(instr->definitions[0].getTemp());
-            } else if (instr->operands[!i].constantValue() == (fp16 ? 0xb800 : 0x3f000000)) { /* 0.5 */
+            } else if (instr->operands[!i].constantValue() == (fp16 ? 0x3800 : 0x3f000000)) { /* 0.5 */
                ctx.info[instr->operands[i].tempId()].set_omod5(instr->definitions[0].getTemp());
             } else if (instr->operands[!i].constantValue() == (fp16 ? 0x3c00 : 0x3f800000) &&
                        !(fp16 ? block.fp_mode.must_flush_denorms16_64 : block.fp_mode.must_flush_denorms32)) { /* 1.0 */
