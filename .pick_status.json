@@ -337,7 +337,7 @@
         "description": "nir: fix gathering TCS cross invocation access with lowered IO",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "abe9588ff048656c94d2074ca3d852ac371e0c7b"
     },
