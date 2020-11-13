@@ -1030,7 +1030,7 @@
         "description": "panfrost: Fix stack shift calculation",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "e6152091ca99c3d8491ac48baa1f301da6f4a4c3"
     },
