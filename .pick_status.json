@@ -220,7 +220,7 @@
         "description": "zink: more accurately track supported blits",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "5743fa6e709a01c5a6820320b2e87931af46e7cf"
     },
