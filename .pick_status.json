@@ -274,7 +274,7 @@
         "description": "ac/nir: fix a typo in ac_are_tessfactors_def_in_all_invocs",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "2832bc972bfb512b314a3180a1258be984807760"
     },
