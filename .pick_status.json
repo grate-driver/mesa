@@ -328,7 +328,7 @@
         "description": "nir: fix gathering patch IO usage with lowered IO",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "17af07024dfc8302b37a270cea4ef3eae06fe5e2"
     },
