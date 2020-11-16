@@ -652,7 +652,7 @@
         "description": "etnaviv: fix disabling of INT filter for real",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "89a41dae7702731bee298288f3acbcbd56096b30"
     },
