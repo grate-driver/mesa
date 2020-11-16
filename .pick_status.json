@@ -562,7 +562,7 @@
         "description": "radeonsi: fix scan_instruction for bindless inc_wrap/dec_wrap atomics",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "25fff591c1162a9c1158b0e69de3a6edf89f42d4"
     },
