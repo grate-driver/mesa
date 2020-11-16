@@ -1993,7 +1993,7 @@
         "description": "mesa/main: add missing include in glformats.h",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "1bf539b3a2129779addde397886870c00045e6d7"
     },
