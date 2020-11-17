@@ -463,7 +463,7 @@
         "description": "turnip: Close sync_fd only if it is a valid file descriptor.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "cec0bc73e550859635a71d330625bccdf71e87ee"
     },
