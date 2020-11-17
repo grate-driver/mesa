@@ -283,7 +283,7 @@
         "description": "freedreno: Fix warning about uninit size for the size==0 special case.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "536ec9d7f5ab3bba904090abf7b3fc58e92eec78"
     },
