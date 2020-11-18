@@ -166,7 +166,7 @@
         "description": "ac: Don't negate strstr return values in ac_query_gpu_info",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "b635dff25620b948080d31211ca487a71203af4d"
     },
