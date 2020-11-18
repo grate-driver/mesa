@@ -67,7 +67,7 @@
         "description": "gallium: Fix leak of the merged driconf options.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "8a05d6ffc65d0fd0e0a52fe84a174d4ca63e5521"
     },
