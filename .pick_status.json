@@ -58,7 +58,7 @@
         "description": "freedreno: Fix leak of u_transfer_helper.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "d1465b3aeee318a3a76a652325aa13d4a1946f37"
     },
