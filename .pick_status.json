@@ -1930,7 +1930,7 @@
         "description": "aco/optimizer: Only set scc_needed when it is actually needed.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "8a32f57fff56b3b94f1b5589feba38016f39427c"
     },
