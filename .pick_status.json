@@ -814,7 +814,7 @@
         "description": "turnip: use ir3_compiler_destroy instead of ralloc_free",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "c0f22c3d9406ef354142e974783f6c6c066a5c68"
     },
