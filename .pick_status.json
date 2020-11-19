@@ -103,7 +103,7 @@
         "description": "v3dv/cmd_buffer: missing (uint8_t *) casting when calling memcmp",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "e1c8041cde64ff72dab504ee0e31c2b5224145d6"
     },
