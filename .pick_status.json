@@ -769,7 +769,7 @@
         "description": "meson: Don't add extra values to shader-cache",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "5de56937a3d009659076dc67de6a57379fc7a31b"
     },
