@@ -1,8 +1,8 @@
-mesa (20.3.0~rc2-1) UNRELEASED; urgency=medium
+mesa (20.3.0~rc2-1) experimental; urgency=medium
 
   * New upstream release candidate.
 
- -- Timo Aaltonen <tjaalton@debian.org>  Fri, 20 Nov 2020 14:02:35 +0200
+ -- Timo Aaltonen <tjaalton@debian.org>  Fri, 20 Nov 2020 17:00:27 +0200
 
 mesa (20.3.0~rc1-1) experimental; urgency=medium
 
