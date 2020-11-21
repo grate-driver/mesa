@@ -355,7 +355,7 @@
         "description": "radv: Fix RB+ blending for VK_FORMAT_E5B9G9R9_UFLOAT_PACK32.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "e893102bcf5d6632f36399d745481639344e5526"
     },
