@@ -310,7 +310,7 @@
         "description": "r600/sfn: lower bool to int32 only after common optimizations",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "f79b7fcf7c7f5db626efdb63f27e8bc64d0aed77"
     },
