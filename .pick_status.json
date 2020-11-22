@@ -814,7 +814,7 @@
         "description": "radeonsi: fix a memory leak in si_create_dcc_retile_cs",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "1f21396431a03dc4e5a542628d7d8370973c967f"
     },
