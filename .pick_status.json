@@ -1705,7 +1705,7 @@
         "description": "r600/sfn: fix component loading from fixed buffer ID",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "18e97817148eb376274a8749c03b45c2f817c139"
     },
