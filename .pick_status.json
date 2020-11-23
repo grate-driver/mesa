@@ -481,7 +481,7 @@
         "description": "spirv: Call repair SSA for OpTerminateInvocation",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "886d2d1a9abcb0572a957c24ae44de4d6c055bc0"
     },
