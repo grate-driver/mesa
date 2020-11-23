@@ -652,7 +652,7 @@
         "description": "zink: fix layered resolves",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "19906022e22cb37493861b6976c9623618b5b769"
     },
