@@ -958,7 +958,7 @@
         "description": "radeonsi: fix a nasty bug in si_pm4.c",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "da78d50bc87ef5db846a942664094b6299cd1888"
     },
