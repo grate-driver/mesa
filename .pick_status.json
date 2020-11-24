@@ -2425,7 +2425,7 @@
         "description": "aco: fix v_mul_hi_u32_u24 format",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "57c152af9ce2e34c1a8724574c6a2c5d19c0c845"
     },
