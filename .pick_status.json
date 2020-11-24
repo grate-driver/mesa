@@ -1885,7 +1885,7 @@
         "description": "radv/llvm,aco: always split typed vertex buffer loads on GFX6 and GFX10+",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": null
     },
