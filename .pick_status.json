@@ -580,7 +580,7 @@
         "description": "gallium: fix missing bit field in p_state.h",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "3dc6da1ac1f5be2d6421940739b88f7e8d36cdf9"
     },
