@@ -157,6 +157,11 @@ DRI_CONF_OPT_BEGIN_V(force_glsl_version, int, def, "0:999") \
         DRI_CONF_DESC("Force a default GLSL version for shaders that lack an explicit #version line") \
 DRI_CONF_OPT_END
 
+#define DRI_CONF_ALLOW_EXTRA_PP_TOKENS(def) \
+DRI_CONF_OPT_BEGIN_B(allow_extra_pp_tokens, def) \
+    DRI_CONF_DESC("Allow extra tokens at end of preprocessor directives.") \
+DRI_CONF_OPT_END
+
 #define DRI_CONF_ALLOW_GLSL_EXTENSION_DIRECTIVE_MIDSHADER(def) \
 DRI_CONF_OPT_BEGIN_B(allow_glsl_extension_directive_midshader, def) \
         DRI_CONF_DESC("Allow GLSL #extension directives in the middle of shaders") \

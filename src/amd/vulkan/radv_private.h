@@ -1589,6 +1589,8 @@ struct radv_shader_module;
 #define RADV_HASH_SHADER_PS_WAVE32           (1 << 2)
 #define RADV_HASH_SHADER_GE_WAVE32           (1 << 3)
 #define RADV_HASH_SHADER_LLVM                (1 << 4)
+#define RADV_HASH_SHADER_DISCARD_TO_DEMOTE   (1 << 5)
+#define RADV_HASH_SHADER_MRT_NAN_FIXUP       (1 << 6)
 
 void
 radv_hash_shaders(unsigned char *hash,
