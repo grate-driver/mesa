@@ -1,5 +1,779 @@
 [
     {
+        "sha": "9fa1cdfe7ffd9e7ebd83055e2008f3e4b8ada549",
+        "description": "intel/rt: Implement push constants as global memory reads",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f7e24e559fb632eae54e444b022db9da35922258",
+        "description": "intel/rt: Add support for hit attributes",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "96fde5518b5c47550f0f42f3a0504ccbdc4a4e92",
+        "description": "intel/rt: Add a helper to create the raygen trampoline shader",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "303378e1dd4119e04e0f6cb623766115a00c2eea",
+        "description": "intel/rt: Add lowering for combined intersection/any-hit shaders",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cb261b03e5af7862f1321c778e3ad54b640226bc",
+        "description": "intel/rt: Add lowering for ray-walk intrinsics in any-hit shaders",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c3ddefa000ec09631ac0115fd959e152edca27d8",
+        "description": "intel/rt: Add support for shader buffer record memory",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9ba7d459a3a193b002586ddbee2720948002421c",
+        "description": "intel/rt: Implement the new ray-tracing system values",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7ce7c93755fd62ea91e384255e85f6689b6d890b",
+        "description": "intel/rt: Implement traceRay()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "75209d5bd1f6e93cd52568d87d3ee84f516eec56",
+        "description": "intel/fs: Add and implement intel-specific ray-tracing intrinsics",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1f6ae809ef000a3f0ed20148fd5e8c98d43b62d1",
+        "description": "intel/rt: Implement support for shader call payloads",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "72354b0e9dd338f28e0422be81ccb31cf241a36c",
+        "description": "intel/rt: Add a helper to create a trivial return shader",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "fad81a3968144f4765a13e70082fdc163650b1db",
+        "description": "intel/rt: Add a pass to lower shader call instructions",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ca88cd8e5a6d1c36e0f3842eee20edeb1d78eec2",
+        "description": "intel/rt: Add return instructions at the end of ray-tracing shaders",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "49778a7253dfce7a09c6d0e433c571a543d85065",
+        "description": "intel/rt: Add support for scratch in ray-tracing shaders",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2b3f6cdc6cf1b2a217af447196e53469a1c9a8d6",
+        "description": "intel/rt: Add lowering functions for each ray-tracing stage",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c7660918d77851d35170e0064d22d2281fed5ac4",
+        "description": "intel/rt: Add a pass to lower the new ray-tracing intrinsics",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6e50db4edac110f59b2381cbb27cb568a4a4b8ea",
+        "description": "intel/rt: Add builder helpers for accessing RT data structures",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1f6e70c85a88bb18f48a42574b77b4c0a27d8dbf",
+        "description": "intel/fs: Add and implement a load_global_const_block intrinsic",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6d5b57aeb7d381337e7bfda418205240330f3f04",
+        "description": "intel/rt: Add a brw_rt.h header with #defines for basic RT data structures",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7280b0911d8ce22092251a8db6d37b11bdc5a59e",
+        "description": "intel/compiler: Add support for bindless shaders",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "27f44116fe0bfde34149a676ddb5e75d14fffe7b",
+        "description": "intel/debug: Add a debug flag for ray-tracing shaders",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a7dd172aaa11fcada1513082ff0abea031090b1e",
+        "description": "nir/lower_io: Support shader_call_data in vars_to_explicit_types",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "477d2f03794154eccde9e33573d326d11f1c64d0",
+        "description": "nir/lower_io: Allow ray_hit_attrib in lower_vars_to_explicit_types",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "bbbb0600f64347a1b1c6d9ba6d4d5863071d7fb4",
+        "description": "nir: Add a helper to get the live set at a cursor",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c7eccb9ca2a3371aa6bbe912c1088cfa30f548f6",
+        "description": "intel/genxml: Add BVH data structures",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "980950c52100f8f54c68d0ec0cd0023480673c95",
+        "description": "intel/genxml: Add RT_DISPATCH_GLOBALS and RT_*_SBT_HANDLE structs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "858d565eea4d9e1152277550ee88f7acf4cb71fc",
+        "description": "intel/genxml: Support truncated addresses",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ba9c714cacd21b6f5ee1c58d219c52af23a80a27",
+        "description": "intel/genxml/pack: Stash the cloned address field",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9d16d973a70aed61f38607229339a8c4d3c2ad6d",
+        "description": "intel/genxml: Add the BINDLESS_SHADER_RECORD data structure",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5faf859ebbeed2a529913d064aae76055cce586b",
+        "description": "intel/dev: Add a gen_device_info::has_ray_tracing bit",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1d6434f02ba7ae17664506645f43365b2753ffc4",
+        "description": "spirv: Emit nir_jump_halt after TerminateRay or IgnoreIntersection",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "630e54a08b7efb4a92e7708fc5cd682767a1a502",
+        "description": "nir: Add a halt instruction type",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a1281f8a995bcbe6144b43f27bb0c89c28f2a3ba",
+        "description": "meson: add idep_mesautil to components using simple_mtx.h",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "53f7d539cd93aff35f64a113a7f22fd91f1eb841"
+    },
+    {
+        "sha": "37a706ad5d99857da187d2e253e8927e7fe23145",
+        "description": "Revert \"zink: initial implementation of shader keys\"",
+        "nominated": false,
+        "nomination_type": 2,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "2be2a500a396fe1dc0e121816e4056874cdd43fc"
+    },
+    {
+        "sha": "06cb6c6063b989c9f225822ff8616590d2167814",
+        "description": "Revert \"zink: refcount the shader cache\"",
+        "nominated": false,
+        "nomination_type": 2,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "b9fdc21bba0724271520462f3f04ba72ae106a26"
+    },
+    {
+        "sha": "01f04c7760aa27f7edc138631eb434124d3b6b17",
+        "description": "Revert \"zink: move shader key structs into their own header\"",
+        "nominated": false,
+        "nomination_type": 2,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "ed7a5a55689ddcf10aae3f671e390252aad2d62f"
+    },
+    {
+        "sha": "a4d03aa2b16a0cd6a94855784bbf8f32ed7bd595",
+        "description": "Revert \"zink: fill in params for fs shader keys and flag shader for rebuild\"",
+        "nominated": false,
+        "nomination_type": 2,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "9aa08221fa6653002dec2a07641d58d3c7fa227a"
+    },
+    {
+        "sha": "1a25b1b36e791e5c13757d1cd8d07b72e49b1ca4",
+        "description": "Revert \"zink: put those shader keys to work fixing up fragment shaders\"",
+        "nominated": false,
+        "nomination_type": 2,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "eeff625ab31f0a1bf94739e09ca6b08de00c94f5"
+    },
+    {
+        "sha": "469c59f8eade8fa72dfe0260abaccced69d2aa8d",
+        "description": "Revert \"zink: update shader modules in gfx program when flagged dirty\"",
+        "nominated": false,
+        "nomination_type": 2,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "e96afeeb7bb2306aa0fba76e27163d4c7a86860b"
+    },
+    {
+        "sha": "025cb90042ba62db8f4be6b612c8f5d2b6b3746b",
+        "description": "radv: Fix RB+ blending for VK_FORMAT_E5B9G9R9_UFLOAT_PACK32.",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "e893102bcf5d6632f36399d745481639344e5526"
+    },
+    {
+        "sha": "0742edba5ef4aa2253436a449a797daa8f2779d5",
+        "description": "mesa: Synchronize get_gl_override()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d91fe7d1c65179e64a6ca294135ac1bad2b16fb9",
+        "description": "tgsi: Fix helgrind complaint about one-time init",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1aa055539f32fcb3c78d908d1635bb3a3d517bc2",
+        "description": "gallium/trace: Fix helgrind complaint about one-time init",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f7102ac376a23a394786085a2b0dffa94c13150c",
+        "description": "mesa: Fix helgrind complaint about one-time init",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f8c7a43f33d4647c16c4892d56706a14e5d6bf17",
+        "description": "util: Fix helgrind complaint about one-time init",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "bcb2981e145f0c2a54a637e20b6c55eaf316c04f",
+        "description": "mesa/st: Use do_once for one-time init",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2e81ec5e009e3fbeef3fe1a76f2dfee428b7c160",
+        "description": "gallium/hud: Use do_once for one-time init",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b4ad27a986e1c6899cbf23355c3e9c6de345a323",
+        "description": "freedreno/ir3: Use get_once() for one-time init",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c9062df1d57df19a56288c1749d4b6d22d7c1418",
+        "description": "nir: Use get_once() helper for one-time init's",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "bda4d6e0d01116db59a0a03b0c703a7af6e11949",
+        "description": "util: Add helpers for various one-time-init patters",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "53f7d539cd93aff35f64a113a7f22fd91f1eb841",
+        "description": "util: Add helgrind support for simple_mtx",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7f223a2329a7d392b8860f488b3797012cdd37fe",
+        "description": "spirv: Implement SpvOpConvertUToAccelerationStructureKHR",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "879b87cf8cc59087e81b51ea26738c013c6cfa95",
+        "description": "spirv: Implement OpTerminateRayKHR and OpIgnoreIntersectionKHR",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "66685679b7c047398d3f593db86a24eba38db3b9",
+        "description": "spirv: Call repair SSA for OpTerminateInvocation",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "886d2d1a9abcb0572a957c24ae44de4d6c055bc0"
+    },
+    {
+        "sha": "6885cc6f654e66eb53d5e3b44b3e071c9e0621a9",
+        "description": "spirv: Implement OpTraceRayKHR and OpExecuteCallableKHR",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "946d5ca004c33435a648ae115b859caa607e78d6",
+        "description": "spirv: Update JSON and headers from Khronos main",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b15caf190b574b4e58b29eeb5b241abccbc43de1",
+        "description": "spirv: Rename some ray-tracing intrinsics to NV",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "22c1e0974786249066c27e15fd7ebec74e5a5a62",
+        "description": "vulkan: Update XML and headers to 1.2.162",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c0286fc09b72bd8e7e43bdccb30a89b023d79452",
+        "description": "zink: fall back to util_blitter for scaled resolves",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "19906022e22cb37493861b6976c9623618b5b769"
+    },
+    {
+        "sha": "1c17223c02b68679d67a4e4a6be8b9b7a80fa2e9",
+        "description": "nir/opt_peephole_select: respect selection_control when collapsing ifs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "28395407eb86d17a72b970262d4089c73975ae11",
+        "description": "nir/opt_peephole_select: collapse nested IFs if applicable",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "000ea77938725d81588f2cc5120a09798e51f192",
+        "description": "v3dv: fix allocation size for BO handles",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "fa5429390b2236f4cb92336b122d7a16be7a5fa7",
+        "description": "v3dv: remove obsolete comment",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "19da9bd10d94bbda211c6395aef34fe97daabebc",
+        "description": "clover: Fix typo in comment.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "105fc1c615eb4963503c738c68766f830bc5a662",
+        "description": "gallium: fix missing bit field in p_state.h",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "3dc6da1ac1f5be2d6421940739b88f7e8d36cdf9"
+    },
+    {
+        "sha": "87c70f1984fc6f9be6c32559ecfbde1946ff7360",
+        "description": "lavapipe: enable pipeline stats queries",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4263162839d67f08c69895925ffc19cb4fbf4c42",
+        "description": "lavapipe: fixup mipmap precsion bits",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2c0a078fdb4b856ecc29d5cf9b0478afc2309aa8",
+        "description": "llvmpipe: fix multisample lines.",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d932720ff7dd8fafbb200d9f91c3956d5f0e775e",
+        "description": "llvmpipe: fix multisample point rendering.",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2ed54033def4e56e2ec9de7d25f7d4db30523b77",
+        "description": "llvmpipe/setup: move point stats collection earlier.",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f24645653863564eb059c1200a52b25f659216e5",
+        "description": "lavapipe: fix wsi acquire fences",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0d90c7cbc4d005fe6245d0a19985784940792403",
+        "description": "lavapipe: fixup device allocate + enable private data",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2ac396e2e5b966a247b698dcc44456fff1ffa0df",
+        "description": "zink: fix layered resolves",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "19906022e22cb37493861b6976c9623618b5b769"
+    },
+    {
+        "sha": "989877365d236e553e740dd9b77dbf524d8d4a98",
+        "description": "release-calender: Update 20.3",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f60fabc38f72c1a201698ca263b4fadb5b9df1dc",
+        "description": "docs: update calendar and link releases notes for 20.2.3",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9c2e8a8f90a09a0ec2d0a4bb9592e57311e17a1e",
+        "description": "docs: Add relnotes for 20.2.3",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ad2b1200875bc3f99c5302117ebc58f624a3e14e",
+        "description": "docs: add release notes for 20.2.3",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8e961b91c320125c81fbae0d8f9f6076ee58aa3c",
+        "description": "aco: optimize v_add+v_lshlrev to v_mad_u32_u24 on GFX6-8",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d9e4504b0dc6752f1820deb01eb829b4f2af3a45",
+        "description": "aco: optimize v_add+s_lshl to v_mad_u32_u24 on GFX6-8",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "eaef1f21278ff8ddd534946c562b211b7208c155",
+        "description": "aco: allow to use the range analysis UB in emit_{sop2,vop2}_instruction()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "be600b009a8c4508a488f71b9eaf5e6901dff245",
+        "description": "aco: add a new Operand flag to indicate that is 24-bit",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "05fd780012894c3b6527df6d434c4cb3c82d7772",
+        "description": "aco/tests: extend the optimize.add_lshl tests to GFX8",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cd59c22325293d17ed76bc803d927407ae0a7abe",
+        "description": "ac,radv: use better export formats for 8-bit when RB+ isn't allowed",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "684531fd37ca3aa15dfb34f34ada10615ff66864",
+        "description": "radv: add new vk_format_is_*() helpers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a5227465c13ae74651a932a82aeae65683f4a063",
+        "description": "meson: use a feature option for microsoft-clc",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "ff05da7f8dc4aa531704d48f718514e3b1fff45d"
+    },
+    {
+        "sha": "7ca4a478ad307e3e706e86b2786929a6a3b7dff8",
+        "description": "meson: Don't add extra values to shader-cache",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "5de56937a3d009659076dc67de6a57379fc7a31b"
+    },
+    {
         "sha": "a92f597b98bb032b904c7c8a8c3a9fe798b51915",
         "description": "freedreno/ir3: Fix valgrind complaint about streamout state",
         "nominated": false,
