@@ -1885,7 +1885,7 @@
         "description": "freedreno/a6xx: Fix typo in height alignment calculation in a6xx layout",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "e49748521ec9182e8d2eec823182cc463709123f"
     },
