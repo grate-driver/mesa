@@ -1912,7 +1912,7 @@
         "description": "anv: fix descriptor pool leak in VMA object",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "0a6d2593b8b63d2429e79eed900848c5c9a522c9"
     },
