@@ -1444,7 +1444,7 @@
         "description": "radv: Deal with unused attachments in mip flush",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "4cce4d22a72bf84459ee95223cc7d1c6542617fb"
     },
