@@ -1417,7 +1417,7 @@
         "description": "radeonsi: fix regression on gpus using the radeon winsys.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "f2977a162af46ff0b9d9334bb677b768900ba5d3"
     },
@@ -4954,7 +4954,7 @@
         "description": "radv: Deal with unused attachments in mip flush",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "4cce4d22a72bf84459ee95223cc7d1c6542617fb"
     },
