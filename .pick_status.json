@@ -76,7 +76,7 @@
         "description": "aco: Fix NGG GS assert failure from the WG scan.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "62b5012ec35358a7c109746bfe1da33ca1b04f24"
     },
