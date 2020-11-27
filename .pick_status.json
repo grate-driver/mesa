@@ -670,7 +670,7 @@
         "description": "radv: Fix leak in radv_amdgpu_winsys_destroy()",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "fa97061a8235b64009d7897ecf20cc81258f3403"
     },
