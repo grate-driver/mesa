@@ -265,7 +265,7 @@
         "description": "radv: round-up num_records division in radv_flush_vertex_descriptors",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": null
     },
