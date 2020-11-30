@@ -135,6 +135,7 @@ struct radv_nir_compiler_options {
 	bool explicit_scratch_args;
 	bool clamp_shadow_reference;
 	bool robust_buffer_access;
+	bool robust_buffer_access2;
 	bool dump_shader;
 	bool dump_preoptir;
 	bool record_ir;
