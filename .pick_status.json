@@ -481,7 +481,7 @@
         "description": "iris: update depth value for stages after fast clear depth",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": null
     },
