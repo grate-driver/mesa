@@ -301,7 +301,7 @@
         "description": "panfrost: Make sure we always add a reader -> write dependency when needed",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "c6ebff3ecdde46ef7925326522395b4a50dd65a3"
     },
