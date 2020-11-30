@@ -616,7 +616,7 @@
         "description": "radv,aco: don't use MUBUF for multi-channel loads on GFX8 with robustness2",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "03a0d39366db367b26aea29b04b032c6f1f7cd84"
     },
