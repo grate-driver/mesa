@@ -39,4 +39,3 @@ dEQP-GLES3.functional.fbo.msaa.4_samples.rg32f,Fail
 dEQP-GLES3.functional.fbo.msaa.4_samples.rgba16f,Fail
 dEQP-GLES3.functional.fbo.msaa.4_samples.rgba32f,Fail
 dEQP-GLES3.functional.fbo.msaa.4_samples.stencil_index8,Fail
-dEQP-GLES3.functional.fence_sync.client_wait_sync_finish,Fail
