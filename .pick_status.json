@@ -148,7 +148,7 @@
         "description": "android: fix build failure with libbacktrace",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "848e7b947d0d505d54d27780b052e5532c721678"
     },
