@@ -229,7 +229,7 @@
         "description": "freedreno: Break out of \"should we free the entry\" loop once we've freed.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "6de01faac5a20208422fb75d22f2bd88c53f53d8"
     },
