@@ -103,7 +103,7 @@
         "description": "iris: store copy of the border color in the border color hash table",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "809a81ec3a0b8666ec426a88b86fb133ae5f1bcb"
     },
