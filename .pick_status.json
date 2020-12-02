@@ -283,7 +283,7 @@
         "description": "freedreno: Add missing dependency to build",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "1e8808a4a0f7f28dfc885bbe6c50e7a65ad15bbf"
     },
