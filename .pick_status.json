@@ -121,7 +121,7 @@
         "description": "zink: do not require VK_KHR_external_memory",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "f1432fd3e2d915f09a295f1ffb878471ce4e4d73"
     },
