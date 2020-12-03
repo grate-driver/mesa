@@ -796,7 +796,7 @@
         "description": "turnip: no linear_to_srgb for alpha channel for gmem clear value packing",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "ddac5933f8f30df66b389c32a634dab16cff5a4c"
     },
