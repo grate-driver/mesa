@@ -94,7 +94,7 @@
         "description": "Revert \"Revert \"radeonsi: use staging buffer uploads for most VRAM buffers\"\"",
         "nominated": true,
         "nomination_type": 2,
-        "resolution": 0,
+        "resolution": 2,
         "master_sha": null,
         "because_sha": "af0435cbfe61632407ce135fbea9cab6fe1e4fb6"
     },
