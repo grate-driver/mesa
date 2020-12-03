@@ -148,7 +148,7 @@
         "description": "radv: fix access to uninitialized radeon_bo_metadata",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "d5fd8cd46eeedeabf8647c06489a755aea8f0080"
     },
