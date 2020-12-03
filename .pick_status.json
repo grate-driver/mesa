@@ -85,7 +85,7 @@
         "description": "aco: don't assume src=lower when splitting self-intersecting copies",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "09c584caeb2a1e7446ac2016ce7a7d8f0586774b"
     },
