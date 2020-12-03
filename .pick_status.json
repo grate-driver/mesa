@@ -751,7 +751,7 @@
         "description": "turnip: move up LRZ invalidate in CmdClearAttachments",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "2f79e0066405f80c3244d1cc814bc6a51d1d581a"
     },
