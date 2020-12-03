@@ -1,5 +1,230 @@
 [
     {
+        "sha": "872c4bcd27db7b7ca26abe9fc090ae26d502156f",
+        "description": "turnip: implement z-scaling and z-mirroring BlitImage",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c76edc646b35f7dabef101897fd6b37e5488cee5",
+        "description": "meson.build: Order the flex/bison by odds of them working",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4c285e70806aa036d73705dd8b6ae46d1176130a",
+        "description": "meson.build: Disable zlib as per -Dzlib option",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "12fa2d2ac22ef3ddbc8c5efaf55064fe1a19fd29",
+        "description": "meson.build: Use SSE math for MinGW X86 build as per sse2 option",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "81702c0ba6bc588d50c11aeb5975eca57bc18848",
+        "description": "meson: Don't build svgadrm on windows",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8955980f17f902d24c50962502a20285dcd11642",
+        "description": "gallium/targets/libgl-gdi: prefer d3d12 driver",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "843a56324a388ca994f6f2150e8f0235c4830b1b",
+        "description": "lavapipe: set some basic usage-flags",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "870724d43ba0f2784bb9bb575cb114ca43f00b25",
+        "description": "nir/opt_sink: use common instruction removal/insertion helpers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "45e43445ce724c4d7f15457ac30fc23fd531bc80",
+        "description": "gallium/u_threaded: disable forced staging upload at runtime",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2900f82e1919dcb70d29f34e5ed10a09f7356b3e",
+        "description": "gallium/u_threaded: fix staging and non-staging conflicts",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a5e0a2e101bcda0132185a82c3e8c9b4c90ce94c",
+        "description": "Revert \"Revert \"radeonsi: use staging buffer uploads for most VRAM buffers\"\"",
+        "nominated": true,
+        "nomination_type": 2,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "af0435cbfe61632407ce135fbea9cab6fe1e4fb6"
+    },
+    {
+        "sha": "128b2de63b415e96225a2077846d64bd54edbcff",
+        "description": "nir: gather if a fragment shader uses sample shading",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c0aa3c83232d21bcd2a4d4d4a34b894e0870f403",
+        "description": "glx: Claim to support more GL versions in __glX_send_client_info",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f39fd3dce72eaef59ab39a23b75030ef9efc2a40",
+        "description": "glx/indirect: Validate the context version in CreateContextAttribs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6a265420dd585a81fa5c8060122201ac6befcbb9",
+        "description": "lavapipe: add support for VK_KHR_indirect_draw_count",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f65b1d22f21fedf51d4cdb5480aa6afc723a6da4",
+        "description": "lavapipe: enable post depth coverage",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0a6e1971eadad79eb0b592ea795cfafc7c355a56",
+        "description": "lavapipe: enable VK_EXT_shader_stencil_export",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d3024817514fc0865a61a85c4e95e063450e6433",
+        "description": "CI: Add llvmpipe- prefix to Piglit jobs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2609fe34522b31106f52adcc0e3de6910d3c47b5",
+        "description": "CI: Reorder non-hardware stages last",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "220a467b7fa5fb22d15d646f45bc56debe73c0ed",
+        "description": "CI: Collapse lima & panfrost stages into one",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "567332274579d5c1fe588dcb8759e0781ef2da1c",
+        "description": "CI: Collapse virgl & d3d12 stages into one",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "343705a9cfa11c4bcdf5fad167c03e5328e1a277",
+        "description": "CI: Collapse radv & radeonsi stages into one",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d5bf4c99f60e285a0499ab64b9fe5e2b1405301b",
+        "description": "CI: Collapse llvmpipe & softpipe stages into one",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4d7c84805362adf96a73cc7c630714e920345067",
+        "description": "CI: Collapse SCons & meson-misc stages into one",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "18f6bd676d1bd6f37c88a55434339080735e8ad7",
+        "description": "util: unbreak on BSDs after MSVC changes",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "cdf3a6a83b5013dad78a3d95817cd772a146ca40"
+    },
+    {
         "sha": "d3c67d7e7ec6b9cf10fbea0d08e92751b7b0fbae",
         "description": "freedreno: Break out of \"should we free the entry\" loop once we've freed.",
         "nominated": true,
