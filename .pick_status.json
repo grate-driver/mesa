@@ -778,7 +778,7 @@
         "description": "turnip: always emit LRZ draw state in DIRTY_DRAW_STATE path",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "3c07a149986381847a8431db0491286c1fc10897"
     },
