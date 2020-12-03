@@ -742,7 +742,7 @@
         "description": "turnip: always set LRZ registers to zero for 3d clear/blit",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "1d83f5ae8435c428a20fa947d6a2b22ae453e80c"
     },
