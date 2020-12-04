@@ -1,5 +1,365 @@
 [
     {
+        "sha": "72b68bd2a62d193e26bd6b31123182d7dbae3098",
+        "description": "ci: add testing for VC4 drivers (Raspberry Pi 3)",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f66236617cd52a7c0d5e27f3941c2e7390def2f2",
+        "description": "clover/core: Fix x86 build",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "f88347cd223c34324816e917e02aeaa31c6a58b5"
+    },
+    {
+        "sha": "e476c1819634c839c31228b616f53ea2baaa61dd",
+        "description": ".mailmap: add and update aliases for Danylo Piliaiev",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "76106301248b94b995a7600aa9b99360ce4e91f7",
+        "description": "aco: coalesce constant copies",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f53d4e5f6087b5a2d09d4513332919592e1c8242",
+        "description": "aco: use v_lshrrev_b64 for 64-bit VGPR copies on GFX10+",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8c02a8e2d207a1d085f7a8fb3a0117b50b769611",
+        "description": "aco: add get_const/is_constant_representable helpers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b10de4c1d8fc495b042632d8122b957d5ca09af0",
+        "description": "aco: allow 64-bit literals if they can be sign/zero-extended from 32-bit",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "24ee0f55f2d99c9c8d611b36016a6f42aa5188cc",
+        "description": "aco: remove sign-extension in constantValue64()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8451911156cebf73d446bde5422566d650c6fa69",
+        "description": "aco: test self-intersecting copies when src=higher",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2c40846ab6f8bf161dc79ed99b51702055c6d538",
+        "description": "aco: don't assume src=lower when splitting self-intersecting copies",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "09c584caeb2a1e7446ac2016ce7a7d8f0586774b"
+    },
+    {
+        "sha": "741921e2ffa877500c8fb4045702dfb4dae4f16e",
+        "description": "panfrost: Update the resource layout before calling util_copy_rect()",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "d4f662a25227a3d469a516ba0acb6dc4d1a71bcb"
+    },
+    {
+        "sha": "90515f90c8523bbf637a4dfdbce959adc45b4834",
+        "description": "iris: store copy of the border color in the border color hash table",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "809a81ec3a0b8666ec426a88b86fb133ae5f1bcb"
+    },
+    {
+        "sha": "055aff2613a2913e499ebb82ad61cc2bb343955f",
+        "description": "radv: reduce maxTransformFeedbackBufferDataSize to 512",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "da1642569071144a4f2d80b76cb4d725aa94621a",
+        "description": "util: Add os_get_page_size support for macOS.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ba42de95da4312230b16c25a0ce1e75d8839f9c1",
+        "description": "radeon/vcn: support hevc SAO enc for VCN2+",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c56a1898d73df6c1ad816e76a71c52c782279c88",
+        "description": "radeon/vcn: use cdw to calculate slice header index",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e37cd34ea6b2b58e584b32d0ebade67d8abd5c33",
+        "description": "radeon/vcn: add 0x02 to enc emulation prevention",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cf7bf7fadeb76a084235dcfaca8c96f569909aed",
+        "description": "amd/addrlib: Initialize Lib members in constructors.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "df0157dc697b858a3fa939dc6a938dd58c976bd2",
+        "description": "meson: Make the glvnd vendor name configurable",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9a3aaffeb809e2bc11b828ee3ccbe66a01e9b8d6",
+        "description": "radv: Don't invalidate the SCACHE for image barriers.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6d7518600838d4ad7ed3579e2cf979b06feb30a4",
+        "description": "st/mesa: move cso_context next to the other pointers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a07cb9a1ef70f67675ede78ee1824dde80204ed2",
+        "description": "st/mesa: put pipe_screen * into st_context and use it",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d23f45577eec88deab8e2083749ad0b7412c49d7",
+        "description": "cso: inline struct cso_cache to remove dereferences",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8904fcca6dbe3059b73a90d99b9105bfa0661e12",
+        "description": "gallium: inline struct u_suballocator to remove dereferences",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0b22def5f84c0c2c83daaf00710ae7c50ceee9d1",
+        "description": "cso: remove unused code",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d0bc10affb3845e30d15bbd82c2bfa2469770401",
+        "description": "vbo: remove gl_context dereferences when we can just subtract the pointer",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "03e7c93b828a585c354f2d167c01cacc6054f8c2",
+        "description": "freedreno: Remove fd_log()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d5bc39c9d0e2a22d9cf968023fb39b296ffdcf5d",
+        "description": "freedreno: Add trace-parser.py",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a02dcb970fff17e73648b58bf4a603bc4f9c0c36",
+        "description": "freedreno: Add GPU tracepoints",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7a70f28de2b547f393b6a10079a0123ad335f0ba",
+        "description": "freedreno: Don't emit log/trace points in gmem for nondraw",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "552dbd4470df82639532b4d6a6ff661081af8dc5",
+        "description": "freedreno: Remove unused fxn",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c0f2897a7b3976a67509cef6a44c80b17579fa20",
+        "description": "freedreno: Small log-parser.py cleanup",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3471af9c6cfa1dfa46e9607910bd4febc31095d2",
+        "description": "gallium/aux: Add GPU tracepoint mechanism",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a1440ec3daaa4f95b5ce007157ae1371c39da5b6",
+        "description": "util: Add helper to get FILE* options",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1e4cd12c8bf5c7ecf829f203b0162f7268da03cc",
+        "description": "asm: Try to fix sparc assembly for inverse matrix operations",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "3175b63a0dfa290430f9f7eb651387788933a02b"
+    },
+    {
+        "sha": "70762b826b6d2781de9e06f1dad5d5e741876704",
+        "description": "asm: Fix x86 assembly for inverse matrix operations",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "3175b63a0dfa290430f9f7eb651387788933a02b"
+    },
+    {
+        "sha": "94c6511757254da6c3b6113c6423bbe27c7ee77c",
+        "description": "docs: add release schedule for 20.3",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e1f47001ed068cd7991921b4d28de2a4b8784f7e",
+        "description": "docs: update calendar and link releases notes for 20.3.0",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9681b5b7551414e4feacfd653c8b31a7683a8076",
+        "description": "docs: Add sha256 sums for 20.3.0",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "af74c35d7d2e513b9da6981f672d3a48ac1b7cb1",
+        "description": "docs: add release notes for 20.3.0",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "872c4bcd27db7b7ca26abe9fc090ae26d502156f",
         "description": "turnip: implement z-scaling and z-mirroring BlitImage",
         "nominated": false,
