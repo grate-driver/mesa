@@ -175,7 +175,7 @@
         "description": "radeonsi: fix regression on gpus using the radeon winsys.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "f2977a162af46ff0b9d9334bb677b768900ba5d3"
     },
