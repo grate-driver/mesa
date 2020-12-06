@@ -1381,7 +1381,7 @@
         "description": "util: Avoid pthread_setaffinity_np on NetBSD",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": null
     },
