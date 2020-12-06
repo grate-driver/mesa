@@ -868,7 +868,7 @@
         "description": "anv: only signal wsi fence BO on last command buffer",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "ccb7d606f1a2939d5a784f1ec491cffc62e8f814"
     },
