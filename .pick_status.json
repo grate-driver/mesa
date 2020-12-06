@@ -193,7 +193,7 @@
         "description": "frontends/va/context: don't set max_references with num_render_targets",
         "nominated": false,
         "nomination_type": null,
-        "resolution": 4,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": null
     },
