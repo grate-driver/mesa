@@ -994,7 +994,7 @@
         "description": "radv/winsys: Fix inequality for sparse buffer remapping.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "715df30a4e27a76917d6172e68fd7f4c3ff1fb9d"
     },
