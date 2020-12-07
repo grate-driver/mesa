@@ -1,6 +1,8 @@
 mesa (20.3.0-1) UNRELEASED; urgency=medium
 
   * New upstream release.
+  * rules: Enable v3dv on armhf/arm64, and zink where vulkan is
+    available. (Closes: #975679)
 
  -- Timo Aaltonen <tjaalton@debian.org>  Mon, 07 Dec 2020 15:25:17 +0200
 
