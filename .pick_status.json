@@ -157,7 +157,7 @@
         "description": "freedreno/a6xx: Fix assert which checks the count of shader outputs",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "2251a4345b1d9ebbf1defe533e16a2633d5127ef"
     },
