@@ -832,7 +832,7 @@
         "description": "zink: fix format-mapping",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "8d46e35d16e3936968958bcab86d61967a673305"
     },
