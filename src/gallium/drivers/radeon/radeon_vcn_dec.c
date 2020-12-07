@@ -397,7 +397,7 @@ static rvcn_dec_message_vp9_t get_vp9_msg(struct radeon_decoder *dec,
       for (i = 0; i < 3; ++i)
          prbs->seg.pred_probs[i] = pic->picture_parameter.segment_pred_probs[i];
 
-      prbs->seg.abs_delta = 0;
+      prbs->seg.abs_delta = pic->picture_parameter.abs_delta;
    } else
       memset(&prbs->seg, 0, 256);
 
@@ -1264,7 +1264,7 @@ static unsigned calc_dpb_size(struct radeon_decoder *dec)
                     : (4096 * 3000 * 3 / 2) * max_references;
 
       if (dec->base.profile == PIPE_VIDEO_PROFILE_VP9_PROFILE2)
-         dpb_size *= (3 / 2);
+         dpb_size = dpb_size * 3 / 2;
       break;
 
    case PIPE_VIDEO_FORMAT_JPEG:
