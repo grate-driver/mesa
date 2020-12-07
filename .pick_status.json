@@ -679,7 +679,7 @@
         "description": "android: spirv: fix '::' typo in gen rules",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "1070bba19e26640bc1dbfd04180e97217761404d"
     },
