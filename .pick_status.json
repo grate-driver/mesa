@@ -1,5 +1,509 @@
 [
     {
+        "sha": "ec3828add38a83b8c09fd5896265abc9d766162e",
+        "description": "radv: fix clearing FMASK for layered MSAA images on GFX9+",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "35964e9387532a00f63f11d2ee666ce5112e4417",
+        "description": "ac/surface: initialize the FMASK slice size for GFX9+",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c0319e4505b95c72d08864eda517998cf506fbde",
+        "description": "radv: advertise VK_EXT_sample_locations on GFX10+",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3adf8121a0391711004b52f4b5278e1ae34343c4",
+        "description": "radv: enable using MSAA2x and MSAA4x sample locations on GFX10+",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "86644b84b94910ddb78b7a1117b8bcf55bb76265",
+        "description": "radv: Implement VK_VALVE_mutable_descriptor_type.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "08fb84dc9d5eef78e9914f3c526f9f49fde1e5dd",
+        "description": "vulkan: Update to 1.2.164.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2c16c209b59baef328fdcf45e0d6d959f498fcfb",
+        "description": "android: freedreno/ir3: use python3 in gen rules",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5e07590e6a649e52145ebee8f2a4604c7f21cda2",
+        "description": "android: freedreno: Remove fd_log()",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "03e7c93b828a585c354f2d167c01cacc6054f8c2"
+    },
+    {
+        "sha": "cbcac6b2fb5dbe37cb517068c4a0ddd8bea39e37",
+        "description": "android: freedreno: Add GPU tracepoints",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "a02dcb970fff17e73648b58bf4a603bc4f9c0c36"
+    },
+    {
+        "sha": "8fc7807cc2efe843caf67c82605fdf1f64eb30ec",
+        "description": "android: gallium/aux: Add GPU tracepoint mechanism",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "3471af9c6cfa1dfa46e9607910bd4febc31095d2"
+    },
+    {
+        "sha": "0553e717e41c10f312618f8a49fae224786d1932",
+        "description": "android: gallium/aux: update old generated sources rules",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "3471af9c6cfa1dfa46e9607910bd4febc31095d2"
+    },
+    {
+        "sha": "98df055736c6adb916edcb8e6187adef2369787d",
+        "description": "ci: update the list of expected failures for RADV/FIJI",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "562dd79bfa6c19af871baa0464a5b12f72145d4b",
+        "description": "radv: fix using FS sample shading if the linker optimized inputs away",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9a993da0ff499f3489f1d57de2c7e3b6da701e7f",
+        "description": "lavapipe: fix logic-op support",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5bcefcc91abe796368adc2f9f23720594c9eef82",
+        "description": "zink. Fixing vkGetPhysicalDeviceProperties2 and vkGetPhysicalDeviceFeatures2 for Vk 1.1 and VK_KHR_get_physical_device_properties2.",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "752f6d806541ac38594f3adb1e45d63709506e2c"
+    },
+    {
+        "sha": "b24b3026cc0541c59613463a124b16954b2a7cd8",
+        "description": "radv: use 32-bit predication for skipping FCE on GFX10.3+",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3494551d081820b1e5835fb46c8e98564ce855f6",
+        "description": "radv: set the predication boolean as 32-bit if necessary",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "fadcf13c8bad5bc07e7fffaca7197adda66b4bd7",
+        "description": "radv: fix exporting multiviews with NGG",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5cacb56041d1acbbff162509d0635ba465b80df6",
+        "description": "radv: mark GFX10.3 as a non-conformant Vulkan implementation",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7c075bae56e45f268e62efcd82589111bce92ae3",
+        "description": "radeonsi: fix regression on gpus using the radeon winsys.",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "f2977a162af46ff0b9d9334bb677b768900ba5d3"
+    },
+    {
+        "sha": "6df572532dce8fa5c09c4774e0f79e039b118a85",
+        "description": "radeonsi/gfx10: added support for gfx10 conditional rendering",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3bd9db5be3c0e28443098dd0108e01a73c2b83e2",
+        "description": "r300,r600,radeonsi: inline struct radeon_cmdbuf to remove dereferences",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "40a7f6d0477c06cf7eef0cee253cc3de300236d5",
+        "description": "panfrost: Only set varyings and varying_buffers when varying_count > 0",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e3794264fff9dc3eaa7b84b344c3f22638d0223a",
+        "description": "panfrost: Fix draw descriptor definition",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "764db6a223f9f3bd785edf9bf9bf5021835be22c",
+        "description": "panfrost: Fix texture payload decoding",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "87ad5f5b0df3beb3e971b3e5a5187ce1f4ac828b",
+        "description": "isl: Fix android build",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "f08d8c849e0df3703800a4471039a0297455951f"
+    },
+    {
+        "sha": "f20153536087079f39f1ab9995ac3d36dd3c467f",
+        "description": "ci: Run sanity job automatically for forked branches as well",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "459b3fcd064d1410fc89dfdc84b454cd6b649cca",
+        "description": "ci: Manual test jobs don't need the Git tree",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9a340814cba0d9de7bfc5813e6e0dab310d081f9",
+        "description": "ci: sanity job doesn't need the Git tree",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "42bc6db7e71c348594277af58975467c54eb2b19",
+        "description": "ci: Drop x86_build_old image",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "a3543adc2628461818cfa691a7f547af7bc6f0fb"
+    },
+    {
+        "sha": "0781d9825b31d55aa350dfe158a314eb663e9c5d",
+        "description": "ci: Append $MESA_TEMPLATES_COMMIT to image tags",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "48f78dfd1ac10d5d309aff437f81d44d1ed06cd2",
+        "description": "ci: Define global variable MESA_TEMPLATES_COMMIT for ci-templates commit",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a82fd890600e60ae4a50a1f0a2ed9ff6ccd2f954",
+        "description": "ci: Run git gc before creating Git cache tarball",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "bb46a010bbe9f703ff9d48e450dbd6529906b8e9",
+        "description": "meson: Fix Clang microsoft-enum-value detection.",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "3aee462781abc0bfcce207fb64f9199b43a57542"
+    },
+    {
+        "sha": "ef9362acb81bd8615cd2f9014ca9880ae3d7e738",
+        "description": "gallium/osmesa: Return cleanly for OSMesaGetDepthBuffer() with no depth.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ddbad3f4eae3e3b2ed41d8c541c01a0fb21a6e90",
+        "description": "gallium/osmesa: Fix leak of the ST manager/api on library unload.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "bc3142734e321aa64fe6946b79cfdbf9a99ed668",
+        "description": "gallium/osmesa: Fix data race on setting up the ST API.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "26c6f6cfbb6d489cf6f995718e3e959b9fa5b233",
+        "description": "gallium/osmesa: Remove the broken buffer-reuse scheme.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c5c1aa7c75c05927017325829cb3f354654d0b73",
+        "description": "gallium/osmesa: Fix flushing and Y-flipping of the depth buffer.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0223552fa0ac5d2116f8bfdda40b0193176682c9",
+        "description": "zink: assert all index values in ntv OpAccessChain constructor",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b4ae9e07cdf877006bcc7374a64c0cad2b37e82c",
+        "description": "xmlconfig: Warn if parsing the engine/app versions fails.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1618bd1bee6c80a3614c980f6649ae5a13bfeff4",
+        "description": "xmlconfig: Add unit tests for recent bugs in the driconf rewrite.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "aacf309c8d8e03aa411b5da1298864afd0ed0eca",
+        "description": "docs: update calendar and link releases notes for 20.2.4",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7cb8700f764e5948a89359bdd5398251b0ca2f59",
+        "description": "relnotes: Add sha256sums for 20.2.4",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ec2a055b56c9e2402e750bd59ed4a705a86b601e",
+        "description": "docs: add release notes for 20.2.4",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c553084bf9888f5139b2be411a1efdd95004aee8",
+        "description": "aco: remove rollback code when making an instruction vop3",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "349908587f73ee186693af43812536f15e7c6311",
+        "description": "aco: move update_renames() out of get_reg()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8794f0348a9507dd3696b1b01a26f2c1759bfdc2",
+        "description": "aco: remove rollback code for blocked fixed definitions",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6f7cb47ad853d85f22a6cc0129b89a6c9edfcdef",
+        "description": "aco: remove rollback code around parallelcopy creation",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9177fe83566083d564996d20cf7f30dc3be59a9d",
+        "description": "aco: simplify get_reg_impl()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5c9d2ed78d61c63532e9fbeeca30393d65113bc2",
+        "description": "aco: use clear() helper instead of writing reg file directly",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d671cf7f53f3ef8ab4f158776740ecdf790288ea",
+        "description": "aco: repeat get_reg_create_vector() with increased register demand if fail",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ebd8ab17578d0e823ec96d921e4052fdc1820ff0",
+        "description": "aco: remove rollback code in get_reg_create_vector()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ad26eae5441bc6f246f095661c4af45f29898dc7",
+        "description": "aco: don't fill killed operands in update_renames()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "67860b99ce57e6df8e7e150f3c2eb13dc0754574",
+        "description": "aco: clear operands in update_renames()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f173bf1be963a5df4379afd236fd843dd784733f",
+        "description": "util: Do not insert uninitialized data if Android property is not set",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "eeecc21d935c6c8fc783d9f805b5fa153b455df5"
+    },
+    {
         "sha": "72b68bd2a62d193e26bd6b31123182d7dbae3098",
         "description": "ci: add testing for VC4 drivers (Raspberry Pi 3)",
         "nominated": false,
