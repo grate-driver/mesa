@@ -319,7 +319,7 @@
         "description": "gallium: do not reset buffers for unsupported stages",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "daaf5f1d1868bebec7931a51753236a850ebbd24"
     },
