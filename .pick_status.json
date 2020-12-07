@@ -1120,7 +1120,7 @@
         "description": "zink: Cap PIPE_SHADER_CAP_MAX_CONST_BUFFERS to 32",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "daaf5f1d1868bebec7931a51753236a850ebbd24"
     },
