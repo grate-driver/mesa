@@ -175,7 +175,7 @@
         "description": "zink: fail if set failed to create",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "a03d17ede778610f2c66099d0d5342cf09ef12a2"
     },
