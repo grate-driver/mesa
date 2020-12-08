@@ -1,5 +1,338 @@
 [
     {
+        "sha": "f93b7d14d66d8ba70d44772d1a1b6696310b7d17",
+        "description": "vulkan/device_select: Store Vulkan vendorID and deviceID as uint32_t",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f4bbf29d7671869569eee0bd949ea5a6d8af2c20",
+        "description": "gallium/aux: Update scons build for u_tracepoints.[ch]",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7dda840f32a92c0c5004e43acdf765ed650f978f",
+        "description": "gallium/aux: Split u_tracepoints.[ch] generation",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4c670b13dd5a5e9425941bc425d1ba4afcfe3c15",
+        "description": "gallium/aux: Avoid creating queue when traces not enabled",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d1283083eac00c6466a0f066df732699b7074c6f",
+        "description": "nir: improve divergence analysis for loads with non-uniform resources",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b1619109ca91f5b9b4f29d75479241ec82c31549",
+        "description": "nir/lower_non_uniform: remove non_uniform flags after lowering",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3aaac40b12bf683cb30ea30e35af02d56de9df90",
+        "description": "iris: fix memleak for query_buffer_uploader",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ebfb9e181737e7ff7be638134410b919145a0f95",
+        "description": "aco: use UINT64_C on 64 bit constant arguments",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "df645fa369d12be4d5e0fd9e4f6d4455caf2f4c3"
+    },
+    {
+        "sha": "454c8485929052c1d997d102ed195610d23f9079",
+        "description": "mesa/st: lower 64 bit ops to scalar before lowering to soft-float",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "59b1578176a786e3c226c0b2b53fed378812288e",
+        "description": "radv: disable alphaToOne feature",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "34b08a298ddf34f10af21b6a9b3a528b2c51a82f",
+        "description": "driconf: add allow_incorrect_primitive_id option",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ebb228bec52ae7c456e11a472845720b85751226",
+        "description": "vbo/dlist: only use merged primitives when it's ok to do so",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1c016a5ba0818207e050a04a72ca2feb883ad6cb",
+        "description": "vbo/dlist: avoid splitting draw commands in multiple draws",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "83149e1c2d8578fb25cf95502d67917cef78692f",
+        "description": "vbo/dlist: refactor prim_store/vertex_store allocations",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b81ed32ba859202cd4179db456471697abfcb280",
+        "description": "mesa: optimize _mesa_program_resource_location",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ba67843dbd5965093f7367dbcf42c7f67359c422",
+        "description": "util/hash_table: add _mesa_hash_data_with_seed function",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "310991415ee1f5bcdd91460f00205190e8e0c2d9",
+        "description": "vbo/dlist: implement primitive merging",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ac3d4c7635beab92cadada63f8c09fd12a2f7069",
+        "description": "vbo/dlist: convert LINE_STRIPS to LINES",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "dc995adec5ef36dbda43d9dd7f698ff8d6a70f2c",
+        "description": "vbo/dlist: create an index buffer in compile_vertex_list",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7e296c62a71a172540142a0779722b499add5f3d",
+        "description": "dlist: do not call _mesa_lookup_list twice",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2b1930a50a0bdf201769c608f3bad71bb3515b6a",
+        "description": "android: radv: add libcutils shared dependency",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "eeecc21d935c6c8fc783d9f805b5fa153b455df5"
+    },
+    {
+        "sha": "a0c508993504c7e44999ec8ac654bec4c99ad301",
+        "description": "mesa/math: Fix address of array always returning true",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "3175b63a0dfa290430f9f7eb651387788933a02b"
+    },
+    {
+        "sha": "77dafaece337b617e51036284fc6d66552614b68",
+        "description": "android: util: Add libcutils to Android.mk shared libs",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "eeecc21d935c6c8fc783d9f805b5fa153b455df5"
+    },
+    {
+        "sha": "e2b4247e403957ebd9767b2e8700442306c7e7c6",
+        "description": "zink: Cap PIPE_SHADER_CAP_MAX_CONST_BUFFERS to 32",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "daaf5f1d1868bebec7931a51753236a850ebbd24"
+    },
+    {
+        "sha": "6b6cb44ec811bd8992d1f58e9d6cd6709e3cdef2",
+        "description": "gallium: fix the PIPE_SHADER_CAP_SUPPORTED_IRS value for all drivers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a33dbba26147b3fad94146f384bbf14feaca2c3e",
+        "description": "st/mesa: remove less useful debug options in hot paths",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "44b7e1497f91e1ad0c4bb6a95a19e2f1b456897a",
+        "description": "st/mesa: don't generate TGSI for the draw VS because it now supports NIR too",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "df11ceaaaf74e4715cde076eccadf84f2f8fd00d",
+        "description": "draw: add NIR support to draw_create_vertex_shader",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8bb4a76addd0f0a48585ba9a4a30d6bbc5acec80",
+        "description": "zink: fix channel ordering in format-mapping",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "cdfb1d925f388861751ce04a0000141013e1c704"
+    },
+    {
+        "sha": "6c0ce29b04a6045e6db2279c61bc9b1bcaa58126",
+        "description": "r600/sfn: Add support for shader_clock",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d95791bb2eeb73df81ac3da2514a56b8533cdcd1",
+        "description": "r600/sfn: Fix dest-swizzle for GS vertex loads",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c5088b497290ba1207085899ec635ef851635267",
+        "description": "gallium: Fix VAAPI postproc blit",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "49465babdb35d88ed8a283e925d6cd346255d50c"
+    },
+    {
+        "sha": "c47fe54bc785788147f1f1808d0da720995f5447",
+        "description": "nir/lower_non_uniform: Better handle non-derefs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0bf8d156a9f0e53e17fe342a9cb528513236ef8f",
+        "description": "nir/lower_non_uniform: Refactor for better code organization",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "562e07db38499eaa377c0ad88ab789c701ab8927",
+        "description": "nir/lower_non_uniform: Use nir_read_first_invocation helper.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3abac03d49b5dc4a6642fe0637da5a19ad60dd4f",
+        "description": "gallium: do not reset buffers for unsupported stages",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "daaf5f1d1868bebec7931a51753236a850ebbd24"
+    },
+    {
+        "sha": "c4342755cc08c2dc3650bdeafa9c07f51b8b87f1",
+        "description": "llvmpipe: work around mingw compiler optimization bug",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "ec3828add38a83b8c09fd5896265abc9d766162e",
         "description": "radv: fix clearing FMASK for layered MSAA images on GFX9+",
         "nominated": false,
