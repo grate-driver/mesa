@@ -1,5 +1,257 @@
 [
     {
+        "sha": "cf3fc79cd0ab55776bbbabe76237c272ab07133e",
+        "description": "st/mesa: Replace mesa_to_tgsi() with prog_to_nir() and nir_to_tgsi().",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e11513b74090c4d8d48c952c3d4c4b4402de1e3c",
+        "description": "ci: Make sure that osmesa stays warnings-clean in release builds.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ee802372180a2b4460cc7abb53438e45c6b6f1e4",
+        "description": "mesa: Retire classic OSMesa.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6ffc5611c8a9ba61387f571449d2290aed2266dc",
+        "description": "docs: Fix the documentation of the OSMesa path.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7497917cfd8972849c611087366a027fecdea80b",
+        "description": "osmesa/test: Clear the stencil bits in the depth test.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a9a8e05b696ec756c87be7a0f5c7a0aafc310904",
+        "description": "aco: Skip TCS s_barrier when VS outputs are not stored in the LDS.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "790144e65ae55d44698fc02a670964175029e347",
+        "description": "util+treewide: container_of() cleanup",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6fe84c5dda2f5935787c428347cf16ec1b1a5a30",
+        "description": "util: Allow STATIC_ASSERT() everywhere",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5a082911cdaf9a7b04d14c8ec60ad83cd063a524",
+        "description": "util: Promote __builtin_types_compatible_p compat",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f63c595a73698e96232f6465be01f3449022af9d",
+        "description": "swr: fix crashes caused by incorrectly reporting SSBO support",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5d833f433afe955cc01edc372c17f0059ab99492",
+        "description": "ci: Only run the sanity job if there's a MR",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "d4151f2efd09254dc8f45dca761f0f83af93d97d"
+    },
+    {
+        "sha": "f27ee2a3ad9b9fcb9fbc154485c0d0a60f3a7221",
+        "description": "zink: remove useless import in zink_device_info.py",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3f1d4de25b22fe377c018feedf01d77d9da8e632",
+        "description": "zink: move blend_operation_advanced conditions to zink_device_info.py",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a103666b0209907e4c9cbfe8b7e737b0e3cd0aff",
+        "description": "zink: decouple features and enabling conditions in zink_device_info.py",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6e313bc9181a6619698d8478d1c02c4584de2602",
+        "description": "zink: define and use <%guard> helper in zink_device_info",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f0ca77c4787da84487572aed9551f8c05a92d618",
+        "description": "ci: Move deploy stage to the end of the pipeline",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d4151f2efd09254dc8f45dca761f0f83af93d97d",
+        "description": "ci: Run sanity job only in pre-merge pipelines",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ef75ede4edf1f603a25e291cee15ae5706a5147c",
+        "description": "egl/wayland: remove libwayland < 1.18 workaround",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f5711ae7d2b6ff65085bd0db485fb8e58df7f496",
+        "description": "zink: use _mesa_pointer_set_create for simplicity",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8a30ac49ac72275d4b123807fceb175658203f95",
+        "description": "zink: fail if set failed to create",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "a03d17ede778610f2c66099d0d5342cf09ef12a2"
+    },
+    {
+        "sha": "7c85b1d2f0ff951de741c480cfd6e00ba3eb5486",
+        "description": "gallium/u_threaded: set has_user_indices = false for merged draws",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "351ba767afe5db4603a60be33fb78ec41630f502"
+    },
+    {
+        "sha": "5eda9673b2347aa33713790b3a04b8363862db2f",
+        "description": "radeonsi: fix si_get_draw_start_count count value",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "0ce68852c1a8d37e837d64f97a2a2ef5d6b669a5"
+    },
+    {
+        "sha": "5d073b5aa160adfe4c5e0b388bd199741f4893d8",
+        "description": "ci: .lava-test:amd64 template needs arm_build",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "6c8b921572a542f5de62475a76501a9db73dae4d"
+    },
+    {
+        "sha": "cd4f6cdcf44c4f789aaf5b5e2b19bb64edc7f259",
+        "description": "docs: Adapt to FDO_DISTRIBUTION_TAG \u2192 MESA_IMAGE_TAG rename",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "0781d9825b31d55aa350dfe158a314eb663e9c5d"
+    },
+    {
+        "sha": "01175c38c2db582289d6798eb5fdbe5e559331a6",
+        "description": "ci: Adapt armhf_test job to MESA_TEMPLATES_COMMIT related changes",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "0781d9825b31d55aa350dfe158a314eb663e9c5d"
+    },
+    {
+        "sha": "6701662ae0576f26e62fd23a07ba1bc16b938970",
+        "description": "ci: Add .use-base-image template",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "0781d9825b31d55aa350dfe158a314eb663e9c5d"
+    },
+    {
+        "sha": "f957d0d915c246ddbc7c52361b6eac47c8a094cb",
+        "description": "ci: Move BASE_TAG expansion to FDO_BASE_IMAGE assignment",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "0781d9825b31d55aa350dfe158a314eb663e9c5d"
+    },
+    {
+        "sha": "5998a6543a6f3116b6c77ace4f9bcde382e90138",
+        "description": "anv: fix calculation of buffer size in case dynamic size is used",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "b9a05447a1976101c04a02f5588c51de0b0f6573"
+    },
+    {
         "sha": "3f0da800eb4b8184c24707c52d5a519abe948898",
         "description": "lavapipe: implement VK_EXT_vertex_attribute_divisor (v2)",
         "nominated": false,
