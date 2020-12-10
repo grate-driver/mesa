@@ -5,6 +5,7 @@ mesa (20.3.0-2) UNRELEASED; urgency=medium
     there.
   * rules: Enable gallium swrast (softpipe) and OSMesa everywhere, as
     they're not actually tied to llvm being available.
+  * rules: Move common settings for !hurd to the top.
 
  -- Timo Aaltonen <tjaalton@debian.org>  Tue, 08 Dec 2020 09:03:41 +0200
 
