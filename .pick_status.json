@@ -265,7 +265,7 @@
         "description": "intel/isl: Add Wa_22011186057 to disable CCS on ADL GT2 A0",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": null
     },
