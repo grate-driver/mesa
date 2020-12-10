@@ -82,7 +82,9 @@ else
 		VULKAN_DRIVERS += intel
 	endif
 
-	# Non-Linux ports also lack *_CLOEXEC and epoll, so wayland isn't ready yet:
+	# Non-Linux ports lack epoll, so wayland isn't ready yet:
+	# https://gitlab.freedesktop.org/wayland/wayland/-/issues/72
+	# hurd also lacks *_CLOEXEC
 	EGL_PLATFORMS += ,wayland
 
 	ifneq (,$(filter $(DEB_HOST_ARCH), amd64 arm64 armhf i386 mips64el mipsel powerpc ppc64 ppc64el s390x))
