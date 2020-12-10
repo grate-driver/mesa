@@ -274,7 +274,7 @@
         "description": "radeonsi: fix small primitive culling with MSAA force-disabled and smoothing",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 3,
         "master_sha": null,
         "because_sha": "7648060dc03775979e3fa8904c4948c084e82b6a"
     },
