@@ -148,7 +148,7 @@
         "description": "ir3: Allow tesselation to use all 32 varying slots",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "9e063b01b77059d13756794f95fa0eb0e5ef6633"
     },
