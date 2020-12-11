@@ -31,7 +31,7 @@
         "description": "aco: fix DCE of rematerializable phi operands",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "d48d72e98af9436babeeb3a94b312f94bc582b36"
     },
