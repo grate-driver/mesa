@@ -1,5 +1,266 @@
 [
     {
+        "sha": "84c8a35aa2ca4d4de66192933735094ed07b4aaa",
+        "description": "CI: Add Windows source dependency map",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "533f6debb17b02ee9f92f51c19a2da9c0700bca1",
+        "description": "nir: change return type to void",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e8bf15d107d5d53bc1bf83d2849651db99de8fa1",
+        "description": "turnip: pCounterBufferOffsets can be NULL on vkCmd*TransformFeedbackEXT()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c0e7a2cd0229bfaae030c266dd847cdcd21a95af",
+        "description": "mesa: Remove silly \"dummy_false\" extension support",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "fd49ba59a3888795ad0788259e3472e08c42bc24",
+        "description": "aco/ra: use get_reg_specified() for p_extract_vector",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "51f4b22feec3720c89458094a3245efc984115ee"
+    },
+    {
+        "sha": "731f8fc9dd5018e9ee55982207b70130ab72d22b",
+        "description": "aco: Use program->num_waves as maximum in scheduler.",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b54851281354f6feba5921c94b84aa11133e6274",
+        "description": "nir/opt_access: don't ignore infer_non_readable",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "d7d0b4445ae7a80fff59f91c04b124c5ee40a82b"
+    },
+    {
+        "sha": "fe669ff4a023a98865b5ab6538613e3ae4c4eae9",
+        "description": "zink: replace old code with generated zink_instance",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "52138ea9b383ff7ca604e93d78c86eabc4266117",
+        "description": "zink: hook zink_instance to build",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2b4fcf0a063f32d7000e9f4c6b8e398867d3b21c",
+        "description": "zink: generate instance creation code with a python script",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "12656de341a778dd4b9fbdd753421b8e4b010510",
+        "description": "zink: factor out GET_PROC_ADDR and friends to zink_screen.h",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2f58d933ea8358ea80b374a5e23063e9bcc6e091",
+        "description": "zink: allow Extension/Version to be shared across files",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4ad7541cf0780a8611fcb3a88b23f0179d24f269",
+        "description": "mesa: check for extension instead of desktop GL",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "47eb9b865d0d8a252546b9c9cba5dcda8fe10c74",
+        "description": "mesa: do not allow es2-extension enums for es1",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4eaff8dba72f78f8820f003d5a2ac322b549f851",
+        "description": ".gitlab-ci: verify that Get-Content worked",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9eea5213910e691a5bc8183bb18d6b68aa8a4525",
+        "description": "gitlab-ci: copy piglit expected results to artifacts",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "195a001d7366a23c569c38437390edc5ad1c25e9"
+    },
+    {
+        "sha": "83d1e2efd0e89191da80b62c048a9b7a471a86a3",
+        "description": "android: fix build failure with libbacktrace",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "848e7b947d0d505d54d27780b052e5532c721678"
+    },
+    {
+        "sha": "42fd7e3457becc8a6c61132de70d5e70ad11ab70",
+        "description": "v3d: extend the list of formats supported by the TFU unit",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4117f08226fac9a95de88b62d18fc0e9d9b57abe",
+        "description": "panfrost: Fix several depth/stencil format mappings",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7ca72f172678116d29d254b786a9422b864aef3d",
+        "description": "gallium/util: Fix depth/stencil blit shaders",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e15fd6c36ee2614e006238bcf8121770602226ff",
+        "description": "panfrost: Reload depth/stencil when they are read",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "94009cbebc73651bab81a97202d7337829569fd3",
+        "description": "panfrost: Force ->s_writeback_base to ->zs_writeback_base for Z24S8 buffers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "27d622cffe32b45d73e866ac1a03d422a536d51d",
+        "description": "panfost: Fix depth/stencil writeback on Bifrost v7",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "27af1352803bed4f78744d36638dff28d04decbb",
+        "description": "panfrost: Allow 2DMS arrays",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "727cc80fe3e19371da6cac9d7c92f99acc853ddc",
+        "description": "pan/mdg: Fix texture handling for 2DMS arrays",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "77b67a747efcdf5b3bff31cb38c26a2941705475",
+        "description": "vulkan: Enable VK_KHR_performance_query on android",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "574429f9528734f078c8c3a56232ba66fa818913",
+        "description": "intel/blorp: Drop support for STC_CCS resolves",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0f369e1472438c71b0c3a9d1bb4ceb1d9b8c8a23",
+        "description": "iris: Stop using blorp_hiz_stencil_op",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ac0d393eb18deec397efd8d5f40faf38dfeb12e4",
+        "description": "CI: add lavapipe vulkan testing",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "cf3fc79cd0ab55776bbbabe76237c272ab07133e",
         "description": "st/mesa: Replace mesa_to_tgsi() with prog_to_nir() and nir_to_tgsi().",
         "nominated": false,
