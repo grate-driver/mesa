@@ -355,7 +355,7 @@
         "description": "softpipe: count CS invocations for pipeline stats queries.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "e749c30cebe071da450e28cb47b1b7deb8284a39"
     },
