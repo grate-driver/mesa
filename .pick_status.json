@@ -220,7 +220,7 @@
         "description": "nir: Redefine start/end_ip of blocks to fix NIR-to-TGSI liveness bugs.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "a206b581578d585d845250f62dfb1e6684ddf2f0"
     },
