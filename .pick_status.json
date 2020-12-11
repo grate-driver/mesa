@@ -40,7 +40,7 @@
         "description": "aco/ra: use get_reg_specified() for p_extract_vector",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "51f4b22feec3720c89458094a3245efc984115ee"
     },
