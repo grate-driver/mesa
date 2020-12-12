@@ -157,7 +157,7 @@
         "description": "st/pbo: fix pbo uploads without PIPE_CAP_TGSI_VS_LAYER_VIEWPORT",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "c99f2fe70ec6a9273786d123fa4ac9924b5911b2"
     },
