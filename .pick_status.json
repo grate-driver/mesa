@@ -166,7 +166,7 @@
         "description": "zink: really fix direct image mapping offset (I mean it this time)",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "456b57802eaf95d36e7b950bdb5ffd86a1c0dc63"
     },
