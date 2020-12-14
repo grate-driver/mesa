@@ -1,5 +1,311 @@
 [
     {
+        "sha": "a7fb3954a1318a6b27e1405a9e799dd8f06eaa34",
+        "description": "glx: fix spelling issues",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "618e480f3854d8e79187e16152c9cee47146258d",
+        "description": "glx: lets compare drawing command sizes using MIN3",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ef4101d6d73614f4f41708050f963d6038f91e25",
+        "description": "aco/spill: only prevent rematerializable vars from being DCE'd if they haven't been renamed",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0bccfd86f6e97611a3b9b4f227aa414bc3d04e02",
+        "description": "aco: fix DCE of rematerializable phi operands",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "d48d72e98af9436babeeb3a94b312f94bc582b36"
+    },
+    {
+        "sha": "a791c1f3a714cd54a3a97067c911bcfb5b4421f5",
+        "description": "radv: advertise VK_KHR_fragment_shading_rate on GFX10.3+",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "77343576ebd1880d59f66d5b76befd24defe37c0",
+        "description": "aco: implement a workaround for gl_FragCoord.z with VRS on GFX10.3",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "45524afe95dbbc517677807b7abb941031d4cd4d",
+        "description": "radv/llvm: implement a workaround for gl_FragCoord.z with VRS on GFX10.3",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7a464f4296a73df89755323e03646ccbf835d66c",
+        "description": "radv: track if VRS is enabled to apply a workaround on GFX10.3",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c587eaadf6ffc321165b9ff51cf2bd700599d412",
+        "description": "aco: implement fragment shading rate",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0bac0b7f19bb74fe8e99edec87331cb6c7a9e64e",
+        "description": "radv/llvm: implement fragment shading rate",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "bf69d89b5a74b3bf930ecbbbeeaf44767136ec1b",
+        "description": "radv: implement VK_KHR_fragment_shading_rate",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d8c1931ca93b35c9b236b47e58e95ab0233f2b53",
+        "description": "radv: add VK_KHR_fragment_shading_rate but leave it disabled",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9770ffb07ccd148387e9ec9b65854fcce492834b",
+        "description": "amd/registers: add missing VRS registers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c4217ef2fc73576aee636d7c8cc4e4d7e94f33cd",
+        "description": "aco: don't create dead exec mask phis on merge blocks",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a5f4be4fcd54d7f3c3823b534220ab579c210231",
+        "description": "etnaviv: remove imm_ prefix from etna_shader_uniform_info members",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "fefbafb6ff305437ae7d4e47326a4c68247de3cd",
+        "description": "etnaviv: rename from immedaite to uniform in some places",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ad19b0714a8d3cb51121b09b6e3915439d5f3452",
+        "description": "radv: fix access to uninitialized radeon_bo_metadata",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "d5fd8cd46eeedeabf8647c06489a755aea8f0080"
+    },
+    {
+        "sha": "614c77772ac2f48955537efcfefaf0609d6c03e5",
+        "description": "st/pbo: fix pbo uploads without PIPE_CAP_TGSI_VS_LAYER_VIEWPORT",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "c99f2fe70ec6a9273786d123fa4ac9924b5911b2"
+    },
+    {
+        "sha": "dfd0f042e0d8faa374629ea0a67422edff6d48c3",
+        "description": "zink: really fix direct image mapping offset (I mean it this time)",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "456b57802eaf95d36e7b950bdb5ffd86a1c0dc63"
+    },
+    {
+        "sha": "ab79e6b8e33689857509c417c37f34c40f72ad45",
+        "description": "ci: skip failing test on lavapipe",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6a34a686ea953cb64c656518c239998cef78dba9",
+        "description": "zink: fix property detection",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "a103666b0209907e4c9cbfe8b7e737b0e3cd0aff"
+    },
+    {
+        "sha": "d7911f9c6b0510b74c96306f748ff19d0f4807ba",
+        "description": "mesa: Remove cmd_size < 0 check.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "56cb5cf34e8edbf863ff5577efe851852472e9bd",
+        "description": "intel/genxml: Avoid generating identical 12.5 and 12 branches.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "73c33803359dcb378c040abcc3f517fa4ea65646",
+        "description": "mesa: Remove extra texObj.",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "d0e18550e26209a01465c85382c86a2c9246db0c"
+    },
+    {
+        "sha": "d3d28f6c2d1795d391442249343d8cd38356665d",
+        "description": "nir: Redefine start/end_ip of blocks to fix NIR-to-TGSI liveness bugs.",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "a206b581578d585d845250f62dfb1e6684ddf2f0"
+    },
+    {
+        "sha": "6916d1d9247482c851e1a76e1017d04431d44268",
+        "description": "gallium/ntt: Drop reindexing of SSA defs and regs.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7956c788af229f31c2e0f6a9600690ef735a608e",
+        "description": "gallium/ntt: Don't manually reindex instrs.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "41f7fa273d21566d82a6376fb3ad4e44c5e57d33",
+        "description": "lavapipe: add support for VK_KHR_descriptor_update_template",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6be19765cf238315d1d88c4e474a77e799820b39",
+        "description": "lavapipe: add support for VK_KHR_push_descriptor",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e7cb57d73e771a2f8c86c46a4ba8a33da3874c47",
+        "description": "lavapipe: refactor descriptor set binding to support push later.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "fb7ccd3b23538eff70b5e75d518ffb01bbd06ade",
+        "description": "gallium/u_threaded: fix pipe_resource leak for staging transfer",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "2900f82e1919dcb70d29f34e5ed10a09f7356b3e"
+    },
+    {
+        "sha": "d9dd8288aa0fc273fd56b87c41f459e29aa385ab",
+        "description": "lima: add support for half float textures",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "aca67a555c011f59c37b05544eecbeea9aa42f3e",
+        "description": "mesa: allow half float textures based on ARB_half_float_pixel",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "456b57802eaf95d36e7b950bdb5ffd86a1c0dc63",
+        "description": "zink: fix direct image mapping offset",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "8d46e35d16e3936968958bcab86d61967a673305"
+    },
+    {
         "sha": "84c8a35aa2ca4d4de66192933735094ed07b4aaa",
         "description": "CI: Add Windows source dependency map",
         "nominated": false,
