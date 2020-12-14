@@ -112,7 +112,7 @@
         "description": "gallium/dri2: Don't forget protected content flag",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "bd182777c8f2c4468568901ce92b1796674eb87d"
     },
