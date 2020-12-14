@@ -103,7 +103,7 @@
         "description": "st/pbo: fix pbo uploads without PIPE_CAP_TGSI_VS_LAYER_VIEWPORT and skip gs",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "614c77772ac2f48955537efcfefaf0609d6c03e5"
     },
