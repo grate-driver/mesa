@@ -175,7 +175,7 @@
         "description": "zink: fix 8 bit index handling code",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "f4583b40863e3e57fe0df60daf1d5ab5ea8ebbae"
     },
