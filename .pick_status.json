@@ -166,7 +166,7 @@
         "description": "st/mesa: set drawpixels swizzle before creating sampler view",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "d11fefa96165836ffeed531a74319a64aa98a696"
     },
