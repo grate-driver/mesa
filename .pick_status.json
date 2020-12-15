@@ -1,5 +1,239 @@
 [
     {
+        "sha": "ada9be1ec9e14fc045086411fbf2d3cb0efbbe2f",
+        "description": "radv,aco: Compile with -Wimplicit-fallthrough when available",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6ba83d820c17719d3c1500103df1bcc4efa45f06",
+        "description": "aco: Annotate switch fallthroughs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "22790ef3d4defa1b34c3be7d131e1cc49b272d80",
+        "description": "radv: add support for resolving layered depth/stencil images",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0e9c231aef8f325eb24bb4346e8c1ab292e024c5",
+        "description": "glx/xlib: Build fix",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "53f7d539cd93aff35f64a113a7f22fd91f1eb841"
+    },
+    {
+        "sha": "78c7edf962a8cd1dfd40fd1cddfe0231942e9599",
+        "description": "zink: Simplify MoltenVK support a bit",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0781808935e161b1731da944ffe8e2a4c681f9d6",
+        "description": "zink: Factor out zink_create_logical_device",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "aa93673d9d174a6fdeeff51398bfa4b98a0c441e",
+        "description": "zink: Factor out zink_get_loader_version()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5f7a8f6fc1d2391937b06ef870c486c8c4c36ba1",
+        "description": "zink: Factor out winsys awareness from zink_internal_create_screen",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a2f1354bdc53628125cec7dbcc4dd1bcde7e8d01",
+        "description": "zink: Fix indentation in zink_create_instance",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c314893988d4b7408383d5c0357319082c347fc6",
+        "description": "gallium/util: add bitcast helpers for double and uint",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "615c4610bb6882decc384913b28545c3cb945a1a",
+        "description": "gallium/util: make bitcast-helpers explicitly sized",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0ba788d73b47aa9c40c692c95e756a39c151bf7d",
+        "description": "etnaviv: tex_state: fix miplevel selection",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d21cc94201ab1e6cb54ff33a7a835248fe336777",
+        "description": "gallium/dri2: Don't forget protected content flag",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "bd182777c8f2c4468568901ce92b1796674eb87d"
+    },
+    {
+        "sha": "df76963a5cd56c677f189ad89d75935a76fca090",
+        "description": "anv: Add DRM_RDWR flag in anv_gem_handle_to_fd",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "94687ee59f0e027f2957b7420f2ac973054b6d74",
+        "description": "vulkan/overlay: add new options to display device/swapchain-format",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "af9481cb8904ef6207733270d6acc7d011955a6e",
+        "description": "vulkan/overlay: don't display frame numbers unless required",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a2fb87eea6d45ac02c9e669699481711ae70ef50",
+        "description": "egl/android: implement image cleanup callback",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a1cf065e0a1aba0deb7c1fee0ed4e720468d28c9",
+        "description": "i965: plumb loader image cleanup callback",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d7814d6e0cc8ad10b4568e34d06afad95993e936",
+        "description": "frontend/dri: plumb loader image cleanup callback",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "479840459f9562afaecb150537da3173c8735b18",
+        "description": "dri: add image cleanup callback to loader extensions",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "80a028d830e2198a839e346b3b845999680c92e6",
+        "description": "egl/android: don't pass loaderPriv in get_front_bo",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c0f2a19aeebf9549420709c53e9acfccd895e9c3",
+        "description": "zink: Fix typos.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9ac8f8f490d0ee08ac9ca6f1c6963043c2991443",
+        "description": "gallium: Add optional pipe_context to flush_frontbuffer",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "23488c35152c58a3f15bde6ade658959de94ff9a",
+        "description": "aco: allow divergent mbcnt_amd masks",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "feee375db997ca662f425fbdad466624c29ddfa6",
+        "description": "aco: fix mbcnt_amd with wave32",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2ffae5a439bff248fdf5ed77dfbdf98059b4069a",
+        "description": "xmlconfig: Disable WITH_XMLCONFIG on Windows",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "1618bd1bee6c80a3614c980f6649ae5a13bfeff4"
+    },
+    {
         "sha": "a7fb3954a1318a6b27e1405a9e799dd8f06eaa34",
         "description": "glx: fix spelling issues",
         "nominated": false,
