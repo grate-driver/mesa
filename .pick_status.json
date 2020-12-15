@@ -814,7 +814,7 @@
         "description": "zink: dot leak dummy_buffer",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "8736ffae2eda9de1ac49200ef399170b428b9f8c"
     },
