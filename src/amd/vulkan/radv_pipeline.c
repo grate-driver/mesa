@@ -555,8 +555,10 @@ radv_pipeline_compute_spi_color_formats(struct radv_pipeline *pipeline,
 	/* The output for dual source blending should have the same format as
 	 * the first output.
 	 */
-	if (blend->mrt0_is_dual_src)
+	if (blend->mrt0_is_dual_src) {
+		assert(!(col_format >> 4));
 		col_format |= (col_format & 0xf) << 4;
+	}
 
 	blend->spi_shader_col_format = col_format;
 	blend->col_format_is_int8 = is_int8;
@@ -682,6 +684,12 @@ radv_pipeline_init_blend_state(struct radv_pipeline *pipeline,
 			blend.sx_mrt_blend_opt[i] = S_028760_COLOR_COMB_FCN(V_028760_OPT_COMB_BLEND_DISABLED) | S_028760_ALPHA_COMB_FCN(V_028760_OPT_COMB_BLEND_DISABLED);
 
 			if (!att->colorWriteMask)
+				continue;
+
+			/* Ignore other blend targets if dual-source blending
+			 * is enabled to prevent wrong behaviour.
+			 */
+			if (blend.mrt0_is_dual_src)
 				continue;
 
 			blend.cb_target_mask |= (unsigned)att->colorWriteMask << (4 * i);
@@ -916,6 +924,21 @@ radv_order_invariant_stencil_state(const VkStencilOpState *state)
 }
 
 static bool
+radv_is_state_dynamic(const VkGraphicsPipelineCreateInfo *pCreateInfo,
+		      VkDynamicState state)
+{
+	if (pCreateInfo->pDynamicState) {
+		uint32_t count = pCreateInfo->pDynamicState->dynamicStateCount;
+		for (uint32_t i = 0; i < count; i++) {
+			if (pCreateInfo->pDynamicState->pDynamicStates[i] == state)
+				return true;
+		}
+	}
+
+	return false;
+}
+
+static bool
 radv_pipeline_has_dynamic_ds_states(const VkGraphicsPipelineCreateInfo *pCreateInfo)
 {
 	VkDynamicState ds_states[] = {
@@ -926,14 +949,9 @@ radv_pipeline_has_dynamic_ds_states(const VkGraphicsPipelineCreateInfo *pCreateI
 		VK_DYNAMIC_STATE_STENCIL_OP_EXT,
 	};
 
-	if (pCreateInfo->pDynamicState) {
-		uint32_t count = pCreateInfo->pDynamicState->dynamicStateCount;
-		for (uint32_t i = 0; i < count; i++) {
-			for (uint32_t j = 0; j < ARRAY_SIZE(ds_states); j++) {
-				if (pCreateInfo->pDynamicState->pDynamicStates[i] == ds_states[j])
-					return true;
-			}
-		}
+	for (uint32_t i = 0; i < ARRAY_SIZE(ds_states); i++) {
+		if (radv_is_state_dynamic(pCreateInfo, ds_states[i]))
+			return true;
 	}
 
 	return false;
@@ -1333,11 +1351,13 @@ static uint32_t radv_pipeline_needed_dynamic_state(const VkGraphicsPipelineCreat
 		states &= ~RADV_DYNAMIC_DEPTH_BIAS;
 
 	if (!pCreateInfo->pDepthStencilState ||
-	    !pCreateInfo->pDepthStencilState->depthBoundsTestEnable)
+	    (!pCreateInfo->pDepthStencilState->depthBoundsTestEnable &&
+	     !radv_is_state_dynamic(pCreateInfo, VK_DYNAMIC_STATE_DEPTH_BOUNDS_TEST_ENABLE_EXT)))
 		states &= ~RADV_DYNAMIC_DEPTH_BOUNDS;
 
 	if (!pCreateInfo->pDepthStencilState ||
-	    !pCreateInfo->pDepthStencilState->stencilTestEnable)
+	    (!pCreateInfo->pDepthStencilState->stencilTestEnable &&
+	     !radv_is_state_dynamic(pCreateInfo, VK_DYNAMIC_STATE_STENCIL_TEST_ENABLE_EXT)))
 		states &= ~(RADV_DYNAMIC_STENCIL_COMPARE_MASK |
 		            RADV_DYNAMIC_STENCIL_WRITE_MASK |
 		            RADV_DYNAMIC_STENCIL_REFERENCE);
@@ -2055,21 +2075,33 @@ gfx10_get_ngg_info(const struct radv_pipeline_key *key,
 						   (max_lds_size - max_gsprims * gsprim_lds_size) /
 						   esvert_lds_size);
 			max_esverts = MIN2(max_esverts, max_gsprims * max_verts_per_prim);
+			/* Hardware restriction: minimum value of max_esverts */
+			max_esverts = MAX2(max_esverts, min_esverts - 1 + max_verts_per_prim);
 
 			max_gsprims = align(max_gsprims, wavesize);
 			max_gsprims = MIN2(max_gsprims, max_gsprims_base);
-			if (gsprim_lds_size)
-				max_gsprims = MIN2(max_gsprims,
-						   (max_lds_size - max_esverts * esvert_lds_size) /
-						   gsprim_lds_size);
+			if (gsprim_lds_size) {
+				/* Don't count unusable vertices to the LDS
+				 * size. Those are vertices above the maximum
+				 * number of vertices that can occur in the
+				 * workgroup, which is e.g. max_gsprims * 3
+				 * for triangles.
+				 */
+				unsigned usable_esverts = MIN2(max_esverts, max_gsprims * max_verts_per_prim);
+				max_gsprims =
+					MIN2(max_gsprims, (max_lds_size - usable_esverts * esvert_lds_size) / gsprim_lds_size);
+			}
 			clamp_gsprims_to_esverts(&max_gsprims, max_esverts,
 						 min_verts_per_prim, uses_adjacency);
 			assert(max_esverts >= max_verts_per_prim && max_gsprims >= 1);
 		} while (orig_max_esverts != max_esverts || orig_max_gsprims != max_gsprims);
-	}
 
-	/* Hardware restriction: minimum value of max_esverts */
-	max_esverts = MAX2(max_esverts, min_esverts - 1 + max_verts_per_prim);
+		/* Verify the restriction. */
+		assert(max_esverts >= min_esverts - 1 + max_verts_per_prim);
+	} else {
+		/* Hardware restriction: minimum value of max_esverts */
+		max_esverts = MAX2(max_esverts, min_esverts - 1 + max_verts_per_prim);
+	}
 
 	unsigned max_out_vertices =
 		max_vert_out_per_gs_instance ? gs_info->gs.vertices_out :
@@ -2096,7 +2128,10 @@ gfx10_get_ngg_info(const struct radv_pipeline_key *key,
 	ngg->prim_amp_factor = prim_amp_factor;
 	ngg->max_vert_out_per_gs_instance = max_vert_out_per_gs_instance;
 	ngg->ngg_emit_size = max_gsprims * gsprim_lds_size;
-	ngg->esgs_ring_size = 4 * max_esverts * esvert_lds_size;
+
+	/* Don't count unusable vertices. */
+	ngg->esgs_ring_size =
+		MIN2(max_esverts, max_gsprims * max_verts_per_prim) * esvert_lds_size * 4;
 
 	if (gs_type == MESA_SHADER_GEOMETRY) {
 		ngg->vgt_esgs_ring_itemsize = es_info->esgs_itemsize / 4;
@@ -2334,6 +2369,7 @@ radv_generate_graphics_pipeline_key(struct radv_pipeline *pipeline,
 	                                         pCreateInfo->pVertexInputState;
 	const VkPipelineVertexInputDivisorStateCreateInfoEXT *divisor_state =
 		vk_find_struct_const(input_state->pNext, PIPELINE_VERTEX_INPUT_DIVISOR_STATE_CREATE_INFO_EXT);
+	bool uses_dynamic_stride = false;
 
 	struct radv_pipeline_key key;
 	memset(&key, 0, sizeof(key));
@@ -2356,6 +2392,16 @@ radv_generate_graphics_pipeline_key(struct radv_pipeline *pipeline,
 		for (unsigned i = 0; i < divisor_state->vertexBindingDivisorCount; ++i) {
 			instance_rate_divisors[divisor_state->pVertexBindingDivisors[i].binding] =
 				divisor_state->pVertexBindingDivisors[i].divisor;
+		}
+	}
+
+	if (pCreateInfo->pDynamicState) {
+		uint32_t count = pCreateInfo->pDynamicState->dynamicStateCount;
+		for (uint32_t i = 0; i < count; i++) {
+			if (pCreateInfo->pDynamicState->pDynamicStates[i] == VK_DYNAMIC_STATE_VERTEX_INPUT_BINDING_STRIDE_EXT) {
+				uses_dynamic_stride = true;
+				break;
+			}
 		}
 	}
 
@@ -2382,7 +2428,26 @@ radv_generate_graphics_pipeline_key(struct radv_pipeline *pipeline,
 		key.vertex_attribute_formats[location] = data_format | (num_format << 4);
 		key.vertex_attribute_bindings[location] = desc->binding;
 		key.vertex_attribute_offsets[location] = desc->offset;
-		key.vertex_attribute_strides[location] = radv_get_attrib_stride(input_state, desc->binding);
+
+		if (!uses_dynamic_stride) {
+			/* From the Vulkan spec 1.2.157:
+			 *
+			 * "If the bound pipeline state object was created
+			 *  with the
+			 *  VK_DYNAMIC_STATE_VERTEX_INPUT_BINDING_STRIDE_EXT
+			 *  dynamic state enabled then pStrides[i] specifies
+			 *  the distance in bytes between two consecutive
+			 *  elements within the corresponding buffer. In this
+			 *  case the VkVertexInputBindingDescription::stride
+			 *  state from the pipeline state object is ignored."
+			 *
+			 * Make sure the vertex attribute stride is zero to
+			 * avoid computing a wrong offset if it's initialized
+			 * to something else than zero.
+			 */
+			key.vertex_attribute_strides[location] =
+				radv_get_attrib_stride(input_state, desc->binding);
+		}
 
 		if (pipeline->device->physical_device->rad_info.chip_class <= GFX8 &&
 		    pipeline->device->physical_device->rad_info.family != CHIP_STONEY) {

@@ -139,6 +139,13 @@ radv_get_vram_size(struct radv_physical_device *device)
 	return device->rad_info.vram_size - radv_get_visible_vram_size(device);
 }
 
+enum radv_heap {
+	RADV_HEAP_VRAM     = 1 << 0,
+	RADV_HEAP_GTT      = 1 << 1,
+	RADV_HEAP_VRAM_VIS = 1 << 2,
+	RADV_HEAP_MAX      = 1 << 3,
+};
+
 static void
 radv_physical_device_init_mem_types(struct radv_physical_device *device)
 {
@@ -146,8 +153,13 @@ radv_physical_device_init_mem_types(struct radv_physical_device *device)
 	uint64_t vram_size = radv_get_vram_size(device);
 	int vram_index = -1, visible_vram_index = -1, gart_index = -1;
 	device->memory_properties.memoryHeapCount = 0;
-	if (vram_size > 0) {
+	device->heaps = 0;
+
+	/* Only get a VRAM heap if it is significant, not if it is a 16 MiB
+	 * remainder above visible VRAM. */
+	if (vram_size > 0 && vram_size * 9 >= visible_vram_size) {
 		vram_index = device->memory_properties.memoryHeapCount++;
+		device->heaps |= RADV_HEAP_VRAM;
 		device->memory_properties.memoryHeaps[vram_index] = (VkMemoryHeap) {
 			.size = vram_size,
 			.flags = VK_MEMORY_HEAP_DEVICE_LOCAL_BIT,
@@ -156,6 +168,7 @@ radv_physical_device_init_mem_types(struct radv_physical_device *device)
 
 	if (device->rad_info.gart_size > 0) {
 		gart_index = device->memory_properties.memoryHeapCount++;
+		device->heaps |= RADV_HEAP_GTT;
 		device->memory_properties.memoryHeaps[gart_index] = (VkMemoryHeap) {
 			.size = device->rad_info.gart_size,
 			.flags = 0,
@@ -164,6 +177,7 @@ radv_physical_device_init_mem_types(struct radv_physical_device *device)
 
 	if (visible_vram_size) {
 		visible_vram_index = device->memory_properties.memoryHeapCount++;
+		device->heaps |= RADV_HEAP_VRAM_VIS;
 		device->memory_properties.memoryHeaps[visible_vram_index] = (VkMemoryHeap) {
 			.size = visible_vram_size,
 			.flags = VK_MEMORY_HEAP_DEVICE_LOCAL_BIT,
@@ -370,7 +384,8 @@ radv_physical_device_try_create(struct radv_instance *instance,
 	disk_cache_format_hex_id(buf, device->cache_uuid, VK_UUID_SIZE * 2);
 	device->disk_cache = disk_cache_create(device->name, buf, shader_env_flags);
 
-	if (device->rad_info.chip_class < GFX8)
+	if (device->rad_info.chip_class < GFX8 ||
+	    device->rad_info.chip_class > GFX10)
 		fprintf(stderr, "WARNING: radv is not a conformant vulkan implementation, testing use only.\n");
 
 	radv_get_driver_uuid(&device->driver_uuid);
@@ -939,7 +954,7 @@ void radv_GetPhysicalDeviceFeatures(
 		.depthBounds                              = true,
 		.wideLines                                = true,
 		.largePoints                              = true,
-		.alphaToOne                               = true,
+		.alphaToOne                               = false,
 		.multiViewport                            = true,
 		.samplerAnisotropy                        = true,
 		.textureCompressionETC2                   = radv_device_supports_etc(pdevice),
@@ -2172,10 +2187,6 @@ radv_get_memory_budget_properties(VkPhysicalDevice physicalDevice,
 {
 	RADV_FROM_HANDLE(radv_physical_device, device, physicalDevice);
 	VkPhysicalDeviceMemoryProperties *memory_properties = &device->memory_properties;
-	uint64_t visible_vram_size = radv_get_visible_vram_size(device);
-	uint64_t vram_size = radv_get_vram_size(device);
-	uint64_t gtt_size = device->rad_info.gart_size;
-	uint64_t heap_budget, heap_usage;
 
 	/* For all memory heaps, the computation of budget is as follow:
 	 *	heap_budget = heap_size - global_heap_usage + app_heap_usage
@@ -2186,43 +2197,38 @@ radv_get_memory_budget_properties(VkPhysicalDevice physicalDevice,
 	 * Note that the application heap usages are not really accurate (eg.
 	 * in presence of shared buffers).
 	 */
-	for (int i = 0; i < device->memory_properties.memoryTypeCount; i++) {
-		uint32_t heap_index = device->memory_properties.memoryTypes[i].heapIndex;
+	unsigned mask = device->heaps;
+	unsigned heap = 0;
+	while (mask) {
+		uint64_t internal_usage = 0, total_usage = 0;
+		unsigned type = 1u << u_bit_scan(&mask);
 
-		if ((device->memory_domains[i] & RADEON_DOMAIN_VRAM) && (device->memory_flags[i] & RADEON_FLAG_NO_CPU_ACCESS)) {
-			heap_usage = device->ws->query_value(device->ws,
-							     RADEON_ALLOCATED_VRAM);
-
-			heap_budget = vram_size -
-				device->ws->query_value(device->ws, RADEON_VRAM_USAGE) +
-				heap_usage;
-
-			memoryBudget->heapBudget[heap_index] = heap_budget;
-			memoryBudget->heapUsage[heap_index] = heap_usage;
-		} else if (device->memory_domains[i] & RADEON_DOMAIN_VRAM) {
-			heap_usage = device->ws->query_value(device->ws,
-							     RADEON_ALLOCATED_VRAM_VIS);
-
-			heap_budget = visible_vram_size -
-				device->ws->query_value(device->ws, RADEON_VRAM_VIS_USAGE) +
-				heap_usage;
-
-			memoryBudget->heapBudget[heap_index] = heap_budget;
-			memoryBudget->heapUsage[heap_index] = heap_usage;
-		} else {
-			assert(device->memory_domains[i] & RADEON_DOMAIN_GTT);
-
-			heap_usage = device->ws->query_value(device->ws,
-							     RADEON_ALLOCATED_GTT);
-
-			heap_budget = gtt_size -
-				device->ws->query_value(device->ws, RADEON_GTT_USAGE) +
-				heap_usage;
-
-			memoryBudget->heapBudget[heap_index] = heap_budget;
-			memoryBudget->heapUsage[heap_index] = heap_usage;
+		switch(type) {
+		case RADV_HEAP_VRAM:
+			internal_usage = device->ws->query_value(device->ws, RADEON_ALLOCATED_VRAM);
+			total_usage = device->ws->query_value(device->ws, RADEON_VRAM_USAGE);
+			break;
+		case RADV_HEAP_VRAM_VIS:
+			internal_usage = device->ws->query_value(device->ws, RADEON_ALLOCATED_VRAM_VIS);
+			if (!(device->heaps & RADV_HEAP_VRAM))
+				internal_usage += device->ws->query_value(device->ws, RADEON_ALLOCATED_VRAM);
+			total_usage = device->ws->query_value(device->ws, RADEON_VRAM_VIS_USAGE);
+			break;
+		case RADV_HEAP_GTT:
+			internal_usage = device->ws->query_value(device->ws, RADEON_ALLOCATED_GTT);
+			total_usage = device->ws->query_value(device->ws, RADEON_GTT_USAGE);
+			break;
 		}
+
+		uint64_t free_space = device->memory_properties.memoryHeaps[heap].size -
+			MIN2(device->memory_properties.memoryHeaps[heap].size,
+			     total_usage);
+		memoryBudget->heapBudget[heap] = free_space + internal_usage;
+		memoryBudget->heapUsage[heap] = internal_usage;
+		++heap;
 	}
+
+	assert(heap == memory_properties->memoryHeapCount);
 
 	/* The heapBudget and heapUsage values must be zero for array elements
 	 * greater than or equal to
@@ -2776,6 +2782,12 @@ VkResult radv_CreateDevice(
 					"the RGP documentation for the list of "
 					"supported GPUs!\n");
 			abort();
+		}
+
+		if (device->physical_device->rad_info.chip_class > GFX10) {
+			fprintf(stderr, "radv: Thread trace is not supported "
+					"for that GPU!\n");
+			exit(1);
 		}
 
 		/* Default buffer size set to 1MB per SE. */
@@ -4949,9 +4961,8 @@ bool radv_get_memory_fd(struct radv_device *device,
 {
 	struct radeon_bo_metadata metadata;
 
-	if (memory->image) {
-		if (memory->image->tiling != VK_IMAGE_TILING_LINEAR)
-			radv_init_metadata(device, memory->image, &metadata);
+	if (memory->image && memory->image->tiling != VK_IMAGE_TILING_LINEAR) {
+		radv_init_metadata(device, memory->image, &metadata);
 		device->ws->buffer_set_metadata(memory->bo, &metadata);
 	}
 
@@ -5082,7 +5093,8 @@ static VkResult radv_alloc_memory(struct radv_device *device,
 		}
 
 		if (mem->image && mem->image->plane_count == 1 &&
-		    !vk_format_is_depth_or_stencil(mem->image->vk_format)) {
+		    !vk_format_is_depth_or_stencil(mem->image->vk_format) &&
+		    mem->image->info.samples == 1) {
 			struct radeon_bo_metadata metadata;
 			device->ws->buffer_get_metadata(mem->bo, &metadata);
 
