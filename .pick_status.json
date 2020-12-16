@@ -22,7 +22,7 @@
         "description": "spirv: Remove more dead variables",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "3a266a18ae5df27f78c442628a84ba2ab11dfb9d"
     },
