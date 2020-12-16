@@ -31,7 +31,7 @@
         "description": "nir: Consider pointer initializers in nir_remove_dead_variables",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "7acc81056f7ac6a869ef6403573b2572c77dbecf"
     },
