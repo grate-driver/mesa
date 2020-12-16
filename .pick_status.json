@@ -112,7 +112,7 @@
         "description": "virgl: fix BGRA emulation artifacts during window resize",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "6f68cacf619f7f13bc870355709224c1f3e9bbd8"
     },
