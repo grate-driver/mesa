@@ -1,5 +1,455 @@
 [
     {
+        "sha": "2d78e28ba702d366becabb8e241b861e6711c76e",
+        "description": "d3d12: Flush and wait in flush_frontbuffer",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0507da62c47ad6ca0b5c4f9bb2209d773c3e444c",
+        "description": "gallium/dri: Add D3D12 software driver option",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "eb4353838d7b54f0811d171da9afad5416b04059",
+        "description": "d3d12: Don't require DXIL for WSL",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0b60d6a24d405066c4077154095a76204c103cc1",
+        "description": "d3d12: Support Linux eventfds for fences",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ee4c80f77df6310807db6a8f29b1389a7c3a2c43",
+        "description": "d3d12: Only support DXGI and GDI APIs on Windows",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ed286325a0ecbf5fceeb9c8f5d5fc677154fad00",
+        "description": "d3d12: Only play DLL path tricks on Windows",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "dfeb5ecd4ac28b7189bd311cce34a495a7249972",
+        "description": "d3d12: Use u_dl instead of Windows DLL APIs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "29ccbd9b1e59eebb139008f9d292a0c6f01ca770",
+        "description": "d3d12: Add forward declaration for LUID",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "738564a75318d6d90c810abb874995ab9a735a34",
+        "description": "d3d12: Scope down wrl includes to just client.h",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "af2e212c598d41d2dd6b1da85537c822198edd82",
+        "description": "d3d12: Use IID_PPV_ARGS instead of __uuidof",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e1e05ad772e8872af1f0ef420640d02c11784271",
+        "description": "d3d12: Include dxguids/dxguids.h in files that need __uuidof",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "da9b6a21f4d0b018eb487d80528f8aa326afe362",
+        "description": "d3d12: Include wsl/winadapter.h when not compiling for Windows",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8fc2676e47d50b561efc4b6c5b932aa637226c4a",
+        "description": "winsys_handle: Change D3D12 resource handle type to void*",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4ee55769d6d6991a88513b0de9fc8e3e06543acd",
+        "description": "microsoft/compiler: Pick up new dxcapi.h",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f6736480035281f9d37a69a3f65114226a5ac9a8",
+        "description": "d3d12: Add DXCore screen variation",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "50fab5da93ad05817f8bc33abba759cc0cb3d0ef",
+        "description": "d3d12: Refactor screen to abstract DXGI details",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "bc5f69faee969cf32fdb7cd31b8b12206d82a77e",
+        "description": "d3d12: Use DirectX-Headers wrap for d3d12.h",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c37d8ae82b9d6ad30ebffbc8bf043afa0f5b6cc5",
+        "description": "egl/wayland: add a NULL guard for the authenticate callback",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a709d99bfd7982bcb15d2c98bea5bc8de91ea0a7",
+        "description": "st/mesa: set drawpixels swizzle before creating sampler view",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "d11fefa96165836ffeed531a74319a64aa98a696"
+    },
+    {
+        "sha": "ba74e1be22f646f9639e85b12c7707e96351a075",
+        "description": "zink: fix 8 bit index handling code",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "f4583b40863e3e57fe0df60daf1d5ab5ea8ebbae"
+    },
+    {
+        "sha": "008bf6ca61081fbe9025a6bb1facf3f82b08106e",
+        "description": "zink: ralloc spirv_shader",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "03ccd3c4687ae401353a72a116b0d4f7de560c88",
+        "description": "zink: use emit_bitcast helper",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "134df0069fbc5fb956865c7777ba16663333cb10",
+        "description": "zink: use shader-read-only-optimal for samplers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1a4c4cd110380c99c51e57c59c868beac01234d2",
+        "description": "driconf: add workaround for Enter The Gungeon",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "296316b5dec2d3512408859c38f50dd308a75bbc",
+        "description": "st/mesa: disable line stippling if pattern is all 1's",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "967ae12931e0dc12855de903851222b2f0607878",
+        "description": "Revert \"st/dri: make sure software color-buffers are linear\"",
+        "nominated": true,
+        "nomination_type": 2,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "040a2643c08dd0accee6942bc05836b99417ee49"
+    },
+    {
+        "sha": "1fd5e7b14eb9130d22f0a6ff219af1680734415a",
+        "description": "zink: force display-targets to be linear",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "87d7568d69199d1fa16858b45521764d31815aa9",
+        "description": "swr: Fix building with LLVM12",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "27097ca6b52f3b84a8fd8f7427487440980fae29",
+        "description": "radeonsi: improve a comment about an MSAA bug workaround",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3b9fb98c4b6bf5d9a5cabf55b47efee7c712769a",
+        "description": "radeonsi: disable NGG fast launch with indexed triangle strips to fix a hang",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "aaed7a29bef6637c712c459f84ec6ec7911f1300"
+    },
+    {
+        "sha": "dffc27e5e10350c371bb32b5b49facc8b30b2f16",
+        "description": "radeonsi: fix small primitive culling with MSAA force-disabled and smoothing",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "7648060dc03775979e3fa8904c4948c084e82b6a"
+    },
+    {
+        "sha": "836b9e1d8831eb9ec3b1652bc041d70e1e0db71a",
+        "description": "glsl: Fix typos in comments.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "001411774d203007850a157900c9cd9d0307a417",
+        "description": "lima: adjust pp and gp max const buffer size",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9ed50cba6e8561128a98dcf6ac8a98cef94591aa",
+        "description": "gallium/swr: Fix Windows build",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "9ac8f8f490d0ee08ac9ca6f1c6963043c2991443"
+    },
+    {
+        "sha": "5228847c02749079c765cc143064b29737aa93a4",
+        "description": "CI: Add repeat-wait to Windows Piglit skip",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0e215ff487d23d4bf040e368ec08ef08b7ac4cb3",
+        "description": "d3d12: Fix incorrect fence timeout calculation",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "2ea15cd661c8355e8e35624eba0bf10cbcd57f61"
+    },
+    {
+        "sha": "f3e33dee07073f0ea25bdf68e335a1ee19b2bcb6",
+        "description": "ci: Add an ASan build on x86.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6f52386544a38b6d1628ae8c9e17875a31e7e8d4",
+        "description": "amd: Fix leak in ac_surface_modifier_test.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "26198e875a39625e413dd1f1ee0e4cf4a3d93646",
+        "description": "driconf: Fix memory leak in the unit test.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0d23f4e56fb6ec8b1b13fd48d937850d87ad4f26",
+        "description": "glsl/standalone: Fix memory leaks",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a8fb7ac1c4f2cee6b2f772efe2a0b503a3480df9",
+        "description": "mapi: Fix symbols check with ASan enabled.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "39dbf47bfe75231329fa29eb21465d915ba06bc4",
+        "description": "glsl/uniform_initializer_tests: Fix memory leak",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "49c22c21557fc9289337a861a8b1e4aecb65b095",
+        "description": "glsl/general_ir_test: Fix leaks.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1d026e22752eb4138d46787d41ebfa2527e449fa",
+        "description": "disk_cache: Fix memory leaks in the unit test.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f6665eb0531e2ada489278be0104b52b2e99b185",
+        "description": "freedreno/ir3: Free the compiler at the end of the unit tests.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ba8ce62d3cc3761776a666d5e38e5bac6f99bb53",
+        "description": "glx/tests: Fix leaks in the unit tests.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a3a1a65c09114eea20dc616f189233164ce80e79",
+        "description": "glx/tests: Remove unused teardown function.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "867e7f7cf4e3e117588612e36bb749b3ec8414af",
+        "description": "util/vma: Fix leak of the heap in the unit test.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e640a9ca79f29814235fff388c5460d9b12cb529",
+        "description": "util: Fix memory leak in a hash table unit test.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "547d11de54c6863dc73446181b80f4f368808c3c",
+        "description": "etnaviv, v3d: Fix valgrind include paths.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "ada9be1ec9e14fc045086411fbf2d3cb0efbbe2f",
         "description": "radv,aco: Compile with -Wimplicit-fallthrough when available",
         "nominated": false,
