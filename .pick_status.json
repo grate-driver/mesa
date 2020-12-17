@@ -1,5 +1,383 @@
 [
     {
+        "sha": "661922f6ac9576fc2077c5d50b53ef7edf9e8a18",
+        "description": "aco: add block to worklist in mark_block_wqm()",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6d7ea0f0202b47f1c2ab545bfa2c4a33e65997a4",
+        "description": "zink: add struct type support for ntv",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "26a955959ef44d4ea5101989eb65d668030a7cf7",
+        "description": "zink: ntv formatting",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "02fd562e65b3007a6cc5c778c57f0f8689e65018",
+        "description": "zink: handle struct derefs in ntv",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d4748913fc4923649c0982bd32a0a34a68e1fe0f",
+        "description": "zink: add get_storage_class() ntv util",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f9bc320c61a14c0cd873728f8c5bd66ac2c62023",
+        "description": "zink: be more paranoid about array strides in ntv",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2bea7f4336808c9bbfcd2c58f8f6d161015a0834",
+        "description": "ci/freedreno: Stop specifying the number of deqp threads",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "82f5664b74d635ef79d3cd7e93f3e31680947933",
+        "description": "ci/freedreno: Treat all freedreno deqp runs as saving results.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2cb9e3b8e1d1f36b6122f663a54aa6f98ec1ddc7",
+        "description": "zink: add nir pass for splitting 64bit vertex attribs which cross slot boundaries",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ec65021771c1a27b8ce62100c8de02974a4a83a2",
+        "description": "zink: support frem shader op",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b34bc3db67448e54c239e933faa268e2bff63346",
+        "description": "tu: pCounterBuffers can be NULL in vkCmd*TransformFeedbackEXT()",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "98b0d900474e1f3abdc3f465cbe659bf1caf95c6"
+    },
+    {
+        "sha": "6aec3c9a2340474d4c8a9243b5c7732f0aeb7149",
+        "description": "tu: Ignore pTessellationState if there is no tesselation shaders",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "eefdca2e2f5a558e02102c1f6e1736b61acc67b2"
+    },
+    {
+        "sha": "4d47b22bf007413274cabac264122ab7e428fe7d",
+        "description": "glsl/float64: make this compatible with glsl 330",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7880faccc51b68391390071c872f5fea45e41fee",
+        "description": "radv: add missing DB flush after depth/stencil resolve operations",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b50d3e5760ca8af775357b4176aaac5991f93cf0",
+        "description": "aco/ra: fix phi operand renaming",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e384476d1e95c13dd31652c004073714685c2a03",
+        "description": "ci: Bump deqp to current vulkan-cts-1.2.5.0",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "663e06faa62c3e1a0e9b4e9a584ef6fb832c2cf8",
+        "description": "egl: fix EGL_EXT_protected_content/surface mixup",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "bd182777c8f2c4468568901ce92b1796674eb87d"
+    },
+    {
+        "sha": "6526e6d11b82a96139c3e5d16120765262d5707e",
+        "description": "lavapipe: implement VK_EXT_index_type_uint8",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2832cbea7ae078c0ad1ef93a6041d3d3bd0fd243",
+        "description": "v3dv: fix BO list for TFU jobs",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "30f1fc25ce5cf054874ff278eb19304c6fff5d55"
+    },
+    {
+        "sha": "9f2afe4170546cac3195a6b6d5a2222d94ded46a",
+        "description": "v3dv: fix incorrect slice selection for TFU jobs",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "30f1fc25ce5cf054874ff278eb19304c6fff5d55"
+    },
+    {
+        "sha": "e6a66201a7ada69d93c9c9eb2112b20f87695754",
+        "description": "symbol_table:fix mesa symbol table return scope error",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "193888fd7578fed0afd8e8f22a346dc127952da7",
+        "description": "glsl: Initialize glsl_type member name.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "daf339a4795c96ebc7295a3184fa59a13fdecbf0",
+        "description": "docs: Add a stub page for Panfrost",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "434da21a7c81acbe03f0e1621e80904313c0b05c",
+        "description": "meson: add missing dependency on generated git_sha1.h",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "818031afd1cb712ffb466cf95b39de260dafbdf5",
+        "description": "docs: update calendar and link releases notes for 20.2.6",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5c164e361b78d29beb6f4ae3822f2ae558cff0db",
+        "description": "docs: Add sha256 sums for 20.2.6",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "aade49f95672fcdcb80fec293f83dea59bb06548",
+        "description": "docs: add release notes for 20.2.6",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2a627e7a03d2c216845662c0da724b9fdbcaf3fd",
+        "description": "pan/decode: Fix \"Access to unknown memory\" message formatting",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1baddfcff6f3c85366ed6ed25ed10de56e9a00cc",
+        "description": "panfrost: Fix negative LOD bias support on Bifrost",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3a2a00540469fa40b44cd0481ffae0e91b423a9b",
+        "description": "pan/gen_pack: Fix signed integer packing",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e541aa76e298bde494180ccd22c1cbf45f2b95f7",
+        "description": "panfrost: Split up batches with many jobs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "720a2d8f29e732d722d8891c62cf80f306308d3c",
+        "description": "zink: map some more formats",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "74132b761cd064d7a059571772befb7266a6f7f5",
+        "description": "zink: add format test",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d788a1d6f4ef07f75eaa761ae715ec4d5c852885",
+        "description": "zink: fix format-mapping",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "8d46e35d16e3936968958bcab86d61967a673305"
+    },
+    {
+        "sha": "123f3d0d647eb870f76fb018909ce7f1cb562ca6",
+        "description": "zink: make zink_format all about raw format-translation",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d66df61bf7800181098d8b0719a6469263f27df6",
+        "description": "zink: convert x8-formats in zink_get_format",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "96f1c5426672504c838c39d9483bdb11e1bbda6c",
+        "description": "docs: update calendar and link releases notes for 20.3.1",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "066689cb590af9db0d06011a1ef425034d4722f6",
+        "description": "docs: Add sha256 sums for 20.3.1",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "245145f3c384b88c28d732b560d6bace9ccefe7b",
+        "description": "docs: add release notes for 20.3.1",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e836005194676e756a24d50d36092ed7d392e540",
+        "description": "docs: update calendar and link releases notes for 20.2.5",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b8005592bdce46cd07c93ac42a79d6569424b6df",
+        "description": "docs: add sha256 sums for 20.2.5",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8c12442ba398e58deaa15dccd384e0a8557f8445",
+        "description": "docs: add release notes for 20.2.5",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "2d78e28ba702d366becabb8e241b861e6711c76e",
         "description": "d3d12: Flush and wait in flush_frontbuffer",
         "nominated": false,
