@@ -113,24 +113,25 @@ async def gather_bugs(version: str) -> typing.List[str]:
     commits = await gather_commits(version)
 
     issues: typing.List[str] = []
-    for commit in commits.split('\n'):
-        sha, message = commit.split(maxsplit=1)
-        p = await asyncio.create_subprocess_exec(
-            'git', 'log', '--max-count', '1', r'--format=%b', sha,
-            stdout=asyncio.subprocess.PIPE)
-        _out, _ = await p.communicate()
-        out = _out.decode().split('\n')
-        for line in reversed(out):
-            if line.startswith('Closes:'):
-                bug = line.lstrip('Closes:').strip()
-                break
-        else:
-            raise Exception('No closes found?')
-        if bug.startswith('h'):
-            # This means we have a bug in the form "Closes: https://..."
-            issues.append(os.path.basename(urllib.parse.urlparse(bug).path))
-        else:
-            issues.append(bug.lstrip('#'))
+    if commits:
+        for commit in commits.split('\n'):
+            sha, message = commit.split(maxsplit=1)
+            p = await asyncio.create_subprocess_exec(
+                'git', 'log', '--max-count', '1', r'--format=%b', sha,
+                stdout=asyncio.subprocess.PIPE)
+            _out, _ = await p.communicate()
+            out = _out.decode().split('\n')
+            for line in reversed(out):
+                if line.startswith('Closes:'):
+                    bug = line.lstrip('Closes:').strip()
+                    break
+            else:
+                raise Exception('No closes found?')
+            if bug.startswith('h'):
+                # This means we have a bug in the form "Closes: https://..."
+                issues.append(os.path.basename(urllib.parse.urlparse(bug).path))
+            else:
+                issues.append(bug.lstrip('#'))
 
     loop = asyncio.get_event_loop()
     async with aiohttp.ClientSession(loop=loop) as session:
