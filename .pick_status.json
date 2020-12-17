@@ -94,7 +94,7 @@
         "description": "tu: pCounterBuffers can be NULL in vkCmd*TransformFeedbackEXT()",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "98b0d900474e1f3abdc3f465cbe659bf1caf95c6"
     },
