@@ -1,5 +1,59 @@
 [
     {
+        "sha": "b9fccafed616aa2906dad3c77dca0c67af5017b8",
+        "description": "vc4: Fix typos.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "19e96d4566dda9ad64af849b91db7ad9b9d55395",
+        "description": "radv: remove useless push constants data when resolving ds attachments",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c4c9c780b131939fa10ede84e079a90fc090e17a",
+        "description": "spirv: Remove more dead variables",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "3a266a18ae5df27f78c442628a84ba2ab11dfb9d"
+    },
+    {
+        "sha": "acce4ce04ec1b591b47afeda512a9b554dac14f3",
+        "description": "nir: Consider pointer initializers in nir_remove_dead_variables",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "7acc81056f7ac6a869ef6403573b2572c77dbecf"
+    },
+    {
+        "sha": "577bfba95937b90f13b2b256b23dde2a52a09999",
+        "description": "nir: Remove unused parameter in remove_dead_var_writes",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "617d8d3788eddf1ea049819298da2f8f9629a80b",
+        "description": "nir: Fix outdated name in comment",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "f65750d2215242b17309b5aa8845b717bb913e77",
         "description": "spirv: Implement OpArrayLength for OpenGL",
         "nominated": true,
