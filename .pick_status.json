@@ -58,7 +58,7 @@
         "description": "spirv: Implement OpArrayLength for OpenGL",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 3,
         "master_sha": null,
         "because_sha": "15e439071d8d695503a92594e561bf845ef9f4bb"
     },
