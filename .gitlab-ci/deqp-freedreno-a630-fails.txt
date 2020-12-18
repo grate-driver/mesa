@@ -1,8 +1,6 @@
 # Possibly https://gitlab.khronos.org/Tracker/vk-gl-cts/-/issues/2035 related,Fail
 dEQP-GLES2.functional.clipping.triangle_vertex.clip_three.clip_neg_x_neg_z_and_pos_x_pos_z_and_neg_x_neg_y_pos_z,Fail
 
-dEQP-VK.api.image_clearing.core.clear_color_attachment.single_layer.a8b8g8r8_srgb_pack32_1x33,Fail
-dEQP-VK.api.image_clearing.dedicated_allocation.clear_color_attachment.single_layer.b8g8r8a8_srgb_33x128,Fail
 dEQP-VK.compute.indirect_dispatch.upload_buffer.multi_dispatch,Fail
 dEQP-VK.draw.output_location.array.r8g8-uint-mediump-output-uint,Fail
 dEQP-VK.memory_model.message_passing.core11.u32.coherent.fence_fence.atomicwrite.device.payload_local.image.guard_nonlocal.workgroup.comp,Fail

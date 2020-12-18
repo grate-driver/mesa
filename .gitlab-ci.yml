@@ -360,21 +360,6 @@ x86_test-vk:
   variables:
     FDO_DISTRIBUTION_TAG: &x86_test-vk "2020-11-05-deqp-runner"
 
-# Debian 9 based x86 build image (old LLVM)
-x86_build_old:
-  extends: x86_build-base
-  variables:
-    FDO_DISTRIBUTION_TAG: &x86_build_old "2020-11-05-kmod"
-    FDO_DISTRIBUTION_VERSION: stretch-slim
-
-.use-x86_build_old:
-  variables:
-    TAG: *x86_build_old
-  image: "$CI_REGISTRY_IMAGE/debian/x86_build_old:$TAG"
-  needs:
-    - x86_build_old
-    - check mr
-
 # Debian 10 based ARM build image
 arm_build:
   extends:
