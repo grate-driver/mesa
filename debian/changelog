@@ -1,3 +1,9 @@
+mesa (20.3.1-1) UNRELEASED; urgency=medium
+
+  * New upstream release.
+
+ -- Timo Aaltonen <tjaalton@debian.org>  Fri, 18 Dec 2020 09:38:20 +0200
+
 mesa (20.3.0-2) experimental; urgency=medium
 
   * rules: Fix the name of the broadcom vulkan driver.
