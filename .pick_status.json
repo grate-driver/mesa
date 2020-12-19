@@ -526,7 +526,7 @@
         "description": "etnaviv: Fix rework ZSA into a derived state",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "b29fe26d43874c90df60edbffda70fca67b98e4a"
     },
