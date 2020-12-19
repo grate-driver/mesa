@@ -11650,7 +11650,7 @@
         "description": "mesa: flush glBegin/End before changing GL_DEPTH_STENCIL_TEXTURE_MODE",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "23e81b93bbe3966a842de507988eeaa7342e12ca"
     },
