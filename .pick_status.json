@@ -1,5 +1,293 @@
 [
     {
+        "sha": "8db0775f4520e08b3c539f9bd2d1f567639c088c",
+        "description": "pan/bi: Minor styling cleanup in disasm",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "15558873f49574d1df602572eb4687a7866146f1",
+        "description": "pan/bi: Remove all-0's termination condition",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b18855a0a16a757e6a1222514625b828bcb96ad8",
+        "description": "pan/bi: Space out disassembly",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3071f36cfb170e942931d4881d37b227dbc20625",
+        "description": "pan/bi: Allow toggling disassembly verbosity",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5ad54d498cae78ffda5075258b24f218115bbcba",
+        "description": "intel/fs: don't spill a register, set by undef",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "bb4ade40e41ec2d89d920e65ba2aaa82bfe51cd1",
+        "description": "lvp: Fix vtn warnings about unsupported image read/write without format.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "463dbbffa8cc3d55715ab0a886ff542057c23236",
+        "description": "ci/deqp: Make sure that we pull in all board-specific xfail/skip/flake files.",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "ab79e6b8e33689857509c417c37f34c40f72ad45"
+    },
+    {
+        "sha": "9339ed2f85ff6f1985924acc4950857e8ed9bab9",
+        "description": "radv: Enable DCC in the GENERAL layout on GFX10+.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "18ddd48e705ec0a2ab0e05ead56c0a7c8bf25552",
+        "description": "radv: Disable DCC explicitly for incompatible copies.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f23eaf0db64df329c794aa3df6a545cb23725b6d",
+        "description": "radv: Add option to disable DCC in renderpasses without layout.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "88f392f6f81f85cfe2ccf08794ad555ba03ff64c",
+        "description": "radv: Never allow fast clears on DCC images that are not compressed.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "da36577558ee77054800cf52f04f9ada81702f89",
+        "description": "radv: Don't skip layout transitions that only differ in render loop.",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "66131ceb8bc9f3a3e17a73d90ef520694e3b50b6"
+    },
+    {
+        "sha": "909e06075da15a2eaf9a978c97432ae04f918a76",
+        "description": "radv: ignore the mutable bit for TC-compatible HTILE",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ffe87c2689f369b3dfc067607f294d5e739ebb8b",
+        "description": "glsl: remove unused state variable",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "972e9ca294bc81f6652bd1c64ff7b8282a6dceab",
+        "description": "freedreno/a6xx: bump varyings limit",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e5499ca2bfe8b8d9520e2ef72ebc0da24425992c",
+        "description": "freedreno/a6xx: Fix SP_HS_UNKNOWN_A831 value and document it",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "47e2c195115854452a5560c59f82bebfc989694a"
+    },
+    {
+        "sha": "22180137e9709937116f622185d027a108410236",
+        "description": "ir3: Allow tesselation to use all 32 varying slots",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "9e063b01b77059d13756794f95fa0eb0e5ef6633"
+    },
+    {
+        "sha": "4b208fa36b484d2dbe0e7f1fc707544d3a1f17c5",
+        "description": "freedreno/a6xx: Fix assert which checks the count of shader outputs",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "2251a4345b1d9ebbf1defe533e16a2633d5127ef"
+    },
+    {
+        "sha": "296d8662dc68612c41d0e488d9b8bdf51e674b06",
+        "description": "mesa: fix layered framebuffer attachment target check",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "448e60314ae0956af92cfac1a63a783a8f94ece7",
+        "description": "lavapipe: add transform feedback support",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "29955cbbc01d41c3f7c94884050c2f93e8e42421",
+        "description": "llvmpipe: handle SO statistics multi value query copy. (v2)",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7f849d137566b4e3b1caa5123738a479419bd3a2",
+        "description": "llvmpipe: add support for vulkan streamout offset hook",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "46734a02fc916c46156262c3a47a92796ed59934",
+        "description": "gallium: add an api to retrieve pipe offsets",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3df7c9bf54c7eebc11b2d67667cf6538a662124d",
+        "description": "d3d12: Fix memory leak if create_root_signature failed.",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "2ea15cd661c8355e8e35624eba0bf10cbcd57f61"
+    },
+    {
+        "sha": "1ff5463ff83c0a5f6ea6be56056852318bc12d8c",
+        "description": "d3d12: Fix memory leak if create_gfx_pipeline_state failed.",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "2ea15cd661c8355e8e35624eba0bf10cbcd57f61"
+    },
+    {
+        "sha": "f9ceab7b237d40ded7728457114e59ca6707dd71",
+        "description": "panfrost: Fix CLAMP wrap mode",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ac265c0a968d1f57e800ec9a2be9f1912f54359f",
+        "description": "panfrost: Fix precise occlusion queries on Bifrost",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "05ad0f8871d75c29bbfae38ad1051f136fa1a192",
+        "description": "docs/panfrost: Mention the IRC channel",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2a7c881c1400ff2404d106dd922c2d77d0bceca9",
+        "description": "docs/panfrost: Document building Panfrost",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "32da749edb3cd2bd3f1cbee1acfd753d0902c0ae",
+        "description": "docs/systems: Update Panfrost link",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "59b7228a6836002c63ee5aed82802984b48a2ee5",
+        "description": "docs: Update Panfrost in the source tree",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "496ca466fd1b8bd37c1f401555183e51df043757",
+        "description": "docs/panfrost: Fix comment about Lima",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "b9fccafed616aa2906dad3c77dca0c67af5017b8",
         "description": "vc4: Fix typos.",
         "nominated": false,
