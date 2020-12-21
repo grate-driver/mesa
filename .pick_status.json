@@ -17518,7 +17518,7 @@
         "description": "Revert \"gallium/u_upload_mgr: allow use of FLUSH_EXPLICIT with persistent mappings\"",
         "nominated": true,
         "nomination_type": 2,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "54f7545cd7925db9ff78b9dccbff7406dd2ad4a4"
     },
