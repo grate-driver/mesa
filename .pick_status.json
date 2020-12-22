@@ -697,7 +697,7 @@
         "description": "vulkan/overay: fix violation of VUID-VkDeviceCreateInfo-pNext-00373",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "ea7a6fa98055ada285894ddea106d8292db55393"
     },
