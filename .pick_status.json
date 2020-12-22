@@ -859,7 +859,7 @@
         "description": "panfrost: Fix panfrost_small_padded_vertex_count for 17 vertices",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": null
     },
