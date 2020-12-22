@@ -364,7 +364,7 @@
         "description": "nir: account for point-coord origin when lowering it",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "d934d3206e764bbb15c0cacf357e4ce9279f22b0"
     },
