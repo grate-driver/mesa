@@ -10759,7 +10759,7 @@
         "description": "nir/from_ssa: consider defs in sibling blocks",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "943ddb945877fc8a48dd7a435d40e1a9e7b9eead"
     },
