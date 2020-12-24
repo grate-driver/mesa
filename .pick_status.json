@@ -1255,7 +1255,7 @@
         "description": "util: add AMD CPU family enums and enable L3 cache pinning on Zen3",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "15fa2c5e359149a0b67b8572cd7dab87626b48ae"
     },
