@@ -4,7 +4,7 @@
         "description": "turnip: Remove unused TU_DEBUG_IR3 flag",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "808992fc506b02908468b64082981ddb4e58f713"
     },
