@@ -1,5 +1,581 @@
 [
     {
+        "sha": "9ef23e428bd18c412499471b4e3550a489b72c3f",
+        "description": "panfrost: Fix discard behaviour on Bifrost",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5a1518e86b4ae743162f92fefd7c41804cac611f",
+        "description": "zink: add support for VK_EXT_4444_formats",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0f5726c5035249a6398f8db884d199bffed14a77",
+        "description": "zink: fix more instance detection stuff",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "fe669ff4a023a98865b5ab6538613e3ae4c4eae9"
+    },
+    {
+        "sha": "122da9bd2da1734a35f5df570b23b53a895c1ccf",
+        "description": "freedreno/ir3: remap FRAG_RESULT_COLOR to _DATA* for dual-src blending",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "174070942b8215b3b3d7295c1ae724f277569b1f",
+        "description": "ci/deqp: Fix inverted meaning of DEQP_NO_SAVE_RESULTS.",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "bf29daa1b5a33ce2cc62b7743b4bf7220c7b8539"
+    },
+    {
+        "sha": "017edcd63dd3d7a32c82010399cb9aa743cbb2e6",
+        "description": "android: pan/bi: Generate bi_opcodes.{c,h}",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "25c9946883ce29b3f79f523fb22f220ec255ce6f"
+    },
+    {
+        "sha": "c0bae8d67fa1e09cc3a7e509876d8ae8485c85d0",
+        "description": "android: pan/bi: Add explicit dependency on the ISA helpers",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "4d76a3d4a19b6d7b51a653a9334c82b322e7ef97"
+    },
+    {
+        "sha": "2e7f35a8bcb7e8c79e08a6a643a151ffbeeb21ad",
+        "description": "r600/sfn: merge SpecialValue and InlineConstValue",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a7be48bdae90d7087df4d2e4d5261c37767395c9",
+        "description": "mesa: glProgramBinary add resource_hash",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "72390f063f2ce30b93edd9d640f75c867a60c567",
+        "description": "virgl: next_handle variable modify to atomic inc in virgl_object_assign_handle",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "746a0f502ae0be3b755946dbaed0e66ee154c41e",
+        "description": "gallium/ntt: Fix check for \"is there anything in the else block?\"",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "358d5a270d98fa42e5b8c26a7e2deddeb511f5f1",
+        "description": "ci/softpipe: Include a piglit run.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cb5ee80ee801003e816574e6a4469368e63d8b47",
+        "description": "ci/piglit: Include the updated piglit results list in the job results.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "829e9105a6213953468eb5ffbe6602c1727b4658",
+        "description": "softpipe: Enable GLSL 400 for compat contexts too.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7d8d99ea129a367497512ec8df25b5995e32a2b7",
+        "description": "turnip: Remove unsigned nonnegative check.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "512ca3464dd2176049287aaae5b10bda59741351",
+        "description": "d3d12: Initialize TransitionableResourceState m_SupportsSimultaneousAccess.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "28a9c9e573facb989736086383c2ba2ae882c4be",
+        "description": "d3d12: Fix memory leak if state is NULL.",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "2ea15cd661c8355e8e35624eba0bf10cbcd57f61"
+    },
+    {
+        "sha": "671e1571d9fc98d94b37c353e638518919244d63",
+        "description": "nir/tests: Initialize nir_serialize_test member dup.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2472f52e738c5e692b1988e6272f78dafc0cbd68",
+        "description": "zink: handle 0 as valid pipeline hash value",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "fc34f684d6c059cc1420fa78006530f2522f16e0",
+        "description": "zink: handle null ubos",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9c176a7e63dadf5d54185fdf2708ac8f3d9b1a5a",
+        "description": "Revert \"radv: use 32-bit predication for skipping FCE on GFX10.3+\"",
+        "nominated": false,
+        "nomination_type": 2,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "b24b3026cc0541c59613463a124b16954b2a7cd8"
+    },
+    {
+        "sha": "7da33b68b0f3a6cf6f3cc44fc30ad77d90d7f296",
+        "description": "v3d: Fix typos.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2f8237754b8125885a55b5378007901c81ccecd9",
+        "description": "zink: fix debug utils init",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "fe669ff4a023a98865b5ab6538613e3ae4c4eae9"
+    },
+    {
+        "sha": "0ce7c4a7c98122996af849b0f1199da13cd7efa2",
+        "description": "gallivm: Use the proper enum for the texture target bitfield.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0a179bb6e26b487356384c561dee6aefa9af5889",
+        "description": "st/mesa: Generate NIR for ATI_fragment_shader instead of TGSI.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5875cfcc2ff8d6321f08b6d3f4f90c8b8ae3bbb5",
+        "description": "mesa/ati_fs: Clean up writemask handling.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "06a081c631959eba7fc2356fcd831eeb967f481b",
+        "description": "mesa/prog_to_nir: Factor out the texture-target-to-sampler-dim helper.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f0606cafe8330b10ad205b29267b4fba1dfbe7b2",
+        "description": "mesa/st: Update FP state when textures change with an ATI_fs bound.",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "69487c754c48f31f1e2befa7aea0c2e78e77b0df",
+        "description": "radeon/vcn: fix hevc 10bit profile error",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6af87193c4f7fe1dbdc15553ecd453cfe913c64e",
+        "description": "lavapipe: add basic vulkan device group support.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7de0d93fcd660e3770b03f77a2674df2977c059c",
+        "description": "llvmpipe: enable lower device id to zero",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "de10428770e169e148ba5039d83d188fc1691f28",
+        "description": "llvmpipe: add support for grid base",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c16239b4a66f08c68714c293fc51930c2efb88f0",
+        "description": "gallium: add grid base to dispatch info",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d0684c1914e5654a49bb1b192fbfa6c85537ad5a",
+        "description": "zink: zero VkMemoryRequirements on init",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "16fb50440234ee57e2d6df9becaec2a7a6a5f305",
+        "description": "ci/deqp: Move the load reporting to a quiet block.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "302b4f772445cbfd2dd3f3ad69e4e293f5768fc9",
+        "description": "ci/deqp: Upgrade the runner, enable junit output.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "35e914342836e4e05de2e288164f674e18e33dfa",
+        "description": "ci/deqp: Move .shader_cache artifacts exclusion to the yml.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "872cfe2beb6728b62bae1e91a81ac6f5f58fa621",
+        "description": "ci: Disable the now flaky Portals.trace on a630.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2f41afeac1ac2ba02a99dc1f77813d957f288728",
+        "description": "mesa/st: Fix use-after-free of the draw VS.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5dd5fb1926c72c97571ddcb5f6c696766e7c9abc",
+        "description": "softpipe: count CS invocations for pipeline stats queries.",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "e749c30cebe071da450e28cb47b1b7deb8284a39"
+    },
+    {
+        "sha": "eb7e20b378baf7798b31e6842b3dc9055f7b0b07",
+        "description": "pan/bi: Add builder data structure",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e8c687b15b85324aaac3f12640c2137fb6be95bb",
+        "description": "pan/bi: Add cursor data structures",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "dd11e5076e6dda833b3e62551761aff9d2b01600",
+        "description": "pan/bi: Add new bi_instr data structure",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e364e110208a8f9f5676849d3dd1d450d6ce9304",
+        "description": "pan/bi: Add bi_{abs, neg} helpers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7e6be656d34ab7a09162d5847c4a3f1126013134",
+        "description": "pan/bi: Add bi_imm_u{8, 16} helpers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f4b1c12bab17bc497dadc3226bf9d63cb0b5b041",
+        "description": "pan/bi: Add imm_f32 helper",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "372787020d48da14976fcc56387c73110c7f838b",
+        "description": "pan/bi: Add bi_half and bi_byte selectors",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "06f52fe0b1a219682317035c831d60824fecce55",
+        "description": "pan/bi: Add node_to_index helper",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b85f317017d4560fd98b09468aef755bd3fd3cd6",
+        "description": "pan/bi: Add a helper to convert to old-style nodes",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2d9147dae45115fbd5481a9811fe0b8de400d1e2",
+        "description": "pan/bi: Add helpers to generate bi_index from NIR",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "fc760e7d66b36b5d0cf220b0f72c76aedd20875b",
+        "description": "pan/bi: Add bi_temp{_reg} for new-style bi_index",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "903a818f33e713b66317fbe2fc588475bf0db6ab",
+        "description": "pan/bi: Add helper to extract a word from an index",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3a63b5d7cf39dca2dfec4367fd579dde3774e67f",
+        "description": "pan/bi: Add nullity/equality helpers for bi_index",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5dd756afedee0d45663c00976624c9c2493c2884",
+        "description": "pan/bi: Add bi_index constructors",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "99152b6045791e368fff014858a935dffd5e8114",
+        "description": "pan/bi: Add bi_index data structure",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f9cd6f0500c8e3c3b76ef2ccd53bcb8a6788809b",
+        "description": "pan/bi: Add bi_swizzle enum",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d93995fd2bc0a1dd7ee324f41dd15d412784c69e",
+        "description": "pan/bi: Make BIR_INDEX_ZERO less special",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0f0bb87e9d41285b08a0486971709b892c83c8e6",
+        "description": "pan/bi: Remove BIR_INDEX_UNIFORM",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "98fabee21393eb7e5197b190f23c5b0876b9a55b",
+        "description": "pan/bi: Merge BIR_INDEX_FAU and BIR_INDEX_BLEND",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "25c9946883ce29b3f79f523fb22f220ec255ce6f",
+        "description": "pan/bi: Generate bi_opcodes.c",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2d4597de2ec41098239df6824b3da802a1f44ea2",
+        "description": "pan/bi: Use autogenerated modifiers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f9084b6c3f135e9a63ef14474c98563ecb5fc7d8",
+        "description": "pan/bi: Generate bi_opcodes.h",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "bfa1163980e8e9c13b6d33784363c7d510229fa9",
+        "description": "pan/bi: Move modifier prints out of common code",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "83d5dd4d1bc0981d30309295f5bc4a9ad6dda869",
+        "description": "pan/bi: Remove reference to 64-bit RA",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "a22b85ce5e825275533ca1be9fbd47667e991356",
         "description": "zink: document some more features for higher GL versions",
         "nominated": false,
