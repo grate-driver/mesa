@@ -2497,7 +2497,7 @@
         "description": "aco/optimizer: don't propagate subdword temps of different size",
         "nominated": false,
         "nomination_type": null,
-        "resolution": 4,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": null
     },
