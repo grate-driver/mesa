@@ -1372,7 +1372,7 @@
         "description": "st/mesa: don't affect original st_CompressedTexSubImage parameters",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "4b02f165375ccff65e117651a9a75920a1b4e502"
     },
