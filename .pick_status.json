@@ -2965,7 +2965,7 @@
         "description": "Revert \"st/dri: make sure software color-buffers are linear\"",
         "nominated": true,
         "nomination_type": 2,
-        "resolution": 0,
+        "resolution": 2,
         "master_sha": null,
         "because_sha": "040a2643c08dd0accee6942bc05836b99417ee49"
     },
