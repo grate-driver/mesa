@@ -1,5 +1,212 @@
 [
     {
+        "sha": "6c8cc9be12dc5d6c0d2386d6addb69d8f2fb5399",
+        "description": "glsl: default to compat shaders in compat profile",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "c7e3d31b0b5f22299a6bd72655502ce8427b40bf"
+    },
+    {
+        "sha": "5692e2dda5cac0d8042bc7637b8d201acdc7e2f8",
+        "description": "intel/isl: move get_tile dims/masks to common isl header",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "02328637c1af9a4dce8d6743641241344b17d606",
+        "description": "freedreno: Enable GLSL 1.50, updating us to GL 3.2 contexts.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9fe5859d5de16245272932cfd876450f5e11be13",
+        "description": "nir/lower_fragcolor: handle dual source blending",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6b538506f2ae77cb7dd54ee2768946c3155ba529",
+        "description": "aco/ra: Fix register allocation for subdword operands",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "031edbc4a54d5685b05e244f8aa1e094ec246eb5"
+    },
+    {
+        "sha": "187b185502737e72dfc4a87842ef327231403846",
+        "description": "aco/ra: Add some documentation",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b841b4fde83e33cdcd6792996064d1cd27b56ab9",
+        "description": "aco: Add tests for subdword register allocation",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6a246f5c6d51db1a91f4419871051f81d4b552d9",
+        "description": "aco/tests: Fix deadlock for too large test lists",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a240341ec94b3932ebe8b3a4fe014833380eb29f",
+        "description": "aco/tests: Allow specifiying the test subvariant in setup_cs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "05ca6758cb5131519a1d200a41048c0b38ebe84c",
+        "description": "aco/tests: Fix GFX10_3 being printed as gfx11",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d06abc263d33eb05816d530561299e20eabf7b78",
+        "description": "aco/ra: Add policy parameter to select implementation details for testing",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "36097fc7ef70471ecfecd428f990233276e9c45b",
+        "description": "st/pbo: fix pbo uploads without PIPE_CAP_TGSI_VS_LAYER_VIEWPORT and skip gs",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "614c77772ac2f48955537efcfefaf0609d6c03e5"
+    },
+    {
+        "sha": "accc2222174a90fd24ee56ce751feb6022ecc0c7",
+        "description": "virgl: fix BGRA emulation artifacts during window resize",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "6f68cacf619f7f13bc870355709224c1f3e9bbd8"
+    },
+    {
+        "sha": "46d2f4b75e3f10a9fc0d5e2b33027dc70fc5af69",
+        "description": "svga: Fix typos in comments.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4dbcf24f6826055529a7b2212f113cb8ad089fed",
+        "description": "microsoft/clc: Hook up printf",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "76788353b2bac86f65718984e16136e033979bfa",
+        "description": "clover/nir: hookup printf (v3)",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3f779013423b5472e1da939dab1304e9998cfc47",
+        "description": "nir: Add an algebraic optimization for float->double->float",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "24669a672f331a10152f9a4d7deb6126a1106211",
+        "description": "nir: Add a printf lowering pass (v5)",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9524e9dbd085734869af519ccbaae3a8ae85a312",
+        "description": "nir/vtn: Implement printf opcode in terms of intrinsic (v9)",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2a3fe68c33257790c051ed03077c52a8ef8f1e0b",
+        "description": "nir: Add intrinsic and string ptrs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0a6e1cf383d4125630a9758a4069b9f93ed8453b",
+        "description": "clover: add core clover printf support (v12)",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "95527fe22926af9e2d7cbcffe23216ab2837cd85",
+        "description": "clover/module: add a printf support to module (v5)",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "77b70fa35d4802af06c40ba82af8976e2938c5b0",
+        "description": "util: add printf specifier shared helper code.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "9ef23e428bd18c412499471b4e3550a489b72c3f",
         "description": "panfrost: Fix discard behaviour on Bifrost",
         "nominated": false,
