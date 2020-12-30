@@ -1732,7 +1732,7 @@
         "description": "util: Disable memstream for Apple builds",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "af8d488ea5e13219c67c132a3edfa2e7a698746d"
     },
