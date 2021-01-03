@@ -72,7 +72,6 @@ dEQP-GLES31.functional.ssbo.layout.3_level_array.std140.column_major_mat4x2,Fail
 dEQP-GLES31.functional.ssbo.layout.3_level_unsized_array.std430.mat3,Fail
 dEQP-GLES31.functional.ssbo.layout.random.arrays_of_arrays.6,Fail
 dEQP-GLES31.functional.ssbo.layout.unsized_struct_array.per_block_buffer.shared_instance_array,Fail
-dEQP-GLES31.functional.stencil_texturing.render.depth24_stencil8_draw,Fail
 dEQP-GLES31.functional.stencil_texturing.render.depth32f_stencil8_clear,Fail
 dEQP-GLES31.functional.stencil_texturing.render.depth32f_stencil8_draw,Fail
 dEQP-GLES31.functional.tessellation.invariance.inner_triangle_set.quads_fractional_even_spacing,Fail
@@ -81,7 +80,5 @@ dEQP-GLES31.functional.texture.multisample.samples_1.use_texture_depth_2d,Fail
 dEQP-GLES31.functional.texture.multisample.samples_1.use_texture_depth_2d_array,Fail
 dEQP-GLES31.functional.texture.multisample.samples_2.use_texture_depth_2d,Fail
 dEQP-GLES31.functional.texture.multisample.samples_2.use_texture_depth_2d_array,Fail
-dEQP-GLES31.functional.texture.multisample.samples_3.use_texture_depth_2d,Fail
 dEQP-GLES31.functional.texture.multisample.samples_3.use_texture_depth_2d_array,Fail
 dEQP-GLES31.functional.texture.multisample.samples_4.use_texture_depth_2d,Fail
-dEQP-GLES31.functional.texture.multisample.samples_4.use_texture_depth_2d_array,Fail
