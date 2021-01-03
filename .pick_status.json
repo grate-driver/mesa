@@ -175,7 +175,7 @@
         "description": "pan/mdg: Fix spilling when scratch memory is used",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "152bc5d15e1a3a6685dfd6bf955c9b4d66eaacb8"
     },
