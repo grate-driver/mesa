@@ -796,7 +796,7 @@
         "description": "frontends/va: Return an error if non-interlaced buffer is not supported",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "fcb558321e65b62244a11e0066bb8713b1854721"
     },
