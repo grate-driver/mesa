@@ -4,7 +4,7 @@
         "description": "gallium/util: do not perform n^2 stencil blits",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "e8a40715a8bcd479c0c33eab411d276777153a0e"
     },
