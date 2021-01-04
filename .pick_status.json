@@ -76,7 +76,7 @@
         "description": "anv: add transfer usage for color/depth/stencil attachments",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "54b525caf0aa9966f5c0aa359709f43038bbd5ca"
     },
