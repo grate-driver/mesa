@@ -1,5 +1,545 @@
 [
     {
+        "sha": "b2d000513e4a9b06d3b073913741dae47a00526e",
+        "description": "aco: fix incorrect address calculation for load_barycentric_at_sample",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "93c8ebfa780ebd1495095e794731881aef29e7d3"
+    },
+    {
+        "sha": "b32834e5f72b55cb1f37aed1c1aba79ca46e2464",
+        "description": "pan/bi: Fix TEXS register counts",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "cffc1d90da0d03e1ec90b1fff2e35cc0f5fee390"
+    },
+    {
+        "sha": "20f7a73a2c0686c0f8ab541bb8492a2c054ad6d1",
+        "description": "panfrost: Allow 3D AFBC on Bifrost v7",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4ffe73547d074496fcefe943da2439e43a115922",
+        "description": "panfrost: Fix calculation of body/header pointers for 3D AFBC",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a6b269a39d82dc652c41f385561da480c7cd5873",
+        "description": "panfrost: Allow AFBC on 2D arrays",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f901de6b06d3630da56c98aa38d86485d2b00450",
+        "description": "panfrost: Fix panfrost_should_linear_convert()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "72444d4d280106c6f0e5f3338d08d01885fc9b12",
+        "description": "panfrost: Initialize AFBC headers to zero",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3c92abe359379066a166f86fe7bfbb4da8029478",
+        "description": "panfrost: Use panfrost_get_layer_stride() instead of open-coding it",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8a9b2ef82d65132a9c3321d138f2838da8cdf34d",
+        "description": "panfrost: Enable AFBC support on Bifrost",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8a677cea0a486ced04d6ff81424d578596962240",
+        "description": "panfrost: Fix AFBC support on Bifrost",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "dc664d5fb80f24fa0d1787b7b3110154bf5c50dd",
+        "description": "panfrost: Use proper format for Z16_UNORM",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ebeb3613507e78f2352557afcd9d2aa20e34618a",
+        "description": "panfrost: Fix ZS block format v7 definition",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "44217be92134b03e7426860b42918b1d4602e08e",
+        "description": "panfrost: Adjust the format for AFBC textures on Bifrost v7",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "256d4a3eee448df82b62b6cef539746847007e2c",
+        "description": "panfrost: Pass a pipe-like swizzle to panfrost_new_texture()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e91cb99ec61154f527879160693ea98b2bdd1aa7",
+        "description": "panfrost: Add R5G6B5_UNORM entries to the format tables",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5d4a1bc709cf1021ef8c8689dc6f93b211a65bc6",
+        "description": "panfrost: Adjust surface stride calculation to take AFBC into account",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e8b997e175827d8ee907b3813d1e5a05388c606a",
+        "description": "panfrost: Add AFBC slice.body_size and slice.{row,surface}_stride fields",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7e37a31741218f325b2f02dc308a23fe5d40858c",
+        "description": "panfrost: Fix AFBC header_size and slice size calculation",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a9a3b0e21fa73b4584b1fa894d2d246148812e94",
+        "description": "panfrost: Move AFBC header_size to a sub-struct",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4dd7991422ce06bc56e9adb82bca3b5c34c59a95",
+        "description": "panfrost: Add a pan_image_layout object",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e9e823ec830bfdbc1bb6c3e5aa141f90a86d96a2",
+        "description": "panfrost: Stop mixing depth and number of samples",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "728069485da5b4a2a6d42caa381003e530f54c9d",
+        "description": "panfrost: Use PAN_V6_SWIZZLE() in pan_blit.c",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "25eb7c52dc46510a0fbc337e41cacea2bc7eeace",
+        "description": "panfrost: s/panfrost_slice.size0/panfrost_slice.surface_stride/",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "284c43ed4bf8bccc85cb6fd9a558ba3b9e55066d",
+        "description": "panfrost: Merge panfrost_new_texture() and panfrost_new_texture_bifrost()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1fd3861a719a4d1e0f12aa2e41f23c1b17d5ac47",
+        "description": "panfrost: Adjust the compression tag creation for Bifrost",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "def5fb9f5efd97160b1862e4dfc0035cae926103",
+        "description": "panfrost: Define AFBC surface flags",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ca265b48d93f3f68a990a65c4a3ba786ac82f09e",
+        "description": "panfrost: Pass a dev object to panfrost_needs_explicit_stride()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ab1dec8dd4a5957b500423229c92af17ea52f3ef",
+        "description": "panfrost: Merge emit_texture_payload() and emit_texture_payload_v7()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "062dde41517f4acbc26e969046ab7255e64f5749",
+        "description": "panfrost: Pass a device object to panfrost_new_texture()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3c5fd5509fca6dc417ef6347d4fc19edf68f5cee",
+        "description": "panfrost: Group CRC fields in a struct",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cbf68b21fb2b6baf4578c98dd7e91855aa6dfa62",
+        "description": "panfrost: Move checksum_bo to panfrost_resource",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9ab45f4a6351d32c39f5cf4888229eb078613f71",
+        "description": "features: mark off textureGather for zink",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c28ca189911ba9d4bb7b8c90ee540ed035274beb",
+        "description": "zink: enable PIPE_CAP_MAX_TEXTURE_GATHER_COMPONENTS",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1ebba319cffc0b4b5f6e88b3e82f4fad3268e3bd",
+        "description": "zink: handle textureGather with Shadow-type samplers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "03a9a063e5361dcd127457ae2a0051037c5eee5f",
+        "description": "zink: implement ARB_texture_gather",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "fd39bf6c06c9b7b8f1cc5ea1e74d624b996925fe",
+        "description": "zink: use Offset param for txf ops",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6bbd7cc370fb0b545eee7b79455b9e5940a40255",
+        "description": "zink: run nir_lower_tex for offsets if shaderImageGatherExtended is missing",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "81132983cdb0dd9f088743ec43e3a40347424a6c",
+        "description": "nir: fix missing nir_lower_pntc_ytransform.c in the makefile",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "33fd9e5d8a6b85e20d34f89df655fa5a75eca431"
+    },
+    {
+        "sha": "9c18491e4104a2d31992fb0e1304136b21e8e463",
+        "description": "zink: handle dynamic sampler array indexing for arb_gpu_shader5",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1a7b7b17ad0afbc53af9fa012880e6600a4399e4",
+        "description": "radv: avoid oob read during clear",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "33fd9e5d8a6b85e20d34f89df655fa5a75eca431",
+        "description": "nir: account for point-coord origin when lowering it",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "d934d3206e764bbb15c0cacf357e4ce9279f22b0"
+    },
+    {
+        "sha": "3898f747ce47dd1de2b6fcada1d8d3a670fd4d36",
+        "description": "radv: Use VRAM for the initial gfx cmdbuffer.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b7cc5dc8537af32df4270b252e989252004e674a",
+        "description": "radv: Put commandbuffers in VRAM if all VRAM is CPU visible.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f06e91d85ab602a0a906f8afc405c0d027b547f0",
+        "description": "radv: Use VRAM for upload buffers if entire VRAM is CPU-visible.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "24dcdc3fa9485463de2d3f9053bc02619656a3e8",
+        "description": "microsoft/compiler: Fix clang fallthrough warnings",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "72d7e173e39b02102c3e5ba8a85225730a8273f5",
+        "description": "microsoft/resource_state_manager: Remove unused private variable",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c11f2f5de85c985733411776ab8e32ec8e3a64f8",
+        "description": "microsoft/compiler: Fix tautological comparison",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f0eda8fbf857c6739263cb30428ea54730a87f9a",
+        "description": "microsoft/compile: Fix incorrect enum type in function signature",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e3ca385f3d738b3cae47cf69b8a9353a2d94554c",
+        "description": "d3d12: Remove copy/pasted line of array initialization",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ca5df4273e0a14b590694c918a15f63a68bf4073",
+        "description": "d3d12: Fix uninitialized variable referenced in error case",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "2ea15cd661c8355e8e35624eba0bf10cbcd57f61"
+    },
+    {
+        "sha": "9252f947e572ee9235b061ca6908561f61ea28a8",
+        "description": "d3d12: Fix clang warnings from {0} in C++ code",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cda9d44bae334722bfadf8af0d49bd490b1c0c9d",
+        "description": "microsoft/resoure_state_manager: Silence GCC invalid offsetof warning",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1fb192d5b248cd887745590596158afdafade1f6",
+        "description": "d3d12: Fix implicit fallthrough warnings",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "54dd7b1d35c1c5636a6c6543ae531d83d837df67",
+        "description": "d3d12: Fix unused local variable warning in release build",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "28f1f6fe56f38f1505c4de3b9f688f9452ce1fe0",
+        "description": "d3d12: Signed/unsigned comparison warning fixes",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7319cabfb5616d0ae5198882ae1bb5a9122d92f5",
+        "description": "d3d12: Unused variable warning indicated bug in bo_unmap",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "2ea15cd661c8355e8e35624eba0bf10cbcd57f61"
+    },
+    {
+        "sha": "bd97f401dc8ec76e717862c654a6ae29fcb93292",
+        "description": "microsoft/compiler: Fix incorrect size passed to strncpy",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "b9c61379ab4c5065d624fb9403c1df9d5589b313"
+    },
+    {
+        "sha": "bb6a1f5b1ec0141981ca31416cfb4e2d0e0e3697",
+        "description": "microsoft/compiler: Fix warnings produced by GCC in release mode",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "33a6c01e12cca60903fb78af44ecca3899ad628f",
+        "description": "etnaviv: Fix rework ZSA into a derived state",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "b29fe26d43874c90df60edbffda70fca67b98e4a"
+    },
+    {
+        "sha": "8bec23a91a09a5cdf2aefe15e987e3bf9fdd4994",
+        "description": "softpipe: Fix typos.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "9ef2c44ce682b7981bd7a68c65f338f1e33bb001",
         "description": "ci: Add a530 and a630 piglit runs.",
         "nominated": false,
