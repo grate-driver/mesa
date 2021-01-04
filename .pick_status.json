@@ -337,7 +337,7 @@
         "description": "nir: fix missing nir_lower_pntc_ytransform.c in the makefile",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "33fd9e5d8a6b85e20d34f89df655fa5a75eca431"
     },
