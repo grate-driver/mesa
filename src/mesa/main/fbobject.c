@@ -3122,9 +3122,6 @@ _mesa_bind_framebuffers(struct gl_context *ctx,
    if (bindReadBuf) {
       FLUSH_VERTICES(ctx, _NEW_BUFFERS);
 
-      /* check if old readbuffer was render-to-texture */
-      check_end_texture_render(ctx, oldReadFb);
-
       _mesa_reference_framebuffer(&ctx->ReadBuffer, newReadFb);
    }
 
