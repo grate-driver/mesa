@@ -358,6 +358,7 @@ struct radv_instance {
 	 * Workarounds for game bugs.
 	 */
 	bool enable_mrt_output_nan_fixup;
+	bool disable_tc_compat_htile_in_general;
 };
 
 VkResult radv_init_wsi(struct radv_physical_device *physical_device);
@@ -1901,7 +1902,8 @@ struct radv_image {
  * If this is false reads that don't use the htile should be able to return
  * correct results.
  */
-bool radv_layout_is_htile_compressed(const struct radv_image *image,
+bool radv_layout_is_htile_compressed(const struct radv_device *device,
+				     const struct radv_image *image,
                                      VkImageLayout layout,
                                      bool in_render_loop,
                                      unsigned queue_mask);
