@@ -166,7 +166,7 @@
         "description": "pan/bi: Fix 64-bit SSBO addresses",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "9c7efc4510500c21e106362e05596f07220b22e6"
     },
