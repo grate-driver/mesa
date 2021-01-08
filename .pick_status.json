@@ -373,7 +373,7 @@
         "description": "aco: allow SGPRs on every src position for VOP3P",
         "nominated": false,
         "nomination_type": null,
-        "resolution": 4,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": null
     },
