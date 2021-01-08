@@ -1705,7 +1705,7 @@
         "description": "aco: fix unreachable() for uniform 8/16-bit nir_op_mov from VGPR",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "d20a752c0de426e4c7c64a4d42d10f373f73c97a"
     },
