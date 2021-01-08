@@ -157,7 +157,7 @@
         "description": "pan/bi: Fix RA of node 0",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "39aa8c4a5ac9243348b552d9055a926b77d98c29"
     },
