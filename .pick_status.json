@@ -12460,7 +12460,7 @@
         "description": "pan/bi: Fix M1/M2 decoding in disassembler",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "08a9e5e3e892e9acc7fcfc2cefb45990efa62e40"
     },
