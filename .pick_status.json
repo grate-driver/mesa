@@ -544,7 +544,7 @@
         "description": "iris: Fix android build due to missing link to libmesa_iris_gen125",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "cd3251d6bafaae13d5a2cf52c917ef4517fe0130"
     },
