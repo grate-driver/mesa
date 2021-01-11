@@ -148,7 +148,7 @@
         "description": "gallium/ntt: Fix leak of the per-instr liveness information.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "34cc6a804ec92b5e74cde5b346828874737276a8"
     },
