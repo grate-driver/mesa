@@ -139,7 +139,7 @@
         "description": "mesa/st: Free the NIR builtins TGSI tokens after passing to the driver.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "57effa342b75a2ae681f2a7665925022dd6e4aa9"
     },
