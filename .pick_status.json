@@ -1021,7 +1021,7 @@
         "description": "vulkan/device_select: Stop using device properties 2.",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": null
     },
