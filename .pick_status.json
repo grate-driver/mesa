@@ -3118,7 +3118,7 @@
         "description": "nir/algebraic: Fix some min/max of b2f replacements",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "68420d8322c2b304a0b15f94b43dec19f082dfae"
     },
