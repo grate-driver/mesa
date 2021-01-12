@@ -535,7 +535,7 @@
         "description": "mesa: always set valid index bounds for non-indexed draws for classic drivers",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "2358da81d26d8baa2a46a7e854869d1c02c2dc38"
     },
