@@ -238,7 +238,7 @@
         "description": "Revert \"mesa: allow half float textures based on ARB_half_float_pixel\"",
         "nominated": true,
         "nomination_type": 2,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "aca67a555c011f59c37b05544eecbeea9aa42f3e"
     },
