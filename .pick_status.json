@@ -139,7 +139,7 @@
         "description": "v3d: fix dest offset in TFU setup",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "976ea90bdca2b1fc9e7a577ddc302e810c622183"
     },
