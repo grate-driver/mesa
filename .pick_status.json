@@ -922,7 +922,7 @@
         "description": "aco: do not flag all blocks WQM to ensure we enter all nested loops in WQM",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "661922f6ac9576fc2077c5d50b53ef7edf9e8a18"
     },
