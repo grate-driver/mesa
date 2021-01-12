@@ -1057,7 +1057,7 @@
         "description": "radv: disable TC-compat HTILE in GENERAL for Detroit: Become Human",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 3,
         "master_sha": null,
         "because_sha": null
     },
