@@ -112,7 +112,7 @@
         "description": "radv: Add Android module info to linker script.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "41bb6459d3a7dba21ff811069dc4757d7789fd12"
     },
