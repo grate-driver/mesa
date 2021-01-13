@@ -589,7 +589,7 @@
         "description": "anv: Fix stencil layout in render passes",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "c1c346f1667375e9330aa3f729b97e4a6ece0320"
     },
