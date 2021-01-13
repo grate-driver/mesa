@@ -85,7 +85,7 @@
         "description": "radeonsi: inhibit clockgating when using SQTT",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "07c1504d1b08d4f61aeada7364d63e26d05d05f9"
     },
