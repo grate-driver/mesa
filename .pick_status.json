@@ -19939,7 +19939,7 @@
         "description": "Fall back on clock_gettime when timespec_get() is unavailable",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "e3a8013de8ca854d21225be00f123ccf63f9060f"
     },
