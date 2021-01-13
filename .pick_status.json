@@ -1,0 +1,416 @@
+[
+    {
+        "sha": "dfe429eb414511170f3dfc960d247c4aa295f924",
+        "description": "nir/loop_unroll: unroll more aggressively if it can improve load scheduling",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "74748f16c969c59096a0bf4ce9f86fc92c797905",
+        "description": "freedreno/ir3: Remove legacy packed-struct encoding",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1a8113fdee508ca8f880e74cc1adb616d4f35c9b",
+        "description": "freedreno/ir3/decode: Switch over to new disasm",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "668943e9f75c72d0d1f04f3b3da74427661c3cb7",
+        "description": "freedreno/ir3: Realign disasm shader stats",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3e15ba5ccc4e7b8af80ea84a44906a2ffa895490",
+        "description": "freedreno/ir3: Better sstall estimation",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "11cba228fd5a7296088d42947e6ce014891f00fb",
+        "description": "freedreno/ir3: Small resinfo disasm tweak",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5cae4779c2e2276da3720fdde136fbf623c3c983",
+        "description": "freedreno/ir3: Switch over to new encoder/decoder",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "01e8bd55de7712f14bd7d29adb9c4d930e9f6df0",
+        "description": "freedreno/ir3/tests: Switch disasm test over to new decoder",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "704e49bae06ba98c435c311ffd64d79658fd654e",
+        "description": "freedreno/hw/isa: Add expression caching",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6d94f575d2137f6f31353df6b0d6279e9d206ea8",
+        "description": "freedreno/hw/isa: Add description of ir3 ISA",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e7630ec278f49aa11f47bc743dfde0f62f7e51c1",
+        "description": "freedreno/hw: Add isaspec mechanism for documenting/defining an ISA",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6309c9313b194cb269da54e3553ddb0c001eed3a",
+        "description": "freedreno/ir3: Add some new \"logical\" opcodes",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cd31bface82f5eba4686dda6cde55cc53edf0348",
+        "description": "freedreno/ir3: Decouple ir3_info collection from assembler",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e1f8aaf9d2a3743cc6f9dc50cbab19db5833bd75",
+        "description": "freedreno/ir3: Fix ldg decoding/parsing",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b603875482d78f02e50c57ff04f0bfb4f0d98669",
+        "description": "aco/ra: Use PhysRegInterval for count_zero",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c30e83cc515b826e14f412208ee01182c1abaddf",
+        "description": "aco/ra: Use PhysRegInterval for collect_vars parameters",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0959b7c435dcf69e734e01b02a3497abd71f68db",
+        "description": "aco/ra: Use PhysReg when indexing into RegisterFile's containers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c3660f4781943632180f866742daf5e756fd07d0",
+        "description": "aco/ra: Use PhysReg for member functions of PhysRegInterval",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d2d0096c0cf7a4fa71dfd619dbb70bd596f1dfa4",
+        "description": "aco/ra: Remove unused function parameter",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d9e1375e2718992d965c23a5a9c074037c640a48",
+        "description": "aco/ra: Use std::all_of to simplify a loop",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f7e6b61379ca2a55c85427818565c3d6ff722dce",
+        "description": "aco/ra: Add helpers to test for intersection/containment of reg intervals",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "88f21ad87a454deac0cfdae302385ae19db6cea2",
+        "description": "aco/ra: Move commonly repeated code to a helper function",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8962510e38fbaff792f60bc17d46507bb77401ac",
+        "description": "aco/ra: Conservatively refactor get_reg_specified to use PhysRegInterval",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "46c9d761347bf94001a14c5a2f0758f1ec7d6b87",
+        "description": "aco/ra: Use std::all_of to simplify a loop",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2b3b2f7ff5b6883be78b38b55e6cf19de0914106",
+        "description": "aco/ra: Use std::find_if(_not) to clean up get_reg_simple",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ebdb362937a2a038aba2e86b43dd0a1fa60c5202",
+        "description": "aco/ra: Add iterator interface for PhysRegInterval",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "689ce1f39d32bec64aeb2354ff67a242c833b59c",
+        "description": "aco/ra: Remove always-false conditions",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "46eee40abc22f6c5ab34a7103e207ad2ed054a31",
+        "description": "aco/ra: Conservatively refactor existing code to use PhysRegInterval",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9bbd6162a9f2160b8682ba9b4db0e8680bdd4987",
+        "description": "aco/ra: Introduce PhysRegInterval helper class",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "67c1f32228de25dff56ec9c625af3001932e1d4b",
+        "description": "aco/ra: Update register use bounds before recursing in get_regs_for_copies",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "288032a87316f8542d1d5de8b8e1d3a20359ceab",
+        "description": "aco: remove divergent branches which only jump over very few instructions",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "412291ddef50b4185a7c8eb444e4143b830db376",
+        "description": "aco: propagate swizzles when optimizing packed clamp & fma",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6ecbccfb2374c4074ab49d3cd31d9aa48a950ab2",
+        "description": "aco: optimize v_pk_fma_f16 -> v_pk_fmac_f16 on GFX10",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b03be30e07546b813acc1156407b964e68892beb",
+        "description": "aco: optimize packed fneg",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e3790fc4587485b75a389a5a640846c8b5ffa33f",
+        "description": "aco: optimize packed clamp",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a9fd9187e830b6665984f2f9cf651465c266dc85",
+        "description": "aco: optimize packed mul+add to v_pk_fma_f16",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "01134b0bfe407f43d8089551301ffedaeeb459ff",
+        "description": "aco: simplify multiply-add combining",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "fcd2ef23e5f1d50008166168e772815c0213e37c",
+        "description": "radv: vectorize 16bit instructions",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "454bbf8f230e44e54b1dfc04e87dff353fa3fd1f",
+        "description": "aco: emit packed 16bit instructions",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5ad52ac90630e344650cf9a1b48820432af22680",
+        "description": "aco: create helpers to emit vop3p instructions",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "036a369f46ea7e5a3582377d72c77bf04550613c",
+        "description": "aco: change usesModifiers() considering opsel_hi on packed instructions",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "178b33c87089ddec0df1e7adac9bf4630974439f",
+        "description": "aco: allow SGPRs on every src position for VOP3P",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0db4263a3a45987abadeae584907d75b9dceb7c2",
+        "description": "aco: allow constants/literals on every src position for VOP3P",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4a75a286987d54d097bc708607c1e8876436ea63",
+        "description": "aco/RA: fix subdword operands on VOP3P instructions",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2caba08c1af16b9aa972e9eb6c7595371650a351",
+        "description": "aco: fix VOP3P assembly, VN and validation",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2bde971f4632baca205d0760aba554a22bc0f87f",
+        "description": "VERSION: bump for 21.1.0 cycle",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    }
+]
