@@ -1,5 +1,347 @@
 [
     {
+        "sha": "184bbef33d1fff3520958c130f2b8e4fce17379c",
+        "description": "util/set: split off create() into an init() function",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "491e7decad0f46b6d5f2e517cc0ea18193cf2f33",
+        "description": "util/set: add the found param to search_or_add",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5f3f128088ae45734723071ec4af340488ece741",
+        "description": "util/set: optimize rehash for empty table and no-func clears",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "41042f7fa29787347a4844a06a60b0c83fc916c1",
+        "description": "util/hash_table: optimize rehash for empty table and no-func clears",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "17f8e56c96ca6cfafa90c87564441b4fb7fa1b23",
+        "description": "radeonsi: invalidate compute sgprs in si_rebind_buffer",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "85a6bcca615f9aae1ffd2a1e790ee5d980e7cc43"
+    },
+    {
+        "sha": "c4b7a0d61d62a4c7f6e995fa49c56c8ab665f2da",
+        "description": "ac: add ifdef __cplusplus guard to header",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b83d0b2f5de926a86b371d2b48e59e26cbd159de",
+        "description": "ci: Use meson test directly instead of ninja test",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5eb9c6203c2b25c21c0acda04b302c46de2bf928",
+        "description": "ci: Remove .gitlab-ci/meson-build.bat",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d4b4d69d4dc387a3d999f4d820fe9471dd9cf8b9",
+        "description": "anv: add transfer usage for color/depth/stencil attachments",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "54b525caf0aa9966f5c0aa359709f43038bbd5ca"
+    },
+    {
+        "sha": "ad098553ee9ef1ce8c115454f26fb0d3fe272be3",
+        "description": "turnip/ir3: handle image load/stores produced by AtomicLoad/Store",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9c54928f7762a59da4638a563e6c852ecbb9c76f",
+        "description": "lavapipe: Defer lavapipe warning to CreateDevice",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "b38879f8c5f57b7f1802e433e33181bdf5e72aef"
+    },
+    {
+        "sha": "aa3dfcd803183d34373e48bff795a39e6a6fc868",
+        "description": "panfrost: Fix typos.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "179e549995136b47e0adcda06cffb1db936124fb",
+        "description": "gallium/tgsi: garbage collect unused TGSI_UTIL_SIGN_MODE.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f44212067ef76b574e765dd32b966712987b4479",
+        "description": "gallium/tgsi: Rewrite the docs on source modifiers.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1fc79592b76a4ac3e07b0ea3dfd5ebdadb8a4253",
+        "description": "gallium/tgsi: Remove support for f64 src modifiers.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9a2cbe02ed5bec475ef90e3404132a7e948041ae",
+        "description": "gallium/tgsi: Assert that we don't see integer abs modifiers.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1ff2c01741bf14b3af9e36f0e4c8b5a92e60cbf2",
+        "description": "gallium/ntt: Stop lowering integer source mods.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ecaa7c3e39424c6617752bd6561bf900d9da2d86",
+        "description": "gallium/ttn: Add support for TGSI_OPCODE_I64NEG/ABS.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8c7526afd2ea56e1c7c1692fde990e0594b7d0d2",
+        "description": "nv50,nvc0: explicitly list recently-added caps",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "be7e12d81b2321307ca0719d40b48c21648847e2",
+        "description": "nv50/ir: ignore FS_BLEND_EQUATION_ADVANCED",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9d651d2a0f85e8fbe760faebb9376af94d0fc731",
+        "description": "zink: clamp sampler+samplerview limits",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f4902bb189c810cc333a87d93babfc5a51e56ae5",
+        "description": "intel/genxml,anv,iris: Drop the legacy compute path from gen125.xml",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "32857a63508f4562e536d630e6d9733f62b61147",
+        "description": "iris: Add support for COMPUTE_WALKER",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8f85e68deaa3f162008f440bce7fb44834987fc0",
+        "description": "anv: Enable push constants on gen12-hp",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "369eab9420cfc8c33e67f250aa09ff913db9168b",
+        "description": "intel/fs: Emit code for Gen12-HP indirect compute data",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4077ca1cc805cf6bd37a7b1c3afc99e7a11e45e8",
+        "description": "anv: Add a general state pool",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a6f8d5914206abf5f3e04d6acaae2bbb45315e03",
+        "description": "anv: Use COMPUTE_WALKER for gen12-hp",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "91fe96cfbe388a90d1577ede745276674493d336",
+        "description": "anv: Don't use MEDIA_INTERFACE_DESCRIPTOR_LOAD for gen12-hp",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "435b272241e0edf3081e5819372f9fa955518544",
+        "description": "anv: Emit CFE_STATE for gen12-hp",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b4ffbf152137d24b20bb24dbbaa7945fd706970d",
+        "description": "intel/fs: Allow compute dispatch without a pushed subgroup ID on Gen12-HP",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9294193098149c87d95a55d71e42cdbd1f885bb3",
+        "description": "intel/compiler: Disable push constants on gen12-hp",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b7c1ad00fc76d05157c4f1d1729afc78a96d4d30",
+        "description": "intel/tools: Decode COMPUTE_WALKER",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cdc9e22a3adce409099765a6319ce858128fef6c",
+        "description": "intel/genxml/gen125: Add CFE_STATE and COMPUTE_WALKER",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9149d71bb610e7dd93470be764ced2ebc494999e",
+        "description": "docs: update calendar for 21.0.0-rc1",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "68b1e7b2347c7d3b9bb0de247c969bdcc1001a61",
+        "description": "docs: update calendar and link releases notes for 20.3.3",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "60ffde59943bf5286eafa14d27b32c14b4717ca6",
+        "description": "docs: Add sha256sum for 20.3.3",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1a20041361a30f700189ba0c52dead0e1366a57d",
+        "description": "docs: add release notes for 20.3.3",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "86101cdad7d2525a5f5ac02dcc4417940cb74889",
+        "description": "panfrost: Don't skip the test with a 4k shader",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "dfe429eb414511170f3dfc960d247c4aa295f924",
         "description": "nir/loop_unroll: unroll more aggressively if it can improve load scheduling",
         "nominated": false,
