@@ -319,7 +319,7 @@
         "description": "android: r600/sfn: add sfn_nir_lower_64bit.cpp to Makefile.sources",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "165fb5117bf70402e66d34538d4085e060f57fea"
     },
