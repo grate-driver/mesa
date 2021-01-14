@@ -573,6 +573,19 @@ void lvp_GetPhysicalDeviceProperties2(
    }
 }
 
+static void lvp_get_physical_device_queue_family_properties(
+   VkQueueFamilyProperties*                    pQueueFamilyProperties)
+{
+   *pQueueFamilyProperties = (VkQueueFamilyProperties) {
+      .queueFlags = VK_QUEUE_GRAPHICS_BIT |
+      VK_QUEUE_COMPUTE_BIT |
+      VK_QUEUE_TRANSFER_BIT,
+      .queueCount = 1,
+      .timestampValidBits = 64,
+      .minImageTransferGranularity = (VkExtent3D) { 1, 1, 1 },
+   };
+}
+
 void lvp_GetPhysicalDeviceQueueFamilyProperties(
    VkPhysicalDevice                            physicalDevice,
    uint32_t*                                   pCount,
@@ -584,15 +597,21 @@ void lvp_GetPhysicalDeviceQueueFamilyProperties(
    }
 
    assert(*pCount >= 1);
+   lvp_get_physical_device_queue_family_properties(pQueueFamilyProperties);
+}
 
-   *pQueueFamilyProperties = (VkQueueFamilyProperties) {
-      .queueFlags = VK_QUEUE_GRAPHICS_BIT |
-      VK_QUEUE_COMPUTE_BIT |
-      VK_QUEUE_TRANSFER_BIT,
-      .queueCount = 1,
-      .timestampValidBits = 64,
-      .minImageTransferGranularity = (VkExtent3D) { 1, 1, 1 },
-   };
+void lvp_GetPhysicalDeviceQueueFamilyProperties2(
+   VkPhysicalDevice                            physicalDevice,
+   uint32_t*                                   pCount,
+   VkQueueFamilyProperties2                   *pQueueFamilyProperties)
+{
+   if (pQueueFamilyProperties == NULL) {
+      *pCount = 1;
+      return;
+   }
+
+   assert(*pCount >= 1);
+   lvp_get_physical_device_queue_family_properties(&pQueueFamilyProperties->queueFamilyProperties);
 }
 
 void lvp_GetPhysicalDeviceMemoryProperties(
@@ -613,6 +632,14 @@ void lvp_GetPhysicalDeviceMemoryProperties(
       .size = 2ULL*1024*1024*1024,
       .flags = VK_MEMORY_HEAP_DEVICE_LOCAL_BIT,
    };
+}
+
+void lvp_GetPhysicalDeviceMemoryProperties2(
+   VkPhysicalDevice                            physicalDevice,
+   VkPhysicalDeviceMemoryProperties2          *pMemoryProperties)
+{
+   lvp_GetPhysicalDeviceMemoryProperties(physicalDevice,
+                                         &pMemoryProperties->memoryProperties);
 }
 
 PFN_vkVoidFunction lvp_GetInstanceProcAddr(
