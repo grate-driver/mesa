@@ -265,7 +265,7 @@
         "description": "tnl: Try not to botch index buffer munging when start > 0.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "4c751ad67aa2bbde5897030495f86e31c9e1fda7"
     },
