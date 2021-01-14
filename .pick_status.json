@@ -328,7 +328,7 @@
         "description": "radv: do not invalidate the L2 metadata cache on compute queues",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "4a783a3c7846857671a9f2e91b62850e24e01029"
     },
