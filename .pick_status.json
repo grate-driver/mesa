@@ -841,7 +841,7 @@
         "description": "util: Fix pointer to integer conversion error when using libunwind",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "70c272004f727457e852ba5f2498754b07a7d995"
     },
