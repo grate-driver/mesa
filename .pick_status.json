@@ -454,7 +454,7 @@
         "description": "wsi/x11: Use get_screen_resources_current in wsi_x11_detect_xwayland",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "b5268d532a019c81877343f8e5390ca215db6338"
     },
