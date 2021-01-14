@@ -814,7 +814,7 @@
         "description": "pan/bi: Fix assertion",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "bef3fedc8145c4030342f7c8f5cfc24c9df82909"
     },
