@@ -274,7 +274,7 @@
         "description": "vbo: Only mark merged line strips as lines when actually converting them",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "310991415ee1f5bcdd91460f00205190e8e0c2d9"
     },
