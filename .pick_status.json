@@ -1,5 +1,689 @@
 [
     {
+        "sha": "c27347b2e1883a30e023347a36bdcf86cdec4a7c",
+        "description": "zink: enable PIPE_CAP_CLEAR_TEXTURE",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "622f8f6ed57bb32cb6b1014e4f8c7be2a58a5bd3",
+        "description": "zink: add a pipe_context::clear_texture hook",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e100746a73f0af337121d0b0386d7f3128d07452",
+        "description": "zink: break out some of the u_blitter setup into util function",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "526db0fe82fc0abe16d19d9b81caa2ec3cd0c8ee",
+        "description": "zink: break out color/zs no_rp clear into separate functions",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5bd0d7c62f722b74aae195d2a176b589259deb70",
+        "description": "zink: break out scissor region testing for clear functions",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a131d06f170e8acfb4ff01dd63afcb25d71380ad",
+        "description": "zink: handle clears with scissor regions",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "196794264f40d0f1ab8ab7326b528b156302228a",
+        "description": "zink: start to refactor clearing",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cf40a087f3785577695928c9e77788adaf7ef52a",
+        "description": "zink: move zink_clear to zink_clear.c",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9a54aa131e958a890080036bbeb1e17a469b7cfe",
+        "description": "intel/perf: move gt_frequency to results",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b7032d67764304b949adc1867a0e17de576d2373",
+        "description": "intel/perf: link queries back to the gen_perf_config object",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e79f112e4fd388836938cc07b4501d41fb13b4f2",
+        "description": "intel/perf: add definition for generic perf counters",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "bd7df91372646acdfa69f8167bd9148841f434a9",
+        "description": "intel/perf: restructure i915 perf version checks",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d8154c40063d0d6114370c30c800676039e358ee",
+        "description": "intel/mi_builder: fix self modifying batches",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "796fccce631bf8ecb6ce2fd1a68f219788693a6e"
+    },
+    {
+        "sha": "359312ae011a5f4a3aa9889c9c8807f7b5268b73",
+        "description": "intel/mi_builder: optimize 64bit immediate register loads & memory stores",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "dbeca67a1de8eae7ab2edcf269352f84a9a10c00",
+        "description": "anv: don't disable KHR_performance_query in debug mode",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "08b16cfe0bc4eb86c166440f70435224b9f44244",
+        "description": "v3d: fix dest offset in TFU setup",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "976ea90bdca2b1fc9e7a577ddc302e810c622183"
+    },
+    {
+        "sha": "5e2cee57c5177f52d3620abb60c05b438acca1eb",
+        "description": "freedreno/ir3/parser: add cat7 support",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f8fe2ca600b2c1a0029fd71ab502e51385e4526d",
+        "description": "st/mesa: optimize binding and unbinding shader images",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8436d9c5940969e5ee56c745a79fe09fe228b6e4",
+        "description": "st/mesa: unbind sampler views, images, and vertex buffers after meta ops",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "211ec4226b02c407a75de013029f22e38ebc0227",
+        "description": "cso_context: remove ability to restore VBs, const bufs, sampler views, images",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "fab62bb518df152e233bca42f311e3b8e1982cca",
+        "description": "st/mesa: replace st->pipe with pipe in a few places",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4c52aba41e19d38e9e51005b0408b06b012f8f83",
+        "description": "st/mesa: don't use cso_context to set const bufs, sampler views and images",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d107eef04f653cb6ca3c589815210b4e65e87093",
+        "description": "st/mesa: don't use cso_context to restore VBs, etc. for PBO glTexSubImage",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7c7a6e05f4c58c7219132a999470fba7c0e3b82b",
+        "description": "st/mesa: don't use cso_context to restore VBs, etc. for PBO glReadPixels",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "78c0dc2f56ab6723a32ee76ac84c943fedab3cc6",
+        "description": "st/mesa: don't use cso_context to restore VBs, sampler views for glDrawTex*OES",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "82a388dc2d7f799508bda60be840da59081da705",
+        "description": "st/mesa: don't use cso_context to restore VBs, sampler views for glDrawPixels",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f2141d3a9d5ee60fbe002b4fde40c1ea32f8be99",
+        "description": "st/mesa: don't use cso_context to restore VBs for glClear",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cde98f3e0e142d8f2a2f7253dd0071c61c68549c",
+        "description": "st/mesa: don't use cso_context to restore VBs, sampler views for glBitmap",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "98e8dc1db8fcf3b31dd3d1ab20b616e17565a986",
+        "description": "gallium/pp: don't use cso_context to restore VBs, constbuf 0 and sampler views",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2813688f8dbe813baaa99c028da4058e5dfb428d",
+        "description": "gallium/hud: don't use cso_context to restore VBs, constbuf 0 and sampler views",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a93ca3be01e51df30c0e7ec58927053e7057afd9",
+        "description": "gallium/api: add state invalidate interface as alternative to cso_save/restore",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7afa7cb4b4216660489d8883c6b7d8d86414456a",
+        "description": "gallium/tests: stop using cso_set_sampler_views",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2a0195f4b9e535945a2df9c16469d923a696126a",
+        "description": "st/xa: stop using cso_set_sampler_views",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "fc78ecd3793673ae550900f68bf9e459a9f6ec62",
+        "description": "st/nine: stop using cso_set_sampler_views",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "95c567518077a2f2a7ff66ff25852bc94fc93090",
+        "description": "ci: mark some sparse CTS as expected failures on RAVEN",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4bc9f7d53fa8941080a571b485563cabe2973349",
+        "description": "android: r600/sfn: add sfn_nir_lower_64bit.cpp to Makefile.sources",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "165fb5117bf70402e66d34538d4085e060f57fea"
+    },
+    {
+        "sha": "c6849f9687295c2711b99579a3ba9306ec3c0a30",
+        "description": "radv: do not invalidate the L2 metadata cache on compute queues",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "4a783a3c7846857671a9f2e91b62850e24e01029"
+    },
+    {
+        "sha": "953067ef5aa695065e5145c26bcebb9401afa800",
+        "description": "ci/freedreno: Remove some long-unseen a6xx known flakes.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "eab2bb46911952278e9ea387d334e132e8b73410",
+        "description": "ci/freedreno: Drop skip list stuff from a5xx flakes.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "13be54ee086bd46a31c7f16f8cd828c54f9a41e8",
+        "description": "ci/freedreno: Drop some long-unseen a5xx flakes.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4ba6f4a05328669621e764ec0da5fb1b6910a883",
+        "description": "ci/freedreno: Remove a bunch of stale flakes from a3xx.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "22bf4831b8aef537427829cde1c272f979addf8d",
+        "description": "ci/freedreno: Fix up the xfail/flake handling of a3xx texture functions.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "783f726ea2a144021ba6f952850e8f999962a398",
+        "description": "ci/freedreno: Mark some a5xx separate_shader tests as xfails.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "fea6446b302a57d5c6b5f38b83bdcf64f16f0e65",
+        "description": "gallium/ntt: Avoid referencing undefined channels of system values.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "37363ef66369d1108c6215e8f0bdbba8b9f317fd",
+        "description": "gallium/ntt: Add support for store_per_vertex_output.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "97d5bc7de3c2e5554367dc27a7c03227074e9029",
+        "description": "gallium/ntt: Don't vectorize IBFE/UBFE/BFI.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "942ee6a547f337c18be76df545cb5653df0ce7d1",
+        "description": "mesa/st: Dump nir-to-tgsi output when ST_DEBUG=tgsi or nir is set.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "45048f4829e8937cf854634611c92081f06922d5",
+        "description": "mesa/st: Lower shader images before handing off to NIR-to-TGSI.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "500dfc05da2398d5a617bc3c155cc2d0552dfe3c",
+        "description": "mesa/st: Make a single helper for the NIR-to-TGSI transfer.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f70c50b643c7edac04d25eb89bb847eb27ed89d5",
+        "description": "frontend/dri: Expose RGB[AX]_SRGB as well",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3d88e65e88cd0d38a559496294a636d42ed6d71a",
+        "description": "zink: decouple renderpass from framebuffer state",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "49bb7919916ec4da424518a358f1e1e87ea9a4d7",
+        "description": "zink: use 'fb' variable name for zink_framebuffer objects in zink_framebuffer.c",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "301de75b2555ddee1ef70f80830ec246087ad2e2",
+        "description": "zink: rename param in zink_create_framebuffer",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b4da9f42e5ab08bba1b2dbaab49126b252007b61",
+        "description": "zink: ralloc zink_framebuffer structs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c6741f52bd2f646b2c1575db6e47aba2083f3765",
+        "description": "zink: remove renderpass refcounting",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b2e5dadd229cf77a302ec082f443bf502f0d7990",
+        "description": "zink: add batch flag for checking renderpass state",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "448c85acfcc3b72c4aa9cee4eb94116fe53fe424",
+        "description": "zink: rework framebuffer state",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "39a2da738d85adca0fef6ee8fa7363836be3401a",
+        "description": "ir3: add debug option to override shader assembly",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "64f939020d8dbe23e5230369488e18fb983559dd",
+        "description": "zink: only emit streamout targets during draw if we have them",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "39c415d5fd496b64f8fda2ea47b6adb88b9bd51e",
+        "description": "mesa: always set valid index bounds for non-indexed draws for classic drivers",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "2358da81d26d8baa2a46a7e854869d1c02c2dc38"
+    },
+    {
+        "sha": "fc1bd69bbd535b56fc701c54be404e250b7be856",
+        "description": "iris: Fix android build due to missing link to libmesa_iris_gen125",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "cd3251d6bafaae13d5a2cf52c917ef4517fe0130"
+    },
+    {
+        "sha": "cea4d85093af807ea0f84d505929766918452892",
+        "description": "turnip: make GS use correct varyings size from previous stage",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0c08a66ce526913ed2691f982f600285206248b8",
+        "description": "iris: only set point sprite overrides if actually using points",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "322a3d4fb0c3601a42dfe267c57aebe6fda4c25e",
+        "description": "zink: partially enable SSBO pipe cap",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2bfa998960d506a60a3c4515a50e19e5ec11e795",
+        "description": "zink: add more usage bits for buffer types",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e79d905f5a0d5bf0f83276ed08fc5d3affd65952",
+        "description": "zink: flag ssbo buffer resources as having pending writes on batch",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d0d1888af05c18d71b2d359c12916db62e9d6a29",
+        "description": "zink: split UBOs and samplers into 'read' batch references during draw",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "fa321e0cc4a4e92e5e9296af317d475c2305482c",
+        "description": "zink: start supporting atomic shader ops",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "400c7743f6323ef1c738e07c4f990cb8d857fb81",
+        "description": "zink: modify ubo loading in ntv to work for ssbos",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3dd5500f7b2957563a116228b8d29453cd981783",
+        "description": "zink: emit ssbo variables in ntv",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6e22f52ba121c85d38b55bc3c1713250f3827f65",
+        "description": "zink: hook up ssbo shader bindings",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f5ab1a1f00c1495da7c3b9cb645f268041c42f50",
+        "description": "zink: add set_shader_buffers pipe_context method",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2fa1cf99b981294d25a5adb1b1de17b4332b7ed8",
+        "description": "zink: add util function for emitting ntv atomic ops",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "621fb6a72a3661263e57441e27930bf3da91f433",
+        "description": "zink: add spirv builder function for runtime array type",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "652e51e1f3421369ee1d9efc30b20168fcb12e37",
+        "description": "nir/lower_uniforms_to_ubo: set explicit_binding on uniform_0",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a5bd2b95ef61763e00b462eb8c4de981f3c3931d",
+        "description": "zink: optimize renderpass hash table",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "184bbef33d1fff3520958c130f2b8e4fce17379c",
         "description": "util/set: split off create() into an init() function",
         "nominated": false,
