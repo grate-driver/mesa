@@ -976,7 +976,7 @@
         "description": "util/format: Fix pack/unpack of A1R5G5B5_UINT.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "b28eb044cdc1b9bbf4a830b36476f047b660b7ad"
     },
