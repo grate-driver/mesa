@@ -5,6 +5,7 @@ mesa (20.3.3-1) UNRELEASED; urgency=medium
   * lavapipe-Defer-lavapipe-warning-to-CreateDevice.patch:
     Don't print a warning which might confuse users to think they're on
     swrast vulkan.
+  * rules: Use 'enabled' instead of 'true' for DRI3.
 
  -- Timo Aaltonen <tjaalton@debian.org>  Mon, 04 Jan 2021 09:07:25 +0200
 
