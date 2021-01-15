@@ -769,7 +769,7 @@
         "description": "ac/surface: Fix GFX9 sparse mip info.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "50bafb85ec165e70feb366b06e58166491880c93"
     },
