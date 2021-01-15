@@ -130,7 +130,7 @@
         "description": "mesa: fix alpha channel of ETC2_SRGB8 decompression for !bgra",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "e5604ef78bd56fc136f00ee39003e3996bf23c80"
     },
