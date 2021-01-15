@@ -1795,7 +1795,7 @@
         "description": "nv50/ir: clear dnz flag when converting mul/mad to simpler ops",
         "nominated": false,
         "nomination_type": null,
-        "resolution": 4,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": null
     },
