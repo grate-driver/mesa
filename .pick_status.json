@@ -1687,7 +1687,7 @@
         "description": "pan/bi: Fix FLOG_TABLE modifier handling",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "dd11e5076e6dda833b3e62551761aff9d2b01600"
     },
