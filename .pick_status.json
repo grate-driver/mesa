@@ -400,7 +400,7 @@
         "description": "nvc0: index_bias is now only set for indexed draws",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "cbdc00ac3a6170e61d36233560e5b3ce83098906"
     },
