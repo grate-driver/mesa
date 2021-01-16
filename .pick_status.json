@@ -445,7 +445,7 @@
         "description": "radv: Do not use a pipe offset for aliased sparse images.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "e553ea51e8c7bf19770f2b959c185ccf0accecc2"
     },
