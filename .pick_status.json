@@ -742,7 +742,7 @@
         "description": "glsl: only expose int64 atomics when extension is enabled",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "40c1f9883e59f1a4a36b236debba7305ff57b0b0"
     },
