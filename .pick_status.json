@@ -211,7 +211,7 @@
         "description": "ci: correct the trace image URLs in the piglit summary",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "09429fa85b68ca0cdf8c8ac320560b2936249bd6"
     },
