@@ -409,7 +409,7 @@
         "description": "cso: set index_bounds_valid = true for arrays draws",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "72ff53098c648ea5513fc2b150349b5b9ae58667"
     },

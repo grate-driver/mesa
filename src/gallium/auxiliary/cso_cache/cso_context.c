@@ -1718,6 +1718,7 @@ cso_draw_arrays(struct cso_context *cso, uint mode, uint start, uint count)
    util_draw_init_info(&info);
 
    info.mode = mode;
+   info.index_bounds_valid = true;
    info.min_index = start;
    info.max_index = start + count - 1;
 
@@ -1738,6 +1739,7 @@ cso_draw_arrays_instanced(struct cso_context *cso, uint mode,
    util_draw_init_info(&info);
 
    info.mode = mode;
+   info.index_bounds_valid = true;
    info.min_index = start;
    info.max_index = start + count - 1;
    info.start_instance = start_instance;
