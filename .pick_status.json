@@ -4,7 +4,7 @@
         "description": "radv: fix separate depth/stencil layout in render pass",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "e4c8491bdf8a1238d475491533d937568019e633"
     },
