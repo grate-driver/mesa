@@ -94,7 +94,7 @@
         "description": "st/mesa: fix pbo upload/download for arrays of textures with only 1 layer",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "36097fc7ef70471ecfecd428f990233276e9c45b"
     },
