@@ -202,7 +202,7 @@
         "description": "nvc0/ir: add fixup to deal with interpolateAtSample with non-MSAA",
         "nominated": false,
         "nomination_type": null,
-        "resolution": 4,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": null
     },
