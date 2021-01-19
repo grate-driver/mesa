@@ -580,7 +580,7 @@
         "description": "nir: Work around MSVC x86 internal compiler error",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "1fd8b466672b76ad206af8aac6002e8a658db9fb"
     },
