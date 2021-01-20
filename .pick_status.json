@@ -103,7 +103,7 @@
         "description": "ci: exclude one CTS test that timeout most of the time for RADV CI",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": null
     },
