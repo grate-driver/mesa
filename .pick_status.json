@@ -526,7 +526,7 @@
         "description": "vc4: Remove vestiges of alpha test lowering.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "1404b8b1e5b6c517851d3296feb659c1fa4cfdef"
     },
