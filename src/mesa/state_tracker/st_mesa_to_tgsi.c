@@ -963,42 +963,37 @@ st_translate_mesa_program(struct gl_context *ctx,
 
    /* Declare misc input registers
     */
-   GLbitfield64 sysInputs = program->info.system_values_read;
-   for (i = 0; sysInputs; i++) {
-      if (sysInputs & (1ull << i)) {
-         unsigned semName = tgsi_get_sysval_semantic(i);
+   BITSET_FOREACH_SET (i, program->info.system_values_read, SYSTEM_VALUE_MAX) {
+      unsigned semName = tgsi_get_sysval_semantic(i);
 
-         t->systemValues[i] = ureg_DECL_system_value(ureg, semName, 0);
+      t->systemValues[i] = ureg_DECL_system_value(ureg, semName, 0);
 
-         if (semName == TGSI_SEMANTIC_INSTANCEID ||
-             semName == TGSI_SEMANTIC_VERTEXID) {
-            /* From Gallium perspective, these system values are always
-             * integer, and require native integer support.  However, if
-             * native integer is supported on the vertex stage but not the
-             * pixel stage (e.g, i915g + draw), Mesa will generate IR that
-             * assumes these system values are floats. To resolve the
-             * inconsistency, we insert a U2F.
-             */
-            struct st_context *st = st_context(ctx);
-            struct pipe_screen *pscreen = st->pipe->screen;
-            assert(procType == PIPE_SHADER_VERTEX);
-            assert(pscreen->get_shader_param(pscreen, PIPE_SHADER_VERTEX,
-                   PIPE_SHADER_CAP_INTEGERS));
-            (void) pscreen;  /* silence non-debug build warnings */
-            if (!ctx->Const.NativeIntegers) {
-               struct ureg_dst temp = ureg_DECL_local_temporary(t->ureg);
-               ureg_U2F(t->ureg, ureg_writemask(temp, TGSI_WRITEMASK_X),
-                        t->systemValues[i]);
-               t->systemValues[i] = ureg_scalar(ureg_src(temp), 0);
-            }
+      if (semName == TGSI_SEMANTIC_INSTANCEID ||
+          semName == TGSI_SEMANTIC_VERTEXID) {
+         /* From Gallium perspective, these system values are always
+          * integer, and require native integer support.  However, if
+          * native integer is supported on the vertex stage but not the
+          * pixel stage (e.g, i915g + draw), Mesa will generate IR that
+          * assumes these system values are floats. To resolve the
+          * inconsistency, we insert a U2F.
+          */
+         struct st_context *st = st_context(ctx);
+         struct pipe_screen *pscreen = st->pipe->screen;
+         assert(procType == PIPE_SHADER_VERTEX);
+         assert(pscreen->get_shader_param(pscreen, PIPE_SHADER_VERTEX,
+                                          PIPE_SHADER_CAP_INTEGERS));
+         (void) pscreen;  /* silence non-debug build warnings */
+         if (!ctx->Const.NativeIntegers) {
+            struct ureg_dst temp = ureg_DECL_local_temporary(t->ureg);
+            ureg_U2F(t->ureg, ureg_writemask(temp, TGSI_WRITEMASK_X),
+                     t->systemValues[i]);
+            t->systemValues[i] = ureg_scalar(ureg_src(temp), 0);
          }
-
-         if (procType == PIPE_SHADER_FRAGMENT &&
-             semName == TGSI_SEMANTIC_POSITION)
-            emit_wpos(st_context(ctx), t, program, ureg);
-
-          sysInputs &= ~(1ull << i);
       }
+
+      if (procType == PIPE_SHADER_FRAGMENT &&
+          semName == TGSI_SEMANTIC_POSITION)
+         emit_wpos(st_context(ctx), t, program, ureg);
    }
 
    if (program->arb.IndirectRegisterFiles & (1 << PROGRAM_TEMPORARY)) {
