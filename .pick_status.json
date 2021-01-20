@@ -499,7 +499,7 @@
         "description": "v3d: Clean up vestiges of alpha test lowering.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "8ad931808e2d3f54b4bf2ddbbaa632be1018801a"
     },
