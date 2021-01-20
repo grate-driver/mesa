@@ -1,5 +1,392 @@
 [
     {
+        "sha": "af9977a3d5f3378c297965e21389e36491f47e1b",
+        "description": "aco: add affinity for non-sequential MIMG operands",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4015b3651acec7279feaddfb9a6ea3fcb42ce907",
+        "description": "aco: only require texture coordinates to be in WQM if NSA is used",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c353895c92270c0e2a6e2b849c24d558efae0d5e",
+        "description": "aco: use non-sequential addressing",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "faf3e9a27f46df233bfd7d5a6d930343fceb215a",
+        "description": "aco: move VADDR to the end of the operand list",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cd29210fcee104e8529490b82d6f408cacc549f4",
+        "description": "aco: add emit_mimg() helper",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9890dabb1b2eed8766d03ef63c8d61334e6c74aa",
+        "description": "aco: have emit_wqm() take Builder instead of isel_context",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "489aa8c7cb7357b37f0e42771a9ca3a29eccb27b",
+        "description": "aco: fix num_waves on GFX10+",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "12ea0143de66971c8dc62864621f1100e551bb2e",
+        "description": "radv: fix max_waves estimation on GFX10.3",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "924d1ba9eb03279b51ee2439aa027fb73cb3f8c2",
+        "description": "zink: enable WSI-faking for RADV too",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "356a381600cb45d068492015061184457de78e63",
+        "description": "zink: add VK_KHR_driver_properties",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e87b59f68779a7c838f35323fd9f4dddf146381d",
+        "description": "st/mesa: fix pbo upload/download for arrays of textures with only 1 layer",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "36097fc7ef70471ecfecd428f990233276e9c45b"
+    },
+    {
+        "sha": "13f7224dbf31e602b0cdea37d7a2dca07a01da0b",
+        "description": "ci: exclude one CTS test that timeout most of the time for RADV CI",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "fa74389485b705955fa3fb826fb508a7a21fd65f",
+        "description": "turnip: don't emit tess consts if they are not used",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "212b1516df9d9cac979336de300936a063121d5c",
+        "description": "v3d/compiler: enable lower_add_sat NIR option",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e333692e9d4369458f95b99a39f4b28f887181ee",
+        "description": "v3dv/pipeline: enable lower_add_sat NIR option",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3b27243b01ecdfea6df068338e56ffbd9b16b663",
+        "description": "r600: Enable sb also for NIR",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e20a83eb86d43bdb5af62ad9fd234782a7df3f6a",
+        "description": "r600/sb: fall back to un-optimized byte code when ra_init fails",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c1785c55f7c68dfe28d610753cf82e455487b351",
+        "description": "r600/sb: fix boundary assert for mem-instruction decoding",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "14fe19e7976b217e2d59e44ab3ffdf5d267b190a",
+        "description": "r600/sfn: Keep array registers alive for the whole shader",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9fa48c0207dbc4972bef39b08e3da31dcce82320",
+        "description": "r600/sfn: update shader array info",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7717c1090a57e107a3652b0e38bd39e0a82d18e7",
+        "description": "r600/nir: pass array info to r600_shader for sb",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ff382c6634692cdbba61f684a7d612ebf9345263",
+        "description": "r600/sb: Add support for INTERP_X and INTERP_Z ops",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f57ae1e69cfa5328d1520dd8832bf79805932fcb",
+        "description": "r600: Add flags to INTERP_X and INTERP_Z two-slot ops",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "198c3acacf43389822c1cafd436eabd7127a199d",
+        "description": "r600/sfn: fix use of b32all/and",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "f79b7fcf7c7f5db626efdb63f27e8bc64d0aed77"
+    },
+    {
+        "sha": "4f88668f4a6669c34486ed9d24b19592b33d886b",
+        "description": "r600/nir: clone shader before first query to shader key",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6d587f754cddb1708b31a83d6a34afa7830eb53d",
+        "description": "v3d: use a compatible supported format for TFU-based blit",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "07473321a2b09283ac819e014b89c3535cee756b",
+        "description": "Revert \"mesa: allow half float textures based on ARB_half_float_pixel\"",
+        "nominated": false,
+        "nomination_type": 2,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "aca67a555c011f59c37b05544eecbeea9aa42f3e"
+    },
+    {
+        "sha": "9fb5d7acbbab04af3c85f7b6188af16eda824b43",
+        "description": "tnl: Reset nr_bos to 0 between map/unmap cycles.",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "e99e7aa4c1ddd7b8c2c4388f4f8e4fa1955ca771"
+    },
+    {
+        "sha": "376c8f750b9766d9704ced167dfaf00f521a92f4",
+        "description": "tnl: Respect `start` when converting indices to GLuint",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "e99e7aa4c1ddd7b8c2c4388f4f8e4fa1955ca771"
+    },
+    {
+        "sha": "bd6120f562d57e150aa2071f9108f538858311a6",
+        "description": "tnl: Try not to botch index buffer munging when start > 0.",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "4c751ad67aa2bbde5897030495f86e31c9e1fda7"
+    },
+    {
+        "sha": "14ae5069da896cc93953e935051a76884800cac9",
+        "description": "vbo: Only mark merged line strips as lines when actually converting them",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "310991415ee1f5bcdd91460f00205190e8e0c2d9"
+    },
+    {
+        "sha": "44bdd5225c48d266e42d93defbb7ca9ae74aa21b",
+        "description": "vbo: Don't set node->min_index = max_index = indices_offset when merging",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "4c751ad67aa2bbde5897030495f86e31c9e1fda7"
+    },
+    {
+        "sha": "dd72019d03f4df82cdce982d78f7983f32207929",
+        "description": "r600/sfn: Remove StoreMerger unused member b.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3884307b69aafd36729bd59d694a314ed5e6dd5c",
+        "description": "ci/piglit: Upgrade to a newer piglit in our containers.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "77aa86a5217662e5dfe3886a7ada04ec01d42f41",
+        "description": "intel/fs: Separate SLM size calculation from encoding",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9c38cbbb968b8a856de1862b0bc321d42d709ac1",
+        "description": "mesa/main: Replace the uint format packing code with util/format's.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "23bb92c4f683f5e286af8f5c1bfc50204bd5ea1e",
+        "description": "mesa/main: Replace float pack function with util_format_pack_rgba().",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f1403d66d40c39bb0aab3732e6f641282cf7eb14",
+        "description": "swrast: Use util_format_write_4/4ub for the scattered pixel writes.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4c99d6ff54b2614b46d7e2252aa6c71c46045c16",
+        "description": "radv: flush L2 for images affected by the pipe misaligned issue on GFX10+",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "4a783a3c7846857671a9f2e91b62850e24e01029"
+    },
+    {
+        "sha": "8882abe47eb79f2975762343ed1dc596f45d2602",
+        "description": "radv: restore invalidating the vector cache for internal meta operations",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "8f8d72af555c2f4d7a44107bf52602571fc0c4d2"
+    },
+    {
+        "sha": "c28401ab437d0c575ab7a7cdc05f9ca786977ed7",
+        "description": "radv: enable TC-compat HTILE for D16S8 on GFX9+",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cc5b6a0e897c6a1946e340c3f0b62e5ca47796f1",
+        "description": "radv: enable TC-compat HTILE with D32S8 and MSAA on GFX9+",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "60ead6e04becf00e928d1e30a279f71cb0ce0e4a",
+        "description": "radv: add a comment explaining the micro tile mode resolve",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "3e13c1f8dfef4a4c0fd5e79bbc364f9e5f998856",
         "description": "frontend/dri: fix doesn't support RGBA ordering still expose RGBA in config",
         "nominated": false,
