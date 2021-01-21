@@ -1,5 +1,482 @@
 [
     {
+        "sha": "64f55b82c7f1652e4fae478c0af325fc38b9b53b",
+        "description": "zink: set PIPE_CAP_COPY_BETWEEN_COMPRESSED_AND_PLAIN_FORMATS",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "81f7cb149da21b648d2305094bf542b3564cab56",
+        "description": "st/mesa: enable state var merging to improve fetch_state performance",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "fd6ce2be9048f112c94ee288baea02b46c0ea4cd",
+        "description": "mesa: merge equivalent switch cases in prog_statevars.c",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "23729a783996545ff2e56605f7c025a36ac8ba35",
+        "description": "mesa: sort and tightly pack STATE_* enums to generate better switch code",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "72a1828868bb3a9eab61f7af7a0abd8a9d723ce3",
+        "description": "mesa: don't handle STATE_* enums in fetch_state that don't do anything",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "bddb4f9e1e9175521565a27fd7676c66a9ea1ab5",
+        "description": "mesa: compute gl_program_parameter_list::UniformBytes accurately",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "fb73058ad2b6b0d143078b9bdc6688ec6275ec87",
+        "description": "mesa: add upper bound to limit program state var iterations",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0f7877d96a9b6bd5f3f211324f2ee169a3b73e40",
+        "description": "mesa: sort state vars with constant indexing for ARB programs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f485331c5b6fb5ab3493ef7c2c7ae787d56f7cb9",
+        "description": "mesa: merge local and env program parameters for faster uploads",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "293526a273304ea6e500270f1f78bd78ad38dc41",
+        "description": "mesa: don't allocate local parameters in fetch_state",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5336e41ac058f0cb8dc594e35eab411efde0256b",
+        "description": "mesa: optimize get_local_param_pointer and program_local_parameters4fv",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "bb3802b26fb2c96fab268fa00894a4ce3baf356f",
+        "description": "mesa: rename STATE_LIGHT_ATTRIBS -> STATE_LIGHT_ARRAY for consistency",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2a80595ba58c7d1a063973847dc5f2822dc3c406",
+        "description": "mesa: skip memmove in optimize_state_parameters if it's no-op",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0c77190b312a495b010302b3fe9a097ddf8a7b30",
+        "description": "glsl: split gl_CurrentAttribFragMESA into elements",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e3a7acf9583444d426b9cbcc61cee34b4481b6ea",
+        "description": "glsl: remove unused internal builtin gl_CurrentAttribVertMESA",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7ad84a02bd40bb2d08c718fded57c47fe85b7681",
+        "description": "mesa: eliminate the switch statement for STATE_TEXGEN",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0eccba1ac03fe4ab30d641076106b83374b8dcbb",
+        "description": "mesa: flatten STATE_MATERIAL and STATE_LIGHTPROD tokens",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3d9b5d80870924f69401c267b719a814f02c7c61",
+        "description": "mesa: combine STATE_ENV, STATE_LOCAL enums with STATE_xxx_PROGRAM",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b4f3497786ef4c4923844b56133955a2f48bfe59",
+        "description": "mesa: remove STATE_INTERNAL",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0c1ed47eee049c204a06ed8b591d58e03896c68c",
+        "description": "docs/features: mark off GL 4.2 for zink",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "099ce1aacc3205f0ceeadfc65a12af6778a2f250",
+        "description": "zink: GLSL 420",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f14836574aad53cbd27d14216306f608daf39dd3",
+        "description": "nv50/ir: Initialize CodeEmitter members in constructor.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "245a696741d2a4cd5f2aade38c2194e3030d659b",
+        "description": "nvc0/ir: add fixup to deal with interpolateAtSample with non-MSAA",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0773cd33c2bd14605eee471dd0dcc5306dd41cd4",
+        "description": "ci: correct the trace image URLs in the piglit summary",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "09429fa85b68ca0cdf8c8ac320560b2936249bd6"
+    },
+    {
+        "sha": "27f8c466486b6e25d301681d3610fbe57ad8c032",
+        "description": "ci: recover tracie dashboard URLs for failing traces",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "09429fa85b68ca0cdf8c8ac320560b2936249bd6"
+    },
+    {
+        "sha": "3f9a6d333b3e5f05ef6560123ee98d217358be89",
+        "description": "zink: export shader image caps using features",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0daa61553d0888e207ac0546794d9f45a3ac0921",
+        "description": "zink: check if multisample support exists for shader image formats",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b9b812edb832e239f74ea065111284879f2d9e11",
+        "description": "zink: handle shader image descriptor updates during draw",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9ba38ab6facff5ef93bc88ed81c0e12fab314d1a",
+        "description": "zink: add a pipe_context::set_shader_images hook",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e1f798ca5015992b4e54dae3da8f5d29999d136f",
+        "description": "zink: break out bufferview creation into separate function",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c4d00b9ca4e27cdf1668293c0866c8722c2fce88",
+        "description": "zink: handle image descriptors during zink_shader creation",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "10fb7a8c0ff94700416ff6a0ebb2a8415e3817fa",
+        "description": "zink: enable image caps in ntv when a shader has images",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "245d9fa21b138c2ca9c99d7004c5f652330e615d",
+        "description": "zink: enable early frag test execution in ntv when necessary",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9cd2aff1a3470ab0551e861fb242242724435ea3",
+        "description": "zink: add handling for all basic image ops in ntv",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a4f06b3528837e84f9e7bf5e60645a6d986183dc",
+        "description": "zink: expand ntv array derefs to track image derefs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "77b6b3eb0b8e64fe4439b1dd1c3c4c50664300e7",
+        "description": "zink: add nir_var_uniform case to get_storage_class()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2ade1f3a6e7abe000775614eda1eae1d38e61ef0",
+        "description": "zink: handle nir_intrinsic_memory_barrier in ntv",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "768c9fa5c2d87641cf06b3acd3a004d994db4814",
+        "description": "zink: handle more atomic ops in ntv",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a2855e21801ddb8a53d250fdd91e65527f2c91c9",
+        "description": "zink: handle image variable types in ntv",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "fce791722bd58d8ec4f326522a01f0fd13bbc0cb",
+        "description": "zink: add new 'sampler_types' variable to ntv_context struct",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a9f2637267bae3429a90dbcb6f52f36489223907",
+        "description": "zink: add shader image support to zink_binding()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "934625d53d143c6b784bbdaf115cf7f309cbbd29",
+        "description": "zink: add a pipe_context::memory_barrier hook",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "06273abd203038396f387ba2ed05b412f97ff9ec",
+        "description": "zink: add 'has_draw' flag to batch struct",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "05629bb4700b87b4942b7461d4be803fa43a40ec",
+        "description": "zink: verify format caps and add storage image usage when possible in creation",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "493fae5016b9aea8b8f5fd585fa4b464cfb4a275",
+        "description": "zink: add ntv function for emitting variable access decorations",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "882ab6afb770e2134223e7973af75e4c80e6db62",
+        "description": "zink: add spirv builder functions for image ops",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3d2ffb394a191d0bc4f1e76d293facb0506ad2a0",
+        "description": "zink: add spirv_builder function for hexops",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "139ae442c62cc4eed1da9ed417dd872351113cb7",
+        "description": "zink: rewrite image/sampler glsl -> vk type functions for robustness",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "177a42333ff7361ef28909d248115ed8c1db4574",
+        "description": "zink: add ntv util function for getting image type",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "263d3ae1881b156b6582e9a4e9c744c3a6cc498b",
+        "description": "zink: rename zink_context::*image_views -> sampler_views",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9f389af35f11d881e009a484821d0119a0096f09",
+        "description": "radv: sink load_ssbo",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a6d92eaf4f3b29e43792c25f45a0288ea8a24d15",
+        "description": "nir/sink,nir/move: sink/move reorderable load_ssbo",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "af4c6605a834f7c1f160fa4dbbcc119417659517",
+        "description": "radv: use nir_opt_access",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "c3dbc4df194a15aa1cf09493a3100b59e37e48fe",
         "description": "docs: turn non-code into comment",
         "nominated": false,
