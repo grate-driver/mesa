@@ -427,7 +427,7 @@
         "description": "glx: Provide glvnd wrapper for glXSwapIntervalEXT",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "60ebeb4608a871ba89ba081c1c6e7ebdd5efec9a"
     },
