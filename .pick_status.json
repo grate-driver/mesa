@@ -229,7 +229,7 @@
         "description": "spirv: Don't remove variables used by resource indexing intrinsics",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "c4c9c780b131939fa10ede84e079a90fc090e17a"
     },
