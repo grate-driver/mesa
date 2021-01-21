@@ -265,7 +265,7 @@
         "description": "intel/gen12: Fix memory corruption issues in fused Gen12 parts.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "9e5ce30da7fa3f1cc3badfd348e5f8fda1bbacb2"
     },
