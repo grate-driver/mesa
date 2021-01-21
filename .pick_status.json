@@ -454,7 +454,7 @@
         "description": "radv: Only enable sparse features on Polaris and newer.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "9f43b44bf06c61735dbab7e8e508642315bd93d1"
     },
