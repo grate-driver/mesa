@@ -1,5 +1,491 @@
 [
     {
+        "sha": "d37124b065c2b6c99c042fb402c6a23ce16b034e",
+        "description": "virgl: add support for VIRGL_CAP_V2_UNTYPED_RESOURCE",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "41366ba49424592086cba0c32aa26e72482411e6",
+        "description": "virgl: update headers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "fb65285629caa14580ff8e2c2eed88226da239fe",
+        "description": "docs/zink: add GL 4.2 requirements",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d0e7a7d58de1192dff73adb89cf0369b829143b2",
+        "description": "docs/zink: add GL 4.1 requirements",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c3d7de47cd64cc9b520ec9322953407582d2dc5a",
+        "description": "docs/zink: add GL 4.0 requirements",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4374e8e99f1a935ebb5e3ce0cfe266d60a4678d0",
+        "description": "docs/zink: fix phrasing of GL 3.3 requirements",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "02c43eb975d366ff0b6d4e6e522c14dfa382e5cd",
+        "description": "docs/zink: document the independentBlend requirement for GL3",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "fb5d7d60e7e4e580e71ad682529d83e2b9c10801",
+        "description": "docs/zink: add two missing required features",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a640588a416bf983af57ce21c915c1bde60b51b5",
+        "description": "docs/zink: add missing colon",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9565c1d83c97f29a8c03b6974c6e6b48bd498a12",
+        "description": "nv50/ir: Initialize RegAlloc member func in constructor.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "92ec7b577c8cb47b308bba1d21b4c2ec05f35f9f",
+        "description": "zink: clone shader before lowering clip_halfz",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "15f478fe840c29ba118fbb4fa49118f85fb208c6"
+    },
+    {
+        "sha": "5282210c0b96f75630a5271a8956f8ae69a0ca1b",
+        "description": "zink: check correct caps for PIPE_CAP_IMAGE_LOAD_FORMATTED",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d31f2200b35bd3bb707e804363fccb77aa3e1c61",
+        "description": "ci: Enable process isolation for softpipe & freedreno piglit jobs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cca257d59611584de31ed6500bdd08a75844fd42",
+        "description": "anv: Advertise shaderInt64 on Gen11+",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8c2543d03777150e1a5cc7c7fbbe1ceab75a9574",
+        "description": "intel/fs: Implement umin/umax shuffle",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a6500236e392a513edb1e3bf4f7351036f9e90d5",
+        "description": "intel/fs: Refactor our shuffle emit code",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "44571c6a68a4dd6b4c13f70b1d30e0e87ec2f2e4",
+        "description": "intel/fs: Properly lower 64-bit MUL on 64-bit-incapable platforms",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c80db6611aaf9c59dd8ccd8597e52b789018eb20",
+        "description": "intel/fs: Support 64-bit CLUSTER_BROADCAST on Gen11+",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b90921ec0c454e49a131ce6aabc6ec43a17278bf",
+        "description": "intel/fs: Support 64-bit SHUFFLE on Gen11+",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cdedc82329cb005f862e9250907124ead718ae4c",
+        "description": "intel/fs: Support 64-bit SEL_EXEC on Gen11+",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "58bcb5401d85b4a21f6d9ea4eb7bff8e1ed7110f",
+        "description": "intel/fs: QUAD_SWIZZLE requires packed data",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "8b4a5e641bc3cb9cf0cfe7d0487926127fc25de7"
+    },
+    {
+        "sha": "69a3559efd6ec036749c3f460f092b7a38c12d2a",
+        "description": "intel/reg,fs: Handle immediates properly in subscript()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e797daba538e605b6b94cb28c922384cef9ef014",
+        "description": "intel/compiler: Move brw_reg_type_for_bit_size to brw_reg_type.h",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4c8cbe9b1340db826fa21eec5fcbee6e6fc35efe",
+        "description": "intel/compiler: Return 1 for immediates in regs_read",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "178820212b7c7d86c1d17f5c1beb2ce9b0ef5a47",
+        "description": "nir/lower_int64: Lower 64-bit vote_ieq",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "731adf1e17a1ae966096ca02641b7b9e6249d558",
+        "description": "nir/lower_int64: Add lowering for 64-bit iadd shuffle/reduce",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "bf7a11424650af2ac9e8f546741fb6ab2ed3b8d7",
+        "description": "nir/lower_int64: Add lowering for some 64-bit subgroup ops",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "da331f814fd4a487e0e738c1395d3e3a00c215e3",
+        "description": "nir/lower_int64: Fix lowering of f2[ui]64 for 16-bit float",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "70b4524de57cdbef9c0c5fb6f06994c7e39ec7d9",
+        "description": "nir/lower_int64: Add a level of wrapper functions",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "093b3f6e1f0b919be247c30bb7cac9c1a25941c3",
+        "description": "radv: only decompress the depth/stencil aspect that needs to be resolved",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "36a4aeb91f3a940f53e1209b5f1671403142a130",
+        "description": "util: When building 'ARM64EC', don't use x64 intrinsics which need to be emulated",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "86b4f6ad43d635b63adf7bfe99f9eeb103f99255",
+        "description": "main: Undefine MemoryBarrier for Windows",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0e1447eb1b3729998ec06cf7bc5ba7d28c1e67e1",
+        "description": "anv: Early-exit from cmd_buffer_flush_state",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "18fc1dfea386b4c2235b477adde801ea2a393176",
+        "description": "anv: Only flush descriptors used by the pipeline",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "72c7a68c2bda06170da4210cfe9fb669bffb858f",
+        "description": "anv: Take the set of stages to flush in flush_descriptor_sets",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "16a81cabb57ba3ec558e0ca00bb69c95b7b4761a",
+        "description": "anv: Exit early from cmd_buffer_apply_pipe_flushes",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7683ff14208d62bc8b79eec2890afa3cf71903e1",
+        "description": "radv: use a workgroup size of 8x8 for FMASK color expand",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b4f551d41b80db7d503055f59e6d62bc48ed9ccf",
+        "description": "radv: use the range aspect mask in FMASK color expand",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4d30de140e1358cc0538461c9eaf083eca122a13",
+        "description": "radv: add multi-layer support to FMASK color expand",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "67c2921193ec71a902b4b1a8bed2465f45b348a1",
+        "description": "radeonsi: iterate from draw 1 for total/min_direct_count computation",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "01e3d28829b297d87c025a9bd8d679c6c1cb811b",
+        "description": "radeonsi: enable accidentally disabled fast launch with non-indexed tri strips",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ea670ac1502788e5376aa2432f9c99fa75bf3d56",
+        "description": "radeonsi: skip some code for ALLOW_PRIM_DISCARD_CS if tess or GS is enabled",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "dd9801a918ce488d764075de09e6bb309e539995",
+        "description": "radeonsi: rename SI_SGPR_RW_BUFFERS to SI_SGPR_INTERNAL_BINDINGS",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "59a478b84346fd83f13ae608c852e2be6bcf49f3",
+        "description": "radeonsi: move if (sctx->vertex_buffers_dirty) into the upload function",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5013828863010a1feded43c20d74250c48eff757",
+        "description": "radeonsi: don't set vertex buffer dirty flags when they don't do anything",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "26d785fbbdf7635607510ebf7e78d93db532bf21",
+        "description": "radeonsi: move y_inverted out of si_viewports",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c1957e58a6165b7daeb8519b4214428a5d8fcfb2",
+        "description": "radeonsi: inline si_blend_color and si_clip_state structures",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ca2062a394daa6c2734e46a65b0f05c71943e2ea",
+        "description": "radeonsi: simplify determining whether render condition is enabled at draw time",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1a2dde8f8697edb7bdb5e9112acc291f19409ea1",
+        "description": "radeonsi: add internal blitter_running flag",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5fabeb49d82c2faf34134f9e1e8597c5b0c1622d",
+        "description": "radeonsi: don't use rasterizer_discard to validate draws, only check ps_shader",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cd42ed34b0259c0597597715ef0ad07fc9df2698",
+        "description": "radeonsi: optimize translating index_size to index_type",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "28e419f00117b223337eaef56067d657342b19c9",
+        "description": "radeonsi: don't mark NULL states as dirty in si_pm4_reset_emitted",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "488cd3b93fc894689544b0c9b6436b88adc3559a",
+        "description": "radeonsi: clear dirty_states if si_pm4_bind_state is unbinding or no-op",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a0978fffb849264ccb20e6b4905b9cf05ed17593",
+        "description": "radeonsi: add new possibly faster command submission helpers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "3ef89b245e3e1ac4e67fea9c1b13ebeda75769d0",
         "description": "radv: fix separate depth/stencil layout in render pass",
         "nominated": true,
