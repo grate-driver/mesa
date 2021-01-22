@@ -1,5 +1,365 @@
 [
     {
+        "sha": "3ef89b245e3e1ac4e67fea9c1b13ebeda75769d0",
+        "description": "radv: fix separate depth/stencil layout in render pass",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "e4c8491bdf8a1238d475491533d937568019e633"
+    },
+    {
+        "sha": "45bebc7a9c73f3add08c2290fa1eac237edf5a34",
+        "description": "zink: respect fragment-shader depth-layout",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "6785d8c4601c6b8b1a5d8da8221313d1c332e7e5"
+    },
+    {
+        "sha": "855370bb620663b5e451e08046e4ddb4b6429c0b",
+        "description": "zink: make all xfb caps depend on extension",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "e8ad52f7b0c603d28518b9b288a8d9d5862d2053"
+    },
+    {
+        "sha": "8c7d9716669a74159d2eec86490c756c274f663c",
+        "description": "zink: require vulkan memory model for tesselation",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "f815b87e188a0e7f4b0aa31f502be7939479f622"
+    },
+    {
+        "sha": "f95c174927a341e2ce96bb86b432028669b1d537",
+        "description": "zink: check for extension instead of function",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c9340744a3c6310f0f36c6c5576ea1bc87b65f03",
+        "description": "zink: respect feature-cap for multi-draw indirect",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "cef876910a04070e5c89667d88df7bc3e588af19"
+    },
+    {
+        "sha": "6f6941e2dd8f1d1d1d6e52276485d41c7dd0b029",
+        "description": "zink: respect feature-cap for sample-shading",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "0c70268ff73adfc9d588fa5a10c500ed9f66bab6"
+    },
+    {
+        "sha": "612169859a3300879fa890a03a8693ab3c718d2c",
+        "description": "zink: respect feature-cap for independent blending",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "8d46e35d16e3936968958bcab86d61967a673305"
+    },
+    {
+        "sha": "831d205513dbac2178126ac198f64d8307d7b45a",
+        "description": "zink: respect feature-cap for robust buffer access",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "61720098fa4cddaeb5759a499c9c3fabf5bb84b7"
+    },
+    {
+        "sha": "b35e11ef9506f8bb4e4607ec4a9acab908ce8705",
+        "description": "zink: always expose linear float textures",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "27209e63ea816762708deef4b4fbec0dfbf4a331",
+        "description": "frontend/va/image: add pipe flush for vlVaPutImage",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f6755eee0c7bfe01fdd38537e9ed6609da428980",
+        "description": "radv: enable SQTT support on GFX10.3",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "aedcaff3564eb9824a3df913355682fd31197ead",
+        "description": "ac,radv: add SQTT support on GFX10.3",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cd53f24fbf2f171007fa93f827906b1cd75d84cb",
+        "description": "ac/rgp: add support for GFX10.3",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5b5cd18853c1d5ff0b159ea6df78674532b78b18",
+        "description": "radv: inhibit clock gating when tracing with SQTT",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c40ea24ee009d8c9816ff6327f65be3fbd45deb7",
+        "description": "radv: fix overflow when computing the SQTT buffer size",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e115b01948f90dcb922c626438a0e83a796d5ceb",
+        "description": "aco: return references in instruction cast methods",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1d245cd18b637484512f275b9bb49f05105ad373",
+        "description": "aco: use format-check methods",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "70dbcfa1c9e0b5fe609485b011c3ce9d0819a9ee",
+        "description": "aco: use instruction cast methods",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "fb12302b8ee585c3c623062c47e9b2982247a356",
+        "description": "aco: add instruction cast and format-check methods",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "441ead5fb35f84dcbaf4724a771ff3475257d400",
+        "description": "aco: remove Format::{VOP3A,VOP3B}",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "925d701014c2ba084061eae131f4b5c75e595f29",
+        "description": "frontends/va/context: don't set max_references with num_render_targets",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "824eba2148e56a75d0678011b4f546cabbd5d345",
+        "description": "aco: don't consider a phi trivial if same's register doesn't match the def",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "69b6069dd288455cdb2655284c592a85d17df273"
+    },
+    {
+        "sha": "9eab6ca20c29680c4bb9f4d3ba69751ae4bb9eb9",
+        "description": "docs/features: remove a few redundant zink mentions",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ce7eb7e02a0e62e5b11d3243e0598173869270d9",
+        "description": "docs/features: add missing features for zink",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a346e1dea039560baa7bec4050cb60a9f29e558c",
+        "description": "v3dv: properly handle two different binding points for cmd_buffers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "dac20e100b4cb967fb28989e8cd718946baa72c7",
+        "description": "v3dv: drop v3dv_resource definition",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f55649d20b4b0263245f047db6239a46890e04a4",
+        "description": "panfrost: Add support for INTEL_blackhole_render",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "96d7555770c414a1dc4c4f7fa04b0602e62547ae",
+        "description": "zink: support PIPE_FORMAT_X24S8_UINT",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "264a5b1d150cbea3dec82b28897a645b6dc2b406",
+        "description": "zink: add layout member to barrier setup in draw",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "09182d9ae8f6ba04acfd6ada34607605541c8106",
+        "description": "zink: support VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL usage",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "fa862725476e5c7ff03d12d868e5a10cf5624407",
+        "description": "zink: expose PIPE_CAP_ANISOTROPIC_FILTER",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0f9f625089e1e3b8d62c74cfa8dc9b9ef4ef8f32",
+        "description": "iris: Refactor iris_debug_recompile interface to take a shader.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4423903089ad8e4ff6224437895dbc6c19f75a54",
+        "description": "iris: Drop iris_print_program_cache().",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5e2c799d0e199a00dd9a660c4a9da4edb7c5b3e0",
+        "description": "iris: Drop find_existing_assembly optimization from program cache",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7b9c01a5b1bf92f6d75e05c6913129d99bb83143",
+        "description": "bin/post_version: convert the csv.reader into a concrete list",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "61720098fa4cddaeb5759a499c9c3fabf5bb84b7",
+        "description": "zink: set PIPE_CAP_ROBUST_BUFFER_ACCESS_BEHAVIOR",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "bcc8222277d9c8d1dc1ef39ab0ade331ccf0a9a8",
+        "description": "zink: set PIPE_CAP_FRAMEBUFFER_NO_ATTACHMENT",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0ab9114abde1f9fac31ba6cbf55754e5596755e2",
+        "description": "zink: force per-sample interpolation",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e2500c02cc7bd429e035c5208e533e569c525b03",
+        "description": "iris: Consider resolves after changing a resource's aux state",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "64f55b82c7f1652e4fae478c0af325fc38b9b53b",
         "description": "zink: set PIPE_CAP_COPY_BETWEEN_COMPRESSED_AND_PLAIN_FORMATS",
         "nominated": false,
