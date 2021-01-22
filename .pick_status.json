@@ -49,7 +49,7 @@
         "description": "zink: respect feature-cap for multi-draw indirect",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "cef876910a04070e5c89667d88df7bc3e588af19"
     },

@@ -107,6 +107,8 @@ zink_get_param(struct pipe_screen *pscreen, enum pipe_cap param)
       return 1;
 
    case PIPE_CAP_MULTI_DRAW_INDIRECT:
+      return screen->info.feats.features.multiDrawIndirect;
+
    case PIPE_CAP_MULTI_DRAW_INDIRECT_PARAMS:
       return screen->vk_CmdDrawIndirectCount &&
              screen->vk_CmdDrawIndexedIndirectCount;
