@@ -58,7 +58,7 @@
         "description": "zink: respect feature-cap for sample-shading",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "0c70268ff73adfc9d588fa5a10c500ed9f66bab6"
     },
