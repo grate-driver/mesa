@@ -202,7 +202,7 @@
         "description": "aco: don't consider a phi trivial if same's register doesn't match the def",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "69b6069dd288455cdb2655284c592a85d17df273"
     },
