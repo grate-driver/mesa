@@ -22,7 +22,7 @@
         "description": "zink: make all xfb caps depend on extension",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "e8ad52f7b0c603d28518b9b288a8d9d5862d2053"
     },
