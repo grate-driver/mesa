@@ -94,7 +94,7 @@
         "description": "zink: clone shader before lowering clip_halfz",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "15f478fe840c29ba118fbb4fa49118f85fb208c6"
     },
