@@ -1,3 +1,9 @@
+mesa (21.0.0~rc2-1) UNRELEASED; urgency=medium
+
+  * New upstream release candidate.
+
+ -- Timo Aaltonen <tjaalton@debian.org>  Fri, 22 Jan 2021 09:09:13 +0200
+
 mesa (20.3.3-1) unstable; urgency=medium
 
   * New upstream release.
