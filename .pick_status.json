@@ -517,7 +517,7 @@
         "description": "zink: require vulkan memory model for tesselation",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 3,
         "master_sha": null,
         "because_sha": "f815b87e188a0e7f4b0aa31f502be7939479f622"
     },
