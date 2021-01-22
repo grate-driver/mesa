@@ -499,7 +499,7 @@
         "description": "zink: respect fragment-shader depth-layout",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 3,
         "master_sha": null,
         "because_sha": "6785d8c4601c6b8b1a5d8da8221313d1c332e7e5"
     },
