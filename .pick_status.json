@@ -481,7 +481,7 @@
         "description": "Revert \"virgl: fix BGRA emulation artifacts during window resize\"",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "accc2222174a90fd24ee56ce751feb6022ecc0c7"
     },
