@@ -274,7 +274,7 @@
         "description": "panfrost: Use normal malloc/free instead of ralloc for surfaces",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": null
     },
