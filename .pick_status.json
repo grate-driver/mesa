@@ -1,5 +1,491 @@
 [
     {
+        "sha": "9052819ebbff07d82c3eb9adf414144df4868644",
+        "description": "zink: request texcoord replace lowering",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3b705ea511b38e064a482e1b27c1b89f86357f81",
+        "description": "gallium/st: lower point-sprites if not supported",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "bc0222d471b4fb3d97f7387aad6de8767fb73001",
+        "description": "compiler/nir: add texcoord replace lowering pass",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "92ff89f6f50c773f6d3531623db2997315d63c22",
+        "description": "mesa/main: remove leftover bumpmap code",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "4000c0112a49c28793844f454278b50e00943173"
+    },
+    {
+        "sha": "9c65f1f11115248c672ddc2595434c3e9ac2ec3a",
+        "description": "radv: synchronize Cmd{Set,Write}Event() using PS_DONE/CS_DONE events",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "bb8f87088cb2868d267f83c537b33c9f3e0ed36e",
+        "description": "radv,aco: fix shifting input VGPRs for the LS VGPR init bug on GFX9",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6b233b95360de97e1c1de58b291be700b2bfb79c",
+        "description": "docs/zink: correct vk version for GL 4.2",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "fb65285629caa14580ff8e2c2eed88226da239fe"
+    },
+    {
+        "sha": "b7c31874206d63df4963caa7bd586706d8fe1b57",
+        "description": "docs/features: mark off two more extensions for zink",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b59d98ae5f2a1caf45b704efaaaaafd333236bc3",
+        "description": "zink: enable PIPE_CAP_TEXTURE_MIRROR_CLAMP_TO_EDGE",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b7fe85e94992131ce1a5a4baea0dfbe240a7505e",
+        "description": "zink: set lower_mul_2x32_64 when 64bit int support is available",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f03c20ffae8e022dfd74a8a2704a3a759fa92c80",
+        "description": "aco: fix WQM for texture instructions with args before the coordinates",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "4015b3651acec7279feaddfb9a6ea3fcb42ce907"
+    },
+    {
+        "sha": "b415211ce9c20941eb2b80a7b1b996742d891f2a",
+        "description": "zink: add a VkExternalMemoryImageCreateInfo for PIPE_BIND_SHARED images",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7f1ad0538f2d05cb7a632db439f5a5827987d4d8",
+        "description": "radv: enable sparseImageInt64Atomics/sparseImageFloat32Atomics",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cf5df156224e3fb78fa8e80065dabce22900d1d8",
+        "description": "ntt: Assume that nir_tex_instr::dest_type is sized",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ae7a9d0585ac3b5eb439fa203687ba4889a7286f",
+        "description": "ir3: Assume that nir_tex_instr::dest_type is sized",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5c92b3c460b87dda5ee87a1b196466a0f42e1cf3",
+        "description": "panfrost: Assume that nir_tex_instr::dest_type is sized",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6ca1ab3bb4902d3c86f83e83e065b0f1a2bd79ff",
+        "description": "nir/lower_tex: Assume that nir_tex_instr::dest_type is sized",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "708c47e663be686b150c1dae33fee5b8323c8d1b",
+        "description": "nir: Validate nir_tex_instr::dest_type bitsize",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "65a35dc7ea85fa9859dbd729cc0d874d9861ade3",
+        "description": "ptn: Use sized types for nir_tex_instr::dest_type",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6af5181f137c7fa54d9ed64ba2989a37f992620b",
+        "description": "vtn: Use sized types for nir_tex_instr::dest_type",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d5e54c6edb8e60b038a3bb50df5b7d6f5391e27e",
+        "description": "glsl/nir: Use sized types for nir_tex_instr::dest_type",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "60bb3fec54f1eccbe0f43ba61d02a78fb883347b",
+        "description": "st/atifs: Use sized types for nir_tex_instr::dest_type",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "81336499181058b0b7c1a6424a6185113148ac0f",
+        "description": "ttn: Use sized types for nir_tex_instr::dest_type",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4b623afc3f7830bb3a3f303cee87e7f8a1b32a1b",
+        "description": "gallium/nir: Use sized types for nir_tex_instr::dest_type",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ff0b7e0da93624f3727804927cdf92c4e3cce74e",
+        "description": "st/mesa: Use sized types for nir_tex_instr::dest_type",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b2da598ff90fdd64ca72bb03bf269e53ee0b1f21",
+        "description": "nir: Use sized types for nir_tex_instr::dest_type",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3ed9e75868e99668e96e0c2d5a7142d554cc85f7",
+        "description": "d3d12/blit: Use sized types for nir_tex_instr::dest_type",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f0cb161e786d8e5900648731274b09a24a45fef4",
+        "description": "panfrost/blit: Use sized types for nir_tex_instr::dest_type",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c81389ace0acb9ea2fa84eae754fa58748c4fb19",
+        "description": "dxil: Use sized types for nir_tex_instr::dest_type",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5c41a416c10e08ee3e168bb9d17e7f723e32d1cd",
+        "description": "anv: Use sized types for nir_tex_instr::dest_type",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "fe45fefe57db43925ac5ec943c20967c52c2f8a9",
+        "description": "intel/blorp: Use sized types for nir_tex_instr::dest_type",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2a470ab0d02e3d30dcf5c894086e67011dca34bb",
+        "description": "v3dv/meta: Use sized types for nir_tex_instr::dest_type",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "219b84fd5fd1984fb16d5888b05405549c2fe927",
+        "description": "radv/meta: Use sized types for nir_tex_instr::dest_type",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "68969cbcb73c5a99001d4238624b9a30f6ed8b85",
+        "description": "brw/vec4: Don't convert tex dest type to glsl_type",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3d803893da5b9ce06f8963ac8103d220b85f7e87",
+        "description": "nir/lower_bool: Rewrite dest_type for boolean destinations",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3d6fe93382699a61911e979db46c1297865c508b",
+        "description": "ntt: Handle sized tex destination types",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "23beffadea137f4d7ee4928f2b9d7cf98c4e811e",
+        "description": "freedreno/ir3: Handle sized tex destination types",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "acd6616eab8099f1d8f6692fdab26d64967767c1",
+        "description": "nir/lower_tex: Handle sized tex destination types",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "65f7b93435009e9f49668ce49561adabc44333ac",
+        "description": "intel: silence unused var warnings in release builds",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c196ffaca6d927e213d1c39ec9eed611fd01e2e1",
+        "description": "vk-device-select: add device group support",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "250b511f8e7c89933af25583398799d7bd61d944",
+        "description": "lima/ppir: fix creation of mov node for non-ssa tex dest",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b6f8f3a3ba4739338c75bf39f9ec3f77e20f544e",
+        "description": "zink: fix streamout for clipdistance",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "9eec52c67e61c2382490733d3aa3c585735814b5"
+    },
+    {
+        "sha": "f0b0095feca4d245d47dc94e86f57260d2c040c8",
+        "description": "ci/freedreno/a6xx: Skip vs-output-array-vec2-index-wr-before-gs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "03c28278a78d0251af940d888d9f36a66722e07a",
+        "description": "freedreno: Add perf_warn() for missed UBWC opportunities",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "55f4f6882fc815aac1cfe89946ada047e16794e5",
+        "description": "freedreno/a6xx: Add helper to check if UBWC is supported",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "38b073ebfef63d625ddf195b3ef8f11db8109e9f",
+        "description": "freedreno: Add fmt/args macros for pipe_resource",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a065682f3062f39c3d4a8d4ea65c8ddf5b58527d",
+        "description": "freedreno: Add perf_warn() trace helper",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d548d781eee91842695cf54a3161348bf6a06a2e",
+        "description": "glx: Provide glvnd wrapper for glXSwapIntervalEXT",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "60ebeb4608a871ba89ba081c1c6e7ebdd5efec9a"
+    },
+    {
+        "sha": "8588fb65d65879791f747aa1b00895491caa80d3",
+        "description": "vc4/ci: Replace expect script by python script",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "64fd191d8a88977067011d3727e32439e801d433",
+        "description": "spirv: handle NoContraction in GLSL450 alu ops",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3c3764f7df5ebc986657df97f06e78d990d888bf",
+        "description": "zink: don't force a renderpass start when setting framebuffer state",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2bc24c7e46587ba8c3931644b9f1ee7594ba7ca8",
+        "description": "zink: add function for waiting on a specific batch's fence",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "53d9beb9b883484b6de6ff4629179c4631ff17ca",
+        "description": "gallium/u_inlines: add helper for simplifying pipe_context::resource_copy_region",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cacb3e182671a90dba9fcbfbca5004180454a279",
+        "description": "zink: enable PIPE_CAP_SAMPLER_VIEW_TARGET",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "d37124b065c2b6c99c042fb402c6a23ce16b034e",
         "description": "virgl: add support for VIRGL_CAP_V2_UNTYPED_RESOURCE",
         "nominated": false,
