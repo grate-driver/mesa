@@ -1210,7 +1210,7 @@
         "description": "radv: move queue object to a common base object",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "9b1138e3f0e960119a46dc08794132719c93173e"
     },
