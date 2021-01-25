@@ -13945,7 +13945,7 @@
         "description": "aco: fix nir_intrinsic_ballot with wave32",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "21db083504fde3100f0b528f683a087357f5aaff"
     },
