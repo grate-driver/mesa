@@ -10516,7 +10516,7 @@
         "description": "panfrost: Fix tiler job injection (again)",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "2f1947b39ca5426f1bb501d22cf3dcae9ae411ea"
     },
