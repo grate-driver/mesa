@@ -256,7 +256,7 @@
         "description": "anv: Skip CCS ambiguate which preceed fast-clears",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "d5849bc840e5167b5b735d9e3f1ec1e8e1197c98"
     },
