@@ -202,7 +202,7 @@
         "description": "turnip: don't always use 3d ops for blit_image",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "872c4bcd27db7b7ca26abe9fc090ae26d502156f"
     },
