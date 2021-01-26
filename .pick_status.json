@@ -184,7 +184,7 @@
         "description": "radeonsi: fix centroid with VRS coarse shading",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "c3432ad852449ec31580a0b77af785e37eaa48f9"
     },
