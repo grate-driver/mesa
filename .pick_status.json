@@ -13162,7 +13162,7 @@
         "description": "i965: Don't parse driconf again",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "d67ef485804cab53499dd763db136070ef107a16"
     },
