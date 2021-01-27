@@ -1,5 +1,464 @@
 [
     {
+        "sha": "86ff78e8fe55b424c6b853ead6979bcd46820d81",
+        "description": "zink: don't export PIPE_CAP_MAX_COMBINED_SHADER_BUFFERS value",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b2dbe2b87b5e7a1a19c4a95d7cc5c8cef0ab10cc",
+        "description": "aco: implement non-uniform get_ssbo_size",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2f2a9f253e973f38a37a0491f87db64dc1026dc5",
+        "description": "radv,ac/nir: implement non-uniform get_ssbo_size",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "30f40364f6b2ba48f1dbe7b39ff8316dc2bb9fd5",
+        "description": "nir,spirv: allow non-uniform OpArrayLength",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b64fdefad5cda57a530d98000ae3f690ef7f417e",
+        "description": "panfrost: advertise images for midgard",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7584a25919a0ac015a6e1e8dc78c5c4326fa485a",
+        "description": "pan/mdg: implement nir_intrinsic_image_size",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8edccb7e8dd0dfc2e8b69ff158976eed0e90848f",
+        "description": "pan/mdg: implement shader image instructions",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a14f825126b89a96a1d9d112fe0a6e62f84fe97e",
+        "description": "pan/mdg: rename st_image opcodes and add float16 versions",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "45095c42ac03e94b1969e849d2f4075021594996",
+        "description": "pan/mdg: add ld_image opcodes",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8cfedd36ba407ec25d222c36b03a0d4c9a033ed0",
+        "description": "pan/mdg: enable image bitsize lowering pass",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "db725e1d52a64646c32d5a6159fd6beb526d3abf",
+        "description": "pan/mdg: create nir pass to lower image coord bitsize",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0efe7a6eb909b47fb24a7e15edcf4ee0d01cfd95",
+        "description": "panfrost: implement image_size sysval",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "dc85f65e059d3c603210bc3a0d93c34bdcdd6d17",
+        "description": "panfrost: emit shader image attribute descriptors",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0b9b0ee5321d9b483ed3c734b97135d04d039f18",
+        "description": "panfrost: implement gallium->set_shader_images",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f63a35baee5101cf999a2fd96420c4148984df51",
+        "description": "panfrost: add resource modifier conversion",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c7c4fbc823053740b1bab0bb7c3a2eef3ccbce86",
+        "description": "panfrost: decode 3d attribute continuation",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2638f72d2df50630957912a68093bdf069b0d429",
+        "description": "panfrost: add 3d attribute buffer continuation to XML",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a36c95cd779aec802d4ed07cf69140cddedaf1cf",
+        "description": "panfrost: fix attribute continuation decoding",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2fc5411e5ef89d26dc9c9c35f29836b7381c5df0",
+        "description": "intel/perf: export information about units of performance counters",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5fdc298e4b144df462c9986990a3bebac7eef1a8",
+        "description": "aco/ra: Remove preprocessor guards for print_regs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3675aefa84e363d820a3e596b9f2795a0d51c39f",
+        "description": "aco/ra: Fix build with print_regs enabled",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b241a050dae5ef8dbbcd8e43806dafa21b1125f5",
+        "description": "aco/ra: Fix print_regs using the wrong constant to check for blocked slots",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "26c9574bdb16d7f6cbe06cd5ef5d1ce258afc1ba",
+        "description": "intel: change urb max shader geometry for KBL GT1",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "741c0b160563f8afe87654291d41e6cbebb9d8b5",
+        "description": "radv: enable TC-compat HTILE for mipmaps on GFX10+",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5417c6690e1013425500a6959c51c2157a97a565",
+        "description": "radv: teach radv_htile_enabled() about the number of HTILE levels",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "13f34e65baf5dbae08106b3c9320e891acaf2fec",
+        "description": "radv: add support for fast clearing levels of the HTILE buffer",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6576033b20bdaffddcccc5ded7103d892f777738",
+        "description": "radv: remove mipmaps related assertions when initializing HTILE",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d47b13c0285555236ada0c40b2eb1d89a4762094",
+        "description": "radv: do not decompress/resummarize levels without HTILE",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e7d898a26891a29518992fc137763d9fe77d1b0a",
+        "description": "radv: check if HTILE is enabled per-level instead of the entire image",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8f1db7401a1e1a3fd48d682787f4c9ffc0421eff",
+        "description": "radv: use the image view range when fast clearing depth",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8087202a6555218b647089016981ce0bb3a858b2",
+        "description": "ac/surface: store HTILE mip info into the surface",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2f5ef1e8915bf661688edde26a3198e06cbcaf1b",
+        "description": "CI: add lavapipe to llvmpipe rules.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "34e3e164936d1d3cef267da7780e87f062fedf39",
+        "description": "lavapipe: add VK_EXT_conditional_rendering support.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9cc332884221102c1f4a6f75e6c666d369236d53",
+        "description": "llvmpipe: handle vulkan conditional rendering",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "86328fc7b700f6e93d2f569fbfffc992954f855f",
+        "description": "gallium: add a cond rendering hook for vulkan.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a57361ae02807207948fc1e9b2734caf1747178e",
+        "description": "lavapipe: rewrite attachment clearing for conditional rendering.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4be0e92db10584bc3526884b92aa483458aa93af",
+        "description": "lavapipe: refactor image surface creation",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0f178290caf6ee7ea33ef3293fc953870f4a6c5c",
+        "description": "aco: don't affect isPrecise() after applying output modifiers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "40d6b92de9432137db4799d482afe7ae5ad52ae8",
+        "description": "iris: Disable aux as needed in iris_flush_resource",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b26f510978d3695dcede49892d6702a605cfbcc5",
+        "description": "gallium: Flush GL API resources in eglCreateImage",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0a8cc882024c6c03c96e639ea827361e3be9c92e",
+        "description": "gallium: Map _DRI_IMAGE_FORMAT_NONE to NULL",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6c9aca951c2cf5be423348f1aebf3a444fbfe5c3",
+        "description": "st/drawpixels: use GL_CLAMP_TO_EDGE instead of GL_CLAMP for samplers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "66bb4277622c465a88c81b907dd5e9f84d307ebb",
+        "description": "st/bitmap: use GL_CLAMP_TO_EDGE for bitmap samplers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b06609e90324e8c445eb71eec39158a893c574c3",
+        "description": "aco: fix nir_intrinsic_ballot with wave32",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "21db083504fde3100f0b528f683a087357f5aaff"
+    },
+    {
+        "sha": "c02b6822047be37f2b4c95e04b771e126e341fb4",
+        "description": "ci: Add nouveau chipset 162 to shader-db runs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9f3d5e99ea601ae4bc492ff47738290eed520651",
+        "description": "compiler: Use util/bitset.h for system_values_read",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ecd0ae09f90756d3b0b13bec517a3d02f5578eab",
+        "description": "nir/linking: Remove system_value handling from helper",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4fdd8b09bd629ef53dfbfde6da729c37dfc0eef4",
+        "description": "ci/freedreno: Ban vs-clip-vertex-enables which flakes in CI.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ce1bb26b0601fa0f39a471cb80d2d46329549eca",
+        "description": "ci/freedreno: Detect cheza HFI errors and restart the run.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4c3ad4d06588dcc8f5c4d9e27c746055a013f358",
+        "description": "nir/algebraic: mark more optimization with fsat(NaN) as inexact",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "bc123c396a99b2f6ff845792374d6a8d5de5d15e"
+    },
+    {
+        "sha": "3c03fa5801ceccd2f9e408cc42f1dfad57b234d9",
+        "description": "radv: Only enable sparse features on Polaris and newer.",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "9f43b44bf06c61735dbab7e8e508642315bd93d1"
+    },
+    {
         "sha": "f01ea0aef8a50d2732eb0c64153903e52ed2a757",
         "description": "radv: remove unused EMPTY constant in radv_descript_set.c",
         "nominated": false,
