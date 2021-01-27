@@ -1417,7 +1417,7 @@
         "description": "glthread: fix interpreting vertex size == GL_BGRA for vertex attribs",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "c9c9f57b022ab47251c260825e81241fdad9b3ea"
     },
