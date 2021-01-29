@@ -2551,7 +2551,7 @@
         "description": "drisw: Disable automatic use of layered drivers with LIBGL_ALWAYS_SOFTWARE",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "4a3b42a717ce4fa4450066352f04f2e1ef78ad9a"
     },
