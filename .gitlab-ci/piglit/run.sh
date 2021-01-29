@@ -154,8 +154,6 @@ if [ "x$PIGLIT_PROFILES" = "xreplay" ] \
     __MINIO_PATH="$PIGLIT_REPLAY_ARTIFACTS_BASE_URL"
     __MINIO_TRACES_PREFIX="traces"
 
-    ci-fairy minio cp "$RESULTS"/junit.xml \
-        "minio://${MINIO_HOST}${__MINIO_PATH}/${__MINIO_TRACES_PREFIX}/junit.xml"
     ci-fairy minio cp "$RESULTS"/results.json.bz2 \
         "minio://${MINIO_HOST}${__MINIO_PATH}/${__MINIO_TRACES_PREFIX}/results.json.bz2"
 
@@ -175,11 +173,21 @@ if [ "x$PIGLIT_PROFILES" = "xreplay" ] \
         else
             __MINIO_PATH="$PIGLIT_REPLAY_ARTIFACTS_BASE_URL"
             __DESTINATION_FILE_PATH="$__MINIO_TRACES_PREFIX/${line##*-}"
+            # Adding to the JUnit the direct link to the diff page in
+            # the dashboard
+            __PIGLIT_TESTCASE_CLASSNAME="piglit\.trace\.$PIGLIT_REPLAY_DEVICE_NAME\.$(dirname $__TRACE | sed 's%/%\\.%g;s@%@\\%@')"
+            __PIGLIT_TESTCASE_NAME="$(basename $__TRACE | sed 's%\.%_%g;s@%@\\%@')"
+            __DASHBOARD_URL="https://tracie.freedesktop.org/dashboard/imagediff/${CI_PROJECT_PATH}/${CI_JOB_ID}/${__TRACE}"
+            sed '\%<testcase classname="'"${__PIGLIT_TESTCASE_CLASSNAME}"'" name="'"${__PIGLIT_TESTCASE_NAME}"'" status="fail"%,\%</system-out><failure type="fail"/></testcase>%{s%</system-out><failure type="fail"/></testcase>%</system-out><failure type="fail">To view the image differences visit: '"${__DASHBOARD_URL}"'</failure></testcase>%}' \
+                -i "$RESULTS"/junit.xml
         fi
 
         ci-fairy minio cp "$RESULTS/$__PREFIX/$line" \
             "minio://${MINIO_HOST}${__MINIO_PATH}/${__DESTINATION_FILE_PATH}"
     done
+
+    ci-fairy minio cp "$RESULTS"/junit.xml \
+        "minio://${MINIO_HOST}${__MINIO_PATH}/${__MINIO_TRACES_PREFIX}/junit.xml"
 fi
 
 cp "$INSTALL/piglit/$PIGLIT_RESULTS.txt" \
@@ -194,9 +202,9 @@ if [ ${PIGLIT_HTML_SUMMARY:-1} -eq 1 ]; then
 
     if [ "x$PIGLIT_PROFILES" = "xreplay" ]; then
         find "$OLDPWD"/summary -type f -name "*.html" -print0 \
-            | xargs -0 sed -i 's@<img src="file://'"${RESULTS}"'@<img src="https://'"${MINIO_HOST}${PIGLIT_REPLAY_ARTIFACTS_BASE_URL}"'@g'
+            | xargs -0 sed -i 's%<img src="file://'"${RESULTS}"'.*-\([0-9a-f]*\)\.png%<img src="https://'"${MINIO_HOST}${PIGLIT_REPLAY_ARTIFACTS_BASE_URL}"'/traces/\1.png%g'
         find "$OLDPWD"/summary -type f -name "*.html" -print0 \
-            | xargs -0 sed -i 's@<img src="file://@<img src="https://'"${MINIO_HOST}${PIGLIT_REPLAY_REFERENCE_IMAGES_BASE_URL}"'/@g'
+            | xargs -0 sed -i 's%<img src="file://%<img src="https://'"${MINIO_HOST}${PIGLIT_REPLAY_REFERENCE_IMAGES_BASE_URL}"'/%g'
     fi
 fi
 
