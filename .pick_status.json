@@ -2974,7 +2974,7 @@
         "description": "panfrost: Add panfrost_sample_pattern helper",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": null
     },
