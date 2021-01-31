@@ -166,7 +166,7 @@
         "description": "mesa: Remove _mesa_destroy_context()",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "55e853d823e860dd232a8be0378bd0519e35b6bd"
     },
