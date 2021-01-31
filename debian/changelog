@@ -5,6 +5,8 @@ mesa (20.3.4-1) UNRELEASED; urgency=medium
 
   [ Timo Aaltonen ]
   * New upstream release.
+  * lavapipe-Defer-lavapipe-warning-to-CreateDevice.patch: Dropped,
+    upstream.
 
  -- keithp <keithp@keithp.com>  Tue, 19 Jan 2021 17:28:10 -0800
 
