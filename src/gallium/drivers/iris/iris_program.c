@@ -1541,7 +1541,7 @@ iris_update_compiled_tes(struct iris_context *ice)
 
    /* TODO: Could compare and avoid flagging this. */
    const struct shader_info *tes_info = &ish->nir->info;
-   if (tes_info->system_values_read & (1ull << SYSTEM_VALUE_VERTICES_IN)) {
+   if (BITSET_TEST(tes_info->system_values_read, SYSTEM_VALUE_VERTICES_IN)) {
       ice->state.stage_dirty |= IRIS_STAGE_DIRTY_CONSTANTS_TES;
       ice->state.shaders[MESA_SHADER_TESS_EVAL].sysvals_need_upload = true;
    }
@@ -2109,8 +2109,8 @@ iris_get_scratch_space(struct iris_context *ice,
     * in the base configuration.
     */
    unsigned subslice_total = screen->subslice_total;
-   if (devinfo->gen >= 12)
-      subslice_total = devinfo->num_subslices[0];
+   if (devinfo->gen == 12)
+      subslice_total = (devinfo->is_dg1 || devinfo->gt == 2 ? 6 : 2);
    else if (devinfo->gen == 11)
       subslice_total = 8;
    else if (devinfo->gen < 11)
