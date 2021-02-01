@@ -1939,7 +1939,7 @@
         "description": "spirv: Create acceleration structure and shader record variables",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "10b3eecd361af465e0e207fb18553ae37b924c45"
     },
