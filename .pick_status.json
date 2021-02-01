@@ -11362,7 +11362,7 @@
         "description": "radv: Do not hash vk_object_base in descriptor set layout.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "178adfa6a8e5694a077c3e11fdcc5bc0802839ab"
     },
