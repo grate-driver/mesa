@@ -4,7 +4,7 @@
         "description": "i965: use aligned malloc for context instead of ralloc",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "3175b63a0dfa290430f9f7eb651387788933a02b"
     },
