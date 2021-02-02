@@ -382,7 +382,7 @@
         "description": "nir: Drop the lower_mem_constant_vars declaration",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "c730ace12b51d46585fac6710fbe57dccd67071c"
     },
