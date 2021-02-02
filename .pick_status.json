@@ -2362,7 +2362,7 @@
         "description": "panfrost: Fix a polygon list corruption in the multi-context case",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "d8deb1eb6a2244e765a1789c87b32ff43bd5349c"
     },
