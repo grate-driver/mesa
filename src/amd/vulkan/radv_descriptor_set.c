@@ -883,6 +883,8 @@ static void write_texel_buffer_descriptor(struct radv_device *device,
 
 	if (!buffer_view) {
 		memset(dst, 0, 4 * 4);
+		if (!cmd_buffer)
+			*buffer_list = NULL;
 		return;
 	}
 
@@ -904,6 +906,8 @@ static void write_buffer_descriptor(struct radv_device *device,
 
 	if (!buffer) {
 		memset(dst, 0, 4 * 4);
+		if (!cmd_buffer)
+			*buffer_list = NULL;
 		return;
 	}
 
@@ -968,6 +972,7 @@ static void write_dynamic_buffer_descriptor(struct radv_device *device,
 
 	if (!buffer) {
 		range->va = 0;
+		*buffer_list = NULL;
 		return;
 	}
 
@@ -1003,6 +1008,8 @@ write_image_descriptor(struct radv_device *device,
 
 	if (!iview) {
 		memset(dst, 0, size);
+		if (!cmd_buffer)
+			*buffer_list = NULL;
 		return;
 	}
 
