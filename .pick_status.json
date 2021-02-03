@@ -8959,7 +8959,7 @@
         "description": "radv: zero the bo descriptor array when allocating a new set",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "126d5adb11e18a329e197db8f117b47bba30eeed"
     },
