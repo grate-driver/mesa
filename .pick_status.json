@@ -1903,7 +1903,7 @@
         "description": "nir/algebraic: Fix a >> #b << #b for sizes other than 32-bit",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "00b28a50b2c492eee25ef3f75538aabe1e569ff1"
     },
