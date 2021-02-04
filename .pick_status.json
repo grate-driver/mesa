@@ -1957,7 +1957,7 @@
         "description": "nouveau: reinstate fencing on screen destroy",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "28a781323fba87e6e338cfecb0b6fe25a08f61a4"
     },
