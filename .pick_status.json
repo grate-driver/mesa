@@ -3271,7 +3271,7 @@
         "description": "d3d12: Fail screen creation if a shader validator is needed and can't be created",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "2ea15cd661c8355e8e35624eba0bf10cbcd57f61"
     },
