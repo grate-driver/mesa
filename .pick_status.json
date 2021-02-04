@@ -3145,7 +3145,7 @@
         "description": "st/mesa: fix PBO download for TEXTURE_1D_ARRAY textures",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "a01ad3110a92e88f815242b59ad1da6d2623decc"
     },
