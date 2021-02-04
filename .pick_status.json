@@ -3280,7 +3280,7 @@
         "description": "wgl: Add a loop for screen creation with an ordered list of fallbacks",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "8955980f17f902d24c50962502a20285dcd11642"
     },
