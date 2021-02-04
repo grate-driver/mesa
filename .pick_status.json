@@ -3478,7 +3478,7 @@
         "description": "nir: Don't optimize bcsel-of-shuffle across blocks",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "4ff4d4e56966a40bff83d1813e3a308cff38736e"
     },
