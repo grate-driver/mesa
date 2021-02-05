@@ -3226,7 +3226,7 @@
         "description": "aco: fix shared VGPR allocation on RDNA2",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "14a5021aff661a26d76f330fec55d400d35443a8"
     },
