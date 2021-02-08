@@ -4117,7 +4117,7 @@
         "description": "tgsi_to_nir: Fix uniform ranges.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "f3b33a5a35e605101d45213bddf52f2f800a52bb"
     },
