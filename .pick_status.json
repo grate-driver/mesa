@@ -1066,7 +1066,7 @@
         "description": "radv: Fix vram override with fully visible VRAM.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "cf2eebdf4f1eff4eaad30e6f62e026d8fbbe4ff5"
     },
