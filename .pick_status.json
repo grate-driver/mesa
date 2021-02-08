@@ -1039,7 +1039,7 @@
         "description": "panfrost: Only add resource checksum BOs to the batch once",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "cbf68b21fb2b6baf4578c98dd7e91855aa6dfa62"
     },
