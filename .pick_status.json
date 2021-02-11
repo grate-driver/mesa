@@ -6205,7 +6205,7 @@
         "description": "disk_cache: Fail creation when cannot inizialize queue.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "e2c4435b078a1471b044219552873a54b1817bac"
     },
