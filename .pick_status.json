@@ -1264,7 +1264,7 @@
         "description": "pan/bi: Use the correct size for UBO loads",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "2e57684d2d3ec6ddf5f0e1158af549983c306a3c"
     },
