@@ -6826,7 +6826,7 @@
         "description": "glsl: fix leak in gl_nir_link_uniform_blocks",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "5723919282c32bdacb68ef8d68f2132732e69017"
     },
