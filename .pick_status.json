@@ -5944,7 +5944,7 @@
         "description": "radv: Ignore WC flags for VRAM.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "7262c743dc84d4efa778658bb77b10850c29e014"
     },
