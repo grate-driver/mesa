@@ -993,18 +993,24 @@ anv_queue_submit(struct anv_queue *queue,
       }
 
       case ANV_SEMAPHORE_TYPE_TIMELINE:
+         assert(in_values);
+         if (in_values[i] == 0)
+            break;
          result = anv_queue_submit_add_timeline_wait(submit, device,
                                                      &impl->timeline,
-                                                     in_values ? in_values[i] : 0);
+                                                     in_values[i]);
          if (result != VK_SUCCESS)
             goto error;
          break;
 
       case ANV_SEMAPHORE_TYPE_DRM_SYNCOBJ_TIMELINE:
+         assert(in_values);
+         if (in_values[i] == 0)
+            break;
          result = anv_queue_submit_add_syncobj(submit, device,
                                                impl->syncobj,
                                                I915_EXEC_FENCE_WAIT,
-                                               in_values ? in_values[i] : 0);
+                                               in_values[i]);
          if (result != VK_SUCCESS)
             goto error;
          break;
@@ -1057,17 +1063,23 @@ anv_queue_submit(struct anv_queue *queue,
       }
 
       case ANV_SEMAPHORE_TYPE_TIMELINE:
+         assert(out_values);
+         if (out_values[i] == 0)
+            break;
          result = anv_queue_submit_add_timeline_signal(submit, device,
                                                        &impl->timeline,
-                                                       out_values ? out_values[i] : 0);
+                                                       out_values[i]);
          if (result != VK_SUCCESS)
             goto error;
          break;
 
       case ANV_SEMAPHORE_TYPE_DRM_SYNCOBJ_TIMELINE:
+         assert(out_values);
+         if (out_values[i] == 0)
+            break;
          result = anv_queue_submit_add_syncobj(submit, device, impl->syncobj,
                                                I915_EXEC_FENCE_SIGNAL,
-                                               out_values ? out_values[i] : 0);
+                                               out_values[i]);
          if (result != VK_SUCCESS)
             goto error;
          break;
