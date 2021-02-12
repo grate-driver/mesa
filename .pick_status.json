@@ -3253,7 +3253,7 @@
         "description": "zink: fix streamout for tess stage",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "2891e0b74e6c6dc4a93bc73536949dbb93c2bb50"
     },
