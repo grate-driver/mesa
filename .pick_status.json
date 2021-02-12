@@ -3298,7 +3298,7 @@
         "description": "pan/bi: Fix empty shader handling",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "bfcdc8f1747eabad57449a309be7160dd27605ac"
     },
