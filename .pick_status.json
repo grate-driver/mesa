@@ -1534,7 +1534,7 @@
         "description": "zink: fix slot mapping for legacy gl io with tess stages",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "aec03553e1bec8ac4c026b977006d7661879b277"
     },
