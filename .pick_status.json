@@ -3046,7 +3046,7 @@
         "description": "intel/anv: Fix condition to set MipModeFilter for YUV surface",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "b24b93d58431a4349eecddb07304f6eda648e997"
     },
