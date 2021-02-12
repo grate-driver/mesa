@@ -6088,7 +6088,7 @@
         "description": "anv: Allow null handle in DestroyDescriptorUpdateTemplate.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "af5f13e58c9dfe3a54487a3b002370c1edd39cf3"
     },
