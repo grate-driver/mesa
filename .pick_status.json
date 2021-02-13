@@ -355,7 +355,7 @@
         "description": "intel/compiler: Make the CMPN builder work like the CMP builder",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "2f2c00c7279e7c43e520e21de1781f8cec263e92"
     },
