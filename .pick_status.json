@@ -3442,7 +3442,7 @@
         "description": "etnaviv: Fix memory leak in etna_vertex_elements_state_create.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "c9e8b49b885242d84ba031dacef5aa4a5ac1e5b6"
     },
