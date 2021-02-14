@@ -1111,7 +1111,7 @@
         "description": "aco: Initialize ds_state.front.writeMask.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "d488d0fd7baff77204dbd3fd0d625b5974728534"
     },
