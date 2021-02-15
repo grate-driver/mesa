@@ -1525,7 +1525,7 @@
         "description": "zink: handle 1bit undef values in ntv",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "93af00502ebc32061c63927815d0d2255fe66a98"
     },
