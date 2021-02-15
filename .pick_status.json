@@ -211,7 +211,7 @@
         "description": "ir3: memory_barrier also controls shared memory access order",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "819a613ae33410584e13e78e78af82c71716f67d"
     },
