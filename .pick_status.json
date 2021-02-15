@@ -1903,7 +1903,7 @@
         "description": "freedreno: Add missing dep on freedreno tracepoints.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "a02dcb970fff17e73648b58bf4a603bc4f9c0c36"
     },
