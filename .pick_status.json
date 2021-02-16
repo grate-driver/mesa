@@ -3217,7 +3217,7 @@
         "description": "gallium/trace: add a pipe_screen::get_compiler_options method",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "a3512ddfdf7ff1dff0920568102bfaef99ab498e"
     },
