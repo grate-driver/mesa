@@ -1273,7 +1273,7 @@
         "description": "radv: Do pipe misalignment check per plane.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "4c99d6ff54b2614b46d7e2252aa6c71c46045c16"
     },
