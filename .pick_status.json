@@ -2920,7 +2920,7 @@
         "description": "intel/anv: Fix condition for planar yuv surface",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "226316116cd1e48a8f0734aa58669f98294d3d19"
     },
