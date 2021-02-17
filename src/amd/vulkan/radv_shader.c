@@ -1199,6 +1199,10 @@ radv_shader_variant_create(struct radv_device *device,
 			unsigned alloc_granularity = device->physical_device->rad_info.chip_class >= GFX7 ? 512 : 256;
 			config.lds_size = align(rtld_binary.lds_size, alloc_granularity) / alloc_granularity;
 		}
+		if (!config.lds_size && binary->stage == MESA_SHADER_TESS_CTRL) {
+			/* This is used for reporting LDS statistics */
+			config.lds_size = binary->info.tcs.num_lds_blocks;
+		}
 
 		variant->code_size = rtld_binary.rx_size;
 		variant->exec_size = rtld_binary.exec_size;

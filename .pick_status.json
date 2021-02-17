@@ -67,7 +67,7 @@
         "description": "radv/llvm: Fix reporting LDS stats of tess control shaders.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "cf89bdb9ba9c7a7ba39d142ee3c83e0379c2092a"
     },
