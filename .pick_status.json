@@ -3793,7 +3793,7 @@
         "description": "pan/bi: Use explicit move even for RT#0 of MRT",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "a6f1500bedd2ceaacdc95c7e7b04fc9b4d32f7f5"
     },
