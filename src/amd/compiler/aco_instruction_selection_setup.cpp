@@ -490,8 +490,7 @@ setup_tcs_info(isel_context *ctx, nir_shader *nir, nir_shader *vs)
 
    ctx->args->shader_info->tcs.num_patches = ctx->tcs_num_patches;
    ctx->args->shader_info->tcs.num_lds_blocks = lds_size;
-   ctx->program->config->lds_size = (lds_size + ctx->program->lds_alloc_granule - 1) /
-                                    ctx->program->lds_alloc_granule;
+   ctx->program->config->lds_size = lds_size; /* Already in blocks of the encoding granule */
 }
 
 void
