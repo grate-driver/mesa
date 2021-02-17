@@ -931,7 +931,7 @@
         "description": "intel/isl: Fix HiZ+CCS comment about ambiguates",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "98dc7f56b7d17cd56ab43768058a8d9c5a8f2e0f"
     },
