@@ -30,8 +30,6 @@ dEQP-VK.memory_model.message_passing.core11.u32.coherent.fence_fence.atomicwrite
 dEQP-VK.memory_model.write_after_read.core11.u32.coherent.fence_fence.atomicwrite.device.payload_local.buffer.guard_local.image.comp,Crash
 dEQP-VK.memory_model.write_after_read.core11.u32.coherent.fence_fence.atomicwrite.workgroup.payload_local.image.guard_local.image.comp,Crash
 dEQP-VK.memory_model.write_after_read.core11.u32.coherent.fence_fence.atomicwrite.workgroup.payload_nonlocal.workgroup.guard_local.image.comp,Crash
-dEQP-VK.multiview.masks.max_multi_view_view_count,Fail
-dEQP-VK.multiview.renderpass2.masks.max_multi_view_view_count,Fail
 dEQP-VK.pipeline.extended_dynamic_state.after_pipelines.depth_compare_greater_equal_greater,Fail
 dEQP-VK.pipeline.extended_dynamic_state.before_draw.depth_compare_always_greater,Fail
 dEQP-VK.pipeline.multisample.alpha_to_coverage_unused_attachment.samples_4.alpha_invisible,Fail
