@@ -4216,7 +4216,7 @@
         "description": "microsoft/clc: Let lower_vars_to_explicit_types fill kernel input driver_location",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "ff05da7f8dc4aa531704d48f718514e3b1fff45d"
     },
