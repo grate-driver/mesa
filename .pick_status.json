@@ -3343,7 +3343,7 @@
         "description": "radv: set correct value for OFFCHIP_BUFFERING on GFX10+",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "74d69299d167cdd88bf8582266ab4fa8b845f53e"
     },
