@@ -4189,7 +4189,7 @@
         "description": "microsoft/clc: Use driver_location for metadata instead of re-computing offsets",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "ff05da7f8dc4aa531704d48f718514e3b1fff45d"
     },
