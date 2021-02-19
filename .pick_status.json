@@ -769,7 +769,7 @@
         "description": "panfrost: Don't advertise OES_copy_image",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "61d3ae6e0bde93c5601278d1a60c44be655a7cb5"
     },
