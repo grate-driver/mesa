@@ -244,35 +244,45 @@ static struct drisw_loader_funcs lvp_sw_lf = {
    .put_image2 = lvp_put_image2,
 };
 
-VkResult lvp_EnumeratePhysicalDevices(
+static VkResult
+lvp_enumerate_physical_devices(struct lvp_instance *instance)
+{
+   VkResult result;
+
+   if (instance->physicalDeviceCount != -1)
+      return VK_SUCCESS;
+
+   /* sw only for now */
+   instance->num_devices = pipe_loader_sw_probe(NULL, 0);
+
+   assert(instance->num_devices == 1);
+
+   pipe_loader_sw_probe_dri(&instance->devs, &lvp_sw_lf);
+
+
+   result = lvp_physical_device_init(&instance->physicalDevice,
+                                     instance, &instance->devs[0]);
+   if (result == VK_ERROR_INCOMPATIBLE_DRIVER) {
+      instance->physicalDeviceCount = 0;
+   } else if (result == VK_SUCCESS) {
+      instance->physicalDeviceCount = 1;
+   }
+
+   return result;
+}
+
+VKAPI_ATTR VkResult VKAPI_CALL lvp_EnumeratePhysicalDevices(
    VkInstance                                  _instance,
    uint32_t*                                   pPhysicalDeviceCount,
    VkPhysicalDevice*                           pPhysicalDevices)
 {
    LVP_FROM_HANDLE(lvp_instance, instance, _instance);
    VkResult result;
-
-   if (instance->physicalDeviceCount < 0) {
-
-      /* sw only for now */
-      instance->num_devices = pipe_loader_sw_probe(NULL, 0);
-
-      assert(instance->num_devices == 1);
-
-      pipe_loader_sw_probe_dri(&instance->devs, &lvp_sw_lf);
-
-
-      result = lvp_physical_device_init(&instance->physicalDevice,
-                                        instance, &instance->devs[0]);
-      if (result == VK_ERROR_INCOMPATIBLE_DRIVER) {
-         instance->physicalDeviceCount = 0;
-      } else if (result == VK_SUCCESS) {
-         instance->physicalDeviceCount = 1;
-      } else {
-         return result;
-      }
-   }
-
+ 
+   result = lvp_enumerate_physical_devices(instance);
+   if (result != VK_SUCCESS)
+      return result;
+ 
    if (!pPhysicalDevices) {
       *pPhysicalDeviceCount = instance->physicalDeviceCount;
    } else if (*pPhysicalDeviceCount >= 1) {
@@ -283,6 +293,30 @@ VkResult lvp_EnumeratePhysicalDevices(
    }
 
    return VK_SUCCESS;
+}
+
+VKAPI_ATTR VkResult VKAPI_CALL lvp_EnumeratePhysicalDeviceGroups(
+   VkInstance                                 _instance,
+   uint32_t*                                   pPhysicalDeviceGroupCount,
+   VkPhysicalDeviceGroupProperties*            pPhysicalDeviceGroupProperties)
+{
+   LVP_FROM_HANDLE(lvp_instance, instance, _instance);
+   VK_OUTARRAY_MAKE_TYPED(VkPhysicalDeviceGroupProperties, out,
+                          pPhysicalDeviceGroupProperties,
+                          pPhysicalDeviceGroupCount);
+ 
+   VkResult result = lvp_enumerate_physical_devices(instance);
+   if (result != VK_SUCCESS)
+      return result;
+ 
+   vk_outarray_append_typed(VkPhysicalDeviceGroupProperties, &out, p) {
+      p->physicalDeviceCount = 1;
+      memset(p->physicalDevices, 0, sizeof(p->physicalDevices));
+      p->physicalDevices[0] = lvp_physical_device_to_handle(&instance->physicalDevice);
+      p->subsetAllocation = false;
+   }
+ 
+   return vk_outarray_status(&out);
 }
 
 void lvp_GetPhysicalDeviceFeatures(
