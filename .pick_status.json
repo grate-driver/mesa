@@ -2380,7 +2380,7 @@
         "description": "Revert \"glsl/test: Don't run whitespace tests in parallel\"",
         "nominated": true,
         "nomination_type": 2,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "c60cea0daa2b140547088188d90bce6f09bb1517"
     },
