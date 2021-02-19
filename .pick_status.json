@@ -12613,7 +12613,7 @@
         "description": "util/bitscan: add u_foreach_bit macros",
         "nominated": false,
         "nomination_type": null,
-        "resolution": 4,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": null
     },
