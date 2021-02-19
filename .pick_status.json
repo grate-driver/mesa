@@ -2596,7 +2596,7 @@
         "description": "panfrost: Raise TEXTURE_BUFFER_OFFSET_ALIGNMENT",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "5f7bafa316f60ff79b9839cf88142b33f330a8e7"
     },
