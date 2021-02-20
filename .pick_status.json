@@ -373,7 +373,7 @@
         "description": "meson: disable -Werror=thread-safety on FreeBSD",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "0d5fe24c9b7de15241727922e18c3ea08d11ef08"
     },
