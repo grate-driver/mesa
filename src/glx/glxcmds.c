@@ -1867,8 +1867,8 @@ glXSwapIntervalEXT(Display *dpy, GLXDrawable drawable, int interval)
       __glXSendError(dpy, BadValue, interval, 0, True);
       return;
    }
-
-   pdraw->psc->driScreen->setSwapInterval(pdraw, interval);
+   if (pdraw->psc->driScreen->setSwapInterval)
+      pdraw->psc->driScreen->setSwapInterval(pdraw, interval);
 #endif
 }
 
