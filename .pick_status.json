@@ -2047,7 +2047,7 @@
         "description": "aco/lower_phis: fix all_preds_uniform with continue_or_break",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "9a089baff1af757b1c0f033f4bb16cb2c8864271"
     },
