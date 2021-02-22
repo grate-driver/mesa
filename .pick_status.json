@@ -13,7 +13,7 @@
         "description": "anv: Fix wait_count missing increment",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "02f94c33066eff9e5de2077230affab1a1f3d063"
     },
