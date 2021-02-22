@@ -184,7 +184,7 @@
         "description": "iris: fix layer calculation for TEXTURE_3D ReadPixels() on mip-level>0",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "3c979b0e6d9e4d7a880cebcee514238ecb6baf61"
     },
