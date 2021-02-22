@@ -2326,7 +2326,7 @@
         "description": "anv: don't wait for completion of work on vkQueuePresent()",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "829699ba632b2b78e4de372baf42ae01095158a7"
     },
