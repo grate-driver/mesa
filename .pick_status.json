@@ -922,7 +922,7 @@
         "description": "radv: don't shrink image stores for The Surge 2",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "e4d75c22beba5533b499f7f8f8be6ab0a110ecbc"
     },
