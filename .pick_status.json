@@ -3964,7 +3964,7 @@
         "description": "android: pan/bi: reorder static dependencies in gallium/dri",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "166630f759246cc1a49ece8dc3feb4e3d6a777a2"
     },
