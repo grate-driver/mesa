@@ -733,7 +733,7 @@
         "description": "zink: fix streamout emission for super-enhanced layouts",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "1b130c42b8dbed3a7cabaf47e2695e7db8429b56"
     },
