@@ -1939,7 +1939,7 @@
         "description": "frontends/va: Use correct size for secondary planes.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "f7a4051b836294ab8f55c71d239e99c5cbf63170"
     },
