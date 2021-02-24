@@ -2389,7 +2389,7 @@
         "description": "util/u_queue: Ensure num_cpu_mask_bits is valid",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "d877451b48a59ab0f9a4210fc736f51da5851c9a"
     },
@@ -5359,7 +5359,7 @@
         "description": "tu: reset object base on recycled command buffers",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": null
     },
@@ -5368,7 +5368,7 @@
         "description": "radv: reset object base on recycled command buffers",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": null
     },
