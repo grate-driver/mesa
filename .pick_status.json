@@ -535,7 +535,7 @@
         "description": "radv: do not scale the depth bias for D16_UNORM depth surfaces",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": null
     },
