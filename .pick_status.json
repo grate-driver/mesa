@@ -337,7 +337,7 @@
         "description": "spirv: Fix handling of OpBranchConditional with same THEN and ELSE",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "9c2a11430e101b820ce8d605f3cc5b0593bb4c5e"
     },
