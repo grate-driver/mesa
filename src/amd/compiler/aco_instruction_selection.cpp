@@ -740,8 +740,10 @@ Temp convert_pointer_to_64_bit(isel_context *ctx, Temp ptr)
    if (ptr.size() == 2)
       return ptr;
    Builder bld(ctx->program, ctx->block);
-   if (ptr.type() == RegType::vgpr)
+   if (ptr.type() == RegType::vgpr) {
       ptr = bld.vop1(aco_opcode::v_readfirstlane_b32, bld.def(s1), ptr);
+      ptr = emit_wqm(ctx, ptr);
+   }
    return bld.pseudo(aco_opcode::p_create_vector, bld.def(s2),
                      ptr, Operand((unsigned)ctx->options->address32_hi));
 }
@@ -5700,8 +5702,10 @@ Temp get_sampler_desc(isel_context *ctx, nir_deref_instr *deref_instr,
             constant_index += array_size * const_value->u32;
          } else {
             Temp indirect = get_ssa_temp(ctx, deref_instr->arr.index.ssa);
-            if (indirect.type() == RegType::vgpr)
+            if (indirect.type() == RegType::vgpr) {
                indirect = bld.vop1(aco_opcode::v_readfirstlane_b32, bld.def(s1), indirect);
+               indirect = emit_wqm(ctx, indirect);
+            }
 
             if (array_size != 1)
                indirect = bld.sop2(aco_opcode::s_mul_i32, bld.def(s1), Operand(array_size), indirect);
