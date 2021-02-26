@@ -3154,7 +3154,7 @@
         "description": "aco: add missing usable_read2 check",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "57e6886f981ca629a863544df253b9ecb3604eec"
     },
