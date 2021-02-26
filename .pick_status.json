@@ -2056,7 +2056,7 @@
         "description": "etnaviv: don't try to copy PIPE_BUFFER with the 3D engine",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "c9e8b49b885242d84ba031dacef5aa4a5ac1e5b6"
     },
