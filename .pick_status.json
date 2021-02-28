@@ -382,7 +382,7 @@
         "description": "pipe-loader,gallium/drm: Fix the kmsro pipe_loader target",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "9ec28b8d226558aa2748dbf813b125f8938a09cc"
     },
