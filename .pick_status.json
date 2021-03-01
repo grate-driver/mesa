@@ -1633,7 +1633,7 @@
         "description": "mesa/st: clamp scissored clear regions to fb size",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "1c8bcad81a7ce106b37f1ee4a75b817651d6545e"
     },
