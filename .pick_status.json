@@ -1399,7 +1399,7 @@
         "description": "glsl/float64: Bump #version to 400",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "4d47b22bf007413274cabac264122ab7e428fe7d"
     },
