@@ -1759,7 +1759,7 @@
         "description": "panfrost/lcra: Fix constraint counting",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "66ad64d73d244501f5c70c742564cb5ab4fb56da"
     },
