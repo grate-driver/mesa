@@ -1129,7 +1129,7 @@
         "description": "tegra/context: fix regression in tegra_draw_vbo",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "abe8ef862fe5649e16ceed76f60a2a364949b7b4"
     },
