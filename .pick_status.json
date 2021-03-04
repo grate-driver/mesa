@@ -1570,7 +1570,7 @@
         "description": "aco: Fix vector::reserve() being called with the wrong size",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "7f1b537304d4837c907a9299dab3a7acf2518b0b"
     },
