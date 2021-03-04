@@ -220,7 +220,7 @@
         "description": "spirv: Ignore WorkgroupSize in non-compute stages",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "7d862ef53024b70458929c1665af43573b4d07ff"
     },
