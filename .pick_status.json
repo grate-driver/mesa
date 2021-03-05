@@ -1705,7 +1705,7 @@
         "description": "st/mesa: Update constants on alpha test change if it's lowered",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "b1c4c4c7f53cde52a8f3b3ec17cd66b89bf04199"
     },
