@@ -2128,7 +2128,7 @@
         "description": "aco: set compr for fp16 exports",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "f29c81f863c9879a6a87724cbdae1e1818f3f6b4"
     },
