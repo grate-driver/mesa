@@ -10364,6 +10364,7 @@ static bool export_fs_mrt_color(isel_context *ctx, int slot)
    unsigned target, col_format;
    unsigned enabled_channels = 0;
    aco_opcode compr_op = (aco_opcode)0;
+   bool compr = false;
 
    slot -= FRAG_RESULT_DATA0;
    target = V_008DFC_SQ_EXP_MRT + slot;
@@ -10418,7 +10419,7 @@ static bool export_fs_mrt_color(isel_context *ctx, int slot)
       for (int i = 0; i < 2; i++) {
          bool enabled = (write_mask >> (i*2)) & 0x3;
          if (enabled) {
-            enabled_channels |= 1 << i;
+            enabled_channels |= 0x3 << (i*2);
             if (is_16bit) {
                values[i] = bld.pseudo(aco_opcode::p_create_vector, bld.def(v1),
                                       values[i*2].isUndefined() ? Operand(v2b) : values[i*2],
@@ -10436,6 +10437,9 @@ static bool export_fs_mrt_color(isel_context *ctx, int slot)
             values[i] = Operand(v1);
          }
       }
+      values[2] = Operand(v1);
+      values[3] = Operand(v1);
+      compr = true;
       break;
 
    case V_028714_SPI_SHADER_UNORM16_ABGR:
@@ -10522,7 +10526,7 @@ static bool export_fs_mrt_color(isel_context *ctx, int slot)
          /* check if at least one of the values to be compressed is enabled */
          bool enabled = (write_mask >> (i*2)) & 0x3;
          if (enabled) {
-            enabled_channels |= 1 << (i*2);
+            enabled_channels |= 0x3 << (i*2);
             values[i] = bld.vop3(compr_op, bld.def(v1),
                                  values[i*2].isUndefined() ? Operand(0u) : values[i*2],
                                  values[i*2+1].isUndefined() ? Operand(0u): values[i*2+1]);
@@ -10532,13 +10536,14 @@ static bool export_fs_mrt_color(isel_context *ctx, int slot)
       }
       values[2] = Operand(v1);
       values[3] = Operand(v1);
-   } else {
+      compr = true;
+   } else if (!compr) {
       for (int i = 0; i < 4; i++)
          values[i] = enabled_channels & (1 << i) ? values[i] : Operand(v1);
    }
 
    bld.exp(aco_opcode::exp, values[0], values[1], values[2], values[3],
-           enabled_channels, target, (bool) compr_op);
+           enabled_channels, target, compr);
    return true;
 }
 
