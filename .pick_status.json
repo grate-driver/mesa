@@ -1120,7 +1120,7 @@
         "description": "tegra/context: unwrap indirect_draw_count as well",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "22f6624ed318e8131681ec1f2e7b3a59449df412"
     },
