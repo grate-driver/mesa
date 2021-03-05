@@ -2065,7 +2065,7 @@
         "description": "radv: don't set sx_blend_opt_epsilon for V_028C70_COLOR_10_11_11",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "ed9463815644c85c124c72111d96e256db2986b4"
     },
