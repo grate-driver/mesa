@@ -2461,7 +2461,7 @@
         "description": "intel/tools: Use subprocess.Popen to read output directly from a pipe",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "ccaa5b034f4845672e22c4bb990a8272a16da15e"
     },
