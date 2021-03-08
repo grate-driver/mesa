@@ -445,6 +445,9 @@ u_pipe_screen_get_param_defaults(struct pipe_screen *pscreen,
    case PIPE_CAP_SHADER_ATOMIC_INT64:
       return 0;
 
+   case PIPE_CAP_ALLOW_DYNAMIC_VAO_FASTPATH:
+      return 1;
+
    default:
       unreachable("bad PIPE_CAP_*");
    }
