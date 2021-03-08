@@ -1138,7 +1138,7 @@
         "description": "vulkan/device_select: Only call vkGetPhysicalDeviceProperties2 if the device supports it.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "38ce8d4d00c2b0e567b6dd36876cf171acb1dbc7"
     },
