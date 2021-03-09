@@ -1912,7 +1912,7 @@
         "description": "aco/tests: Use _exit in child process",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "6a246f5c6d51db1a91f4419871051f81d4b552d9"
     },
