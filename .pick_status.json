@@ -1633,7 +1633,7 @@
         "description": "ir3: fix has_src() to return correctly in ir3_nir_lower_tex_prefetch",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "2a0d45ae6cf09d60c048d7854e3d082bf15e374f"
     },
