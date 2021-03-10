@@ -2317,7 +2317,7 @@
         "description": "Revert \"glsl: default to compat shaders in compat profile\"",
         "nominated": true,
         "nomination_type": 2,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "6c8cc9be12dc5d6c0d2386d6addb69d8f2fb5399"
     },
