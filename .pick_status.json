@@ -2416,7 +2416,7 @@
         "description": "intel/fs: Handle payload node interference in destinations",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "d0d039a4d3f49f3cc89e167b46edae54cf32a6be"
     },
