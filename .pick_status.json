@@ -1,5 +1,14 @@
 [
     {
+        "sha": "ea27f2bf092f462171fe14a44619565d14f43fb8",
+        "description": "zink: Fix a thinko in instance setup",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "2b4fcf0a063f32d7000e9f4c6b8e398867d3b21c"
+    },
+    {
         "sha": "6ceb6b509e64c54812a5f6a208e7d93cc61119f4",
         "description": "turnip: Remove unused TU_DEBUG_IR3 flag",
         "nominated": true,
