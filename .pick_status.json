@@ -337,7 +337,7 @@
         "description": "i965/gen11: Fix must-be-ones bit positions in 3D_MODE",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "f0d29238df33d66ca4ee1e5f25a1edd9034f632e"
     },
