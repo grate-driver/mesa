@@ -9643,7 +9643,7 @@
         "description": "zink: unset generated TCS if its parent TESS is unset",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 3,
         "master_sha": null,
         "because_sha": "334759d8509b1ca3009edd0ad9b7caad3e12456e"
     },
