@@ -1570,7 +1570,7 @@
         "description": "glsl: fix declarations of gl_MaxVaryingFloats",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "0ebf4257a385972be0b6e851383ee6b728515aad"
     },
