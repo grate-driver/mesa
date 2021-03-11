@@ -11317,7 +11317,7 @@
         "description": "zink: VK_KHR_draw_indirect_count is a device extension",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 3,
         "master_sha": null,
         "because_sha": "1c01ad1b804a6c46d22775c1622de412eec50fa3"
     },
