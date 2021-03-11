@@ -76,7 +76,7 @@
         "description": "zink: Fix a thinko in instance setup",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 3,
         "master_sha": null,
         "because_sha": "2b4fcf0a063f32d7000e9f4c6b8e398867d3b21c"
     },
