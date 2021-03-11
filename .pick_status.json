@@ -1,5 +1,77 @@
 [
     {
+        "sha": "c22267262ee1b6817df368a51168fa82bd17293c",
+        "description": "vulkan: Use ALWAYS_INLINE for multialloc",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "145444d2651b3ff1c8d404a1927324add36c3942"
+    },
+    {
+        "sha": "96e251bde7b243e0b84292aa911ccf95be832a7a",
+        "description": "intel: Rename \"GEN_\" prefix used in common code to \"INTEL_\"",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "65d7f52098f062c372546170b4e355edbc264584",
+        "description": "intel: Fix broken alignment due to gen_ prefix renaming",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "692472a376c919d0eec07c04bdd1d1426252d8ca",
+        "description": "intel: Rename \"gen_\" prefix used in common code to \"intel_\"",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "733b0ee8cb750bd54e17891f0b26323dc088f325",
+        "description": "intel: Rename files with gen_ prefix in common code to intel_",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b9e9f92f73df91e0cb64094170ab3ba7fad16f07",
+        "description": "intel/fs: Handle payload node interference in destinations",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "d0d039a4d3f49f3cc89e167b46edae54cf32a6be"
+    },
+    {
+        "sha": "8b7c2f180013a1ec7d6efb88d82a17a2e076a701",
+        "description": "intel/fs: Use INTEL_MASK for pushish constant address masking",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "369f9d225db1c44bb1e942f4ad8fefd871b8cf28",
+        "description": "turnip: fix alpha to coverage in no color and unused attachment cases",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "ea27f2bf092f462171fe14a44619565d14f43fb8",
         "description": "zink: Fix a thinko in instance setup",
         "nominated": true,
