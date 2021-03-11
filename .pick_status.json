@@ -1,5 +1,563 @@
 [
     {
+        "sha": "38b2e137665f36f1b0fe58e40971548d9eafa865",
+        "description": "aco: remove vmem/smem score statistics",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a0243f5c4722959ae94f46f7e086bf466534f7c7",
+        "description": "aco: add ACO_DEBUG=perfinfo",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5d6a1095bfe1774d0b81819a75b8b7e672f9b1f7",
+        "description": "aco: add print option to print program without temporary IDs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "23ecceb160c7dd2e910c773813385487b1f67ca7",
+        "description": "aco: add latency and inverse throughput statistics",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "83ce9407f20e17b63252211b43db59a78de8c1f1",
+        "description": "aco: add instruction classes",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0af7ff49fdecd05531b4c4f5fb841e11f9f451c1",
+        "description": "aco: lower p_constaddr into separate instructions earlier",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ab957bb89978048baf92e46846c889fbaa998d95",
+        "description": "aco: move wait_imm to aco_ir.h",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7d5643c0fe43bc87f0d405e9ba667496cbea551a",
+        "description": "aco: track divergent and uniform branch depth",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8f71be0a7b91f71ccf4d88b4531198b079f6b027",
+        "description": "aco: simplify loop_nest_depth tracking in isel",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "442fbcdb475d01f9288d625c5947e9f6d8d1148c",
+        "description": "panfrost: Expose panfrost_modifier_to_layout()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "825b1f94464be7bfdbd2a3a1065ee72428c8dd58",
+        "description": "panfrost: Split the sampler and texture count",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b0f968cf5c99710b0e204ac59e87314f5cdbc60f",
+        "description": "panfrost: Don't count the special vertex/instance ID attributes on Bifrost",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7b9dfc502aad61d36a56ffa3eee82cda10aa82a2",
+        "description": "panfrost: Print the correct UBO size when dumping UBO information",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3559efb9bf5cb69c9ddad377ed121685954f10f1",
+        "description": "panfrost: Allow passing an explicit UBO index for the sysval UBO",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "92d9f090d9faa83a6f3215682f6b7a5a6844b160",
+        "description": "panfrost: Add a knob to disable the UBO -> push constants optimization",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2229328cf9213bfbfac2e0e5cc411a41bcaae695",
+        "description": "renderonly: close the gpu fd when destroying renderonly",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "187218395d7c9e8257ac17c7cbf1cc7add5c9363",
+        "description": "renderonly: remove layering violations",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5487847d8c75b40ef53d881c9abe0afcca378e26",
+        "description": "pan/bi: Implement u{add, sub}_sat",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3c7634f7d27c76eee0f11a3c1c2541a648bfdc6f",
+        "description": "pan/bi: Extend the bi_builder to support type variants correctly",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0113a0a1eed3aa23d3f4a9a95d90cb302608cfb5",
+        "description": "panfrost: Move pan_special_varying definition to pan_encoder.h",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1f99bba06e34574af8a7dc92dde3f70b1c70ad75",
+        "description": "panfrost: Add a pan_section_offset() helper",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1758da0a7e412fa6d6054ee2dcc5a17f69b5ef9c",
+        "description": "panfrost: Allow passing an explicit global dependency when queuing a job",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0bb091fd7c278802b343e8bd0f3ad08d88c2af0b",
+        "description": "panfrost: Add a parameter to suppress next job prefetching",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "00b85a0aafdd3c45a868bff277c271ad2fdd9c70",
+        "description": "panfrost: Split the direct and indirect draw logic",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "691c47dd6c0fcdab5be0f9684100224cc0eb34a3",
+        "description": "pan/bi: Move int64 lowering before idiv lowering",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f7bbfbaeb5694a238056d68a047f923470bcb8f0",
+        "description": "Revert \"pan/bi: Optimize out redundant jumps to #0x0\"",
+        "nominated": false,
+        "nomination_type": 2,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "a496b41d50589191ad2e37a17019aef0dafcb9f2"
+    },
+    {
+        "sha": "35fe62dad10cdeff0af39009185c85aa59db6a76",
+        "description": "radv/llvm: fix enabled_channels for compressed exports",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "341dd9d834c994d2ea4ccafeda058813a4ae4447",
+        "description": "aco: set compr for fp16 exports",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "f29c81f863c9879a6a87724cbdae1e1818f3f6b4"
+    },
+    {
+        "sha": "73a48600b4242ef50d22cd4fc51f5d71d3579e29",
+        "description": "meson: detect winflex/bison only on native win32",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e6a0f243ea1435e7435e78441184903e84fdcbdb",
+        "description": "radeonsi: update pipe_screen::num_contexts",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "981e55d5300f2bfb7e062d3c8807b9d7c37fd49d",
+        "description": "gallium: add pipe_screen::num_contexts for skipping mutex locking in util_range",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "728aa749ea7ff7212c2c7bc6ad6844dd2fa50436",
+        "description": "gallium/u_threaded: don't sync in create_stream_output_target",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c4e5beef076d42b66b7fefd4b74a759d69bd9f6a",
+        "description": "freedreno: threaded_context async flush support",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9dbe2405a3a697fed589b04a6ccb9e18a3d502a8",
+        "description": "freedreno: threaded_context support",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1a12d682a6e5af0b7c7f7548740722171e07a674",
+        "description": "freedreno: Check cb0 in rebind_resource()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "00eb60ee59eecf7b2a8a6d316c3e605c9dd91dbc",
+        "description": "freedreno/a6xx: Move UBWC demotion to first sampler view bind",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "acc2c015b3bcd674c872e9d25678304918c06f08",
+        "description": "freedreno: Add transfer_pool_unsync",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0c163e0a4531b5ad2e96a58fe19fbd1015ff79c9",
+        "description": "freedreno: Add fd_replace_buffer_storage()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "63649e4101bee68d733ea8c706fbe4ae6dc20ac4",
+        "description": "freedreno: Extract out helper for transfer-map flag munging",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4f07a24e41aead48885d8ee6083bd0168f5f347d",
+        "description": "freedreno: Extend threaded_transfer",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1017dc9f6e8f63658668e1b6557c7cf2226b79bf",
+        "description": "freedreno: Extend threaded_resource",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5fbaa8033b893bc30e02bf61e1b15be48bfafc1f",
+        "description": "freedreno: Restructure transfer_map()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "39d6343a3eb123f2c1b3005c0e8fee30b3d9e405",
+        "description": "freedreno: Split out batch/resource tracking",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f74ccde2c767b6e53e43ce9c0e189776301776b8",
+        "description": "freedreno: Factor out common fd_resource init",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "bcf4562528ee0d176923b33a3e8995d4d282477a",
+        "description": "freedreno: Fix u_blitter constant-buffer leak",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9425b1343ebb03431dd0aecf1e4f19ab5126b7f8",
+        "description": "gallium/u_threaded: use mesa_log for debug msgs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f2f72ec3fe2d830afac9990d39014fb2da3f2357",
+        "description": "gallium/u_threaded: Add helper to assert driver thread",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d2a920ee6ee060bc2ae0e5e355d61ad1bf1a3092",
+        "description": "util: Extract thread-id helpers from u_current",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1772569449c07979487f95e2ab1a73d22fde4b5e",
+        "description": "Revert \"glsl: default to compat shaders in compat profile\"",
+        "nominated": false,
+        "nomination_type": 2,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "6c8cc9be12dc5d6c0d2386d6addb69d8f2fb5399"
+    },
+    {
+        "sha": "217d6594dec934b4b34f5c7e0a0cd978339a5ba0",
+        "description": "gallium/indices: Use \"__restrict\" to help the compiler",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e7e297732ed56ce4869b2a0e2b5f0533be69f32e",
+        "description": "vulkan/alloc: Use char * for pointer arithmetic",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "492b5577f0037cb95f74f059c71b91c01349a0fa",
+        "description": "vulkan/util: Add a type parameter to vk_multialloc_add",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c120edd8e861985496e1054a84844641c10de643",
+        "description": "vulkan/alloc: Add VK_MULTIALLOC_DECL macros",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5afdbfe0c84896bc9cec74a5248f7201b5e91fbf",
+        "description": "vk/alloc: Handle zero sizes better in vk_multialloc_add",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c22267262ee1b6817df368a51168fa82bd17293c",
+        "description": "vulkan: Use ALWAYS_INLINE for multialloc",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "145444d2651b3ff1c8d404a1927324add36c3942"
+    },
+    {
+        "sha": "96e251bde7b243e0b84292aa911ccf95be832a7a",
+        "description": "intel: Rename \"GEN_\" prefix used in common code to \"INTEL_\"",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "65d7f52098f062c372546170b4e355edbc264584",
+        "description": "intel: Fix broken alignment due to gen_ prefix renaming",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "692472a376c919d0eec07c04bdd1d1426252d8ca",
+        "description": "intel: Rename \"gen_\" prefix used in common code to \"intel_\"",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "733b0ee8cb750bd54e17891f0b26323dc088f325",
+        "description": "intel: Rename files with gen_ prefix in common code to intel_",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b9e9f92f73df91e0cb64094170ab3ba7fad16f07",
+        "description": "intel/fs: Handle payload node interference in destinations",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "d0d039a4d3f49f3cc89e167b46edae54cf32a6be"
+    },
+    {
+        "sha": "8b7c2f180013a1ec7d6efb88d82a17a2e076a701",
+        "description": "intel/fs: Use INTEL_MASK for pushish constant address masking",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "369f9d225db1c44bb1e942f4ad8fefd871b8cf28",
+        "description": "turnip: fix alpha to coverage in no color and unused attachment cases",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "ea27f2bf092f462171fe14a44619565d14f43fb8",
         "description": "zink: Fix a thinko in instance setup",
         "nominated": false,
