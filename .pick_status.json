@@ -1,5 +1,257 @@
 [
     {
+        "sha": "4fdbc22c42dd4672e1660e7598dcd7874880b2f1",
+        "description": "docs: add notes about nvc0 support of ARB/EXT_texture_filter_minmax",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "987fef5f0ec5792dee840eaa9178fe84300543c2",
+        "description": "nvc0: enable minmax reductions on gm200+",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "41aad1c120c5c1b839c019d8469fb200c7d62458",
+        "description": "st/mesa: add EXT_texture_filter_minmax support",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6384dcaf7ce91df8936f798e86caa6810b0a2607",
+        "description": "mesa: add tracking of reduction mode",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7c999249efc381bec959a6273beb56f219b83a74",
+        "description": "gallium: add a sampler reduction cap + settings",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8016a098fcd494281522f48d69d99808d13773a1",
+        "description": "microsoft/spirv_to_dxil: Fix spirv2dxil I/O to use binary mode",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d4a51160ad346b22dc8a8e53c39665d5c03b3a7d",
+        "description": "util: Make os_read_file use O_BINARY on Windows",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5785fdac63228fe981f9be39ad7290800dee5d7f",
+        "description": "u_format: Mark the generated pack/unpack src/dst args as restrict.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d4b231bb800f63d7a174eb381b1ffbd2b9c90553",
+        "description": "intel/isl: Drop intel_ prefix in function names",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4e8618a33ce7211a86a8866bb0207d4c66eea8d0",
+        "description": "lavapipe: update features.txt",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f491d0cd3e7d129a04911113bb7d2003ffb1868e",
+        "description": "turnip: update features.txt",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "da7389eced0ea876f3d1210a10fa6e98b32ebba7",
+        "description": "nir/range_analysis: Simplify analysis of bcsel",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7019cd84c0ff2e3682c91cf2ab3a50c20226d024",
+        "description": "nir/search: Use range analysis for is_finite",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f4a7dbc58f884ea73c3f8fb0e64ed9c32ee9c07d",
+        "description": "nir/range_analysis: Fix analysis of fmin, fmax, or fsat with NaN source",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "405de7ccb6cb0b2e38a861e9ddbb535598718734"
+    },
+    {
+        "sha": "aa5d38decde5c8851988d80ecb407b91de8342c7",
+        "description": "nir/range_analysis: Add \"is a number\" range analysis tracking",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "405de7ccb6cb0b2e38a861e9ddbb535598718734"
+    },
+    {
+        "sha": "d4f21b53f291e69ac6b846df9dd5f44f2a663535",
+        "description": "nir/range_analysis: Add \"is finite\" range analysis tracking",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "405de7ccb6cb0b2e38a861e9ddbb535598718734"
+    },
+    {
+        "sha": "86fb53b1be1fea5ccea34d5bfca9d9aea64f3af2",
+        "description": "nir/range_analysis: Refactor fsat handling",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "767270e8099073748032599fd357719b05dec081",
+        "description": "st/nine: Check memfd_create support",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ae3b95daa7b7e051b78b70c82d159c821f376fea",
+        "description": "turnip: lower device index to zero",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ee1f140fd9b295f2494606f803b4420bf752c112",
+        "description": "freedreno/a6xx: Cleanup SP_XS_CTRL_REG0 definitions",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9a5596d6798c587552e26d53fa6f0acbd649f937",
+        "description": "freedreno/registers: Handle typed registers with fields",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8d55a1e1123cfb1b50ffd182568451747c1407f9",
+        "description": "freedreno/a6xx: Fix compute threadsize type",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1d8bf2d0bf1f7199bb2d34bc25d1d46a19aa1f27",
+        "description": "freedreno/computerator: Fix thrsz type",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f3cf70dc8d6da8ec2fbdbf2d63503ba2ccfca927",
+        "description": "intel/tools: fix meson warning",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4a408ff7ea96ca792c5b0e589fd85bf4490f3973",
+        "description": "spirv: Ignore WorkgroupSize in non-compute stages",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "7d862ef53024b70458929c1665af43573b4d07ff"
+    },
+    {
+        "sha": "5fee362fbac21bac6c8fe711dad1e82115a7c56d",
+        "description": "docs: Remove 21.0 features from features_new.txt",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9d95e1bd79a8b6a94e371b808f61d415d0ec1372",
+        "description": "i965: Rename files with \"intel_\" prefix to \"brw_\"",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3096788e5ca9f34d9a5c88f87645ff137dbe1e59",
+        "description": "i965: Remove blank line at EOF",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "38b2e137665f36f1b0fe58e40971548d9eafa865",
         "description": "aco: remove vmem/smem score statistics",
         "nominated": false,
