@@ -679,7 +679,7 @@
         "description": "lavapipe: fix push descriptor set indexing",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "6be19765cf238315d1d88c4e474a77e799820b39"
     },
