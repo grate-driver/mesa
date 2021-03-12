@@ -13,7 +13,7 @@
         "description": "anv: Lower ViewIndex to zero when multiview is disabled",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "0db70703300938356e8f3bef33e5826efc0b10c3"
     },
