@@ -211,7 +211,7 @@
         "description": "frontends/va: fix protected slice data buffer read size",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "deb7dc82f626e92525d01829d88f0ac348de03b8"
     },
