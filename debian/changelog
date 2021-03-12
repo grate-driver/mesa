@@ -1,5 +1,6 @@
-mesa (21.0.0~rc5-2) UNRELEASED; urgency=medium
+mesa (21.0.0-1) UNRELEASED; urgency=medium
 
+  * New upstream release.
   * control: Add directx-headers-dev to build-depends for amd64 and arm64
     on Linux, which is what WSL2 currently supports.
 
