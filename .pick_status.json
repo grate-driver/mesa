@@ -4675,7 +4675,7 @@
         "description": "radeonsi: don't crash on NULL images in si_check_needs_implicit_sync",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 3,
         "master_sha": null,
         "because_sha": "bddc0e023c2c87d3248691ea62b77626704cc5a4"
     },
