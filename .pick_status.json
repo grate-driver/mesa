@@ -85,7 +85,7 @@
         "description": "gallium/st: fix shader_has_one_variant",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "ad0037fcfe19655e9cee7c0bed80adc6c0dc967a"
     },
