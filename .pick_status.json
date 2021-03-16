@@ -274,7 +274,7 @@
         "description": "gallium/u_vbuf: use updated pipe_draw_start_count while using draw_vbo",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "1cd455b17b7ac9260fb1e943c5993e8cf747abb1"
     },
