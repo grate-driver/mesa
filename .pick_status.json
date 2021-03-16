@@ -292,7 +292,7 @@
         "description": "mesa: set states in fast path for restoring light attributes",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "7fa9d9d06c44e9cf3d39b2ce5126bf1b0abff586"
     },
