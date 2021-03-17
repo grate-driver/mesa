@@ -1,5 +1,14 @@
 [
     {
+        "sha": "2407952ec99ab1c2a16e01a9e300f799e4d53320",
+        "description": "ci/bare-metal: Restart a run on intermittent kernel lockups.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "5d2c9fd161eb1c6b29852e22431fa8bc804bf5af",
         "description": "freedreno/drm: Avoid unitialized timestamp in submit fail",
         "nominated": false,
