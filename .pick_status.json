@@ -2560,7 +2560,7 @@
         "description": "lavapipe: fix templated descriptor updates",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "41f7fa273d21566d82a6376fb3ad4e44c5e57d33"
     },
