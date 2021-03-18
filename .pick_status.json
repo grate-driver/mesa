@@ -2956,7 +2956,7 @@
         "description": "panfrost: Disable early-z when alpha test is used",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "275277a2b48ce38fba1d5203941e987fdc856e92"
     },
