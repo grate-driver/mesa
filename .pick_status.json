@@ -2785,7 +2785,7 @@
         "description": "aco: implement image_deref_samples",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "50881d59e66fbf0be73cf61677754e512956fd84"
     },
