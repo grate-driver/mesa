@@ -121,7 +121,7 @@
         "description": "egl: fix software flag in _eglAddDevice call on DRM",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "5743a36b2b32a91eaf82c8d109932fe4fea01233"
     },
