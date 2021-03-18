@@ -265,7 +265,7 @@
         "description": "zink: always use requested format for sampler view creation",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "c768c5297a89841d80f65f6a4e8de50509baed7c"
     },
