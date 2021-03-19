@@ -1543,7 +1543,7 @@
         "description": "panfrost: Add a Meson dependency on bi_opcodes.h for bifrost_compiler",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "2d4597de2ec41098239df6824b3da802a1f44ea2"
     },
