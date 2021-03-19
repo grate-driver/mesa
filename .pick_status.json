@@ -67,7 +67,7 @@
         "description": "ir3: Don't copy propagate arrays in ir3_cp",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "f370e95421f553ace931a02743c96be80fd62dc8"
     },
