@@ -76,7 +76,7 @@
         "description": "ir3/cp_postsched: Set address of uses for relative mov's",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "680ca5b393827bde8b3a8f7dc1893d0f646494ef"
     },
