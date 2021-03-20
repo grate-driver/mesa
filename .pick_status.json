@@ -283,7 +283,7 @@
         "description": "radv: Use correct border swizzle on GFX9+.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "57e796a12a883f5845c8e0ed05ec6bdb6d055b53"
     },
