@@ -292,7 +292,7 @@
         "description": "android: anv: add libcutils shared dependency",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "eeecc21d935c6c8fc783d9f805b5fa153b455df5"
     },
