@@ -652,7 +652,7 @@
         "description": "nv50: initialize target for blit source surfaces",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "1288ac7632b31a20497a0e75f374f66ce3d5bc3c"
     },
