@@ -112,7 +112,7 @@
         "description": "radeonsi: don't decompress DCC for float formats in si_compute_copy_image",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "1d64a1045ea205ee0297d2f741a824811570fc6d"
     },
