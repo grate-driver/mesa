@@ -130,7 +130,7 @@
         "description": "mesa/st: fix lower_tex_src_plane in multiple samplers scenario",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "079e5f73d72e9ed8b06a3d14aa0e4ac93d9bac43"
     },
