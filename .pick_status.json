@@ -337,7 +337,7 @@
         "description": "util/set: stop leaking u32 key sets which pass a mem ctx",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "10a7682413785a0b3667ab077971cd132f43281b"
     },
