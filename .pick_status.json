@@ -1,5 +1,437 @@
 [
     {
+        "sha": "8e43abcd2c29366d77fff804a7845b61fb97ca5c",
+        "description": "aco/ra: remove exec handling for phis",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3284f755a3a065764e13b4ad3c43bdfb0f7b0073",
+        "description": "aco/ra: allow m0 in get_reg_specified()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4bfbd4de847e22524dce5d8b8a11c012e10642d9",
+        "description": "aco/ra: iterate backwards when coalescing phis",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7c64623e9489a37297808f7346e6e80bd1c78587",
+        "description": "aco/ra: refactor SSA repairing during register allocation",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3ea2c05b32602410939ba7e7b9991f2fcd61aaa5",
+        "description": "aco/ra: split register_file initialization into separate function",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e4902d4574f370828153865ff628d15a17f08b48",
+        "description": "aco/ra: split affinity creation into separate function",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cf4ed054176d9cb39f6c60e2d8ef94767cfc2274",
+        "description": "zink: follow spir-v 1.0 spec",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ab71c0ba446a972ab260c0b6c955fff026208900",
+        "description": "lima/ppir: rework liveness data structures to bitset",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2b83d9953862a1b042707bdfa496a3270e90166f",
+        "description": "lima/ppir: remove use of live_out",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "55b1dbb1c1682c422e6fb890c99b21be47918b43",
+        "description": "lima/ppir: remove liveness info from blocks",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "56909868cd12b1b143f06c02dab9503c4f7c60e3",
+        "description": "turnip: implement VK_KHR_pipeline_executable_properties",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2bff8fd53be33ee7f194c444298312fef93a9d18",
+        "description": "nir: add nir_shader_as_str function",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "616394cf31cecc0165857dd032a316da5b0a2440",
+        "description": "pan/mdg: Use appropriate sizes for global loads/stores",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2f78ed8f0a7e1ff6c8992605577bfa1b600804f5",
+        "description": "pan/mdg: Rename load/store operations",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b7fb5450ef8c855f79fe0ea6aca7e5e255888159",
+        "description": "ac: invalidate metadata after hs_emit_write_tess_factors()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "22a979be6516da89d1d1b3c0a8923c5d236b1abd",
+        "description": "broadcom/compiler: convert add to mul when possible to allow merge",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "bdf93f4e3b3e7eca828b7ab52f6084a7649c0530",
+        "description": "v3dv/cmd_buffer: return early for draw commands if there is nothing to draw",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "bb201733acc3a1c0bd4d08d9361867c6bffcf8a6",
+        "description": "v3dv/pipeline_cache: fix assert",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "e354c528015aaa33cb8f6c1de2e12122992f1afe"
+    },
+    {
+        "sha": "e87ff43fb38acbf74e53495a08f0b1d52b7956d8",
+        "description": "zink: do not open-code vector-compares",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "296a2fb35033f1845fae94ccc129d01483bc6df8",
+        "description": "zink: drop bool attempt in float vector compares",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9b52ac694c8748f42a839f3b5b4ca5159ed8b98c",
+        "description": "zink: fix vector comparison",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "bf09ba538595a28c26166c99b86852d2ce13fcff",
+        "description": "lima: implement shader disk cache",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3099ce7d022cc251343d74663bb1f648bec45552",
+        "description": "lima: rename lima_{fs,vs}_bind_state to lima_{fs,vs}_uncompiled_shader",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1261c06c680ec78e8b50ce34c372e0fc4ecb4d94",
+        "description": "lima: rename *_shader_state to *_compiled_shader",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5c7dd85e4f0754e2e396197dae377b362573d12d",
+        "description": "android: add some more stub functions for cross compilation",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e10a094e0ab96699b9be81d2f5afea5eaa71338b",
+        "description": "gbm: add gbm_bo_get_fd_for_plane",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ab7744b280184d623cf5a67a50880bf871d8c6db",
+        "description": "gallium/dri2: Pass the resource that corresponds to the plane",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "382e5f2737af00256ce3e591604e6e9275300dde",
+        "description": "anv/android: fix image creation with external format",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "6fa56273be734dd04d4a8c0d342dd65bc8602a30"
+    },
+    {
+        "sha": "02492bea5f4749f5359eb2b9216a67af0fc193ea",
+        "description": "glcpp: Fix undefined behaviour in glcpp",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "95c58aacf81f2b9790a4a25bc7adcff1e11d0b85",
+        "description": "docs: update calendar and link releases notes for 21.0.1",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "38bce7238ce898f81c0a288c426f0437e3afed8b",
+        "description": "docs: Add 21.0.1 hashes",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e26906ce939e52cc2efd8c87567a994338670cdf",
+        "description": "docs: add release notes for 21.0.1",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3e9d753cb9f6fe0149bb340cc588e08d9e15757c",
+        "description": "docs: update calendar and link releases notes for 20.3.5",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8463066078e65fc4f2da27813c3106728ec33720",
+        "description": "docs: Add hashes for 20.3.5",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "930d2a92a3282e8001132892699d774b566f3e79",
+        "description": "docs: add release notes for 20.3.5",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e20aebb83c5af9ddf11167c39f9b76434e1e7083",
+        "description": "lavapipe: use the passed offset for CmdCopyQueryPoolResults",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "b38879f8c5f57b7f1802e433e33181bdf5e72aef"
+    },
+    {
+        "sha": "4ad5bfd1bdbf9abfb49f3bde7f655df90717d32b",
+        "description": "lavapipe: fix CmdCopyQueryPoolResults for partial pipeline statistics queries",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "b38879f8c5f57b7f1802e433e33181bdf5e72aef"
+    },
+    {
+        "sha": "5ecad3cb44cc06271734c479e13f9ae9605eb79b",
+        "description": "util/set: stop leaking u32 key sets which pass a mem ctx",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "10a7682413785a0b3667ab077971cd132f43281b"
+    },
+    {
+        "sha": "e93c8ab02331a255486212e45601b6c64e558bdb",
+        "description": "intel/compiler: Use a struct for brw_compile_cs parameters",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "05933fb0f7eb39cec6a709e9bf7d31adf6fc04eb",
+        "description": "intel/compiler: Use INTEL_DEBUG=blorp to dump blorp shaders",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7fb1e58651369ac717ceec7d155ed0294a99bf25",
+        "description": "intel/compiler: Make visitors take debug_enabled as a parameter",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "758eb18c6f2ee4daf76c6ec730bd56c526d9d193",
+        "description": "intel/compiler: Make vec4 generator take debug_enabled as a parameter",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "244d2daa004bb9eca70c5e2fd26b7b5530460335",
+        "description": "intel/compiler: Make brw_postprocess_nir take debug_enabled as a parameter",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "82d77f0ea85c459fb44423302458e70f748d2e4d",
+        "description": "intel/compiler: Refactor the shader INTEL_DEBUG checks",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "57d664245e77878477e2960efaa61e42dbe21e4c",
+        "description": "intel/compiler: Use a struct for brw_compile_vs parameters",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f5e1765f98eaf03fa8c03d8eef9722238b999414",
+        "description": "intel/compiler: Use a struct for brw_compile_fs parameters",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "84c3d6834402b62ae36e1f2e6fc090b91b2dfa30",
+        "description": "intel/compiler: Make vue_map parameter const for brw_compile_fs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "893aab57a85fde65dd0b09915455f278f19a71b8",
+        "description": "aco/ra: Avoid unnecessary copying of std::vectors",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "9be24c89c8c298069eaa3ff600ba556b9a4557e9",
         "description": "freedreno: Clamp TF prims written to buffer size pre-a6xx.",
         "nominated": false,
