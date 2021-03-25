@@ -85,7 +85,7 @@
         "description": "util: rework AMD cpu L3 cache affinity code.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "d8ea50996580a34b17059ec5456c75bb0d1f8750"
     },
